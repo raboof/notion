@@ -22,6 +22,7 @@
 #include "sizehint.h"
 #include "stacking.h"
 #include "extlconv.h"
+#include "genws.h"
 #include "genframe-pointer.h"
 
 
@@ -282,15 +283,26 @@ WRegion *mplex_nth_managed(WMPlex *mplex, uint n)
 }
 
 
+static void do_switch(WMPlex *mplex, WRegion *sub)
+{
+	if(sub==NULL)
+		return;
+	
+	/* Allow workspaces to warp on switch */
+	if(region_may_control_focus((WRegion*)mplex) && WOBJ_IS(sub, WGenWS))
+		region_goto(sub);
+	else
+		region_display_sp(sub);
+}
+
+
 /*EXTL_DOC
  * Have \var{mplex} display the \var{n}:th object managed by it.
  */
 EXTL_EXPORT
 void mplex_switch_nth(WMPlex *mplex, uint n)
 {
-	WRegion *sub=mplex_nth_managed(mplex, n);
-	if(sub!=NULL)
-		region_display_sp(sub);
+	do_switch(mplex, mplex_nth_managed(mplex, n));
 }
 
 
@@ -301,9 +313,8 @@ void mplex_switch_nth(WMPlex *mplex, uint n)
 EXTL_EXPORT
 void mplex_switch_next(WMPlex *mplex)
 {
-	WRegion *sub=NEXT_MANAGED_WRAP(mplex->managed_list, mplex->current_sub);
-	if(sub!=NULL)
-		region_display_sp(sub);
+	do_switch(mplex, NEXT_MANAGED_WRAP(mplex->managed_list, 
+									   mplex->current_sub));
 }
 
 
@@ -314,9 +325,8 @@ void mplex_switch_next(WMPlex *mplex)
 EXTL_EXPORT
 void mplex_switch_prev(WMPlex *mplex)
 {
-	WRegion *sub=PREV_MANAGED_WRAP(mplex->managed_list, mplex->current_sub);
-	if(sub!=NULL)
-		region_display_sp(sub);
+	do_switch(mplex, PREV_MANAGED_WRAP(mplex->managed_list, 
+									   mplex->current_sub));
 }
 
 
