@@ -37,6 +37,17 @@ add_shortenrule("(.*) - Mozilla(<[0-9]+>)", "$1$2$|$1$<...$2")
 add_shortenrule("(.*) - Mozilla", "$1$|$1$<...")
 add_shortenrule("XMMS - (.*)", "$1$|...$>$1")
 
+-- List of hosts to tab-complete in the F4 ssh query.
+--query_ssh_hosts={"host1", "host2"}
+
+-- List of directories to look for manuals in the F1 man page query.
+query_man_path={
+    "/usr/man",
+    "/usr/share/man",
+    "/usr/X11R6/man",
+    "/usr/local/man"
+}
+
 -- Modules. The query module must be loaded before the WS modules
 -- for the functions to be bound in the WS modules' configuration
 -- files to be defined. Alternatively the functions could be bound
