@@ -21,6 +21,10 @@
 /*{{{ Implementation */
 
 
+/* To keep the amount of unnecessary bloat down and to keep things simple, 
+ * Lua's tables are used as our hash implementation.
+ */
+
 typedef struct{
 	ExtlTab alloc_tab;
 	WRegion *list;
