@@ -118,16 +118,15 @@ void set_selection(const char *p, int n)
 
 void request_selection(Window win)
 {
+	Atom a=XA_STRING;
+	
+	if(wglobal.use_mb){
 #ifdef X_HAVE_UTF8_STRING
-	/*Atom a=XA_UTF8_STRING(wglobal.dpy);*/
-	Atom a=XInternAtom(wglobal.dpy, "UTF8_STRING", True);
+		a=XInternAtom(wglobal.dpy, "UTF8_STRING", True);
 #else
-	/*Atom a=XA_TEXT(wglobal.dpy);*/
-	Atom a=XInternAtom(wglobal.dpy, "COMPOUND_TEXT", True);
+		a=XInternAtom(wglobal.dpy, "COMPOUND_TEXT", True);
 #endif
-
-	if(a==None)
-		a=XA_STRING;
+	}
 	
 	XConvertSelection(wglobal.dpy, XA_PRIMARY, a,
 					  wglobal.atom_selection, win, CurrentTime);
