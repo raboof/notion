@@ -87,6 +87,9 @@ WHook *ioncore_unregister_hook(const char *name, WHook *hk)
 }
 
 
+/*EXTL_DOC
+ * Find named hook \var{name}.
+ */
 EXTL_EXPORT
 WHook *ioncore_get_hook(const char *name)
 {
@@ -182,6 +185,9 @@ WHookItem *hook_find_extl(WHook *hk, ExtlFn efn)
 }
 
 
+/*EXTL_DOC
+ * Is \var{fn} hooked to hook \var{hk}?
+ */
 EXTL_EXPORT_MEMBER
 bool hook_listed(WHook *hk, ExtlFn efn)
 {
@@ -204,20 +210,21 @@ bool hook_add(WHook *hk, WHookDummy *fn)
 }
 
 
+/*EXTL_DOC
+ * Add \var{efn} to the list of functions to be called when the
+ * hook \var{hk} is triggered.
+ */
 EXTL_EXPORT_AS(WHook, add)
 bool hook_add_extl(WHook *hk, ExtlFn efn)
 {
-        WHookItem *item;
-    
+    WHookItem *item;
     if(hook_find_extl(hk, efn))
         return FALSE;
-    
     item=create_item(hk);
     if(item==NULL)
         return FALSE;
     item->efn=efn;
     return TRUE;
-
 }
 
 
@@ -230,6 +237,10 @@ bool hook_remove(WHook *hk, WHookDummy *fn)
 }
 
 
+/*EXTL_DOC
+ * Remove \var{efn} from the list of functions to be called when the 
+ * hook \var{hk} is triggered.
+ */
 EXTL_EXPORT_AS(WHook, remove)
 bool hook_remove_extl(WHook *hk, ExtlFn efn)
 {
