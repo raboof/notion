@@ -62,5 +62,6 @@ typedef struct WRectangle_struct{
 #endif
 
 #define EXTL_EXPORT
+#define EXTL_EXPORT_AS(X)
 
 #endif /* ION_IONCORE_COMMON_H */

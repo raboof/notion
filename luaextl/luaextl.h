@@ -25,6 +25,7 @@
 
 /* In ioncore/common.h
 #define EXTL_EXPORT
+#define EXTL_EXPORT_AS(X)
 */
 
 typedef int ExtlTab;
