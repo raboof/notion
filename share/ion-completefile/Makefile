@@ -8,8 +8,9 @@ include $(TOPDIR)/system-inc.mk
 
 ######################################
 
-#DIST: LIBS += -L../libtu -ltu
+#DIST: LIBS += -L../../libtu -ltu
 LIBS += -ltu
+#DIST: INCLUDES += -I../../libtu/include -I../..
 INCLUDES += -I../..
 CFLAGS += $(XOPEN_SOURCE)
 
