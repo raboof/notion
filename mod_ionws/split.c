@@ -681,6 +681,7 @@ static WSplit *do_create_split(const WRectangle *geom)
         split->max_w=INT_MAX;
         split->max_h=INT_MAX;
         split->is_static=FALSE;
+        split->is_lazy=FALSE;
     }
     return split;
 }
@@ -911,20 +912,21 @@ static bool split_tree_remove_split(WSplit **root, WSplit *split,
 WSplit *split_tree_remove(WSplit **root, WSplit *node, bool reclaim_space)
 {
     WSplit *split=node->parent;
-    WSplit **thisptr;
-    WSplit *other=NULL;
+    WSplit *other=NULL, *nextfocus=NULL;
+    WSplit **thisptr=NULL;
     bool replace_ok=FALSE, tl=FALSE;
     
     if(split!=NULL){
         tl=(split->u.s.tl==node);
         thisptr=(tl ? &(split->u.s.tl) : &(split->u.s.br));
-        
-        if(tl)
-            other=split_current_tl(split->u.s.br, split->type);
-        else
-            other=split_current_br(split->u.s.tl, split->type);
+        other=(tl ? split->u.s.br : split->u.s.tl);
+        nextfocus=(tl ? split_current_tl(split->u.s.br, split->type)
+                      : split_current_br(split->u.s.tl, split->type));
 
-        if(split->is_static){
+        assert(other!=NULL);
+        
+        if(split->is_static || 
+           (split->is_lazy && other->type!=SPLIT_UNUSED)){
             WSplit *un=create_split_unused(&(node->geom));
             if(un!=NULL){
                 *thisptr=un;
@@ -949,7 +951,7 @@ WSplit *split_tree_remove(WSplit **root, WSplit *node, bool reclaim_space)
     node->parent=NULL;
     destroy_obj((Obj*)node);
     
-    return other;
+    return nextfocus;
 }
 
 

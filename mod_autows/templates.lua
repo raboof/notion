@@ -21,13 +21,28 @@ _G.templates=T
 
 -- Helper code {{{
 
-function T.split3(d, ls, cs, rs, static_, co)
-    return {
+function T.set_static(t)
+    t.static=true
+    return t
+end
+
+function T.set_lazy(t)
+    t.lazy=true
+    return t
+end
+
+function T.id(t)
+    return t
+end
+
+function T.split3(d, ls, cs, rs, co, sattr)
+    if not sattr then sattr=T.id end
+    return sattr{
         split_tls = ls+cs,
         split_brs = rs,
         split_dir = d,
         static = static_,
-        tl = {
+        tl = sattr{
             split_tls = ls,
             split_brs = cs,
             split_dir = d,
@@ -39,11 +54,11 @@ function T.split3(d, ls, cs, rs, static_, co)
     }
 end
 
-function T.center3(d, ts, cs, static, co)
+function T.center3(d, ts, cs, co, sattr)
     local sc=math.min(ts, cs)
     local sl=math.floor((ts-sc)/2)
     local sr=ts-sc-sl
-    return T.split3(d, sl, sc, sr, static, co)
+    return T.split3(d, sl, sc, sr, co, sattr)
 end
 
 -- }}}
@@ -63,21 +78,23 @@ end
 -- 
 function T.default_layout(ws, reg)
     local gw, gr=ws:geom(), reg:geom()
-    return T.center3("horizontal", gw.w, gr.w, true,
-                     T.center3("vertical", gw.h, gr.h, false,
+    return T.center3("horizontal", gw.w, gr.w,
+                     T.center3("vertical", gw.h, gr.h, 
                                { 
                                    type = obj_typename(reg),
                                    reference = reg,
-                               }))
+                               }, T.set_lazy), T.set_static)
     
 end
 
 -- Extended default. Has additional zero-width/height extendable unused 
 -- spaces blocks around the default layout.
 function T.default_layout_ext(ws, reg)
-    return T.center3("horizontal", 1, 1, true,
-                     T.center3("vertical", 1, 1, true,
-                               T.default_layout(ws, reg)))
+    return T.center3("horizontal", 1, 1,
+                     T.center3("vertical", 1, 1,
+                               T.default_layout(ws, reg),
+                               T.set_static),
+                     T.set_static)
 end
 
 -- }}}

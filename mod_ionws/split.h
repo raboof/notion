@@ -50,6 +50,7 @@ DECLCLASS(WSplit){
     int max_w, max_h;
 
     bool is_static;
+    bool is_lazy;
     
     union{
         struct{

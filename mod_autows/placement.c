@@ -143,11 +143,6 @@ static int split_penalty_scale[][2]={
 };
 
 
-/*static int scale(int val, int max_p, int max_v)
-{
-    return maxof(max_p, val*max_p/max_v);
-}*/
-
 static int interp1(int scale[][2], int v)
 {
     assert(scale[0][1]!=PENALTY_ENDSCALE);
@@ -178,19 +173,27 @@ static int fit_penalty(int s, int ss, int slack)
 #define vfit_penalty(S1, S2, T, I, DS) fit_penalty(S1, S2, (T)->t+(T)->b)
 
 
-static int slack_penalty(int s, int ss, int slack)
+static int slack_penalty(int s, int ss, int slack, int islack)
 {
     int ds=ss-s;
     
     if(ds>=0)
         return PENALTY_NEVER; /* fit will do */
     
+    /* If there's enough "immediate" slack, don't penalise more
+     * than normal fit would penalise stretching ss to s.
+     */
+    if(-ds<=islack)
+        return interp1(fit_penalty_scale, -ds);
+    
     return interp1(slack_penalty_scale, -ds);
 
 }
 
-#define hslack_penalty(S1, S2, T, I, DS) slack_penalty(S1, S2, (T)->l+(T)->r)
-#define vslack_penalty(S1, S2, T, I, DS) slack_penalty(S1, S2, (T)->t+(T)->b)
+#define hslack_penalty(S1, S2, T, I, DS) \
+    slack_penalty(S1, S2, (T)->l+(T)->r, (I)->l+(I)->r)
+#define vslack_penalty(S1, S2, T, I, DS) \
+    slack_penalty(S1, S2, (T)->t+(T)->b, (I)->t+(I)->b)
 
 
 static int split_penalty(int s, int ss, int slack)
@@ -422,6 +425,9 @@ static bool do_split(Res *rs, WSplit **tree, WFrame *frame)
     mke_frame=frame;
     node=split_tree_split(tree, rs->split, dir, rs->split_primn, 
                           mins, mke, par);
+    if(node!=NULL)
+        node->parent->is_lazy=TRUE;
+    
     mke_frame=NULL;
     return (node!=NULL);
 }

@@ -791,6 +791,8 @@ static ExtlTab get_node_config(WSplit *node)
 
     if(node->is_static)
         extl_table_sets_b(tab, "static", TRUE);
+    if(node->is_lazy)
+        extl_table_sets_b(tab, "lazy", TRUE);
 
     return tab;
 }
@@ -904,6 +906,7 @@ static WSplit *load_split(WIonWS *ws, WWindow *par, const WRectangle *geom,
     }
     
     extl_table_gets_b(tab, "static", &(split->is_static));
+    extl_table_gets_b(tab, "lazy", &(split->is_lazy));
     
     tl->parent=split;
     br->parent=split;
