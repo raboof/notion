@@ -563,9 +563,7 @@ static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
  * At least the following fields in \var{p} are supported:
  * 
  * \begin{tabularx}{\linewidth}{lX}
- *  \hline
- *  Field & Description \\
- *  \hline
+ *  \tabhead{Field & Description}
  *  \var{switchto} & Should the region be switched to (boolean)? Optional. \\
  *  \var{geom} & Geometry; \var{x} and \var{y}, if set, indicates top-left of 
  *   the frame to be created while \var{width} and \var{height}, if set, indicate

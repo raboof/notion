@@ -92,12 +92,4 @@ extern void frame_do_load(WFrame *frame, ExtlTab tab);
 extern WHook *frame_managed_changed_hook;
 
 
-typedef struct{
-    WFrame *frame;
-    int mode;
-    bool sw;
-    WRegion *reg;
-} WFrameChangedParams;
-
-
 #endif /* ION_IONCORE_FRAME_H */

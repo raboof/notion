@@ -531,48 +531,11 @@ static void frame_size_changed_default(WFrame *frame,
     /* We should get a request from X to draw the frame... */
 }
 
-static const char *mode2str(int mode)
-{
-    if(mode==MPLEX_CHANGE_SWITCHONLY)
-        return "switchonly";
-    else if(mode==MPLEX_CHANGE_REORDER)
-        return "reorder";
-    else if(mode==MPLEX_CHANGE_ADD)
-        return "add";
-    else if(mode==MPLEX_CHANGE_REMOVE)
-        return "remove";
-    return NULL;
-}
-    
-
-static bool mrsh_chg(ExtlFn fn, WFrameChangedParams *p)
-{
-    ExtlTab t=extl_create_table();
-    bool ret;
-    
-    extl_table_sets_o(t, "frame", (Obj*)p->frame);
-    extl_table_sets_s(t, "mode", mode2str(p->mode));
-    extl_table_sets_b(t, "sw", p->sw);
-    extl_table_sets_o(t, "reg", (Obj*)p->reg);
-    
-    ret=extl_call(fn, "t", NULL, t);
-    
-    extl_unref_table(t);
-    
-    return ret;
-}
-
 
 static void frame_managed_changed(WFrame *frame, int mode, bool sw,
                                   WRegion *reg)
 {
     bool need_draw=TRUE;
-    WFrameChangedParams p;
-    
-    p.frame=frame;
-    p.mode=mode;
-    p.sw=sw;
-    p.reg=reg;
     
     if(mode!=MPLEX_CHANGE_SWITCHONLY)
         frame_initialise_titles(frame);
@@ -585,8 +548,9 @@ static void frame_managed_changed(WFrame *frame, int mode, bool sw,
     if(need_draw)
         frame_draw_bar(frame, mode!=MPLEX_CHANGE_SWITCHONLY);
 
-    hook_call_p(frame_managed_changed_hook, &p,
-                (WHookMarshallExtl*)mrsh_chg);
+    mplex_call_changed_hook((WMPlex*)frame,
+                            frame_managed_changed_hook,
+                            mode, sw, reg);
 }
 
 

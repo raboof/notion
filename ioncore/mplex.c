@@ -942,9 +942,7 @@ WRegion *mplex_attach(WMPlex *mplex, WRegion *reg, ExtlTab param)
  * fields in \var{param} are understood:
  * 
  * \begin{tabularx}{\linewidth}{lX}
- *  \hline
- *  Field & Description \\
- *  \hline
+ *  \tabhead{Field & Description}
  *  \var{type} & Class name (a string) of the object to be created. Mandatory. \\
  *  \var{name} & Name of the object to be created (a string). Optional. \\
  *  \var{switchto} & Should the region be switched to (boolean)? Optional. \\
@@ -1224,9 +1222,7 @@ static WRegion *do_attach_stdisp(WMPlex *mplex, WRegionAttachHandler *handler,
  * recognised:
  * 
  * \begin{tabularx}{\linewidth}{lX}
- *   \hline
- *   Field & Description \\
- *   \hline
+ *   \tabhead{Field & Description}
  *   \var{pos} & The corner of the screen to place the status display
  *               in. One of \code{tl}, \code{tr}, \var{bl} or \var{br}. \\
  *   \var{action} & If this field is set to \code{keep}, \var{corner}
@@ -1362,6 +1358,58 @@ void mplex_managed_changed(WMPlex *mplex, int mode, bool sw, WRegion *mgd)
 
 
 /*}}}*/
+
+
+/*{{{ Changed hook helper */
+
+
+static const char *mode2str(int mode)
+{
+    if(mode==MPLEX_CHANGE_SWITCHONLY)
+        return "switchonly";
+    else if(mode==MPLEX_CHANGE_REORDER)
+        return "reorder";
+    else if(mode==MPLEX_CHANGE_ADD)
+        return "add";
+    else if(mode==MPLEX_CHANGE_REMOVE)
+        return "remove";
+    return NULL;
+}
+    
+
+static bool mrsh_chg(ExtlFn fn, WMPlexChangedParams *p)
+{
+    ExtlTab t=extl_create_table();
+    bool ret;
+    
+    extl_table_sets_o(t, "reg", (Obj*)p->reg);
+    extl_table_sets_s(t, "mode", mode2str(p->mode));
+    extl_table_sets_b(t, "sw", p->sw);
+    extl_table_sets_o(t, "sub", (Obj*)p->sub);
+    
+    ret=extl_call(fn, "t", NULL, t);
+    
+    extl_unref_table(t);
+    
+    return ret;
+}
+
+
+void mplex_call_changed_hook(WMPlex *mplex, WHook *hook, 
+                             int mode, bool sw, WRegion *reg)
+{
+    WMPlexChangedParams p;
+    
+    p.reg=mplex;
+    p.mode=mode;
+    p.sw=sw;
+    p.sub=reg;
+
+    hook_call_p(hook, &p, (WHookMarshallExtl*)mrsh_chg);
+}
+
+
+/*}}} */
 
 
 /*{{{ Save/load */

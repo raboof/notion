@@ -193,9 +193,7 @@ static SR *shortenrules=NULL;
  * inserted in the resulting string and specials as follows:
  * 
  * \begin{tabularx}{\linewidth}{lX}
- *  \hline
- *  Special & Description \\
- *  \hline
+ *  \tabhead{Special & Description}
  *  \$0 &          Place the original string here. \\
  *  \$1 to \$9 & Insert n:th capture here (as usual,captures are surrounded
  *                 by parentheses in the regex). \\

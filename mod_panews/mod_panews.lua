@@ -139,9 +139,7 @@ settings.shrink_minimum=32
 -- Set some module parameters. Currently \var{s} may contain the following
 -- fields:
 -- \begin{tabularx}{\linewidth}{lX}
---  \hline
---  Field & Description \\
---  \hline
+--  \tabhead{Field & Description}
 --  \var{template} & layout template for newly created \type{WPaneWS} 
 --                   workspaces. This can be either a table or one of the 
 --                   predefined layouts 'default', 'alternative1', and

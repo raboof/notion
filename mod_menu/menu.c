@@ -905,9 +905,7 @@ static void reset_scroll_timer()
  * following fields:
  * 
  * \begin{tabularx}{\linewidth}{lX}
- *  \hline
- *  Field & Description \\
- *  \hline
+ *  \tabhead{Field & Description}
  *  \var{scroll_amount} & Number of pixels to scroll at a time 
  *                        pointer-controlled menus when one extends
  *                        beyond a border of the screen and the pointer

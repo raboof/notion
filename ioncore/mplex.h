@@ -49,6 +49,14 @@ typedef struct{
 } WMPlexSTDispInfo;
 
 
+typedef struct{
+    WMPlex *reg;
+    int mode;
+    bool sw;
+    WRegion *sub;
+} WMPlexChangedParams;
+
+
 DECLCLASS(WMPlex){
     WWindow win;
     int flags;
@@ -123,6 +131,9 @@ extern int mplex_lcount(WMPlex *mplex, uint l);
 extern WRegion *mplex_lnth(WMPlex *mplex, uint l, uint n);
 extern ExtlTab mplex_llist(WMPlex *mplex, uint l);
 extern WRegion *mplex_lcurrent(WMPlex *mplex, uint l);
+
+extern void mplex_call_changed_hook(WMPlex *mplex, WHook *hook, 
+                                    int mode, bool sw, WRegion *reg);
 
 /* Dynfuns */
 DYNFUN void mplex_managed_geom(const WMPlex *mplex, WRectangle *geom);

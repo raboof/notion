@@ -33,9 +33,7 @@ char *ioncore_default_ws_type=NULL;
  * following fields.
  * 
  * \begin{tabularx}{\linewidth}{lX}
- *  \hline
- *  Field & Description \\
- *  \hline
+ *  \tabhead{Field & Description}
  *  \var{opaque_resize} & (boolean) Controls whether interactive move and
  *                        resize operations simply draw a rubberband during
  *                        the operation (false) or immediately affect the 

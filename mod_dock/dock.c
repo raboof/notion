@@ -1011,9 +1011,7 @@ static void dock_do_set(WDock *dock, ExtlTab conftab, bool resize)
  * Configure \var{dock}. \var{conftab} is a table of key/value pairs:
  *
  * \begin{tabularx}{\linewidth}{llX}
- *  \hline
- *  Key & Values & Description \\
- *  \hline
+ *  \tabhead{Key & Values & Description}
  *  \var{name} & string & Name of dock \\
  *  \var{pos} & string in $\{t,m,b\}\times\{t,c,b\}$ & Dock position. 
  *       Can only be used in floating mode. \\
