@@ -8,16 +8,15 @@ include $(TOPDIR)/system-inc.mk
 
 ######################################
 
-EXPORT_TEXES=ioncore-exports.tex ionws-exports.tex \
-             floatws-exports.tex query-exports.tex
+TARGETS=ioncore-exports.tex ionws-exports.tex \
+	floatws-exports.tex query-exports.tex \
+	querylib-fns.tex ioncorelib-fns.tex
 
 ######################################
 
 include $(TOPDIR)/rules.mk
 
 ######################################
-
-all: $(EXPORT_TEXES)
 
 ioncore-exports.tex: ../ioncore/*.c
 	$(LUA) $(TOPDIR)/mkexports.lua -module ioncore -mkdoc -o $@ $+
@@ -30,3 +29,9 @@ floatws-exports.tex: ../floatws/*.c
 
 query-exports.tex: ../query/*.c
 	$(LUA) $(TOPDIR)/mkexports.lua -module query -mkdoc -o $@ $+
+
+querylib-fns.tex: ../etc/querylib.lua
+	$(LUA) $(TOPDIR)/mkexports.lua -module query -luadoc -o $@ $+
+
+ioncorelib-fns.tex: ../etc/ioncorelib.lua
+	$(LUA) $(TOPDIR)/mkexports.lua -module query -luadoc -o $@ $+
