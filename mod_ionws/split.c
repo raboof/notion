@@ -121,8 +121,8 @@ static void get_minmax(WSplit *node, int dir, int *min, int *max)
         *min=node->min_h;
         *max=node->max_h;
     }else{
-        *min=node->min_h;
-        *max=node->max_h;
+        *min=node->min_w;
+        *max=node->max_w;
     }
 }
 
@@ -260,16 +260,16 @@ static void split_update_bounds(WSplit *node, bool recursive)
         node->used_w=infadd(tl->used_w, br->used_w);
         node->max_w=infadd(tl->max_w, br->max_w);
         node->min_w=infadd(tl->min_w, br->min_w);
-        node->used_h=maxof(tl->used_w, br->used_w);
-        node->max_w=maxof(tl->max_w, br->max_w);
-        node->min_w=maxof(tl->min_w, br->min_w);
+        node->used_h=maxof(tl->used_h, br->used_h);
+        node->max_h=maxof(tl->max_h, br->max_h);
+        node->min_h=maxof(tl->min_h, br->min_h);
     }else{
         node->used_h=infadd(tl->used_h, br->used_h);
         node->max_h=infadd(tl->max_h, br->max_h);
         node->min_h=infadd(tl->min_h, br->min_h);
-        node->used_h=maxof(tl->used_h, br->used_h);
-        node->max_h=maxof(tl->max_h, br->max_h);
-        node->min_h=maxof(tl->min_h, br->min_h);
+        node->used_w=maxof(tl->used_w, br->used_w);
+        node->max_w=maxof(tl->max_w, br->max_w);
+        node->min_w=maxof(tl->min_w, br->min_w);
     }
 }
 
@@ -280,36 +280,45 @@ static void split_update_bounds(WSplit *node, bool recursive)
 /*{{{ Low-level resize code */
 
 
+static int other_dir(int dir)
+{
+    return (dir==SPLIT_VERTICAL ? SPLIT_HORIZONTAL : SPLIT_VERTICAL);
+}
+
+
 void split_do_resize(WSplit *node, const WRectangle *ng, 
-                     int hprimn, int vprimn)
+                     int hprimn, int vprimn, bool transpose)
 {
     CHKNODE(node);
+
+    assert(!transpose || (hprimn==PRIMN_ANY && vprimn==PRIMN_ANY));
     
     if(node->type==SPLIT_REGNODE){
         region_fit(node->u.reg, ng, REGION_FIT_BOUNDS);
     }else{
         WSplit *tl=node->u.s.tl, *br=node->u.s.br;
-        int dir=node->type;
+        int sz=split_size(node, node->type);
+        int tls=split_size(tl, node->type);
+        int brs=split_size(br, node->type);
+        int dir=(transpose ? other_dir(node->type) : node->type);
         int nsize=(dir==SPLIT_VERTICAL ? ng->h : ng->w);
-        int npos=(dir==SPLIT_VERTICAL ? ng->y : ng->x);
         int primn=(dir==SPLIT_VERTICAL ? vprimn : hprimn);
-        int sz=split_size(node, dir);
-        int tls=split_size(tl, dir);
-        int brs=split_size(br, dir);
         int tlmin, tlmax, brmin, brmax;
         WRectangle tlg=*ng, brg=*ng;
 
         get_minmax(tl, dir, &tlmin, &tlmax);
         get_minmax(br, dir, &brmin, &brmax);
-            
+
         if(primn==PRIMN_TL){
             tls=tls+nsize-sz;
             bound(&tls, tlmin, tlmax);
             brs=nsize-tls;
+            /* TODO: brs may be <=0 */
         }else if(primn==PRIMN_BR){
             brs=brs+nsize-sz;
             bound(&brs, brmin, brmax);
             tls=nsize-brs;
+            /* TODO: tls may be <=0 */
         }else{
             if(sz==0)
                 tls=nsize/2;
@@ -317,22 +326,23 @@ void split_do_resize(WSplit *node, const WRectangle *ng,
                 tls=tls*nsize/sz;
             bound(&tls, tlmin, tlmax);
             brs=nsize-tls;
+            /* TODO: brs may be <=0 */
         }
 
         if(dir==SPLIT_VERTICAL){
-            tlg.y=npos;
             tlg.h=tls;
-            brg.y=npos+tls;
+            brg.y+=tls;
             brg.h=brs;
         }else{
-            tlg.x=npos;
             tlg.w=tls;
-            brg.x=npos+tls;
+            brg.x+=tls;
             brg.w=brs;
         }
-            
-        split_do_resize(tl, &tlg, hprimn, vprimn);
-        split_do_resize(br, &brg, hprimn, vprimn);
+
+        split_do_resize(tl, &tlg, hprimn, vprimn, transpose);
+        split_do_resize(br, &brg, hprimn, vprimn, transpose);
+        
+        node->type=dir;
     }
     
     node->geom=*ng;
@@ -343,7 +353,7 @@ void split_do_resize(WSplit *node, const WRectangle *ng,
 void split_resize(WSplit *node, const WRectangle *ng, int hprimn, int vprimn)
 {
     split_update_bounds(node, TRUE);
-    split_do_resize(node, ng, hprimn, vprimn);
+    split_do_resize(node, ng, hprimn, vprimn, FALSE);
 }
 
 
@@ -485,7 +495,7 @@ static void split_do_resize_rootward(WSplit *node, const WRectangle *ng,
     }
     
     if(!tryonly){
-        split_do_resize(other, &og, PRIMN_ANY, PRIMN_ANY);
+        split_do_resize(other, &og, PRIMN_ANY, PRIMN_ANY, FALSE);
         p->geom=prg;
     }
 }
@@ -497,7 +507,7 @@ void split_resize_rootward(WSplit *node, const WRectangle *ng,
 {
     split_do_resize_rootward(node, ng, hany, vany, tryonly, rg);
     if(!tryonly)
-        split_do_resize(node, rg, PRIMN_ANY, PRIMN_ANY);
+        split_do_resize(node, rg, PRIMN_ANY, PRIMN_ANY, FALSE);
 }
 
 
@@ -569,8 +579,8 @@ static WSplit *do_create_split(const WRectangle *geom)
         split->geom=*geom;
         split->min_w=0;
         split->min_h=0;
-        split->max_w=0;
-        split->max_h=0;
+        split->max_w=INT_MAX;
+        split->max_h=INT_MAX;
         split->used_w=0;
         split->used_h=0;
     }
@@ -706,7 +716,8 @@ WSplit *split_tree_split(WSplit **root, WSplit *node, int dir, int primn,
     
     split_do_resize(node, &ng, 
                     (dir==SPLIT_HORIZONTAL ? primn : PRIMN_ANY),
-                    (dir==SPLIT_VERTICAL ? primn : PRIMN_ANY));
+                    (dir==SPLIT_VERTICAL ? primn : PRIMN_ANY),
+                    FALSE);
     
     /* Set up split structure
      */
@@ -999,8 +1010,8 @@ WSplit *split_parent(WSplit *split)
     return split->parent;
 }
 
-    
-static Obj *hoist(WSplit *split)
+
+Obj *split_hoist(WSplit *split)
 {
     if(split->type==SPLIT_REGNODE)
         return (Obj*)split->u.reg;
@@ -1017,7 +1028,7 @@ Obj *split_tl(WSplit *split)
 {
     if(split->type==SPLIT_REGNODE)
         return NULL;
-    return hoist(split->u.s.tl);
+    return split_hoist(split->u.s.tl);
 }
 
 
@@ -1030,7 +1041,7 @@ Obj *split_br(WSplit *split)
 {
     if(split->type==SPLIT_REGNODE)
         return NULL;
-    return hoist(split->u.s.br);
+    return split_hoist(split->u.s.br);
 }
 
 
@@ -1106,3 +1117,24 @@ void split_mark_current(WSplit *node)
 
 /*}}}*/
 
+
+/*{{{ Transpose */
+
+
+void split_transpose_to(WSplit *node, const WRectangle *geom)
+{
+    split_update_bounds(node, TRUE);
+    split_do_resize(node, geom,  PRIMN_ANY, PRIMN_ANY, TRUE);
+}
+
+
+EXTL_EXPORT_MEMBER
+void split_transpose(WSplit *node)
+{
+    WRectangle g=node->geom;
+    
+    split_transpose_to(node, &g);
+}
+
+
+/*}}}*/

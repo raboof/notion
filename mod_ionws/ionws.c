@@ -535,6 +535,16 @@ ExtlTab ionws_managed_list(WIonWS *ws)
 }
 
 
+/*EXTL_DOC
+ * Returns the root of the split tree.
+ */
+EXTL_EXPORT_MEMBER
+Obj *ionws_split_tree(WIonWS *ws)
+{
+    return (ws->split_tree==NULL ? NULL : split_hoist(ws->split_tree));
+}
+
+
 static WRegion *do_get_next_to(WIonWS *ws, WRegion *reg, int dir, int primn)
 {
     WSplit *node=get_node_check(ws, reg);
