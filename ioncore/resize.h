@@ -99,4 +99,6 @@ extern bool genframe_is_shaded(WGenFrame *frame);
 
 extern void region_convert_root_geom(WRegion *reg, WRectangle *geom);
 
+extern void resize_accel(int *wu, int *hu, int mode);
+
 #endif /* ION_IONCORE_RESIZE_H */

@@ -88,25 +88,45 @@ static WTimer resize_timer=INIT_TIMER(tmr_end_resize);
 /*{{{ Keyboard resize interface */
 
 
+static int sign(int x)
+{
+	return (x>0 ? 1 : (x<0 ? -1 : 0));
+}
+
+
+static int limit_and_encode_mode(int *left, int *right, 
+								 int *top, int *bottom)
+{
+	*left=sign(*left);
+	*right=sign(*right);
+	*top=sign(*top);
+	*bottom=sign(*bottom);
+
+	return (*left)+(*right)*3+(*top)*9+(*bottom)*27;
+}
+
+
 /*EXTL_DOC
- * Shrink or grow \var{frame} one or more steps in each direction.
- * Negative values for the parameters \var{left}, \var{right}, \var{top}
- * and \var{bottom} attempt to shrink the frame by altering the corresponding
- * border and positive values grow.
+ * Shrink or grow \var{frame} one step in each direction.
+ * Acceptable values for the parameters \var{left}, \var{right}, \var{top}
+ * and \var{bottom} are as follows: -1: shrink along,
+ * 0: do not change, 1: grow along corresponding border.
  */
 EXTL_EXPORT_MEMBER
 void floatframe_do_resize(WFloatFrame *frame, int left, int right,
 						  int top, int bottom)
 {
 	int wu=0, hu=0;
-
-	/* TODO: should use WEAK_ stuff? */
+	int mode=0;
 	
 	if(!may_resize((WRegion*)frame))
 		return;
 	
 	genframe_resize_units((WGenFrame*)frame, &wu, &hu);
 	
+	mode=3*limit_and_encode_mode(&left, &right, &top, &bottom);
+	resize_accel(&wu, &hu, mode);
+
 	delta_resize((WRegion*)frame, -left*wu, right*wu, -top*hu, bottom*hu,
 				 NULL);
 	
@@ -129,17 +149,15 @@ void floatframe_do_resize(WFloatFrame *frame, int left, int right,
 EXTL_EXPORT_MEMBER
 void floatframe_do_move(WFloatFrame *frame, int horizmul, int vertmul)
 {
-	int wu, hu;
-
+	int mode=0, dummy=0;
+	
 	if(!may_resize((WRegion*)frame))
 		return;
 	
-	/*wu=GRDATA_OF(frame)->w_unit*horizmul;
-	hu=GRDATA_OF(frame)->h_unit*vertmul;*/
-	wu=1;
-	hu=1;
+	mode=1+3*limit_and_encode_mode(&horizmul, &vertmul, &dummy, &dummy);
+	resize_accel(&horizmul, &vertmul, mode);
 
-	delta_resize((WRegion*)frame, wu, wu, hu, hu, NULL);
+	delta_resize((WRegion*)frame, horizmul, horizmul, vertmul, vertmul, NULL);
 	
 	set_timer(&resize_timer, wglobal.resize_delay);
 }
