@@ -965,16 +965,24 @@ static void move_down_(WSplit **root, WSplit *node, WSplit *unused)
     if(node!=unused && node->type!=p->type)
         return;
 
+    D(fprintf(stderr, "[%d] p: %p %d node: %p %d unused: %p %d, other: %p %d\n",
+            SPLIT_REGNODE,
+            p, p->type, node, node->type, unused, unused->type,
+            other, other->type));
+    
     if(node==unused || tl!=utl){
         if(other->type==SPLIT_UNUSED){
             if(node==unused){
+                D(fprintf(stderr, "1\n"));
                 /*
                  *     p             p
                  *   /   \    =>
                  * node other
                  */
-                if(p->is_static)
+                if(p->is_static){
+                    D(fprintf(stderr, "st\n"));
                     return;
+                }
                 p->type=SPLIT_UNUSED;
                 other->parent=NULL;
                 node->parent=NULL;
@@ -982,6 +990,7 @@ static void move_down_(WSplit **root, WSplit *node, WSplit *unused)
                 destroy_obj((Obj*)node);
                 move_down(root, p, p);
             }else{
+                D(fprintf(stderr, "2\n"));
                 /*          p                     p
                  *        /   \                 /   \        
                  *    node     other   =>      _   other
@@ -1001,6 +1010,7 @@ static void move_down_(WSplit **root, WSplit *node, WSplit *unused)
                 move_down(root, p, other);
             }
         }else if(other->type==p->type && !other->is_static){
+            D(fprintf(stderr, "3\n"));
             if((tl && other->u.s.tl->type==SPLIT_UNUSED) ||
                (!tl && other->u.s.br->type==SPLIT_UNUSED)){
                 /*          p                     p         
@@ -1013,27 +1023,32 @@ static void move_down_(WSplit **root, WSplit *node, WSplit *unused)
                  * in y, so unless node==unused, stop here.
                  */
                 WSplit *unused2;
+                D(fprintf(stderr, "3.1\n"));
                 if(tl){
+                    D(fprintf(stderr, "3.1.1\n"));
                     unused2=other->u.s.tl;
                     other->u.s.tl=NULL;
                     split_tree_remove_split(root, other, PRIMN_BR, FALSE);
                 }else{
+                    D(fprintf(stderr, "3.1.2\n"));
                     unused2=other->u.s.br;
                     other->u.s.br=NULL;
                     split_tree_remove_split(root, other, PRIMN_TL, FALSE);
                 }
-                 
+                
                 inc_s(node, unused, dir, split_size(unused2, dir));
                 unused2->parent=NULL;
                 destroy_obj((Obj*)unused2);
                 
                 if(node==unused)
                     move_down(root, p, node);
+            }else if(node==unused){
+                D(fprintf(stderr, "3.2\n"));
+                move_down(root, p, node);
             }
-        }else if(node==unused){
-            move_down(root, p, node);
         }
     }else{ /* tl==utl */
+        D(fprintf(stderr, "5\n"));
         /*     p                    p         
          *   /  \                 /  \        
          * other \node    =>    node unused
@@ -1041,10 +1056,12 @@ static void move_down_(WSplit **root, WSplit *node, WSplit *unused)
          *  uother unused   other uother
          */
         if(tl){
+            D(fprintf(stderr, "5.1\n"));
             p->u.s.tl=unused;
             node->u.s.tl=uother;
             node->u.s.br=other;
         }else{
+            D(fprintf(stderr, "5.2\n"));
             p->u.s.br=unused;
             node->u.s.br=uother;
             node->u.s.tl=other;
@@ -1060,7 +1077,7 @@ static void move_down_(WSplit **root, WSplit *node, WSplit *unused)
         move_down(root, p, unused);
     }
 }
-
+    
 
 WSplit *split_tree_remove(WSplit **root, WSplit *node, bool reclaim_space)
 {
@@ -1084,8 +1101,11 @@ WSplit *split_tree_remove(WSplit **root, WSplit *node, bool reclaim_space)
                 *thisptr=un;
                 un->parent=split;
                 replace_ok=TRUE;
-                if(split->is_lazy)
+                if(split->is_lazy){
+                    D(fprintf(stderr, ">>>>\n"));
                     move_down(root, un, un);
+                    D(fprintf(stderr, "<<<<\n"));
+                }
             }else{
                 warn_err();
             }
@@ -1110,7 +1130,6 @@ WSplit *split_tree_remove(WSplit **root, WSplit *node, bool reclaim_space)
 
 
 /*}}}*/
-
 
 
 /*{{{ Tree traversal */
@@ -1313,7 +1332,6 @@ WMPlex *split_tree_find_mplex(WRegion *from)
 
 
 /*}}}*/
-
 
 
 /*{{{ Misc. exports */
