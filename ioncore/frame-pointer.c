@@ -342,7 +342,7 @@ static void p_tabdrag_end(WFrame *frame, XButtonEvent *ev)
     }
     
     if(region_handle_drop(dropped_on, p_tab_x, p_tab_y, sub))
-        region_set_focus(dropped_on);
+        region_goto(dropped_on);
     else
         frame_draw_bar(frame, TRUE);
 }
