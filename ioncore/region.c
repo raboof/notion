@@ -783,46 +783,19 @@ bool region_may_destroy(WRegion *reg)
 }
 
 
-/*}}}*/
-
-
-/*{{{ Children linking */
-
-/*
-void link_child(WRegion *parent, WRegion *child)
+WRegion *region_get_manager_chk(WRegion *p, const WObjDescr *descr)
 {
-	LINK_ITEM(parent->children, child, p_next, p_prev);
-	child->parent=parent;
-}
-
-
-void link_child_before(WRegion *before, WRegion *child)
-{
-	WRegion *parent=before->parent;
-	LINK_ITEM_BEFORE(parent->children, before, child, p_next, p_prev);
-	child->parent=parent;
-}
-
-
-void link_child_after(WRegion *after, WRegion *child)
-{
-	WRegion *parent=after->parent;
-	LINK_ITEM_AFTER(parent->children, after, child, p_next, p_prev);
-	child->parent=parent;
-}
-
-
-void unlink_from_parent(WRegion *reg)
-{
-	WRegion *parent=reg->parent;
-
-	if(parent==NULL)
-		return;
+	WRegion *mgr=NULL;
 	
-	UNLINK_ITEM(parent->children, reg, p_next, p_prev);
-	reg->parent=NULL;
+	if(p!=NULL){
+		mgr=REGION_MANAGER(p);
+		if(wobj_is((WObj*)mgr, descr))
+			return mgr;
+	}
+	
+	return NULL;
 }
-*/
+
 
 /*}}}*/
 

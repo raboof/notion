@@ -398,6 +398,26 @@ again:
 		param.size_hints=&(cwin->size_hints);
 	}
 
+	if(XGetTransientForHint(wglobal.dpy, cwin->win, &(cwin->transient_for))){
+		param.tfor=find_clientwin(cwin->transient_for);
+		if(param.tfor==cwin){
+			param.tfor=NULL;
+			cwin->transient_for=None;
+			warn("The transient_for hint for \"%s\" points to itself.",
+				 region_name((WRegion*)cwin));
+		}else if(param.tfor==NULL){
+			warn("Client window \"%s\" has broken transient_for hint. "
+				 "(\"Extended WM hints\" multi-parent idiocy?)",
+				 region_name((WRegion*)cwin));
+		}else if(SCREEN_OF(param.tfor)!=SCREEN_OF(cwin)){
+			warn("The transient_for window for \"%s\" is not on the same "
+				 "screen.", region_name((WRegion*)cwin));
+		}else{
+			if(clientwin_get_transient_mode(cwin)==TRANSIENT_MODE_NORMAL)
+				param.flags|=REGION_ATTACH_TFOR;
+		}
+	}
+
 	CALL_ALT_B(managed, add_clientwin_alt, (cwin, &param));
 
 	if(!managed){

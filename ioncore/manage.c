@@ -100,7 +100,7 @@ static WViewport *find_suitable_viewport(WClientWin *cwin,
 /*{{{ Add */
 
 
-bool add_clientwin_default(WClientWin *cwin, WAttachParams *param)
+bool add_clientwin_default(WClientWin *cwin, const WAttachParams *param)
 {
 	WRegion *target=NULL;
 	WGenWS *ws=NULL;
@@ -108,7 +108,6 @@ bool add_clientwin_default(WClientWin *cwin, WAttachParams *param)
 	int tm;
 	
 	/* check full screen mode */
-	
 	if(param->flags&REGION_ATTACH_POSRQ){ /* flag should always be set */
 		if(clientwin_check_fullscreen_request(cwin, param->geomrq.w,
 											  param->geomrq.h))
@@ -116,82 +115,48 @@ bool add_clientwin_default(WClientWin *cwin, WAttachParams *param)
 
 	}
 
-	/* Check transient mode */
+	/* Transients are managed by their transient_for client window 
+	 * (unless overridden before call to this function).
+	 */
+	if(param->flags&REGION_ATTACH_TFOR){
+		/* The flag should only be set if transient_mode is ...NORMAL. */
+		if(finish_add_clientwin((WRegion*)param->tfor, cwin, param))
+			return TRUE;
+	}
 	
-	tm=clientwin_get_transient_mode(cwin);
+	find_prop_target(cwin, target==NULL ? &target : NULL, &ws);
 	
-	if(tm!=TRANSIENT_MODE_CURRENT){
-		if(tm==TRANSIENT_MODE_NORMAL){
-			/* Is it a transient to some other window? */
-			if(XGetTransientForHint(wglobal.dpy, cwin->win,
-									&(cwin->transient_for))){
-				param->tfor=find_clientwin(cwin->transient_for);
-				if(param->tfor==cwin){
-					param->tfor=NULL;
-					cwin->transient_for=None;
-				}else if(param->tfor!=NULL){
-					param->flags|=REGION_ATTACH_TFOR;
-				}else{
-					warn("Client window \"%s\" has broken transient_for hint. "
-						 "(\"Extended WM hints\" multi-parent idiocy?)",
-						 region_name((WRegion*)cwin));
-				}
-			}
+	if(target!=NULL){
+		if(!region_supports_add_managed(target)){
+			warn("Target region of window %#x does not support primitive "
+				 "add_managed method", cwin->win);
+			target=NULL;
+		}else if(SCREEN_OF(target)!=SCREEN_OF(cwin)){
+			warn("The target id property of window %#x is set to "
+				 "a frame on different screen", cwin->win);
+			target=NULL;
 		}
 	}
 	
-	/* Check target id property and target winprop for non-transients */
-	
-	if(!(param->flags&REGION_ATTACH_TFOR)){
-		/*get_integer_property(cwin->win, wglobal.atom_frame_id, &target_id);
-		
-		if(target_id!=0)
-			target=find_target_by_id(target_id);*/
-		
-		find_prop_target(cwin, target==NULL ? &target : NULL, &ws);
-		
-		if(target!=NULL){
-			if(!region_supports_add_managed(target)){
-				warn("Target region of window %#x does not support primitive "
-					 "add_managed method", cwin->win);
-				target=NULL;
-			}else if(SCREEN_OF(target)!=SCREEN_OF(cwin)){
-				warn("The target id property of window %#x is set to "
-					 "a frame on different screen", cwin->win);
-				target=NULL;
-			}
-		}
-		
-		/* Found a specific target frame or such? */
-		if(target!=NULL){
-			if(finish_add_clientwin(target, cwin, param))
-				return TRUE;
-		}
+	/* Found a specific target frame or such? */
+	if(target!=NULL){
+		if(finish_add_clientwin(target, cwin, param))
+			return TRUE;
 	}
 	
 	/* Need to find a workspace and let it handle this. */
-	
 	if(ws==NULL){
 		vp=find_suitable_viewport(cwin, param);
 		if(vp!=NULL)
 			ws=find_suitable_workspace(vp);
 	}
-
+	
 	if(ws!=NULL){
 		if(genws_add_clientwin(ws, cwin, param))
 			return TRUE;
 	}
 	
-	/* If there was no workspace or the workspace failed to handle this,
-	 * try to have the transient_for clientwin manage transients.
-	 */
-	if(param->flags&REGION_ATTACH_TFOR){
-		if(finish_add_clientwin((WRegion*)param->tfor, cwin, param))
-			return TRUE;
-	}
-	
 	/* All else failed, try full screen mode */
-	
 	return clientwin_fullscreen_vp(cwin, vp, FALSE);
 }
 
@@ -221,6 +186,11 @@ bool finish_add_clientwin(WRegion *reg, WClientWin *cwin,
 	
 	assert(reg!=NULL);
 	
+	if(SCREEN_OF(reg)!=SCREEN_OF(cwin)){
+		warn("Trying to add client window to a region not on same screen.");
+		return FALSE;
+	}
+		
 	if(clientwin_get_switchto(cwin))
 		param2.flags|=REGION_ATTACH_SWITCHTO;
 	
@@ -234,7 +204,7 @@ bool finish_add_clientwin(WRegion *reg, WClientWin *cwin,
 	   param->init_state==IconicState)
 		param2.flags=0;
 	
-	return region_add_managed(reg, (WRegion*)cwin, &param2));
+	return region_add_managed(reg, (WRegion*)cwin, &param2);
 }
 
 

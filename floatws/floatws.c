@@ -288,16 +288,9 @@ static bool floatws_add_clientwin(WFloatWS *ws,
 {
 	WRegion *target=NULL;
 	WWindow *par;
-	WRegion *stack_above=NULL;
 	bool newreg=FALSE;
 	bool respectpos=FALSE;
 
-	if(params->flags&REGION_ATTACH_TFOR){
-		stack_above=(WRegion*)REGION_PARENT_CHK(params->tfor, WRegion);
-		if(stack_above!=NULL && REGION_MANAGER(stack_above)!=(WRegion*)ws)
-			stack_above=NULL;
-	}
-	
 	par=REGION_PARENT_CHK(ws, WWindow);
 	assert(par!=NULL);
 	
@@ -351,7 +344,6 @@ static bool floatws_add_clientwin(WFloatWS *ws,
 		   (fgeom.y+fgeom.h<=REGION_GEOM(ws).y) ||
 		   (fgeom.x>=REGION_GEOM(ws).x+REGION_GEOM(ws).w) ||
 		   (fgeom.y>=REGION_GEOM(ws).y+REGION_GEOM(ws).h)){
-			fprintf(stderr, "doh!\n");
 			respectpos=FALSE;
 		}
 
@@ -364,9 +356,6 @@ static bool floatws_add_clientwin(WFloatWS *ws,
 			warn("Failed to create a new WFloatFrame for client window");
 			return FALSE;
 		}
-		
-		if(stack_above!=NULL)
-			region_stack_above(target, stack_above);
 
 		floatws_add_managed(ws, target);
 		newreg=TRUE;
@@ -422,6 +411,34 @@ static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
 	}
 	
 	floatws_add_managed(ws, target);
+
+	return TRUE;
+}
+
+
+/* A handler for add_clientwin_alt hook to handle transients for windows
+ * on WFloatWS:s differently from the normal behaviour.
+ */
+bool add_clientwin_floatws_transient(WClientWin *cwin, WAttachParams *param)
+{
+	WRegion *stack_above;
+	WFloatWS *ws;
+	
+	if(!(param->flags&REGION_ATTACH_TFOR))
+		return FALSE;
+
+	stack_above=(WRegion*)REGION_PARENT_CHK(param->tfor, WFloatFrame);
+	if(stack_above==NULL)
+		return FALSE;
+	
+	ws=REGION_MANAGER_CHK(stack_above, WFloatWS);
+	if(ws==NULL)
+		return FALSE;
+	
+	if(!floatws_add_clientwin(ws, cwin, param))
+		return FALSE;
+
+	region_stack_above(REGION_MANAGER(cwin), stack_above);
 
 	return TRUE;
 }

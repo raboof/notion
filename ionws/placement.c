@@ -35,33 +35,18 @@ static WRegion *find_suitable_frame(WIonWS *ws)
 }
 
 
-static bool finish_add_transient(WRegion *reg, WClientWin *cwin,
-								 const WAttachParams *param)
-{
-	return finish_add_clientwin(reg, cwin, param);
-}
-
-
 bool ionws_add_clientwin(WIonWS *ws, WClientWin *cwin,
 						 const WAttachParams *param)
 {
 	WRegion *target=NULL;
 	bool uspos;
-	int tm;
 	
-	if(param->flags&REGION_ATTACH_TFOR){
-		if(finish_add_transient((WRegion*)param->tfor, cwin, 
-								param))
-			return TRUE;
-	}
-	
-	tm=clientwin_get_transient_mode(cwin);
-	if(tm==TRANSIENT_MODE_CURRENT){
+	if(clientwin_get_transient_mode(cwin)==TRANSIENT_MODE_CURRENT){
 		target=find_suitable_frame(ws);
 		if(target!=NULL && WOBJ_IS(target, WGenFrame)){
 			if(((WGenFrame*)target)->current_sub!=NULL &&
 			   WOBJ_IS(((WGenFrame*)target)->current_sub, WClientWin)){
-				if(finish_add_transient(((WGenFrame*)target)->current_sub,
+				if(finish_add_clientwin(((WGenFrame*)target)->current_sub,
 										cwin, param))
 					return TRUE;
 			}
@@ -77,19 +62,6 @@ bool ionws_add_clientwin(WIonWS *ws, WClientWin *cwin,
 				target=NULL;
 		}
 		
-#ifndef CF_IONWS_IGNORE_USER_POSITION
-		if(target==NULL && uspos){
-			/* MAPRQ implies POSRQ and SIZERQ */
-			
-			/* Maybe gravity should be taken into account so that user
-			 * specified position -0-0 would put to the frame in the
-			 * lower right corner. 
-			 */
-			
-			target=(WRegion*)find_frame_at(ws, param->geomrq.x,
-										   param->geomrq.y);
-		}
-#endif
 		if(target==NULL)
 			target=find_suitable_frame(ws);
 	}
@@ -98,8 +70,6 @@ bool ionws_add_clientwin(WIonWS *ws, WClientWin *cwin,
 		warn("Ooops... could not find a frame to add client to.");
 		return FALSE;
 	}
-	
-	assert(SCREEN_OF(target)==SCREEN_OF(cwin));
 	
 	return finish_add_clientwin(target, cwin, param);
 }

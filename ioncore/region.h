@@ -75,6 +75,7 @@ DECLOBJ(WRegion){
 #define REGION_GEOM(R)  		(((WRegion*)(R))->geom)
 #define REGION_ACTIVE_SUB(R)  	(((WRegion*)(R))->active_sub)
 #define REGION_MANAGER(R)  		(((WRegion*)(R))->manager)
+#define REGION_MANAGER_CHK(R, TYPE) (TYPE*)region_get_manager_chk((WRegion*)R, &OBJDESCR(TYPE))
 
 
 #define FOR_ALL_MANAGED_ON_LIST(LIST, REG) \
@@ -141,6 +142,7 @@ extern WRegion *region_manager(WRegion *reg);
 extern void region_set_parent(WRegion *reg, WRegion *par);
 extern void region_set_manager(WRegion *reg, WRegion *mgr, WRegion **listptr);
 extern void region_unset_manager(WRegion *reg, WRegion *mgr, WRegion **listptr);
+extern WRegion *region_get_manager_chk(WRegion *p, const WObjDescr *descr);
 
 DYNFUN WRegion *region_managed_enter_to_focus(WRegion *mgr, WRegion *reg);
 DYNFUN void region_remove_managed(WRegion *reg, WRegion *sub);

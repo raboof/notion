@@ -11,6 +11,8 @@
 #include <ioncore/genframep.h>
 #include <ioncore/genframe-pointer.h>
 #include <ioncore/reginfo.h>
+#include <ioncore/hooks.h>
+#include <ioncore/clientwin.h>
 #include <ioncore/extl.h>
 
 #include "floatws.h"
@@ -87,6 +89,8 @@ extern bool floatws_module_unregister_exports();
 
 void floatws_module_deinit()
 {
+	REMOVE_HOOK(add_clientwin_alt, add_clientwin_floatws_transient);
+
 	floatws_module_unregister_exports();
 	deinit_bindmap(&floatws_bindmap);
 	deinit_bindmap(&floatframe_bindmap);
@@ -119,6 +123,8 @@ bool floatws_module_init()
 				 "Refusing to load module. Please fix your configuration.");
 		goto err;
 	}
+	
+	ADD_HOOK(add_clientwin_alt, add_clientwin_floatws_transient);
 
 	return TRUE;
 	

@@ -18,7 +18,7 @@ extern bool finish_add_clientwin(WRegion *reg, WClientWin *cwin,
 
 
 extern bool add_clientwin_default(WClientWin *cwin,
-								  WAttachParams *param);
+								  const WAttachParams *param);
 
 
 DYNFUN bool genws_add_clientwin(WGenWS *genws, WClientWin *cwin,
