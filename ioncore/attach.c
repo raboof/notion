@@ -23,7 +23,7 @@ WRegion *region_do_add_managed(WRegion *reg, WRegionAddFn *fn, void *param,
 {
 	WRegion *ret=NULL;
 	CALL_DYN_RET(ret, WRegion*, region_do_add_managed, reg,
-				 (reg, fn, param, flags));
+				 (reg, fn, param, flags, geomrq));
 	return ret;
 }
 

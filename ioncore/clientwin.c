@@ -400,7 +400,7 @@ static WRegion *clientwin_do_add_managed(WClientWin *cwin, WRegionAddFn *fn,
 	WRectangle geom=cwin->max_geom;
 	WWindow *par=FIND_PARENT1(cwin, WWindow);
 	WRegion *reg, *t;
-	
+
 	if(par==NULL)
 		return NULL;
 	
@@ -421,16 +421,19 @@ static WRegion *clientwin_do_add_managed(WClientWin *cwin, WRegionAddFn *fn,
 	if(reg==NULL)
 		return NULL;
 
+	t=TOPMOST_TRANSIENT(cwin);
+
 	region_set_manager(reg, (WRegion*)cwin, &(cwin->transient_list));
 	
-	t=TOPMOST_TRANSIENT(cwin);
 	if(t!=NULL)
 		region_restack(reg, region_x_window(t), Above);
 	else
 		region_restack(reg, cwin->win, Above);
 
 	if(REGION_IS_MAPPED((WRegion*)cwin))
-	   region_map(reg);
+		region_map(reg);
+	else
+		region_unmap(reg);
 	
 	if(REGION_IS_ACTIVE(cwin))
 		set_focus(reg);

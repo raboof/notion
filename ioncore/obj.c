@@ -114,8 +114,13 @@ static void dummy_dyn()
 DynFun *lookup_dynfun(const WObj *obj, DynFun *func,
 					  bool *funnotfound)
 {
-	const WObjDescr *descr=obj->obj_type;
+	const WObjDescr *descr;
 	const DynFunTab *df;
+	
+	if(obj==NULL)
+		return NULL;
+	
+	descr=obj->obj_type;
 	
 	for(; descr!=&WObj_objdescr; descr=descr->ancestor){
 		df=descr->funtab;
