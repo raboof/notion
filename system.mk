@@ -14,9 +14,8 @@ BINDIR=$(PREFIX)/bin
 ETCDIR=$(PREFIX)/etc
 MANDIR=$(PREFIX)/man
 DOCDIR=$(PREFIX)/doc
-# Not used
-INCDIR=$(PREFIX)/include
 LIBDIR=$(PREFIX)/lib
+INCDIR=$(PREFIX)/include
 
 
 ##
@@ -32,15 +31,11 @@ MODULE_SUPPORT_LDFLAGS=-export-dynamic -ldl
 ##
 
 X11_PREFIX=/usr/X11R6
-
 # SunOS/Solaris
 #X11_PREFIX=/usr/openwin
 
 X11_LIBS=-L$(X11_PREFIX)/lib
 X11_INCLUDES=-I$(X11_PREFIX)/include
-
-#EXTRA_INCLUDES = -I$(PREFIX)/include
-#EXTRA_LIBS = -L$(PREFIX)/lib
 
 # Change commenting to disable Xinerama support
 XINERAMA_LIBS=-lXinerama -lXext
@@ -50,6 +45,10 @@ XINERAMA_LIBS=-lXinerama -lXext
 #EXTRA_LIBS += `xft-config --libs`
 #EXTRA_INCLUDES += `xft-config --cflags`
 #DEFINES += -DCF_XFT
+
+
+#EXTRA_INCLUDES = -I$(PREFIX)/include
+#EXTRA_LIBS = -L$(PREFIX)/lib
 
 
 ##
