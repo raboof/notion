@@ -53,12 +53,12 @@ static bool screen_init(WScreen *scr, WRootWin *rootwin,
 	scr->managed_off.h=0;
 	
 	if(useroot){
-		win=rootwin->root;
+		win=WROOTWIN_ROOT(rootwin);
 	}else{
 		attr.background_pixmap=ParentRelative;
 		attrflags=CWBackPixmap;
 		
-		win=XCreateWindow(wglobal.dpy, rootwin->root,
+		win=XCreateWindow(wglobal.dpy, WROOTWIN_ROOT(rootwin),
 						  geom.x, geom.y, geom.w, geom.h, 0, 
 						  DefaultDepth(wglobal.dpy, rootwin->xscr),
 						  InputOutput,

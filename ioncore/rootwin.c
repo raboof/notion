@@ -42,6 +42,7 @@
 #include "bindmaps.h"
 
 
+
 /*{{{ Error handling */
 
 
@@ -129,7 +130,7 @@ static void scan_initial_windows(WRootWin *rootwin)
 	uint nwins=0, i, j;
 	XWMHints *hints;
 	
-	XQueryTree(wglobal.dpy, rootwin->root, &dummy_root, &dummy_parent,
+	XQueryTree(wglobal.dpy, WROOTWIN_ROOT(rootwin), &dummy_root, &dummy_parent,
 			   &wins, &nwins);
 	
 	for(i=0; i<nwins; i++){
@@ -220,11 +221,10 @@ static WRootWin *preinit_rootwin(int xscr)
 	geom.w=DisplayWidth(dpy, xscr);
 	geom.h=DisplayHeight(dpy, xscr);
 	
-	region_init((WRegion*)rootwin, NULL, geom);
+	window_init((WWindow*)rootwin, NULL, root, geom);
 	
-	rootwin->reg.flags|=REGION_BINDINGS_ARE_GRABBED;
-	rootwin->reg.rootwin=rootwin;
-	rootwin->root=root;
+	((WRegion*)rootwin)->flags|=REGION_BINDINGS_ARE_GRABBED;
+	((WRegion*)rootwin)->rootwin=rootwin;
 	rootwin->xscr=xscr;
 	rootwin->default_cmap=DefaultColormap(dpy, xscr);
 	rootwin->screen_list=NULL;
@@ -263,7 +263,7 @@ static WScreen *add_screen(WRootWin *rw, int id, WRectangle geom,
 
 	if(!useroot){
 		p[1]=region_x_window((WRegion*)scr);
-		XChangeProperty(wglobal.dpy, rw->root, net_virtual_roots,
+		XChangeProperty(wglobal.dpy, WROOTWIN_ROOT(rw), net_virtual_roots,
 						XA_WINDOW, 32, PropModeAppend, (uchar*)&(p[1]), 1);
 	}
 
@@ -307,7 +307,7 @@ WRootWin *manage_rootwin(int xscr, bool noxinerama)
 	preinit_graphics(rootwin);
 	
 	net_virtual_roots=XInternAtom(wglobal.dpy, "_NET_VIRTUAL_ROOTS", False);
-	XDeleteProperty(wglobal.dpy, rootwin->root, net_virtual_roots);
+	XDeleteProperty(wglobal.dpy, WROOTWIN_ROOT(rootwin), net_virtual_roots);
 	
 #ifndef CF_NO_XINERAMA
 	if(xi!=NULL && nxi!=0){
@@ -338,14 +338,6 @@ WRootWin *manage_rootwin(int xscr, bool noxinerama)
 		return NULL;
 	}
 	
-	if(nxi>1){
-		/* If a WScreen uses the root window, we'll let win_context point
-		 * to it.
-		 */
-		XSaveContext(wglobal.dpy, rootwin->root, wglobal.win_context,
-					 (XPointer)rootwin);
-	}
-
 	/* */ {
 		/* TODO: typed LINK_ITEM */
 		WRegion *tmp=(WRegion*)wglobal.rootwins;
@@ -355,7 +347,7 @@ WRootWin *manage_rootwin(int xscr, bool noxinerama)
 	
 	read_draw_config(rootwin);
 	postinit_graphics(rootwin);
-	set_cursor(rootwin->root, CURSOR_DEFAULT);
+	set_cursor(WROOTWIN_ROOT(rootwin), CURSOR_DEFAULT);
 	
 	return rootwin;
 }
@@ -374,10 +366,9 @@ void rootwin_deinit(WRootWin *rw)
 		wglobal.rootwins=(WRootWin*)tmp;
 	}
 	
-	XSelectInput(wglobal.dpy, rw->root, 0);
-	XDeleteContext(wglobal.dpy, rw->root, wglobal.win_context);
-
-	region_deinit((WRegion*)rw);
+	XSelectInput(wglobal.dpy, WROOTWIN_ROOT(rw), 0);
+	
+	window_deinit((WWindow*)rw);
 }
 
 
@@ -403,7 +394,7 @@ static void rootwin_set_focus_to(WRootWin *rootwin, bool warp)
 	if(sub!=NULL)
 		region_set_focus_to(sub, warp);
 	else
-		SET_FOCUS(rootwin->root);
+		SET_FOCUS(WROOTWIN_ROOT(rootwin));
 }
 
 
@@ -440,7 +431,7 @@ static void rootwin_remove_managed(WRootWin *rootwin, WRegion *reg)
 
 static Window rootwin_x_window(WRootWin *rootwin)
 {
-	return rootwin->root;
+	return WROOTWIN_ROOT(rootwin);
 }
 
 
@@ -466,7 +457,7 @@ WRootWin *region_rootwin_of(const WRegion *reg)
 
 Window region_root_of(const WRegion *reg)
 {
-	return region_rootwin_of(reg)->root;
+	return WROOTWIN_ROOT(region_rootwin_of(reg));
 }
 
 
@@ -554,7 +545,7 @@ static DynFunTab rootwin_dynfuntab[]={
 };
 
 
-IMPLOBJ(WRootWin, WRegion, rootwin_deinit, rootwin_dynfuntab);
+IMPLOBJ(WRootWin, WWindow, rootwin_deinit, rootwin_dynfuntab);
 
 	
 /*}}}*/

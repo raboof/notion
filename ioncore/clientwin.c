@@ -456,7 +456,7 @@ again:
 	}
 
 	FOR_ALL_ROOTWINS(rootwin){
-		if(rootwin->root==attr.root)
+		if(WROOTWIN_ROOT(rootwin)==attr.root)
 			break;
 	}
 

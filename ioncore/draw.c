@@ -373,7 +373,7 @@ static void create_wm_windows(WRootWin *rootwin)
 	attr.background_pixel=COLOR_PIXEL(grdata->tab_sel_colors.bg);
 
 	grdata->moveres_win=
-		XCreateWindow(wglobal.dpy, rootwin->root,
+		XCreateWindow(wglobal.dpy, rootwin->wwin.win,
 					  CF_MOVERES_WIN_X, CF_MOVERES_WIN_Y, w, h, 0,
 					  CopyFromParent, InputOutput, CopyFromParent,
 					  CWSaveUnder|CWBackPixel, &attr);
@@ -393,7 +393,7 @@ static void create_wm_windows(WRootWin *rootwin)
 	attr.background_pixel=COLOR_PIXEL(grdata->frame_colors.bg);
 	
 	grdata->drag_win=
-		XCreateWindow(wglobal.dpy, rootwin->root,
+		XCreateWindow(wglobal.dpy, rootwin->wwin.win,
 					  0, 0, 16, 16, 0,
 					  CopyFromParent, InputOutput, CopyFromParent,
 					  CWSaveUnder|CWBackPixel, &attr);
@@ -422,7 +422,7 @@ void postinit_graphics(WRootWin *rootwin)
 {
 	Display *dpy=wglobal.dpy;
 	WGRData *grdata=&(rootwin->grdata);
-	Window root=rootwin->root;
+	Window root=rootwin->wwin.win;
 	WColor black, white;
 	XGCValues gcv;
 	ulong gcvmask;
@@ -542,7 +542,7 @@ void draw_rubberbox(WRootWin *rw, WRectangle rect)
 	fpts[4].x=rect.x;
 	fpts[4].y=rect.y;
 	
-	XDrawLines(wglobal.dpy, rw->root, rw->grdata.xor_gc, fpts, 5,
+	XDrawLines(wglobal.dpy, rw->wwin.win, rw->grdata.xor_gc, fpts, 5,
 			   CoordModeOrigin);
 }
 

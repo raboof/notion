@@ -20,7 +20,8 @@ INTROBJ(WRootWin);
 #include "window.h"
 #include "screen.h"
 
-	
+#define WROOTWIN_ROOT(X) ((X)->wwin.win)
+
 #define ROOTWIN_OF(X) region_rootwin_of((WRegion*)X)
 #define ROOT_OF(X) region_root_of((WRegion*)X)
 #define GRDATA_OF(X) region_grdata_of((WRegion*)X)
@@ -31,8 +32,7 @@ INTROBJ(WRootWin);
 
 
 DECLOBJ(WRootWin){
-	WRegion reg;
-	Window root;
+	WWindow wwin;
 	int xscr;
 	
 	WRegion *screen_list;
