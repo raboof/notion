@@ -898,13 +898,13 @@ static void do_fit_clientwin(WClientWin *cwin, WRectangle max_geom, WWindow *np)
 		if(np==NULL){
 			region_fit(transient, geom2);
 		}else{
-			/* TODO: stacking should not be reset */
 			if(!reparent_region(transient, np, geom2)){
 				warn("Problem: can't reparent a %s managed by a WClientWin"
 					 "being reparented. Detaching from this object.",
 					 WOBJ_TYPESTR(transient));
 				region_detach_manager(transient);
 			}
+			region_stack_above(transient, (WRegion*)cwin);
 		}
 	}
 }
