@@ -26,6 +26,7 @@ INTROBJ(WObj);
 INTRSTRUCT(WWatch);
 
 extern bool wobj_is(const WObj *obj, const WObjDescr *descr);
+extern bool wobj_is_str(const WObj *obj, const char *str);
 extern const void *wobj_cast(const WObj *obj, const WObjDescr *descr);
 
 extern void destroy_obj(WObj *obj);

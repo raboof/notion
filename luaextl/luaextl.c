@@ -23,6 +23,8 @@
 
 static lua_State *l_st=NULL;
 
+static bool extl_stack_get(lua_State *st, int pos, char type, bool copystring,
+						   void *valret);
 
 /*{{{ WObj userdata handling */
 
@@ -53,6 +55,13 @@ static bool extl_verify_wobj(lua_State *st, int pos)
 	lua_pop(st, 2);
 	
 	return ret;
+}
+
+
+static WObj *extl_do_get_obj(lua_State *st, int pos)
+{
+	WWatch *watch=(WWatch*)lua_touserdata(st, pos);
+	return watch->obj;
 }
 
 
@@ -102,7 +111,37 @@ static bool extl_push_obj(lua_State *st, WObj *obj)
 }
 	
 	
-static bool extl_init_obj_metatable(lua_State *st)
+static int extl_obj_typename(lua_State *st)
+{
+	WObj *obj;
+
+	if(!extl_stack_get(st, -1, 'o', FALSE, &obj)){
+		lua_pushnil(st);
+	}else{
+		lua_pushstring(st, WOBJ_TYPESTR(obj));
+	}
+	
+	return 1;
+}
+
+
+static int extl_obj_is(lua_State *st)
+{
+	WObj *obj;
+	const char *tn;
+	
+	if(!extl_stack_get(st, -2, 'o', FALSE, &obj)){
+		lua_pushboolean(st, 0);
+	}else{
+		tn=lua_tostring(st, -1);
+		lua_pushboolean(st, wobj_is_str(obj, tn));
+	}
+	
+	return 1;
+}
+
+
+static bool extl_init_obj_info(lua_State *st)
 {
 	lua_getregistry(st);
 	lua_pushstring(st, "ioncore_luaextl_WObj_metatable");
@@ -112,7 +151,12 @@ static bool extl_init_obj_metatable(lua_State *st)
 	lua_settable(st, -3); /* set metatable.__gc=extl_obj_gc_handler */
 	lua_settable(st, -3); /* set registry.WObj_metatable=metatable */
 	lua_pop(st, 1); /* pop registry */
-	
+
+	lua_pushcfunction(st, extl_obj_typename);
+	lua_setglobal(st, "obj_typename");
+	lua_pushcfunction(st, extl_obj_is);
+	lua_setglobal(st, "obj_is");
+
 	return TRUE;
 }
 
@@ -138,7 +182,7 @@ bool extl_init()
 	lua_strlibopen(l_st);
 	lua_mathlibopen(l_st);
 	
-	if(!extl_init_obj_metatable(l_st)){
+	if(!extl_init_obj_info(l_st)){
 		warn("Failed to initialize WObj metatable\n");
 		goto fail;
 	}
@@ -160,13 +204,6 @@ const char *extl_extension()
 
 
 /*{{{ Stack get/push */
-
-
-static WObj *do_get_obj(lua_State *st, int pos)
-{
-	WWatch *watch=(WWatch*)lua_touserdata(st, pos);
-	return watch->obj;
-}
 
 
 static bool extl_stack_get(lua_State *st, int pos, char type, bool copystring,
@@ -251,7 +288,7 @@ static bool extl_stack_get(lua_State *st, int pos, char type, bool copystring,
 		if(!extl_verify_wobj(st, pos))
 			return FALSE;
 		if(valret)
-			*((WObj**)valret)=do_get_obj(st, pos);
+			*((WObj**)valret)=extl_do_get_obj(st, pos);
 		return TRUE;
 	}
 	
@@ -1015,62 +1052,6 @@ void extl_unregister_function(ExtlExportedFnSpec *spec)
 /*}}}*/
 
 
-#if 0
-static int extl_type_redef(lua_State *st)
-{
-	const char *s;
-	WObj *obj;
-	
-	if(lua_tag(st, -1)==obj_tag){
-		obj=do_get_obj(st, -1);
-		if(obj==NULL){
-			s="nil";
-		}else{
-			s=WOBJ_TYPESTR(obj);
-		}
-	}else{
-		s=lua_typename(st, -1);
-	}
-	lua_pushstring(st, s);
-	
-	return 1;
-}
-
-
-static int extl_is_a(lua_State *st)
-{
-	int ret=0;
-	const char *s, *s2;
-	WObj *obj;
-	
-	s=lua_tostring(st, -1);
-
-	if(s==NULL)
-		return 0;
-	
-	if(strcmp(s, "nil")==0){
-		ret=lua_isnil(st, -2);
-	}else if(strcmp(s, "number")==0){
-		ret=lua_isnumber(st, -2);
-	}else if(strcmp(s, "string")==0){
-		ret=lua_isstring(st, -2);
-	}else if(strcmp(s, "table")==0){
-		ret=lua_istable(st, -2);
-	}else if(strcmp(s, "function")==0){
-		ret=lua_isfunction(st, -2);
-	}else if(strcmp(s, "userdata")==0){
-		ret=lua_isuserdata(st, -2);
-	}else{
-		ret=extl_stack_get(st, -2, 'o', FALSE, NULL);
-		/* ... */
-	}
-	
-	lua_pushnumber(st, ret);
-	
-	return 1;
-}
-
-#endif
 
 /*{{{ Misc */
 

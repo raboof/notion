@@ -5,6 +5,8 @@
  * See the included file LICENSE for details.
  */
 
+#include <string.h>
+
 #include "common.h"
 #include "obj.h"
 #include "objp.h"
@@ -53,6 +55,24 @@ bool wobj_is(const WObj *obj, const WObjDescr *descr)
 	
 	while(d!=NULL){
 		if(d==descr)
+			return TRUE;
+		d=d->ancestor;
+	}
+	return FALSE;
+}
+
+
+bool wobj_is_str(const WObj *obj, const char *str)
+{
+	WObjDescr *d;
+	
+	if(obj==NULL)
+		return FALSE;
+	
+	d=obj->obj_type;
+	
+	while(d!=NULL){
+		if(strcmp(d->name, str)==0)
 			return TRUE;
 		d=d->ancestor;
 	}
