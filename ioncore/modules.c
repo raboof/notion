@@ -19,55 +19,53 @@
 #include "../version.h"
 
 
-INTRSTRUCT(Module);
-	
-DECLSTRUCT(Module){
-	lt_dlhandle handle;
-	char *name;
-	Module *next, *prev;
-};
-
-static Module *modules=NULL;
-
+static lt_dlcaller_id ltid=0;
 
 
 /*{{{ Loading and initialization code */
 
 
-static bool check_version(lt_dlhandle handle, char *name)
+static void *get_module_symbol(lt_dlhandle handle, char *name)
 {
-	char *p=scat(name, "_module_ion_version");
-	char *versionstr;
+	const lt_dlinfo *info;
+	char *p;
+	void *ret;
+	
+	info=lt_dlgetinfo(handle);
+	
+	if(info==NULL || info->name==NULL){
+		warn("lt_dlgetinfo() failed to return module name.");
+		return NULL;
+	}
 
+	p=scat(info->name, name);
 	if(p==NULL){
 		warn_err();
-		return FALSE;
+		return NULL;
 	}
 	
-	versionstr=(char*)lt_dlsym(handle, p);
+	ret=lt_dlsym(handle, p);
 	
 	free(p);
 	
+	return ret;
+}
+							   
+
+static bool check_version(lt_dlhandle handle)
+{
+	char *versionstr=(char*)get_module_symbol(handle, "_module_ion_version");
 	if(versionstr==NULL)
 		return FALSE;
-	
 	return (strcmp(versionstr, ION_VERSION)==0);
 }
 
 
-static bool call_init(lt_dlhandle handle, char *name)
+static bool call_init(lt_dlhandle handle)
 {
-	char *p=scat(name, "_module_init");
 	bool (*initfn)(void);
-
-	if(p==NULL){
-		warn_err();
-		return FALSE;
-	}
 	
-	initfn=(bool (*)())lt_dlsym(handle, p);
-	
-	free(p);
+	initfn=(bool (*)())get_module_symbol(handle, "_module_init");
 	
 	if(initfn==NULL)
 		return TRUE;
@@ -85,6 +83,9 @@ bool init_module_support()
 		warn("lt_dlinit: %s", lt_dlerror());
 		return FALSE;
 	}
+	
+	ltid=lt_dlcaller_register();
+	
 	return TRUE;
 }
 
@@ -99,10 +100,6 @@ EXTL_EXPORT
 bool load_module(const char *modname)
 {
 	lt_dlhandle handle=NULL;
-	Module *m;
-	const char *p;
-	char *n;
-	size_t l;
 	
 	if(modname==NULL)
 		return FALSE;
@@ -114,100 +111,26 @@ bool load_module(const char *modname)
 		return FALSE;
 	}
 	
-	for(m=modules; m!=NULL; m=m->next){
-		if(m->handle==handle)
-			return TRUE;
-	}
-
-	/* Get the module name without directory or extension */
-	
-	p=strrchr(modname, '/');
-	
-	if(p!=NULL)
-		modname=p+1;
-	
-	for(p=modname; *p!='\0'; p++){
-		if(!isalnum(*p) && *p!='_')
-			break;
+	if(lt_dlcaller_set_data(ltid, handle, &ltid)!=NULL){
+		warn("Module %s already loaded", modname);
+		return TRUE;
 	}
 	
-	n=ALLOC_N(char, p-modname+1);
-	
-	if(n==NULL){
-		warn_err();
-		goto err1;
-	}
-	 
-	memcpy(n, modname, p-modname);
-	n[p-modname]='\0';
-	
-	/* Allocate space for module info */
-	
-	m=ALLOC(Module);
-	
-	if(m==NULL){
-		warn_err();
-		goto err2;
-	}
-	
-	m->name=n;
-	m->handle=handle;
-	m->next=NULL;
-	
-	/* initialize */
-	if(!check_version(handle, n)){
+	if(!check_version(handle)){
 		warn_obj(modname, "Module version information not found or version "
 				 "mismatch. Refusing to use.");
-		goto err3;
+		goto err;
 	}
 	
-	if(!call_init(handle, n))
-		goto err3;
-
-	LINK_ITEM(modules, m, next, prev);
+	if(!call_init(handle))
+		goto err;
 	
 	return TRUE;
 	
-err3:
-	free(m);
-err2:
-	free(n);
-err1:
+err:
 	lt_dlclose(handle);
 	return FALSE;
 }
-
-
-/*EXTL_EXPORT
-bool load_module(const char *name)
-{
-	char *name2=NULL;
-	bool ret=FALSE;
-	
-	if(strchr(name, '/')!=NULL)
-		return do_load_module(name);
-
-	if(strchr(name, '.')==NULL){
-		name2=scat(name, ".la");
-		if(name2==NULL){
-			warn_err();
-			return FALSE;
-		}
-		ret=load_module(name2);
-		free(name2);
-		return ret;
-	}
-
-	name2=find_module(name);
-	
-	if(name2!=NULL){
-		ret=do_load_module(name2);
-		free(name2);
-	}
-	
-	return ret;
-}*/
-
 
 /*}}}*/
 
@@ -217,43 +140,35 @@ bool load_module(const char *name)
 
 static void call_deinit(lt_dlhandle handle, char *name)
 {
-	char *p=scat(name, "_module_deinit");
 	void (*deinitfn)(void);
-
-	if(p==NULL){
-		warn_err();
-		return;
-	}
 	
-	deinitfn=(void (*)())lt_dlsym(handle, p);
-	
-	free(p);
+	deinitfn=(void (*)())get_module_symbol(handle, "_module_deinit");
 	
 	if(deinitfn!=NULL)
 		deinitfn();
 }
 
 
-static void do_unload_module(Module *m)
+static int do_unload_module(lt_dlhandle handle, void *unused)
 {
-	call_deinit(m->handle, m->name);
+	const lt_dlinfo *info;
 
-	lt_dlclose(m->handle);
-	if(m->name!=NULL)
-		free(m->name);
-	free(m);
+	info=lt_dlgetinfo(handle);
+	if(info==NULL || info->name==NULL){
+		warn("Unable to get module name.");
+	}else{
+		call_deinit(handle, info->name);
+	}
+
+	lt_dlclose(handle);
+	
+	return 0;
 }
 
 
 void unload_modules()
 {
-	Module *m;
-	
-	while(modules!=NULL){
-		m=modules->prev;
-		UNLINK_ITEM(modules, m, next, prev);
-		do_unload_module(m);
-	}
+	lt_dlforeach(do_unload_module, NULL);
 }
 
 
