@@ -54,6 +54,8 @@
 #include <ioncore/region-iter.h>
 #include <ioncore/mplex.h>
 #include <ioncore/saveload.h>
+#include <ioncore/bindmaps.h>
+#include <ioncore/regbind.h>
 
 /*}}}*/
 
@@ -69,15 +71,18 @@
 /*}}}*/
 
 
-/*{{{ Global variables */
+/*{{{ Vvariables */
 
 #include "../version.h"
 
 static const char *modname="dock";
 const char mod_dock_ion_api_version[]=ION_API_VERSION;
-bool shape_extension=FALSE;
-int shape_event_basep=0;
-int shape_error_basep=0;
+
+static bool shape_extension=FALSE;
+static int shape_event_basep=0;
+static int shape_error_basep=0;
+
+static WBindmap *dock_bindmap=NULL;
 
 /*}}}*/
 
@@ -1049,6 +1054,8 @@ static bool dock_init(WDock *dock, WWindow *parent, const WFitParams *fp)
     if(!window_init((WWindow*)dock, parent, fp))
         return FALSE;
     
+    region_add_bindmap((WRegion*)dock, dock_bindmap);
+
     ((WRegion*)dock)->flags|=REGION_SKIP_FOCUS;
 
     XSelectInput(ioncore_g.dpy, ((WWindow*)dock)->win,
@@ -1334,9 +1341,12 @@ static bool clientwin_do_manage_hook(WClientWin *cwin, const WManageParams *para
 /*{{{ Module init/deinit */
 
 
+extern bool mod_dock_register_exports();
+extern void mod_dock_unregister_exports();
+
+
 bool mod_dock_init()
 {
-    extern bool mod_dock_register_exports();
 
     if(XShapeQueryExtension(ioncore_g.dpy, &shape_event_basep,
                             &shape_error_basep)){
@@ -1355,6 +1365,13 @@ bool mod_dock_init()
         return FALSE;
     }
 
+    dock_bindmap=ioncore_alloc_bindmap("WDock", NULL);
+    if(dock_bindmap==NULL){
+        WARN_FUNC("Unable to allocate dock bindmap.");
+        mod_dock_unregister_exports();
+        ioncore_unregister_regclass(&CLASSDESCR(WDock));
+    }
+
     ioncore_read_config(modname, NULL, TRUE);
 
     hook_add(clientwin_do_manage_alt, 
@@ -1368,7 +1385,6 @@ bool mod_dock_init()
 void mod_dock_deinit()
 {
     WDock *dock;
-    extern void mod_dock_unregister_exports();
 
     ioncore_unregister_regclass(&CLASSDESCR(WDock));
 
@@ -1383,7 +1399,11 @@ void mod_dock_deinit()
     }
 
     mod_dock_unregister_exports();
-
+    
+    if(dock_bindmap!=NULL){
+        ioncore_free_bindmap("WDock", dock_bindmap);
+        dock_bindmap=NULL;
+    }
 }
 
 

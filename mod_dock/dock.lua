@@ -2,6 +2,25 @@
 -- Ion-devel dock module configuration
 --
 
+--[[
+include('menulib')
+
+defmenu("dock-settings", {
+    menuentry("Pos-TL", "_:set{pos='tl'}"),
+    menuentry("Pos-TR", "_:set{pos='tr'}"),
+    menuentry("Pos-BL", "_:set{pos='bl'}"),
+    menuentry("Pos-BR", "_:set{pos='br'}"),
+    menuentry("Grow-L", "_:set{grow='left'}"),
+    menuentry("Grow-R", "_:set{grow='right'}"),
+    menuentry("Grow-U", "_:set{grow='up'}"),
+    menuentry("Grow-D", "_:set{grow='down'}"),
+})
+
+defbindings("WDock", {
+    mpress("Button3", "menulib.pmenu(_, _sub, 'dock-settings')"),
+})
+--]]
+
 -- create a new dock on screen 0
 --[[
 dock = mod_dock.create_dock(0, {
