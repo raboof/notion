@@ -86,7 +86,7 @@ void debrush_get_font_extents(DEBrush *brush, GrFontExtents *fnte)
 			goto fail;
 		fnte->max_height=ext->max_logical_extent.height;
 		fnte->max_width=ext->max_logical_extent.width;
-		fnte->baseline=-extl->max_logical_extent.y;
+		fnte->baseline=-ext->max_logical_extent.y;
 	}
 #else
 	{
