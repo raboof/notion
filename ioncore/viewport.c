@@ -119,7 +119,7 @@ static bool create_initial_workspace_on_vp(WViewport *vp)
 	}
 	
 	region_set_name(reg, "main");
-	return FALSE;
+	return TRUE;
 }
 
 
