@@ -200,8 +200,10 @@ static WWinMatch *match_cwin(WClientWin *cwin)
                 if(win_match<3){
                     if(xstreq(match->wm_cmd, wm_cmd))
                         win_match++;
-                    if(*wm_name!=NULL && xstreq(match->wm_name, *wm_name))
+                    if(wm_name!=NULL && *wm_name!=NULL && 
+                       xstreq(match->wm_name, *wm_name)){
                         win_match++;
+                    }
                 }
             }
         }
