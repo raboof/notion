@@ -82,8 +82,17 @@ static WScreen *find_suitable_screen(WClientWin *cwin,
 bool add_clientwin_default(WClientWin *cwin, const WAttachParams *param)
 {
 	WGenWS *ws=NULL;
-	WScreen *vp=NULL;
+	WScreen *scr=NULL;
 	int tm;
+
+	/* Transients are managed by their transient_for client window 
+	 * (unless overridden before call to this function).
+	 */
+	if(param->flags&REGION_ATTACH_TFOR){
+		/* The flag should only be set if transient_mode is ...NORMAL. */
+		if(finish_add_clientwin((WRegion*)param->tfor, cwin, param))
+			return TRUE;
+	}
 	
 	/* check full screen mode */
 	if(param->flags&REGION_ATTACH_POSRQ){ /* flag should always be set */
@@ -95,19 +104,14 @@ bool add_clientwin_default(WClientWin *cwin, const WAttachParams *param)
 		}
 	}
 
-	/* Transients are managed by their transient_for client window 
-	 * (unless overridden before call to this function).
-	 */
-	if(param->flags&REGION_ATTACH_TFOR){
-		/* The flag should only be set if transient_mode is ...NORMAL. */
-		if(finish_add_clientwin((WRegion*)param->tfor, cwin, param))
-			return TRUE;
+	/* Need to find a workspace and let it handle this. */
+	scr=find_suitable_screen(cwin, param);
+	if(scr==NULL){
+		warn("Unable to find a screen for a new client window.");
+		return FALSE;
 	}
 	
-	/* Need to find a workspace and let it handle this. */
-	vp=find_suitable_screen(cwin, param);
-	if(vp!=NULL)
-		ws=find_suitable_workspace(vp);
+	ws=find_suitable_workspace(scr);
 	
 	if(ws!=NULL){
 		if(genws_add_clientwin(ws, cwin, param))
@@ -115,7 +119,7 @@ bool add_clientwin_default(WClientWin *cwin, const WAttachParams *param)
 	}
 	
 	/* All else failed, try full screen mode */
-	return clientwin_fullscreen_scr(cwin, vp, FALSE);
+	return clientwin_fullscreen_scr(cwin, scr, FALSE);
 }
 
 
