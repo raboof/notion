@@ -314,7 +314,7 @@ end
         
         
 function T.ratio_layout(p)
-    local fnode={reference=p.frame}
+    local fnode={reg=p.frame}
     local fg=p.frame:geom()
     local sg=p.node:geom()
     local vp, vsplit, dest_h

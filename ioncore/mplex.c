@@ -1294,7 +1294,7 @@ static ExtlTab mplex_do_get_stdisp_extl(WMPlex *mplex, bool fullconfig)
         extl_table_sets_rectangle(t, "geom", &REGION_GEOM(di->regwatch.obj));
     }else{
         t=extl_create_table();
-        extl_table_sets_o(t, "reference", di->regwatch.obj);
+        extl_table_sets_o(t, "reg", di->regwatch.obj);
     }
     
     if(t!=extl_table_none()){

@@ -185,7 +185,7 @@ static bool pfn_fallback(PenaltyParams *p)
         p->res.config=extl_create_table();
         if(p->res.config==extl_table_none())
             return FALSE;
-        extl_table_sets_o(p->res.config, "reference", (Obj*)(p->frame));
+        extl_table_sets_o(p->res.config, "reg", (Obj*)(p->frame));
     }else if(p->node->type==SPLIT_REGNODE){
         p->res.config=extl_table_none();
     }else{

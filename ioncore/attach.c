@@ -61,7 +61,7 @@ WRegion *region__attach_load(WRegion *mgr, ExtlTab tab,
 {
     WRegion *reg=NULL;
     
-    if(extl_table_gets_o(tab, "reference", (Obj**)&reg))
+    if(extl_table_gets_o(tab, "reg", (Obj**)&reg))
         return region__attach_reparent(mgr, reg, fn, param);
 
     return fn(mgr, (WRegionAttachHandler*)add_fn_load, (void*)&tab, param);

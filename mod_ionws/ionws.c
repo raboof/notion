@@ -1118,10 +1118,10 @@ static WRegion *do_attach(WIonWS *ws, WRegionAttachHandler *handler,
 WSplit *ionws_load_node(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
 {
     char *typestr=NULL;
-    Obj *reference=NULL;
+    Obj *ref=NULL;
     
     if(extl_table_gets_s(tab, "type", &typestr) ||
-       extl_table_gets_o(tab, "reference", &reference)){
+       extl_table_gets_o(tab, "reg", &ref)){
         WSplit *node=NULL;
         WRegion *reg;
         
