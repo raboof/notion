@@ -45,9 +45,6 @@ add_shortenrule("[^:]+: (.*)", "$1$|$1$<...")
 add_shortenrule("(.*)(<[0-9]+>)", "$1$2$|$1$<...$2")
 add_shortenrule("(.*)", "$1$|$1$<...")
 
--- List of hosts to tab-complete in the F4 ssh query.
---query_ssh_hosts={"host1", "host2"}
-
 -- List of directories to look for manuals in the F1 man page query.
 query_man_path={
     "/usr/man",

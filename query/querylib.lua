@@ -432,13 +432,35 @@ querylib.query_exec=querylib.make_frame_fn(
 )
 
 
+querylib.known_hosts={}
+
+function querylib.get_known_hosts(mplex)
+    querylib.known_hosts={}
+    local f
+    local h=os.getenv("HOME")
+    if h then 
+        f=io.open(h.."/.ssh/known_hosts")
+    end
+    if not f then 
+        query_message(mplex, "Failed to open ~/.ssh/known_hosts") 
+        return
+    end
+    for l in f:lines() do
+        local st, en, hostname=string.find(l, "^([^%s,]+)")
+        if hostname then
+            table.insert(querylib.known_hosts, hostname)
+        end
+    end
+    f:close()
+end
+
 function querylib.complete_ssh(str)
     if string.len(str)==0 then
-        return query_ssh_hosts
+        return querylib.known_hosts
     end
     
     local res={}
-    for _, v in ipairs(query_ssh_hosts) do
+    for _, v in ipairs(querylib.known_hosts) do
     	local s, e=string.find(v, str, 1, true)
 	if s==1 and e>=1 then
             table.insert(res, v)
@@ -447,15 +469,20 @@ function querylib.complete_ssh(str)
     return res
 end
 
---DOC
--- This query asks for a host to connect to with SSH. It starts
--- up ssh in a terminal using \file{ion-ssh}. To enable tab completion,
--- put the names of often-used hosts in the table \var{query_ssh_hosts}.
-querylib.query_ssh=querylib.make_execwith_fn(
+querylib.do_query_ssh=querylib.make_execwith_fn(
     "SSH to:", nil, 
     querylib.make_script_lookup_fn("ion-ssh"),
     querylib.make_completor(querylib.complete_ssh)
 )
+
+--DOC
+-- This query asks for a host to connect to with SSH. It starts
+-- up ssh in a terminal using \file{ion-ssh}. To enable tab completion,
+-- put the names of often-used hosts in the table \var{query_ssh_hosts}.
+function querylib.query_ssh(mplex)
+    querylib.get_known_hosts(mplex)
+    return querylib.do_query_ssh(mplex)
+end
 
 
 -- Use weak references to cache found manuals.
