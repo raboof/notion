@@ -218,7 +218,7 @@ int frame_tab_at_x(const WFrame *frame, int x)
 	
 	x-=bar_x;
 	
-	if(x<0)
+	if(x<0 || bar_w==0)
 		return -1;
 	
 	return (x*frame->managed_count)/bar_w;
@@ -230,6 +230,9 @@ int frame_nth_tab_x(const WFrame *frame, int n)
 	WGRData *grdata=GRDATA_OF(frame);
 	int bar_w=BAR_W(frame, grdata);
 	int bar_x=BAR_X(frame, grdata);
+	
+	if(frame->managed_count==0)
+		return bar_x;
 	
 	return (n*bar_w)/frame->managed_count+bar_x;
 }
