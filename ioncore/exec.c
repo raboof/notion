@@ -42,13 +42,8 @@
 void ioncore_do_exec(const char *cmd)
 {
     char *argv[4];
-    char *tmp=NULL;
 
     close(ioncore_g.conn);
-    
-    libtu_asprintf(&tmp, "exec %s", cmd);
-    if(tmp!=NULL)
-        cmd=tmp;
     
     ioncore_g.dpy=NULL;
     
