@@ -24,7 +24,9 @@ INTROBJ(WFrame)
 #define FRAME_CLIENT_HOFF(SCR) ((SCR)->grdata.client_off.h)
 
 #define FRAME_NO_SAVED_WH -1
-	
+
+#define FRAME_TAB_DRAGGED 0x0001
+
 DECLOBJ(WFrame){
 	WWindow win;
 	int flags;
@@ -36,7 +38,7 @@ DECLOBJ(WFrame){
 	int sub_count;
 	WRegion *current_sub;
 	WRegion *current_input;
-	WRegion *dragged_sub;
+	WRegion *tab_pressed_sub;
 };
 
 

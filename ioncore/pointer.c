@@ -43,23 +43,20 @@ static WMotionHandler *p_motion_begin_handler=NULL;
 /*{{{ Handler setup */
 
 
-bool set_button_handler(WThing *thing, WButtonHandler *handler)
+bool set_button_handler(WButtonHandler *handler)
 {
-	if(thing!=NULL)
-		p_thing=thing;
 	p_button_handler=handler;
 	return TRUE;
 }
 
 
-bool set_drag_handlers(WThing *thing, WMotionHandler *begin,
-					   WMotionHandler *motion, WButtonHandler *end)
+bool set_drag_handlers(WMotionHandler *begin,
+					   WMotionHandler *motion,
+					   WButtonHandler *end)
 {
 	if(p_motion==FALSE)
 		return FALSE;
 	
-	if(thing!=NULL)
-		p_thing=thing;
 	p_motion_begin_handler=begin;
 	p_motion_handler=motion;
 	p_button_handler=end;
@@ -167,7 +164,6 @@ bool handle_button_press(XButtonEvent *ev)
 	WBinding *pressbind=NULL;
 	WRegion *reg=NULL;
 	uint button, state;
-	/*WBindmap *bindmap=NULL;*/
 	int area=0;
 	
 	p_motiontmp=NULL;
@@ -184,7 +180,8 @@ bool handle_button_press(XButtonEvent *ev)
 	do_grab_kb_ptr(ev->root, reg, FocusChangeMask);
 	
 	p_thing=(WThing*)reg;
-	area=window_press((WWindow*)reg, ev, &p_thing);
+	
+	area=window_press((WWindow*)reg, ev);
 	
 	if(p_clickcnt==1 && time_in_threshold(ev->time) && p_button==button &&
 	   p_state==state && reg==p_reg){
@@ -235,6 +232,9 @@ bool handle_button_release(XButtonEvent *ev)
 		if(p_button_handler!=NULL)
 			p_button_handler(p_thing, ev);
 	}
+	
+	/* Allow any temporary settings to be cleared */
+	window_release((WWindow*)p_reg);
 
 	return TRUE;
 }

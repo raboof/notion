@@ -44,11 +44,17 @@ void window_insstr(WWindow *wwin, const char *buf, size_t n)
 }
 
 
-int window_press(WWindow *wwin, XButtonEvent *ev, WThing **thing_ret)
+int window_press(WWindow *wwin, XButtonEvent *ev)
 {
 	int area=0;
-	CALL_DYN_RET(area, int, window_press, wwin, (wwin, ev, thing_ret));
+	CALL_DYN_RET(area, int, window_press, wwin, (wwin, ev));
 	return area;
+}
+
+
+void window_release(WWindow *wwin)
+{
+	CALL_DYN(window_release, wwin, (wwin));
 }
 
 

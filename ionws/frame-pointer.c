@@ -51,7 +51,7 @@ static void frame_borders(WFrame *frame, WGRData *grdata, WRectangle *geom)
 
 #define RESB 8
 
-int frame_press(WFrame *frame, XButtonEvent *ev, WThing **thing_ret)
+int frame_press(WFrame *frame, XButtonEvent *ev)
 {
 	WScreen *scr=SCREEN_OF(frame);
 	WRegion *sub;
@@ -87,10 +87,9 @@ int frame_press(WFrame *frame, XButtonEvent *ev, WThing **thing_ret)
 
 		if(sub==NULL)
 			return FRAME_AREA_EMPTY_TAB;
-		
-		if(thing_ret!=NULL)
-			*thing_ret=(WThing*)sub;
-		
+
+		frame->tab_pressed_sub=sub;
+
 		return FRAME_AREA_TAB;
 	}
 	
@@ -126,13 +125,17 @@ int frame_press(WFrame *frame, XButtonEvent *ev, WThing **thing_ret)
 }
 
 
+void frame_release(WFrame *frame)
+{
+	frame->tab_pressed_sub=NULL;
+}
+
+
 /*}}}*/
 
 
 /*{{{ Tab drag */
 
-
-/* TODO: frame as arg. */
 
 static void draw_tabdrag(const WRegion *reg)
 {
@@ -161,8 +164,10 @@ static void draw_tabdrag(const WRegion *reg)
 		else
 			dinfo->colors=&(grdata->tab_colors);
 	}
+	
+	assert(((WFrame*)reg)->tab_pressed_sub!=NULL);
 
-	label=REGION_LABEL(reg);
+	label=REGION_LABEL(((WFrame*)reg)->tab_pressed_sub);
 	if(label==NULL)
 		label="";
 	
@@ -170,9 +175,9 @@ static void draw_tabdrag(const WRegion *reg)
 }
 
 
-static void p_tabdrag_motion(WRegion *sub, XMotionEvent *ev, int dx, int dy)
+static void p_tabdrag_motion(WFrame *frame, XMotionEvent *ev, int dx, int dy)
 {
-	WGRData *grdata=GRDATA_OF(sub);
+	WGRData *grdata=GRDATA_OF(frame);
 
 	p_tab_x+=dx;
 	p_tab_y+=dy;
@@ -181,15 +186,13 @@ static void p_tabdrag_motion(WRegion *sub, XMotionEvent *ev, int dx, int dy)
 }	
 
 
-static void p_tabdrag_begin(WRegion *sub, XMotionEvent *ev, int dx, int dy)
+static void p_tabdrag_begin(WFrame *frame, XMotionEvent *ev, int dx, int dy)
 {
-	WGRData *grdata=GRDATA_OF(sub);
-	WFrame *frame;
-
-	frame=FIND_PARENT1(sub, WFrame);
+	WGRData *grdata=GRDATA_OF(frame);
+	WRegion *sub;
 	
-	if(frame==NULL)
-		return;
+	sub=frame->tab_pressed_sub;
+	assert(sub!=NULL);
 	
 	change_grab_cursor(CURSOR_DRAG);
 		
@@ -199,49 +202,52 @@ static void p_tabdrag_begin(WRegion *sub, XMotionEvent *ev, int dx, int dy)
 				  frame->tab_w, grdata->bar_h);
 	/*XSelectInput(wglobal.dpy, grdata->drag_win, ExposureMask);*/
 	
+	/* TODO: drawlist */
 	wglobal.draw_dragwin=(WDrawDragwinFn*)draw_tabdrag;
-	wglobal.draw_dragwin_arg=sub;
+	wglobal.draw_dragwin_arg=(WRegion*)frame;
 	
 	p_tabdrag_active=REGION_IS_ACTIVE(frame);
 	p_tabdrag_selected=(frame->current_sub==sub);
 	
-	frame->dragged_sub=sub;
-
+	frame->flags|=FRAME_TAB_DRAGGED;
+		
 	draw_frame_bar(frame, FALSE);
 	
-	p_tabdrag_motion(sub, ev, dx, dy);
+	p_tabdrag_motion(frame, ev, dx, dy);
 	
 	XMapRaised(wglobal.dpy, grdata->drag_win);
 }
 
 
-static void p_tabdrag_end(WRegion *sub, XButtonEvent *ev)
+static void p_tabdrag_end(WFrame *frame, XButtonEvent *ev)
 {
-	WGRData *grdata=GRDATA_OF(sub);
-	WFrame *frame, *newframe=NULL;
-	Window win;
+	WGRData *grdata=GRDATA_OF(frame);
+	WFrame *newframe=NULL;
+	WRegion *sub=NULL;
+	Window win=None;
 	
 	wglobal.draw_dragwin=NULL;
+
+	sub=frame->tab_pressed_sub;
+	assert(sub!=NULL);
+	frame->tab_pressed_sub=NULL; /* TODO: reset jonnekin muualle */
+	frame->flags&=~FRAME_TAB_DRAGGED;
 	
 	XUnmapWindow(wglobal.dpy, grdata->drag_win);	
 	/*XSelectInput(wglobal.dpy, grdata->drag_win, 0);*/
 	
-	frame=FIND_PARENT1(sub, WFrame);
-	
-	if(frame!=NULL){
-		frame->dragged_sub=NULL;
-		draw_frame_bar(frame, TRUE);
-	}
-	
 	/* Must be same screen */
+	
 	if(ev->root!=ROOT_OF(sub))
 		return;
 	
 	if(find_window_at(ev->root, ev->x_root, ev->y_root, &win))
 		newframe=find_frame_of(win);
 
-	if(newframe==NULL || frame==newframe)
+	if(newframe==NULL || frame==newframe){
+		draw_frame_bar(frame, TRUE);
 		return;
+	}
 	
 	frame_attach_sub(newframe, sub, REGION_ATTACH_SWITCHTO);
 	set_focus((WRegion*)newframe);
@@ -250,8 +256,7 @@ static void p_tabdrag_end(WRegion *sub, XButtonEvent *ev)
 
 void p_tabdrag_setup(WFrame *frame)
 {
-	set_drag_handlers(NULL,
-					  (WMotionHandler*)p_tabdrag_begin,
+	set_drag_handlers((WMotionHandler*)p_tabdrag_begin,
 					  (WMotionHandler*)p_tabdrag_motion,
 					  (WButtonHandler*)p_tabdrag_end);
 }
@@ -286,12 +291,24 @@ static void p_resize_end(WFrame *frame, XButtonEvent *ev)
 
 void p_resize_setup(WFrame *frame)
 {
-	set_drag_handlers((WThing*)frame,
-					  (WMotionHandler*)p_resize_begin,
+	set_drag_handlers((WMotionHandler*)p_resize_begin,
 					  (WMotionHandler*)p_resize_motion,
 					  (WButtonHandler*)p_resize_end);
 }
 
+
+/*}}}*/
+
+
+/*{{{ switch_tab */
+
+
+void frame_switch_tab(WFrame *frame)
+{
+	if(frame->tab_pressed_sub!=NULL)
+		switch_region(frame->tab_pressed_sub);
+	
+}
 
 /*}}}*/
 

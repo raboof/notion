@@ -112,7 +112,7 @@ static WFunction ion_frame_funtab[]={
 	FN_VOID(generic, WFrame,	"destroy_frame",	region_request_close),
 /*	FN_VOID(generic, WFrame,	"closedestroy",		close_propagate),*/
 	FN_VOID(generic, WFrame,	"close_main",		close_sub),
-	FN_VOID(generic, WRegion,	"switch_tab",		switch_region),
+	FN_VOID(generic, WRegion,	"switch_tab",		frame_switch_tab),
 
 	FN_VOID(generic, WRegion,	"resize_vert",		resize_vert),
 	FN_VOID(generic, WRegion,	"resize_horiz",		resize_horiz),

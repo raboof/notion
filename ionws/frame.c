@@ -55,6 +55,7 @@ static DynFunTab frame_dynfuntab[]={
 	
 	{draw_window, draw_frame},
 	{(DynFun*)window_press, (DynFun*)frame_press},
+	{(DynFun*)window_release, (DynFun*)frame_release},
 	
 	{region_activated, frame_activated},
 	{region_inactivated, frame_inactivated},
@@ -178,7 +179,8 @@ static bool init_frame(WFrame *frame, WScreen *scr, WWinGeomParams params,
 	frame->saved_h=FRAME_NO_SAVED_WH;
 	frame->saved_x=FRAME_NO_SAVED_WH;
 	frame->saved_y=FRAME_NO_SAVED_WH;
-
+	frame->tab_pressed_sub=NULL;
+	
 	if(transparent){
 		attr.background_pixmap=ParentRelative;
 		attrflags=CWBackPixmap;
@@ -415,7 +417,8 @@ void draw_frame_bar(const WFrame *frame, bool complete)
 						I_X+I_W-grdata->stick_pixmap_w, I_Y);
 		}
 		
-		if(sub==frame->dragged_sub){
+		if(frame->flags&FRAME_TAB_DRAGGED &&
+		   sub==frame->tab_pressed_sub){
 			/* drag */
 			if(grdata->bar_inside_frame){
 				if(REGION_IS_ACTIVE(frame)){
@@ -738,8 +741,8 @@ static void frame_do_detach(WFrame *frame, WRegion *sub)
 {
 	WRegion *next=NULL;
 
-	if(frame->dragged_sub==sub)
-		frame->dragged_sub=NULL;
+	if(frame->tab_pressed_sub==sub)
+		frame->tab_pressed_sub=NULL;
 	
 	if(frame->current_sub==sub){
 		next=prevreg_ni(frame, sub);

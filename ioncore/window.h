@@ -45,7 +45,8 @@ extern WThing *find_window_t(Window win, const WObjDescr *descr);
 
 DYNFUN void draw_window(WWindow *wwin, bool complete);
 DYNFUN void window_insstr(WWindow *wwin, const char *buf, size_t n);
-DYNFUN int window_press(WWindow *wwin, XButtonEvent *ev, WThing **thing_ret);
+DYNFUN int window_press(WWindow *wwin, XButtonEvent *ev);
+DYNFUN void window_release(WWindow *wwin);
 
 /* Only to be used by regions that inherit this */
 extern void map_window(WWindow *wwin);

@@ -22,7 +22,9 @@ enum{
 
 extern void p_resize_setup(WFrame *frame);
 extern void p_tabdrag_setup(WFrame *frame);
+extern void frame_switch_tab(WFrame *frame);
 
-extern int frame_press(WFrame *frame, XButtonEvent *ev, WThing **thing_ret);
+extern int frame_press(WFrame *frame, XButtonEvent *ev);
+extern void frame_release(WFrame *frame);
 
 #endif /* ION_FRAME_POINTER_H */
