@@ -76,9 +76,10 @@ extern WSplit *split_to_tl(WSplit *node, int dir);
 extern WSplit *split_to_br(WSplit *node, int dir);
 
 extern void split_resize(WSplit *node, const WRectangle *ng, 
-                         int hprimn, int vprimn);
+                         int hprimn, int vprimn, int fit_mode);
 extern bool split_do_resize(WSplit *node, const WRectangle *ng, 
-                            int hprimn, int vprimn, bool transpose);
+                            int hprimn, int vprimn, 
+                            bool transpose, int fit_mode);
 
 extern WSplit *split_tree_split(WSplit **root, WSplit *node, int dir, 
                                 int primn, int minsize, int oprimn, 
