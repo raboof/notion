@@ -150,9 +150,6 @@ bool mod_ionws_init()
     if(!mod_ionws_register_exports())
         goto err;
 
-    if(!mod_ionws_register_exports())
-        goto err;
-    
     if(!register_regions())
         goto err;
     
