@@ -34,3 +34,19 @@ end
 function WMPlex.current_index(mplex)
     return mplex:managed_index(mplex:current())
 end
+
+--DOC
+-- Move currently viewed object left within mplex; same as
+-- \code{mplex:move_left(mplex:current())}.
+function WMPlex.move_current_to_next_index(mplex)
+    local c=mplex:current()
+    if c then mplex:move_to_next_index(c) end
+end
+
+--DOC
+-- Move currently viewed object right within mplex; same as
+-- \code{mplex:move_left(mplex:current())}.
+function WMPlex.move_current_to_prev_index(mplex)
+    local c=mplex:current()
+    if c then mplex:move_to_prev_index(c) end
+end

@@ -534,12 +534,12 @@ static bool genframe_do_managed_changed(WGenFrame *genframe, bool sw)
 
 static void genframe_managed_changed(WGenFrame *genframe, bool sw)
 {
-	if(sw){
-		update_attrs(genframe);
+	update_attrs(genframe);
+	
+	if(sw)
 		genframe_do_managed_changed(genframe, sw);
-	}else{
+	else
 		genframe_draw_bar(genframe, FALSE);
-	}
 }
 
 

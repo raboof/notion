@@ -73,19 +73,56 @@ void mplex_deinit(WMPlex *mplex)
 /*{{{ Ordering */
 
 
+static void link_at(WMPlex *mplex, WRegion *reg, int index)
+{
+	WRegion *after=NULL;
+	
+	if(index>0){
+		after=mplex_nth_managed(mplex, index-1);
+	}else if(index<0){
+		if(!(mplex->flags&WMPLEX_ADD_TO_END) && wglobal.opmode!=OPMODE_INIT)
+			after=mplex->current_sub;
+	}
+	
+	if(after!=NULL){
+		LINK_ITEM_AFTER(mplex->managed_list, after, reg, mgr_next, mgr_prev);
+	}else if(index==0){
+		LINK_ITEM_FIRST(mplex->managed_list, reg, mgr_next, mgr_prev);
+	}else{
+		LINK_ITEM(mplex->managed_list, reg, mgr_next, mgr_prev);
+	}
+}
+
+
 /*EXTL_DOC
- * Move currently selected region to the right.
+ * Set index of \var{reg} within the multiplexer to \var{index}.
  */
 EXTL_EXPORT_MEMBER
-void mplex_move_current_right(WMPlex *mplex)
+void mplex_move_to_index(WMPlex *mplex, WRegion *reg, int index)
 {
-	WRegion *reg, *next;
-	
-	if((reg=mplex->current_sub)==NULL)
+	if(REGION_MANAGER(reg)!=(WRegion*)mplex)
 		return;
+
+	UNLINK_ITEM(mplex->managed_list, reg, mgr_next, mgr_prev);
+	link_at(mplex, reg, index);
+	mplex_managed_changed(mplex, FALSE);
+}
+
+
+/*EXTL_DOC
+ * Move \var{reg} to next index within the multiplexer.
+ */
+EXTL_EXPORT_MEMBER
+void mplex_move_to_next_index(WMPlex *mplex, WRegion *reg)
+{
+	WRegion *next;
+
+	if(REGION_MANAGER(reg)!=(WRegion*)mplex)
+		return;
+
 	if((next=NEXT_MANAGED(mplex->managed_list, reg))==NULL)
 		return;
-	
+
 	UNLINK_ITEM(mplex->managed_list, reg, mgr_next, mgr_prev);
 	LINK_ITEM_AFTER(mplex->managed_list, next, reg, mgr_next, mgr_prev);
 	
@@ -94,15 +131,16 @@ void mplex_move_current_right(WMPlex *mplex)
 
 
 /*EXTL_DOC
- * Move currently selected region to the left.
+ * Move \var{reg} to previous index within the multiplexer.
  */
 EXTL_EXPORT_MEMBER
-void mplex_move_current_left(WMPlex *mplex)
+void mplex_move_to_prev_index(WMPlex *mplex, WRegion *reg)
 {
-	WRegion *reg, *prev;
-	
-	if((reg=mplex->current_sub)==NULL)
+	WRegion *prev;
+
+	if(REGION_MANAGER(reg)!=(WRegion*)mplex)
 		return;
+	
 	if((prev=PREV_MANAGED(mplex->managed_list, reg))==NULL)
 		return;
 
@@ -383,7 +421,6 @@ static WRegion *mplex_do_attach(WMPlex *mplex, WRegionAttachHandler *fn,
 	bool switchto;
 	WRectangle geom;
 	WRegion *reg;
-	WRegion *after=NULL;
 	
 	mplex_managed_geom(mplex, &geom);
 	
@@ -392,22 +429,10 @@ static WRegion *mplex_do_attach(WMPlex *mplex, WRegionAttachHandler *fn,
 	if(reg==NULL)
 		return NULL;
 	
-	if(param->index>0){
-		after=mplex_nth_managed(mplex, param->index-1);
-	}else if(param->index<0){
-		if(!(mplex->flags&WMPLEX_ADD_TO_END) && wglobal.opmode!=OPMODE_INIT)
-			after=mplex->current_sub;
-	}
+	link_at(mplex, reg, param->index);
 	
-	if(after!=NULL){
-		LINK_ITEM_AFTER(mplex->managed_list, after, reg, mgr_next, mgr_prev);
-	}else if(param->index==0){
-		LINK_ITEM_FIRST(mplex->managed_list, reg, mgr_next, mgr_prev);
-	}else{
-		LINK_ITEM(mplex->managed_list, reg, mgr_next, mgr_prev);
-	}
-
 	region_set_manager(reg, (WRegion*)mplex, NULL);
+	
 	mplex->managed_count++;
 	
 	if(mplex->managed_count==1 || param->switchto){
