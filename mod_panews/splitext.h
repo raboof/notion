@@ -74,4 +74,6 @@ extern WRegion *panews_do_get_farthest(WPaneWS *ws,
 
 extern WSplitRegion *split_tree_find_region_in_pane_of(WSplit *node);
 
+extern void splitfloat_flip(WSplitFloat *split);
+
 #endif /* ION_PANEWS_SPLITEXT_H */

@@ -638,46 +638,95 @@ static void adjust_sizes(int *tls_, int *brs_, int nsize,
 }
 
 
+static void adjust_size(int *sz, int dir, WSplitFloat *f, WSplit *s)
+{
+    int mi=splitfloat_get_min(f, dir, s);
+    int ma=splitfloat_get_max(f, dir, s);
+    *sz=maxof(mi, minof(*sz, ma));
+}
+
+
 static void splitfloat_do_resize(WSplitFloat *split, const WRectangle *ng, 
                                  int hprimn, int vprimn, bool transpose)
 {
     WRectangle tlg=GEOM(split->ssplit.tl);
     WRectangle brg=GEOM(split->ssplit.br);
     WRectangle ntlg=*ng, nbrg=*ng;
+    WRectangle *og=&((WSplit*)split)->geom;
     int dir=split->ssplit.dir;
+    bool adjust=TRUE;
     
     splitfloat_tl_cnt_to_pwin(split, &tlg);
     splitfloat_br_cnt_to_pwin(split, &brg);
 
+    if(transpose){
+        if(dir==SPLIT_VERTICAL){
+            dir=SPLIT_HORIZONTAL;
+            split->tlpwin->bline=GR_BORDERLINE_RIGHT;
+            split->brpwin->bline=GR_BORDERLINE_LEFT;
+        }else{
+            dir=SPLIT_VERTICAL;
+            split->tlpwin->bline=GR_BORDERLINE_BOTTOM;
+            split->brpwin->bline=GR_BORDERLINE_TOP;
+        }
+        split->ssplit.dir=dir;
+    }
+
     if(dir==SPLIT_VERTICAL){
-        if(ng->h>tlg.h+brg.h){
+        if(ng->h<=tlg.h+brg.h){
+            if(transpose){
+                ntlg.h=minof(tlg.w, ng->h*2/3);
+                nbrg.h=minof(brg.w, ng->h*2/3);
+                adjust_size(&ntlg.h, dir, split, split->ssplit.tl);
+                adjust_size(&nbrg.h, dir, split, split->ssplit.br);
+                adjust=(ng->h>ntlg.h+nbrg.h);
+            }else{
+                ntlg.h=minof(ng->h, tlg.h);
+                nbrg.h=minof(ng->h, brg.h);
+                adjust=FALSE;
+            }
+        }else{
             ntlg.h=tlg.h;
             nbrg.h=brg.h;
+        }
+
+        if(adjust){
             adjust_sizes(&ntlg.h, &nbrg.h, ng->h,
                          splitfloat_get_min(split, dir, split->ssplit.tl),
                          splitfloat_get_min(split, dir, split->ssplit.br),
                          splitfloat_get_max(split, dir, split->ssplit.tl),
                          splitfloat_get_max(split, dir, split->ssplit.br),
                          vprimn);
-        }else{
-            ntlg.h=minof(ng->h, tlg.h);
-            nbrg.h=minof(ng->h, brg.h);
         }
+        
         nbrg.y=ng->y+ng->h-nbrg.h;
     }else{
-        if(ng->w>tlg.w+brg.w){
+        if(ng->w<=tlg.w+brg.w){
+            if(transpose){
+                ntlg.w=minof(tlg.h, ng->w*2/3);
+                nbrg.w=minof(brg.h, ng->w*2/3);
+                adjust_size(&ntlg.w, dir, split, split->ssplit.tl);
+                adjust_size(&nbrg.w, dir, split, split->ssplit.br);
+                adjust=(ng->w>ntlg.w+nbrg.w);
+            }else{
+                ntlg.w=minof(ng->w, tlg.w);
+                nbrg.w=minof(ng->w, brg.w);
+                adjust=FALSE;
+            }
+        }else{
             ntlg.w=tlg.w;
             nbrg.w=brg.w;
+        }
+        
+        if(adjust){
             adjust_sizes(&ntlg.w, &nbrg.w, ng->w,
                          splitfloat_get_min(split, dir, split->ssplit.tl),
                          splitfloat_get_min(split, dir, split->ssplit.br),
                          splitfloat_get_max(split, dir, split->ssplit.tl),
                          splitfloat_get_max(split, dir, split->ssplit.br),
                          hprimn);
-        }else{
-            ntlg.w=minof(ng->w, tlg.w);
-            nbrg.w=minof(ng->w, brg.w);
         }
+        
         nbrg.x=ng->x+ng->w-nbrg.w;
     }
 
@@ -686,9 +735,9 @@ static void splitfloat_do_resize(WSplitFloat *split, const WRectangle *ng,
     splitfloat_update_handles(split, &ntlg, &nbrg);
 
     splitfloat_tl_pwin_to_cnt(split, &ntlg);
-    split_do_resize(split->ssplit.tl, &ntlg, hprimn, vprimn, FALSE);
+    split_do_resize(split->ssplit.tl, &ntlg, hprimn, vprimn, transpose);
     splitfloat_br_pwin_to_cnt(split, &nbrg);
-    split_do_resize(split->ssplit.br, &nbrg, hprimn, vprimn, FALSE);
+    split_do_resize(split->ssplit.br, &nbrg, hprimn, vprimn, transpose);
 }
 
 
@@ -834,7 +883,22 @@ static void splitfloat_do_rqsize(WSplitFloat *split, WSplit *node,
     else
         splitfloat_br_pwin_to_cnt(split, rg);
 }
+
+
+void splitfloat_flip(WSplitFloat *split)
+{
+    WRectangle tlg, brg;
     
+    splitsplit_flip_default(&split->ssplit);
+    
+    tlg=split->ssplit.tl->geom;
+    brg=split->ssplit.br->geom;
+
+    splitfloat_tl_cnt_to_pwin(split, &tlg);
+    splitfloat_br_cnt_to_pwin(split, &brg);
+    splitfloat_update_handles(split, &tlg, &brg);
+}
+
 
 /*}}}*/
 
@@ -1165,6 +1229,7 @@ static DynFunTab splitfloat_dynfuntab[]={
     {split_reparent, splitfloat_reparent},
     {split_map, splitfloat_map},
     {split_unmap, splitfloat_unmap},
+    {splitsplit_flip, splitfloat_flip},
     END_DYNFUNTAB,
 };
 

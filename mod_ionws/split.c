@@ -1538,7 +1538,7 @@ void split_reparent(WSplit *split, WWindow *wwin)
 /*}}}*/
 
 
-/*{{{ Transpose */
+/*{{{ Transpose and flip */
 
 
 void split_transpose_to(WSplit *node, const WRectangle *geom)
@@ -1582,6 +1582,50 @@ void split_transpose(WSplit *node)
     WRectangle g=node->geom;
     
     split_transpose_to(node, &g);
+}
+
+
+
+void splitsplit_flip_default(WSplitSplit *split)
+{
+    WRectangle tlng, brng;
+    WRectangle *sg=&((WSplit*)split)->geom;
+    WSplit *tmp;
+    
+    assert(split->tl!=NULL && split->br!=NULL);
+
+    tlng=split->tl->geom;
+    brng=split->br->geom;
+    
+    if(split->dir==SPLIT_HORIZONTAL){
+        brng.x=sg->x;
+        tlng.x=sg->x+sg->w-tlng.w;
+    }else{
+        brng.y=sg->y;
+        tlng.y=sg->y+sg->h-tlng.h;
+    }
+    
+    tmp=split->tl;
+    split->tl=split->br;
+    split->br=tmp;
+    split->current=(split->current==SPLIT_CURRENT_TL
+                    ? SPLIT_CURRENT_BR
+                    : SPLIT_CURRENT_TL);
+
+    split_do_resize(split->tl, &brng, PRIMN_ANY, PRIMN_ANY, FALSE);
+    split_do_resize(split->br, &tlng, PRIMN_ANY, PRIMN_ANY, FALSE);
+}
+
+
+/*EXTL_DOC
+ * Flip contents of \var{node}.
+ */
+EXTL_EXPORT_MEMBER
+void splitsplit_flip(WSplitSplit *split)
+{
+    CALL_DYN(splitsplit_flip, split, (split));
+    
+    
 }
 
 
@@ -1774,6 +1818,7 @@ static DynFunTab splitsplit_dynfuntab[]={
     {split_restack, splitsplit_restack},
     {split_stacking, splitsplit_stacking},
     {split_reparent, splitsplit_reparent},
+    {splitsplit_flip, splitsplit_flip_default},
     END_DYNFUNTAB,
 };
 
