@@ -99,7 +99,7 @@ de_define_style("tab-menuentry", {
 
 de_define_style("tab-menuentry-big", {
     based_on = "tab-menuentry",
-    font = "-*-helvetica-medium-r-normal-*-16-*-*-*-*-*-*-*",
+    font = "-*-helvetica-medium-r-normal-*-17-*-*-*-*-*-*-*",
     padding_pixels = 7,
 })
 
