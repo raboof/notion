@@ -125,7 +125,7 @@ ext_statusbar.register_meter('load', detect_load_fn(), 'xx.xx xx.xx xx.xx')
 
 -- Mail meters {{{
 
-function calcmail(fname)
+local function calcmail(fname)
     local f=io.open(fname, 'r')
     local total, read, old=0, 0, 0
     local had_blank=true
