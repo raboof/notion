@@ -19,6 +19,7 @@ DYNFUN bool region_save_to_file(WRegion *reg, FILE *file, int lvl);
 extern WRegion *load_create_region(WWindow *par, WRectangle geom,
 								   Tokenizer *tokz, int n, Token *toks);
 
+extern void write_escaped_string(FILE *file, const char *str);
 extern void begin_saved_region(WRegion *reg, FILE *file, int lvl);
 extern void end_saved_region(WRegion *reg, FILE *file, int lvl);
 extern void save_indent_line(FILE *file, int lvl);

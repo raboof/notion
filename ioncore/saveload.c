@@ -86,6 +86,22 @@ void save_indent_line(FILE *file, int lvl)
 }
 
 
+void write_escaped_string(FILE *file, const char *str)
+{
+	fputc('"', file);
+
+	while(*str){
+		if(((*str)&0x7f)<32)
+			fprintf(file, "\\%o", (int)(uchar)(*str));
+		else
+			fputc(*str, file);
+		str++;
+	}
+	
+	fputc('"', file);
+}
+
+
 void begin_saved_region(WRegion *reg, FILE *file, int lvl)
 {
 	const char *name;
@@ -95,10 +111,12 @@ void begin_saved_region(WRegion *reg, FILE *file, int lvl)
 	
 	name=region_name(reg);
 	
-	if(name!=NULL)
-		fprintf(file, ", \"%s\" {\n", name);
-	else
-		fprintf(file, " {\n");
+	if(name!=NULL){
+		fprintf(file, ", ");
+		write_escaped_string(file, name);
+	}
+	
+	fprintf(file, " {\n");
 }
 
 
