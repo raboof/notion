@@ -35,10 +35,6 @@
 #include "activity.h"
 #include "extlconv.h"
 
-#define SCR_MLIST(SCR) ((SCR)->mplex.l1_list)
-#define SCR_MCOUNT(SCR) ((SCR)->mplex.l1_count)
-#define SCR_WIN(SCR) ((SCR)->mplex.win.win)
-
 
 WHook *screen_managed_changed_hook=NULL;
 
@@ -135,7 +131,7 @@ void screen_deinit(WScreen *scr)
     UNLINK_ITEM(ioncore_g.screens, scr, next_scr, prev_scr);
     
     if(scr->uses_root)
-        SCR_WIN(scr)=None;
+        scr->mplex.win.win=None;
     
     mplex_deinit((WMPlex*)scr);
 }
@@ -312,17 +308,17 @@ static char *addnot(char *str, WRegion *reg)
 
 static char *screen_managed_activity(WScreen *scr)
 {
-    WRegion *reg;
+    WMPlexManaged *node;
     char *notstr=NULL;
     
-    FOR_ALL_MANAGED_ON_LIST(scr->mplex.l1_list, reg){
-        if(region_activity(reg) && !REGION_IS_MAPPED(reg))
-            notstr=addnot(notstr, reg);
+    LIST_FOR_ALL(scr->mplex.l1_list, node, next, prev){
+        if(region_activity(node->reg) && !REGION_IS_MAPPED(node->reg))
+            notstr=addnot(notstr, node->reg);
     }
-    
-    FOR_ALL_MANAGED_ON_LIST(scr->mplex.l2_list, reg){
-        if(region_activity(reg) && !REGION_IS_MAPPED(reg))
-            notstr=addnot(notstr, reg);
+
+    LIST_FOR_ALL(scr->mplex.l2_list, node, next, prev){
+        if(region_activity(node->reg) && !REGION_IS_MAPPED(node->reg))
+            notstr=addnot(notstr, node->reg);
     }
     
     return notstr;
@@ -449,10 +445,10 @@ int screen_id(WScreen *scr)
 
 static bool screen_managed_may_destroy(WScreen *scr, WRegion *reg)
 {
-    WRegion *r2;
-    
-    FOR_ALL_MANAGED_ON_LIST(SCR_MLIST(scr), r2){
-        if(OBJ_IS(r2, WGenWS) && r2!=reg)
+    WMPlexManaged *node;
+
+    LIST_FOR_ALL(scr->mplex.l1_list, node, next, prev){
+        if(OBJ_IS(node->reg, WGenWS) && node->reg!=reg)
             return TRUE;
     }
     

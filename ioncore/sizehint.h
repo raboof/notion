@@ -16,7 +16,7 @@
 #include "region.h"
 
 extern void xsizehints_sanity_adjust(XSizeHints *hints);
-extern void xsizehints_adjust_for(XSizeHints *hints, WRegion *list);
+extern void xsizehints_adjust_for(XSizeHints *hints, WRegion *reg);
 extern void xsizehints_correct(const XSizeHints *hints, int *wp, int *hp, 
                                bool min);
 

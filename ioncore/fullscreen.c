@@ -86,7 +86,7 @@ bool clientwin_fullscreen_scr(WClientWin *cwin, WScreen *scr, bool switchto)
                         lastmgr_watchhandler);
         }else if(scr->mplex.l1_current!=NULL){
             watch_setup(&(cwin->fsinfo.last_mgr_watch),
-                        (Obj*)scr->mplex.l1_current, 
+                        (Obj*)scr->mplex.l1_current->reg, 
                         lastmgr_watchhandler);
         }
         region_rootpos((WRegion*)cwin, &rootx, &rooty);

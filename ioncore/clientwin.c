@@ -1240,8 +1240,13 @@ static void clientwin_activated(WClientWin *cwin)
 
 static void clientwin_resize_hints(WClientWin *cwin, XSizeHints *hints_ret)
 {
+    WRegion *trs;
+    
     *hints_ret=cwin->size_hints;
-    xsizehints_adjust_for(hints_ret, cwin->transient_list);
+    
+    FOR_ALL_MANAGED_ON_LIST(cwin->transient_list, trs){
+        xsizehints_adjust_for(hints_ret, trs);
+    }
 }
 
 

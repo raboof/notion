@@ -171,35 +171,32 @@ void xsizehints_sanity_adjust(XSizeHints *hints)
 /*{{{ xsizehints_adjust_for */
 
 
-void xsizehints_adjust_for(XSizeHints *hints, WRegion *list)
+void xsizehints_adjust_for(XSizeHints *hints, WRegion *reg)
 {
-    WRegion *reg;
     XSizeHints tmp_hints;
     
-    FOR_ALL_MANAGED_ON_LIST(list, reg){
-        region_size_hints(reg, &tmp_hints);
-        
-        if(tmp_hints.flags&PMinSize){
-            if(!(hints->flags&PMinSize)){
-                hints->flags|=PMinSize;
-                hints->min_width=tmp_hints.min_width;
-                hints->min_height=tmp_hints.min_height;
-            }else{
-                hints->min_width=maxof(hints->min_width,
-                                       tmp_hints.min_width);
-                hints->min_height=maxof(hints->min_height,
-                                        tmp_hints.min_height);
-            }
-        }
-        
-        if(tmp_hints.flags&PMaxSize && hints->flags&PMaxSize){
-            hints->max_width=maxof(hints->max_width,
-                                   tmp_hints.max_width);
-            hints->max_height=maxof(hints->max_height,
-                                    tmp_hints.max_height);
+    region_size_hints(reg, &tmp_hints);
+    
+    if(tmp_hints.flags&PMinSize){
+        if(!(hints->flags&PMinSize)){
+            hints->flags|=PMinSize;
+            hints->min_width=tmp_hints.min_width;
+            hints->min_height=tmp_hints.min_height;
         }else{
-            hints->flags&=~PMaxSize;
+            hints->min_width=maxof(hints->min_width,
+                                   tmp_hints.min_width);
+            hints->min_height=maxof(hints->min_height,
+                                    tmp_hints.min_height);
         }
+    }
+    
+    if(tmp_hints.flags&PMaxSize && hints->flags&PMaxSize){
+        hints->max_width=maxof(hints->max_width,
+                               tmp_hints.max_width);
+        hints->max_height=maxof(hints->max_height,
+                                tmp_hints.max_height);
+    }else{
+        hints->flags&=~PMaxSize;
     }
 }
 

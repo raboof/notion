@@ -271,8 +271,9 @@ static void update_attrs(WFrame *frame)
 {
     int i=0;
     WRegion *sub;
+    WMPlexManaged *node;
     
-    FOR_ALL_MANAGED_ON_LIST(FRAME_MLIST(frame), sub){
+    FRAME_L1_FOR_ALL(frame, node, sub){
         update_attr(frame, i, sub);
         i++;
     }
@@ -306,7 +307,6 @@ static void do_init_title(WFrame *frame, int i, WRegion *sub)
 static bool frame_initialise_titles(WFrame *frame)
 {
     int i, n=FRAME_MCOUNT(frame);
-    WRegion *sub;
     
     frame_free_titles(frame);
 
@@ -321,8 +321,10 @@ static bool frame_initialise_titles(WFrame *frame)
     if(FRAME_MCOUNT(frame)==0){
         do_init_title(frame, 0, NULL);
     }else{
+        WMPlexManaged *node;
+        WRegion *sub;
         i=0;
-        FOR_ALL_MANAGED_ON_LIST(FRAME_MLIST(frame), sub){
+        FRAME_L1_FOR_ALL(frame, node, sub){
             do_init_title(frame, i, sub);
             i++;
         }
@@ -383,6 +385,8 @@ bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp)
 void frame_resize_hints(WFrame *frame, XSizeHints *hints_ret)
 {
     WRectangle subgeom;
+    WMPlexManaged *node;
+    WRegion *sub;
     int woff, hoff;
     
     mplex_managed_geom((WMPlex*)frame, &subgeom);
@@ -399,7 +403,9 @@ void frame_resize_hints(WFrame *frame, XSizeHints *hints_ret)
         hints_ret->flags=0;
     }
     
-    xsizehints_adjust_for(hints_ret, FRAME_MLIST(frame));
+    FRAME_L1_FOR_ALL(frame, node, sub){
+        xsizehints_adjust_for(hints_ret, sub);
+    }
     
     if(!hints_ret->flags&PBaseSize){
         hints_ret->base_width=0;
@@ -451,7 +457,7 @@ bool frame_toggle_tabbar(WFrame *frame)
         frame->flags^=FRAME_TAB_HIDE;
         mplex_size_changed(&(frame->mplex), FALSE, TRUE);
         mplex_fit_managed(&(frame->mplex));
-        XClearWindow(ioncore_g.dpy, FRAME_WIN(frame));
+        XClearWindow(ioncore_g.dpy, frame->mplex.win.win);
         window_draw((WWindow*)frame, TRUE);
     }
     

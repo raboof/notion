@@ -231,6 +231,8 @@ static void floatframe_rqgeom_clientwin(WFloatFrame *frame, WClientWin *cwin,
 void floatframe_resize_hints(WFloatFrame *frame, XSizeHints *hints_ret)
 {
     WRectangle subgeom;
+    WMPlexManaged *node;
+    WRegion *sub;
     int woff, hoff;
     
     mplex_managed_geom((WMPlex*)frame, &subgeom);
@@ -238,13 +240,15 @@ void floatframe_resize_hints(WFloatFrame *frame, XSizeHints *hints_ret)
     woff=maxof(REGION_GEOM(frame).w-subgeom.w, 0);
     hoff=frame->frame.bar_h;
 
-    if(FRAME_CURRENT(frame)!=NULL){
-        region_size_hints(FRAME_CURRENT(frame), hints_ret);
+    if(FRAME_CURRENT(&(frame->frame))!=NULL){
+        region_size_hints(FRAME_CURRENT(&(frame->frame)), hints_ret);
     }else{
         hints_ret->flags=0;
     }
     
-    xsizehints_adjust_for(hints_ret, FRAME_MLIST(frame));
+    FRAME_L1_FOR_ALL(&(frame->frame), node, sub){
+        xsizehints_adjust_for(hints_ret, sub);
+    }
     
     if(!hints_ret->flags&PBaseSize){
         hints_ret->base_width=0;
@@ -303,7 +307,8 @@ static void floatframe_set_shape(WFloatFrame *frame)
         floatframe_border_geom(frame, gs+n);
         n++;
     
-        grbrush_set_window_shape(frame->frame.brush, FRAME_WIN(frame),
+        grbrush_set_window_shape(frame->frame.brush, 
+                                 frame->frame.mplex.win.win,
                                  TRUE, n, gs);
     }
 }
@@ -330,6 +335,7 @@ static int init_title(WFloatFrame *frame, int i)
 static void floatframe_recalc_bar(WFloatFrame *frame)
 {
     int bar_w=0, textw=0, tmaxw=frame->tab_min_w, tmp=0;
+    WMPlexManaged *node;
     WRegion *sub;
     const char *p;
     GrBorderWidths bdw;
@@ -347,7 +353,7 @@ static void floatframe_recalc_bar(WFloatFrame *frame)
         bdtotal=((m-1)*(bdw.tb_ileft+bdw.tb_iright)
                  +bdw.right+bdw.left);
 
-        FOR_ALL_MANAGED_ON_LIST(FRAME_MLIST(frame), sub){
+        FRAME_L1_FOR_ALL(&(frame->frame), node, sub){
             p=region_name(sub);
             if(p==NULL)
                 continue;
@@ -389,7 +395,7 @@ static void floatframe_recalc_bar(WFloatFrame *frame)
         return;
     
     i=0;
-    FOR_ALL_MANAGED_ON_LIST(FRAME_MLIST(frame), sub){
+    FRAME_L1_FOR_ALL(&(frame->frame), node, sub){
         textw=init_title(frame, i);
         if(textw>0){
             title=region_make_label(sub, textw, frame->frame.bar_brush);

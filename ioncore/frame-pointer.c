@@ -49,7 +49,7 @@ static WRegion *sub_at_tab(WFrame *frame)
 
 int frame_press(WFrame *frame, XButtonEvent *ev, WRegion **reg_ret)
 {
-    WRegion *sub;
+    WRegion *sub=NULL;
     WRectangle g;
     
     p_tabnum=-1;
@@ -80,10 +80,10 @@ int frame_press(WFrame *frame, XButtonEvent *ev, WRegion **reg_ret)
         
         return FRAME_AREA_TAB;
     }else{
-        WRegion *sub, *curr=mplex_lcurrent(&(frame->mplex), 1);
-        FOR_ALL_MANAGED_ON_LIST(frame->mplex.l1_list, sub){
+        WMPlexManaged *node;
+        FRAME_L1_FOR_ALL(frame, node, sub){
             p_tabnum++;
-            if(sub==curr)
+            if(sub==FRAME_CURRENT(frame))
                 break;
         }
         

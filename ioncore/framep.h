@@ -14,11 +14,19 @@
 
 #include "frame.h"
 
-#define FRAME_WIN(FRAME) (((WFrame*)(FRAME))->mplex.win.win)
-#define FRAME_DRAW(FRAME) (((WFrame*)(FRAME))->mplex.win.draw)
 #define FRAME_MCOUNT(FRAME) (((WFrame*)(FRAME))->mplex.l1_count)
-#define FRAME_MLIST(FRAME) (((WFrame*)(FRAME))->mplex.l1_list)
-#define FRAME_CURRENT(FRAME) (((WFrame*)(FRAME))->mplex.l1_current)
+#define FRAME_CURRENT(FRAME) ((FRAME)->mplex.l1_current!=NULL \
+                              ? (FRAME)->mplex.l1_current->reg : NULL)
+
+#define FOR_ALL_REGIONS__(LL, NODE, REG)        \
+   for(REG=(LL==NULL ? NULL : (LL)->reg),       \
+       NODE=(LL==NULL ? NULL : (LL)->next);     \
+       REG!=NULL;                               \
+       REG=(NODE==NULL ? NULL : (NODE)->reg),   \
+       NODE=(NODE==NULL ? NULL : (NODE)->next))
+
+#define FRAME_L1_FOR_ALL(FRAME, NODE, REG) \
+    FOR_ALL_REGIONS__((FRAME)->mplex.l1_list, NODE, REG)
 
 enum{
     FRAME_AREA_NONE=0,
@@ -28,11 +36,11 @@ enum{
 };
 
 #define IONCORE_EVENTMASK_FRAME    (FocusChangeMask|          \
-                     ButtonPressMask|          \
-                     ButtonReleaseMask|        \
-                     KeyPressMask|             \
-                     EnterWindowMask|          \
-                     ExposureMask|             \
-                     SubstructureRedirectMask)
+                                    ButtonPressMask|          \
+                                    ButtonReleaseMask|        \
+                                    KeyPressMask|             \
+                                    EnterWindowMask|          \
+                                    ExposureMask|             \
+                                    SubstructureRedirectMask)
 
 #endif /* ION_IONCORE_FRAMEP_H */

@@ -65,17 +65,26 @@ typedef struct{
 } MPlexAttachParams;
 
 
+INTRSTRUCT(WMPlexManaged);
+DECLSTRUCT(WMPlexManaged){
+    WMPlexManaged *next, *prev;
+    int flags;
+    WRegion *reg;
+    /*WMPlexPlaceHolder *ph; */
+};
+
+
 DECLCLASS(WMPlex){
     WWindow win;
     int flags;
     
     int l1_count;
-    WRegion *l1_list;
-    WRegion *l1_current;
+    WMPlexManaged *l1_list;
+    WMPlexManaged *l1_current;
     
     int l2_count;
-    WRegion *l2_list;
-    WRegion *l2_current;
+    WMPlexManaged *l2_list;
+    WMPlexManaged *l2_current;
     
     WMPlexSTDispInfo stdispinfo;
 };

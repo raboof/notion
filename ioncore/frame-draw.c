@@ -183,6 +183,7 @@ static int init_title(WFrame *frame, int i)
 void frame_recalc_bar_default(WFrame *frame)
 {
     int textw, i;
+    WMPlexManaged *node;
     WRegion *sub;
     char *title;
 
@@ -200,7 +201,7 @@ void frame_recalc_bar_default(WFrame *frame)
         return;
     }
     
-    FOR_ALL_MANAGED_ON_LIST(FRAME_MLIST(frame), sub){
+    FRAME_L1_FOR_ALL(frame, node, sub){
         textw=init_title(frame, i);
         if(textw>0){
             title=region_make_label(sub, textw, frame->bar_brush);
@@ -225,7 +226,7 @@ void frame_draw_bar_default(const WFrame *frame, bool complete)
     
     frame_bar_geom(frame, &geom);
     
-    grbrush_draw_textboxes(frame->bar_brush, FRAME_WIN(frame), 
+    grbrush_draw_textboxes(frame->bar_brush, frame->mplex.win.win, 
                            &geom, frame->titles_n, frame->titles,
                            complete, cattr);
 }
@@ -242,7 +243,7 @@ void frame_draw_default(const WFrame *frame, bool complete)
     
     frame_border_geom(frame, &geom);
     
-    grbrush_draw_border(frame->brush, FRAME_WIN(frame), &geom,
+    grbrush_draw_border(frame->brush, frame->mplex.win.win, &geom,
                         attr);
 
     frame_draw_bar(frame, FALSE);
@@ -274,7 +275,7 @@ void frame_brushes_updated_default(WFrame *frame)
 
 void frame_updategr(WFrame *frame)
 {
-    Window win=FRAME_WIN(frame);
+    Window win=frame->mplex.win.win;
     WRectangle geom;
     WRegion *sub;
     
@@ -296,7 +297,7 @@ void frame_updategr(WFrame *frame)
 
 void frame_initialise_gr(WFrame *frame)
 {
-    Window win=FRAME_WIN(frame);
+    Window win=frame->mplex.win.win;
     GrBorderWidths bdw;
     GrFontExtents fnte;
     WRootWin *rw=region_rootwin_of((WRegion*)frame);
@@ -333,12 +334,12 @@ void frame_initialise_gr(WFrame *frame)
 void frame_release_brushes(WFrame *frame)
 {
     if(frame->bar_brush!=NULL){
-        grbrush_release(frame->bar_brush, FRAME_WIN(frame));
+        grbrush_release(frame->bar_brush, frame->mplex.win.win);
         frame->bar_brush=NULL;
     }
     
     if(frame->brush!=NULL){
-        grbrush_release(frame->brush, FRAME_WIN(frame));
+        grbrush_release(frame->brush, frame->mplex.win.win);
         frame->brush=NULL;
     }
 }
@@ -361,8 +362,8 @@ bool frame_set_background(WFrame *frame, bool set_always)
     if(mode!=frame->tr_mode || set_always){
         frame->tr_mode=mode;
         if(frame->brush!=NULL){
-            grbrush_enable_transparency(frame->brush, 
-                                        FRAME_WIN(frame), mode);
+            grbrush_enable_transparency(frame->brush, frame->mplex.win.win, 
+                                        mode);
             window_draw((WWindow*)frame, TRUE);
         }
         return TRUE;
