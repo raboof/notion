@@ -492,17 +492,36 @@ end
 
 
 function querylib.complete_ssh(str)
-    if string.len(str)==0 then
-        return querylib.known_hosts
+    local st, en, user, at, host=string.find(str, "^([^@]*)(@?)(.*)$")
+    
+    if string.len(at)==0 and string.len(host)==0 then
+        host = user; user = ""
     end
     
-    local res={}
+    if at=="@" then 
+        user = user .. at 
+    end
+    
+    local res = {}
+    
+    if string.len(host)==0 then
+        if string.len(user)==0 then
+            return querylib.known_hosts
+        end
+        
+        for _, v in ipairs(querylib.known_hosts) do
+            table.insert(res, user .. v)
+        end
+        return res
+    end
+    
     for _, v in ipairs(querylib.known_hosts) do
-        local s, e=string.find(v, str, 1, true)
+        local s, e=string.find(v, host, 1, true)
         if s==1 and e>=1 then
-            table.insert(res, v)
+            table.insert(res, user .. v)
         end
     end
+    
     return res
 end
 
