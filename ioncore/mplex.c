@@ -600,7 +600,7 @@ bool mplex_l2_hidden(WMPlex *mplex, WRegion *reg)
 
 /*EXTL_DOC
  * If var \var{reg} is on the l2 list of \var{mplex} and currently shown, 
- * hide it. if \var{reg} is nil, hide all objects on the l2 list.
+ * hide it. 
  */
 EXTL_EXPORT_MEMBER
 bool mplex_l2_hide(WMPlex *mplex, WRegion *reg)
@@ -638,7 +638,7 @@ bool mplex_l2_hide(WMPlex *mplex, WRegion *reg)
 
 /*EXTL_DOC
  * If var \var{reg} is on the l2 list of \var{mplex} and currently hidden, 
- * display it. if \var{reg} is nil, display all objects on the l2 list.
+ * display it. 
  */
 EXTL_EXPORT_MEMBER
 bool mplex_l2_show(WMPlex *mplex, WRegion *reg)
