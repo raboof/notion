@@ -74,7 +74,7 @@ defbindings("WScreen", {
 defbindings("WMPlex", {
     kpress_waitrel(DEFAULT_MOD.."C", "close_sub_or_self"),
     kpress_waitrel(DEFAULT_MOD.."L", "@sub_cwin", "broken_app_resize_kludge"),
-    kpress_waitrel(DEFAULT_MOD.."Return", "@sub", "toggle_fullscreen"),
+    kpress_waitrel(DEFAULT_MOD.."Return", "@sub_cwin", "toggle_fullscreen"),
 
     submap(DEFAULT_MOD.."K", {
         kpress("AnyModifier+C", "@sub_cwin", "kill"),

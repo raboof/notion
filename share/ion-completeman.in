@@ -22,7 +22,7 @@ case "$1" in
         ;;
 esac
    
-if test "x$action" == x; then
+if test "x$action" = x; then
     echo 2>&1 "Usage: $0 (-complete what|-mkusercache|-mksyscache)"
     exit 1
 fi
@@ -34,7 +34,7 @@ scan() {
         mpath="$MANPATH"
     else
         mpprog=`which manpath`
-        if test "x$mpprog" == x; then
+        if test "x$mpprog" = x; then
             echo "Please set MANPATH, ION_MANPATH or put 'manpath' on PATH" > /dev/stderr
             exit 1
         fi
