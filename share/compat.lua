@@ -166,3 +166,7 @@ local function class_fn_wrapper(tab, name)
 end
 
 setmetatable(_G, {__index=class_fn_wrapper, __newindex=oldmt.__newindex})
+
+-- Added 2003-07-14
+obsolete("exec_on_wm_display", "exec")
+

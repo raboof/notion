@@ -173,7 +173,7 @@ local function execrootw(reg, cmd)
     if rw then
         rw:exec_on(cmd)
     else
-        exec_on_wm_display(cmd)
+        exec(cmd)
     end
 end
 

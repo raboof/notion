@@ -102,10 +102,11 @@ bool exec_on_rootwin(WRootWin *rootwin, const char *cmd)
 
 /*EXTL_DOC
  * Run \var{cmd} with the environment variable DISPLAY set to point to the
- * X display the WM is running on without a specific screen set.
+ * X display the WM is running on. No specific screen is set unlike with
+ * \fnref{WRootWin.exec_on}.
  */
 EXTL_EXPORT
-bool exec_on_wm_display(const char *cmd)
+bool exec(const char *cmd)
 {
 	return do_exec_on_rootwin(-1, cmd);
 }
