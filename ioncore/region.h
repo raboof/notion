@@ -174,11 +174,11 @@ extern void region_request_managed_geom_allow(WRegion *reg, WRegion *sub,
 #define FOR_ALL_TYPED_CHILDREN(NAM, NAM2, TYPE) \
 	for(NAM2=FIRST_CHILD(NAM, TYPE); NAM2!=NULL; NAM2=NEXT_CHILD(NAM2, TYPE))
 
-extern void link_child(WRegion *parent, WRegion *child);
+/*extern void link_child(WRegion *parent, WRegion *child);
 extern void link_child_before(WRegion *before, WRegion *child);
 extern void link_child_after(WRegion *after, WRegion *reg);
 extern void unlink_from_parent(WRegion *reg);
-extern void destroy_children(WRegion *reg);
+*/
 
 extern WRegion *next_child(WRegion *first, const WObjDescr *descr);
 extern WRegion *next_child_fb(WRegion *first, const WObjDescr *descr, WRegion *fb);

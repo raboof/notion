@@ -62,7 +62,8 @@ void init_region(WRegion *reg, WRegion *parent, WRectangle geom)
 	
 	if(parent!=NULL){
 		reg->screen=parent->screen;
-		link_child(parent, reg);
+		/*link_child(parent, reg);*/
+		region_set_parent(reg, parent);
 	}else{
 		assert(WOBJ_IS(reg, WScreen));
 		reg->screen=reg;
@@ -86,7 +87,7 @@ void init_region(WRegion *reg, WRegion *parent, WRectangle geom)
 }
 
 
-void destroy_children(WRegion *reg)
+static void destroy_children(WRegion *reg)
 {
 	WRegion *sub, *prev=NULL;
 
@@ -394,28 +395,17 @@ void region_detach_parent(WRegion *reg)
 	if(p==NULL)
 		return;
 	
-	unlink_from_parent(reg);
-	
-	if(p!=NULL){
-		if(p->active_sub==reg){
-			p->active_sub=NULL;
-			
-			/*region_remove_sub((WRegion*)p, reg);*/
-			
-			/* ??? Maybe manager should handle this all? */
-			if(REGION_IS_ACTIVE(reg) && wglobal.focus_next==NULL)
-				set_focus(p);
-		}else{
-			/*region_remove_sub((WRegion*)p, reg);*/
-		}
-	}
+	/*unlink_from_parent(reg);*/
+	UNLINK_ITEM(p->children, reg, p_next, p_prev);
+	reg->parent=NULL;
 
-	/* remove_sub might need the active flag to restore focus where
-	 * appropriate so we do not zero the flags in check_active_sub.
-	 * However, because the parent might have been destroyed at this point
-	 * and we thus must reset active_sub earlier as we do not know that,
-	 * it is expected not to need that information. Ugly? Yes.
-	 */
+	if(p->active_sub==reg){
+		p->active_sub=NULL;
+			
+		/* ??? Maybe manager should handle this all? */
+		if(REGION_IS_ACTIVE(reg) && wglobal.focus_next==NULL)
+			set_focus(p);
+	}
 
 	while(reg!=NULL && REGION_IS_ACTIVE(reg)){
 		D(fprintf(stderr, "detach-deact %s [%p]!\n", WOBJ_TYPESTR(reg), reg);)
@@ -664,10 +654,12 @@ void region_unset_manager(WRegion *reg, WRegion *mgr, WRegion **listptr)
 }
 
 
-void region_set_parent(WRegion *reg, WRegion *par)
+void region_set_parent(WRegion *reg, WRegion *parent)
 {
-	assert(reg->parent==NULL && par!=NULL);
-	link_child(par, reg);
+	assert(reg->parent==NULL && parent!=NULL);
+	/*link_child(par, reg);*/
+	LINK_ITEM(parent->children, reg, p_next, p_prev);
+	reg->parent=parent;
 }
 
 
@@ -706,7 +698,7 @@ bool region_manages_active_reg(WRegion *reg)
 
 /*{{{ Children linking */
 
-
+/*
 void link_child(WRegion *parent, WRegion *child)
 {
 	LINK_ITEM(parent->children, child, p_next, p_prev);
@@ -740,7 +732,7 @@ void unlink_from_parent(WRegion *reg)
 	UNLINK_ITEM(parent->children, reg, p_next, p_prev);
 	reg->parent=NULL;
 }
-
+*/
 
 /*}}}*/
 
