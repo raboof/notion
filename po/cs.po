@@ -938,7 +938,7 @@ msgstr "Pøesune rám do pozadí"
 
 #: ../etc/cfg_bindings.lua:171
 msgid "Display frame context menu."
-msgstr "Zobrazit kontextové menu rámu."
+msgstr "Zobrazí kontextové menu rámu."
 
 #: ../etc/cfg_ionws.lua:44
 msgid "Flip at root"
@@ -963,7 +963,7 @@ msgstr "SSH na:"
 
 #: ../etc/cfg_menus.lua:28
 msgid "Restart"
-msgstr "Restart"
+msgstr "Restartovat"
 
 #: ../mod_menu/mod_menu.lua:231
 msgid "Cannot save selection."
@@ -1254,7 +1254,7 @@ msgstr "Neznámá chyba"
 
 #: ../etc/cfg_bindings.lua:175 ../etc/cfg_panews.lua:8
 msgid "Begin move/resize mode."
-msgstr "Zahájí reøim pøesunu/zmìny velikosti."
+msgstr "Zahájí re¾im pøesunu/zmìny velikosti."
 
 #: ../etc/cfg_bindings.lua:136
 msgid "Tag current object within the frame."
@@ -1433,7 +1433,7 @@ msgstr "Zobrazí menu se seznamem oken."
 
 #: ../etc/cfg_floatws.lua:26
 msgid "Toggle shade mode"
-msgstr "Pøepnout stínový re¾im"
+msgstr "Pøepne stínový re¾im"
 
 #: ../mod_query/mod_query.lua:393
 msgid "Exit Ion/Shutdown session (y/n)?"
@@ -1585,7 +1585,7 @@ msgstr "Název pracovní plochy:"
 
 #: ../etc/cfg_menus.lua:31
 msgid "Exit"
-msgstr "Konec"
+msgstr "Ukonèit"
 
 #: ../etc/cfg_menus.lua:27
 msgid "Save"
