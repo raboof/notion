@@ -28,7 +28,6 @@ CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
 ifeq ($(PRELOAD_MODULES),1)
 LDFLAGS += $(foreach mod, $(MODULE_LIST), -dlpreopen ../$(mod)/$(mod).la)
-CFLAGS += -DCF_PRELOAD_MODULES
 LINKOPTS = -R$(MODULEDIR)
 else
 LINKOPTS = -export-dynamic -R$(MODULEDIR)

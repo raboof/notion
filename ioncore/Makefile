@@ -25,6 +25,10 @@ SOURCES=binding.c conf-bindings.c cursor.c event.c     \
 	stacking.c extlconv.c fullscreen.c mplex.c bindmaps.c gr.c \
 	infowin.c activity.c netwm.c objlist.c
 
+ifeq ($(PRELOAD_MODULES),1)
+CFLAGS += -DCF_PRELOAD_MODULES
+endif
+
 MAKE_EXPORTS=ioncore
 
 TARGETS=ioncore.a
