@@ -72,4 +72,6 @@ extern WRegion *autows_do_get_nextto(WAutoWS *ws, WRegion *reg,
 extern WRegion *autows_do_get_farthest(WAutoWS *ws,
                                        int dir, int primn, bool any);
 
+extern WSplitRegion *split_tree_find_region_in_pane_of(WSplit *node);
+
 #endif /* ION_AUTOWS_SPLITEXT_H */

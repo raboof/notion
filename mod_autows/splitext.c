@@ -943,28 +943,45 @@ static WSplitRegion *get_node_check(WAutoWS *ws, WRegion *reg)
 }
 
 
-WRegion *autows_do_get_nextto(WAutoWS *ws, WRegion *reg,
-                              int dir, int primn, bool any)
+static WSplitRegion *do_get_nextto(WSplit *node, int dir, int primn, 
+                                   bool any, bool paneonly)
 {
     WSplitFilter *filter=(any ? filter_no_unused : filter_no_stdisp_unused);
-    WSplit *node=(WSplit*)get_node_check(ws, reg), *nextto=NULL;
-    if(node==NULL)
-        return NULL;
+    WSplit *nextto=NULL;
 
     while(node->parent!=NULL){
-        if(OBJ_IS(node, WSplitPane))
+        if(OBJ_IS(node, WSplitPane)){
+            if(paneonly)
+                break;
             filter=(any ? filter_any : filter_no_stdisp);
+        }
         nextto=splitinner_nextto(node->parent, node, dir, primn, filter);
         if(nextto!=NULL)
             break;
         node=(WSplit*)(node->parent);
     }
     
-    if(nextto!=NULL && OBJ_IS(nextto, WSplitRegion))
-        return ((WSplitRegion*)nextto)->reg;
+    if(OBJ_IS(nextto, WSplitRegion))
+        return (WSplitRegion*)nextto;
     return NULL;
 }
 
+
+WRegion *autows_do_get_nextto(WAutoWS *ws, WRegion *reg,
+                              int dir, int primn, bool any)
+{
+    WSplitRegion *node=get_node_check(ws, reg), *nextto=NULL;
+
+    if(node==NULL)
+        return NULL;
+    
+    nextto=do_get_nextto((WSplit*)node, dir, primn, TRUE, FALSE);
+    
+    if(nextto!=NULL)
+        return nextto->reg;
+
+    return NULL;
+}
 
 WRegion *autows_do_get_farthest(WAutoWS *ws,
                                 int dir, int primn, bool any)
@@ -978,6 +995,11 @@ WRegion *autows_do_get_farthest(WAutoWS *ws,
     return NULL;
 }
 
+
+WSplitRegion *split_tree_find_region_in_pane_of(WSplit *node)
+{
+    return do_get_nextto(node, SPLIT_ANY, PRIMN_ANY, FALSE, TRUE);
+}
 
 
 /*}}}*/

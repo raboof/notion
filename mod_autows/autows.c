@@ -232,6 +232,27 @@ bool autows_managed_may_destroy(WAutoWS *ws, WRegion *reg)
 }
 
 
+WRegion *autows_managed_control_focus(WAutoWS *ws, WRegion *reg)
+{
+    WSplitRegion *node=get_node_check(ws, reg);
+    WSplitRegion *other;
+        
+    if(node==NULL || !OBJ_IS(node, WSplitUnused))
+        return NULL;
+    
+    /* An unused region - do not focus unless there are no
+     * normal regions in its pane. 
+     */
+    
+    other=split_tree_find_region_in_pane_of((WSplit*)node);
+    
+    if(other!=NULL)
+        return other->reg;
+    
+    return NULL;
+}
+
+
 /*}}}*/
 
 
@@ -474,10 +495,9 @@ static DynFunTab autows_dynfuntab[]={
     {(DynFun*)ionws_do_get_farthest,
      (DynFun*)autows_do_get_farthest},
 
-/*
     {(DynFun*)region_managed_control_focus,
      (DynFun*)autows_managed_control_focus},
-    */
+
     END_DYNFUNTAB
 };
 
