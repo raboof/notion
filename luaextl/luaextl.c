@@ -241,11 +241,12 @@ bool extl_init()
 		return FALSE;
 	}
 
-	lua_baselibopen(l_st);
-	lua_tablibopen(l_st);
-	lua_iolibopen(l_st);
-	lua_strlibopen(l_st);
-	lua_mathlibopen(l_st);
+	luaopen_base(l_st);
+	luaopen_table(l_st);
+	luaopen_io(l_st);
+	luaopen_string(l_st);
+	luaopen_math(l_st);
+	luaopen_loadlib(l_st);
 	
 	if(!extl_init_obj_info(l_st)){
 		warn("Failed to initialize WObj metatable\n");
