@@ -235,16 +235,19 @@ function parse_luadoc(d)
             s=string.sub(s, en)
         end
         
-        local fn
-        st, en, fn=string.find(s, "^\n[%s\n]*function ([%w_:%.]+)")
-        if not fn then
+        local fn, param
+        st, en, fn, param=
+            string.find(s, "^\n[%s\n]*function ([%w_:%.]+)%s*(%b())")
+        if fn then
+            
+        else
             st, en, fn=string.find(s, "^\n[%s\n]*([%w_:%.]+)%s*=")
             if not fn then
                 errorf("Syntax error while parsing \"%s\"",
                        string.sub(s, 1, 50))
             end
         end
-        fns[fn]={doc=doc}
+        fns[fn]={doc=doc, paramstr=param}
     end
     
     do_parse(d, {["\n%-%-DOC"]=do_luadoc})
@@ -396,7 +399,11 @@ function write_fndoc(h, fn, info)
     fprintf(h, "%s@\\code{%s}}\n", texfriendly(fnx), fnx)
     fprintf(h, "\\hyperlabel{fn:%s}", fn)
     if lua_input then
-        fprintf(h, "\\funcname{%s}\n", fn)
+        if info.paramstr then
+            fprintf(h, "\\synopsis{%s%s}\n", fn, info.paramstr)
+        else
+            fprintf(h, "\\funcname{%s}\n", fn)
+        end
     else
         fprintf(h, "\\synopsis{%s %s(", tohuman(info.odesc, info.otype), fn)
         local comma=""
