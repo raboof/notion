@@ -77,7 +77,7 @@ CREDITS
 
 Ion was written by Tuomo Valkonen.
 
-query/ion-completefile/ion-completefile.c is based on editline, (c)
+share/ion-completefile/ion-completefile.c is based on editline, (c)
 1992 Simmule Turner and Rich Salz. See the file for details.
 
 libtu/snprintf_2.2/ was written by Mark Martinec, see the README there
