@@ -17,7 +17,7 @@
 #include <wmcore/focus.h>
 #include <src/frame.h>
 #include <src/workspace.h>
-#include <src/funtab.h>
+#include <src/funtabs.h>
 #include "query.h"
 #include "wedln.h"
 #include "complete_file.h"
@@ -417,7 +417,7 @@ void query_yesno(WFrame *frame, char *prompt, char *fn)
 static int complete_mainfunc(char *nam, char ***cp_ret,
 								   char **beg)
 {
-	return complete_func_ex(nam, cp_ret, beg, &ion_main_funclist);
+	return complete_func_ex(nam, cp_ret, beg, &ion_frame_funclist);
 }
 
 

@@ -8,6 +8,7 @@
 #include <wmcore/common.h>
 #include <wmcore/window.h>
 #include <wmcore/global.h>
+#include <wmcore/regbind.h>
 #include "inputp.h"
 
 
@@ -111,7 +112,9 @@ bool init_input(WInput *input, WScreen *scr, WWinGeomParams params)
 	
 	XSelectInput(wglobal.dpy, input->win.win, INPUT_MASK);
 
-	input->win.bindmap=query_bindmap;
+	/*input->win.bindmap=query_bindmap;*/
+	
+	region_add_bindmap((WRegion*)input, query_bindmap, FALSE);
 	
 	/*link_thing((WThing*)parent, (WThing*)input);
 	map_window((WWindow*)input);*/

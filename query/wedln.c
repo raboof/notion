@@ -14,6 +14,7 @@
 #include <wmcore/xic.h>
 #include <wmcore/selection.h>
 #include <wmcore/event.h>
+#include <wmcore/regbind.h>
 #include "edln.h"
 #include "wedln.h"
 #include "inputp.h"
@@ -425,6 +426,8 @@ bool init_wedln(WEdln *wedln, WScreen *scr, WWinGeomParams params,
 	wedln->input.win.xic=create_xic(wedln->input.win.win);
 
 	wedln->edln.completion_handler=chandler;
+	
+	region_add_bindmap((WRegion*)wedln, query_edln_bindmap, FALSE);
 	
 	return TRUE;
 }

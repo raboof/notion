@@ -9,7 +9,7 @@
 #include <wmcore/conf-bindings.h>
 #include <wmcore/functionp.h>
 #include <wmcore/readconfig.h>
-#include <src/funtab.h>
+#include <src/funtabs.h>
 
 #include "query.h"
 #include "edln.h"
@@ -19,6 +19,7 @@
 
 
 WBindmap *query_bindmap=NULL;
+WBindmap *query_edln_bindmap=NULL;
 
 
 /*{{{ Bindable functions */
@@ -39,10 +40,9 @@ static void callhnd_edln_void(WThing *thing, WFunction *func,
 }
 
 
-/* Private function table, not exported for global binding if compiled
- * as a module.
- */
-static WFunction query_funtab[]={
+static WFunclist query_edln_funclist=INIT_FUNCLIST;
+
+static WFunction query_edln_funtab[]={
 	FN_VOID(edln, WEdln,		"back",				edln_back),
 	FN_VOID(edln, WEdln,		"forward",			edln_forward),
 	FN_VOID(edln, WEdln,		"bol",				edln_bol),
@@ -63,7 +63,14 @@ static WFunction query_funtab[]={
 	FN_VOID(edln, WEdln,		"history_next",		edln_history_next),
 	FN_VOID(edln, WEdln,		"history_prev",		edln_history_prev),
 	FN_VOID(generic, WEdln,		"paste",			wedln_paste),
-	FN_VOID(generic, WEdln,		"finish",			wedln_finish),	
+	FN_VOID(generic, WEdln,		"finish",			wedln_finish),
+	END_FUNTAB
+};
+
+
+static WFunclist query_funclist=INIT_FUNCLIST;
+
+static WFunction query_funtab[]={
 	FN_VOID(generic, WInput,	"cancel",			input_cancel),	
 	FN_VOID(generic, WInput,	"scrollup",			input_scrollup),
 	FN_VOID(generic, WInput,	"scrolldown",		input_scrolldown),
@@ -71,10 +78,8 @@ static WFunction query_funtab[]={
 };
 
 
-static WFunclist query_funclist=INIT_FUNCLIST;
 
-
-static WFunction query_main_funtab[]={
+static WFunction query_frame_funtab[]={
 	FN(ss, 	generic, WFrame,	"query_runfile",	query_runfile),
 	FN(ss, 	generic, WFrame,	"query_runwith",	query_runwith),
 	FN(ss,	generic, WFrame,	"query_yesno",		query_yesno),
@@ -102,8 +107,16 @@ static bool query_begin_bindings(Tokenizer *tokz, int n, Token *toks)
 }
 
 
+static bool query_begin_edln_bindings(Tokenizer *tokz, int n, Token *toks)
+{
+	return wmcore_begin_bindings(query_edln_bindmap, &query_edln_funclist,
+								 NULL);
+}
+
+
 static ConfOpt query_opts[]={
-	{"bindings", NULL, query_begin_bindings, wmcore_binding_opts},
+	{"query_bindings", NULL, query_begin_bindings, wmcore_binding_opts},
+	{"edln_bindings", NULL, query_begin_edln_bindings, wmcore_binding_opts},
 	END_CONFOPTS
 };
 
@@ -122,16 +135,25 @@ bool query_init()
 	bool ret;
 	
 	query_bindmap=create_bindmap();
+	
 	if(query_bindmap==NULL)
 		return FALSE;
 
-	if(!add_to_funclist(&query_funclist, query_funtab))
+	query_edln_bindmap=create_bindmap();
+	if(query_edln_bindmap==NULL){
+		free(query_bindmap);
+		query_bindmap=NULL;
 		return FALSE;
-	
-	ret=read_config_for("query", query_opts);
+	}
+
+	ret=(add_to_funclist(&query_funclist, query_funtab) &&
+		 add_to_funclist(&query_edln_funclist, query_edln_funtab));
 	
 	if(ret)
-		ret=add_to_funclist(&ion_main_funclist, query_main_funtab);
+		ret=read_config_for("query", query_opts);
+	
+	if(ret)
+		ret=add_to_funclist(&ion_frame_funclist, query_frame_funtab);
 		
 	if(!ret)
 		query_deinit();
@@ -142,9 +164,14 @@ bool query_init()
 
 void query_deinit()
 {
-	remove_from_funclist(&query_funclist, query_funtab);
-	destroy_bindmap(query_bindmap);
-	query_bindmap=NULL;
+	clear_funclist(&query_funclist);
+	clear_funclist(&query_edln_funclist);
+	remove_from_funclist(&ion_frame_funclist, query_frame_funtab);
+	
+	if(query_bindmap!=NULL){
+		destroy_bindmap(query_bindmap);
+		query_bindmap=NULL;
+	}
 }
 
 
