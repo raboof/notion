@@ -63,14 +63,17 @@ queries won't work.
 .B ETCDIR/
 System default configuration files
 .TP
-.B ETCDIR/pwm.lua
+.B ETCDIR/cfg_pwm.lua
 System default main configuration file
+.TP
+.B ETCDIR/cfg_*.lua
+Other configuration files
 .TP
 .B ~/.pwm3/
 User configuration files
 .TP
-.B ~/.pwm3/pwm.lua
-User default configuration file (overrides system default)
+.B ~/.pwm3/cfg_pwm.lua
+User default main configuration file (overrides system default)
 
 .SH SEE ALSO
 

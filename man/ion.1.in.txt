@@ -390,17 +390,20 @@ FILES AND DIRECTORIES
        ETCDIR/
               System default configuration files
 
-       ETCDIR/ion.lua
+       ETCDIR/cfg_ion.lua
               System default main configuration files
 
-       ETCDIR/look-*.lua
+       ETCDIR/cfg_*.lua
+              Other configuration files
+
+       ETCDIR/look_*.lua
               Colour scheme configuration files
 
        ~/.ion3/
               User configuration files
 
-       ~/.ion3/ion.lua
-              User default configuration file (overrides system default)
+       ~/.ion3/cfg_ion.lua
+              User default main configuration file (overrides system default)
 
 
 SEE ALSO
