@@ -1,5 +1,5 @@
 /*
- * ion/mod_autows/autows.c
+ * ion/mod_panews/panews.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -28,7 +28,7 @@
 #include <ioncore/region-iter.h>
 #include <mod_ionws/ionws.h>
 #include <mod_ionws/split.h>
-#include "autows.h"
+#include "panews.h"
 #include "placement.h"
 #include "main.h"
 #include "splitext.h"
@@ -37,25 +37,25 @@
 /*{{{ Create/destroy */
 
 
-void autows_managed_add(WAutoWS *ws, WRegion *reg)
+void panews_managed_add(WPaneWS *ws, WRegion *reg)
 {
-    region_add_bindmap_owned(reg, mod_autows_autows_bindmap, (WRegion*)ws);
+    region_add_bindmap_owned(reg, mod_panews_panews_bindmap, (WRegion*)ws);
     if(OBJ_IS(reg, WFrame))
-        region_add_bindmap(reg, mod_autows_frame_bindmap);
+        region_add_bindmap(reg, mod_panews_frame_bindmap);
     
     ionws_managed_add_default(&(ws->ionws), reg);
 }
 
 
-static WRegion *create_frame_autows(WWindow *parent, const WFitParams *fp)
+static WRegion *create_frame_panews(WWindow *parent, const WFitParams *fp)
 {
-    return (WRegion*)create_frame(parent, fp, "frame-tiled-autows");
+    return (WRegion*)create_frame(parent, fp, "frame-tiled-panews");
 }
 
 
 
 typedef struct{
-    WAutoWS *ws;
+    WPaneWS *ws;
     ExtlTab layout;
 } InitParams;
 
@@ -77,14 +77,14 @@ static bool mrsh_init_layout_extl(ExtlFn fn, InitParams *p)
 }
 
 
-static bool autows_init_layout(WAutoWS *ws)
+static bool panews_init_layout(WPaneWS *ws)
 {
     InitParams p;
     
     p.ws=ws;
     p.layout=extl_table_none();
 	
-    hook_call_p(autows_init_layout_alt, &p,
+    hook_call_p(panews_init_layout_alt, &p,
                 (WHookMarshallExtl*)mrsh_init_layout_extl);
 
     if(p.layout!=extl_table_none()){            
@@ -104,18 +104,18 @@ static bool autows_init_layout(WAutoWS *ws)
 }
 
 
-bool autows_init(WAutoWS *ws, WWindow *parent, const WFitParams *fp, 
+bool panews_init(WPaneWS *ws, WWindow *parent, const WFitParams *fp, 
                  bool ilo)
 {
     if(!ionws_init(&(ws->ionws), parent, fp, 
-                   create_frame_autows, FALSE))
+                   create_frame_panews, FALSE))
         return FALSE;
     
     assert(ws->ionws.split_tree==NULL);
     
     if(ilo){
-        if(!autows_init_layout(ws)){
-            autows_deinit(ws);
+        if(!panews_init_layout(ws)){
+            panews_deinit(ws);
             return FALSE;
         }
     }
@@ -124,25 +124,25 @@ bool autows_init(WAutoWS *ws, WWindow *parent, const WFitParams *fp,
 }
 
 
-WAutoWS *create_autows(WWindow *parent, const WFitParams *fp, bool cu)
+WPaneWS *create_panews(WWindow *parent, const WFitParams *fp, bool cu)
 {
-    CREATEOBJ_IMPL(WAutoWS, autows, (p, parent, fp, cu));
+    CREATEOBJ_IMPL(WPaneWS, panews, (p, parent, fp, cu));
 }
 
 
-WAutoWS *create_autows_simple(WWindow *parent, const WFitParams *fp)
+WPaneWS *create_panews_simple(WWindow *parent, const WFitParams *fp)
 {
-    return create_autows(parent, fp, TRUE);
+    return create_panews(parent, fp, TRUE);
 }
 
 
-void autows_deinit(WAutoWS *ws)
+void panews_deinit(WPaneWS *ws)
 {
     ionws_deinit(&(ws->ionws));
 }
 
 
-static WSplitRegion *get_node_check(WAutoWS *ws, WRegion *reg)
+static WSplitRegion *get_node_check(WPaneWS *ws, WRegion *reg)
 {
     WSplitRegion *node;
 
@@ -158,12 +158,12 @@ static WSplitRegion *get_node_check(WAutoWS *ws, WRegion *reg)
 }
 
 
-static void autows_do_managed_remove(WAutoWS *ws, WRegion *reg)
+static void panews_do_managed_remove(WPaneWS *ws, WRegion *reg)
 {
     ionws_do_managed_remove(&(ws->ionws), reg);
-    region_remove_bindmap_owned(reg, mod_autows_autows_bindmap, (WRegion*)ws);
+    region_remove_bindmap_owned(reg, mod_panews_panews_bindmap, (WRegion*)ws);
     if(OBJ_IS(reg, WFrame))
-        region_remove_bindmap(reg, mod_autows_frame_bindmap);
+        region_remove_bindmap(reg, mod_panews_frame_bindmap);
 }
 
 
@@ -174,14 +174,14 @@ static bool plainregionfilter(WSplit *node)
 
 
 
-void autows_managed_remove(WAutoWS *ws, WRegion *reg)
+void panews_managed_remove(WPaneWS *ws, WRegion *reg)
 {
     bool ds=OBJ_IS_BEING_DESTROYED(ws);
     bool act=REGION_IS_ACTIVE(reg);
     bool mcf=region_may_control_focus((WRegion*)ws);
     WSplitRegion *other=NULL, *node=get_node_check(ws, reg);
     
-    autows_do_managed_remove(ws, reg);
+    panews_do_managed_remove(ws, reg);
 
     if(node==NULL)
         return;
@@ -202,7 +202,7 @@ void autows_managed_remove(WAutoWS *ws, WRegion *reg)
                 ws->ionws.split_tree=NULL;
             }
 
-            autows_create_initial_unused(ws);
+            panews_create_initial_unused(ws);
             
             if(ws->ionws.split_tree==NULL){
                 warn(TR("Unable to re-initialise workspace. Destroying."));
@@ -229,13 +229,13 @@ void autows_managed_remove(WAutoWS *ws, WRegion *reg)
 /*{{{ Misc. */
 
 
-bool autows_managed_may_destroy(WAutoWS *ws, WRegion *reg)
+bool panews_managed_may_destroy(WPaneWS *ws, WRegion *reg)
 {
     return TRUE;
 }
 
 
-bool autows_managed_goto(WAutoWS *ws, WRegion *reg, int flags)
+bool panews_managed_goto(WPaneWS *ws, WRegion *reg, int flags)
 {
     if(flags&REGION_GOTO_ENTERWINDOW){
         WSplitRegion *other, *node=get_node_check(ws, reg);
@@ -262,7 +262,7 @@ bool autows_managed_goto(WAutoWS *ws, WRegion *reg, int flags)
 /*{{{ Save */
 
 
-ExtlTab autows_get_configuration(WAutoWS *ws)
+ExtlTab panews_get_configuration(WPaneWS *ws)
 {
     return ionws_get_configuration(&(ws->ionws));
 }
@@ -274,14 +274,14 @@ ExtlTab autows_get_configuration(WAutoWS *ws)
 /*{{{ Load */
 
 
-static WSplit *load_splitunused(WAutoWS *ws, const WRectangle *geom, 
+static WSplit *load_splitunused(WPaneWS *ws, const WRectangle *geom, 
                                 ExtlTab tab)
 {
-    return (WSplit*)create_splitunused(geom, (WAutoWS*)ws);
+    return (WSplit*)create_splitunused(geom, (WPaneWS*)ws);
 }
 
 
-static WSplit *load_splitpane(WAutoWS *ws, const WRectangle *geom, ExtlTab tab)
+static WSplit *load_splitpane(WPaneWS *ws, const WRectangle *geom, ExtlTab tab)
 {
     ExtlTab t;
     WSplitPane *pane;
@@ -326,7 +326,7 @@ static void adjust_tls_brs(int *tls, int *brs, int total)
 }
 
 
-static WSplit *load_splitfloat(WAutoWS *ws, const WRectangle *geom, 
+static WSplit *load_splitfloat(WPaneWS *ws, const WRectangle *geom, 
                                ExtlTab tab)
 {
     WSplit *tl=NULL, *br=NULL;
@@ -411,7 +411,7 @@ static WSplit *load_splitfloat(WAutoWS *ws, const WRectangle *geom,
 }
 
 
-static WSplit *autows_load_node(WAutoWS *ws, const WRectangle *geom, 
+static WSplit *panews_load_node(WPaneWS *ws, const WRectangle *geom, 
                                 ExtlTab tab)
 {
     char *s=NULL;
@@ -438,12 +438,12 @@ static WSplit *autows_load_node(WAutoWS *ws, const WRectangle *geom,
 }
 
 
-WRegion *autows_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
+WRegion *panews_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 {
-    WAutoWS *ws;
+    WPaneWS *ws;
     ExtlTab treetab;
 
-    ws=create_autows(par, fp, FALSE);
+    ws=create_panews(par, fp, FALSE);
     
     if(ws==NULL)
         return NULL;
@@ -455,7 +455,7 @@ WRegion *autows_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
     }
     
     if(ws->ionws.split_tree==NULL){
-        if(!autows_init_layout(ws)){
+        if(!panews_init_layout(ws)){
             destroy_obj((Obj*)ws);
             return NULL;
         }
@@ -474,39 +474,39 @@ WRegion *autows_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 /*{{{ Dynamic function table and class implementation */
 
 
-static DynFunTab autows_dynfuntab[]={
+static DynFunTab panews_dynfuntab[]={
     {region_managed_remove, 
-     autows_managed_remove},
+     panews_managed_remove},
 
     {(DynFun*)region_manage_clientwin, 
-     (DynFun*)autows_manage_clientwin},
+     (DynFun*)panews_manage_clientwin},
     
     {(DynFun*)region_get_configuration,
-     (DynFun*)autows_get_configuration},
+     (DynFun*)panews_get_configuration},
 
     {(DynFun*)region_managed_may_destroy,
-     (DynFun*)autows_managed_may_destroy},
+     (DynFun*)panews_managed_may_destroy},
 
     {ionws_managed_add,
-     autows_managed_add},
+     panews_managed_add},
     
     {(DynFun*)ionws_load_node,
-     (DynFun*)autows_load_node},
+     (DynFun*)panews_load_node},
 
     {(DynFun*)ionws_do_get_nextto,
-     (DynFun*)autows_do_get_nextto},
+     (DynFun*)panews_do_get_nextto},
 
     {(DynFun*)ionws_do_get_farthest,
-     (DynFun*)autows_do_get_farthest},
+     (DynFun*)panews_do_get_farthest},
 
     {(DynFun*)region_managed_goto,
-     (DynFun*)autows_managed_goto},
+     (DynFun*)panews_managed_goto},
 
     END_DYNFUNTAB
 };
 
 
-IMPLCLASS(WAutoWS, WIonWS, autows_deinit, autows_dynfuntab);
+IMPLCLASS(WPaneWS, WIonWS, panews_deinit, panews_dynfuntab);
 
     
 /*}}}*/

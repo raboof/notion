@@ -1,5 +1,5 @@
 --
--- ion/mod_autows/mod_autows.lua
+-- ion/mod_panews/mod_panews.lua
 -- 
 -- Copyright (c) Tuomo Valkonen 2004.
 -- 
@@ -15,11 +15,11 @@
 -- the user with require/include differences.
 if _LOADED["templates"] then return end
 
-if not ioncore.load_module("mod_autows") then
+if not ioncore.load_module("mod_panews") then
     return
 end
 
-local mod_autows=_G["mod_autows"]
+local mod_panews=_G["mod_panews"]
 
 local T={}
 --_G.templates=T
@@ -191,9 +191,9 @@ function T.classify(ws, reg)
     if obj_is(reg, "WClientWin") then
         -- Check if there's a winprop override
         local wp=ioncore.getwinprop(reg)
-        if wp and wp.autows_classification then
-            if S.valid_classifications[wp.autows_classification] then
-                return wp.autows_classification
+        if wp and wp.panews_classification then
+            if S.valid_classifications[wp.panews_classification] then
+                return wp.panews_classification
             end
         end
         
@@ -429,8 +429,8 @@ function T.setup_hooks()
         end
     end
 
-    hookto("autows_init_layout_alt", T.init_layout)
-    hookto("autows_make_placement_alt", T.make_placement)
+    hookto("panews_init_layout_alt", T.init_layout)
+    hookto("panews_make_placement_alt", T.make_placement)
 end
 
 

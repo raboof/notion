@@ -1,5 +1,5 @@
 /*
- * ion/autows/splitext.h
+ * ion/panews/splitext.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -9,8 +9,8 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_AUTOWS_SPLITEXT_H
-#define ION_AUTOWS_SPLITEXT_H
+#ifndef ION_PANEWS_SPLITEXT_H
+#define ION_PANEWS_SPLITEXT_H
 
 #include <ioncore/common.h>
 #include <ioncore/gr.h>
@@ -20,9 +20,9 @@ INTRCLASS(WSplitUnused);
 INTRCLASS(WSplitPane);
 INTRCLASS(WSplitFloat);
 
-#include "autows.h"
+#include "panews.h"
 #include "panehandle.h"
-#include "autows.h"
+#include "panews.h"
 
 DECLCLASS(WSplitUnused){
     WSplitRegion regnode;
@@ -40,17 +40,17 @@ DECLCLASS(WSplitFloat){
 };
 
 extern bool splitunused_init(WSplitUnused *split, const WRectangle *geom,
-                             WAutoWS *ws);
+                             WPaneWS *ws);
 extern bool splitpane_init(WSplitPane *split, const WRectangle *geom,
                            WSplit *cnt);
 extern bool splitfloat_init(WSplitFloat *split, const WRectangle *geom,
-                            WAutoWS *ws, int dir);
+                            WPaneWS *ws, int dir);
 
 extern WSplitUnused *create_splitunused(const WRectangle *geom,
-                                        WAutoWS *ws);
+                                        WPaneWS *ws);
 extern WSplitPane *create_splitpane(const WRectangle *geom, WSplit *cnt);
 extern WSplitFloat *create_splitfloat(const WRectangle *geom, 
-                                      WAutoWS *ws, int dir);
+                                      WPaneWS *ws, int dir);
 
 extern void splitunused_deinit(WSplitUnused *split);
 extern void splitpane_deinit(WSplitPane *split);
@@ -67,11 +67,11 @@ extern void splitfloat_br_pwin_to_cnt(WSplitFloat *split, WRectangle *g);
 extern void splitfloat_tl_cnt_to_pwin(WSplitFloat *split, WRectangle *g);
 extern void splitfloat_br_cnt_to_pwin(WSplitFloat *split, WRectangle *g);
 
-extern WRegion *autows_do_get_nextto(WAutoWS *ws, WRegion *reg,
+extern WRegion *panews_do_get_nextto(WPaneWS *ws, WRegion *reg,
                                      int dir, int primn, bool any);
-extern WRegion *autows_do_get_farthest(WAutoWS *ws,
+extern WRegion *panews_do_get_farthest(WPaneWS *ws,
                                        int dir, int primn, bool any);
 
 extern WSplitRegion *split_tree_find_region_in_pane_of(WSplit *node);
 
-#endif /* ION_AUTOWS_SPLITEXT_H */
+#endif /* ION_PANEWS_SPLITEXT_H */

@@ -13,7 +13,7 @@ ETC =	cfg_ion.lua cfg_bindings.lua cfg_menus.lua cfg_kludges.lua \
 	look_brownsteel.lua look_clean.lua look_dusky.lua \
 	look_greyviolet.lua look_ios.lua look_cleanviolet.lua \
 	look_simpleblue.lua look_wheat2.lua look_cleanios.lua \
-        cfg_autows.lua
+        cfg_panews.lua
 
 ######################################
 

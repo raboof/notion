@@ -1,5 +1,5 @@
 /*
- * ion/autows/panehandle.h
+ * ion/panews/panehandle.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -9,8 +9,8 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_AUTOWS_PANEHANDLE_H
-#define ION_AUTOWS_PANEHANDLE_H
+#ifndef ION_PANEWS_PANEHANDLE_H
+#define ION_PANEWS_PANEHANDLE_H
 
 #include <ioncore/common.h>
 #include <ioncore/gr.h>
@@ -31,4 +31,4 @@ extern bool panehandle_init(WPaneHandle *pwin,
                             WWindow *parent, const WFitParams *fp);
 extern WPaneHandle *create_panehandle(WWindow *parent, const WFitParams *fp);
 
-#endif /* ION_AUTOWS_PANEHANDLE_H */
+#endif /* ION_PANEWS_PANEHANDLE_H */

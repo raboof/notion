@@ -1,5 +1,5 @@
 /*
- * ion/autows/panehandle.c
+ * ion/panews/panehandle.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *

@@ -1,5 +1,5 @@
 /*
- * ion/autows/main.h
+ * ion/panews/main.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -9,17 +9,17 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_AUTOWS_MAIN_H
-#define ION_AUTOWS_MAIN_H
+#ifndef ION_PANEWS_MAIN_H
+#define ION_PANEWS_MAIN_H
 
 #include <ioncore/binding.h>
 #include <ioncore/regbind.h>
 
-extern bool mod_autows_init();
-extern void mod_autows_deinit();
+extern bool mod_panews_init();
+extern void mod_panews_deinit();
 
-extern WBindmap *mod_autows_autows_bindmap;
-extern WBindmap *mod_autows_unusedwin_bindmap;
-extern WBindmap *mod_autows_frame_bindmap;
+extern WBindmap *mod_panews_panews_bindmap;
+extern WBindmap *mod_panews_unusedwin_bindmap;
+extern WBindmap *mod_panews_frame_bindmap;
 
-#endif /* ION_AUTOWS_MAIN_H */
+#endif /* ION_PANEWS_MAIN_H */

@@ -1,5 +1,5 @@
 --
--- Ion autows module configuration file
+-- Ion panews module configuration file
 --
 
 -- Bindings for unused area. 

@@ -1,5 +1,5 @@
 /*
- * ion/autows/unusedwin.c
+ * ion/panews/unusedwin.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -34,7 +34,7 @@
 static void unusedwin_getbrush(WUnusedWin *uwin)
 {
     GrBrush *brush=gr_get_brush(region_rootwin_of((WRegion*)uwin),
-                                uwin->wwin.win, "frame-tiled-autows-unused");
+                                uwin->wwin.win, "frame-tiled-panews-unused");
 
     if(brush!=NULL){
         if(uwin->brush!=NULL)
@@ -57,7 +57,7 @@ bool unusedwin_init(WUnusedWin *uwin, WWindow *parent, const WFitParams *fp)
     
     unusedwin_getbrush(uwin);
     
-    region_add_bindmap((WRegion*)uwin, mod_autows_unusedwin_bindmap);
+    region_add_bindmap((WRegion*)uwin, mod_panews_unusedwin_bindmap);
 
     XSelectInput(ioncore_g.dpy, uwin->wwin.win, IONCORE_EVENTMASK_FRAME);
     
@@ -143,12 +143,12 @@ static bool unusedwin_handle_drop(WUnusedWin *uwin, int x, int y,
 {
     WSplitUnused *us=OBJ_CAST(splittree_node_of((WRegion*)uwin),
                               WSplitUnused);
-    WAutoWS *ws=REGION_MANAGER_CHK(uwin, WAutoWS);
+    WPaneWS *ws=REGION_MANAGER_CHK(uwin, WPaneWS);
     
     if(us==NULL || ws==NULL)
         return FALSE;
     
-    return autows_handle_unused_drop(ws, us, dropped);
+    return panews_handle_unused_drop(ws, us, dropped);
 }
 
 

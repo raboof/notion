@@ -1,5 +1,5 @@
 /*
- * ion/mod_autows/placement.h
+ * ion/mod_panews/placement.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -9,25 +9,25 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_MOD_AUTOWS_PLACEMENT_H
-#define ION_MOD_AUTOWS_PLACEMENT_H
+#ifndef ION_MOD_PANEWS_PLACEMENT_H
+#define ION_MOD_PANEWS_PLACEMENT_H
 
 #include <ioncore/common.h>
 #include <ioncore/clientwin.h>
 #include <ioncore/manage.h>
 #include <ioncore/hooks.h>
-#include "autows.h"
+#include "panews.h"
 #include "splitext.h"
 
 
-extern WHook *autows_init_layout_alt;
-extern WHook *autows_make_placement_alt;
+extern WHook *panews_init_layout_alt;
+extern WHook *panews_make_placement_alt;
 
 
-extern bool autows_manage_clientwin(WAutoWS *ws, WClientWin *cwin,
+extern bool panews_manage_clientwin(WPaneWS *ws, WClientWin *cwin,
                                     const WManageParams *param,
                                     int redir);
-extern bool autows_handle_unused_drop(WAutoWS *ws, WSplitUnused *specifier, 
+extern bool panews_handle_unused_drop(WPaneWS *ws, WSplitUnused *specifier, 
                                       WRegion *reg);
 
-#endif /* ION_MOD_AUTOWS_PLACEMENT_H */
+#endif /* ION_MOD_PANEWS_PLACEMENT_H */

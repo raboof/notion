@@ -1,5 +1,5 @@
 /*
- * ion/mod_autows/placement.h
+ * ion/mod_panews/placement.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -30,18 +30,18 @@
 #include <mod_ionws/split.h>
 #include <mod_ionws/split-stdisp.h>
 #include "placement.h"
-#include "autows.h"
+#include "panews.h"
 #include "splitext.h"
 
 
-WHook *autows_init_layout_alt=NULL;
-WHook *autows_make_placement_alt=NULL;
+WHook *panews_init_layout_alt=NULL;
+WHook *panews_make_placement_alt=NULL;
 
 
 /*{{{ create_frame_for */
 
 
-static WFrame *create_frame_for(WAutoWS *ws, WRegion *reg)
+static WFrame *create_frame_for(WPaneWS *ws, WRegion *reg)
 {
     WWindow *par=REGION_PARENT_CHK(ws, WWindow);
     WFitParams fp;
@@ -80,7 +80,7 @@ static WFrame *create_frame_for(WAutoWS *ws, WRegion *reg)
 
 
 typedef struct{
-    WAutoWS *ws;
+    WPaneWS *ws;
     WFrame *frame;
     WRegion *reg;
     WSplitUnused *specifier;
@@ -174,7 +174,7 @@ static bool fallback_layout(PlacementParams *p)
 /*{{{ Split/replace unused code */
 
 
-static bool do_replace(WAutoWS *ws, WFrame *frame, WRegion *reg, 
+static bool do_replace(WPaneWS *ws, WFrame *frame, WRegion *reg, 
                        PlacementParams *rs)
 {
     WSplit *u=rs->res_node;
@@ -216,7 +216,7 @@ static bool do_replace(WAutoWS *ws, WFrame *frame, WRegion *reg,
 /*{{{ The main dynfun */
 
 
-static WRegion *autows_get_target(WAutoWS *ws, WSplitUnused *specifier,
+static WRegion *panews_get_target(WPaneWS *ws, WSplitUnused *specifier,
                                   WRegion *reg)
 {
     WRegion *target=NULL;
@@ -239,9 +239,9 @@ static WRegion *autows_get_target(WAutoWS *ws, WSplitUnused *specifier,
 
         split_update_bounds(*tree, TRUE);
         
-        assert(autows_make_placement_alt!=NULL);
+        assert(panews_make_placement_alt!=NULL);
         
-        hook_call_p(autows_make_placement_alt, &rs,
+        hook_call_p(panews_make_placement_alt, &rs,
                     (WHookMarshallExtl*)mrsh_layout_extl);
         
         if(rs.res_node==NULL && specifier==NULL)
@@ -285,10 +285,10 @@ static WRegion *autows_get_target(WAutoWS *ws, WSplitUnused *specifier,
 }
 
 
-bool autows_manage_clientwin(WAutoWS *ws, WClientWin *cwin,
+bool panews_manage_clientwin(WPaneWS *ws, WClientWin *cwin,
                              const WManageParams *param, int redir)
 {
-    WRegion *target=autows_get_target(ws, NULL, (WRegion*)cwin);
+    WRegion *target=panews_get_target(ws, NULL, (WRegion*)cwin);
     
     if(target!=NULL){
         if(region_manage_clientwin(target, cwin, param,
@@ -303,10 +303,10 @@ bool autows_manage_clientwin(WAutoWS *ws, WClientWin *cwin,
 }
 
 
-bool autows_handle_unused_drop(WAutoWS *ws, WSplitUnused *specifier, 
+bool panews_handle_unused_drop(WPaneWS *ws, WSplitUnused *specifier, 
                                WRegion *reg)
 {
-    WRegion *target=autows_get_target(ws, specifier, reg);
+    WRegion *target=panews_get_target(ws, specifier, reg);
     
     if(target==NULL || !OBJ_IS(target, WMPlex))
         return FALSE;

@@ -1,5 +1,5 @@
 /*
- * ion/autows/splitext.c
+ * ion/panews/splitext.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -31,7 +31,7 @@
 
 
 bool splitunused_init(WSplitUnused *split, const WRectangle *geom,
-                      WAutoWS *ws)
+                      WPaneWS *ws)
 {
     WWindow *par=REGION_PARENT_CHK(ws, WWindow);
     WUnusedWin *uwin;
@@ -58,7 +58,7 @@ bool splitunused_init(WSplitUnused *split, const WRectangle *geom,
 }
 
 
-WSplitUnused *create_splitunused(const WRectangle *geom, WAutoWS *ws)
+WSplitUnused *create_splitunused(const WRectangle *geom, WPaneWS *ws)
 {
     CREATEOBJ_IMPL(WSplitUnused, splitunused, (p, geom, ws));
 }
@@ -97,7 +97,7 @@ static void splitfloat_set_borderlines(WSplitFloat *split)
 
 
 bool splitfloat_init(WSplitFloat *split, const WRectangle *geom, 
-                     WAutoWS *ws, int dir)
+                     WPaneWS *ws, int dir)
 {
     WWindow *par=REGION_PARENT_CHK(ws, WWindow);
     WFitParams fp;
@@ -140,7 +140,7 @@ bool splitfloat_init(WSplitFloat *split, const WRectangle *geom,
 }
 
 
-WSplitFloat *create_splitfloat(const WRectangle *geom, WAutoWS *ws, int dir)
+WSplitFloat *create_splitfloat(const WRectangle *geom, WPaneWS *ws, int dir)
 {
     CREATEOBJ_IMPL(WSplitFloat, splitfloat, (p, geom, ws, dir));
 }
@@ -823,13 +823,13 @@ static void splitpane_replace(WSplitPane *pane, WSplit *child, WSplit *what)
 }
 
 
-static WAutoWS *find_ws(WSplit *split)
+static WPaneWS *find_ws(WSplit *split)
 {
     if(split->parent!=NULL)
         return find_ws((WSplit*)split->parent);
     
     if(split->ws_if_root!=NULL)
-        return OBJ_CAST(split->ws_if_root, WAutoWS);
+        return OBJ_CAST(split->ws_if_root, WPaneWS);
     
     return NULL;
 }
@@ -840,7 +840,7 @@ static void splitpane_remove(WSplitPane *pane, WSplit *child,
 {
     WSplitInner *parent=((WSplit*)pane)->parent;
     WSplitUnused *un;
-    WAutoWS *ws=find_ws((WSplit*)pane);
+    WPaneWS *ws=find_ws((WSplit*)pane);
     
     assert(child==pane->contents);
     
@@ -938,7 +938,7 @@ static WSplit *splitpane_current(WSplitPane *pane)
 }
 
 
-static WSplitRegion *get_node_check(WAutoWS *ws, WRegion *reg)
+static WSplitRegion *get_node_check(WPaneWS *ws, WRegion *reg)
 {
     WSplitRegion *node;
 
@@ -978,7 +978,7 @@ static WSplitRegion *do_get_nextto(WSplit *node, int dir, int primn,
 }
 
 
-WRegion *autows_do_get_nextto(WAutoWS *ws, WRegion *reg,
+WRegion *panews_do_get_nextto(WPaneWS *ws, WRegion *reg,
                               int dir, int primn, bool any)
 {
     WSplitRegion *node=get_node_check(ws, reg), *nextto=NULL;
@@ -994,7 +994,7 @@ WRegion *autows_do_get_nextto(WAutoWS *ws, WRegion *reg,
     return NULL;
 }
 
-WRegion *autows_do_get_farthest(WAutoWS *ws,
+WRegion *panews_do_get_farthest(WPaneWS *ws,
                                 int dir, int primn, bool any)
 {
     WSplitFilter *filter=(any ? filter_any : filter_no_stdisp);

@@ -18,7 +18,7 @@ POTDIRS=../ioncore \
 	../luaextl \
 	../mod_ionws \
 	../mod_floatws \
-	../mod_autows \
+	../mod_panews \
 	../mod_query \
 	../mod_menu \
 	../mod_sm \
