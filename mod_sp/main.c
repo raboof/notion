@@ -20,6 +20,7 @@
 #include <ioncore/global.h>
 #include <ioncore/framep.h>
 #include <ioncore/bindmaps.h>
+#include <ioncore/region-iter.h>
 
 #include "main.h"
 #include "scratchpad.h"
@@ -57,6 +58,15 @@ static StringIntMap frame_areas[]={
 /*{{{ Exports */
 
 
+static bool do_toggle(WMPlex *mplex, WScratchpad *sp)
+{
+    if(mplex_l2_hidden(mplex, (WRegion*)sp))
+        return mplex_l2_show(mplex, (WRegion*)sp);
+    else
+        return mplex_l2_hide(mplex, (WRegion*)sp);
+}
+
+
 /*EXTL_DOC
  * Toggle displayed status of some scratchpad on \var{mplex} if one is 
  * found.
@@ -68,17 +78,23 @@ bool mod_sp_toggle_on(WMPlex *mplex)
     
     for(i=mplex_lcount(mplex, 2)-1; i>=0; i--){
         WScratchpad *sp=OBJ_CAST(mplex_lnth(mplex, 2, i), WScratchpad);
-        if(sp!=NULL){
-            if(REGION_IS_MAPPED(sp))
-                return mplex_l2_hide(mplex, (WRegion*)sp);
-            else
-                return mplex_l2_show(mplex, (WRegion*)sp);
-        }
+        if(sp!=NULL)
+            return do_toggle(mplex, sp);
     }
    
-    warn("No scratchpad found.");
-    
     return FALSE;
+}
+
+
+/*EXTL_DOC
+ * Toggle displayed status of \var{sp}.
+ */
+EXTL_EXPORT
+void mod_sp_toggle(WScratchpad *sp)
+{
+    WMPlex *mplex=OBJ_CAST(REGION_MANAGER(sp), WMPlex);
+    if(mplex!=NULL /*&& mplex_layer(mplex, (WRegion*)sp)==2*/)
+        do_toggle(mplex, sp);
 }
 
 
