@@ -35,7 +35,7 @@ typedef union{
 	int i;
 	double d;
 	bool b;
-	char *s;
+	const char *s;
 	ExtlFn f;
 	ExtlTab t;
 } ExtlL2Param;
