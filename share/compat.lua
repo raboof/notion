@@ -96,7 +96,7 @@ obsolete("make_active_leaf_fn",
              if not fn then
                  error("fn==nil", 2)
              end
-             return function call_active_leaf(reg)
+             return function(reg)
                         fn(region_get_active_leaf(reg))
                     end
          end)
