@@ -89,7 +89,7 @@ bool wobj_is_str(const WObj *obj, const char *str)
 	return FALSE;
 }
 
-
+#if 0
 const void *wobj_cast(const WObj *obj, const WObjDescr *descr)
 {
 	WObjDescr *d;
@@ -106,7 +106,7 @@ const void *wobj_cast(const WObj *obj, const WObjDescr *descr)
 	}
 	return NULL;
 }
-
+#endif
 
 /*}}}*/
 
