@@ -33,7 +33,7 @@
 
 
 #ifndef CF_NEW_USER_MESSAGE
-#define CF_NEW_USER_MESSAGE SHAREDIR"/welcome_message.txt"
+#define CF_NEW_USER_MESSAGE SHAREDIR"/welcome.txt"
 #endif
 
 

@@ -41,7 +41,7 @@ export(ioncore,
        "warn",
        "exec",
        "TR",
-       "doc")
+       "bdoc")
 
 -- Mark ourselves loaded.
 _LOADED["ioncore"]=true

@@ -9,7 +9,8 @@ include $(TOPDIR)/system-inc.mk
 ######################################
 
 MAN_TARGETS=ion3.1 pwm3.1 
-TARGETS=$(MAN_TARGETS) welcome.fi.txt
+WELCOME_TARGETS=welcome.txt
+TARGETS=$(MAN_TARGETS) $(WELCOME_TARGETS)
 
 MKMAN=$(LUA) ../build/mkman.lua
 GROFF=groff -man -Tascii
@@ -32,11 +33,14 @@ include $(TOPDIR)/rules.mk
 	$(MKMAN) -i $< -o $@ -D ETCDIR $(ETCDIR) -D DOCDIR $(DOCDIR) $(CONFIGS)
 
 welcome%txt: welcome%head ion3%1
-	(cat welcome$*head > $@ ; \
+	(cat welcome$*head; \
 	$(GROFF) ion3$*1 | $(FILTERCRAP)) > $@
 
 _install:
 	$(INSTALLDIR) $(MANDIR)/man1
 	for i in $(MAN_TARGETS); do \
 		$(INSTALL) -m $(DATA_MODE) $$i $(MANDIR)/man1 ; \
+	done
+	for i in $(WELCOME_TARGETS); do \
+		$(INSTALL) -m $(DATA_MODE) $$i $(SHAREDIR) ; \
 	done
