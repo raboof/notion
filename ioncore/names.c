@@ -275,12 +275,14 @@ ExtlTab complete_region(const char *nam, const char *typenam)
 {
 	WRegion *reg;
 	char *name;
-	int lnum=0, l=strlen(nam);
+	int lnum=0, l==0;
 	int n=0;
 	ExtlTab tab=extl_create_table();
 	
 	if(nam==NULL)
 		nam="";
+	
+	l=strlen(nam);
 	
 again:
 	
@@ -312,4 +314,6 @@ again:
 	return tab;
 }
 
+
+/*}}}*/
 
