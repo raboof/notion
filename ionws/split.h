@@ -15,7 +15,7 @@
 INTROBJ(WWsSplit);
 INTRSTRUCT(WResizeTmp);
 
-#define SPLIT_OF(X) ((X)->mgr_data)
+#define SPLIT_OF(X) ((WWsSplit*)((X)->mgr_data.p))
 
 enum WSplitDir{
 	HORIZONTAL,

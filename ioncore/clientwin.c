@@ -31,6 +31,7 @@
 #include "fullscreen.h"
 
 
+
 static void set_clientwin_state(WClientWin *cwin, int state);
 static void send_clientmsg(Window win, Atom a);
 

@@ -15,7 +15,7 @@
 #define WGENFRAME_WIN(FRAME) (((WGenFrame*)(FRAME))->win.win)
 #define WGENFRAME_DRAW(FRAME) (((WGenFrame*)(FRAME))->win.draw)
 
-#define REGION_LABEL(REG) ((REG)->mgr_data)
+#define REGION_LABEL(REG) ((char*)((REG)->mgr_data.p))
 
 enum{
 	WGENFRAME_AREA_NONE=0,
