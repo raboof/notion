@@ -27,8 +27,6 @@ INTROBJ(WScreen)
 
 #define SCREEN_MAX_STACK 3
 
-#define IS_SCREEN(REG) ((void*)(REG)==((WRegion*)(REG))->screen)
-
 
 DECLOBJ(WScreen){
 	WWindow root;

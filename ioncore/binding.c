@@ -107,7 +107,16 @@ bool init_bindmap(WBindmap *bindmap)
 
 WBindmap *create_bindmap()
 {
-	SIMPLECREATESTRUCT_IMPL(WBindmap, bindmap, (p));
+	WBindmap *bindmap=ALLOC(WBindmap);
+	
+	if(bindmap==NULL){
+		warn_err();
+		return NULL;
+	}
+	
+	init_bindmap(bindmap);
+	
+	return bindmap;
 }
 
 

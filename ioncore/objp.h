@@ -35,23 +35,6 @@ DECLSTRUCT(WObjDescr){
 #define WOBJ_INIT(O, TYPE) {((WObj*)(O))->obj_type=&OBJDESCR(TYPE); \
 	((WObj*)(O))->obj_watches=NULL;}
 
-#define CREATESTRUCT_IMPL_(OBJ, LOWOBJ, INIT, ARGS)                  \
-	OBJ *p;  p=ALLOC(OBJ); if(p==NULL){ warn_err(); return NULL; }   \
-	INIT;                                                            \
-	if(!init_##LOWOBJ ARGS){ free((void*)p); return NULL; } return p
-
-#define CREATESTRUCT_IMPL(OBJ, LOWOBJ, ARGS) \
-	CREATESTRUCT_IMPL_(OBJ, LOWOBJ, /* */, ARGS)
-
-#define SIMPLECREATESTRUCT_IMPL(OBJ, LOWOBJ, ARGS) \
-	CREATESTRUCT_IMPL_(OBJ, LOWOBJ, /* */, (p))
-
-/*#define CREATEOBJ_IMPL(OBJ, LOWOBJ, ARGS) \
-	CREATESTRUCT_IMPL_(OBJ, LOWOBJ, WOBJ_INIT(p, OBJ), ARGS)
-
-#define SIMPLECREATEOBJ_IMPL(OBJ, LOWOBJ, ARGS) \
-	CREATESTRUCT_IMPL_(OBJ, LOWOBJ, WOBJ_INIT(p, OBJ), (p))*/
-
 #define CREATEOBJ_IMPL(OBJ, LOWOBJ, INIT_ARGS)                          \
 	OBJ *p;  p=ALLOC(OBJ); if(p==NULL){ warn_err(); return NULL; }      \
 	WOBJ_INIT(p, OBJ);                                                  \

@@ -450,7 +450,7 @@ static void screen_remove_managed(WScreen *scr, WRegion *reg)
 	if((WRegion*)scr->current_viewport==reg)
 		scr->current_viewport=NULL;
 	
-	region_unset_manager(reg, (WRegion*)scr, NULL);
+	region_unset_manager(reg, (WRegion*)scr, &(scr->viewport_list));
 }
 
 
@@ -493,19 +493,19 @@ bool same_screen(const WRegion *reg1, const WRegion *reg2)
 /*}}}*/
 
 
-
 /*{{{ Workspace and client window management setup */
 
 
 bool setup_screens()
 {
 	WScreen *scr;
-	WViewport *vp;
+	WRegion *reg;
 	int n=0;
 	
 	FOR_ALL_SCREENS(scr){
-		FOR_ALL_TYPED_CHILDREN(scr, vp, WViewport){
-			if(init_workspaces_on_vp(vp))
+		FOR_ALL_MANAGED_ON_LIST(scr->viewport_list, reg){
+			if(WOBJ_IS(reg, WViewport) &&
+			   init_workspaces_on_vp((WViewport*)reg))
 				n++;
 		}
 		manage_initial_windows(scr);

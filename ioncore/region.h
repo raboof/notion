@@ -73,7 +73,7 @@ DECLOBJ(WRegion){
 
 
 #define FOR_ALL_MANAGED_ON_LIST(LIST, REG) \
-	for((REG)=(LIST); (REG)!=NULL; (REG)=(REG)->mgr_next)
+	for((REG)=(WRegion*)(LIST); (REG)!=NULL; (REG)=(REG)->mgr_next)
 
 #define FOR_ALL_MANAGED_ON_LIST_W_NEXT(LIST, REG, NEXT)            \
   for((REG)=(LIST), (NEXT)=((REG)==NULL ? NULL : (REG)->mgr_next); \
