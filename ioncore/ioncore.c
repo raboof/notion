@@ -283,6 +283,8 @@ static void init_global()
     ioncore_g.enc_utf8=FALSE;
     ioncore_g.enc_sb=TRUE;
     ioncore_g.use_mb=FALSE;
+    
+    ioncore_g.screen_notify=TRUE;
 }
 
 
