@@ -425,14 +425,14 @@ QueryLib.query_restart=QueryLib.make_yesno_fn(
 -- This function asks for a name new for the frame where the query
 -- was created.
 QueryLib.query_renameframe=QueryLib.make_rename_fn(
-    "Frame name: ", function(frame) return frame end
+    "Frame name:", function(frame) return frame end
 )
 
 --DOC
 -- This function asks for a name new for the workspace on which the
 -- query resides.
 QueryLib.query_renameworkspace=QueryLib.make_rename_fn(
-    "Workspace name: ", QueryLib.getws
+    "Workspace name:", QueryLib.getws
 )
 
 -- Queries for starting external programs
