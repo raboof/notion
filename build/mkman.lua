@@ -4,14 +4,54 @@
 local translations={}
 
 local function gettext(x)
-    return (translations[x] or x)
+    local t=translations[x]
+    if not t or t=="" then
+        return x
+    else
+        return t
+    end
 end
 
 local function TR(x, ...)
     return string.format(gettext(x), unpack(arg))
 end
 
-local function read_translations(f)
+local function read_translations(pofile)
+    local f, err=io.open(pofile)
+    if not f then 
+        error(err) 
+    end
+    
+    local msgid, msgstr, st, en
+    
+    for l in f:lines() do
+        if string.find(l, "^msgid") then
+            if msgid then
+                assert(msgstr)
+                translations[msgid]=msgstr
+                msgstr=nil
+            end
+            st, en, msgid=string.find(l, '^msgid%s*"(.*)"%s*$')
+        elseif string.find(l, "^msgstr") then
+            assert(msgid and not msgstr)
+            st, en, msgstr=string.find(l, '^msgstr%s*"(.*)"%s*$')
+        elseif not (string.find(l, "^%s*#") or string.find(l, "^%s*$")) then
+            local st, en, str=string.find(l, '^%s*"(.*)"%s*$')
+            assert(msgid or msgstr)
+            if not msgstr then
+                msgid=msgid..str
+            else
+                msgstr=msgstr..str
+            end
+        end
+    end
+
+    if msgid then
+        assert(msgstr)
+        translations[msgid]=msgstr
+    end
+    
+    f:close()
 end
 
 -- }}}

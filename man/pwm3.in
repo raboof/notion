@@ -16,13 +16,10 @@ file lookup paths and some options.
 .B \-display host:display.screen
 X display to manage
 .TP
-.B \-cfgfile configfile
+.B \-conffile configfile
 Configuration file to use instead of default
 .TP
-.B \-moduledir dir
-Directory to search for module
-.TP
-.B \-confdir dir
+.B \-searchdir dir
 Directory to search for configuration files and other scripts
 .TP
 .B \-oneroot
@@ -50,12 +47,10 @@ Show about text (version, copyright)
 
 .SH BINDINGS
 
-These are the default key and pointer bindings.
-.B Mod1
-depends on your system. On PC:s with XFree86 it is probably bound to the left
-Alt key (\fBAlt_L\fP).
-On Suns it is usually bound to the diamond keys (\fBMeta_L\fP, \fBMeta_R\fP). Use
-\fIxmodmap(1x)\fP to find out.
+These are the default key and pointer bindings. (\fBMod1\fP) depends on your
+system. On PC:s with XFree86 it is probably bound to the left Alt key
+(\fBAlt_L\fP). On Suns it is usually bound to the diamond keys
+(\fBMeta_L\fP, \fBMeta_R\fP). Use \fIxmodmap(1x)\fP to find out.
 
 The string in square brackets after a binding group heading below indicates
 the module that whose configuration file defines these bindings.
@@ -76,9 +71,11 @@ BINDINGS:WFrame
 
 BINDINGS:WMoveresMode
 
-.SS Bindings for floating workspaces [mod_floatws]
+.SS Bindings for floating workspaces and frames [mod_floatws]
 
 BINDINGS:WFloatWS
+
+BINDINGS:WFloatFrame
 
 .SS Bindings for menus [mod_menu]
 
@@ -107,3 +104,5 @@ User default main configuration file (overrides system default)
 For more information, see
 \fIion3(1)\fP.
 
+.SH AUTHOR
+Both PWM and Ion have been written by Tuomo Valkonen <tuomov at iki.fi>.

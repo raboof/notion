@@ -13,13 +13,10 @@ Ion is a tiling tabbed window manager designed with keyboard users in mind.
 .B \-display host:display.screen
 X display to manage
 .TP
-.B \-cfgfile configfile
+.B \-conffile configfile
 Configuration file to use instead of default
 .TP
-.B \-moduledir dir
-Directory to search for module
-.TP
-.B \-confdir dir
+.B \-searchdir dir
 Directory to search for configuration files and other scripts
 .TP
 .B \-oneroot
@@ -48,41 +45,38 @@ Show about text (version, copyright)
 .SH BASIC CONCEPTS
 
 This section is an overview of the types objects that appear on an X
-display managed by Ion and their relationships in a standard setup.
-This information is necessary to understand the operations of different
-key bindings. For a more detailed explanation, needed for writing
-custom bindings configuration files, see the additional documentation
-available from the Ion Web page.
+display managed by Ion and their relationships in a standard setup. This
+information is necessary to understand the operations and availability
+of the different key bindings explained below. For a more detailed 
+explanation, needed for writing custom bindings configuration files,
+see the additional documentation available from the Ion Web page.
 
-The top-level objects that matter are screens and they correspond to
-physical screens. Screens contain workspaces and client windows put in
-full screen mode. Only one of these "multiplexed" objects can be viewed
-at a time. 
+The top-level objects that matter in the case at hand are \fBscreens\fP.
+They correspond to physical screens. Screens contain \fBworkspaces\fP and 
+\fBclient windows\fP put in full screen mode. These objects are
+\fBmultiplixed\fP in the sense that only one can be displayed at a time.
 
-Two types of workspaces are currently supported; tiled (traditional Ion-style) 
-and floating (PWM-style). Workspaces are not visible objects but rather 
-collections of frames. Frames are the objects with decorations such as 
-tabs and borders and there are two types of these corresponding to the
-different types of workspaces.
+Ion currently supports two types of workspaces; \fBtiled\fP of the
+traditional Ion-style and more conventional \fBfloating\fP workspaces
+of the PWM flavour. Workspaces are not visible objects but rather 
+collections of simultaneously visible \fBframes\fP.
 
-Frames contain (multiplex) client windows, to each of which corresponds a
-tab in the frame's decoration. Only one client window (or other object) 
-can be shown at a time in each frame. (In a traditional window manager
-each frame may contain exactly one client window.)
+Akin to screens, frames multiplex other objects, but in this case mostly
+client windows. Most of the time, frames are the only trace of Ion you
+see on the screen. Frames may have border decorations, and they have
+a \fBtab\fP for each multiplexed object.
 
-"Queries" are boxes that appear at the bottoms of frames or screens 
-and are used to ask the user for textual input. Most queries support 
-tab-completion.
+\fBQueries\fP are boxes that appear at the bottoms of frames or screens 
+to ask you for textual input to execute an action that depends on it.
+Most queries support tab-completion.
 
 
 .SH BINDINGS
 
-These are the default key and pointer bindings.
-.B Mod1
-depends on your system. On PC:s with XFree86 it is probably bound to the left
-Alt key (\fBAlt_L\fP).
-On Suns it is usually bound to the diamond keys (\fBMeta_L\fP, \fBMeta_R\fP). 
-Use \fIxmodmap(1x)\fP to find out.
+These are the default key and pointer bindings. (\fBMod1\fP) depends on your
+system. On PC:s with XFree86 it is probably bound to the left Alt key
+(\fBAlt_L\fP). On Suns it is usually bound to the diamond keys
+(\fBMeta_L\fP, \fBMeta_R\fP). Use \fIxmodmap(1x)\fP to find out.
 
 The string in square brackets after a binding group heading below indicates
 the module that whose configuration file defines these bindings.
@@ -107,9 +101,11 @@ BINDINGS:WMoveresMode
 
 BINDINGS:WIonWS
 
-.SS Bindings for floating workspaces [mod_floatws]
+.SS Bindings for floating workspaces and frames [mod_floatws]
 
 BINDINGS:WFloatWS
+
+BINDINGS:WFloatFrame
 
 .SS Bindings for message boxes and queries [mod_query]
 

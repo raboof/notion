@@ -1,0 +1,153 @@
+.TH ION 1
+.SH NIMI
+Ion - X11 ikkunanhallintaohjelma
+.SH SELOSTE
+.B ion3
+.I "[valinnat]"
+.SH "KUVAUS"
+
+Ion on näppäimistökäyttäjiä silmälläpitäen suunniteltu laatoitusta ja 
+välilehtiä hyödyntävä ikkunanhallintaohjelma X11:lle.
+ 
+.SH "VALINNAT"
+.TP
+.B \-display kone:palvelin.näyttö
+X palvelin, johon ottaa yhteys.
+.TP
+.B \-conffile asetustiedosto
+Käytettävä asetustiedosto.
+.TP
+.B \-searchdir dir
+Hakupolkuun lisättävä hakemisto, josta löytyy asetus- ja muita tiedostoja.
+.TP
+.B \-oneroot
+Hallitse vain oletusnäyttöä X-palvelimilla, joissa on useampi perinteinen
+(ei Xinerama) näyttö/juuri-ikkuna. Tämä näyttö voidaan valita -display
+parametrillä tai DISPLAY ympäristömuuttujalla.
+.TP
+.B \-sessionname session_name
+Istunnon nimi. Tämä vaikuttaa talletustiedostojen sijaintiin.
+.TP
+.B \-xinerama 0|1
+Jos Ion käännettiin Xinerama-tuella, voidaan Xinerama tieto silti jättää
+hyödyntämättä  asettamalla tämä valinta arvoon 0.
+.TP
+.B \-help
+Näytä komentorivin ohje.
+.TP
+.B \-version
+Näytä Ionin versio.
+.TP
+.B \-about
+Näytä tietoja Ionista (versio, tekijänoikeudet).
+
+.SH PERUSKÄSITTEET
+
+Tämä kappale on katsaus erilaisiin niin kutsuttuihin \fBolioihin\fP,
+joita ilmenee Ionin hallitsemalla X-näytöllä, ja niiden suhteisiin 
+tavallisessa kokoonpanossa. Sinun tarvitse ymmärtää nämä suhteet 
+tietääksesi milloin mitkäkin alempana kuvattavat näppäinsidonnat 
+ovat käytettävissäsi. Jos kaipaat vielä tarkempaa kuvausta, esimerkiksi
+tehdäksesi omat asetustiedostot, katso Ionin seittisivulta saatavaa 
+yksityiskohtaisempaa  dokumentaatiota.
+
+Ylimmän tason olioita, joilla on merkitystä tässä yhteydessä, 
+kutsutaan \fBnäytöiksi\fP. Ne vastaavat fyysisiä näyttöjä. Näytöt
+sisältävät \fBtyöpöytiä\fP ja kokoruudun tilassa olevia
+\fBasiakasikkunoita\fP. Nämä oliot ovat \fBlomitettu\fP siten, että
+vain yksi voi näkyä kerrallaan.
+
+Ion tukee tällä hetkellä kahdentyyppisiä työpöytiä: \fBlaatoittavia\fP
+Ionin perinteiseen tapaan ja tavanomaisempia \fBkelluvia\fP työpöytiä
+PWM:n tapaan. Työpöydät eivät ole näkyviä olioita, vaan lähinnä 
+kokoelmia samanaikaisesti näytettäviä \fBkehyksiä\fP.
+
+Näyttöjen tapaan kehykset lomittavat muita olioita, mutta tässä
+tapauksessa lähinnä asiakasikkunoita. Kehykset ovat suurimman osan
+ajasta ainut asia, minkä näet Ionista. Niillä voi olla reunakoristukset, 
+ja lisäksi kehyksissä on \fBvälilehti\fP jokaiselle lomitetulle oliolle.
+
+\fBKyselyt\fP ovat näyttöjen tai kehysten alaosiin imestyviä laatikoita,
+jotka odottavat sinulta tekstin syöttöä jonkin siitä riippuvan toiminnon
+suorittamiseksi. Useimmat kyselyt tukevat tab-täydennystä.
+
+
+.SH SIDONNAT
+
+Nämä ovat oletusarvoiset näppäin- ja osoitinsidonnat. Näppäinmuunninta
+(\fBMod1\fP) vastaava näppäin riippuu järjestelmästäsi. PC-tietokoneilla,
+joissa on XFree86 se on todennäköisesti vasen Alt-näppäin (\fBAlt_L\fP).
+Suneilla se on luultavasti sidottu timanttinäppäimiin. Käytä komentoa
+\fIxmodmap(1x)\fP selvittääksesi asian tarkemmin.
+
+Otsikkojen perässä hakasuluissa oleva merkkijono ilmoittaa moduulin,
+jonka asetustiedosto määrittelee alla olevat sidonnat.
+
+.SS Yleisesti saatavilla olevat sidonnat
+
+BINDINGS:WScreen
+
+.SS Kehyksiä ja näyttöjä, sekä niiden lapsia käsittelevät sidonnat
+
+BINDINGS:WMPlex
+
+.SS Kehyksiä, sekä niiden lapsia käsittelevät sidonnat
+
+BINDINGS:WFrame
+
+.SS Siirto ja koonmuutostilan sidonnat
+
+BINDINGS:WMoveresMode
+
+.SS Laatoitettujen työpöytien sidonnat [mod_ionws]
+
+BINDINGS:WIonWS
+
+.SS Kelluvien työpöytien ja kehyksien sidonnat [mod_floatws]
+
+BINDINGS:WFloatWS
+
+BINDINGS:WFloatFrame
+
+.SS Kysely- ja viestilaatikoiden sidonnat [mod_query]
+
+BINDINGS:WInput
+
+.SS Sidonnat tekstinmuokkaukseen kyselyissä [mod_query]
+
+BINDINGS:WEdln
+
+.SS Valikoiden sidonnat [mod_menu]
+
+BINDINGS:WMenu
+
+
+.SH TIEDOSTOT JA HAKEMISTOT
+.TP
+.B ETCDIR/cfg_ion.lua
+Järjestelmän oletusarvoinen pääasetustiedosto.
+.TP
+.B ETCDIR/cfg_*.lua
+Muita asetustiedostoja.
+.TP
+.B ETCDIR/look_*.lua
+Ulkonäön asetustiedostoja.
+.TP
+.B ~/.ion3/
+Käyttäjän asetustiedostot.
+.TP
+.B ~/.ion3/cfg_ion.lua
+Käyttäjän oletusarvoinen pääasetustiedosto.
+
+.SH KATSO MYÖS
+Ionin kotisivu, \fIhttp://iki.fi/tuomov/ion/\fP (englanniksi).
+.PP
+Dokumentti "Ion: Configuring and extending with Lua" (englanniksi)
+nähtävissä Ionin kotisivulla.
+.PP
+.I DOCDIR/
+.PP
+\fIX(7x)\fP, \fIpwm3(1)\fP, \fIjoe(1)\fP
+
+.SH TEKIJÄ
+Ionin on kirjoittanut Tuomo Valkonen <tuomov at iki.fi>.

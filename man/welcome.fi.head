@@ -1,0 +1,25 @@
+
+Tervetuloa käyttämään Ionia!
+
+Jos et ole käyttänyt Ionia aiemmin, on hyvin suotiteltavaa, että opiskelet
+Ionin ohjesivun ennen kuin jatkat tätä pidemmälle. Se on toistettu alla,
+mutta voit aukaista sen myös myöhemmin painamalla <F1> ja <Enter>, tai
+suorittamalla 'man ion3' komentoriviltä. (Tämä toimii sillä oletuksella,
+että olet asentanut Ionin järjestelmässäsi sellaiseen vakiosijaintin, 
+mistä sen työkalut osaavat hakea ohjesivuja.)
+
+Jos olet innokas kokeilemaan Ionia nyt heti ja vastoin suosituksia haluat
+jättää ohjesivun lukematta tällä istumalla, sinun tulisi kuitenkin tietää
+ainakin seuraavat näppäimet: <F2> käynnistää pääte-emulaattorin (xterm)
+ja <F12> näyttää päävalikon.
+
+Jossain vaiheessa, kun olet opetellut Ionin peruskäsiteet ja toiminnot, 
+haluat varmaan muokata sen asetukset itsellesi sopivammiksi. Tähän löydät
+(englanniksi) apua Ionin asetus- ja ohjelmointimanuaalista. Se löytyy
+Ionin seittisivulta, johon on linkki alla olevan ohjesivun lopussa.
+Huomautettakoon vielä, että Ionin käytön ja peruskäsitteiden opettelu
+on hyvin suositeltvaa ennen asetustiedostojen pariin hyppäämistä.
+
+---- Ohjesivu seuraa ----
+
+

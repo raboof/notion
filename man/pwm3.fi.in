@@ -1,0 +1,107 @@
+.TH ION 1
+.SH NIMI
+PWM - X11 ikkunanhallintaohjelma
+.SH SELOSTE
+.B pwm3
+.I "[valinnat]"
+.SH "KUVAUS"
+
+Alkuperäinen PWM oli ensimmäinen ohjelma, joka toi välilehdet
+ikkunanhallintaohjelman tasolle. Tämä versio PWM:stä taas pohjautuu
+Ioniin ja sen mod_floatws moduuliin hieman eri oletusasetuksilla.
+ 
+.SH "VALINNAT"
+.TP
+.B \-display kone:palvelin.näyttö
+X palvelin, johon ottaa yhteys.
+.TP
+.B \-conffile asetustiedosto
+Käytettävä asetustiedosto.
+.TP
+.B \-searchdir dir
+Hakupolkuun lisättävä hakemisto, josta löytyy asetus- ja muita tiedostoja.
+.TP
+.B \-oneroot
+Hallitse vain oletusnäyttöä X-palvelimilla, joissa on useampi perinteinen
+(ei Xinerama) näyttö/juuri-ikkuna. Tämä näyttö voidaan valita -display
+parametrillä tai DISPLAY ympäristömuuttujalla.
+.TP
+.B \-sessionname session_name
+Istunnon nimi. Tämä vaikuttaa talletustiedostojen sijaintiin.
+.TP
+.B \-xinerama 0|1
+PWM ei oletuksena käytä Xinerama-tietoa Ionista poiketen. Jos se kuitenkin
+käännettiin Xinerama-tuella, voidaan tuo tieto ottaa käyttää asettamalla
+tämän parametrin arvoksi 1. Tuolloin kaikilla Xinerama-näytöillä on 
+erilliset työpöydät.
+.TP
+.B \-help
+Näytä komentorivin ohje.
+.TP
+.B \-version
+Näytä Ionin versio.
+.TP
+.B \-about
+Näytä tietoja PWM:sta (versio, tekijänoikeudet).
+
+.SH SIDONNAT
+
+Nämä ovat oletusarvoiset näppäin- ja osoitinsidonnat. Näppäinmuunninta
+(\fBMod1\fP) vastaava näppäin riippuu järjestelmästäsi. PC-tietokoneilla,
+joissa on XFree86 se on todennäköisesti vasen Alt-näppäin (\fBAlt_L\fP).
+Suneilla se on luultavasti sidottu timanttinäppäimiin. Käytä komentoa
+\fIxmodmap(1x)\fP selvittääksesi asian tarkemmin.
+
+Otsikkojen perässä hakasuluissa oleva merkkijono ilmoittaa moduulin,
+jonka asetustiedosto määrittelee alla olevat sidonnat.
+
+.SS Yleisesti saatavilla olevat sidonnat
+
+BINDINGS:WScreen
+
+.SS Kehyksiä ja näyttöjä, sekä niiden lapsia käsittelevät sidonnat
+
+BINDINGS:WMPlex
+
+.SS Kehyksiä, sekä niiden lapsia käsittelevät sidonnat
+
+BINDINGS:WFrame
+
+.SS Siirto ja koonmuutostilan sidonnat
+
+BINDINGS:WMoveresMode
+
+.SS Kelluvien työpöytien ja kehyksien sidonnat [mod_floatws]
+
+BINDINGS:WFloatWS
+
+BINDINGS:WFloatFrame
+
+.SS Valikoiden sidonnat [mod_menu]
+
+BINDINGS:WMenu
+
+
+.SH TIEDOSTOT JA HAKEMISTOT
+.TP
+.B ETCDIR/cfg_pwm.lua
+Järjestelmän oletusarvoinen pääasetustiedosto.
+.TP
+.B ETCDIR/cfg_*.lua
+Muita asetustiedostoja.
+.TP
+.B ETCDIR/look_*.lua
+Ulkonäön asetustiedostoja.
+.TP
+.B ~/.ion3/
+Käyttäjän asetustiedostot.
+.TP
+.B ~/.ion3/cfg_pwm.lua
+Käyttäjän oletusarvoinen pääasetustiedosto.
+
+.SH KATSO MYÖS
+
+Katso \fIion3(1)\fP.
+
+.SH TEKIJÄ
+PWM:n sekä Ionin on kirjoittanut Tuomo Valkonen <tuomov at iki.fi>.
