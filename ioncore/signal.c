@@ -245,10 +245,13 @@ static void deadly_signal_handler(int signal_num)
 {
 	set_warn_handler(NULL);
 	warn("Caught signal %d. Dying.", signal_num);
-	kill_sig=signal_num;
-	
 	signal(signal_num, SIG_DFL);
+	if(wglobal.opmode==OPMODE_INIT)
+		kill(getpid(), signal_num);
+	else
+		kill_sig=signal_num;
 }
+
 
 static void chld_handler(int signal_num)
 {

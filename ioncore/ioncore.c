@@ -377,6 +377,8 @@ bool ioncore_startup(const char *display, const char *cfgfile,
 
 	ioncore_register_exports();
 	
+	trap_signals();
+
 	if(!read_config("ioncorelib"))
 		return FALSE;
 	
@@ -393,8 +395,6 @@ bool ioncore_startup(const char *display, const char *cfgfile,
 		warn("Unable to set up any rootwins.");
 		return FALSE;
 	}
-	
-	trap_signals();
 	
 	return TRUE;
 }
