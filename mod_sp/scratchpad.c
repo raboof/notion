@@ -25,6 +25,7 @@
 #include <ioncore/region-iter.h>
 #include <ioncore/infowin.h>
 #include <ioncore/names.h>
+#include <ioncore/stacking.h>
 
 #include "scratchpad.h"
 #include "main.h"
@@ -120,6 +121,7 @@ void scratchpad_notify(WScratchpad *sp)
     fp.g.y=sp->last_fp.g.y;
     
     region_fitrep((WRegion*)iw, NULL, &fp);
+    region_keep_on_top((WRegion*)iw);
     region_map((WRegion*)iw);
     
     watch_setup(&(sp->notifywin_watch), (Obj*)iw, NULL);
@@ -157,8 +159,14 @@ static bool scratchpad_managed_activity(WScratchpad *sp)
 static void scratchpad_managed_notify(WScratchpad *sp, WRegion *sub)
 {
     frame_managed_notify(&(sp->frame), sub);
-    if(!REGION_IS_MAPPED(sp) && scratchpad_managed_activity(sp))
+    
+    if(ioncore_g.opmode!=IONCORE_OPMODE_NORMAL || REGION_IS_MAPPED(sp))
+        return;
+    
+    if(scratchpad_managed_activity(sp))
         scratchpad_notify(sp);
+    else
+        scratchpad_unnotify(sp);
 }
 
 
