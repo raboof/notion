@@ -182,6 +182,8 @@ bool setup_watch(WWatch *watch, WObj *obj, WWatchHandler *handler)
 	watch->handler=handler;
 	LINK_ITEM(obj->obj_watches, watch, next, prev);
 	watch->obj=obj;
+	
+	return TRUE;
 }
 
 void do_reset_watch(WWatch *watch, bool call)
