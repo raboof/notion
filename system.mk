@@ -92,6 +92,14 @@ XINERAMA_LIBS=-lXinerama
 # function, encoding names unfortunately aren't and thus these also have to
 # specified here.
 
+# GNU/Linux and other glibc-2.2 based systems.
+#DEFINES += -DCF_UTF8 -DCF_ICONV_TARGET=\"WCHAR_T\" -DCF_ICONV_SOURCE=\"UTF-8\"
+
+# Systems that depend on libutf8 and libiconv might want these.
+#DEFINES += -DCF_UTF8 -DCF_LIBUTF8 -DCF_ICONV_TARGET=\"C99\" -DCF_ICONV_SOURCE=\"UTF-8\"
+#EXTRA_LIBS += -liconv -lutf8 -L/usr/local/lib
+#EXTRA_INCLUDES += -I/usr/local/include
+
 # Uncomment to enable Xft (anti-aliased fonts) support. 
 # NOTE: This feature is a bonus that may or may not work. I have better
 # things to do than test something I strongly dislike after every change to
@@ -100,13 +108,6 @@ XINERAMA_LIBS=-lXinerama
 #X11_INCLUDES += `xft-config --cflags`
 #X11_LIBS += `xft-config --libs`
 
-# GNU/Linux and other glibc-2.2 based systems.
-#DEFINES += -DCF_UTF8 -DCF_ICONV_TARGET=\"WCHAR_T\" -DCF_ICONV_SOURCE=\"UTF-8\"
-
-# Systems that depend on libutf8 and libiconv might want these.
-#DEFINES += -DCF_UTF8 -DCF_LIBUTF8 -DCF_ICONV_TARGET=\"C99\" -DCF_ICONV_SOURCE=\"UTF-8\"
-#EXTRA_LIBS += -liconv -lutf8 -L/usr/local/lib
-#EXTRA_INCLUDES += -I/usr/local/include
 
 ##
 ## libc
