@@ -40,8 +40,8 @@ _install:
 
 	@ if test ! -f $(ETCDIR)/draw.lua ; then \
 		echo ""; \
-		echo "*** Linking draw.lua to look-clean.lua"; \
-		ln -s look-clean.lua $(ETCDIR)/draw.lua; \
+		echo "*** Linking draw.lua to look-cleanviolet.lua"; \
+		ln -s look-cleanviolet.lua $(ETCDIR)/draw.lua; \
 	fi
 
 	@ if test -f $(ETCDIR)/ion.lua ; then \
