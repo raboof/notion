@@ -11,8 +11,9 @@ include modulelist.mk
 ######################################
 
 INSTALL_SUBDIRS=\
+	$(MODULE_LIST) \
 	ioncore ion pwm etc utils man po \
-	$(MODULE_LIST)
+	
 
 SUBDIRS = $(LIBS_SUBDIRS) $(INSTALL_SUBDIRS)
 
