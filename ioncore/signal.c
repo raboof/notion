@@ -109,7 +109,7 @@ void ioncore_check_signals()
 		gettimeofday(&current_time, NULL);
 		while(queue.next!=NULL){
 			if((TIMEVAL_LATER(current_time, queue.next->when))){
-				WObj *obj;
+				Obj *obj;
 				q=queue.next;
 				queue.next=q->next;
 				q->next=NULL;
@@ -136,7 +136,7 @@ static void add_to_current_time(struct timeval *when, uint msecs)
 }
 
 
-void kill_timer(WWatch *watch, WObj *obj)
+void kill_timer(Watch *watch, Obj *obj)
 {
 	WTimer *tmr;
 	warn("Timer handler parameter destroyed.");
@@ -159,7 +159,7 @@ bool timer_is_set(WTimer *timer)
 }
 
 
-void timer_set_param(WTimer *timer, uint msecs, WObj *obj)
+void timer_set_param(WTimer *timer, uint msecs, Obj *obj)
 {
 	WTimer *q;
 

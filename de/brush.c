@@ -16,7 +16,7 @@
 #include <ioncore/extl.h>
 #include <ioncore/extlconv.h>
 #include <ioncore/ioncore.h>
-#include <ioncore/objp.h>
+#include <libtu/objp.h>
 
 #include "brush.h"
 #include "font.h"
@@ -444,7 +444,7 @@ void dementbrush_deinit(DEMEntBrush *brush)
 
 void debrush_release(DEBrush *brush, Window win)
 {
-	destroy_obj((WObj*)brush);
+	destroy_obj((Obj*)brush);
 }
 
 

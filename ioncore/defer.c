@@ -15,14 +15,14 @@
  */
 
 #include "common.h"
-#include "obj.h"
-#include "objp.h"
+#include <libtu/obj.h>
+#include <libtu/objp.h>
 #include "defer.h"
 
 INTRSTRUCT(Defer);
 	
 DECLSTRUCT(Defer){
-	WWatch watch;
+	Watch watch;
 	WDeferredAction *action;
 	Defer *next, *prev;
 	void **list;
@@ -67,7 +67,7 @@ static void free_defer(Defer *d)
 }
 
 
-static bool get_next(WObj **obj, WDeferredAction **action, Defer **list)
+static bool get_next(Obj **obj, WDeferredAction **action, Defer **list)
 {
 	Defer *d=*list;
 	
@@ -83,7 +83,7 @@ static bool get_next(WObj **obj, WDeferredAction **action, Defer **list)
 }
 
 
-static void defer_watch_handler(WWatch *w, WObj *obj)
+static void defer_watch_handler(Watch *w, Obj *obj)
 {
 	Defer *d=(Defer*)w;
 	
@@ -94,7 +94,7 @@ static void defer_watch_handler(WWatch *w, WObj *obj)
 }
 
 	
-bool ioncore_defer_action_on_list(WObj *obj, WDeferredAction *action, 
+bool ioncore_defer_action_on_list(Obj *obj, WDeferredAction *action, 
                                   void **list)
 {
 	Defer *d;
@@ -118,13 +118,13 @@ bool ioncore_defer_action_on_list(WObj *obj, WDeferredAction *action,
 }
 
 
-bool ioncore_defer_action(WObj *obj, WDeferredAction *action)
+bool ioncore_defer_action(Obj *obj, WDeferredAction *action)
 {
 	return ioncore_defer_action_on_list(obj, action, (void**)&deferred);
 }
 
 
-bool ioncore_defer_destroy(WObj *obj)
+bool ioncore_defer_destroy(Obj *obj)
 {
 	if(OBJ_IS_BEING_DESTROYED(obj))
 		return FALSE;
@@ -135,8 +135,8 @@ bool ioncore_defer_destroy(WObj *obj)
 
 void ioncore_execute_deferred_on_list(void **list)
 {
-	WObj *obj;
-	void (*action)(WObj*);
+	Obj *obj;
+	void (*action)(Obj*);
 	
 	while(get_next(&obj, &action, (Defer**)list))
 		action(obj);

@@ -23,7 +23,7 @@ DECLSTRUCT(WTimer){
 	struct timeval when;
 	void (*handler)();
 	WTimer *next;
-	WWatch paramwatch;
+	Watch paramwatch;
 };
 
 #define TIMER_INIT(FUN) {{0, 0}, FUN, NULL, WWATCH_INIT}
@@ -32,7 +32,7 @@ extern void ioncore_check_signals();
 extern void ioncore_trap_signals();
 
 extern void timer_set(WTimer *timer, uint msecs);
-extern void timer_set_param(WTimer *timer, uint msecs, WObj *param);
+extern void timer_set_param(WTimer *timer, uint msecs, Obj *param);
 extern void timer_reset(WTimer *timer);
 extern bool timer_is_set(WTimer *timer);
 

@@ -11,7 +11,7 @@
 
 #include "common.h"
 #include "global.h"
-#include "objp.h"
+#include <libtu/objp.h>
 #include "region.h"
 #include "focus.h"
 #include "attach.h"
@@ -91,7 +91,7 @@ static void destroy_children(WRegion *reg)
 			complained=TRUE;
 		}
 		prev=sub;
-		destroy_obj((WObj*)sub);
+		destroy_obj((Obj*)sub);
 	}
 }
 
@@ -598,13 +598,13 @@ bool region_may_destroy(WRegion *reg)
 }
 
 
-WRegion *region_get_manager_chk(WRegion *p, const WClassDescr *descr)
+WRegion *region_get_manager_chk(WRegion *p, const ClassDescr *descr)
 {
 	WRegion *mgr=NULL;
 	
 	if(p!=NULL){
 		mgr=REGION_MANAGER(p);
-		if(obj_is((WObj*)mgr, descr))
+		if(obj_is((Obj*)mgr, descr))
 			return mgr;
 	}
 	
@@ -678,7 +678,7 @@ static DynFunTab region_dynfuntab[]={
 };
 
 
-IMPLCLASS(WRegion, WObj, region_deinit, region_dynfuntab);
+IMPLCLASS(WRegion, Obj, region_deinit, region_dynfuntab);
 
 	
 /*}}}*/

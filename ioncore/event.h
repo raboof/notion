@@ -45,9 +45,10 @@
                                  ButtonPressMask|ButtonReleaseMask| \
                                  FocusChangeMask)
 
-extern void ioncore_mainloop();
-extern void ioncore_get_event(XEvent *ev);
-extern void ioncore_get_event_mask(XEvent *ev, long mask);
+extern void ioncore_x_connection_handler(int conn, void *unused);
+    
+extern void ioncore_get_event(XEvent *ev, long mask);
+
 extern void ioncore_update_timestamp(XEvent *ev);
 extern Time ioncore_get_timestamp();
 

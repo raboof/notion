@@ -13,7 +13,7 @@
 #define ION_IONCORE_BINDING_H
 
 #include "common.h"
-#include "obj.h"
+#include <libtu/obj.h>
 #include "region.h"
 #include "extl.h"
 

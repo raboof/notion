@@ -148,7 +148,7 @@ void input_deinit(WInput *input)
 EXTL_EXPORT_MEMBER
 void input_cancel(WInput *input)
 {
-	ioncore_defer_destroy((WObj*)input);
+	ioncore_defer_destroy((Obj*)input);
 }
 
 

@@ -15,16 +15,15 @@ INCLUDES += -I..
 
 CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
-SOURCES=binding.c conf-bindings.c cursor.c event.c     \
-	exec.c focus.c strings.c key.c modules.c mwmhints.c obj.c pointer.c  \
-	property.c readconfig.c screen.c signal.c sizehint.c window.c     \
-	ioncore.c xic.c selection.c symlist.c clientwin.c colormap.c      \
-	region.c eventh.c attach.c resize.c defer.c grab.c     	  	  \
-	manage.c readfds.c regbind.c rootwin.c tags.c names.c saveload.c  \
-	genws.c frame.c frame-pointer.c conf.c reginfo.c errorlog.c \
-	stacking.c extlconv.c fullscreen.c mplex.c bindmaps.c gr.c \
-	infowin.c activity.c netwm.c objlist.c frame-draw.c kbresize.c \
-        rectangle.c
+SOURCES=binding.c conf-bindings.c cursor.c event.c exec.c focus.c         \
+	strings.c key.c modules.c mwmhints.c pointer.c property.c         \
+        readconfig.c screen.c signal.c sizehint.c window.c ioncore.c      \
+        xic.c selection.c clientwin.c colormap.c region.c                 \
+        eventh.c attach.c resize.c defer.c grab.c manage.c mainloop.c     \
+        regbind.c rootwin.c tags.c names.c saveload.c genws.c frame.c     \
+        frame-pointer.c conf.c reginfo.c stacking.c extlconv.c            \
+        fullscreen.c mplex.c bindmaps.c gr.c infowin.c activity.c netwm.c \
+        frame-draw.c kbresize.c rectangle.c
 
 ifeq ($(PRELOAD_MODULES),1)
 CFLAGS += -DCF_PRELOAD_MODULES

@@ -15,7 +15,7 @@
 #include <ioncore/frame-draw.h>
 #include <ioncore/saveload.h>
 #include <ioncore/names.h>
-#include <ioncore/objp.h>
+#include <libtu/objp.h>
 #include <ioncore/gr.h>
 #include <ioncore/resize.h>
 #include <ioncore/extl.h>
@@ -161,7 +161,7 @@ void ionframe_relocate_and_close(WIonFrame *frame)
 		return;
 	}
 
-	ioncore_defer_destroy((WObj*)frame);
+	ioncore_defer_destroy((Obj*)frame);
 }
 
 

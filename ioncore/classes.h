@@ -16,7 +16,7 @@
  * with the header system.
  */
 
-#include "obj.h"
+#include <libtu/obj.h>
 
 INTRCLASS(WClientWin);
 INTRCLASS(WFrame);

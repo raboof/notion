@@ -17,7 +17,7 @@
 #include "modules.h"
 #include "readconfig.h"
 #include "gr.h"
-#include "objp.h"
+#include <libtu/objp.h>
 
 
 /*{{{ Lookup and registration */
@@ -432,7 +432,7 @@ static DynFunTab grbrush_dynfuntab[]={
 };
 									   
 
-IMPLCLASS(GrBrush, WObj, grbrush_deinit, grbrush_dynfuntab);
+IMPLCLASS(GrBrush, Obj, grbrush_deinit, grbrush_dynfuntab);
 
 
 /*}}}*/

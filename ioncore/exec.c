@@ -26,7 +26,7 @@
 #include "signal.h"
 #include "global.h"
 #include "ioncore.h"
-#include "readfds.h"
+#include "mainloop.h"
 
 
 #define SHELL_PATH "/bin/sh"

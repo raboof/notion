@@ -17,10 +17,10 @@
  * anymore for alternative handlers to low-level functions.
  */
 
-#include "symlist.h"
+#include <libtu/symlist.h>
 
 
-typedef WSymlist WHooklist;
+typedef Symlist WHooklist;
 
 
 #define CALL_HOOKS(HOOK, ARGS)              \

@@ -25,7 +25,7 @@
 #include "eventh.h"
 #include "clientwin.h"
 #include "colormap.h"
-#include "objp.h"
+#include <libtu/objp.h>
 #include "grab.h"
 #include "regbind.h"
 #include "activity.h"
@@ -449,7 +449,7 @@ void ioncore_handle_buttonpress(XEvent *ev)
 
 	while(!finished && ioncore_grab_held()){
 		XFlush(ioncore_g.dpy);
-		ioncore_get_event_mask(ev, IONCORE_EVENTMASK_PTRLOOP);
+		ioncore_get_event(ev, IONCORE_EVENTMASK_PTRLOOP);
 		
 		if(ev->type==MotionNotify){
 			/* Handle sequences of MotionNotify (possibly followed by button

@@ -15,7 +15,7 @@
 #include <ioncore/rootwin.h>
 #include <ioncore/focus.h>
 #include <ioncore/global.h>
-#include <ioncore/objp.h>
+#include <libtu/objp.h>
 #include <ioncore/region.h>
 #include <ioncore/manage.h>
 #include <ioncore/screen.h>
@@ -35,7 +35,7 @@
 #include "main.h"
 
 
-WObjList *floatws_sticky_list=NULL;
+ObjList *floatws_sticky_list=NULL;
 
 
 /*{{{ region dynfun implementations */
@@ -266,7 +266,7 @@ WFloatWS *create_floatws(WWindow *parent, const WRectangle *bounds)
 void floatws_deinit(WFloatWS *ws)
 {
 	while(ws->managed_list!=NULL)
-		destroy_obj((WObj*)(ws->managed_list));
+		destroy_obj((Obj*)(ws->managed_list));
 
 	genws_deinit(&(ws->genws));
 
@@ -301,7 +301,7 @@ bool floatws_relocate_and_close(WFloatWS *ws)
 		return FALSE;
 	}
 	
-	ioncore_defer_destroy((WObj*)ws);
+	ioncore_defer_destroy((Obj*)ws);
 	return TRUE;
 }
 
@@ -437,7 +437,7 @@ static bool floatws_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
     region_fit((WRegion*)frame, &fgeom);
     
 	if(!mplex_attach_simple((WMPlex*)frame, (WRegion*)cwin, param->switchto)){
-		destroy_obj((WObj*)frame);
+		destroy_obj((Obj*)frame);
 		return FALSE;
 	}
 
@@ -483,7 +483,7 @@ static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
     region_fit((WRegion*)frame, &fgeom);
 	
 	if(!mplex_attach_simple((WMPlex*)frame, dropped, TRUE)){
-		destroy_obj((WObj*)frame);
+		destroy_obj((Obj*)frame);
 		warn("Failed to attach dropped region to created WFloatFrame");
 		return FALSE;
 	}

@@ -18,7 +18,7 @@
 #include "screen.h"
 #include "saveload.h"
 #include "names.h"
-#include "objp.h"
+#include <libtu/objp.h>
 #include "attach.h"
 #include "reginfo.h"
 #include "extl.h"

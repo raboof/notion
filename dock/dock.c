@@ -49,7 +49,7 @@
 #include <ioncore/global.h>
 #include <ioncore/manage.h>
 #include <ioncore/names.h>
-#include <ioncore/objp.h>
+#include <libtu/objp.h>
 #include <ioncore/property.h>
 #include <ioncore/readconfig.h>
 #include <ioncore/resize.h>
@@ -906,7 +906,7 @@ void dock_destroy(WDock *dock)
 		return;
 	}
 
-	destroy_obj((WObj *)dock);
+	destroy_obj((Obj *)dock);
 
 }
 /* }}} */
@@ -1304,7 +1304,7 @@ void dockmod_deinit()
 	dock=docks;
 	while(dock!=NULL){
 		WDock *next=dock->dock_next;
-		destroy_obj((WObj *)dock);
+		destroy_obj((Obj *)dock);
 		dock=next;
 	}
 	/* }}} */

@@ -15,7 +15,7 @@
 #include <ioncore/rootwin.h>
 #include <ioncore/focus.h>
 #include <ioncore/global.h>
-#include <ioncore/objp.h>
+#include <libtu/objp.h>
 #include <ioncore/region.h>
 #include <ioncore/manage.h>
 #include <ioncore/screen.h>
@@ -43,9 +43,9 @@ static void ionws_fit(WIonWS *ws, const WRectangle *geom)
 	if(ws->split_tree==NULL)
 		return;
 	
-	split_tree_resize((WObj*)ws->split_tree, HORIZONTAL, ANY, 
+	split_tree_resize((Obj*)ws->split_tree, HORIZONTAL, ANY, 
 					  geom->x, geom->w);
-	split_tree_resize((WObj*)ws->split_tree, VERTICAL, ANY, 
+	split_tree_resize((Obj*)ws->split_tree, VERTICAL, ANY, 
 					  geom->y,  geom->h);
 }
 
@@ -136,7 +136,7 @@ static WIonFrame *create_initial_frame(WIonWS *ws, WWindow *parent,
 	if(frame==NULL)
 		return NULL;
 	
-	ws->split_tree=(WObj*)frame;
+	ws->split_tree=(Obj*)frame;
 	ionws_add_managed(ws, (WRegion*)frame);
 
 	return frame;
@@ -194,7 +194,7 @@ void ionws_deinit(WIonWS *ws)
 
 static bool ionws_may_destroy_managed(WIonWS *ws, WRegion *reg)
 {
-	if(ws->split_tree==(WObj*)reg)
+	if(ws->split_tree==(Obj*)reg)
 		return region_may_destroy((WRegion*)ws);
 	else
 		return TRUE;
@@ -214,7 +214,7 @@ static bool ionws_do_rescue_clientwins(WIonWS *ws, WRegion *dst)
 /*{{{ Save */
 
 
-static void write_obj(WObj *obj, FILE *file, int lvl)
+static void write_obj(Obj *obj, FILE *file, int lvl)
 {
 	WWsSplit *split;
 	int tls, brs;
@@ -285,19 +285,19 @@ static bool ionws_save_to_file(WIonWS *ws, FILE *file, int lvl)
 /*{{{ Load */
 
 
-extern void set_split_of(WObj *obj, WWsSplit *split);
-static WObj *load_obj(WIonWS *ws, WWindow *par, const WRectangle *geom, 
+extern void set_split_of(Obj *obj, WWsSplit *split);
+static Obj *load_obj(WIonWS *ws, WWindow *par, const WRectangle *geom, 
 					  ExtlTab tab);
 
 
-static WObj *load_split(WIonWS *ws, WWindow *par, const WRectangle *geom,
+static Obj *load_split(WIonWS *ws, WWindow *par, const WRectangle *geom,
 						ExtlTab tab)
 {
 	WWsSplit *split;
 	char *dir_str;
 	int dir, brs, tls;
 	ExtlTab subtab;
-	WObj *tl=NULL, *br=NULL;
+	Obj *tl=NULL, *br=NULL;
 	WRectangle geom2;
 
 	if(!extl_table_gets_i(tab, "split_tls", &tls))
@@ -370,11 +370,11 @@ static WObj *load_split(WIonWS *ws, WWindow *par, const WRectangle *geom,
 	split->tl=tl;
 	split->br=br;
 	
-	return (WObj*)split;
+	return (Obj*)split;
 }
 
 
-static WObj *load_obj(WIonWS *ws, WWindow *par, const WRectangle *geom,
+static Obj *load_obj(WIonWS *ws, WWindow *par, const WRectangle *geom,
 					  ExtlTab tab)
 {
 	char *typestr;
@@ -385,7 +385,7 @@ static WObj *load_obj(WIonWS *ws, WWindow *par, const WRectangle *geom,
 		reg=create_region_load(par, geom, tab);
 		if(reg!=NULL)
 			ionws_add_managed(ws, reg);
-		return (WObj*)reg;
+		return (Obj*)reg;
 	}
 	
 	return load_split(ws, par, geom, tab);
@@ -416,7 +416,7 @@ WRegion *ionws_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
 	
 	if(ws->split_tree==NULL){
 		warn("Workspace empty");
-		destroy_obj((WObj*)ws);
+		destroy_obj((Obj*)ws);
 		return NULL;
 	}
 	

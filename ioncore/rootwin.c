@@ -26,7 +26,7 @@
 #endif
 
 #include "common.h"
-#include "objp.h"
+#include <libtu/objp.h>
 #include "rootwin.h"
 #include "cursor.h"
 #include "global.h"
@@ -380,7 +380,7 @@ WRootWin *ioncore_manage_rootwin(int xscr, bool noxinerama)
 	
 	if(rootwin->screen_list==NULL){
 		warn("Unable to add a viewport to X screen %d.", xscr);
-		destroy_obj((WObj*)rootwin);
+		destroy_obj((Obj*)rootwin);
 		return NULL;
 	}
 	
@@ -402,7 +402,7 @@ void rootwin_deinit(WRootWin *rw)
 	WRegion *reg, *next;
 
 	while(rw->screen_list!=NULL)
-		destroy_obj((WObj*)rw->screen_list);
+		destroy_obj((Obj*)rw->screen_list);
 	
 	/* */ {
 		WRegion *tmp=(WRegion*)ioncore_g.rootwins;
@@ -526,7 +526,7 @@ ExtlTab ioncore_root_windows()
 	ExtlTab tab=extl_create_table();
 	
 	FOR_ALL_ROOTWINS(rootwin){
-		extl_table_seti_o(tab, rootwin->xscr, (WObj*)rootwin);
+		extl_table_seti_o(tab, rootwin->xscr, (Obj*)rootwin);
 	}
 
 	return tab;

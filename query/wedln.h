@@ -13,7 +13,7 @@
 #define ION_QUERY_WEDLN_H
 
 #include <ioncore/common.h>
-#include <ioncore/obj.h>
+#include <libtu/obj.h>
 #include <ioncore/window.h>
 #include <ioncore/xic.h>
 #include <ioncore/extl.h>

@@ -12,7 +12,7 @@
 #ifndef ION_IONCORE_STACKING_H
 #define ION_IONCORE_STACKING_H
 
-#include "obj.h"
+#include <libtu/obj.h>
 #include "region.h"
 #include "window.h"
 

@@ -22,10 +22,10 @@
 #include <lauxlib.h>
 
 #include <libtu/util.h>
+#include <libtu/obj.h>
+#include <libtu/objp.h>
+#include <libtu/errorlog.h>
 #include <ioncore/common.h>
-#include <ioncore/obj.h>
-#include <ioncore/objp.h>
-#include <ioncore/errorlog.h>
 #include <ioncore/readconfig.h>
 
 #include "luaextl.h"
@@ -88,15 +88,15 @@ static void lua_rawgeti_check(lua_State *st, int index, int n)
 /*}}}*/
 
 
-/*{{{ WObj userdata handling -- unsafe */
+/*{{{ Obj userdata handling -- unsafe */
 
 
 static int obj_cache_ref=LUA_NOREF;
 
 
-static WObj *extl_get_wobj(lua_State *st, int pos)
+static Obj *extl_get_wobj(lua_State *st, int pos)
 {
-	WWatch *watch;
+	Watch *watch;
 	int val;
 	
 	if(!lua_isuserdata(st, pos))
@@ -105,7 +105,7 @@ static WObj *extl_get_wobj(lua_State *st, int pos)
 	if(!lua_getmetatable(st, pos))
 		return NULL;
 	
-	/* If the userdata object is a proper WObj, metatable[MAGIC] must
+	/* If the userdata object is a proper Obj, metatable[MAGIC] must
 	 * have been set to MAGIC.
 	 */
 	lua_pushnumber(st, MAGIC);
@@ -114,7 +114,7 @@ static WObj *extl_get_wobj(lua_State *st, int pos)
 	lua_pop(st, 2);
 	
 	if(val==MAGIC){
-		watch=(WWatch*)lua_touserdata(st, pos);
+		watch=(Watch*)lua_touserdata(st, pos);
 		if(watch!=NULL && watch->obj!=NULL)
 			return watch->obj;
 	}
@@ -123,16 +123,16 @@ static WObj *extl_get_wobj(lua_State *st, int pos)
 }
 
 
-static void extl_obj_dest_handler(WWatch *watch, WObj *obj)
+static void extl_obj_dest_handler(Watch *watch, Obj *obj)
 {
 	D(warn("%s destroyed while Lua code is still referencing it.",
 		   OBJ_TYPESTR(obj)));
 }
 
 
-static void extl_push_obj(lua_State *st, WObj *obj)
+static void extl_push_obj(lua_State *st, Obj *obj)
 {
-	WWatch *watch;
+	Watch *watch;
 	
 	if(obj==NULL){
 		lua_pushnil(st);
@@ -153,7 +153,7 @@ static void extl_push_obj(lua_State *st, WObj *obj)
 
 	D(fprintf(stderr, "Creating %p\n", obj));
 	
-	watch=(WWatch*)lua_newuserdata(st, sizeof(WWatch));
+	watch=(Watch*)lua_newuserdata(st, sizeof(Watch));
 	
 	/* Lua shouldn't return if the allocation fails */
 	
@@ -184,12 +184,12 @@ static void extl_push_obj(lua_State *st, WObj *obj)
 
 static int extl_obj_gc_handler(lua_State *st)
 {
-	WWatch *watch;
+	Watch *watch;
 	
 	if(extl_get_wobj(st, 1)==NULL)
 		return 0;
 
-	watch=(WWatch*)lua_touserdata(st, 1);
+	watch=(Watch*)lua_touserdata(st, 1);
 	
 	if(watch!=NULL){
 		D(fprintf(stderr, "Collecting %p\n", watch->obj));
@@ -206,7 +206,7 @@ static int extl_obj_gc_handler(lua_State *st)
 
 static int extl_obj_typename(lua_State *st)
 {
-	WObj *obj;
+	Obj *obj;
 
 	if(!extl_stack_get(st, 1, 'o', FALSE, &obj))
 		return 0;
@@ -221,12 +221,12 @@ static int extl_obj_typename(lua_State *st)
  * Return type name of \var{obj}.
  */
 EXTL_EXPORT_AS(global, obj_typename)
-const char *__obj_typename(WObj *obj);
+const char *__obj_typename(Obj *obj);
 
 
 static int extl_obj_exists(lua_State *st)
 {
-	WObj *obj;
+	Obj *obj;
     lua_pushboolean(st, extl_stack_get(st, 1, 'o', FALSE, &obj));
 	return 1;
 }
@@ -237,12 +237,12 @@ static int extl_obj_exists(lua_State *st)
  * Does \var{obj} still exist on the C side of Ion?
  */
 EXTL_EXPORT_AS(global, obj_exists)
-bool __obj_exists(WObj *obj);
+bool __obj_exists(Obj *obj);
 
 
 static int extl_obj_is(lua_State *st)
 {
-	WObj *obj;
+	Obj *obj;
 	const char *tn;
 	
 	if(!extl_stack_get(st, 1, 'o', FALSE, &obj)){
@@ -261,7 +261,7 @@ static int extl_obj_is(lua_State *st)
  * Is \var{obj} of type \var{typename}.
  */
 EXTL_EXPORT_AS(global, obj_is)
-bool __obj_is(WObj *obj, const char *typename);
+bool __obj_is(Obj *obj, const char *typename);
 
 
 static int extl_current_file_or_dir(lua_State *st, bool dir)
@@ -334,7 +334,7 @@ static bool extl_init_obj_info(lua_State *st)
 		{NULL, NULL, NULL, NULL, NULL}
 	};
 	
-	extl_register_class("WObj", dummy, NULL);
+	extl_register_class("Obj", dummy, NULL);
 	
 	/* Create cache */
 	lua_newtable(st);
@@ -458,7 +458,7 @@ static int extl_stack_trace(lua_State *st)
 static int extl_do_collect_errors(lua_State *st)
 {
 	int n, err;
-	WErrorLog *el=(WErrorLog*)lua_touserdata(st, -1);
+	ErrorLog *el=(ErrorLog*)lua_touserdata(st, -1);
 
 	lua_pop(st, 1);
 	
@@ -477,7 +477,7 @@ static int extl_do_collect_errors(lua_State *st)
 
 int extl_collect_errors(lua_State *st)
 {
-	WErrorLog el;
+	ErrorLog el;
 	int n=lua_gettop(st);
 	int err;
 	
@@ -522,7 +522,7 @@ bool extl_init()
 	luaopen_loadlib(l_st);
 	
 	if(!extl_init_obj_info(l_st)){
-		warn("Failed to initialize WObj metatable\n");
+		warn("Failed to initialize Obj metatable\n");
 		goto fail;
 	}
 
@@ -630,11 +630,11 @@ static bool extl_stack_get(lua_State *st, int pos, char type, bool copystring,
 	}
 
 	if(type=='o'){
-		WObj *obj=extl_get_wobj(st, pos);
+		Obj *obj=extl_get_wobj(st, pos);
 		if(obj==NULL)
 			return FALSE;
 		if(valret){
-			*((WObj**)valret)=obj;
+			*((Obj**)valret)=obj;
 			D(fprintf(stderr, "Got obj %p, ", obj);
 			  fprintf(stderr, "%s\n", OBJ_TYPESTR(obj)));
 		}
@@ -654,7 +654,7 @@ static void extl_stack_push(lua_State *st, char spec, void *ptr)
 	}else if(spec=='b'){
 		lua_pushboolean(st, *(bool*)ptr);
 	}else if(spec=='o'){
-		extl_push_obj(st, *(WObj**)ptr);
+		extl_push_obj(st, *(Obj**)ptr);
 	}else if(spec=='s' || spec=='S'){
 		lua_pushstring(st, *(char**)ptr);
 	}else if(spec=='t' || spec=='f'){
@@ -678,7 +678,7 @@ static bool extl_stack_push_vararg(lua_State *st, char spec, va_list *argsp)
 		lua_pushboolean(st, va_arg(*argsp, bool));
 		break;
 	case 'o':
-		extl_push_obj(st, va_arg(*argsp, WObj*));
+		extl_push_obj(st, va_arg(*argsp, Obj*));
 		break;
 	case 'S':
 	case 's':
@@ -897,7 +897,7 @@ static bool extl_table_do_gets(ExtlTab ref, const char *entry,
 	return extl_table_get(ref, 's', type, entry, valret);
 }
 
-bool extl_table_gets_o(ExtlTab ref, const char *entry, WObj **ret)
+bool extl_table_gets_o(ExtlTab ref, const char *entry, Obj **ret)
 {
 	return extl_table_do_gets(ref, entry, 'o', (void*)ret);
 }
@@ -938,7 +938,7 @@ static bool extl_table_do_geti(ExtlTab ref, int entry, char type, void *valret)
 	return extl_table_get(ref, 'i', type, entry, valret);
 }
 
-bool extl_table_geti_o(ExtlTab ref, int entry, WObj **ret)
+bool extl_table_geti_o(ExtlTab ref, int entry, Obj **ret)
 {
 	return extl_table_do_geti(ref, entry, 'o', (void*)ret);
 }
@@ -1044,7 +1044,7 @@ bool extl_table_set(ExtlTab ref, char itype, char type, ...)
 }
 
 
-bool extl_table_sets_o(ExtlTab ref, const char *entry, WObj *val)
+bool extl_table_sets_o(ExtlTab ref, const char *entry, Obj *val)
 {
 	return extl_table_set(ref, 's', 'o', entry, val);
 }
@@ -1080,7 +1080,7 @@ bool extl_table_sets_t(ExtlTab ref, const char *entry, ExtlTab val)
 }
 
 
-bool extl_table_seti_o(ExtlTab ref, int entry, WObj *val)
+bool extl_table_seti_o(ExtlTab ref, int entry, Obj *val)
 {
 	return extl_table_set(ref, 'i', 'o', entry, val);
 }
@@ -1227,7 +1227,7 @@ static bool extl_get_retvals(lua_State *st, int m, ExtlDoCallParam *param)
 		if(!extl_stack_get(st, -m, *spec, TRUE, ptr)){
 			/* This is the only place where we allow nil-objects */
 			if(*spec=='o' && lua_isnil(st, -m)){
-				*(WObj**)ptr=NULL;
+				*(Obj**)ptr=NULL;
 			}else{
 				warn("Invalid return value (expected '%c', got lua type \"%s\").",
 					 *spec, lua_typename(st, lua_type(st, -m)));
@@ -1911,7 +1911,7 @@ static bool extl_do_register_class(lua_State *st, ClassData *data)
     lua_pushstring(st, data->cls);
     lua_settable(st, -3);
 
-	/* If we have a parent class (i.e. class!=WObj), we want also the parent's
+	/* If we have a parent class (i.e. class!=Obj), we want also the parent's
 	 * functions visible in this table so set up a metatable to do so.
 	 */
 	if(data->parent!=NULL){
@@ -1957,7 +1957,7 @@ static bool extl_do_register_class(lua_State *st, ClassData *data)
 
 	/* New we create a metatable for the actual objects with __gc metamethod
 	 * and __index pointing to the table created above. The MAGIC entry is 
-	 * used to check that userdatas passed to us really are WWatches with a
+	 * used to check that userdatas passed to us really are Watches with a
 	 * high likelihood.
 	 */
 	lua_newtable(st);
@@ -1987,9 +1987,9 @@ bool extl_register_class(const char *cls, ExtlExportedFnSpec *fns,
 	clsdata.cls=cls;
 	clsdata.parent=parent;
 	clsdata.refret=LUA_NOREF;
-    clsdata.hide=(strcmp(cls, "WObj")==0);/*(fns==NULL);*/
+    clsdata.hide=(strcmp(cls, "Obj")==0);/*(fns==NULL);*/
 	
-	D(assert(strcmp(cls, "WObj")==0 || parent!=NULL));
+	D(assert(strcmp(cls, "Obj")==0 || parent!=NULL));
 		   
 	if(!extl_cpcall(l_st, (ExtlCPCallFn*)extl_do_register_class, &clsdata)){
 		warn("Unable to register class %s.\n", cls);

@@ -18,7 +18,7 @@
 #include "sizehint.h"
 #include "event.h"
 #include "cursor.h"
-#include "objp.h"
+#include <libtu/objp.h>
 #include "extl.h"
 #include "extlconv.h"
 #include "grab.h"
@@ -189,7 +189,7 @@ static void moveres_draw_rubberband(WMoveresMode *mode)
 WMoveresMode *tmpmode=NULL;
 
 
-IMPLCLASS(WMoveresMode, WObj, NULL, NULL);
+IMPLCLASS(WMoveresMode, Obj, NULL, NULL);
 
 
 WMoveresMode *moveres_mode(WRegion *reg)
@@ -471,10 +471,10 @@ bool moveresmode_do_end(WMoveresMode *mode, bool apply)
 		set_saved(mode, reg);
 	
 	if(mode->infowin!=NULL){
-		ioncore_defer_destroy((WObj*)mode->infowin);
+		ioncore_defer_destroy((Obj*)mode->infowin);
 		mode->infowin=NULL;
 	}
-    destroy_obj((WObj*)mode);
+    destroy_obj((Obj*)mode);
     
     return TRUE;
 }

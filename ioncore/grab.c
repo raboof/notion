@@ -31,7 +31,7 @@ typedef struct _grab_status{
 	WRegion *holder;
 	GrabHandler *handler;
 	GrabKilledHandler *killedhandler;
-	WWatch watch;
+	Watch watch;
 	long eventmask;
 	long flags;
     
@@ -88,7 +88,7 @@ static void ungrab_kb_ptr()
 static void do_holder_remove(WRegion *holder, bool killed);
 
 
-static void grab_watch_handler(WWatch *w, WObj *obj)
+static void grab_watch_handler(Watch *w, Obj *obj)
 {
 	do_holder_remove((WRegion*)obj, TRUE);
 }
@@ -96,7 +96,7 @@ static void grab_watch_handler(WWatch *w, WObj *obj)
 
 static void do_grab_install(GrabStatus *grab)
 {
-	watch_setup(&grab->watch, (WObj*)grab->holder, grab_watch_handler);
+	watch_setup(&grab->watch, (Obj*)grab->holder, grab_watch_handler);
 	grab_kb_ptr(region_root_of(grab->holder), grab->confine_to, 
                 grab->cursor, grab->eventmask);
 	current_grab=grab;

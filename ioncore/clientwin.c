@@ -13,7 +13,7 @@
 #include <limits.h>
 
 #include "common.h"
-#include "objp.h"
+#include <libtu/objp.h>
 #include "global.h"
 #include "property.h"
 #include "focus.h"
@@ -692,7 +692,7 @@ void clientwin_deinit(WClientWin *cwin)
 	WRegion *reg;
 	
 	while(cwin->transient_list!=NULL)
-		destroy_obj((WObj*)(cwin->transient_list));
+		destroy_obj((Obj*)(cwin->transient_list));
 	
 	UNLINK_ITEM(ioncore_g.cwin_list, cwin, g_cwin_next, g_cwin_prev);
 	
@@ -733,7 +733,7 @@ void clientwin_unmapped(WClientWin *cwin)
 	region_rescue_clientwins((WRegion*)cwin);
 	if(cf && cwin->fsinfo.last_mgr_watch.obj!=NULL)
 		region_goto((WRegion*)(cwin->fsinfo.last_mgr_watch.obj));
-	destroy_obj((WObj*)cwin);
+	destroy_obj((Obj*)cwin);
 }
 
 

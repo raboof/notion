@@ -15,7 +15,7 @@
 #include "region.h"
 #include "attach.h"
 #include "manage.h"
-#include "objp.h"
+#include <libtu/objp.h>
 #include "focus.h"
 #include "property.h"
 #include "names.h"

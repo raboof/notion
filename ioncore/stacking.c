@@ -14,7 +14,7 @@
 #include "window.h"
 #include "stacking.h"
 #include "global.h"
-#include "objp.h"
+#include <libtu/objp.h>
 #include "region-iter.h"
 
 

@@ -31,8 +31,9 @@
 #include "readconfig.h"
 #include "global.h"
 #include "modules.h"
-#include "event.h"
+#include "mainloop.h"
 #include "eventh.h"
+#include "event.h"
 #include "saveload.h"
 #include "ioncore.h"
 #include "manage.h"
@@ -42,7 +43,6 @@
 #include "bindmaps.h"
 #include "strings.h"
 #include "extl.h"
-#include "errorlog.h"
 #include "gr.h"
 #include "xic.h"
 #include "netwm.h"
@@ -365,8 +365,40 @@ static bool ioncore_init_x(const char *display, int stflags)
 			warn("Could not find a screen to manage.");
 		return FALSE;
 	}
+
+    if(!ioncore_register_input_fd(ioncore_g.conn, NULL,
+                                  ioncore_x_connection_handler)){
+        warn("Unable to register X connection FD");
+        return FALSE;
+    }
 	
 	return TRUE;
+}
+
+
+static void set_initial_focus()
+{
+	Window root=None, win=None;
+	int x, y, wx, wy;
+	uint mask;
+	WScreen *scr;
+	WWindow *wwin;
+	
+	XQueryPointer(ioncore_g.dpy, None, &root, &win,
+				  &x, &y, &wx, &wy, &mask);
+	
+	FOR_ALL_SCREENS(scr){
+        Window scrroot=region_root_of((WRegion*)scr);
+		if(scrroot==root && rectangle_contains(&REGION_GEOM(scr), x, y)){
+			break;
+		}
+	}
+	
+	if(scr==NULL)
+		scr=ioncore_g.screens;
+	
+	ioncore_g.active_screen=scr;
+	region_do_set_focus((WRegion*)scr, FALSE);
 }
 
 
@@ -395,6 +427,8 @@ bool ioncore_startup(const char *display, const char *cfgfile,
 		return FALSE;
 	}
 	
+    set_initial_focus();
+    
 	return TRUE;
 }
 
@@ -424,15 +458,17 @@ void ioncore_deinit()
 	}
 	
 	while(ioncore_g.screens!=NULL)
-		destroy_obj((WObj*)ioncore_g.screens);
+		destroy_obj((Obj*)ioncore_g.screens);
 
 	ioncore_unload_modules();
 
 	while(ioncore_g.rootwins!=NULL)
-		destroy_obj((WObj*)ioncore_g.rootwins);
+		destroy_obj((Obj*)ioncore_g.rootwins);
 
 	ioncore_deinit_bindmaps();
-	
+
+    ioncore_unregister_input_fd(ioncore_g.conn);
+    
 	dpy=ioncore_g.dpy;
 	ioncore_g.dpy=NULL;
 	

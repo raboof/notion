@@ -369,7 +369,7 @@ static WRegion *do_lookup_region(Namespace *ns, const char *cname,
 				continue;
 		}
 		
-		if(typenam!=NULL && !obj_is_str((WObj*)reg, typenam))
+		if(typenam!=NULL && !obj_is_str((Obj*)reg, typenam))
 			continue;
 
 		return reg;
@@ -429,7 +429,7 @@ again:
 				continue;
 		}
 
-		if(typenam!=NULL && !obj_is_str((WObj*)reg, typenam))
+		if(typenam!=NULL && !obj_is_str((Obj*)reg, typenam))
 			continue;
 			
 		if(extl_table_seti_s(tab, n+1, name))

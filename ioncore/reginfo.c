@@ -14,7 +14,7 @@
 
 #include "common.h"
 #include "region.h"
-#include "objp.h"
+#include <libtu/objp.h>
 #include "attach.h"
 #include "reginfo.h"
 
@@ -25,7 +25,7 @@ static WRegClassInfo *reg_class_infos;
 /*{{{ Registration */
 
 
-bool ioncore_register_regclass(WClassDescr *descr, WRegionSimpleCreateFn *sc_fn,
+bool ioncore_register_regclass(ClassDescr *descr, WRegionSimpleCreateFn *sc_fn,
                                WRegionLoadCreateFn *lc_fn)
 {
 	WRegClassInfo *info;
@@ -48,7 +48,7 @@ bool ioncore_register_regclass(WClassDescr *descr, WRegionSimpleCreateFn *sc_fn,
 }
 
 
-void ioncore_unregister_regclass(WClassDescr *descr)
+void ioncore_unregister_regclass(ClassDescr *descr)
 {
     WRegClassInfo *info;
     
@@ -74,7 +74,7 @@ WRegClassInfo *ioncore_lookup_regclass(const char *name,
                                        bool need_loadfn)
 {
 	WRegClassInfo *info;
-	WClassDescr *descr;
+	ClassDescr *descr;
 
 	if(name==NULL)
 		return NULL;

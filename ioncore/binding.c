@@ -14,7 +14,7 @@
 #include "event.h"
 #include "binding.h"
 #include "global.h"
-#include "objp.h"
+#include <libtu/objp.h>
 #include "regbind.h"
 #include "extl.h"
 

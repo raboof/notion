@@ -14,7 +14,7 @@
 #include "region.h"
 #include "binding.h"
 #include "regbind.h"
-#include "objp.h"
+#include <libtu/objp.h>
 
 
 /*{{{ Grab/ungrab */

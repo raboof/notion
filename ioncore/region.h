@@ -13,7 +13,7 @@
 #define ION_IONCORE_REGION_H
 
 #include "common.h"
-#include "obj.h"
+#include <libtu/obj.h>
 #include "rectangle.h"
 
 #define REGION_MAPPED		0x0001
@@ -42,7 +42,7 @@ DECLSTRUCT(WSubmapState){
 };
 
 DECLCLASS(WRegion){
-	WObj obj;
+	Obj obj;
 	
 	WRectangle geom;
 	void *rootwin;

@@ -14,12 +14,12 @@
 
 #include <stdarg.h>
 
-#include <ioncore/obj.h>
+#include <libtu/obj.h>
 
 #define EXTL_EXTENSION	"lua"
 #define EXTL_COMPILED_EXTENSION	"lc"
 
-/* o: userdata/WObj
+/* o: userdata/Obj
  * i: integer
  * d: double
  * b: boolean
@@ -38,7 +38,7 @@ typedef int ExtlTab;
 typedef int ExtlFn;
 
 typedef union{
-	WObj *o;
+	Obj *o;
 	int i;
 	double d;
 	bool b;
@@ -80,7 +80,7 @@ extern bool extl_table_get_vararg(ExtlTab ref, char itype, char type,
 								  va_list *args);
 extern bool extl_table_get(ExtlTab ref, char itype, char type, ...);
 
-extern bool extl_table_gets_o(ExtlTab ref, const char *entry, WObj **ret);
+extern bool extl_table_gets_o(ExtlTab ref, const char *entry, Obj **ret);
 extern bool extl_table_gets_i(ExtlTab ref, const char *entry, int *ret);
 extern bool extl_table_gets_d(ExtlTab ref, const char *entry, double *ret);
 extern bool extl_table_gets_b(ExtlTab ref, const char *entry, bool *ret);
@@ -89,7 +89,7 @@ extern bool extl_table_gets_f(ExtlTab ref, const char *entry, ExtlFn *ret);
 extern bool extl_table_gets_t(ExtlTab ref, const char *entry, ExtlTab *ret);
 
 extern int extl_table_get_n(ExtlTab ref);
-extern bool extl_table_geti_o(ExtlTab ref, int entry, WObj **ret);
+extern bool extl_table_geti_o(ExtlTab ref, int entry, Obj **ret);
 extern bool extl_table_geti_i(ExtlTab ref, int entry, int *ret);
 extern bool extl_table_geti_d(ExtlTab ref, int entry, double *ret);
 extern bool extl_table_geti_b(ExtlTab ref, int entry, bool *ret);
@@ -102,7 +102,7 @@ extern bool extl_table_set_vararg(ExtlTab ref, char itype, char type,
 								  va_list *args);
 extern bool extl_table_set(ExtlTab ref, char itype, char type, ...);
 
-extern bool extl_table_sets_o(ExtlTab ref, const char *entry, WObj *val);
+extern bool extl_table_sets_o(ExtlTab ref, const char *entry, Obj *val);
 extern bool extl_table_sets_i(ExtlTab ref, const char *entry, int val);
 extern bool extl_table_sets_d(ExtlTab ref, const char *entry, double val);
 extern bool extl_table_sets_b(ExtlTab ref, const char *entry, bool val);
@@ -110,7 +110,7 @@ extern bool extl_table_sets_s(ExtlTab ref, const char *entry, const char *val);
 extern bool extl_table_sets_f(ExtlTab ref, const char *entry, ExtlFn val);
 extern bool extl_table_sets_t(ExtlTab ref, const char *entry, ExtlTab val);
 
-extern bool extl_table_seti_o(ExtlTab ref, int entry, WObj *val);
+extern bool extl_table_seti_o(ExtlTab ref, int entry, Obj *val);
 extern bool extl_table_seti_i(ExtlTab ref, int entry, int val);
 extern bool extl_table_seti_d(ExtlTab ref, int entry, double val);
 extern bool extl_table_seti_b(ExtlTab ref, int entry, bool val);

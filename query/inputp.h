@@ -13,7 +13,7 @@
 #define ION_QUERY_INPUTP_H
 
 #include <ioncore/common.h>
-#include <ioncore/objp.h>
+#include <libtu/objp.h>
 #include <ioncore/binding.h>
 #include <ioncore/rectangle.h>
 #include "input.h"

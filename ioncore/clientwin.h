@@ -41,7 +41,7 @@
 
 
 typedef struct{
-	WWatch last_mgr_watch;
+	Watch last_mgr_watch;
 	WRectangle saved_rootrel_geom;
 } WClientWinFSInfo;
 

@@ -1,7 +1,7 @@
 /*
- * ion/ioncore/readfds.h
+ * ion/ioncore/mainloop.h
  * 
- * Based on a contributed code.
+ * Based on a contributed readfds code.
  * 
  * Ion is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by
@@ -9,14 +9,14 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_IONCORE_READFDS_H
-#define ION_IONCORE_READFDS_H
+#ifndef ION_IONCORE_MAINLOOP_H
+#define ION_IONCORE_MAINLOOP_H
 
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/time.h>
 #include "common.h"
-#include "obj.h"
+#include <libtu/obj.h>
 
 INTRSTRUCT(WInputFd);
 
@@ -30,7 +30,7 @@ DECLSTRUCT(WInputFd){
 extern bool ioncore_register_input_fd(int fd, void *data,
                                       void (*callback)(int fd, void *data));
 extern void ioncore_unregister_input_fd(int fd);
-extern void ioncore_set_input_fds(fd_set *rfds, int *nfds);
-extern void ioncore_check_input_fds(fd_set *rfds);
 
-#endif /* ION_IONCORE_READFDS_H */
+extern void ioncore_mainloop();
+
+#endif /* ION_IONCORE_MAINLOOP_H */

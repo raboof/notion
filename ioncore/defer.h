@@ -14,14 +14,14 @@
 
 #include "common.h"
 
-typedef void WDeferredAction(WObj*);
+typedef void WDeferredAction(Obj*);
 
 extern void ioncore_execute_deferred();
 extern void ioncore_execute_deferred_on_list(void **list);
 
-extern bool ioncore_defer_action(WObj *obj, WDeferredAction *action);
-extern bool ioncore_defer_action_on_list(WObj *obj, WDeferredAction *action,
+extern bool ioncore_defer_action(Obj *obj, WDeferredAction *action);
+extern bool ioncore_defer_action_on_list(Obj *obj, WDeferredAction *action,
                                          void **list);
-extern bool ioncore_defer_destroy(WObj *obj);
+extern bool ioncore_defer_destroy(Obj *obj);
 
 #endif /* ION_IONCORE_DEFER_H */

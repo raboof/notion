@@ -12,13 +12,13 @@
 #ifndef ION_FLOATWS_FLOATWS_H
 #define ION_FLOATWS_FLOATWS_H
 
+#include <libtu/objlist.h>
 #include <ioncore/common.h>
 #include <ioncore/region.h>
 #include <ioncore/screen.h>
 #include <ioncore/genws.h>
 #include <ioncore/manage.h>
 #include <ioncore/extl.h>
-#include <ioncore/objlist.h>
 #include <ioncore/rectangle.h>
 
 INTRCLASS(WFloatWS);
@@ -41,7 +41,7 @@ extern WRegion *floatws_load(WWindow *par, const WRectangle *geom,
 
 extern WRegion* floatws_current(WFloatWS *floatws);
 
-extern WObjList *floatws_sticky_list;
+extern ObjList *floatws_sticky_list;
 
 extern bool floatwsmod_clientwin_do_manage(WClientWin *cwin, 
                                            const WManageParams *param);

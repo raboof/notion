@@ -9,13 +9,12 @@
  * (at your option) any later version.
  */
 
-
+#include <libtu/objlist.h>
 #include "region.h"
 #include "tags.h"
-#include "objlist.h"
 
 
-static WObjList *taglist=NULL;
+static ObjList *taglist=NULL;
 
 
 /*{{{ Adding/removing tags */
@@ -31,7 +30,7 @@ void region_tag(WRegion *reg)
 	
 	/*clear_sub_tags(reg);*/
 	
-	objlist_insert(&taglist, (WObj*)reg);
+	objlist_insert(&taglist, (Obj*)reg);
 	
 	reg->flags|=REGION_TAGGED;
 	region_notify_change(reg);
@@ -47,7 +46,7 @@ void region_untag(WRegion *reg)
 	if(!(reg->flags&REGION_TAGGED))
 		return;
 
-	objlist_remove(&taglist, (WObj*)reg);
+	objlist_remove(&taglist, (Obj*)reg);
 	
 	reg->flags&=~REGION_TAGGED;
 	region_notify_change(reg);

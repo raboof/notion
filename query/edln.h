@@ -13,7 +13,7 @@
 #define ION_QUERY_EDLN_H
 
 #include <ioncore/common.h>
-#include <ioncore/obj.h>
+#include <libtu/obj.h>
 
 INTRSTRUCT(Edln);
 

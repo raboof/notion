@@ -23,7 +23,7 @@
 #include "framep.h"
 #include "frame-pointer.h"
 #include "frame-draw.h"
-#include "objp.h"
+#include <libtu/objp.h>
 #include "bindmaps.h"
 #include "infowin.h"
 #include "defer.h"
@@ -295,7 +295,7 @@ static void tabdrag_deinit(WFrame *frame)
 	frame_update_attr_nth(frame, idx);
 	
 	if(tabdrag_infowin!=NULL){
-		destroy_obj((WObj*)tabdrag_infowin);
+		destroy_obj((Obj*)tabdrag_infowin);
 		tabdrag_infowin=NULL;
 	}
 }

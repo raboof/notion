@@ -12,7 +12,7 @@
 #include <string.h>
 
 #include <ioncore/common.h>
-#include <ioncore/objp.h>
+#include <libtu/objp.h>
 #include <ioncore/strings.h>
 #include <ioncore/global.h>
 #include <ioncore/event.h>

@@ -16,7 +16,7 @@
 #include "global.h"
 #include "event.h"
 #include "cursor.h"
-#include "objp.h"
+#include <libtu/objp.h>
 #include "grab.h"
 #include "regbind.h"
 #include "extl.h"

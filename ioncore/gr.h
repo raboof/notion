@@ -18,7 +18,7 @@
 
 INTRCLASS(GrBrush);
 DECLCLASS(GrBrush){
-	WObj obj;
+	Obj obj;
 };
 
 

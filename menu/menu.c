@@ -12,6 +12,7 @@
 #include <string.h>
 #include <limits.h>
 
+#include <libtu/minmax.h>
 #include <ioncore/common.h>
 #include <ioncore/window.h>
 #include <ioncore/global.h>
@@ -20,11 +21,10 @@
 #include <ioncore/strings.h>
 #include <ioncore/pointer.h>
 #include <ioncore/stacking.h>
-#include <ioncore/minmax.h>
 #include <ioncore/signal.h>
 #include <ioncore/focus.h>
 #include <ioncore/event.h>
-#include <ioncore/objp.h>
+#include <libtu/objp.h>
 #include <ioncore/region-iter.h>
 #include "menu.h"
 #include "main.h"
@@ -521,7 +521,7 @@ void menu_deinit(WMenu *menu)
 	WMenu *m;
 	
 	if(menu->submenu!=NULL)
-		destroy_obj((WObj*)menu->submenu);
+		destroy_obj((Obj*)menu->submenu);
 	
 	extl_unref_table(menu->tab);
 	extl_unref_fn(menu->handler);
@@ -672,7 +672,7 @@ static void menu_do_select_nth(WMenu *menu, int n)
 		return;
 	
 	if(menu->submenu!=NULL)
-		destroy_obj((WObj*)menu->submenu);
+		destroy_obj((Obj*)menu->submenu);
 	
 	assert(menu->submenu==NULL);
 
@@ -757,7 +757,7 @@ static void menu_do_finish(WMenu *menu)
 	
 	ok=extl_table_geti_t(actmenu->tab, actmenu->selected_entry+1, &tab);
 	
-	destroy_obj((WObj*)menu_head(menu));
+	destroy_obj((Obj*)menu_head(menu));
 	
 	if(ok)
 		extl_call(handler, "t", NULL, tab);
@@ -779,7 +779,7 @@ void menu_finish(WMenu *menu)
 		return;
 	}
 	
-	ioncore_defer_action((WObj*)menu, (WDeferredAction*)menu_do_finish);
+	ioncore_defer_action((Obj*)menu, (WDeferredAction*)menu_do_finish);
 }
 
 
@@ -790,7 +790,7 @@ void menu_finish(WMenu *menu)
 EXTL_EXPORT_MEMBER
 void menu_cancel(WMenu *menu)
 {
-	ioncore_defer_destroy((WObj*)menu);
+	ioncore_defer_destroy((Obj*)menu);
 }
 
 
@@ -899,7 +899,7 @@ static void scroll_left(WTimer *timer, WMenu *menu)
 	menu=menu_tail(menu);
 	scroll_left_or_up(menu, right_diff(menu), 0);
 	if(right_diff(menu)>0)
-		timer_set_param(timer, scroll_time, (WObj*)menu);
+		timer_set_param(timer, scroll_time, (Obj*)menu);
 }
 
 
@@ -908,7 +908,7 @@ static void scroll_up(WTimer *timer, WMenu *menu)
 	menu=menu_tail(menu);
 	scroll_left_or_up(menu, 0, bottom_diff(menu));
 	if(bottom_diff(menu)>0)
-		timer_set_param(timer, scroll_time, (WObj*)menu);
+		timer_set_param(timer, scroll_time, (Obj*)menu);
 }
 
 
@@ -931,7 +931,7 @@ static void scroll_right(WTimer *timer, WMenu *menu)
 	menu=menu_head(menu);
 	scroll_right_or_down(menu, left_diff(menu), 0);
 	if(left_diff(menu)>0)
-		timer_set_param(timer, scroll_time, (WObj*)menu);
+		timer_set_param(timer, scroll_time, (Obj*)menu);
 }
 
 
@@ -940,7 +940,7 @@ static void scroll_down(WTimer *timer, WMenu *menu)
 	menu=menu_head(menu);
 	scroll_right_or_down(menu, 0, top_diff(menu));
 	if(top_diff(menu)>0)
-		timer_set_param(timer, scroll_time, (WObj*)menu);
+		timer_set_param(timer, scroll_time, (Obj*)menu);
 }
 
 
@@ -989,7 +989,7 @@ static void check_scroll(WMenu *menu, int x, int y)
 		if(rectangle_contains(&REGION_GEOM(menu), x, y)){
 			if(scroll_timer.handler!=fn || !timer_is_set(&scroll_timer)){
 				scroll_timer.handler=fn;
-				timer_set_param(&scroll_timer, scroll_time, (WObj*)menu);
+				timer_set_param(&scroll_timer, scroll_time, (Obj*)menu);
 			}
 			return;
 		}

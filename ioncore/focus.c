@@ -23,10 +23,10 @@
 /*{{{ Previous active region tracking */
 
 
-static WWatch prev_watch=WWATCH_INIT;
+static Watch prev_watch=WWATCH_INIT;
 
 
-static void prev_watch_handler(WWatch *watch, WRegion *prev)
+static void prev_watch_handler(Watch *watch, WRegion *prev)
 {
 	WRegion *r;
 	while(1){
@@ -34,8 +34,8 @@ static void prev_watch_handler(WWatch *watch, WRegion *prev)
 		if(r==NULL)
 			break;
 		
-		if(watch_setup(&prev_watch, (WObj*)r, 
-					   (WWatchHandler*)prev_watch_handler))
+		if(watch_setup(&prev_watch, (Obj*)r, 
+					   (WatchHandler*)prev_watch_handler))
 			break;
 		prev=r;
 	}
@@ -62,7 +62,7 @@ void ioncore_set_previous_of(WRegion *reg)
 	}
 
 	if(r2!=NULL)
-		watch_setup(&prev_watch, (WObj*)r2, (WWatchHandler*)prev_watch_handler);
+		watch_setup(&prev_watch, (Obj*)r2, (WatchHandler*)prev_watch_handler);
 }
 
 
@@ -100,10 +100,10 @@ void ioncore_goto_previous()
 /*{{{ Await focus */
 
 
-static WWatch await_watch=WWATCH_INIT;
+static Watch await_watch=WWATCH_INIT;
 
 
-static void await_watch_handler(WWatch *watch, WRegion *prev)
+static void await_watch_handler(Watch *watch, WRegion *prev)
 {
 	WRegion *r;
 	while(1){
@@ -111,8 +111,8 @@ static void await_watch_handler(WWatch *watch, WRegion *prev)
 		if(r==NULL)
 			break;
 		
-		if(watch_setup(&await_watch, (WObj*)r, 
-					   (WWatchHandler*)await_watch_handler))
+		if(watch_setup(&await_watch, (Obj*)r, 
+					   (WatchHandler*)await_watch_handler))
 			break;
 		prev=r;
 	}
@@ -124,8 +124,8 @@ void region_set_await_focus(WRegion *reg)
     if(reg==NULL){
         watch_reset(&await_watch);
     }else{
-        watch_setup(&await_watch, (WObj*)reg,
-                    (WWatchHandler*)await_watch_handler);
+        watch_setup(&await_watch, (Obj*)reg,
+                    (WatchHandler*)await_watch_handler);
     }
 }
 

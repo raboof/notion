@@ -92,7 +92,7 @@ WMenu *menumod_pmenu(WWindow *where, ExtlFn handler, ExtlTab tab)
 							(WButtonHandler*)menu_release,
 							NULL, 
 							(GrabKilledHandler*)menu_cancel)){
-		destroy_obj((WObj*)menu);
+		destroy_obj((Obj*)menu);
 		return NULL;
 	}
 	

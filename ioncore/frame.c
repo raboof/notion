@@ -10,7 +10,7 @@
  */
 
 #include "common.h"
-#include "objp.h"
+#include <libtu/objp.h>
 #include "window.h"
 #include "global.h"
 #include "rootwin.h"

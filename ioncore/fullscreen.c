@@ -56,7 +56,7 @@ bool clientwin_check_fullscreen_request(WClientWin *cwin, int w, int h,
 }
 
 
-static void lastmgr_watchhandler(WWatch *watch, WObj *obj)
+static void lastmgr_watchhandler(Watch *watch, Obj *obj)
 {
 	WClientWinFSInfo *fsinfo=(WClientWinFSInfo*)watch;
 	WRegion *r;
@@ -66,7 +66,7 @@ static void lastmgr_watchhandler(WWatch *watch, WObj *obj)
 	r=region_find_rescue_manager((WRegion*)obj);
 	
 	if(r!=NULL)
-		watch_setup(&(fsinfo->last_mgr_watch), (WObj*)r, lastmgr_watchhandler);
+		watch_setup(&(fsinfo->last_mgr_watch), (Obj*)r, lastmgr_watchhandler);
 }
 
 
@@ -80,11 +80,11 @@ bool clientwin_fullscreen_scr(WClientWin *cwin, WScreen *scr, bool switchto)
 		
 		if(REGION_MANAGER(cwin)!=NULL){
 			watch_setup(&(cwin->fsinfo.last_mgr_watch),
-						(WObj*)REGION_MANAGER(cwin),
+						(Obj*)REGION_MANAGER(cwin),
 						lastmgr_watchhandler);
 		}else if(scr->mplex.current_sub!=NULL){
 			watch_setup(&(cwin->fsinfo.last_mgr_watch),
-						(WObj*)scr->mplex.current_sub, 
+						(Obj*)scr->mplex.current_sub, 
 						lastmgr_watchhandler);
 		}
 		region_rootpos((WRegion*)cwin, &rootx, &rooty);

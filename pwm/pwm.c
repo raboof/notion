@@ -21,14 +21,14 @@
 
 #include <libtu/util.h>
 #include <libtu/optparser.h>
+#include <libtu/errorlog.h>
 
 #include <ioncore/common.h>
 #include <ioncore/global.h>
 #include <ioncore/ioncore.h>
 #include <ioncore/readconfig.h>
 #include <ioncore/exec.h>
-#include <ioncore/errorlog.h>
-#include <ioncore/event.h>
+#include <ioncore/mainloop.h>
 #include "../version.h"
 
 
@@ -72,7 +72,7 @@ int main(int argc, char*argv[])
 	char *cmd=NULL;
 	int stflags=IONCORE_STARTUP_NOXINERAMA;
 	int opt;
-	WErrorLog el;
+	ErrorLog el;
 	FILE *ef=NULL;
 	char *efnam=NULL;
 	bool may_continue=FALSE;

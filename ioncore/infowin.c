@@ -14,7 +14,7 @@
 #include "window.h"
 #include "infowin.h"
 #include "gr.h"
-#include "objp.h"
+#include <libtu/objp.h>
 
 
 /*{{{ Init/deinit */

@@ -12,7 +12,7 @@
 #include <string.h>
 #include <ioncore/common.h>
 #include <ioncore/global.h>
-#include <ioncore/objp.h>
+#include <libtu/objp.h>
 #include <ioncore/strings.h>
 #include <ioncore/xic.h>
 #include <ioncore/selection.h>
@@ -616,7 +616,7 @@ static void wedln_do_finish(WEdln *wedln)
 	wedln->handler=extl_fn_none();
 	p=edln_finish(&(wedln->edln));
 	
-	destroy_obj((WObj*)wedln);
+	destroy_obj((Obj*)wedln);
 	
 	if(p!=NULL)
 		extl_call(handler, "s", NULL, p);
@@ -632,7 +632,7 @@ static void wedln_do_finish(WEdln *wedln)
 EXTL_EXPORT_MEMBER
 void wedln_finish(WEdln *wedln)
 {
-	ioncore_defer_action((WObj*)wedln, (WDeferredAction*)wedln_do_finish);
+	ioncore_defer_action((Obj*)wedln, (WDeferredAction*)wedln_do_finish);
 }
 
 

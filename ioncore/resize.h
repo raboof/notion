@@ -42,7 +42,7 @@ typedef void WDrawRubberbandFn(WRootWin *rw, const WRectangle *geom);
 
 
 DECLCLASS(WMoveresMode){
-	WObj obj;
+	Obj obj;
     XSizeHints hints;
     uint relw, relh;
     int dx1, dx2, dy1, dy2;

@@ -25,7 +25,7 @@ INTRCLASS(WIonWS);
 
 DECLCLASS(WIonWS){
 	WGenWS genws;
-	WObj *split_tree;
+	Obj *split_tree;
 	WRegion *managed_list;
 	ExtlTab managed_splits;
 };

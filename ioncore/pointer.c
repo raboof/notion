@@ -37,7 +37,7 @@ static WMotionHandler *p_motion_begin_handler=NULL;
 static GrabHandler *p_key_handler=NULL;
 static GrabKilledHandler *p_killed_handler=NULL;
 
-static WWatch p_regwatch=WWATCH_INIT, p_subregwatch=WWATCH_INIT;
+static Watch p_regwatch=WWATCH_INIT, p_subregwatch=WWATCH_INIT;
 
 #define p_reg ((WRegion*)p_regwatch.obj)
 #define p_subreg ((WRegion*)p_subregwatch.obj)
@@ -64,7 +64,7 @@ bool ioncore_set_drag_handlers(WRegion *reg,
 		return FALSE;
 	
 	if(p_reg!=reg){
-		watch_setup(&p_regwatch, (WObj*)reg, NULL);
+		watch_setup(&p_regwatch, (Obj*)reg, NULL);
 		watch_reset(&p_subregwatch);
 	}
 	
@@ -262,12 +262,12 @@ bool ioncore_do_handle_buttonpress(XButtonEvent *ev)
 	p_time=ev->time;
 	p_clickcnt=0;
 
-	watch_setup(&p_regwatch, (WObj*)reg, NULL);
+	watch_setup(&p_regwatch, (Obj*)reg, NULL);
 	
 	subreg=NULL;
 	p_area=window_press((WWindow*)reg, ev, &subreg);
 	if(subreg)
-		watch_setup(&p_subregwatch, (WObj*)subreg, NULL);
+		watch_setup(&p_subregwatch, (Obj*)subreg, NULL);
 
 	if(dblclick){
 		pressbind=region_lookup_binding(reg, BINDING_BUTTONDBLCLICK, state,

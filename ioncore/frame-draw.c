@@ -16,7 +16,7 @@
 #include "strings.h"
 #include "names.h"
 #include "gr.h"
-#include "objp.h"
+#include <libtu/objp.h>
 #include "region-iter.h"
 
 

@@ -14,7 +14,7 @@
 #include "region.h"
 #include "attach.h"
 #include "manage.h"
-#include "objp.h"
+#include <libtu/objp.h>
 #include "names.h"
 #include "fullscreen.h"
 #include "pointer.h"

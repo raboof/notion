@@ -13,7 +13,7 @@
 #define ION_IONCORE_REGINFO_H
 
 #include "common.h"
-#include "obj.h"
+#include <libtu/obj.h>
 #include "region.h"
 #include "window.h"
 #include "extl.h"
@@ -26,17 +26,17 @@ typedef WRegion *WRegionSimpleCreateFn(WWindow *par, const WRectangle *geom);
 INTRSTRUCT(WRegClassInfo);
 	
 DECLSTRUCT(WRegClassInfo){
-	WClassDescr *descr;
+	ClassDescr *descr;
 	WRegionSimpleCreateFn *sc_fn;
 	WRegionLoadCreateFn *lc_fn;
 	WRegClassInfo *next, *prev;
 };
 
 
-extern bool ioncore_register_regclass(WClassDescr *descr,
+extern bool ioncore_register_regclass(ClassDescr *descr,
                                       WRegionSimpleCreateFn *sc_fn,
                                       WRegionLoadCreateFn *lc_fn);
-extern void ioncore_unregister_regclass(WClassDescr *descr);
+extern void ioncore_unregister_regclass(ClassDescr *descr);
 
 extern WRegClassInfo *ioncore_lookup_regclass(const char *name, 
                                               bool inheriting_ok,

@@ -13,7 +13,7 @@
 #define ION_QUERY_WMESSAGE_H
 
 #include <ioncore/common.h>
-#include <ioncore/obj.h>
+#include <libtu/obj.h>
 #include <ioncore/window.h>
 #include <ioncore/rectangle.h>
 #include "listing.h"

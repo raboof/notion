@@ -10,7 +10,7 @@
  */
 
 #include "common.h"
-#include "objp.h"
+#include <libtu/objp.h>
 #include "global.h"
 #include "window.h"
 #include "focus.h"
@@ -122,14 +122,14 @@ WRegion *xwindow_region_of(Window win)
 }
 
 
-WRegion *xwindow_region_of_t(Window win, const WClassDescr *descr)
+WRegion *xwindow_region_of_t(Window win, const ClassDescr *descr)
 {
 	WRegion *reg=xwindow_region_of(win);
 	
 	if(reg==NULL)
 		return NULL;
 	
-	if(!obj_is((WObj*)reg, descr))
+	if(!obj_is((Obj*)reg, descr))
 		return NULL;
 	
 	return reg;

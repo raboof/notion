@@ -16,13 +16,10 @@
 
 #include "common.h"
 #include "global.h"
-#include "signal.h"
 #include "event.h"
-#include "cursor.h"
-#include "readfds.h"
 #include "eventh.h"
-#include "defer.h"
 #include "focus.h"
+#include "signal.h"
 
 
 
@@ -35,7 +32,7 @@ WHooklist *ioncore_handle_event_alt=NULL;
 /*}}}*/
 
 
-/*{{{ Time updating */
+/*{{{ Timestamp management */
 
 #define CHKEV(E, T) case E: tm=((T*)ev)->time; break;
 #define CLOCK_SKEW_MS 30000
@@ -87,7 +84,7 @@ Time ioncore_get_timestamp()
 		XChangeProperty(ioncore_g.dpy, ioncore_g.rootwins->dummy_win,
 						dummy, dummy, 8, PropModeAppend,
 						(unsigned char*)"", 0);
-		ioncore_get_event_mask(&ev, PropertyChangeMask);
+		ioncore_get_event(&ev, PropertyChangeMask);
 		XPutBackEvent(ioncore_g.dpy, &ev);
 	}
 	
@@ -101,40 +98,7 @@ Time ioncore_get_timestamp()
 /*{{{ Event reading */
 
 
-void ioncore_get_event(XEvent *ev)
-{
-	fd_set rfds;
-	int nfds=ioncore_g.conn;
-	
-	while(1){
-		ioncore_check_signals();
-		
-		if(QLength(ioncore_g.dpy)>0){
-			XNextEvent(ioncore_g.dpy, ev);
-			ioncore_update_timestamp(ev);
-			return;
-		}
-		
-		XFlush(ioncore_g.dpy);
-		
-		FD_ZERO(&rfds);
-		FD_SET(ioncore_g.conn, &rfds);
-		
-		ioncore_set_input_fds(&rfds, &nfds);
-		
-		if(select(nfds+1, &rfds, NULL, NULL, NULL)>0){
-			ioncore_check_input_fds(&rfds);
-			if(FD_ISSET(ioncore_g.conn, &rfds)){
-				XNextEvent(ioncore_g.dpy, ev);
-				ioncore_update_timestamp(ev);
-				return;
-			}
-		}
-	}
-}
-
-
-void ioncore_get_event_mask(XEvent *ev, long mask)
+void ioncore_get_event(XEvent *ev, long mask)
 {
 	fd_set rfds;
 	
@@ -148,7 +112,8 @@ void ioncore_get_event_mask(XEvent *ev, long mask)
 		
 		FD_ZERO(&rfds);
 		FD_SET(ioncore_g.conn, &rfds);
-		
+
+        /* Other FD:s are _not_ to be handled! */
 		select(ioncore_g.conn+1, &rfds, NULL, NULL, NULL);
 	}
 }
@@ -157,7 +122,7 @@ void ioncore_get_event_mask(XEvent *ev, long mask)
 /*}}}*/
 
 
-/*{{{ Mainloop */
+/*{{{ X connection FD handler */
 
 
 static void skip_focusenter()
@@ -180,60 +145,33 @@ static void skip_focusenter()
 }
 
 
-static void set_initial_focus()
-{
-	Window root=None, win=None;
-	int x, y, wx, wy;
-	uint mask;
-	WScreen *scr;
-	WWindow *wwin;
-	
-	XQueryPointer(ioncore_g.dpy, None, &root, &win,
-				  &x, &y, &wx, &wy, &mask);
-	
-	FOR_ALL_SCREENS(scr){
-        Window scrroot=region_root_of((WRegion*)scr);
-		if(scrroot==root && rectangle_contains(&REGION_GEOM(scr), x, y)){
-			break;
-		}
-	}
-	
-	if(scr==NULL)
-		scr=ioncore_g.screens;
-	
-	ioncore_g.active_screen=scr;
-	region_do_set_focus((WRegion*)scr, FALSE);
-}
 
-
-void ioncore_mainloop()
+void ioncore_x_connection_handler(int conn, void *unused)
 {
 	XEvent ev;
+    bool more=TRUE;
 
-	ioncore_g.opmode=IONCORE_OPMODE_NORMAL;
-	
-	set_initial_focus();
-	
-	for(;;){
-		ioncore_get_event(&ev);
-		
-		CALL_ALT_B_NORET(ioncore_handle_event_alt, (&ev));
+    while(more){
+        XNextEvent(ioncore_g.dpy, &ev);
+        ioncore_update_timestamp(&ev);
+        
+        CALL_ALT_B_NORET(ioncore_handle_event_alt, (&ev));
 
-		ioncore_execute_deferred();
-		
 		XSync(ioncore_g.dpy, False);
-		if(ioncore_g.focus_next!=NULL && ioncore_g.input_mode==IONCORE_INPUTMODE_NORMAL){
+		if(ioncore_g.focus_next!=NULL && 
+           ioncore_g.input_mode==IONCORE_INPUTMODE_NORMAL){
 			bool warp=ioncore_g.warp_next;
 			WRegion *next=ioncore_g.focus_next;
 			ioncore_g.focus_next=NULL;
 			skip_focusenter();
 			region_do_set_focus(next, warp);
-		}/*else if(ioncore_g.grab_released && !ioncore_g.warp_enabled){
-			skip_focusenter();
-		}
-		ioncore_g.grab_released=FALSE;
-		  */
-	}
+        }
+
+		/*ioncore_check_signals();
+		ioncore_execute_deferred();*/
+        
+        more=(QLength(ioncore_g.dpy)>0);
+    }
 }
 
 

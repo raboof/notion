@@ -9,17 +9,17 @@
  * (at your option) any later version.
  */
 
-#include <ioncore/common.h>
 #include <string.h>
+#include <libtu/objlist.h>
+#include <libtu/objp.h>
 
+#include <ioncore/common.h>
 #include <ioncore/frame.h>
 #include <ioncore/framep.h>
 #include <ioncore/frame-pointer.h>
 #include <ioncore/frame-draw.h>
 #include <ioncore/saveload.h>
 #include <ioncore/names.h>
-#include <ioncore/objp.h>
-#include <ioncore/objp.h>
 #include <ioncore/regbind.h>
 #include <ioncore/defer.h>
 #include <ioncore/resize.h>
@@ -405,7 +405,7 @@ void floatframe_remove_managed(WFloatFrame *frame, WRegion *reg)
 {
 	mplex_remove_managed((WMPlex*)frame, reg);
 	if(FRAME_MCOUNT(frame)==0 && !OBJ_IS_BEING_DESTROYED(frame))
-		ioncore_defer_destroy((WObj*)frame);
+		ioncore_defer_destroy((Obj*)frame);
 }
 
 
@@ -447,10 +447,10 @@ EXTL_EXPORT_MEMBER
 void floatframe_toggle_sticky(WFloatFrame *frame)
 {
 	if(frame->sticky){
-		objlist_remove(&floatws_sticky_list, (WObj*)frame);
+		objlist_remove(&floatws_sticky_list, (Obj*)frame);
 		frame->sticky=FALSE;
 	}else{
-		objlist_insert(&floatws_sticky_list, (WObj*)frame);
+		objlist_insert(&floatws_sticky_list, (Obj*)frame);
 		frame->sticky=TRUE;
 	}
 }
@@ -527,7 +527,7 @@ WRegion *floatframe_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
 	
 	if(FRAME_MCOUNT(frame)==0){
 		/* Nothing to manage, destroy */
-		destroy_obj((WObj*)frame);
+		destroy_obj((Obj*)frame);
 		frame=NULL;
 	}else{
 		if(extl_table_is_bool_set(tab, "sticky"))

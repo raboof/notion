@@ -14,7 +14,7 @@
 #include <ioncore/global.h>
 #include <ioncore/focus.h>
 #include <ioncore/frame.h>
-#include <ioncore/objp.h>
+#include <libtu/objp.h>
 #include "wmessage.h"
 #include "fwarn.h"
 

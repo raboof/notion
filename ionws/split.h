@@ -37,28 +37,28 @@ enum PrimaryNode{
 
 
 DECLCLASS(WWsSplit){
-	WObj obj;
+	Obj obj;
 	int dir;
 	WRectangle geom;
 	int current;
-	WObj *tl, *br;
+	Obj *tl, *br;
 	WWsSplit *parent;
 	uint max_w, min_w, max_h, min_h;
 };
 
 
-extern WWsSplit *create_split(int dir, WObj *tl, WObj *br, 
+extern WWsSplit *create_split(int dir, Obj *tl, Obj *br, 
 							  const WRectangle *geom);
-extern int split_tree_do_calcresize(WObj *node_, int dir, int primn, 
+extern int split_tree_do_calcresize(Obj *node_, int dir, int primn, 
 									int nsize);
-extern void split_tree_resize(WObj *node, int dir, int primn,
+extern void split_tree_resize(Obj *node, int dir, int primn,
 							  int npos, int nsize);
-extern void split_tree_do_resize(WObj *node, int dir, int primn,
+extern void split_tree_do_resize(Obj *node, int dir, int primn,
 								 int npos, int nsize);
 
-extern int split_tree_size(WObj *obj, int dir);
-extern int split_tree_pos(WObj *obj, int dir);
-extern int split_tree_other_size(WObj *obj, int dir);
+extern int split_tree_size(Obj *obj, int dir);
+extern int split_tree_pos(Obj *obj, int dir);
+extern int split_tree_other_size(Obj *obj, int dir);
 
 #include "ionws.h"
 
@@ -81,7 +81,7 @@ extern WIonFrame *ionws_newframe(WIonWS *ws, const char *dirstr);
 extern WIonFrame *ionws_newframe_at(WIonWS *ws, WIonFrame *oframe,
                                     const char *str, bool attach);
 
-extern WRegion *ionws_do_split_at(WIonWS *ws, WObj *obj, int dir, 
+extern WRegion *ionws_do_split_at(WIonWS *ws, Obj *obj, int dir, 
                                   int primn, int minsize, int oprimn,
                                   WRegionSimpleCreateFn *fn);
 

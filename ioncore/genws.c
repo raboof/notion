@@ -10,7 +10,7 @@
  */
 
 #include "common.h"
-#include "objp.h"
+#include <libtu/objp.h>
 #include "region.h"
 #include "genws.h"
 #include "names.h"

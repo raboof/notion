@@ -16,7 +16,7 @@
 #include "global.h"
 #include "region.h"
 #include "attach.h"
-#include "objp.h"
+#include <libtu/objp.h>
 #include "clientwin.h"
 #include "saveload.h"
 #include "manage.h"

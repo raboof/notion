@@ -55,7 +55,7 @@ DYNFUN bool region_reparent(WRegion *reg, WWindow *target,
 #define XWINDOW_REGION_OF(WIN) xwindow_region_of(WIN)
 
 extern WRegion *xwindow_region_of(Window win);
-extern WRegion *xwindow_region_of_t(Window win, const WClassDescr *descr);
+extern WRegion *xwindow_region_of_t(Window win, const ClassDescr *descr);
 
 extern void xwindow_restack(Window win, Window other, int stack_mode);
 

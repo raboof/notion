@@ -1,7 +1,7 @@
 /*
- * ion/ioncore/readfds.c
+ * ion/ioncore/mainloop.c
  * 
- * Based on a contributed code.
+ * Partly based on a contributed code.
  *
  * Ion is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by
@@ -9,7 +9,10 @@
  * (at your option) any later version.
  */
 
-#include "readfds.h"
+#include "mainloop.h"
+#include "global.h"
+#include "signal.h"
+#include "defer.h"
 
 
 static WInputFd *input_fds=NULL;
@@ -61,7 +64,7 @@ void ioncore_unregister_input_fd(int fd)
 	}
 }
 
-void ioncore_set_input_fds(fd_set *rfds, int *nfds)
+static void set_input_fds(fd_set *rfds, int *nfds)
 {
 	WInputFd *tmp=input_fds;
 	
@@ -73,7 +76,7 @@ void ioncore_set_input_fds(fd_set *rfds, int *nfds)
 	}
 }
 
-void ioncore_check_input_fds(fd_set *rfds)
+static void check_input_fds(fd_set *rfds)
 {
 	WInputFd *tmp=input_fds, *next=NULL;
 	
@@ -84,3 +87,25 @@ void ioncore_check_input_fds(fd_set *rfds)
 		tmp=next;
 	}
 }
+
+void ioncore_mainloop()
+{
+	fd_set rfds;
+	int nfds=0;
+    
+	ioncore_g.opmode=IONCORE_OPMODE_NORMAL;
+
+	while(1){
+		ioncore_check_signals();
+		ioncore_execute_deferred();
+		
+		FD_ZERO(&rfds);
+		FD_SET(ioncore_g.conn, &rfds);
+		
+		set_input_fds(&rfds, &nfds);
+		
+		if(select(nfds+1, &rfds, NULL, NULL, NULL)>0)
+			check_input_fds(&rfds);
+	}
+}
+
