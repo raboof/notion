@@ -185,15 +185,15 @@ void preinit_graphics(WScreen *scr)
 
 #define INIT_CG(CG, HL, SH, BG, FG) CG.bg=BG; CG.hl=HL; CG.sh=SH; CG.fg=FG;
 										/* hl, sh,    bg,    fg */
-	INIT_CG(grdata->tab_sel_colors, 	white, white, white, black);
-	INIT_CG(grdata->tab_colors, 		white, white, black, white);
+	INIT_CG(grdata->tab_sel_colors, 	white, white, black, white);
+	INIT_CG(grdata->tab_colors, 		black, black, black, white);
 	INIT_CG(grdata->frame_colors,		white, white, black, white);
 
 	INIT_CG(grdata->act_tab_sel_colors, black, black, white, black);
-	INIT_CG(grdata->act_tab_colors, 	black, black, black, white);
+	INIT_CG(grdata->act_tab_colors, 	white, white, white, black);
 	INIT_CG(grdata->act_frame_colors,	white, white, black, white);
 
-	INIT_CG(grdata->input_colors,		white, white, black, black);
+	INIT_CG(grdata->input_colors,		white, white, black, white);
 	
 #undef INIT_CG
 
