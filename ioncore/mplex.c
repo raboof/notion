@@ -116,45 +116,87 @@ void mplex_deinit(WMPlex *mplex)
 
 /*{{{ Hidden L2 objects RB-tree */ 
 
+#define MGD_L2_HIDDEN 0x0001
+#define MGD_L2_PASSIVE 0x0002
 
-static Rb_node l2_hidden=NULL;
+static Rb_node mgd_flag_rb=NULL;
 
 
-static bool l2_mark_hidden(WRegion *reg)
+static bool mgd_set_flags(WRegion *reg, int flag)
 {
-    if(l2_hidden==NULL){
-        l2_hidden=make_rb();
-        if(l2_hidden==NULL){
+    Rb_node nd;
+    
+    if(mgd_flag_rb==NULL){
+        mgd_flag_rb=make_rb();
+        if(mgd_flag_rb==NULL){
             warn_err();
             return FALSE;
         }
+    }else{
+        int found=0;
+        nd=rb_find_pkey_n(mgd_flag_rb, reg, &found);
+        if(found){
+            nd->v.ival|=flag;
+            return TRUE;
+        }
     }
     
-    return (rb_insertp(l2_hidden, reg, NULL)!=NULL);
+    nd=rb_insertp(mgd_flag_rb, reg, NULL);
+    if(nd!=NULL)
+        nd->v.ival=flag;
+    
+    return (nd!=NULL);
 }
 
 
-static void l2_unmark_hidden(WRegion *reg)
+static void mgd_unset_flags(WRegion *reg, int flag)
 {
     int found=0;
     Rb_node nd;
     
-    if(l2_hidden!=NULL){
-        nd=rb_find_pkey_n(l2_hidden, reg, &found);
-        if(found)
-            rb_delete_node(nd);
-    }
+    if(mgd_flag_rb==NULL)
+        return;
+    
+    nd=rb_find_pkey_n(mgd_flag_rb, reg, &found);
+    if(!found)
+        return;
+    
+    nd->v.ival&=~flag;
+    
+    if(nd->v.ival==0)
+        rb_delete_node(nd);
+}
+
+
+static int mgd_flags(WRegion *reg)
+{
+    int found=0;
+    Rb_node nd;
+    
+    if(mgd_flag_rb==NULL)
+        return 0;
+    
+    nd=rb_find_pkey_n(mgd_flag_rb, reg, &found);
+    
+    return (found ? nd->v.ival : 0);
 }
 
 
 static bool l2_is_hidden(WRegion *reg)
 {
-    int found=0;
-    
-    if(l2_hidden!=NULL)
-        rb_find_pkey_n(l2_hidden, reg, &found);
-    
-    return found;
+    return mgd_flags(reg)&MGD_L2_HIDDEN;
+}
+
+
+static bool l2_mark_hidden(WRegion *reg)
+{
+    return mgd_set_flags(reg, MGD_L2_HIDDEN);
+}
+
+
+static void l2_unmark_hidden(WRegion *reg)
+{
+    mgd_unset_flags(reg, MGD_L2_HIDDEN);
 }
 
 
@@ -975,8 +1017,9 @@ void mplex_managed_remove(WMPlex *mplex, WRegion *sub)
         l2=on_l2_list(mplex, sub);
     }
     
+    mgd_unset_flags(sub, ~0);
+    
     if(l2){
-        l2_unmark_hidden(sub);
         region_unset_manager(sub, (WRegion*)mplex, &(mplex->l2_list));
         mplex->l2_count--;
     }else{
@@ -1179,7 +1222,7 @@ bool mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t)
             return FALSE;
         }
     }
-
+    
     if(extl_table_gets_s(t, "orientation", &s)){
         o=str_to_orientation(s);
         if(o<0){
@@ -1187,7 +1230,7 @@ bool mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t)
             return FALSE;
         }
     }
-
+    
     s=NULL;
     extl_table_gets_s(t, "action", &s);
     
@@ -1205,11 +1248,11 @@ bool mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t)
          * if there's one.
          */
         extl_table_gets_rectangle(t, "geom", &(fp.g));
-
+        
         stdisp=region__attach_load((WRegion*)mplex, t,
-                                 (WRegionDoAttachFn*)do_attach_stdisp, 
-                                 (void*)&fp);
-
+                                   (WRegionDoAttachFn*)do_attach_stdisp, 
+                                   (void*)&fp);
+        
         if(stdisp==NULL)
             return FALSE;
         
@@ -1241,7 +1284,7 @@ static ExtlTab mplex_do_get_stdisp_extl(WMPlex *mplex, bool fullconfig)
     
     if(di->regwatch.obj==NULL)
         return extl_table_none();
-
+    
     if(fullconfig){
         t=region_get_configuration((WRegion*)di->regwatch.obj);
         extl_table_sets_rectangle(t, "geom", &REGION_GEOM(di->regwatch.obj));
@@ -1330,7 +1373,7 @@ ExtlTab mplex_get_configuration(WMPlex *mplex)
             extl_unref_table(st);
         }
     }
-
+    
     FOR_ALL_MANAGED_ON_LIST(mplex->l2_list, sub){
         ExtlTab st=region_get_configuration(sub);
         if(st!=extl_table_none()){
@@ -1395,12 +1438,12 @@ WRegion *mplex_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 static DynFunTab mplex_dynfuntab[]={
     {region_do_set_focus, mplex_do_set_focus},
     {(DynFun*)region_managed_control_focus,
-     (DynFun*)mplex_managed_control_focus},
+            (DynFun*)mplex_managed_control_focus},
     
     {region_managed_remove, mplex_managed_remove},
     {region_managed_rqgeom, mplex_managed_rqgeom},
     {(DynFun*)region_managed_display, (DynFun*)mplex_managed_display},
-
+    
     {(DynFun*)region_handle_drop, (DynFun*)mplex_handle_drop},
     
     {region_map, mplex_map},
@@ -1411,25 +1454,25 @@ static DynFunTab mplex_dynfuntab[]={
     
     {(DynFun*)region_current,
      (DynFun*)mplex_current},
-
+    
     {(DynFun*)region_rescue_clientwins,
      (DynFun*)mplex_rescue_clientwins},
     
     {(DynFun*)region_manage_rescue,
      (DynFun*)mplex_manage_rescue},
-
+    
     {(DynFun*)region_get_configuration,
      (DynFun*)mplex_get_configuration},
-
+    
     {mplex_managed_geom, 
      mplex_managed_geom_default},
-
+    
     {(DynFun*)region_fitrep,
      (DynFun*)mplex_fitrep},
-            
+    
     END_DYNFUNTAB
 };
-                                       
+
 
 IMPLCLASS(WMPlex, WWindow, mplex_deinit, mplex_dynfuntab);
 
