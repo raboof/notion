@@ -358,9 +358,16 @@ function write_fndoc(h, fn, info)
 end
 
 function write_documentation(h)
-    for fn, info in fns do
-        if info.doc then
-            write_fndoc(h, fn, info)
+    sorted={}
+    
+    for fn in fns do
+        table.insert(sorted, fn)
+    end
+    table.sort(sorted)
+    
+    for _, fn in ipairs(sorted) do
+        if fns[fn].doc then
+            write_fndoc(h, fn, fns[fn])
         end
     end
 end
