@@ -252,11 +252,18 @@ end
 function get_winprop(cwin)
     local id=cwin:get_ident()
     local prop
+    local names
     
     for c, r, i in alternative_winprop_idents(id) do
-        if pcall(function() prop=winprops[c][r][i] end) then
-            if prop then
-                return prop
+        if pcall(function() names=winprops[c][r][i] end) then
+            if names then
+                for name, prop in names do
+                    if string.find(cwin:name(), name) then
+                        return prop
+                    end
+                end
+                -- no regexp match, use default winprop
+                return winprops[c][r][i][" ! "]
             end
         end
     end
@@ -269,17 +276,20 @@ local function ensure_winproptab(class, role, instance)
     if not winprops[class][role] then
         winprops[class][role]={}
     end
+    if not winprops[class][role][instance] then
+        winprops[class][role][instance]={}
+    end
 end    
 
-local function do_add_winprop(class, role, instance, props)
+local function do_add_winprop(class, role, instance, name, props)
     ensure_winproptab(class, role, instance)
-    winprops[class][role][instance]=props
+    winprops[class][role][instance][name]=props
 end
 
 --DOC
 -- Define a winprop. For more information, see section \ref{sec:winprops}.
 function winprop(list)
-    local list2, class, role, instance = {}, "*", "*", "*"
+    local list2, class, role, instance, name = {}, "*", "*", "*", " ! "
 
     for k, v in list do
 	if k == "class" then
@@ -288,12 +298,14 @@ function winprop(list)
 	    role = v
 	elseif k == "instance" then
 	    instance = v
+	elseif k == "name" then
+	    name = v
 	else
 	    list2[k] = v
 	end
     end
     
-    do_add_winprop(class, role, instance, list2)
+    do_add_winprop(class, role, instance, name, list2)
 end
 
 -- }}}
