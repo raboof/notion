@@ -85,8 +85,8 @@ WMenu *mod_menu_do_pmenu(WWindow *where, ExtlFn handler, ExtlTab tab)
     fnp.ref_y=ev->xbutton.y_root-REGION_GEOM(scr).y;
     
     fp.mode=REGION_FIT_BOUNDS;
-    fp.g.x=0;
-    fp.g.y=0;
+    fp.g.x=REGION_GEOM(where).x;
+    fp.g.y=REGION_GEOM(where).y;
     fp.g.w=REGION_GEOM(where).w;
     fp.g.h=REGION_GEOM(where).h;
     

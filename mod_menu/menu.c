@@ -302,6 +302,17 @@ static void menu_firstfit(WMenu *menu, bool submenu, int ref_x, int ref_y)
             geom.y=maxg.y+maxg.h-geom.h;
         }
     }
+    /***********************/
+#define MINIMUM_Y_VISIBILITY    20
+    WRectangle maxg = menu->last_fp.g;
+    if(geom.y + MINIMUM_Y_VISIBILITY > maxg.y + maxg.h)
+    {
+        geom.y = maxg.y + maxg.h - MINIMUM_Y_VISIBILITY;
+        geom.x = ref_x;
+        if(geom.x+geom.w > maxg.x+maxg.w)
+            geom.x = ref_x - geom.w;
+    }
+    /***********************/
     
     window_do_fitrep(&menu->win, NULL, &geom);
 }
