@@ -2,64 +2,56 @@
 -- PWM menu definitions
 --
 
-
--- Load a library with some convenience functions.
-include("menulib")
-
-
 -- Main menu
 defmenu("mainmenu", {
-    submenu("Programs", "appmenu"),
-    menuentry("Lock screen", "exec", "xlock"),
-    submenu("Workspaces", "wsmenu"),
-    submenu("Styles", "stylemenu"),
-    submenu("Exit", "exitmenu"),
+    submenu("Programs",         "appmenu"),
+    menuentry("Lock screen",    "ioncore.exec('xlock')"),
+    menuentry("Help",           "querylib.query_man(_)"),
+    menuentry("About Ion",      "querylib.show_about_ion(_)"),
+    submenu("Styles",           "stylemenu"),
+    submenu("Exit",             "exitmenu"),
 })
 
 
 -- Application menu
 defmenu("appmenu", {
-    menuentry("XTerm", "exec", "xterm"),
-    menuentry("Mozilla Firebird", "exec", "MozillaFirebird"),
-    menuentry("Xdvi", "exec", "xdvi"),
-    menuentry("GV", "exec", "gv"),
+    menuentry("XTerm",          "ioncore.exec('xterm')"),
+    menuentry("Mozilla Firefox","ioncore.exec('firefox')"),
+    menuentry("Xdvi",           "ioncore.exec('xdvi')"),
+    menuentry("GV",             "ioncore.exec('gv')"),
 })
 
 
 -- Menu with restart/exit alternatives
 defmenu("exitmenu", {
-    menuentry("Restart", "restart"),
-    menuentry("Restart Ion", "restart_other", "ion"),
-    menuentry("Restart TWM", "restart_other", "twm"),
-    menuentry("Exit", "exit"),
-})
-
-
--- Workspaces
-defmenu("wsmenu", {
-    menuentry("New", "@screen_of", "create_new_ws"),
-    menuentry("Close", "@screen_of", "close_current_ws"),
-    submenu("List", "workspacelist"),
+    menuentry("Restart",        "ioncore.restart()"),
+    menuentry("Restart Ion",    "ioncore.restart_other('ion')"),
+    menuentry("Restart TWM",    "ioncore.restart_other('twm')"),
+    menuentry("Exit",           "ioncore.exit()"),
 })
 
 
 -- Context menu (frame/client window actions)
 defmenu("ctxmenu", {
-    menuentry("Close", "close_sub_or_self"),
-    menuentry("Kill", "@sub_cwin", "kill"),
-    menuentry("(Un)tag", "@sub", "toggle_tag"),
-    menuentry("Attach tagged", "attach_tagged"),
-    menuentry("Clear tags", "clear_tags"),
+    menuentry("Close",          "ioncorelib.propagate_close(_, _sub)"),
+    menuentry("Kill",           "WClientWin.kill(_sub)",
+                                "_sub:WClientWin"),
+    menuentry("(Un)tag",        "WRegion.toggle_tag(_sub)",
+                                "_sub:non-nil"),
+    menuentry("Attach tagged",  "WFrame.attach_tagged(_)"),
+    menuentry("Clear tags",     "ioncore.clear_tags()"),
 })
 
 
 -- Context menu for floating frames -- add sticky toggle.
 defmenu("ctxmenu-floatframe", {
-    menuentry("Close", "close_sub_or_self"),
-    menuentry("Kill", "@sub_cwin", "kill"),
-    menuentry("(Un)tag", "@sub", "toggle_tag"),
-    menuentry("Attach tagged", "attach_tagged"),
-    menuentry("Clear tags", "clear_tags"),
-    menuentry("(Un)stick", "toggle_sticky"),
+    menuentry("Close",          "ioncorelib.propagate_close(_, _sub)"),
+    menuentry("Kill",           "WClientWin.kill(_sub)",
+                                "_sub:WClientWin"),
+    menuentry("(Un)tag",        "WRegion.toggle_tag(_sub)",
+                                "_sub:non-nil"),
+    menuentry("Attach tagged",  "WFrame.attach_tagged(_)"),
+    menuentry("Clear tags",     "ioncore.clear_tags()"),
+    menuentry("(Un)stick",      "WFloatFrame.toggle_sticky(_)"),
 })
 
