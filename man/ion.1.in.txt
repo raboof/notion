@@ -150,7 +150,6 @@ KEYS
 
 
 
-
        Navigation on tiled workspaces
 
 
@@ -168,11 +167,15 @@ KEYS
        Navigation on floating workspaces
 
 
+       Mod1+N Raise
+
+       Mod1+P Lower
+
        Mod1+Tab
-              Circulate
+              Circulate focus and raise
 
        Mod1+K Tab
-              Backcirculate
+              Backcirculate focus and raise
 
 
    Closing and destroying objects.

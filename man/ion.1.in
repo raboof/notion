@@ -156,7 +156,6 @@ Go to client (query; only works in a frame)
 Go to previously active object
 
 
-
 .IP "\fINavigation on tiled workspaces\fR"
 
 .TP
@@ -175,11 +174,17 @@ Go to left frame
 .IP "\fINavigation on floating workspaces\fR"
 
 .TP
+.B Mod1+N
+Raise
+.TP
+.B Mod1+P
+Lower
+.TP
 .B Mod1+Tab
-Circulate
+Circulate focus and raise
 .TP
 .B Mod1+K Tab
-Backcirculate
+Backcirculate focus and raise
 
 .SS Closing and destroying objects.
 

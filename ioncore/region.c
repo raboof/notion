@@ -368,10 +368,10 @@ void region_detach_manager(WRegion *reg)
 					   WOBJ_TYPESTR(reg), WOBJ_TYPESTR(par),
 					   WOBJ_TYPESTR(mgr)));
 			par->active_sub=mgr;
-			if(region_x_window(mgr)!=None){
+			/*if(region_x_window(mgr)!=None){*/
 				D2(fprintf(stderr, "\tdo_set_focus\n"));
 				do_set_focus(mgr, FALSE);
-			}
+			/*}*/
 		}
 	}
 

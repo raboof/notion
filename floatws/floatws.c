@@ -161,6 +161,7 @@ static bool floatws_display_managed(WFloatWS *ws, WRegion *reg)
 static void floatws_remove_managed(WFloatWS *ws, WRegion *reg)
 {
 	WRegion *next=NULL;
+	bool mcf=region_may_control_focus((WRegion*)ws);
 	
 	region_unset_manager(reg, (WRegion*)ws, &(ws->managed_list));
 	region_remove_bindmap_owned(reg, &floatws_bindmap, (WRegion*)ws);
@@ -170,12 +171,32 @@ static void floatws_remove_managed(WFloatWS *ws, WRegion *reg)
 	
 	ws->current_managed=NULL;
 	
-	if(reg->stacking.above!=NULL)
+	if(reg->stacking.above!=NULL){
 		next=reg->stacking.above;
-	else
-		next=NEXT_MANAGED_WRAP(ws->managed_list, reg);
+	}else{
+		WWindow *par=REGION_PARENT_CHK(ws, WWindow);
+		if(par!=NULL){
+			Window root=None, parent=None, *children=NULL;
+			uint nchildren=0;
+			WRegion *r;
+			XQueryTree(wglobal.dpy, region_x_window((WRegion*)par),
+					   &root, &parent, &children, &nchildren);
+			while(nchildren>0){
+				nchildren--;
+				r=find_window(children[nchildren]);
+				if(r!=NULL && REGION_MANAGER(r)==(WRegion*)ws){
+					next=r;
+					break;
+				}
+			}
+			XFree(children);
+		}
+		
+		if(next==NULL)
+			next=NEXT_MANAGED_WRAP(ws->managed_list, reg);
+	}
 	
-	if(region_may_control_focus((WRegion*)ws))
+	if(mcf)
 		do_set_focus(next!=NULL ? next : (WRegion*)ws, FALSE);
 	else
 		ws->current_managed=next;

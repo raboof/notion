@@ -6,10 +6,10 @@
 -- object on the workspace.
 
 ionws_bindings{
-    kpress(DEFAULT_MOD .. "N", WIonWS.goto_below),
-    kpress(DEFAULT_MOD .. "P", WIonWS.goto_above),
-    kpress(DEFAULT_MOD .. "Tab", WIonWS.goto_right),
-    submap(DEFAULT_MOD .. "K", {
+    kpress(DEFAULT_MOD.."N", WIonWS.goto_below),
+    kpress(DEFAULT_MOD.."P", WIonWS.goto_above),
+    kpress(DEFAULT_MOD.."Tab", WIonWS.goto_right),
+    submap(DEFAULT_MOD.."K", {
         kpress("AnyModifier+Tab", WIonWS.goto_left),
     }),
 }
@@ -20,11 +20,11 @@ ionws_bindings{
 -- ioncore-bindings.lua.
 
 ionframe_bindings{
-    kpress(DEFAULT_MOD .. "R", WIonFrame.begin_resize),
-    kpress(DEFAULT_MOD .. "S",
+    kpress(DEFAULT_MOD.."R", WIonFrame.begin_resize),
+    kpress(DEFAULT_MOD.."S",
            function(frame) frame:split("bottom") end),
 
-    submap(DEFAULT_MOD .. "K", {
+    submap(DEFAULT_MOD.."K", {
         kpress("AnyModifier+T", 
                make_mplex_clientwin_fn(WClientWin.toggle_transients_pos)),
         kpress("AnyModifier+X", WIonFrame.relocate_and_close),
@@ -40,7 +40,7 @@ ionframe_bindings{
     mclick("Button2", WGenFrame.p_switch_tab, "tab"),
     mdrag("Button2", WGenFrame.p_tabdrag, "tab"),
     
-    mdrag(DEFAULT_MOD .. "Button3", WGenFrame.p_resize),
+    mdrag(DEFAULT_MOD.."Button3", WGenFrame.p_resize),
 }
 
 
