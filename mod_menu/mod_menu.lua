@@ -164,7 +164,7 @@ end
 --DOC
 -- This function displays a drop-down menu and should only
 -- be called from a mouse press handler. The parameters are
--- similar to thos of \fnref{mod_menu.menu}.
+-- similar to those of \fnref{mod_menu.menu}.
 function mod_menu.pmenu(win, sub, menu_or_name) 
     return menu_(win, sub, menu_or_name, mod_menu.do_pmenu)
 end
