@@ -127,7 +127,7 @@ bool load_module(const char *modname)
 			break;
 	}
 	
-	n=ALLOC_N(char, p-modname);
+	n=ALLOC_N(char, p-modname+1);
 	
 	if(n==NULL){
 		warn_err();
