@@ -98,6 +98,7 @@ void floatws_module_deinit()
 	floatws_module_unregister_exports();
 	deinit_bindmap(&floatws_bindmap);
 	deinit_bindmap(&floatframe_bindmap);
+	deinit_bindmap(&floatframe_moveres_bindmap);
 	unregister_region_class(&OBJDESCR(WFloatWS));
 	unregister_region_class(&OBJDESCR(WFloatFrame));
 }

@@ -100,14 +100,16 @@ static int compare_bindings(const void *a_, const void *b_)
 #undef CVAL
 
 
+static WBindmap *known_bindmaps=NULL;
+
 
 bool init_bindmap(WBindmap *bindmap)
 {
 	bindmap->nbindings=0;
 	bindmap->bindings=NULL;
-	bindmap->parent=NULL;
-	bindmap->confdefmod=0;
 	bindmap->rbind_list=NULL;
+	bindmap->next_known=NULL;
+	bindmap->prev_known=NULL;
 	return TRUE;
 }
 
@@ -134,11 +136,10 @@ void deinit_binding(WBinding *binding)
 	if(binding->submap!=NULL){
 		deinit_bindmap(binding->submap);
 		free(binding->submap);
+		binding->submap=NULL;
 	}
-	
+
 	binding->func=extl_unref_fn(binding->func);
-	
-	binding->submap=NULL;
 }
 
 
@@ -146,7 +147,9 @@ void deinit_bindmap(WBindmap *bindmap)
 {
 	int i;
 	WBinding *binding;
-	
+
+	UNLINK_ITEM(known_bindmaps, bindmap, next_known, prev_known);
+
 	while(bindmap->rbind_list!=NULL){
 		region_remove_bindmap(bindmap->rbind_list->reg,
 							  bindmap);
@@ -160,11 +163,51 @@ void deinit_bindmap(WBindmap *bindmap)
 	free(bindmap->bindings);
 	bindmap->bindings=NULL;
 	bindmap->nbindings=0;
-	bindmap->parent=NULL;
 }
 
 
+static void refresh_bindmap(WBindmap *bindmap)
+{
+	WRegBindingInfo *rbind;
+	WBinding *b;
+	int i;
 	
+	for(i=0, b=bindmap->bindings; i<bindmap->nbindings; i++, b++){
+		if(b->act!=ACT_KEYPRESS)
+			continue;
+		for(rbind=bindmap->rbind_list; rbind!=NULL; rbind=rbind->bm_next)
+			rbind_binding_removed(rbind, b, bindmap);
+	}
+
+	for(i=0, b=bindmap->bindings; i<bindmap->nbindings; i++, b++){
+		if(b->act!=ACT_KEYPRESS)
+			continue;
+		b->kcb=XKeysymToKeycode(wglobal.dpy, b->ksb);
+	}
+	
+	qsort((void*)(bindmap->bindings), bindmap->nbindings, sizeof(WBinding), 
+		  compare_bindings);
+	
+	for(i=0, b=bindmap->bindings; i<bindmap->nbindings; i++, b++){
+		if(b->act!=ACT_KEYPRESS)
+			continue;
+		for(rbind=bindmap->rbind_list; rbind!=NULL; rbind=rbind->bm_next)
+			rbind_binding_added(rbind, b, bindmap);
+	}
+}
+
+
+void refresh_bindings()
+{
+	WBindmap *bindmap;
+	
+	update_modmap();
+	
+	for(bindmap=known_bindmaps; bindmap!=NULL; bindmap=bindmap->next_known)
+		refresh_bindmap(bindmap);
+}
+
+
 bool add_binding(WBindmap *bindmap, const WBinding *b)
 {
 	WBinding *binding;
@@ -172,6 +215,10 @@ bool add_binding(WBindmap *bindmap, const WBinding *b)
 	
 	if(bindmap==NULL)
 		return FALSE;
+
+	if(bindmap->prev_known==NULL){
+		LINK_ITEM(known_bindmaps, bindmap, next_known, prev_known);
+	}
 
 	binding=bindmap->bindings;
 	

@@ -24,7 +24,7 @@
 #define ACT_BUTTONCLICK		3
 #define ACT_BUTTONDBLCLICK	4
 
-#define BINDMAP_INIT		{0, 0, NULL, NULL, NULL}
+#define BINDMAP_INIT		{0, NULL, NULL, NULL, NULL}
 
 
 INTRSTRUCT(WBinding);
@@ -34,6 +34,7 @@ INTRSTRUCT(WRegBindingInfo);
 
 DECLSTRUCT(WBinding){
 	uint kcb; /* keycode or button */
+	uint ksb; /* keysym or button */
 	uint state;
 	uint act;
 	int area;
@@ -56,10 +57,9 @@ DECLSTRUCT(WRegBindingInfo){
 
 DECLSTRUCT(WBindmap){
 	int nbindings;
-	uint confdefmod;
 	WBinding *bindings;
-	WBindmap *parent;
 	WRegBindingInfo *rbind_list;
+	WBindmap *next_known, *prev_known;
 };
 
 
@@ -79,5 +79,6 @@ extern void ungrab_binding(const WBinding *binding, Window win);
 extern int unmod(int state, int keycode);
 extern bool ismod(int keycode);
 extern void update_modmap();
+extern void refresh_bindings();
 
 #endif /* ION_IONCORE_BINDING_H */

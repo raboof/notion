@@ -36,6 +36,7 @@
 #include "exec.h"
 #include "conf.h"
 #include "binding.h"
+#include "bindmaps.h"
 #include "strings.h"
 #include "extl.h"
 #include "errorlog.h"
@@ -417,6 +418,8 @@ void ioncore_deinit()
 
 	while(wglobal.rootwins!=NULL)
 		destroy_obj((WObj*)wglobal.rootwins);
+
+	ioncore_deinit_bindmaps();
 	
 	dpy=wglobal.dpy;
 	wglobal.dpy=NULL;

@@ -60,3 +60,12 @@ bool genframe_bindings(ExtlTab tab)
 	return process_bindings(&ioncore_genframe_bindmap, frame_areas, tab);
 }
 
+
+
+void ioncore_deinit_bindmaps()
+{
+	deinit_bindmap(&ioncore_rootwin_bindmap);
+	deinit_bindmap(&ioncore_mplex_bindmap);
+	deinit_bindmap(&ioncore_genframe_bindmap);
+}
+

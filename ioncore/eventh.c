@@ -140,7 +140,7 @@ bool handle_event_default(XEvent *ev)
 		break;
 	CASE_EVENT(MappingNotify)
 		XRefreshKeyboardMapping(&(ev->xmapping));
-		update_modmap();
+		refresh_bindings();
 		break;
 	CASE_EVENT(SelectionClear)
 		clear_selection();

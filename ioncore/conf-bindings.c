@@ -48,14 +48,14 @@ static StringIntMap state_map[]={
 };
 
 
-static bool parse_keybut(const char *str, uint *mod_ret, uint *kcb_ret,
+static bool parse_keybut(const char *str, uint *mod_ret, uint *ksb_ret,
 						 bool button)
 {
 	char *str2, *p, *p2;
 	int keysym=NoSymbol, i;
 	bool ret=FALSE;
 	
-	*kcb_ret=NoSymbol;
+	*ksb_ret=NoSymbol;
 	*mod_ret=0;
 	
 	str2=scopy(str);
@@ -75,15 +75,16 @@ static bool parse_keybut(const char *str, uint *mod_ret, uint *kcb_ret,
 			keysym=XStringToKeysym(p);
 		
 		if(!button && keysym!=NoSymbol){
-			if(*kcb_ret!=NoSymbol){
+			int tmp;
+			if(*ksb_ret!=NoSymbol){
 				warn_obj(str, "Insane key combination");
 				break;
 			}
-			*kcb_ret=XKeysymToKeycode(wglobal.dpy, keysym);
-			if(*kcb_ret==0){
+			if(XKeysymToKeycode(wglobal.dpy, keysym)==0){
 				warn_obj(str, "Could not convert keysym to keycode");
 				break;
 			}
+			*ksb_ret=keysym;
 		}else{
 			i=stringintmap_ndx(state_map, p);
 
@@ -93,11 +94,11 @@ static bool parse_keybut(const char *str, uint *mod_ret, uint *kcb_ret,
 			}
 			
 			if(i>=BUTTON1_NDX){
-				if(!button || *kcb_ret!=NoSymbol){
+				if(!button || *ksb_ret!=NoSymbol){
 					warn_obj(str, "Insane button combination");
 					break;
 				}
-				*kcb_ret=state_map[i].value;
+				*ksb_ret=state_map[i].value;
 			}else{
 				if(*mod_ret==AnyModifier || 
 				   (*mod_ret!=0 && state_map[i].value==AnyModifier)){
@@ -131,7 +132,7 @@ static bool parse_keybut(const char *str, uint *mod_ret, uint *kcb_ret,
 
 
 static bool do_action(WBindmap *bindmap, const char *str,
-					  ExtlFn func, uint act, uint mod, uint kcb,
+					  ExtlFn func, uint act, uint mod, uint ksb,
 					  int area, bool wr)
 {
 	WBinding binding;
@@ -144,7 +145,8 @@ static bool do_action(WBindmap *bindmap, const char *str,
 	binding.waitrel=wr;
 	binding.act=act;
 	binding.state=mod;
-	binding.kcb=kcb;
+	binding.ksb=ksb;
+	binding.kcb=(act==ACT_KEYPRESS ? XKeysymToKeycode(wglobal.dpy, ksb) : ksb);
 	binding.area=area;
 	binding.submap=NULL;
 	
@@ -168,11 +170,11 @@ static bool do_action(WBindmap *bindmap, const char *str,
 
 
 static bool do_submap(WBindmap *bindmap, const char *str,
-					  ExtlTab subtab, uint action, uint mod, uint kcb)
+					  ExtlTab subtab, uint action, uint mod, uint ksb)
 {
 	WBinding binding, *bnd;
 
-	bnd=lookup_binding(bindmap, action, mod, kcb);
+	bnd=lookup_binding(bindmap, action, mod, ksb);
 	
 	if(bnd!=NULL && bnd->submap!=NULL && bnd->state==mod)
 		return process_bindings(bnd->submap, NULL, subtab);
@@ -180,7 +182,8 @@ static bool do_submap(WBindmap *bindmap, const char *str,
 	binding.waitrel=FALSE;
 	binding.act=ACT_KEYPRESS;
 	binding.state=mod;
-	binding.kcb=kcb;
+	binding.ksb=ksb;
+	binding.kcb=XKeysymToKeycode(wglobal.dpy, ksb);
 	binding.area=0;
 	binding.func=extl_fn_none();
 	binding.submap=create_bindmap();
@@ -188,10 +191,8 @@ static bool do_submap(WBindmap *bindmap, const char *str,
 	if(binding.submap==NULL)
 		return FALSE;
 
-	if(add_binding(bindmap, &binding)){
-		binding.submap->parent=bindmap;
+	if(add_binding(bindmap, &binding))
 		return process_bindings(binding.submap, NULL, subtab);
-	}
 
 	deinit_binding(&binding);
 	
@@ -214,9 +215,9 @@ static StringIntMap action_map[]={
 static bool do_entry(WBindmap *bindmap, ExtlTab tab, StringIntMap *areamap)
 {
 	bool ret=FALSE;
-	char *action_str=NULL, *kcb_str=NULL, *area_str=NULL;
+	char *action_str=NULL, *ksb_str=NULL, *area_str=NULL;
 	int action;
-	uint kcb, mod;
+	uint ksb, mod;
 	WBinding *bnd;
 	ExtlTab subtab;
 	ExtlFn func;
@@ -239,34 +240,34 @@ static bool do_entry(WBindmap *bindmap, ExtlTab tab, StringIntMap *areamap)
 		}
 	}
 
-	if(!extl_table_gets_s(tab, "kcb", &kcb_str))
+	if(!extl_table_gets_s(tab, "kcb", &ksb_str))
 		goto fail;
 
-	if(!parse_keybut(kcb_str, &mod, &kcb, (action!=ACT_KEYPRESS &&
+	if(!parse_keybut(ksb_str, &mod, &ksb, (action!=ACT_KEYPRESS &&
 										   action!=-1))){
 		goto fail;
 	}
 	
 	if(extl_table_gets_t(tab, "submap", &subtab)){
-		ret=do_submap(bindmap, kcb_str, subtab, action, mod, kcb);
+		ret=do_submap(bindmap, ksb_str, subtab, action, mod, ksb);
 		extl_unref_table(subtab);
 	}else{
 		if(areamap!=NULL){
 			if(extl_table_gets_s(tab, "area", &area_str)){
 				area=stringintmap_value(areamap, area_str, -1);
 				if(area<0){
-					warn("Unknown area %s for binding %s.", area_str, kcb_str);
+					warn("Unknown area %s for binding %s.", area_str, ksb_str);
 					area=0;
 				}
 			}
 		}
 		
 		if(!extl_table_gets_f(tab, "func", &func)){
-			/*warn("Function for binding %s not set/nil/undefined.", kcb_str);
+			/*warn("Function for binding %s not set/nil/undefined.", ksb_str);
 			goto fail;*/
 			func=extl_fn_none();
 		}
-		ret=do_action(bindmap, kcb_str, func, action, mod, kcb, area, wr);
+		ret=do_action(bindmap, ksb_str, func, action, mod, ksb, area, wr);
 		if(!ret)
 			extl_unref_fn(func);
 	}
@@ -274,8 +275,8 @@ static bool do_entry(WBindmap *bindmap, ExtlTab tab, StringIntMap *areamap)
 fail:
 	if(action_str!=NULL)
 		free(action_str);
-	if(kcb_str!=NULL)
-		free(kcb_str);
+	if(ksb_str!=NULL)
+		free(ksb_str);
 	if(area_str!=NULL)
 		free(area_str);
 	return ret;
