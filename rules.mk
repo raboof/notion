@@ -86,7 +86,7 @@ ifneq ($(PRELOAD_MODULES),1)
 CC_PICFLAGS=-fPIC -DPIC
 LD_SHAREDFLAGS=-shared
 
-%.lo: %.c
+%.o: %.c
 	$(CC) $(CC_PICFLAGS) $(CFLAGS) -c $< -o $@
 
 $(MODULE).so: $(OBJS) $(EXT_OBJS)
@@ -101,7 +101,7 @@ else # PRELOAD_MODULES
 PICOPT=-fPIC -DPIC
 LINKOPT=-shared
 
-%.lo: %.c
+%.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(MODULE).a: $(OBJS) $(EXT_OBJS)
