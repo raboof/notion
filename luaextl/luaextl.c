@@ -140,17 +140,6 @@ static int extl_obj_is(lua_State *st)
 }
 
 
-static int extl_obj_exists(lua_State *st)
-{
-	WObj *obj=NULL;
-	bool exists;
-	
-	exists=extl_stack_get(st, 1, 'o', FALSE, &obj);
-	lua_pushboolean(st, exists);
-	return 1;
-}
-
-
 static bool extl_init_obj_info(lua_State *st)
 {
 	lua_getregistry(st);
@@ -166,8 +155,6 @@ static bool extl_init_obj_info(lua_State *st)
 	lua_setglobal(st, "obj_typename");
 	lua_pushcfunction(st, extl_obj_is);
 	lua_setglobal(st, "obj_is");
-	lua_pushcfunction(st, extl_obj_exists);
-	lua_setglobal(st, "obj_exists");
 
 	return TRUE;
 }
