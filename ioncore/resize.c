@@ -10,9 +10,11 @@
  */
 
 #include <stdio.h>
+#include <limits.h>
 
 #include <libtu/objp.h>
 #include <libtu/minmax.h>
+
 #include "common.h"
 #include "global.h"
 #include "resize.h"
@@ -588,7 +590,11 @@ void region_size_hints(WRegion *reg, XSizeHints *hints_ret)
         hints_ret->base_width=0;
         hints_ret->base_height=0;
     }
-    hints_ret->flags|=(PMinSize|PBaseSize);
+    if(!(hints_ret->flags&PMaxSize)){
+        hints_ret->max_width=INT_MAX;
+        hints_ret->max_height=INT_MAX;
+    }
+    hints_ret->flags|=(PMinSize|PBaseSize|PMaxSize);
 }
 
 
