@@ -19,7 +19,7 @@
 #include "mkmenu.h"
 
 
-/*--lowlevel routine not to be called--EXTL_DOC
+/*--lowlevel routine not to be called by the user--EXTL_DOC
  * Display a menu inside multiplexer. The \var{handler} parameter
  * is a function that gets the selected menu entry as argument and
  * should call it with proper parameters. The table \var{tab} is a
@@ -49,7 +49,7 @@ WMenu *mod_menu_do_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
 }
 
 
-/*--lowlevel routine not to be called--EXTL_DOC
+/*--lowlevel routine not to be called by the user--EXTL_DOC
  * Display a pop-up menu inside window \var{where}. This function
  * can only be called from a mouse/pointing device button press handler
  * and the menu will be placed below the point where the press occured.

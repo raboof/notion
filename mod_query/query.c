@@ -18,7 +18,7 @@
 #include "wedln.h"
 
 
-/*EXTL_DOC
+/*--lowlevel routine not to be called by the user--EXTL_DOC
  * Show a query window in \var{mplex} with prompt \var{prompt}, initial
  * contents \var{dflt}. The function \var{handler} is called with
  * the entered string as the sole argument when \fnref{WEdln.finish}

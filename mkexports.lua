@@ -595,7 +595,8 @@ function write_fndoc(h, fn, info)
         fprintf(h, "%s.", info.class)
     end
     
-    if lua_input then
+    if not info.ivars then
+        -- Lua input
         fprintf(h, "%s%s}", fn, info.paramstr)
     else
         fprintf(h, "%s(", fn)
@@ -662,7 +663,6 @@ end
 inputs={}
 outh=io.stdout
 make_docs=false
-lua_input=false
 module="global"
 i=1
 
@@ -672,9 +672,6 @@ while arg[i] do
         return
     elseif arg[i]=="-mkdoc" then
         make_docs=true
-    elseif arg[i]=="-luadoc" then
-        make_docs=true
-        lua_input=true
     elseif arg[i]=="-o" then
         i=i+1
         outh, err=io.open(arg[i], "w")
@@ -705,11 +702,15 @@ for _, ifnam in inputs do
     print("Scanning " .. ifnam .. " for exports.")
     data=h:read("*a")
     h:close()
-    if lua_input then
+    if string.find(ifnam, "%.lua$") then
+        assert(make_docs)
         parse_luadoc("\n" .. data .. "\n")
-    else
+    elseif string.find(ifnam, "%.c$") then
         parse("\n" .. data .. "\n")
+    else
+        error('Unknown file')
     end
+    
 end
 
 if make_docs then
