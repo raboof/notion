@@ -33,7 +33,7 @@
 
 
 static void set_clientwin_state(WClientWin *cwin, int state);
-static void send_clientmsg(Window win, Atom a);
+static bool send_clientmsg(Window win, Atom a, Time stmp);
 
 
 WHooklist *add_clientwin_alt=NULL;
@@ -631,7 +631,7 @@ void clientwin_destroyed(WClientWin *cwin)
 /*{{{ Kill/close */
 
 
-static void send_clientmsg(Window win, Atom a)
+static bool send_clientmsg(Window win, Atom a, Time stmp)
 {
 	XClientMessageEvent ev;
 	
@@ -640,9 +640,9 @@ static void send_clientmsg(Window win, Atom a)
 	ev.message_type=wglobal.atom_wm_protocols;
 	ev.format=32;
 	ev.data.l[0]=a;
-	ev.data.l[1]=get_timestamp();/*CurrentTime;*/
+	ev.data.l[1]=stmp;
 	
-	XSendEvent(wglobal.dpy, win, False, 0L, (XEvent*)&ev);
+	return (XSendEvent(wglobal.dpy, win, False, 0L, (XEvent*)&ev)!=0);
 }
 
 
@@ -667,7 +667,7 @@ EXTL_EXPORT
 void clientwin_close(WClientWin *cwin)
 {
 	if(cwin->flags&CWIN_P_WM_DELETE)
-		send_clientmsg(cwin->win, wglobal.atom_wm_delete);
+		send_clientmsg(cwin->win, wglobal.atom_wm_delete, get_timestamp());
 	else
 		warn("Client does not support WM_DELETE.");
 }
@@ -938,6 +938,7 @@ static void clientwin_unmap(WClientWin *cwin)
 static void clientwin_set_focus_to(WClientWin *cwin, bool warp)
 {
 	WRegion *reg=region_topmost_stacked_above((WRegion*)cwin);
+	Time stmp;
 	
 	if(warp)
 		do_move_pointer_to((WRegion*)cwin);
@@ -947,10 +948,12 @@ static void clientwin_set_focus_to(WClientWin *cwin, bool warp)
 		return;
 	}
 
-	SET_FOCUS(cwin->win);
+	stmp=get_timestamp();
+	
+	XSetInputFocus(wglobal.dpy, cwin->win, RevertToParent, stmp);
 	
 	if(cwin->flags&CWIN_P_WM_TAKE_FOCUS)
-		send_clientmsg(cwin->win, wglobal.atom_wm_take_focus);
+		send_clientmsg(cwin->win, wglobal.atom_wm_take_focus, stmp);
 }
 
 
@@ -1112,13 +1115,10 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 	
 	cwin->flags|=CWIN_NEED_CFGNTFY;
 	
-	if(sz || pos){
-		fprintf(stderr, "rq %d\n", cwin->win);
+	if(sz || pos)
 		region_request_geom((WRegion*)cwin, geom, NULL, FALSE);
-	}
 	
 	if(cwin->flags&CWIN_NEED_CFGNTFY){
-		fprintf(stderr, "sc %d\n", cwin->win);
 		sendconfig_clientwin(cwin);
 		cwin->flags&=~CWIN_NEED_CFGNTFY;
 	}

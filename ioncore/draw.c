@@ -396,8 +396,9 @@ static void create_wm_windows(WRootWin *rootwin)
 												  rootwin->xscr),
 								    rootwin->default_cmap);
 #endif
-		
-	XSelectInput(wglobal.dpy, grdata->drag_win, ExposureMask);
+
+	XSelectInput(wglobal.dpy, grdata->drag_win, 
+				 ExposureMask|PropertyChangeMask);
 }
 
 

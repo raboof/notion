@@ -75,13 +75,15 @@ DECLSTRUCT(WGlobal){
 	bool grab_released;
 	int opmode;
 	int previous_protect;
-
+	
 	Time resize_delay;
 	Time dblclick_delay;
 	int opaque_resize;
 	bool warp_enabled;
 	
+	bool ws_save_enabled;
 };
+
 
 extern WGlobal wglobal;
 

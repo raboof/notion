@@ -276,6 +276,8 @@ static void initialize_global()
 	wglobal.warp_enabled=TRUE;
 	
 	wglobal.grab_released=FALSE;
+	
+	wglobal.ws_save_enabled=TRUE;
 }
 
 
@@ -436,11 +438,13 @@ void ioncore_deinit()
 	if(wglobal.dpy==NULL)
 		return;
 	
-	while((rootwin=wglobal.rootwins)!=NULL){
-		FOR_ALL_TYPED_CHILDREN(rootwin, scr, WScreen){
-			save_workspaces(scr);
+	if(wglobal.ws_save_enabled){
+		while((rootwin=wglobal.rootwins)!=NULL){
+			FOR_ALL_TYPED_CHILDREN(rootwin, scr, WScreen){
+				save_workspaces(scr);
+			}
+			destroy_obj((WObj*)rootwin);
 		}
-		destroy_obj((WObj*)rootwin);
 	}
 
 	unload_modules();

@@ -5,6 +5,8 @@
  * See the included file LICENSE for details.
  */
 
+#include <X11/Xmd.h>
+
 #include "common.h"
 #include "global.h"
 #include "signal.h"
@@ -19,6 +21,67 @@
 #include <sys/time.h>
 
 
+/*{{{ Time updating */
+
+#define CHKEV(E, T) case E: tm=((T*)ev)->time; break;
+
+static Time last_timestamp=CurrentTime;
+
+void update_timestamp(XEvent *ev)
+{
+	Time tm;
+	
+	switch(ev->type){
+	CHKEV(ButtonPress, XButtonPressedEvent);
+	CHKEV(ButtonRelease, XButtonReleasedEvent);
+	CHKEV(EnterNotify, XEnterWindowEvent);
+	CHKEV(KeyPress, XKeyPressedEvent);
+	CHKEV(KeyRelease, XKeyReleasedEvent);
+	CHKEV(LeaveNotify, XLeaveWindowEvent);
+	CHKEV(MotionNotify, XPointerMovedEvent);
+	CHKEV(PropertyNotify, XPropertyEvent);
+	CHKEV(SelectionClear, XSelectionClearEvent);
+	CHKEV(SelectionNotify, XSelectionEvent);
+	CHKEV(SelectionRequest, XSelectionRequestEvent);
+	default:
+		return;
+	}
+
+	last_timestamp=tm;
+}
+
+
+Time get_timestamp()
+{
+	if(last_timestamp==CurrentTime){
+		/* Idea blatantly copied from wmx */
+		XEvent ev;
+		Atom dummy;
+		
+		D(fprintf(stderr, "Attempting to get time from X server."));
+		
+		dummy=XInternAtom(wglobal.dpy, "_ION_TIMEREQUEST", False);
+		if(dummy==None){
+			warn("Time request failed.");
+			return 0;
+		}
+		/* TODO: use some other window that should also function as a
+		 * NET_WM support check window.
+		 */
+		XChangeProperty(wglobal.dpy, wglobal.rootwins->grdata.drag_win,
+						dummy, dummy, 8, PropModeAppend,
+						(unsigned char*)"", 0);
+		get_event_mask(&ev, PropertyChangeMask);
+		XPutBackEvent(wglobal.dpy, &ev);
+	}
+	
+	return last_timestamp;
+}
+
+
+/*}}}*/
+
+
 /*{{{ Event reading */
 
 
@@ -29,25 +92,27 @@ void get_event(XEvent *ev)
 	
 	while(1){
 		check_signals();
-	
+		
 		if(QLength(wglobal.dpy)>0){
 			XNextEvent(wglobal.dpy, ev);
+			update_timestamp(ev);
 			return;
 		}
 		
 		XFlush(wglobal.dpy);
-
+		
 		FD_ZERO(&rfds);
 		FD_SET(wglobal.conn, &rfds);
-
- 		set_input_fds(&rfds, &nfds);
- 		
- 		if(select(nfds+1, &rfds, NULL, NULL, NULL)>0){
- 			check_input_fds(&rfds);
- 			if(FD_ISSET(wglobal.conn, &rfds)){
- 				XNextEvent(wglobal.dpy, ev);
- 				return;
- 			}
+		
+		set_input_fds(&rfds, &nfds);
+		
+		if(select(nfds+1, &rfds, NULL, NULL, NULL)>0){
+			check_input_fds(&rfds);
+			if(FD_ISSET(wglobal.conn, &rfds)){
+				XNextEvent(wglobal.dpy, ev);
+				update_timestamp(ev);
+				return;
+			}
 		}
 	}
 }
@@ -56,23 +121,18 @@ void get_event(XEvent *ev)
 void get_event_mask(XEvent *ev, long mask)
 {
 	fd_set rfds;
-	bool found=FALSE;
 	
 	while(1){
 		check_signals();
 		
-		while(XCheckMaskEvent(wglobal.dpy, mask, ev)){
-			if(ev->type!=MotionNotify)
-				return;
-			found=TRUE;
-		}
-
-		if(found)
+		if(XCheckMaskEvent(wglobal.dpy, mask, ev)){
+			update_timestamp(ev);
 			return;
+		}
 		
 		FD_ZERO(&rfds);
 		FD_SET(wglobal.conn, &rfds);
-
+		
 		select(wglobal.conn+1, &rfds, NULL, NULL, NULL);
 	}
 }

@@ -63,8 +63,8 @@ static void keyboard_handler(XEvent *ev);
 /*{{{ Main loop  */
 
 
-#define CASE_EVENT(X) case X: 
-	/*fprintf(stderr, "[%#lx] %s\n", ev->xany.window, #X);*/
+#define CASE_EVENT(EV) case EV:  /*\
+	fprintf(stderr, "[%#lx] %s\n", ev->xany.window, #EV);*/
 
 
 static void skip_focusenter()
@@ -76,6 +76,7 @@ static void skip_focusenter()
 	
 	while(XCheckMaskEvent(wglobal.dpy,
 						  EnterWindowMask|FocusChangeMask, &ev)){
+		update_timestamp(&ev);
 		if(ev.type==FocusOut)
 			handle_focus_out(&(ev.xfocus));
 		else if(ev.type==FocusIn)
@@ -175,6 +176,7 @@ void mainloop()
 		if(wglobal.focus_next!=NULL && wglobal.input_mode==INPUT_NORMAL){
 			bool warp=wglobal.warp_next;
 			WRegion *next=wglobal.focus_next;
+			wglobal.focus_next=NULL;
 			skip_focusenter();
 			do_set_focus(next, warp);
 		}/*else if(wglobal.grab_released && !wglobal.warp_enabled){
@@ -255,7 +257,7 @@ static void handle_configure_request(XConfigureRequestEvent *ev)
 		XConfigureWindow(wglobal.dpy, ev->window, ev->value_mask, &wc);
 		return;
 	}
-	
+
 	clientwin_handle_configure_request(cwin, ev);
 }
 
@@ -561,6 +563,16 @@ static void pointer_handler(XEvent *ev)
 	while(mouse_grab_held){
 		XFlush(wglobal.dpy);
 		get_event_mask(ev, GRAB_EV_MASK);
+		
+		if(ev->type==MotionNotify){
+			/* Handle sequences of MotionNotify (possibly followed by button
+			 * release) as one.
+			 */
+			if(XPeekEvent(wglobal.dpy, &tmp)){
+				if(ev->type==MotionNotify || ev->type==ButtonRelease)
+					XNextEvent(wglobal.dpy, ev);
+			}
+		}
 		
 		switch(ev->type){
 		CASE_EVENT(ButtonRelease)
