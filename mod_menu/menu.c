@@ -518,7 +518,7 @@ bool menu_init(WMenu *menu, WWindow *par, const WFitParams *fp,
 
     menu_firstfit(menu, params->submenu_mode, params->ref_x, params->ref_y);
     
-    XSelectInput(ioncore_g.dpy, win, IONCORE_EVENTMASK_INPUT);
+    XSelectInput(ioncore_g.dpy, win, IONCORE_EVENTMASK_NORMAL);
     region_add_bindmap((WRegion*)menu, mod_menu_menu_bindmap);
     
     return TRUE;

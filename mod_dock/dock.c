@@ -57,6 +57,7 @@
 #include <ioncore/regbind.h>
 #include <ioncore/defer.h>
 #include <ioncore/extlconv.h>
+#include <ioncore/event.h>
 
 /*}}}*/
 
@@ -1086,8 +1087,7 @@ static bool dock_init(WDock *dock, WWindow *parent, const WFitParams *fp)
     ((WRegion*)dock)->flags|=REGION_SKIP_FOCUS;
 
     XSelectInput(ioncore_g.dpy, ((WWindow*)dock)->win,
-                 EnterWindowMask|ExposureMask|FocusChangeMask|KeyPressMask
-                 |SubstructureRedirectMask);
+                 IONCORE_EVENTMASK_CWINMGR);
 
     dock_brush_get(dock);
 

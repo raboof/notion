@@ -63,7 +63,7 @@ void genws_do_reparent(WGenWS *ws, WWindow *par, const WFitParams *fp)
 {
     region_unset_parent((WRegion*)ws);
     XReparentWindow(ioncore_g.dpy, ws->dummywin, par->win, fp->g.x, fp->g.h);
-    region_set_parent((WRegion*)ws, (WRegion*)par);
+    region_set_parent((WRegion*)ws, par);
 }
 
 

@@ -59,7 +59,7 @@ bool unusedwin_init(WUnusedWin *uwin, WWindow *parent, const WFitParams *fp)
     
     region_add_bindmap((WRegion*)uwin, mod_panews_unusedwin_bindmap);
 
-    XSelectInput(ioncore_g.dpy, uwin->wwin.win, IONCORE_EVENTMASK_FRAME);
+    XSelectInput(ioncore_g.dpy, uwin->wwin.win, IONCORE_EVENTMASK_NORMAL);
     
     return TRUE;
 }

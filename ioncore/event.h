@@ -23,27 +23,19 @@
                                    KeyPressMask|KeyReleaseMask|            \
                                    EnterWindowMask|FocusChangeMask)
 
-#define IONCORE_EVENTMASK_ROOT    (SubstructureRedirectMask|          \
-                                 ColormapChangeMask|                \
-                                 ButtonPressMask|ButtonReleaseMask| \
-                                 PropertyChangeMask|KeyPressMask|   \
-                                 FocusChangeMask|EnterWindowMask)
+#define IONCORE_EVENTMASK_NORMAL (ExposureMask|KeyPressMask|         \
+                                  ButtonPressMask|ButtonReleaseMask| \
+                                  FocusChangeMask|EnterWindowMask)
 
-#define IONCORE_EVENTMASK_FRAME (FocusChangeMask|          \
-                                 ButtonPressMask|          \
-                                 ButtonReleaseMask|        \
-                                 KeyPressMask|             \
-                                 EnterWindowMask|          \
-                                 ExposureMask|             \
-                                 SubstructureRedirectMask)
+#define IONCORE_EVENTMASK_CWINMGR (IONCORE_EVENTMASK_NORMAL| \
+                                   SubstructureRedirectMask)
+
+#define IONCORE_EVENTMASK_ROOT (IONCORE_EVENTMASK_CWINMGR| \
+                                PropertyChangeMask|ColormapChangeMask)
 
 #define IONCORE_EVENTMASK_CLIENTWIN (ColormapChangeMask|                  \
                                      PropertyChangeMask|FocusChangeMask|  \
                                      StructureNotifyMask|EnterWindowMask)
-
-#define IONCORE_EVENTMASK_INPUT (ExposureMask|KeyPressMask|         \
-                                 ButtonPressMask|ButtonReleaseMask| \
-                                 FocusChangeMask)
 
 extern void ioncore_x_connection_handler(int conn, void *unused);
 extern void ioncore_flush();
