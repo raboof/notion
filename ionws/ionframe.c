@@ -313,15 +313,24 @@ void ionframe_draw_config_updated(WIonFrame *frame)
 
 static bool ionframe_save_to_file(WIonFrame *ionframe, FILE *file, int lvl)
 {
+	WRegion *sub;
+	
 	begin_saved_region((WRegion*)ionframe, file, lvl);
 	save_indent_line(file, lvl);
 	fprintf(file, "target_id %d\n", ionframe->genframe.target_id);
+	
+	FOR_ALL_MANAGED_ON_LIST(ionframe->genframe.managed_list, sub){
+		region_save_to_file((WRegion*)sub, file, lvl+1);
+	}
+	
 	end_saved_region((WRegion*)ionframe, file, lvl);
+	
 	return TRUE;
 }
 
 
 static int load_target_id;
+static WIonFrame *tmp_frame;
 
 
 static bool opt_target_id(Tokenizer *tokz, int n, Token *toks)
@@ -331,8 +340,29 @@ static bool opt_target_id(Tokenizer *tokz, int n, Token *toks)
 }
 
 
+static bool opt_region(Tokenizer *tokz, int n, Token *toks)
+{
+	WRegion *reg;
+	WRectangle geom;
+	
+	if(tmp_frame==NULL)
+		return FALSE;
+	
+	genframe_managed_geom((WGenFrame*)tmp_frame, &geom);
+	
+	reg=load_create_region((WWindow*)tmp_frame, geom, tokz, n, toks);
+
+	if(reg==NULL)
+		return FALSE;
+
+	region_add_managed_doit((WRegion*)tmp_frame, reg, 0);
+	
+	return TRUE;
+}
+
 static ConfOpt ionframe_opts[]={
 	{"target_id", "l", opt_target_id, NULL},
+	{"region", "s?s", opt_region, CONFOPTS_NOT_SET},
 	END_CONFOPTS
 };
 
@@ -340,11 +370,15 @@ static ConfOpt ionframe_opts[]={
 WRegion *ionframe_load(WWindow *par, WRectangle geom, Tokenizer *tokz)
 {
 	load_target_id=0;
+
+	tmp_frame=create_ionframe(par, geom, load_target_id);
 	
-	if(!parse_config_tokz(tokz, ionframe_opts))
+	if(!parse_config_tokz(tokz, ionframe_opts)){
+		destroy_thing((WThing*)tmp_frame);
 		return NULL;
+	}
 	
-	return (WRegion*)create_ionframe(par, geom, load_target_id);
+	return (WRegion*)tmp_frame;
 }
 
 

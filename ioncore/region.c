@@ -203,6 +203,14 @@ void region_remove_managed(WRegion *mgr, WRegion *reg)
 }
 
 
+WRegion *region_managed_enter_to_focus(WRegion *mgr, WRegion *reg)
+{
+	WRegion *ret=NULL;
+	CALL_DYN_RET(ret, WRegion*, region_managed_enter_to_focus, mgr, (mgr, reg));
+	return ret;
+}
+
+
 /*}}}*/
 
 

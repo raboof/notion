@@ -426,22 +426,24 @@ static void handle_enter_window(XEvent *ev)
 			freg=reg;
 	}while(freg!=NULL && XCheckMaskEvent(wglobal.dpy, EnterWindowMask, ev));
 
-	if(reg==NULL)
+	if(freg==NULL)
 		return;
 	
 	/* Does the manager of the region want to handle focusing?
 	 */
-	mgr=reg;
+	mgr=freg;
 	while(1){
-		mgr=REGION_MANAGER(mgr);
+		reg=mgr;
+		mgr=REGION_MANAGER(reg);
 		if(mgr==NULL)
 			break;
-		if(mgr->flags&REGION_HANDLES_MANAGED_ENTER_FOCUS)
-			reg=mgr;
+		reg=region_managed_enter_to_focus(mgr, reg);
+		if(reg!=NULL)
+			freg=reg;
 	}
 
-	set_previous_of(reg);
-	set_focus(reg);
+	set_previous_of(freg);
+	set_focus(freg);
 }
 
 

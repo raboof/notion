@@ -53,7 +53,6 @@ DECLOBJ(WRegion){
 #define REGION_ACTIVE		0x0002
 #define REGION_HAS_GRABS 	0x0004
 #define REGION_TAGGED		0x0008
-#define REGION_HANDLES_MANAGED_ENTER_FOCUS 0x0010
 #define REGION_BINDINGS_ARE_GRABBED 0x0020
 
 #define MARK_REGION_MAPPED(R)	(((WRegion*)(R))->flags|=REGION_MAPPED)
@@ -131,6 +130,7 @@ extern void region_set_manager(WRegion *reg, WRegion *mgr, WRegion **listptr);
 extern void region_unset_manager(WRegion *reg, WRegion *mgr, WRegion **listptr);
 extern bool region_manages_active_reg(WRegion *reg);
 
+DYNFUN WRegion *region_managed_enter_to_focus(WRegion *mgr, WRegion *reg);
 DYNFUN void region_remove_managed(WRegion *reg, WRegion *sub);
 DYNFUN bool region_display_managed(WRegion *reg, WRegion *sub);
 DYNFUN void region_managed_activated(WRegion *reg, WRegion *sub);

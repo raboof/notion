@@ -43,6 +43,8 @@ static void genframe_size_changed_default(WGenFrame *genframe,
 										  bool wchg, bool hchg);
 static bool genframe_handle_drop(WGenFrame *genframe, int x, int y,
 								 WRegion *dropped);
+static WRegion *genframe_managed_enter_to_focus(WGenFrame *genframe,
+												WRegion *reg);
 
 #define genframe_draw(F, C) draw_window((WWindow*)F, C)
 
@@ -61,6 +63,8 @@ static DynFunTab genframe_dynfuntab[]={
 	{focus_region, genframe_focus},
 	{region_activated, genframe_activated},
 	{region_inactivated, genframe_inactivated},
+	{(DynFun*)region_managed_enter_to_focus,
+	 (DynFun*)genframe_managed_enter_to_focus},
 	
 	{region_add_managed_params, genframe_add_managed_params},
 	{region_add_managed_doit, genframe_add_managed_doit},
@@ -125,8 +129,7 @@ bool init_genframe(WGenFrame *genframe, WWindow *parent, WRectangle geom,
 		return FALSE;
 	}
 	
-	genframe->win.region.flags|=(REGION_BINDINGS_ARE_GRABBED|
-								 REGION_HANDLES_MANAGED_ENTER_FOCUS);
+	genframe->win.region.flags|=REGION_BINDINGS_ARE_GRABBED;
 	
 	genframe->target_id=use_target_id((WRegion*)genframe, id);
 	
@@ -731,6 +734,13 @@ void genframe_border_inner_geom(const WGenFrame *genframe, WRectangle *geom)
 void genframe_size_changed(WGenFrame *genframe, bool wchg, bool hchg)
 {
 	CALL_DYN(genframe_size_changed, genframe, (genframe, wchg, hchg));
+}
+
+
+static WRegion *genframe_managed_enter_to_focus(WGenFrame *genframe,
+												WRegion *reg)
+{
+	return genframe->current_input;
 }
 
 

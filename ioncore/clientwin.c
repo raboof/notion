@@ -47,6 +47,7 @@ static Window clientwin_x_window(WClientWin *cwin);
 static void clientwin_activated(WClientWin *cwin);
 static void clientwin_resize_hints(WClientWin *cwin, XSizeHints *hints_ret,
 								   uint *relw_ret, uint *relh_ret);
+static WRegion *clientwin_managed_enter_to_focus(WClientWin *cwin, WRegion *reg);
 
 static void clientwin_remove_managed(WClientWin *cwin, WRegion *reg);
 static void clientwin_add_managed_params(const WClientWin *cwin, WRegion **par,
@@ -69,13 +70,15 @@ static DynFunTab clientwin_dynfuntab[]={
 	{(DynFun*)region_x_window, (DynFun*)clientwin_x_window},
 	{region_activated, clientwin_activated},
 	{region_resize_hints, clientwin_resize_hints},
+	{(DynFun*)region_managed_enter_to_focus,
+	 (DynFun*)clientwin_managed_enter_to_focus},
 	
 	{region_remove_managed, clientwin_remove_managed},
 	{region_add_managed_params, clientwin_add_managed_params},
 	{region_add_managed_doit, clientwin_add_managed_doit},
 	/* Perhaps resize accordingly instead? */
 	{region_request_managed_geom, clientwin_request_managed_geom},
-
+	
 	END_DYNFUNTAB
 };
 
@@ -200,7 +203,6 @@ static bool init_clientwin(WClientWin *cwin, WWindow *parent,
 	geom.w=attr->width;
 	
 	init_region(&(cwin->region), &(parent->region), geom);
-	((WRegion*)cwin)->flags|=REGION_HANDLES_MANAGED_ENTER_FOCUS;
 	
 	cwin->max_geom=geom;
 	cwin->flags=0;
@@ -874,6 +876,12 @@ static void clientwin_resize_hints(WClientWin *cwin, XSizeHints *hints_ret,
 	*hints_ret=cwin->size_hints;
 	
 	adjust_size_hints_for_managed(hints_ret, cwin->transient_list);
+}
+
+
+static WRegion *clientwin_managed_enter_to_focus(WClientWin *cwin, WRegion *reg)
+{
+	return TOPMOST_TRANSIENT(cwin);
 }
 
 

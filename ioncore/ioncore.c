@@ -206,6 +206,7 @@ bool ioncore_init(const char *appname, const char *appetcdir,
 	 * reset to POSIX so that at least fonts will be loadable if not all
 	 * characters supported.
 	 */
+#ifdef CF_UTF8
 	if(setlocale(LC_ALL, "")==NULL)
 		warn("setlocale() call failed");
 	if(!XSupportsLocale()){
@@ -219,6 +220,7 @@ bool ioncore_init(const char *appname, const char *appetcdir,
 			return FALSE;
 		}
 	}
+#endif
 	
 	initialize_global();
 	ioncore_init_funclists();
