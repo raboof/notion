@@ -59,12 +59,8 @@ LTDL_LIBS=-lltdl
 
 # Note to Cygwin users: you must set the above option and also LIBTOOL point 
 # to a real libtool script (e.g. /usr/autotool/stable/bin/libtool) instead 
-# of some useless autoconf-expecting wrapper. In order to workspace save 
-# files to work, you should also add the setting
-#DEFINES+=-DCF_SECOND_RATE_OS_FS
-# to replace colons in save file names with underscores. With these settings
-# Ion should compile on at least the version of Cygwin I installed on
-# 2003-06-17 on WinXP.
+# of some useless autoconf-expecting wrapper. With these settings Ion should
+# compile on at least the version of Cygwin I installed on 2003-06-17 on WinXP.
 
 # List of modules to build (and possibly preload)
 MODULE_LIST=ionws floatws query de
