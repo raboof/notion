@@ -307,7 +307,7 @@ bool add_shortenrule(const char *rx, const char *rule)
 		return FALSE;
 	
 	si=ALLOC(SR);
-	pp
+
 	if(si==NULL)
 		return FALSE;
 	
