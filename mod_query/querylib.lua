@@ -370,10 +370,12 @@ end
 
 
 --DOC
--- This query asks whether the user wants to have Ioncore exit.
--- If the answer is 'y', 'Y' or 'yes', so will happen.
-function querylib.query_exit(mplex)
-    querylib.query_yesno(mplex, "Exit Ion (y/n)?", ioncore.exit)
+-- This query asks whether the user wants to exit Ion (no session manager)
+-- or close the session (running under a session manager that supports such
+-- requests). If the answer is 'y', 'Y' or 'yes', so will happen.
+function querylib.query_shutdown(mplex)
+    querylib.query_yesno(mplex, "Exit Ion/Shutdown session (y/n)?", 
+                         ioncore.shutdown)
 end
 
 
