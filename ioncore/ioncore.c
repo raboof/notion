@@ -269,7 +269,7 @@ static void initialize_global()
 }
 
 
-/*#ifdef CF_UTF8*/
+#ifdef CF_UTF8
 static bool test_fallback_font(Display *dpy)
 {
 	WFontPtr fnt=load_font(dpy, CF_FALLBACK_FONT_NAME);
@@ -316,7 +316,7 @@ static bool set_up_locales(Display *dpy)
 		tryno++;
 	}
 }
-/*#endif*/
+#endif
 
 
 bool ioncore_init(const char *display, bool onescreen)

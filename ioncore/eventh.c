@@ -478,7 +478,7 @@ static void handle_focus_in(const XFocusChangeEvent *ev)
 	if(WOBJ_IS(reg, WScreen)){
 		D(fprintf(stderr, "scr-in %d %d %d\n", ((WScreen*)reg)->xscr, ev->mode, ev->detail));
 		if((ev->detail==NotifyPointerRoot || ev->detail==NotifyDetailNone) &&
-		   pointer_in_scr((WScreen*)reg)){
+		   pointer_in_scr((WScreen*)reg) && wglobal.focus_next==NULL){
 			/* Restore focus */
 			set_focus(reg);
 			return;

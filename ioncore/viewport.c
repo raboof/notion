@@ -251,7 +251,7 @@ static bool viewport_display_managed(WViewport *vp, WRegion *reg)
 	
 	if(wglobal.opmode!=OPMODE_DEINIT && 
 	   region_manages_active_reg((WRegion*)vp)){
-		warp(reg);
+		set_focus(reg);
 	}
 	
 	return TRUE;

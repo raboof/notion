@@ -127,7 +127,13 @@ void genframe_release(WGenFrame *genframe)
 
 
 static const char *tabdrag_safe_funclist[]={
-	"switch_ws_nth", "switch_ws_next", "switch_ws_prev", NULL
+	"screen_switch_nth_on_cvp",
+	"screen_switch_next_on_cvp",
+	"screen_switch_prev_on_cvp",
+	"viewport_switch_nth",
+	"viewport_switch_next",
+	"viewport_switch_prev",
+	NULL
 };
 
 

@@ -242,7 +242,7 @@ static ExtlTab complete(char *pathname, int (*cfn)(char *pathname,
 EXTL_EXPORT
 ExtlTab complete_file(char *pathname)
 {
-	complete(pathname, do_complete_file);
+	return complete(pathname, do_complete_file);
 }
 
 	

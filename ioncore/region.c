@@ -660,8 +660,12 @@ bool region_manages_active_reg(WRegion *reg)
 	WRegion *p;
 	WRegion *reg2;
 	
-	if(REGION_IS_ACTIVE(reg))
+	/* This should cover regions that have children */
+	if(REGION_IS_ACTIVE(reg)){
 		return TRUE;
+	}
+	
+	/* Otherwise check the parent */
 	
 	p=FIND_PARENT1(reg, WRegion);
 	

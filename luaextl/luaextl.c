@@ -1119,7 +1119,8 @@ static int extl_l1_call_handler2(lua_State *st)
 				break;
 		}
 		if(extl_safelist[i]==NULL){
-			warn("Attempt to call an unsafe function in restricted mode.");
+			warn("Attempt to call an unsafe function \"%s\" in restricted mode.",
+				 spec->name);
 			return 0;
 		}
 	}

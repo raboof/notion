@@ -331,7 +331,7 @@ bool genframe_display_managed(WGenFrame *genframe, WRegion *sub)
 	bool mapped;
 	
 	if(sub==genframe->current_sub || sub==genframe->current_input)
-		return FALSE;
+		return TRUE;
 	
 	if(genframe->current_sub!=NULL && REGION_IS_MAPPED(genframe))
 		region_unmap(genframe->current_sub);

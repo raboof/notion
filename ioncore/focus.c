@@ -121,7 +121,6 @@ void do_set_focus(WRegion *reg, bool warp)
 {
 	if(reg==NULL || !region_is_fully_mapped(reg))
 		return;
-
 	region_set_focus_to(reg, warp);
 }
 

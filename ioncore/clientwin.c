@@ -137,13 +137,16 @@ void clientwin_get_size_hints(WClientWin *cwin)
 
 void clientwin_get_set_name(WClientWin *cwin)
 {
-	char **list;
-	
+	char **list=NULL;
+#ifdef CF_UTF8
 	list=get_text_property(cwin->win, wglobal.atom_net_wm_name);
 	if(list==NULL)
 		list=get_text_property(cwin->win, XA_WM_NAME);
 	else
 		cwin->flags|=CWIN_USE_NET_WM_NAME;
+#else
+	list=get_text_property(cwin->win, XA_WM_NAME);
+#endif
 
 	if(list==NULL){
 		region_unuse_name((WRegion*)cwin);
