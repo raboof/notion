@@ -54,7 +54,7 @@ static OptParserOpt ion_opts[]={
 
 
 static const char statusd_copy[]=
-    "Ion-statusd " ION_VERSION ", copyright (c) Tuomo Valkonen 1999-2004.";
+    "Ion-statusd " ION_VERSION ", copyright (c) Tuomo Valkonen 2004.";
 
 
 static const char statusd_license[]=DUMMY_TR(

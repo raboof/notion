@@ -26,9 +26,10 @@ string.format("[ %%date || %s: %%load || %s: %%mail_new/%%mail_total ]",
 
 -- Default settings
 local settings={
-    date_format='%Y-%m-%d %H:%M',
+    date_format='%a %Y-%m-%d %H:%M',
     template=default_tmpl,
     statusd_params="-m mail -m load",
+    load_wtempl="x.xx, x.xx, x.xx",
 }
 
 local infowins={}
@@ -57,13 +58,11 @@ end
 -- Meter list {{{
 
 local meters={}
-local wtempls={}
 
 --DOC
 -- Inform of a value.
-function ext_statusbar.inform(name, value, wtempl)
+function ext_statusbar.inform(name, value)
     meters[name]=value
-    wtempls[name]=wtempl
 end
 
 -- }}}
@@ -127,7 +126,7 @@ function ext_statusbar.get_w_template()
                                return ""
                            end
                            local m=meters[s]
-                           local w=wtempls[s]
+                           local w=settings[s.."_wtempl"]
                            return (w or m or "??")
                        end)
 end
@@ -229,14 +228,14 @@ function ext_statusbar.create(param)
     if not iw then
         error(TR("Failed to create statusbar."))
     end
+
+    ext_statusbar.init_timer()
+    
+    ext_statusbar.launch_statusd()
     
     infowins[iw]=true
     iw:set_natural_w(ext_statusbar.get_w_template())
     iw:set_text(ext_statusbar.get_status())
-    
-    ext_statusbar.init_timer()
-    
-    ext_statusbar.launch_statusd()
     
     return iw
 end

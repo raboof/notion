@@ -12,10 +12,10 @@ ext_statusbar.set{
     -- programs and thus belongs to ion-statusd.)
     --statusd_params="-m mail -m load"
 
-    -- ISO-8601 date format
-    --date_format='%Y-%m-%d %H:%M',
+    -- ISO-8601 date format with additional abbreviated day name
+    --date_format='%a %Y-%m-%d %H:%M',
     -- Finnish date format
-    --date_format='%d.%m.%Y %H:%M'
+    --date_format='%a %d.%m.%Y %H:%M'
     -- Locale date format (usually shows seconds, which would require
     -- updating rather often and can be distracting)
     --date_format='%c',
