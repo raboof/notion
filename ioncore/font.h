@@ -57,5 +57,8 @@ extern bool add_shortenrule(const char *rx, const char *rule);
 
 extern int str_nextoff(const char *p);
 extern int str_prevoff(const char *p, int pos);
+#ifdef CF_UTF8
+extern wchar_t str_wchar_at(char *p, int max);
+#endif
 
 #endif /* WMCORE_FONT_H */

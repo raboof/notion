@@ -15,10 +15,6 @@
 #include "edln.h"
 #include "wedln.h"
 
-#ifdef CF_UTF8
-#include <unicode.h>
-#endif
-
 #define EDLN_ALLOCUNIT 16
 #define EDLN_HISTORY_SIZE 256
 
@@ -29,16 +25,9 @@
 
 #ifdef CF_UTF8
 
-#define CHAR unicode_char_t
-#define ISALNUM unicode_isalnum
-#define CHAR_AT(P, N) char_at(P, N)
-static CHAR char_at(const char *p, int n)
-{
-	CHAR ch;
-	if(unicode_get_utf8(p, &ch)==NULL)
-		return (CHAR)0;
-	return ch;
-}
+#define CHAR wchar_t
+#define ISALNUM iswalnum
+#define CHAR_AT(P, N) str_wchar_at(P, N)
 
 #else /* !CF_UTF8 */
 

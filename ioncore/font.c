@@ -16,25 +16,58 @@
 #endif
 
 #ifdef CF_UTF8
-#include <unicode.h>
+#include <errno.h>
+#include <iconv.h>
 #endif
 
 
+#ifdef CF_UTF8
+wchar_t str_wchar_at(char *p, int max)
+{
+	static iconv_t ic=(iconv_t)(-1);
+	static bool iconv_tried=FALSE;
+	size_t il, ol, n;
+	wchar_t wc, *wcp=&wc;
+
+	if(max<=0)
+		return 0;
+	
+	if(!iconv_tried){
+		iconv_tried=TRUE;
+		ic=iconv_open("WCHAR_T", "UTF-8");
+		if(ic==(iconv_t)(-1))
+			warn_err_obj("iconv_open(\"WCHAR_T\", \"UTF-8\")");
+	}
+	
+	if(ic==(iconv_t)(-1))
+		return ((*p&0x80)==0 ? (wchar_t)*p : 0);
+	
+	ol=sizeof(wchar_t);
+	il=max;
+	
+	n=iconv(ic, &p, &il, (char**)&wcp, &ol);
+	if(n==(size_t)(-1) && errno!=E2BIG){
+		/*iconv_close(ic);
+		iconv_tried=FALSE;*/
+		warn_err_obj("iconv");
+		return 0;
+	}
+	return wc;
+}
+#endif
+
+	
 int str_prevoff(const char *p, int pos)
 {
 #ifdef CF_UTF8
-	const char *prev;
-
+	int opos=pos;
+	
 	while(pos>0){
-		/* unicode_previous_utf8 returns NULL if there's no valid
-		 * utf8 character at p+len... lame.
-		 */
-		prev=unicode_previous_utf8(p, p+pos);
-		if(prev!=NULL)
-			return p+pos-prev;
 		pos--;
+		if((p[pos]&0xC0)!=0x80)
+			break;
 	}
-	return 0;
+	return opos-pos;
 #else
 	return (pos>0 ? 1 : 0);
 #endif
@@ -44,11 +77,14 @@ int str_prevoff(const char *p, int pos)
 int str_nextoff(const char *p)
 {
 #ifdef CF_UTF8
-	char *next;
-	next=unicode_next_utf8(p);
-	if(next==NULL)
-		return 0;
-	return next-p;
+	int pos=0;
+	
+	while(p[pos]){
+		pos++;
+		if((p[pos]&0xC0)!=0x80)
+			break;
+	}
+	return pos;
 #else
 	return (*p=='\0' ? 0 : 1);
 #endif
