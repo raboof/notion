@@ -27,11 +27,14 @@ static ExtlFn continuation;
 void ioncore_handle_selection_request(XSelectionRequestEvent *ev)
 {
     XSelectionEvent sev;
+    const char *p[1];
     
     if(selection_data==NULL)
         return;
     
-    xwindow_set_text_property(ev->requestor, ev->property, selection_data);
+    p[0]=selection_data;
+    
+    xwindow_set_text_property(ev->requestor, ev->property, p, 1);
     
     sev.type=SelectionNotify;
     sev.requestor=ev->requestor;

@@ -17,17 +17,20 @@
 #include "global.h"
 
 
-ulong xwindow_get_property(Window win, Atom atom, Atom type, 
-                           ulong n32expected, bool more, uchar **p)
+/*{{{ Primitives */
+
+
+static ulong xwindow_get_property_(Window win, Atom atom, Atom type, 
+                                   ulong n32expected, bool more, uchar **p,
+                                   int *format)
 {
     Atom real_type;
-    int format;
     ulong n=-1, extra=0;
     int status;
     
     do{
         status=XGetWindowProperty(ioncore_g.dpy, win, atom, 0L, n32expected, 
-                                  False, type, &real_type, &format, &n,
+                                  False, type, &real_type, format, &n,
                                   &extra, p);
         
         if(status!=Success || *p==NULL)
@@ -37,7 +40,7 @@ ulong xwindow_get_property(Window win, Atom atom, Atom type,
             break;
         
         XFree((void*)*p);
-        n32expected+=extra;
+        n32expected+=(extra+4)/4;
         more=FALSE;
     }while(1);
 
@@ -51,8 +54,20 @@ ulong xwindow_get_property(Window win, Atom atom, Atom type,
 }
 
 
-/* string
- */
+ulong xwindow_get_property(Window win, Atom atom, Atom type, 
+                           ulong n32expected, bool more, uchar **p)
+{
+    int format=0;
+    return xwindow_get_property_(win, atom, type, n32expected, more, p, 
+                                 &format);
+}
+
+
+/*}}}*/
+
+
+/*{{{ String property stuff */
+
 
 char *xwindow_get_string_property(Window win, Atom a, int *nret)
 {
@@ -79,8 +94,11 @@ void xwindow_set_string_property(Window win, Atom a, const char *value)
 }
 
 
-/* integer
- */
+/*}}}*/
+
+
+/*{{{ Integer property stuff */
+
 
 bool xwindow_get_integer_property(Window win, Atom a, int *vret)
 {
@@ -143,8 +161,11 @@ void xwindow_set_state_property(Window win, int state)
 }
 
 
-/* xwindow_get_text_property
- */
+/*}}}*/
+
+
+/*{{{ Text property stuff */
+
 
 char **xwindow_get_text_property(Window win, Atom a, int *nret)
 {
@@ -189,22 +210,19 @@ char **xwindow_get_text_property(Window win, Atom a, int *nret)
 }
 
 
-void xwindow_set_text_property(Window win, Atom a, const char *str)
+void xwindow_set_text_property(Window win, Atom a, const char **ptr, int n)
 {
     XTextProperty prop;
-    const char *ptr[1]={NULL};
     Status st;
 
-    ptr[0]=str;
-    
     if(!ioncore_g.use_mb){
         st=XStringListToTextProperty((char **)&ptr, 1, &prop);
     }else{
 #ifdef X_HAVE_UTF8_STRING        
-        st=XmbTextListToTextProperty(ioncore_g.dpy, (char **)&ptr, 1,
+        st=XmbTextListToTextProperty(ioncore_g.dpy, (char **)ptr, n,
                                      XUTF8StringStyle, &prop);
 #else        
-        st=XmbTextListToTextProperty(ioncore_g.dpy, (char **)&ptr, 1,
+        st=XmbTextListToTextProperty(ioncore_g.dpy, (char **)ptr, n,
                                      XTextStyle, &prop);
 #endif        
         st=!st;
@@ -216,3 +234,171 @@ void xwindow_set_text_property(Window win, Atom a, const char *str)
     XSetTextProperty(ioncore_g.dpy, win, &prop, a);
     XFree(prop.value);
 }
+
+
+/*}}}*/
+
+
+/*{{{ Exports */
+
+
+EXTL_EXPORT
+int ioncore_x_intern_atom(const char *name, bool only_if_exists)
+{
+    return XInternAtom(ioncore_g.dpy, name, only_if_exists);
+}
+
+
+EXTL_EXPORT
+char *ioncore_x_get_atom_name(const char *name, int atom)
+{
+    return XGetAtomName(ioncore_g.dpy, atom);
+}
+
+
+#define CP(TYPE)                                              \
+    {                                                         \
+        TYPE *d=(TYPE*)p;                                     \
+        for(i=0; i<n; i++) extl_table_seti_i(tab, i+1, d[i]); \
+    }
+
+
+EXTL_EXPORT
+ExtlTab ioncore_x_get_window_property(int win, int atom, int atom_type,
+                                      int n32expected, bool more)
+{
+    uchar *p=NULL;
+    ExtlTab tab;
+    int format=0;
+    int i, n;
+    
+    n=xwindow_get_property_(win, atom, atom_type, n32expected, more, &p, 
+                            &format);
+    
+    if(p==NULL)
+        return extl_table_none();
+    
+    if(n<=0 || (format!=8 && format!=16 && format!=32)){
+        free(p);
+        return extl_table_none();
+    }
+    
+    tab=extl_create_table();
+    
+    switch(format){
+    case 8: CP(char); break;
+    case 16: CP(short); break;
+    case 32: CP(long); break;
+    }
+
+    return tab;
+}
+
+
+#define GET(TYPE)                                          \
+    {                                                      \
+        TYPE *d=ALLOC_N(TYPE, n);                          \
+        if(d==NULL) return;                                \
+        for(i=0; i<n; i++) {                               \
+            if(!extl_table_geti_i(tab, i+1, &tmp)) return; \
+            d[i]=tmp;                                      \
+        }                                                  \
+        p=(uchar*)d;                                       \
+    }
+
+        
+static bool get_mode(const char *mode, int *m)
+{
+    if(strcmp(mode, "replace")==0)
+        *m=PropModeReplace;
+    else if(strcmp(mode, "prepend")==0)
+        *m=PropModePrepend;
+    else if(strcmp(mode, "append")==0)
+        *m=PropModeAppend;
+    else
+        return FALSE;
+    
+    return TRUE;
+}
+
+
+EXTL_EXPORT
+void ioncore_x_change_property(int win, int atom, int atom_type,
+                               int format, const char *mode, ExtlTab tab)
+{
+    int tmp, m, i, n=extl_table_get_n(tab);
+    uchar *p;
+        
+    if(n<0 || !get_mode(mode, &m)){
+        warn(TR("Invalid arguments."));
+        return;
+    }
+
+    switch(format){
+    case 8: GET(char); break;
+    case 16: GET(short); break;
+    case 32: GET(long); break;
+    default:
+        warn(TR("Invalid arguments."));
+        return;
+    }
+    
+    XChangeProperty(ioncore_g.dpy, win, atom, atom_type, format, m, p, n);
+    
+    free(p);
+}
+
+
+EXTL_EXPORT
+void ioncore_x_delete_property(int win, int atom)
+{
+    XDeleteProperty(ioncore_g.dpy, win, atom);
+}
+
+
+EXTL_EXPORT
+ExtlTab ioncore_x_get_text_property(int win, int atom)
+{
+    char **list;
+    int i, n;
+    ExtlTab tab=extl_table_none();
+    
+    list=xwindow_get_text_property(win, atom, &n);
+    
+    if(list!=NULL){
+        if(n!=0){
+            tab=extl_create_table();
+            for(i=0; i<n; i++)
+                extl_table_seti_s(tab, i+1, list[i]);
+        }
+        XFreeStringList(list);
+    }
+    
+    return tab;
+}
+
+
+EXTL_EXPORT
+void ioncore_x_set_text_property(int win, int atom, ExtlTab tab)
+{
+    char **list;
+    int i, n=extl_table_get_n(tab);
+    
+    list=ALLOC_N(char*, n);
+
+    if(list==NULL)
+        return;
+    
+    for(i=0; i<n; i++){
+        list[i]=NULL;
+        extl_table_geti_s(tab, i+1, &(list[i]));
+    }
+    
+    xwindow_set_text_property(win, atom, (const char **)list, n);
+    
+    XFreeStringList(list);
+}
+
+
+/*}}}*/
+

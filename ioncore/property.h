@@ -25,7 +25,8 @@ extern void xwindow_set_integer_property(Window win, Atom a, int value);
 extern bool xwindow_get_state_property(Window win, int *state);
 extern void xwindow_set_state_property(Window win, int state);
 extern char **xwindow_get_text_property(Window win, Atom a, int *nret);
-extern void xwindow_set_text_property(Window win, Atom a, const char *str);
+extern void xwindow_set_text_property(Window win, Atom a, 
+                                      const char **p, int n);
 
 #endif /* ION_IONCORE_PROPERTY_H */
 
