@@ -826,7 +826,8 @@ static bool extl_push_args(lua_State *st, bool intab, const char *spec,
 		spec++;
 	}
 	
-	*retargs=args;
+	va_copy(*retargs, args);
+	va_end(args);
 	
 	return TRUE;
 }
