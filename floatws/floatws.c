@@ -146,7 +146,7 @@ static void floatws_remove_managed(WFloatWS *ws, WRegion *reg)
 	
 	region_remove_bindmap_owned(reg, &floatws_bindmap, (WRegion*)ws);
 	
-	if(REGION_IS_ACTIVE(reg))
+	if(region_may_control_focus((WRegion*)ws))
 		do_set_focus(next!=NULL ? next : (WRegion*)ws, FALSE);
 }
 

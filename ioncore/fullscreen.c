@@ -122,9 +122,12 @@ bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto)
 	WAttachParams param;
 	XSizeHints hnt;
 	int rootx, rooty;
+	bool cf;
 	
 	if(cwin->fsinfo.last_mgr_watch.obj==NULL)
 		return FALSE;
+	
+	cf=region_may_control_focus((WRegion*)cwin);
 
 	reg=(WRegion*)cwin->fsinfo.last_mgr_watch.obj;
 	reset_watch(&(cwin->fsinfo.last_mgr_watch));
@@ -150,6 +153,8 @@ bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto)
 		return FALSE;
 	}
 	
+	if(!cf)
+		return TRUE;
 	return region_goto((WRegion*)cwin);
 }
 
