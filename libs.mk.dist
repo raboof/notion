@@ -1,9 +1,12 @@
 
 LIBS_SUBDIRS = libtu libextl
 
-LIBTU_INCLUDES = -I$(TOPDIR)/libtu/include
-LIBTU_LIBS = -L$(TOPDIR)/libtu -ltu
+LIBTU_DIR = $(TOPDIR)/libtu
+LIBTU_INCLUDES = -I$(LIBTU_DIR)/include
+LIBTU_LIBS = -L$(LIBTU_DIR) -ltu
 
-LIBEXTL_INCLUDES = -I$(TOPDIR)/libextl/include
-LIBEXTL_LIBS = -L$(TOPDIR)/libextl -lextl
-MKEXPORTS = $(LUA) $(TOPDIR)/libextl/libextl-mkexports
+LIBEXTL_DIR = $(TOPDIR)/libextl
+LIBEXTL_INCLUDES = -I$(LIBEXTL_DIR)
+LIBEXTL_LIBS = -L$(LIBEXTL_DIR) -lextl
+
+MKEXPORTS = $(LUA) $(LIBEXTL_DIR)/libextl-mkexports

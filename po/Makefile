@@ -15,7 +15,6 @@ TRANSLATIONS := fi cs
 MO_FILES := $(patsubst %,%.mo, $(TRANSLATIONS))
 
 POTDIRS=../ioncore \
-	../libextl \
 	../mod_ionws \
 	../mod_floatws \
 	../mod_panews \
@@ -27,7 +26,9 @@ POTDIRS=../ioncore \
 	../ext_statusbar \
 	../ion \
 	../pwm \
-	../etc
+	../etc \
+	$(LIBEXTL_DIR) \
+	$(LIBTU_DIR) \
 
 POTFILE=ion3.pot
 
