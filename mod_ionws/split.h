@@ -58,8 +58,7 @@ DECLCLASS(WSplit){
     int min_w, min_h;
     int max_w, max_h;
 
-    bool is_static;
-    bool is_lazy;
+    char *marker;
     
     union{
         struct{
@@ -133,13 +132,31 @@ extern void split_transpose_to(WSplit *split, const WRectangle *geom);
 
 extern void split_update_geom_from_children(WSplit *node);
 
-#define CHKNODE(NODE)                                              \
+extern const char *split_get_marker(WSplit *node);
+extern bool split_set_marker(WSplit *node, const char *s);
+
+#define CHKNODE_(NODE)                                              \
     assert(((NODE)->type==SPLIT_REGNODE && (NODE)->u.reg!=NULL) || \
            ((NODE)->type==SPLIT_STDISPNODE) ||                       \
            ((NODE)->type==SPLIT_UNUSED) ||                         \
            (((NODE)->type==SPLIT_VERTICAL ||                       \
              (NODE)->type==SPLIT_HORIZONTAL)                       \
             && ((NODE)->u.s.tl!=NULL && (NODE)->u.s.br!=NULL)))
+
+
+#define CHKNODE(NODE)                                               \
+    assert((NODE)->type==SPLIT_REGNODE ||                           \
+           (NODE)->type==SPLIT_STDISPNODE ||                        \
+           (NODE)->type==SPLIT_UNUSED ||                            \
+           (NODE)->type==SPLIT_VERTICAL ||                          \
+           (NODE)->type==SPLIT_HORIZONTAL);                         \
+    assert((NODE)->type!=SPLIT_REGNODE || (NODE)->u.reg!=NULL);     \
+    assert((NODE)->type!=SPLIT_STDISPNODE || (NODE)->u.reg!=NULL);  \
+    assert((NODE)->type!=SPLIT_VERTICAL || (NODE)->u.s.tl!=NULL);   \
+    assert((NODE)->type!=SPLIT_VERTICAL || (NODE)->u.s.br!=NULL);   \
+    assert((NODE)->type!=SPLIT_HORIZONTAL || (NODE)->u.s.tl!=NULL); \
+    assert((NODE)->type!=SPLIT_HORIZONTAL || (NODE)->u.s.br!=NULL);
+            
 
 #define UNUSED_TOT(U1, U2, S) ((U1)+(U2)>=(S) ? (U1)+(U2) : (U1))
 #define UNUSED_L_TOT(U, R) UNUSED_TOT((U).l, (U).r, (R)->geom.w)

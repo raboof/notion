@@ -90,166 +90,96 @@ static WRegion *find_suitable_target(WIonWS *ws)
 
 /*{{{ Placement scan */
 
-#define PENALTY_NEVER    INT_MAX
-#define PENALTY_INIT     (INT_MAX-1)
-#define PENALTY_MAX      (INT_MAX-2)
-
-
-typedef struct{
-    WSplit *split;
-    int penalty;
-    int dest_w, dest_h;
-    ExtlTab config;
-} Res;
-
 
 typedef struct{
     WAutoWS *ws;
-    WSplit *node;
     WFrame *frame;
     WClientWin *cwin;
-    int depth;
-    int last_static_dir;
-    const WSplitUnused *unused;
-    Res res;
-} PenaltyParams;
+    
+    WSplit *res_node;
+    ExtlTab res_config;
+    int res_w, res_h;
+} PlacementParams;
 
 
 WHook *autows_layout_alt=NULL;
 
 
-static bool mrsh_layout_extl(ExtlFn fn, PenaltyParams *p)
+static bool mrsh_layout_extl(ExtlFn fn, PlacementParams *p)
 {
-    ExtlTab t=extl_create_table(), ut=extl_create_table();
+    ExtlTab t=extl_create_table();
     bool ret=FALSE;
     
     extl_table_sets_o(t, "ws", (Obj*)p->ws);
-    extl_table_sets_o(t, "node", (Obj*)p->node);
     extl_table_sets_o(t, "frame", (Obj*)p->frame);
     extl_table_sets_o(t, "cwin", (Obj*)p->cwin);
-    extl_table_sets_i(t, "depth", p->depth);
-    extl_table_sets_b(t, "last_static_vert", 
-                      (p->last_static_dir==SPLIT_VERTICAL));
-    extl_table_sets_i(ut, "l", p->unused->l);
-    extl_table_sets_i(ut, "r", p->unused->r);
-    extl_table_sets_i(ut, "t", p->unused->t);
-    extl_table_sets_i(ut, "b", p->unused->b);
-    extl_table_sets_i(ut, "tot_v", p->unused->tot_v);
-    extl_table_sets_i(ut, "tot_h", p->unused->tot_h);
-    extl_table_sets_t(t, "unused", ut);
 
     extl_call(fn, "t", "b", t, &ret);
     
     if(ret){
-        double d;
-        Res *r=&(p->res);
-        r->split=p->node;
-        r->penalty=PENALTY_NEVER;
-        r->dest_w=-1;
-        r->dest_h=-1;
-        r->config=extl_table_none();
+        ret=FALSE;
 
-        extl_table_gets_i(t, "dest_w", &(r->dest_w));
-        extl_table_gets_i(t, "dest_h", &(r->dest_h));
-        if(extl_table_gets_d(t, "penalty", &d) && d>=0)
-            r->penalty=(d>=PENALTY_NEVER ? PENALTY_NEVER : d);
-        ret=(extl_table_gets_t(t, "config", &(r->config))
-             || r->split->type==SPLIT_REGNODE);
+        extl_table_gets_i(t, "res_w", &(p->res_w));
+        extl_table_gets_i(t, "res_h", &(p->res_h));
+        
+        if(extl_table_gets_o(t, "res_node", (Obj**)&(p->res_node))){
+            if(!OBJ_IS(p->res_node, WSplit)){
+                WARN_FUNC("Malfunctioning hook; not split.");
+                goto err;
+            }
+            
+            if(p->res_node->type==SPLIT_UNUSED){
+                if(!extl_table_gets_t(t, "res_config", &(p->res_config))){
+                    WARN_FUNC("Malfunctioning hook; config missing.");
+                    goto err;
+                }
+            }else if(p->res_node->type!=SPLIT_REGNODE){
+                WARN_FUNC("Malfunctioning hook; not SPLIT_UNUSED or "
+                          "SPLIT_REGNODE");
+                goto err;
+            }
+        }
     }
     
-    extl_unref_table(ut);
     extl_unref_table(t);
     
     return ret;
+    
+err:    
+    p->res_node=NULL;
+    extl_unref_table(t);
+    return FALSE;
 }
 
 
-typedef bool PenaltyFn(PenaltyParams *p);
-
-
-static bool pfn_hook(PenaltyParams *p)
+static bool fallback_layout_(WSplit *node, PlacementParams *p)
 {
-    return hook_call_alt_p(autows_layout_alt, p, 
-                           (WHookMarshallExtl*)mrsh_layout_extl);
-}
-
-
-static bool pfn_fallback(PenaltyParams *p)
-{
-    p->res.split=p->node;
-    p->res.penalty=PENALTY_MAX;
-    p->res.dest_w=-1;
-    p->res.dest_h=-1;
-
-    if(p->node->type==SPLIT_UNUSED){
-        p->res.config=extl_create_table();
-        if(p->res.config==extl_table_none())
-            return FALSE;
-        extl_table_sets_o(p->res.config, "reg", (Obj*)(p->frame));
-    }else if(p->node->type==SPLIT_REGNODE){
-        p->res.config=extl_table_none();
-    }else{
+    if(node==NULL)
         return FALSE;
-    }
     
-    return TRUE;
+    if(node->type==SPLIT_UNUSED){
+        p->res_config=extl_create_table();
+        if(p->res_config==extl_table_none())
+            return FALSE;
+        extl_table_sets_o(p->res_config, "reg", (Obj*)(p->frame));
+        p->res_node=node;
+        return TRUE;
+    }else if(node->type==SPLIT_REGNODE){
+        p->res_node=node;
+        return TRUE;
+    }else if(node->type==SPLIT_VERTICAL || node->type==SPLIT_HORIZONTAL){
+        if(fallback_layout_(node->u.s.tl, p))
+            return TRUE;
+        if(fallback_layout_(node->u.s.br, p))
+            return TRUE;
+    }
+    return FALSE;
 }
 
 
-static void scan(WSplit *split, PenaltyFn *pfn, WAutoWS *ws, WFrame *frame, 
-                 WClientWin *cwin, int depth, int last_static_dir, 
-                 const WSplitUnused *uspc, Res *best)
+static bool fallback_layout(PlacementParams *p)
 {
-    if(split->type==SPLIT_REGNODE && !OBJ_IS(split->u.reg, WMPlex))
-        return;
-    
-    if(split->type==SPLIT_UNUSED || split->type==SPLIT_REGNODE){
-        PenaltyParams p;
-
-        p.ws=ws;
-        p.node=split;
-        p.frame=frame;
-        p.cwin=cwin;
-        p.depth=depth;
-        p.last_static_dir=last_static_dir;
-        p.unused=uspc;
-
-        if(pfn(&p)){
-            if(p.res.penalty<best->penalty)
-                *best=p.res;
-            else
-                extl_unref_table(p.res.config);
-        }
-        
-    }else if(split->type==SPLIT_VERTICAL || split->type==SPLIT_HORIZONTAL){
-        WSplit *tl=split->u.s.tl, *br=split->u.s.br;
-        WSplitUnused tlunused, brunused, un;
-        
-        if(split->is_static)
-            last_static_dir=split->type;
-
-        split_get_unused(tl, &tlunused);
-        split_get_unused(br, &brunused);
-        if(split->type==SPLIT_VERTICAL){
-            un=*uspc;
-            UNUSED_B_ADD(un, brunused, br);
-            un.tot_v=brunused.tot_v;
-            scan(tl, pfn, ws, frame, cwin, depth+1, last_static_dir, &un, best);
-            un=*uspc;
-            UNUSED_T_ADD(un, tlunused, tl);
-            un.tot_v=tlunused.tot_v;
-            scan(br, pfn, ws, frame, cwin, depth+1, last_static_dir, &un, best);
-        }else if(split->type==SPLIT_HORIZONTAL){
-            un=*uspc;
-            UNUSED_R_ADD(un, brunused, br);
-            un.tot_h=brunused.tot_h;
-            scan(tl, pfn, ws, frame, cwin, depth+1, last_static_dir, &un, best);
-            un=*uspc;
-            UNUSED_L_ADD(un, tlunused, tl);
-            un.tot_h=tlunused.tot_h;
-            scan(br, pfn, ws, frame, cwin, depth+1, last_static_dir, &un, best);
-        }
-    }
+    return fallback_layout_(p->ws->ionws.split_tree, p);
 }
 
 
@@ -260,11 +190,11 @@ static void scan(WSplit *split, PenaltyFn *pfn, WAutoWS *ws, WFrame *frame,
 
 
 static bool do_replace(WAutoWS *ws, WFrame *frame, WClientWin *cwin, 
-                       Res *rs)
+                       PlacementParams *rs)
 {
-    WSplit *u=rs->split;
+    WSplit *u=rs->res_node;
     WSplit *p=u->parent;
-    WSplit *node=ionws_load_node(&(ws->ionws), &(u->geom), rs->config);
+    WSplit *node=ionws_load_node(&(ws->ionws), &(u->geom), rs->res_config);
     
     assert(u->type==SPLIT_UNUSED);
     
@@ -312,65 +242,64 @@ bool autows_manage_clientwin(WAutoWS *ws, WClientWin *cwin,
     assert(ws->ionws.split_tree!=NULL);
     
     if(frame!=NULL){
-        int i;
-        PenaltyFn *pfns[]={pfn_hook, pfn_fallback};
+        WSplit **tree=&(ws->ionws.split_tree);
+        PlacementParams rs;
         
-        for(i=0; i<2; i++){
-            /*      split action         penalty       primn      w    h */
-            Res rs={NULL, PENALTY_INIT, -1, -1, 0};
-            WSplitUnused unused={0, 0, 0, 0, 0, 0};
-            WSplit **tree=&(ws->ionws.split_tree);
-            
-            rs.config=extl_table_none();
-            
-            split_update_bounds(*tree, TRUE);
-            scan(*tree, pfns[i], ws, frame, cwin, 0, SPLIT_UNUSED, &unused, 
-                 &rs);
-            
-            if(rs.split!=NULL){
-                /* Resize */
-                if(rs.dest_w>0 || rs.dest_h>0){
-                    WRectangle grq=rs.split->geom;
-                    int gflags=REGION_RQGEOM_WEAK_ALL;
-                    
-                    if(rs.dest_w>0){
-                        grq.w=rs.dest_w;
-                        gflags&=~REGION_RQGEOM_WEAK_W;
-                    }
-                    
-                    if(rs.dest_h>0){
-                        grq.h=rs.dest_h;
-                        gflags&=~REGION_RQGEOM_WEAK_H;
-                    }
-                    
-                    split_tree_rqgeom(*tree, rs.split, gflags, &grq, NULL);
+        rs.ws=ws;
+        rs.frame=frame;
+        rs.cwin=cwin;
+        rs.res_node=NULL;
+        rs.res_config=extl_table_none();
+        rs.res_w=-1;
+        rs.res_h=-1;
+
+        split_update_bounds(*tree, TRUE);
+        
+        assert(autows_layout_alt!=NULL);
+        
+        hook_call_p(autows_layout_alt, &rs,
+                    (WHookMarshallExtl*)mrsh_layout_extl);
+        
+        if(rs.res_node==NULL)
+            fallback_layout(&rs);
+        
+        if(rs.res_node!=NULL){
+            /* Resize */
+            if(rs.res_w>0 || rs.res_h>0){
+                WRectangle grq=rs.res_node->geom;
+                int gflags=REGION_RQGEOM_WEAK_ALL;
+                
+                if(rs.res_w>0){
+                    grq.w=rs.res_w;
+                    gflags&=~REGION_RQGEOM_WEAK_W;
                 }
                 
-                if(rs.split->type==SPLIT_UNUSED){
-                    if(do_replace(ws, frame, cwin, &rs))
-                        target=(WRegion*)frame;
-                }else if(rs.split->type==SPLIT_REGNODE){
-                    target=rs.split->u.reg;
-                }else{
-                    warn("There's a bug in placement code.");
+                if(rs.res_h>0){
+                    grq.h=rs.res_h;
+                    gflags&=~REGION_RQGEOM_WEAK_H;
                 }
                 
-                extl_unref_table(rs.config);
+                split_tree_rqgeom(*tree, rs.res_node, gflags, &grq, NULL);
             }
             
-            if(target==NULL){
-                warn("Scan #%d failed to find a placement for new client "
-                     "window/frame.", i);
+            if(rs.res_node->type==SPLIT_UNUSED){
+                if(do_replace(ws, frame, cwin, &rs))
+                    target=(WRegion*)frame;
+            }else if(rs.res_node->type==SPLIT_REGNODE){
+                target=rs.res_node->u.reg;
             }else{
-                break;
+                WARN_FUNC("Bug in placement code.");
             }
+            
+            extl_unref_table(rs.res_config);
         }
         
         if(target!=(WRegion*)frame)
             destroy_obj((Obj*)frame);
-    }else{
-        target=find_suitable_target(&(ws->ionws));
     }
+    
+    if(target==NULL)
+        target=find_suitable_target(&(ws->ionws));
 
     if(target!=NULL){
         if(region_manage_clientwin(target, cwin, param, 

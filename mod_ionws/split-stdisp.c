@@ -61,7 +61,15 @@ static void swap(int *x, int *y)
 
 static void swapptr(WSplit **x, WSplit **y)
 {
-    WSplit *z=*x;
+    void *z=*x;
+    *x=*y;
+    *y=z;
+}
+
+
+static void swapstr(char **x, char **y)
+{
+    char *z=*x;
     *x=*y;
     *y=z;
 }
@@ -156,6 +164,10 @@ static void rot_rs_rotate_right(WSplit *a, WSplit *p, WSplit *y)
     }
     
     swap(&(a->type), &(p->type));
+    /* Marker for a parent i of children j, k will this way stay in
+     * the first common parent of j and k (these nodes included).
+     */
+    swapstr(&(a->marker), &(p->marker));
     
     p->geom=pg;
     split_do_resize(a->u.s.br, &xg, PRIMN_ANY, PRIMN_ANY, FALSE, NULL);
@@ -229,6 +241,7 @@ static void rot_rs_rotate_left(WSplit *a, WSplit *p, WSplit *y)
     }
     
     swap(&(a->type), &(p->type));
+    swapstr(&(a->marker), &(p->marker));
     
     p->geom=pg;
     split_do_resize(a->u.s.tl, &xg, PRIMN_ANY, PRIMN_ANY, FALSE, NULL);
@@ -297,6 +310,7 @@ static void rot_rs_flip_right(WSplit *a, WSplit *p)
     }
     
     swap(&(a->type), &(p->type));
+    swapstr(&(a->marker), &(p->marker));
     
     p->geom=pg;
     split_do_resize(a->u.s.br, &xg, PRIMN_ANY, PRIMN_ANY, FALSE, NULL);
@@ -372,6 +386,7 @@ static void rot_rs_flip_left(WSplit *a, WSplit *p)
     }
     
     swap(&(a->type), &(p->type));
+    swapstr(&(a->marker), &(p->marker));
     
     p->geom=pg;
     split_do_resize(a->u.s.tl, &xg, PRIMN_ANY, PRIMN_ANY, FALSE, NULL);

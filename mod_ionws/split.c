@@ -199,6 +199,11 @@ void split_deinit(WSplit *split)
             destroy_obj((Obj*)(split->u.s.br));
         }
     }
+    
+    if(split->marker!=NULL){
+        free(split->marker);
+        split->marker=NULL;
+    }
 }
 
     
@@ -856,6 +861,7 @@ static WSplit *do_create_split(const WRectangle *geom)
         split->min_h=0;
         split->max_w=INT_MAX;
         split->max_h=INT_MAX;
+        split->marker=NULL;
     }
     return split;
 }
@@ -1094,6 +1100,7 @@ static bool split_tree_remove_split(WSplit **root, WSplit *split,
 }
 
 
+#if 0
 static void inc_s(WSplit *node, WSplit *unused, int dir, int s)
 {
     if(dir==SPLIT_VERTICAL){
@@ -1238,7 +1245,8 @@ static void move_down_(WSplit **root, WSplit *node, WSplit *unused)
         move_down(root, p, unused);
     }
 }
-    
+#endif    
+
 
 void split_tree_remove(WSplit **root, WSplit *node, 
                        bool reclaim_space, bool lazy)
@@ -1246,6 +1254,7 @@ void split_tree_remove(WSplit **root, WSplit *node,
     WSplit *split=node->parent, *other=NULL;
     WSplit **thisptr=NULL;
     bool replace_ok=FALSE, tl=FALSE;
+    int primn;
 
     if(split!=NULL && reclaim_space){
         if((split->u.s.tl!=node && split->u.s.tl->type==SPLIT_STDISPNODE) ||
@@ -1263,13 +1272,13 @@ void split_tree_remove(WSplit **root, WSplit *node,
         
         assert(other!=NULL);
         
-        if(lazy || other->type==SPLIT_STDISPNODE){
+        if(split->marker!=NULL || other->type==SPLIT_STDISPNODE){
             WSplit *un=create_split_unused(&(node->geom));
             if(un!=NULL){
                 *thisptr=un;
                 un->parent=split;
                 replace_ok=TRUE;
-                move_down(root, un, un);
+                /*move_down(root, un, un);*/
             }else{
                 warn_err();
             }
@@ -1277,10 +1286,8 @@ void split_tree_remove(WSplit **root, WSplit *node,
 
         if(!replace_ok){
             *thisptr=NULL;
-            if(tl)
-                split_tree_remove_split(root, split, PRIMN_BR, reclaim_space);
-            else
-                split_tree_remove_split(root, split, PRIMN_TL, reclaim_space);
+            split_tree_remove_split(root, split, (tl ? PRIMN_BR : PRIMN_TL),
+                                    reclaim_space);
         }
     }else{
         *root=NULL;
@@ -1543,6 +1550,24 @@ WSplit *split_br(WSplit *split)
 
 
 /*EXTL_DOC
+ * For splits of type \code{SPLIT_HORIZONTAL} the most recently active
+ * child node is returned. For other types of nodes \code{nil} is returned.
+ */
+EXTL_EXPORT_MEMBER
+WSplit *split_current(WSplit *split)
+{
+    if(split->type==SPLIT_VERTICAL || split->type==SPLIT_HORIZONTAL){
+        if(split->u.s.current==SPLIT_CURRENT_TL)
+            return split->u.s.tl;
+        else
+            return split->u.s.br;
+    }else{
+        return NULL;
+    }
+}
+
+
+/*EXTL_DOC
  * For split nodes of type \code{SPLIT_REGNODE} or \code{SPLIT_STDISPNODE}
  * this function returns the region contained in the node. For other types
  * of nodes \code{nil} is returned.
@@ -1634,6 +1659,41 @@ void split_mark_current(WSplit *node)
         node=split;
         split=split->parent;
     }
+}
+
+
+/*EXTL_DOC
+ * Get marker.
+ */
+EXTL_EXPORT_MEMBER
+const char *split_get_marker(WSplit *node)
+{
+    return node->marker;
+}
+
+
+/*EXTL_DOC
+ * Set marker.
+ */
+EXTL_EXPORT_MEMBER
+bool split_set_marker(WSplit *node, const char *s)
+{
+    char *s2=NULL;
+    
+    if(s!=NULL){
+        s2=scopy(s);
+        if(s2==NULL){
+            warn_err();
+            return FALSE;
+        }
+    }
+    
+    if(node->marker==NULL)
+        free(node->marker);
+    
+    node->marker=s2;
+    
+    return TRUE;
 }
 
 

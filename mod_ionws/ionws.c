@@ -928,20 +928,14 @@ static bool get_node_config(WSplit *node, ExtlTab *ret)
         tab=extl_create_table();
         extl_table_sets_b(tab, "stdispnode", TRUE);
         *ret=tab;
-        return TRUE;
-    }
-    
-    if(node->type==SPLIT_REGNODE){
+    }else if(node->type==SPLIT_REGNODE){
         if(!region_supports_save(node->u.reg)){
             warn("Unable to get configuration for a %s.",
                  OBJ_TYPESTR(node->u.reg));
             return FALSE;
         }
         *ret=region_get_configuration(node->u.reg);
-        return TRUE;
-    }
-
-    if(node->type==SPLIT_VERTICAL || node->type==SPLIT_HORIZONTAL){
+    }else if(node->type==SPLIT_VERTICAL || node->type==SPLIT_HORIZONTAL){
         if(!get_node_config(node->u.s.tl, &tltab))
             return get_node_config(node->u.s.br, ret);
         if(!get_node_config(node->u.s.br, &brtab)){
@@ -966,13 +960,15 @@ static bool get_node_config(WSplit *node, ExtlTab *ret)
         extl_unref_table(brtab);
         
         *ret=tab;
-        return TRUE;
     }else if(node->type==SPLIT_UNUSED){
         *ret=extl_create_table();
-        return TRUE;
+    }else{
+        return FALSE;
     }
-
-    return FALSE;
+    
+    extl_table_sets_s(*ret, "marker", node->marker);
+    
+    return TRUE;
 }
 
 
@@ -1120,10 +1116,10 @@ WSplit *ionws_load_node(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
 {
     char *typestr=NULL;
     Obj *ref=NULL;
-    
+    WSplit *node=NULL;
+
     if(extl_table_gets_s(tab, "type", &typestr) ||
        extl_table_gets_o(tab, "reg", &ref)){
-        WSplit *node=NULL;
         WRegion *reg;
         
         if(typestr!=NULL)
@@ -1140,11 +1136,16 @@ WSplit *ionws_load_node(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
             else
                 ionws_managed_add(ws, reg);
         }
-        
-        return node;
+    }else{
+        node=load_split(ws, geom, tab);
     }
     
-    return load_split(ws, geom, tab);
+    if(node!=NULL){
+        assert(node->marker==NULL);
+        extl_table_gets_s(tab, "marker", &(node->marker));
+    }
+    
+    return node;
 }
 
 
