@@ -224,7 +224,7 @@ void edln_back(Edln *edln)
 
 static int do_edln_forward(Edln *edln)
 {
-	int l=str_nextoff(edln->p+edln->point);
+	int l=str_nextoff(edln->p, edln->point);
 	edln->point+=l;
 	return l;
 }
@@ -347,7 +347,7 @@ void edln_delete(Edln *edln)
 	if(left<=0)
 		return;
 	
-	l=str_nextoff(edln->p+edln->point);
+	l=str_nextoff(edln->p, edln->point);
 	
 	if(l>0)
 		edln_rspc(edln, l);

@@ -19,7 +19,7 @@
 extern char *make_label(GrBrush *brush, const char *str, uint maxw);
 extern bool add_shortenrule(const char *rx, const char *rule);
 
-extern int str_nextoff(const char *p);
+extern int str_nextoff(const char *p, int pos);
 extern int str_prevoff(const char *p, int pos);
 extern wchar_t str_wchar_at(char *p, int max);
 

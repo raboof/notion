@@ -43,22 +43,34 @@ static int calc_text_y(WEdln *wedln, const WRectangle *geom)
 }
 
 
-static int wedln_draw_strsect(WEdln *wedln, const WRectangle *geom, int x,
-							  const char *str, int len, const char *attr)
+static int wedln_draw_strsect(WEdln *wedln, const WRectangle *geom, 
+							  int x, int y, const char *str, int len,
+							  const char *attr)
 {
-	int ty=calc_text_y(wedln, geom);
-
 	if(len==0)
 		return 0;
 	
-	grbrush_draw_string(WEDLN_BRUSH(wedln), WEDLN_WIN(wedln), geom->x+x, ty,
+	grbrush_draw_string(WEDLN_BRUSH(wedln), WEDLN_WIN(wedln), x, y, 
 						str, len, TRUE, attr);
 	
 	return grbrush_get_text_width(WEDLN_BRUSH(wedln), str, len);
 }
 
+#if 0
+static void dispu(const char* s, int l)
+{
+	while(l>0){
+		int c=(unsigned char)*s;
+		fprintf(stderr, "%d[%c]", c, *s);
+		s++;
+		l--;
+	}
+	fprintf(stderr, "\n");
+}
+#endif
+
 #define DSTRSECT(LEN, INV) \
-	{tx+=wedln_draw_strsect(wedln, geom, tx, str, LEN, INV); \
+	if(LEN>0){tx+=wedln_draw_strsect(wedln, geom, geom->x+tx, ty, str, LEN, INV); \
 	 str+=LEN; len-=LEN;}
 
 
@@ -66,7 +78,7 @@ static void wedln_do_draw_str_box(WEdln *wedln, const WRectangle *geom,
 								  const char *str, int cursor, 
 								  int mark, int tx)
 {
-	int len=strlen(str), ll;
+	int len=strlen(str), ll=0, ty=0;
 	const char *normalstyle=(REGION_IS_ACTIVE(wedln)
 							 ? "active-normal" : "inactive-normal");
 	const char *selectionstyle=(REGION_IS_ACTIVE(wedln)
@@ -75,6 +87,15 @@ static void wedln_do_draw_str_box(WEdln *wedln, const WRectangle *geom,
 							 ? "active-cursor" : "inactive-cursor");
 	
 	grbrush_set_clipping_rectangle(WEDLN_BRUSH(wedln), WEDLN_WIN(wedln), geom);
+	
+	if(tx<geom->w){
+		WRectangle g=*geom;
+		g.x+=tx;
+		g.w-=tx;
+		grbrush_clear_area(WEDLN_BRUSH(wedln), WEDLN_WIN(wedln), &g);
+	}
+	
+	ty=calc_text_y(wedln, geom);
 
 	if(mark<=cursor){
 		if(mark>=0){
@@ -84,25 +105,26 @@ static void wedln_do_draw_str_box(WEdln *wedln, const WRectangle *geom,
 			DSTRSECT(cursor, normalstyle);
 		}
 		if(len==0){
-			tx+=wedln_draw_strsect(wedln, geom, tx, " ", 1, cursorstyle);
+			tx+=wedln_draw_strsect(wedln, geom, geom->x+tx, ty,
+								   " ", 1, cursorstyle);
 		}else{
-			ll=str_nextoff(str);
+			ll=str_nextoff(str, 0);
 			DSTRSECT(ll, cursorstyle);
 		}
 	}else{
 		DSTRSECT(cursor, normalstyle);
-		ll=str_nextoff(str);
+		ll=str_nextoff(str, 0);
 		DSTRSECT(ll, cursorstyle);
 		DSTRSECT(mark-cursor-ll, selectionstyle);
 	}
-	DSTRSECT(len, 0);
+	DSTRSECT(len, normalstyle);
 
-	if(tx<geom->w){
+	/*if(tx<geom->w){
 		WRectangle g=*geom;
 		g.x+=tx;
 		g.w-=tx;
 		grbrush_clear_area(WEDLN_BRUSH(wedln), WEDLN_WIN(wedln), &g);
-	}
+	}*/
 	
 	grbrush_clear_clipping_rectangle(WEDLN_BRUSH(wedln), WEDLN_WIN(wedln));
 }
@@ -114,6 +136,9 @@ static void wedln_draw_str_box(WEdln *wedln, const WRectangle *geom,
 {
 	int tx=0;
 
+	/* Some fonts and Xmb/utf8 routines don't work well with dstart!=0. */
+	dstart=0;
+	
 	if(mark>=0){
 		mark-=vstart+dstart;
 		if(mark<0)
@@ -151,15 +176,16 @@ static bool wedln_update_cursor(WEdln *wedln, int iw)
 									  point-vstart);
 			cx+=grbrush_get_text_width(WEDLN_BRUSH(wedln), " ", 1);
 		}else{
+			int nxt=str_nextoff(str, point);
 			cx=grbrush_get_text_width(WEDLN_BRUSH(wedln), str+vstart, 
-									  point-vstart+1);
+									  point-vstart+nxt);
 		}
 		l=cx;
 		
 		if(l<iw)
 			break;
 		
-		vstart++;
+		vstart+=str_nextoff(str, vstart);
 	}
 	
 	ret=(wedln->vstart!=vstart);

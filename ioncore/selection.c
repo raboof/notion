@@ -116,36 +116,19 @@ void set_selection(const char *p, int n)
 }
 
 
-#if 0 /*def CF_UTF8*/
-static Atom utf8_atom=XA_STRING;
-#endif
-
 void request_selection(Window win)
 {
-#if 0	
-	Atom a;
-#ifndef CF_UTF8
-	a=XA_STRING;
-#else
-	if(utf8_atom==XA_STRING){
-		XTextProperty prop;
-		const char *ptr[1]={""};
-		Status st;
-
-		st=Xutf8TextListToTextProperty(wglobal.dpy, (char **)&ptr, 1,
-									   XUTF8StringStyle, &prop);
-		if(!st)
-			utf8_atom=prop.encoding;
-	}
-	a=utf8_atom;
-#endif
-#endif
-	
 #ifdef X_HAVE_UTF8_STRING
+	/*Atom a=XA_UTF8_STRING(wglobal.dpy);*/
 	Atom a=XInternAtom(wglobal.dpy, "UTF8_STRING", True);
 #else
+	/*Atom a=XA_TEXT(wglobal.dpy);*/
 	Atom a=XInternAtom(wglobal.dpy, "COMPOUND_TEXT", True);
 #endif
+
+	if(a==None)
+		a=XA_STRING;
+	
 	XConvertSelection(wglobal.dpy, XA_PRIMARY, a,
 					  wglobal.atom_selection, win, CurrentTime);
 }

@@ -20,6 +20,7 @@
 #define CF_FONT_ELEMENT_SIZE 50
 #endif
 
+#define FNT_D(X) /*X*/
 
 static const char *mystrcasestr(const char *str, const char *ptn) 
 {
@@ -97,11 +98,16 @@ XFontSet de_create_font_set(const char *fontname)
 	char weight[CF_FONT_ELEMENT_SIZE], slant[CF_FONT_ELEMENT_SIZE];
 	const char *nfontname = fontname;
 	char *pattern2 = NULL;
-
+	
+    FNT_D(fprintf(stderr, "FNTRQ: %s\n", fontname));
+	
 	fs = XCreateFontSet(wglobal.dpy, fontname, &missing, &nmissing, &def);
 	
 	if (fs && (! nmissing))
 		return fs;
+	
+	/* Not a warning, nothing serious */
+	FNT_D(fprintf(stderr, "Failed to load fonset.\n"));
 	
 	if (! fs) {
 		char *lcc=NULL;
@@ -129,6 +135,14 @@ XFontSet de_create_font_set(const char *fontname)
 		XFontsOfFontSet(fs, &fontstructs, &fontnames);
 		nfontname = fontnames[0];
 	}
+
+    /*if(fs){
+		XFontStruct **fontstructs;
+		char **fontnames;
+		int i, n=XFontsOfFontSet(fs, &fontstructs, &fontnames);
+		for(i=0; fontnames[i] && i<n; i++)
+			fprintf(stderr, "%s\n", fontnames[i]);
+	}*/
 	
 	get_font_element(nfontname, weight, CF_FONT_ELEMENT_SIZE,
 					 "-medium-", "-bold-", "-demibold-", "-regular-", NULL);
@@ -149,10 +163,12 @@ XFontSet de_create_font_set(const char *fontname)
 				   "%s,"
 				   "-*-*-%s-%s-*-*-%d-*-*-*-*-*-*-*,"
 				   "-*-*-*-*-*-*-%d-*-*-*-*-*-*-*,*",
-				   nfontname, weight, slant, pixel_size, pixel_size);
+				   fontname, weight, slant, pixel_size, pixel_size);
 	
 	if(pattern2==NULL)
 		return NULL;
+	
+	FNT_D(fprintf(stderr, "NRQ: %s\n", pattern2));
 	
 	nfontname = pattern2;
 	
@@ -160,10 +176,21 @@ XFontSet de_create_font_set(const char *fontname)
 		XFreeStringList(missing);
 	if (fs)
 		XFreeFontSet(wglobal.dpy, fs);
+
+	FNT_D(if(fs) fprintf(stderr, "Trying '%s'.\n", nfontname));
 	
 	fs = XCreateFontSet(wglobal.dpy, nfontname, &missing, &nmissing, &def);
 	
 	free(pattern2);
 	
+    /*if(fs){
+		XFontStruct **fontstructs;
+		char **fontnames;
+		int i, n=XFontsOfFontSet(fs, &fontstructs, &fontnames);
+		for(i=0; fontnames[i] && i<n; i++)
+			fprintf(stderr, "%s\n", fontnames[i]);
+	}*/
+
+
 	return fs;
 }

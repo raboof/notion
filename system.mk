@@ -99,24 +99,13 @@ XINERAMA_LIBS=-lXinerama
 #DEFINES += -DCF_NO_XINERAMA
 
 # XFree86 libraries up to 4.3.0 have a bug that will cause Ion to segfault
-# if Opera is used when UTF8 support is enabled. The following setting
+# if Opera is used when i18n support is enabled. The following setting
 # should work around that situation.
 DEFINES += -DCF_XFREE86_TEXTPROP_BUG_WORKAROUND
 
-# Uncomment to enable UTF8 support. You must have XFree86 (4.x?) and C99
-# wide char support available (either libc directly or maybe libutf8+libiconv).
-# Although iconv (that is needed to convert to wchar_t -- which is not
-# necessarily ucs-4 -- to test character properties) is a standardised
-# function, encoding names unfortunately aren't and thus these also have to
-# specified here.
-
-# GNU/Linux and other glibc-2.2 based systems.
-#DEFINES += -DCF_UTF8 -DCF_ICONV_TARGET=\"WCHAR_T\" -DCF_ICONV_SOURCE=\"UTF-8\"
-
-# Systems that depend on libutf8 and libiconv might want these.
-#DEFINES += -DCF_UTF8 -DCF_LIBUTF8 -DCF_ICONV_TARGET=\"C99\" -DCF_ICONV_SOURCE=\"UTF-8\"
-#EXTRA_LIBS += -liconv -lutf8 -L/usr/local/lib
-#EXTRA_INCLUDES += -I/usr/local/include
+# Use the Xutf8 routines (XFree86 extension) instead of Xmb routines in
+# an UTF8 locale given the -i18n command line option?
+#DEFINES += -DCF_DE_USE_XUTF8
 
 
 ##

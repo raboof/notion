@@ -164,19 +164,26 @@ void clientwin_get_size_hints(WClientWin *cwin)
 void clientwin_get_set_name(WClientWin *cwin)
 {
 	char **list=NULL;
+	int n=0;
 	
-#ifdef CF_UTF8
-	if(wglobal.utf8_mode && wglobal.atom_net_wm_name!=0)
+	if(wglobal.use_mb && wglobal.atom_net_wm_name!=0)
 		list=get_text_property(cwin->win, wglobal.atom_net_wm_name, NULL);
-#endif
-	
-	if(list==NULL)
-		list=get_text_property(cwin->win, XA_WM_NAME, NULL);
-	else
-		cwin->flags|=CWIN_USE_NET_WM_NAME;
 
 	if(list==NULL){
-		region_unuse_name((WRegion*)cwin);
+		list=get_text_property(cwin->win, XA_WM_NAME, &n);
+	}else{
+		cwin->flags|=CWIN_USE_NET_WM_NAME;
+	}
+
+	if(list==NULL){
+		if(n==-1){
+			/* Special condition kludge: property exists, but couldn't
+			 * be converted to a string list.
+			 */
+			clientwin_set_name(cwin, "???");
+		}else{
+			region_unuse_name((WRegion*)cwin);
+		}
 	}else{
 		clientwin_set_name(cwin, *list);
 		XFreeStringList(list);

@@ -34,6 +34,10 @@ put (~/.ion-devel/session_name if option set).
 If Ion was compiled with Xinerama support, this option can be used to
 disable it.
 .TP
+.B \-i18n
+Enable use of multibyte string routines, actual encoding depending on the
+locale.
+.TP
 .B \-help
 Show help on command line options
 .TP

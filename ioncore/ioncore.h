@@ -19,9 +19,10 @@
 
 /* argc and argv are needed for restart_wm */
 bool ioncore_init(int argc, char *argv[]);
+bool ioncore_init_i18n();
 bool ioncore_startup(const char *display, const char *cfgfile, int flags);
 void ioncore_deinit();
 
-bool ioncore_is_utf8();
+bool ioncore_is_i18n();
 
 #endif /* ION_IONCORE_IONCORE_H */

@@ -150,10 +150,10 @@ char **get_text_property(Window win, Atom a, int *nret)
 	int n=0;
 	Status st=0;
 	
-	if(nret)
-		*nret=0;
-
 	st=XGetTextProperty(wglobal.dpy, win, &prop, a);
+
+	if(nret)
+		*nret=(!st ? 0 : -1);
 	
 	if(!st)
 		return NULL;
@@ -167,22 +167,21 @@ char **get_text_property(Window win, Atom a, int *nret)
 	}
 #endif
 
-#ifdef CF_UTF8
-	if(wglobal.utf8_mode){
-		st=Xutf8TextPropertyToTextList(wglobal.dpy, &prop, &list, &n);
-		st=!st;
-	}else
-#endif
-	{
+	if(!wglobal.use_mb){
 		st=XTextPropertyToStringList(&prop, &list, &n);
+	}else{
+		st=XmbTextPropertyToTextList(wglobal.dpy, &prop, &list, &n);
+		st=!st;
 	}
+
 	XFree(prop.value);
 	
 	if(!st || n==0 || list==NULL)
 		return NULL;
 	
 	if(nret)
-			*nret=n;
+		*nret=n;
+	
 	return list;
 }
 
@@ -195,16 +194,19 @@ void set_text_property(Window win, Atom a, const char *str)
 
 	ptr[0]=str;
 	
-#ifdef CF_UTF8
-	if(wglobal.utf8_mode){
-		st=Xutf8TextListToTextProperty(wglobal.dpy, (char **)&ptr, 1,
-									   XUTF8StringStyle, &prop);
-		st=!st;
-	}else
-#endif		
-	{
+	if(!wglobal.use_mb){
 		st=XStringListToTextProperty((char **)&ptr, 1, &prop);
+	}else{
+#ifdef X_HAVE_UTF8_STRING		
+		st=XmbTextListToTextProperty(wglobal.dpy, (char **)&ptr, 1,
+									 XUTF8StringStyle, &prop);
+#else		
+		st=XmbTextListToTextProperty(wglobal.dpy, (char **)&ptr, 1,
+									 XTextStyle, &prop);
+#endif		
+		st=!st;
 	}
+	
 	if(!st)
 		return;
 	

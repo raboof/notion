@@ -15,6 +15,7 @@
 #include <string.h>
 #include <errno.h>
 #include <locale.h>
+#include <langinfo.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 
@@ -73,6 +74,8 @@ static OptParserOpt ioncore_opts[]={
 	{OPT_ID('x'), 	"noxinerama", 0, NULL, "Ignored: not compiled with Xinerama support"},
 #endif
 	{OPT_ID('s'),   "sessionname", OPT_ARG, "session_name", "Name of session (affects savefiles)"},
+	{OPT_ID('i'),   "i18n", 0, NULL, "Enable use of multibyte string routines, actual "
+									 "encoding depending on the locale."},
 	END_OPTPARSEROPTS
 };
 
@@ -120,7 +123,8 @@ int main(int argc, char*argv[])
 	FILE *ef=NULL;
 	char *efnam=NULL;
 	bool may_continue=FALSE;
-
+	bool i18n=FALSE;
+	
 	libtu_init(argv[0]);
 
 	if(!ioncore_init(argc, argv))
@@ -151,6 +155,9 @@ int main(int argc, char*argv[])
 		case OPT_ID('s'):
 			ioncore_set_sessiondir("ion-devel", optparser_get_arg());
 			break;
+		case OPT_ID('i'):
+			i18n=TRUE;
+			break;
 		default:
 			optparser_print_error();
 			return EXIT_FAILURE;
@@ -158,8 +165,8 @@ int main(int argc, char*argv[])
 	}
 
 	/* We may have to pass the file to xmessage so just using tmpfile()
-	 * isn't sufficient */
-	
+	 * isn't sufficient.
+	 */
 	libtu_asprintf(&efnam, "%s/ion-%d-startup-errorlog", P_tmpdir,
 				   getpid());
 	if(efnam==NULL){
@@ -173,6 +180,13 @@ int main(int argc, char*argv[])
 		}
 		fprintf(ef, "Ion startup error log:\n");
 		begin_errorlog_file(&el, ef);
+	}
+
+	/* Set up locale and detect encoding.
+	 */
+	if(i18n){
+		if(!ioncore_init_i18n())
+			warn("Please fix your locale settings.");
 	}
 	
 	if(ioncore_startup(display, cfgfile, stflags))
@@ -271,37 +285,104 @@ static void init_global()
 	wglobal.warp_enabled=TRUE;
 	wglobal.ws_save_enabled=TRUE;
 	
-	wglobal.utf8_mode=FALSE;
+	wglobal.enc_utf8=FALSE;
+	wglobal.enc_sb=TRUE;
+	wglobal.use_mb=FALSE;
 }
 
 
-static bool set_up_locales(Display *dpy)
+static bool check_encoding()
 {
-	char *p;
+	int i;
+	char chs[8]=" ";
+	wchar_t wc;
+	const char *langi, *ctype, *a, *b;
+
+	langi=nl_langinfo(CODESET);
+	ctype=setlocale(LC_CTYPE, NULL);
+	
+	if(langi==NULL || ctype==NULL){
+		warn("Cannot verify locale encoding setting integrity "
+			 "(LC_CTYPE=%s, nl_langinfo(CODESET)=%s).", ctype, langi);
+		return FALSE;
+	}
+
+	a=langi; 
+	b=strchr(ctype, '.');
+	if(b!=NULL){
+		b=b+1;
+		while(*a==*b && *a!='\0'){
+			a++;
+			b++;
+		}
+	}
+	
+	if(b==NULL || (*a!='\0' || (*a=='\0' && *b!='\0' && *b!='@'))){
+		warn("Encoding in LC_CTYPE (%s) and encoding reported by "
+			 "nl_langinfo(CODESET) (%s) do not match. ", ctype, langi);
+		return FALSE;
+	}
+		
+	if(strcmp(langi, "UTF-8")==0 || strcmp(langi, "UTF8")==0){
+		wglobal.enc_sb=FALSE;
+		wglobal.enc_utf8=TRUE;
+		wglobal.use_mb=TRUE;
+		return TRUE;
+	}
+	
+	for(i=0; i<256; i++){
+		chs[0]=i;
+		if(mbtowc(&wc, chs, 8)==-1){
+			/* Doesn't look like a single-byte encoding. */
+			break;
+		}
+		
+	}
+	
+	if(i==256){
+		/* Seems like a single-byte encoding... */
+		wglobal.use_mb=TRUE;
+		return TRUE;
+	}
+
+	if(mbtowc(NULL, NULL, 0)!=0){
+		warn("Statefull encodings are unsupported.");
+		return FALSE;
+	}
+	
+	wglobal.enc_sb=FALSE;
+	wglobal.use_mb=TRUE;
+	
+	return TRUE;
+}
+
+
+bool ioncore_init_i18n()
+{
+	const char *p;
 	
 	p=setlocale(LC_ALL, "");
 	
 	if(p==NULL){
-		warn("setlocale() call failed");
+		warn("setlocale() call failed.");
 		return FALSE;
 	}
 
 	if(strcmp(p, "C")==0 || strcmp(p, "POSIX")==0)
 		return TRUE;
 	
-	if(XSupportsLocale()){
-#ifdef CF_UTF8
-		wglobal.utf8_mode=TRUE;
-#endif
-		return TRUE;
+	if(!XSupportsLocale()){
+		warn("XSupportsLocale() failed.");
+	}else{
+		if(check_encoding())
+			return TRUE;
 	}
 	
-	warn("XSupportsLocale() failed. Resetting back to C.");
+	warn("Reverting locale settings to \"C\".");
 	
-	if(setlocale(LC_ALL, "C")==NULL){
-		warn("setlocale() call failed");
-	}
-	
+	if(setlocale(LC_ALL, "C")==NULL)
+		warn("setlocale() call failed.");
+		
 	return FALSE;
 }
 
@@ -351,23 +432,13 @@ static bool init_x(const char *display, int stflags)
 	 */
 	assert(!called);
 	called=TRUE;
-    
-	/* Try to set up locales. If X does not support user-specified locale,
-	 * reset to POSIX so that at least fonts will be loadable if not all
-	 * characters supported.
-	 */
-	
+
 	/* Open the display. */
 	dpy=XOpenDisplay(display);
 	
 	if(dpy==NULL){
 		warn("Could not connect to X display '%s'", XDisplayName(display));
 		return FALSE;
-	}
-
-	if(!set_up_locales(dpy)){
-		warn("There's something wrong with your locale settings. "
-			 "Please fix them.");
 	}
 
 	if(stflags&IONCORE_STARTUP_ONEROOT){
@@ -536,12 +607,12 @@ void exported_warn(const char *str)
 
 
 /*EXTL_DOC
- * Was Ioncore compiled to use UTF8 strings internally?
+ * Is Ion supporting locale-specifically multibyte-encoded strings?
  */
 EXTL_EXPORT
-bool ioncore_is_utf8()
+bool ioncore_is_i18n()
 {
-	return wglobal.utf8_mode;
+	return wglobal.use_mb;
 }
 
 

@@ -13,15 +13,7 @@
 #include <libtu/misc.h>
 #include <string.h>
 #include <regex.h>
-
-#ifdef CF_UTF8
-#include <errno.h>
-#include <iconv.h>
-#ifdef CF_LIBUTF8
-#include <libutf8.h>
-#endif
-#endif
-
+#include <wctype.h>
 #include "common.h"
 #include "global.h"
 #include "strings.h"
@@ -30,57 +22,21 @@
 /*{{{ String scanning */
 
 
-#ifdef CF_UTF8
-static wchar_t str_wchar_at_utf8(char *p, int max)
-{
-	static iconv_t ic=(iconv_t)(-1);
-	static bool iconv_tried=FALSE;
-	size_t il, ol, n;
-	wchar_t wc, *wcp=&wc;
-
-	if(max<=0)
-		return 0;
-	
-	if(!iconv_tried){
-		iconv_tried=TRUE;
-		ic=iconv_open(CF_ICONV_TARGET, CF_ICONV_SOURCE);
-		if(ic==(iconv_t)(-1)){
-			warn_err_obj("iconv_open(\"" CF_ICONV_TARGET "\", \""
-						 CF_ICONV_SOURCE "\")");
-		}
-	}
-	
-	if(ic==(iconv_t)(-1))
-		return ((*p&0x80)==0 ? (wchar_t)*p : 0);
-	
-	ol=sizeof(wchar_t);
-	il=max;
-	
-	n=iconv(ic, &p, &il, (char**)&wcp, &ol);
-	if(n==(size_t)(-1) && errno!=E2BIG){
-		/*iconv_close(ic);
-		iconv_tried=FALSE;*/
-		warn_err_obj("iconv");
-		return 0;
-	}
-	return wc;
-}
-#endif
-
-
 wchar_t str_wchar_at(char *p, int max)
 {
-#ifdef CF_UTF8
-	if(wglobal.utf8_mode)
-		return str_wchar_at_utf8(p, max);
-#endif
-	return *p;
+	wchar_t wc;
+	if(mbtowc(&wc, p, max)>0)
+		return wc;
+	return 0;
 }
+	
 
 int str_prevoff(const char *p, int pos)
 {
-#ifdef CF_UTF8
-	if(wglobal.utf8_mode){
+	if(wglobal.enc_sb)
+		return (pos>0 ? 1 : 0);
+
+	if(wglobal.enc_utf8){
 		int opos=pos;
 		
 		while(pos>0){
@@ -90,32 +46,64 @@ int str_prevoff(const char *p, int pos)
 		}
 		return opos-pos;
 	}
-#endif
-	return (pos>0 ? 1 : 0);
+	
+	assert(wglobal.use_mb);
+	{
+        /* *sigh* */
+		int l, prev=0;
+		mbstate_t ps;
+		
+		memset(&ps, 0, sizeof(ps));
+		
+		while(1){
+			l=mbrlen(p+prev, pos-prev, &ps);
+			if(l<0){
+				warn("Invalid multibyte string.");
+				return 0;
+			}
+			if(prev+l>=pos)
+				return pos-prev;
+			prev+=l;
+		}
+		
+	}
 }
 
 
-int str_nextoff(const char *p)
+int str_nextoff(const char *p, int opos)
 {
-#ifdef CF_UTF8
-	if(wglobal.utf8_mode){
-		int pos=0;
+	if(wglobal.enc_sb)
+		return (*(p+opos)=='\0' ? 0 : 1);
+
+	if(wglobal.enc_utf8){
+		int pos=opos;
 		
 		while(p[pos]){
 			pos++;
 			if((p[pos]&0xC0)!=0x80)
 				break;
 		}
-		return pos;
+		return pos-opos;
 	}
-#endif
-	return (*p=='\0' ? 0 : 1);
+
+	assert(wglobal.use_mb);
+	{
+		mbstate_t ps;
+		int l;
+		memset(&ps, 0, sizeof(ps));
+		
+		l=mbrlen(p+opos, strlen(p+opos), &ps);
+		if(l<0){
+			warn("Invalid multibyte string.");
+			return 0;
+		}
+		return l;
+	}
 }
 
 
 
 /*}}}*/
-
 
 
 /*{{{ Title shortening */
@@ -219,36 +207,62 @@ static char *shorten(GrBrush *brush, const char *str, uint maxw,
 					 const char *rule, int nmatch, regmatch_t *pmatch)
 {
 	char *s;
-	int rl, l, i, j, k, ll;
+	int rulelen, slen, i, j, k, ll;
 	int strippt=0;
 	int stripdir=-1;
 	bool more=FALSE;
 	
+	/* Ensure matches are at character boundaries */
+	if(!wglobal.enc_sb){
+		int pos=0, len, strl;
+		mbstate_t ps;
+		memset(&ps, 0, sizeof(ps));
+		
+		strl=strlen(str);
+
+		while(pos<strl){
+			len=mbrtowc(NULL, str+pos, strl-pos, &ps);
+			if(len<0){
+				/* Invalid multibyte string */
+				return scopy("???");
+			}
+			if(len==0)
+				break;
+			for(i=0; i<nmatch; i++){
+				if(pmatch[i].rm_so>pos && pmatch[i].rm_so<pos+len)
+					pmatch[i].rm_so=pos+len;
+				if(pmatch[i].rm_eo>pos && pmatch[i].rm_eo<pos+len)
+					pmatch[i].rm_eo=pos;
+			}
+			pos+=len;
+		}
+	}
+	
 	/* Stupid alloc rule that wastes space */
 	
-	rl=strlen(rule);
-	l=rl;
+	rulelen=strlen(rule);
+	slen=rulelen;
 	
 	for(i=0; i<nmatch; i++){
 		if(pmatch[i].rm_so==-1)
 			continue;
-		l+=(pmatch[i].rm_eo-pmatch[i].rm_so);
+		slen+=(pmatch[i].rm_eo-pmatch[i].rm_so);
 	}
 	
-	s=ALLOC_N(char, l);
+	s=ALLOC_N(char, slen);
 	
 	if(s==NULL){
 		warn_err();
 		return NULL;
 	}
 	
-	assert(rule!=NULL);
-	
 	do{
 		more=FALSE;
 		j=0;
+		strippt=0;
+		stripdir=-1;
 		
-		for(i=0; i<rl; i++){
+		for(i=0; i<rulelen; i++){
 			if(rule[i]!='$'){
 				s[j++]=rule[i];
 				continue;
@@ -258,7 +272,7 @@ static char *shorten(GrBrush *brush, const char *str, uint maxw,
 			
 			if(rule[i]=='|'){
 				rule=rule+i+1;
-				rl=rl-i-1;
+				rulelen=rulelen-i-1;
 				more=TRUE;
 				break;
 			}
@@ -292,30 +306,43 @@ static char *shorten(GrBrush *brush, const char *str, uint maxw,
 			}
 		}
 		
-		s[j]='\0';
+		slen=j;
+		s[slen]='\0';
 		
-		while(1){
-			if(grbrush_get_text_width(brush, s, strlen(s))<=maxw)
-				return s;
-			if(stripdir==-1){
-				if(strippt==0)
-					break;
-				ll=str_prevoff(s, strippt);
-				if(ll!=0){
-					strcpy(s+strippt-ll, s+strippt);
-					strippt-=ll;
+		i=strippt;
+		j=strippt;
+		
+		/* shorten */
+		{
+			uint bl=grbrush_get_text_width(brush, s, i);
+			uint el=grbrush_get_text_width(brush, s+j, slen-j);
+
+			while(1){
+				/* el+bl may not be the actual length, but close enough. */
+				if(el+bl<=maxw){
+					strcpy(s+i, s+j);
+					return s;
 				}
-			}else{
-				if(s[strippt]=='\0')
-					break;
-				ll=str_nextoff(s+strippt);
-				strcpy(s+strippt, s+strippt+ll);
+				
+				if(stripdir==-1){
+					ll=str_prevoff(s, i);
+					if(ll==0)
+						break;
+					i-=ll;
+					bl=grbrush_get_text_width(brush, s, i);
+				}else{
+					ll=str_nextoff(s, j);
+					if(ll==0)
+						break;
+					j+=ll;
+					el=grbrush_get_text_width(brush, s+j, slen-j);
+				}
 			}
 		}
 	}while(more);
 		
 	free(s);
-	/*warn("Failed to shorten title");*/
+
 	return NULL;
 }
 
@@ -351,3 +378,4 @@ rettest:
 
 
 /*}}}*/
+

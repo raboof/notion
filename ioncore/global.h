@@ -84,7 +84,9 @@ DECLSTRUCT(WGlobal){
 	
 	bool ws_save_enabled;
 	
-	bool utf8_mode;
+	bool use_mb; /* use mb routines? */
+	bool enc_sb; /* 8-bit charset? If unset, use_mb must be set. */
+	bool enc_utf8; /* mb encoding is utf8? */
 };
 
 

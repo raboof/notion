@@ -10,6 +10,7 @@
  */
 
 #include <ctype.h>
+#include <wctype.h>
 
 #include "common.h"
 #include "key.h"
@@ -21,6 +22,7 @@
 #include "grab.h"
 #include "regbind.h"
 #include "extl.h"
+#include "strings.h"
 
 
 static void waitrelease(WRegion *reg);
@@ -29,7 +31,7 @@ static void waitrelease(WRegion *reg);
 static void insstr(WWindow *wwin, XKeyEvent *ev)
 {
 	static XComposeStatus cs={NULL, 0};
-	char buf[16]={0,};
+	char buf[32]={0,};
 	Status stat;
 	int n, i;
 	KeySym ksym;
@@ -37,24 +39,24 @@ static void insstr(WWindow *wwin, XKeyEvent *ev)
 	if(wwin->xic!=NULL){
 		if(XFilterEvent((XEvent*)ev, ev->window))
 		   return;
-#ifdef CF_UTF8
-		if(wglobal.utf8_mode){
-			n=Xutf8LookupString(wwin->xic, ev, buf, 16, &ksym, &stat);
-		}else
-#endif
-		{
-			n=XmbLookupString(wwin->xic, ev, buf, 16, &ksym, &stat);
-		}
-		
+		n=XmbLookupString(wwin->xic, ev, buf, 16, &ksym, &stat);
 		if(stat!=XLookupChars && stat!=XLookupBoth)
 			return;
 	}else{
-		n=XLookupString(ev, buf, 16, &ksym, &cs);
+		n=XLookupString(ev, buf, 32, &ksym, &cs);
 	}
 	
-	
-	if(n<=0 || *(uchar*)buf<32)
+	if(n<=0)
 		return;
+	
+	/* Won't catch bad strings, but should filter out most crap. */
+	if(wglobal.use_mb){
+		if(!iswprint(str_wchar_at(buf, 32)))
+			return;
+	}else{
+		if(iscntrl(*buf))
+			return;
+	}
 	
 	window_insstr(wwin, buf, n);
 }
