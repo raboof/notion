@@ -572,20 +572,6 @@ bool ionws_managed_may_destroy(WIonWS *ws, WRegion *reg)
 }
 
 
-static WRegion *iter_just_cwins(WIonWSIterTmp *tmp)
-{
-    WRegion *r;
-    
-    while(TRUE){
-        r=(WRegion*)ptrlist_iter(tmp);
-        if(r==NULL || OBJ_IS(r, WClientWin))
-            break;
-    }
-    
-    return r;
-}
-
-
 bool ionws_rescue_clientwins(WIonWS *ws)
 {
     WIonWSIterTmp tmp;
@@ -593,7 +579,7 @@ bool ionws_rescue_clientwins(WIonWS *ws)
     ptrlist_iter_init(&tmp, ws->managed_list);
     
     return region_rescue_some_clientwins((WRegion*)ws, 
-                                         (WRegionIterator*)iter_just_cwins, 
+                                         (WRegionIterator*)ptrlist_iter, 
                                          &tmp);
 }
 

@@ -66,6 +66,7 @@ WRegion *floatws_iter(WFloatWSIterTmp *tmp)
         tmp->st=tmp->st->next;
         if(tmp->ws==NULL || REGION_MANAGER(next)==(WRegion*)tmp->ws)
             break;
+        next=NULL;
     }
     
     return next;
@@ -374,20 +375,7 @@ void floatws_deinit(WFloatWS *ws)
 }
 
 
-static WRegion *iter_just_cwins(WFloatWSIterTmp *tmp)
-{
-    WRegion *r;
     
-    while(TRUE){
-        r=(WRegion*)floatws_iter(tmp);
-        if(r==NULL || OBJ_IS(r, WClientWin))
-            break;
-    }
-    
-    return r;
-}
-
-
 bool floatws_rescue_clientwins(WFloatWS *ws)
 {
     WFloatWSIterTmp tmp;
@@ -395,7 +383,7 @@ bool floatws_rescue_clientwins(WFloatWS *ws)
     floatws_iter_init(&tmp, ws);
     
     return region_rescue_some_clientwins((WRegion*)ws, 
-                                         (WRegionIterator*)iter_just_cwins, 
+                                         (WRegionIterator*)floatws_iter,
                                          &tmp);
 }
 

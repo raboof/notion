@@ -690,20 +690,6 @@ static void clientwin_managed_remove(WClientWin *cwin, WRegion *transient)
 }
 
 
-static WRegion *iter_just_cwins(PtrListIterTmp *tmp)
-{
-    WRegion *r;
-    
-    while(TRUE){
-        r=(WRegion*)ptrlist_iter(tmp);
-        if(r==NULL || OBJ_IS(r, WClientWin))
-            break;
-    }
-    
-    return r;
-}
-
-
 bool clientwin_rescue_clientwins(WClientWin *cwin)
 {
     PtrListIterTmp tmp;
@@ -712,7 +698,7 @@ bool clientwin_rescue_clientwins(WClientWin *cwin)
     ptrlist_iter_init(&tmp, cwin->transient_list);
     
     ret1=region_rescue_some_clientwins((WRegion*)cwin, 
-                                       (WRegionIterator*)iter_just_cwins, 
+                                       (WRegionIterator*)ptrlist_iter, 
                                        &tmp);
 
     ret2=region_rescue_child_clientwins((WRegion*)cwin);

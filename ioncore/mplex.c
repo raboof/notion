@@ -1160,35 +1160,17 @@ void mplex_managed_remove(WMPlex *mplex, WRegion *sub)
 }
 
 
-static WRegion *iter_just_cwins(WLListIterTmp *tmp)
-{
-    WLListNode *mgd;
-    
-    while(TRUE){
-        mgd=llist_iter(tmp);
-        if(mgd==NULL)
-            break;
-        if(OBJ_IS(mgd->reg, WClientWin))
-            return mgd->reg;
-    }
-    
-    return NULL;
-}
-
-
 bool mplex_rescue_clientwins(WMPlex *mplex)
 {
     bool ret1, ret2, ret3;
     WLListIterTmp tmp;
     
     llist_iter_init(&tmp, mplex->l1_list);
-    ret1=region_rescue_some_clientwins((WRegion*)mplex, 
-                                       (WRegionIterator*)iter_just_cwins, 
+    ret1=region_rescue_some_clientwins((WRegion*)mplex, llist_iter_regions,
                                        &tmp);
 
     llist_iter_init(&tmp, mplex->l2_list);
-    ret2=region_rescue_some_clientwins((WRegion*)mplex, 
-                                       (WRegionIterator*)iter_just_cwins, 
+    ret2=region_rescue_some_clientwins((WRegion*)mplex, llist_iter_regions,
                                        &tmp);
     
     ret3=region_rescue_child_clientwins((WRegion*)mplex);

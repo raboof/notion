@@ -135,16 +135,11 @@ bool region_manage_clientwin_default(WRegion *reg, WClientWin *cwin,
 /*{{{ Rescue */
 
 
-static WRegion *iter_child_cwins(void *st)
+static WRegion *iter_children(void *st)
 {
     WRegion **nextp=(WRegion**)st;
-    WRegion *next;
-    
-    do{
-        next=*nextp;
-        *nextp=(next==NULL ? NULL : next->p_next);
-    }while(next!=NULL && !OBJ_IS(next, WClientWin));
-        
+    WRegion *next=*nextp;
+    *nextp=(next==NULL ? NULL : next->p_next);
     return next;   
 }
 
@@ -152,16 +147,14 @@ static WRegion *iter_child_cwins(void *st)
 bool region_rescue_child_clientwins(WRegion *reg)
 {
     WRegion *next=reg->children;
-    bool res=region_rescue_some_clientwins(reg, iter_child_cwins, &next);
-    assert(!res || reg->children==NULL);
-    return res;
+    return region_rescue_some_clientwins(reg, iter_children, &next);
 }
 
 
 bool region_rescue_some_clientwins(WRegion *reg, 
                                    WRegionIterator *iter, void *st)
 {
-    WPHolder *ph;
+    WPHolder *ph=NULL;
     bool res=FALSE;
     int fails=0;
 
@@ -169,16 +162,20 @@ bool region_rescue_some_clientwins(WRegion *reg,
     
     while(TRUE){
         WRegion *tosave=iter(st);
+        
         if(tosave==NULL)
             break;
         
-        ph=region_get_rescue_pholder(reg);
-        
-        if(ph==NULL)
-            return FALSE;
-
-        if(!pholder_attach(ph, tosave))
-            fails++;
+        if(!OBJ_IS(tosave, WClientWin)){
+            if(!region_rescue_clientwins(tosave))
+                fails++;
+        }else{
+            if(ph==NULL)
+                ph=region_get_rescue_pholder(reg);
+            
+            if(ph==NULL || !pholder_attach(ph, tosave))
+                fails++;
+        }
     }
     
     reg->flags&=~REGION_CWINS_BEING_RESCUED;
