@@ -170,3 +170,5 @@ setmetatable(_G, {__index=class_fn_wrapper, __newindex=oldmt.__newindex})
 -- Added 2003-07-14
 obsolete("exec_on_wm_display", "exec")
 
+-- Added 2003-08-08
+obsolete("close_sub_or_self", WRegion.close_sub_or_self)

@@ -80,7 +80,7 @@ global_bindings{
 -- For details see the document "Ion: Configuring and extending with Lua".
 
 mplex_bindings{
-    kpress_waitrel(DEFAULT_MOD.."C", close_sub_or_self),
+    kpress_waitrel(DEFAULT_MOD.."C", WRegion.close_sub_or_self),
     kpress_waitrel(DEFAULT_MOD.."L", 
                    make_current_clientwin_fn(WClientWin.broken_app_resize_kludge)),
     kpress_waitrel(DEFAULT_MOD.."Return", 

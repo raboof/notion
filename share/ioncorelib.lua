@@ -311,7 +311,7 @@ end
 -- Misc {{{
 
 --DOC
--- Check that the \type{WObj} \var{obj} still exists in Ioncore.
+-- Check that the \type{WObj} \var{obj} still exists in the C side of Ion.
 function obj_exists(obj)
     return (obj_typename(obj)~=nil)
 end
@@ -319,7 +319,7 @@ end
 --DOC
 -- Attempt to close using \fnref{WRegion.close} most recently active 
 -- child (\fnref{WRegion.active_sub}) of, or if this is nil, \var{reg} itself.
-function close_sub_or_self(reg)
+function WRegion.close_sub_or_self(reg)
     WRegion.close(reg:active_sub() or reg)
 end
 
