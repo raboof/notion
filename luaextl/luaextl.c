@@ -40,36 +40,42 @@ static void extl_get_wobj_metatable(lua_State *st)
 }
 
 
-static bool extl_verify_wobj(lua_State *st, int pos)
+static WObj *extl_get_wobj(lua_State *st, int pos)
 {
-	bool ret;
+	WWatch *watch;
+	bool eq;
 	
 	if(!lua_isuserdata(st, pos))
-		return FALSE;
+		return NULL;
 	
 	if(!lua_getmetatable(st, pos))
-		return FALSE;
+		return NULL;
 	
 	extl_get_wobj_metatable(st);
 	
-	ret=lua_equal(st, -1, -2);
+	eq=lua_equal(st, -1, -2);
 	
 	lua_pop(st, 1);
 	
-	return ret;
-}
+	if(eq){
+		watch=(WWatch*)lua_touserdata(st, pos);
+		if(watch==NULL || watch->obj==NULL){
+			/* Replace dead object with nil */
+			lua_pushnil(st);
+			lua_replace(st, pos);
+		}else{
+			return watch->obj;
+		}
+	}
 
-
-static WObj *extl_do_get_obj(lua_State *st, int pos)
-{
-	WWatch *watch=(WWatch*)lua_touserdata(st, pos);
-	return watch->obj;
+	return NULL;
 }
 
 
 static void extl_obj_dest_handler(WWatch *watch, WObj *obj)
 {
-	D(fprintf(stderr, "Object destroyed while Lua code is still referencing it."));
+	D(warn("%s destroyed while Lua code is still referencing it.",
+		   WOBJ_TYPESTR(obj)));
 }
 
 
@@ -77,7 +83,7 @@ static int extl_obj_gc_handler(lua_State *st)
 {
 	WWatch *watch;
 	
-	if(!extl_verify_wobj(st, 1))
+	if(extl_get_wobj(st, 1)==NULL)
 		return 0;
 	
 	watch=(WWatch*)lua_touserdata(st, 1);
@@ -358,10 +364,11 @@ static bool extl_stack_get(lua_State *st, int pos, char type, bool copystring,
 	}
 
 	if(type=='o'){
-		if(!extl_verify_wobj(st, pos))
+		WObj *obj=extl_get_wobj(st, pos);
+		if(obj==NULL)
 			return FALSE;
 		if(valret)
-			*((WObj**)valret)=extl_do_get_obj(st, pos);
+			*((WObj**)valret)=obj;
 		return TRUE;
 	}
 	
@@ -1111,7 +1118,7 @@ static int extl_l1_call_handler2(lua_State *st)
 		return 0;
 	}
 	
-	/*fprintf(stderr, "%s called\n", spec->name);*/
+	D(fprintf(stderr, "%s called\n", spec->name));
 	
 	/* Check safelist */
 	if(extl_safelist!=NULL){
