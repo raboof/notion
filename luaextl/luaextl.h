@@ -157,6 +157,9 @@ bool extl_register_class(const char *cls, ExtlExportedFnSpec *fns,
 						 const char *parent);
 void extl_unregister_class(const char *cls, ExtlExportedFnSpec *fns);
 
+bool extl_register_module(const char *cls, ExtlExportedFnSpec *fns);
+void extl_unregister_module(const char *cls, ExtlExportedFnSpec *fns);
+
 /* Misc. */
 
 extern bool extl_init();

@@ -398,7 +398,6 @@ static bool extl_cpcall(lua_State *st, ExtlCPCallFn *fn, void *ptr)
 	param.udata=ptr;
 	param.retval=FALSE;
 	
-	
 	if(lua_cpcall(st, extl_docpcall, &param)!=0){
 		D(fprintf(stderr, "-->%s\n", lua_tostring(st, -1)));
 	}
@@ -1848,7 +1847,9 @@ static bool extl_do_unregister_function(lua_State *st, RegData *data)
 		ind=-3;
 	}
 	
-	lua_pushnil(st); /* Clear table.fn */
+    /* Clear table.fn */
+    lua_pushstring(st, spec->name);
+	lua_pushnil(st); 
 	lua_rawset_check(st, ind);
 	
 	return TRUE;
@@ -1902,7 +1903,12 @@ static bool extl_do_register_class(lua_State *st, ClassData *data)
 	 * references reside.
 	 */
 	lua_newtable(st);
-	D(fprintf(stderr, "%s: %d\n", data->cls, lua_topointer(st, -1)));
+    
+    /* Set type information.
+     */
+    lua_pushstring(st, "__typename");
+    lua_pushstring(st, data->cls);
+    lua_settable(st, -3);
 
 	/* If we have a parent class (i.e. class!=WObj), we want also the parent's
 	 * functions visible in this table so set up a metatable to do so.
@@ -1924,14 +1930,21 @@ static bool extl_do_register_class(lua_State *st, ClassData *data)
 		/* Stack: cls, parent_meta, meta, "__index", "__index" */
 		lua_gettable(st, -4);
 		/* Stack: cls, parent_meta, meta, "__index", parent_meta.__index */
-		lua_rawset_check(st, -3);
-		/* Stack: cls, parent_meta, meta */
+        lua_pushvalue(st, -1);
+        lua_insert(st, -3);
+		/* Stack: cls, parent_meta, meta, parent_meta.__index, "__index", parent_meta.__index */
+		lua_rawset_check(st, -4);
+		/* Stack: cls, parent_meta, meta, parent_meta.__index */
+        lua_pushstring(st, "__parentclass");
+        lua_insert(st, -2);
+		/* Stack: cls, parent_meta, meta, "__parentclass", parent_meta.__index */
+        lua_settable(st, -5);
+		/* Stack: cls, parent_meta, meta, */
 		lua_setmetatable(st, -3);
 		lua_pop(st, 1);
 		/* Stack: cls */
 	}
 	
-	D(fprintf(stderr, "%s-1 %d\n", data->cls, lua_topointer(st, -1)));
 	/* Set the global WFoobar */
 	lua_pushvalue(st, -1);
 	data->refret=lua_ref(st, 1); /* TODO: free on failure */
@@ -1942,15 +1955,12 @@ static bool extl_do_register_class(lua_State *st, ClassData *data)
 		lua_rawset(st, LUA_GLOBALSINDEX);
 	}
 
-	D(fprintf(stderr, "%s-2\n", data->cls));
-
 	/* New we create a metatable for the actual objects with __gc metamethod
 	 * and __index pointing to the table created above. The MAGIC entry is 
 	 * used to check that userdatas passed to us really are WWatches with a
 	 * high likelihood.
 	 */
 	lua_newtable(st);
-	D(fprintf(stderr, "%s-meta: %d\n", data->cls, lua_topointer(st, -1)));
 
 	lua_pushnumber(st, MAGIC);
 	lua_pushnumber(st, MAGIC);
@@ -1966,8 +1976,6 @@ static bool extl_do_register_class(lua_State *st, ClassData *data)
 	lua_insert(st, -2);
 	lua_rawset(st, LUA_REGISTRYINDEX);
 	
-	D(fprintf(stderr, "%s-4\n", data->cls));
-
 	return TRUE;
 }
 
@@ -1993,12 +2001,12 @@ bool extl_register_class(const char *cls, ExtlExportedFnSpec *fns,
 	return extl_do_register_functions(fns, INT_MAX, cls, clsdata.refret);
 }
 
-							
+
 static void extl_do_unregister_class(lua_State *st, ClassData *data)
 {
 	/* Get reference from registry to the metatable. */
 	lua_pushfstring(st, "luaextl_%s_metatable", data->cls);
-	lua_insert(st, -1);
+	lua_pushvalue(st, -1);
 	lua_gettable(st, LUA_REGISTRYINDEX);
 	/* Get __index and return it for resetting the functions. */
 	lua_pushstring(st, "__index");
@@ -2030,6 +2038,79 @@ void extl_unregister_class(const char *cls, ExtlExportedFnSpec *fns)
 	/* We still need to reset function upvalues. */
 	if(fns!=NULL)
 		extl_do_unregister_functions(fns, INT_MAX, cls, clsdata.refret);
+}
+
+
+/*}}}*/
+
+
+/*{{{ Module registration */
+
+
+static bool extl_do_register_module(lua_State *st, ClassData *clsdata)
+{
+    lua_getglobal(st, clsdata->cls);
+    
+    if(!lua_istable(st, -1)){
+        lua_newtable(st);
+        lua_pushvalue(st, -1);
+        lua_setglobal(st, clsdata->cls);
+    }
+	lua_pushfstring(st, "luaextl_module_%s", clsdata->cls);
+    lua_pushvalue(st, -2);
+	lua_rawset(st, LUA_REGISTRYINDEX);
+    
+	clsdata->refret=lua_ref(st, -1);
+    
+    return TRUE;
+}
+
+
+bool extl_register_module(const char *mdl, ExtlExportedFnSpec *fns)
+{
+	ClassData clsdata;
+    
+	clsdata.cls=mdl;
+	clsdata.parent=NULL;
+	clsdata.refret=LUA_NOREF;
+	
+	if(!extl_cpcall(l_st, (ExtlCPCallFn*)extl_do_register_module, &clsdata)){
+		warn("Unable to register module %s.\n", mdl);
+		return FALSE;
+	}
+
+	if(fns==NULL)
+		return TRUE;
+	
+	return extl_do_register_functions(fns, INT_MAX, mdl, clsdata.refret);
+}
+
+
+static bool extl_do_unregister_module(lua_State *st, ClassData *clsdata)
+{
+	lua_pushfstring(st, "luaextl_module_%s", clsdata->cls);
+    lua_pushvalue(st, -1);
+    lua_pushnil(st);
+	lua_rawset(st, LUA_REGISTRYINDEX);
+	clsdata->refret=lua_ref(st, -1);
+    
+    return TRUE;
+}
+
+
+void extl_unregister_module(const char *mdl, ExtlExportedFnSpec *fns)
+{
+	ClassData clsdata;
+    
+	clsdata.cls=mdl;
+	clsdata.parent=NULL;
+	clsdata.refret=LUA_NOREF;
+	
+	if(!extl_cpcall(l_st, (ExtlCPCallFn*)extl_do_unregister_module, &clsdata))
+		return;
+
+	if(fns!=NULL)
+		extl_do_unregister_functions(fns, INT_MAX, mdl, clsdata.refret);
 }
 
 
