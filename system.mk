@@ -90,7 +90,7 @@ POSIX_SOURCE=-ansi -D_POSIX_SOURCE
 # have unused variables.
 WARN=	-W -Wimplicit -Wreturn-type -Wswitch -Wcomment \
 	-Wtrigraphs -Wformat -Wchar-subscripts \
-	-Wparentheses -pedantic-errors -Wuninitialized
+	-Wparentheses -pedantic -Wuninitialized
 
 
 CFLAGS=-g -O2 $(WARN) $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES)
