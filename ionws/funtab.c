@@ -12,6 +12,7 @@
 #include <wmcore/clientwin.h>
 #include <wmcore/screen.h>
 #include <wmcore/close.h>
+#include <wmcore/commandsq.h>
 #include "frame.h"
 #include "frame-pointer.h"
 #include "workspace.h"
@@ -141,5 +142,5 @@ void init_funclists()
 
 bool command_sequence(WThing *thing, char *fn)
 {
-	execute_command_sequence(thing, fn, &ion_main_funclist);
+	return execute_command_sequence(thing, fn, &ion_main_funclist);
 }

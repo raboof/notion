@@ -14,6 +14,7 @@
 #include "event.h"
 #include "cursor.h"
 #include "objp.h"
+#include "grab.h"
 
 static void waitrelease(WScreen *screen);
 
@@ -83,10 +84,13 @@ static bool waitrelease_handler(WRegion *thing, XEvent *ev)
 	return FALSE;
 }
 
+
 static void waitrelease(WScreen *screen)
 {
-	grab_establish((WThing *)screen, waitrelease_handler, FocusChangeMask|KeyPressMask);
+	grab_establish((WRegion*)screen, waitrelease_handler,
+				   FocusChangeMask|KeyPressMask);
 }
+
 
 static bool submapgrab_handler(WRegion *reg, XEvent *ev)
 {

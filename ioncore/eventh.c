@@ -27,6 +27,7 @@
 #include "colormap.h"
 #include "objp.h"
 #include "defer.h"
+#include "grab.h"
 
 
 /*{{{ Prototypes */

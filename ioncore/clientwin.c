@@ -21,6 +21,7 @@
 #include "colormap.h"
 #include "resize.h"
 #include "close.h"
+#include "attach.h"
 
 
 #define TOPMOST_TRANSIENT(CWIN) LAST_THING(CWIN, WRegion)
@@ -595,10 +596,9 @@ static WRectangle cwin_geom(WClientWin *cwin, WRectangle geom)
 static void convert_geom(WClientWin *cwin, WRectangle geom,
 						 WRectangle *wingeom)
 {
-#warning Remove this #if 0
 #if 0
-	/* Ion doesn't need this stuff at the moment, but PWM will so that the
-	 * frames will shrink appropriately.
+	/* TODO -- Ion doesn't need this stuff at the moment, but PWM will
+	 * so that the frames will shrink appropriately.
 	 */
 	WRegion *sub;
 	XSizeHints hints;
@@ -923,7 +923,7 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 		return;
 	}
 
-#warning Remove this #if 0
+	/* TODO */
 #if 0
 	region_request_geom(&(cwin->region), geom, NULL, FALSE);
 #else

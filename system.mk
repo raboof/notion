@@ -81,9 +81,9 @@ POSIX_SOURCE=-ansi -D_POSIX_SOURCE
 
 # Same as '-Wall -pedantic-errors' without '-Wunused' as callbacks often
 # have unused variables.
-#WARN=	-W -Wimplicit -Wreturn-type -Wswitch -Wcomment \
-#	-Wtrigraphs -Wformat -Wchar-subscripts \
-#	-Wparentheses -pedantic-errors -Wuninitialized
+WARN=	-W -Wimplicit -Wreturn-type -Wswitch -Wcomment \
+	-Wtrigraphs -Wformat -Wchar-subscripts \
+	-Wparentheses -pedantic-errors -Wuninitialized
 
 
 CFLAGS=-g -O2 $(WARN) $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES)

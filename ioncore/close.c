@@ -9,6 +9,7 @@
 #include "region.h"
 #include "clientwin.h"
 #include "objp.h"
+#include "attach.h"
 
 
 static void default_request_close(WRegion *reg)

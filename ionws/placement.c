@@ -8,15 +8,13 @@
 #include <wmcore/common.h>
 #include <wmcore/global.h>
 #include <wmcore/screen.h>
-#include <wmcore/property.h>
 #include <wmcore/clientwin.h>
-#include <wmcore/targetid.h>
 #include <wmcore/attach.h>
+#include <wmcore/wsreg.h>
 #include "placement.h"
 #include "frame.h"
-#include "winprops.h"
 #include "splitframe.h"
-
+#include "winprops.h"
 
 
 static WRegion *find_suitable_frame(WWorkspace *ws)
@@ -65,7 +63,7 @@ bool workspace_add_transient(WRegion *reg, WClientWin *tfor,
 							 const XWindowAttributes *attr,
 							 int init_state, WWinProp *props)
 {
-	return clientwin_attach_sub(tfor, cwin, 0);
+	return clientwin_attach_sub(tfor, (WRegion*)cwin, 0);
 }
 
 

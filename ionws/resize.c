@@ -8,6 +8,7 @@
 
 #include <wmcore/global.h>
 #include <wmcore/resize.h>
+#include <wmcore/grab.h>
 #include "resize.h"
 #include "split.h"
 #include "bindmaps.h"
@@ -65,7 +66,7 @@ static void begin_keyresize(WRegion *reg, int dir)
 	XSizeHints hints;
 	uint relw, relh;
 
-	grab_establish((WThing *)reg, resize_handler,
+	grab_establish((WRegion*)reg, resize_handler,
 				   FocusChangeMask|KeyReleaseMask);
 	
 	tmpdir=dir;

@@ -19,6 +19,7 @@
 #include "workspace.h"
 #include "split.h"
 #include "frame.h"
+#include "confws.h"
 
 
 static void deinit_workspace(WWorkspace *ws);

@@ -399,7 +399,7 @@ void draw_frame_bar(const WFrame *frame, bool complete)
 			draw_textbox(dinfo, REGION_LABEL(sub), CF_TAB_TEXT_ALIGN, TRUE);
 		
 #define IS_TAGGED(X) 0
-#warning TODO: IS_TAGGED
+		/* TODO: IS_TAGGED */
 		if(IS_TAGGED(sub)){
 			XSetForeground(wglobal.dpy, grdata->copy_gc, COLORS->fg);
 			copy_masked(grdata, grdata->stick_pixmap, WIN, 0, 0,

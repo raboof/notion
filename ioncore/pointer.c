@@ -177,7 +177,7 @@ bool handle_button_press(XButtonEvent *ev)
 	reg=(WRegion*)FIND_WINDOW_T(ev->window, WWindow);
 	
 	if(reg==NULL)
-		return NULL;
+		return FALSE;
 	
 	do_grab_kb_ptr(ev->root, reg, FocusChangeMask);
 	bindmap=((WWindow*)reg)->bindmap;

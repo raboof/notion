@@ -94,7 +94,7 @@ bool init_input(WInput *input, WScreen *scr, WWinGeomParams params)
 	
 	input->max_geom=params.geom;
 	
-	#warning KLUDGE
+	/* Kludge -- TODO */
 	input->win.region.screen=scr;
 	
 	input_calc_size(input, &params.geom);

@@ -752,8 +752,9 @@ static void region_unuse_name(WRegion *reg)
 		reg->ni.name=NULL;
 	}
 	
-	if(reg->ni.g_prev!=NULL)
+	if(reg->ni.g_prev!=NULL){
 		UNLINK_ITEM(region_list, reg, ni.g_next, ni.g_prev);
+	}
 }
 
 

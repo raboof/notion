@@ -17,9 +17,13 @@
 #include <wmcore/global.h>
 #include <wmcore/readconfig.h>
 #include <wmcore/targetid.h>
+#include <wmcore/screen.h>
 #include "workspace.h"
 #include "split.h"
 #include "frame.h"
+
+
+extern int tree_size(WObj *obj, int dir);
 
 
 static WWsSplit *current_split=NULL;
@@ -225,7 +229,7 @@ static bool opt_workspace(Tokenizer *tokz, int n, Token *toks)
 	if(current_ws==NULL)
 		return FALSE;
 	
-	screen_attach_sub(current_screen, current_ws, FALSE);
+	region_attach_sub((WRegion*)current_screen, (WRegion*)current_ws, 0);
 
 	return TRUE;
 }

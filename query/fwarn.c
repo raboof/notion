@@ -8,6 +8,7 @@
 
 #include <wmcore/common.h>
 #include <wmcore/global.h>
+#include <wmcore/focus.h>
 #include <src/frame.h>
 #include "wmessage.h"
 

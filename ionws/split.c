@@ -15,6 +15,7 @@
 #include <wmcore/objp.h>
 #include <wmcore/resize.h>
 #include <wmcore/attach.h>
+#include <wmcore/defer.h>
 #include "workspace.h"
 #include "frame.h"
 #include "split.h"

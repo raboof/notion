@@ -52,7 +52,7 @@ static Defer *alloc_defer()
 
 static void free_defer(Defer *d)
 {
-	if(d>=dbuf & d<dbuf+N_DBUF){
+	if(d>=dbuf && d<dbuf+N_DBUF){
 		dbuf_used&=~1<<((d-dbuf)/sizeof(Defer));
 		return;
 	}

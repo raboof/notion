@@ -169,7 +169,7 @@ void wmcore_deinit()
 	unload_modules();
 	
 	FOR_ALL_SCREENS(scr){
-#warning TODO: clean this up
+		/* TODO */
 		write_workspaces(scr);
 		deinit_screen(scr);
 	}
