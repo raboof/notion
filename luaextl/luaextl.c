@@ -273,12 +273,13 @@ static int extl_stack_trace(lua_State *st)
 {
 	lua_Debug ar;
 	int lvl=0;
-	int n_c=0;
+	int n_skip=0;
 	
 	lua_pushstring(st, "Stack trace:");
 
 	for( ; lua_getstack(st, lvl, &ar); lvl++){
 		bool is_c=FALSE;
+		
 		if(lua_getinfo(st, "Sln", &ar)==0){
 			lua_pushfstring(st, "\n(Unable to get debug info for level %d)",
 							lvl);
@@ -286,22 +287,23 @@ static int extl_stack_trace(lua_State *st)
 			continue;
 		}
 		
-		is_c=(ar.what!=NULL && strcmp(ar.what, "C")==0 && ar.name==NULL);
+		is_c=(ar.what!=NULL && strcmp(ar.what, "C")==0);
 
-		if(!is_c){
-			lua_pushfstring(st, "\n%d %s: line %d, function: %s", lvl, 
-							ar.short_src==NULL ? "?" : ar.short_src,
-							ar.currentline,
-							ar.name==NULL ? "?" : ar.name);
-			lua_concat(st, 2);
-			n_c=0;
+		if(!is_c || ar.name!=NULL){
+			lua_pushfstring(st, "\n%d %s", lvl, ar.short_src);
+			if(ar.currentline!=-1)
+				lua_pushfstring(st, ":%d", ar.currentline);
+			if(ar.name!=NULL)
+				lua_pushfstring(st, ": in '%s'", ar.name);
+			lua_concat(st, 2+(ar.currentline!=-1)+(ar.name!=NULL));
+			n_skip=0;
 		}else{
-			if(n_c==0){
+			if(n_skip==0){
 				lua_pushstring(st, "\n  [Skipping unnamed C functions.]");
 				/*lua_pushstring(st, "\n...skipping...");*/
 				lua_concat(st, 2);
 			}
-			n_c++;
+			n_skip++;
 		}
 	}
 	return 1;
