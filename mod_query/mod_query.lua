@@ -470,13 +470,31 @@ function mod_query.exec_completor(wedln, str)
 end
 
 
-function mod_query.exec_handler(frame, cmd)
-    if string.sub(cmd, 1, 1)==":" then
-        local ix=mod_query.lookup_script_warn(frame, "ion-runinxterm")
-        if not ix then return end
-        cmd=ix.." "..string.sub(cmd, 2)
+local cmd_overrides={}
+
+--DOC
+-- Define a command override for the query_exec query.
+function mod_query.defcmd(cmd, fn)
+    cmd_overrides[cmd]=fn
+end
+
+local function trim(s)
+    local _, _, sn=string.find(s, "^[%s]*(.-)[%s]*$")
+    return sn
+end
+
+function mod_query.exec_handler(frame, cmdline)
+    local _, _, cmd, params=string.find(cmdline, "^([^%s]+)(.*)")
+    if cmd and cmd_overrides[cmd] then
+        cmd_overrides[cmd](frame, trim(params))
+    else
+        if string.sub(cmdline, 1, 1)==":" then
+            local ix=mod_query.lookup_script_warn(frame, "ion-runinxterm")
+            if not ix then return end
+            cmd=ix.." "..string.sub(cmdline, 2)
+        end
+        ioncore.exec_on(frame, cmdline)
     end
-    ioncore.exec_on(frame, cmd)
 end
 
 --DOC
@@ -819,6 +837,8 @@ end
 
 -- }}}
 
+-- Load extras
+dopath('mod_query_chdir')
 
 -- Mark ourselves loaded.
 _LOADED["mod_query"]=true

@@ -51,9 +51,6 @@ defbindings("WScreen", {
     bdoc("Show the Ion manual page."),
     kpress(MOD1.."F1", "ioncore.show_manual()"),
     
-    bdoc("Run a terminal emulator."),
-    kpress(MOD2.."F2", "ioncore.exec_on(_, 'xterm')"),
-    
     bdoc("Create a new workspace of chosen default type."),
     kpress(MOD1.."F9", "ioncore.create_ws(_)"),
     
@@ -69,10 +66,9 @@ defbindings("WScreen", {
 -- WMPlex context bindings
 --
 -- These bindings work in frames and on screens. The innermost of such
--- contexts/objects always gets to handle the key press. Essentially these 
--- bindings are used to define actions on client windows. (Remember that 
--- client windows can be put in fullscreen mode and therefore may not have a
--- frame.)
+-- contexts/objects always gets to handle the key press. Most of these 
+-- bindings define actions on client windows. (Remember that client windows 
+-- can be put in fullscreen mode and therefore may not have a frame.)
 -- 
 -- The "_sub:WClientWin" guards are used to ensure that _sub is a client
 -- window in order to stop Ion from executing the callback with an invalid
@@ -99,9 +95,12 @@ defbindings("WMPlex", {
             "Some programs may not allow this by default."),
        kpress("Q", "WClientWin.quote_next(_sub)", "_sub:WClientWin"),
     }),
-    
+
     bdoc("Query for manual page to be displayed."),
     kpress(MOD2.."F1", "mod_query.query_man(_)"),
+
+    bdoc("Run a terminal emulator."),
+    kpress(MOD2.."F2", "ioncore.exec_on(_, 'xterm')"),
     
     bdoc("Query for command line to execute."),
     kpress(MOD2.."F3", "mod_query.query_exec(_)"),

@@ -18,6 +18,7 @@ MAKE_EXPORTS=mod_query
 
 MODULE=mod_query
 MODULE_STUB=mod_query.lua
+LUA_SOURCES=mod_query_chdir.lua
 
 ######################################
 
@@ -25,4 +26,4 @@ include $(TOPDIR)/rules.mk
 
 ######################################
 
-_install: module_install
+_install: module_install lc_install

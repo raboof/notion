@@ -61,7 +61,8 @@ void ioncore_do_exec(const char *cmd)
 }
 
 
-static bool do_exec_on_rootwin(int xscr, const char *cmd)
+EXTL_EXPORT
+bool ioncore_do_exec_rw(WRootWin *rw, const char *cmd, const char *wd)
 {
     int pid;
     
@@ -80,29 +81,17 @@ static bool do_exec_on_rootwin(int xscr, const char *cmd)
     if(pid!=0)
         return TRUE;
     
-    ioncore_setup_environ(xscr);
+    ioncore_setup_environ(rw==NULL ? -1 : rw->xscr);
+    
+    if(wd!=NULL){
+        if(chdir(wd)!=0)
+            warn_err_obj(wd);
+    }
     
     ioncore_do_exec(cmd);
     
     /* We should not get here */
     return FALSE;
-}
-
-
-/*EXTL_DOC
- * Run \var{cmd} with the environment variable DISPLAY set to point to the
- * root window of the X screen \var{reg} is on.
- */
-EXTL_EXPORT
-bool ioncore_exec_on(WRegion *reg, const char *cmd)
-{
-    WRootWin *rw=region_rootwin_of(reg);
-    if(rw==NULL){
-        warn(TR("Could not find a root window."));
-        return FALSE;
-    }
-    
-    return do_exec_on_rootwin(rw->xscr, cmd);
 }
 
 
@@ -114,7 +103,7 @@ bool ioncore_exec_on(WRegion *reg, const char *cmd)
 EXTL_EXPORT
 bool ioncore_exec(const char *cmd)
 {
-    return do_exec_on_rootwin(-1, cmd);
+    return ioncore_do_exec_rw(NULL, cmd, NULL);
 }
 
 

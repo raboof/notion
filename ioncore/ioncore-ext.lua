@@ -26,6 +26,7 @@ dopath('ioncore-luaext')
 dopath('ioncore-bindings')
 dopath('ioncore-winprops')
 dopath('ioncore-misc')
+dopath('ioncore-wd')
 
 -- Export some important functions into global namespace.
 export(ioncore, 

@@ -177,6 +177,13 @@ char *extl_get_savefile(const char *basename);
 EXTL_EXPORT_AS(ioncore, write_savefile)
 bool extl_write_savefile(const char *basename, ExtlTab tab);
 
+
+/*EXTL_DOC
+ * Read a savefile.
+ */
+EXTL_EXPORT_AS(ioncore, read_savefile)
+ExtlTab extl_extl_read_savefile(const char *basename);
+
     
 
 bool ioncore_read_main_config(const char *cfgfile)
