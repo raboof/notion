@@ -15,6 +15,7 @@
 #include "clientwin.h"
 #include "colormap.h"
 #include "region.h"
+#include "names.h"
 
 
 /*{{{ Installing colormaps */
