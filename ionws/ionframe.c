@@ -380,10 +380,7 @@ static bool opt_region(Tokenizer *tokz, int n, Token *toks)
 		}
 	}
 	
-	pgeom("bar: ", REGION_GEOM(tmp_frame));
-	pgeom("quk: ", tmp_geom);
 	genframe_managed_geom((WGenFrame*)tmp_frame, &geom);
-	pgeom("foo: ", geom);
 	reg=load_create_region((WWindow*)tmp_frame, geom, tokz, n, toks);
 
 	if(reg==NULL)

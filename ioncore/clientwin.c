@@ -442,13 +442,13 @@ static void clientwin_remove_managed(WClientWin *cwin, WRegion *transient)
 static void reparent_root(WClientWin *cwin)
 {
 	XWindowAttributes attr;
-	Window dummy, root=SCREEN_OF(cwin)->root.win;
-	int x, y;
+	Window dummy;
+	int x=0, y=0;
 	
-	if(XTranslateCoordinates(wglobal.dpy, cwin->win, root,
-							 0, 0, &x, &y, &dummy)){
-		XReparentWindow(wglobal.dpy, cwin->win, root, x, y);
-	}
+	XGetWindowAttributes(wglobal.dpy, cwin->win, &attr);
+	XTranslateCoordinates(wglobal.dpy, cwin->win, attr.root, 0, 0, &x, &y,
+						  &dummy);
+	XReparentWindow(wglobal.dpy, cwin->win, attr.root, x, y);
 }
 
 
