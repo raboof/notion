@@ -29,6 +29,7 @@ floatframe_bindings{
     mclick("Button1", genframe_p_switch_tab, "tab"),
     mdrag("Button1", floatframe_p_move, "tab"),
     mdrag("Button1", genframe_p_resize, "border"),
+    mdblclick("Button1", floatframe_toggle_shade, "tab"),
     
     mclick(DEFAULT_MOD .. "Button1", floatframe_raise),
     mdrag(DEFAULT_MOD .. "Button1", floatframe_p_move),
