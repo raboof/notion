@@ -189,12 +189,16 @@ void setup_listing(WListing *l, char **strs, int nstrs, bool onecol)
 void fit_listing(GrBrush *brush, const WRectangle *geom, WListing *l)
 {
 	int ncol, nrow=0, visrow=INT_MAX;
-	int i;
-	int w=geom->w, h=geom->h;
+	int i, maxw, w, h;
 	GrFontExtents fnte;
-	int maxw;
+	GrBorderWidths bdw;
 	
 	grbrush_get_font_extents(brush, &fnte);
+	grbrush_get_border_widths(brush, &bdw);
+	
+	w=geom->w-bdw.left-bdw.right;
+	h=geom->h-bdw.top-bdw.bottom;
+	
 	maxw=strings_maxw(brush, l->strs, l->nstrs);
 	l->itemw=maxw+COL_SPACING;
 	l->itemh=fnte.max_height;
@@ -323,6 +327,7 @@ void draw_listing(GrBrush *brush, Window win, const WRectangle *geom,
 	GrBorderWidths bdw;
 	
 	grbrush_clear_area(brush, win, geom);
+	
 	grbrush_draw_border(brush, win, geom, NULL);
 
 	grbrush_get_border_widths(brush, &bdw);
