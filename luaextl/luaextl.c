@@ -384,8 +384,6 @@ static bool extl_stack_push(lua_State *st, char spec, void *ptr)
 		}
 	}else if(spec=='s' || spec=='S'){
 		lua_pushstring(st, *(char**)ptr);
-		if(spec=='s')
-			free(*(char**)ptr);
 	}else if(spec=='t' || spec=='f'){
 		lua_rawgeti(l_st, LUA_REGISTRYINDEX, *(int*)ptr);
 		return !lua_isnil(st, -1);
