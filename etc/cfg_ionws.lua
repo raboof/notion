@@ -42,6 +42,10 @@ if mod_menu then
                   "WIonWS.split_at(_, _sub, 'bottom', true)"),
         menuentry("Split horizontally", 
                   "WIonWS.split_at(_, _sub, 'right', true)"),
+        menuentry("Flip root", "_:split_tree():flip()"),
+        menuentry("Flip parent", "_:node_of(_sub):parent():flip()"),
+        menuentry("Transpose root", "_:split_tree():transpose()"),
+        menuentry("Transpose parent", "_:node_of(_sub):parent():transpose()"),
     })
 end
 
