@@ -77,7 +77,6 @@ static void do_timer_set()
 
 bool ioncore_check_signals()
 {
-    char *tmp=NULL;
     struct timeval current_time;
     WTimer *q;
     bool ret=FALSE;
@@ -94,14 +93,17 @@ bool ioncore_check_signals()
     
     if(kill_sig!=0){
         if(kill_sig==SIGUSR1){
-            ioncore_restart_other(tmp);
+            ioncore_restart();
             assert(0);
         } 
-        if(kill_sig==SIGTERM)
-            ioncore_exit();
-
-        ioncore_deinit();
-        kill(getpid(), kill_sig);
+        if(kill_sig==SIGTERM){
+            ioncore_resign();
+            /* We may still return here if running under a session manager. */
+        }else{
+            ioncore_emergency_snapshot();
+            ioncore_deinit();
+            kill(getpid(), kill_sig);
+        }
     }
 
     /* Check for timer events in the queue */

@@ -10,6 +10,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 
 #include <libtu/misc.h>
 #include <libtu/parser.h>
@@ -22,6 +23,7 @@
 #include <ioncore/readconfig.h>
 #include <ioncore/manage.h>
 #include <ioncore/ioncore.h>
+#include <ioncore/exec.h>
 #include "sm_matchwin.h"
 #include "sm_session.h"
 
@@ -110,6 +112,8 @@ static void set_sdir()
 
 void mod_sm_deinit()
 {
+    ioncore_set_smhook(NULL);
+
     hook_remove(clientwin_do_manage_alt, (WHookDummy*)sm_do_manage);
 
     ioncore_unset_sm_callbacks(mod_sm_add_match, mod_sm_get_configuration);
@@ -139,6 +143,8 @@ int mod_sm_init()
     
     hook_add(clientwin_do_manage_alt, (WHookDummy*)sm_do_manage);
 
+    ioncore_set_smhook(mod_sm_smhook);
+    
     return TRUE;
     
 err:

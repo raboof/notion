@@ -10,7 +10,7 @@ defmenu("mainmenu", {
     menuentry("About Ion",      "querylib.show_about_ion(_)"),
     submenu("Workspaces",       "workspacelist"),
     submenu("Styles",           "stylemenu"),
-    submenu("Exit",             "exitmenu"),
+    submenu("Session",          "sessionmenu"),
 })
 
 
@@ -23,12 +23,13 @@ defmenu("appmenu", {
 })
 
 
--- Menu with restart/exit alternatives
-defmenu("exitmenu", {
+-- Session control menu
+defmenu("sessionmenu", {
+    menuentry("Save",           "ioncore.snapshot()"),
     menuentry("Restart",        "ioncore.restart()"),
     menuentry("Restart Ion",    "ioncore.restart_other('ion')"),
     menuentry("Restart TWM",    "ioncore.restart_other('twm')"),
-    menuentry("Exit",           "ioncore.exit()"),
+    menuentry("Exit",           "ioncore.shutdown()"),
 })
 
 

@@ -35,7 +35,7 @@ static SmcConn sm_conn=NULL;
 static int sm_fd=-1;
 
 static char *sm_client_id=NULL;
-static char restart_hint=SmRestartIfRunning;
+static char restart_hint=SmRestartImmediately;
 
 static Bool sent_save_done=FALSE;
 
@@ -223,7 +223,7 @@ static void sm_save_yourself_phase2(SmcConn conn, SmPointer client_data)
 {
     Bool success;
 
-    if(!(success=ioncore_save_session()))
+    if(!(success=ioncore_do_snapshot()))
         warn("Failed to save session state\n");
     else
         sm_set_properties();
@@ -277,9 +277,9 @@ static void sm_save_complete(SmcConn conn, SmPointer client_data)
 static void sm_die(SmcConn conn, SmPointer client_data)
 {
     assert(conn==sm_conn);
+    ioncore_set_smhook(NULL);
     mod_sm_close();
-    ioncore_g.save_enabled=FALSE;
-    ioncore_exit();
+    ioncore_do_exit();
 }
 
 
@@ -348,6 +348,7 @@ void mod_sm_close()
     if(sm_fd>=0){
         ioncore_unregister_input_fd(sm_fd);
         close(sm_fd);
+        sm_fd=-1;
     }
 
     if(sm_client_id!=NULL){
@@ -363,64 +364,48 @@ static void sm_exit()
 }
 
 
-static void sm_resign(char hint)
+static void sm_restart()
 {
-    restart_hint=hint;
-    SmcRequestSaveYourself(sm_conn, SmSaveBoth, False,
-                           SmInteractStyleAny, False, False);
-    save_complete_fn=&sm_exit;
+    ioncore_do_restart();
 }
 
 
-/*EXTL_DOC
- * Request shutdown.
- */
-EXTL_EXPORT
-void mod_sm_request_shutdown()
+void mod_sm_smhook(int what)
 {
-    SmcRequestSaveYourself(sm_conn, SmSaveBoth, True,
-                           SmInteractStyleAny, False, True);
+    save_complete_fn=NULL;
+    
+    /* pending check? */
+    
+    switch(what){
+    case IONCORE_SM_RESIGN:
+        restart_hint=SmRestartIfRunning;
+        SmcRequestSaveYourself(sm_conn, SmSaveBoth, False,
+                               SmInteractStyleAny, False, False);
+        save_complete_fn=&sm_exit;
+        break;
+    case IONCORE_SM_SHUTDOWN:
+        restart_hint=SmRestartIfRunning;
+        SmcRequestSaveYourself(sm_conn, SmSaveBoth, True,
+                               SmInteractStyleAny, False, True);
+        break;
+    case IONCORE_SM_RESTART:
+        restart_hint=SmRestartImmediately;
+        SmcRequestSaveYourself(sm_conn, SmSaveBoth, False,
+                               SmInteractStyleAny, False, False);
+        save_complete_fn=&sm_exit;
+        break;
+    case IONCORE_SM_RESTART_OTHER:
+        restart_hint=SmRestartIfRunning;
+        SmcRequestSaveYourself(sm_conn, SmSaveBoth, False,
+                               SmInteractStyleAny, False, False);
+        save_complete_fn=&sm_restart;
+        break;
+    case IONCORE_SM_SNAPSHOT:
+        restart_hint=SmRestartImmediately;
+        SmcRequestSaveYourself(sm_conn, SmSaveBoth, False,
+                               SmInteractStyleAny, False, True);
+        break;
+    }
 }
 
-
-/*EXTL_DOC
- * Request save.
- */
-EXTL_EXPORT
-void mod_sm_request_save()
-{
-    SmcRequestSaveYourself(sm_conn, SmSaveBoth, False,
-                           SmInteractStyleAny, False, True);
-}
-
-
-/*EXTL_DOC
- * Sets the restart hint property to restart immediately and exits.
- */
-EXTL_EXPORT
-void mod_sm_restart()
-{
-    sm_resign(SmRestartImmediately);
-}
-
-
-/*EXTL_DOC
- * Just exits.
- */
-EXTL_EXPORT
-void mod_sm_resign()
-{
-    sm_resign(SmRestartIfRunning);
-}
-
-
-/*EXTL_DOC
- * Restart hint to restart anyway and exit. Ion will be restarted next
- * session launch even if it wasn't running at shutdown.
- */
-EXTL_EXPORT
-void mod_sm_resign_tmp()
-{
-    sm_resign(SmRestartAnyway);
-}
 

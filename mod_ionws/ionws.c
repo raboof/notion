@@ -70,7 +70,8 @@ bool ionws_fitrep(WIonWS *ws, WWindow *par, const WFitParams *fp)
     if(ws->split_tree==NULL)
         return TRUE;
     
-    split_resize(ws->split_tree, &(fp->g), PRIMN_ANY, PRIMN_ANY);
+    split_resize(ws->split_tree, &(fp->g), PRIMN_ANY, PRIMN_ANY,
+                 REGION_FIT_BOUNDS);
     
     return TRUE;
 }

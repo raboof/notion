@@ -33,7 +33,6 @@
 #include "modules.h"
 #include "mainloop.h"
 #include "eventh.h"
-#include "saveload.h"
 #include "ioncore.h"
 #include "manage.h"
 #include "conf.h"
@@ -46,6 +45,7 @@
 #include "netwm.h"
 #include "focus.h"
 #include "frame.h"
+#include "saveload.h"
 #include "../version.h"
 
 
@@ -70,7 +70,7 @@ static const char ioncore_about[]=
 
 
 WHook *ioncore_post_layout_setup_hook=NULL;
-WHook *ioncore_save_session_hook=NULL;
+WHook *ioncore_snapshot_hook=NULL;
 WHook *ioncore_deinit_hook=NULL;
 
 
@@ -95,7 +95,7 @@ extern void ioncore_unregister_exports();
 static bool init_hooks()
 {
     INIT_HOOK_(ioncore_post_layout_setup_hook);
-    INIT_HOOK_(ioncore_save_session_hook);
+    INIT_HOOK_(ioncore_snapshot_hook);
     INIT_HOOK_(ioncore_deinit_hook);
     INIT_HOOK_(screen_content_switched_hook);
     INIT_HOOK_(frame_content_switched_hook);
@@ -488,27 +488,6 @@ bool ioncore_startup(const char *display, const char *cfgfile,
 /*}}}*/
 
 
-/*{{{ ioncore_save_session */
-
-
-/*EXTL_DOC
- * Save session state.
- */
-EXTL_EXPORT
-bool ioncore_save_session()
-{
-    if(!ioncore_save_layout())
-        return FALSE;
-
-    hook_call_v(ioncore_save_session_hook);
-    
-    return TRUE;
-}
-
-
-/*}}}*/
-
-
 /*{{{ ioncore_deinit */
 
 
@@ -522,15 +501,12 @@ void ioncore_deinit()
     if(ioncore_g.dpy==NULL)
         return;
 
-    if(ioncore_g.save_enabled)
-        ioncore_save_session();
-
     hook_call_v(ioncore_deinit_hook);
-    
+
     while(ioncore_g.screens!=NULL)
         destroy_obj((Obj*)ioncore_g.screens);
 
-    ioncore_unload_modules();
+    /*ioncore_unload_modules();*/
 
     while(ioncore_g.rootwins!=NULL)
         destroy_obj((Obj*)ioncore_g.rootwins);

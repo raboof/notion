@@ -18,5 +18,6 @@ extern bool mod_sm_init_session();
 extern void mod_sm_set_ion_id(const char *client_id);
 extern char *mod_sm_get_ion_id();
 extern void mod_sm_close();
+extern void mod_sm_smhook(int what);
 
 #endif /* ION_MOD_SM_BINDING_H */

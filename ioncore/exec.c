@@ -28,6 +28,7 @@
 #include "global.h"
 #include "ioncore.h"
 #include "mainloop.h"
+#include "saveload.h"
 
 
 #define SHELL_PATH "/bin/sh"
@@ -263,40 +264,98 @@ void ioncore_setup_environ(int xscr)
 /*}}}*/
 
 
-/*{{{ Exit and restart */
+/*{{{ Exit, restart, snapshot */
 
 
-static void exitret(int retval)
-{    
-    ioncore_deinit();
-    exit(retval);
+static void (*smhook)(int what);
+
+bool ioncore_set_smhook(void (*fn)(int what))
+{
+    smhook=fn;
+    return TRUE;
 }
 
 
-/*EXTL_DOC
- * Causes the window manager to exit.
- */
-EXTL_EXPORT
-void ioncore_exit()
+void ioncore_do_exit()
 {
-    exitret(EXIT_SUCCESS);
+    ioncore_deinit();
+    exit(0);
 }
 
 
-/*EXTL_DOC
- * Attempt to restart another window manager \var{cmd}.
- */
-EXTL_EXPORT
-void ioncore_restart_other(const char *cmd)
+bool ioncore_do_snapshot()
+{
+    if(!ioncore_save_layout())
+        return FALSE;
+
+    hook_call_v(ioncore_snapshot_hook);
+    
+    return TRUE;
+}
+
+
+void ioncore_emergency_snapshot()
+{
+    if(smhook!=NULL)
+        warn("State not saved: running under session manager.");
+    else
+        ioncore_do_snapshot();
+}
+
+
+
+static char *other=NULL;
+
+static void set_other(const char *s)
+{
+    if(other!=NULL)
+        free(other);
+    other=(s==NULL ? NULL : scopy(s));
+}
+
+
+void ioncore_do_restart()
 {
     ioncore_deinit();
-    if(cmd!=NULL){
+    if(other!=NULL){
         if(ioncore_g.display!=NULL)
             ioncore_setup_environ(-1);
-        ioncore_do_exec(cmd);
+        ioncore_do_exec(other);
     }
     execvp(ioncore_g.argv[0], ioncore_g.argv);
     die_err_obj(ioncore_g.argv[0]);
+}
+
+
+/*EXTL_DOC
+ * Causes the window manager to simply exit.
+ */
+EXTL_EXPORT
+void ioncore_resign()
+{
+    if(smhook!=NULL){
+        smhook(IONCORE_SM_RESIGN);
+    }else{
+        if(ioncore_g.save_enabled)
+            ioncore_do_snapshot();
+        ioncore_do_exit();
+    }
+}
+
+
+/*EXTL_DOC
+ * End session.
+ */
+EXTL_EXPORT
+void ioncore_shutdown()
+{
+    if(smhook!=NULL){
+        smhook(IONCORE_SM_SHUTDOWN);
+    }else{
+        if(ioncore_g.save_enabled)
+            ioncore_do_snapshot();
+        ioncore_do_exit();
+    }
 }
 
 
@@ -306,7 +365,46 @@ void ioncore_restart_other(const char *cmd)
 EXTL_EXPORT
 void ioncore_restart()
 {
-    ioncore_restart_other(NULL);
+    set_other(NULL);
+    
+    if(smhook!=NULL){
+        smhook(IONCORE_SM_RESTART);
+    }else{
+        if(ioncore_g.save_enabled)
+            ioncore_do_snapshot();
+        ioncore_do_restart();
+    }
+}
+
+
+/*EXTL_DOC
+ * Attempt to restart another window manager \var{cmd}.
+ */
+EXTL_EXPORT
+void ioncore_restart_other(const char *cmd)
+{
+    set_other(cmd);
+    
+    if(smhook!=NULL){
+        smhook(IONCORE_SM_RESTART_OTHER);
+    }else{
+        if(ioncore_g.save_enabled)
+            ioncore_do_snapshot();
+        ioncore_do_restart();
+    }
+}
+
+
+/*EXTL_DOC
+ * Save session.
+ */
+EXTL_EXPORT
+void ioncore_snapshot()
+{
+    if(smhook!=NULL)
+        smhook(IONCORE_SM_SNAPSHOT);
+    else
+        ioncore_do_snapshot();
 }
 
 
