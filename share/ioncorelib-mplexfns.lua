@@ -17,9 +17,9 @@
 -- (\code{mplex [, sub]}) that calls \var{fn} with parameter chosen
 -- as the first match from the following steps:
 -- \begin{enumerate}
+-- \item \var{sub} if it is not nil.
 -- \item The current input in \var{mplex} (see \fnref{WMPlex.current_input})
 --   if one exists and \var{noinput} is not set.
--- \item \var{sub} if it is not nil.
 -- \item The currently displayed object in \var{mplex} 
 --   (see \fnref{WMPlex.current}), if not nil.
 -- \item \var{mplex} itself, if \var{noself} is not set.
