@@ -374,16 +374,18 @@ void handler_function(WThing *thing, char *fn, char *userdata)
 	bool error;
 	
 	assert(WTHING_IS(thing, WFrame));
+
+	setup_watch(&watch, thing, NULL);
+	
 	if(((WFrame*)thing)->current_sub!=NULL)
 		thing=(WThing*)(((WFrame*)thing)->current_sub);
-	
-	setup_watch(&watch, thing, NULL);
 	
 	old_warn_handler=set_warn_handler(function_warn_handler);
 	error=!execute_command_sequence(thing, fn);
 	set_warn_handler(old_warn_handler);
 	
 	if(watch.thing!=NULL){
+		thing=watch.thing;
 		if(last_error_message!=NULL){
 			FWARN(("%s", last_error_message));
 		}else if(error){

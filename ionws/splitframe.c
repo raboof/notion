@@ -14,7 +14,7 @@
 #include "framep.h"
 #include <wmcore/global.h>
 #include <wmcore/close.h>
-
+#include <wmcore/objp.h>
 
 typedef WRegion *WSplitCreate(WScreen *scr, WWinGeomParams params);
 extern WRegion *split_reg(WRegion *reg, int dir, int primn,

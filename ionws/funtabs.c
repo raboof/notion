@@ -27,41 +27,47 @@
 /*{{{ Call handlers */
 
 
-#define WSCURRENT_PASS(HND)                 \
-	WRegion *reg;                           \
-	assert(WTHING_IS(thing, WWorkspace));   \
-	reg=REGION_ACTIVE_SUB((WRegion*)thing); \
-	if(reg!=NULL)                           \
-		HND(thing, func, n, args)
+#define WSCURRENT_HANDLE(HND, T, G)               \
+	WRegion *reg;                                 \
+	typedef void Func(WThing*, T);                \
+	assert(WTHING_IS(thing, WWorkspace));         \
+	reg=REGION_ACTIVE_SUB((WRegion*)thing);       \
+	if(reg!=NULL)                                 \
+		((Func*)func->fn)((WThing*)reg, G(args));
 
 void callhnd_wscurrent_void(WThing *thing, WFunction *func,
 							int n, const Token *args)
 {
-	WSCURRENT_PASS(callhnd_generic_void);
+	WRegion *reg;
+	typedef void Func(WThing*);
+	assert(WTHING_IS(thing, WWorkspace));
+	reg=REGION_ACTIVE_SUB((WRegion*)thing);
+	if(reg!=NULL)
+		((Func*)func->fn)((WThing*)reg);
 }
 
 
 void callhnd_wscurrent_l(WThing *thing, WFunction *func,
 						 int n, const Token *args)
 {
-	WSCURRENT_PASS(callhnd_generic_l);
+	WSCURRENT_HANDLE(callhnd_generic_l, long, TOK_LONG_VAL);
 }
 
 
 void callhnd_wscurrent_d(WThing *thing, WFunction *func,
 						 int n, const Token *args)
 {
-	WSCURRENT_PASS(callhnd_generic_d);
+	WSCURRENT_HANDLE(callhnd_generic_d, double, TOK_DOUBLE_VAL);
 }
 
 
 void callhnd_wscurrent_s(WThing *thing, WFunction *func,
 						 int n, const Token *args)
 {
-	WSCURRENT_PASS(callhnd_generic_s);
+	WSCURRENT_HANDLE(callhnd_generic_s, const char*, TOK_STRING_VAL);
 }
 
-#undef WSCURRENT_PASS
+#undef WSCURRENT_HANDLE
 
 
 /*}}}*/

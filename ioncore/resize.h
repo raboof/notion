@@ -37,8 +37,8 @@ extern void region_request_geom(WRegion *reg,
 extern uint region_min_h(WRegion *reg);
 extern uint region_min_w(WRegion *reg);
 
-extern void set_width(WRegion *reg, uint w);
-extern void set_height(WRegion *reg, uint h);
+extern void set_width(WRegion *reg, int w);
+extern void set_height(WRegion *reg, int h);
 extern void set_widthq(WRegion *reg, double q);
 extern void set_heightq(WRegion *reg, double q);
 

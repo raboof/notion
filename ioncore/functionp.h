@@ -38,6 +38,9 @@ extern void callhnd_direct(WThing *thing, WFunction *func,
 						   int n, const Token *args);
 extern void callhnd_generic_void(WThing *thing, WFunction *func,
 								 int n, const Token *args);
+/* Notice: although the libtu token type l(ong) is used, functions
+ * are expected to take an int argument.
+ */
 extern void callhnd_generic_l(WThing *thing, WFunction *func,
 							  int n, const Token *args);
 extern void callhnd_generic_b(WThing *thing, WFunction *func,

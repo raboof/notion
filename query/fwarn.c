@@ -11,6 +11,7 @@
 #include <wmcore/focus.h>
 #include <src/frame.h>
 #include "wmessage.h"
+#include <wmcore/objp.h>
 
 
 void fwarn(WFrame *frame, const char *p)
@@ -20,7 +21,6 @@ void fwarn(WFrame *frame, const char *p)
 	
 	if(p==NULL || frame_current_input(frame)!=NULL)
 		return;
-	
 	
 	p2=scat("-Error- ", p);
 	

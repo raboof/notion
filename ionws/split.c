@@ -140,7 +140,7 @@ static WWsSplit *split_of(WObj *obj)
 
 static void set_split_of(WObj *obj, WWsSplit *split)
 {
-	if(WOBJ_IS(obj, WWindow)){
+	if(WOBJ_IS(obj, WRegion)){
 		SPLIT_OF((WRegion*)obj)=split;
 		return;
 	}
@@ -259,7 +259,7 @@ int tree_do_resize(WObj *node_, int dir, int npos, int nsize)
 			brs=node->tmpsize;
 			tls=nsize-brs;
 		}else{
-			fprintf(stderr, "Resize is broken!");
+			/*fprintf(stderr, "Resize is broken!");*/
 			brs=nsize/2;
 			tls=nsize-brs;
 		}

@@ -350,19 +350,23 @@ uint region_min_w(WRegion *reg)
 /*{{{ set_width etc. */
 
 
-void set_width(WRegion *reg, uint w)
+void set_width(WRegion *reg, int w)
 {
 	WRectangle geom=REGION_GEOM(reg);
-	geom.w=w;
-	region_request_geom(reg, geom, &geom, FALSE);
+	if(w>0){
+		geom.w=w;
+		region_request_geom(reg, geom, &geom, FALSE);
+	}
 }
 
 
-void set_height(WRegion *reg, uint h)
+void set_height(WRegion *reg, int h)
 {
 	WRectangle geom=REGION_GEOM(reg);
-	geom.h=h;
-	region_request_geom(reg, geom, &geom, FALSE);
+	if(h>0){
+		geom.h=h;
+		region_request_geom(reg, geom, &geom, FALSE);
+	}
 }
 
 

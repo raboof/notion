@@ -138,8 +138,7 @@ void callhnd_generic_void(WThing *thing, WFunction *func,
 						  int n, const Token *args)
 {
 	typedef void Func(WThing*);
-	thing=find_parent(thing, func->objdescr);
-	if(thing!=NULL)
+	if(thing!=NULL && wobj_is((WObj*)thing, func->objdescr))
 		((Func*)func->fn)(thing);
 }
 
@@ -148,8 +147,7 @@ void callhnd_generic_l(WThing *thing, WFunction *func,
 					   int n, const Token *args)
 {
 	typedef void Func(WThing*, int);
-	thing=find_parent(thing, func->objdescr);
-	if(thing!=NULL)
+	if(thing!=NULL && wobj_is((WObj*)thing, func->objdescr))
 		((Func*)func->fn)(thing, TOK_LONG_VAL(args));
 }
 
@@ -158,8 +156,7 @@ void callhnd_generic_b(WThing *thing, WFunction *func,
 					   int n, const Token *args)
 {
 	typedef void Func(WThing*, bool);
-	thing=find_parent(thing, func->objdescr);
-	if(thing!=NULL)
+	if(thing!=NULL && wobj_is((WObj*)thing, func->objdescr))
 		((Func*)func->fn)(thing, TOK_BOOL_VAL(args));
 }
 
@@ -168,8 +165,7 @@ void callhnd_generic_d(WThing *thing, WFunction *func,
 					   int n, const Token *args)
 {
 	typedef void Func(WThing*, double);
-	thing=find_parent(thing, func->objdescr);
-	if(thing!=NULL)
+	if(thing!=NULL && wobj_is((WObj*)thing, func->objdescr))
 		((Func*)func->fn)(thing, TOK_DOUBLE_VAL(args));
 }
 
@@ -178,8 +174,7 @@ void callhnd_generic_s(WThing *thing, WFunction *func,
 					   int n, const Token *args)
 {
 	typedef void Func(WThing*, char*);
-	thing=find_parent(thing, func->objdescr);
-	if(thing!=NULL)
+	if(thing!=NULL && wobj_is((WObj*)thing, func->objdescr))
 		((Func*)func->fn)(thing, TOK_STRING_VAL(args));
 }
 
@@ -188,8 +183,7 @@ void callhnd_generic_ss(WThing *thing, WFunction *func,
 						int n, const Token *args)
 {
 	typedef void Func(WThing*, char*, char*);
-	thing=find_parent(thing, func->objdescr);
-	if(thing!=NULL)
+	if(thing!=NULL && wobj_is((WObj*)thing, func->objdescr))
 		((Func*)func->fn)(thing, TOK_STRING_VAL(args), TOK_STRING_VAL(args+1));
 }
 
