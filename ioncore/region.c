@@ -303,10 +303,14 @@ bool region_goto_flags(WRegion *reg, int flags)
 {
     bool ret=FALSE;
 
-    ioncore_set_previous_of(reg);
-    ioncore_protect_previous();
-    region_do_goto(reg, flags);
-    ioncore_unprotect_previous();
+    if(flags&REGION_GOTO_FOCUS){
+        ioncore_set_previous_of(reg);
+        ioncore_protect_previous();
+        region_do_goto(reg, flags);
+        ioncore_unprotect_previous();
+    }else{
+        region_do_goto(reg, flags);
+    }
     
     return ret;
 }
