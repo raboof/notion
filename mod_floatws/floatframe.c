@@ -39,7 +39,8 @@ static bool floatframe_init(WFloatFrame *frame, WWindow *parent,
                             const WFitParams *fp)
 {
     frame->bar_w=fp->g.w;
-    frame->sticky=FALSE;
+    frame->tab_min_w=0;
+    frame->bar_max_width_q=1.0;
     
     if(!frame_init((WFrame*)frame, parent, fp, "frame-floatframe"))
         return FALSE;
@@ -424,13 +425,9 @@ static void floatframe_size_changed(WFloatFrame *frame, bool wchg, bool hchg)
 EXTL_EXPORT_MEMBER
 void floatframe_toggle_sticky(WFloatFrame *frame)
 {
-    if(frame->sticky){
-        objlist_remove(&floatws_sticky_list, (Obj*)frame);
-        frame->sticky=FALSE;
-    }else{
-        objlist_insert(&floatws_sticky_list, (Obj*)frame);
-        frame->sticky=TRUE;
-    }
+    WFloatStacking *st=mod_floatws_find_stacking((WRegion*)frame);
+    if(st!=NULL)
+        st->sticky=!st->sticky;
 }
 
 /*EXTL_DOC
@@ -439,7 +436,8 @@ void floatframe_toggle_sticky(WFloatFrame *frame)
 EXTL_EXPORT_MEMBER
 bool floatframe_is_sticky(WFloatFrame *frame)
 {
-    return frame->sticky;
+    WFloatStacking *st=mod_floatws_find_stacking((WRegion*)frame);
+    return (st!=NULL ? st->sticky : FALSE);
 }
 
 
@@ -451,11 +449,7 @@ bool floatframe_is_sticky(WFloatFrame *frame)
 
 static ExtlTab floatframe_get_configuration(WFloatFrame *frame)
 {
-    ExtlTab tab=frame_get_configuration(&(frame->frame));
-
-    extl_table_sets_b(tab, "sticky", frame->sticky);
-    
-    return tab;
+    return frame_get_configuration(&(frame->frame));
 }
 
 
@@ -472,10 +466,8 @@ WRegion *floatframe_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
         /* Nothing to manage, destroy */
         destroy_obj((Obj*)frame);
         frame=NULL;
-    }else{
-        if(extl_table_is_bool_set(tab, "sticky"))
-            floatframe_toggle_sticky(frame);
     }
+    
     return (WRegion*)frame;
 }
 

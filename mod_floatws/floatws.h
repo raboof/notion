@@ -28,6 +28,7 @@ DECLSTRUCT(WFloatStacking){
     WRegion *reg;
     WRegion *above;
     WFloatStacking *next, *prev;
+    bool sticky;
 };
 
 
@@ -37,7 +38,6 @@ DECLCLASS(WFloatWS){
     WRegion *managed_stdisp;
     int stdisp_corner;
     WRegion *current_managed;
-    WFloatStacking *stacking;
 };
 
 
@@ -70,8 +70,6 @@ extern void floatws_lower(WFloatWS *ws, WRegion *reg);
 extern bool mod_floatws_clientwin_do_manage(WClientWin *cwin, 
                                             const WManageParams *param);
 
-/* */
-
-extern ObjList *floatws_sticky_list;
+extern WFloatStacking *mod_floatws_find_stacking(WRegion *r);
 
 #endif /* ION_MOD_FLOATWS_FLOATWS_H */

@@ -37,7 +37,7 @@
 #include "main.h"
 
 
-ObjList *floatws_sticky_list=NULL;
+static WFloatStacking *stacking=NULL;
 
 
 static void floatws_place_stdisp(WFloatWS *ws, WWindow *parent,
@@ -55,9 +55,10 @@ static void floatws_fit(WFloatWS *ws, const WRectangle *geom)
 
 bool floatws_fitrep(WFloatWS *ws, WWindow *par, const WFitParams *fp)
 {
-    WRegion *sub, *next;
-    bool rs;
+    WFloatStacking *st, *stnext;
     int xdiff, ydiff;
+    WRectangle g;
+    bool rs;
     
     if(par==NULL){
         REGION_GEOM(ws)=fp->g;
@@ -67,50 +68,103 @@ bool floatws_fitrep(WFloatWS *ws, WWindow *par, const WFitParams *fp)
     if(!region_same_rootwin((WRegion*)ws, (WRegion*)par))
         return FALSE;
 
+    if(ws->managed_stdisp!=NULL)
+        region_detach_manager(ws->managed_stdisp);
+    
+    assert(ws->managed_stdisp==NULL);
+
     genws_do_reparent(&(ws->genws), par, fp);
     
     xdiff=fp->g.x-REGION_GEOM(ws).x;
     ydiff=fp->g.y-REGION_GEOM(ws).y;
     
-    FOR_ALL_MANAGED_ON_LIST_W_NEXT(ws->managed_list, sub, next){
-        WRectangle g=REGION_GEOM(sub);
-        g.x+=xdiff;
-        g.y+=ydiff;
-        if(!region_reparent(sub, par, &g, REGION_FIT_EXACT)){
-            warn("Problem: can't reparent a %s managed by a WFloatWS"
-                 "being reparented. Detaching from this object.",
-                 OBJ_TYPESTR(sub));
-            region_detach_manager(sub);
+    for(st=stacking; st!=NULL; st=stnext){
+        stnext=st->next;
+        
+        if(REGION_MANAGER(st->reg)==(WRegion*)ws){
+            /* It doesn't matter in which order the frames for different
+             * parents are, just that the frames with the same parent are
+             * ordered properly.
+             */
+            UNLINK_ITEM(stacking, st, next, prev);
+            LINK_ITEM(stacking, st, next, prev);
+            
+            g=REGION_GEOM(st->reg);
+            g.x+=xdiff;
+            g.y+=ydiff;
+        
+            if(!region_reparent(st->reg, par, &g, REGION_FIT_EXACT)){
+                warn("Problem: can't reparent a %s managed by a WFloatWS"
+                     "being reparented. Detaching from this object.",
+                 OBJ_TYPESTR(st->reg));
+                region_detach_manager(st->reg);
+            }
         }
     }
-    
-    if(ws->managed_stdisp!=NULL)
-        floatws_place_stdisp(ws, par, ws->stdisp_corner, ws->managed_stdisp);
     
     return TRUE;
 }
 
 
+static bool is_l1(WFloatWS *ws)
+{
+    WMPlex *mplex=REGION_MANAGER_CHK(ws, WMPlex);
+    return (mplex!=NULL && mplex_layer(mplex, (WRegion*)ws)==1);
+}
+
+
+static WFloatWS *same_stacking(WFloatWS *ws, WRegion *reg)
+{
+    WMPlex *mplex;
+    WFloatWS *ws2;
+
+    ws2=REGION_MANAGER_CHK(reg, WFloatWS);
+    
+    if(ws2==ws)
+        return ws;
+    
+    if(ws2==NULL)
+        return NULL;
+    
+    if(REGION_MANAGER(ws)==NULL){
+        if(REGION_PARENT(ws)==REGION_PARENT(ws2) && is_l1(ws2))
+            return ws2;
+        return NULL;
+    }
+
+    if(REGION_MANAGER(ws2)==NULL){
+        if(REGION_PARENT(ws)==REGION_PARENT(ws2) && is_l1(ws))
+            return ws2;
+        return NULL;
+    }
+    
+    if(REGION_MANAGER(ws2)==REGION_MANAGER(ws) && is_l1(ws) && is_l1(ws2))
+        return ws2;
+    return NULL;
+}
+
+
 static void move_sticky(WFloatWS *ws)
 {
-    WRegion *reg, *par=REGION_PARENT(ws);
-    
-    if(par==NULL || !OBJ_IS(par, WMPlex))
-        return;
-    
-    FOR_ALL_ON_OBJLIST(WRegion*, reg, floatws_sticky_list){
-        WFloatWS *rmgr;
-        if(REGION_PARENT(reg)!=par)
+    WFloatStacking *st;
+    WFloatWS *ws2;
+
+    for(st=stacking; st!=NULL; st=st->next){
+        if(!st->sticky || REGION_MANAGER(st->reg)==(WRegion*)ws)
             continue;
-        rmgr=REGION_MANAGER_CHK(reg, WFloatWS);
-        if(rmgr==NULL)
+        
+        ws2=same_stacking(ws, st->reg);
+        
+        if(ws2==NULL)
             continue;
-        if(rmgr->current_managed==reg)
-            rmgr->current_managed=NULL;
-        region_unset_manager(reg, (WRegion*)rmgr, &(rmgr->managed_list));
-        region_set_manager(reg, (WRegion*)ws, &(ws->managed_list));
-        if(REGION_IS_ACTIVE(reg) && ws->current_managed==NULL)
-            ws->current_managed=reg;
+
+        if(ws2->current_managed==st->reg){
+            ws2->current_managed=NULL;
+            ws->current_managed=st->reg;
+        }
+        
+        region_unset_manager(st->reg, (WRegion*)ws2, &(ws2->managed_list));
+        region_set_manager(st->reg, (WRegion*)ws, &(ws->managed_list));
     }
 }
 
@@ -147,47 +201,28 @@ static void floatws_unmap(WFloatWS *ws)
 }
 
 
-static WRegion *floatws_get_focus_to(WFloatWS *ws)
-{
-    WRegion *next=NULL;
-    WWindow *par=REGION_PARENT_CHK(ws, WWindow);
-    
-    if(par!=NULL){
-        Window root=None, parent=None, *children=NULL;
-        uint nchildren=0;
-        WRegion *r;
-        /* Use XQueryTree to get things in stacking order. */
-        XQueryTree(ioncore_g.dpy, region_xwindow((WRegion*)par),
-                   &root, &parent, &children, &nchildren);
-        while(nchildren>0){
-            nchildren--;
-            r=xwindow_region_of(children[nchildren]);
-            if(r!=NULL && r!=ws->managed_stdisp &&
-               REGION_MANAGER(r)==(WRegion*)ws){
-                next=r;
-                break;
-            }
-        }
-        XFree(children);
-    }
-    
-    return (next ? next : ws->managed_list);
-}
-
-
 static void floatws_do_set_focus(WFloatWS *ws, bool warp)
 {
     WRegion *r=ws->current_managed;
         
-    if(r==NULL)
-        r=floatws_get_focus_to(ws);
-
-    if(r==NULL){
-        genws_fallback_focus(&(ws->genws), warp);
-        return;
+    if(r==NULL && stacking!=NULL){
+        WFloatStacking *st=stacking->prev;
+        while(1){
+            if(REGION_MANAGER(st->reg)==(WRegion*)ws && 
+               st->reg!=ws->managed_stdisp){
+                r=st->reg;
+                break;
+            }
+            if(st==stacking)
+                break;
+            st=st->prev;
+        }
     }
-    
-    region_do_set_focus(r, warp);
+
+    if(r!=NULL)
+        region_do_set_focus(r, warp);
+    else
+        genws_fallback_focus(&(ws->genws), warp);
 }
 
 
@@ -208,12 +243,12 @@ static void floatws_managed_remove(WFloatWS *ws, WRegion *reg)
     WFloatStacking *st, *stnext;
     bool nextlocked=FALSE;
     
-    for(st=ws->stacking; st!=NULL; st=stnext){
+    for(st=stacking; st!=NULL; st=stnext){
         stnext=st->next;
         if(st->reg==reg){
             next=st->above;
             nextlocked=TRUE;
-            UNLINK_ITEM(ws->stacking, st, next, prev);
+            UNLINK_ITEM(stacking, st, next, prev);
             free(st);
         }else if(st->above==reg){
             st->above=NULL;
@@ -262,7 +297,6 @@ static bool floatws_init(WFloatWS *ws, WWindow *parent, const WFitParams *fp)
     ws->current_managed=NULL;
     ws->managed_stdisp=NULL;
     ws->stdisp_corner=MPLEX_STDISP_BL;
-    ws->stacking=NULL;
 
     if(!genws_init(&(ws->genws), parent, fp))
         return FALSE;
@@ -341,7 +375,7 @@ bool floatws_rqclose(WFloatWS *ws)
 
 static bool floatws_add_managed(WFloatWS *ws, WRegion *reg, bool skip_list)
 {
-    WFloatStacking *st=ALLOC(WFloatStacking);
+    WFloatStacking *st=ALLOC(WFloatStacking), *sttop=NULL;
     Window bottom=None, top=None;
     
     if(st==NULL)
@@ -349,18 +383,17 @@ static bool floatws_add_managed(WFloatWS *ws, WRegion *reg, bool skip_list)
     
     st->reg=reg;
     st->above=NULL;
-    
-    region_stacking((WRegion*)ws, &bottom, &top);
-    region_restack(reg, top, Above);
-    
-    LINK_ITEM(ws->stacking, st, next, prev);
-    
+    st->sticky=FALSE;
+
     if(skip_list)
         region_set_manager(reg, (WRegion*)ws, NULL);
     else
         region_set_manager(reg, (WRegion*)ws, &(ws->managed_list));
     
     region_add_bindmap_owned(reg, mod_floatws_floatws_bindmap, (WRegion*)ws);
+
+    LINK_ITEM_FIRST(stacking, st, next, prev);
+    floatws_raise(ws, reg);
 
     if(region_is_fully_mapped((WRegion*)ws))
         region_map(reg);
@@ -602,14 +635,14 @@ bool mod_floatws_clientwin_do_manage(WClientWin *cwin,
 
     mgr=REGION_MANAGER(cwin);
     
-    if(ws->stacking!=NULL){
-        st=ws->stacking->prev; /* Should be the correct one already.. */
+    if(stacking!=NULL){
+        st=stacking->prev;
         while(1){
             if(st->reg==mgr){
                 st->above=stack_above;
                 break;
             }
-            if(st==ws->stacking)
+            if(st==stacking)
                 break;
             st=st->prev;
         }
@@ -719,46 +752,218 @@ WRegion *floatws_backcirculate(WFloatWS *ws)
 /*{{{ Stacking */
 
 
+WFloatStacking *mod_floatws_find_stacking(WRegion *r)
+{
+    WFloatStacking *st;
+    
+    for(st=stacking; st!=NULL; st=st->next){
+        if(st->reg==r)
+            return st;
+    }
+    
+    return NULL;
+}
+
+
 void floatws_stacking(WFloatWS *ws, Window *bottomret, Window *topret)
 {
     WFloatStacking *st;
     
-    *bottomret=ws->genws.dummywin;
-    *topret=ws->genws.dummywin;
-
-    if(ws->stacking==NULL)
-        return;
+    /* Ignore dummywin if we manage anything in order to not confuse 
+     * the global stacking list 
+     */
     
-    st=ws->stacking->prev;
+    *topret=None;
+    *bottomret=None;
     
-    while(1){
-        Window bottom=None, top=None;
-        region_stacking(st->reg, &bottom, &top);
-        if(top!=None){
-            *topret=top;
-            break;
+    if(stacking!=NULL){
+        st=stacking->prev;
+        
+        while(1){
+            Window bottom=None, top=None;
+            if(REGION_MANAGER(st->reg)==(WRegion*)ws){
+                region_stacking(st->reg, &bottom, &top);
+                if(top!=None){
+                    *topret=top;
+                    break;
+                }
+            }
+            if(st==stacking)
+                break;
+            st=st->prev;
         }
-        if(st==ws->stacking)
-            break;
-        st=st->prev;
+        
+        for(st=stacking; st!=NULL; st=st->next){
+            Window bottom=None, top=None;
+            if(REGION_MANAGER(st->reg)==(WRegion*)ws){
+                region_stacking(st->reg, &bottom, &top);
+                if(bottom!=None){
+                    *bottomret=top;
+                    break;
+                }
+            }
+        }
     }
+    
+    if(*bottomret==None)
+        *bottomret=ws->genws.dummywin;
+    if(*topret==None)
+        *topret=ws->genws.dummywin;
+}
+
+
+static WFloatStacking *link_lists(WFloatStacking *l1, WFloatStacking *l2)
+{
+    /* As everywhere, doubly-linked lists without the forward 
+     * link in last item! 
+     */
+    WFloatStacking *tmp=l2->prev;
+    l1->prev->next=l2;
+    l2->prev=l2->prev;
+    l1->prev=tmp;
+    return l1;
+}
+
+
+static WFloatStacking *link_list_before(WFloatStacking *l1, 
+                                        WFloatStacking *i1,
+                                        WFloatStacking *l2)
+{
+    WFloatStacking *tmp;
+    
+    if(i1==l1)
+        return link_lists(l2, l1);
+    
+    l2->prev->next=i1;
+    i1->prev->next=l2;
+    tmp=i1->prev;
+    i1->prev=l2->prev;
+    l2->prev=tmp;
+    
+    return l1;
+}
+
+
+static WFloatStacking *link_list_after(WFloatStacking *l1, 
+                                        WFloatStacking *i1,
+                                        WFloatStacking *l2)
+{
+    WFloatStacking *tmp;
+    
+    if(i1==l1->prev)
+        return link_lists(l1, l2);
+    
+    i1->next->prev=l2->prev;
+    l2->prev->next=i1->next;
+    i1->next=l2;
+    l2->prev=i1;
+    
+    return l1;
+}
+
+
+static WFloatStacking *find_stacking_if_not_on_ws(WFloatWS *ws, Window w)
+{
+    WRegion *r=xwindow_region_of(w);
+    WFloatStacking *st=NULL;
+    
+    while(r!=NULL){
+        if(REGION_PARENT(r)==REGION_PARENT(ws))
+            break;
+        if(REGION_MANAGER(r)==(WRegion*)ws)
+            break;
+        st=mod_floatws_find_stacking(r);
+        if(st!=NULL)
+            break;
+        r=REGION_MANAGER(r);
+    }
+    
+    return st;
 }
 
 
 void floatws_restack(WFloatWS *ws, Window other, int mode)
 {
-    WFloatStacking *st;
-    
-    xwindow_restack(ws->genws.dummywin, other, mode);
-    other=ws->genws.dummywin;
+    WFloatStacking *st, *stnext, *chain=NULL;
+    bool samepar=FALSE;
+    Window ref=other;
+    WMPlex *par=REGION_PARENT_CHK(ws, WMPlex);
+
+    assert(mode==Above || mode==Below);
+
+    xwindow_restack(ws->genws.dummywin, ref, mode);
+    ref=ws->genws.dummywin;
     mode=Above;
     
-    for(st=ws->stacking; st!=NULL; st=st->next){
-        Window bottom=None, top=None;
-        region_restack(st->reg, other, mode);
-        region_stacking(st->reg, &bottom, &top);
-        if(top!=None)
-            other=top;
+    if(stacking==NULL)
+        return;
+    
+    for(st=stacking; st!=NULL; st=stnext){
+        stnext=st->next;
+        if(REGION_MANAGER(st->reg)==(WRegion*)ws){
+            Window bottom=None, top=None;
+            region_restack(st->reg, ref, mode);
+            region_stacking(st->reg, &bottom, &top);
+            if(top!=None)
+                ref=top;
+            
+            UNLINK_ITEM(stacking, st, next, prev);
+            LINK_ITEM(chain, st, next, prev);
+        }else if(REGION_PARENT(st->reg)==REGION_PARENT(ws)){
+            samepar=TRUE;
+        }
+    }
+    
+    if(chain==NULL)
+        return;
+    
+    if(stacking==NULL){
+        stacking=chain;
+        return;
+    }
+    
+    if(other==None || !samepar || par==NULL){
+        WFloatStacking *tmp;
+        if(mode==Above)
+            stacking=link_lists(stacking, chain);
+        else
+            stacking=link_lists(chain, stacking);
+    }else{
+        /* Need to find the point on the list to insert to. */
+        Window root=None, parent=None, *children=NULL;
+        uint i, n=0;
+        /* Use XQueryTree to get things in stacking order. */
+        XQueryTree(ioncore_g.dpy, region_xwindow((WRegion*)par),
+                   &root, &parent, &children, &n);
+        if(mode==Above){
+            WFloatStacking *below=NULL, *st;
+            for(i=n; i>0; ){
+                i--;
+                if(children[i]==other)
+                    break;
+                st=find_stacking_if_not_on_ws(ws, children[i]);
+                if(st!=NULL)
+                    below=st;
+            }
+            if(below!=NULL)
+                stacking=link_list_before(stacking, below, chain);
+            else
+                stacking=link_lists(stacking, chain);
+        }else{
+            WFloatStacking *above=NULL, *st;
+            for(i=0; i<n; i++){
+                if(children[i]==other)
+                    break;
+                st=find_stacking_if_not_on_ws(ws, children[i]);
+                if(st!=NULL)
+                    above=st;
+            }
+            if(above!=NULL)
+                stacking=link_list_after(stacking, above, chain);
+            else
+                stacking=link_lists(chain, stacking);
+        }
+        XFree(children);
     }
 }
 
@@ -770,38 +975,58 @@ void floatws_restack(WFloatWS *ws, Window other, int mode)
 EXTL_EXPORT_MEMBER
 void floatws_raise(WFloatWS *ws, WRegion *reg)
 {
-    WFloatStacking *st, *stabove, *stnext;
-    Window bottom=None, top=None;
+    WFloatStacking *st, *sttop=NULL, *stabove, *stnext;
+    Window bottom=None, top=None, other=None;
 
-    if(reg==NULL || ws->stacking==NULL)
+    if(reg==NULL || stacking==NULL)
         return;
-    
+
     if(REGION_MANAGER(reg)!=(WRegion*)ws){
         WARN_FUNC("reg not managed by ws");
         return;
     }
     
-    for(st=ws->stacking; st!=NULL; st=st->next){
+    st=stacking->prev;
+    while(1){
         if(st->reg==reg)
             break;
+        if(st->above!=reg && sttop==NULL && same_stacking(ws, st->reg)){
+            region_stacking(st->reg, &bottom, &top);
+            if(top!=None){
+                other=top;
+                sttop=st;
+            }
+        }
+        if(st==stacking) /* reg not found */
+            return;
+        st=st->prev;
     }
     
-    if(st==NULL)
-        return;
+    if(sttop!=NULL){
+        UNLINK_ITEM(stacking, st, next, prev);
+        region_restack(reg, other, Above);
+        LINK_ITEM_AFTER(stacking, sttop, st, next, prev);
+    }else{
+        region_restack(reg, ws->genws.dummywin, Above);
+    }
     
-    UNLINK_ITEM(ws->stacking, st, next, prev);
-    region_stacking((WRegion*)ws, &bottom, &top);
-    region_restack(reg, top, Above);
-    LINK_ITEM(ws->stacking, st, next, prev);
+    region_stacking(reg, &bottom, &top);
+    if(top==None)
+        return;
+    other=top;
+    sttop=st;
 
-    for(stabove=ws->stacking; stabove!=NULL && stabove!=st; stabove=stnext){
+    for(stabove=stacking; stabove!=NULL && stabove!=st; stabove=stnext){
         stnext=stabove->next;
         
         if(stabove->above==reg){
-            UNLINK_ITEM(ws->stacking, stabove, next, prev);
-            region_stacking((WRegion*)ws, &bottom, &top);
-            region_restack(stabove->reg, top, Above);
-            LINK_ITEM(ws->stacking, stabove, next, prev);
+            UNLINK_ITEM(stacking, stabove, next, prev);
+            region_restack(stabove->reg, other, Above);
+            LINK_ITEM_AFTER(stacking, sttop, st, next, prev);
+            region_stacking(stabove->reg, &bottom, &top);
+            if(top!=None)
+                other=top;
+            sttop=stabove;
         }
     }
 }
@@ -814,28 +1039,38 @@ void floatws_raise(WFloatWS *ws, WRegion *reg)
 EXTL_EXPORT_MEMBER
 void floatws_lower(WFloatWS *ws, WRegion *reg)
 {
-    WFloatStacking *st;
+    WFloatStacking *st, *stbottom=NULL, *stabove, *stnext;
+    Window bottom=None, top=None, other=None;
 
-    if(reg==NULL || ws->stacking==NULL)
+    if(reg==NULL || stacking==NULL)
         return;
-    
+
     if(REGION_MANAGER(reg)!=(WRegion*)ws){
         WARN_FUNC("reg not managed by ws");
         return;
     }
     
-    for(st=ws->stacking; st!=NULL; st=st->next){
+    for(st=stacking; st!=NULL; st=st->next){
         if(st->reg==reg)
             break;
+        if(stbottom==NULL && same_stacking(ws, st->reg)){
+            region_stacking(st->reg, &bottom, &top);
+            if(bottom!=None){
+                other=bottom;
+                stbottom=st;
+            }
+        }
     }
-
-    if(st==NULL)
-        return;
     
-    UNLINK_ITEM(ws->stacking, st, next, prev);
-    region_restack(reg, ws->genws.dummywin, Above);
-    LINK_ITEM_FIRST(ws->stacking, st, next, prev);
-
+    if(st!=NULL){
+        if(stbottom==NULL){
+            region_restack(reg, ws->genws.dummywin, Above);
+        }else{
+            UNLINK_ITEM(stacking, st, next, prev);
+            region_restack(reg, other, Below);
+            LINK_ITEM_BEFORE(stacking, stbottom, st, next, prev);
+        }
+    }
 }
 
 
@@ -874,7 +1109,8 @@ WRegion* floatws_current(WFloatWS *ws)
 
 static ExtlTab floatws_get_configuration(WFloatWS *ws)
 {
-    ExtlTab tab, mgds, st, g;
+    ExtlTab tab, mgds, subtab, g;
+    WFloatStacking *st;
     WRegion *mgd;
     WMPlex *par;
     int n=0;
@@ -886,16 +1122,18 @@ static ExtlTab floatws_get_configuration(WFloatWS *ws)
     extl_table_sets_t(tab, "managed", mgds);
     
     FOR_ALL_MANAGED_ON_LIST(ws->managed_list, mgd){
-        st=region_get_configuration(mgd);
-        if(st==extl_table_none())
-            continue;
+        subtab=region_get_configuration(mgd);
 
         g=extl_table_from_rectangle(&REGION_GEOM(mgd));
-        extl_table_sets_t(st, "geom", g);
+        extl_table_sets_t(subtab, "geom", g);
         extl_unref_table(g);
         
-        extl_table_seti_t(mgds, ++n, st);
-        extl_unref_table(st);
+        st=mod_floatws_find_stacking(mgd);
+        if(st!=NULL && st->sticky)
+            extl_table_sets_b(subtab, "sticky", TRUE);
+        
+        extl_table_seti_t(mgds, ++n, subtab);
+        extl_unref_table(subtab);
     }
     
     extl_unref_table(mgds);
@@ -926,6 +1164,7 @@ static WRegion *floatws_do_attach(WFloatWS *ws, WRegionAttachHandler *fn,
 static WRegion *floatws_attach_load(WFloatWS *ws, ExtlTab param)
 {
     WRectangle geom;
+    WRegion *reg;
     
     if(!extl_table_gets_rectangle(param, "geom", &geom)){
         warn("No geometry specified");
@@ -935,9 +1174,17 @@ static WRegion *floatws_attach_load(WFloatWS *ws, ExtlTab param)
     geom.w=maxof(geom.w, 0);
     geom.h=maxof(geom.h, 0);
     
-    return region__attach_load((WRegion*)ws, param, 
-                               (WRegionDoAttachFn*)floatws_do_attach,
-                               &geom);
+    reg=region__attach_load((WRegion*)ws, param, 
+                            (WRegionDoAttachFn*)floatws_do_attach,
+                            &geom);
+    
+    if(reg!=NULL && extl_table_is_bool_set(param, "sticky")){
+        WFloatStacking *st=mod_floatws_find_stacking(reg);
+        if(st!=NULL)
+            st->sticky=TRUE;
+    }
+    
+    return reg;
 }
 
 

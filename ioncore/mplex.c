@@ -743,7 +743,8 @@ static bool mplex_do_managed_display(WMPlex *mplex, WRegion *sub,
          * window. 'netscape -remote' will not work at all if there are
          * no visible netscape windows.
          */
-        region_lower(sub);
+        if(OBJ_IS(sub, WClientWin))
+            region_lower(sub);
         
         /* This call should be unnecessary... */
         mplex_managed_activated(mplex, sub);
