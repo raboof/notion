@@ -1155,8 +1155,6 @@ bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg, int pos)
             region_unmap(reg);
     }
     
-#warning "Huoh, pitäisi saada selville kun stdisp reparentoidaan."
-    
     return TRUE;
 }
 

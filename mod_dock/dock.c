@@ -71,7 +71,7 @@
 /*}}}*/
 
 
-/*{{{ Vvariables */
+/*{{{ Variables */
 
 #include "../version.h"
 
@@ -1089,21 +1089,17 @@ static WDock *create_dock(WWindow *parent, const WFitParams *fp)
 }
 
 
-/*EXTL_DOC
- * Destroys \var{dock} if it is empty.
- */
-EXTL_EXPORT_MEMBER
-void dock_destroy(WDock *dock)
-{
 
+bool dock_rqclose(WDock *dock)
+{
     if(dock->managed_list!=NULL){
         warn_obj(modname, "Dock \"%s\" is still managing other objects "
                 " -- refusing to close.", region_name((WRegion*)dock));
-        return;
+        return FALSE;
+    }else{
+        ioncore_defer_destroy((Obj*)dock);
+        return TRUE;
     }
-
-    destroy_obj((Obj*)dock);
-
 }
 
 
@@ -1423,6 +1419,7 @@ static DynFunTab dock_dynfuntab[]={
     {region_size_hints, dock_size_hints},
     {(DynFun*)region_fitrep, (DynFun*)dock_fitrep},
     {(DynFun*)region_orientation, (DynFun*)dock_orientation},
+    {(DynFun*)region_rqclose, (DynFun*)dock_rqclose},
     END_DYNFUNTAB
 };
 
