@@ -37,19 +37,39 @@
  * Instead, I've reinvented the wheel in libtu :(.
  */
 static OptParserOpt pwm_opts[]={
-    {OPT_ID('d'), "display",  OPT_ARG, "host:dpy.scr", "X display to use"},
-    {'c',         "conffile", OPT_ARG, "config_file", "Configuration file"},
-    {'s',         "searchdir",OPT_ARG, "dir", "Add directory to search path"},
-    {OPT_ID('o'), "oneroot",  0, NULL, "Manage default root window/non-Xinerama screen only"},
+    {OPT_ID('d'), "display",  OPT_ARG, "host:dpy.scr", 
+     "X display to use"},
+    
+    {'c', "conffile", OPT_ARG, "config_file", 
+     "Configuration file"},
+    
+    {'s', "searchdir", OPT_ARG, "dir", 
+     "Add directory to search path"},
+
+    {OPT_ID('o'), "oneroot",  0, NULL,
+     "Manage default root window/non-Xinerama screen only"},
+
 #ifndef CF_NOXINERAMA    
-    {OPT_ID('x'), "xinerama", OPT_ARG, "1|0", "Use Xinerama screen information (default: 0/no)"},
+    {OPT_ID('x'), "xinerama", OPT_ARG, "1|0", 
+     "Use Xinerama screen information (default: 0/no)"},
 #else
-    {OPT_ID('x'), "xinerama", OPT_ARG, "?", "Ignored: not compiled with Xinerama support"},
+    {OPT_ID('x'), "xinerama", OPT_ARG, "?", 
+     "Ignored: not compiled with Xinerama support"},
 #endif
-    {OPT_ID('s'), "session",  OPT_ARG, "session_name", "Name of session (affects savefiles)"},
-    {OPT_ID('S'), "smclientid", OPT_ARG, "client_id", "Session manager client ID"},
-    {OPT_ID('i'), "i18n", 0, NULL, "Enable use of multibyte string routines, actual "
-                                   "encoding depending on the locale."},
+    
+    {OPT_ID('s'), "session",  OPT_ARG, "session_name", 
+     "Name of session (affects savefiles)"},
+    
+    {OPT_ID('S'), "smclientid", OPT_ARG, "client_id", 
+     "Session manager client ID"},
+
+    {OPT_ID('i'), "i18n", 0, NULL, 
+     "Enable use of multibyte string routines, actual "
+     "encoding depending on the locale."},
+    
+    {OPT_ID('N'), "noerrorlog", 0, NULL, 
+     "Do not create startup error log and display it with xmessage."},
+    
     END_OPTPARSEROPTS
 };
 
@@ -77,6 +97,7 @@ int main(int argc, char*argv[])
     char *efnam=NULL;
     bool may_continue=FALSE;
     bool i18n=FALSE;
+    bool noerrorlog=FALSE;
     
     libtu_init(argv[0]);
 
@@ -131,28 +152,33 @@ int main(int argc, char*argv[])
         case OPT_ID('i'):
             i18n=TRUE;
             break;
+        case OPT_ID('N'):
+            noerrorlog=TRUE;
+            break;
         default:
             optparser_print_error();
             return EXIT_FAILURE;
         }
     }
 
-    /* We may have to pass the file to xmessage so just using tmpfile()
-     * isn't sufficient.
-     */
-    libtu_asprintf(&efnam, "%s/pwm-%d-startup-errorlog", P_tmpdir,
-                   getpid());
-    if(efnam==NULL){
-        warn_err("Failed to create error log file");
-    }else{
-        ef=fopen(efnam, "wt");
-        if(ef==NULL){
-            warn_err_obj(efnam);
-            free(efnam);
-            efnam=NULL;
+    if(!noerrorlog){
+        /* We may have to pass the file to xmessage so just using tmpfile()
+         * isn't sufficient.
+         */
+        libtu_asprintf(&efnam, "%s/pwm-%d-startup-errorlog", P_tmpdir,
+                       getpid());
+        if(efnam==NULL){
+            warn_err("Failed to create error log file");
+        }else{
+            ef=fopen(efnam, "wt");
+            if(ef==NULL){
+                warn_err_obj(efnam);
+                free(efnam);
+                efnam=NULL;
+            }
+            fprintf(ef, "PWM startup error log:\n");
+            errorlog_begin_file(&el, ef);
         }
-        fprintf(ef, "PWM startup error log:\n");
-        errorlog_begin_file(&el, ef);
     }
 
     /* Set up locale and detect encoding.
