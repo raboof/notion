@@ -182,13 +182,13 @@ end
 
 --DOC    
 -- This function will generate another function that, depending on its
--- parameter, will call either \fnref{exec_in_frame} or 
+-- parameter, will call either \fnref{exec_in} or 
 -- \fnref{exec_on_rootwin} to execute \var{cmd}. You should use this
 -- function to bind execution commands to keys.
 function make_exec_fn(cmd)
     local function do_exec(reg)
         if obj_is(reg, "WGenFrame") then
-            exec_in_frame(frame, cmd)
+            exec_in(frame, cmd)
         else
             execrootw(reg, cmd)
         end
@@ -199,11 +199,11 @@ end
 
 --DOC
 -- Equivalent to 
--- \fnref{exec_on_rootwin}\code{(}\fnref{region_rootwin_of}\code{(frame), cmd)}. 
+-- \fnref{exec_on_rootwin}\code{(}\fnref{region_rootwin_of}\code{(where), cmd)}. 
 -- This function should be overridden by scripts and other kludges that
 -- want to attempt to put new windows where they belong.
-function exec_in_frame(frame, cmd)
-    execrootw(frame, cmd)
+function exec_in(where, cmd)
+    execrootw(where, cmd)
 end
 
 -- }}}

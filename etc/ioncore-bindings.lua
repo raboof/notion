@@ -38,7 +38,13 @@ global_bindings{
     kpress(DEFAULT_MOD.."Shift+Left", goto_next_screen),
     kpress(DEFAULT_MOD.."Shift+Right", goto_prev_screen),
     
-    kpress(DEFAULT_MOD.."F1", make_exec_fn("ion-man ion")),
+    kpress(DEFAULT_MOD.."F1", function(scr)
+                                  -- Display Ion's manual page
+                                  local m=lookup_script("ion-man")
+                                  if m then
+                                      exec_in(scr, m.." ion")
+                                  end
+                              end),
     kpress("F2", make_exec_fn("xterm")),
     
     -- Create a new workspace with a default name.

@@ -111,3 +111,6 @@ obsolete("region_get_active_leaf",
              until r==nil
              return reg
          end)
+
+-- Added 2003-06-27
+obsolete("exec_in_frame", exec_in)

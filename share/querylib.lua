@@ -113,7 +113,7 @@ function QueryLib.make_execwith_fn(prompt, init, prog, completor)
     local function handle_execwith(frame, str)
         local p, err=getprog(prog)
         if p then
-            exec_in_frame(frame, p.." "..str)
+            exec_in(frame, p.." "..str)
         else
             query_fwarn(frame, err)
         end
@@ -126,7 +126,7 @@ function QueryLib.make_execfile_fn(prompt, init, prog, completor)
         local p, err=getprog(prog)
         if p then
             QueryLib.last_dir=string.gsub(str, "^(.*/)[^/]-$", "%1")
-            exec_in_frame(frame, getprog(prog) .. " " .. str)
+            exec_in(frame, getprog(prog) .. " " .. str)
         else
             query_fwarn(frame, err)
         end
@@ -145,7 +145,7 @@ function QueryLib.exec_handler(frame, cmd)
         if not ix then return end
         cmd=ix.." "..string.sub(cmd, 2)
     end
-    exec_in_frame(frame, cmd)
+    exec_in(frame, cmd)
 end
 
 function QueryLib.getws(obj)
