@@ -13,7 +13,7 @@ PREFIX=/usr/local/ion-devel
 # Unless you are creating a package conforming to some OS's standards, you
 # probably do not want to modify the following directories:
 
-# 'ioncore' binary and 'ion' script
+# Main binaries
 BINDIR=$(PREFIX)/bin
 # Configuration .lua files
 ETCDIR=$(PREFIX)/etc/ion
