@@ -627,8 +627,9 @@ void clientwin_deinit(WClientWin *cwin)
 /* Used when the window was unmapped */
 void clientwin_unmapped(WClientWin *cwin)
 {
+	bool cf=region_may_control_focus((WRegion*)cwin);
 	rescue_managed_clientwins((WRegion*)cwin, cwin->transient_list);
-	if(cwin->fsinfo.last_mgr_watch.obj!=NULL)
+	if(cf && cwin->fsinfo.last_mgr_watch.obj!=NULL)
 		region_goto((WRegion*)(cwin->fsinfo.last_mgr_watch.obj));
 	destroy_obj((WObj*)cwin);
 }
