@@ -226,7 +226,7 @@ static bool init_hooks()
     INIT_HOOK_(ioncore_snapshot_hook);
     INIT_HOOK_(ioncore_deinit_hook);
     INIT_HOOK_(screen_content_switched_hook);
-    INIT_HOOK_(frame_content_switched_hook);
+    INIT_HOOK_(frame_managed_changed_hook);
     INIT_HOOK_(frame_activated_hook);
     INIT_HOOK_(frame_inactivated_hook);
     INIT_HOOK_(clientwin_added_hook);

@@ -91,6 +91,6 @@ extern void frame_do_load(WFrame *frame, ExtlTab tab);
 /* Hooks */
 extern WHook *frame_activated_hook;
 extern WHook *frame_inactivated_hook;
-extern WHook *frame_content_switched_hook;
+extern WHook *frame_managed_changed_hook;
 
 #endif /* ION_IONCORE_FRAME_H */

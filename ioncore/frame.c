@@ -49,7 +49,7 @@ static void frame_free_titles(WFrame *frame);
 
 WHook *frame_activated_hook=NULL;
 WHook *frame_inactivated_hook=NULL;
-WHook *frame_content_switched_hook=NULL;
+WHook *frame_managed_changed_hook=NULL;
 
 
 /*{{{ Destroy/create frame */
@@ -440,10 +440,10 @@ void frame_activated(WFrame *frame)
 
 
 /*EXTL_DOC
- * Toggle tab visibility.
+ * Toggle tab-bar visibility.
  */
 EXTL_EXPORT_MEMBER
-bool frame_toggle_tab(WFrame *frame)
+bool frame_toggle_tabbar(WFrame *frame)
 {
     if(!(frame->flags&FRAME_SHADED)){
         frame->flags^=FRAME_TAB_HIDE;
@@ -508,7 +508,7 @@ bool frame_is_shaded(WFrame *frame)
 
 
 /*EXTL_DOC
- * Is \var{frame}'s tab bar displayed?
+ * Is \var{frame}'s tab-bar displayed?
  */
 EXTL_EXPORT_MEMBER
 bool frame_is_tabbar_hidden(WFrame *frame)
@@ -535,22 +535,70 @@ static void frame_size_changed_default(WFrame *frame,
 }
 
 
+typedef struct{
+    WFrame *frame;
+    int mode;
+    bool sw;
+    WRegion *reg;
+} ChgParam;
+
+
+static const char *mode2str(int mode)
+{
+    if(mode==MPLEX_CHANGE_SWITCHONLY)
+        return "switchonly";
+    else if(mode==MPLEX_CHANGE_REORDER)
+        return "reorder";
+    else if(mode==MPLEX_CHANGE_ADD)
+        return "add";
+    else if(mode==MPLEX_CHANGE_REMOVE)
+        return "remove";
+    return NULL;
+}
+    
+
+static bool mrsh_chg(ExtlFn fn, ChgParam *p)
+{
+    ExtlTab t=extl_create_table();
+    bool ret;
+    
+    extl_table_sets_o(t, "frame", (Obj*)p->frame);
+    extl_table_sets_s(t, "mode", mode2str(p->mode));
+    extl_table_sets_b(t, "sw", p->sw);
+    extl_table_sets_o(t, "reg", (Obj*)p->reg);
+    
+    ret=extl_call(fn, "t", NULL, t);
+    
+    extl_unref_table(t);
+    
+    return ret;
+}
+
 
 static void frame_managed_changed(WFrame *frame, int mode, bool sw,
                                   WRegion *reg)
 {
+    bool need_draw=TRUE;
+    ChgParam p;
+    
+    p.frame=frame;
+    p.mode=mode;
+    p.sw=sw;
+    p.reg=reg;
+    
     if(mode!=MPLEX_CHANGE_SWITCHONLY)
         frame_initialise_titles(frame);
     else
         update_attrs(frame);
 
-    if(sw){
-        hook_call_o(frame_content_switched_hook, (Obj*)frame); /* +current? */
-        if(frame_set_background(frame, FALSE))
-            return;
-    }
+    if(sw)
+        need_draw=!frame_set_background(frame, FALSE);
+    
+    if(need_draw)
+        frame_draw_bar(frame, mode!=MPLEX_CHANGE_SWITCHONLY);
 
-    frame_draw_bar(frame, mode!=MPLEX_CHANGE_SWITCHONLY);
+    hook_call_p(frame_managed_changed_hook, &p,
+                (WHookMarshallExtl*)mrsh_chg);
 }
 
 
@@ -600,7 +648,7 @@ void frame_do_load(WFrame *frame, ExtlTab tab)
     extl_table_gets_i(tab, "flags", &flags);
     
     if(flags&FRAME_TAB_HIDE)
-        frame_toggle_tab((WFrame*)frame);
+        frame_toggle_tabbar((WFrame*)frame);
 
     frame->flags|=(flags&FRAME_DEST_EMPTY);
     
