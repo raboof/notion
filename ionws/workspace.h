@@ -15,6 +15,7 @@ INTROBJ(WWorkspace)
 #include <wmcore/region.h>
 #include <wmcore/window.h>
 #include <wmcore/screen.h>
+#include <wmcore/viewport.h>
 
 #include "split.h"
 
@@ -34,7 +35,7 @@ extern void workspace_remove_sub(WWorkspace *ws, WRegion *reg);
 extern bool remove_split(WWorkspace *ws, WWsSplit *split);
 extern WRegion *workspace_find_current(WWorkspace *ws);
 
-extern void init_workspaces(WScreen *scr);
+extern void init_workspaces(WViewport *vp);
 extern void setup_screens();
 
 extern WWorkspace *lookup_workspace(const char *name);
@@ -42,7 +43,7 @@ extern int complete_workspace(char *nam, char ***cp_ret, char **beg);
 
 extern bool switch_workspace_name(const char *str);
 
-extern WWorkspace *create_new_workspace_on_scr(WScreen *scr, const char *name);
+extern WWorkspace *create_new_workspace_on_vp(WViewport *vp, const char *name);
 
 extern void workspace_goto_above(WWorkspace *ws);
 extern void workspace_goto_below(WWorkspace *ws);

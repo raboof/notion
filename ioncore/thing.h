@@ -25,8 +25,10 @@ INTRSTRUCT(WWatch)
 
 #define FIRST_THING(NAM, TYPE) (TYPE*)first_thing((WThing*)NAM, &OBJDESCR(TYPE))
 #define NEXT_THING(NAM, TYPE) (TYPE*)next_thing((WThing*)NAM, &OBJDESCR(TYPE))
+#define NEXT_THING_FB(NAM, TYPE, FB) (TYPE*)next_thing_fb((WThing*)NAM, &OBJDESCR(TYPE), (WThing*)FB)
 #define LAST_THING(NAM, TYPE) (TYPE*)last_thing((WThing*)NAM, &OBJDESCR(TYPE))
 #define PREV_THING(NAM, TYPE) (TYPE*)prev_thing((WThing*)NAM, &OBJDESCR(TYPE))
+#define PREV_THING_FB(NAM, TYPE, FB) (TYPE*)prev_thing_fb((WThing*)NAM, &OBJDESCR(TYPE), (WThing*)FB)
 #define FIND_PARENT(NAM, TYPE) (TYPE*)find_parent((WThing*)NAM, &OBJDESCR(TYPE))
 #define FIND_PARENT1(NAM, TYPE) (TYPE*)find_parent1((WThing*)NAM, &OBJDESCR(TYPE))
 #define NTH_THING(NAM, N, TYPE) (TYPE*)nth_thing((WThing*)NAM, N, &OBJDESCR(TYPE))
@@ -44,7 +46,9 @@ extern void destroy_subthings(WThing *thing);
 extern void destroy_thing(WThing *thing);
 
 extern WThing *next_thing(WThing *first, const WObjDescr *descr);
+extern WThing *next_thing_fb(WThing *first, const WObjDescr *descr, WThing *fb);
 extern WThing *prev_thing(WThing *first, const WObjDescr *descr);
+extern WThing *prev_thing_fb(WThing *first, const WObjDescr *descr, WThing *fb);
 extern WThing *first_thing(WThing *parent, const WObjDescr *descr);
 extern WThing *last_thing(WThing *parent, const WObjDescr *descr);
 extern WThing *find_parent(WThing *p, const WObjDescr *descr);

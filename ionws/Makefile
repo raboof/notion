@@ -7,8 +7,8 @@ include ../system.mk
 
 ######################################
 
-#DIST: LIBS += -L../libtu -ltu -lm $(X11_LIBS) -lX11
-LIBS += -ltu -lm $(X11_LIBS) -lX11
+#DIST: LIBS += -L../libtu -ltu -lm $(X11_LIBS) -lX11 $(XINERAMA_LIBS)
+LIBS += -ltu -lm $(X11_LIBS) -lX11 $(XINERAMA_LIBS)
 #-lefence
 #DIST: INCLUDES += -I../libtu/include $(X11_INCLUDES) -I..
 INCLUDES += $(X11_INCLUDES) -I..

@@ -133,7 +133,7 @@ bool wmcore_init(const char *appname, const char *appetcdir,
 	wglobal.atom_wm_take_focus=XInternAtom(dpy, "WM_TAKE_FOCUS", False);
 	wglobal.atom_wm_colormaps=XInternAtom(dpy, "WM_COLORMAP_WINDOWS", False);
 	wglobal.atom_frame_id=XInternAtom(dpy, "_ION_FRAME_ID", False);
-	wglobal.atom_workspace=XInternAtom(dpy, "_ION_WORKSPACE", False);
+	/*wglobal.atom_workspace=XInternAtom(dpy, "_ION_WORKSPACE", False);*/
 	wglobal.atom_selection=XInternAtom(dpy, "_ION_SELECTION_STRING", False);
 	wglobal.atom_mwm_hints=XInternAtom(dpy, "_MOTIF_WM_HINTS", False);
 	
@@ -170,6 +170,7 @@ void wmcore_deinit()
 {
 	Display *dpy;
 	WScreen *scr;
+	WViewport *vp;
 	
 	wglobal.opmode=OPMODE_DEINIT;
 	
@@ -180,7 +181,9 @@ void wmcore_deinit()
 	
 	FOR_ALL_SCREENS(scr){
 		/* TODO */
-		write_workspaces(scr);
+		FOR_ALL_TYPED(scr, vp, WViewport){
+			write_workspaces(vp);
+		}
 		deinit_screen(scr);
 	}
 	

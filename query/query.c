@@ -222,6 +222,7 @@ static void handler_workspace(WThing *thing, char *name, char *userdata)
 {
 	WScreen *scr=SCREEN_OF(thing);
 	WWorkspace *ws;
+	WViewport *vp;
 	
 	if(empty_name(name))
 		return;
@@ -229,7 +230,9 @@ static void handler_workspace(WThing *thing, char *name, char *userdata)
 	ws=lookup_workspace(name);
 	
 	if(ws==NULL){
-		ws=create_new_workspace_on_scr(scr, name);
+		vp=viewport_of((WRegion*)thing);
+		if(vp!=NULL)
+			ws=create_new_workspace_on_vp(vp, name);
 		if(ws==NULL){
 			FWARN(("Unable to create workspace."));
 			return;
@@ -253,6 +256,7 @@ static void handler_workspace_with(WThing *thing, char *name, char *userdata)
 	WWorkspace *ws;
 	WClientWin *cwin;
 	WFrame *frame;
+	WViewport *vp;
 	
 	if(empty_name(name))
 		return;
@@ -271,9 +275,11 @@ static void handler_workspace_with(WThing *thing, char *name, char *userdata)
 			FWARN(("Client disappeared"));
 			return;
 		}
-	
-		ws=create_new_workspace_on_scr(scr, name);
-
+		
+		vp=viewport_of((WRegion*)thing);
+		if(vp!=NULL)
+			ws=create_new_workspace_on_vp(vp, name);
+		
 		if(ws==NULL){
 			FWARN(("Unable to create workspace."));
 			return;

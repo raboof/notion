@@ -9,6 +9,7 @@
 #include "targetid.h"
 #include "region.h"
 #include "clientwin.h"
+#include "objp.h"
 
 
 /* Yeah, yeah, fixed-size arrays are evil, but if the user really
@@ -88,7 +89,8 @@ int alloc_target_id(WRegion *reg)
 
 		tabs[i][last_target[i]]=reg;
 		n_targets[i]++;
-		return TAB_SIZE*i+last_target[i]++;
+		last_target[i]++;
+		return TAB_SIZE*i+last_target[i]-1;
 	}
 
 	if(j!=0)
@@ -100,7 +102,7 @@ int alloc_target_id(WRegion *reg)
 	}
 	
 	tabs[j][0]=reg;
-	n_targets[j]++;
+	n_targets[j]=1;
 	last_target[j]=1;
 	
 	return TAB_SIZE*j;
@@ -121,7 +123,8 @@ int use_target_id(WRegion *reg, int id)
 		tabs[tab]=ALLOC_N(WRegion*, TAB_SIZE);
 	
 	if(tabs[tab]==NULL || tabs[tab][ndx]!=NULL){
-		warn("Unable to allocate requested target ID; allocating other.");
+		warn("Unable to allocate requested target ID %d; "
+			 "allocating other.", id);
 		return alloc_target_id(reg);
 	}
 	

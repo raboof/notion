@@ -51,7 +51,7 @@ DECLSTRUCT(WGlobal){
 	Atom atom_wm_take_focus;
 	Atom atom_wm_colormaps;
 	Atom atom_frame_id;
-	Atom atom_workspace;
+	/*Atom atom_workspace;*/
 	Atom atom_selection;
 #ifndef CF_NO_MWM_HINTS	
 	Atom atom_mwm_hints;

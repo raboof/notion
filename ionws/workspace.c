@@ -16,6 +16,7 @@
 #include <wmcore/region.h>
 #include <wmcore/wsreg.h>
 #include <wmcore/funtabs.h>
+#include <wmcore/viewport.h>
 #include "bindmaps.h"
 #include "placement.h"
 #include "workspace.h"
@@ -198,9 +199,9 @@ static WRegion *create_new_ws(WScreen *scr, WWinGeomParams params, void *fnp)
 }
 
 
-WWorkspace *create_new_workspace_on_scr(WScreen *scr, const char *name)
+WWorkspace *create_new_workspace_on_vp(WViewport *vp, const char *name)
 {
-	return (WWorkspace*)region_attach_new((WRegion*)scr, create_new_ws,
+	return (WWorkspace*)region_attach_new((WRegion*)vp, create_new_ws,
 										  (char *)name, 0);
 }
 
@@ -217,22 +218,23 @@ void deinit_workspace(WWorkspace *ws)
 /*{{{ init_workspaces */
 
 
-void init_workspaces(WScreen *scr)
+void init_workspaces(WViewport* vp)
 {
 	WWorkspace *ws=NULL;
 	char *wsname=NULL;
 
-	wsname=get_string_property(scr->root.win, wglobal.atom_workspace, NULL);
+	if(vp->atom_workspace!=None)
+		wsname=get_string_property(ROOT_OF(vp), vp->atom_workspace, NULL);
 
-	read_workspaces(scr);
+	read_workspaces(vp);
 	
-	if(scr->sub_count==0){
-		ws=create_new_workspace_on_scr(scr, "main");
+	if(vp->sub_count==0){
+		ws=create_new_workspace_on_vp(vp, "main");
 	}else{
 		if(wsname!=NULL)
 			ws=lookup_workspace(wsname);
 		if(ws==NULL)
-			ws=FIRST_THING(scr, WWorkspace);
+			ws=FIRST_THING(vp, WWorkspace);
 	}
 	
 	if(wsname!=NULL)
@@ -240,19 +242,22 @@ void init_workspaces(WScreen *scr)
 	
 	assert(ws!=NULL);
 	
-	goto_region((WRegion*)ws);
+	/*if((WRegion*)vp==SCREEN_OF(vp)->default_viewport)
+		goto_region((WRegion*)ws);*/
 }
 
 
 void setup_screens()
 {
 	WScreen *scr;
+	WViewport *vp;
 	
 	FOR_ALL_SCREENS(scr){
 		/* TODO: Should be moved somewhere else */
 		region_add_bindmap((WRegion*)scr, &wmcore_screen_bindmap, TRUE);
-		
-		init_workspaces(scr);
+		FOR_ALL_TYPED(scr, vp, WViewport){
+			init_workspaces(vp);
+		}
 		manage_initial_windows(scr);
 	}
 }

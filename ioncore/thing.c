@@ -152,12 +152,34 @@ WThing *next_thing(WThing *first, const WObjDescr *descr)
 }
 
 
+WThing *next_thing_fb(WThing *first, const WObjDescr *descr, WThing *fb)
+{
+	WThing *r=NULL;
+	if(first!=NULL)
+		r=next_thing(first, descr);
+	if(r==NULL)
+		r=fb;
+	return r;
+}
+
+
 WThing *prev_thing(WThing *first, const WObjDescr *descr)
 {
 	if(first==NULL)
 		return NULL;
 	
 	return get_prev_thing(first, descr);
+}
+
+
+WThing *prev_thing_fb(WThing *first, const WObjDescr *descr, WThing *fb)
+{
+	WThing *r=NULL;
+	if(first!=NULL)
+		r=prev_thing(first, descr);
+	if(r==NULL)
+		r=fb;
+	return r;
 }
 
 

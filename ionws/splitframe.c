@@ -165,17 +165,17 @@ void split_top(WWorkspace *ws, const char *str)
 void destroy_frame(WFrame *frame)
 {
 	WWorkspace *ws;
-	WScreen *scr;
+	WViewport *vp;
 	WRegion *other;
 	bool was_active=REGION_IS_ACTIVE(frame);
 
 	ws=FIND_PARENT1(frame, WWorkspace);
 
 	if(ws!=NULL){
-		scr=FIND_PARENT(ws, WScreen);
-		assert(scr!=NULL);
+		vp=FIND_PARENT(ws, WViewport);
+		assert(vp!=NULL);
 		
-		if(scr->sub_count<=1 && ws->splitree==(WObj*)frame){
+		if(vp->sub_count<=1 && ws->splitree==(WObj*)frame){
 			fwarn(frame, "Cannot destroy only frame on only workspace.");
 			return;
 		}

@@ -303,7 +303,7 @@ bool read_draw_config(WScreen *scr)
 	bool ret;
 	
 	tmp_screen=scr;
-	ret=read_core_config_for_scr("draw", scr, screen_opts);
+	ret=read_core_config_for_scr("draw", scr->xscr, screen_opts);
 	tmp_screen=NULL;
 	
 	return ret;

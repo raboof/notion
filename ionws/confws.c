@@ -28,7 +28,7 @@ extern int tree_size(WObj *obj, int dir);
 
 static WWsSplit *current_split=NULL;
 static WWorkspace *current_ws=NULL;
-static WScreen *current_screen=NULL;
+static WViewport *current_vp=NULL;
 
 
 /*{{{ Conf. functions */
@@ -40,10 +40,13 @@ static WRectangle get_geom()
 	int s, pos;
 	
 	if(current_split==NULL){
-		if(current_ws==NULL)
-			geom=REGION_GEOM(current_screen);
-		else
+		if(current_ws==NULL){
+			geom=REGION_GEOM(current_vp);
+			geom.x=0;
+			geom.y=0;
+		}else{
 			geom=REGION_GEOM(current_ws);
+		}
 	}else{
 		geom=current_split->geom;
 
@@ -77,7 +80,7 @@ static WRectangle get_geom()
 static void get_params(WWinGeomParams *params)
 {
 	/*if(current_ws==NULL)*/
-		region_rect_params((WRegion*)current_screen, get_geom(), params);
+		region_rect_params((WRegion*)current_vp, get_geom(), params);
 	/*else
 		region_rect_params((WRegion*)current_ws, get_geom(), params);*/
 }
@@ -193,7 +196,7 @@ static bool opt_workspace_frame(Tokenizer *tokz, int n, Token *toks)
 	id=TOK_LONG_VAL(&(toks[1]));
 	
 	get_params(&params);
-	frame=create_frame(current_screen, params, id, 0);
+	frame=create_frame(SCREEN_OF(current_vp), params, id, 0);
 
 	if(n>=3)
 		set_region_name((WRegion*)frame, TOK_STRING_VAL(&(toks[2])));
@@ -227,12 +230,12 @@ static bool opt_workspace(Tokenizer *tokz, int n, Token *toks)
 	}
 	
 	get_params(&params);
-	current_ws=create_workspace(current_screen, params, name, FALSE);
+	current_ws=create_workspace(SCREEN_OF(current_vp), params, name, FALSE);
 	
 	if(current_ws==NULL)
 		return FALSE;
 	
-	region_attach_sub((WRegion*)current_screen, (WRegion*)current_ws, 0);
+	region_attach_sub((WRegion*)current_vp, (WRegion*)current_ws, 0);
 
 	return TRUE;
 }
@@ -315,7 +318,7 @@ static void dodo_write_workspaces(FILE *file)
 	WWorkspace *ws;
 	int i=0;
 	
-	FOR_ALL_TYPED(current_screen, ws, WWorkspace){
+	FOR_ALL_TYPED(current_vp, ws, WWorkspace){
 		i++;
 		if(region_name((WRegion*)ws)==NULL){
 			warn("Not saving workspace %d -- no name", i);
@@ -375,13 +378,13 @@ static ConfOpt wsconf_opts[]={
 /*{{{ read_workspace, write_workspaces */
 
 
-bool read_workspaces(WScreen *scr)
+bool read_workspaces(WViewport *vp)
 {
 	bool successp;
 
-	current_screen=scr;
-	successp=read_config_for_scr("workspaces", scr, wsconf_opts);
-	current_screen=NULL;
+	current_vp=vp;
+	successp=read_config_for_scr("workspaces", vp->id, wsconf_opts);
+	current_vp=NULL;
 	
 	return successp;
 }
@@ -433,19 +436,19 @@ static bool do_write_workspaces(char *wsconf)
 }
 
 
-bool write_workspaces(WScreen *scr)
+bool write_workspaces(WViewport *vp)
 {
 	bool successp;
 	char *wsconf;
 	
-	wsconf=get_savefile_for_scr("workspaces", scr);
+	wsconf=get_savefile_for_scr("workspaces", vp->id);
 	
 	if(wsconf==NULL)
 		return FALSE;
 	
-	current_screen=scr;
+	current_vp=vp;
 	successp=do_write_workspaces(wsconf);
-	current_screen=NULL;
+	current_vp=NULL;
 	
 	free(wsconf);
 	

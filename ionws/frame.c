@@ -285,23 +285,19 @@ void frame_recalc_bar(WFrame *frame)
 	
 	if(frame->sub_count==0){
 		frame->tab_w=bar_w;
-		draw_frame_bar(frame, TRUE);
-		return;
+	}else{
+		tab_w=(bar_w-(frame->sub_count-1)*spc)/frame->sub_count;
+		frame->tab_w=tab_w;
+		
+		textw=BORDER_IW(&(scr->grdata.tab_border), tab_w);
+		
+		FOR_ALL_TYPED(frame, sub, WRegion){
+			if(sub==frame->current_input)
+				continue;
+			REGION_LABEL(sub)=region_make_label(sub, textw,
+												scr->grdata.tab_font);
+		}
 	}
-	
-	tab_w=(bar_w-(frame->sub_count-1)*spc)/frame->sub_count;
-	frame->tab_w=tab_w;
-	
-	textw=BORDER_IW(&(scr->grdata.tab_border), tab_w);
-	
-	FOR_ALL_TYPED(frame, sub, WRegion){
-		if(sub==frame->current_input)
-			continue;
-		REGION_LABEL(sub)=region_make_label(sub, textw,
-											scr->grdata.tab_font);
-	}
-	
-	draw_frame_bar(frame, TRUE);
 }
 
 
@@ -309,7 +305,7 @@ void draw_frame(const WFrame *frame, bool complete)
 {
 	DrawInfo _dinfo, *dinfo=&_dinfo;
 	WGRData *grdata=GRDATA_OF(frame);
-	
+
 	dinfo->win=FRAME_WIN(frame);
 	dinfo->grdata=grdata;
 	dinfo->gc=grdata->gc;
@@ -332,13 +328,13 @@ void draw_frame(const WFrame *frame, bool complete)
 				   dinfo->colors->bg, dinfo->colors->bg);
 	
 	draw_border(dinfo);
-	
+
 	/*
 	 XSetForeground(wglobal.dpy, XGC, grdata->frame_bgcolor);
 	 XFillRectangle(wglobal.dpy, WIN, XGC, C_X, C_Y, C_W, C_H);
 	 */
 	
-	draw_frame_bar(frame, !grdata->bar_inside_frame);
+	draw_frame_bar(frame, !complete || !grdata->bar_inside_frame);
 }
 
 
@@ -366,8 +362,7 @@ void draw_frame_bar(const WFrame *frame, bool complete)
 			XFillRectangle(wglobal.dpy, WIN, XGC, X, Y,
 						   bg.w, H+grdata->spacing);
 #else
-			XClearArea(wglobal.dpy, WIN, X, Y,
-					   bg.w, H+grdata->spacing, False);
+			XClearArea(wglobal.dpy, WIN, X, Y, bg.w, H, False);
 #endif
 		}else{
 			XClearArea(wglobal.dpy, WIN, X, Y, bg.w, H, False);
@@ -389,7 +384,7 @@ void draw_frame_bar(const WFrame *frame, bool complete)
 		next=nextreg_ni(frame, sub);
 		
 		if(next==NULL)
-			W=bg.w-(X-bg.x);
+			dinfo->geom.w=bg.w-(X-bg.x);
 		
 		if(REGION_IS_ACTIVE(frame)){
 			if(sub==frame->current_sub)
@@ -405,8 +400,8 @@ void draw_frame_bar(const WFrame *frame, bool complete)
 		
 		if(REGION_LABEL(sub)!=NULL)
 			draw_textbox(dinfo, REGION_LABEL(sub), CF_TAB_TEXT_ALIGN, TRUE);
-		else
-			draw_textbox(dinfo, "?", CF_TAB_TEXT_ALIGN, TRUE);
+		/*else
+			draw_textbox(dinfo, "", CF_TAB_TEXT_ALIGN, TRUE);*/
 		
 #define IS_TAGGED(X) 0
 		/* TODO: IS_TAGGED */
@@ -474,6 +469,8 @@ static bool reparent_or_fit(WFrame *frame, WWinGeomParams params, bool rep)
 	if(wchg){
 		frame->saved_w=FRAME_NO_SAVED_WH;
 		frame_recalc_bar(frame);
+		/* We should get an exposure event so this should not be needed. */
+		/* draw_frame(frame, TRUE); */
 	}
 	
 	if(hchg)
@@ -536,14 +533,14 @@ static bool frame_switch_subregion(WFrame *frame, WRegion *sub)
 #endif
 	}
 
-	draw_frame_bar(frame, FALSE);
-
 	/* Many programs will get upset if the visible, although only such,
 	 * client window is not the lowest window in the frame. xprop/xwininfo
 	 * will return the information for the lowest window. 'netscape -remote'
 	 * will not work at all if there are no visible netscape windows.
 	 */
 	region_restack(sub, None, Below);
+
+	draw_frame_bar(frame, TRUE);
 	
 	return TRUE;
 }
@@ -557,14 +554,14 @@ static void frame_inactivated(WFrame *frame)
 
 static void frame_activated(WFrame *frame)
 {
-	/*if(region_is_fully_mapped(&frame->win.region))*/
-		draw_frame(frame, FALSE);
+	draw_frame(frame, FALSE);
 }
 
 
 static void frame_notify_subname(WFrame *frame, WRegion *sub)
 {
 	frame_recalc_bar(frame);
+	draw_frame_bar(frame, FALSE);
 }
 
 
@@ -690,12 +687,15 @@ static void frame_do_attach(WFrame *frame, WRegion *sub, int flags)
 	if(frame->sub_count==1)
 		flags|=REGION_ATTACH_SWITCHTO;
 
-	if(flags&REGION_ATTACH_SWITCHTO)
-		frame_switch_subregion(frame, sub);
-	else
-		unmap_region(sub); 	/* unnecessary */
-	
 	frame_recalc_bar(frame);
+
+	if(flags&REGION_ATTACH_SWITCHTO){
+		frame_switch_subregion(frame, sub);
+	}else{
+		unmap_region(sub);
+		draw_frame_bar(frame, TRUE);
+	}
+
 }
 
 
@@ -755,9 +755,11 @@ static void frame_do_detach(WFrame *frame, WRegion *sub)
 	frame->sub_count--;
 	
 	if(wglobal.opmode!=OPMODE_DEINIT){
+		frame_recalc_bar(frame);
 		if(next!=NULL)
 			frame_switch_subregion(frame, next);
-		frame_recalc_bar(frame);
+		else
+			draw_frame_bar(frame, TRUE);
 	}
 
 	if(REGION_LABEL(sub)!=NULL){

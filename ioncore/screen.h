@@ -24,7 +24,6 @@ INTROBJ(WScreen)
 		SCR!=NULL;                               \
 		SCR=(WScreen*)(((WThing*)(SCR))->t_next))
 
-
 #define SCREEN_MAX_STACK 3
 
 #define IS_SCREEN(REG) ((void*)(REG)==((WRegion*)(REG))->screen)
@@ -32,13 +31,10 @@ INTROBJ(WScreen)
 
 DECLOBJ(WScreen){
 	WWindow root;
-	
 	int xscr;
+	WRegion *default_viewport;
 	
 	Colormap default_cmap;
-
-	int sub_count;
-	WRegion *current_sub;
 	
 	int w_unit, h_unit;
 	
@@ -60,7 +56,6 @@ extern Window create_simple_window_bg(WScreen *scr, WWinGeomParams params,
 									  ulong background);
 extern Window create_simple_window(WScreen *scr, WWinGeomParams params);
 
-
 extern WScreen *manage_screen(int xscr);
 extern void deinit_screen(WScreen *scr);
 
@@ -71,9 +66,7 @@ extern bool same_screen(const WRegion *reg1, const WRegion *reg2);
 
 extern void manage_initial_windows(WScreen *scr);
 
-extern void screen_switch_nth(WScreen *scr, uint n);
 extern void screen_switch_nth2(int scrnum, int n);
-extern void screen_switch_next(WScreen *scr);
-extern void screen_switch_prev(WScreen *scr);
 
 #endif /* WMCORE_SCREEN_H */
+

@@ -8,9 +8,9 @@
 #ifndef ION_CONFWS_H
 #define ION_CONFWS_H
 
-#include <wmcore/screen.h>
+#include <wmcore/viewport.h>
 
-extern bool read_workspaces(WScreen *scr);
-extern bool write_workspaces(WScreen *scr);
+extern bool read_workspaces(WViewport *vp);
+extern bool write_workspaces(WViewport *vp);
 
 #endif /* ION_CONFWS_H */

@@ -122,7 +122,7 @@ static char *do_get_cfgfile_for(bool core, const char *module,
 
 
 static char *do_get_cfgfile_for_scr(bool core, const char *module,
-									WScreen *scr, bool noaccesstest)
+									int xscr, bool noaccesstest)
 {
 	char *ret, *tmp, *display, *dpyend;
 	
@@ -138,7 +138,7 @@ static char *do_get_cfgfile_for_scr(bool core, const char *module,
 		return do_get_cfgfile_for(core, module, display, noaccesstest);
 	
 	libtu_asprintf(&tmp, "%.*s.%d", (int)(dpyend-display)-1,
-				   display, scr->xscr);
+				   display, xscr);
 	
 	if(tmp==NULL){
 		warn_err();
@@ -157,9 +157,9 @@ fallback:
 }
 
 
-char *get_core_cfgfile_for_scr(const char *module, WScreen *scr)
+char *get_core_cfgfile_for_scr(const char *module, int xscr)
 {
-	return do_get_cfgfile_for_scr(TRUE, module, scr, FALSE);
+	return do_get_cfgfile_for_scr(TRUE, module, xscr, FALSE);
 	
 }
 
@@ -171,9 +171,9 @@ char *get_core_cfgfile_for(const char *module)
 }
 
 
-char *get_cfgfile_for_scr(const char *module, WScreen *scr)
+char *get_cfgfile_for_scr(const char *module, int xscr)
 {
-	return do_get_cfgfile_for_scr(FALSE, module, scr, FALSE);
+	return do_get_cfgfile_for_scr(FALSE, module, xscr, FALSE);
 	
 }
 
@@ -185,9 +185,9 @@ char *get_cfgfile_for(const char *module)
 }
 
 
-char *get_savefile_for_scr(const char *module, WScreen *scr)
+char *get_savefile_for_scr(const char *module, int xscr)
 {
-	return do_get_cfgfile_for_scr(FALSE, module, scr, TRUE);
+	return do_get_cfgfile_for_scr(FALSE, module, xscr, TRUE);
 	
 }
 
@@ -248,10 +248,10 @@ bool read_core_config_for(const char *module, const ConfOpt *opts)
 }
 
 
-bool read_core_config_for_scr(const char *module, WScreen *scr,
+bool read_core_config_for_scr(const char *module, int xscr,
 							  const ConfOpt *opts)
 {
-	return do_read_config_for(get_core_cfgfile_for_scr(module, scr), opts);
+	return do_read_config_for(get_core_cfgfile_for_scr(module, xscr), opts);
 }
 
 
@@ -261,10 +261,10 @@ bool read_config_for(const char *module, const ConfOpt *opts)
 }
 
 
-bool read_config_for_scr(const char *module, WScreen *scr,
+bool read_config_for_scr(const char *module, int xscr,
 						 const ConfOpt *opts)
 {
-	return do_read_config_for(get_cfgfile_for_scr(module, scr), opts);
+	return do_read_config_for(get_cfgfile_for_scr(module, xscr), opts);
 }
 
 

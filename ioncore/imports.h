@@ -9,9 +9,10 @@
 #define WMCORE_IMPORTS_H
 
 #include "screen.h"
+#include "viewport.h"
 
 extern void calc_grdata(WScreen *scr);
-extern void read_workspaces(WScreen *scr);
-extern void write_workspaces(WScreen *scr);
+extern void read_workspaces(WViewport *vp);
+extern void write_workspaces(WViewport *vp);
 
 #endif /* WMCORE_IMPORTS_H */

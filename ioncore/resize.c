@@ -27,6 +27,8 @@ static WRectangle tmpgeom;
 static WRegion *tmpreg=NULL;
 static WDrawRubberbandFn *tmprubfn=NULL;
 static void (*resize_atexit)();
+static int parent_rx, parent_ry;
+
 
 /*{{{ Dynfuns */
 
@@ -102,10 +104,16 @@ static void res_draw_moveres(WScreen *scr)
 
 static void res_draw_rubberband(WScreen *scr)
 {
+	WRectangle rgeom=tmpgeom;
+	int rx, ry;
+	
+	rgeom.x+=parent_rx;
+	rgeom.y+=parent_ry;
+
 	if(tmprubfn==NULL)
-		draw_rubberbox(scr, tmpgeom);
+		draw_rubberbox(scr, rgeom);
 	else
-		tmprubfn(scr, tmpgeom);
+		tmprubfn(scr, rgeom);
 	
 }
 
@@ -115,10 +123,12 @@ static void res_draw_rubberband(WScreen *scr)
 
 /*{{{ Resize */
 
+
 bool is_resizing()
 {
 	return resize_mode;
 }
+
 
 bool may_resize(WRegion *reg)
 {
@@ -129,12 +139,21 @@ bool may_resize(WRegion *reg)
 bool begin_resize(WRegion *reg, WDrawRubberbandFn *rubfn)
 {
 	WScreen *scr=SCREEN_OF(reg);
+	WRegion *parent;
 	
 	if(tmpreg!=NULL)
 		return FALSE;
 	
 	region_resize_hints(reg, &tmphints, &tmprelw, &tmprelh);
 
+	parent=FIND_PARENT1(reg, WRegion);
+	if(parent==NULL){
+		parent_rx=0;
+		parent_ry=0;
+	}else{
+		region_rootpos(parent, &parent_rx, &parent_ry);
+	}
+	
 	tmpgeom=REGION_GEOM(reg);
 	tmporiggeom=REGION_GEOM(reg);
 	tmpdx1=0;
@@ -169,6 +188,7 @@ bool begin_resize(WRegion *reg, WDrawRubberbandFn *rubfn)
 	return TRUE;
 }
 
+
 bool begin_resize_atexit(WRegion *reg, WDrawRubberbandFn *rubfn, void (*exitfn)())
 {
 	if(begin_resize(reg, rubfn)){
@@ -177,6 +197,7 @@ bool begin_resize_atexit(WRegion *reg, WDrawRubberbandFn *rubfn, void (*exitfn)(
 	}
 	return FALSE;
 }
+
 
 void delta_resize(WRegion *reg, int dx1, int dx2, int dy1, int dy2,
 				  WRectangle *rret)

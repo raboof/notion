@@ -24,7 +24,7 @@ OBJS=	binding.o conf-bindings.o conf-draw.o cursor.o draw.o event.o	\
 	completehelp.o symlist.o clientwin.o colormap.o region.o	\
 	eventh.o winprops.o targetid.o attach.o resize.o close.o	\
 	defer.o grab.o wsreg.o commandsq.o readfds.o regbind.o		\
-	funtabs.o
+	funtabs.o viewport.o
 
 
 TARGETS=wmcore.a

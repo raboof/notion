@@ -16,7 +16,7 @@ TARGETS=man/ion.1x
 SCRIPTS=scripts/ion-edit scripts/ion-man scripts/ion-runinxterm \
 	scripts/ion-ssh scripts/ion-view
 
-ETC=	etc/bindings-default.conf etc/bindings-sun.conf etc/kludges.conf \
+ETC=	etc/bindings-default.conf etc/kludges.conf \
 	etc/look-brownsteel.conf etc/look-greyviolet.conf \
 	etc/look-simpleblue.conf etc/look-wheat.conf etc/sample.conf \
 	etc/query.conf etc/look-dusky.conf
@@ -53,6 +53,11 @@ _install:
 	for i in $(ETC); do \
 		$(INSTALL) -m $(DATA_MODE) $$i $(IONETCDIR); \
 	done
+
+	if uname -s -p|grep "SunOS sparc" > /dev/null; then \
+		echo "Patching bindings-default.conf as bindings-sun.conf"; \
+		patch etc/bindings-default.conf etc/bindings-sun.diff -o $(IONETCDIR)/bindings-sun.conf; \
+	fi
 
 	@ if test -f $(IONETCDIR)/ion.conf ; then \
 		echo "$(IONETCDIR)/ion.conf already exists. Not installing one."; \

@@ -25,6 +25,7 @@
 #include "funtabs.h"
 #include "regbind.h"
 #include "mwmhints.h"
+#include "viewport.h"
 
 
 #define TOPMOST_TRANSIENT(CWIN) LAST_THING(CWIN, WRegion)
@@ -964,17 +965,28 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 /*{{{ Fullscreen */
 
 
+bool clientwin_fullscreen_vp(WClientWin *cwin, WViewport *vp, bool switchto)
+{
+	/* TODO: Remember last parent */
+
+	return region_attach_sub((WRegion*)vp, (WRegion*)cwin,
+							 switchto ?  REGION_ATTACH_SWITCHTO : 0);
+}
+
 bool clientwin_enter_fullscreen(WClientWin *cwin, bool switchto)
 {
-	WScreen *scr=SCREEN_OF(cwin);
+	WViewport *vp=FIND_PARENT1(cwin, WViewport);
 	
-	/* TODO: Remember last parent */
+	if(vp==NULL){
+		WScreen *scr=SCREEN_OF(cwin);
+		if(scr!=NULL)
+			vp=viewport_of((WRegion*)cwin);
+	}
 	
-	if(scr==NULL)
+	if(vp==NULL)
 		return FALSE;
 	
-	return region_attach_sub((WRegion*)scr, (WRegion*)cwin,
-							 switchto ?  REGION_ATTACH_SWITCHTO : 0);
+	return clientwin_fullscreen_vp(cwin, vp, switchto);
 }
 
 

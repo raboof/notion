@@ -11,6 +11,7 @@
 #include "common.h"
 #include "region.h"
 #include "hooks.h"
+#include "viewport.h"
 
 INTROBJ(WClientWin)
 
@@ -73,6 +74,8 @@ extern void clientwin_handle_configure_request(WClientWin *cwin,
 
 extern bool clientwin_attach_sub(WClientWin *cwin, WRegion *sub, int flags);
 
+extern bool clientwin_fullscreen_vp(WClientWin *cwin, WViewport *vp,
+									bool switchto);
 extern bool clientwin_enter_fullscreen(WClientWin *cwin, bool switchto);
 
 /* Hooks */

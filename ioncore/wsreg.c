@@ -82,14 +82,14 @@ static bool add_transient(WClientWin *tfor, WClientWin *cwin,
 }
 
 
-static WRegion *find_suitable_workspace(WScreen *scr)
+static WRegion *find_suitable_workspace(WViewport *vp)
 {
-	WRegion *r=REGION_ACTIVE_SUB(scr);
+	WRegion *r=REGION_ACTIVE_SUB(vp);
 	
 	if(r!=NULL && HAS_DYN(r, region_ws_add_clientwin))
 		return r;
 
-	FOR_ALL_TYPED(scr, r, WRegion){
+	FOR_ALL_TYPED(vp, r, WRegion){
 		if(HAS_DYN(r, region_ws_add_clientwin))
 			return r;
 	}
@@ -118,6 +118,30 @@ static void find_prop_target(WClientWin *cwin, WWinProp *props,
 }
 
 
+static WViewport *find_suitable_viewport(WClientWin *cwin, int x, int y)
+{
+	WScreen *scr=SCREEN_OF(cwin);
+	WViewport *vp;
+	
+	if(x>CF_STUBBORN_TRESH && y>CF_STUBBORN_TRESH &&
+	   cwin->size_hints.win_gravity!=ForgetGravity){
+		FOR_ALL_TYPED(scr, vp, WViewport){
+			WRectangle geom=REGION_GEOM(vp);
+			if(x>=geom.x && x<geom.x+geom.w &&
+			   y>=geom.y && y<geom.y+geom.h)
+				return vp;
+		}
+	}
+	
+	if(REGION_ACTIVE_SUB(scr)!=NULL &&
+	   WTHING_IS(REGION_ACTIVE_SUB(scr), WViewport)){
+		return (WViewport*)REGION_ACTIVE_SUB(scr);
+	}
+	
+	return (WViewport*)scr->default_viewport;
+}
+
+
 /*}}}*/
 
 
@@ -132,7 +156,10 @@ bool add_clientwin_default(WClientWin *cwin, const XWindowAttributes *attr,
 	WClientWin *tfor;
 	WRegion *target=NULL, *ws=NULL;
 	WWinProp *props;
-
+	WViewport *vp;
+	
+	vp=find_suitable_viewport(cwin, attr->x, attr->y);
+	
 	/* Get and set winprops */
 	props=setup_get_winprops(cwin);
 
@@ -153,7 +180,7 @@ bool add_clientwin_default(WClientWin *cwin, const XWindowAttributes *attr,
 				if(props!=NULL)
 					switchto=(props->manage_flags&REGION_ATTACH_SWITCHTO);
 			}
-			if(clientwin_enter_fullscreen(cwin, switchto))
+			if(clientwin_fullscreen_vp(cwin, vp, switchto))
 				return TRUE;
 			warn("Failed to enter full screen mode.");
 		}
@@ -198,10 +225,10 @@ bool add_clientwin_default(WClientWin *cwin, const XWindowAttributes *attr,
 	/* No, need to find a workspace and let it handle this. */
 	
 	if(ws==NULL)
-		ws=find_suitable_workspace(SCREEN_OF(cwin));
+		ws=find_suitable_workspace(vp);
 
 	if(ws==NULL)
-		return FALSE;
+		return clientwin_fullscreen_vp(cwin, vp, FALSE);
 	
 	return region_ws_add_clientwin(ws, cwin, attr, init_state, props);
 }

@@ -16,6 +16,9 @@
 #include <X11/Xlib.h>
 #include <X11/Xproto.h>
 /*#include <X11/Xmu/Error.h>*/
+#ifndef CF_NO_XINERAMA
+#include <X11/extensions/Xinerama.h>
+#endif
 
 #include "common.h"
 #include "screen.h"
@@ -28,10 +31,10 @@
 #include "conf-draw.h"
 #include "clientwin.h"
 #include "property.h"
-#include "attach.h"
 #include "focus.h"
 #include "funtabs.h"
 #include "regbind.h"
+#include "viewport.h"
 
 static void screen_remove_sub(WScreen *scr, WRegion *sub);
 static void fit_screen(WScreen *scr, WRectangle geom);
@@ -55,10 +58,6 @@ static DynFunTab screen_dynfuntab[]={
 	{(DynFun*)reparent_region, (DynFun*)reparent_screen},
 	{region_request_sub_geom, region_request_sub_geom_unallow},
 	{region_activated, screen_activated},
-	
-	{region_do_attach_params, screen_sub_params},
-	{region_do_attach, screen_do_attach},
-	
 	{region_remove_sub, screen_remove_sub},
 	
 	END_DYNFUNTAB
@@ -246,8 +245,10 @@ static WScreen *preinit_screen(int xscr)
 	scr->xscr=xscr;
 	scr->default_cmap=DefaultColormap(dpy, xscr);
 
-	scr->sub_count=0;
-	scr->current_sub=NULL;
+	scr->default_viewport=NULL;
+	
+	/*scr->sub_count=0;
+	scr->current_sub=NULL;*/
 	scr->w_unit=7;
 	scr->h_unit=13;
 	
@@ -275,25 +276,86 @@ static void postinit_screen(WScreen *scr)
 }
 
 
+WViewport *add_viewport(WScreen *scr, int id, WRectangle geom)
+{
+	WViewport *vp=create_viewport(scr, id, geom);
+	
+	if(vp==NULL)
+		return NULL;
+	
+	link_thing((WThing*)scr, (WThing*)vp);
+
+	map_region((WRegion*)vp);
+	
+	if(scr->default_viewport==NULL)
+		scr->default_viewport=(WRegion*)vp;
+	
+	return vp;
+}
+
+
 WScreen *manage_screen(int xscr)
 {
 	WScreen *scr;
 	WThing *tmp;
 	
+#ifndef CF_NO_XINERAMA
+	XineramaScreenInfo *xi=NULL;
+	int i, nxi=0;
+	
+	xi=XineramaQueryScreens(wglobal.dpy, &nxi);
+	
+	if(xi!=NULL && wglobal.screens!=NULL){
+		warn("Unable to support both Xinerama and normal multihead.\n");
+		XFree(xi);
+		return NULL;
+	}
+	
+#endif
+	
 	scr=preinit_screen(xscr);
 		
-	if(scr==NULL)
+	if(scr==NULL){
+#ifndef CF_NO_XINERAMA
+		if(xi!=NULL)
+			XFree(xi);
+#endif
 		return NULL;
-		
+	}
+	
 	preinit_graphics(scr);
 	
 	read_draw_config(scr);
+
+#ifndef CF_NO_XINERAMA
+	if(xi!=NULL && nxi!=0){
+		WRectangle geom;
+
+		for(i=0; i<nxi; i++){
+			geom.x=xi[i].x_org;
+			geom.y=xi[i].y_org;
+			geom.w=xi[i].width;
+			geom.h=xi[i].height;
+			/*pgeom("Detected Xinerama screen", geom);*/
+			if(!add_viewport(scr, i, geom))
+				warn("Unable to add viewport for Xinerama screen %d\n", i);
+		}
+		XFree(xi);
+	}else
+#endif
+	add_viewport(scr, xscr, REGION_GEOM(scr));
+	
+	if(scr->default_viewport==NULL){
+		warn("Unable to add a viewport to X screen %d\n", xscr);
+		destroy_thing((WThing*)scr);
+		return NULL;
+	}
 	
 	/* TODO: typed LINK_ITEM */
 	tmp=(WThing*)wglobal.screens;
 	LINK_ITEM(tmp, (WThing*)scr, t_next, t_prev);
 	wglobal.screens=(WScreen*)tmp;
-
+	
 	postinit_graphics(scr);
 	
 	postinit_screen(scr);
@@ -315,73 +377,9 @@ void deinit_screen(WScreen *scr)
 /*{{{ Attach/detach */
 
 
-static void screen_sub_params(const WScreen *scr, WWinGeomParams *ret)
-{
-	ret->geom=REGION_GEOM(scr);
-	ret->win_x=0;
-	ret->win_y=0;
-	ret->win=scr->root.win;
-}
-
-
-static void screen_do_attach(WScreen *scr, WRegion *sub, int flags)
-{
-	/*if(scr->current_sub!=NULL && wglobal.opmode!=OPMODE_INIT)
-		link_thing_after((WThing*)(scr->current_sub), (WThing*)sub);
-	else*/{
-		link_thing((WThing*)scr, (WThing*)sub);
-	}
-	scr->sub_count++;
-	
-	if(scr->sub_count==1)
-		flags|=REGION_ATTACH_SWITCHTO;
-
-	if(flags&REGION_ATTACH_SWITCHTO)
-		screen_switch_subregion(scr, sub);
-	else
-		unmap_region(sub);
-}
-
-
-bool screen_attach_sub(WScreen *scr, WRegion *sub, bool switchto)
-{
-	WWinGeomParams params;
-
-	screen_sub_params(scr, &params);
-	detach_reparent_region(sub, params);
-	
-	screen_do_attach(scr, sub, switchto ? REGION_ATTACH_SWITCHTO : 0);
-	
-	return TRUE;
-}
-
-
-static bool screen_do_detach_sub(WScreen *scr, WRegion *sub)
-{
-	WRegion *next=NULL;
-
-	if(scr->current_sub==sub){
-		next=PREV_THING(sub, WRegion);
-		if(next==NULL)
-			next=NEXT_THING(sub, WRegion);
-		scr->current_sub=NULL;
-	}
-	
-	unlink_thing((WThing*)sub);
-	scr->sub_count--;
-	
-	if(wglobal.opmode!=OPMODE_DEINIT){
-		if(next!=NULL)
-			screen_switch_subregion(scr, next);
-	}
-
-	return TRUE;
-}
-
-
 static void screen_remove_sub(WScreen *scr, WRegion *sub)
 {
-	screen_do_detach_sub(scr, sub);
+	return;
 }
 
 
@@ -393,13 +391,7 @@ static void screen_remove_sub(WScreen *scr, WRegion *sub)
 
 static void fit_screen(WScreen *scr, WRectangle geom)
 {
-	WRegion *sub;
-	
-	REGION_GEOM(scr)=geom;
-	
-	FOR_ALL_TYPED(scr, sub, WRegion){
-		fit_region(sub, geom);
-	}
+	warn("Don't know how to fit_screen");
 }
 
 
@@ -417,7 +409,13 @@ static void unmap_screen(WScreen *scr)
 
 static void focus_screen(WScreen *scr, bool warp)
 {
-	WRegion *sub=scr->current_sub;
+	WRegion *sub;
+	
+	sub=REGION_ACTIVE_SUB(scr);
+	
+	if(sub==NULL)
+		sub=FIRST_THING(scr, WRegion);
+		
 	if(sub!=NULL)
 		focus_region(sub, warp);
 	else
@@ -427,34 +425,6 @@ static void focus_screen(WScreen *scr, bool warp)
 
 static bool screen_switch_subregion(WScreen *scr, WRegion *sub)
 {
-	char *n;
-	
-	if(sub==scr->current_sub)
-		return FALSE;
-	
-	if(scr->current_sub!=NULL)
-		unmap_region(scr->current_sub);
-	scr->current_sub=sub;
-	map_region(sub);
-
-	if(wglobal.opmode!=OPMODE_DEINIT){
-		n=region_full_name(sub);
-
-		if(n==NULL){
-			set_string_property(scr->root.win, wglobal.atom_workspace, "");
-		}else{
-			set_string_property(scr->root.win, wglobal.atom_workspace, n);
-			free(n);
-		}
-	}
-	
-	if(REGION_IS_ACTIVE(scr)){
-		if(wglobal.warp_enabled)
-			warp(sub);
-		else
-			do_set_focus(sub, FALSE);
-	}
-	
 	return TRUE;
 }
 
@@ -469,87 +439,6 @@ static bool reparent_screen(WScreen *scr, WWinGeomParams params)
 static void screen_activated(WScreen *scr)
 {
 	wglobal.active_screen=scr;
-}
-
-
-/*}}}*/
-
-
-/*{{{ Workspace switch */
-
-
-WScreen *nth_screen(int ndx)
-{
-	WScreen *scr=wglobal.screens;
-	while(ndx-->0 && scr!=NULL)
-		scr=NEXT_THING(scr, WScreen);
-	return scr;
-}
-
-
-static WRegion *nth_sub(WScreen *scr, uint n)
-{
-	return NTH_THING(scr, n, WRegion);
-}
-
-
-static WRegion *next_sub(WScreen *scr)
-{
-	WRegion *reg=NULL;
-	if(scr->current_sub!=NULL)
-		reg=NEXT_THING(scr->current_sub, WRegion);
-	if(reg==NULL)
-		reg=FIRST_THING(scr, WRegion);
-	return reg;
-}
-
-
-static WRegion *prev_sub(WScreen *scr)
-{
-	WRegion *reg=NULL;
-	if(scr->current_sub!=NULL)
-		reg=PREV_THING(scr->current_sub, WRegion);
-	if(reg==NULL)
-		reg=LAST_THING(scr, WRegion);
-	return reg;
-}
-
-
-void screen_switch_nth(WScreen *scr, uint n)
-{
-	WRegion *sub=nth_sub(scr, n);
-	if(sub!=NULL)
-		switch_region(sub);
-}
-
-
-void screen_switch_nth2(int scrnum, int n)
-{
-	WScreen *scr=nth_screen(scrnum);
-	
-	if(scr==NULL)
-		return;
-	
-	if(n<0)
-		switch_region((WRegion*)scr);
-	else
-		screen_switch_nth(scr, n);
-}
-	
-	   
-void screen_switch_next(WScreen *scr)
-{
-	WRegion *sub=next_sub(scr);
-	if(sub!=NULL)
-		switch_region(sub);
-}
-
-
-void screen_switch_prev(WScreen *scr)
-{
-	WRegion *sub=prev_sub(scr);
-	if(sub!=NULL)
-		switch_region(sub);
 }
 
 
