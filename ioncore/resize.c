@@ -174,8 +174,8 @@ bool begin_resize(WRegion *reg, WDrawRubberbandFn *rubfn)
 		XGrabServer(wglobal.dpy);
 	
 	XMoveWindow(wglobal.dpy, scr->grdata.moveres_win,
-				tmpgeom.x+(tmpgeom.w-scr->grdata.moveres_geom.w)/2,
-				tmpgeom.y+(tmpgeom.h-scr->grdata.moveres_geom.h)/2);
+				parent_rx+tmpgeom.x+(tmpgeom.w-scr->grdata.moveres_geom.w)/2,
+				parent_ry+tmpgeom.y+(tmpgeom.h-scr->grdata.moveres_geom.h)/2);
 	XMapRaised(wglobal.dpy, scr->grdata.moveres_win);
 	
 	res_draw_moveres(scr);
