@@ -485,6 +485,8 @@ bool ionws_init(WIonWS *ws, WWindow *parent, const WFitParams *fp,
     ws->create_frame_fn=(create_frame_fn 
                          ? create_frame_fn
                          : create_frame_ionws);
+    ws->stdispnode=NULL;
+    ws->managed_list=NULL;
 
     if(!genws_init(&(ws->genws), parent, fp))
         return FALSE;
