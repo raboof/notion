@@ -70,9 +70,12 @@ end
 
 
 local function putcmd(cmd, guard, tab)
-    local func=ioncorelib.compile_cmd(cmd, guard)
-    if type(func)~="function" then
-        return
+    local func
+    if cmd then
+        func=ioncorelib.compile_cmd(cmd, guard)
+        if type(func)~="function" then
+            return
+        end
     end
     
     tab.func=func
