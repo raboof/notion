@@ -48,6 +48,39 @@ Show version
 .B \-about
 Show about text (version, copyright)
 
+.SH BASIC CONCEPTS
+
+This section is an overview of the types objects that appear on an X
+display managed by Ion and their relationships in a standard setup.
+This information is necessary to understand the operations of different
+key bindings. For a more detailed explanation, needed for writing
+custom bindings configuration files, see the additional documentation
+available from the Ion Web page.
+
+The top-level objects that matter are screens and they correspond to
+physical screens. Screens contain workspaces and client windows put in
+full screen mode. Only one of these "multiplexed" objects can be viewed
+at a time. 
+
+Two types of workspaces currently supported; tiled (traditional Ion-style) 
+and floating (pwm-style). Workspaces are not visible objects but rather 
+collections of frames. Frames are the objects with decorations such as 
+tabs and borders and there are two types of these corresponding to the
+diffent types of workspaces.
+
+Frames contain (multiplex) client windows, to each of which corresponds a
+tab in the frame's decoration. Only one client window (or other object) 
+can be shown at a time in each frame. (In a traditional window manager
+each frame may contain exactly one client window.)
+
+"Messages" are boxes that appear at the bottoms of frames or screens.
+These are used to display important information, such as error messages.
+
+"Queries" are also boxes that appear at the bottoms of frames or screens 
+and are used to ask the user for textual input. Most queries support 
+tab-completion.
+
+
 .SH KEYS
 
 These are the default keybindings.
