@@ -219,7 +219,7 @@ int frame_nth_tab_iw(const WFrame *frame, int n)
 static void update_attr(WFrame *frame, int i, WRegion *reg)
 {
     int flags=0;
-    static const char *attrs[]={
+    static char *attrs[]={
         "unselected-not_tagged-not_dragged-no_activity",
         "selected-not_tagged-not_dragged-no_activity",
         "unselected-tagged-not_dragged-no_activity",
@@ -389,9 +389,12 @@ void frame_resize_hints(WFrame *frame, XSizeHints *hints_ret)
     
     woff=maxof(REGION_GEOM(frame).w-subgeom.w, 0);
     hoff=maxof(REGION_GEOM(frame).h-subgeom.h, 0);
-    
+
     if(FRAME_CURRENT(frame)!=NULL){
         region_size_hints(FRAME_CURRENT(frame), hints_ret);
+#if 1
+        hints_ret->flags&=PResizeInc|PBaseSize;
+#endif
     }else{
         hints_ret->flags=0;
     }
@@ -405,7 +408,9 @@ void frame_resize_hints(WFrame *frame, XSizeHints *hints_ret)
     }
     hints_ret->base_width+=woff;
     hints_ret->base_height+=hoff;
-        
+    hints_ret->max_width+=woff;
+    hints_ret->max_height+=hoff;
+
     hints_ret->flags|=PMinSize;
     hints_ret->min_width=woff;
     hints_ret->min_height=hoff;
