@@ -1,5 +1,5 @@
 /*
- * Ion-devel dock module
+ * Ion dock module
  * Copyright (C) 2003 Tom Payne
  * Copyright (C) 2003 Per Olofsson
  *
@@ -20,25 +20,27 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * $Header: /home/twp/cvsroot/twp/ion/ion-devel-dock/dock.c,v 1.13 2003/12/17 19:12:48 twp Exp $
+ * $Header: /home/twp/cvsroot/twp/ion/ion-devel-dock/dock.c,v 1.17 2003/12/21 11:59:48 twp Exp $
  *
  */
 
 
+/* Macros {{{ */
 #ifdef __GNUC__
 #define UNUSED __attribute__ ((unused))
 #else
 #define UNUSED
 #endif
+/* }}} */
 
 
 /* Includes {{{ */
 
 #include <string.h>
+#include <X11/Xlib.h>
 #include <X11/Xatom.h>
-#ifdef CF_HAVE_SHAPE_EXTENSION
 #include <X11/extensions/shape.h>
-#endif
+#include <X11/extensions/Xext.h>
 #include <ioncore/clientwin.h>
 #include <ioncore/common.h>
 #include <ioncore/eventh.h>
@@ -50,7 +52,6 @@
 #include <ioncore/property.h>
 #include <ioncore/readconfig.h>
 #include <ioncore/resize.h>
-/* #include <ioncore/saveload.h> */
 #include <ioncore/stacking.h>
 #include <ioncore/window.h>
 #include <libtu/map.h>
@@ -62,18 +63,15 @@
 /* Global variables {{{ */
 static const char *modname="dock";
 const char dock_module_ion_api_version[]=ION_API_VERSION;
-#ifdef CF_HAVE_SHAPE_EXTENSION
 bool shape_extension=FALSE;
 int shape_event_basep=0;
 int shape_error_basep=0;
-#endif
 /* }}} */
 
 
 /* StringIntMap {{{ */
 
 /* strintintmap_reverse_value {{{ */
-/* Reverse lookup a string in a StringIntMap */
 static const char *stringintmap_reverse_value(const StringIntMap *map,
 											  int value,
 											  const char *dflt)
@@ -90,26 +88,6 @@ static const char *stringintmap_reverse_value(const StringIntMap *map,
 
 }
 /* }}} */
-
-/* }}} */
-
-
-/* WWindow {{{ */
-
-#ifdef CF_HAVE_SHAPE_EXTENSION
-
-/* window_handle_shape_notify {{{ */
-bool window_handle_shape_notify(WWindow *wwin, XShapeEvent *se)
-{
-	bool ret=FALSE;
-
-	CALL_DYN_RET(ret, bool, window_handle_shape_notify, wwin, (wwin, se));
-	return ret;
-
-}
-/* }}} */
-
-#endif
 
 /* }}} */
 
@@ -150,7 +128,7 @@ static bool dock_param_extl_table_set(const WDockParam *param, ExtlTab conftab,
 	if(extl_table_gets_s(conftab, param->key, &s)){
 		int i=stringintmap_value(param->map, s, -1);
 		if(i<0){
-			warn_obj(modname, "Invalid %s '%s'", param->desc, s);
+			warn_obj(modname, "Invalid %s \"%s\"", param->desc, s);
 		}else{
 			if(*ret!=i){
 				changed=TRUE;
@@ -306,14 +284,16 @@ static const WDockParam dock_param_is_mapped={ /* {{{ */
 };
 /* }}} */
 
-/* Border style {{{ */
+/* Outline style {{{ */
 
-enum WDockDrawStyle{
+enum WDockOutlineStyle{
+	DOCK_OUTLINE_STYLE_NONE,
 	DOCK_OUTLINE_STYLE_ALL,
 	DOCK_OUTLINE_STYLE_EACH
 };
 
 static StringIntMap dock_outline_style_map[]={
+	{"none", DOCK_OUTLINE_STYLE_NONE},
 	{"all", DOCK_OUTLINE_STYLE_ALL},
 	{"each", DOCK_OUTLINE_STYLE_EACH},
 	END_STRINGINTMAP
@@ -393,8 +373,6 @@ static void dock_get_tile_size(WDock *dock, WRectangle *ret)
 }
 /* }}} */
 
-#ifdef CF_HAVE_SHAPE_EXTENSION
-
 /* dock_reshape {{{ */
 static void dock_reshape(WDock *dock)
 {
@@ -406,6 +384,57 @@ static void dock_reshape(WDock *dock)
 
 	dock_get_outline_style(dock, &outline_style);
 	switch(outline_style){
+
+	case DOCK_OUTLINE_STYLE_NONE:
+	case DOCK_OUTLINE_STYLE_EACH: /* {{{ */
+		{
+			WDockApp *dockapp;
+
+			/* Start with an empty set {{{ */
+			XShapeCombineRectangles(wglobal.dpy, ((WWindow *)dock)->win,
+									ShapeBounding, 0, 0, NULL, 0, ShapeSet, 0);
+			/* }}} */
+
+			/* Union with dockapp shapes {{{ */
+			for(dockapp=dock->dockapps; dockapp!=NULL; dockapp=dockapp->next){
+				if(outline_style==DOCK_OUTLINE_STYLE_EACH
+				   && dockapp->draw_border){
+					/* Union with border shape {{{ */
+					XRectangle tile_rect;
+
+					tile_rect.x=dockapp->border_geom.x;
+					tile_rect.y=dockapp->border_geom.y;
+					tile_rect.width=dockapp->border_geom.w;
+					tile_rect.height=dockapp->border_geom.h;
+					XShapeCombineRectangles(wglobal.dpy, ((WWindow *)dock)->win,
+											ShapeBounding, 0, 0, &tile_rect, 1,
+											ShapeUnion, 0);
+					/* }}} */
+				}else{
+					/* Union with dockapp shape {{{ */
+					int count;
+					int ordering;
+
+					XRectangle *rects=XShapeGetRectangles(wglobal.dpy,
+														  dockapp->cwin->win,
+														  ShapeBounding, &count,
+														  &ordering);
+					if(rects!=NULL){
+						WRectangle dockapp_geom=REGION_GEOM(dockapp->cwin);
+						XShapeCombineRectangles(wglobal.dpy, ((WWindow *)dock)->win,
+												ShapeBounding,
+												dockapp_geom.x, dockapp_geom.y,
+												rects, count, ShapeUnion, ordering);
+						XFree(rects);
+					}
+					/* }}} */
+				}
+			}
+			/* }}} */
+
+		}
+		break;
+		/* }}} */
 
 	case DOCK_OUTLINE_STYLE_ALL: /* {{{ */
 		{
@@ -423,65 +452,10 @@ static void dock_reshape(WDock *dock)
 		break;
 		/* }}} */
 
-	case DOCK_OUTLINE_STYLE_EACH: /* {{{ */
-		{
-			WDockApp *dockapp;
-
-			/* Start with an empty set {{{ */
-			XShapeCombineRectangles(wglobal.dpy, ((WWindow *)dock)->win,
-									ShapeBounding, 0, 0, NULL, 0, ShapeSet, 0);
-			/* }}} */
-
-			/* Union with dockapp shapes {{{ */
-			for(dockapp=dock->dockapps; dockapp!=NULL; dockapp=dockapp->next){
-
-				if(dockapp->draw_border){
-
-					/* Union with border shape {{{ */
-					XRectangle tile_rect;
-					tile_rect.x=dockapp->border_geom.x;
-					tile_rect.y=dockapp->border_geom.y;
-					tile_rect.width=dockapp->border_geom.w;
-					tile_rect.height=dockapp->border_geom.h;
-					XShapeCombineRectangles(wglobal.dpy, ((WWindow *)dock)->win,
-											ShapeBounding, 0, 0, &tile_rect, 1,
-											ShapeUnion, 0);
-					/* }}} */
-
-				}else{
-
-					/* Union with dockapp shape {{{ */
-					int count;
-					int ordering;
-					XRectangle *rects=XShapeGetRectangles(wglobal.dpy,
-														  dockapp->cwin->win,
-														  ShapeBounding, &count,
-														  &ordering);
-					if(rects!=NULL){
-						WRectangle dockapp_geom=REGION_GEOM(dockapp->cwin);
-						XShapeCombineRectangles(wglobal.dpy, ((WWindow *)dock)->win,
-												ShapeBounding,
-												dockapp_geom.x, dockapp_geom.y,
-												rects, count, ShapeUnion, ordering);
-						XFree(rects);
-					}
-					/* }}} */
-
-				}
-
-			}
-			/* }}} */
-
-		}
-		break;
-		/* }}} */
-
 	}
 
 }
 /* }}} */
-
-#endif
 
 /* dock_request_managed_geom {{{ */
 static void dock_request_managed_geom(WDock *dock, WRegion *reg, int flags,
@@ -491,27 +465,32 @@ static void dock_request_managed_geom(WDock *dock, WRegion *reg, int flags,
 	WDockApp *dockapp;
 	WRectangle parent_geom, dock_geom, border_dock_geom;
 	GrBorderWidths dock_bdw, dockapp_bdw;
-	int outline_style;
 	WRectangle tile_size;
 	int n_dockapps=0, max_w=1, max_h=1, total_w=0, total_h=0, cur_coord=0;
 
 	/* Determine parent and tile geoms {{{ */
 	parent_geom=((WRegion *)dock)->parent->geom;
-	dock_get_outline_style(dock, &outline_style);
 	dock_get_tile_size(dock, &tile_size);
 	/* }}} */
 
 	/* Determine dock and dockapp border widths {{{ */
 	memset(&dock_bdw, 0, sizeof(GrBorderWidths));
 	memset(&dockapp_bdw, 0, sizeof(GrBorderWidths));
-	switch(outline_style){
-	case DOCK_OUTLINE_STYLE_ALL:
-		grbrush_get_border_widths(dock->brush, &dock_bdw);
-		dockapp_bdw.spacing=dock_bdw.spacing;
-		break;
-	case DOCK_OUTLINE_STYLE_EACH:
-		grbrush_get_border_widths(dock->brush, &dockapp_bdw);
-		break;
+	if(dock->brush){
+		int outline_style;
+
+		dock_get_outline_style(dock, &outline_style);
+		switch(outline_style){
+		case DOCK_OUTLINE_STYLE_NONE:
+			break;
+		case DOCK_OUTLINE_STYLE_ALL:
+			grbrush_get_border_widths(dock->brush, &dock_bdw);
+			dockapp_bdw.spacing=dock_bdw.spacing;
+			break;
+		case DOCK_OUTLINE_STYLE_EACH:
+			grbrush_get_border_widths(dock->brush, &dockapp_bdw);
+			break;
+		}
 	}
 	/* }}} */
 
@@ -727,73 +706,11 @@ static void dock_request_managed_geom(WDock *dock, WRegion *reg, int flags,
 	}
 	/* }}} */
 
-#ifdef CF_HAVE_SHAPE_EXTENSION
-
 	/* Reshape the dock if required {{{ */
 	if(shape_extension && !(flags&REGION_RQGEOM_TRYONLY)){
 		dock_reshape(dock);
 	}
 	/* }}} */
-
-#endif
-
-}
-/* }}} */
-
-/* dock_draw {{{ */
-static void dock_draw(WDock *dock, bool complete UNUSED)
-{
-
-	WDockApp *dockapp;
-	WRectangle geom;
-	int outline_style;
-
-	dock_get_outline_style(dock, &outline_style);
-	XClearWindow(wglobal.dpy, ((WWindow *)dock)->win);
-	switch(outline_style){
-	case DOCK_OUTLINE_STYLE_ALL:
-		geom=REGION_GEOM(dock);
-		geom.x=geom.y=0;
-		grbrush_draw_border(dock->brush, ((WWindow *)dock)->win, &geom, "dock");
-		break;
-	case DOCK_OUTLINE_STYLE_EACH:
-		for(dockapp=dock->dockapps; dockapp!=NULL; dockapp=dockapp->next){
-			grbrush_draw_border(dock->brush, ((WWindow *)dock)->win,
-								&dockapp->tile_geom, "dock");
-		}
-		break;
-	}
-
-}
-/* }}} */
-
-/* dock_resize {{{ */
-/*EXTL_DOC
- * Resizes and refreshes \var{dock}.
- */
-EXTL_EXPORT_MEMBER
-void dock_resize(WDock *dock)
-{
-
-	dock_request_managed_geom(dock, NULL, 0, NULL, NULL);
-
-}
-/* }}} */
-
-/* dock_destroy {{{ */
-EXTL_EXPORT_MEMBER
-void dock_destroy(WDock *dock)
-{
-	WDockApp *dockapp, *next;
-
-	/* Destroy all WDockApp structs {{{ */
-	for(dockapp=dock->dockapps, next=dockapp->next; next!=NULL;
-		dockapp=next, next=dockapp->next){
-		free(dockapp);
-	}
-	/* }}} */
-
-	destroy_obj((WObj *)dock);
 
 }
 /* }}} */
@@ -857,6 +774,123 @@ void dock_toggle(WDock *dock)
 }
 /* }}} */
 
+/* dock_draw {{{ */
+static void dock_draw(WDock *dock, bool complete UNUSED)
+{
+	
+	if(!dock_is_mapped(dock)){
+		return;
+	}
+
+	XClearWindow(wglobal.dpy, ((WWindow *)dock)->win);
+
+	/* Draw border(s) {{{ */
+	if(dock->brush){
+		int outline_style;
+
+		dock_get_outline_style(dock, &outline_style);
+		switch(outline_style){
+		case DOCK_OUTLINE_STYLE_NONE:
+			break;
+		case DOCK_OUTLINE_STYLE_ALL: /* {{{ */
+			{
+				WRectangle geom=REGION_GEOM(dock);
+				geom.x=geom.y=0;
+				grbrush_draw_border(dock->brush, ((WWindow *)dock)->win, &geom,
+									"dock");
+			}
+			break;
+			/* }}} */
+		case DOCK_OUTLINE_STYLE_EACH: /* {{{ */
+			{
+				WDockApp *dockapp;
+				for(dockapp=dock->dockapps; dockapp!=NULL;
+					dockapp=dockapp->next){
+					grbrush_draw_border(dock->brush, ((WWindow *)dock)->win,
+										&dockapp->tile_geom, "dock");
+				}
+			}
+			break;
+			/* }}} */
+		}
+	}
+	/* }}} */
+
+}
+/* }}} */
+
+/* dock_resize {{{ */
+/*EXTL_DOC
+ * Resizes and refreshes \var{dock}.
+ */
+EXTL_EXPORT_MEMBER
+void dock_resize(WDock *dock)
+{
+
+	dock_request_managed_geom(dock, NULL, 0, NULL, NULL);
+	dock_draw(dock, TRUE);
+
+}
+/* }}} */
+
+/* dock_brush_release {{{ */
+static void dock_brush_release(WDock *dock)
+{
+
+	if(dock->brush_extra_values!=extl_table_none()){
+		extl_unref_table(dock->brush_extra_values);
+		dock->brush_extra_values=extl_table_none();
+	}
+	if(dock->brush){
+		grbrush_release(dock->brush, ((WWindow *)dock)->win);
+		dock->brush=NULL;
+	}
+
+}
+/* }}} */
+
+/* dock_brush_get {{{ */
+static void dock_brush_get(WDock *dock)
+{
+
+	dock_brush_release(dock);
+	dock->brush=gr_get_brush(ROOTWIN_OF(dock), ((WWindow *)dock)->win, "dock");
+	if(dock->brush){
+		grbrush_get_extra_values(dock->brush, &dock->brush_extra_values);
+	}
+
+}
+/* }}} */
+
+/* dock_draw_config_updated {{{ */
+static void dock_draw_config_updated(WDock *dock)
+{
+
+	dock_brush_get(dock);
+	dock_resize(dock);
+
+}
+/* }}} */
+
+/* dock_destroy {{{ */
+/*EXTL_DOC
+ * Destroys \var{dock} if it is empty.
+ */
+EXTL_EXPORT_MEMBER
+void dock_destroy(WDock *dock)
+{
+
+	if(dock->managed_list!=NULL){
+		warn_obj(modname, "Dock \"%s\" is still managing other objects "
+				" -- refusing to close.", region_name((WRegion *)dock));
+		return;
+	}
+
+	destroy_obj((WObj *)dock);
+
+}
+/* }}} */
+
 /* dock_set {{{ */
 /*EXTL_DOC
  * Configure \var{dock}. \{conftab} is a table of key/value pairs:
@@ -865,9 +899,9 @@ void dock_toggle(WDock *dock)
  *  \hline
  *  Key & Values & Description \\
  *  \hline
- *  name & string & Name of doc\\
- *  hpos & left|center|right & Horizontal position of dock on screen \\
- *  vpos & top|middle|bottom & Vertical position of dock on screen \\
+ *  name & string & Name of dock \\
+ *  hpos & left|center|right & Horizontal position \\
+ *  vpos & top|middle|bottom & Vertical position \\
  *  grow & up|down|left|right & Growth direction (where new dockapps are added)
  *                              \\
  *  is_auto & bool & Should \var{dock} automatically manage new dockapps? \\
@@ -887,7 +921,7 @@ void dock_set(WDock *dock, ExtlTab conftab)
 	/* Configure name {{{ */
 	if(extl_table_gets_s(conftab, dock_param_name.key, &s)){
 		if(!region_set_name((WRegion *)dock, s)){
-			warn_obj(modname, "Can't set name to %s", s);
+			warn_obj(modname, "Can't set name to \"%s\"", s);
 		}
 		free(s);
 	}
@@ -953,44 +987,42 @@ ExtlTab dock_get(WDock *dock)
 /* dock_init {{{ */
 static bool dock_init(WDock *dock, int screen, ExtlTab conftab)
 {
-	WRectangle geom={0, 0, 1, 1};
+	WRectangle geom={-1, -1, 1, 1};
 	WScreen *scr;
 	WWindow *parent;
 
-	/* Configure screen {{{ */
+	/* Find screen {{{ */
 	for(scr=wglobal.screens; screen && scr;
 		--screen, scr=NEXT_CHILD(scr, WScreen)){
 	}
 	if(!scr){
-		warn_obj(modname, "Unknown screen '%d'", screen);
+		warn_obj(modname, "Unknown screen %d", screen);
 		return FALSE;
 	}
 	parent=(WWindow *)scr;
 	/* }}} */
 
-	/* Configuration defaults {{{ */
+	/* Initialise member variables {{{ */
 	dock->vpos=dock_param_vpos.dflt;
 	dock->hpos=dock_param_hpos.dflt;
 	dock->grow=dock_param_grow.dflt;
 	dock->is_auto=dock_param_is_auto.dflt;
+	dock->brush=NULL;
+	dock->brush_extra_values=extl_table_none();
+	dock->dockapps=NULL;
 	/* }}} */
 
 	if(!window_init_new((WWindow *)dock, parent, &geom)){
 		return FALSE;
 	}
-	region_keep_on_top((WRegion *)dock);
 
-	LINK_ITEM(docks, dock, dock_next, dock_prev);
+	region_keep_on_top((WRegion *)dock);
 
 	XSelectInput(wglobal.dpy, ((WWindow *)dock)->win,
 				 EnterWindowMask|ExposureMask|FocusChangeMask|KeyPressMask
 				 |SubstructureRedirectMask);
-#ifdef CF_HAVE_SHAPE_EXTENSION
-	XShapeSelectInput(wglobal.dpy, ((WWindow *)dock)->win, True);
-#endif
 
-	dock->brush=gr_get_brush(ROOTWIN_OF(dock), ((WWindow *)dock)->win, "dock");
-	grbrush_get_extra_values(dock->brush, &dock->brush_extra_values);
+	dock_brush_get(dock);
 
 	dock_set(dock, conftab);
 
@@ -1003,6 +1035,8 @@ static bool dock_init(WDock *dock, int screen, ExtlTab conftab)
 		dock_map(dock);
 	}
 
+	LINK_ITEM(docks, dock, dock_next, dock_prev);
+
 	return TRUE;
 
 }
@@ -1014,8 +1048,7 @@ static void dock_deinit(WDock *dock)
 
 	UNLINK_ITEM(docks, dock, dock_next, dock_prev);
 
-	extl_unref_table(dock->brush_extra_values);
-	grbrush_release(dock->brush, ((WWindow *)dock)->win);
+	dock_brush_release(dock);
 
 	window_deinit((WWindow *) dock);
 
@@ -1025,8 +1058,8 @@ static void dock_deinit(WDock *dock)
 /* create_dock {{{ */
 /*EXTL_DOC
  * Create a dock. \var{screen} is the screen number on which the dock should
- * appear (default is the active screen). \var{conftab} is the initial
- * configuration table passed to \fnref{WDock.set}.
+ * appear. \var{conftab} is the initial configuration table passed to
+ * \fnref{WDock.set}.
  */
 EXTL_EXPORT
 WDock *create_dock(int screen, ExtlTab conftab)
@@ -1066,10 +1099,6 @@ static bool dock_manage_clientwin(WDock *dock, WClientWin *cwin,
 	}
 	/* }}} */
 
-#ifdef CF_HAVE_SHAPE_EXTENSION
-	XShapeInputSelected(wglobal.dpy, cwin->win);
-#endif
-
 	region_set_manager((WRegion *)cwin, (WRegion *)dock,
 					   &(dock->managed_list));
 	dock_request_managed_geom(dock, (WRegion *)cwin, REGION_RQGEOM_TRYONLY,
@@ -1100,31 +1129,12 @@ static void dock_remove_managed(WDock *dock, WRegion *reg)
 }
 /* }}} */
 
-#ifdef CF_HAVE_SHAPE_EXTENSION
-
-/* dock_handle_shape_notify {{{ */
-bool dock_handle_shape_notify(WDock *dock, XShapeEvent *se UNUSED)
-{
-
-	XShapeSelectInput(wglobal.dpy, ((WWindow *)dock)->win, 0);
-	dock_reshape(dock);
-	XShapeSelectInput(wglobal.dpy, ((WWindow *)dock)->win, ShapeNotifyMask);
-
-	return FALSE;
-
-}
-/* }}} */
-
-#endif
-
 static DynFunTab dock_dynfuntab[]={ /* {{{ */
 	{window_draw, dock_draw},
+	{region_draw_config_updated, dock_draw_config_updated},
 	{region_request_managed_geom, dock_request_managed_geom},
 	{(DynFun *)region_manage_clientwin, (DynFun *)dock_manage_clientwin},
 	{region_remove_managed, dock_remove_managed},
-#ifdef CF_HAVE_SHAPE_EXTENSION
-	/* {(DynFun *)window_handle_shape_notify, (DynFun *)dock_handle_shape_notify}, */
-#endif
 	END_DYNFUNTAB
 };
 /* }}} */
@@ -1157,6 +1167,7 @@ static bool dock_clientwin_is_dockapp(WClientWin *cwin,
 		unsigned long nitems;
 		unsigned long bytes_after;
 		unsigned char *prop;
+
 		if(atom__net_wm_window_type==None){
 			atom__net_wm_window_type=XInternAtom(wglobal.dpy,
 												 "_NET_WM_WINDOW_TYPE",
@@ -1182,6 +1193,7 @@ static bool dock_clientwin_is_dockapp(WClientWin *cwin,
 	if(!is_dockapp){
 		char **p;
 		int n;
+
 		p=get_text_property(cwin->win, XA_WM_CLASS, &n);
 		if(p!=NULL){
 			if(n>=2 && strcmp(p[1], "DockApp")==0){
@@ -1236,44 +1248,17 @@ static bool add_clientwin_hook(WClientWin *cwin, const WManageParams *param)
 }
 /* }}} */
 
-#ifdef CF_HAVE_SHAPE_EXTENSION
-
-/* handle_event_hook {{{ */
-static bool handle_event_hook(XEvent *ev)
-{
-	WWindow *wwin;
-
-	switch(ev->type-shape_event_basep)
-	{
-	case ShapeNotify:
-		wwin=FIND_WINDOW_T(((XShapeEvent *)ev)->window, WWindow);
-		if(wwin!=NULL){
-			return window_handle_shape_notify(wwin, (XShapeEvent *)ev);
-		}
-		break;
-	}
-
-	return FALSE;
-
-}
-/* }}} */
-
-#endif
-
 /* dock_module_init {{{ */
 bool dock_module_init()
 {
 	extern bool dock_module_register_exports();
 
-#ifdef CF_HAVE_SHAPE_EXTENSION
 	if(XShapeQueryExtension(wglobal.dpy, &shape_event_basep,
 							&shape_error_basep)){
 		shape_extension=TRUE;
 	}else{
-		warn_obj(modname, "Shape extension missing on display '%s'",
-				 XDisplayName((char *)wglobal.dpy));
+		XMissingExtension(wglobal.dpy, "SHAPE");
 	}
-#endif
 
 	if(!dock_module_register_exports()){
 		return FALSE;
@@ -1282,11 +1267,6 @@ bool dock_module_init()
 	read_config(modname);
 
 	ADD_HOOK(add_clientwin_alt, add_clientwin_hook);
-#ifdef CF_HAVE_SHAPE_EXTENSION
-	if(shape_extension){
-		ADD_HOOK(handle_event_alt, handle_event_hook);
-	}
-#endif
 
 	return TRUE;
 
@@ -1299,6 +1279,8 @@ void dock_module_deinit()
 	WDock *dock;
 	extern void dock_module_unregister_exports();
 
+	REMOVE_HOOK(add_clientwin_alt, add_clientwin_hook);
+
 	/* Destroy all docks {{{ */
 	dock=docks;
 	while(dock!=NULL){
@@ -1307,13 +1289,6 @@ void dock_module_deinit()
 		dock=next;
 	}
 	/* }}} */
-
-	REMOVE_HOOK(add_clientwin_alt, add_clientwin_hook);
-#ifdef CF_HAVE_SHAPE_EXTENSION
-	if(shape_extension){
-		REMOVE_HOOK(handle_event_alt, handle_event_hook);
-	}
-#endif
 
 	dock_module_unregister_exports();
 

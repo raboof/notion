@@ -1,15 +1,12 @@
 ##
-## ion-devel-dock module Makefile
+## Ion dock module Makefile
 ##
-## $Header: /home/twp/cvsroot/twp/ion/ion-devel-dock/Makefile,v 1.11 2003/12/02 18:40:33 twp Exp $
+## $Header: /home/twp/cvsroot/twp/ion/ion-devel-dock/Makefile,v 1.15 2003/12/21 18:08:43 twp Exp $
 ##
 
 # System specific configuration is in system.mk
 TOPDIR=..
 include $(TOPDIR)/system-inc.mk
-
-# If you do not want to use the Shape extension then comment out the following.
-DEFINES += -DCF_HAVE_SHAPE_EXTENSION
 
 ######################################
 
@@ -19,8 +16,7 @@ CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
 SOURCES=dock.c
 ETC=dock.lua dock-draw.lua
-DOCS=LICENSE README
-PATCHES=
+DOCS=LICENSE README.dock
 
 MAKE_EXPORTS=dock_module
 
@@ -40,9 +36,16 @@ _install: module_install
 
 ######################################
 
-tarball:
-	sh -c 'DIR=ion-devel-$(MODULE)-`date +%Y%m%d`; \
-		mkdir $$DIR; \
-		cp $(SOURCES) $(ETC) $(DOCS) $(PATCHES) Makefile $$DIR; \
-		tar -cvjf $$DIR.tar.bz2 $$DIR/*; \
-		rm -Rf $$DIR'
+.PHONY: tarball
+tarball: $(SOURCES) $(ETC) $(DOCS) Makefile
+	sh -c 'BASENAME=ion-devel-$(MODULE)-`date -r \`ls -t $+ | head -n 1\` +%Y%m%d`; \
+		mkdir $$BASENAME; \
+		cp $+ $$BASENAME; \
+		tar -cvjf $$BASENAME.tar.bz2 $$BASENAME/*; \
+		rm -Rf $$BASENAME'
+
+######################################
+
+.PHONY: tags
+tags:
+	exuberant-ctags -R . $(TOPDIR)

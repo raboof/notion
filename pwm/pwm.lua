@@ -58,3 +58,4 @@ query_man_path={
 load_module("floatws")
 load_module("menu")
 load_module("query")
+load_module("dock")

@@ -5,8 +5,8 @@
 dock = create_dock(0, {	-- create a new dock on screen 0
 	name="dock",	-- name for use in target="..." winprops
 	hpos="right",	-- horizontal position left|center|right
-	vpos="middle",	-- vertical position top|middle|bottom
-	grow="down",	-- growth direction up|down|left|right
+	vpos="bottom",	-- vertical position top|middle|bottom
+	grow="left",	-- growth direction up|down|left|right
 	is_auto=true})	-- whether new dockapps should be added automatically
 
 global_bindings{
