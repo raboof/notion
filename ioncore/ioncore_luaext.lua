@@ -47,7 +47,7 @@ end
 function table.join(t1, t2)
     local t=table.copy(t1, false)
     for k, v in t2 do
-        if not t[k] then
+        if t[k]==nil then
             t[k]=v
         end
     end
