@@ -555,33 +555,36 @@ void clientwin_tfor_changed(WClientWin *cwin)
 
 /*{{{ Add/remove managed */
 
+typedef struct{
+	WClientWin *cwin;
+	WRegion *transient;
+	bool top;
+} TransRepar;
+
+static TransRepar *transient_reparents;
 
 static WRegion *clientwin_do_attach_transient(WClientWin *cwin, 
 											  WRegionAttachHandler *fn,
-											  void *fnparams, 
-											  int *h)
+											  void *fnparams,
+											  WRegion *thereg)
 {
 	WRectangle geom=cwin->max_geom;
 	WWindow *par=REGION_PARENT_CHK(cwin, WWindow);
 	WRegion *reg;
+	TransRepar tp, *tpold;
 
 	if(par==NULL)
 		return NULL;
-	
-	if(*h>0){
-		/* Don't increase the height of the transient */
-		int diff=geom.h-*h;
-		if(diff>0){
-			geom.y+=diff;
-			geom.h-=diff;
-		}
-	}else{
-		/* Put something less than the full height for the size */
-		geom.h/=3;
-		geom.y+=geom.h*2;
-	}
+
+	tp.cwin=cwin;
+	tp.transient=thereg;
+	tp.top=(cwin->flags&CWIN_TRANSIENTS_TOP);
+	tpold=transient_reparents;
+	transient_reparents=&tp;
 	
 	reg=fn(par, &geom, fnparams);
+	
+	transient_reparents=tpold;
 	
 	if(reg==NULL)
 		return NULL;
@@ -603,12 +606,10 @@ static WRegion *clientwin_do_attach_transient(WClientWin *cwin,
 
 bool clientwin_attach_transient(WClientWin *cwin, WRegion *transient)
 {
-	int h=REGION_GEOM(transient).h;
-	
 	return attach_reparent_helper((WRegion*)cwin, transient,
 								  ((WRegionDoAttachFn*)
 								   clientwin_do_attach_transient), 
-								  &h);
+								  transient);
 }
 
 
@@ -883,24 +884,32 @@ static void convert_geom(WClientWin *cwin, const WRectangle *max_geom,
 {
 	WRectangle r;
 	bool bottom=FALSE;
+	bool top=FALSE;
 	int htry=max_geom->h;
+	WClientWin *mgr=REGION_MANAGER_CHK(cwin, WClientWin);
 	
-	/* Align transients managed by another client window at bottom. */
-	/*if(cwin->transient_for!=None){*/
-	if(REGION_MANAGER(cwin)!=NULL &&
-	   WOBJ_IS(REGION_MANAGER(cwin), WClientWin)){
-		bottom=TRUE;
-		if(max_geom->h>cwin->last_h_rq)
-			htry=cwin->last_h_rq;
+	if(transient_reparents!=NULL && 
+	   transient_reparents->transient==(WRegion*)cwin){
+		if(transient_reparents->top)
+			top=TRUE;
+		else
+			bottom=TRUE;
+	}else if(mgr!=NULL){
+		if(mgr->flags&CWIN_TRANSIENTS_TOP)
+			top=TRUE;
+		else
+			bottom=TRUE;
 	}
+	
+	htry=cwin->last_h_rq;
 	
 	geom->w=max_geom->w;
 	geom->h=htry;
 	
 	/* Don't ignore minimum size at first try. */
-	if(bottom)
+	if(bottom || top)
 		correct_size(&(geom->w), &(geom->h), &(cwin->size_hints), TRUE);
-	if(!bottom || geom->w>max_geom->w || geom->h>max_geom->h){
+	if(!(bottom || top) || geom->w>max_geom->w || geom->h>max_geom->h){
 		geom->w=max_geom->w;
 		geom->h=htry;
 		correct_size(&(geom->w), &(geom->h), &(cwin->size_hints), FALSE);
@@ -908,7 +917,9 @@ static void convert_geom(WClientWin *cwin, const WRectangle *max_geom,
 
 	geom->x=max_geom->x+max_geom->w/2-geom->w/2;
 	
-	if(bottom)
+	if(top)
+		geom->y=max_geom->y;
+	else if(bottom)
 		geom->y=max_geom->y+max_geom->h-geom->h;
 	else
 		geom->y=max_geom->y+max_geom->h/2-geom->h/2;
