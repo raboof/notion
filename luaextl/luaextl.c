@@ -242,11 +242,11 @@ static bool extl_init_obj_info(lua_State *st)
 	
 	/* Create cache */
 	lua_newtable(st);
-	lua_newtable(st);
+	/*lua_newtable(st);
 	lua_pushstring(st, "__mode");
 	lua_pushstring(st, "v");
 	lua_rawset_check(st, -3);
-	lua_setmetatable(st, -2);
+	lua_setmetatable(st, -2);*/
 	obj_cache_ref=lua_ref(st, -1);
 
 	lua_pushcfunction(st, extl_obj_typename);
@@ -298,7 +298,10 @@ static bool extl_cpcall(lua_State *st, ExtlCPCallFn *fn, void *ptr)
 	param.udata=ptr;
 	param.retval=FALSE;
 	
-	lua_cpcall(st, extl_docpcall, &param);
+	
+	if(lua_cpcall(st, extl_docpcall, &param)!=0){
+		D(fprintf(stderr, "-->%s\n", lua_tostring(st, -1)));
+	}
 	
 	lua_settop(st, oldtop);
 	
@@ -719,18 +722,18 @@ ExtlTab extl_globals()
 
 typedef struct{
 	int ref;
-	const char *sentry;
-	int ientry;
 	char type;
 	void *val;
+	char itype;
+	void *ival;
 	bool insertlast;
 } TableParams;
 
 
-static bool extl_table_dodo_gets(lua_State *st, TableParams *params)
+static bool extl_table_dodo_get(lua_State *st, TableParams *params)
 {
 	lua_rawgeti(st, LUA_REGISTRYINDEX, params->ref);
-	lua_pushstring(st, params->sentry);
+	extl_stack_push(st, params->itype, params->ival);
 	lua_gettable(st, -2);
 	if(lua_isnil(st, -1))
 		return FALSE;
@@ -739,19 +742,26 @@ static bool extl_table_dodo_gets(lua_State *st, TableParams *params)
 }
 
 
-static bool extl_table_do_gets(ExtlTab ref, const char *entry,
+static bool extl_table_do_get(ExtlTab ref, char itype, void *ival,
 							   char type, void *valret)
 {
 	TableParams params;
 	
 	params.ref=ref;
-	params.sentry=entry;
+	params.itype=itype;
+	params.ival=ival;
 	params.type=type;
 	params.val=valret;
 	
-	return extl_cpcall(l_st, (ExtlCPCallFn*)extl_table_dodo_gets, &params);
+	return extl_cpcall(l_st, (ExtlCPCallFn*)extl_table_dodo_get, &params);
 }
 
+
+static bool extl_table_do_gets(ExtlTab ref, const char *entry,
+							   char type, void *valret)
+{
+	return extl_table_do_get(ref, 's', (void*)&entry, type, valret);
+}
 
 bool extl_table_gets_o(ExtlTab ref, const char *entry, WObj **ret)
 {
@@ -789,59 +799,10 @@ bool extl_table_gets_t(ExtlTab ref, const char *entry, ExtlTab *ret)
 }
 
 
-typedef struct{
-	int ref;
-	int n;
-} GetNParams;
-
-
-static bool extl_table_do_get_n(lua_State *st, GetNParams *params)
-{
-	lua_rawgeti(st, LUA_REGISTRYINDEX, params->ref);
-	params->n=luaL_getn_check(st, -1);
-	return TRUE;
-}
-
-
-int extl_table_get_n(ExtlTab ref)
-{
-	GetNParams params;
-	int oldtop;
-	
-	params.ref=ref;
-	params.n=0;
-	
-	extl_cpcall(l_st, (ExtlCPCallFn*)extl_table_do_get_n, &params);
-	
-	return params.n;
-}
-
-
-
-static bool extl_table_dodo_geti(lua_State *st, TableParams *params)
-{
-	lua_rawgeti(st, LUA_REGISTRYINDEX, params->ref);
-	lua_rawgeti(st, -1, params->ientry);
-	if(!lua_isnil(st, -1) &&
-	   extl_stack_get(st, -1, params->type, TRUE, params->val))
-		return TRUE;
-	
-	return FALSE;
-}
-
-
 static bool extl_table_do_geti(ExtlTab ref, int entry, char type, void *valret)
 {
-	TableParams params;
-	
-	params.ref=ref;
-	params.ientry=entry;
-	params.type=type;
-	params.val=valret;
-	
-	return extl_cpcall(l_st, (ExtlCPCallFn*)extl_table_dodo_geti, &params);
+	return extl_table_do_get(ref, 'i', &entry, type, valret);
 }
-
 
 bool extl_table_geti_o(ExtlTab ref, int entry, WObj **ret)
 {
@@ -879,36 +840,70 @@ bool extl_table_geti_t(ExtlTab ref, int entry, ExtlTab *ret)
 }
 
 
+typedef struct{
+	int ref;
+	int n;
+} GetNParams;
+
+
+static bool extl_table_do_get_n(lua_State *st, GetNParams *params)
+{
+	lua_rawgeti(st, LUA_REGISTRYINDEX, params->ref);
+	params->n=luaL_getn_check(st, -1);
+	return TRUE;
+}
+
+
+int extl_table_get_n(ExtlTab ref)
+{
+	GetNParams params;
+	int oldtop;
+	
+	params.ref=ref;
+	params.n=0;
+	
+	extl_cpcall(l_st, (ExtlCPCallFn*)extl_table_do_get_n, &params);
+	
+	return params.n;
+}
+
+
 /*}}}*/
 
 
 /*{{{ Table/set */
 
 
-static bool extl_table_dodo_sets(lua_State *st, TableParams *params)
+static bool extl_table_dodo_set(lua_State *st, TableParams *params)
 {
 	lua_rawgeti(st, LUA_REGISTRYINDEX, params->ref);
-	lua_pushstring(st, params->sentry);
+	extl_stack_push(st, params->itype, params->ival);
 	extl_stack_push(st, params->type, params->val);
 	lua_rawset_check(st, -3);
 	return TRUE;
 }
 
 
-static bool extl_table_do_sets(ExtlTab ref, const char *entry,
-							   char type, void *val)
+static bool extl_table_do_set(ExtlTab ref, char itype, void *ival,
+							  char type, void *val)
 {
 	TableParams params;
 		
 	params.ref=ref;
-	params.sentry=entry;
+	params.itype=itype;
+	params.ival=ival;
 	params.type=type;
 	params.val=val;
 	
-	return extl_cpcall(l_st, (ExtlCPCallFn*)extl_table_dodo_sets, &params);
+	return extl_cpcall(l_st, (ExtlCPCallFn*)extl_table_dodo_set, &params);
 }
 
 
+static bool extl_table_do_sets(ExtlTab ref, const char *entry, 
+							   char type, void *val)
+{
+	return extl_table_do_set(ref, 's', (void*)&entry, type, val);
+}
 
 bool extl_table_sets_o(ExtlTab ref, const char *entry, WObj *val)
 {
@@ -946,110 +941,60 @@ bool extl_table_sets_t(ExtlTab ref, const char *entry, ExtlTab val)
 }
 
 
-static bool extl_table_do_clears(lua_State *st, TableParams *params)
+static bool extl_table_do_seti(ExtlTab ref, int entry, char type, void *val)
 {
-	lua_rawgeti(st, LUA_REGISTRYINDEX, params->ref);
-	lua_pushstring(st, params->sentry);
-	lua_pushnil(st);
-	lua_rawset_check(st, -3);
-	return TRUE;
+	return extl_table_do_set(ref, 'i', &entry, type, val);
 }
-
-
-bool extl_table_clears(ExtlTab ref, const char *entry)
-{
-	TableParams params;
-
-	params.ref=ref;
-	params.sentry=entry;
-
-	return extl_cpcall(l_st, (ExtlCPCallFn*)extl_table_do_clears, &params);
-}
-
-
-static bool extl_table_dodo_seti(lua_State *st, TableParams *params)
-{
-	int n, i;
-	lua_rawgeti(st, LUA_REGISTRYINDEX, params->ref);
-	extl_stack_push(st, params->type, params->val);
-	n=luaL_getn_check(st, -2);
-	i=(params->insertlast ? n+1 : params->ientry);
-	lua_rawseti_check(st, -2, i);
-	if(i>n)
-		luaL_setn(st, -1, i);
-	   
-	return TRUE;
-}
-
-
-static bool extl_table_do_seti(ExtlTab ref, bool insertlast, int entry,
-							   char type, void *val)
-{
-	TableParams params;
-	
-	params.ref=ref;
-	params.insertlast=insertlast;
-	params.ientry=entry;
-	params.type=type;
-	params.val=val;
-
-	return extl_cpcall(l_st, (ExtlCPCallFn*)extl_table_dodo_seti, &params);
-}
-
 
 bool extl_table_seti_o(ExtlTab ref, int entry, WObj *val)
 {
-	return extl_table_do_seti(ref, FALSE, entry, 'o', (void*)&val);
+	return extl_table_do_seti(ref,  entry, 'o', (void*)&val);
 }
 
 bool extl_table_seti_i(ExtlTab ref, int entry, int val)
 {
-	return extl_table_do_seti(ref, FALSE, entry, 'i', (void*)&val);
+	return extl_table_do_seti(ref, entry, 'i', (void*)&val);
 }
 
 bool extl_table_seti_d(ExtlTab ref, int entry, double val)
 {
-	return extl_table_do_seti(ref, FALSE, entry, 'd', (void*)&val);
+	return extl_table_do_seti(ref, entry, 'd', (void*)&val);
 }
 
 bool extl_table_seti_b(ExtlTab ref, int entry, bool val)
 {
-	return extl_table_do_seti(ref, FALSE, entry, 'b', (void*)&val);
+	return extl_table_do_seti(ref, entry, 'b', (void*)&val);
 }
 
 bool extl_table_seti_s(ExtlTab ref, int entry, const char *val)
 {
-	return extl_table_do_seti(ref, FALSE, entry, 'S', (void*)&val);
+	return extl_table_do_seti(ref, entry, 'S', (void*)&val);
 }
 
 bool extl_table_seti_f(ExtlTab ref, int entry, ExtlFn val)
 {
-	return extl_table_do_seti(ref, FALSE, entry, 'f', (void*)&val);
+	return extl_table_do_seti(ref, entry, 'f', (void*)&val);
 }
 
 bool extl_table_seti_t(ExtlTab ref, int entry, ExtlTab val)
 {
-	return extl_table_do_seti(ref, FALSE, entry, 't', (void*)&val);
+	return extl_table_do_seti(ref, entry, 't', (void*)&val);
 }
 
 
-static bool extl_table_do_cleari(lua_State *st, TableParams *params)
+static bool extl_table_do_clear(ExtlTab ref, char spec, void *entry)
 {
-	lua_rawgeti(st, LUA_REGISTRYINDEX, params->ref);
-	lua_pushnil(st);
-	lua_rawseti_check(st, -2, params->ientry);
-	return TRUE;
+	return extl_table_do_set(ref, spec, entry, '?', NULL);
 }
 
+bool extl_table_clears(ExtlTab ref, const char *entry)
+{
+	return extl_table_do_clear(ref, 's', (void*)&entry);
+}
 
 bool extl_table_cleari(ExtlTab ref, int entry)
 {
-	TableParams params;
-
-	params.ref=ref;
-	params.ientry=entry;
-
-	return extl_cpcall(l_st, (ExtlCPCallFn*)extl_table_do_cleari, &params);
+	return extl_table_do_clear(ref, 'i', &entry);
 }
 
 
