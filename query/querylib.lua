@@ -242,41 +242,76 @@ function querylib.attachclient_handler(frame, str)
     frame:attach(cwin, { switchto = true })
 end
 
+function querylib.lookup_workspace_classes()
+    local classes={}
+    
+    for k, v in _G do
+        local m=getmetatable(v)
+        if m and m.__index==WGenWS then
+            table.insert(classes, k)
+            print(k)
+        end
+    end
+    
+    return classes
+end
+
+function querylib.complete_from_list(list, str)
+    local results={}
+    local len=string.len(str)
+    if len==0 then
+        results=list
+    else
+        for _, m in list do
+            if string.sub(m, 1, len)==str then
+                table.insert(results, m)
+            end
+        end
+    end
+    
+    return results
+end    
+
 function querylib.workspace_handler(frame, name)
-    name=string.gsub(name, "^%s*(.-)%s*$", "%1")
     local ws=lookup_workspace(name)
     if ws then
         ws:goto()
         return
     end
     
-    local scr=frame:screen_of()
-    if not scr then
-        query_fwarn(frame, "Unable to create workspace: no screen.")
-        return
+    local classes=querylib.lookup_workspace_classes()
+    
+    local function completor(wedln, what)
+        local results=querylib.complete_from_list(classes, what)
+        wedln:set_completions(results)
     end
     
-    local _, _, cls, nam=string.find(name, "^(.-):%s*(.-)%s*$")
-    if not cls then
-        -- TODO: This hardcoding should be removed when the C->Lua interfac
-        -- is more object-oriented and we can scan the available classes. 
-        -- I can't be bothered to create such a function at the moment.
-        cls=default_ws_type
-    else
-        name=nam
-    end
+    local function handler(cls)
+        local scr=frame:screen_of()
+        if not scr then
+            query_fwarn(frame, "Unable to create workspace: no screen.")
+            return
+        end
+        
+        if not cls or cls=="" then
+            cls=default_ws_type
+        end
     
-    err=collect_errors(function()
-                           ws=scr:attach_new({ 
-                               type=cls, 
-                               name=name, 
-                               switchto=true 
-                           })
-                       end)
-    if not ws then
-        query_fwarn(frame, err or "Unknown error")
+        err=collect_errors(function()
+                               ws=scr:attach_new({ 
+                                   type=cls, 
+                                   name=name, 
+                                   switchto=true 
+                               })
+                           end)
+        if not ws then
+            query_fwarn(frame, err or "Unknown error")
+        end
     end
+
+    local prompt="Workspace type ("..default_ws_type.."):"
     
+    query_query(frame, prompt, "", handler, completor)
 end
 
 --DOC
@@ -499,17 +534,7 @@ setmetatable(querylib.mancache, {__mode="v"})
 
 function querylib.man_completor(wedln, str)
     local function set_completions(manuals)
-        local results={}
-        local len=string.len(str)
-        if len==0 then
-            results=manuals
-        else
-            for _, m in manuals do
-                if string.sub(m, 1, len)==str then
-                    table.insert(results, m)
-                end
-            end
-        end
+        local results=querylib.complete_from_list(manuals, str)
         wedln:set_completions(results)
     end
 
@@ -694,6 +719,19 @@ end
 
 
 -- }}}
+
+
+-- Miscellaneous {{{
+
+
+--DOC 
+-- Display an "About Ion" message in \var{mplex}.
+function querylib.show_aboutmsg(mplex)
+    query_message(mplex, ioncore_aboutmsg())
+end
+
+
+-- }}
 
 
 -- Mark ourselves loaded.
