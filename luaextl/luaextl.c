@@ -52,7 +52,7 @@ static bool extl_verify_wobj(lua_State *st, int pos)
 	
 	ret=lua_equal(st, -1, -2);
 	
-	lua_pop(st, 2);
+	lua_pop(st, 1);
 	
 	return ret;
 }
@@ -243,7 +243,7 @@ static bool extl_stack_get(lua_State *st, int pos, char type, bool copystring,
 		return TRUE;
 	}
 
-	if(lua_type(st, pos)==LUA_TNIL){
+	if(lua_type(st, pos)==LUA_TNIL || lua_type(st, pos)==LUA_TNONE){
 		if(type!='t' && type!='f')
 			return FALSE;
 		if(valret)
@@ -271,16 +271,20 @@ static bool extl_stack_get(lua_State *st, int pos, char type, bool copystring,
 	if(type=='f'){
 		if(!lua_isfunction(st, pos))
 			return FALSE;
-		if(valret)
-			*((int*)valret)=lua_ref(st, pos);
+		if(valret){
+			lua_pushvalue(st, pos);
+			*((int*)valret)=lua_ref(st, 1);
+		}
 		return TRUE;
 	}
 
 	if(type=='t'){
 		if(!lua_istable(st, pos))
 			return FALSE;
-		if(valret)
-			*((int*)valret)=lua_ref(st, pos);
+		if(valret){
+			lua_pushvalue(st, pos);
+			*((int*)valret)=lua_ref(st, 1);
+		}
 		return TRUE;
 	}
 
@@ -688,7 +692,7 @@ bool extl_table_seti_t(ExtlTab ref, int entry, ExtlTab val)
 
 
 static bool extl_push_args(lua_State *st, bool intab, const char *spec,
-						   va_list args)
+						   va_list args, va_list *retargs)
 {
 	int i=1;
 	
@@ -727,13 +731,18 @@ static bool extl_push_args(lua_State *st, bool intab, const char *spec,
 		spec++;
 	}
 	
+	*retargs=args;
+	
 	return TRUE;
 }
 
 
-static void extl_free_param(void *ptr, char spec, bool strings)
+enum{STRINGS_NONE, STRINGS_NONCONST, STRINGS_ALL};
+
+static void extl_free(void *ptr, char spec, int strings)
 {
-	if((spec=='s' || spec=='S') && strings && *(char**)ptr!=NULL){
+	if(((spec=='s' && strings!=STRINGS_NONE) ||
+		(spec=='S' && strings==STRINGS_ALL)) && *(char**)ptr!=NULL){
 		free(*(char**)ptr);
 		*(char**)ptr=NULL;
 	}else if(spec=='t'){
@@ -751,7 +760,7 @@ static bool extl_get_retvals(lua_State *st, const char *spec, int m,
 	void *ptr;
 	char *s;
 	va_list oargs;
-	
+
 	va_copy(oargs,args);
 	
 	while(m>0){
@@ -775,7 +784,7 @@ fail:
 	spec-=(om-m);
 	while(om>m){
 		ptr=va_arg(oargs, void*);
-		extl_free_param(ptr, *spec, TRUE);
+		extl_free(ptr, *spec, STRINGS_ALL);
 		spec++;
 		om--;
 	}
@@ -802,12 +811,12 @@ static bool extl_do_call_vararg(lua_State *st, int oldtop, bool intab,
 		n=strlen(spec);
 	
 		/* +1 for extl_push_obj */
-		if(!lua_checkstack(l_st, n+1)){
+		/*if(!lua_checkstack(l_st, n+1)){
 			warn("Stack full");
 			return FALSE;
-		}
+		}*/
 		
-		ret=extl_push_args(st, intab, spec, args);
+		ret=extl_push_args(st, intab, spec, args, &args);
 	}
 
 	if(ret){
@@ -846,12 +855,16 @@ bool extl_call_vararg(ExtlFn fnref, const char *spec,
 					  const char *rspec, va_list args)
 {
 	int oldtop=lua_gettop(l_st);
+
+	if(fnref==LUA_NOREF)
+		return FALSE;
 	
 	if(!extl_getref(l_st, fnref))
 		return FALSE;
 	
 	return extl_do_call_vararg(l_st, oldtop, FALSE, spec, rspec, args);
 }
+
 
 bool extl_call(ExtlFn fnref, const char *spec, const char *rspec, ...)
 {
@@ -1041,16 +1054,23 @@ static int extl_l1_call_handler2(lua_State *st)
 	no=(spec->ospec==NULL ? 0 : strlen(spec->ospec));
 	
 	/* +1 for extl_push_obj */
-	if(!lua_checkstack(st, no+1)){
+	/*if(!lua_checkstack(st, no+1)){
 		warn("Stack full");
 		return 0;
-	}
+	}*/
+	
+	/*for(i=0; i<ni; i++)
+		fprintf(stderr, "%d: %s\n", i+1, lua_typename(st, lua_type(st, i+1)));
+	*/
 	
 	for(i=0; i<ni; i++){
 		if(!extl_stack_get(st, i+1, spec->ispec[i], FALSE, (void*)&(ip[i]))){
-			warn("Invalid arguments. Template is '%s'.", spec->ispec);
+			warn("Argument %d to %s is of invalid type. "
+				 "(Argument template is '%s', got lua type %s).",
+				 i+1, spec->name, spec->ispec,
+				 lua_typename(st, lua_type(st, i+1)));
 			while(--i>=0)
-				extl_free_param((void*)&(ip[i]), spec->ispec[i], FALSE);
+				extl_free((void*)&(ip[i]), spec->ispec[i], STRINGS_NONE);
 			return 0;
 		}
 	}
@@ -1058,14 +1078,16 @@ static int extl_l1_call_handler2(lua_State *st)
 	ret=spec->l2handler(spec->fn, ip, op);
 	
 	for(i=0; i<ni; i++)
-		extl_free_param((void*)&(ip[i]), spec->ispec[i], FALSE);
+		extl_free((void*)&(ip[i]), spec->ispec[i], STRINGS_NONE);
 
 	if(!ret)
 		return 0;
 	
-	for(i=0; i<no; i++)
+	for(i=0; i<no; i++){
 		extl_stack_push(st, spec->ospec[i], (void*)&(op[i]));
-
+		extl_free((void*)&(op[i]), spec->ospec[i], STRINGS_NONCONST);
+	}
+	
 	return no;
 }
 
@@ -1233,7 +1255,8 @@ ExtlTab extl_complete_fn(const char *nam)
 		lua_pop(l_st, 1);
 	}
 	
-	tab=lua_ref(l_st, -2);
+	lua_pop(l_st, 1);
+	tab=lua_ref(l_st, 1);
 	
 	lua_settop(l_st, oldtop);
 	
