@@ -358,6 +358,13 @@ const char *extl_extension()
 }
 
 
+void extl_deinit()
+{
+	lua_close(l_st);
+	l_st=NULL;
+}
+
+
 /*}}}*/
 
 
@@ -1477,7 +1484,7 @@ static void extl_l1_finalize(L1Param *param)
 	ExtlExportedFnSpec *spec=param->spec;
 	int i;
 	
-	for(i=0; i<param->ii; i++)
+	for(i=0; i<=param->ii; i++)
 		extl_free((void*)&(param->ip[i]), spec->ispec[i], STRINGS_NONE);
 
 	for(i=0; i<param->no; i++)

@@ -143,5 +143,6 @@ extern void extl_unregister_function(ExtlExportedFnSpec *spec);
 extern const char* extl_extension();
 
 extern bool extl_init();
+extern void extl_deinit();
 
 #endif /* ION_LUA_LUAEXTL_H */
