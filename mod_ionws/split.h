@@ -37,6 +37,7 @@ enum WPrimaryNode{
 
 typedef struct{
     int t, l, b, r;
+    int tot_v, tot_h;
 } WSplitUnused;
 
 INTRCLASS(WSplit);

@@ -112,11 +112,13 @@ static void get_minmaxused(WSplit *node, int dir,
     if(dir==SPLIT_VERTICAL){
         *min=node->min_h;
         *max=maxof(*min, node->max_h);
-        *used=maxof(0, (node->geom.h-node->u.s.unused.t+node->u.s.unused.b));
+        /**used=maxof(0, (node->geom.h-node->u.s.unused.t+node->u.s.unused.b));*/
+        *used=maxof(0, node->geom.h-node->u.s.unused.tot_v);
     }else{
         *min=node->min_w;
         *max=maxof(*min, node->max_w);
-        *used=maxof(0, (node->geom.w-node->u.s.unused.l+node->u.s.unused.r));
+        /**used=maxof(0, (node->geom.w-node->u.s.unused.l+node->u.s.unused.r));*/
+        *used=maxof(0, node->geom.w-node->u.s.unused.tot_h);
     }
 }
 
@@ -240,11 +242,15 @@ void split_get_unused(WSplit *node, WSplitUnused *unused)
         unused->b=0;
         unused->l=0;
         unused->r=0;
+        unused->tot_v=0;
+        unused->tot_h=0;
     }else if(node->type==SPLIT_UNUSED){
         unused->t=0;
-        unused->b=node->geom.h;;
+        unused->b=node->geom.h;
         unused->l=0;
         unused->r=node->geom.w;
+        unused->tot_v=node->geom.h;
+        unused->tot_h=node->geom.w;
     }else{
         *unused=node->u.s.unused;
     }
@@ -292,6 +298,8 @@ void split_update_bounds(WSplit *node, bool recursive)
         node->u.s.unused.r=UNUSED_R_TOT(brunused, br);
         node->u.s.unused.t=minof(tlunused.t, brunused.t);
         node->u.s.unused.b=minof(tlunused.b, brunused.b);
+        node->u.s.unused.tot_v=minof(tlunused.tot_v, brunused.tot_v);
+        node->u.s.unused.tot_h=tlunused.tot_h+brunused.tot_h;
     }else{
         node->max_h=infadd(tl->max_h, br->max_h);
         node->min_h=infadd(tl->min_h, br->min_h);
@@ -301,6 +309,8 @@ void split_update_bounds(WSplit *node, bool recursive)
         node->u.s.unused.b=UNUSED_B_TOT(brunused, br);
         node->u.s.unused.l=minof(tlunused.l, brunused.l);
         node->u.s.unused.r=minof(tlunused.r, brunused.r);
+        node->u.s.unused.tot_v=tlunused.tot_v+brunused.tot_v;
+        node->u.s.unused.tot_h=minof(tlunused.tot_h, brunused.tot_h);
     }
 }
 
@@ -445,11 +455,13 @@ static void flexibility(WSplit *node, int dir, int *unused, int *force,
 {
     if(dir==SPLIT_VERTICAL){
         *force=maxof(0, node->geom.h-node->min_h);
-        *unused=node->u.s.unused.t+node->u.s.unused.b;
+        /**unused=node->u.s.unused.t+node->u.s.unused.b;*/
+        *unused=node->u.s.unused.tot_v;
         *stretch=INT_MAX;
     }else{
         *force=maxof(0, node->geom.w-node->min_w);
-        *unused=node->u.s.unused.l+node->u.s.unused.r;
+        /**unused=node->u.s.unused.l+node->u.s.unused.r;*/
+        *unused=node->u.s.unused.tot_h;
         *stretch=INT_MAX;
     }
 }
@@ -486,6 +498,7 @@ static void split_do_resize_rootward(WSplit *node, RootwardAmount *ha,
     WRectangle og, pg, ng;
     RootwardAmount *ca;
     int thisnode;
+    int hprimn=PRIMN_ANY, vprimn=PRIMN_ANY;
     
     assert(!ha->any || ha->tltot==0);
     assert(!va->any || va->tltot==0);
@@ -531,6 +544,7 @@ static void split_do_resize_rootward(WSplit *node, RootwardAmount *ha,
             og.y=pg.y+pg.h-og.h;
         else
             ng.y=pg.y+pg.h-ng.h;
+        vprimn=(thisnode==PRIMN_TL ? PRIMN_BR : PRIMN_TL);
     }else{
         og.w=other->geom.w-amount;
         ng.w=pg.w-og.w;
@@ -538,10 +552,11 @@ static void split_do_resize_rootward(WSplit *node, RootwardAmount *ha,
             og.x=pg.x+pg.w-og.w;
         else
             ng.x=pg.x+pg.w-ng.w;
+        hprimn=(thisnode==PRIMN_TL ? PRIMN_BR : PRIMN_TL);
     }
     
     if(!tryonly){
-        split_do_resize(other, &og, PRIMN_ANY, PRIMN_ANY, FALSE);
+        split_do_resize(other, &og, hprimn, vprimn, FALSE);
         p->geom=pg;
     }
     
@@ -700,6 +715,8 @@ WSplit *create_split(const WRectangle *geom, int dir, WSplit *tl, WSplit *br)
         split->u.s.unused.l=0;
         split->u.s.unused.b=0;
         split->u.s.unused.r=0;
+        split->u.s.unused.tot_v=0;
+        split->u.s.unused.tot_h=0;
     }
     
     return split;
