@@ -268,7 +268,7 @@ WRegion *ionws_do_managed_remove(WIonWS *ws, WRegion *reg, bool reclaim_space)
     region_remove_bindmap_owned(reg, mod_ionws_ionws_bindmap, (WRegion*)ws);
 
     if(ws->split_tree!=NULL)
-        other=split_tree_remove(&(ws->split_tree), node, !reclaim_space);
+        other=split_tree_remove(&(ws->split_tree), node, reclaim_space);
 
     /* Other is guaranteed to be SPLIT_REGNODE if not NULL */
     return (other!=NULL ? other->u.reg : NULL);
