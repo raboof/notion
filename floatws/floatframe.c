@@ -18,6 +18,7 @@
 #include <ioncore/drawp.h>
 #include <ioncore/regbind.h>
 #include <ioncore/defer.h>
+#include <ioncore/resize.h>
 #include "floatframe.h"
 #include "funtabs.h"
 
@@ -36,6 +37,10 @@ static void floatframe_border_inner_geom(const WFloatFrame *frame,
 										 WRectangle *geom);
 static void floatframe_size_changed(WFloatFrame *frame, bool wchg, bool hchg);
 static void floatframe_set_shape(WFloatFrame *frame);
+static void floatframe_request_managed_geom(WFloatFrame *frame, WRegion *sub,
+											WRectangle geom,
+											WRectangle *geomret,
+											bool tryonly);
 
 static DynFunTab floatframe_dynfuntab[]={
 	{draw_window, floatframe_draw},
@@ -45,8 +50,9 @@ static DynFunTab floatframe_dynfuntab[]={
 	{genframe_managed_geom, floatframe_managed_geom},
 	{genframe_bar_geom, floatframe_bar_geom},
 	{genframe_border_inner_geom, floatframe_border_inner_geom},
-	
 	{region_remove_managed, floatframe_remove_managed},
+	
+	{region_request_managed_geom, floatframe_request_managed_geom},
 	
 	/*{(DynFun*)region_save_to_file, (DynFun*)floatframe_save_to_file},*/
 	
@@ -98,6 +104,32 @@ static void deinit_floatframe(WFloatFrame *frame)
 /*{{{ Geometry */
 
 
+static WRectangle floatframe_to_managed_geom(WGRData *grdata, WRectangle geom)
+{
+	geom.x=BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad;
+	geom.w-=2*(BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad);
+	geom.y=BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad
+		+grdata->bar_h;
+	geom.h-=2*(BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad)
+		+grdata->bar_h;
+	
+	return geom;
+}
+
+
+WRectangle managed_to_floatframe_geom(WGRData *grdata, WRectangle geom)
+{
+	geom.x-=BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad;
+	geom.w+=2*(BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad);
+	geom.y-=BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad
+		+grdata->bar_h;
+	geom.h+=2*(BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad)
+		+grdata->bar_h;
+	
+	return geom;
+}
+
+
 static void floatframe_border_geom(const WFloatFrame *frame, WRectangle *geom)
 {
 	WGRData *grdata=GRDATA_OF(frame);
@@ -122,32 +154,26 @@ static void floatframe_bar_geom(const WFloatFrame *frame, WRectangle *geom)
 
 static void floatframe_managed_geom(const WFloatFrame *frame, WRectangle *geom)
 {
-	floatframe_border_inner_geom(frame, geom);
+	*geom=floatframe_to_managed_geom(GRDATA_OF(frame), REGION_GEOM(frame));
 }
 
 
 static void floatframe_border_inner_geom(const WFloatFrame *frame,
 										 WRectangle *geom)
 {
-	WGRData *grdata=GRDATA_OF(frame);
-	
-	floatframe_border_geom(frame, geom);
-
-	geom->x+=BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad;
-	geom->y+=BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad;
-	geom->w-=2*(BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad);
-	geom->h-=2*(BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad);
+	*geom=floatframe_to_managed_geom(GRDATA_OF(frame), REGION_GEOM(frame));
 }
 
 
-WRectangle sub_to_floatframe_geom(WGRData *grdata, WRectangle geom)
+WRectangle initial_to_floatframe_geom(WGRData *grdata, WRectangle geom,
+									  int gravity)
 {
 	/* TODO: gravity */
 	
-	geom.x-=BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad;
+	/*geom.x-=BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad;*/
 	geom.w+=2*(BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad);
-	geom.y-=BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad
-		+grdata->bar_h;
+	/*geom.y-=BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad
+		+grdata->bar_h;*/
 	geom.h+=2*(BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad)
 		+grdata->bar_h;
 	
@@ -155,6 +181,23 @@ WRectangle sub_to_floatframe_geom(WGRData *grdata, WRectangle geom)
 }
 
 
+static void floatframe_request_managed_geom(WFloatFrame *frame, WRegion *sub,
+											WRectangle geom,
+											WRectangle *geomret,
+											bool tryonly)
+{
+	WRectangle fgeom;
+	fgeom=managed_to_floatframe_geom(GRDATA_OF(frame), geom);
+	fgeom.x+=REGION_GEOM(frame).x;
+	fgeom.y+=REGION_GEOM(frame).y;
+	
+	region_request_geom((WRegion*)frame, fgeom, &fgeom, tryonly);
+	
+	if(geomret!=NULL)
+		*geomret=floatframe_to_managed_geom(GRDATA_OF(frame), fgeom);
+}
+
+	
 /*}}}*/
 
 

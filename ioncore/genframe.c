@@ -23,7 +23,7 @@
 #include "genframep.h"
 #include "genframe-pointer.h"
 #include "funtabs.h"
-
+#include "sizehint.h"
 
 /*{{{ Static function definitions, dynfuntab and class info */
 
@@ -324,19 +324,20 @@ void genframe_resize_hints(WGenFrame *genframe, XSizeHints *hints_ret,
 {
 	WRectangle subgeom;
 	uint wdummy, hdummy;
-	WScreen *scr=SCREEN_OF(genframe);
-
+	
 	genframe_managed_geom(genframe, &subgeom);
-
+	
 	*relw_ret=subgeom.w;
 	*relh_ret=subgeom.h;
-
+	
 	if(genframe->current_sub!=NULL){
 		region_resize_hints(genframe->current_sub, hints_ret,
 							&wdummy, &hdummy);
 	}else{
 		hints_ret->flags=0;
 	}
+	
+	adjust_size_hints_for_managed(hints_ret, genframe->managed_list);
 }
 
 
@@ -350,7 +351,7 @@ bool genframe_display_managed(WGenFrame *genframe, WRegion *sub)
 {
 	if(sub==genframe->current_sub || sub==genframe->current_input)
 		return FALSE;
-
+	
 	if(genframe->current_sub!=NULL)
 		unmap_region(genframe->current_sub);
 	
@@ -371,7 +372,7 @@ bool genframe_display_managed(WGenFrame *genframe, WRegion *sub)
 		}
 #endif
 	}
-
+	
 	/* Many programs will get upset if the visible, although only such,
 	 * client window is not the lowest window in the genframe. xprop/xwininfo
 	 * will return the information for the lowest window. 'netscape -remote'
@@ -392,7 +393,7 @@ WRegion *genframe_nth_managed(WGenFrame *genframe, uint n)
 	
 	while(n-->0 && reg!=NULL)
 		reg=NEXT_MANAGED(genframe->managed_list, reg);
-
+	
 	return reg;
 }
 
@@ -404,7 +405,7 @@ void genframe_switch_nth(WGenFrame *genframe, uint n)
 		display_region_sp(sub);
 }
 
-	   
+
 void genframe_switch_next(WGenFrame *genframe)
 {
 	WRegion *sub=NEXT_MANAGED_WRAP(genframe->managed_list, genframe->current_sub);
@@ -452,7 +453,7 @@ static void genframe_add_managed_doit(WGenFrame *genframe, WRegion *sub,
 	
 	if(genframe->managed_count==1)
 		flags|=REGION_ATTACH_SWITCHTO;
-
+	
 	if(flags&REGION_ATTACH_SWITCHTO){
 		genframe_recalc_bar(genframe, FALSE);
 		genframe_display_managed(genframe, sub);
@@ -460,14 +461,14 @@ static void genframe_add_managed_doit(WGenFrame *genframe, WRegion *sub,
 		unmap_region(sub);
 		genframe_recalc_bar(genframe, TRUE);
 	}
-
+	
 }
 
 
 static void genframe_do_remove(WGenFrame *genframe, WRegion *sub)
 {
 	WRegion *next=NULL;
-
+	
 	if(genframe->tab_pressed_sub==sub)
 		genframe->tab_pressed_sub=NULL;
 	
@@ -488,7 +489,7 @@ static void genframe_do_remove(WGenFrame *genframe, WRegion *sub)
 		else
 			set_genframe_background(genframe, FALSE);
 	}
-
+	
 	if(REGION_LABEL(sub)!=NULL){
 		free(REGION_LABEL(sub));
 		REGION_LABEL(sub)=NULL;
@@ -578,13 +579,13 @@ WRegion *genframe_attach_input_new(WGenFrame *genframe, WRegionCreateFn *fn,
 	
 	genframe_managed_geom(genframe, &geom);
 	sub=fn((WWindow*)genframe, geom, fnp);
-
+	
 	if(sub==NULL)
 		return NULL;
 	
 	genframe->current_input=sub;
 	region_set_manager(sub, (WRegion*)genframe, NULL);
-
+	
 	return sub;
 }
 
@@ -627,7 +628,7 @@ static bool set_genframe_background(WGenFrame *genframe, bool set_always)
 		genframe_draw(genframe, TRUE);
 		return TRUE;
 	}
-
+	
 	return FALSE;
 }
 
@@ -647,7 +648,7 @@ void genframe_draw_config_updated(WGenFrame *genframe)
 		if(REGION_MANAGER(sub)==(WRegion*)genframe)
 			fit_region(sub, geom);
 	}
-
+	
 	genframe_recalc_bar(genframe, FALSE);
 	
 	set_genframe_background(genframe, TRUE);
@@ -684,7 +685,7 @@ void genframe_toggle_sub_tag(WGenFrame *genframe)
 void genframe_recalc_bar(WGenFrame *genframe, bool draw)
 {
 	CALL_DYN(genframe_recalc_bar, genframe, (genframe, draw));
-
+	
 }
 
 
@@ -737,7 +738,7 @@ void genframe_draw_bar_default(const WGenFrame *genframe, bool complete)
 	
 	dinfo->win=WGENFRAME_WIN(genframe);
 	dinfo->draw=WGENFRAME_DRAW(genframe);
-
+	
 	dinfo->grdata=grdata;
 	dinfo->gc=grdata->tab_gc;
 	dinfo->geom=bg;

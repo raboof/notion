@@ -9,6 +9,9 @@
 
 #include "common.h"
 #include "global.h"
+#include "region.h"
+#include "resize.h"
+#include "sizehint.h"
 
 
 /*{{{ correct_size */
@@ -152,6 +155,49 @@ void get_sizehints(WScreen *scr, Window win, XSizeHints *hints)
 	
 	if(!(hints->flags&PWinGravity))
 		hints->win_gravity=ForgetGravity;
+}
+
+
+/*}}}*/
+
+
+/*{{{ adjust_size_hints_for_managed */
+
+
+#define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
+
+
+void adjust_size_hints_for_managed(XSizeHints *hints, WRegion *list)
+{
+	WRegion *reg;
+	uint wdummy, hdummy;
+	XSizeHints tmp_hints;
+	
+	FOR_ALL_MANAGED_ON_LIST(list, reg){
+		region_resize_hints(reg, &tmp_hints, &wdummy, &hdummy);
+		
+		if(tmp_hints.flags&PMinSize){
+			if(!(hints->flags&PMinSize)){
+				hints->flags|=PMinSize;
+				hints->min_width=tmp_hints.min_width;
+				hints->min_height=tmp_hints.min_height;
+			}else{
+				hints->min_width=MAX(hints->min_width,
+										 tmp_hints.min_width);
+				hints->min_height=MAX(hints->min_height,
+										  tmp_hints.min_height);
+			}
+		}
+		
+		if(tmp_hints.flags&PMaxSize && hints->flags&PMaxSize){
+			hints->max_width=MAX(hints->max_width,
+									 tmp_hints.max_width);
+			hints->max_height=MAX(hints->max_height,
+									  tmp_hints.max_height);
+		}else{
+			hints->flags&=~PMaxSize;
+		}
+	}
 }
 
 

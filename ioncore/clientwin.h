@@ -36,7 +36,7 @@ DECLOBJ(WClientWin){
 	int state;
 	int event_mask;
 	Window win;
-	WRectangle win_geom;
+	WRectangle max_geom;
 	
 	int orig_bw;
 

@@ -320,10 +320,9 @@ static bool floatws_add_clientwin(WFloatWS *ws, WClientWin *cwin,
 #endif
 		
 	if(target==NULL){
-		WRectangle fgeom=sub_to_floatframe_geom(GRDATA_OF(ws),
-												REGION_GEOM(cwin));
-		fgeom.x+=REGION_GEOM(ws).x+200;
-		fgeom.y+=REGION_GEOM(ws).y+200;
+		WRectangle fgeom=initial_to_floatframe_geom(GRDATA_OF(ws),
+													REGION_GEOM(cwin),
+													attr->win_gravity);
 		
 		target=(WRegion*)create_floatframe(par, fgeom, 0);
 	

@@ -23,9 +23,10 @@ extern WFloatFrame *create_floatframe(WWindow *parent, WRectangle geom, int id);
 
 extern void floatframe_remove_managed(WFloatFrame *frame, WRegion *reg);
 
-extern WRectangle sub_to_floatframe_geom(WGRData *grdata, WRectangle geom);
+extern WRectangle initial_to_floatframe_geom(WGRData *grdata, WRectangle geom,
+											 int gravity);
 
-/*extern WRegion *ionframe_load(WRegion *par, WRectangle geom, Tokenizer *tokz);*/
+/*extern WFloatFrame *floatframe_load(WRegion *par, WRectangle geom, Tokenizer *tokz);*/
 
 extern void floatframe_raise(WFloatFrame *frame);
 extern void floatframe_lower(WFloatFrame *frame);

@@ -196,14 +196,10 @@ static bool init_clientwin(WClientWin *cwin, WWindow *parent,
 	geom.h=attr->height;
 	geom.w=attr->width;
 	
-	cwin->win_geom.x=0;
-	cwin->win_geom.y=0;	
-	cwin->win_geom.h=attr->height;
-	cwin->win_geom.w=attr->width;
-	
 	init_region(&(cwin->region), &(parent->region), geom);
 	((WRegion*)cwin)->flags|=REGION_HANDLES_MANAGED_ENTER_FOCUS;
 	
+	cwin->max_geom=geom;
 	cwin->flags=0;
 	cwin->win=win;
 	cwin->orig_bw=attr->border_width;
@@ -378,7 +374,7 @@ static void clientwin_add_managed_params(const WClientWin *cwin, WRegion **par,
 	
 	*par=FIND_PARENT1(cwin, WRegion);
 	
-	*geom=REGION_GEOM(cwin);
+	*geom=cwin->max_geom;
 	
 	if(htmp<=0){
 		geom->h/=3;
@@ -551,7 +547,7 @@ static void hide_clientwin(WClientWin *cwin)
 {
 	if(cwin->flags&CWIN_PROP_ACROBATIC){
 		XMoveWindow(wglobal.dpy, cwin->win,
-					-2*cwin->win_geom.w, -2*cwin->win_geom.h);
+					-2*cwin->max_geom.w, -2*cwin->max_geom.h);
 		return;
 	}
 			
@@ -567,8 +563,7 @@ static void show_clientwin(WClientWin *cwin)
 {
 	if(cwin->flags&CWIN_PROP_ACROBATIC){
 		XMoveWindow(wglobal.dpy, cwin->win,
-					REGION_GEOM(cwin).x+cwin->win_geom.x,
-					REGION_GEOM(cwin).y+cwin->win_geom.y);
+					REGION_GEOM(cwin).x, REGION_GEOM(cwin).y);
 		if(cwin->state==NormalState)
 			return;
 	}
@@ -600,10 +595,10 @@ void clientwin_notify_rootpos(WClientWin *cwin, int rootx, int rooty)
 	ce.xconfigure.type=ConfigureNotify;
 	ce.xconfigure.event=win;
 	ce.xconfigure.window=win;
-	ce.xconfigure.x=rootx+cwin->win_geom.x;
-	ce.xconfigure.y=rooty+cwin->win_geom.y;
-	ce.xconfigure.width=cwin->win_geom.w;
-	ce.xconfigure.height=cwin->win_geom.h;
+	ce.xconfigure.x=rootx;
+	ce.xconfigure.y=rooty;
+	ce.xconfigure.width=REGION_GEOM(cwin).w;
+	ce.xconfigure.height=REGION_GEOM(cwin).h;
 	ce.xconfigure.border_width=cwin->orig_bw;
 	ce.xconfigure.above=None;
 	ce.xconfigure.override_redirect=False;
@@ -632,84 +627,31 @@ static void do_reparent_clientwin(WClientWin *cwin, Window win, int x, int y)
 }
 
 
-static WRectangle cwin_geom(WClientWin *cwin, WRectangle geom, bool rq)
+static void convert_geom(WClientWin *cwin, WRectangle max_geom,
+						 WRectangle *geom, bool rq)
 {
 	WRectangle r;
-	bool bottom=(cwin->transient_for!=None);
-
-	geom.x=0;
-	geom.y=0;
+	bool bottom=FALSE;
 	
-	r.w=geom.w;
-	r.h=geom.h;
-	
-	correct_size(&(r.w), &(r.h), &(cwin->size_hints), FALSE);
-	
-	if(rq){
-		if(r.h>geom.h)
-			r.h=geom.h;
-	}else if(bottom && r.h>cwin->win_geom.h){
-		r.h=cwin->win_geom.h;
+	if(REGION_MANAGER(cwin)!=NULL &&
+	   WTHING_IS(REGION_MANAGER(cwin), WClientWin)){
+			bottom=TRUE;
 	}
+
+	geom->w=max_geom.w;
+	geom->h=max_geom.h;
 	
-	r.x=geom.x+geom.w/2-r.w/2;
+	correct_size(&(geom->w), &(geom->h), &(cwin->size_hints), FALSE);
+	
+	if(!rq && bottom && geom->h>REGION_GEOM(cwin).h)
+	   geom->h=REGION_GEOM(cwin).h;
+	
+	geom->x=max_geom.x+max_geom.w/2-geom->w/2;
 	
 	if(bottom)
-		r.y=geom.y+geom.h-r.h;
+		geom->y=max_geom.y+max_geom.h-geom->h;
 	else
-		r.y=geom.y+geom.h/2-r.h/2;
-
-	return r;
-}
-
-
-static void convert_geom(WClientWin *cwin, WRectangle geom,
-						 WRectangle *wingeom, bool rq)
-{
-#if 0
-	/* TODO -- Ion doesn't need this stuff at the moment, but PWM will
-	 * so that the frames will shrink appropriately.
-	 */
-	WRegion *sub;
-	XSizeHints hints;
-	uint dummy_w, dummy_h;
-	int maxw, maxh, w, h;
-	bool subs;
-	
-	w=geom->w; h=geom->h;
-	correct_size(&w, &h, &(cwin->size_hints), FALSE);
-	maxw=w; maxh=h;
-	
-	FOR_ALL_TYPED(cwin, sub, WRegion){
-		region_resize_hints(sub, &hints, &dummy_w, &dummy_h);
-		w=geom->w; h=geom->h;
-		correct_size(&w, &h, &hints, FALSE);
-		if(w>maxw)
-			maxw=w;
-		if(h>maxh)
-			maxh=h;
-		subs=TRUE;
-	}
-	
-	geom->x+=geom->w/2-maxw/2;
-	geom->w=maxw;
-	
-	/*TODO: vertical shrink */
-#endif
-	
-	*wingeom=cwin_geom(cwin, geom, rq);
-}
-
-
-static int min(int a, int b)
-{
-	return (a<b ? a : b);
-}
-
-
-static int max(int a, int b)
-{
-	return (a>b ? a : b);
+		geom->y=max_geom.y+max_geom.h/2-geom->h/2;
 }
 
 
@@ -719,56 +661,52 @@ static int max(int a, int b)
 /*{{{ Region dynfuns */
 
 
-static void do_fit_clientwin(WClientWin *cwin, WRectangle geom,
+static void do_fit_clientwin(WClientWin *cwin, WRectangle max_geom,
 							 bool rq, WWindow *np)
 {
 	WRegion *transient, *next;
-	WRectangle wingeom, geom2;
+	WRectangle geom, geom2;
 	int diff;
+	bool changes;
 	
-	convert_geom(cwin, geom, &wingeom, rq);
+	convert_geom(cwin, max_geom, &geom, rq);
 	
-	/* XMoveResizeWindow won't send a ConfigureNotify event if the
-	 * geometry has not changed and some programs expect that.
-	 */
-	cwin->win_geom=wingeom;
+	changes=(REGION_GEOM(cwin).x!=geom.x ||
+			 REGION_GEOM(cwin).y!=geom.y ||
+			 REGION_GEOM(cwin).w!=geom.w ||
+			 REGION_GEOM(cwin).h!=geom.h);
+	
+	cwin->max_geom=max_geom;
 	REGION_GEOM(cwin)=geom;
 
 	if(np==NULL){
-		bool changes=(REGION_GEOM(cwin).x!=wingeom.x ||
-					  REGION_GEOM(cwin).y!=wingeom.y ||
-					  REGION_GEOM(cwin).w!=wingeom.w ||
-					  REGION_GEOM(cwin).h!=wingeom.h);
 		if(!changes){
+			/* XMoveResizeWindow won't send a ConfigureNotify event if the
+			 * geometry has not changed and some programs expect that.
+			 */
 			if(rq)
 				sendconfig_clientwin(cwin);
 			return;
 		}
 	}
 
-	if(np!=NULL){
-		do_reparent_clientwin(cwin, np->win,
-							  geom.x+wingeom.x, geom.y+wingeom.y);
-
-	}
+	if(np!=NULL)
+		do_reparent_clientwin(cwin, np->win, geom.x, geom.y);
 	
 	if(cwin->flags&CWIN_PROP_ACROBATIC && !REGION_IS_MAPPED(cwin)){
 		XMoveResizeWindow(wglobal.dpy, cwin->win,
-						  -2*wingeom.w, -2*wingeom.h,
-						  wingeom.w, wingeom.h);
+						  -2*max_geom.w, -2*max_geom.h, geom.w, geom.h);
 	}else{
 		XMoveResizeWindow(wglobal.dpy, cwin->win,
-						  geom.x+wingeom.x, geom.y+wingeom.y,
-						  wingeom.w, wingeom.h);
+						  geom.x, geom.y, geom.w, geom.h);
 	}
 	
-	
-	geom2.x=geom.x;
-	geom2.w=geom.w;
+	geom2.x=max_geom.x;
+	geom2.w=max_geom.w;
 	
 	FOR_ALL_MANAGED_ON_LIST_W_NEXT(cwin->transient_list, transient, next){
-		geom2.y=geom.y;
-		geom2.h=geom.h;
+		geom2.y=max_geom.y;
+		geom2.h=max_geom.h;
 		diff=geom.h-REGION_GEOM(transient).h;
 		if(diff>0){
 			geom2.y+=diff;
@@ -918,11 +856,12 @@ static void clientwin_resize_hints(WClientWin *cwin, XSizeHints *hints_ret,
 	*relw_ret=REGION_GEOM(cwin).w;
 	*relh_ret=REGION_GEOM(cwin).h;
 	*hints_ret=cwin->size_hints;
+	
+	adjust_size_hints_for_managed(hints_ret, cwin->transient_list);
 }
 
 
 /*}}}*/
-
 
 
 /*{{{ Names */
@@ -986,8 +925,10 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 	int dx=0, dy=0;
 	int rx, ry;
 	bool sz=FALSE, pos=FALSE;
-
+	WWindow *par;
+	
 	/* check full screen request */
+	/* TODO: viewport check */
 	if((ev->value_mask&(CWX|CWY))==(CWX|CWY) &&
 	   REGION_GEOM(SCREEN_OF(cwin)).w==ev->width &&
 	   REGION_GEOM(SCREEN_OF(cwin)).h==ev->height){
@@ -1000,19 +941,29 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 		}
 	}
 	
-	geom=cwin->win_geom;
-	region_rootpos(&(cwin->region), &rx, &ry);
-	rx+=geom.x;
-	ry+=geom.y;
+	geom=REGION_GEOM(cwin);
+	
+	/* ConfigureRequest coordinates are coordinates of the window manager
+	 * frame if such exists.
+	 */
+	par=FIND_PARENT1(cwin, WWindow);
+	if(par==NULL || WTHING_IS(par, WScreen))
+		region_rootpos((WRegion*)cwin, &rx, &ry);
+	else
+		region_rootpos((WRegion*)par, &rx, &ry);
 	
 	if(ev->value_mask&CWX){
 		dx=ev->x-rx;
+		if(dx!=0)
+			fprintf(stderr, "dx=%d\n",dx);
 		geom.x+=dx;
 		pos=TRUE;
 	}
 	
 	if(ev->value_mask&CWY){
 		dy=ev->y-ry;
+		if(dy!=0)
+			fprintf(stderr, "dy=%d\n",dy);
 		geom.y+=dy;
 		pos=TRUE;
 	}
@@ -1039,12 +990,7 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 		return;
 	}
 	
-	/* TODO */
-#if 0
-	region_request_geom(&(cwin->region), geom, NULL, FALSE);
-#else
-	do_fit_clientwin(cwin, REGION_GEOM(cwin), TRUE, NULL);
-#endif
+	region_request_geom((WRegion*)cwin, geom, NULL, FALSE);
 }
 
 
@@ -1110,9 +1056,11 @@ bool clientwin_toggle_fullscreen(WClientWin *cwin)
 
 void clientwin_broken_app_resize_kludge(WClientWin *cwin)
 {
-	XResizeWindow(wglobal.dpy, cwin->win, 2*cwin->win_geom.w, 2*cwin->win_geom.h);
+	XResizeWindow(wglobal.dpy, cwin->win, 2*cwin->max_geom.w,
+				  2*cwin->max_geom.h);
 	XFlush(wglobal.dpy);
-	XResizeWindow(wglobal.dpy, cwin->win, cwin->win_geom.w, cwin->win_geom.h);
+	XResizeWindow(wglobal.dpy, cwin->win, REGION_GEOM(cwin).w,
+				  REGION_GEOM(cwin).h);
 }
 
 
