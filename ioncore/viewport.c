@@ -235,7 +235,7 @@ static bool viewport_switch_subregion(WViewport *vp, WRegion *sub)
 	}
 	
 	if(REGION_IS_ACTIVE(vp))
-		do_set_focus(sub, TRUE);
+		do_set_focus(sub, wglobal.warp_enabled);
 		
 	return TRUE;
 }
