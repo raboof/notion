@@ -63,6 +63,8 @@ DECLSTRUCT(DEStyle){
 	
 	WRootWin *rootwin;
 	
+    DEStyle *based_on;
+    
 	GC normal_gc;	
 	
 	DEBorder border;
@@ -91,6 +93,7 @@ DECLSTRUCT(DEStyle){
 	int sub_ind_w;
 	
 	DEStyle *next, *prev;
+    
 };
 
 
@@ -116,6 +119,7 @@ DECLOBJ(DEMEntBrush){
 /*{{{ Initilisation/deinitialisation */
 
 extern DEStyle *de_create_style(WRootWin *rootwin, const char *name);
+extern DEStyle *de_get_style(WRootWin *rootwin, const char *name);
 extern DEBrush *create_debrush(DEStyle *style);
 extern DETabBrush *create_detabbrush(DEStyle *style);
 extern DEMEntBrush *create_dementbrush(DEStyle *style);

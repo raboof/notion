@@ -123,7 +123,7 @@ static void init_sub_ind_w(DEStyle *style)
 static DEStyle *styles=NULL;
 
 
-static DEStyle *de_get_style(WRootWin *rootwin, const char *stylename)
+DEStyle *de_get_style(WRootWin *rootwin, const char *stylename)
 {
 	DEStyle *style, *maxstyle=NULL;
 	int score, maxscore=0;
@@ -146,6 +146,16 @@ static DEStyle *de_get_style(WRootWin *rootwin, const char *stylename)
 
 
 /*{{{ Style initialisation and deinitialisation */
+
+
+static void unref_style(DEStyle *style)
+{
+	style->usecount--;
+	if(style->usecount==0){
+		destyle_deinit(style);
+		free(style);
+	}
+}
 
 
 void destyle_deinit(DEStyle *style)
@@ -182,18 +192,14 @@ void destyle_deinit(DEStyle *style)
 	}
     
     XSync(wglobal.dpy, False);
+    
+    if(style->based_on!=NULL){
+        unref_style(style->based_on);
+        style->based_on=NULL;
+    }
 }
 
 
-static void unref_style(DEStyle *style)
-{
-	style->usecount--;
-	if(style->usecount==0){
-		destyle_deinit(style);
-		free(style);
-	}
-}
-	
 static void dump_style(DEStyle *style)
 {
 	/* Allow the style still be used but get if off the list. */
@@ -210,6 +216,8 @@ static bool destyle_init(DEStyle *style, WRootWin *rootwin, const char *name)
 		return FALSE;
 	}
 	
+    style->based_on=NULL;
+    
 	style->usecount=1;
 	/* Fallback brushes are not released on de_reset() */
 	style->is_fallback=FALSE;

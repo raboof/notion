@@ -24,33 +24,40 @@
 /*{{{ Colour group lookup */
 
 
+static DEColourGroup *destyle_get_colour_group2(DEStyle *style,
+                                                const char *attr_p1,
+                                                const char *attr_p2)
+{
+	int i, score, maxscore=0;
+    DEColourGroup *maxg=&(style->cgrp);
+    
+    while(style!=NULL){
+        for(i=0; i<style->n_extra_cgrps; i++){
+            score=gr_stylespec_score2(style->extra_cgrps[i].spec,
+                                      attr_p1, attr_p2);
+            if(score>maxscore){
+                maxg=&(style->extra_cgrps[i]);
+                maxscore=score;
+            }
+        }
+        style=style->based_on;
+    }
+	
+    return maxg;
+}
+
+
 DEColourGroup *debrush_get_colour_group2(DEBrush *brush, 
 										 const char *attr_p1,
 										 const char *attr_p2)
 {
-	int i, maxi=-1;
-	int score, maxscore=0;
-	
-	for(i=0; i<brush->d->n_extra_cgrps; i++){
-		score=gr_stylespec_score2(brush->d->extra_cgrps[i].spec,
-								  attr_p1, attr_p2);
-		if(score>maxscore){
-			maxi=i;
-			maxscore=score;
-		}
-	}
-	
-	if(maxi==-1)
-		return &(brush->d->cgrp);
-	else
-		return &(brush->d->extra_cgrps[maxi]);
+	return destyle_get_colour_group2(brush->d, attr_p1, attr_p2);
 }
-
 
 
 DEColourGroup *debrush_get_colour_group(DEBrush *brush, const char *attr)
 {
-	return debrush_get_colour_group2(brush, attr, NULL);
+	return destyle_get_colour_group2(brush->d, attr, NULL);
 }
 
 

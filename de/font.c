@@ -99,8 +99,28 @@ DEFont *de_load_font(const char *fontname)
 }
 
 
+bool de_set_font_for_style(DEStyle *style, DEFont *font)
+{
+    if(style->font!=NULL)
+        de_free_font(style->font);
+    
+    style->font=font;
+    font->refcount++;
+    
+	if(style->font->fontstruct!=NULL){
+		XSetFont(wglobal.dpy, style->normal_gc, 
+				 style->font->fontstruct->fid);
+	}
+
+    return TRUE;
+}
+
+
 bool de_load_font_for_style(DEStyle *style, const char *fontname)
 {
+    if(style->font!=NULL)
+        de_free_font(style->font);
+    
 	style->font=de_load_font(fontname);
 
 	if(style->font==NULL)

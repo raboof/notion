@@ -81,7 +81,8 @@ static void get_border(DEBorder *border, ExtlTab tab)
 
 
 static bool get_colour(WRootWin *rootwin, DEColour *ret, 
-					   ExtlTab tab, const char *what, DEColour substitute)
+					   ExtlTab tab, DEStyle *based_on,
+                       const char *what, DEColour substitute)
 {
 	char *name=NULL;
 	bool ok=FALSE;
@@ -95,25 +96,29 @@ static bool get_colour(WRootWin *rootwin, DEColour *ret,
 		free(name);
 	}
 	
-	if(!ok)
+	if(!ok && based_on!=NULL){
+        return get_colour(rootwin, ret, based_on->data_table,
+                          based_on->based_on, what, substitute);
+    }else if(!ok){
 		return de_duplicate_colour(rootwin, substitute, ret);
+    }
 	
 	return ok;
 }
 
 
 static void get_colour_group(WRootWin *rootwin, DEColourGroup *cg, 
-							 ExtlTab tab)
+							 ExtlTab tab, DEStyle *based_on)
 {
-	get_colour(rootwin, &(cg->hl), tab, "highlight_colour",
+	get_colour(rootwin, &(cg->hl), tab, based_on, "highlight_colour",
 			   DE_WHITE(rootwin));
-	get_colour(rootwin, &(cg->sh), tab, "shadow_colour",
+	get_colour(rootwin, &(cg->sh), tab, based_on, "shadow_colour",
 			   DE_WHITE(rootwin));
-	get_colour(rootwin, &(cg->bg), tab, "background_colour",
+	get_colour(rootwin, &(cg->bg), tab, based_on, "background_colour",
 			   DE_BLACK(rootwin));
-	get_colour(rootwin, &(cg->fg), tab, "foreground_colour",
+	get_colour(rootwin, &(cg->fg), tab, based_on, "foreground_colour",
 			   DE_WHITE(rootwin));
-	get_colour(rootwin, &(cg->pad), tab, "padding_colour", cg->bg);
+	get_colour(rootwin, &(cg->pad), tab, based_on, "padding_colour", cg->bg);
 }
 
 
@@ -144,7 +149,7 @@ static void get_extra_cgrps(WRootWin *rootwin, DEStyle *style, ExtlTab tab)
 		
 		/*de_init_colour_group(rootwin, style->extra_cgrps+i-nfailed);*/
 		style->extra_cgrps[i-nfailed].spec=name;
-		get_colour_group(rootwin, style->extra_cgrps+i-nfailed, sub);
+		get_colour_group(rootwin, style->extra_cgrps+i-nfailed, sub, style);
 		
 		extl_unref_table(sub);
 		continue;
@@ -205,15 +210,16 @@ static void get_transparent_background(uint *mode, ExtlTab tab)
 
 
 /*EXTL_DOC
- * Define a style for the root window \var{rootwin}. Use
- * \fnref{de_define_style} instead to define for all root windows.
+ * Define a style for the root window \var{rootwin}. 
  */
 EXTL_EXPORT
-bool de_do_define_style(WRootWin *rootwin, const char *name, ExtlTab tab)
+bool de_define_style_rootwin(WRootWin *rootwin, const char *name, ExtlTab tab)
 {
 	DEStyle *style;
 	char *fnt;
 	uint n;
+    DEStyle *based_on=NULL;
+    char *based_on_name=NULL;
 
 	if(name==NULL)
 		return FALSE;
@@ -223,6 +229,24 @@ bool de_do_define_style(WRootWin *rootwin, const char *name, ExtlTab tab)
 	if(style==NULL)
 		return FALSE;
 
+    if(extl_table_gets_s(tab, "based_on", &based_on_name)){
+        based_on=de_get_style(rootwin, based_on_name);
+        if(based_on==style){
+            warn("'based_on' for %s points back to the style itself.", name);
+        }else if(based_on==NULL){
+            warn("Unknown base style \"%s\".", based_on);
+        }else{
+            style->based_on=based_on;
+            based_on->usecount++;
+            /* Copy simple parameters */
+            style->border=based_on->border;
+            style->transparency_mode=based_on->transparency_mode;
+            style->textalign=based_on->textalign;
+            style->spacing=based_on->spacing;
+        }
+        free(based_on_name);
+    }
+    
 	get_border(&(style->border), tab);
 	get_border_val(&(style->spacing), tab, "spacing");
 
@@ -234,11 +258,14 @@ bool de_do_define_style(WRootWin *rootwin, const char *name, ExtlTab tab)
 		de_load_font_for_style(style, fnt);
 		free(fnt);
 	}else{
-		de_load_font_for_style(style, CF_FALLBACK_FONT_NAME);
-	}
+        de_set_font_for_style(style, based_on->font);
+    }
+    
+    if(style->font==NULL)
+        de_load_font_for_style(style, CF_FALLBACK_FONT_NAME);
 	
 	style->cgrp_alloced=TRUE;
-	get_colour_group(rootwin, &(style->cgrp), tab);
+	get_colour_group(rootwin, &(style->cgrp), tab, based_on);
 	get_extra_cgrps(rootwin, style, tab);
 	
 	style->data_table=extl_ref_table(tab);
@@ -246,7 +273,36 @@ bool de_do_define_style(WRootWin *rootwin, const char *name, ExtlTab tab)
 	return TRUE;
 }
 
-	
+
+/*EXTL_DOC
+ * Define a style.
+ */
+EXTL_EXPORT
+bool de_define_style(const char *name, ExtlTab tab)
+{
+    bool ok=TRUE;
+    WRootWin *rw;
+    
+    FOR_ALL_ROOTWINS(rw){
+        if(!de_define_style_rootwin(rw, name, tab))
+            ok=FALSE;
+    }
+    
+    return ok;
+}
+
+
+/*EXTL_DOC
+ * Define a substyle.
+ */
+EXTL_EXPORT
+ExtlTab de_substyle(const char *pattern, ExtlTab tab)
+{
+    extl_table_sets_s(tab, "substyle_pattern", pattern);
+    return extl_ref_table(tab);
+}
+
+
 /*}}}*/
 
 
@@ -269,9 +325,6 @@ bool de_module_init()
 	
 	if(!de_module_register_exports())
 		return FALSE;
-	
-	if(!read_config("delib"))
-		goto fail;
 	
 	if(!gr_register_engine("de", (GrGetBrushFn*)&de_get_brush,
 						   (GrGetValuesFn*)&de_get_brush_values)){
