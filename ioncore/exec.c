@@ -271,6 +271,8 @@ void restart_other_wm(const char *cmd)
 {
 	ioncore_deinit();
 	if(cmd!=NULL){
+		if(wglobal.display!=NULL)
+			setup_environ(-1);
 		do_exec(cmd);
 	}
 	execvp(wglobal.argv[0], wglobal.argv);

@@ -526,6 +526,7 @@ void ioncore_deinit()
 	dpy=wglobal.dpy;
 	wglobal.dpy=NULL;
 	
+	XSync(dpy, True);
 	XCloseDisplay(dpy);
 	
 	extl_deinit();
