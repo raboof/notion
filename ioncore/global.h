@@ -72,7 +72,6 @@ DECLSTRUCT(WGlobal){
 	WRootWin *active_rootwin;
 	
 	int input_mode;
-	bool grab_released;
 	int opmode;
 	int previous_protect;
 	

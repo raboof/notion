@@ -156,7 +156,7 @@ void do_grab_kb_ptr(Window win, Window confine_to, int cursor, long eventmask)
 				  GrabModeAsync, CurrentTime);
 	XSync(wglobal.dpy, False);
 	XSelectInput(wglobal.dpy, win, ROOT_MASK);
-	wglobal.grab_released=FALSE;
+	/*wglobal.grab_released=FALSE;*/
 }
 
 
@@ -173,7 +173,7 @@ void ungrab_kb_ptr()
 	
 	wglobal.input_mode=INPUT_NORMAL;
 	wglobal.draw_dragwin=NULL;
-	wglobal.grab_released=TRUE;
+	/*wglobal.grab_released=TRUE;*/
 }
 
 

@@ -37,7 +37,7 @@ extern void get_event(XEvent *ev);
 extern void get_event_mask(XEvent *ev, long mask);
 extern void do_grab_kb_ptr(Window win, Window confine_to, int cursor,
 						   long eventmask);
-extern void grab_kb_ptr(WRegion *reg);
+/*extern void grab_kb_ptr(WRegion *reg);*/
 extern void ungrab_kb_ptr();
 extern void update_timestamp(XEvent *ev);
 extern Time get_timestamp();

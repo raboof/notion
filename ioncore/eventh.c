@@ -181,9 +181,9 @@ void mainloop()
 			do_set_focus(next, warp);
 		}/*else if(wglobal.grab_released && !wglobal.warp_enabled){
 			skip_focusenter();
-		}*/
-
+		}
 		wglobal.grab_released=FALSE;
+		  */
 	}
 }
 
@@ -578,10 +578,10 @@ static void pointer_handler(XEvent *ev)
 		CASE_EVENT(ButtonRelease)
 			if(handle_button_release(&ev->xbutton)){
 				/*ungrab_kb_ptr();*/
-				wglobal.grab_released=FALSE;
 				/* Don't ignore following UngrabNotify EnterWindow events in
 				 * case of pointer action originated grabs.
 				 */
+				/*wglobal.grab_released=FALSE;*/
 				mouse_grab_held=FALSE;
 			}
 			break;
