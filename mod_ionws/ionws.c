@@ -141,7 +141,7 @@ void ionws_managed_add_default(WIonWS *ws, WRegion *reg)
 
 void ionws_managed_add(WIonWS *ws, WRegion *reg)
 {
-    CALL_DYN(ws, ionws_managed_add, (ws, reg));
+    CALL_DYN(ionws_managed_add, ws, (ws, reg));
 }
 
 
