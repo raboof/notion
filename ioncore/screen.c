@@ -312,12 +312,12 @@ static char *screen_managed_activity(WScreen *scr)
     WRegion *reg;
     
     FOR_ALL_REGIONS_ON_LLIST(reg, scr->mplex.l1_list, tmp){
-        if(region_activity(reg) && !REGION_IS_MAPPED(reg))
+        if(region_is_activity_r(reg) && !REGION_IS_MAPPED(reg))
             notstr=addnot(notstr, reg);
     }
 
     FOR_ALL_REGIONS_ON_LLIST(reg, scr->mplex.l2_list, tmp){
-        if(region_activity(reg) && !REGION_IS_MAPPED(reg))
+        if(region_is_activity_r(reg) && !REGION_IS_MAPPED(reg))
             notstr=addnot(notstr, reg);
     }
     

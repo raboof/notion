@@ -493,7 +493,7 @@ void region_detach_manager(WRegion *reg)
         }
     }
 
-    region_clear_activity(reg, TRUE);
+    region_set_activity(reg, SETPARAM_UNSET);
 
     region_managed_remove(mgr, reg);
 

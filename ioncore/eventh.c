@@ -217,9 +217,9 @@ void ioncore_handle_property(const XPropertyEvent *ev)
         if(hints!=NULL){
             if(hints->flags&XUrgencyHint){
                 if(!region_skip_focus((WRegion*)cwin))
-                   region_notify_activity((WRegion*)cwin);
+                    region_set_activity((WRegion*)cwin, SETPARAM_SET);
             }else{
-                region_clear_activity((WRegion*)cwin, TRUE);
+                region_set_activity((WRegion*)cwin, SETPARAM_UNSET);
             }
         }
         XFree(hints);

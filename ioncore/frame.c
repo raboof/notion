@@ -236,7 +236,7 @@ static void update_attr(WFrame *frame, int i, WRegion *reg)
         flags|=0x02;
     if(i==frame->tab_dragged_idx)
         flags|=0x04;
-    if(reg!=NULL && region_activity(reg))
+    if(reg!=NULL && region_is_activity_r(reg))
         flags|=0x08;
     
     frame->titles[i].attr=attrs[flags];

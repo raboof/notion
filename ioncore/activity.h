@@ -12,10 +12,11 @@
 #ifndef ION_IONCORE_ACTIVITY_H
 #define ION_IONCORE_ACTIVITY_H
 
+#include <libtu/setparam.h>
 #include "region.h"
 
-extern void region_notify_activity(WRegion *reg);
-extern void region_clear_activity(WRegion *reg, bool force);
-extern bool region_activity(WRegion *reg);
+extern bool region_set_activity(WRegion *reg, int sp);
+extern bool region_is_activity(WRegion* re);
+extern bool region_is_activity_r(WRegion *reg);
 
 #endif /* ION_IONCORE_ACTIVITY_H */
