@@ -89,6 +89,7 @@ void mgmtmode_finish(WMgmtMode *mode)
 }
     
 
+EXTL_EXPORT
 IMPLCLASS(WMgmtMode, Obj, mgmtmode_deinit, NULL);
 
 

@@ -216,6 +216,7 @@ static DynFunTab wmsg_dynfuntab[]={
 };
 
 
+EXTL_EXPORT
 IMPLCLASS(WMessage, WInput, wmsg_deinit, wmsg_dynfuntab);
 
     

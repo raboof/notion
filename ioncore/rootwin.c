@@ -565,6 +565,7 @@ static DynFunTab rootwin_dynfuntab[]={
 };
 
 
+EXTL_EXPORT
 IMPLCLASS(WRootWin, WWindow, rootwin_deinit, rootwin_dynfuntab);
 
     

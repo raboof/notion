@@ -138,6 +138,7 @@ static DynFunTab genws_dynfuntab[]={
 };
 
 
+EXTL_EXPORT
 IMPLCLASS(WGenWS, WRegion, genws_deinit, genws_dynfuntab);
 
 

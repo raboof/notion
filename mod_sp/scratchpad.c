@@ -125,6 +125,7 @@ static DynFunTab scratchpad_dynfuntab[]={
 };
                                        
 
+EXTL_EXPORT
 IMPLCLASS(WScratchpad, WFrame, scratchpad_deinit, scratchpad_dynfuntab);
 
     

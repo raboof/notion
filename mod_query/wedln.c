@@ -701,6 +701,7 @@ static DynFunTab wedln_dynfuntab[]={
 };
 
 
+EXTL_EXPORT
 IMPLCLASS(WEdln, WInput, wedln_deinit, wedln_dynfuntab);
 
     

@@ -296,6 +296,7 @@ static DynFunTab statusbar_dynfuntab[]={
 };
 
 
+EXTL_EXPORT
 IMPLCLASS(WStatusBar, WWindow, statusbar_deinit, statusbar_dynfuntab);
 
     

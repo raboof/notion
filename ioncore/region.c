@@ -791,6 +791,7 @@ static DynFunTab region_dynfuntab[]={
 };
 
 
+EXTL_EXPORT
 IMPLCLASS(WRegion, Obj, region_deinit, region_dynfuntab);
 
     

@@ -593,6 +593,7 @@ static DynFunTab screen_dynfuntab[]={
 };
 
 
+EXTL_EXPORT
 IMPLCLASS(WScreen, WMPlex, screen_deinit, screen_dynfuntab);
 
 

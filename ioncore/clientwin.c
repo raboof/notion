@@ -1690,6 +1690,7 @@ static DynFunTab clientwin_dynfuntab[]={
 };
 
 
+EXTL_EXPORT
 IMPLCLASS(WClientWin, WRegion, clientwin_deinit, clientwin_dynfuntab);
 
 

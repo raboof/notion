@@ -603,7 +603,10 @@ static DynFunTab splitpane_dynfuntab[]={
 };
 
 
+EXTL_EXPORT
 IMPLCLASS(WSplitUnused, WSplitRegion, splitunused_deinit, splitunused_dynfuntab);
+
+EXTL_EXPORT
 IMPLCLASS(WSplitPane, WSplitInner, splitpane_deinit, splitpane_dynfuntab);
 
 

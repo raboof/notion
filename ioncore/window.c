@@ -238,6 +238,7 @@ static DynFunTab window_dynfuntab[]={
 };
 
 
+EXTL_EXPORT
 IMPLCLASS(WWindow, WRegion, window_deinit, window_dynfuntab);
 
     

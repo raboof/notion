@@ -1363,6 +1363,7 @@ static DynFunTab floatws_dynfuntab[]={
 };
 
 
+EXTL_EXPORT
 IMPLCLASS(WFloatWS, WGenWS, floatws_deinit, floatws_dynfuntab);
 
 

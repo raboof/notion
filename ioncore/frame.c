@@ -691,6 +691,7 @@ static DynFunTab frame_dynfuntab[]={
 };
                                        
 
+EXTL_EXPORT
 IMPLCLASS(WFrame, WMPlex, frame_deinit, frame_dynfuntab);
 
 

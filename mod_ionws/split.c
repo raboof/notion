@@ -1847,10 +1847,19 @@ static DynFunTab splitst_dynfuntab[]={
 };
 
 
+EXTL_EXPORT
 IMPLCLASS(WSplit, Obj, split_deinit, split_dynfuntab);
+
+EXTL_EXPORT
 IMPLCLASS(WSplitInner, WSplit, splitinner_deinit, splitinner_dynfuntab);
+
+EXTL_EXPORT
 IMPLCLASS(WSplitSplit, WSplitInner, splitsplit_deinit, splitsplit_dynfuntab);
+
+EXTL_EXPORT
 IMPLCLASS(WSplitRegion, WSplit, splitregion_deinit, splitregion_dynfuntab);
+
+EXTL_EXPORT
 IMPLCLASS(WSplitST, WSplitRegion, splitst_deinit, splitst_dynfuntab);
 
 

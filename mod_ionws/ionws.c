@@ -1434,6 +1434,7 @@ static DynFunTab ionws_dynfuntab[]={
 };
 
 
+EXTL_EXPORT
 IMPLCLASS(WIonWS, WGenWS, ionws_deinit, ionws_dynfuntab);
 
     

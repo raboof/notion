@@ -449,6 +449,7 @@ static DynFunTab panews_dynfuntab[]={
 };
 
 
+EXTL_EXPORT
 IMPLCLASS(WPaneWS, WIonWS, panews_deinit, panews_dynfuntab);
 
     

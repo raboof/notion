@@ -1003,6 +1003,7 @@ static DynFunTab splitfloat_dynfuntab[]={
 };
 
 
+EXTL_EXPORT
 IMPLCLASS(WSplitFloat, WSplitSplit, splitfloat_deinit, splitfloat_dynfuntab);
 
 

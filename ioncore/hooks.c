@@ -16,6 +16,7 @@
 #include "hooks.h"
 
 
+EXTL_EXPORT
 IMPLCLASS(WHook, Obj, hook_deinit, NULL);
 
 static Rb_node named_hooks=NULL;

@@ -248,6 +248,7 @@ WTimer *create_timer_extl_owned()
 }
 
 
+EXTL_EXPORT
 IMPLCLASS(WTimer, Obj, timer_deinit, NULL);
 
 

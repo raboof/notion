@@ -1335,6 +1335,7 @@ static DynFunTab menu_dynfuntab[]={
 };
 
 
+EXTL_EXPORT
 IMPLCLASS(WMenu, WWindow, menu_deinit, menu_dynfuntab);
 
     

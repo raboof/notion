@@ -504,6 +504,7 @@ static DynFunTab floatframe_dynfuntab[]={
 };
 
 
+EXTL_EXPORT
 IMPLCLASS(WFloatFrame, WFrame, NULL, floatframe_dynfuntab);
 
         

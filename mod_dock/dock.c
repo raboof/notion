@@ -1615,6 +1615,8 @@ static DynFunTab dock_dynfuntab[]={
     END_DYNFUNTAB
 };
 
+
+EXTL_EXPORT
 IMPLCLASS(WDock, WWindow, dock_deinit, dock_dynfuntab);
 
 

@@ -256,6 +256,7 @@ static DynFunTab infowin_dynfuntab[]={
 };
 
 
+EXTL_EXPORT
 IMPLCLASS(WInfoWin, WWindow, infowin_deinit, infowin_dynfuntab);
 
     

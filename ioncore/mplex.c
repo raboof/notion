@@ -1695,6 +1695,7 @@ static DynFunTab mplex_dynfuntab[]={
 };
 
 
+EXTL_EXPORT
 IMPLCLASS(WMPlex, WWindow, mplex_deinit, mplex_dynfuntab);
 
 

@@ -192,6 +192,7 @@ static void moveres_draw_rubberband(WMoveresMode *mode)
 WMoveresMode *tmpmode=NULL;
 
 
+EXTL_EXPORT
 IMPLCLASS(WMoveresMode, Obj, NULL, NULL);
 
 
