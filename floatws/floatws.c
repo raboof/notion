@@ -369,7 +369,6 @@ static bool floatws_add_clientwin(WFloatWS *ws,
 			return FALSE;
 		}
 
-		floatws_add_managed(ws, target);
 		newreg=TRUE;
 	}
 
@@ -380,14 +379,11 @@ static bool floatws_add_clientwin(WFloatWS *ws,
 			destroy_obj((WObj*)target);
 		return FALSE;
 	}
+
+	floatws_add_managed(ws, target);
 	
-	/*if(clientwin_get_switchto(cwin)){
-	if(params->flags&REGION_ATTACH_SWITCHTO){
-		if(region_may_control_focus((WRegion*)ws)){
-			region_display_sp((WRegion*)cwin);
-			set_focus((WRegion*)cwin);
-		}
-	}*/
+	if(newreg && params->flags&REGION_ATTACH_SWITCHTO)
+		region_goto((WRegion*)cwin);
 	
 	return TRUE;
 }
