@@ -48,6 +48,9 @@ static void do_grab_ungrab_bindings(const WRegion *reg, const WBindmap *bindmap,
 	WBinding *binding=bindmap->bindings;
 	int i;
 	
+	if(!(reg->flags&REGION_BINDINGS_ARE_GRABBED))
+		return;
+	
 	for(i=0; i<bindmap->nbindings; i++, binding++)
 		do_grab_ungrab_binding(reg, binding, bindmap, grab);
 }
@@ -68,7 +71,7 @@ static void ungrab_freed_bindings(const WRegion *reg, const WBindmap *bindmap)
 void rbind_binding_added(const WRegBindingInfo *rbind, const WBinding *binding,
 						 const WBindmap *bindmap)
 {
-	if(rbind->reg->flags&REGION_BINDINGS_ARE_GRABBED && binding->area==0)
+	if(binding->area==0)
 		do_grab_ungrab_binding(rbind->reg, binding, rbind->bindmap, TRUE);
 }
 
@@ -123,8 +126,7 @@ bool region_add_bindmap_owned(WRegion *reg, WBindmap *bindmap, WRegion *owner)
 	rbind->reg=reg;
 	LINK_ITEM(bindmap->rbind_list, rbind, bm_next, bm_prev);
 
-	if(reg->flags&REGION_BINDINGS_ARE_GRABBED)
-		grab_ungrabbed_bindings(reg, bindmap);
+	grab_ungrabbed_bindings(reg, bindmap);
 	
 	/* Link to reg's rbind list*/ {
 		WRegBindingInfo *b=reg->bindings;
@@ -152,8 +154,7 @@ static void remove_rbind(WRegion *reg, WRegBindingInfo *rbind)
 		reg->bindings=b;
 	}
 
-	if(reg->flags&REGION_BINDINGS_ARE_GRABBED)
-		ungrab_freed_bindings(reg, rbind->bindmap);
+	ungrab_freed_bindings(reg, rbind->bindmap);
 
 	free(rbind);
 }
