@@ -269,7 +269,6 @@ static bool clientwin_init(WClientWin *cwin, WWindow *par, Window win,
                            XWindowAttributes *attr)
 {
     WRectangle geom;
-    char *name;
 
     cwin->flags=0;
     cwin->win=win;

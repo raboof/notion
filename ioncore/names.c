@@ -73,6 +73,62 @@ static int parseinst(const char *name, const char **startinst)
 }
 
 
+static bool separated(const char *n1, const char *n2, int *i1ret)
+{
+    const char *n1e, *n2e;
+    int i1, i2;
+
+    i1=maxof(0, parseinst(n1, &n1e));
+    i2=maxof(0, parseinst(n2, &n2e));
+
+    *i1ret=i1;
+    
+    /* Instance if n2 is is greater enough */
+    if(i2>i1+1)
+        return TRUE;
+    
+    /* Different name */
+    if((n1e-n1)!=(n2e-n2))
+        return TRUE;
+    
+    return (memcmp(n1, n2, n1e-n1)!=0);
+}
+
+
+#define COMPARE_FN ((Rb_compfn*)compare_names)
+
+static int compare_names(const char *n1, const char *n2)
+{
+    const char *n1e, *n2e;
+    int l1, l2, i1, i2;
+    int mc;
+    
+    i1=maxof(0, parseinst(n1, &n1e));
+    i2=maxof(0, parseinst(n2, &n2e));
+
+    l1=n1e-n1;
+    l2=n2e-n2;
+    
+    mc=strncmp(n1, n2, minof(l1, l2));
+    
+    if(mc!=0)
+        return mc;
+    
+    if(l1!=l2)
+        return (l1<l2 ? -1 : 1);
+
+    /* Same name, different instance */
+    
+    if(i1!=i2)
+        return (i1<i2 ? -1 : 1);
+    
+    /* Same name and instance */
+    
+    return 0;
+}
+
+
+
 void region_do_unuse_name(WRegion *reg, bool insert_unnamed)
 {
     WNamespace *ns=reg->ni.namespaceinfo;
@@ -85,15 +141,17 @@ void region_do_unuse_name(WRegion *reg, bool insert_unnamed)
     if(reg->ni.name==NULL)
         node=rb_find_pkey_n(ns->rb_unnamed, reg, &found);
     else
-        node=rb_find_key_n(ns->rb, reg->ni.name, &found);
+        node=rb_find_gkey_n(ns->rb, reg->ni.name, COMPARE_FN, &found);
+
+    if(found){
+        assert((rb_val(node)==(void*)reg));
+        rb_delete_node(node);
+    }
 
     if(reg->ni.name!=NULL){
         free(reg->ni.name);
         reg->ni.name=NULL;
     }
-    
-    if(found)
-        rb_delete_node(node);
     
     if(insert_unnamed){
         if(rb_insertp(ns->rb_unnamed, reg, reg))
@@ -126,28 +184,6 @@ static char *make_full_name(const char *name, int inst,
 }
 
 
-static bool separated(const char *n1, const char *n2, int *i1ret)
-{
-    const char *n1e, *n2e;
-    int i1, i2;
-
-    i1=maxof(0, parseinst(n1, &n1e));
-    i2=maxof(0, parseinst(n2, &n2e));
-
-    *i1ret=i1;
-    
-    /* Instance if n2 is is greater enough */
-    if(i2>i1+1)
-        return TRUE;
-    
-    /* Different name */
-    if((n1e-n1)!=(n2e-n2))
-        return TRUE;
-    
-    return (memcmp(n1, n2, n1e-n1)!=0);
-}
-
-
 static bool do_use_name(WRegion *reg, WNamespace *ns, const char *name,
                         int instrq, bool failchange)
 {
@@ -160,7 +196,7 @@ static bool do_use_name(WRegion *reg, WNamespace *ns, const char *name,
     
     parsed_inst=parseinst(name, &dummy);
     
-    if(ns->rb==NULL)
+    if(!ns->initialised)
         return FALSE;
 
     /* If there's something that looks like an instance at the end of
@@ -171,34 +207,38 @@ static bool do_use_name(WRegion *reg, WNamespace *ns, const char *name,
     
     if(instrq>=0){
         fullname=make_full_name(name, instrq, parsed_inst>=0);
-        node=rb_find_key_n(ns->rb, fullname, &found);
-        if(found){
-            free(fullname);
-            fullname=NULL;
-            if(rb_val(node)==(void*)reg){
-                /* The region already has the requested name */
-                return TRUE;
+        if(fullname!=NULL){
+            node=rb_find_gkey_n(ns->rb, fullname, COMPARE_FN, &found);
+            if(found){
+                free(fullname);
+                fullname=NULL;
+                if(rb_val(node)==(void*)reg){
+                    /* The region already has the requested name */
+                    return TRUE;
+                }
+                if(failchange)
+                    return FALSE;
             }
-            if(failchange)
-                return FALSE;
+        }else if(failchange){
+            return FALSE;
         }
     }
     
     if(fullname==NULL){
         found=0;
         inst=0;
-        node=rb_find_key_n(ns->rb, name, &found);
+        node=rb_find_gkey_n(ns->rb, name, COMPARE_FN, &found);
         
         if(found){
-            Rb_node next=node->c.list.flink;
-            
             while(1){
+                Rb_node next=rb_next(node);
+
                 if(rb_val(node)==(void*)reg){
                     /* The region already has a name of requested form */
                     return TRUE;
                 }
                 
-                if(next==NULL ||
+                if(next==rb_nil(ns->rb) ||
                    separated((const char*)node->k.key, 
                              (const char*)next->k.key, &inst)){
                     /* 'inst' should be next free instance after increment
@@ -212,7 +252,6 @@ static bool do_use_name(WRegion *reg, WNamespace *ns, const char *name,
                  */
                 inst++;
                 node=next;
-                next=node->c.list.flink;
             }
         }
         
@@ -221,9 +260,10 @@ static bool do_use_name(WRegion *reg, WNamespace *ns, const char *name,
         if(fullname==NULL)
             return FALSE;
     }
-    
-    if(!rb_insert(ns->rb, fullname, reg))
+
+    if(!rb_insertg(ns->rb, fullname, reg, COMPARE_FN))
         return FALSE;
+    
     /* Unuse old name or remove from unnamed tree now that we have 
      * managed to allocate new one
      */
@@ -332,13 +372,15 @@ static bool do_set_name(bool (*fn)(WRegion *reg, WNamespace *ns, const char *p),
 
 bool region_init_name(WRegion *reg)
 {
+    if(OBJ_IS(reg, WClientWin)){
+        if(!initialise_ns(&ioncore_clientwin_ns))
+            return FALSE;
+        reg->ni.namespaceinfo=&ioncore_clientwin_ns;
+        return (rb_insertp(ioncore_clientwin_ns.rb_unnamed, reg, reg)!=NULL);
+    }
+
     if(!initialise_ns(&ioncore_internal_ns))
         return FALSE;
-    
-    if(OBJ_IS(reg, WClientWin)){
-        region_do_unuse_name(reg, TRUE);
-        return TRUE;
-    }
     
     return use_name_anyinst(reg, &ioncore_internal_ns, OBJ_TYPESTR(reg));
 }
@@ -391,7 +433,7 @@ static WRegion *do_lookup_region(WNamespace *ns, const char *cname,
     if(cname==NULL || !ns->initialised)
         return NULL;
     
-    node=rb_find_key_n(ns->rb, cname, &found);
+    node=rb_find_gkey_n(ns->rb, cname, COMPARE_FN, &found);
     
     if(!found)
         return NULL;
