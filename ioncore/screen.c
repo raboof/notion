@@ -26,6 +26,7 @@
 #include "event.h"
 #include "bindmaps.h"
 #include "regbind.h"
+#include "genframe-pointer.h"
 
 
 #define SCR_MLIST(SCR) ((SCR)->mplex.managed_list)
@@ -194,6 +195,12 @@ void screen_managed_geom(WScreen *scr, WRectangle *geom)
 	geom->y=scr->managed_off.y;
 	geom->w=REGION_GEOM(scr).w+scr->managed_off.w;
 	geom->h=REGION_GEOM(scr).h+scr->managed_off.h;
+}
+
+
+static bool screen_handle_drop(WScreen *screen, int x, int y, WRegion *dropped)
+{
+	return FALSE;
 }
 
 
@@ -519,6 +526,9 @@ static DynFunTab screen_dynfuntab[]={
 
 	{(DynFun*)region_save_to_file,
 	 (DynFun*)screen_save_to_file},
+
+	{(DynFun*)region_handle_drop, 
+	 (DynFun*)screen_handle_drop},
 	
 	END_DYNFUNTAB
 };

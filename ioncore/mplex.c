@@ -583,10 +583,10 @@ static bool mplex_handle_drop(WMPlex *mplex, int x, int y,
 }
 
 
-static bool mplex_manage_clientwin(WMPlex *mplex, WRegion *dropped,
+static bool mplex_manage_clientwin(WMPlex *mplex, WRegion *reg,
 								   const WManageParams *param)
 {
-	return mplex_attach_simple(mplex, dropped, param->switchto);
+	return mplex_attach_simple(mplex, reg, param->switchto);
 }
 
 
