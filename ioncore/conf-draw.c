@@ -14,7 +14,14 @@
 #include "draw.h"
 
 
+/* This all tmp_screen stuff is supposed to go away eventually. */
+
 static WScreen *tmp_screen;
+
+#define DO_CHK_SCR(RET) \
+	if(tmp_screen==NULL){warn("Screen not set.\n"); return RET;}
+#define CHK_SCR_V DO_CHK_SCR( )
+#define CHK_SCR DO_CHK_SCR(FALSE)
 
 
 /*{{{ Font */
@@ -24,6 +31,7 @@ EXTL_EXPORT
 bool set_font(const char *fname)
 {
 	WFontPtr fnt;
+	CHK_SCR;
 	
 	fnt=load_font(wglobal.dpy, fname);
 	
@@ -41,6 +49,7 @@ EXTL_EXPORT
 bool set_tab_font(const char *fname)
 {
 	WFontPtr fnt;
+	CHK_SCR;
 	
 	fnt=load_font(wglobal.dpy, fname);
 	if(fnt!=NULL){
@@ -58,6 +67,7 @@ bool set_term_font(const char *fname)
 {
 
 	WFontPtr term_font;
+	CHK_SCR;
 	
 	term_font=load_font(wglobal.dpy, fname);
 	
@@ -94,18 +104,21 @@ static bool do_border(WBorder *bd, int tl, int br, int ipad)
 EXTL_EXPORT
 bool set_frame_border(int tl, int br, int ipad)
 {
+	CHK_SCR;
 	return do_border(&(tmp_screen->grdata.frame_border), tl, br, ipad);
 }
 
 EXTL_EXPORT
 bool set_tab_border(int tl, int br, int ipad)
 {
+	CHK_SCR;
 	return do_border(&(tmp_screen->grdata.tab_border), tl, br, ipad);
 }
 
 EXTL_EXPORT
 bool set_input_border(int tl, int br, int ipad)
 {
+	CHK_SCR;
 	return do_border(&(tmp_screen->grdata.input_border), tl, br, ipad);
 }
 
@@ -141,6 +154,7 @@ EXTL_EXPORT
 bool set_frame_colors(const char *hl, const char *sh, const char *bg,
 					  const char *fg)
 {
+	CHK_SCR;
 	return do_colorgroup(tmp_screen, &(tmp_screen->grdata.frame_colors),
 						 hl, sh, bg, fg);
 }
@@ -150,6 +164,7 @@ EXTL_EXPORT
 bool set_tab_colors(const char *hl, const char *sh, const char *bg,
 					const char *fg)
 {
+	CHK_SCR;
 	return do_colorgroup(tmp_screen, &(tmp_screen->grdata.tab_colors),
 						 hl, sh, bg, fg);
 }
@@ -159,6 +174,7 @@ EXTL_EXPORT
 bool set_tab_sel_colors(const char *hl, const char *sh, const char *bg,
 						const char *fg)
 {
+	CHK_SCR;
 	return do_colorgroup(tmp_screen, &(tmp_screen->grdata.tab_sel_colors),
 						 hl, sh, bg, fg);
 }
@@ -168,6 +184,7 @@ EXTL_EXPORT
 bool set_act_frame_colors(const char *hl, const char *sh, const char *bg,
 						  const char *fg)
 {
+	CHK_SCR;
 	return do_colorgroup(tmp_screen, &(tmp_screen->grdata.act_frame_colors),
 						 hl, sh, bg, fg);
 }
@@ -177,6 +194,7 @@ EXTL_EXPORT
 bool set_act_tab_colors(const char *hl, const char *sh, const char *bg,
 						const char *fg)
 {
+	CHK_SCR;
 	return do_colorgroup(tmp_screen, &(tmp_screen->grdata.act_tab_colors),
 						 hl, sh, bg, fg);
 }
@@ -186,6 +204,7 @@ EXTL_EXPORT
 bool set_act_tab_sel_colors(const char *hl, const char *sh, const char *bg,
 							const char *fg)
 {
+	CHK_SCR;
 	return do_colorgroup(tmp_screen, &(tmp_screen->grdata.act_tab_sel_colors),
 						 hl, sh, bg, fg);
 }
@@ -195,6 +214,7 @@ EXTL_EXPORT
 bool set_input_colors(const char *hl, const char *sh, const char *bg,
 					  const char *fg)
 {
+	CHK_SCR;
 	return do_colorgroup(tmp_screen, &(tmp_screen->grdata.input_colors),
 						 hl, sh, bg, fg);
 }
@@ -203,6 +223,7 @@ bool set_input_colors(const char *hl, const char *sh, const char *bg,
 EXTL_EXPORT
 bool set_background_color(const char *bg)
 {
+	CHK_SCR;
 	if(!alloc_color(tmp_screen, bg, &(tmp_screen->grdata.frame_bgcolor))){
 		warn("Unable to allocate one or more colors");
 		return FALSE;
@@ -215,6 +236,7 @@ bool set_background_color(const char *bg)
 EXTL_EXPORT
 bool set_selection_colors(const char *bg, const char *fg)
 {
+	CHK_SCR;
 	if(!alloc_color(tmp_screen, bg, &(tmp_screen->grdata.selection_bgcolor)) ||
 	   !alloc_color(tmp_screen, fg, &(tmp_screen->grdata.selection_fgcolor))){
 		warn("Unable to allocate one or more colors");
@@ -234,6 +256,7 @@ bool set_selection_colors(const char *bg, const char *fg)
 EXTL_EXPORT
 bool set_ion_spacing(int spacing)
 {
+	CHK_SCR;
 	if(spacing<0){
 		warn("Invalid value");
 		return FALSE;
@@ -248,6 +271,7 @@ bool set_ion_spacing(int spacing)
 EXTL_EXPORT
 void enable_ion_bar_inside_frame(bool enable)
 {
+	CHK_SCR_V;
 	tmp_screen->grdata.bar_inside_frame=enable;
 }
 
@@ -263,6 +287,7 @@ void enable_ion_bar_inside_frame(bool enable)
 EXTL_EXPORT
 bool set_pwm_bar_widths(int i, double j)
 {
+	CHK_SCR;
 	if(i<0 || j<0.0){
 		warn("Erroneous values");
 		return FALSE;
@@ -282,13 +307,10 @@ bool set_pwm_bar_widths(int i, double j)
 
 
 EXTL_EXPORT
-bool enable_transparent_background(bool enable)
+void enable_transparent_background(bool enable)
 {
-	WScreen *scr;
-	
+	CHK_SCR_V;
 	tmp_screen->grdata.transparent_background=enable;
-	
-	return TRUE;
 }
 
 
