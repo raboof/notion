@@ -32,6 +32,7 @@
 #include "placement.h"
 #include "panews.h"
 #include "splitext.h"
+#include "unusedwin.h"
 
 
 WHook *panews_init_layout_alt=NULL;
@@ -147,7 +148,7 @@ static bool fallback_layout(WPaneWSPlacementParams *p)
 
     if(p->res_node!=NULL && OBJ_IS(p->res_node, WSplitUnused)){
         p->res_config=extl_create_table();
-        if(p->res_config==extl_table_none())
+        if(p->res_config==extl_table_none() || p->frame==NULL)
             return FALSE;
         extl_table_sets_o(p->res_config, "reg", (Obj*)(p->frame));
     }
@@ -204,70 +205,80 @@ static bool do_replace(WPaneWS *ws, WFrame *frame, WRegion *reg,
 /*{{{ The main dynfun */
 
 
+static bool current_unused(WPaneWS *ws)
+{
+    return OBJ_IS(ionws_current(&ws->ionws), WUnusedWin);
+}
+
+
 static WRegion *panews_get_target(WPaneWS *ws, WSplitUnused *specifier,
                                   WRegion *reg)
 {
     WRegion *target=NULL;
     WFrame *frame=create_frame_for(ws, reg);
+    WSplit **tree=&(ws->ionws.split_tree);
+    WPaneWSPlacementParams rs;
     
     assert(ws->ionws.split_tree!=NULL);
+
+    rs.ws=ws;
+    rs.frame=frame;
+    rs.reg=reg;
+    rs.specifier=specifier;
+    rs.res_node=NULL;
+    rs.res_config=extl_table_none();
+    rs.res_w=-1;
+    rs.res_h=-1;
     
     if(frame!=NULL){
-        WSplit **tree=&(ws->ionws.split_tree);
-        WPaneWSPlacementParams rs;
-        
-        rs.ws=ws;
-        rs.frame=frame;
-        rs.reg=reg;
-        rs.specifier=specifier;
-        rs.res_node=NULL;
-        rs.res_config=extl_table_none();
-        rs.res_w=-1;
-        rs.res_h=-1;
-
         split_update_bounds(*tree, TRUE);
         
         assert(panews_make_placement_alt!=NULL);
         
         hook_call_p(panews_make_placement_alt, &rs,
                     (WHookMarshallExtl*)mrsh_layout_extl);
+    }
         
-        if(rs.res_node==NULL && specifier==NULL)
-            fallback_layout(&rs);
+    if(rs.res_node==NULL && specifier==NULL)
+        fallback_layout(&rs);
         
-        if(rs.res_node!=NULL){
-            /* Resize */
-            if(rs.res_w>0 || rs.res_h>0){
-                WRectangle grq=rs.res_node->geom;
-                int gflags=REGION_RQGEOM_WEAK_ALL;
-                
-                if(rs.res_w>0){
-                    grq.w=rs.res_w;
-                    gflags&=~REGION_RQGEOM_WEAK_W;
-                }
-                
-                if(rs.res_h>0){
-                    grq.h=rs.res_h;
-                    gflags&=~REGION_RQGEOM_WEAK_H;
-                }
-                
-                splittree_rqgeom(rs.res_node, gflags, &grq, NULL);
+    if(rs.res_node!=NULL){
+        /* Resize */
+        if(rs.res_w>0 || rs.res_h>0){
+            WRectangle grq=rs.res_node->geom;
+            int gflags=REGION_RQGEOM_WEAK_ALL;
+            
+            if(rs.res_w>0){
+                grq.w=rs.res_w;
+                gflags&=~REGION_RQGEOM_WEAK_W;
             }
             
-            if(OBJ_IS(rs.res_node, WSplitUnused)){
-                if(do_replace(ws, frame, reg, &rs))
-                    target=(WRegion*)frame;
-            }else{
-                assert(OBJ_IS(rs.res_node, WSplitRegion));
-                target=((WSplitRegion*)rs.res_node)->reg;
+            if(rs.res_h>0){
+                grq.h=rs.res_h;
+                gflags&=~REGION_RQGEOM_WEAK_H;
             }
             
-            extl_unref_table(rs.res_config);
+            splittree_rqgeom(rs.res_node, gflags, &grq, NULL);
         }
         
-        if(target!=(WRegion*)frame)
-            destroy_obj((Obj*)frame);
+        if(OBJ_IS(rs.res_node, WSplitUnused)){
+            if(frame!=NULL){
+                if(do_replace(ws, frame, reg, &rs))
+                    target=(WRegion*)frame;
+            }
+        }else{
+            assert(OBJ_IS(rs.res_node, WSplitRegion));
+            target=((WSplitRegion*)rs.res_node)->reg;
+        }
+        
+        extl_unref_table(rs.res_config);
     }
+        
+    if(frame!=NULL && target!=(WRegion*)frame)
+        destroy_obj((Obj*)frame);
+    
+    if(target!=NULL && current_unused(ws))
+        region_goto(target);
     
     return target;
 }
