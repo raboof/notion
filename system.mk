@@ -46,8 +46,8 @@ LTDL_LIBS=-lltdl
 
 # If you, for example, have lua 4.0 in /usr/lib and 5.0 somewhere else,
 # the following settings might be what you need. 
-LUA_PATH=/usr/local/lib
-LUA_LIBS = -L$(LUA_PATH) -R$(LUA_PATH) -llua -llualib
+LUA_PATH=/usr/local
+LUA_LIBS = -L$(LUA_PATH)/lib -R$(LUA_PATH)/lib -llua -llualib
 LUA_INCLUDES = -I$(LUA_PATH)/include
 
 # The location of the Lua interpreter is needed for mkexports.lua
