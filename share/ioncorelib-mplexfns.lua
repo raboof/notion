@@ -23,7 +23,7 @@
 -- a \type{WClientWin}.
 function make_mplex_sub_or_self_fn(fn, noself, noinput, cwincheck)
     if not fn then
-        warn("nil parameter to make_mplex_sub_fn")
+        warn("nil parameter to make_mplex_sub_or_self_fn")
     end
     return function(mplex, current)
                if not noinput then
@@ -32,19 +32,15 @@ function make_mplex_sub_or_self_fn(fn, noself, noinput, cwincheck)
                        current=ci
                    end
                end
-               if not current then 
+               if not current or (current==mplex and noself) then
                    current=mplex:current()
-               end
-               if not current then
-                   if noself then
+                   if not current then
                        return 
                    end
-                   current=mplex
                end
-               if not cwincheck or obj_is(current, "WClientWin") then
+               if (not cwincheck) or obj_is(current, "WClientWin") then
                    fn(current)
                end
-               
            end
 end
 
