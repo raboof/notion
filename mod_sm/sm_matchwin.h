@@ -18,13 +18,13 @@ DECLSTRUCT(WWinMatch){
     WWinMatch *next, *prev;
 };
 
-extern WRegion *sm_match_cwin_to_saved(WClientWin *cwin);
-extern void sm_register_win_match(WWinMatch *match);
-extern char *sm_get_window_cmd(Window window);
-extern char *sm_get_client_id(Window window);
-extern char *sm_get_window_role(Window window);
-extern bool sm_have_match_list();
-extern void sm_start_purge_timer();
+extern WRegion *mod_sm_match_cwin_to_saved(WClientWin *cwin);
+extern void mod_sm_register_win_match(WWinMatch *match);
+extern char *mod_sm_get_window_cmd(Window window);
+extern char *mod_sm_get_client_id(Window window);
+extern char *mod_sm_get_window_role(Window window);
+extern bool mod_sm_have_match_list();
+extern void mod_sm_start_purge_timer();
 
 extern bool mod_sm_add_match(WWindow *par, ExtlTab tab);
 extern void mod_sm_get_configuration(WClientWin *cwin, ExtlTab tab);

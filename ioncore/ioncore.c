@@ -113,6 +113,7 @@ static void init_global()
     ioncore_g.dpy=NULL;
     ioncore_g.display=NULL;
 
+    ioncore_g.sm_client_id=NULL;
     ioncore_g.rootwins=NULL;
     ioncore_g.screens=NULL;
     ioncore_g.focus_next=NULL;
@@ -282,7 +283,7 @@ static void set_session(const char *display)
         /* Probably running under a session manager; use its
          * save file directory. (User should also load mod_sm.)
          */
-        libtu_asprintf(&tmp, "%s/ion3");
+        libtu_asprintf(&tmp, "%s/ion3", smdir); /* !!! pwm<=>ion */
         if(tmp==NULL){
             warn_err();
             return;

@@ -16,11 +16,11 @@
 
 static WWinMatch *match_list=NULL;
 
-static void sm_purge_matches(WTimer *timer);
-static WTimer purge_timer=TIMER_INIT(sm_purge_matches);
+static void mod_sm_purge_matches(WTimer *timer);
+static WTimer purge_timer=TIMER_INIT(mod_sm_purge_matches);
 
 
-char *sm_get_window_role(Window window)
+char *mod_sm_get_window_role(Window window)
 {
     Atom atom;
     XTextProperty tp;
@@ -36,7 +36,7 @@ char *sm_get_window_role(Window window)
     return NULL;
 }
 
-Window sm_get_client_leader(Window window)
+Window mod_sm_get_client_leader(Window window)
 {
     Window client_leader = 0;
     Atom atom;
@@ -61,14 +61,14 @@ Window sm_get_client_leader(Window window)
     return client_leader;
 }
 
-char *sm_get_client_id(Window window)
+char *mod_sm_get_client_id(Window window)
 {
     char *client_id = NULL;
     Window client_leader;
     XTextProperty tp;
     Atom atom;
     
-    if((client_leader=sm_get_client_leader(window))!=0){
+    if((client_leader=mod_sm_get_client_leader(window))!=0){
         atom=XInternAtom(ioncore_g.dpy, "SM_CLIENT_ID", False);  	
         if (XGetTextProperty (ioncore_g.dpy, client_leader, &tp, atom))
             if (tp.encoding == XA_STRING && tp.format == 8 && tp.nitems != 0)
@@ -78,14 +78,14 @@ char *sm_get_client_id(Window window)
     return client_id;
 }
 
-char *sm_get_window_cmd(Window window)
+char *mod_sm_get_window_cmd(Window window)
 {
     char **cmd_argv, *command=NULL;
     int id, i, len=0, cmd_argc=0;
     
     if(XGetCommand(ioncore_g.dpy, window, &cmd_argv, &cmd_argc) && (cmd_argc > 0))
         ;
-    else if((id=sm_get_client_leader(window)))
+    else if((id=mod_sm_get_client_leader(window)))
         XGetCommand(ioncore_g.dpy, id, &cmd_argv, &cmd_argc);
     
     if(cmd_argc > 0){
@@ -122,7 +122,7 @@ static void free_win_match(WWinMatch *match)
     free(match);
 }
 
-static void sm_purge_matches(WTimer *timer)
+static void mod_sm_purge_matches(WTimer *timer)
 {
 #ifdef DEBUG
     warn("purging remaining matches\n");
@@ -131,17 +131,17 @@ static void sm_purge_matches(WTimer *timer)
         free_win_match(match_list);
 }
 
-void sm_start_purge_timer()
+void mod_sm_start_purge_timer()
 {
     timer_set(&purge_timer, TIME_OUT);
 }
 
-void sm_register_win_match(WWinMatch *match)
+void mod_sm_register_win_match(WWinMatch *match)
 {
     LINK_ITEM(match_list, match, next, prev);
 }
 
-bool sm_have_match_list()
+bool mod_sm_have_match_list()
 {
     if(match_list!=NULL)
         return TRUE;
@@ -158,9 +158,9 @@ static WWinMatch *match_cwin(WClientWin *cwin)
     WWinMatch *match=match_list;
     int win_match;
     XClassHint clss;
-    char *client_id=sm_get_client_id(cwin->win);
-    char *window_role=sm_get_window_role(cwin->win);
-    char *wm_cmd=sm_get_window_cmd(cwin->win);
+    char *client_id=mod_sm_get_client_id(cwin->win);
+    char *window_role=mod_sm_get_window_role(cwin->win);
+    char *wm_cmd=mod_sm_get_window_cmd(cwin->win);
     char **wm_name=NULL;
     int n;
     
@@ -204,7 +204,7 @@ static WWinMatch *match_cwin(WClientWin *cwin)
 
 /* Returns frame_id of a match. Called from add_clientwin_alt in sm.c */
 
-WRegion *sm_match_cwin_to_saved(WClientWin *cwin)
+WRegion *mod_sm_match_cwin_to_saved(WClientWin *cwin)
 {
     WWinMatch *match=NULL;
     WRegion *reg=NULL;
@@ -241,7 +241,7 @@ bool mod_sm_add_match(WWindow *par, ExtlTab tab)
     
     watch_setup(&(m->target_watch), (Obj*)par, NULL);
     
-    sm_register_win_match(m);
+    mod_sm_register_win_match(m);
 
     return TRUE;
 }
@@ -253,13 +253,13 @@ void mod_sm_get_configuration(WClientWin *cwin, ExtlTab tab)
     char *client_id=NULL, *window_role=NULL, *wm_cmd=NULL, **wm_name;
     int n=0;
     
-    if((client_id=sm_get_client_id(cwin->win))){
+    if((client_id=mod_sm_get_client_id(cwin->win))){
         extl_table_sets_s(tab, "mod_sm_client_id", client_id);
         XFree(client_id);
     }
      
     
-    if((window_role=sm_get_window_role(cwin->win))){
+    if((window_role=mod_sm_get_window_role(cwin->win))){
         extl_table_sets_s(tab, "mod_sm_window_role", window_role);
         XFree(window_role);
     }
@@ -277,7 +277,7 @@ void mod_sm_get_configuration(WClientWin *cwin, ExtlTab tab)
         
     }
     
-    if((wm_cmd=sm_get_window_cmd(cwin->win))){
+    if((wm_cmd=mod_sm_get_window_cmd(cwin->win))){
         extl_table_sets_s(tab, "mod_sm_wm_cmd", wm_cmd);
         free(wm_cmd);
     }

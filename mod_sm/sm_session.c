@@ -34,7 +34,7 @@ static Bool sent_save_done=FALSE;
 static void (*save_complete_fn)();
 #endif
 
-void sm_set_ion_id(char *client_id)
+void mod_sm_set_ion_id(const char *client_id)
 {
     if(sm_client_id)
         free(sm_client_id);
@@ -45,7 +45,7 @@ void sm_set_ion_id(char *client_id)
         sm_client_id=scopy(client_id);
 }
 
-char *sm_get_ion_id()
+char *mod_sm_get_ion_id()
 {
     return sm_client_id;
 }
@@ -55,22 +55,22 @@ char *sm_get_ion_id()
  unpacks the message and sends it to the client via
  registered callbacks. */
 
-void sm_process_messages(int fd, void *data)
+static void sm_process_messages(int fd, void *data)
 {
     Bool ret;
     
     if(IceProcessMessages(ice_sm_conn, NULL, &ret)==IceProcessMessagesIOError){
-        sm_close();
+        mod_sm_close();
     }
 }
 
 /* Callback triggered when an Ice connection is
  opened or closed. */
 
-void sm_ice_watch_fd(IceConn conn,
-                     IcePointer client_data,
-                     Bool opening,
-                     IcePointer *watch_data)
+static void sm_ice_watch_fd(IceConn conn,
+                            IcePointer client_data,
+                            Bool opening,
+                            IcePointer *watch_data)
 {
     if(opening){
         if(sm_fd!=-1){ /* shouldn't happen */
@@ -129,10 +129,11 @@ static void sm_set_some_properties()
 static void sm_set_other_properties()
 {
     char *restore="-session";
+    char *clientid="-smclientid";
     char *rmprog="/bin/rm";
     char *rmarg="-rf";
     int nvals=0, i;
-    const char *sdir=NULL;
+    const char *sdir=NULL, *cid=NULL;
     
 #ifdef XSM   
     SmPropValue discard_val;
@@ -155,18 +156,20 @@ static void sm_set_other_properties()
     /*props[2]=&discard_prop;*/
     
     sdir=ioncore_sessiondir();
+    cid=mod_sm_get_ion_id();
     
-    if(sdir==NULL)
+    if(sdir==NULL || cid==NULL)
         return;
     
     restart_hint_val.value=&restart_hint;
     restart_hint_val.length=1;
     
-    restart_val=(SmPropValue *)malloc((ioncore_g.argc+2)*sizeof(SmPropValue));
+    restart_val=(SmPropValue *)malloc((ioncore_g.argc+4)*sizeof(SmPropValue));
     for(i=0; i<ioncore_g.argc; i++){
-        if(strcmp(ioncore_g.argv[i], restore)==0)
+        if(strcmp(ioncore_g.argv[i], restore)==0 ||
+           strcmp(ioncore_g.argv[i], clientid)==0){
             i++;
-        else{
+        }else{
             restart_val[nvals].value=ioncore_g.argv[i];
             restart_val[nvals++].length=strlen(ioncore_g.argv[i]);
         }
@@ -175,6 +178,10 @@ static void sm_set_other_properties()
     restart_val[nvals++].length=strlen(restore);
     restart_val[nvals].value=(char*)sdir;
     restart_val[nvals++].length=strlen(sdir);
+    restart_val[nvals].value=clientid;
+    restart_val[nvals++].length=strlen(clientid);
+    restart_val[nvals].value=(char*)cid;
+    restart_val[nvals++].length=strlen(cid);
     restart_prop.num_vals=nvals;
     restart_prop.vals=restart_val;
 #ifdef XSM
@@ -217,10 +224,10 @@ static void sm_set_properties()
  saving state. This is requested in the save yourself callback by clients
  like this one that manages other clients. */
 
-void sm_save_yourself_phase2(SmcConn conn, SmPointer client_data)
+static void sm_save_yourself_phase2(SmcConn conn, SmPointer client_data)
 {
     Bool success;
-    
+
     if(!(success=ioncore_save_session()))
         warn("Failed to save session state\n");
     else
@@ -233,12 +240,12 @@ void sm_save_yourself_phase2(SmcConn conn, SmPointer client_data)
 /* Callback. Called when the client recieves a save yourself
  message from the sm. */
 
-void sm_save_yourself(SmcConn conn,
-                      SmPointer client_data,
-                      int save_type,
-                      Bool shutdown,
-                      int interact_style,
-                      Bool fast)
+static void sm_save_yourself(SmcConn conn,
+                             SmPointer client_data,
+                             int save_type,
+                             Bool shutdown,
+                             int interact_style,
+                             Bool fast)
 {
     if(!SmcRequestSaveYourselfPhase2(sm_conn, sm_save_yourself_phase2, NULL)){
         SmcSaveYourselfDone(sm_conn, False);
@@ -250,7 +257,7 @@ void sm_save_yourself(SmcConn conn,
 
 /* Response to the shutdown cancelled message */
 
-void sm_shutdown_cancelled(SmcConn conn, SmPointer client_data)
+static void sm_shutdown_cancelled(SmcConn conn, SmPointer client_data)
 {
 #ifndef XSM
     save_complete_fn=NULL;
@@ -263,7 +270,7 @@ void sm_shutdown_cancelled(SmcConn conn, SmPointer client_data)
 
 /* Callback */
 
-void sm_save_complete(SmcConn conn, SmPointer client_data)
+static void sm_save_complete(SmcConn conn, SmPointer client_data)
 {
 #ifndef XSM
     if(save_complete_fn){
@@ -275,21 +282,19 @@ void sm_save_complete(SmcConn conn, SmPointer client_data)
 
 /* Callback */
 
-void sm_die(SmcConn conn, SmPointer client_data)
+static void sm_die(SmcConn conn, SmPointer client_data)
 {
-    if(conn==sm_conn)
-        sm_close();
-    else
-        SmcCloseConnection(conn, 0, NULL);
-    
+    assert(conn==sm_conn);
+    mod_sm_close();
     ioncore_g.save_enabled=FALSE;
     ioncore_exit();
 }
 
+
 /* Connects to the sm and registers
  callbacks for different messages */
 
-bool sm_init_session()
+bool mod_sm_init_session()
 {
     char error_str[256];
     char *new_client_id=NULL;
@@ -304,6 +309,8 @@ bool sm_init_session()
         warn("Session Manager: IceAddConnectionWatch failed.");
         return FALSE;
     }
+    
+    fprintf(stderr, "ionid: %s\n", sm_client_id);
     
     memset(&smcall, 0, sizeof(smcall));
     smcall.save_yourself.callback=&sm_save_yourself;
@@ -330,7 +337,7 @@ bool sm_init_session()
         return FALSE;
     }
     
-    sm_set_ion_id(new_client_id);
+    mod_sm_set_ion_id(new_client_id);
     free(new_client_id);
     
     ice_sm_conn=SmcGetIceConnection(sm_conn);
@@ -339,7 +346,7 @@ bool sm_init_session()
 }
 
 
-void sm_close()
+void mod_sm_close()
 {
     if(sm_conn!=NULL){
         SmcCloseConnection(sm_conn, 0, NULL);
@@ -370,7 +377,7 @@ static void sm_exit()
  a save yourself message from the sm.
  xsm does not support this. */
 
-void sm_resign(char hint)
+static void sm_resign(char hint)
 {
     restart_hint=hint;
     SmcRequestSaveYourself(sm_conn, SmSaveBoth, False,
@@ -388,7 +395,7 @@ void mod_sm_request_shutdown()
                            SmInteractStyleAny, False, True);
 }
 #else
-void sm_resign(char hint)
+static void sm_resign(char hint)
 {
     bool success;
     
@@ -401,4 +408,35 @@ void sm_resign(char hint)
     }
 }
 #endif
+
+
+/*EXTL_DOC
+ * Sets the restart hint property to restart immediately and exits.
+ */
+EXTL_EXPORT
+void mod_sm_restart()
+{
+    sm_resign(SmRestartImmediately);
+}
+
+
+/*EXTL_DOC
+ * Just exits.
+ */
+EXTL_EXPORT
+void mod_sm_resign()
+{
+    sm_resign(SmRestartIfRunning);
+}
+
+
+/*EXTL_DOC
+ * Restart hint to restart anyway and exit Ion will be restarted next
+ * session launch even if it wasn't running at shutdown.
+ */
+EXTL_EXPORT
+void mod_sm_resign_tmp()
+{
+    sm_resign(SmRestartAnyway);
+}
 

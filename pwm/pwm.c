@@ -37,19 +37,20 @@
  * Instead, I've reinvented the wheel in libtu :(.
  */
 static OptParserOpt pwm_opts[]={
-    {OPT_ID('d'),  "display",  OPT_ARG, "host:dpy.scr", "X display to use"},
-    {'c',          "conffile", OPT_ARG, "config_file", "Configuration file"},
-    {OPT_ID('o'),  "oneroot",  0, NULL, "Manage default root window/non-Xinerama screen only"},
-    {OPT_ID('c'),  "confdir",  OPT_ARG, "dir", "Search directory for configuration files"},
-    {OPT_ID('l'),  "moduledir", OPT_ARG,"dir", "Search directory for modules"},
+    {OPT_ID('d'), "display",  OPT_ARG, "host:dpy.scr", "X display to use"},
+    {'c',         "conffile", OPT_ARG, "config_file", "Configuration file"},
+    {OPT_ID('o'), "oneroot",  0, NULL, "Manage default root window/non-Xinerama screen only"},
+    {OPT_ID('c'), "confdir",  OPT_ARG, "dir", "Search directory for configuration files"},
+    {OPT_ID('l'), "moduledir", OPT_ARG,"dir", "Search directory for modules"},
 #ifndef CF_NOXINERAMA    
-    {OPT_ID('x'),  "xinerama", OPT_ARG, "1|0", "Use Xinerama screen information (default: 0/no)"},
+    {OPT_ID('x'), "xinerama", OPT_ARG, "1|0", "Use Xinerama screen information (default: 0/no)"},
 #else
-    {OPT_ID('x'),  "xinerama", OPT_ARG,  "?", "Ignored: not compiled with Xinerama support"},
+    {OPT_ID('x'), "xinerama", OPT_ARG, "?", "Ignored: not compiled with Xinerama support"},
 #endif
-    {OPT_ID('s'),  "session",  OPT_ARG, "session_name", "Name of session (affects savefiles)"},
-    {OPT_ID('i'),  "i18n", 0, NULL, "Enable use of multibyte string routines, actual "
-                                    "encoding depending on the locale."},
+    {OPT_ID('s'), "session",  OPT_ARG, "session_name", "Name of session (affects savefiles)"},
+    {OPT_ID('S'), "smclientid", OPT_ARG, "client_id", "Session manager client ID"},
+    {OPT_ID('i'), "i18n", 0, NULL, "Enable use of multibyte string routines, actual "
+                                   "encoding depending on the locale."},
     END_OPTPARSEROPTS
 };
 
@@ -104,6 +105,9 @@ int main(int argc, char*argv[])
             break;
         case 'c':
             cfgfile=optparser_get_arg();
+            break;
+        case OPT_ID('S'):
+            ioncore_g.sm_client_id=optparser_get_arg();
             break;
         case OPT_ID('c'):
             ioncore_add_scriptdir(optparser_get_arg());
