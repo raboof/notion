@@ -64,7 +64,6 @@ extern void genframe_toggle_tab(WGenFrame *genframe);
 
 /* Misc */
 extern void genframe_draw_config_updated(WGenFrame *genframe);
-extern void genframe_toggle_sub_tag(WGenFrame *genframe);
 extern void genframe_managed_geom(const WGenFrame *genframe, 
 								  WRectangle *geom);
 
