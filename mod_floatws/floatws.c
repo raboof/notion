@@ -616,8 +616,6 @@ static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
         destroy_obj((Obj*)frame);
         return FALSE;
     }
-    
-    floatws_add_managed(ws, (WRegion*)frame);
 
     return TRUE;
 }
