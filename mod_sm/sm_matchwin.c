@@ -16,10 +16,10 @@
 #include <time.h>
 #include <X11/Xatom.h>
 
+#include <libmainloop/signal.h>
 #include <ioncore/common.h>
 #include <ioncore/global.h>
 #include <ioncore/exec.h>
-#include <ioncore/signal.h>
 #include <ioncore/names.h>
 #include <ioncore/property.h>
 

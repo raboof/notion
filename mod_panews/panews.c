@@ -13,6 +13,9 @@
 
 #include <libtu/objp.h>
 #include <libtu/minmax.h>
+#include <libextl/extl.h>
+#include <libmainloop/defer.h>
+
 #include <ioncore/common.h>
 #include <ioncore/global.h>
 #include <ioncore/region.h>
@@ -20,10 +23,8 @@
 #include <ioncore/manage.h>
 #include <ioncore/saveload.h>
 #include <ioncore/attach.h>
-#include <libextl/extl.h>
 #include <ioncore/regbind.h>
 #include <ioncore/extlconv.h>
-#include <ioncore/defer.h>
 #include <ioncore/frame.h>
 #include <ioncore/region-iter.h>
 #include <mod_ionws/ionws.h>
@@ -191,7 +192,7 @@ void panews_managed_remove(WPaneWS *ws, WRegion *reg)
         if(other==NULL){
             if(ws->ionws.split_tree==NULL){
                 warn(TR("Unable to re-initialise workspace. Destroying."));
-                ioncore_defer_destroy((Obj*)ws);
+                mainloop_defer_destroy((Obj*)ws);
             }else if(act && mcf){
                 /* We don't want to give the stdisp focus, even if one exists. 
                  * Or do we?
@@ -260,7 +261,7 @@ static bool panews_rqclose(WPaneWS *ws)
         return FALSE;
     }
     
-    ioncore_defer_destroy((Obj*)ws);
+    mainloop_defer_destroy((Obj*)ws);
     
     return TRUE;
 }
@@ -279,7 +280,7 @@ static WRegion *panews_rqclose_propagate(WPaneWS *ws, WRegion *sub)
                                                     filter_no_stdisp_unused);
         }
         if(node==NULL){
-            ioncore_defer_destroy((Obj*)ws);
+            mainloop_defer_destroy((Obj*)ws);
             return (WRegion*)ws;
         }
         if(node->reg==NULL)

@@ -13,6 +13,9 @@
 
 #include <libtu/objp.h>
 #include <libtu/minmax.h>
+#include <libmainloop/defer.h>
+#include <libmainloop/signal.h>
+
 #include <ioncore/common.h>
 #include <ioncore/rootwin.h>
 #include <ioncore/focus.h>
@@ -28,9 +31,7 @@
 #include <ioncore/region-iter.h>
 #include <ioncore/regbind.h>
 #include <ioncore/extlconv.h>
-#include <ioncore/defer.h>
 #include <ioncore/xwindow.h>
-#include <ioncore/signal.h>
 #include "placement.h"
 #include "ionws.h"
 #include "split.h"
@@ -638,7 +639,7 @@ void ionws_managed_remove(WIonWS *ws, WRegion *reg)
     
     if(!ds){
         if(other==NULL)
-            ioncore_defer_destroy((Obj*)ws);
+            mainloop_defer_destroy((Obj*)ws);
         else if(act && mcf)
             region_warp(other);
     }
@@ -858,7 +859,7 @@ void ionws_unsplit_at(WIonWS *ws, WFrame *frame)
         return;
     }
 
-    ioncore_defer_destroy((Obj*)frame);
+    mainloop_defer_destroy((Obj*)frame);
 }
 
 

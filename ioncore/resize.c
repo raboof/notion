@@ -14,6 +14,8 @@
 
 #include <libtu/objp.h>
 #include <libtu/minmax.h>
+#include <libextl/extl.h>
+#include <libmainloop/defer.h>
 
 #include "common.h"
 #include "global.h"
@@ -22,12 +24,10 @@
 #include "sizehint.h"
 #include "event.h"
 #include "cursor.h"
-#include <libextl/extl.h>
 #include "extlconv.h"
 #include "grab.h"
 #include "framep.h"
 #include "infowin.h"
-#include "defer.h"
 #include "region-iter.h"
 
 
@@ -473,7 +473,7 @@ bool moveresmode_do_end(WMoveresMode *mode, bool apply)
         set_saved(mode, reg);
     
     if(mode->infowin!=NULL){
-        ioncore_defer_destroy((Obj*)mode->infowin);
+        mainloop_defer_destroy((Obj*)mode->infowin);
         mode->infowin=NULL;
     }
     destroy_obj((Obj*)mode);

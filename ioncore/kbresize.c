@@ -15,12 +15,14 @@
 #include <limits.h>
 
 #include <libtu/minmax.h>
+
+#include <libmainloop/signal.h>
+
 #include "global.h"
 #include "resize.h"
 #include "kbresize.h"
 #include "grab.h"
 #include "binding.h"
-#include "signal.h"
 #include "focus.h"
 #include "bindmaps.h"
 

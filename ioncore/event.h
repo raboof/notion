@@ -47,4 +47,6 @@ extern Time ioncore_get_timestamp();
 /* Handlers to this hook should take XEvent* as parameter. */
 extern WHook *ioncore_handle_event_alt;
 
+extern void ioncore_mainloop();
+
 #endif /* ION_IONCORE_EVENT_H */

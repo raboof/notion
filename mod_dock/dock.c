@@ -39,15 +39,17 @@
 #include <libtu/objp.h>
 #include <libtu/map.h>
 #include <libtu/minmax.h>
+#include <libextl/extl.h>
+#include <libextl/readconfig.h>
+#include <libmainloop/defer.h>
+
 #include <ioncore/common.h>
 #include <ioncore/clientwin.h>
 #include <ioncore/eventh.h>
-#include <libextl/extl.h>
 #include <ioncore/global.h>
 #include <ioncore/manage.h>
 #include <ioncore/names.h>
 #include <ioncore/property.h>
-#include <libextl/readconfig.h>
 #include <ioncore/resize.h>
 #include <ioncore/window.h>
 #include <ioncore/region-iter.h>
@@ -55,7 +57,6 @@
 #include <ioncore/saveload.h>
 #include <ioncore/bindmaps.h>
 #include <ioncore/regbind.h>
-#include <ioncore/defer.h>
 #include <ioncore/extlconv.h>
 #include <ioncore/event.h>
 
@@ -1132,7 +1133,7 @@ bool dock_rqclose(WDock *dock)
                 " -- refusing to close.", region_name((WRegion*)dock));
         return FALSE;
     }else{
-        ioncore_defer_destroy((Obj*)dock);
+        mainloop_defer_destroy((Obj*)dock);
         return TRUE;
     }
 }

@@ -12,6 +12,7 @@
 #include <string.h>
 
 #include <libtu/objp.h>
+
 #include "common.h"
 #include "global.h"
 #include "pointer.h"
@@ -26,7 +27,6 @@
 #include "frame-draw.h"
 #include "bindmaps.h"
 #include "infowin.h"
-#include "defer.h"
 #include "rectangle.h"
 #include "xwindow.h"
 #include "region-iter.h"

@@ -15,6 +15,8 @@
 #include <libtu/objp.h>
 #include <libtu/minmax.h>
 #include <libtu/rb.h>
+#include <libextl/extl.h>
+#include <libmainloop/defer.h>
 
 #include "common.h"
 #include "window.h"
@@ -27,7 +29,6 @@
 #include "resize.h"
 #include "tags.h"
 #include "sizehint.h"
-#include <libextl/extl.h>
 #include "extlconv.h"
 #include "genws.h"
 #include "frame-pointer.h"
@@ -36,7 +37,6 @@
 #include "region-iter.h"
 #include "saveload.h"
 #include "xwindow.h"
-#include "defer.h"
 
 
 #define MPLEX_WIN(MPLEX) ((MPLEX)->win.win)
@@ -1156,7 +1156,7 @@ bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg, int pos)
         mgr=OBJ_CAST(REGION_MANAGER(oldstdisp), WGenWS);
         
         if(oldstdisp!=reg){
-            ioncore_defer_destroy(di->regwatch.obj);
+            mainloop_defer_destroy(di->regwatch.obj);
             watch_reset(&(di->regwatch));
         }
     }

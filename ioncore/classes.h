@@ -28,6 +28,5 @@ INTRCLASS(WMoveresMode);
 INTRCLASS(WRootWin);
 INTRCLASS(WScreen);
 INTRCLASS(WWindow);
-INTRCLASS(WTimer);
 
 #endif /* ION_IONCORE_CLASSES_H */

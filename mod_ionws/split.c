@@ -22,7 +22,6 @@
 #include <ioncore/window.h>
 #include <ioncore/resize.h>
 #include <ioncore/attach.h>
-#include <ioncore/defer.h>
 #include <ioncore/manage.h>
 #include <ioncore/extlconv.h>
 #include <ioncore/region-iter.h>

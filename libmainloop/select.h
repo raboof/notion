@@ -1,5 +1,5 @@
 /*
- * ion/ioncore/mainloop.h
+ * ion/mainloop/select.h
  * 
  * Based on a contributed readfds code.
  * 
@@ -9,14 +9,14 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_IONCORE_MAINLOOP_H
-#define ION_IONCORE_MAINLOOP_H
+#ifndef ION_LIBMAINLOOP_SELECT_H
+#define ION_LIBMAINLOOP_SELECT_H
 
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/time.h>
-#include "common.h"
 #include <libtu/obj.h>
+#include <libtu/types.h>
 
 INTRSTRUCT(WInputFd);
 
@@ -27,10 +27,10 @@ DECLSTRUCT(WInputFd){
     WInputFd *next, *prev;
 };
 
-extern bool ioncore_register_input_fd(int fd, void *data,
-                                      void (*callback)(int fd, void *data));
-extern void ioncore_unregister_input_fd(int fd);
+extern bool mainloop_register_input_fd(int fd, void *data,
+                                       void (*callback)(int fd, void *data));
+extern void mainloop_unregister_input_fd(int fd);
 
-extern void ioncore_mainloop();
+extern void mainloop_select();
 
-#endif /* ION_IONCORE_MAINLOOP_H */
+#endif /* ION_LIBMAINLOOP_SELECT_H */

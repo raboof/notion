@@ -1,5 +1,5 @@
 /*
- * ion/ioncore/mainloop.c
+ * ion/libmainloop/mainloop.c
  * 
  * Partly based on a contributed code.
  *
@@ -9,11 +9,11 @@
  * (at your option) any later version.
  */
 
-#include "mainloop.h"
-#include "global.h"
-#include "signal.h"
-#include "defer.h"
-#include "event.h"
+#include <libtu/types.h>
+#include <libtu/misc.h>
+#include <libtu/dlist.h>
+
+#include "select.h"
 
 
 /*{{{ File descriptor management */
@@ -33,8 +33,8 @@ static WInputFd *find_input_fd(int fd)
     return tmp;
 }
 
-bool ioncore_register_input_fd(int fd, void *data,
-                               void (*callback)(int fd, void *d))
+bool mainloop_register_input_fd(int fd, void *data,
+                                void (*callback)(int fd, void *d))
 {
     WInputFd *tmp;
     
@@ -54,7 +54,7 @@ bool ioncore_register_input_fd(int fd, void *data,
     return TRUE;
 }
 
-void ioncore_unregister_input_fd(int fd)
+void mainloop_unregister_input_fd(int fd)
 {
     WInputFd *tmp=find_input_fd(fd);
     
@@ -88,40 +88,23 @@ static void check_input_fds(fd_set *rfds)
     }
 }
 
-
 /*}}}*/
 
 
-/*{{{ Mainloop */
+/*{{{ Select */
 
-
-void ioncore_mainloop()
+void mainloop_select()
 {
     fd_set rfds;
     int nfds=0;
+            
+    FD_ZERO(&rfds);
     
-    ioncore_g.opmode=IONCORE_OPMODE_NORMAL;
-
-    while(1){
-        ioncore_check_signals();
-        ioncore_execute_deferred();
-        ioncore_flush();
-
-        if(QLength(ioncore_g.dpy)>0){
-           ioncore_x_connection_handler(ioncore_g.conn, NULL);
-           ioncore_check_signals();
-        }else{
-            FD_ZERO(&rfds);
-            FD_SET(ioncore_g.conn, &rfds);
-            
-            set_input_fds(&rfds, &nfds);
-            
-            if(select(nfds+1, &rfds, NULL, NULL, NULL)>0)
-                check_input_fds(&rfds);
-        }
-    }
+    set_input_fds(&rfds, &nfds);
+    
+    if(select(nfds+1, &rfds, NULL, NULL, NULL)>0)
+        check_input_fds(&rfds);
 }
 
 
 /*}}}*/
-

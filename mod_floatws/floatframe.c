@@ -21,7 +21,6 @@
 #include <ioncore/saveload.h>
 #include <ioncore/names.h>
 #include <ioncore/regbind.h>
-#include <ioncore/defer.h>
 #include <ioncore/resize.h>
 #include <ioncore/sizehint.h>
 #include <ioncore/extlconv.h>

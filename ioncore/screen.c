@@ -11,6 +11,7 @@
 
 #include <libtu/objp.h>
 #include <libtu/minmax.h>
+#include <libmainloop/defer.h>
 #include "common.h"
 #include "global.h"
 #include "screen.h"
@@ -31,7 +32,6 @@
 #include "rectangle.h"
 #include "region-iter.h"
 #include "infowin.h"
-#include "defer.h"
 #include "activity.h"
 #include "extlconv.h"
 
@@ -283,7 +283,7 @@ void screen_unnotify(WScreen *scr)
 {
     Obj *iw=scr->notifywin_watch.obj;
     if(iw!=NULL){
-        ioncore_defer_destroy(iw);
+        mainloop_defer_destroy(iw);
         watch_reset(&(scr->notifywin_watch));
     }
 }

@@ -15,6 +15,7 @@
 #include <libtu/objp.h>
 #include <libtu/minmax.h>
 #include <libtu/stringstore.h>
+#include <libmainloop/defer.h>
 
 #include "common.h"
 #include "window.h"
@@ -38,7 +39,6 @@
 #include "gr.h"
 #include "genws.h"
 #include "activity.h"
-#include "defer.h"
 #include "region-iter.h"
 
 
@@ -121,7 +121,7 @@ bool frame_rqclose(WFrame *frame)
     if(FRAME_MCOUNT(frame)!=0 || FRAME_CURRENT(frame)!=NULL){
         warn(TR("Frame is not empty."));
     }else if(region_may_destroy((WRegion*)frame)){
-        ioncore_defer_destroy((Obj*)frame);
+        mainloop_defer_destroy((Obj*)frame);
         return TRUE;
     }
     
@@ -595,7 +595,7 @@ void frame_managed_remove(WFrame *frame, WRegion *reg)
     mplex_managed_remove((WMPlex*)frame, reg);
     if(frame->flags&FRAME_DEST_EMPTY && FRAME_MCOUNT(frame)==0 &&
        !OBJ_IS_BEING_DESTROYED(frame)){
-        ioncore_defer_destroy((Obj*)frame);
+        mainloop_defer_destroy((Obj*)frame);
     }
 }
 

@@ -10,17 +10,19 @@
  */
 
 #include <string.h>
+
+#include <libtu/objp.h>
+#include <libtu/minmax.h>
+#include <libextl/extl.h>
+#include <libmainloop/defer.h>
+
 #include <ioncore/common.h>
 #include <ioncore/global.h>
-#include <libtu/objp.h>
 #include <ioncore/strings.h>
 #include <ioncore/xic.h>
 #include <ioncore/selection.h>
 #include <ioncore/event.h>
 #include <ioncore/regbind.h>
-#include <libextl/extl.h>
-#include <ioncore/defer.h>
-#include <libtu/minmax.h>
 #include "edln.h"
 #include "wedln.h"
 #include "inputp.h"
@@ -634,7 +636,7 @@ static void wedln_do_finish(WEdln *wedln)
 EXTL_EXPORT_MEMBER
 void wedln_finish(WEdln *wedln)
 {
-    ioncore_defer_action((Obj*)wedln, (WDeferredAction*)wedln_do_finish);
+    mainloop_defer_action((Obj*)wedln, (WDeferredAction*)wedln_do_finish);
 }
 
 

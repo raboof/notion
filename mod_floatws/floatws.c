@@ -13,6 +13,8 @@
 
 #include <libtu/minmax.h>
 #include <libtu/objp.h>
+#include <libmainloop/defer.h>
+
 #include <ioncore/common.h>
 #include <ioncore/rootwin.h>
 #include <ioncore/focus.h>
@@ -26,7 +28,6 @@
 #include <ioncore/regbind.h>
 #include <ioncore/frame-pointer.h>
 #include <ioncore/extlconv.h>
-#include <ioncore/defer.h>
 #include <ioncore/region-iter.h>
 #include <ioncore/xwindow.h>
 #include <ioncore/resize.h>
@@ -359,7 +360,7 @@ bool floatws_rqclose_relocate(WFloatWS *ws)
         return FALSE;
     }
     
-    ioncore_defer_destroy((Obj*)ws);
+    mainloop_defer_destroy((Obj*)ws);
     return TRUE;
 }
 

@@ -13,13 +13,19 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/time.h>
+#include <sys/signal.h>
+
+#include <libmainloop/select.h>
+#include <libmainloop/signal.h>
+#include <libmainloop/defer.h>
 
 #include "common.h"
 #include "global.h"
 #include "event.h"
 #include "eventh.h"
-#include "signal.h"
 #include "focus.h"
+#include "exec.h"
+#include "ioncore.h"
 
 
 
@@ -27,6 +33,33 @@
 
 
 WHook *ioncore_handle_event_alt=NULL;
+
+
+/*}}}*/
+
+
+/*{{{ Signal check */
+    
+
+static void check_signals()
+{
+    int kill_sig=mainloop_check_signals();
+    
+    if(kill_sig!=0){
+        if(kill_sig==SIGUSR1){
+            ioncore_restart();
+            assert(0);
+        } 
+        if(kill_sig==SIGTERM){
+            ioncore_resign();
+            /* We may still return here if running under a session manager. */
+        }else{
+            ioncore_emergency_snapshot();
+            ioncore_deinit();
+            kill(getpid(), kill_sig);
+        }
+    }
+}
 
 
 /*}}}*/
@@ -103,7 +136,7 @@ void ioncore_get_event(XEvent *ev, long mask)
     fd_set rfds;
     
     while(1){
-        ioncore_check_signals();
+        check_signals();
         
         if(XCheckMaskEvent(ioncore_g.dpy, mask, ev)){
             ioncore_update_timestamp(ev);
@@ -174,6 +207,31 @@ void ioncore_x_connection_handler(int conn, void *unused)
     ioncore_update_timestamp(&ev);
 
     hook_call_alt_p(ioncore_handle_event_alt, &ev, NULL);
+}
+
+
+/*}}}*/
+
+
+/*{{{ Mainloop */
+
+
+void ioncore_mainloop()
+{
+    mainloop_trap_signals();
+    
+    ioncore_g.opmode=IONCORE_OPMODE_NORMAL;
+
+    while(1){
+        check_signals();
+        mainloop_execute_deferred();
+        ioncore_flush();
+
+        if(QLength(ioncore_g.dpy)>0)
+           ioncore_x_connection_handler(ioncore_g.conn, NULL);
+        else
+            mainloop_select();
+    }
 }
 
 

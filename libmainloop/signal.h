@@ -1,5 +1,5 @@
 /*
- * ion/ioncore/signal.h
+ * ion/mainloop/signal.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -9,18 +9,18 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_IONCORE_SIGNAL_H
-#define ION_IONCORE_SIGNAL_H
+#ifndef ION_LIBMAINLOOP_SIGNAL_H
+#define ION_LIBMAINLOOP_SIGNAL_H
 
 #include <sys/time.h>
 #include <time.h>
 #include <unistd.h>
 
 #include <libtu/obj.h>
-#include "common.h"
-#include "classes.h"
+#include <libtu/types.h>
 #include <libextl/extl.h>
 
+INTRCLASS(WTimer);
 
 typedef void WTimerHandler(WTimer *timer);
 
@@ -45,7 +45,7 @@ extern void timer_set_extl(WTimer *timer, uint msecs, ExtlFn fn);
 extern void timer_reset(WTimer *timer);
 extern bool timer_is_set(WTimer *timer);
 
-extern bool ioncore_check_signals();
-extern void ioncore_trap_signals();
+extern bool mainloop_check_signals();
+extern void mainloop_trap_signals();
 
-#endif /* ION_IONCORE_SIGNAL_H */
+#endif /* ION_LIBMAINLOOP_SIGNAL_H */

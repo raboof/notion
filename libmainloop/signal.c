@@ -1,5 +1,5 @@
 /*
- * ion/ioncore/signal.c
+ * ion/libmainloop/signal.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -19,12 +19,12 @@
 #include <stdlib.h>
 
 #include <libtu/objp.h>
-#include "common.h"
-#include "property.h"
+#include <libtu/types.h>
+#include <libtu/misc.h>
+#include <libtu/locale.h>
+#include <libtu/output.h>
+
 #include "signal.h"
-#include "exec.h"
-#include "global.h"
-#include "ioncore.h"
 
 
 static int kill_sig=0;
@@ -81,11 +81,11 @@ static void do_timer_set()
 }
 
 
-bool ioncore_check_signals()
+bool mainloop_check_signals()
 {
     struct timeval current_time;
     WTimer *q;
-    bool ret=FALSE;
+    int ret=0;
 
 #if 1    
     if(wait_sig!=0){
@@ -97,25 +97,12 @@ bool ioncore_check_signals()
     }
 #endif
     
-    if(kill_sig!=0){
-        if(kill_sig==SIGUSR1){
-            ioncore_restart();
-            assert(0);
-        } 
-        if(kill_sig==SIGTERM){
-            ioncore_resign();
-            /* We may still return here if running under a session manager. */
-        }else{
-            ioncore_emergency_snapshot();
-            ioncore_deinit();
-            kill(getpid(), kill_sig);
-        }
-    }
+    if(kill_sig!=0)
+        return kill_sig;
 
     /* Check for timer events in the queue */
     while(had_tmr && queue!=NULL){
         had_tmr=FALSE;
-        ret=TRUE;
         gettimeofday(&current_time, NULL);
         while(queue!=NULL){
             if(TIMEVAL_LATER(current_time, queue->when)){
@@ -154,10 +141,6 @@ static void add_to_current_time(struct timeval *when, uint msecs)
 }
 
 
-/*EXTL_DOC
- * Is timer active?
- */
-EXTL_EXPORT_MEMBER
 bool timer_is_set(WTimer *timer)
 {
     WTimer *tmr;
@@ -169,8 +152,8 @@ bool timer_is_set(WTimer *timer)
 }
 
 
-static void timer_do_set(WTimer *timer, uint msecs, WTimerHandler *handler,
-                         ExtlFn fn)
+void timer_do_set(WTimer *timer, uint msecs, WTimerHandler *handler,
+                  ExtlFn fn)
 {
     WTimer *q, **qptr;
     bool set=FALSE;
@@ -206,21 +189,13 @@ void timer_set(WTimer *timer, uint msecs, WTimerHandler *handler)
     timer_do_set(timer, msecs, handler, extl_fn_none());
 }
 
-    
-/*EXTL_DOC
- * Set timer handler and timeout in milliseconds, and start timing.
- */
-EXTL_EXPORT_AS(WTimer, set)
+
 void timer_set_extl(WTimer *timer, uint msecs, ExtlFn fn)
 {
     timer_do_set(timer, msecs, NULL, extl_ref_fn(fn));
 }
 
-
-/*EXTL_DOC
- * Reset timer (clear handler and stop timing).
- */
-EXTL_EXPORT_MEMBER
+    
 void timer_reset(WTimer *timer)
 {
     WTimer *q=queue, **qptr=&queue;
@@ -263,10 +238,7 @@ WTimer *create_timer()
     CREATEOBJ_IMPL(WTimer, timer, (p));
 }
 
-/*EXTL_DOC
- * Create a new timer.
- */
-EXTL_EXPORT_AS(ioncore, create_timer)
+
 WTimer *create_timer_extl_owned()
 {
     WTimer *timer=create_timer();
@@ -299,9 +271,9 @@ static void deadly_signal_handler(int signal_num)
     set_warn_handler(NULL);
     warn(TR("Caught signal %d. Dying."), signal_num);
     signal(signal_num, SIG_DFL);
-    if(ioncore_g.opmode==IONCORE_OPMODE_INIT)
+    /*if(ioncore_g.opmode==IONCORE_OPMODE_INIT)
         kill(getpid(), signal_num);
-    else
+    else*/
         kill_sig=signal_num;
 }
 
@@ -347,7 +319,7 @@ static void ignore_handler(int signal_num)
 #endif
 
 
-void ioncore_trap_signals()
+void mainloop_trap_signals()
 {
     struct sigaction sa;
     sigset_t set, oldset;

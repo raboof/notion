@@ -9,11 +9,11 @@
  * (at your option) any later version.
  */
 
+#include <libmainloop/defer.h>
 #include <ioncore/common.h>
 #include <ioncore/window.h>
 #include <ioncore/global.h>
 #include <ioncore/regbind.h>
-#include <ioncore/defer.h>
 #include <ioncore/event.h>
 #include "inputp.h"
 
@@ -157,7 +157,7 @@ void input_deinit(WInput *input)
 EXTL_EXPORT_MEMBER
 void input_cancel(WInput *input)
 {
-    ioncore_defer_destroy((Obj*)input);
+    mainloop_defer_destroy((Obj*)input);
 }
 
 

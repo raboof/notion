@@ -21,13 +21,13 @@
 #include <stdio.h>
 #include <errno.h>
 
+#include <libmainloop/select.h>
+
 #include "common.h"
 #include "exec.h"
 #include "property.h"
-#include "signal.h"
 #include "global.h"
 #include "ioncore.h"
-#include "mainloop.h"
 #include "saveload.h"
 
 
@@ -148,7 +148,7 @@ static void process_pipe(int fd, void *p)
     }
     
     /* We get here on EOL or if the handler failed */
-    ioncore_unregister_input_fd(fd);
+    mainloop_unregister_input_fd(fd);
     close(fd);
     extl_unref_fn(*(ExtlFn*)p);
     free(p);
@@ -200,7 +200,7 @@ bool ioncore_popen_bgread(const char *cmd, ExtlFn handler)
         p=ALLOC(ExtlFn);
         if(p!=NULL){
             *(ExtlFn*)p=extl_ref_fn(handler);
-            if(ioncore_register_input_fd(fds[0], p, process_pipe))
+            if(mainloop_register_input_fd(fds[0], p, process_pipe))
                 return TRUE;
             extl_unref_fn(*(ExtlFn*)p);
             free(p);

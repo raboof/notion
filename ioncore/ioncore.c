@@ -24,16 +24,16 @@
 
 #include <libtu/util.h>
 #include <libtu/optparser.h>
+#include <libextl/readconfig.h>
+#include <libextl/extl.h>
+#include <libmainloop/select.h>
 
 #include "common.h"
 #include "rootwin.h"
 #include "event.h"
 #include "cursor.h"
-#include "signal.h"
-#include <libextl/readconfig.h>
 #include "global.h"
 #include "modules.h"
-#include "mainloop.h"
 #include "eventh.h"
 #include "ioncore.h"
 #include "manage.h"
@@ -41,7 +41,6 @@
 #include "binding.h"
 #include "bindmaps.h"
 #include "strings.h"
-#include <libextl/extl.h>
 #include "gr.h"
 #include "xic.h"
 #include "netwm.h"
@@ -438,8 +437,8 @@ static bool ioncore_init_x(const char *display, int stflags)
         return FALSE;
     }
 
-    if(!ioncore_register_input_fd(ioncore_g.conn, NULL,
-                                  ioncore_x_connection_handler)){
+    if(!mainloop_register_input_fd(ioncore_g.conn, NULL,
+                                   ioncore_x_connection_handler)){
         return FALSE;
     }
     
@@ -483,8 +482,6 @@ bool ioncore_startup(const char *display, const char *cfgfile,
 
     ioncore_register_exports();
     
-    ioncore_trap_signals();
-
     if(!ioncore_init_x(display, stflags))
         return FALSE;
 
@@ -537,7 +534,7 @@ void ioncore_deinit()
 
     ioncore_deinit_bindmaps();
 
-    ioncore_unregister_input_fd(ioncore_g.conn);
+    mainloop_unregister_input_fd(ioncore_g.conn);
     
     dpy=ioncore_g.dpy;
     ioncore_g.dpy=NULL;
@@ -552,18 +549,7 @@ void ioncore_deinit()
 /*}}}*/
 
 
-/*{{{ miscellaneous */
-
-
-/*EXTL_DOC
- * Issue a warning. How the message is displayed depends on the current
- * warning handler.
- */
-EXTL_EXPORT
-void ioncore_warn(const char *str)
-{
-    warn("%s", str);
-}
+/*{{{ Miscellaneous */
 
 
 /*EXTL_DOC
@@ -585,7 +571,6 @@ const char *ioncore_version()
     return ION_VERSION;
 }
 
-
 /*EXTL_DOC
  * Returns the name of program using Ioncore.
  */
@@ -603,16 +588,6 @@ EXTL_EXPORT
 const char *ioncore_aboutmsg()
 {
     return ioncore_about;
-}
-
-
-EXTL_EXPORT
-const char *ioncore_gettext(const char *s)
-{
-    if(s==NULL)
-        return NULL;
-    else
-        return TR(s);
 }
 
 

@@ -15,14 +15,15 @@
 #include <libtu/minmax.h>
 #include <libtu/objp.h>
 #include <libtu/obj.h>
+#include <libmainloop/defer.h>
+#include <libmainloop/signal.h>
+
 #include <ioncore/common.h>
 #include <ioncore/window.h>
 #include <ioncore/global.h>
 #include <ioncore/regbind.h>
-#include <ioncore/defer.h>
 #include <ioncore/strings.h>
 #include <ioncore/pointer.h>
-#include <ioncore/signal.h>
 #include <ioncore/focus.h>
 #include <ioncore/event.h>
 #include <ioncore/xwindow.h>
@@ -832,7 +833,7 @@ void menu_finish(WMenu *menu)
         return;
     }
     
-    ioncore_defer_action((Obj*)menu, (WDeferredAction*)menu_do_finish);
+    mainloop_defer_action((Obj*)menu, (WDeferredAction*)menu_do_finish);
 }
 
 
@@ -843,7 +844,7 @@ void menu_finish(WMenu *menu)
 EXTL_EXPORT_MEMBER
 void menu_cancel(WMenu *menu)
 {
-    ioncore_defer_destroy((Obj*)menu);
+    mainloop_defer_destroy((Obj*)menu);
 }
 
 

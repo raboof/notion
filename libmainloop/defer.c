@@ -1,5 +1,5 @@
 /*
- * ion/ioncore/defer.c
+ * ion/libmainloop/defer.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -14,9 +14,13 @@
  * loop.
  */
 
-#include "common.h"
 #include <libtu/obj.h>
 #include <libtu/objp.h>
+#include <libtu/types.h>
+#include <libtu/misc.h>
+#include <libtu/dlist.h>
+#include <libtu/output.h>
+#include <libtu/locale.h>
 #include "defer.h"
 
 INTRSTRUCT(Defer);
@@ -94,7 +98,7 @@ static void defer_watch_handler(Watch *w, Obj *obj)
 }
 
     
-bool ioncore_defer_action_on_list(Obj *obj, WDeferredAction *action, 
+bool mainloop_defer_action_on_list(Obj *obj, WDeferredAction *action, 
                                   void **list)
 {
     Defer *d;
@@ -118,22 +122,22 @@ bool ioncore_defer_action_on_list(Obj *obj, WDeferredAction *action,
 }
 
 
-bool ioncore_defer_action(Obj *obj, WDeferredAction *action)
+bool mainloop_defer_action(Obj *obj, WDeferredAction *action)
 {
-    return ioncore_defer_action_on_list(obj, action, (void**)&deferred);
+    return mainloop_defer_action_on_list(obj, action, (void**)&deferred);
 }
 
 
-bool ioncore_defer_destroy(Obj *obj)
+bool mainloop_defer_destroy(Obj *obj)
 {
     if(OBJ_IS_BEING_DESTROYED(obj))
         return FALSE;
     
-    return ioncore_defer_action(obj, destroy_obj);
+    return mainloop_defer_action(obj, destroy_obj);
 }
     
 
-void ioncore_execute_deferred_on_list(void **list)
+void mainloop_execute_deferred_on_list(void **list)
 {
     Obj *obj;
     void (*action)(Obj*);
@@ -143,8 +147,8 @@ void ioncore_execute_deferred_on_list(void **list)
 }
 
 
-void ioncore_execute_deferred()
+void mainloop_execute_deferred()
 {
-    ioncore_execute_deferred_on_list((void**)&deferred);
+    mainloop_execute_deferred_on_list((void**)&deferred);
 }
 

@@ -15,18 +15,18 @@
 
 #include <libtu/minmax.h>
 #include <libtu/objp.h>
+#include <libextl/extl.h>
+#include <libmainloop/defer.h>
 
 #include <ioncore/common.h>
 #include <ioncore/global.h>
 #include <ioncore/clientwin.h>
 #include <ioncore/attach.h>
 #include <ioncore/manage.h>
-#include <libextl/extl.h>
 #include <ioncore/framep.h>
 #include <ioncore/names.h>
 #include <ioncore/region-iter.h>
 #include <ioncore/resize.h>
-#include <ioncore/defer.h>
 #include <mod_ionws/split.h>
 #include <mod_ionws/split-stdisp.h>
 #include "placement.h"
@@ -188,7 +188,7 @@ static bool do_replace(WPaneWS *ws, WFrame *frame, WRegion *reg,
         splittree_changeroot((WSplit*)u, node);
     
     u->parent=NULL;
-    ioncore_defer_destroy((Obj*)u);
+    mainloop_defer_destroy((Obj*)u);
     
     if(ws->ionws.stdispnode!=NULL)
         split_regularise_stdisp(ws->ionws.stdispnode);

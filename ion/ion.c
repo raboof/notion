@@ -28,7 +28,7 @@
 #include <ioncore/global.h>
 #include <ioncore/ioncore.h>
 #include <ioncore/exec.h>
-#include <ioncore/mainloop.h>
+#include <ioncore/event.h>
 #include "../version.h"
 
 

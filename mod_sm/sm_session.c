@@ -22,11 +22,11 @@
 #include <X11/Xlib.h>
 #include <X11/SM/SMlib.h>
 
+#include <libextl/readconfig.h>
+#include <libmainloop/select.h>
 #include <ioncore/global.h>
 #include <ioncore/ioncore.h>
-#include <ioncore/mainloop.h>
 #include <ioncore/exec.h>
-#include <libextl/readconfig.h>
 #include "sm_session.h"
 
 
@@ -87,12 +87,12 @@ static void sm_ice_watch_fd(IceConn conn,
         else{
             sm_fd=IceConnectionNumber(conn);
             fcntl(sm_fd, F_SETFD, FD_CLOEXEC);
-            ioncore_register_input_fd(sm_fd, NULL, &sm_process_messages);
+            mainloop_register_input_fd(sm_fd, NULL, &sm_process_messages);
         }
     }
     else{
         if (IceConnectionNumber(conn)==sm_fd){
-            ioncore_unregister_input_fd(sm_fd);
+            mainloop_unregister_input_fd(sm_fd);
             sm_fd=-1;
         }
     }
@@ -345,7 +345,7 @@ void mod_sm_close()
     ice_sm_conn=NULL;
     
     if(sm_fd>=0){
-        ioncore_unregister_input_fd(sm_fd);
+        mainloop_unregister_input_fd(sm_fd);
         close(sm_fd);
         sm_fd=-1;
     }
