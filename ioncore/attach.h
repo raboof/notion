@@ -37,4 +37,16 @@ extern WRegion *region__attach_load(WRegion *mgr, ExtlTab tab,
                                     WRegionDoAttachFn *fn, void *param);
 
 
+extern WRegion *region__attach_reparent_doit(WWindow *par, 
+                                             const WFitParams *fp, 
+                                             WRegion *reg);
+
+extern WRegion *region__attach_new_doit(WWindow *par, const WFitParams *fp,
+                                       WRegionSimpleCreateFn *fn);
+
+extern WRegion *region__attach_load_doit(WWindow *par, const WFitParams *fp, 
+                                         ExtlTab *tab);
+
+extern bool region__attach_reparent_check(WRegion *mgr, WRegion *reg);
+
 #endif /* ION_IONCORE_ATTACH_H */

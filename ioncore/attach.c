@@ -16,7 +16,6 @@
 #include "global.h"
 #include "region.h"
 #include "attach.h"
-#include <libtu/objp.h>
 #include "clientwin.h"
 #include "saveload.h"
 #include "manage.h"
@@ -27,8 +26,8 @@
 /*{{{ New */
 
 
-static WRegion *add_fn_new(WWindow *par, const WFitParams *fp,
-                           WRegionSimpleCreateFn *fn)
+WRegion *region__attach_new_doit(WWindow *par, const WFitParams *fp,
+                                 WRegionSimpleCreateFn *fn)
 {
     return fn(par, fp);
 }
@@ -37,7 +36,8 @@ static WRegion *add_fn_new(WWindow *par, const WFitParams *fp,
 WRegion *region__attach_new(WRegion *mgr, WRegionSimpleCreateFn *cfn,
                             WRegionDoAttachFn *fn, void *param)
 {
-    return fn(mgr, (WRegionAttachHandler*)add_fn_new, (void*)cfn, param);
+    return fn(mgr, (WRegionAttachHandler*)region__attach_new_doit, 
+              (void*)cfn, param);
 }
 
 
@@ -47,8 +47,8 @@ WRegion *region__attach_new(WRegion *mgr, WRegionSimpleCreateFn *cfn,
 /*{{{ Load */
 
 
-static WRegion *add_fn_load(WWindow *par, const WFitParams *fp, 
-                            ExtlTab *tab)
+WRegion *region__attach_load_doit(WWindow *par, const WFitParams *fp, 
+                                  ExtlTab *tab)
 {
     return create_region_load(par, fp, *tab);
 }
@@ -62,7 +62,8 @@ WRegion *region__attach_load(WRegion *mgr, ExtlTab tab,
     if(extl_table_gets_o(tab, "reg", (Obj**)&reg))
         return region__attach_reparent(mgr, reg, fn, param);
 
-    return fn(mgr, (WRegionAttachHandler*)add_fn_load, (void*)&tab, param);
+    return fn(mgr, (WRegionAttachHandler*)region__attach_load_doit, 
+              (void*)&tab, param);
 }
 
 
@@ -72,8 +73,8 @@ WRegion *region__attach_load(WRegion *mgr, ExtlTab tab,
 /*{{{ Reparent */
 
 
-static WRegion *add_fn_reparent(WWindow *par, const WFitParams *fp, 
-                                WRegion *reg)
+WRegion *region__attach_reparent_doit(WWindow *par, const WFitParams *fp, 
+                                      WRegion *reg)
 {
     if(!region_fitrep(reg, par, fp)){
         warn(TR("Unable to reparent."));
@@ -84,13 +85,14 @@ static WRegion *add_fn_reparent(WWindow *par, const WFitParams *fp,
 }
 
 
-WRegion *region__attach_reparent(WRegion *mgr, WRegion *reg, 
-                                 WRegionDoAttachFn *fn, void *param)
+bool region__attach_reparent_check(WRegion *mgr, WRegion *reg)
 {
     WRegion *reg2;
     
-    if(REGION_MANAGER(reg)==mgr)
-        return reg;
+    if(REGION_MANAGER(reg)==mgr){
+        warn(TR("Same manager."));
+        return FALSE;
+    }
     
     /* Check that reg is not a parent or manager of mgr */
     reg2=mgr;
@@ -103,14 +105,24 @@ WRegion *region__attach_reparent(WRegion *mgr, WRegion *reg,
         if(reg2==reg)
             goto err;
     }
-    
-    return fn(mgr, (WRegionAttachHandler*)add_fn_reparent,
-              (void*)reg, param);
 
+    return TRUE;
+    
 err:
     warn(TR("Attempt to make region %s manage its ancestor %s."),
          region_name(mgr), region_name(reg));
     return FALSE;
+}
+
+
+WRegion *region__attach_reparent(WRegion *mgr, WRegion *reg, 
+                                 WRegionDoAttachFn *fn, void *param)
+{
+    if(!region__attach_reparent_check(mgr, reg))
+        return NULL;
+    
+    return fn(mgr, (WRegionAttachHandler*)region__attach_reparent_doit,
+              (void*)reg, param);
 }
 
 
