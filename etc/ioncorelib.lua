@@ -18,9 +18,11 @@ function submap2(kcb_, list)
 end
 
 --DOC
--- Create a submap table. For more information, see section
--- \ref{sec:bindings}.
-function submap(kcb_)
+-- Returns a function that creates a submap binding description table.
+-- When the key press action \var{keyspec} occurs, Ioncore will wait for
+-- a further key presse and act according to the submap.
+-- For details, see section \ref{sec:bindings}.
+function submap(keyspec)
     local function submap_helper(list)
 	return submap2(kcb_, list)
     end
@@ -28,18 +30,20 @@ function submap(kcb_)
 end
 
 --DOC
--- Create a table defining a key press binding. For more information,
--- see section \ref{sec:bindings}.
-function kpress(kcb_, func_)
-    return {action = "kpress", kcb = kcb_, func = func_}
+-- Creates a binding description table for the action of pressing a key given 
+-- by \var{keyspec} (with possible modifiers) to the function \var{func}.
+-- For more information on bindings, see section \ref{sec:bindings}.
+function kpress(keyspec, func)
+    return {action = "kpress", kcb = keyspec, func = func}
 end
 
 --DOC
--- Create a table defining a key press binding. When this key is pressed,
--- Ioncore waits for all modifiers to be released before processing any
--- further key presses. For more information see section \ref{sec:bindings}.
-function kpress_waitrel(kcb_, func_)
-    return {action = "kpress_waitrel", kcb = kcb_, func = func_}
+-- This is similar to \fnref{kpress} but after calling \var{func}, 
+-- Ioncore waits for all modifiers to be released before processing
+-- any further actions.
+-- For more information on bindings, see section \ref{sec:bindings}.
+function kpress_waitrel(keyspec, func)
+    return {action = "kpress_waitrel", kcb = keyspec, func = func}
 end
 
 function mact(act_, kcb_, func_, area_)
@@ -57,31 +61,38 @@ function mact(act_, kcb_, func_, area_)
 end
 
 --DOC
--- Create a table defining a mouse click binding.
+-- Creates a binding description table for the action of clicking a mouse 
+-- button while possible modifier keys are pressed,
+-- both given by \var{buttonspec}, to the function \var{func}.
+-- The optional argument \var{area} (a string or nil) depends on the
+-- context.
 -- For more information, see section \ref{sec:bindings}.
-function mclick(kcb_, func_, area_)
-    return mact("mclick", kcb_, func_, area_)
+function mclick(buttonspec, func, area)
+    return mact("mclick", buttonspec, func, area)
 end
 
 --DOC
--- Create a table defining a mouse drag binding.
--- For more information, see section \ref{sec:bindings}.
-function mdrag(kcb_, func_, area_)
-    return mact("mdrag", kcb_, func_, area_)
+-- Similar to \fnref{mclick} but for double-click.
+-- Also see section \ref{sec:bindings}.
+function mdblclick(buttonspec, func, area)
+    return mact("mdblclick", buttonspec, func, area)
 end
 
 --DOC
--- Create a table defining a mouse double click binding.
--- For more information, see section \ref{sec:bindings}.
-function mdblclick(kcb_, func_, area_)
-    return mact("mdblclick", kcb_, func_, area_)
+-- Similar to \fnref{mclick} but for just pressing the mouse button.
+-- Also see section \ref{sec:bindings}.
+function mpress(buttonspec, func, area)
+    return mact("mpress", buttonspec, func, area)
 end
 
 --DOC
--- Create a table defining a mouse button press binding.
--- For more information, see section \ref{sec:bindings}.
-function mpress(kcb_, func_, area_)
-    return mact("mpress", kcb_, func_, area_)
+-- Creates a binding description table for the action of moving the mouse
+-- (or other pointing device) while the button given by \var{buttonspec}
+-- is held pressed and the modifiers given by \var{buttonspec} were pressed
+-- when the button was initially pressed.
+-- Also see section \ref{sec:bindings}.
+function mdrag(buttonspec, func, area)
+    return mact("mdrag", buttonspec, func, area)
 end
 
 -- }}}
