@@ -12,10 +12,12 @@
 #ifndef ION_IONCORE_CLIENTWIN_H
 #define ION_IONCORE_CLIENTWIN_H
 
+#include <libextl/extl.h>
+#include <libtu/symlist.h>
+
 #include "common.h"
 #include "region.h"
 #include "hooks.h"
-#include <libextl/extl.h>
 #include "window.h"
 #include "rectangle.h"
 #include "attach.h"
@@ -57,7 +59,7 @@ DECLCLASS(WClientWin){
 
     Window transient_for;
     
-    WRegion *transient_list;
+    Symlist *transient_list;
     
     WClientWin *g_cwin_next, *g_cwin_prev;
     

@@ -18,17 +18,34 @@
 /*{{{ Region list */
 
 
+static WRegion *iter_managed(WRegion **list)
+{
+    WRegion *next=*list;
+    
+    if(next!=NULL)
+        *list=next->mgr_next;
+    
+    return next;
+}
+
+
 ExtlTab managed_list_to_table(WRegion *list, bool (*filter)(WRegion *r))
+{
+    return extl_list_to_obj_table((ObjIterator*)iter_managed, &list);
+}
+    
+ExtlTab extl_list_to_obj_table(ObjIterator *iter, void *st)
 {
     ExtlTab tab=extl_create_table();
     int i=1;
-    WRegion *r;
+    Obj *obj;
     
-    FOR_ALL_MANAGED_ON_LIST(list, r){
-        if(filter==NULL || filter(r)){
-            extl_table_seti_o(tab, i, (Obj*)r);
+    while(1){
+        obj=iter(st);
+        if(obj==NULL)
+            break;
+        if(extl_table_seti_o(tab, i, obj))
             i++;
-        }
     }
     
     return tab;

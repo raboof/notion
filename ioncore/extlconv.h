@@ -19,6 +19,10 @@
 extern ExtlTab managed_list_to_table(WRegion *list, 
                                     bool (*filter)(WRegion *r));
 
+typedef Obj *ObjIterator(void *st);
+
+extern ExtlTab extl_list_to_obj_table(ObjIterator *iter, void *st);
+
 extern bool extl_table_is_bool_set(ExtlTab tab, const char *entry);
 
 extern bool extl_table_to_rectangle(ExtlTab tab, WRectangle *rect);
