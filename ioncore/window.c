@@ -67,12 +67,14 @@ bool window_init(WWindow *wwin, WWindow *parent, Window win, WRectangle geom)
 	
 	wwin->win=win;
 #ifdef CF_XFT
-	wwin->draw=XftDrawCreate(wglobal.dpy, win, 
-							 DefaultVisual(wglobal.dpy, ROOTWIN_OF(wwin)->xscr),
-							 ROOTWIN_OF(wwin)->default_cmap);
-#else
-	wwin->draw=NULL;
+	if(parent!=NULL){
+		wwin->draw=XftDrawCreate(wglobal.dpy, win, 
+								 DefaultVisual(wglobal.dpy, ROOTWIN_OF(parent)->xscr),
+								 ROOTWIN_OF(parent)->default_cmap);
+	}else
 #endif
+	wwin->draw=NULL;
+	
 	wwin->xic=NULL;
 	wwin->keep_on_top_list=NULL;
 	
@@ -105,7 +107,8 @@ void window_deinit(WWindow *wwin)
 
 	XDeleteContext(wglobal.dpy, wwin->win, wglobal.win_context);
 #ifdef CF_XFT
-	XftDrawDestroy(wwin->draw);
+	if(wwin->draw!=NULL)
+		XftDrawDestroy(wwin->draw);
 #endif
 	XDestroyWindow(wglobal.dpy, wwin->win);
 }
