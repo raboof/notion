@@ -113,11 +113,11 @@ de_define_style("input", {
     highlight_pixels = 0,
     shadow_pixels = 0,
     border_style = "elevated",
-    de_substyle("cursor", {
+    de_substyle("*-cursor", {
         background_colour = "white",
         foreground_colour = "#3f3f3f",
     }),
-    de_substyle("selection", {
+    de_substyle("*-selection", {
         background_colour = "black",
         foreground_colour = "white",
     }),

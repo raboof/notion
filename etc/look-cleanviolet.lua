@@ -115,12 +115,12 @@ de_define_style("input", {
     background_colour = "#9999aa",
     foreground_colour = "#000000",
     
-    de_substyle("selection", {
+    de_substyle("*-selection", {
         background_colour = "#777799",
         foreground_colour = "#000000",
     }),
 
-    de_substyle("cursor", {
+    de_substyle("*-cursor", {
         background_colour = "#000000",
         foreground_colour = "#9999aa",
     }),
