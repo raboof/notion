@@ -39,7 +39,7 @@
 /*{{{ region dynfun implementations */
 
 
-static bool ionws_fitrep(WIonWS *ws, WWindow *par, const WFitParams *fp)
+bool ionws_fitrep(WIonWS *ws, WWindow *par, const WFitParams *fp)
 {
     WRegion *sub, *next;
     bool rs;
@@ -75,7 +75,7 @@ static bool ionws_fitrep(WIonWS *ws, WWindow *par, const WFitParams *fp)
 }
 
 
-static void ionws_map(WIonWS *ws)
+void ionws_map(WIonWS *ws)
 {
     WRegion *reg;
 
@@ -87,7 +87,7 @@ static void ionws_map(WIonWS *ws)
 }
 
 
-static void ionws_unmap(WIonWS *ws)
+void ionws_unmap(WIonWS *ws)
 {
     WRegion *reg;
     
@@ -99,12 +99,15 @@ static void ionws_unmap(WIonWS *ws)
 }
 
 
-static void ionws_do_set_focus(WIonWS *ws, bool warp)
+void ionws_do_set_focus(WIonWS *ws, bool warp)
 {
     WRegion *sub=ionws_current(ws);
     
     if(sub==NULL){
+        WRegion *r=REGION_PARENT(ws);
         warn("Trying to focus an empty ionws.");
+        if(r!=NULL)
+            xwindow_do_set_focus(region_xwindow(r));
         return;
     }
 
@@ -112,7 +115,7 @@ static void ionws_do_set_focus(WIonWS *ws, bool warp)
 }
 
 
-static bool ionws_managed_display(WIonWS *ws, WRegion *reg)
+bool ionws_managed_display(WIonWS *ws, WRegion *reg)
 {
     return TRUE;
 }
@@ -124,7 +127,7 @@ static bool ionws_managed_display(WIonWS *ws, WRegion *reg)
 /*{{{ Create/destroy */
 
 
-static void ionws_managed_add(WIonWS *ws, WRegion *reg)
+void ionws_managed_add_default(WIonWS *ws, WRegion *reg)
 {
     region_set_manager(reg, (WRegion*)ws, &(ws->managed_list));
     
@@ -133,6 +136,13 @@ static void ionws_managed_add(WIonWS *ws, WRegion *reg)
     if(REGION_IS_MAPPED(ws))
         region_map(reg);
 }
+
+
+void ionws_managed_add(WIonWS *ws, WRegion *reg)
+{
+    CALL_DYN(ws, ionws_managed_add, (ws, reg));
+}
+
 
 
 static WRegion *create_initial_frame(WIonWS *ws, WWindow *parent,
@@ -210,7 +220,7 @@ void ionws_deinit(WIonWS *ws)
 }
 
 
-static bool ionws_managed_may_destroy(WIonWS *ws, WRegion *reg)
+bool ionws_managed_may_destroy(WIonWS *ws, WRegion *reg)
 {
     if(ws->split_tree!=NULL && 
        ws->split_tree->type==SPLIT_REGNODE &&
@@ -244,9 +254,8 @@ static WSplit *get_node_check(WIonWS *ws, WRegion *reg)
 }
 
 
-void ionws_managed_remove(WIonWS *ws, WRegion *reg)
+WRegion *ionws_do_managed_remove(WIonWS *ws, WRegion *reg, bool reclaim_space)
 {
-    bool ds=OBJ_IS_BEING_DESTROYED(ws);
     WSplit *other=NULL, *node=get_node_check(ws, reg);
     
     /* This function should only be called by a code that gets us 
@@ -258,14 +267,23 @@ void ionws_managed_remove(WIonWS *ws, WRegion *reg)
     region_remove_bindmap_owned(reg, mod_ionws_ionws_bindmap, (WRegion*)ws);
 
     if(ws->split_tree!=NULL)
-        other=split_tree_remove(&(ws->split_tree), node, !ds);
+        other=split_tree_remove(&(ws->split_tree), node, !reclaim_space);
+
+    /* Other is guaranteed to be SPLIT_REGNODE if not NULL */
+    return (other!=NULL ? other->u.reg : NULL);
+}
+
+
+void ionws_managed_remove(WIonWS *ws, WRegion *reg)
+{
+    bool ds=OBJ_IS_BEING_DESTROYED(ws);
+    
+    WRegion *other=ionws_do_managed_remove(ws, reg, !ds);
     
     if(!ds){
-        if(other){
-            if(region_may_control_focus((WRegion*)ws)){
-                /* Other is guaranteed to be SPLIT_REGNODE */
-                region_set_focus(other->u.reg);
-            }
+        if(other!=NULL){
+            if(region_may_control_focus((WRegion*)ws))
+                region_set_focus(other);
         }else{
             ioncore_defer_destroy((Obj*)ws);
         }
@@ -778,7 +796,7 @@ static ExtlTab get_node_config(WSplit *node)
 }
 
 
-static ExtlTab ionws_get_configuration(WIonWS *ws)
+ExtlTab ionws_get_configuration(WIonWS *ws)
 {
     ExtlTab tab, split_tree;
     
@@ -807,8 +825,6 @@ static ExtlTab ionws_get_configuration(WIonWS *ws)
 
 
 extern void set_split_of(Obj *obj, WSplit *split);
-static WSplit *load_node(WIonWS *ws, WWindow *par, const WRectangle *geom, 
-                         ExtlTab tab);
 
 #define MINS 8
 
@@ -857,7 +873,7 @@ static WSplit *load_split(WIonWS *ws, WWindow *par, const WRectangle *geom,
     }
     
     if(extl_table_gets_t(tab, "tl", &subtab)){
-        tl=load_node(ws, par, &geom2, subtab);
+        tl=ionws_load_node(ws, par, &geom2, subtab);
         extl_unref_table(subtab);
     }
 
@@ -873,7 +889,7 @@ static WSplit *load_split(WIonWS *ws, WWindow *par, const WRectangle *geom,
     }
             
     if(extl_table_gets_t(tab, "br", &subtab)){
-        br=load_node(ws, par, &geom2, subtab);
+        br=ionws_load_node(ws, par, &geom2, subtab);
         extl_unref_table(subtab);
     }
     
@@ -893,8 +909,8 @@ static WSplit *load_split(WIonWS *ws, WWindow *par, const WRectangle *geom,
 }
 
 
-static WSplit *load_node(WIonWS *ws, WWindow *par, const WRectangle *geom,
-                         ExtlTab tab)
+WSplit *ionws_load_node(WIonWS *ws, WWindow *par, const WRectangle *geom,
+                        ExtlTab tab)
 {
     char *typestr;
     
@@ -943,7 +959,7 @@ WRegion *ionws_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
     }
 
     if(!ci){
-        ws->split_tree=load_node(ws, par, &REGION_GEOM(ws), treetab);
+        ws->split_tree=ionws_load_node(ws, par, &REGION_GEOM(ws), treetab);
         extl_unref_table(treetab);
     }
     
@@ -995,6 +1011,9 @@ static DynFunTab ionws_dynfuntab[]={
     {(DynFun*)region_current,
      (DynFun*)ionws_current},
 
+    {ionws_managed_add,
+     ionws_managed_add_default},
+    
     END_DYNFUNTAB
 };
 

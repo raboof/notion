@@ -33,19 +33,10 @@ DECLCLASS(WIonWS){
 
 extern bool ionws_init(WIonWS *ws, WWindow *parent, const WFitParams *fp,
                        bool ci, WRegionSimpleCreateFn *create_frame_fn);
+extern void ionws_deinit(WIonWS *ws);
 extern WIonWS *create_ionws(WWindow *parent, const WFitParams *fp, bool ci,
                             WRegionSimpleCreateFn *create_frame_fn);
 extern WIonWS *create_ionws_simple(WWindow *parent, const WFitParams *fp);
-extern WRegion *ionws_load(WWindow *par, const WFitParams *fp, ExtlTab tab);
-
-extern bool ionws_rescue_clientwins(WIonWS *ws);
-
-extern void ionws_managed_rqgeom(WIonWS *ws, WRegion *reg,
-                                 int flags, const WRectangle *geom,
-                                 WRectangle *geomret);
-extern void ionws_managed_remove(WIonWS *ws, WRegion *reg);
-extern void ionws_managed_activated(WIonWS *ws, WRegion *reg);
-extern bool ionws_managed_rescue(WIonWS *ws, WClientWin *cwin, WRegion *from);
 
 extern ExtlTab ionws_resize_tree(WIonWS *ws, Obj *node, ExtlTab g);
 
@@ -61,5 +52,32 @@ extern WFrame *ionws_split_at(WIonWS *ws, WFrame *frame,
 extern void ionws_unsplit_at(WIonWS *ws, WFrame *frame);
 
 extern WSplit *ionws_split_of(WIonWS *ws, WRegion *reg);
+
+extern WRegion *ionws_load(WWindow *par, const WFitParams *fp, ExtlTab tab);
+extern WSplit *ionws_load_node(WIonWS *ws, WWindow *par, 
+                               const WRectangle *geom, ExtlTab tab);
+
+extern WRegion *ionws_do_managed_remove(WIonWS *ws, WRegion *reg,
+                                        bool reclaim_space);
+
+DYNFUN void ionws_managed_add(WIonWS *ws, WRegion *reg);
+extern void ionws_managed_add_default(WIonWS *ws, WRegion *reg);
+
+/* Inherited dynfun implementations */
+
+extern bool ionws_fitrep(WIonWS *ws, WWindow *par, const WFitParams *fp);
+extern void ionws_map(WIonWS *ws);
+extern void ionws_unmap(WIonWS *ws);
+extern ExtlTab ionws_get_configuration(WIonWS *ws);
+extern void ionws_managed_rqgeom(WIonWS *ws, WRegion *reg,
+                                 int flags, const WRectangle *geom,
+                                 WRectangle *geomret);
+extern void ionws_managed_remove(WIonWS *ws, WRegion *reg);
+extern void ionws_managed_activated(WIonWS *ws, WRegion *reg);
+extern bool ionws_managed_rescue(WIonWS *ws, WClientWin *cwin, WRegion *from);
+extern bool ionws_rescue_clientwins(WIonWS *ws);
+extern void ionws_do_set_focus(WIonWS *ws, bool warp);
+extern bool ionws_managed_display(WIonWS *ws, WRegion *reg);
+extern bool ionws_managed_may_destroy(WIonWS *ws, WRegion *reg);
 
 #endif /* ION_IONWS_IONWS_H */
