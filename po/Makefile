@@ -11,7 +11,7 @@ MSGFMT = msgfmt -c
 MSGMERGE = msgmerge
 LXGETTEXT = $(LUA) $(TOPDIR)/build/lxgettext.lua
 
-TRANSLATIONS := fi cs
+TRANSLATIONS := fi cs de
 MO_FILES := $(patsubst %,%.mo, $(TRANSLATIONS))
 
 POTDIRS=../ioncore \

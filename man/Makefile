@@ -8,7 +8,7 @@ include $(TOPDIR)/system-inc.mk
 
 ######################################
 
-TRANSLATIONS=fi cs
+TRANSLATIONS=fi cs de
 
 WELCOME_TARGETS=\
 	welcome.txt \
