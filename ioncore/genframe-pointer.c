@@ -36,7 +36,7 @@ static bool inrect(WRectangle g, int x, int y)
 }
 
 
-#define RESB 8
+#define RESB 32
 
 
 int genframe_press(WGenFrame *genframe, XButtonEvent *ev, WRegion **reg_ret)
@@ -101,14 +101,17 @@ int genframe_press(WGenFrame *genframe, XButtonEvent *ev, WRegion **reg_ret)
 	
 	/* Neither of those */
 	
-	if(ev->x<REGION_GEOM(genframe).w/2)
-		p_dx1mul=1;
-	else
-		p_dx2mul=1;
-	if(ev->y<REGION_GEOM(genframe).h/2)
-		p_dy1mul=1;
-	else
-		p_dy2mul=1;
+	{
+		int tmpx=REGION_GEOM(genframe).w/2-ev->x;
+		int tmpy=REGION_GEOM(genframe).h/2-ev->y;
+		if(abs(tmpy)>abs(tmpx)){
+			p_dy1mul=(tmpy>=0);
+			p_dy2mul=(tmpy<0);
+		}else{
+			p_dx1mul=(tmpx>=0);
+			p_dx2mul=(tmpx<0);
+		}
+	}
 
 	return 0;
 }
