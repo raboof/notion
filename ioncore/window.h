@@ -31,10 +31,10 @@ DECLOBJ(WWindow){
 };
 
 
-extern bool window_init(WWindow *p, WWindow *parent,
-						Window win, const WRectangle *geom);
 extern bool window_init_new(WWindow *p, WWindow *parent, 
 							const WRectangle *geom);
+extern bool window_init(WWindow *p, WWindow *parent, Window win, 
+						const WRectangle *geom);
 extern void window_deinit(WWindow *win);
 
 extern WRegion *find_window(Window win);

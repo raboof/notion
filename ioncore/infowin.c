@@ -26,18 +26,17 @@ bool infowin_init(WInfoWin* p, WWindow *parent, const WRectangle *geom,
 	
 	if(!window_init_new(&(p->wwin), parent, geom))
 		return FALSE;
-
+	
 	p->buffer=ALLOC_N(char, WINFOWIN_BUFFER_LEN);
 	if(p->buffer==NULL)
 		goto fail;
 	p->buffer[0]='\0';
-	
+	p->attr=NULL;
+
 	p->brush=gr_get_brush(ROOTWIN_OF(parent), p->wwin.win, style);
 	if(p->brush==NULL)
 		goto fail2;
 	
-	p->attr=NULL;
-
 	/* Enable save unders */
 	attr.save_under=True;
 	XChangeWindowAttributes(wglobal.dpy, p->wwin.win,

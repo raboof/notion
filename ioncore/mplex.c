@@ -41,8 +41,8 @@
 /*{{{ Destroy/create mplex */
 
 
-bool mplex_init(WMPlex *mplex, WWindow *parent, Window win,
-				const WRectangle *geom)
+static bool mplex_do_init(WMPlex *mplex, WWindow *parent, Window win,
+						  const WRectangle *geom, bool create)
 {
 	mplex->managed_count=0;
 	mplex->managed_list=NULL;
@@ -50,8 +50,13 @@ bool mplex_init(WMPlex *mplex, WWindow *parent, Window win,
 	mplex->current_input=NULL;
 	mplex->flags=0;
 	
-	if(!window_init((WWindow*)mplex, parent, win, geom))
-		return FALSE;
+	if(create){
+		if(!window_init_new((WWindow*)mplex, parent, geom))
+			return FALSE;
+	}else{
+		if(!window_init((WWindow*)mplex, parent, win, geom))
+			return FALSE;
+	}
 	
 	mplex->win.region.flags|=REGION_BINDINGS_ARE_GRABBED;
 
@@ -60,6 +65,19 @@ bool mplex_init(WMPlex *mplex, WWindow *parent, Window win,
 	return TRUE;
 }
 
+
+bool mplex_init(WMPlex *mplex, WWindow *parent, Window win,
+				const WRectangle *geom)
+{
+	return mplex_do_init(mplex, parent, win, geom, FALSE);
+}
+
+
+bool mplex_init_new(WMPlex *mplex, WWindow *parent, const WRectangle *geom)
+{
+	return mplex_do_init(mplex, parent, None, geom, TRUE);
+}
+	
 
 void mplex_deinit(WMPlex *mplex)
 {

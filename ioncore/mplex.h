@@ -36,8 +36,10 @@ DECLOBJ(WMPlex){
 
 
 /* Create/destroy */
-extern bool mplex_init(WMPlex *mplex, WWindow *parent,
-					   Window win, const WRectangle *geom);
+extern bool mplex_init(WMPlex *mplex, WWindow *parent, Window win,
+					   const WRectangle *geom);
+extern bool mplex_init_new(WMPlex *mplex, WWindow *parent, 
+						   const WRectangle *geom);
 extern void mplex_deinit(WMPlex *mplex);
 
 /* Resize and reparent */

@@ -55,8 +55,7 @@ static void genframe_free_titles(WGenFrame *genframe);
 bool genframe_init(WGenFrame *genframe, WWindow *parent, 
 				   const WRectangle *geom)
 {
-	Window win;
-	
+	genframe->flags=0;
 	genframe->saved_w=0;
 	genframe->saved_h=0;
 	genframe->saved_x=0;
@@ -66,21 +65,16 @@ bool genframe_init(WGenFrame *genframe, WWindow *parent,
 	genframe->titles_n=0;
 	genframe->bar_h=0;
 	genframe->tr_mode=GR_TRANSPARENCY_DEFAULT;
-	
-	win=create_simple_window(ROOTWIN_OF(parent), parent->win, geom);
-	
-	if(!mplex_init((WMPlex*)genframe, parent, win, geom)){
-		XDestroyWindow(wglobal.dpy, win);
+	genframe->brush=NULL;
+	genframe->bar_brush=NULL;
+
+	if(!mplex_init_new((WMPlex*)genframe, parent, geom))
 		return FALSE;
-	}
 	
 	genframe_initialise_gr(genframe);
 	genframe_initialise_titles(genframe);
 	
-	/* in mplex */
-	/*genframe->win.region.flags|=REGION_BINDINGS_ARE_GRABBED;*/
-	
-	XSelectInput(wglobal.dpy, win, FRAME_MASK);
+	XSelectInput(wglobal.dpy, WGENFRAME_WIN(genframe), FRAME_MASK);
 
 	region_add_bindmap((WRegion*)genframe, &ioncore_genframe_bindmap);
 	

@@ -441,15 +441,13 @@ bool menu_init(WMenu *menu, WWindow *par, const WRectangle *geom,
 	menu->entry_spacing=0;
 	menu->submenu=NULL;
 	
-	win=create_simple_window(ROOTWIN_OF(par), par->win, geom);
-	
-	if(!menu_init_gr(menu, ROOTWIN_OF(par), win))
+	if(!window_init_new((WWindow*)menu, par, geom))
 		goto fail;
 
-	if(!window_init((WWindow*)menu, par, win, geom)){
-		menu_release_gr(menu, win);
-		goto fail;
-	}
+	win=menu->win.win;
+	
+	if(!menu_init_gr(menu, ROOTWIN_OF(par), win))
+		goto fail2;
 
 	menu_firstfit(menu, params->submenu_mode, params->ref_x, params->ref_y);
 	
@@ -458,8 +456,9 @@ bool menu_init(WMenu *menu, WWindow *par, const WRectangle *geom,
 	
 	return TRUE;
 
+fail2:
+	window_deinit((WWindow*)menu);
 fail:
-	XDestroyWindow(wglobal.dpy, win);
 	extl_unref_table(menu->tab);
 	extl_unref_fn(menu->handler);
 	free(menu->entries);

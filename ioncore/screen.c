@@ -52,7 +52,9 @@ static bool screen_init(WScreen *scr, WRootWin *rootwin,
 	scr->managed_off.y=0;
 	scr->managed_off.w=0;
 	scr->managed_off.h=0;
-	
+	scr->next_scr=NULL;
+	scr->prev_scr=NULL;
+
 	if(useroot){
 		win=WROOTWIN_ROOT(rootwin);
 	}else{
@@ -65,18 +67,15 @@ static bool screen_init(WScreen *scr, WRootWin *rootwin,
 						  InputOutput,
 						  DefaultVisual(wglobal.dpy, rootwin->xscr),
 						  attrflags, &attr);
-		
 		if(win==None)
 			return FALSE;
 	}
 
-	if(!mplex_init((WMPlex*)scr, NULL, win, geom)){
-		XDestroyWindow(wglobal.dpy, win);
+	if(!mplex_init((WMPlex*)scr, (WWindow*)rootwin, win, geom))
 		return FALSE;
-	}
 
-	scr->mplex.win.region.rootwin=rootwin;
-	region_set_parent((WRegion*)scr, (WRegion*)rootwin);
+	/*scr->mplex.win.region.rootwin=rootwin;
+	region_set_parent((WRegion*)scr, (WRegion*)rootwin);*/
 	scr->mplex.flags|=WMPLEX_ADD_TO_END;
 	scr->mplex.win.region.flags|=REGION_BINDINGS_ARE_GRABBED;
 	if(useroot)
@@ -190,7 +189,7 @@ void screen_managed_geom(WScreen *scr, WRectangle *geom)
 /*}}}*/
 
 
-/*{{{ region dynfun implementations */
+/*{{{ Region dynfun implementations */
 
 
 static void screen_fit(WScreen *scr, const WRectangle *geom)
@@ -416,6 +415,7 @@ void screen_set_managed_offset(WScreen *scr, const WRectangle *off)
 
 
 /*}}}*/
+
 
 /*{{{ Save/load */
 

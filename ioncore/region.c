@@ -46,6 +46,7 @@ void region_init(WRegion *reg, WRegion *parent, const WRectangle *geom)
 	reg->geom=*geom;
 	reg->flags=0;
 	reg->bindings=NULL;
+	reg->rootwin=NULL;
 	
 	reg->children=NULL;
 	reg->parent=NULL;
@@ -69,18 +70,16 @@ void region_init(WRegion *reg, WRegion *parent, const WRectangle *geom)
 	reg->stacking.above=NULL;
 	
 	reg->mgd_activity=FALSE;
+
+	if(!WOBJ_IS(reg, WClientWin))
+		region_set_name(reg, WOBJ_TYPESTR(reg));
 	
 	if(parent!=NULL){
 		reg->rootwin=parent->rootwin;
-		/*link_child(parent, reg);*/
-		region_attach_parent(reg, parent);
+		region_set_parent(reg, parent);
 	}else{
-		assert(WOBJ_IS(reg, WRootWin) || WOBJ_IS(reg, WScreen));
-		reg->rootwin=NULL;
+		assert(WOBJ_IS(reg, WRootWin));/* || WOBJ_IS(reg, WScreen));*/
 	}
-	
-	if(!WOBJ_IS(reg, WClientWin))
-		region_set_name(reg, WOBJ_TYPESTR(reg));
 }
 
 

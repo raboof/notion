@@ -201,6 +201,17 @@ void region_raise(WRegion *reg)
 }
 
 
+void stacking_init_window(WWindow *par, Window win)
+{
+	Window w;
+	
+	if(par->keep_on_top_list!=NULL){
+		w=region_x_window(par->keep_on_top_list);
+		do_restack_window(win, w, Below);
+	}
+}
+
+
 /*EXTL_DOC
  * Lower \var{reg} in the stack. The regions marked to be stacked above
  * \var{reg} will also be lowerd and regions marked to be kept on top

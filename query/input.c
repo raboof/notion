@@ -107,27 +107,26 @@ bool input_init(WInput *input, WWindow *par, const WRectangle *geom)
 	Window win;
 
 	input->max_geom=*geom;
+
+	if(!window_init_new((WWindow*)input, par, geom))
+		return FALSE;
 	
-	win=create_simple_window(ROOTWIN_OF(par), par->win, geom);
+	win=input->win.win;
 	
 	input->brush=gr_get_brush(ROOTWIN_OF(par), win, input_style(input));
-	if(input->brush==NULL){
-		XDestroyWindow(wglobal.dpy, win);
-		return FALSE;
-	}
-
-	if(!window_init((WWindow*)input, par, win, geom)){
-		grbrush_release(input->brush, win);
-		XDestroyWindow(wglobal.dpy, win);
-		return FALSE;
-	}
-
-	input_refit(input);
 	
+	if(input->brush==NULL)
+		goto fail;
+	
+	input_refit(input);
 	XSelectInput(wglobal.dpy, input->win.win, INPUT_MASK);
 	region_add_bindmap((WRegion*)input, &query_bindmap);
 	
 	return TRUE;
+	
+fail:
+	window_deinit((WWindow*)input);
+	return FALSE;
 }
 
 

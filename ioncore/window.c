@@ -61,32 +61,31 @@ bool reparent_region(WRegion *reg, WWindow *par, const WRectangle *geom)
 /*{{{ Init, create */
 
 
-bool window_init(WWindow *wwin, WWindow *parent, Window win, 
+bool window_init(WWindow *wwin, WWindow *parent, Window win,
 				 const WRectangle *geom)
 {
 	wwin->win=win;
 	wwin->xic=NULL;
 	wwin->keep_on_top_list=NULL;
-	
 	region_init(&(wwin->region), (WRegion*)parent, geom);
-	
-	XSaveContext(wglobal.dpy, win, wglobal.win_context, (XPointer)wwin);
-	
+	if(win!=None){
+		XSaveContext(wglobal.dpy, win, wglobal.win_context, (XPointer)wwin);
+		if(parent!=NULL)
+			stacking_init_window(parent, win);
+	}
 	return TRUE;
 }
 
 
-bool window_init_new(WWindow *p, WWindow *parent, const WRectangle *geom)
+bool window_init_new(WWindow *wwin, WWindow *parent, const WRectangle *geom)
 {
 	Window win;
 	
 	win=create_simple_window(ROOTWIN_OF(parent), parent->win, geom);
-	
 	if(win==None)
 		return FALSE;
-	
-	/* window_init above will always succeed */
-	return window_init(p, parent, win, geom);
+	/* window_init does not fail */
+	return window_init(wwin, parent, win, geom);
 }
 
 
@@ -97,8 +96,10 @@ void window_deinit(WWindow *wwin)
 	if(wwin->xic!=NULL)
 		XDestroyIC(wwin->xic);
 
-	XDeleteContext(wglobal.dpy, wwin->win, wglobal.win_context);
-	XDestroyWindow(wglobal.dpy, wwin->win);
+	if(wwin->win!=None){
+		XDeleteContext(wglobal.dpy, wwin->win, wglobal.win_context);
+		XDestroyWindow(wglobal.dpy, wwin->win);
+	}
 }
 
 

@@ -243,18 +243,26 @@ static WRootWin *preinit_rootwin(int xscr)
 	
 	/* Init the struct */
 	WOBJ_INIT(rootwin, WRootWin);
+
+	rootwin->xscr=xscr;
+	rootwin->default_cmap=DefaultColormap(dpy, xscr);
+	rootwin->screen_list=NULL;
+	rootwin->tmpwins=NULL;
+	rootwin->tmpnwins=0;
+	rootwin->dummy_win=None;
+	rootwin->xor_gc=None;
 	
 	geom.x=0; geom.y=0;
 	geom.w=DisplayWidth(dpy, xscr);
 	geom.h=DisplayHeight(dpy, xscr);
 	
-	window_init((WWindow*)rootwin, NULL, root, &geom);
-	
+	if(!window_init((WWindow*)rootwin, NULL, root, &geom)){
+		free(rootwin);
+		return NULL;
+	}
+
 	((WRegion*)rootwin)->flags|=REGION_BINDINGS_ARE_GRABBED;
 	((WRegion*)rootwin)->rootwin=rootwin;
-	rootwin->xscr=xscr;
-	rootwin->default_cmap=DefaultColormap(dpy, xscr);
-	rootwin->screen_list=NULL;
 	
 	MARK_REGION_MAPPED(rootwin);
 	
@@ -474,11 +482,11 @@ static Window rootwin_x_window(WRootWin *rootwin)
 EXTL_EXPORT_MEMBER
 WRootWin *region_rootwin_of(const WRegion *reg)
 {
-	WRootWin *scr;
-	assert(reg!=NULL);
-	scr=(WRootWin*)(reg->rootwin);
-	assert(scr!=NULL);
-	return scr;
+	WRootWin *rw;
+	assert(reg!=NULL); /* Lua interface should not pass NULL reg. */
+	rw=(WRootWin*)(reg->rootwin);
+	assert(rw!=NULL);
+	return rw;
 }
 
 

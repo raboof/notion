@@ -96,6 +96,8 @@ static void save_history()
 		return;
 	}
 	
+	free(fname);
+	
 	fprintf(file, "local saves={\n");
 	
 	while(1){
