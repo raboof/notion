@@ -13,12 +13,14 @@
 #define ION_IONCORE_NETWM_H
 
 #include "common.h"
+#include "rootwin.h"
 
 #define _NET_WM_STATE_REMOVE        0    /* remove/unset property */
 #define _NET_WM_STATE_ADD           1    /* add/set property */
 #define _NET_WM_STATE_TOGGLE        2    /* toggle property  */
 
 extern void netwm_init();
+extern void netwm_init_rootwin(WRootWin *rw);
 
 extern int netwm_check_initial_fullscreen(WClientWin *cwin, bool switchto);
 extern void netwm_update_state(WClientWin *cwin);

@@ -11,6 +11,8 @@
 
 #include <string.h>
 #include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <ltdl.h>
 #include <libtu/output.h>
 
@@ -426,6 +428,37 @@ bool read_config_args(const char *module, bool warn_nx,
 /*{{{ get_savefile */
 
 
+static bool ensuredir(char *f)
+{
+	char *p;
+	int tryno=0;
+	bool ret=TRUE;
+	
+	if(access(f, F_OK)==0)
+		return TRUE;
+	
+	if(mkdir(f, 0700)==0)
+		return TRUE;
+	
+	p=strrchr(f, '/');
+	if(p==NULL){
+		warn_err_obj(f);
+		return FALSE;
+	}
+	
+	*p='\0';
+	if(!ensuredir(f))
+		return FALSE;
+	*p='/';
+		
+	if(mkdir(f, 0700)==0)
+		return TRUE;
+	
+	warn_err_obj(f);
+	return FALSE;
+}
+
+
 /*EXTL_DOC
  * Get a file name to save (session) data in. The string \var{basename} should
  * contain no path or extension components.
@@ -435,8 +468,15 @@ char *get_savefile(const char *basename)
 {
 	char *res=NULL;
 	
-	if(sessiondir!=NULL)
-		libtu_asprintf(&res, "%s/%s." EXTL_EXTENSION, sessiondir, basename);
+	if(sessiondir==NULL)
+		return NULL;
+	
+	if(!ensuredir(sessiondir)){
+		warn("Unable to create session directory %s\n", sessiondir);
+		return NULL;
+	}
+	
+	libtu_asprintf(&res, "%s/%s." EXTL_EXTENSION, sessiondir, basename);
 	
 	return res;
 }

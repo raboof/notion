@@ -11,6 +11,7 @@
 
 #include <X11/Xatom.h>
 
+#include <libtu/util.h>
 #include "common.h"
 #include "mwmhints.h"
 #include "global.h"
@@ -21,15 +22,45 @@
 
 
 static Atom atom_net_wm_state_fullscreen=0;
+static Atom atom_net_supported=0;
+static Atom atom_net_supporting_wm_check=0;
+static Atom atom_net_virtual_roots=0;
+
+#define N_NETWM 5
 
 
 void netwm_init()
 {
 	wglobal.atom_net_wm_name=XInternAtom(wglobal.dpy, "_NET_WM_NAME", False);
 	wglobal.atom_net_wm_state=XInternAtom(wglobal.dpy, "_NET_WM_STATE", False);
+	atom_net_supported=XInternAtom(wglobal.dpy, "_NET_SUPPORTED", False);
+	atom_net_supporting_wm_check=XInternAtom(wglobal.dpy, "_NET_SUPPORTING_WM_CHECK", False);
 	atom_net_wm_state_fullscreen=XInternAtom(wglobal.dpy, "_NET_WM_STATE_FULLSCREEN", False);
+	atom_net_virtual_roots=XInternAtom(wglobal.dpy, "_NET_VIRTUAL_ROOTS", False);
+}
+
+
+void netwm_init_rootwin(WRootWin *rw)
+{
+	Atom atoms[N_NETWM];
+
+	atoms[0]=wglobal.atom_net_wm_name;
+	atoms[1]=wglobal.atom_net_wm_state;
+	atoms[2]=atom_net_wm_state_fullscreen;
+	atoms[3]=atom_net_supporting_wm_check;
+	atoms[4]=atom_net_virtual_roots;
 	
-	/* Should set _NET_SUPPROTED. */
+	FOR_ALL_ROOTWINS(rw){
+		XChangeProperty(wglobal.dpy, WROOTWIN_ROOT(rw),
+						atom_net_supporting_wm_check, XA_WINDOW,
+						32, PropModeReplace, (uchar*)&(rw->dummy_win), 1);
+		XChangeProperty(wglobal.dpy, WROOTWIN_ROOT(rw),
+						atom_net_supported, XA_ATOM,
+						32, PropModeReplace, (uchar*)atoms, N_NETWM);
+		/* Something else should probably be used as WM name here. */
+		set_text_property(rw->dummy_win, wglobal.atom_net_wm_name,
+						  prog_execname());
+	}
 }
 
 	

@@ -42,7 +42,7 @@
 #include "readconfig.h"
 #include "resize.h"
 #include "saveload.h"
-
+#include "netwm.h"
 
 
 /*{{{ Error handling */
@@ -271,7 +271,8 @@ static WRootWin *preinit_rootwin(int xscr)
 
 	create_wm_windows(rootwin);
 	preinit_gr(rootwin);
-
+	netwm_init_rootwin(rootwin);
+	
 	region_add_bindmap((WRegion*)rootwin, &ioncore_rootwin_bindmap);
 	
 	return rootwin;

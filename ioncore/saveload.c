@@ -10,9 +10,6 @@
  */
 
 #include <string.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 
 #include "common.h"
 #include "global.h"
@@ -172,38 +169,6 @@ bool load_workspaces()
 }
 
 
-static bool ensuredir(char *f)
-{
-	char *p=strrchr(f, '/');
-	int tryno=0;
-	bool ret=TRUE;
-	
-	if(p==NULL)
-		return TRUE;
-	
-	*p='\0';
-	
-	if(access(f, F_OK)!=0){
-		ret=FALSE;
-		do{
-			if(mkdir(f, 0700)==0){
-				ret=TRUE;
-				break;
-			}
-			if(!ensuredir(f))
-				break;
-			tryno++;
-		}while(tryno<2);
-		
-		if(!ret)
-			warn_obj(f, "Unable to create directory");
-	}
-
-	*p='/';
-	return ret;
-}
-
-
 bool save_workspaces()
 {
 	bool successp=TRUE;
@@ -214,9 +179,6 @@ bool save_workspaces()
 	wsconf=get_savefile("workspaces");
 
 	if(wsconf==NULL)
-		return FALSE;
-
-	if(!ensuredir(wsconf))
 		return FALSE;
 
 	file=fopen(wsconf, "w");
