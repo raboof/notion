@@ -14,6 +14,8 @@ CFLAGS += $(XOPEN_SOURCE)
 
 SOURCES=main.c menu.c mkmenu.c
 
+LUA_SOURCES=menulib.lua
+
 MAKE_EXPORTS=menu_module
 
 MODULE=menu
@@ -26,5 +28,5 @@ include $(TOPDIR)/rules.mk
 
 _install: module_install
 	$(INSTALLDIR) $(SHAREDIR)
-	$(INSTALL) -m $(DATA_MODE) menulib.lua $(SHAREDIR)
+	$(INSTALL) -m $(DATA_MODE) menulib.lua menulib.lc $(SHAREDIR)
 

@@ -11,6 +11,13 @@ ifdef MODULE
 TARGETS := $(TARGETS) $(MODULE).la
 endif
 
+ifdef LUA_SOURCES
+LUA_COMPILED := $(subst .lua,.lc, $(LUA_SOURCES))
+TARGETS := $(TARGETS) $(LUA_COMPILED)
+TO_CLEAN := $(TO_CLEAN) $(LUA_COMPILED)
+endif
+
+
 ifdef SUBDIRS
 
 all: subdirs $(TARGETS)
@@ -121,6 +128,12 @@ _clean: clean_objs
 
 _realclean: clean_target
 	$(RM) -f $(TO_REALCLEAN)
+
+# Lua rules
+######################################
+
+%.lc: %.lua
+	$(LUAC) -o $@ $<
 
 
 # Dependencies

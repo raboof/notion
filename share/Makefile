@@ -8,8 +8,8 @@ include $(TOPDIR)/system-inc.mk
 
 ######################################
 
-LUACODE = ioncorelib.lua ioncore-mplexfns.lua compat.lua \
-	  ioncore-efbb.lua
+LUA_SOURCES = ioncorelib.lua ioncore-mplexfns.lua compat.lua \
+	      ioncore-efbb.lua
 
 SHELLSCRIPTS = ion-edit ion-man ion-runinxterm ion-ssh ion-view
 
@@ -26,7 +26,7 @@ _install:
 	for i in $(SHELLSCRIPTS); do \
 		$(INSTALL) -m $(BIN_MODE) $$i $(SHAREDIR); \
 	done
-	for i in $(LUACODE); do \
+	for i in $(LUA_SOURCES) $(LUA_COMPILED); do \
 		$(INSTALL) -m $(DATA_MODE) $$i $(SHAREDIR); \
 	done
 

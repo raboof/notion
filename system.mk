@@ -72,6 +72,7 @@ LUA_PATH=/usr/local
 LUA_LIBS = -L$(LUA_PATH)/lib -R$(LUA_PATH)/lib -llua -llualib
 LUA_INCLUDES = -I$(LUA_PATH)/include
 LUA=$(LUA_PATH)/bin/lua
+LUAC=$(LUA_PATH)/bin/luac
 
 # If you are using the Debian packages, the following settings should be
 # what you want.
@@ -79,6 +80,7 @@ LUA=$(LUA_PATH)/bin/lua
 #LUA_LIBS = -llua50 -llualib50
 #LUA_INCLUDES = -I$(LUA_PATH)/include/lua50
 #LUA=$(LUA_PATH)/bin/lua50
+#LUAC=$(LUA_PATH)/bin/luac50
 
 
 ##
