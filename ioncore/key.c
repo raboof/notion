@@ -120,7 +120,13 @@ static bool waitrelease_handler(WRegion *reg, XEvent *ev)
 
 static void waitrelease(WRegion *reg)
 {
-	grab_establish(reg, waitrelease_handler, FocusChangeMask|KeyPressMask);
+	/* We need to grab on the root window as <reg> might have been
+	 * defer_destroy:ed by the binding handler (the most common case
+	 * for using this kpress_waitrel!). In such a case the grab may
+	 * be removed before the modifiers are released.
+	 */
+	grab_establish((WRegion*)region_rootwin_of(reg), waitrelease_handler, 
+				   FocusChangeMask|KeyPressMask);
 	change_grab_cursor(CURSOR_WAITKEY);
 }
 
