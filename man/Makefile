@@ -8,7 +8,7 @@ include $(TOPDIR)/system-inc.mk
 
 ######################################
 
-TARGETS=ion.1x
+TARGETS=ion.1
 
 ######################################
 
@@ -16,9 +16,18 @@ include $(TOPDIR)/rules.mk
 
 ######################################
 
-ion.1x: ion.1x.in
+ion.1: ion.1.in
 	sed 's#ETCDIR#$(ETCDIR)#g; s#DOCDIR#$(DOCDIR)#g;' $< > $@
 
 _install:
 	$(INSTALLDIR) $(MANDIR)/man1
-	$(INSTALL) -m $(DATA_MODE) ion.1x $(MANDIR)/man1
+	$(INSTALL) -m $(DATA_MODE) ion.1 $(MANDIR)/man1
+
+#
+# Awful hack that may not work on the user's system. This is rule is
+# supposed to be executed before packaging Ion.
+#
+
+ion.1.in.txt: ion.1.in
+	man ./ion.1.in|perl -p -i -e 's/.\10//g' > ion.1.in.txt
+

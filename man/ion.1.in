@@ -402,7 +402,7 @@ System default configuration files
 System default main configuratio files
 .TP
 .B ETCDIR/look-*.lua
-Color scheme configuration files
+Colour scheme configuration files
 .TP
 .B ~/.ion-devel/
 User configuration files

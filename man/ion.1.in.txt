@@ -1,0 +1,408 @@
+ION(1)                                                                  ION(1)
+
+
+
+NAME
+       Ion - an X11 window manager
+
+SYNOPSIS
+       ion [options]
+
+DESCRIPTION
+       Ion  is  a tiling tabbed window manager designed with keyboard users in
+       mind.
+
+
+OPTIONS
+       -display host:display.screen
+              X display to manage
+
+       -cfgfile configfile
+              Config file to use instead of default
+
+       -moduledir dir
+              Directory to search for module
+
+       -confdir dir
+              Directory to search for configuration files and other scripts
+
+       -oneroot
+              On X servers with multiple (traditional  non-Xinerama)  screens,
+              manage  only  default screen (root window), not all, as given by
+              the -display option or in the DISPLAY environment variable.
+
+       -sessionname seession_name
+              Set sesion name. This option affects where workspace  and  other
+              savefiles are put (~/.ion-devel/session_name if option set).
+
+       -noxinerama
+              If  Ion  was  compiled with Xinerama support, this option can be
+              used to disable it.
+
+       -i18n  Enable use of multibyte string routines, actual encoding depend-
+              ing on the locale.
+
+       -help  Show help on command line options
+
+       -version
+              Show version
+
+       -about Show about text (version, copyright)
+
+
+BASIC CONCEPTS
+       This  section  is  an overview of the types objects that appear on an X
+       display managed by Ion and their relationships  in  a  standard  setup.
+       This information is necessary to understand the operations of different
+       key bindings. For a more detailed explanation, needed for writing  cus-
+       tom  bindings  configuration  files,  see  the additional documentation
+       available from the Ion Web page.
+
+       The top-level objects that matter are screens and  they  correspond  to
+       physical  screens. Screens contain workspaces and client windows put in
+       full screen mode. Only one of these "multiplexed" objects can be viewed
+       at a time.
+
+       Two  types  of  workspaces currently supported; tiled (traditional Ion-
+       style) and floating (pwm-style). Workspaces are not visible objects but
+       rather  collections  of frames. Frames are the objects with decorations
+       such as tabs and borders and there are two types of these corresponding
+       to the diffent types of workspaces.
+
+       Frames contain (multiplex) client windows, to each of which corresponds
+       a tab in the frame's decoration.  Only  one  client  window  (or  other
+       object)  can be shown at a time in each frame. (In a traditional window
+       manager each frame may contain exactly one client window.)
+
+       "Queries" are boxes that appear at the bottoms of frames or screens and
+       are  used  to ask the user for textual input. Most queries support tab-
+       completion.
+
+
+
+KEYS
+       These are the default keybindings.  Mod1 depends  on  your  system.  On
+       PC:s with XFree86 it is probably bound to the left alt key (Alt_L).  On
+       Suns it is usually bound to the  diamond  keys  (Meta_L,  Meta_R).  Use
+       xmodmap(1x) to find out.
+
+
+   F-keys
+       F1     Show  manual  page  (query, uses ion-man). Tab-completion can be
+              enabled by specifying a list  of  directories  in  the  variable
+              query_man_path.
+
+       Mod1+F1
+              Show Ion manual page.
+
+       F2     Run an xterm.
+
+       F3     Run a program (query). Precede the program name with a colon (:)
+              to run in xterm (ion-runinxterm).
+
+       Mod1+F3
+              Call a function (query).
+
+       F4     Start new SSH session (query, uses ion-ssh).  Tab-completion  of
+              hosts  can  be  enabled  by specifying them in the configuration
+              variable query_ssh_hosts.
+
+       F5     Open a file for editing (query). Uses ion-edit which by  default
+              uses run-mailcap.
+
+       F6     Open  a file for viewing (query). Uses ion-view which by default
+              uses run-mailcap.
+
+       F9     Go to existing workspace or create new (query).
+
+       Mod1+F9
+              Create a new tiled workspace with a name of the form  WIonWS<n>.
+
+       F12    Main menu
+
+
+   Navigation
+       Mod1+n Go to n:th workspace (n=1..9, 0)
+
+       Mod1+Right
+              Go to next workspace
+
+       Mod1+Left
+              Go to previous workspace
+
+       Mod1+Shift+n
+              Go to n:th screen (n=1,2)
+
+       Mod1+Shift+Right
+              Go to next screen
+
+       Mod1+Shift+Left
+              Go to previous screen
+
+       Mod1+G Go to client (query; only works in a frame)
+
+       Mod1+K K
+              Go to previously active object
+
+
+
+
+       Navigation on tiled workspaces
+
+
+       Mod1+N Go to below frame
+
+       Mod1+P Go to above frame
+
+       Mod1+Tab
+              Go to right frame
+
+       Mod1+K Tab
+              Go to left frame
+
+
+       Navigation on floating workspaces
+
+
+       Mod1+Tab
+              Circulate
+
+       Mod1+K Tab
+              Backcirculate
+
+
+   Closing and destroying objects.
+       Mod1+C Close active object if possible
+
+       Mod1+K C
+              Kill client window
+
+       Mod1+K X
+              Destroy frame
+
+
+   Frame operations
+       Mod1+K N
+              Go to next client window within frame
+
+       Mod1+K P
+              Go to previous client window within frame
+
+       Mod1+K n
+              Go to n:th client window within frame (n=1..9, 0)
+
+       Mod1+A Attach named client window in the frame (query)
+
+       Mod1+M Frame context menu
+
+
+
+       Tags
+
+       Mod1+T Toggle  current client window's tag state (indicated by a right-
+              angle in the top-right corner of the window's tab)
+
+       Mod1+K T
+              Clear all objects' tag state
+
+       Mod1+K A
+              Attach all tagged windows to the frame
+
+
+       Resizing and splitting
+
+
+       Mod1+K V
+              Maximize vertically
+
+       Mod1+K H
+              Maximize horizontally
+
+       Mod1+S Split vertically (tiled workspaces only)
+
+       Mod1+K S
+              Split horizontally (tiled workspaces only)
+
+       Mod1+R Enter resize mode
+
+
+       Resize mode bindings
+
+
+       Left, Right, Up Down or F, B, P, N
+              Grow the frame in the specific direction
+
+       Shift+Left, Right, Up Down or Shift+F, B, P, N
+              Shrink the frame in the specific direction
+
+       Mod1+Left, Right, Up Down or Mod1+F, B, P, N
+              On floating frame worskacpes: move the  frame  in  the  specific
+              direction.
+
+
+   Miscellaneous
+       Mod1+L Broken application resize kludge; try to make that broken appli-
+              cation that didn't get it the first time to understand the  real
+              size of the active window
+
+       Mod1+K Q
+              Send next key press to active client window.
+
+
+
+LINE-EDITING KEYS
+       These  keys  can be used in the line editor (queries). They are similar
+       to those of joe(1).  Selection works  differently,  though,  while  the
+       keys are equivalent.
+
+
+   Movement
+       Control+F, Right arrow
+              Go forward character
+
+       Control+B, Left arrow
+              Go backward character
+
+       Control+E, End
+              Go to end of line
+
+       Control+A, Home
+              Go to beginning of line
+
+       Control+Z
+              Backward skip word
+
+       Control+X
+              Forward skip word
+
+
+   Delete
+       Control+D, Delete
+              Delete next character
+
+       Control+H, Backspace
+              Delete previous character
+
+       Control+J
+              Delete to end of line
+
+       Control+Y
+              Delete whole line
+
+       Control+W
+              Delete word
+
+       Control+O
+              Backward delete word
+
+
+   Selections
+       Control+K B
+              Set mark (begin selection)
+
+       Control+K K
+              Copy selection
+
+       Control+K Y
+              Cut selection
+
+       Control+K C
+              Paste
+
+
+   Completion and history
+       Tab    Complete or list possible completions (if available)
+
+       Control+U, Page up
+              Scroll completions up
+
+       Control+V, Page down
+              Scroll completions down
+
+       Control+P, Up arrow
+              Previous history entry
+
+       Control+N, Down arrow
+              Next history entry
+
+
+   Cancel, accept
+       Control+C, Escape
+              Cancel
+
+       Control+M, Enter
+              Accept
+
+
+POINTING DEVICE BUTTONS
+       The  bindings  for  the two types of frames are again different because
+       not all legacy/floating frame actions are available on tiled frames and
+       thus those buttons have been mapped to other actions.
+
+
+   Tiled frames
+       Button1 (left) or Button2 (middle) on tab
+              Click: switch client, drag: drag&drop clients between frames
+
+       Button1 (left) on border
+              Drag: resize
+
+       Mod1+Button1 (left) or Mod1+Button3 (right)
+              Resize.
+
+       Button3 (right) on tab
+              Context menu
+
+
+   Floating frames
+       Button1 (left)
+              Press:  raise frame, click tab: switch client, double-click tab:
+              toggle shade mode, drag border:  resize,  drag  elsewhere:  move
+              frame
+
+       Button2 (middle) on tab
+              Click: switch client, drag: drag&drop clients between frames
+
+       Mod1+Button1 (left)
+              Click: raise, drag: move
+
+       Mod1+Button3 (right)
+              Click: lower: drag: resize
+
+       Button3 (right) on tab
+              Context menu
+
+
+FILES AND DIRECTORIES
+       ETCDIR/
+              System default configuration files
+
+       ETCDIR/ioncore.lua
+              System default main configuratio files
+
+       ETCDIR/look-*.lua
+              Colour scheme configuration files
+
+       ~/.ion-devel/
+              User configuration files
+
+       ~/.ion-devel/ioncore.lua
+              User default configuration file (overrides system default)
+
+
+SEE ALSO
+       The Ion home page, http://iki.fi/tuomov/ion/
+
+       The document "Ion: Configuring and extending with Lua" found on the Ion
+       home page.
+
+       DOCDIR/
+
+       X(1x)
+
+AUTHOR
+       Ion was written by Tuomo Valkonen <tuomov at iki.fi>.
+
+
+
+                                                                        ION(1)
