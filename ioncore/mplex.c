@@ -992,6 +992,17 @@ ExtlTab mplex_get_base_configuration(WMPlex *mplex)
             extl_unref_table(st);
         }
     }
+
+    FOR_ALL_MANAGED_ON_LIST(mplex->l2_list, sub){
+        ExtlTab st=region_get_configuration(sub);
+        if(st!=extl_table_none()){
+            extl_table_sets_i(st, "layer", 2);
+            if(REGION_IS_MAPPED(sub))
+                extl_table_sets_b(st, "switchto", TRUE);
+            extl_table_seti_t(subs, ++n, st);
+            extl_unref_table(st);
+        }
+    }
     
     extl_unref_table(subs);
     
