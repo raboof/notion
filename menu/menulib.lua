@@ -19,6 +19,9 @@ if _LOADED["menulib"] then return end
 local menus={}
 
 
+-- Menu construction {{{
+
+
 --DOC
 -- Define a new menu with \var{name} being the menu's name and \var{tab} 
 -- being a table of menu entries.
@@ -108,7 +111,11 @@ function make_pmenu_fn(menu_or_name)
 end
 
 
--- Window list
+-- }}}
+
+
+-- Workspace and window lists {{{
+
 
 function menus.windowlist()
     local cwins=complete_clientwin("")
@@ -123,8 +130,6 @@ function menus.windowlist()
 end
 
 
--- Workspace list.
-
 function menus.workspacelist()
     local wss=complete_workspace("")
     table.sort(wss)
@@ -136,6 +141,109 @@ function menus.workspacelist()
     
     return entries
 end
+
+
+local RESULT_DATA_LIMIT=1024^2
+
+
+-- }}}
+
+
+-- Style menu {{{
+
+
+local function mplex_of(reg)
+    while reg and not obj_is(reg, "WMPlex") do
+        reg=reg:parent()
+    end
+    return reg
+end
+
+function selectstyle(look, where)
+    include(look)
+    
+    if not querylib or not query_message then
+        return
+    end
+    
+    where=mplex_of(where)
+    if not where then return end
+    
+    local fname=get_savefile('draw')
+    if not fname then
+        query_message(where, "Cannot save selection.")
+        return
+    end
+    
+    local function writeit()
+        local f, err=io.open(fname, 'w')
+        if not f then
+            query_message(where, err)
+        else
+            f:write(string.format('include("%s")\n', look))
+            f:close()
+        end
+    end
+    
+    local q=querylib.make_yesno_fn("Save look selection in "..fname.."?", writeit)
+    q(where)
+end
+
+local function receive_styles(str)
+    local data=""
+    
+    while str do
+        data=data .. str
+        if string.len(data)>RESULT_DATA_LIMIT then
+            error("Too much result data")
+        end
+        str=coroutine.yield()
+    end
+    
+    local found={}
+    local styles={}
+    local stylemenu={}
+    
+    for look in string.gfind(data, "(look-[^\n]*)%.lua\n") do
+        if not found[look] then
+            found[look]=true
+            table.insert(styles, look)
+        end
+    end
+    
+    table.sort(styles)
+    
+    for _, look in ipairs(styles) do
+        local look_=look
+        table.insert(stylemenu, menuentry(look,  
+                                          function(where)
+                                              selectstyle(look_, where)
+                                          end))
+    end
+    
+    menus.stylemenu=stylemenu
+end
+
+                          
+local function refresh_styles()
+    local cmd=lookup_script("ion-completefile")
+    if cmd then
+        local dirs=ioncore_searchpath()
+        if table.getn(dirs)==0 then
+            return
+        end
+        for _, s in dirs do
+            cmd=cmd.." "..s.."/look-"
+        end
+        
+        popen_bgread(cmd, coroutine.wrap(receive_styles))
+    end
+end
+
+refresh_styles()
+
+
+-- }}}
 
 
 -- Mark ourselves loaded.

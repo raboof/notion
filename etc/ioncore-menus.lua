@@ -39,6 +39,7 @@ defmenu("mainmenu", {
     menuentry("Lock screen", make_exec_fn("xlock")),
     menuentry("Help", querylib.query_man),
     menuentry("About Ion", about),
+    submenu("Styles", "stylemenu"),
     submenu("Exit", "exitmenu"),
 })
 
