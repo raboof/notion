@@ -183,26 +183,6 @@ static void floatframe_request_clientwin_geom(WFloatFrame *frame,
 }
 
 
-static void floatframe_request_managed_geom(WFloatFrame *frame, WRegion *sub,
-											int flags, WRectangle geom,
-											WRectangle *geomret)
-{
-	WRectangle fgeom;
-	XSizeHints hints;
-	
-	fgeom=managed_to_floatframe_geom(GRDATA_OF(frame), geom);
-	fgeom.x+=REGION_GEOM(frame).x;
-	fgeom.y+=REGION_GEOM(frame).y;
-
-	genframe_resize_hints((WGenFrame*)frame, &hints, NULL, NULL);
-	correct_size(&(geom.w), &(geom.h), &hints, TRUE);
-	region_request_geom((WRegion*)frame, flags, fgeom, &fgeom);
-	
-	if(geomret!=NULL)
-		*geomret=floatframe_to_managed_geom(GRDATA_OF(frame), fgeom);
-}
-
-	
 /*}}}*/
 
 
@@ -243,18 +223,17 @@ static void floatframe_recalc_bar(WFloatFrame *frame, bool draw)
 	int bar_w=0, maxw=0, tmaxw=0;
 	int tab_w, textw, tmp;
 	WRegion *sub;
-	char *p;
+	const char *p;
 	
 	if(frame->genframe.managed_count!=0){
 		FOR_ALL_MANAGED_ON_LIST(frame->genframe.managed_list, sub){
-			p=region_full_name(sub);
+			p=region_name(sub);
 			if(p!=NULL){
 				tab_w=(text_width(grdata->tab_font, p, strlen(p))
 					   +BORDER_TL_TOTAL(&(grdata->tab_border))
 					   +BORDER_BR_TOTAL(&(grdata->tab_border)));
 				if(tab_w>tmaxw)
 					tmaxw=tab_w;
-				free(p);
 			}
 		}
 		
@@ -476,7 +455,7 @@ static DynFunTab floatframe_dynfuntab[]={
 	{genframe_border_inner_geom, floatframe_border_inner_geom},
 	{region_remove_managed, floatframe_remove_managed},
 	
-	{region_request_managed_geom, floatframe_request_managed_geom},
+	/*{region_request_managed_geom, floatframe_request_managed_geom},*/
 
 	{region_request_clientwin_geom, floatframe_request_clientwin_geom},
 	
