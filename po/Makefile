@@ -27,8 +27,9 @@ POTDIRS=../ioncore \
 	../ion \
 	../pwm \
 	../etc \
-	$(LIBEXTL_DIR) \
-	$(LIBTU_DIR) \
+	$(LIBEXTL_DIR)
+
+EXTRA_POTFILES_LUA=../build/mkman.lua
 
 POTFILE=ion3.pot
 
@@ -46,7 +47,8 @@ include $(TOPDIR)/rules.mk
 
 potfiles: potdirs_potfiles
 	(for i in $(POTDIRS); do cat $$i/potfiles_c|sed "s:\w\+:$$i/&:"; done) > potfiles_c
-	(for i in $(POTDIRS); do cat $$i/potfiles_lua|sed "s:\w\+:$$i/&:"; done) > potfiles_lua
+	(for i in $(POTDIRS); do cat $$i/potfiles_lua|sed "s:\w\+:$$i/&:"; done; \
+	 for i in $(EXTRA_POTFILES_LUA); do echo $$i; done) > potfiles_lua
 
 potdirs_potfiles:
 	for i in $(POTDIRS); do make -C $$i _potfiles; done

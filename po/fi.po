@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ion3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-10-02 05:19+0300\n"
+"POT-Creation-Date: 2004-10-09 18:45+0300\n"
 "PO-Revision-Date: 2004-07-31 23:50+0300\n"
 "Last-Translator: Tuomo Valkonen <tuomov at iki.fi>\n"
 "Language-Team: none\n"
@@ -138,7 +138,7 @@ msgstr ""
 msgid "Unable to initialise module %s."
 msgstr "Virhe moduulin %s alustuksessa."
 
-#: ../ioncore/modules.c:220 ../ioncore/readconfig.c:413
+#: ../ioncore/modules.c:220 ../../libextl/readconfig.c:368
 #, c-format
 msgid "Unable to find '%s' on search path."
 msgstr "Hakupolulta ei löytynyt '%s':ää."
@@ -154,30 +154,6 @@ msgstr "Moduulin alustus epäonnistui."
 #: ../ioncore/modules.c:344
 msgid "No module to load given."
 msgstr "Ladattava moduulia ei ole annettu."
-
-#: ../ioncore/readconfig.c:87
-msgid "$HOME not set"
-msgstr "Ympäristömuuttujaa HOME ei ole asetettu."
-
-#: ../ioncore/readconfig.c:114
-msgid "User directory not set. Unable to set session directory."
-msgstr ""
-"Käyttäjän hakemistoa ei ole asetettu, joten istuntohakemistoa ei voida "
-"asettaa."
-
-#: ../ioncore/readconfig.c:172
-msgid "User directory can not be set."
-msgstr "Käyttäjän hakemistoa ei pystytä asettamaan."
-
-#: ../ioncore/readconfig.c:292
-#, c-format
-msgid "Falling back to %s."
-msgstr "Yritetään tiedostoa %s."
-
-#: ../ioncore/readconfig.c:486
-#, c-format
-msgid "Unable to create session directory \"%s\"."
-msgstr "Istuntohakemiston \"%s\" luonti epäonnistui."
 
 #: ../ioncore/screen.c:301
 msgid "act: "
@@ -240,12 +216,12 @@ msgstr ""
 "hyväksyttävästä laadusta tai soveltuvuudesta tiettyyn tarkoitukseen.\n"
 "Katso LGPL lisenssistä lisää yksityiskohtia.\n"
 
-#: ../ioncore/ioncore.c:380
+#: ../ioncore/ioncore.c:385
 #, c-format
 msgid "Could not connect to X display '%s'"
 msgstr "Yhteydenotto X-palvelimeen '%s' epäonnistui."
 
-#: ../ioncore/ioncore.c:433
+#: ../ioncore/ioncore.c:438
 msgid "Could not find a screen to manage."
 msgstr "Yhtään hallittavissa olevaa juuri-ikkunaa ei löytynyt."
 
@@ -302,12 +278,12 @@ msgid "Changes is WM_TRANSIENT_FOR property are unsupported."
 msgstr "Muutoksia WM_TRANSIENT_FOR ominaisuudessa ei tueta."
 
 #
-#: ../ioncore/clientwin.c:875
+#: ../ioncore/clientwin.c:874
 msgid "Client does not support the WM_DELETE protocol."
 msgstr "Asiakasikkuna ei tue WM_DELETE-protokollaa."
 
-#: ../ioncore/clientwin.c:1104 ../mod_ionws/ionws.c:75
-#: ../mod_floatws/floatws.c:98
+#: ../ioncore/clientwin.c:1103 ../mod_ionws/ionws.c:75
+#: ../mod_floatws/floatws.c:103
 #, c-format
 msgid "Error reparenting %s."
 msgstr "Virhe alueen %s vanhemman vaihdossa."
@@ -432,11 +408,15 @@ msgstr "Ruudun %d asetukset puuttuvat."
 msgid "Unable to save layout."
 msgstr "Sijoittelun talletus epäonnistui."
 
-#: ../ioncore/frame.c:120
+#: ../ioncore/frame.c:122
 msgid "Frame is not empty."
 msgstr "Kehys ei ole tyhjä."
 
-#: ../ioncore/conf.c:127
+#: ../ioncore/conf.c:134
+msgid "User directory can not be set."
+msgstr "Käyttäjän hakemistoa ei pystytä asettamaan."
+
+#: ../ioncore/conf.c:197
 msgid "Some bindmaps were empty, loading ioncore-efbb."
 msgstr "Jotkut sidontakartat olivat tyhjiä. Ladataan ioncore-efbb."
 
@@ -453,12 +433,12 @@ msgstr ""
 "tai vanhempi kieltäytyi hallitsemasta ikkunaa."
 
 #
-#: ../ioncore/mplex.c:1254
+#: ../ioncore/mplex.c:1247
 msgid "Invalid position setting."
 msgstr "Virheellinen paikka-asetus."
 
 #
-#: ../ioncore/mplex.c:1287
+#: ../ioncore/mplex.c:1280
 msgid "Invalid action setting."
 msgstr "Virheellinen toiminto-asetus."
 
@@ -481,106 +461,6 @@ msgstr "Yhtään piirtomoottoria ei ole ladattu. Yritetään oletusta \"de\"."
 msgid "No function given."
 msgstr "Funktiota ei ole annettu."
 
-#: ../luaextl/luaextl.c:111
-msgid "Lua stack full."
-msgstr "Luan pino on täysi."
-
-#
-#: ../luaextl/luaextl.c:137
-msgid "Unknown Lua error."
-msgstr "Tuntematon Lua:n virhe."
-
-#: ../luaextl/luaextl.c:462
-msgid "Stack trace:"
-msgstr "Pinojälki:"
-
-#: ../luaextl/luaextl.c:469
-#, c-format
-msgid ""
-"\n"
-"(Unable to get debug info for level %d)"
-msgstr ""
-"\n"
-"(Debuggaustiedot eivät ole saatavilla tasolle %d)"
-
-#: ../luaextl/luaextl.c:487
-msgid ""
-"\n"
-"  [Skipping unnamed C functions.]"
-msgstr ""
-"\n"
-"  [Ohitetaan nimettömiä C-funktioita.]"
-
-#: ../luaextl/luaextl.c:536
-msgid "Internal error."
-msgstr "Sisäinen virhe."
-
-#: ../luaextl/luaextl.c:553
-msgid "Unable to initialize Lua."
-msgstr "Lua:n alustus epäonnistui."
-
-#: ../luaextl/luaextl.c:1277
-msgid ""
-"Too many return values. Use a C compiler that has va_copy to support more."
-msgstr ""
-"Liian monta paluuarvoa. Useamman tukemiseksi käytä C-kääntäjää, joka tukee "
-"va_copy:ä."
-
-#: ../luaextl/luaextl.c:1295
-#, c-format
-msgid "Invalid return value (expected '%c', got lua type \"%s\")."
-msgstr ""
-"Virheellinen paluuarvo (odotettiin tyyppiä '%c', mutta saatiin Lua:n tyyppi "
-"\"%s\")."
-
-#: ../luaextl/luaextl.c:1330 ../luaextl/luaextl.c:1594
-msgid "Stack full."
-msgstr "Pino täysi."
-
-#: ../luaextl/luaextl.c:1570
-msgid "L1 call handler upvalues corrupt."
-msgstr "Tason 1 kutsunkäsittelijän \"upvalue\":t rikki."
-
-#: ../luaextl/luaextl.c:1575
-msgid "Called function has been unregistered."
-msgstr "Kutsuttu funktio on poistettu."
-
-#: ../luaextl/luaextl.c:1587
-#, c-format
-msgid "Attempt to call an unsafe function \"%s\" in restricted mode."
-msgstr "Yritys kutsua turvatonta funktiota \"%s\" rajoitetussa tilassa."
-
-#: ../luaextl/luaextl.c:1603
-#, c-format
-msgid ""
-"Argument %d to %s is of invalid type. (Argument template is '%s', got lua "
-"type %s)."
-msgstr ""
-"Parameteri %d funktiolle %s on väärää tyyppiä. (Parametripohja on '%s', "
-"saatiin Lua:n tyyppi '%s'.)"
-
-#: ../luaextl/luaextl.c:1770
-#, c-format
-msgid ""
-"Function '%s' has more parameters than the level 1 call handler can handle"
-msgstr ""
-"Funktiolla %s on enemmän parametrejä kuin mihin tason yksi kutsunkäsittelijä "
-"kykenee."
-
-#
-#: ../luaextl/luaextl.c:2187
-msgid "Maximal serialisation depth reached."
-msgstr "Suurin mahdollinen talletuksen rekursiosyvyys saavutettu."
-
-#: ../luaextl/luaextl.c:2208
-#, c-format
-msgid "Unable to serialise type %s."
-msgstr "Tyyppiä %s ei voida tallettaa."
-
-#: ../luaextl/luaextl.c:2239
-msgid "-- This file has been generated by Ion. Do no edit.\n"
-msgstr "-- Tämä tiedosto on Ionin luoma. Älä editoi sitä.\n"
-
 #: ../mod_ionws/ionws.c:310
 msgid "Unable to create a node for status display."
 msgstr "Solmun luonti tilanäytölle epäonnistui."
@@ -590,78 +470,78 @@ msgid "Unable to create new split for status display."
 msgstr "Uuden jaon tekeminen tilanäytölle epäonnistui."
 
 #
-#: ../mod_ionws/ionws.c:714
+#: ../mod_ionws/ionws.c:716
 msgid "Frame not managed by the workspace."
 msgstr "Kehys ei ole tämän työpöydän hallitsema."
 
 #
-#: ../mod_ionws/ionws.c:719
+#: ../mod_ionws/ionws.c:721
 msgid "Invalid direction parameter."
 msgstr "Tuntematon suuntaparametri."
 
 #
-#: ../mod_ionws/ionws.c:732
+#: ../mod_ionws/ionws.c:734
 msgid "Unable to split."
 msgstr "Halkaisu ei ole mahdollista."
 
-#: ../mod_ionws/ionws.c:770
+#: ../mod_ionws/ionws.c:772
 msgid "Nil frame."
 msgstr "Kehys on asettamatta."
 
-#: ../mod_ionws/ionws.c:774
+#: ../mod_ionws/ionws.c:776
 msgid "The frame is not managed by the workspace."
 msgstr "Kehys ei ole tämän työpöydän hallinnoima."
 
-#: ../mod_ionws/ionws.c:779
+#: ../mod_ionws/ionws.c:781
 msgid "Frame may not be destroyed."
 msgstr "Kehystä ei saa tuhota."
 
-#: ../mod_ionws/ionws.c:784
+#: ../mod_ionws/ionws.c:786
 msgid "Failed to rescue managed objects."
 msgstr "Hallittujen olioiden pelastaminen epäonnistui."
 
-#: ../mod_ionws/ionws.c:995
+#: ../mod_ionws/ionws.c:997
 msgid "Nil parameter."
 msgstr "Parametri on asettamatta."
 
-#: ../mod_ionws/ionws.c:1000
+#: ../mod_ionws/ionws.c:1002
 msgid "Manager doesn't match."
 msgstr "Hallitsija on väärä."
 
 #
-#: ../mod_ionws/ionws.c:1022
+#: ../mod_ionws/ionws.c:1024
 msgid "Could not get split tree."
 msgstr "Halkaisupuu puuttuu."
 
-#: ../mod_ionws/ionws.c:1043
+#: ../mod_ionws/ionws.c:1045
 msgid "Workspace already has a status display node."
 msgstr "Työpöydällä on jo solmu tilanäytölle."
 
 #
-#: ../mod_ionws/ionws.c:1093
+#: ../mod_ionws/ionws.c:1095
 msgid "Missing region parameters."
 msgstr "Alueen parameterit puuttuu."
 
-#: ../mod_ionws/ionws.c:1129 ../mod_panews/panews.c:396
+#: ../mod_ionws/ionws.c:1131 ../mod_panews/panews.c:398
 msgid "Invalid direction."
 msgstr "Virheellinen suunta."
 
 #
-#: ../mod_ionws/ionws.c:1203
+#: ../mod_ionws/ionws.c:1205
 msgid "No split type given."
 msgstr "Halkaisun tyyppiä ei ole asetettu."
 
-#: ../mod_ionws/ionws.c:1214
+#: ../mod_ionws/ionws.c:1216
 msgid "Unknown split type."
 msgstr "Tuntematon halkaisutyyppi."
 
 #
 #
-#: ../mod_ionws/ionws.c:1254
+#: ../mod_ionws/ionws.c:1256
 msgid "The workspace is empty."
 msgstr "Työpöytä on tyhjä."
 
-#: ../mod_ionws/placement.c:97 ../mod_panews/placement.c:288
+#: ../mod_ionws/placement.c:97 ../mod_panews/placement.c:299
 #, c-format
 msgid ""
 "Ooops... could not find a region to attach client window to on workspace %s."
@@ -703,29 +583,29 @@ msgstr "Tilanäyttö huonossa halkaisuasetelmassa."
 msgid "Status display badly located in split tree."
 msgstr "Tilanäyttö on huonosti sijoittuneena halkaisupuuhun."
 
-#: ../mod_floatws/floatws.c:346 ../mod_panews/panews.c:259
+#: ../mod_floatws/floatws.c:351 ../mod_panews/panews.c:259
 msgid "Workspace may not be destroyed."
 msgstr "Työpöytää ei saa tuhota."
 
-#: ../mod_floatws/floatws.c:353
+#: ../mod_floatws/floatws.c:358
 msgid "Failed to rescue some client windows!"
 msgstr "Joidenkin asiakasikkunoiden pelastaminen epäonnistui."
 
-#: ../mod_floatws/floatws.c:365 ../mod_panews/panews.c:254
+#: ../mod_floatws/floatws.c:370 ../mod_panews/panews.c:254
 msgid "Refusing to close non-empty workspace."
 msgstr "Työpöydän tuhoamisesta kieltäydytään, koska se ei ole tyhjä."
 
 #
-#: ../mod_floatws/floatws.c:457
+#: ../mod_floatws/floatws.c:462
 msgid "Failure to create a new frame."
 msgstr "Uuden kehyksen luonti epäonnistui."
 
 #
-#: ../mod_floatws/floatws.c:1032 ../mod_floatws/floatws.c:1110
+#: ../mod_floatws/floatws.c:1037 ../mod_floatws/floatws.c:1115
 msgid "Region not managed by the workspace."
 msgstr "Alue ei ole työpöydän hallinnassa."
 
-#: ../mod_floatws/floatws.c:1231
+#: ../mod_floatws/floatws.c:1236
 msgid "No geometry specified."
 msgstr "Geometria on asettamatta."
 
@@ -738,8 +618,8 @@ msgstr "Tuntematon sijoittelumenetelmä \"%s\"."
 msgid "Unable to re-initialise workspace. Destroying."
 msgstr "Työpöydän uudelleenalustus epäonnistui, joten se tuhotaan."
 
-#: ../mod_panews/placement.c:103 ../mod_panews/placement.c:107
-#: ../mod_panews/placement.c:174 ../mod_panews/placement.c:179
+#: ../mod_panews/placement.c:104 ../mod_panews/placement.c:108
+#: ../mod_panews/placement.c:175 ../mod_panews/placement.c:180
 #, c-format
 msgid "Malfunctioning placement hook; condition #%d."
 msgstr "Rikkinäinen koukku; tapaus #%d."
@@ -789,37 +669,37 @@ msgstr "Yhteydenotto istunnonhallintaohjelmaan epäonnistui."
 msgid "Unable to create scratchpad for screen %d."
 msgstr "Suttupöydän luonti ruudulle %d epäonnistui."
 
-#: ../de/init.c:40
+#: ../de/init.c:41
 #, c-format
 msgid "Border attribute %s sanity check failed."
 msgstr "Reunan arvon '%s' järkevyystarkistus epäonnistui."
 
-#: ../de/init.c:63
+#: ../de/init.c:64
 #, c-format
 msgid "Unknown border style \"%s\"."
 msgstr "Reunan tyyli \"%s\" on tuntematon."
 
-#: ../de/init.c:95
+#: ../de/init.c:96
 #, c-format
 msgid "Unable to allocate colour \"%s\"."
 msgstr "Värin \"%s\" varaaminen epäonnistui."
 
-#: ../de/init.c:159
+#: ../de/init.c:160
 #, c-format
 msgid "Corrupt substyle table %d."
 msgstr "Alityylin %d taulu on rikki."
 
-#: ../de/init.c:192
+#: ../de/init.c:193
 #, c-format
 msgid "Unknown text alignment \"%s\"."
 msgstr "Tuntematon tekstin tasaus \"%s\"."
 
-#: ../de/init.c:262
+#: ../de/init.c:263
 #, c-format
 msgid "'based_on' for %s points back to the style itself."
 msgstr "Tyylin %s 'based_on' -asetus osoittaa itseensä."
 
-#: ../de/init.c:265
+#: ../de/init.c:266
 #, c-format
 msgid "Unknown base style \"%s\"."
 msgstr "Tuntematon pohjatyyli \"%s\"."
@@ -838,7 +718,7 @@ msgstr ""
 msgid "Could not load font \"%s\", trying \"%s\""
 msgstr "Kirjaisimen \"%s\" lataaminen epäonnistui. Yritetään \"%s\":ää."
 
-#: ../de/style.c:314
+#: ../de/style.c:315
 #, c-format
 msgid "Style %s still in use [%d] but the module is being unloaded!"
 msgstr "Tyyli %s on vielä käytössä [%d], mutta moduulia poistetaan!"
@@ -935,6 +815,135 @@ msgstr "Hyödynnä Xineramaa (oletus: 0/ei)"
 #: ../pwm/pwm.c:189
 msgid "PWM startup error log:\n"
 msgstr "PWM:n käynnistysvirheloki:\n"
+
+#: ../../libextl/readconfig.c:86
+msgid "$HOME not set"
+msgstr "Ympäristömuuttujaa HOME ei ole asetettu."
+
+#: ../../libextl/readconfig.c:113
+msgid "User directory not set. Unable to set session directory."
+msgstr ""
+"Käyttäjän hakemistoa ei ole asetettu, joten istuntohakemistoa ei voida "
+"asettaa."
+
+#: ../../libextl/readconfig.c:247
+#, c-format
+msgid "Falling back to %s."
+msgstr "Yritetään tiedostoa %s."
+
+#: ../../libextl/readconfig.c:441
+#, c-format
+msgid "Unable to create session directory \"%s\"."
+msgstr "Istuntohakemiston \"%s\" luonti epäonnistui."
+
+#: ../../libextl/luaextl.c:113
+msgid "Lua stack full."
+msgstr "Luan pino on täysi."
+
+#
+#: ../../libextl/luaextl.c:139
+msgid "Unknown Lua error."
+msgstr "Tuntematon Lua:n virhe."
+
+#: ../../libextl/luaextl.c:456
+msgid "Stack trace:"
+msgstr "Pinojälki:"
+
+#: ../../libextl/luaextl.c:463
+#, c-format
+msgid ""
+"\n"
+"(Unable to get debug info for level %d)"
+msgstr ""
+"\n"
+"(Debuggaustiedot eivät ole saatavilla tasolle %d)"
+
+#: ../../libextl/luaextl.c:481
+msgid ""
+"\n"
+"  [Skipping unnamed C functions.]"
+msgstr ""
+"\n"
+"  [Ohitetaan nimettömiä C-funktioita.]"
+
+#: ../../libextl/luaextl.c:532
+msgid "Internal error."
+msgstr "Sisäinen virhe."
+
+#: ../../libextl/luaextl.c:551
+msgid "Unable to initialize Lua."
+msgstr "Lua:n alustus epäonnistui."
+
+#: ../../libextl/luaextl.c:1277
+msgid ""
+"Too many return values. Use a C compiler that has va_copy to support more."
+msgstr ""
+"Liian monta paluuarvoa. Useamman tukemiseksi käytä C-kääntäjää, joka tukee "
+"va_copy:ä."
+
+#: ../../libextl/luaextl.c:1295
+#, c-format
+msgid "Invalid return value (expected '%c', got lua type \"%s\")."
+msgstr ""
+"Virheellinen paluuarvo (odotettiin tyyppiä '%c', mutta saatiin Lua:n tyyppi "
+"\"%s\")."
+
+#: ../../libextl/luaextl.c:1330 ../../libextl/luaextl.c:1594
+msgid "Stack full."
+msgstr "Pino täysi."
+
+#: ../../libextl/luaextl.c:1570
+msgid "L1 call handler upvalues corrupt."
+msgstr "Tason 1 kutsunkäsittelijän \"upvalue\":t rikki."
+
+#: ../../libextl/luaextl.c:1575
+msgid "Called function has been unregistered."
+msgstr "Kutsuttu funktio on poistettu."
+
+#: ../../libextl/luaextl.c:1587
+#, c-format
+msgid "Attempt to call an unsafe function \"%s\" in restricted mode."
+msgstr "Yritys kutsua turvatonta funktiota \"%s\" rajoitetussa tilassa."
+
+#: ../../libextl/luaextl.c:1603
+#, c-format
+msgid ""
+"Argument %d to %s is of invalid type. (Argument template is '%s', got lua "
+"type %s)."
+msgstr ""
+"Parameteri %d funktiolle %s on väärää tyyppiä. (Parametripohja on '%s', "
+"saatiin Lua:n tyyppi '%s'.)"
+
+#: ../../libextl/luaextl.c:1782
+#, c-format
+msgid ""
+"Function '%s' has more parameters than the level 1 call handler can handle"
+msgstr ""
+"Funktiolla %s on enemmän parametrejä kuin mihin tason yksi kutsunkäsittelijä "
+"kykenee."
+
+#
+#: ../../libextl/luaextl.c:2199
+msgid "Maximal serialisation depth reached."
+msgstr "Suurin mahdollinen talletuksen rekursiosyvyys saavutettu."
+
+#: ../../libextl/luaextl.c:2220
+#, c-format
+msgid "Unable to serialise type %s."
+msgstr "Tyyppiä %s ei voida tallettaa."
+
+#: ../../libextl/luaextl.c:2251
+msgid "-- This file has been generated by Ion. Do no edit.\n"
+msgstr "-- Tämä tiedosto on Ionin luoma. Älä editoi sitä.\n"
+
+#: ../../libextl/misc.c:17
+#, c-format
+msgid ""
+"Type checking failed in level 2 call handler for parameter %d (got %s, "
+"expected %s)."
+msgstr ""
+"Tyyppitarkistus epäonnistui tason 2 kutsunkäsittelijässä parametrille #%d "
+"(oli %s, odotettiin %s)."
 
 #: ../etc/cfg_floatws.lua:34
 msgid "Lower the frame."
@@ -1033,8 +1042,8 @@ msgstr "Ei löydettyä %s:ää."
 msgid "Screen already has an stdisp. Refusing to create a statusbar."
 msgstr "Ruudulla on jo tilanäyttö. Kieltäydytään luomasta tilariviä."
 
-#: ../etc/cfg_ionws.lua:43
 #
+#: ../etc/cfg_ionws.lua:43
 msgid "Split horizontally"
 msgstr "Halkaise vaakasuunnassa"
 
@@ -1093,8 +1102,8 @@ msgstr "Työpöydän tyyppi (%s):"
 msgid "Go to previous active object."
 msgstr "Mene edelliseen aktiiviseen olioon."
 
-#: ../etc/cfg_ionws.lua:41
 #
+#: ../etc/cfg_ionws.lua:41
 msgid "Split vertically"
 msgstr "Halkaise pystysuunnassa"
 
@@ -1238,8 +1247,8 @@ msgstr "Kysy asiakasikkunaa liitettäväksi kehykseen."
 msgid "Run:"
 msgstr "Suorita:"
 
-#: ../etc/cfg_panews.lua:11
 #
+#: ../etc/cfg_panews.lua:11
 msgid "Resize the area."
 msgstr "Muuta kehyksen kokoa."
 
@@ -1281,6 +1290,14 @@ msgstr "Peruuta tilasta."
 msgid "Go to window:"
 msgstr "Mene ikkunaan:"
 
+#: ../etc/cfg_ionws.lua:45
+msgid "Flip root"
+msgstr "Peilaa juuri"
+
+#: ../build/mkman.lua:196
+msgid "%s %s"
+msgstr ""
+
 #
 #: ../etc/cfg_bindings.lua:98
 msgid ""
@@ -1295,13 +1312,30 @@ msgid "Select next/previous history entry."
 msgstr "Näytä seuraava/edellinen kirjattu vastaus."
 
 #
+#: ../etc/cfg_query.lua:65
+msgid "Clear mark/cancel selection."
+msgstr "Lopeta tekstin valinta."
+
+#: ../build/mkman.lua:180
+msgid "drag"
+msgstr "raahaus"
+
+#
 #: ../etc/cfg_bindings.lua:31
 msgid "Switch to next/previous object within current screen."
 msgstr "Siirry seuraavaan/edelliseen tämänhetkisen näytön lomittamaan olioon."
 
+#: ../build/mkman.lua:179
+msgid "click"
+msgstr "napsautus"
+
 #: ../pwm/cfg_pwm_menus.lua:14 ../etc/cfg_menus.lua:11
 msgid "About Ion"
 msgstr "Tietoja Ionista"
+
+#: ../build/mkman.lua:178
+msgid "press"
+msgstr "painallus"
 
 #: ../etc/cfg_menu.lua:27
 msgid "Clear the menu's typeahead find buffer."
@@ -1335,10 +1369,9 @@ msgstr "Sulje kysely ja suorita sidottu toiminta."
 msgid "Cannot attach: different root windows."
 msgstr "Ei voida liittää: eri juuri-ikkunat."
 
-#
-#: ../etc/cfg_query.lua:65
-msgid "Clear mark/cancel selection."
-msgstr "Lopeta tekstin valinta."
+#: ../build/mkman.lua:181
+msgid "double click"
+msgstr "kaksoisnapsautus"
 
 #
 #: ../etc/cfg_bindings.lua:18
@@ -1498,9 +1531,9 @@ msgstr "Muokkaa tiedostoa:"
 msgid "XTerm"
 msgstr ""
 
-#: ../etc/cfg_ionws.lua:45
-msgid "Flip root"
-msgstr "Peilaa juuri"
+#: ../build/mkman.lua:198
+msgid "%s %s at %s"
+msgstr "%s %s osassa %s"
 
 #: ../pwm/cfg_pwm_menus.lua:27
 msgid "List"
@@ -1518,8 +1551,8 @@ msgstr "Virhe komentojonossa:"
 msgid "Lock screen"
 msgstr "Lukitse näyttö"
 
-#: ../etc/cfg_ionws.lua:39
 #
+#: ../etc/cfg_ionws.lua:39
 msgid "Destroy frame"
 msgstr "Tuhoa kehys"
 
@@ -1598,13 +1631,3 @@ msgstr ""
 "Rooli(role): %s\n"
 "Instanssi(instance): %s\n"
 "XID: 0x%x"
-
-#~ msgid "main"
-#~ msgstr "ensisijainen"
-
-#~ msgid "Could not create a WSplitUnused for empty WSplitPane. Destroying."
-#~ msgstr ""
-#~ "Ei voitu luoda WSplitUnused:ia tyhjälle WSplitPane:lle, joten se tuhotaan."
-
-#~ msgid "Show frame context menu."
-#~ msgstr "Näytä kehyksen kontekstivalikko."

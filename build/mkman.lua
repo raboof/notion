@@ -174,14 +174,14 @@ local function docgroup_bindings(bindings)
     return out
 end
 
-local nact={
-    ["mpress"]=TR("press"),
-    ["mclick"]=TR("click"),
-    ["mdrag"]=TR("drag"),
-    ["mdblclick"]=TR("double click"),
-}
 
 local function combine_bindings(v)    
+    local nact={
+        ["mpress"]=TR("press"),
+        ["mclick"]=TR("click"),
+        ["mdrag"]=TR("drag"),
+        ["mdblclick"]=TR("double click"),
+    }
     local first=true
     local s=""
     for _, b in ipairs(v.bindings) do
