@@ -2,6 +2,7 @@
 ## Some make rules
 ##
 
+RM=$(LIBTOOL) --mode=clean rm
 
 # Main targets
 ######################################
@@ -86,10 +87,10 @@ module_install:
 	# $(STRIP) $(MODULEDIR)/$(MODULE).so
 
 clean_objs:
-	$(LIBTOOL) --mode=clean $(RM) -f $(OBJS)
+	$(RM) -f $(OBJS)
 
 clean_target:
-	$(LIBTOOL) --mode=clean $(RM) -f $(MODULE).la
+	$(RM) -f $(MODULE).la
 
 else #!MODULE
 
@@ -106,19 +107,20 @@ clean_objs:
 
 endif #!SOURCES
 
+
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean_target:
-	rm -f $(TARGETS)
+	$(RM) -f $(TARGETS)
 
 endif #!MODULE
 
 _clean: clean_objs
-	rm -f core $(DEPEND_FILE) $(TO_CLEAN)
+	$(RM) -f core $(DEPEND_FILE) $(TO_CLEAN)
 
 _realclean: clean_target
-	rm -f $(TO_REALCLEAN)
+	$(RM) -f $(TO_REALCLEAN)
 
 
 ifdef SOURCES
