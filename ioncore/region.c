@@ -73,7 +73,6 @@ void region_init(WRegion *reg, WRegion *parent, const WRectangle *geom)
 	reg->manager=NULL;
 	reg->mgr_next=NULL;
 	reg->mgr_prev=NULL;
-	reg->mgr_data.p=NULL;
 	
 	reg->stacking.below_list=NULL;
 	reg->stacking.next=NULL;

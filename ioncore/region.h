@@ -50,10 +50,6 @@ DECLOBJ(WRegion){
 	
 	WRegion *manager;
 	WRegion *mgr_next, *mgr_prev;
-	union{
-		void *p;
-		int i;
-	} mgr_data;
 	
 	struct{
 		WRegion *below_list;
