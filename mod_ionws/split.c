@@ -452,21 +452,28 @@ void splittree_scan_stdisp_rootward(WSplit *node)
 }
 
 
-static WSplitSplit *splittree_scan_stdisp_parent(WSplit *node_)
+static WSplitSplit *splittree_scan_stdisp_parent(WSplit *node_, bool set_saw)
 {
     WSplitSplit *r, *node=OBJ_CAST(node_, WSplitSplit);
     
     if(node==NULL)
         return NULL;
     
-    if(OBJ_IS(node->tl, WSplitST) ||
-       OBJ_IS(node->br, WSplitST)){
+    if(OBJ_IS(node->tl, WSplitST)){
+        if(set_saw)
+            saw_stdisp=(WSplitST*)node->tl;
         return node;
     }
 
-    r=splittree_scan_stdisp_parent(node->tl);
+    if(OBJ_IS(node->br, WSplitST)){
+        if(set_saw)
+            saw_stdisp=(WSplitST*)node->br;
+        return node;
+    }
+
+    r=splittree_scan_stdisp_parent(node->tl, set_saw);
     if(r==NULL)
-        r=splittree_scan_stdisp_parent(node->br);
+        r=splittree_scan_stdisp_parent(node->br, set_saw);
     return r;
 }
 
@@ -836,30 +843,6 @@ void split_do_rqgeom_(WSplit *node, const WRectangle *ng,
 }
 
 
-void split_do_rqgeom(WSplit *node, const WRectangle *ng, 
-                     bool hany, bool vany, WRectangle *rg,
-                     bool tryonly)
-{
-    WRectangle rg_;
-    
-    if(rg==NULL)
-        rg=&rg_;
-
-    splittree_begin_resize();
-    
-    split_do_rqgeom_(node, ng, hany, vany, rg, tryonly);
-    
-    if(!tryonly){
-        split_do_resize(node, rg, PRIMN_ANY, PRIMN_ANY, FALSE);
-        splittree_end_resize();
-        if(rg!=NULL){
-            /* splittree_end_resize may have changed geometry. */
-            *rg=node->geom;
-        }
-    }
-}
-
-
 /*}}}*/
 
 
@@ -892,8 +875,13 @@ void splittree_rqgeom(WSplit *sub, int flags, const WRectangle *geom_,
 {
     bool hany=flags&REGION_RQGEOM_WEAK_X;
     bool vany=flags&REGION_RQGEOM_WEAK_Y;
+    bool tryonly=flags&REGION_RQGEOM_TRYONLY;
     WRectangle geom=*geom_;
+    WRectangle retg;
     WSplit *root=split_find_root(sub);
+    
+    if(geomret==NULL)
+        geomret=&retg;
 
     split_update_bounds(root, TRUE);
     
@@ -902,8 +890,7 @@ void splittree_rqgeom(WSplit *sub, int flags, const WRectangle *geom_,
         
         if(flags&REGION_RQGEOM_TRYONLY){
             warn(TR("REGION_RQGEOM_TRYONLY unsupported for status display."));
-            if(geomret!=NULL)
-                *geomret=sub->geom;
+            *geomret=sub->geom;
             return;
         }
         split_regularise_stdisp(sub_as_stdisp);
@@ -938,8 +925,17 @@ void splittree_rqgeom(WSplit *sub, int flags, const WRectangle *geom_,
         geom.y=sub->geom.y;
     }
     
-    split_do_rqgeom(sub, &geom, hany, vany, geomret, 
-                    flags&REGION_RQGEOM_TRYONLY);
+    splittree_begin_resize();
+    
+    split_do_rqgeom_(sub, &geom, hany, vany, geomret, tryonly);
+    
+    if(!tryonly){
+        split_do_resize(sub, geomret, hany, vany, FALSE);
+        splittree_end_resize();
+        *geomret=sub->geom;
+    }else{
+        saw_stdisp=NULL;
+    }
 }
 
 
@@ -1538,34 +1534,43 @@ void split_reparent(WSplit *split, WWindow *wwin)
 
 /*{{{ Transpose and flip */
 
-
-void split_transpose_to(WSplit *node, const WRectangle *geom)
+static bool move_stdisp_out_of_way(WSplit *node)
 {
     if(OBJ_IS(node, WSplitSplit)){
-        WSplitSplit *stdispp=splittree_scan_stdisp_parent(node);
+        WSplitSplit *stdispp=splittree_scan_stdisp_parent(node, TRUE);
         
         /* split_do_resize can do things right if 'node' has stdisp as child, 
-         * but otherwise transpose will put the stdisp the stdisp in a bad 
-         * split configuration if it is contained within 'node', so we must
+         * but otherwise transpose will put the stdisp in a bad split
+         * configuration if it is contained within 'node', so we must
          * first move it out of the way.
          */
-        if(stdispp!=NULL && stdispp!=(WSplitSplit*)node){
+        if(stdispp!=NULL){
+            /*assert(stdispp!=(WSplitSplit*)node);*/
             split_try_unsink_stdisp(stdispp, TRUE, TRUE);
-            stdispp=splittree_scan_stdisp_parent(node);
-            if(stdispp!=NULL && stdispp!=(WSplitSplit*)node){
-                warn(TR("Unable to move the status display out of way of "
-                        "transpose."));
-                return;
+            stdispp=splittree_scan_stdisp_parent(node, FALSE);
+            if(stdispp!=NULL){
+                warn(TR("Unable to move the status display out of way of."));
+                return FALSE;
             }
         }
     }
     
-    split_update_bounds(node, TRUE);
+    return TRUE;
+}
+
+void split_transpose_to(WSplit *node, const WRectangle *geom)
+{
+    WRectangle rg;
     
     splittree_begin_resize();
     
-    split_do_resize(node, geom, PRIMN_ANY, PRIMN_ANY, TRUE);
-    splittree_scan_stdisp_rootward(node);
+    if(!move_stdisp_out_of_way(node))
+        return;
+    
+    split_update_bounds(node, TRUE);
+    
+    split_do_rqgeom_(node, geom, PRIMN_ANY, PRIMN_ANY, &rg, FALSE);
+    split_do_resize(node, &rg, PRIMN_ANY, PRIMN_ANY, TRUE);
     
     splittree_end_resize();
 }
@@ -1592,6 +1597,13 @@ void splitsplit_flip_default(WSplitSplit *split)
     
     assert(split->tl!=NULL && split->br!=NULL);
 
+    splittree_begin_resize();
+
+    if(!move_stdisp_out_of_way((WSplit*)split))
+        return;
+    
+    split_update_bounds((WSplit*)split, TRUE);
+
     tlng=split->tl->geom;
     brng=split->br->geom;
     
@@ -1612,6 +1624,8 @@ void splitsplit_flip_default(WSplitSplit *split)
 
     split_do_resize(split->tl, &brng, PRIMN_ANY, PRIMN_ANY, FALSE);
     split_do_resize(split->br, &tlng, PRIMN_ANY, PRIMN_ANY, FALSE);
+
+    splittree_end_resize();
 }
 
 
@@ -1622,8 +1636,6 @@ EXTL_EXPORT_MEMBER
 void splitsplit_flip(WSplitSplit *split)
 {
     CALL_DYN(splitsplit_flip, split, (split));
-    
-    
 }
 
 

@@ -203,9 +203,6 @@ extern void splittree_begin_resize();
 extern void splittree_end_resize();
 extern void splittree_scan_stdisp_rootward(WSplit *node);
 
-extern void split_do_rqgeom(WSplit *node, const WRectangle *ng, 
-                            bool hany, bool vany, WRectangle *rg,
-                            bool tryonly);
 extern void split_do_rqgeom_(WSplit *node, const WRectangle *ng, 
                              bool hany, bool vany, WRectangle *rg, 
                              bool tryonly);

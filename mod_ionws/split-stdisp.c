@@ -584,7 +584,7 @@ static bool do_try_unsink_stdisp_orth(WSplitSplit *a, WSplitSplit *p,
                 else /*stdisp==p->tl*/
                     rot_rs_rotate_right(a, p, (WSplit*)stdisp);
             }else{ /*p==a->br*/
-#if 1
+#if 0
                 /* abnormal cases. */
                 warn(TR("Status display in bad split configuration."));
                 return FALSE;
@@ -609,7 +609,7 @@ static bool do_try_unsink_stdisp_orth(WSplitSplit *a, WSplitSplit *p,
         
         if(doit){
             if((WSplit*)p==a->tl){
-#if 1
+#if 0
                 /* abnormal cases. */
                 warn(TR("Status display in bad split configuration."));
                 return FALSE;
