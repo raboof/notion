@@ -163,17 +163,6 @@ static Window floatws_x_window(const WFloatWS *ws)
 }
 
 
-/*EXTL_DOC
- * Returns the object that currently has or previously had focus on \var{ws}
- * (if no other object on the workspace currently has focus).
- */
-EXTL_EXPORT
-WRegion* floatws_current(WFloatWS *ws)
-{
-	return ws->current_managed;
-}
-
-
 /*}}}*/
 
 
@@ -524,6 +513,17 @@ EXTL_EXPORT_MEMBER
 ExtlTab floatws_managed_list(WFloatWS *ws)
 {
 	return managed_list_to_table(ws->managed_list, NULL);
+}
+
+
+/*EXTL_DOC
+ * Returns the object that currently has or previously had focus on \var{ws}
+ * (if no other object on the workspace currently has focus).
+ */
+EXTL_EXPORT
+WRegion* floatws_current(WFloatWS *ws)
+{
+	return ws->current_managed;
 }
 
 
