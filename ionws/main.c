@@ -25,9 +25,10 @@
 #include "funtabs.h"
 #include "../version.h"
 #include "placement.h"
-#include "workspace.h"
+#include "ionws.h"
 #include "bindmaps.h"
 #include "frame.h"
+
 
 /*{{{ Optparser data */
 
@@ -67,15 +68,15 @@ static OptParserCommonInfo ion_cinfo={
 /*{{{ Misc. */
 
 
-extern WRegion *workspace_load(WRegion *par, WRectangle geom, Tokenizer *tokz);
+extern WRegion *ionws_load(WRegion *par, WRectangle geom, Tokenizer *tokz);
 extern WFrame *frame_load(WFrame *par, WRectangle geom, Tokenizer *tokz);
 
 static void register_loaders()
 {
 	register_region_load_create_fn("WFrame", (WRegionLoadCreateFn*)
 								   frame_load);
-	register_region_load_create_fn("WWorkspace", (WRegionLoadCreateFn*)
-								   workspace_load);
+	register_region_load_create_fn("WIonWS", (WRegionLoadCreateFn*)
+								   ionws_load);
 }
 
 

@@ -17,9 +17,9 @@
 #include "winprops.h"
 
 
-static WRegion *find_suitable_frame(WWorkspace *ws)
+static WRegion *find_suitable_frame(WIonWS *ws)
 {
-	WRegion *r=workspace_find_current(ws);
+	WRegion *r=ionws_find_current(ws);
 	
 	if(r!=NULL && region_supports_add_managed(r))
 		return r;
@@ -34,9 +34,9 @@ static WRegion *find_suitable_frame(WWorkspace *ws)
 }
 
 
-bool workspace_add_clientwin(WWorkspace *ws, WClientWin *cwin,
-							 const XWindowAttributes *attr,
-							 int init_state, WWinProp *props)
+bool ionws_add_clientwin(WIonWS *ws, WClientWin *cwin,
+						 const XWindowAttributes *attr,
+						 int init_state, WWinProp *props)
 {
 	WRegion *target=NULL;
 	bool geomset;
@@ -74,10 +74,9 @@ bool workspace_add_clientwin(WWorkspace *ws, WClientWin *cwin,
 }
 
 
-bool workspace_add_transient(WRegion *reg, WClientWin *tfor,
-							 WClientWin *cwin,
-							 const XWindowAttributes *attr,
-							 int init_state, WWinProp *props)
+bool ionws_add_transient(WIonWS *ws, WClientWin *tfor, WClientWin *cwin,
+						 const XWindowAttributes *attr,
+						 int init_state, WWinProp *props)
 {
 	return region_add_managed((WRegion*)tfor, (WRegion*)cwin, 0);
 }

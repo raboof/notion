@@ -1,5 +1,5 @@
 /*
- * ion/workspace.c
+ * ion/ionws.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
@@ -7,9 +7,9 @@
 
 #include <string.h>
 
+#include <libtu/parser.h>
 #include <wmcore/common.h>
 #include <wmcore/screen.h>
-#include <wmcore/property.h>
 #include <wmcore/focus.h>
 #include <wmcore/global.h>
 #include <wmcore/thingp.h>
@@ -19,60 +19,59 @@
 #include <wmcore/viewport.h>
 #include <wmcore/names.h>
 #include <wmcore/saveload.h>
+#include <wmcore/attach.h>
 #include "placement.h"
-#include "workspace.h"
+#include "ionws.h"
 #include "split.h"
 #include "frame.h"
 #include "funtabs.h"
 
 
-static void deinit_workspace(WWorkspace *ws);
-static void fit_workspace(WWorkspace *ws, WRectangle geom);
-static bool reparent_workspace(WWorkspace *ws, WRegion *parent,
+static void deinit_ionws(WIonWS *ws);
+static void fit_ionws(WIonWS *ws, WRectangle geom);
+static bool reparent_ionws(WIonWS *ws, WRegion *parent,
 							   WRectangle geom);
-static void map_workspace(WWorkspace *ws);
-static void unmap_workspace(WWorkspace *ws);
-static void focus_workspace(WWorkspace *ws, bool warp);
-static bool workspace_save_to_file(WWorkspace *ws, FILE *file, int lvl);
-
-bool workspace_display_managed(WWorkspace *ws, WRegion *reg)
-{
-	return TRUE;
-}
+static void map_ionws(WIonWS *ws);
+static void unmap_ionws(WIonWS *ws);
+static void focus_ionws(WIonWS *ws, bool warp);
+static bool ionws_save_to_file(WIonWS *ws, FILE *file, int lvl);
+static bool ionws_display_managed(WIonWS *ws, WRegion *reg);
 
 
-static DynFunTab workspace_dynfuntab[]={
-	{fit_region, fit_workspace},
-	{map_region, map_workspace},
-	{unmap_region, unmap_workspace},
-	{focus_region, focus_workspace},
-	{(DynFun*)reparent_region, (DynFun*)reparent_workspace},
+static DynFunTab ionws_dynfuntab[]={
+	{fit_region, fit_ionws},
+	{map_region, map_ionws},
+	{unmap_region, unmap_ionws},
+	{focus_region, focus_ionws},
+	{(DynFun*)reparent_region, (DynFun*)reparent_ionws},
 	
-	{(DynFun*)region_ws_add_clientwin, (DynFun*)workspace_add_clientwin},
-	{(DynFun*)region_ws_add_transient, (DynFun*)workspace_add_transient},
+	{(DynFun*)region_ws_add_clientwin, (DynFun*)ionws_add_clientwin},
+	{(DynFun*)region_ws_add_transient, (DynFun*)ionws_add_transient},
 
-	{region_request_managed_geom, workspace_request_managed_geom},
-	{region_managed_activated, workspace_managed_activated},
-	{region_remove_managed, workspace_remove_managed},
-	{(DynFun*)region_display_managed, (DynFun*)workspace_display_managed},
+	{region_request_managed_geom, ionws_request_managed_geom},
+	{region_managed_activated, ionws_managed_activated},
+	{region_remove_managed, ionws_remove_managed},
+	{(DynFun*)region_display_managed, (DynFun*)ionws_display_managed},
 	
-	{(DynFun*)region_do_find_new_manager, (DynFun*)workspace_do_find_new_manager},
+	{(DynFun*)region_do_find_new_manager, (DynFun*)ionws_do_find_new_manager},
 	
-	{(DynFun*)region_save_to_file, (DynFun*)workspace_save_to_file},
+	{(DynFun*)region_save_to_file, (DynFun*)ionws_save_to_file},
 
 	END_DYNFUNTAB
 };
 
 
-IMPLOBJ(WWorkspace, WRegion, deinit_workspace, workspace_dynfuntab,
-		&ion_workspace_funclist)
+IMPLOBJ(WIonWS, WGenericWS, deinit_ionws, ionws_dynfuntab,
+		&ion_ionws_funclist)
 
 
 /*{{{ region dynfun implementations */
 
 
-static void fit_workspace(WWorkspace *ws, WRectangle geom)
+static void fit_ionws(WIonWS *ws, WRectangle geom)
 {
+	REGION_GEOM(ws)=geom;
+	
 	if(ws->split_tree!=NULL){
 		split_tree_do_resize(ws->split_tree, HORIZONTAL, geom.x, geom.w);
 		split_tree_do_resize(ws->split_tree, VERTICAL, geom.y, geom.h);
@@ -80,8 +79,8 @@ static void fit_workspace(WWorkspace *ws, WRectangle geom)
 }
 
 
-static bool reparent_workspace(WWorkspace *ws, WRegion *parent,
-							   WRectangle geom)
+static bool reparent_ionws(WIonWS *ws, WRegion *parent,
+						   WRectangle geom)
 {
 	WRegion *sub, *next;
 	bool rs;
@@ -101,20 +100,20 @@ static bool reparent_workspace(WWorkspace *ws, WRegion *parent,
 		g.x+=xdiff;
 		g.y+=ydiff;
 		if(!reparent_region(sub, parent, g)){
-			warn("Problem: can't reparent a %s managed by a WWorkspace"
+			warn("Problem: can't reparent a %s managed by a WIonWS"
 				 "being reparented. Detaching from this object.",
 				 WOBJ_TYPESTR(sub));
 			region_detach_manager(sub);
 		}
 	}
 	
-	fit_workspace(ws, geom);
+	fit_ionws(ws, geom);
 	
 	return TRUE;
 }
 
 
-static void map_workspace(WWorkspace *ws)
+static void map_ionws(WIonWS *ws)
 {
 	WRegion *reg;
 
@@ -126,7 +125,7 @@ static void map_workspace(WWorkspace *ws)
 }
 
 
-static void unmap_workspace(WWorkspace *ws)
+static void unmap_ionws(WIonWS *ws)
 {
 	WRegion *reg;
 	
@@ -138,16 +137,22 @@ static void unmap_workspace(WWorkspace *ws)
 }
 
 
-static void focus_workspace(WWorkspace *ws, bool warp)
+static void focus_ionws(WIonWS *ws, bool warp)
 {
-	WRegion *sub=workspace_find_current(ws);
+	WRegion *sub=ionws_find_current(ws);
 	
 	if(sub==NULL){
-		warn("Trying to focus an empty workspace.");
+		warn("Trying to focus an empty ionws.");
 		return;
 	}
 
 	focus_region(sub, warp);
+}
+
+
+static bool ionws_display_managed(WIonWS *ws, WRegion *reg)
+{
+	return TRUE;
 }
 
 
@@ -157,7 +162,7 @@ static void focus_workspace(WWorkspace *ws, bool warp)
 /*{{{ Create/destroy */
 
 
-static WFrame *create_initial_frame(WWorkspace *ws, WRectangle geom)
+static WFrame *create_initial_frame(WIonWS *ws, WRectangle geom)
 {
 	WFrame *frame;
 	WRegion *parent=FIND_PARENT1(ws, WRegion);
@@ -171,30 +176,28 @@ static WFrame *create_initial_frame(WWorkspace *ws, WRectangle geom)
 		return NULL;
 	
 	ws->split_tree=(WObj*)frame;
-	workspace_add_managed(ws, (WRegion*)frame);
+	ionws_add_managed(ws, (WRegion*)frame);
 
 	return frame;
 }
 
 
-static bool init_workspace(WWorkspace *ws, WRegion *parent,
-						   WRectangle bounds, const char *name, bool ci)
+static bool init_ionws(WIonWS *ws, WRegion *parent, WRectangle bounds,
+					   const char *name, bool ci)
 {
-	init_region(&(ws->region), parent, bounds);
+	init_genericws(&(ws->genws), parent, bounds);
+	ws->split_tree=NULL;
 	
 	if(name!=NULL){
-		if(!region_set_name(&(ws->region), name)){
-			deinit_region(&ws->region);
+		if(!region_set_name((WRegion*)ws, name)){
+			deinit_region((WRegion*)ws);
 			return FALSE;
 		}
 	}
 	
-	ws->region.thing.flags|=WTHING_DESTREMPTY;
-	ws->split_tree=NULL;
-	
 	if(ci){
 		if(create_initial_frame(ws, bounds)==NULL){
-			deinit_region(&(ws->region));
+			deinit_genericws(&(ws->genws));
 			return FALSE;
 		}
 	}
@@ -203,74 +206,43 @@ static bool init_workspace(WWorkspace *ws, WRegion *parent,
 }
 
 
-WWorkspace *create_workspace(WRegion *parent, WRectangle bounds,
-							 const char *name, bool ci)
+WIonWS *create_ionws(WRegion *parent, WRectangle bounds, const char *name,
+					 bool ci)
 {
-	CREATETHING_IMPL(WWorkspace, workspace, (p, parent, bounds, name, ci));
+	CREATETHING_IMPL(WIonWS, ionws, (p, parent, bounds, name, ci));
 }
 
 
 static WRegion *create_new_ws(WRegion *parent, WRectangle bounds, void *fnp)
 {
-	return (WRegion*)create_workspace(parent, bounds, (char*)fnp, TRUE);
+	return (WRegion*)create_ionws(parent, bounds, (char*)fnp, TRUE);
 }
 
 
 
-WWorkspace *create_new_workspace_on_vp(WViewport *vp, const char *name)
+WIonWS *create_new_ionws_on_vp(WViewport *vp, const char *name)
 {
-	return (WWorkspace*)region_add_managed_new((WRegion*)vp, create_new_ws,
+	return (WIonWS*)region_add_managed_new((WRegion*)vp, create_new_ws,
 											   (char *)name, 0);
 }
 
 
 bool create_initial_workspace_on_vp(WViewport *vp)
 {
-	WWorkspace *ws=create_new_workspace_on_vp(vp, "main");
+	WIonWS *ws=create_new_ionws_on_vp(vp, "main");
 	return (ws!=NULL);
 }
 
 
-void deinit_workspace(WWorkspace *ws)
+void deinit_ionws(WIonWS *ws)
 {
 	WRegion *reg;
 	
 	FOR_ALL_MANAGED_ON_LIST(ws->managed_list, reg){
-		workspace_remove_managed(ws, reg);
+		ionws_remove_managed(ws, reg);
 	}
 
-	deinit_region(&(ws->region));
-}
-
-
-/*}}}*/
-
-
-/*{{{ Names */
-
-
-WWorkspace *lookup_workspace(const char *name)
-{
-	return (WWorkspace*)do_lookup_region(name, &OBJDESCR(WWorkspace));
-}
-
-
-int complete_workspace(char *nam, char ***cp_ret, char **beg, void *unused)
-{
-	return do_complete_region(nam, cp_ret, beg, &OBJDESCR(WWorkspace));
-}
-
-
-bool goto_workspace_name(const char *str)
-{
-	WWorkspace *ws=lookup_workspace(str);
-	
-	if(ws==NULL)
-		return FALSE;
-
-	goto_region((WRegion*)ws);
-	
-	return TRUE;
+	deinit_genericws(&(ws->genws));
 }
 
 
@@ -316,7 +288,7 @@ static void write_obj(WObj *obj, FILE *file, int lvl)
 }
 
 
-static bool workspace_save_to_file(WWorkspace *ws, FILE *file, int lvl)
+static bool ionws_save_to_file(WIonWS *ws, FILE *file, int lvl)
 {
 	begin_saved_region((WRegion*)ws, file, lvl);
 	write_obj(ws->split_tree, file, lvl);
@@ -333,7 +305,7 @@ static bool workspace_save_to_file(WWorkspace *ws, FILE *file, int lvl)
 
 static WRegion *tmp_par=NULL;
 static WRectangle tmp_geom;
-static WWorkspace *current_ws=NULL;
+static WIonWS *current_ws=NULL;
 static WWsSplit *current_split=NULL;
 
 
@@ -395,7 +367,7 @@ static bool check_splits(const Tokenizer *tokz, int l)
 }
 
 
-static bool opt_workspace_split(int dir, Tokenizer *tokz, int n, Token *toks)
+static bool opt_ionws_split(int dir, Tokenizer *tokz, int n, Token *toks)
 {
 	WRectangle geom;
 	WWsSplit *split;
@@ -436,15 +408,15 @@ static bool opt_workspace_split(int dir, Tokenizer *tokz, int n, Token *toks)
 }
 
 
-static bool opt_workspace_vsplit(Tokenizer *tokz, int n, Token *toks)
+static bool opt_ionws_vsplit(Tokenizer *tokz, int n, Token *toks)
 {
-	return opt_workspace_split(VERTICAL, tokz, n, toks);
+	return opt_ionws_split(VERTICAL, tokz, n, toks);
 }
 
 
-static bool opt_workspace_hsplit(Tokenizer *tokz, int n, Token *toks)
+static bool opt_ionws_hsplit(Tokenizer *tokz, int n, Token *toks)
 {
-	return opt_workspace_split(HORIZONTAL, tokz, n, toks);
+	return opt_ionws_split(HORIZONTAL, tokz, n, toks);
 }
 
 
@@ -472,7 +444,7 @@ static bool opt_split_end(Tokenizer *tokz, int n, Token *toks)
 }
 
 
-static bool opt_workspace_region(Tokenizer *tokz, int n, Token *toks)
+static bool opt_ionws_region(Tokenizer *tokz, int n, Token *toks)
 {
 	WRegion *reg;
 	WRectangle geom;
@@ -495,7 +467,7 @@ static bool opt_workspace_region(Tokenizer *tokz, int n, Token *toks)
 		current_split->br=(WObj*)reg;
 	
 	SPLIT_OF((WRegion*)reg)=current_split;
-	workspace_add_managed(current_ws, reg);
+	ionws_add_managed(current_ws, reg);
 	
 	return TRUE;
 }
@@ -507,27 +479,27 @@ static ConfOpt dummy_opts[]={
 
 
 static ConfOpt split_opts[]={
-	{"vsplit", "ll",  opt_workspace_vsplit, split_opts},
-	{"hsplit", "ll",  opt_workspace_hsplit, split_opts},
-	{"region", "s?s", opt_workspace_region, dummy_opts},
+	{"vsplit", "ll",  opt_ionws_vsplit, split_opts},
+	{"hsplit", "ll",  opt_ionws_hsplit, split_opts},
+	{"region", "s?s", opt_ionws_region, dummy_opts},
 	{"#end", NULL, opt_split_end, NULL},
 	END_CONFOPTS
 };
 
 
-static ConfOpt workspace_opts[]={
-	{"vsplit", "ll",  opt_workspace_vsplit, split_opts},
-	{"hsplit", "ll",  opt_workspace_hsplit, split_opts},
-	{"region", "s?s", opt_workspace_region, dummy_opts},
+static ConfOpt ionws_opts[]={
+	{"vsplit", "ll",  opt_ionws_vsplit, split_opts},
+	{"hsplit", "ll",  opt_ionws_hsplit, split_opts},
+	{"region", "s?s", opt_ionws_region, dummy_opts},
 	END_CONFOPTS
 };
 
 
-WRegion *workspace_load(WRegion *par, WRectangle geom, Tokenizer *tokz)
+WRegion *ionws_load(WRegion *par, WRectangle geom, Tokenizer *tokz)
 {
-	WWorkspace *ws;
+	WIonWS *ws;
 	
-	ws=create_workspace(par, geom, NULL, FALSE);
+	ws=create_ionws(par, geom, NULL, FALSE);
 	if(ws==NULL)
 		return NULL;
 
@@ -536,7 +508,7 @@ WRegion *workspace_load(WRegion *par, WRectangle geom, Tokenizer *tokz)
 	current_split=NULL;
 	current_ws=ws;
 	
-	parse_config_tokz(tokz, workspace_opts);
+	parse_config_tokz(tokz, ionws_opts);
 	
 	tmp_par=NULL;
 	current_split=NULL;

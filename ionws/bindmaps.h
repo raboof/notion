@@ -11,7 +11,7 @@
 #include <wmcore/binding.h>
 #include <wmcore/regbind.h>
 
-extern WBindmap ion_workspace_bindmap;
+extern WBindmap ion_ionws_bindmap;
 extern WBindmap ion_frame_bindmap;
 extern WBindmap ion_moveres_bindmap;
 

@@ -56,18 +56,18 @@ extern int split_tree_size(WObj *obj, int dir);
 extern int split_tree_pos(WObj *obj, int dir);
 extern int split_tree_other_size(WObj *obj, int dir);
 
-#include "workspace.h"
+#include "ionws.h"
 
-extern void workspace_add_managed(WWorkspace *ws, WRegion *reg);
-extern void workspace_managed_activated(WWorkspace *ws, WRegion *reg);
-extern WRegion *workspace_do_find_new_manager(WRegion *reg);
-extern WRegion *workspace_find_new_manager(WRegion *reg);
-extern void workspace_request_managed_geom(WWorkspace *ws, WRegion *reg,
-										   WRectangle geom,
-										   WRectangle *geomret, bool tryonly);
-extern void workspace_remove_managed(WWorkspace *ws, WRegion *reg);
-extern bool remove_split(WWorkspace *ws, WWsSplit *split);
-extern WRegion *workspace_find_current(WWorkspace *ws);
+extern void ionws_add_managed(WIonWS *ws, WRegion *reg);
+extern void ionws_managed_activated(WIonWS *ws, WRegion *reg);
+extern WRegion *ionws_do_find_new_manager(WRegion *reg);
+extern WRegion *ionws_find_new_manager(WRegion *reg);
+extern void ionws_request_managed_geom(WIonWS *ws, WRegion *reg,
+										 WRectangle geom,
+										 WRectangle *geomret, bool tryonly);
+extern void ionws_remove_managed(WIonWS *ws, WRegion *reg);
+extern bool ionws_remove_split(WIonWS *ws, WWsSplit *split);
+extern WRegion *ionws_find_current(WIonWS *ws);
 
 #endif /* ION_SPLIT_H */
 

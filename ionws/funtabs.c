@@ -17,7 +17,7 @@
 #include <wmcore/tags.h>
 #include "frame.h"
 #include "frame-pointer.h"
-#include "workspace.h"
+#include "ionws.h"
 #include "resize.h"
 #include "funtabs.h"
 #include "split.h"
@@ -27,12 +27,12 @@
 /*{{{ Call handlers */
 
 
-#define WSCURRENT_HANDLE(HND, T, G)                 \
-	WRegion *reg;                                   \
-	typedef void Func(WThing*, T);                  \
-	assert(WTHING_IS(thing, WWorkspace));           \
-	reg=workspace_find_current((WWorkspace*)thing); \
-	if(reg!=NULL)                                   \
+#define WSCURRENT_HANDLE(HND, T, G)               \
+	WRegion *reg;                                 \
+	typedef void Func(WThing*, T);                \
+	assert(WTHING_IS(thing, WIonWS));             \
+	reg=ionws_find_current((WIonWS*)thing);       \
+	if(reg!=NULL)                                 \
 		((Func*)func->fn)((WThing*)reg, G(args));
 
 void callhnd_wscurrent_void(WThing *thing, WFunction *func,
@@ -40,8 +40,8 @@ void callhnd_wscurrent_void(WThing *thing, WFunction *func,
 {
 	WRegion *reg;
 	typedef void Func(WThing*);
-	assert(WTHING_IS(thing, WWorkspace));
-	reg=workspace_find_current((WWorkspace*)thing);
+	assert(WTHING_IS(thing, WIonWS));
+	reg=ionws_find_current((WIonWS*)thing);
 	if(reg!=NULL)
 		((Func*)func->fn)((WThing*)reg);
 }
@@ -89,27 +89,27 @@ static void frame_toggle_sub_tag(WFrame *frame)
 /*{{{ Function tables */
 
 
-WFunclist ion_workspace_funclist=INIT_FUNCLIST;
+WFunclist ion_ionws_funclist=INIT_FUNCLIST;
 
-static WFunction ion_workspace_funtab[]={
-	FN_VOID(generic, WWorkspace,	"ionws_goto_above",		workspace_goto_above),
-	FN_VOID(generic, WWorkspace,	"ionws_goto_below",		workspace_goto_below),
-	FN_VOID(generic, WWorkspace,	"ionws_goto_right",		workspace_goto_right),
-	FN_VOID(generic, WWorkspace,	"ionws_goto_left",		workspace_goto_left),
+static WFunction ion_ionws_funtab[]={
+	FN_VOID(generic, WIonWS,	"ionws_goto_above",		ionws_goto_above),
+	FN_VOID(generic, WIonWS,	"ionws_goto_below",		ionws_goto_below),
+	FN_VOID(generic, WIonWS,	"ionws_goto_right",		ionws_goto_right),
+	FN_VOID(generic, WIonWS,	"ionws_goto_left",		ionws_goto_left),
 	
-	FN(s,	generic, WWorkspace,	"ionws_split_top",		split_top),
-	FN(s,	wscurrent, WWorkspace,	"ionws_split",			split),
-	FN(s,	wscurrent, WWorkspace,	"ionws_split_empty", 	split_empty),
+	FN(s,	generic, WIonWS,	"ionws_split_top",		split_top),
+	FN(s,	wscurrent, WIonWS,	"ionws_split",			split),
+	FN(s,	wscurrent, WIonWS,	"ionws_split_empty", 	split_empty),
 	
 	/*
-	FN_VOID(wscurrent, WWorkspace,	"resize_vert",		resize_vert),
-	FN_VOID(wscurrent, WWorkspace,	"resize_horiz",		resize_horiz),
-	FN_VOID(wscurrent, WWorkspace,	"maximize_vert", 	maximize_vert),
-	FN_VOID(wscurrent, WWorkspace,	"maximize_horiz", 	maximize_horiz),
-	FN(l,	wscurrent, WWorkspace,	"set_width",		set_width),
-	FN(l,	wscurrent, WWorkspace,	"set_height",		set_height),
-	FN(d,	wscurrent, WWorkspace,	"set_widthq",		set_widthq),
-	FN(d,	wscurrent, WWorkspace,	"set_heightq",		set_heightq),
+	FN_VOID(wscurrent, WIonWS,	"resize_vert",		resize_vert),
+	FN_VOID(wscurrent, WIonWS,	"resize_horiz",		resize_horiz),
+	FN_VOID(wscurrent, WIonWS,	"maximize_vert", 	maximize_vert),
+	FN_VOID(wscurrent, WIonWS,	"maximize_horiz", 	maximize_horiz),
+	FN(l,	wscurrent, WIonWS,	"set_width",		set_width),
+	FN(l,	wscurrent, WIonWS,	"set_height",		set_height),
+	FN(d,	wscurrent, WIonWS,	"set_widthq",		set_widthq),
+	FN(d,	wscurrent, WIonWS,	"set_heightq",		set_heightq),
 	 */
 	END_FUNTAB
 };
@@ -170,7 +170,7 @@ static WFunction ion_moveres_funtab[]={
 
 void init_funclists()
 {
-	assert(add_to_funclist(&ion_workspace_funclist, ion_workspace_funtab));
+	assert(add_to_funclist(&ion_ionws_funclist, ion_ionws_funtab));
 	assert(add_to_funclist(&ion_frame_funclist, ion_frame_funtab));
 	assert(add_to_funclist(&ion_moveres_funclist, ion_moveres_funtab));
 }

@@ -86,9 +86,9 @@ static StringIntMap frame_areas[]={
 };
 
 	
-static bool opt_workspace_bindings(Tokenizer *tokz, int n, Token *toks)
+static bool opt_ionws_bindings(Tokenizer *tokz, int n, Token *toks)
 {
-	return wmcore_begin_bindings(&ion_workspace_bindmap, NULL);
+	return wmcore_begin_bindings(&ion_ionws_bindmap, NULL);
 }
 
 
@@ -145,7 +145,7 @@ static ConfOpt opts[]={
 	{"winprop" , "sss", ion_begin_winprop, ion_winprop_opts},
 	
 	/* bindings */
-	{"workspace_bindings", NULL, opt_workspace_bindings, wmcore_binding_opts},
+	{"ionws_bindings", NULL, opt_ionws_bindings, wmcore_binding_opts},
 	{"frame_bindings", NULL, opt_frame_bindings, wmcore_binding_opts},
 	{"moveres_bindings", NULL, opt_moveres_bindings, wmcore_binding_opts},
 

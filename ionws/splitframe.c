@@ -22,7 +22,7 @@
 typedef WRegion *WSplitCreate(WRegion *parent, WRectangle geom);
 extern WRegion *split_reg(WRegion *reg, int dir, int primn,
 						  int minsize, WSplitCreate *fn);
-extern WRegion *split_toplevel(WWorkspace *ws, int dir, int primn,
+extern WRegion *split_toplevel(WIonWS *ws, int dir, int primn,
 							   int minsize, WSplitCreate *fn);
 
 
@@ -60,7 +60,7 @@ static WObj *do_find_at(WObj *obj, int x, int y)
 }
 
 
-WFrame *find_frame_at(WWorkspace *ws, int x, int y)
+WFrame *find_frame_at(WIonWS *ws, int x, int y)
 {
 	WObj *obj=ws->split_tree;
 	
@@ -145,7 +145,7 @@ void split_empty(WRegion *reg, const char *str)
 }
 
 
-void split_top(WWorkspace *ws, const char *str)
+void split_top(WIonWS *ws, const char *str)
 {
 	WRegion *reg;
 	int dir, primn, mins;
@@ -171,14 +171,14 @@ void split_top(WWorkspace *ws, const char *str)
 
 void frame_close(WFrame *frame)
 {
-	WWorkspace *ws;
+	WIonWS *ws;
 	WViewport *vp;
 	WRegion *other;
 	bool was_active=REGION_IS_ACTIVE(frame);
 	
-	ws=(WWorkspace*)REGION_MANAGER(frame);
+	ws=(WIonWS*)REGION_MANAGER(frame);
 	
-	if(ws==NULL || !WTHING_IS(ws, WWorkspace)){
+	if(ws==NULL || !WTHING_IS(ws, WIonWS)){
 		region_rescue_managed_on_list((WRegion*)frame, frame->managed_list);
 		destroy_thing((WThing*)frame);
 		return;
@@ -188,12 +188,12 @@ void frame_close(WFrame *frame)
 	
 	if(vp!=NULL && WTHING_IS(vp, WViewport)){
 		if(vp->ws_count<=1 && ws->split_tree==(WObj*)frame){
-			fwarn(frame, "Cannot destroy only frame on only workspace.");
+			fwarn(frame, "Cannot destroy only frame on only ionws.");
 			return;
 		}
 	}
 	
-	other=workspace_find_new_manager((WRegion*)frame);
+	other=ionws_find_new_manager((WRegion*)frame);
 	
 	if(frame->managed_count!=0){
 		if(other==NULL || WTHING_IS(other, WScreen)){

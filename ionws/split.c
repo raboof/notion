@@ -16,7 +16,7 @@
 #include <wmcore/resize.h>
 #include <wmcore/attach.h>
 #include <wmcore/defer.h>
-#include "workspace.h"
+#include "ionws.h"
 #include "frame.h"
 #include "split.h"
 #include "splitframe.h"
@@ -398,9 +398,8 @@ static void resize_tmp(const WResizeTmp *tmp)
 }
 
 
-void workspace_request_managed_geom(WWorkspace *ws, WRegion *sub,
-									WRectangle geom, WRectangle *geomret,
-									bool tryonly)
+void ionws_request_managed_geom(WIonWS *ws, WRegion *sub, WRectangle geom,
+								WRectangle *geomret, bool tryonly)
 {
 	int hprimn=ANY, vprimn=ANY;
 	WResizeTmp tmp;
@@ -471,7 +470,7 @@ WWsSplit *create_split(int dir, WObj *tl, WObj *br, WRectangle geom)
 }
 
 
-static WRegion *do_split_at(WWorkspace *ws, WObj *obj, int dir, int primn,
+static WRegion *do_split_at(WIonWS *ws, WObj *obj, int dir, int primn,
 							int minsize, WSplitCreate *fn)
 {
 	int s, sn, gs, pos;
@@ -539,7 +538,7 @@ static WRegion *do_split_at(WWorkspace *ws, WObj *obj, int dir, int primn,
 		return NULL;
 	}
 	
-	workspace_add_managed(ws, nreg);
+	ionws_add_managed(ws, nreg);
 	
 	/* Now that everything's ok, resize (and move) the original
 	 * obj.
@@ -583,13 +582,13 @@ WRegion *split_reg(WRegion *reg, int dir, int primn, int minsize,
 				   WSplitCreate *fn)
 {
 	WRegion *mgr=REGION_MANAGER(reg);
-	assert(mgr!=NULL && WTHING_IS(mgr, WWorkspace));
+	assert(mgr!=NULL && WTHING_IS(mgr, WIonWS));
 	
-	return do_split_at((WWorkspace*)mgr, (WObj*)reg, dir, primn, minsize, fn);
+	return do_split_at((WIonWS*)mgr, (WObj*)reg, dir, primn, minsize, fn);
 }
 
 
-WRegion *split_toplevel(WWorkspace *ws, int dir, int primn, int minsize,
+WRegion *split_toplevel(WIonWS *ws, int dir, int primn, int minsize,
 						WSplitCreate *fn)
 {
 	if(ws->split_tree==NULL)
@@ -659,7 +658,7 @@ static WRegion *right_or_bottomost_current(WObj *obj, int dir)
 }
 
 
-WRegion *workspace_find_current(WWorkspace *ws)
+WRegion *ionws_find_current(WIonWS *ws)
 {
 	return left_or_topmost_current(ws->split_tree, -1);
 }
@@ -694,7 +693,7 @@ static WWsSplit *find_split(WObj *obj, int dir, int *from)
 static WRegion *right_or_down(WRegion *reg, int dir)
 {
 	WObj *prev=(WObj*)reg;
-	WWorkspace *ws;
+	WIonWS *ws;
 	WWsSplit *split;
 	int from;
 
@@ -720,7 +719,7 @@ static WRegion *right_or_down(WRegion *reg, int dir)
 static WRegion *up_or_left(WRegion *reg, int dir)
 {
 	WObj *prev=(WObj*)reg;
-	WWorkspace *ws;
+	WIonWS *ws;
 	WWsSplit *split;
 	int from;
 
@@ -754,7 +753,7 @@ static void goto_reg(WRegion *reg)
 static void check_mgr(WRegion *reg)
 {
 	assert(REGION_MANAGER(reg)!=NULL && 
-		   WTHING_IS(REGION_MANAGER(reg), WWorkspace));
+		   WTHING_IS(REGION_MANAGER(reg), WIonWS));
 }
 
 
@@ -787,27 +786,27 @@ void goto_right(WRegion *reg)
 #endif
 
 
-void workspace_goto_above(WWorkspace *ws)
+void ionws_goto_above(WIonWS *ws)
 {
-	goto_reg(up_or_left(workspace_find_current(ws), VERTICAL));
+	goto_reg(up_or_left(ionws_find_current(ws), VERTICAL));
 }
 
 
-void workspace_goto_below(WWorkspace *ws)
+void ionws_goto_below(WIonWS *ws)
 {
-	goto_reg(right_or_down(workspace_find_current(ws), VERTICAL));
+	goto_reg(right_or_down(ionws_find_current(ws), VERTICAL));
 }
 
 
-void workspace_goto_left(WWorkspace *ws)
+void ionws_goto_left(WIonWS *ws)
 {
-	goto_reg(up_or_left(workspace_find_current(ws), HORIZONTAL));
+	goto_reg(up_or_left(ionws_find_current(ws), HORIZONTAL));
 }
 
 
-void workspace_goto_right(WWorkspace *ws)
+void ionws_goto_right(WIonWS *ws)
 {
-	goto_reg(right_or_down(workspace_find_current(ws), HORIZONTAL));
+	goto_reg(right_or_down(ionws_find_current(ws), HORIZONTAL));
 }
 
 
@@ -817,24 +816,24 @@ void workspace_goto_right(WWorkspace *ws)
 /*{{{ Remove/add */
 
 
-void workspace_add_managed(WWorkspace *ws, WRegion *reg)
+void ionws_add_managed(WIonWS *ws, WRegion *reg)
 {
 	region_set_manager(reg, (WRegion*)ws, &(ws->managed_list));
 	
-	region_add_bindmap_owned(reg, &ion_workspace_bindmap, TRUE, (WRegion*)ws);
+	region_add_bindmap_owned(reg, &ion_ionws_bindmap, TRUE, (WRegion*)ws);
 	
 	if(REGION_IS_MAPPED(ws))
 		map_region(reg);
 }
 
 
-void workspace_remove_managed(WWorkspace *ws, WRegion *reg)
+void ionws_remove_managed(WIonWS *ws, WRegion *reg)
 {
 	WWsSplit *split;
 	
 	region_unset_manager(reg, (WRegion*)ws, &(ws->managed_list));
 
-	region_remove_bindmap_owned(reg, &ion_workspace_bindmap, (WRegion*)ws);
+	region_remove_bindmap_owned(reg, &ion_ionws_bindmap, (WRegion*)ws);
 
 	split=SPLIT_OF(reg);
 	
@@ -846,7 +845,7 @@ void workspace_remove_managed(WWorkspace *ws, WRegion *reg)
 		
 		SPLIT_OF(reg)=NULL;
 		
-		remove_split(ws, split);
+		ionws_remove_split(ws, split);
 	}else{
 		ws->split_tree=NULL;
 	}
@@ -856,7 +855,7 @@ void workspace_remove_managed(WWorkspace *ws, WRegion *reg)
 }
 
 
-bool remove_split(WWorkspace *ws, WWsSplit *split)
+bool ionws_remove_split(WIonWS *ws, WWsSplit *split)
 {
 	WWsSplit *split2;
 	WObj *other;
@@ -909,7 +908,7 @@ bool remove_split(WWorkspace *ws, WWsSplit *split)
 /*{{{ managed_activated */
 
 
-void workspace_managed_activated(WWorkspace *ws, WRegion *reg)
+void ionws_managed_activated(WIonWS *ws, WRegion *reg)
 {
 	WWsSplit *split=SPLIT_OF(reg);
 	WObj *prev=(WObj*)reg;
@@ -961,7 +960,7 @@ static WRegion *do_find_nmgr(WObj *ptr, int primn)
 }
 					  
 
-WRegion *workspace_find_new_manager(WRegion *reg)
+WRegion *ionws_find_new_manager(WRegion *reg)
 {
 	WWsSplit *split=SPLIT_OF(reg);
 	
@@ -981,13 +980,13 @@ WRegion *workspace_find_new_manager(WRegion *reg)
 }
 
 
-WRegion *workspace_do_find_new_manager(WRegion *reg)
+WRegion *ionws_do_find_new_manager(WRegion *reg)
 {
 	WWsSplit *split=SPLIT_OF(reg);
 	WRegion *r;
 	
 	if(split!=NULL){
-		r=workspace_find_new_manager(reg);
+		r=ionws_find_new_manager(reg);
 		if(r!=NULL)
 			return r;
 	}
