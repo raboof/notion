@@ -19,6 +19,7 @@ extern void split(WRegion *reg, const char *str);
 extern void split_empty(WRegion *reg, const char *str);
 extern void split_top(WWorkspace *ws, const char *str);
 extern void frame_close(WFrame *frame);
+extern void frame_close_if_empty(WFrame *frame);
 
 #endif /* ION_SPLITFRAME_H */
 

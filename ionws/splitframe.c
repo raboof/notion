@@ -214,5 +214,14 @@ void frame_close(WFrame *frame)
 }
 
 
+void frame_close_if_empty(WFrame *frame)
+{
+	if(frame->managed_count!=0 || frame->current_input!=NULL)
+		return;
+	
+	frame_close(frame);
+}
+
+
 /*}}}*/
 

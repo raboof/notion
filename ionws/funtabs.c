@@ -124,6 +124,7 @@ static WFunction ion_frame_funtab[]={
 	FN_VOID(generic, WFrame,	"frame_attach_tagged",	frame_attach_tagged),
 	FN_VOID(generic, WFrame,	"frame_toggle_sub_tag",	frame_toggle_sub_tag),
 	FN_VOID(generic, WFrame,	"frame_close",			frame_close),
+	FN_VOID(generic, WFrame,	"frame_close_if_empty", frame_close_if_empty),
 
 	FN_VOID(generic, WRegion,	"frame_resize_vert",	resize_vert),
 	FN_VOID(generic, WRegion,	"frame_resize_horiz",	resize_horiz),
@@ -143,7 +144,7 @@ static WFunction ion_frame_funtab[]={
 	FN_VOID(generic, WFrame,	"frame_move_current_tab_right", frame_move_current_tab_right),
 
 	/* Common functions */
-	FN_VOID(generic, WFrame,	"close",				frame_close),
+	FN_VOID(generic, WFrame,	"close",				frame_close_if_empty),
 	
 	END_FUNTAB
 };
