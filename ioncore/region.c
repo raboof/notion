@@ -17,12 +17,6 @@
 #include "names.h"
 
 
-#if 0
-#define D(X) X
-#else
-#define D(X)
-#endif
-
 #define FOR_ALL_SUBREGIONS(REG, SUB) \
 	FOR_ALL_TYPED(REG, SUB, WRegion)
 

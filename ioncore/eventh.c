@@ -76,10 +76,12 @@ static void skip_focusenter_but(WRegion *reg)
 						  EnterWindowMask|FocusChangeMask, &ev)){
 		if(ev.type==FocusOut)
 			handle_focus_out(&(ev.xfocus));
+		else if(ev.type==FocusIn)
+			handle_focus_in(&(ev.xfocus));
 		
 		/*if(ev.type!=FocusIn)
 			continue;*/
-		
+		#if 0
 		r=FIND_WINDOW_T(ev.xany.window, WRegion);
 		
 		while(r!=NULL){
@@ -92,6 +94,7 @@ static void skip_focusenter_but(WRegion *reg)
 			}
 			r=FIND_PARENT1(r, WRegion);
 		}
+		#endif
 	}
 }
 
@@ -182,16 +185,19 @@ void mainloop()
 		execute_deferred();
 		
 		XSync(wglobal.dpy, False);
-		
-		if(wglobal.focus_next!=NULL){
+		if(wglobal.focus_next!=NULL && wglobal.input_mode==INPUT_NORMAL){
 			skip_focusenter_but(wglobal.focus_next);
 			do_set_focus(wglobal.focus_next, wglobal.warp_next);
 			wglobal.focus_next=NULL;
 			wglobal.warp_next=FALSE;
-		}else if(wglobal.grab_released){
-			wglobal.grab_released=FALSE;
+		}
+		#if 0
+		else 
+			if(wglobal.grab_released /*|| wglobal.focus_next!=NULL*/){
 			skip_focusenter_but(NULL);
 		}
+		#endif
+		wglobal.grab_released=FALSE;
 	}
 }
 
@@ -401,19 +407,18 @@ static void handle_enter_window(XEvent *ev)
 {
 	XEnterWindowEvent *eev=&(ev->xcrossing);
 	WRegion *reg=NULL, *mgr;
-
+#if 0
 	while(XCheckMaskEvent(wglobal.dpy, EnterWindowMask, ev)){
 		/* We're only interested in the latest enter event */
 	}
-
-	/*
-	if((eev->mode!=NotifyNormal && eev->mode!=NotifyUngrab) &&
-	   !wglobal.warp_enabled)
+#endif
+	if(wglobal.input_mode!=INPUT_NORMAL)
 		return;
-	*/
-	
-	/*
-	if(eev->window==eev->root){
+/*
+	if(eev->mode!=NotifyNormal && !wglobal.warp_enabled)
+		return;
+*/
+/*	if(eev->window==eev->root){
 		return;
 	}*/
 	
@@ -451,11 +456,22 @@ static void handle_focus_in(const XFocusChangeEvent *ev)
 	if(reg==NULL)
 		return;
 
-	/*fprintf(stderr, "FI: %s %p %d %d\n", WOBJ_TYPESTR(reg), reg, ev->mode, ev->detail);*/
+	D(fprintf(stderr, "FI: %s %p %d %d\n", WOBJ_TYPESTR(reg), reg, ev->mode, ev->detail);)
 
     if(ev->mode==NotifyGrab)/* || ev->mode==NotifyWhileGrabbed)*/
 	/*if(ev->mode!=NotifyNormal && ev->mode!=NotifyWhileGrabbed)*/
 		return;
+	
+	if(wglobal.focus_next!=NULL){
+		WRegion *r2=reg;
+		while(r2!=NULL){
+			if(r2==wglobal.focus_next)
+				break;
+			r2=FIND_PARENT1(r2, WRegion);
+		}
+		if(r2==NULL)
+			return;
+	}
 	
 	if(WTHING_IS(reg, WScreen)){
 		if(ev->detail!=NotifyInferior){
@@ -496,7 +512,7 @@ static void handle_focus_out(const XFocusChangeEvent *ev)
 	if(reg==NULL)
 		return;
 
-	/*fprintf(stderr, "FO: %s %p %d %d\n", WOBJ_TYPESTR(reg), reg, ev->mode, ev->detail);*/
+	D(fprintf(stderr, "FO: %s %p %d %d\n", WOBJ_TYPESTR(reg), reg, ev->mode, ev->detail);)
 
 	if(ev->mode==NotifyGrab)/* || ev->mode==NotifyWhileGrabbed)*/
 	/*if(ev->mode!=NotifyNormal && ev->mode!=NotifyWhileGrabbed)*/

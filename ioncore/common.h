@@ -43,4 +43,10 @@ typedef struct WRectangle_struct{
 
 extern void pgeom(const char *n, WRectangle g);
 
+#if 0
+#define D(X) X
+#else
+#define D(X)
+#endif
+
 #endif /* WMCORE_COMMON_H */

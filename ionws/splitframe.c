@@ -206,7 +206,7 @@ void frame_close(WFrame *frame)
 		if(frame->managed_count==0)
 			warn("Could not move all managed objects.");
 	}
-	
+
 	if(other!=NULL && was_active)
 		set_focus(other);
 				 

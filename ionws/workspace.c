@@ -35,6 +35,11 @@ static void unmap_workspace(WWorkspace *ws);
 static void focus_workspace(WWorkspace *ws, bool warp);
 static bool workspace_save_to_file(WWorkspace *ws, FILE *file, int lvl);
 
+bool workspace_display_managed(WWorkspace *ws, WRegion *reg)
+{
+	return TRUE;
+}
+
 
 static DynFunTab workspace_dynfuntab[]={
 	{fit_region, fit_workspace},
@@ -49,7 +54,8 @@ static DynFunTab workspace_dynfuntab[]={
 	{region_request_managed_geom, workspace_request_managed_geom},
 	{region_managed_activated, workspace_managed_activated},
 	{region_remove_managed, workspace_remove_managed},
-
+	{(DynFun*)region_display_managed, (DynFun*)workspace_display_managed},
+	
 	{(DynFun*)region_do_find_new_manager, (DynFun*)workspace_do_find_new_manager},
 	
 	{(DynFun*)region_save_to_file, (DynFun*)workspace_save_to_file},
