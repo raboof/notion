@@ -34,6 +34,7 @@
 #include "regbind.h"
 #include "screen.h"
 #include "draw.h"
+#include "screen.h"
 
 
 /*{{{ The bindmap */
@@ -103,7 +104,7 @@ static int my_error_handler(Display *dpy, XErrorEvent *ev)
 /*{{{ Utility functions */
 
 
-Window create_simple_window_bg(const WRootWin *rootwin, Window par,
+Window create_simple_window_bg(const WGRData *grdata, Window par,
 							   WRectangle geom, WColor background)
 {
 	return XCreateSimpleWindow(wglobal.dpy, par,
@@ -112,11 +113,11 @@ Window create_simple_window_bg(const WRootWin *rootwin, Window par,
 }
 
 
-Window create_simple_window(const WRootWin *rootwin, Window par, 
+Window create_simple_window(const WGRData *grdata, Window par, 
 							WRectangle geom)
 {
-	return create_simple_window_bg(rootwin, par, geom, 
-								   rootwin->grdata.frame_colors.bg);
+	return create_simple_window_bg(grdata, par, geom, 
+								   grdata->frame_colors.bg);
 }
 
 
@@ -132,8 +133,8 @@ static void scan_initial_windows(WRootWin *rootwin)
 	uint nwins=0, i, j;
 	XWMHints *hints;
 	
-	XQueryTree(wglobal.dpy, rootwin->root.win,
-			   &dummy_root, &dummy_parent, &wins, &nwins);
+	XQueryTree(wglobal.dpy, rootwin->root, &dummy_root, &dummy_parent,
+			   &wins, &nwins);
 	
 	for(i=0; i<nwins; i++){
 		if(wins[i]==None)
@@ -223,18 +224,16 @@ static WRootWin *preinit_rootwin(int xscr)
 	geom.w=DisplayWidth(dpy, xscr);
 	geom.h=DisplayHeight(dpy, xscr);
 	
-	window_init((WWindow*)rootwin, NULL, root, geom);
+	region_init((WRegion*)rootwin, NULL, geom);
 	
-	rootwin->root.region.flags|=REGION_BINDINGS_ARE_GRABBED;
-	rootwin->root.region.rootwin=rootwin;
+	rootwin->reg.flags|=REGION_BINDINGS_ARE_GRABBED;
+	rootwin->reg.rootwin=rootwin;
+	rootwin->root=root;
 	rootwin->xscr=xscr;
 	rootwin->default_cmap=DefaultColormap(dpy, xscr);
 	rootwin->current_screen=NULL;
 	rootwin->screen_list=NULL;
 	
-	rootwin->w_unit=7;
-	rootwin->h_unit=13;
-
 	MARK_REGION_MAPPED(rootwin);
 	
 	scan_initial_windows(rootwin);
@@ -245,33 +244,34 @@ static WRootWin *preinit_rootwin(int xscr)
 }
 
 
-#ifdef CF_WINDOWED_SCREENS
 static Atom net_virtual_roots=None;
-#endif
 
 
-WScreen *add_screen(WRootWin *scr, int id, WRectangle geom)
+static WScreen *add_screen(WRootWin *rw, int id, WRectangle geom, 
+						   bool useroot)
 {
-	WScreen *vp=create_screen(scr, id, geom);
+	WScreen *scr;
 	CARD32 p[1];
 	
-	if(vp==NULL)
+	scr=create_screen(rw, id, geom, useroot);
+	
+	if(scr==NULL)
 		return NULL;
 	
-	region_set_manager((WRegion*)vp, (WRegion*)scr, &(scr->screen_list));
+	region_set_manager((WRegion*)scr, (WRegion*)rw, &(rw->screen_list));
 	
-	region_map((WRegion*)vp);
+	region_map((WRegion*)scr);
 
-#ifdef CF_WINDOWED_SCREENS
-	p[1]=region_x_window((WRegion*)vp);
-	XChangeProperty(wglobal.dpy, scr->root.win, net_virtual_roots,
-					XA_WINDOW, 32, PropModeAppend, (uchar*)&(p[1]), 1);
-#endif
+	if(!useroot){
+		p[1]=region_x_window((WRegion*)scr);
+		XChangeProperty(wglobal.dpy, rw->root, net_virtual_roots,
+						XA_WINDOW, 32, PropModeAppend, (uchar*)&(p[1]), 1);
+	}
 
-	return vp;
+	return scr;
 }
 
-	
+
 WRootWin *manage_rootwin(int xscr)
 {
 	WRootWin *rootwin;
@@ -285,7 +285,8 @@ WRootWin *manage_rootwin(int xscr)
 		xi=XineramaQueryScreens(wglobal.dpy, &nxi);
 	
 		if(xi!=NULL && wglobal.rootwins!=NULL){
-			warn("Unable to support both Xinerama and normal multihead.");
+			warn("Don't know how to get Xinerama information for "
+				 "multiple X root windows.");
 			XFree(xi);
 			return NULL;
 		}
@@ -304,13 +305,12 @@ WRootWin *manage_rootwin(int xscr)
 
 	preinit_graphics(rootwin);
 	
-#ifdef CF_WINDOWED_SCREENS
 	net_virtual_roots=XInternAtom(wglobal.dpy, "_NET_VIRTUAL_ROOTS", False);
-	XDeleteProperty(wglobal.dpy, rootwin->root.win, net_virtual_roots);
-#endif
-
+	XDeleteProperty(wglobal.dpy, rootwin->root, net_virtual_roots);
+	
 #ifndef CF_NO_XINERAMA
 	if(xi!=NULL && nxi!=0){
+		bool useroot=FALSE;
 		WRectangle geom;
 
 		for(i=0; i<nxi; i++){
@@ -318,8 +318,9 @@ WRootWin *manage_rootwin(int xscr)
 			geom.y=xi[i].y_org;
 			geom.w=xi[i].width;
 			geom.h=xi[i].height;
-			/*pgeom("Detected Xinerama screen", geom);*/
-			if(!add_screen(rootwin, i, geom))
+			/*if(nxi==1)
+				useroot=(geom.x==0 && geom.y==0);*/
+			if(!add_screen(rootwin, i, geom, useroot))
 				warn("Unable to add viewport for Xinerama screen %d", i);
 		}
 		XFree(xi);
@@ -327,7 +328,7 @@ WRootWin *manage_rootwin(int xscr)
 #endif
 	{
 		nxi=1;
-		add_screen(rootwin, xscr, REGION_GEOM(rootwin));
+		add_screen(rootwin, xscr, REGION_GEOM(rootwin), TRUE);
 	}
 	
 	if(rootwin->screen_list==NULL){
@@ -336,6 +337,14 @@ WRootWin *manage_rootwin(int xscr)
 		return NULL;
 	}
 	
+	if(nxi>1){
+		/* If a WScreen uses the root window, we'll let win_context point
+		 * to it.
+		 */
+		XSaveContext(wglobal.dpy, rootwin->root, wglobal.win_context,
+					 (XPointer)rootwin);
+	}
+
 	/* */ {
 		/* TODO: typed LINK_ITEM */
 		WRegion *tmp=(WRegion*)wglobal.rootwins;
@@ -345,32 +354,29 @@ WRootWin *manage_rootwin(int xscr)
 	
 	read_draw_config(rootwin);
 	postinit_graphics(rootwin);
-	set_cursor(rootwin->root.win, CURSOR_DEFAULT);
+	set_cursor(rootwin->root, CURSOR_DEFAULT);
 	
 	return rootwin;
 }
 
 
-void rootwin_deinit(WRootWin *scr)
+void rootwin_deinit(WRootWin *rw)
 {
 	WRegion *reg, *next;
 
-	if(wglobal.active_rootwin==scr)
-		wglobal.active_rootwin=NULL;
-	
-	FOR_ALL_MANAGED_ON_LIST_W_NEXT(scr->screen_list, reg, next){
-		region_unset_manager(reg, (WRegion*)scr, &(scr->screen_list));
-	}
+	while(rw->screen_list!=NULL)
+		destroy_obj((WObj*)rw->screen_list);
 	
 	/* */ {
 		WRegion *tmp=(WRegion*)wglobal.rootwins;
-		UNLINK_ITEM(tmp, (WRegion*)scr, p_next, p_prev);
+		UNLINK_ITEM(tmp, (WRegion*)rw, p_next, p_prev);
 		wglobal.rootwins=(WRootWin*)tmp;
 	}
 	
-	XSelectInput(wglobal.dpy, scr->root.win, 0);
+	XSelectInput(wglobal.dpy, rw->root, 0);
+	XDeleteContext(wglobal.dpy, rw->root, wglobal.win_context);
 
-	region_deinit((WRegion*)scr);
+	region_deinit((WRegion*)rw);
 }
 
 
@@ -378,6 +384,26 @@ void rootwin_deinit(WRootWin *scr)
 
 
 /*{{{ region dynfun implementations */
+
+
+static void rootwin_set_focus_to(WRootWin *rootwin, bool warp)
+{
+	WRegion *sub;
+	
+	sub=(WRegion*)rootwin->current_screen;
+	
+	if(sub==NULL){
+		FOR_ALL_MANAGED_ON_LIST(rootwin->screen_list, sub){
+			if(REGION_IS_MAPPED(sub))
+				break;
+		}
+	}
+
+	if(sub!=NULL)
+		region_set_focus_to(sub, warp);
+	else
+		SET_FOCUS(rootwin->root);
+}
 
 
 static void rootwin_fit(WRootWin *rootwin, WRectangle geom)
@@ -388,46 +414,20 @@ static void rootwin_fit(WRootWin *rootwin, WRectangle geom)
 
 static void rootwin_map(WRootWin *rootwin)
 {
-	warn("Attempt to map a screen.");
+	warn("Attempt to map a root window.");
 }
 
 
 static void rootwin_unmap(WRootWin *rootwin)
 {
-	warn("Attempt to unmap a screen -- impossible");
-}
-
-
-static void rootwin_set_focus_to(WRootWin *rootwin, bool warp)
-{
-	WRegion *sub;
-	
-	sub=REGION_ACTIVE_SUB(rootwin);
-	
-	if(sub==NULL){
-		FOR_ALL_TYPED_CHILDREN(rootwin, sub, WRegion){
-			if(REGION_IS_MAPPED(sub))
-				break;
-		}
-	}
-		
-	if(sub!=NULL)
-		region_set_focus_to(sub, warp);
-	else
-		window_set_focus_to(&(rootwin->root), warp);
+	warn("Attempt to unmap a root window -- impossible");
 }
 
 
 static bool reparent_rootwin(WRootWin *rootwin, WWindow *par, WRectangle geom)
 {
-	warn("Attempt to reparent a screen -- impossible");
+	warn("Attempt to reparent a root window -- impossible");
 	return FALSE;
-}
-
-
-static void rootwin_activated(WRootWin *rootwin)
-{
-	wglobal.active_rootwin=rootwin;
 }
 
 
@@ -437,6 +437,12 @@ static void rootwin_remove_managed(WRootWin *rootwin, WRegion *reg)
 		rootwin->current_screen=NULL;
 	
 	region_unset_manager(reg, (WRegion*)rootwin, &(rootwin->screen_list));
+}
+
+
+static Window rootwin_x_window(WRootWin *rootwin)
+{
+	return rootwin->root;
 }
 
 
@@ -462,15 +468,13 @@ WRootWin *region_rootwin_of(const WRegion *reg)
 
 Window region_root_of(const WRegion *reg)
 {
-	WRootWin *scr=region_rootwin_of(reg);
-	return scr->root.win;
+	return region_rootwin_of(reg)->root;
 }
 
 
 WGRData *region_grdata_of(const WRegion *reg)
 {
-	WRootWin *scr=region_rootwin_of(reg);
-	return &(scr->grdata);
+	return &(region_rootwin_of(reg)->grdata);
 }
 
 
@@ -486,15 +490,6 @@ bool same_rootwin(const WRegion *reg1, const WRegion *reg2)
 EXTL_EXPORT
 WScreen *rootwin_current_scr(WRootWin *rootwin)
 {
-	if(rootwin==NULL)
-		return NULL;
-	
-	if(rootwin->current_screen==NULL){
-		WRegion *r=REGION_ACTIVE_SUB(rootwin);
-		if(r!=NULL)
-			rootwin->current_screen=region_screen_of(r);
-	}
-	
 	return rootwin->current_screen;
 }
 
@@ -535,15 +530,15 @@ static DynFunTab rootwin_dynfuntab[]={
 	{region_map, rootwin_map},
 	{region_unmap, rootwin_unmap},
 	{region_set_focus_to, rootwin_set_focus_to},
+	{(DynFun*)region_x_window, (DynFun*)rootwin_x_window},
 	{(DynFun*)reparent_region, (DynFun*)reparent_rootwin},
 	/*{region_request_managed_geom, region_request_managed_geom_unallow},*/
-	{region_activated, rootwin_activated},
 	{region_remove_managed, rootwin_remove_managed},
 	END_DYNFUNTAB
 };
 
 
-IMPLOBJ(WRootWin, WWindow, rootwin_deinit, rootwin_dynfuntab);
+IMPLOBJ(WRootWin, WRegion, rootwin_deinit, rootwin_dynfuntab);
 
 	
 /*}}}*/

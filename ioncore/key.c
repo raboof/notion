@@ -19,7 +19,7 @@
 #include "extl.h"
 
 
-static void waitrelease(WRootWin *rootwin);
+static void waitrelease(WRegion *reg);
 
 
 static void insstr(WWindow *wwin, XKeyEvent *ev)
@@ -65,10 +65,9 @@ static bool dispatch_binding(WRegion *mgr, WRegion *reg, WBinding *binding,
 		/* Get the screen now for waitrel grab - the object might
 		 * have been destroyed when call_binding returns.
 		 */
-		rootwin=ROOTWIN_OF(reg);
 		extl_call(binding->func, "oo", NULL, mgr, reg);
 		if(ev->state!=0 && binding->waitrel)
-			waitrelease(rootwin);
+			waitrelease(reg);
 	}
 	return TRUE;
 }
@@ -115,10 +114,9 @@ static bool waitrelease_handler(WRegion *reg, XEvent *ev)
 }
 
 
-static void waitrelease(WRootWin *rootwin)
+static void waitrelease(WRegion *reg)
 {
-	grab_establish((WRegion*)rootwin, waitrelease_handler,
-				   FocusChangeMask|KeyPressMask);
+	grab_establish(reg, waitrelease_handler, FocusChangeMask|KeyPressMask);
 	change_grab_cursor(CURSOR_WAITKEY);
 }
 
@@ -223,6 +221,10 @@ void handle_keypress(XKeyEvent *ev)
 	WRegion *reg=NULL, *oreg=NULL, *binding_owner=NULL;
 
 	reg=(WRegion*)FIND_WINDOW(ev->window);
+	
+	/*if(reg!=NULL && WOBJ_IS(reg, WRootWin))
+		reg=(WRegion*)((WRootWin*)reg)->current_screen;*/
+
 	if(reg==NULL)
 		return;
 	
@@ -237,20 +239,9 @@ void handle_keypress(XKeyEvent *ev)
 			break;
 		if(WOBJ_IS(reg, WRootWin))
 			break;
-		reg=REGION_PARENT_CHK(reg, WRegion);
+		reg=region_parent(reg);
 	}while(reg!=NULL);
-
-	if(reg==NULL)
-		return;
 	
-#ifndef CF_WINDOWED_SCREENS
-	if(WOBJ_IS(reg, WRootWin)){
-		binding_owner=(WRegion*)((WRootWin*)reg)->current_screen;
-		if(binding_owner==NULL)
-			binding_owner=(WRegion*)((WRootWin*)reg)->screen_list;
-	}
-#endif
-
 	if(binding!=NULL){
 		if(binding->submap!=NULL){
 			if(add_sub(reg, ev->keycode, ev->state))

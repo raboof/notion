@@ -57,7 +57,7 @@ WGlobal wglobal;
 static OptParserOpt ioncore_opts[]={
 	{OPT_ID('d'), 	"display", 	OPT_ARG, "host:dpy.scr", "X display to use"},
 	{'c', 			"conffile", OPT_ARG, "config_file", "Configuration file"},
-	{OPT_ID('o'), 	"onescreen", 0, NULL, "Manage default screen only"},
+	{OPT_ID('o'), 	"oneroot",  0, NULL, "Manage default root window/non-Xinerama screen only"},
 	{OPT_ID('c'), 	"confdir", 	OPT_ARG, "dir", "Search directory for configuration files"},
 	{OPT_ID('l'), 	"libdir", 	OPT_ARG, "dir", "Search directory for modules"},
 	END_OPTPARSEROPTS
@@ -97,7 +97,7 @@ int main(int argc, char*argv[])
 	const char *display=NULL;
 	const char *msg=NULL;
 	char *cmd=NULL;
-	bool onescreen=FALSE;
+	bool oneroot=FALSE;
 	int opt;
 	ErrorLog el;
 	FILE *ef=NULL;
@@ -131,7 +131,7 @@ int main(int argc, char*argv[])
 			ioncore_add_libdir(optparser_get_arg());
 			break;
 		case OPT_ID('o'):
-			onescreen=TRUE;
+			oneroot=TRUE;
 			break;
 		default:
 			optparser_print_error();
@@ -170,7 +170,7 @@ int main(int argc, char*argv[])
 	if(!read_config_for("ioncorelib"))
 		goto fail;
 	
-	if(!ioncore_init(display, onescreen))
+	if(!ioncore_init(display, oneroot))
 		goto fail;
 
 	if(!ioncore_read_config(cfgfile)){
@@ -260,11 +260,12 @@ static void initialize_global()
 	wglobal.display=NULL;
 
 	wglobal.rootwins=NULL;
+	wglobal.screens=NULL;
 	wglobal.focus_next=NULL;
 	wglobal.warp_next=FALSE;
 	wglobal.cwin_list=NULL;
 	
-	wglobal.active_rootwin=NULL;
+	wglobal.active_screen=NULL;
 
 	wglobal.input_mode=INPUT_NORMAL;
 	wglobal.opmode=OPMODE_INIT;
@@ -327,7 +328,7 @@ static bool set_up_locales(Display *dpy)
 #endif
 
 
-bool ioncore_init(const char *display, bool onescreen)
+bool ioncore_init(const char *display, bool oneroot)
 {
 	Display *dpy;
 	int i, drw, nrw;
@@ -362,14 +363,14 @@ bool ioncore_init(const char *display, bool onescreen)
 	}
 #endif
 
-	if(onescreen){
+	if(oneroot){
 		drw=DefaultScreen(dpy);
 		nrw=drw+1;
 	}else{
 		drw=0;
 		nrw=ScreenCount(dpy);
 	}
-
+	
 	/* Initialize */
 	if(display!=NULL){
 		wglobal.display=scopy(display);
@@ -381,7 +382,7 @@ bool ioncore_init(const char *display, bool onescreen)
 	}
 	
 	wglobal.dpy=dpy;
-
+	
 	wglobal.conn=ConnectionNumber(dpy);
 	wglobal.win_context=XUniqueContext();
 	
@@ -410,7 +411,7 @@ bool ioncore_init(const char *display, bool onescreen)
 			warn("Could not find a screen to manage.");
 		return FALSE;
 	}
-
+	
 	trap_signals();
 	
 	return TRUE;
@@ -426,7 +427,7 @@ bool ioncore_init(const char *display, bool onescreen)
 void ioncore_deinit()
 {
 	Display *dpy;
-	WRootWin *rootwin, *next;
+	WRootWin *rootwin;
 	WScreen *scr;
 	
 	wglobal.opmode=OPMODE_DEINIT;
@@ -435,13 +436,13 @@ void ioncore_deinit()
 		return;
 	
 	if(wglobal.ws_save_enabled){
-		while((rootwin=wglobal.rootwins)!=NULL){
-			FOR_ALL_TYPED_CHILDREN(rootwin, scr, WScreen){
-				save_workspaces(scr);
-			}
-			destroy_obj((WObj*)rootwin);
+		FOR_ALL_SCREENS(scr){
+			save_workspaces(scr);
 		}
 	}
+	
+	while(wglobal.rootwins!=NULL)
+		destroy_obj((WObj*)wglobal.rootwins);
 
 	unload_modules();
 	

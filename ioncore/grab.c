@@ -11,7 +11,6 @@
 #include "common.h"
 #include "global.h"
 #include "event.h"
-#include "rootwin.h"
 #include "cursor.h"
 #include "grab.h"
 

@@ -161,7 +161,7 @@ void region_remove_bindmap_owned(WRegion *reg, WBindmap *bindmap,
 {
 	WRegBindingInfo *rbind=find_rbind(reg, bindmap);
 	
-	if(rbind!=NULL && rbind->owner==owner)
+	if(rbind!=NULL /*&& rbind->owner==owner*/)
 		remove_rbind(reg, rbind);
 }
 

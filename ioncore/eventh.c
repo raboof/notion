@@ -152,18 +152,38 @@ bool handle_event_default(XEvent *ev)
 }
 
 
+static void set_initial_focus()
+{
+	Window root=None, win=None;
+	int x, y, wx, wy;
+	uint mask;
+	WScreen *scr;
+	WWindow *wwin;
+	
+	XQueryPointer(wglobal.dpy, None, &root, &win,
+				  &x, &y, &wx, &wy, &mask);
+	
+	FOR_ALL_SCREENS(scr){
+		if(ROOT_OF(scr)==root && coords_in_rect(&REGION_GEOM(scr), x, y)){
+			break;
+		}
+	}
+	
+	if(scr==NULL)
+		scr=wglobal.screens;
+	
+	wglobal.active_screen=scr;
+	do_set_focus((WRegion*)scr, FALSE);
+}
+
+
 void mainloop()
 {
 	XEvent ev;
 
 	wglobal.opmode=OPMODE_NORMAL;
-
-	/* Need to force REGION_ACTIVE on some screen -- temporary kludge */
-	XSetInputFocus(wglobal.dpy, wglobal.rootwins->root.win, PointerRoot,
-				   CurrentTime);
-	((WRegion*)wglobal.rootwins)->flags|=REGION_ACTIVE;
-	wglobal.active_rootwin=wglobal.rootwins;
 	
+	set_initial_focus();
 	
 	for(;;){
 		get_event(&ev);
@@ -355,7 +375,8 @@ static void handle_expose(const XExposeEvent *ev)
 	
 	/* TODO: drawlist */
 	FOR_ALL_ROOTWINS(rootwin){
-		if(rootwin->grdata.drag_win==ev->window && wglobal.draw_dragwin!=NULL){
+		if(rootwin->grdata.drag_win==ev->window && 
+		   wglobal.draw_dragwin!=NULL){
 			wglobal.draw_dragwin(wglobal.draw_dragwin_arg);
 			break;
 		}
@@ -433,15 +454,15 @@ static void handle_enter_window(XEvent *ev)
 }
 
 
-static bool pointer_in_rootwin(WRootWin *rootwin)
+static bool pointer_in_root(Window root1)
 {
-	Window root=None, win;
+	Window root2=None, win;
 	int x, y, wx, wy;
 	uint mask;
 	
-	XQueryPointer(wglobal.dpy, rootwin->root.win, &root, &win,
+	XQueryPointer(wglobal.dpy, root1, &root2, &win,
 				  &x, &y, &wx, &wy, &mask);
-	return (root==rootwin->root.win);
+	return (root1==root2);
 }
 
 
@@ -465,21 +486,12 @@ static void handle_focus_in(const XFocusChangeEvent *ev)
 	if(ev->detail==NotifyPointer)
 		return;
 	
-	/*if(wglobal.focus_next!=NULL){
-		WRegion *r2=wglobal.focus_next;
-		while(r2!=NULL){
-			if(r2==reg)
-				break;
-			r2=REGION_PARENT_CHK(r2, WRegion);
-		}
-		if(r2==NULL)
-			return;
-	}*/
-	
-	if(WOBJ_IS(reg, WRootWin)){
-		D(fprintf(stderr, "scr-in %d %d %d\n", ((WRootWin*)reg)->xscr, ev->mode, ev->detail));
+	/* Root windows appear either as WRootWins or WScreens */
+	if(ev->window==ROOT_OF(reg)){
+		D(fprintf(stderr, "scr-in %d %d %d\n", ROOTWIN_OF(reg)->xscr,
+				  ev->mode, ev->detail));
 		if((ev->detail==NotifyPointerRoot || ev->detail==NotifyDetailNone) &&
-		   pointer_in_rootwin((WRootWin*)reg) && wglobal.focus_next==NULL){
+		   pointer_in_root(ev->window) && wglobal.focus_next==NULL){
 			/* Restore focus */
 			set_focus(reg);
 			return;

@@ -219,7 +219,7 @@ static bool ensuredir(char *f)
 }
 
 
-static bool do_save_workspaces(WScreen *vp, char *wsconf)
+static bool do_save_workspaces(WScreen *scr, char *wsconf)
 {
 	FILE *file;
 	WRegion *reg;
@@ -237,14 +237,14 @@ static bool do_save_workspaces(WScreen *vp, char *wsconf)
 	
 	fprintf(file, "-- This file was created by and is modified by Ion.\n");
 	
-	name=region_name((WRegion*)vp);
+	name=region_name((WRegion*)scr);
 	if(name!=NULL){
 		fprintf(file, "region_set_name(arg[1], ");
 		write_escaped_string(file, name);
 		fprintf(file, ")\n");
 	}
 	
-	FOR_ALL_MANAGED_ON_LIST(vp->ws_list, reg){
+	FOR_ALL_MANAGED_ON_LIST(scr->ws_list, reg){
 		if(region_supports_save(reg)){
 			fprintf(file, "region_manage_new(arg[1], {\n");
 			region_save_to_file(reg, file, 1);
@@ -259,12 +259,12 @@ static bool do_save_workspaces(WScreen *vp, char *wsconf)
 }
 
 
-bool save_workspaces(WScreen *vp)
+bool save_workspaces(WScreen *scr)
 {
 	bool successp;
 	char *wsconf;
 	
-	wsconf=get_savefile_for_scr("saves/workspaces", vp->id);
+	wsconf=get_savefile_for_scr("saves/workspaces", scr->id);
 
 	if(wsconf==NULL)
 		return FALSE;
@@ -272,9 +272,7 @@ bool save_workspaces(WScreen *vp)
 	if(!ensuredir(wsconf))
 		return FALSE;
 
-	current_scr=vp;
-	successp=do_save_workspaces(vp, wsconf);
-	current_scr=NULL;
+	successp=do_save_workspaces(scr, wsconf);
 	
 	free(wsconf);
 	

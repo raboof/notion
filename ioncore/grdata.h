@@ -58,6 +58,8 @@ DECLSTRUCT(WGRData){
 	/* calculated data (from configurable) */
 	int bar_h, tab_spacing;
 	
+	int w_unit, h_unit;
+	
 	/* other data */
 	GC gc;
 	GC tab_gc;

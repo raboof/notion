@@ -18,6 +18,7 @@
 #include "reginfo.h"
 #include "saveload.h"
 #include "genws.h"
+#include "event.h"
 
 
 static bool screen_display_managed(WScreen *scr, WRegion *reg);
@@ -27,45 +28,53 @@ static bool screen_display_managed(WScreen *scr, WRegion *reg);
 
 
 static bool screen_init(WScreen *scr, WRootWin *rootwin,
-						int id, WRectangle geom)
+						int id, WRectangle geom, bool useroot)
 {
-	Window dummywin;
-#ifdef CF_WINDOWED_SCREENS
+	Window win;
 	XSetWindowAttributes attr;
 	ulong attrflags=0;
-#endif
 	
 	scr->ws_count=0;
 	scr->current_ws=NULL;
 	scr->ws_list=NULL;
 	scr->id=id;
 	scr->atom_workspace=None;
+	scr->uses_root=useroot;
 
-#ifdef CF_WINDOWED_SCREENS
-	attr.background_pixmap=ParentRelative;
-	attrflags=CWBackPixmap;
-	
-	dummywin=XCreateWindow(wglobal.dpy, rootwin->root.win,
-						   geom.x, geom.y, geom.w, geom.h, 0, 
-						   DefaultDepth(wglobal.dpy, rootwin->xscr),
-						   InputOutput,
-						   DefaultVisual(wglobal.dpy, rootwin->xscr),
-						   attrflags, &attr);
+	if(useroot){
+		win=rootwin->root;
+	}else{
+		attr.background_pixmap=ParentRelative;
+		attrflags=CWBackPixmap;
+		
+		win=XCreateWindow(wglobal.dpy, rootwin->root,
+						  geom.x, geom.y, geom.w, geom.h, 0, 
+						  DefaultDepth(wglobal.dpy, rootwin->xscr),
+						  InputOutput,
+						  DefaultVisual(wglobal.dpy, rootwin->xscr),
+						  attrflags, &attr);
+		
+		if(win==None)
+			return FALSE;
+	}
 
-	if(dummywin==None)
-		return FALSE;
-
-	if(!window_init((WWindow*)scr, (WWindow*)rootwin, dummywin, geom)){
-		XDestroyWindow(wglobal.dpy, dummywin);
+	if(!window_init((WWindow*)scr, NULL, win, geom)){
+		XDestroyWindow(wglobal.dpy, win);
 		return FALSE;
 	}
 
-	XSelectInput(wglobal.dpy, dummywin, FocusChangeMask|EnterWindowMask|
-				 /*KeyPressMask|KeyReleaseMask|
-				 ButtonPressMask|ButtonReleaseMask|*/);
-#else
-	region_init((WRegion*)scr, (WRegion*)rootwin, geom);
-#endif
+	scr->wwin.region.rootwin=rootwin;
+	region_set_parent((WRegion*)scr, (WRegion*)rootwin);
+	scr->wwin.region.flags|=REGION_BINDINGS_ARE_GRABBED;
+	if(useroot)
+		scr->wwin.region.flags|=REGION_MAPPED;
+	
+	XSelectInput(wglobal.dpy, win, 
+				 FocusChangeMask|EnterWindowMask|
+				 KeyPressMask|KeyReleaseMask|
+				 ButtonPressMask|ButtonReleaseMask|
+				 (useroot ? ROOT_MASK : 0));
+
 	if(id==0){
 		scr->atom_workspace=XInternAtom(wglobal.dpy, "_ION_WORKSPACE", False);
 	}else if(id>=0){
@@ -84,26 +93,33 @@ static bool screen_init(WScreen *scr, WRootWin *rootwin,
 	 */
 	region_add_bindmap((WRegion*)scr, &ioncore_rootwin_bindmap);
 
+	LINK_ITEM(wglobal.screens, scr, next_scr, prev_scr);
+	
+	if(wglobal.active_screen==NULL)
+		wglobal.active_screen=scr;
+
 	return TRUE;
 }
 
 
-WScreen *create_screen(WRootWin *rootwin, int id, WRectangle geom)
+WScreen *create_screen(WRootWin *rootwin, int id, WRectangle geom,
+					   bool useroot)
 {
-	CREATEOBJ_IMPL(WScreen, screen, (p, rootwin, id, geom));
+	CREATEOBJ_IMPL(WScreen, screen, (p, rootwin, id, geom, useroot));
 }
 
 
 void screen_deinit(WScreen *scr)
 {
+	UNLINK_ITEM(wglobal.screens, scr, next_scr, prev_scr);
+	
 	while(scr->ws_list!=NULL)
 		region_unset_manager(scr->ws_list, (WRegion*)scr, &(scr->ws_list));
 
-#ifdef CF_WINDOWED_SCREENS
+	if(scr->uses_root)
+		scr->wwin.win=None;
+	
 	window_deinit((WWindow*)scr);
-#else
-	region_deinit((WRegion*)scr);
-#endif
 }
 
 
@@ -174,22 +190,13 @@ static WRegion *screen_do_add_managed(WScreen *scr, WRegionAddFn *fn,
 	WRegion *reg;
 	WRectangle geom;
 	
-#ifdef CF_WINDOWED_SCREENS
 	geom.x=0;
 	geom.y=0;
 	geom.w=REGION_GEOM(scr).w;
 	geom.h=REGION_GEOM(scr).h;
 	
 	reg=fn((WWindow*)scr, geom, fnparams);
-#else
-	{
-		WWindow *par=REGION_PARENT_CHK(scr, WWindow);
-		if(par==NULL)
-			return NULL;
-		geom=REGION_GEOM(scr);
-		reg=fn((WWindow*)par, geom, fnparams);
-	}
-#endif
+
 	if(reg==NULL)
 		return NULL;
 
@@ -236,15 +243,17 @@ static void screen_fit(WScreen *scr, WRectangle geom)
 {
 	WRegion *sub;
 	
-	REGION_GEOM(scr)=geom;
+	if(!scr->uses_root){
+		REGION_GEOM(scr)=geom;
 	
-#ifdef CF_WINDOWED_SCREENS
-	XMoveResizeWindow(wglobal.dpy, scr->wwin.win,
-					  geom.x, geom.y, geom.w, geom.h);
+		XMoveResizeWindow(wglobal.dpy, scr->wwin.win,
+						  geom.x, geom.y, geom.w, geom.h);
 	
-	geom.x=0;
-	geom.y=0;
-#endif
+		geom.x=0;
+		geom.y=0;
+	}else{
+		geom=REGION_GEOM(scr);
+	}
 
 	FOR_ALL_MANAGED_ON_LIST(scr->ws_list, sub){
 		region_fit(sub, geom);
@@ -259,9 +268,7 @@ static void screen_set_focus_to(WScreen *scr, bool warp)
 	}else{
 		if(warp)
 			do_move_pointer_to((WRegion*)scr);
-#ifdef CF_WINDOWED_SCREENS
 		SET_FOCUS(scr->wwin.win);
-#endif
 	}
 }
 
@@ -323,11 +330,10 @@ static WRegion *screen_find_rescue_manager_for(WScreen *scr, WRegion *reg)
 
 static void screen_map(WScreen *scr)
 {
-#ifdef CF_WINDOWED_SCREENS
+	if(scr->uses_root)
+		return;
+	
 	window_map((WWindow*)scr);
-#else
-	MARK_REGION_MAPPED(scr);
-#endif
 	if(scr->current_ws!=NULL)
 		region_map(scr->current_ws);
 }
@@ -335,13 +341,18 @@ static void screen_map(WScreen *scr)
 
 static void screen_unmap(WScreen *scr)
 {
-#ifdef CF_WINDOWED_SCREENS
+	if(scr->uses_root)
+		return;
+	
 	window_unmap((WWindow*)scr);
-#else
-	MARK_REGION_UNMAPPED(scr);
-#endif
 	if(scr->current_ws!=NULL)
 		region_unmap(scr->current_ws);
+}
+
+
+static void screen_activated(WScreen *scr)
+{
+	wglobal.active_screen=scr;
 }
 
 
@@ -420,7 +431,7 @@ WScreen *region_screen_of(WRegion *reg)
 	while(reg!=NULL){
 		if(WOBJ_IS(reg, WScreen))
 			return (WScreen*)reg;
-		reg=REGION_MANAGER(reg);
+		reg=region_parent(reg);
 	}
 	return NULL;
 }
@@ -434,18 +445,15 @@ WScreen *region_screen_of(WRegion *reg)
 EXTL_EXPORT
 WScreen *find_screen_id(int id)
 {
-	WRootWin *rootwin;
 	WScreen *scr, *maxscr=NULL;
 	
-	FOR_ALL_ROOTWINS(rootwin){
-		FOR_ALL_TYPED_CHILDREN(rootwin, scr, WScreen){
-			if(id==-1){
-				if(maxscr==NULL || scr->id>maxscr->id)
-					maxscr=scr;
-			}
-			if(scr->id==id)
-				return scr;
+	FOR_ALL_SCREENS(scr){
+		if(id==-1){
+			if(maxscr==NULL || scr->id>maxscr->id)
+				maxscr=scr;
 		}
+		if(scr->id==id)
+			return scr;
 	}
 	
 	return maxscr;
@@ -470,12 +478,12 @@ void goto_nth_screen(int id)
 EXTL_EXPORT
 void goto_next_screen()
 {
-	WScreen *scr=rootwin_current_scr(wglobal.active_rootwin);
+	WScreen *scr=wglobal.active_screen;
 	
 	if(scr!=NULL)
-		scr=find_screen_id(scr->id+1);
+		scr=scr->next_scr;
 	if(scr==NULL)
-		scr=find_screen_id(0);
+		scr=wglobal.screens;
 	if(scr!=NULL)
 		region_goto((WRegion*)scr);
 }
@@ -487,14 +495,12 @@ void goto_next_screen()
 EXTL_EXPORT
 void goto_prev_screen()
 {
-	WScreen *scr=rootwin_current_scr(wglobal.active_rootwin);
-	
-	if(scr==NULL)
-		scr=find_screen_id(0);
-	else if(scr->id==0)
-		scr=find_screen_id(-1);
+	WScreen *scr=wglobal.active_screen;
+
+	if(scr!=NULL)
+		scr=scr->prev_scr;
 	else
-		scr=find_screen_id(scr->id-1);
+		scr=wglobal.screens;
 	if(scr!=NULL)
 		region_goto((WRegion*)scr);
 }
@@ -546,6 +552,7 @@ static DynFunTab screen_dynfuntab[]={
 	{region_set_focus_to, screen_set_focus_to},
     {region_map, screen_map},
 	{region_unmap, screen_unmap},
+	{region_activated, screen_activated},
 	
 	{(DynFun*)region_display_managed, (DynFun*)screen_display_managed},
 	{region_request_managed_geom, region_request_managed_geom_unallow},
@@ -562,10 +569,6 @@ static DynFunTab screen_dynfuntab[]={
 };
 
 
-#ifdef CF_WINDOWED_SCREENS
 IMPLOBJ(WScreen, WWindow, screen_deinit, screen_dynfuntab);
-#else
-IMPLOBJ(WScreen, WRegion, screen_deinit, screen_dynfuntab);
-#endif
 
 /*}}}*/

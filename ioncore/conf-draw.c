@@ -72,8 +72,8 @@ bool set_term_font(const char *fname)
 	term_font=load_font(wglobal.dpy, fname);
 	
 	if(term_font!=NULL){
-		tmp_rootwin->w_unit=MAX_FONT_WIDTH(term_font);
-		tmp_rootwin->h_unit=MAX_FONT_HEIGHT(term_font);
+		tmp_rootwin->grdata.w_unit=MAX_FONT_WIDTH(term_font);
+		tmp_rootwin->grdata.h_unit=MAX_FONT_HEIGHT(term_font);
 		free_font(wglobal.dpy, term_font);
 	}
 

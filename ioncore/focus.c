@@ -44,7 +44,7 @@ void set_previous_of(WRegion *reg)
 	if(REGION_IS_ACTIVE(reg))
 		return;
 	
-	r2=region_get_active_leaf((WRegion*)wglobal.active_rootwin);
+	r2=region_get_active_leaf((WRegion*)wglobal.active_screen);
 	
 	if(r2!=NULL)
 		setup_watch(&prev_watch, (WObj*)r2, (WWatchHandler*)prev_watch_handler);
@@ -85,13 +85,13 @@ void goto_previous()
 /*{{{ set_focus, warp */
 
 
-static void pointer_rootpos(Window rootwin, int *xret, int *yret)
+static void pointer_rootpos(Window root, int *xret, int *yret)
 {
-	Window root, win;
+	Window win;
 	int x, y, wx, wy;
 	uint mask;
 	
-	XQueryPointer(wglobal.dpy, rootwin, &root, &win,
+	XQueryPointer(wglobal.dpy, root, &root, &win,
 				  xret, yret, &wx, &wy, &mask);
 }
 

@@ -26,7 +26,6 @@ static int p_clickcnt=0;
 static Time p_time=0;
 static bool p_motiontmp_dirty;
 static WBinding *p_motiontmp=NULL;
-static WRootWin *p_rootwin=NULL;
 static int p_area=0;
 
 static WButtonHandler *p_button_handler=NULL;
@@ -194,19 +193,6 @@ bool handle_button_press(XButtonEvent *ev)
 	subreg=reg;
 	area=window_press((WWindow*)reg, ev, &subreg);
 
-#ifndef CF_WINDOWED_SCREENS
-	if(WOBJ_IS(reg, WRootWin)){
-		WScreen *scr;
-		FOR_ALL_TYPED_CHILDREN(reg, scr, WScreen){
-			if(coords_in_rect(&REGION_GEOM(scr), ev->x, ev->y))
-				break;
-		}
-		if(scr==NULL)
-			return FALSE;
-		reg=(WRegion*)scr;
-	}
-#endif
-	
 	if(p_clickcnt==1 && time_in_threshold(ev->time) && p_button==button &&
 	   p_state==state && reg==p_reg){
 		pressbind=region_lookup_binding_area(reg, ACT_BUTTONDBLCLICK, state,
@@ -221,7 +207,6 @@ bool handle_button_press(XButtonEvent *ev)
 	setup_watch(&p_regwatch, (WObj*)reg, NULL);
 	setup_watch(&p_subregwatch, (WObj*)subreg, NULL);
 
-	
 	/*do_grab_kb_ptr(ev->root, reg, FocusChangeMask);*/
 	grab_establish(reg, handle_key_dummy, 0);
 	
@@ -235,7 +220,6 @@ end:
 	p_motion=FALSE;
 	p_clickcnt=0;
 	p_motiontmp_dirty=TRUE;
-	p_rootwin=ROOTWIN_OF(reg);
 	p_area=area;
 	p_button_handler=NULL;
 	p_motion_handler=NULL;

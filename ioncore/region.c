@@ -51,8 +51,8 @@ void region_init(WRegion *reg, WRegion *parent, WRectangle geom)
 		/*link_child(parent, reg);*/
 		region_set_parent(reg, parent);
 	}else{
-		assert(WOBJ_IS(reg, WRootWin));
-		reg->rootwin=reg;
+		assert(WOBJ_IS(reg, WRootWin) || WOBJ_IS(reg, WScreen));
+		reg->rootwin=NULL;
 	}
 	
 	reg->active_sub=NULL;
@@ -344,10 +344,9 @@ void region_detach_parent(WRegion *reg)
 
 	region_reset_stacking(reg);
 
-	if(p==NULL)
+	if(p==NULL || p==reg)
 		return;
 	
-	/*unlink_from_parent(reg);*/
 	UNLINK_ITEM(p->children, reg, p_next, p_prev);
 	reg->parent=NULL;
 
@@ -427,12 +426,6 @@ bool _region_may_control_focus(WRegion *reg)
 		return FALSE;
 	}
 	
-	/*do{
-		if(par->active_sub==reg)
-			return TRUE;
-		reg=REGION_MANAGER(reg);
-	}while(reg!=par && reg!=NULL);*/
-	
 	r2=par->active_sub;
 	while(r2!=NULL && r2!=par){
 		if(r2==reg)
@@ -466,10 +459,10 @@ void region_got_focus(WRegion *reg)
 					r->active_sub->flags&=~REGION_ACTIVE;
 			}*/
 			r->active_sub=reg;
-			if(WOBJ_IS(r, WRootWin)){
+			/*if(WOBJ_IS(r, WRootWin)){
 				D(fprintf(stderr, "cvp: %p, %d [%s]\n", r, region_screen_of(reg)->id, WOBJ_TYPESTR(reg)));
 				((WRootWin*)r)->current_screen=region_screen_of(reg);
-			}
+			}*/
 		}
 		
 		region_activated(reg);
@@ -636,7 +629,7 @@ void region_rootpos(WRegion *reg, int *xret, int *yret)
 
 	par=REGION_PARENT_CHK(reg, WRegion);
 	
-	if(par==NULL || WOBJ_IS(reg, WRootWin)){
+	if(par==NULL || par==reg){
 		*xret=0;
 		*yret=0;
 		return;

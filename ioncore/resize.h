@@ -9,10 +9,9 @@
 #define ION_IONCORE_RESIZE_H
 
 #include "common.h"
-#include "rootwin.h"
 #include "genframe.h"
 
-typedef void WDrawRubberbandFn(WWindow *wwin, WRectangle geom);
+typedef void WDrawRubberbandFn(WRootWin *rw, WRectangle geom);
 
 extern bool begin_resize(WRegion *reg, WDrawRubberbandFn *rubfn,
 						 bool cumulative);

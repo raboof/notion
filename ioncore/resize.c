@@ -118,9 +118,9 @@ static void res_draw_rubberband(WRootWin *rootwin)
 	rgeom.y+=parent_ry;
 
 	if(tmprubfn==NULL)
-		draw_rubberbox((WWindow*)rootwin, rgeom);
+		draw_rubberbox(rootwin, rgeom);
 	else
-		tmprubfn((WWindow*)rootwin, rgeom);
+		tmprubfn(rootwin, rgeom);
 	
 }
 
@@ -645,9 +645,9 @@ uint region_min_w(WRegion *reg)
 
 void genframe_resize_units(WGenFrame *genframe, int *wret, int *hret)
 {
-	WRootWin *rootwin=ROOTWIN_OF(genframe);
-	*wret=rootwin->w_unit;
-	*hret=rootwin->h_unit;
+	WGRData *grdata=GRDATA_OF(genframe);
+	*wret=grdata->w_unit;
+	*hret=grdata->h_unit;
 	
 	if(genframe->current_sub!=NULL){
 		uint dummyrelw,  dummyrelh;

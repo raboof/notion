@@ -369,7 +369,7 @@ static bool floatws_add_clientwin(WFloatWS *ws,
 		newreg=TRUE;
 	}
 
-	assert(ROOTWIN_OF(target)==ROOTWIN_OF(cwin));
+	assert(same_rootwin(target, (WRegion*)cwin));
 	
 	if(!finish_add_clientwin(target, cwin, params)){
 		if(newreg)

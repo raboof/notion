@@ -30,6 +30,7 @@
 #include "extlconv.h"
 #include "fullscreen.h"
 #include "event.h"
+#include "rootwin.h"
 
 
 static void set_clientwin_state(WClientWin *cwin, int state);
@@ -218,7 +219,7 @@ static void configure_cwin_bw(Window win, int bw)
 }
 
 
-static bool clientwin_init(WClientWin *cwin, WWindow *parent,
+static bool clientwin_init(WClientWin *cwin, WRegion *parent,
 						   Window win, XWindowAttributes *attr)
 {
 	WRectangle geom;
@@ -251,8 +252,8 @@ static bool clientwin_init(WClientWin *cwin, WWindow *parent,
 		geom.h=attr->height;
 	}
 
-	region_init(&(cwin->region), &(parent->region), geom);
-						
+	region_init(&(cwin->region), parent, geom);
+
 	cwin->max_geom=geom;
 
 	cwin->transient_for=None;
@@ -282,7 +283,7 @@ static bool clientwin_init(WClientWin *cwin, WWindow *parent,
 }
 
 
-static WClientWin *create_clientwin(WWindow *parent, Window win,
+static WClientWin *create_clientwin(WRegion *parent, Window win,
 									XWindowAttributes *attr)
 {
 	CREATEOBJ_IMPL(WClientWin, clientwin, (p, parent, win, attr));
@@ -324,7 +325,7 @@ static void get_transient_for(WClientWin *cwin, WAttachParams *param)
 					 "(\"Extended WM hints\" multi-parent brain damage?)",
 					 region_name((WRegion*)cwin));
 			}
-		}else if(ROOTWIN_OF(param->tfor)!=ROOTWIN_OF(cwin)){
+		}else if(!same_rootwin((WRegion*)cwin, (WRegion*)param->tfor)){
 			warn("The transient_for window for \"%s\" is not on the same "
 				 "screen.", region_name((WRegion*)cwin));
 		}else{
@@ -412,10 +413,15 @@ again:
 		goto fail2;
 	}
 
-	rootwin=FIND_WINDOW_T(attr.root, WRootWin);
+	FOR_ALL_ROOTWINS(rootwin){
+		if(rootwin->root==attr.root)
+			break;
+	}
 
-	if(rootwin==NULL)
+	if(rootwin==NULL){
+		warn("Unable to find a matching root window!");
 		goto fail2;
+	}
 
 	/*if(state!=NormalState && state!=IconicState)
 		state=NormalState;*/
@@ -429,7 +435,7 @@ again:
 		param.flags&=~REGION_ATTACH_SWITCHTO;*/
 
 	/* Allocate and initialize */
-	cwin=create_clientwin((WWindow*)rootwin, win, &attr);
+	cwin=create_clientwin((WRegion*)rootwin, win, &attr);
 	
 	if(cwin==NULL)
 		goto fail2;
@@ -560,7 +566,7 @@ static void reparent_root(WClientWin *cwin)
 	
 	par=REGION_PARENT_CHK(cwin, WWindow);
 	
-	if(par==NULL || WOBJ_IS(par, WRootWin)){
+	if(par==NULL){
 		x=REGION_GEOM(cwin).x;
 		y=REGION_GEOM(cwin).y;
 	}else{
@@ -1075,11 +1081,7 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 	/* ConfigureRequest coordinates are coordinates of the window manager
 	 * frame if such exists.
 	 */
-	par=REGION_PARENT_CHK(cwin, WWindow);
-	if(par==NULL || WOBJ_IS(par, WRootWin))
-		region_rootpos((WRegion*)cwin, &rx, &ry);
-	else
-		region_rootpos((WRegion*)par, &rx, &ry);
+	region_rootpos((WRegion*)cwin, &rx, &ry);
 	
 	if(ev->value_mask&CWX){
 		dx=ev->x-rx;
@@ -1212,7 +1214,7 @@ WRegion *clientwin_load(WWindow *par, WRectangle geom, ExtlTab tab)
 	attr.width=geom.w;
 	attr.height=geom.h;
 
-	cwin=create_clientwin(par, win, &attr);
+	cwin=create_clientwin((WRegion*)par, win, &attr);
 	
 	if(cwin!=NULL){
 		/* Reparent and resize taking limits set by size hints into account */

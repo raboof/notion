@@ -10,8 +10,6 @@
 
 #include "genframe.h"
 
-#define WGENFRAME_MIN_W(SCR) (CF_MIN_WIDTH*(SCR)->w_unit)
-#define WGENFRAME_MIN_H(SCR) (CF_MIN_HEIGHT*(SCR)->h_unit)
 #define WGENFRAME_WIN(FRAME) (((WGenFrame*)(FRAME))->win.win)
 #define WGENFRAME_DRAW(FRAME) (((WGenFrame*)(FRAME))->win.draw)
 

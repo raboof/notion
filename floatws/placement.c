@@ -27,7 +27,7 @@ static void random_placement(WRectangle box, WRectangle *g)
 static bool shaded_frame(WRegion *reg)
 {
 	return (WOBJ_IS(reg, WFloatFrame) &&
-		   floatframe_is_shaded((WFloatFrame*)reg));
+		   genframe_is_shaded((WFloatFrame*)reg));
 }
 
 

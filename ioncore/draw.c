@@ -308,6 +308,9 @@ void preinit_graphics(WRootWin *rootwin)
 	grdata->spacing=1;
 	grdata->font=NULL;
 	grdata->tab_font=NULL;
+	
+	grdata->w_unit=7;
+	grdata->h_unit=13;
 }
 
 
@@ -366,7 +369,7 @@ static void create_wm_windows(WRootWin *rootwin)
 	attr.background_pixel=COLOR_PIXEL(grdata->tab_sel_colors.bg);
 
 	grdata->moveres_win=
-		XCreateWindow(wglobal.dpy, rootwin->root.win,
+		XCreateWindow(wglobal.dpy, rootwin->root,
 					  CF_MOVERES_WIN_X, CF_MOVERES_WIN_Y, w, h, 0,
 					  CopyFromParent, InputOutput, CopyFromParent,
 					  CWSaveUnder|CWBackPixel, &attr);
@@ -386,7 +389,7 @@ static void create_wm_windows(WRootWin *rootwin)
 	attr.background_pixel=COLOR_PIXEL(grdata->frame_colors.bg);
 	
 	grdata->drag_win=
-		XCreateWindow(wglobal.dpy, rootwin->root.win,
+		XCreateWindow(wglobal.dpy, rootwin->root,
 					  0, 0, 16, 16, 0,
 					  CopyFromParent, InputOutput, CopyFromParent,
 					  CWSaveUnder|CWBackPixel, &attr);
@@ -415,7 +418,7 @@ void postinit_graphics(WRootWin *rootwin)
 {
 	Display *dpy=wglobal.dpy;
 	WGRData *grdata=&(rootwin->grdata);
-	Window root=rootwin->root.win;
+	Window root=rootwin->root;
 	WColor black, white;
 	XGCValues gcv;
 	ulong gcvmask;
@@ -520,7 +523,7 @@ void postinit_graphics(WRootWin *rootwin)
 /*{{{ Rubberband */
 
 
-void draw_rubberbox(WWindow *wwin, WRectangle rect)
+void draw_rubberbox(WRootWin *rw, WRectangle rect)
 {
 	XPoint fpts[5];
 	
@@ -535,26 +538,8 @@ void draw_rubberbox(WWindow *wwin, WRectangle rect)
 	fpts[4].x=rect.x;
 	fpts[4].y=rect.y;
 	
-	XDrawLines(wglobal.dpy, wwin->win, GRDATA_OF(wwin)->xor_gc, fpts, 5,
+	XDrawLines(wglobal.dpy, rw->root, rw->grdata.xor_gc, fpts, 5,
 			   CoordModeOrigin);
-}
-
-
-void draw_rubberband(WWindow *wwin, WRectangle rect, bool vertical)
-{
-	GC gc=GRDATA_OF(wwin)->xor_gc;
-	
-	if(vertical){
-		XDrawLine(wglobal.dpy, wwin->win, gc,
-				  rect.x, rect.y, rect.x+rect.w, rect.y);
-		XDrawLine(wglobal.dpy, wwin->win, gc,
-				  rect.x, rect.y+rect.h, rect.x+rect.w, rect.y+rect.h);
-	}else{
-		XDrawLine(wglobal.dpy, wwin->win, gc,
-				  rect.x, rect.y, rect.x, rect.y+rect.h);
-		XDrawLine(wglobal.dpy, wwin->win, gc,
-				  rect.x+rect.w, rect.y, rect.x+rect.w, rect.y+rect.h);
-	}
 }
 
 

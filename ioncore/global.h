@@ -59,6 +59,7 @@ DECLSTRUCT(WGlobal){
 	Atom atom_net_wm_name;
 
 	WRootWin *rootwins;
+	WScreen *screens;
 	WClientWin *cwin_list;
 	WRegion *focus_next;
 	bool warp_next;
@@ -69,7 +70,7 @@ DECLSTRUCT(WGlobal){
 	/* We could have a display WRegion but the screen-link could impose
 	 * some problems so these are handled as a special case.
 	 */
-	WRootWin *active_rootwin;
+	WScreen *active_screen;
 	
 	int input_mode;
 	int opmode;

@@ -19,7 +19,7 @@
 
 bool clientwin_check_fullscreen_request(WClientWin *cwin, int w, int h)
 {
-	WRegion *reg;
+	WScreen *scr;
 	WMwmHints *mwm;
 	
 	mwm=get_mwm_hints(cwin->win);
@@ -27,20 +27,21 @@ bool clientwin_check_fullscreen_request(WClientWin *cwin, int w, int h)
 	   mwm->decorations!=0)
 		return FALSE;
 	
-	FOR_ALL_MANAGED_ON_LIST(ROOTWIN_OF(cwin)->screen_list, reg){
-		if(!WOBJ_IS(reg, WScreen))
+	FOR_ALL_SCREENS(scr){
+		if(!same_rootwin((WRegion*)scr, (WRegion*)cwin))
 			continue;
 		/* TODO: if there are multiple possible rootwins, use the one with
 		 * requested position, if any.
 		 */
-		if(REGION_GEOM(reg).w==w && REGION_GEOM(reg).h==h){
-			return clientwin_fullscreen_scr(cwin, (WScreen*)reg,
+		if(REGION_GEOM(scr).w==w && REGION_GEOM(scr).h==h){
+			return clientwin_fullscreen_scr(cwin, (WScreen*)scr,
 										   clientwin_get_switchto(cwin));
 		}
 	}
 	
 	/* Catch Xinerama-unaware apps here */
-	if(REGION_GEOM(ROOTWIN_OF(cwin)).w==w && REGION_GEOM(ROOTWIN_OF(cwin)).h==h){
+	if(REGION_GEOM(ROOTWIN_OF(cwin)).w==w &&
+	   REGION_GEOM(ROOTWIN_OF(cwin)).h==h){
 		return clientwin_enter_fullscreen(cwin, 
 										  clientwin_get_switchto(cwin));
 	}
@@ -62,7 +63,7 @@ static void lastmgr_watchhandler(WWatch *watch, WObj *obj)
 }
 
 
-bool clientwin_fullscreen_scr(WClientWin *cwin, WScreen *vp, bool switchto)
+bool clientwin_fullscreen_scr(WClientWin *cwin, WScreen *scr, bool switchto)
 {
 	int rootx, rooty;
 	bool wasfs=TRUE;
@@ -74,9 +75,9 @@ bool clientwin_fullscreen_scr(WClientWin *cwin, WScreen *vp, bool switchto)
 			setup_watch(&(cwin->fsinfo.last_mgr_watch),
 						(WObj*)REGION_MANAGER(cwin),
 						lastmgr_watchhandler);
-		}else if(vp->current_ws!=NULL){
+		}else if(scr->current_ws!=NULL){
 			setup_watch(&(cwin->fsinfo.last_mgr_watch),
-						(WObj*)vp->current_ws, 
+						(WObj*)scr->current_ws, 
 						lastmgr_watchhandler);
 		}
 		region_rootpos((WRegion*)cwin, &rootx, &rooty);
@@ -86,7 +87,7 @@ bool clientwin_fullscreen_scr(WClientWin *cwin, WScreen *vp, bool switchto)
 		cwin->fsinfo.saved_rootrel_geom.h=REGION_GEOM(cwin).h;
 	}
 	
-	if(!region_add_managed_simple((WRegion*)vp, (WRegion*)cwin, switchto ? 
+	if(!region_add_managed_simple((WRegion*)scr, (WRegion*)cwin, switchto ? 
 								  REGION_ATTACH_SWITCHTO : 0)){
 		warn("Failed to enter full screen mode");
 		if(!wasfs)
@@ -100,15 +101,15 @@ bool clientwin_fullscreen_scr(WClientWin *cwin, WScreen *vp, bool switchto)
 
 bool clientwin_enter_fullscreen(WClientWin *cwin, bool switchto)
 {
-	WScreen *vp=region_screen_of((WRegion*)cwin);
+	WScreen *scr=region_screen_of((WRegion*)cwin);
 	
-	if(vp==NULL){
-		vp=ROOTWIN_OF(cwin)->current_screen;
-		if(vp==NULL)
+	if(scr==NULL){
+		scr=ROOTWIN_OF(cwin)->current_screen;
+		if(scr==NULL)
 			return FALSE;
 	}
 	
-	return clientwin_fullscreen_scr(cwin, vp, switchto);
+	return clientwin_fullscreen_scr(cwin, scr, switchto);
 }
 
 

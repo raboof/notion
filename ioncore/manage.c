@@ -53,23 +53,19 @@ static WGenWS *find_suitable_workspace(WScreen *vp)
 static WScreen *find_suitable_screen(WClientWin *cwin, 
 									 const WAttachParams *param)
 {
-	WRootWin *rootwin=ROOTWIN_OF(cwin);
-	WScreen *vp;
-
-	if(((param->flags&(REGION_ATTACH_MAPRQ|REGION_ATTACH_SIZE_HINTS))
-		==(REGION_ATTACH_MAPRQ|REGION_ATTACH_SIZE_HINTS)) &&
-	   param->size_hints->flags&USPosition){
-		FOR_ALL_TYPED_CHILDREN(rootwin, vp, WScreen){
-			if(coords_in_rect(&REGION_GEOM(vp), 
-							 param->geomrq.x, param->geomrq.y))
-				return vp;
-		}
+	WScreen *scr=NULL, *found=NULL;
+	
+	FOR_ALL_SCREENS(scr){
+		if(!same_rootwin((WRegion*)scr, (WRegion*)cwin))
+		   continue;
+		if(found==NULL || REGION_IS_ACTIVE(scr))
+			found=scr;
+		if(coords_in_rect(&REGION_GEOM(scr), 
+						  param->geomrq.x, param->geomrq.y))
+			return scr;
 	}
 	
-	if(rootwin->current_screen!=NULL)
-		return rootwin->current_screen;
-	
-	return FIRST_CHILD(rootwin, WScreen);
+	return found;
 }
 
 
@@ -167,7 +163,7 @@ bool finish_add_clientwin(WRegion *reg, WClientWin *cwin,
 	
 	assert(reg!=NULL);
 	
-	if(ROOTWIN_OF(reg)!=ROOTWIN_OF(cwin)){
+	if(!same_rootwin(reg, (WRegion*)cwin)){
 		warn("Trying to add client window to a region not on same screen.");
 		return FALSE;
 	}

@@ -114,10 +114,11 @@ int genframe_press(WGenFrame *genframe, XButtonEvent *ev, WRegion **reg_ret)
 	
 	genframe_border_inner_geom(genframe, &g);
 	
-	if(coords_in_rect(&g, ev->x, ev->y))
-		return WGENFRAME_AREA_BORDER;
-
-	return 0;
+	if(coords_in_rect(&g, ev->x, ev->y)){
+		return 0;
+	}
+	
+	return WGENFRAME_AREA_BORDER;
 }
 
 
@@ -249,19 +250,19 @@ static void p_tabdrag_begin(WGenFrame *genframe, XMotionEvent *ev,
 }
 
 
-static WRegion *fnd(WWindow *w, int x, int y)
+static WRegion *fnd(Window root, int x, int y)
 {
+	Window win=root;
 	int dstx, dsty;
-	Window rootwin=w->win;
-	Window childret;
 	WRegion *reg=NULL, *reg2;
+	WWindow *w=NULL;
 	
 	do{
-		if(!XTranslateCoordinates(wglobal.dpy, rootwin, w->win,
-								  x, y, &dstx, &dsty, &childret))
+		if(!XTranslateCoordinates(wglobal.dpy, root, win,
+								  x, y, &dstx, &dsty, &win))
 			return NULL;
 	
-		if(childret==None){
+		if(win==None){
 			x-=REGION_GEOM(w).x;
 			y-=REGION_GEOM(w).y;
 			FOR_ALL_TYPED_CHILDREN(w, reg2, WRegion){
@@ -273,7 +274,7 @@ static WRegion *fnd(WWindow *w, int x, int y)
 			}
 			break;
 		}
-		w=FIND_WINDOW_T(childret, WWindow);
+		w=FIND_WINDOW_T(win, WWindow);
 		if(w==NULL)
 			break;
 		if(HAS_DYN(w, region_handle_drop))
@@ -307,7 +308,7 @@ static void p_tabdrag_end(WGenFrame *genframe, XButtonEvent *ev)
 	if(ev->root!=ROOT_OF(sub))
 		return;
 	
-	dropped_on=fnd((WWindow*)ROOTWIN_OF(sub), ev->x_root, ev->y_root);
+	dropped_on=fnd(ev->root, ev->x_root, ev->y_root);
 
 	if(dropped_on==NULL || dropped_on==(WRegion*)genframe || dropped_on==sub){
 		genframe_draw_bar(genframe, TRUE);

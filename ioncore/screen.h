@@ -9,27 +9,34 @@
 #define ION_IONCORE_VIEWPORT_H
 
 #include "common.h"
-#include "window.h"
 
 INTROBJ(WScreen);
 
+#include "window.h"
+
+#define FOR_ALL_SCREENS(SCR)   \
+	for((SCR)=wglobal.screens; \
+		(SCR)!=NULL;           \
+		(SCR)=(SCR)->next_scr)
+
+
 DECLOBJ(WScreen){
-#ifdef CF_WINDOWED_SCREENS
 	WWindow wwin;
-#else
-	WRegion reg;
-#endif
 	int id;
 	Atom atom_workspace;
+	bool uses_root;
 	
 	int ws_count;
 	WRegion *ws_list;
 	WRegion *current_ws;
+	
+	WScreen *next_scr, *prev_scr;
 };
 
 #include "rootwin.h"
 
-extern WScreen *create_screen(WRootWin *rootwin, int id, WRectangle geom);
+extern WScreen *create_screen(WRootWin *rootwin, int id, WRectangle geom,
+							  bool useroot);
 
 extern bool screen_initialize_workspaces(WScreen *scr);
 

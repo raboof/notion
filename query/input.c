@@ -102,15 +102,15 @@ void input_draw_config_updated(WInput *input)
 
 bool input_init(WInput *input, WWindow *par, WRectangle geom)
 {
-	WRootWin *rootwin;
+	WGRData *grdata;
 	Window win;
 
 	input->max_geom=geom;
 	
-	rootwin=ROOTWIN_OF(par);
+	grdata=GRDATA_OF(par);
 	
-	win=create_simple_window_bg(rootwin, par->win, geom,
-								rootwin->grdata.input_colors.bg);
+	win=create_simple_window_bg(grdata, par->win, geom,
+								grdata->input_colors.bg);
 	
 	if(!window_init((WWindow*)input, par, win, geom))
 		return FALSE;

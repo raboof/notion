@@ -27,7 +27,8 @@ INTROBJ(WRootWin);
 
 
 DECLOBJ(WRootWin){
-	WWindow root;
+	WRegion reg;
+	Window root;
 	int xscr;
 	
 	WRegion *screen_list;
@@ -38,14 +39,13 @@ DECLOBJ(WRootWin){
 	Window *tmpwins;
 	int tmpnwins;
 	
-	int w_unit, h_unit;
 	WGRData grdata;
 };
 
 
-extern Window create_simple_window_bg(const WRootWin *rootwin, Window par,
+extern Window create_simple_window_bg(const WGRData *grdata, Window par,
 									  WRectangle geom, WColor background);
-extern Window create_simple_window(const WRootWin *rootwin, Window par,
+extern Window create_simple_window(const WGRData *grdata, Window par,
 								   WRectangle geom);
 
 extern WRootWin *manage_rootwin(int xscr);

@@ -13,9 +13,7 @@
 #include "rootwin.h"
 #include "grdata.h"
 
-extern void draw_rubberband(WWindow *wwin, WRectangle rect,
-							bool vertical);
-extern void draw_rubberbox(WWindow *wwin, WRectangle rect);
+extern void draw_rubberbox(WRootWin *rw, WRectangle rect);
 
 extern void set_moveres_pos(WRootWin *rootwin, int x, int y);
 extern void set_moveres_size(WRootWin *rootwin, int w, int h);
