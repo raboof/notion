@@ -1056,7 +1056,7 @@ static bool extl_push_args(lua_State *st, const char *spec, va_list *argsp)
 typedef struct{
 	const char *spec;
 	const char *rspec;
-	va_list args;
+	va_list *args;
 	void *misc;
 	int nret;
 #ifndef CF_HAS_VA_COPY
@@ -1072,7 +1072,7 @@ static bool extl_get_retvals(lua_State *st, int m, ExtlDoCallParam *param)
 
 #ifdef CF_HAS_VA_COPY
 	va_list args;
-	va_copy(args, param->args);
+	va_copy(args, *(param->args));
 #else
 	if(m>MAX_PARAMS){
 		warn("Too many return values. Use a C compiler that has va_copy "
@@ -1085,7 +1085,7 @@ static bool extl_get_retvals(lua_State *st, int m, ExtlDoCallParam *param)
 #ifdef CF_HAS_VA_COPY
 		ptr=va_arg(args, void*);
 #else
-		ptr=va_arg(param->args, void*);
+		ptr=va_arg(*(param->args), void*);
 		param->ret_ptrs[param->nret]=ptr;
 #endif
 		if(!extl_stack_get(st, -m, *spec, TRUE, ptr)){
@@ -1132,7 +1132,7 @@ static bool extl_dodo_call_vararg(lua_State *st, ExtlDoCallParam *param)
 	}
 	
 	if(n>0){
-		if(!extl_push_args(st, param->spec, &(param->args)))
+		if(!extl_push_args(st, param->spec, param->args))
 			return FALSE;
 	}
 
@@ -1170,7 +1170,7 @@ static bool extl_cpcall_call(lua_State *st, ExtlCPCallFn *fn,
 	
 	for(i=0; i<param->nret; i++){
 #ifdef CF_HAS_VA_COPY
-		ptr=va_arg(param->args, void*);
+		ptr=va_arg(*(param->args), void*);
 #else
 		ptr=param->ret_ptrs[i];
 #endif
@@ -1202,7 +1202,7 @@ bool extl_call_vararg(ExtlFn fnref, const char *spec,
 
 	param.spec=spec;
 	param.rspec=rspec;
-	param.args=args;
+	param.args=&args;
 	param.misc=(void*)&fnref;
 
 	return extl_cpcall_call(l_st, (ExtlCPCallFn*)extl_do_call_vararg, &param);
@@ -1241,7 +1241,7 @@ bool extl_call_named_vararg(const char *name, const char *spec,
 	ExtlDoCallParam param;
 	param.spec=spec;
 	param.rspec=rspec;
-	param.args=args;
+	param.args=&args;
 	param.misc=(void*)name;
 
 	return extl_cpcall_call(l_st, (ExtlCPCallFn*)extl_do_call_named_vararg,
