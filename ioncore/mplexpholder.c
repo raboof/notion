@@ -125,8 +125,10 @@ bool mplexpholder_init(WMPlexPHolder *ph, WMPlex *mplex,
     if(mplex==NULL)
         return TRUE;
     
-    if(!watch_setup(&(ph->mplex_watch), (Obj*)mplex, mplex_watch_handler))
+    if(!watch_setup(&(ph->mplex_watch), (Obj*)mplex, mplex_watch_handler)){
+        pholder_deinit(&(ph->ph));
         return FALSE;
+    }
 
     do_link_ph(ph, mplex, after, or_after, or_layer);
     
@@ -185,7 +187,7 @@ int mplexpholder_layer(WMPlexPHolder *ph)
 
 bool mplexpholder_stale(WMPlexPHolder *ph)
 {
-    return (ph->mplex_watch.obj!=NULL);
+    return (ph->mplex_watch.obj==NULL);
 }
 
 

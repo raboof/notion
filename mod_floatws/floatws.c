@@ -33,6 +33,7 @@
 #include <ioncore/resize.h>
 
 #include "floatws.h"
+#include "floatwspholder.h"
 #include "floatframe.h"
 #include "placement.h"
 #include "main.h"
@@ -427,7 +428,7 @@ bool floatws_rqclose(WFloatWS *ws)
 /*{{{ manage_clientwin/transient */
 
 
-static bool floatws_add_managed(WFloatWS *ws, WRegion *reg)
+bool floatws_add_managed(WFloatWS *ws, WRegion *reg)
 {
     WFloatStacking *st=ALLOC(WFloatStacking), *sttop=NULL;
     Window bottom=None, top=None;
@@ -1376,6 +1377,9 @@ static DynFunTab floatws_dynfuntab[]={
 
     {region_stacking,
      floatws_stacking},
+
+    {(DynFun*)region_managed_get_pholder,
+     (DynFun*)floatws_managed_get_pholder},
     
     END_DYNFUNTAB
 };
