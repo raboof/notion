@@ -19,12 +19,18 @@
 
 static WRegion *find_suitable_frame(WWorkspace *ws)
 {
-	WRegion *r=REGION_ACTIVE_SUB(ws);
+	WRegion *r=workspace_find_current(ws);
 	
-	if(r!=NULL && region_supports_attach(r)) /* WTHING_IS(r, WFrame)) */
+	if(r!=NULL && region_supports_add_managed(r))
 		return r;
 	
-	return (WRegion*)FIRST_THING(ws, WFrame);
+	FOR_ALL_MANAGED_ON_LIST(ws->managed_list, r){
+		if(region_supports_add_managed(r))
+			return r;
+		
+	}
+	
+	return NULL;
 }
 
 
@@ -37,13 +43,11 @@ bool workspace_add_clientwin(WWorkspace *ws, WClientWin *cwin,
 
 	if(props!=NULL && props->transient_mode==TRANSIENT_MODE_CURRENT){
 		target=find_suitable_frame(ws);
-		if(target!=NULL){
-			if(REGION_ACTIVE_SUB(target)!=NULL &&
-			   WTHING_IS(REGION_ACTIVE_SUB(target), WClientWin)){
-				/*target=REGION_ACTIVE_SUB(target);*/
-				return clientwin_attach_sub((WClientWin*)
-											REGION_ACTIVE_SUB(target),
-											(WRegion*)cwin, 0);
+		if(target!=NULL && WTHING_IS(target, WFrame)){
+			if(((WFrame*)target)->current_sub!=NULL &&
+			   WTHING_IS(((WFrame*)target)->current_sub, WClientWin)){
+				return region_add_managed(((WFrame*)target)->current_sub,
+										  (WRegion*)cwin, 0);
 			}
 		}
 	}else{
@@ -60,7 +64,7 @@ bool workspace_add_clientwin(WWorkspace *ws, WClientWin *cwin,
 	}
 	
 	if(target==NULL){
-		warn("Ooops... could not find a frame to attach client to.");
+		warn("Ooops... could not find a frame to add client to.");
 		return FALSE;
 	}
 	
@@ -75,5 +79,5 @@ bool workspace_add_transient(WRegion *reg, WClientWin *tfor,
 							 const XWindowAttributes *attr,
 							 int init_state, WWinProp *props)
 {
-	return clientwin_attach_sub(tfor, (WRegion*)cwin, 0);
+	return region_add_managed((WRegion*)tfor, (WRegion*)cwin, 0);
 }

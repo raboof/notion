@@ -18,63 +18,80 @@
 /*{{{ Attach */
 
 
-void region_do_attach_params(const WRegion *reg, WWinGeomParams *params)
+void region_add_managed_params(const WRegion *reg, WRegion **par,
+							   WRectangle *geom)
 {
-	CALL_DYN(region_do_attach_params, reg, (reg, params));
+	CALL_DYN(region_add_managed_params, reg, (reg, par, geom));
 }
 
 
-void region_do_attach(WRegion *reg, WRegion *sub, int flags)
+void region_add_managed_doit(WRegion *reg, WRegion *sub, int flags)
 {
-	CALL_DYN(region_do_attach, reg, (reg, sub, flags));
+	CALL_DYN(region_add_managed_doit, reg, (reg, sub, flags));
 }
 
 
-bool region_supports_attach(WRegion *reg)
+bool region_supports_add_managed(WRegion *reg)
 {
-	/* Checking for just one should be enough. */
-	return (HAS_DYN(reg, region_do_attach) /* &&
-			HAS_DYN(reg, region_do_attach_params)*/);
+	return HAS_DYN(reg, region_add_managed_doit);
 }
 
 
-WRegion *region_attach_new(WRegion *reg, WRegionCreateFn *fn, void *fnp,
-						   int flags)
+WRegion *region_add_managed_new(WRegion *mgr, WRegionCreateFn *fn,
+								void *fnp, int flags)
 {
-	WWinGeomParams params;
-	WRegion *sub;
+	WRectangle geom;
+	WRegion *reg;
+	WRegion *par=NULL;
+
+	geom.x=0;
+	geom.y=0;
+	geom.w=0;
+	geom.h=0;
 	
-	/*region_do_attach_params(reg, &params);*/
+	{ /* CALL_DYN defines variables */
+		CALL_DYN(region_add_managed_params, mgr, (mgr, &par, &geom));
+		if(funnotfound)
+			return NULL;
+	}
 	
-	CALL_DYN(region_do_attach_params, reg, (reg, &params));
-	if(funnotfound)
-		return NULL;
+	reg=fn(par, geom, fnp);
 	
-	sub=fn(SCREEN_OF(reg), params, fnp);
+	if(reg!=NULL)
+		region_add_managed_doit(mgr, reg, flags);
 	
-	if(sub!=NULL)
-		region_do_attach(reg, sub, flags);
-	
-	return sub;
+	return reg;
 }
 
 	
-bool region_attach_sub(WRegion *reg, WRegion *sub, int flags)
+bool region_add_managed(WRegion *mgr, WRegion *reg, int flags)
 {
-	WWinGeomParams params;
+	WRectangle geom;
+	WRegion *par=NULL;
 	
-	if(thing_is_child((WThing*)reg, (WThing*)sub))
+	if(REGION_MANAGER(reg)==mgr)
 		return TRUE;
 	
-	/*region_do_attach_params(reg, &params);*/
-	{
-		CALL_DYN(region_do_attach_params, reg, (reg, &params));
+	/* clientwin_add_managed_params wants the old geometry */
+	geom=REGION_GEOM(reg);
+	
+	{ /* CALL_DYN defines variables */
+		CALL_DYN(region_add_managed_params, mgr, (mgr, &par, &geom));
 		if(funnotfound)
 			return FALSE;
 	}
 	
-	detach_reparent_region(sub, params);
-	region_do_attach(reg, sub, flags);
+	if(FIND_PARENT1(reg, WRegion)!=par){
+		if(!reparent_region(reg, par, geom)){
+			warn("Unable to reparent.");
+			return FALSE;
+		}
+	}else{
+		fit_region(reg, geom);
+	}
+	
+	region_detach_manager(reg);
+	region_add_managed_doit(mgr, reg, flags);
 	
 	return TRUE;
 }
@@ -83,58 +100,57 @@ bool region_attach_sub(WRegion *reg, WRegion *sub, int flags)
 /*}}}*/
 
 
-/*{{{ find_new_home */
+/*{{{ find_new_manager */
 
 
-WRegion *default_do_find_new_home(WRegion *reg)
+WRegion *default_do_find_new_manager(WRegion *reg)
 {
 	WRegion *p;
 	
-	if(region_supports_attach(reg))
+	if(region_supports_add_managed(reg))
 		return reg;
 	
 	p=FIND_PARENT1(reg, WRegion);
 
-	if(p!=NULL)
-		p=region_do_find_new_home(p);
+	if(p==NULL)
+		return NULL;
 	
-	return p;
+	return region_do_find_new_manager(p);
 }
 
 
-WRegion *region_do_find_new_home(WRegion *reg)
+WRegion *region_do_find_new_manager(WRegion *reg)
 {
 	WRegion *ret=NULL;
-	CALL_DYN_RET(ret, WRegion*, region_do_find_new_home, reg, (reg));
+	CALL_DYN_RET(ret, WRegion*, region_do_find_new_manager, reg, (reg));
 	if(funnotfound)
-		ret=default_do_find_new_home(reg);
+		ret=default_do_find_new_manager(reg);
 	return ret;
 }
 
 
 
-WRegion *region_find_new_home(WRegion *reg)
+WRegion *region_find_new_manager(WRegion *reg)
 {
 	WRegion *p=FIND_PARENT1(reg, WRegion);
 	
 	if(p!=NULL)
-		p=region_do_find_new_home(p);
+		p=region_do_find_new_manager(p);
 	
 	return p;
 }
 
-bool region_move_subregions(WRegion *dest, WRegion *src)
+
+bool region_move_managed_on_list(WRegion *dest, WRegion *src,
+								 WRegion *list)
 {
-	WRegion *r;
+	WRegion *r, *next;
 	bool success=TRUE;
 	
-	assert(region_supports_attach(dest));
+	assert(region_supports_add_managed(dest));
 	
-	while(1){
-		r=FIRST_THING(src, WRegion);
-		if(r==NULL)
-			break;
-		if(!region_attach_sub(dest, r, 0))
+	FOR_ALL_MANAGED_ON_LIST_W_NEXT(list, r, next){
+		if(!region_add_managed(dest, r, 0))
 			success=FALSE;
 	}
 	
@@ -142,13 +158,13 @@ bool region_move_subregions(WRegion *dest, WRegion *src)
 }
 
 
-bool region_rescue_subregions(WRegion *reg)
+bool region_rescue_managed_on_list(WRegion *reg, WRegion *list)
 {
-	WRegion *p=region_find_new_home(reg);
+	WRegion *p=region_find_new_manager(reg);
 	WRegion *r;
 	
 	if(p!=NULL){
-		if(region_move_subregions(p, reg))
+		if(region_move_managed_on_list(p, reg, list))
 			return TRUE;
 	}
 	
@@ -157,43 +173,6 @@ bool region_rescue_subregions(WRegion *reg)
 	 */
 	
 	warn("Unable to move subregions of a (to-be-destroyed) frame"
-		 "somewhere else.");
-	
-	return FALSE;
-}
-
-
-bool region_move_clientwins(WRegion *dest, WRegion *src)
-{
-	WClientWin *r;
-	bool success=TRUE;
-	
-	assert(region_supports_attach(dest));
-	
-	FOR_ALL_TYPED(src, r, WClientWin){
-		if(!region_attach_sub(dest, (WRegion*)r, 0))
-			success=FALSE;
-	}
-	
-	return success;
-}
-
-
-bool region_rescue_clientwins(WRegion *reg)
-{
-	WRegion *p=region_find_new_home(reg);
-	WRegion *r;
-	
-	if(p!=NULL){
-		if(region_move_clientwins(p, reg))
-			return TRUE;
-	}
-	
-	/* This should not happen unless the region is not
-	 * properly in a tree with a WScreen root.
-	 */
-	
-	warn("Unable to move client windows of a (to-be-destroyed) "
 		 "somewhere else.");
 	
 	return FALSE;

@@ -17,6 +17,7 @@
 #include <wmcore/conf-bindings.h>
 #include <wmcore/modules.h>
 #include <wmcore/funtabs.h>
+#include <wmcore/font.h>
 #include "funtabs.h"
 #include "winprops.h"
 #include "frame.h"
@@ -117,12 +118,6 @@ static bool opt_global_bindings(Tokenizer *tokz, int n, Token *toks)
 }
 
 
-static bool opt_viewport_bindings(Tokenizer *tokz, int n, Token *toks)
-{
-	return wmcore_begin_bindings(&wmcore_viewport_bindmap, NULL);
-}
-
-
 /*}}}*/
 
 
@@ -157,7 +152,6 @@ static ConfOpt opts[]={
 	/* Temporary */
 	{"clientwin_bindings", NULL, opt_clientwin_bindings, wmcore_binding_opts},
 	{"global_bindings", NULL, opt_global_bindings, wmcore_binding_opts},
-	{"viewport_bindings", NULL, opt_viewport_bindings, wmcore_binding_opts},
 	
 	/* modules */
 	{"module", "s", opt_module, NULL},

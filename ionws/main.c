@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <libtu/util.h>
 #include <libtu/optparser.h>
+#include <libtu/tokenizer.h>
 
 #include <wmcore/common.h>
 #include <wmcore/wmcore.h>
@@ -18,6 +19,7 @@
 #include <wmcore/hooks.h>
 #include <wmcore/clientwin.h>
 #include <wmcore/exec.h>
+#include <wmcore/saveload.h>
 #include <query/main.h>
 #include "conf.h"
 #include "funtabs.h"
@@ -25,7 +27,7 @@
 #include "placement.h"
 #include "workspace.h"
 #include "bindmaps.h"
-
+#include "frame.h"
 
 /*{{{ Optparser data */
 
@@ -61,7 +63,19 @@ static OptParserCommonInfo ion_cinfo={
 
 /*}}}*/
 
+
+extern WRegion *workspace_load(WRegion *par, WRectangle geom, Tokenizer *tokz);
+extern WFrame *frame_load(WFrame *par, WRectangle geom, Tokenizer *tokz);
 	
+void register_loaders()
+{
+	register_region_load_create_fn("WFrame", (WRegionLoadCreateFn*)
+								   frame_load);
+	register_region_load_create_fn("WWorkspace", (WRegionLoadCreateFn*)
+								   workspace_load);
+}
+
+
 /*{{{ Main */
 
 
@@ -100,6 +114,7 @@ int main(int argc, char*argv[])
 		return EXIT_FAILURE;
 	
 	init_funclists();
+	register_loaders();
 	query_init();
 	
 	if(!ion_read_config(cfgfile))

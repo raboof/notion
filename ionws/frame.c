@@ -5,6 +5,7 @@
  * See the included file LICENSE for details.
  */
 
+#include <libtu/parser.h>
 #include <wmcore/common.h>
 #include <wmcore/window.h>
 #include <wmcore/global.h>
@@ -16,8 +17,9 @@
 #include <wmcore/targetid.h>
 #include <wmcore/attach.h>
 #include <wmcore/resize.h>
-#include <wmcore/close.h>
 #include <wmcore/tags.h>
+#include <wmcore/names.h>
+#include <wmcore/saveload.h>
 #include "framep.h"
 #include "frame-pointer.h"
 #include "bindmaps.h"
@@ -26,34 +28,35 @@
 
 
 static void deinit_frame(WFrame *frame);
-static void frame_remove_sub(WFrame *frame, WRegion *sub);
-static bool reparent_frame(WFrame *frame, WWinGeomParams params);
+static bool reparent_frame(WFrame *frame, WRegion *parent, WRectangle geom);
 static void fit_frame(WFrame *frame, WRectangle geom);
 static void focus_frame(WFrame *frame, bool warp);
-static bool frame_switch_subregion(WFrame *frame, WRegion *sub);
+static bool frame_display_managed(WFrame *frame, WRegion *sub);
 static void frame_activated(WFrame *frame);
 static void frame_inactivated(WFrame *frame);
-static void frame_notify_sub_change(WFrame *frame, WRegion *sub);
-static void frame_request_sub_geom(WFrame *frame, WRegion *sub,
-								   WRectangle geom, WRectangle *geomret,
-								   bool tryonly);
-
-static void frame_sub_params(const WFrame *frame, WWinGeomParams *ret);
-static void frame_do_attach(WFrame *frame, WRegion *sub, int flags);
-static void frame_do_detach(WFrame *frame, WRegion *sub);
-
+static void frame_notify_managed_change(WFrame *frame, WRegion *sub);
 static void frame_resize_hints(WFrame *frame, XSizeHints *hints_ret,
 							   uint *relw_ret, uint *relh_ret);
-	
 static WRegion *frame_selected_sub(WFrame *frame);
 static void frame_draw_config_updated(WFrame *frame);
 
 
+static void frame_managed_geom(const WFrame *frame, WRectangle *geom);
+static void frame_add_managed_params(const WFrame *frame, WRegion **par,
+									 WRectangle *geom);
+static void frame_add_managed_doit(WFrame *frame, WRegion *sub, int flags);
+static void frame_remove_managed(WFrame *frame, WRegion *sub);
+static void frame_request_managed_geom(WFrame *frame, WRegion *sub,
+									   WRectangle geom, WRectangle *geomret,
+									   bool tryonly);
+
+static bool frame_save_to_file(WFrame *frame, FILE *file, int lvl);
+	
 static DynFunTab frame_dynfuntab[]={
 	{fit_region, fit_frame},
 	{(DynFun*)reparent_region, (DynFun*)reparent_frame},
 	{focus_region, focus_frame},
-	{(DynFun*)switch_subregion, (DynFun*)frame_switch_subregion},
+	{(DynFun*)region_display_managed, (DynFun*)frame_display_managed},
 	
 	{draw_window, draw_frame},
 	{(DynFun*)window_press, (DynFun*)frame_press},
@@ -62,22 +65,20 @@ static DynFunTab frame_dynfuntab[]={
 	{region_activated, frame_activated},
 	{region_inactivated, frame_inactivated},
 	
-	{region_notify_sub_change, frame_notify_sub_change},
-	{region_request_sub_geom, frame_request_sub_geom},
-
-	{region_do_attach_params, frame_sub_params},
-	{region_do_attach, frame_do_attach},
-	
 	{region_resize_hints, frame_resize_hints},
 	
-	{region_remove_sub, frame_remove_sub},
-
 	{(DynFun*)region_selected_sub, (DynFun*)frame_selected_sub},
 
-	{region_request_close, destroy_frame},
+	{region_add_managed_params, frame_add_managed_params},
+	{region_add_managed_doit, frame_add_managed_doit},
+	{region_remove_managed, frame_remove_managed},
+	{region_notify_managed_change, frame_notify_managed_change},
+	{region_request_managed_geom, frame_request_managed_geom},
 	
 	{region_draw_config_updated, frame_draw_config_updated},
 
+	{(DynFun*)region_save_to_file, (DynFun*)frame_save_to_file},
+	
 	END_DYNFUNTAB
 };
 									   
@@ -87,7 +88,7 @@ IMPLOBJ(WFrame, WWindow, deinit_frame, frame_dynfuntab, &ion_frame_funclist)
 
 /*{{{ Helpers */
 
-#define REGION_LABEL(REG)	((REG)->uldata)
+#define REGION_LABEL(REG)	((REG)->mgr_data)
 
 #define BAR_X(FRAME, GRDATA) ((GRDATA)->bar_off.x)
 #define BAR_Y(FRAME, GRDATA) ((GRDATA)->bar_off.y)
@@ -105,77 +106,27 @@ IMPLOBJ(WFrame, WWindow, deinit_frame, frame_dynfuntab, &ion_frame_funclist)
 #define CLIENT_H(FRAME, GRDATA) FRAME_TO_CLIENT_H(FRAME_H(FRAME), GRDATA)
 
 
-static WRegion *firstreg_ni(const WFrame *frame)
-{
-	WRegion *reg=FIRST_THING(frame, WRegion);
-	if(reg==frame->current_input && reg!=NULL)
-		reg=NEXT_THING(reg, WRegion);
-	return reg;
-}
-
-
-static WRegion *lastreg_ni(const WFrame *frame)
-{
-	WRegion *reg=LAST_THING(frame, WRegion);
-	
-	if(reg==frame->current_input && reg!=NULL)
-		reg=PREV_THING(reg, WRegion);
-	return reg;
-}
-
-
-static WRegion *nextreg_ni(const WFrame *frame, const WRegion *reg)
-{
-	WRegion *rreg=NULL;
-	if(reg!=NULL){
-		rreg=NEXT_THING(reg, WRegion);
-		if(rreg==frame->current_input && rreg!=NULL)
-			rreg=NEXT_THING(rreg, WRegion);
-	}
-	return rreg;
-}
-
-
-static WRegion *prevreg_ni(const WFrame *frame, const WRegion *reg)
-{
-	WRegion *rreg=NULL;
-	if(reg!=NULL){
-		rreg=PREV_THING(reg, WRegion);
-		if(rreg==frame->current_input && rreg!=NULL)
-			rreg=PREV_THING(rreg, WRegion);
-	}
-	return rreg;
-}
-
-
-WRegion *frame_nthreg_ni(WFrame *frame, uint n)
-{
-	WRegion *reg=firstreg_ni(frame);
-	
-	while(n-->0 && reg!=NULL){
-		reg=nextreg_ni(frame, reg);
-	}
-	return reg;
-}
-
-
 /*}}}*/
 
 
 /*{{{ Destroy/create frame */
 
 
-static bool init_frame(WFrame *frame, WScreen *scr, WWinGeomParams params,
+static bool init_frame(WFrame *frame, WRegion *parent, WRectangle geom,
 					   int id, int flags)
 {
 	Window win;
 	XSetWindowAttributes attr;
-	WGRData *grdata=&(scr->grdata);
+	WGRData *grdata=GRDATA_OF(parent);
 	int sp=grdata->spacing;
 	ulong attrflags=0;
 	
+	if(!WTHING_IS(parent, WWindow))
+		return FALSE;
+	
 	frame->flags=flags;
-	frame->sub_count=0;
+	frame->managed_count=0;
+	frame->managed_list=NULL;
 	frame->current_sub=NULL;
 	frame->current_input=NULL;
 	frame->saved_w=FRAME_NO_SAVED_WH;
@@ -192,13 +143,12 @@ static bool init_frame(WFrame *frame, WScreen *scr, WWinGeomParams params,
 		attrflags=CWBackPixel;
 	}
 	
-	win=XCreateWindow(wglobal.dpy, params.win,
-					  params.win_x, params.win_y,
-					  params.geom.w, params.geom.h,
+	win=XCreateWindow(wglobal.dpy, ((WWindow*)parent)->win,
+					  geom.x, geom.y, geom.w, geom.h,
 					  0, CopyFromParent, InputOutput,
 					  CopyFromParent, attrflags, &attr);
 	
-	if(!init_window((WWindow*)frame, scr, win, params.geom)){
+	if(!init_window((WWindow*)frame, (WWindow*)parent, win, geom)){
 		XDestroyWindow(wglobal.dpy, win);
 		return FALSE;
 	}
@@ -215,10 +165,9 @@ static bool init_frame(WFrame *frame, WScreen *scr, WWinGeomParams params,
 }
 
 
-WFrame *create_frame(WScreen *scr, WWinGeomParams params,
-					 int id, int flags)
+WFrame *create_frame(WRegion *parent, WRectangle geom, int id, int flags)
 {
-	CREATETHING_IMPL(WFrame, frame, (p, scr, params, id, flags));
+	CREATETHING_IMPL(WFrame, frame, (p, parent, geom, id, flags));
 }
 
 
@@ -246,7 +195,7 @@ void frame_bar_geom(const WFrame *frame, WRectangle *geom)
 }
 
 
-void frame_sub_geom(const WFrame *frame, WRectangle *geom)
+void frame_managed_geom(const WFrame *frame, WRectangle *geom)
 {
 	WGRData *grdata=GRDATA_OF(frame);
 	
@@ -254,15 +203,6 @@ void frame_sub_geom(const WFrame *frame, WRectangle *geom)
 	geom->y=CLIENT_Y(frame, grdata);
 	geom->w=CLIENT_W(frame, grdata);
 	geom->h=CLIENT_H(frame, grdata);
-}
-
-
-void frame_sub_params(const WFrame *frame, WWinGeomParams *ret)
-{
-	frame_sub_geom(frame, &(ret->geom));
-	ret->win_x=ret->geom.x;
-	ret->win_y=ret->geom.y;
-	ret->win=FRAME_WIN(frame);
 }
 
 
@@ -281,21 +221,28 @@ void frame_recalc_bar(WFrame *frame)
 	int textw;
 	WRegion *sub;
 	
-	if(frame->sub_count==0){
+	if(frame->managed_count==0){
 		frame->tab_w=bar_w;
 	}else{
-		tab_w=(bar_w-(frame->sub_count-1)*spc)/frame->sub_count;
+		tab_w=(bar_w-(frame->managed_count-1)*spc)/frame->managed_count;
 		frame->tab_w=tab_w;
 		
 		textw=BORDER_IW(&(scr->grdata.tab_border), tab_w);
 		
-		FOR_ALL_TYPED(frame, sub, WRegion){
+		FOR_ALL_MANAGED_ON_LIST(frame->managed_list, sub){
 			if(sub==frame->current_input)
 				continue;
 			REGION_LABEL(sub)=region_make_label(sub, textw,
 												scr->grdata.tab_font);
 		}
 	}
+}
+
+
+static void frame_notify_managed_change(WFrame *frame, WRegion *sub)
+{
+	frame_recalc_bar(frame);
+	draw_frame_bar(frame, FALSE);
 }
 
 
@@ -371,7 +318,7 @@ void draw_frame_bar(const WFrame *frame, bool complete)
 		}
 	}
 	
-	if(frame->sub_count==0){
+	if(frame->managed_count==0){
 		if(REGION_IS_ACTIVE(frame))
 			COLORS=&(grdata->act_tab_sel_colors);
 		else
@@ -382,8 +329,8 @@ void draw_frame_bar(const WFrame *frame, bool complete)
 	
 	dinfo->geom.w=frame->tab_w;
 	
-	for(sub=firstreg_ni(frame); sub!=NULL; sub=next){
-		next=nextreg_ni(frame, sub);
+	for(sub=FIRST_MANAGED(frame->managed_list); sub!=NULL; sub=next){
+		next=NEXT_MANAGED(frame->managed_list, sub);
 		
 		if(next==NULL)
 			dinfo->geom.w=bg.w-(X-bg.x);
@@ -451,11 +398,12 @@ static void frame_draw_config_updated(WFrame *frame)
 	XChangeWindowAttributes(wglobal.dpy, frame->win.win,
 							attrflags, &attr);
 	
-	frame_sub_geom(frame, &geom);
+	frame_managed_geom(frame, &geom);
 	
 	FOR_ALL_TYPED(frame, sub, WRegion){
 		region_draw_config_updated(sub);
-		fit_region(sub, geom);
+		if(REGION_MANAGER(sub)==(WRegion*)frame)
+			fit_region(sub, geom);
 	}
 	
 	frame_recalc_bar(frame);
@@ -466,33 +414,31 @@ static void frame_draw_config_updated(WFrame *frame)
 /*}}}*/
 
 
-/*{{{ Region dynfuns */
+/*{{{ Resize and reparent */
 
 
-static bool reparent_or_fit(WFrame *frame, WWinGeomParams params, bool rep)
+static void reparent_or_fit(WFrame *frame, WRectangle geom, WWindow *parent)
 {
-	bool wchg=(FRAME_W(frame)!=params.geom.w);
-	bool hchg=(FRAME_H(frame)!=params.geom.h);
-	bool move=(FRAME_X(frame)!=params.geom.x ||
-			   FRAME_Y(frame)!=params.geom.y);
+	bool wchg=(FRAME_W(frame)!=geom.w);
+	bool hchg=(FRAME_H(frame)!=geom.h);
+	bool move=(FRAME_X(frame)!=geom.x ||
+			   FRAME_Y(frame)!=geom.y);
 	
-	if(rep){
-		XReparentWindow(wglobal.dpy, FRAME_WIN(frame), params.win,
-						params.win_x, params.win_y);
-		XResizeWindow(wglobal.dpy, FRAME_WIN(frame),
-					  params.geom.w, params.geom.h);
+	if(parent!=NULL){
+		XReparentWindow(wglobal.dpy, FRAME_WIN(frame), parent->win,
+						geom.x, geom.y);
+		XResizeWindow(wglobal.dpy, FRAME_WIN(frame), geom.w, geom.h);
 	}else{
 		XMoveResizeWindow(wglobal.dpy, FRAME_WIN(frame),
-						  params.win_x, params.win_y,
-						  params.geom.w, params.geom.h);
+						  geom.x, geom.y, geom.w, geom.h);
 	}
 	
-	REGION_GEOM(frame)=params.geom;
+	REGION_GEOM(frame)=geom;
 
 	if(move && !wchg && !hchg)
 		notify_subregions_move(&(frame->win.region));
 	else if(wchg || hchg)
-		frame_fit_subs(frame);
+		frame_fit_managed(frame);
 
 	if(wchg){
 		frame->saved_w=FRAME_NO_SAVED_WH;
@@ -503,23 +449,239 @@ static bool reparent_or_fit(WFrame *frame, WWinGeomParams params, bool rep)
 	
 	if(hchg)
 		frame->saved_h=FRAME_NO_SAVED_WH;
+}
+
+
+static bool reparent_frame(WFrame *frame, WRegion *parent, WRectangle geom)
+{
+	if(!WTHING_IS(parent, WWindow) || !same_screen((WRegion*)frame, parent))
+		return FALSE;
+	
+	region_detach_parent((WRegion*)frame);
+	region_set_parent((WRegion*)frame, parent);
+	reparent_or_fit(frame, geom, (WWindow*)parent);
 	
 	return TRUE;
 }
 
 
-static bool reparent_frame(WFrame *frame, WWinGeomParams params)
-{
-	return reparent_or_fit(frame, params, TRUE);
-}
-
-
 static void fit_frame(WFrame *frame, WRectangle geom)
 {
-	WWinGeomParams params;
-	region_params2((WRegion*)frame, geom, &params);
-	reparent_or_fit(frame, params, FALSE);
+	reparent_or_fit(frame, geom, NULL);
 }
+
+
+
+static void frame_request_managed_geom(WFrame *frame, WRegion *sub,
+									   WRectangle geom, WRectangle *geomret,
+									   bool tryonly)
+{
+	/* Just try to give it the maximum size */
+	frame_managed_geom(frame, &geom);
+	
+	if(geomret!=NULL)
+		*geomret=geom;
+	
+	if(!tryonly)
+		fit_region(sub, geom);
+}
+
+
+static void frame_resize_hints(WFrame *frame, XSizeHints *hints_ret,
+							   uint *relw_ret, uint *relh_ret)
+{
+	WRectangle subgeom;
+	XSizeHints hints2;
+	uint wdummy, hdummy;
+	WScreen *scr=SCREEN_OF(frame);
+	
+	frame_managed_geom(frame, &subgeom);
+	
+	*relw_ret=subgeom.w;
+	*relh_ret=subgeom.h;
+	
+	hints_ret->flags=PResizeInc|PMinSize;
+	hints_ret->width_inc=scr->w_unit;
+	hints_ret->height_inc=scr->h_unit;
+	hints_ret->min_width=FRAME_MIN_W(scr);
+	hints_ret->min_height=FRAME_MIN_H(scr);
+	
+	if(frame->current_sub==NULL)
+		return;
+	
+	region_resize_hints(frame->current_sub, &hints2, &wdummy, &hdummy);
+		
+	if(hints2.flags&PResizeInc){
+		hints_ret->width_inc=hints2.width_inc;
+		hints_ret->height_inc=hints2.height_inc;
+	}
+}
+
+
+/*}}}*/
+
+
+/*{{{ Client switching */
+
+
+WRegion *frame_nth_managed(WFrame *frame, uint n)
+{
+	WRegion *reg=FIRST_MANAGED(frame->managed_list);
+	
+	while(n-->0 && reg!=NULL)
+		reg=NEXT_MANAGED(frame->managed_list, reg);
+
+	return reg;
+}
+
+
+void frame_switch_nth(WFrame *frame, uint n)
+{
+	WRegion *sub=frame_nth_managed(frame, n);
+	if(sub!=NULL)
+		display_region_sp(sub);
+}
+
+	   
+void frame_switch_next(WFrame *frame)
+{
+	WRegion *sub=NEXT_MANAGED_WRAP(frame->managed_list, frame->current_sub);
+	if(sub!=NULL)
+		display_region_sp(sub);
+}
+
+
+void frame_switch_prev(WFrame *frame)
+{
+	WRegion *sub=PREV_MANAGED_WRAP(frame->managed_list, frame->current_sub);
+	if(sub!=NULL)
+		display_region_sp(sub);
+}
+
+
+/*}}}*/
+
+
+/*{{{ Add/remove managed */
+
+
+static void frame_add_managed_params(const WFrame *frame, WRegion **par,
+									 WRectangle *geom)
+{
+	frame_managed_geom(frame, geom);
+	*par=(WRegion*)frame;
+}
+
+
+static void frame_add_managed_doit(WFrame *frame, WRegion *sub, int flags)
+{
+	set_target_id(sub, frame->target_id);
+	
+	if(frame->current_sub!=NULL && wglobal.opmode!=OPMODE_INIT){
+		region_set_manager(sub, (WRegion*)frame, NULL);
+		LINK_ITEM_AFTER(frame->managed_list, frame->current_sub,
+						sub, mgr_next, mgr_prev);
+	}else{
+		region_set_manager(sub, (WRegion*)frame, &(frame->managed_list));
+	}
+	
+	frame->managed_count++;
+	
+	if(frame->managed_count==1)
+		flags|=REGION_ATTACH_SWITCHTO;
+
+	frame_recalc_bar(frame);
+
+	if(flags&REGION_ATTACH_SWITCHTO){
+		frame_display_managed(frame, sub);
+	}else{
+		unmap_region(sub);
+		draw_frame_bar(frame, TRUE);
+	}
+
+}
+
+
+/*
+void frame_move_managed(WFrame *dest, WFrame *src)
+{
+	WRegion *sub, *next, *cur;
+	
+	cur=src->current_sub;
+	
+	for(sub=FIRST_MANAGED(src->managed_list); sub!=NULL; sub=next){
+		next=NEXT_MANAGED(src->managed_list, sub);
+		region_add_managed((WRegion*)dest, sub,
+						   sub==cur ? REGION_ATTACH_SWITCHTO : 0);
+	}
+}
+*/
+
+void frame_fit_managed(WFrame *frame)
+{
+	WRectangle geom;
+	WRegion *sub;
+	
+	frame_managed_geom(frame, &geom);
+	
+	FOR_ALL_MANAGED_ON_LIST(frame->managed_list, sub){
+		fit_region(sub, geom);
+	}
+	
+	if(frame->current_input!=NULL)
+		fit_region(frame->current_input, geom);
+}
+
+
+static void frame_do_remove(WFrame *frame, WRegion *sub)
+{
+	WRegion *next=NULL;
+
+	if(frame->tab_pressed_sub==sub)
+		frame->tab_pressed_sub=NULL;
+	
+	if(frame->current_sub==sub){
+		next=PREV_MANAGED(frame->managed_list, sub);
+		if(next==NULL)
+			next=NEXT_MANAGED(frame->managed_list, sub);
+		frame->current_sub=NULL;
+	}
+	
+	region_unset_manager(sub, (WRegion*)frame, &(frame->managed_list));
+	frame->managed_count--;
+	
+	if(wglobal.opmode!=OPMODE_DEINIT){
+		frame_recalc_bar(frame);
+		if(next!=NULL)
+			frame_display_managed(frame, next);
+		else
+			draw_frame_bar(frame, TRUE);
+	}
+
+	if(REGION_LABEL(sub)!=NULL){
+		free(REGION_LABEL(sub));
+		REGION_LABEL(sub)=NULL;
+	}
+}
+
+
+static void frame_remove_managed(WFrame *frame, WRegion *reg)
+{
+	if(frame->current_input==reg){
+		region_unset_manager(reg, (WRegion*)frame, NULL);
+		frame->current_input=NULL;
+		if(REGION_IS_ACTIVE(frame))
+			set_focus((WRegion*)frame);
+	}else{
+		frame_do_remove(frame, reg);
+	}
+}
+
+
+/*}}}*/
+
+
+/*{{{ Focus and managed switching */
 
 
 static void focus_frame(WFrame *frame, bool warp)
@@ -536,13 +698,14 @@ static void focus_frame(WFrame *frame, bool warp)
 }
 
 
-static bool frame_switch_subregion(WFrame *frame, WRegion *sub)
+static bool frame_display_managed(WFrame *frame, WRegion *sub)
 {
 	if(sub==frame->current_sub || sub==frame->current_input)
 		return FALSE;
 
 	if(frame->current_sub!=NULL)
 		unmap_region(frame->current_sub);
+	
 	frame->current_sub=sub;
 	map_region(sub);
 	
@@ -586,232 +749,6 @@ static void frame_activated(WFrame *frame)
 }
 
 
-static void frame_notify_sub_change(WFrame *frame, WRegion *sub)
-{
-	frame_recalc_bar(frame);
-	draw_frame_bar(frame, FALSE);
-}
-
-
-static void frame_request_sub_geom(WFrame *frame, WRegion *sub,
-								   WRectangle geom, WRectangle *geomret,
-								   bool tryonly)
-{
-	/* Just try to give it the maximum size */
-	frame_sub_geom(frame, &geom);
-	
-	if(geomret!=NULL)
-		*geomret=geom;
-	
-	fit_region(sub, geom);
-}
-
-
-static void frame_resize_hints(WFrame *frame, XSizeHints *hints_ret,
-							   uint *relw_ret, uint *relh_ret)
-{
-	WRectangle subgeom;
-	XSizeHints hints2;
-	uint wdummy, hdummy;
-	WScreen *scr=SCREEN_OF(frame);
-	
-	frame_sub_geom(frame, &subgeom);
-	
-	*relw_ret=subgeom.w;
-	*relh_ret=subgeom.h;
-	
-	hints_ret->flags=PResizeInc|PMinSize;
-	hints_ret->width_inc=scr->w_unit;
-	hints_ret->height_inc=scr->h_unit;
-	hints_ret->min_width=FRAME_MIN_W(scr);
-	hints_ret->min_height=FRAME_MIN_H(scr);
-	
-	if(frame->current_sub==NULL)
-		return;
-	
-	region_resize_hints(frame->current_sub, &hints2, &wdummy, &hdummy);
-		
-	if(hints2.flags&PResizeInc){
-		hints_ret->width_inc=hints2.width_inc;
-		hints_ret->height_inc=hints2.height_inc;
-	}
-}
-
-
-/*}}}*/
-
-
-/*{{{ Client switching */
-
-
-static WRegion *nth_sub(WFrame *frame, uint n)
-{
-	return frame_nthreg_ni(frame, n);
-}
-
-
-static WRegion *next_sub(WFrame *frame)
-{
-	WRegion *reg=NULL;
-	if(frame->current_sub!=NULL)
-		reg=nextreg_ni(frame, frame->current_sub);
-	if(reg==NULL)
-		reg=firstreg_ni(frame);
-	return reg;
-}
-
-
-static WRegion *prev_sub(WFrame *frame)
-{
-	WRegion *reg=NULL;
-	if(frame->current_sub!=NULL)
-		reg=prevreg_ni(frame, frame->current_sub);
-	if(reg==NULL)
-		reg=lastreg_ni(frame);
-	return reg;
-}
-
-
-void frame_switch_nth(WFrame *frame, uint n)
-{
-	WRegion *sub=nth_sub(frame, n);
-	if(sub!=NULL)
-		switch_region(sub);
-}
-
-	   
-void frame_switch_next(WFrame *frame)
-{
-	WRegion *sub=next_sub(frame);
-	if(sub!=NULL)
-		switch_region(sub);
-}
-
-
-void frame_switch_prev(WFrame *frame)
-{
-	WRegion *sub=prev_sub(frame);
-	if(sub!=NULL)
-		switch_region(sub);
-}
-
-
-/*}}}*/
-
-
-/*{{{ Attach, detach & fit */
-
-
-static void frame_do_attach(WFrame *frame, WRegion *sub, int flags)
-{
-	set_target_id(sub, frame->target_id);
-	
-	if(frame->current_sub!=NULL && wglobal.opmode!=OPMODE_INIT)
-		link_thing_after((WThing*)(frame->current_sub), (WThing*)sub);
-	else
-		link_thing((WThing*)frame, (WThing*)sub);
-	frame->sub_count++;
-	
-	if(frame->sub_count==1)
-		flags|=REGION_ATTACH_SWITCHTO;
-
-	frame_recalc_bar(frame);
-
-	if(flags&REGION_ATTACH_SWITCHTO){
-		frame_switch_subregion(frame, sub);
-	}else{
-		unmap_region(sub);
-		draw_frame_bar(frame, TRUE);
-	}
-
-}
-
-
-void frame_attach_sub(WFrame *frame, WRegion *sub, int flags)
-{
-	region_attach_sub((WRegion*)frame, sub, flags);
-	/*
-	WWinGeomParams params;
-
-	frame_sub_params(frame, &params);
-	detach_reparent_region(sub, params);
-	
-	frame_do_attach(frame, sub, flags);
-	 */
-}
-
-
-void frame_move_subs(WFrame *dest, WFrame *src)
-{
-	WRegion *sub, *next, *cur;
-	
-	cur=src->current_sub;
-	
-	for(sub=firstreg_ni(src); sub!=NULL; sub=next){
-		next=nextreg_ni(src, sub);
-		frame_attach_sub(dest, sub,
-						 sub==cur ? REGION_ATTACH_SWITCHTO : 0);
-	}
-}
-
-
-void frame_fit_subs(WFrame *frame)
-{
-	WRectangle geom;
-	WRegion *sub;
-	
-	frame_sub_geom(frame, &geom);
-	
-	FOR_ALL_TYPED(frame, sub, WRegion){
-		fit_region(sub, geom);
-	}
-}
-
-
-static void frame_do_detach(WFrame *frame, WRegion *sub)
-{
-	WRegion *next=NULL;
-
-	if(frame->tab_pressed_sub==sub)
-		frame->tab_pressed_sub=NULL;
-	
-	if(frame->current_sub==sub){
-		next=prevreg_ni(frame, sub);
-		if(next==NULL)
-			next=nextreg_ni(frame, sub);
-		frame->current_sub=NULL;
-	}
-	
-	unlink_thing((WThing*)sub);
-	frame->sub_count--;
-	
-	if(wglobal.opmode!=OPMODE_DEINIT){
-		frame_recalc_bar(frame);
-		if(next!=NULL)
-			frame_switch_subregion(frame, next);
-		else
-			draw_frame_bar(frame, TRUE);
-	}
-
-	if(REGION_LABEL(sub)!=NULL){
-		free(REGION_LABEL(sub));
-		REGION_LABEL(sub)=NULL;
-	}
-}
-
-
-static void frame_remove_sub(WFrame *frame, WRegion *sub)
-{
-	if(frame->current_input==sub){
-		frame->current_input=NULL;
-		if(REGION_IS_ACTIVE(frame))
-			set_focus((WRegion*)frame);
-	}else{
-		frame_do_detach(frame, sub);
-	}
-}
-
-
 /*}}}*/
 
 
@@ -827,21 +764,21 @@ WRegion *frame_current_input(WFrame *frame)
 WRegion *frame_attach_input_new(WFrame *frame, WRegionCreateFn *fn,
 								void *fnp)
 {
-	WWinGeomParams params;
+	WRectangle geom;
 	WRegion *sub;
 	
 	if(frame->current_input!=NULL)
 		return NULL;
 	
-	frame_sub_params(frame, &params);
-	
-	sub=fn(SCREEN_OF(frame), params, fnp);
+	frame_managed_geom(frame, &geom);
+	sub=fn((WRegion*)frame, geom, fnp);
 
+	if(sub==NULL)
+		return NULL;
+	
 	frame->current_input=sub;
-	
-	if(sub!=NULL)
-		link_thing((WThing*)frame, (WThing*)sub);
-	
+	region_set_manager(sub, (WRegion*)frame, NULL);
+
 	return sub;
 }
 
@@ -861,7 +798,7 @@ void frame_attach_tagged(WFrame *frame)
 			warn("Cannot attach tagged region: ancestor");
 			continue;
 		}
-		frame_attach_sub(frame, reg, 0);
+		region_add_managed((WRegion*)frame, reg, 0);
 	}
 }
 
@@ -893,11 +830,12 @@ void frame_move_current_tab_right(WFrame *frame)
 	
 	if((reg=frame->current_sub)==NULL)
 		return;
-	if((next=nextreg_ni(frame, reg))==NULL)
+	if((next=NEXT_MANAGED(frame->managed_list, reg))==NULL)
 		return;
 	
-	unlink_thing((WThing*)reg);
-	link_thing_after((WThing*)next, (WThing*)reg);
+	UNLINK_ITEM(frame->managed_list, reg, mgr_next, mgr_prev);
+	LINK_ITEM_AFTER(frame->managed_list, next, reg, mgr_next, mgr_prev);
+	
 	draw_frame_bar(frame, TRUE);
 }
 
@@ -908,13 +846,57 @@ void frame_move_current_tab_left(WFrame *frame)
 	
 	if((reg=frame->current_sub)==NULL)
 		return;
-	if((prev=prevreg_ni(frame, reg))==NULL)
+	if((prev=PREV_MANAGED(frame->managed_list, reg))==NULL)
 		return;
-	
-	unlink_thing((WThing*)reg);
-	link_thing_before((WThing*)prev, (WThing*)reg);
+
+	UNLINK_ITEM(frame->managed_list, reg, mgr_next, mgr_prev);
+	LINK_ITEM_BEFORE(frame->managed_list, prev, reg, mgr_next, mgr_prev);
+
 	draw_frame_bar(frame, TRUE);
 }
+
+/*}}}*/
+
+
+/*{{{ Save/load */
+
+
+static bool frame_save_to_file(WFrame *frame, FILE *file, int lvl)
+{
+	begin_saved_region((WRegion*)frame, file, lvl);
+	save_indent_line(file, lvl);
+	fprintf(file, "target_id %d\n", frame->target_id);
+	end_saved_region((WRegion*)frame, file, lvl);
+	return TRUE;
+}
+
+
+static int load_target_id;
+
+
+static bool opt_target_id(Tokenizer *tokz, int n, Token *toks)
+{
+	load_target_id=TOK_LONG_VAL(&(toks[1]));
+	return TRUE;
+}
+
+
+static ConfOpt frame_opts[]={
+	{"target_id", "l", opt_target_id, NULL},
+	END_CONFOPTS
+};
+
+
+WRegion *frame_load(WRegion *par, WRectangle geom, Tokenizer *tokz)
+{
+	load_target_id=0;
+	
+	if(!parse_config_tokz(tokz, frame_opts))
+		return NULL;
+	
+	return (WRegion*)create_frame(par, geom, load_target_id, 0);
+}
+
 
 /*}}}*/
 

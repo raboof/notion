@@ -19,16 +19,21 @@ DECLOBJ(WViewport){
 	int id;
 	Atom atom_workspace;
 	
-	int sub_count;
-	WRegion *current_sub;
+	int ws_count;
+	WRegion *ws_list;
+	WRegion *current_ws;
 };
 
 
 extern WViewport *create_viewport(WScreen *scr, int id, WRectangle geom);
 
-extern void viewport_switch_nth(WViewport *vp, uint n);
-extern void viewport_switch_next(WViewport *vp);
-extern void viewport_switch_prev(WViewport *vp);
+extern void viewport_display_nth(WViewport *vp, uint n);
+extern void viewport_display_next(WViewport *vp);
+extern void viewport_display_prev(WViewport *vp);
+
+extern void switch_ws_nth(uint n);
+extern void switch_ws_next();
+extern void switch_ws_prev();
 
 extern WViewport *viewport_of(WRegion *reg);
 
@@ -41,5 +46,8 @@ extern WViewport *find_viewport_id(int id);
 extern void goto_viewport_id(int id);
 extern void goto_next_viewport();
 extern void goto_prev_viewport();
+
+
+extern void viewport_add_managed_doit(WViewport *vp, WRegion *reg, int flags);
 
 #endif /* WMCORE_VIEWPORT_H */

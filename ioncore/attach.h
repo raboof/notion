@@ -13,24 +13,25 @@
 
 #define REGION_ATTACH_SWITCHTO	0x0001
 
-typedef WRegion *WRegionCreateFn(WScreen *scr, WWinGeomParams params,
-								 void *fnp);
+typedef WRegion *WRegionCreateFn(WRegion *parent, WRectangle geom, void *fnp);
 								 
-DYNFUN void region_do_attach_params(const WRegion *reg, WWinGeomParams *params);
-DYNFUN void region_do_attach(WRegion *reg, WRegion *sub, int flags);
+DYNFUN void region_add_managed_params(const WRegion *reg, WRegion **par,
+									  WRectangle *geom);
+DYNFUN void region_add_managed_doit(WRegion *reg, WRegion *sub, int flags);
 
-extern bool region_supports_attach(WRegion *reg);
-extern WRegion *region_attach_new(WRegion *reg, WRegionCreateFn *fn, void
-								  *fnp, int flags);
-extern bool region_attach_sub(WRegion *reg, WRegion *sub, int flags);
+extern bool region_supports_add_managed(WRegion *reg);
+extern WRegion *region_add_managed_new(WRegion *reg, WRegionCreateFn *fn,
+									   void *fnp, int flags);
+extern bool region_add_managed(WRegion *reg, WRegion *sub, int flags);
 
-DYNFUN WRegion *region_do_find_new_home(WRegion *reg);
-extern WRegion *default_do_find_new_home(WRegion *reg);
-extern WRegion *region_find_new_home(WRegion *reg);
+/* */
 
-extern bool region_move_subregions(WRegion *dest, WRegion *src);
-extern bool region_move_clientwins(WRegion *dest, WRegion *src);
-extern bool region_rescue_subregions(WRegion *reg);
-extern bool region_rescue_clientwins(WRegion *reg);
+DYNFUN WRegion *region_do_find_new_manager(WRegion *reg);
+extern WRegion *default_do_find_new_manager(WRegion *reg);
+extern WRegion *region_find_new_manager(WRegion *reg);
+
+extern bool region_move_managed_on_list(WRegion *dest, WRegion *src,
+										WRegion *list);
+extern bool region_rescue_managed_on_list(WRegion *reg, WRegion *list);
 
 #endif /* WMCORE_ATTACH_H */

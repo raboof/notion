@@ -18,9 +18,7 @@ extern WFrame *find_frame_at(WWorkspace *ws, int x, int y);
 extern void split(WRegion *reg, const char *str);
 extern void split_empty(WRegion *reg, const char *str);
 extern void split_top(WWorkspace *ws, const char *str);
-
-extern void destroy_frame(WFrame *frame);
-extern void closedestroy(WFrame *frame);
+extern void frame_close(WFrame *frame);
 
 #endif /* ION_SPLITFRAME_H */
 

@@ -20,6 +20,7 @@
 #include "frame.h"
 #include "split.h"
 #include "splitframe.h"
+#include "bindmaps.h"
 
 
 IMPLOBJ(WWsSplit, WObj, NULL, NULL, NULL)
@@ -397,9 +398,9 @@ void resize_tmp(const WResizeTmp *tmp)
 }
 
 
-void workspace_request_sub_geom(WWorkspace *ws, WRegion *sub,
-								WRectangle geom, WRectangle *geomret,
-								bool tryonly)
+void workspace_request_managed_geom(WWorkspace *ws, WRegion *sub,
+									WRectangle geom, WRectangle *geomret,
+									bool tryonly)
 {
 	int hprimn=ANY, vprimn=ANY;
 	WResizeTmp tmp;
@@ -445,7 +446,7 @@ void workspace_request_sub_geom(WWorkspace *ws, WRegion *sub,
 /*{{{ Split */
 
 
-typedef WRegion *WSplitCreate(WScreen *scr, WWinGeomParams params);
+typedef WRegion *WSplitCreate(WRegion *parent, WRectangle geom);
 
 
 WWsSplit *create_split(int dir, WObj *tl, WObj *br, WRectangle geom)
@@ -478,7 +479,7 @@ static WRegion *do_split_at(WWorkspace *ws, WObj *obj, int dir, int primn,
 	WRectangle geom;
 	WRegion *nreg;
 	WResizeTmp rtmp;
-	WWinGeomParams params;
+	WRegion *par;
 	
 	assert(obj!=NULL);
 	
@@ -528,16 +529,17 @@ static WRegion *do_split_at(WWorkspace *ws, WObj *obj, int dir, int primn,
 		geom.w=sn;
 	}
 	
-	region_rect_params(&(ws->region), geom, &params);
+	par=FIND_PARENT1(ws, WRegion);
+	assert(par!=NULL);
 	
-	nreg=fn(SCREEN_OF(ws), params);
+	nreg=fn(par, geom);
 	
 	if(nreg==NULL){
 		free(nsplit);
 		return NULL;
 	}
 	
-	workspace_add_sub(ws, nreg);
+	workspace_add_managed(ws, nreg);
 	
 	/* Now that everything's ok, resize (and move) the original
 	 * obj.
@@ -580,11 +582,10 @@ static WRegion *do_split_at(WWorkspace *ws, WObj *obj, int dir, int primn,
 WRegion *split_reg(WRegion *reg, int dir, int primn, int minsize,
 				   WSplitCreate *fn)
 {
-	WWorkspace *ws=FIND_PARENT(reg, WWorkspace);
+	WRegion *mgr=REGION_MANAGER(reg);
+	assert(mgr!=NULL && WTHING_IS(mgr, WWorkspace));
 	
-	assert(ws!=NULL);
-	
-	return do_split_at(ws, (WObj*)reg, dir, primn, minsize, fn);
+	return do_split_at((WWorkspace*)mgr, (WObj*)reg, dir, primn, minsize, fn);
 }
 
 
@@ -748,28 +749,64 @@ static void goto_reg(WRegion *reg)
 		goto_region(reg);
 }
 
+/*
+static void check_mgr(WRegion *reg)
+{
+	assert(REGION_MANAGER(reg)!=NULL && 
+		   WTHING_IS(REGION_MANAGER(reg), WWorkspace));
+}
+
+
+void goto_above(WRegion *reg)
+{
+	check_mgr(reg);
+	goto_reg(up_or_left(reg, VERTICAL));
+}
+
+
+void goto_below(WRegion *reg)
+{
+	check_mgr(reg);
+	goto_reg(right_or_down(reg, VERTICAL));
+}
+
+
+void goto_left(WRegion *reg)
+{
+	check_mgr(reg);
+	goto_reg(up_or_left(reg, HORIZONTAL));
+}
+
+
+void goto_right(WRegion *reg)
+{
+	check_mgr(reg);
+	goto_reg(right_or_down(reg, HORIZONTAL));
+}
+*/
+
 
 void workspace_goto_above(WWorkspace *ws)
 {
-	goto_reg(up_or_left(REGION_ACTIVE_SUB(ws), VERTICAL));
+	goto_reg(up_or_left(workspace_find_current(ws), VERTICAL));
 }
 
 
 void workspace_goto_below(WWorkspace *ws)
 {
-	goto_reg(right_or_down(REGION_ACTIVE_SUB(ws), VERTICAL));
+	goto_reg(right_or_down(workspace_find_current(ws), VERTICAL));
 }
 
 
 void workspace_goto_left(WWorkspace *ws)
 {
-	goto_reg(up_or_left(REGION_ACTIVE_SUB(ws), HORIZONTAL));
+	goto_reg(up_or_left(workspace_find_current(ws), HORIZONTAL));
 }
 
 
 void workspace_goto_right(WWorkspace *ws)
 {
-	goto_reg(right_or_down(REGION_ACTIVE_SUB(ws), HORIZONTAL));
+	goto_reg(right_or_down(workspace_find_current(ws), HORIZONTAL));
 }
 
 
@@ -779,19 +816,25 @@ void workspace_goto_right(WWorkspace *ws)
 /*{{{ Remove/add */
 
 
-void workspace_add_sub(WWorkspace *ws, WRegion *reg)
+void workspace_add_managed(WWorkspace *ws, WRegion *reg)
 {
-	link_thing((WThing*)ws, (WThing*)reg);
+	region_set_manager(reg, (WRegion*)ws, &(ws->managed_list));
+	
+	region_add_bindmap_owned(reg, &ion_workspace_bindmap, TRUE, (WRegion*)ws);
 	
 	if(REGION_IS_MAPPED(ws))
 		map_region(reg);
 }
 
 
-void workspace_remove_sub(WWorkspace *ws, WRegion *reg)
+void workspace_remove_managed(WWorkspace *ws, WRegion *reg)
 {
 	WWsSplit *split;
 	
+	region_unset_manager(reg, (WRegion*)ws, &(ws->managed_list));
+
+	region_remove_bindmap_owned(reg, &ion_workspace_bindmap, (WRegion*)ws);
+
 	split=SPLIT_OF(reg);
 	
 	if(split!=NULL){
@@ -865,7 +908,7 @@ bool remove_split(WWorkspace *ws, WWsSplit *split)
 /*{{{ sub_activated */
 
 
-void workspace_sub_activated(WWorkspace *ws, WRegion *reg)
+void workspace_managed_activated(WWorkspace *ws, WRegion *reg)
 {
 	WWsSplit *split=SPLIT_OF(reg);
 	WObj *prev=(WObj*)reg;
@@ -881,17 +924,17 @@ void workspace_sub_activated(WWorkspace *ws, WRegion *reg)
 /*}}}*/
 
 
-/*{{{ do_find_new_home */
+/*{{{ do_find_new_manager */
 
 
-static WRegion *do_find_nh(WObj *ptr, int primn)
+static WRegion *do_find_nmgr(WObj *ptr, int primn)
 {
 	WRegion *reg;
 	WWsSplit *split;
 	
 	do{
 		if(WOBJ_IS(ptr, WRegion)){
-			return (region_supports_attach((WRegion*)ptr)
+			return (region_supports_add_managed((WRegion*)ptr)
 					? (WRegion*)ptr
 					: NULL);
 		}
@@ -902,9 +945,9 @@ static WRegion *do_find_nh(WObj *ptr, int primn)
 		split=(WWsSplit*)ptr;
 		
 		if(primn==TOP_OR_LEFT)
-			reg=do_find_nh(split->tl, primn);
+			reg=do_find_nmgr(split->tl, primn);
 		else
-			reg=do_find_nh(split->br, primn);
+			reg=do_find_nmgr(split->br, primn);
 		
 		if(reg!=NULL)
 			return reg;
@@ -917,15 +960,15 @@ static WRegion *do_find_nh(WObj *ptr, int primn)
 }
 					  
 
-WRegion *workspace_find_new_home(WRegion *reg)
+WRegion *workspace_find_new_manager(WRegion *reg)
 {
 	WWsSplit *split=SPLIT_OF(reg);
 	
 	while(split!=NULL){
 		if(split->tl==(WObj*)reg)
-			reg=do_find_nh(split->br, TOP_OR_LEFT);
+			reg=do_find_nmgr(split->br, TOP_OR_LEFT);
 		else
-			reg=do_find_nh(split->tl, BOTTOM_OR_RIGHT);
+			reg=do_find_nmgr(split->tl, BOTTOM_OR_RIGHT);
 		
 		if(reg!=NULL)
 			return reg;
@@ -937,18 +980,18 @@ WRegion *workspace_find_new_home(WRegion *reg)
 }
 
 
-WRegion *workspace_do_find_new_home(WRegion *reg)
+WRegion *workspace_do_find_new_manager(WRegion *reg)
 {
 	WWsSplit *split=SPLIT_OF(reg);
 	WRegion *r;
 	
 	if(split!=NULL){
-		r=workspace_find_new_home(reg);
+		r=workspace_find_new_manager(reg);
 		if(r!=NULL)
 			return r;
 	}
 		
-	return default_do_find_new_home(reg);
+	return default_do_find_new_manager(reg);
 }
 
 

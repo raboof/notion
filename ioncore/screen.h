@@ -52,9 +52,10 @@ DECLOBJ(WScreen){
 };
 
 
-extern Window create_simple_window_bg(WScreen *scr, WWinGeomParams params,
-									  WColor background);
-extern Window create_simple_window(WScreen *scr, WWinGeomParams params);
+extern Window create_simple_window_bg(const WScreen *scr, Window par,
+									  WRectangle geom, WColor background);
+extern Window create_simple_window(const WScreen *scr, Window par,
+								   WRectangle geom);
 
 extern WScreen *manage_screen(int xscr);
 extern void deinit_screen(WScreen *scr);

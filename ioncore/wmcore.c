@@ -64,8 +64,6 @@ static void initialize_global()
 	wglobal.active_screen=NULL;
 	wglobal.previous_screen=NULL;
 
-	wglobal.ggrab_top=NULL;
-	
 	wglobal.input_mode=INPUT_NORMAL;
 	wglobal.opmode=OPMODE_INIT;
 	wglobal.previous_protect=0;
@@ -178,9 +176,8 @@ void wmcore_deinit()
 	unload_modules();
 	
 	FOR_ALL_SCREENS(scr){
-		/* TODO */
 		FOR_ALL_TYPED(scr, vp, WViewport){
-			write_workspaces(vp);
+			save_workspaces(vp);
 		}
 		deinit_screen(scr);
 	}

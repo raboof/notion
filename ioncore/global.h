@@ -66,8 +66,6 @@ DECLSTRUCT(WGlobal){
 	WDrawDragwinFn *draw_dragwin;
 	WRegion *draw_dragwin_arg;
 	
-	WRegion *ggrab_top;
-	
 	/* We could have a display WRegion but the screen-link could impose
 	 * some problems so these are handled as a special case.
 	 */

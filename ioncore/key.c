@@ -39,7 +39,7 @@ static void insstr(WWindow *wwin, XKeyEvent *ev)
 	
 	if(n<=0 || *(uchar*)buf<32)
 		return;
-	
+
 	window_insstr(wwin, buf, n);
 }
 
@@ -112,27 +112,28 @@ static void waitrelease(WScreen *screen)
 }
 
 
-static void kgrab_binding_and_reg(WBinding **binding_ret, WRegion **reg_ret,
+static void kgrab_binding_and_reg(WBinding **binding_ret,
+								  WRegion **binding_owner_ret,
 								  WRegion *reg, XKeyEvent *ev)
 {
 	WBinding *binding;
 	WSubmapState *subchain;
 	
 	*binding_ret=NULL;
-	*reg_ret=reg;
+	*binding_owner_ret=reg;
 	
-	subchain=(((WRegion*)SCREEN_OF(reg))->submapstat.key==None
+	subchain=&(reg->submapstat);
+		/*(((WRegion*)SCREEN_OF(reg))->submapstat.key==None
 			  ? NULL
-			  : &(((WRegion*)SCREEN_OF(reg))->submapstat));
+			  : &(((WRegion*)SCREEN_OF(reg))->submapstat));*/
 	
 	while(reg!=NULL){
-		binding=region_lookup_keybinding(reg, ev, TRUE, subchain);
+		binding=region_lookup_keybinding(reg, ev, subchain, binding_owner_ret);
 		if(binding!=NULL){
 			*binding_ret=binding;
-			*reg_ret=reg;
 			return;
 		}
-		if(IS_SCREEN(reg))
+		if(WTHING_IS(reg, WScreen))
 			break;
 		reg=FIND_PARENT1(reg, WRegion);
 	}
@@ -160,15 +161,14 @@ static bool add_sub(WRegion *reg, uint key, uint state)
 static bool submapgrab_handler(WRegion *reg, XEvent *ev)
 {
 	WBinding *binding=NULL;
-	WRegion *rreg=NULL;
+	WRegion *binding_owner=NULL;
 	
 	if(ev->type==KeyRelease)
 		return FALSE;
 	
-	kgrab_binding_and_reg(&binding, &rreg, wglobal.ggrab_top, &ev->xkey);
+	kgrab_binding_and_reg(&binding, &binding_owner, reg, &ev->xkey);
 
-	/* if it is just a modifier, then return
-	 */
+	/* if it is just a modifier, then return. */
 	if(binding==NULL){
 		if(ismod(ev->xkey.keycode))
 			return FALSE;
@@ -187,9 +187,9 @@ static bool submapgrab_handler(WRegion *reg, XEvent *ev)
 	
 	clear_subs(reg);
 	
-	return dispatch_binding(rreg, binding, &ev->xkey);
+	return dispatch_binding(binding_owner, binding, &ev->xkey);
 }
-    
+
 
 static void submapgrab(WRegion *reg)
 {
@@ -199,52 +199,58 @@ static void submapgrab(WRegion *reg)
 
 void handle_keypress(XKeyEvent *ev)
 {
-	WRegion *reg=NULL, *rreg=NULL;
-	WBinding *binding=NULL;
+	/*
 	bool grabit=FALSE;
 	bool topmap=TRUE;
+	*/
+	
+	WBinding *binding=NULL;
+	WRegion *reg=NULL, *oreg=NULL, *binding_owner=NULL;
 	
 	/* Lookup the object that should receive the event and
 	 * the action.
 	 */
 
-	reg=(WRegion*)FIND_WINDOW(ev->window);
-	
-	if(reg==NULL || !WTHING_IS(reg, WWindow))
+	if(ev->subwindow!=None)
+		reg=(WRegion*)FIND_WINDOW(ev->subwindow);
+	if(reg==NULL)
+		reg=(WRegion*)FIND_WINDOW(ev->window);
+	if(reg==NULL)
+		return;
+	oreg=reg;
+	/*evreg=(WRegion*)FIND_WINDOW(ev->window);
+
+	if(evreg==NULL || !WTHING_IS(evreg, WWindow))
 		return;
 
-	if(IS_SCREEN(reg)){
-		/* Got to handle grabbed keys */
-		kgrab_binding_and_reg(&binding, &rreg, wglobal.ggrab_top, ev);
-		grabit=TRUE;
-	}else{
-		topmap=(reg->submapstat.key==None);
-		rreg=reg;
-		binding=region_lookup_keybinding(reg, ev, FALSE,
-										 topmap ? NULL : &(reg->submapstat));
-	}
+	if(reg==NULL)
+		reg=evreg*/
 	
-	/* Is it a submap? Then handle it accordingly...
-	 */
-	if(binding!=NULL && binding->submap!=NULL){
-		if(add_sub(reg, ev->keycode, ev->state)){
-			if(grabit)
-				submapgrab(reg); /* reg==screen */
-		}else{	
-			if(!topmap)
-				clear_subs(reg);
-		}
-		return;
-	}
+	/*if(reg==NULL || !WTHING_IS(reg, WWindow))
+		return;*/
 
-	if(!topmap)
-		clear_subs(reg);
+	do{
+		binding=region_lookup_keybinding(reg, ev, NULL, &binding_owner);
+		if(binding!=NULL)
+			break;
+		/*if(reg==evreg)
+			break;*/
+		if(WTHING_IS(reg, WScreen))
+			break;
+		reg=FIND_PARENT1(reg, WRegion);
+	}while(reg!=NULL);
+
+	/*fprintf(stderr, "key: %s %s %d\n",
+			WOBJ_TYPESTR(reg), WOBJ_TYPESTR(binding_owner), binding);*/
 	
-	/* Call the handler.
-	 */
 	if(binding!=NULL){
-		dispatch_binding(rreg, binding, ev);
-	}else if(topmap && WTHING_IS(reg, WWindow)){
-		insstr((WWindow*)reg, ev);
+		if(binding->submap!=NULL){
+			if(add_sub(reg, ev->keycode, ev->state))
+				submapgrab(reg);
+		}else{
+			dispatch_binding(binding_owner, binding, ev);
+		}
+	}else if(WTHING_IS(oreg, WWindow)){
+		insstr((WWindow*)oreg, ev);
 	}
 }

@@ -13,6 +13,7 @@
 #include "common.h"
 #include "function.h"
 #include "obj.h"
+#include "region.h"
 
 
 #define ACT_KEYPRESS 		0
@@ -31,20 +32,30 @@
 INTRSTRUCT(WBinding)
 INTRSTRUCT(WBindingSimple)
 INTRSTRUCT(WBindmap)
+INTRSTRUCT(WRegBindingInfo)
 
 
 DECLSTRUCT(WBinding){
-	uint kcb;	/* keycode or button */
+	uint kcb; /* keycode or button */
 	uint state;
 	uint act;
 	int area;
 	bool waitrel;
 	WBindmap *submap;
 	char *cmd;
-	/*WFunction *func;
-	int nargs;
-	Token args[BINDING_MAXARGS];*/
 };
+
+
+
+DECLSTRUCT(WRegBindingInfo){
+	WBindmap *bindmap;
+	bool grab;
+	WRegBindingInfo *next, *prev;
+	WRegBindingInfo *bm_next, *bm_prev;
+	WRegion *reg;
+	WRegion *owner;
+};
+
 
 
 DECLSTRUCT(WBindingSimple){
@@ -59,13 +70,14 @@ DECLSTRUCT(WBindmap){
 	uint confdefmod;
 	WBinding *bindings;
 	WBindmap *parent;
-	int ggrab_cntr;
+	WRegBindingInfo *rbind_list;
 };
+
 
 extern void init_bindings();
 extern WBindmap *create_bindmap();
 extern void destroy_bindmap(WBindmap *bindmap);
-extern void destroy_binding(WBinding *binding);
+extern void deinit_binding(WBinding *binding);
 extern bool add_binding(WBindmap *bindmap, const WBinding *binding);
 extern WBinding *lookup_binding(WBindmap *bindmap, int act,
 								uint state, uint kcb);

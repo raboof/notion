@@ -15,6 +15,7 @@
 
 static WWatch *sq_watch=NULL;
 static WFunclist *tmp_funclist=NULL;
+static WRegion *commands_at_next=NULL;
 
 /* We don't want to refer to destroyed things. */
 static void sq_watch_handler(WWatch *watch, WThing *t)
@@ -23,6 +24,24 @@ static void sq_watch_handler(WWatch *watch, WThing *t)
 	
 	if(t2!=NULL)
 		setup_watch(watch, t2, sq_watch_handler);
+}
+
+
+void commands_at_top()
+{
+	WRegion *reg;
+	
+	assert(sq_watch->thing!=NULL);
+	
+	if(!WTHING_IS(sq_watch->thing, WRegion))
+		return;
+	
+	reg=(WRegion*)sq_watch->thing;
+	
+	while(reg->active_sub!=NULL)
+			reg=reg->active_sub;
+	
+	commands_at_next=reg;
 }
 
 
@@ -53,11 +72,15 @@ static bool opt_default(Tokenizer *tokz, int n, Token *toks)
 	
 		func->callhnd(thing, func, n-1, &(toks[1]));
 	
-		if(wglobal.focus_next!=NULL){
+		if(commands_at_next!=NULL){
+			setup_watch(sq_watch, (WThing*)commands_at_next,
+						sq_watch_handler);
+			commands_at_next=NULL;
+		}else if(wglobal.focus_next!=NULL){
 			setup_watch(sq_watch, (WThing*)wglobal.focus_next,
 						sq_watch_handler);
 		}
-	
+
 		return TRUE;
 	}
 

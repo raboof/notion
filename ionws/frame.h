@@ -37,14 +37,15 @@ DECLOBJ(WFrame){
 	int saved_w, saved_h;
 	int saved_x, saved_y;
 	
-	int sub_count;
+	int managed_count;
+	WRegion *managed_list;
 	WRegion *current_sub;
 	WRegion *current_input;
 	WRegion *tab_pressed_sub;
 };
 
 
-extern WFrame *create_frame(WScreen *scr, WWinGeomParams params,
+extern WFrame *create_frame(WRegion *parent, WRectangle geom,
 							int id, int flags);
 
 extern void frame_bar_geom(const WFrame *frame, WRectangle *geom);
@@ -64,8 +65,8 @@ extern void frame_switch_prev(WFrame *frame);
 
 extern void frame_attach_sub(WFrame *frame, WRegion *sub, int flags);
 /*extern void frame_detach_sub(WFrame *frame, WRegion *sub);*/
-extern void frame_move_subs(WFrame *dest, WFrame *src);
-extern void frame_fit_subs(WFrame *frame);
+extern void frame_move_managed(WFrame *dest, WFrame *src);
+extern void frame_fit_managed(WFrame *frame);
 
 extern void activate_frame(WFrame *frame);
 extern void deactivate_frame(WFrame *frame);
@@ -75,5 +76,7 @@ extern void frame_attach_tagged(WFrame *frame);
 
 extern void frame_move_current_tab_right(WFrame *frame);
 extern void frame_move_current_tab_left(WFrame *frame);
+
+extern WRegion *frame_nth_managed(WFrame *frame, uint n);
 
 #endif /* ION_FRAME_H */

@@ -11,7 +11,6 @@
 #include <wmcore/functionp.h>
 #include <wmcore/clientwin.h>
 #include <wmcore/screen.h>
-#include <wmcore/close.h>
 #include <wmcore/commandsq.h>
 #include <wmcore/region.h>
 #include <wmcore/objp.h>
@@ -28,12 +27,12 @@
 /*{{{ Call handlers */
 
 
-#define WSCURRENT_HANDLE(HND, T, G)               \
-	WRegion *reg;                                 \
-	typedef void Func(WThing*, T);                \
-	assert(WTHING_IS(thing, WWorkspace));         \
-	reg=REGION_ACTIVE_SUB((WRegion*)thing);       \
-	if(reg!=NULL)                                 \
+#define WSCURRENT_HANDLE(HND, T, G)                 \
+	WRegion *reg;                                   \
+	typedef void Func(WThing*, T);                  \
+	assert(WTHING_IS(thing, WWorkspace));           \
+	reg=workspace_find_current((WWorkspace*)thing); \
+	if(reg!=NULL)                                   \
 		((Func*)func->fn)((WThing*)reg, G(args));
 
 void callhnd_wscurrent_void(WThing *thing, WFunction *func,
@@ -42,7 +41,7 @@ void callhnd_wscurrent_void(WThing *thing, WFunction *func,
 	WRegion *reg;
 	typedef void Func(WThing*);
 	assert(WTHING_IS(thing, WWorkspace));
-	reg=REGION_ACTIVE_SUB((WRegion*)thing);
+	reg=workspace_find_current((WWorkspace*)thing);
 	if(reg!=NULL)
 		((Func*)func->fn)((WThing*)reg);
 }
@@ -93,14 +92,14 @@ static void frame_toggle_sub_tag(WFrame *frame)
 WFunclist ion_workspace_funclist=INIT_FUNCLIST;
 
 static WFunction ion_workspace_funtab[]={
-	FN_VOID(generic, WWorkspace,	"goto_above",		workspace_goto_above),
-	FN_VOID(generic, WWorkspace,	"goto_below",		workspace_goto_below),
-	FN_VOID(generic, WWorkspace,	"goto_right",		workspace_goto_right),
-	FN_VOID(generic, WWorkspace,	"goto_left",		workspace_goto_left),
+	FN_VOID(generic, WWorkspace,	"ionws_goto_above",		workspace_goto_above),
+	FN_VOID(generic, WWorkspace,	"ionws_goto_below",		workspace_goto_below),
+	FN_VOID(generic, WWorkspace,	"ionws_goto_right",		workspace_goto_right),
+	FN_VOID(generic, WWorkspace,	"ionws_goto_left",		workspace_goto_left),
 	
-	FN(s,	generic, WWorkspace,	"split_top",		split_top),
-	FN(s,	wscurrent, WWorkspace,	"split",			split),
-	FN(s,	wscurrent, WWorkspace,	"split_empty", 		split_empty),
+	FN(s,	generic, WWorkspace,	"ionws_split_top",		split_top),
+	FN(s,	wscurrent, WWorkspace,	"ionws_split",			split),
+	FN(s,	wscurrent, WWorkspace,	"ionws_split_empty", 	split_empty),
 	
 	/*
 	FN_VOID(wscurrent, WWorkspace,	"resize_vert",		resize_vert),
@@ -119,32 +118,33 @@ static WFunction ion_workspace_funtab[]={
 WFunclist ion_frame_funclist=INIT_FUNCLIST;
 
 static WFunction ion_frame_funtab[]={
-	FN(l,	generic, WFrame,	"switch_nth",		frame_switch_nth),
-	FN_VOID(generic, WFrame, 	"switch_next",		frame_switch_next),
-	FN_VOID(generic, WFrame, 	"switch_prev",		frame_switch_prev),
-	FN_VOID(generic, WFrame,	"attach_tagged",	frame_attach_tagged),
-	FN_VOID(generic, WFrame,	"toggle_sub_tag",	frame_toggle_sub_tag),
-	FN_VOID(generic, WFrame,	"destroy_frame",	region_request_close),
-/*	FN_VOID(generic, WFrame,	"closedestroy",		close_propagate),*/
-	FN_VOID(generic, WFrame,	"close_main",		close_sub),
-	FN_VOID(generic, WRegion,	"switch_tab",		frame_switch_tab),
+	FN(l,	generic, WFrame,	"frame_switch_nth",		frame_switch_nth),
+	FN_VOID(generic, WFrame, 	"frame_switch_next",	frame_switch_next),
+	FN_VOID(generic, WFrame, 	"frame_switch_prev",	frame_switch_prev),
+	FN_VOID(generic, WFrame,	"frame_attach_tagged",	frame_attach_tagged),
+	FN_VOID(generic, WFrame,	"frame_toggle_sub_tag",	frame_toggle_sub_tag),
+	FN_VOID(generic, WFrame,	"frame_close",			frame_close),
 
-	FN_VOID(generic, WRegion,	"resize_vert",		resize_vert),
-	FN_VOID(generic, WRegion,	"resize_horiz",		resize_horiz),
-	FN_VOID(generic, WFrame,	"maximize_vert", 	maximize_vert),
-	FN_VOID(generic, WFrame,	"maximize_horiz", 	maximize_horiz),
-	FN(l,	generic, WRegion,	"set_width",		set_width),
-	FN(l,	generic, WRegion,	"set_height",		set_height),
-	FN(d,	generic, WRegion,	"set_widthq",		set_widthq),
-	FN(d,	generic, WRegion,	"set_heightq",		set_heightq),
+	FN_VOID(generic, WRegion,	"frame_resize_vert",	resize_vert),
+	FN_VOID(generic, WRegion,	"frame_resize_horiz",	resize_horiz),
+	FN_VOID(generic, WFrame,	"frame_maximize_vert", 	maximize_vert),
+	FN_VOID(generic, WFrame,	"frame_maximize_horiz", maximize_horiz),
+	FN(l,	generic, WRegion,	"frame_set_width",		set_width),
+	FN(l,	generic, WRegion,	"frame_set_height",		set_height),
+	FN(d,	generic, WRegion,	"frame_set_widthq",		set_widthq),
+	FN(d,	generic, WRegion,	"frame_set_heightq",	set_heightq),
 
 	/* mouse move/resize and tab drag */
-	FN_VOID(generic, WFrame,	"p_resize",		p_resize_setup),
-	FN_VOID(generic, WRegion,	"p_tabdrag", 	p_tabdrag_setup),
+	FN_VOID(generic, WFrame,	"frame_p_resize",		p_resize_setup),
+	FN_VOID(generic, WRegion,	"frame_p_tabdrag", 		p_tabdrag_setup),
+	FN_VOID(generic, WRegion,	"frame_p_switch_tab",	frame_switch_tab),
 
 	FN_VOID(generic, WFrame,	"frame_move_current_tab_left", frame_move_current_tab_left),
 	FN_VOID(generic, WFrame,	"frame_move_current_tab_right", frame_move_current_tab_right),
 
+	/* Common functions */
+	FN_VOID(generic, WFrame,	"close",				frame_close),
+	
 	END_FUNTAB
 };
 

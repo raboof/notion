@@ -36,11 +36,12 @@ DECLOBJ(WClientWin){
 	int event_mask;
 	Window win;
 	WRectangle win_geom;
-	int x_off_cache, y_off_cache;
 	
 	int orig_bw;
 
 	Window transient_for;
+	
+	WRegion *transient_list;
 	
 	WClientWin *g_cwin_next, *g_cwin_prev;
 	
@@ -73,10 +74,9 @@ extern void clientwin_clear_target_id(WClientWin *cwin);
 extern void clientwin_handle_configure_request(WClientWin *cwin,
 											   XConfigureRequestEvent *ev);
 
-extern bool clientwin_attach_sub(WClientWin *cwin, WRegion *sub, int flags);
-
 extern bool clientwin_fullscreen_vp(WClientWin *cwin, WViewport *vp,
 									bool switchto);
+extern bool clientwin_toggle_fullscreen(WClientWin *cwin);
 extern bool clientwin_enter_fullscreen(WClientWin *cwin, bool switchto);
 
 extern void clientwin_broken_app_resize_kludge(WClientWin *cwin);

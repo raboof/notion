@@ -14,6 +14,7 @@
 #include "drawp.h"
 #include "imports.h"
 #include "conf-draw.h"
+#include "region.h"
 
 
 /*{{{ Primitives */

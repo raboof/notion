@@ -18,7 +18,7 @@ static DynFunTab window_dynfuntab[]={
 	{map_region, map_window},
 	{unmap_region, unmap_window},
 	{focus_region, focus_window},
-	{region_rect_params, window_rect_params},
+	/*{region_rect_params, window_rect_params},*/
 	{(DynFun*)reparent_region, (DynFun*)reparent_window},
 	{(DynFun*)region_restack, (DynFun*)window_restack},
 	{(DynFun*)region_lowest_win, (DynFun*)window_lowest_win},
@@ -64,11 +64,10 @@ void window_release(WWindow *wwin)
 /*{{{ Init, create */
 
 
-bool init_window(WWindow *wwin, WScreen *scr, Window win, WRectangle geom)
+bool init_window(WWindow *wwin, WWindow *parent, Window win, WRectangle geom)
 {
-	init_region(&wwin->region, scr, geom);
+	init_region(&(wwin->region), (WRegion*)parent, geom);
 	
-	wwin->flags=0;
 	wwin->win=win;
 #ifdef CF_XFT
 	wwin->draw=XftDrawCreate(wglobal.dpy, win, 
@@ -86,15 +85,17 @@ bool init_window(WWindow *wwin, WScreen *scr, Window win, WRectangle geom)
 }
 
 
-bool init_window_new(WWindow *p, WScreen *scr, WWinGeomParams params)
+bool init_window_new(WWindow *p, WWindow *parent, WRectangle geom)
 {
 	Window win;
 	
-	win=create_simple_window(scr, params);
+	win=create_simple_window(SCREEN_OF(parent), parent->win, geom);
+	
 	if(win==None)
 		return FALSE;
+	
 	/* init_window above will always succeed */
-	return init_window(p, scr, win, params.geom);
+	return init_window(p, parent, win, geom);
 }
 
 
@@ -151,56 +152,52 @@ WThing *find_window_t(Window win, const WObjDescr *descr)
 /*{{{ Region dynfuns */
 
 
-void window_rect_params(WWindow *wwin, WRectangle geom,
+/*void window_rect_params(WWindow *wwin, WRectangle geom,
 						WWinGeomParams *ret)
 {
 	ret->geom=geom;
 	ret->win=wwin->win;
 	ret->win_x=geom.x;
 	ret->win_y=geom.y;
-}
+}*/
 
 
-static bool reparent_or_fit_window(WWindow *wwin, WWinGeomParams params,
-								   bool rep)
+static void reparent_or_fit_window(WWindow *wwin, Window parwin,
+								   WRectangle geom)
 {
-	bool move=(REGION_GEOM(wwin).x!=params.geom.x ||
-			   REGION_GEOM(wwin).y!=params.geom.y);
+	bool move=(REGION_GEOM(wwin).x!=geom.x ||
+			   REGION_GEOM(wwin).y!=geom.y);
 
-	if(rep){
-		XReparentWindow(wglobal.dpy, wwin->win, params.win,
-						params.win_x, params.win_y);
-		XResizeWindow(wglobal.dpy, wwin->win, params.geom.w, params.geom.h);
+	if(parwin!=None){
+		XReparentWindow(wglobal.dpy, wwin->win, parwin, geom.x, geom.y);
+		XResizeWindow(wglobal.dpy, wwin->win, geom.w, geom.h);
 	}else{
-		XMoveResizeWindow(wglobal.dpy, wwin->win,
-						  params.win_x, params.win_y,
-						  params.geom.w, params.geom.h);
+		XMoveResizeWindow(wglobal.dpy, wwin->win, geom.x, geom.y,
+						  geom.w, geom.h);
 	}
 	
-	REGION_GEOM(wwin)=params.geom;
+	REGION_GEOM(wwin)=geom;
 
 	if(move)
 		notify_subregions_move(&(wwin->region));
-	
-	return TRUE;
 }
 
 
-bool reparent_window(WWindow *wwin, WWinGeomParams params)
+bool reparent_window(WWindow *wwin, WRegion *parent, WRectangle geom)
 {
-	return reparent_or_fit_window(wwin, params, TRUE);
+	if(!WTHING_IS(parent, WWindow) || !same_screen((WRegion*)wwin, parent))
+		return FALSE;
+	
+	region_detach((WRegion*)wwin);
+	region_set_parent((WRegion*)wwin, parent);
+	reparent_or_fit_window(wwin, ((WWindow*)parent)->win, geom);
+	return TRUE;
 }
 
 
 void fit_window(WWindow *wwin, WRectangle geom)
 {
-	WWinGeomParams params;
-	WRegion *par;
-	par=FIND_PARENT1(wwin, WRegion);
-	if(par!=NULL){
-		region_rect_params(par, geom, &params);
-		reparent_or_fit_window(wwin, params, FALSE);
-	}
+	reparent_or_fit_window(wwin, None, geom);
 }
 
 

@@ -19,7 +19,7 @@ LDFLAGS += $(MODULE_SUPPORT_LDFLAGS)
 
 OBJS=	bindmaps.o conf.o draw.o frame-pointer.o frame.o		\
 	funtabs.o main.o placement.o resize.o split.o splitframe.o	\
-	winprops.o workspace.o confws.o
+	winprops.o workspace.o
 
 EXT_OBJS= ../query/query.a ../wmcore/wmcore.a
 

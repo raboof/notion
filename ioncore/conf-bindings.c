@@ -146,7 +146,7 @@ static bool do_bind(Tokenizer *tokz, int n, Token *toks, int act, bool wr,
 	if(add_binding(tmp_bindmap, &binding))
 		return TRUE;
 
-	destroy_binding(&binding);
+	deinit_binding(&binding);
 	
 	tokz_warn(tokz, toks[0].line, "Unable to bind \"%s\" to \"%s\"", 
 			  TOK_STRING_VAL(&(toks[0])), TOK_STRING_VAL(&(toks[1])));
@@ -237,7 +237,7 @@ static bool opt_submap(Tokenizer *tokz, int n, Token *toks)
 		return TRUE;
 	}
 
-	destroy_binding(&binding);
+	deinit_binding(&binding);
 	
 	tokz_warn(tokz, toks[0].line, "Unable to bind \"%s\" to \"%s\"", 
 			  TOK_STRING_VAL(&(toks[1])), TOK_STRING_VAL(&(toks[2])));

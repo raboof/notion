@@ -22,9 +22,9 @@ OBJS=	binding.o conf-bindings.o conf-draw.o cursor.o draw.o event.o	\
 	obj.o pointer.o property.o readconfig.o screen.o signal.o	\
 	sizehint.o thing.o window.o wmcore.o xic.o selection.o		\
 	completehelp.o symlist.o clientwin.o colormap.o region.o	\
-	eventh.o winprops.o targetid.o attach.o resize.o close.o	\
-	defer.o grab.o wsreg.o commandsq.o readfds.o regbind.o		\
-	funtabs.o viewport.o tags.o
+	eventh.o winprops.o targetid.o attach.o resize.o defer.o grab.o \
+	wsreg.o commandsq.o readfds.o regbind.o	funtabs.o viewport.o 	\
+	tags.o names.o saveload.o
 
 
 TARGETS=wmcore.a

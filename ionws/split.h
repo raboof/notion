@@ -14,8 +14,8 @@
 INTROBJ(WWsSplit)
 INTRSTRUCT(WResizeTmp)
 
-#define SPLIT_OF(X) ((X)->uldata)
-		
+#define SPLIT_OF(X) ((X)->mgr_data)
+
 enum WSplitDir{
 	HORIZONTAL,
 	VERTICAL
@@ -56,7 +56,7 @@ extern int calcresize_window(WWindow *wwin, int dir, int prim, int nsize,
 extern void resize_tmp(const WResizeTmp *tmp);
 extern int tree_do_resize(WObj *node_, int dir, int npos, int nsize);
 
-extern WRegion *workspace_find_new_home(WRegion *reg);
+extern WRegion *workspace_find_new_manager(WRegion *reg);
 
 #endif /* ION_SPLIT_H */
 

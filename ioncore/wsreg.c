@@ -14,6 +14,7 @@
 #include "wsreg.h"
 #include "mwmhints.h"
 #include "objp.h"
+#include "names.h"
 
 
 /* This file contains the add_clientwin_default handler for managing
@@ -75,21 +76,21 @@ static bool add_transient(WClientWin *tfor, WClientWin *cwin,
 	}
 	
 	/* No parent workspace found that would want to handle transients.
-	 * tfor is probably a full screen client window so let's just attach
-	 * the transient to it like Ion normally does.
+	 * tfor is probably a full screen client window so let's just handle
+	 * the transient like Ion normally does.
 	 */
-	return clientwin_attach_sub(tfor, (WRegion*)cwin, 0);
+	return region_add_managed((WRegion*)tfor, (WRegion*)cwin, 0);
 }
 
 
 static WRegion *find_suitable_workspace(WViewport *vp)
 {
-	WRegion *r=REGION_ACTIVE_SUB(vp);
+	WRegion *r=vp->current_ws;
 	
 	if(r!=NULL && HAS_DYN(r, region_ws_add_clientwin))
 		return r;
 
-	FOR_ALL_TYPED(vp, r, WRegion){
+	FOR_ALL_MANAGED_ON_LIST(vp->ws_list, r){
 		if(HAS_DYN(r, region_ws_add_clientwin))
 			return r;
 	}
@@ -133,9 +134,10 @@ static WViewport *find_suitable_viewport(WClientWin *cwin, int x, int y)
 		}
 	}
 	
-	if(REGION_ACTIVE_SUB(scr)!=NULL &&
-	   WTHING_IS(REGION_ACTIVE_SUB(scr), WViewport)){
-		return (WViewport*)REGION_ACTIVE_SUB(scr);
+	if(REGION_ACTIVE_SUB(scr)!=NULL){
+		vp=viewport_of(REGION_ACTIVE_SUB(scr));
+		if(vp!=NULL)
+			return vp;
 	}
 	
 	return (WViewport*)scr->default_viewport;
@@ -206,9 +208,9 @@ bool add_clientwin_default(WClientWin *cwin, const XWindowAttributes *attr,
 		find_prop_target(cwin, props, target==NULL ? &target : NULL, &ws);
 		
 		if(target!=NULL){
-			if(!region_supports_attach(target)){
+			if(!region_supports_add_managed(target)){
 				warn("Target region of window %#x does not support primitive "
-					 "attach method", cwin->win);
+					 "add_managed method", cwin->win);
 				target=NULL;
 			}else if(SCREEN_OF(target)!=SCREEN_OF(cwin)){
 				warn("The target id property of window %#x is set to "
@@ -270,8 +272,8 @@ bool finish_add_clientwin(WRegion *reg, WClientWin *cwin,
 		flags=0;
 	if(wglobal.opmode!=OPMODE_INIT && props!=NULL)
 		flags=props->manage_flags;
-		
-	return region_attach_sub(reg, (WRegion*)cwin, flags);
+	
+	return region_add_managed(reg, (WRegion*)cwin, flags);
 }
 
 

@@ -23,14 +23,15 @@ INTROBJ(WWorkspace)
 DECLOBJ(WWorkspace){
 	WRegion region;
 	WObj *splitree;
+	WRegion *managed_list;
 };
 
 
-extern WWorkspace *create_workspace(WScreen *scr, WWinGeomParams params,
+extern WWorkspace *create_workspace(WRegion *parent, WRectangle bounds,
 									const char *name, bool ci);
+extern WWorkspace *create_new_workspace_on_vp(WViewport *vp, const char *name);
 
-extern void workspace_add_sub(WWorkspace *ws, WRegion *reg);
-extern void workspace_remove_sub(WWorkspace *ws, WRegion *reg);
+extern void workspace_add_managed(WWorkspace *ws, WRegion *reg);
 
 extern bool remove_split(WWorkspace *ws, WWsSplit *split);
 extern WRegion *workspace_find_current(WWorkspace *ws);
@@ -44,8 +45,12 @@ extern int complete_workspace(char *nam, char ***cp_ret, char **beg,
 
 extern bool switch_workspace_name(const char *str);
 
-extern WWorkspace *create_new_workspace_on_vp(WViewport *vp, const char *name);
+/*extern WWorkspace *create_new_workspace_on_vp(WViewport *vp, const char *name);*/
 
+/*extern void goto_above(WRegion *reg);
+extern void goto_below(WRegion *reg);
+extern void goto_left(WRegion *reg);
+extern void goto_right(WRegion *reg);*/
 extern void workspace_goto_above(WWorkspace *ws);
 extern void workspace_goto_below(WWorkspace *ws);
 extern void workspace_goto_left(WWorkspace *ws);

@@ -145,6 +145,7 @@ static void skip_focusenter_but(WRegion *reg)
 
 bool handle_event_default(XEvent *ev)
 {
+	
 	switch(ev->type){
 	CASE_EVENT(MapRequest)
 		handle_map_request(&(ev->xmaprequest));
@@ -218,7 +219,7 @@ void mainloop()
 				   CurrentTime);
 	((WRegion*)wglobal.screens)->flags|=REGION_ACTIVE;
 	wglobal.active_screen=wglobal.screens;
-	activate_ggrabs((WRegion*)wglobal.screens);
+	/*activate_ggrabs((WRegion*)wglobal.screens);*/
 	
 	
 	for(;;){
@@ -499,12 +500,15 @@ static void handle_focus_in(const XFocusChangeEvent *ev)
 	WScreen *scr;
 	Colormap cmap=None;
 
-    if(ev->mode==NotifyGrab || ev->detail > NotifyNonlinearVirtual)
-		return;
-	
 	reg=FIND_WINDOW_T(ev->window, WRegion);
 	
 	if(reg==NULL)
+		return;
+
+	/*fprintf(stderr, "FI: %s %d %d\n", WOBJ_TYPESTR(reg), ev->mode, ev->detail);*/
+
+    if(ev->mode==NotifyGrab)/* || ev->mode==NotifyWhileGrabbed)*/
+	/*if(ev->mode!=NotifyNormal && ev->mode!=NotifyWhileGrabbed)*/
 		return;
 
 	if(WTHING_IS(reg, WScreen)){
@@ -515,19 +519,6 @@ static void handle_focus_in(const XFocusChangeEvent *ev)
 		return;
 	}
 
-	/* Set current screen */
-	/*scr=SCREEN_OF(thing);
-	wglobal.current_screen=scr;*/
-	
-	/* Handle colormap */
-	
-	/* ??????
-	if(WTHING_IS(thing, WClientWin))
-		install_cwin_cmap((WClientWin*)thing);
-	else
-		XInstallColormap(wglobal.dpy, scr->default_cmap);
-	 */
-	
 	/* Input contexts */
 	if(WTHING_IS(reg, WWindow)){
 		wwin=(WWindow*)reg;
@@ -535,20 +526,9 @@ static void handle_focus_in(const XFocusChangeEvent *ev)
 			XSetICFocus(wwin->xic);
 	}
 	
-	/*wwin=wswindow_of(thing);
-	if(wglobal.current_wswindow==wwin)
-		return;
-	tmp=wglobal.current_wswindow;
-	if(tmp!=NULL){
-		wglobal.current_wswindow=NULL;
-		deactivate_window(tmp);
+	/*if(ev->detail!=NotifyInferior)*/{
+		region_got_focus(reg);
 	}
-	if(wwin!=NULL){
-		set_current_wswindow(wwin);
-		activate_window(wwin);
-	}*/
-	
-	region_got_focus(reg, NULL);
 }
 
 
@@ -557,9 +537,6 @@ static void handle_focus_out(const XFocusChangeEvent *ev)
 	WRegion *reg;
 	WWindow *wwin;
 	
-	if(ev->mode==NotifyGrab || ev->mode==NotifyWhileGrabbed)
-		return;
-
 	/*if(ev->window==SCREEN->root.win){
 		SCREEN->active=FALSE;
 		wwin=wglobal.current_wswindow;
@@ -572,12 +549,23 @@ static void handle_focus_out(const XFocusChangeEvent *ev)
 	
 	if(reg==NULL)
 		return;
+
+	/*fprintf(stderr, "FO: %s %d %d\n", WOBJ_TYPESTR(reg), ev->mode, ev->detail);*/
+	
+	if(ev->mode==NotifyGrab)/* || ev->mode==NotifyWhileGrabbed)*/
+	/*if(ev->mode!=NotifyNormal && ev->mode!=NotifyWhileGrabbed)*/
+		return;
 	
 	if(WTHING_IS(reg, WWindow)){
 		wwin=(WWindow*)reg;
 		if(wwin->xic!=NULL)
 			XUnsetICFocus(wwin->xic);
 	}
+	
+	if(ev->detail!=NotifyInferior)
+		region_lost_focus(reg);
+	else
+		region_got_focus(reg);
 }
 
 

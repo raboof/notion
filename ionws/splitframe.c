@@ -7,6 +7,9 @@
 
 #include <string.h>
 
+#include <wmcore/common.h>
+#include <wmcore/global.h>
+#include <wmcore/objp.h>
 #include <wmcore/focus.h>
 #include <wmcore/clientwin.h>
 #include <wmcore/resize.h>
@@ -14,11 +17,9 @@
 #include "splitframe.h"
 #include "split.h"
 #include "framep.h"
-#include <wmcore/global.h>
-#include <wmcore/close.h>
-#include <wmcore/objp.h>
 
-typedef WRegion *WSplitCreate(WScreen *scr, WWinGeomParams params);
+
+typedef WRegion *WSplitCreate(WRegion *parent, WRectangle geom);
 extern WRegion *split_reg(WRegion *reg, int dir, int primn,
 						  int minsize, WSplitCreate *fn);
 extern WRegion *split_toplevel(WWorkspace *ws, int dir, int primn,
@@ -75,9 +76,9 @@ WFrame *find_frame_at(WWorkspace *ws, int x, int y)
 /*{{{ Split */
 
 
-static WRegion* split_create_frame(WScreen *scr, WWinGeomParams params)
+static WRegion* split_create_frame(WRegion *parent, WRectangle geom)
 {
-	return (WRegion*)create_frame(scr, params, 0, 0);
+	return (WRegion*)create_frame(parent, geom, 0, 0);
 }
 
 
@@ -111,8 +112,10 @@ static void do_split(WRegion *oreg, const char *str, bool attach)
 	WRegion *reg;
 	int dir, primn, mins;
 
-	if(!get_splitparams(&dir, &primn, str))
+	if(!get_splitparams(&dir, &primn, str)){
+		warn("Unknown parameter to do_split");
 		return;
+	}
 
 	mins=(dir==VERTICAL ? region_min_h(oreg) : region_min_w(oreg));
 	
@@ -121,9 +124,11 @@ static void do_split(WRegion *oreg, const char *str, bool attach)
 	if(reg!=NULL){
 		if(attach && WTHING_IS(oreg, WFrame) &&
 		   ((WFrame*)oreg)->current_sub!=NULL){
-			frame_attach_sub((WFrame*)reg, ((WFrame*)oreg)->current_sub, TRUE);
+			region_add_managed(reg, ((WFrame*)oreg)->current_sub, TRUE);
 		}
 		goto_region(reg);
+	}else{
+		warn("Unable to split");
 	}
 }
 
@@ -164,37 +169,45 @@ void split_top(WWorkspace *ws, const char *str)
 /*{{{ Close */
 
 
-void destroy_frame(WFrame *frame)
+void frame_close(WFrame *frame)
 {
 	WWorkspace *ws;
 	WViewport *vp;
 	WRegion *other;
 	bool was_active=REGION_IS_ACTIVE(frame);
 
-	ws=FIND_PARENT1(frame, WWorkspace);
+	ws=(WWorkspace*)REGION_MANAGER(frame);
 
+	/* TODO */
+	
+	if(ws!=NULL && !WTHING_IS(ws, WWorkspace))
+		ws=NULL;
+	
+	/*
 	if(ws!=NULL){
 		vp=FIND_PARENT(ws, WViewport);
 		assert(vp!=NULL);
 		
-		if(vp->sub_count<=1 && ws->splitree==(WObj*)frame){
+		if(vp->ws_count<=1 && ws->splitree==(WObj*)frame){
 			fwarn(frame, "Cannot destroy only frame on only workspace.");
 			return;
 		}
 	}
+	*/
 	
-	other=workspace_find_new_home((WRegion*)frame);
+	other=workspace_find_new_manager((WRegion*)frame);
 	
-	if(frame->sub_count!=0){
+	if(frame->managed_count!=0){
 		if(other==NULL || WTHING_IS(other, WScreen)){
 			fwarn(frame, "Last frame on workspace and not empty: "
 				  "refusing to destroy.");
 			return;
 		}
-		region_move_subregions(other, (WRegion*)frame);
+		region_move_managed_on_list(other, (WRegion*)frame,
+									frame->managed_list);
 		/*SET_FOCUS(((WWindow*)frame)->win);*/
 
-		assert(frame->sub_count==0);
+		assert(frame->managed_count==0);
 	}
 	
 	if(other!=NULL && was_active)

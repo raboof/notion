@@ -14,5 +14,6 @@
 extern bool execute_command_sequence(WThing *thing, char *fn);
 extern bool execute_command_sequence_restricted(WThing *thing, char *fn,
 												WFunclist *funclist);
+extern void commands_at_top();
 
 #endif /* WMCORE_COMMANDSQ_H */

@@ -13,284 +13,73 @@
 #include "objp.h"
 
 
-INTRSTRUCT(RBind)
-INTRSTRUCT(BCount)	
-	
-
-DECLSTRUCT(RBind){
-	WBindmap *bindmap;
-	bool grab;
-	RBind *next, *prev;
-};
+/*{{{ Grab/ungrab */
 
 
-DECLSTRUCT(BCount){
-	uint key;
-	uint state;
-	uint count;
-};
-
-
-/*{{{ Binding-level management */
-
-
-#define CVAL(A, B, V) ( A->V < B->V ? -1 : (A->V > B->V ? 1 : 0))
-
-static int compare_bcount(const void *a_, const void *b_)
+static void do_grab_ungrab_binding(const WRegion *reg, const WBinding *binding,
+								   const WBindmap *bindmap, bool grab)
 {
-	const BCount *a=(BCount*)a_, *b=(BCount*)b_;
-	int r;
+	Window win=((WWindow*)reg)->win;
+	WRegBindingInfo *r;
 	
-	r=CVAL(a, b, key);
-	if(r==0)
-		r=CVAL(a, b, state);
-	
-	return r;
-}
-
-#undef CVAL
-
-
-static bool inc_bcount(WScreen *scr, uint key, uint state)
-{
-	BCount dummy;
-	BCount *bc, *bcount;
-	int i;
-	
-	bcount=(BCount*)(scr->bcount);
-	
-	dummy.key=key;
-	dummy.state=state;
-	dummy.count=1;
-	
-	/* As the bindings usually should already be grabbed, it might
-	 * be best to do a bsearch() first instead of simultaneously
-	 * looking for the place for new entry?
-	 */
-	for(i=0; i<scr->n_bcount; i++){
-		switch(compare_bcount((void*)&dummy, (void*)(bcount+i))){
-		case 1:
+	for(r=reg->bindings; r!=NULL; r=r->next){
+		if(r->bindmap==bindmap)
 			continue;
-		case 0:
-			bcount[i].count++;
-			/*fprintf(stderr, "inc-found: %d/%x [%d,%d] | %d\n", key, state, bcount[i].count, n_bcount, bcount[i].key);*/
-			return FALSE;
-		}
-		break;
+		if(lookup_binding(r->bindmap, binding->act, binding->state,
+						  binding->kcb)!=NULL)
+			break;
 	}
-
-	bc=REALLOC_N(bcount, BCount, scr->n_bcount, scr->n_bcount+1);
-	
-	if(bc==NULL){
-		warn_err();
-		return FALSE;
+	if(r==NULL){
+		if(grab)
+			grab_binding(binding, win);
+		else
+			ungrab_binding(binding, win);
 	}
-	
-	memmove(bc+i+1, bc+i, sizeof(BCount)*(scr->n_bcount-i));
-	memcpy(bc+i, &dummy, sizeof(BCount));
-	scr->bcount=(void*)bc;
-	scr->n_bcount++;
-	
-	return TRUE;
 }
 
 
-static bool dec_bcount(WScreen *scr, uint key, uint state)
-{
-	BCount dummy;
-	BCount *bc, *bcount;
-	int i;
-	
-	bcount=(BCount*)(scr->bcount);
-	
-	dummy.key=key;
-	dummy.state=state;
-	dummy.count=1;
-	
-	bc=bsearch((void*)&dummy, (void*)(bcount), scr->n_bcount, sizeof(BCount),
-			   compare_bcount);
-	
-	if(bc==NULL){
-		warn("dec_bcount: key/state not found!");
-		return TRUE;
-	}
-
-	i=bc-bcount;
-
-	/*fprintf(stderr, "dec-found: %d/%x [%d,%d]", key, state, bcount[i].count-1, n_bcount);*/
-
-	if(--bcount[i].count>0)
-		return FALSE;
-
-	memmove(bcount+i, bcount+i+1, sizeof(BCount)*(scr->n_bcount-i-1));
-	
-	bc=REALLOC_N(bcount, BCount, scr->n_bcount, scr->n_bcount-1);
-
-	scr->n_bcount--;
-	
-	if(bc==NULL)
-		warn_err();
-	else
-		scr->bcount=(void*)bc;
-	
-	return TRUE;
-}
-
-
-static void do_grab_new(WScreen *scr, WBindmap *bindmap)
+static void do_grab_ungrab_bindings(const WRegion *reg, const WBindmap *bindmap,
+									bool grab)
 {
 	WBinding *binding=bindmap->bindings;
 	int i;
 	
-	for(i=0; i<bindmap->nbindings; i++, binding++){
-		if(binding->act!=ACT_KEYPRESS)
-			continue;
-		
-		/* add to table, grab if ungrab */
-		if(inc_bcount(scr, binding->kcb, binding->state)){
-			/*fprintf(stderr, "Grab: %d/%x [%d]\n", binding->kcb, binding->state, n_bcount);*/
-			grab_binding(binding, scr->root.win);
-		}
-	}
+	for(i=0; i<bindmap->nbindings; i++, binding++)
+		do_grab_ungrab_binding(reg, binding, bindmap, grab);
 }
 
 
-static void do_ungrab_old(WScreen *scr, WBindmap *bindmap)
+static void grab_ungrabbed_bindings(const WRegion *reg, const WBindmap *bindmap)
 {
-	WBinding *binding=bindmap->bindings;
-	int i;
-	
-	for(i=0; i<bindmap->nbindings; i++, binding++){
-		if(binding->act!=ACT_KEYPRESS)
-			continue;
-		
-		/* remove from table, ungrab if unused */
-		if(dec_bcount(scr, binding->kcb, binding->state)){
-			/*fprintf(stderr, "Ungrab: %d/%x [%d]\n", binding->kcb, binding->state, n_bcount);*/
-			ungrab_binding(binding, scr->root.win);
-		}
-	}
+	do_grab_ungrab_bindings(reg, bindmap, TRUE);
+}
+
+
+static void ungrab_freed_bindings(const WRegion *reg, const WBindmap *bindmap)
+{
+	do_grab_ungrab_bindings(reg, bindmap, FALSE);
+}
+
+
+void rbind_binding_added(const WRegBindingInfo *rbind, const WBinding *binding,
+						 const WBindmap *bindmap)
+{
+	if(rbind->grab)
+		do_grab_ungrab_binding(rbind->reg, binding, rbind->bindmap, TRUE);
 }
 
 
 /*}}}*/
 
 
-/*{{{ Buttons */
+/*{{{ Find */
 
 
-static bool is_button_act(int act)
+static WRegBindingInfo *find_rbind(WRegion *reg, WBindmap *bindmap)
 {
-	return (act==ACT_BUTTONPRESS ||
-			act==ACT_BUTTONCLICK ||
-			act==ACT_BUTTONDBLCLICK ||
-			act==ACT_BUTTONMOTION);
-}
-
-
-static void grab_buttons(WRegion *reg, WBindmap *bindmap)
-{
-	WBinding *binding=bindmap->bindings;
-	Window win;
-	int i;
+	WRegBindingInfo *rbind;
 	
-	if(!WTHING_IS(reg, WWindow))
-		return;
-	
-	win=((WWindow*)reg)->win;
-	
-	if(win==None)
-		return;
-	
-	for(i=0; i<bindmap->nbindings; i++, binding++){
-		if(!is_button_act(binding->act))
-			continue;
-		grab_binding(binding, win);
-	}
-}
-
-
-static void ungrab_buttons(WRegion *reg, WBindmap *bindmap)
-{
-	WBinding *binding=bindmap->bindings;
-	Window win;
-	int i;
-	
-	if(!WTHING_IS(reg, WWindow))
-		return;
-	
-	win=((WWindow*)reg)->win;
-	
-	if(win==None)
-		return;
-	
-	for(i=0; i<bindmap->nbindings; i++, binding++){
-		if(!is_button_act(binding->act))
-			continue;
-		ungrab_binding(binding, win);
-	}
-}
-
-
-/*}}}*/
-
-
-/*{{{ RBind-level management */
-
-
-static void do_activate_ggrab(WScreen *scr, RBind *rbind)
-{
-	if(rbind->bindmap->ggrab_cntr==0)
-		do_grab_new(scr, rbind->bindmap);
-	rbind->bindmap->ggrab_cntr++;
-}
-
-
-static void do_release_ggrab(WScreen *scr, RBind *rbind)
-{
-	rbind->bindmap->ggrab_cntr--;
-	if(rbind->bindmap->ggrab_cntr==0)
-		do_ungrab_old(scr, rbind->bindmap);
-}
-
-
-void release_ggrabs(WRegion *reg)
-{
-	RBind *rbind;
-	
-	if(!(reg->flags&REGION_HAS_GRABS))
-		return;
-	
-	for(rbind=(RBind*)reg->bindings; rbind!=NULL; rbind=rbind->next){
-		if(rbind->grab)
-			do_release_ggrab(SCREEN_OF(reg), rbind);
-	}
-	
-	reg->flags&=~REGION_HAS_GRABS;
-}
-
-
-void activate_ggrabs(WRegion *reg)
-{
-	RBind *rbind;
-
-	if(reg->flags&REGION_HAS_GRABS)
-		return;
-	
-	for(rbind=(RBind*)reg->bindings; rbind!=NULL; rbind=rbind->next){
-		if(rbind->grab)
-			do_activate_ggrab(SCREEN_OF(reg), rbind);
-	}
-
-	reg->flags|=REGION_HAS_GRABS;
-}
-
-
-static RBind *find_rbind(WRegion *reg, WBindmap *bindmap)
-{
-	RBind *rbind;
-	
-	for(rbind=(RBind*)reg->bindings; rbind!=NULL; rbind=rbind->next){
+	for(rbind=(WRegBindingInfo*)reg->bindings; rbind!=NULL; rbind=rbind->next){
 		if(rbind->bindmap==bindmap)
 			return rbind;
 	}
@@ -299,33 +88,20 @@ static RBind *find_rbind(WRegion *reg, WBindmap *bindmap)
 }
 
 
-static void remove_rbind(WRegion *reg, RBind *rbind)
-{
-	if(rbind->grab){
-		ungrab_buttons(reg, rbind->bindmap);
-		if(reg->flags&REGION_HAS_GRABS)
-			do_release_ggrab(SCREEN_OF(reg), rbind);
-	}
-	
-	{
-		RBind *b=reg->bindings;
-		UNLINK_ITEM(b, rbind, next, prev);
-		reg->bindings=b;
-	}
-	
-	free(rbind);
-}
-
-
 /*}}}*/
 
 
 /*{{{ Interface */
 
+#define REGION_SUPPORTS_BINDINGS(reg) WTHING_IS(reg, WWindow)
 
-bool region_add_bindmap(WRegion *reg, WBindmap *bindmap, bool grab)
+bool region_add_bindmap_owned(WRegion *reg, WBindmap *bindmap, bool grab,
+							  WRegion *owner)
 {
-	RBind *rbind;
+	WRegBindingInfo *rbind;
+	
+	if(!REGION_SUPPORTS_BINDINGS(reg))
+		return FALSE;
 	
 	if(bindmap==NULL)
 		return FALSE;
@@ -333,7 +109,7 @@ bool region_add_bindmap(WRegion *reg, WBindmap *bindmap, bool grab)
 	if(find_rbind(reg, bindmap)!=NULL)
 		return FALSE;
 	
-	rbind=ALLOC(RBind);
+	rbind=ALLOC(WRegBindingInfo);
 	
 	if(rbind==NULL){
 		warn_err();
@@ -342,59 +118,87 @@ bool region_add_bindmap(WRegion *reg, WBindmap *bindmap, bool grab)
 	
 	rbind->bindmap=bindmap;
 	rbind->grab=grab;
-	
-	/* ??? */
+	rbind->owner=owner;
+	rbind->reg=reg;
+	LINK_ITEM(bindmap->rbind_list, rbind, bm_next, bm_prev);
+
 	if(grab)
-		grab_buttons(reg, bindmap);
+		grab_ungrabbed_bindings(reg, bindmap);
 	
-	{
-		RBind *b=reg->bindings;
+	/* Link to reg's rbind list*/ {
+		WRegBindingInfo *b=reg->bindings;
 		LINK_ITEM(b, rbind, next, prev);
 		reg->bindings=b;
 	}
-	
-	if(grab && REGION_IS_ACTIVE(reg))
-		do_activate_ggrab(SCREEN_OF(reg), rbind);
 	
 	return TRUE;
 }
 
 
+bool region_add_bindmap(WRegion *reg, WBindmap *bindmap, bool grab)
+{
+	return region_add_bindmap_owned(reg, bindmap, grab, NULL);
+}
+
+
+static void remove_rbind(WRegion *reg, WRegBindingInfo *rbind)
+{
+	UNLINK_ITEM(rbind->bindmap->rbind_list, rbind, bm_next, bm_prev);
+	
+	/* Unlink from reg's rbind list*/ {
+		WRegBindingInfo *b=reg->bindings;
+		UNLINK_ITEM(b, rbind, next, prev);
+		reg->bindings=b;
+	}
+
+	if(rbind->grab)
+		ungrab_freed_bindings(reg, rbind->bindmap);
+
+	free(rbind);
+}
+
+
+void region_remove_bindmap_owned(WRegion *reg, WBindmap *bindmap,
+								 WRegion *owner)
+{
+	WRegBindingInfo *rbind=find_rbind(reg, bindmap);
+	
+	if(rbind!=NULL && rbind->owner==owner)
+		remove_rbind(reg, rbind);
+}
+
+
 void region_remove_bindmap(WRegion *reg, WBindmap *bindmap)
 {
-	RBind *rbind=find_rbind(reg, bindmap);
-	
-	if(rbind!=NULL)
-		remove_rbind(reg, rbind);
+	region_remove_bindmap_owned(reg, bindmap, NULL);
 }
 
 
 void region_remove_bindings(WRegion *reg)
 {
-	RBind *rbind;
+	WRegBindingInfo *rbind;
 	
-	while((rbind=(RBind*)reg->bindings)!=NULL)
+	while((rbind=(WRegBindingInfo*)reg->bindings)!=NULL)
 		remove_rbind(reg, rbind);
 }
 
 
-WBinding *region_lookup_keybinding(const WRegion *reg, const XKeyEvent *ev,
-								   bool grabonly, const WSubmapState *sc)
+WBinding *region_lookup_keybinding(WRegion *reg, const XKeyEvent *ev,
+								   const WSubmapState *sc,
+								   WRegion **binding_owner_ret)
 {
-	RBind *rbind;
+	WRegBindingInfo *rbind;
 	WBinding *binding=NULL;
 	const WSubmapState *s=NULL;
 	WBindmap *bindmap=NULL;
 	
-	for(rbind=(RBind*)reg->bindings; rbind!=NULL; rbind=rbind->next){
-		if(!IS_SCREEN(reg) && grabonly && !rbind->grab)
-			continue;
-		
+	*binding_owner_ret=reg;
+	
+	for(rbind=(WRegBindingInfo*)reg->bindings; rbind!=NULL; rbind=rbind->next){
 		bindmap=rbind->bindmap;
 		
 		for(s=sc; s!=NULL && bindmap!=NULL; s=s->next){
-			binding=lookup_binding(bindmap, ACT_KEYPRESS,
-								   s->state, s->key);
+			binding=lookup_binding(bindmap, ACT_KEYPRESS, s->state, s->key);
 
 			if(binding==NULL){
 				bindmap=NULL;
@@ -413,17 +217,22 @@ WBinding *region_lookup_keybinding(const WRegion *reg, const XKeyEvent *ev,
 			break;
 	}
 	
+	if(binding!=NULL && rbind->owner!=NULL)
+		*binding_owner_ret=rbind->owner;
+	
 	return binding;
 }
 
 
-WBinding *region_lookup_binding_area(const WRegion *reg, int act,
-									 uint state, uint kcb, int area)
+WBinding *region_lookup_binding_area(WRegion *reg, int act, uint state,
+									 uint kcb, int area)
 {
-	RBind *rbind;
+	WRegBindingInfo *rbind;
 	WBinding *binding=NULL;
 	
-	for(rbind=(RBind*)reg->bindings; rbind!=NULL; rbind=rbind->next){
+	for(rbind=(WRegBindingInfo*)reg->bindings; rbind!=NULL; rbind=rbind->next){
+		if(rbind->owner!=NULL)
+			continue;
 		binding=lookup_binding_area(rbind->bindmap, act, state, kcb, area);
 		if(binding!=NULL)
 			break;

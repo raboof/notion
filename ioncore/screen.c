@@ -36,29 +36,22 @@
 #include "regbind.h"
 #include "viewport.h"
 
-static void screen_remove_sub(WScreen *scr, WRegion *sub);
 static void fit_screen(WScreen *scr, WRectangle geom);
 static void map_screen(WScreen *scr);
 static void unmap_screen(WScreen *scr);
-static bool screen_switch_subregion(WScreen *scr, WRegion *sub);
 static void focus_screen(WScreen *scr, bool warp);
-static bool reparent_screen(WScreen *scr, WWinGeomParams params);
-
-static void screen_sub_params(const WScreen *scr, WWinGeomParams *ret);
-static void screen_do_attach(WScreen *scr, WRegion *sub, int flags);
-
+static bool reparent_screen(WScreen *scr, WRegion *par, WRectangle geom);
+static void screen_sub_params(const WScreen *scr, WRectangle **geom);
 static void screen_activated(WScreen *scr);
 
 static DynFunTab screen_dynfuntab[]={
 	{fit_region, fit_screen},
 	{map_region, map_screen},
 	{unmap_region, unmap_screen},
-	{(DynFun*)switch_subregion, (DynFun*)screen_switch_subregion},
 	{focus_region, focus_screen},
 	{(DynFun*)reparent_region, (DynFun*)reparent_screen},
-	{region_request_sub_geom, region_request_sub_geom_unallow},
+	/*{region_request_managed_geom, region_request_managed_geom_unallow},*/
 	{region_activated, screen_activated},
-	{region_remove_sub, screen_remove_sub},
 	
 	END_DYNFUNTAB
 };
@@ -126,20 +119,19 @@ static int my_error_handler(Display *dpy, XErrorEvent *ev)
 /*{{{ Utility functions */
 
 
-Window create_simple_window_bg(WScreen *scr, WWinGeomParams params,
-							   WColor background)
+Window create_simple_window_bg(const WScreen *scr, Window par,
+							   WRectangle geom, WColor background)
 {
-	return XCreateSimpleWindow(wglobal.dpy, params.win,
-							   params.win_x, params.win_y,
-							   params.geom.w, params.geom.h,
+	return XCreateSimpleWindow(wglobal.dpy, par,
+							   geom.x, geom.y, geom.w, geom.h,
 							   0, BlackPixel(wglobal.dpy, scr->xscr),
 							   COLOR_PIXEL(background));
 }
 
 
-Window create_simple_window(WScreen *scr, WWinGeomParams params)
+Window create_simple_window(const WScreen *scr, Window par, WRectangle geom)
 {
-	return create_simple_window_bg(scr, params, scr->grdata.frame_colors.bg);
+	return create_simple_window_bg(scr, par, geom, scr->grdata.frame_colors.bg);
 }
 
 
@@ -186,6 +178,7 @@ static void scan_initial_windows(WScreen *scr)
 void manage_initial_windows(WScreen *scr)
 {
 	Window *wins=scr->tmpwins;
+	Window tfor=None;
 	int i, nwins=scr->tmpnwins;
 
 	scr->tmpwins=NULL;
@@ -194,7 +187,15 @@ void manage_initial_windows(WScreen *scr)
 	for(i=0; i<nwins; i++){
 		if(wins[i]==None)
 			continue;
-		
+		if(XGetTransientForHint(wglobal.dpy, wins[i], &tfor))
+			continue;
+		manage_clientwin(wins[i], MANAGE_INITIAL);
+		wins[i]=None;
+	}
+
+	for(i=0; i<nwins; i++){
+		if(wins[i]==None)
+			continue;
 		manage_clientwin(wins[i], MANAGE_INITIAL);
 	}
 	
@@ -239,11 +240,11 @@ static WScreen *preinit_screen(int xscr)
 	geom.w=DisplayWidth(dpy, xscr);
 	geom.h=DisplayHeight(dpy, xscr);
 	
-	init_window((WWindow*)scr, scr, rootwin, geom);
+	init_window((WWindow*)scr, NULL, rootwin, geom);
 	
+	scr->root.region.screen=scr;
 	scr->xscr=xscr;
 	scr->default_cmap=DefaultColormap(dpy, xscr);
-
 	scr->default_viewport=NULL;
 	
 	scr->w_unit=7;
@@ -258,9 +259,9 @@ static WScreen *preinit_screen(int xscr)
 		scr->u.stack_lists[i]=NULL;
 	
 	scan_initial_windows(scr);
-	
-	region_add_bindmap((WRegion*)scr, &wmcore_screen_bindmap, TRUE);
 
+	region_add_bindmap((WRegion*)scr, &wmcore_screen_bindmap, TRUE);
+	
 	return scr;
 }
 
@@ -268,8 +269,8 @@ static WScreen *preinit_screen(int xscr)
 static void postinit_screen(WScreen *scr)
 {
 	set_cursor(scr->root.win, CURSOR_DEFAULT);
+	
 	/* TODO: Need to reorder initilisation code */
-	/*region_add_bindmap((WRegion*)scr, &wmcore_screen_bindmap, TRUE);*/
 	/*init_workspaces(scr);*/
 }
 
@@ -281,8 +282,6 @@ WViewport *add_viewport(WScreen *scr, int id, WRectangle geom)
 	if(vp==NULL)
 		return NULL;
 	
-	link_thing((WThing*)scr, (WThing*)vp);
-
 	map_region((WRegion*)vp);
 	
 	if(scr->default_viewport==NULL)
@@ -300,15 +299,17 @@ WScreen *manage_screen(int xscr)
 #ifndef CF_NO_XINERAMA
 	XineramaScreenInfo *xi=NULL;
 	int i, nxi=0;
+	int event_base, error_base;
 	
-	xi=XineramaQueryScreens(wglobal.dpy, &nxi);
+	if(XineramaQueryExtension(wglobal.dpy, &event_base, &error_base)){
+		xi=XineramaQueryScreens(wglobal.dpy, &nxi);
 	
-	if(xi!=NULL && wglobal.screens!=NULL){
-		warn("Unable to support both Xinerama and normal multihead.\n");
-		XFree(xi);
-		return NULL;
+		if(xi!=NULL && wglobal.screens!=NULL){
+			warn("Unable to support both Xinerama and normal multihead.\n");
+			XFree(xi);
+			return NULL;
+		}
 	}
-	
 #endif
 	
 	scr=preinit_screen(xscr);
@@ -372,18 +373,6 @@ void deinit_screen(WScreen *scr)
 /*}}}*/
 
 
-/*{{{ Attach/detach */
-
-
-static void screen_remove_sub(WScreen *scr, WRegion *sub)
-{
-	return;
-}
-
-
-/*}}}*/
-
-
 /*{{{ region dynfun implementations */
 
 
@@ -411,8 +400,12 @@ static void focus_screen(WScreen *scr, bool warp)
 	
 	sub=REGION_ACTIVE_SUB(scr);
 	
-	if(sub==NULL)
+	if(sub==NULL){
 		sub=FIRST_THING(scr, WRegion);
+		while(sub!=NULL && !REGION_IS_MAPPED(sub)){
+			sub=NEXT_THING(sub, WRegion);
+		}
+	}
 		
 	if(sub!=NULL)
 		focus_region(sub, warp);
@@ -421,13 +414,7 @@ static void focus_screen(WScreen *scr, bool warp)
 }
 
 
-static bool screen_switch_subregion(WScreen *scr, WRegion *sub)
-{
-	return TRUE;
-}
-
-
-static bool reparent_screen(WScreen *scr, WWinGeomParams params)
+static bool reparent_screen(WScreen *scr, WRegion *par, WRectangle geom)
 {
 	warn("Attempt to reparent a screen -- impossible");
 	return FALSE;
@@ -448,7 +435,9 @@ static void screen_activated(WScreen *scr)
 
 WScreen *screen_of(const WRegion *reg)
 {
-	WScreen *scr=(WScreen*)(reg->screen);
+	WScreen *scr;
+	assert(reg!=NULL);
+	scr=(WScreen*)(reg->screen);
 	assert(scr!=NULL);
 	return scr;
 }

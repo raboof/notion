@@ -12,6 +12,8 @@
 #include "global.h"
 #include "objp.h"
 #include "commandsq.h"
+#include "regbind.h"
+
 
 #ifndef CF_NO_LOCK_HACK
 #define CF_HACK_IGNORE_EVIL_LOCKS
@@ -97,8 +99,8 @@ bool init_bindmap(WBindmap *bindmap)
 	bindmap->nbindings=0;
 	bindmap->bindings=NULL;
 	bindmap->parent=NULL;
-	bindmap->ggrab_cntr=0;
 	bindmap->confdefmod=0;
+	bindmap->rbind_list=NULL;
 	return TRUE;
 }
 
@@ -109,7 +111,7 @@ WBindmap *create_bindmap()
 }
 
 
-void destroy_binding(WBinding *binding)
+void deinit_binding(WBinding *binding)
 {
 	int i;
 	
@@ -123,20 +125,23 @@ void destroy_binding(WBinding *binding)
 	
 	binding->submap=NULL;
 	binding->cmd=NULL;
-	/*
-	for(i=1; i<binding->nargs; i++)
-		tok_free(binding->args+i);
-	 */
 }
 
 
 void destroy_bindmap(WBindmap *bindmap)
 {
 	int i;
-	WBinding *binding=bindmap->bindings;
+	WBinding *binding;
+	
+	while(bindmap->rbind_list!=NULL){
+		region_remove_bindmap(bindmap->rbind_list->reg,
+							  bindmap);
+	}
+		
+	binding=bindmap->bindings;
 	
 	for(i=0; i<bindmap->nbindings; i++, binding++)
-		destroy_binding(binding);
+		deinit_binding(binding);
 	
 	free(bindmap->bindings);
 }
@@ -158,7 +163,7 @@ bool add_binding(WBindmap *bindmap, const WBinding *b)
 		case 1:
 			continue;
 		case 0:
-			destroy_binding(binding+i);
+			deinit_binding(binding+i);
 			goto subst;
 		}
 		break;
@@ -177,6 +182,12 @@ bool add_binding(WBindmap *bindmap, const WBinding *b)
 	
 	bindmap->bindings=binding;
 	bindmap->nbindings++;
+	
+	{
+		WRegBindingInfo *rbind;
+		for(rbind=bindmap->rbind_list; rbind!=NULL; rbind=rbind->bm_next)
+			rbind_binding_added(rbind, b, bindmap);
+	}
 	
 subst:
 	memcpy(&(binding[i]), b, sizeof(WBinding));

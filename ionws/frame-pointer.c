@@ -19,8 +19,7 @@
 #include "resize.h"
 
 
-extern WRegion *frame_nthreg_ni(const WFrame *frame, uint n);
-#define REGION_LABEL(REG)	((REG)->uldata)
+#define REGION_LABEL(REG)	((REG)->mgr_data)
 
 
 static int p_tab_x, p_tab_y;
@@ -83,7 +82,7 @@ int frame_press(WFrame *frame, XButtonEvent *ev, WThing **thing_ret)
 		p_tab_x+=x*tw+g.x;
 		p_tab_y+=g.y;
 		
-		sub=frame_nthreg_ni(frame, x);
+		sub=frame_nth_managed(frame, x);
 
 		if(sub==NULL)
 			return FRAME_AREA_EMPTY_TAB;
@@ -275,7 +274,7 @@ static void p_tabdrag_end(WFrame *frame, XButtonEvent *ev)
 		return;
 	}
 	
-	frame_attach_sub(newframe, sub, REGION_ATTACH_SWITCHTO);
+	region_add_managed((WRegion*)newframe, sub, REGION_ATTACH_SWITCHTO);
 	set_focus((WRegion*)newframe);
 }
 
@@ -337,7 +336,7 @@ void p_resize_setup(WFrame *frame)
 void frame_switch_tab(WFrame *frame)
 {
 	if(frame->tab_pressed_sub!=NULL)
-		switch_region(frame->tab_pressed_sub);
+		display_region_sp(frame->tab_pressed_sub);
 	
 }
 

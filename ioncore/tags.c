@@ -16,6 +16,7 @@ static WRegion *taglist;
 /*{{{ Adding/removing tags */
 
 
+/*
 void clear_sub_tags(WRegion *reg)
 {
 	WRegion *sub;
@@ -29,7 +30,7 @@ void clear_sub_tags(WRegion *reg)
 		clear_sub_tags(sub);
 	}
 }
-
+*/
 
 void tag_region(WRegion *reg)
 {

@@ -93,8 +93,6 @@ bool defer_action(WThing *thing, Action *action)
 {
 	Defer *d;
 	
-	/*fprintf(stderr, "defer: %p(%p)\n", action, thing);*/
-	
 	d=alloc_defer();
 	
 	if(d==NULL){
@@ -124,8 +122,6 @@ void execute_deferred()
 	WThing *thing;
 	void (*action)(WThing*);
 	
-	while(get_next(&thing, &action)){
-		/*fprintf(stderr, "dexec: %p(%p)\n", action, thing);*/
+	while(get_next(&thing, &action))
 		action(thing);
-	}
 }

@@ -79,7 +79,6 @@ DECLSTRUCT(WWatch){
 DECLOBJ(WThing){
 	WObj obj;
 	int flags;
-	void *screen;
 	WWatch *t_watches;
 	WThing *t_parent, *t_children;
 	WThing *t_next, *t_prev;

@@ -316,16 +316,15 @@ void region_request_geom(WRegion *reg,
 						 WRectangle geom, WRectangle *geomret,
 						 bool tryonly)
 {
-	WRegion *par=FIND_PARENT1(reg, WRegion);
-	
-	if(par==NULL){
+	if(REGION_MANAGER(reg)!=NULL){
+		region_request_managed_geom(REGION_MANAGER(reg), reg, geom, geomret, tryonly);
+	}else{
 		if(geomret!=NULL)
 			*geomret=REGION_GEOM(reg);
-		return;
+		if(!tryonly)
+			fit_region(reg, geom);
 	}
-		
-	region_request_sub_geom(par, reg, geom, geomret, tryonly);
-	
+
 	if(!tryonly && geomret!=NULL)
 		*geomret=REGION_GEOM(reg);
 }
