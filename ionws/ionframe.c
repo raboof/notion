@@ -283,6 +283,20 @@ static bool ionframe_save_to_file(WIonFrame *frame, FILE *file, int lvl)
 	begin_saved_region((WRegion*)frame, file, lvl);
 	save_indent_line(file, lvl);
 	fprintf(file, "flags = %d,\n", frame->genframe.flags);
+	
+	if(frame->genframe.flags&WGENFRAME_SAVED_VERT){
+		save_indent_line(file, lvl);
+		fprintf(file, "saved_y = %d, saved_h = %d,\n", 
+				frame->genframe.saved_y,
+				frame->genframe.saved_h);
+	}
+	if(frame->genframe.flags&WGENFRAME_SAVED_HORIZ){
+		save_indent_line(file, lvl);
+		fprintf(file, "saved_x = %d, saved_w = %d,\n", 
+				frame->genframe.saved_x,
+				frame->genframe.saved_w);
+	}
+	
 	save_indent_line(file, lvl);
 	fprintf(file, "subs = {\n");
 	FOR_ALL_MANAGED_ON_LIST(WGENFRAME_MLIST(frame), sub){
@@ -320,6 +334,8 @@ WRegion *ionframe_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
 	if(flags&WGENFRAME_TAB_HIDE)
 		genframe_toggle_tab((WGenFrame*)frame);
 
+	genframe_load_saved_geom((WGenFrame*)frame, tab);
+	
 	if(!extl_table_gets_t(tab, "subs", &substab))
 		return (WRegion*)frame;
 	

@@ -55,6 +55,8 @@ static void genframe_free_titles(WGenFrame *genframe);
 bool genframe_init(WGenFrame *genframe, WWindow *parent, 
 				   const WRectangle *geom)
 {
+	WRectangle mg;
+	
 	genframe->flags=0;
 	genframe->saved_w=0;
 	genframe->saved_h=0;
@@ -77,6 +79,11 @@ bool genframe_init(WGenFrame *genframe, WWindow *parent,
 	XSelectInput(wglobal.dpy, WGENFRAME_WIN(genframe), FRAME_MASK);
 
 	region_add_bindmap((WRegion*)genframe, &ioncore_genframe_bindmap);
+
+	genframe_managed_geom(genframe, &mg);
+	
+	if(mg.h<=1)
+		SET_SHADE_FLAG(genframe);
 	
 	return TRUE;
 }
@@ -538,6 +545,26 @@ static void genframe_managed_changed(WGenFrame *genframe, int mode, bool sw,
 	}
 
 	genframe_draw_bar(genframe, mode!=MPLEX_CHANGE_SWITCHONLY);
+}
+
+
+void genframe_load_saved_geom(WGenFrame* genframe, ExtlTab tab)
+{
+	int p=0, s=0;
+	
+	if(extl_table_gets_i(tab, "saved_x", &p) &&
+	   extl_table_gets_i(tab, "saved_w", &s)){
+		genframe->saved_x=p;
+		genframe->saved_w=s;
+		genframe->flags|=WGENFRAME_SAVED_HORIZ;
+	}
+
+	if(extl_table_gets_i(tab, "saved_y", &p) &&
+	   extl_table_gets_i(tab, "saved_h", &s)){
+		genframe->saved_y=p;
+		genframe->saved_h=s;
+		genframe->flags|=WGENFRAME_SAVED_VERT;
+	}
 }
 
 

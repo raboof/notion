@@ -17,6 +17,7 @@
 #include "attach.h"
 #include "mplex.h"
 #include "gr.h"
+#include "extl.h"
 
 INTROBJ(WGenFrame);
 
@@ -76,6 +77,7 @@ extern void genframe_border_geom(const WGenFrame *genframe,
 								 WRectangle *geom);
 extern void genframe_border_inner_geom(const WGenFrame *genframe, 
 									   WRectangle *geom);
+extern void genframe_load_saved_geom(WGenFrame* genframe, ExtlTab tab);
 
 /* Dynfuns */
 DYNFUN const char *genframe_style(WGenFrame *genframe);
