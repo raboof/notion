@@ -357,6 +357,9 @@ bool genframe_display_managed(WGenFrame *genframe, WRegion *sub)
 	if(!set_genframe_background(genframe, FALSE))
 		genframe_draw_bar(genframe, FALSE);
 	
+	extl_call_named("call_hook", "soo", NULL,
+					"genframe_managed_switched", genframe, sub);
+
 	return TRUE;
 }
 

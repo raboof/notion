@@ -250,6 +250,9 @@ static bool viewport_display_managed(WViewport *vp, WRegion *reg)
 	if(wglobal.opmode!=OPMODE_DEINIT && region_may_control_focus((WRegion*)vp))
 		set_focus(reg);
 	
+	extl_call_named("call_hook", "soo", NULL,
+					"viewport_workspace_switched", vp, reg);
+	
 	return TRUE;
 }
 
