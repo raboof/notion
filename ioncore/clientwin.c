@@ -419,6 +419,7 @@ void clientwin_destroyed(WClientWin *cwin)
 {
 	XDeleteContext(wglobal.dpy, cwin->win, wglobal.win_context);
 	cwin->win=None;
+	region_rescue_clientwins((WRegion*)cwin);
 	destroy_thing((WThing*)cwin);
 }
 
