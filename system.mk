@@ -87,7 +87,7 @@ XINERAMA_LIBS=-lXinerama
 # Systems that depend on libutf8 and libiconv might want these.
 #DEFINES += -DCF_UTF8 -DCF_LIBUTF8 -DCF_ICONV_TARGET=\"C99\" -DCF_ICONV_SOURCE=\"UTF-8\"
 #EXTRA_LIBS += -liconv -lutf8 -L/usr/local/lib
-#EXTRA_INCLUDES -I/usr/local/include
+#EXTRA_INCLUDES += -I/usr/local/include
 
 ##
 ## libc
