@@ -30,6 +30,7 @@
 #include "exec.h"
 #include "conf.h"
 #include "binding.h"
+#include "font.h"
 #include "extl.h"
 #include "../version.h"
 
@@ -214,6 +215,56 @@ static void initialize_global()
 }
 
 
+#ifdef CF_UTF8
+static bool test_fallback_font(Display *dpy)
+{
+	WFontPtr fnt=load_font(dpy, CF_FALLBACK_FONT_NAME);
+	
+	if(fnt==NULL){
+		warn("Failed to load fallback font \"%s\"", CF_FALLBACK_FONT_NAME);
+		return FALSE;
+	}
+	
+	free_font(dpy, fnt);
+	return TRUE;
+}
+
+
+static bool set_up_locales(Display *dpy)
+{
+	bool tryno=0;
+	
+	if(setlocale(LC_ALL, "")==NULL)
+		warn("setlocale() call failed");
+
+	while(1){
+		if(XSupportsLocale()){
+			if(test_fallback_font(dpy)){
+				if(tryno==1){
+					warn("This seems to work but support for non-ASCII "
+						 "characters will be crippled. Please set up your "
+						 "locales properly.");
+				}
+				return TRUE;
+			}
+		}else{
+			warn("XSupportsLocale() failed%s",
+				 tryno==0 ? " for your locale settings." : "");
+		}
+		
+		if(tryno==1)
+			return FALSE;
+		
+		warn("Resetting locale to \"POSIX\".");
+		if(setlocale(LC_ALL, "POSIX")==NULL){
+			warn("setlocale() call failed");
+		}
+		tryno++;
+	}
+}
+#endif
+
+
 bool ioncore_init(const char *display, bool onescreen)
 {
 	Display *dpy;
@@ -232,21 +283,6 @@ bool ioncore_init(const char *display, bool onescreen)
 	 * reset to POSIX so that at least fonts will be loadable if not all
 	 * characters supported.
 	 */
-#ifdef CF_UTF8
-	if(setlocale(LC_ALL, "")==NULL)
-		warn("setlocale() call failed");
-	if(!XSupportsLocale()){
-		warn("XSupportLocale() failed. Resetting locale to \"POSIX\".");
-		if(setlocale(LC_ALL, "POSIX")==NULL){
-			warn("setlocale() call failed");
-			return FALSE;
-		}
-		if(!XSupportsLocale()){
-			warn("XSupportLocale still failed. Refusing to resume.");
-			return FALSE;
-		}
-	}
-#endif
 	
 	initialize_global();
 	
@@ -257,6 +293,13 @@ bool ioncore_init(const char *display, bool onescreen)
 		warn("Could not connect to X display '%s'", XDisplayName(display));
 		return FALSE;
 	}
+
+#ifdef CF_UTF8
+	if(!set_up_locales(dpy)){
+		warn("There's something wrong with your system. Attempting to "
+			 "continue nevertheless, but expect problems.");
+	}
+#endif
 
 	if(onescreen){
 		dscr=DefaultScreen(dpy);
