@@ -812,6 +812,9 @@ WFrame *ionws_split_at(WIonWS *ws, WFrame *frame, const char *dirstr,
     WSplitRegion *node;
     WFrame *newframe;
     
+    if(frame==NULL)
+        return NULL;
+    
     node=get_node_check(ws, (WRegion*)frame);
 
     newframe=ionws_do_split(ws, (WSplit*)node, dirstr, 
