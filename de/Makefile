@@ -12,7 +12,7 @@ include $(TOPDIR)/system-inc.mk
 INCLUDES += $(X11_INCLUDES) -I..
 CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
-SOURCES=init.c draw.c font.c colour.c brush.c fontset.c
+SOURCES=init.c draw.c font.c colour.c brush.c fontset.c style.c
 
 MODULE=de
 

@@ -19,6 +19,7 @@ INTRSTRUCT(DEFont);
 
 #include "brush.h"
 #include "colour.h"
+#include "style.h"
 
 #define DE_RESET_FONT_EXTENTS(FNTE) \
    {(FNTE)->max_height=0; (FNTE)->max_width=0; (FNTE)->baseline=0;}
