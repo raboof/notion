@@ -888,6 +888,8 @@ static DynFunTab region_dynfuntab[]={
 	{region_notify_rootpos, default_notify_rootpos},
 	{region_request_managed_geom, region_request_managed_geom_allow},
 	{region_draw_config_updated, region_default_draw_config_updated},
+	{(DynFun*)region_find_rescue_manager_for, 
+	 (DynFun*)default_find_rescue_manager_for},
 	END_DYNFUNTAB
 };
 
