@@ -205,7 +205,7 @@ ExtlTab do_complete_region(const char *nam, WObjDescr *descr)
 	WRegion *reg;
 	char *name;
 	int lnum=0, l=strlen(nam);
-	int n=1;
+	int n=0;
 	ExtlTab tab=extl_create_table();
 	
 again:
@@ -223,7 +223,7 @@ again:
 		if(l==0 ||
 		   (lnum==0 && strncmp(name, nam, l)==0) ||
 		   (lnum==1 && strstr(name, nam)!=NULL)){
-			if(extl_table_seti_s(tab, n, name))
+			if(extl_table_seti_s(tab, n+1, name))
 				n++;
 		}
 		
