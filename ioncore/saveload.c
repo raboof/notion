@@ -46,8 +46,8 @@ WRegion *create_region_load(WWindow *par, const WFitParams *fp,
     
     if(fn==NULL){
         warn("Unknown class \"%s\", cannot create region.", objclass);
-        if(loading_layout && ioncore_g.layout_save_enabled){
-            ioncore_g.layout_save_enabled=FALSE;
+        if(loading_layout && ioncore_g.save_enabled){
+            ioncore_g.save_enabled=FALSE;
             warn("Disabling workspace saving on exit to prevent savefile "
                  "corruption.\n"
                  "Call enable_workspace_saves(TRUE) to re-enable saves or\n"

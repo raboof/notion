@@ -66,9 +66,9 @@ void ioncore_set_warp(bool warp)
  * Enable or disable layout saving on exit.
  */
 EXTL_EXPORT
-void ioncore_set_save_layout(bool enable)
+void ioncore_set_save(bool enable)
 {
-    ioncore_g.layout_save_enabled=enable;
+    ioncore_g.save_enabled=enable;
 }
 
 

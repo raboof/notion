@@ -16,6 +16,7 @@
 #include <ioncore/saveload.h>
 #include <ioncore/extl.h>
 #include <ioncore/bindmaps.h>
+#include <ioncore/ioncore.h>
 
 #include "query.h"
 #include "edln.h"
@@ -110,8 +111,7 @@ void mod_query_deinit()
         mod_query_wedln_bindmap=NULL;
     }
     
-    if(loaded_ok)
-        save_history();
+    REMOVE_HOOK(ioncore_save_session_hook, save_history);
 }
 
 
@@ -127,12 +127,14 @@ bool mod_query_init()
        mod_query_input_bindmap==NULL){
         goto err;
     }
-    
+
     ioncore_read_config("query", NULL, TRUE);
 
     load_history();
     
     loaded_ok=TRUE;
+
+    ADD_HOOK(ioncore_save_session_hook, save_history);
     
     return TRUE;
     

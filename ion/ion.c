@@ -52,7 +52,7 @@ static OptParserOpt ion_opts[]={
 #else
     {OPT_ID('x'),   "xinerama", OPT_ARG, "?", "Ignored: not compiled with Xinerama support"},
 #endif
-    {OPT_ID('s'),   "sessionname", OPT_ARG, "session_name", "Name of session (affects savefiles)"},
+    {OPT_ID('s'),   "session",  OPT_ARG, "session_name", "Name of session (affects savefiles)"},
     {OPT_ID('i'),   "i18n", 0, NULL, "Enable use of multibyte string routines, actual "
                                      "encoding depending on the locale."},
     END_OPTPARSEROPTS

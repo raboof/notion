@@ -1371,6 +1371,30 @@ static WRegion *clientwin_current(WClientWin *cwin)
 
 static int last_checkcode=1;
 
+static bool (*add_cb)(WWindow *par, ExtlTab tab);
+static void (*cfg_cb)(WClientWin *cwin, ExtlTab tab);
+
+bool ioncore_set_sm_callbacks(bool (*add)(WWindow *par, ExtlTab tab),
+                              void (*cfg)(WClientWin *cwin, ExtlTab tab))
+{
+    if(add_cb!=NULL || cfg_cb!=NULL)
+        return FALSE;
+    
+    add_cb=add;
+    cfg_cb=cfg;
+    
+    return TRUE;
+}
+
+void ioncore_unset_sm_callbacks(bool (*add)(WWindow *par, ExtlTab tab),
+                                void (*cfg)(WClientWin *cwin, ExtlTab tab))
+{
+    if(add_cb==add)
+        add_cb=NULL;
+    if(cfg_cb==cfg)
+        cfg_cb=NULL;
+}
+
 
 static ExtlTab clientwin_get_configuration(WClientWin *cwin)
 {
@@ -1387,6 +1411,9 @@ static ExtlTab clientwin_get_configuration(WClientWin *cwin)
                                      chkc);
         extl_table_sets_i(tab, "checkcode", chkc);
     }
+    
+    if(cfg_cb!=NULL)
+        cfg_cb(cwin, tab);
     
     return tab;
 }
@@ -1408,11 +1435,10 @@ WRegion *clientwin_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
     
     win=(Window)wind;
 
-    if(!xwindow_get_integer_property(win, ioncore_g.atom_checkcode, &real_chkc))
-        return NULL;
-
-    if(real_chkc!=chkc){
-        /*warn("Client window check code mismatch.");*/
+    if(!xwindow_get_integer_property(win, ioncore_g.atom_checkcode, &real_chkc)
+       || real_chkc!=chkc){
+        if(add_cb!=NULL)
+            add_cb(par, tab);
         return NULL;
     }
 

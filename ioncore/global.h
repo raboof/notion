@@ -80,7 +80,7 @@ DECLSTRUCT(WGlobal){
     bool warp_enabled;
     bool switchto_new;
     
-    bool layout_save_enabled;
+    bool save_enabled;
     
     bool use_mb; /* use mb routines? */
     bool enc_sb; /* 8-bit charset? If unset, use_mb must be set. */

@@ -27,9 +27,9 @@ On X servers with multiple (traditional non-Xinerama) screens, manage only
 default screen (root window), not all, as given by the -display option or
 in the DISPLAY environment variable.
 .TP
-.B \-sessionname session_name
-Set session name. This option affects where workspace and other save files are
-put (~/.ion3/session_name if option set).
+.B \-session session_dir
+Set session save file directory. If there are no slashes in the name,
+~/.ion3/ prefix is added.
 .TP
 .B \-xinerama 0|1
 If Ion was compiled with Xinerama support, this option can be used to

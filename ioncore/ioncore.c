@@ -126,7 +126,7 @@ static void init_global()
     ioncore_g.resize_delay=CF_RESIZE_DELAY;
     ioncore_g.opaque_resize=0;
     ioncore_g.warp_enabled=TRUE;
-    ioncore_g.layout_save_enabled=TRUE;
+    ioncore_g.save_enabled=TRUE;
     ioncore_g.switchto_new=TRUE;
     
     ioncore_g.enc_utf8=FALSE;
@@ -272,28 +272,43 @@ static void set_session(const char *display)
 {
     const char *dpyend;
     char *tmp, *colon;
+    const char *smdir, *sm;
     
-    dpyend=strchr(display, ':');
-    if(dpyend!=NULL)
-        dpyend=strchr(dpyend, '.');
-    if(dpyend==NULL){    
-        libtu_asprintf(&tmp, "default-session-%s", display);
+    sm=getenv("SESSION_MANAGER");
+    smdir=getenv("SM_SAVE_DIR");
+    
+    if(sm!=NULL && smdir!=NULL){
+        /* Probably running under a session manager; use its
+         * save file directory. (User should also load mod_sm.)
+         */
+        libtu_asprintf(&tmp, "%s/ion3");
+        if(tmp==NULL){
+            warn_err();
+            return;
+        }
     }else{
-        libtu_asprintf(&tmp, "default-session-%.*s",
-                       (int)(dpyend-display), display);
-    }
-
-    if(tmp==NULL){
-        warn_err();
-        return;
-    }
-
-    colon=tmp;
-    while(1){
-        colon=strchr(colon, ':');
-        if(colon==NULL)
-            break;
-        *colon='-';
+        dpyend=strchr(display, ':');
+        if(dpyend!=NULL)
+            dpyend=strchr(dpyend, '.');
+        if(dpyend==NULL){    
+            libtu_asprintf(&tmp, "default-session-%s", display);
+        }else{
+            libtu_asprintf(&tmp, "default-session-%.*s",
+                           (int)(dpyend-display), display);
+        }
+        
+        if(tmp==NULL){
+            warn_err();
+            return;
+        }
+        
+        colon=tmp;
+        while(1){
+            colon=strchr(colon, ':');
+            if(colon==NULL)
+                break;
+            *colon='-';
+        }
     }
     
     ioncore_set_sessiondir(tmp);
@@ -340,7 +355,8 @@ static bool ioncore_init_x(const char *display, int stflags)
         }
     }
     
-    set_session(XDisplayName(display));
+    if(ioncore_sessiondir()==NULL)
+        set_session(XDisplayName(display));
     
     ioncore_g.dpy=dpy;
     
@@ -451,6 +467,32 @@ bool ioncore_startup(const char *display, const char *cfgfile,
 /*}}}*/
 
 
+/*{{{ ioncore_save_session */
+
+
+WHooklist *ioncore_save_session_hook=NULL;
+
+
+/*EXTL_DOC
+ * Save session state.
+ */
+EXTL_EXPORT
+bool ioncore_save_session()
+{
+    if(!ioncore_save_layout())
+        return FALSE;
+
+    CALL_HOOKS(ioncore_save_session_hook, ());
+              
+    extl_call_named("call_hook", "s", NULL, "save_session");
+    
+    return TRUE;
+}
+
+
+/*}}}*/
+
+
 /*{{{ ioncore_deinit */
 
 
@@ -463,14 +505,11 @@ void ioncore_deinit()
     
     if(ioncore_g.dpy==NULL)
         return;
-    
+
+    if(ioncore_g.save_enabled)
+        ioncore_save_session();
+
     extl_call_named("call_hook", "s", NULL, "deinit");
-                    
-    if(ioncore_g.layout_save_enabled){
-        ioncore_save_layout();
-    }else{
-        warn("Not saving workspace layout.");
-    }
     
     while(ioncore_g.screens!=NULL)
         destroy_obj((Obj*)ioncore_g.screens);

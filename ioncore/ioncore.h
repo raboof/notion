@@ -29,6 +29,9 @@ extern const char *ioncore_aboutmsg();
 extern const char *ioncore_version();
 extern bool ioncore_is_i18n();
 
+extern bool ioncore_save_session();
+
 extern WHooklist *ioncore_post_layout_setup_hook;
+extern WHooklist *ioncore_save_session_hook;
 
 #endif /* ION_IONCORE_IONCORE_H */

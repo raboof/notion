@@ -138,27 +138,41 @@ const char* ioncore_userdir()
 }
 
 
+/*EXTL_DOC
+ * Get session directory.
+ */
+EXTL_EXPORT
+const char* ioncore_sessiondir()
+{
+    return sessiondir;
+}
+
+
 bool ioncore_set_sessiondir(const char *session)
 {
     char *tmp;
     bool ret=FALSE;
     
-    if(sessiondir!=NULL)
-        return FALSE;
-    
-    if(userdir!=NULL){
+    if(strchr(session, '/')!=NULL){
+        tmp=scopy(session);
+    }else if(userdir!=NULL){
         libtu_asprintf(&tmp, "%s/%s", userdir, session);
-        if(tmp==NULL){
-            warn_err();
-        }else{
-            ret=ioncore_add_scriptdir(tmp);
-            if(sessiondir!=NULL)
-                free(sessiondir);
-            sessiondir=tmp;
-        }
+    }else{
+        warn("User directory not set. Unable to set session directory.");
+        return FALSE;
     }
     
-    return ret;
+    if(tmp==NULL){
+        warn_err();
+        return FALSE;
+    }
+    
+    if(sessiondir!=NULL)
+        free(sessiondir);
+    
+    sessiondir=tmp;
+    
+    return TRUE;
 }
 
 
@@ -220,10 +234,18 @@ static int try_dir(const char *const *files, const char *cfdir,
 
 
 static int try_etcpath(const char *const *files, 
-                        WTryConfigFn *tryfn, void *tryfnparam)
+                       WTryConfigFn *tryfn, void *tryfnparam)
 {
-    const char *const *file;
+    const char *const *file=NULL;
     int i, ret;
+
+    if(sessiondir!=NULL){
+        for(file=files; *file!=NULL; file++){
+            ret=do_try(sessiondir, *file, tryfn, tryfnparam);
+            if(ret>=0)
+                return ret;
+        }
+    }
     
     for(i=n_scriptpaths-1; i>=0; i--){
         for(file=files; *file!=NULL; file++){
@@ -458,7 +480,7 @@ char *ioncore_get_savefile(const char *basename)
         return NULL;
     
     if(!ensuredir(sessiondir)){
-        warn("Unable to create session directory %s\n", sessiondir);
+        warn("Unable to create session directory \"%s\"\n", sessiondir);
         return NULL;
     }
     
