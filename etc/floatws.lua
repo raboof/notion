@@ -12,7 +12,7 @@ floatws_bindings{
                region_raise(f)
            end
           ),
-    submap "Mod1+K" {
+    submap(DEFAULT_MOD .. "K") {
         kpress("AnyModifier+Tab",
                function(ws)
                    f=floatws_backcirculate(ws)

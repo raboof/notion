@@ -58,7 +58,7 @@ function frame_query_bindings()
         
         kpress("F1", QueryLib.query_man),
         kpress("F3", QueryLib.query_exec),
-        kpress("Mod1+F3", QueryLib.query_lua),
+        kpress(DEFAULT_MOD .. "F3", QueryLib.query_lua),
         kpress("F4", QueryLib.query_ssh),
         kpress("F5", QueryLib.query_editfile),
         kpress("F6", QueryLib.query_runfile),
