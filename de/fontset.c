@@ -22,18 +22,6 @@
 
 #define FNT_D(X) /*X*/
 
-static const char *mystrcasestr(const char *str, const char *ptn) 
-{
-    const char *s2, *p2;
-    for(; *str; str++) {
-        for(s2=str,p2=ptn; ; s2++,p2++) {
-            if (!*p2) return str;
-            if (toupper(*s2) != toupper(*p2)) break;
-        }
-    }
-    return NULL;
-}
-
 
 static const char *get_font_element(const char *pattern, char *buf,
                                     int bufsiz, ...) 
@@ -46,7 +34,7 @@ static const char *get_font_element(const char *pattern, char *buf,
     buf[bufsiz-1] = 0;
     buf[bufsiz-2] = '*';
     while((v = va_arg(va, char *)) != NULL) {
-        p = mystrcasestr(pattern, v);
+        p = libtu_strcasestr(pattern, v);
         if (p) {
             strncpy(buf, p+1, bufsiz-2);
             p2 = strchr(buf, '-');
