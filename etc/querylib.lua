@@ -31,7 +31,7 @@ function QueryLib.make_frame_fn(prompt, initfn, handler, completor)
             initvalue=initfn(frame)
         end
         local function handle_it(str)
-            handler(%frame, str)
+            handler(frame, str)
         end
         query_query(frame, prompt, initvalue or "", handle_it, completor)
     end
@@ -42,9 +42,9 @@ function QueryLib.make_rename_fn(prompt, getobj)
     local function query_it(frame)
         local obj=getobj(frame)
         local function handle_it(str)
-            region_set_name(%obj, str)
+            region_set_name(obj, str)
         end
-        query_query(frame, %prompt, region_name(obj) or "", handle_it, nil)
+        query_query(frame, prompt, region_name(obj) or "", handle_it, nil)
     end
     return query_it
 end
@@ -60,9 +60,9 @@ function QueryLib.make_yesno_handler(fn)
     local function handle_yesno(_, yesno)
         if yesno=="y" or yesno=="Y" or yesno=="yes" then
             if arg then
-                %fn(unpack(arg))
+                fn(unpack(arg))
             else
-                %fn()
+                fn()
             end
         end
     end
