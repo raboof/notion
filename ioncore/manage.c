@@ -129,7 +129,7 @@ bool add_clientwin_default(WClientWin *cwin, WAttachParams *param)
 				if(param->tfor==cwin){
 					param->tfor=NULL;
 					cwin->transient_for=None;
-				}else{
+				}else if(param->tfor){
 					param->flags|=REGION_ATTACH_TFOR;
 				}
 			}
