@@ -382,8 +382,12 @@ static bool floatws_add_clientwin(WFloatWS *ws,
 
 	floatws_add_managed(ws, target);
 	
-	if(newreg && params->flags&REGION_ATTACH_SWITCHTO)
-		region_goto((WRegion*)target);
+	/* Don't warp, it is annoying in this case */
+	if(newreg && params->flags&REGION_ATTACH_SWITCHTO &&
+	   region_may_control_focus((WRegion*)ws)){
+		set_previous_of((WRegion*)target);
+		set_focus((WRegion*)target);
+	}
 	
 	return TRUE;
 }
