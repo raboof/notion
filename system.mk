@@ -40,33 +40,12 @@ VARDIR=/var/cache/ion
 ## Modules
 ##
 
-# The path to the libtool script. Version 1.4.3 or newer is required.
-# Users of many of the *BSD:s will have to manually install a a recent
-# libtool because even more-recent-than-libtool-1.4.3 releases of those
-# OSes only have an _ancient_ 1.3.x libtool that _will_ _not_ _work even
-# though a lot of libltdl-using apps require 1.4.3.
-LIBTOOL=libtool
-
-# Settings for compiling and linking to ltdl
-LTDL_INCLUDES=
-LTDL_LIBS=-lltdl
-
-# The following should do it if you have manually installed libtool 1.5 in
-# $(LIBTOOLDIR).
-#
-# Note to Cygwin users: you must set LIBTOOLDIR point to a real libtool 
-# script (e.g. /usr/autotool/stable/bin/libtool) instead of some useless
-# autoconf-expecting wrapper. If you also set PRELOAD_MODULES=1 and disable
-# Xinerama support below, Ion should compile on Cygwin.
-#
-#LIBTOOLDIR=/usr/local/stow/libtool-1.5
-#LIBTOOL=$(LIBTOOLDIR)/bin/libtool
-#LTDL_INCLUDES=-I$(LIBTOOLDIR)/include
-#LTDL_LIBS=-L$(LIBTOOLDIR)/lib -lltdl
-
 # Set PRELOAD_MODULES=1 if your system does not support dynamically loaded
-# modules. 
+# modules through 'libdl' or has non-standard naming conventions.
 #PRELOAD_MODULES=1
+
+# Flags to link with libdl.
+#DL_LIBS=-ldl
 
 
 ##
@@ -76,7 +55,7 @@ LTDL_LIBS=-lltdl
 # If you have installed Lua 5.0 from the official tarball without changing
 # paths, this should do it.
 LUA_DIR=/usr/local
-LUA_LIBS = -L$(LUA_DIR)/lib -R$(LUA_DIR)/lib -llua -llualib
+LUA_LIBS = -L$(LUA_DIR)/lib -llua -llualib
 LUA_INCLUDES = -I$(LUA_DIR)/include
 LUA=$(LUA_DIR)/bin/lua
 LUAC=$(LUA_DIR)/bin/luac
@@ -181,7 +160,6 @@ LDFLAGS=-g -Os $(EXTRA_LIBS) $(LIBS)
 DEPEND_FILE=.depend
 DO_MAKE_DEPEND=$(CC) -MM $(DEFINES) $(EXTRA_INCLUDES) $(INCLUDES)
 MAKE_DEPEND=$(DO_MAKE_DEPEND) $(SOURCES) > $(DEPEND_FILE)
-MAKE_DEPEND_MOD=$(DO_MAKE_DEPEND) $(SOURCES) | sed 's/\.o/\.lo/' > $(DEPEND_FILE)
 
 ##
 ## AR
@@ -208,3 +186,4 @@ DATA_MODE=644
 
 STRIP=strip
 
+RM=rm

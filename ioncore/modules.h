@@ -18,4 +18,11 @@ extern bool ioncore_load_module(const char *name);
 extern void ioncore_unload_modules();
 extern bool ioncore_init_module_support();
 
+typedef struct{
+    const char *name;
+    bool (*init)();
+    void (*deinit)();
+    bool loaded;
+} WStaticModuleInfo;
+
 #endif /* ION_IONCORE_MODULES_H */

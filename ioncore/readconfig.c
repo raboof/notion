@@ -13,7 +13,6 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <ltdl.h>
 #include <libtu/output.h>
 
 #include "common.h"
@@ -91,7 +90,8 @@ bool ioncore_add_scriptdir(const char *dir)
 EXTL_EXPORT
 bool ioncore_add_moduledir(const char *dir)
 {
-    return (lt_dlinsertsearchdir(lt_dlgetsearchpath(), dir)==0);
+    return ioncore_add_scriptdir(dir);
+    /*(lt_dlinsertsearchdir(lt_dlgetsearchpath(), dir)==0);*/
 }
 
 
@@ -317,8 +317,9 @@ static int try_read_savefile(const char *file, TryCallParam *param)
 }
 
 
-static int do_try_config(const char *fname, const char *cfdir,
-                         WTryConfigFn *tryfn, void *tryfnparam)
+int ioncore_try_config(const char *fname, const char *cfdir,
+                       WTryConfigFn *tryfn, void *tryfnparam,
+                       const char *ext1, const char *ext2)
 {
     char *files[]={NULL, NULL, NULL};
     int n=0, ret;
@@ -336,18 +337,21 @@ static int do_try_config(const char *fname, const char *cfdir,
         else
             n++;
     }else{
-#ifdef EXTL_COMPILED_EXTENSION
-        files[n]=scat(fname, "." EXTL_COMPILED_EXTENSION);
-        if(files[n]==NULL)
-            warn_err();
-        else
-            n++;
-#endif
-        files[n]=scat(fname, "." EXTL_EXTENSION);
-        if(files[n]==NULL)
-            warn_err();
-        else
-            n++;
+        if(ext1!=NULL){
+            files[n]=scat3(fname, ".", ext1);
+            if(files[n]==NULL)
+                warn_err();
+            else
+                n++;
+        }
+
+        if(ext2!=NULL){
+            files[n]=scat3(fname, ".", ext2);
+            if(files[n]==NULL)
+                warn_err();
+            else
+                n++;
+        }
     }
     
     if(!search)
@@ -359,13 +363,6 @@ static int do_try_config(const char *fname, const char *cfdir,
         free(files[--n]);
     
     return ret;
-}
-
-
-int ioncore_try_config(const char *module, WTryConfigFn *tryfn, 
-                       void *tryfnparam)
-{
-    return do_try_config(module, NULL, tryfn, tryfnparam);
 }
 
 
@@ -404,7 +401,8 @@ bool ioncore_read_config(const char *file, const char *sp, bool warn_nx)
     
     param.status=0;
     
-    retval=do_try_config(file, sp, (WTryConfigFn*)try_call, &param);
+    retval=ioncore_try_config(file, sp, (WTryConfigFn*)try_call, &param,
+                              EXTL_COMPILED_EXTENSION, EXTL_EXTENSION);
     
     if(retval==IONCORE_TRYCONFIG_NOTFOUND && warn_nx)
         warn("Unable to find '%s' on configuration file search path.", file);
@@ -421,8 +419,8 @@ bool ioncore_read_savefile(const char *basename, ExtlTab *tabret)
     param.status=0;
     param.tab=extl_table_none();
     
-    retval=do_try_config(basename, NULL, (WTryConfigFn*)try_read_savefile,
-                         &param);
+    retval=ioncore_try_config(basename, NULL, (WTryConfigFn*)try_read_savefile,
+                              &param, EXTL_EXTENSION, NULL);
 
     *tabret=param.tab;
     

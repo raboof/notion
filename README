@@ -12,7 +12,6 @@ BUILDING AND INSTALLING
 1. Make sure you have the following tools and libraries installed:
 
     * GNU make
-    * Libtool and libltdl, version 1.4.3 or newer
     * Lua 5.0.1 (see <http://www.lua.org/>). 
     
    Lua 5.0 has a stack management bug that manifests in Ion, resulting in

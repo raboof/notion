@@ -18,7 +18,7 @@ INCLUDES += -I..
 LIBS += -lm
 LIBS += $(X11_LIBS) $(XINERAMA_LIBS)
 LIBS += $(LUA_LIBS)
-LIBS += $(LTDL_LIBS)
+LIBS += $(DL_LIBS)
 EXT_OBJS += ../ioncore/ioncore.a ../luaextl/luaextl.a
 #DIST: EXT_OBJS += ../libtu/libtu.a
 LIBS += -ltu
@@ -35,14 +35,17 @@ endif
 
 CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
+SOURCES=pwm.c
+
 ifeq ($(PRELOAD_MODULES),1)
-LDFLAGS += $(foreach mod, $(PWM_MODULE_LIST), -dlpreopen ../$(mod)/$(mod).la)
-LINKOPTS = -R$(MODULEDIR)
+EXT_OBJS += $(foreach mod, $(PWM_MODULE_LIST), ../$(mod)/$(mod).a)
+SOURCES += preload.c
+TO_CLEAN += preload.c
+LIBS += -lSM -lICE
 else
-LINKOPTS = -export-dynamic -R$(MODULEDIR)
+LINKOPTS = -export-dynamic
 endif
 
-SOURCES = pwm.c
 ETC = pwm.lua pwm-menus.lua pwm-bindings.lua
 TARGETS = pwm
 
@@ -53,7 +56,10 @@ include $(TOPDIR)/rules.mk
 ######################################
 
 pwm: $(OBJS) $(EXT_OBJS)
-	$(LIBTOOL) --mode=link $(CC) $(LINKOPTS) $(OBJS) $(EXT_OBJS) $(LDFLAGS) -o $@
+	$(CC) $(LINKOPTS) $(OBJS) $(EXT_OBJS) $(LDFLAGS) -o $@
+
+preload.c:
+	$(LUA) ../mkpreload.lua $(PWM_MODULE_LIST) > preload.c
 
 _install:
 	$(INSTALLDIR) $(BINDIR)

@@ -2,13 +2,16 @@
 ## Some make rules
 ##
 
-RM=$(LIBTOOL) --mode=clean rm
 
 # Main targets
 ######################################
 
 ifdef MODULE
-TARGETS := $(TARGETS) $(MODULE).la
+ifeq ($(PRELOAD_MODULES),1)
+TARGETS := $(TARGETS) $(MODULE).a
+else
+TARGETS := $(TARGETS) $(MODULE).so
+endif
 endif
 
 ifdef LUA_SOURCES
@@ -51,7 +54,7 @@ install: _install
 endif
 
 
-# The rules
+# Exports
 ######################################
 
 ifdef MAKE_EXPORTS
@@ -69,40 +72,63 @@ EXPORTS_C =
 
 endif # !MAKE_EXPORTS
 
+
+# Compilation and linking
+######################################
+
+OBJS=$(subst .c,.o,$(SOURCES) $(EXPORTS_C))
+
+
 ifdef MODULE
 
-OBJS=$(subst .c,.lo,$(SOURCES) $(EXPORTS_C))
-
 ifneq ($(PRELOAD_MODULES),1)
-PICOPT=-prefer-pic
-LINKOPT=-module -avoid-version
-else
-PICOPT=-static -prefer-non-pic
-LINKOPT=-static -module -avoid-version
-endif
+
+CC_PICFLAGS=-fPIC -DPIC
+LD_SHAREDFLAGS=-shared
 
 %.lo: %.c
-	$(LIBTOOL) --mode=compile $(CC) $(PICOPT) $(CFLAGS) -c $< -o $@
+	$(CC) $(CC_PICFLAGS) $(CFLAGS) -c $< -o $@
 
-$(MODULE).la: $(OBJS) $(EXT_OBJS)
-	$(LIBTOOL) --mode=link $(CC) $(LINKOPT) $(LDFLAGS) \
- 	-rpath $(MODULEDIR) $(OBJS) $(EXT_OBJS) -o $@
+$(MODULE).so: $(OBJS) $(EXT_OBJS)
+	$(CC) $(LD_SHAREDFLAGS) $(LDFLAGS) $(OBJS) $(EXT_OBJS) -o $@
 
 module_install:
 	$(INSTALLDIR) $(MODULEDIR)
-	$(LIBTOOL) --mode=install $(INSTALL) -m $(BIN_MODE) $(MODULE).la $(MODULEDIR)
+	$(INSTALL) -m $(BIN_MODE) $(MODULE).so $(MODULEDIR)
 
-clean_objs:
-	$(RM) -f $(OBJS)
+else # PRELOAD_MODULES
 
-clean_target:
-	$(RM) -f $(MODULE).la
+PICOPT=-fPIC -DPIC
+LINKOPT=-shared
 
-else #!MODULE
+%.lo: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(MODULE).a: $(OBJS) $(EXT_OBJS)
+	$(AR) $(ARFLAGS) $@ $+
+	$(RANLIB) $@
+
+module_install:
+#	$(INSTALLDIR) $(MODULEDIR)
+#	$(INSTALL) -m $(BIN_MODE) $(MODULE).a $(MODULEDIR)
+
+endif # PRELOAD_MODULES
+
+
+else # !MODULE
+
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+
+endif# !MODULE
+
+
+# Clean rules
+######################################
 
 ifdef SOURCES
-
-OBJS=$(subst .c,.o,$(SOURCES) $(EXPORTS_C))
 
 clean_objs:
 	$(RM) -f $(OBJS)
@@ -113,14 +139,8 @@ clean_objs:
 
 endif #!SOURCES
 
-
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
 clean_target:
 	$(RM) -f $(TARGETS)
-
-endif #!MODULE
 
 _clean: clean_objs
 	$(RM) -f core $(DEPEND_FILE) $(TO_CLEAN)
@@ -140,17 +160,8 @@ _realclean: clean_target
 
 ifdef SOURCES
 
-ifdef MODULE
-
-_depend:
-	$(MAKE_DEPEND_MOD)
-	
-else
-
 _depend:
 	$(MAKE_DEPEND)
-
-endif
 
 else #!SOURCES
 

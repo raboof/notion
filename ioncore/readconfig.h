@@ -34,8 +34,9 @@ extern bool ioncore_add_moduledir(const char *dir);
 extern const char *ioncore_userdir();
 extern const char *ioncore_sessiondir();
 
-extern int ioncore_try_config(const char *module, WTryConfigFn *tryfn, 
-                              void *tryfnparam);
+extern int ioncore_try_config(const char *fname, const char *cfdir,
+                              WTryConfigFn *tryfn, void *tryfnparam,
+                              const char *ext1, const char *ext2);
 
 extern char *ioncore_lookup_script(const char *file, const char *sp);
 
