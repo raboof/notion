@@ -29,4 +29,7 @@ INTRCLASS(WRootWin);
 INTRCLASS(WScreen);
 INTRCLASS(WWindow);
 
+INTRCLASS(WPHolder);
+INTRCLASS(WMPlexPHolder);
+
 #endif /* ION_IONCORE_CLASSES_H */

@@ -12,11 +12,11 @@
 #ifndef ION_IONCORE_MPLEX_H
 #define ION_IONCORE_MPLEX_H
 
+#include <libextl/extl.h>
 #include "common.h"
 #include "window.h"
 #include "attach.h"
 #include "manage.h"
-#include <libextl/extl.h>
 #include "rectangle.h"
 #include "hooks.h"
 
@@ -62,7 +62,7 @@ typedef struct{
     int flags;
     int index;
     WRectangle l2geom;
-} MPlexAttachParams;
+} WMPlexAttachParams;
 
 
 INTRSTRUCT(WMPlexManaged);
@@ -70,7 +70,7 @@ DECLSTRUCT(WMPlexManaged){
     WMPlexManaged *next, *prev;
     int flags;
     WRegion *reg;
-    /*WMPlexPlaceHolder *ph; */
+    WMPlexPHolder *phs;
 };
 
 
@@ -81,10 +81,12 @@ DECLCLASS(WMPlex){
     int l1_count;
     WMPlexManaged *l1_list;
     WMPlexManaged *l1_current;
+    WMPlexPHolder *l1_phs;
     
     int l2_count;
     WMPlexManaged *l2_list;
     WMPlexManaged *l2_current;
+    WMPlexPHolder *l2_phs;
     
     WMPlexSTDispInfo stdispinfo;
 };
@@ -114,6 +116,14 @@ extern WRegion *mplex_attach_hnd(WMPlex *mplex, WRegionAttachHandler *hnd,
 
 extern WRegion *mplex_attach(WMPlex *mplex, WRegion *reg, ExtlTab param);
 extern WRegion *mplex_attach_new(WMPlex *mplex, ExtlTab param);
+
+extern WRegion *mplex_do_attach(WMPlex *mplex, WRegionAttachHandler *hnd,
+                                void *hnd_param, WMPlexAttachParams *param);
+extern WMPlexManaged *mplex_do_attach_after(WMPlex *mplex, 
+                                            WMPlexManaged *after, 
+                                            WMPlexAttachParams *param,
+                                            WRegionAttachHandler *hnd,
+                                            void *hnd_param);
 
 extern void mplex_attach_tagged(WMPlex *mplex);
 

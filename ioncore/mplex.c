@@ -37,6 +37,7 @@
 #include "region-iter.h"
 #include "saveload.h"
 #include "xwindow.h"
+#include "mplexpholder.h"
 
 
 #define MPLEX_WIN(MPLEX) ((MPLEX)->win.win)
@@ -113,30 +114,40 @@ static WRegion *nth_region_on_list(WMPlexManaged *list, uint n)
 }
 
 
-static void do_link_at(WMPlexManaged **list, WMPlexManaged *node,
-                       WMPlexManaged *after, bool nullfirst)
+static void link_after(WMPlexManaged **list, 
+                       WMPlexManaged *after,
+                       WMPlexManaged *node)
 {
     if(after!=NULL){
         LINK_ITEM_AFTER(*list, after, node, next, prev);
-    }else if(nullfirst){
-        LINK_ITEM_FIRST(*list, node, next, prev);
     }else{
-        LINK_ITEM(*list, node, next, prev);
+        LINK_ITEM_FIRST(*list, node, next, prev);
     }
 }
 
 
-static void link_at(WMPlexManaged **list, WMPlexManaged *node, int index)
+static void link_last(WMPlexManaged **list, 
+                      WMPlexManaged *node)
+{
+    LINK_ITEM_LAST(*list, node, next, prev);
+}
+
+
+static WMPlexManaged *index_to_after(WMPlexManaged *list, 
+                                     WMPlexManaged *current,
+                                     int index)
 {
     WMPlexManaged *after=NULL;
     
-    if(index>0){
-        after=nth_node_on_list(*list, index-1);
-        if(after==node)
-            return;
+    if(index==INDEX_AFTER_CURRENT){
+        return current;
+    }else if(index<0){
+        return (list!=NULL ? list->prev : NULL);
+    }else if(index==0){
+        return NULL;
+    }else{ /* index>0 */
+        return nth_node_on_list(list, index-1);
     }
-    
-    do_link_at(list, node, after, index==0);
 }
 
 
@@ -160,6 +171,7 @@ static ExtlTab llist_to_table(WMPlexManaged *list)
     return t;
 }
 
+
 /*}}}*/
 
 
@@ -170,12 +182,17 @@ bool mplex_do_init(WMPlex *mplex, WWindow *parent, Window win,
                    const WFitParams *fp, bool create)
 {
     mplex->flags=0;
+    
     mplex->l1_count=0;
     mplex->l1_list=NULL;
     mplex->l1_current=NULL;
+    mplex->l1_phs=NULL;
+    
     mplex->l2_count=0;
     mplex->l2_list=NULL;
     mplex->l2_current=NULL;
+    mplex->l2_phs=NULL;
+    
     watch_init(&(mplex->stdispinfo.regwatch));
     mplex->stdispinfo.pos=MPLEX_STDISP_BL;
     
@@ -227,6 +244,14 @@ void mplex_deinit(WMPlex *mplex)
 
     assert(mplex->l1_list==NULL);
     assert(mplex->l2_list==NULL);
+
+    while(mplex->l1_phs!=NULL){
+        assert(mplexpholder_move(mplex->l1_phs, NULL, NULL, NULL, 1));
+    }
+
+    while(mplex->l2_phs!=NULL){
+        assert(mplexpholder_move(mplex->l2_phs, NULL, NULL, NULL, 1));
+    }
     
     window_deinit((WWindow*)mplex);
 }
@@ -337,7 +362,7 @@ int mplex_lcount(WMPlex *mplex, uint l)
 EXTL_EXPORT_MEMBER
 void mplex_set_index(WMPlex *mplex, WRegion *reg, int index)
 {
-    WMPlexManaged *node;
+    WMPlexManaged *node, *after;
     
     if(reg==NULL)
         return;
@@ -347,8 +372,11 @@ void mplex_set_index(WMPlex *mplex, WRegion *reg, int index)
     if(node==NULL)
         return;
     
+    mplex_move_phs_before(mplex, node, 1);
     unlink(&(mplex->l1_list), node);
-    link_at(&(mplex->l1_list), node, index);
+    
+    after=index_to_after(mplex->l1_list, mplex->l1_current, index);
+    link_after(&(mplex->l1_list), after, node);
     
     mplex_managed_changed(mplex, MPLEX_CHANGE_REORDER, FALSE, reg);
 }
@@ -707,9 +735,12 @@ static bool mplex_do_managed_display(WMPlex *mplex, WRegion *sub,
         /* This call should be unnecessary... */
         mplex_managed_activated(mplex, sub);
     }else{
+        mplex_move_phs_before(mplex, node, 2);
         unlink(&(mplex->l2_list), node);
+        
         region_raise(sub);
-        do_link_at(&(mplex->l2_list), node, NULL, TRUE);
+        
+        link_last(&(mplex->l2_list), node);
         
         node->flags&=~MGD_L2_HIDDEN;
         if(!(node->flags&MGD_L2_PASSIVE))
@@ -806,8 +837,11 @@ void mplex_switch_prev(WMPlex *mplex)
 /*{{{ Attach */
 
 
-static WRegion *mplex_do_attach(WMPlex *mplex, WRegionAttachHandler *hnd,
-                                void *hnd_param, MPlexAttachParams *param)
+WMPlexManaged *mplex_do_attach_after(WMPlex *mplex, 
+                                     WMPlexManaged *after, 
+                                     WMPlexAttachParams *param,
+                                     WRegionAttachHandler *hnd,
+                                     void *hnd_param)
 {
     WRegion *reg;
     WFitParams fp;
@@ -843,13 +877,10 @@ static WRegion *mplex_do_attach(WMPlex *mplex, WRegionAttachHandler *hnd,
     node->flags=0;
     
     if(l2){
-        do_link_at(&(mplex->l2_list), node, NULL, TRUE);
+        link_after(&(mplex->l2_list), after, node);
         mplex->l2_count++;
     }else{
-        if(mplex->l1_current!=NULL && param->index==INDEX_AFTER_CURRENT)
-            do_link_at(&(mplex->l1_list), node, mplex->l1_current, FALSE);
-        else
-            link_at(&(mplex->l1_list), node, param->index);
+        link_after(&(mplex->l1_list), after, node);
         mplex->l1_count++;
     }
     
@@ -873,13 +904,30 @@ static WRegion *mplex_do_attach(WMPlex *mplex, WRegionAttachHandler *hnd,
     if(!l2)
         mplex_managed_changed(mplex, MPLEX_CHANGE_ADD, sw, reg);
     
-    return reg;
+    return node;
+}
+    
+
+WRegion *mplex_do_attach(WMPlex *mplex, WRegionAttachHandler *hnd,
+                         void *hnd_param, WMPlexAttachParams *param)
+{
+    bool l2=param->flags&MPLEX_ATTACH_L2;
+    WMPlexManaged *node, *after;
+    
+    if(l2)
+        after=index_to_after(mplex->l2_list, mplex->l2_current, param->index);
+    else
+        after=index_to_after(mplex->l1_list, mplex->l1_current, param->index);
+
+    node=mplex_do_attach_after(mplex, after, param, hnd, hnd_param);
+    
+    return (node!=NULL ? node->reg : NULL);
 }
 
 
 WRegion *mplex_attach_simple(WMPlex *mplex, WRegion *reg, int flags)
 {
-    MPlexAttachParams par;
+    WMPlexAttachParams par;
     
     if(reg==(WRegion*)mplex)
         return FALSE;
@@ -896,7 +944,7 @@ WRegion *mplex_attach_simple(WMPlex *mplex, WRegion *reg, int flags)
 WRegion *mplex_attach_hnd(WMPlex *mplex, WRegionAttachHandler *hnd,
                           void *hnd_param, int flags)
 {
-    MPlexAttachParams par;
+    WMPlexAttachParams par;
     
     par.index=DEFAULT_INDEX(mplex);
     par.flags=flags&~MPLEX_ATTACH_L2_GEOM;
@@ -905,7 +953,7 @@ WRegion *mplex_attach_hnd(WMPlex *mplex, WRegionAttachHandler *hnd,
 }
 
 
-static void get_params(ExtlTab tab, MPlexAttachParams *par)
+static void get_params(ExtlTab tab, WMPlexAttachParams *par)
 {
     int layer=1;
     
@@ -938,7 +986,7 @@ static void get_params(ExtlTab tab, MPlexAttachParams *par)
 EXTL_EXPORT_MEMBER
 WRegion *mplex_attach(WMPlex *mplex, WRegion *reg, ExtlTab param)
 {
-    MPlexAttachParams par;
+    WMPlexAttachParams par;
     get_params(param, &par);
     
     /* region__attach_reparent should do better checks. */
@@ -973,7 +1021,7 @@ WRegion *mplex_attach(WMPlex *mplex, WRegion *reg, ExtlTab param)
 EXTL_EXPORT_MEMBER
 WRegion *mplex_attach_new(WMPlex *mplex, ExtlTab param)
 {
-    MPlexAttachParams par;
+    WMPlexAttachParams par;
     get_params(param, &par);
     
     return region__attach_load((WRegion*)mplex, param,
@@ -1068,6 +1116,8 @@ void mplex_managed_remove(WMPlex *mplex, WRegion *sub)
     node=find_on_list(mplex->l2_list, sub);
     if(node!=NULL){
         l2=TRUE;
+        
+        mplex_move_phs_before(mplex, node, 2);
         unlink(&(mplex->l2_list), node);
         mplex->l2_count--;
 
@@ -1099,6 +1149,7 @@ void mplex_managed_remove(WMPlex *mplex, WRegion *sub)
             }
         }
         
+        mplex_move_phs_before(mplex, node, 1);
         unlink(&(mplex->l1_list), node);
         mplex->l1_count--;
     }
