@@ -20,7 +20,7 @@ ioncore.set{
     -- For keyboard resize, time (in milliseconds) to wait after latest
     -- key press before automatically leaving resize mode (and doing
     -- the resize in case of non-opaque move).
-    resize_delay=1500,
+    kbresize_delay=1500,
 
     -- Opaque resize?
     opaque_resize=false,
