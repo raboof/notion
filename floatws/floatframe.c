@@ -36,6 +36,7 @@ static bool floatframe_init(WFloatFrame *frame, WWindow *parent,
 
 	frame->bar_w=geom.w;
 	frame->genframe.tab_spacing=0;
+	frame->shaded=FALSE;
 	
 	genframe_recalc_bar((WGenFrame*)frame, FALSE);
 	
@@ -175,7 +176,7 @@ static void floatframe_set_shape(WFloatFrame *frame)
 	r[1].x=0;
 	r[1].y=g.h;
 	XShapeCombineRectangles(wglobal.dpy, WGENFRAME_WIN(frame), ShapeBounding,
-							0, 0, r, 2, ShapeSet, YXBanded);
+							0, 0, r, 2-frame->shaded, ShapeSet, YXBanded);
 }
 
 
@@ -307,7 +308,7 @@ void floatframe_remove_managed(WFloatFrame *frame, WRegion *reg)
 /*}}}*/
 
 
-/*{{{ Raise/lower */
+/*{{{ Actions */
 
 
 EXTL_EXPORT
@@ -324,16 +325,25 @@ void floatframe_lower(WFloatFrame *frame)
 }
 
 
-/*}}}*/
-
-
-/*{{{ Move */
-
-
 EXTL_EXPORT
 void floatframe_p_move(WFloatFrame *frame)
 {
 	genframe_p_move((WGenFrame*)frame);
+}
+
+
+EXTL_EXPORT
+void floatframe_toggle_shade(WFloatFrame *frame)
+{
+	frame->shaded=!frame->shaded;
+	floatframe_set_shape(frame);
+}
+
+
+EXTL_EXPORT
+bool floatframe_is_shaded(WFloatFrame *frame)
+{
+	return frame->shaded;
 }
 
 

@@ -15,6 +15,7 @@ INTROBJ(WFloatFrame);
 
 DECLOBJ(WFloatFrame){
 	WGenFrame genframe;
+	bool shaded;
 	int bar_w;
 };
 
