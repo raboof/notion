@@ -46,10 +46,22 @@ local function base_on(name, list)
     return true
 end
 
+local translations={
+    ["frame-tab"] = "tab-frame",
+    ["frame-tab-ionframe"] = "tab-frame-ionframe",
+    ["frame-tab-floatframe"] = "tab-frame-floatframe",
+}
+
 --DOC
 -- Define a new style for the default drawing engine (that must've
 -- been loaded with \fnref{gr_select_engine}.
-function de_define_style(name, list)    
+function de_define_style(name, list)
+    if translations[name] then
+        warn('The style "'..name..'" has been renamed to "'
+             ..translations[name]..'"')
+        name=translations[name]
+    end
+
     if not list then
         return function(list2)
                    de_define_style(name, list2)
@@ -72,11 +84,22 @@ function de_define_style(name, list)
 end
 
 
+local subtranslations={
+    ["cursor"]="*-cursor",
+    ["selection"]="*-selection",
+}
+    
 --DOC 
 -- Define a substyle for the default drawing engine. This function
 -- is to be used in constructing style definitions for 
 -- \fnref{de_define_style}.
 function de_substyle(pattern, list)
+    if subtranslations[pattern] then
+        warn('The substyle "'..pattern..'" has been renamed to "'
+             ..subtranslations[pattern]..'"')
+        pattern=subtranslations[pattern]
+    end
+    
     if not list then
         return function(list2)
                    substyle(pattern, list2)
