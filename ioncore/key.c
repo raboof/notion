@@ -247,8 +247,8 @@ void handle_keypress(XKeyEvent *ev)
 	
 	if(binding!=NULL){
 		if(binding->submap!=NULL){
-			if(add_sub(oreg, ev->keycode, ev->state))
-				submapgrab(oreg);
+			if(add_sub(reg, ev->keycode, ev->state))
+				submapgrab(reg);
 		}else{
 			dispatch_binding(binding_owner, binding, ev);
 		}
