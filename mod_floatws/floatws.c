@@ -82,7 +82,7 @@ bool floatws_fitrep(WFloatWS *ws, WWindow *par, const WFitParams *fp)
     
     end=NULL;
 
-    for(st=stacking; st!=end; st=stnext){
+    for(st=stacking; st!=end && st!=NULL; st=stnext){
         stnext=st->next;
         
         if(REGION_MANAGER(st->reg)==(WRegion*)ws){
