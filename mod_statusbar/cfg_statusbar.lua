@@ -26,8 +26,8 @@ mod_statusbar.create{
     --   mail_total  total mail count
     -- Space preceded by % adds stretchable space. > before meter name 
     -- aligns right, < left, and | centers.
-    --template="[ %date || load:% %>load || mail:% %>mail_new/%>mail_total ]",
-    template="[ %date || load: %load || mail: %mail_new/%mail_total ]",
+    template="[ %date || load:% %>load || mail:% %>mail_new/%>mail_total ]",
+    --template="[ %date || load: %load || mail: %mail_new/%mail_total ]",
 }
 
 

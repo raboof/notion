@@ -17,7 +17,7 @@
 #include <ioncore/gr.h>
 
 
-#define STATUSBAR_NX_STR "??"
+#define STATUSBAR_NX_STR "?"
 
 
 typedef enum{
@@ -44,7 +44,7 @@ DECLSTRUCT(WSBElem){
     int text_w;
     char *text;
     char *meter;
-    int tmpl_w;
+    int max_w;
     char *tmpl;
     char *attr;
 };

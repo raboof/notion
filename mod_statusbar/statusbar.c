@@ -112,7 +112,7 @@ static WSBElem *get_sbelems(ExtlTab t, int *nret)
         el[i].meter=NULL;
         el[i].text_w=0;
         el[i].text=NULL;
-        el[i].tmpl_w=0;
+        el[i].max_w=0;
         el[i].tmpl=NULL;
         el[i].attr=NULL;
         el[i].stretch=0;
@@ -202,19 +202,24 @@ static void calc_elem_w(WSBElem *el, GrBrush *brush)
     const char *str;
 
     if(el->type==WSBELEM_METER){
-        str=(el->tmpl!=NULL ? el->tmpl : STATUSBAR_NX_STR);
-        el->tmpl_w=grbrush_get_text_width(brush, str, strlen(str));
+        str=(el->text!=NULL ? el->text : STATUSBAR_NX_STR);
+        el->text_w=grbrush_get_text_width(brush, str, strlen(str));
+        str=el->tmpl;
+        el->max_w=maxof((str!=NULL
+                         ? grbrush_get_text_width(brush, str, strlen(str))
+                         : 0),
+                        el->text_w);
     }else{
         str=el->text;
-        if(str!=NULL)
-            el->text_w=grbrush_get_text_width(brush, str, strlen(str));
-        else
-            el->text_w=0;
+        el->text_w=(str!=NULL
+                    ? grbrush_get_text_width(brush, str, strlen(str))
+                    : 0);
+        el->max_w=el->text_w;
     }
 }
 
 
-static void statusbar_update_natural_size(WStatusBar *p)
+static void statusbar_do_update_natural_size(WStatusBar *p)
 {
     GrBorderWidths bdw;
     GrFontExtents fnte;
@@ -224,16 +229,21 @@ static void statusbar_update_natural_size(WStatusBar *p)
     grbrush_get_border_widths(p->brush, &bdw);
     grbrush_get_font_extents(p->brush, &fnte);
     
-    for(i=0; i<p->nelems; i++){
-        calc_elem_w(&(p->elems[i]), p->brush);
-        if(p->elems[i].type==WSBELEM_METER)
-            totw+=p->elems[i].tmpl_w;
-        else
-            totw+=p->elems[i].text_w;
-    }
+    for(i=0; i<p->nelems; i++)
+        totw+=p->elems[i].max_w;
     
     p->natural_w=bdw.left+totw+bdw.right;
     p->natural_h=fnte.max_height+bdw.top+bdw.bottom;
+}
+
+static void statusbar_update_natural_size(WStatusBar *p)
+{
+    int i;
+    
+    for(i=0; i<p->nelems; i++)
+        calc_elem_w(&(p->elems[i]), p->brush);
+    
+    statusbar_do_update_natural_size(p);
 }
 
 
@@ -298,10 +308,7 @@ static void spread_stretch(WStatusBar *sb)
         if(el->type!=WSBELEM_METER)
             continue;
         
-        str=(el->text!=NULL ? el->text : STATUSBAR_NX_STR);
-        el->text_w=grbrush_get_text_width(sb->brush, str, strlen(str));
-        
-        diff=el->tmpl_w-el->text_w;
+        diff=el->max_w-el->text_w;
         
         lel=NULL;
         rel=NULL;
@@ -347,6 +354,7 @@ void statusbar_update(WStatusBar *sb, ExtlTab t)
 {
     int i;
     WSBElem *el;
+    bool grow=FALSE;
     
     if(sb->brush==NULL)
         return;
@@ -368,18 +376,35 @@ void statusbar_update(WStatusBar *sb, ExtlTab t)
         }
         
         if(el->meter!=NULL){
-            char *attrnm=scat(el->meter, "_hint");
+            const char *str;
+            char *attrnm;
+            
             extl_table_gets_s(t, el->meter, &(el->text));
+            
+            str=(el->text!=NULL ? el->text : STATUSBAR_NX_STR);
+            el->text_w=grbrush_get_text_width(sb->brush, str, strlen(str));
+            
+            if(el->text_w>el->max_w){
+                el->max_w=el->text_w;
+                grow=TRUE;
+            }
+            
+            attrnm=scat(el->meter, "_hint");
             if(attrnm!=NULL){
                 extl_table_gets_s(t, attrnm, &(el->attr));
                 free(attrnm);
             }
         }
     }
-    
+
     reset_stretch(sb);
     spread_stretch(sb);
     positive_stretch(sb);
+    
+    if(grow){
+        statusbar_do_update_natural_size(sb);
+        statusbar_resize(sb);
+    }
     
     window_draw((WWindow*)sb, FALSE);
 }

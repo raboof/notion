@@ -79,7 +79,7 @@ local function update_load()
 end
 
 -- Init
-statusd.inform("load_template", "0.00, 0.00, 0.00");
+--statusd.inform("load_template", "0.00, 0.00, 0.00");
 
 get_load=detect_load_fn()
 load_timer=statusd.create_timer()

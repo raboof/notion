@@ -24,7 +24,7 @@ local mod_statusbar={}
 _G["mod_statusbar"]=mod_statusbar
 
 
--- Settings etc. {{{
+-- Settings {{{
 
 -- Default settings
 local defaults={
@@ -35,16 +35,31 @@ local defaults={
     ),
 }
 
+-- }}}
+
+
+-- Statusbar list {{{
+
 local statusbars={}
 
+local function live_statusbars()
+    return coroutine.wrap(function()
+                              for sb, stng in statusbars do
+                                  if obj_exists(sb) then
+                                      coroutine.yield(sb, stng)
+                                  else
+                                      statusbars[sb]=nil
+                                  end
+                              end
+                          end)
+end
+     
 -- }}}
 
 
 -- Meter list {{{
 
-local meters={
-    load_template="0.00, 0.00, 0.00",
-}
+local meters={}
 
 --DOC
 -- Inform of a value.
@@ -59,10 +74,6 @@ end
 
 local timer
 
---local function get_date()
---    return os.date(defaults.date_format)
---end
-
 function mod_statusbar.set_timer()
     local t=os.date('*t')
     local d=(60-t.sec)*1000
@@ -71,7 +82,6 @@ function mod_statusbar.set_timer()
 end
 
 function mod_statusbar.timer_handler(tmr)
-    --mod_statusbar.inform("date", get_date())
     mod_statusbar.update()
     mod_statusbar.set_timer()
 end
@@ -93,7 +103,7 @@ end
 -- }}}
 
 
--- Status update {{{
+-- Template processing {{{
 
 local function process_template(template, meter_f, text_f, stretch_f)
     local st, en, b, c, r
@@ -132,19 +142,10 @@ local function process_template(template, meter_f, text_f, stretch_f)
 end
 
 
-local function set_date(stng, meters)
-    local d=os.date(stng.date_format)
-    meters["date"]=d
-    if not meters["date_template"] then
-        meters["date_template"]=d
-    end
-    return meters
-end
-
 
 function mod_statusbar.get_template_table(stng)
     local res={}
-    local m=set_date(stng, meters)
+    local m=meters --set_date(stng, meters)
     local aligns={["<"]=0, ["|"]=1, [">"]=2}
     
     process_template(stng.template,
@@ -154,7 +155,7 @@ function mod_statusbar.get_template_table(stng)
                              type=2,
                              meter=s,
                              align=aligns[c],
-                             tmpl=m[s.."_template"]
+                             tmpl=meters[s.."_template"]
                          })
                      end,
                      -- text
@@ -174,32 +175,32 @@ function mod_statusbar.get_template_table(stng)
     return res
 end
 
+-- }}}
+
+-- Update {{{
+-- 
+local function set_date(stng, meters)
+    local d=os.date(stng.date_format)
+    meters["date"]=d
+    return meters
+end
+
 
 --DOC
 -- Update statusbar contents. To be called after series
 -- of \fnref{mod_statusbar.inform} calls.
-function mod_statusbar.update()
+function mod_statusbar.update(update_template)
     local found=false
     
-    for sb, stng in statusbars do
-        if not obj_exists(sb) then
-            statusbars[sb]=nil
-        else
-            sb:update(set_date(stng, meters))
-            found=true
+    for sb, stng in live_statusbars() do
+        if update_template then
+            sb:set_template(mod_statusbar.get_template_table(stng))
         end
+        sb:update(set_date(stng, meters))
+        found=true
     end
     
     return found
-end
-
-
-function mod_statusbar.update_template()
-    for sb, stng in statusbars do
-        if obj_exists(sb) then
-            sb:set_template(mod_statusbar.get_template_table(stng))
-        end
-    end
 end
 
 -- }}}
@@ -217,11 +218,7 @@ function mod_statusbar.rcv_statusd(str)
 
     local function doline(i)
         if i=="." then
-            if updatenw then
-                mod_statusbar.update_template()
-                updatenw=false
-            end
-            mod_statusbar.update()
+            mod_statusbar.update(updatenw)
         else
             local _, _, m, v=string.find(i, "^([^:]+):%s*(.*)")
             if m and v then
@@ -239,13 +236,13 @@ function mod_statusbar.rcv_statusd(str)
     ioncore.warn(TR("ion-statusd quit."))
     statusd_pid=0
     meters={}
-    mod_statusbar.update()
+    mod_statusbar.update(updatenw)
 end
 
 
 local function get_statusd_params()
     local mods={}
-    for sb, stng in statusbars do
+    for sb, stng in live_statusbars() do
         process_template(stng.template,
                          -- meter
                          function(s)
