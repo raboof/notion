@@ -20,6 +20,7 @@
 #include "genframe.h"
 #include "genframe-pointer.h"
 #include "genframep.h"
+#include "objp.h"
 
 
 /*?*/
@@ -251,37 +252,46 @@ static void p_tabdrag_begin(WGenFrame *genframe, XMotionEvent *ev,
 }
 
 
-static WGenFrame *fnd(Window rootwin, int x, int y)
+static WRegion *fnd(WWindow *w, int x, int y)
 {
 	int dstx, dsty;
+	Window rootwin=w->win;
 	Window childret;
-	WGenFrame *genframe=NULL;
-	WWindow *w;
+	WRegion *reg=NULL, *reg2;
 	
 	do{
-		if(!XTranslateCoordinates(wglobal.dpy, rootwin, rootwin,
+		if(!XTranslateCoordinates(wglobal.dpy, rootwin, w->win,
 								  x, y, &dstx, &dsty, &childret))
 			return NULL;
 	
-		if(childret==None)
-			return genframe;
+		if(childret==None){
+			x-=REGION_GEOM(w).x;
+			y-=REGION_GEOM(w).y;
+			FOR_ALL_TYPED(w, reg2, WRegion){
+				if(region_is_fully_mapped(reg2) &&
+				   inrect(REGION_GEOM(reg2), x, y) &&
+				   HAS_DYN(reg2, region_handle_drop)){
+					return reg2;
+				}
+			}
+			break;
+		}
 		w=FIND_WINDOW_T(childret, WWindow);
 		if(w==NULL)
 			break;
-		if(WTHING_IS(w, WGenFrame))
-			genframe=(WGenFrame*)w;
-		rootwin=childret;
+		if(HAS_DYN(w, region_handle_drop))
+			reg=(WRegion*)w;
 	}while(1);
 	
-	return genframe;
+	return reg;
 }
 
 
 static void p_tabdrag_end(WGenFrame *genframe, XButtonEvent *ev)
 {
 	WGRData *grdata=GRDATA_OF(genframe);
-	WGenFrame *newgenframe=NULL;
 	WRegion *sub=NULL;
+	WRegion *dropped_on;
 	Window win=None;
 	
 	grab_remove(tabdrag_kbd_handler);
@@ -300,15 +310,15 @@ static void p_tabdrag_end(WGenFrame *genframe, XButtonEvent *ev)
 	if(ev->root!=ROOT_OF(sub))
 		return;
 	
-	newgenframe=fnd(ev->root, ev->x_root, ev->y_root);
+	dropped_on=fnd((WWindow*)SCREEN_OF(sub), ev->x_root, ev->y_root);
 
-	if(newgenframe==NULL || genframe==newgenframe){
+	if(dropped_on==NULL || dropped_on==(WRegion*)genframe){
 		genframe_draw_bar(genframe, TRUE);
 		return;
 	}
 	
-	region_add_managed((WRegion*)newgenframe, sub, REGION_ATTACH_SWITCHTO);
-	set_focus((WRegion*)newgenframe);
+	if(region_handle_drop(dropped_on, p_tab_x, p_tab_y, sub))
+		set_focus(dropped_on);
 }
 
 
@@ -330,6 +340,14 @@ void genframe_p_tabdrag_setup(WGenFrame *genframe)
 	grab_establish((WRegion*)genframe, tabdrag_kbd_handler, 0);
 }
 
+
+bool region_handle_drop(WRegion *reg, int x, int y, WRegion *dropped)
+{
+	bool ret=FALSE;
+	CALL_DYN_RET(ret, bool, region_handle_drop, reg, (reg, x, y, dropped));
+	return ret;
+}
+	
 
 /*}}}*/
 

@@ -21,4 +21,7 @@ extern int genframe_press(WGenFrame *genframe, XButtonEvent *ev,
 						  WThing **thing_ret);
 extern void genframe_release(WGenFrame *genframe);
 
+DYNFUN bool region_handle_drop(WRegion *reg, int x, int y,
+							   WRegion *dropped);
+							   
 #endif /* ION_IONCORE_GENFRAME_POINTER_H */

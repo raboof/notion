@@ -21,6 +21,7 @@
 #include <ioncore/saveload.h>
 #include <ioncore/attach.h>
 #include <ioncore/regbind.h>
+#include <ioncore/genframe-pointer.h>
 
 #include "floatws.h"
 #include "floatframe.h"
@@ -48,6 +49,8 @@ static bool floatws_add_transient(WFloatWS *ws, WClientWin *tfor,
 								  const XWindowAttributes *attr,
 								  int init_state, WWinProp *props);
 static Window floatws_x_window(const WFloatWS *ws);
+static bool floatws_handle_drop(WFloatWS *floatws, int x, int y,
+								WRegion *dropped);
 
 
 /*}}}*/
@@ -76,6 +79,8 @@ static DynFunTab floatws_dynfuntab[]={
 
 	{(DynFun*)region_x_window, (DynFun*)floatws_x_window},
 
+	{(DynFun*)region_handle_drop, (DynFun*)floatws_handle_drop},
+	
 	END_DYNFUNTAB
 };
 
@@ -366,6 +371,42 @@ static bool floatws_add_transient(WFloatWS *ws, WClientWin *tfor,
 	}
 	
 	return FALSE;
+}
+
+
+static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
+								WRegion *dropped)
+{
+	WRectangle fgeom;
+	WRegion *target;
+	WWindow *par;
+	
+	par=FIND_PARENT1(ws, WWindow);
+	
+	if(par==NULL)
+		return FALSE;
+	
+	fgeom=initial_to_floatframe_geom(GRDATA_OF(ws), REGION_GEOM(dropped),
+									 ForgetGravity);
+	fgeom.x=x;
+	fgeom.y=y;
+
+	target=(WRegion*)create_floatframe(par, fgeom, 0);
+	
+	if(target==NULL){
+		warn("Failed to create a new WFloatFrame.");
+		return FALSE;
+	}
+	
+	if(!region_add_managed(target, dropped, REGION_ATTACH_SWITCHTO)){
+		destroy_thing((WThing*)target);
+		warn("Failed to attach dropped region to created WFloatFrame");
+		return FALSE;
+	}
+	
+	floatws_add_managed(ws, target);
+
+	return TRUE;
 }
 
 

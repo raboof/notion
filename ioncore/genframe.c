@@ -25,6 +25,7 @@
 #include "funtabs.h"
 #include "sizehint.h"
 
+
 /*{{{ Static function definitions, dynfuntab and class info */
 
 
@@ -40,6 +41,9 @@ static void genframe_request_managed_geom(WGenFrame *genframe, WRegion *sub,
 									   bool tryonly);
 static void genframe_size_changed_default(WGenFrame *genframe,
 										  bool wchg, bool hchg);
+static bool genframe_handle_drop(WGenFrame *genframe, int x, int y,
+								 WRegion *dropped);
+
 #define genframe_draw(F, C) draw_window((WWindow*)F, C)
 
 
@@ -65,6 +69,8 @@ static DynFunTab genframe_dynfuntab[]={
 	{region_request_managed_geom, genframe_request_managed_geom},
 	{(DynFun*)region_display_managed, (DynFun*)genframe_display_managed},
 
+	{(DynFun*)region_handle_drop, (DynFun*)genframe_handle_drop},
+	
 	{region_draw_config_updated, genframe_draw_config_updated},
 	
 	END_DYNFUNTAB
@@ -673,6 +679,14 @@ void genframe_toggle_sub_tag(WGenFrame *genframe)
 {
 	if(genframe->current_sub!=NULL)
 		toggle_region_tag(genframe->current_sub);
+}
+
+
+static bool genframe_handle_drop(WGenFrame *genframe, int x, int y,
+								 WRegion *dropped)
+{
+	return region_add_managed((WRegion*)genframe, dropped,
+							  REGION_ATTACH_SWITCHTO);
 }
 
 
