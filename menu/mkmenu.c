@@ -23,8 +23,9 @@
  * should call it with proper parameters; use \fnref{make_menu_fn}
  * to create functions that pass a proper \var{handler}. The table
  * \var{tab} is a list of menu entries of the form
- * \code{\{name = ???, fn = ???\}}; the convenience function
- * \fnref{menuentry} maybe also used to create these entries.
+ * \code{\{name = ???, [ submenu = ??? ]\}}. (The table may and usually
+ * does contain other entries as well, such as the function to call
+ * when entry is activated, but this is handled by \var{handler}.)
  */
 EXTL_EXPORT
 WMenu *menu_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab, bool big_mode)
@@ -43,6 +44,13 @@ WMenu *menu_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab, bool big_mode)
 }
 
 
+/*EXTL_DOC
+ * Display a pop-up menu inside window \var{where}. This function
+ * can only be called from a mouse/pointing device button press handler
+ * and the menu will be placed below the point where the press occured.
+ * The \var{handler} and \var{tab} parameters are similar to those of
+ * \fnref{menu_menu}.
+ */
 EXTL_EXPORT
 WMenu *menu_pmenu(WWindow *where, ExtlFn handler, ExtlTab tab)
 {
