@@ -12,7 +12,7 @@
 #include <libtu/rb.h>
 #include <libtu/objp.h>
 #include "common.h"
-#include "extl.h"
+#include <libextl/extl.h>
 #include "hooks.h"
 
 

@@ -30,7 +30,7 @@
 #include "event.h"
 #include "cursor.h"
 #include "signal.h"
-#include "readconfig.h"
+#include <libextl/readconfig.h>
 #include "global.h"
 #include "modules.h"
 #include "mainloop.h"
@@ -41,7 +41,7 @@
 #include "binding.h"
 #include "bindmaps.h"
 #include "strings.h"
-#include "extl.h"
+#include <libextl/extl.h>
 #include "gr.h"
 #include "xic.h"
 #include "netwm.h"
@@ -335,7 +335,7 @@ static void ioncore_init_session(const char *display)
     if(sm!=NULL)
         ioncore_load_module("mod_sm");
 
-    if(ioncore_sessiondir()!=NULL)
+    if(extl_sessiondir()!=NULL)
         return;
     
     /* Not running under SM; use display-specific directory */
@@ -360,7 +360,7 @@ static void ioncore_init_session(const char *display)
         *colon='-';
     }
     
-    ioncore_set_sessiondir(tmp);
+    extl_set_sessiondir(tmp);
     free(tmp);
 }
     
@@ -491,7 +491,7 @@ bool ioncore_startup(const char *display, const char *cfgfile,
 
     gr_read_config();
 
-    if(!ioncore_read_config("ioncore-ext", NULL, TRUE))
+    if(!extl_read_config("ioncore-ext", NULL, TRUE))
         return FALSE;
     
     ioncore_read_main_config(cfgfile);

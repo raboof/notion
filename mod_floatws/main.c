@@ -10,13 +10,13 @@
  */
 
 #include <ioncore/bindmaps.h>
-#include <ioncore/readconfig.h>
+#include <libextl/readconfig.h>
 #include <ioncore/framep.h>
 #include <ioncore/frame-pointer.h>
 #include <ioncore/reginfo.h>
 #include <ioncore/hooks.h>
 #include <ioncore/clientwin.h>
-#include <ioncore/extl.h>
+#include <libextl/extl.h>
 
 #include "floatws.h"
 #include "floatframe.h"
@@ -104,7 +104,7 @@ bool mod_floatws_init()
         goto err;
     }
 
-    ioncore_read_config("cfg_floatws", NULL, TRUE);
+    extl_read_config("cfg_floatws", NULL, TRUE);
     
     hook_add(clientwin_do_manage_alt, 
              (WHookDummy*)mod_floatws_clientwin_do_manage);

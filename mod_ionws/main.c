@@ -13,7 +13,7 @@
 
 #include <ioncore/common.h>
 #include <ioncore/reginfo.h>
-#include <ioncore/readconfig.h>
+#include <libextl/readconfig.h>
 #include <ioncore/framep.h>
 #include <ioncore/bindmaps.h>
 #include <ioncore/bindmaps.h>
@@ -117,7 +117,7 @@ bool mod_ionws_init()
     if(!register_regions())
         goto err;
     
-    ioncore_read_config("cfg_ionws", NULL, TRUE);
+    extl_read_config("cfg_ionws", NULL, TRUE);
 
     return TRUE;
     

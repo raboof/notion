@@ -21,7 +21,7 @@
 #include <ioncore/clientwin.h>
 #include <ioncore/attach.h>
 #include <ioncore/manage.h>
-#include <ioncore/extl.h>
+#include <libextl/extl.h>
 #include <ioncore/framep.h>
 #include <ioncore/names.h>
 #include <ioncore/region-iter.h>

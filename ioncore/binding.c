@@ -16,7 +16,7 @@
 #include "global.h"
 #include <libtu/objp.h>
 #include "regbind.h"
-#include "extl.h"
+#include <libextl/extl.h>
 
 
 #ifndef CF_NO_LOCK_HACK

@@ -17,12 +17,12 @@
 
 #include "common.h"
 #include "global.h"
-#include "readconfig.h"
+#include <libextl/readconfig.h>
 #include "modules.h"
 #include "rootwin.h"
 #include "bindmaps.h"
 #include "kbresize.h"
-#include "readconfig.h"
+#include <libextl/readconfig.h>
 
 
 char *ioncore_default_ws_type=NULL;
@@ -107,6 +107,76 @@ ExtlTab ioncore_get()
     return tab;
 }
         
+
+/*EXTL_DOC
+ * Get important directories (userdir, sessiondir, searchpath).
+ */
+EXTL_EXPORT
+ExtlTab ioncore_get_paths(ExtlTab tab)
+{
+    tab=extl_create_table();
+    extl_table_sets_s(tab, "userdir", extl_userdir());
+    extl_table_sets_s(tab, "sessiondir", extl_sessiondir());
+    extl_table_sets_s(tab, "searchpath", extl_searchpath());
+    return tab;
+}
+
+
+/*EXTL_DOC
+ * Set important directories (sessiondir, searchpath).
+ */
+EXTL_EXPORT
+bool ioncore_set_paths(ExtlTab tab)
+{
+    char *s;
+
+    if(extl_table_gets_s(tab, "userdir", &s)){
+        warn(TR("User directory can not be set."));
+        free(s);
+        return FALSE;
+    }
+    
+    if(extl_table_gets_s(tab, "sessiondir", &s)){
+        extl_set_sessiondir(s);
+        free(s);
+        return FALSE;
+    }
+
+    if(extl_table_gets_s(tab, "searchpath", &s)){
+        extl_set_searchpath(s);
+        free(s);
+        return FALSE;
+    }
+    
+    return TRUE;
+}
+
+
+/* Exports these in ioncore. */
+
+/*EXTL_DOC
+ * Lookup script \var{file}. If \var{try_in_dir} is set, it is tried
+ * before the standard search path.
+ */
+EXTL_EXPORT_AS(ioncore, lookup_script)
+char *extl_lookup_script(const char *file, const char *sp);
+
+
+/*EXTL_DOC
+ * Get a file name to save (session) data in. The string \var{basename} 
+ * should contain no path or extension components.
+ */
+EXTL_EXPORT_AS(ioncore, get_savefile)
+char *extl_get_savefile(const char *basename);
+
+
+/*EXTL_DOC
+ * Write \var{tab} in file with basename \var{basename} in the
+ * session directory.
+ */
+EXTL_EXPORT_AS(ioncore, write_savefile)
+bool extl_write_savefile(const char *basename, ExtlTab tab);
+
     
 
 bool ioncore_read_main_config(const char *cfgfile)
@@ -117,7 +187,7 @@ bool ioncore_read_main_config(const char *cfgfile)
     if(cfgfile==NULL)
         cfgfile="cfg_ion";
     
-    ret=ioncore_read_config(cfgfile, ".", TRUE);
+    ret=extl_read_config(cfgfile, ".", TRUE);
     
     unset+=(ioncore_rootwin_bindmap->nbindings==0);
     unset+=(ioncore_mplex_bindmap->nbindings==0);
@@ -125,7 +195,7 @@ bool ioncore_read_main_config(const char *cfgfile)
     
     if(unset>0){
         warn(TR("Some bindmaps were empty, loading ioncore-efbb."));
-        ioncore_read_config("ioncore-efbb", NULL, TRUE);
+        extl_read_config("ioncore-efbb", NULL, TRUE);
     }
     
     return (ret && unset==0);

@@ -13,7 +13,7 @@ include modulelist.mk
 EXT_LIST=ext_statusbar
 
 INSTALL_SUBDIRS=\
-	ioncore luaextl ion pwm etc utils man po \
+	ioncore libextl ion pwm etc utils man po \
 	$(MODULE_LIST) $(EXT_LIST)
 
 #DIST: SUBDIRS = libtu $(INSTALL_SUBDIRS)

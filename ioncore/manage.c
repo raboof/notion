@@ -17,7 +17,7 @@
 #include "names.h"
 #include "fullscreen.h"
 #include "pointer.h"
-#include "extl.h"
+#include <libextl/extl.h>
 #include "netwm.h"
 #include "extlconv.h"
 #include "region-iter.h"

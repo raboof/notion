@@ -12,7 +12,7 @@
 #include <string.h>
 
 #include <ioncore/common.h>
-#include <ioncore/extl.h>
+#include <libextl/extl.h>
 
 #include "history.h"
 

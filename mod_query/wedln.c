@@ -18,7 +18,7 @@
 #include <ioncore/selection.h>
 #include <ioncore/event.h>
 #include <ioncore/regbind.h>
-#include <ioncore/extl.h>
+#include <libextl/extl.h>
 #include <ioncore/defer.h>
 #include <libtu/minmax.h>
 #include "edln.h"

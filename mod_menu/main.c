@@ -9,7 +9,7 @@
  * (at your option) any later version.
  */
 
-#include <ioncore/readconfig.h>
+#include <libextl/readconfig.h>
 #include <ioncore/saveload.h>
 #include <ioncore/bindmaps.h>
 

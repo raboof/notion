@@ -29,7 +29,7 @@
 #include "names.h"
 #include "saveload.h"
 #include "manage.h"
-#include "extl.h"
+#include <libextl/extl.h>
 #include "extlconv.h"
 #include "fullscreen.h"
 #include "event.h"

@@ -1,5 +1,5 @@
 /*
- * ion/ioncore/readconfig.c
+ * ion/libextl/readconfig.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -13,10 +13,13 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <libtu/output.h>
 
-#include "common.h"
-#include "global.h"
+#include <libtu/output.h>
+#include <libtu/types.h>
+#include <libtu/output.h>
+#include <libtu/misc.h>
+#include <libtu/locale.h>
+
 #include "readconfig.h"
 #include "extl.h"
 
@@ -36,7 +39,7 @@ static char *sessiondir=NULL;
 static char *scriptpath=NULL;
 
 
-bool ioncore_add_searchdir(const char *dir)
+bool extl_add_searchdir(const char *dir)
 {
     if(scriptpath==NULL){
         scriptpath=scopy(dir);
@@ -54,7 +57,7 @@ bool ioncore_add_searchdir(const char *dir)
 }
 
 
-bool ioncore_set_searchpath(const char *path)
+bool extl_set_searchpath(const char *path)
 {
     char *s=NULL;
     
@@ -72,7 +75,7 @@ bool ioncore_set_searchpath(const char *path)
 }
 
 
-bool ioncore_set_userdirs(const char *appname)
+bool extl_set_userdirs(const char *appname)
 {
     const char *home;
     char *tmp;
@@ -88,11 +91,11 @@ bool ioncore_set_userdirs(const char *appname)
     }else{
         libtu_asprintf(&userdir, "%s/.%s", home, appname);
         if(userdir!=NULL)
-            fails-=ioncore_add_searchdir(userdir);
+            fails-=extl_add_searchdir(userdir);
         
         libtu_asprintf(&tmp, "%s/.%s/lib", home, appname);
         if(tmp!=NULL){
-            fails-=ioncore_add_searchdir(tmp);
+            fails-=extl_add_searchdir(tmp);
             free(tmp);
         }
     }
@@ -101,7 +104,7 @@ bool ioncore_set_userdirs(const char *appname)
 }
 
 
-bool ioncore_set_sessiondir(const char *session)
+bool extl_set_sessiondir(const char *session)
 {
     char *tmp;
     bool ret=FALSE;
@@ -128,65 +131,21 @@ bool ioncore_set_sessiondir(const char *session)
 }
 
 
-const char *ioncore_userdir()
+const char *extl_userdir()
 {
     return userdir;
 }
 
 
-const char *ioncore_sessiondir()
+const char *extl_sessiondir()
 {
     return sessiondir;
 }
 
 
-const char *ioncore_searchpath()
+const char *extl_searchpath()
 {
     return scriptpath;
-}
-
-
-/*EXTL_DOC
- * Get important directories (userdir, sessiondir, searchpath).
- */
-EXTL_EXPORT
-ExtlTab ioncore_get_paths(ExtlTab tab)
-{
-    tab=extl_create_table();
-    extl_table_sets_s(tab, "userdir", userdir);
-    extl_table_sets_s(tab, "sessiondir", sessiondir);
-    extl_table_sets_s(tab, "searchpath", scriptpath);
-    return tab;
-}
-
-
-/*EXTL_DOC
- * Set important directories (sessiondir, searchpath).
- */
-EXTL_EXPORT
-bool ioncore_set_paths(ExtlTab tab)
-{
-    char *s;
-
-    if(extl_table_gets_s(tab, "userdir", &s)){
-        warn(TR("User directory can not be set."));
-        free(s);
-        return FALSE;
-    }
-    
-    if(extl_table_gets_s(tab, "sessiondir", &s)){
-        ioncore_set_sessiondir(s);
-        free(s);
-        return FALSE;
-    }
-
-    if(extl_table_gets_s(tab, "searchpath", &s)){
-        ioncore_set_searchpath(s);
-        free(s);
-        return FALSE;
-    }
-    
-    return TRUE;
 }
 
 
@@ -204,7 +163,7 @@ static int do_try(const char *dir, const char *file, WTryConfigFn *tryfn,
     
     libtu_asprintf(&tmp, "%s/%s", dir, file);
     if(tmp==NULL)
-        return IONCORE_TRYCONFIG_MEMERROR;
+        return EXTL_TRYCONFIG_MEMERROR;
 
     ret=tryfn(tmp, tryfnparam);
     free(tmp);
@@ -226,7 +185,7 @@ static int try_dir(const char *const *files, const char *cfdir,
         }
     }
     
-    return IONCORE_TRYCONFIG_NOTFOUND;
+    return EXTL_TRYCONFIG_NOTFOUND;
 }
 
 
@@ -270,14 +229,14 @@ static int try_etcpath(const char *const *files,
         }
     }
     
-    return IONCORE_TRYCONFIG_NOTFOUND;
+    return EXTL_TRYCONFIG_NOTFOUND;
 }
 
 
 static int try_lookup(const char *file, char **ptr)
 {
     if(access(file, F_OK)!=0)
-        return IONCORE_TRYCONFIG_NOTFOUND;
+        return EXTL_TRYCONFIG_NOTFOUND;
     *ptr=scopy(file);
     return (*ptr!=NULL);
 }
@@ -286,17 +245,17 @@ static int try_lookup(const char *file, char **ptr)
 static int try_load(const char *file, TryCallParam *param)
 {
     if(access(file, F_OK)!=0)
-        return IONCORE_TRYCONFIG_NOTFOUND;
+        return EXTL_TRYCONFIG_NOTFOUND;
     
     if(param->status==1)
         warn(TR("Falling back to %s."), file);
     
     if(!extl_loadfile(file, &(param->fn))){
         param->status=1;
-        return IONCORE_TRYCONFIG_LOAD_FAILED;
+        return EXTL_TRYCONFIG_LOAD_FAILED;
     }
     
-    return IONCORE_TRYCONFIG_OK;
+    return EXTL_TRYCONFIG_OK;
 }
 
 
@@ -304,14 +263,14 @@ static int try_call(const char *file, TryCallParam *param)
 {
     int ret=try_load(file, param);
     
-    if(ret!=IONCORE_TRYCONFIG_OK)
+    if(ret!=EXTL_TRYCONFIG_OK)
         return ret;
     
     ret=extl_call(param->fn, NULL, NULL);
     
     extl_unref_fn(param->fn);
     
-    return (ret ? IONCORE_TRYCONFIG_OK : IONCORE_TRYCONFIG_CALL_FAILED);
+    return (ret ? EXTL_TRYCONFIG_OK : EXTL_TRYCONFIG_CALL_FAILED);
 }
 
 
@@ -319,18 +278,18 @@ static int try_read_savefile(const char *file, TryCallParam *param)
 {
     int ret=try_load(file, param);
     
-    if(ret!=IONCORE_TRYCONFIG_OK)
+    if(ret!=EXTL_TRYCONFIG_OK)
         return ret;
     
     ret=extl_call(param->fn, NULL, "t", &(param->tab));
     
     extl_unref_fn(param->fn);
     
-    return (ret ? IONCORE_TRYCONFIG_OK : IONCORE_TRYCONFIG_CALL_FAILED);
+    return (ret ? EXTL_TRYCONFIG_OK : EXTL_TRYCONFIG_CALL_FAILED);
 }
 
 
-int ioncore_try_config(const char *fname, const char *cfdir,
+int extl_try_config(const char *fname, const char *cfdir,
                        WTryConfigFn *tryfn, void *tryfnparam,
                        const char *ext1, const char *ext2)
 {
@@ -378,7 +337,7 @@ int ioncore_try_config(const char *fname, const char *cfdir,
  * before the standard search path.
  */
 EXTL_EXPORT
-char *ioncore_lookup_script(const char *file, const char *sp)
+char *extl_lookup_script(const char *file, const char *sp)
 {
     const char *files[]={NULL, NULL};
     char* tmp=NULL;
@@ -396,7 +355,7 @@ char *ioncore_lookup_script(const char *file, const char *sp)
 }
 
 
-bool ioncore_read_config(const char *file, const char *sp, bool warn_nx)
+bool extl_read_config(const char *file, const char *sp, bool warn_nx)
 {
     TryCallParam param;
     int retval;
@@ -406,17 +365,17 @@ bool ioncore_read_config(const char *file, const char *sp, bool warn_nx)
     
     param.status=0;
     
-    retval=ioncore_try_config(file, sp, (WTryConfigFn*)try_call, &param,
+    retval=extl_try_config(file, sp, (WTryConfigFn*)try_call, &param,
                               EXTL_COMPILED_EXTENSION, EXTL_EXTENSION);
     
-    if(retval==IONCORE_TRYCONFIG_NOTFOUND && warn_nx)
+    if(retval==EXTL_TRYCONFIG_NOTFOUND && warn_nx)
         warn(TR("Unable to find '%s' on search path."), file);
 
-    return (retval==IONCORE_TRYCONFIG_OK);
+    return (retval==EXTL_TRYCONFIG_OK);
 }
 
 
-bool ioncore_read_savefile(const char *basename, ExtlTab *tabret)
+bool extl_read_savefile(const char *basename, ExtlTab *tabret)
 {
     TryCallParam param;
     int retval;
@@ -424,19 +383,19 @@ bool ioncore_read_savefile(const char *basename, ExtlTab *tabret)
     param.status=0;
     param.tab=extl_table_none();
     
-    retval=ioncore_try_config(basename, NULL, (WTryConfigFn*)try_read_savefile,
+    retval=extl_try_config(basename, NULL, (WTryConfigFn*)try_read_savefile,
                               &param, EXTL_EXTENSION, NULL);
 
     *tabret=param.tab;
     
-    return (retval==IONCORE_TRYCONFIG_OK);
+    return (retval==EXTL_TRYCONFIG_OK);
 }
 
 
 /*}}}*/
 
 
-/*{{{ ioncore_get_savefile */
+/*{{{ extl_get_savefile */
 
 
 static bool ensuredir(char *f)
@@ -475,7 +434,7 @@ static bool ensuredir(char *f)
  * should contain no path or extension components.
  */
 EXTL_EXPORT
-char *ioncore_get_savefile(const char *basename)
+char *extl_get_savefile(const char *basename)
 {
     char *res=NULL;
     
@@ -493,11 +452,15 @@ char *ioncore_get_savefile(const char *basename)
 }
 
 
+/*EXTL_DOC
+ * Write \var{tab} in file with basename \var{basename} in the
+ * session directory.
+ */
 EXTL_EXPORT
-bool ioncore_write_savefile(const char *basename, ExtlTab tab)
+bool extl_write_savefile(const char *basename, ExtlTab tab)
 {
     bool ret=FALSE;
-    char *fname=ioncore_get_savefile(basename);
+    char *fname=extl_get_savefile(basename);
     
     if(fname!=NULL){
         ret=extl_serialise(fname, tab);

@@ -436,7 +436,7 @@ function write_exports(h)
 #include <libtu/output.h>
 #include <libtu/obj.h>
 #include <libtu/objp.h>
-#include <ioncore/extl.h>
+#include <libextl/extl.h>
 
 ]])
     -- end blockwrite

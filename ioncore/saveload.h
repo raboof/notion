@@ -15,7 +15,7 @@
 #include "common.h"
 #include "region.h"
 #include "screen.h"
-#include "extl.h"
+#include <libextl/extl.h>
 #include "rectangle.h"
 
 extern WRegion *create_region_load(WWindow *par, const WFitParams *fp, 

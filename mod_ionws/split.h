@@ -17,7 +17,7 @@
 #include <ioncore/reginfo.h>
 #include <ioncore/attach.h>
 #include <ioncore/rectangle.h>
-#include <ioncore/extl.h>
+#include <libextl/extl.h>
 
 
 INTRCLASS(WSplit);

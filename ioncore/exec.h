@@ -14,7 +14,7 @@
 
 #include "common.h"
 #include "rootwin.h"
-#include "extl.h"
+#include <libextl/extl.h>
 
 enum{
     IONCORE_SM_RESIGN,

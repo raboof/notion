@@ -39,7 +39,7 @@
 #include "screen.h"
 #include "screen.h"
 #include "bindmaps.h"
-#include "readconfig.h"
+#include <libextl/readconfig.h>
 #include "resize.h"
 #include "saveload.h"
 #include "netwm.h"

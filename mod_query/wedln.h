@@ -16,7 +16,7 @@
 #include <libtu/obj.h>
 #include <ioncore/window.h>
 #include <ioncore/xic.h>
-#include <ioncore/extl.h>
+#include <libextl/extl.h>
 #include <ioncore/rectangle.h>
 #include "listing.h"
 #include "input.h"

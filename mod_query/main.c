@@ -11,10 +11,10 @@
 
 #include <ioncore/binding.h>
 #include <ioncore/conf-bindings.h>
-#include <ioncore/readconfig.h>
+#include <libextl/readconfig.h>
 #include <ioncore/frame.h>
 #include <ioncore/saveload.h>
-#include <ioncore/extl.h>
+#include <libextl/extl.h>
 #include <ioncore/bindmaps.h>
 #include <ioncore/ioncore.h>
 
@@ -59,7 +59,7 @@ static void load_history()
     ExtlTab tab;
     int i, n;
 
-    if(!ioncore_read_savefile("saved_queryhist", &tab))
+    if(!extl_read_savefile("saved_queryhist", &tab))
         return;
     
     n=extl_table_get_n(tab);
@@ -80,7 +80,7 @@ static void save_history()
 {
     ExtlTab tab=mod_query_history_table();
     
-    ioncore_write_savefile("saved_queryhist", tab);
+    extl_write_savefile("saved_queryhist", tab);
     
     extl_unref_table(tab);
 }

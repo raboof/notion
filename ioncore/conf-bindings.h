@@ -15,7 +15,7 @@
 #include <libtu/map.h>
 
 #include "binding.h"
-#include "extl.h"
+#include <libextl/extl.h>
 
 extern bool bindmap_defbindings(WBindmap *bindmap, ExtlTab tab, bool submap);
 extern ExtlTab bindmap_getbindings(WBindmap *bindmap);

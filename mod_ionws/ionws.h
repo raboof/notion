@@ -16,7 +16,7 @@
 #include <ioncore/region.h>
 #include <ioncore/screen.h>
 #include <ioncore/genws.h>
-#include <ioncore/extl.h>
+#include <libextl/extl.h>
 #include <ioncore/rectangle.h>
 #include "split.h"
 

@@ -13,7 +13,7 @@
 #include <ioncore/common.h>
 #include <ioncore/pointer.h>
 #include <ioncore/grab.h>
-#include <ioncore/extl.h>
+#include <libextl/extl.h>
 #include "menu.h"
 #include "mkmenu.h"
 

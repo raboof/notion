@@ -17,7 +17,7 @@
 #include <libtu/map.h>
 #include "common.h"
 #include "region.h"
-#include "extl.h"
+#include <libextl/extl.h>
 
 
 #define BINDING_KEYPRESS        0

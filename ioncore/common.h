@@ -20,40 +20,12 @@
 #include <libtu/misc.h>
 #include <libtu/dlist.h>
 #include <libtu/obj.h>
+#include <libtu/locale.h>
+#include <libtu/debug.h>
+
+#include <libextl/extl.h>
 
 #include "../config.h"
 #include "classes.h"
-
-#if 0
-#define D(X) X
-#else
-#define D(X)
-#endif
-
-#define EXTL_EXPORT
-#define EXTL_EXPORT_AS(T, F)
-#define EXTL_EXPORT_MEMBER
-
-#if __STDC_VERSION__ >= 199901L
-#define WARN_FUNC(...) warn_obj(__func__, __VA_ARGS__)
-#define WARN_ERR_FUNC() warn_err_obj(__func__)
-#else
-#define WARN_FUNC warn
-#define WARN_ERR_FUNC() warn_err()
-#endif
-
-#ifdef CF_NO_LOCALE
-
-#define TR(X) X
-#define DUMMY_TR(X) X
-
-#else
-
-#include <libintl.h>
-
-#define TR(X) gettext(X)
-#define DUMMY_TR(X) X
-
-#endif
 
 #endif /* ION_IONCORE_COMMON_H */

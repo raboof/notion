@@ -15,7 +15,7 @@
 #include <ioncore/common.h>
 #include <ioncore/frame.h>
 #include <ioncore/window.h>
-#include <ioncore/extl.h>
+#include <libextl/extl.h>
 #include <ioncore/rectangle.h>
 #include "floatws.h"
 

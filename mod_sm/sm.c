@@ -20,7 +20,7 @@
 #include <ioncore/global.h>
 #include <ioncore/clientwin.h>
 #include <ioncore/property.h>
-#include <ioncore/readconfig.h>
+#include <libextl/readconfig.h>
 #include <ioncore/manage.h>
 #include <ioncore/ioncore.h>
 #include <ioncore/exec.h>
@@ -102,7 +102,7 @@ static void mod_sm_set_sessiondir()
     }
         
     if(tmp!=NULL){
-        ok=ioncore_set_sessiondir(tmp);
+        ok=extl_set_sessiondir(tmp);
         free(tmp);
     }
     
@@ -134,7 +134,7 @@ int mod_sm_init()
     if(!mod_sm_init_session())
         goto err;
 
-    if(ioncore_sessiondir()==NULL)
+    if(extl_sessiondir()==NULL)
         mod_sm_set_sessiondir();
     
     if(!mod_sm_register_exports())

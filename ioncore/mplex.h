@@ -16,7 +16,7 @@
 #include "window.h"
 #include "attach.h"
 #include "manage.h"
-#include "extl.h"
+#include <libextl/extl.h>
 #include "rectangle.h"
 #include "hooks.h"
 

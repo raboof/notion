@@ -14,7 +14,7 @@
 
 #include "common.h"
 #include "mplex.h"
-#include "extl.h"
+#include <libextl/extl.h>
 #include "rectangle.h"
 #include "rootwin.h"
 #include "hooks.h"

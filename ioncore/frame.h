@@ -19,7 +19,7 @@
 #include "attach.h"
 #include "mplex.h"
 #include "gr.h"
-#include "extl.h"
+#include <libextl/extl.h>
 #include "rectangle.h"
 
 #define FRAME_TAB_HIDE    0x0004

@@ -18,9 +18,9 @@
 
 #include "common.h"
 #include "binding.h"
-#include "readconfig.h"
+#include <libextl/readconfig.h>
 #include "global.h"
-#include "extl.h"
+#include <libextl/extl.h>
 #include "conf-bindings.h"
 #include "bindmaps.h"
 

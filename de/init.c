@@ -11,13 +11,14 @@
 
 #include <string.h>
 
+#include <libextl/readconfig.h>
+#include <libextl/extl.h>
+
 #include <ioncore/common.h>
 #include <ioncore/global.h>
 #include <ioncore/rootwin.h>
-#include <ioncore/extl.h>
 #include <ioncore/extlconv.h>
 #include <ioncore/ioncore.h>
-#include <ioncore/readconfig.h>
 
 #include "brush.h"
 #include "font.h"

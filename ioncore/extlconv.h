@@ -14,7 +14,7 @@
 
 #include "common.h"
 #include "region.h"
-#include "extl.h"
+#include <libextl/extl.h>
 
 extern ExtlTab managed_list_to_table(WRegion *list, 
                                     bool (*filter)(WRegion *r));

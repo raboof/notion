@@ -15,10 +15,10 @@
 #include <unistd.h>
 
 #include <libtu/rb.h>
+#include <libextl/readconfig.h>
 
 #include "common.h"
 #include "modules.h"
-#include "readconfig.h"
 #include "../version.h"
 
 
@@ -144,7 +144,7 @@ static int try_load(const char *file, void *param)
     Rb_node mod;
     
     if(access(file, F_OK)!=0)
-        return IONCORE_TRYCONFIG_NOTFOUND;
+        return EXTL_TRYCONFIG_NOTFOUND;
 
     slash=strrchr(file, '/');
     dot=strrchr(file, '.');
@@ -179,7 +179,7 @@ static int try_load(const char *file, void *param)
     }
     
     if(get_name(handle))
-        return IONCORE_TRYCONFIG_OK;
+        return EXTL_TRYCONFIG_OK;
     
     if(!check_version(handle, name)){
         warn_obj(file, TR("Module version information not found or "
@@ -198,14 +198,14 @@ static int try_load(const char *file, void *param)
         goto err3;
     }
     
-    return IONCORE_TRYCONFIG_OK;
+    return EXTL_TRYCONFIG_OK;
 
 err3:    
     dlclose(handle);
 err2:
     free(name);
 err1:
-    return IONCORE_TRYCONFIG_LOAD_FAILED;
+    return EXTL_TRYCONFIG_LOAD_FAILED;
 }
 
 
@@ -213,13 +213,13 @@ static bool do_load_module(const char *modname)
 {
     int retval;
     
-    retval=ioncore_try_config(modname, NULL, (WTryConfigFn*)try_load, NULL,
-                              "so", NULL);
+    retval=extl_try_config(modname, NULL, (WTryConfigFn*)try_load, NULL,
+                           "so", NULL);
     
-    if(retval==IONCORE_TRYCONFIG_NOTFOUND)
+    if(retval==EXTL_TRYCONFIG_NOTFOUND)
         warn(TR("Unable to find '%s' on search path."), modname);
     
-    return (retval==IONCORE_TRYCONFIG_OK);
+    return (retval==EXTL_TRYCONFIG_OK);
 }
 
 

@@ -22,7 +22,7 @@
 #include "sizehint.h"
 #include "event.h"
 #include "cursor.h"
-#include "extl.h"
+#include <libextl/extl.h>
 #include "extlconv.h"
 #include "grab.h"
 #include "framep.h"

@@ -19,7 +19,7 @@
 #include <libtu/obj.h>
 #include "common.h"
 #include "classes.h"
-#include "extl.h"
+#include <libextl/extl.h>
 
 
 typedef void WTimerHandler(WTimer *timer);

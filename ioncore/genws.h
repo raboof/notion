@@ -14,7 +14,7 @@
 
 #include "region.h"
 #include "window.h"
-#include "extl.h"
+#include <libextl/extl.h>
 #include "rectangle.h"
 
 DECLCLASS(WGenWS){

@@ -23,7 +23,7 @@
 #include "names.h"
 #include "strings.h"
 #include "gr.h"
-#include "extl.h"
+#include <libextl/extl.h>
 
 
 /*{{{ Implementation */

@@ -19,7 +19,7 @@ LIBS += -lm
 LIBS += $(X11_LIBS) $(XINERAMA_LIBS)
 LIBS += $(LUA_LIBS)
 LIBS += $(DL_LIBS)
-EXT_OBJS += ../ioncore/ioncore.a ../luaextl/luaextl.a
+EXT_OBJS += ../ioncore/ioncore.a ../libextl/libextl.a
 #DIST: EXT_OBJS += ../libtu/libtu.a
 LIBS += -ltu
 

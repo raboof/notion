@@ -12,9 +12,10 @@
 #include <string.h>
 
 #include <libtu/objp.h>
+#include <libextl/extl.h>
+
 #include <ioncore/common.h>
 #include <ioncore/rootwin.h>
-#include <ioncore/extl.h>
 #include <ioncore/extlconv.h>
 #include <ioncore/ioncore.h>
 

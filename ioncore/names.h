@@ -15,7 +15,7 @@
 #include "region.h"
 #include "clientwin.h"
 #include "gr.h"
-#include "extl.h"
+#include <libextl/extl.h>
 
 
 typedef struct{

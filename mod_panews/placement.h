@@ -16,7 +16,7 @@
 #include <ioncore/clientwin.h>
 #include <ioncore/manage.h>
 #include <ioncore/hooks.h>
-#include <ioncore/extl.h>
+#include <libextl/extl.h>
 #include <mod_ionws/split.h>
 #include "panews.h"
 #include "splitext.h"

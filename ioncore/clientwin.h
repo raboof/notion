@@ -15,7 +15,7 @@
 #include "common.h"
 #include "region.h"
 #include "hooks.h"
-#include "extl.h"
+#include <libextl/extl.h>
 #include "window.h"
 #include "rectangle.h"
 #include "attach.h"

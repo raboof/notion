@@ -26,7 +26,7 @@
 #include <ioncore/ioncore.h>
 #include <ioncore/mainloop.h>
 #include <ioncore/exec.h>
-#include <ioncore/readconfig.h>
+#include <libextl/readconfig.h>
 #include "sm_session.h"
 
 
@@ -158,7 +158,7 @@ static void sm_set_other_properties()
     props[1]=&restart_hint_prop;
     /*props[2]=&discard_prop;*/
     
-    sdir=ioncore_sessiondir();
+    sdir=extl_sessiondir();
     cid=mod_sm_get_ion_id();
     
     if(sdir==NULL || cid==NULL)

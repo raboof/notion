@@ -16,7 +16,7 @@
 #include "global.h"
 #include "property.h"
 #include "xwindow.h"
-#include "extl.h"
+#include <libextl/extl.h>
 
 
 static char *selection_data=NULL;

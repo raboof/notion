@@ -15,7 +15,7 @@
 #include "common.h"
 #include "frame.h"
 #include "resize.h"
-#include "extl.h"
+#include <libextl/extl.h>
 
 extern WMoveresMode *region_begin_kbresize(WRegion *reg);
 

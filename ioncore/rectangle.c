@@ -11,7 +11,7 @@
 
 #include <libtu/minmax.h>
 #include "common.h"
-#include "extl.h"
+#include <libextl/extl.h>
 #include "rectangle.h"
 
 

@@ -27,7 +27,7 @@
 #include "resize.h"
 #include "tags.h"
 #include "sizehint.h"
-#include "extl.h"
+#include <libextl/extl.h>
 #include "extlconv.h"
 #include "genws.h"
 #include "frame-pointer.h"

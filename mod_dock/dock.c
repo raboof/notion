@@ -42,12 +42,12 @@
 #include <ioncore/common.h>
 #include <ioncore/clientwin.h>
 #include <ioncore/eventh.h>
-#include <ioncore/extl.h>
+#include <libextl/extl.h>
 #include <ioncore/global.h>
 #include <ioncore/manage.h>
 #include <ioncore/names.h>
 #include <ioncore/property.h>
-#include <ioncore/readconfig.h>
+#include <libextl/readconfig.h>
 #include <ioncore/resize.h>
 #include <ioncore/window.h>
 #include <ioncore/region-iter.h>
@@ -1515,7 +1515,7 @@ bool mod_dock_init()
         ioncore_unregister_regclass(&CLASSDESCR(WDock));
     }
 
-    ioncore_read_config("cfg_dock", NULL, TRUE);
+    extl_read_config("cfg_dock", NULL, TRUE);
 
     hook_add(clientwin_do_manage_alt, 
              (WHookDummy*)clientwin_do_manage_hook);

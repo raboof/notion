@@ -10,7 +10,7 @@
  */
 
 #include "common.h"
-#include "extl.h"
+#include <libextl/extl.h>
 #include "extlconv.h"
 #include "region-iter.h"
 

@@ -1,5 +1,5 @@
 /*
- * ion/lua/luaextl.h
+ * ion/libextl/luaextl.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -9,8 +9,8 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_LUA_LUAEXTL_H
-#define ION_LUA_LUAEXTL_H
+#ifndef LIBEXTL_LUAEXTL_H
+#define LIBEXTL_LUAEXTL_H
 
 #include <stdarg.h>
 
@@ -29,11 +29,6 @@
  * f: function (c or lua)
  * v: void
  */
-
-/* In ioncore/common.h
-#define EXTL_EXPORT
-#define EXTL_EXPORT_AS(X)
-*/
 
 typedef int ExtlTab;
 typedef int ExtlFn;
@@ -164,4 +159,4 @@ void extl_unregister_module(const char *cls, ExtlExportedFnSpec *fns);
 extern bool extl_init();
 extern void extl_deinit();
 
-#endif /* ION_LUA_LUAEXTL_H */
+#endif /* LIBEXTL_LUAEXTL_H */

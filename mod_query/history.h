@@ -13,7 +13,7 @@
 #define ION_MOD_QUERY_HISTORY_H
 
 #include <ioncore/common.h>
-#include <ioncore/extl.h>
+#include <libextl/extl.h>
 
 extern const char *mod_query_history_get(int n);
 extern bool mod_query_history_push(const char *s);

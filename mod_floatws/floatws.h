@@ -18,7 +18,7 @@
 #include <ioncore/screen.h>
 #include <ioncore/genws.h>
 #include <ioncore/manage.h>
-#include <ioncore/extl.h>
+#include <libextl/extl.h>
 #include <ioncore/rectangle.h>
 
 INTRCLASS(WFloatWS);

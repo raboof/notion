@@ -20,7 +20,7 @@ INTRSTRUCT(WManageParams);
 #include "genws.h"
 #include "attach.h"
 #include "rectangle.h"
-#include "extl.h"
+#include <libextl/extl.h>
 
 
 #define MANAGEPARAMS_INIT                                                \

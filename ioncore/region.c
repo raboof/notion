@@ -18,7 +18,7 @@
 #include "names.h"
 #include "resize.h"
 #include "manage.h"
-#include "extl.h"
+#include <libextl/extl.h>
 #include "extlconv.h"
 #include "activity.h"
 #include "region-iter.h"

@@ -20,7 +20,7 @@
 #include <ioncore/manage.h>
 #include <ioncore/saveload.h>
 #include <ioncore/attach.h>
-#include <ioncore/extl.h>
+#include <libextl/extl.h>
 #include <ioncore/regbind.h>
 #include <ioncore/extlconv.h>
 #include <ioncore/defer.h>

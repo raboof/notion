@@ -12,9 +12,10 @@
 #ifndef ION_DE_STYLE_H
 #define ION_DE_STYLE_H
 
+#include <libextl/extl.h>
+
 #include <ioncore/common.h>
 #include <ioncore/gr.h>
-#include <ioncore/extl.h>
 #include <ioncore/rectangle.h>
 
 INTRSTRUCT(DEBorder);

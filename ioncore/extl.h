@@ -1,5 +1,5 @@
 /*
- * ion/ioncore/extl.h
+ * ion/libextl/extl.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -9,9 +9,13 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_IONCORE_EXTL_H
-#define ION_IONCORE_EXTL_H
+#ifndef LIBEXTL_EXTL_H
+#define LIBEXTL_EXTL_H
 
-#include "../luaextl/luaextl.h"
+#include "luaextl.h"
 
-#endif /* ION_IONCORE_EXTL_H */
+#define EXTL_EXPORT
+#define EXTL_EXPORT_AS(T, F)
+#define EXTL_EXPORT_MEMBER
+
+#endif /* LIBEXTL_EXTL_H */

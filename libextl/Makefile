@@ -15,9 +15,9 @@ INCLUDES += -I..
 
 CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
-SOURCES=luaextl.c
+SOURCES=readconfig.c luaextl.c
 
-TARGETS=luaextl.a
+TARGETS=libextl.a
 
 ######################################
 
@@ -25,7 +25,6 @@ include $(TOPDIR)/rules.mk
 
 ######################################
 
-luaextl.a: $(OBJS)
+libextl.a: $(OBJS)
 	$(AR) $(ARFLAGS) $@ $+
 	$(RANLIB) $@
-

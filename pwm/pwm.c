@@ -22,11 +22,11 @@
 #include <libtu/util.h>
 #include <libtu/optparser.h>
 #include <libtu/errorlog.h>
+#include <libextl/readconfig.h>
 
 #include <ioncore/common.h>
 #include <ioncore/global.h>
 #include <ioncore/ioncore.h>
-#include <ioncore/readconfig.h>
 #include <ioncore/exec.h>
 #include <ioncore/mainloop.h>
 #include "../version.h"
@@ -109,15 +109,15 @@ int main(int argc, char*argv[])
     if(!ioncore_init("pwm3", argc, argv, LOCALEDIR))
         return EXIT_FAILURE;
 
-    ioncore_add_searchdir(EXTRABINDIR); /* ion-completefile */
-    ioncore_add_searchdir(MODULEDIR);
-    ioncore_add_searchdir(ETCDIR);
+    extl_add_searchdir(EXTRABINDIR); /* ion-completefile */
+    extl_add_searchdir(MODULEDIR);
+    extl_add_searchdir(ETCDIR);
 #ifdef PWM_ETCDIR    
-    ioncore_add_searchdir(PWM_ETCDIR);
+    extl_add_searchdir(PWM_ETCDIR);
 #endif
-    ioncore_add_searchdir(SHAREDIR);
-    ioncore_add_searchdir(LCDIR);
-    ioncore_set_userdirs("pwm3");
+    extl_add_searchdir(SHAREDIR);
+    extl_add_searchdir(LCDIR);
+    extl_set_userdirs("pwm3");
 
     optparser_init(argc, argv, OPTP_MIDLONG, pwm_opts);
     
@@ -130,7 +130,7 @@ int main(int argc, char*argv[])
             cfgfile=optparser_get_arg();
             break;
         case 's':
-            ioncore_add_searchdir(optparser_get_arg());
+            extl_add_searchdir(optparser_get_arg());
             break;
         case OPT_ID('S'):
             ioncore_g.sm_client_id=optparser_get_arg();
@@ -150,7 +150,7 @@ int main(int argc, char*argv[])
             }
             break;
         case OPT_ID('s'):
-            ioncore_set_sessiondir(optparser_get_arg());
+            extl_set_sessiondir(optparser_get_arg());
             break;
         case OPT_ID('N'):
             noerrorlog=TRUE;

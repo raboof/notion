@@ -19,7 +19,7 @@
 #include "cursor.h"
 #include "grab.h"
 #include "regbind.h"
-#include "extl.h"
+#include <libextl/extl.h>
 #include "region-iter.h"
 #include "strings.h"
 #include "xwindow.h"

@@ -11,7 +11,7 @@
 
 #include <libtu/map.h>
 #include <ioncore/conf-bindings.h>
-#include <ioncore/readconfig.h>
+#include <libextl/readconfig.h>
 #include <ioncore/saveload.h>
 #include <ioncore/screen.h>
 #include <ioncore/hooks.h>
@@ -160,7 +160,7 @@ bool mod_sp_init()
         return FALSE;
     }
     
-    ioncore_read_config("cfg_sp", NULL, FALSE);
+    extl_read_config("cfg_sp", NULL, FALSE);
     
     if(ioncore_g.opmode==IONCORE_OPMODE_INIT){
         hook_add(ioncore_post_layout_setup_hook, check_and_create);

@@ -16,7 +16,7 @@
 #include <libtu/obj.h>
 #include "region.h"
 #include "window.h"
-#include "extl.h"
+#include <libextl/extl.h>
 #include "rectangle.h"
 
 typedef WRegion *WRegionLoadCreateFn(WWindow *par, const WFitParams *fp,

@@ -13,7 +13,7 @@
 #define ION_MOD_MENU_MKMENU_H
 
 #include <ioncore/common.h>
-#include <ioncore/extl.h>
+#include <libextl/extl.h>
 #include "menu.h"
 
 extern WMenu *mod_menu_do_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab, 

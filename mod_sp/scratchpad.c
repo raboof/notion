@@ -18,7 +18,7 @@
 #include <ioncore/frame-draw.h>
 #include <ioncore/framep.h>
 #include <ioncore/saveload.h>
-#include <ioncore/extl.h>
+#include <libextl/extl.h>
 #include <ioncore/regbind.h>
 
 #include "scratchpad.h"

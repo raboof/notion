@@ -13,7 +13,7 @@
 #define ION_IONCORE_HOOKS_H
 
 #include "common.h"
-#include "extl.h"
+#include <libextl/extl.h>
 
 INTRSTRUCT(WHookItem);
 INTRCLASS(WHook);

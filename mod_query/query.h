@@ -14,7 +14,7 @@
 
 #include <ioncore/common.h>
 #include <ioncore/mplex.h>
-#include <ioncore/extl.h>
+#include <libextl/extl.h>
 #include "wedln.h"
 
 extern WEdln *mod_query_do_query(WMPlex *mplex, const char *prompt, 

@@ -15,7 +15,7 @@ TRANSLATIONS := fi cs
 MO_FILES := $(patsubst %,%.mo, $(TRANSLATIONS))
 
 POTDIRS=../ioncore \
-	../luaextl \
+	../libextl \
 	../mod_ionws \
 	../mod_floatws \
 	../mod_panews \

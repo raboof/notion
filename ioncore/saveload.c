@@ -18,13 +18,13 @@
 #include "common.h"
 #include "global.h"
 #include "region.h"
-#include "readconfig.h"
+#include <libextl/readconfig.h>
 #include "screen.h"
 #include "saveload.h"
 #include "names.h"
 #include "attach.h"
 #include "reginfo.h"
-#include "extl.h"
+#include <libextl/extl.h>
 #include "extlconv.h"
 
 
@@ -137,7 +137,7 @@ bool ioncore_init_layout()
     bool ok;
     int n=0;
     
-    ok=ioncore_read_savefile("saved_layout", &tab);
+    ok=extl_read_savefile("saved_layout", &tab);
     
     loading_layout=TRUE;
     layout_load_error=FALSE;
@@ -162,7 +162,7 @@ bool ioncore_init_layout()
         char *backup;
         
         strftime(tm+20, 15, "%Y%m%d%H%M%S", localtime(&t));
-        backup=ioncore_get_savefile(tm);
+        backup=extl_get_savefile(tm);
         if(backup==NULL){
             warn(TR("Unable to get file for layout backup."));
             return FALSE;
@@ -207,7 +207,7 @@ bool ioncore_save_layout()
         }
     }
     
-    ret=ioncore_write_savefile("saved_layout", tab);
+    ret=extl_write_savefile("saved_layout", tab);
     
     extl_unref_table(tab);
     

@@ -13,7 +13,7 @@
 
 #include <ioncore/common.h>
 #include <ioncore/reginfo.h>
-#include <ioncore/readconfig.h>
+#include <libextl/readconfig.h>
 #include <ioncore/framep.h>
 #include <ioncore/bindmaps.h>
 #include <ioncore/bindmaps.h>

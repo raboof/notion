@@ -13,7 +13,7 @@
 #include <unistd.h>
 #include <string.h>
 
-#include <ioncore/extl.h>
+#include <libextl/extl.h>
 #include "query.h"
 #include "wedln.h"
 

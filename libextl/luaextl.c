@@ -1,5 +1,5 @@
 /*
- * ion/lua/luaextl.c
+ * ion/libextl/luaextl.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -22,13 +22,17 @@
 #include <lualib.h>
 #include <lauxlib.h>
 
+#include <libtu/types.h>
 #include <libtu/util.h>
 #include <libtu/obj.h>
 #include <libtu/objp.h>
 #include <libtu/errorlog.h>
-#include <ioncore/common.h>
-#include <ioncore/readconfig.h>
+#include <libtu/output.h>
+#include <libtu/misc.h>
+#include <libtu/locale.h>
+#include <libtu/debug.h>
 
+#include "readconfig.h"
 #include "luaextl.h"
 
 #define MAGIC 0xf00ba7
@@ -395,10 +399,10 @@ static int extl_dopath(lua_State *st)
     complain=!lua_toboolean(st, 2);
     
     if(extl_current_file_or_dir(st, TRUE)!=1){
-        res=ioncore_read_config(toincl, NULL, complain);
+        res=extl_read_config(toincl, NULL, complain);
     }else{
         cfdir=lua_tostring(st, -1);
-        res=ioncore_read_config(toincl, cfdir, complain);
+        res=extl_read_config(toincl, cfdir, complain);
         lua_pop(st, 1);
     }
     lua_pushboolean(st, res);

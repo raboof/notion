@@ -14,7 +14,7 @@
 
 #include <stdio.h>
 #include "common.h"
-#include "extl.h"
+#include <libextl/extl.h>
 
 INTRSTRUCT(WRectangle);
 

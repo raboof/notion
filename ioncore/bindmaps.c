@@ -13,7 +13,7 @@
 #include "common.h"
 #include "conf-bindings.h"
 #include "binding.h"
-#include "extl.h"
+#include <libextl/extl.h>
 #include "framep.h"
 #include "bindmaps.h"
 
