@@ -17,7 +17,7 @@ WMwmHints *get_mwm_hints(Window win)
 	int n;
 	
 	n=get_property(wglobal.dpy, win, wglobal.atom_mwm_hints,
-				   wglobal.atom_mwm_hints, MWM_N_HINTS, (uchar**)&hints);
+				   wglobal.atom_mwm_hints, MWM_N_HINTS, FALSE, (uchar**)&hints);
 	
 	if(n<MWM_N_HINTS && hints!=NULL){
 		XFree((void*)hints);
@@ -34,7 +34,7 @@ void check_mwm_hints_nodecor(Window win, bool *nodecor)
 	int n;
 	
 	n=get_property(wglobal.dpy, win, wglobal.atom_mwm_hints,
-				   wglobal.atom_mwm_hints, MWM_N_HINTS, (uchar**)&hints);
+				   wglobal.atom_mwm_hints, MWM_N_HINTS, FALSE, (uchar**)&hints);
 	
 	if(n<MWM_DECOR_NDX)
 		return;

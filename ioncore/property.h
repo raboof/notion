@@ -12,8 +12,8 @@
 
 #include "common.h"
 
-extern int get_property(Display *dpy, Window win, Atom atom, Atom type,
-						long len, uchar **p);
+extern ulong get_property(Display *dpy, Window win, Atom atom, Atom type,
+						  ulong n32expected, bool more, uchar **p);
 extern char *get_string_property(Window win, Atom a, int *nret);
 extern void set_string_property(Window win, Atom a, const char *value);
 extern bool get_integer_property(Window win, Atom a, int *vret);

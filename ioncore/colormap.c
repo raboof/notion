@@ -86,7 +86,7 @@ void get_colormaps(WClientWin *cwin)
 	int i, n;
 	
 	n=get_property(wglobal.dpy, cwin->win, wglobal.atom_wm_colormaps,
-				   XA_WINDOW, 100L, (uchar**)&wins);
+				   XA_WINDOW, 100L, TRUE, (uchar**)&wins);
 	
 	if(cwin->n_cmapwins!=0){
 		free(cwin->cmapwins);
