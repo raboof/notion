@@ -152,20 +152,23 @@ end
 -- Parameter & Description \\
 -- \hline
 -- \var{prompt} & The prompt \\
--- \var{init} & A function that returns initial input when called. \\
+-- \var{dflt} & Default value to call \var{prog} with \\
 -- \var{prog} & Program name or a function that returns it when called. \\
 -- \var{completor} & A completor function. \\
 -- \end{tabularx}
-function querylib.make_execwith_fn(prompt, init, prog, completor)
+function querylib.make_execwith_fn(prompt, dflt, prog, completor)
     local function handle_execwith(frame, str)
         local p, err=getprog(prog)
         if p then
+            if not str or str=="" then
+                str=dflt
+            end
             exec_in(frame, p.." "..string.shell_safe(str))
         else
             query_fwarn(frame, err)
         end
     end
-    return querylib.make_frame_fn(prompt, init, handle_execwith, completor)
+    return querylib.make_frame_fn(prompt, nil, handle_execwith, completor)
 end
 
 --DOC
@@ -554,7 +557,7 @@ end
 --}
 --\end{verbatim}
 querylib.query_man=querylib.make_execwith_fn(
-    "Manual page (ion):", nil,
+    "Manual page (ion):", "ion",
     querylib.make_script_lookup_fn("ion-man"),
     querylib.man_completor
 )
