@@ -1,6 +1,6 @@
 /*
  * ion/floatws/floatframe.c
-n *
+ *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
  * Ion is free software; you can redistribute it and/or modify it under
