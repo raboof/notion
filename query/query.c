@@ -16,6 +16,7 @@
 #include <wmcore/clientwin.h>
 #include <wmcore/focus.h>
 #include <wmcore/commandsq.h>
+#include <wmcore/names.h>
 #include <src/frame.h>
 #include <src/workspace.h>
 #include <src/funtabs.h>
@@ -170,7 +171,7 @@ static bool attach_test(WFrame *dst, WRegion *sub, WFrame *thing)
 		FWARN(("Cannot attach: not on same screen."));
 		return FALSE;
 	}
-	frame_attach_sub(dst, sub, TRUE);
+	region_add_managed((WRegion*)dst, sub, TRUE);
 	return TRUE;
 }
 
@@ -328,7 +329,7 @@ void handler_renameworkspace(WThing *thing, char *name, char *userdata)
 	if(ws==NULL || empty_name(name))
 		return;
 
-	set_region_name((WRegion*)ws, name);
+	region_set_name((WRegion*)ws, name);
 }
 
 
@@ -347,7 +348,7 @@ void query_renameworkspace(WFrame *frame)
 
 void handler_renameframe(WThing *thing, char *name, char *userdata)
 {
-	set_region_name((WRegion*)thing, name);
+	region_set_name((WRegion*)thing, name);
 }
 
 

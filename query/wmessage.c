@@ -115,14 +115,14 @@ void wmsg_scrolldown(WMessage *wmsg)
 		wmsg_draw(wmsg, TRUE);
 }
 
-	
+
 /*}}}*/
 
 
 /*{{{ Init, deinit draw config update */
 
 
-static bool init_wmsg(WMessage *wmsg, WScreen *scr, WWinGeomParams params,
+static bool init_wmsg(WMessage *wmsg, WRegion *par, WRectangle geom,
 					  const char *msg)
 {
 	char **ptr;
@@ -146,9 +146,9 @@ static bool init_wmsg(WMessage *wmsg, WScreen *scr, WWinGeomParams params,
 	*ptr=cmsg;
 
 	init_listing(&(wmsg->listing));
-	setup_listing(&(wmsg->listing), INPUT_FONT(GRDATA_OF(scr)), ptr, 1);
+	setup_listing(&(wmsg->listing), INPUT_FONT(GRDATA_OF(par)), ptr, 1);
 	
-	if(!init_input((WInput*)wmsg, scr, params)){
+	if(!init_input((WInput*)wmsg, par, geom)){
 		free(cmsg);
 		free(ptr);
 		deinit_listing(&(wmsg->listing));
@@ -159,9 +159,9 @@ static bool init_wmsg(WMessage *wmsg, WScreen *scr, WWinGeomParams params,
 }
 
 
-WMessage *create_wmsg(WScreen *scr, WWinGeomParams params, const char *msg)
+WMessage *create_wmsg(WRegion *par, WRectangle geom, const char *msg)
 {
-	CREATETHING_IMPL(WMessage, wmsg, (p, scr, params, msg));
+	CREATETHING_IMPL(WMessage, wmsg, (p, par, geom, msg));
 }
 
 

@@ -19,7 +19,7 @@ DECLOBJ(WInput){
 };
 
 
-extern bool init_input(WInput *input, WScreen *scr, WWinGeomParams params);
+extern bool init_input(WInput *input, WRegion *par, WRectangle geom);
 extern void deinit_input(WInput *input);
 
 extern void fit_input(WInput *input, WRectangle geom);

@@ -102,36 +102,27 @@ void input_draw_config_updated(WInput *input)
 /*{{{ Init/deinit */
 
 
-bool init_input(WInput *input, WScreen *scr, WWinGeomParams params)
+bool init_input(WInput *input, WRegion *par, WRectangle geom)
 {
+	WScreen *scr;
 	Window win;
 	
-	input->max_geom=params.geom;
-	
-	/* Kludge -- TODO */
-	input->win.region.screen=scr;
-	
-	input_calc_size(input, &params.geom);
-	
-	params.win_x+=params.geom.x-input->max_geom.x;
-	params.win_y+=params.geom.y-input->max_geom.y;
-
-	win=create_simple_window_bg(scr, params, scr->grdata.input_colors.bg);
-
-	if(!init_window((WWindow*)input, scr, win, params.geom)){
-		XDestroyWindow(wglobal.dpy, win);
+	if(!WTHING_IS(par, WWindow))
 		return FALSE;
-	}
+
+	input->max_geom=geom;
+	scr=SCREEN_OF(par);
+	win=create_simple_window_bg(scr, ((WWindow*)par)->win, geom,
+								scr->grdata.input_colors.bg);
+	
+	if(!init_window((WWindow*)input, (WWindow*)par, win, geom))
+		return FALSE;
+
+	input_refit(input);
 	
 	XSelectInput(wglobal.dpy, input->win.win, INPUT_MASK);
-
-	/*input->win.bindmap=query_bindmap;*/
-	
 	region_add_bindmap((WRegion*)input, query_bindmap, FALSE);
 	
-	/*link_thing((WThing*)parent, (WThing*)input);
-	map_window((WWindow*)input);*/
-
 	return TRUE;
 }
 

@@ -395,7 +395,7 @@ static bool wedln_init_prompt(WEdln *wedln, WScreen *scr, const char *prompt)
 }
 
 
-bool init_wedln(WEdln *wedln, WScreen *scr, WWinGeomParams params,
+bool init_wedln(WEdln *wedln, WRegion *par, WRectangle geom,
 				WEdlnHandler *handler,
 				const char *prompt, const char *dflt)
 {
@@ -403,7 +403,7 @@ bool init_wedln(WEdln *wedln, WScreen *scr, WWinGeomParams params,
 	wedln->handler=handler;
 	wedln->userdata=NULL;
 
-	if(!wedln_init_prompt(wedln, scr, prompt))
+	if(!wedln_init_prompt(wedln, SCREEN_OF(par), prompt))
 		return FALSE;
 	
 	if(!edln_init(&(wedln->edln), dflt)){
@@ -418,7 +418,7 @@ bool init_wedln(WEdln *wedln, WScreen *scr, WWinGeomParams params,
 
 	init_listing(&(wedln->complist));
 	
-	if(!init_input((WInput*)wedln, scr, params)){
+	if(!init_input((WInput*)wedln, par, geom)){
 		edln_deinit(&(wedln->edln));
 		free(wedln->prompt);
 		return FALSE;
@@ -432,10 +432,10 @@ bool init_wedln(WEdln *wedln, WScreen *scr, WWinGeomParams params,
 }
 
 
-WEdln *create_wedln(WScreen *scr, WWinGeomParams params,
+WEdln *create_wedln(WRegion *par, WRectangle geom,
 					WEdlnCreateParams *fnp)
 {
-	CREATETHING_IMPL(WEdln, wedln, (p, scr, params, fnp->handler,
+	CREATETHING_IMPL(WEdln, wedln, (p, par, geom, fnp->handler,
 									fnp->prompt, fnp->dflt));
 }
 

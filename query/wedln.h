@@ -44,7 +44,7 @@ DECLOBJ(WEdln){
 	char *userdata;
 };
 
-extern WEdln *create_wedln(WScreen *scr, WWinGeomParams params,
+extern WEdln *create_wedln(WRegion *par, WRectangle geom,
 						   WEdlnCreateParams *p);
 extern void wedln_set_completion_handler(WEdln *wedln,
 										 EdlnCompletionHandler *h, void *d);

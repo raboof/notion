@@ -21,7 +21,7 @@ DECLOBJ(WMessage){
 	WListing listing;
 };
 
-extern WMessage *create_wmsg(WScreen *scr, WWinGeomParams params,
+extern WMessage *create_wmsg(WRegion *par, WRectangle geom,
 							 const char *msg);
 extern void deinit_wmsg(WMessage *msg);
 
