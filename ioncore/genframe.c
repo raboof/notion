@@ -822,8 +822,8 @@ void genframe_draw_bar_default(const WGenFrame *genframe, bool complete)
 	dinfo->border=&(grdata->tab_border);
 	dinfo->font=grdata->tab_font;
 	
-	if(complete)
-		XClearArea(wglobal.dpy, WIN, X, Y, W, H, False);
+	/*if(complete)
+		XClearArea(wglobal.dpy, WIN, X, Y, W, H, False);*/
 	
 	if(genframe->managed_count==0){
 		if(REGION_IS_ACTIVE(genframe))
