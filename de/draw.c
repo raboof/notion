@@ -182,11 +182,11 @@ static void draw_borderline(Window win, GC gc, WRectangle *geom,
         geom->y+=tl;
     }else if(line==GR_BORDERLINE_RIGHT && geom->h>0){
         XSetForeground(ioncore_g.dpy, gc, brc);
-        XDrawRectangle(ioncore_g.dpy, win, gc, geom->x+geom->w-br, geom->y, br, geom->h);
+        XDrawRectangle(ioncore_g.dpy, win, gc, geom->x+geom->w-1-br, geom->y, br, geom->h);
         geom->w-=br;
     }else if(line==GR_BORDERLINE_BOTTOM && geom->w>0){
         XSetForeground(ioncore_g.dpy, gc, brc);
-        XDrawRectangle(ioncore_g.dpy, win, gc, geom->x, geom->y+geom->h-br, geom->w, br);
+        XDrawRectangle(ioncore_g.dpy, win, gc, geom->x, geom->y+geom->h-1-br, geom->w, br);
         geom->h-=br;
     }
 }
