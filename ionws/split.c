@@ -1095,7 +1095,7 @@ WRegion *ionws_do_find_new_manager(WIonWS *ws, WRegion *reg)
  * a leaf of which \var{reg} is.
  */
 EXTL_EXPORT
-WWsSplit *ionws_split_of(WIonWS *ws, WObj *reg)
+WWsSplit *ionws_split_of(WIonWS *ws, WRegion *reg)
 {
 	if(REGION_MANAGER(reg)!=(WRegion*)ws){
 		warn_obj("ionws_split_of", "Manager doesn't match");
