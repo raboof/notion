@@ -29,6 +29,7 @@
 #include "defer.h"
 #include "rectangle.h"
 #include "xwindow.h"
+#include "region-iter.h"
 
 
 static int p_tab_x=0, p_tab_y=0, p_tabnum=-1;
@@ -123,6 +124,20 @@ int frame_press(WFrame *frame, XButtonEvent *ev, WRegion **reg_ret)
             *reg_ret=sub;
         
         return FRAME_AREA_TAB;
+    }else{
+        WRegion *sub, *curr=mplex_lcurrent(&(frame->mplex), 1);
+        FOR_ALL_MANAGED_ON_LIST(frame->mplex.l1_list, sub){
+            p_tabnum++;
+            if(sub==curr)
+                break;
+        }
+        
+        if(sub!=NULL){
+            p_tab_x=ev->x_root-frame_nth_tab_w(frame, p_tabnum)/2;
+            p_tab_y=ev->y_root-frame->bar_h/2;
+        }else{
+            p_tabnum=-1;
+        }
     }
     
 
