@@ -113,7 +113,7 @@ function QueryLib.complete_ssh(str)
             table.insert(res, v)
         end
     end
-    return res	
+    return res
 end
 
 function QueryLib.gotoclient_handler(frame, str)
@@ -173,16 +173,6 @@ function QueryLib.workspace_handler(frame, name)
         query_fwarn(frame, "Failed to create workspace")
     end
     
-end
-
-function QueryLib.get_initdir()
-    local wd=os.getenv("PWD")
-    if wd==nil then
-        wd="/"
-    elseif string.sub(wd, -1)~="/" then
-        wd=wd .. "/"
-    end
-    return wd
 end
 
 -- }}}
@@ -268,6 +258,27 @@ end
 
 
 -- More complex completors that start external programs {{{
+
+function QueryLib.make_execfile_fn(prompt, init, prog, completor)
+    local function handle_execwith(frame, str)
+        QueryLib.last_dir=string.gsub(str, "^(.*/)[^/]-$", "%1")
+        exec_in_frame(frame, prog .. " " .. str)
+    end
+    return QueryLib.make_frame_fn(prompt, init, handle_execwith, completor)
+end
+
+function QueryLib.get_initdir()
+    if QueryLib.last_dir then
+        return QueryLib.last_dir
+    end
+    local wd=os.getenv("PWD")
+    if wd==nil then
+        wd="/"
+    elseif string.sub(wd, -1)~="/" then
+        wd=wd .. "/"
+    end
+    return wd
+end
 
 -- How many characters of result data to completions do we allow?
 QueryLib.RESULT_DATA_LIMIT=10*1024^2
@@ -474,7 +485,7 @@ QueryLib.query_man=QueryLib.make_execwith_fn(
 -- Asks for a file to be edited. It uses the script \file{ion-edit} to
 -- start a program to edit the file. This script uses \file{run-mailcap}
 -- by default, but if you don't have it, you may customise the script.
-QueryLib.query_editfile=QueryLib.make_execwith_fn(
+QueryLib.query_editfile=QueryLib.make_execfile_fn(
     "Edit file:", QueryLib.get_initdir, "ion-edit", QueryLib.file_completor
 )
 
@@ -482,7 +493,7 @@ QueryLib.query_editfile=QueryLib.make_execwith_fn(
 -- Asks for a file to be viewed. It uses the script \file{ion-view} to
 -- start a program to view the file. This script uses \file{run-mailcap}
 -- by default, but if you don't have it, you may customise the script.
-QueryLib.query_runfile=QueryLib.make_execwith_fn(
+QueryLib.query_runfile=QueryLib.make_execfile_fn(
     "View file:", QueryLib.get_initdir, "ion-view", QueryLib.file_completor
 )
 
