@@ -131,11 +131,12 @@ static void draw_border(Window win, GC gc, WRectangle *geom,
 }
 
 
-void debrush_do_draw_border(DEBrush *brush, Window win, WRectangle geom,
+void debrush_do_draw_border(DEBrush *brush, WRectangle geom, 
                             DEColourGroup *cg)
 {
     DEBorder *bd=&(brush->d->border);
     GC gc=brush->d->normal_gc;
+    Window win=brush->win;
     
     switch(bd->style){
     case DEBORDER_RIDGE:
@@ -158,13 +159,13 @@ void debrush_do_draw_border(DEBrush *brush, Window win, WRectangle geom,
 }
 
 
-void debrush_draw_border(DEBrush *brush, Window win,
+void debrush_draw_border(DEBrush *brush, 
                          const WRectangle *geom,
                          const char *attrib)
 {
     DEColourGroup *cg=debrush_get_colour_group(brush, attrib);
     if(cg!=NULL)
-        debrush_do_draw_border(brush, win, *geom, cg);
+        debrush_do_draw_border(brush, *geom, cg);
 }
 
 
@@ -192,11 +193,12 @@ static void draw_borderline(Window win, GC gc, WRectangle *geom,
 }
 
 
-void debrush_do_draw_borderline(DEBrush *brush, Window win, WRectangle geom,
+void debrush_do_draw_borderline(DEBrush *brush, WRectangle geom,
                                 DEColourGroup *cg, GrBorderLine line)
 {
     DEBorder *bd=&(brush->d->border);
     GC gc=brush->d->normal_gc;
+    Window win=brush->win;
     
     switch(bd->style){
     case DEBORDER_RIDGE:
@@ -219,13 +221,12 @@ void debrush_do_draw_borderline(DEBrush *brush, Window win, WRectangle geom,
 }
 
 
-void debrush_draw_borderline(DEBrush *brush, Window win,
-                             const WRectangle *geom,
+void debrush_draw_borderline(DEBrush *brush, const WRectangle *geom,
                              const char *attrib, GrBorderLine line)
 {
     DEColourGroup *cg=debrush_get_colour_group(brush, attrib);
     if(cg!=NULL)
-        debrush_do_draw_borderline(brush, win, *geom, cg, line);
+        debrush_do_draw_borderline(brush, *geom, cg, line);
 }
 
 
@@ -249,9 +250,8 @@ static void copy_masked(DEBrush *brush, Drawable src, Drawable dst,
 }
 
 
-void debrush_tab_extras(DEBrush *brush, Window win,
-                        const WRectangle *g, DEColourGroup *cg,
-                        GrBorderWidths *bdw,
+void debrush_tab_extras(DEBrush *brush, const WRectangle *g, 
+                        DEColourGroup *cg, GrBorderWidths *bdw,
                         GrFontExtents *fnte,
                         const char *a1, const char *a2,
                         bool pre)
@@ -271,14 +271,14 @@ void debrush_tab_extras(DEBrush *brush, Window win,
         d->normal_gc=d->stipple_gc;
         d->stipple_gc=tmp;
         swapped=TRUE;
-        XClearArea(ioncore_g.dpy, win, g->x, g->y, g->w, g->h, False);
+        XClearArea(ioncore_g.dpy, brush->win, g->x, g->y, g->w, g->h, False);
         return;
     }
     
     if(MATCHES2("*-*-tagged", a1, a2)){
         XSetForeground(ioncore_g.dpy, d->copy_gc, cg->fg);
             
-        copy_masked(brush, d->tag_pixmap, win, 0, 0,
+        copy_masked(brush, d->tag_pixmap, brush->win, 0, 0,
                     d->tag_pixmap_w, d->tag_pixmap_h,
                     g->x+g->w-bdw->right-d->tag_pixmap_w, 
                     g->y+bdw->top);
@@ -297,9 +297,8 @@ void debrush_tab_extras(DEBrush *brush, Window win,
 }
 
 
-void debrush_menuentry_extras(DEBrush *brush, Window win,
-                              const WRectangle *g, DEColourGroup *cg,
-                              GrBorderWidths *bdw,
+void debrush_menuentry_extras(DEBrush *brush, const WRectangle *g, 
+                              DEColourGroup *cg, GrBorderWidths *bdw,
                               GrFontExtents *fnte,
                               const char *a1, const char *a2, 
                               bool pre)
@@ -316,30 +315,29 @@ void debrush_menuentry_extras(DEBrush *brush, Window win,
         +(g->h-bdw->top-bdw->bottom-fnte->max_height)/2);
     tx=g->x+g->w-bdw->right;
 
-    debrush_do_draw_string(brush, win, tx, ty, DE_SUB_IND,
-                           DE_SUB_IND_LEN, FALSE, cg);
+    debrush_do_draw_string(brush, tx, ty, DE_SUB_IND, DE_SUB_IND_LEN, 
+                           FALSE, cg);
 }
 
 
-void debrush_do_draw_box(DEBrush *brush, Window win,
-                         const WRectangle *geom, DEColourGroup *cg,
-                         bool needfill)
+void debrush_do_draw_box(DEBrush *brush, const WRectangle *geom, 
+                         DEColourGroup *cg, bool needfill)
 {
     GC gc=brush->d->normal_gc;
     
     if(TRUE/*needfill*/){
         XSetForeground(ioncore_g.dpy, gc, cg->bg);
-        XFillRectangle(ioncore_g.dpy, win, gc, geom->x, geom->y, 
+        XFillRectangle(ioncore_g.dpy, brush->win, gc, geom->x, geom->y, 
                        geom->w, geom->h);
     }
     
-    debrush_do_draw_border(brush, win, *geom, cg);
+    debrush_do_draw_border(brush, *geom, cg);
 }
 
 
-static void debrush_do_draw_textbox(DEBrush *brush, Window win, 
-                                    const WRectangle *geom, const char *text, 
-                                    DEColourGroup *cg, bool needfill,
+static void debrush_do_draw_textbox(DEBrush *brush, const WRectangle *geom, 
+                                    const char *text, DEColourGroup *cg, 
+                                    bool needfill,
                                     const char *a1, const char *a2)
 {
     uint len;
@@ -351,9 +349,9 @@ static void debrush_do_draw_textbox(DEBrush *brush, Window win,
     grbrush_get_font_extents(&(brush->grbrush), &fnte);
     
     if(brush->extras_fn!=NULL)
-        brush->extras_fn(brush, win, geom, cg, &bdw, &fnte, a1, a2, TRUE);
+        brush->extras_fn(brush, geom, cg, &bdw, &fnte, a1, a2, TRUE);
     
-    debrush_do_draw_box(brush, win, geom, cg, needfill);
+    debrush_do_draw_box(brush, geom, cg, needfill);
     
     do{ /*...while(0)*/
         if(text==NULL)
@@ -378,28 +376,27 @@ static void debrush_do_draw_textbox(DEBrush *brush, Window win,
         ty=(geom->y+bdw.top+fnte.baseline
             +(geom->h-bdw.top-bdw.bottom-fnte.max_height)/2);
         
-        debrush_do_draw_string(brush, win, tx, ty, text, len, FALSE, cg);
+        debrush_do_draw_string(brush, tx, ty, text, len, FALSE, cg);
     }while(0);
     
     if(brush->extras_fn!=NULL)
-        brush->extras_fn(brush, win, geom, cg, &bdw, &fnte, a1, a2, FALSE);
+        brush->extras_fn(brush, geom, cg, &bdw, &fnte, a1, a2, FALSE);
 }
 
 
-void debrush_draw_textbox(DEBrush *brush, Window win, 
-                          const WRectangle *geom, const char *text, 
-                          const char *attr, bool needfill)
+void debrush_draw_textbox(DEBrush *brush, const WRectangle *geom, 
+                          const char *text, const char *attr, 
+                          bool needfill)
 {
     DEColourGroup *cg=debrush_get_colour_group(brush, attr);
     if(cg!=NULL){
-        debrush_do_draw_textbox(brush, win, geom, text, cg, needfill, 
+        debrush_do_draw_textbox(brush, geom, text, cg, needfill, 
                                 attr, NULL);
     }
 }
 
 
-void debrush_draw_textboxes(DEBrush *brush, Window win, 
-                            const WRectangle *geom,
+void debrush_draw_textboxes(DEBrush *brush, const WRectangle *geom,
                             int n, const GrTextElem *elem, 
                             bool needfill, const char *common_attrib)
 {
@@ -415,13 +412,13 @@ void debrush_draw_textboxes(DEBrush *brush, Window win,
         cg=debrush_get_colour_group2(brush, common_attrib, elem[i].attr);
         
         if(cg!=NULL){
-            debrush_do_draw_textbox(brush, win, &g, elem[i].text, cg, needfill,
+            debrush_do_draw_textbox(brush, &g, elem[i].text, cg, needfill,
                                     common_attrib, elem[i].attr);
         }
         
         g.x+=g.w;
         if(bdw.spacing>0 && needfill){
-            XClearArea(ioncore_g.dpy, win, g.x, g.y,
+            XClearArea(ioncore_g.dpy, brush->win, g.x, g.y,
                        brush->d->spacing, g.h, False);
         }
         g.x+=bdw.spacing;
@@ -438,8 +435,7 @@ void debrush_draw_textboxes(DEBrush *brush, Window win,
  * window-specific GC:s to do this correctly...
  */
 
-void debrush_set_clipping_rectangle(DEBrush *brush, Window unused,
-                                    const WRectangle *geom)
+void debrush_set_clipping_rectangle(DEBrush *brush, const WRectangle *geom)
 {
     XRectangle rect;
     
@@ -453,7 +449,7 @@ void debrush_set_clipping_rectangle(DEBrush *brush, Window unused,
 }
 
 
-void debrush_clear_clipping_rectangle(DEBrush *brush, Window unused)
+void debrush_clear_clipping_rectangle(DEBrush *brush)
 {
     XSetClipMask(ioncore_g.dpy, brush->d->normal_gc, None);
 }
@@ -466,7 +462,7 @@ void debrush_clear_clipping_rectangle(DEBrush *brush, Window unused)
 
 #define MAXSHAPE 16
 
-void debrush_set_window_shape(DEBrush *brush, Window win, bool rough,
+void debrush_set_window_shape(DEBrush *brush, bool rough,
                               int n, const WRectangle *rects)
 {
     XRectangle r[MAXSHAPE];
@@ -482,13 +478,13 @@ void debrush_set_window_shape(DEBrush *brush, Window win, bool rough,
         r[i].height=rects[i].h;
     }
     
-    XShapeCombineRectangles(ioncore_g.dpy, win, ShapeBounding, 0, 0, r, n,
+    XShapeCombineRectangles(ioncore_g.dpy, brush->win,
+                            ShapeBounding, 0, 0, r, n,
                             ShapeSet, YXBanded);
 }
 
 
-void debrush_enable_transparency(DEBrush *brush, Window win, 
-                                 GrTransparency mode)
+void debrush_enable_transparency(DEBrush *brush, GrTransparency mode)
 {
     XSetWindowAttributes attr;
     ulong attrflags=0;
@@ -504,13 +500,12 @@ void debrush_enable_transparency(DEBrush *brush, Window win,
         attr.background_pixel=brush->d->cgrp.bg;
     }
     
-    XChangeWindowAttributes(ioncore_g.dpy, win, attrflags, &attr);
-    XClearWindow(ioncore_g.dpy, win);
+    XChangeWindowAttributes(ioncore_g.dpy, brush->win, attrflags, &attr);
+    XClearWindow(ioncore_g.dpy, brush->win);
 }
 
 
-void debrush_fill_area(DEBrush *brush, Window win, const WRectangle *geom,
-                       const char *attr)
+void debrush_fill_area(DEBrush *brush, const WRectangle *geom, const char *attr)
 {
     DEColourGroup *cg=debrush_get_colour_group(brush, attr);
     GC gc=brush->d->normal_gc;
@@ -519,13 +514,15 @@ void debrush_fill_area(DEBrush *brush, Window win, const WRectangle *geom,
         return;
     
     XSetForeground(ioncore_g.dpy, gc, cg->bg);
-    XFillRectangle(ioncore_g.dpy, win, gc, geom->x, geom->y, geom->w, geom->h);
+    XFillRectangle(ioncore_g.dpy, brush->win, gc, 
+                   geom->x, geom->y, geom->w, geom->h);
 }
 
 
-void debrush_clear_area(DEBrush *brush, Window win, const WRectangle *geom)
+void debrush_clear_area(DEBrush *brush, const WRectangle *geom)
 {
-    XClearArea(ioncore_g.dpy, win, geom->x, geom->y, geom->w, geom->h, False);
+    XClearArea(ioncore_g.dpy, brush->win,
+               geom->x, geom->y, geom->w, geom->h, False);
 }
 
 

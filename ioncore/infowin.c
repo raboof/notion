@@ -81,17 +81,25 @@ WInfoWin *create_infowin(WWindow *parent, const WFitParams *fp,
 
 void infowin_deinit(WInfoWin *p)
 {
-    if(p->buffer!=NULL)
+    if(p->buffer!=NULL){
         free(p->buffer);
-    
-    if(p->attr!=NULL)
+        p->buffer=NULL;
+    }
+
+    if(p->attr!=NULL){
         free(p->attr);
+        p->attr=NULL;
+    }
     
-    if(p->style!=NULL)
+    if(p->style!=NULL){
         free(p->style);
+        p->style=NULL;
+    }
     
-    if(p->brush!=NULL)
-        grbrush_release(p->brush, p->wwin.win);
+    if(p->brush!=NULL){
+        grbrush_release(p->brush);
+        p->brush=NULL;
+    }
     
     window_deinit(&(p->wwin));
 }
@@ -115,8 +123,7 @@ void infowin_draw(WInfoWin *p, bool complete)
     g.w=REGION_GEOM(p).w;
     g.h=REGION_GEOM(p).h;
     
-    grbrush_draw_textbox(p->brush, p->wwin.win, &g, p->buffer, p->attr,
-                         complete);
+    grbrush_draw_textbox(p->brush, &g, p->buffer, p->attr, complete);
 }
 
 
@@ -126,13 +133,14 @@ void infowin_updategr(WInfoWin *p)
     
     assert(p->style!=NULL);
     
-    nbrush=gr_get_brush(region_rootwin_of((WRegion*)p),
-                        p->wwin.win, p->style);
+    nbrush=gr_get_brush(p->wwin.win, 
+                        region_rootwin_of((WRegion*)p),
+                        p->style);
     if(nbrush==NULL)
         return;
     
     if(p->brush!=NULL)
-        grbrush_release(p->brush, p->wwin.win);
+        grbrush_release(p->brush);
     
     p->brush=nbrush;
     

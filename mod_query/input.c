@@ -90,15 +90,15 @@ void input_updategr(WInput *input)
 {
     GrBrush *brush;
     
-    brush=gr_get_brush(region_rootwin_of((WRegion*)input),
-                       input->win.win,
+    brush=gr_get_brush(input->win.win,
+                       region_rootwin_of((WRegion*)input),
                        input_style(input));
     
     if(brush==NULL)
         return;
     
     if(input->brush!=NULL)
-        grbrush_release(input->brush, input->win.win);
+        grbrush_release(input->brush);
     input->brush=brush;
     input_refit(input);
     
@@ -127,8 +127,8 @@ bool input_init(WInput *input, WWindow *par, const WFitParams *fp)
     
     win=input->win.win;
     
-    input->brush=gr_get_brush(region_rootwin_of((WRegion*)par),
-                              win, input_style(input));
+    input->brush=gr_get_brush(win, region_rootwin_of((WRegion*)par),
+                              input_style(input));
     
     if(input->brush==NULL)
         goto fail;
@@ -149,7 +149,7 @@ fail:
 void input_deinit(WInput *input)
 {
     if(input->brush!=NULL)
-        grbrush_release(input->brush, input->win.win);
+        grbrush_release(input->brush);
     
     window_deinit((WWindow*)input);
 }

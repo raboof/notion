@@ -27,18 +27,18 @@
 
 static void panehandle_getbrush(WPaneHandle *pwin)
 {
-    GrBrush *brush=gr_get_brush(region_rootwin_of((WRegion*)pwin),
-                                pwin->wwin.win, "pane");
+    GrBrush *brush=gr_get_brush(pwin->wwin.win, 
+                                region_rootwin_of((WRegion*)pwin), 
+                                "pane");
 
     if(brush!=NULL){
         if(pwin->brush!=NULL)
-            grbrush_release(pwin->brush, pwin->wwin.win);
+            grbrush_release(pwin->brush);
         
         pwin->brush=brush;
         
         grbrush_get_border_widths(brush, &(pwin->bdw));
-        grbrush_enable_transparency(brush, pwin->wwin.win,
-                                    GR_TRANSPARENCY_YES);
+        grbrush_enable_transparency(brush, GR_TRANSPARENCY_YES);
     }
 }
 
@@ -78,7 +78,7 @@ void panehandle_deinit(WPaneHandle *pwin)
     assert(pwin->splitfloat==NULL);
     
     if(pwin->brush!=NULL){
-        grbrush_release(pwin->brush, pwin->wwin.win);
+        grbrush_release(pwin->brush);
         pwin->brush=NULL;
     }
     
@@ -111,8 +111,7 @@ static void panehandle_draw(WPaneHandle *pwin, bool complete)
     g.w=REGION_GEOM(pwin).w;
     g.h=REGION_GEOM(pwin).h;
     
-    grbrush_draw_borderline(pwin->brush, pwin->wwin.win, &g, NULL, 
-                            pwin->bline);
+    grbrush_draw_borderline(pwin->brush, &g, NULL, pwin->bline);
 }
 
 

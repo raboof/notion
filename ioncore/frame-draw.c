@@ -225,9 +225,8 @@ void frame_draw_bar_default(const WFrame *frame, bool complete)
     
     frame_bar_geom(frame, &geom);
     
-    grbrush_draw_textboxes(frame->bar_brush, frame->mplex.win.win, 
-                           &geom, frame->titles_n, frame->titles,
-                           complete, cattr);
+    grbrush_draw_textboxes(frame->bar_brush, &geom, frame->titles_n, 
+                           frame->titles, complete, cattr);
 }
 
 
@@ -242,8 +241,7 @@ void frame_draw_default(const WFrame *frame, bool complete)
     
     frame_border_geom(frame, &geom);
     
-    grbrush_draw_border(frame->brush, frame->mplex.win.win, &geom,
-                        attr);
+    grbrush_draw_border(frame->brush, &geom, attr);
 
     frame_draw_bar(frame, FALSE);
 }
@@ -306,7 +304,7 @@ void frame_initialise_gr(WFrame *frame)
     
     frame->bar_h=0;
     
-    frame->brush=gr_get_brush(rw, win, style);
+    frame->brush=gr_get_brush(win, rw, style);
     if(frame->brush==NULL)
         return;
     
@@ -314,7 +312,7 @@ void frame_initialise_gr(WFrame *frame)
     if(tab_style==NULL)
         return;
     
-    frame->bar_brush=grbrush_get_slave(frame->brush, rw, win, tab_style);
+    frame->bar_brush=grbrush_get_slave(frame->brush, rw, tab_style);
     free(tab_style);
     
     if(frame->bar_brush==NULL)
@@ -332,12 +330,12 @@ void frame_initialise_gr(WFrame *frame)
 void frame_release_brushes(WFrame *frame)
 {
     if(frame->bar_brush!=NULL){
-        grbrush_release(frame->bar_brush, frame->mplex.win.win);
+        grbrush_release(frame->bar_brush);
         frame->bar_brush=NULL;
     }
     
     if(frame->brush!=NULL){
-        grbrush_release(frame->brush, frame->mplex.win.win);
+        grbrush_release(frame->brush);
         frame->brush=NULL;
     }
 }
@@ -360,8 +358,7 @@ bool frame_set_background(WFrame *frame, bool set_always)
     if(mode!=frame->tr_mode || set_always){
         frame->tr_mode=mode;
         if(frame->brush!=NULL){
-            grbrush_enable_transparency(frame->brush, frame->mplex.win.win, 
-                                        mode);
+            grbrush_enable_transparency(frame->brush, mode);
             window_draw((WWindow*)frame, TRUE);
         }
         return TRUE;

@@ -78,7 +78,7 @@ void statusbar_deinit(WStatusBar *p)
     statusbar_free_elems(p);
     
     if(p->brush!=NULL)
-        grbrush_release(p->brush, p->wwin.win);
+        grbrush_release(p->brush);
     
     window_deinit(&(p->wwin));
 }
@@ -395,13 +395,13 @@ void statusbar_updategr(WStatusBar *p)
 {
     GrBrush *nbrush;
     
-    nbrush=gr_get_brush(region_rootwin_of((WRegion*)p),
-                        p->wwin.win, "stdisp-statusbar");
+    nbrush=gr_get_brush(p->wwin.win, region_rootwin_of((WRegion*)p),
+                        "stdisp-statusbar");
     if(nbrush==NULL)
         return;
     
     if(p->brush!=NULL)
-        grbrush_release(p->brush, p->wwin.win);
+        grbrush_release(p->brush);
     
     p->brush=nbrush;
     

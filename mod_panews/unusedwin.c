@@ -32,17 +32,17 @@
 
 static void unusedwin_getbrush(WUnusedWin *uwin)
 {
-    GrBrush *brush=gr_get_brush(region_rootwin_of((WRegion*)uwin),
-                                uwin->wwin.win, "frame-tiled-panews-unused");
+    GrBrush *brush=gr_get_brush(uwin->wwin.win,
+                                region_rootwin_of((WRegion*)uwin),
+                                "frame-tiled-panews-unused");
 
     if(brush!=NULL){
         if(uwin->brush!=NULL)
-            grbrush_release(uwin->brush, uwin->wwin.win);
+            grbrush_release(uwin->brush);
         
         uwin->brush=brush;
         
-        grbrush_enable_transparency(brush, uwin->wwin.win,
-                                    GR_TRANSPARENCY_YES);
+        grbrush_enable_transparency(brush, GR_TRANSPARENCY_YES);
     }
 }
 
@@ -75,7 +75,7 @@ WUnusedWin *create_unusedwin(WWindow *parent, const WFitParams *fp)
 void unusedwin_deinit(WUnusedWin *uwin)
 {
     if(uwin->brush!=NULL){
-        grbrush_release(uwin->brush, uwin->wwin.win);
+        grbrush_release(uwin->brush);
         uwin->brush=NULL;
     }
     
@@ -181,7 +181,7 @@ static void unusedwin_draw(WUnusedWin *uwin, bool complete)
     g.w=REGION_GEOM(uwin).w;
     g.h=REGION_GEOM(uwin).h;
     
-    grbrush_draw_border(uwin->brush, uwin->wwin.win, &g, substyle);
+    grbrush_draw_border(uwin->brush, &g, substyle);
 }
 
 

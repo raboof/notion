@@ -875,8 +875,7 @@ static void dock_draw(WDock *dock, bool complete UNUSED)
             {
                 WRectangle geom=REGION_GEOM(dock);
                 geom.x=geom.y=0;
-                grbrush_draw_border(dock->brush, ((WWindow*)dock)->win, &geom,
-                                    "dock");
+                grbrush_draw_border(dock->brush, &geom, "dock");
             }
             break;
         case DOCK_OUTLINE_STYLE_EACH:
@@ -884,8 +883,8 @@ static void dock_draw(WDock *dock, bool complete UNUSED)
                 WDockApp *dockapp;
                 for(dockapp=dock->dockapps; dockapp!=NULL;
                     dockapp=dockapp->next){
-                    grbrush_draw_border(dock->brush, ((WWindow*)dock)->win,
-                                        &dockapp->tile_geom, "dock");
+                    grbrush_draw_border(dock->brush, &dockapp->tile_geom, 
+                                        "dock");
                 }
             }
             break;
@@ -910,7 +909,7 @@ static void dock_brush_release(WDock *dock)
 {
     
     if(dock->brush){
-        grbrush_release(dock->brush, ((WWindow*)dock)->win);
+        grbrush_release(dock->brush);
         dock->brush=NULL;
     }
 
@@ -921,8 +920,9 @@ static void dock_brush_get(WDock *dock)
 {
 
     dock_brush_release(dock);
-    dock->brush=gr_get_brush(region_rootwin_of((WRegion*)dock), 
-                             ((WWindow*)dock)->win, "stdisp-dock");
+    dock->brush=gr_get_brush(((WWindow*)dock)->win, 
+                             region_rootwin_of((WRegion*)dock), 
+                             "stdisp-dock");
 }
 
 

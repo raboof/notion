@@ -53,8 +53,7 @@ static int wedln_draw_strsect(WEdln *wedln, const WRectangle *geom,
     if(len==0)
         return 0;
     
-    grbrush_draw_string(WEDLN_BRUSH(wedln), WEDLN_WIN(wedln), x, y, 
-                        str, len, TRUE, attr);
+    grbrush_draw_string(WEDLN_BRUSH(wedln), x, y, str, len, TRUE, attr);
     
     return grbrush_get_text_width(WEDLN_BRUSH(wedln), str, len);
 }
@@ -89,13 +88,13 @@ static void wedln_do_draw_str_box(WEdln *wedln, const WRectangle *geom,
     const char *cursorstyle=(REGION_IS_ACTIVE(wedln)
                              ? "active-cursor" : "inactive-cursor");
     
-    grbrush_set_clipping_rectangle(WEDLN_BRUSH(wedln), WEDLN_WIN(wedln), geom);
+    grbrush_set_clipping_rectangle(WEDLN_BRUSH(wedln), geom);
     
     if(tx<geom->w){
         WRectangle g=*geom;
         g.x+=tx;
         g.w-=tx;
-        grbrush_clear_area(WEDLN_BRUSH(wedln), WEDLN_WIN(wedln), &g);
+        grbrush_clear_area(WEDLN_BRUSH(wedln), &g);
     }
     
     ty=calc_text_y(wedln, geom);
@@ -129,7 +128,7 @@ static void wedln_do_draw_str_box(WEdln *wedln, const WRectangle *geom,
         grbrush_clear_area(WEDLN_BRUSH(wedln), WEDLN_WIN(wedln), &g);
     }*/
     
-    grbrush_clear_clipping_rectangle(WEDLN_BRUSH(wedln), WEDLN_WIN(wedln));
+    grbrush_clear_clipping_rectangle(WEDLN_BRUSH(wedln));
 }
 
 
@@ -370,8 +369,8 @@ void wedln_draw_completions(WEdln *wedln, bool complete)
     if(wedln->complist.strs!=NULL && WEDLN_BRUSH(wedln)!=NULL){
         const char *style=(REGION_IS_ACTIVE(wedln) ? "active" : "inactive");
         get_completions_geom(wedln, G_CURRENT, &geom);
-        draw_listing(WEDLN_BRUSH(wedln), WEDLN_WIN(wedln), &geom,
-                     &(wedln->complist), complete, style);
+        draw_listing(WEDLN_BRUSH(wedln), &geom, &(wedln->complist), 
+                     complete, style);
     }
 }
 
@@ -385,7 +384,7 @@ void wedln_draw_textarea(WEdln *wedln, bool complete)
         return;
     
     get_outer_geom(wedln, G_CURRENT, &geom);
-    grbrush_draw_border(WEDLN_BRUSH(wedln), WEDLN_WIN(wedln), &geom, style);
+    grbrush_draw_border(WEDLN_BRUSH(wedln), &geom, style);
 
     if(wedln->prompt!=NULL){
         int ty;
@@ -395,7 +394,7 @@ void wedln_draw_textarea(WEdln *wedln, bool complete)
         get_inner_geom(wedln, G_CURRENT, &geom);
         ty=calc_text_y(wedln, &geom);
         
-        grbrush_draw_string(WEDLN_BRUSH(wedln), WEDLN_WIN(wedln), geom.x, ty,
+        grbrush_draw_string(WEDLN_BRUSH(wedln), geom.x, ty,
                             wedln->prompt, wedln->prompt_len, TRUE, 
                             promptstyle);
     }

@@ -37,14 +37,13 @@ extern bool de_set_font_for_style(DEStyle *style, DEFont *font);
 extern DEFont *de_load_font(const char *fontname);
 extern void de_free_font(DEFont *font);
 
-extern void debrush_draw_string(DEBrush *brush, Window win, int x, int y,
+extern void debrush_draw_string(DEBrush *brush, int x, int y,
                                 const char *str, int len, bool needfill,
                                 const char *attrib);
-extern void debrush_do_draw_string(DEBrush *brush, Window win, int x, int y,
+extern void debrush_do_draw_string(DEBrush *brush, int x, int y,
                                    const char *str, int len, bool needfill, 
                                    DEColourGroup *colours);
-extern void debrush_do_draw_string_default(DEBrush *brush, Window win,
-                                           int x, int y,
+extern void debrush_do_draw_string_default(DEBrush *brush, int x, int y,
                                            const char *str, int len, 
                                            bool needfill, 
                                            DEColourGroup *colours);

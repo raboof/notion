@@ -124,7 +124,7 @@ bool gr_select_engine(const char *engine)
 }
 
 
-GrBrush *gr_get_brush(WRootWin *rootwin, Window win, const char *style)
+GrBrush *gr_get_brush(Window win, WRootWin *rootwin, const char *style)
 {
     GrEngine *eng=(current_engine!=NULL ? current_engine : engines);
     GrBrush *ret;
@@ -132,7 +132,7 @@ GrBrush *gr_get_brush(WRootWin *rootwin, Window win, const char *style)
     if(eng==NULL || eng->fn==NULL)
         return NULL;
     
-    ret=(eng->fn)(rootwin, win, style);
+    ret=(eng->fn)(win, rootwin, style);
     
     if(ret==NULL)
         warn(TR("Unable to find brush for style '%s'."), style);
@@ -226,18 +226,18 @@ void grbrush_deinit(GrBrush *brush)
 }
 
 
-void grbrush_release(GrBrush *brush, Window win)
+void grbrush_release(GrBrush *brush)
 {
-    CALL_DYN(grbrush_release, brush, (brush, win));
+    CALL_DYN(grbrush_release, brush, (brush));
 }
 
 
 GrBrush *grbrush_get_slave(GrBrush *brush, WRootWin *rootwin, 
-                           Window win, const char *style)
+                           const char *style)
 {
     GrBrush *slave=NULL;
     CALL_DYN_RET(slave, GrBrush*, grbrush_get_slave, brush,
-                 (brush, rootwin, win, style));
+                 (brush, rootwin, style));
     return slave;
 }
 
@@ -276,19 +276,17 @@ DYNFUN bool grbrush_get_extra(GrBrush *brush, const char *key,
 /*{{{ Dynfuns/Borders */
 
 
-void grbrush_draw_border(GrBrush *brush, Window win, 
-                         const WRectangle *geom,
+void grbrush_draw_border(GrBrush *brush, const WRectangle *geom,
                          const char *attrib)
 {
-    CALL_DYN(grbrush_draw_border, brush, (brush, win, geom, attrib));
+    CALL_DYN(grbrush_draw_border, brush, (brush, geom, attrib));
 }
 
 
-void grbrush_draw_borderline(GrBrush *brush, Window win, 
-                             const WRectangle *geom,
+void grbrush_draw_borderline(GrBrush *brush, const WRectangle *geom,
                              const char *attrib, GrBorderLine line)
 {
-    CALL_DYN(grbrush_draw_borderline, brush, (brush, win, geom, attrib, line));
+    CALL_DYN(grbrush_draw_borderline, brush, (brush, geom, attrib, line));
 }
 
 
@@ -298,12 +296,12 @@ void grbrush_draw_borderline(GrBrush *brush, Window win,
 /*{{{ Dynfuns/Strings */
 
 
-void grbrush_draw_string(GrBrush *brush, Window win, int x, int y,
+void grbrush_draw_string(GrBrush *brush, int x, int y,
                          const char *str, int len, bool needfill,
                          const char *attrib)
 {
     CALL_DYN(grbrush_draw_string, brush, 
-             (brush, win, x, y, str, len, needfill, attrib));
+             (brush, x, y, str, len, needfill, attrib));
 }
 
 
@@ -322,23 +320,20 @@ uint grbrush_get_text_width(GrBrush *brush, const char *text, uint len)
 /*{{{ Dynfuns/Textboxes */
 
 
-void grbrush_draw_textbox(GrBrush *brush, Window win, 
-                          const WRectangle *geom,
-                          const char *text, 
-                          const char *attr,
+void grbrush_draw_textbox(GrBrush *brush, const WRectangle *geom,
+                          const char *text, const char *attr,
                           bool needfill)
 {
     CALL_DYN(grbrush_draw_textbox, brush, 
-             (brush, win, geom, text, attr, needfill));
+             (brush, geom, text, attr, needfill));
 }
 
-void grbrush_draw_textboxes(GrBrush *brush, Window win, 
-                            const WRectangle *geom,
+void grbrush_draw_textboxes(GrBrush *brush, const WRectangle *geom,
                             int n, const GrTextElem *elem, 
                             bool needfill, const char *common_attrib)
 {
     CALL_DYN(grbrush_draw_textboxes, brush, 
-             (brush, win, geom, n, elem, needfill, common_attrib));
+             (brush, geom, n, elem, needfill, common_attrib));
 }
 
 
@@ -348,43 +343,41 @@ void grbrush_draw_textboxes(GrBrush *brush, Window win,
 /*{{{ Dynfuns/Misc */
 
 
-void grbrush_set_clipping_rectangle(GrBrush *brush, Window win,
-                                    const WRectangle *geom)
+void grbrush_set_clipping_rectangle(GrBrush *brush, const WRectangle *geom)
 {
-    CALL_DYN(grbrush_set_clipping_rectangle, brush, (brush, win, geom));
+    CALL_DYN(grbrush_set_clipping_rectangle, brush, (brush, geom));
 }
 
 
-void grbrush_clear_clipping_rectangle(GrBrush *brush, Window win)
+void grbrush_clear_clipping_rectangle(GrBrush *brush)
 {
-    CALL_DYN(grbrush_clear_clipping_rectangle, brush, (brush, win));
+    CALL_DYN(grbrush_clear_clipping_rectangle, brush, (brush));
 }
 
 
-void grbrush_set_window_shape(GrBrush *brush, Window win,bool rough,
+void grbrush_set_window_shape(GrBrush *brush, bool rough,
                               int n, const WRectangle *rects)
 {
-    CALL_DYN(grbrush_set_window_shape, brush, (brush, win, rough, n, rects));
+    CALL_DYN(grbrush_set_window_shape, brush, (brush, rough, n, rects));
 }
 
 
-void grbrush_enable_transparency(GrBrush *brush, Window win, 
-                                 GrTransparency tr)
+void grbrush_enable_transparency(GrBrush *brush, GrTransparency tr)
 {
-    CALL_DYN(grbrush_enable_transparency, brush, (brush, win, tr));
+    CALL_DYN(grbrush_enable_transparency, brush, (brush, tr));
 }
 
 
-void grbrush_fill_area(GrBrush *brush, Window win, const WRectangle *geom,
+void grbrush_fill_area(GrBrush *brush, const WRectangle *geom,
                        const char *attr)
 {
-    CALL_DYN(grbrush_fill_area, brush, (brush, win, geom, attr));
+    CALL_DYN(grbrush_fill_area, brush, (brush, geom, attr));
 }
 
 
-void grbrush_clear_area(GrBrush *brush, Window win, const WRectangle *geom)
+void grbrush_clear_area(GrBrush *brush, const WRectangle *geom)
 {
-    CALL_DYN(grbrush_clear_area, brush, (brush, win, geom));
+    CALL_DYN(grbrush_clear_area, brush, (brush, geom));
 }
 
 

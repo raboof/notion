@@ -64,7 +64,7 @@ typedef enum{
 
 /* Init/deinit */
 
-typedef GrBrush *GrGetBrushFn(WRootWin *rootwin, Window win, 
+typedef GrBrush *GrGetBrushFn(Window win, WRootWin *rootwin,
                               const char *style);
 
 extern bool gr_register_engine(const char *engine,  GrGetBrushFn *fn);
@@ -73,13 +73,13 @@ extern bool gr_select_engine(const char *engine);
 extern void gr_refresh();
 extern void gr_read_config();
 
-extern GrBrush *gr_get_brush(WRootWin *rootwin, Window win, 
+extern GrBrush *gr_get_brush(Window win, WRootWin *rootwin,
                              const char *style);
 
 extern GrBrush *grbrush_get_slave(GrBrush *brush, WRootWin *rootwin, 
-                                  Window win, const char *style);
+                                  const char *style);
 
-extern void grbrush_release(GrBrush *brush, Window win);
+extern void grbrush_release(GrBrush *brush);
 
 extern bool grbrush_init(GrBrush *brush);
 extern void grbrush_deinit(GrBrush *brush);
@@ -108,18 +108,16 @@ extern uint gr_stylespec_score2(const char *spec, const char *attrib,
 
 DYNFUN void grbrush_get_border_widths(GrBrush *brush, GrBorderWidths *bdi);
 
-DYNFUN void grbrush_draw_border(GrBrush *brush, Window win, 
-                                const WRectangle *geom,
+DYNFUN void grbrush_draw_border(GrBrush *brush, const WRectangle *geom,
                                 const char *attrib);
-DYNFUN void grbrush_draw_borderline(GrBrush *brush, Window win, 
-                                    const WRectangle *geom,
+DYNFUN void grbrush_draw_borderline(GrBrush *brush, const WRectangle *geom,
                                     const char *attrib, GrBorderLine line);
 
 /* String drawing */
 
 DYNFUN void grbrush_get_font_extents(GrBrush *brush, GrFontExtents *fnti);
 
-DYNFUN void grbrush_draw_string(GrBrush *brush, Window win, int x, int y,
+DYNFUN void grbrush_draw_string(GrBrush *brush, int x, int y,
                                 const char *str, int len, bool needfill,
                                 const char *attrib);
 
@@ -127,38 +125,33 @@ DYNFUN uint grbrush_get_text_width(GrBrush *brush, const char *text, uint len);
 
 /* Textbox drawing */
 
-DYNFUN void grbrush_draw_textbox(GrBrush *brush, Window win, 
-                                 const WRectangle *geom,
-                                 const char *text, 
-                                 const char *attr,
+DYNFUN void grbrush_draw_textbox(GrBrush *brush, const WRectangle *geom,
+                                 const char *text, const char *attr,
                                  bool needfill);
 
-DYNFUN void grbrush_draw_textboxes(GrBrush *brush, Window win, 
-                                   const WRectangle *geom,
+DYNFUN void grbrush_draw_textboxes(GrBrush *brush, const WRectangle *geom,
                                    int n, const GrTextElem *elem, 
                                    bool needfill, const char *common_attrib);
 
 /* Misc */
 
-DYNFUN void grbrush_set_clipping_rectangle(GrBrush *brush, Window win,
+DYNFUN void grbrush_set_clipping_rectangle(GrBrush *brush, 
                                            const WRectangle *geom);
-DYNFUN void grbrush_clear_clipping_rectangle(GrBrush *brush, Window win);
+DYNFUN void grbrush_clear_clipping_rectangle(GrBrush *brush);
 
 /* Behaviour of the following two functions for "slave brushes" is undefined. 
  * If the parameter rough to grbrush_set_window_shape is set, the actual 
  * shape may be changed for corner smoothing and other superfluous effects.
  * (This feature is only used by floatframes.)
  */
-DYNFUN void grbrush_set_window_shape(GrBrush *brush, Window win, bool rough,
+DYNFUN void grbrush_set_window_shape(GrBrush *brush, bool rough,
                                      int n, const WRectangle *rects);
 
-DYNFUN void grbrush_enable_transparency(GrBrush *brush, Window win, 
-                                        GrTransparency mode);
+DYNFUN void grbrush_enable_transparency(GrBrush *brush, GrTransparency mode);
 
-DYNFUN void grbrush_fill_area(GrBrush *brush, Window win, 
-                              const WRectangle *geom, const char *attr);
-DYNFUN void grbrush_clear_area(GrBrush *brush, Window win, 
-                               const WRectangle *geom);
+DYNFUN void grbrush_fill_area(GrBrush *brush, const WRectangle *geom, 
+                              const char *attr);
+DYNFUN void grbrush_clear_area(GrBrush *brush, const WRectangle *geom);
 
 DYNFUN bool grbrush_get_extra(GrBrush *brush, const char *key, 
                               char type, void *data);

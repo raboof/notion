@@ -83,8 +83,8 @@ static void wmsg_draw(WMessage *wmsg, bool complete)
     if(WMSG_BRUSH(wmsg)!=NULL){
         const char *style=(REGION_IS_ACTIVE(wmsg) ? "active" : "inactive");
         get_geom(wmsg, FALSE, &geom);
-        draw_listing(WMSG_BRUSH(wmsg), WMSG_WIN(wmsg), &geom,
-                     &(wmsg->listing), complete, style);
+        draw_listing(WMSG_BRUSH(wmsg), &geom, &(wmsg->listing), 
+                     complete, style);
     }
 }
 

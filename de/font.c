@@ -207,7 +207,7 @@ uint defont_get_text_width(DEFont *font, const char *text, uint len)
 /*{{{ String drawing */
 
 
-void debrush_do_draw_string_default(DEBrush *brush, Window win, int x, int y,
+void debrush_do_draw_string_default(DEBrush *brush, int x, int y,
                                     const char *str, int len, bool needfill, 
                                     DEColourGroup *colours)
 {
@@ -222,49 +222,53 @@ void debrush_do_draw_string_default(DEBrush *brush, Window win, int x, int y,
         if(brush->d->font->fontset!=NULL){
 #ifdef CF_DE_USE_XUTF8
             if(ioncore_g.enc_utf8)
-                Xutf8DrawString(ioncore_g.dpy, win, brush->d->font->fontset,
+                Xutf8DrawString(ioncore_g.dpy, brush->win, 
+                                brush->d->font->fontset,
                                 gc, x, y, str, len);
             else
 #endif
-                XmbDrawString(ioncore_g.dpy, win, brush->d->font->fontset,
+                XmbDrawString(ioncore_g.dpy, brush->win, 
+                              brush->d->font->fontset,
                               gc, x, y, str, len);
         }else if(brush->d->font->fontstruct!=NULL){
-            XDrawString(ioncore_g.dpy, win, gc, x, y, str, len);
+            XDrawString(ioncore_g.dpy, brush->win, gc, x, y, str, len);
         }
     }else{
         XSetBackground(ioncore_g.dpy, gc, colours->bg);
         if(brush->d->font->fontset!=NULL){
 #ifdef CF_DE_USE_XUTF8
             if(ioncore_g.enc_utf8)
-                Xutf8DrawImageString(ioncore_g.dpy, win, brush->d->font->fontset,
+                Xutf8DrawImageString(ioncore_g.dpy, brush->win, 
+                                     brush->d->font->fontset,
                                      gc, x, y, str, len);
             else
 #endif
-                XmbDrawImageString(ioncore_g.dpy, win, brush->d->font->fontset,
+                XmbDrawImageString(ioncore_g.dpy, brush->win, 
+                                   brush->d->font->fontset,
                                    gc, x, y, str, len);
         }else if(brush->d->font->fontstruct!=NULL){
-            XDrawImageString(ioncore_g.dpy, win, gc, x, y, str, len);
+            XDrawImageString(ioncore_g.dpy, brush->win, gc, x, y, str, len);
         }
     }
 }
 
 
-void debrush_do_draw_string(DEBrush *brush, Window win, int x, int y,
+void debrush_do_draw_string(DEBrush *brush, int x, int y,
                             const char *str, int len, bool needfill, 
                             DEColourGroup *colours)
 {
-    CALL_DYN(debrush_do_draw_string, brush, (brush, win, x, y, str, len,
+    CALL_DYN(debrush_do_draw_string, brush, (brush, x, y, str, len,
                                              needfill, colours));
 }
 
 
-void debrush_draw_string(DEBrush *brush, Window win, int x, int y,
+void debrush_draw_string(DEBrush *brush, int x, int y,
                          const char *str, int len, bool needfill,
                          const char *attrib)
 {
     DEColourGroup *cg=debrush_get_colour_group(brush, attrib);
     if(cg!=NULL)
-        debrush_do_draw_string(brush, win, x, y, str, len, needfill, cg);
+        debrush_do_draw_string(brush, x, y, str, len, needfill, cg);
 }
 
 

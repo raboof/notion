@@ -17,7 +17,7 @@
 #include "draw.h"
 
 
-static void draw_elems(GrBrush *brush, Window win, int x, int y,
+static void draw_elems(GrBrush *brush, int x, int y,
                        WSBElem *elems, int nelems, bool needfill, 
                        const char *dfltattr)
 {
@@ -28,7 +28,7 @@ static void draw_elems(GrBrush *brush, Window win, int x, int y,
             const char *s=(elems->text!=NULL
                            ? elems->text 
                            : STATUSBAR_NX_STR);
-            grbrush_draw_string(brush, win, x, y, s, strlen(s), needfill, 
+            grbrush_draw_string(brush, x, y, s, strlen(s), needfill, 
                                 elems->attr ? elems->attr : dfltattr);
             x+=elems->text_w;
         }
@@ -38,7 +38,7 @@ static void draw_elems(GrBrush *brush, Window win, int x, int y,
 }
 
 
-static void draw_elems_ra(GrBrush *brush, Window win, int x, int y,
+static void draw_elems_ra(GrBrush *brush, int x, int y,
                           WSBElem *elems, int nelems, bool needfill, 
                           const char *dfltattr)
 {
@@ -54,7 +54,7 @@ static void draw_elems_ra(GrBrush *brush, Window win, int x, int y,
                            ? elems->text 
                            : STATUSBAR_NX_STR);
             x-=elems->text_w;
-            grbrush_draw_string(brush, win, x, y, s, strlen(s), needfill,
+            grbrush_draw_string(brush, x, y, s, strlen(s), needfill,
                                 elems->attr ? elems->attr : dfltattr);
         }
     }
@@ -82,8 +82,8 @@ void statusbar_draw(WStatusBar *sb, bool complete)
     g.w=REGION_GEOM(sb).w;
     g.h=REGION_GEOM(sb).h;
     
-    /*grbrush_draw_border(sb->brush, win, &g, NULL);*/
-    grbrush_draw_textbox(sb->brush, win, &g, NULL, NULL, complete);
+    /*grbrush_draw_border(sb->brush, &g, NULL);*/
+    grbrush_draw_textbox(sb->brush, &g, NULL, NULL, complete);
 
     if(sb->elems==NULL)
         return;
@@ -100,10 +100,10 @@ void statusbar_draw(WStatusBar *sb, bool complete)
     ty=(g.y+bdw.top+fnte.baseline+(g.h-bdw.top-bdw.bottom-fnte.max_height)/2);
 
     if(!right_align){
-        draw_elems(sb->brush, win, g.x+bdw.left, ty,
+        draw_elems(sb->brush, g.x+bdw.left, ty,
                    sb->elems, sb->nelems, TRUE, NULL);
     }else{
-        draw_elems_ra(sb->brush, win, g.x+g.w-bdw.right, ty,
+        draw_elems_ra(sb->brush, g.x+g.w-bdw.right, ty,
                       sb->elems, sb->nelems, TRUE, NULL);
     }
 }

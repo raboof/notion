@@ -306,7 +306,6 @@ static void floatframe_set_shape(WFloatFrame *frame)
         n++;
     
         grbrush_set_window_shape(frame->frame.brush, 
-                                 frame->frame.mplex.win.win,
                                  TRUE, n, gs);
     }
 }

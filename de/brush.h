@@ -26,7 +26,7 @@ INTRCLASS(DEBrush);
 #define MATCHES2(S, A1, A2) (gr_stylespec_score2(S, A1, A2)>0)
 
 
-typedef void DEBrushExtrasFn(DEBrush *brush, Window win,
+typedef void DEBrushExtrasFn(DEBrush *brush, 
                              const WRectangle *g, DEColourGroup *cg,
                              GrBorderWidths *bdw,
                              GrFontExtents *fnte,
@@ -38,20 +38,22 @@ DECLCLASS(DEBrush){
     DEStyle *d;
     DEBrushExtrasFn *extras_fn;
     int indicator_w;
+    Window win;
 };
 
-extern DEBrush *de_get_brush(WRootWin *rootwin, Window win, 
+extern DEBrush *de_get_brush(Window win, WRootWin *rootwin,
                              const char *style);
 
-extern DEBrush *create_debrush(const char *stylename, DEStyle *style);
-extern bool debrush_init(DEBrush *brush, const char *stylename, 
-                         DEStyle *style);
+extern DEBrush *create_debrush(Window win, 
+                               const char *stylename, DEStyle *style);
+extern bool debrush_init(DEBrush *brush, Window win,
+                         const char *stylename, DEStyle *style);
 extern void debrush_deinit(DEBrush *brush);
 
 extern DEBrush *debrush_get_slave(DEBrush *brush, WRootWin *rootwin, 
-                                  Window win, const char *style);
+                                  const char *style);
 
-extern void debrush_release(DEBrush *brush, Window win);
+extern void debrush_release(DEBrush *brush);
 
 
 extern DEColourGroup *debrush_get_colour_group2(DEBrush *brush, 
@@ -64,47 +66,42 @@ extern DEColourGroup *debrush_get_colour_group(DEBrush *brush,
 /* Information */
 
 extern void debrush_get_border_widths(DEBrush *brush, GrBorderWidths *bdw);
-extern bool debrush_get_extra(DEBrush *brush, const char *key, char type, void *data);
+extern bool debrush_get_extra(DEBrush *brush, const char *key, char type, 
+                              void *data);
 
 /* Borders & boxes */
 
-extern void debrush_draw_border(DEBrush *brush, Window win, 
+extern void debrush_draw_border(DEBrush *brush, 
                                 const WRectangle *geom,
                                 const char *attrib);
-extern void debrush_draw_borderline(DEBrush *brush, Window win,
-                                    const WRectangle *geom,
+extern void debrush_draw_borderline(DEBrush *brush, const WRectangle *geom,
                                     const char *attrib, GrBorderLine line);
 
-extern void debrush_draw_textbox(DEBrush *brush, Window win, 
-                                 const WRectangle *geom,
-                                 const char *text, 
-                                 const char *attr,
+extern void debrush_draw_textbox(DEBrush *brush, const WRectangle *geom,
+                                 const char *text, const char *attr,
                                  bool needfill);
 
-extern void debrush_draw_textboxes(DEBrush *brush, Window win, 
-                                   const WRectangle *geom, int n,
-                                   const GrTextElem *elem, bool needfill,
-                                   const char *common_attrib);
+extern void debrush_draw_textboxes(DEBrush *brush, const WRectangle *geom, 
+                                   int n, const GrTextElem *elem, 
+                                   bool needfill, const char *common_attrib);
 
 extern DEBrushExtrasFn debrush_tab_extras;
 extern DEBrushExtrasFn debrush_menuentry_extras;
 
 /* Misc */
 
-extern void debrush_set_clipping_rectangle(DEBrush *brush, Window win,
+extern void debrush_set_clipping_rectangle(DEBrush *brush, 
                                            const WRectangle *geom);
-extern void debrush_clear_clipping_rectangle(DEBrush *brush, Window win);
+extern void debrush_clear_clipping_rectangle(DEBrush *brush);
 
-extern void debrush_set_window_shape(DEBrush *brush, Window win, bool rough,
+extern void debrush_set_window_shape(DEBrush *brush, bool rough,
                                      int n, const WRectangle *rects);
 
-extern void debrush_enable_transparency(DEBrush *brush, Window win, 
-                                        GrTransparency mode);
+extern void debrush_enable_transparency(DEBrush *brush, GrTransparency mode);
 
-extern void debrush_fill_area(DEBrush *brush, Window win, 
-                              const WRectangle *geom, const char *attr);
-extern void debrush_clear_area(DEBrush *brush, Window win, 
-                               const WRectangle *geom);
+extern void debrush_fill_area(DEBrush *brush, const WRectangle *geom, 
+                              const char *attr);
+extern void debrush_clear_area(DEBrush *brush, const WRectangle *geom);
 
 
 #endif /* ION_DE_BRUSH_H */

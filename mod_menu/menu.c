@@ -113,8 +113,8 @@ void menu_draw_entry(WMenu *menu, int i, const WRectangle *igeom,
        |(menu->selected_entry==i ? 0 : 2)
        |(menu->entries[i].flags&WMENUENTRY_SUBMENU ? 1 : 0));
 
-    grbrush_draw_textbox(menu->entry_brush, MENU_WIN(menu), &geom,
-                         menu->entries[i].title, attrs[a], complete);
+    grbrush_draw_textbox(menu->entry_brush, &geom, menu->entries[i].title, 
+                         attrs[a], complete);
 }
 
     
@@ -143,7 +143,7 @@ void menu_draw(WMenu *menu, bool complete)
     
     get_outer_geom(menu, &geom);
     
-    grbrush_draw_border(menu->brush, MENU_WIN(menu), &geom, substyle);
+    grbrush_draw_border(menu->brush, &geom, substyle);
     
     menu_draw_entries(menu, FALSE);
 }
@@ -394,22 +394,22 @@ static bool menu_init_gr(WMenu *menu, WRootWin *rootwin, Window win)
                                       ? "tab-menuentry-pmenu"
                                       : "tab-menuentry-normal"));
     
-    brush=gr_get_brush(rootwin, win,  style);
+    brush=gr_get_brush(win, rootwin, style);
     
     if(brush==NULL)
         return FALSE;
 
-    entry_brush=grbrush_get_slave(brush, rootwin, win, entry_style);
+    entry_brush=grbrush_get_slave(brush, rootwin, entry_style);
     
     if(entry_brush==NULL){
-        grbrush_release(brush, win);
+        grbrush_release(brush);
         return FALSE;
     }
     
     if(menu->entry_brush!=NULL)
-        grbrush_release(menu->entry_brush, win);
+        grbrush_release(menu->entry_brush);
     if(menu->brush!=NULL)
-        grbrush_release(menu->brush, win);
+        grbrush_release(menu->brush);
 
     menu->brush=brush;
     menu->entry_brush=entry_brush;
@@ -423,8 +423,9 @@ static bool menu_init_gr(WMenu *menu, WRootWin *rootwin, Window win)
 void menu_updategr(WMenu *menu)
 {
     if(!menu_init_gr(menu, region_rootwin_of((WRegion*)menu),
-                     MENU_WIN(menu)))
+                     MENU_WIN(menu))){
         return;
+    }
     
     menu_do_refit(menu, NULL, &(menu->last_fp));
     
@@ -434,12 +435,16 @@ void menu_updategr(WMenu *menu)
 }
 
 
-static void menu_release_gr(WMenu *menu, Window win)
+static void menu_release_gr(WMenu *menu)
 {
-    if(menu->entry_brush!=NULL)
-        grbrush_release(menu->entry_brush, win);
-    if(menu->brush!=NULL)
-        grbrush_release(menu->brush, win);
+    if(menu->entry_brush!=NULL){
+        grbrush_release(menu->entry_brush);
+        menu->entry_brush=NULL;
+    }
+    if(menu->brush!=NULL){
+        grbrush_release(menu->brush);
+        menu->brush=NULL;
+    }
 }
 
 
@@ -579,7 +584,7 @@ void menu_deinit(WMenu *menu)
         free(menu->entries[i].title);
     free(menu->entries);
     
-    menu_release_gr(menu, MENU_WIN(menu));
+    menu_release_gr(menu);
     window_deinit((WWindow*)menu);
 }
 

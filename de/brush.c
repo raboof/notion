@@ -29,11 +29,13 @@
 /*{{{ Brush creation and releasing */
 
 
-bool debrush_init(DEBrush *brush, const char *stylename, DEStyle *style)
+bool debrush_init(DEBrush *brush, Window win,
+                  const char *stylename, DEStyle *style)
 {
     brush->d=style;
     brush->extras_fn=NULL;
     brush->indicator_w=0;
+    brush->win=win;
     
     style->usecount++;
 
@@ -57,13 +59,13 @@ bool debrush_init(DEBrush *brush, const char *stylename, DEStyle *style)
 }
 
 
-DEBrush *create_debrush(const char *stylename, DEStyle *style)
+DEBrush *create_debrush(Window win, const char *stylename, DEStyle *style)
 {
-    CREATEOBJ_IMPL(DEBrush, debrush, (p, stylename, style));
+    CREATEOBJ_IMPL(DEBrush, debrush, (p, win, stylename, style));
 }
 
 
-static DEBrush *do_get_brush(WRootWin *rootwin, Window win, 
+static DEBrush *do_get_brush(Window win, WRootWin *rootwin, 
                              const char *stylename, bool slave)
 {
     DEStyle *style=de_get_style(rootwin, stylename);
@@ -72,11 +74,11 @@ static DEBrush *do_get_brush(WRootWin *rootwin, Window win,
     if(style==NULL)
         return NULL;
     
-    brush=create_debrush(stylename, style);
+    brush=create_debrush(win, stylename, style);
     
     /* Set background colour */
     if(brush!=NULL && !slave){
-        grbrush_enable_transparency(&(brush->grbrush), win,
+        grbrush_enable_transparency(&(brush->grbrush), 
                                     GR_TRANSPARENCY_DEFAULT);
     }
     
@@ -84,16 +86,16 @@ static DEBrush *do_get_brush(WRootWin *rootwin, Window win,
 }
 
 
-DEBrush *de_get_brush(WRootWin *rootwin, Window win, const char *stylename)
+DEBrush *de_get_brush(Window win, WRootWin *rootwin, const char *stylename)
 {
-    return do_get_brush(rootwin, win, stylename, FALSE);
+    return do_get_brush(win, rootwin, stylename, FALSE);
 }
 
 
 DEBrush *debrush_get_slave(DEBrush *master, WRootWin *rootwin, 
-                           Window win, const char *stylename)
+                           const char *stylename)
 {
-    return do_get_brush(rootwin, win, stylename, TRUE);
+    return do_get_brush(master->win, rootwin, stylename, TRUE);
 }
 
 
@@ -105,7 +107,7 @@ void debrush_deinit(DEBrush *brush)
 }
 
 
-void debrush_release(DEBrush *brush, Window win)
+void debrush_release(DEBrush *brush)
 {
     destroy_obj((Obj*)brush);
 }
