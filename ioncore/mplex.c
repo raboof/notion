@@ -764,6 +764,8 @@ static void do_switch(WMPlex *mplex, WRegion *sub)
 {
     if(sub!=NULL){
         bool mcf=region_may_control_focus((WRegion*)mplex);
+        if(mcf)
+            ioncore_set_previous_of(sub);
         region_managed_goto((WRegion*)mplex, sub,
                             (mcf ? REGION_GOTO_FOCUS : 0));
     }
