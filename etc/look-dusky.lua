@@ -101,8 +101,8 @@ de_define_style("tab-menuentry", {
 
 de_define_style("tab-menuentry-big", {
     based_on = "tab-menuentry",
-    font = "-*-helvetica-medium-r-normal-*-18-*-*-*-*-*-*-*",
-    padding_pixels = 10,
+    font = "-*-helvetica-medium-r-normal-*-16-*-*-*-*-*-*-*",
+    padding_pixels = 7,
 })
 
 de_define_style("input", {
@@ -120,7 +120,6 @@ de_define_style("input", {
         background_colour = "#505050",
         foreground_colour = "#ffffff",
     }),
-    font = "-*-helvetica-medium-r-normal-*-14-*-*-*-*-*-*-*",
 })
 
 de_define_style("input-menu", {

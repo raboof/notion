@@ -96,8 +96,8 @@ de_define_style("tab-menuentry", {
 
 de_define_style("tab-menuentry-big", {
     based_on = "tab-menuentry",
-    font = "-*-helvetica-medium-r-normal-*-18-*-*-*-*-*-*-*",
-    padding_pixels = 10,
+    font = "-*-fixed-medium-r-normal-*-16-*-*-*-*-*-*-*",
+    padding_pixels = 7,
 })
 
 de_define_style("input", {

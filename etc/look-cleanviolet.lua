@@ -24,7 +24,7 @@ de_define_style("*", {
     spacing = 0,
     border_style = "elevated",
     
-    font = "-*-helvetica-medium-r-normal-*-12-*-*-*-*-*-*-*",
+    font = "-*-helvetica-medium-r-normal-*-14-*-*-*-*-*-*-*",
     text_align = "center",
 })
 
@@ -48,6 +48,7 @@ de_define_style("frame-ionframe", {
 
 de_define_style("tab", {
     based_on = "*",
+    font = "-*-helvetica-medium-r-normal-*-12-*-*-*-*-*-*-*",
     
     de_substyle("active-selected", {
         -- Violet tab
@@ -96,19 +97,15 @@ de_define_style("tab-menuentry", {
 
 de_define_style("tab-menuentry-big", {
     based_on = "tab-menuentry",
-    font = "-*-helvetica-medium-r-normal-*-18-*-*-*-*-*-*-*",
-    padding_pixels = 10,
+    font = "-*-helvetica-medium-r-normal-*-16-*-*-*-*-*-*-*",
+    padding_pixels = 7,
 })
 
 
 de_define_style("input", {
     based_on = "*",
-    
-    -- Bigger font for readability
-    font = "-*-helvetica-medium-r-normal-*-14-*-*-*-*-*-*-*",
     text_align = "left",
     spacing = 1,
-    
     -- Greyish violet background
     highlight_colour = "#eeeeff",
     shadow_colour = "#eeeeff",
