@@ -55,3 +55,4 @@ mv libs.mk.dist libs.mk
 ##
 
 autoconf
+rm -rf autom4te.cache
