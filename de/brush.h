@@ -28,8 +28,6 @@
 INTRSTRUCT(DEBorder);
 INTRSTRUCT(DEStyle);
 INTRCLASS(DEBrush);
-INTRCLASS(DETabBrush);
-INTRCLASS(DEMEntBrush);
 
 
 #include "font.h"
@@ -89,28 +87,21 @@ DECLSTRUCT(DEStyle){
     int tag_pixmap_w;
     int tag_pixmap_h;
     
-    /* Only initialised if used as a DEMentBrush */
-    bool mentbrush_data_ok;
-    int sub_ind_w;
-    
     DEStyle *next, *prev;
-    
 };
 
+typedef void DEBrushExtrasFn(DEBrush *brush, Window win,
+                             const WRectangle *g, DEColourGroup *cg,
+                             GrBorderWidths *bdw,
+                             GrFontExtents *fnte,
+                             const char *a1, const char *a2,
+                             bool pre);
 
 DECLCLASS(DEBrush){
     GrBrush grbrush;
     DEStyle *d;
-};
-
-
-DECLCLASS(DETabBrush){
-    DEBrush debrush;
-};
-
-
-DECLCLASS(DEMEntBrush){
-    DEBrush debrush;
+    DEBrushExtrasFn *extras_fn;
+    int indicator_w;
 };
 
 
@@ -123,15 +114,10 @@ extern bool destyle_init(DEStyle *style, WRootWin *rootwin, const char *name);
 extern void destyle_deinit(DEStyle *style);
 extern DEStyle *de_create_style(WRootWin *rootwin, const char *name);
 
-extern bool debrush_init(DEBrush *brush, DEStyle *style);
-extern bool dementbrush_init(DEMEntBrush *brush, DEStyle *style);
-extern bool detabbrush_init(DETabBrush *brush, DEStyle *style);
+extern DEBrush *create_debrush(const char *stylename, DEStyle *style);
+extern bool debrush_init(DEBrush *brush, const char *stylename, 
+                         DEStyle *style);
 extern void debrush_deinit(DEBrush *brush);
-extern void detabbrush_deinit(DETabBrush *brush);
-extern void dementbrush_deinit(DEMEntBrush *brush);
-extern DEBrush *create_debrush(DEStyle *style);
-extern DETabBrush *create_detabbrush(DEStyle *style);
-extern DEMEntBrush *create_dementbrush(DEStyle *style);
 
 extern DEStyle *de_get_style(WRootWin *rootwin, const char *name);
 extern DEBrush *de_get_brush(WRootWin *rootwin, Window win, 
@@ -159,12 +145,7 @@ extern void debrush_draw_border(DEBrush *brush, Window win,
                                 const char *attrib);
 
 extern void debrush_get_border_widths(DEBrush *brush, GrBorderWidths *bdw);
-extern void dementbrush_get_border_widths(DEMEntBrush *brush, 
-                                          GrBorderWidths *bdw);
-
-extern void destyle_get_border_widths(DEStyle *style, GrBorderWidths *bdw);
-extern void destyle_get_mentbrush_border_widths(DEStyle *style,
-                                                GrBorderWidths *bdw);
+/*extern void destyle_get_border_widths(DEStyle *style, GrBorderWidths *bdw);*/
 
 
 /* Textboxes */
@@ -175,33 +156,13 @@ extern void debrush_draw_textbox(DEBrush *brush, Window win,
                                  const char *attr,
                                  bool needfill);
 
-extern void detabbrush_draw_textbox(DETabBrush *brush, Window win, 
-                                    const WRectangle *geom,
-                                    const char *text, 
-                                    const char *attr,
-                                    bool needfill);
-
-extern void dementbrush_draw_textbox(DEMEntBrush *brush, Window win, 
-                                     const WRectangle *geom,
-                                     const char *text, 
-                                     const char *attr,
-                                     bool needfill);
-
-
 extern void debrush_draw_textboxes(DEBrush *brush, Window win, 
                                    const WRectangle *geom, int n,
                                    const GrTextElem *elem, bool needfill,
                                    const char *common_attrib);
 
-extern void detabbrush_draw_textboxes(DETabBrush *brush, Window win, 
-                                      const WRectangle *geom, int n,
-                                      const GrTextElem *elem, bool needfill, 
-                                      const char *common_attrib);
-
-extern void dementbrush_draw_textboxes(DEMEntBrush *brush, Window win, 
-                                       const WRectangle *geom, int n,
-                                       const GrTextElem *elem, bool needfill, 
-                                       const char *common_attrib);
+extern DEBrushExtrasFn debrush_tab_extras;
+extern DEBrushExtrasFn debrush_menuentry_extras;
 
 /* Misc */
 
@@ -234,7 +195,7 @@ extern DEColourGroup *debrush_get_colour_group2(DEBrush *brush,
 extern DEColourGroup *debrush_get_colour_group(DEBrush *brush, 
                                                const char *attr);
 
-bool destyle_get_extra(DEStyle *style, const char *key, char type, void *data);
+/*bool destyle_get_extra(DEStyle *style, const char *key, char type, void *data);*/
 bool debrush_get_extra(DEBrush *brush, const char *key, char type, void *data);
 
 

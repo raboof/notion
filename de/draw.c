@@ -174,18 +174,12 @@ void debrush_draw_border(DEBrush *brush, Window win,
 /*{{{ Boxes */
 
 
-typedef void TextBoxExtraFn(DEBrush *brush_, Window win, const WRectangle *g,
-                            DEColourGroup *cg, GrBorderWidths *bdw,
-                            GrFontExtents *fnte,
-                            const char *a1, const char *a2, bool pre);
-
-
-static void copy_masked(DETabBrush *brush, Drawable src, Drawable dst,
+static void copy_masked(DEBrush *brush, Drawable src, Drawable dst,
                         int src_x, int src_y, int w, int h,
                         int dst_x, int dst_y)
 {
     
-    GC copy_gc=brush->debrush.d->copy_gc;
+    GC copy_gc=brush->d->copy_gc;
     
     XSetClipMask(ioncore_g.dpy, copy_gc, src);
     XSetClipOrigin(ioncore_g.dpy, copy_gc, dst_x, dst_y);
@@ -194,14 +188,14 @@ static void copy_masked(DETabBrush *brush, Drawable src, Drawable dst,
 }
 
 
-static void tabbrush_textbox_extras(DETabBrush *brush, Window win,
-                                    const WRectangle *g, DEColourGroup *cg,
-                                    GrBorderWidths *bdw,
-                                    GrFontExtents *fnte,
-                                    const char *a1, const char *a2,
-                                    bool pre)
+void debrush_tab_extras(DEBrush *brush, Window win,
+                        const WRectangle *g, DEColourGroup *cg,
+                        GrBorderWidths *bdw,
+                        GrFontExtents *fnte,
+                        const char *a1, const char *a2,
+                        bool pre)
 {
-    DEStyle *d=brush->debrush.d;
+    DEStyle *d=brush->d;
     GC tmp;
     /* Not thread-safe, but neither is the rest of the drawing code
      * with shared GC:s.
@@ -242,12 +236,12 @@ static void tabbrush_textbox_extras(DETabBrush *brush, Window win,
 }
 
 
-static void mentbrush_textbox_extras(DEMEntBrush *brush, Window win,
-                                     const WRectangle *g, DEColourGroup *cg,
-                                     GrBorderWidths *bdw,
-                                     GrFontExtents *fnte,
-                                     const char *a1, const char *a2, 
-                                     bool pre)
+void debrush_menuentry_extras(DEBrush *brush, Window win,
+                              const WRectangle *g, DEColourGroup *cg,
+                              GrBorderWidths *bdw,
+                              GrFontExtents *fnte,
+                              const char *a1, const char *a2, 
+                              bool pre)
 {
     int tx, ty;
 
@@ -261,7 +255,7 @@ static void mentbrush_textbox_extras(DEMEntBrush *brush, Window win,
         +(g->h-bdw->top-bdw->bottom-fnte->max_height)/2);
     tx=g->x+g->w-bdw->right;
 
-    debrush_do_draw_string((DEBrush*)brush, win, tx, ty, DE_SUB_IND,
+    debrush_do_draw_string(brush, win, tx, ty, DE_SUB_IND,
                            DE_SUB_IND_LEN, FALSE, cg);
 }
 
@@ -285,16 +279,15 @@ void debrush_do_draw_box(DEBrush *brush, Window win,
 static void debrush_do_draw_textbox(DEBrush *brush, Window win, 
                                     const WRectangle *geom, const char *text, 
                                     DEColourGroup *cg, bool needfill,
-                                    const char *a1, const char *a2,
-                                    TextBoxExtraFn *extrafn)
+                                    const char *a1, const char *a2)
 {
     uint len;
     GrBorderWidths bdw;
     GrFontExtents fnte;
     uint tx, ty, tw;
 
-    if(extrafn!=NULL)
-        extrafn(brush, win, geom, cg, &bdw, &fnte, a1, a2, TRUE);
+    if(brush->extras_fn!=NULL)
+        brush->extras_fn(brush, win, geom, cg, &bdw, &fnte, a1, a2, TRUE);
     
     debrush_do_draw_box(brush, win, geom, cg, needfill);
     
@@ -327,18 +320,28 @@ static void debrush_do_draw_textbox(DEBrush *brush, Window win,
         debrush_do_draw_string(brush, win, tx, ty, text, len, FALSE, cg);
     }while(0);
     
-    if(extrafn!=NULL)
-        extrafn(brush, win, geom, cg, &bdw, &fnte, a1, a2, FALSE);
+    if(brush->extras_fn!=NULL)
+        brush->extras_fn(brush, win, geom, cg, &bdw, &fnte, a1, a2, FALSE);
 }
 
 
-static void do_draw_textboxes(DEBrush *brush, Window win, 
-                              const WRectangle *geom,
-                              int n, const GrTextElem *elem, 
-                              bool needfill, const char *common_attrib,
-                              TextBoxExtraFn *extrafn)
+void debrush_draw_textbox(DEBrush *brush, Window win, 
+                          const WRectangle *geom, const char *text, 
+                          const char *attr, bool needfill)
 {
+    DEColourGroup *cg=debrush_get_colour_group(brush, attr);
+    if(cg!=NULL){
+        debrush_do_draw_textbox(brush, win, geom, text, cg, needfill, 
+                                attr, NULL);
+    }
+}
 
+
+void debrush_draw_textboxes(DEBrush *brush, Window win, 
+                            const WRectangle *geom,
+                            int n, const GrTextElem *elem, 
+                            bool needfill, const char *common_attrib)
+{
     WRectangle g=*geom;
     DEColourGroup *cg;
     GrBorderWidths bdw;
@@ -350,8 +353,10 @@ static void do_draw_textboxes(DEBrush *brush, Window win,
         g.w=bdw.left+elem[i].iw+bdw.right;
         cg=debrush_get_colour_group2(brush, common_attrib, elem[i].attr);
         
-        debrush_do_draw_textbox(brush, win, &g, elem[i].text, cg, needfill,
-                                common_attrib, elem[i].attr, extrafn);
+        if(cg!=NULL){
+            debrush_do_draw_textbox(brush, win, &g, elem[i].text, cg, needfill,
+                                    common_attrib, elem[i].attr);
+        }
         
         g.x+=g.w;
         if(bdw.spacing>0 && needfill){
@@ -360,77 +365,6 @@ static void do_draw_textboxes(DEBrush *brush, Window win,
         }
         g.x+=bdw.spacing;
     }
-}
-
-
-void debrush_draw_textbox(DEBrush *brush, Window win, 
-                          const WRectangle *geom, const char *text, 
-                          const char *attr, bool needfill)
-{
-    DEColourGroup *cg=debrush_get_colour_group(brush, attr);
-    if(cg!=NULL){
-        debrush_do_draw_textbox(brush, win, geom, text, cg, needfill, 
-                                attr, NULL, NULL);
-    }
-}
-
-
-void detabbrush_draw_textbox(DETabBrush *brush, Window win, 
-                             const WRectangle *geom, const char *text, 
-                             const char *attr, bool needfill)
-{
-    DEColourGroup *cg=debrush_get_colour_group(&(brush->debrush), attr);
-    if(cg!=NULL){
-        debrush_do_draw_textbox(&(brush->debrush), win, geom, text, cg, 
-                                needfill, attr, NULL,
-                                (TextBoxExtraFn*)tabbrush_textbox_extras);
-    }
-}
-
-
-void dementbrush_draw_textbox(DEMEntBrush *brush, Window win, 
-                              const WRectangle *geom, const char *text, 
-                              const char *attr, bool needfill)
-{
-    DEColourGroup *cg=debrush_get_colour_group(&(brush->debrush), attr);
-    if(cg!=NULL){
-        debrush_do_draw_textbox(&(brush->debrush), win, geom, text, cg, 
-                                needfill, attr, NULL,
-                                (TextBoxExtraFn*)mentbrush_textbox_extras);
-    }
-}
-
-
-void debrush_draw_textboxes(DEBrush *brush, Window win, 
-                            const WRectangle *geom,
-                            int n, const GrTextElem *elem, 
-                            bool needfill, const char *common_attrib)
-{
-    do_draw_textboxes(brush, win, geom, n, elem, needfill, common_attrib, 
-                      NULL);
-}
-
-
-
-void detabbrush_draw_textboxes(DETabBrush *brush, Window win, 
-                               const WRectangle *geom,
-                               int n, const GrTextElem *elem, 
-                               bool needfill, const char *common_attrib)
-{
-    do_draw_textboxes(&(brush->debrush), win, geom, n, elem, 
-                      needfill, common_attrib,
-                      (TextBoxExtraFn*)tabbrush_textbox_extras);
-}
-
-
-void dementbrush_draw_textboxes(DEMEntBrush *brush, Window win, 
-                                const WRectangle *geom,
-                                int n, const GrTextElem *elem, 
-                                bool needfill, const char *common_attrib)
-{
-    do_draw_textboxes(&(brush->debrush), win, geom, n, elem, 
-                      needfill, common_attrib,
-                      (TextBoxExtraFn*)mentbrush_textbox_extras);
 }
 
 
