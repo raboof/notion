@@ -1003,6 +1003,12 @@ static bool extl_get_retvals(lua_State *st, int m, ExtlDoCallParam *param)
 #ifdef CF_HAS_VA_COPY
 	va_list args;
 	va_copy(args, param->args);
+#else
+	if(m>MAX_PARAMS){
+		warn("Too many return values. Use a C compiler that has va_copy "
+			 "to support more");
+		return FALSE;
+	}
 #endif
 	
 	while(m>0){
