@@ -162,6 +162,8 @@ end
 function selectstyle(look, where)
     include(look)
 
+    local fname=get_savefile('draw')
+
     local function writeit()
         local f, err=io.open(fname, 'w')
         if not f then
@@ -172,8 +174,6 @@ function selectstyle(look, where)
         end
     end
 
-    local fname=get_savefile('draw')
-    
     if not querylib or not query_message then
         if fname then
             writeit()
