@@ -65,18 +65,19 @@ LTDL_LIBS=-lltdl
 ## Lua
 ##
 
-# If you have Lua 5.0 in /usr/lib, the following should do it:
-#LUA_LIBS = -llua -llualib
-#LUA_INCLUDES =
-
-# If you, for example, have lua 4.0 in /usr/lib and 5.0 somewhere else,
-# the following settings might be what you need. 
+# If you have installed Lua 5.0 from the official tarball without changing
+# paths, this so do it.
 LUA_PATH=/usr/local
 LUA_LIBS = -L$(LUA_PATH)/lib -R$(LUA_PATH)/lib -llua -llualib
 LUA_INCLUDES = -I$(LUA_PATH)/include
+LUA=$(LUA_PATH)/bin/lua
 
-# The location of the Lua interpreter is needed for mkexports.lua
-LUA=lua
+# If you are using the Debian packages, the following settings should be
+# what you want.
+#LUA_PATH=/usr
+#LUA_LIBS = -llua50 -llualib50
+#LUA_INCLUDES = -I$(LUA_PATH)/include/lua50
+#LUA=$(LUA_PATH)/bin/lua50
 
 
 ##
