@@ -33,7 +33,7 @@ OBJS=	binding.o conf-bindings.o conf-draw.o cursor.o draw.o event.o	\
 	tags.o names.o saveload.o genws.o genframe.o genframe-pointer.o	\
 	conf.o conf-winprops.o reginfo.o
 
-TARGETS=ioncore
+TARGETS=ion
 
 ######################################
 
@@ -41,7 +41,7 @@ include $(TOPDIR)/rules.mk
 
 ######################################
 
-ioncore: $(OBJS) $(EXT_OBJS)
+ion: $(OBJS) $(EXT_OBJS)
 	$(CC) $(OBJS) $(EXT_OBJS) $(LDFLAGS) -o $@
 
 ifeq ($(STATIC_MODULES),1)

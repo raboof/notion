@@ -151,6 +151,7 @@ fail:
 	
 /*{{{ Init */
 
+
 static void init_hooks()
 {
 	ADD_HOOK(add_clientwin_alt, add_clientwin_default);
@@ -187,7 +188,7 @@ static void initialize_global()
 
 
 bool ioncore_init(const char *appname, const char *appetcdir,
-				 const char *applibdir, const char *display, bool onescreen)
+				  const char *applibdir, const char *display, bool onescreen)
 {
 	Display *dpy;
 	WScreen *scr;
