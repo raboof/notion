@@ -419,6 +419,9 @@ static void handle_enter_window(XEvent *ev)
 
 		reg=FIND_WINDOW_T(eev->window, WRegion);
 		
+		if(reg==NULL)
+			continue;
+		
 		D(fprintf(stderr, "E: %p %s %d %d\n", reg, WOBJ_TYPESTR(reg),
 				  eev->mode, eev->detail));
 		
@@ -436,7 +439,6 @@ static void handle_enter_window(XEvent *ev)
 			if(r2==NULL)
 				continue;
 		}
-		
 		
 		if(!REGION_IS_ACTIVE(reg))
 			freg=reg;
