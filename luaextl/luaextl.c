@@ -16,6 +16,7 @@
 #include <ioncore/common.h>
 #include <ioncore/obj.h>
 #include <ioncore/objp.h>
+#include <ioncore/errorlog.h>
 
 #include "luaextl.h"
 
@@ -163,6 +164,69 @@ static bool extl_init_obj_info(lua_State *st)
 /*}}}*/
 
 
+/*{{{ Stack trace*/
+
+
+static int extl_stack_trace(lua_State *st)
+{
+	lua_Debug ar;
+	int lvl=1;
+	
+	/*lua_settop(st, 1);*/
+	lua_pushstring(st, "Stack trace:");
+	/*lua_concat(st, 2);*/
+
+	for( ; lua_getstack(st, lvl, &ar); lvl++){
+		if(lua_getinfo(st, "Sln", &ar)==0){
+			lua_pushfstring(st, "\n    (Unable to get debug info for level %d)",
+							lvl);
+		}else{
+			lua_pushfstring(st, "\n    %s: line %d, function: %s",
+							ar.source==NULL ? "(unknown)" : ar.source,
+							ar.currentline,
+							ar.name==NULL ? "(unknown)" : ar.name);
+		}
+		lua_concat(st, 2);
+	}
+	return 1;
+}
+
+
+/*}}}*/
+
+
+/*{{{ Misc. */
+
+
+int extl_collect_errors(lua_State *st)
+{
+	ErrorLog el;
+	int err;
+	int n=lua_gettop(st);
+	
+	begin_errorlog(&el);
+	
+	err=lua_pcall(st, n-1, LUA_MULTRET, 0);
+	
+	if(err!=0)
+		warn("%s", lua_tostring(l_st, -1));
+	
+	if(end_errorlog(&el))
+		lua_pushstring(st, el.msgs);
+	else
+		lua_pushnil(st);
+	
+	lua_insert(st, 1);
+	
+	deinit_errorlog(&el);
+	
+	return lua_gettop(st);
+}
+
+
+/*}}}*/
+
+
 /*{{{ Init */
 
 
@@ -185,6 +249,9 @@ bool extl_init()
 		warn("Failed to initialize WObj metatable\n");
 		goto fail;
 	}
+
+	lua_pushcfunction(l_st, extl_collect_errors);
+	lua_setglobal(l_st, "collect_errors");
 
 	return TRUE;
 fail:
@@ -801,22 +868,27 @@ static bool extl_do_call_vararg(lua_State *st, int oldtop, bool intab,
 	bool ret=TRUE;
 	int n=0, m=0;
 
+	if(spec!=NULL)
+		n=strlen(spec);
+
+	/* +2 for stack tracer and extl_push_obj */
+	if(!lua_checkstack(l_st, n+2)){
+		lua_settop(l_st, oldtop);
+		warn("Stack full");
+		return FALSE;
+	}
+#if 0
+	lua_pushcfunction(st, extl_stack_trace);
+	lua_insert(st, -2);
+#endif
+	
 	/* For dostring and dofile arguments are passed in the global table 'arg'.
 	 */
 	if(intab)
 		lua_newtable(l_st);
 
-	if(spec!=NULL){
-		n=strlen(spec);
-	
-		/* +1 for extl_push_obj */
-		if(!lua_checkstack(l_st, n+1)){
-			warn("Stack full");
-			return FALSE;
-		}
-		
+	if(n>0)
 		ret=extl_push_args(st, intab, spec, args, &args);
-	}
 
 	if(ret){
 		if(intab){
@@ -826,9 +898,12 @@ static bool extl_do_call_vararg(lua_State *st, int oldtop, bool intab,
 		
 		if(rspec!=NULL)
 			m=strlen(rspec);
-		
+#if 0
+		if(lua_pcall(st, n, m, -n-2)!=0){
+#else
 		if(lua_pcall(st, n, m, 0)!=0){
-			warn_obj("extl_do_call_vararg", "%s", lua_tostring(st, -1));
+#endif
+			warn("%s", lua_tostring(st, -1));
 			ret=FALSE;
 		}else{
 			if(m>0)
@@ -920,7 +995,7 @@ bool extl_dofile_vararg(const char *file, const char *spec,
 	bool ret=FALSE;
 	int oldtop;
 	
-	fprintf(stderr, "lua_dofile(%s)\n", file);
+	printf("lua_dofile(%s)\n", file);
 	
 	oldtop=lua_gettop(l_st);
 	lua_pushstring(l_st, file);
@@ -1091,77 +1166,57 @@ static int extl_l1_call_handler2(lua_State *st)
 }
 
 
+INTRSTRUCT(WarnChain);
+DECLSTRUCT(WarnChain){
+	bool need_trace;
+	WarnHandler *old_handler;
+	WarnChain *prev;
+};
 
+static WarnChain *warnchain;
 
-static bool need_trace=FALSE;
-static WarnHandler *old_warn_handler=NULL;
-static bool wh_has_been_set=FALSE;
 
 static void l1_warn_handler(const char *message)
 {
+	WarnChain *ch=warnchain;
 	static int called=0;
 	
-	if(old_warn_handler!=NULL && called==0){
-		called++;
-		old_warn_handler(message);
-		called--;
-	}else{
-		fprintf(stderr, "%s: %s\n", prog_execname(), message);
-	}
+	assert(warnchain!=NULL);
 	
-	need_trace=TRUE;
-}
-
-
-static void extl_stack_trace(lua_State *st)
-{
-	lua_Debug ar;
-	int lvl=1;
+	if(called==0)
+		ch->need_trace=TRUE;
 	
-	warn("Stack trace: ");
-				 
-	for( ; lua_getstack(st, lvl, &ar); lvl++){
-		if(lua_getinfo(st, "Sln", &ar)==0){
-			warn("  (Unable to get debug info for level %d)", lvl);
-		}else{
-			warn("  %s\n   current line: %d, function: %s",
-				 ar.source, ar.currentline, ar.name);
-		}
-	}
-}
-
-
-static void clean_warn_handler(const char *msg)
-{
-	fwrite(msg, sizeof(char), strlen(msg), stderr);
-	fputc('\n', stderr);
+	called++;
+	warnchain=ch->prev;
+	ch->old_handler(message);
+	warnchain=ch;
+	called--;
 }
 
 
 static int extl_l1_call_handler(lua_State *st)
 {
-	bool old_need_trace=need_trace;
-	WarnHandler *old_old_warn_handler=old_warn_handler;
+	WarnChain ch;
 	int ret;
 	
-	old_warn_handler=set_warn_handler(l1_warn_handler);
+	ch.old_handler=set_warn_handler(l1_warn_handler);
+	ch.need_trace=FALSE;
+	ch.prev=warnchain;
+	warnchain=&ch;
 	
 	ret=extl_l1_call_handler2(st);
 
-	if(need_trace){
-		if(old_warn_handler==NULL)
-			set_warn_handler(clean_warn_handler);
-		else
-			set_warn_handler(old_warn_handler);
+	if(ch.need_trace){
+		const char *p;
 		extl_stack_trace(st);
-		set_warn_handler(l1_warn_handler);
+		p=lua_tostring(st, -1);
+		warn(p);
+		lua_pop(st, 1);
 	}
-	
-	set_warn_handler(old_warn_handler);
-	old_warn_handler=old_old_warn_handler;
-	
-	need_trace=old_need_trace;
-	
+
+	warnchain=ch.prev;
+	set_warn_handler(ch.old_handler);
+
 	return ret;
 }
 
