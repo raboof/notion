@@ -129,6 +129,8 @@ WARN=	-W -Wimplicit -Wreturn-type -Wswitch -Wcomment \
 	-Wparentheses -pedantic -Wuninitialized
 
 
+C99_SOURCE=-std=c99
+
 CFLAGS=-g -O2 $(WARN) $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES)
 LDFLAGS=-g $(LIBS) $(EXTRA_LIBS)
 
