@@ -13,6 +13,15 @@ QueryLib={}
 -- Helper functions
 -- 
 
+
+function QueryLib.make_completor(completefn)
+    local function completor(wedln, str)
+        wedln_set_completions(wedln, completefn(str))
+    end
+    return completor
+end
+
+    
 function QueryLib.make_simple_fn(prompt, initfn, handler, completor)
     local function query_it(frame)
         local initvalue;
@@ -152,105 +161,175 @@ function QueryLib.complete_function(str)
     return res
 end
 
+
+--
+-- More complex completors that start external programs
+--
+
+-- How many characters of result data to completions do we allow?
+QueryLib.RESULT_DATA_LIMIT=10*1024^2
+
 -- Use weak references to cache found manuals.
 QueryLib.mancache={}
 setmetatable(QueryLib.mancache, {__mode="v"})
 
-function QueryLib.complete_man(str)
-    local function find_manuals()
-        local manuals={}
-        -- Maybe we should attempt to grep /etc/manpath.config and
-        -- check the MANPATH environment variable?
-        local dirs=table.concat(query_man_path, " ")
-        if dirs==nil then
-            return {}
-        end
-        local h=io.popen("find "..dirs.." -type f", "r");
-        for l in h:lines() do
-            -- Extract page name part and try to ignore non-manpage files
-            for a in string.gfind(l, ".*/([^/.]+)%.%d.*") do
-                table.insert(manuals, a)
+function QueryLib.man_completor(wedln, str)
+    local function set_completions(manuals)
+        local results={}
+        local len=string.len(str)
+        if len==0 then
+            results=manuals
+        else
+            for _, m in manuals do
+                if string.sub(m, 1, len)==str then
+                    table.insert(results, m)
+                end
             end
         end
-        h:close()
-        return manuals
-    end
-    
-    local manuals=QueryLib.mancache.manuals
-    if not manuals then
-        -- Manuals were not cached, find them
-        manuals=find_manuals()
-        QueryLib.mancache.manuals=manuals
+        wedln_set_completions(wedln, results)
     end
 
-    local results={}
-    local len=string.len(str)
-    if len==0 then
-        return manuals
+    if QueryLib.mancache.manuals then
+        set_completions(QueryLib.mancache.manuals)
+        return
+    end    
+    
+    local function receive_data(str)
+        local data = "\n"
+        
+        while str do
+            data=data .. str
+            if string.len(data)>QueryLib.RESULT_DATA_LIMIT then
+                error("Too much result data")
+            end
+            str=coroutine.yield()
+        end
+        
+        local manuals={}
+        
+        for a in string.gfind(data, "[^\n]*/([^/.\n]+)%.%d[^\n]*\n") do
+            table.insert(manuals, a)
+        end
+
+        QueryLib.mancache.manuals=manuals
+        
+        set_completions(manuals)
     end
     
-    for _, m in manuals do
-        if string.sub(m, 1, len)==str then
-            table.insert(results, m)
-        end
+    local dirs=table.concat(query_man_path, " ")
+    if dirs==nil then
+        return
     end
-    return results
+    
+    popen_bgread("find "..dirs.." -type f", coroutine.wrap(receive_data))
 end
+
+
+function QueryLib.file_completor(wedln, str, wp)
+    local function receive_data(str)
+        local data=""
+        
+        while str do
+            data=data .. str
+            if string.len(data)>QueryLib.RESULT_DATA_LIMIT then
+                error("Too much result data")
+            end
+            str=coroutine.yield()
+        end
+        
+        
+        local results={}
+        
+        -- ion-completefile will return possible common part of path on
+        -- the first line and the entries in that directory on the
+        -- following lines.
+        for a in string.gfind(data, "([^\n]*)\n") do
+            table.insert(results, a)
+        end
+        
+        results.common_part=results[1]
+        table.remove(results, 1)
+        
+        wedln_set_completions(wedln, results)
+    end
+    
+    str=string.gsub(str, "'", "'\\''")
+    local cmd="ion-completefile " .. "'" .. str .. "' " .. (wp or "")
+    popen_bgread(cmd, coroutine.wrap(receive_data))
+end
+
+
+function QueryLib.exec_completor(wedln, str)
+    QueryLib.file_completor(wedln, str, "-wp")
+end
+
 
 --    
 -- The queries
 -- 
 
-QueryLib.query_gotoclient=QueryLib.make_frame_fn("Go to window:", nil,
-                                                 QueryLib.gotoclient_handler,
-                                                 complete_clientwin)
+-- Internal operations
 
-QueryLib.query_attachclient=QueryLib.make_frame_fn("Attach window:", nil,
-                                                    query_handler_attachclient,
-                                                    complete_clientwin)
+QueryLib.query_gotoclient=QueryLib.make_frame_fn(
+    "Go to window:", nil,
+    QueryLib.gotoclient_handler,
+    QueryLib.make_completor(complete_clientwin)
+)
 
-QueryLib.query_workspace=QueryLib.make_frame_fn("Go to or create workspace:",
-                                                nil, query_handler_workspace,
-                                                complete_workspace)
+QueryLib.query_attachclient=QueryLib.make_frame_fn(
+    "Attach window:", nil,
+    query_handler_attachclient, 
+    QueryLib.make_completor(complete_clientwin)
+)
 
-QueryLib.query_exec=QueryLib.make_frame_fn("Run:", nil,
-                                           QueryLib.exec_handler,
-                                           complete_file_with_path)    
+QueryLib.query_workspace=QueryLib.make_frame_fn(
+    "Go to or create workspace:", nil, 
+    query_handler_workspace, 
+    QueryLib.make_completor(complete_workspace)
+)
 
-QueryLib.query_exit=QueryLib.make_yesno_fn("Exit Ion (y/n)?",
-                                           exit_wm)
+QueryLib.query_exit=QueryLib.make_yesno_fn(
+    "Exit Ion (y/n)?", exit_wm
+)
 
-QueryLib.query_restart=QueryLib.make_yesno_fn("Restart Ion (y/n)?",
-                                              restart_wm)
+QueryLib.query_restart=QueryLib.make_yesno_fn(
+    "Restart Ion (y/n)?", restart_wm
+)
 
-QueryLib.query_renameframe=QueryLib.make_rename_fn("Frame name: ",
-                                                   function(frame)
-                                                       return frame
-                                                   end
-                                                  )
+QueryLib.query_renameframe=QueryLib.make_rename_fn(
+    "Frame name: ", function(frame) return frame end
+)
 
-QueryLib.query_renameworkspace=QueryLib.make_rename_fn("Workspace name: ",
-                                                       QueryLib.getws)
+QueryLib.query_renameworkspace=QueryLib.make_rename_fn(
+    "Workspace name: ", QueryLib.getws
+)
 
-QueryLib.query_ssh=QueryLib.make_execwith_fn("SSH to:", nil, "ion-ssh",
-                                             QueryLib.complete_ssh)
+-- Queries for starting external programs
 
-QueryLib.query_man=QueryLib.make_execwith_fn("Manual page (ion):",
-                                             nil,
-                                             "ion-man",
-                                             QueryLib.complete_man)
+QueryLib.query_exec=QueryLib.make_frame_fn(
+    "Run:", nil, exec_on_screen, QueryLib.exec_completor
+)
 
-QueryLib.query_editfile=QueryLib.make_execwith_fn("Edit file:",
-                                                  QueryLib.get_initdir,
-                                                  "ion-edit",
-                                                  complete_file)
+QueryLib.query_ssh=QueryLib.make_execwith_fn(
+    "SSH to:", nil, "ion-ssh", QueryLib.make_completor(QueryLib.complete_ssh)
+)
 
-QueryLib.query_runfile=QueryLib.make_execwith_fn("View file:",
-                                                 QueryLib.get_initdir,
-                                                 "ion-view",
-                                                 complete_file)
+QueryLib.query_man=QueryLib.make_execwith_fn(
+    "Manual page (ion):", nil, "ion-man", QueryLib.man_completor
+)
 
-QueryLib.query_lua=QueryLib.make_frame_fn("Lua code to run:",
-                                          nil,
-                                          QueryLib.handler_lua,
-                                          QueryLib.complete_function);
+QueryLib.query_editfile=QueryLib.make_execwith_fn(
+    "Edit file:", QueryLib.get_initdir, "ion-edit", QueryLib.file_completor
+)
+
+QueryLib.query_runfile=QueryLib.make_execwith_fn(
+    "View file:", QueryLib.get_initdir, "ion-view", QueryLib.file_completor
+)
+
+-- Lua code execution
+
+QueryLib.query_lua=QueryLib.make_frame_fn(
+    "Lua code to run:", nil,
+    QueryLib.handler_lua,
+    QueryLib.make_completor(QueryLib.complete_function)
+)
