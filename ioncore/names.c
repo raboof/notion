@@ -227,7 +227,20 @@ static bool do_use_name(WRegion *reg, WNamespace *ns, const char *name,
     if(fullname==NULL){
         found=0;
         inst=0;
-        node=rb_find_gkey_n(ns->rb, name, COMPARE_FN, &found);
+        if(parsed_inst>=0){
+            /* Need to append <0> before lookup if the name ends in something
+             * that looks like an instance number.
+             */
+            char *tmpname=make_full_name(name, 0, TRUE);
+            if(tmpname==NULL){
+                warn_err();
+                return FALSE;
+            }
+            node=rb_find_gkey_n(ns->rb, tmpname, COMPARE_FN, &found);
+            free(tmpname);
+        }else{
+            node=rb_find_gkey_n(ns->rb, name, COMPARE_FN, &found);
+        }
         
         if(found){
             while(1){
@@ -270,6 +283,7 @@ static bool do_use_name(WRegion *reg, WNamespace *ns, const char *name,
     region_do_unuse_name(reg, FALSE);
     reg->ni.name=fullname;
     reg->ni.namespaceinfo=ns;
+
     return TRUE;
 }
 
