@@ -2,6 +2,8 @@
 -- A script to automatically generate exported function registration
 -- code and documentation for those from C source.
 -- 
+-- The script can also parse documentation comments from Lua code.
+-- 
 
 
 -- Helper functions {{{
@@ -189,6 +191,10 @@ function parse(d)
         ["[%s\n]EXTL_EXPORT"] = do_export,
     }
     
+    do_parse(d, lookfor)
+end
+
+function do_parse(d, lookfor)
     while true do
         local mins, mine, minfn=string.len(d)+1, nil, nil
         for str, fn in pairs(lookfor) do
@@ -205,8 +211,45 @@ function parse(d)
         minfn(string.sub(d, mins))
         d=string.sub(d, mine+1)
     end
-end
+end    
 
+-- }}}
+
+
+-- Parser for Lua code documentation {{{
+
+function parse_luadoc(d)
+    function do_luadoc(s_)
+        local st, en, b, s=string.find(s_, "\n%-%-DOC(.-)(\n.*)")
+        if string.find(b, "[^%s]") then
+            errorf("Syntax error while parsing \"--DOC%s\"", b)
+        end
+        local doc, docl=""
+        while true do
+            st, en, docl=string.find(s, "^\n%s*%-%-([^\n]*\n)")
+            if not st then
+                break
+            end
+            --print(docl)
+            doc=doc .. docl
+            s=string.sub(s, en)
+        end
+        
+        local fn
+        st, en, fn=string.find(s, "^\n[%s\n]*function ([%w_:%.]+)")
+        if not fn then
+            st, en, fn=string.find(s, "^\n[%s\n]*([%w_:%.]+)%s*=")
+            if not fn then
+                errorf("Syntax error while parsing \"%s\"",
+                       string.sub(s, 1, 50))
+            end
+        end
+        fns[fn]={doc=doc}
+    end
+    
+    do_parse(d, {["\n%-%-DOC"]=do_luadoc})
+end
+    
 -- }}}
 
 
@@ -341,19 +384,32 @@ end
 
 function write_fndoc(h, fn, info)
     fprintf(h, "\\begin{function}\n")
-    fprintf(h, "\\index{%s@\\code{%s}}\n", texfriendly(fn), fn)
-    fprintf(h, "\\hyperlabel{fn:%s}", fn)
-    fprintf(h, "\\synopsis{%s %s(", tohuman(info.odesc, info.otype), fn)
-    local comma=""
-    for i, varname in info.ivars do
-        fprintf(h, comma .. "%s", tohuman(string.sub(info.idesc, i, i),
-                                          info.itypes[i]))
-        if varname then
-            fprintf(h, " %s", varname)
-        end
-        comma=", "
+    local fnx=fn
+    fprintf(h, "\\index{")
+    if lua_input then
+        fnx=string.gsub(fnx, "(.-)%.", 
+                        function(s) 
+                            fprintf(h, "%s@\\var{%s}!", texfriendly(s), s)
+                            return ""
+                        end)
     end
-    fprintf(h, ")}\n")
+    fprintf(h, "%s@\\code{%s}}\n", texfriendly(fnx), fnx)
+    fprintf(h, "\\hyperlabel{fn:%s}", fn)
+    if lua_input then
+        fprintf(h, "\\funcname{%s}\n", fn)
+    else
+        fprintf(h, "\\synopsis{%s %s(", tohuman(info.odesc, info.otype), fn)
+        local comma=""
+        for i, varname in info.ivars do
+            fprintf(h, comma .. "%s", tohuman(string.sub(info.idesc, i, i),
+                                              info.itypes[i]))
+            if varname then
+                fprintf(h, " %s", varname)
+            end
+            comma=", "
+        end
+        fprintf(h, ")}\n")
+    end
     h:write("\\begin{funcdesc}\n" .. trim(info.doc).. "\n\\end{funcdesc}\n")
     fprintf(h, "\\end{function}\n\n")
 end
@@ -381,6 +437,7 @@ end
 inputs={}
 outh=io.stdout
 make_docs=false
+lua_input=false
 module=""
 i=1
 
@@ -390,6 +447,9 @@ while arg[i] do
         return
     elseif arg[i]=="-mkdoc" then
         make_docs=true
+    elseif arg[i]=="-luadoc" then
+        make_docs=true
+        lua_input=true
     elseif arg[i]=="-o" then
         i=i+1
         outh, err=io.open(arg[i], "w")
@@ -420,7 +480,11 @@ for _, ifnam in inputs do
     print("Scanning " .. ifnam .. " for exports.")
     data=h:read("*a")
     h:close()
-    parse("\n" .. data .. "\n")
+    if lua_input then
+        parse_luadoc("\n" .. data .. "\n")
+    else
+        parse("\n" .. data .. "\n")
+    end
 end
 
 if make_docs then
