@@ -65,12 +65,12 @@ end
 ionframe_moveres_bindings{
     kpress("AnyModifier+Escape", ionframe_cancel_resize),
     kpress("AnyModifier+Return", ionframe_end_resize),
-    kpress("AnyModifier+Up", ionframe_grow_vert),
-    kpress("AnyModifier+Down", ionframe_shrink_vert),
+    kpress("AnyModifier+Down", ionframe_grow_vert),
+    kpress("AnyModifier+Up", ionframe_shrink_vert),
     kpress("AnyModifier+Right", ionframe_grow_horiz),
     kpress("AnyModifier+Left", ionframe_shrink_horiz),
-    kpress("AnyModifier+P", ionframe_grow_vert),
-    kpress("AnyModifier+N", ionframe_shrink_vert),
+    kpress("AnyModifier+N", ionframe_grow_vert),
+    kpress("AnyModifier+P", ionframe_shrink_vert),
     kpress("AnyModifier+F", ionframe_grow_horiz),
     kpress("AnyModifier+B", ionframe_shrink_horiz),
 }
