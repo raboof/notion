@@ -25,16 +25,16 @@
  */
 
 
-/* Macros {{{ */
+/*{{{ Macros */
 #ifdef __GNUC__
 #define UNUSED __attribute__ ((unused))
 #else
 #define UNUSED
 #endif
-/* }}} */
+/*}}}*/
 
 
-/* Includes {{{ */
+/*{{{ Includes */
 
 #include <string.h>
 #include <X11/Xlib.h>
@@ -58,21 +58,21 @@
 #include <libtu/map.h>
 #include <version.h>
 
-/* }}} */
+/*}}}*/
 
 
-/* Global variables {{{ */
+/*{{{ Global variables */
 static const char *modname="dock";
 const char mod_dock_ion_api_version[]=ION_API_VERSION;
 bool shape_extension=FALSE;
 int shape_event_basep=0;
 int shape_error_basep=0;
-/* }}} */
+/*}}}*/
 
 
-/* StringIntMap {{{ */
+/*{{{ StringIntMap */
 
-/* strintintmap_reverse_value {{{ */
+/*{{{ strintintmap_reverse_value */
 static const char *stringintmap_reverse_value(const StringIntMap *map,
                                               int value,
                                               const char *dflt)
@@ -88,24 +88,24 @@ static const char *stringintmap_reverse_value(const StringIntMap *map,
     return dflt;
 
 }
-/* }}} */
+/*}}}*/
 
-/* }}} */
+/*}}}*/
 
 
-/* WDockParam {{{ */
+/*{{{ WDockParam */
 
 INTRCLASS(WDockParam);
 
-DECLCLASS(WDockParam){ /* {{{ */
+DECLCLASS(WDockParam){ /*{{{ */
     const char *key;
     const char *desc;
     const StringIntMap *map;
     int dflt;
 };
-/* }}} */
+/*}}}*/
 
-/* dock_param_extl_table_get {{{ */
+/*{{{ dock_param_extl_table_get */
 static void dock_param_extl_table_get(const WDockParam *param, ExtlTab conftab,
                                       int value)
 {
@@ -117,9 +117,9 @@ static void dock_param_extl_table_get(const WDockParam *param, ExtlTab conftab,
     }
 
 }
-/* }}} */
+/*}}}*/
 
-/* dock_param_do_set {{{ */
+/*{{{ dock_param_do_set */
 static bool dock_param_do_set(const WDockParam *param, char *s,
                                  int *ret)
 {
@@ -138,9 +138,9 @@ static bool dock_param_do_set(const WDockParam *param, char *s,
     return changed;
 
 }
-/* }}} */
+/*}}}*/
 
-/* dock_param_extl_table_set {{{ */
+/*{{{ dock_param_extl_table_set */
 static bool dock_param_extl_table_set(const WDockParam *param, ExtlTab conftab,
                                       int *ret)
 {
@@ -152,9 +152,9 @@ static bool dock_param_extl_table_set(const WDockParam *param, ExtlTab conftab,
     return FALSE;
 
 }
-/* }}} */
+/*}}}*/
 
-/* dock_param_brush_set {{{ */
+/*{{{ dock_param_brush_set */
 static bool dock_param_brush_set(const WDockParam *param, GrBrush *brush,
                                  int *ret)
 {
@@ -166,16 +166,16 @@ static bool dock_param_brush_set(const WDockParam *param, GrBrush *brush,
     return FALSE;
 
 }
-/* }}} */
+/*}}}*/
 
-/* }}} */
+/*}}}*/
 
 
-/* WDockApp {{{ */
+/*{{{ WDockApp */
 
 INTRCLASS(WDockApp);
 
-DECLCLASS(WDockApp){ /* {{{ */
+DECLCLASS(WDockApp){ /*{{{ */
     WDockApp *next, *prev;
     WClientWin *cwin;
     int pos;
@@ -185,16 +185,16 @@ DECLCLASS(WDockApp){ /* {{{ */
     WRectangle tile_geom;
     WRectangle border_geom;
 };
-/* }}} */
+/*}}}*/
 
-/* }}} */
+/*}}}*/
 
 
-/* WDock {{{ */
+/*{{{ WDock */
 
 INTRCLASS(WDock);
 
-DECLCLASS(WDock){ /* {{{ */
+DECLCLASS(WDock){ /*{{{ */
     WWindow win;
     WDock *dock_next, *dock_prev;
     WRegion *managed_list;
@@ -203,21 +203,21 @@ DECLCLASS(WDock){ /* {{{ */
     GrBrush *brush;
     WDockApp *dockapps;
 };
-/* }}} */
+/*}}}*/
 
 static WDock *docks=NULL;
 
-/* Parameter descriptions {{{ */
+/*{{{ Parameter descriptions */
 
-static const WDockParam dock_param_name={ /* {{{ */
+static const WDockParam dock_param_name={ /*{{{ */
     "name",
     "name",
     NULL,
     0
 };
-/* }}} */
+/*}}}*/
 
-/* Horizontal position {{{ */
+/*{{{ Horizontal position */
 
 enum WDockHPos{
     DOCK_HPOS_LEFT,
@@ -240,9 +240,9 @@ static WDockParam dock_param_hpos={
     DOCK_HPOS_RIGHT
 };
 
-/* }}} */
+/*}}}*/
 
-/* Vertical position {{{ */
+/*{{{ Vertical position */
 
 enum WDockVPos{
     DOCK_VPOS_TOP,
@@ -264,9 +264,9 @@ static WDockParam dock_param_vpos={
     DOCK_VPOS_MIDDLE
 };
 
-/* }}} */
+/*}}}*/
 
-/* Growth direction {{{ */
+/*{{{ Growth direction */
 
 enum WDockGrow{
     DOCK_GROW_UP,
@@ -290,25 +290,25 @@ WDockParam dock_param_grow={
     DOCK_GROW_DOWN
 };
 
-/* }}} */
+/*}}}*/
 
-static const WDockParam dock_param_is_auto={ /* {{{ */
+static const WDockParam dock_param_is_auto={ /*{{{ */
     "is_auto",
     "is automatic",
     NULL,
     TRUE
 };
-/* }}} */
+/*}}}*/
 
-static const WDockParam dock_param_is_mapped={ /* {{{ */
+static const WDockParam dock_param_is_mapped={ /*{{{ */
     "is_mapped",
     "is mapped",
     NULL,
     TRUE
 };
-/* }}} */
+/*}}}*/
 
-/* Outline style {{{ */
+/*{{{ Outline style */
 
 enum WDockOutlineStyle{
     DOCK_OUTLINE_STYLE_NONE,
@@ -330,30 +330,30 @@ WDockParam dock_param_outline_style={
     DOCK_OUTLINE_STYLE_ALL
 };
 
-/* }}} */
+/*}}}*/
 
-static const WDockParam dock_param_tile_width={ /* {{{ */
+static const WDockParam dock_param_tile_width={ /*{{{ */
     "width",
     "tile width",
     NULL,
     64
 };
-/* }}} */
+/*}}}*/
 
-static const WDockParam dock_param_tile_height={ /* {{{ */
+static const WDockParam dock_param_tile_height={ /*{{{ */
     "height",
     "tile height",
     NULL,
     64
 };
-/* }}} */
+/*}}}*/
 
-/* }}} */
+/*}}}*/
 
 #define CLIENTWIN_WINPROP_POSITION "dockposition"
 #define CLIENTWIN_WINPROP_BORDER "dockborder"
 
-/* dock_find_dockapp {{{ */
+/*{{{ dock_find_dockapp */
 static WDockApp *dock_find_dockapp(WDock *dock, WRegion *reg)
 {
     WDockApp *dockapp;
@@ -367,9 +367,9 @@ static WDockApp *dock_find_dockapp(WDock *dock, WRegion *reg)
     return NULL;
 
 }
-/* }}} */
+/*}}}*/
 
-/* dock_get_outline_style {{{ */
+/*{{{ dock_get_outline_style */
 static void dock_get_outline_style(WDock *dock, int *ret)
 {
 
@@ -378,9 +378,9 @@ static void dock_get_outline_style(WDock *dock, int *ret)
         dock_param_brush_set(&dock_param_outline_style, dock->brush, ret);
 
 }
-/* }}} */
+/*}}}*/
 
-/* dock_get_tile_size {{{ */
+/*{{{ dock_get_tile_size */
 static void dock_get_tile_size(WDock *dock, WRectangle *ret)
 {
     ExtlTab tile_size_table;
@@ -398,9 +398,9 @@ static void dock_get_tile_size(WDock *dock, WRectangle *ret)
     }
 
 }
-/* }}} */
+/*}}}*/
 
-/* dock_reshape {{{ */
+/*{{{ dock_reshape */
 static void dock_reshape(WDock *dock)
 {
     int outline_style;
@@ -413,20 +413,20 @@ static void dock_reshape(WDock *dock)
     switch(outline_style){
 
     case DOCK_OUTLINE_STYLE_NONE:
-    case DOCK_OUTLINE_STYLE_EACH: /* {{{ */
+    case DOCK_OUTLINE_STYLE_EACH: /*{{{ */
         {
             WDockApp *dockapp;
 
-            /* Start with an empty set {{{ */
+            /*{{{ Start with an empty set */
             XShapeCombineRectangles(ioncore_g.dpy, ((WWindow *)dock)->win,
                                     ShapeBounding, 0, 0, NULL, 0, ShapeSet, 0);
-            /* }}} */
+            /*}}}*/
 
-            /* Union with dockapp shapes {{{ */
+            /*{{{ Union with dockapp shapes */
             for(dockapp=dock->dockapps; dockapp!=NULL; dockapp=dockapp->next){
                 if(outline_style==DOCK_OUTLINE_STYLE_EACH
                    && dockapp->draw_border){
-                    /* Union with border shape {{{ */
+                    /*{{{ Union with border shape */
                     XRectangle tile_rect;
 
                     tile_rect.x=dockapp->border_geom.x;
@@ -436,9 +436,9 @@ static void dock_reshape(WDock *dock)
                     XShapeCombineRectangles(ioncore_g.dpy, ((WWindow *)dock)->win,
                                             ShapeBounding, 0, 0, &tile_rect, 1,
                                             ShapeUnion, 0);
-                    /* }}} */
+                    /*}}}*/
                 }else{
-                    /* Union with dockapp shape {{{ */
+                    /*{{{ Union with dockapp shape */
                     int count;
                     int ordering;
 
@@ -454,16 +454,16 @@ static void dock_reshape(WDock *dock)
                                                 rects, count, ShapeUnion, ordering);
                         XFree(rects);
                     }
-                    /* }}} */
+                    /*}}}*/
                 }
             }
-            /* }}} */
+            /*}}}*/
 
         }
         break;
-        /* }}} */
+        /*}}}*/
 
-    case DOCK_OUTLINE_STYLE_ALL: /* {{{ */
+    case DOCK_OUTLINE_STYLE_ALL: /*{{{ */
         {
             WRectangle geom;
             XRectangle rect;
@@ -477,14 +477,14 @@ static void dock_reshape(WDock *dock)
                                     ShapeBounding, 0, 0, &rect, 1, ShapeSet, 0);
         }
         break;
-        /* }}} */
+        /*}}}*/
 
     }
 
 }
-/* }}} */
+/*}}}*/
 
-/* dock_managed_rqgeom {{{ */
+/*{{{ dock_managed_rqgeom */
 static void dock_managed_rqgeom(WDock *dock, WRegion *reg, int flags,
                                       const WRectangle *geom,
                                       WRectangle *geomret)
@@ -495,12 +495,12 @@ static void dock_managed_rqgeom(WDock *dock, WRegion *reg, int flags,
     WRectangle tile_size;
     int n_dockapps=0, max_w=1, max_h=1, total_w=0, total_h=0, cur_coord=0;
 
-    /* Determine parent and tile geoms {{{ */
+    /*{{{ Determine parent and tile geoms */
     parent_geom=((WRegion *)dock)->parent->geom;
     dock_get_tile_size(dock, &tile_size);
-    /* }}} */
+    /*}}}*/
 
-    /* Determine dock and dockapp border widths {{{ */
+    /*{{{ Determine dock and dockapp border widths */
     memset(&dock_bdw, 0, sizeof(GrBorderWidths));
     memset(&dockapp_bdw, 0, sizeof(GrBorderWidths));
     if(dock->brush){
@@ -519,24 +519,24 @@ static void dock_managed_rqgeom(WDock *dock, WRegion *reg, int flags,
             break;
         }
     }
-    /* }}} */
+    /*}}}*/
 
-    /* Calculate widths and heights {{{ */
+    /*{{{ Calculate widths and heights */
     for(dockapp=dock->dockapps; dockapp!=NULL; dockapp=dockapp->next){
 
-        /* Use requested geom if available, otherwise use existing geom {{{ */
+        /*{{{ Use requested geom if available, otherwise use existing geom */
         if((WRegion *)dockapp->cwin==reg && geom){
             dockapp->geom=*geom;
         }else{
             dockapp->geom=REGION_GEOM(dockapp->cwin);
         }
-        /* }}} */
+        /*}}}*/
 
-        /* Determine whether dockapp should be placed on a tile {{{ */
+        /*{{{ Determine whether dockapp should be placed on a tile */
         dockapp->tile=dockapp->geom.w<=tile_size.w && dockapp->geom.h<=tile_size.h;
-        /* }}} */
+        /*}}}*/
 
-        /* Calculate width and height {{{ */
+        /*{{{ Calculate width and height */
         if(dockapp->tile){
             dockapp->tile_geom.w=tile_size.w;
             dockapp->tile_geom.h=tile_size.h;
@@ -544,14 +544,14 @@ static void dock_managed_rqgeom(WDock *dock, WRegion *reg, int flags,
             dockapp->tile_geom.w=dockapp->geom.w;
             dockapp->tile_geom.h=dockapp->geom.h;
         }
-        /* }}} */
+        /*}}}*/
 
-        /* Calculate border width and height {{{ */
+        /*{{{ Calculate border width and height */
         dockapp->border_geom.w=dockapp_bdw.left+dockapp->tile_geom.w+dockapp_bdw.right;
         dockapp->border_geom.h=dockapp_bdw.top+dockapp->tile_geom.h+dockapp_bdw.right;
-        /* }}} */
+        /*}}}*/
 
-        /* Calculate maximum and accumulated widths and heights {{{ */
+        /*{{{ Calculate maximum and accumulated widths and heights */
         if(dockapp->border_geom.w>max_w){
             max_w=dockapp->border_geom.w;
         }
@@ -560,16 +560,16 @@ static void dock_managed_rqgeom(WDock *dock, WRegion *reg, int flags,
             max_h=dockapp->border_geom.h;
         }
         total_h+=dockapp->border_geom.h+(n_dockapps ? dockapp_bdw.spacing : 0);
-        /* }}} */
+        /*}}}*/
 
-        /* Count dockapps {{{ */
+        /*{{{ Count dockapps */
         ++n_dockapps;
-        /* }}} */
+        /*}}}*/
 
     }
-    /* }}} */
+    /*}}}*/
 
-    /* Calculate width and height of dock {{{ */
+    /*{{{ Calculate width and height of dock */
     if(n_dockapps){
         switch(dock->grow){
         case DOCK_GROW_LEFT:
@@ -589,9 +589,9 @@ static void dock_managed_rqgeom(WDock *dock, WRegion *reg, int flags,
     }
     border_dock_geom.w=dock_bdw.left+dock_geom.w+dock_bdw.right;
     border_dock_geom.h=dock_bdw.top+dock_geom.h+dock_bdw.bottom;
-    /* }}} */
+    /*}}}*/
 
-    /* Position dock horizontally {{{ */
+    /*{{{ Position dock horizontally */
     switch(dock->hpos){
     case DOCK_HPOS_LEFT:
         border_dock_geom.x=0;
@@ -603,9 +603,9 @@ static void dock_managed_rqgeom(WDock *dock, WRegion *reg, int flags,
         border_dock_geom.x=parent_geom.w-border_dock_geom.w;
         break;
     }
-    /* }}} */
+    /*}}}*/
 
-    /* Position dock vertically {{{ */
+    /*{{{ Position dock vertically */
     switch(dock->vpos){
     case DOCK_VPOS_TOP:
         border_dock_geom.y=0;
@@ -617,15 +617,15 @@ static void dock_managed_rqgeom(WDock *dock, WRegion *reg, int flags,
         border_dock_geom.y=parent_geom.h-border_dock_geom.h;
         break;
     }
-    /* }}} */
+    /*}}}*/
 
-    /* Fit dock to new geom if required {{{ */
+    /*{{{ Fit dock to new geom if required */
     if(!(flags&REGION_RQGEOM_TRYONLY)){
         region_fit((WRegion *)dock, &border_dock_geom, REGION_FIT_EXACT);
     }
-    /* }}} */
+    /*}}}*/
 
-    /* Calculate initial co-ordinate for layout algorithm {{{ */
+    /*{{{ Calculate initial co-ordinate for layout algorithm */
     switch(dock->grow){
     case DOCK_GROW_UP:
         cur_coord=dock_bdw.top+dock_geom.h;
@@ -640,12 +640,12 @@ static void dock_managed_rqgeom(WDock *dock, WRegion *reg, int flags,
         cur_coord=dock_bdw.left;
         break;
     }
-    /* }}} */
+    /*}}}*/
 
-    /* Arrange dockapps {{{ */
+    /*{{{ Arrange dockapps */
     for(dockapp=dock->dockapps; dockapp!=NULL; dockapp=dockapp->next){
 
-        /* Calculate first co-ordinate {{{ */
+        /*{{{ Calculate first co-ordinate */
         switch(dock->grow){
         case DOCK_GROW_UP:
         case DOCK_GROW_DOWN:
@@ -678,9 +678,9 @@ static void dock_managed_rqgeom(WDock *dock, WRegion *reg, int flags,
             dockapp->border_geom.y+=dock_bdw.top;
             break;
         }
-        /* }}} */
+        /*}}}*/
 
-        /* Calculate second co-ordinate {{{ */
+        /*{{{ Calculate second co-ordinate */
         switch(dock->grow){
         case DOCK_GROW_UP:
             cur_coord-=dockapp->border_geom.h;
@@ -701,14 +701,14 @@ static void dock_managed_rqgeom(WDock *dock, WRegion *reg, int flags,
             cur_coord+=dockapp->border_geom.w+dockapp_bdw.spacing;
             break;
         }
-        /* }}} */
+        /*}}}*/
 
-        /* Calculate tile geom {{{ */
+        /*{{{ Calculate tile geom */
         dockapp->tile_geom.x=dockapp->border_geom.x+dockapp_bdw.left;
         dockapp->tile_geom.y=dockapp->border_geom.y+dockapp_bdw.top;
-        /* }}} */
+        /*}}}*/
 
-        /* Calculate dockapp geom {{{ */
+        /*{{{ Calculate dockapp geom */
         if(dockapp->tile){
             dockapp->geom.x=dockapp->tile_geom.x+(dockapp->tile_geom.w-dockapp->geom.w)/2;
             dockapp->geom.y=dockapp->tile_geom.y+(dockapp->tile_geom.h-dockapp->geom.h)/2;
@@ -716,34 +716,34 @@ static void dock_managed_rqgeom(WDock *dock, WRegion *reg, int flags,
             dockapp->geom.x=dockapp->tile_geom.x;
             dockapp->geom.y=dockapp->tile_geom.y;
         }
-        /* }}} */
+        /*}}}*/
 
-        /* Return geom if required {{{ */
+        /*{{{ Return geom if required */
         if((WRegion *)dockapp->cwin==reg && geomret){
             *geomret=dockapp->geom;
         }
-        /* }}} */
+        /*}}}*/
 
-        /* Fit dockapp to new geom if required {{{ */
+        /*{{{ Fit dockapp to new geom if required */
         if(!(flags&REGION_RQGEOM_TRYONLY)){
             region_fit((WRegion *)dockapp->cwin, &dockapp->geom, 
                        REGION_FIT_BOUNDS);
         }
-        /* }}} */
+        /*}}}*/
 
     }
-    /* }}} */
+    /*}}}*/
 
-    /* Reshape the dock if required {{{ */
+    /*{{{ Reshape the dock if required */
     if(shape_extension && !(flags&REGION_RQGEOM_TRYONLY)){
         dock_reshape(dock);
     }
-    /* }}} */
+    /*}}}*/
 
 }
-/* }}} */
+/*}}}*/
 
-/* dock_is_mapped {{{ */
+/*{{{ dock_is_mapped */
 /*EXTL_DOC
  * Is \var{dock} mapped? This is much faster than calling
  * \fnref{WDock.get}\code{(dock).is_mapped}.
@@ -755,9 +755,9 @@ bool dock_is_mapped(WDock *dock)
     return REGION_IS_MAPPED(dock);
 
 }
-/* }}} */
+/*}}}*/
 
-/* dock_map {{{ */
+/*{{{ dock_map */
 /*EXTL_DOC
  * Map (show) \var{dock}. This is much faster than calling
  * \fnref{WDock.set}\code{(dock, \{is_mapped=true\})}.
@@ -769,9 +769,9 @@ void dock_map(WDock *dock)
     window_map((WWindow *)dock);
 
 }
-/* }}} */
+/*}}}*/
 
-/* dock_unmap {{{ */
+/*{{{ dock_unmap */
 /*EXTL_DOC
  * Unmap (hide) \var{dock}. This is much faster than calling
  * \fnref{WDock.set}\code{(dock, \{is_mapped=false\})}.
@@ -783,9 +783,9 @@ void dock_unmap(WDock *dock)
     window_unmap((WWindow *)dock);
 
 }
-/* }}} */
+/*}}}*/
 
-/* dock_toggle {{{ */
+/*{{{ dock_toggle */
 /*EXTL_DOC
  * Toggle \var{dock}'s mapped (shown/hidden) state.
  */
@@ -800,9 +800,9 @@ void dock_toggle(WDock *dock)
     }
 
 }
-/* }}} */
+/*}}}*/
 
-/* dock_draw {{{ */
+/*{{{ dock_draw */
 static void dock_draw(WDock *dock, bool complete UNUSED)
 {
     
@@ -812,7 +812,7 @@ static void dock_draw(WDock *dock, bool complete UNUSED)
 
     XClearWindow(ioncore_g.dpy, ((WWindow *)dock)->win);
 
-    /* Draw border(s) {{{ */
+    /*{{{ Draw border(s) */
     if(dock->brush){
         int outline_style;
 
@@ -820,7 +820,7 @@ static void dock_draw(WDock *dock, bool complete UNUSED)
         switch(outline_style){
         case DOCK_OUTLINE_STYLE_NONE:
             break;
-        case DOCK_OUTLINE_STYLE_ALL: /* {{{ */
+        case DOCK_OUTLINE_STYLE_ALL: /*{{{ */
             {
                 WRectangle geom=REGION_GEOM(dock);
                 geom.x=geom.y=0;
@@ -828,8 +828,8 @@ static void dock_draw(WDock *dock, bool complete UNUSED)
                                     "dock");
             }
             break;
-            /* }}} */
-        case DOCK_OUTLINE_STYLE_EACH: /* {{{ */
+            /*}}}*/
+        case DOCK_OUTLINE_STYLE_EACH: /*{{{ */
             {
                 WDockApp *dockapp;
                 for(dockapp=dock->dockapps; dockapp!=NULL;
@@ -839,15 +839,15 @@ static void dock_draw(WDock *dock, bool complete UNUSED)
                 }
             }
             break;
-            /* }}} */
+            /*}}}*/
         }
     }
-    /* }}} */
+    /*}}}*/
 
 }
-/* }}} */
+/*}}}*/
 
-/* dock_resize {{{ */
+/*{{{ dock_resize */
 /*EXTL_DOC
  * Resizes and refreshes \var{dock}.
  */
@@ -859,9 +859,9 @@ void dock_resize(WDock *dock)
     dock_draw(dock, TRUE);
 
 }
-/* }}} */
+/*}}}*/
 
-/* dock_brush_release {{{ */
+/*{{{ dock_brush_release */
 static void dock_brush_release(WDock *dock)
 {
 
@@ -871,9 +871,9 @@ static void dock_brush_release(WDock *dock)
     }
 
 }
-/* }}} */
+/*}}}*/
 
-/* dock_brush_get {{{ */
+/*{{{ dock_brush_get */
 static void dock_brush_get(WDock *dock)
 {
 
@@ -881,9 +881,9 @@ static void dock_brush_get(WDock *dock)
     dock->brush=gr_get_brush(region_rootwin_of((WRegion*)dock), 
                              ((WWindow *)dock)->win, "dock");
 }
-/* }}} */
+/*}}}*/
 
-/* dock_updategr {{{ */
+/*{{{ dock_updategr */
 static void dock_updategr(WDock *dock)
 {
 
@@ -891,9 +891,9 @@ static void dock_updategr(WDock *dock)
     dock_resize(dock);
 
 }
-/* }}} */
+/*}}}*/
 
-/* dock_destroy {{{ */
+/*{{{ dock_destroy */
 /*EXTL_DOC
  * Destroys \var{dock} if it is empty.
  */
@@ -910,9 +910,9 @@ void dock_destroy(WDock *dock)
     destroy_obj((Obj *)dock);
 
 }
-/* }}} */
+/*}}}*/
 
-/* dock_set {{{ */
+/*{{{ dock_set */
 /*EXTL_DOC
  * Configure \var{dock}. \var{conftab} is a table of key/value pairs:
  *
@@ -939,14 +939,14 @@ void dock_set(WDock *dock, ExtlTab conftab)
     bool b;
     bool resize=FALSE;
 
-    /* Configure name {{{ */
+    /*{{{ Configure name */
     if(extl_table_gets_s(conftab, dock_param_name.key, &s)){
         if(!region_set_name((WRegion *)dock, s)){
             warn_obj(modname, "Can't set name to \"%s\"", s);
         }
         free(s);
     }
-    /* }}} */
+    /*}}}*/
 
     if(dock_param_extl_table_set(&dock_param_hpos, conftab, &dock->hpos)){
         resize=TRUE;
@@ -958,13 +958,13 @@ void dock_set(WDock *dock, ExtlTab conftab)
         resize=TRUE;
     }
 
-    /* Configure is_auto {{{ */
+    /*{{{ Configure is_auto */
     if(extl_table_gets_b(conftab, dock_param_is_auto.key, &b)){
         dock->is_auto=b;
     }
-    /* }}} */
+    /*}}}*/
 
-    /* Configure is_mapped {{{ */
+    /*{{{ Configure is_mapped */
     if(extl_table_gets_b(conftab, dock_param_is_mapped.key, &b)){
         if(b){
             dock_map(dock);
@@ -972,16 +972,16 @@ void dock_set(WDock *dock, ExtlTab conftab)
             dock_unmap(dock);
         }
     }
-    /* }}} */
+    /*}}}*/
 
     if(resize){
         dock_resize(dock);
     }
 
 }
-/* }}} */
+/*}}}*/
 
-/* dock_get {{{ */
+/*{{{ dock_get */
 /*EXTL_DOC
  * Get \var{dock}'s configuration table. See \fnref{WDock.set} for a
  * description of the table.
@@ -1003,32 +1003,32 @@ ExtlTab dock_get(WDock *dock)
     return conftab;
 
 }
-/* }}} */
+/*}}}*/
 
-/* dock_init {{{ */
+/*{{{ dock_init */
 static bool dock_init(WDock *dock, int screen, ExtlTab conftab)
 {
     WFitParams fp={{-1, -1, 1, 1}, REGION_FIT_EXACT};
     WScreen *scr;
     WWindow *parent;
 
-    /* Find screen {{{ */
+    /*{{{ Find screen */
     scr=ioncore_find_screen_id(screen);
     if(!scr){
         warn_obj(modname, "Unknown screen %d", screen);
         return FALSE;
     }
     parent=(WWindow *)scr;
-    /* }}} */
+    /*}}}*/
 
-    /* Initialise member variables {{{ */
+    /*{{{ Initialise member variables */
     dock->vpos=dock_param_vpos.dflt;
     dock->hpos=dock_param_hpos.dflt;
     dock->grow=dock_param_grow.dflt;
     dock->is_auto=dock_param_is_auto.dflt;
     dock->brush=NULL;
     dock->dockapps=NULL;
-    /* }}} */
+    /*}}}*/
 
     if(!window_init((WWindow *)dock, parent, &fp)){
         return FALSE;
@@ -1060,9 +1060,9 @@ static bool dock_init(WDock *dock, int screen, ExtlTab conftab)
     return TRUE;
 
 }
-/* }}} */
+/*}}}*/
 
-/* dock_deinit {{{ */
+/*{{{ dock_deinit */
 static void dock_deinit(WDock *dock)
 {
 
@@ -1073,9 +1073,9 @@ static void dock_deinit(WDock *dock)
     window_deinit((WWindow *) dock);
 
 }
-/* }}} */
+/*}}}*/
 
-/* create_dock {{{ */
+/*{{{ create_dock */
 /*EXTL_DOC
  * Create a dock. \var{screen} is the screen number on which the dock should
  * appear. \var{conftab} is the initial configuration table passed to
@@ -1088,9 +1088,9 @@ WDock *create_dock(int screen, ExtlTab conftab)
     CREATEOBJ_IMPL(WDock, dock, (p, screen, conftab));
 
 }
-/* }}} */
+/*}}}*/
 
-/* dock_manage_clientwin {{{ */
+/*{{{ dock_manage_clientwin */
 static bool dock_manage_clientwin(WDock *dock, WClientWin *cwin,
                                   const WManageParams *param UNUSED,
                                   int redir)
@@ -1101,15 +1101,15 @@ static bool dock_manage_clientwin(WDock *dock, WClientWin *cwin,
     if(redir==MANAGE_REDIR_STRICT_YES)
         return FALSE;
     
-    /* Create and initialise a new WDockApp struct {{{ */
+    /*{{{ Create and initialise a new WDockApp struct */
     dockapp=ALLOC(WDockApp);
     dockapp->cwin=cwin;
     dockapp->draw_border=TRUE;
     extl_table_gets_b(cwin->proptab, CLIENTWIN_WINPROP_BORDER,
                       &dockapp->draw_border);
-    /* }}} */
+    /*}}}*/
 
-    /* Insert the dockapp at the correct relative position {{{ */
+    /*{{{ Insert the dockapp at the correct relative position */
     extl_table_gets_i(cwin->proptab, CLIENTWIN_WINPROP_POSITION, &dockapp->pos);
     before_dockapp=dock->dockapps;
     for(before_dockapp=dock->dockapps;
@@ -1121,7 +1121,7 @@ static bool dock_manage_clientwin(WDock *dock, WClientWin *cwin,
     }else{
         LINK_ITEM(dock->dockapps, dockapp, next, prev);
     }
-    /* }}} */
+    /*}}}*/
 
     region_set_manager((WRegion *)cwin, (WRegion *)dock,
                        &(dock->managed_list));
@@ -1135,9 +1135,9 @@ static bool dock_manage_clientwin(WDock *dock, WClientWin *cwin,
     return TRUE;
 
 }
-/* }}} */
+/*}}}*/
 
-/* dock_managed_remove {{{ */
+/*{{{ dock_managed_remove */
 static void dock_managed_remove(WDock *dock, WRegion *reg)
 {
 
@@ -1152,9 +1152,9 @@ static void dock_managed_remove(WDock *dock, WRegion *reg)
     dock_resize(dock);
 
 }
-/* }}} */
+/*}}}*/
 
-static DynFunTab dock_dynfuntab[]={ /* {{{ */
+static DynFunTab dock_dynfuntab[]={ /*{{{ */
     {window_draw, dock_draw},
     {region_updategr, dock_updategr},
     {region_managed_rqgeom, dock_managed_rqgeom},
@@ -1162,28 +1162,28 @@ static DynFunTab dock_dynfuntab[]={ /* {{{ */
     {region_managed_remove, dock_managed_remove},
     END_DYNFUNTAB
 };
-/* }}} */
+/*}}}*/
 
 IMPLCLASS(WDock, WWindow, dock_deinit, dock_dynfuntab);
 
-/* }}} */
+/*}}}*/
 
 
-/* Module {{{ */
+/*{{{ Module */
 
-/* dock_clientwin_is_dockapp {{{ */
+/*{{{ dock_clientwin_is_dockapp */
 static bool dock_clientwin_is_dockapp(WClientWin *cwin,
                                       const WManageParams *param)
 {
     bool is_dockapp=FALSE;
 
-    /* First, inspect the WManageParams.dockapp parameter {{{ */
+    /*{{{ First, inspect the WManageParams.dockapp parameter */
     if(param->dockapp){
         is_dockapp=TRUE;
     }
-    /* }}} */
+    /*}}}*/
 
-    /* Second, inspect the _NET_WM_WINDOW_TYPE property {{{ */
+    /*{{{ Second, inspect the _NET_WM_WINDOW_TYPE property */
     if(!is_dockapp){
         static Atom atom__net_wm_window_type=None;
         static Atom atom__net_wm_window_type_dock=None;
@@ -1214,9 +1214,9 @@ static bool dock_clientwin_is_dockapp(WClientWin *cwin,
             XFree(prop);
         }
     }
-    /* }}} */
+    /*}}}*/
 
-    /* Third, inspect the WM_CLASS property {{{ */
+    /*{{{ Third, inspect the WM_CLASS property */
     if(!is_dockapp){
         char **p;
         int n;
@@ -1229,9 +1229,9 @@ static bool dock_clientwin_is_dockapp(WClientWin *cwin,
             XFreeStringList(p);
         }
     }
-    /* }}} */
+    /*}}}*/
 
-    /* Fourth, inspect the _KDE_NET_WM_SYSTEM_TRAY_WINDOW_FOR property {{{ */
+    /*{{{ Fourth, inspect the _KDE_NET_WM_SYSTEM_TRAY_WINDOW_FOR property */
     if(!is_dockapp){
         static Atom atom__kde_net_wm_system_tray_window_for=None;
         Atom actual_type=None;
@@ -1256,14 +1256,14 @@ static bool dock_clientwin_is_dockapp(WClientWin *cwin,
             XFree(prop);
         }
     }
-    /* }}} */
+    /*}}}*/
 
     return is_dockapp;
 
 }
-/* }}} */
+/*}}}*/
 
-/* dock_find_suitable_dock {{{ */
+/*{{{ dock_find_suitable_dock */
 static WDock *dock_find_suitable_dock(WClientWin *cwin,
                                       const WManageParams *param)
 {
@@ -1281,9 +1281,9 @@ static WDock *dock_find_suitable_dock(WClientWin *cwin,
     return dock;
 
 }
-/* }}} */
+/*}}}*/
 
-/* clientwin_do_manage_hook {{{ */
+/*{{{ clientwin_do_manage_hook */
 static bool clientwin_do_manage_hook(WClientWin *cwin, const WManageParams *param)
 {
     WDock *dock;
@@ -1301,9 +1301,9 @@ static bool clientwin_do_manage_hook(WClientWin *cwin, const WManageParams *para
                                    MANAGE_REDIR_PREFER_NO);
 }
 
-/* }}} */
+/*}}}*/
 
-/* mod_dock_init {{{ */
+/*{{{ mod_dock_init */
 bool mod_dock_init()
 {
     extern bool mod_dock_register_exports();
@@ -1327,9 +1327,9 @@ bool mod_dock_init()
     return TRUE;
 
 }
-/* }}} */
+/*}}}*/
 
-/* mod_dock_deinit {{{ */
+/*{{{ mod_dock_deinit */
 void mod_dock_deinit()
 {
     WDock *dock;
@@ -1338,18 +1338,18 @@ void mod_dock_deinit()
     hook_remove(clientwin_do_manage_alt, 
                 (WHookDummy*)clientwin_do_manage_hook);
 
-    /* Destroy all docks {{{ */
+    /*{{{ Destroy all docks */
     dock=docks;
     while(dock!=NULL){
         WDock *next=dock->dock_next;
         destroy_obj((Obj *)dock);
         dock=next;
     }
-    /* }}} */
+    /*}}}*/
 
     mod_dock_unregister_exports();
 
 }
-/* }}} */
+/*}}}*/
 
-/* }}} */
+/*}}}*/
