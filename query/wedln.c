@@ -421,7 +421,7 @@ static void wedln_show_completions(WEdln *wedln, char **strs, int nstrs)
 	
 	setup_listing(&(wedln->complist), strs, nstrs, FALSE);
 	input_refit((WInput*)wedln);
-	/*?*/ wedln_draw_completions(wedln, TRUE);
+	/*wedln_draw_completions(wedln, TRUE);*/
 }
 
 
