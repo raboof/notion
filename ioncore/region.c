@@ -764,15 +764,17 @@ bool set_region_name(WRegion *reg, const char *p)
 	
 	if(p==NULL || *p=='\0'){
 		region_unuse_name(reg);
-		return TRUE;
 	}else{
-		return region_use_name(reg, p);
+		if(!region_use_name(reg, p))
+			return FALSE;
 	}
 	
 	par=FIND_PARENT1(reg, WRegion);
 	
 	if(par!=NULL)
 		region_notify_subname(par, reg);
+	
+	return TRUE;
 }
 
 
