@@ -34,10 +34,10 @@ defbindings("WScreen", {
     
     submap(MOD1.."K", {
         bdoc("Go to previous active object."),
-        kpress("AnyModifier+K", "ioncore.goto_previous()"),
+        kpress("K", "ioncore.goto_previous()"),
         
         bdoc("Clear all tags."),
-        kpress("AnyModifier+T", "ioncore.clear_tags()"),
+        kpress("T", "ioncore.clear_tags()"),
     }),
     
     bdoc("Go to n:th screen on multihead setup."),
@@ -93,13 +93,11 @@ defbindings("WMPlex", {
 
     submap(MOD1.."K", {
        bdoc("Kill client owning current client window."),
-       kpress("AnyModifier+C", 
-              "WClientWin.kill(_sub)", "_sub:WClientWin"),
+       kpress("C", "WClientWin.kill(_sub)", "_sub:WClientWin"),
                                 
        bdoc("Send next key press to current client window. "..
             "Some programs may not allow this by default."),
-       kpress("AnyModifier+Q", 
-              "WClientWin.quote_next(_sub)", "_sub:WClientWin"),
+       kpress("Q", "WClientWin.quote_next(_sub)", "_sub:WClientWin"),
     }),
     
     bdoc("Query for manual page to be displayed."),
@@ -140,33 +138,31 @@ defbindings("WFrame", {
 
     submap(MOD1.."K", {
         bdoc("Switch to n:th object within the frame."),
-        kpress("AnyModifier+1", "WFrame.switch_nth(_, 0)"),
-        kpress("AnyModifier+2", "WFrame.switch_nth(_, 1)"),
-        kpress("AnyModifier+3", "WFrame.switch_nth(_, 2)"),
-        kpress("AnyModifier+4", "WFrame.switch_nth(_, 3)"),
-        kpress("AnyModifier+5", "WFrame.switch_nth(_, 4)"),
-        kpress("AnyModifier+6", "WFrame.switch_nth(_, 5)"),
-        kpress("AnyModifier+7", "WFrame.switch_nth(_, 6)"),
-        kpress("AnyModifier+8", "WFrame.switch_nth(_, 7)"),
-        kpress("AnyModifier+9", "WFrame.switch_nth(_, 8)"),
-        kpress("AnyModifier+0", "WFrame.switch_nth(_, 9)"),
+        kpress("1", "WFrame.switch_nth(_, 0)"),
+        kpress("2", "WFrame.switch_nth(_, 1)"),
+        kpress("3", "WFrame.switch_nth(_, 2)"),
+        kpress("4", "WFrame.switch_nth(_, 3)"),
+        kpress("5", "WFrame.switch_nth(_, 4)"),
+        kpress("6", "WFrame.switch_nth(_, 5)"),
+        kpress("7", "WFrame.switch_nth(_, 6)"),
+        kpress("8", "WFrame.switch_nth(_, 7)"),
+        kpress("9", "WFrame.switch_nth(_, 8)"),
+        kpress("0", "WFrame.switch_nth(_, 9)"),
         
         bdoc("Switch to next/previous object within the frame."),
-        kpress("AnyModifier+N", "WFrame.switch_next(_)"),
-        kpress("AnyModifier+P", "WFrame.switch_prev(_)"),
+        kpress("N", "WFrame.switch_next(_)"),
+        kpress("P", "WFrame.switch_prev(_)"),
         
         bdoc("Move current object within the frame left/right."),
-        kpress("AnyModifier+Left",
-               "WFrame.dec_index(_, _sub)", "_sub:non-nil"),
-        kpress("AnyModifier+Right",
-               "WFrame.inc_index(_, _sub)", "_sub:non-nil"),
+        kpress("Left", "WFrame.dec_index(_, _sub)", "_sub:non-nil"),
+        kpress("Right", "WFrame.inc_index(_, _sub)", "_sub:non-nil"),
                
         bdoc("Maximize the frame horizontally/vertically."),
-        kpress("AnyModifier+H", "WFrame.maximize_horiz(_)"),
-        kpress("AnyModifier+V", "WFrame.maximize_vert(_)"),
+        kpress("H", "WFrame.maximize_horiz(_)"),
+        kpress("V", "WFrame.maximize_vert(_)"),
 
         bdoc("Attach tagged objects to this frame."),
-        kpress("AnyModifier+A", "WFrame.attach_tagged(_)"),
+        kpress("A", "WFrame.attach_tagged(_)"),
     }),
 
     bdoc("Query for a client window to attach to active frame."),

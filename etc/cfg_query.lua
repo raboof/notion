@@ -51,19 +51,19 @@ defbindings("WEdln", {
     bdoc("Paste from the clipboard."),
     mclick("Button2", "WEdln.paste(_)"),
     submap("Control+K", {
-        kpress("AnyModifier+C", "WEdln.paste(_)"),
+        kpress("C", "WEdln.paste(_)"),
         
         bdoc("Set mark/begin selection."),
-        kpress("AnyModifier+B", "WEdln.set_mark(_)"),
+        kpress("B", "WEdln.set_mark(_)"),
         
         bdoc("Cut selection."),
-        kpress("AnyModifier+Y", "WEdln.cut(_)"),
+        kpress("Y", "WEdln.cut(_)"),
         
         bdoc("Copy selection."),
-        kpress("AnyModifier+K", "WEdln.copy(_)"),
+        kpress("K", "WEdln.copy(_)"),
         
         bdoc("Clear mark/cancel selection."),
-        kpress("AnyModifier+G", "WEdln.clear_mark(_)"),
+        kpress("G", "WEdln.clear_mark(_)"),
     }),
 
     bdoc("Try to complete the entered text."),

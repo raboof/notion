@@ -14,13 +14,13 @@ defbindings("WIonWS", {
     kpress(MOD1.."N", "WIonWS.goto_dir(_, 'below')"),
     kpress(MOD1.."Tab", "WIonWS.goto_dir(_, 'right')"),
     submap(MOD1.."K", {
-        kpress("AnyModifier+Tab", "WIonWS.goto_dir(_, 'left')"),
+        kpress("Tab", "WIonWS.goto_dir(_, 'left')"),
         
         bdoc("Split current frame horizontally."),
-        kpress("AnyModifier+S", "WIonWS.split_at(_, _sub, 'right', true)"),
+        kpress("S", "WIonWS.split_at(_, _sub, 'right', true)"),
         
         bdoc("Destroy current frame."),
-        kpress("AnyModifier+X", "WIonWS.unsplit_at(_, _sub)"),
+        kpress("X", "WIonWS.unsplit_at(_, _sub)"),
     }),
 })
 

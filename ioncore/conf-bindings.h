@@ -17,7 +17,7 @@
 #include "binding.h"
 #include "extl.h"
 
-extern bool bindmap_defbindings(WBindmap *bindmap, ExtlTab tab);
+extern bool bindmap_defbindings(WBindmap *bindmap, ExtlTab tab, bool submap);
 extern ExtlTab bindmap_getbindings(WBindmap *bindmap);
 
 #endif /* ION_IONCORE_CONF_BINDINGS_H */

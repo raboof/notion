@@ -10,7 +10,7 @@ defbindings("WFloatWS", {
     kpress(MOD1.."Tab", "WFloatWS.raise(_, WFloatWS.circulate(_))"),
     submap(MOD1.."K", { 
         bdoc("Backwards-circulate focus and raise the newly focused frame."),
-        kpress("AnyModifier+Tab", "WFloatWS.raise(_, WFloatWS.backcirculate(_))"),
+        kpress("Tab", "WFloatWS.raise(_, WFloatWS.backcirculate(_))"),
     }),
     bdoc("Raise/lower active frame."),
     kpress(MOD1.."P", "WFloatWS.lower(_, _sub)", "_sub:non-nil"),

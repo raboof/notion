@@ -149,7 +149,7 @@ bool ioncore_do_defbindings(const char *name, ExtlTab tab)
         warn("Unknown bindmap %s.", name);
         return FALSE;
     }
-    return bindmap_defbindings(bm, tab);
+    return bindmap_defbindings(bm, tab, FALSE);
 }
 
 

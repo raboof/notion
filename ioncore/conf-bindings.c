@@ -40,6 +40,7 @@ static StringIntMap state_map[]={
     {"Mod4",        Mod4Mask},
     {"Mod5",        Mod5Mask},
     {"AnyModifier", AnyModifier},
+    {"NoModifier",  0},
     {NULL,          0},
 };
 
@@ -57,14 +58,14 @@ static StringIntMap button_map[]={
 
 
 static bool parse_keybut(const char *str, uint *mod_ret, uint *ksb_ret,
-                         bool button)
+                         bool button, bool init_any)
 {
     char *str2, *p, *p2;
     int keysym=NoSymbol, i;
     bool ret=FALSE;
     
     *ksb_ret=NoSymbol;
-    *mod_ret=0;
+    *mod_ret=(init_any && !button ? AnyModifier : 0);
     
     str2=scopy(str);
     
@@ -117,12 +118,21 @@ static bool parse_keybut(const char *str, uint *mod_ret, uint *ksb_ret,
                 }
                 *ksb_ret=button_map[i].value;
             }else{
-                if(*mod_ret==AnyModifier || 
-                   (*mod_ret!=0 && state_map[i].value==AnyModifier)){
-                    warn_obj(str, TR("Insane modifier combination."));
-                    break;
+                if(*mod_ret==AnyModifier){
+                    if(!init_any){
+                        warn_obj(str, TR("Insane modifier combination."));
+                        break;
+                    }else{
+                        *mod_ret=state_map[i].value;
+                    }
+                }else{
+                    if(*mod_ret!=0 && state_map[i].value==AnyModifier){
+                        warn_obj(str, TR("Insane modifier combination."));
+                        break;
+                    }else{
+                        *mod_ret|=state_map[i].value;
+                    }
                 }
-                *mod_ret|=state_map[i].value;
             }
         }
 
@@ -198,7 +208,7 @@ static bool do_submap(WBindmap *bindmap, const char *str,
     bnd=bindmap_lookup_binding(bindmap, action, mod, kcb);
     
     if(bnd!=NULL && bnd->submap!=NULL && bnd->state==mod)
-        return bindmap_defbindings(bnd->submap, subtab);
+        return bindmap_defbindings(bnd->submap, subtab, TRUE);
 
     binding.waitrel=FALSE;
     binding.act=BINDING_KEYPRESS;
@@ -213,7 +223,7 @@ static bool do_submap(WBindmap *bindmap, const char *str,
         return FALSE;
 
     if(bindmap_add_binding(bindmap, &binding))
-        return bindmap_defbindings(binding.submap, subtab);
+        return bindmap_defbindings(binding.submap, subtab, TRUE);
 
     binding_deinit(&binding);
     
@@ -234,7 +244,7 @@ static StringIntMap action_map[]={
 
 
 static bool do_entry(WBindmap *bindmap, ExtlTab tab, 
-                     const StringIntMap *areamap)
+                     const StringIntMap *areamap, bool init_any)
 {
     bool ret=FALSE;
     char *action_str=NULL, *ksb_str=NULL, *area_str=NULL;
@@ -265,8 +275,8 @@ static bool do_entry(WBindmap *bindmap, ExtlTab tab,
     if(!extl_table_gets_s(tab, "kcb", &ksb_str))
         goto fail;
 
-    if(!parse_keybut(ksb_str, &mod, &ksb, (action!=BINDING_KEYPRESS &&
-                                           action!=-1))){
+    if(!parse_keybut(ksb_str, &mod, &ksb,
+                     (action!=BINDING_KEYPRESS && action!=-1), init_any)){
         goto fail;
     }
     
@@ -306,7 +316,7 @@ fail:
 }
 
 
-bool bindmap_defbindings(WBindmap *bindmap, ExtlTab tab)
+bool bindmap_defbindings(WBindmap *bindmap, ExtlTab tab, bool submap)
 {
     int i, n, nok=0;
     ExtlTab ent;
@@ -315,7 +325,7 @@ bool bindmap_defbindings(WBindmap *bindmap, ExtlTab tab)
     
     for(i=1; i<=n; i++){
         if(extl_table_geti_t(tab, i, &ent)){
-            nok+=do_entry(bindmap, ent, bindmap->areamap);
+            nok+=do_entry(bindmap, ent, bindmap->areamap, submap);
             extl_unref_table(ent);
             continue;
         }
