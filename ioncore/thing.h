@@ -55,6 +55,9 @@ extern WThing *find_parent(WThing *p, const WObjDescr *descr);
 extern WThing *find_parent1(WThing *p, const WObjDescr *descr);
 extern WThing *nth_thing(WThing *parent, int n, const WObjDescr *descr);
 
+extern bool thing_is_ancestor(WThing *thing, WThing *thing2);
+extern bool thing_is_child(WThing *thing, WThing *thing2);
+
 typedef void WWatchHandler(WWatch *watch, WThing *t);
 
 extern void setup_watch(WWatch *watch, WThing *thing,

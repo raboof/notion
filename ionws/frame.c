@@ -17,6 +17,7 @@
 #include <wmcore/attach.h>
 #include <wmcore/resize.h>
 #include <wmcore/close.h>
+#include <wmcore/tags.h>
 #include "framep.h"
 #include "frame-pointer.h"
 #include "bindmaps.h"
@@ -32,7 +33,7 @@ static void focus_frame(WFrame *frame, bool warp);
 static bool frame_switch_subregion(WFrame *frame, WRegion *sub);
 static void frame_activated(WFrame *frame);
 static void frame_inactivated(WFrame *frame);
-static void frame_notify_subname(WFrame *frame, WRegion *sub);
+static void frame_notify_sub_change(WFrame *frame, WRegion *sub);
 static void frame_request_sub_geom(WFrame *frame, WRegion *sub,
 								   WRectangle geom, WRectangle *geomret,
 								   bool tryonly);
@@ -60,7 +61,7 @@ static DynFunTab frame_dynfuntab[]={
 	{region_activated, frame_activated},
 	{region_inactivated, frame_inactivated},
 	
-	{region_notify_subname, frame_notify_subname},
+	{region_notify_sub_change, frame_notify_sub_change},
 	{region_request_sub_geom, frame_request_sub_geom},
 
 	{region_do_attach_params, frame_sub_params},
@@ -398,9 +399,7 @@ void draw_frame_bar(const WFrame *frame, bool complete)
 		else
 			draw_textbox(dinfo, "?", CF_TAB_TEXT_ALIGN, TRUE);
 		
-#define IS_TAGGED(X) 0
-		/* TODO: IS_TAGGED */
-		if(IS_TAGGED(sub)){
+		if(REGION_IS_TAGGED(sub)){
 			XSetForeground(wglobal.dpy, grdata->copy_gc, COLORS->fg);
 			copy_masked(grdata, grdata->stick_pixmap, WIN, 0, 0,
 						grdata->stick_pixmap_w, grdata->stick_pixmap_h,
@@ -550,7 +549,7 @@ static void frame_activated(WFrame *frame)
 }
 
 
-static void frame_notify_subname(WFrame *frame, WRegion *sub)
+static void frame_notify_sub_change(WFrame *frame, WRegion *sub)
 {
 	frame_recalc_bar(frame);
 	draw_frame_bar(frame, FALSE);
@@ -693,12 +692,15 @@ static void frame_do_attach(WFrame *frame, WRegion *sub, int flags)
 
 void frame_attach_sub(WFrame *frame, WRegion *sub, int flags)
 {
+	region_attach_sub((WRegion*)frame, sub, flags);
+	/*
 	WWinGeomParams params;
 
 	frame_sub_params(frame, &params);
 	detach_reparent_region(sub, params);
 	
 	frame_do_attach(frame, sub, flags);
+	 */
 }
 
 
@@ -815,7 +817,15 @@ WRegion *frame_attach_input_new(WFrame *frame, WRegionCreateFn *fn,
 
 void frame_attach_tagged(WFrame *frame)
 {
-	warn("Tagging unimplemented.");
+	WRegion *reg;
+	
+	while((reg=tag_take_first())!=NULL){
+		if(thing_is_ancestor((WThing*)frame, (WThing*)reg)){
+			warn("Cannot attach tagged region: ancestor");
+			continue;
+		}
+		frame_attach_sub(frame, reg, 0);
+	}
 }
 
 

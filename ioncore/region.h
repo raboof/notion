@@ -42,6 +42,8 @@ DECLOBJ(WRegion){
 	} ni;
 	
 	void *funclist;
+	
+	WRegion *tag_next, *tag_prev;
 };
 
 
@@ -55,6 +57,7 @@ DECLSTRUCT(WWinGeomParams){
 #define REGION_MAPPED		0x0001
 #define REGION_ACTIVE		0x0002
 #define REGION_HAS_GRABS	0x0004
+#define REGION_TAGGED		0x0008
 
 #define MARK_REGION_MAPPED(R)	(((WRegion*)(R))->flags|=REGION_MAPPED)
 #define MARK_REGION_UNMAPPED(R)	(((WRegion*)(R))->flags&=~REGION_MAPPED)
@@ -62,6 +65,7 @@ DECLSTRUCT(WWinGeomParams){
 /* Use region_is_fully_mapped instead */
 #define REGION_IS_MAPPED(R)		(((WRegion*)(R))->flags&REGION_MAPPED)
 #define REGION_IS_ACTIVE(R)		(((WRegion*)(R))->flags&REGION_ACTIVE)
+#define REGION_IS_TAGGED(R)		(((WRegion*)(R))->flags&REGION_TAGGED)
 
 #define REGION_GEOM(R)  (((WRegion*)(R))->geom)
 #define REGION_SCREEN(R)  ((WScreen*)((WRegion*)(R))->screen)
@@ -85,7 +89,7 @@ DYNFUN Window region_lowest_win(WRegion *reg);
 DYNFUN void region_activated(WRegion *reg);
 DYNFUN void region_inactivated(WRegion *reg);
 DYNFUN void region_sub_activated(WRegion *reg, WRegion *sub);
-DYNFUN void region_notify_subname(WRegion *reg, WRegion *sub);
+DYNFUN void region_notify_sub_change(WRegion *reg, WRegion *sub);
 DYNFUN void region_request_sub_geom(WRegion *reg, WRegion *sub,
 									WRectangle geom, WRectangle *geomret,
 									bool tryonly);
@@ -128,6 +132,8 @@ extern void region_got_focus(WRegion *reg, WRegion *sub);
 extern void region_lost_focus(WRegion *reg);
 
 extern bool region_is_fully_mapped(WRegion *reg);
+
+extern void region_notify_change(WRegion *reg);
 
 extern bool set_region_name(WRegion *reg, const char *name);
 extern const char *region_name(WRegion *reg);

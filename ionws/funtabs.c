@@ -15,6 +15,7 @@
 #include <wmcore/commandsq.h>
 #include <wmcore/region.h>
 #include <wmcore/objp.h>
+#include <wmcore/tags.h>
 #include "frame.h"
 #include "frame-pointer.h"
 #include "workspace.h"
@@ -73,6 +74,19 @@ void callhnd_wscurrent_s(WThing *thing, WFunction *func,
 /*}}}*/
 
 
+/*{{{ Misc. wrappers */
+
+
+static void frame_toggle_sub_tag(WFrame *frame)
+{
+	if(frame->current_sub!=NULL)
+		toggle_region_tag(frame->current_sub);
+}
+
+
+/*}}}*/
+
+
 /*{{{ Function tables */
 
 
@@ -109,6 +123,7 @@ static WFunction ion_frame_funtab[]={
 	FN_VOID(generic, WFrame, 	"switch_next",		frame_switch_next),
 	FN_VOID(generic, WFrame, 	"switch_prev",		frame_switch_prev),
 	FN_VOID(generic, WFrame,	"attach_tagged",	frame_attach_tagged),
+	FN_VOID(generic, WFrame,	"toggle_sub_tag",	frame_toggle_sub_tag),
 	FN_VOID(generic, WFrame,	"destroy_frame",	region_request_close),
 /*	FN_VOID(generic, WFrame,	"closedestroy",		close_propagate),*/
 	FN_VOID(generic, WFrame,	"close_main",		close_sub),

@@ -14,6 +14,7 @@
 #include "functionp.h"
 #include "funtabs.h"
 #include "viewport.h"
+#include "tags.h"
 
 
 WBindmap wmcore_screen_bindmap=BINDMAP_INIT;
@@ -32,6 +33,7 @@ static WFunction wmcore_screen_funtab[]={
 	FN_GLOBAL(l,				"goto_nth_viewport",	goto_viewport_id),
 	FN_GLOBAL_VOID(				"goto_next_viewport",	goto_next_viewport),
 	FN_GLOBAL_VOID(				"goto_prev_viewport",	goto_prev_viewport),
+	FN_GLOBAL_VOID(				"clear_tags",			clear_tags),
 
 	END_FUNTAB
 };

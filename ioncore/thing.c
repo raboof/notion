@@ -251,6 +251,24 @@ WThing *nth_thing(WThing *parent, int n, const WObjDescr *descr)
 }
 
 
+bool thing_is_ancestor(WThing *thing, WThing *thing2)
+{
+	while(thing!=NULL){
+		if(thing==thing2)
+			return TRUE;
+		thing=thing->t_parent;
+	}
+	
+	return FALSE;
+}
+
+
+bool thing_is_child(WThing *thing, WThing *thing2)
+{
+	return thing2->t_parent==thing;
+}
+
+
 /*}}}*/
 
 

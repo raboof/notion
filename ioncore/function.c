@@ -121,12 +121,9 @@ static int do_complete_func_thing(const char *nam, char ***cp_ret, char **beg,
 {
 	WObjDescr *descr;
 	
-	fprintf(stderr, "%s\n", WOBJ_TYPESTR(thing));
 	descr=thing->obj.obj_type;
 	
 	while(descr!=NULL){
-		fprintf(stderr, "->%s\n", descr->name);
-
 		n=complete_func_ex(nam, cp_ret, beg, n,
 						   (WFunclist*)descr->funclist);
 		descr=descr->ancestor;

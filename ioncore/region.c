@@ -18,6 +18,7 @@
 #include "attach.h"
 #include "close.h"
 #include "regbind.h"
+#include "tags.h"
 
 
 #if 0
@@ -95,6 +96,7 @@ void deinit_region(WRegion *reg)
 {
 	detach_region(reg);
 	region_unuse_name(reg);
+	untag_region(reg);
 	region_remove_bindings(reg);
 }
 
@@ -168,9 +170,9 @@ Window region_lowest_win(WRegion *reg)
 }
 
 
-void region_notify_subname(WRegion *reg, WRegion *sub)
+void region_notify_sub_change(WRegion *reg, WRegion *sub)
 {
-	CALL_DYN(region_notify_subname, reg, (reg, sub));
+	CALL_DYN(region_notify_sub_change, reg, (reg, sub));
 }
 
 
@@ -196,6 +198,7 @@ void focus_region(WRegion *reg, bool warp)
 {
 	CALL_DYN(focus_region, reg, (reg, warp));
 }
+
 
 void region_request_sub_geom(WRegion *reg, WRegion *sub,
 							 WRectangle geom, WRectangle *geomret,
@@ -779,8 +782,6 @@ static void region_unuse_name(WRegion *reg)
 
 bool set_region_name(WRegion *reg, const char *p)
 {
-	WRegion *par;
-	
 	if(p==NULL || *p=='\0'){
 		region_unuse_name(reg);
 	}else{
@@ -788,12 +789,18 @@ bool set_region_name(WRegion *reg, const char *p)
 			return FALSE;
 	}
 	
-	par=FIND_PARENT1(reg, WRegion);
-	
-	if(par!=NULL)
-		region_notify_subname(par, reg);
+	region_notify_change(reg);
 	
 	return TRUE;
+}
+
+
+void region_notify_change(WRegion *reg)
+{
+	WRegion *par=FIND_PARENT1(reg, WRegion);
+	
+	if(par!=NULL)
+		region_notify_sub_change(par, reg);
 }
 
 

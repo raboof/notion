@@ -63,10 +63,15 @@ bool region_attach_sub(WRegion *reg, WRegion *sub, int flags)
 {
 	WWinGeomParams params;
 	
+	if(thing_is_child((WThing*)reg, (WThing*)sub))
+		return TRUE;
+	
 	/*region_do_attach_params(reg, &params);*/
-	CALL_DYN(region_do_attach_params, reg, (reg, &params));
-	if(funnotfound)
-		return FALSE;
+	{
+		CALL_DYN(region_do_attach_params, reg, (reg, &params));
+		if(funnotfound)
+			return FALSE;
+	}
 	
 	detach_reparent_region(sub, params);
 	region_do_attach(reg, sub, flags);
