@@ -338,6 +338,7 @@ static bool init_x(const char *display, int stflags)
 	wglobal.atom_wm_window_role=XInternAtom(dpy, "WM_WINDOW_ROLE", False);
 	wglobal.atom_checkcode=XInternAtom(dpy, "_ION_CWIN_RESTART_CHECKCODE", False);
 	wglobal.atom_selection=XInternAtom(dpy, "_ION_SELECTION_STRING", False);
+	wglobal.atom_kludges=XInternAtom(dpy, "_ION_KLUDGES", False);
 	wglobal.atom_mwm_hints=XInternAtom(dpy, "_MOTIF_WM_HINTS", False);
 
 	netwm_init();

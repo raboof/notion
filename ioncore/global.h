@@ -61,6 +61,7 @@ DECLSTRUCT(WGlobal){
 	Atom atom_mwm_hints;
 	Atom atom_net_wm_name;
 	Atom atom_net_wm_state;
+	Atom atom_kludges;
 
 	WRootWin *rootwins;
 	WScreen *screens;

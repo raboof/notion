@@ -384,8 +384,7 @@ WClientWin *clientwin_get_transient_for(WClientWin *cwin)
 }
 
 
-static WClientWin *postmanage_check(WClientWin *cwin,
-									XWindowAttributes *attr)
+static bool postmanage_check(WClientWin *cwin, XWindowAttributes *attr)
 {
 	/* Check that the window exists. The previous check and selectinput
 	 * do not seem to catch all cases of window destroyal.
@@ -393,11 +392,11 @@ static WClientWin *postmanage_check(WClientWin *cwin,
 	XSync(wglobal.dpy, False);
 	
 	if(XGetWindowAttributes(wglobal.dpy, cwin->win, attr))
-		return cwin;
+		return TRUE;
 	
 	warn("Window %#x disappeared", cwin->win);
 	
-	return NULL;
+	return FALSE;
 }
 
 
@@ -519,6 +518,7 @@ again:
 
 failure:
 	clientwin_destroyed(cwin);
+	return NULL;
 
 fail2:
 	XSelectInput(wglobal.dpy, win, 0);
@@ -1142,12 +1142,13 @@ static WRegion *clientwin_managed_focus(WClientWin *cwin, WRegion *reg)
 EXTL_EXPORT_MEMBER
 ExtlTab clientwin_get_ident(WClientWin *cwin)
 {
-	char **p=NULL, *wrole=NULL;
-	int n=0, n2=0, tmp=0;
+	char **p=NULL, *wrole=NULL, *kludges=NULL;
+	int n=0, n2=0, n3=0, tmp=0;
 	ExtlTab tab;
 	
 	p=get_text_property(cwin->win, XA_WM_CLASS, &n);
 	wrole=get_string_property(cwin->win, wglobal.atom_wm_window_role, &n2);
+	kludges=get_string_property(cwin->win, wglobal.atom_kludges, &n3);
 	
 	tab=extl_create_table();
 	if(n>=2 && p[1]!=NULL)
@@ -1156,9 +1157,15 @@ ExtlTab clientwin_get_ident(WClientWin *cwin)
 		extl_table_sets_s(tab, "instance", p[0]);
 	if(wrole!=NULL)
 		extl_table_sets_s(tab, "role", wrole);
+	if(kludges!=NULL)
+		extl_table_sets_s(tab, "kludges", kludges);
 	
 	if(p!=NULL)
 		XFreeStringList(p);
+	if(wrole!=NULL)
+		free(wrole);
+	if(kludges!=NULL)
+		free(kludges);
 	
 	return tab;
 }
@@ -1406,7 +1413,12 @@ WRegion *clientwin_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
 	do_reparent_clientwin(cwin, par->win, rg.x, rg.y);
 	XResizeWindow(wglobal.dpy, win, rg.w, rg.h);
 	
-	return (WRegion*)postmanage_check(cwin, &attr);
+	if(!postmanage_check(cwin, &attr)){
+		clientwin_destroyed(cwin);
+		return NULL;
+	}
+	
+	return (WRegion*)cwin;
 }
 
 
