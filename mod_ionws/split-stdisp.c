@@ -399,25 +399,9 @@ static void rot_rs_flip_left(WSplitSplit *a, WSplitSplit *p)
 
 
 static void rot_para_right(WSplitSplit *a, WSplitSplit *p,
-                           WSplit *stdisp)
+                           WSplit *y)
 {
-    rotate_right(a, p, stdisp);
-    if(a->dir==SPLIT_VERTICAL){
-        GEOM(p).y=GEOM(a).y;
-        GEOM(p).h=GEOM(a).h;
-        GEOM(a).h=GEOM(a->br).y+GEOM(a->br).h-GEOM(a).y;
-    }else{
-        GEOM(p).x=GEOM(a).x;
-        GEOM(p).w=GEOM(a).w;
-        GEOM(a).w=GEOM(a->br).x+GEOM(a->br).w-GEOM(a).x;
-    }
-}
-
-
-static void rot_para_left(WSplitSplit *a, WSplitSplit *p,
-                          WSplit *stdisp)
-{
-    rotate_left(a, p, stdisp);
+    rotate_right(a, p, y);
     if(a->dir==SPLIT_VERTICAL){
         GEOM(p).y=GEOM(a).y;
         GEOM(p).h=GEOM(a).h;
@@ -427,6 +411,22 @@ static void rot_para_left(WSplitSplit *a, WSplitSplit *p,
         GEOM(p).x=GEOM(a).x;
         GEOM(p).w=GEOM(a).w;
         GEOM(a).x=GEOM(a->tl).x;
+        GEOM(a).w=GEOM(a->br).x+GEOM(a->br).w-GEOM(a).x;
+    }
+}
+
+
+static void rot_para_left(WSplitSplit *a, WSplitSplit *p,
+                          WSplit *y)
+{
+    rotate_left(a, p, y);
+    if(a->dir==SPLIT_VERTICAL){
+        GEOM(p).y=GEOM(a).y;
+        GEOM(p).h=GEOM(a).h;
+        GEOM(a).h=GEOM(a->br).y+GEOM(a->br).h-GEOM(a).y;
+    }else{
+        GEOM(p).x=GEOM(a).x;
+        GEOM(p).w=GEOM(a).w;
         GEOM(a).w=GEOM(a->br).x+GEOM(a->br).w-GEOM(a).x;
     }
 }
@@ -637,7 +637,6 @@ static bool do_try_unsink_stdisp_orth(WSplitSplit *a, WSplitSplit *p,
 static bool do_try_unsink_stdisp_para(WSplitSplit *a, WSplitSplit *p,
                                       WSplitST *stdisp,  bool force)
 {
-    
     if(!force){
         if(STDISP_IS_HORIZONTAL(stdisp)){
             if(recommended_w(stdisp)<=GEOM(p).w)
@@ -657,8 +656,6 @@ static bool do_try_unsink_stdisp_para(WSplitSplit *a, WSplitSplit *p,
         warn(TR("Status display badly located in split tree."));
         return FALSE;
     }
-    
-    swapgeom(&GEOM(a), &GEOM(p));
     
     return TRUE;
 }
