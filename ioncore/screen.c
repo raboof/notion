@@ -217,7 +217,7 @@ static void screen_managed_changed(WScreen *scr, int mode, bool sw,
                                     n==NULL ? "" : n);
     
         mplex_call_changed_hook((WMPlex*)scr,
-                                frame_managed_changed_hook,
+                                screen_managed_changed_hook,
                                 mode, sw, reg_);
     }
     
