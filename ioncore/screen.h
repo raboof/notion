@@ -29,6 +29,7 @@ DECLOBJ(WScreen){
 	int id;
 	Atom atom_workspace;
 	bool uses_root;
+	WRectangle managed_off;
 	WScreen *next_scr, *prev_scr;
 };
 
@@ -46,6 +47,8 @@ extern void screen_switch_prev(WScreen *scr);*/
 extern WScreen *region_screen_of(WRegion *reg);
 
 extern WRegion *screen_current(WScreen *scr);
+
+extern void screen_set_managed_offset(WScreen *scr, const WRectangle *off);
 
 /* For viewports corresponding to Xinerama rootwins <id> is initially set
  * to the Xinerama screen number. When Xinerama is not enabled, <id> is

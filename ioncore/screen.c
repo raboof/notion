@@ -45,7 +45,11 @@ static bool screen_init(WScreen *scr, WRootWin *rootwin,
 	scr->id=id;
 	scr->atom_workspace=None;
 	scr->uses_root=useroot;
-
+	scr->managed_off.x=0;
+	scr->managed_off.y=0;
+	scr->managed_off.w=0;
+	scr->managed_off.h=0;
+	
 	if(useroot){
 		win=rootwin->root;
 	}else{
@@ -191,10 +195,10 @@ bool screen_initialize_workspaces(WScreen* scr)
 
 void screen_managed_geom(WScreen *scr, WRectangle *geom)
 {
-	geom->x=0;
-	geom->y=0;
-	geom->w=REGION_GEOM(scr).w;
-	geom->h=REGION_GEOM(scr).h;
+	geom->x=scr->managed_off.x;
+	geom->y=scr->managed_off.y;
+	geom->w=REGION_GEOM(scr).w+scr->managed_off.w;
+	geom->h=REGION_GEOM(scr).h+scr->managed_off.h;
 }
 
 
@@ -398,6 +402,13 @@ static bool screen_may_destroy_managed(WScreen *scr, WRegion *reg)
 	
 	warn("Cannot destroy only workspace.");
 	return FALSE;
+}
+
+
+void screen_set_managed_offset(WScreen *scr, const WRectangle *off)
+{
+	scr->managed_off=*off;
+	mplex_fit_managed((WMPlex*)scr);
 }
 
 
