@@ -145,7 +145,7 @@ void clientwin_get_set_name(WClientWin *cwin)
 #ifdef CF_UTF8
 	list=get_text_property(cwin->win, wglobal.atom_net_wm_name, NULL);
 	if(list==NULL)
-		list=get_text_property(cwin->win, XA_WM_NAME);
+		list=get_text_property(cwin->win, XA_WM_NAME, NULL);
 	else
 		cwin->flags|=CWIN_USE_NET_WM_NAME;
 #else
