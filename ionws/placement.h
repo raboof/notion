@@ -20,7 +20,7 @@ extern bool ionws_add_clientwin(WIonWS *ws, WClientWin *cwin,
 								const XWindowAttributes *attr,
 								int init_state, WWinProp *props);
 
-extern bool ionws_add_transient(WIOnWS *ws, WClientWin *tfor,
+extern bool ionws_add_transient(WIonWS *ws, WClientWin *tfor,
 								WClientWin *cwin,
 								const XWindowAttributes *attr,
 								int init_state, WWinProp *props);
