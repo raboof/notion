@@ -124,6 +124,9 @@ static void get_winprops(WClientWin *cwin)
 	
 	if(extl_table_is_bool_set(tab, "ignore_resizeinc"))
 		cwin->flags|=CWIN_PROP_IGNORE_RSZINC;
+
+	if(extl_table_is_bool_set(tab, "ignore_cfgrq"))
+		cwin->flags|=CWIN_PROP_IGNORE_CFGRQ;
 }
 
 
@@ -1102,6 +1105,11 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 	if(ev->value_mask&CWBorderWidth)
 		cwin->orig_bw=ev->border_width;
 	
+	if(cwin->flags&CWIN_PROP_IGNORE_CFGRQ){
+		sendconfig_clientwin(cwin);
+		return;
+	}
+
 	/* check full screen request */
 	if((ev->value_mask&(CWWidth|CWHeight))==(CWWidth|CWHeight)){
 		if(clientwin_check_fullscreen_request(cwin, ev->width, ev->height))
