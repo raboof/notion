@@ -11,11 +11,12 @@
 
 
 #include <libmainloop/signal.h>
+#include <libmainloop/defer.h>
 
 #include "common.h"
 
 
-/*{{{ libmainloop (timers) */
+/*{{{ libmainloop/WTimer */
 
 EXTL_CLASS(WTimer, Obj)
 
@@ -47,6 +48,20 @@ bool timer_is_set(WTimer *timer);
  */
 EXTL_EXPORT_AS(WTimer, set)
 void timer_set_extl(WTimer *timer, uint msecs, ExtlFn fn);
+
+
+/*}}}*/
+
+
+/*{{{ libmainloop/defer */
+
+
+/*EXTL_DOC
+ * Defer action until return to program main loop.
+ */
+EXTL_SAFE /* special case - this function does modify state */
+EXTL_EXPORT_AS(ioncore, defer)
+bool mainloop_defer_extl(ExtlFn fn);
 
 
 /*}}}*/

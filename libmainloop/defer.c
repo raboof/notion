@@ -23,16 +23,18 @@
 #include <libtu/locale.h>
 #include "defer.h"
 
-INTRSTRUCT(Defer);
-    
-DECLSTRUCT(Defer){
+
+DECLSTRUCT(WDeferred){
     Watch watch;
     WDeferredAction *action;
-    Defer *next, *prev;
-    void **list;
+    ExtlFn fn;
+    WDeferred *next, *prev;
+    WDeferred **list;
 };
 
-static Defer *deferred=NULL;
+
+static WDeferred *deferred=NULL;
+
 
 #define N_DBUF 16
 
@@ -40,11 +42,11 @@ static Defer *deferred=NULL;
  * buffer that should be able to contain the small expected
  * number of simultaneous deferred actions.
  */
-static Defer dbuf[N_DBUF];
+static WDeferred dbuf[N_DBUF];
 static int dbuf_used=0;
 
 
-static Defer *alloc_defer()
+static WDeferred *alloc_defer()
 {
     int i;
     
@@ -57,41 +59,26 @@ static Defer *alloc_defer()
             return dbuf+i;
         }
     }
-    return ALLOC(Defer);
+    return ALLOC(WDeferred);
 }
 
 
-static void free_defer(Defer *d)
+static void free_defer(WDeferred *d)
 {
     if(d>=dbuf && d<dbuf+N_DBUF){
-        dbuf_used&=~1<<((d-dbuf)/sizeof(Defer));
+        dbuf_used&=~1<<((d-dbuf)/sizeof(WDeferred));
         return;
     }
     FREE(d);
 }
 
 
-static bool get_next(Obj **obj, WDeferredAction **action, Defer **list)
-{
-    Defer *d=*list;
-    
-    if(d==NULL)
-        return FALSE;
-    
-    UNLINK_ITEM(*list, d, next, prev);
-    *obj=d->watch.obj;
-    *action=d->action;
-    watch_reset(&(d->watch));
-    free_defer(d);
-    return TRUE;
-}
-
-
 static void defer_watch_handler(Watch *w, Obj *obj)
 {
-    Defer *d=(Defer*)w;
+    WDeferred *d=(WDeferred*)w;
     
-    UNLINK_ITEM(*(Defer**)(d->list), d, next, prev);
+    UNLINK_ITEM(*(WDeferred**)(d->list), d, next, prev);
+    
     free_defer(d);
     
     warn(TR("Object destroyed while deferred actions are still pending."));
@@ -99,9 +86,9 @@ static void defer_watch_handler(Watch *w, Obj *obj)
 
     
 bool mainloop_defer_action_on_list(Obj *obj, WDeferredAction *action, 
-                                  void **list)
+                                   WDeferred **list)
 {
-    Defer *d;
+    WDeferred *d;
     
     d=alloc_defer();
     
@@ -112,11 +99,12 @@ bool mainloop_defer_action_on_list(Obj *obj, WDeferredAction *action,
     
     d->action=action;
     d->list=list;
+    d->fn=extl_fn_none();
     
     if(obj!=NULL)
         watch_setup(&(d->watch), obj, defer_watch_handler);
     
-    LINK_ITEM(*(Defer**)list, d, next, prev);
+    LINK_ITEM(*list, d, next, prev);
     
     return TRUE;
 }
@@ -124,7 +112,7 @@ bool mainloop_defer_action_on_list(Obj *obj, WDeferredAction *action,
 
 bool mainloop_defer_action(Obj *obj, WDeferredAction *action)
 {
-    return mainloop_defer_action_on_list(obj, action, (void**)&deferred);
+    return mainloop_defer_action_on_list(obj, action, &deferred);
 }
 
 
@@ -137,18 +125,69 @@ bool mainloop_defer_destroy(Obj *obj)
 }
     
 
-void mainloop_execute_deferred_on_list(void **list)
+bool mainloop_defer_extl_on_list(ExtlFn fn, WDeferred **list)
+{
+    WDeferred *d;
+    
+    d=alloc_defer();
+    
+    if(d==NULL){
+        warn_err();
+        return FALSE;
+    }
+    
+    d->action=NULL;
+    d->list=list;
+    d->fn=extl_ref_fn(fn);
+    
+    watch_init(&(d->watch));
+    
+    LINK_ITEM(*list, d, next, prev);
+    
+    return TRUE;
+}
+
+
+bool mainloop_defer_extl(ExtlFn fn)
+{
+    return mainloop_defer_extl_on_list(fn, &deferred);
+}
+
+
+static void do_execute(WDeferred *d)
+{
+    Obj *obj=d->watch.obj;
+    WDeferredAction *a=d->action;
+    ExtlFn fn=d->fn;
+    
+    watch_reset(&(d->watch));
+    free_defer(d);
+    
+    if(a!=NULL){
+        if(obj!=NULL)
+            a(obj);
+    }else if(fn!=extl_fn_none()){
+        extl_call(fn, NULL, NULL);
+        extl_unref_fn(fn);
+    }
+}
+
+
+void mainloop_execute_deferred_on_list(WDeferred **list)
 {
     Obj *obj;
     void (*action)(Obj*);
     
-    while(get_next(&obj, &action, (Defer**)list))
-        action(obj);
+    while(*list!=NULL){
+        WDeferred *d=*list;
+        UNLINK_ITEM(*list, d, next, prev);
+        do_execute(d);
+    }
 }
 
 
 void mainloop_execute_deferred()
 {
-    mainloop_execute_deferred_on_list((void**)&deferred);
+    mainloop_execute_deferred_on_list(&deferred);
 }
 
