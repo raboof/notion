@@ -1,102 +1,46 @@
-Autoconf script for the Ion Window Manager
-Copyright (C) Tom Payne, 2003-4
-by Tom Payne <ion@tompayne.org>
 
-INTRODUCTION
+Ion autoconf script README
 
-	This is an autoconf script for the development version of the Ion
-	window manager. It generates system-ac.mk which is automatically used
-	in preference to system.mk if it exists.
 
-	Please report bugs in this script to Tom Payne <ion@tompayne.org>.
+CONFIGURE SCRIPT OPTIONS
 
-DEPENDENCIES
+The Ion-specific options to ./configure are:
 
-	ion-devel-20031211
+    --disable-xinerama
+    --disable-xfree86-textprop-bug-workaround
+    --enable-Xutf8
+    --disable-shared
+    --with-libtool (see *BSD NOTES below)
+    --with-lua* (see DEBIAN NOTES below)
+    --enable-c99-source
+    --enable-xopen-source
 
-INSTALLATION
+Run ./configure --help for more information on these options. The
+defaults are chosen to generate a configuration very similar to the
+Ion default.
 
-	Copy all the files to your ion-devel toplevel source directory and
-	run:
-		autoconf
-		./configure --help
-
-NOTES
-
-	The Ion-specific options to ./configure are:
-
-		--disable-xinerama
-		--disable-xfree86-textprop-bug-workaround
-		--enable-Xutf8
-		--disable-shared
-		--with-libtool (see *BSD NOTES below)
-		--with-lua* (see DEBIAN NOTES below)
-		--enable-c99-source
-		--enable-xopen-source
-
-	Run ./configure --help for more information on these options. The
-	defaults are chosen to generate a configuration very similar to the
-	Ion default.
 
 *BSD NOTES
 
-	Many *BSD versions come with a very old version of libtool. Use the
-	--with-libtool option to use a more recent version installed
-	elsewhere, e.g.
+Many *BSD versions come with a very old version of libtool. Use the
+--with-libtool option to use a more recent version installed
+elsewhere, e.g.
 
-		./configure --with-libtool=/usr/local/stow/libtool-1.5
+    ./configure --with-libtool=/usr/local/stow/libtool-1.5
+
 
 DEBIAN NOTES
 
-	If you are using the Lua 5.0 package on Debian then use
+If you are using the Lua 5.0 package on Debian then use
 
-		./configure --with-lua-suffix=50 \
-			    --with-lua-includes=/usr/include/lua50
+    ./configure --with-lua-suffix=50 \
+    --with-lua-includes=/usr/include/lua50
 
-	This will allow the configure script to find the correct lua
-	configuration script and binaries.
+This will allow the script to find the Lua headers, binaries and
+libraries as renamed and located on Debian.
 
-
-KNOWN BUGS
-
-	This script has only been tested on Gentoo Linux. It needs to be
-	tested _much_ more widely!
-
-IMPLEMENTATION NOTES
-
-	system-ac.mk.in is constructed to be as similar to system.mk as
-	possible.
-
-	The canonical files for this package are:
-		README.autoconf
-		configure.ac
-		system-ac.mk.in
-	install-sh is part of automake and can usually be found in
-	/usr/share/automake*, the other files are added when autoconf is run
-	to generate configure.
-
-	This autoconf script has been developed with autoconf-2.58, it is
-	unknown whether it works with other versions.
-
-	The Ion version number is hardcoded in configure.ac. Sadly it cannot be
-	generated dynamically (e.g. from version.h) due to an autoconf
-	limitation. However the version number is not used anywhere and so can
-	be safely ignored.
-
-	On my system (Gentoo Linux, glibc 2.3.2, gcc 3.3.2) the -ansi option
-	to gcc causes the macro va_copy not to be defined, which later causes
-	link errors when ld tries to link the symbol va_copy rather than
-	whatever the va_copy macro expands to. I've put in a test to
-	automatically strip -ansi from XOPEN_SOURCE if this is the case, but I
-	regard this is as a kludge.
 
 AUTHORS
 
-	Tom Payne <ion@tompayne.org>
+Tom Payne <ion@tompayne.org>
 
-COPYRIGHT
-
-	This program is licensed under the terms of the Lesser General Public
-	License (LGPL) version 2.1.
-
-vim: textwidth=78

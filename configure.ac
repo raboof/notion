@@ -21,6 +21,11 @@ dnl }}}
 dnl Checks for libraries. {{{
 AC_PATH_XTRA()
 test "${X_DISPLAY_MISSING+set}" == set && exit 1
+AC_CHECK_LIB([Xext],
+			 [XMissingExtension],
+			 [X_LIBS="$X_LIBS -lXext"],
+			 [exit 1],
+			 [$X_PRE_LIBS -lX11 $X_LIBS $X_EXTRA_LIBS])
 dnl }}}
 
 dnl XINERAMA_LIBS, _DCF_NO_XINERAMA {{{
@@ -33,11 +38,6 @@ AC_ARG_ENABLE([xinerama],
 							  [Disable Xinerama support])])
 
 if test "x$enable_xinerama" != xno; then
-	AC_CHECK_LIB([Xext],
-				 [XMissingExtension],
-				 [X_LIBS="$X_LIBS -lXext"],
-				 [exit 1],
-				 [$X_PRE_LIBS -lX11 $X_LIBS $X_EXTRA_LIBS])
 	AC_CHECK_LIB([Xinerama],
 				 [XineramaQueryExtension],
 				 [XINERAMA_LIBS="-lXinerama"],
