@@ -1,24 +1,98 @@
---
--- look-greyviolet.lua for Ion
---
+-- look-greyviolet.lua drawing engine configuration file for Ion.
 
-set_font("-*-helvetica-medium-r-normal-*-14-*-*-*-*-*-*-*")
-set_tab_font("-*-helvetica-medium-r-normal-*-12-*-*-*-*-*-*-*")
+if not gr_select_engine("de") then return end
 
-set_tab_border(1, 1, 1)
-set_frame_border(1, 1, 2)
-set_input_border(1, 1, 1)
-enable_ion_bar_inside_frame(TRUE)
-set_ion_spacing(1)
+de_define_style("*", {
+    shadow_colour = "#777777",
+    highlight_colour = "#eeeeee",
+    background_colour = "#aaaaaa",
+    foreground_colour = "#000000",
+    padding_pixels = 1,
+    highlight_pixels = 1,
+    shadow_pixels = 1,
+    border_style = "elevated",
+    font = "-*-helvetica-medium-r-normal-*-14-*-*-*-*-*-*-*",
+    text_align = "center",
+})
 
-set_act_tab_sel_colors("#aaaacc", "#333366", "#666699", "#eeeeee")
-set_act_tab_colors("#eeeeee", "#777777", "#aaaaaa", "#000000")
-set_act_frame_colors("#eeeeee", "#777777", "#aaaaaa", "#ffffff")
+de_define_style("frame", {
+    based_on = "*",
+    shadow_colour = "#777777",
+    highlight_colour = "#eeeeee",
+    padding_colour = "#aaaaaa",
+    background_colour = "#000000",
+    foreground_colour = "#ffffff",
+    padding_pixels = 2,
+    highlight_pixels = 1,
+    shadow_pixels = 1,
+    de_substyle("active", {
+        shadow_colour = "#777777",
+        highlight_colour = "#eeeeee",
+        background_colour = "#aaaaaa",
+        foreground_colour = "#ffffff",
+    }),
+})
 
-set_tab_sel_colors("#eeeeff", "#777788", "#9999aa", "#000000")
-set_tab_colors("#eeeeee", "#777777", "#aaaaaa", "#000000")
-set_frame_colors("#eeeeee", "#777777", "#aaaaaa", "#ffffff")
-set_input_colors("#eeeeee", "#777777", "#aaaaaa", "#000000")
+de_define_style("frame-ionframe", {
+    based_on = "frame",
+    border_style = "inlaid",
+    padding_pixels = 1,
+    spacing = 1,
+    bar_inside_frame = true,
+})
 
-set_background_color("#000000")
-set_selection_colors("#aaaaaa", "black")
+de_define_style("frame-floatframe", {
+    based_on = "frame",
+    border_style = "ridge"
+})
+
+de_define_style("frame-tab", {
+    based_on = "*",
+    font = "-*-helvetica-medium-r-normal-*-12-*-*-*-*-*-*-*",
+    de_substyle("active-selected", {
+        shadow_colour = "#333366",
+        highlight_colour = "#aaaacc",
+        background_colour = "#666699",
+        foreground_colour = "#eeeeee",
+    }),
+    de_substyle("active-unselected", {
+        shadow_colour = "#777777",
+        highlight_colour = "#eeeeee",
+        background_colour = "#aaaaaa",
+        foreground_colour = "#000000",
+    }),
+    de_substyle("inactive-selected", {
+        shadow_colour = "#777788",
+        highlight_colour = "#eeeeff",
+        background_colour = "#9999aa",
+        foreground_colour = "#000000",
+    }),
+    text_align = "center",
+})
+
+de_define_style("frame-tab-ionframe", {
+    based_on = "frame-tab",
+    spacing = 1,
+})
+
+de_define_style("input", {
+    based_on = "*",
+    shadow_colour = "#777777",
+    highlight_colour = "#eeeeee",
+    background_colour = "#aaaaaa",
+    foreground_colour = "#000000",
+    padding_pixels = 1,
+    highlight_pixels = 1,
+    shadow_pixels = 1,
+    border_style = "elevated",
+    de_substyle("cursor", {
+        background_colour = "#000000",
+        foreground_colour = "#aaaaaa",
+    }),
+    de_substyle("selection", {
+        background_colour = "#aaaaaa",
+        foreground_colour = "black",
+    }),
+    font = "-*-helvetica-medium-r-normal-*-14-*-*-*-*-*-*-*",
+})
+

@@ -1,0 +1,104 @@
+--
+-- Look-cleanviolet for Ion's default drawing engine. 
+-- Based on look-clean and look-violetgrey.
+-- 
+
+if not gr_select_engine("de") then
+    return
+end
+
+
+-- Base style
+de_define_style("*", {
+    -- Gray background
+    highlight_colour = "#eeeeee",
+    shadow_colour = "#eeeeee",
+    background_colour = "#aaaaaa",
+    foreground_colour = "#ffffff",
+    
+    shadow_pixels = 1,
+    highlight_pixels = 1,
+    padding_pixels = 1,
+    spacing = 0,
+    border_style = "elevated",
+    
+    font = "-*-helvetica-medium-r-normal-*-12-*-*-*-*-*-*-*",
+    text_align = "center",
+})
+
+
+de_define_style("frame", {
+    based_on = "*",
+    transparent_background = true,
+    border_style = "inlaid", -- No effect as we don't do 3D effects
+})
+
+
+de_define_style("frame-ionframe", {
+    based_on = "frame",
+    shadow_pixels = 0,
+    highlight_pixels = 0,
+    spacing = 1,
+    padding_colour = "#aaaaaa",
+    background_colour = "#000000",
+})
+
+
+de_define_style("frame-tab", {
+    based_on = "*",
+    
+    de_substyle("active-selected", {
+        -- Violet tab
+        highlight_colour = "#aaaacc",
+        shadow_colour = "#aaaacc",
+        background_colour = "#666699",
+        foreground_colour = "#eeeeee",
+    }),
+
+    de_substyle("inactive-selected", {
+        -- Greyish violet tab
+        highlight_colour = "#eeeeff",
+        shadow_colour = "#eeeeff",
+        background_colour = "#9999aa",
+        foreground_colour = "#000000",
+    }),
+
+    de_substyle("*-*-*-urgent", { -- ???
+        -- Red tab
+        highlight_colour = "#eeeeff",
+        shadow_colour = "#eeeeff",
+        background_colour = "#ff0000",
+        foreground_colour = "#eeeeee",
+    }),
+})
+
+
+de_define_style("frame-tab-ionframe", {
+    based_on = "frame-tab",
+    spacing = 1,
+    bar_inside_frame = true,
+})
+
+
+de_define_style("input", {
+    based_on = "*",
+    
+    -- Bigger font for readability
+    font = "-*-helvetica-medium-r-normal-*-14-*-*-*-*-*-*-*",
+    
+    -- Greyish violet background
+    highlight_colour = "#eeeeff",
+    shadow_colour = "#eeeeff",
+    background_colour = "#9999aa",
+    foreground_colour = "#000000",
+    
+    de_substyle("selection", {
+        background_colour = "#777799",
+        foreground_colour = "#000000",
+    }),
+
+    de_substyle("cursor", {
+        background_colour = "#000000",
+        foreground_colour = "#9999aa",
+    }),
+})

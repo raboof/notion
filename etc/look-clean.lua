@@ -1,28 +1,82 @@
 --
--- Based on PWM look-clean.lua by db@mosey.org
+-- look-clean.lua drawing engine configuration file for Ion.
+-- Style based on the PWM look-clean.conf by db@mosey.org
 --
 
-set_font("fixed")
-set_tab_font("fixed")
-set_term_font("7x13")
+if not gr_select_engine("de") then
+    return
+end
 
-set_tab_border(1, 1, 1)
-set_frame_border(0, 0, 0)
-set_input_border(1, 1, 1)
-enable_ion_bar_inside_frame(TRUE)
-set_ion_spacing(1)
 
-set_act_tab_sel_colors("white", "white", "#8a999e", "white")
-set_act_tab_colors("grey", "grey", "#545d75", "grey")
-set_act_frame_colors("#545d75", "grey", "black", "grey")
+-- Base style
+de_define_style("*", {
+    -- Gray background
+    highlight_colour = "grey",
+    shadow_colour = "grey",
+    background_colour = "#545d75",
+    foreground_colour = "grey",
+    
+    shadow_pixels = 1,
+    highlight_pixels = 1,
+    padding_pixels = 1,
+    spacing = 0,
+    border_style = "elevated",
+    
+    font = "fixed",
+    text_align = "center",
+})
 
-set_tab_sel_colors("grey", "grey", "#545d75", "grey")
-set_tab_colors("grey", "grey", "#545d75", "grey")
 
-set_frame_colors("#545d75", "grey", "black", "grey")
-set_input_colors("grey", "grey", "#545d75", "white")
+de_define_style("frame", {
+    based_on = "*",
+    transparent_background = false,
+    border_style = "ridge",
+})
 
-set_background_color("black")
-set_selection_colors("#aaaaaa", "black")
 
-enable_transparent_background(FALSE)
+de_define_style("frame-ionframe", {
+    based_on = "frame",
+    shadow_pixels = 0,
+    highlight_pixels = 0,
+    padding_pixels = 0,
+    spacing = 1,
+    padding_colour = "#aaaaaa",
+    background_colour = "#000000",
+})
+
+
+de_define_style("frame-tab", {
+    based_on = "*",
+
+    de_substyle("active-selected", {
+        highlight_colour = "white",
+        shadow_colour = "white",
+        background_colour = "#8a999e",
+        foreground_colour = "white",
+    }),
+})
+
+
+de_define_style("frame-tab-ionframe", {
+    based_on = "frame-tab",
+    spacing = 1,
+    bar_inside_frame = true,
+})
+
+
+de_define_style("input", {
+    based_on = "*",
+    
+    foreground_colour = "white",
+    
+    de_substyle("selection", {
+        background_colour = "#8a999e",
+        foreground_colour = "white",
+    }),
+
+    de_substyle("cursor", {
+        background_colour = "white",
+        foreground_colour = "#545d75",
+    }),
+})
+
