@@ -44,6 +44,8 @@ static WDrawRubberbandFn *tmprubfn=NULL;
 static int parent_rx, parent_ry;
 static enum {MOVERES_SIZE, MOVERES_POS} moveres_mode=MOVERES_SIZE;
 static bool resize_cumulative=FALSE;
+static bool snap_enabled=FALSE;
+static WRectangle tmp_snapgeom;
 static int tmprqflags=0;
 static WInfoWin *moveres_infowin=NULL;
 
@@ -224,7 +226,7 @@ static void res_draw_rubberband(WRootWin *rootwin)
 static struct timeval last_action_tv={-1, 0};
 static struct timeval last_update_tv={-1, 0};
 static int last_mode=0;
-static double accel=1.0, accelmul=1.5, accelmax=100;
+static double accel=1, accelinc=30, accelmax=100*100;
 static long actmax=200, uptmin=50;
 
 static void accel_reset()
@@ -241,9 +243,10 @@ static void accel_reset()
  * function is called, and at most \var{t_max} milliseconds has passed
  * from a previous call, acceleration factor is reset to 1.0. Otherwise,
  * if at least \var{t_min} milliseconds have passed from the from previous
- * acceleration update or reset the acceleration factor is multiplied by 
- * \var{mul}. The maximum acceleration (pixels/call modulo size hints)
- * is given by \var{maxacc}. The default values are (200, 50, 1.5, 100). 
+ * acceleration update or reset the squere root of the acceleration factor
+ * is incremented by \var{step}. The maximum acceleration factor (pixels/call 
+ * modulo size hints) is given by \var{maxacc}. The default values are 
+ * (200, 50, 30, 100). 
  * 
  * Notice the interplay with X keyboard acceleration parameters.
  * (Maybe insteed of \var{t_min} we should use a minimum number of
@@ -252,12 +255,12 @@ static void accel_reset()
  * the changes?)
  */
 EXTL_EXPORT
-void set_resize_accel_params(int t_max, int t_min, double mul, double maxacc)
+void set_resize_accel_params(int t_max, int t_min, double step, double maxacc)
 {
 	actmax=(t_max>0 ? t_max : INT_MAX);
 	uptmin=(t_min>0 ? t_min : INT_MAX);
-	accelmul=(mul>0 ? mul : 1);
-	accelmax=(maxacc>0 ? maxacc : 1);
+	accelinc=(step>0 ? step : 1);
+	accelmax=(maxacc>0 ? maxacc*maxacc : 1);
 }
 
 
@@ -275,6 +278,12 @@ static long tvdiffmsec(struct timeval *tv1, struct timeval *tv2)
 	return (int)(t1-t2);
 }
 
+#define SIGN_NZ(X) ((X) < 0 ? -1 : 1)
+
+static double max(double a, double b)
+{
+	return (a<b ? b : a);
+}
 
 void resize_accel(int *wu, int *hu, int mode)
 {
@@ -288,7 +297,7 @@ void resize_accel(int *wu, int *hu, int mode)
 	
 	if(last_mode==mode && adiff<actmax){
 		if(udiff>uptmin){
-			accel*=accelmul;
+			accel+=accelinc;
 			if(accel>accelmax)
 				accel=accelmax;
 			last_update_tv=tv;
@@ -302,9 +311,9 @@ void resize_accel(int *wu, int *hu, int mode)
 	last_action_tv=tv;
 	
 	if(*wu!=0)
-		*wu=(*wu)*ceil(accel/abs(*wu));
+		*wu=SIGN_NZ(*wu)*ceil(max(sqrt(accel), 1));
 	if(*hu!=0)
-		*hu=(*hu)*ceil(accel/abs(*hu));
+		*hu=SIGN_NZ(*hu)*ceil(max(sqrt(accel), 1));
 }
 
 
@@ -387,9 +396,12 @@ static bool begin_moveres(WRegion *reg, WDrawRubberbandFn *rubfn,
 {
 	WRootWin *rootwin=ROOTWIN_OF(reg);
 	WWindow *parent;
+	WRegion *mgr;
 	
 	if(tmpreg!=NULL)
 		return FALSE;
+
+	snap_enabled=FALSE;
 	
 	region_resize_hints(reg, &tmphints, &tmprelw, &tmprelh);
 
@@ -416,6 +428,21 @@ static bool begin_moveres(WRegion *reg, WDrawRubberbandFn *rubfn,
 	/*setup_watch(&tmpregwatch, (WObj*)reg,
 				(WWatchHandler*)tmpreg_watch_handler);*/
 	tmpreg=reg;
+
+	/* Get snapping geometry */
+	mgr=REGION_MANAGER(reg);
+		
+	if(mgr!=NULL){
+		tmp_snapgeom=REGION_GEOM(mgr);
+		
+		if(mgr==(WRegion*)parent){
+			tmp_snapgeom.x=0;
+			tmp_snapgeom.y=0;	
+			snap_enabled=FALSE;
+		}else if(REGION_PARENT(mgr)==(WRegion*)parent){
+			snap_enabled=TRUE;
+		}
+	}
 	
 	if(!tmphints.flags&PMinSize || tmphints.min_width<1)
 		tmphints.min_width=1;
@@ -454,25 +481,42 @@ bool begin_move(WRegion *reg, WDrawRubberbandFn *rubfn, bool cumulative)
 }
 
 
-
 static void delta_moveres(WRegion *reg, int dx1, int dx2, int dy1, int dy2,
 						  WRectangle *rret)
 {
 	WRootWin *rootwin=ROOTWIN_OF(reg);
 	WRectangle geom;
 	int w, h;
+	int realdx1, realdx2, realdy1, realdy2;
 	
 	if(tmpreg!=reg || reg==NULL)
 		return;
-
-	tmpdx1+=dx1;
-	tmpdx2+=dx2;
-	tmpdy1+=dy1;
-	tmpdy2+=dy2;
-	geom=tmporiggeom;
 	
-	w=tmprelw-tmpdx1+tmpdx2;
-	h=tmprelh-tmpdy1+tmpdy2;
+	moveres_mode=MOVERES_SIZE;
+	
+	realdx1=(tmpdx1+=dx1);
+	realdx2=(tmpdx2+=dx2);
+	realdy1=(tmpdy1+=dy1);
+	realdy2=(tmpdy2+=dy2);
+	geom=tmporiggeom;
+
+	/* snap */
+	if(snap_enabled){
+		WRectangle *sg=&tmp_snapgeom;
+		int er=CF_EDGE_RESISTANCE;
+
+		if(tmpdx1!=0 && geom.x+tmpdx1<sg->x && geom.x+tmpdx1>sg->x-er)
+			realdx1=sg->x-geom.x;
+		if(tmpdx2!=0 && geom.x+geom.w+tmpdx2>sg->x+sg->w && geom.x+geom.w+tmpdx2<sg->x+sg->w+er)
+			realdx2=sg->x+sg->w-geom.x-geom.w;
+		if(tmpdy1!=0 && geom.y+tmpdy1<sg->y && geom.y+tmpdy1>sg->y-er)
+			realdy1=sg->y-geom.y;
+		if(tmpdy2!=0 && geom.y+geom.h+tmpdy2>sg->y+sg->h && geom.y+geom.h+tmpdy2<sg->y+sg->h+er)
+			realdy2=sg->y+sg->h-geom.y-geom.h;
+	}
+	
+	w=tmprelw-realdx1+realdx2;
+	h=tmprelh-realdy1+realdy2;
 	
 	if(w<=0)
 		w=tmphints.min_width;
@@ -480,38 +524,43 @@ static void delta_moveres(WRegion *reg, int dx1, int dx2, int dy1, int dy2,
 		h=tmphints.min_height;
 	
 	correct_size(&w, &h, &tmphints, TRUE);
-	/* Do not alter sizes that were not changed */
-	if(tmpdx1==tmpdx2)
-		w=tmprelw;
-	if(tmpdy1==tmpdy2)
-		h=tmprelh;
 	
-	geom.w=geom.w-tmprelw+w;
-	geom.h=geom.h-tmprelh+h;
-
-	/* If top/left delta is not zero, don't move bottom/right side
-	 * if the respective delta is zero
+	/* Do not modify coordinates and sizes that were not requested to be
+	 * changed. 
 	 */
 	
-	if(tmpdx1!=0){
-		if(tmpdx2==0)
+	if(tmpdx1==tmpdx2){
+		if(tmpdx1==0 || realdx1!=tmpdx1)
+			geom.x+=realdx1;
+		else
+			geom.x+=realdx2;
+	}else{
+		geom.w=geom.w-tmprelw+w;
+		if(tmpdx1==0 || realdx1!=tmpdx1)
+			geom.x+=realdx1;
+		else
 			geom.x+=tmporiggeom.w-geom.w;
-		else
-			geom.x+=tmpdx1;
-	}
-		
-	if(tmpdy1!=0){
-		if(tmpdy2==0)
-			geom.y+=tmporiggeom.h-geom.h;
-		else
-			geom.y+=tmpdy1;
 	}
 
+	
+	if(tmpdy1==tmpdy2){
+		if(tmpdy1==0 || realdy1!=tmpdy1)
+			geom.y+=realdy1;
+		else
+			geom.y+=realdy2;
+	}else{
+		geom.h=geom.h-tmprelh+h;
+		if(tmpdy1==0 || realdy1!=tmpdy1)
+			geom.y+=realdy1;
+		else
+			geom.y+=tmporiggeom.h-geom.h;
+	}
+	
 	if(XOR_RESIZE)
 		res_draw_rubberband(rootwin);
 	
 	region_request_geom(reg, tmprqflags, &geom, &tmpgeom);
-
+	
 	if(!resize_cumulative){
 		tmpdx1=0;
 		tmpdx2=0;
@@ -533,7 +582,7 @@ static void delta_moveres(WRegion *reg, int dx1, int dx2, int dy1, int dy2,
 
 
 void delta_resize(WRegion *reg, int dx1, int dx2, int dy1, int dy2,
-				  WRectangle *rret)
+				   WRectangle *rret)
 {
 	moveres_mode=MOVERES_SIZE;
 	delta_moveres(reg, dx1, dx2, dy1, dy2, rret);
