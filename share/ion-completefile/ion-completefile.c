@@ -1,5 +1,5 @@
 /*
- * ion/query/complete_file.c
+ * ion/share/ion-completefile/ion-completefile.c
  */
 
 /****************************************************************************/
@@ -41,7 +41,7 @@
 /*  awb Dec 30 1998                                                         */
 /*                                                                          */
 /****************************************************************************/
-/*  $Revision: 1.1 $
+/*  $Revision: 1.2 $
  **
  **  History and file completion functions for editline library.
  */
@@ -646,46 +646,47 @@ int main(int argc, char *argv[])
 {
 	char **avp=NULL;
 	char *beg=NULL;
-	char *path=NULL;
 	bool wp=FALSE;
-	int i, n;
+	int i, j, n;
 	
 	libtu_init(argv[0]);
 	
 	for(i=1; i<argc; i++){
 		if(strcmp(argv[i], "-h")==0){
-			printf("Usage: ion-completefile [-wp] [-help] [path_to_complete]\n");
+			printf("Usage: ion-completefile [-help] [-wp] [to_complete...]\n");
 			return EXIT_SUCCESS;
 		}
+	}
+	
+	for(i=1; i<argc; i++){
 		if(strcmp(argv[i], "-wp")==0){
 			wp=TRUE;
 		}else{
-			if(path!=NULL){
-				fprintf(stderr, "-help for usage.\n");
-				return EXIT_FAILURE;
+			if(wp){
+				n=do_complete_file_with_path(argv[i], &avp, &beg, NULL);
+			}else{
+				n=do_complete_file(argv[i], &avp, &beg, NULL);
 			}
-			path=argv[i];
+			
+			if(beg){
+				printf("%s\n", beg);
+				free(beg);
+				beg=NULL;
+			}else{
+				printf("\n");
+			}
+	
+
+			if(avp){
+				for(j=0; j<n; j++){
+					printf("%s\n", avp[j]);
+					free(avp[j]);
+				}
+				free(avp);
+				avp=NULL;
+			}
 		}
 	}
 	
-	if(path==NULL)
-		path="";
-	
-	if(wp){
-		n=do_complete_file_with_path(path, &avp, &beg, NULL);
-	}else{
-		n=do_complete_file(path, &avp, &beg, NULL);
-	}
-	
-	if(beg)
-		printf("%s\n", beg);
-	else
-		printf("\n");
-	
-	for(i=0; i<n; i++)
-		printf("%s\n", avp[i]);
-	
 	return EXIT_SUCCESS;
 }
-
-

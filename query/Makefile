@@ -8,9 +8,6 @@ include $(TOPDIR)/system-inc.mk
 
 ######################################
 
-SUBDIRS=ion-completefile
-INSTALL_SUBDIRS=ion-completefile
-
 #DIST: INCLUDES += -I../libtu/include $(X11_INCLUDES) -I..
 INCLUDES += $(X11_INCLUDES) -I..
 CFLAGS += $(XOPEN_SOURCE)

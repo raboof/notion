@@ -386,7 +386,7 @@ function querylib.file_completor(wedln, str, wp)
     str=string.gsub(str, "'", "'\\''")
     local ic=lookup_script("ion-completefile")
     if ic then
-        popen_bgread(ic.." '"..str.."' "..(wp or ""), 
+        popen_bgread(ic..(wp or "").." '"..str.."' ",
                      coroutine.wrap(receive_data))
     end
 end
@@ -410,7 +410,7 @@ querylib.query_runfile=querylib.make_execfile_fn(
 
 
 function querylib.exec_completor(wedln, str)
-    querylib.file_completor(wedln, str, "-wp")
+    querylib.file_completor(wedln, str, " -wp ")
 end
 
 function querylib.exec_handler(frame, cmd)
