@@ -126,9 +126,6 @@ bool mod_panews_init()
 
     if(!mod_panews_register_exports())
         goto err;
-
-    if(!mod_panews_register_exports())
-        goto err;
     
     if(!register_regions())
         goto err;
