@@ -5,8 +5,6 @@
  * See the included file LICENSE for details.
  */
 
-#include <math.h>
-
 #include "common.h"
 #include "global.h"
 #include "pointer.h"
