@@ -76,9 +76,29 @@ bool region_add_managed_simple(WRegion *mgr, WRegion *reg, int flags)
 bool region_add_managed(WRegion *mgr, WRegion *reg, 
 						const WAttachParams *param)
 {
+	WRegion *reg2;
+	
 	if(REGION_MANAGER(reg)==mgr)
 		return TRUE;
 	
+	/* Check that reg is not a parent or manager of mgr */
+	reg2=mgr;
+	for(reg2=mgr; reg2!=NULL; reg2=REGION_MANAGER(reg2)){
+		if(reg2==reg){
+			warn("Trying to make a %s manage a %s above it in management "
+				 "hierarchy", WOBJ_TYPESTR(mgr), WOBJ_TYPESTR(reg));
+			return FALSE;
+		}
+	}
+	
+	for(reg2=region_parent(mgr); reg2!=NULL; reg2=region_parent(reg2)){
+		if(reg2==reg){
+			warn("Trying to make a %s manage its ancestor (a %s)",
+				 WOBJ_TYPESTR(mgr), WOBJ_TYPESTR(reg));
+			return FALSE;
+		}
+	}
+					 
 	return (region_do_add_managed(mgr, (WRegionAddFn*)add_fn_reparent,
 								  (void*)reg, param)!=NULL);
 }
