@@ -35,6 +35,7 @@ EXTRABINDIR=$(LIBDIR)/ion-devel
 ## Modules
 ##
 
+# The path to the libtool script
 LIBTOOL=libtool
 
 # Set PRELOAD_MODULES=1 if your system does not support dynamically loaded
@@ -43,7 +44,7 @@ LIBTOOL=libtool
 
 # Note to Cygwin users: you must set this option and also LIBTOOL point to 
 # a real libtool script (e.g. /usr/autotool/stable/bin/libtool) instead of
-# some useless autoconf-expecting wrapper. In order to worksapce save files
+# some useless autoconf-expecting wrapper. In order to workspace save files
 # to work, you should also add the setting
 #DEFINES+=-DCF_SECOND_RATE_OS_FS
 # to replace colons in save file names with underscores. With these settings
@@ -56,9 +57,6 @@ MODULE_LIST=ionws floatws query
 # Settings for compiling and linking to ltdl
 LTDL_INCLUDES=
 LTDL_LIBS=-lltdl
-# Libtool 1.4.3 or newer is highly recommended, but some older versions
-# might work with the following flag.
-#LTDL_CFLAGS=-DCF_LTDL_ANCIENT
 
 
 ##
