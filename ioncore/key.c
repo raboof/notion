@@ -235,32 +235,50 @@ void handle_keypress(XKeyEvent *ev)
 {
 	WBinding *binding=NULL;
 	WRegion *reg=NULL, *oreg=NULL, *binding_owner=NULL;
+	bool grabbed;
 
 	reg=(WRegion*)FIND_WINDOW(ev->window);
 	
 	if(reg==NULL)
 		return;
 	
-	while(reg->active_sub!=NULL)
-		reg=reg->active_sub;
+	grabbed=(reg->flags&REGION_BINDINGS_ARE_GRABBED);
 	
 	oreg=reg;
-
-	do{
+	
+	if(grabbed){
+		/* Find the deepest nested active window grabbing this key. */
+		while(reg->active_sub!=NULL)
+			reg=reg->active_sub;
+		
+		do{
+			if(reg->flags&REGION_BINDINGS_ARE_GRABBED){
+				binding=region_lookup_keybinding(reg, ev, NULL, 
+												 &binding_owner);
+			}
+			if(binding!=NULL)
+				break;
+			if(WOBJ_IS(reg, WRootWin))
+				break;
+			reg=region_parent(reg);
+		}while(reg!=NULL);
+	}else{
+		if(reg->submapstat.key!=None){
+			submapgrab_handler(reg, (XEvent*)ev);
+			return;
+		}
 		binding=region_lookup_keybinding(reg, ev, NULL, &binding_owner);
-		if(binding!=NULL)
-			break;
-		if(WOBJ_IS(reg, WRootWin))
-			break;
-		reg=region_parent(reg);
-	}while(reg!=NULL);
+	}
 	
 	if(binding!=NULL){
 		if(binding->submap!=NULL){
-			if(add_sub(reg, ev->keycode, ev->state))
-				submapgrab(reg);
+			if(add_sub(reg, ev->keycode, ev->state)){
+				if(grabbed)
+					submapgrab(reg);
+			}
 		}else{
-			XUngrabKeyboard(wglobal.dpy, CurrentTime);
+			if(grabbed)
+				XUngrabKeyboard(wglobal.dpy, CurrentTime);
 			dispatch_binding(binding_owner, reg, binding, ev);
 		}
 	}else if(WOBJ_IS(oreg, WWindow)){
