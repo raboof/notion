@@ -34,7 +34,7 @@ DECLOBJ(WRegion){
 	void *bindings;
 	WSubmapState submapstat;
 	
-	WRegion *active_sub, *previous_act;
+	WRegion *active_sub;
 	
 	struct{
 		char *name;
@@ -131,6 +131,7 @@ extern void region_deinit(WRegion *reg);
 extern void region_got_focus(WRegion *reg);
 extern void region_lost_focus(WRegion *reg);
 extern bool region_may_control_focus(WRegion *reg);
+extern WRegion *region_get_active_leaf(WRegion *reg);
 
 extern bool region_is_fully_mapped(WRegion *reg);
 extern void region_notify_change(WRegion *reg);
@@ -141,6 +142,7 @@ extern void region_detach_manager(WRegion *reg);
 
 extern WRegion *region_parent(WRegion *reg);
 extern WRegion *region_manager(WRegion *reg);
+extern WRegion *region_manager_or_parent(WRegion *reg);
 extern void region_set_parent(WRegion *reg, WRegion *par);
 extern void region_set_manager(WRegion *reg, WRegion *mgr, WRegion **listptr);
 extern void region_unset_manager(WRegion *reg, WRegion *mgr, WRegion **listptr);

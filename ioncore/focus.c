@@ -9,14 +9,33 @@
 #include "focus.h"
 #include "global.h"
 #include "window.h"
+#include "region.h"
 
 
 /*{{{ Previous active region */
 
 
+static WWatch prev_watch=WWATCH_INIT;
+
+
+static void prev_watch_handler(WWatch *watch, WRegion *prev)
+{
+	WRegion *r;
+	while(1){
+		r=region_manager_or_parent(prev);
+		if(r==NULL)
+			break;
+		
+		if(setup_watch(&prev_watch, (WObj*)r, 
+					   (WWatchHandler*)prev_watch_handler))
+			break;
+		prev=r;
+	}
+}
+
+
 void set_previous_of(WRegion *reg)
 {
-	bool flag=FALSE;
 	WRegion *r2;
 	
 	if(reg==NULL || wglobal.previous_protect!=0)
@@ -24,29 +43,11 @@ void set_previous_of(WRegion *reg)
 
 	if(REGION_IS_ACTIVE(reg))
 		return;
-
-	/* Trace back to the root to remove all previous-references on
-	 * the path to reg. We do this so the node previous to reg can
-	 * be found starting from both reg and the root.
-	 */
-	while(1){
-		r2=REGION_PARENT_CHK(reg, WRegion);
-		if(r2==NULL)
-			break;
-		r2->previous_act=NULL;
-		reg=r2;
-	}
 	
-	wglobal.previous_rootwin=wglobal.active_rootwin;
-	r2=(WRegion*)wglobal.active_rootwin;
+	r2=region_get_active_leaf((WRegion*)wglobal.active_rootwin);
 	
-	/* Create a new previous-path from the root passing through all
-	 * the currently active nodes.
-	 */
-	while(r2!=NULL){
-		r2->previous_act=r2->active_sub;
-		r2=r2->active_sub;
-	}
+	if(r2!=NULL)
+		setup_watch(&prev_watch, (WObj*)r2, (WWatchHandler*)prev_watch_handler);
 }
 
 
@@ -69,18 +70,12 @@ void unprotect_previous()
 EXTL_EXPORT
 void goto_previous()
 {
-	WRegion *reg=(WRegion*)wglobal.previous_rootwin;
-
-	if(reg==NULL)
-		reg=(WRegion*)wglobal.active_rootwin;
+	WRegion *r=(WRegion*)prev_watch.obj;
 	
-	if(reg==NULL)
-		reg=(WRegion*)wglobal.rootwins;
-	
-	while(reg->previous_act!=NULL)
-		reg=reg->previous_act;
-	
-	region_goto(reg);
+	if(r!=NULL){
+		reset_watch(&prev_watch);
+		region_goto(r);
+	}
 }
 
 

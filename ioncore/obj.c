@@ -172,9 +172,10 @@ bool has_dynfun(const WObj *obj, DynFun *func)
 /*{{{ Watches */
 
 
-void setup_watch(WWatch *watch, WObj *obj, WWatchHandler *handler)
+bool setup_watch(WWatch *watch, WObj *obj, WWatchHandler *handler)
 {
-	assert(!WOBJ_IS_BEING_DESTROYED(obj));
+	if(WOBJ_IS_BEING_DESTROYED(obj))
+		return FALSE;
 	
 	reset_watch(watch);
 	

@@ -265,7 +265,6 @@ static void initialize_global()
 	wglobal.cwin_list=NULL;
 	
 	wglobal.active_rootwin=NULL;
-	wglobal.previous_rootwin=NULL;
 
 	wglobal.input_mode=INPUT_NORMAL;
 	wglobal.opmode=OPMODE_INIT;

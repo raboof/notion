@@ -1,4 +1,4 @@
-/*
+	/*
  * ion/ioncore/region.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
@@ -695,7 +695,7 @@ void region_set_parent(WRegion *reg, WRegion *parent)
 EXTL_EXPORT
 WRegion *region_manager(WRegion *reg)
 {
-	return REGION_MANAGER(reg);
+	return reg->manager;
 }
 
 
@@ -707,6 +707,16 @@ WRegion *region_parent(WRegion *reg)
 {
 	return reg->parent;
 }
+
+
+WRegion *region_manager_or_parent(WRegion *reg)
+{
+	if(reg->manager!=NULL)
+		return reg->manager;
+	else
+		return reg->parent;
+}
+
 
 /*EXTL_DOC
  * Returns the geometry of \var{reg} within its parent; a table with fields

@@ -240,6 +240,8 @@ function QueryLib.complete_lua(str)
     _, _, compl.common_part, tocomp=string.find(str, "(.-)([%w_]*)$")
 
     local l=string.len(tocomp)
+
+    -- TODO: metatable scanning
     
     for k in comptab do
         if type(k)=="string" then
@@ -252,7 +254,6 @@ function QueryLib.complete_lua(str)
     -- If there was only one completion and it is a string or function,
     -- concatenate it with "." or "(", respectively.
     if table.getn(compl)==1 then
-        -- TODO: metatable scanning
         if type(comptab[compl[1]])=="table" then
             compl[1]=compl[1] .. "."
         elseif type(comptab[compl[1]])=="function" then

@@ -52,7 +52,7 @@ DECLSTRUCT(WWatch){
 	WWatchHandler *handler;
 };
 
-extern void setup_watch(WWatch *watch, WObj *obj,
+extern bool setup_watch(WWatch *watch, WObj *obj,
 						WWatchHandler *handler);
 extern void reset_watch(WWatch *watch);
 extern bool watch_ok(WWatch *watch);

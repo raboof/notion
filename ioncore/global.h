@@ -69,7 +69,7 @@ DECLSTRUCT(WGlobal){
 	/* We could have a display WRegion but the screen-link could impose
 	 * some problems so these are handled as a special case.
 	 */
-	WRootWin *active_rootwin, *previous_rootwin;
+	WRootWin *active_rootwin;
 	
 	int input_mode;
 	bool grab_released;

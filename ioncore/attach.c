@@ -212,13 +212,9 @@ WRegion *default_find_rescue_manager_for(WRegion *reg, WRegion *todst)
 			return reg;
 	}
 	
-	p=REGION_MANAGER(reg);
-	
-	if(p==NULL){
-		p=region_parent(reg);
-		if(p==NULL)
-			return NULL;
-	}
+	p=region_manager_or_parent(reg);
+	if(p==NULL)
+		return NULL;
 	
 	if(!WOBJ_IS_BEING_DESTROYED(p)){
 		WRegion *nm=region_find_rescue_manager_for(p, reg);
