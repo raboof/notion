@@ -14,6 +14,7 @@
 #include "objp.h"
 #include "clientwin.h"
 #include "saveload.h"
+#include "geom.h"
 
 
 /*{{{ Attach */
@@ -165,7 +166,7 @@ WRegion *region_add_managed_load(WRegion *mgr, ExtlTab tab)
  *  \var{name} & The (short) name of the region. Note that this name
  *               should not be used to reference the object but the full
  * 				 name with instance number (\fnref{region_full_name}). \\
- *  \var{name_instance} & Request for instance number of name. \\
+ *  \var{name_instance} & Request for instance number of \var{name}. \\
  * \end{tabularx}
  */
 EXTL_EXPORT
