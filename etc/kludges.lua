@@ -15,3 +15,19 @@ winprop{
     instance = "dialog_find",
     transient_mode = "current",
 }
+
+-- You might want to enable these if you really must use XMMS. 
+--[[
+winprop{                                                                                
+    class = "xmms",                                                                     
+    instance = "XMMS_Playlist",                                                         
+    transient_mode = "off"                                                              
+}                                                                                       
+
+winprop{                                                                                
+    class = "xmms",                                                                     
+    instance = "XMMS_Player",                                                           
+    transient_mode = "off"                                                              
+}                                                                                       
+--]]
+
