@@ -672,8 +672,15 @@ static void fit_clientwin(WClientWin *cwin, WRectangle geom)
 	cwin->win_geom=wingeom;
 	REGION_GEOM(cwin)=geom;
 	
-	XMoveResizeWindow(wglobal.dpy, cwin->win, params.win_x+wingeom.x,
-					  params.win_y+wingeom.y, wingeom.w, wingeom.h);
+	if(cwin->flags&CWIN_PROP_ACROBATIC && !REGION_IS_MAPPED(cwin)){
+		XMoveResizeWindow(wglobal.dpy, cwin->win,
+						  -2*wingeom.w, -2*wingeom.h,
+						  wingeom.w, wingeom.h);
+	}else{
+		XMoveResizeWindow(wglobal.dpy, cwin->win,
+						  params.win_x+wingeom.x, params.win_y+wingeom.y,
+						  wingeom.w, wingeom.h);
+	}
 	
 	geom.x=0;
 	geom.y=0;
