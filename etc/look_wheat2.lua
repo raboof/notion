@@ -1,14 +1,14 @@
--- look-greyviolet.lua drawing engine configuration file for Ion.
+-- look_wheat2.lua drawing engine configuration file for Ion.
 
 if not gr.select_engine("de") then return end
 
 de.reset()
 
 de.defstyle("*", {
-    shadow_colour = "#777777",
-    highlight_colour = "#eeeeee",
-    background_colour = "#aaaaaa",
-    foreground_colour = "#000000",
+    shadow_colour = "gray10",
+    highlight_colour = "gray10",
+    background_colour = "#7f7f75",
+    foreground_colour = "white",
     padding_pixels = 1,
     highlight_pixels = 1,
     shadow_pixels = 1,
@@ -19,14 +19,20 @@ de.defstyle("*", {
 
 de.defstyle("frame", {
     based_on = "*",
-    shadow_colour = "#777777",
-    highlight_colour = "#eeeeee",
-    padding_colour = "#aaaaaa",
-    background_colour = "#000000",
-    foreground_colour = "#ffffff",
-    padding_pixels = 2,
+    shadow_colour = "gray10",
+    highlight_colour = "gray10",
+    padding_colour = "#7f7f75",
+    background_colour = "black",
+    foreground_colour = "white",
+    padding_pixels = 1,
     highlight_pixels = 1,
     shadow_pixels = 1,
+    de.substyle("active", {
+        shadow_colour = "gray10",
+        highlight_colour = "gray10",
+        background_colour = "#7f7f75",
+        foreground_colour = "white",
+    }),
 })
 
 de.defstyle("frame-ionframe", {
@@ -45,28 +51,28 @@ de.defstyle("tab", {
     based_on = "*",
     font = "-*-helvetica-medium-r-normal-*-12-*-*-*-*-*-*-*",
     de.substyle("active-selected", {
-        shadow_colour = "#333366",
-        highlight_colour = "#aaaacc",
-        background_colour = "#666699",
-        foreground_colour = "#eeeeee",
+        shadow_colour = "gray10",
+        highlight_colour = "gray10",
+        background_colour = "#aaaa9e",
+        foreground_colour = "white",
     }),
     de.substyle("active-unselected", {
-        shadow_colour = "#777777",
-        highlight_colour = "#eeeeee",
-        background_colour = "#aaaaaa",
-        foreground_colour = "#000000",
+        shadow_colour = "gray10",
+        highlight_colour = "gray10",
+        background_colour = "#7f7f75",
+        foreground_colour = "white",
     }),
     de.substyle("inactive-selected", {
-        shadow_colour = "#777788",
-        highlight_colour = "#eeeeff",
-        background_colour = "#9999aa",
-        foreground_colour = "#000000",
+        shadow_colour = "gray10",
+        highlight_colour = "gray10",
+        background_colour = "#7f7f75",
+        foreground_colour = "white",
     }),
     de.substyle("inactive-unselected", {
-        shadow_colour = "#777777",
-        highlight_colour = "#eeeeee",
-        background_colour = "#aaaaaa",
-        foreground_colour = "#000000",
+        shadow_colour = "gray10",
+        highlight_colour = "gray10",
+        background_colour = "#7f7f75",
+        foreground_colour = "gray",
     }),
     text_align = "center",
 })
@@ -74,8 +80,8 @@ de.defstyle("tab", {
 de.defstyle("tab-frame", {
     based_on = "tab",
     de.substyle("*-*-*-*-activity", {
-        shadow_colour = "#777777",
-        highlight_colour = "#eeeeee",
+        shadow_colour = "black",
+        highlight_colour = "black",
         background_colour = "#990000",
         foreground_colour = "#eeeeee",
     }),
@@ -89,8 +95,6 @@ de.defstyle("tab-frame-ionframe", {
 de.defstyle("tab-menuentry", {
     based_on = "tab",
     text_align = "left",
-    highlight_pixels = 0,
-    shadow_pixels = 0,
 })
 
 de.defstyle("tab-menuentry-big", {
@@ -101,21 +105,21 @@ de.defstyle("tab-menuentry-big", {
 
 de.defstyle("input", {
     based_on = "*",
-    shadow_colour = "#777777",
-    highlight_colour = "#eeeeee",
-    background_colour = "#aaaaaa",
-    foreground_colour = "#000000",
+    shadow_colour = "black",
+    highlight_colour = "black",
+    background_colour = "#454545",
+    foreground_colour = "white",
     padding_pixels = 1,
     highlight_pixels = 1,
     shadow_pixels = 1,
     border_style = "elevated",
     de.substyle("*-cursor", {
-        background_colour = "#000000",
-        foreground_colour = "#aaaaaa",
+        background_colour = "white",
+        foreground_colour = "#454545",
     }),
     de.substyle("*-selection", {
-        background_colour = "#aaaaaa",
-        foreground_colour = "black",
+        background_colour = "black",
+        foreground_colour = "white",
     }),
 })
 

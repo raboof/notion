@@ -222,7 +222,7 @@ local function receive_styles(str)
     local styles={}
     local stylemenu={}
     
-    for look in string.gfind(data, "(look-[^\n]*)%.lua\n") do
+    for look in string.gfind(data, "(look[-_][^\n]*)%.lua\n") do
         if not found[look] then
             found[look]=true
             table.insert(styles, look)
@@ -252,14 +252,16 @@ function mod_menu.refresh_styles()
     local cmd=ioncore.lookup_script("ion-completefile")
     if cmd then
         local path=ioncore.get_paths().searchpath
-        cmd=cmd..string.gsub(path..":", "([^:]*):",
-                             function(s)
-                                 if s=="" then
-                                     return ""
-                                 else
-                                     return " "..string.shell_safe(s).."/look-"
-                                 end
-                             end)
+        local function mkarg(s)
+            if s=="" then
+                return ""
+            else
+                return (" "..string.shell_safe(s).."/look_"..
+                        " "..string.shell_safe(s).."/look-")
+            end
+        end
+
+        cmd=cmd..string.gsub(path..":", "([^:]*):", mkarg)
         
         ioncore.popen_bgread(cmd, coroutine.wrap(receive_styles))
     end
