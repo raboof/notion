@@ -102,7 +102,8 @@ void region_deinit(WRegion *reg)
         ioncore_g.focus_next=NULL;
     }
     
-    region_detach(reg);
+    region_detach_manager(reg);
+    region_unset_parent(reg);
     region_remove_bindings(reg);
     region_do_unuse_name(reg, FALSE);
 
@@ -271,81 +272,6 @@ void region_updategr_default(WRegion *reg)
 /*}}}*/
 
 
-/*{{{ Detach */
-
-
-void region_detach_parent(WRegion *reg)
-{
-    WRegion *p=reg->parent;
-
-    if(p==NULL || p==reg)
-        return;
-
-    UNLINK_ITEM(p->children, reg, p_next, p_prev);
-    reg->parent=NULL;
-
-    if(p->active_sub==reg){
-        p->active_sub=NULL;
-        
-        /* Removed: seems to confuse floatws:s when frames are
-         * destroyd.
-         */
-        /*if(REGION_IS_ACTIVE(reg) && ioncore_g.focus_next==NULL)
-            set_focus(p);*/
-    }
-    
-    region_child_removed(p, reg);
-}
-
-
-void region_detach_manager(WRegion *reg)
-{
-    WRegion *mgr;
-    
-    mgr=REGION_MANAGER(reg);
-    
-    if(mgr==NULL)
-        return;
-    
-    D2(fprintf(stderr, "detach %s (mgr:%s)\n", OBJ_TYPESTR(reg),
-               OBJ_TYPESTR(mgr)));
-    
-    /* Restore activity state to non-parent manager */
-    if(region_may_control_focus(reg)){
-        WRegion *par=region_parent(reg);
-        if(par!=NULL && mgr!=par && region_parent(mgr)==par){
-            /* REGION_ACTIVE shouldn't be set for windowless regions
-             * but make the parent's active_sub point to it
-             * nevertheless so that region_may_control_focus can
-             * be made to work.
-             */
-            D2(fprintf(stderr, "detach mgr %s, %s->active_sub=%s\n",
-                       OBJ_TYPESTR(reg), OBJ_TYPESTR(par),
-                       OBJ_TYPESTR(mgr)));
-            par->active_sub=mgr;
-            /*if(region_xwindow(mgr)!=None){*/
-                region_do_set_focus(mgr, FALSE);
-            /*}*/
-        }
-    }
-
-    region_clear_activity(reg, TRUE);
-
-    region_managed_remove(mgr, reg);
-
-    assert(REGION_MANAGER(reg)==NULL);
-}
-
-
-void region_detach(WRegion *reg)
-{
-    region_detach_manager(reg);
-    region_detach_parent(reg);
-}
-
-
-/*}}}*/
-
 
 /*{{{ Goto */
 
@@ -502,19 +428,41 @@ bool region_may_destroy(WRegion *reg)
 /*{{{ Manager/parent stuff */
 
 
-void region_set_manager(WRegion *reg, WRegion *mgr, WRegion **listptr)
+/* Routine to call to unmanage a region */
+void region_detach_manager(WRegion *reg)
 {
-    assert(reg->manager==NULL);
+    WRegion *mgr;
     
-    reg->manager=mgr;
-    if(listptr!=NULL){
-        LINK_ITEM(*listptr, reg, mgr_next, mgr_prev);
+    mgr=REGION_MANAGER(reg);
+    
+    if(mgr==NULL)
+        return;
+    
+    /* Restore activity state to non-parent manager */
+    if(region_may_control_focus(reg)){
+        WRegion *par=region_parent(reg);
+        if(par!=NULL && mgr!=par && region_parent(mgr)==par){
+            /* REGION_ACTIVE shouldn't be set for windowless regions
+             * but make the parent's active_sub point to it
+             * nevertheless so that region_may_control_focus can
+             * be made to work.
+             */
+            par->active_sub=mgr;
+            /*if(region_xwindow(mgr)!=None){*/
+                region_do_set_focus(mgr, FALSE);
+            /*}*/
+        }
     }
-    
-    region_manager_changed(reg, mgr);
+
+    region_clear_activity(reg, TRUE);
+
+    region_managed_remove(mgr, reg);
+
+    assert(REGION_MANAGER(reg)==NULL);
 }
 
 
+/* This should only be called within region_managed_remove */
 void region_unset_manager(WRegion *reg, WRegion *mgr, WRegion **listptr)
 {
     if(reg->manager!=mgr)
@@ -529,6 +477,19 @@ void region_unset_manager(WRegion *reg, WRegion *mgr, WRegion **listptr)
 }
 
 
+void region_set_manager(WRegion *reg, WRegion *mgr, WRegion **listptr)
+{
+    assert(reg->manager==NULL);
+    
+    reg->manager=mgr;
+    if(listptr!=NULL){
+        LINK_ITEM(*listptr, reg, mgr_next, mgr_prev);
+    }
+    
+    region_manager_changed(reg, mgr);
+}
+
+
 void region_set_parent(WRegion *reg, WRegion *parent)
 {
     assert(reg->parent==NULL && parent!=NULL);
@@ -537,11 +498,20 @@ void region_set_parent(WRegion *reg, WRegion *parent)
 }
 
 
-void region_attach_parent(WRegion *reg, WRegion *parent)
+void region_unset_parent(WRegion *reg)
 {
-    region_set_parent(reg, parent);
-#warning "Do we need the raise?"
-    region_raise(reg);
+    WRegion *p=reg->parent;
+
+    if(p==NULL || p==reg)
+        return;
+
+    UNLINK_ITEM(p->children, reg, p_next, p_prev);
+    reg->parent=NULL;
+
+    if(p->active_sub==reg)
+        p->active_sub=NULL;
+    
+    region_child_removed(p, reg);
 }
 
 

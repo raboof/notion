@@ -1049,9 +1049,9 @@ static bool clientwin_fitrep(WClientWin *cwin, WWindow *np, WFitParams *fp)
         return TRUE;
     
     if(np!=NULL){
-        region_detach_parent((WRegion*)cwin);
+        region_unset_parent((WRegion*)cwin);
         do_reparent_clientwin(cwin, np->win, geom.x, geom.y);
-        region_attach_parent((WRegion*)cwin, (WRegion*)np);
+        region_set_parent((WRegion*)cwin, (WRegion*)np);
         sendconfig_clientwin(cwin);
 
         if(!CLIENTWIN_IS_FULLSCREEN(cwin) && 

@@ -136,17 +136,15 @@ extern bool region_goto_flags(WRegion *reg, int flags);
 
 extern bool region_is_fully_mapped(WRegion *reg);
 
-extern void region_detach(WRegion *reg);
-extern void region_detach_parent(WRegion *reg);
 extern void region_detach_manager(WRegion *reg);
 
 extern WRegion *region_parent(WRegion *reg);
 extern WRegion *region_manager(WRegion *reg);
 extern WRegion *region_manager_or_parent(WRegion *reg);
 extern void region_set_parent(WRegion *reg, WRegion *par);
-extern void region_attach_parent(WRegion *reg, WRegion *par);
 extern void region_set_manager(WRegion *reg, WRegion *mgr, WRegion **listptr);
 extern void region_unset_manager(WRegion *reg, WRegion *mgr, WRegion **listptr);
+extern void region_unset_parent(WRegion *reg);
 
 extern WRootWin *region_rootwin_of(const WRegion *reg);
 extern Window region_root_of(const WRegion *reg);

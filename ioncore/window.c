@@ -132,10 +132,10 @@ void window_do_fitrep(WWindow *wwin, WWindow *par, const WRectangle *geom)
     int h=maxof(1, geom->h);
 
     if(par!=NULL){
-        region_detach_parent((WRegion*)wwin);
+        region_unset_parent((WRegion*)wwin);
         XReparentWindow(ioncore_g.dpy, wwin->win, par->win, geom->x, geom->y);
         XResizeWindow(ioncore_g.dpy, wwin->win, w, h);
-        region_attach_parent((WRegion*)wwin, (WRegion*)par);
+        region_set_parent((WRegion*)wwin, (WRegion*)par);
     }else{
         XMoveResizeWindow(ioncore_g.dpy, wwin->win, geom->x, geom->y, w, h);
     }
