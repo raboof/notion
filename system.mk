@@ -69,19 +69,19 @@ LTDL_LIBS=-lltdl
 
 # If you have installed Lua 5.0 from the official tarball without changing
 # paths, this so do it.
-LUA_PATH=/usr/local
-LUA_LIBS = -L$(LUA_PATH)/lib -R$(LUA_PATH)/lib -llua -llualib
-LUA_INCLUDES = -I$(LUA_PATH)/include
-LUA=$(LUA_PATH)/bin/lua
-LUAC=$(LUA_PATH)/bin/luac
+LUA_DIR=/usr/local
+LUA_LIBS = -L$(LUA_DIR)/lib -R$(LUA_DIR)/lib -llua -llualib
+LUA_INCLUDES = -I$(LUA_DIR)/include
+LUA=$(LUA_DIR)/bin/lua
+LUAC=$(LUA_DIR)/bin/luac
 
 # If you are using the Debian packages, the following settings should be
 # what you want.
-#LUA_PATH=/usr
+#LUA_DIR=/usr
 #LUA_LIBS = -llua50 -llualib50
-#LUA_INCLUDES = -I$(LUA_PATH)/include/lua50
-#LUA=$(LUA_PATH)/bin/lua50
-#LUAC=$(LUA_PATH)/bin/luac50
+#LUA_INCLUDES = -I$(LUA_DIR)/include/lua50
+#LUA=$(LUA_DIR)/bin/lua50
+#LUAC=$(LUA_DIR)/bin/luac50
 
 
 ##
