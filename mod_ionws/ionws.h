@@ -25,6 +25,7 @@ INTRCLASS(WIonWS);
 DECLCLASS(WIonWS){
     WGenWS genws;
     WSplit *split_tree;
+    WSplit *stdispnode;
     WRegion *managed_list;
     WRegionSimpleCreateFn *create_frame_fn;
 };
@@ -56,8 +57,7 @@ extern WSplit *ionws_split_of(WIonWS *ws, WRegion *reg);
 extern WRegion *ionws_load(WWindow *par, const WFitParams *fp, ExtlTab tab);
 extern WSplit *ionws_load_node(WIonWS *ws, const WRectangle *geom, ExtlTab tab);
 
-extern WRegion *ionws_do_managed_remove(WIonWS *ws, WRegion *reg,
-                                        bool reclaim_space, bool lazy);
+extern void ionws_do_managed_remove(WIonWS *ws, WRegion *reg);
 
 DYNFUN void ionws_managed_add(WIonWS *ws, WRegion *reg);
 extern void ionws_managed_add_default(WIonWS *ws, WRegion *reg);
@@ -78,5 +78,9 @@ extern bool ionws_rescue_clientwins(WIonWS *ws);
 extern void ionws_do_set_focus(WIonWS *ws, bool warp);
 extern bool ionws_managed_display(WIonWS *ws, WRegion *reg);
 extern bool ionws_managed_may_destroy(WIonWS *ws, WRegion *reg);
+extern void ionws_manage_stdisp(WIonWS *ws, WRegion *stdisp,
+                                int corner, int orientation);
+extern void ionws_unmanage_stdisp(WIonWS *ws, bool permanent, bool nofocus);
+
 
 #endif /* ION_MOD_IONWS_IONWS_H */

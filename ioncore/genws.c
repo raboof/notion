@@ -98,6 +98,25 @@ void genws_do_unmap(WGenWS *ws)
 /*}}}*/
 
 
+/*{{{ Dynfuns */
+
+
+void genws_manage_stdisp(WGenWS *ws, WRegion *stdisp, 
+                         int corner, int orientation)
+{
+    CALL_DYN(genws_manage_stdisp, ws, (ws, stdisp, corner, orientation));
+}
+
+
+void genws_unmanage_stdisp(WGenWS *ws, bool permanent, bool nofocus)
+{
+    CALL_DYN(genws_unmanage_stdisp, ws, (ws, permanent, nofocus));
+}
+
+
+/*}}}*/
+
+
 /*{{{ Class implementation */
 
 

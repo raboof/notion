@@ -12,7 +12,7 @@ include $(TOPDIR)/system-inc.mk
 INCLUDES += $(X11_INCLUDES) -I..
 CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
-SOURCES=main.c ionws.c placement.c split.c split-dock.c
+SOURCES=main.c ionws.c placement.c split.c split-stdisp.c
 
 MAKE_EXPORTS=mod_ionws
 

@@ -30,6 +30,7 @@
 #include <ioncore/defer.h>
 #include <ioncore/region-iter.h>
 #include <ioncore/xwindow.h>
+#include <ioncore/resize.h>
 
 #include "floatws.h"
 #include "floatframe.h"
@@ -562,6 +563,51 @@ bool floatws_manage_rescue(WFloatWS *ws, WClientWin *cwin, WRegion *from)
 /*}}}*/
 
 
+/*{{{ Sticky status display support */
+
+
+static void floatws_place_stdisp(WFloatWS *ws, int corner, WRegion *stdisp)
+{
+    XSizeHints hints;
+    WRectangle g;
+    WRectangle *wg=&REGION_GEOM(ws);
+    uint relw, relh;
+    
+    region_size_hints(stdisp, &hints, &relw, &relh);
+    g.w=minof(wg->w, maxof(CF_STDISP_MIN_SZ, region_min_w(stdisp)));
+    g.h=minof(wg->h, maxof(CF_STDISP_MIN_SZ, region_min_h(stdisp)));
+    
+    if(corner==MPLEX_STDISP_TL || corner==MPLEX_STDISP_BL)
+        g.x=wg->x;
+    else
+        g.x=wg->x+wg->w-g.w;
+
+    if(corner==MPLEX_STDISP_TL || corner==MPLEX_STDISP_TR)
+        g.y=wg->y;
+    else
+        g.y=wg->y+wg->h-g.h;
+        
+    region_fit(stdisp, &g, REGION_FIT_EXACT);
+}
+
+
+void floatws_manage_stdisp(WFloatWS *ws, WRegion *stdisp, 
+                           int corner, int orientation)
+{
+    if(REGION_MANAGER(stdisp)==(WRegion*)ws)
+        return;
+    
+    region_detach_manager(stdisp);
+    
+    floatws_add_managed(ws, stdisp);
+    
+    floatws_place_stdisp(ws, corner, stdisp);
+}
+
+
+/*}}}*/
+
+
 /*{{{ Circulate */
 
 
@@ -786,6 +832,9 @@ static DynFunTab floatws_dynfuntab[]={
     
     {(DynFun*)region_rescue_clientwins,
      (DynFun*)floatws_rescue_clientwins},
+    
+    {genws_manage_stdisp,
+     floatws_manage_stdisp},
     
     END_DYNFUNTAB
 };

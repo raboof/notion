@@ -38,6 +38,10 @@
 #define REGION_RQGEOM_H_ONLY    (REGION_RQGEOM_VERT_ONLY|REGION_RQGEOM_WEAK_Y)
 #define REGION_RQGEOM_W_ONLY    (REGION_RQGEOM_HORIZ_ONLY|REGION_RQGEOM_WEAK_X)
 
+#define REGION_ORIENTATION_NONE 0
+#define REGION_ORIENTATION_HORIZONTAL 1
+#define REGION_ORIENTATION_VERTICAL 2
+
 typedef void WDrawRubberbandFn(WRootWin *rw, const WRectangle *geom);
 
 
@@ -113,7 +117,8 @@ DYNFUN void region_rqgeom_clientwin(WRegion *reg, WClientWin *cwin,
                                     int flags, const WRectangle *geom);
 
 DYNFUN void region_size_hints(WRegion *reg, XSizeHints *hints_ret,
-                                uint *relw_ret, uint *relh_ret);
+                              uint *relw_ret, uint *relh_ret);
+DYNFUN int region_orientation(WRegion *reg);
 
 extern uint region_min_h(WRegion *reg);
 extern uint region_min_w(WRegion *reg);

@@ -24,6 +24,7 @@
 #include <ioncore/extlconv.h>
 #include <ioncore/defer.h>
 #include <ioncore/frame.h>
+#include <ioncore/region-iter.h>
 #include <mod_ionws/ionws.h>
 #include <mod_ionws/split.h>
 #include "autows.h"
@@ -37,7 +38,9 @@
 void autows_managed_add(WAutoWS *ws, WRegion *reg)
 {
     region_add_bindmap_owned(reg, mod_autows_autows_bindmap, (WRegion*)ws);
-    region_add_bindmap(reg, mod_autows_frame_bindmap);
+    if(OBJ_IS(reg, WFrame))
+        region_add_bindmap(reg, mod_autows_frame_bindmap);
+    
     ionws_managed_add_default(&(ws->ionws), reg);
 }
 
@@ -92,28 +95,72 @@ void autows_deinit(WAutoWS *ws)
 }
 
 
+static WSplit *get_node_check(WAutoWS *ws, WRegion *reg)
+{
+    WSplit *node;
+
+    if(reg==NULL)
+        return NULL;
+    
+    node=split_tree_node_of(reg);
+    
+    if(node==NULL || REGION_MANAGER(reg)!=(WRegion*)ws)
+        return NULL;
+    
+    return node;
+}
+
+
+static void autows_do_managed_remove(WAutoWS *ws, WRegion *reg)
+{
+    ionws_do_managed_remove(&(ws->ionws), reg);
+    region_remove_bindmap_owned(reg, mod_autows_autows_bindmap, (WRegion*)ws);
+    if(OBJ_IS(reg, WFrame))
+        region_remove_bindmap(reg, mod_autows_frame_bindmap);
+}
+
+
+static bool nostdispfilter(WSplit *node)
+{
+    return (node->type==SPLIT_REGNODE && node->u.reg!=NULL);
+}
+
+
 void autows_managed_remove(WAutoWS *ws, WRegion *reg)
 {
     bool ds=OBJ_IS_BEING_DESTROYED(ws);
+    bool act=REGION_IS_ACTIVE(reg);
     bool mcf=region_may_control_focus((WRegion*)ws);
-    WRegion *other=ionws_do_managed_remove(&(ws->ionws), reg, !ds, TRUE);
+    WSplit *other=NULL, *node=get_node_check(ws, reg);
     
-    region_remove_bindmap_owned(reg, mod_autows_autows_bindmap, (WRegion*)ws);
-    region_remove_bindmap(reg, mod_autows_frame_bindmap);
+    assert(node!=NULL);
+
+    autows_do_managed_remove(ws, reg);
+
+    other=split_closest_leaf(node, nostdispfilter);
+
+    if(ws->ionws.split_tree!=NULL)
+        split_tree_remove(&(ws->ionws.split_tree), node, !ds, FALSE);
     
-    if(other==NULL){
-        if(mcf)
-            genws_fallback_focus((WGenWS*)ws, FALSE);
-        if(ws->ionws.split_tree==NULL){
-            autows_create_initial_unused(ws);
-            if(ws->ionws.split_tree==NULL){
-                warn("Unable to re-initialise workspace. Destroying.");
-                ioncore_defer_destroy((Obj*)ws);
+    if(!ds){
+        if(other==NULL){
+            if(act && mcf){
+                /* We don't want to give the stdisp focus, even if one exists. 
+                 * Or do we?
+                 */
+                genws_fallback_focus((WGenWS*)ws, FALSE);
             }
+            
+            if(ws->ionws.split_tree==NULL){
+                autows_create_initial_unused(ws);
+                if(ws->ionws.split_tree==NULL){
+                    warn("Unable to re-initialise workspace. Destroying.");
+                    ioncore_defer_destroy((Obj*)ws);
+                }
+            }
+        }else if(act && mcf){
+            region_set_focus(other->u.reg);
         }
-    }else{
-        if(!ds && mcf)
-            region_set_focus(other);
     }
 }
 

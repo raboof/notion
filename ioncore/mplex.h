@@ -14,6 +14,7 @@
 #include "manage.h"
 #include "extl.h"
 #include "rectangle.h"
+#include "hooks.h"
 
 #define MPLEX_ADD_TO_END 0x0001
 #define MPLEX_MANAGED_UNVIEWABLE 0x0002
@@ -29,6 +30,21 @@ enum{
 };
 
 
+enum{
+    MPLEX_STDISP_TL,
+        MPLEX_STDISP_TR,
+        MPLEX_STDISP_BL,
+        MPLEX_STDISP_BR
+};
+
+
+typedef struct{
+    Watch regwatch;
+    int corner;
+    int orientation;
+} WMPlexSTDispInfo;
+
+
 DECLCLASS(WMPlex){
     WWindow win;
     int flags;
@@ -40,6 +56,8 @@ DECLCLASS(WMPlex){
     int l2_count;
     WRegion *l2_list;
     WRegion *l2_current;
+    
+    WMPlexSTDispInfo stdispinfo;
 };
 
 
@@ -109,5 +127,17 @@ DYNFUN void mplex_managed_changed(WMPlex *mplex, int what, bool sw,
 extern ExtlTab mplex_get_configuration(WMPlex *mplex);
 extern WRegion *mplex_load(WWindow *par, const WFitParams *fp, ExtlTab tab);
 extern void mplex_load_contents(WMPlex *frame, ExtlTab tab);
+
+
+/* Sticky status display support */
+
+extern bool mplex_set_stdisp(WMPlex *mplex, WRegion *stdisp,
+                             int corner, int orientation);
+extern void mplex_get_stdisp(WMPlex *mplex, WRegion **stdisp, 
+                             int *corner, int *orientation);
+
+extern bool mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t);
+extern ExtlTab mplex_get_stdisp_extl(WMPlex *mplex);
+
 
 #endif /* ION_IONCORE_MPLEX_H */

@@ -25,7 +25,7 @@ enum WSplitType{
     SPLIT_HORIZONTAL,
     SPLIT_VERTICAL,
     SPLIT_UNUSED,
-    SPLIT_DOCKNODE
+    SPLIT_STDISPNODE
 };
 
 
@@ -67,13 +67,20 @@ DECLCLASS(WSplit){
             WSplit *tl, *br;
             WSplitUnused unused;
         } s;
+        struct{
+            WRegion *reg;
+            int orientation;
+            int corner;
+        } d;
         WRegion *reg;
     } u;
 };
 
 
-extern WSplit *create_split(const WRectangle *geom,
-                            int dir, WSplit *tl, WSplit *br);
+typedef bool WSplitFilter(WSplit *split);
+    
+
+extern WSplit *create_split(const WRectangle *geom, int dir);
 extern WSplit *create_split_regnode(const WRectangle *geom, WRegion *reg);
 extern WSplit *create_split_unused(const WRectangle *geom);
 
@@ -88,11 +95,11 @@ extern Obj *split_hoist(WSplit *split);
 
 extern void split_mark_current(WSplit *split);
 
-/* x and y are in relative to parent */
-extern WSplit *split_current_tl(WSplit *node, int dir);
-extern WSplit *split_current_br(WSplit *node, int dir);
-extern WSplit *split_to_tl(WSplit *node, int dir);
-extern WSplit *split_to_br(WSplit *node, int dir);
+extern WSplit *split_current_tl(WSplit *node, int dir, WSplitFilter *filter);
+extern WSplit *split_current_br(WSplit *node, int dir, WSplitFilter *filter);
+extern WSplit *split_to_tl(WSplit *node, int dir, WSplitFilter *filter);
+extern WSplit *split_to_br(WSplit *node, int dir, WSplitFilter *filter);
+extern WSplit *split_closest_leaf(WSplit *node, WSplitFilter *filter);
 
 extern void split_update_bounds(WSplit *node, bool recursive);
 extern void split_get_unused(WSplit *node, WSplitUnused *unused);
@@ -102,22 +109,22 @@ extern bool split_do_resize(WSplit *node, const WRectangle *ng,
                             int hprimn, int vprimn, bool transpose,
                             void (*justcheck)(WSplit *node, 
                                               const WRectangle *g));
+extern void split_tree_rqgeom(WSplit *root, WSplit *node, int flags, 
+                              const WRectangle *geom, WRectangle *geomret);
 
 extern WSplit *split_tree_split(WSplit **root, WSplit *node, int dir, 
                                 int primn, int minsize, 
                                 WRegionSimpleCreateFn *fn,
                                 WWindow *parent);
-extern WSplit *split_tree_remove(WSplit **root, WSplit *node,
-                                 bool reclaim_space, bool lazy);
-extern void split_tree_rqgeom(WSplit *root, WSplit *node, int flags, 
-                              const WRectangle *geom, WRectangle *geomret);
+extern void split_tree_remove(WSplit **root, WSplit *node,
+                              bool reclaim_space, bool lazy);
 
+/* x and y are in relative to parent */
 extern WRegion *split_region_at(WSplit *node, int x, int y);
 
 extern WSplit *split_tree_node_of(WRegion *reg);
 extern WSplit *split_tree_split_of(WRegion *reg);
 extern WMPlex *split_tree_find_mplex(WRegion *from);
-extern WSplit *split_find_closest_regnode(WSplit *node);
 
 extern bool split_tree_set_node_of(WRegion *reg, WSplit *split);
 
@@ -128,7 +135,7 @@ extern void split_update_geom_from_children(WSplit *node);
 
 #define CHKNODE(NODE)                                              \
     assert(((NODE)->type==SPLIT_REGNODE && (NODE)->u.reg!=NULL) || \
-           ((NODE)->type==SPLIT_DOCKNODE && (NODE)->u.reg!=NULL) ||\
+           ((NODE)->type==SPLIT_STDISPNODE) ||                       \
            ((NODE)->type==SPLIT_UNUSED) ||                         \
            (((NODE)->type==SPLIT_VERTICAL ||                       \
              (NODE)->type==SPLIT_HORIZONTAL)                       \

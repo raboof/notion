@@ -540,8 +540,8 @@ ExtlTab region_rqgeom_extl(WRegion *reg, ExtlTab g)
 
 
 void region_managed_rqgeom(WRegion *mgr, WRegion *reg,
-                                 int flags, const WRectangle *geom,
-                                 WRectangle *geomret)
+                           int flags, const WRectangle *geom,
+                           WRectangle *geomret)
 {
     CALL_DYN(region_managed_rqgeom, mgr,
              (mgr, reg, flags, geom, geomret));
@@ -568,8 +568,8 @@ void region_managed_rqgeom_allow(WRegion *mgr, WRegion *reg,
 
 
 void region_managed_rqgeom_unallow(WRegion *mgr, WRegion *reg,
-                                         int flags, const WRectangle *geom,
-                                         WRectangle *geomret)
+                                   int flags, const WRectangle *geom,
+                                   WRectangle *geomret)
 {
     if(geomret!=NULL)
         *geomret=REGION_GEOM(reg);
@@ -589,6 +589,16 @@ void region_size_hints(WRegion *reg, XSizeHints *hints_ret,
     {
         CALL_DYN(region_size_hints, reg, (reg, hints_ret, relw_ret, relh_ret));
     }
+}
+
+
+int region_orientation(WRegion *reg)
+{
+    int ret=REGION_ORIENTATION_NONE;
+    
+    CALL_DYN_RET(ret, int, region_orientation, reg, (reg));
+    
+    return ret;
 }
 
 

@@ -37,6 +37,7 @@
 #include "region-iter.h"
 #include "saveload.h"
 #include "xwindow.h"
+#include "defer.h"
 
 
 #define MPLEX_WIN(MPLEX) ((MPLEX)->win.win)
@@ -57,6 +58,9 @@ bool mplex_do_init(WMPlex *mplex, WWindow *parent, Window win,
     mplex->l2_count=0;
     mplex->l2_list=NULL;
     mplex->l2_current=NULL;
+    watch_init(&(mplex->stdispinfo.regwatch));
+    mplex->stdispinfo.orientation=REGION_ORIENTATION_HORIZONTAL;
+    mplex->stdispinfo.corner=MPLEX_STDISP_BL;
     
     if(create){
         if(!window_init((WWindow*)mplex, parent, fp))
@@ -65,13 +69,13 @@ bool mplex_do_init(WMPlex *mplex, WWindow *parent, Window win,
         if(!window_do_init((WWindow*)mplex, parent, win, fp))
             return FALSE;
     }
-
+    
     mplex->win.region.flags|=REGION_BINDINGS_ARE_GRABBED;
-
+    
     XSelectInput(ioncore_g.dpy, MPLEX_WIN(mplex), IONCORE_EVENTMASK_FRAME);
     
     region_add_bindmap((WRegion*)mplex, ioncore_mplex_bindmap);
-
+    
     /* Call this to set MPLEX_MANAGED_UNVIEWABLE if necessary. */
     mplex_fit_managed(mplex);
     
@@ -83,7 +87,7 @@ bool mplex_init(WMPlex *mplex, WWindow *parent, const WFitParams *fp)
 {
     return mplex_do_init(mplex, parent, None, fp, TRUE);
 }
-    
+
 
 WMPlex *create_mplex(WWindow *parent, const WFitParams *fp)
 {
@@ -102,7 +106,7 @@ void mplex_deinit(WMPlex *mplex)
     FOR_ALL_MANAGED_ON_LIST_W_NEXT(mplex->l2_list, reg, next){
         destroy_obj((Obj*)reg);
     }
-
+    
     window_deinit((WWindow*)mplex);
 }
 
@@ -163,7 +167,7 @@ static bool l2_is_hidden(WRegion *reg)
 static bool on_list(WRegion *list, WRegion *reg)
 {
     WRegion *reg2;
-
+    
     FOR_ALL_MANAGED_ON_LIST(list, reg2){
         if(reg2==reg)
             return TRUE;
@@ -207,7 +211,7 @@ WRegion *mplex_current(WMPlex *mplex)
  * \var{mplex}.
  */
 EXTL_EXPORT_MEMBER
-WRegion *mplex_lcurrent(WMPlex *mplex, uint l)
+    WRegion *mplex_lcurrent(WMPlex *mplex, uint l)
 {
     return (l==1 
             ? mplex->l1_current
@@ -222,7 +226,7 @@ WRegion *mplex_lcurrent(WMPlex *mplex, uint l)
  * \var{l}:th layer..
  */
 EXTL_EXPORT_MEMBER
-WRegion *mplex_lnth(WMPlex *mplex, uint l, uint n)
+    WRegion *mplex_lnth(WMPlex *mplex, uint l, uint n)
 {
     return (l==1 
             ? nth_on_list(mplex->l1_list, n)
@@ -236,7 +240,7 @@ WRegion *mplex_lnth(WMPlex *mplex, uint l, uint n)
  * Returns a list of regions managed by \var{mplex} on layer \var{l}.
  */
 EXTL_EXPORT_MEMBER
-ExtlTab mplex_llist(WMPlex *mplex, uint l)
+    ExtlTab mplex_llist(WMPlex *mplex, uint l)
 {
     return (l==1 
             ? managed_list_to_table(mplex->l1_list, NULL)
@@ -250,7 +254,7 @@ ExtlTab mplex_llist(WMPlex *mplex, uint l)
  * Returns the number of regions managed by \var{mplex} on layer \var{l}.
  */
 EXTL_EXPORT_MEMBER
-int mplex_lcount(WMPlex *mplex, uint l)
+    int mplex_lcount(WMPlex *mplex, uint l)
 {
     return (l==1 
             ? mplex->l1_count
@@ -272,7 +276,7 @@ static void link_at(WMPlex *mplex, WRegion *reg, int index)
             after=mplex->l1_current;
         }
     }
-
+    
     if(after==reg)
         after=NULL;
     
@@ -290,14 +294,14 @@ static void link_at(WMPlex *mplex, WRegion *reg, int index)
  * Set index of \var{reg} within the multiplexer to \var{index}.
  */
 EXTL_EXPORT_MEMBER
-void mplex_set_index(WMPlex *mplex, WRegion *reg, int index)
+    void mplex_set_index(WMPlex *mplex, WRegion *reg, int index)
 {
     if(index<0 || reg==NULL)
         return;
-
+    
     if(!on_l1_list(mplex, reg))
         return;
-
+    
     UNLINK_ITEM(mplex->l1_list, reg, mgr_next, mgr_prev);
     link_at(mplex, reg, index);
     mplex_managed_changed(mplex, MPLEX_CHANGE_REORDER, FALSE, reg);
@@ -310,7 +314,7 @@ void mplex_set_index(WMPlex *mplex, WRegion *reg, int index)
  * -1 is returned.
  */
 EXTL_EXPORT_MEMBER
-int mplex_get_index(WMPlex *mplex, WRegion *reg)
+    int mplex_get_index(WMPlex *mplex, WRegion *reg)
 {
     WRegion *other;
     int index=0;
@@ -329,7 +333,7 @@ int mplex_get_index(WMPlex *mplex, WRegion *reg)
  * Move \var{r} ''right'' within objects managed by \var{mplex}.
  */
 EXTL_EXPORT_MEMBER
-void mplex_inc_index(WMPlex *mplex, WRegion *r)
+    void mplex_inc_index(WMPlex *mplex, WRegion *r)
 {
     if(r==NULL)
         r=mplex_lcurrent(mplex, 1);
@@ -342,7 +346,7 @@ void mplex_inc_index(WMPlex *mplex, WRegion *r)
  * Move \var{r} ''right'' within objects managed by \var{mplex}.
  */
 EXTL_EXPORT_MEMBER
-void mplex_dec_index(WMPlex *mplex, WRegion *r)
+    void mplex_dec_index(WMPlex *mplex, WRegion *r)
 {
     if(r==NULL)
         r=mplex_lcurrent(mplex, 1);
@@ -446,7 +450,7 @@ void mplex_fit_managed(WMPlex *mplex)
         if(REGION_IS_MAPPED(mplex))
             mplex_map_mgd(mplex);
     }
-
+    
     if(!MPLEX_MGD_UNVIEWABLE(mplex)){
         fp.mode=REGION_FIT_EXACT;
         FOR_ALL_MANAGED_ON_LIST(mplex->l1_list, sub){
@@ -506,11 +510,11 @@ void mplex_do_set_focus(WMPlex *mplex, bool warp)
     }else{
         xwindow_do_set_focus(MPLEX_WIN(mplex));
     }
-
+    
     if(warp)
         region_do_warp((WRegion*)mplex);
 }
-    
+
 
 static WRegion *mplex_managed_control_focus(WMPlex *mplex, WRegion *reg)
 {
@@ -529,7 +533,7 @@ static WRegion *mplex_managed_control_focus(WMPlex *mplex, WRegion *reg)
  * hide it. if \var{reg} is nil, hide all objects on the l2 list.
  */
 EXTL_EXPORT_MEMBER
-bool mplex_l2_hide(WMPlex *mplex, WRegion *reg)
+    bool mplex_l2_hide(WMPlex *mplex, WRegion *reg)
 {
     WRegion *reg2, *toact=NULL;
     bool mcf=region_may_control_focus((WRegion*)mplex);
@@ -547,10 +551,10 @@ bool mplex_l2_hide(WMPlex *mplex, WRegion *reg)
         if(!l2_is_hidden(reg2))
             toact=reg2;
     }
-
+    
     if(reg==mplex->l2_current)
         mplex->l2_current=toact;
-
+    
     if(mcf)
         region_warp((WRegion*)mplex);
     
@@ -566,11 +570,11 @@ bool mplex_l2_hide(WMPlex *mplex, WRegion *reg)
  * display it. if \var{reg} is nil, display all objects on the l2 list.
  */
 EXTL_EXPORT_MEMBER
-bool mplex_l2_show(WMPlex *mplex, WRegion *reg)
+    bool mplex_l2_show(WMPlex *mplex, WRegion *reg)
 {
     /*WRegion *reg2, *toact=NULL;
-    bool mcf=region_may_control_focus((WRegion*)mplex);
-    */
+     bool mcf=region_may_control_focus((WRegion*)mplex);
+     */
     
     if(!l2_is_hidden(reg))
         return FALSE;
@@ -603,6 +607,7 @@ bool mplex_l2_show(WMPlex *mplex, WRegion *reg)
 static bool mplex_do_managed_display(WMPlex *mplex, WRegion *sub)
 {
     bool l2=FALSE;
+    WRegion *stdisp;
     
     if(sub==mplex->l1_current || sub==mplex->l2_current)
         return TRUE;
@@ -612,6 +617,22 @@ static bool mplex_do_managed_display(WMPlex *mplex, WRegion *sub)
     else if(!on_l1_list(mplex, sub))
         return FALSE;
     
+    stdisp=(WRegion*)(mplex->stdispinfo.regwatch.obj);
+    
+    if(!l2 && stdisp!=NULL){
+        WRegion *mgr=REGION_MANAGER(stdisp);
+        if(mgr!=sub && OBJ_IS(sub, WGenWS)){
+            if(OBJ_IS(mgr, WGenWS)){
+                genws_unmanage_stdisp((WGenWS*)mgr, FALSE, TRUE);
+                region_detach_manager(stdisp);
+            }
+            
+            genws_manage_stdisp((WGenWS*)sub, stdisp, 
+                                mplex->stdispinfo.corner,
+                                mplex->stdispinfo.orientation);
+        }
+    }
+    
     if(REGION_IS_MAPPED(mplex) && !MPLEX_MGD_UNVIEWABLE(mplex))
         region_map(sub);
     else
@@ -620,7 +641,7 @@ static bool mplex_do_managed_display(WMPlex *mplex, WRegion *sub)
     if(!l2){
         if(mplex->l1_current!=NULL && REGION_IS_MAPPED(mplex))
             region_unmap(mplex->l1_current);
-
+        
         mplex->l1_current=sub;
         
         /* Many programs will get upset if the visible, although only 
@@ -668,7 +689,7 @@ static void do_switch(WMPlex *mplex, WRegion *sub)
  * Have \var{mplex} display the \var{n}:th object managed by it.
  */
 EXTL_EXPORT_MEMBER
-void mplex_switch_nth(WMPlex *mplex, uint n)
+    void mplex_switch_nth(WMPlex *mplex, uint n)
 {
     do_switch(mplex, mplex_lnth(mplex, 1, n));
 }
@@ -679,7 +700,7 @@ void mplex_switch_nth(WMPlex *mplex, uint n)
  * by it.
  */
 EXTL_EXPORT_MEMBER
-void mplex_switch_next(WMPlex *mplex)
+    void mplex_switch_next(WMPlex *mplex)
 {
     do_switch(mplex, REGION_NEXT_MANAGED_WRAP(mplex->l1_list, 
                                               mplex->l1_current));
@@ -691,7 +712,7 @@ void mplex_switch_next(WMPlex *mplex)
  * managed by it.
  */
 EXTL_EXPORT_MEMBER
-void mplex_switch_prev(WMPlex *mplex)
+    void mplex_switch_prev(WMPlex *mplex)
 {
     do_switch(mplex, REGION_PREV_MANAGED_WRAP(mplex->l1_list, 
                                               mplex->l1_current));
@@ -741,7 +762,7 @@ static WRegion *mplex_do_attach(WMPlex *mplex, WRegionAttachHandler *hnd,
         if(!sw)
             sw=!l2_mark_hidden(reg);
     }
-
+    
     if(sw || (!l2 && mplex->l1_count==1)){
         mplex_do_managed_display(mplex, reg);
         mplex_managed_changed(mplex, MPLEX_CHANGE_ADD, TRUE, reg);
@@ -760,7 +781,7 @@ WRegion *mplex_attach_simple(WMPlex *mplex, WRegion *reg, int flags)
     
     if(reg==(WRegion*)mplex)
         return FALSE;
-
+    
     par.index=-1;
     par.flags=flags;
     
@@ -791,8 +812,8 @@ static void get_params(ExtlTab tab, MPlexAttachParams *par)
     
     extl_table_gets_i(tab, "layer", &layer);
     if(layer==2)
-       par->flags|=MPLEX_ATTACH_L2;
-
+        par->flags|=MPLEX_ATTACH_L2;
+    
     if(extl_table_is_bool_set(tab, "switchto"))
         par->flags|=MPLEX_ATTACH_SWITCHTO;
     
@@ -806,11 +827,11 @@ static void get_params(ExtlTab tab, MPlexAttachParams *par)
  * \var{switchto} that are interpreted as for \fnref{WMPlex.attach_new}.
  */
 EXTL_EXPORT_MEMBER
-WRegion *mplex_attach(WMPlex *mplex, WRegion *reg, ExtlTab param)
+    WRegion *mplex_attach(WMPlex *mplex, WRegion *reg, ExtlTab param)
 {
     MPlexAttachParams par;
     get_params(param, &par);
-
+    
     /* region__attach_reparent should do better checks. */
     if(reg==NULL || reg==(WRegion*)mplex)
         return FALSE;
@@ -841,7 +862,7 @@ WRegion *mplex_attach(WMPlex *mplex, WRegion *reg, ExtlTab param)
  * same table.
  */
 EXTL_EXPORT_MEMBER
-WRegion *mplex_attach_new(WMPlex *mplex, ExtlTab param)
+    WRegion *mplex_attach_new(WMPlex *mplex, ExtlTab param)
 {
     MPlexAttachParams par;
     get_params(param, &par);
@@ -856,7 +877,7 @@ WRegion *mplex_attach_new(WMPlex *mplex, ExtlTab param)
  * Attach all tagged regions to \var{mplex}.
  */
 EXTL_EXPORT_MEMBER
-void mplex_attach_tagged(WMPlex *mplex)
+    void mplex_attach_tagged(WMPlex *mplex)
 {
     WRegion *reg;
     
@@ -869,7 +890,7 @@ static bool mplex_handle_drop(WMPlex *mplex, int x, int y,
                               WRegion *dropped)
 {
     WRegion *curr=mplex_lcurrent(mplex, 1);
-
+    
     /* This code should handle dropping tabs on floating workspaces. */
     if(curr && HAS_DYN(curr, region_handle_drop)){
         int rx, ry;
@@ -904,7 +925,7 @@ bool mplex_manage_clientwin(WMPlex *mplex, WClientWin *cwin,
     
     if(redir==MANAGE_REDIR_STRICT_YES)
         return FALSE;
-
+    
     return (NULL!=mplex_attach_simple(mplex, (WRegion*)cwin, swf));
 }
 
@@ -926,7 +947,13 @@ void mplex_managed_remove(WMPlex *mplex, WRegion *sub)
     WRegion *next=NULL;
     bool l2=FALSE;
     bool sw=FALSE;
-
+    WRegion *stdisp=(WRegion*)(mplex->stdispinfo.regwatch.obj);
+    
+    if(OBJ_IS(sub, WGenWS) && stdisp!=NULL && REGION_MANAGER(stdisp)==sub){
+        genws_unmanage_stdisp((WGenWS*)sub, TRUE, TRUE);
+        region_detach_manager(stdisp);
+    }
+    
     if(mplex->l1_current==sub){
         next=REGION_PREV_MANAGED(mplex->l1_list, sub);
         if(next==NULL)
@@ -966,7 +993,7 @@ void mplex_managed_remove(WMPlex *mplex, WRegion *sub)
         region_set_focus((WRegion*)mplex);
     
     mplex_managed_changed(mplex, MPLEX_CHANGE_REMOVE, sw, sub);
-
+    
 }
 
 
@@ -979,6 +1006,245 @@ bool mplex_rescue_clientwins(WMPlex *mplex)
     ret3=region_rescue_child_clientwins((WRegion*)mplex);
     
     return (ret1 && ret2 && ret3);
+}
+
+
+/*}}}*/
+
+
+/*{{{ Status display support */
+
+#ifndef offsetof
+# define offsetof(T,F) ((size_t)((char*)&((T*)0L)->F-(char*)0L))
+#endif
+
+#define STRUCTOF(T, F, FADDR) \
+        ((T*)((char*)(FADDR)-offsetof(T, F)))
+
+
+static void stdisp_watch_handler(Watch *watch, Obj *obj)
+{
+    /*WMPlex *mplex=STRUCTOF(WMPlex, stdispinfo, 
+     STRUCTOF(WMPlexSTDispInfo, regwatch, watch));
+     WMPlexSTDispInfo *di=&(mplex->stdispinfo);
+     WGenWS *ws=OBJ_CAST(REGION_MANAGER(obj), WGenWS);
+     * 
+     if(ioncore_g.opmode!=IONCORE_OPMODE_DEINIT && ws!=NULL)
+     genws_unmanage_stdisp(ws, TRUE, FALSE);*/
+}
+
+
+bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg, 
+                      int corner, int orientation)
+{
+    WMPlexSTDispInfo *di=&(mplex->stdispinfo);
+    WRegion *oldstdisp=(WRegion*)(di->regwatch.obj);
+    WGenWS *mgr=NULL;
+    
+    assert(reg==NULL || (Obj*)reg==di->regwatch.obj ||
+           (REGION_MANAGER(reg)==NULL && REGION_PARENT(reg)==(WRegion*)mplex));
+    
+    if(oldstdisp!=NULL){
+        mgr=OBJ_CAST(REGION_MANAGER(oldstdisp), WGenWS);
+        
+        if(oldstdisp!=reg){
+            warn("D-old");
+            ioncore_defer_destroy(di->regwatch.obj);
+            watch_reset(&(di->regwatch));
+        }
+    }
+    
+    di->corner=corner;
+    di->orientation=orientation;
+    
+    if(reg==NULL){
+        if(mgr!=NULL){
+            genws_unmanage_stdisp((WGenWS*)mgr, TRUE, FALSE);
+            region_detach_manager(oldstdisp);
+        }
+    }else{
+        watch_setup(&(di->regwatch), (Obj*)reg, stdisp_watch_handler);
+        
+        if(mplex->l1_current!=NULL && OBJ_IS(mplex->l1_current, WGenWS) &&
+           mgr!=(WGenWS*)(mplex->l1_current)){
+            if(mgr!=NULL){
+                genws_unmanage_stdisp(mgr, FALSE, TRUE);
+                region_detach_manager(oldstdisp);
+            }
+            mgr=(WGenWS*)(mplex->l1_current);
+        }
+        if(mgr!=NULL)
+            genws_manage_stdisp(mgr, reg, di->corner, di->orientation);
+        else
+            region_unmap(reg);
+    }
+    
+#warning "Huoh, pitäisi saada selville kun stdisp reparentoidaan."
+    
+    return TRUE;
+}
+
+
+void mplex_get_stdisp(WMPlex *mplex, WRegion **reg, 
+                      int *corner, int *orientation)
+{
+    WMPlexSTDispInfo *di=&(mplex->stdispinfo);
+    
+    *reg=(WRegion*)di->regwatch.obj;
+    *corner=di->corner;
+    *orientation=di->orientation;
+}
+
+
+#define CHK(O, V, S) if(O==V) return S;
+
+static const char *corner_to_str(int c)
+{
+    CHK(c, MPLEX_STDISP_TL, "tl");
+    CHK(c, MPLEX_STDISP_TR, "tr");
+    CHK(c, MPLEX_STDISP_BL, "bl");
+    CHK(c, MPLEX_STDISP_BR, "br");
+    return NULL;
+}
+
+static const char *orientation_to_str(int o)
+{
+    CHK(o, REGION_ORIENTATION_VERTICAL, "vertical");
+    CHK(o, REGION_ORIENTATION_HORIZONTAL, "horizontal");
+    return NULL;
+}
+
+
+#undef CHK
+#define CHK(O, V, S) if(strcmp(O, S)==0) return V;
+
+static int str_to_corner(const char *c)
+{
+    CHK(c, MPLEX_STDISP_TL, "tl");
+    CHK(c, MPLEX_STDISP_TR, "tr");
+    CHK(c, MPLEX_STDISP_BL, "bl");
+    CHK(c, MPLEX_STDISP_BR, "br");
+    return -1;
+}
+
+static int str_to_orientation(const char *o)
+{
+    CHK(o, REGION_ORIENTATION_VERTICAL, "vertical");
+    CHK(o, REGION_ORIENTATION_HORIZONTAL, "horizontal");
+    return -1;
+}
+
+
+static WRegion *do_attach_stdisp(WMPlex *mplex, WRegionAttachHandler *handler,
+                                 void *handlerparams, const WFitParams *fp)
+{
+    return handler((WWindow*)mplex, fp, handlerparams);
+    
+    /* We do not manage the stdisp, so manager is not set in this
+     * function unlike a true "attach" function.
+     */
+}
+
+
+EXTL_EXPORT_AS(WMPlex, set_stdisp)
+bool mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t)
+{
+    WRegion *stdisp=NULL;
+    int c=mplex->stdispinfo.corner, o=mplex->stdispinfo.orientation;
+    char *s;
+    
+    if(extl_table_gets_s(t, "corner", &s)){
+        c=str_to_corner(s);
+        if(c<0){
+            warn("Invalid corner setting");
+            return FALSE;
+        }
+    }
+
+    if(extl_table_gets_s(t, "orientation", &s)){
+        o=str_to_orientation(s);
+        if(o<0){
+            warn("Invalid orientation setting");
+            return FALSE;
+        }
+    }
+
+    s=NULL;
+    extl_table_gets_s(t, "action", &s);
+    
+    if(s==NULL || strcmp(s, "replace")==0){
+        WFitParams fp;
+        int o2;
+        
+        fp.g.x=0;
+        fp.g.y=0;
+        fp.g.w=REGION_GEOM(mplex).w;
+        fp.g.h=REGION_GEOM(mplex).h;
+        fp.mode=REGION_FIT_BOUNDS;
+        
+        /* Full mplex size is stupid so use saved geometry initially
+         * if there's one.
+         */
+        extl_table_gets_rectangle(t, "geom", &(fp.g));
+
+        stdisp=region__attach_load((WRegion*)mplex, t,
+                                 (WRegionDoAttachFn*)do_attach_stdisp, 
+                                 (void*)&fp);
+
+        if(stdisp==NULL)
+            return FALSE;
+        
+        o2=region_orientation(stdisp);
+        if(o2==REGION_ORIENTATION_HORIZONTAL || 
+           o2==REGION_ORIENTATION_VERTICAL){
+            o=o2;
+        }
+    }else if(strcmp(s, "keep")==0){
+        stdisp=(WRegion*)(mplex->stdispinfo.regwatch.obj);
+    }else if(strcmp(s, "remove")!=0){
+        warn("Invalid action.");
+        return FALSE;
+    }
+    
+    if(!mplex_set_stdisp(mplex, stdisp, c, o)){
+        destroy_obj((Obj*)stdisp);
+        return FALSE;
+    }
+    
+    return TRUE;
+}
+
+
+static ExtlTab mplex_do_get_stdisp_extl(WMPlex *mplex, bool fullconfig)
+{
+    WMPlexSTDispInfo *di=&(mplex->stdispinfo);
+    ExtlTab t;
+    
+    if(di->regwatch.obj==NULL)
+        return extl_table_none();
+
+    if(fullconfig){
+        t=region_get_configuration((WRegion*)di->regwatch.obj);
+        extl_table_sets_rectangle(t, "geom", &REGION_GEOM(di->regwatch.obj));
+    }else{
+        t=extl_create_table();
+        extl_table_sets_o(t, "reference", di->regwatch.obj);
+    }
+    
+    if(t!=extl_table_none()){
+        extl_table_sets_s(t, "corner", corner_to_str(di->corner));
+        extl_table_sets_s(t, "orientation", 
+                          orientation_to_str(di->orientation));
+    }
+    
+    return t;
+}
+
+
+EXTL_EXPORT_AS(WMPlex, get_stdisp)
+ExtlTab mplex_get_stdisp_extl(WMPlex *mplex)
+{
+    return mplex_do_get_stdisp_extl(mplex, FALSE);
 }
 
 
@@ -1025,7 +1291,7 @@ ExtlTab mplex_get_configuration(WMPlex *mplex)
 {
     WRegion *sub=NULL;
     int n=0;
-    ExtlTab tab, subs;
+    ExtlTab tab, subs, stdisptab;
     
     tab=region_get_base_configuration((WRegion*)mplex);
     
@@ -1055,6 +1321,12 @@ ExtlTab mplex_get_configuration(WMPlex *mplex)
     
     extl_unref_table(subs);
     
+    stdisptab=mplex_do_get_stdisp_extl(mplex, TRUE);
+    if(stdisptab!=extl_table_none()){
+        extl_table_sets_t(tab, "stdisp", stdisptab);
+        extl_unref_table(stdisptab);
+    }
+    
     return tab;
 }
 
@@ -1063,6 +1335,11 @@ void mplex_load_contents(WMPlex *mplex, ExtlTab tab)
 {
     ExtlTab substab, subtab;
     int n, i;
+    
+    if(extl_table_gets_t(tab, "stdisp", &subtab)){
+        mplex_set_stdisp_extl(mplex, subtab);
+        extl_unref_table(subtab);
+    }
     
     if(extl_table_gets_t(tab, "subs", &substab)){
         n=extl_table_get_n(substab);
@@ -1135,3 +1412,4 @@ IMPLCLASS(WMPlex, WWindow, mplex_deinit, mplex_dynfuntab);
 
 
 /*}}}*/
+

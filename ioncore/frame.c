@@ -406,7 +406,7 @@ void frame_resize_hints(WFrame *frame, XSizeHints *hints_ret,
     xsizehints_adjust_for(hints_ret, FRAME_MLIST(frame));
     
     hints_ret->flags|=PMinSize;
-    hints_ret->min_width=1;
+    hints_ret->min_width=0;
     hints_ret->min_height=0;
 }
 

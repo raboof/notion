@@ -12,8 +12,8 @@
 #ifndef ION_IONCORE_REGION_H
 #define ION_IONCORE_REGION_H
 
-#include "common.h"
 #include <libtu/obj.h>
+#include "common.h"
 #include "rectangle.h"
 
 #define REGION_MAPPED        0x0001
