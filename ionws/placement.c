@@ -35,17 +35,29 @@ bool workspace_add_clientwin(WWorkspace *ws, WClientWin *cwin,
 	WRegion *target=NULL;
 	bool geomset;
 
-#ifdef CF_PLACEMENT_GEOM
-	geomset=(cwin->size_hints.win_gravity!=ForgetGravity &&
-			 (attr->x>CF_STUBBORN_TRESH &&
-			  attr->y>CF_STUBBORN_TRESH));
-	if(geomset && (!props || !props->stubborn))
-		target=(WRegion*)find_frame_at(ws, attr->x, attr->y);
-
-	if(target==NULL)
-#endif
+	if(props!=NULL && props->transient_mode==TRANSIENT_MODE_CURRENT){
 		target=find_suitable_frame(ws);
+		if(target!=NULL){
+			if(REGION_ACTIVE_SUB(target)!=NULL &&
+			   WTHING_IS(REGION_ACTIVE_SUB(target), WClientWin)){
+				/*target=REGION_ACTIVE_SUB(target);*/
+				return clientwin_attach_sub((WClientWin*)
+											REGION_ACTIVE_SUB(target),
+											(WRegion*)cwin, 0);
+			}
+		}
+	}else{
+#ifdef CF_PLACEMENT_GEOM
+		geomset=(cwin->size_hints.win_gravity!=ForgetGravity &&
+				 (attr->x>CF_STUBBORN_TRESH &&
+				  attr->y>CF_STUBBORN_TRESH));
+		if(geomset && (!props || !props->stubborn))
+			target=(WRegion*)find_frame_at(ws, attr->x, attr->y);
 
+		if(target==NULL)
+#endif
+			target=find_suitable_frame(ws);
+	}
 	
 	if(target==NULL){
 		warn("Ooops... could not find a frame to attach client to.");
@@ -65,5 +77,3 @@ bool workspace_add_transient(WRegion *reg, WClientWin *tfor,
 {
 	return clientwin_attach_sub(tfor, (WRegion*)cwin, 0);
 }
-
-

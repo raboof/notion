@@ -74,6 +74,30 @@ static bool opt_winprop_target(Tokenizer *tokz, int n, Token *toks)
 }
 
 
+static bool opt_winprop_transient_mode(Tokenizer *tokz, int n, Token *toks)
+{
+	char *mod=TOK_IDENT_VAL(&(toks[1]));
+	int tm;
+
+	if(strcmp(mod, "normal")==0){
+		tm=TRANSIENT_MODE_NORMAL;
+	}else if(strcmp(mod, "current")==0){
+		tm=TRANSIENT_MODE_CURRENT;
+	}else if(strcmp(mod, "off")==0){
+		tm=TRANSIENT_MODE_OFF;
+	}else{
+		tokz_warn(tokz, toks[1].line,
+				  "Invalid transient mode `%s', must be 'normal',"
+				  " 'current' or 'off'", mod);
+		return FALSE;
+	}
+
+	tmp_winprop->transient_mode=tm;
+	
+	return TRUE;
+}
+
+
 bool ion_begin_winprop(Tokenizer *tokz, int n, Token *toks)
 {
 	WWinProp *wrop;
@@ -109,7 +133,8 @@ ConfOpt ion_winprop_opts[]={
 	{"switchto", "b", opt_winprop_switchto, NULL},
 	{"stubborn", "b", opt_winprop_stubborn, NULL},
 	{"target", "s", opt_winprop_target, NULL},
-		
+	{"transient_mode", "i", opt_winprop_transient_mode, NULL},
+	
 	{"#end", NULL, end_winprop, NULL},
 	{"#cancel", NULL, cancel_winprop, NULL},
 	

@@ -151,7 +151,7 @@ bool region_rescue_subregions(WRegion *reg)
 	 * properly in a tree with a WScreen root.
 	 */
 	
-	warn("Unable to move subregions of a (to-be-destroyed) "
+	warn("Unable to move subregions of a (to-be-destroyed) frame"
 		 "somewhere else.");
 	
 	return FALSE;

@@ -131,39 +131,44 @@ bool add_clientwin_default(WClientWin *cwin, const XWindowAttributes *attr,
 	/* Get and set winprops */
 	props=setup_get_winprops(cwin);
 	
-	/* Is it a transient to some other window? */
-	if(XGetTransientForHint(wglobal.dpy, win, &(cwin->transient_for))){
-		tfor=find_clientwin(cwin->transient_for);
-		if(tfor!=NULL && add_transient(tfor, cwin, attr, init_state, props))
-			return TRUE;
-		cwin->transient_for=None;
+	if(props==NULL || props->transient_mode!=TRANSIENT_MODE_CURRENT){
+		if(props==NULL || props->transient_mode==TRANSIENT_MODE_NORMAL){
+			/* Is it a transient to some other window? */
+			if(XGetTransientForHint(wglobal.dpy, win, &(cwin->transient_for))){
+				tfor=find_clientwin(cwin->transient_for);
+				if(tfor!=NULL && add_transient(tfor, cwin, attr,
+											   init_state, props))
+					return TRUE;
+				cwin->transient_for=None;
+			}
+		}
+		
+		get_integer_property(win, wglobal.atom_frame_id, &target_id);
+		
+		if(target_id!=0)
+			target=find_target_by_id(target_id);
+		
+		find_prop_target(cwin, props, target==NULL ? &target : NULL, &ws);
+		
+		if(target!=NULL){
+			if(!region_supports_attach(target)){
+				warn("Target region of window %#x does not support primitive "
+					 "attach method", cwin->win);
+				target=NULL;
+			}else if(SCREEN_OF(target)!=SCREEN_OF(cwin)){
+				warn("The target id property of window %#x is set to "
+					 "a frame on different screen", cwin->win);
+				target=NULL;
+			}
+		}
+		
+		/* Found a specific target frame or such? */
+		if(target!=NULL)
+			return finish_add_clientwin(target, cwin, init_state, props);
 	}
 	
-	get_integer_property(win, wglobal.atom_frame_id, &target_id);
-
-	if(target_id!=0)
-		target=find_target_by_id(target_id);
-
-	find_prop_target(cwin, props, target==NULL ? &target : NULL, &ws);
-
-	if(target!=NULL){
-		if(!region_supports_attach(target)){
-			warn("Target region of window %#x does not support primitive "
-				 "attach method", cwin->win);
-			target=NULL;
-		}else if(SCREEN_OF(target)!=SCREEN_OF(cwin)){
-			warn("The target id property of window %#x is set to "
-				 "a frame on different screen", cwin->win);
-			target=NULL;
-		}
-	}
-
-	/* Found a specific target frame or such? */
-	if(target!=NULL)
-		return finish_add_clientwin(target, cwin, init_state, props);
-
 	/* No, need to find a workspace and let it handle this. */
-
+	
 	if(ws==NULL)
 		ws=find_suitable_workspace(SCREEN_OF(cwin));
 

@@ -8,6 +8,12 @@
 #ifndef WMCORE_WINPROPS_H
 #define WMCORE_WINPROPS_H
 
+enum TransientMode{
+	TRANSIENT_MODE_NORMAL,
+	TRANSIENT_MODE_CURRENT,
+	TRANSIENT_MODE_OFF
+};
+
 INTRSTRUCT(WWinProp)
 
 DECLSTRUCT(WWinProp){
@@ -22,6 +28,7 @@ DECLSTRUCT(WWinProp){
 	int max_w, max_h;
 	int aspect_w, aspect_h;
 	char *target_name;
+	int transient_mode;
 };
 
 extern WWinProp *alloc_winprop(const char *winname);
