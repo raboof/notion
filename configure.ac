@@ -3,7 +3,7 @@ dnl Please report bugs in this autoconf script Tom Payne <ion@tompayne.org>
 dnl $Header: /home/twp/cvsroot/twp/ion/ion-devel-autoconf/configure.ac,v 1.16 2004/01/14 11:32:19 twp Exp $
 
 AC_INIT([Ion Window Manager],
-		[20031211],
+		[ION_VERSION],
 		[tuomov@iki.fi],
 		[ion])
 AC_PREREQ([2.58])
