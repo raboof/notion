@@ -97,10 +97,10 @@ void statusbar_draw(WStatusBar *sb, bool complete)
 
     if(!right_align){
         draw_elems(sb->brush, win, g.x+bdw.left, ty,
-                   sb->elems, sb->nelems, !complete, NULL);
+                   sb->elems, sb->nelems, TRUE, NULL);
     }else{
         draw_elems_ra(sb->brush, win, g.x+g.w-bdw.right, ty,
-                      sb->elems, sb->nelems, !complete, NULL);
+                      sb->elems, sb->nelems, TRUE, NULL);
     }
 }
 
