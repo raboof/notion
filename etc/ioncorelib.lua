@@ -24,7 +24,7 @@ end
 -- For details, see section \ref{sec:bindings}.
 function submap(keyspec)
     local function submap_helper(list)
-	return submap2(kcb_, list)
+	return submap2(keyspec, list)
     end
     return submap_helper
 end
