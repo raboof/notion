@@ -337,9 +337,11 @@ static void reparent_or_fit(WGenFrame *genframe, const WRectangle *geom,
 			   REGION_GEOM(genframe).y!=geom->y);
 	
 	if(parent!=NULL){
+		region_detach_parent((WRegion*)genframe);
 		XReparentWindow(wglobal.dpy, WGENFRAME_WIN(genframe), parent->win,
 						geom->x, geom->y);
 		XResizeWindow(wglobal.dpy, WGENFRAME_WIN(genframe), geom->w, geom->h);
+		region_attach_parent((WRegion*)genframe, (WRegion*)parent);
 	}else{
 		XMoveResizeWindow(wglobal.dpy, WGENFRAME_WIN(genframe),
 						  geom->x, geom->y, geom->w, geom->h);
@@ -391,10 +393,7 @@ bool genframe_reparent(WGenFrame *genframe, WWindow *parent,
 	if(!same_rootwin((WRegion*)genframe, (WRegion*)parent))
 		return FALSE;
 	
-	region_detach_parent((WRegion*)genframe);
-	region_set_parent((WRegion*)genframe, (WRegion*)parent);
 	reparent_or_fit(genframe, geom, parent);
-	
 	return TRUE;
 }
 

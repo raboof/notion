@@ -59,7 +59,7 @@ static bool reparent_ionws(WIonWS *ws, WWindow *parent,
 		return FALSE;
 	
 	region_detach_parent((WRegion*)ws);
-	region_set_parent((WRegion*)ws, (WRegion*)parent);
+	region_attach_parent((WRegion*)ws, (WRegion*)parent);
 	
 	FOR_ALL_MANAGED_ON_LIST_W_NEXT(ws->managed_list, sub, next){
 		if(!reparent_region(sub, parent, &REGION_GEOM(sub))){
@@ -146,11 +146,13 @@ static bool ionws_init(WIonWS *ws, WWindow *parent, const WRectangle *bounds,
 					   bool ci)
 {
 	ws->managed_splits=extl_create_table();
+	
 	if(ws->managed_splits==extl_table_none())
 		return FALSE;
+	
+	ws->split_tree=NULL;
 
 	genws_init(&(ws->genws), parent, bounds);
-	ws->split_tree=NULL;
 	
 	if(ci){
 		if(create_initial_frame(ws, parent, bounds)==NULL){

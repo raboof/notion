@@ -52,15 +52,6 @@ void region_init(WRegion *reg, WRegion *parent, const WRectangle *geom)
 	reg->p_next=NULL;
 	reg->p_prev=NULL;
 	
-	if(parent!=NULL){
-		reg->rootwin=parent->rootwin;
-		/*link_child(parent, reg);*/
-		region_set_parent(reg, parent);
-	}else{
-		assert(WOBJ_IS(reg, WRootWin) || WOBJ_IS(reg, WScreen));
-		reg->rootwin=NULL;
-	}
-	
 	reg->active_sub=NULL;
 	
 	reg->ni.name=NULL;
@@ -68,9 +59,6 @@ void region_init(WRegion *reg, WRegion *parent, const WRectangle *geom)
 	reg->ni.ns_next=NULL;
 	reg->ni.ns_prev=NULL;
 	
-	if(!WOBJ_IS(reg, WClientWin))
-		region_set_name(reg, WOBJ_TYPESTR(reg));
-
 	reg->manager=NULL;
 	reg->mgr_next=NULL;
 	reg->mgr_prev=NULL;
@@ -81,6 +69,18 @@ void region_init(WRegion *reg, WRegion *parent, const WRectangle *geom)
 	reg->stacking.above=NULL;
 	
 	reg->mgd_activity=FALSE;
+	
+	if(parent!=NULL){
+		reg->rootwin=parent->rootwin;
+		/*link_child(parent, reg);*/
+		region_attach_parent(reg, parent);
+	}else{
+		assert(WOBJ_IS(reg, WRootWin) || WOBJ_IS(reg, WScreen));
+		reg->rootwin=NULL;
+	}
+	
+	if(!WOBJ_IS(reg, WClientWin))
+		region_set_name(reg, WOBJ_TYPESTR(reg));
 }
 
 
@@ -649,9 +649,15 @@ void region_unset_manager(WRegion *reg, WRegion *mgr, WRegion **listptr)
 void region_set_parent(WRegion *reg, WRegion *parent)
 {
 	assert(reg->parent==NULL && parent!=NULL);
-	/*link_child(par, reg);*/
 	LINK_ITEM(parent->children, reg, p_next, p_prev);
 	reg->parent=parent;
+}
+
+
+void region_attach_parent(WRegion *reg, WRegion *parent)
+{
+	region_set_parent(reg, parent);
+	region_raise(reg);
 }
 
 

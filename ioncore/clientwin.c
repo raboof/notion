@@ -271,8 +271,6 @@ static bool clientwin_init(WClientWin *cwin, WRegion *parent,
 							   -cwin->orig_bw, -cwin->orig_bw);
 	}
 
-	region_init(&(cwin->region), parent, &geom);
-
 	cwin->max_geom=geom;
 	cwin->last_h_rq=geom.h;
 
@@ -284,23 +282,24 @@ static bool clientwin_init(WClientWin *cwin, WRegion *parent,
 	cwin->cmaps=NULL;
 	cwin->cmapwins=NULL;
 	cwin->n_cmapwins=0;
-	get_colormaps(cwin);
+	cwin->event_mask=CLIENT_MASK;
 
+	init_watch(&(cwin->fsinfo.last_mgr_watch));
+	
+	region_init(&(cwin->region), parent, &geom);
+	
+	get_colormaps(cwin);
+	get_winprops(cwin);
 	clientwin_get_protocols(cwin);
 	clientwin_get_set_name(cwin);
+	clientwin_get_size_hints(cwin);
 	
-	init_watch(&(cwin->fsinfo.last_mgr_watch));
-
-	cwin->event_mask=CLIENT_MASK;
 	XSelectInput(wglobal.dpy, win, cwin->event_mask);
 
 	XSaveContext(wglobal.dpy, win, wglobal.win_context, (XPointer)cwin);
 	XAddToSaveSet(wglobal.dpy, win);
 
 	LINK_ITEM(wglobal.cwin_list, cwin, g_cwin_next, g_cwin_prev);
-
-	get_winprops(cwin);
-	clientwin_get_size_hints(cwin);
 	
 	return TRUE;
 }
@@ -905,8 +904,11 @@ static void do_fit_clientwin(WClientWin *cwin, const WRectangle *max_geom,
 	if(np==NULL && !changes)
 		return;
 	
-	if(np!=NULL)
+	if(np!=NULL){
+		region_detach_parent((WRegion*)cwin);
 		do_reparent_clientwin(cwin, np->win, geom.x, geom.y);
+		region_attach_parent((WRegion*)cwin, (WRegion*)np);
+	}
 	
 	if(cwin->flags&CWIN_PROP_ACROBATIC && !REGION_IS_MAPPED(cwin)){
 		XMoveResizeWindow(wglobal.dpy, cwin->win,
@@ -948,11 +950,7 @@ static bool reparent_clientwin(WClientWin *cwin, WWindow *par,
 	if(!same_rootwin((WRegion*)cwin, (WRegion*)par))
 		return FALSE;
 	
-	region_detach_parent((WRegion*)cwin);
-	region_set_parent((WRegion*)cwin, (WRegion*)par);
-	
 	do_fit_clientwin(cwin, geom, par);
-	
 	sendconfig_clientwin(cwin);
 	
 	return TRUE;

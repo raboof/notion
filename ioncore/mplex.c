@@ -166,9 +166,11 @@ static void reparent_or_fit(WMPlex *mplex, const WRectangle *geom,
 			   REGION_GEOM(mplex).y!=geom->y);
 	
 	if(parent!=NULL){
+		region_detach_parent((WRegion*)mplex);
 		XReparentWindow(wglobal.dpy, WMPLEX_WIN(mplex), parent->win,
 						geom->x, geom->y);
 		XResizeWindow(wglobal.dpy, WMPLEX_WIN(mplex), geom->w, geom->h);
+		region_attach_parent((WRegion*)mplex, (WRegion*)parent);
 	}else{
 		XMoveResizeWindow(wglobal.dpy, WMPLEX_WIN(mplex),
 						  geom->x, geom->y, geom->w, geom->h);
@@ -189,10 +191,7 @@ bool mplex_reparent(WMPlex *mplex, WWindow *parent, const WRectangle *geom)
 	if(!same_rootwin((WRegion*)mplex, (WRegion*)parent))
 		return FALSE;
 	
-	region_detach_parent((WRegion*)mplex);
-	region_set_parent((WRegion*)mplex, (WRegion*)parent);
 	reparent_or_fit(mplex, geom, parent);
-	
 	return TRUE;
 }
 

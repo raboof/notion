@@ -149,6 +149,7 @@ extern WRegion *region_parent(WRegion *reg);
 extern WRegion *region_manager(WRegion *reg);
 extern WRegion *region_manager_or_parent(WRegion *reg);
 extern void region_set_parent(WRegion *reg, WRegion *par);
+extern void region_attach_parent(WRegion *reg, WRegion *par);
 extern void region_set_manager(WRegion *reg, WRegion *mgr, WRegion **listptr);
 extern void region_unset_manager(WRegion *reg, WRegion *mgr, WRegion **listptr);
 extern WRegion *region_get_manager_chk(WRegion *p, const WObjDescr *descr);

@@ -82,6 +82,8 @@ void region_keep_on_top(WRegion *reg)
 	
 	LINK_ITEM(par->keep_on_top_list, reg, stacking.next, stacking.prev);
 	reg->flags|=REGION_KEEPONTOP;
+	
+	D(fprintf(stderr, "keep_on_top: %p\n", reg));
 }
 
 
@@ -167,6 +169,8 @@ void region_raise(WRegion *reg)
 	WRegion *r2;
 	bool st=FALSE;
 	Window w=None;
+
+	D(fprintf(stderr, "raise: %p\n", reg));
 	
 	r2=reg;
 	while(r2->stacking.above!=NULL)
@@ -176,11 +180,15 @@ void region_raise(WRegion *reg)
 		/* Stack below lowest keepontop window */
 		WWindow *par=REGION_PARENT_CHK(reg, WWindow);
 		if(par!=NULL && par->keep_on_top_list!=NULL){
+			D(fprintf(stderr, "below %p\n", par->keep_on_top_list));
 			w=region_x_window(par->keep_on_top_list);
 			w=region_restack(reg, w, Below);
 			st=TRUE;
 		}
+	}else{
+		D(fprintf(stderr, "kept on top\n"));
 	}
+		
 	
 	if(!st)
 		w=region_restack(reg, None, Above);
@@ -203,6 +211,8 @@ void region_lower(WRegion *reg)
 {
 	WRegion *r2;
 	Window w;
+
+	D(fprintf(stderr, "lower: %p\n", reg));
 	
 	r2=reg;
 	while(reg->stacking.above){

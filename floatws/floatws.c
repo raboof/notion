@@ -53,10 +53,9 @@ static bool reparent_floatws(WFloatWS *ws, WWindow *parent,
 	if(!same_rootwin((WRegion*)ws, (WRegion*)parent))
 		return FALSE;
 	
-	XReparentWindow(wglobal.dpy, ws->dummywin, parent->win, geom->x, geom->h);
-					
 	region_detach_parent((WRegion*)ws);
-	region_set_parent((WRegion*)ws, (WRegion*)parent);
+	XReparentWindow(wglobal.dpy, ws->dummywin, parent->win, geom->x, geom->h);
+	region_attach_parent((WRegion*)ws, (WRegion*)parent);
 	
 	xdiff=geom->x-REGION_GEOM(ws).x;
 	ydiff=geom->y-REGION_GEOM(ws).y;
@@ -200,11 +199,11 @@ static bool floatws_init(WFloatWS *ws, WWindow *parent,
 	XSaveContext(wglobal.dpy, ws->dummywin, wglobal.win_context,
 				 (XPointer)ws);
 	
-	genws_init(&(ws->genws), parent, bounds);
-
 	ws->managed_list=NULL;
 	ws->current_managed=NULL;
-	
+
+	genws_init(&(ws->genws), parent, bounds);
+
 	region_add_bindmap((WRegion*)ws, &floatws_bindmap);
 	
 	return TRUE;

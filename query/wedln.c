@@ -527,6 +527,9 @@ static bool wedln_init(WEdln *wedln, WWindow *par, const WRectangle *geom,
 		return FALSE;
 	}
 	
+	wedln->handler=extl_fn_none();
+	wedln->completor=extl_fn_none();
+	
 	wedln->edln.uiptr=wedln;
 	wedln->edln.ui_update=(EdlnUpdateHandler*)wedln_update_handler;
 	wedln->edln.completion_handler=(EdlnCompletionHandler*)wedln_completion_handler;
