@@ -124,7 +124,7 @@ int main(int argc, char*argv[])
 
 	if(!ioncore_init(argc, argv))
 		return EXIT_FAILURE;
-	
+
 	optparser_init(argc, argv, OPTP_MIDLONG, ioncore_opts, &ioncore_cinfo);
 	
 	while((opt=optparser_get_opt())){

@@ -56,6 +56,8 @@ DECLOBJ(WRegion){
 		WRegion *above;
 		WRegion *next, *prev;
 	} stacking;
+	
+	int mgd_activity;
 };
 
 
@@ -65,6 +67,7 @@ DECLOBJ(WRegion){
 #define REGION_TAGGED		0x0008
 #define REGION_BINDINGS_ARE_GRABBED 0x0020
 #define REGION_KEEPONTOP 	0x0080
+#define REGION_ACTIVITY		0x0100
 
 #define MARK_REGION_MAPPED(R)	(((WRegion*)(R))->flags|=REGION_MAPPED)
 #define MARK_REGION_UNMAPPED(R)	(((WRegion*)(R))->flags&=~REGION_MAPPED)

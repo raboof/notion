@@ -34,6 +34,7 @@
 #include "fullscreen.h"
 #include "event.h"
 #include "rootwin.h"
+#include "activity.h"
 
 
 static void set_clientwin_state(WClientWin *cwin, int state);
@@ -371,7 +372,7 @@ WClientWin *clientwin_get_transient_for(WClientWin *cwin)
 }
 
 
-static WClientWin *postmanage_check (WClientWin *cwin,
+static WClientWin *postmanage_check(WClientWin *cwin,
 									XWindowAttributes *attr)
 {
 	/* Check that the window exists. The previous check and selectinput
@@ -491,6 +492,11 @@ again:
 		}
 	}
 	
+	if(!region_is_fully_mapped((WRegion*)cwin) && 
+	   wglobal.opmode==OPMODE_NORMAL){
+		region_notify_activity((WRegion*)cwin);
+	}
+		
 	return postmanage_check(cwin, &attr);
 
 failure:

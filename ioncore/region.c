@@ -23,6 +23,7 @@
 #include "resize.h"
 #include "extl.h"
 #include "extlconv.h"
+#include "activity.h"
 
 
 #define FOR_ALL_SUBREGIONS(REG, SUB) \
@@ -78,6 +79,8 @@ void region_init(WRegion *reg, WRegion *parent, const WRectangle *geom)
 	reg->stacking.next=NULL;
 	reg->stacking.prev=NULL;
 	reg->stacking.above=NULL;
+	
+	reg->mgd_activity=FALSE;
 }
 
 
@@ -369,6 +372,8 @@ void region_detach_manager(WRegion *reg)
 		}
 	}
 
+	region_clear_activity(reg);
+
 	region_remove_managed(mgr, reg);
 	
 	assert(REGION_MANAGER(reg)==NULL);
@@ -421,6 +426,8 @@ bool region_may_control_focus(WRegion *reg)
 void region_got_focus(WRegion *reg)
 {
 	WRegion *r;
+	
+	region_clear_activity(reg);
 	
 	if(!REGION_IS_ACTIVE(reg)){
 		D(fprintf(stderr, "got focus (inact) %s [%p]\n", WOBJ_TYPESTR(reg), reg);)

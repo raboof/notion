@@ -31,6 +31,7 @@
 #include "regbind.h"
 #include "gr.h"
 #include "genws.h"
+#include "activity.h"
 
 
 #define genframe_draw(F, C) window_draw((WWindow*)F, C)
@@ -205,26 +206,29 @@ int genframe_nth_tab_iw(const WGenFrame *genframe, int n)
 static void update_attr(WGenFrame *genframe, int i, WRegion *reg)
 {
 	int flags=0;
-
 	static const char *attrs[]={
-		"unselected-not_tagged-not_dragged-not_urgent",
-		"selected-not_tagged-not_dragged-not_urgent",
-		"unselected-tagged-not_dragged-not_urgent",
-		"selected-tagged-not_dragged-not_urgent",
-		"unselected-not_tagged-dragged-not_urgent",
-		"selected-not_tagged-dragged-not_urgent",
-		"unselected-tagged-dragged-not_urgent",
-		"selected-tagged-dragged-not_urgent",
-		"unselected-not_tagged-not_dragged-urgent",
-		"selected-not_tagged-not_dragged-urgent",
-		"unselected-tagged-not_dragged-urgent",
-		"selected-tagged-not_dragged-urgent",
-		"unselected-not_tagged-dragged-urgent",
-		"selected-not_tagged-dragged-urgent",
-		"unselected-tagged-dragged-urgent",
-		"selected-tagged-dragged-urgent"
+		"unselected-not_tagged-not_dragged-no_activity",
+		"selected-not_tagged-not_dragged-no_activity",
+		"unselected-tagged-not_dragged-no_activity",
+		"selected-tagged-not_dragged-no_activity",
+		"unselected-not_tagged-dragged-no_activity",
+		"selected-not_tagged-dragged-no_activity",
+		"unselected-tagged-dragged-no_activity",
+		"selected-tagged-dragged-no_activity",
+		"unselected-not_tagged-not_dragged-activity",
+		"selected-not_tagged-not_dragged-activity",
+		"unselected-tagged-not_dragged-activity",
+		"selected-tagged-not_dragged-activity",
+		"unselected-not_tagged-dragged-activity",
+		"selected-not_tagged-dragged-activity",
+		"unselected-tagged-dragged-activity",
+		"selected-tagged-dragged-activity"
 	};
 
+	if(i>=genframe->titles_n){
+		/* Might happen when deinitialising */
+		return;
+	}
 	
 	if(reg==WGENFRAME_CURRENT(genframe))
 		flags|=0x01;
@@ -232,8 +236,8 @@ static void update_attr(WGenFrame *genframe, int i, WRegion *reg)
 		flags|=0x02;
 	if(i==genframe->tab_dragged_idx)
 		flags|=0x04;
-	/*if(reg!=NULL && reg->flags&REGION_URGENT)
-		flags|=0x08;*/
+	if(reg!=NULL && region_activity(reg))
+		flags|=0x08;
 	
 	genframe->titles[i].attr=attrs[flags];
 }
