@@ -1329,63 +1329,63 @@ WSplit *split_parent(WSplit *split)
 }
 
 
-Obj *split_hoist(WSplit *split)
+/*EXTL_DOC
+ * For splits of type \code{SPLIT_HORIZONTAL} the left child node is
+ * returned, and for splits of type \code{SPLIT_VERTICAL} returns the top
+ * child node is returned. For other types of nodes \code{nil} is returned.
+ */
+EXTL_EXPORT_MEMBER
+WSplit *split_tl(WSplit *split)
 {
-    if(split->type==SPLIT_UNUSED)
+    if(split->type!=SPLIT_VERTICAL && split->type!=SPLIT_HORIZONTAL)
         return NULL;
-    if(split->type==SPLIT_REGNODE)
-        return (Obj*)split->u.reg;
-    return (Obj*)split;
+    return split->u.s.tl;
 }
 
 
 /*EXTL_DOC
- * Return the object (region or split) corresponding to top or left
- * child of \var{split} depending on the split's direction.
+ * For splits of type \code{SPLIT_HORIZONTAL} the right child node is
+ * returned, and for splits of type \code{SPLIT_VERTICAL} returns the bottom
+ * child node is returned. For other types of nodes \code{nil} is returned.
  */
 EXTL_EXPORT_MEMBER
-Obj *split_tl(WSplit *split)
+WSplit *split_br(WSplit *split)
 {
-    CHKNODE(split);
+    if(split->type!=SPLIT_VERTICAL && split->type!=SPLIT_HORIZONTAL)
+        return NULL;
+    return split->u.s.br;
+}
+
+
+/*EXTL_DOC
+ * For split nodes of type \code{SPLIT_REGNODE} this function returns the
+ * region contained in the node. For other types of nodes \code{nil} is
+ * returned.
+ */
+EXTL_EXPORT_MEMBER
+WRegion *split_reg(WSplit *node)
+{
+    if(node->type!=SPLIT_REGNODE)
+        return NULL;
+    return node->u.reg;
+}
     
-    if(split->type==SPLIT_REGNODE || split->type==SPLIT_UNUSED)
-        return NULL;
-    return split_hoist(split->u.s.tl);
-}
-
 
 /*EXTL_DOC
- * Return the object (region or split) corresponding to bottom or right
- * child of \var{split} depending on the split's direction.
+ * Returns the split type of \var{node}, one of
+ * \code{SPLIT_VERTICAL}, \code{SPLIT_HORIZONTAL},
+ * \code{SPLIT_UNUSED} and \code{SPLIT_REGNODE}
  */
 EXTL_EXPORT_MEMBER
-Obj *split_br(WSplit *split)
+const char *split_type(WSplit *split)
 {
-    CHKNODE(split);
-    
-    if(split->type==SPLIT_REGNODE || split->type==SPLIT_UNUSED)
-        return NULL;
-    return split_hoist(split->u.s.br);
-}
-
-
-/*EXTL_DOC
- * Is \var{split} a vertical split?
- */
-EXTL_EXPORT_MEMBER
-bool split_is_vertical(WSplit *split)
-{
-    return (split->type==SPLIT_VERTICAL);
-}
-
-
-/*EXTL_DOC
- * Is \var{split} a horizontal split?
- */
-EXTL_EXPORT_MEMBER
-bool split_is_horizontal(WSplit *split)
-{
-    return (split->type==SPLIT_HORIZONTAL);
+#define CT(X) if(split->type==X) return #X;
+    CT(SPLIT_VERTICAL);
+    CT(SPLIT_HORIZONTAL);
+    CT(SPLIT_UNUSED);
+    CT(SPLIT_REGNODE);
+    return NULL;
+#undef CT
 }
 
 
@@ -1397,6 +1397,16 @@ ExtlTab split_geom(WSplit *split)
 {
     return extl_table_from_rectangle(&(split->geom));
 }
+
+
+/*Obj *split_hoist(WSplit *split)
+{
+    if(split->type==SPLIT_UNUSED)
+        return NULL;
+    if(split->type==SPLIT_REGNODE)
+        return (Obj*)split->u.reg;
+    return (Obj*)split;
+}*/
 
 
 /*}}}*/

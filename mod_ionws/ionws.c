@@ -559,9 +559,9 @@ ExtlTab ionws_managed_list(WIonWS *ws)
  * Returns the root of the split tree.
  */
 EXTL_EXPORT_MEMBER
-Obj *ionws_split_tree(WIonWS *ws)
+WSplit *ionws_split_tree(WIonWS *ws)
 {
-    return (ws->split_tree==NULL ? NULL : split_hoist(ws->split_tree));
+    return ws->split_tree;
 }
 
 

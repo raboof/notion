@@ -48,6 +48,7 @@ extern WFrame *ionws_split_at(WIonWS *ws, WFrame *frame,
                               const char *dirstr, bool attach_current);
 extern void ionws_unsplit_at(WIonWS *ws, WFrame *frame);
 
+extern WSplit *ionws_split_tree(WIonWS *ws);
 extern WSplit *ionws_split_of(WIonWS *ws, WRegion *reg);
 
 extern WRegion *ionws_load(WWindow *par, const WFitParams *fp, ExtlTab tab);
