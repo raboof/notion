@@ -442,21 +442,30 @@ static void clientwin_remove_managed(WClientWin *cwin, WRegion *transient)
 static void reparent_root(WClientWin *cwin)
 {
 	XWindowAttributes attr;
+	WWindow *par;
 	Window dummy;
 	int x=0, y=0;
 	
 	XGetWindowAttributes(wglobal.dpy, cwin->win, &attr);
-	XTranslateCoordinates(wglobal.dpy, cwin->win, attr.root, 0, 0, &x, &y,
-						  &dummy);
+	
+	par=FIND_PARENT1(cwin, WWindow);
+	
+	if(par==NULL || WTHING_IS(par, WScreen)){
+		x=REGION_GEOM(cwin).x;
+		y=REGION_GEOM(cwin).y;
+	}else{
+		XTranslateCoordinates(wglobal.dpy, cwin->win, attr.root, 0, 0,
+							  &x, &y, &dummy);
+		x-=REGION_GEOM(cwin).x;
+		y-=REGION_GEOM(cwin).y;
+	}
+	
 	XReparentWindow(wglobal.dpy, cwin->win, attr.root, x, y);
 }
 
 
 void deinit_clientwin(WClientWin *cwin)
 {
-	reset_watch(&(cwin->last_mgr_watch));
-	deinit_region((WRegion*)cwin);
-
 	UNLINK_ITEM(wglobal.cwin_list, cwin, g_cwin_next, g_cwin_prev);
 	
 	if(cwin->win!=None){
@@ -476,6 +485,9 @@ void deinit_clientwin(WClientWin *cwin)
 			clientwin_clear_target_id(cwin);
 	}
 	clear_colormaps(cwin);
+	
+	reset_watch(&(cwin->last_mgr_watch));
+	deinit_region((WRegion*)cwin);
 }
 
 
