@@ -112,7 +112,6 @@ bool input_init(WInput *input, WWindow *par, WRectangle geom)
 	
 	input->brush=gr_get_brush(ROOTWIN_OF(par), win, input_style(input));
 	if(input->brush==NULL){
-		warn("Could not get a brush for WInput.");
 		XDestroyWindow(wglobal.dpy, win);
 		return FALSE;
 	}
