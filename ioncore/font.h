@@ -36,7 +36,7 @@ extern int text_width(WFont *font, const char *str, int len);
 #define FONT_BASELINE(X) ((X)->ascent)
 
 extern WFont *load_font(Display *dpy, const char *fontname);
-extern char *make_label(WFont *fnt, const char *str, const char *trailer,
-						int maxw, int *wret);
+extern char *make_label(WFont *fnt, const char *str, int maxw);
+extern bool add_shortenrule(const char *rx, const char *rule);
 
 #endif /* WMCORE_FONT_H */

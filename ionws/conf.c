@@ -63,6 +63,13 @@ static bool opt_warp_enabled(Tokenizer *tokz, int n, Token *toks)
 }
 
 
+static bool opt_shorten_rule(Tokenizer *tokz, int n, Token *toks)
+{
+	return add_shortenrule(TOK_STRING_VAL(&(toks[1])),
+						   TOK_STRING_VAL(&(toks[2])));
+}
+
+
 /*}}}*/
 
 
@@ -137,10 +144,11 @@ static ConfOpt opts[]={
 	{"resize_delay", "l", opt_resize_delay, NULL},
 	{"opaque_resize", "b", opt_opaque_resize, NULL},
 	{"warp_enabled", "b", opt_warp_enabled, NULL},
+	{"shorten_rule", "ss", opt_shorten_rule, NULL},
 	
 	/* window props */
 	{"winprop" , "sss", ion_begin_winprop, ion_winprop_opts},
-
+	
 	/* bindings */
 	{"workspace_bindings", NULL, opt_workspace_bindings, wmcore_binding_opts},
 	{"frame_bindings", NULL, opt_frame_bindings, wmcore_binding_opts},

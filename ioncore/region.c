@@ -688,19 +688,17 @@ char *region_full_name(WRegion *reg)
 
 char *region_make_label(WRegion *reg, int maxw, WFont *font)
 {
-	const char *str=region_name(reg);
-	char tmp[16];
-	WGRData *grdata;
+	char *str=region_full_name(reg);
+	char *ret;
 	
 	if(str==NULL)
 		return NULL;
 	
-	if(reg->ni.instance!=0)
-		sprintf(tmp, NAMEDNUM_TMPL, reg->ni.instance);
-	else
-		*tmp='\0';
+	ret=make_label(font, str, maxw);
 	
-	return make_label(font, str, tmp, maxw, NULL);
+	free(str);
+	
+	return ret;
 }
 
 

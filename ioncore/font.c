@@ -8,6 +8,7 @@
 #include <libtu/output.h>
 #include <libtu/misc.h>
 #include <string.h>
+#include <regex.h>
 #include "common.h"
 #include "font.h"
 #ifdef CF_XFT
@@ -78,58 +79,183 @@ static char *scatn3(const char *p1, int l1,
 }
 
 
-char *make_label(WFont *fnt, const char *str, const char *trailer,
-				 int maxw, int *wret)
-{
-	static const char *dots="...";
-	const char *b;
-	size_t len, tlen;
-	int w, bw, dw,  tw;
-	
-	len=strlen(str);
-	tlen=strlen(trailer);
-	
-	w=text_width(fnt, str, len);
-	tw=text_width(fnt, trailer, tlen);
-	
-	if(tw+w<=maxw){
-		if(wret!=NULL)
-			*wret=tw+w;
-		return scat(str, trailer);
-	}
-	
-	b=strchr(str, ':');
-	
-	if(b!=NULL){
-		b++;
-		b+=strspn(b, " ");
-		bw=text_width(fnt, str, b-str);
-		
-		if(tw+w-bw<=maxw){
-			if(wret!=NULL)
-				*wret=tw+w-bw;
-			return scat(b, trailer);
-		}
-		
-		len-=(b-str);
-		str=b;
-		w=bw;
-	}
 
-	dw=text_width(fnt, dots, 3);
+/*{{{ Title shortening */
+
+INTRSTRUCT(SR)
 	
-	if(len>0){
-		while(--len){
-			w=text_width(fnt, str, len);
-			if(tw+w+dw<=maxw)
-				break;
-		}
+DECLSTRUCT(SR){
+	regex_t re;
+	char *rule;
+	SR *next, *prev;
+};
+
+
+static SR *shortenrules=NULL;
+
+
+bool add_shortenrule(const char *rx, const char *rule)
+{
+	SR *si;
+	int ret;
+	
+	si=ALLOC(SR);
+	
+	if(si==NULL)
+		return FALSE;
+	
+	ret=regcomp(&(si->re), rx, REG_EXTENDED);
+	
+	if(ret!=0){
+		warn("Error compiling regular_expression");
+		goto fail2;
 	}
 	
-	if(wret!=NULL)
-		*wret=tw+w+dw;
+	si->rule=scopy(rule);
 	
+	if(si->rule==NULL)
+		goto fail;
+
+	LINK_ITEM(shortenrules, si, next, prev);
 	
-	return scatn3(str, len, dots, 3, trailer, tlen);
+	return TRUE;
+	
+fail:
+	warn_err();
+	regfree(&(si->re));
+fail2:
+	free(si);
+	return FALSE;
 }
 
+
+static char *shorten(WFont *fnt, const char *str, int maxw,
+					 const char *rule, int nmatch, regmatch_t *pmatch)
+{
+	char *s;
+	int rl, l, i, j, k;
+	int strippt=0;
+	int stripdir=-1;
+	bool more=FALSE;
+	
+	/* Stupid alloc rule that wastes space */
+	
+	rl=strlen(rule);
+	l=rl;
+	
+	for(i=0; i<nmatch; i++){
+		if(pmatch[i].rm_so==-1)
+			continue;
+		l+=(pmatch[i].rm_eo-pmatch[i].rm_so);
+	}
+	
+	s=ALLOC_N(char, l);
+	
+	if(s==NULL){
+		warn_err();
+		return NULL;
+	}
+	
+	do{
+		more=FALSE;
+		j=0;
+		
+		for(i=0; i<rl; i++){
+			if(rule[i]!='$'){
+				s[j++]=rule[i];
+				continue;
+			}
+			
+			i++;
+			
+			if(rule[i]=='|'){
+				rule=rule+i+1;
+				more=TRUE;
+				break;
+			}
+			
+			if(rule[i]=='$'){
+				s[j++]='$';
+				continue;
+			}
+			
+			if(rule[i]=='<'){
+				strippt=j;
+				stripdir=-1;
+				continue;
+			}
+			
+			if(rule[i]=='>'){
+				strippt=j;
+				stripdir=1;
+				continue;
+			}
+			
+			if(rule[i]>='0' && rule[i]<='9'){
+				int ll;
+				k=(int)(rule[i]-'0');
+				if(k>=nmatch)
+					continue;
+				if(pmatch[k].rm_so==-1)
+					continue;
+				ll=(pmatch[k].rm_eo-pmatch[k].rm_so);
+				strncpy(s+j, str+pmatch[k].rm_so, ll);
+				j+=ll;
+			}
+		}
+		
+		s[j]='\0';
+		
+		while(1){
+			if(text_width(fnt, s, strlen(s))<=maxw)
+				return s;
+			if(stripdir==-1){
+				if(strippt==0)
+					break;
+				strcpy(s+strippt-1, s+strippt);
+				strippt--;
+			}else{
+				if(s[strippt]=='\0')
+					break;
+				strcpy(s+strippt, s+strippt+1);
+			}
+		}
+	}while(more);
+		
+	free(s);
+	warn("Failed to shorten title");
+	return NULL;
+}
+
+
+char *make_label(WFont *fnt, const char *str, int maxw)
+{
+	size_t nmatch=10;
+	regmatch_t pmatch[10];
+	SR *rule;
+	int ret;
+	char *retstr;
+	
+	if(text_width(fnt, str, strlen(str))<=maxw)
+		return scopy(str);
+	
+	for(rule=shortenrules; rule!=NULL; rule=rule->next){
+		ret=regexec(&(rule->re), str, nmatch, pmatch, 0);
+		if(ret!=0)
+			continue;
+		retstr=shorten(fnt, str, maxw, rule->rule, nmatch, pmatch);
+		goto rettest;
+	}
+
+	pmatch[0].rm_so=0;
+	pmatch[0].rm_eo=strlen(str)-1;
+	retstr=shorten(fnt, str, maxw, "$1$<...", 1, pmatch);
+	
+rettest:
+	if(retstr!=NULL)
+		return retstr;
+	return scopy("");
+}
+
+
+/*}}}*/
