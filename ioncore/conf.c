@@ -82,7 +82,7 @@ bool ioncore_read_config(const char *cfgfile)
 	
 	if(n>0){
 		warn("Some bindmaps were empty, loading ioncore-efbb");
-		read_config_for_args("ioncore-efbb", TRUE, "S", NULL, unset);
+		read_config_args("ioncore-efbb", TRUE, "S", NULL, unset);
 	}
 	
 	return ret;	

@@ -20,7 +20,7 @@
 
 extern void netwm_init();
 
-extern int netwm_check_initial_fullscreen(WClientWin *cwin);
+extern int netwm_check_initial_fullscreen(WClientWin *cwin, bool switchto);
 extern void netwm_update_state(WClientWin *cwin);
 extern void netwm_state_change_rq(WClientWin *cwin, 
 								  const XClientMessageEvent *ev);

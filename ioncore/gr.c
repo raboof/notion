@@ -409,7 +409,7 @@ void grbrush_clear_area(GrBrush *brush, Window win, const WRectangle *geom)
 EXTL_EXPORT
 void gr_read_config()
 {
-	read_config_for("draw");
+	read_config("draw");
 	
 	/* If nothing has been loaded, try the default engine with
 	 * default settings.

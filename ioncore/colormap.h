@@ -16,10 +16,10 @@
 #include "clientwin.h"
 
 extern void install_cmap(WRootWin *scr, Colormap cmap);
-extern void handle_cwin_cmap(WClientWin *cwin, const XColormapEvent *ev);
-extern void handle_all_cmaps(const XColormapEvent *ev);
-extern void get_colormaps(WClientWin *cwin);
-extern void clear_colormaps(WClientWin *cwin);
 extern void install_cwin_cmap(WClientWin *cwin);
+extern void handle_all_cmaps(const XColormapEvent *ev);
+extern void handle_cwin_cmap(WClientWin *cwin, const XColormapEvent *ev);
+extern void clientwin_get_colormaps(WClientWin *cwin);
+extern void clientwin_clear_colormaps(WClientWin *cwin);
 
 #endif /* ION_IONCORE_COLORMAP_H */

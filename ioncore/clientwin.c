@@ -70,7 +70,7 @@ void clientwin_get_protocols(WClientWin *cwin)
 }
 
 
-static void get_winprops(WClientWin *cwin)
+static void clientwin_get_winprops(WClientWin *cwin)
 {
 	ExtlTab tab, tab2;
 	int i1, i2;
@@ -297,10 +297,10 @@ static bool clientwin_init(WClientWin *cwin, WRegion *parent,
 	
 	region_init(&(cwin->region), parent, &geom);
 	
-	get_colormaps(cwin);
-	get_winprops(cwin);
+	clientwin_get_colormaps(cwin);
 	clientwin_get_protocols(cwin);
 	clientwin_get_set_name(cwin);
+	clientwin_get_winprops(cwin);
 	clientwin_get_size_hints(cwin);
 	
 	XSelectInput(wglobal.dpy, win, cwin->event_mask);
@@ -341,8 +341,7 @@ static bool handle_target_props(WClientWin *cwin, const WManageParams *param)
 	if(!extl_table_is_bool_set(cwin->proptab, "fullscreen"))
 			return FALSE;
 	
-	return clientwin_enter_fullscreen(cwin, 
-									  clientwin_get_switchto(cwin));
+	return clientwin_enter_fullscreen(cwin, param->switchto);
 }
 
 
@@ -485,6 +484,7 @@ again:
 	param.maprq=TRUE;
 	param.userpos=(cwin->size_hints.flags&USPosition);
 	param.switchto=(init_state!=IconicState && clientwin_get_switchto(cwin));
+	param.jumpto=extl_table_is_bool_set(cwin->proptab, "jumpto");
 	param.gravity=(cwin->size_hints.flags&PWinGravity
 				   ? cwin->size_hints.win_gravity
 				   : ForgetGravity);
@@ -506,8 +506,14 @@ again:
 	   wglobal.opmode==OPMODE_NORMAL){
 		region_notify_activity((WRegion*)cwin);
 	}
-		
-	return postmanage_check(cwin, &attr);
+	
+	
+	if(postmanage_check(cwin, &attr)){
+		if(param.jumpto && wglobal.focus_next==NULL)
+			region_goto((WRegion*)cwin);
+		extl_call_named("call_hook", "so", NULL, "clientwin_added", cwin);
+		return cwin;
+	}
 
 failure:
 	clientwin_unmapped(cwin);
@@ -660,7 +666,7 @@ void clientwin_deinit(WClientWin *cwin)
 							wglobal.atom_net_wm_state);
 		}
 	}
-	clear_colormaps(cwin);
+	clientwin_clear_colormaps(cwin);
 	
 	reset_watch(&(cwin->fsinfo.last_mgr_watch));
 	region_deinit((WRegion*)cwin);
@@ -1138,7 +1144,8 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 
 	/* check full screen request */
 	if((ev->value_mask&(CWWidth|CWHeight))==(CWWidth|CWHeight)){
-		if(clientwin_check_fullscreen_request(cwin, ev->width, ev->height))
+		bool sw=region_may_control_focus((WRegion*)cwin);
+		if(clientwin_check_fullscreen_request(cwin, ev->width, ev->height, sw))
 			return;
 	}
 

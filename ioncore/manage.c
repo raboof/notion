@@ -93,18 +93,17 @@ bool add_clientwin_default(WClientWin *cwin, const WManageParams *param)
 	
 	/* Check fullscreen mode */
 	
-	fs=netwm_check_initial_fullscreen(cwin);
+	fs=netwm_check_initial_fullscreen(cwin, param->switchto);
 	
-	if(fs<0 && clientwin_check_fullscreen_request(cwin, param->geom.w,
-												  param->geom.h)){
-		fs=1;
+	if(fs<0){
+		fs=clientwin_check_fullscreen_request(cwin, 
+											  param->geom.w,
+											  param->geom.h,
+											  param->switchto);
 	}
 
-	if(fs>0){
-		if(param->switchto)
-			region_goto((WRegion*)cwin);
+	if(fs>0)
 		return TRUE;
-	}
 
 	/* Find a suitable screen */
 	scr=find_suitable_screen(cwin, param);

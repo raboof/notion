@@ -59,7 +59,7 @@ void netwm_state_change_rq(WClientWin *cwin, const XClientMessageEvent *ev)
 }
 
 
-int netwm_check_initial_fullscreen(WClientWin *cwin)
+int netwm_check_initial_fullscreen(WClientWin *cwin, bool sw)
 {
 
 	int i, n;
@@ -74,8 +74,8 @@ int netwm_check_initial_fullscreen(WClientWin *cwin)
 	
 	for(i=0; i<n; i++){
 		if(data[i]==(long)atom_net_wm_state_fullscreen){
-			bool sw=clientwin_get_switchto(cwin);
 			ret=clientwin_enter_fullscreen(cwin, sw);
+			break;
 		}
 	}
 	

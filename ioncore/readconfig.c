@@ -53,7 +53,7 @@ static bool add_dir(char ***pathsptr, int *n_pathsptr, const char *dir)
 		warn_err();
 		return FALSE;
 	}
-		
+	
 	if(*n_pathsptr==0)
 		paths=ALLOC_N(char*, 2);
 	else
@@ -93,7 +93,7 @@ bool ioncore_add_userdirs(const char *appname)
 	int fails=2;
 	
 	home=getenv("HOME");
-
+	
 	if(home==NULL){
 		warn("$HOME not set");
 	}else{
@@ -180,7 +180,7 @@ static int do_try(const char *dir, const char *file, TryConfigFn *tryfn,
 	return ret;
 }
 
-	
+
 static int try_etcpath2(const char *const *files, const char *cfdir,
 						TryConfigFn *tryfn, void *tryfnparam)
 {
@@ -216,13 +216,13 @@ static int try_lookup(const char *file, char **ptr)
 		warn_err();
 	return (*ptr!=NULL);
 }
-	
+
 
 static int try_load(const char *file, TryCallParam *param)
 {
 	if(access(file, F_OK)!=0)
 		return TRYCONFIG_NOTFOUND;
-
+	
 	if(param->status==1)
 		warn("Falling back to %s", file);
 	
@@ -265,13 +265,13 @@ static int try_call_nargs(const char *file, TryCallParam *param)
 }
 
 
-static int do_try_config_for(const char *module, const char *cfdir,
-							 TryConfigFn *tryfn, void *tryfnparam)
+static int do_try_config(const char *module, const char *cfdir,
+						 TryConfigFn *tryfn, void *tryfnparam)
 {
 	char *files[]={NULL, NULL, NULL};
 	int n=0;
 	int ret;
-
+	
 #ifdef EXTL_COMPILED_EXTENSION	
 	libtu_asprintf(files+n, "%s." EXTL_COMPILED_EXTENSION, module);
 	if(files[n]==NULL)
@@ -295,9 +295,9 @@ static int do_try_config_for(const char *module, const char *cfdir,
 }
 
 
-int try_config_for(const char *module, TryConfigFn *tryfn, void *tryfnparam)
+int try_config(const char *module, TryConfigFn *tryfn, void *tryfnparam)
 {
-	return do_try_config_for(module, NULL, tryfn, tryfnparam);
+	return do_try_config(module, NULL, tryfn, tryfnparam);
 }
 
 
@@ -307,7 +307,7 @@ int do_lookup_script(const char *file, const char *try_in_dir,
 	const char *files[]={NULL, NULL};
 	char* tmp=NULL;
 	int retval;
-
+	
 	if(file==NULL)
 		return TRYCONFIG_NOTFOUND;
 	
@@ -345,10 +345,10 @@ bool do_include(const char *file, const char *current_file_dir)
 	}
 	
 	param.status=0;
-
+	
 	if(strpbrk(file, "./")==NULL){
-		retval=do_try_config_for(file, current_file_dir,
-								 (TryConfigFn*)try_call_nargs, &param);
+		retval=do_try_config(file, current_file_dir,
+							 (TryConfigFn*)try_call_nargs, &param);
 	}else{
 		retval=do_lookup_script(file, current_file_dir,
 								(TryConfigFn*)try_call_nargs, &param);
@@ -356,7 +356,7 @@ bool do_include(const char *file, const char *current_file_dir)
 	
 	if(retval==TRYCONFIG_NOTFOUND)
 		warn("Unable to find '%s' on search path", file);
-
+	
 	return (retval==TRYCONFIG_OK);
 }
 
@@ -367,27 +367,27 @@ bool do_include(const char *file, const char *current_file_dir)
 /*{{{ read_config */
 
 
-bool read_config(const char *cfgfile)
+/*bool read_config(const char *cfgfile)
+ {
+ int retval;
+ TryCallParam param;
+ * 
+ param.status=0;
+ retval=try_call_nargs(cfgfile, &param);
+ if(retval==-2)
+ warn_err_obj(cfgfile);
+ return (retval==1);
+ }*/
+
+
+bool read_config(const char *module)
 {
-	int retval;
-	TryCallParam param;
-	
-	param.status=0;
-	retval=try_call_nargs(cfgfile, &param);
-	if(retval==-2)
-		warn_err_obj(cfgfile);
-	return (retval==1);
+	return read_config_args(module, TRUE, NULL, NULL);
 }
 
 
-bool read_config_for(const char *module)
-{
-	return read_config_for_args(module, TRUE, NULL, NULL);
-}
-
-
-bool read_config_for_args(const char *module, bool warn_nx,
-						  const char *spec, const char *rspec, ...)
+bool read_config_args(const char *module, bool warn_nx,
+					  const char *spec, const char *rspec, ...)
 {
 	bool ret;
 	TryCallParam param;
@@ -398,13 +398,13 @@ bool read_config_for_args(const char *module, bool warn_nx,
 	
 	va_start(param.args, rspec);
 	
-	ret=try_config_for(module, (TryConfigFn*)try_call, &param);
+	ret=try_config(module, (TryConfigFn*)try_call, &param);
 	
 	if(ret==TRYCONFIG_NOTFOUND && warn_nx){
 		warn("Unable to find configuration file '%s' on search path", 
 			 module);
 	}
-
+	
 	va_end(param.args);
 	
 	return (ret==TRYCONFIG_OK);
@@ -414,15 +414,20 @@ bool read_config_for_args(const char *module, bool warn_nx,
 /*}}}*/
 
 
-/*{{{ get_savefile_for */
+/*{{{ get_savefile */
 
 
-char *get_savefile_for(const char *file)
+/*EXTL_DOC
+ * Get a file name to save (session) data in. The string \var{basename} should
+ * contain no path or extension components.
+ */
+EXTL_EXPORT
+char *get_savefile(const char *basename)
 {
 	char *res=NULL;
 	
 	if(sessiondir!=NULL)
-		libtu_asprintf(&res, "%s/%s." EXTL_EXTENSION, sessiondir, file);
+		libtu_asprintf(&res, "%s/%s." EXTL_EXTENSION, sessiondir, basename);
 	
 	return res;
 }

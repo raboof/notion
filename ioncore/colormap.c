@@ -82,7 +82,7 @@ void handle_all_cmaps(const XColormapEvent *ev)
 /*{{{ Management */
 
 
-void get_colormaps(WClientWin *cwin)
+void clientwin_get_colormaps(WClientWin *cwin)
 {
 	Window *wins;
 	XWindowAttributes attr;
@@ -127,7 +127,7 @@ void get_colormaps(WClientWin *cwin)
 }
 
 
-void clear_colormaps(WClientWin *cwin)
+void clientwin_clear_colormaps(WClientWin *cwin)
 {
 	int i;
 	
@@ -139,6 +139,8 @@ void clear_colormaps(WClientWin *cwin)
 	
 	free(cwin->cmapwins);
 	free(cwin->cmaps);
+	cwin->cmapwins=NULL;
+	cwin->cmaps=NULL;
 }
 
 

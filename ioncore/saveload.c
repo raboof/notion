@@ -166,7 +166,7 @@ bool load_workspaces()
 {
 	bool ret;
 	loading_workspaces=TRUE;
-	ret=read_config_for_args("workspaces", FALSE, NULL, NULL);
+	ret=read_config_args("workspaces", FALSE, NULL, NULL);
 	loading_workspaces=FALSE;
 	return ret;
 }
@@ -211,7 +211,7 @@ bool save_workspaces()
 	FILE *file;
 	WScreen *scr;
 	
-	wsconf=get_savefile_for("workspaces");
+	wsconf=get_savefile("workspaces");
 
 	if(wsconf==NULL)
 		return FALSE;

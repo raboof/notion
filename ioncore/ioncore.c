@@ -524,7 +524,7 @@ bool ioncore_startup(const char *display, const char *cfgfile,
 
 	ioncore_register_exports();
 	
-	if(!read_config_for("ioncorelib"))
+	if(!read_config("ioncorelib"))
 		return FALSE;
 	
 	if(!init_x(display, stflags))

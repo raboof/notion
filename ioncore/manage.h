@@ -19,11 +19,12 @@
 
 
 #define INIT_WMANAGEPARAMS \
-  {FALSE, FALSE, FALSE, FALSE, ForgetGravity, {0, 0, 0, 0}, NULL}
+  {FALSE, FALSE, FALSE, FALSE, FALSE, ForgetGravity, {0, 0, 0, 0}, NULL}
 
 
 typedef struct{
 	bool switchto;
+	bool jumpto;
 	bool userpos;
 	bool dockapp;
 	bool maprq;
