@@ -30,7 +30,7 @@
 
 #define CLIENT_MASK (ColormapChangeMask| \
 					 PropertyChangeMask|FocusChangeMask| \
-					 StructureNotifyMask)
+					 StructureNotifyMask|EnterWindowMask)
 
 
 extern void get_event(XEvent *ev);

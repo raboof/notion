@@ -15,7 +15,12 @@ WObjDescr OBJDESCR(WObj)={"WObj", NULL, NULL, NULL, NULL};
 
 bool wobj_is(const WObj *obj, const WObjDescr *descr)
 {
-	WObjDescr *d=obj->obj_type;
+	WObjDescr *d;
+	
+	if(obj==NULL)
+		return FALSE;
+	
+	d=obj->obj_type;
 	
 	while(d!=NULL){
 		if(d==descr)
@@ -28,7 +33,12 @@ bool wobj_is(const WObj *obj, const WObjDescr *descr)
 
 const void *wobj_cast(const WObj *obj, const WObjDescr *descr)
 {
-	WObjDescr *d=obj->obj_type;
+	WObjDescr *d;
+	
+	if(obj==NULL)
+		return FALSE;
+	
+	d=obj->obj_type;
 	
 	while(d!=NULL){
 		if(d==descr)
