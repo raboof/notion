@@ -178,7 +178,6 @@ bool handle_button_press(XButtonEvent *ev)
 	WRegion *subreg=NULL;
 	uint button, state;
 	int area=0;
-	
 	p_motiontmp=NULL;
 	
 	state=ev->state;
@@ -189,8 +188,17 @@ bool handle_button_press(XButtonEvent *ev)
 	if(reg==NULL)
 		return FALSE;
 
-	do_grab_kb_ptr(ev->root, reg, FocusChangeMask);
-	
+	if(ev->subwindow!=None){
+		XButtonEvent ev2=*ev;
+		ev2.window=ev->subwindow;
+		if(XTranslateCoordinates(wglobal.dpy, ev->window, ev2.window,
+								 ev->x, ev->y, &(ev2.x), &(ev2.y),
+								 &(ev2.subwindow))){
+			if(handle_button_press(&ev2))
+				return TRUE;
+		}
+	}
+		
 	subreg=reg;
 	area=window_press((WWindow*)reg, ev, &subreg);
 	
@@ -207,6 +215,9 @@ bool handle_button_press(XButtonEvent *ev)
 	
 	setup_watch(&p_regwatch, (WObj*)reg, NULL);
 	setup_watch(&p_subregwatch, (WObj*)subreg, NULL);
+
+	
+	do_grab_kb_ptr(ev->root, reg, FocusChangeMask);
 	
 end:
 	/*p_reg=reg;*/
