@@ -15,8 +15,9 @@
 #include "common.h"
 
 /* argc and argv are needed for restart_wm */
-bool ioncore_startup(int argc, char *argv[], const char *display,
-					 bool oneroot, const char *cfgfile);
+bool ioncore_init(int argc, char *argv[]);
+bool ioncore_startup(const char *display, bool oneroot, 
+					 const char *cfgfile);
 void ioncore_deinit();
 
 #endif /* ION_IONCORE_WMCORE_H */

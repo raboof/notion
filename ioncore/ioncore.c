@@ -115,7 +115,8 @@ int main(int argc, char*argv[])
 
 	libtu_init(argv[0]);
 
-	ioncore_add_default_dirs();
+	if(!ioncore_init(argc, argv))
+		return EXIT_FAILURE;
 	
 	optparser_init(argc, argv, OPTP_MIDLONG, ioncore_opts, &ioncore_cinfo);
 	
@@ -160,7 +161,7 @@ int main(int argc, char*argv[])
 		begin_errorlog_file(&el, ef);
 	}
 	
-	if(ioncore_startup(argc, argv, display, oneroot, cfgfile))
+	if(ioncore_startup(display, oneroot, cfgfile))
 		may_continue=TRUE;
 
 fail:
@@ -391,8 +392,7 @@ static bool init_x(const char *display, bool oneroot)
 }
 
 
-bool ioncore_startup(int argc, char *argv[], const char *display,
-					 bool oneroot, const char *cfgfile)
+bool ioncore_init(int argc, char *argv[])
 {
 	init_global();
 	
@@ -404,7 +404,16 @@ bool ioncore_startup(int argc, char *argv[], const char *display,
 
 	if(!init_module_support())
 		return FALSE;
+
+	ioncore_add_default_dirs();
 	
+	return TRUE;
+}
+
+
+bool ioncore_startup(const char *display,
+					 bool oneroot, const char *cfgfile)
+{
 	if(!extl_init())
 		return FALSE;
 

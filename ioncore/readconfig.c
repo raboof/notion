@@ -72,7 +72,7 @@ bool ioncore_add_scriptdir(const char *dir)
 
 bool ioncore_add_moduledir(const char *dir)
 {
-	return (lt_dladdsearchdir(dir)==0);
+	return (lt_dlinsertsearchdir(lt_dlgetsearchpath(), dir)==0);
 }
 
 
