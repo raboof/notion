@@ -1,5 +1,5 @@
 /*
- * ion/ioncore/tag.h
+ * ion/ioncore/tags.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  *
@@ -9,8 +9,8 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_IONCORE_TAG_H
-#define ION_IONCORE_TAG_H
+#ifndef ION_IONCORE_TAGS_H
+#define ION_IONCORE_TAGS_H
 
 #include "region.h"
 
@@ -23,4 +23,4 @@ extern WRegion *tag_first();
 extern WRegion *tag_take_first();
 extern WRegion *tag_next(WRegion *reg);
 
-#endif /* ION_IONCORE_WSREG_H */
+#endif /* ION_IONCORE_TAGS_H */
