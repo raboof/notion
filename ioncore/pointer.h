@@ -23,7 +23,8 @@ extern bool handle_button_press(XButtonEvent *ev);
 extern bool handle_button_release(XButtonEvent *ev);
 extern void handle_pointer_motion(XMotionEvent *ev);
 
-extern bool p_set_button_handler(WRegion *reg, WButtonHandler *handler);
+extern XEvent *p_current_event();
+
 extern bool p_set_drag_handlers(WRegion *reg, 
 								WMotionHandler *begin,
 								WMotionHandler *motion, 

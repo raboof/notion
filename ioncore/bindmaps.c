@@ -13,6 +13,8 @@
 #include "conf-bindings.h"
 #include "binding.h"
 #include "extl.h"
+#include "genframep.h"
+
 
 WBindmap ioncore_rootwin_bindmap=BINDMAP_INIT;
 WBindmap ioncore_mplex_bindmap=BINDMAP_INIT;
@@ -40,12 +42,21 @@ bool mplex_bindings(ExtlTab tab)
 }
 
 
+static StringIntMap frame_areas[]={
+	{"border", 		WGENFRAME_AREA_BORDER},
+	{"tab", 		WGENFRAME_AREA_TAB},
+	{"empty_tab", 	WGENFRAME_AREA_TAB},
+	{"client", 		WGENFRAME_AREA_CLIENT},
+	END_STRINGINTMAP
+};
+
+
 /*EXTL_DOC
  * Add a set of bindings available in \type{WGenFrame}s (all types of frames).
  */
 EXTL_EXPORT
 bool genframe_bindings(ExtlTab tab)
 {
-	return process_bindings(&ioncore_genframe_bindmap, NULL, tab);
+	return process_bindings(&ioncore_genframe_bindmap, frame_areas, tab);
 }
 

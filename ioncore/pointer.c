@@ -28,12 +28,10 @@ static int p_orig_x=-1, p_orig_y=-1;
 static bool p_motion=FALSE;
 static int p_clickcnt=0;
 static Time p_time=0;
-static bool p_motiontmp_dirty;
-static WBinding *p_motiontmp=NULL;
 static int p_area=0;
 static enum{ST_NO, ST_INIT, ST_HELD} p_grabstate=ST_NO;
 
-static WButtonHandler *p_button_handler=NULL;
+static WButtonHandler *p_motion_end_handler=NULL;
 static WMotionHandler *p_motion_handler=NULL;
 static WMotionHandler *p_motion_begin_handler=NULL;
 static GrabHandler *p_key_handler=NULL;
@@ -51,17 +49,6 @@ static WWatch p_regwatch=WWATCH_INIT, p_subregwatch=WWATCH_INIT;
 /*{{{ Handler setup */
 
 
-bool p_set_button_handler(WRegion *reg,
-						  WButtonHandler *handler)
-{
-	if(reg!=p_reg)
-		return FALSE;
-	
-	p_button_handler=handler;
-	return TRUE;
-}
-
-
 bool p_set_drag_handlers(WRegion *reg,
 						 WMotionHandler *begin,
 						 WMotionHandler *motion,
@@ -69,14 +56,24 @@ bool p_set_drag_handlers(WRegion *reg,
 						 GrabHandler *keypress,
 						 GrabKilledHandler *killed)
 {
-	if(pointer_grab_region()!=reg)
+	if(pointer_grab_region()==NULL || p_motion)
 		return FALSE;
+	
+	/* A motion handler set at this point may not set a begin handler */
+	if(p_grabstate!=ST_HELD && begin!=NULL)
+		return FALSE;
+	
+	if(p_reg!=reg){
+		setup_watch(&p_regwatch, (WObj*)reg, NULL);
+		reset_watch(&p_subregwatch);
+	}
 	
 	p_motion_begin_handler=begin;
 	p_motion_handler=motion;
-	p_button_handler=end;
+	p_motion_end_handler=end;
 	p_key_handler=keypress;
 	p_killed_handler=killed;
+	p_motion=TRUE;
 	
 	return TRUE;
 }
@@ -128,6 +125,15 @@ WRegion *pointer_grab_region()
 /*{{{ Call handlers */
 
 
+static XEvent *p_curr_event=NULL;
+
+
+XEvent *p_current_event()
+{
+	return p_curr_event;
+}
+
+
 static void call_button(WBinding *binding, XButtonEvent *ev)
 {
 	WButtonHandler *fn;
@@ -135,20 +141,29 @@ static void call_button(WBinding *binding, XButtonEvent *ev)
 	if(binding==NULL)
 		return;
 
+	p_curr_event=(XEvent*)ev;
 	extl_call(binding->func, "oo", NULL, p_reg, p_subreg);
-	
-	if(p_button_handler!=NULL && p_reg!=NULL)
-		p_button_handler(p_reg, ev);
-	
-	p_button_handler=NULL;
+	p_curr_event=NULL;
 }
 
 
-static void call_motion(WBinding *binding, XMotionEvent *ev,
-						int dx, int dy)
+static void call_motion(XMotionEvent *ev, int dx, int dy)
 {
-	if(p_motion_handler!=NULL && p_reg!=NULL)
+	if(p_motion_handler!=NULL && p_reg!=NULL){
+		p_curr_event=(XEvent*)ev;
 		p_motion_handler(p_reg, ev, dx, dy);
+		p_curr_event=NULL;
+	}
+}
+
+
+static void call_motion_end(XButtonEvent *ev)
+{
+	if(p_motion_end_handler!=NULL && p_reg!=NULL){
+		p_curr_event=(XEvent*)ev;
+		p_motion_end_handler(p_reg, ev);
+		p_curr_event=NULL;
+	}
 }
 
 
@@ -160,12 +175,16 @@ static void call_motion_begin(WBinding *binding, XMotionEvent *ev,
 	if(binding==NULL)
 		return;
 
+	p_curr_event=(XEvent*)ev;
+	
 	extl_call(binding->func, "oo", NULL, p_reg, p_subreg);
 	
 	if(p_motion_begin_handler!=NULL && p_reg!=NULL)
 		p_motion_begin_handler(p_reg, ev, dx, dy);
 	
 	p_motion_begin_handler=NULL;
+	
+	p_curr_event=NULL;
 }
 
 
@@ -213,8 +232,6 @@ bool handle_button_press(XButtonEvent *ev)
 	uint button, state;
 	bool dblclick;
 	
-	p_motiontmp=NULL;
-	
 	state=ev->state;
 	button=ev->button;
 	
@@ -237,9 +254,10 @@ bool handle_button_press(XButtonEvent *ev)
 	dblclick=(p_clickcnt==1 && time_in_threshold(ev->time) && 
 			  p_button==button && p_state==state && reg==p_reg);
 	
-	p_button_handler=NULL;
-	p_motion_handler=NULL;
+	p_motion=FALSE;
 	p_motion_begin_handler=NULL;
+	p_motion_handler=NULL;
+	p_motion_end_handler=NULL;
 	p_key_handler=NULL;
 	p_killed_handler=NULL;
 	p_grabstate=ST_INIT;
@@ -248,15 +266,14 @@ bool handle_button_press(XButtonEvent *ev)
 	p_orig_x=p_x=ev->x_root;
 	p_orig_y=p_y=ev->y_root;
 	p_time=ev->time;
-	p_motion=FALSE;
 	p_clickcnt=0;
-	p_motiontmp_dirty=TRUE;
 
 	setup_watch(&p_regwatch, (WObj*)reg, NULL);
 	
-	subreg=reg;
+	subreg=NULL;
 	p_area=window_press((WWindow*)reg, ev, &subreg);
-	setup_watch(&p_subregwatch, (WObj*)subreg, NULL);
+	if(subreg)
+		setup_watch(&p_subregwatch, (WObj*)subreg, NULL);
 
 	if(dblclick){
 		pressbind=region_lookup_binding_area(reg, ACT_BUTTONDBLCLICK, state,
@@ -289,10 +306,9 @@ bool handle_button_release(XButtonEvent *ev)
 			p_clickcnt=1;
 			binding=region_lookup_binding_area(p_reg, ACT_BUTTONCLICK,
 											   p_state, p_button, p_area);
-			call_button(binding,  ev);
+			call_button(binding, ev);
 		}else{
-			if(p_button_handler!=NULL)
-				p_button_handler(p_reg, ev);
+			call_motion_end(ev);
 		}
 		
 	}
@@ -307,30 +323,29 @@ bool handle_button_release(XButtonEvent *ev)
 void handle_pointer_motion(XMotionEvent *ev)
 {
 	int dx, dy;
+	WBinding *binding=NULL;
 	
 	if(p_reg==NULL)
 		return;
 	
-	if(p_motion==FALSE && motion_in_threshold(ev->x_root, ev->y_root))
-		return;
-	
-	if(p_motiontmp_dirty && p_motion_handler==NULL){
-		p_motiontmp=region_lookup_binding_area(p_reg, ACT_BUTTONMOTION,
-											   p_state, p_button, p_area);
-		p_motiontmp_dirty=FALSE;
+	if(!p_motion){
+		if(motion_in_threshold(ev->x_root, ev->y_root))
+			return;
+		binding=region_lookup_binding_area(p_reg, ACT_BUTTONMOTION,
+										   p_state, p_button, p_area);
 	}
-
+	
 	p_time=ev->time;
 	dx=ev->x_root-p_x;
 	dy=ev->y_root-p_y;
 	p_x=ev->x_root;
 	p_y=ev->y_root;	
 	
-	if(p_motion==FALSE){
+	if(!p_motion){
+		call_motion_begin(binding, ev, dx, dy);
 		p_motion=TRUE;
-		call_motion_begin(p_motiontmp, ev, dx, dy);
 	}else{
-		call_motion(p_motiontmp, ev, dx, dy);
+		call_motion(ev, dx, dy);
 	}
 }
 

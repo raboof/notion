@@ -9,8 +9,8 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_IONCORE_WMCORE_H
-#define ION_IONCORE_WMCORE_H
+#ifndef ION_IONCORE_IONCORE_H
+#define ION_IONCORE_IONCORE_H
 
 #include "common.h"
 
@@ -24,4 +24,4 @@ void ioncore_deinit();
 
 bool ioncore_is_utf8();
 
-#endif /* ION_IONCORE_WMCORE_H */
+#endif /* ION_IONCORE_IONCORE_H */

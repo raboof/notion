@@ -171,6 +171,7 @@ DYNFUN WRegion *region_current(WRegion *mgr);
 #define LAST_CHILD(NAM, TYPE) (TYPE*)last_child((WRegion*)NAM, &OBJDESCR(TYPE))
 #define PREV_CHILD(NAM, TYPE) (TYPE*)prev_child((WRegion*)NAM, &OBJDESCR(TYPE))
 #define PREV_CHILD_FB(NAM, TYPE, FB) (TYPE*)prev_child_fb((WRegion*)NAM, &OBJDESCR(TYPE), (WRegion*)FB)
+#define REGION_PARENT(NAM) (((WRegion*)NAM)->parent)
 #define REGION_PARENT_CHK(NAM, TYPE) (TYPE*)region_get_parent_chk((WRegion*)NAM, &OBJDESCR(TYPE))
 #define NTH_CHILD(NAM, N, TYPE) (TYPE*)nth_child((WRegion*)NAM, N, &OBJDESCR(TYPE))
 #define FOR_ALL_TYPED_CHILDREN(NAM, NAM2, TYPE) \

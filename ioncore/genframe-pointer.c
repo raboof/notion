@@ -116,9 +116,6 @@ int genframe_press(WGenFrame *genframe, XButtonEvent *ev, WRegion **reg_ret)
 		
 		sub=mplex_nth_managed(&(genframe->mplex), p_tabnum);
 
-		if(sub==NULL)
-			return WGENFRAME_AREA_EMPTY_TAB;
-
 		if(reg_ret!=NULL)
 			*reg_ret=sub;
 		
@@ -130,9 +127,8 @@ int genframe_press(WGenFrame *genframe, XButtonEvent *ev, WRegion **reg_ret)
 	
 	genframe_border_inner_geom(genframe, &g);
 	
-	if(coords_in_rect(&g, ev->x, ev->y)){
-		return 0;
-	}
+	if(coords_in_rect(&g, ev->x, ev->y))
+		return WGENFRAME_AREA_CLIENT;
 	
 	return WGENFRAME_AREA_BORDER;
 }
