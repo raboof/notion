@@ -6,16 +6,10 @@
 -- These should work on any object on the workspace.
 
 ionws_bindings{
-    kpress(DEFAULT_MOD .. "S",
-           function(ws, sub) ionws_split(sub, "bottom") end
-          ),
     kpress(DEFAULT_MOD .. "N", ionws_goto_below),
     kpress(DEFAULT_MOD .. "P", ionws_goto_above),
     kpress(DEFAULT_MOD .. "Tab", ionws_goto_right),
     submap(DEFAULT_MOD .. "K") {
-        kpress("AnyModifier+S",
-               function(ws,sub) ionws_split(sub, "right") end
-              ),
         kpress("AnyModifier+Tab", ionws_goto_left),
     },
 }
@@ -28,9 +22,13 @@ ionframe_bindings(frame_query_bindings())
 
 ionframe_bindings{
     kpress(DEFAULT_MOD .. "R", ionframe_begin_resize),
-    
+    kpress(DEFAULT_MOD .. "S",
+           function(frame) ionframe_split(frame, "bottom") end),
+
     submap(DEFAULT_MOD .. "K"){
         kpress("X", ionframe_close),
+        kpress("AnyModifier+S",
+               function(frame) ionframe_split(frame, "right") end),
     },
     
     mclick("Button1", genframe_p_switch_tab, "tab"),

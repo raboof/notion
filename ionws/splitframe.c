@@ -93,7 +93,7 @@ bool get_splitparams(int *dir, int *primn, const char *str)
 }
 
 
-static void do_split(WRegion *oreg, const char *str, bool attach)
+static void do_split(WIonFrame *oframe, const char *str, bool attach)
 {
 	WRegion *reg;
 	int dir, primn, mins;
@@ -103,57 +103,56 @@ static void do_split(WRegion *oreg, const char *str, bool attach)
 		return;
 	}
 	
-	mins=(dir==VERTICAL ? region_min_h(oreg) : region_min_w(oreg));
+	mins=(dir==VERTICAL
+		  ? region_min_h((WRegion*)oframe)
+		  : region_min_w((WRegion*)oframe));
 	
-	reg=split_reg(oreg, dir, primn, mins,
+	reg=split_reg((WRegion*)oframe, dir, primn, mins,
 				  (WRegionSimpleCreateFn*)create_ionframe_simple);
 	
-	if(reg!=NULL){
-		if(attach && WOBJ_IS(oreg, WIonFrame) &&
-		   ((WIonFrame*)oreg)->genframe.current_sub!=NULL){
-			region_add_managed_simple(reg,
-									  ((WIonFrame*)oreg)->genframe.current_sub,
-									  REGION_ATTACH_SWITCHTO);
-		}
-		region_goto(reg);
-	}else{
+	if(reg==NULL){
 		warn("Unable to split");
+		return;
 	}
+
+	if(attach && oframe->genframe.current_sub!=NULL){
+		region_add_managed_simple(reg, oframe->genframe.current_sub,
+								  REGION_ATTACH_SWITCHTO);
+	}
+	region_goto(reg);
 }
 
 
 /*EXTL_DOC
- * Split \var{reg} creating a new WIonFrame to direction \var{dir}
- * (one of ''left'', ''right'', ''top'', ''bottom'') of \var{reg}.
- * If \var{reg} is a frame, the active managed region in that frame
- * is moved to the new frame.
- * \note{NOTE: This function will be changed into something else.}
+ * Split \var{frame} creating a new WIonFrame to direction \var{dir}
+ * (one of ''left'', ''right'', ''top'' or ''bottom'') of \var{frame}.
+ * The active manages region in \var{frame}, if any, is moved to the
+ * new frame.
  */
 EXTL_EXPORT
-void ionws_split(WRegion *reg, const char *dirstr)
+void ionframe_split(WIonFrame *frame, const char *dirstr)
 {
-	do_split(reg, dirstr, TRUE);
+	do_split(frame, dirstr, TRUE);
 }
 
 /*EXTL_DOC
- * Same as \fnref{ionws_split} except nothing is moved to the newly
+ * Similar to \fnref{ionframe_split} except nothing is moved to the newly
  * created frame.
- * \note{NOTE: This function will be changed into something else.}
  */
 EXTL_EXPORT
-void ionws_split_empty(WRegion *reg, const char *dirstr)
+void ionframe_split_empty(WIonFrame *frame, const char *dirstr)
 {
-	do_split(reg, dirstr, FALSE);
+	do_split(frame, dirstr, FALSE);
 }
 
 
 /*EXTL_DOC
  * Create new WIonFrame on \var{ws} above/below/left of/right of
  * all other objects depending on \var{dirstr}
- * (one of ''left'', ''right'', ''top'', ''bottom'').
+ * (one of ''left'', ''right'', ''top'' or ''bottom'').
  */
 EXTL_EXPORT
-void ionws_split_top(WIonWS *ws, const char *dirstr)
+void ionws_newframe(WIonWS *ws, const char *dirstr)
 {
 	WRegion *reg;
 	int dir, primn, mins;

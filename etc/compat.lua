@@ -7,15 +7,19 @@
 
 local function obsolete(name, fn)
     function obswrap(...)
+        local fnx=fn
+        if type(fn)=="string" then
+            fnx=_G[fn]
+        end
         io.stderr:write("Warning: function " .. name .. " is obsolete.\n")
-        fn(unpack(arg))
+        fnx(unpack(arg))
     end
     _G[name]=obswrap
 end
 
 -- Added 2003-04-22
-obsolete("floatframe_raise", region_raise)
-obsolete("floatframe_lower", region_lower)
+obsolete("floatframe_raise", "region_raise")
+obsolete("floatframe_lower", "region_lower")
 
 -- Added 2003-05-02
 local vertical_resize=true
@@ -49,3 +53,9 @@ obsolete("ionframe_shrink", function(frame)
                                 end
                             end
         )
+
+
+-- Added 2003-05-07
+obsolete("ionws_split", "ionframe_split")
+obsolete("ionws_split_empty", "ionframe_split_empty")
+obsolete("ionws_split_top", "ionws_newframe")
