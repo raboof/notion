@@ -27,28 +27,27 @@ BUILDING AND INSTALLING
 4. Run 'make install', as root if you set $PREFIX in system.mk to a directory
    that requires those privileges.
    
-5. If you did not install Ion so that $PREFIX/bin is on $PATH, you should add
-   it there. Otherwise Ion can not find the various ion-* helper scripts.
-    
-   YOU SHOULD NOT SKIP THIS LAST STEP unless you know what you are doing.
-   Ion will refuse to start if it can not find all the necessary uncorrupt
+   YOU SHOULD NOT SKIP THIS STEP unless you know what you are doing. Ion
+   will refuse to start if it can not find all the necessary uncorrupt
    configuration files either in $PREFIX/etc/ion-devel/ or in ~/.ion-devel/.
 
+5. The scripts 'ion-edit' and 'ion-view' in $SHAREDIR and bound to the
+   F5 and F6 keys expect the program 'run-mailcap' to be found. This 
+   program opens a viewer/editor for a file based on its MIME type. 
+   Unless you are using Debian, most likely you don't have it, but any
+   other similar program (or just plain old text editor) will do as
+   well - just modify the scripts. Of course, if you don't want to use
+   the feature at this time or never, you may simply skip this step. 
+   If you want to use run-mailcap, it can be found from the address
+   <http://www.debian.org/Packages/unstable/net/mime-support.html>
+   as tarball as well.
 
-ADDITIONAL CONFIGURATION
 
-The scripts 'ion-edit' and 'ion-view' (F5 and F6 keys) expect the
-program 'run-mailcap' to be found. This program opens a viewer/editor
-for a file based on its mime-type. Most likely you don't have it, but
-any other similar program (or just plain old text editor) will do as
-well - just modify the scripts. Unless you don't want to use them,
-of course. If you want to use run-mailcap, it can be found at
-<http://www.debian.org/Packages/unstable/net/mime-support.html>
-(as .tar.gz as well).
+CONFIGURATION
 
-For help on modifying Ion's configuration files, read the documentation
-at <http://iki.fi/tuomov/ion/#docs>. The Ion home page and the
-wikiwiki may provide other usefull links.
+For help on modifying Ion's configuration files, PLEASE READ THE DOCUMENT
+"Ion: Configuring and extending with Lua" available from the Ion web page.
+listed at the top of this file.
 
 
 QUESTIONS, COMMENTS, PROBLEMS?
