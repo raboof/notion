@@ -164,22 +164,40 @@ bool ioncore_add_default_dirs()
 /*{{{ try_etcpath, do_include, etc. */
 
 
-static int try_etcpath2(const char *const *files, TryConfigFn *tryfn,
-						void *tryfnparam)
+static int do_try(const char *dir, const char *file, TryConfigFn *tryfn,
+				  void *tryfnparam)
 {
 	char *tmp=NULL;
+	int ret;
+	
+	libtu_asprintf(&tmp, "%s/%s", dir, file);
+	if(tmp==NULL){
+		warn_err();
+		return TRYCONFIG_MEMERROR;
+	}
+	ret=tryfn(tmp, tryfnparam);
+	free(tmp);
+	return ret;
+}
+
+	
+static int try_etcpath2(const char *const *files, const char *cfdir,
+						TryConfigFn *tryfn, void *tryfnparam)
+{
 	const char *const *file;
 	int i, ret;
 	
+	if(cfdir!=NULL){
+		for(file=files; *file!=NULL; file++){
+			ret=do_try(cfdir, *file, tryfn, tryfnparam);
+			if(ret>=0)
+				return ret;
+		}
+	}
+	
 	for(i=n_scriptpaths-1; i>=0; i--){
 		for(file=files; *file!=NULL; file++){
-			libtu_asprintf(&tmp, "%s/%s", scriptpaths[i], *file);
-			if(tmp==NULL){
-				warn_err();
-				return TRYCONFIG_MEMERROR;
-			}
-			ret=tryfn(tmp, tryfnparam);
-			free(tmp);
+			ret=do_try(scriptpaths[i], *file, tryfn, tryfnparam);
 			if(ret>=0)
 				return ret;
 		}
@@ -247,6 +265,42 @@ static int try_call_nargs(const char *file, TryCallParam *param)
 }
 
 
+static int do_try_config_for(const char *module, const char *cfdir,
+							 TryConfigFn *tryfn, void *tryfnparam)
+{
+	char *files[]={NULL, NULL, NULL};
+	int n=0;
+	int ret;
+
+#ifdef EXTL_COMPILED_EXTENSION	
+	libtu_asprintf(files+n, "%s." EXTL_COMPILED_EXTENSION, module);
+	if(files[n]==NULL)
+		warn_err();
+	else
+		n++;
+#endif
+	
+	libtu_asprintf(files+n, "%s." EXTL_EXTENSION, module);
+	if(files[n]==NULL)
+		warn_err();
+	else
+		n++;
+	
+	ret=try_etcpath2((const char**)&files, cfdir, tryfn, tryfnparam);
+	
+	while(n>0)
+		free(files[--n]);
+	
+	return ret;
+}
+
+
+int try_config_for(const char *module, TryConfigFn *tryfn, void *tryfnparam)
+{
+	return do_try_config_for(module, NULL, tryfn, tryfnparam);
+}
+
+
 int do_lookup_script(const char *file, const char *try_in_dir,
 					 TryConfigFn *tryfn, void *tryfnparam)
 {
@@ -257,26 +311,11 @@ int do_lookup_script(const char *file, const char *try_in_dir,
 	if(file==NULL)
 		return TRYCONFIG_NOTFOUND;
 	
-	if(file[0]=='/'){
-		retval=tryfn(file, tryfnparam);
-		if(retval>=0)
-			return retval;
-	}
-	
-	if(try_in_dir!=NULL){
-		libtu_asprintf(&tmp, "%s/%s", try_in_dir, file);
-		if(tmp==NULL){
-			warn_err();
-			return TRYCONFIG_MEMERROR;
-		}
-		retval=tryfn(file, tryfnparam);
-		free(tmp);
-		if(retval>=0)
-			return retval;
-	}
+	if(file[0]=='/')
+		return tryfn(file, tryfnparam);
 	
 	files[0]=file;
-	return try_etcpath2(files, tryfn, tryfnparam);
+	return try_etcpath2(files, try_in_dir, tryfn, tryfnparam);
 }
 
 
@@ -300,10 +339,20 @@ bool do_include(const char *file, const char *current_file_dir)
 	TryCallParam param;
 	int retval;
 	
+	if(file==NULL){
+		warn("No file to include given.");
+		return FALSE;
+	}
+	
 	param.status=0;
 
-	retval=do_lookup_script(file, current_file_dir,
-							(TryConfigFn*)try_call_nargs, &param);
+	if(strpbrk(file, "./")==NULL){
+		retval=do_try_config_for(file, current_file_dir,
+								 (TryConfigFn*)try_call_nargs, &param);
+	}else{
+		retval=do_lookup_script(file, current_file_dir,
+								(TryConfigFn*)try_call_nargs, &param);
+	}
 	
 	if(retval==TRYCONFIG_NOTFOUND)
 		warn("Unable to find '%s' on search path", file);
@@ -314,30 +363,6 @@ bool do_include(const char *file, const char *current_file_dir)
 
 /*}}}*/
 
-
-/*{{{ try_config */
-
-
-int try_config_for(const char *module, TryConfigFn *tryfn, void *tryfnparam)
-{
-	char *files[]={NULL, NULL};
-	int ret;
-	
-	libtu_asprintf(files+0, "%s.%s", module, extl_extension());
-	if(files[0]==NULL){
-		warn_err();
-		return TRYCONFIG_MEMERROR;
-	}
-	
-	ret=try_etcpath2((const char**)&files, tryfn, tryfnparam);
-	
-	free(files[0]);
-	
-	return ret;
-}
-
-
-/*}}}*/
 
 
 /*{{{ read_config */
@@ -397,10 +422,8 @@ char *get_savefile_for(const char *file)
 {
 	char *res=NULL;
 	
-	if(sessiondir!=NULL){
-		libtu_asprintf(&res, "%s/%s.%s", sessiondir, file,
-					   extl_extension());
-	}
+	if(sessiondir!=NULL)
+		libtu_asprintf(&res, "%s/%s." EXTL_EXTENSION, sessiondir, file);
 	
 	return res;
 }
