@@ -85,9 +85,8 @@ end
 
 function ext_statusbar.timer_handler(tmr)
     ext_statusbar.inform("date", get_date())
-    if ext_statusbar.update() then
-        ext_statusbar.set_timer()
-    end
+    ext_statusbar.update()
+    ext_statusbar.set_timer()
 end
 
 function ext_statusbar.init_timer()
