@@ -1,6 +1,8 @@
 #!/bin/sh
 
 tocompl=""
+section="[0-9]"
+beg=""
 action=""
 usercache=""
 syscache=""
@@ -10,12 +12,23 @@ translate_grepsafe() {
     # and doesn't support simple and intuitive escaping and we have to
     # do it the hard way with the collations [.[.] and [.].] standing 
     # for [ and ], respectively.
-    sed 's:[[.[.][.].].*$^\\]:\\&:g'
+    sed 's:^[ \t]*\(.*\)[ \t]*$:\1:;
+         s:[[.[.][.].].*$^\\]:\\&:g;
+         s:^\([0-9]\+\)[ \t]\+\(.*\)$:\2[^.]*[.]?:'
 }
 
 case "$1" in
     -complete)
-        tocompl=`echo "$2" | translate_grepsafe`
+        read section tocompl << EOF
+$2
+EOF
+        if test "$tocompl" = ""; then
+            tocompl="$section"
+            section="[0-9]"
+        else
+            beg="$section "
+        fi
+        tocompl=`echo "$tocompl" | translate_grepsafe`
         action="complete"
         ;;
     -mkusercache)
@@ -31,6 +44,16 @@ if test "x$action" = x; then
     exit 1
 fi
         
+
+filterpath() {
+    sed 's:^.*/\([^/]\+\.[0-9].*\)$:\1:p; d'
+}
+
+filtersect() {
+    sed 's:^\(.*\)\.[0-9].*$:\1:p; d'
+}
+
+
 scan() {
     if test "x$ION_MC_MANPATH" != "x"; then
         mpath="$ION_MANPATH"
@@ -46,7 +69,7 @@ scan() {
     fi
     
     for p in `echo "$mpath"|tr : '\n'`; do
-        find  "$p" -type f -o -type l|sed 's:^.*/\([^/]\+\)\.[0-9].*$:\1:p; d'
+        find  "$p" -type f -o -type l | filterpath
     done 
 }
 
@@ -70,12 +93,12 @@ case "$action" in
         fi
         
         # Empty "common part" of completions.
-        echo ""
+        echo "$beg"
         
         if test "x$cachefile" != x; then
-            grep "^$tocompl" "$cachefile"
+            grep "^$tocompl.*\.$section" "$cachefile" | filtersect
         else
-            scan | grep "^$tocompl" 
+            scan | grep "^$tocompl.*\.$section" | filtersect
         fi
         ;;
     mkusercache)
