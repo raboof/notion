@@ -31,6 +31,7 @@ ionframe_bindings{
     },
     
     mclick("Button1", WGenFrame.p_switch_tab, "tab"),
+    mdblclick("Button1", WIonFrame.toggle_shade, "tab"),
     mdrag("Button1", WGenFrame.p_tabdrag, "tab"),
     mdrag("Button1", WGenFrame.p_resize, "border"),
     
