@@ -49,9 +49,8 @@ XINERAMA_LIBS=-lXinerama -lXext
 # Uncomment to enable UTF8 support. You must have XFree86 (4.x?) and the
 # libunicode library (the one from Gnome -- no, the library doesn't depend
 # no other Gnome libraries of even glib at the time of writing this).
-#DEFINES += -DCF_UTF8
-#EXTRA_INCLUDES += `unicode-config --cflags`
-#EXTRA_LIBS += `unicode-config --libs`
+DEFINES += -DCF_UTF8
+#EXTRA_LIBS += -liconv
 
 
 ##
