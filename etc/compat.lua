@@ -59,3 +59,10 @@ obsolete("ionframe_shrink", function(frame)
 obsolete("ionws_split", "ionframe_split")
 obsolete("ionws_split_empty", "ionframe_split_empty")
 obsolete("ionws_split_top", "ionws_newframe")
+
+obsolete("make_screen_switch_nth_fn", function(n)
+                                          local function call_nth(scr)
+                                              screen_switch_nth_on_cvp(scr, n)
+                                          end
+                                          return call_nth
+                                      end)

@@ -3,25 +3,22 @@
 -- modules' configuration files for other bindings.
 --
 
+
 global_bindings{
-    -- make_screen_switch_nth_fn(n) (defined in ioncore-lib.lua) creates a
-    -- function to call screen_switch_nth_fn_on_cvp(screen, n), where cvp
-    -- stands for "current viewport" and screen is the parameter with which
-    -- the key handling code in Ion calls us.
-    kpress(DEFAULT_MOD .. "1", make_screen_switch_nth_fn(0)),
-    kpress(DEFAULT_MOD .. "2", make_screen_switch_nth_fn(1)),
-    kpress(DEFAULT_MOD .. "3", make_screen_switch_nth_fn(2)),
-    kpress(DEFAULT_MOD .. "4", make_screen_switch_nth_fn(3)),
-    kpress(DEFAULT_MOD .. "5", make_screen_switch_nth_fn(4)),
-    kpress(DEFAULT_MOD .. "6", make_screen_switch_nth_fn(5)),
-    kpress(DEFAULT_MOD .. "7", make_screen_switch_nth_fn(6)),
-    kpress(DEFAULT_MOD .. "8", make_screen_switch_nth_fn(7)),
-    kpress(DEFAULT_MOD .. "9", make_screen_switch_nth_fn(8)),
-    kpress(DEFAULT_MOD .. "0", make_screen_switch_nth_fn(9)),
+    kpress(DEFAULT_MOD .. "1", function(s) screen_switch_nth_on_cvp(s, 0) end),
+    kpress(DEFAULT_MOD .. "2", function(s) screen_switch_nth_on_cvp(s, 1) end),
+    kpress(DEFAULT_MOD .. "3", function(s) screen_switch_nth_on_cvp(s, 2) end),
+    kpress(DEFAULT_MOD .. "4", function(s) screen_switch_nth_on_cvp(s, 3) end),
+    kpress(DEFAULT_MOD .. "5", function(s) screen_switch_nth_on_cvp(s, 4) end),
+    kpress(DEFAULT_MOD .. "6", function(s) screen_switch_nth_on_cvp(s, 5) end),
+    kpress(DEFAULT_MOD .. "7", function(s) screen_switch_nth_on_cvp(s, 6) end),
+    kpress(DEFAULT_MOD .. "8", function(s) screen_switch_nth_on_cvp(s, 7) end),
+    kpress(DEFAULT_MOD .. "9", function(s) screen_switch_nth_on_cvp(s, 8) end),
+    kpress(DEFAULT_MOD .. "0", function(s) screen_switch_nth_on_cvp(s, 9) end),
     kpress(DEFAULT_MOD .. "Left", screen_switch_prev_on_cvp),
     kpress(DEFAULT_MOD .. "Right", screen_switch_next_on_cvp),
     
-    -- make_active_leaf_fn(fn) (defined again in ioncore-lib.lua) creates a
+    -- make_active_leaf_fn(fn) (defined in ioncore-lib.lua) creates a
     -- function to call fn(region_get_active_leaf(screen)).
     -- Region_get_active_leaf is a function that will start from it's
     -- parameter (the screen in this case) and advance active_sub links in
