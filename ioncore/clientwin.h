@@ -89,6 +89,7 @@ extern void clientwin_kill(WClientWin *cwin);
 extern void clientwin_close(WClientWin *cwin);
 
 extern WClientWin *manage_clientwin(Window win, int mflags);
+extern void clientwin_tfor_changed(WClientWin *cwin);
 
 extern bool clientwin_attach_transient(WClientWin *cwin, WRegion *transient);
 

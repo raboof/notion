@@ -481,7 +481,7 @@ again:
 		goto fail2;
 
 	param.geom=REGION_GEOM(cwin);
-	param.maprq=TRUE;
+	param.maprq=!(mflags&MANAGE_INITIAL);
 	param.userpos=(cwin->size_hints.flags&USPosition);
 	param.switchto=(init_state!=IconicState && clientwin_get_switchto(cwin));
 	param.jumpto=extl_table_is_bool_set(cwin->proptab, "jumpto");
@@ -521,6 +521,32 @@ failure:
 fail2:
 	XSelectInput(wglobal.dpy, win, 0);
 	return NULL;
+}
+
+
+void clientwin_tfor_changed(WClientWin *cwin)
+{
+#if 0
+	WManageParams param=INIT_WMANAGEPARAMS;
+	bool succeeded=FALSE;
+	param.tfor=clientwin_get_transient_for(cwin);
+	if(param.tfor==NULL)
+		return;
+	
+	region_rootpos((WRegion*)cwin, &(param.geom.x), &(param.geom.y));
+	param.geom.w=REGION_GEOM(cwin).w;
+	param.geom.h=REGION_GEOM(cwin).h;
+	param.maprq=FALSE;
+	param.userpos=FALSE;
+	param.switchto=region_may_control_focus((WRegion*)cwin);
+	param.jumpto=extl_table_is_bool_set(cwin->proptab, "jumpto");
+	param.gravity=ForgetGravity;
+	
+	CALL_ALT_B(succeeded, add_clientwin_alt, (cwin, &param));
+	warn("WM_TRANSIENT_FOR changed for \"%s\".", region_name((WRegion*)cwin));
+#else
+	warn("Changes is WM_TRANSIENT_FOR property are unsupported.");
+#endif		
 }
 
 

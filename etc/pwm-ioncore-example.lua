@@ -7,6 +7,9 @@
 -- or Mod4; see the output of 'xmodmap'.
 DEFAULT_MOD = "Mod1+"
 
+-- Set default workspace type.
+default_ws_type="WFloatWS"
+
 -- Maximum delay between clicks in milliseconds to be considered a
 -- double click.
 --set_dblclick_delay(250)
@@ -21,7 +24,7 @@ enable_opaque_resize(FALSE)
 
 -- Movement commands warp the pointer to frames instead of just
 -- changing focus. Enabled by default.
-enable_warp(TRUE)
+enable_warp(FALSE)
 
 -- Kludges to make apps behave better.
 include("kludges")

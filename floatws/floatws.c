@@ -382,7 +382,7 @@ static bool floatws_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
 			/* When the window is mapped by application request, position
 			 * request is only honoured if the position was given by the user
 			 * and in case of a transient (the app may know better where to 
-			 * place them) or of we're initialising.
+			 * place them) or if we're initialising.
 			 */
 			respectpos=(param->tfor!=NULL || param->userpos);
 		}
