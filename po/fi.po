@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ion3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-08-02 00:44+0300\n"
+"POT-Creation-Date: 2004-08-02 16:00+0300\n"
 "PO-Revision-Date: 2004-07-31 23:50+0300\n"
 "Last-Translator: Tuomo Valkonen <tuomov at iki.fi>\n"
 "Language-Team: none\n"
@@ -852,61 +852,66 @@ msgstr "Kirjaisinta \"%s\" lataaminen epäonnistui. Yritetään \"%s\":ää."
 msgid "Style %s still in use [%d] but the module is being unloaded!"
 msgstr "Tyyli %s on vielä käytössä [%d], mutta moduulia poistetaan!"
 
-#: ../ion/ion.c:46 ../pwm/pwm.c:41
+#: ../ion/ion.c:41 ../pwm/pwm.c:41
 msgid "X display to use"
 msgstr "Käytettävä X-palvelin/näyttö"
 
-#: ../ion/ion.c:49 ../pwm/pwm.c:44
+#: ../ion/ion.c:44 ../pwm/pwm.c:44
 msgid "Configuration file"
 msgstr "Ensisijainen asetustiedosto"
 
-#: ../ion/ion.c:52 ../pwm/pwm.c:47
+#: ../ion/ion.c:47 ../pwm/pwm.c:47
 msgid "Add directory to search path"
 msgstr "Lisää hakemisto hakupolulle"
 
-#: ../ion/ion.c:55 ../pwm/pwm.c:50
+#: ../ion/ion.c:50 ../pwm/pwm.c:50
 msgid "Manage default root window/non-Xinerama screen only"
 msgstr ""
 "Hallitse vain oletusarvoista juuri-ikkunaa. (Vastaa ensisijaista näyttöä jos "
 "Xinerama ei ole käytössä.)"
 
-#: ../ion/ion.c:59
+#: ../ion/ion.c:54
 msgid "Use Xinerama screen information (default: 1/yes)"
 msgstr "Hyödynnä Xineramaa (oletus: 1/kyllä)"
 
-#: ../ion/ion.c:62 ../pwm/pwm.c:57
+#: ../ion/ion.c:57 ../pwm/pwm.c:57
 msgid "Ignored: not compiled with Xinerama support"
 msgstr "Jätetään huomiotta: ohjelmaa ei ole käännetty Xinerama-tuella"
 
-#: ../ion/ion.c:66 ../pwm/pwm.c:61
+#: ../ion/ion.c:61 ../pwm/pwm.c:61
 msgid "Name of session (affects savefiles)"
 msgstr "Istunnon nimi (vaikuttaa talletustiedostoihin)"
 
-#: ../ion/ion.c:69 ../pwm/pwm.c:64
+#: ../ion/ion.c:64 ../pwm/pwm.c:64
 msgid "Session manager client ID"
 msgstr "Istunnonhallinnan asiakastunniste"
 
-#: ../ion/ion.c:72 ../pwm/pwm.c:67
+#: ../ion/ion.c:67 ../pwm/pwm.c:67
 msgid "Do not create startup error log and display it with xmessage."
 msgstr "Älä luo käynnistysvirhelokia ja näytä sitä xmessage:lla."
 
-#: ../ion/ion.c:76 ../pwm/pwm.c:71
+#: ../ion/ion.c:71 ../pwm/pwm.c:71
 msgid "Show this help"
 msgstr "Näytä tämä aputeksti"
 
-#: ../ion/ion.c:79 ../pwm/pwm.c:74
+#: ../ion/ion.c:74 ../pwm/pwm.c:74
 msgid "Show program version"
 msgstr "Näytä ohjelman versio"
 
-#: ../ion/ion.c:82 ../pwm/pwm.c:77
+#: ../ion/ion.c:77 ../pwm/pwm.c:77
 msgid "Show about text"
 msgstr "Näytä tietoja ohjelmasta"
 
-#: ../ion/ion.c:95
+#: ../ion/ion.c:92
 msgid "Could not get user configuration file directory."
 msgstr "Käyttäjän asetustiedostohakemisto puuttuu, eikä sitä voitu luoda."
 
-#: ../ion/ion.c:128 ../pwm/pwm.c:86
+#: ../ion/ion.c:106
+#, c-format
+msgid "%s/welcome.txt"
+msgstr "%s/welcome.fi.txt"
+
+#: ../ion/ion.c:139 ../pwm/pwm.c:86
 #, c-format
 msgid ""
 "Usage: %s [options]\n"
@@ -915,20 +920,20 @@ msgstr ""
 "Käyttö: %s [valintoja]\n"
 "\n"
 
-#: ../ion/ion.c:188 ../pwm/pwm.c:149
+#: ../ion/ion.c:199 ../pwm/pwm.c:149
 msgid "Invalid parameter to -xinerama."
 msgstr "Virheellinen parametri -xinerama:lle"
 
 #
-#: ../ion/ion.c:207 ../pwm/pwm.c:168
+#: ../ion/ion.c:218 ../pwm/pwm.c:168
 msgid "Invalid command line."
 msgstr "Virheellinen komentorivi."
 
-#: ../ion/ion.c:228
+#: ../ion/ion.c:239
 msgid "Ion startup error log:\n"
 msgstr "Ionin käynnistysvirheloki:\n"
 
-#: ../ion/ion.c:238 ../pwm/pwm.c:199
+#: ../ion/ion.c:249 ../pwm/pwm.c:199
 msgid "Refusing to start due to encountered errors."
 msgstr "Kieltäydytään käynnistymästä tavattujen virheiden johdosta."
 
@@ -944,7 +949,7 @@ msgstr "PWM:n käynnistysvirheloki:\n"
 msgid "Lower the frame."
 msgstr "Alenna kehystä."
 
-#: ../etc/cfg_bindings.lua:174
+#: ../etc/cfg_bindings.lua:175
 msgid "Display frame context menu."
 msgstr "Näytä kehyksen kontekstivalikko."
 
@@ -952,11 +957,12 @@ msgstr "Näytä kehyksen kontekstivalikko."
 msgid "Exit Ion/Shutdown session (y/n)?"
 msgstr "Poistu Ionista/Lopeta istunto (kyllä: y, ei: n)?"
 
-#: ../mod_menu/mod_menu.lua:206
-msgid "Save look selection in %s?"
-msgstr "Talletaanko ulkonäköasetus tiedostoon %s?"
+#
+#: ../etc/cfg_bindings.lua:43
+msgid "Go to n:th screen on multihead setup."
+msgstr "Siirry näytölle n usean näytön järjestelmässä."
 
-#: ../ext_statusbar/ext_statusbar.lua:304
+#: ../ext_statusbar/ext_statusbar.lua:308
 msgid "Failed to create statusbar."
 msgstr "Epäonnistuttiin tilarivin luonnissa"
 
@@ -964,14 +970,9 @@ msgstr "Epäonnistuttiin tilarivin luonnissa"
 msgid "Help"
 msgstr "Ohjeet"
 
-#
-#: ../etc/cfg_bindings.lua:56
-msgid "Create a workspace of chosen default type."
-msgstr "Luo uusi työpöytä ennalta asetettua tyyppiä."
-
-#: ../etc/cfg_query.lua:31
-msgid "Delete previous character."
-msgstr "Tuhoa edellinen merkki."
+#: ../mod_query/mod_query.lua:553
+msgid "SSH to:"
+msgstr "Avaa SSH-yhteys:"
 
 #: ../etc/cfg_menus.lua:28
 msgid "Restart"
@@ -981,42 +982,39 @@ msgstr "Uudelleenkäynnistä"
 msgid "Cannot save selection."
 msgstr "Ei voida tallettaa valintaa."
 
-#: ../etc/cfg_bindings.lua:209
+#: ../etc/cfg_bindings.lua:210
 msgid "End the resize mode."
 msgstr "Siirry tilasta pois."
 
-#: ../share/ioncore-bindings.lua:34
+#: ../ioncore/ioncore-bindings.lua:34
 msgid "Invalid guard %s."
 msgstr "Virheellinen vahti %s."
 
-#: ../etc/cfg_floatws.lua:42
-msgid "Show frame context menu."
-msgstr "Näytä kehyksen kontekstivalikko."
+#: ../etc/cfg_bindings.lua:111
+msgid "Query for Lua code to execute."
+msgstr "Kysy Lua-koodia ajettavaksi."
 
-#: ../etc/cfg_menus.lua:20
-msgid "Mozilla Firefox"
-msgstr ""
+#
+#: ../etc/cfg_bindings.lua:47
+msgid "Go to next/previous screen on multihead setup."
+msgstr "Mene seuraavalle/edelliselle näytölle usean näytön järjestelmässä."
 
 #: ../mod_query/mod_query.lua:336
 msgid "none"
 msgstr "ei mikään"
 
-#: ../etc/cfg_bindings.lua:222
+#: ../etc/cfg_bindings.lua:223
 msgid "Shrink in specified direction."
 msgstr "Kutista vastaavaan suuntaan."
 
-#: ../etc/cfg_bindings.lua:160
+#: ../etc/cfg_bindings.lua:164
 msgid "Maximize the frame horizontally/vertically."
 msgstr "Maksimoi kehys vaaka/pystysuunnassa."
 
-#: ../etc/cfg_bindings.lua:154
+#: ../etc/cfg_bindings.lua:158
 msgid "Move current object within the frame left/right."
 msgstr ""
 "Siirrä kehyksessä tällä hetkellä näytettävää oliota vasemmalle/oikealle."
-
-#: ../etc/cfg_bindings.lua:42
-msgid "Go to n:th screen."
-msgstr "Siirry n:nelle ruudulle."
 
 #: ../etc/cfg_ionws.lua:12
 msgid "Go to frame above/below/right/left of current frame."
@@ -1024,15 +1022,15 @@ msgstr ""
 "Siirry tämänhetkisen kehyksen yllä/alla/vasemmalle/oikealla olevaan "
 "kehykseen."
 
-#: ../ext_statusbar/ext_statusbar.lua:285
+#: ../ext_statusbar/ext_statusbar.lua:289
 msgid "Screen not found."
 msgstr "Ruutua ei löytynyt."
 
-#: ../etc/cfg_bindings.lua:185
+#: ../etc/cfg_bindings.lua:186
 msgid "Resize the frame."
 msgstr "Muuta kehyksen kokoa."
 
-#: ../etc/cfg_bindings.lua:192
+#: ../etc/cfg_bindings.lua:193
 msgid "Move objects between frames by dragging and dropping the tab."
 msgstr "Siirrä olioita kehysten välillä raahaamalla ja pudottamalla välilehti."
 
@@ -1040,18 +1038,23 @@ msgstr "Siirrä olioita kehysten välillä raahaamalla ja pudottamalla välilehti."
 msgid "Could not find %s"
 msgstr "Ei löydettyä %s:ää."
 
-#: ../ext_statusbar/ext_statusbar.lua:291
+#: ../ext_statusbar/ext_statusbar.lua:295
 msgid "Screen already has an stdisp. Refusing to create a statusbar."
 msgstr "Ruudulla on jo tilanäyttö. Kieltäydytään luomasta tilariviä."
 
-#: ../etc/cfg_bindings.lua:113
-msgid "Query for host to connect to with SSH."
-msgstr "Ota SSH-yhteys kyseltävään koneeseen."
+#: ../mod_query/mod_query.lua:409
+msgid "Workspace name:"
+msgstr "Työpöydän nimi:"
 
 #
-#: ../etc/cfg_bindings.lua:232
+#: ../etc/cfg_bindings.lua:233
 msgid "Move in specified direction."
 msgstr "Liiku vastaavaan suuntaan."
+
+#: ../ext_statusbar/ext_statusbar.lua:27
+#
+msgid "mail"
+msgstr "posti"
 
 #: ../mod_query/mod_query.lua:793
 msgid ""
@@ -1065,18 +1068,18 @@ msgstr ""
 msgid "Select next/previous menu entry."
 msgstr "Siirry seuraavaan/edelliseen valintaan."
 
-#: ../share/ioncore-luaext.lua:30
+#: ../ioncore/ioncore-luaext.lua:30
 msgid "Recursive table - unable to deepcopy"
 msgstr "Rekursiivinen taulu - ei voida syväkopioida."
 
 #
-#: ../etc/cfg_bindings.lua:212
+#: ../etc/cfg_bindings.lua:213
 msgid "Grow in specified direction."
 msgstr "Kasvata vastaavaan suuntaan."
 
-#: ../share/ioncore-bindings.lua:45
-msgid "Error compiling guard: %s"
-msgstr "Virhe vahdin käännössä. %s"
+#: ../ioncore/ioncore-bindings.lua:68
+msgid "Invalid command"
+msgstr "Virheellinen komento"
 
 #: ../mod_query/mod_query.lua:181 ../mod_menu/mod_menu.lua:216
 msgid "Too much result data"
@@ -1086,7 +1089,7 @@ msgstr "Liian suuri vastaus"
 msgid "Workspace type (%s):"
 msgstr "Työpöydän tyyppi (%s):"
 
-#: ../etc/cfg_bindings.lua:35
+#: ../etc/cfg_bindings.lua:36
 msgid "Go to previous active object."
 msgstr "Mene edelliseen aktiiviseen olioon."
 
@@ -1099,34 +1102,36 @@ msgstr "Lopeta tekstin valinta."
 msgid "No entry '%s'"
 msgstr "Kirjausta '%s' ei löydy."
 
-#: ../etc/cfg_ionws.lua:19
-msgid "Split current frame horizontally."
-msgstr "Halkaise tämänhetkinen kehys vaakasuunnassa."
+#
+#
+#: ../etc/cfg_bindings.lua:90
+msgid "Toggle fullscreen mode of current client window."
+msgstr "Kytke aktiivisen asiakasikkunan kokoruudun tila päälle/pois."
 
-#: ../etc/cfg_bindings.lua:104
+#: ../etc/cfg_bindings.lua:105
 msgid "Query for manual page to be displayed."
 msgstr "Kysy ohjesivua näytettäväksi."
 
-#: ../etc/cfg_bindings.lua:50
+#: ../etc/cfg_bindings.lua:51
 msgid "Show the Ion manual page."
 msgstr "Näytä Ionin ohjesivu."
 
-#: ../etc/cfg_bindings.lua:59
+#: ../etc/cfg_bindings.lua:60
 msgid "Display the main menu."
 msgstr "Näytä päävalikko."
 
 #
-#: ../etc/cfg_bindings.lua:53
+#: ../etc/cfg_bindings.lua:54
 msgid "Run a terminal emulator."
 msgstr "Käynnistä pääte-emulaattori."
 
-#: ../etc/cfg_bindings.lua:122
+#: ../etc/cfg_bindings.lua:123
 msgid "Query for workspace to go to or create a new one."
 msgstr "Kysy työpöytää jolle siirtyä, tai luo uusi."
 
-#: ../etc/cfg_bindings.lua:30
-msgid "Switch to next/previous object within the screen."
-msgstr "Siirry seuraavaan/edelliseen olioon näytön sisällä."
+#: ../etc/cfg_menus.lua:38 ../etc/cfg_menus.lua:52
+msgid "Kill"
+msgstr "Tapa"
 
 #: ../pwm/cfg_pwm_menus.lua:25 ../etc/cfg_menus.lua:37 ../etc/cfg_menus.lua:51
 msgid "Close"
@@ -1144,26 +1149,13 @@ msgstr "Tuhoa yksi sana eteen/taakse."
 msgid "Go to end/beginning."
 msgstr "Mene rivin alkuun/loppuun."
 
-#: ../etc/cfg_bindings.lua:150
+#: ../etc/cfg_bindings.lua:154
 msgid "Switch to next/previous object within the frame."
 msgstr "Siirry seuraavaan/edelliseen kehyksen jakavaan olioon."
 
 #: ../mod_query/mod_query.lua:390
 msgid "Restart Ion (y/n)?"
 msgstr "Uudelleenkäynnistä Ion (kyllä: y, ei: n)?"
-
-#: ../etc/cfg_bindings.lua:84
-msgid ""
-"Nudge the client window. This might help with some programs' resizing "
-"problems."
-msgstr ""
-"Tönäise asiakasikkunaa. Tämä saattaa auttaa joidenkin ohjelmien koko-"
-"ongelmien kanssa."
-
-#
-#: ../etc/cfg_bindings.lua:89
-msgid "Toggle fullscreen mode."
-msgstr "Kytke kokoruudun tila päälle/pois."
 
 #: ../mod_query/mod_query.lua:710
 msgid "Lua code: "
@@ -1173,7 +1165,7 @@ msgstr "Lua-koodia:"
 msgid "Attach window:"
 msgstr "Liitä ikkuna:"
 
-#: ../etc/cfg_bindings.lua:189 ../etc/cfg_floatws.lua:37
+#: ../etc/cfg_bindings.lua:190 ../etc/cfg_floatws.lua:37
 msgid "Move the frame."
 msgstr "Siirrä kehystä."
 
@@ -1211,6 +1203,12 @@ msgid "Split current frame vertically."
 msgstr "Halkaise tämänhetkinen kehys pystysuunnassa."
 
 #
+#
+#: ../etc/cfg_bindings.lua:57
+msgid "Create a new workspace of chosen default type."
+msgstr "Luo uusi työpöytä ennalta asetettua tyyppiä."
+
+#
 #: ../etc/cfg_floatws.lua:29
 msgid "Raise the frame."
 msgstr "Nosta kehys."
@@ -1227,20 +1225,26 @@ msgstr "Asiakasikkunaa %s ei löytynyt."
 msgid "Close the query/message box, not executing bound actions."
 msgstr "Sulje kysely/viesti suorittamatta sidottuja toimintoja."
 
-#: ../etc/cfg_bindings.lua:107
-msgid "Query for command line to execute."
-msgstr "Kysy komentoriviä suoritettavaksi."
+#
+#: ../etc/cfg_bindings.lua:172
+msgid "Query for a client window to attach to active frame."
+msgstr "Kysy asiakasikkunaa liitettäväksi kehykseen."
 
 #: ../mod_query/mod_query.lua:476
 msgid "Run:"
 msgstr "Suorita:"
+
+#
+#: ../etc/cfg_bindings.lua:95
+msgid "Kill client owning current client window."
+msgstr "Tapa aktiivisen asiakasikkunan omistava ohjelma."
 
 #: ../mod_query/mod_query.lua:581
 msgid "Manual page (%s):"
 msgstr "Ohjesivu (%s):"
 
 #
-#: ../etc/cfg_bindings.lua:171
+#: ../etc/cfg_bindings.lua:126
 msgid "Query for a client window to go to."
 msgstr "Kysy asiakasikkunaa, johon siirtyä."
 
@@ -1248,41 +1252,43 @@ msgstr "Kysy asiakasikkunaa, johon siirtyä."
 msgid "Unknown error"
 msgstr "Tuntematon virhe"
 
-#: ../etc/cfg_bindings.lua:178
+#: ../etc/cfg_bindings.lua:179
 msgid "Begin move/resize mode."
 msgstr "Aloita siirto ja koonmuutostila."
 
-#: ../etc/cfg_bindings.lua:134
+#: ../etc/cfg_bindings.lua:138
 msgid "Tag current object within the frame."
 msgstr "Merkitse kehyksen tällä hetkellä näyttämä olio."
 
-#: ../etc/cfg_bindings.lua:138
+#: ../etc/cfg_bindings.lua:142
 msgid "Switch to n:th object within the frame."
 msgstr "Siirry n:teen kehyksen jakavaan olioon."
 
-#: ../etc/cfg_bindings.lua:81
-msgid "Close active object."
-msgstr "Sulje aktiivinen olio."
-
-#: ../etc/cfg_bindings.lua:18
-msgid "Switch to n:th object within the screen."
-msgstr "Siirry n:teen näytön jakavaan olioon."
+#: ../etc/cfg_bindings.lua:207
+msgid "Cancel the resize mode."
+msgstr "Peruuta tilasta."
 
 #: ../mod_query/mod_query.lua:347
 msgid "Go to window:"
 msgstr "Mene ikkunaan:"
 
+#
+#: ../etc/cfg_bindings.lua:99
+msgid ""
+"Send next key press to current client window. Some programs may not allow "
+"this by default."
+msgstr ""
+"Lähetä seuraava näppäinpainallus aktiiviselle asiakasikkunalle. Kaikki "
+"ohjelmat eivät välttämättä salli tätä oletuksena."
+
 #: ../etc/cfg_query.lua:45
 msgid "Select next/previous history entry."
 msgstr "Näytä seuraava/edellinen kirjattu vastaus."
 
-#: ../etc/cfg_bindings.lua:98
-msgid ""
-"Send next key press to client window. Some programs may not allow this by "
-"default."
-msgstr ""
-"Lähetä seuraava näppäinpainallus asiakasikkunalle. Kaikki ohjelmat eivät "
-"välttämättä salli tätä oletuksena."
+#
+#: ../etc/cfg_bindings.lua:31
+msgid "Switch to next/previous object within current screen."
+msgstr "Siirry seuraavaan/edelliseen tämänhetkisen näytön lomittamaan olioon."
 
 #: ../pwm/cfg_pwm_menus.lua:14 ../etc/cfg_menus.lua:11
 msgid "About Ion"
@@ -1292,36 +1298,154 @@ msgstr "Tietoja Ionista"
 msgid "Clear tags"
 msgstr "Poista merkinnät"
 
+#: ../etc/cfg_menu.lua:27
+msgid "Clear the menu's typeahead find buffer."
+msgstr "Tyhjää valikon hakupuskuri."
+
 #: ../etc/cfg_query.lua:69
 msgid "Try to complete the entered text."
 msgstr "Yritä täydentää syötetty teksti."
+
+#: ../etc/cfg_query.lua:31
+msgid "Delete previous character."
+msgstr "Tuhoa edellinen merkki."
 
 #: ../mod_query/mod_query.lua:291
 msgid "Cannot attach: different root windows."
 msgstr "Ei voida liittää: eri juuri-ikkunat."
 
-#: ../etc/cfg_menu.lua:27
-msgid "Clear the menu's typeahead find buffer."
-msgstr "Tyhjää valikon hakupuskuri."
+#: ../etc/cfg_menu.lua:11
+msgid "Close the menu."
+msgstr "Sulje valikko."
+
+#: ../etc/cfg_query.lua:85
+msgid "Scroll the message or completions up/down."
+msgstr "Vieritä viestiä tai täydennyksiä ylös/alas."
 
 #: ../etc/cfg_menus.lua:29
 msgid "Restart PWM"
 msgstr "Käynnistä PWM"
 
-#: ../etc/cfg_bindings.lua:116
+#: ../etc/cfg_bindings.lua:117
 msgid "Query for file to edit."
 msgstr "Kysy tiedostoa muokattavaksi."
 
 #
-#: ../etc/cfg_bindings.lua:38
+#: ../etc/cfg_bindings.lua:39
 msgid "Clear all tags."
-msgstr "Poista merkinnät"
+msgstr "Poista kaikki merkinnät."
 
-#: ../etc/cfg_bindings.lua:181
+#: ../etc/cfg_bindings.lua:182
 msgid "Switch the frame to display the object indicated by the tab."
 msgstr "Vaihda kehys näyttämään välilehden ilmoittama olio."
 
-#: ../share/ioncore-efbb.lua:12
+#: ../etc/cfg_query.lua:72
+msgid "Close the query and execute bound action."
+msgstr "Sulje kysely ja suorita sidottu toiminta."
+
+#: ../pwm/cfg_pwm_menus.lua:16 ../pwm/cfg_pwm_menus.lua:24
+msgid "New"
+msgstr "Uusi"
+
+#: ../mod_query/mod_query.lua:398
+msgid "Frame name:"
+msgstr "Kehyksen nimi:"
+
+#: ../etc/cfg_query.lua:42
+msgid "Delete the whole line."
+msgstr "Tuhoa koko rivi."
+
+#: ../etc/cfg_bindings.lua:64
+msgid "Display the window list menu."
+msgstr "Näytä ikkunavalikko."
+
+#
+#: ../etc/cfg_query.lua:59
+msgid "Cut selection."
+msgstr "Leikkaa valittu teksti."
+
+#: ../etc/cfg_query.lua:51
+msgid "Paste from the clipboard."
+msgstr "Liimaa teksti leikelaudalta."
+
+#
+#: ../etc/cfg_bindings.lua:18
+msgid ""
+"Switch to n:th object (workspace, full screen client window) within current "
+"screen."
+msgstr ""
+"Siirry n:teen tämänhetkisen näytön lomittamaan olioon (työpöytä, kokoruudun "
+"asiakasikkuna)."
+
+#: ../etc/cfg_menus.lua:31
+msgid "Exit"
+msgstr "Poistu"
+
+#: ../etc/cfg_bindings.lua:82
+msgid "Close current object."
+msgstr "Sulje aktiivinen olio."
+
+#
+#: ../etc/cfg_query.lua:62
+msgid "Copy selection."
+msgstr "Kopioi valittu teksti."
+
+#: ../etc/cfg_bindings.lua:168
+msgid "Attach tagged objects to this frame."
+msgstr "Liitä merkityt oliot tähän kehykseen."
+
+#: ../etc/cfg_query.lua:39
+msgid "Delete to end of line."
+msgstr "Tuhoa merkit rivin loppuun saakka."
+
+#: ../mod_query/mod_query.lua:754
+msgid "%s menu:"
+msgstr "Valikko %s"
+
+#: ../mod_menu/mod_menu.lua:206
+msgid "Save look selection in %s?"
+msgstr "Talletaanko ulkonäköasetus tiedostoon %s?"
+
+#: ../etc/cfg_bindings.lua:114
+msgid "Query for host to connect to with SSH."
+msgstr "Ota SSH-yhteys kyseltävään koneeseen."
+
+#
+#
+#: ../etc/cfg_menu.lua:16
+msgid "Activate current menu entry."
+msgstr "Suorita valinta."
+
+#: ../ext_statusbar/ext_statusbar.lua:318
+msgid "Failed to create a timer for statusbar."
+msgstr "Epäonnistuttiin ajastimen luonnissa tilariville."
+
+#: ../etc/cfg_query.lua:27
+msgid "Delete next character."
+msgstr "Poista seuraava merkki."
+
+#: ../pwm/cfg_pwm_menus.lua:17 ../etc/cfg_menus.lua:12
+msgid "Styles"
+msgstr "Tyylit"
+
+#
+#: ../etc/cfg_bindings.lua:85
+msgid ""
+"Nudge current client window. This might help with some programs' resizing "
+"problems."
+msgstr ""
+"Tönäise aktiivista asiakasikkunaa. Tämä saattaa auttaa joidenkin ohjelmien "
+"koko-ongelmien kanssa."
+
+#: ../mod_query/mod_query.lua:315
+msgid "Unable to create workspace: no screen."
+msgstr "Ei voida luoda työpöytää: ei ruutua."
+
+#: ../etc/cfg_query.lua:11
+msgid "Move one character forward/backward."
+msgstr "Siirry yksi merkki eteen/taakse."
+
+#: ../ioncore/ioncore-efbb.lua:12
 msgid ""
 "Making the following minimal emergency mappings:\n"
 "  F2 -> xterm\n"
@@ -1336,109 +1460,13 @@ msgstr ""
 "  F12 -> lopetus\n"
 "  Mod1+C -> sulkeminen  Mod1+K P/N -> vaihto kehyksen sisällä\n"
 
-#: ../pwm/cfg_pwm_menus.lua:16 ../pwm/cfg_pwm_menus.lua:24
-msgid "New"
-msgstr "Uusi"
+#: ../etc/cfg_floatws.lua:42
+msgid "Show frame context menu."
+msgstr "Näytä kehyksen kontekstivalikko."
 
-#: ../mod_query/mod_query.lua:398
-msgid "Frame name:"
-msgstr "Kehyksen nimi:"
-
-#: ../etc/cfg_menu.lua:11
-msgid "Close the menu."
-msgstr "Sulje valikko."
-
-#: ../etc/cfg_bindings.lua:63
-msgid "Display the window list menu."
-msgstr "Näytä ikkunavalikko."
-
-#: ../etc/cfg_query.lua:85
-msgid "Scroll the message or completions up/down."
-msgstr "Vieritä viestiä tai täydennyksiä ylös/alas."
-
-#: ../etc/cfg_query.lua:72
-msgid "Close the query and execute bound action."
-msgstr "Sulje kysely ja suorita sidottu toiminta."
-
-#: ../etc/cfg_query.lua:51
-msgid "Paste from the clipboard."
-msgstr "Liimaa teksti leikelaudalta."
-
-#
-#: ../etc/cfg_query.lua:59
-msgid "Cut selection."
-msgstr "Leikkaa valittu teksti."
-
-#: ../etc/cfg_query.lua:42
-msgid "Delete the whole line."
-msgstr "Tuhoa koko rivi."
-
-#
-#: ../etc/cfg_query.lua:62
-msgid "Copy selection."
-msgstr "Kopioi valittu teksti."
-
-#: ../mod_menu/mod_menu.lua:242
-msgid "Refresh list"
-msgstr "Virkistä lista"
-
-#: ../ext_statusbar/ext_statusbar.lua:314
-msgid "Failed to create a timer for statusbar."
-msgstr "Epäonnistuttiin ajastimen luonnissa tilariville."
-
-#: ../mod_query/mod_query.lua:754
-msgid "%s menu:"
-msgstr "Valikko %s"
-
-#: ../etc/cfg_query.lua:39
-msgid "Delete to end of line."
-msgstr "Tuhoa merkit rivin loppuun saakka."
-
-#: ../mod_query/mod_query.lua:553
-msgid "SSH to:"
-msgstr "Avaa SSH-yhteys:"
-
-#
-#: ../etc/cfg_menu.lua:16
-#
-msgid "Activate current menu entry."
-msgstr "Suorita valinta."
-
-#: ../etc/cfg_query.lua:27
-msgid "Delete next character."
-msgstr "Poista seuraava merkki."
-
-#: ../etc/cfg_bindings.lua:94
-msgid "Kill the client."
-msgstr "Tapa asiakas."
-
-#: ../pwm/cfg_pwm_menus.lua:17 ../etc/cfg_menus.lua:12
-msgid "Styles"
-msgstr "Tyylit"
-
-#: ../etc/cfg_bindings.lua:110
-msgid "Query for Lua code to execute."
-msgstr "Kysy Lua-koodia ajettavaksi."
-
-#: ../mod_query/mod_query.lua:315
-msgid "Unable to create workspace: no screen."
-msgstr "Ei voida luoda työpöytää: ei ruutua."
-
-#: ../etc/cfg_query.lua:11
-msgid "Move one character forward/backward."
-msgstr "Siirry yksi merkki eteen/taakse."
-
-#: ../pwm/cfg_pwm_menus.lua:12 ../etc/cfg_menus.lua:9
-msgid "Lock screen"
-msgstr "Lukitse näyttö"
-
-#: ../etc/cfg_floatws.lua:26
-msgid "Toggle shade mode"
-msgstr "Kytke litistys päälle/pois."
-
-#: ../etc/cfg_floatws.lua:15
-msgid "Raise/lower active frame."
-msgstr "Nosta/alenna aktiivinen kehys."
+#: ../etc/cfg_bindings.lua:108
+msgid "Query for command line to execute."
+msgstr "Kysy komentoriviä suoritettavaksi."
 
 #: ../mod_query/mod_query.lua:437
 msgid "Edit file:"
@@ -1448,33 +1476,33 @@ msgstr "Muokkaa tiedostoa:"
 msgid "XTerm"
 msgstr ""
 
-#: ../etc/cfg_ionws.lua:22
-msgid "Destroy current frame."
-msgstr "Tuhoa tämänhetkinen kehys."
+#: ../ext_statusbar/ext_statusbar.lua:27
+msgid "load"
+msgstr "kuorma"
 
 #: ../pwm/cfg_pwm_menus.lua:27
 msgid "List"
 msgstr "Lista"
 
-#: ../mod_query/mod_query.lua:409
-msgid "Workspace name:"
-msgstr "Työpöydän nimi:"
+#: ../etc/cfg_floatws.lua:26
+msgid "Toggle shade mode"
+msgstr "Kytke litistys päälle/pois."
 
-#: ../share/ioncore-bindings.lua:53
+#: ../ioncore/ioncore-bindings.lua:53
 msgid "Error in command string: "
 msgstr "Virhe komentojonossa:"
 
-#: ../etc/cfg_menus.lua:42 ../etc/cfg_menus.lua:56
-msgid "Attach tagged"
-msgstr "Liitä merkityt"
+#: ../etc/cfg_floatws.lua:15
+msgid "Raise/lower active frame."
+msgstr "Nosta/alenna aktiivinen kehys."
 
-#: ../etc/cfg_bindings.lua:46
-msgid "Go to next/previous screen."
-msgstr "Mene seuraavalle/edelliselle näytölle."
+#: ../etc/cfg_bindings.lua:120
+msgid "Query for file to view."
+msgstr "Kysy tiedostoa näytettäväksi."
 
-#: ../etc/cfg_menus.lua:38 ../etc/cfg_menus.lua:52
-msgid "Kill"
-msgstr "Tapa"
+#: ../pwm/cfg_pwm_menus.lua:12 ../etc/cfg_menus.lua:9
+msgid "Lock screen"
+msgstr "Lukitse näyttö"
 
 #: ../etc/cfg_menus.lua:40 ../etc/cfg_menus.lua:54
 msgid "(Un)tag"
@@ -1484,30 +1512,55 @@ msgstr "Vaihda merkintä"
 msgid "View file:"
 msgstr "Näytä tiedosto:"
 
-#: ../etc/cfg_menus.lua:31
-msgid "Exit"
-msgstr "Poistu"
+#: ../etc/cfg_ionws.lua:22
+msgid "Destroy current frame."
+msgstr "Tuhoa tämänhetkinen kehys."
+
+#: ../etc/cfg_ionws.lua:19
+msgid "Split current frame horizontally."
+msgstr "Halkaise tämänhetkinen kehys vaakasuunnassa."
+
+#: ../etc/cfg_menus.lua:42 ../etc/cfg_menus.lua:56
+msgid "Attach tagged"
+msgstr "Liitä merkityt"
 
 #: ../etc/cfg_menus.lua:27
 msgid "Save"
 msgstr "Talleta"
 
-#: ../share/ioncore-bindings.lua:68
-msgid "Invalid command"
-msgstr "Virheellinen komento"
-
-#: ../etc/cfg_bindings.lua:119
-msgid "Query for file to view."
-msgstr "Kysy tiedostoa näytettäväksi."
-
-#: ../etc/cfg_bindings.lua:206
-msgid "Cancel the resize mode."
-msgstr "Peruuta tilasta."
-
 #
 #: ../pwm/cfg_pwm_menus.lua:15
 msgid "Workspaces"
 msgstr "Työpöydät"
+
+#: ../etc/cfg_menus.lua:20
+msgid "Mozilla Firefox"
+msgstr ""
+
+#: ../ioncore/ioncore-bindings.lua:45
+msgid "Error compiling guard: %s"
+msgstr "Virhe vahdin käännössä. %s"
+
+#: ../etc/cfg_floatws.lua:9
+msgid "Circulate focus and raise the newly focused frame."
+msgstr "Kierrätä fokusta ja nosta uudelleen fokusoitu kehys."
+
+#
+#: ../etc/cfg_menus.lua:21
+msgid "Run..."
+msgstr "Suorita..."
+
+#: ../mod_menu/mod_menu.lua:242
+msgid "Refresh list"
+msgstr "Virkistä lista"
+
+#: ../mod_query/mod_query.lua:498
+msgid "Failed to open ~/.ssh/known_hosts"
+msgstr "Ei pystytty avaamaan tiedostoa ~/.ssh/known_hosts."
+
+#: ../pwm/cfg_pwm_menus.lua:18 ../etc/cfg_menus.lua:13
+msgid "Session"
+msgstr "Istunto"
 
 #: ../mod_query/mod_query.lua:790
 msgid ""
@@ -1522,28 +1575,3 @@ msgstr ""
 "Rooli(role): %s\n"
 "Instanssi(instance): %s\n"
 "XID: 0x%x"
-
-#: ../etc/cfg_floatws.lua:9
-msgid "Circulate focus and raise the newly focused frame."
-msgstr "Kierrätä fokusta ja nosta uudelleen fokusoitu kehys."
-
-#
-#: ../etc/cfg_menus.lua:21
-msgid "Run..."
-msgstr "Suorita..."
-
-#: ../etc/cfg_bindings.lua:168
-msgid "Query for a client window to attach to this frame."
-msgstr "Kysy asiakasikkunaa liitettäväksi kehykseen."
-
-#: ../mod_query/mod_query.lua:498
-msgid "Failed to open ~/.ssh/known_hosts"
-msgstr "Ei pystytty avaamaan tiedostoa ~/.ssh/known_hosts."
-
-#: ../pwm/cfg_pwm_menus.lua:18 ../etc/cfg_menus.lua:13
-msgid "Session"
-msgstr "Istunto"
-
-#: ../etc/cfg_bindings.lua:164
-msgid "Attach tagged objects to this frame."
-msgstr "Liitä merkityt oliot tähän kehykseen."

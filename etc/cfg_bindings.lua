@@ -15,7 +15,8 @@
 -- modifier to some of the F-key bindings.
 
 defbindings("WScreen", {
-    bdoc("Switch to n:th object within the screen."),
+    bdoc("Switch to n:th object (workspace, full screen client window) "..
+         "within current screen."),
     kpress(MOD1.."1", "WScreen.switch_nth(_, 0)"),
     kpress(MOD1.."2", "WScreen.switch_nth(_, 1)"),
     kpress(MOD1.."3", "WScreen.switch_nth(_, 2)"),
@@ -27,7 +28,7 @@ defbindings("WScreen", {
     kpress(MOD1.."9", "WScreen.switch_nth(_, 8)"),
     kpress(MOD1.."0", "WScreen.switch_nth(_, 9)"),
     
-    bdoc("Switch to next/previous object within the screen."),
+    bdoc("Switch to next/previous object within current screen."),
     kpress(MOD1.."Right", "WScreen.switch_next(_)"),
     kpress(MOD1.."Left", "WScreen.switch_prev(_)"),
     
@@ -39,11 +40,11 @@ defbindings("WScreen", {
         kpress("AnyModifier+T", "ioncore.clear_tags()"),
     }),
     
-    bdoc("Go to n:th screen."),
+    bdoc("Go to n:th screen on multihead setup."),
     kpress(MOD1.."Shift+1", "ioncore.goto_nth_screen(0)"),
     kpress(MOD1.."Shift+2", "ioncore.goto_nth_screen(1)"),
     
-    bdoc("Go to next/previous screen."),
+    bdoc("Go to next/previous screen on multihead setup."),
     kpress(MOD1.."Shift+Left", "ioncore.goto_next_screen()"),
     kpress(MOD1.."Shift+Right", "ioncore.goto_prev_screen()"),
     
@@ -53,7 +54,7 @@ defbindings("WScreen", {
     bdoc("Run a terminal emulator."),
     kpress(MOD2.."F2", "ioncore.exec_on(_, 'xterm')"),
     
-    bdoc("Create a workspace of chosen default type."),
+    bdoc("Create a new workspace of chosen default type."),
     kpress(MOD1.."F9", "ioncore.create_ws(_)"),
     
     bdoc("Display the main menu."),
@@ -78,25 +79,25 @@ defbindings("WScreen", {
 -- parameter if it is not and then complaining.
 
 defbindings("WMPlex", {
-    bdoc("Close active object."),
+    bdoc("Close current object."),
     kpress_wait(MOD1.."C", "WRegion.rqclose_propagate(_, _sub)"),
     
-    bdoc("Nudge the client window. This might help with some programs' "..
-        "resizing problems."),
+    bdoc("Nudge current client window. This might help with some "..
+         "programs' resizing problems."),
     kpress_wait(MOD1.."L", 
                 "WClientWin.nudge(_sub)", "_sub:WClientWin"),
 
-    bdoc("Toggle fullscreen mode."),
+    bdoc("Toggle fullscreen mode of current client window."),
     kpress_wait(MOD1.."Return", 
                 "WClientWin.toggle_fullscreen(_sub)", "_sub:WClientWin"),
-                            
+
     submap(MOD1.."K", {
-       bdoc("Kill the client."),
+       bdoc("Kill client owning current client window."),
        kpress("AnyModifier+C", 
               "WClientWin.kill(_sub)", "_sub:WClientWin"),
                                 
-       bdoc("Send next key press to client window. "..
-           "Some programs may not allow this by default."),
+       bdoc("Send next key press to current client window. "..
+            "Some programs may not allow this by default."),
        kpress("AnyModifier+Q", 
               "WClientWin.quote_next(_sub)", "_sub:WClientWin"),
     }),
@@ -121,6 +122,9 @@ defbindings("WMPlex", {
 
     bdoc("Query for workspace to go to or create a new one."),
     kpress(MOD2.."F9", "mod_query.query_workspace(_)"),
+    
+    bdoc("Query for a client window to go to."),
+    kpress(MOD1.."G", "mod_query.query_gotoclient(_)"),
 })
 
 
@@ -133,7 +137,7 @@ defbindings("WMPlex", {
 defbindings("WFrame", {
     bdoc("Tag current object within the frame."),
     kpress(MOD1.."T", "WRegion.toggle_tag(_sub)", "_sub:non-nil"),
-           
+
     submap(MOD1.."K", {
         bdoc("Switch to n:th object within the frame."),
         kpress("AnyModifier+1", "WFrame.switch_nth(_, 0)"),
@@ -165,12 +169,9 @@ defbindings("WFrame", {
         kpress("AnyModifier+A", "WFrame.attach_tagged(_)"),
     }),
 
-    bdoc("Query for a client window to attach to this frame."),
+    bdoc("Query for a client window to attach to active frame."),
     kpress(MOD1.."A", "mod_query.query_attachclient(_)"),
 
-    bdoc("Query for a client window to go to."),
-    kpress(MOD1.."G", "mod_query.query_gotoclient(_)"),
-           
     bdoc("Display frame context menu."),
     kpress(MOD1.."M", "mod_menu.menu(_, _sub, 'ctxmenu')"),
     mpress("Button3", "mod_menu.pmenu(_, _sub, 'ctxmenu')"),

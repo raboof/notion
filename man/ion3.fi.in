@@ -87,7 +87,7 @@ jonka asetustiedosto määrittelee alla olevat sidonnat.
 
 BINDINGS:WScreen
 
-.SS Kehyksiä ja näyttöjä, sekä niiden lapsia käsittelevät sidonnat
+.".SS Kehyksiä ja näyttöjä, sekä niiden lapsia käsittelevät sidonnat
 
 BINDINGS:WMPlex
 
@@ -99,7 +99,7 @@ BINDINGS:WFrame
 
 BINDINGS:WMoveresMode
 
-.SS Laatoitettujen työpöytien sidonnat [mod_ionws]
+.SS Laatoitettavien työpöytien sidonnat [mod_ionws]
 
 BINDINGS:WIonWS
 
@@ -114,6 +114,10 @@ BINDINGS:WFloatFrame
 BINDINGS:WInput
 
 .SS Sidonnat tekstinmuokkaukseen kyselyissä [mod_query]
+
+Nämä näppäinsidonnat vastaavat tekstieditorin \fIjoe(1)\fP sidontoja.
+Leikkaus ja liimaus toimii kuitenkin tavanomaisemmin, joskin näppäimet
+ovat vastaavat.
 
 BINDINGS:WEdln
 

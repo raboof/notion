@@ -59,7 +59,7 @@ the module that whose configuration file defines these bindings.
 
 BINDINGS:WScreen
 
-.SS Bindings operating on both frames and screens and their children
+.".SS Bindings operating on both frames and screens and their children
 
 BINDINGS:WMPlex
 

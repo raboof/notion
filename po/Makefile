@@ -27,7 +27,6 @@ POTDIRS=../ioncore \
 	../ext_statusbar \
 	../ion \
 	../pwm \
-	../share \
 	../etc
 
 POTFILE=ion3.pot

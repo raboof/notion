@@ -6,7 +6,7 @@
 -- Configure format and updating
 ext_statusbar.set{
     -- ISO-8601 date format
-    date_format='%Y-%m-%d %H:%M',
+    --date_format='%Y-%m-%d %H:%M',
     -- Finnish date format
     --date_format='%d.%m.%Y %H:%M'
     -- Locale date format (usually shows seconds, which would require
@@ -14,10 +14,10 @@ ext_statusbar.set{
     --date_format='%c',
 
     -- Update interval in seconds
-    update_interval=10,
+    --update_interval=10,
     
     -- Mail checking interval
-    mail_interval=60,
+    --mail_interval=60,
     
     -- Template. Tokens %string are replaced with the value of the 
     -- corresponding meter. Currently supported meters are:
@@ -26,7 +26,7 @@ ext_statusbar.set{
     --   %mail_new    new mail count
     --   %mail_unread unread mail count
     --   %mail_total  total mail count
-    template="[ %date || load: %load || mail: %mail_new/%mail_total ]",
+    --template="[ %date || load: %load || mail: %mail_new/%mail_total ]",
 }
 
 

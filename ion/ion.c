@@ -32,11 +32,6 @@
 #include "../version.h"
 
 
-#ifndef CF_NEW_USER_MESSAGE
-#define CF_NEW_USER_MESSAGE SHAREDIR"/welcome.txt"
-#endif
-
-
 /* Options. Getopt is not used because getopt_long is quite gnu-specific
  * and they don't know of '-display foo' -style args anyway.
  * Instead, I've reinvented the wheel in libtu :(.
@@ -89,7 +84,9 @@ void check_new_user_help()
 {
     const char *userdir=ioncore_userdir();
     char *oldbeard=NULL;
+    char *tmp=NULL, *cmd=NULL;
     pid_t pid;
+    bool ret;
 
     if(userdir==NULL){
         warn(TR("Could not get user configuration file directory."));
@@ -98,26 +95,40 @@ void check_new_user_help()
     
     libtu_asprintf(&oldbeard, "%s/.welcome_msg_displayed", userdir);
     
-    if(oldbeard==NULL){
-        warn_err();
+    if(oldbeard==NULL)
         return;
-    }
     
     if(access(oldbeard, F_OK)==0){
         free(oldbeard);
         return;
     }
 
-    if(!ioncore_exec(CF_XMESSAGE" "CF_NEW_USER_MESSAGE))
-        return;
-
-    /* This should actually be done when less or xmessage returns,
-     * but that would mean yet another script...
-     */
-    mkdir(userdir, 0700);
-    if(open(oldbeard, O_CREAT|O_RDWR, 0600)<0)
-        warn_err_obj(oldbeard);
+    libtu_asprintf(&tmp, TR("%s/welcome.txt"), SHAREDIR);
     
+    if(tmp!=NULL){
+        if(access(tmp, F_OK)==0)
+            libtu_asprintf(&cmd, "%s %s", CF_XMESSAGE, tmp);
+        else
+            libtu_asprintf(&cmd, "%s %s/welcome.txt", CF_XMESSAGE, SHAREDIR);
+    
+        free(tmp);
+        
+        if(cmd!=NULL){
+            ret=ioncore_exec(cmd);
+    
+            free(cmd);
+    
+            if(ret){
+                /* This should actually be done when less or xmessage returns,
+                 * but that would mean yet another script...
+                 */
+                mkdir(userdir, 0700);
+                if(open(oldbeard, O_CREAT|O_RDWR, 0600)<0)
+                    warn_err_obj(oldbeard);
+            }
+        }
+    }
+
     free(oldbeard);
 }
 

@@ -22,12 +22,16 @@ _G["ext_statusbar"]=ext_statusbar
 
 local default_update_interval=10
 
+local default_tmpl=
+string.format("[ %%date || %s: %%load || %s: %%mail_new/%%mail_total ]",
+              TR("load"), TR("mail"))
+
 -- Default settings
 local settings={
     date_format='%Y-%m-%d %H:%M',
     update_interval=default_update_interval,
     mail_interval=60,
-    template="[ %date || load: %load || mail: %mail_new/%mail_total ]"
+    template=default_tmpl,
 }
 
 local infowins={}

@@ -85,7 +85,7 @@ the module that whose configuration file defines these bindings.
 
 BINDINGS:WScreen
 
-.SS Bindings operating on frames and screens and their children
+.".SS Bindings operating on frames and screens and their children
 
 BINDINGS:WMPlex
 
@@ -112,6 +112,10 @@ BINDINGS:WFloatFrame
 BINDINGS:WInput
 
 .SS Bindings for editing in queries [mod_query]
+
+These bindings are similar to those of the \fIjoe(1)\fP text editor.
+Cut, copy and paste works in a more conventional manner, though, but
+the keys are equivalent.
 
 BINDINGS:WEdln
 

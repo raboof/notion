@@ -59,7 +59,7 @@ jonka asetustiedosto määrittelee alla olevat sidonnat.
 
 BINDINGS:WScreen
 
-.SS Kehyksiä ja näyttöjä, sekä niiden lapsia käsittelevät sidonnat
+.\".SS Kehyksiä ja näyttöjä, sekä niiden lapsia käsittelevät sidonnat
 
 BINDINGS:WMPlex
 
