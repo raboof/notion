@@ -66,3 +66,10 @@ obsolete("make_screen_switch_nth_fn", function(n)
                                           end
                                           return call_nth
                                       end)
+
+-- Added 2003-05-12
+obsolete("region_get_x", function(reg) return region_geom(reg).x end)
+obsolete("region_get_y", function(reg) return region_geom(reg).y end)
+obsolete("region_get_w", function(reg) return region_geom(reg).w end)
+obsolete("region_get_h", function(reg) return region_geom(reg).h end)
+
