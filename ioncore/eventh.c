@@ -11,7 +11,7 @@
 
 #include "common.h"
 #include "global.h"
-#include "screen.h"
+#include "rootwin.h"
 #include "property.h"
 #include "pointer.h"
 #include "key.h"
@@ -63,8 +63,8 @@ static void keyboard_handler(XEvent *ev);
 /*{{{ Main loop  */
 
 
-#define CASE_EVENT(X) case X:
-/*	fprintf(stderr, "[%#lx] %s\n", ev->xany.window, #X);*/
+#define CASE_EVENT(X) case X: 
+	/*fprintf(stderr, "[%#lx] %s\n", ev->xany.window, #X);*/
 
 
 static void skip_focusenter()
@@ -158,10 +158,10 @@ void mainloop()
 	wglobal.opmode=OPMODE_NORMAL;
 
 	/* Need to force REGION_ACTIVE on some screen -- temporary kludge */
-	XSetInputFocus(wglobal.dpy, wglobal.screens->root.win, PointerRoot,
+	XSetInputFocus(wglobal.dpy, wglobal.rootwins->root.win, PointerRoot,
 				   CurrentTime);
-	((WRegion*)wglobal.screens)->flags|=REGION_ACTIVE;
-	wglobal.active_screen=wglobal.screens;
+	((WRegion*)wglobal.rootwins)->flags|=REGION_ACTIVE;
+	wglobal.active_rootwin=wglobal.rootwins;
 	
 	
 	for(;;){
@@ -195,7 +195,6 @@ void mainloop()
 static void handle_map_request(const XMapRequestEvent *ev)
 {
 	WRegion *reg;
-	WScreen *scr;
 	
 	reg=FIND_WINDOW(ev->window);
 	
@@ -339,7 +338,7 @@ static void handle_colormap_notify(const XColormapEvent *ev)
 static void handle_expose(const XExposeEvent *ev)
 {
 	WWindow *wwin;
-	WScreen *scr;
+	WRootWin *rootwin;
 	XEvent tmp;
 	
 	while(XCheckWindowEvent(wglobal.dpy, ev->window, ExposureMask, &tmp))
@@ -353,8 +352,8 @@ static void handle_expose(const XExposeEvent *ev)
 	}
 	
 	/* TODO: drawlist */
-	FOR_ALL_SCREENS(scr){
-		if(scr->grdata.drag_win==ev->window && wglobal.draw_dragwin!=NULL){
+	FOR_ALL_ROOTWINS(rootwin){
+		if(rootwin->grdata.drag_win==ev->window && wglobal.draw_dragwin!=NULL){
 			wglobal.draw_dragwin(wglobal.draw_dragwin_arg);
 			break;
 		}
@@ -432,15 +431,15 @@ static void handle_enter_window(XEvent *ev)
 }
 
 
-static bool pointer_in_scr(WScreen *scr)
+static bool pointer_in_rootwin(WRootWin *rootwin)
 {
 	Window root=None, win;
 	int x, y, wx, wy;
 	uint mask;
 	
-	XQueryPointer(wglobal.dpy, scr->root.win, &root, &win,
+	XQueryPointer(wglobal.dpy, rootwin->root.win, &root, &win,
 				  &x, &y, &wx, &wy, &mask);
-	return (root==scr->root.win);
+	return (root==rootwin->root.win);
 }
 
 
@@ -475,10 +474,10 @@ static void handle_focus_in(const XFocusChangeEvent *ev)
 			return;
 	}*/
 	
-	if(WOBJ_IS(reg, WScreen)){
-		D(fprintf(stderr, "scr-in %d %d %d\n", ((WScreen*)reg)->xscr, ev->mode, ev->detail));
+	if(WOBJ_IS(reg, WRootWin)){
+		D(fprintf(stderr, "scr-in %d %d %d\n", ((WRootWin*)reg)->xscr, ev->mode, ev->detail));
 		if((ev->detail==NotifyPointerRoot || ev->detail==NotifyDetailNone) &&
-		   pointer_in_scr((WScreen*)reg) && wglobal.focus_next==NULL){
+		   pointer_in_rootwin((WRootWin*)reg) && wglobal.focus_next==NULL){
 			/* Restore focus */
 			set_focus(reg);
 			return;
@@ -517,8 +516,8 @@ static void handle_focus_out(const XFocusChangeEvent *ev)
 	if(ev->detail==NotifyPointer)
 		return;
 
-	D(if(WOBJ_IS(reg, WScreen))
-	  fprintf(stderr, "scr-out %d %d %d\n", ((WScreen*)reg)->xscr, ev->mode, ev->detail));
+	D(if(WOBJ_IS(reg, WRootWin))
+	  fprintf(stderr, "scr-out %d %d %d\n", ((WRootWin*)reg)->xscr, ev->mode, ev->detail));
 
 	if(WOBJ_IS(reg, WWindow)){
 		wwin=(WWindow*)reg;

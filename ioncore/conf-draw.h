@@ -8,8 +8,8 @@
 #ifndef ION_IONCORE_CONF_DRAW_H
 #define ION_IONCORE_CONF_DRAW_H
 
-#include "screen.h"
+#include "rootwin.h"
 
-bool read_draw_config(WScreen *scr);
+bool read_draw_config(WRootWin *rootwin);
 
 #endif /* ION_IONCORE_CONF_DRAW_H */

@@ -82,7 +82,7 @@ void set_resize_timer(WRegion *reg, uint timeout)
 /*{{{ Size display and rubberband */
 
 
-static void res_draw_moveres(WScreen *scr)
+static void res_draw_moveres(WRootWin *rootwin)
 {
 	if(moveres_mode==MOVERES_SIZE){
 		int w, h;
@@ -100,14 +100,14 @@ static void res_draw_moveres(WScreen *scr)
 			h/=tmphints.height_inc;
 		}
 	
-		set_moveres_size(scr, w, h);
+		set_moveres_size(rootwin, w, h);
 	}else{
-		set_moveres_pos(scr, tmpgeom.x, tmpgeom.y);
+		set_moveres_pos(rootwin, tmpgeom.x, tmpgeom.y);
 	}
 }
 
 
-static void res_draw_rubberband(WScreen *scr)
+static void res_draw_rubberband(WRootWin *rootwin)
 {
 	WRectangle rgeom=tmpgeom;
 	int rx, ry;
@@ -116,9 +116,9 @@ static void res_draw_rubberband(WScreen *scr)
 	rgeom.y+=parent_ry;
 
 	if(tmprubfn==NULL)
-		draw_rubberbox(scr, rgeom);
+		draw_rubberbox((WWindow*)rootwin, rgeom);
 	else
-		tmprubfn(scr, rgeom);
+		tmprubfn((WWindow*)rootwin, rgeom);
 	
 }
 
@@ -144,7 +144,7 @@ bool may_resize(WRegion *reg)
 static bool begin_moveres(WRegion *reg, WDrawRubberbandFn *rubfn,
 						  bool cumulative)
 {
-	WScreen *scr=SCREEN_OF(reg);
+	WRootWin *rootwin=ROOTWIN_OF(reg);
 	WRegion *parent;
 	
 	if(tmpreg!=NULL)
@@ -180,15 +180,15 @@ static bool begin_moveres(WRegion *reg, WDrawRubberbandFn *rubfn,
 	if(XOR_RESIZE)
 		XGrabServer(wglobal.dpy);
 	
-	XMoveWindow(wglobal.dpy, scr->grdata.moveres_win,
-				parent_rx+tmpgeom.x+(tmpgeom.w-scr->grdata.moveres_geom.w)/2,
-				parent_ry+tmpgeom.y+(tmpgeom.h-scr->grdata.moveres_geom.h)/2);
-	XMapRaised(wglobal.dpy, scr->grdata.moveres_win);
+	XMoveWindow(wglobal.dpy, rootwin->grdata.moveres_win,
+				parent_rx+tmpgeom.x+(tmpgeom.w-rootwin->grdata.moveres_geom.w)/2,
+				parent_ry+tmpgeom.y+(tmpgeom.h-rootwin->grdata.moveres_geom.h)/2);
+	XMapRaised(wglobal.dpy, rootwin->grdata.moveres_win);
 	
-	res_draw_moveres(scr);
+	res_draw_moveres(rootwin);
 	
 	if(XOR_RESIZE)
-		res_draw_rubberband(scr);
+		res_draw_rubberband(rootwin);
 
 	change_grab_cursor(CURSOR_RESIZE);
 	
@@ -224,7 +224,7 @@ bool begin_resize_atexit(WRegion *reg, WDrawRubberbandFn *rubfn,
 static void delta_moveres(WRegion *reg, int dx1, int dx2, int dy1, int dy2,
 						  WRectangle *rret)
 {
-	WScreen *scr=SCREEN_OF(reg);
+	WRootWin *rootwin=ROOTWIN_OF(reg);
 	WRectangle geom;
 	int w, h;
 	
@@ -288,14 +288,14 @@ static void delta_moveres(WRegion *reg, int dx1, int dx2, int dy1, int dy2,
 	region_request_geom(reg, geom, &geom, XOR_RESIZE);
 
 	if(XOR_RESIZE)
-		res_draw_rubberband(scr);
+		res_draw_rubberband(rootwin);
 	
-	res_draw_moveres(scr);
+	res_draw_moveres(rootwin);
 	
 	tmpgeom=geom;
 	
 	if(XOR_RESIZE)
-		res_draw_rubberband(scr);
+		res_draw_rubberband(rootwin);
 	
 	if(rret!=NULL)
 		*rret=tmpgeom;
@@ -319,7 +319,7 @@ void delta_move(WRegion *reg, int dx, int dy, WRectangle *rret)
 
 void end_resize(WRegion *reg)
 {
-	WScreen *scr=SCREEN_OF(reg);
+	WRootWin *rootwin=ROOTWIN_OF(reg);
 	
 	assert(tmpreg==reg);
 
@@ -329,12 +329,12 @@ void end_resize(WRegion *reg)
 	reset_timer(&resize_timer);
 	
 	if(XOR_RESIZE){
-		res_draw_rubberband(scr);
+		res_draw_rubberband(rootwin);
 		region_request_geom(reg, tmpgeom, &tmpgeom, FALSE);
 		XUngrabServer(wglobal.dpy);
 	}
 	
-	XUnmapWindow(wglobal.dpy, scr->grdata.moveres_win);
+	XUnmapWindow(wglobal.dpy, rootwin->grdata.moveres_win);
 
 	if(resize_atexit){
 		resize_atexit();
@@ -345,7 +345,7 @@ void end_resize(WRegion *reg)
 
 void cancel_resize(WRegion *reg)
 {
-	WScreen *scr=SCREEN_OF(reg);
+	WRootWin *rootwin=ROOTWIN_OF(reg);
 
 	assert(tmpreg==reg);
 	
@@ -355,11 +355,11 @@ void cancel_resize(WRegion *reg)
 	reset_timer(&resize_timer);
 	
 	if(XOR_RESIZE){
-		res_draw_rubberband(scr);
+		res_draw_rubberband(rootwin);
 		XUngrabServer(wglobal.dpy);
 	}
 	
-	XUnmapWindow(wglobal.dpy, scr->grdata.moveres_win);
+	XUnmapWindow(wglobal.dpy, rootwin->grdata.moveres_win);
 
 	if(resize_atexit){
 		resize_atexit();
@@ -511,9 +511,9 @@ uint region_min_w(WRegion *reg)
 
 void genframe_resize_units(WGenFrame *genframe, int *wret, int *hret)
 {
-	WScreen *scr=SCREEN_OF(genframe);
-	*wret=scr->w_unit;
-	*hret=scr->h_unit;
+	WRootWin *rootwin=ROOTWIN_OF(genframe);
+	*wret=rootwin->w_unit;
+	*hret=rootwin->h_unit;
 	
 	if(genframe->current_sub!=NULL){
 		uint dummyrelw,  dummyrelh;

@@ -134,8 +134,8 @@ void floatframe_do_move(WFloatFrame *frame, int horizmul, int vertmul)
 	if(!may_resize((WRegion*)frame))
 		return;
 	
-	wu=SCREEN_OF(frame)->w_unit*horizmul;
-	hu=SCREEN_OF(frame)->h_unit*vertmul;
+	wu=ROOTWIN_OF(frame)->w_unit*horizmul;
+	hu=ROOTWIN_OF(frame)->h_unit*vertmul;
 
 	delta_resize((WRegion*)frame, wu, wu, hu, hu, NULL);
 	set_resize_timer((WRegion*)frame, wglobal.resize_delay);

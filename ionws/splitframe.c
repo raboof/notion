@@ -161,8 +161,8 @@ void ionws_newframe(WIonWS *ws, const char *dirstr)
 		return;
 	
 	mins=(dir==VERTICAL
-		  ? WGENFRAME_MIN_H(SCREEN_OF(ws)) 
-		  : WGENFRAME_MIN_W(SCREEN_OF(ws)));
+		  ? WGENFRAME_MIN_H(ROOTWIN_OF(ws)) 
+		  : WGENFRAME_MIN_W(ROOTWIN_OF(ws)));
 	
 	reg=split_toplevel(ws, dir, primn, mins,
 					   (WRegionSimpleCreateFn*)create_ionframe_simple);

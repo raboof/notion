@@ -30,18 +30,11 @@ static int p_dx1mul=0, p_dx2mul=0, p_dy1mul=0, p_dy2mul=0;
 /*{{{ Frame press */
 
 
-static bool inrect(WRectangle g, int x, int y)
-{
-	return (x>=g.x && x<g.x+g.w && y>=g.y && y<g.y+g.h);
-}
-
-
 #define RESB 32
 
 
 int genframe_press(WGenFrame *genframe, XButtonEvent *ev, WRegion **reg_ret)
 {
-	WScreen *scr=SCREEN_OF(genframe);
 	WRegion *sub;
 	WRectangle g;
 	
@@ -55,7 +48,7 @@ int genframe_press(WGenFrame *genframe, XButtonEvent *ev, WRegion **reg_ret)
 	
 	genframe_bar_geom(genframe, &g);
 		
-	if(inrect(g, ev->x, ev->y)){
+	if(coords_in_rect(g, ev->x, ev->y)){
 		p_dy1mul=1;
 
 		if(ev->x<g.x+RESB)
@@ -130,12 +123,12 @@ void genframe_release(WGenFrame *genframe)
 
 
 static const char *tabdrag_safe_funclist[]={
-	"screen_switch_nth_on_cvp",
-	"screen_switch_next_on_cvp",
-	"screen_switch_prev_on_cvp",
-	"viewport_switch_nth",
-	"viewport_switch_next",
-	"viewport_switch_prev",
+	"rootwin_switch_nth_on_cvp",
+	"rootwin_switch_next_on_cvp",
+	"rootwin_switch_prev_on_cvp",
+	"screen_switch_nth",
+	"screen_switch_next",
+	"screen_switch_prev",
 	NULL
 };
 
@@ -155,12 +148,12 @@ static bool tabdrag_kbd_handler(WRegion *reg, XEvent *xev)
 	
 	assert(reg!=NULL);
 
-	binding=lookup_binding(&ioncore_screen_bindmap, ACT_KEYPRESS,
+	binding=lookup_binding(&ioncore_rootwin_bindmap, ACT_KEYPRESS,
 						   ev->state&~BUTTONS_MASK, ev->keycode);
 	
 	if(binding!=NULL && binding->func!=extl_fn_none()){
 		const char **old_safelist=extl_set_safelist(tabdrag_safe_funclist);
-		extl_call(binding->func, "o", NULL, SCREEN_OF(reg));
+		extl_call(binding->func, "o", NULL, ROOTWIN_OF(reg));
 		extl_set_safelist(old_safelist);
 	}
 	
@@ -265,7 +258,7 @@ static WRegion *fnd(WWindow *w, int x, int y)
 			y-=REGION_GEOM(w).y;
 			FOR_ALL_TYPED_CHILDREN(w, reg2, WRegion){
 				if(region_is_fully_mapped(reg2) &&
-				   inrect(REGION_GEOM(reg2), x, y) &&
+				   coords_in_rect(REGION_GEOM(reg2), x, y) &&
 				   HAS_DYN(reg2, region_handle_drop)){
 					return reg2;
 				}
@@ -306,7 +299,7 @@ static void p_tabdrag_end(WGenFrame *genframe, XButtonEvent *ev)
 	if(ev->root!=ROOT_OF(sub))
 		return;
 	
-	dropped_on=fnd((WWindow*)SCREEN_OF(sub), ev->x_root, ev->y_root);
+	dropped_on=fnd((WWindow*)ROOTWIN_OF(sub), ev->x_root, ev->y_root);
 
 	if(dropped_on==NULL || dropped_on==(WRegion*)genframe || dropped_on==sub){
 		genframe_draw_bar(genframe, TRUE);

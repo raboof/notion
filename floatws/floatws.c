@@ -8,13 +8,13 @@
 #include <string.h>
 
 #include <ioncore/common.h>
-#include <ioncore/screen.h>
+#include <ioncore/rootwin.h>
 #include <ioncore/focus.h>
 #include <ioncore/global.h>
 #include <ioncore/objp.h>
 #include <ioncore/region.h>
 #include <ioncore/manage.h>
-#include <ioncore/viewport.h>
+#include <ioncore/screen.h>
 #include <ioncore/names.h>
 #include <ioncore/saveload.h>
 #include <ioncore/attach.h>
@@ -45,7 +45,7 @@ static bool reparent_floatws(WFloatWS *ws, WWindow *parent, WRectangle geom)
 	bool rs;
 	int xdiff, ydiff;
 	
-	if(!same_screen((WRegion*)ws, (WRegion*)parent))
+	if(!same_rootwin((WRegion*)ws, (WRegion*)parent))
 		return FALSE;
 	
 	XReparentWindow(wglobal.dpy, ws->dummywin, parent->win, geom.x, geom.h);
@@ -101,10 +101,10 @@ static void floatws_unmap(WFloatWS *ws)
 static void floatws_set_focus_to(WFloatWS *ws, bool warp)
 {
 	WRegion *r=ws->current_managed;
-	
+		
 	if(r==NULL)
 		r=ws->managed_list;
-	
+
 	if(r==NULL){
 		SET_FOCUS(ws->dummywin);
 		if(warp)
@@ -369,7 +369,7 @@ static bool floatws_add_clientwin(WFloatWS *ws,
 		newreg=TRUE;
 	}
 
-	assert(SCREEN_OF(target)==SCREEN_OF(cwin));
+	assert(ROOTWIN_OF(target)==ROOTWIN_OF(cwin));
 	
 	if(!finish_add_clientwin(target, cwin, params)){
 		if(newreg)

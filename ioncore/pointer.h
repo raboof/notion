@@ -24,4 +24,6 @@ extern bool set_button_handler(WRegion *reg, WButtonHandler *handler);
 extern bool set_drag_handlers(WRegion *reg, WMotionHandler *begin,
 							  WMotionHandler *motion, WButtonHandler *end);
 
+extern bool coords_in_rect(WRectangle g, int x, int y);
+
 #endif /* ION_IONCORE_POINTER_H */

@@ -25,7 +25,7 @@ static int p_clickcnt=0;
 static Time p_time=0;
 static bool p_motiontmp_dirty;
 static WBinding *p_motiontmp=NULL;
-static WScreen *p_screen=NULL;
+static WRootWin *p_rootwin=NULL;
 static int p_area=0;
 
 static WButtonHandler *p_button_handler=NULL;
@@ -75,6 +75,12 @@ bool set_drag_handlers(WRegion *reg,
 
 
 /*{{{ Misc. */
+
+
+bool coords_in_rect(WRectangle g, int x, int y)
+{
+	return (x>=g.x && x<g.x+g.w && y>=g.y && y<g.y+g.h);
+}
 
 
 static bool time_in_threshold(Time time)
@@ -198,9 +204,22 @@ bool handle_button_press(XButtonEvent *ev)
 				return TRUE;
 		}
 	}
-		
+
 	subreg=reg;
 	area=window_press((WWindow*)reg, ev, &subreg);
+
+#ifndef CF_WINDOWED_SCREENS
+	if(WOBJ_IS(reg, WRootWin)){
+		WScreen *scr;
+		FOR_ALL_TYPED_CHILDREN(reg, scr, WScreen){
+			if(coords_in_rect(REGION_GEOM(scr), ev->x, ev->y))
+				break;
+		}
+		if(scr==NULL)
+			return FALSE;
+		reg=(WRegion*)scr;
+	}
+#endif
 	
 	if(p_clickcnt==1 && time_in_threshold(ev->time) && p_button==button &&
 	   p_state==state && reg==p_reg){
@@ -229,7 +248,7 @@ end:
 	p_motion=FALSE;
 	p_clickcnt=0;
 	p_motiontmp_dirty=TRUE;
-	p_screen=SCREEN_OF(reg);
+	p_rootwin=ROOTWIN_OF(reg);
 	p_area=area;
 	p_button_handler=NULL;
 	p_motion_handler=NULL;

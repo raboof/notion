@@ -9,11 +9,11 @@
 #define ION_IONCORE_FULLSCREEN_H
 
 #include "common.h"
-#include "viewport.h"
+#include "screen.h"
 #include "clientwin.h"
 
 extern bool clientwin_check_fullscreen_request(WClientWin *cwin, int w, int h);
-extern bool clientwin_fullscreen_vp(WClientWin *cwin, WViewport *vp,
+extern bool clientwin_fullscreen_scr(WClientWin *cwin, WScreen *vp,
 									bool switchto);
 extern bool clientwin_toggle_fullscreen(WClientWin *cwin);
 extern bool clientwin_enter_fullscreen(WClientWin *cwin, bool switchto);

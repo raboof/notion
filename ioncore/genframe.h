@@ -10,7 +10,7 @@
 
 #include "common.h"
 #include "window.h"
-#include "screen.h"
+#include "rootwin.h"
 #include "attach.h"
 
 INTROBJ(WGenFrame);

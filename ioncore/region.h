@@ -25,7 +25,7 @@ DECLOBJ(WRegion){
 	WObj obj;
 	
 	WRectangle geom;
-	void *screen;
+	void *rootwin;
 	bool flags;
 
 	WRegion *parent, *children;

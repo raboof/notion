@@ -8,13 +8,13 @@
 #include <string.h>
 
 #include <ioncore/common.h>
-#include <ioncore/screen.h>
+#include <ioncore/rootwin.h>
 #include <ioncore/focus.h>
 #include <ioncore/global.h>
 #include <ioncore/objp.h>
 #include <ioncore/region.h>
 #include <ioncore/manage.h>
-#include <ioncore/viewport.h>
+#include <ioncore/screen.h>
 #include <ioncore/names.h>
 #include <ioncore/saveload.h>
 #include <ioncore/attach.h>
@@ -45,7 +45,7 @@ static bool reparent_ionws(WIonWS *ws, WWindow *parent, WRectangle geom)
 	bool rs;
 	int xdiff, ydiff;
 	
-	if(!same_screen((WRegion*)ws, (WRegion*)parent))
+	if(!same_rootwin((WRegion*)ws, (WRegion*)parent))
 		return FALSE;
 	
 	region_detach_parent((WRegion*)ws);

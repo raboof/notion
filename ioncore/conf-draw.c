@@ -6,7 +6,7 @@
  */
 
 #include "common.h"
-#include "screen.h"
+#include "rootwin.h"
 #include "grdata.h"
 #include "readconfig.h"
 #include "font.h"
@@ -14,12 +14,12 @@
 #include "draw.h"
 
 
-/* This all tmp_screen stuff is supposed to go away eventually. */
+/* This all tmp_rootwin stuff is supposed to go away eventually. */
 
-static WScreen *tmp_screen;
+static WRootWin *tmp_rootwin;
 
 #define DO_CHK_SCR(RET) \
-	if(tmp_screen==NULL){warn("Screen not set.\n"); return RET;}
+	if(tmp_rootwin==NULL){warn("Screen not set.\n"); return RET;}
 #define CHK_SCR_V DO_CHK_SCR( )
 #define CHK_SCR DO_CHK_SCR(FALSE)
 
@@ -36,9 +36,9 @@ bool set_font(const char *fname)
 	fnt=load_font(wglobal.dpy, fname);
 	
 	if(fnt!=NULL){
-		if(tmp_screen->grdata.font!=NULL)
-			free_font(wglobal.dpy, tmp_screen->grdata.font);
-		tmp_screen->grdata.font=fnt;
+		if(tmp_rootwin->grdata.font!=NULL)
+			free_font(wglobal.dpy, tmp_rootwin->grdata.font);
+		tmp_rootwin->grdata.font=fnt;
 	}
 	
 	return (fnt!=NULL);
@@ -53,9 +53,9 @@ bool set_tab_font(const char *fname)
 	
 	fnt=load_font(wglobal.dpy, fname);
 	if(fnt!=NULL){
-		if(tmp_screen->grdata.tab_font!=NULL)
-			free_font(wglobal.dpy, tmp_screen->grdata.tab_font);
-		tmp_screen->grdata.tab_font=fnt;
+		if(tmp_rootwin->grdata.tab_font!=NULL)
+			free_font(wglobal.dpy, tmp_rootwin->grdata.tab_font);
+		tmp_rootwin->grdata.tab_font=fnt;
 	}
 	
 	return (fnt!=NULL);
@@ -72,8 +72,8 @@ bool set_term_font(const char *fname)
 	term_font=load_font(wglobal.dpy, fname);
 	
 	if(term_font!=NULL){
-		tmp_screen->w_unit=MAX_FONT_WIDTH(term_font);
-		tmp_screen->h_unit=MAX_FONT_HEIGHT(term_font);
+		tmp_rootwin->w_unit=MAX_FONT_WIDTH(term_font);
+		tmp_rootwin->h_unit=MAX_FONT_HEIGHT(term_font);
 		free_font(wglobal.dpy, term_font);
 	}
 
@@ -105,21 +105,21 @@ EXTL_EXPORT
 bool set_frame_border(int tl, int br, int ipad)
 {
 	CHK_SCR;
-	return do_border(&(tmp_screen->grdata.frame_border), tl, br, ipad);
+	return do_border(&(tmp_rootwin->grdata.frame_border), tl, br, ipad);
 }
 
 EXTL_EXPORT
 bool set_tab_border(int tl, int br, int ipad)
 {
 	CHK_SCR;
-	return do_border(&(tmp_screen->grdata.tab_border), tl, br, ipad);
+	return do_border(&(tmp_rootwin->grdata.tab_border), tl, br, ipad);
 }
 
 EXTL_EXPORT
 bool set_input_border(int tl, int br, int ipad)
 {
 	CHK_SCR;
-	return do_border(&(tmp_screen->grdata.input_border), tl, br, ipad);
+	return do_border(&(tmp_rootwin->grdata.input_border), tl, br, ipad);
 }
 
 
@@ -129,7 +129,7 @@ bool set_input_border(int tl, int br, int ipad)
 /*{{{ Colors */
 
 			
-static bool do_colorgroup(WScreen *scr, WColorGroup *cg,
+static bool do_colorgroup(WRootWin *rootwin, WColorGroup *cg,
 						  const char *hl, const char *sh,
 						  const char *bg, const char *fg)
 {
@@ -141,10 +141,10 @@ static bool do_colorgroup(WScreen *scr, WColorGroup *cg,
 	}
 
 	/* alloc_color wil free cg->xx */
-	cnt+=alloc_color(scr, hl, &(cg->hl));
-	cnt+=alloc_color(scr, sh, &(cg->sh));
-	cnt+=alloc_color(scr, bg, &(cg->bg));
-	cnt+=alloc_color(scr, fg, &(cg->fg));
+	cnt+=alloc_color(rootwin, hl, &(cg->hl));
+	cnt+=alloc_color(rootwin, sh, &(cg->sh));
+	cnt+=alloc_color(rootwin, bg, &(cg->bg));
+	cnt+=alloc_color(rootwin, fg, &(cg->fg));
 	
 	if(cnt!=4){
 		warn("Unable to allocate one or more colors");
@@ -160,7 +160,7 @@ bool set_frame_colors(const char *hl, const char *sh, const char *bg,
 					  const char *fg)
 {
 	CHK_SCR;
-	return do_colorgroup(tmp_screen, &(tmp_screen->grdata.frame_colors),
+	return do_colorgroup(tmp_rootwin, &(tmp_rootwin->grdata.frame_colors),
 						 hl, sh, bg, fg);
 }
 
@@ -170,7 +170,7 @@ bool set_tab_colors(const char *hl, const char *sh, const char *bg,
 					const char *fg)
 {
 	CHK_SCR;
-	return do_colorgroup(tmp_screen, &(tmp_screen->grdata.tab_colors),
+	return do_colorgroup(tmp_rootwin, &(tmp_rootwin->grdata.tab_colors),
 						 hl, sh, bg, fg);
 }
 
@@ -180,7 +180,7 @@ bool set_tab_sel_colors(const char *hl, const char *sh, const char *bg,
 						const char *fg)
 {
 	CHK_SCR;
-	return do_colorgroup(tmp_screen, &(tmp_screen->grdata.tab_sel_colors),
+	return do_colorgroup(tmp_rootwin, &(tmp_rootwin->grdata.tab_sel_colors),
 						 hl, sh, bg, fg);
 }
 
@@ -190,7 +190,7 @@ bool set_act_frame_colors(const char *hl, const char *sh, const char *bg,
 						  const char *fg)
 {
 	CHK_SCR;
-	return do_colorgroup(tmp_screen, &(tmp_screen->grdata.act_frame_colors),
+	return do_colorgroup(tmp_rootwin, &(tmp_rootwin->grdata.act_frame_colors),
 						 hl, sh, bg, fg);
 }
 
@@ -200,7 +200,7 @@ bool set_act_tab_colors(const char *hl, const char *sh, const char *bg,
 						const char *fg)
 {
 	CHK_SCR;
-	return do_colorgroup(tmp_screen, &(tmp_screen->grdata.act_tab_colors),
+	return do_colorgroup(tmp_rootwin, &(tmp_rootwin->grdata.act_tab_colors),
 						 hl, sh, bg, fg);
 }
 
@@ -210,7 +210,7 @@ bool set_act_tab_sel_colors(const char *hl, const char *sh, const char *bg,
 							const char *fg)
 {
 	CHK_SCR;
-	return do_colorgroup(tmp_screen, &(tmp_screen->grdata.act_tab_sel_colors),
+	return do_colorgroup(tmp_rootwin, &(tmp_rootwin->grdata.act_tab_sel_colors),
 						 hl, sh, bg, fg);
 }
 
@@ -220,7 +220,7 @@ bool set_input_colors(const char *hl, const char *sh, const char *bg,
 					  const char *fg)
 {
 	CHK_SCR;
-	return do_colorgroup(tmp_screen, &(tmp_screen->grdata.input_colors),
+	return do_colorgroup(tmp_rootwin, &(tmp_rootwin->grdata.input_colors),
 						 hl, sh, bg, fg);
 }
 
@@ -234,7 +234,7 @@ bool set_background_color(const char *bg)
 		return FALSE;
 	}
 	   
-	if(!alloc_color(tmp_screen, bg, &(tmp_screen->grdata.frame_bgcolor))){
+	if(!alloc_color(tmp_rootwin, bg, &(tmp_rootwin->grdata.frame_bgcolor))){
 		warn("Unable to allocate one or more colors");
 		return FALSE;
 	}
@@ -253,8 +253,8 @@ bool set_selection_colors(const char *bg, const char *fg)
 		return FALSE;
 	}
 
-	if(!alloc_color(tmp_screen, bg, &(tmp_screen->grdata.selection_bgcolor)) ||
-	   !alloc_color(tmp_screen, fg, &(tmp_screen->grdata.selection_fgcolor))){
+	if(!alloc_color(tmp_rootwin, bg, &(tmp_rootwin->grdata.selection_bgcolor)) ||
+	   !alloc_color(tmp_rootwin, fg, &(tmp_rootwin->grdata.selection_fgcolor))){
 		warn("Unable to allocate one or more colors");
 		return FALSE;
 	}
@@ -278,7 +278,7 @@ bool set_ion_spacing(int spacing)
 		return FALSE;
 	}
 	
-	tmp_screen->grdata.spacing=spacing;
+	tmp_rootwin->grdata.spacing=spacing;
 	
 	return TRUE;
 }
@@ -288,7 +288,7 @@ EXTL_EXPORT
 void enable_ion_bar_inside_frame(bool enable)
 {
 	CHK_SCR_V;
-	tmp_screen->grdata.bar_inside_frame=enable;
+	tmp_rootwin->grdata.bar_inside_frame=enable;
 }
 
 
@@ -309,8 +309,8 @@ bool set_pwm_bar_widths(int i, double j)
 		return FALSE;
 	}
 	
-	tmp_screen->grdata.pwm_tab_min_width=i;
-	tmp_screen->grdata.pwm_bar_max_width_q=j;
+	tmp_rootwin->grdata.pwm_tab_min_width=i;
+	tmp_rootwin->grdata.pwm_bar_max_width_q=j;
 	
 	return TRUE;
 }
@@ -326,20 +326,20 @@ EXTL_EXPORT
 void enable_transparent_background(bool enable)
 {
 	CHK_SCR_V;
-	tmp_screen->grdata.transparent_background=enable;
+	tmp_rootwin->grdata.transparent_background=enable;
 }
 
 
 /*}}}*/
 
 
-bool read_draw_config(WScreen *scr)
+bool read_draw_config(WRootWin *rootwin)
 {
 	bool ret;
 	
-	tmp_screen=scr;
-	ret=read_config_for_scr("draw", scr->xscr);
-	tmp_screen=NULL;
+	tmp_rootwin=rootwin;
+	ret=read_config_for_scr("draw", rootwin->xscr);
+	tmp_rootwin=NULL;
 	
 	return ret;
 }

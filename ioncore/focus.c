@@ -37,8 +37,8 @@ void set_previous_of(WRegion *reg)
 		reg=r2;
 	}
 	
-	wglobal.previous_screen=wglobal.active_screen;
-	r2=(WRegion*)wglobal.active_screen;
+	wglobal.previous_rootwin=wglobal.active_rootwin;
+	r2=(WRegion*)wglobal.active_rootwin;
 	
 	/* Create a new previous-path from the root passing through all
 	 * the currently active nodes.
@@ -69,13 +69,13 @@ void unprotect_previous()
 EXTL_EXPORT
 void goto_previous()
 {
-	WRegion *reg=(WRegion*)wglobal.previous_screen;
+	WRegion *reg=(WRegion*)wglobal.previous_rootwin;
 
 	if(reg==NULL)
-		reg=(WRegion*)wglobal.active_screen;
+		reg=(WRegion*)wglobal.active_rootwin;
 	
 	if(reg==NULL)
-		reg=(WRegion*)wglobal.screens;
+		reg=(WRegion*)wglobal.rootwins;
 	
 	while(reg->previous_act!=NULL)
 		reg=reg->previous_act;

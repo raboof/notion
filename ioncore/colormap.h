@@ -11,7 +11,7 @@
 #include "common.h"
 #include "clientwin.h"
 
-extern void install_cmap(WScreen *scr, Colormap cmap);
+extern void install_cmap(WRootWin *scr, Colormap cmap);
 extern void handle_cwin_cmap(WClientWin *cwin, const XColormapEvent *ev);
 extern void handle_all_cmaps(const XColormapEvent *ev);
 extern void get_colormaps(WClientWin *cwin);

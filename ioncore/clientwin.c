@@ -323,7 +323,7 @@ static void get_transient_for(WClientWin *cwin, WAttachParams *param)
 					 "(\"Extended WM hints\" multi-parent brain damage?)",
 					 region_name((WRegion*)cwin));
 			}
-		}else if(SCREEN_OF(param->tfor)!=SCREEN_OF(cwin)){
+		}else if(ROOTWIN_OF(param->tfor)!=ROOTWIN_OF(cwin)){
 			warn("The transient_for window for \"%s\" is not on the same "
 				 "screen.", region_name((WRegion*)cwin));
 		}else{
@@ -341,7 +341,7 @@ static void get_transient_for(WClientWin *cwin, WAttachParams *param)
  */
 WClientWin* manage_clientwin(Window win, int mflags)
 {
-	WScreen *scr;
+	WRootWin *rootwin;
 	WClientWin *cwin=NULL;
 	XWindowAttributes attr;
 	XWMHints *hints;
@@ -411,9 +411,9 @@ again:
 		goto fail2;
 	}
 
-	scr=FIND_WINDOW_T(attr.root, WScreen);
+	rootwin=FIND_WINDOW_T(attr.root, WRootWin);
 
-	if(scr==NULL)
+	if(rootwin==NULL)
 		goto fail2;
 
 	/*if(state!=NormalState && state!=IconicState)
@@ -428,7 +428,7 @@ again:
 		param.flags&=~REGION_ATTACH_SWITCHTO;*/
 
 	/* Allocate and initialize */
-	cwin=create_clientwin((WWindow*)scr, win, &attr);
+	cwin=create_clientwin((WWindow*)rootwin, win, &attr);
 	
 	if(cwin==NULL)
 		goto fail2;
@@ -559,7 +559,7 @@ static void reparent_root(WClientWin *cwin)
 	
 	par=REGION_PARENT_CHK(cwin, WWindow);
 	
-	if(par==NULL || WOBJ_IS(par, WScreen)){
+	if(par==NULL || WOBJ_IS(par, WRootWin)){
 		x=REGION_GEOM(cwin).x;
 		y=REGION_GEOM(cwin).y;
 	}else{
@@ -894,7 +894,7 @@ static bool reparent_clientwin(WClientWin *cwin, WWindow *par, WRectangle geom)
 {
 	int rootx, rooty;
 	
-	if(!same_screen((WRegion*)cwin, (WRegion*)par))
+	if(!same_rootwin((WRegion*)cwin, (WRegion*)par))
 		return FALSE;
 	
 	region_detach_parent((WRegion*)cwin);
@@ -1097,7 +1097,7 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 	 * frame if such exists.
 	 */
 	par=REGION_PARENT_CHK(cwin, WWindow);
-	if(par==NULL || WOBJ_IS(par, WScreen))
+	if(par==NULL || WOBJ_IS(par, WRootWin))
 		region_rootpos((WRegion*)cwin, &rx, &ry);
 	else
 		region_rootpos((WRegion*)par, &rx, &ry);

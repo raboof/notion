@@ -11,7 +11,7 @@
 #include "sizehint.h"
 #include "clientwin.h"
 #include "attach.h"
-#include "viewport.h"
+#include "screen.h"
 #include "manage.h"
 #include "fullscreen.h"
 #include "mwmhints.h"
@@ -27,20 +27,20 @@ bool clientwin_check_fullscreen_request(WClientWin *cwin, int w, int h)
 	   mwm->decorations!=0)
 		return FALSE;
 	
-	FOR_ALL_MANAGED_ON_LIST(SCREEN_OF(cwin)->viewport_list, reg){
-		if(!WOBJ_IS(reg, WViewport))
+	FOR_ALL_MANAGED_ON_LIST(ROOTWIN_OF(cwin)->screen_list, reg){
+		if(!WOBJ_IS(reg, WScreen))
 			continue;
-		/* TODO: if there are multiple possible screens, use the one with
+		/* TODO: if there are multiple possible rootwins, use the one with
 		 * requested position, if any.
 		 */
 		if(REGION_GEOM(reg).w==w && REGION_GEOM(reg).h==h){
-			return clientwin_fullscreen_vp(cwin, (WViewport*)reg,
+			return clientwin_fullscreen_scr(cwin, (WScreen*)reg,
 										   clientwin_get_switchto(cwin));
 		}
 	}
 	
 	/* Catch Xinerama-unaware apps here */
-	if(REGION_GEOM(SCREEN_OF(cwin)).w==w && REGION_GEOM(SCREEN_OF(cwin)).h==h){
+	if(REGION_GEOM(ROOTWIN_OF(cwin)).w==w && REGION_GEOM(ROOTWIN_OF(cwin)).h==h){
 		return clientwin_enter_fullscreen(cwin, 
 										  clientwin_get_switchto(cwin));
 	}
@@ -62,7 +62,7 @@ static void lastmgr_watchhandler(WWatch *watch, WObj *obj)
 }
 
 
-bool clientwin_fullscreen_vp(WClientWin *cwin, WViewport *vp, bool switchto)
+bool clientwin_fullscreen_scr(WClientWin *cwin, WScreen *vp, bool switchto)
 {
 	int rootx, rooty;
 	bool wasfs=TRUE;
@@ -100,15 +100,15 @@ bool clientwin_fullscreen_vp(WClientWin *cwin, WViewport *vp, bool switchto)
 
 bool clientwin_enter_fullscreen(WClientWin *cwin, bool switchto)
 {
-	WViewport *vp=region_viewport_of((WRegion*)cwin);
+	WScreen *vp=region_screen_of((WRegion*)cwin);
 	
 	if(vp==NULL){
-		vp=SCREEN_OF(cwin)->current_viewport;
+		vp=ROOTWIN_OF(cwin)->current_screen;
 		if(vp==NULL)
 			return FALSE;
 	}
 	
-	return clientwin_fullscreen_vp(cwin, vp, switchto);
+	return clientwin_fullscreen_scr(cwin, vp, switchto);
 }
 
 

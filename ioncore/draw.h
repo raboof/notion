@@ -9,22 +9,23 @@
 #define ION_IONCORE_DRAW_H
 
 #include "common.h"
-#include "screen.h"
+#include "window.h"
+#include "rootwin.h"
 #include "grdata.h"
 
-extern void draw_rubberband(WScreen *scr, WRectangle rect,
+extern void draw_rubberband(WWindow *wwin, WRectangle rect,
 							bool vertical);
-extern void draw_rubberbox(WScreen *scr, WRectangle rect);
+extern void draw_rubberbox(WWindow *wwin, WRectangle rect);
 
-extern void set_moveres_pos(WScreen *scr, int x, int y);
-extern void set_moveres_size(WScreen *scr, int w, int h);
+extern void set_moveres_pos(WRootWin *rootwin, int x, int y);
+extern void set_moveres_size(WRootWin *rootwin, int w, int h);
 
-extern bool alloc_color(WScreen *scr, const char *name, WColor *cret);
-extern void setup_color_group(WScreen *scr, WColorGroup *cg,
+extern bool alloc_color(WRootWin *rootwin, const char *name, WColor *cret);
+extern void setup_color_group(WRootWin *rootwin, WColorGroup *cg,
 							  WColor hl, WColor sh, WColor bg, WColor fg);
 
-extern void preinit_graphics(WScreen *scr);
-extern void postinit_graphics(WScreen *scr);
+extern void preinit_graphics(WRootWin *rootwin);
+extern void postinit_graphics(WRootWin *rootwin);
 
 extern void reread_draw_config();
 

@@ -16,10 +16,10 @@
 /*{{{ Installing colormaps */
 
 
-void install_cmap(WScreen *scr, Colormap cmap)
+void install_cmap(WRootWin *rootwin, Colormap cmap)
 {
 	if(cmap==None)
-		cmap=scr->default_cmap;
+		cmap=rootwin->default_cmap;
 	XInstallColormap(wglobal.dpy, cmap);
 }
 
@@ -30,7 +30,7 @@ void install_cwin_cmap(WClientWin *cwin)
 	bool found=FALSE;
 
 	for(i=cwin->n_cmapwins-1; i>=0; i--){
-		install_cmap(SCREEN_OF(cwin), cwin->cmaps[i]);
+		install_cmap(ROOTWIN_OF(cwin), cwin->cmaps[i]);
 		if(cwin->cmapwins[i]==cwin->win)
 			found=TRUE;
 	}
@@ -38,7 +38,7 @@ void install_cwin_cmap(WClientWin *cwin)
 	if(found)
 		return;
 	
-	install_cmap(SCREEN_OF(cwin), cwin->cmap);
+	install_cmap(ROOTWIN_OF(cwin), cwin->cmap);
 }
 
 

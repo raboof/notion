@@ -5,6 +5,7 @@
  * See the included file LICENSE for details.
  */
 
+#include <limits.h>
 #include <sys/types.h>
 #include <sys/signal.h>
 #include <unistd.h>
@@ -34,6 +35,13 @@
 void do_exec(const char *cmd)
 {
 	char *argv[4];
+	char *tmp=NULL;
+
+	close(wglobal.conn);
+	
+	libtu_asprintf(&tmp, "exec %s", cmd);
+	if(tmp!=NULL)
+		cmd=tmp;
 	
 	wglobal.dpy=NULL;
 	
@@ -51,15 +59,9 @@ void do_exec(const char *cmd)
 }
 
 
-/*EXTL_DOC
- * Run \var{cmd} with the environment variable DISPLAY set to
- * point to \var{scr}.
- */
-EXTL_EXPORT
-bool exec_on_screen(WScreen *scr, const char *cmd)
+static bool do_exec_on_rootwin(int xscr, const char *cmd)
 {
 	int pid;
-	char *tmp;
 	
 	if(cmd==NULL)
 		return FALSE;
@@ -74,21 +76,34 @@ bool exec_on_screen(WScreen *scr, const char *cmd)
 	if(pid!=0)
 		return TRUE;
 	
-	setup_environ(scr->xscr);
+	setup_environ(xscr);
 	
-	close(wglobal.conn);
-	
-	tmp=ALLOC_N(char, strlen(cmd)+8);
-	
-	if(tmp==NULL)
-		die_err();
-	
-	sprintf(tmp, "exec %s", cmd);
-	
-	do_exec(tmp);
+	do_exec(cmd);
 	
 	/* We should not get here */
 	return FALSE;
+}
+
+
+/*EXTL_DOC
+ * Run \var{cmd} with the environment variable DISPLAY set to point to the
+ * root window \var{rootwin} of the X display the WM is running on.
+ */
+EXTL_EXPORT
+bool exec_on_rootwin(WRootWin *rootwin, const char *cmd)
+{
+	return do_exec_on_rootwin(rootwin->xscr, cmd);
+}
+
+
+/*EXTL_DOC
+ * Run \var{cmd} with the environment variable DISPLAY set to point to the
+ * X display the WM is running on without a specific screen set.
+ */
+EXTL_EXPORT
+bool exec_on_wm_display(const char *cmd)
+{
+	return do_exec_on_rootwin(-1, cmd);
 }
 
 
@@ -137,7 +152,6 @@ EXTL_EXPORT
 bool popen_bgread(const char *cmd, ExtlFn handler)
 {
 	int pid;
-	char *tmp;
 	int fds[2];
 	
 	if(pipe(fds)!=0){
@@ -174,39 +188,31 @@ bool popen_bgread(const char *cmd, ExtlFn handler)
 	close(1);
 	dup(fds[1]);
 	
-	/*setup_environ(scr->xscr);*/
+	setup_environ(-1);
 	
-	close(wglobal.conn);
-	
-	tmp=ALLOC_N(char, strlen(cmd)+8);
-	
-	if(tmp==NULL)
-		die_err();
-	
-	sprintf(tmp, "exec %s", cmd);
-	
-	do_exec(tmp);
+	do_exec(cmd);
 	
 	/* We should not get here */
 	return FALSE;
 }
 
 
-void setup_environ(int scr)
+void setup_environ(int xscr)
 {
 	char *tmp, *ptr;
 	char *display;
 	
 	display=XDisplayName(wglobal.display);
 	
-	tmp=ALLOC_N(char, strlen(display)+16);
-	
+	/* %ui, UINT_MAX is used to ensure there is enough space for the screen
+	 * number
+	 */
+	libtu_asprintf(&tmp, "DISPLAY=%s.%u", display, UINT_MAX);
+
 	if(tmp==NULL){
 		warn_err();
 		return;
 	}
-	
-	sprintf(tmp, "DISPLAY=%s", display); 
 
 	ptr=strchr(tmp, ':');
 	if(ptr!=NULL){
@@ -215,11 +221,14 @@ void setup_environ(int scr)
 			*ptr='\0';
 	}
 
-	if(scr>=0)
-		sprintf(tmp+strlen(tmp), ".%i", scr);
-
+	if(xscr>=0)
+		sprintf(tmp+strlen(tmp), ".%u", (unsigned)xscr);
+	
 	putenv(tmp);
 	
+	/* No need to free it, we'll execve soon */
+	/*free(tmp);*/
+
 	/*XFree(display);*/
 }
 

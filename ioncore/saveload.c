@@ -13,7 +13,7 @@
 #include "common.h"
 #include "region.h"
 #include "readconfig.h"
-#include "viewport.h"
+#include "screen.h"
 #include "saveload.h"
 #include "names.h"
 #include "objp.h"
@@ -151,24 +151,24 @@ void save_geom(WRectangle geom, FILE *file, int lvl)
 /*{{{ save_workspaces, load_workspaces */
 
 
-static WViewport *current_vp=NULL;
+static WScreen *current_scr=NULL;
 
 
 /* 2003-10-05, TODO: keep for savefile backwards compatibility 
  * for now, but remove eventually.
  */
 EXTL_EXPORT
-bool add_to_viewport(ExtlTab tab)
+bool add_to_screen(ExtlTab tab)
 {
-	if(current_vp==NULL)
+	if(current_scr==NULL)
 		return FALSE;
 	
-	return (region_add_managed_load((WRegion*)current_vp, tab)!=NULL);
+	return (region_add_managed_load((WRegion*)current_scr, tab)!=NULL);
 }
 
 
 
-bool load_workspaces(WViewport *vp)
+bool load_workspaces(WScreen *vp)
 {
 	bool successp;
 	char *filename;
@@ -177,9 +177,9 @@ bool load_workspaces(WViewport *vp)
 	if(filename==NULL)
 		return FALSE;
 	
-	current_vp=vp;
+	current_scr=vp;
 	successp=extl_dofile(filename, "o", NULL, vp);
-	current_vp=NULL;
+	current_scr=NULL;
 	
 	free(filename);
 	
@@ -219,7 +219,7 @@ static bool ensuredir(char *f)
 }
 
 
-static bool do_save_workspaces(WViewport *vp, char *wsconf)
+static bool do_save_workspaces(WScreen *vp, char *wsconf)
 {
 	FILE *file;
 	WRegion *reg;
@@ -259,7 +259,7 @@ static bool do_save_workspaces(WViewport *vp, char *wsconf)
 }
 
 
-bool save_workspaces(WViewport *vp)
+bool save_workspaces(WScreen *vp)
 {
 	bool successp;
 	char *wsconf;
@@ -272,9 +272,9 @@ bool save_workspaces(WViewport *vp)
 	if(!ensuredir(wsconf))
 		return FALSE;
 
-	current_vp=vp;
+	current_scr=vp;
 	successp=do_save_workspaces(vp, wsconf);
-	current_vp=NULL;
+	current_scr=NULL;
 	
 	free(wsconf);
 	

@@ -156,14 +156,14 @@ static void set_tab_spacing(WIonFrame *frame)
 static void ionframe_resize_hints(WIonFrame *frame, XSizeHints *hints_ret,
 								  uint *relw_ret, uint *relh_ret)
 {
-	WScreen *scr=SCREEN_OF(frame);
+	WRootWin *rootwin=ROOTWIN_OF(frame);
 	
 	genframe_resize_hints((WGenFrame*)frame, hints_ret, relw_ret, relh_ret);
 	
 	if(!(hints_ret->flags&PResizeInc)){
 		hints_ret->flags|=PResizeInc;
-		hints_ret->width_inc=scr->w_unit;
-		hints_ret->height_inc=scr->h_unit;
+		hints_ret->width_inc=rootwin->w_unit;
+		hints_ret->height_inc=rootwin->h_unit;
 	}
 	
 	hints_ret->flags|=PMinSize;

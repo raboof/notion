@@ -9,7 +9,7 @@
 #include "objp.h"
 #include "window.h"
 #include "global.h"
-#include "screen.h"
+#include "rootwin.h"
 #include "focus.h"
 #include "drawp.h"
 #include "event.h"
@@ -39,6 +39,7 @@ bool genframe_init(WGenFrame *genframe, WWindow *parent, WRectangle geom)
 	XSetWindowAttributes attr;
 	WGRData *grdata=GRDATA_OF(parent);
 	ulong attrflags=0;
+	WRootWin *rootwin=ROOTWIN_OF(parent);
 	
 	genframe->flags=0;
 	genframe->managed_count=0;
@@ -62,8 +63,11 @@ bool genframe_init(WGenFrame *genframe, WWindow *parent, WRectangle geom)
 	}
 	
 	win=XCreateWindow(wglobal.dpy, parent->win, geom.x, geom.y,
-					  geom.w, geom.h, 0, CopyFromParent, InputOutput,
-					  CopyFromParent, attrflags, &attr);
+					  geom.w, geom.h, 0, 
+					  DefaultDepth(wglobal.dpy, rootwin->xscr),
+					  InputOutput,
+					  DefaultVisual(wglobal.dpy, rootwin->xscr),
+					  attrflags, &attr);
 	
 	if(!window_init((WWindow*)genframe, parent, win, geom)){
 		XDestroyWindow(wglobal.dpy, win);
@@ -225,7 +229,7 @@ static void reparent_or_fit(WGenFrame *genframe, WRectangle geom,
 
 bool genframe_reparent(WGenFrame *genframe, WWindow *parent, WRectangle geom)
 {
-	if(!same_screen((WRegion*)genframe, (WRegion*)parent))
+	if(!same_rootwin((WRegion*)genframe, (WRegion*)parent))
 		return FALSE;
 	
 	region_detach_parent((WRegion*)genframe);
@@ -768,8 +772,7 @@ void genframe_draw_bar_default(const WGenFrame *genframe, bool complete)
 {
 	DrawInfo _dinfo, *dinfo=&_dinfo;
 	WRegion *sub, *next;
-	WScreen *scr=SCREEN_OF(genframe);
-	WGRData *grdata=&(scr->grdata);
+	WGRData *grdata=GRDATA_OF(genframe);
 	WRectangle bg;
 	int n;
 	

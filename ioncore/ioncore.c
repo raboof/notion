@@ -18,7 +18,7 @@
 #include <libtu/optparser.h>
 
 #include "common.h"
-#include "screen.h"
+#include "rootwin.h"
 #include "event.h"
 #include "cursor.h"
 #include "signal.h"
@@ -181,8 +181,8 @@ int main(int argc, char*argv[])
 		goto fail;*/
 	}
 	
-	if(!setup_screens()){
-		warn("Unable to set up any screens.");
+	if(!setup_rootwins()){
+		warn("Unable to set up any rootwins.");
 		goto fail;
 	}
 	
@@ -259,13 +259,13 @@ static void initialize_global()
 	wglobal.dpy=NULL;
 	wglobal.display=NULL;
 
-	wglobal.screens=NULL;
+	wglobal.rootwins=NULL;
 	wglobal.focus_next=NULL;
 	wglobal.warp_next=FALSE;
 	wglobal.cwin_list=NULL;
 	
-	wglobal.active_screen=NULL;
-	wglobal.previous_screen=NULL;
+	wglobal.active_rootwin=NULL;
+	wglobal.previous_rootwin=NULL;
 
 	wglobal.input_mode=INPUT_NORMAL;
 	wglobal.opmode=OPMODE_INIT;
@@ -332,8 +332,7 @@ static bool set_up_locales(Display *dpy)
 bool ioncore_init(const char *display, bool onescreen)
 {
 	Display *dpy;
-	WScreen *scr;
-	int i, dscr, nscr;
+	int i, drw, nrw;
 	static bool called=FALSE;
 
 	/* Sorry, this function can not be re-entered due to laziness
@@ -366,11 +365,11 @@ bool ioncore_init(const char *display, bool onescreen)
 #endif
 
 	if(onescreen){
-		dscr=DefaultScreen(dpy);
-		nscr=dscr+1;
+		drw=DefaultScreen(dpy);
+		nrw=drw+1;
 	}else{
-		dscr=0;
-		nscr=ScreenCount(dpy);
+		drw=0;
+		nrw=ScreenCount(dpy);
 	}
 
 	/* Initialize */
@@ -405,11 +404,11 @@ bool ioncore_init(const char *display, bool onescreen)
 	init_bindings();
 	load_cursors();	
 	
-	for(i=dscr; i<nscr; i++)
-		scr=manage_screen(i);
+	for(i=drw; i<nrw; i++)
+		manage_rootwin(i);
 	
-	if(wglobal.screens==NULL){
-		if(nscr-dscr>1)
+	if(wglobal.rootwins==NULL){
+		if(nrw-drw>1)
 			warn("Could not find a screen to manage.");
 		return FALSE;
 	}
@@ -429,21 +428,19 @@ bool ioncore_init(const char *display, bool onescreen)
 void ioncore_deinit()
 {
 	Display *dpy;
-	WScreen *scr, *next;
-	WViewport *vp;
+	WRootWin *rootwin, *next;
+	WScreen *scr;
 	
 	wglobal.opmode=OPMODE_DEINIT;
 	
 	if(wglobal.dpy==NULL)
 		return;
 	
-	for(scr=wglobal.screens; scr!=NULL; scr=next){
-		next=NEXT_CHILD(scr, WScreen);
-		
-		FOR_ALL_TYPED_CHILDREN(scr, vp, WViewport){
-			save_workspaces(vp);
+	while((rootwin=wglobal.rootwins)!=NULL){
+		FOR_ALL_TYPED_CHILDREN(rootwin, scr, WScreen){
+			save_workspaces(scr);
 		}
-		destroy_obj((WObj*)scr);
+		destroy_obj((WObj*)rootwin);
 	}
 
 	unload_modules();

@@ -10,7 +10,7 @@
 #include "global.h"
 #include "window.h"
 #include "focus.h"
-#include "screen.h"
+#include "rootwin.h"
 #include "stacking.h"
 
 
@@ -64,8 +64,8 @@ bool window_init(WWindow *wwin, WWindow *parent, Window win, WRectangle geom)
 	wwin->win=win;
 #ifdef CF_XFT
 	wwin->draw=XftDrawCreate(wglobal.dpy, win, 
-							 DefaultVisual(wglobal.dpy, SCREEN_OF(wwin)->xscr),
-							 SCREEN_OF(wwin)->default_cmap);
+							 DefaultVisual(wglobal.dpy, ROOTWIN_OF(wwin)->xscr),
+							 ROOTWIN_OF(wwin)->default_cmap);
 #else
 	wwin->draw=NULL;
 #endif
@@ -82,7 +82,7 @@ bool window_init_new(WWindow *p, WWindow *parent, WRectangle geom)
 {
 	Window win;
 	
-	win=create_simple_window(SCREEN_OF(parent), parent->win, geom);
+	win=create_simple_window(ROOTWIN_OF(parent), parent->win, geom);
 	
 	if(win==None)
 		return FALSE;
@@ -178,7 +178,7 @@ static void reparent_or_fit_window(WWindow *wwin, Window parwin,
 
 bool reparent_window(WWindow *wwin, WWindow *parent, WRectangle geom)
 {
-	if(!same_screen((WRegion*)wwin, (WRegion*)parent))
+	if(!same_rootwin((WRegion*)wwin, (WRegion*)parent))
 		return FALSE;
 	
 	region_detach((WRegion*)wwin);

@@ -10,7 +10,7 @@
 
 #include "common.h"
 #include "region.h"
-#include "viewport.h"
+#include "screen.h"
 #include "extl.h"
 
 extern bool region_supports_save(WRegion *reg);
@@ -22,8 +22,8 @@ extern void begin_saved_region(WRegion *reg, FILE *file, int lvl);
 /*extern void end_saved_region(WRegion *reg, FILE *file, int lvl);*/
 extern void save_indent_line(FILE *file, int lvl);
 
-extern bool load_workspaces(WViewport *vp);
-extern bool save_workspaces(WViewport *vp);
+extern bool load_workspaces(WScreen *vp);
+extern bool save_workspaces(WScreen *vp);
 
 extern WRegion *region_add_managed_load(WRegion *mgr, ExtlTab tab);
 

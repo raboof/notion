@@ -75,7 +75,7 @@ end
 
 function QueryLib.make_execwith_fn(prompt, init, prog, completor)
     local function handle_execwith(frame, str)
-        exec_on_screen(region_screen_of(frame), prog .. " " .. str)
+        exec_in_frame(frame, prog .. " " .. str)
     end
     return QueryLib.make_frame_fn(prompt, init, handle_execwith, completor)
 end
@@ -89,7 +89,7 @@ function QueryLib.exec_handler(frame, cmd)
     if string.sub(cmd, 1, 1)==":" then
         cmd="ion-runinxterm " .. string.sub(cmd, 2)
     end
-    exec_on_screen(region_screen_of(frame), cmd)
+    exec_in_frame(frame, cmd)
 end
 
 function QueryLib.getws(obj)
@@ -136,8 +136,8 @@ function QueryLib.attachclient_handler(frame, str)
         return
     end
     
-    if region_screen_of(frame)~=region_screen_of(cwin) then
-        query_fwarn(frame, "Cannot attach: not on same screen.")
+    if region_rootwin_of(frame)~=region_rootwin_of(cwin) then
+        query_fwarn(frame, "Cannot attach: not on same root window.")
         return
     end
     
@@ -152,9 +152,9 @@ function QueryLib.workspace_handler(frame, name)
         return
     end
     
-    local vp=region_viewport_of(frame)
-    if not vp then
-        query_fwarn(frame, "Unable to create workspace: no viewport.")
+    local scr=region_screen_of(frame)
+    if not scr then
+        query_fwarn(frame, "Unable to create workspace: no screen.")
         return
     end
     
@@ -168,7 +168,7 @@ function QueryLib.workspace_handler(frame, name)
         name=nam
     end
     
-    ws=region_manage_new(vp, { type=cls, name=name, selected=true })
+    ws=region_manage_new(scr, { type=cls, name=name, selected=true })
     if not ws then
         query_fwarn(frame, "Failed to create workspace")
     end

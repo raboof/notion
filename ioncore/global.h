@@ -13,6 +13,7 @@
 #include <X11/Xutil.h>
 #include <X11/Xresource.h>
 
+#include "rootwin.h"
 #include "screen.h"
 #include "window.h"
 #include "clientwin.h"
@@ -57,8 +58,8 @@ DECLSTRUCT(WGlobal){
 	
 	Atom atom_net_wm_name;
 
+	WRootWin *rootwins;
 	WClientWin *cwin_list;
-	WScreen *screens;
 	WRegion *focus_next;
 	bool warp_next;
 	
@@ -68,7 +69,7 @@ DECLSTRUCT(WGlobal){
 	/* We could have a display WRegion but the screen-link could impose
 	 * some problems so these are handled as a special case.
 	 */
-	WScreen *active_screen, *previous_screen;
+	WRootWin *active_rootwin, *previous_rootwin;
 	
 	int input_mode;
 	bool grab_released;

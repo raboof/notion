@@ -17,6 +17,7 @@
 #include "conf-bindings.h"
 #include "modules.h"
 #include "font.h"
+#include "rootwin.h"
 
 
 /*EXTL_DOC
@@ -65,7 +66,7 @@ void enable_warp(bool warp)
 EXTL_EXPORT
 void global_bindings(ExtlTab tab)
 {
-	process_bindings(&ioncore_screen_bindmap, NULL, tab);
+	process_bindings(&ioncore_rootwin_bindmap, NULL, tab);
 }
 
 

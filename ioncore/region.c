@@ -47,12 +47,12 @@ void region_init(WRegion *reg, WRegion *parent, WRectangle geom)
 	reg->p_prev=NULL;
 	
 	if(parent!=NULL){
-		reg->screen=parent->screen;
+		reg->rootwin=parent->rootwin;
 		/*link_child(parent, reg);*/
 		region_set_parent(reg, parent);
 	}else{
-		assert(WOBJ_IS(reg, WScreen));
-		reg->screen=reg;
+		assert(WOBJ_IS(reg, WRootWin));
+		reg->rootwin=reg;
 	}
 	
 	reg->active_sub=NULL;
@@ -517,9 +517,9 @@ void region_got_focus(WRegion *reg)
 					r->active_sub->flags&=~REGION_ACTIVE;
 			}*/
 			r->active_sub=reg;
-			if(WOBJ_IS(r, WScreen)){
-				D(fprintf(stderr, "cvp: %p, %p [%s]\n", r, region_viewport_of(reg), WOBJ_TYPESTR(reg)));
-				((WScreen*)r)->current_viewport=region_viewport_of(reg);
+			if(WOBJ_IS(r, WRootWin)){
+				D(fprintf(stderr, "cvp: %p, %d [%s]\n", r, region_screen_of(reg)->id, WOBJ_TYPESTR(reg)));
+				((WRootWin*)r)->current_screen=region_screen_of(reg);
 			}
 		}
 		
@@ -537,7 +537,7 @@ void region_got_focus(WRegion *reg)
 	 * default map.
 	 */
 	if(reg->active_sub==NULL && !WOBJ_IS(reg, WClientWin))
-		install_cmap(SCREEN_OF(reg), None); 
+		install_cmap(ROOTWIN_OF(reg), None); 
 }
 
 
@@ -687,7 +687,7 @@ void region_rootpos(WRegion *reg, int *xret, int *yret)
 
 	par=REGION_PARENT_CHK(reg, WRegion);
 	
-	if(par==NULL || WOBJ_IS(reg, WScreen)){
+	if(par==NULL || WOBJ_IS(reg, WRootWin)){
 		*xret=0;
 		*yret=0;
 		return;

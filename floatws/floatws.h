@@ -10,7 +10,7 @@
 
 #include <ioncore/common.h>
 #include <ioncore/region.h>
-#include <ioncore/viewport.h>
+#include <ioncore/screen.h>
 #include <ioncore/genws.h>
 #include <ioncore/attach.h>
 #include <ioncore/extl.h>

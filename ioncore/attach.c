@@ -302,7 +302,7 @@ bool rescue_clientwins_on_list(WRegion *reg, WRegion *list)
 	}
 	
 	/* This should not happen unless the region is not
-	 * properly in a tree with a WScreen root.
+	 * properly in a tree with a WRootWin root.
 	 */
 	FOR_ALL_MANAGED_ON_LIST(list, r){
 		if(WOBJ_IS(r, WClientWin)){

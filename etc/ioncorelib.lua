@@ -116,17 +116,41 @@ function make_active_leaf_fn(fn)
 end
 
 
+local function execrootw(reg, cmd)
+    local rw=region_rootwin_of(reg)
+    if rw then
+        exec_on_rootwin(rw, cmd)
+    else
+        exec_on_wm_display(cmd)
+    end
+end
+
+
 --DOC    
--- Create a function that will make the call
--- \fnref{exec_on_screen}\code{(scr, cmd)} where \var{scr} is is the
--- argument of the generated function and should be of type \type{WScreen}.
+-- This function will generate another function, that depending on its
+-- parameter, will call either \fnref{exec_in_frame} or 
+-- \fnref{exec_on_rootwin} to execute \var{cmd}. You should use this
+-- function to bind execution commands to keys.
 function make_exec_fn(cmd)
-    local function do_exec(scr)
-	return exec_on_screen(scr, cmd)
+    local function do_exec(reg)
+        if obj_is(reg, "WGenFrame") then
+            exec_in_frame(frame, cmd)
+        else
+            execrootw(reg, cmd)
+        end
     end
     return do_exec
 end
 
+
+--DOC
+-- Equivalent to 
+-- \fnref{exec_on_rootwin}\code{(}\fnref{region_rootwin_of}\code{(frame), cmd)}. 
+-- This function should be overridden by scripts and other kludges that
+-- want to attempt to put new windows where they belong.
+function exec_in_frame(frame, cmd)
+    execrootw(frame, cmd)
+end
 
 
 -- {{{ Includes

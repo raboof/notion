@@ -33,7 +33,7 @@ static bool ws_ok(WRegion *r)
 }
 	
 	
-static WGenWS *find_suitable_workspace(WViewport *vp)
+static WGenWS *find_suitable_workspace(WScreen *vp)
 {
 	WRegion *r=vp->current_ws;
 	
@@ -49,14 +49,16 @@ static WGenWS *find_suitable_workspace(WViewport *vp)
 }
 
 
-static WViewport *find_suitable_viewport(WClientWin *cwin, 
-										 const WAttachParams *param)
+static WScreen *find_suitable_screen(WClientWin *cwin, 
+									 const WAttachParams *param)
 {
-	WScreen *scr=SCREEN_OF(cwin);
-	WViewport *vp;
+	WRootWin *rootwin=ROOTWIN_OF(cwin);
+	WScreen *vp;
 
-	if(param->flags&REGION_ATTACH_POSRQ){
-		FOR_ALL_TYPED_CHILDREN(scr, vp, WViewport){
+	if(param->flags&REGION_ATTACH_MAPRQ && 
+	   param->flags&REGION_ATTACH_SIZE_HINTS &&
+	   param->size_hints->flags&USPosition){
+		FOR_ALL_TYPED_CHILDREN(rootwin, vp, WScreen){
 			WRectangle geom=REGION_GEOM(vp);
 			if(param->geomrq.x>=geom.x && param->geomrq.x<geom.x+geom.w &&
 			   param->geomrq.y>=geom.y && param->geomrq.y<geom.y+geom.h)
@@ -64,10 +66,10 @@ static WViewport *find_suitable_viewport(WClientWin *cwin,
 		}
 	}
 	
-	if(scr->current_viewport!=NULL)
-		return scr->current_viewport;
+	if(rootwin->current_screen!=NULL)
+		return rootwin->current_screen;
 	
-	return scr->default_viewport;
+	return rootwin->default_screen;
 }
 
 
@@ -80,7 +82,7 @@ static WViewport *find_suitable_viewport(WClientWin *cwin,
 bool add_clientwin_default(WClientWin *cwin, const WAttachParams *param)
 {
 	WGenWS *ws=NULL;
-	WViewport *vp=NULL;
+	WScreen *vp=NULL;
 	int tm;
 	
 	/* check full screen mode */
@@ -103,7 +105,7 @@ bool add_clientwin_default(WClientWin *cwin, const WAttachParams *param)
 	}
 	
 	/* Need to find a workspace and let it handle this. */
-	vp=find_suitable_viewport(cwin, param);
+	vp=find_suitable_screen(cwin, param);
 	if(vp!=NULL)
 		ws=find_suitable_workspace(vp);
 	
@@ -113,7 +115,7 @@ bool add_clientwin_default(WClientWin *cwin, const WAttachParams *param)
 	}
 	
 	/* All else failed, try full screen mode */
-	return clientwin_fullscreen_vp(cwin, vp, FALSE);
+	return clientwin_fullscreen_scr(cwin, vp, FALSE);
 }
 
 
@@ -161,7 +163,7 @@ bool finish_add_clientwin(WRegion *reg, WClientWin *cwin,
 	
 	assert(reg!=NULL);
 	
-	if(SCREEN_OF(reg)!=SCREEN_OF(cwin)){
+	if(ROOTWIN_OF(reg)!=ROOTWIN_OF(cwin)){
 		warn("Trying to add client window to a region not on same screen.");
 		return FALSE;
 	}

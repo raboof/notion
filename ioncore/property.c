@@ -83,7 +83,7 @@ bool get_integer_property(Window win, Atom a, int *vret)
 	
 	n=get_property(wglobal.dpy, win, a, XA_INTEGER, 1L, FALSE, (uchar**)&p);
 	
-	if(n>0){
+	if(n>0 && p!=NULL){
 		*vret=*p;
 		XFree((void*)p);
 		return TRUE;
