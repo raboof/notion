@@ -26,7 +26,7 @@ ionframe_bindings{
            function(frame) ionframe_split(frame, "bottom") end),
 
     submap(DEFAULT_MOD .. "K"){
-        kpress("X", ionframe_close),
+        kpress("AnyModifier+X", ionframe_close),
         kpress("AnyModifier+S",
                function(frame) ionframe_split(frame, "right") end),
     },
@@ -38,7 +38,7 @@ ionframe_bindings{
     mclick("Button2", genframe_p_switch_tab, "tab"),
     mdrag("Button2", genframe_p_tabdrag, "tab"),
     
-    mdrag("Mod1+Button3", genframe_p_resize),
+    mdrag(DEFAULT_MOD .. "Button3", genframe_p_resize),
 }
 
 
