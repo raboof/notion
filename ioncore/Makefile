@@ -14,6 +14,12 @@ LIBS += -ltu -lm $(X11_LIBS) -lX11 $(XINERAMA_LIBS)
 INCLUDES += $(X11_INCLUDES) -I..
 DEFINES += -DETCDIR=\"$(ETCDIR)\" -DLIBDIR=\"$(LIBDIR)\"
 
+ifeq ($(STATIC_MODULES),1)
+DEFINES += -DCF_STATIC_MODULES
+EXT_OBJS := $(foreach mod, $(MODULE_LIST), ../$(mod)/$(mod).a)
+CLEAN_TARGETS := static-modules-clean
+endif
+
 CFLAGS += $(XOPEN_SOURCE) $(MODULE_SUPPORT_CFLAGS)
 LDFLAGS += $(MODULE_SUPPORT_LDFLAGS)
 
@@ -37,6 +43,28 @@ include $(TOPDIR)/rules.mk
 
 ioncore: $(OBJS) $(EXT_OBJS)
 	$(CC) $(OBJS) $(EXT_OBJS) $(LDFLAGS) -o $@
+
+ifeq ($(STATIC_MODULES),1)
+
+modules.c: static-modules.h
+
+.PHONY: static-modules.h
+
+static-modules.h:
+	for i in $(MODULE_LIST); do \
+		echo "#include \"../$$i/main.h\""; \
+	done > static-modules.h; \
+	echo "static StatModInfo available_modules[]={" >> static-modules.h; \
+	for i in $(MODULE_LIST); do \
+		echo "{\"$$i\", $${i}_module_init, $${i}_module_deinit, FALSE},"; \
+	done >> static-modules.h; \
+	echo "{NULL, NULL, NULL, FALSE}," >> static-modules.h;
+	echo "};" >> static-modules.h
+
+static-modules-clean:
+	rm -f static-modules.h
+
+endif
 
 _install:
 	$(INSTALLDIR) $(BINDIR)

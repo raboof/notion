@@ -5,18 +5,16 @@
 ######################################
 
 ifdef MODULE
-
-TARGETS := $(TARGETS) $(MODULE).so
-
+TARGETS := $(TARGETS) module_link
 endif
 
 ifdef SUBDIRS
 
 all: subdirs $(TARGETS)
 
-clean: subdirs-clean _clean
+clean: subdirs-clean _clean $(CLEAN_TARGETS)
 
-realclean: subdirs-realclean _realclean
+realclean: subdirs-realclean _clean _realclean $(CLEAN_TARGETS) $(REALCLEAN_TARGETS)
 
 depend: subdirs-depend _depend
 
@@ -24,9 +22,9 @@ else
 
 all: $(TARGETS)
 
-clean: _clean
+clean: _clean $(CLEAN_TARGETS)
 
-realclean: _realclean
+realclean: _clean _realclean $(CLEAN_TARGETS) $(REALCLEAN_TARGETS)
 
 depend: _depend
 
@@ -46,20 +44,32 @@ endif
 
 ifdef MODULE
 
+ifneq ($(STATIC_MODULES),1)
+
+module_link: $(MODULE).so
+
 $(MODULE).so: $(OBJS) $(EXT_OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(MODULE_LDFLAGS) $(OBJS) $(EXT_OBJS) -o $@
-
-$(MODULE).a: $(OBJS)
-	$(AR) $(ARFLAGS) $@ $+
-	$(RANLIB) $@
-
-.c.o:
-	$(CC) $(CFLAGS) $(MODULE_CFLAGS) -c $< -o $@
 
 module_install:
 	$(INSTALLDIR) $(MODULEDIR)
 	$(INSTALL) -m $(BIN_MODE) $(MODULE).so $(MODULEDIR)
 	$(STRIP) $(MODULEDIR)/$(MODULE).so
+
+else
+
+module_link: $(MODULE).a
+
+$(MODULE).a: $(OBJS)
+	$(AR) $(ARFLAGS) $@ $+
+	$(RANLIB) $@
+
+module_install:
+
+endif
+
+.c.o:
+	$(CC) $(CFLAGS) $(MODULE_CFLAGS) -c $< -o $@
 
 else
 
@@ -84,7 +94,7 @@ _depend:
 	
 endif
 
-_realclean: _clean
+_realclean:
 	rm -f $(TARGETS)
 
 

@@ -5,7 +5,7 @@
  * See the included file LICENSE for details.
  */
 
-#ifndef CF_NO_MODULE_SUPPORT
+#ifndef CF_STATIC_MODULES
 
 #include <dlfcn.h>
 #include <string.h>
@@ -233,11 +233,21 @@ void unload_modules()
 /*}}}*/
 
 
-#else /* CF_MODULE_SUPPORT */
+#else /* CF_STATIC_MODULES */
 
 
 #include "common.h"
 
+INTRSTRUCT(StatModInfo)
+
+DECLSTRUCT(StatModInfo){
+	char *name;
+	bool (*initfn)();
+	void (*deinitfn)();
+	bool loaded;
+};
+
+#include "static-modules.h"
 
 /*{{{ Dummy functions for systems without sufficient dynamic
  * linking support
@@ -245,17 +255,44 @@ void unload_modules()
 
 bool load_module(const char *name)
 {
-	warn_obj(name, "Unable to load: module support not enabled.");
-	return FALSE;
+	int i;
+	StatModInfo *smi=available_modules;
+		
+	for( ; smi->name!=NULL; smi++){
+		if(strcmp(smi->name, name)==0)
+			break;
+	}
+	
+	if(smi->name==NULL){
+		warn_obj(name, "No such statically compiled module found");
+		return FALSE;
+	}
+	
+	if(smi->loaded)
+		return TRUE;
+	
+	if(!smi->initfn())
+		return FALSE;
+		
+	smi->loaded=TRUE;
+	return TRUE;
 }
 
 
 void unload_modules()
 {
+	StatModInfo *smi=available_modules;
+		
+	for( ; smi->name!=NULL; smi++){
+		if(!smi->loaded)
+			continue;
+		smi->deinitfn();
+		smi->loaded=FALSE;
+	}
 }
 
 
 /*}}}*/
 
 
-#endif
+#endif /* CF_STATIC_MODULES */

@@ -19,7 +19,7 @@
 #include <ioncore/regbind.h>
 #include <ioncore/defer.h>
 #include "floatframe.h"
-#include "main.h"
+#include "funtabs.h"
 
 
 /*{{{ Static function declarations, dynfuntab and class implementation */

@@ -7,9 +7,9 @@ include system-inc.mk
 
 ######################################
 
-#DIST: SUBDIRS = libtu ioncore ionws floatws query man
-SUBDIRS = ioncore ionws floatws query man
-INSTALL_SUBDIRS = ioncore ionws floatws query scripts man etc
+#DIST: SUBDIRS = libtu $(MODULE_LIST) ioncore man
+SUBDIRS = $(MODULE_LIST) ioncore man
+INSTALL_SUBDIRS = $(MODULE_LIST) ioncore scripts man etc
 
 DOCS = README LICENSE ChangeLog
 

@@ -24,7 +24,7 @@
 
 #include "floatws.h"
 #include "floatframe.h"
-#include "main.h"
+#include "funtabs.h"
 
 
 /*{{{ Static function declarations */

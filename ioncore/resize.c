@@ -90,7 +90,7 @@ static void res_draw_moveres(WScreen *scr)
 		h=(tmpgeom.h-tmporiggeom.h)+tmprelh;
 
 		if(tmphints.flags&PResizeInc &&
-		   tmphints.width_inc>1 || tmphints.height_inc>1){
+		   (tmphints.width_inc>1 || tmphints.height_inc>1)){
 			if(tmphints.flags&PBaseSize){
 				w-=tmphints.base_width;
 				h-=tmphints.base_height;

@@ -22,11 +22,20 @@ INCDIR=$(PREFIX)/include
 ## Modules
 ##
 
-#MODULE_SUPPORT_CFLAGS=-DCF_NO_MODULE_SUPPORT
+MODULE_LIST=ionws floatws query
+
+# For dynamically loaded modules
+MODULE_SUPPORT_CFLAGS=
 MODULE_SUPPORT_LDFLAGS=-export-dynamic -ldl
 MODULE_LDFLAGS=-shared
 MODULE_CFLAGS=-shared
 
+# Statically loaded modules
+#STATIC_MODULES=1
+#MODULE_SUPPORT_CFLAGS=
+#MODULE_SUPPORT_LDFLAGS=
+#MODULE_LDFLAGS=
+#MODULE_CFLAGS=
 
 ##
 ## X libraries, includes and options
