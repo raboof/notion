@@ -6,7 +6,7 @@
 -- Main menu
 defmenu("mainmenu", {
     submenu("Programs",         "appmenu"),
-    menuentry("Lock screen",    "ioncore.exec('xlock')"),
+    menuentry("Lock screen",    "ioncore.exec_on(_, 'xlock')"),
     menuentry("Help",           "querylib.query_man(_)"),
     menuentry("About Ion",      "querylib.show_about_ion(_)"),
     submenu("Styles",           "stylemenu"),
@@ -16,8 +16,8 @@ defmenu("mainmenu", {
 
 -- Application menu
 defmenu("appmenu", {
-    menuentry("XTerm",          "ioncore.exec('xterm')"),
-    menuentry("Mozilla Firefox","ioncore.exec('firefox')"),
+    menuentry("XTerm",          "ioncore.exec_on(_, 'xterm')"),
+    menuentry("Mozilla Firefox","ioncore.exec_on(_, 'firefox')"),
     menuentry("Run...",         "querylib.query_exec(_)"),
 })
 

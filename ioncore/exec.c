@@ -95,12 +95,18 @@ static bool do_exec_on_rootwin(int xscr, const char *cmd)
 
 /*EXTL_DOC
  * Run \var{cmd} with the environment variable DISPLAY set to point to the
- * root window \var{rootwin} of the X display the WM is running on.
+ * root window of the X screen \var{reg} is on.
  */
 EXTL_EXPORT
-bool ioncore_exec_on(WRootWin *rootwin, const char *cmd)
+bool ioncore_exec_on(WRegion *reg, const char *cmd)
 {
-    return do_exec_on_rootwin(rootwin->xscr, cmd);
+    WRootWin *rw=region_rootwin_of(reg);
+    if(rw==NULL){
+        WARN_FUNC("No root window.");
+        return FALSE;
+    }
+    
+    return do_exec_on_rootwin(rw->xscr, cmd);
 }
 
 

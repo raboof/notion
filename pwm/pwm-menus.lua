@@ -16,10 +16,10 @@ defmenu("mainmenu", {
 
 -- Application menu
 defmenu("appmenu", {
-    menuentry("XTerm",          "ioncore.exec('xterm')"),
-    menuentry("Mozilla Firefox","ioncore.exec('firefox')"),
-    menuentry("Xdvi",           "ioncore.exec('xdvi')"),
-    menuentry("GV",             "ioncore.exec('gv')"),
+    menuentry("XTerm",          "ioncore.exec_on(_, 'xterm')"),
+    menuentry("Mozilla Firefox","ioncore.exec_on(_, 'firefox')"),
+    menuentry("Xdvi",           "ioncore.exec_on(_, 'xdvi')"),
+    menuentry("GV",             "ioncore.exec_on(_, 'gv')"),
 })
 
 

@@ -39,7 +39,7 @@ defbindings("WScreen", {
     kpress(MOD1.."Shift+Right", "ioncore.goto_prev_screen()"),
     
     kpress(MOD1.."F1",          "ioncorelib.show_manual('pwm')"),
-    kpress(MOD2.."F2",          "ioncore.exec('xterm')"),
+    kpress(MOD2.."F2",          "ioncore.exec_on(_, 'xterm')"),
     
     kpress(MOD1.."F9",          "ioncorelib.create_new_ws(_)"),
     
