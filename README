@@ -20,7 +20,7 @@ BUILDING AND INSTALLING
    b) Alternatively, edit system.mk to suit your system. If the autoconf
       script failed for some reason and you are falling back to this choice
       because of that, remove system-ac.mk. Most GNU/Linux users should
-      need very little modifications to ssytem.mk.
+      need very little modifications to system.mk.
 
 3. If you want to build some extra modules now or do not want to build
    some of the standard modules, edit modulelist.mk.

@@ -110,8 +110,8 @@ Ion configuration document (see section SEE ALSO) here. The
 variable "_" is bound to the frame in which the query was opened.
 .TP
 .B F4
-Start new SSH session (query, uses ion-ssh). Tab-completion of hosts can be
-enabled by specifying them in the configuration variable query_ssh_hosts.
+Start new SSH session (query, uses ion-ssh). Hosts to tab-complete are
+read from ~/.ssh/known_hosts.
 .TP
 .B F5
 Open a file for editing (query). Uses ion-edit which by default uses run-mailcap.
@@ -120,10 +120,13 @@ Open a file for editing (query). Uses ion-edit which by default uses run-mailcap
 Open a file for viewing (query). Uses ion-view which by default uses run-mailcap.
 .TP
 .B F9
-Go to existing workspace or create new (query).
+Go to existing workspace or create new (query). If a non-existent
+workspace was entered, the type of the workspace to be created will
+be queried as well.
 .TP
 .B Mod1+F9
-Create a new tiled workspace with a name of the form WIonWS<n>.
+Create a new tiled workspace with name matching the type of
+workspace to be created (the default_ws_type variable).
 .TP
 .B F12
 Main menu

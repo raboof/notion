@@ -3,10 +3,10 @@ Welcome to Ion!
 
 If you have never used Ion before, it is highly recommended that you study 
 the Ion manual page before proceeding further. It is reproduced below, but 
-to access it later on, for example, by pressing <F1> and then <Enter> or, by
-running 'man ion' in a terminal. All this supposing that you have installed
-Ion in a standard location so that the system commands can find the manual 
-page.
+you can also access it later on, for example, by pressing <F1> and then 
+<Enter> or, by running 'man ion' in a terminal. All this supposing that you
+have installed Ion in a standard location so that the system commands can 
+find the manual page.
 
 If you are too eager to try out Ion and against all recommendation want to
 skip reading the manual page, you should at least know that pressing <F2> 
