@@ -19,6 +19,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <errno.h>
 
 #include "common.h"
 #include "exec.h"
@@ -124,8 +125,10 @@ static void process_pipe(int fd, void *p)
     while(1){
         n=read(fd, buf, BL-1);
         if(n<0){
+            if(errno==EAGAIN || errno==EINTR)
+                return;
+            n=0;
             warn_err_obj("pipe read");
-            return;
         }
         if(n>0){
             buf[n]='\0';
@@ -177,7 +180,17 @@ bool ioncore_popen_bgread(const char *cmd, ExtlFn handler)
     if(pid!=0){
         ExtlFn *p;
         close(fds[1]);
-        fcntl(fds[0], O_NONBLOCK);
+        /* unblock */ {
+            int fl=fcntl(fds[0], F_GETFL);
+            if(fl!=-1)
+                fl=fcntl(fds[0], F_SETFL, fl|O_NONBLOCK);
+            if(fl==-1){
+                warn_err();
+                close(fds[0]);
+                return FALSE;
+            }
+        }
+            
         p=ALLOC(ExtlFn);
         if(p!=NULL){
             *(ExtlFn*)p=extl_ref_fn(handler);

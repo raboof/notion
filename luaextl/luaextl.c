@@ -88,7 +88,58 @@ static void lua_rawgeti_check(lua_State *st, int index, int n)
 /*}}}*/
 
 
-/*{{{ Obj userdata handling -- unsafe */
+/*{{{ A cpcall wrapper */
+
+
+typedef bool ExtlCPCallFn(lua_State *st, void *ptr);
+
+
+typedef struct{
+    ExtlCPCallFn *fn;
+    void *udata;
+    bool retval;
+} ExtlCPCallParam;
+
+
+static int extl_docpcall(lua_State *st)
+{
+    ExtlCPCallParam *param=(ExtlCPCallParam*)lua_touserdata(st, -1);
+    
+    /* Should be enough for most things */
+    if(!lua_checkstack(st, 8)){
+        warn("Lua stack full");
+        return 0;
+    }
+
+    param->retval=param->fn(st, param->udata);
+    return 0;
+}
+
+                            
+static bool extl_cpcall(lua_State *st, ExtlCPCallFn *fn, void *ptr)
+{
+    ExtlCPCallParam param;
+    int oldtop=lua_gettop(st);
+    
+    param.fn=fn;
+    param.udata=ptr;
+    param.retval=FALSE;
+    
+    
+    if(lua_cpcall(st, extl_docpcall, &param)!=0){
+        D(fprintf(stderr, "-->%s\n", lua_tostring(st, -1)));
+    }
+    
+    lua_settop(st, oldtop);
+    
+    return param.retval;
+}
+
+
+/*}}}*/
+
+
+/*{{{ WObj userdata handling -- unsafe */
 
 
 static int obj_cache_ref=LUA_NOREF;
@@ -123,10 +174,20 @@ static Obj *extl_get_wobj(lua_State *st, int pos)
 }
 
 
-static void extl_obj_dest_handler(Watch *watch, Obj *obj)
+static void extl_uncache(lua_State *st, WObj *obj)
 {
-    D(warn("%s destroyed while Lua code is still referencing it.",
-           OBJ_TYPESTR(obj)));
+    lua_rawgeti(st, LUA_REGISTRYINDEX, obj_cache_ref);
+    lua_pushlightuserdata(st, obj);
+    lua_pushnil(st);
+    lua_rawset_check(st, -3);
+    obj->flags&=~WOBJ_EXTL_CACHED;
+}
+
+
+static void extl_obj_dest_handler(WWatch *watch, WObj *obj)
+{
+    if(obj->flags&WOBJ_EXTL_CACHED)
+        extl_cpcall(l_st, (ExtlCPCallFn*)extl_uncache, obj);
 }
 
 
@@ -189,14 +250,16 @@ static int extl_obj_gc_handler(lua_State *st)
     if(extl_get_wobj(st, 1)==NULL)
         return 0;
 
-    watch=(Watch*)lua_touserdata(st, 1);
+    /* This should not happen, actually. Our object cache should
+     * hold references to all objects seen on the Lua side until
+     * they are destroyed.
+     */
+    
+    watch=(WWatch*)lua_touserdata(st, 1);
     
     if(watch!=NULL){
-        D(fprintf(stderr, "Collecting %p\n", watch->obj));
-        if(watch->obj!=NULL){
-            D(fprintf(stderr, "was cached\n"));
+        if(watch->obj!=NULL)
             watch->obj->flags&=~OBJ_EXTL_CACHED;
-        }
         watch_reset(watch);
     }
     
@@ -355,56 +418,6 @@ static bool extl_init_obj_info(lua_State *st)
     lua_setglobal(st, "include");
 
     return TRUE;
-}
-
-
-/*}}}*/
-
-
-/*{{{ A cpcall wrapper */
-
-
-typedef bool ExtlCPCallFn(lua_State *st, void *ptr);
-
-
-typedef struct{
-    ExtlCPCallFn *fn;
-    void *udata;
-    bool retval;
-} ExtlCPCallParam;
-
-
-static int extl_docpcall(lua_State *st)
-{
-    ExtlCPCallParam *param=(ExtlCPCallParam*)lua_touserdata(st, -1);
-    
-    /* Should be enough for most things */
-    if(!lua_checkstack(st, 8)){
-        warn("Lua stack full");
-        return 0;
-    }
-
-    param->retval=param->fn(st, param->udata);
-    return 0;
-}
-
-                            
-static bool extl_cpcall(lua_State *st, ExtlCPCallFn *fn, void *ptr)
-{
-    ExtlCPCallParam param;
-    int oldtop=lua_gettop(st);
-    
-    param.fn=fn;
-    param.udata=ptr;
-    param.retval=FALSE;
-    
-    if(lua_cpcall(st, extl_docpcall, &param)!=0){
-        D(fprintf(stderr, "-->%s\n", lua_tostring(st, -1)));
-    }
-    
-    lua_settop(st, oldtop);
-    
-    return param.retval;
 }
 
 
