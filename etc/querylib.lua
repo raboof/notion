@@ -59,14 +59,18 @@ end
 function QueryLib.make_yesno_handler(fn)
     local function handle_yesno(_, yesno)
         if yesno=="y" or yesno=="Y" or yesno=="yes" then
-            %fn(unpack(arg))
+            if arg then
+                %fn(unpack(arg))
+            else
+                %fn()
+            end
         end
     end
     return handle_yesno
 end
 
 function QueryLib.make_yesno_fn(prompt, handler)
-    return QueryLib.make_frame_fn(prompt,
+    return QueryLib.make_frame_fn(prompt, nil,
                                   QueryLib.make_yesno_handler(handler),
                                   nil)
 end
