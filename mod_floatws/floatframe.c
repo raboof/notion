@@ -126,8 +126,8 @@ void floatframe_managed_geom(const WFloatFrame *frame, WRectangle *geom)
     floatframe_offsets(frame, &off);
     geom->x=-off.x;
     geom->y=-off.y;
-    geom->w-=off.w;
-    geom->h-=off.h;
+    geom->w=maxof(geom->w-off.w, 0);
+    geom->h=maxof(geom->h-off.h, 0);
 }
 
 

@@ -34,7 +34,7 @@
 void region_init(WRegion *reg, WWindow *par, const WFitParams *fp)
 {
     if(fp->g.w<0 || fp->g.h<0)
-        warn("Creating reg ion with negative width or height!");
+        warn("Creating region with negative width or height!");
     
     reg->geom=fp->g;
     reg->flags=0;
