@@ -29,3 +29,15 @@ function make_menu_fn(entries)
            end
 end
 
+function make_pmenu_fn(entries)
+    return function(mplex, ...)
+               local params=arg
+               local function wrapper(entry)
+                   if entry.fn then
+                       entry.fn(mplex, unpack(params))
+                   end
+               end
+               return menu_pmenu(mplex, wrapper, entries)
+           end
+end
+

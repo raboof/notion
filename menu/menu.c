@@ -1,5 +1,5 @@
 /*
- * ion/query/input.c
+ * ion/menu/menu.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  *
@@ -10,6 +10,7 @@
  */
 
 #include <string.h>
+#include <limits.h>
 
 #include <ioncore/common.h>
 #include <ioncore/window.h>
@@ -17,8 +18,25 @@
 #include <ioncore/regbind.h>
 #include <ioncore/defer.h>
 #include <ioncore/strings.h>
+#include <ioncore/pointer.h>
+#include <ioncore/stacking.h>
+#include <ioncore/minmax.h>
 #include "menu.h"
 #include "menup.h"
+
+
+static bool extl_table_getis(ExtlTab tab, int i, const char *s, char c,
+							 void *p)
+{
+	ExtlTab sub;
+	bool ret;
+	
+	if(!extl_table_geti_t(tab, i, &sub))
+		return FALSE;
+	ret=extl_table_get(sub, 's', c, s, p);
+	extl_unref_table(sub);
+	return ret;
+}
 
 
 /*{{{ Drawing routines */
@@ -52,7 +70,13 @@ static void get_inner_geom(WMenu *menu, WRectangle *geom)
 void menu_draw_entries(WMenu *menu, bool complete)
 {
 	WRectangle geom;
-	uint i;
+	int i;
+	static const char *attrs[]={
+		"selected-normal",
+		"unselected-normal",
+		"selected-submenu",
+		"unselected-submenu"
+	};
 	
 	if(menu->entry_brush==NULL)
 		return;
@@ -61,12 +85,11 @@ void menu_draw_entries(WMenu *menu, bool complete)
 	geom.h=menu->entry_h;
 	
 	for(i=0; i<menu->n_entries; i++){
-		/* TODO: submenus */
-		const char *attr=(menu->selected_entry==i
-						  ? "selected"
-						  : "unselected");
+		int a=((menu->selected_entry==i ? 0 : 1)
+			   |(menu->entries[i].flags&WMENUENTRY_SUBMENU ? 2 : 0));
+
 		grbrush_draw_textbox(menu->entry_brush, MENU_WIN(menu), &geom,
-							 menu->entry_titles[i], attr, complete);
+							 menu->entries[i].title, attrs[a], complete);
 		geom.y+=menu->entry_h+menu->entry_spacing;
 	}
 }
@@ -95,17 +118,17 @@ void menu_draw(WMenu *menu, bool complete)
 
 const char *menu_style(WMenu *menu)
 {
-	const char *ret="input-menu";
-	CALL_DYN_RET(ret, const char*, menu_style, menu, (menu));
-	return ret;
+	return (menu->pmenu_mode
+			? "input-menu-pmenu"
+			: "input-menu-normal");
 }
 
 
 const char *menu_entry_style(WMenu *menu)
 {
-	const char *ret="input-menu-entry";
-	CALL_DYN_RET(ret, const char*, menu_entry_style, menu, (menu));
-	return ret;
+	return (menu->pmenu_mode
+			? "input-menu-entry-pmenu"
+			: "input-menu-entry-normal");
 }
 
 
@@ -119,9 +142,8 @@ static void menu_calc_size(WMenu *menu, int maxw, int maxh,
 						   int *w_ret, int *h_ret)
 {
 	GrBorderWidths bdw, e_bdw;
-	ExtlTab entry;
 	char *str;
-	uint i;
+	int i;
 	int nath, maxew=menu->max_entry_w;
 	
 	grbrush_get_border_widths(menu->brush, &bdw);
@@ -158,33 +180,106 @@ static void menu_calc_size(WMenu *menu, int maxw, int maxh,
 #endif
 	
 	for(i=0; i<menu->n_entries; i++){
-		if(menu->entry_titles[i]){
-			free(menu->entry_titles[i]);
-			menu->entry_titles[i]=NULL;
+		if(menu->entries[i].title){
+			free(menu->entries[i].title);
+			menu->entries[i].title=NULL;
 		}
 		if(maxew<=0)
 			continue;
 		
-		if(extl_table_geti_t(menu->tab, i+1, &entry)){
-			if(extl_table_gets_s(entry, "name", &str)){
-				menu->entry_titles[i]=make_label(menu->entry_brush, str, 
-												 maxew);
-				free(str);
-			}
+		if(extl_table_getis(menu->tab, i+1, "name", 's', &str)){
+			menu->entries[i].title=make_label(menu->entry_brush, str, 
+											  maxew);
+			free(str);
 		}
 	}
 }
 
 
-void menu_refit(WMenu *menu)
+void calc_size(WMenu *menu, int *w, int *h)
+{
+	if(menu->pmenu_mode)
+		menu_calc_size(menu, INT_MAX, INT_MAX, w, h);
+	else
+		menu_calc_size(menu, menu->max_geom.w, menu->max_geom.h, w, h);
+}
+	
+
+/* Return offset from bottom-left corner of containing mplex or top-right
+ * corner of  parent menu for the respective corner of menu.
+ */
+static void get_placement_offs(WMenu *menu, int *xoff, int *yoff)
+{
+	GrBorderWidths bdw;
+	
+	*xoff=0; 
+	*yoff=0;
+	
+	if(menu->brush!=NULL){
+		grbrush_get_border_widths(menu->brush, &bdw);
+		*xoff+=bdw.right;
+		*yoff+=bdw.top;
+	}
+	
+	if(menu->entry_brush!=NULL){
+		grbrush_get_border_widths(menu->entry_brush, &bdw);
+		*xoff+=bdw.right;
+		*yoff+=bdw.top;
+	}
+}
+	
+	
+static void menu_firstfit(WMenu *menu, bool submenu, int ref_x, int ref_y)
 {
 	WRectangle geom;
-	menu_calc_size(menu, menu->max_geom.w, menu->max_geom.h, 
-				   &(geom.w), &(geom.h));
 	
-	geom.x=menu->max_geom.x;
-	geom.y=menu->max_geom.y+menu->max_geom.h-geom.h;
+	calc_size(menu, &(geom.w), &(geom.h));
 	
+	if(menu->pmenu_mode){
+		geom.x=ref_x;
+		geom.y=ref_y;
+		if(!submenu){
+			geom.x-=geom.w/2;
+			geom.y+=5;
+		}
+	}else{
+		if(submenu){
+			int xoff, yoff, x2, y2;
+			get_placement_offs(menu, &xoff, &yoff);
+			x2=minof(ref_x+xoff, menu->max_geom.x+menu->max_geom.w);
+			y2=maxof(ref_y-yoff, menu->max_geom.y);
+			geom.x=menu->max_geom.x+xoff;
+			if(geom.x+geom.w<x2)
+				geom.x=x2-geom.w;
+			geom.y=menu->max_geom.y+menu->max_geom.h-yoff-geom.h;
+			if(geom.y>y2)
+				geom.y=y2;
+			
+		}else{
+			geom.x=menu->max_geom.x;
+			geom.y=menu->max_geom.y+menu->max_geom.h-geom.h;
+		}
+	}
+	
+	window_fit(&menu->win, &geom);
+}
+
+
+static void menu_refit(WMenu *menu)
+{
+	WRectangle geom;
+	
+	calc_size(menu, &(geom.w), &(geom.h));
+	
+	geom.x=REGION_GEOM(menu).x;
+	geom.y=REGION_GEOM(menu).y;
+	
+	if(!menu->pmenu_mode){
+		geom.x=maxof(geom.x, menu->max_geom.x);
+		geom.x=minof(geom.x, menu->max_geom.x+menu->max_geom.w-geom.w);
+		geom.y=maxof(geom.y, menu->max_geom.y);
+		geom.y=minof(geom.y, menu->max_geom.y+menu->max_geom.h-geom.h);
+	}
 	window_fit(&menu->win, &geom);
 }
 
@@ -207,7 +302,6 @@ static void calc_entry_dimens(WMenu *menu)
 	int i, n=extl_table_get_n(menu->tab);
 	GrFontExtents fnte;
 	GrBorderWidths bdw;
-	ExtlTab entry, sub;
 	int maxw=0;
 	char *str;
 	
@@ -219,15 +313,12 @@ static void calc_entry_dimens(WMenu *menu)
 #endif
 	
 	for(i=1; i<=n; i++){
-		if(extl_table_geti_t(menu->tab, i, &entry)){
-			if(extl_table_gets_s(entry, "name", &str)){
-				int w=grbrush_get_text_width(menu->entry_brush, 
-											 str, strlen(str));
-				if(w>maxw)
-					maxw=w;
-				free(str);
-			}
-			extl_unref_table(entry);
+		if(extl_table_getis(menu->tab, i, "name", 's', &str)){
+			int w=grbrush_get_text_width(menu->entry_brush, 
+										 str, strlen(str));
+			if(w>maxw)
+				maxw=w;
+			free(str);
 		}
 	}
 	
@@ -299,24 +390,36 @@ static void menu_release_gr(WMenu *menu, Window win)
 /*{{{ Init/deinit */
 
 
-static void preprocess_menus(ExtlTab tab, bool *submenus, uint *n_entries)
+static WMenuEntry *preprocess_menu(ExtlTab tab, int *n_entries)
 {
-	int i, n=extl_table_get_n(tab);
 	ExtlTab entry, sub;
+	WMenuEntry *entries;
+	int i, n;
 	
-	*submenus=FALSE;
+	n=extl_table_get_n(tab);
 	*n_entries=n;
 	
-	/* Check submenus */
-	for(i=1; i<=n && !(*submenus); i++){
-		if(extl_table_geti_t(tab, i, &entry)){
-			if(extl_table_gets_t(entry, "submenu", &sub)){
-				*submenus=TRUE;
-				extl_unref_table(sub);
-			}
-			extl_unref_table(entry);
+	if(n<=0)
+		return NULL;
+
+	entries=ALLOC_N(WMenuEntry, n);  
+	
+	if(entries==NULL){
+		warn_err();
+		return NULL;
+	}
+
+	/* Initialise entries and check submenus */
+	for(i=1; i<=n; i++){
+		entries[i-1].title=NULL;
+		entries[i-1].flags=0;
+		if(extl_table_getis(tab, i, "submenu", 't', &sub)){
+			entries[i-1].flags|=WMENUENTRY_SUBMENU;
+			extl_unref_table(sub);
 		}
 	}
+	
+	return entries;
 }
 
 
@@ -325,36 +428,27 @@ bool menu_init(WMenu *menu, WWindow *par, const WRectangle *geom,
 			   const WMenuCreateParams *params)
 {
 	Window win;
-	uint i;
-	bool submenus;
+	int i;
 
-	preprocess_menus(params->tab, &(submenus), &(menu->n_entries));
+	menu->entries=preprocess_menu(params->tab, &(menu->n_entries));
 	
-	if(menu->n_entries==0){
+	if(menu->entries==NULL){
 		warn("Empty menu");
 		return FALSE;
 	}
 
-	menu->entry_titles=ALLOC_N(char*, menu->n_entries);  
-		
-	if(menu->entry_titles==NULL){
-		warn_err();
-		return FALSE;
-	}
-
-	for(i=0; i<menu->n_entries; i++)
-		menu->entry_titles[i]=NULL;
-
 	menu->tab=extl_ref_table(params->tab);
 	menu->handler=extl_ref_fn(params->handler);
+	menu->pmenu_mode=params->pmenu_mode;
 
 	menu->max_geom=*geom;
-	menu->selected_entry=0;
+	menu->selected_entry=(params->pmenu_mode ? -1 : 0);
 	menu->max_entry_w=0;
 	menu->entry_h=0;
 	menu->brush=NULL;
 	menu->entry_brush=NULL;
 	menu->entry_spacing=0;
+	menu->submenu=NULL;
 	
 	win=create_simple_window(ROOTWIN_OF(par), par->win, geom);
 	
@@ -366,7 +460,7 @@ bool menu_init(WMenu *menu, WWindow *par, const WRectangle *geom,
 		goto fail;
 	}
 
-	menu_refit(menu);
+	menu_firstfit(menu, params->submenu_mode, params->ref_x, params->ref_y);
 	
 	XSelectInput(wglobal.dpy, win, MENU_MASK);
 	region_add_bindmap((WRegion*)menu, &menu_bindmap);
@@ -377,7 +471,7 @@ fail:
 	XDestroyWindow(wglobal.dpy, win);
 	extl_unref_table(menu->tab);
 	extl_unref_fn(menu->handler);
-	free(menu->entry_titles);
+	free(menu->entries);
 	return FALSE;
 }
 
@@ -392,14 +486,18 @@ WMenu *create_menu(WWindow *par, const WRectangle *geom,
 
 void menu_deinit(WMenu *menu)
 {
-	uint i;
+	int i;
+	WMenu *m;
+	
+	if(menu->submenu!=NULL)
+		destroy_obj((WObj*)menu->submenu);
 	
 	extl_unref_table(menu->tab);
 	extl_unref_fn(menu->handler);
 	
 	for(i=0; i<menu->n_entries; i++)
-		free(menu->entry_titles[i]);
-	free(menu->entry_titles);
+		free(menu->entries[i].title);
+	free(menu->entries);
 	
 	menu_release_gr(menu, MENU_WIN(menu));
 	window_deinit((WWindow*)menu);
@@ -409,29 +507,108 @@ void menu_deinit(WMenu *menu)
 /*}}}*/
 
 
-/*{{{ Exports */
+/*{{{ Submenus */
 
 
-/*EXTL_DOC
- * Select previous entry in menu.
- */
-EXTL_EXPORT_MEMBER
-void menu_select_prev(WMenu *menu)
+static WMenu *menu_head(WMenu *menu)
 {
-	menu->selected_entry=(menu->selected_entry == 0 
-						  ? menu->n_entries-1
-						  : menu->selected_entry-1);
-	menu_draw_entries(menu, TRUE);
+	WMenu *m=REGION_MANAGER_CHK(menu, WMenu);
+	return (m==NULL ? menu : menu_head(m));
+}
+
+static void menu_remove_managed(WMenu *menu, WRegion *sub)
+{
+	if(sub!=(WRegion*)menu->submenu)
+		return;
+
+	region_unset_manager(sub, (WRegion*)menu, (WRegion**)&(menu->submenu));
+	
+	if(region_may_control_focus((WRegion*)menu))
+		region_set_focus_to((WRegion*)menu, FALSE);
 }
 
 
-/*EXTL_DOC
- * Select next entry in menu.
- */
-EXTL_EXPORT_MEMBER
-void menu_select_next(WMenu *menu)
+int get_sub_y_off(WMenu *menu, int n)
 {
-	menu->selected_entry=(menu->selected_entry+1)%menu->n_entries;
+	/* top + sum of above entries and spacings - top_of_sub */
+	return (menu->entry_h+menu->entry_spacing)*n;
+}
+
+
+static void show_sub(WMenu *menu, int n)
+{
+	WRectangle g;
+	WMenuCreateParams fnp;
+	WMenu *submenu;
+	WWindow *par;
+	
+	par=REGION_PARENT_CHK(menu, WWindow);
+	
+	if(par==NULL)
+		return;
+	
+	g=menu->max_geom;
+	
+	if(menu->pmenu_mode){
+	    fnp.ref_x=REGION_GEOM(menu).x+REGION_GEOM(menu).w;
+		fnp.ref_y=REGION_GEOM(menu).y+get_sub_y_off(menu, n);
+	}else{
+		fnp.ref_x=REGION_GEOM(menu).x+REGION_GEOM(menu).w;
+		fnp.ref_y=REGION_GEOM(menu).y;
+	}
+
+	fnp.handler=extl_ref_fn(menu->handler);
+	fnp.tab=extl_table_none();
+	extl_table_getis(menu->tab, n+1, "submenu", 't', &(fnp.tab));
+	fnp.pmenu_mode=menu->pmenu_mode;
+	fnp.submenu_mode=TRUE;
+	
+	submenu=create_menu(par, &g, &fnp);
+	
+	if(submenu==NULL)
+		return;
+	
+	region_set_manager((WRegion*)submenu, (WRegion*)menu,
+					   (WRegion**)&(menu->submenu));
+	region_stack_above((WRegion*)submenu, (WRegion*)menu);
+	region_map((WRegion*)submenu);
+	
+	if(!menu->pmenu_mode && region_may_control_focus((WRegion*)menu))
+		region_set_focus_to((WRegion*)submenu, FALSE);
+}
+
+
+static void menu_set_focus_to(WMenu *menu, bool warp)
+{
+	if(menu->submenu!=NULL)
+		region_set_focus_to((WRegion*)menu->submenu, warp);
+	else
+		window_set_focus_to((WWindow*)menu, warp);
+}
+
+
+/*}}}*/
+
+
+/*{{{ Exports */
+
+
+static void menu_do_select_nth(WMenu *menu, int n)
+{
+	if(menu->selected_entry==n)
+		return;
+	
+	if(menu->submenu!=NULL)
+		destroy_obj((WObj*)menu->submenu);
+	assert(menu->submenu==NULL);
+
+	menu->selected_entry=n;
+
+	if(n>=0 && menu->entries[n].flags&WMENUENTRY_SUBMENU &&
+	   menu->pmenu_mode){
+		show_sub(menu, n);
+	}
+	
 	menu_draw_entries(menu, TRUE);
 }
 
@@ -442,8 +619,34 @@ void menu_select_next(WMenu *menu)
 EXTL_EXPORT_MEMBER
 void menu_select_nth(WMenu *menu, int n)
 {
-	menu->selected_entry=((uint)n)%menu->n_entries;
-	menu_draw_entries(menu, TRUE);
+	if(n<0)
+		n=0;
+	if(n>=menu->n_entries)
+		n=menu->n_entries-1;
+	
+	menu_do_select_nth(menu, n);
+}
+
+
+/*EXTL_DOC
+ * Select previous entry in menu.
+ */
+EXTL_EXPORT_MEMBER
+void menu_select_prev(WMenu *menu)
+{
+	menu_select_nth(menu, (menu->selected_entry<=0 
+						   ? menu->n_entries-1
+						   : menu->selected_entry-1));
+}
+
+
+/*EXTL_DOC
+ * Select next entry in menu.
+ */
+EXTL_EXPORT_MEMBER
+void menu_select_next(WMenu *menu)
+{
+	menu_select_nth(menu, (menu->selected_entry+1)%menu->n_entries);
 }
 
 
@@ -452,13 +655,17 @@ static void menu_do_finish(WMenu *menu)
 	ExtlFn handler;
 	ExtlTab tab;
 	bool ok;
+	WMenu *actmenu=menu;
 	
-	handler=menu->handler;
-	menu->handler=extl_fn_none();
+	/*while(actmenu->submenu!=NULL)
+		actmenu=actmenu->submenu;*/
 	
-	ok=extl_table_geti_t(menu->tab, menu->selected_entry+1, &tab);
+	handler=actmenu->handler;
+	actmenu->handler=extl_fn_none();
 	
-	destroy_obj((WObj*)menu);
+	ok=extl_table_geti_t(actmenu->tab, actmenu->selected_entry+1, &tab);
+	
+	destroy_obj((WObj*)menu_head(menu));
 	
 	if(ok)
 		extl_call(handler, "t", NULL, tab);
@@ -474,6 +681,12 @@ static void menu_do_finish(WMenu *menu)
 EXTL_EXPORT_MEMBER
 void menu_finish(WMenu *menu)
 {
+	if(!menu->pmenu_mode && menu->selected_entry>=0 &&
+	   menu->entries[menu->selected_entry].flags&WMENUENTRY_SUBMENU){
+		show_sub(menu, menu->selected_entry);
+		return;
+	}
+	
 	defer_action((WObj*)menu, (DeferredAction*)menu_do_finish);
 }
 
@@ -502,6 +715,98 @@ void menu_close(WMenu *menu)
 /*}}}*/
 
 
+/*{{{ Pointer handlers */
+
+
+int menu_entry_at_root(WMenu *menu, int root_x, int root_y)
+{
+	int rx, ry, x, y;
+	WRectangle ig;
+	region_rootpos((WRegion*)menu, &rx, &ry);
+	
+	get_inner_geom(menu, &ig);
+	
+	x=root_x-rx-ig.x;
+	y=root_y-ry-ig.y;
+	
+	if(x<0 || x>ig.w || y<0  || y>ig.h)
+		return -1;
+	
+	return y/(menu->entry_h+menu->entry_spacing);
+}
+
+
+int menu_entry_at_root_tree(WMenu *menu, int root_x, int root_y, 
+							WMenu **realmenu)
+{
+	int entry=-1;
+	
+	while(menu->submenu!=NULL)
+		menu=menu->submenu;
+	
+	*realmenu=menu;
+	
+	if(!menu->pmenu_mode)
+		return menu_entry_at_root(menu, root_x, root_y);
+	
+	while(menu!=NULL){
+		entry=menu_entry_at_root(menu, root_x, root_y);
+		if(entry>=0){
+			*realmenu=menu;
+			break;
+		}
+		menu=REGION_MANAGER_CHK(menu, WMenu);
+	}
+	
+	return entry;
+}
+
+
+void menu_release(WMenu *menu, XButtonEvent *ev)
+{
+	int entry=menu_entry_at_root_tree(menu, ev->x_root, ev->y_root, &menu);
+	if(entry>=0){
+		menu_select_nth(menu, entry);
+		menu_finish(menu);
+	}else if(menu->pmenu_mode){
+		menu_cancel(menu_head(menu));
+	}
+}
+
+
+void menu_motion(WMenu *menu, XMotionEvent *ev, int dx, int dy)
+{
+	int entry=menu_entry_at_root_tree(menu, ev->x_root, ev->y_root, &menu);
+	if(menu->pmenu_mode || entry>=0)
+		menu_do_select_nth(menu, entry);
+}
+
+
+void menu_button(WMenu *menu, XButtonEvent *ev)
+{
+	int entry=menu_entry_at_root_tree(menu, ev->x_root, ev->y_root, &menu);
+	if(entry>=0)
+		menu_select_nth(menu, entry);
+}
+
+
+int menu_press(WMenu *menu, XButtonEvent *ev, WRegion **reg_ret)
+{
+	menu_button(menu, ev);
+	menu=menu_head(menu);
+	p_set_drag_handlers((WRegion*)menu,
+						NULL,
+						(WMotionHandler*)menu_motion,
+						(WButtonHandler*)menu_release,
+						NULL, 
+						NULL);
+	return 0;
+}
+
+
+/*}}}*/
+
+
 /*{{{ Dynamic function table and class implementation */
 
 
@@ -510,6 +815,9 @@ static DynFunTab menu_dynfuntab[]={
 	{region_draw_config_updated, menu_draw_config_updated},
 	{region_close, menu_close},
 	{window_draw, menu_draw},
+	{(DynFun*)window_press, (DynFun*)menu_press},
+	{region_remove_managed, menu_remove_managed},
+	{region_set_focus_to, menu_set_focus_to},
 	END_DYNFUNTAB
 };
 

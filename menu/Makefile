@@ -1,5 +1,5 @@
 ##
-## Query module Makefile
+## Menu module Makefile
 ##
 
 # System-specific configuration is in system.mk

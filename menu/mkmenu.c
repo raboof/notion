@@ -9,7 +9,10 @@
  * (at your option) any later version.
  */
 
+#include <limits.h>
 #include <ioncore/common.h>
+#include <ioncore/pointer.h>
+#include <ioncore/grab.h>
 #include <ioncore/extl.h>
 #include "menu.h"
 #include "mkmenu.h"
@@ -26,13 +29,65 @@
 EXTL_EXPORT
 WMenu *menu_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab)
 {
-	WRectangle geom;
 	WMenuCreateParams fnp;
 
 	fnp.handler=handler;
 	fnp.tab=tab;
+	fnp.pmenu_mode=FALSE;
+	fnp.submenu_mode=FALSE;
 	
 	return (WMenu*)mplex_add_input(mplex,
 								   (WRegionAttachHandler*)create_menu,
 								   (void*)&fnp);
 }
+
+
+EXTL_EXPORT
+WMenu *menu_pmenu(WWindow *where, ExtlFn handler, ExtlTab tab)
+{
+	WScreen *scr;
+	WMenuCreateParams fnp;
+	XEvent *ev=p_current_event();
+	WMenu *menu;
+	WRectangle geom;
+	
+	if(ev==NULL || ev->type!=ButtonPress)
+		return NULL;
+
+	scr=region_screen_of((WRegion*)where);
+
+	if(scr==NULL)
+		return NULL;
+	
+	fnp.handler=handler;
+	fnp.tab=tab;
+	fnp.pmenu_mode=TRUE;
+	fnp.submenu_mode=FALSE;
+	fnp.ref_x=ev->xbutton.x_root-REGION_GEOM(scr).x;
+	fnp.ref_y=ev->xbutton.y_root-REGION_GEOM(scr).y;
+	
+	geom.x=0;
+	geom.y=0;
+	geom.w=REGION_GEOM(where).w;
+	geom.h=REGION_GEOM(where).h;
+	
+	menu=create_menu((WWindow*)scr, &geom, &fnp);
+	
+	if(menu==NULL)
+		return NULL;
+	
+	if(!p_set_drag_handlers((WRegion*)menu,
+							NULL,
+							(WMotionHandler*)menu_motion,
+							(WButtonHandler*)menu_release,
+							NULL, 
+							(GrabKilledHandler*)menu_cancel)){
+		destroy_obj((WObj*)menu);
+		return NULL;
+	}
+	
+	region_map((WRegion*)menu);
+	
+	return menu;
+}
+
