@@ -6,7 +6,7 @@
 
 include('menulib.lua')
 
-about_msg=[[
+local about_msg=[[
 Ion  ]]..ioncore_version()..[[ , copyright (c) Tuomo Valkonen 1999-2003.
 
 This program is free software; you can redistribute it and/or
