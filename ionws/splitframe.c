@@ -178,20 +178,18 @@ void frame_close(WFrame *frame)
 	
 	ws=(WWorkspace*)REGION_MANAGER(frame);
 	
-	if(ws!=NULL || !WTHING_IS(ws, WWorkspace)){
+	if(ws==NULL || !WTHING_IS(ws, WWorkspace)){
 		region_rescue_managed_on_list((WRegion*)frame, frame->managed_list);
 		destroy_thing((WThing*)frame);
 		return;
 	}
 	
-	if(ws!=NULL){
-		vp=(WViewport*)REGION_MANAGER(ws);
-		
-		if(vp!=NULL && WTHING_IS(vp, WViewport)){
-			if(vp->ws_count<=1 && ws->split_tree==(WObj*)frame){
-				fwarn(frame, "Cannot destroy only frame on only workspace.");
-				return;
-			}
+	vp=(WViewport*)REGION_MANAGER(ws);
+	
+	if(vp!=NULL && WTHING_IS(vp, WViewport)){
+		if(vp->ws_count<=1 && ws->split_tree==(WObj*)frame){
+			fwarn(frame, "Cannot destroy only frame on only workspace.");
+			return;
 		}
 	}
 	
