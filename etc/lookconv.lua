@@ -102,6 +102,7 @@ end
 local function output(nm)
     print('-- '..nm..' drawing engine configuration file for Ion.\n')
     print('if not gr_select_engine("de") then return end\n')
+    print('de_reset()\n')
     
     -- Base style
     print('de_define_style("*", {')
@@ -185,6 +186,7 @@ local function output(nm)
     end
     print_font("normal_font")
     print('})\n')
+    print('gr_refresh()\n')
 end
 
 

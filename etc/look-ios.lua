@@ -2,6 +2,8 @@
 
 if not gr_select_engine("de") then return end
 
+de_reset()
+
 de_define_style("*", {
     shadow_colour = "#606060",
     highlight_colour = "#ffffff",
@@ -95,4 +97,6 @@ de_define_style("input", {
     }),
     font = "-*-helvetica-medium-r-normal-*-12-*-*-*-*-*-*-*",
 })
+
+gr_refresh()
 

@@ -7,6 +7,8 @@ if not gr_select_engine("de") then
     return
 end
 
+-- Clear existing styles from memory.
+de_reset()
 
 -- Base style
 de_define_style("*", {
@@ -29,8 +31,7 @@ de_define_style("*", {
 
 de_define_style("frame", {
     based_on = "*",
-    transparent_background = true,
-    border_style = "inlaid", -- No effect as we don't do 3D effects
+    transparent_background = false,
 })
 
 
@@ -38,6 +39,7 @@ de_define_style("frame-ionframe", {
     based_on = "frame",
     shadow_pixels = 0,
     highlight_pixels = 0,
+    padding_pixels = 0,
     spacing = 1,
     padding_colour = "#aaaaaa",
     background_colour = "#000000",
@@ -102,3 +104,6 @@ de_define_style("input", {
         foreground_colour = "#9999aa",
     }),
 })
+
+-- Refresh objects' brushes.
+gr_refresh()

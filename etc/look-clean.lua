@@ -7,6 +7,8 @@ if not gr_select_engine("de") then
     return
 end
 
+-- Clear existing styles from memory.
+de_reset()
 
 -- Base style
 de_define_style("*", {
@@ -80,3 +82,5 @@ de_define_style("input", {
     }),
 })
 
+-- Refresh objects' brushes
+gr_refresh()
