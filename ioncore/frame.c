@@ -460,6 +460,7 @@ void frame_toggle_tab(WFrame *frame)
 		return;
 	
 	frame->flags^=WFRAME_TAB_HIDE;
+    mplex_size_changed(&(frame->mplex), FALSE, TRUE);
 	mplex_fit_managed(&(frame->mplex));
 	XClearWindow(wglobal.dpy, WFRAME_WIN(frame));
 	window_draw((WWindow*)frame, TRUE);

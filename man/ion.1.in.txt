@@ -64,11 +64,11 @@ BASIC CONCEPTS
        full screen mode. Only one of these "multiplexed" objects can be viewed
        at a time.
 
-       Two types of workspaces currently supported;  tiled  (traditional  Ion-
-       style) and floating (PWM-style). Workspaces are not visible objects but
-       rather collections of frames. Frames are the objects  with  decorations
-       such as tabs and borders and there are two types of these corresponding
-       to the different types of workspaces.
+       Two types of workspaces are  currently  supported;  tiled  (traditional
+       Ion-style) and floating (PWM-style). Workspaces are not visible objects
+       but rather collections of frames. Frames are the objects  with  decora-
+       tions  such as tabs and borders and there are two types of these corre-
+       sponding to the different types of workspaces.
 
        Frames contain (multiplex) client windows, to each of which corresponds
        a  tab  in  the  frame's  decoration.  Only one client window (or other
@@ -411,7 +411,7 @@ SEE ALSO
 
        DOCDIR/
 
-       X(7x), pwm(1)
+       X(7x), pwm(1), joe(1)
 
 
 AUTHOR

@@ -63,7 +63,7 @@ physical screens. Screens contain workspaces and client windows put in
 full screen mode. Only one of these "multiplexed" objects can be viewed
 at a time. 
 
-Two types of workspaces currently supported; tiled (traditional Ion-style) 
+Two types of workspaces are currently supported; tiled (traditional Ion-style) 
 and floating (PWM-style). Workspaces are not visible objects but rather 
 collections of frames. Frames are the objects with decorations such as 
 tabs and borders and there are two types of these corresponding to the
@@ -432,7 +432,7 @@ Ion home page.
 .PP
 .I DOCDIR/
 .PP
-\fIX(7x)\fP, \fIpwm(1)\fP
+\fIX(7x)\fP, \fIpwm(1)\fP, \fIjoe(1)\fP
 
 .SH AUTHOR
 Ion was written by Tuomo Valkonen <tuomov at iki.fi>.

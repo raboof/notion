@@ -65,6 +65,9 @@ static void deinit_floatframe(WFloatFrame *frame)
 
 /*{{{ Geometry */
 
+#define BAR_H(FRAME) \
+    ((FRAME)->frame.flags&WFRAME_TAB_HIDE ? 0 : (FRAME)->frame.bar_h)
+
 static void floatframe_offsets(WRootWin *rootwin, const WFloatFrame *frame,
 							   WRectangle *off)
 {
@@ -84,7 +87,7 @@ static void floatframe_offsets(WRootWin *rootwin, const WFloatFrame *frame,
 	off->h=bdw.top+bdw.bottom;
 
 	if(frame!=NULL){
-		bar_h=frame->frame.bar_h;
+		bar_h=BAR_H(frame);
 	}else if(rootwin!=NULL){
 		GrBorderWidths bdwt=GR_BORDER_WIDTHS_INIT;
 		GrFontExtents fntet=GR_FONT_EXTENTS_INIT;
@@ -125,9 +128,9 @@ static void floatframe_to_managed_geom(WRootWin *rootwin,
 static void floatframe_border_geom(const WFloatFrame *frame, WRectangle *geom)
 {
 	geom->x=0;
-	geom->y=frame->frame.bar_h;
+	geom->y=BAR_H(frame);
 	geom->w=REGION_GEOM(frame).w;
-	geom->h=REGION_GEOM(frame).h-frame->frame.bar_h;
+	geom->h=REGION_GEOM(frame).h-BAR_H(frame);
 }
 
 
@@ -136,7 +139,7 @@ static void floatframe_bar_geom(const WFloatFrame *frame, WRectangle *geom)
 	geom->x=0;
 	geom->y=0;
 	geom->w=frame->bar_w;
-	geom->h=frame->frame.bar_h;
+	geom->h=BAR_H(frame);
 }
 
 
@@ -275,13 +278,18 @@ static void floatframe_brushes_updated(WFloatFrame *frame)
 static void floatframe_set_shape(WFloatFrame *frame)
 {
 	WRectangle gs[2];
-	
+	int n=0;
+    
 	if(frame->frame.brush!=NULL){
-		floatframe_bar_geom(frame, gs+0);
-		floatframe_border_geom(frame, gs+1);
+        if(!(frame->frame.flags&WFRAME_TAB_HIDE)){
+            floatframe_bar_geom(frame, gs+n);
+            n++;
+        }
+		floatframe_border_geom(frame, gs+n);
+        n++;
 	
 		grbrush_set_window_shape(frame->frame.brush, WFRAME_WIN(frame),
-								 TRUE, 2, gs);
+								 TRUE, n, gs);
 	}
 }
 
