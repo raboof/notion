@@ -42,6 +42,7 @@ DEFont *de_load_font(const char *fontname)
 		}
 	}
 
+#ifdef CF_UTF8	
 	if(wglobal.utf8_mode){
 		fontset=de_create_font_set(fontname);
 		if(fontset!=NULL){
@@ -51,7 +52,9 @@ DEFont *de_load_font(const char *fontname)
 					 "clutter.", fontname);
 			}
 		}
-	}else{
+	}else
+#endif	
+	{
 		fontstruct=XLoadQueryFont(wglobal.dpy, fontname);
 	}
 
