@@ -70,6 +70,8 @@ static bool do_exec_on_rootwin(int xscr, const char *cmd)
 	if(cmd==NULL)
 		return FALSE;
 
+	XSync(wglobal.dpy, False);
+	
 	pid=fork();
 	
 	if(pid<0){
