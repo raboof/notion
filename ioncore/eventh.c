@@ -291,31 +291,17 @@ static void handle_property(const XPropertyEvent *ev)
 	if(cwin==NULL)
 		return;
 	
-	switch(ev->atom){
-	case XA_WM_NORMAL_HINTS:
+	if(ev->atom==XA_WM_NORMAL_HINTS){
 		clientwin_get_size_hints(cwin);
-		return;
-	
-	case XA_WM_NAME:
-		clientwin_get_set_name(cwin);
-		break;
-		
-	case XA_WM_ICON_NAME:
-		/* Not used */
-		break;
-
-	case XA_WM_TRANSIENT_FOR:
+	}else if(ev->atom==XA_WM_NAME){
+		if(!(cwin->flags&CWIN_USE_NET_WM_NAME))
+			clientwin_get_set_name(cwin);
+	}else if(ev->atom== XA_WM_TRANSIENT_FOR){
 		warn("Changes in WM_TRANSIENT_FOR property are unsupported.");
-		/*clientwin_unmap(cwin);
-		manage_clientwin(ev->window, 0);*/
-		break;
-		
-	default:
-		if(ev->atom==wglobal.atom_wm_protocols){
-			clientwin_get_protocols(cwin);
-			return;
-		}
-		return;
+	}else if(ev->atom==wglobal.atom_wm_protocols){
+		clientwin_get_protocols(cwin);
+	}else if(ev->atom==wglobal.atom_net_wm_name){
+		clientwin_get_set_name(cwin);
 	}
 }
 
@@ -446,11 +432,23 @@ static void handle_enter_window(XEvent *ev)
 }
 
 
+static bool pointer_in_scr(WScreen *scr)
+{
+	Window root=None, win;
+	int x, y, wx, wy;
+	uint mask;
+	
+	XQueryPointer(wglobal.dpy, scr->root.win, &root, &win,
+				  &x, &y, &wx, &wy, &mask);
+	return (root==scr->root.win);
+}
+
+
+
 static void handle_focus_in(const XFocusChangeEvent *ev)
 {
 	WRegion *reg;
 	WWindow *wwin, *tmp;
-	WScreen *scr;
 	Colormap cmap=None;
 
 	reg=FIND_WINDOW_T(ev->window, WRegion);
@@ -462,22 +460,28 @@ static void handle_focus_in(const XFocusChangeEvent *ev)
 
     if(ev->mode==NotifyGrab)
 		return;
+
+	if(ev->detail==NotifyPointer)
+		return;
 	
-	if(wglobal.focus_next!=NULL){
-		WRegion *r2=reg;
+	/*if(wglobal.focus_next!=NULL){
+		WRegion *r2=wglobal.focus_next;
 		while(r2!=NULL){
-			if(r2==wglobal.focus_next)
+			if(r2==reg)
 				break;
 			r2=FIND_PARENT1(r2, WRegion);
 		}
 		if(r2==NULL)
 			return;
-	}
+	}*/
 	
 	if(WOBJ_IS(reg, WScreen)){
-		if(ev->detail!=NotifyInferior){
+		D(fprintf(stderr, "scr-in %d %d %d\n", ((WScreen*)reg)->xscr, ev->mode, ev->detail));
+		if((ev->detail==NotifyPointerRoot || ev->detail==NotifyDetailNone) &&
+		   pointer_in_scr((WScreen*)reg)){
 			/* Restore focus */
 			set_focus(reg);
+			return;
 		}
 		/*return;*/
 	}
@@ -509,6 +513,12 @@ static void handle_focus_out(const XFocusChangeEvent *ev)
 
 	if(ev->mode==NotifyGrab)
 		return;
+
+	if(ev->detail==NotifyPointer)
+		return;
+
+	D(if(WOBJ_IS(reg, WScreen))
+	  fprintf(stderr, "scr-out %d %d %d\n", ((WScreen*)reg)->xscr, ev->mode, ev->detail));
 
 	if(WOBJ_IS(reg, WWindow)){
 		wwin=(WWindow*)reg;
