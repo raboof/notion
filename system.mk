@@ -135,6 +135,7 @@ WARN=	-W -Wimplicit -Wreturn-type -Wswitch -Wcomment \
 
 CFLAGS=-g -Os $(WARN) $(DEFINES) $(EXTRA_INCLUDES) $(INCLUDES)
 LDFLAGS=-g -Os $(EXTRA_LIBS) $(LIBS)
+EXPORT_DYNAMIC=-Xlinker --export-dynamic
 
 # The following options are mainly for development use and can be used
 # to check that the code seems to conform to some standards. Depending

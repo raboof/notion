@@ -37,7 +37,7 @@ SOURCES += preload.c
 TO_CLEAN += preload.c
 LIBS += -lSM -lICE
 else
-LINKOPTS = -export-dynamic
+LINKOPTS = $(EXPORT_DYNAMIC)
 endif
 
 TARGETS=ion3

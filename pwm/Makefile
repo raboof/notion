@@ -43,7 +43,7 @@ SOURCES += preload.c
 TO_CLEAN += preload.c
 LIBS += -lSM -lICE
 else
-LINKOPTS = -export-dynamic
+LINKOPTS = $(EXPORT_DYNAMIC)
 endif
 
 ETC = cfg_pwm.lua cfg_pwm_menus.lua cfg_pwm_bindings.lua
