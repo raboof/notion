@@ -144,6 +144,15 @@ void wedln_set_mark(WEdln *wedln)
 }
 
 /*EXTL_DOC
+ * Clear \emph{mark}.
+ */
+EXTL_EXPORT_MEMBER
+void wedln_clear_mark(WEdln *wedln)
+{
+    edln_clear_mark(&(wedln->edln));
+}
+
+/*EXTL_DOC
  * Copy text between \emph{mark} and current cursor position to clipboard
  * and then delete that sequence.
  */

@@ -77,6 +77,9 @@ static bool edln_pspc(Edln *edln, int n)
 				(edln->psize-edln->point+1)*sizeof(char));
 	}
 
+	if(edln->mark>edln->point)
+		edln->mark+=n;
+	
 	edln->psize+=n;
 
 	edln->modified=1;
@@ -116,6 +119,9 @@ static bool edln_rspc(Edln *edln, int n)
 				(edln->psize-edln->point+1-n)*sizeof(char));
 	}
 	edln->psize-=n;
+
+	if(edln->mark>edln->point)
+		edln->mark-=n;
 	
 	edln->modified=1;
 	return TRUE;
@@ -445,21 +451,24 @@ void edln_bkill_word(Edln *edln)
 /*{{{ Selection */
 
 
+static void do_set_mark(Edln *edln, int nm)
+{
+	int m=edln->mark;
+	edln->mark=nm;
+	if(m!=-1)
+		UPDATE(m < edln->point ? m : edln->point);
+}
+
+
 void edln_set_mark(Edln *edln)
 {
-	edln->mark=edln->point;
+	do_set_mark(edln, edln->point);
 }
 
 
 void edln_clear_mark(Edln *edln)
 {
-	int m=edln->mark;
-	edln->mark=-1;
-	
-	if(m<edln->point)
-		UPDATE(m);
-	else
-		UPDATE(edln->point);
+	do_set_mark(edln, -1);
 }
 
 
