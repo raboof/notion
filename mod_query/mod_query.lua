@@ -491,7 +491,7 @@ function mod_query.exec_handler(frame, cmdline)
         if string.sub(cmdline, 1, 1)==":" then
             local ix=mod_query.lookup_script_warn(frame, "ion-runinxterm")
             if not ix then return end
-            cmd=ix.." "..string.sub(cmdline, 2)
+            cmdline=ix.." "..string.sub(cmdline, 2)
         end
         ioncore.exec_on(frame, cmdline)
     end
