@@ -11,9 +11,11 @@
 #include <ioncore/clientwin.h>
 #include <ioncore/attach.h>
 #include <ioncore/wsreg.h>
+#include <ioncore/winprops.h>
 #include "placement.h"
 #include "ionframe.h"
 #include "splitframe.h"
+#include "ionws.h"
 
 
 static WRegion *find_suitable_frame(WIonWS *ws)

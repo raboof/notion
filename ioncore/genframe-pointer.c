@@ -23,10 +23,6 @@
 #include "objp.h"
 
 
-/*?*/
-#include "resize.h"
-
-
 static int p_tab_x, p_tab_y, p_tabnum=-1;
 static bool p_tabdrag_active=FALSE;
 static bool p_tabdrag_selected=FALSE;
@@ -148,23 +144,24 @@ static WFunclist tabdrag_safe_funclist=INIT_FUNCLIST;
 	(Button1Mask|Button2Mask|Button3Mask|Button4Mask|Button5Mask)
 
 
-static bool tabdrag_kbd_handler(WRegion *thing, XEvent *xev)
+static bool tabdrag_kbd_handler(WRegion *reg, XEvent *xev)
 {
 	XKeyEvent *ev=&xev->xkey;
-	WScreen *scr;
 	WBinding *binding=NULL;
 	WBindmap **bindptr;
+	WViewport *vp;
 	
 	if(ev->type==KeyRelease)
 		return FALSE;
 	
-	assert(thing && WTHING_IS(thing, WWindow));
+	assert(reg!=NULL);
 
 	binding=lookup_binding(&ioncore_screen_bindmap, ACT_KEYPRESS,
 						   ev->state&~BUTTONS_MASK, ev->keycode);
 	
-	if(binding!=NULL){
-		call_binding_restricted(binding, (WThing*)viewport_of(thing),
+	vp=viewport_of(reg);
+	if(binding!=NULL && vp!=NULL){
+		call_binding_restricted(binding, (WRegion*)vp,
 								&tabdrag_safe_funclist);
 	}
 	

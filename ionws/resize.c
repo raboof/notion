@@ -20,17 +20,16 @@
 /*{{{ keyboard handling */
 
 
-static bool resize_handler(WRegion *thing, XEvent *xev)
+static bool resize_handler(WRegion *reg, XEvent *xev)
 {
 	XKeyEvent *ev=&xev->xkey;
-	WScreen *scr;
 	WBinding *binding=NULL;
 	WBindmap **bindptr;
 	
 	if(ev->type==KeyRelease)
 		return FALSE;
 	
-	assert(thing && WTHING_IS(thing, WWindow));
+	assert(reg!=NULL);
 	
 	binding=lookup_binding(&ionframe_moveres_bindmap, ACT_KEYPRESS,
 						   ev->state, ev->keycode);
@@ -38,14 +37,8 @@ static bool resize_handler(WRegion *thing, XEvent *xev)
 	if(!binding)
 		return FALSE;
 	
-	if(binding!=NULL){
-		/* Get the screen now for waitrel grab - the thing might
-		 * have been destroyed when call_binding returns.
-		 */
-		scr=SCREEN_OF(thing);
-		call_binding_restricted(binding, (WThing*)thing,
-								&ionframe_moveres_funclist);
-	}
+	if(binding!=NULL)
+		call_binding_restricted(binding, reg, &ionframe_moveres_funclist);
 	
 	return !is_resizing();
 }

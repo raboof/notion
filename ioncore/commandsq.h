@@ -11,8 +11,8 @@
 #include "thing.h"
 #include "function.h"
 
-extern bool execute_command_sequence(WThing *thing, char *fn);
-extern bool execute_command_sequence_restricted(WThing *thing, char *fn,
+extern bool execute_command_sequence(WRegion *reg, char *fn);
+extern bool execute_command_sequence_restricted(WRegion *reg, char *fn,
 												WFunclist *funclist);
 extern void commands_at_leaf();
 

@@ -131,14 +131,14 @@ int complete_func_thing(const char *nam, char ***cp_ret, char **beg,
 }
 
 
-int complete_func_thing_parents(const char *nam, char ***cp_ret, char **beg,
-								WThing *thing)
+int complete_func_reg_mgrs(const char *nam, char ***cp_ret, char **beg,
+						   WRegion *reg)
 {
 	int n=0;
 	
-	while(thing!=NULL){
-		n=do_complete_func_thing(nam, cp_ret, beg, n, thing);
-		thing=thing->t_parent;
+	while(reg!=NULL){
+		n=do_complete_func_thing(nam, cp_ret, beg, n, (WThing*)reg);
+		reg=REGION_MANAGER(reg);
 	}
 	
 	return n;

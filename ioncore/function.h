@@ -13,6 +13,7 @@
 #include "thing.h"
 #include "symlist.h"
 #include "hooks.h"
+#include "region.h"
 
 INTRSTRUCT(WFunction)
 INTRSTRUCT(WFunclist)
@@ -46,7 +47,7 @@ extern void remove_from_funclist(WFunclist *funclist, WFunction *funtab);
 extern void clear_funclist(WFunclist *funclist);
 extern int complete_func_thing(const char *nam, char ***cp_ret, char **beg,
 							   WThing *thing);
-extern int complete_func_thing_parents(const char *nam, char ***cp_ret,
-									   char **beg, WThing *thing);
+extern int complete_func_reg_mgrs(const char *nam, char ***cp_ret,
+								  char **beg, WRegion *reg);
 
 #endif /* ION_IONCORE_FUNCTION_H */

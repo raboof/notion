@@ -366,18 +366,18 @@ WBinding *lookup_binding_area(WBindmap *bindmap,
 }
 
 	
-void call_binding(const WBinding *binding, WThing *thing)
+void call_binding(const WBinding *binding, WRegion *reg)
 {
 	if(binding->cmd!=NULL)
-		execute_command_sequence(thing, binding->cmd);
+		execute_command_sequence(reg, binding->cmd);
 }
 
 
-void call_binding_restricted(const WBinding *binding, WThing *thing,
+void call_binding_restricted(const WBinding *binding, WRegion *reg,
 							 WFunclist *funclist)
 {
 	if(binding->cmd!=NULL)
-		execute_command_sequence_restricted(thing, binding->cmd, funclist);
+		execute_command_sequence_restricted(reg, binding->cmd, funclist);
 }
 
 

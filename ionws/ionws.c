@@ -465,6 +465,7 @@ WRegion *ionws_load(WWindow *par, WRectangle geom, Tokenizer *tokz)
 	WIonWS *ws;
 	
 	ws=create_ionws(par, geom, FALSE);
+	
 	if(ws==NULL)
 		return NULL;
 

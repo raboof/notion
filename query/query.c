@@ -429,7 +429,7 @@ void handler_function(WThing *thing, char *fn, char *userdata)
 		thing=(WThing*)(((WGenFrame*)thing)->current_sub);
 	
 	old_warn_handler=set_warn_handler(function_warn_handler);
-	error=!execute_command_sequence(thing, fn);
+	error=!execute_command_sequence((WRegion*)thing, fn);
 	set_warn_handler(old_warn_handler);
 	
 	if(watch.thing!=NULL){
@@ -469,8 +469,7 @@ void query_yesno(WGenFrame *frame, char *prompt, char *fn)
 }
 
 
-static int complete_mainfunc(char *nam, char ***cp_ret, char **beg,
-							 void *fr)
+static int complete_func(char *nam, char ***cp_ret, char **beg, void *fr)
 {
 	WRegion *r;
 	
@@ -481,15 +480,15 @@ static int complete_mainfunc(char *nam, char ***cp_ret, char **beg,
 	
 	if(r==NULL)
 		r=((WRegion*)fr);
-	
-	return complete_func_thing_parents(nam, cp_ret, beg, (WThing*)r);
+		
+	return complete_func_reg_mgrs(nam, cp_ret, beg, r);
 }
 
 
 void query_function(WGenFrame *frame)
 {
 	do_query_edln(frame, handler_function,
-				  "Function name:", NULL, complete_mainfunc, frame);
+				  "Function name:", NULL, complete_func, frame);
 }
 
 

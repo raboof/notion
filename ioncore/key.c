@@ -64,7 +64,7 @@ static bool dispatch_binding(WRegion *reg, WBinding *binding, XKeyEvent *ev)
 		 * have been destroyed when call_binding returns.
 		 */
 		scr=SCREEN_OF(reg);
-		call_binding(binding, (WThing *)reg);
+		call_binding(binding, reg);
 		if(ev->state!=0 && binding->waitrel){
 			waitrelease(scr);
 			/* return FALSE here to prevent uninstalling the waitrelease handler

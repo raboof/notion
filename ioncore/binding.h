@@ -86,8 +86,8 @@ extern WBinding *lookup_binding_area(WBindmap *bindmap, int act,
 extern void grab_binding(const WBinding *binding, Window win);
 extern void ungrab_binding(const WBinding *binding, Window win);
 /*extern void grab_bindings(WBindmap *bindmap, Window win);*/
-extern void call_binding(const WBinding *binding, WThing *thing);
-extern void call_binding_restricted(const WBinding *binding, WThing *thing,
+extern void call_binding(const WBinding *binding, WRegion *reg);
+extern void call_binding_restricted(const WBinding *binding, WRegion *reg,
 									WFunclist *funclist);
 extern int unmod(int state, int keycode);
 extern bool ismod(int keycode);

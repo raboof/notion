@@ -14,8 +14,6 @@
 #include "regbind.h"
 
 
-/* TODO: Monitor p_thing */
-
 /*{{{ Variables */
 
 
@@ -27,8 +25,6 @@ static int p_clickcnt=0;
 static Time p_time=0;
 static bool p_motiontmp_dirty;
 static WBinding *p_motiontmp=NULL;
-/*static WThing *p_thing=NULL;
-static WRegion *p_reg=NULL;*/
 static WScreen *p_screen=NULL;
 static int p_area=0;
 
@@ -36,10 +32,10 @@ static WButtonHandler *p_button_handler=NULL;
 static WMotionHandler *p_motion_handler=NULL;
 static WMotionHandler *p_motion_begin_handler=NULL;
 
-static WWatch p_regwatch=WWATCH_INIT, p_thingwatch=WWATCH_INIT;
+static WWatch p_regwatch=WWATCH_INIT, p_subregwatch=WWATCH_INIT;
 
 #define p_reg ((WRegion*)p_regwatch.thing)
-#define p_thing (p_thingwatch.thing)
+#define p_subreg ((WRegion*)p_subregwatch.thing)
 
 
 /*}}}*/
@@ -129,7 +125,7 @@ static void call_button(WBinding *binding, XButtonEvent *ev)
 	if(binding==NULL)
 		return;
 
-	call_binding(binding, p_thing);
+	call_binding(binding, p_subreg);
 	
 	if(p_button_handler!=NULL && p_reg!=NULL)
 		p_button_handler(p_reg, ev);
@@ -154,7 +150,7 @@ static void call_motion_begin(WBinding *binding, XMotionEvent *ev,
 	if(binding==NULL)
 		return;
 
-	call_binding(binding, p_thing);
+	call_binding(binding, p_subreg);
 	
 	if(p_motion_begin_handler!=NULL && p_reg!=NULL)
 		p_motion_begin_handler(p_reg, ev, dx, dy);
@@ -179,12 +175,11 @@ bool handle_button_press(XButtonEvent *ev)
 {
 	WBinding *pressbind=NULL;
 	WRegion *reg=NULL;
-	WThing *thing=NULL;
+	WThing *subreg=NULL;
 	uint button, state;
 	int area=0;
 	
 	p_motiontmp=NULL;
-	p_thing=NULL;
 	
 	state=ev->state;
 	button=ev->button;
@@ -196,9 +191,8 @@ bool handle_button_press(XButtonEvent *ev)
 
 	do_grab_kb_ptr(ev->root, reg, FocusChangeMask);
 	
-	thing=(WThing*)reg;
-	
-	area=window_press((WWindow*)reg, ev, &thing);
+	subreg=(WThing*)reg;
+	area=window_press((WWindow*)reg, ev, &subreg);
 	
 	if(p_clickcnt==1 && time_in_threshold(ev->time) && p_button==button &&
 	   p_state==state && reg==p_reg){
@@ -212,7 +206,7 @@ bool handle_button_press(XButtonEvent *ev)
 	}
 	
 	setup_watch(&p_regwatch, (WThing*)reg, NULL);
-	setup_watch(&p_thingwatch, thing, NULL);
+	setup_watch(&p_subregwatch, (WThing*)subreg, NULL);
 	
 end:
 	/*p_reg=reg;*/
@@ -258,8 +252,8 @@ bool handle_button_release(XButtonEvent *ev)
 		window_release((WWindow*)p_reg);
 	}
 	
-	/*reset_watch(&p_regwatch);*/
-	reset_watch(&p_thingwatch);
+	reset_watch(&p_regwatch);
+	reset_watch(&p_subregwatch);
 
 	return TRUE;
 }

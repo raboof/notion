@@ -89,7 +89,7 @@ static void res_draw_moveres(WScreen *scr)
 		w=(tmpgeom.w-tmporiggeom.w)+tmprelw;
 		h=(tmpgeom.h-tmporiggeom.h)+tmprelh;
 
-		if(tmphints.flags&PResizeInc &&
+		if((tmphints.flags&PResizeInc) &&
 		   (tmphints.width_inc>1 || tmphints.height_inc>1)){
 			if(tmphints.flags&PBaseSize){
 				w-=tmphints.base_width;
@@ -366,7 +366,6 @@ void region_request_geom(WRegion *reg,
 
 
 /*}}}*/
-
 
 
 /*{{{ set_width etc. */

@@ -12,6 +12,7 @@
 #include "common.h"
 #include "global.h"
 #include "objp.h"
+#include "region.h"
 
 static WWatch *sq_watch=NULL;
 static WFunclist *tmp_funclist=NULL;
@@ -20,10 +21,14 @@ static WRegion *commands_at_next=NULL;
 /* We don't want to refer to destroyed things. */
 static void sq_watch_handler(WWatch *watch, WThing *t)
 {
-	WThing *t2=t->t_parent;
+	WRegion *reg;
 	
-	if(t2!=NULL)
-		setup_watch(watch, t2, sq_watch_handler);
+	assert(WTHING_IS(t, WRegion));
+	
+	reg=REGION_MANAGER((WRegion*)t);
+	
+	if(reg!=NULL)
+		setup_watch(watch, (WThing*)reg, sq_watch_handler);
 }
 
 
@@ -47,20 +52,20 @@ void commands_at_leaf()
 
 static bool opt_default(Tokenizer *tokz, int n, Token *toks)
 {
-	WThing *thing=sq_watch->thing;
+	WRegion *reg=(WRegion*)sq_watch->thing;
 	WFunction *func;
 	char *name=TOK_IDENT_VAL(&(toks[0]));
 	
-	while(thing!=NULL){
+	while(reg!=NULL){
 		if(tmp_funclist!=NULL)
 			func=lookup_func_ex(name, tmp_funclist);
 		else
-			func=lookup_func_thing(thing, name);
+			func=lookup_func_thing((WThing*)reg, name);
 		
 		if(func==NULL){
 			if(tmp_funclist!=NULL)
 				break;
-			thing=thing->t_parent;
+			reg=REGION_MANAGER(reg);
 			continue;
 		}
 	
@@ -70,7 +75,7 @@ static bool opt_default(Tokenizer *tokz, int n, Token *toks)
 			return FALSE;
 		}
 	
-		func->callhnd(thing, func, n-1, &(toks[1]));
+		func->callhnd((WThing*)reg, func, n-1, &(toks[1]));
 	
 		if(commands_at_next!=NULL){
 			setup_watch(sq_watch, (WThing*)commands_at_next,
@@ -96,7 +101,7 @@ static ConfOpt command_opts[]={
 };
 
 
-bool execute_command_sequence(WThing *thing, char *fn)
+bool execute_command_sequence(WRegion *reg, char *fn)
 {
 	static int command_sq=0;
 	bool retval;
@@ -111,7 +116,7 @@ bool execute_command_sequence(WThing *thing, char *fn)
 
 	command_sq++;
 
-	setup_watch(&watch, thing, sq_watch_handler);
+	setup_watch(&watch, (WThing*)reg, sq_watch_handler);
 	sq_watch=&watch;
 	
 	tokz=tokz_prepare_buffer(fn, -1);
@@ -128,7 +133,7 @@ bool execute_command_sequence(WThing *thing, char *fn)
 }
 
 
-bool execute_command_sequence_restricted(WThing *thing, char *fn,
+bool execute_command_sequence_restricted(WRegion *reg, char *fn,
 										 WFunclist *funclist)
 {
 	bool ret;
@@ -136,7 +141,7 @@ bool execute_command_sequence_restricted(WThing *thing, char *fn,
 	WFunclist *old_tmp=tmp_funclist;
 	tmp_funclist=funclist;
 	
-	ret=execute_command_sequence(thing, fn);
+	ret=execute_command_sequence(reg, fn);
 	
 	tmp_funclist=old_tmp;
 	
