@@ -1,0 +1,111 @@
+.TH PWM 1
+.SH NAME
+PWM - ein X11 Fenster Manager
+.SH ÜBERSICHT
+.B pwm3
+.I "[optionen]"
+.SH "BESCHREIBUNG"
+
+Der originale PWM war der erste Fenster Manager, welcher einen tabellenartigen 
+Aufbau seiner Objekte unterstützte. Diese Version des PWM basiert auf dem
+Quellcode von Ion und unterscheidet sich zu diesem nur durch Unterschiede in den
+Konfigurationsdateien, den Pfaden und einigen wenigen zusätzliche Optionen. 
+
+.SH "OPTIONEN"
+.TP
+.B \-display host:display.screen
+X Anzeige zum darstellen
+.TP
+.B \-conffile Konfigurationsdatei
+Konfigurationsdatei welche anstelle der Vorgegebenen benutzt werden soll
+.TP
+.B \-searchdir dir
+Verzeichnis worin die Konfigurationsdateien und andere Scripte gesucht werden
+.TP
+.B \-oneroot
+Auf X Servern mit mehreren (traditionell non-Xinerama) Screens; handhabt nur den 
+voreingestellten Screen (Wurzelfenster); nicht alle, welche durch die '-display'
+Option oder in der DISPLAY Umgebungsvariable bereitgestellt werden
+.TP
+.B \-sessionname sitzungs_name
+Setzt einen Sitzungsnamen. Diese Option beeinflusst wo der Arbeitsbereich und
+andere Sicherungsdateien abgelegt werden (~/.pwm3/sitzungs_name wenn die Option
+gesetzt wurde).
+.TP
+.B \-xinerama 0|1
+Wenn Ion mit Xinerama Unterstützung kompiliert wurde, kann diese Option benutzt
+werden um sie 'an = 1' oder 'aus = 0' zu stellen. Die Voreinstelllung ist
+Xineramas Screeninformation 'NICHT' zu benutzen.
+.TP
+.B \-help
+Zeigt die Hilfe für die Kommandozeilenoptionen
+.TP
+.B \-version
+Zeigt die Version
+.TP
+.B \-about
+Zeigt Informationen über den Autor, die Version und das Copyright
+
+.SH BINDUNGEN
+Hier sind die voreingestellten Tasten- und Mauszeigerbindungen beschrieben.
+(\fBMod1\fP) hängt vom jeweiligen verwendeten System ab. Auf PC's mit XFree86
+ist es höchstwahrscheinlich an die linke 'ALT-Taste' gebungen (\fBALT_L\fP).
+Auf SUN Systemen ist es sicherlich an die 'Diamant' Tasten gebunden
+(\fBMETA_L\fP, \fBMETA_R\fP).  Benutze \fIxmodmap(1x)\fP um die Belegung
+herauszufinden. 
+
+Die Zeichenkette in den eckigen Klammern nach einer Bindungsgruppe (wird unten
+gezeigt) deutet auf die Konfigurationsdatei des Modules in welchem die Bindungen
+definiert sind. 
+
+.SS Global verfügbare Bindungen
+
+BINDINGS:WScreen
+
+.".SS Bindungsoperationen auf Frames und Screens und ihren Kindern
+
+BINDINGS:WMPlex
+
+.SS Bindungsoperationen auf Frames und ihren Kindern 
+
+BINDINGS:WFrame
+
+.SS Bindungen zum Bewegungs-/Veränderungsmodus 
+
+BINDINGS:WMoveresMode
+
+.SS Bindungen für den fliessenden Arbeitsbereich und Frames [mod_floatws]
+
+BINDINGS:WFloatWS
+
+BINDINGS:WFloatFrame
+
+.SS Bindungen für die Menüs [mod_menu]
+
+BINDINGS:WMenu
+
+
+.SH DATEIEN und VERZEICHNISSE
+.TP
+.B ETCDIR/cfg_pwm.lua
+Voreingestellte Hauptkonfigurationsdateien
+.TP
+.B ETCDIR/cfg_*.lua
+Andere Konfigurationsdateien
+.TP
+.B ETCDIR/look_*.lua
+Farbschemata Konfigurationsdateien
+.TP
+.B ~/.pwm3/
+Benutzerkonfigurationsdateien
+.TP
+.B ~/.pwm3/cfg_pwm.lua
+Voreingestellte Benutzer Hauptkonfigurationsdateien (überschreiben die
+systemweiten Konfigurationen)
+
+.SH SIEHE AUCH
+
+Weitere Informationen siehe \fIion3(1)\fP.
+
+.SH AUTOR
+PWM und Ion wurde von Tuomo Valkonen <tuomov at iki.fi> geschrieben
