@@ -83,6 +83,8 @@ DECLSTRUCT(WGlobal){
 	bool warp_enabled;
 	
 	bool ws_save_enabled;
+	
+	bool utf8_mode;
 };
 
 

@@ -38,10 +38,14 @@ static void insstr(WWindow *wwin, XKeyEvent *ev)
 		if(XFilterEvent((XEvent*)ev, ev->window))
 		   return;
 #ifdef CF_UTF8
-		n=Xutf8LookupString(wwin->xic, ev, buf, 16, &ksym, &stat);
-#else
-		n=XmbLookupString(wwin->xic, ev, buf, 16, &ksym, &stat);
+		if(wglobal.utf8_mode){
+			n=Xutf8LookupString(wwin->xic, ev, buf, 16, &ksym, &stat);
+		}else
 #endif
+		{
+			n=XmbLookupString(wwin->xic, ev, buf, 16, &ksym, &stat);
+		}
+		
 		if(stat!=XLookupChars && stat!=XLookupBoth)
 			return;
 	}else{

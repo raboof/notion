@@ -12,25 +12,15 @@
 #ifndef ION_IONCORE_STRINGS_H
 #define ION_IONCORE_STRINGS_H
 
+#include <wchar.h>
 #include "common.h"
 #include "gr.h"
-
-#ifdef CF_UTF8
-#ifdef CF_LIBUTF8
-#include <libutf8.h>
-#else
-#include <wchar.h>
-#endif
-#endif
 
 extern char *make_label(GrBrush *brush, const char *str, uint maxw);
 extern bool add_shortenrule(const char *rx, const char *rule);
 
 extern int str_nextoff(const char *p);
 extern int str_prevoff(const char *p, int pos);
-
-#ifdef CF_UTF8
 extern wchar_t str_wchar_at(char *p, int max);
-#endif
 
 #endif /* ION_IONCORE_FONT_H */

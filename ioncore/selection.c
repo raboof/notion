@@ -116,12 +116,13 @@ void set_selection(const char *p, int n)
 }
 
 
-#ifdef CF_UTF8
+#if 0 /*def CF_UTF8*/
 static Atom utf8_atom=XA_STRING;
 #endif
 
 void request_selection(Window win)
 {
+#if 0	
 	Atom a;
 #ifndef CF_UTF8
 	a=XA_STRING;
@@ -137,6 +138,13 @@ void request_selection(Window win)
 			utf8_atom=prop.encoding;
 	}
 	a=utf8_atom;
+#endif
+#endif
+	
+#ifdef X_HAVE_UTF8_STRING
+	Atom a=XInternAtom(wglobal.dpy, "UTF8_STRING", True);
+#else
+	Atom a=XInternAtom(wglobal.dpy, "COMPOUND_TEXT", True);
 #endif
 	XConvertSelection(wglobal.dpy, XA_PRIMARY, a,
 					  wglobal.atom_selection, win, CurrentTime);

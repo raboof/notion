@@ -14,6 +14,7 @@
 
 #include "common.h"
 
-XIC create_xic(Window win);
+extern XIC create_xic(Window win);
+extern void init_xim(void);
 
 #endif /* ION_IONCORE_XIC_H */

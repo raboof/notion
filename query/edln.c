@@ -11,7 +11,8 @@
 
 #include <string.h>
 #include <ctype.h>
-#include <string.h>
+#include <wchar.h>
+#include <wctype.h>
 #include <ioncore/common.h>
 #include <ioncore/selection.h>
 #include <ioncore/strings.h>
@@ -22,31 +23,12 @@
 #define EDLN_ALLOCUNIT 16
 #define EDLN_HISTORY_SIZE 256
 
-
 #define UPDATE(X) edln->ui_update(edln->uiptr, X, FALSE)
 #define UPDATE_MOVED(X) edln->ui_update(edln->uiptr, X, TRUE)
-
-
-#ifdef CF_UTF8
-
-#ifdef CF_LIBUTF8
-#include <libutf8.h>
-#else
-#include <wchar.h>
-#include <wctype.h>
-#endif
 
 #define CHAR wchar_t
 #define ISALNUM iswalnum
 #define CHAR_AT(P, N) str_wchar_at(P, N)
-
-#else /* !CF_UTF8 */
-
-#define CHAR char
-#define ISALNUM isalnum
-#define CHAR_AT(P, N) ((N)==0 ? '\0' : *(P))
-
-#endif /* !CF_UTF8 */
 
 
 /*{{{ Alloc */
@@ -359,7 +341,6 @@ void edln_set_point(Edln *edln, int point)
 
 void edln_delete(Edln *edln)
 {
-#ifdef CF_UTF8
 	int left=edln->psize-edln->point;
 	size_t l;
 	
@@ -370,9 +351,7 @@ void edln_delete(Edln *edln)
 	
 	if(l>0)
 		edln_rspc(edln, l);
-#else
-	edln_rspc(edln, 1);
-#endif
+	
 	UPDATE(edln->point);
 }
 

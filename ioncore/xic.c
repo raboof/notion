@@ -14,15 +14,15 @@
 #include "common.h"
 #include "global.h"
 
-/*#define X_LOCALE*/
-#include <X11/Xlocale.h>
+/*#define X_LOCALE
+#include <X11/Xlocale.h>*/
 
 
 static XIM input_method=NULL;
 static XIMStyle input_style=(XIMPreeditNothing|XIMStatusNothing);
 
 
-static void init_xlocale(void)
+void init_xim(void)
 {
 	char *p;
 	int i;
@@ -68,13 +68,14 @@ static void init_xlocale(void)
 
 XIC create_xic(Window win)
 {
-	static bool tried=FALSE;
+	/*static bool tried=FALSE;*/
 	XIC xic;
 	
+	/*
 	if(input_method==NULL && !tried){
 		init_xlocale();
 		tried=TRUE;
-	}
+	}*/
 	
 	if(input_method==NULL)
 		return NULL;

@@ -13,20 +13,25 @@
 #include <libtu/misc.h>
 #include <string.h>
 #include <regex.h>
-#include "common.h"
-#include "strings.h"
 
 #ifdef CF_UTF8
 #include <errno.h>
 #include <iconv.h>
+#ifdef CF_LIBUTF8
+#include <libutf8.h>
 #endif
+#endif
+
+#include "common.h"
+#include "global.h"
+#include "strings.h"
 
 
 /*{{{ String scanning */
 
 
 #ifdef CF_UTF8
-wchar_t str_wchar_at(char *p, int max)
+static wchar_t str_wchar_at_utf8(char *p, int max)
 {
 	static iconv_t ic=(iconv_t)(-1);
 	static bool iconv_tried=FALSE;
@@ -62,38 +67,49 @@ wchar_t str_wchar_at(char *p, int max)
 }
 #endif
 
-	
+
+wchar_t str_wchar_at(char *p, int max)
+{
+#ifdef CF_UTF8
+	if(wglobal.utf8_mode)
+		return str_wchar_at_utf8(p, max);
+#endif
+	return *p;
+}
+
 int str_prevoff(const char *p, int pos)
 {
 #ifdef CF_UTF8
-	int opos=pos;
-	
-	while(pos>0){
-		pos--;
-		if((p[pos]&0xC0)!=0x80)
-			break;
+	if(wglobal.utf8_mode){
+		int opos=pos;
+		
+		while(pos>0){
+			pos--;
+			if((p[pos]&0xC0)!=0x80)
+				break;
+		}
+		return opos-pos;
 	}
-	return opos-pos;
-#else
-	return (pos>0 ? 1 : 0);
 #endif
+	return (pos>0 ? 1 : 0);
 }
 
 
 int str_nextoff(const char *p)
 {
 #ifdef CF_UTF8
-	int pos=0;
-	
-	while(p[pos]){
-		pos++;
-		if((p[pos]&0xC0)!=0x80)
-			break;
+	if(wglobal.utf8_mode){
+		int pos=0;
+		
+		while(p[pos]){
+			pos++;
+			if((p[pos]&0xC0)!=0x80)
+				break;
+		}
+		return pos;
 	}
-	return pos;
-#else
-	return (*p=='\0' ? 0 : 1);
 #endif
+	return (*p=='\0' ? 0 : 1);
 }
 
 

@@ -40,6 +40,7 @@
 #include "extl.h"
 #include "errorlog.h"
 #include "gr.h"
+#include "xic.h"
 #include "../version.h"
 
 
@@ -268,12 +269,13 @@ static void init_global()
 	wglobal.opaque_resize=0;
 	wglobal.warp_enabled=TRUE;
 	wglobal.ws_save_enabled=TRUE;
+	
+	wglobal.utf8_mode=FALSE;
 }
 
 
 static bool set_up_locales(Display *dpy)
 {
-	bool tryno=0;
 	char *p;
 	
 	p=setlocale(LC_ALL, "");
@@ -283,12 +285,15 @@ static bool set_up_locales(Display *dpy)
 		return FALSE;
 	}
 
-	if(strcmp(p, "C")==0 || strcmp(p, "POSIX")==0){
-		
-	}
-	
-	if(XSupportsLocale())
+	if(strcmp(p, "C")==0 || strcmp(p, "POSIX")==0)
 		return TRUE;
+	
+	if(XSupportsLocale()){
+#ifdef CF_UTF8
+		wglobal.utf8_mode=TRUE;
+#endif
+		return TRUE;
+	}
 	
 	warn("XSupportsLocale() failed. Resetting back to C.");
 	
@@ -385,6 +390,8 @@ static bool init_x(const char *display, int stflags)
 	set_session(XDisplayName(display));
 	
 	wglobal.dpy=dpy;
+	
+	init_xim();
 	
 	wglobal.conn=ConnectionNumber(dpy);
 	wglobal.win_context=XUniqueContext();
@@ -532,11 +539,7 @@ void exported_warn(const char *str)
 EXTL_EXPORT
 bool ioncore_is_utf8()
 {
-#ifdef CF_UTF8
-	return TRUE;
-#else
-	return FALSE;
-#endif
+	return wglobal.utf8_mode;
 }
 
 
