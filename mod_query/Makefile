@@ -29,4 +29,6 @@ include $(TOPDIR)/rules.mk
 
 _install: module_install
 	$(INSTALLDIR) $(SHAREDIR)
-	$(INSTALL) -m $(DATA_MODE) querylib.lua querylib.lc $(SHAREDIR)
+	$(INSTALL) -m $(DATA_MODE) querylib.lua $(SHAREDIR)
+	$(INSTALLDIR) $(LCDIR)
+	$(INSTALL) -m $(DATA_MODE) querylib.lc $(LCDIR)

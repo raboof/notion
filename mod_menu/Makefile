@@ -28,5 +28,7 @@ include $(TOPDIR)/rules.mk
 
 _install: module_install
 	$(INSTALLDIR) $(SHAREDIR)
-	$(INSTALL) -m $(DATA_MODE) menulib.lua menulib.lc $(SHAREDIR)
+	$(INSTALL) -m $(DATA_MODE) menulib.lua $(SHAREDIR)
+	$(INSTALLDIR) $(LCDIR)
+	$(INSTALL) -m $(DATA_MODE) menulib.lc $(LCDIR)
 
