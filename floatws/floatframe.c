@@ -157,7 +157,6 @@ void floatframe_geom_from_initial_geom(WFloatFrame *frame,
 
     geom->w=maxof(geom->w, 0);
     geom->h=maxof(geom->h, 0);
-
     geom->w+=off.w;
     geom->h+=off.h;
 #ifndef CF_NO_WSREL_INIT_GEOM
@@ -193,10 +192,10 @@ static void floatframe_request_clientwin_geom(WFloatFrame *frame,
     region_resize_hints((WRegion*)frame, &hints, NULL, NULL);
     xsizehints_correct(&hints, &(geom.w), &(geom.h), TRUE);
     
-    geom.w+=off.w;
-    geom.h+=off.h;
     geom.w=maxof(geom.w, 0);
     geom.h=maxof(geom.h, 0);
+    geom.w+=off.w;
+    geom.h+=off.h;
     
     /* If WEAK_? is set, then geom.(x|y) is root-relative as it was not 
      * requested by the client and clientwin_handle_configure_request has

@@ -694,14 +694,21 @@ static void reparent_root(WClientWin *cwin)
         x=REGION_GEOM(cwin).x;
         y=REGION_GEOM(cwin).y;
     }else{
-        XTranslateCoordinates(ioncore_g.dpy, cwin->win, attr.root, 0, 0,
+        int dr=REGION_GEOM(par).w-REGION_GEOM(cwin).w-REGION_GEOM(cwin).x;
+        int db=REGION_GEOM(par).h-REGION_GEOM(cwin).h-REGION_GEOM(cwin).y;
+        dr=maxof(dr, 0);
+        db=maxof(db, 0);
+        
+        XTranslateCoordinates(ioncore_g.dpy, par->win, attr.root, 0, 0, 
                               &x, &y, &dummy);
-        x-=REGION_GEOM(cwin).x;
-        y-=REGION_GEOM(cwin).y;
+
+        x-=xgravity_deltax(cwin->size_hints.win_gravity, 
+                           maxof(0, REGION_GEOM(cwin).x), dr);
+        y-=xgravity_deltay(cwin->size_hints.win_gravity, 
+                           maxof(0, REGION_GEOM(cwin).y), db);
     }
     
     XReparentWindow(ioncore_g.dpy, cwin->win, attr.root, x, y);
-    
 }
 
 

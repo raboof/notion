@@ -648,6 +648,10 @@ void wedln_finish(WEdln *wedln)
 
 /*EXTL_DOC
  * Request selection from application holding such.
+ * 
+ * Note that this function is asynchronous; the selection will not
+ * actually be inserted before Ion receives it. This will be no
+ * earlier than Ion return to its main loop.
  */
 EXTL_EXPORT_MEMBER
 void wedln_paste(WEdln *wedln)

@@ -9,13 +9,13 @@
  * (at your option) any later version.
  */
 
+#include <libtu/objp.h>
 #include "common.h"
 #include "global.h"
 #include "screen.h"
 #include "region.h"
 #include "attach.h"
 #include "manage.h"
-#include <libtu/objp.h>
 #include "focus.h"
 #include "property.h"
 #include "names.h"
@@ -285,22 +285,29 @@ WScreen *ioncore_find_screen_id(int id)
 
 
 /*EXTL_DOC
- * Switch focus to the screen with id \var{id}.
+ * Switch focus to the screen with id \var{id} and return it.
+ * 
+ * Note that this function is asynchronous; the screen will not
+ * actually have received the focus when this function returns.
  */
 EXTL_EXPORT
-void ioncore_goto_nth_screen(int id)
+WScreen *ioncore_goto_nth_screen(int id)
 {
     WScreen *scr=ioncore_find_screen_id(id);
     if(scr!=NULL)
         region_goto((WRegion*)scr);
+    return scr;
 }
 
 
 /*EXTL_DOC
- * Switch focus to the next screen.
+ * Switch focus to the next screen and return it.
+ * 
+ * Note that this function is asynchronous; the screen will not
+ * actually have received the focus when this function returns.
  */
 EXTL_EXPORT
-void ioncore_goto_next_screen()
+WScreen *ioncore_goto_next_screen()
 {
     WScreen *scr=ioncore_g.active_screen;
     
@@ -310,14 +317,18 @@ void ioncore_goto_next_screen()
         scr=ioncore_g.screens;
     if(scr!=NULL)
         region_goto((WRegion*)scr);
+    return scr;
 }
 
 
 /*EXTL_DOC
- * Switch focus to the previous screen.
+ * Switch focus to the previous screen and return it.
+ * 
+ * Note that this function is asynchronous; the screen will not
+ * actually have received the focus when this function returns.
  */
 EXTL_EXPORT
-void ioncore_goto_prev_screen()
+WScreen *ioncore_goto_prev_screen()
 {
     WScreen *scr=ioncore_g.active_screen;
 
@@ -327,6 +338,7 @@ void ioncore_goto_prev_screen()
         scr=ioncore_g.screens;
     if(scr!=NULL)
         region_goto((WRegion*)scr);
+    return scr;
 }
 
 

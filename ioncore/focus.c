@@ -80,7 +80,11 @@ void ioncore_unprotect_previous()
 
 
 /*EXTL_DOC
- * Go to a region that had its activity state previously saved.
+ * Go to and return the region that had its activity state previously 
+ * saved.
+ * 
+ * Note that this function is asynchronous; the region will not
+ * actually have received the focus when this function returns.
  */
 EXTL_EXPORT
 WRegion *ioncore_goto_previous()

@@ -1137,6 +1137,9 @@ static WRegion *do_goto_dir(WIonWS *ws, int dir, int primn)
  * direction \var{dirstr} (up/down/left/right), wrapping around to a most 
  * recently active farthest region in the opposite direction if \var{reg} 
  * is already the further region in the given direction.
+ * 
+ * Note that this function is asynchronous; the region will not
+ * actually have received the focus when this function returns.
  */
 EXTL_EXPORT_MEMBER
 WRegion *ionws_goto_dir(WIonWS *ws, const char *dirstr)

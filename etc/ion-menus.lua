@@ -17,7 +17,7 @@ defmenu("mainmenu", {
 -- Application menu
 defmenu("appmenu", {
     menuentry("XTerm",          "ioncore.exec('xterm')"),
-    menuentry("Mozilla Firebird", "ioncore.exec('MozillaFirebird')"),
+    menuentry("Mozilla Firefox","ioncore.exec('firefox')"),
     menuentry("Run...",         "querylib.query_exec(_)"),
 })
 

@@ -635,12 +635,11 @@ function querylib.query_lua(mplex)
         wedln:set_completions(querylib.do_complete_lua(env, code))
     end
     
-    local function handle(code)
+    local function handler(mplex, code)
         return querylib.do_handle_lua(mplex, env, code)
     end
     
-    querylib.query_check(mplex, "Lua code to run: ", nil, handle, 
-                         complete)
+    querylib.do_query(mplex, "Lua code to run: ", nil, handler, complete)
 end
 
 -- }}}

@@ -15,11 +15,13 @@ INCLUDES += $(X11_INCLUDES)
 #DIST: INCLUDES += -I.. -I../libtu/include 
 INCLUDES += -I..
 
-#DIST: LIBS += -L../libtu -ltu -lm
-LIBS += -ltu -lm
+LIBS += -lm
 LIBS += $(X11_LIBS) $(XINERAMA_LIBS)
 LIBS += $(LUA_LIBS)
 LIBS += $(LTDL_LIBS)
+#DIST: EXT_OBJS += ../libtu/libtu.a
+LIBS += -ltu
+EXT_OBJS += ../ioncore/ioncore.a ../luaextl/luaextl.a
 
 DEFINES += -DETCDIR=\"$(ETCDIR)\" -DSHAREDIR=\"$(SHAREDIR)\" \
 	   -DEXTRABINDIR=\"$(EXTRABINDIR)\" -DMODULEDIR=\"$(MODULEDIR)\"
@@ -38,8 +40,6 @@ LINKOPTS = -R$(MODULEDIR)
 else
 LINKOPTS = -export-dynamic -R$(MODULEDIR)
 endif
-
-EXT_OBJS += ../ioncore/ioncore.a ../luaextl/luaextl.a
 
 SOURCES = pwm.c
 ETC = pwm.lua pwm-menus.lua pwm-bindings.lua

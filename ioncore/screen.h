@@ -52,8 +52,8 @@ extern bool screen_init_layout(WScreen *scr, ExtlTab tab);
  * For all other viewports <id> is undefined.
  */
 extern WScreen *ioncore_find_screen_id(int id);
-extern void ioncore_goto_screen_id(int id);
-extern void ioncore_goto_next_screen();
-extern void ioncore_goto_prev_screen();
+extern WScreen *ioncore_goto_screen_id(int id);
+extern WScreen *ioncore_goto_next_screen();
+extern WScreen *ioncore_goto_prev_screen();
 
 #endif /* ION_IONCORE_SCREEN_H */

@@ -353,12 +353,12 @@ static WMPlex *find_existing(WFloatWS *ws)
 }
 
 
-bool floatws_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
-                              const WManageParams *param, int redir)
+static bool floatws_do_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
+                                        const WManageParams *param, 
+                                        int redir, bool respectpos)
 {
     WFloatFrame *frame=NULL;
     WWindow *par;
-    bool respectpos=TRUE;
     WRectangle fgeom=param->geom;
     int swf;
     
@@ -433,6 +433,14 @@ bool floatws_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
 }
 
 
+bool floatws_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
+                              const WManageParams *param,
+                              int redir)
+{
+    return floatws_do_manage_clientwin(ws, cwin, param, redir, TRUE);
+}
+
+
 static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
                                 WRegion *dropped)
 {
@@ -471,6 +479,57 @@ static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
     floatws_add_managed(ws, (WRegion*)frame);
 
     return TRUE;
+}
+
+
+/*EXTL_DOC
+ * Attach client window \var{cwin} on \var{ws}.
+ * At least the following fields in \var{p} are supported:
+ * 
+ * \begin{tabularx}{\linewidth}{lX}
+ *  \hline
+ *  Field & Description \\
+ *  \hline
+ *  \var{switchto} & Should the region be switched to (boolean)? Optional. \\
+ *  \var{geom} & Geometry; \var{x} and \var{y}, if set, indicates top-left of 
+ *   the frame to be created while \var{width} and \var{height}, if set, indicate
+ *   the size of the client window within that frame. Optional.
+ * \end{tabularx}
+ */
+EXTL_EXPORT_MEMBER
+bool floatws_attach(WFloatWS *ws, WClientWin *cwin, ExtlTab p)
+{
+    int posok=0;
+    WManageParams param=MANAGEPARAMS_INIT;
+    ExtlTab g;
+    
+    param.gravity=ForgetGravity;
+    param.geom.w=REGION_GEOM(cwin).w;
+    param.geom.h=REGION_GEOM(cwin).h;
+    
+    extl_table_gets_b(p, "switchto", &(param.switchto));
+    
+    if(extl_table_gets_t(p, "geom", &g)){
+        if(extl_table_gets_i(g, "x", &(param.geom.x)))
+            posok++;
+        if(extl_table_gets_i(g, "y", &(param.geom.y)))
+            posok++;
+    
+        extl_table_gets_i(p, "w", &(param.geom.w));
+        extl_table_gets_i(p, "h", &(param.geom.h));
+        
+        extl_unref_table(g);
+    }
+    
+    param.geom.w=maxof(0, param.geom.w);
+    param.geom.h=maxof(0, param.geom.h);
+
+    /*if(posok==2)
+        param.userpos=TRUE;*/
+    
+    return floatws_do_manage_clientwin(ws, cwin, &param, 
+                                       MANAGE_REDIR_STRICT_NO,
+                                       posok==2);
 }
 
 
