@@ -144,19 +144,23 @@ void autows_managed_remove(WAutoWS *ws, WRegion *reg)
     
     if(!ds){
         if(other==NULL){
+            if(ws->ionws.split_tree!=NULL){
+                ioncore_defer_destroy((Obj*)(ws->ionws.split_tree));
+                ws->ionws.split_tree=NULL;
+            }
+
+            autows_create_initial_unused(ws);
+            
+            if(ws->ionws.split_tree==NULL){
+                warn("Unable to re-initialise workspace. Destroying.");
+                ioncore_defer_destroy((Obj*)ws);
+            }
+
             if(act && mcf){
                 /* We don't want to give the stdisp focus, even if one exists. 
                  * Or do we?
                  */
                 genws_fallback_focus((WGenWS*)ws, FALSE);
-            }
-            
-            if(ws->ionws.split_tree==NULL){
-                autows_create_initial_unused(ws);
-                if(ws->ionws.split_tree==NULL){
-                    warn("Unable to re-initialise workspace. Destroying.");
-                    ioncore_defer_destroy((Obj*)ws);
-                }
             }
         }else if(act && mcf){
             region_set_focus(other->u.reg);

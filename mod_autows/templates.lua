@@ -21,12 +21,25 @@ _G.templates=T
 -- Settings {{{
 
 local S={}
-S.valid_classifications={["W"]=true, ["TE"]=true, ["TB"]=true,}
--- Xterm, rxvt, aterm, etc. all have class XTerm
+-- Classes:
+--  (T)erminal
+--  (V)iewer
+--  (M)isc
+S.valid_classifications={["V"]=true, ["T"]=true, ["M"]=true,}
+
+-- Xterm, rxvt, aterm, etc. all have "XTerm" as class part of WM_CLASS
 S.terminal_emulators={["XTerm"]=true,} 
 
-S.b_ratio=(1+math.sqrt(5))/2
+-- Pixel scale factor from 1280x1024/75dpi
+S.scalef=1.0
+
+--S.b_ratio=(1+math.sqrt(5))/2
+--S.s_ratio=1
+S.b_ratio=3
 S.s_ratio=1
+
+S.b_ratio2=7
+S.s_ratio2=1
 
 S.templates={}
 
@@ -34,17 +47,52 @@ S.templates["default"]={
     split_dir="horizontal",
     split_tls=S.b_ratio,
     split_brs=S.s_ratio,
-    marker=":;TE:up",
+    marker=":;T:up",
     tl={
         split_dir="vertical",
-        split_tls=S.b_ratio,
-        split_brs=S.s_ratio/2,
-        marker="W:single;TB:right",
+        split_tls=S.b_ratio2,
+        split_brs=S.s_ratio2,
+        marker="V:single;M:right",
         tl={},
         br={},
     },
     br={},
 }
+
+
+S.templates["alternative1"]={
+    split_dir="horizontal",
+    split_tls=S.s_ratio2,
+    split_brs=S.b_ratio2,
+    marker="M:down;:",
+    tl={},
+    br={
+        split_dir="vertical",
+        split_tls=S.b_ratio,
+        split_brs=S.s_ratio,
+        marker="V:single;T:right",
+        tl={},
+        br={},
+    },
+}
+
+
+S.templates["alternative2"]={
+    split_dir="vertical",
+    split_tls=S.b_ratio,
+    split_brs=S.s_ratio,
+    marker=":;T:right",
+    tl={
+        split_dir="horizontal",
+        split_tls=S.s_ratio2,
+        split_brs=S.b_ratio2,
+        marker="M:down;V:single",
+        tl={},
+        br={},
+    },
+    br={},
+}
+
 
 S.template=S.templates["default"]
 
@@ -128,27 +176,21 @@ function T.classify(ws, cwin)
     -- Handle known terminal emulators.
     local id=cwin:get_ident()
     if S.terminal_emulators[id.class] then
-        return "TE"
+        return "T"
     end
     
-    -- Try size heuristics. We are assuming a relative large 
-    -- screen here.
-    local wg, cg=ws:geom(), cwin:geom()
-    local l, r=T.div_length(wg.w, S.b_ratio, S.s_ratio)
-    local t, b=T.div_length(wg.h, S.b_ratio, S.s_ratio)
+    -- Try size heuristics.
+    local cg=cwin:geom()
+
+    if cg.w<3/8*(1280*S.scalef) then
+        return "M"
+    end
     
-    if cg.w>=l then
-        if cg.h>b then
-            return "W"
-        end
+    if cg.h>4/8*(960*S.scalef) then
+        return "V"
     else
-        if cg.w>=r/2 then
-            return "TE"
-        end
+        return "T"
     end
-    
-    -- All odd-sized windows are considered tool-boxes
-    return "TB"
 end
 
 -- }}}
@@ -344,9 +386,9 @@ function T.do_init_layout(p, cls, tmpl)
         end
         
         -- Adjust size requests based on heuristics for classes
-        if cls=="TB" then
+        if cls=="M" then
             hrq, wrq=nil, nil
-        elseif cls=="W" then
+        elseif cls=="V" then
             if hrq<sh then
                 hrq=nil
             end
