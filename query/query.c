@@ -78,7 +78,8 @@ void query_handler_attachclient(WGenFrame *frame, const char *str)
 		return;
 	}
 	
-	region_add_managed((WRegion*)frame, (WRegion*)cwin, TRUE);
+	region_add_managed((WRegion*)frame, (WRegion*)cwin,
+					   REGION_ATTACH_SWITCHTO);
 }
 
 

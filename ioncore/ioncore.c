@@ -167,7 +167,7 @@ int main(int argc, char*argv[])
 
 	ioncore_register_exports();
 	
-	if(!read_config_for("ioncore-lib"))
+	if(!read_config_for("ioncorelib"))
 		goto fail;
 	
 	if(!ioncore_init(display, onescreen))

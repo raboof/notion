@@ -112,7 +112,7 @@ static void do_split(WRegion *oreg, const char *str, bool attach)
 		if(attach && WOBJ_IS(oreg, WIonFrame) &&
 		   ((WIonFrame*)oreg)->genframe.current_sub!=NULL){
 			region_add_managed(reg, ((WIonFrame*)oreg)->genframe.current_sub,
-							   TRUE);
+							   REGION_ATTACH_SWITCHTO);
 		}
 		region_goto(reg);
 	}else{

@@ -11,7 +11,6 @@
 #include <ioncore/clientwin.h>
 #include <ioncore/attach.h>
 #include <ioncore/wsreg.h>
-#include <ioncore/winprops.h>
 #include "placement.h"
 #include "ionframe.h"
 #include "splitframe.h"
