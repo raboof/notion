@@ -48,7 +48,7 @@
 
 
 bool mplex_do_init(WMPlex *mplex, WWindow *parent, Window win,
-                          const WFitParams *fp, bool create)
+                   const WFitParams *fp, bool create)
 {
     mplex->flags=0;
     mplex->l1_count=0;
@@ -72,6 +72,9 @@ bool mplex_do_init(WMPlex *mplex, WWindow *parent, Window win,
     
     region_add_bindmap((WRegion*)mplex, ioncore_mplex_bindmap);
 
+    /* Call this to set MPLEX_MANAGED_UNVIEWABLE if necessary. */
+    mplex_fit_managed(mplex);
+    
     return TRUE;
 }
 
