@@ -121,12 +121,14 @@ void do_set_focus(WRegion *reg, bool warp)
 {
 	if(reg==NULL || !region_is_fully_mapped(reg))
 		return;
+	D(fprintf(stderr, "do_set_focus %p %s\n", reg, WOBJ_TYPESTR(reg)));
 	region_set_focus_to(reg, warp);
 }
 
 
 void set_focus(WRegion *reg)
 {
+	D(fprintf(stderr, "set_focus %p %s\n", reg, WOBJ_TYPESTR(reg)));
 	wglobal.focus_next=reg;
 	wglobal.warp_next=FALSE;
 }
@@ -134,6 +136,7 @@ void set_focus(WRegion *reg)
 
 void warp(WRegion *reg)
 {
+	D(fprintf(stderr, "warp %p %s\n", reg, WOBJ_TYPESTR(reg)));
 	wglobal.focus_next=reg;
 	wglobal.warp_next=wglobal.warp_enabled;
 }

@@ -27,6 +27,9 @@
 		(SUB)=PREV_CHILD(SUB, WRegion))
 
 
+#define D2(X)
+
+
 /*{{{ Init & deinit */
 
 
@@ -399,7 +402,7 @@ void region_detach_parent(WRegion *reg)
 
 	if(p->active_sub==reg){
 		p->active_sub=NULL;
-			
+		
 		/* Removed: seems to confuse floatws:s when frames are
 		 * destroyd.
 		 */
@@ -418,6 +421,9 @@ void region_detach_manager(WRegion *reg)
 	if(mgr==NULL)
 		return;
 	
+	D2(fprintf(stderr, "detach %s (mgr:%s)\n", WOBJ_TYPESTR(reg),
+			   WOBJ_TYPESTR(mgr)));
+	
 	/* Restore activity state to non-parent manager */
 	if(region_may_control_focus(reg)){
 		WRegion *par=FIND_PARENT1(reg, WRegion);
@@ -428,8 +434,13 @@ void region_detach_manager(WRegion *reg)
 				 * nevertheless so that region_may_control_focus can
 				 * be made to work.
 				 */
+				D2(fprintf(stderr, "detach mgr %s, %s->active_sub=%s\n",
+						   WOBJ_TYPESTR(reg), WOBJ_TYPESTR(par),
+						   WOBJ_TYPESTR(mgr)));
 				par->active_sub=mgr;
 			}else{
+				D2(fprintf(stderr, "detach mgr %s, set_focus(%s)\n",
+						   WOBJ_TYPESTR(reg), WOBJ_TYPESTR(mgr)));
 				set_focus(mgr);
 			}
 		}
@@ -454,27 +465,42 @@ void region_detach(WRegion *reg)
 /*{{{ Focus */
 
 
-bool region_may_control_focus(WRegion *reg)
+bool _region_may_control_focus(WRegion *reg)
 {
-	WRegion *par;
+	WRegion *par, *r2;
 	
 	if(REGION_IS_ACTIVE(reg))
 		return TRUE;
 	
 	par=FIND_PARENT1(reg, WRegion);
 	
-	if(par==NULL || !REGION_IS_ACTIVE(par))
+	if(par==NULL || !REGION_IS_ACTIVE(par)){
 		return FALSE;
+	}
 	
-	do{
+	/*do{
 		if(par->active_sub==reg)
 			return TRUE;
 		reg=REGION_MANAGER(reg);
-	}while(reg!=par && reg!=NULL);
+	}while(reg!=par && reg!=NULL);*/
+	
+	r2=par->active_sub;
+	while(r2!=NULL && r2!=par){
+		if(r2==reg)
+			return TRUE;
+		r2=REGION_MANAGER(r2);
+	}
 
 	return FALSE;
 }
 
+
+bool region_may_control_focus(WRegion *reg)
+{
+	bool mcf=_region_may_control_focus(reg);
+	D2(fprintf(stderr, "mcf: %s %d\n", WOBJ_TYPESTR(reg), mcf));
+	return mcf;
+}
 
 void region_got_focus(WRegion *reg)
 {
