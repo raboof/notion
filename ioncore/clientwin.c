@@ -1139,8 +1139,11 @@ static WRegion *clientwin_managed_focus(WClientWin *cwin, WRegion *reg)
 
 
 /*EXTL_DOC
- * Returns a table containing the class, instance and role properties
- * for \var{cwin}.
+ * Returns a table containing the properties \code{WM_CLASS} (table entries
+ * \var{instance} and \var{class}),  \code{WM_WINDOW_ROLE} (and \var{role})
+ * and \code{_ION_KLUDGES} (\var{kludges}) properties for \var{cwin}.
+ * If a property is not set, the corresponding field(s) are unset in the 
+ * table.
  */
 EXTL_EXPORT_MEMBER
 ExtlTab clientwin_get_ident(WClientWin *cwin)
