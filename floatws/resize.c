@@ -85,6 +85,7 @@ void floatframe_begin_resize(WFloatFrame *frame)
 	grab_establish((WRegion*)frame, resize_handler,
 				   FocusChangeMask|KeyReleaseMask);
 	begin_resize_atexit((WRegion*)frame, NULL, FALSE, end_keyresize);
+	set_resize_timer((WRegion*)frame, wglobal.resize_delay);
 }
 
 
