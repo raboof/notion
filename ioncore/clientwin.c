@@ -201,14 +201,10 @@ void clientwin_get_set_name(WClientWin *cwin)
     }
 
     if(list==NULL){
-        if(n==-1){
-            /* Special condition kludge: property exists, but couldn't
-             * be converted to a string list.
-             */
-            clientwin_set_name(cwin, "???");
-        }else{
-            region_unuse_name((WRegion*)cwin);
-        }
+        /* Special condition kludge: property exists, but couldn't
+         * be converted to a string list.
+         */
+        clientwin_set_name(cwin, (n==-1 ? "???" : NULL));
     }else{
         clientwin_set_name(cwin, *list);
         XFreeStringList(list);

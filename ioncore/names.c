@@ -15,6 +15,7 @@
 
 #include <libtu/rb.h>
 #include <libtu/minmax.h>
+#include <libtu/objp.h>
 
 #include "common.h"
 #include "region.h"
@@ -28,17 +29,21 @@
 /*{{{ Implementation */
 
 
-WNamespace ioncore_internal_ns={0, NULL, FALSE};
-WNamespace ioncore_clientwin_ns={0, NULL, FALSE};
+WNamespace ioncore_internal_ns={0, NULL, NULL, FALSE};
+WNamespace ioncore_clientwin_ns={0, NULL, NULL, FALSE};
 
 
 static bool initialise_ns(WNamespace *ns)
 {
     if(ns->initialised)
         return TRUE;
-    ns->rb=make_rb();
-    if(ns->rb!=NULL)
-        ns->initialised=TRUE;
+    
+    if(ns->rb==NULL)
+        ns->rb=make_rb();
+    if(ns->rb_unnamed==NULL)
+        ns->rb_unnamed=make_rb();
+    
+    ns->initialised=(ns->rb!=NULL && ns->rb_unnamed!=NULL);
     return ns->initialised;
 }
 
@@ -68,31 +73,41 @@ static int parseinst(const char *name, const char **startinst)
 }
 
 
-static void do_unuse_name(WRegion *reg)
+void region_do_unuse_name(WRegion *reg, bool insert_unnamed)
 {
     WNamespace *ns=reg->ni.namespaceinfo;
     Rb_node node;
     int found=0;
     
-    if(ns==NULL || reg->ni.name==NULL || !ns->initialised)
+    if(ns==NULL || !ns->initialised)
         return;
     
-    node=rb_find_key_n(ns->rb, reg->ni.name, &found);
+    if(reg->ni.name==NULL)
+        node=rb_find_pkey_n(ns->rb_unnamed, reg, &found);
+    else
+        node=rb_find_key_n(ns->rb, reg->ni.name, &found);
+
+    if(reg->ni.name!=NULL){
+        free(reg->ni.name);
+        reg->ni.name=NULL;
+    }
     
-    if(!found)
-        return;
+    if(found)
+        rb_delete_node(node);
     
-    rb_delete_node(node);
-    
-    free(reg->ni.name);
-    reg->ni.name=NULL;
+    if(insert_unnamed){
+        if(rb_insertp(ns->rb_unnamed, reg, reg))
+            return;
+        warn_err();
+    }
+
     reg->ni.namespaceinfo=NULL;
 }
 
 
 void region_unuse_name(WRegion *reg)
 {
-    do_unuse_name(reg);
+    region_do_unuse_name(reg, TRUE);
     region_notify_change(reg);
 }
 
@@ -154,14 +169,16 @@ static bool do_use_name(WRegion *reg, WNamespace *ns, const char *name,
     if(parsed_inst>=0 && inst==0 && failchange)
         return FALSE;
     
-    do_unuse_name(reg);
-    
     if(instrq>=0){
         fullname=make_full_name(name, instrq, parsed_inst>=0);
         node=rb_find_key_n(ns->rb, fullname, &found);
         if(found){
             free(fullname);
             fullname=NULL;
+            if(rb_val(node)==(void*)reg){
+                /* The region already has the requested name */
+                return TRUE;
+            }
             if(failchange)
                 return FALSE;
         }
@@ -169,18 +186,31 @@ static bool do_use_name(WRegion *reg, WNamespace *ns, const char *name,
     
     if(fullname==NULL){
         found=0;
+        inst=0;
         node=rb_find_key_n(ns->rb, name, &found);
         
         if(found){
             Rb_node next=node->c.list.flink;
-            inst=0;
             
-            while(next!=NULL){
-                if(separated((const char*)node->k.key, 
+            while(1){
+                if(rb_val(node)==(void*)reg){
+                    /* The region already has a name of requested form */
+                    return TRUE;
+                }
+                
+                if(next==NULL ||
+                   separated((const char*)node->k.key, 
                              (const char*)next->k.key, &inst)){
-                    inst=inst+1;
+                    /* 'inst' should be next free instance after increment
+                     * as separation was greater then one.
+                     */
+                    inst++;
                     break;
                 }
+                /* 'inst' should be instance of next after increment 
+                 * as separation was one.
+                 */
+                inst++;
                 node=next;
                 next=node->c.list.flink;
             }
@@ -192,7 +222,12 @@ static bool do_use_name(WRegion *reg, WNamespace *ns, const char *name,
             return FALSE;
     }
     
-    rb_insert(ns->rb, fullname, reg);
+    if(!rb_insert(ns->rb, fullname, reg))
+        return FALSE;
+    /* Unuse old name or remove from unnamed tree now that we have 
+     * managed to allocate new one
+     */
+    region_do_unuse_name(reg, FALSE);
     reg->ni.name=fullname;
     reg->ni.namespaceinfo=ns;
     return TRUE;
@@ -235,7 +270,7 @@ static bool use_name_parseany(WRegion *reg, WNamespace *ns, const char *name)
         }
     }
     
-    return do_use_name(reg, ns, name, -1, FALSE);
+    return do_use_name(reg, ns, name, 0, FALSE);
 }
 
 
@@ -279,7 +314,7 @@ static bool do_set_name(bool (*fn)(WRegion *reg, WNamespace *ns, const char *p),
     }
     
     if(nm==NULL || *nm=='\0'){
-        do_unuse_name(reg);
+        region_do_unuse_name(reg, TRUE);
     }else{
         if(!initialise_ns(ns))
             return FALSE;
@@ -295,12 +330,17 @@ static bool do_set_name(bool (*fn)(WRegion *reg, WNamespace *ns, const char *p),
 }
 
 
-bool region_init_name(WRegion *reg, const char *p)
+bool region_init_name(WRegion *reg)
 {
     if(!initialise_ns(&ioncore_internal_ns))
         return FALSE;
     
-    return use_name_anyinst(reg, &ioncore_internal_ns, p);
+    if(OBJ_IS(reg, WClientWin)){
+        region_do_unuse_name(reg, TRUE);
+        return TRUE;
+    }
+    
+    return use_name_anyinst(reg, &ioncore_internal_ns, OBJ_TYPESTR(reg));
 }
 
 
@@ -382,18 +422,11 @@ WClientWin *ioncore_lookup_clientwin(const char *name)
 }
 
 
-static ExtlTab do_list(WNamespace *ns, const char *typenam)
+static int do_list_tree(ExtlTab tab, int n, Rb_node rb, const char *typenam)
 {
-    ExtlTab tab;
     Rb_node node;
-    int n=0;
     
-    if(!ns->initialised)
-        return extl_table_none();
-    
-    tab=extl_create_table();
-    
-    rb_traverse(node, ns->rb){
+    rb_traverse(node, rb){
         WRegion *reg=(WRegion*)node->v.val;
         
         assert(reg!=NULL);
@@ -404,6 +437,23 @@ static ExtlTab do_list(WNamespace *ns, const char *typenam)
         if(extl_table_seti_o(tab, n+1, (Obj*)reg))
             n++;
     }
+    
+    return n;
+}
+
+
+static ExtlTab do_list(WNamespace *ns, const char *typenam)
+{
+    ExtlTab tab;
+    int n=0;
+    
+    if(!ns->initialised)
+        return extl_table_none();
+    
+    tab=extl_create_table();
+    
+    n=do_list_tree(tab, n, ns->rb, typenam);
+    n=do_list_tree(tab, n, ns->rb_unnamed, typenam);
     
     return tab;
 }

@@ -62,8 +62,7 @@ void region_init(WRegion *reg, WRegion *parent, const WRectangle *geom)
     
     reg->mgd_activity=FALSE;
 
-    if(!OBJ_IS(reg, WClientWin))
-        region_init_name(reg, OBJ_TYPESTR(reg));
+    region_init_name(reg);
     
     if(parent!=NULL){
         reg->rootwin=parent->rootwin;
@@ -109,8 +108,8 @@ void region_deinit(WRegion *reg)
     }
     
     region_detach(reg);
-    region_unuse_name(reg);
     region_remove_bindings(reg);
+    region_do_unuse_name(reg, FALSE);
 
     if(ioncore_g.focus_next==reg){
         D(warn("Region to be focused next destroyed[2]."));
