@@ -863,13 +863,56 @@ static void splitpane_remove(WSplitPane *pane, WSplit *child,
 /*{{{ Tree traversal */
 
 
+static bool filter_any(WSplit *split)
+{
+    return OBJ_IS(split, WSplitRegion);
+}
+
+
+static bool filter_no_unused(WSplit *split)
+{
+    return (OBJ_IS(split, WSplitRegion)
+            && !OBJ_IS(split, WSplitUnused));
+}
+
+
+static bool filter_no_stdisp(WSplit *split)
+{
+    return (OBJ_IS(split, WSplitRegion)
+            && !OBJ_IS(split, WSplitST));
+}
+
+
+static bool filter_no_stdisp_unused(WSplit *split)
+{
+    return (OBJ_IS(split, WSplitRegion)
+            && !OBJ_IS(split, WSplitST)
+            && !OBJ_IS(split, WSplitUnused));
+            
+}
+
+
 static WSplit *splitpane_current_todir(WSplitPane *pane, int dir, int primn,
                                        WSplitFilter *filter)
 {
+    WSplit *ret=NULL;
+    
     if(pane->contents==NULL)
         return NULL;
-    else
-        return split_current_todir(pane->contents, dir, primn, filter);
+    
+    /* Try non-unused first */
+    if(filter==filter_no_stdisp){
+        ret=split_current_todir(pane->contents, dir, primn, 
+                                filter_no_stdisp_unused);
+    }else if(filter==filter_any){
+        ret=split_current_todir(pane->contents, dir, primn, 
+                                filter_no_unused);
+    }
+    
+    if(ret==NULL)
+        ret=split_current_todir(pane->contents, dir, primn, filter);
+    
+    return ret;
 }
 
 
@@ -884,6 +927,59 @@ static WSplit *splitpane_current(WSplitPane *pane)
 {
     return pane->contents;
 }
+
+
+static WSplitRegion *get_node_check(WAutoWS *ws, WRegion *reg)
+{
+    WSplitRegion *node;
+
+    if(reg==NULL)
+        return NULL;
+    
+    node=splittree_node_of(reg);
+    
+    if(node==NULL || REGION_MANAGER(reg)!=(WRegion*)ws)
+        return NULL;
+    
+    return node;
+}
+
+
+WRegion *autows_do_get_nextto(WAutoWS *ws, WRegion *reg,
+                              int dir, int primn, bool any)
+{
+    WSplitFilter *filter=(any ? filter_no_unused : filter_no_stdisp_unused);
+    WSplit *node=(WSplit*)get_node_check(ws, reg), *nextto=NULL;
+    if(node==NULL)
+        return NULL;
+
+    while(node->parent!=NULL){
+        if(OBJ_IS(node, WSplitPane))
+            filter=(any ? filter_any : filter_no_stdisp);
+        nextto=splitinner_nextto(node->parent, node, dir, primn, filter);
+        if(nextto!=NULL)
+            break;
+        node=(WSplit*)(node->parent);
+    }
+    
+    if(node!=NULL && OBJ_IS(node, WSplitRegion))
+        return ((WSplitRegion*)node)->reg;
+    return NULL;
+}
+
+
+WRegion *autows_do_get_farthest(WAutoWS *ws,
+                                int dir, int primn, bool any)
+{
+    WSplitFilter *filter=(any ? filter_any : filter_no_stdisp);
+    WSplit *node=NULL;
+    if(ws->ionws.split_tree!=NULL)
+        node=split_current_todir(ws->ionws.split_tree, dir, primn, filter);
+    if(node!=NULL && OBJ_IS(node, WSplitRegion))
+        return ((WSplitRegion*)node)->reg;
+    return NULL;
+}
+
 
 
 /*}}}*/

@@ -796,9 +796,10 @@ WSplit *ionws_split_tree(WIonWS *ws)
 }
 
 
-static WRegion *do_get_next_to(WIonWS *ws, WRegion *reg, int dir, int primn,
-                               WSplitFilter *filter)
+static WRegion *ionws_do_get_nextto_default(WIonWS *ws, WRegion *reg,
+                                            int dir, int primn, bool any)
 {
+    WSplitFilter *filter=(any ? NULL : nostdispfilter);
     WSplitRegion *node=get_node_check(ws, reg);
     if(node!=NULL)
         node=(WSplitRegion*)split_nextto((WSplit*)node, dir, primn, filter);
@@ -806,51 +807,71 @@ static WRegion *do_get_next_to(WIonWS *ws, WRegion *reg, int dir, int primn,
 }
 
 
+WRegion *ionws_do_get_nextto(WIonWS *ws, WRegion *reg,
+                             int dir, int primn, bool any)
+{
+    WRegion *ret=NULL;
+    CALL_DYN_RET(ret, WRegion*, ionws_do_get_nextto, ws,
+                 (ws, reg, dir, primn, any));
+    return ret;
+}
+
+
 /*EXTL_DOC
  * Return the most previously active region next to \var{reg} in
  * direction \var{dirstr} (left/right/up/down). The region \var{reg}
- * must be managed by \var{ws}.
+ * must be managed by \var{ws}. If \var{any} is not set, the status display
+ * is not considered.
  */
 EXTL_EXPORT_MEMBER
-WRegion *ionws_next_to(WIonWS *ws, WRegion *reg, const char *dirstr)
+WRegion *ionws_nextto(WIonWS *ws, WRegion *reg, const char *dirstr,
+                      bool any)
 {
     int dir=0, primn=0;
     
     if(!get_split_dir_primn(dirstr, &dir, &primn))
         return NULL;
     
-    return do_get_next_to(ws, reg, dir, primn, NULL);
+    return ionws_do_get_nextto(ws, reg, dir, primn, any);
 }
 
 
-static WRegion *do_get_farthest(WIonWS *ws, int dir, int primn,
-                                WSplitFilter *filter)
+static WRegion *ionws_do_get_farthest_default(WIonWS *ws,
+                                              int dir, int primn, bool any)
 {
+    WSplitFilter *filter=(any ? NULL : nostdispfilter);
     WSplitRegion *node=NULL;
-    
-    if(ws->split_tree!=NULL){
-        node=(WSplitRegion*)split_current_todir(ws->split_tree, dir, primn, 
-                                                filter);
-    }
-    
+    if(ws->split_tree!=NULL)
+        node=(WSplitRegion*)split_current_todir(ws->split_tree, dir, primn, filter);
     return (node ? node->reg : NULL);
+}
+
+
+WRegion *ionws_do_get_farthest(WIonWS *ws, 
+                               int dir, int primn, bool any)
+{
+    WRegion *ret=NULL;
+    CALL_DYN_RET(ret, WRegion*, ionws_do_get_farthest, ws,
+                 (ws, dir, primn, any));
+    return ret;
 }
 
 
 /*EXTL_DOC
  * Return the most previously active region on \var{ws} with no
  * other regions next to it in  direction \var{dirstr} 
- * (left/right/up/down). 
+ * (left/right/up/down). If \var{any} is not set, the status 
+ * display is not considered.
  */
 EXTL_EXPORT_MEMBER
-WRegion *ionws_farthest(WIonWS *ws, const char *dirstr)
+WRegion *ionws_farthest(WIonWS *ws, const char *dirstr, bool any)
 {
     int dir=0, primn=0;
 
     if(!get_split_dir_primn(dirstr, &dir, &primn))
         return NULL;
     
-    return do_get_farthest(ws, dir, primn, NULL);
+    return ionws_do_get_farthest(ws, dir, primn, any);
 }
 
 
@@ -859,9 +880,9 @@ static WRegion *do_goto_dir(WIonWS *ws, int dir, int primn)
     int primn2=(primn==PRIMN_TL ? PRIMN_BR : PRIMN_TL);
     WRegion *reg=NULL, *curr=ionws_current(ws);
     if(curr!=NULL)
-        reg=do_get_next_to(ws, curr, dir, primn, nostdispfilter);
+        reg=ionws_do_get_nextto(ws, curr, dir, primn, FALSE);
     if(reg==NULL)
-        reg=do_get_farthest(ws, dir, primn2, nostdispfilter);
+        reg=ionws_do_get_farthest(ws, dir, primn2, FALSE);
     if(reg!=NULL)
         region_goto(reg);
     return reg;
@@ -894,7 +915,7 @@ static WRegion *do_goto_dir_nowrap(WIonWS *ws, int dir, int primn)
     int primn2=(primn==PRIMN_TL ? PRIMN_BR : PRIMN_TL);
     WRegion *reg=NULL, *curr=ionws_current(ws);
     if(curr!=NULL)
-        reg=do_get_next_to(ws, curr, dir, primn, nostdispfilter);
+        reg=ionws_do_get_nextto(ws, curr, dir, primn, FALSE);
     if(reg!=NULL)
         region_goto(reg);
     return reg;
@@ -1290,6 +1311,12 @@ static DynFunTab ionws_dynfuntab[]={
     {region_stacking,
      ionws_stacking},
     
+    {(DynFun*)ionws_do_get_nextto,
+     (DynFun*)ionws_do_get_nextto_default},
+
+    {(DynFun*)ionws_do_get_farthest,
+     (DynFun*)ionws_do_get_farthest_default},
+     
     END_DYNFUNTAB
 };
 

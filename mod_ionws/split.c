@@ -1279,7 +1279,11 @@ static WSplit *splitsplit_current_todir(WSplitSplit *node, int dir, int primn,
     ret=split_current_todir(first, dir, primn, filter);
     if(ret==NULL)
         ret=split_current_todir(second, dir, primn, filter);
-
+    if(ret==NULL && filter!=NULL){
+        if(filter((WSplit*)node))
+            ret=(WSplit*)node;
+    }
+        
     return ret;
 }
 
@@ -1294,22 +1298,8 @@ WSplit *split_current_todir(WSplit *node, int dir, int primn,
 }
 
 
-static WSplit *splitinner_nextto_default(WSplitInner *node, WSplit *child,
-                                         int dir, int primn,
-                                         WSplitFilter *filter)
-{
-
-    if(((WSplit*)node)->parent!=NULL){
-        return splitinner_nextto(((WSplit*)node)->parent, (WSplit*)node, 
-                                 dir, primn, filter);
-    }
-    
-    return NULL;
-}
-
-
-static WSplit *splitsplit_nextto(WSplitSplit *node, WSplit *child,
-                                 int dir, int primn, WSplitFilter *filter)
+WSplit *splitsplit_nextto(WSplitSplit *node, WSplit *child,
+                          int dir, int primn, WSplitFilter *filter)
 {
     WSplit *nnode=NULL;
     
@@ -1321,11 +1311,6 @@ static WSplit *splitsplit_nextto(WSplitSplit *node, WSplit *child,
             nnode=split_current_todir(node->tl, dir, PRIMN_BR, filter);
     }
    
-    if(nnode==NULL){
-        nnode=splitinner_nextto_default(&(node->isplit), child, dir, primn, 
-                                        filter);
-    }
-        
     return nnode;
 }
 
@@ -1342,10 +1327,13 @@ WSplit *splitinner_nextto(WSplitInner *node, WSplit *child,
 
 WSplit *split_nextto(WSplit *node, int dir, int primn, WSplitFilter *filter)
 {
-    if(node->parent==NULL)
-        return NULL;
-    
-    return splitinner_nextto(node->parent, node, dir, primn, filter);
+    while(node->parent!=NULL){
+        WSplit *ret=splitinner_nextto(node->parent, node, dir, primn, filter);
+        if(ret!=NULL)
+            return ret;
+        node=(WSplit*)node->parent;
+    }
+    return NULL;
 }
 
 
@@ -1790,7 +1778,6 @@ static DynFunTab split_dynfuntab[]={
 };
 
 static DynFunTab splitinner_dynfuntab[]={
-    {(DynFun*)splitinner_nextto, (DynFun*)splitinner_nextto_default},
     {splitinner_mark_current, splitinner_mark_current_default},
     {split_map, splitinner_map},
     {split_unmap, splitinner_unmap},

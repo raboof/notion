@@ -41,10 +41,15 @@ extern void ionws_deinit(WIonWS *ws);
 extern ExtlTab ionws_resize_tree(WIonWS *ws, WSplit *node, ExtlTab g);
 
 extern WRegion *ionws_current(WIonWS *ws);
-extern WRegion *ionws_next_to(WIonWS *ws, WRegion *reg, const char *str);
-extern WRegion *ionws_farthest(WIonWS *ws, const char *str);
+extern WRegion *ionws_nextto(WIonWS *ws, WRegion *reg, const char *str, bool any);
+extern WRegion *ionws_farthest(WIonWS *ws, const char *str, bool any);
 extern WRegion *ionws_goto_dir(WIonWS *ws, const char *str);
 extern WRegion *ionws_region_at(WIonWS *ws, int x, int y);
+
+DYNFUN WRegion *ionws_do_get_nextto(WIonWS *ws, WRegion *reg,
+                                    int dir, int primn, bool any);
+DYNFUN WRegion *ionws_do_get_farthest(WIonWS *ws, 
+                                      int dir, int primn, bool any);
 
 extern WFrame *ionws_split_top(WIonWS *ws, const char *dirstr);
 extern WFrame *ionws_split_at(WIonWS *ws, WFrame *frame, 

@@ -234,13 +234,6 @@ bool autows_managed_may_destroy(WAutoWS *ws, WRegion *reg)
 }
 
 
-/*WRegion *autows_managed_control_focus(WAutoWS *ws, WRegion *reg)
-{
-    if(OBJ_IS(reg, WPaneWin)){
-    }
-}
-*/
-
 /*}}}*/
 
 
@@ -476,6 +469,13 @@ static DynFunTab autows_dynfuntab[]={
     
     {(DynFun*)ionws_load_node,
      (DynFun*)autows_load_node},
+
+    {(DynFun*)ionws_do_get_nextto,
+     (DynFun*)autows_do_get_nextto},
+
+    {(DynFun*)ionws_do_get_farthest,
+     (DynFun*)autows_do_get_farthest},
+
 /*
     {(DynFun*)region_managed_control_focus,
      (DynFun*)autows_managed_control_focus},

@@ -22,6 +22,7 @@ INTRCLASS(WSplitFloat);
 
 #include "autows.h"
 #include "panewin.h"
+#include "autows.h"
 
 DECLCLASS(WSplitUnused){
     WSplitRegion regnode;
@@ -65,5 +66,10 @@ extern void splitfloat_tl_pwin_to_cnt(WSplitFloat *split, WRectangle *g);
 extern void splitfloat_br_pwin_to_cnt(WSplitFloat *split, WRectangle *g);
 extern void splitfloat_tl_cnt_to_pwin(WSplitFloat *split, WRectangle *g);
 extern void splitfloat_br_cnt_to_pwin(WSplitFloat *split, WRectangle *g);
+
+extern WRegion *autows_do_get_nextto(WAutoWS *ws, WRegion *reg,
+                                     int dir, int primn, bool any);
+extern WRegion *autows_do_get_farthest(WAutoWS *ws,
+                                       int dir, int primn, bool any);
 
 #endif /* ION_AUTOWS_SPLITEXT_H */
