@@ -8,6 +8,7 @@ defmenu("mainmenu", {
     menuentry("Lock screen",    "ioncore.exec('xlock')"),
     menuentry("Help",           "querylib.query_man(_)"),
     menuentry("About Ion",      "querylib.show_about_ion(_)"),
+    submenu("Workspaces",       "workspacelist"),
     submenu("Styles",           "stylemenu"),
     submenu("Exit",             "exitmenu"),
 })
