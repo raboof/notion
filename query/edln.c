@@ -109,8 +109,10 @@ static bool edln_rspc(Edln *edln, int n)
 
 static void edln_clearstr(Edln *edln)
 {
-	if(edln->p!=NULL)
+	if(edln->p!=NULL){
 		free(edln->p);
+        edln->p=NULL;
+    }
 	edln->palloced=0;
 	edln->psize=0;
 }
@@ -611,7 +613,7 @@ void edln_history_next(Edln *edln)
 		edln->p=edln->tmp_p;
 		edln->palloced=edln->tmp_palloced;
 		edln->tmp_p=NULL;
-		edln->psize=strlen(edln->p);
+		edln->psize=(edln->p==NULL ? 0 : strlen(edln->p));
 		edln->point=edln->psize;
 		edln->mark=-1;
 		edln->modified=TRUE;

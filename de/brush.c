@@ -168,8 +168,6 @@ void destyle_deinit(DEStyle *style)
 	for(i=0; i<style->n_extra_cgrps; i++)
 		de_free_colour_group(style->rootwin, style->extra_cgrps+i);
 	
-	XSync(wglobal.dpy, False);
-	
 	if(style->extra_cgrps!=NULL)
 		free(style->extra_cgrps);
 	
@@ -182,6 +180,8 @@ void destyle_deinit(DEStyle *style)
 		XFreeGC(wglobal.dpy, style->stipple_gc);
 		XFreePixmap(wglobal.dpy, style->tag_pixmap);
 	}
+    
+    XSync(wglobal.dpy, False);
 }
 
 

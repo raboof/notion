@@ -469,7 +469,7 @@ EXTL_EXPORT_MEMBER
 void wedln_set_completions(WEdln *wedln, ExtlTab completions)
 {
 	int n=0, i=0;
-	char **ptr,  *p, *beg=NULL;
+	char **ptr=NULL, *beg=NULL, *p=NULL;
 	
 	n=extl_table_get_n(completions);
 	
@@ -490,8 +490,7 @@ void wedln_set_completions(WEdln *wedln, ExtlTab completions)
 		ptr[i]=p;
 	}
 
-	if(extl_table_gets_s(completions, "common_part", &p))
-		beg=p;
+	extl_table_gets_s(completions, "common_part", &beg);
 	
 	n=edln_do_completions(&(wedln->edln), ptr, n, beg);
 	i=n;
