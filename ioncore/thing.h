@@ -13,7 +13,6 @@
 INTROBJ(WThing)
 INTRSTRUCT(WWatch)
 
-#define WTHING_DESTREMPTY	0x00001
 #define WTHING_SUBDEST		0x10000
 
 #define WTHING_CHILDREN(THING, TYPE) ((TYPE*)((WThing*)(THING))->t_children)

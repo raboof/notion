@@ -38,7 +38,7 @@ void default_draw_config_updated(WRegion *reg);
 static DynFunTab region_dynfuntab[]={
 	{region_notify_rootpos, default_notify_rootpos},
 	/*{(DynFun*)region_restack, (DynFun*)default_restack},*/
-	{region_request_managed_geom, default_request_managed_geom},
+	{region_request_managed_geom, region_request_managed_geom_allow},
 	{(DynFun*)region_selected_sub, (DynFun*)default_selected_sub},
 	{region_draw_config_updated, default_draw_config_updated},
 	END_DYNFUNTAB
@@ -270,9 +270,9 @@ static WRegion *default_selected_sub(WRegion *reg)
 /*{{{ Manager region default dynfuns */
 
 
-static void default_request_managed_geom(WRegion *mgr, WRegion *reg,
-										 WRectangle geom, WRectangle *geomret,
-										 bool tryonly)
+void region_request_managed_geom_allow(WRegion *mgr, WRegion *reg,
+									   WRectangle geom, WRectangle *geomret,
+									   bool tryonly)
 {
 	if(geomret!=NULL)
 		*geomret=geom;

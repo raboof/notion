@@ -151,6 +151,10 @@ extern void region_request_managed_geom_unallow(WRegion *reg, WRegion *sub,
 extern void region_request_managed_geom_constrain(WRegion *reg, WRegion *sub,
 												  WRectangle geom, WRectangle *geomret,
 												  bool tryonly);
+/* default */
+extern void region_request_managed_geom_allow(WRegion *reg, WRegion *sub,
+											  WRectangle geom, WRectangle *geomret,
+											  bool tryonly);
 
 
 #endif /* WMCORE_REGION_H */
