@@ -119,9 +119,11 @@ static void do_grab_remove()
 
 static void mark_for_removal(GrabStatus *grab, bool killed)
 {
-	grab->remove=TRUE;
-	if(killed && grab->killedhandler!=NULL && grab->holder!=NULL)
-		grab->killedhandler(grab->holder);
+	if(!grab->remove){
+		grab->remove=TRUE;
+		if(killed && grab->killedhandler!=NULL && grab->holder!=NULL)
+			grab->killedhandler(grab->holder);
+	}
 	
 	if(grabs[idx_grab-1].remove)
 		do_grab_remove();
@@ -199,7 +201,6 @@ bool call_grab_handler(XEvent *ev)
 
 
 /*}}}*/
-
 
 
 /*{{{ Misc. */
