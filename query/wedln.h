@@ -20,9 +20,6 @@
 INTROBJ(WEdln);
 INTRSTRUCT(WEdlnCreateParams);
 
-typedef void WEdlnHandler(WObj *p, char *str, char *userdata);
-
-
 DECLSTRUCT(WEdlnCreateParams){
 	const char *prompt;
 	const char *dflt;
