@@ -52,6 +52,9 @@ static void clientwin_remove_managed(WClientWin *cwin, WRegion *reg);
 static void clientwin_add_managed_params(const WClientWin *cwin, WRegion **par,
 										WRectangle *ret);
 static void clientwin_add_managed_doit(WClientWin *cwin, WRegion *reg, int flags);
+static void clientwin_request_managed_geom(WClientWin *cwin, WRegion *sub,
+										   WRectangle geom, WRectangle *geomret,
+										   bool tryonly);
 
 
 static DynFunTab clientwin_dynfuntab[]={
@@ -71,7 +74,7 @@ static DynFunTab clientwin_dynfuntab[]={
 	{region_add_managed_params, clientwin_add_managed_params},
 	{region_add_managed_doit, clientwin_add_managed_doit},
 	/* Perhaps resize accordingly instead? */
-	{region_request_managed_geom, region_request_managed_geom_constrain},
+	{region_request_managed_geom, clientwin_request_managed_geom},
 
 	END_DYNFUNTAB
 };
@@ -628,7 +631,7 @@ static void do_reparent_clientwin(WClientWin *cwin, Window win, int x, int y)
 
 
 static void convert_geom(WClientWin *cwin, WRectangle max_geom,
-						 WRectangle *geom, bool rq)
+						 WRectangle *geom/*, bool rq*/)
 {
 	WRectangle r;
 	bool bottom=FALSE;
@@ -642,10 +645,10 @@ static void convert_geom(WClientWin *cwin, WRectangle max_geom,
 	geom->h=max_geom.h;
 	
 	correct_size(&(geom->w), &(geom->h), &(cwin->size_hints), FALSE);
-	
+	/*
 	if(!rq && bottom && geom->h>REGION_GEOM(cwin).h)
 	   geom->h=REGION_GEOM(cwin).h;
-	
+	*/
 	geom->x=max_geom.x+max_geom.w/2-geom->w/2;
 	
 	if(bottom)
@@ -661,15 +664,34 @@ static void convert_geom(WClientWin *cwin, WRectangle max_geom,
 /*{{{ Region dynfuns */
 
 
-static void do_fit_clientwin(WClientWin *cwin, WRectangle max_geom,
-							 bool rq, WWindow *np)
+static void clientwin_request_managed_geom(WClientWin *cwin, WRegion *sub,
+										   WRectangle geom, WRectangle *geomret,
+										   bool tryonly)
+{
+	WRectangle rgeom=cwin->max_geom;
+
+	if(rgeom.h>geom.h){
+		rgeom.h=geom.h;
+		rgeom.y+=cwin->max_geom.h-geom.h;
+	}
+	
+	if(geomret!=NULL)
+		*geomret=rgeom;
+	
+	if(!tryonly)
+		fit_region(sub, rgeom);
+}
+
+
+
+static void do_fit_clientwin(WClientWin *cwin, WRectangle max_geom, WWindow *np)
 {
 	WRegion *transient, *next;
 	WRectangle geom, geom2;
 	int diff;
 	bool changes;
 	
-	convert_geom(cwin, max_geom, &geom, rq);
+	convert_geom(cwin, max_geom, &geom);
 	
 	changes=(REGION_GEOM(cwin).x!=geom.x ||
 			 REGION_GEOM(cwin).y!=geom.y ||
@@ -679,16 +701,8 @@ static void do_fit_clientwin(WClientWin *cwin, WRectangle max_geom,
 	cwin->max_geom=max_geom;
 	REGION_GEOM(cwin)=geom;
 
-	if(np==NULL){
-		if(!changes){
-			/* XMoveResizeWindow won't send a ConfigureNotify event if the
-			 * geometry has not changed and some programs expect that.
-			 */
-			if(rq)
-				sendconfig_clientwin(cwin);
-			return;
-		}
-	}
+	if(np==NULL && !changes)
+		return;
 
 	if(np!=NULL)
 		do_reparent_clientwin(cwin, np->win, geom.x, geom.y);
@@ -700,6 +714,8 @@ static void do_fit_clientwin(WClientWin *cwin, WRectangle max_geom,
 		XMoveResizeWindow(wglobal.dpy, cwin->win,
 						  geom.x, geom.y, geom.w, geom.h);
 	}
+
+	cwin->flags&=~CWIN_NEED_CFGNTFY;
 	
 	geom2.x=max_geom.x;
 	geom2.w=max_geom.w;
@@ -707,7 +723,7 @@ static void do_fit_clientwin(WClientWin *cwin, WRectangle max_geom,
 	FOR_ALL_MANAGED_ON_LIST_W_NEXT(cwin->transient_list, transient, next){
 		geom2.y=max_geom.y;
 		geom2.h=max_geom.h;
-		diff=geom.h-REGION_GEOM(transient).h;
+		diff=geom.h-region_min_h(transient);/*REGION_GEOM(transient).h;*/
 		if(diff>0){
 			geom2.y+=diff;
 			geom2.h-=diff;
@@ -729,7 +745,7 @@ static void do_fit_clientwin(WClientWin *cwin, WRectangle max_geom,
 
 static void fit_clientwin(WClientWin *cwin, WRectangle geom)
 {
-	do_fit_clientwin(cwin, geom, FALSE, NULL);
+	do_fit_clientwin(cwin, geom, NULL);
 }
 
 
@@ -743,7 +759,7 @@ static bool reparent_clientwin(WClientWin *cwin, WWindow *par, WRectangle geom)
 	region_detach_parent((WRegion*)cwin);
 	region_set_parent((WRegion*)cwin, (WRegion*)par);
 
-	do_fit_clientwin(cwin, geom, FALSE, par);
+	do_fit_clientwin(cwin, geom, par);
 	
 	sendconfig_clientwin(cwin);
 	
@@ -954,16 +970,12 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 	
 	if(ev->value_mask&CWX){
 		dx=ev->x-rx;
-		if(dx!=0)
-			fprintf(stderr, "dx=%d\n",dx);
 		geom.x+=dx;
 		pos=TRUE;
 	}
 	
 	if(ev->value_mask&CWY){
 		dy=ev->y-ry;
-		if(dy!=0)
-			fprintf(stderr, "dy=%d\n",dy);
 		geom.y+=dy;
 		pos=TRUE;
 	}
@@ -984,13 +996,16 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 	
 	if(ev->value_mask&CWBorderWidth)
 		cwin->orig_bw=ev->border_width;
+
+	cwin->flags|=CWIN_NEED_CFGNTFY;
 	
-	if(!sz && !pos){
+	if(sz || pos)
+		region_request_geom((WRegion*)cwin, geom, NULL, FALSE);
+	
+	if(cwin->flags&CWIN_NEED_CFGNTFY){
 		sendconfig_clientwin(cwin);
-		return;
+		cwin->flags&=~CWIN_NEED_CFGNTFY;
 	}
-	
-	region_request_geom((WRegion*)cwin, geom, NULL, FALSE);
 }
 
 
@@ -1040,6 +1055,7 @@ bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto)
 	return FALSE;
 }
 
+
 bool clientwin_toggle_fullscreen(WClientWin *cwin)
 {
 	if(cwin->last_mgr_watch.thing!=NULL)
@@ -1047,6 +1063,7 @@ bool clientwin_toggle_fullscreen(WClientWin *cwin)
 	
 	return clientwin_enter_fullscreen(cwin, TRUE);
 }
+
 
 /*}}}*/
 

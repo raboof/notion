@@ -190,9 +190,6 @@ void mainloop()
 /*}}}*/
 
 
-/*}}}*/
-
-
 /*{{{ Map, unmap, destroy */
 
 
@@ -298,7 +295,6 @@ static void handle_property(const XPropertyEvent *ev)
 	switch(ev->atom){
 	case XA_WM_NORMAL_HINTS:
 		get_clientwin_size_hints(cwin);
-		/*refit(cwin);*/
 		return;
 	
 	case XA_WM_NAME:
