@@ -163,8 +163,10 @@ void set_split_of(WObj *obj, WWsSplit *split)
 /*{{{ Low-level resize code */
 
 
-static int split_tree_calcresize(WObj *node_, int dir, int primn,
-						   int nsize)
+/* Calculate parameters to attempt to resize tree at node_ to nsize in
+ * direction dir with primn being the primary node to resize.
+ */
+int split_tree_do_calcresize(WObj *node_, int dir, int primn, int nsize)
 {
 	WWsSplit *node;
 	WObj *o1, *o2;
@@ -182,27 +184,19 @@ static int split_tree_calcresize(WObj *node_, int dir, int primn,
 	
 	if(node->dir!=dir){
 		/* Found a split in the other direction than the resize */
-		s1=split_tree_calcresize(node->tl, dir, primn, nsize);
-		s2=split_tree_calcresize(node->br, dir, primn, nsize);
+		s1=split_tree_do_calcresize(node->tl, dir, primn, nsize);
+		s2=split_tree_do_calcresize(node->br, dir, primn, nsize);
 		
 		if(s1>s2){
-			/*if(nsize>split_tree_size(node->tl, dir)){
-				split_tree_calcresize(node->tl, dir, primn, s2);
-				s1=s2;
-			}else*/{
-				split_tree_calcresize(node->br, dir, primn, s1);
-			}
+			split_tree_do_calcresize(node->br, dir, primn, s1);
 		}else if(s2>s1){
-			/*if(nsize>split_tree_size(node->br, dir)){
-				split_tree_calcresize(node->br, dir, primn, s1);
-			}else*/{
-				split_tree_calcresize(node->tl, dir, primn, s2);
-				s1=s2;
-			}
+			split_tree_do_calcresize(node->tl, dir, primn, s2);
+			s1=s2;
 		}
 		node->res=ANY;
 		node->knowsize=ANY;
-		return (node->tmpsize=s1);
+		node->tmpsize=s1;
+		return s1;
 	}else{
 		if(primn==TOP_OR_LEFT){
 			/* Resize top or left node first */
@@ -212,21 +206,24 @@ static int split_tree_calcresize(WObj *node_, int dir, int primn,
 			/* Resize bottom or right node first */
 			o1=node->br;
 			o2=node->tl;
-			primn=BOTTOM_OR_RIGHT;
 		}
 		
 		s2=split_tree_size(o2, dir);
-		ns1=nsize-s2;
-		s1=split_tree_calcresize(o1, dir, primn, ns1);
 		
-		/*if(s1!=ns1){*/
-			ns2=nsize-s1;
-			s2=split_tree_calcresize(o2, dir, primn, ns2);
-			node->res=ANY;
-		/*}else{
-			node->res=primn;
-		}*/
+		if(primn==ANY){
+			primn=BOTTOM_OR_RIGHT;
+			s1=split_tree_size(o1, dir);
+			ns1=(nsize*s1+(s1+s2)/2)/(s1+s2);
+		}else{
+			ns1=nsize-s2;
+		}
 		
+		s1=split_tree_do_calcresize(o1, dir, primn, ns1);
+		
+		ns2=nsize-s1;
+		s2=split_tree_do_calcresize(o2, dir, primn, ns2);
+		
+		node->res=ANY;
 		node->knowsize=primn;
 		node->tmpsize=s1;
 		return s1+s2;
@@ -234,6 +231,9 @@ static int split_tree_calcresize(WObj *node_, int dir, int primn,
 }
 
 
+/* Resize node_ and its children to nsize in direction dir according to
+ * precalculated (above function) values and parameters.
+ */
 int split_tree_do_resize(WObj *node_, int dir, int npos, int nsize)
 {
 	WWsSplit *node;
@@ -270,18 +270,9 @@ int split_tree_do_resize(WObj *node_, int dir, int npos, int nsize)
 			tls=nsize-brs;
 		}
 		
-		
-		/*if(node->res!=BOTTOM_OR_RIGHT)*/
-			s+=split_tree_do_resize(node->tl, dir, npos, tls);
-		/*else
-			s+=split_tree_size(node->tl, dir);*/
-		
+		s+=split_tree_do_resize(node->tl, dir, npos, tls);
 		npos+=s;
-		
-		/*if(node->res!=TOP_OR_LEFT)*/
-			s+=split_tree_do_resize(node->br, dir, npos, brs);
-		/*else
-			s+=split_tree_size(node->br, dir);*/
+		s+=split_tree_do_resize(node->br, dir, npos, brs);
 	}
 	
 	if(dir==VERTICAL){
@@ -294,6 +285,29 @@ int split_tree_do_resize(WObj *node_, int dir, int npos, int nsize)
 	
 	return s;
 }
+
+
+/*void split_tree_move(WObj *node, int x, int y)
+{
+	if(!WOBJ_IS(node, WWsSplit)){
+		WRectangle g;
+		assert(WOBJ_IS(node, WRegion));
+		g=REGION_GEOM(node);
+		g.x=x; 
+		g.y=y;
+		region_fit((WRegion*)node, g);
+	}else{
+		WWsSplit *split=(WWsSplit*)node;
+		split->geom.x=x;
+		split->geom.y=y;
+		split_tree_move(split->tl, x, y);
+		if(split->dir==VERTICAL)
+			y+=split_tree_size(split->tl, VERTICAL);
+		else
+			x+=split_tree_size(split->tl, HORIZONTAL);
+		split_tree_move(split->br, x, y);
+	}
+}*/
 
 
 /* Calculate parameters for resizing <split> and possibly anything
@@ -311,14 +325,14 @@ static void wcalcres(WWsSplit *split, int dir, int primn,
 	
 	if(dir!=split->dir){
 		/* It might not be possible to shrink the other as much */
-		ds=split_tree_calcresize(other, dir, primn, nsize);
+		ds=split_tree_do_calcresize(other, dir, primn, nsize);
 		nsize=ds;
 		s2=0;
 	}else{
 		if(primn!=from)
-			s2=split_tree_calcresize(other, dir, from, s-nsize);
+			s2=split_tree_do_calcresize(other, dir, from, s-nsize);
 		else
-			s2=split_tree_calcresize(other, dir, from, split_tree_size(other, dir));
+			s2=split_tree_do_calcresize(other, dir, from, split_tree_size(other, dir));
 	}
 	ds=nsize+s2;
 
@@ -344,7 +358,7 @@ static void wcalcres(WWsSplit *split, int dir, int primn,
 		rs=ret->winsizetmp;
 		
 		if(rs!=ds && dir!=split->dir)
-			split_tree_calcresize(other, dir, primn, rs);
+			split_tree_do_calcresize(other, dir, primn, rs);
 	}
 	
 	nsize=rs-s2;
@@ -361,12 +375,12 @@ static void wcalcres(WWsSplit *split, int dir, int primn,
 }
 
 
-static int calcresize_obj(WObj *obj, int dir, int primn, int nsize,
-						  WResizeTmp *ret)
+int calcresize_obj(WObj *obj, int dir, int primn, int nsize, 
+				   WResizeTmp *ret)
 {
 	WWsSplit *split=split_of(obj);
 	
-	nsize=split_tree_calcresize(obj, dir, primn, nsize);
+	nsize=split_tree_do_calcresize(obj, dir, primn, nsize);
 	
 	ret->dir=dir;
 	
@@ -438,7 +452,7 @@ void ionws_request_managed_geom(WIonWS *ws, WRegion *sub,
 			else if(REGION_GEOM(sub).y+REGION_GEOM(sub).h==geom.y+geom.h)
 				vprimn=TOP_OR_LEFT;
 		}
-
+		
 		calcresize_reg(sub, VERTICAL, vprimn, geom.h, &tmp);
 		if(geomret!=NULL){
 			geomret->y=tmp.winpostmp;
@@ -499,15 +513,15 @@ static WRegion *do_split_at(WIonWS *ws, WObj *obj, int dir, int primn,
 	 * is big enough to fit the new object and <obj> itself without
 	 * them becoming too small.
 	 */
-
+	
 	s=split_tree_size(obj, dir);
 	sn=s/2;
 	
 	if(sn<minsize)
 		sn=minsize;
 	
-	gs=split_tree_calcresize(obj, dir, primn, s-sn);
-
+	gs=split_tree_do_calcresize(obj, dir, primn, s-sn);
+	
 	if(gs+sn>s){
 		s=calcresize_obj(obj, dir, ANY, gs+sn, &rtmp);
 		if(gs+sn>s){
@@ -554,9 +568,9 @@ static WRegion *do_split_at(WIonWS *ws, WObj *obj, int dir, int primn,
 	pos=split_tree_pos(obj, dir);
 	if(primn!=BOTTOM_OR_RIGHT)
 		pos+=sn;
-	s=split_tree_calcresize(obj, dir, primn, gs);
+	s=split_tree_do_calcresize(obj, dir, primn, gs);
 	split_tree_do_resize(obj, dir, pos, s);
-
+	
 	/* Set up split structure
 	 */
 	split=split_of(obj);
@@ -642,7 +656,7 @@ static WRegion *left_or_topmost_current(WObj *obj, int dir)
 static WRegion *right_or_lowest_current(WObj *obj, int dir)
 {
 	WWsSplit *split;
-
+	
 	if(obj==NULL)
 		return NULL;
 	
@@ -689,7 +703,7 @@ ExtlTab ionws_managed_list(WIonWS *ws)
 static WWsSplit *find_split(WObj *obj, int dir, int *from)
 {
 	WWsSplit *split;
-
+	
 	if(WOBJ_IS(obj, WRegion))
 		split=SPLIT_OF((WRegion*)obj);
 	else
@@ -703,7 +717,7 @@ static WWsSplit *find_split(WObj *obj, int dir, int *from)
 				*from=BOTTOM_OR_RIGHT;
 			break;
 		}
-			
+		
 		obj=(WObj*)split;
 		split=split->parent;
 	}
@@ -718,13 +732,13 @@ static WRegion *down_or_right(WRegion *reg, int dir)
 	WIonWS *ws;
 	WWsSplit *split;
 	int from;
-
+	
 	if(reg==NULL)
 		return NULL;
 	
 	while(1){
 		split=find_split(prev, dir, &from);
-
+		
 		if(split==NULL)
 			break;
 		
@@ -745,13 +759,13 @@ static WRegion *up_or_left(WRegion *reg, int dir)
 	WIonWS *ws;
 	WWsSplit *split;
 	int from;
-
+	
 	if(reg==NULL)
 		return NULL;
-
+	
 	while(1){
 		split=find_split(prev, dir, &from);
-
+		
 		if(split==NULL)
 			break;
 		
@@ -880,7 +894,7 @@ void ionws_goto_above(WIonWS *ws)
 {
 	if(!goto_reg(ionws_above(ws, ionws_current(ws))))
 		goto_reg(ionws_lowest(ws));
-	   
+	
 }
 
 
@@ -940,7 +954,7 @@ static bool ionws_remove_split(WIonWS *ws, WWsSplit *split)
 	WObj *other;
 	int osize, nsize, npos;
 	int primn;
-
+	
 	if(split->tl==NULL){
 		other=split->br;
 		primn=TOP_OR_LEFT;
@@ -950,7 +964,7 @@ static bool ionws_remove_split(WIonWS *ws, WWsSplit *split)
 	}
 	
 	split2=split->parent;
-
+	
 	if(split2!=NULL){
 		if((WObj*)split==split2->tl)
 			split2->tl=other;
@@ -962,7 +976,7 @@ static bool ionws_remove_split(WIonWS *ws, WWsSplit *split)
 	
 	if(other==NULL)
 		return FALSE;
-		
+	
 	if(WOBJ_IS(other, WRegion))
 		SPLIT_OF((WRegion*)other)=split2;
 	else
@@ -971,7 +985,7 @@ static bool ionws_remove_split(WIonWS *ws, WWsSplit *split)
 	if(wglobal.opmode!=OPMODE_DEINIT){
 		nsize=split_tree_size((WObj*)split, split->dir);
 		npos=split_tree_pos((WObj*)split, split->dir);
-		nsize=split_tree_calcresize(other, split->dir, primn, nsize);
+		nsize=split_tree_do_calcresize(other, split->dir, primn, nsize);
 		split_tree_do_resize(other, split->dir, npos, nsize);
 	}
 

@@ -35,12 +35,19 @@
 
 static void ionws_fit(WIonWS *ws, WRectangle geom)
 {
+	int tmp;
+	
 	REGION_GEOM(ws)=geom;
 	
-	if(ws->split_tree!=NULL){
-		split_tree_do_resize(ws->split_tree, HORIZONTAL, geom.x, geom.w);
-		split_tree_do_resize(ws->split_tree, VERTICAL, geom.y, geom.h);
-	}
+	if(ws->split_tree==NULL)
+		return;
+	
+	tmp=split_tree_do_calcresize((WObj*)ws->split_tree, HORIZONTAL, ANY, 
+								 geom.w);
+	split_tree_do_resize((WObj*)ws->split_tree, HORIZONTAL, geom.x, tmp);
+	tmp=split_tree_do_calcresize((WObj*)ws->split_tree, VERTICAL, ANY, 
+								 geom.h);
+	split_tree_do_resize((WObj*)ws->split_tree, VERTICAL, geom.y, tmp);
 }
 
 
@@ -48,7 +55,6 @@ static bool reparent_ionws(WIonWS *ws, WWindow *parent, WRectangle geom)
 {
 	WRegion *sub, *next;
 	bool rs;
-	int xdiff, ydiff;
 	
 	if(!same_rootwin((WRegion*)ws, (WRegion*)parent))
 		return FALSE;
@@ -56,14 +62,8 @@ static bool reparent_ionws(WIonWS *ws, WWindow *parent, WRectangle geom)
 	region_detach_parent((WRegion*)ws);
 	region_set_parent((WRegion*)ws, (WRegion*)parent);
 	
-	xdiff=geom.x-REGION_GEOM(ws).x;
-	ydiff=geom.y-REGION_GEOM(ws).y;
-	
 	FOR_ALL_MANAGED_ON_LIST_W_NEXT(ws->managed_list, sub, next){
-		WRectangle g=REGION_GEOM(sub);
-		g.x+=xdiff;
-		g.y+=ydiff;
-		if(!reparent_region(sub, parent, g)){
+		if(!reparent_region(sub, parent, REGION_GEOM(sub))){
 			warn("Problem: can't reparent a %s managed by a WIonWS"
 				 "being reparented. Detaching from this object.",
 				 WOBJ_TYPESTR(sub));
@@ -131,7 +131,7 @@ static WIonFrame *create_initial_frame(WIonWS *ws, WWindow *parent,
 {
 	WIonFrame *frame;
 	
-	frame=create_ionframe(parent, geom, 0);
+	frame=create_ionframe(parent, geom);
 
 	if(frame==NULL)
 		return NULL;

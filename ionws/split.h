@@ -55,6 +55,8 @@ DECLSTRUCT(WResizeTmp){
 
 
 extern WWsSplit *create_split(int dir, WObj *tl, WObj *br, WRectangle geom);
+extern int split_tree_do_calcresize(WObj *node_, int dir, int primn, 
+									int nsize);
 extern int split_tree_do_resize(WObj *node_, int dir, int npos, int nsize);
 
 extern int split_tree_size(WObj *obj, int dir);
