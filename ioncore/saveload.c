@@ -129,6 +129,8 @@ bool ioncore_init_layout()
     
     ok=ioncore_read_savefile("layout", &tab);
     
+    loading_layout=TRUE;
+    
     FOR_ALL_SCREENS(scr){
         ExtlTab scrtab=extl_table_none();
         bool scrok=FALSE;
@@ -140,6 +142,8 @@ bool ioncore_init_layout()
         if(scrok)
             extl_unref_table(scrtab);
     }
+
+    loading_layout=FALSE;
 
     return (n!=0);
 }
