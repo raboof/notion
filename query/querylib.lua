@@ -15,16 +15,12 @@
 -- the user with require/include differences.
 if _LOADED["querylib"] then return end
 
+local querylib={}
+_G.querylib=querylib
 
-querylib={}
-
--- Functions to generate functions {{{
+-- Generic helper functions {{{
 
 
---DOC
--- Generate a ''completor'' passable to many of the \code{querylib.make_*_fn}
--- functions from a simple function \var{completefn} that completes an input 
--- string to a table of completion strings.
 function querylib.make_completor(completefn)
     local function completor(wedln, str)
         wedln:set_completions(completefn(str))
@@ -33,76 +29,15 @@ function querylib.make_completor(completefn)
 end
 
     
---DOC
--- Generate a function that can be directly passed in mplex/frame/screen 
--- binding definitions to display a query to call a function with 
--- tab-completed parameter. The parameters to this function are
--- \begin{tabularx}{\linewidth}{lX}
--- \hline
--- Parameter & Description \\
--- \hline
--- \var{prompt} & The prompt. \\
--- \var{initfn} & A function that returns initial input when called. \\
--- \var{handler} & The function to be called with the user input as parameter 
--- 		   when the query is finished. \\
--- \var{completor} & A completor function. \\
--- \end{tabularx}
-function querylib.make_simple_fn(prompt, initfn, handler, completor)
-    local function query_it(frame)
-        local initvalue;
-        if initfn then
-            initvalue=initfn()
-        end
-        query_query(frame, prompt, initvalue or "", handler, completor)
+function querylib.do_query(mplex, prompt, initvalue, handler, completor)
+    local function handle_it(str)
+        handler(mplex, str)
     end
-    return query_it
+    query_query(mplex, prompt, initvalue, handle_it, completor)
 end
 
---DOC
--- Generate a function that can be directly passed in mplex/frame/screen 
--- binding definitions to display a query to call a function with 
--- tab-completed parameter. The parameters to this function are
--- \begin{tabularx}{\linewidth}{lX}
--- \hline
--- Parameter & Description \\
--- \hline
--- \var{prompt} & The prompt. \\
--- \var{initfn} & A function that returns initial input when called. \\
--- \var{handler} & The function to be called with the mplex/frame/screen and
---                 user input as parameters when the query is finished. \\
--- \var{completor} & A completor function. \\
--- \end{tabularx}
-function querylib.make_frame_fn(prompt, initfn, handler, completor)
-    local function query_it(frame)
-        local initvalue;
-        if initfn then
-            initvalue=initfn(frame)
-        end
-        local function handle_it(str)
-            handler(frame, str)
-        end
-        query_query(frame, prompt, initvalue or "", handle_it, completor)
-    end
-    return query_it
-end
 
-function querylib.make_rename_fn(prompt, getobj)
-    local function query_it(frame)
-        local obj=getobj(frame)
-        local function handle_it(str)
-            obj:set_name(str)
-        end
-        query_query(frame, prompt, obj:name() or "", handle_it, nil)
-    end
-    return query_it
-end
-
---DOC
--- Generate a function that can be directly passed in mplex/frame/screen 
--- binding definitions to display a query to conditionally depending 
--- on user's input call another function \var{handler} that will get the
--- mplex/frame/screen where the query was displayed as argument.
-function querylib.make_yesno_fn(prompt, handler)
+function querylib.do_query_yesno(mplex, prompt, handler)
     local function handle_yesno(...)
         local n=table.getn(arg)
         if n==0 then return end
@@ -111,92 +46,85 @@ function querylib.make_yesno_fn(prompt, handler)
             handler(unpack(arg))
         end
     end
-    return querylib.make_frame_fn(prompt, nil, handle_yesno, nil)
+    return querylib.do_query(mplex, prompt, nil, handle_yesno, nil)
 end
 
-function querylib.make_script_lookup_fn(script)
-    return function()
-               local s=lookup_script(script)
-               if not s then
-                   return nil, "Could not find "..script
-               else
-                   return s
-               end
-           end
-end
 
-local function get_script_warn(frame, script)
-    local s, err=querylib.make_script_lookup_fn(script)()
-    if not s then
-        query_fwarn(frame, err)
+function querylib.do_query_execfile(mplex, prompt, prog)
+    assert(prog~=nil)
+    local function handle_execwith(mplex, str)
+        exec(prog.." "..string.shell_safe(str))
     end
-    return s
+    return querylib.do_query(mplex, prompt, querylib.get_initdir(),
+                             handle_execwith, querylib.file_completor)
 end
+
+
+function querylib.do_query_execwith(mplex, prompt, dflt, prog, completor)
+    local function handle_execwith(frame, str)
+        if not str or str=="" then
+            str=dflt
+        end
+        exec(prog.." "..string.shell_safe(str))
+    end
+    return querylib.do_query(mplex, prompt, nil, 
+                             handle_execwith, completor)
+end
+
+
+function querylib.lookup_script_warn(mplex, script)
+    local script=lookup_script(script)
+    if not script then
+        query_fwarn(mplex, "Could not find "..script)
+        warn("Could not find "..script)
+    end
+    return script
+end
+
+
+function querylib.get_initdir()
+    if querylib.last_dir then
+        return querylib.last_dir
+    end
+    local wd=os.getenv("PWD")
+    if wd==nil then
+        wd="/"
+    elseif string.sub(wd, -1)~="/" then
+        wd=wd .. "/"
+    end
+    return wd
+end
+
+
+function querylib.lookup_workspace_classes()
+    local classes={}
     
-local function getprog(prog)
-    if type(prog)=="function" then
-        return prog()
-    elseif type(prog)=="string" then
-        return prog
+    for k, v in _G do
+        local m=getmetatable(v)
+        if m and m.__index==WGenWS then
+            table.insert(classes, k)
+        end
+    end
+    
+    return classes
+end
+
+
+function querylib.complete_from_list(list, str)
+    local results={}
+    local len=string.len(str)
+    if len==0 then
+        results=list
     else
-        return nil, "No program to run specified"
-    end
-end
-
---DOC
--- Generate a function that can be directly passed in mplex/frame/screen 
--- binding definitions to display a query to start a program with a 
--- tab-completed parameter. The parameters to this function are
--- \begin{tabularx}{\linewidth}{lX}
--- \hline
--- Parameter & Description \\
--- \hline
--- \var{prompt} & The prompt \\
--- \var{dflt} & Default value to call \var{prog} with \\
--- \var{prog} & Program name or a function that returns it when called. \\
--- \var{completor} & A completor function. \\
--- \end{tabularx}
-function querylib.make_execwith_fn(prompt, dflt, prog, completor)
-    local function handle_execwith(frame, str)
-        local p, err=getprog(prog)
-        if p then
-            if not str or str=="" then
-                str=dflt
+        for _, m in list do
+            if string.sub(m, 1, len)==str then
+                table.insert(results, m)
             end
-            exec_in(frame, p.." "..string.shell_safe(str))
-        else
-            query_fwarn(frame, err)
-        end
-    end
-    return querylib.make_frame_fn(prompt, nil, handle_execwith, completor)
-end
-
---DOC
--- Generate a function that can be directly passed in mplex/frame/screen 
--- binding definitions to display a query to start a program with a 
--- tab-completed file as parameter. The previously inputted file's directory is 
--- used as the initial input. The parameters to this function are
--- \begin{tabularx}{\linewidth}{lX}
--- \hline
--- Parameter & Description \\
--- \hline
--- \var{prompt} & The prompt \\
--- \var{prog} & Program name or a function that returns it when called. \\
--- \end{tabularx}
-function querylib.make_execfile_fn(prompt, prog)
-    local function handle_execwith(frame, str)
-        local p, err=getprog(prog)
-        if p then
-            querylib.last_dir=string.gsub(str, "^(.*/)[^/]-$", "%1")
-            exec_in(frame, p.." "..string.shell_safe(str))
-        else
-            query_fwarn(frame, err)
         end
     end
     
-    return querylib.make_frame_fn(prompt, querylib.get_initdir, 
-                                  handle_execwith, querylib.file_completor)
-end
+    return results
+end    
 
 
 -- }}}
@@ -204,15 +132,6 @@ end
 
 -- Simple queries for internal actions {{{
 
-
-function querylib.getws(obj)
-    while obj~=nil do
-        if obj_is(obj, "WGenWS") then
-            return obj
-        end
-        obj=obj:manager()
-    end
-end
 
 function querylib.gotoclient_handler(frame, str)
     local cwin=lookup_clientwin(str)
@@ -242,37 +161,9 @@ function querylib.attachclient_handler(frame, str)
     frame:attach(cwin, { switchto = true })
 end
 
-function querylib.lookup_workspace_classes()
-    local classes={}
-    
-    for k, v in _G do
-        local m=getmetatable(v)
-        if m and m.__index==WGenWS then
-            table.insert(classes, k)
-        end
-    end
-    
-    return classes
-end
-
-function querylib.complete_from_list(list, str)
-    local results={}
-    local len=string.len(str)
-    if len==0 then
-        results=list
-    else
-        for _, m in list do
-            if string.sub(m, 1, len)==str then
-                table.insert(results, m)
-            end
-        end
-    end
-    
-    return results
-end    
 
 function querylib.workspace_handler(frame, name)
-    local ws=lookup_workspace(name)
+    local ws=lookup_region(name, "WGenWS")
     if ws then
         ws:goto()
         return
@@ -293,7 +184,7 @@ function querylib.workspace_handler(frame, name)
         end
         
         if not cls or cls=="" then
-            cls=default_ws_type
+            cls=DEFAULT_WS_TYPE
         end
     
         local err=collect_errors(function()
@@ -308,30 +199,33 @@ function querylib.workspace_handler(frame, name)
         end
     end
 
-    local prompt="Workspace type ("..default_ws_type.."):"
+    local prompt="Workspace type ("..DEFAULT_WS_TYPE.."):"
     
     query_query(frame, prompt, "", handler, completor)
 end
+
 
 --DOC
 -- This query asks for the name of a client window and attaches
 -- it to the frame the query was opened in. It uses the completion
 -- function \fnref{complete_clientwin}.
-querylib.query_gotoclient=querylib.make_frame_fn(
-    "Go to window:", nil,
-    querylib.gotoclient_handler,
-    querylib.make_completor(complete_clientwin)
-)
+defcmd("WMPlex", "query_gotoclient",
+       function(mplex)
+           querylib.do_query(mplex, "Go to window:", nil,
+                             querylib.gotoclient_handler,
+                             querylib.make_completor(complete_clientwin))
+       end)
 
 --DOC
 -- This query asks for the name of a client window and switches
 -- focus to the one entered. It uses the completion function
 -- \fnref{complete_clientwin}.
-querylib.query_attachclient=querylib.make_frame_fn(
-    "Attach window:", nil,
-    querylib.attachclient_handler, 
-    querylib.make_completor(complete_clientwin)
-)
+defcmd("WMPlex", "query_attachclient",
+       function(mplex)
+           querylib.do_query(mplex, "Attach window:", nil,
+                             querylib.attachclient_handler, 
+                             querylib.make_completor(complete_clientwin))
+       end)
 
 --DOC
 -- This query asks for the name of a workspace. If a workspace
@@ -341,62 +235,60 @@ querylib.query_attachclient=querylib.make_frame_fn(
 -- has been \emph{temporarily} hardcoded to \type{WIonWS}. By prefixing
 -- the input string with ''classname:'' it is possible to create other 
 -- kinds of workspaces.
-querylib.query_workspace=querylib.make_frame_fn(
-    "Go to or create workspace:", nil, 
-    querylib.workspace_handler,
-    querylib.make_completor(complete_workspace)
-)
+defcmd("WMPlex", "query_workspace",
+       function(mplex)
+           local function complete_workspace(nm)
+               return complete_region(nm, "WGenWS")
+           end
+           querylib.do_query(mplex, "Go to or create workspace:", nil, 
+                             querylib.workspace_handler,
+                             querylib.make_completor(complete_workspace))
+       end)
 
 --DOC
 -- This query asks whether the user wants to have Ioncore exit.
 -- If the answer is 'y', 'Y' or 'yes', so will happen.
-querylib.query_exit=querylib.make_yesno_fn(
-    "Exit Ion (y/n)?", exit_wm
-)
+defcmd("WMPlex", "query_exit",
+       function(mplex)
+           querylib.do_query_yesno("Exit Ion (y/n)?", exit_wm)
+       end)
 
 --DOC
 -- This query asks whether the user wants restart Ioncore.
 -- If the answer is 'y', 'Y' or 'yes', so will happen.
-querylib.query_restart=querylib.make_yesno_fn(
-    "Restart Ion (y/n)?", restart_wm
-)
+defcmd("WMPlex", "query_restart",
+       function(mplex)
+           querylib.do_query_yesno("Restart Ion (y/n)?", restart_wm)
+       end)
+
 
 --DOC
 -- This function asks for a name new for the frame where the query
 -- was created.
-querylib.query_renameframe=querylib.make_rename_fn(
-    "Frame name:", function(frame) return frame end
-)
+defcmd("WFrame", "query_renameframe",
+       function(frame)
+           querylib.do_query(frame, "Frame name:", frame:name(),
+                             function(frame, str) frame:set_name(str) end,
+                             nil)
+       end)
 
 --DOC
 -- This function asks for a name new for the workspace on which the
 -- query resides.
-querylib.query_renameworkspace=querylib.make_rename_fn(
-    "Workspace name:", querylib.getws
-)
+defcmd("WMPlex", "query_renameworkspace",
+       function(mplex)
+           local ws=ioncorelib.find_manager(ws, "WGenWS")
+           querylib.do_query(frame, "Workspace name:", ws:name(),
+                             function(mplex, str) ws:set_name(str) end,
+                             nil)
+       end)
 
 
 -- }}}
 
 
--- Queries that start external programs {{{
+-- Run/view/edit {{{
 
-
-function querylib.get_initdir()
-    if querylib.last_dir then
-        return querylib.last_dir
-    end
-    local wd=os.getenv("PWD")
-    if wd==nil then
-        wd="/"
-    elseif string.sub(wd, -1)~="/" then
-        wd=wd .. "/"
-    end
-    return wd
-end
-
--- How many characters of result data to completions do we allow?
-querylib.RESULT_DATA_LIMIT=10*1024^2
 
 function querylib.file_completor(wedln, str, wp)
     local function receive_data(str)
@@ -404,7 +296,7 @@ function querylib.file_completor(wedln, str, wp)
         
         while str do
             data=data .. str
-            if string.len(data)>querylib.RESULT_DATA_LIMIT then
+            if string.len(data)>ioncorelib.RESULT_DATA_LIMIT then
                 error("Too much result data")
             end
             str=coroutine.yield()
@@ -438,17 +330,22 @@ end
 -- Asks for a file to be edited. It uses the script \file{ion-edit} to
 -- start a program to edit the file. This script uses \file{run-mailcap}
 -- by default, but if you don't have it, you may customise the script.
-querylib.query_editfile=querylib.make_execfile_fn(
-    "Edit file:", querylib.make_script_lookup_fn("ion-edit")
-)
+defcmd("WMPlex", "query_editfile",
+       function(mplex)
+           local script=querylib.lookup_script_warn(mplex, "ion-edit")
+           querylib.do_query_execfile(mplex, "Edit file:", script)
+       end)
+
 
 --DOC
 -- Asks for a file to be viewed. It uses the script \file{ion-view} to
 -- start a program to view the file. This script uses \file{run-mailcap}
 -- by default, but if you don't have it, you may customise the script.
-querylib.query_runfile=querylib.make_execfile_fn(
-    "View file:", querylib.make_script_lookup_fn("ion-view")
-)
+defcmd("WMPlex", "query_runfile",
+       function(mplex)
+           local script=querylib.lookup_script_warn(mplex, "ion-view")
+           querylib.do_query_execfile(mplex, "View file:", script)
+       end)
 
 
 function querylib.exec_completor(wedln, str)
@@ -457,7 +354,7 @@ end
 
 function querylib.exec_handler(frame, cmd)
     if string.sub(cmd, 1, 1)==":" then
-        local ix=get_script_warn(frame, "ion-runinxterm")
+        local ix=querylib.lookup_script_warn(frame, "ion-runinxterm")
         if not ix then return end
         cmd=ix.." "..string.sub(cmd, 2)
     end
@@ -469,12 +366,21 @@ end
 -- If the command is prefixed with a colon (':'), the command will
 -- be run in an XTerm (or other terminal emulator) using the script
 -- \file{ion-runinxterm}.
-querylib.query_exec=querylib.make_frame_fn(
-    "Run:", nil, querylib.exec_handler, querylib.exec_completor
-)
+defcmd("WMPlex", "query_exec",
+       function(mplex)
+           querylib.do_query(mplex, "Run:", nil, 
+                       querylib.exec_handler, querylib.exec_completor)
+       end)
+
+
+-- }}}
+
+
+-- SSH {{{
 
 
 querylib.known_hosts={}
+
 
 function querylib.get_known_hosts(mplex)
     querylib.known_hosts={}
@@ -496,6 +402,7 @@ function querylib.get_known_hosts(mplex)
     f:close()
 end
 
+
 function querylib.complete_ssh(str)
     if string.len(str)==0 then
         return querylib.known_hosts
@@ -511,20 +418,24 @@ function querylib.complete_ssh(str)
     return res
 end
 
-querylib.do_query_ssh=querylib.make_execwith_fn(
-    "SSH to:", nil, 
-    querylib.make_script_lookup_fn("ion-ssh"),
-    querylib.make_completor(querylib.complete_ssh)
-)
 
 --DOC
 -- This query asks for a host to connect to with SSH. It starts
 -- up ssh in a terminal using \file{ion-ssh}. Hosts to tab-complete
 -- are read from \file{\~{}/.ssh/known\_hosts}.
-function querylib.query_ssh(mplex)
-    querylib.get_known_hosts(mplex)
-    return querylib.do_query_ssh(mplex)
-end
+defcmd("WMPlex", "query_ssh",
+       function(mplex)
+           querylib.get_known_hosts(mplex)
+           local script=querylib.lookup_script_warn(mplex, "ion-ssh")
+           querylib.do_query_execwith(mplex, "SSH to:", nil, script,
+                                      querylib.make_completor(querylib.complete_ssh))
+       end)
+
+
+-- }}}
+
+
+-- Man pages {{{{
 
 
 -- Use weak references to cache found manuals.
@@ -547,7 +458,7 @@ function querylib.man_completor(wedln, str)
         
         while str do
             data=data .. str
-            if string.len(data)>querylib.RESULT_DATA_LIMIT then
+            if string.len(data)>ioncorelib.RESULT_DATA_LIMIT then
                 error("Too much result data")
             end
             str=coroutine.yield()
@@ -586,11 +497,12 @@ end
 --    "/usr/share/man", "/usr/X11R6/man",
 --}
 --\end{verbatim}
-querylib.query_man=querylib.make_execwith_fn(
-    "Manual page (ion):", "ion",
-    querylib.make_script_lookup_fn("ion-man"),
-    querylib.man_completor
-)
+defcmd("WMPlex", "query_man", 
+       function(mplex)
+           local script=querylib.lookup_script_warn(mplex, "ion-man")
+           querylib.do_query_execwith(mplex, "Manual page (ion):", "ion",
+                                      script, querylib.man_completor)
+       end)
 
 
 -- }}}
@@ -702,20 +614,20 @@ end
 -- in the local environment of the string to point to the mplex where the
 -- query was created. It also sets the table \var{arg} in the local
 -- environment to \code{\{_, _:current()\}}.
-function querylib.query_lua(mplex)
-    local env=querylib.create_run_env(mplex)
-    
-    local function complete(wedln, code)
-        wedln:set_completions(querylib.do_complete_lua(env, code))
-    end
-
-    local function handle(code)
-        return querylib.do_handle_lua(mplex, env, code)
-    end
-    
-    query_query(mplex, "Lua code to run: ", nil, handle, complete)
-end
-
+defcmd("WMPlex", "query_lua", 
+       function(mplex)
+           local env=querylib.create_run_env(mplex)
+           
+           local function complete(wedln, code)
+               wedln:set_completions(querylib.do_complete_lua(env, code))
+           end
+           
+           local function handle(code)
+               return querylib.do_handle_lua(mplex, env, code)
+           end
+           
+           query_query(mplex, "Lua code to run: ", nil, handle, complete)
+       end)
 
 -- }}}
 
@@ -725,12 +637,13 @@ end
 
 --DOC 
 -- Display an "About Ion" message in \var{mplex}.
-function querylib.show_aboutmsg(mplex)
-    query_message(mplex, ioncore_aboutmsg())
-end
+defcmd("WMPlex", "show_about_ion",
+       function(mplex)
+           query_message(mplex, ioncore_aboutmsg())
+       end)
 
 
--- }}
+-- }}}
 
 
 -- Mark ourselves loaded.

@@ -4,11 +4,6 @@
 -- files for other bindings.
 --
 
--- Load a library to create common queries.
-include("querylib")
--- Load a library to create menu display callbacks.
-include("menulib")
-
 
 -- global_bindings
 --
@@ -20,58 +15,39 @@ include("menulib")
 -- of the bindings. Similarly SECOND_MOD may be redefined to add a 
 -- modifier to some of the F-key bindings.
 
-global_bindings{
-    kpress(DEFAULT_MOD.."1", function(s) s:switch_nth(0) end),
-    kpress(DEFAULT_MOD.."2", function(s) s:switch_nth(1) end),
-    kpress(DEFAULT_MOD.."3", function(s) s:switch_nth(2) end),
-    kpress(DEFAULT_MOD.."4", function(s) s:switch_nth(3) end),
-    kpress(DEFAULT_MOD.."5", function(s) s:switch_nth(4) end),
-    kpress(DEFAULT_MOD.."6", function(s) s:switch_nth(5) end),
-    kpress(DEFAULT_MOD.."7", function(s) s:switch_nth(6) end),
-    kpress(DEFAULT_MOD.."8", function(s) s:switch_nth(7) end),
-    kpress(DEFAULT_MOD.."9", function(s) s:switch_nth(8) end),
-    kpress(DEFAULT_MOD.."0", function(s) s:switch_nth(9) end),
-    kpress(DEFAULT_MOD.."Left", WScreen.switch_prev),
-    kpress(DEFAULT_MOD.."Right", WScreen.switch_next),
+defbindings("WScreen", {
+    kpress(DEFAULT_MOD.."1", "switch_nth", 0),
+    kpress(DEFAULT_MOD.."2", "switch_nth", 1),
+    kpress(DEFAULT_MOD.."3", "switch_nth", 2),
+    kpress(DEFAULT_MOD.."4", "switch_nth", 3),
+    kpress(DEFAULT_MOD.."5", "switch_nth", 4),
+    kpress(DEFAULT_MOD.."6", "switch_nth", 5),
+    kpress(DEFAULT_MOD.."7", "switch_nth", 6),
+    kpress(DEFAULT_MOD.."8", "switch_nth", 7),
+    kpress(DEFAULT_MOD.."9", "switch_nth", 8),
+    kpress(DEFAULT_MOD.."0", "switch_nth", 9),
+    kpress(DEFAULT_MOD.."Left", "switch_prev"),
+    kpress(DEFAULT_MOD.."Right", "switch_next"),
     
     submap(DEFAULT_MOD.."K", {
-        kpress("AnyModifier+K", goto_previous),
-        kpress("AnyModifier+T", clear_tags),
+        kpress("AnyModifier+K", "goto_previous"),
+        kpress("AnyModifier+T", "clear_tags"),
     }),
     
-    kpress(DEFAULT_MOD.."Shift+1", function() goto_nth_screen(0) end),
-    kpress(DEFAULT_MOD.."Shift+2", function() goto_nth_screen(1) end),
-    kpress(DEFAULT_MOD.."Shift+Left", goto_next_screen),
-    kpress(DEFAULT_MOD.."Shift+Right", goto_prev_screen),
+    kpress(DEFAULT_MOD.."Shift+1", "goto_nth_screen", 0),
+    kpress(DEFAULT_MOD.."Shift+2", "goto_nth_screen", 1),
+    kpress(DEFAULT_MOD.."Shift+Left", "goto_next_screen"),
+    kpress(DEFAULT_MOD.."Shift+Right", "goto_prev_screen"),
     
-    kpress(DEFAULT_MOD.."F1", function(scr)
-                                  -- Display Ion's manual page
-                                  local m=lookup_script("ion-man")
-                                  if m then
-                                      exec_in(scr, m.." ion")
-                                  end
-                              end),
-    kpress("F2", make_exec_fn("xterm")),
+    kpress(DEFAULT_MOD.."F1", "show_manual", "ion"),
+    kpress("F2", "exec", "xterm"),
     
-    -- Create a new workspace with a default name.
-    kpress(DEFAULT_MOD.."F9", 
-           function(scr)
-               scr:attach_new({ type=default_ws_type, switchto=true })
-           end),
+    kpress(DEFAULT_MOD.."F9", "create_new_ws"),
 
-    -- Menus/queries
-
-    -- KEYF11 and KEYF12 are normally defined to be the strings "F11" 
-    -- and "F12", respectively, but on SunOS, they're something  else 
-    -- (although the keys on the keyboard are the same).
-    kpress(SECOND_MOD..KEYF12, make_bigmenu_fn("mainmenu")),
-    mpress("Button2", make_pmenu_fn("windowlist")),
-    mpress("Button3", make_pmenu_fn("mainmenu")),
-    
-    --kpress(DEFAULT_MOD.."Menu", make_bigmenu_fn("mainmenu")),
-    --kpress(SECOND_MOD..KEYF11, querylib.query_restart),
-    --kpress(SECOND_MOD..KEYF12, querylib.query_exit),
-}
+    kpress(SECOND_MOD..KEYF12, "bigmenu", "mainmenu"),
+    mpress("Button2", "pmenu", "windowlist"),
+    mpress("Button3", "pmenu", "mainmenu"),
+})
 
 
 -- mplex_bindings
@@ -95,20 +71,16 @@ global_bindings{
 -- 
 -- For details see the document "Ion: Configuring and extending with Lua".
 
-mplex_bindings{
-    kpress_waitrel(DEFAULT_MOD.."C", WMPlex.close_sub_or_self),
-    kpress_waitrel(DEFAULT_MOD.."L", 
-                   make_mplex_clientwin_fn(WClientWin.broken_app_resize_kludge)),
-    kpress_waitrel(DEFAULT_MOD.."Return", 
-                   make_mplex_clientwin_fn(WClientWin.toggle_fullscreen)),
+defbindings("WMPlex", {
+    kpress_waitrel(DEFAULT_MOD.."C", "close_sub_or_self"),
+    kpress_waitrel(DEFAULT_MOD.."L", "@sub_cwin", "broken_app_resize_kludge"),
+    kpress_waitrel(DEFAULT_MOD.."Return", "@sub", "toggle_fullscreen"),
 
     submap(DEFAULT_MOD.."K", {
-        kpress("AnyModifier+C",
-               make_mplex_clientwin_fn(WClientWin.kill)),
-        kpress("AnyModifier+Q", 
-               make_mplex_clientwin_fn(WClientWin.quote_next)),
+        kpress("AnyModifier+C", "@sub_cwin", "kill"),
+        kpress("AnyModifier+Q", "@sub_cwin", "quote_next"),
     }),
-}
+})
 
 
 -- frame_bindings
@@ -117,78 +89,82 @@ mplex_bindings{
 -- bindings that differ between frame types are defined in the modules' 
 -- configuration files.
 
-frame_bindings{
+defbindings("WFrame", {
     -- Tag viewed object
-    kpress(DEFAULT_MOD.."T", make_mplex_sub_fn(WRegion.toggle_tag)),
+    kpress(DEFAULT_MOD.."T", "@sub", "toggle_tag"),
 
     submap(DEFAULT_MOD.."K", {
         -- Selected object/tab switching
-        kpress("AnyModifier+N", WFrame.switch_next),
-        kpress("AnyModifier+P", WFrame.switch_prev),
-        kpress("AnyModifier+1", function(f) f:switch_nth(0) end),
-        kpress("AnyModifier+2", function(f) f:switch_nth(1) end),
-        kpress("AnyModifier+3", function(f) f:switch_nth(2) end),
-        kpress("AnyModifier+4", function(f) f:switch_nth(3) end),
-        kpress("AnyModifier+5", function(f) f:switch_nth(4) end),
-        kpress("AnyModifier+6", function(f) f:switch_nth(5) end),
-        kpress("AnyModifier+7", function(f) f:switch_nth(6) end),
-        kpress("AnyModifier+8", function(f) f:switch_nth(7) end),
-        kpress("AnyModifier+9", function(f) f:switch_nth(8) end),
-        kpress("AnyModifier+0", function(f) f:switch_nth(9) end),
+        kpress("AnyModifier+N", "switch_next"),
+        kpress("AnyModifier+P", "switch_prev"),
+        kpress("AnyModifier+1", "switch_nth", 0),
+        kpress("AnyModifier+2", "switch_nth", 1),
+        kpress("AnyModifier+3", "switch_nth", 2),
+        kpress("AnyModifier+4", "switch_nth", 3),
+        kpress("AnyModifier+5", "switch_nth", 4),
+        kpress("AnyModifier+6", "switch_nth", 5),
+        kpress("AnyModifier+7", "switch_nth", 6),
+        kpress("AnyModifier+8", "switch_nth", 7),
+        kpress("AnyModifier+9", "switch_nth", 8),
+        kpress("AnyModifier+0", "switch_nth", 9),
+        kpress("Left", "dec_managed_index"),
+        kpress("Right", "inc_managed_index"),
         -- Maximize
-        kpress("AnyModifier+H", WFrame.maximize_horiz),
-        kpress("AnyModifier+V", WFrame.maximize_vert),
+        kpress("AnyModifier+H", "maximize_horiz"),
+        kpress("AnyModifier+V", "maximize_vert"),
         -- Attach tagged objects
-        kpress("AnyModifier+A", WFrame.attach_tagged),
+        kpress("AnyModifier+A", "attach_tagged"),
     }),
     
     -- Queries
-    kpress(DEFAULT_MOD.."A", querylib.query_attachclient),
-    kpress(DEFAULT_MOD.."G", querylib.query_gotoclient),
-    kpress(SECOND_MOD.."F1", querylib.query_man),
-    kpress(SECOND_MOD.."F3", querylib.query_exec),
-    kpress(DEFAULT_MOD.."F3", querylib.query_lua),
-    kpress(SECOND_MOD.."F4", querylib.query_ssh),
-    kpress(SECOND_MOD.."F5", querylib.query_editfile),
-    kpress(SECOND_MOD.."F6", querylib.query_runfile),
-    kpress(SECOND_MOD.."F9", querylib.query_workspace),
+    kpress(DEFAULT_MOD.."A", "query_attachclient"),
+    kpress(DEFAULT_MOD.."G", "query_gotoclient"),
+    kpress(SECOND_MOD.."F1", "query_man"),
+    kpress(SECOND_MOD.."F3", "query_exec"),
+    kpress(DEFAULT_MOD.."F3", "query_lua"),
+    kpress(SECOND_MOD.."F4", "query_ssh"),
+    kpress(SECOND_MOD.."F5", "query_editfile"),
+    kpress(SECOND_MOD.."F6", "query_runfile"),
+    kpress(SECOND_MOD.."F9", "query_workspace"),
     -- Menus
-    kpress(DEFAULT_MOD.."M", make_menu_fn("ctxmenu")),
-    mpress("Button3", make_pmenu_fn("ctxmenu"), "tab"),
-}
+    kpress(DEFAULT_MOD.."M", "menu", "ctxmenu"),
+    mpress("Button3", "pmenu", "ctxmenu"),
+    -- Move/resize mode
+    kpress(DEFAULT_MOD.."R", "begin_moveres"),
+})
 
 
--- Keyboard move/resize mode bindings
+-- Move/resize mode bindings.
 
-kbresize_bindings{
-    kpress("AnyModifier+Escape", kbresize_cancel),
-    kpress("AnyModifier+Return", kbresize_end),
+defbindings("WMoveresMode", {
+    kpress("AnyModifier+Escape", "cancel"),
+    kpress("AnyModifier+Return", "end"),
     
-    kpress("Left", function() kbresize_resize(1, 0, 0, 0) end),
-    kpress("Right",function() kbresize_resize(0, 1, 0, 0) end),
-    kpress("Up",   function() kbresize_resize(0, 0, 1, 0) end),
-    kpress("Down", function() kbresize_resize(0, 0, 0, 1) end),
-    kpress("F",    function() kbresize_resize(1, 0, 0, 0) end),
-    kpress("B",	   function() kbresize_resize(0, 1, 0, 0) end),
-    kpress("P",    function() kbresize_resize(0, 0, 1, 0) end),
-    kpress("N",    function() kbresize_resize(0, 0, 0, 1) end),
+    kpress("Left", "resize", 1, 0, 0, 0),
+    kpress("Right","resize", 0, 1, 0, 0),
+    kpress("Up",   "resize", 0, 0, 1, 0),
+    kpress("Down", "resize", 0, 0, 0, 1),
+    kpress("F",    "resize", 1, 0, 0, 0),
+    kpress("B",	   "resize", 0, 1, 0, 0),
+    kpress("P",    "resize", 0, 0, 1, 0),
+    kpress("N",    "resize", 0, 0, 0, 1),
 
-    kpress("Shift+Left", function() kbresize_resize(-1, 0, 0, 0) end),
-    kpress("Shift+Right",function() kbresize_resize( 0,-1, 0, 0) end),
-    kpress("Shift+Up",   function() kbresize_resize( 0, 0,-1, 0) end),
-    kpress("Shift+Down", function() kbresize_resize( 0, 0, 0,-1) end),
-    kpress("Shift+F",    function() kbresize_resize(-1, 0, 0, 0) end),
-    kpress("Shift+B",    function() kbresize_resize( 0,-1, 0, 0) end),
-    kpress("Shift+P",    function() kbresize_resize( 0, 0,-1, 0) end),
-    kpress("Shift+N",    function() kbresize_resize( 0, 0, 0,-1) end),
+    kpress("Shift+Left", "resize",-1, 0, 0, 0),
+    kpress("Shift+Right","resize", 0,-1, 0, 0),
+    kpress("Shift+Up",   "resize", 0, 0,-1, 0),
+    kpress("Shift+Down", "resize", 0, 0, 0,-1),
+    kpress("Shift+F",    "resize",-1, 0, 0, 0),
+    kpress("Shift+B",    "resize", 0,-1, 0, 0),
+    kpress("Shift+P",    "resize", 0, 0,-1, 0),
+    kpress("Shift+N",    "resize", 0, 0, 0,-1),
 
-    kpress(DEFAULT_MOD.."Left", function() kbresize_move(-1, 0) end),
-    kpress(DEFAULT_MOD.."Right",function() kbresize_move( 1, 0) end),
-    kpress(DEFAULT_MOD.."Up", 	function() kbresize_move( 0,-1) end),
-    kpress(DEFAULT_MOD.."Down", function() kbresize_move( 0, 1) end),
-    kpress(DEFAULT_MOD.."F",    function() kbresize_move(-1, 0) end),
-    kpress(DEFAULT_MOD.."B",    function() kbresize_move( 1, 0) end),
-    kpress(DEFAULT_MOD.."P", 	function() kbresize_move( 0,-1) end),
-    kpress(DEFAULT_MOD.."N",    function() kbresize_move( 0, 1) end),
-}
+    kpress(DEFAULT_MOD.."Left", "move",-1, 0),
+    kpress(DEFAULT_MOD.."Right","move", 1, 0),
+    kpress(DEFAULT_MOD.."Up", 	"move", 0,-1),
+    kpress(DEFAULT_MOD.."Down", "move", 0, 1),
+    kpress(DEFAULT_MOD.."F",    "move",-1, 0),
+    kpress(DEFAULT_MOD.."B",    "move", 1, 0),
+    kpress(DEFAULT_MOD.."P", 	"move", 0,-1),
+    kpress(DEFAULT_MOD.."N",    "move", 0, 1),
+})
 

@@ -12,15 +12,20 @@
 #ifndef ION_IONCORE_KBRESIZE_H
 #define ION_IONCORE_KBRESIZE_H
 
+#include "common.h"
 #include "frame.h"
+#include "resize.h"
 
-extern void frame_kbresize_units(WFrame *frame, int *wret, int *hret);
-extern void frame_kbresize_begin(WFrame *frame);
 
-extern void kbresize_end();
-extern void kbresize_cancel();
-extern void kbresize_move(int horizmul, int vertmul);
-extern void kbresize_resize(int left, int right, int top, int bottom);
-extern void kbresize_accel(int *wu, int *hu, int mode);
+extern void frame_moveres_begin(WFrame *frame);
+
+extern void moveresmode_end(WMoveresMode *mode);
+extern void moveresmode_cancel(WMoveresMode *mode);
+extern void moveresmode_move(WMoveresMode *mode, 
+                             int horizmul, int vertmul);
+extern void moveresmode_resize(WMoveresMode *mode, 
+                               int left, int right, int top, int bottom);
+extern void moveresmode_accel(WMoveresMode *mode, 
+                              int *wu, int *hu, int accel_mode);
 
 #endif /* ION_IONCORE_KBRESIZE_H */

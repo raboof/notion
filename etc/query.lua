@@ -7,57 +7,56 @@
 -- 
 
 
-query_wedln_bindings{
-    kpress("Control+F", WEdln.forward),
-    kpress("Control+B", WEdln.back),
-    kpress("Control+E", WEdln.eol),
-    kpress("Control+A", WEdln.bol),
-    kpress("Control+Z", WEdln.bskip_word),
-    kpress("Control+X", WEdln.skip_word),
+defbindings("WEdln", {
+    kpress("Control+F", "forward"),
+    kpress("Control+B", "back"),
+    kpress("Control+E", "eol"),
+    kpress("Control+A", "bol"),
+    kpress("Control+Z", "bskip_word"),
+    kpress("Control+X", "skip_word"),
 
-    kpress("Control+D", WEdln.delete),
-    kpress("Control+H", WEdln.backspace),
-    kpress("Control+J", WEdln.kill_to_eol),
-    kpress("Control+Y", WEdln.kill_line),
-    kpress("Control+W", WEdln.kill_word),
-    kpress("Control+O", WEdln.bkill_word),
+    kpress("Control+D", "delete"),
+    kpress("Control+H", "backspace"),
+    kpress("Control+J", "kill_to_eol"),
+    kpress("Control+Y", "kill_line"),
+    kpress("Control+W", "kill_word"),
+    kpress("Control+O", "bkill_word"),
 
-    kpress("Control+P", WEdln.history_prev),
-    kpress("Control+N", WEdln.history_next),
+    kpress("Control+P", "history_prev"),
+    kpress("Control+N", "history_next"),
 
-    kpress("Control+M", WEdln.finish),
+    kpress("Control+M", "finish"),
     
     submap("Control+K", {
-        kpress("AnyModifier+B", WEdln.set_mark),
-        kpress("AnyModifier+Y", WEdln.cut),
-        kpress("AnyModifier+K", WEdln.copy),
-        kpress("AnyModifier+C", WEdln.paste),
-        kpress("AnyModifier+G", WEdln.clear_mark),
+        kpress("AnyModifier+B", "set_mark"),
+        kpress("AnyModifier+Y", "cut"),
+        kpress("AnyModifier+K", "copy"),
+        kpress("AnyModifier+C", "paste"),
+        kpress("AnyModifier+G", "clear_mark"),
     }),
 
-    kpress("Return", WEdln.finish),
-    kpress("KP_Enter", WEdln.finish),
-    kpress("Delete", WEdln.delete),
-    kpress("BackSpace", WEdln.backspace),
-    kpress("Home", WEdln.bol),
-    kpress("End", WEdln.eol),
-    kpress("Tab", WEdln.complete),
-    kpress("Up", WEdln.history_prev),
-    kpress("Down", WEdln.history_next),
-    kpress("Right", WEdln.forward),
-    kpress("Left", WEdln.back),
+    kpress("Return", "finish"),
+    kpress("KP_Enter", "finish"),
+    kpress("Delete", "delete"),
+    kpress("BackSpace", "backspace"),
+    kpress("Home", "bol"),
+    kpress("End", "eol"),
+    kpress("Tab", "complete"),
+    kpress("Up", "history_prev"),
+    kpress("Down", "history_next"),
+    kpress("Right", "forward"),
+    kpress("Left", "back"),
 
-    mclick("Button2", WEdln.paste),
-}
+    mclick("Button2", "paste"),
+})
 
-query_bindings{
-    kpress("Escape", WInput.cancel),
-    kpress("Control+G", WInput.cancel),
-    kpress("Control+C", WInput.cancel),
-    kpress("Control+U", WInput.scrollup),
-    kpress("Control+V", WInput.scrolldown),
-    kpress("Page_Up", WInput.scrollup),
-    kpress("Page_Down", WInput.scrolldown),
-}
-
+defbindings("WInput", {
+    kpress("Escape", "cancel"),
+    kpress("Control+G", "cancel"),
+    kpress("Control+C", "cancel"),
+    kpress("Control+U", "scrollup"),
+    kpress("Control+V", "scrolldown"),
+    kpress("Page_Up", "scrollup"),
+    kpress("Page_Down", "scrolldown"),
+})
 

@@ -29,49 +29,6 @@
 
 #define XOR_RESIZE (!wglobal.opaque_resize)
 
-static bool resize_mode=FALSE;
-
-static XSizeHints tmphints;
-static uint tmprelw, tmprelh;
-static int tmpdx1, tmpdx2, tmpdy1, tmpdy2;
-static WRectangle tmporiggeom;
-static WRectangle tmpgeom;
-static WRegion *tmpreg;
-static WDrawRubberbandFn *tmprubfn=NULL;
-static int parent_rx, parent_ry;
-static enum {MOVERES_SIZE, MOVERES_POS} moveres_mode=MOVERES_SIZE;
-static bool resize_cumulative=FALSE;
-static bool snap_enabled=FALSE;
-static WRectangle tmp_snapgeom;
-static int tmprqflags=0;
-static WInfoWin *moveres_infowin=NULL;
-
-
-/*static WWatch tmpregwatch=WWATCH_INIT;
-#define tmpreg ((WRegion*)(tmpregwatch.obj))
-*/
-
-/*{{{ Dynfuns */
-
-
-void region_resize_hints(WRegion *reg, XSizeHints *hints_ret,
-						 uint *relw_ret, uint *relh_ret)
-{
-	hints_ret->flags=0;
-	hints_ret->min_width=1;
-	hints_ret->min_height=1;
-	if(relw_ret!=NULL)
-		*relw_ret=REGION_GEOM(reg).w;
-	if(relh_ret!=NULL)
-		*relh_ret=REGION_GEOM(reg).h;
-	{
-		CALL_DYN(region_resize_hints, reg, (reg, hints_ret, relw_ret, relh_ret));
-	}
-}
-
-
-/*}}}*/
-
 
 /*{{{ Size/position display and rubberband */
 
@@ -124,112 +81,350 @@ static int chars_for_num(int d)
 }
 
 
-static void setup_moveres_display(WWindow *parent, int cx, int cy)
+static WInfoWin *setup_moveres_display(WWindow *parent, int cx, int cy)
 {
 	GrBorderWidths bdw;
 	GrFontExtents fnte;
 	WRectangle g;
+    WInfoWin *infowin;
 	
 	g.x=0;
 	g.y=0;
 	g.w=1;
 	g.h=1;
 	
-	assert(moveres_infowin==NULL);
+	infowin=create_infowin(parent, &g, "moveres_display");
 	
-	moveres_infowin=create_infowin(parent, &g, "moveres_display");
-	
-	if(moveres_infowin==NULL)
-		return;
-
-	grbrush_get_border_widths(WINFOWIN_BRUSH(moveres_infowin), &bdw);
-	grbrush_get_font_extents(WINFOWIN_BRUSH(moveres_infowin), &fnte);
+	if(infowin==NULL)
+		return NULL;
+    
+	grbrush_get_border_widths(WINFOWIN_BRUSH(infowin), &bdw);
+	grbrush_get_font_extents(WINFOWIN_BRUSH(infowin), &fnte);
 	
 	/* Create move/resize position/size display window */
 	g.w=3;
 	g.w+=chars_for_num(REGION_GEOM(parent).w);
 	g.w+=chars_for_num(REGION_GEOM(parent).h);
-	g.w*=max_width(WINFOWIN_BRUSH(moveres_infowin), "0123456789x+"); 	
+	g.w*=max_width(WINFOWIN_BRUSH(infowin), "0123456789x+"); 	
 	g.w+=bdw.left+bdw.right;
 	g.h=fnte.max_height+bdw.top+bdw.bottom;;
-
+    
 	g.x=cx-g.w/2;
 	g.y=cy-g.h/2;
 	
-	region_fit((WRegion*)moveres_infowin, &g);
-	region_map((WRegion*)moveres_infowin);
+	region_fit((WRegion*)infowin, &g);
+	region_map((WRegion*)infowin);
+    
+    return infowin;
 }
 
 
-static void res_draw_moveres()
+static void moveres_draw_infowin(WMoveresMode *mode)
 {
 	WRectangle geom;
 	char *buf;
-		
-	if(moveres_infowin==NULL)
+    
+	if(mode->infowin==NULL)
 		return;
 	
-	buf=WINFOWIN_BUFFER(moveres_infowin);
+	buf=WINFOWIN_BUFFER(mode->infowin);
 	
 	if(buf==NULL)
 		return;
 	
-	if(moveres_mode==MOVERES_SIZE){
+	if(mode->mode==MOVERES_SIZE){
 		int w, h;
 		
-		w=(tmpgeom.w-tmporiggeom.w)+tmprelw;
-		h=(tmpgeom.h-tmporiggeom.h)+tmprelh;
-
-		if((tmphints.flags&PResizeInc) &&
-		   (tmphints.width_inc>1 || tmphints.height_inc>1)){
-			if(tmphints.flags&PBaseSize){
-				w-=tmphints.base_width;
-				h-=tmphints.base_height;
+		w=(mode->geom.w-mode->origgeom.w)+mode->relw;
+		h=(mode->geom.h-mode->origgeom.h)+mode->relh;
+        
+		if((mode->hints.flags&PResizeInc) &&
+		   (mode->hints.width_inc>1 || mode->hints.height_inc>1)){
+			if(mode->hints.flags&PBaseSize){
+				w-=mode->hints.base_width;
+				h-=mode->hints.base_height;
 			}
-			w/=tmphints.width_inc;
-			h/=tmphints.height_inc;
+			w/=mode->hints.width_inc;
+			h/=mode->hints.height_inc;
 		}
 		
 		snprintf(buf, WINFOWIN_BUFFER_LEN, "%dx%d", w, h);
 	}else{
-		snprintf(buf, WINFOWIN_BUFFER_LEN, "%+d %+d", tmpgeom.x, tmpgeom.y);
+		snprintf(buf, WINFOWIN_BUFFER_LEN, "%+d %+d", 
+                 mode->geom.x, mode->geom.y);
 	}
 	
-	window_draw((WWindow*)moveres_infowin, TRUE);
+	window_draw((WWindow*)mode->infowin, TRUE);
 }
 
 
-static void res_draw_rubberband(WRootWin *rootwin)
+static void moveres_draw_rubberband(WMoveresMode *mode)
 {
-	WRectangle rgeom=tmpgeom;
+	WRectangle rgeom=mode->geom;
 	int rx, ry;
-	
-	rgeom.x+=parent_rx;
-	rgeom.y+=parent_ry;
-
-	if(tmprubfn==NULL)
+	WRootWin *rootwin=(mode->reg==NULL ? NULL : ROOTWIN_OF(mode->reg));
+    
+    if(rootwin==NULL)
+        return;
+    
+	rgeom.x+=mode->parent_rx;
+	rgeom.y+=mode->parent_ry;
+    
+	if(mode->rubfn==NULL)
 		draw_rubberbox(rootwin, &rgeom);
 	else
-		tmprubfn(rootwin, &rgeom);
+		mode->rubfn(rootwin, &rgeom);
 }
 
 
 /*}}}*/
 
 
-/*{{{ Resize */
+/*{{{ Move/resize mode */
 
 
-WRegion *resize_target()
+WMoveresMode *tmpmode=NULL;
+
+
+IMPLOBJ(WMoveresMode, WObj, NULL, NULL);
+
+
+WMoveresMode *moveres_mode(WRegion *reg)
 {
-    if(!resize_mode)
+    if(tmpmode==NULL)
         return NULL;
-    return tmpreg;
+    return ((reg==NULL || tmpmode->reg==reg) ? tmpmode : NULL);
+}
+
+
+WRegion *moveresmode_target(WMoveresMode *mode)
+{
+    return mode->reg;
+}
+
+
+static bool moveresmode_init(WMoveresMode *mode, WRegion *reg,
+                             WDrawRubberbandFn *rubfn, bool cumulative)
+{
+	WWindow *parent;
+	WRegion *mgr;
+    
+    if(tmpmode!=NULL)
+        return FALSE;
+    
+	parent=REGION_PARENT_CHK(reg, WWindow);
+	
+	if(parent==NULL)
+		return FALSE;
+	
+    tmpmode=mode;
+    
+	mode->snap_enabled=FALSE;
+	region_resize_hints(reg, &mode->hints, &mode->relw, &mode->relh);
+    
+	region_rootpos((WRegion*)parent, &mode->parent_rx, &mode->parent_ry);
+	
+	mode->geom=REGION_GEOM(reg);
+	mode->origgeom=REGION_GEOM(reg);
+	mode->dx1=0;
+	mode->dx2=0;
+	mode->dy1=0;
+	mode->dy2=0;
+	mode->rubfn=rubfn;
+	mode->resize_cumulative=cumulative;
+	mode->rqflags=(XOR_RESIZE ? REGION_RQGEOM_TRYONLY : 0);
+	mode->reg=reg;
+    mode->mode=MOVERES_SIZE;
+    
+	/* Get snapping geometry */
+	mgr=REGION_MANAGER(reg);
+    
+	if(mgr!=NULL){
+		mode->snapgeom=REGION_GEOM(mgr);
+		
+		if(mgr==(WRegion*)parent){
+			mode->snapgeom.x=0;
+			mode->snapgeom.y=0;	
+			mode->snap_enabled=FALSE;
+		}else if(REGION_PARENT(mgr)==(WRegion*)parent){
+			mode->snap_enabled=TRUE;
+		}
+	}
+	
+	if(!mode->hints.flags&PMinSize || mode->hints.min_width<1)
+		mode->hints.min_width=1;
+	if(!mode->hints.flags&PMinSize || mode->hints.min_height<1)
+		mode->hints.min_height=1;
+	
+    /* Set up info window */
+    {
+        int x=mode->parent_rx+mode->geom.x+mode->geom.w/2;
+        int y=mode->parent_ry+mode->geom.y+mode->geom.h/2;
+        mode->infowin=setup_moveres_display(parent, x, y);
+    }
+                                        
+	moveres_draw_infowin(mode);
+	
+	if(XOR_RESIZE){
+		XGrabServer(wglobal.dpy);
+		moveres_draw_rubberband(mode);
+    }
+    
+	return TRUE;
+}
+
+
+static WMoveresMode *create_moveresmode(WRegion *reg,
+                                        WDrawRubberbandFn *rubfn,
+                                        bool cumulative)
+{
+    CREATEOBJ_IMPL(WMoveresMode, moveresmode, (p, reg, rubfn, cumulative));
+}
+
+
+WMoveresMode *begin_resize(WRegion *reg, WDrawRubberbandFn *rubfn, 
+                           bool cumulative)
+{
+	WMoveresMode *mode=create_moveresmode(reg, rubfn, cumulative);
+    
+    if(mode!=NULL){
+        mode->mode=MOVERES_SIZE;
+        change_grab_cursor(CURSOR_RESIZE);
+    }
+
+    return mode;
+}
+
+
+WMoveresMode *begin_move(WRegion *reg, WDrawRubberbandFn *rubfn, 
+                         bool cumulative)
+{
+	WMoveresMode *mode=create_moveresmode(reg, rubfn, cumulative);
+    
+    if(mode!=NULL){
+        mode->mode=MOVERES_POS;
+        change_grab_cursor(CURSOR_MOVE);
+    }
+    
+    return mode;
+}
+
+
+static void moveresmode_delta(WMoveresMode *mode, 
+                              int dx1, int dx2, int dy1, int dy2,
+                              WRectangle *rret)
+{
+	WRectangle geom;
+	int w, h;
+	int realdx1, realdx2, realdy1, realdy2;
+	
+	realdx1=(mode->dx1+=dx1);
+	realdx2=(mode->dx2+=dx2);
+	realdy1=(mode->dy1+=dy1);
+	realdy2=(mode->dy2+=dy2);
+	geom=mode->origgeom;
+    
+	/* snap */
+	if(mode->snap_enabled){
+		WRectangle *sg=&mode->snapgeom;
+		int er=CF_EDGE_RESISTANCE;
+        
+		if(mode->dx1!=0 && geom.x+mode->dx1<sg->x && geom.x+mode->dx1>sg->x-er)
+			realdx1=sg->x-geom.x;
+		if(mode->dx2!=0 && geom.x+geom.w+mode->dx2>sg->x+sg->w && geom.x+geom.w+mode->dx2<sg->x+sg->w+er)
+			realdx2=sg->x+sg->w-geom.x-geom.w;
+		if(mode->dy1!=0 && geom.y+mode->dy1<sg->y && geom.y+mode->dy1>sg->y-er)
+			realdy1=sg->y-geom.y;
+		if(mode->dy2!=0 && geom.y+geom.h+mode->dy2>sg->y+sg->h && geom.y+geom.h+mode->dy2<sg->y+sg->h+er)
+			realdy2=sg->y+sg->h-geom.y-geom.h;
+	}
+	
+	w=mode->relw-realdx1+realdx2;
+	h=mode->relh-realdy1+realdy2;
+	
+	if(w<=0)
+		w=mode->hints.min_width;
+	if(h<=0)
+		h=mode->hints.min_height;
+	
+	correct_size(&w, &h, &mode->hints, TRUE);
+	
+	/* Do not modify coordinates and sizes that were not requested to be
+	 * changed. 
+	 */
+	
+	if(mode->dx1==mode->dx2){
+		if(mode->dx1==0 || realdx1!=mode->dx1)
+			geom.x+=realdx1;
+		else
+			geom.x+=realdx2;
+	}else{
+		geom.w=geom.w-mode->relw+w;
+		if(mode->dx1==0 || realdx1!=mode->dx1)
+			geom.x+=realdx1;
+		else
+			geom.x+=mode->origgeom.w-geom.w;
+	}
+    
+	
+	if(mode->dy1==mode->dy2){
+		if(mode->dy1==0 || realdy1!=mode->dy1)
+			geom.y+=realdy1;
+		else
+			geom.y+=realdy2;
+	}else{
+		geom.h=geom.h-mode->relh+h;
+		if(mode->dy1==0 || realdy1!=mode->dy1)
+			geom.y+=realdy1;
+		else
+			geom.y+=mode->origgeom.h-geom.h;
+	}
+	
+	if(XOR_RESIZE)
+		moveres_draw_rubberband(mode);
+	
+    if(mode->reg!=NULL)
+        region_request_geom(mode->reg, mode->rqflags, &geom, &mode->geom);
+	
+	if(!mode->resize_cumulative){
+		mode->dx1=0;
+		mode->dx2=0;
+		mode->dy1=0;
+		mode->dy2=0;
+		mode->relw=(mode->geom.w-mode->origgeom.w)+mode->relw;
+		mode->relh=(mode->geom.h-mode->origgeom.h)+mode->relh;
+		mode->origgeom=mode->geom;
+	}
+	
+	moveres_draw_infowin(mode);
+	
+	if(XOR_RESIZE)
+		moveres_draw_rubberband(mode);
+	
+	if(rret!=NULL)
+		*rret=mode->geom;
+}
+
+
+void moveresmode_delta_resize(WMoveresMode *mode, 
+                              int dx1, int dx2, int dy1, int dy2,
+                              WRectangle *rret)
+{
+	mode->mode=MOVERES_SIZE;
+	moveresmode_delta(mode, dx1, dx2, dy1, dy2, rret);
+}
+
+
+void moveresmode_delta_move(WMoveresMode *mode, 
+                            int dx, int dy, WRectangle *rret)
+{
+	mode->mode=MOVERES_POS;
+	moveresmode_delta(mode, dx, dx, dy, dy, rret);
 }
 
 
 /* It is ugly to do this here, but it will have to do for now... */
-static void set_saved(WRegion *reg)
+static void set_saved(WMoveresMode *mode, WRegion *reg)
 {
 	WFrame *frame;
 	
@@ -239,284 +434,53 @@ static void set_saved(WRegion *reg)
 	frame=(WFrame*)reg;
 	
 	/* Restore saved sizes from the beginning of the resize action */
-	if(tmporiggeom.w!=tmpgeom.w){
-		frame->saved_x=tmporiggeom.x;
-		frame->saved_w=tmporiggeom.w;
+	if(mode->origgeom.w!=mode->geom.w){
+		frame->saved_x=mode->origgeom.x;
+		frame->saved_w=mode->origgeom.w;
 	}
 	
-	if(tmporiggeom.h!=tmpgeom.h){
-		frame->saved_y=tmporiggeom.y;
-		frame->saved_h=tmporiggeom.h;
+	if(mode->origgeom.h!=mode->geom.h){
+		frame->saved_y=mode->origgeom.y;
+		frame->saved_h=mode->origgeom.h;
 	}
 }
 
 
-static void do_end_resize(WRegion *reg, bool dors)
+bool moveresmode_do_end(WMoveresMode *mode, bool apply)
 {
-	WRootWin *rootwin;
-	
-	resize_mode=FALSE;
-	rootwin=ROOTWIN_OF(reg);
+	WRegion *reg=mode->reg;
+    
+    assert(reg!=NULL);
+    assert(tmpmode==mode);
+    
+    tmpmode=NULL;
 	
 	if(XOR_RESIZE){
-		res_draw_rubberband(rootwin);
-		if(dors){
-			WRectangle g2=tmpgeom;
-			region_request_geom(reg, tmprqflags&~REGION_RQGEOM_TRYONLY,
-								&g2, &tmpgeom);
+		moveres_draw_rubberband(mode);
+		if(apply){
+			WRectangle g2=mode->geom;
+			region_request_geom(reg, mode->rqflags&~REGION_RQGEOM_TRYONLY,
+								&g2, &mode->geom);
 		}
 		XUngrabServer(wglobal.dpy);
 	}
-	if(dors)
-		set_saved(reg);
+	if(apply)
+		set_saved(mode, reg);
 	
-	if(moveres_infowin!=NULL){
-		defer_destroy((WObj*)moveres_infowin);
-		moveres_infowin=NULL;
+	if(mode->infowin!=NULL){
+		defer_destroy((WObj*)mode->infowin);
+		mode->infowin=NULL;
 	}
-}
-
-
-/*static void tmpreg_watch_handler(WWatch *watch, WRegion *reg)
-{
-	D(warn("Object destroyed while resizing."));
-	do_end_resize(reg, FALSE);
-}*/
-
-
-static bool begin_moveres(WRegion *reg, WDrawRubberbandFn *rubfn,
-						  bool cumulative, int cursor)
-{
-	WRootWin *rootwin=ROOTWIN_OF(reg);
-	WWindow *parent;
-	WRegion *mgr;
-	
-	if(tmpreg!=NULL)
-		return FALSE;
-
-	snap_enabled=FALSE;
-	
-	region_resize_hints(reg, &tmphints, &tmprelw, &tmprelh);
-
-	parent=REGION_PARENT_CHK(reg, WWindow);
-	
-	if(parent==NULL)
-		return FALSE;
-	
-	region_rootpos((WRegion*)parent, &parent_rx, &parent_ry);
-	
-	tmpgeom=REGION_GEOM(reg);
-	tmporiggeom=REGION_GEOM(reg);
-	tmpdx1=0;
-	tmpdx2=0;
-	tmpdy1=0;
-	tmpdy2=0;
-	tmprubfn=rubfn;
-	resize_cumulative=cumulative;
-	resize_mode=TRUE;
-	tmprqflags=(XOR_RESIZE ? REGION_RQGEOM_TRYONLY : 0);
-
-	/*setup_watch(&tmpregwatch, (WObj*)reg,
-				(WWatchHandler*)tmpreg_watch_handler);*/
-	tmpreg=reg;
-
-	/* Get snapping geometry */
-	mgr=REGION_MANAGER(reg);
-		
-	if(mgr!=NULL){
-		tmp_snapgeom=REGION_GEOM(mgr);
-		
-		if(mgr==(WRegion*)parent){
-			tmp_snapgeom.x=0;
-			tmp_snapgeom.y=0;	
-			snap_enabled=FALSE;
-		}else if(REGION_PARENT(mgr)==(WRegion*)parent){
-			snap_enabled=TRUE;
-		}
-	}
-	
-	if(!tmphints.flags&PMinSize || tmphints.min_width<1)
-		tmphints.min_width=1;
-	if(!tmphints.flags&PMinSize || tmphints.min_height<1)
-		tmphints.min_height=1;
-	
-	if(XOR_RESIZE)
-		XGrabServer(wglobal.dpy);
-	
-	setup_moveres_display(parent, 
-						  parent_rx+tmpgeom.x+tmpgeom.w/2,
-						  parent_ry+tmpgeom.y+tmpgeom.h/2);
-	
-	res_draw_moveres();
-	
-	if(XOR_RESIZE)
-		res_draw_rubberband(rootwin);
-
-	change_grab_cursor(cursor);
-	
-	return TRUE;
-}
-
-
-bool begin_resize(WRegion *reg, WDrawRubberbandFn *rubfn, bool cumulative)
-{
-	moveres_mode=MOVERES_SIZE;
-	return begin_moveres(reg, rubfn, cumulative, CURSOR_RESIZE);
-}
-
-
-bool begin_move(WRegion *reg, WDrawRubberbandFn *rubfn, bool cumulative)
-{
-	moveres_mode=MOVERES_POS;
-	return begin_moveres(reg, rubfn, cumulative, CURSOR_MOVE);
-}
-
-
-static void delta_moveres(WRegion *reg, int dx1, int dx2, int dy1, int dy2,
-						  WRectangle *rret)
-{
-	WRootWin *rootwin=ROOTWIN_OF(reg);
-	WRectangle geom;
-	int w, h;
-	int realdx1, realdx2, realdy1, realdy2;
-	
-	if(tmpreg!=reg || reg==NULL)
-		return;
-	
-	moveres_mode=MOVERES_SIZE;
-	
-	realdx1=(tmpdx1+=dx1);
-	realdx2=(tmpdx2+=dx2);
-	realdy1=(tmpdy1+=dy1);
-	realdy2=(tmpdy2+=dy2);
-	geom=tmporiggeom;
-
-	/* snap */
-	if(snap_enabled){
-		WRectangle *sg=&tmp_snapgeom;
-		int er=CF_EDGE_RESISTANCE;
-
-		if(tmpdx1!=0 && geom.x+tmpdx1<sg->x && geom.x+tmpdx1>sg->x-er)
-			realdx1=sg->x-geom.x;
-		if(tmpdx2!=0 && geom.x+geom.w+tmpdx2>sg->x+sg->w && geom.x+geom.w+tmpdx2<sg->x+sg->w+er)
-			realdx2=sg->x+sg->w-geom.x-geom.w;
-		if(tmpdy1!=0 && geom.y+tmpdy1<sg->y && geom.y+tmpdy1>sg->y-er)
-			realdy1=sg->y-geom.y;
-		if(tmpdy2!=0 && geom.y+geom.h+tmpdy2>sg->y+sg->h && geom.y+geom.h+tmpdy2<sg->y+sg->h+er)
-			realdy2=sg->y+sg->h-geom.y-geom.h;
-	}
-	
-	w=tmprelw-realdx1+realdx2;
-	h=tmprelh-realdy1+realdy2;
-	
-	if(w<=0)
-		w=tmphints.min_width;
-	if(h<=0)
-		h=tmphints.min_height;
-	
-	correct_size(&w, &h, &tmphints, TRUE);
-	
-	/* Do not modify coordinates and sizes that were not requested to be
-	 * changed. 
-	 */
-	
-	if(tmpdx1==tmpdx2){
-		if(tmpdx1==0 || realdx1!=tmpdx1)
-			geom.x+=realdx1;
-		else
-			geom.x+=realdx2;
-	}else{
-		geom.w=geom.w-tmprelw+w;
-		if(tmpdx1==0 || realdx1!=tmpdx1)
-			geom.x+=realdx1;
-		else
-			geom.x+=tmporiggeom.w-geom.w;
-	}
-
-	
-	if(tmpdy1==tmpdy2){
-		if(tmpdy1==0 || realdy1!=tmpdy1)
-			geom.y+=realdy1;
-		else
-			geom.y+=realdy2;
-	}else{
-		geom.h=geom.h-tmprelh+h;
-		if(tmpdy1==0 || realdy1!=tmpdy1)
-			geom.y+=realdy1;
-		else
-			geom.y+=tmporiggeom.h-geom.h;
-	}
-	
-	if(XOR_RESIZE)
-		res_draw_rubberband(rootwin);
-	
-	region_request_geom(reg, tmprqflags, &geom, &tmpgeom);
-	
-	if(!resize_cumulative){
-		tmpdx1=0;
-		tmpdx2=0;
-		tmpdy1=0;
-		tmpdy2=0;
-		tmprelw=(tmpgeom.w-tmporiggeom.w)+tmprelw;
-		tmprelh=(tmpgeom.h-tmporiggeom.h)+tmprelh;
-		tmporiggeom=tmpgeom;
-	}
-	
-	res_draw_moveres();
-	
-	if(XOR_RESIZE)
-		res_draw_rubberband(rootwin);
-	
-	if(rret!=NULL)
-		*rret=tmpgeom;
-}
-
-
-void delta_resize(WRegion *reg, int dx1, int dx2, int dy1, int dy2,
-				   WRectangle *rret)
-{
-	moveres_mode=MOVERES_SIZE;
-	delta_moveres(reg, dx1, dx2, dy1, dy2, rret);
-}
-
-
-void delta_move(WRegion *reg, int dx, int dy, WRectangle *rret)
-{
-	moveres_mode=MOVERES_POS;
-	delta_moveres(reg, dx, dx, dy, dy, rret);
-}
-
-
-bool end_resize()
-{
-	WRegion *reg=tmpreg;
-	if(reg!=NULL){
-		/*reset_watch(&tmpregwatch);*/
-		tmpreg=NULL;
-		do_end_resize(reg, TRUE);
-		return TRUE;
-	}
-	return FALSE;
-}
-
-
-bool cancel_resize()
-{
-	WRegion *reg=tmpreg;
-	if(reg!=NULL){
-		/*reset_watch(&tmpregwatch);*/
-		tmpreg=NULL;
-		do_end_resize(reg, FALSE);
-		return TRUE;
-	}
-	return FALSE;
+    destroy_obj((WObj*)mode);
+    
+    return TRUE;
 }
 
 
 /*}}}*/
 
 
-/*{{{ Request */
+/*{{{ Request and other dynfuns */
 
 
 void region_request_geom(WRegion *reg, int flags, const WRectangle *geom,
@@ -602,6 +566,25 @@ void region_request_managed_geom_unallow(WRegion *mgr, WRegion *reg,
 	if(geomret!=NULL)
 		*geomret=REGION_GEOM(reg);
 }
+
+
+void region_resize_hints(WRegion *reg, XSizeHints *hints_ret,
+						 uint *relw_ret, uint *relh_ret)
+{
+	hints_ret->flags=0;
+	hints_ret->min_width=1;
+	hints_ret->min_height=1;
+	if(relw_ret!=NULL)
+		*relw_ret=REGION_GEOM(reg).w;
+	if(relh_ret!=NULL)
+		*relh_ret=REGION_GEOM(reg).h;
+	{
+		CALL_DYN(region_resize_hints, reg, (reg, hints_ret, relw_ret, relh_ret));
+	}
+}
+
+
+/*}}}*/
 
 
 /*}}}*/

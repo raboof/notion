@@ -17,7 +17,7 @@
 extern WBindmap ioncore_rootwin_bindmap;
 extern WBindmap ioncore_mplex_bindmap;
 extern WBindmap ioncore_frame_bindmap;
-extern WBindmap ioncore_kbresize_bindmap;
+extern WBindmap ioncore_moveres_bindmap;
 
 extern void ioncore_deinit_bindmaps();
 

@@ -31,22 +31,15 @@ static StringIntMap frame_areas[]={
 };
 
 
-/*EXTL_DOC
- * Add a set of bindings to the bindings available in every object
- * on WIonWS:s.
- */
 EXTL_EXPORT
-bool ionws_bindings(ExtlTab tab)
+bool __defbindings_WIonWS(ExtlTab tab)
 {
 	return process_bindings(&ionws_bindmap, NULL, tab);
 }
 
 
-/*EXTL_DOC
- * Add a set of bindings to the bindings available in WIonFrames.
- */
 EXTL_EXPORT
-bool ionframe_bindings(ExtlTab tab)
+bool __defbindings_WIonFrame(ExtlTab tab)
 {
 	return process_bindings(&ionframe_bindmap, frame_areas, tab);
 }

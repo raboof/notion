@@ -101,7 +101,10 @@ static void link_at(WMPlex *mplex, WRegion *reg, int index)
 		if(!(mplex->flags&WMPLEX_ADD_TO_END) && wglobal.opmode!=OPMODE_INIT)
 			after=mplex->current_sub;
 	}
-	
+
+    if(after==reg)
+        after=NULL;
+    
 	if(after!=NULL){
 		LINK_ITEM_AFTER(mplex->managed_list, after, reg, mgr_next, mgr_prev);
 	}else if(index==0){
@@ -116,8 +119,11 @@ static void link_at(WMPlex *mplex, WRegion *reg, int index)
  * Set index of \var{reg} within the multiplexer to \var{index}.
  */
 EXTL_EXPORT_MEMBER
-void mplex_move_to_index(WMPlex *mplex, WRegion *reg, int index)
+void mplex_set_managed_index(WMPlex *mplex, WRegion *reg, int index)
 {
+    if(index<0)
+        return;
+
 	if(REGION_MANAGER(reg)!=(WRegion*)mplex)
 		return;
 
@@ -128,44 +134,23 @@ void mplex_move_to_index(WMPlex *mplex, WRegion *reg, int index)
 
 
 /*EXTL_DOC
- * Move \var{reg} to next index within the multiplexer.
+ * Get index of \var{reg} within the multiplexer. The first region managed
+ * by \var{mplex} has index zero. If \var{reg} is not managed by \var{mplex},
+ * -1 is returned.
  */
 EXTL_EXPORT_MEMBER
-void mplex_move_to_next_index(WMPlex *mplex, WRegion *reg)
+int mplex_get_managed_index(WMPlex *mplex, WRegion *reg)
 {
-	WRegion *next;
-
-	if(REGION_MANAGER(reg)!=(WRegion*)mplex)
-		return;
-
-	if((next=NEXT_MANAGED(mplex->managed_list, reg))==NULL)
-		return;
-
-	UNLINK_ITEM(mplex->managed_list, reg, mgr_next, mgr_prev);
-	LINK_ITEM_AFTER(mplex->managed_list, next, reg, mgr_next, mgr_prev);
-	
-	mplex_managed_changed(mplex, MPLEX_CHANGE_REORDER, FALSE, reg);
-}
-
-
-/*EXTL_DOC
- * Move \var{reg} to previous index within the multiplexer.
- */
-EXTL_EXPORT_MEMBER
-void mplex_move_to_prev_index(WMPlex *mplex, WRegion *reg)
-{
-	WRegion *prev;
-
-	if(REGION_MANAGER(reg)!=(WRegion*)mplex)
-		return;
-	
-	if((prev=PREV_MANAGED(mplex->managed_list, reg))==NULL)
-		return;
-
-	UNLINK_ITEM(mplex->managed_list, reg, mgr_next, mgr_prev);
-	LINK_ITEM_BEFORE(mplex->managed_list, prev, reg, mgr_next, mgr_prev);
-
-	mplex_managed_changed(mplex, MPLEX_CHANGE_REORDER, FALSE, reg);
+    WRegion *other;
+    int index=0;
+    
+	FOR_ALL_MANAGED_ON_LIST(mplex->managed_list, other){
+        if(reg==other)
+            return index;
+        index++;
+    }
+    
+    return -1;
 }
 
 

@@ -50,21 +50,15 @@ static StringIntMap frame_areas[]={
 };
 
 
-/*EXTL_DOC
- * Sets up bindings for WFloatFrames.
- */
 EXTL_EXPORT
-bool floatframe_bindings(ExtlTab tab)
+bool __defbindings_WFloatFrame(ExtlTab tab)
 {
 	return process_bindings(&floatframe_bindmap, frame_areas, tab);
 }
 
 
-/*EXTL_DOC
- * Sets up bindings available in all objects on WFloatWS:s.
- */
 EXTL_EXPORT
-void floatws_bindings(ExtlTab tab)
+void __defbindings_WFloatWS(ExtlTab tab)
 {
 	process_bindings(&floatws_bindmap, NULL, tab);
 }

@@ -44,9 +44,9 @@ DECLSTRUCT(WObjDescr){
 	WOBJ_INIT(p, OBJ);                                             \
 	if(!LOWOBJ ## _init INIT_ARGS) { free((void*)p); return NULL; } return p
 
-#define SIMPLECREATEOBJ_IMPL(OBJ, LOWOBJ, INIT_ARGS)                    \
-	OBJ *p;  p=ALLOC(OBJ); if(p==NULL){ warn_err(); return NULL; }      \
-	WOBJ_INIT(p, OBJ);                                                  \
+#define SIMPLECREATEOBJ_IMPL(OBJ, LOWOBJ)                          \
+	OBJ *p;  p=ALLOC(OBJ); if(p==NULL){ warn_err(); return NULL; } \
+	WOBJ_INIT(p, OBJ);                                             \
 	return p;
 
 #define END_DYNFUNTAB {NULL, NULL}

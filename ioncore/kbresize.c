@@ -25,24 +25,18 @@
 #include "framep.h"
 
 
-enum{
-	VERTICAL,
-	HORIZONTAL
-};
-
-
 /*{{{ Resize accelerator */
 
 
 static struct timeval last_action_tv={-1, 0};
 static struct timeval last_update_tv={-1, 0};
-static int last_mode=0;
+static int last_accel_mode=0;
 static double accel=1, accelinc=30, accelmax=100*100;
 static long actmax=200, uptmin=50;
 
 static void accel_reset()
 {
-	last_mode=0;
+	last_accel_mode=0;
 	accel=1.0;
 	last_action_tv.tv_sec=-1;
 	last_action_tv.tv_usec=-1;
@@ -96,7 +90,7 @@ static double max(double a, double b)
 	return (a<b ? b : a);
 }
 
-void kbresize_accel(int *wu, int *hu, int mode)
+void moveresmode_accel(WMoveresMode *mode, int *wu, int *hu, int accel_mode)
 {
 	struct timeval tv;
 	long adiff, udiff;
@@ -106,7 +100,7 @@ void kbresize_accel(int *wu, int *hu, int mode)
 	adiff=tvdiffmsec(&tv, &last_action_tv);
 	udiff=tvdiffmsec(&tv, &last_update_tv);
 	
-	if(last_mode==mode && adiff<actmax){
+	if(last_accel_mode==accel_mode && adiff<actmax){
 		if(udiff>uptmin){
 			accel+=accelinc;
 			if(accel>accelmax)
@@ -118,15 +112,9 @@ void kbresize_accel(int *wu, int *hu, int mode)
 		last_update_tv=tv;
 	}
 	
-	last_mode=mode;
+	last_accel_mode=accel_mode;
 	last_action_tv=tv;
 	
-	/*
-	if(*wu!=0)
-		*wu=SIGN_NZ(*wu)*ceil(max(sqrt(accel), abs(*wu)));
-	if(*hu!=0)
-		*hu=SIGN_NZ(*hu)*ceil(max(sqrt(accel), abs(*hu)));
-	 */
 	if(*wu!=0)
 		*wu=(*wu)*ceil(sqrt(accel)/abs(*wu));
 	if(*hu!=0)
@@ -141,10 +129,10 @@ void kbresize_accel(int *wu, int *hu, int mode)
 
 
 static ExtlSafelist moveres_safe_funclist[]={
-	(ExtlExportedFn*)&kbresize_resize,
-	(ExtlExportedFn*)&kbresize_move,
-	(ExtlExportedFn*)&kbresize_end,
-	(ExtlExportedFn*)&kbresize_cancel,
+	(ExtlExportedFn*)&moveresmode_resize,
+	(ExtlExportedFn*)&moveresmode_move,
+	(ExtlExportedFn*)&moveresmode_end,
+	(ExtlExportedFn*)&moveresmode_cancel,
 	NULL
 };
 
@@ -154,13 +142,20 @@ static bool resize_handler(WRegion *reg, XEvent *xev)
 	XKeyEvent *ev=&xev->xkey;
 	WBinding *binding=NULL;
 	WBindmap **bindptr;
-	
+	WMoveresMode *mode;
+    
 	if(ev->type==KeyRelease)
 		return FALSE;
 	
-	assert(reg!=NULL);
+    if(reg==NULL)
+        return FALSE;
 	
-	binding=lookup_binding(&ioncore_kbresize_bindmap, ACT_KEYPRESS,
+    mode=moveres_mode(reg);
+    
+    if(mode==NULL)
+        return FALSE;
+    
+	binding=lookup_binding(&ioncore_moveres_bindmap, ACT_KEYPRESS,
 						   ev->state, ev->keycode);
 	
 	if(!binding)
@@ -169,11 +164,11 @@ static bool resize_handler(WRegion *reg, XEvent *xev)
 	if(binding!=NULL){
 		const ExtlSafelist *old_safelist=
 			extl_set_safelist(moveres_safe_funclist);
-		extl_call(binding->func, "o", NULL, reg);
+		extl_call(binding->func, "o", NULL, mode);
 		extl_set_safelist(old_safelist);
 	}
 	
-	return (resize_target()==NULL);
+	return (moveres_mode(reg)==NULL);
 }
 
 
@@ -185,8 +180,9 @@ static bool resize_handler(WRegion *reg, XEvent *xev)
 
 static void tmr_end_resize(WTimer *unused)
 {
-	if(end_resize())
-		grab_remove(resize_handler);
+    WMoveresMode *mode=moveres_mode(NULL);
+    if(mode!=NULL)
+        moveresmode_cancel(mode);
 }
 
 
@@ -211,12 +207,9 @@ static int limit_and_encode_mode(int *left, int *right,
 }
 
 
-void frame_kbresize_units(WFrame *frame, int *wret, int *hret)
+static void resize_units(WMoveresMode *mode, int *wret, int *hret)
 {
-	/*WGRData *grdata=GRDATA_OF(frame);
-	*wret=grdata->w_unit;
-	*hret=grdata->h_unit;*/
-	*wret=1;
+	/**wret=1;
 	*hret=1;
 	
 	if(WFRAME_CURRENT(frame)!=NULL){
@@ -229,7 +222,15 @@ void frame_kbresize_units(WFrame *frame, int *wret, int *hret)
 			*wret=hints.width_inc;
 			*hret=hints.height_inc;
 		}
-	}
+	}*/
+
+    XSizeHints *h=&(mode->hints);
+    *wret=1;
+    *hret=1;
+    if(h->flags&PResizeInc && (h->width_inc>1 || h->height_inc>1)){
+        *wret=h->width_inc;
+        *hret=h->height_inc;
+    }
 }
 
 
@@ -245,22 +246,19 @@ void frame_kbresize_units(WFrame *frame, int *wret, int *hret)
  * and \var{bottom} are as follows: -1: shrink along,
  * 0: do not change, 1: grow along corresponding border.
  */
-EXTL_EXPORT
-void kbresize_resize(int left, int right, int top, int bottom)
+EXTL_EXPORT_MEMBER
+void moveresmode_resize(WMoveresMode *mode, 
+                        int left, int right, int top, int bottom)
 {
 	int wu=0, hu=0;
-	int mode=0;
-    WRegion *reg=resize_target();
-    
-    if(reg==NULL || !WOBJ_IS(reg, WFrame))
-        return;
+	int accel_mode=0;
 	
-	frame_kbresize_units((WFrame*)reg, &wu, &hu);
-	
-	mode=3*limit_and_encode_mode(&left, &right, &top, &bottom);
-	kbresize_accel(&wu, &hu, mode);
+	accel_mode=3*limit_and_encode_mode(&left, &right, &top, &bottom);
+	resize_units(mode, &wu, &hu);
+	moveresmode_accel(mode, &wu, &hu, accel_mode);
 
-	delta_resize(reg, -left*wu, right*wu, -top*hu, bottom*hu, NULL);
+	moveresmode_delta_resize(mode, -left*wu, right*wu, -top*hu, bottom*hu, 
+                             NULL);
 	
 	set_timer(&resize_timer, wglobal.resize_delay);
 }
@@ -277,19 +275,16 @@ void kbresize_resize(int left, int right, int top, int bottom)
  * 1 & Move right/down \\
  * \end{tabular}
  */
-EXTL_EXPORT
-void kbresize_move(int horizmul, int vertmul)
+EXTL_EXPORT_MEMBER
+void moveresmode_move(WMoveresMode *mode, int horizmul, int vertmul)
 {
-	int mode=0, dummy=0;
-    WRegion *reg=resize_target();
-    
-    if(reg==NULL || !WOBJ_IS(reg, WFrame))
-        return;
+	int accel_mode=0, dummy=0;
 	
-	mode=1+3*limit_and_encode_mode(&horizmul, &vertmul, &dummy, &dummy);
-	kbresize_accel(&horizmul, &vertmul, mode);
+	accel_mode=1+3*limit_and_encode_mode(&horizmul, &vertmul, &dummy, &dummy);
+	moveresmode_accel(mode, &horizmul, &vertmul, accel_mode);
 
-	delta_resize(reg, horizmul, horizmul, vertmul, vertmul, NULL);
+	moveresmode_delta_resize(mode, horizmul, horizmul, vertmul, vertmul, 
+                             NULL);
 	
 	set_timer(&resize_timer, wglobal.resize_delay);
 }
@@ -299,11 +294,11 @@ void kbresize_move(int horizmul, int vertmul)
  * Return from move/resize mode and apply changes unless opaque
  * move/resize is enabled.
  */
-EXTL_EXPORT
-void kbresize_end()
+EXTL_EXPORT_MEMBER
+void moveresmode_end(WMoveresMode *mode)
 {
-    WRegion *reg=resize_target();
-	if(end_resize()){
+    WRegion *reg=moveresmode_target(mode);
+    if(moveresmode_do_end(mode, TRUE)){
 		reset_timer(&resize_timer);
 		warp(reg);
 		grab_remove(resize_handler);
@@ -315,11 +310,11 @@ void kbresize_end()
  * Return from move/resize cancelling changes if opaque
  * move/resize has not been enabled.
  */
-EXTL_EXPORT
-void kbresize_cancel()
+EXTL_EXPORT_MEMBER
+void moveresmode_cancel(WMoveresMode *mode)
 {
-    WRegion *reg=resize_target();
-	if(cancel_resize()){
+    WRegion *reg=moveresmode_target(mode);
+    if(moveresmode_do_end(mode, FALSE)){
 		reset_timer(&resize_timer);
 		warp(reg);
 		grab_remove(resize_handler);
@@ -327,27 +322,39 @@ void kbresize_cancel()
 }
 
 
+static void cancel_moveres(WRegion *reg)
+{
+    WMoveresMode *mode=moveres_mode(reg);
+    if(mode!=NULL)
+        moveresmode_cancel(mode);
+}
+
+    
 /*EXTL_DOC
  * Enter move/resize mode for \var{frame}. The bindings set with
- * \fnref{kbresize_bindings} are used in this mode and of
- * of the exported functions only \fnref{kbresize_resize}, 
- * \fnref{kbresize_move}, \fnref{kbresize_cancel} and
- * \fnref{kbresize_end} are allowed to be called.
+ * \fnref{WMoveresMode.bindings} are used in this mode and of
+ * of the exported functions only \fnref{WMoveresMode.resize}, 
+ * \fnref{WMoveresMode.move}, \fnref{WMoveresMode.cancel} and
+ * \fnref{WMoveresMode.end} are allowed to be called.
  */
 EXTL_EXPORT_MEMBER
-void frame_begin_kbresize(WFrame *frame)
+WMoveresMode *frame_begin_moveres(WFrame *frame)
 {
-	if(!begin_resize((WRegion*)frame, NULL, FALSE))
-		return;
+    WMoveresMode *mode=begin_resize((WRegion*)frame, NULL, FALSE);
 
+    if(mode==NULL)
+        return NULL;
+    
 	accel_reset();
 	
 	grab_establish((WRegion*)frame, resize_handler,
-				   (GrabKilledHandler*)kbresize_cancel, 0);
+				   (GrabKilledHandler*)cancel_moveres, 0);
 	
 	set_timer(&resize_timer, wglobal.resize_delay);
+    
+    return mode;
+    
 }
 
 
 /*}}}*/
-

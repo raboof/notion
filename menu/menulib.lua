@@ -14,6 +14,8 @@
 -- the user with require/include differences.
 if _LOADED["menulib"] then return end
 
+local menulib={}
+_G.menulib=menulib
 
 -- Table to hold defined menus.
 local menus={}
@@ -21,19 +23,17 @@ local menus={}
 
 -- Menu construction {{{
 
-
 --DOC
 -- Define a new menu with \var{name} being the menu's name and \var{tab} 
 -- being a table of menu entries.
-function defmenu(name, tab)
+function menulib.defmenu(name, tab)
     menus[name]=tab
 end
-
 
 --DOC
 -- If \var{menu_or_name} is a string, returns a menu defined
 -- with \fnref{defmenu}, else return \var{menu_or_name}.
-function getmenu(menu_or_name)
+function menulib.getmenu(menu_or_name)
     if type(menu_or_name)=="string" then
         if type(menus[menu_or_name])=="table" then
             return menus[menu_or_name]
@@ -47,69 +47,58 @@ end
 
 --DOC
 -- Use this function to define normal menu entries.
-function menuentry(name, fn)
-    return {name=name, fn=fn}
+function menulib.menuentry(name, cmd, ...)
+    return {name=name, cmd=cmd, args=arg}
 end
-
 
 --DOC
 -- Use this function to define menu entries for submenus.
-function submenu(name, sub_or_name)
+function menulib.submenu(name, sub_or_name)
     return {
         name=name,
         submenu_fn=function() 
-                       return getmenu(sub_or_name) 
+                       return menulib.getmenu(sub_or_name) 
                    end
     }
 end
 
 
---DOC
--- This function can be used to create a wrapper to create an
--- embedded-in-an-mplex menu and to call the handler for a menu
--- entry once selected. 
--- 
--- See also: \fnref{menu_menu}, \fnref{make_bigmenu_fn} and 
--- \fnref{make_pmenu_fn}.
-function make_menu_fn(menu_or_name, big)
-    return function(mplex, ...)
-               local params=arg
-               local function wrapper(entry)
-                   if entry.fn then
-                       entry.fn(mplex, unpack(params))
-                   end
-               end
-               return menu_menu(mplex, wrapper, getmenu(menu_or_name), big)
-           end
+-- }}}
+
+
+-- Menu commands {{{
+
+local function do_menu(reg, sub, menu_or_name, fn)
+    local function wrapper(entry)
+        if entry.cmd then
+            if type(entry.cmd)=="function" then
+                entry.cmd(reg, sub)
+            else
+                ioncorelib.do_cmd(reg, sub, entry.cmd, entry.args)
+            end
+        end
+    end
+    return fn(reg, wrapper, menulib.getmenu(menu_or_name))
 end
 
 
---DOC
--- This function is similar to \fnref{make_menu_fn} but uses a possibly
--- bigger style for the menu.
-function make_bigmenu_fn(menuname)
-    return make_menu_fn(menuname, true)
-end
+defcmd2("WMPlex", "menu", 
+        function(mplex, sub, menu_or_name) 
+            return do_menu(mplex, sub, menu_or_name, menu_menu)
+        end)
 
+defcmd2("WMPlex", "bigmenu", 
+        function(mplex, sub, menu_or_name) 
+            local function menu_bigmenu(m, s, menu)
+                return menu_menu(m, s, menu, true)
+            end
+            return do_menu(mplex, sub, menu_or_name, menu_bigmenu)
+        end)
 
---DOC
--- This function can be used to create a wrapper display a drop-down menu
--- and to call the handler for a menu entry once selected. The resulting
--- function should only be called from a mouse press binding.
--- 
--- See also: \fnref{menu_pmenu}, \fnref{make_menu_fn}.
-function make_pmenu_fn(menu_or_name)
-    return function(win, ...)
-               local params=arg
-               local function wrapper(entry)
-                   if entry.fn then
-                       entry.fn(win, unpack(params))
-                   end
-               end
-               return menu_pmenu(win, wrapper, getmenu(menu_or_name))
-           end
-end
-
+defcmd2("WWindow", "pmenu",
+        function(win, sub, menu_or_name) 
+            return do_menu(win, sub, menu_or_name, menu_pmenu)
+        end)
 
 -- }}}
 
@@ -131,19 +120,16 @@ end
 
 
 function menus.workspacelist()
-    local wss=complete_workspace("")
+    local wss=complete_region("", "WGenWS")
     table.sort(wss)
     local entries={}
     for i, name in wss do
-        local ws=lookup_workspace(name)
+        local ws=lookup_region(name, "WGenWS")
         entries[i]=menuentry(name, function() ws:goto() end)
     end
     
     return entries
 end
-
-
-local RESULT_DATA_LIMIT=1024^2
 
 
 -- }}}
@@ -159,7 +145,7 @@ local function mplex_of(reg)
     return reg
 end
 
-function selectstyle(look, where)
+local function selectstyle(look, where)
     include(look)
 
     local fname=get_savefile('draw')
@@ -201,7 +187,7 @@ local function receive_styles(str)
     
     while str do
         data=data .. str
-        if string.len(data)>RESULT_DATA_LIMIT then
+        if string.len(data)>ioncorelib.RESULT_DATA_LIMIT then
             error("Too much result data")
         end
         str=coroutine.yield()
@@ -228,11 +214,16 @@ local function receive_styles(str)
                                           end))
     end
     
+    table.insert(stylemenu, menuentry("Refresh list",
+                                      menulib.refresh_styles))
+    
     menus.stylemenu=stylemenu
 end
 
-                          
-local function refresh_styles()
+
+--DOC
+-- Refresh list of known style files.
+function menulib.refresh_styles()
     local cmd=lookup_script("ion-completefile")
     if cmd then
         local dirs=ioncore_get_scriptdirs()
@@ -247,11 +238,14 @@ local function refresh_styles()
     end
 end
 
-refresh_styles()
-
-
 -- }}}
 
+ioncorelib.export(menulib,
+                  "defmenu",
+                  "menuentry",
+                  "submenu")
+
+menulib.refresh_styles()
 
 -- Mark ourselves loaded.
 _LOADED["menulib"]=true

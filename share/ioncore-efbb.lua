@@ -14,31 +14,31 @@ local mappings={}
 
 if string.find(arg[1], "g") then
     table.insert(mappings, "F2 -> xterm\nF11 -> restart_wm\nF12 -> exit_wm")
-    table.insert(groups, "global_bindings")
-    global_bindings{
-        kpress("F2", make_exec_fn("xterm")),
-        kpress("F11", restart_wm),
-        kpress("F12", exit_wm),
-    }
+    table.insert(groups, "WScreen")
+    defbindings("WScreen", {
+        kpress("F2", "exec", "xterm"),
+        kpress("F11", "restart_wm"),
+        kpress("F12", "exit_wm"),
+    })
 end
 
 if string.find(arg[1], "m") then
     table.insert(mappings, "Mod1+C -> WRegion.close_sub_or_self")
-    table.insert(groups, "mplex_bindings")
-    mplex_bindings{
-        kpress_waitrel("Mod1+C", WRegion.close_sub_or_self),
-    }
+    table.insert(groups, "WMPlex")
+    defbindings("WMPlex", {
+        kpress_waitrel("Mod1+C", "close_sub_or_self"),
+    })
 end
 
 if string.find(arg[1], "f") then
     table.insert(mappings, "Mod1+K P/N -> WFrame.switch_next/prev")
-    table.insert(groups, "frame_bindings")
-    frame_bindings{
-        submap("Mod1+K") {
-            kpress("AnyModifier+N", WFrame.switch_next),
-            kpress("AnyModifier+P", WFrame.switch_prev),
-        }
-    }
+    table.insert(groups, "WFrame")
+    defbindings("WFrame", {
+        submap("Mod1+K", {
+            kpress("AnyModifier+N", "switch_next"),
+            kpress("AnyModifier+P", "witch_prev"),
+        })
+    })
 end
 
 if table.getn(groups)>0 then

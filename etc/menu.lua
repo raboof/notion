@@ -7,16 +7,16 @@
 --
 
 
-menu_bindings{
-    kpress("Escape", WMenu.cancel),
-    kpress("Control+G", WMenu.cancel),
-    kpress("Control+C", WMenu.cancel),
-    kpress("AnyModifier+P", WMenu.select_prev),
-    kpress("AnyModifier+N", WMenu.select_next),
-    kpress("Up", WMenu.select_prev),
-    kpress("Down", WMenu.select_next),
-    kpress("Return", WMenu.finish),
-    kpress("KP_Enter", WMenu.finish),
-    kpress("Control+M", WMenu.finish),
-}
+defbindings("WMenu", {
+    kpress("Escape", "cancel"),
+    kpress("Control+G", "cancel"),
+    kpress("Control+C", "cancel"),
+    kpress("AnyModifier+P", "select_prev"),
+    kpress("AnyModifier+N", "select_next"),
+    kpress("Up", "select_prev"),
+    kpress("Down", "select_next"),
+    kpress("Return", "finish"),
+    kpress("KP_Enter", "finish"),
+    kpress("Control+M", "finish"),
+})
 

@@ -9,12 +9,14 @@ dock = create_dock(0, {	-- create a new dock on screen 0
 	grow="left",	-- growth direction up|down|left|right
 	is_auto=true})	-- whether new dockapps should be added automatically
 
-global_bindings{
-	kpress(DEFAULT_MOD.."space",
-		function()
-			WDock.toggle(dock)	-- toggle map/unmapped state
-		end),
-}
+defcmd("global", "toggle_dock",
+        function()
+            WDock.toggle(dock)	-- toggle map/unmapped state
+        end)
+
+defbindings("WScreen", {
+    kpress(DEFAULT_MOD.."space", "toggle_dock")
+})
 
 -- dockapp ordering
 

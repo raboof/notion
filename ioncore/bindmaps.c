@@ -19,26 +19,18 @@
 WBindmap ioncore_rootwin_bindmap=BINDMAP_INIT;
 WBindmap ioncore_mplex_bindmap=BINDMAP_INIT;
 WBindmap ioncore_frame_bindmap=BINDMAP_INIT;
-WBindmap ioncore_kbresize_bindmap=BINDMAP_INIT;
+WBindmap ioncore_moveres_bindmap=BINDMAP_INIT;
 
 
-/*EXTL_DOC
- * Add a set of bindings available everywhere. The bound functions
- * should accept \type{WScreen} as argument.
- */
 EXTL_EXPORT
-bool global_bindings(ExtlTab tab)
+bool __defbindings_WScreen(ExtlTab tab)
 {
 	return process_bindings(&ioncore_rootwin_bindmap, NULL, tab);
 }
 
 
-/*EXTL_DOC
- * Add a set of bindings available in \type{WMPlex}es (screens and all
- * types of frames).
- */
 EXTL_EXPORT
-bool mplex_bindings(ExtlTab tab)
+bool __defbindings_WMPlex(ExtlTab tab)
 {
 	return process_bindings(&ioncore_mplex_bindmap, NULL, tab);
 }
@@ -53,23 +45,17 @@ static StringIntMap frame_areas[]={
 };
 
 
-/*EXTL_DOC
- * Add a set of bindings available in \type{WFrame}s (all types of frames).
- */
 EXTL_EXPORT
-bool frame_bindings(ExtlTab tab)
+bool __defbindings_WFrame(ExtlTab tab)
 {
 	return process_bindings(&ioncore_frame_bindmap, frame_areas, tab);
 }
 
 
-/*EXTL_DOC
- * Sets up bindings for move/resize mode.
- */
 EXTL_EXPORT
-bool kbresize_bindings(ExtlTab tab)
+bool __defbindings_WMoveresMode(ExtlTab tab)
 {
-	return process_bindings(&ioncore_kbresize_bindmap, NULL, tab);
+	return process_bindings(&ioncore_moveres_bindmap, NULL, tab);
 }
 
 
@@ -78,6 +64,6 @@ void ioncore_deinit_bindmaps()
 	deinit_bindmap(&ioncore_rootwin_bindmap);
 	deinit_bindmap(&ioncore_mplex_bindmap);
 	deinit_bindmap(&ioncore_frame_bindmap);
-	deinit_bindmap(&ioncore_kbresize_bindmap);
+	deinit_bindmap(&ioncore_moveres_bindmap);
 }
 

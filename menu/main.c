@@ -34,11 +34,8 @@ char menu_module_ion_api_version[]=ION_API_VERSION;
 WBindmap menu_bindmap=BINDMAP_INIT;
 
 
-/*EXTL_DOC
- * Describe \type{WMenu} bindings.
- */
 EXTL_EXPORT
-bool menu_bindings(ExtlTab tab)
+bool __defbindings_WMenu(ExtlTab tab)
 {
 	return process_bindings(&menu_bindmap, NULL, tab);
 }

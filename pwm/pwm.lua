@@ -5,10 +5,11 @@
 -- Set default modifier. Alt should usually be mapped to Mod1 on
 -- XFree86-based systems. The flying window keys are probably Mod3
 -- or Mod4; see the output of 'xmodmap'.
-DEFAULT_MOD = "Mod1+"
+DEFAULT_MOD="Mod1+"
+SECOND_MOD=""
 
 -- Set default workspace type.
-default_ws_type="WFloatWS"
+DEFAULT_WS_TYPE="WFloatWS"
 
 -- Maximum delay between clicks in milliseconds to be considered a
 -- double click.
@@ -28,6 +29,10 @@ enable_warp(false)
 
 -- Kludges to make apps behave better.
 include("kludges")
+
+-- Some usefull routines (needed by pwm-bindings and pwm-menus)
+include("menulib")
+include("querylib")
 
 -- Make some bindings.
 include("pwm-bindings")

@@ -534,6 +534,19 @@ WRegion *floatws_circulate(WFloatWS *ws)
 
 
 /*EXTL_DOC
+ * Activate and raise next object on \var{ws}.
+ */
+EXTL_EXPORT_MEMBER
+WRegion *floatws_circulate_and_raise(WFloatWS *ws)
+{
+	WRegion *r=floatws_circulate(ws);
+	if(r!=NULL)
+		region_raise(r);
+	return r;
+}
+
+
+/*EXTL_DOC
  * Activate previous object on \var{ws}.
  */
 EXTL_EXPORT_MEMBER
@@ -542,6 +555,19 @@ WRegion *floatws_backcirculate(WFloatWS *ws)
 	WRegion *r=PREV_MANAGED_WRAP(ws->managed_list, ws->current_managed);
 	if(r!=NULL)
 		region_goto(r);
+	return r;
+}
+
+
+/*EXTL_DOC
+ * Activate and raise previous object on \var{ws}.
+ */
+EXTL_EXPORT_MEMBER
+WRegion *floatws_backcirculate_and_raise(WFloatWS *ws)
+{
+	WRegion *r=floatws_backcirculate(ws);
+	if(r!=NULL)
+		region_raise(r);
 	return r;
 }
 

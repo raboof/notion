@@ -5,7 +5,8 @@
 -- Set default modifier. Alt should usually be mapped to Mod1 on
 -- XFree86-based systems. The flying window keys are probably Mod3
 -- or Mod4; see the output of 'xmodmap'.
-DEFAULT_MOD = "Mod1+"
+DEFAULT_MOD="Mod1+"
+SECOND_MOD=""
 
 -- Maximum delay between clicks in milliseconds to be considered a
 -- double click.
@@ -25,6 +26,10 @@ enable_warp(true)
 
 -- Kludges to make apps behave better.
 include("kludges")
+
+-- Some usefull routines (needed by ion-bindings and ion-menus)
+include("menulib")
+include("querylib")
 
 -- Make some bindings.
 include("ion-bindings")

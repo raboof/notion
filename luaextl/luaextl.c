@@ -224,6 +224,22 @@ EXTL_EXPORT_AS(obj_typename)
 const char *obj_typename(WObj *obj);
 
 
+static int extl_obj_exists(lua_State *st)
+{
+	WObj *obj;
+    lua_pushboolean(st, extl_stack_get(st, 1, 'o', FALSE, &obj));
+	return 1;
+}
+
+/* Dummy code for documentation generation. */
+
+/*EXTL_DOC
+ * Does \var{obj} still exist on the C side of Ion?
+ */
+EXTL_EXPORT_AS(obj_exists)
+static bool obj_exists(WObj *obj);
+
+
 static int extl_obj_is(lua_State *st)
 {
 	WObj *obj;
@@ -333,6 +349,8 @@ static bool extl_init_obj_info(lua_State *st)
 	lua_setglobal(st, "obj_typename");
 	lua_pushcfunction(st, extl_obj_is);
 	lua_setglobal(st, "obj_is");
+	lua_pushcfunction(st, extl_obj_exists);
+	lua_setglobal(st, "obj_exists");
 	lua_pushcfunction(st, extl_include);
 	lua_setglobal(st, "include");
 

@@ -10,7 +10,7 @@ include("menulib")
 -- Main menu
 defmenu("mainmenu", {
     submenu("Programs", "appmenu"),
-    menuentry("Lock screen", make_exec_fn("xlock")),
+    menuentry("Lock screen", "exec", "xlock"),
     submenu("Workspaces", "wsmenu"),
     submenu("Styles", "stylemenu"),
     submenu("Exit", "exitmenu"),
@@ -19,51 +19,47 @@ defmenu("mainmenu", {
 
 -- Application menu
 defmenu("appmenu", {
-    menuentry("XTerm", make_exec_fn("xterm")),
-    menuentry("Mozilla Firebird", make_exec_fn("MozillaFirebird")),
-    menuentry("Xdvi", make_exec_fn("xdvi")),
-    menuentry("GV", make_exec_fn("gv")),
+    menuentry("XTerm", "exec", "xterm"),
+    menuentry("Mozilla Firebird", "exec", "MozillaFirebird"),
+    menuentry("Xdvi", "exec", "xdvi"),
+    menuentry("GV", "exec", "gv"),
 })
 
 
 -- Menu with restart/exit alternatives
 defmenu("exitmenu", {
-    menuentry("Restart", restart_wm),
-    menuentry("Restart Ion", function() restart_other_wm("ion") end),
-    menuentry("Restart TWM", function() restart_other_wm("twm") end),
-    menuentry("Exit", exit_wm),
+    menuentry("Restart", "restart_wm"),
+    menuentry("Restart Ion", "restart_other_wm", "ion"),
+    menuentry("Restart TWM", "restart_other_wm", "twm"),
+    menuentry("Exit", "exit_wm"),
 })
 
 
 -- Workspaces
 defmenu("wsmenu", {
-    menuentry("New", function(m) 
-                         m:screen_of():attach_new({
-                             type=(default_ws_type or "WFloatWS"), 
-                             switchto=true,}) 
-                     end),
-    menuentry("Close", function(m) m:screen_of():current():close() end),
+    menuentry("New", "@screen_of", "create_new_ws"),
+    menuentry("Close", "@screen_of", "close_current_ws"),
     submenu("List", "workspacelist"),
 })
 
 
 -- Context menu (frame/client window actions)
 defmenu("ctxmenu", {
-    menuentry("Close", WMPlex.close_sub_or_self),
-    menuentry("Kill", make_mplex_clientwin_fn(WClientWin.kill)),
-    menuentry("(Un)tag", make_mplex_sub_fn(WRegion.toggle_tag)),
-    menuentry("Attach tagged", WFrame.attach_tagged),
-    menuentry("Clear tags", clear_tags),
+    menuentry("Close", "close_sub_or_self"),
+    menuentry("Kill", "@sub_cwin", "kill"),
+    menuentry("(Un)tag", "@sub", "toggle_tag"),
+    menuentry("Attach tagged", "attach_tagged"),
+    menuentry("Clear tags", "clear_tags"),
 })
 
 
 -- Context menu for floating frames -- add sticky toggle.
 defmenu("ctxmenu-floatframe", {
-    menuentry("Close", WMPlex.close_sub_or_self),
-    menuentry("Kill", make_mplex_clientwin_fn(WClientWin.kill)),
-    menuentry("(Un)tag", make_mplex_sub_fn(WRegion.toggle_tag)),
-    menuentry("Attach tagged", WFrame.attach_tagged),
-    menuentry("Clear tags", clear_tags),
-    menuentry("(Un)stick", function(f) f:toggle_sticky() end),
+    menuentry("Close", "close_sub_or_self"),
+    menuentry("Kill", "@sub_cwin", "kill"),
+    menuentry("(Un)tag", "@sub", "toggle_tag"),
+    menuentry("Attach tagged", "attach_tagged"),
+    menuentry("Clear tags", "clear_tags"),
+    menuentry("(Un)stick", "toggle_sticky"),
 })
 

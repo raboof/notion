@@ -368,13 +368,17 @@ bool region_handle_drop(WRegion *reg, int x, int y, WRegion *dropped)
 
 static void p_moveres_end(WFrame *frame, XButtonEvent *ev)
 {
-	end_resize();
+    WMoveresMode *mode=moveres_mode((WRegion*)frame);
+    if(mode!=NULL)
+        moveresmode_do_end(mode, TRUE);
 }
 
 
 static void p_moveres_cancel(WFrame *frame)
 {
-	cancel_resize();
+    WMoveresMode *mode=moveres_mode((WRegion*)frame);
+    if(mode!=NULL)
+        moveresmode_do_end(mode, FALSE);
 }
 
 
@@ -388,8 +392,11 @@ static void confine_to_parent(WFrame *frame)
 
 static void p_resize_motion(WFrame *frame, XMotionEvent *ev, int dx, int dy)
 {
-	delta_resize((WRegion*)frame, p_dx1mul*dx, p_dx2mul*dx,
-				 p_dy1mul*dy, p_dy2mul*dy, NULL);
+    WMoveresMode *mode=moveres_mode((WRegion*)frame);
+    if(mode!=NULL){
+        moveresmode_delta_resize(mode, p_dx1mul*dx, p_dx2mul*dx,
+                                 p_dy1mul*dy, p_dy2mul*dy, NULL);
+    }
 }
 
 
@@ -423,12 +430,14 @@ void frame_p_resize(WFrame *frame)
 /*}}}*/
 
 
-/*{{{ move */
+/*{{{ Move */
 
 
 static void p_move_motion(WFrame *frame, XMotionEvent *ev, int dx, int dy)
 {
-	delta_move((WRegion*)frame, dx, dy, NULL);
+    WMoveresMode *mode=moveres_mode((WRegion*)frame);
+    if(mode!=NULL)
+        moveresmode_delta_move(mode, dx, dy, NULL);
 }
 
 

@@ -14,6 +14,7 @@
 
 #include "common.h"
 #include "frame.h"
+#include "infowin.h"
 
 
 /* To make it easier for region_request_managed_geom handlers, the geom
@@ -38,19 +39,46 @@
 
 typedef void WDrawRubberbandFn(WRootWin *rw, const WRectangle *geom);
 
-extern bool begin_resize(WRegion *reg, WDrawRubberbandFn *rubfn,
-						 bool cumulative);
-extern bool begin_move(WRegion *reg, WDrawRubberbandFn *rubfn,
-					   bool cumulative);
+INTROBJ(WMoveresMode);
+
+DECLOBJ(WMoveresMode){
+	WObj obj;
+    XSizeHints hints;
+    uint relw, relh;
+    int dx1, dx2, dy1, dy2;
+    WRectangle origgeom;
+    WRectangle geom;
+    WRegion *reg;
+    WDrawRubberbandFn *rubfn;
+    int parent_rx, parent_ry;
+    enum {MOVERES_SIZE, MOVERES_POS} mode;
+    bool resize_cumulative;
+    bool snap_enabled;
+    WRectangle snapgeom;
+    int rqflags;
+    WInfoWin *infowin;
+};
+
+extern WMoveresMode *begin_resize(WRegion *reg, WDrawRubberbandFn *rubfn,
+                                  bool cumulative);
+
+extern WMoveresMode *begin_move(WRegion *reg, WDrawRubberbandFn *rubfn,
+                                bool cumulative);
+
 /* dx1/dx2/dy1/dy2: left/right/top/bottom difference to previous values. 
  * left/top negative, bottom/right positive increases size.
  */
-extern void delta_resize(WRegion *reg, int dx1, int dx2, int dy1, int dy2,
-						 WRectangle *rret);
-extern void delta_move(WRegion *reg, int dx, int dy, WRectangle *rret);
-extern bool end_resize();
-extern bool cancel_resize();
-extern WRegion *resize_target();
+extern void moveresmode_delta_resize(WMoveresMode *mode, 
+                                     int dx1, int dx2, int dy1, int dy2,
+                                     WRectangle *rret);
+extern void moveresmode_delta_move(WMoveresMode *mode, 
+                                   int dx, int dy, WRectangle *rret);
+extern bool moveresmode_do_end(WMoveresMode *mode, bool apply);
+extern WRegion *moveresmode_target(WMoveresMode *mode);
+
+extern WMoveresMode *moveres_mode(WRegion *reg);
+
+
 
 /* Note: even if REGION_RQGEOM_(X|Y|W|H) are not all specified, the
  * geom parameter should contain a proper geometry!
