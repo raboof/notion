@@ -25,7 +25,7 @@
 INTRCLASS(WIonWS);
 DECLCLASS(WIonWS){
     WGenWS genws;
-    Obj *split_tree;
+    WSplit *split_tree;
     WRegion *managed_list;
     ExtlTab managed_splits;
 };
@@ -57,7 +57,7 @@ extern WIonFrame *ionws_split_at(WIonWS *ws, WIonFrame *frame,
                                  const char *dirstr, bool attach_current);
 extern void ionws_unsplit_at(WIonWS *ws, WIonFrame *frame);
 
-extern WWsSplit *ionws_split_of(WIonWS *ws, WRegion *reg);
+extern WSplit *ionws_split_of(WIonWS *ws, WRegion *reg);
 
 
 #endif /* ION_IONWS_IONWS_H */

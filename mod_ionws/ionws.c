@@ -69,8 +69,10 @@ static bool ionws_fitrep(WIonWS *ws, WWindow *par, const WFitParams *fp)
     if(ws->split_tree==NULL)
         return TRUE;
     
-    split_tree_resize((Obj*)ws->split_tree, HORIZONTAL, ANY, fp->g.x, fp->g.w);
-    split_tree_resize((Obj*)ws->split_tree, VERTICAL, ANY, fp->g.y,  fp->g.h);
+    split_resize(ws->split_tree, SPLIT_HORIZONTAL, PRIMN_ANY,
+                 fp->g.x, fp->g.w);
+    split_resize(ws->split_tree, SPLIT_VERTICAL, PRIMN_ANY, 
+                 fp->g.y,  fp->g.h);
     
     return TRUE;
 }
@@ -146,7 +148,13 @@ static WIonFrame *create_initial_frame(WIonWS *ws, WWindow *parent,
     if(frame==NULL)
         return NULL;
     
-    ws->split_tree=(Obj*)frame;
+    ws->split_tree=create_split_regnode((WRegion*)frame, &(fp->g));
+    if(ws->split_tree==NULL){
+        warn_err();
+        destroy_obj((Obj*)frame);
+        return NULL;
+    }
+    
     ionws_managed_add(ws, (WRegion*)frame);
 
     return frame;
@@ -204,10 +212,13 @@ void ionws_deinit(WIonWS *ws)
 
 static bool ionws_managed_may_destroy(WIonWS *ws, WRegion *reg)
 {
-    if(ws->split_tree==(Obj*)reg)
+    if(ws->split_tree!=NULL && 
+       ws->split_tree->type==SPLIT_REGNODE &&
+       ws->split_tree->u.reg==reg){
         return region_may_destroy((WRegion*)ws);
-    else
+    }else{
         return TRUE;
+    }
 }
 
 
@@ -217,20 +228,43 @@ bool ionws_rescue_clientwins(WIonWS *ws)
 }
 
 
+static WSplit *get_node_check(WIonWS *ws, WRegion *reg)
+{
+    WSplit *node;
+    
+    if(reg==NULL)
+        return NULL;
+    
+    node=split_tree_node_of(reg);
+    
+    if(node==NULL || REGION_MANAGER(reg)!=(WRegion*)ws)
+        return NULL;
+    
+    return node;
+}
+
+
 void ionws_managed_remove(WIonWS *ws, WRegion *reg)
 {
     bool ds=OBJ_IS_BEING_DESTROYED(ws);
-    WRegion *other;
+    WSplit *other, *node=get_node_check(ws, reg);
+    
+    /* This function should only be called by a code that gets us 
+     * through reg 
+     */
+    assert(node!=NULL);
     
     region_unset_manager(reg, (WRegion*)ws, &(ws->managed_list));
     region_remove_bindmap_owned(reg, mod_ionws_ionws_bindmap, (WRegion*)ws);
 
-    other=split_tree_remove(&(ws->split_tree), reg, !ds);
+    other=split_tree_remove(&(ws->split_tree), node, !ds);
     
     if(!ds){
         if(other){
-            if(region_may_control_focus((WRegion*)ws))
-                region_set_focus(other);
+            if(region_may_control_focus((WRegion*)ws)){
+                /* Other is guaranteed to be SPLIT_REGNODE */
+                region_set_focus(other->u.reg);
+            }
         }else{
             ioncore_defer_destroy((Obj*)ws);
         }
@@ -240,7 +274,7 @@ void ionws_managed_remove(WIonWS *ws, WRegion *reg)
 
 bool ionws_manage_rescue(WIonWS *ws, WClientWin *cwin, WRegion *from)
 {
-    WWsSplit *split;
+    WSplit *split;
     WMPlex *nmgr;
     
     if(REGION_MANAGER(from)!=(WRegion*)ws)
@@ -265,16 +299,15 @@ void ionws_managed_rqgeom(WIonWS *ws, WRegion *mgd,
                           int flags, const WRectangle *geom,
                           WRectangle *geomret)
 {
-    if(REGION_MANAGER(mgd)!=(WRegion*)ws)
-        return;
-    
-    split_tree_rqgeom(ws->split_tree, (Obj*)mgd, flags, geom, geomret);
+    WSplit *node=get_node_check(ws, mgd);
+    if(node!=NULL)
+        split_tree_rqgeom(ws->split_tree, node, flags, geom, geomret);
 }
 
 
 /*EXTL_DOC
  * Attempt to resize and/or move the split tree starting at \var{node}
- * (\type{WWsSplit} or \type{WRegion}). Behaviour and the \var{g} 
+ * (\type{WSplit} or \type{WRegion}). Behaviour and the \var{g} 
  * parameter are as for \fnref{WRegion.rqgeom} operating on
  * \var{node} (if it were a \type{WRegion}).
  */
@@ -283,14 +316,18 @@ ExtlTab ionws_resize_tree(WIonWS *ws, Obj *node, ExtlTab g)
 {
     WRectangle geom, ogeom;
     int flags=REGION_RQGEOM_WEAK_ALL;
+    WSplit *snode;
     
     if(node!=NULL && OBJ_IS(node, WRegion)){
         geom=REGION_GEOM((WRegion*)node);
-    }else if(node!=NULL && OBJ_IS(node, WWsSplit)){
-        geom=((WWsSplit*)node)->geom;
+        snode=get_node_check(ws, (WRegion*)node);
+        if(snode==NULL)
+            goto err;
+    }else if(node!=NULL && OBJ_IS(node, WSplit)){
+        snode=(WSplit*)node;
+        geom=snode->geom;
     }else{
-        warn("Invalid node.");
-        return extl_table_none();
+        goto err;
     }
     
     ogeom=geom;
@@ -307,9 +344,13 @@ ExtlTab ionws_resize_tree(WIonWS *ws, Obj *node, ExtlTab g)
     geom.w=maxof(1, geom.w);
     geom.h=maxof(1, geom.h);
 
-    split_tree_rqgeom(ws->split_tree, node, flags, &geom, &ogeom);
+    split_tree_rqgeom(ws->split_tree, snode, flags, &geom, &ogeom);
     
     return extl_table_from_rectangle(&ogeom);
+    
+err:
+    warn("Invalid node.");
+    return extl_table_none();
 }
 
 
@@ -325,21 +366,21 @@ static bool get_split_dir_primn(const char *str, int *dir, int *primn)
         return FALSE;
     
     if(!strcmp(str, "left")){
-        *primn=TOP_OR_LEFT;
-        *dir=HORIZONTAL;
+        *primn=PRIMN_TL;
+        *dir=SPLIT_HORIZONTAL;
     }else if(!strcmp(str, "right")){
-        *primn=BOTTOM_OR_RIGHT;
-        *dir=HORIZONTAL;
+        *primn=PRIMN_BR;
+        *dir=SPLIT_HORIZONTAL;
     }else if(!strcmp(str, "top") || 
              !strcmp(str, "above") || 
              !strcmp(str, "up")){
-        *primn=TOP_OR_LEFT;
-        *dir=VERTICAL;
+        *primn=PRIMN_TL;
+        *dir=SPLIT_VERTICAL;
     }else if(!strcmp(str, "bottom") || 
              !strcmp(str, "below") ||
              !strcmp(str, "down")){
-        *primn=BOTTOM_OR_RIGHT;
-        *dir=VERTICAL;
+        *primn=PRIMN_BR;
+        *dir=SPLIT_VERTICAL;
     }else{
         return FALSE;
     }
@@ -356,27 +397,29 @@ static bool get_split_dir_primn(const char *str, int *dir, int *primn)
 EXTL_EXPORT_MEMBER
 WIonFrame *ionws_split_top(WIonWS *ws, const char *dirstr)
 {
-    WRegion *reg=NULL;
     int dir, primn, mins;
+    WSplit *nnode=NULL;
     
     if(!get_split_dir_primn(dirstr, &dir, &primn))
         return NULL;
     
     mins=16; /* totally arbitrary */
     
-    if(ws->split_tree!=NULL){
-        reg=split_tree_split(&(ws->split_tree), ws->split_tree, 
-                             dir, primn, mins, ANY,
-                             (WRegionSimpleCreateFn*)create_ionframe,
-                             REGION_PARENT_CHK(ws, WWindow));
-    }
+    if(ws->split_tree==NULL)
+        return NULL;
     
-    if(reg!=NULL){
-        ionws_managed_add(ws, reg);
-        region_warp(reg);
-    }
+    nnode=split_tree_split(&(ws->split_tree), ws->split_tree, 
+                           dir, primn, mins, PRIMN_ANY,
+                           (WRegionSimpleCreateFn*)create_ionframe,
+                           REGION_PARENT_CHK(ws, WWindow));
     
-    return (WIonFrame*)reg;
+    if(nnode==NULL)
+        return NULL;
+
+    ionws_managed_add(ws, nnode->u.reg);
+    region_warp(nnode->u.reg);
+    
+    return OBJ_CAST(nnode->u.reg, WIonFrame);
 }
 
 
@@ -390,16 +433,15 @@ EXTL_EXPORT_MEMBER
 WIonFrame *ionws_split_at(WIonWS *ws, WIonFrame *frame, const char *dirstr, 
                           bool attach_current)
 {
-    WRegion *reg, *curr;
+    WRegion *curr;
     int dir, primn, mins;
+    WSplit *node, *nnode;
     
-    if(frame==NULL){
-        warn_obj("ionws_split_at", "nil frame");
-        return NULL;
-    }
+    node=get_node_check(ws, (WRegion*)frame);
     
-    if(REGION_MANAGER(frame)!=(WRegion*)ws){
-        warn_obj("ionws_split_at", "Frame not managed by the workspace.");
+    if(node==NULL){
+        warn_obj("ionws_split_at", "Invalid frame or frame not managed by "
+                 "the workspace.");
         return NULL;
     }
     
@@ -408,33 +450,34 @@ WIonFrame *ionws_split_at(WIonWS *ws, WIonFrame *frame, const char *dirstr,
         return NULL;
     }
     
-    mins=(dir==VERTICAL
+    mins=(dir==SPLIT_VERTICAL
           ? region_min_h((WRegion*)frame)
           : region_min_w((WRegion*)frame));
     
-    reg=split_tree_split(&(ws->split_tree), (Obj*)frame, 
-                         dir, primn, mins, primn,
-                         (WRegionSimpleCreateFn*)create_ionframe,
-                         REGION_PARENT_CHK(ws, WWindow));
+    nnode=split_tree_split(&(ws->split_tree), node, dir, primn, mins, primn,
+                           (WRegionSimpleCreateFn*)create_ionframe,
+                           REGION_PARENT_CHK(ws, WWindow));
     
-    if(reg==NULL){
+    if(nnode==NULL){
         warn_obj("ionws_split_at", "Unable to split");
         return NULL;
     }
 
-    assert(OBJ_IS(reg, WIonFrame));
+    assert(OBJ_IS(nnode->u.reg, WIonFrame));
 
-    ionws_managed_add(ws, reg);
+    ionws_managed_add(ws, nnode->u.reg);
     
     curr=mplex_l1_current(&(frame->frame.mplex));
     
-    if(attach_current && curr!=NULL)
-        mplex_attach_simple((WMPlex*)reg, curr, MPLEX_ATTACH_SWITCHTO);
+    if(attach_current && curr!=NULL){
+        mplex_attach_simple((WMPlex*)nnode->u.reg, curr, 
+                            MPLEX_ATTACH_SWITCHTO);
+    }
     
     if(region_may_control_focus((WRegion*)frame))
-        region_goto(reg);
+        region_goto(nnode->u.reg);
 
-    return (WIonFrame*)reg;
+    return (WIonFrame*)nnode->u.reg;
 }
 
 
@@ -480,7 +523,8 @@ void ionws_unsplit_at(WIonWS *ws, WIonFrame *frame)
 EXTL_EXPORT_MEMBER
 WRegion *ionws_current(WIonWS *ws)
 {
-    return split_tree_current_tl(ws->split_tree, -1);
+    WSplit *node=split_current_tl(ws->split_tree, -1);
+    return (node ? node->u.reg : NULL);
 }
 
 
@@ -496,13 +540,15 @@ ExtlTab ionws_managed_list(WIonWS *ws)
 
 static WRegion *do_get_next_to(WIonWS *ws, WRegion *reg, int dir, int primn)
 {
-    if(reg==NULL || REGION_MANAGER(reg)!=(WRegion*)ws)
-        return NULL;
+    WSplit *node=get_node_check(ws, reg);
     
-    if(primn==TOP_OR_LEFT)
-        return split_tree_to_tl(reg, dir);
-    else
-        return split_tree_to_br(reg, dir);
+    if(node!=NULL){
+        if(primn==PRIMN_TL)
+            node=split_to_tl(node, dir);
+        else
+            node=split_to_br(node, dir);
+    }
+    return (node ? node->u.reg : NULL);
 }
 
 
@@ -525,10 +571,14 @@ WRegion *ionws_next_to(WIonWS *ws, WRegion *reg, const char *dirstr)
 
 static WRegion *do_get_farthest(WIonWS *ws, int dir, int primn)
 {
-    if(primn==TOP_OR_LEFT)
-        return split_tree_current_tl(ws->split_tree, dir);
+    WSplit *node;
+    
+    if(primn==PRIMN_TL)
+        node=split_current_tl(ws->split_tree, dir);
     else
-        return split_tree_current_br(ws->split_tree, dir);
+        node=split_current_br(ws->split_tree, dir);
+    
+    return (node ? node->u.reg : NULL);
 }
 
 
@@ -551,7 +601,7 @@ WRegion *ionws_farthest(WIonWS *ws, const char *dirstr)
 
 static WRegion *do_goto_dir(WIonWS *ws, int dir, int primn)
 {
-    int primn2=(primn==TOP_OR_LEFT ? BOTTOM_OR_RIGHT : TOP_OR_LEFT);
+    int primn2=(primn==PRIMN_TL ? PRIMN_BR : PRIMN_TL);
     WRegion *reg=NULL, *curr=ionws_current(ws);
     if(curr!=NULL)
         reg=do_get_next_to(ws, curr, dir, primn);
@@ -586,7 +636,7 @@ WRegion *ionws_goto_dir(WIonWS *ws, const char *dirstr)
 
 static WRegion *do_goto_dir_nowrap(WIonWS *ws, int dir, int primn)
 {
-    int primn2=(primn==TOP_OR_LEFT ? BOTTOM_OR_RIGHT : TOP_OR_LEFT);
+    int primn2=(primn==PRIMN_TL ? PRIMN_BR : PRIMN_TL);
     WRegion *reg=NULL, *curr=ionws_current(ws);
     if(curr!=NULL)
         reg=do_get_next_to(ws, curr, dir, primn);
@@ -618,16 +668,16 @@ WRegion *ionws_goto_dir_nowrap(WIonWS *ws, const char *dirstr)
 EXTL_EXPORT_MEMBER
 WRegion *ionws_region_at(WIonWS *ws, int x, int y)
 {
-    return split_tree_region_at(ws->split_tree, x, y);
+    return split_region_at(ws->split_tree, x, y);
 }
 
 
 /*EXTL_DOC
- * For region \var{reg} managed by \var{ws} return the \type{WWsSplit}
+ * For region \var{reg} managed by \var{ws} return the \type{WSplit}
  * a leaf of which \var{reg} is.
  */
 EXTL_EXPORT_MEMBER
-WWsSplit *ionws_split_of(WIonWS *ws, WRegion *reg)
+WSplit *ionws_split_of(WIonWS *ws, WRegion *reg)
 {
     if(reg==NULL){
         warn_obj("ionws_split_of", "nil parameter");
@@ -639,7 +689,7 @@ WWsSplit *ionws_split_of(WIonWS *ws, WRegion *reg)
         return NULL;
     }
     
-    return split_tree_split_of((Obj*)reg);
+    return split_tree_split_of(reg);
 }
 
 
@@ -651,7 +701,9 @@ WWsSplit *ionws_split_of(WIonWS *ws, WRegion *reg)
 
 void ionws_managed_activated(WIonWS *ws, WRegion *reg)
 {
-    split_tree_mark_current(reg);
+    WSplit *node=get_node_check(ws, reg);
+    if(node!=NULL)
+        split_mark_current(node);
 }
 
 
@@ -661,50 +713,43 @@ void ionws_managed_activated(WIonWS *ws, WRegion *reg)
 /*{{{ Save */
 
 
-static ExtlTab get_obj_config(Obj *obj)
+static ExtlTab get_node_config(WSplit *node)
 {
-    WWsSplit *split;
     int tls, brs;
     ExtlTab tab, stab;
     
-    if(obj==NULL)
-        return extl_table_none();
+    assert(node!=NULL);
     
-    if(OBJ_IS(obj, WRegion)){
-        if(region_supports_save((WRegion*)obj))
-            return region_get_configuration((WRegion*)obj);
+    if(node->type==SPLIT_REGNODE){
+        if(region_supports_save(node->u.reg))
+            return region_get_configuration(node->u.reg);
         return extl_table_none();
     }
     
-    if(!OBJ_IS(obj, WWsSplit))
-        return extl_table_none();
-    
-    split=(WWsSplit*)obj;
-    
     tab=extl_create_table();
     
-    tls=split_tree_size(split->tl, split->dir);
-    brs=split_tree_size(split->br, split->dir);
+    tls=split_size(node->u.s.tl, node->type);
+    brs=split_size(node->u.s.br, node->type);
     
-    extl_table_sets_s(tab, "split_dir",(split->dir==VERTICAL
+    extl_table_sets_s(tab, "split_dir",(node->type==SPLIT_VERTICAL
                                         ? "vertical" : "horizontal"));
     
     extl_table_sets_i(tab, "split_tls", tls);
     extl_table_sets_i(tab, "split_brs", brs);
     
-    stab=get_obj_config(split->tl);
+    stab=get_node_config(node->u.s.tl);
     if(stab==extl_table_none()){
         warn("Could not get configuration for split TL (a %s).", 
-             OBJ_TYPESTR(obj));
+             OBJ_TYPESTR(node->u.s.tl));
     }else{
         extl_table_sets_t(tab, "tl", stab);
         extl_unref_table(stab);
     }
     
-    stab=get_obj_config(split->br);
+    stab=get_node_config(node->u.s.br);
     if(stab==extl_table_none()){
         warn("Could not get configuration for split BR (a %s).", 
-             OBJ_TYPESTR(obj));
+             OBJ_TYPESTR(node->u.s.br));
     }else{
         extl_table_sets_t(tab, "br", stab);
         extl_unref_table(stab);
@@ -719,7 +764,7 @@ static ExtlTab ionws_get_configuration(WIonWS *ws)
     ExtlTab tab, split_tree;
     
     tab=region_get_base_configuration((WRegion*)ws);
-    split_tree=get_obj_config(ws->split_tree);
+    split_tree=get_node_config(ws->split_tree);
     
     if(split_tree==extl_table_none()){
         warn("Could not get split tree for a WIonWS.");
@@ -738,20 +783,20 @@ static ExtlTab ionws_get_configuration(WIonWS *ws)
 /*{{{ Load */
 
 
-extern void set_split_of(Obj *obj, WWsSplit *split);
-static Obj *load_obj(WIonWS *ws, WWindow *par, const WRectangle *geom, 
-                      ExtlTab tab);
+extern void set_split_of(Obj *obj, WSplit *split);
+static WSplit *load_node(WIonWS *ws, WWindow *par, const WRectangle *geom, 
+                         ExtlTab tab);
 
 #define MINS 8
 
-static Obj *load_split(WIonWS *ws, WWindow *par, const WRectangle *geom,
-                        ExtlTab tab)
+static WSplit *load_split(WIonWS *ws, WWindow *par, const WRectangle *geom,
+                          ExtlTab tab)
 {
-    WWsSplit *split;
+    WSplit *split;
     char *dir_str;
     int dir, brs, tls;
     ExtlTab subtab;
-    Obj *tl=NULL, *br=NULL;
+    WSplit *tl=NULL, *br=NULL;
     WRectangle geom2;
 
     if(!extl_table_gets_i(tab, "split_tls", &tls))
@@ -761,9 +806,9 @@ static Obj *load_split(WIonWS *ws, WWindow *par, const WRectangle *geom,
     if(!extl_table_gets_s(tab, "split_dir", &dir_str))
         return FALSE;
     if(strcmp(dir_str, "vertical")==0){
-        dir=VERTICAL;
+        dir=SPLIT_VERTICAL;
     }else if(strcmp(dir_str, "horizontal")==0){
-        dir=HORIZONTAL;
+        dir=SPLIT_HORIZONTAL;
     }else{
         free(dir_str);
         return NULL;
@@ -780,7 +825,7 @@ static Obj *load_split(WIonWS *ws, WWindow *par, const WRectangle *geom,
     brs=maxof(brs, MINS);
         
     geom2=*geom;
-    if(dir==HORIZONTAL){
+    if(dir==SPLIT_HORIZONTAL){
         tls=maxof(0, geom->w)*tls/(tls+brs);
         geom2.w=tls;
     }else{
@@ -789,13 +834,13 @@ static Obj *load_split(WIonWS *ws, WWindow *par, const WRectangle *geom,
     }
     
     if(extl_table_gets_t(tab, "tl", &subtab)){
-        tl=load_obj(ws, par, &geom2, subtab);
+        tl=load_node(ws, par, &geom2, subtab);
         extl_unref_table(subtab);
     }
 
     geom2=*geom;
     if(tl!=NULL){
-        if(dir==HORIZONTAL){
+        if(dir==SPLIT_HORIZONTAL){
             geom2.w-=tls;
             geom2.x+=tls;
         }else{
@@ -805,7 +850,7 @@ static Obj *load_split(WIonWS *ws, WWindow *par, const WRectangle *geom,
     }
             
     if(extl_table_gets_t(tab, "br", &subtab)){
-        br=load_obj(ws, par, &geom2, subtab);
+        br=load_node(ws, par, &geom2, subtab);
         extl_unref_table(subtab);
     }
     
@@ -814,32 +859,43 @@ static Obj *load_split(WIonWS *ws, WWindow *par, const WRectangle *geom,
         return (tl==NULL ? br : tl);
     }
     
-    set_split_of(tl, split);
-    set_split_of(br, split);
+    tl->parent=split;
+    br->parent=split;
 
     /*split->tmpsize=tls;*/
-    split->tl=tl;
-    split->br=br;
+    split->u.s.tl=tl;
+    split->u.s.br=br;
     
-    return (Obj*)split;
+    return split;
 }
 
 
-static Obj *load_obj(WIonWS *ws, WWindow *par, const WRectangle *geom,
-                      ExtlTab tab)
+static WSplit *load_node(WIonWS *ws, WWindow *par, const WRectangle *geom,
+                         ExtlTab tab)
 {
     char *typestr;
-    WRegion *reg;
-    WFitParams fp;
     
     if(extl_table_gets_s(tab, "type", &typestr)){
+        WRegion *reg;
+        WFitParams fp;
+        WSplit *node;
+        
         free(typestr);
+        
         fp.g=*geom;
         fp.mode=REGION_FIT_EXACT;
         reg=create_region_load(par, &fp, tab);
-        if(reg!=NULL)
-            ionws_managed_add(ws, reg);
-        return (Obj*)reg;
+        if(reg==NULL)
+            return NULL;
+        
+        node=create_split_regnode(reg, geom);
+        if(node==NULL){
+            destroy_obj((Obj*)reg);
+            return NULL;
+        }
+        
+        ionws_managed_add(ws, reg);
+        return node;
     }
     
     return load_split(ws, par, geom, tab);
@@ -864,7 +920,7 @@ WRegion *ionws_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
     }
 
     if(!ci){
-        ws->split_tree=load_obj(ws, par, &REGION_GEOM(ws), treetab);
+        ws->split_tree=load_node(ws, par, &REGION_GEOM(ws), treetab);
         extl_unref_table(treetab);
     }
     
