@@ -24,9 +24,10 @@ mod_dock.create{
 
 
 -- For floating docks, you may want the following toggle binding.
---defbindings("WScreen", {
---    kpress(MOD1.."space", "mod_dock.toggle_floating_on(_)")
---})
+defbindings("WScreen", {
+    bdoc("Toggle floating dock."),
+    kpress(MOD1.."D", "mod_dock.toggle_floating_on(_)")
+})
 
 
 -- Dock settings menu. For this to work, mod_menu must have been loaded 

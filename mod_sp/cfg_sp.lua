@@ -3,6 +3,17 @@
 --
 
 defbindings("WScreen", {
-    kpress(MOD1.."section", "mod_sp.toggle_on(_)"),
+    bdoc("Toggle scratchpad."),
+    kpress(MOD1.."space", "mod_sp.toggle_on(_)"),
+    
+    -- A more ideal key for toggling the scratchpad would be the key left of
+    -- the key for numeral 1. Unfortunately the symbols mapped to this key
+    -- vary by the keyboard layout, and to be fully portable to different 
+    -- architechtures and fancy keyboards, we can't rely on keycodes either. 
+    -- However, on standard Finnish/Swedish (and other Nordic) keyboard 
+    -- layouts the following should work:
+    --kpress(MOD1.."section", "mod_sp.toggle_on(_)"),
+    -- and on UK and US layouts this should work:
+    --kpress(MOD1.."grave", "mod_sp.toggle_on(_)"),
 })
 
