@@ -12,16 +12,6 @@
 #include "inputp.h"
 
 
-static DynFunTab input_dynfuntab[]={
-	{fit_region, fit_input},
-	{region_draw_config_updated, input_draw_config_updated},
-	END_DYNFUNTAB
-};
-
-
-IMPLOBJ(WInput, WWindow, deinit_input, input_dynfuntab, &query_input_funclist)
-
-
 /*{{{ Dynfuns */
 
 
@@ -139,3 +129,18 @@ void input_cancel(WInput *input)
 
 /*}}}*/
 
+
+/*{{{ Dynamic function table and class implementation */
+
+
+static DynFunTab input_dynfuntab[]={
+	{fit_region, fit_input},
+	{region_draw_config_updated, input_draw_config_updated},
+	END_DYNFUNTAB
+};
+
+
+IMPLOBJ(WInput, WWindow, deinit_input, input_dynfuntab, &query_input_funclist)
+
+	
+/*}}}*/

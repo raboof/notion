@@ -36,31 +36,6 @@
 #include "regbind.h"
 #include "viewport.h"
 
-static void fit_screen(WScreen *scr, WRectangle geom);
-static void map_screen(WScreen *scr);
-static void unmap_screen(WScreen *scr);
-static void focus_screen(WScreen *scr, bool warp);
-static bool reparent_screen(WScreen *scr, WWindow *par, WRectangle geom);
-static void screen_sub_params(const WScreen *scr, WRectangle **geom);
-static void screen_activated(WScreen *scr);
-static void screen_remove_managed(WScreen *scr, WRegion *reg);
-
-
-static DynFunTab screen_dynfuntab[]={
-	{fit_region, fit_screen},
-	{map_region, map_screen},
-	{unmap_region, unmap_screen},
-	{focus_region, focus_screen},
-	{(DynFun*)reparent_region, (DynFun*)reparent_screen},
-	/*{region_request_managed_geom, region_request_managed_geom_unallow},*/
-	{region_activated, screen_activated},
-	{region_remove_managed, screen_remove_managed},
-	END_DYNFUNTAB
-};
-
-
-IMPLOBJ(WScreen, WWindow, deinit_screen, screen_dynfuntab,
-		&ioncore_screen_funclist)
 
 
 /*{{{ Error handling */
@@ -517,3 +492,25 @@ bool setup_screens()
 
 /*}}}*/
 
+
+/*{{{ Dynamic function table and class implementation */
+
+
+static DynFunTab screen_dynfuntab[]={
+	{fit_region, fit_screen},
+	{map_region, map_screen},
+	{unmap_region, unmap_screen},
+	{focus_region, focus_screen},
+	{(DynFun*)reparent_region, (DynFun*)reparent_screen},
+	/*{region_request_managed_geom, region_request_managed_geom_unallow},*/
+	{region_activated, screen_activated},
+	{region_remove_managed, screen_remove_managed},
+	END_DYNFUNTAB
+};
+
+
+IMPLOBJ(WScreen, WWindow, deinit_screen, screen_dynfuntab,
+		&ioncore_screen_funclist)
+
+	
+/*}}}*/

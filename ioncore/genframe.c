@@ -26,64 +26,9 @@
 #include "sizehint.h"
 
 
-/*{{{ Static function definitions, dynfuntab and class info */
-
-
-static void genframe_notify_managed_change(WGenFrame *genframe, WRegion *sub);
-static WRegion *genframe_selected_sub(WGenFrame *genframe);
-static bool set_genframe_background(WGenFrame *genframe, bool set_always);
-static WRegion *genframe_do_add_managed(WGenFrame *genframe, WRegionAddFn *fn,
-										void *params, int flags,
-										WRectangle *geomrq);
-static void genframe_request_managed_geom(WGenFrame *genframe, WRegion *sub,
-									   WRectangle geom, WRectangle *geomret,
-									   bool tryonly);
-static void genframe_size_changed_default(WGenFrame *genframe,
-										  bool wchg, bool hchg);
-static bool genframe_handle_drop(WGenFrame *genframe, int x, int y,
-								 WRegion *dropped);
-static WRegion *genframe_managed_enter_to_focus(WGenFrame *genframe,
-												WRegion *reg);
-
 #define genframe_draw(F, C) draw_window((WWindow*)F, C)
 
-
-static DynFunTab genframe_dynfuntab[]={
-	{fit_region, genframe_fit},
-	{genframe_size_changed, genframe_size_changed_default},
-	{(DynFun*)reparent_region, (DynFun*)genframe_reparent},
-	{region_resize_hints, genframe_resize_hints},
-
-	{genframe_draw_bar, genframe_draw_bar_default},
-	
-	{(DynFun*)window_press, (DynFun*)genframe_press},
-	{(DynFun*)window_release, (DynFun*)genframe_release},
-	
-	{focus_region, genframe_focus},
-	{region_activated, genframe_activated},
-	{region_inactivated, genframe_inactivated},
-	{(DynFun*)region_managed_enter_to_focus,
-	 (DynFun*)genframe_managed_enter_to_focus},
-	
-	{(DynFun*)region_do_add_managed, (DynFun*)genframe_do_add_managed},
-	{region_remove_managed, genframe_remove_managed},
-	{region_notify_managed_change, genframe_notify_managed_change},
-	{region_request_managed_geom, genframe_request_managed_geom},
-	{(DynFun*)region_display_managed, (DynFun*)genframe_display_managed},
-
-	{(DynFun*)region_handle_drop, (DynFun*)genframe_handle_drop},
-	
-	{region_draw_config_updated, genframe_draw_config_updated},
-	
-	END_DYNFUNTAB
-};
-									   
-
-IMPLOBJ(WGenFrame, WWindow, deinit_genframe, genframe_dynfuntab,
-		&ioncore_genframe_funclist)
-
-
-/*}}}*/
+static bool set_genframe_background(WGenFrame *genframe, bool set_always);
 
 
 /*{{{ Destroy/create genframe */
@@ -843,3 +788,42 @@ void genframe_draw_bar_default(const WGenFrame *genframe, bool complete)
 /*}}}*/
 
 
+/*{{{ Dynfuntab and class info */
+
+
+static DynFunTab genframe_dynfuntab[]={
+	{fit_region, genframe_fit},
+	{genframe_size_changed, genframe_size_changed_default},
+	{(DynFun*)reparent_region, (DynFun*)genframe_reparent},
+	{region_resize_hints, genframe_resize_hints},
+
+	{genframe_draw_bar, genframe_draw_bar_default},
+	
+	{(DynFun*)window_press, (DynFun*)genframe_press},
+	{(DynFun*)window_release, (DynFun*)genframe_release},
+	
+	{focus_region, genframe_focus},
+	{region_activated, genframe_activated},
+	{region_inactivated, genframe_inactivated},
+	{(DynFun*)region_managed_enter_to_focus,
+	 (DynFun*)genframe_managed_enter_to_focus},
+	
+	{(DynFun*)region_do_add_managed, (DynFun*)genframe_do_add_managed},
+	{region_remove_managed, genframe_remove_managed},
+	{region_notify_managed_change, genframe_notify_managed_change},
+	{region_request_managed_geom, genframe_request_managed_geom},
+	{(DynFun*)region_display_managed, (DynFun*)genframe_display_managed},
+
+	{(DynFun*)region_handle_drop, (DynFun*)genframe_handle_drop},
+	
+	{region_draw_config_updated, genframe_draw_config_updated},
+	
+	END_DYNFUNTAB
+};
+									   
+
+IMPLOBJ(WGenFrame, WWindow, deinit_genframe, genframe_dynfuntab,
+		&ioncore_genframe_funclist)
+
+
+/*}}}*/

@@ -23,46 +23,8 @@
 #include "funtabs.h"
 
 
-/*{{{ Static function declarations, dynfuntab and class implementation */
-
-
-static void deinit_ionframe(WIonFrame *frame);
-static void ionframe_recalc_bar(WIonFrame *frame, bool draw);
-static bool ionframe_save_to_file(WIonFrame *frame, FILE *file, int lvl);
-static void ionframe_border_geom(const WIonFrame *frame, WRectangle *geom);
-static void ionframe_managed_geom(const WIonFrame *frame, WRectangle *geom);
-static void ionframe_bar_geom(const WIonFrame *frame, WRectangle *geom);
-static void ionframe_border_inner_geom(const WIonFrame *frame, WRectangle *geom);
-static void ionframe_resize_hints(WIonFrame *frame, XSizeHints *hints_ret,
-								  uint *relw_ret, uint *relh_ret);
-
 static void set_tab_spacing(WIonFrame *frame);
 
-
-static DynFunTab ionframe_dynfuntab[]={
-	{draw_window, ionframe_draw},
-	{genframe_draw_bar, ionframe_draw_bar},
-	{genframe_recalc_bar, ionframe_recalc_bar},
-	
-	{genframe_managed_geom, ionframe_managed_geom},
-	{genframe_bar_geom, ionframe_bar_geom},
-	{genframe_border_inner_geom, ionframe_border_inner_geom},
-	{region_resize_hints, ionframe_resize_hints},
-
-	{region_draw_config_updated, ionframe_draw_config_updated},
-		
-	{(DynFun*)region_save_to_file, (DynFun*)ionframe_save_to_file},
-	
-	END_DYNFUNTAB
-};
-									   
-
-IMPLOBJ(WIonFrame, WGenFrame, deinit_ionframe, ionframe_dynfuntab,
-		&ionframe_funclist)
-
-	
-/*}}}*/
-	
 	
 /*{{{ Destroy/create frame */
 
@@ -151,6 +113,20 @@ static void ionframe_bar_geom(const WIonFrame *frame, WRectangle *geom)
 }
 
 
+static void ionframe_border_inner_geom(const WIonFrame *frame, WRectangle *geom)
+{
+	WGRData *grdata=GRDATA_OF(frame);
+	WBorder bd=frame_border(grdata);
+	
+	ionframe_border_geom(frame, geom);
+
+	geom->x+=BORDER_TL_TOTAL(&bd);
+	geom->y+=BORDER_TL_TOTAL(&bd);
+	geom->w-=BORDER_TOTAL(&bd);
+	geom->h-=BORDER_TOTAL(&bd);
+}
+
+
 static void ionframe_managed_geom(const WIonFrame *frame, WRectangle *geom)
 {
 	WGRData *grdata=GRDATA_OF(frame);
@@ -165,20 +141,6 @@ static void ionframe_managed_geom(const WIonFrame *frame, WRectangle *geom)
 		geom->y+=grdata->bar_h+grdata->spacing;
 		geom->h-=grdata->bar_h+grdata->spacing;
 	}
-}
-
-
-static void ionframe_border_inner_geom(const WIonFrame *frame, WRectangle *geom)
-{
-	WGRData *grdata=GRDATA_OF(frame);
-	WBorder bd=frame_border(grdata);
-	
-	ionframe_border_geom(frame, geom);
-
-	geom->x+=BORDER_TL_TOTAL(&bd);
-	geom->y+=BORDER_TL_TOTAL(&bd);
-	geom->w-=BORDER_TOTAL(&bd);
-	geom->h-=BORDER_TOTAL(&bd);
 }
 
 
@@ -412,4 +374,32 @@ WRegion *ionframe_load(WWindow *par, WRectangle geom, Tokenizer *tokz)
 }
 
 
+/*}}}*/
+
+
+/*{{{ Dynamic function table and class implementation */
+
+
+static DynFunTab ionframe_dynfuntab[]={
+	{draw_window, ionframe_draw},
+	{genframe_draw_bar, ionframe_draw_bar},
+	{genframe_recalc_bar, ionframe_recalc_bar},
+	
+	{genframe_managed_geom, ionframe_managed_geom},
+	{genframe_bar_geom, ionframe_bar_geom},
+	{genframe_border_inner_geom, ionframe_border_inner_geom},
+	{region_resize_hints, ionframe_resize_hints},
+
+	{region_draw_config_updated, ionframe_draw_config_updated},
+		
+	{(DynFun*)region_save_to_file, (DynFun*)ionframe_save_to_file},
+	
+	END_DYNFUNTAB
+};
+									   
+
+IMPLOBJ(WIonFrame, WGenFrame, deinit_ionframe, ionframe_dynfuntab,
+		&ionframe_funclist)
+
+	
 /*}}}*/

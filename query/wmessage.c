@@ -17,25 +17,6 @@
 #include "inputp.h"
 
 
-static void wmsg_calc_size(WMessage *wmsg, WRectangle *geom);
-static void wmsg_draw(WMessage *wmsg, bool complete);
-static void wmsg_scrollup(WMessage *edln);
-static void wmsg_scrolldown(WMessage *edln);
-static void wmsg_draw_config_updated(WMessage *msg);
-
-
-static DynFunTab wmsg_dynfuntab[]={
-	{draw_window,		wmsg_draw},
-	{input_calc_size, 	wmsg_calc_size},
-	{input_scrollup, 	wmsg_scrollup},
-	{input_scrolldown,	wmsg_scrolldown},
-	{region_draw_config_updated, wmsg_draw_config_updated},
-	END_DYNFUNTAB
-};
-
-
-IMPLOBJ(WMessage, WInput, deinit_wmsg, wmsg_dynfuntab, NULL)
-
 
 /*{{{ Sizecalc */
 
@@ -183,3 +164,21 @@ static void wmsg_draw_config_updated(WMessage *wmsg)
 
 /*}}}*/
 
+
+/*{{{ Dynamic function table and class implementation */
+
+
+static DynFunTab wmsg_dynfuntab[]={
+	{draw_window,		wmsg_draw},
+	{input_calc_size, 	wmsg_calc_size},
+	{input_scrollup, 	wmsg_scrollup},
+	{input_scrolldown,	wmsg_scrolldown},
+	{region_draw_config_updated, wmsg_draw_config_updated},
+	END_DYNFUNTAB
+};
+
+
+IMPLOBJ(WMessage, WInput, deinit_wmsg, wmsg_dynfuntab, NULL)
+
+	
+/*}}}*/

@@ -28,69 +28,6 @@
 #include "funtabs.h"
 
 
-/*{{{ Static function declarations */
-
-
-static void deinit_floatws(WFloatWS *ws);
-static void fit_floatws(WFloatWS *ws, WRectangle geom);
-static bool reparent_floatws(WFloatWS *ws, WWindow *parent, WRectangle geom);
-static void map_floatws(WFloatWS *ws);
-static void unmap_floatws(WFloatWS *ws);
-static void focus_floatws(WFloatWS *ws, bool warp);
-static bool floatws_save_to_file(WFloatWS *ws, FILE *file, int lvl);
-static bool floatws_display_managed(WFloatWS *ws, WRegion *reg);
-static void floatws_remove_managed(WFloatWS *ws, WRegion *reg);
-static void floatws_managed_activated(WFloatWS *ws, WRegion *reg);
-static bool floatws_add_clientwin(WFloatWS *ws, WClientWin *cwin,
-								  const XWindowAttributes *attr,
-								  int init_state, WWinProp *props);
-static bool floatws_add_transient(WFloatWS *ws, WClientWin *tfor,
-								  WClientWin *cwin,
-								  const XWindowAttributes *attr,
-								  int init_state, WWinProp *props);
-static Window floatws_x_window(const WFloatWS *ws);
-static bool floatws_handle_drop(WFloatWS *floatws, int x, int y,
-								WRegion *dropped);
-
-
-/*}}}*/
-
-
-/*{{{ Dynamic function table and class implementation */
-
-
-static DynFunTab floatws_dynfuntab[]={
-	{fit_region, fit_floatws},
-	{map_region, map_floatws},
-	{unmap_region, unmap_floatws},
-	{focus_region, focus_floatws},
-	{(DynFun*)reparent_region, (DynFun*)reparent_floatws},
-	
-	{(DynFun*)region_ws_add_clientwin, (DynFun*)floatws_add_clientwin},
-	{(DynFun*)region_ws_add_transient, (DynFun*)floatws_add_transient},
-
-	{region_managed_activated, floatws_managed_activated},
-	{region_remove_managed, floatws_remove_managed},
-	{(DynFun*)region_display_managed, (DynFun*)floatws_display_managed},
-	
-/*	{(DynFun*)region_do_find_new_manager, (DynFun*)floatws_do_find_new_manager},*/
-	
-	{(DynFun*)region_save_to_file, (DynFun*)floatws_save_to_file},
-
-	{(DynFun*)region_x_window, (DynFun*)floatws_x_window},
-
-	{(DynFun*)region_handle_drop, (DynFun*)floatws_handle_drop},
-	
-	END_DYNFUNTAB
-};
-
-
-IMPLOBJ(WFloatWS, WGenWS, deinit_floatws, floatws_dynfuntab, &floatws_funclist)
-
-
-/*}}}*/
-
-
 /*{{{ region dynfun implementations */
 
 
@@ -458,4 +395,38 @@ WRegion *floatws_load(WWindow *par, WRectangle geom, Tokenizer *tokz)
 
 /*}}}*/
 
+
+/*{{{ Dynamic function table and class implementation */
+
+
+static DynFunTab floatws_dynfuntab[]={
+	{fit_region, fit_floatws},
+	{map_region, map_floatws},
+	{unmap_region, unmap_floatws},
+	{focus_region, focus_floatws},
+	{(DynFun*)reparent_region, (DynFun*)reparent_floatws},
+	
+	{(DynFun*)region_ws_add_clientwin, (DynFun*)floatws_add_clientwin},
+	{(DynFun*)region_ws_add_transient, (DynFun*)floatws_add_transient},
+
+	{region_managed_activated, floatws_managed_activated},
+	{region_remove_managed, floatws_remove_managed},
+	{(DynFun*)region_display_managed, (DynFun*)floatws_display_managed},
+	
+/*	{(DynFun*)region_do_find_new_manager, (DynFun*)floatws_do_find_new_manager},*/
+	
+	{(DynFun*)region_save_to_file, (DynFun*)floatws_save_to_file},
+
+	{(DynFun*)region_x_window, (DynFun*)floatws_x_window},
+
+	{(DynFun*)region_handle_drop, (DynFun*)floatws_handle_drop},
+	
+	END_DYNFUNTAB
+};
+
+
+IMPLOBJ(WFloatWS, WGenWS, deinit_floatws, floatws_dynfuntab, &floatws_funclist)
+
+
+/*}}}*/
 

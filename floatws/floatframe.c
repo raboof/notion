@@ -23,48 +23,6 @@
 #include "funtabs.h"
 
 
-/*{{{ Static function declarations, dynfuntab and class implementation */
-
-
-static void deinit_floatframe(WFloatFrame *frame);
-static void floatframe_draw(const WFloatFrame *frame, bool complete);
-static void floatframe_recalc_bar(WFloatFrame *frame, bool draw);
-static bool floatframe_save_to_file(WFloatFrame *frame, FILE *file, int lvl);
-static void floatframe_border_geom(const WFloatFrame *frame, WRectangle *geom);
-static void floatframe_managed_geom(const WFloatFrame *frame, WRectangle *geom);
-static void floatframe_bar_geom(const WFloatFrame *frame, WRectangle *geom);
-static void floatframe_border_inner_geom(const WFloatFrame *frame,
-										 WRectangle *geom);
-static void floatframe_size_changed(WFloatFrame *frame, bool wchg, bool hchg);
-static void floatframe_set_shape(WFloatFrame *frame);
-static void floatframe_request_managed_geom(WFloatFrame *frame, WRegion *sub,
-											WRectangle geom,
-											WRectangle *geomret,
-											bool tryonly);
-
-static DynFunTab floatframe_dynfuntab[]={
-	{draw_window, floatframe_draw},
-	{genframe_size_changed, floatframe_size_changed},
-	{genframe_recalc_bar, floatframe_recalc_bar},
-
-	{genframe_managed_geom, floatframe_managed_geom},
-	{genframe_bar_geom, floatframe_bar_geom},
-	{genframe_border_inner_geom, floatframe_border_inner_geom},
-	{region_remove_managed, floatframe_remove_managed},
-	
-	{region_request_managed_geom, floatframe_request_managed_geom},
-	
-	/*{(DynFun*)region_save_to_file, (DynFun*)floatframe_save_to_file},*/
-	
-	END_DYNFUNTAB
-};
-									   
-
-IMPLOBJ(WFloatFrame, WGenFrame, deinit_floatframe, floatframe_dynfuntab,
-		&floatframe_funclist)
-
-/*}}}*/
-	
 	
 /*{{{ Destroy/create frame */
 
@@ -414,3 +372,28 @@ WRegion *floatframe_load(WRegion *par, WRectangle geom, Tokenizer *tokz)
 #endif
 
 
+/*{{{ Dynfuntab and class implementation */
+
+
+static DynFunTab floatframe_dynfuntab[]={
+	{draw_window, floatframe_draw},
+	{genframe_size_changed, floatframe_size_changed},
+	{genframe_recalc_bar, floatframe_recalc_bar},
+
+	{genframe_managed_geom, floatframe_managed_geom},
+	{genframe_bar_geom, floatframe_bar_geom},
+	{genframe_border_inner_geom, floatframe_border_inner_geom},
+	{region_remove_managed, floatframe_remove_managed},
+	
+	{region_request_managed_geom, floatframe_request_managed_geom},
+	
+	/*{(DynFun*)region_save_to_file, (DynFun*)floatframe_save_to_file},*/
+	
+	END_DYNFUNTAB
+};
+									   
+
+IMPLOBJ(WFloatFrame, WGenFrame, deinit_floatframe, floatframe_dynfuntab,
+		&floatframe_funclist)
+
+/*}}}*/

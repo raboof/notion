@@ -26,26 +26,6 @@
 		(SUB)=PREV_CHILD(SUB, WRegion))
 
 
-static void default_notify_rootpos(WRegion *reg, int x, int y);
-/*static Window default_restack(WRegion *reg, Window other, int mode);*/
-static void default_request_managed_geom(WRegion *mgr, WRegion *reg,
-										 WRectangle geom, WRectangle *geomret,
-										 bool tryonly);
-void default_draw_config_updated(WRegion *reg);
-
-
-static DynFunTab region_dynfuntab[]={
-	{region_notify_rootpos, default_notify_rootpos},
-	/*{(DynFun*)region_restack, (DynFun*)default_restack},*/
-	{region_request_managed_geom, region_request_managed_geom_allow},
-	{region_draw_config_updated, default_draw_config_updated},
-	END_DYNFUNTAB
-};
-
-
-IMPLOBJ(WRegion, WObj, deinit_region, region_dynfuntab, NULL)
-
-	
 /*{{{ Init & deinit */
 
 
@@ -897,3 +877,20 @@ bool region_is_child(WRegion *reg, WRegion *reg2)
 
 /*}}}*/
 
+
+/*{{{ Dynamic function table and class implementation */
+
+
+static DynFunTab region_dynfuntab[]={
+	{region_notify_rootpos, default_notify_rootpos},
+	/*{(DynFun*)region_restack, (DynFun*)default_restack},*/
+	{region_request_managed_geom, region_request_managed_geom_allow},
+	{region_draw_config_updated, default_draw_config_updated},
+	END_DYNFUNTAB
+};
+
+
+IMPLOBJ(WRegion, WObj, deinit_region, region_dynfuntab, NULL)
+
+	
+/*}}}*/

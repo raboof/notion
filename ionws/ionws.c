@@ -27,42 +27,6 @@
 #include "funtabs.h"
 
 
-static void deinit_ionws(WIonWS *ws);
-static void fit_ionws(WIonWS *ws, WRectangle geom);
-static bool reparent_ionws(WIonWS *ws, WWindow *parent, WRectangle geom);
-static void map_ionws(WIonWS *ws);
-static void unmap_ionws(WIonWS *ws);
-static void focus_ionws(WIonWS *ws, bool warp);
-static bool ionws_save_to_file(WIonWS *ws, FILE *file, int lvl);
-static bool ionws_display_managed(WIonWS *ws, WRegion *reg);
-
-
-static DynFunTab ionws_dynfuntab[]={
-	{fit_region, fit_ionws},
-	{map_region, map_ionws},
-	{unmap_region, unmap_ionws},
-	{focus_region, focus_ionws},
-	{(DynFun*)reparent_region, (DynFun*)reparent_ionws},
-	
-	{(DynFun*)region_ws_add_clientwin, (DynFun*)ionws_add_clientwin},
-	{(DynFun*)region_ws_add_transient, (DynFun*)ionws_add_transient},
-
-	{region_request_managed_geom, ionws_request_managed_geom},
-	{region_managed_activated, ionws_managed_activated},
-	{region_remove_managed, ionws_remove_managed},
-	{(DynFun*)region_display_managed, (DynFun*)ionws_display_managed},
-	
-	{(DynFun*)region_do_find_new_manager, (DynFun*)ionws_do_find_new_manager},
-	
-	{(DynFun*)region_save_to_file, (DynFun*)ionws_save_to_file},
-
-	END_DYNFUNTAB
-};
-
-
-IMPLOBJ(WIonWS, WGenWS, deinit_ionws, ionws_dynfuntab,
-		&ionws_funclist)
-
 
 /*{{{ region dynfun implementations */
 
@@ -490,5 +454,38 @@ WRegion *ionws_load(WWindow *par, WRectangle geom, Tokenizer *tokz)
 }
 
 
+/*}}}*/
+
+
+/*{{{ Dynamic function table and class implementation */
+
+
+static DynFunTab ionws_dynfuntab[]={
+	{fit_region, fit_ionws},
+	{map_region, map_ionws},
+	{unmap_region, unmap_ionws},
+	{focus_region, focus_ionws},
+	{(DynFun*)reparent_region, (DynFun*)reparent_ionws},
+	
+	{(DynFun*)region_ws_add_clientwin, (DynFun*)ionws_add_clientwin},
+	{(DynFun*)region_ws_add_transient, (DynFun*)ionws_add_transient},
+
+	{region_request_managed_geom, ionws_request_managed_geom},
+	{region_managed_activated, ionws_managed_activated},
+	{region_remove_managed, ionws_remove_managed},
+	{(DynFun*)region_display_managed, (DynFun*)ionws_display_managed},
+	
+	{(DynFun*)region_do_find_new_manager, (DynFun*)ionws_do_find_new_manager},
+	
+	{(DynFun*)region_save_to_file, (DynFun*)ionws_save_to_file},
+
+	END_DYNFUNTAB
+};
+
+
+IMPLOBJ(WIonWS, WGenWS, deinit_ionws, ionws_dynfuntab,
+		&ionws_funclist)
+
+	
 /*}}}*/
 

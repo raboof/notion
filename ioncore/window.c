@@ -13,35 +13,6 @@
 #include "screen.h"
 
 
-/*{{{ Static function declarations */
-
-
-static Window window_x_window(const WWindow *wwin);
-
-
-/*}}}*/
-
-
-/*{{{ Dynfuntab and class implementation */
-
-
-static DynFunTab window_dynfuntab[]={
-	{fit_region, fit_window},
-	{map_region, map_window},
-	{unmap_region, unmap_window},
-	{focus_region, focus_window},
-	{(DynFun*)reparent_region, (DynFun*)reparent_window},
-	{(DynFun*)region_restack, (DynFun*)window_restack},
-	{(DynFun*)region_x_window, (DynFun*)window_x_window},
-	END_DYNFUNTAB
-};
-
-
-IMPLOBJ(WWindow, WRegion, deinit_window, window_dynfuntab, NULL)
-
-	
-/*}}}*/
-
 
 /*{{{ Dynfuns */
 
@@ -274,4 +245,24 @@ Window window_x_window(const WWindow *wwin)
 
 /*}}}*/
 
+
+/*{{{ Dynamic function table and class implementation */
+
+
+static DynFunTab window_dynfuntab[]={
+	{fit_region, fit_window},
+	{map_region, map_window},
+	{unmap_region, unmap_window},
+	{focus_region, focus_window},
+	{(DynFun*)reparent_region, (DynFun*)reparent_window},
+	{(DynFun*)region_restack, (DynFun*)window_restack},
+	{(DynFun*)region_x_window, (DynFun*)window_x_window},
+	END_DYNFUNTAB
+};
+
+
+IMPLOBJ(WWindow, WRegion, deinit_window, window_dynfuntab, NULL)
+
+	
+/*}}}*/
 

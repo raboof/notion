@@ -24,26 +24,7 @@
 	(MAX_FONT_HEIGHT(INPUT_FONT(GRDATA))+INPUT_BORDER_SIZE(GRDATA))
 
 
-static void wedln_calc_size(WEdln *wedln, WRectangle *geom);
-static void wedln_scrollup_completions(WEdln *edln);
-static void wedln_scrolldown_completions(WEdln *edln);
-static void wedln_insstr(WEdln *edln, const char *buf, size_t n);
-static void wedln_draw_config_updated(WEdln *edln);
-
-static DynFunTab wedln_dynfuntab[]={
-	{draw_window,		wedln_draw},
-	{input_calc_size, 	wedln_calc_size},
-	{input_scrollup, 	wedln_scrollup_completions},
-	{input_scrolldown,	wedln_scrolldown_completions},
-	{window_insstr,		wedln_insstr},
-	{region_draw_config_updated, wedln_draw_config_updated},
-	END_DYNFUNTAB
-};
-
-
-IMPLOBJ(WEdln, WInput, deinit_wedln, wedln_dynfuntab, &query_edln_funclist)
-
-
+	
 /*{{{ Drawing primitives */
 
 
@@ -518,3 +499,22 @@ void wedln_set_completion_handler(WEdln *wedln, EdlnCompletionHandler *h,
 
 /*}}}*/
 
+
+/*{{{ Dynamic function table and class implementation */
+
+
+static DynFunTab wedln_dynfuntab[]={
+	{draw_window,		wedln_draw},
+	{input_calc_size, 	wedln_calc_size},
+	{input_scrollup, 	wedln_scrollup_completions},
+	{input_scrolldown,	wedln_scrolldown_completions},
+	{window_insstr,		wedln_insstr},
+	{region_draw_config_updated, wedln_draw_config_updated},
+	END_DYNFUNTAB
+};
+
+
+IMPLOBJ(WEdln, WInput, deinit_wedln, wedln_dynfuntab, &query_edln_funclist)
+
+	
+/*}}}*/

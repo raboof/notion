@@ -20,38 +20,10 @@
 #include "saveload.h"
 
 
-static void fit_viewport(WViewport *vp, WRectangle geom);
-static void map_viewport(WViewport *vp);
-static void unmap_viewport(WViewport *vp);
-static void focus_viewport(WViewport *vp, bool warp);
-static void deinit_viewport(WViewport *vp);
-
 static bool viewport_display_managed(WViewport *vp, WRegion *reg);
-static void viewport_remove_managed(WViewport *vp, WRegion *reg);
-static WRegion *viewport_do_add_managed(WViewport *vp, WRegionAddFn *fn,
-										void *params, int flags,
-										WRectangle *geomrq);
-
-
-static DynFunTab viewport_dynfuntab[]={
-	{fit_region, fit_viewport},
-	{map_region, map_viewport},
-	{unmap_region, unmap_viewport},
-	{focus_region, focus_viewport},
-	
-	{(DynFun*)region_display_managed, (DynFun*)viewport_display_managed},
-	{region_request_managed_geom, region_request_managed_geom_unallow},
-	{(DynFun*)region_do_add_managed, (DynFun*)viewport_do_add_managed},
-	{region_remove_managed, viewport_remove_managed},
-	
-	END_DYNFUNTAB
-};
 
 
 /*{{{ Init/deinit */
-
-
-IMPLOBJ(WViewport, WRegion, deinit_viewport, viewport_dynfuntab, NULL)
 
 
 static bool init_viewport(WViewport *vp, WScreen *scr,
@@ -452,3 +424,25 @@ void switch_ws_prev()
 /*}}}*/
 
 
+/*{{{ Dynamic function table and class implementation */
+
+
+static DynFunTab viewport_dynfuntab[]={
+	{fit_region, fit_viewport},
+	{map_region, map_viewport},
+	{unmap_region, unmap_viewport},
+	{focus_region, focus_viewport},
+	
+	{(DynFun*)region_display_managed, (DynFun*)viewport_display_managed},
+	{region_request_managed_geom, region_request_managed_geom_unallow},
+	{(DynFun*)region_do_add_managed, (DynFun*)viewport_do_add_managed},
+	{region_remove_managed, viewport_remove_managed},
+	
+	END_DYNFUNTAB
+};
+
+
+IMPLOBJ(WViewport, WRegion, deinit_viewport, viewport_dynfuntab, NULL)
+
+
+/*}}}*/

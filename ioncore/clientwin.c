@@ -34,55 +34,6 @@
 #define LOWER_TRANSIENT(CWIN, REG) PREV_MANAGED((CWIN)->transient_list, REG)
 #define FOR_ALL_TRANSIENTS(CWIN, R) FOR_ALL_MANAGED_ON_LIST((CWIN)->transient_list, R)
 
-static void deinit_clientwin(WClientWin *cwin);
-static void fit_clientwin(WClientWin *cwin, WRectangle geom);
-static bool reparent_clientwin(WClientWin *cwin, WWindow *par, WRectangle geom);
-static void map_clientwin(WClientWin *cwin);
-static void unmap_clientwin(WClientWin *cwin);
-static void focus_clientwin(WClientWin *cwin, bool warp);
-static bool clientwin_display_managed(WClientWin *cwin, WRegion *reg);
-static void clientwin_notify_rootpos(WClientWin *cwin, int x, int y);
-static Window clientwin_restack(WClientWin *cwin, Window other, int mode);
-static Window clientwin_x_window(WClientWin *cwin);
-static void clientwin_activated(WClientWin *cwin);
-static void clientwin_resize_hints(WClientWin *cwin, XSizeHints *hints_ret,
-								   uint *relw_ret, uint *relh_ret);
-static WRegion *clientwin_managed_enter_to_focus(WClientWin *cwin, WRegion *reg);
-
-static void clientwin_remove_managed(WClientWin *cwin, WRegion *reg);
-static WRegion *clientwin_do_add_managed(WClientWin *cwin, WRegionAddFn *fn,
-										 void *params, int flags,
-										 WRectangle *geomrq);
-static void clientwin_request_managed_geom(WClientWin *cwin, WRegion *sub,
-										   WRectangle geom, WRectangle *geomret,
-										   bool tryonly);
-
-
-static DynFunTab clientwin_dynfuntab[]={
-	{fit_region, fit_clientwin},
-	{(DynFun*)reparent_region, (DynFun*)reparent_clientwin},
-	{map_region, map_clientwin},
-	{unmap_region, unmap_clientwin},
-	{focus_region, focus_clientwin},
-	{(DynFun*)region_display_managed, (DynFun*)clientwin_display_managed},
-	{region_notify_rootpos, clientwin_notify_rootpos},
-	{(DynFun*)region_restack, (DynFun*)clientwin_restack},
-	{(DynFun*)region_x_window, (DynFun*)clientwin_x_window},
-	{region_activated, clientwin_activated},
-	{region_resize_hints, clientwin_resize_hints},
-	{(DynFun*)region_managed_enter_to_focus,
-	 (DynFun*)clientwin_managed_enter_to_focus},
-	{region_remove_managed, clientwin_remove_managed},
-	{(DynFun*)region_do_add_managed, (DynFun*)clientwin_do_add_managed},
-	{region_request_managed_geom, clientwin_request_managed_geom},
-	
-	END_DYNFUNTAB
-};
-
-
-IMPLOBJ(WClientWin, WRegion, deinit_clientwin, clientwin_dynfuntab,
-		&ioncore_clientwin_funclist)
-
 
 static void set_clientwin_state(WClientWin *cwin, int state);
 static void send_clientmsg(Window win, Atom a);
@@ -1100,3 +1051,33 @@ void clientwin_broken_app_resize_kludge(WClientWin *cwin)
 
 /*}}}*/
 
+
+/*{{{ Dynfuntab and class info */
+
+
+static DynFunTab clientwin_dynfuntab[]={
+	{fit_region, fit_clientwin},
+	{(DynFun*)reparent_region, (DynFun*)reparent_clientwin},
+	{map_region, map_clientwin},
+	{unmap_region, unmap_clientwin},
+	{focus_region, focus_clientwin},
+	{(DynFun*)region_display_managed, (DynFun*)clientwin_display_managed},
+	{region_notify_rootpos, clientwin_notify_rootpos},
+	{(DynFun*)region_restack, (DynFun*)clientwin_restack},
+	{(DynFun*)region_x_window, (DynFun*)clientwin_x_window},
+	{region_activated, clientwin_activated},
+	{region_resize_hints, clientwin_resize_hints},
+	{(DynFun*)region_managed_enter_to_focus,
+	 (DynFun*)clientwin_managed_enter_to_focus},
+	{region_remove_managed, clientwin_remove_managed},
+	{(DynFun*)region_do_add_managed, (DynFun*)clientwin_do_add_managed},
+	{region_request_managed_geom, clientwin_request_managed_geom},
+	
+	END_DYNFUNTAB
+};
+
+
+IMPLOBJ(WClientWin, WRegion, deinit_clientwin, clientwin_dynfuntab,
+		&ioncore_clientwin_funclist)
+
+/*}}}*/
