@@ -92,9 +92,9 @@ XINERAMA_LIBS=-lXinerama
 # Uncomment to enable Xft (ugly anti-aliased fonts) support. 
 # NOTE: This feature is a bonus that may or may not work. I have better
 # things to do than test it after every change to Ion.
-DEFINES += -DCF_XFT
-X11_INCLUDES += `xft-config --cflags`
-X11_LIBS += `xft-config --libs`
+#DEFINES += -DCF_XFT
+#X11_INCLUDES += `xft-config --cflags`
+#X11_LIBS += `xft-config --libs`
 
 # GNU/Linux and other glibc-2.2 based systems.
 #DEFINES += -DCF_UTF8 -DCF_ICONV_TARGET=\"WCHAR_T\" -DCF_ICONV_SOURCE=\"UTF-8\"
