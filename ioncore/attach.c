@@ -105,7 +105,7 @@ WRegion *default_do_find_new_home(WRegion *reg)
 WRegion *region_do_find_new_home(WRegion *reg)
 {
 	WRegion *ret=NULL;
-	CALL_DYN_RET(reg, WRegion*, region_do_find_new_home, reg, (reg));
+	CALL_DYN_RET(ret, WRegion*, region_do_find_new_home, reg, (reg));
 	if(funnotfound)
 		ret=default_do_find_new_home(reg);
 	return ret;
