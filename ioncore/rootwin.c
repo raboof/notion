@@ -304,6 +304,26 @@ static WScreen *add_screen(WRootWin *rw, int id, const WRectangle *geom,
 }
 
 
+#ifndef CF_NO_XINERAMA
+static bool xinerama_sanity_check(XineramaScreenInfo *xi, int nxi)
+{
+    int i, j;
+    
+    for(i=0; i<nxi; i++){
+        for(j=0; j<nxi; j++){
+            if((xi[j].x_org>=xi[i].x_org && xi[j].x_org<xi[i].x_org+xi[i].width) &&
+               (xi[j].y_org>=xi[i].y_org  && xi[j].y_org<xi[i].y_org+xi[i].height)){
+                warn("Xinerama sanity check failed; overlapping screens detected.");
+                return FALSE;
+            }
+        }
+    }
+    return TRUE;
+        
+}
+#endif
+
+
 WRootWin *ioncore_manage_rootwin(int xscr, bool noxinerama)
 {
     WRootWin *rootwin;
@@ -339,9 +359,9 @@ WRootWin *ioncore_manage_rootwin(int xscr, bool noxinerama)
 
     net_virtual_roots=XInternAtom(ioncore_g.dpy, "_NET_VIRTUAL_ROOTS", False);
     XDeleteProperty(ioncore_g.dpy, WROOTWIN_ROOT(rootwin), net_virtual_roots);
-    
+
 #ifndef CF_NO_XINERAMA
-    if(xi!=NULL && nxi!=0){
+    if(xi!=NULL && nxi!=0 && xinerama_sanity_check(xi, nxi)){
         bool useroot=FALSE;
         WRectangle geom;
 
