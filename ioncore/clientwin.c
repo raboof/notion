@@ -1218,7 +1218,7 @@ static bool clientwin_save_to_file(WClientWin *cwin, FILE *file, int lvl)
 
 	begin_saved_region((WRegion*)cwin, file, lvl);
 	save_indent_line(file, lvl);
-	fprintf(file, "windowid = %.32f,\n", (double)(cwin->win));
+	fprintf(file, "windowid = %lu,\n", (unsigned long)(cwin->win));
 	save_indent_line(file, lvl);
 	
 	if(last_checkcode!=0){
