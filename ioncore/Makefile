@@ -1,4 +1,4 @@
-##
+
 ## Ioncore Makefile
 ##
 
@@ -8,8 +8,8 @@ include $(TOPDIR)/system-inc.mk
 
 ######################################
 
-#DIST: LIBS += -L../libtu -ltu -lm $(X11_LIBS) -lX11 $(XINERAMA_LIBS)
-LIBS += -ltu -lm $(X11_LIBS) -lX11 $(XINERAMA_LIBS)
+#DIST: LIBS += -L../libtu -ltu -lm $(X11_LIBS) $(XINERAMA_LIBS)
+LIBS += -ltu -lm $(X11_LIBS) $(XINERAMA_LIBS)
 #DIST: INCLUDES += -I../libtu/include $(X11_INCLUDES) -I..
 INCLUDES += $(X11_INCLUDES) -I..
 DEFINES += -DETCDIR=\"$(ETCDIR)\" -DLIBDIR=\"$(LIBDIR)\"
