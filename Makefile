@@ -56,7 +56,7 @@ _install:
 
 	if uname -s -p|grep "SunOS sparc" > /dev/null; then \
 		echo "Patching bindings-default.conf as bindings-sun.conf"; \
-		patch etc/bindings-default.conf etc/bindings-sun.diff -o $(IONETCDIR)/bindings-sun.conf; \
+		patch -o $(IONETCDIR)/bindings-sun.conf etc/bindings-default.conf < etc/bindings-sun.diff; \
 	fi
 
 	@ if test -f $(IONETCDIR)/ion.conf ; then \
