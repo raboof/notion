@@ -25,21 +25,21 @@ function make_mplex_sub_or_self_fn(fn, noself, noinput, cwincheck)
     if not fn then
         warn("nil parameter to make_mplex_sub_or_self_fn")
     end
-    return function(mplex, current)
-               if not noinput then
-                   local ci=mplex:current_input()
-                   if ci then
-                       current=ci
-                   end
+    return function(mplex, tgt)
+               if not tgt and not noinput then
+                   tgt=mplex:current_input()
                end
-               if not current or (current==mplex and noself) then
-                   current=mplex:current()
-                   if not current then
+               if not tgt then
+                   tgt=mplex:current()
+               end
+               if not tgt then
+                   if noself then
                        return 
                    end
+                   tgt=mplex
                end
-               if (not cwincheck) or obj_is(current, "WClientWin") then
-                   fn(current)
+               if (not cwincheck) or obj_is(tgt, "WClientWin") then
+                   fn(tgt)
                end
            end
 end
