@@ -82,8 +82,9 @@ libtu/snprintf_2.2/ was written by Mark Martinec, see the README there
 or <http://www.ijs.si/software/snprintf/> for more. I made some minor
 modifications. 
 
-de/fontset.c is based on Blackbox code, (c) Sean 'Shaleh' Perry and
-Brad Hughes.
+The code that de/fontset.c is based on was apparently originally written 
+by Tomohiro Kubota; see
+<http://www.debian.org/doc/manuals/intro-i18n/ch-examples.en.html#s13.4.5>.
 
 Various patches have been contributed by other individuals unlisted here.
 (See the mailing list archives.)
