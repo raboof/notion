@@ -11,7 +11,7 @@
 #include "common.h"
 
 extern void mainloop();
-extern void handle_event_default(XEvent *ev);
+extern bool handle_event_default(XEvent *ev);
 
 extern WHooklist *handle_event_alt;
 

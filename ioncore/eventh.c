@@ -143,7 +143,7 @@ static void skip_focusenter_but(WRegion *reg)
 }
 
 
-void handle_event_default(XEvent *ev)
+bool handle_event_default(XEvent *ev)
 {
 	switch(ev->type){
 	CASE_EVENT(MapRequest)
@@ -202,6 +202,8 @@ void handle_event_default(XEvent *ev)
 		send_selection(&(ev->xselectionrequest));
 		break;
 	}
+	
+	return TRUE;
 }
 
 

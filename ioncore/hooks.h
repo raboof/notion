@@ -65,7 +65,7 @@ typedef WSymlist WHooklist;
 	}
 	
 
-#define ADD_HOOK(HOOK, FN) add_to_symlist(&HOOK, (void*)(FN))
-#define REMOVE_HOOK(HOOK, FN) remove_from_symlist(&HOOK, (void*)(FN))
+#define ADD_HOOK(HOOK, FN) add_to_symlist(&(HOOK), (void*)(FN))
+#define REMOVE_HOOK(HOOK, FN) remove_from_symlist(&(HOOK), (void*)(FN))
 
 #endif /* WMCORE_HOOKS_H */

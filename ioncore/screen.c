@@ -151,8 +151,8 @@ Window create_simple_window(WScreen *scr, WWinGeomParams params)
 
 static void scan_initial_windows(WScreen *scr)
 {
-	Window dummy_root, dummy_parent, *wins;
-	uint nwins, i, j;
+	Window dummy_root, dummy_parent, *wins=NULL;
+	uint nwins=0, i, j;
 	XWMHints *hints;
 	
 	XQueryTree(wglobal.dpy, scr->root.win,
@@ -194,6 +194,7 @@ void manage_initial_windows(WScreen *scr)
 	for(i=0; i<nwins; i++){
 		if(wins[i]==None)
 			continue;
+		
 		manage_clientwin(wins[i], MANAGE_INITIAL);
 	}
 	

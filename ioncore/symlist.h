@@ -20,14 +20,15 @@ DECLSTRUCT(WSymlist){
 };
 
 
-#define ITERATE_SYMLIST(TYPE, VAR, LIST) \
-	for((VAR)=(TYPE)iter_symlist(LIST);  \
-		(VAR)!=NULL;                     \
-		(VAR)=(TYPE)iter_symlist(NULL))
+#define ITERATE_SYMLIST(TYPE, VAR, LIST)     \
+	for((VAR)=(TYPE)iter_symlist_init(LIST); \
+		(VAR)!=NULL;                         \
+		(VAR)=(TYPE)iter_symlist())
 
 
 bool add_to_symlist(WSymlist **symlist, void *symbol);
 void remove_from_symlist(WSymlist **symlist, void *symbol);
-void *iter_symlist(WSymlist *symlist);
+void *iter_symlist_init(WSymlist *symlist);
+void *iter_symlist();
 
 #endif /* WMCORE_SYMLIST_H */

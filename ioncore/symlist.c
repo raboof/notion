@@ -13,6 +13,9 @@ bool add_to_symlist(WSymlist **symlist, void *symbol)
 {
 	WSymlist *node;
 	
+	if(symbol==NULL)
+		return FALSE;
+	
 	node=ALLOC(WSymlist);
 	
 	if(node==NULL)
@@ -41,21 +44,34 @@ void remove_from_symlist(WSymlist **symlist, void *symbol)
 }
 
 
-void *iter_symlist(WSymlist *symlist)
+/* Warning: not thread-safe */
+
+
+static WSymlist *next=NULL;
+
+
+void *iter_symlist_init(WSymlist *symlist)
 {
-	/* Warning: not thread-safe */
-	static WSymlist *next=NULL;
-	void *ret;
+	if(symlist==NULL){
+		next=NULL;
+		return NULL;
+	}
 	
-	if(symlist!=NULL)
-		next=symlist;
+	next=symlist->next;
+	return symlist->symbol;
+}
+
+
+void *iter_symlist()
+{
+	WSymlist *ret;
 	
 	if(next==NULL)
 		return NULL;
 	
-	ret=next->symbol;
+	ret=next;
 	next=next->next;
 	
-	return ret;
+	return ret->symbol;
 }
 

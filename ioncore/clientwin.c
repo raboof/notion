@@ -276,19 +276,21 @@ again:
 		goto fail2;
 	}
 	
+
 	/* Get the actual state if any */
 	get_win_state(win, &state);
 	
 	/* Do we really want to manage it? */
 	if(!dock && (attr.override_redirect ||
-				 (mflags&MANAGE_INITIAL && attr.map_state!=IsViewable)))
+				 (mflags&MANAGE_INITIAL && attr.map_state!=IsViewable))){
 		goto fail2;
+	}
 
 	scr=FIND_WINDOW_T(attr.root, WScreen);
 
 	if(scr==NULL)
 		goto fail2;
-	
+
 	if(state!=NormalState && state!=IconicState)
 		state=NormalState;
 	
@@ -297,7 +299,7 @@ again:
 	
 	if(cwin==NULL)
 		goto fail2;
-	
+
 	CALL_ALT_B(managed, add_clientwin_alt, (cwin, &attr, state, dock));
 
 	if(!managed){
@@ -322,6 +324,7 @@ failure:
 	clientwin_unmapped(cwin);
 
 fail2:
+
 	XSelectInput(wglobal.dpy, win, 0);
 	return NULL;
 }
