@@ -694,7 +694,8 @@ WWsSplit *create_split(int dir, WObj *tl, WObj *br, const WRectangle *geom)
 
 
 static WRegion *do_split_at(WIonWS *ws, WObj *obj, int dir, int primn,
-							int minsize, WRegionSimpleCreateFn *fn)
+                            int minsize, int oprimn,
+                            WRegionSimpleCreateFn *fn)
 {
 	int tlfree, brfree, tlshrink, brshrink, minsizebytree, maxsizebytree;
 	int objmin, objmax;
@@ -719,6 +720,8 @@ static WRegion *do_split_at(WIonWS *ws, WObj *obj, int dir, int primn,
 	sn=s/2;
 	so=s-sn;
 	
+    fprintf(stderr, "%d[%d:%d %d:%d]\n", s, sn, minsize, so, objmin);
+    
 	if(sn<minsize)
 		sn=minsize;
 	if(so<objmin)
@@ -769,7 +772,7 @@ static WRegion *do_split_at(WIonWS *ws, WObj *obj, int dir, int primn,
 	pos=split_tree_pos(obj, dir);
 	if(primn!=BOTTOM_OR_RIGHT)
 		pos+=sn;
-	split_tree_do_resize(obj, dir, primn, pos, so);
+	split_tree_do_resize(obj, dir, oprimn, pos, so);
 	
 	/* Set up split structure
 	 */
@@ -806,7 +809,8 @@ WRegion *split_reg(WRegion *reg, int dir, int primn, int minsize,
 	WRegion *mgr=REGION_MANAGER(reg);
 	assert(mgr!=NULL && WOBJ_IS(mgr, WIonWS));
 	
-	return do_split_at((WIonWS*)mgr, (WObj*)reg, dir, primn, minsize, fn);
+	return do_split_at((WIonWS*)mgr, (WObj*)reg, dir, primn, minsize, primn,
+                       fn);
 }
 
 
@@ -816,7 +820,7 @@ WRegion *split_toplevel(WIonWS *ws, int dir, int primn, int minsize,
 	if(ws->split_tree==NULL)
 		return NULL;
 	
-	return do_split_at(ws, ws->split_tree, dir, primn, minsize, fn);
+	return do_split_at(ws, ws->split_tree, dir, primn, minsize, ANY, fn);
 }
 
 
