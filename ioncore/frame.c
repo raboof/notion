@@ -390,7 +390,7 @@ void frame_resize_hints(WFrame *frame, XSizeHints *hints_ret,
         *relh_ret=subgeom.h;
     
     if(FRAME_CURRENT(frame)!=NULL){
-        region_resize_hints(FRAME_CURRENT(frame), hints_ret,
+        region_size_hints(FRAME_CURRENT(frame), hints_ret,
                             &wdummy, &hdummy);
     }else{
         hints_ret->flags=0;
@@ -639,7 +639,7 @@ WRegion *frame_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 
 static DynFunTab frame_dynfuntab[]={
     {(DynFun*)region_rqclose, (DynFun*)frame_rqclose},
-    {region_resize_hints, frame_resize_hints},
+    {region_size_hints, frame_resize_hints},
 
     {mplex_managed_changed, frame_managed_changed},
     {mplex_size_changed, frame_size_changed_default},

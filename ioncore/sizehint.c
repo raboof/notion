@@ -178,7 +178,7 @@ void xsizehints_adjust_for(XSizeHints *hints, WRegion *list)
     XSizeHints tmp_hints;
     
     FOR_ALL_MANAGED_ON_LIST(list, reg){
-        region_resize_hints(reg, &tmp_hints, &wdummy, &hdummy);
+        region_size_hints(reg, &tmp_hints, &wdummy, &hdummy);
         
         if(tmp_hints.flags&PMinSize){
             if(!(hints->flags&PMinSize)){

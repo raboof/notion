@@ -1569,7 +1569,7 @@ static DynFunTab clientwin_dynfuntab[]={
     {region_activated, 
      clientwin_activated},
     
-    {region_resize_hints, 
+    {region_size_hints, 
      clientwin_resize_hints},
     
     {(DynFun*)region_managed_control_focus,

@@ -187,7 +187,7 @@ static void floatframe_rqgeom_clientwin(WFloatFrame *frame, WClientWin *cwin,
 
     floatframe_offsets(frame, &off);
 
-    region_resize_hints((WRegion*)frame, &hints, NULL, NULL);
+    region_size_hints((WRegion*)frame, &hints, NULL, NULL);
     xsizehints_correct(&hints, &(geom.w), &(geom.h), TRUE);
     
     geom.w=maxof(geom.w, 0);
@@ -241,7 +241,7 @@ void floatframe_resize_hints(WFloatFrame *frame, XSizeHints *hints_ret,
         *relh_ret=subgeom.h;
     
     if(FRAME_CURRENT(frame)!=NULL){
-        region_resize_hints(FRAME_CURRENT(frame), hints_ret,
+        region_size_hints(FRAME_CURRENT(frame), hints_ret,
                             &wdummy, &hdummy);
     }else{
         hints_ret->flags=0;
@@ -497,7 +497,7 @@ static DynFunTab floatframe_dynfuntab[]={
 
     {frame_brushes_updated, floatframe_brushes_updated},
     
-    {region_resize_hints, floatframe_resize_hints},
+    {region_size_hints, floatframe_resize_hints},
     
     END_DYNFUNTAB
 };

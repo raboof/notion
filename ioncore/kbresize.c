@@ -217,7 +217,7 @@ static void resize_units(WMoveresMode *mode, int *wret, int *hret)
     if(FRAME_CURRENT(frame)!=NULL){
         XSizeHints hints;
         
-        region_resize_hints(FRAME_CURRENT(frame), &hints, NULL, NULL);
+        region_size_hints(FRAME_CURRENT(frame), &hints, NULL, NULL);
         
         if(hints.flags&PResizeInc &&
            (hints.width_inc>1 || hints.height_inc>1)){

@@ -225,7 +225,7 @@ static bool moveresmode_init(WMoveresMode *mode, WRegion *reg,
     tmpmode=mode;
     
     mode->snap_enabled=FALSE;
-    region_resize_hints(reg, &mode->hints, &mode->relw, &mode->relh);
+    region_size_hints(reg, &mode->hints, &mode->relw, &mode->relh);
     
     region_rootpos((WRegion*)parent, &mode->parent_rx, &mode->parent_ry);
     
@@ -576,8 +576,8 @@ void region_managed_rqgeom_unallow(WRegion *mgr, WRegion *reg,
 }
 
 
-void region_resize_hints(WRegion *reg, XSizeHints *hints_ret,
-                         uint *relw_ret, uint *relh_ret)
+void region_size_hints(WRegion *reg, XSizeHints *hints_ret,
+                       uint *relw_ret, uint *relh_ret)
 {
     hints_ret->flags=0;
     hints_ret->min_width=1;
@@ -587,10 +587,47 @@ void region_resize_hints(WRegion *reg, XSizeHints *hints_ret,
     if(relh_ret!=NULL)
         *relh_ret=REGION_GEOM(reg).h;
     {
-        CALL_DYN(region_resize_hints, reg, (reg, hints_ret, relw_ret, relh_ret));
+        CALL_DYN(region_size_hints, reg, (reg, hints_ret, relw_ret, relh_ret));
     }
 }
 
+
+/*EXTL_DOC
+ * Returns size hints for \var{reg}. The returned table always contains the
+ * fields \code{rel_?}, \code{min_?} and sometimes the fields \code{max_?},
+ * \code{base_?} and \code{inc_?}, where \code{?}=\code{w}, \code{h}.
+ */
+EXTL_EXPORT_AS(WRegion, size_hints)
+ExtlTab region_size_hints_extl(WRegion *reg)
+{
+    uint relw, relh;
+    XSizeHints hints;
+    ExtlTab tab;
+    
+    region_size_hints(reg, &hints, &relw, &relh);
+    
+    tab=extl_create_table();
+    
+    extl_table_sets_i(tab, "rel_w", relw);
+    extl_table_sets_i(tab, "rel_h", relh);
+    /* Minimum size is always guaranteed to be set. */
+    extl_table_sets_i(tab, "min_w", hints.min_width);
+    extl_table_sets_i(tab, "min_h", hints.min_height);
+    if(hints.flags&PMaxSize){
+        extl_table_sets_i(tab, "min_w", hints.max_width);
+        extl_table_sets_i(tab, "min_h", hints.max_height);
+    }
+    if(hints.flags&PBaseSize){
+        extl_table_sets_i(tab, "base_w", hints.base_width);
+        extl_table_sets_i(tab, "base_h", hints.base_height);
+    }
+    if(hints.flags&PResizeInc){
+        extl_table_sets_i(tab, "inc_w", hints.width_inc);
+        extl_table_sets_i(tab, "inc_h", hints.height_inc);
+    }
+    
+    return tab;
+}
 
 /*}}}*/
 
@@ -602,7 +639,7 @@ void frame_restore_size(WFrame *frame, bool horiz, bool vert)
 {
     WRectangle geom;
     int rqf=REGION_RQGEOM_WEAK_ALL;
-
+    
     geom=REGION_GEOM(frame);
     
     if(vert && frame->flags&FRAME_SAVED_VERT){
@@ -610,7 +647,7 @@ void frame_restore_size(WFrame *frame, bool horiz, bool vert)
         geom.h=frame->saved_h;
         rqf&=~(REGION_RQGEOM_WEAK_Y|REGION_RQGEOM_WEAK_H);
     }
-
+    
     if(horiz && frame->flags&FRAME_SAVED_HORIZ){
         geom.x=frame->saved_x;
         geom.w=frame->saved_w;
@@ -628,7 +665,7 @@ static void correct_frame_size(WFrame *frame, int *w, int *h)
     uint relw, relh;
     int wdiff, hdiff;
     
-    region_resize_hints((WRegion*)frame, &hints, &relw, &relh);
+    region_size_hints((WRegion*)frame, &hints, &relw, &relh);
     
     wdiff=REGION_GEOM(frame).w-relw;
     hdiff=REGION_GEOM(frame).h-relh;
@@ -652,8 +689,8 @@ static bool trymaxv(WFrame *frame, WRegion *mgr, int tryonlyflag)
     }
     
     region_rqgeom((WRegion*)frame, 
-                        tryonlyflag|REGION_RQGEOM_VERT_ONLY, 
-                        &geom, &rgeom);
+                  tryonlyflag|REGION_RQGEOM_VERT_ONLY, 
+                  &geom, &rgeom);
     return (abs(rgeom.y-REGION_GEOM(frame).y)>1 ||
             abs(rgeom.h-REGION_GEOM(frame).h)>1);
 }
@@ -663,7 +700,7 @@ static bool trymaxv(WFrame *frame, WRegion *mgr, int tryonlyflag)
  * Attempt to maximize \var{frame} vertically.
  */
 EXTL_EXPORT_MEMBER
-void frame_maximize_vert(WFrame *frame)
+    void frame_maximize_vert(WFrame *frame)
 {
     WRegion *mgr=REGION_MANAGER(frame);
     
@@ -671,16 +708,16 @@ void frame_maximize_vert(WFrame *frame)
         frame_toggle_shade(frame);
         return;
     }
-
+    
     if(mgr==NULL)
         return;
-
+    
     if(!trymaxv(frame, mgr, REGION_RQGEOM_TRYONLY)){
         /* Could not maximize further, restore */
         frame_restore_size(frame, FALSE, TRUE);
         return;
     }
-
+    
     trymaxv(frame, mgr, 0);
 }
 
@@ -697,23 +734,23 @@ static bool trymaxh(WFrame *frame, WRegion *mgr, int tryonlyflag)
     }
     
     region_rqgeom((WRegion*)frame, 
-                        tryonlyflag|REGION_RQGEOM_HORIZ_ONLY, 
-                        &geom, &rgeom);
+                  tryonlyflag|REGION_RQGEOM_HORIZ_ONLY, 
+                  &geom, &rgeom);
     return (abs(rgeom.x-REGION_GEOM(frame).x)>1 ||
             abs(rgeom.w-REGION_GEOM(frame).w)>1);
 }
-                   
+
 /*EXTL_DOC
  * Attempt to maximize \var{frame} horizontally.
  */
 EXTL_EXPORT_MEMBER
-void frame_maximize_horiz(WFrame *frame)
+    void frame_maximize_horiz(WFrame *frame)
 {
     WRegion *mgr=REGION_MANAGER(frame);
     
     if(mgr==NULL)
         return;
-
+    
     if(!trymaxh(frame, mgr, REGION_RQGEOM_TRYONLY)){
         /* Could not maximize further, restore */
         frame_restore_size(frame, TRUE, FALSE);
@@ -733,15 +770,15 @@ void frame_maximize_horiz(WFrame *frame)
 #define REG_MIN_WH(REG, WHL)                                 \
     XSizeHints hints;                                        \
     uint relwidth, relheight;                                \
-    region_resize_hints(reg, &hints, &relwidth, &relheight); \
+    region_size_hints(reg, &hints, &relwidth, &relheight);   \
     return (hints.flags&PMinSize ? hints.min_##WHL : 1);
-    
-    
+
+
 uint region_min_h(WRegion *reg)
 {
     XSizeHints hints;
     uint relw, relh;
-    region_resize_hints(reg, &hints, &relw, &relh);
+    region_size_hints(reg, &hints, &relw, &relh);
     return (hints.flags&PMinSize ? hints.min_height : 1)
         +REGION_GEOM(reg).h-relh;
 }
@@ -751,7 +788,7 @@ uint region_min_w(WRegion *reg)
 {
     XSizeHints hints;
     uint relw, relh;
-    region_resize_hints(reg, &hints, &relw, &relh);
+    region_size_hints(reg, &hints, &relw, &relh);
     return (hints.flags&PMinSize ? hints.min_width : 1)
         +REGION_GEOM(reg).w-relw;
 }

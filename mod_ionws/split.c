@@ -221,7 +221,7 @@ static void split_update_region_bounds(WSplit *node, WRegion *reg)
 {
     XSizeHints hints;
     uint relw, relh;
-    region_resize_hints(reg, &hints, &relw, &relh);
+    region_size_hints(reg, &hints, &relw, &relh);
     
     node->min_w=maxof(1, ((hints.flags&PMinSize ? hints.min_width : 1)
                           +REGION_GEOM(reg).w-relw));
