@@ -398,6 +398,40 @@ static void rot_rs_flip_left(WSplitSplit *a, WSplitSplit *p)
 }
 
 
+static void rot_para_right(WSplitSplit *a, WSplitSplit *p,
+                           WSplit *stdisp)
+{
+    rotate_right(a, p, stdisp);
+    if(a->dir==SPLIT_VERTICAL){
+        GEOM(p).y=GEOM(a).y;
+        GEOM(p).h=GEOM(a).h;
+        GEOM(a).h=GEOM(a->br).y+GEOM(a->br).h-GEOM(a).y;
+    }else{
+        GEOM(p).x=GEOM(a).x;
+        GEOM(p).w=GEOM(a).w;
+        GEOM(a).w=GEOM(a->br).x+GEOM(a->br).w-GEOM(a).x;
+    }
+}
+
+
+static void rot_para_left(WSplitSplit *a, WSplitSplit *p,
+                          WSplit *stdisp)
+{
+    rotate_left(a, p, stdisp);
+    if(a->dir==SPLIT_VERTICAL){
+        GEOM(p).y=GEOM(a).y;
+        GEOM(p).h=GEOM(a).h;
+        GEOM(a).y=GEOM(a->tl).y;
+        GEOM(a).h=GEOM(a->br).y+GEOM(a->br).h-GEOM(a).y;
+    }else{
+        GEOM(p).x=GEOM(a).x;
+        GEOM(p).w=GEOM(a).w;
+        GEOM(a).x=GEOM(a->tl).x;
+        GEOM(a).w=GEOM(a->br).x+GEOM(a->br).w-GEOM(a).x;
+    }
+}
+
+
 /*}}}*/
 
 
@@ -466,11 +500,9 @@ static bool do_try_sink_stdisp_para(WSplitSplit *p, WSplitST *stdisp,
     }
     
     if(p->tl==(WSplit*)stdisp)
-        rotate_left(p, other, other->br);
+        rot_para_left(p, other, other->br);
     else
-        rotate_right(p, other, other->tl);
-    
-    swapgeom(&GEOM(p), &GEOM(other));
+        rot_para_right(p, other, other->tl);
     
     return TRUE;
 }
@@ -480,6 +512,8 @@ bool split_try_sink_stdisp(WSplitSplit *node, bool iterate, bool force)
 {
     bool didsomething=FALSE;
     bool more=TRUE;
+    
+    /*assert(OBJ_IS_EXACTLY(node, WSplitSplit));*/
     
     while(more){
         WSplit *tl=node->tl;
@@ -493,6 +527,8 @@ bool split_try_sink_stdisp(WSplitSplit *node, bool iterate, bool force)
         }else if(OBJ_IS(br, WSplitST)){
             st=(WSplitST*)br;
             other=OBJ_CAST(tl, WSplitSplit);
+        }else{
+            break;
         }
         
         if(other==NULL)
@@ -612,10 +648,11 @@ static bool do_try_unsink_stdisp_para(WSplitSplit *a, WSplitSplit *p,
         }
     }
     
+    
     if(a->tl==(WSplit*)p && p->tl==(WSplit*)stdisp){
-        rotate_right(a, p, (WSplit*)stdisp);
+        rot_para_right(a, p, (WSplit*)stdisp);
     }else if(a->br==(WSplit*)p && p->br==(WSplit*)stdisp){
-        rotate_left(a, p, (WSplit*)stdisp);
+        rot_para_left(a, p, (WSplit*)stdisp);
     }else{
         warn(TR("Status display badly located in split tree."));
         return FALSE;
@@ -632,6 +669,8 @@ bool split_try_unsink_stdisp(WSplitSplit *node, bool iterate, bool force)
     bool didsomething=FALSE;
     bool more=TRUE;
     
+    /*assert(OBJ_IS_EXACTLY(node, WSplitSplit));*/
+
     while(more){
         WSplitSplit *p=OBJ_CAST(((WSplit*)node)->parent, WSplitSplit);
         WSplit *tl=node->tl;
