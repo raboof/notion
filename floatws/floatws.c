@@ -23,7 +23,7 @@
 #include <ioncore/saveload.h>
 #include <ioncore/attach.h>
 #include <ioncore/regbind.h>
-#include <ioncore/genframe-pointer.h>
+#include <ioncore/frame-pointer.h>
 #include <ioncore/stacking.h>
 #include <ioncore/extlconv.h>
 #include <ioncore/defer.h>

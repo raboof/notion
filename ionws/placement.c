@@ -15,7 +15,7 @@
 #include <ioncore/attach.h>
 #include <ioncore/manage.h>
 #include <ioncore/extl.h>
-#include <ioncore/genframep.h>
+#include <ioncore/framep.h>
 #include <ioncore/names.h>
 #include "placement.h"
 #include "ionframe.h"
@@ -48,7 +48,7 @@ static bool try_current(WIonWS *ws, WClientWin *cwin)
 
 	target=find_suitable_target(ws);
 	
-	if(target==NULL || !WOBJ_IS(target, WGenFrame))
+	if(target==NULL || !WOBJ_IS(target, WFrame))
 		return FALSE;
 		
 	target=WGENFRAME_CURRENT(target);

@@ -13,12 +13,12 @@
 #include "conf-bindings.h"
 #include "binding.h"
 #include "extl.h"
-#include "genframep.h"
+#include "framep.h"
 
 
 WBindmap ioncore_rootwin_bindmap=BINDMAP_INIT;
 WBindmap ioncore_mplex_bindmap=BINDMAP_INIT;
-WBindmap ioncore_genframe_bindmap=BINDMAP_INIT;
+WBindmap ioncore_frame_bindmap=BINDMAP_INIT;
 
 /*EXTL_DOC
  * Add a set of bindings available everywhere. The bound functions
@@ -52,12 +52,12 @@ static StringIntMap frame_areas[]={
 
 
 /*EXTL_DOC
- * Add a set of bindings available in \type{WGenFrame}s (all types of frames).
+ * Add a set of bindings available in \type{WFrame}s (all types of frames).
  */
 EXTL_EXPORT
-bool genframe_bindings(ExtlTab tab)
+bool frame_bindings(ExtlTab tab)
 {
-	return process_bindings(&ioncore_genframe_bindmap, frame_areas, tab);
+	return process_bindings(&ioncore_frame_bindmap, frame_areas, tab);
 }
 
 
@@ -66,6 +66,6 @@ void ioncore_deinit_bindmaps()
 {
 	deinit_bindmap(&ioncore_rootwin_bindmap);
 	deinit_bindmap(&ioncore_mplex_bindmap);
-	deinit_bindmap(&ioncore_genframe_bindmap);
+	deinit_bindmap(&ioncore_frame_bindmap);
 }
 

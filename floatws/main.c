@@ -12,8 +12,8 @@
 #include <ioncore/binding.h>
 #include <ioncore/conf-bindings.h>
 #include <ioncore/readconfig.h>
-#include <ioncore/genframep.h>
-#include <ioncore/genframe-pointer.h>
+#include <ioncore/framep.h>
+#include <ioncore/frame-pointer.h>
 #include <ioncore/reginfo.h>
 #include <ioncore/hooks.h>
 #include <ioncore/clientwin.h>

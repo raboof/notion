@@ -32,13 +32,13 @@ ionframe_bindings{
                function(frame) frame:split("right") end),
     }),
     
-    mclick("Button1", WGenFrame.p_switch_tab, "tab"),
+    mclick("Button1", WFrame.p_switch_tab, "tab"),
     mdblclick("Button1", WIonFrame.toggle_shade, "tab"),
-    mdrag("Button1", WGenFrame.p_tabdrag, "tab"),
-    mdrag("Button1", WGenFrame.p_resize, "border"),
+    mdrag("Button1", WFrame.p_tabdrag, "tab"),
+    mdrag("Button1", WFrame.p_resize, "border"),
     
-    mclick("Button2", WGenFrame.p_switch_tab, "tab"),
-    mdrag("Button2", WGenFrame.p_tabdrag, "tab"),
+    mclick("Button2", WFrame.p_switch_tab, "tab"),
+    mdrag("Button2", WFrame.p_tabdrag, "tab"),
     
     mdrag(DEFAULT_MOD.."Button3", WGenFrame.p_resize),
 }

@@ -31,12 +31,12 @@ if string.find(arg[1], "m") then
 end
 
 if string.find(arg[1], "f") then
-    table.insert(mappings, "Mod1+K P/N -> WGenFrame.switch_next/prev")
-    table.insert(groups, "genframe_bindings")
-    genframe_bindings{
+    table.insert(mappings, "Mod1+K P/N -> WFrame.switch_next/prev")
+    table.insert(groups, "frame_bindings")
+    frame_bindings{
         submap("Mod1+K") {
-            kpress("AnyModifier+N", WGenFrame.switch_next),
-            kpress("AnyModifier+P", WGenFrame.switch_prev),
+            kpress("AnyModifier+N", WFrame.switch_next),
+            kpress("AnyModifier+P", WFrame.switch_prev),
         }
     }
 end

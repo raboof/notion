@@ -26,7 +26,7 @@
 #include "event.h"
 #include "bindmaps.h"
 #include "regbind.h"
-#include "genframe-pointer.h"
+#include "frame-pointer.h"
 
 
 #define SCR_MLIST(SCR) ((SCR)->mplex.managed_list)

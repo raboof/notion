@@ -13,7 +13,7 @@
 #define ION_FLOATWS_FLOATFRAME_H
 
 #include <ioncore/common.h>
-#include <ioncore/genframe.h>
+#include <ioncore/frame.h>
 #include <ioncore/window.h>
 #include <ioncore/extl.h>
 #include "floatws.h"
@@ -21,7 +21,7 @@
 INTROBJ(WFloatFrame);
 
 DECLOBJ(WFloatFrame){
-	WGenFrame genframe;
+	WFrame frame;
 	int bar_w;
 	
 	double bar_max_width_q;

@@ -13,23 +13,19 @@
 #define ION_IONWS_IONFRAME_H
 
 #include <ioncore/common.h>
-#include <ioncore/genframe.h>
+#include <ioncore/frame.h>
 #include <ioncore/extl.h>
 
 INTROBJ(WIonFrame);
 
 DECLOBJ(WIonFrame){
-	WGenFrame genframe;
-	bool bar_inside_border;
+	WFrame frame;
 };
-
 
 extern WIonFrame* create_ionframe(WWindow *parent, const WRectangle *geom);
 extern void ionframe_draw_config_updated(WIonFrame *frame);
-
+extern void ionframe_toggle_shade(WIonFrame *frame);
 extern WRegion *ionframe_load(WWindow *par, const WRectangle *geom, 
 							  ExtlTab tab);
-
-extern void ionframe_toggle_shade(WIonFrame *frame);
 
 #endif /* ION_IONWS_IONFRAME_H */

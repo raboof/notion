@@ -111,20 +111,20 @@ mplex_bindings{
 }
 
 
--- genframe_bindings
+-- frame_bindings
 --
 -- These bindings are common to all types of frames. The rest of frame
 -- bindings that differ between frame types are defined in the modules' 
 -- configuration files.
 
-genframe_bindings{
+frame_bindings{
     -- Tag viewed object
     kpress(DEFAULT_MOD.."T", make_mplex_sub_fn(WRegion.toggle_tag)),
 
     submap(DEFAULT_MOD.."K", {
         -- Selected object/tab switching
-        kpress("AnyModifier+N", WGenFrame.switch_next),
-        kpress("AnyModifier+P", WGenFrame.switch_prev),
+        kpress("AnyModifier+N", WFrame.switch_next),
+        kpress("AnyModifier+P", WFrame.switch_prev),
         kpress("AnyModifier+1", function(f) f:switch_nth(0) end),
         kpress("AnyModifier+2", function(f) f:switch_nth(1) end),
         kpress("AnyModifier+3", function(f) f:switch_nth(2) end),
@@ -136,10 +136,10 @@ genframe_bindings{
         kpress("AnyModifier+9", function(f) f:switch_nth(8) end),
         kpress("AnyModifier+0", function(f) f:switch_nth(9) end),
         -- Maximize
-        kpress("AnyModifier+H", WGenFrame.maximize_horiz),
-        kpress("AnyModifier+V", WGenFrame.maximize_vert),
+        kpress("AnyModifier+H", WFrame.maximize_horiz),
+        kpress("AnyModifier+V", WFrame.maximize_vert),
         -- Attach tagged objects
-        kpress("AnyModifier+A", WGenFrame.attach_tagged),
+        kpress("AnyModifier+A", WFrame.attach_tagged),
     }),
     
     -- Queries

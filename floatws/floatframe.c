@@ -12,9 +12,10 @@
 #include <ioncore/common.h>
 #include <string.h>
 
-#include <ioncore/genframe.h>
-#include <ioncore/genframep.h>
-#include <ioncore/genframe-pointer.h>
+#include <ioncore/frame.h>
+#include <ioncore/framep.h>
+#include <ioncore/frame-pointer.h>
+#include <ioncore/frame-draw.h>
 #include <ioncore/saveload.h>
 #include <ioncore/names.h>
 #include <ioncore/objp.h>
@@ -38,7 +39,7 @@ static bool floatframe_init(WFloatFrame *frame, WWindow *parent,
 	frame->bar_w=geom->w;
 	frame->sticky=FALSE;
 	
-	if(!genframe_init((WGenFrame*)frame, parent, geom))
+	if(!frame_init((WFrame*)frame, parent, geom))
 		return FALSE;
 
 	region_add_bindmap((WRegion*)frame, &(floatframe_bindmap));
@@ -55,7 +56,7 @@ WFloatFrame *create_floatframe(WWindow *parent, const WRectangle *geom)
 
 static void deinit_floatframe(WFloatFrame *frame)
 {
-	genframe_deinit((WGenFrame*)frame);
+	frame_deinit((WFrame*)frame);
 }
 
 
@@ -71,8 +72,8 @@ static void floatframe_offsets(WRootWin *rootwin, const WFloatFrame *frame,
 	uint bar_h=0;
 	
 	if(frame!=NULL){
-		if(frame->genframe.brush!=NULL)
-			grbrush_get_border_widths(frame->genframe.brush, &bdw);
+		if(frame->frame.brush!=NULL)
+			grbrush_get_border_widths(frame->frame.brush, &bdw);
 	}else if(rootwin!=NULL){
 		gr_get_brush_values(rootwin, "frame-floatframe", &bdw, NULL, NULL);
 	}
@@ -83,7 +84,7 @@ static void floatframe_offsets(WRootWin *rootwin, const WFloatFrame *frame,
 	off->h=bdw.top+bdw.bottom;
 
 	if(frame!=NULL){
-		bar_h=frame->genframe.bar_h;
+		bar_h=frame->frame.bar_h;
 	}else if(rootwin!=NULL){
 		GrBorderWidths bdwt=GR_BORDER_WIDTHS_INIT;
 		GrFontExtents fntet=GR_FONT_EXTENTS_INIT;
@@ -124,9 +125,9 @@ static void floatframe_to_managed_geom(WRootWin *rootwin,
 static void floatframe_border_geom(const WFloatFrame *frame, WRectangle *geom)
 {
 	geom->x=0;
-	geom->y=frame->genframe.bar_h;
+	geom->y=frame->frame.bar_h;
 	geom->w=REGION_GEOM(frame).w;
-	geom->h=REGION_GEOM(frame).h-frame->genframe.bar_h;
+	geom->h=REGION_GEOM(frame).h-frame->frame.bar_h;
 }
 
 
@@ -135,7 +136,7 @@ static void floatframe_bar_geom(const WFloatFrame *frame, WRectangle *geom)
 	geom->x=0;
 	geom->y=0;
 	geom->w=frame->bar_w;
-	geom->h=frame->genframe.bar_h;
+	geom->h=frame->frame.bar_h;
 }
 
 
@@ -199,7 +200,7 @@ static void floatframe_request_clientwin_geom(WFloatFrame *frame,
 
 	floatframe_offsets(NULL, frame, &off);
 
-	genframe_resize_hints((WGenFrame*)frame, &hints, NULL, NULL);
+	frame_resize_hints((WFrame*)frame, &hints, NULL, NULL);
 	correct_size(&(geom.w), &(geom.h), &hints, TRUE);
 	
 	geom.w+=off.w;
@@ -253,10 +254,10 @@ static void floatframe_brushes_updated(WFloatFrame *frame)
 	frame->tab_min_w=100;
 	frame->bar_max_width_q=0.95;
 
-	if(frame->genframe.brush==NULL)
+	if(frame->frame.brush==NULL)
 		return;
 	
-	grbrush_get_extra_values(frame->genframe.brush, &tab);
+	grbrush_get_extra_values(frame->frame.brush, &tab);
 	
 	if(extl_table_gets_i(tab, "floatframe_tab_min_w", &(frame->tab_min_w))){
 		if(frame->tab_min_w<=0)
@@ -275,11 +276,11 @@ static void floatframe_set_shape(WFloatFrame *frame)
 {
 	WRectangle gs[2];
 	
-	if(frame->genframe.brush!=NULL){
+	if(frame->frame.brush!=NULL){
 		floatframe_bar_geom(frame, gs+0);
 		floatframe_border_geom(frame, gs+1);
 	
-		grbrush_set_window_shape(frame->genframe.brush, WGENFRAME_WIN(frame),
+		grbrush_set_window_shape(frame->frame.brush, WGENFRAME_WIN(frame),
 								 TRUE, 2, gs);
 	}
 }
@@ -292,13 +293,13 @@ static int init_title(WFloatFrame *frame, int i)
 {
 	int textw;
 	
-	if(frame->genframe.titles[i].text!=NULL){
-		free(frame->genframe.titles[i].text);
-		frame->genframe.titles[i].text=NULL;
+	if(frame->frame.titles[i].text!=NULL){
+		free(frame->frame.titles[i].text);
+		frame->frame.titles[i].text=NULL;
 	}
 	
-	textw=genframe_nth_tab_iw((WGenFrame*)frame, i);
-	frame->genframe.titles[i].iw=textw;
+	textw=frame_nth_tab_iw((WFrame*)frame, i);
+	frame->frame.titles[i].iw=textw;
 	return textw;
 }
 
@@ -313,13 +314,13 @@ static void floatframe_recalc_bar(WFloatFrame *frame)
 	uint bdtotal;
 	int i, m;
 	
-	if(frame->genframe.bar_brush==NULL)
+	if(frame->frame.bar_brush==NULL)
 		return;
 	
 	m=WGENFRAME_MCOUNT(frame);
 	
 	if(m>0){
-		grbrush_get_border_widths(frame->genframe.bar_brush, &bdw);
+		grbrush_get_border_widths(frame->frame.bar_brush, &bdw);
 		bdtotal=((m-1)*(bdw.tb_ileft+bdw.tb_iright)
 				 +bdw.right+bdw.left);
 
@@ -328,7 +329,7 @@ static void floatframe_recalc_bar(WFloatFrame *frame)
 			if(p==NULL)
 				continue;
 			
-			textw=grbrush_get_text_width(frame->genframe.bar_brush,
+			textw=grbrush_get_text_width(frame->frame.bar_brush,
 										 p, strlen(p));
 			if(textw>tmaxw)
 				tmaxw=textw;
@@ -361,15 +362,15 @@ static void floatframe_recalc_bar(WFloatFrame *frame)
 		floatframe_set_shape(frame);
 	}
 
-	if(m==0 || frame->genframe.titles==NULL)
+	if(m==0 || frame->frame.titles==NULL)
 		return;
 	
 	i=0;
 	FOR_ALL_MANAGED_ON_LIST(WGENFRAME_MLIST(frame), sub){
 		textw=init_title(frame, i);
 		if(textw>0){
-			title=region_make_label(sub, textw, frame->genframe.bar_brush);
-			frame->genframe.titles[i].text=title;
+			title=region_make_label(sub, textw, frame->frame.bar_brush);
+			frame->frame.titles[i].text=title;
 		}
 		i++;
 	}
@@ -381,7 +382,7 @@ static void floatframe_size_changed(WFloatFrame *frame, bool wchg, bool hchg)
 	int bar_w=frame->bar_w;
 	
 	if(wchg)
-		genframe_recalc_bar((WGenFrame*)frame);
+		frame_recalc_bar((WFrame*)frame);
 	if(hchg || (wchg && bar_w==frame->bar_w))
 		floatframe_set_shape(frame);
 }
@@ -401,7 +402,7 @@ static const char *floatframe_tab_style_default(WFloatFrame *frame)
 
 /*static void floatframe_draw_config_updated(WFloatFrame *floatframe)
 {
-	genframe_draw_config_updated((WGenFrame*)floatframe);
+	frame_draw_config_updated((WFrame*)floatframe);
 }*/
 
 
@@ -433,7 +434,7 @@ void floatframe_remove_managed(WFloatFrame *frame, WRegion *reg)
 EXTL_EXPORT_MEMBER
 void floatframe_p_move(WFloatFrame *frame)
 {
-	genframe_p_move((WGenFrame*)frame);
+	frame_p_move((WFrame*)frame);
 }
 
 
@@ -445,7 +446,7 @@ void floatframe_toggle_shade(WFloatFrame *frame)
 {
 	WRectangle geom;
 	floatframe_bar_geom(frame, &geom);
-	genframe_do_toggle_shade((WGenFrame*)frame, geom.h);
+	frame_do_toggle_shade((WFrame*)frame, geom.h);
 }
 
 
@@ -487,23 +488,23 @@ static bool floatframe_save_to_file(WFloatFrame *frame, FILE *file, int lvl)
 	
 	begin_saved_region((WRegion*)frame, file, lvl);
 	save_indent_line(file, lvl);
-	fprintf(file, "flags = %d,\n", frame->genframe.flags);
+	fprintf(file, "flags = %d,\n", frame->frame.flags);
 	if(frame->sticky){
 		save_indent_line(file, lvl);
 		fprintf(file, "sticky = true,\n");
 	}
 	
-	if(frame->genframe.flags&WGENFRAME_SAVED_VERT){
+	if(frame->frame.flags&WGENFRAME_SAVED_VERT){
 		save_indent_line(file, lvl);
 		fprintf(file, "saved_y = %d, saved_h = %d,\n", 
-				frame->genframe.saved_y,
-				frame->genframe.saved_h);
+				frame->frame.saved_y,
+				frame->frame.saved_h);
 	}
-	if(frame->genframe.flags&WGENFRAME_SAVED_HORIZ){
+	if(frame->frame.flags&WGENFRAME_SAVED_HORIZ){
 		save_indent_line(file, lvl);
 		fprintf(file, "saved_x = %d, saved_w = %d,\n", 
-				frame->genframe.saved_x,
-				frame->genframe.saved_w);
+				frame->frame.saved_x,
+				frame->frame.saved_w);
 	}
 		
 	save_indent_line(file, lvl);
@@ -528,39 +529,21 @@ static bool floatframe_save_to_file(WFloatFrame *frame, FILE *file, int lvl)
 
 WRegion *floatframe_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
 {
-	int flags=0;
-	ExtlTab substab, subtab;
-	WFloatFrame *frame;
-	int n, i;
-	
-	frame=create_floatframe(par, geom);
+	WFloatFrame *frame=create_floatframe(par, geom);
 	
 	if(frame==NULL)
 		return NULL;
-
-	extl_table_gets_t(tab, "subs", &substab);
-	n=extl_table_get_n(substab);
 	
-	for(i=1; i<=n; i++){
-		if(extl_table_geti_t(substab, i, &subtab)){
-			mplex_attach_new((WMPlex*)frame, subtab);
-			extl_unref_table(subtab);
-		}
-	}
-
-	extl_unref_table(substab);
-
-	genframe_load_saved_geom((WGenFrame*)frame, tab);
-	
-	if(extl_table_is_bool_set(tab, "sticky"))
-		floatframe_toggle_sticky(frame);
+	frame_do_load((WFrame*)frame, tab);
 	
 	if(WGENFRAME_MCOUNT(frame)==0){
 		/* Nothing to manage, destroy */
 		destroy_obj((WObj*)frame);
 		frame=NULL;
+	}else{
+		if(extl_table_is_bool_set(tab, "sticky"))
+			floatframe_toggle_sticky(frame);
 	}
-	
 	return (WRegion*)frame;
 }
 
@@ -573,30 +556,30 @@ WRegion *floatframe_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
 
 static DynFunTab floatframe_dynfuntab[]={
 	{mplex_size_changed, floatframe_size_changed},
-	{genframe_recalc_bar, floatframe_recalc_bar},
+	{frame_recalc_bar, floatframe_recalc_bar},
 
 	{mplex_managed_geom, floatframe_managed_geom},
-	{genframe_bar_geom, floatframe_bar_geom},
-	{genframe_border_inner_geom, floatframe_border_inner_geom},
-	{genframe_border_geom, floatframe_border_geom},
+	{frame_bar_geom, floatframe_bar_geom},
+	{frame_border_inner_geom, floatframe_border_inner_geom},
+	{frame_border_geom, floatframe_border_geom},
 	{region_remove_managed, floatframe_remove_managed},
 	
 	{region_request_clientwin_geom, floatframe_request_clientwin_geom},
 	
 	{(DynFun*)region_save_to_file, (DynFun*)floatframe_save_to_file},
 
-	{(DynFun*)genframe_style, (DynFun*)floatframe_style_default},
-	{(DynFun*)genframe_tab_style, (DynFun*)floatframe_tab_style_default},
+	{(DynFun*)frame_style, (DynFun*)floatframe_style_default},
+	{(DynFun*)frame_tab_style, (DynFun*)floatframe_tab_style_default},
 	
 	/*{region_draw_config_updated, floatframe_draw_config_updated},*/
 	
-	{genframe_brushes_updated, floatframe_brushes_updated},
+	{frame_brushes_updated, floatframe_brushes_updated},
 	
 	END_DYNFUNTAB
 };
 
 
-IMPLOBJ(WFloatFrame, WGenFrame, deinit_floatframe, floatframe_dynfuntab);
+IMPLOBJ(WFloatFrame, WFrame, deinit_floatframe, floatframe_dynfuntab);
 
 		
 /*}}}*/

@@ -17,7 +17,7 @@
 #include <ioncore/focus.h>
 #include <ioncore/clientwin.h>
 #include <ioncore/resize.h>
-#include <ioncore/genframep.h>
+#include <ioncore/framep.h>
 #include <ioncore/defer.h>
 #include "splitframe.h"
 #include "split.h"

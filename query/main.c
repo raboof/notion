@@ -12,7 +12,7 @@
 #include <ioncore/binding.h>
 #include <ioncore/conf-bindings.h>
 #include <ioncore/readconfig.h>
-#include <ioncore/genframe.h>
+#include <ioncore/frame.h>
 #include <ioncore/saveload.h>
 
 #include "query.h"

@@ -26,7 +26,7 @@
 #include "extl.h"
 #include "extlconv.h"
 #include "grab.h"
-#include "genframep.h"
+#include "framep.h"
 #include "infowin.h"
 #include "defer.h"
 
@@ -345,12 +345,12 @@ bool may_resize(WRegion *reg)
 /* It is ugly to do this here, but it will have to do for now... */
 static void set_saved(WRegion *reg)
 {
-	WGenFrame *frame;
+	WFrame *frame;
 	
-	if(!WOBJ_IS(reg, WGenFrame))
+	if(!WOBJ_IS(reg, WFrame))
 		return;
 	
-	frame=(WGenFrame*)reg;
+	frame=(WFrame*)reg;
 	
 	/* Restore saved sizes from the beginning of the resize action */
 	if(tmporiggeom.w!=tmpgeom.w){
@@ -726,7 +726,7 @@ void region_request_managed_geom_unallow(WRegion *mgr, WRegion *reg,
 /*{{{ Restore size, maximize, shade */
 
 
-void genframe_restore_size(WGenFrame *frame, bool horiz, bool vert)
+void frame_restore_size(WFrame *frame, bool horiz, bool vert)
 {
 	WRectangle geom;
 	int rqf=REGION_RQGEOM_WEAK_ALL;
@@ -750,7 +750,7 @@ void genframe_restore_size(WGenFrame *frame, bool horiz, bool vert)
 }
 
 
-static void correct_frame_size(WGenFrame *frame, int *w, int *h)
+static void correct_frame_size(WFrame *frame, int *w, int *h)
 {
 	XSizeHints hints;
 	uint relw, relh;
@@ -768,7 +768,7 @@ static void correct_frame_size(WGenFrame *frame, int *w, int *h)
 }
 
 
-static bool trymaxv(WGenFrame *frame, WRegion *mgr, int tryonlyflag)
+static bool trymaxv(WFrame *frame, WRegion *mgr, int tryonlyflag)
 {
 	WRectangle geom=REGION_GEOM(frame), rgeom;
 	geom.y=0;
@@ -791,12 +791,12 @@ static bool trymaxv(WGenFrame *frame, WRegion *mgr, int tryonlyflag)
  * Attempt to maximize \var{frame} vertically.
  */
 EXTL_EXPORT_MEMBER
-void genframe_maximize_vert(WGenFrame *frame)
+void frame_maximize_vert(WFrame *frame)
 {
 	WRegion *mgr=REGION_MANAGER(frame);
 	
 	if(frame->flags&WGENFRAME_SHADED){
-		genframe_do_toggle_shade(frame, 0 /* not used */);
+		frame_do_toggle_shade(frame, 0 /* not used */);
 		return;
 	}
 		
@@ -805,7 +805,7 @@ void genframe_maximize_vert(WGenFrame *frame)
 
 	if(!trymaxv(frame, mgr, REGION_RQGEOM_TRYONLY)){
 		/* Could not maximize further, restore */
-		genframe_restore_size(frame, FALSE, TRUE);
+		frame_restore_size(frame, FALSE, TRUE);
 		return;
 	}
 
@@ -813,7 +813,7 @@ void genframe_maximize_vert(WGenFrame *frame)
 }
 
 
-static bool trymaxh(WGenFrame *frame, WRegion *mgr, int tryonlyflag)
+static bool trymaxh(WFrame *frame, WRegion *mgr, int tryonlyflag)
 {
 	WRectangle geom=REGION_GEOM(frame), rgeom;
 	geom.x=0;
@@ -835,7 +835,7 @@ static bool trymaxh(WGenFrame *frame, WRegion *mgr, int tryonlyflag)
  * Attempt to maximize \var{frame} horizontally.
  */
 EXTL_EXPORT_MEMBER
-void genframe_maximize_horiz(WGenFrame *frame)
+void frame_maximize_horiz(WFrame *frame)
 {
 	WRegion *mgr=REGION_MANAGER(frame);
 	
@@ -844,7 +844,7 @@ void genframe_maximize_horiz(WGenFrame *frame)
 
 	if(!trymaxh(frame, mgr, REGION_RQGEOM_TRYONLY)){
 		/* Could not maximize further, restore */
-		genframe_restore_size(frame, TRUE, FALSE);
+		frame_restore_size(frame, TRUE, FALSE);
 		return;
 	}
 	
@@ -852,7 +852,7 @@ void genframe_maximize_horiz(WGenFrame *frame)
 }
 
 
-void genframe_do_toggle_shade(WGenFrame *frame, int shaded_h)
+void frame_do_toggle_shade(WFrame *frame, int shaded_h)
 {
 	WRectangle geom=REGION_GEOM(frame);
 
@@ -875,7 +875,7 @@ void genframe_do_toggle_shade(WGenFrame *frame, int shaded_h)
  * Is \var{frame} shaded?
  */
 EXTL_EXPORT_MEMBER
-bool genframe_is_shaded(WGenFrame *frame)
+bool frame_is_shaded(WFrame *frame)
 {
 	return ((frame->flags&WGENFRAME_SHADED)!=0);
 }
@@ -914,18 +914,18 @@ uint region_min_w(WRegion *reg)
 }
 
 
-void genframe_resize_units(WGenFrame *genframe, int *wret, int *hret)
+void frame_resize_units(WFrame *frame, int *wret, int *hret)
 {
-	/*WGRData *grdata=GRDATA_OF(genframe);
+	/*WGRData *grdata=GRDATA_OF(frame);
 	*wret=grdata->w_unit;
 	*hret=grdata->h_unit;*/
 	*wret=1;
 	*hret=1;
 	
-	if(WGENFRAME_CURRENT(genframe)!=NULL){
+	if(WGENFRAME_CURRENT(frame)!=NULL){
 		XSizeHints hints;
 		
-		region_resize_hints(WGENFRAME_CURRENT(genframe), &hints, NULL, NULL);
+		region_resize_hints(WGENFRAME_CURRENT(frame), &hints, NULL, NULL);
 		
 		if(hints.flags&PResizeInc &&
 		   (hints.width_inc>1 || hints.height_inc>1)){

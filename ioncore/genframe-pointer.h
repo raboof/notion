@@ -1,5 +1,5 @@
 /*
- * ion/ioncore/genframe-pointer.h
+ * ion/ioncore/frame-pointer.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -14,16 +14,16 @@
 
 #include "common.h"
 #include "pointer.h"
-#include "genframe.h"
+#include "frame.h"
 
-extern void genframe_p_resize(WGenFrame *genframe);
-extern void genframe_p_tabdrag(WGenFrame *genframe);
-extern void genframe_p_move(WGenFrame *genframe);
-extern void genframe_switch_tab(WGenFrame *genframe);
+extern void frame_p_resize(WFrame *frame);
+extern void frame_p_tabdrag(WFrame *frame);
+extern void frame_p_move(WFrame *frame);
+extern void frame_switch_tab(WFrame *frame);
 
-extern int genframe_press(WGenFrame *genframe, XButtonEvent *ev,
+extern int frame_press(WFrame *frame, XButtonEvent *ev,
 						  WRegion **reg_ret);
-extern void genframe_release(WGenFrame *genframe);
+extern void frame_release(WFrame *frame);
 
 DYNFUN bool region_handle_drop(WRegion *reg, int x, int y,
 							   WRegion *dropped);

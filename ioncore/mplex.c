@@ -28,7 +28,7 @@
 #include "extl.h"
 #include "extlconv.h"
 #include "genws.h"
-#include "genframe-pointer.h"
+#include "frame-pointer.h"
 #include "bindmaps.h"
 #include "regbind.h"
 

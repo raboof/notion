@@ -13,7 +13,7 @@
 #define ION_IONCORE_RESIZE_H
 
 #include "common.h"
-#include "genframe.h"
+#include "frame.h"
 
 
 /* To make it easier for region_request_managed_geom handlers, the geom
@@ -89,13 +89,13 @@ DYNFUN void region_resize_hints(WRegion *reg, XSizeHints *hints_ret,
 extern uint region_min_h(WRegion *reg);
 extern uint region_min_w(WRegion *reg);
 
-extern void genframe_resize_units(WGenFrame *genframe, int *wret, int *hret);
+extern void frame_resize_units(WFrame *frame, int *wret, int *hret);
 
-extern void genframe_maximize_vert(WGenFrame *frame);
-extern void genframe_maximize_horiz(WGenFrame *frame);
+extern void frame_maximize_vert(WFrame *frame);
+extern void frame_maximize_horiz(WFrame *frame);
 
-extern void genframe_do_toggle_shade(WGenFrame *frame, int shaded_h);
-extern bool genframe_is_shaded(WGenFrame *frame);
+extern void frame_do_toggle_shade(WFrame *frame, int shaded_h);
+extern bool frame_is_shaded(WFrame *frame);
 
 extern void region_convert_root_geom(WRegion *reg, WRectangle *geom);
 

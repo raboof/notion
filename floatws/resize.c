@@ -123,7 +123,7 @@ void floatframe_do_resize(WFloatFrame *frame, int left, int right,
 	if(!may_resize((WRegion*)frame))
 		return;
 	
-	genframe_resize_units((WGenFrame*)frame, &wu, &hu);
+	frame_resize_units((WFrame*)frame, &wu, &hu);
 	
 	mode=3*limit_and_encode_mode(&left, &right, &top, &bottom);
 	resize_accel(&wu, &hu, mode);

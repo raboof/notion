@@ -16,7 +16,7 @@
 #include <ioncore/readconfig.h>
 #include <ioncore/binding.h>
 #include <ioncore/conf-bindings.h>
-#include <ioncore/genframep.h>
+#include <ioncore/framep.h>
 #include <ioncore/extl.h>
 #include "ionframe.h"
 #include "bindmaps.h"

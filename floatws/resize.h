@@ -15,7 +15,7 @@
 #include <ioncore/common.h>
 #include <ioncore/window.h>
 #include <ioncore/resize.h>
-#include <ioncore/genframe.h>
+#include <ioncore/frame.h>
 #include "floatframe.h"
 
 extern void floatframe_begin_resize(WFloatFrame *frame);

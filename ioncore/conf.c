@@ -77,7 +77,7 @@ bool ioncore_read_config(const char *cfgfile)
 		unset[n++]='g';
 	if(ioncore_mplex_bindmap.nbindings==0)
 		unset[n++]='m';
-	if(ioncore_genframe_bindmap.nbindings==0)
+	if(ioncore_frame_bindmap.nbindings==0)
 		unset[n++]='f';
 	
 	if(n>0){

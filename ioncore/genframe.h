@@ -1,5 +1,5 @@
 /*
- * ion/ioncore/genframe.h
+ * ion/ioncore/frame.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -19,15 +19,16 @@
 #include "gr.h"
 #include "extl.h"
 
-INTROBJ(WGenFrame);
+INTROBJ(WFrame);
 
 #define WGENFRAME_TAB_HIDE    0x0004
 #define WGENFRAME_SAVED_VERT  0x0008
 #define WGENFRAME_SAVED_HORIZ 0x0010
 #define WGENFRAME_SHADED	  0x0020
 #define WGENFRAME_SETSHADED	  0x0040
-	
-DECLOBJ(WGenFrame){
+#define WGENFRAME_BAR_OUTSIDE 0x0080
+
+DECLOBJ(WFrame){
 	WMPlex mplex;
 	
 	int flags;
@@ -46,53 +47,34 @@ DECLOBJ(WGenFrame){
 
 
 /* Create/destroy */
-extern WGenFrame *create_genframe(WWindow *parent, const WRectangle *geom);
-extern bool genframe_init(WGenFrame *genframe, WWindow *parent,
+extern WFrame *create_frame(WWindow *parent, const WRectangle *geom);
+extern bool frame_init(WFrame *frame, WWindow *parent,
 						  const WRectangle *geom);
-extern void genframe_deinit(WGenFrame *genframe);
+extern void frame_deinit(WFrame *frame);
 
 /* Resize and reparent */
-extern bool genframe_reparent(WGenFrame *genframe, WWindow *parent,
+extern bool frame_reparent(WFrame *frame, WWindow *parent,
 							  const WRectangle *geom);
-extern void genframe_fit(WGenFrame *genframe, const WRectangle *geom);
-extern void genframe_resize_hints(WGenFrame *genframe, XSizeHints *hints_ret,
+extern void frame_fit(WFrame *frame, const WRectangle *geom);
+extern void frame_resize_hints(WFrame *frame, XSizeHints *hints_ret,
 								  uint *relw_ret, uint *relh_ret);
 
 /* Focus */
-extern void genframe_activated(WGenFrame *genframe);
-extern void genframe_inactivated(WGenFrame *genframe);
+extern void frame_activated(WFrame *frame);
+extern void frame_inactivated(WFrame *frame);
 
 /* Tabs */
-extern int genframe_nth_tab_w(const WGenFrame *genframe, int n);
-extern int genframe_nth_tab_iw(const WGenFrame *genframe, int n);
-extern int genframe_nth_tab_x(const WGenFrame *genframe, int n);
-extern int genframe_tab_at_x(const WGenFrame *genframe, int x);
-extern void genframe_toggle_tab(WGenFrame *genframe);
-extern void genframe_update_attr_nth(WGenFrame *genframe, int i);
+extern int frame_nth_tab_w(const WFrame *frame, int n);
+extern int frame_nth_tab_iw(const WFrame *frame, int n);
+extern int frame_nth_tab_x(const WFrame *frame, int n);
+extern int frame_tab_at_x(const WFrame *frame, int x);
+extern void frame_toggle_tab(WFrame *frame);
+extern void frame_update_attr_nth(WFrame *frame, int i);
 
 /* Misc */
-extern void genframe_draw_config_updated(WGenFrame *genframe);
-extern void genframe_toggle_sub_tag(WGenFrame *genframe);
-extern void genframe_border_geom(const WGenFrame *genframe, 
-								 WRectangle *geom);
-extern void genframe_border_inner_geom(const WGenFrame *genframe, 
-									   WRectangle *geom);
-extern void genframe_load_saved_geom(WGenFrame* genframe, ExtlTab tab);
-
-/* Dynfuns */
-DYNFUN const char *genframe_style(WGenFrame *genframe);
-DYNFUN const char *genframe_tab_style(WGenFrame *genframe);
-DYNFUN void genframe_recalc_bar(WGenFrame *genframe);
-DYNFUN void genframe_draw_bar(const WGenFrame *genframe, bool complete);
-DYNFUN void genframe_bar_geom(const WGenFrame *genframe, WRectangle *geom);
-DYNFUN void genframe_border_inner_geom(const WGenFrame *genframe,
-									   WRectangle *geom);
-DYNFUN void genframe_brushes_updated(WGenFrame *genframe);
-
-
-extern void genframe_draw_bar_default(const WGenFrame *genframe, 
-									  bool complete);
-extern void genframe_draw_default(const WGenFrame *genframe, bool complete);
-
+extern void frame_toggle_sub_tag(WFrame *frame);
+extern bool frame_save_to_file(WFrame *frame, FILE *file, int lvl);
+extern void frame_load_saved_geom(WFrame* frame, ExtlTab tab);
+extern void frame_do_load(WFrame *frame, ExtlTab tab);
 
 #endif /* ION_IONCORE_GENFRAME_H */

@@ -26,16 +26,16 @@ floatframe_bindings{
     
     mpress("Button1", WRegion.raise, "tab"),
     mpress("Button1", WRegion.raise, "border"),
-    mclick("Button1", WGenFrame.p_switch_tab, "tab"),
+    mclick("Button1", WFrame.p_switch_tab, "tab"),
     mdrag("Button1", WFloatFrame.p_move, "tab"),
-    mdrag("Button1", WGenFrame.p_resize, "border"),
+    mdrag("Button1", WFrame.p_resize, "border"),
     mdblclick("Button1", WFloatFrame.toggle_shade, "tab"),
     
     mclick(DEFAULT_MOD.."Button1", WRegion.raise),
     mdrag(DEFAULT_MOD.."Button1", WFloatFrame.p_move),
     
-    mclick("Button2", WGenFrame.p_switch_tab, "tab"),
-    mdrag("Button2", WGenFrame.p_tabdrag, "tab"),
+    mclick("Button2", WFrame.p_switch_tab, "tab"),
+    mdrag("Button2", WFrame.p_tabdrag, "tab"),
     
     mclick(DEFAULT_MOD.."Button3", WRegion.lower),
     mdrag(DEFAULT_MOD.."Button3", WGenFrame.p_resize),

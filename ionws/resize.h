@@ -15,7 +15,7 @@
 #include <ioncore/common.h>
 #include <ioncore/window.h>
 #include <ioncore/resize.h>
-#include <ioncore/genframe.h>
+#include <ioncore/frame.h>
 #include "ionframe.h"
 
 extern void ionframe_begin_resize(WIonFrame *frame);

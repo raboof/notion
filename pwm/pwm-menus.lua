@@ -52,7 +52,7 @@ defmenu("ctxmenu", {
     menuentry("Close", WMPlex.close_sub_or_self),
     menuentry("Kill", make_mplex_clientwin_fn(WClientWin.kill)),
     menuentry("(Un)tag", make_mplex_sub_fn(WRegion.toggle_tag)),
-    menuentry("Attach tagged", WGenFrame.attach_tagged),
+    menuentry("Attach tagged", WFrame.attach_tagged),
     menuentry("Clear tags", clear_tags),
 })
 
@@ -62,7 +62,7 @@ defmenu("ctxmenu-floatframe", {
     menuentry("Close", WMPlex.close_sub_or_self),
     menuentry("Kill", make_mplex_clientwin_fn(WClientWin.kill)),
     menuentry("(Un)tag", make_mplex_sub_fn(WRegion.toggle_tag)),
-    menuentry("Attach tagged", WGenFrame.attach_tagged),
+    menuentry("Attach tagged", WFrame.attach_tagged),
     menuentry("Clear tags", clear_tags),
     menuentry("(Un)stick", function(f) f:toggle_sticky() end),
 })
