@@ -1483,8 +1483,8 @@ WRegion *clientwin_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
     win=(Window)wind;
 
     if(XWINDOW_REGION_OF(win)!=NULL){
-                warn("Client window %x already managed.", win);
-                return NULL;
+        warn("Client window %x already managed.", win);
+        return NULL;
     }
 
     if(!xwindow_get_integer_property(win, ioncore_g.atom_checkcode, &real_chkc)
