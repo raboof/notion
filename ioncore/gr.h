@@ -45,7 +45,7 @@ typedef struct{
 typedef struct{
     char *text;
     int iw;
-    const char *attr;
+    char *attr;
 } GrTextElem;
 
 typedef enum{

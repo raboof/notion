@@ -25,9 +25,6 @@ DECLCLASS(WInfoWin){
     char *buffer;
     char *attr;
     char *style;
-    char *natural_w_tmpl;
-    int natural_w, natural_h;
-    bool drawn;
 };
 
 #define INFOWIN_BRUSH(INFOWIN) ((INFOWIN)->brush)
@@ -42,11 +39,9 @@ extern void infowin_deinit(WInfoWin *p);
 
 extern void infowin_set_text(WInfoWin *p, const char *s);
 extern bool infowin_set_attr2(WInfoWin *p, const char *a1, const char *a2);
-extern void infowin_set_natural_w(WInfoWin *p, const char *str);
 
 extern WRegion *infowin_load(WWindow *par, const WFitParams *fp, ExtlTab tab);
 
 extern void infowin_updategr(WInfoWin *p);
-extern void infowin_size_hints(WInfoWin *p, XSizeHints *h);
 
 #endif /* ION_IONCORE_INFOWIN_H */

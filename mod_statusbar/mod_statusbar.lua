@@ -37,7 +37,7 @@ local settings={
     load_wtempl="x.xx, x.xx, x.xx",
 }
 
-local infowins={}
+local statusbars={}
 
 
 --DOC
@@ -45,8 +45,8 @@ local infowins={}
 function mod_statusbar.set(s)
     settings=table.join(s, settings)
     local wt=mod_statusbar.get_w_template()
-    for iw, _ in infowins do
-        iw:set_natural_w(wt)
+    for sb, _ in statusbars do
+        sb:set_natural_w(wt)
     end
 end
 
@@ -113,31 +113,45 @@ end
 
 -- Status update {{{
 
-local function process_template(fn)
-    return string.gsub(settings.template, '%%(%%?[a-zA-Z0-9_]*)', 
-                       function(s)
-                           if string.sub(s, 1, 1)=='%' then
-                               return s
-                           elseif s=="" then
-                               return ""
-                           else
-                               return fn(s)
-                           end
-                       end)
+local function process_template(fn, gn)
+    local l=string.gsub(settings.template, '(.-)%%(%%?[a-zA-Z0-9_]*)', 
+                        function(t, s)
+                            if string.len(t)>0 then
+                                gn(t)
+                            end
+                            if string.sub(s, 1, 1)=='%' then
+                                gn('%')
+                            elseif s~="" then
+                                fn(s)
+                            end
+                        end)
+    if l then
+        gn(l)
+    end
 end
 
 function mod_statusbar.get_status()
-    return process_template(function(s)
-                                return (meters[s] or "??")
-                            end)
+    local res={}
+    process_template(function(s)
+                         table.insert(res, {text=meters[s] or "??"})
+                     end,
+                     function(t)
+                         table.insert(res, {text=t})
+                     end)
+    return res
 end
 
 function mod_statusbar.get_w_template()
-    return process_template(function(s)
-                                local m=meters[s]
-                                local w=settings[s.."_wtempl"]
-                                return (w or m or "??")
-                            end)
+    local res=""
+    process_template(function(s)
+                         local m=meters[s]
+                         local w=settings[s.."_wtempl"]
+                         res=res..(w or m or "??")
+                     end,
+                     function(t)
+                         res=res..t
+                     end)
+    return res
 end
 
 
@@ -145,14 +159,14 @@ end
 -- Update statusbar contents. To be called after series
 -- of \fnref{mod_statusbar.inform} calls.
 function mod_statusbar.update()
-    local s=mod_statusbar.get_status()
+    local st=mod_statusbar.get_status()
     local found=false
     
-    for iw, _ in infowins do
-        if not obj_exists(iw) then
-            infowins[iw]=nil
+    for sb, _ in statusbars do
+        if not obj_exists(sb) then
+            statusbars[sb]=nil
         else
-            iw:set_text(s)
+            sb:set_contents(st)
             found=true
         end
     end
@@ -204,6 +218,8 @@ function mod_statusbar.launch_statusd()
                                  if m then
                                      mods[m]=true
                                  end
+                             end,
+                             function() 
                              end)
             local params=""
             table.foreach(mods, function(k) params=params.." -M "..k end)
@@ -248,13 +264,13 @@ function mod_statusbar.create(param)
         end
     end
     
-    local iw=scr:set_stdisp({
+    local sb=scr:set_stdisp({
         type="WStatusBar", 
         pos=(param.pos or "bl"),
         name="*statusbar*",
     })
     
-    if not iw then
+    if not sb then
         error(TR("Failed to create statusbar."))
     end
 
@@ -262,11 +278,11 @@ function mod_statusbar.create(param)
     
     mod_statusbar.launch_statusd()
     
-    infowins[iw]=true
-    iw:set_natural_w(mod_statusbar.get_w_template())
-    iw:set_text(mod_statusbar.get_status())
+    statusbars[sb]=true
+    sb:set_natural_w(mod_statusbar.get_w_template())
+    sb:set_contents(mod_statusbar.get_status())
     
-    return iw
+    return sb
 end
 
 -- }}}

@@ -11,7 +11,7 @@ include $(TOPDIR)/system-inc.mk
 INCLUDES += $(X11_INCLUDES) $(LIBTU_INCLUDES) $(LIBEXTL_INCLUDES) -I..
 CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
-SOURCES=main.c statusbar.c
+SOURCES = main.c statusbar.c draw.c
 
 SUBDIRS = ion-statusd
 INSTALL_SUBDIRS = $(SUBDIRS)
