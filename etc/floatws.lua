@@ -38,7 +38,7 @@ floatframe_bindings{
     mdrag("Button2", WFrame.p_tabdrag, "tab"),
     
     mclick(DEFAULT_MOD.."Button3", WRegion.lower),
-    mdrag(DEFAULT_MOD.."Button3", WGenFrame.p_resize),
+    mdrag(DEFAULT_MOD.."Button3", WFrame.p_resize),
 
     kpress(DEFAULT_MOD.."M", make_menu_fn("ctxmenu-floatframe")),
     mpress("Button3", make_pmenu_fn("ctxmenu-floatframe"), "tab"),

@@ -21,7 +21,7 @@ SOURCES=binding.c conf-bindings.c cursor.c event.c     \
 	ioncore.c xic.c selection.c symlist.c clientwin.c colormap.c      \
 	region.c eventh.c attach.c resize.c defer.c grab.c     	  	  \
 	manage.c readfds.c regbind.c rootwin.c tags.c names.c saveload.c  \
-	genws.c genframe.c genframe-pointer.c conf.c reginfo.c errorlog.c \
+	genws.c frame.c frame-pointer.c conf.c reginfo.c errorlog.c \
 	stacking.c extlconv.c fullscreen.c mplex.c bindmaps.c gr.c \
 	infowin.c activity.c netwm.c objlist.c frame-draw.c
 

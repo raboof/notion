@@ -40,7 +40,7 @@ ionframe_bindings{
     mclick("Button2", WFrame.p_switch_tab, "tab"),
     mdrag("Button2", WFrame.p_tabdrag, "tab"),
     
-    mdrag(DEFAULT_MOD.."Button3", WGenFrame.p_resize),
+    mdrag(DEFAULT_MOD.."Button3", WFrame.p_resize),
 }
 
 
