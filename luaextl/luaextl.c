@@ -60,7 +60,7 @@ static WObj *extl_get_wobj(lua_State *st, int pos)
 	
 	eq=lua_equal(st, -1, -2);
 	
-	lua_pop(st, 1);
+	lua_pop(st, 2);
 	
 	if(eq){
 		watch=(WWatch*)lua_touserdata(st, pos);
@@ -1019,8 +1019,14 @@ static bool extl_get_retvals(lua_State *st, int m, ExtlDoCallParam *param)
 		param->ret_ptrs[param->nret]=ptr;
 #endif
 		if(!extl_stack_get(st, -m, *spec, TRUE, ptr)){
-			warn("Invalid return value.\n");
-			return FALSE;
+			/* This is the only place where we allow nil-objects */
+			if(*spec!='o' && lua_isnil(st, -m)){
+				*(WObj**)ptr=NULL;
+			}else{
+				warn("Invalid return value (expected '%c', got lua type \"%s\").",
+					 *spec, lua_typename(st, lua_type(st, -m)));
+				return FALSE;
+			}
 		}
 		(param->nret)++;
 		spec++;
@@ -1080,7 +1086,7 @@ static bool extl_dodo_call_vararg(lua_State *st, ExtlDoCallParam *param)
 		warn("%s", lua_tostring(st, -1));
 		return FALSE;
 	}
-	
+
 	if(m>0)
 		return extl_get_retvals(st, m, param);
 	
