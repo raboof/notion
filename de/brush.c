@@ -67,12 +67,15 @@ static void create_tab_gcs(DEStyle *style, WRootWin *rootwin)
 	XDrawPoint(dpy, stipple_pixmap, tmp_gc, 0, 1);
 	
 	gcv.fill_style=FillStippled;
-	gcv.function=GXclear;
+	/*gcv.function=GXclear;*/
 	gcv.stipple=stipple_pixmap;
-	gcvmask=GCFillStyle|GCStipple|GCFunction;
+	gcvmask=GCFillStyle|GCStipple/*|GCFunction*/;
 		
 	style->stipple_gc=XCreateGC(dpy, root, gcvmask, &gcv);
-	
+	XCopyGC(dpy, style->normal_gc, 
+			GCLineStyle|GCLineWidth|GCJoinStyle|GCCapStyle,
+			style->stipple_gc);
+			
 	XFreePixmap(dpy, stipple_pixmap);
 	
 	/* Create tag pixmap and copying GC */

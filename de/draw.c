@@ -170,7 +170,7 @@ void debrush_draw_border(DEBrush *brush, Window win,
 typedef void TextBoxExtraFn(DEBrush *brush_, Window win, const WRectangle *g,
 							DEColourGroup *cg, GrBorderWidths *bdw,
 							GrFontExtents *fnte,
-							const char *a1, const char *a2);
+							const char *a1, const char *a2, bool pre);
 
 
 static void copy_masked(DETabBrush *brush, Drawable src, Drawable dst,
@@ -191,9 +191,27 @@ static void tabbrush_textbox_extras(DETabBrush *brush, Window win,
 									const WRectangle *g, DEColourGroup *cg,
 									GrBorderWidths *bdw,
 									GrFontExtents *fnte,
-									const char *a1, const char *a2)
+									const char *a1, const char *a2,
+									bool pre)
 {
 	DEStyle *d=brush->debrush.d;
+	GC tmp;
+	/* Not thread-safe, but neither is the rest of the drawing code
+	 * with shared GC:s.
+	 */
+	static bool swapped=FALSE;
+	
+	if(pre){
+		if(!MATCHES2("*-*-*-dragged", a1, a2))
+			return;
+		
+		tmp=d->normal_gc;
+		d->normal_gc=d->stipple_gc;
+		d->stipple_gc=tmp;
+		swapped=TRUE;
+		XClearArea(wglobal.dpy, win, g->x, g->y, g->w, g->h, False);
+		return;
+	}
 	
 	if(MATCHES2("*-*-tagged", a1, a2)){
 		XSetForeground(wglobal.dpy, d->copy_gc, cg->fg);
@@ -204,10 +222,16 @@ static void tabbrush_textbox_extras(DETabBrush *brush, Window win,
 					g->y+bdw->top);
 	}
 
-	if(MATCHES2("*-*-*-dragged", a1, a2)){
+	if(swapped){
+		tmp=d->normal_gc;
+		d->normal_gc=d->stipple_gc;
+		d->stipple_gc=tmp;
+		swapped=FALSE;
+	}
+	/*if(MATCHES2("*-*-*-dragged", a1, a2)){
 		XFillRectangle(wglobal.dpy, win, d->stipple_gc, 
 					   g->x, g->y, g->w, g->h);
-	}
+	}*/
 }
 
 
@@ -215,10 +239,14 @@ static void mentbrush_textbox_extras(DEMEntBrush *brush, Window win,
 									 const WRectangle *g, DEColourGroup *cg,
 									 GrBorderWidths *bdw,
 									 GrFontExtents *fnte,
-									 const char *a1, const char *a2)
+									 const char *a1, const char *a2, 
+									 bool pre)
 {
 	int tx, ty;
 
+	if(pre)
+		return;
+	
 	if(!MATCHES2("*-*-submenu", a1, a2))
 		return;
 		
@@ -231,7 +259,7 @@ static void mentbrush_textbox_extras(DEMEntBrush *brush, Window win,
 }
 
 
-void debrush_do_draw_box(DEBrush *brush, Window win, 
+void debrush_do_draw_box(DEBrush *brush, Window win,
 						 const WRectangle *geom, DEColourGroup *cg,
 						 bool needfill)
 {
@@ -257,6 +285,9 @@ static void debrush_do_draw_textbox(DEBrush *brush, Window win,
 	GrBorderWidths bdw;
 	GrFontExtents fnte;
 	uint tx, ty, tw;
+
+	if(extrafn!=NULL)
+		extrafn(brush, win, geom, cg, &bdw, &fnte, a1, a2, TRUE);
 	
 	debrush_do_draw_box(brush, win, geom, cg, needfill);
 	
@@ -290,7 +321,7 @@ static void debrush_do_draw_textbox(DEBrush *brush, Window win,
 	}while(0);
 	
 	if(extrafn!=NULL)
-		extrafn(brush, win, geom, cg, &bdw, &fnte, a1, a2);
+		extrafn(brush, win, geom, cg, &bdw, &fnte, a1, a2, FALSE);
 }
 
 
