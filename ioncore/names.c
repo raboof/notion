@@ -266,6 +266,24 @@ char *region_make_label(WRegion *reg, int maxw, WFontPtr font)
 }
 
 
+static bool do_set_name(bool (*fn)(WRegion *reg, Namespace *ns, 
+								   const char *p, bool b),
+						WRegion *reg, Namespace *ns, const char *p, bool b)
+{
+	bool ret=TRUE;
+	
+	if(p==NULL || *p=='\0'){
+		region_unuse_name(reg);
+	}else{
+		if(!initialise_ns(ns))
+			return FALSE;
+		ret=fn(reg, ns, p, FALSE);
+	}
+	region_notify_change(reg);
+	return ret;
+}
+
+						
 /*EXTL_DOC
  * Set the name of \var{reg} to \var{p}. If the name is already in use,
  * an instance number suffix \code{<n>} will be attempted. If \var{p} has
@@ -275,14 +293,7 @@ char *region_make_label(WRegion *reg, int maxw, WFontPtr font)
 EXTL_EXPORT
 bool region_set_name(WRegion *reg, const char *p)
 {
-	if(p==NULL || *p=='\0'){
-		region_unuse_name(reg);
-		return TRUE;
-	}
-	
-	if(!initialise_ns(&internal_ns))
-		return FALSE;
-	return use_name_parseinst(reg, &internal_ns, p, FALSE);
+	return do_set_name(use_name_parseinst, reg, &internal_ns, p, FALSE);
 }
 
 
@@ -294,27 +305,13 @@ bool region_set_name(WRegion *reg, const char *p)
 EXTL_EXPORT
 bool region_set_name_exact(WRegion *reg, const char *p)
 {
-	if(p==NULL || *p=='\0'){
-		region_unuse_name(reg);
-		return TRUE;
-	}
-	
-	if(!initialise_ns(&internal_ns))
-		return FALSE;
-	return use_name(reg, &internal_ns, p, TRUE);
+	return do_set_name(use_name, reg, &internal_ns, p, TRUE);
 }
 
 
 bool clientwin_set_name(WClientWin *cwin, const char *p)
 {
-	if(p==NULL || *p=='\0'){
-		region_unuse_name((WRegion*)cwin);
-		return TRUE;
-	}
-	
-	if(!initialise_ns(&clientwin_ns))
-		return FALSE;
-	return use_name((WRegion*)cwin, &clientwin_ns, p, FALSE);
+	return do_set_name(use_name, (WRegion*)cwin, &clientwin_ns, p, FALSE);
 }
 
 
