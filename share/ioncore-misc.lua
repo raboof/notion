@@ -13,11 +13,11 @@
 --DOC
 -- Create new workspace on screen \var{scr}. If \var{ws_type} is
 -- set, then a workspace of that type is created. Otherwise
--- a workspace of type indicated by the \code{DEFAULT_WS_TYPE}
--- variable is created.
+-- workspace type is taken from the \code{default_ws_type} setting 
+-- returned by \fnref{ioncore.get}.
 function ioncore.create_new_ws(scr, ws_type)
     scr:attach_new({
-        type=(ws_type or DEFAULT_WS_TYPE),
+        type=(ws_type or ioncore.get().default_ws_type),
         switchto=true
     })
 end

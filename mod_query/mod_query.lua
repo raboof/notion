@@ -319,7 +319,7 @@ function mod_query.workspace_handler(mplex, name)
         end
         
         if not cls or cls=="" then
-            cls=DEFAULT_WS_TYPE
+            cls=ioncore.get().default_ws_type
         end
         
         local err=collect_errors(function()
@@ -334,7 +334,12 @@ function mod_query.workspace_handler(mplex, name)
         end
     end
     
-    local prompt="Workspace type ("..DEFAULT_WS_TYPE.."):"
+    local defcls=ioncore.get().default_ws_type
+    local prompt="Workspace type"
+    if defcls then
+        prompt=prompt.."("..defcls..")"
+    end
+    prompt=prompt..":"
     
     mod_query.query(mplex, prompt, "", handler, completor)
 end
