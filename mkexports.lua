@@ -311,7 +311,10 @@ static bool fail(int ndx, WObj *o, const char *s)
     
     -- Write class infos
     for c in classes do
-        fprintf(h, "INTROBJ(%s);\n", c)
+        -- WObj is defined in obj.h which we include.
+        if c~="WObj" then 
+            fprintf(h, "INTROBJ(%s);\n", c)
+        end
     end
     
     fprintf(h, "\n")
