@@ -242,14 +242,17 @@ function QueryLib.complete_lua(str)
     local l=string.len(tocomp)
     
     for k in comptab do
-        if string.sub(k, 1, l)==tocomp then
-            table.insert(compl, k)
+        if type(k)=="string" then
+            if string.sub(k, 1, l)==tocomp then
+                table.insert(compl, k)
+            end
         end
     end
     
     -- If there was only one completion and it is a string or function,
     -- concatenate it with "." or "(", respectively.
     if table.getn(compl)==1 then
+        -- TODO: metatable scanning
         if type(comptab[compl[1]])=="table" then
             compl[1]=compl[1] .. "."
         elseif type(comptab[compl[1]])=="function" then
