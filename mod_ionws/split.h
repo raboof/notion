@@ -35,6 +35,10 @@ enum WPrimaryNode{
 };
 
 
+typedef struct{
+    int t, l, b, r;
+} WSplitUnused;
+
 INTRCLASS(WSplit);
 DECLCLASS(WSplit){
     Obj obj;
@@ -44,7 +48,6 @@ DECLCLASS(WSplit){
     
     int min_w, min_h;
     int max_w, max_h;
-    int used_w, used_h;
 
     bool is_static;
     
@@ -52,6 +55,7 @@ DECLCLASS(WSplit){
         struct{
             int current;
             WSplit *tl, *br;
+            WSplitUnused unused;
         } s;
         WRegion *reg;
     } u;
@@ -81,6 +85,7 @@ extern WSplit *split_to_tl(WSplit *node, int dir);
 extern WSplit *split_to_br(WSplit *node, int dir);
 
 extern void split_update_bounds(WSplit *node, bool recursive);
+extern void split_get_unused(WSplit *node, WSplitUnused *unused);
 extern void split_resize(WSplit *node, const WRectangle *ng, 
                          int hprimn, int vprimn);
 extern bool split_do_resize(WSplit *node, const WRectangle *ng, 
@@ -105,5 +110,22 @@ extern bool split_tree_set_node_of(WRegion *reg, WSplit *split);
 
 extern void split_transpose(WSplit *split);
 extern void split_transpose_to(WSplit *split, const WRectangle *geom);
+
+#define CHKNODE(NODE)                                              \
+    assert(((NODE)->type==SPLIT_REGNODE && (NODE)->u.reg!=NULL) || \
+           ((NODE)->type==SPLIT_UNUSED) ||                         \
+           (((NODE)->type==SPLIT_VERTICAL ||                       \
+             (NODE)->type==SPLIT_HORIZONTAL)                       \
+            && ((NODE)->u.s.tl!=NULL && (NODE)->u.s.br!=NULL)))
+
+#define CHKSPLIT(NODE)                                          \
+    assert((NODE)->type!=SPLIT_REGNODE &&                       \
+           ((NODE)->u.s.tl!=NULL && (NODE)->u.s.br!=NULL));
+
+#define UNUSED_TOT(u1, u2, s) ((u1)+(u2)>=(s) ? (u1)+(u2) : (u1))
+#define UNUSED_L_TOT(U, R) UNUSED_TOT((U).l, (U).r, (R)->geom.w)
+#define UNUSED_R_TOT(U, R) UNUSED_TOT((U).r, (U).l, (R)->geom.w)
+#define UNUSED_T_TOT(U, R) UNUSED_TOT((U).t, (U).b, (R)->geom.h)
+#define UNUSED_B_TOT(U, R) UNUSED_TOT((U).b, (U).t, (R)->geom.h)
 
 #endif /* ION_MOD_IONWS_SPLIT_H */
