@@ -1,7 +1,7 @@
 /*
- * ion/ioncore/extlrx.c
+ * ion/ext_statusbar/ion-statusd/extlrx.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2004. 
+ * Copyright (c) Tuomo Valkonen 2004. 
  *
  * Ion is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by
@@ -10,9 +10,9 @@
  */
 
 
+#include <libtu/output.h>
+#include <libtu/locale.h>
 #include <libmainloop/signal.h>
-
-#include "common.h"
 
 
 /*{{{ libmainloop (timers) */
@@ -23,7 +23,7 @@ EXTL_CLASS(WTimer, Obj)
 /*EXTL_DOC
  * Create a new timer.
  */
-EXTL_EXPORT_AS(ioncore, create_timer)
+EXTL_EXPORT_AS(statusd, create_timer)
 WTimer *create_timer_extl_owned();
 
 
@@ -59,14 +59,14 @@ void timer_set_extl(WTimer *timer, uint msecs, ExtlFn fn);
  * warning handler.
  */
 EXTL_EXPORT
-void ioncore_warn(const char *str)
+void statusd_warn(const char *str)
 {
     warn("%s", str);
 }
 
 
 EXTL_EXPORT
-const char *ioncore_gettext(const char *s)
+const char *statusd_gettext(const char *s)
 {
     if(s==NULL)
         return NULL;

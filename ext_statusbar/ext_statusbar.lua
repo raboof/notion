@@ -30,8 +30,8 @@ string.format("[ %%date || %s: %%load || %s: %%mail_new/%%mail_total ]",
 local settings={
     date_format='%Y-%m-%d %H:%M',
     update_interval=default_update_interval,
-    mail_interval=60,
     template=default_tmpl,
+    statusd_params="-m mail -m load",
 }
 
 local infowins={}
@@ -68,8 +68,16 @@ local meters={}
 
 --DOC
 -- Register a new status meter.
-function ext_statusbar.register_meter(name, fn, width_template)
-    meters[name]={fn=fn, width_template=width_template}
+function ext_statusbar.register_meter(name, fn, widthtempl)
+    meters[name]={fn=fn, width_template=widthtempl}
+end
+
+--DOC
+-- Inform of a value.
+function ext_statusbar.inform(name, value, widthtempl)
+    ext_statusbar.register_meter(name, 
+                                 function() return value end, 
+                                 widthtempl)
 end
 
 -- }}}
@@ -82,132 +90,6 @@ local function get_date()
 end
 
 ext_statusbar.register_meter('date', get_date)
-
--- }}}
-
-
--- Load meter {{{
-
-local function get_load_proc()
-    local f=io.open('/proc/loadavg', 'r')
-    if not f then
-        return ""
-    end
-    local s=f:read('*l')
-    f:close()
-    local st, en, load=string.find(s, '^(%d+%.%d+ %d+%.%d+ %d+%.%d+)')
-    return string.gsub((load or ""), " ", ", ")
-end
-
-local function get_load_uptime()
-    local f=io.popen('uptime', 'r')
-    if not f then
-        return "??"
-    end
-    local s=f:read('*l')
-    f:close()
-    local st, en, load=string.find(s, 'load average:%s*(.*)')
-    return (load or "")
-end
-
-local function detect_load_fn()
-    if get_load_proc()~="" then
-        return get_load_proc
-    else
-        return get_load_uptime
-    end
-end
-
-ext_statusbar.register_meter('load', detect_load_fn(), 'xx.xx xx.xx xx.xx')
-
--- }}}
-
-
--- Mail meters {{{
-
-local function calcmail(fname)
-    local f=io.open(fname, 'r')
-    local total, read, old=0, 0, 0
-    local had_blank=true
-    local in_headers=false
-    local had_status=false
-    
-    if not f then
-        return 0, 0, 0
-    end
-    
-    for l in f:lines() do
-        if had_blank and string.find(l, '^From ') then
-            total=total+1
-            had_status=false
-            in_headers=true
-            had_blank=false
-        else
-            had_blank=false
-            if l=="" then
-                if in_headers then
-                    in_headers=false
-                end
-                had_blank=true
-            elseif in_headers and not had_status then
-                local st, en, stat=string.find(l, '^Status:(.*)')
-                if stat then
-                    had_status=true
-                    if string.find(l, 'R') then
-                        read=read+1
-                    end
-                    if string.find(l, 'O') then
-                        old=old+1
-                    end
-                end
-            end
-        end
-    end
-    
-    f:close()
-    
-    return total, total-read, total-old
-end
-
-local mail_last_check
-local mail_new, mail_unread, mail_total=0, 0, 0
-
-local function update_mail()
-    local t=os.time()
-    if mail_last_check and t<(mail_last_check+settings.mail_interval) then
-        return
-    end
-    mail_last_check=t
-
-    local mbox=settings.mailbox
-    if not mbox or mbox=='' then
-        mbox=os.getenv('MAIL')
-        if not mbox then
-            return
-        end
-    end
-    
-    mail_total, mail_unread, mail_new=calcmail(mbox)
-end
-
-local function get_mail_new()
-    update_mail()
-    return tostring(mail_new)
-end
-
-local function get_mail_unread()
-    update_mail()
-    return tostring(mail_unread)
-end
-
-local function get_mail_total()
-    update_mail()
-    return tostring(mail_total)
-end
-
-ext_statusbar.register_meter('mail_new', get_mail_new, 'xx')
-ext_statusbar.register_meter('mail_unread', get_mail_unread, 'xx')
-ext_statusbar.register_meter('mail_total', get_mail_total, 'xx')
 
 -- }}}
 
@@ -279,8 +161,53 @@ end
 -- }}}
 
 
+-- ion-statusd support {{{
+
+local statusd_running=false
+
+function ext_statusbar.rcv_statusd(str)
+    local data=""
+    
+    while str do
+        data=string.gsub(data..str, "([^\n]*)\n",
+                         function(i)
+                             local _, _, m, v=string.find(i, "^([^:]+):[%s]*(.*)")
+                             if m and v then
+                                 ext_statusbar.inform(m, v)
+                             end
+                         end)
+        str=coroutine.yield()
+    end
+    
+    ioncore.warn(TR("ion-statusd quit."))
+    statusd_running=false
+end
+
+
+function ext_statusbar.launch_statusd()
+    if statusd_running then
+        return
+    end
+    
+    local statusd=ioncore.lookup_script("ion-statusd")
+    if not statusd then
+        ioncore.warn(TR("Could not find %s", script))
+    end
+    
+    local cmd=statusd.." "..settings.statusd_params
+    local cr=coroutine.wrap(ext_statusbar.rcv_statusd)
+    
+    if ioncore.popen_bgread(cmd, cr) then
+        statusd_running=true
+    end
+end
+
+--}}}
+
+
 -- Initialisation {{{
 
+    
 --DOC
 -- Create a statusbar.
 function ext_statusbar.create(param)
@@ -322,6 +249,8 @@ function ext_statusbar.create(param)
     if not timer:is_set() then
         ext_statusbar.set_timer()
     end
+    
+    ext_statusbar.launch_statusd()
     
     return iw
 end

@@ -13,6 +13,7 @@
 #define ION_LIBMAINLOOP_SIGNAL_H
 
 #include <sys/time.h>
+#include <sys/signal.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -47,5 +48,6 @@ extern bool timer_is_set(WTimer *timer);
 
 extern bool mainloop_check_signals();
 extern void mainloop_trap_signals();
+extern void mainloop_trap_timer();
 
 #endif /* ION_LIBMAINLOOP_SIGNAL_H */

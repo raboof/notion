@@ -16,8 +16,12 @@ ext_statusbar.set{
     -- Update interval in seconds
     --update_interval=10,
     
-    -- Mail checking interval
-    --mail_interval=60,
+    -- ion-statusd params. Load mail checker and load modules.
+    -- (The load meter should really be on the Ion side for up-to-datedness, 
+    -- but until ext_statusbar is turned into a proper C module that can use 
+    -- getloadavg, the code uses potentially blocking files and external 
+    -- programs and thus belongs to ion-statusd.)
+    --statusd_params="-m mail -m load"
     
     -- Template. Tokens %string are replaced with the value of the 
     -- corresponding meter. Currently supported meters are:

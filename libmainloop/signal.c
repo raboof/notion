@@ -294,6 +294,10 @@ static void chld_handler(int signal_num)
 
 static void exit_handler(int signal_num)
 {
+    if(kill_sig>0){
+        warn(TR("Got signal %d while %d is still to be handled."),
+             signal_num, kill_sig);
+    }
     kill_sig=signal_num;
 }
 
@@ -319,6 +323,17 @@ static void ignore_handler(int signal_num)
 #endif
 
 
+void mainloop_trap_timer()
+{
+    struct sigaction sa;
+    
+    sigemptyset(&(sa.sa_mask));
+    sa.sa_handler=timer_handler;
+    sa.sa_flags=SA_RESTART;
+    sigaction(SIGALRM, &sa, NULL);
+}
+
+
 void mainloop_trap_signals()
 {
     struct sigaction sa;
@@ -336,7 +351,7 @@ void mainloop_trap_signals()
     DEADLY(SIGQUIT);
     DEADLY(SIGINT);
     DEADLY(SIGABRT);
-    
+
     FATAL(SIGILL);
     FATAL(SIGSEGV);
     FATAL(SIGFPE);
@@ -355,9 +370,6 @@ void mainloop_trap_signals()
     sigaction(SIGTERM, &sa, NULL);
     sigaction(SIGUSR1, &sa, NULL);
     
-    sa.sa_handler=timer_handler;
-    sigaction(SIGALRM, &sa, NULL);
-
     /* SIG_IGN is preserved over execve and since the the default action
      * for SIGPIPE is not to ignore it, some programs may get upset if
      * the behaviour is not the default.

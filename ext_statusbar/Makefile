@@ -8,7 +8,8 @@ include $(TOPDIR)/system-inc.mk
 
 ######################################
 
-INSTALL_SUBDIRS=$(SUBDIRS)
+SUBDIRS = ion-statusd
+INSTALL_SUBDIRS = $(SUBDIRS)
 
 LUA_SOURCES = ext_statusbar.lua
 ETC = cfg_statusbar.lua
