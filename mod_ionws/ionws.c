@@ -583,8 +583,10 @@ void ionws_managed_remove(WIonWS *ws, WRegion *reg)
     if(node==(WSplitRegion*)(ws->stdispnode))
         ws->stdispnode=NULL;
     
-    if(node!=NULL)
-        splittree_remove((WSplit*)node, !ds);
+    if(node==NULL)
+        return;
+    
+    splittree_remove((WSplit*)node, !ds);
     
     if(!ds){
         if(other==NULL)

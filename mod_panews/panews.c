@@ -189,8 +189,10 @@ void panews_managed_remove(WPaneWS *ws, WRegion *reg)
     if(node==(WSplitRegion*)(ws->ionws.stdispnode))
         ws->ionws.stdispnode=NULL;
     
-    if(node!=NULL)
-        splittree_remove((WSplit*)node, !ds);
+    if(node==NULL)
+        return;
+    
+    splittree_remove((WSplit*)node, !ds);
     
     if(!ds){
         if(other==NULL){
