@@ -142,15 +142,8 @@ bool wmcore_init(const char *appname, const char *appetcdir,
 	load_cursors();	
 	init_bindings();
 	
-	for(i=dscr; i<nscr; i++){
+	for(i=dscr; i<nscr; i++)
 		scr=manage_screen(i);
-		/* Need to force REGION_ACTIVE on some screen -- temporary kludge */
-		if(i==dscr){
-			XSetInputFocus(wglobal.dpy, scr->root.win, PointerRoot,
-						   CurrentTime);
-			((WRegion*)scr)->flags|=REGION_ACTIVE;
-		}
-	}
 	
 	if(wglobal.screens==NULL){
 		if(nscr-dscr>1)
@@ -158,6 +151,11 @@ bool wmcore_init(const char *appname, const char *appetcdir,
 		return FALSE;
 	}
 	
+	/* Need to force REGION_ACTIVE on some screen -- temporary kludge */
+	XSetInputFocus(wglobal.dpy, wglobal.screens->root.win, PointerRoot,
+				   CurrentTime);
+	((WRegion*)wglobal.screens)->flags|=REGION_ACTIVE;
+
 	return TRUE;
 }
 
