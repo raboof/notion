@@ -78,13 +78,14 @@ extern WSplit *split_current_br(WSplit *node, int dir);
 extern WSplit *split_to_tl(WSplit *node, int dir);
 extern WSplit *split_to_br(WSplit *node, int dir);
 
+extern void split_update_bounds(WSplit *node, bool recursive);
 extern void split_resize(WSplit *node, const WRectangle *ng, 
                          int hprimn, int vprimn);
 extern bool split_do_resize(WSplit *node, const WRectangle *ng, 
                             int hprimn, int vprimn, bool transpose);
 
 extern WSplit *split_tree_split(WSplit **root, WSplit *node, int dir, 
-                                int primn, int minsize, int oprimn, 
+                                int primn, int minsize, 
                                 WRegionSimpleCreateFn *fn,
                                 WWindow *parent);
 extern WSplit *split_tree_remove(WSplit **root, WSplit *node,
@@ -97,6 +98,8 @@ extern WRegion *split_region_at(WSplit *node, int x, int y);
 extern WSplit *split_tree_node_of(WRegion *reg);
 extern WSplit *split_tree_split_of(WRegion *reg);
 extern WMPlex *split_tree_find_mplex(WRegion *from);
+
+extern bool split_tree_set_node_of(WRegion *reg, WSplit *split);
 
 extern void split_transpose(WSplit *split);
 extern void split_transpose_to(WSplit *split, const WRectangle *geom);

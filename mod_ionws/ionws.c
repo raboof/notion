@@ -136,6 +136,12 @@ void ionws_managed_add_default(WIonWS *ws, WRegion *reg)
     
     if(REGION_IS_MAPPED(ws))
         region_map(reg);
+    
+    if(region_may_control_focus((WRegion*)ws)){
+        WRegion *curr=ionws_current(ws);
+        if(!REGION_IS_ACTIVE(curr))
+            region_warp(curr);
+    }
 }
 
 
@@ -432,8 +438,7 @@ WFrame *ionws_split_top(WIonWS *ws, const char *dirstr)
         return NULL;
     
     nnode=split_tree_split(&(ws->split_tree), ws->split_tree, 
-                           dir, primn, mins, PRIMN_ANY,
-                           ws->create_frame_fn,
+                           dir, primn, mins, ws->create_frame_fn,
                            REGION_PARENT_CHK(ws, WWindow));
     
     if(nnode==NULL)
@@ -477,8 +482,8 @@ WFrame *ionws_split_at(WIonWS *ws, WFrame *frame, const char *dirstr,
           ? region_min_h((WRegion*)frame)
           : region_min_w((WRegion*)frame));
     
-    nnode=split_tree_split(&(ws->split_tree), node, dir, primn, mins, primn,
-                           ws->create_frame_fn,
+    nnode=split_tree_split(&(ws->split_tree), node, dir, primn, mins, 
+                           ws->create_frame_fn, 
                            REGION_PARENT_CHK(ws, WWindow));
     
     if(nnode==NULL){
@@ -759,7 +764,7 @@ static ExtlTab get_node_config(WSplit *node)
     assert(node!=NULL);
     
     if(node->type==SPLIT_UNUSED)
-        return extl_table_none();
+        return extl_create_table();
 
     if(node->type==SPLIT_REGNODE){
         if(region_supports_save(node->u.reg))

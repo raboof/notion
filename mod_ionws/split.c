@@ -121,11 +121,11 @@ static void get_minmaxused(WSplit *node, int dir,
                            int *min, int *max, int *used)
 {
     if(dir==SPLIT_VERTICAL){
-        *min=maxof(1, node->min_h);
+        *min=node->min_h;
         *max=maxof(*min, node->max_h);
         *used=node->used_h;
     }else{
-        *min=maxof(1, node->min_w);
+        *min=node->min_w;
         *max=maxof(*min, node->max_w);
         *used=node->used_w;
     }
@@ -166,7 +166,10 @@ WSplit *split_tree_split_of(WRegion *reg)
 }
 
 
-static bool set_node_of_reg(WRegion *reg, WSplit *split)
+#define set_node_of_reg split_tree_set_node_of
+
+
+bool split_tree_set_node_of(WRegion *reg, WSplit *split)
 {
     Rb_node node=NULL;
     int found;
@@ -230,18 +233,18 @@ static void split_update_region_bounds(WSplit *node, WRegion *reg)
     region_resize_hints(reg, &hints, &relw, &relh);
     
     node->used_w=node->geom.w;/*REGION_GEOM(reg).w;*/
-    node->min_w=((hints.flags&PMinSize ? hints.min_width : 1)
-                 +REGION_GEOM(reg).w-relw);
+    node->min_w=maxof(1, ((hints.flags&PMinSize ? hints.min_width : 1)
+                          +REGION_GEOM(reg).w-relw));
     node->max_w=INT_MAX;
 
     node->used_h=node->geom.h;/*REGION_GEOM(reg).h;*/
-    node->min_h=((hints.flags&PMinSize ? hints.min_height : 1)
-                 +REGION_GEOM(reg).h-relh);
+    node->min_h=maxof(1, ((hints.flags&PMinSize ? hints.min_height : 1)
+                          +REGION_GEOM(reg).h-relh));
     node->max_h=INT_MAX;
 }
 
 
-static void split_update_bounds(WSplit *node, bool recursive)
+void split_update_bounds(WSplit *node, bool recursive)
 {
     int tlmax, tlmin, brmax, brmin;
     WSplit *tl, *br;
@@ -649,6 +652,7 @@ void split_tree_rqgeom(WSplit *root, WSplit *sub, int flags,
 
 /*{{{ Split */
 
+
 static WSplit *do_create_split(const WRectangle *geom)
 {
     WSplit *split=ALLOC(WSplit);
@@ -711,8 +715,8 @@ WSplit *create_split_unused(const WRectangle *geom)
 
 
 WSplit *split_tree_split(WSplit **root, WSplit *node, int dir, int primn,
-                         int minsize, int oprimn, 
-                         WRegionSimpleCreateFn *fn, WWindow *parent)
+                         int minsize, WRegionSimpleCreateFn *fn, 
+                         WWindow *parent)
 {
     int objmin, objmax;
     int s, sn, so, pos;
@@ -735,33 +739,36 @@ WSplit *split_tree_split(WSplit **root, WSplit *node, int dir, int primn,
     sn=maxof(minsize, s/2);
     so=maxof(objmin, s-sn);
 
+    
     if(sn+so!=s){
+        int rs;
         ng=node->geom;
         if(dir==SPLIT_VERTICAL)
             ng.h=sn+so;
         else
             ng.w=sn+so;
         split_resize_rootward_(node, &ng, TRUE, TRUE, TRUE, &rg);
-        if(rg.h<minsize+objmin){
+        rs=(dir==SPLIT_VERTICAL ? rg.h : rg.w);
+        if(rs<minsize+objmin){
             warn("Unable to split: not enough free space.");
             return NULL;
         }
         split_resize_rootward_(node, &ng, TRUE, TRUE, FALSE, &rg);
-        if(minsize>rg.h/2){
+        rs=(dir==SPLIT_VERTICAL ? rg.h : rg.w);
+        if(minsize>rs/2){
             sn=minsize;
-            so=rg.h-sn;
+            so=rs-sn;
         }else{
-            so=maxof(rg.h/2, objmin);
-            sn=rg.h-so;
+            so=maxof(rs/2, objmin);
+            sn=rs-so;
         }
     }else{
         rg=node->geom;
     }
-        
 
     /* Create split and new window
      */
-    fp.mode=REGION_FIT_EXACT;
+    fp.mode=REGION_FIT_BOUNDS;
     fp.g=rg;
     
     nsplit=create_split(&(fp.g), dir, NULL, NULL);
