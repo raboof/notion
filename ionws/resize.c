@@ -43,8 +43,9 @@ static bool resize_handler(WRegion *reg, XEvent *xev)
 		return FALSE;
 	
 	if(binding!=NULL){
-		extl_call_restricted(binding->func, moveres_safe_funclist,
-							 "o", NULL, reg);
+		const char **old_safelist=extl_set_safelist(moveres_safe_funclist);
+		extl_call(binding->func, "o", NULL, reg);
+		extl_set_safelist(old_safelist);
 	}
 	
 	return !is_resizing();

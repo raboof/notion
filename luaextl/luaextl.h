@@ -79,22 +79,31 @@ extern bool extl_table_geti_s(ExtlTab ref, int entry, char **ret);
 extern bool extl_table_geti_f(ExtlTab ref, int entry, ExtlFn *ret);
 extern bool extl_table_geti_t(ExtlTab ref, int entry, ExtlTab *ret);
 
-extern bool extl_call_vararg(ExtlFn fnref, const char **safelist,
-							 const char *spec, const char *rspec,
-							 va_list args);
+extern const char **extl_set_safelist(const char **list);
+
+extern bool extl_call_vararg(ExtlFn fnref, const char *spec,
+							 const char *rspec, va_list args);
 extern bool extl_call(ExtlFn fnref, const char *spec,
 					  const char *rspec, ...);
-extern bool extl_call_restricted(ExtlFn fnref, const char **safelist,
-								 const char *spec, const char *rspec, ...);
+
 extern bool extl_call_named_vararg(const char *name, const char *spec,
 								   const char *rspec, va_list args);
 extern bool extl_call_named(const char *name, const char *spec,
 							const char *rspec, ...);
 
+extern bool extl_dofile_vararg(const char *file, const char *spec,
+							   const char *rspec, va_list args);
+extern bool extl_dofile(const char *file, const char *spec,
+						const char *rspec, ...);
+
+extern bool extl_dostring_vararg(const char *string, const char *spec,
+								 const char *rspec, va_list args);
+extern bool extl_dostring(const char *string, const char *spec,
+						  const char *rspec, ...);
+
 extern bool extl_register_function(ExtlExportedFnSpec *spec);
 extern void extl_unregister_function(ExtlExportedFnSpec *spec);
 
-extern bool extl_dofile(const char *file);
 extern const char* extl_extension();
 
 extern bool extl_init();

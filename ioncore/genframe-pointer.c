@@ -150,8 +150,9 @@ static bool tabdrag_kbd_handler(WRegion *reg, XEvent *xev)
 						   ev->state&~BUTTONS_MASK, ev->keycode);
 	
 	if(binding!=NULL && binding->func!=extl_fn_none()){
-		extl_call_restricted(binding->func, tabdrag_safe_funclist,
-							 "o", NULL, SCREEN_OF(reg));
+		const char **old_safelist=extl_set_safelist(tabdrag_safe_funclist);
+		extl_call(binding->func, "o", NULL, SCREEN_OF(reg));
+		extl_set_safelist(old_safelist);
 	}
 	
 	return FALSE;

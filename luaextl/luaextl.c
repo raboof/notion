@@ -158,38 +158,7 @@ const char *extl_extension()
 /*}}}*/
 
 
-/*{{{ Runfile */
-
-
-bool extl_dofile(const char *file)
-{
-	int ret, oldtop;
-	
-	fprintf(stderr, "lua_dofile(%s)\n", file);
-	
-	oldtop=lua_gettop(l_st);
-	lua_pushstring(l_st, file);
-	lua_setglobal(l_st, "CURRENT_FILE");
-	ret=lua_dofile(l_st, file);
-	lua_pushnil(l_st);
-	lua_setglobal(l_st, "CURRENT_FILE");
-	
-	if(ret!=0){
-		warn("%s", lua_tostring(l_st, -1));
-		lua_settop(l_st, oldtop);
-		return FALSE;
-	}
-	
-	lua_settop(l_st, oldtop);
-
-	return TRUE;
-}
-
-
-/*}}}*/
-
-
-/*{{{ Stack get */
+/*{{{ Stack get/push */
 
 
 static WObj *do_get_obj(lua_State *st, int pos)
@@ -527,10 +496,14 @@ bool extl_table_geti_t(ExtlTab ref, int entry, ExtlTab *ret)
 /*{{{ Function calls to Lua */
 
 
-static bool extl_push_args(lua_State *st, const char *spec, va_list args)
+static bool extl_push_args(lua_State *st, bool intab, const char *spec,
+						   va_list args)
 {
+	int i=1;
+	
 	while(*spec!='\0'){
-		/*fprintf(stderr, "push: %c\n", *spec);*/
+		if(intab)
+			lua_pushnumber(l_st, i);
 		switch(*spec){
 		case 'i':
 			lua_pushnumber(l_st, (double)va_arg(args, int));
@@ -557,6 +530,9 @@ static bool extl_push_args(lua_State *st, const char *spec, va_list args)
 		default:
 			return FALSE;
 		}
+		if(intab)
+			lua_rawset(l_st, -3);
+		i++;
 		spec++;
 	}
 	
@@ -619,31 +595,18 @@ fail:
 }
 
 
-static const char **extl_safelist=NULL;
-static int extl_l1_call_handler(lua_State *st);
-
-
-static bool extl_do_call_vararg(lua_State *st, int oldtop,
-								const char **safelist, const char *spec,
-								const char *rspec, va_list args)
+static bool extl_do_call_vararg(lua_State *st, int oldtop, bool intab,
+								const char *spec, const char *rspec,
+								va_list args)
 {
 	bool ret=TRUE;
-	const char **old_safelist=NULL;
 	int n=0, m=0;
-#if 0
-	/* First phase of safelist checking: Make sure the called function is our
-	 * l1 call handler. The call handler then checks that the name of the
-	 * called function matches as otherwise we'd  have to do some extra
-	 * bookkeeping (Why can't upvalues be accessed or can they?).
+
+	/* For dostring and dofile arguments are passed in the global table 'arg'.
 	 */
-	if(safelist!=NULL){
-		if(lua_tocfunction(st, -1)!=extl_l1_call_handler){
-			lua_settop(st, oldtop);
-			warn("Attempt to call an unsafe function in restricted mode.");
-			return FALSE;
-		}
-	}
-#endif
+	if(intab)
+		lua_newtable(l_st);
+
 	if(spec!=NULL){
 		n=strlen(spec);
 	
@@ -653,13 +616,15 @@ static bool extl_do_call_vararg(lua_State *st, int oldtop,
 			return FALSE;
 		}
 		
-		ret=extl_push_args(st, spec, args);
+		ret=extl_push_args(st, intab, spec, args);
 	}
 
-	old_safelist=extl_safelist;
-	extl_safelist=safelist;
-
 	if(ret){
+		if(intab){
+			lua_setglobal(l_st, "arg");
+			n=0;
+		}
+		
 		if(rspec!=NULL)
 			m=strlen(rspec);
 		
@@ -670,26 +635,50 @@ static bool extl_do_call_vararg(lua_State *st, int oldtop,
 			if(m>0)
 				ret=extl_get_retvals(st, rspec, m, args);
 		}
+		
+		if(intab){
+			lua_pushnil(l_st);
+			lua_setglobal(l_st, "arg");
+		}
 	}
 	
 	lua_settop(l_st, oldtop);
-	
-	extl_safelist=old_safelist;
 	
 	return ret;
 }
 
 
-bool extl_call_vararg(ExtlFn fnref, const char **safelist,
-					  const char *spec, const char *rspec, va_list args)
+/*{{{ extl_call */
+
+
+bool extl_call_vararg(ExtlFn fnref, const char *spec,
+					  const char *rspec, va_list args)
 {
 	int oldtop=lua_gettop(l_st);
 	
 	if(!extl_getref(l_st, fnref))
 		return FALSE;
 	
-	return extl_do_call_vararg(l_st, oldtop, safelist, spec, rspec, args);
+	return extl_do_call_vararg(l_st, oldtop, FALSE, spec, rspec, args);
 }
+
+bool extl_call(ExtlFn fnref, const char *spec, const char *rspec, ...)
+{
+	bool retval;
+	va_list args;
+	
+	va_start(args, rspec);
+	retval=extl_call_vararg(fnref, spec, rspec, args);
+	va_end(args);
+	
+	return retval;
+}
+
+
+/*}}}*/
+
+
+/*{{{ extl_call_named */
 
 
 bool extl_call_named_vararg(const char *name, const char *spec,
@@ -699,34 +688,7 @@ bool extl_call_named_vararg(const char *name, const char *spec,
 	
 	lua_getglobal(l_st, name);
 	
-	return extl_do_call_vararg(l_st, oldtop, NULL, spec, rspec, args);
-}
-
-
-bool extl_call(ExtlFn fnref, const char *spec, const char *rspec, ...)
-{
-	bool retval;
-	va_list args;
-	
-	va_start(args, rspec);
-	retval=extl_call_vararg(fnref, NULL, spec, rspec, args);
-	va_end(args);
-	
-	return retval;
-}
-
-
-bool extl_call_restricted(ExtlFn fnref, const char **safelist,
-						  const char *spec, const char *rspec, ...)
-{
-	bool retval;
-	va_list args;
-	
-	va_start(args, rspec);
-	retval=extl_call_vararg(fnref, safelist, spec, rspec, args);
-	va_end(args);
-	
-	return retval;
+	return extl_do_call_vararg(l_st, oldtop, FALSE, spec, rspec, args);
 }
 
 
@@ -746,9 +708,106 @@ bool extl_call_named(const char *name, const char *spec, const char *rspec, ...)
 /*}}}*/
 
 
+/*{{{ extl_dofile */
+
+
+bool extl_dofile_vararg(const char *file, const char *spec,
+						const char *rspec, va_list args)
+{
+	bool ret=FALSE;
+	int oldtop;
+	
+	fprintf(stderr, "lua_dofile(%s)\n", file);
+	
+	oldtop=lua_gettop(l_st);
+	lua_pushstring(l_st, file);
+	lua_setglobal(l_st, "CURRENT_FILE");
+	if(luaL_loadfile(l_st, file)!=0){
+		warn("%s", lua_tostring(l_st, -1));
+	}else{
+		ret=extl_do_call_vararg(l_st, oldtop, TRUE, spec, rspec, args);
+	}
+
+restore:
+	lua_pushnil(l_st);
+	lua_setglobal(l_st, "CURRENT_FILE");
+	
+	lua_settop(l_st, oldtop);
+
+	return ret;
+}
+
+
+bool extl_dofile(const char *file, const char *spec, const char *rspec, ...)
+{
+	bool retval;
+	va_list args;
+	
+	va_start(args, rspec);
+	retval=extl_dofile_vararg(file, spec, rspec, args);
+	va_end(args);
+	
+	return retval;
+}
+
+
+/*}}}*/
+
+
+/*{{{ extl_dofile */
+
+
+bool extl_dostring_vararg(const char *string, const char *spec,
+						  const char *rspec, va_list args)
+{
+	bool ret=FALSE;
+	int oldtop;
+	
+	oldtop=lua_gettop(l_st);
+	if(luaL_loadbuffer(l_st, string, strlen(string), string)!=0){
+		warn("%s", lua_tostring(l_st, -1));
+	}else{
+		ret=extl_do_call_vararg(l_st, oldtop, TRUE, spec, rspec, args);
+	}
+
+	lua_settop(l_st, oldtop);
+
+	return ret;
+}
+
+
+bool extl_dostring(const char *string, const char *spec, const char *rspec, ...)
+{
+	bool retval;
+	va_list args;
+	
+	va_start(args, rspec);
+	retval=extl_dostring_vararg(string, spec, rspec, args);
+	va_end(args);
+	
+	return retval;
+}
+
+/*}}}*/
+
+
+/*}}}*/
+
+
 /*{{{ Function calls from lua */
 
 
+static const char **extl_safelist=NULL;
+
+
+const char **extl_set_safelist(const char **newlist)
+{
+	const char **oldlist=extl_safelist;
+	extl_safelist=newlist;
+	return oldlist;
+}
+	
+	
 #define MAX_PARAMS 16
 
 
@@ -775,7 +834,7 @@ static int extl_l1_call_handler(lua_State *st)
 	
 	/*fprintf(stderr, "%s called\n", spec->name);*/
 	
-	/* Second phase of safelist checking */
+	/* Check safelist */
 	if(extl_safelist!=NULL){
 		for(i=0; extl_safelist[i]!=NULL; i++){
 			if(strcmp(spec->name, extl_safelist[i])==0)

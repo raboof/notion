@@ -168,7 +168,7 @@ void ioncore_include(const char *file, const char *current_dir)
 		return;
 	}
 	
-	extl_dofile(tmp);
+	extl_dofile(tmp, NULL, NULL);
 	free(tmp);
 }
 
@@ -303,7 +303,7 @@ char *get_savefile_for(const char *module)
 
 bool read_config(const char *cfgfile)
 {
-	return extl_dofile(cfgfile);
+	return extl_dofile(cfgfile, NULL, NULL);
 }
 
 

@@ -435,7 +435,7 @@ void handler_commands(WObj *obj, char *cmds, char *userdata)
 		obj=(WObj*)(((WGenFrame*)obj)->current_sub);
 	
 	old_warn_handler=set_warn_handler(function_warn_handler);
-	/*error=extl_do_string(cmds, "o", obj);*/
+	error=!extl_dostring(cmds, "o", NULL, obj);
 	set_warn_handler(old_warn_handler);
 	
 	if(watch.obj!=NULL){
