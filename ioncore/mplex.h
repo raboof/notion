@@ -113,6 +113,7 @@ extern bool mplex_l2_hidden(WMPlex *mplex, WRegion *reg);
 
 /* Focus */
 extern void mplex_do_set_focus(WMPlex *mplex, bool warp);
+extern void mplex_managed_activated(WMPlex *mplex, WRegion *reg);
 
 /* Misc */
 extern WRegion *mplex_current(WMPlex *mplex);

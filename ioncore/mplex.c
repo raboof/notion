@@ -556,12 +556,9 @@ void mplex_do_set_focus(WMPlex *mplex, bool warp)
     bool focset=FALSE;
     
     if(!MPLEX_MGD_UNVIEWABLE(mplex)){
-        if(mplex->l2_current!=NULL && 
-           (mplex->l1_current==NULL ||
-            (mgd_flags(mplex->l2_current)&MGD_L2_PASSIVE)==0)){
-            
-            region_do_set_focus((WRegion*)mplex->l2_current, FALSE);
-            focset=TRUE;
+        if(mplex->l2_current!=NULL){
+            region_do_set_focus((WRegion*)mplex->l2_current, warp);
+            return;
         }else if(mplex->l1_current!=NULL){
             /* Allow workspaces to position cursor to their liking. */
             if(warp && OBJ_IS(mplex->l1_current, WGenWS)){
@@ -596,6 +593,17 @@ static WRegion *mplex_managed_control_focus(WMPlex *mplex, WRegion *reg)
 
 
 /*{{{ Managed region switching */
+
+
+void mplex_managed_activated(WMPlex *mplex, WRegion *reg)
+{
+    if(mplex->l2_current!=NULL && mplex->l2_current!=reg &&
+       mgd_flags(mplex->l2_current)&MGD_L2_PASSIVE){
+        mplex->l2_current=NULL;
+    }else if(on_l2_list(mplex, reg)){
+        mplex->l2_current=reg;
+    }
+}
 
 
 /*EXTL_DOC
@@ -671,7 +679,7 @@ bool mplex_l2_show(WMPlex *mplex, WRegion *reg)
         region_map(reg);
     
 #if 0
-    return mplex_managed_display(mplex, reg);
+    return mplex_managed_dispplay(mplex, reg);
 #else    
     FOR_ALL_MANAGED_ON_LIST(mplex->l2_list, reg2){
         /*if(!l2_is_hidden(reg2))*/
@@ -746,6 +754,9 @@ static bool mplex_do_managed_display(WMPlex *mplex, WRegion *sub)
          * no visible netscape windows.
          */
         region_lower(sub);
+        
+        /* This call should be unnecessary... */
+        mplex_managed_activated(mplex, sub);
     }else{
         UNLINK_ITEM(mplex->l2_list, sub, mgr_next, mgr_prev);
         region_raise(sub);
@@ -1017,8 +1028,7 @@ bool mplex_manage_clientwin(WMPlex *mplex, WClientWin *cwin,
     int swf=(param->switchto ? MPLEX_ATTACH_SWITCHTO : 0);
     
     if(redir==MANAGE_REDIR_STRICT_YES || redir==MANAGE_REDIR_PREFER_YES){
-        if(mplex->l2_current!=NULL &&
-           !(mgd_flags(mplex->l2_current)&MGD_L2_PASSIVE)){
+        if(mplex->l2_current!=NULL){
             if(region_manage_clientwin(mplex->l2_current, cwin, param,
                                        MANAGE_REDIR_PREFER_YES))
                 return TRUE;
@@ -1071,11 +1081,10 @@ void mplex_managed_remove(WMPlex *mplex, WRegion *sub)
         WRegion *next2;
         l2=TRUE;
         mplex->l2_current=NULL;
-        next=mplex->l1_current;
         FOR_ALL_MANAGED_ON_LIST(mplex->l2_list, next2){
-            if(REGION_IS_MAPPED(next2) && next2!=sub){
+            if(next2!=sub &&
+               (mgd_flags(next2)&(MGD_L2_HIDDEN|MGD_L2_PASSIVE))==0){
                 mplex->l2_current=next2;
-                next=NULL;
             }
         }
     }else{
@@ -1493,6 +1502,9 @@ static DynFunTab mplex_dynfuntab[]={
     
     {region_child_removed,
      mplex_child_removed},
+    
+    {region_managed_activated,
+     mplex_managed_activated},
     
     END_DYNFUNTAB
 };

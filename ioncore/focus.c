@@ -170,7 +170,7 @@ static void check_clear_await(WRegion *reg)
 
 void region_got_focus(WRegion *reg)
 {
-    WRegion *r;
+    WRegion *par, *mgr, *tmp;
     
     check_clear_await(reg);
     
@@ -180,15 +180,24 @@ void region_got_focus(WRegion *reg)
         D(fprintf(stderr, "got focus (inact) %s [%p]\n", OBJ_TYPESTR(reg), reg);)
         reg->flags|=REGION_ACTIVE;
         
-        r=region_parent(reg);
-        if(r!=NULL)
-            r->active_sub=reg;
+        par=region_parent(reg);
+        if(par!=NULL)
+            par->active_sub=reg;
         
         region_activated(reg);
         
-        r=REGION_MANAGER(reg);
-        if(r!=NULL)
-            region_managed_activated(r, reg);
+        mgr=REGION_MANAGER(reg);
+        tmp=reg;
+        while(mgr!=NULL){
+            /* We need to loop over managing non-windows (workspaces) here to
+             * signal their managers.
+             */
+            region_managed_activated(mgr, tmp);
+            if(REGION_PARENT(reg)==mgr)
+                break;
+            tmp=mgr;
+            mgr=REGION_MANAGER(mgr);
+        }
     }else{
         D(fprintf(stderr, "got focus (act) %s [%p]\n", OBJ_TYPESTR(reg), reg);)
     }
