@@ -41,6 +41,9 @@ typedef WLListNode *WLListIterTmp;
 #define FOR_ALL_NODES_ON_LLIST(NODE, LL) \
     LIST_FOR_ALL(LL, NODE, next, prev)
 
+#define FOR_ALL_NODES_ON_LLIST_REV(NODE, LL) \
+    LIST_FOR_ALL_REV(LL, NODE, next, prev)
+
 #define FOR_ALL_NODES_ON_LLIST_W_NEXT(NODE, LL, TMP) \
     FOR_ALL_ITER(llist_iter_init, llist_iter, NODE, LL, &(TMP))
 

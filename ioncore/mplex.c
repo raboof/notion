@@ -701,7 +701,7 @@ bool mplex_l2_set_hidden(WMPlex *mplex, WRegion *reg, bool sp)
                            (mcf && !psv ? REGION_GOTO_FOCUS : 0));
     }
     
-    return !(node->flags&LLIST_L2_HIDDEN);
+    return (node->flags&LLIST_L2_HIDDEN);
 }
 
 
@@ -718,7 +718,7 @@ bool mplex_l2_set_hidden_extl(WMPlex *mplex, WRegion *reg, const char *how)
 
 
 /*EXTL_DOC
- * Is \var{reg} on the layer2 of \var{mplex}, but hidden?
+ * Is \var{reg} on the layer2 of \var{mplex} and hidden?
  */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
@@ -727,6 +727,65 @@ bool mplex_l2_is_hidden(WMPlex *mplex, WRegion *reg)
     WLListNode *node=llist_find_on(mplex->l2_list, reg);
     
     return (node!=NULL && node->flags&LLIST_L2_HIDDEN);
+}
+
+
+bool mplex_l2_set_passive(WMPlex *mplex, WRegion *reg, bool sp)
+{
+    bool mcf=region_may_control_focus((WRegion*)mplex);
+    WLListNode *node=llist_find_on(mplex->l2_list, reg);
+    bool passive, npassive;
+    
+    if(node==NULL)
+        return FALSE;
+    
+    passive=(node->flags&LLIST_L2_PASSIVE);
+    npassive=libtu_do_setparam(sp, passive);
+    
+    if(!passive && npassive){
+        node->flags|=LLIST_L2_PASSIVE;
+    }else if(passive && !npassive){
+        WLListNode *node2;
+        
+        node->flags&=~LLIST_L2_PASSIVE;
+
+        FOR_ALL_NODES_ON_LLIST_REV(node2, mplex->l2_list){
+            if((node2->flags&(LLIST_L2_HIDDEN|LLIST_L2_PASSIVE))==0)
+                break;
+        }
+        
+        if(node2==node){
+            mplex->l2_current=node;
+            if(mcf)
+                region_warp((WRegion*)mplex);
+        }
+    }
+
+    return (node->flags&LLIST_L2_PASSIVE);
+}
+
+
+/*EXTL_DOC
+ * Set the passivity of the layer2 region \var{reg} on \var{mplex}
+ * as specified with the parameter \var{how} (set/unset/toggle).
+ * The resulting state is returned.
+ */
+EXTL_EXPORT_AS(WMPlex, l2_set_passive)
+bool mplex_l2_set_passive_extl(WMPlex *mplex, WRegion *reg, const char *how)
+{
+    return mplex_l2_set_passive(mplex, reg, libtu_string_to_setparam(how));
+}
+
+/*EXTL_DOC
+ * Is \var{reg} on the layer2 of \var{mplex} and passive?
+ */
+EXTL_SAFE
+EXTL_EXPORT_MEMBER
+bool mplex_l2_is_passive(WMPlex *mplex, WRegion *reg)
+{
+    WLListNode *node=llist_find_on(mplex->l2_list, reg);
+    
+    return (node!=NULL && node->flags&LLIST_L2_PASSIVE);
 }
 
 
