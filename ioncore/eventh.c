@@ -321,7 +321,15 @@ static void handle_property(const XPropertyEvent *ev)
 		if(!(cwin->flags&CWIN_USE_NET_WM_NAME))
 			clientwin_get_set_name(cwin);
 	}else if(ev->atom== XA_WM_TRANSIENT_FOR){
-		warn("Changes in WM_TRANSIENT_FOR property are unsupported.");
+#if 0
+		/* floatws:s would need special handling... */
+		int tmode=clientwin_get_transient_mode(cwin);
+		WClientWin *tfor=clientwin_get_transient_for(cwin);
+		if(tmode==TRANSIENT_MODE_NORMAL && tfor!=NULL)
+			clientwin_attach_transient(tfor, (WRegion*)cwin);
+#else
+		warn("Changes is WM_TRANSIENT_FOR property are unsupported.");
+#endif		
 	}else if(ev->atom==wglobal.atom_wm_protocols){
 		clientwin_get_protocols(cwin);
 	}else if(ev->atom==wglobal.atom_net_wm_name){

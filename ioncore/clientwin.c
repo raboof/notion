@@ -335,40 +335,39 @@ static bool handle_target_props(WClientWin *cwin, const WManageParams *param)
 }
 
 
-static void get_transient_for(WClientWin *cwin, WManageParams *param)
+WClientWin *clientwin_get_transient_for(WClientWin *cwin)
 {
-	Window tfor;
-
-	param->tfor=NULL;
+	Window tforwin;
+	WClientWin *tfor=NULL;
 	
 	if(clientwin_get_transient_mode(cwin)!=TRANSIENT_MODE_NORMAL)
-		return;
+		return NULL;
 
-	if(!XGetTransientForHint(wglobal.dpy, cwin->win, &tfor))
-		return;
+	if(!XGetTransientForHint(wglobal.dpy, cwin->win, &tforwin))
+		return NULL;
 	
-	if(tfor==None)
-		return;
+	if(tforwin==None)
+		return NULL;
 	
-	param->tfor=find_clientwin(tfor);
+	tfor=find_clientwin(tforwin);
 	
-	if(param->tfor==cwin){
-		param->tfor=NULL;
+	if(tfor==cwin){
 		warn("The transient_for hint for \"%s\" points to itself.",
 			 region_name((WRegion*)cwin));
-	}else if(param->tfor==NULL){
-		if(find_window(tfor)!=NULL){
+	}else if(tfor==NULL){
+		if(find_window(tforwin)!=NULL){
 			warn("Client window \"%s\" has broken transient_for hint. "
 				 "(\"Extended WM hints\" multi-parent brain damage?)",
 				 region_name((WRegion*)cwin));
 		}
-	}else if(!same_rootwin((WRegion*)cwin, (WRegion*)param->tfor)){
-		param->tfor=NULL;
+	}else if(!same_rootwin((WRegion*)cwin, (WRegion*)tfor)){
 		warn("The transient_for window for \"%s\" is not on the same "
 			 "screen.", region_name((WRegion*)cwin));
 	}else{
-		cwin->transient_for=tfor;
+		return tfor;
 	}
+	
+	return NULL;
 }
 
 
@@ -479,7 +478,7 @@ again:
 				   ? cwin->size_hints.win_gravity
 				   : ForgetGravity);
 	
-	get_transient_for(cwin, &param);
+	param.tfor=clientwin_get_transient_for(cwin);
 
 	if(!handle_target_props(cwin, &param)){
 		bool managed=FALSE;

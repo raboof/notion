@@ -111,6 +111,7 @@ enum{
 
 extern bool clientwin_get_switchto(WClientWin *cwin);
 extern int clientwin_get_transient_mode(WClientWin *cwin);
+extern WClientWin *clientwin_get_transient_for(WClientWin *cwin);
 
 /* Hooks */
 
