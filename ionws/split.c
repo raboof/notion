@@ -176,10 +176,7 @@ void set_split_of(WObj *obj, WWsSplit *split)
 }
 
 
-/*}}}*/
-
-
-/* No, there are not even supposed to be proper/consistent 
+/* No, these are not even supposed to be proper/consistent 
  * Z \cup {\infty, -\infty} calculation rules. 
  */
 
@@ -209,6 +206,8 @@ static void bound(int *what, int min, int max)
 	else if(*what>max)
 		*what=max;
 }
+
+/*}}}*/
 
 
 /*{{{ Low-level resize code */
@@ -554,26 +553,27 @@ static void adjust_d(int *d, int negmax, int posmax)
 }
 
 
-static void ionws_request_managed_geom_dir(WIonWS *ws, WRegion *sub, 
-										   int flags, const WRectangle *geom,
-										   WRectangle *geomret, int dir)
+static void ionws_do_request_geom_dir(WIonWS *ws, WObj *sub, 
+									  int flags, const WRectangle *geom,
+									  WRectangle *geomret, int dir)
 {
 	bool horiz=(dir==HORIZONTAL);
 	int x1d, x2d;
 	int tlfree=0, brfree=0, tlshrink=0, brshrink=0, minsize, maxsize;
+	int pos, size;
 
-	get_bounds_for((WObj*)sub, dir, &tlfree, &brfree, &maxsize,
+	get_bounds_for(sub, dir, &tlfree, &brfree, &maxsize,
 				   &tlshrink, &brshrink, &minsize);
 	
 	{
 		int x, w, w2, ox, ow;
 		if(horiz){
 			x=geom->x; w=geom->w;
-			ox=REGION_GEOM(sub).x; ow=REGION_GEOM(sub).w;
 		}else{
 			x=geom->y; w=geom->h;
-			ox=REGION_GEOM(sub).y; ow=REGION_GEOM(sub).h;
 		}
+		ox=split_tree_pos(sub, dir);
+		ow=split_tree_size(sub, dir);
 		
 		x1d=x-ox;
 		x2d=x+w-(ox+ow);
@@ -620,41 +620,47 @@ static void ionws_request_managed_geom_dir(WIonWS *ws, WRegion *sub,
 		
 	}
 
+	pos=split_tree_pos(sub, dir);
+	size=split_tree_size(sub, dir);
+
 	if(geomret!=NULL){
 		if(horiz){
-			geomret->x=REGION_GEOM(sub).x+x1d;
-			geomret->w=REGION_GEOM(sub).w-x1d+x2d;
+			geomret->x=pos+x1d;
+			geomret->w=size-x1d+x2d;
 		}else{
-			geomret->y=REGION_GEOM(sub).y+x1d;
-			geomret->h=REGION_GEOM(sub).h-x1d+x2d;
+			geomret->y=pos+x1d;
+			geomret->h=size-x1d+x2d;
 		}
 	}
 	
 	if(!(flags&REGION_RQGEOM_TRYONLY)){
-		int pos=split_tree_pos((WObj*)sub, dir);
-		int size=split_tree_size((WObj*)sub, dir);
-		WWsSplit *split=split_of_reg(sub);
+		WWsSplit *split=split_of(sub);
 
-		if(x1d!=0 && split!=NULL){
-			do_resize_split(split, dir, (WObj*)sub, TOP_OR_LEFT, -x1d, size);
-		}
+		if(x1d!=0 && split!=NULL)
+			do_resize_split(split, dir, sub, TOP_OR_LEFT, -x1d, size);
 		
-		if(x2d!=0 && split!=NULL){
-			do_resize_split(split, dir, (WObj*)sub, BOTTOM_OR_RIGHT, x2d, 
-							size-x1d);
-		}
+		if(x2d!=0 && split!=NULL)
+			do_resize_split(split, dir, sub, BOTTOM_OR_RIGHT, x2d, size-x1d);
 		
-		split_tree_do_resize((WObj*)sub, dir, ANY, pos+x1d, size-x1d+x2d);
+		split_tree_do_resize(sub, dir, ANY, pos+x1d, size-x1d+x2d);
 	}
 }
 
 
-void ionws_request_managed_geom(WIonWS *ws, WRegion *sub, 
+static void ionws_do_request_geom(WIonWS *ws, WObj *obj,
+								  int flags, const WRectangle *geom,
+								  WRectangle *geomret)
+{
+	ionws_do_request_geom_dir(ws, obj, flags, geom, geomret, HORIZONTAL);
+	ionws_do_request_geom_dir(ws, obj, flags, geom, geomret, VERTICAL);
+}
+
+
+void ionws_request_managed_geom(WIonWS *ws, WRegion *mgd, 
 								int flags, const WRectangle *geom,
 								WRectangle *geomret)
 {
-	ionws_request_managed_geom_dir(ws, sub, flags, geom, geomret, HORIZONTAL);
-	ionws_request_managed_geom_dir(ws, sub, flags, geom, geomret, VERTICAL);
+	ionws_do_request_geom(ws, (WObj*)mgd, flags, geom, geomret);
 }
 
 
@@ -1382,6 +1388,44 @@ EXTL_EXPORT_MEMBER
 ExtlTab split_geom(WWsSplit *split)
 {
 	return geom_to_extltab(&(split->geom));
+}
+
+
+/*EXTL_DOC
+ * Attempt to resize and/or move the split tree starting at \var{node}
+ * (\type{WWsSplit} or \type{WRegion}). Behaviour and the \var{g} 
+ * parameter are as for \fnref{WRegion.request_geom} operating on
+ * \var{node} (if it were a \type{WRegion}).
+ */
+EXTL_EXPORT_MEMBER
+ExtlTab ionws_resize_tree(WIonWS *ws, WObj *node, ExtlTab g)
+{
+	WRectangle geom, ogeom;
+	int flags=REGION_RQGEOM_WEAK_ALL;
+	
+	if(WOBJ_IS(node, WRegion)){
+		geom=REGION_GEOM((WRegion*)node);
+	}else if(WOBJ_IS(node, WWsSplit)){
+		geom=((WWsSplit*)node)->geom;
+	}else{
+		warn("Invalid node.");
+		return extl_table_none();
+	}
+	
+	ogeom=geom;
+
+	if(extl_table_gets_i(g, "x", &(geom.x)))
+		flags&=~REGION_RQGEOM_WEAK_X;
+	if(extl_table_gets_i(g, "y", &(geom.y)))
+		flags&=~REGION_RQGEOM_WEAK_Y;
+	if(extl_table_gets_i(g, "w", &(geom.w)))
+		flags&=~REGION_RQGEOM_WEAK_W;
+	if(extl_table_gets_i(g, "h", &(geom.h)))
+		flags&=~REGION_RQGEOM_WEAK_H;
+	
+	ionws_do_request_geom(ws, node, flags, &geom, &ogeom);
+	
+	return geom_to_extltab(&ogeom);
 }
 
 

@@ -206,12 +206,6 @@ void ionframe_relocate_and_close(WIonFrame *frame)
 }
 
 
-/*EXTL_DOC
- * Destroy \var{frame} unless it manages other regions or it is
- * otherwised not desirable that the frame is destroyed (e.g.
- * only frame on only workspace).
- */
-EXTL_EXPORT_MEMBER
 void ionframe_close(WIonFrame *frame)
 {
 	if(WGENFRAME_MCOUNT(frame)!=0 || WGENFRAME_CURRENT(frame)!=NULL){

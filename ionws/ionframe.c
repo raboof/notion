@@ -225,8 +225,7 @@ static void ionframe_recalc_bar(WIonFrame *frame)
 	if(WGENFRAME_MCOUNT(frame)==0){
 		textw=init_title(frame, i);
 		if(textw>0){
-			title=make_label(frame->genframe.bar_brush, "<empty frame>",
-							 textw);
+			title=make_label(frame->genframe.bar_brush, CF_STR_EMPTY, textw);
 			frame->genframe.titles[i].text=title;
 		}
 		return;
