@@ -16,9 +16,9 @@
 
 #include "edln.h"
 #include "wedln.h"
+#include "history.h"
 
 #define EDLN_ALLOCUNIT 16
-#define EDLN_HISTORY_SIZE 256
 
 #define UPDATE(X) edln->ui_update(edln->uiptr, X, FALSE)
 #define UPDATE_MOVED(X) edln->ui_update(edln->uiptr, X, TRUE)
@@ -491,115 +491,67 @@ void edln_copy(Edln *edln)
 /*{{{ History */
 
 
-static int hist_head=EDLN_HISTORY_SIZE;
-static int hist_count=0;
-static char *hist[EDLN_HISTORY_SIZE];
-
-
-
-/*EXTL_DOC
- * Push an entry into line editor history.
- */
-EXTL_EXPORT
-void mod_query_history_push(const char *str)
+bool edln_set_context(Edln *edln, const char *str)
 {
-    char *strc;
+    char *s=scat(str, ":"), *cp;
     
-    if(hist_count>0 && strcmp(hist[hist_head], str)==0)
-        return;
+    if(s==NULL)
+        return FALSE;
     
-    strc=scopy(str);
-    
-    if(strc==NULL)
-        return;
-    
-    hist_head--;
-    if(hist_head<0)
-        hist_head=EDLN_HISTORY_SIZE-1;
-    
-    if(hist_count==EDLN_HISTORY_SIZE)
-        free(hist[hist_head]);
-    else
-        hist_count++;
-    
-    hist[hist_head]=strc;
-}
-
-
-/*EXTL_DOC
- * Get entry at index \var{n} in line editor history, 0 being the latest.
- */
-EXTL_EXPORT
-const char *mod_query_history_get(int n)
-{
-    int i=0;
-    int e=hist_head;
-    
-    if(n>=hist_count || n<0)
-        return NULL;
-    
-    n=(hist_head+n)%EDLN_HISTORY_SIZE;
-    return hist[n];
-}
-
-
-/*EXTL_DOC
- * Clear line editor history.
- */
-EXTL_EXPORT
-void mod_query_history_clear()
-{
-    while(hist_count!=0){
-        free(hist[hist_head]);
-        hist_count--;
-        if(++hist_head==EDLN_HISTORY_SIZE)
-            hist_head=0;
+    cp=strchr(s, ':');
+    while(cp!=NULL && *(cp+1)!='\0'){
+        *cp='_';
+        cp=strchr(cp, ':');
     }
-    hist_head=EDLN_HISTORY_SIZE;
+
+    if(edln->context!=NULL)
+        free(edln->context);
+    edln->context=s;
+        
+    return TRUE;
 }
 
 
 static void edln_do_set_hist(Edln *edln, int e)
 {
-    edln->histent=e;
-    edln_setstr(edln, hist[e]);
-    edln->point=edln->psize;
-    edln->mark=-1;
-    edln->modified=FALSE;
-    UPDATE_MOVED(0);
+    const char *str=mod_query_history_get(e), *s2;
+    if(str!=NULL){
+        if(edln->histent<0){
+            edln->tmp_p=edln->p;
+            edln->tmp_palloced=edln->palloced;
+            edln->p=NULL;
+        }
+        
+        /* Skip context label */
+        s2=strchr(str, ':');
+        if(s2!=NULL)
+            str=s2+1;
+        
+        edln->histent=e;
+        edln_setstr(edln, str);
+        edln->point=edln->psize;
+        edln->mark=-1;
+        edln->modified=FALSE;
+        UPDATE_MOVED(0);
+    }
 }
 
 
 void edln_history_prev(Edln *edln)
 {
-    int e;
-    
-    if(edln->histent==-1){
-        if(hist_count==0)
-            return;
-        edln->tmp_p=edln->p;
-        edln->tmp_palloced=edln->palloced;
-        edln->p=NULL;
-        e=hist_head;
-    }else{
-        e=edln->histent;
-        if(e==(hist_head+hist_count-1)%EDLN_HISTORY_SIZE)
-            return;
-        e=(e+1)%EDLN_HISTORY_SIZE;
-    }
-    
-    edln_do_set_hist(edln, e);
+    int e=mod_query_history_search(edln->context, edln->histent+1, FALSE);
+    if(e>=0)
+        edln_do_set_hist(edln, e);
 }
 
 
 void edln_history_next(Edln *edln)
 {
-    int e=edln->histent;
-    
-    if(edln->histent==-1)
-        return;
-    
-    if(edln->histent==hist_head){
+    if(edln->histent>0){
+        int e=mod_query_history_search(edln->context, edln->histent-1, TRUE);
+        if(e>=0)
+            edln_do_set_hist(edln, e);
+    }else if(edln->histent==0){
         edln->histent=-1;
         if(edln->p!=NULL)
             free(edln->p);
@@ -611,12 +563,7 @@ void edln_history_next(Edln *edln)
         edln->mark=-1;
         edln->modified=TRUE;
         UPDATE_MOVED(0);
-        return;
     }
-    
-/*    e=edln->histent-1;*/
-
-    edln_do_set_hist(edln, (e+EDLN_HISTORY_SIZE-1)%EDLN_HISTORY_SIZE);
 }
 
 
@@ -640,6 +587,7 @@ bool edln_init(Edln *edln, const char *p)
     edln->modified=FALSE;
     edln->completion_handler=NULL;
     edln->tmp_p=NULL;
+    edln->context=NULL;
     
     return TRUE;
 }
@@ -655,15 +603,31 @@ void edln_deinit(Edln *edln)
         free(edln->tmp_p);
         edln->tmp_p=NULL;
     }
+    if(edln->context!=NULL){
+        free(edln->context);
+        edln->context=NULL;
+    }
+}
+
+
+static const char *ctx(Edln *edln)
+{
+    if(edln->context!=NULL)
+        return edln->context;
+    else
+        return "default:";
 }
 
 
 char* edln_finish(Edln *edln)
 {
-    char *p=edln->p;
+    char *p=edln->p, *hist;
     
-    /*if(edln->modified)*/
-    mod_query_history_push(p);
+    if(p!=NULL){
+        libtu_asprintf(&hist, "%s%s", ctx(edln), p);
+        if(hist!=NULL)
+            mod_query_history_push_(hist);
+    }
     
     edln->p=NULL;
     edln->psize=edln->palloced=0;

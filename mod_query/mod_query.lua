@@ -35,7 +35,8 @@ function mod_query.make_completor(completefn)
 end
 
     
-function mod_query.query(mplex, prompt, initvalue, handler, completor)
+function mod_query.query(mplex, prompt, initvalue, handler, completor,
+                         context)
     local function handle_it(str)
         handler(mplex, str)
     end
@@ -46,7 +47,10 @@ function mod_query.query(mplex, prompt, initvalue, handler, completor)
             return
         end
     end
-    mod_query.do_query(mplex, prompt, initvalue, handle_it, completor)
+    wedln=mod_query.do_query(mplex, prompt, initvalue, handle_it, completor)
+    if context then
+        wedln:set_context(context)
+    end
 end
 
 
@@ -60,7 +64,8 @@ function mod_query.query_yesno(mplex, prompt, handler)
             handler(mplex)
         end
     end
-    return mod_query.query(mplex, prompt, nil, handler_yesno, nil)
+    return mod_query.query(mplex, prompt, nil, handler_yesno, nil,
+                           "yesno")
 end
 
 
@@ -70,18 +75,21 @@ function mod_query.query_execfile(mplex, prompt, prog)
         ioncore.exec_on(mplex, prog.." "..string.shell_safe(str))
     end
     return mod_query.query(mplex, prompt, mod_query.get_initdir(),
-                           handle_execwith, mod_query.file_completor)
+                           handle_execwith, mod_query.file_completor,
+                           "filename")
 end
 
 
-function mod_query.query_execwith(mplex, prompt, dflt, prog, completor)
+function mod_query.query_execwith(mplex, prompt, dflt, prog, completor,
+                                  context)
     local function handle_execwith(frame, str)
         if not str or str=="" then
             str=dflt
         end
         ioncore.exec_on(mplex, prog.." "..string.shell_safe(str))
     end
-    return mod_query.query(mplex, prompt, nil, handle_execwith, completor)
+    return mod_query.query(mplex, prompt, nil, handle_execwith, completor,
+                           context)
 end
 
 
@@ -335,7 +343,8 @@ function mod_query.workspace_handler(mplex, name)
     local defcls=ioncore.get().default_ws_type
     local prompt=TR("Workspace type (%s):", defcls or TR("none"))
     
-    mod_query.query(mplex, prompt, "", handler, completor)
+    mod_query.query(mplex, prompt, "", handler, completor,
+                    "workspacename")
 end
 
 
@@ -346,7 +355,8 @@ end
 function mod_query.query_gotoclient(mplex)
     mod_query.query(mplex, TR("Go to window:"), nil,
                     mod_query.gotoclient_handler,
-                    mod_query.make_completor(mod_query.complete_clientwin))
+                    mod_query.make_completor(mod_query.complete_clientwin),
+                    "windowname")
 end
 
 --DOC
@@ -356,7 +366,8 @@ end
 function mod_query.query_attachclient(mplex)
     mod_query.query(mplex, TR("Attach window:"), nil,
                     mod_query.attachclient_handler, 
-                    mod_query.make_completor(mod_query.complete_clientwin))
+                    mod_query.make_completor(mod_query.complete_clientwin),
+                    "windowname")
 end
 
 
@@ -369,7 +380,8 @@ end
 function mod_query.query_workspace(mplex)
     mod_query.query(mplex, TR("Go to or create workspace:"), nil, 
                     mod_query.workspace_handler,
-                    mod_query.make_completor(mod_query.complete_workspace))
+                    mod_query.make_completor(mod_query.complete_workspace),
+                    "workspacename")
 end
 
 
@@ -397,7 +409,7 @@ end
 function mod_query.query_renameframe(frame)
     mod_query.query(frame, TR("Frame name:"), frame:name(),
                     function(frame, str) frame:set_name(str) end,
-                    nil)
+                    nil, "framename")
 end
 
 
@@ -408,7 +420,7 @@ function mod_query.query_renameworkspace(mplex)
     local ws=ioncore.find_manager(mplex, "WGenWS")
     mod_query.query(mplex, TR("Workspace name:"), ws:name(),
                     function(mplex, str) ws:set_name(str) end,
-                    nil)
+                    nil, "framename")
 end
 
 
@@ -474,7 +486,8 @@ end
 -- \file{ion-runinxterm}.
 function mod_query.query_exec(mplex)
     mod_query.query(mplex, TR("Run:"), nil, mod_query.exec_handler, 
-                    mod_query.exec_completor)
+                    mod_query.exec_completor,
+                    "run")
 end
 
 
@@ -551,7 +564,8 @@ function mod_query.query_ssh(mplex)
     mod_query.get_known_hosts(mplex)
     local script=mod_query.lookup_script_warn(mplex, "ion-ssh")
     mod_query.query_execwith(mplex, TR("SSH to:"), nil, script,
-                             mod_query.make_completor(mod_query.complete_ssh))
+                             mod_query.make_completor(mod_query.complete_ssh),
+                             "ssh")
 end
 
 
@@ -580,7 +594,7 @@ function mod_query.query_man(mplex)
     local prgm=ioncore.progname()
     local prompt=TR("Manual page (%s):", prgm)
     mod_query.query_execwith(mplex, prompt, prgm, script, 
-                             mod_query.man_completor)
+                             mod_query.man_completor, "man")
 end
 
 
@@ -707,7 +721,7 @@ function mod_query.query_lua(mplex)
         return mod_query.do_handle_lua(mplex, env, code)
     end
     
-    mod_query.query(mplex, TR("Lua code: "), nil, handler, complete)
+    mod_query.query(mplex, TR("Lua code: "), nil, handler, complete, "lua")
 end
 
 -- }}}
@@ -760,7 +774,7 @@ function mod_query.query_menu(mplex, prompt, menuname)
     end
     
     mod_query.query(mplex, prompt, nil, handle, 
-                    mod_query.make_completor(complete))
+                    mod_query.make_completor(complete), "menu")
 end
 
 -- }}}

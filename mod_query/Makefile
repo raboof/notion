@@ -13,7 +13,7 @@ INCLUDES += $(X11_INCLUDES) -I..
 CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
 SOURCES=complete.c edln.c input.c listing.c main.c wedln.c \
-        wedln-wrappers.c wmessage.c query.c fwarn.c
+        wedln-wrappers.c wmessage.c query.c fwarn.c history.c
 
 MAKE_EXPORTS=mod_query
 

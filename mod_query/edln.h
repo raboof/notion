@@ -32,6 +32,7 @@ DECLSTRUCT(Edln){
     int modified;
     int histent;
     void *uiptr;
+    char *context;
 
     EdlnCompletionHandler *completion_handler;
     EdlnUpdateHandler *ui_update;
@@ -60,13 +61,10 @@ void edln_cut(Edln *edln);
 void edln_copy(Edln *edln);
 void edln_history_prev(Edln *edln);
 void edln_history_next(Edln *edln);
+bool edln_set_context(Edln *edln, const char *str);
 
 bool edln_init(Edln *edln, const char *dflt);
 void edln_deinit(Edln *edln);
 char* edln_finish(Edln *edln);
-
-void mod_query_history_push(const char *str);
-const char *mod_query_history_get(int n);
-void mod_query_history_clear();
 
 #endif /* ION_MOD_QUERY_EDLN_H */

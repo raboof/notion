@@ -23,6 +23,7 @@
 #include "wedln.h"
 #include "input.h"
 #include "complete.h"
+#include "history.h"
 
 
 /*{{{ Module information */
@@ -77,17 +78,7 @@ static void load_history()
 
 static void save_history()
 {
-    ExtlTab tab;
-    int i;
-    
-    tab=extl_create_table();
-
-    for(i=0; ; i++){
-        const char *histent=mod_query_history_get(i);
-        if(!histent)
-            break;
-        extl_table_seti_s(tab, i+1, histent);
-    }
+    ExtlTab tab=mod_query_history_table();
     
     ioncore_write_savefile("saved_queryhist", tab);
     

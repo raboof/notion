@@ -239,3 +239,24 @@ int wedln_mark(WEdln *wedln)
 {
     return wedln->edln.mark;
 }
+
+
+/*EXTL_DOC
+ * Set history context for \var{wedln}.
+ */
+EXTL_EXPORT_MEMBER
+void wedln_set_context(WEdln *wedln, const char *context)
+{
+    edln_set_context(&(wedln->edln), context);
+}
+
+
+/*EXTL_DOC
+ * Get history context for \var{wedln}.
+ */
+EXTL_EXPORT_MEMBER
+const char *wedln_context(WEdln *wedln)
+{
+    return wedln->edln.context;
+}
+
