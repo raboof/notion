@@ -248,6 +248,21 @@ WRegion *mplex_current(WMPlex *mplex)
 
 
 /*EXTL_DOC
+ * Returns the layer \var{reg} is on \var{mplex} or $-1$ if \var{reg}
+ * is not managed by \var{mplex}.
+ */
+EXTL_EXPORT_MEMBER
+int mplex_layer(WMPlex *mplex, WRegion *reg)
+{
+    if(on_l1_list(mplex, reg))
+        return 1;
+    if(on_l2_list(mplex, reg))
+        return 2;
+    return -1;
+}
+
+
+/*EXTL_DOC
  * Return the managed object currently active within layer \var{l} of
  * \var{mplex}.
  */
@@ -584,6 +599,17 @@ static WRegion *mplex_managed_control_focus(WMPlex *mplex, WRegion *reg)
 
 
 /*EXTL_DOC
+ * Is \var{reg} on the layer2 of \var{mplex}, but hidden?
+ */
+EXTL_EXPORT_MEMBER
+bool mplex_l2_hidden(WMPlex *mplex, WRegion *reg)
+{
+    return (REGION_MANAGER(reg)==(WRegion*)mplex
+            && l2_is_hidden(reg));
+}
+
+
+/*EXTL_DOC
  * If var \var{reg} is on the l2 list of \var{mplex} and currently shown, 
  * hide it. if \var{reg} is nil, hide all objects on the l2 list.
  */
@@ -592,6 +618,9 @@ bool mplex_l2_hide(WMPlex *mplex, WRegion *reg)
 {
     WRegion *reg2, *toact=NULL;
     bool mcf=region_may_control_focus((WRegion*)mplex);
+    
+    if(REGION_MANAGER(reg)!=(WRegion*)mplex)
+        return FALSE;
     
     if(l2_is_hidden(reg))
         return FALSE;
@@ -630,6 +659,9 @@ bool mplex_l2_show(WMPlex *mplex, WRegion *reg)
 {
     WRegion *reg2, *toact=NULL;
     bool mcf=region_may_control_focus((WRegion*)mplex);
+
+    if(REGION_MANAGER(reg)!=(WRegion*)mplex)
+        return FALSE;
     
     if(!l2_is_hidden(reg))
         return FALSE;
@@ -828,7 +860,10 @@ static WRegion *mplex_do_attach(WMPlex *mplex, WRegionAttachHandler *hnd,
             mgd_set_flags(reg, MGD_L2_PASSIVE);
     }
     
-    if(sw || (!l2 && mplex->l1_count==1)){
+    if(!l2 && mplex->l1_count==1)
+        sw=TRUE;
+    
+    if(sw){
         mplex_do_managed_display(mplex, reg);
         mplex_managed_changed(mplex, MPLEX_CHANGE_ADD, TRUE, reg);
     }else{
@@ -1373,11 +1408,11 @@ ExtlTab mplex_get_configuration(WMPlex *mplex)
     
     extl_unref_table(subs);
     
-    stdisptab=mplex_do_get_stdisp_extl(mplex, TRUE);
+    /*stdisptab=mplex_do_get_stdisp_extl(mplex, TRUE);
     if(stdisptab!=extl_table_none()){
         extl_table_sets_t(tab, "stdisp", stdisptab);
         extl_unref_table(stdisptab);
-    }
+    }*/
     
     return tab;
 }
@@ -1388,10 +1423,10 @@ void mplex_load_contents(WMPlex *mplex, ExtlTab tab)
     ExtlTab substab, subtab;
     int n, i;
     
-    if(extl_table_gets_t(tab, "stdisp", &subtab)){
+    /*if(extl_table_gets_t(tab, "stdisp", &subtab)){
         mplex_set_stdisp_extl(mplex, subtab);
         extl_unref_table(subtab);
-    }
+    }*/
     
     if(extl_table_gets_t(tab, "subs", &substab)){
         n=extl_table_get_n(substab);

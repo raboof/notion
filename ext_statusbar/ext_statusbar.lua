@@ -281,7 +281,8 @@ function ext_statusbar.create(param)
     if not param.force then
         local stdisp=scr:get_stdisp()
         if stdisp and stdisp.reg then
-            error("Screen already has an stdisp")
+            error("Screen already has an stdisp. Refusing to create a "..
+                  "statusbar.")
         end
     end
     
@@ -310,6 +311,8 @@ function ext_statusbar.create(param)
     if not timer:is_set() then
         ext_statusbar.set_timer()
     end
+    
+    return iw
 end
 
 -- }}}

@@ -109,6 +109,7 @@ extern void mplex_switch_next(WMPlex *mplex);
 extern void mplex_switch_prev(WMPlex *mplex);
 extern bool mplex_l2_hide(WMPlex *mplex, WRegion *reg);
 extern bool mplex_l2_show(WMPlex *mplex, WRegion *reg);
+extern bool mplex_l2_hidden(WMPlex *mplex, WRegion *reg);
 
 /* Focus */
 extern void mplex_do_set_focus(WMPlex *mplex, bool warp);
@@ -116,6 +117,7 @@ extern void mplex_do_set_focus(WMPlex *mplex, bool warp);
 /* Misc */
 extern WRegion *mplex_current(WMPlex *mplex);
 
+extern int mplex_layer(WMPlex *mplex, WRegion *reg);
 extern int mplex_lcount(WMPlex *mplex, uint l);
 extern WRegion *mplex_lnth(WMPlex *mplex, uint l, uint n);
 extern ExtlTab mplex_llist(WMPlex *mplex, uint l);

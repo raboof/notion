@@ -2,7 +2,6 @@
 -- Ion main configuration file
 --
 
-
 --
 -- Some basic setup
 --
@@ -49,6 +48,7 @@ ioncore.add_shortenrule("(.*)", "$1$|$1$<...")
 dopath("mod_query")
 dopath("mod_menu")
 dopath("mod_ionws")
+--dopath("mod_autows")
 dopath("mod_floatws")
 --dopath("mod_dock")
 --dopath("mod_sp")

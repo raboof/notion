@@ -57,6 +57,7 @@
 #include <ioncore/bindmaps.h>
 #include <ioncore/regbind.h>
 #include <ioncore/defer.h>
+#include <ioncore/extlconv.h>
 
 /*}}}*/
 
@@ -840,6 +841,8 @@ static int dock_orientation(WDock *dock)
 
 
 /*{{{ Drawing */
+
+
 static void dock_draw(WDock *dock, bool complete UNUSED)
 {
     
@@ -945,6 +948,51 @@ static void mplexpos(int pos, int *mpos)
 }
     
 
+static void dock_do_set(WDock *dock, ExtlTab conftab, bool resize)
+{
+    char *s;
+    bool b;
+    bool growset=FALSE;
+    bool posset=FALSE;
+    
+    if(extl_table_gets_s(conftab, dock_param_name.key, &s)){
+        if(!region_set_name((WRegion*)dock, s)){
+            warn_obj(modname, "Can't set name to \"%s\"", s);
+        }
+        free(s);
+    }
+
+    if(dock_param_extl_table_set(&dock_param_pos, conftab, &dock->pos))
+        posset=TRUE;
+
+    if(dock_param_extl_table_set(&dock_param_grow, conftab, &dock->grow))
+        growset=TRUE;
+    
+    if(extl_table_gets_b(conftab, dock_param_is_auto.key, &b))
+        dock->is_auto=b;
+
+    if(resize && (growset || posset)){
+        WMPlex *par=OBJ_CAST(region_parent((WRegion*)dock), WMPlex);
+        WRegion *stdisp=NULL;
+        int pos;
+        
+        if(par!=NULL){
+            mplex_get_stdisp(par, &stdisp, &pos);
+            if(stdisp==(WRegion*)dock){
+                if(posset)
+                    mplexpos(dock->pos, &pos);
+                if(growset){
+                    /* Update min/max first */
+                    dock_managed_rqgeom_(dock, NULL, 0, NULL, NULL, TRUE);
+                }
+                mplex_set_stdisp(par, (WRegion*)dock, pos);
+            }
+        }
+        
+        dock_resize(dock);
+    }
+}
+
 
 /*EXTL_DOC
  * Configure \var{dock}. \var{conftab} is a table of key/value pairs:
@@ -969,47 +1017,7 @@ static void mplexpos(int pos, int *mpos)
 EXTL_EXPORT_MEMBER
 void dock_set(WDock *dock, ExtlTab conftab)
 {
-    char *s;
-    bool b;
-    bool growset=FALSE;
-    bool posset=FALSE;
-    
-    if(extl_table_gets_s(conftab, dock_param_name.key, &s)){
-        if(!region_set_name((WRegion*)dock, s)){
-            warn_obj(modname, "Can't set name to \"%s\"", s);
-        }
-        free(s);
-    }
-
-    if(dock_param_extl_table_set(&dock_param_pos, conftab, &dock->pos))
-        posset=TRUE;
-
-    if(dock_param_extl_table_set(&dock_param_grow, conftab, &dock->grow))
-        growset=TRUE;
-    
-    if(extl_table_gets_b(conftab, dock_param_is_auto.key, &b))
-        dock->is_auto=b;
-
-    if(growset || posset){
-        WMPlex *par=OBJ_CAST(region_parent((WRegion*)dock), WMPlex);
-        WRegion *stdisp=NULL;
-        int pos;
-        
-        if(par!=NULL){
-            mplex_get_stdisp(par, &stdisp, &pos);
-            if(stdisp==(WRegion*)dock){
-                if(posset)
-                    mplexpos(dock->pos, &pos);
-                if(growset){
-                    /* Update min/max first */
-                    dock_managed_rqgeom_(dock, NULL, 0, NULL, NULL, TRUE);
-                }
-                mplex_set_stdisp(par, (WRegion*)dock, pos);
-            }
-        }
-        
-        dock_resize(dock);
-    }
+    dock_do_set(dock, conftab, TRUE);
 }
 
 
@@ -1042,6 +1050,7 @@ ExtlTab dock_get(WDock *dock)
 
 
 /*{{{ Init/deinit */
+
 
 static bool dock_init(WDock *dock, WWindow *parent, const WFitParams *fp)
 {
@@ -1116,12 +1125,118 @@ bool dock_rqclose(WDock *dock)
 }
 
 
+EXTL_EXPORT
+WDock *mod_dock_create(ExtlTab tab)
+{
+    char *mode=NULL;
+    bool floating=FALSE;
+    int screenid=0;
+    WScreen *screen=NULL;
+    WDock *dock=NULL;
+    WFitParams fp;
+    WRegion *stdisp=NULL;
+    int pos=0;
+    
+    if(extl_table_gets_s(tab, "mode", &mode)){
+        if(strcmp(mode, "floating")==0){
+            floating=TRUE;
+        }else if(strcmp(mode, "embedded")!=0){
+            warn("Invalid dock mode.");
+            return NULL;
+        }
+        free(mode);
+    }
+    
+    extl_table_gets_i(tab, "screen", &screenid);
+    screen=ioncore_find_screen_id(screenid);
+    if(screen==NULL){
+        warn("Screen %d does not exist.", screenid);
+        return NULL;
+    }
+    
+    for(dock=docks; dock; dock=dock->dock_next){
+        if(region_screen_of((WRegion*)dock)==screen){
+            warn("Screen %d already has a dock. Refusing to create another.",
+                 screenid);
+            return NULL;
+        }
+    }
+
+    if(!floating){
+        mplex_get_stdisp((WMPlex*)screen, &stdisp, &pos);
+        if(stdisp!=NULL && !extl_table_is_bool_set(tab, "force")){
+            warn("Screen %d already has an stdisp. Refusing to add embedded "
+                 "dock.", screenid);
+            return NULL;
+        }
+    }
+
+    fp.g.x=0;
+    fp.g.y=0;
+    fp.g.w=1;
+    fp.g.w=1;
+    fp.mode=REGION_FIT_EXACT;
+    
+    dock=create_dock((WWindow*)screen, &fp);
+    if(dock==NULL){
+        warn("Failed to create dock.");
+        return NULL;
+    }
+
+    dock_do_set(dock, tab, FALSE);
+    
+    if(floating){
+        int af=MPLEX_ATTACH_L2|MPLEX_ATTACH_L2_PASSIVE;
+        if(!extl_table_is_bool_set(tab, "floating_hidden"))
+            af|=MPLEX_ATTACH_SWITCHTO;
+        
+        if(mplex_attach_simple((WMPlex*)screen, (WRegion*)dock, af)!=NULL)
+            return dock;
+    }else{
+        mplexpos(dock->pos, &pos);
+        if(mplex_set_stdisp((WMPlex*)screen, (WRegion*)dock, pos))
+            return dock;
+    }
+    
+    /* Failed to attach. */
+    warn("Failed to attach dock to screen.");
+    destroy_obj((Obj*)dock);
+    return NULL;
+}
+
+
+/*}}}*/
+
+
+/*{{{ Toggle */
+
+
+/*EXTL_DOC
+ * Toggle floating docks on \var{mplex}.
+ */
+EXTL_EXPORT
+void mod_dock_toggle_floating_on(WMPlex *mplex)
+{
+    WDock *dock;
+    
+    for(dock=docks; dock; dock=dock->dock_next){
+        if(REGION_MANAGER(dock)==(WRegion*)mplex &&
+           mplex_layer(mplex, (WRegion*)dock)==2){
+            if(mplex_l2_hidden(mplex, (WRegion*)dock))
+                mplex_l2_show(mplex, (WRegion*)dock);
+            else
+                mplex_l2_hide(mplex, (WRegion*)dock);
+        }
+    }
+}
+
+
 /*}}}*/
 
 
 /*{{{ Save/load */
 
-
+/*
 ExtlTab dock_get_configuration(WDock *dock)
 {
     ExtlTab tab;
@@ -1133,7 +1248,7 @@ ExtlTab dock_get_configuration(WDock *dock)
     
     return tab;
 }
-
+*/
 
 WRegion *dock_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 {
@@ -1429,7 +1544,7 @@ static DynFunTab dock_dynfuntab[]={
     {region_managed_rqgeom, dock_managed_rqgeom},
     {(DynFun*)region_manage_clientwin, (DynFun*)dock_manage_clientwin},
     {region_managed_remove, dock_managed_remove},
-    {(DynFun*)region_get_configuration, (DynFun*)dock_get_configuration},
+    /*{(DynFun*)region_get_configuration, (DynFun*)dock_get_configuration},*/
     {region_size_hints, dock_size_hints},
     {(DynFun*)region_fitrep, (DynFun*)dock_fitrep},
     {(DynFun*)region_orientation, (DynFun*)dock_orientation},
