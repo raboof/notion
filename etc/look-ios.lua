@@ -95,6 +95,8 @@ de_define_style("tab-frame-ionframe", {
 de_define_style("tab-menuentry", {
     based_on = "tab",
     text_align = "left",
+    highlight_pixels = 0,
+    shadow_pixels = 0,
 })
 
 de_define_style("tab-menuentry-big", {

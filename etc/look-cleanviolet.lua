@@ -31,6 +31,8 @@ de_define_style("*", {
 
 de_define_style("frame", {
     based_on = "*",
+    padding_colour = "#aaaaaa",
+    background_colour = "#000000",
     transparent_background = false,
 })
 
@@ -41,8 +43,6 @@ de_define_style("frame-ionframe", {
     highlight_pixels = 0,
     padding_pixels = 0,
     spacing = 1,
-    padding_colour = "#aaaaaa",
-    background_colour = "#000000",
 })
 
 

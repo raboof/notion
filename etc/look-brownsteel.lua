@@ -28,9 +28,9 @@ de_define_style("frame", {
     highlight_pixels = 1,
     shadow_pixels = 1,
     de_substyle("active", {
-        shadow_colour = "#204050",
+        shadow_colour = "#203040",
         highlight_colour = "#607080",
-        background_colour = "#505050",
+        padding_colour = "#405060",
         foreground_colour = "#ffffff",
     }),
 })
@@ -95,6 +95,8 @@ de_define_style("tab-frame-ionframe", {
 de_define_style("tab-menuentry", {
     based_on = "tab",
     text_align = "left",
+    highlight_pixels = 0,
+    shadow_pixels = 0,
 })
 
 de_define_style("tab-menuentry-big", {
@@ -122,6 +124,16 @@ de_define_style("input", {
         foreground_colour = "#ffffff",
     }),
     font = "-*-helvetica-medium-r-normal-*-14-*-*-*-*-*-*-*",
+})
+
+de_define_style("input-menu", {
+    based_on = "*",
+    de_substyle("active", {
+        shadow_colour = "#304050",
+        highlight_colour = "#708090",
+        background_colour = "#506070",
+        foreground_colour = "#ffffff",
+    }),
 })
 
 gr_refresh()

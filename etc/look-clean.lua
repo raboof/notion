@@ -19,33 +19,24 @@ de_define_style("*", {
 
 de_define_style("frame", {
     based_on = "*",
-    shadow_colour = "grey",
-    highlight_colour = "#545d75",
-    padding_colour = "black",
+    padding_colour = "#545d75",
     background_colour = "black",
-    foreground_colour = "grey",
-    padding_pixels = 0,
-    highlight_pixels = 0,
-    shadow_pixels = 0,
     de_substyle("active", {
         shadow_colour = "grey",
-        highlight_colour = "#545d75",
+        highlight_colour = "grey",
+        padding_colour = "#545d75",
         background_colour = "black",
-        foreground_colour = "grey",
     }),
 })
 
 de_define_style("frame-ionframe", {
     based_on = "frame",
-    border_style = "inlaid",
     padding_pixels = 0,
+    highlight_pixels = 0,
+    shadow_pixels = 0,
     spacing = 1,
 })
 
-de_define_style("frame-floatframe", {
-    based_on = "frame",
-    border_style = "ridge"
-})
 
 de_define_style("tab", {
     based_on = "*",
@@ -95,6 +86,12 @@ de_define_style("tab-frame-ionframe", {
 de_define_style("tab-menuentry", {
     based_on = "tab",
     text_align = "left",
+    de_substyle("inactive-selected", {
+        shadow_colour = "grey",
+        highlight_colour = "grey",
+        background_colour = "#8a999e",
+        foreground_colour = "grey",
+    }),
 })
 
 de_define_style("tab-menuentry-big", {
