@@ -298,23 +298,19 @@ bool ioncore_init(const char *prog, int argc, char *argv[],
 
     ioncore_about=scat3(ioncore_copy, "\n\n", TR(ioncore_license));
     
-    if(!ioncore_init_bindmaps()){
-        warn(TR("Unable to initialise bindmaps."));
+    if(!ioncore_init_bindmaps())
         return FALSE;
-    }
-    if(!register_classes()){
-        warn(TR("Unable to register classes."));
+    
+    if(!register_classes())
         return FALSE;
-    }
-    if(!init_hooks()){
-        warn(TR("Unable to initialise hooks."));
+
+    if(!init_hooks())
         return FALSE;
-    }
-    if(!ioncore_init_module_support()){
-        warn(TR("Unable to initialise module support."));
+
+    if(!ioncore_init_module_support())
         return FALSE;
-    }
-	return TRUE;
+
+    return TRUE;
 }
 
 
@@ -347,10 +343,8 @@ static void ioncore_init_session(const char *display)
                        (int)(dpyend-display), display);
     }
     
-    if(tmp==NULL){
-        warn_err();
+    if(tmp==NULL)
         return;
-    }
     
     colon=tmp;
     while(1){
@@ -399,7 +393,6 @@ static bool ioncore_init_x(const char *display, int stflags)
     if(display!=NULL){
         ioncore_g.display=scopy(display);
         if(ioncore_g.display==NULL){
-            warn_err();
             XCloseDisplay(dpy);
             return FALSE;
         }
@@ -442,7 +435,6 @@ static bool ioncore_init_x(const char *display, int stflags)
 
     if(!ioncore_register_input_fd(ioncore_g.conn, NULL,
                                   ioncore_x_connection_handler)){
-        warn(TR("Unable to register X connection FD."));
         return FALSE;
     }
     
@@ -498,10 +490,8 @@ bool ioncore_startup(const char *display, const char *cfgfile,
     
     ioncore_read_main_config(cfgfile);
     
-    if(!ioncore_init_layout()){
-        warn(TR("Unable to set up layout on any screen."));
+    if(!ioncore_init_layout())
         return FALSE;
-    }
     
     hook_call_v(ioncore_post_layout_setup_hook);
     

@@ -206,10 +206,8 @@ static void dump_style(DEStyle *style)
 bool destyle_init(DEStyle *style, WRootWin *rootwin, const char *name)
 {
     style->style=scopy(name);
-    if(style->style==NULL){
-        warn_err();
+    if(style->style==NULL)
         return FALSE;
-    }
     
     style->based_on=NULL;
     
@@ -313,8 +311,8 @@ void de_deinit_styles()
     for(style=styles; style!=NULL; style=next){
         next=style->next;
         if(style->usecount>1){
-            WARN_FUNC(TR("Style %s still in use [%d] but the module "
-                         "is being unloaded!"), style->style, style->usecount);
+            warn(TR("Style %s still in use [%d] but the module "
+                    "is being unloaded!"), style->style, style->usecount);
         }
         dump_style(style);
     }

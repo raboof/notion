@@ -35,18 +35,14 @@ WHook *ioncore_register_hook(const char *name, WHook *hk)
     
     if(named_hooks==NULL){
         named_hooks=make_rb();
-        if(named_hooks==NULL){
-            warn_err();
+        if(named_hooks==NULL)
             return NULL;
-        }
     }
     
     nnm=scopy(name);
     
-    if(nnm==NULL){
-        warn_err();
+    if(nnm==NULL)
         return NULL;
-    }
     
     if(!rb_insert(named_hooks, nnm, hk)){
         free(nnm);

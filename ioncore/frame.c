@@ -77,10 +77,8 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
     frame->bar_brush=NULL;
     frame->style=stringstore_alloc(style);
     
-    if(frame->style==STRINGID_NONE){
-        warn_err();
+    if(frame->style==STRINGID_NONE)
         return FALSE;
-    }
 
     if(!mplex_init((WMPlex*)frame, parent, fp)){
         stringstore_free(frame->style);
@@ -122,7 +120,7 @@ void frame_deinit(WFrame *frame)
 bool frame_rqclose(WFrame *frame)
 {
     if(FRAME_MCOUNT(frame)!=0 || FRAME_CURRENT(frame)!=NULL){
-        warn(TR("Frame not empty."));
+        warn(TR("Frame is not empty."));
     }else if(region_may_destroy((WRegion*)frame)){
         ioncore_defer_destroy((Obj*)frame);
         return TRUE;

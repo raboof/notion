@@ -71,10 +71,11 @@ extern bool mod_sm_register_exports();
 extern void mod_sm_unregister_exports();
 
 
-static void set_sdir()
+static void mod_sm_set_sessiondir()
 {
     const char *smdir=NULL, *id=NULL;
     char *tmp;
+    bool ok=FALSE;
     
     smdir=getenv("SM_SAVE_DIR");
     id=getenv("GNOME_DESKTOP_SESSION_ID");
@@ -100,12 +101,13 @@ static void set_sdir()
         tmp=scopy("default-session-sm");
     }
         
-    if(tmp==NULL){
-        warn_err();
-    }else{
-        ioncore_set_sessiondir(tmp);
+    if(tmp!=NULL){
+        ok=ioncore_set_sessiondir(tmp);
         free(tmp);
     }
+    
+    if(!ok)
+        warn(TR("Failed to set session directory."));
 }
 
 
@@ -133,7 +135,7 @@ int mod_sm_init()
         goto err;
 
     if(ioncore_sessiondir()==NULL)
-        set_sdir();
+        mod_sm_set_sessiondir();
     
     if(!mod_sm_register_exports())
         goto err;

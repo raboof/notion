@@ -40,16 +40,12 @@ bool ioncore_add_searchdir(const char *dir)
 {
     if(scriptpath==NULL){
         scriptpath=scopy(dir);
-        if(scriptpath==NULL){
-            warn_err();
+        if(scriptpath==NULL)
             return FALSE;
-        }
     }else{
         char *p=scat3(dir, ":", scriptpath);
-        if(p==NULL){
-            warn_err();
+        if(p==NULL)
             return FALSE;
-        }
         free(scriptpath);
         scriptpath=p;
     }
@@ -64,10 +60,8 @@ bool ioncore_set_searchpath(const char *path)
     
     if(path!=NULL){
         s=scopy(path);
-        if(s==NULL){
-            warn_err();
+        if(s==NULL)
             return FALSE;
-        }
     }
     
     if(scriptpath!=NULL)
@@ -93,16 +87,11 @@ bool ioncore_set_userdirs(const char *appname)
         warn(TR("$HOME not set"));
     }else{
         libtu_asprintf(&userdir, "%s/.%s", home, appname);
-        if(userdir==NULL){
-            warn_err();
-        }else{
+        if(userdir!=NULL)
             fails-=ioncore_add_searchdir(userdir);
-        }
         
         libtu_asprintf(&tmp, "%s/.%s/lib", home, appname);
-        if(tmp==NULL){
-            warn_err();
-        }else{
+        if(tmp!=NULL){
             fails-=ioncore_add_searchdir(tmp);
             free(tmp);
         }
@@ -127,10 +116,8 @@ bool ioncore_set_sessiondir(const char *session)
         return FALSE;
     }
     
-    if(tmp==NULL){
-        warn_err();
+    if(tmp==NULL)
         return FALSE;
-    }
     
     if(sessiondir!=NULL)
         free(sessiondir);
@@ -182,7 +169,7 @@ bool ioncore_set_paths(ExtlTab tab)
     char *s;
 
     if(extl_table_gets_s(tab, "userdir", &s)){
-        WARN_FUNC(TR("User directory can not be set."));
+        warn(TR("User directory can not be set."));
         free(s);
         return FALSE;
     }
@@ -216,10 +203,9 @@ static int do_try(const char *dir, const char *file, WTryConfigFn *tryfn,
     int ret;
     
     libtu_asprintf(&tmp, "%s/%s", dir, file);
-    if(tmp==NULL){
-        warn_err();
+    if(tmp==NULL)
         return IONCORE_TRYCONFIG_MEMERROR;
-    }
+
     ret=tryfn(tmp, tryfnparam);
     free(tmp);
     return ret;
@@ -270,9 +256,7 @@ static int try_etcpath(const char *const *files,
             path=NULL;
         }
         
-        if(dir==NULL){
-            warn_err();
-        }else{
+        if(dir!=NULL){
             if(*dir!='\0'){
                 for(file=files; *file!=NULL; file++){
                     ret=do_try(dir, *file, tryfn, tryfnparam);
@@ -295,8 +279,6 @@ static int try_lookup(const char *file, char **ptr)
     if(access(file, F_OK)!=0)
         return IONCORE_TRYCONFIG_NOTFOUND;
     *ptr=scopy(file);
-    if(*ptr==NULL)
-        warn_err();
     return (*ptr!=NULL);
 }
 
@@ -363,24 +345,18 @@ int ioncore_try_config(const char *fname, const char *cfdir,
 
     if(strrchr(fname, '.')>strrchr(fname, '/')){
         files[n]=scopy(fname);
-        if(files[n]==NULL)
-            warn_err();
-        else
+        if(files[n]!=NULL)
             n++;
     }else{
         if(ext1!=NULL){
             files[n]=scat3(fname, ".", ext1);
-            if(files[n]==NULL)
-                warn_err();
-            else
+            if(files[n]!=NULL)
                 n++;
         }
 
         if(ext2!=NULL){
             files[n]=scat3(fname, ".", ext2);
-            if(files[n]==NULL)
-                warn_err();
-            else
+            if(files[n]!=NULL)
                 n++;
         }
     }

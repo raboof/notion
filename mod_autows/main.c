@@ -100,34 +100,23 @@ static bool init_hooks()
 
 bool mod_autows_init()
 {
-    if(!init_hooks()){
-        WARN_FUNC(TR("Failed to initialise hooks"));
+    if(!init_hooks())
         goto err;
-    }
 
     mod_autows_autows_bindmap=ioncore_alloc_bindmap("WAutoWS", NULL);
     mod_autows_frame_bindmap=ioncore_alloc_bindmap_frame("WFrame-on-WAutoWS");
 
-    if(mod_autows_autows_bindmap==NULL ||
-       mod_autows_frame_bindmap==NULL){
-        WARN_FUNC(TR("failed to allocate bindmaps."));
+    if(mod_autows_autows_bindmap==NULL || mod_autows_frame_bindmap==NULL)
         goto err;
-    }
 
-    if(!mod_autows_register_exports()){
-        WARN_FUNC(TR("Failed to register functions."));
+    if(!mod_autows_register_exports())
         goto err;
-    }
 
-    if(!mod_autows_register_exports()){
-        WARN_FUNC(TR("Unable to register exports"));
+    if(!mod_autows_register_exports())
         goto err;
-    }
     
-    if(!register_regions()){
-        WARN_FUNC(TR("Unable to register classes"));
+    if(!register_regions())
         goto err;
-    }
     
     ioncore_read_config("cfg_autows", NULL, FALSE);
 

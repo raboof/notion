@@ -131,10 +131,8 @@ bool region_add_bindmap_owned(WRegion *reg, WBindmap *bindmap, WRegion *owner)
     
     rbind=ALLOC(WRegBindingInfo);
     
-    if(rbind==NULL){
-        warn_err();
+    if(rbind==NULL)
         return FALSE;
-    }
     
     rbind->bindmap=bindmap;
     rbind->owner=owner;

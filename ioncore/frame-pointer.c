@@ -221,10 +221,8 @@ static void setup_dragwin(WFrame *frame, uint tab)
     
     tab_style=scat("tab-", style);
     
-    if(tab_style==NULL){
-        warn_err();
+    if(tab_style==NULL)
         return;
-    }
     
     tabdrag_infowin=create_infowin((WWindow*)rw, &fp, tab_style);
     

@@ -226,10 +226,8 @@ static WRootWin *preinit_rootwin(int xscr)
     
     rootwin=ALLOC(WRootWin);
     
-    if(rootwin==NULL){
-        warn_err();
+    if(rootwin==NULL)
         return NULL;
-    }
     
     /* Init the struct */
     OBJ_INIT(rootwin, WRootWin);

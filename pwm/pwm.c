@@ -173,7 +173,7 @@ int main(int argc, char*argv[])
         libtu_asprintf(&efnam, "%s/pwm-%d-startup-errorlog", P_tmpdir,
                        getpid());
         if(efnam==NULL){
-            warn_err(TR("Failed to create error log file."));
+            warn_err();
         }else{
             ef=fopen(efnam, "wt");
             if(ef==NULL){
@@ -205,8 +205,11 @@ fail:
                 else
                     close(ioncore_g.conn);
                 libtu_asprintf(&cmd, CF_XMESSAGE " %s", efnam);
-                if(system(cmd)==-1)
+                if(cmd==NULL){
+                    warn_err();
+                }else if(system(cmd)==-1){
                     warn_err_obj(cmd);
+                }
                 unlink(efnam);
                 exit(EXIT_SUCCESS);
             }

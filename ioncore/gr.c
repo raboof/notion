@@ -43,15 +43,12 @@ bool gr_register_engine(const char *engine, GrGetBrushFn *fn)
     
     eng=ALLOC(GrEngine);
     
-    if(eng==NULL){
-        warn_err();
+    if(eng==NULL)
         return FALSE;
-    }
     
     eng->name=scopy(engine);
     
     if(eng->name==NULL){
-        warn_err();
         free(eng);
         return FALSE;
     }
@@ -119,7 +116,7 @@ bool gr_select_engine(const char *engine)
         return FALSE;
     
     if(!gr_do_select_engine(engine)){
-        warn(TR("Drawing engine %s not registered!"), engine);
+        warn(TR("Drawing engine %s is not registered!"), engine);
         return FALSE;
     }
     

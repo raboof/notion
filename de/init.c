@@ -136,10 +136,8 @@ void de_get_extra_cgrps(WRootWin *rootwin, DEStyle *style, ExtlTab tab)
     
     style->extra_cgrps=ALLOC_N(DEColourGroup, n);
     
-    if(style->extra_cgrps==NULL){
-        warn_err();
+    if(style->extra_cgrps==NULL)
         return;
-    }
 
     for(i=0; i<n-nfailed; i++){
         if(!extl_table_geti_t(tab, i+1, &sub))
@@ -341,18 +339,13 @@ bool de_init()
     if(!de_register_exports())
         return FALSE;
     
-    if(!gr_register_engine("de", (GrGetBrushFn*)&de_get_brush)){
-        WARN_FUNC(TR("Failed to register the drawing engine."));
+    if(!gr_register_engine("de", (GrGetBrushFn*)&de_get_brush))
         goto fail;
-    }
     
     /* Create fallback brushes */
     FOR_ALL_ROOTWINS(rootwin){
         style=de_create_style(rootwin, "*");
-        if(style==NULL){
-            WARN_FUNC(TR("Could not initialise fallback style for "
-                         "root window %d."), rootwin->xscr);
-        }else{
+        if(style!=NULL){
             style->is_fallback=TRUE;
             de_load_font_for_style(style, CF_FALLBACK_FONT_NAME);
         }

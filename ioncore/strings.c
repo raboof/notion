@@ -161,9 +161,7 @@ static char *scatn3(const char *p1, int l1,
 {
     char *p=ALLOC_N(char, l1+l2+l3+1);
     
-    if(p==NULL){
-        warn_err();
-    }else{
+    if(p!=NULL){
         strncat(p, p1, l1);
         strncat(p, p2, l2);
         strncat(p, p3, l3);
@@ -217,7 +215,9 @@ bool ioncore_defshortening(const char *rx, const char *rule, bool always)
 {
     SR *si;
     int ret;
-    
+    #define ERRBUF_SIZE 256
+    static char errbuf[ERRBUF_SIZE];
+        
     if(rx==NULL || rule==NULL)
         return FALSE;
     
@@ -229,7 +229,9 @@ bool ioncore_defshortening(const char *rx, const char *rule, bool always)
     ret=regcomp(&(si->re), rx, REG_EXTENDED);
     
     if(ret!=0){
-        warn(TR("Error compiling regular expression."));
+        errbuf[0]='\0';
+        regerror(ret, &(si->re), errbuf, ERRBUF_SIZE);
+        warn(TR("Error compiling regular expression: %s"), errbuf);
         goto fail2;
     }
     
@@ -244,7 +246,6 @@ bool ioncore_defshortening(const char *rx, const char *rule, bool always)
     return TRUE;
     
 fail:
-    warn_err();
     regfree(&(si->re));
 fail2:
     free(si);
@@ -299,10 +300,8 @@ static char *shorten(GrBrush *brush, const char *str, uint maxw,
     
     s=ALLOC_N(char, slen);
     
-    if(s==NULL){
-        warn_err();
+    if(s==NULL)
         return NULL;
-    }
     
     do{
         more=FALSE;

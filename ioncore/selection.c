@@ -101,10 +101,9 @@ void ioncore_set_selection(const char *p, int n)
     
     selection_data=ALLOC_N(char, n+1);
     
-    if(selection_data==NULL){
-        warn_err();
+    if(selection_data==NULL)
         return;
-    }
+    
     memcpy(selection_data, p, n);
     selection_data[n]='\0';
     selection_length=n;

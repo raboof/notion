@@ -1030,7 +1030,7 @@ static void floatws_do_raise(WFloatWS *ws, WRegion *reg, bool initial)
         return;
 
     if(REGION_MANAGER(reg)!=(WRegion*)ws){
-        WARN_FUNC(TR("reg not managed by ws"));
+        warn(TR("reg not managed by ws"));
         return;
     }
     
@@ -1108,7 +1108,7 @@ void floatws_lower(WFloatWS *ws, WRegion *reg)
         return;
 
     if(REGION_MANAGER(reg)!=(WRegion*)ws){
-        WARN_FUNC(TR("reg not managed by ws"));
+        warn(TR("reg not managed by ws"));
         return;
     }
     

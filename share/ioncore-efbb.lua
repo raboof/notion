@@ -9,15 +9,14 @@
 -- (at your option) any later version.
 --
 
-warn([[
-Some binding groups were empty. Making the following minimal emergency
-mappings:
+warn(TR([[
+Making the following minimal emergency mappings:
   F2 -> xterm
   F11 -> restart
   F12 -> exit
   Mod1+C -> close
   Mod1+K P/N -> WFrame.switch_next/switch_prev
-]])
+]]))
 
 
 defbindings("WScreen", {
@@ -27,7 +26,7 @@ defbindings("WScreen", {
 })
 
 defbindings("WMPlex", {
-    kpress_waitrel("Mod1+C", WRegion.rqclose_propagate),
+    kpress_wait("Mod1+C", WRegion.rqclose_propagate),
 })
 
 defbindings("WFrame", {

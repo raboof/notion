@@ -199,10 +199,8 @@ static bool setup_resize_timer()
 {
     if(resize_timer==NULL){
         resize_timer=create_timer();
-        if(resize_timer==NULL){
-            warn_err();
+        if(resize_timer==NULL)
             return FALSE;
-        }
     }
     
     timer_set(resize_timer, resize_delay, tmr_end_resize);

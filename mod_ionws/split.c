@@ -157,10 +157,8 @@ bool splittree_set_node_of(WRegion *reg, WSplitRegion *split)
         if(split==NULL)
             return TRUE;
         split_of_map=make_rb();
-        if(split_of_map==NULL){
-            warn_err();
+        if(split_of_map==NULL)
             return FALSE;
-        }
     }
     
     node=rb_find_pkey_n(split_of_map, reg, &found);
@@ -893,7 +891,7 @@ void splittree_rqgeom(WSplit *root, WSplit *sub, int flags,
         WSplitST *sub_as_stdisp=(WSplitST*)sub;
         
         if(flags&REGION_RQGEOM_TRYONLY){
-            WARN_FUNC("REGION_RQGEOM_TRYONLY unsupported for status display.");
+            warn(TR("REGION_RQGEOM_TRYONLY unsupported for status display."));
             if(geomret!=NULL)
                 *geomret=sub->geom;
             return;
@@ -971,7 +969,7 @@ ExtlTab split_rqgeom(WSplit *node, ExtlTab g)
     return extl_table_from_rectangle(&ogeom);
     
 err:
-    warn("Invalid node.");
+    warn(TR("Invalid node."));
     return extl_table_none();
 }
 
@@ -1019,7 +1017,7 @@ WSplitRegion *splittree_split(WSplit **root, WSplit *node, int dir, int primn,
     assert(root!=NULL && *root!=NULL && node!=NULL && parent!=NULL);
     
     if(OBJ_IS(node, WSplitST)){
-        WARN_FUNC(TR("Splitting stdisp not allowed."));
+        warn(TR("Splitting stdisp not allowed."));
         return NULL;
     }
 
@@ -1047,7 +1045,7 @@ WSplitRegion *splittree_split(WSplit **root, WSplit *node, int dir, int primn,
         split_do_rqgeom_(node, &ng, TRUE, TRUE, &rg, TRUE);
         rs=(dir==SPLIT_VERTICAL ? rg.h : rg.w);
         if(rs<minsize+objmin){
-            WARN_FUNC(TR("Unable to split: not enough free space."));
+            warn(TR("Unable to split: not enough free space."));
             return NULL;
         }
         split_do_rqgeom_(node, &ng, TRUE, TRUE, &rg, FALSE);
@@ -1093,7 +1091,6 @@ WSplitRegion *splittree_split(WSplit **root, WSplit *node, int dir, int primn,
 
     nnode=create_splitregion(&(fp.g), nreg);
     if(nnode==NULL){
-        warn_err();
         destroy_obj((Obj*)nreg);
         destroy_obj((Obj*)nsplit);
         return NULL;
@@ -1440,8 +1437,8 @@ void split_transpose_to(WSplit *node, const WRectangle *geom)
             split_try_unsink_stdisp(stdispp, TRUE, TRUE);
             stdispp=split_lookup_stdisp_parent(node);
             if(stdispp!=NULL && stdispp!=(WSplitSplit*)node){
-                WARN_FUNC(TR("Unable to move status display out of way of "
-                             "transpose."));
+                warn(TR("Unable to move status display out of way of "
+                        "transpose."));
                 return;
             }
         }

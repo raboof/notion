@@ -88,10 +88,9 @@ static void xwindow_selcmap(Window win)
         (*p)++;
     }else{
         p=ALLOC(int);
-        if(p==NULL){
-            warn_err();
+        if(p==NULL)
             return;
-        }
+        
         *p=1;
         if(XSaveContext(ioncore_g.dpy, win, ctx, (XPointer)p)!=0){
             warn(TR("Unable to save colourmap watch info."));
@@ -146,10 +145,8 @@ void clientwin_get_colormaps(WClientWin *cwin)
     
     cwin->cmaps=ALLOC_N(Colormap, n);
     
-    if(cwin->cmaps==NULL){
-        warn_err();
+    if(cwin->cmaps==NULL)
         return;
-    }
     
     cwin->cmapwins=wins;
     cwin->n_cmapwins=n;

@@ -33,10 +33,8 @@ bool ioncore_register_regclass(ClassDescr *descr, WRegionLoadCreateFn *lc_fn)
         return FALSE;
     
     info=ALLOC(WRegClassInfo);
-    if(info==NULL){
-        warn_err();
+    if(info==NULL)
         return FALSE;
-    }
     
     info->descr=descr;
     info->lc_fn=lc_fn;

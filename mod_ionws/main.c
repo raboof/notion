@@ -98,35 +98,24 @@ static bool init_hooks()
 
 bool mod_ionws_init()
 {
-    if(!init_hooks()){
-        WARN_FUNC(TR("Failed to initialise hooks"));
+    if(!init_hooks())
         goto err;
-    }
             
     mod_ionws_ionws_bindmap=ioncore_alloc_bindmap("WIonWS", NULL);
     
     mod_ionws_frame_bindmap=ioncore_alloc_bindmap_frame("WFrame-on-WIonWS");
 
-    if(mod_ionws_ionws_bindmap==NULL ||
-       mod_ionws_frame_bindmap==NULL){
-        WARN_FUNC(TR("Failed to allocate bindmaps."));
+    if(mod_ionws_ionws_bindmap==NULL || mod_ionws_frame_bindmap==NULL)
         goto err;
-    }
 
-    if(!mod_ionws_register_exports()){
-        WARN_FUNC(TR("Failed to register functions."));
+    if(!mod_ionws_register_exports())
         goto err;
-    }
 
-    if(!mod_ionws_register_exports()){
-        WARN_FUNC(TR("Unable to register exports"));
+    if(!mod_ionws_register_exports())
         goto err;
-    }
     
-    if(!register_regions()){
-        WARN_FUNC(TR("Unable to register classes"));
+    if(!register_regions())
         goto err;
-    }
     
     ioncore_read_config("cfg_ionws", NULL, TRUE);
 

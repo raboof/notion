@@ -25,6 +25,7 @@
 #include <ioncore/signal.h>
 #include <ioncore/focus.h>
 #include <ioncore/event.h>
+#include <ioncore/xwindow.h>
 #include <ioncore/region-iter.h>
 #include "menu.h"
 #include "main.h"
@@ -456,10 +457,8 @@ static WMenuEntry *preprocess_menu(ExtlTab tab, int *n_entries)
 
     entries=ALLOC_N(WMenuEntry, n);  
     
-    if(entries==NULL){
-        warn_err();
+    if(entries==NULL)
         return NULL;
-    }
 
     /* Initialise entries and check submenus */
     for(i=1; i<=n; i++){
@@ -488,7 +487,7 @@ bool menu_init(WMenu *menu, WWindow *par, const WFitParams *fp,
     menu->entries=preprocess_menu(params->tab, &(menu->n_entries));
     
     if(menu->entries==NULL){
-        warn(TR("Empty menu"));
+        warn(TR("Empty menu."));
         return FALSE;
     }
 

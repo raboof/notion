@@ -312,10 +312,9 @@ void frame_initialise_gr(WFrame *frame)
         return;
     
     tab_style=scat("tab-", style);
-    if(tab_style==NULL){
-        warn_err();
+    if(tab_style==NULL)
         return;
-    }
+    
     frame->bar_brush=grbrush_get_slave(frame->brush, rw, win, tab_style);
     free(tab_style);
     

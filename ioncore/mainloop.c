@@ -44,10 +44,8 @@ bool ioncore_register_input_fd(int fd, void *data,
     }
     
     tmp=ALLOC(WInputFd);
-    if(tmp==NULL){
-        warn_err();
+    if(tmp==NULL)
         return FALSE;
-    }
     
     tmp->fd=fd;
     tmp->data=data;

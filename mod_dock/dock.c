@@ -725,7 +725,7 @@ static void dock_managed_rqgeom_(WDock *dock, WRegion *reg, int flags,
     }
     
     if(thisdockapp==NULL && reg!=NULL){
-        WARN_FUNC("Requesting dockapp not found.");
+        warn("Requesting dockapp not found.");
         if(geomret)
             *geomret=REGION_GEOM(reg);
         return;
@@ -1328,7 +1328,7 @@ static void dock_managed_remove(WDock *dock, WRegion *reg)
         UNLINK_ITEM(dock->dockapps, dockapp, next, prev);
         free(dockapp);
     }else{
-        WARN_FUNC("Dockapp not found.");
+        warn("Dockapp not found.");
     }
 
     region_unset_manager(reg, (WRegion*)dock, &(dock->managed_list));
@@ -1491,7 +1491,7 @@ bool mod_dock_init()
 
     dock_bindmap=ioncore_alloc_bindmap("WDock", NULL);
     if(dock_bindmap==NULL){
-        WARN_FUNC("Unable to allocate dock bindmap.");
+        warn("Unable to allocate dock bindmap.");
         mod_dock_unregister_exports();
         ioncore_unregister_regclass(&CLASSDESCR(WDock));
     }

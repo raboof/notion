@@ -85,10 +85,8 @@ void edln_complete(Edln *edln)
     
     p=ALLOC_N(char, len+1);
     
-    if(p==NULL){
-        warn_err();
+    if(p==NULL)
         return;
-    }
     
     memcpy(p, edln->p, len);
     p[len]='\0';

@@ -525,7 +525,7 @@ int extl_collect_errors(lua_State *st)
     errorlog_deinit(&el);
     
     if(err!=0)
-        WARN_FUNC(TR("Internal error."));
+        warn(TR("Internal error."));
     
     return 1;
 }
@@ -634,10 +634,8 @@ static bool extl_stack_get(lua_State *st, int pos, char type, bool copystring,
             str=lua_tostring(st, pos);
             if(str!=NULL && copystring){
                 str=scopy(str);
-                if(str==NULL){
-                    warn_err();
+                if(str==NULL)
                     return FALSE;
-                }
             }
             *((const char**)valret)=str;
         }

@@ -64,10 +64,8 @@ DEFont *de_load_font(const char *fontname)
     
     fnt=ALLOC(DEFont);
     
-    if(fnt==NULL){
-        warn_err();
+    if(fnt==NULL)
         return NULL;
-    }
     
     fnt->fontset=fontset;
     fnt->fontstruct=fontstruct;

@@ -487,10 +487,9 @@ void wedln_set_completions(WEdln *wedln, ExtlTab completions)
     }
     
     ptr=ALLOC_N(char*, n);
-    if(ptr==NULL){
-        warn_err();
+    if(ptr==NULL)
         goto allocfail;
-    }
+
     for(i=0; i<n; i++){
         if(!extl_table_geti_s(completions, i+1, &p)){
             goto allocfail;
@@ -533,10 +532,9 @@ static bool wedln_init_prompt(WEdln *wedln, const char *prompt)
     if(prompt!=NULL){
         p=scat(prompt, "  ");
     
-        if(p==NULL){
-            warn_err();
+        if(p==NULL)
             return FALSE;
-        }
+
         wedln->prompt=p;
         wedln->prompt_len=strlen(p);
     }else{

@@ -124,23 +124,6 @@ static bool wmsg_init(WMessage *wmsg, WWindow *par, const WFitParams *fp,
     const char *p;
     size_t l;
     
-#if 0
-    cmsg=scopy(msg);
-    
-    if(cmsg==NULL){
-        warn_err();
-        return FALSE;
-    }
-    
-    ptr=ALLOC_N(char*, 1);
-    if(ptr==NULL){
-        warn_err();
-        free(cmsg);
-        return FALSE;
-    }
-    ptr[0]=cmsg;
-    n=1;
-#else
     p=msg;
     while(1){
         n=n+1;
@@ -155,10 +138,8 @@ static bool wmsg_init(WMessage *wmsg, WWindow *par, const WFitParams *fp,
         
     ptr=ALLOC_N(char*, n);
     
-    if(ptr==NULL){
-        warn_err();
+    if(ptr==NULL)
         return FALSE;
-    }
     
     for(k=0; k<n; k++)
         ptr[k]=NULL;
@@ -184,7 +165,6 @@ static bool wmsg_init(WMessage *wmsg, WWindow *par, const WFitParams *fp,
             break;
         p=p+l+1;
     }
-#endif
     
     init_listing(&(wmsg->listing));
     setup_listing(&(wmsg->listing), ptr, k, TRUE);

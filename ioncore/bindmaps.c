@@ -100,7 +100,6 @@ WBindmap *ioncore_alloc_bindmap(const char *name, const StringIntMap *areas)
     bm->areamap=areas;
     
     if(!rb_insert(known_bindmaps, name, bm)){
-        warn_err();
         bindmap_destroy(bm);
         return NULL;
     }

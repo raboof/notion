@@ -87,7 +87,7 @@ static int parseinst_simple(const char *inststr)
             return inst;
     }
 
-    WARN_FUNC(TR("Corrupt instance number %s."), inststr);
+    warn(TR("Corrupt instance number %s."), inststr);
     return -1;
 }
 
@@ -221,7 +221,6 @@ void region_do_unuse_name(WRegion *reg, bool insert_unnamed)
     if(insert_unnamed){
         if(rb_insertg(ns->rb, &(reg->ni), reg, COMPARE_FN))
             return;
-        warn_err();
     }
 
     reg->ni.namespaceinfo=NULL;
@@ -340,8 +339,7 @@ static bool do_use_name(WRegion *reg, WNamespace *ns, const char *name,
     reg->ni.namespaceinfo=ns;
     
     if(!rb_insertg(ns->rb, &(reg->ni), reg, COMPARE_FN)){
-        WARN_FUNC(TR("Unable to insert newly allocated name to "
-                     "allocation tree."));
+        warn(TR("Unable to insert newly allocated name to allocation tree."));
         free(reg->ni.name);
         reg->ni.name=NULL;
         reg->ni.inst_off=0;
@@ -376,10 +374,7 @@ static bool use_name_parseany(WRegion *reg, WNamespace *ns, const char *name)
     if(inst>=0){
         int realnamelen=startinst-name;
         char *realname=ALLOC_N(char, realnamelen+1);
-        if(realname==NULL){
-            warn_err();
-            /* No return is intended here. */
-        }else{
+        if(realname!=NULL){
             bool retval;
             memcpy(realname, name, realnamelen);
             realname[realnamelen]='\0';

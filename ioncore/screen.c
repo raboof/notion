@@ -103,9 +103,7 @@ static bool screen_init(WScreen *scr, WRootWin *rootwin,
     }else if(id>=0){
         char *str;
         libtu_asprintf(&str, "_ION_WORKSPACE%d", id);
-        if(str==NULL){
-            warn_err();
-        }else{
+        if(str!=NULL){
             scr->atom_workspace=XInternAtom(ioncore_g.dpy, str, False);
             free(str);
         }

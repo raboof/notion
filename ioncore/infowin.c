@@ -170,10 +170,8 @@ void infowin_set_natural_w(WInfoWin *p, const char *str)
     
     if(str!=NULL){
         s=scopy(str);
-        if(s==NULL){
-            warn_err();
+        if(s==NULL)
             return;
-        }
     }
 
     if(p->natural_w_tmpl!=NULL)

@@ -79,10 +79,8 @@ static void *get_module_symbol(dlhandle handle,
 
     p=scat(modulename, name);
     
-    if(p==NULL){
-        warn_err();
+    if(p==NULL)
         return NULL;
-    }
     
     ret=dlsym(handle, p);
     
@@ -134,12 +132,7 @@ static void call_deinit(dlhandle handle, const char *modulename)
 bool ioncore_init_module_support()
 {
     modules=make_rb();
-    if(modules==NULL){
-        warn_err();
-        return FALSE;
-    }
-
-    return TRUE;
+    return (modules!=NULL);
 }
 
 
@@ -167,10 +160,8 @@ static int try_load(const char *file, void *param)
     }
     
     name=ALLOC_N(char, dot-slash+1);
-    if(name==NULL){
-        warn_err();
+    if(name==NULL)
         goto err1;
-    }
     
     strncpy(name, slash, dot-slash);
     name[dot-slash]='\0';
@@ -198,13 +189,11 @@ static int try_load(const char *file, void *param)
     
     mod=add_module(name, handle);
     
-    if(mod==NULL){
-        warn_err();
+    if(mod==NULL)
         goto err3;
-    }
     
     if(!call_init(handle, name)){
-        warn_obj(file, TR("Unable to initialise module."));
+        warn_obj(file, TR("Unable to initialise module %s."), name);
         rb_delete_node(mod);
         goto err3;
     }

@@ -178,7 +178,12 @@ bool ioncore_init_layout()
         free(backup);
     }
         
-    return (n!=0);
+    if(n==0){
+        warn(TR("Unable to initialise layout on any screen."));
+        return FALSE;
+    }else{
+        return TRUE;
+    }
 }
 
 

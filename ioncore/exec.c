@@ -98,7 +98,7 @@ bool ioncore_exec_on(WRegion *reg, const char *cmd)
 {
     WRootWin *rw=region_rootwin_of(reg);
     if(rw==NULL){
-        WARN_FUNC(TR("No root window."));
+        warn(TR("No root window."));
         return FALSE;
     }
     
@@ -235,10 +235,8 @@ void ioncore_setup_environ(int xscr)
      */
     libtu_asprintf(&tmp, "DISPLAY=%s.0123456789a", display);
 
-    if(tmp==NULL){
-        warn_err();
+    if(tmp==NULL)
         return;
-    }
 
     ptr=strchr(tmp, ':');
     if(ptr!=NULL){

@@ -126,10 +126,8 @@ static bool mgd_set_flags(WRegion *reg, int flag)
     
     if(mgd_flag_rb==NULL){
         mgd_flag_rb=make_rb();
-        if(mgd_flag_rb==NULL){
-            warn_err();
+        if(mgd_flag_rb==NULL)
             return FALSE;
-        }
     }else{
         int found=0;
         nd=rb_find_pkey_n(mgd_flag_rb, reg, &found);

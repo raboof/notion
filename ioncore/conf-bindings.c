@@ -351,9 +351,6 @@ static char *get_mods(uint state)
         }
     }
     
-    if(ret==NULL)
-        warn_err();
-    
     return ret;
 }
 
@@ -368,12 +365,7 @@ static char *get_key(char *mods, uint ksb)
         return NULL;
     }
     
-    ret=scat(mods, s);
-    
-    if(ret==NULL)
-        warn_err();
-    
-    return ret;
+    return scat(mods, s);
 }
 
 
@@ -387,12 +379,7 @@ static char *get_button(char *mods, uint ksb)
         return NULL;
     }
     
-    ret=scat(mods, s);
-    
-    if(ret==NULL)
-        warn_err();
-    
-    return ret;
+    return scat(mods, s);
 }
 
 

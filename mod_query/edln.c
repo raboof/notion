@@ -41,10 +41,9 @@ static bool edln_pspc(Edln *edln, int n)
         pa|=(EDLN_ALLOCUNIT-1);
         np=ALLOC_N(char, pa);
         
-        if(np==NULL){
-            warn_err();
+        if(np==NULL)
             return FALSE;
-        }
+
         memmove(np, edln->p, edln->point*sizeof(char));
         memmove(np+edln->point+n, edln->p+edln->point,
                 (edln->psize-edln->point+1)*sizeof(char));
@@ -81,10 +80,8 @@ static bool edln_rspc(Edln *edln, int n)
         pa=edln->palloced&~(EDLN_ALLOCUNIT-1);
         np=ALLOC_N(char, pa);
         
-        if(np==NULL){
-            warn_err();
+        if(np==NULL)
             goto norm;
-        }
         
         memmove(np, edln->p, edln->point*sizeof(char));
         memmove(np+edln->point, edln->p+edln->point+n,
@@ -126,10 +123,8 @@ static bool edln_initstr(Edln *edln, const char *p)
     
     edln->p=ALLOC_N(char, al);
     
-    if(edln->p==NULL){
-        warn_err();
+    if(edln->p==NULL)
         return FALSE;
-    }
 
     edln->palloced=al;
     edln->psize=l;
@@ -515,10 +510,8 @@ void mod_query_history_push(const char *str)
     
     strc=scopy(str);
     
-    if(strc==NULL){
-        warn_err();
+    if(strc==NULL)
         return;
-    }
     
     hist_head--;
     if(hist_head<0)
