@@ -866,7 +866,7 @@ static int scrolld(int d)
 static bool get_parent_g(WMenu *menu, WRectangle *geom)
 {
     WRegion *p=REGION_PARENT(menu);
-    if(menu==NULL)
+    if(p==NULL)
         return FALSE;
     *geom=REGION_GEOM(p);
     return TRUE;

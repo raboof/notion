@@ -218,7 +218,7 @@ static void handle_all_cmaps(const XColormapEvent *ev)
 {
     Rb_node node;
     
-    if(!ioncore_internal_ns.initialised)
+    if(!ioncore_clientwin_ns.initialised)
         return;
     
     rb_traverse(node, ioncore_clientwin_ns.rb){
