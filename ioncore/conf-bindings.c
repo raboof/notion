@@ -232,6 +232,7 @@ static bool opt_submap(Tokenizer *tokz, int n, Token *toks)
 	binding.act=ACT_KEYPRESS;
 	binding.state=mod;
 	binding.kcb=kcb;
+	binding.cmd=NULL;
 	binding.submap=create_bindmap();
 	
 	if(binding.submap==NULL)

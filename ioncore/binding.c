@@ -193,7 +193,7 @@ bool add_binding(WBindmap *bindmap, const WBinding *b)
 	}
 	
 subst:
-	memcpy(&(binding[i]), b, sizeof(WBinding));
+	memcpy(binding+i, b, sizeof(WBinding));
 	
 	return TRUE;
 }
