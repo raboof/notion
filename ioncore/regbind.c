@@ -29,7 +29,7 @@ static void do_grab_ungrab_binding(const WRegion *reg, const WBinding *binding,
 						  binding->kcb)!=NULL)
 			break;
 	}
-	if(r==NULL){
+	if(r==NULL && binding->area==0){
 		if(grab)
 			grab_binding(binding, win);
 		else
@@ -64,7 +64,7 @@ static void ungrab_freed_bindings(const WRegion *reg, const WBindmap *bindmap)
 void rbind_binding_added(const WRegBindingInfo *rbind, const WBinding *binding,
 						 const WBindmap *bindmap)
 {
-	if(rbind->grab)
+	if(rbind->grab && binding->area==0)
 		do_grab_ungrab_binding(rbind->reg, binding, rbind->bindmap, TRUE);
 }
 
