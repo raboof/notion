@@ -54,7 +54,7 @@ pot: $(POTFILE)
 
 $(POTFILE): potfiles
 	$(XGETTEXT) -kTR -kDUMMY_TR -o $(POTFILE).tmp -f potfiles_c
-	$(LUA) $(TOPDIR)/build/lxgettext.lua -out $(POTFILE) -add $(POTFILE).tmp -f potfiles_lua
+	$(LUA) $(TOPDIR)/build/lxgettext.lua -k TR -k bdoc -o $(POTFILE) -a $(POTFILE).tmp -f potfiles_lua
 	$(RM) $(POTFILE).tmp
 
 %.mo: %.po

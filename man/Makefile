@@ -8,7 +8,19 @@ include $(TOPDIR)/system-inc.mk
 
 ######################################
 
-TARGETS=ion3.1 pwm3.1
+MAN_TARGETS=ion3.1 pwm3.1 
+TARGETS=$(MAN_TARGETS) welcome.fi.txt
+
+MKMAN=$(LUA) ../build/mkman.lua
+GROFF=groff -man -Tascii
+#FILTERCRAP=perl -p -i -e 's/.\10//g'
+FILTERCRAP=$(LUA) -e 'io.write((string.gsub(io.read("*a"), ".\8", "")))'
+
+CONFIGS=../etc/cfg_bindings.lua \
+	../etc/cfg_ionws.lua \
+	../etc/cfg_floatws.lua \
+	../etc/cfg_query.lua \
+	../etc/cfg_menu.lua
 
 ######################################
 
@@ -16,19 +28,15 @@ include $(TOPDIR)/rules.mk
 
 ######################################
 
-%.1: %.1.in
-	sed 's#ETCDIR#$(ETCDIR)#g; s#DOCDIR#$(DOCDIR)#g;' $< > $@
+%.1: %.1.in $(CONFIGS)
+	$(MKMAN) -i $< -o $@ -D ETCDIR $(ETCDIR) -D DOCDIR $(DOCDIR) $(CONFIGS)
+
+welcome%txt: welcome%head ion3%1
+	(cat welcome$*head > $@ ; \
+	$(GROFF) ion3$*1 | $(FILTERCRAP)) > $@
 
 _install:
 	$(INSTALLDIR) $(MANDIR)/man1
-	$(INSTALL) -m $(DATA_MODE) ion3.1 $(MANDIR)/man1
-	$(INSTALL) -m $(DATA_MODE) pwm3.1 $(MANDIR)/man1
-
-#
-# Awful hack that may not work on the user's system. This is rule is
-# supposed to be executed before packaging Ion.
-#
-
-ion3.1.in.txt: ion3.1.in
-	man ./$< | perl -p -i -e 's/.\10//g' > $@
-
+	for i in $(MAN_TARGETS); do \
+		$(INSTALL) -m $(DATA_MODE) $$i $(MANDIR)/man1 ; \
+	done

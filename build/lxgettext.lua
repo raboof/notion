@@ -24,7 +24,8 @@
 require('tokens')
 
 local addto=nil
-local keyword="TR"
+local keywords={}
+local keywords_set=false
 local messages={}
 local outfile=nil
 
@@ -98,7 +99,7 @@ local function parsefile(f)
     end
     local i=1
     while i<=table.getn(tokens) do
-        if tokens[i].token=="name" and tokens[i].value==keyword then
+        if tokens[i].token=="name" and keywords[tokens[i].value] then
             i=i+(try_keyword(f, tokens, i) or 1)
         else
             i=i+1
@@ -189,7 +190,7 @@ local function output()
 end
 
 local function help()
-    print('Usage: lxgettext [-add source_pot] [-keyword fn] [lua files...]')
+    print('Usage: lxgettext [-h] [-a source_pot] [-k fn] [-o outfile] [lua files...]')
     os.exit()
 end
 
@@ -199,19 +200,22 @@ local function doargs(a)
         if a[i]=='-f' then
             parsefiles(a[i+1])
             i=i+2
-        elseif a[i]=='-out' then
+        elseif a[i]=='-o' then
             outfile=a[i+1]
             i=i+2
-        elseif a[i]=='-help' then
+        elseif a[i]=='-h' then
             help()
-        elseif a[i]=='-keyword' then
-            keyword=a[i+1]
+        elseif a[i]=='-k' then
+            keywords[a[i+1]]=true
             i=i+2
-        elseif a[i]=='-add' then
+        elseif a[i]=='-a' then
             assert(not addto)
             addto=a[i+1]
             i=i+2
         else
+            if not keywords_set then
+                keywords["TR"]=true
+            end
             parsefile(a[i])
             i=i+1
         end

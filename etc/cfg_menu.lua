@@ -8,16 +8,23 @@
 
 
 defbindings("WMenu", {
-    kpress("Escape",            "WMenu.cancel(_)"),
-    kpress("Control+G",         "WMenu.cancel(_)"),
-    kpress("Control+C",         "WMenu.cancel(_)"),
-    kpress("Return",            "WMenu.finish(_)"),
-    kpress("KP_Enter",          "WMenu.finish(_)"),
-    kpress("Control+M",         "WMenu.finish(_)"),
-    kpress("AnyModifier+P",     "WMenu.select_prev(_)"),
-    kpress("AnyModifier+N",     "WMenu.select_next(_)"),
-    kpress("Up",                "WMenu.select_prev(_)"),
-    kpress("Down",              "WMenu.select_next(_)"),
-    kpress("BackSpace",         "WMenu.typeahead_clear(_)"),
+    bdoc("Close the menu."),
+    kpress("Escape", "WMenu.cancel(_)"),
+    kpress("Control+G", "WMenu.cancel(_)"),
+    kpress("Control+C", "WMenu.cancel(_)"),
+    
+    bdoc("Active current menu entry."),
+    kpress("Return",  "WMenu.finish(_)"),
+    kpress("KP_Enter", "WMenu.finish(_)"),
+    kpress("Control+M", "WMenu.finish(_)"),
+    
+    bdoc("Select next/previous menu entry."),
+    kpress("AnyModifier+N", "WMenu.select_next(_)"),
+    kpress("AnyModifier+P", "WMenu.select_prev(_)"),
+    kpress("Up", "WMenu.select_prev(_)"),
+    kpress("Down", "WMenu.select_next(_)"),
+    
+    bdoc("Clear the menu's typeahead find buffer."),
+    kpress("BackSpace", "WMenu.typeahead_clear(_)"),
 })
 

@@ -39,10 +39,6 @@ If Ioncore was compiled with Xinerama support, this option can be used to
 enable/disable (1/0) the use of it. The default is _not_ to use Xinerama
 screen information.
 .TP
-.B \-i18n
-Enable use of multi-byte string routines, actual encoding depending on the
-locale.
-.TP
 .B \-help
 Show help on command line options
 .TP
@@ -52,11 +48,42 @@ Show version
 .B \-about
 Show about text (version, copyright)
 
-.SH KEYS
+.SH BINDINGS
 
-See the Ion manual page. The bindings are the same except that the query
-module is not loaded by PWM configuration files by default, so that 
-queries won't work.
+These are the default key and pointer bindings.
+.B Mod1
+depends on your system. On PC:s with XFree86 it is probably bound to the left
+Alt key (\fBAlt_L\fP).
+On Suns it is usually bound to the diamond keys (\fBMeta_L\fP, \fBMeta_R\fP). Use
+\fIxmodmap(1x)\fP to find out.
+
+The string in square brackets after a binding group heading below indicates
+the module that whose configuration file defines these bindings.
+
+.SS Globally available bindings
+
+BINDINGS:WScreen
+
+.SS Bindings operating on both frames and screens and their children
+
+BINDINGS:WMPlex
+
+.SS Bindings operating on frames and their children
+
+BINDINGS:WFrame
+
+.SS Move/resize mode bindings
+
+BINDINGS:WMoveresMode
+
+.SS Bindings for floating workspaces [mod_floatws]
+
+BINDINGS:WFloatWS
+
+.SS Bindings for menus [mod_menu]
+
+BINDINGS:WMenu
+
 
 .SH FILES AND DIRECTORIES
 .TP

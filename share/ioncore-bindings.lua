@@ -86,6 +86,13 @@ local function putcmd(cmd, guard, tab)
 end
 
 --DOC
+-- Used to enter documentation among bindings so that other programs
+-- can read it. Does nothing.
+function ioncore.bdoc(text)
+    return {action = "doc", text = text}
+end
+
+--DOC
 -- Returns a function that creates a submap binding description table.
 -- When the key press action \var{keyspec} occurs, Ioncore will wait for
 -- a further key presse and act according to the submap.
@@ -163,7 +170,21 @@ end
 -- a table composed of entries created with \fnref{ioncore.kpress}, 
 -- etc.; see section \ref{sec:bindings} for details.
 function ioncore.defbindings(context, bindings)
-    return ioncore.do_defbindings(context, bindings)
+    local function filterdoc(b)
+        local t={}
+        for k, v in ipairs(b) do
+            local v2=v
+            if v2.submap then
+                v2=table.copy(v)
+                v2.submap=filterdoc(v2.submap)
+            end
+            if v2.action~="doc" then
+                table.insert(t, v2)
+            end
+        end
+        return t
+    end
+    return ioncore.do_defbindings(context, filterdoc(bindings))
 end
 
 local function bindings_get_cmds(map)

@@ -17,9 +17,7 @@ LUA_SOURCES = ioncore-ext.lua ioncore-luaext.lua ioncore-bindings.lua \
 SHELLSCRIPTS = ion-edit ion-man ion-runinxterm ion-ssh ion-view \
 	       ion-completeman
 
-MISC_SHARE = welcome_message.txt
-
-TARGETS=ion-ssh ion-man ion-completeman welcome_message.txt
+TARGETS=ion-ssh ion-man ion-completeman
 
 ######################################
 
@@ -32,9 +30,6 @@ _install:
 	for i in $(SHELLSCRIPTS); do \
 		$(INSTALL) -m $(BIN_MODE) $$i $(SHAREDIR); \
 	done
-	for i in $(MISC_SHARE); do \
-		$(INSTALL) -m $(DATA_MODE) $$i $(SHAREDIR); \
-	done
 	$(INSTALLDIR) $(LCDIR)
 	for i in $(LUA_COMPILED); do \
 		$(INSTALL) -m $(DATA_MODE) $$i $(LCDIR); \
@@ -44,13 +39,3 @@ _install:
 	sed 's#@SHAREDIR@#$(SHAREDIR)#g' $< | \
 	sed 's#@VARDIR@#$(VARDIR)#g' > $@
 	chmod $(BIN_MODE) $@
-
-#
-# Awful hack that is not even supposed to work on the user's platform.
-# Therefore these commands should be executed before packaging Ion.
-#
-
-welcome_message.txt: ../man/ion3.1.in.txt welcome_message.head
-	(cat welcome_message.head; \
-         sed 's#ETCDIR#$(ETCDIR)#g; s#DOCDIR#$(DOCDIR)#g;' \
-	 ../man/ion3.1.in.txt) > welcome_message.txt

@@ -40,7 +40,8 @@ export(ioncore,
        "defwinprop",
        "warn",
        "exec",
-       "TR")
+       "TR",
+       "doc")
 
 -- Mark ourselves loaded.
 _LOADED["ioncore"]=true

@@ -6,12 +6,15 @@
 -- on any object on the workspace.
 
 defbindings("WFloatWS", {
-    kpress(MOD1.."Tab",         "WFloatWS.raise(_, WFloatWS.circulate(_))"),
+    bdoc("Circulate focus and raise the newly focused frame."),
+    kpress(MOD1.."Tab", "WFloatWS.raise(_, WFloatWS.circulate(_))"),
     submap(MOD1.."K", { 
+        bdoc("Backwards-circulate focus and raise the newly focused frame."),
         kpress("AnyModifier+Tab", "WFloatWS.raise(_, WFloatWS.backcirculate(_))"),
     }),
-    kpress(MOD1.."P",           "WFloatWS.lower(_, _sub)", "_sub:non-nil"),
-    kpress(MOD1.."N",           "WFloatWS.raise(_, _sub)", "_sub:non-nil"),
+    bdoc("Raise/lower active frame."),
+    kpress(MOD1.."P", "WFloatWS.lower(_, _sub)", "_sub:non-nil"),
+    kpress(MOD1.."N", "WFloatWS.raise(_, _sub)", "_sub:non-nil"),
 })
 
 
@@ -20,16 +23,24 @@ defbindings("WFloatWS", {
 -- ion-bindings.lua.
 
 defbindings("WFloatFrame", {
-    mdblclick("Button1@tab",    "WFloatFrame.toggle_shade(_)"),
-    mpress("Button1@tab",       "WFloatWS.raise(WRegion.manager(_), _)"),
-    mpress("Button1@border",    "WFloatWS.raise(WRegion.manager(_), _)"),
-    mclick(MOD1.."Button1",     "WFloatWS.raise(WRegion.manager(_), _)"),
-    mclick(MOD1.."Button3",     "WFloatWS.lower(WRegion.manager(_), _)"),
-    mdrag("Button1@tab",        "WFrame.p_move(_)"),
-     -- in ion-bindings.lua now:
-    --mdrag(MOD1.."Button1",      "WFrame.p_move(_)"),
+    bdoc("Toggle shade mode"),
+    mdblclick("Button1@tab", "WFloatFrame.toggle_shade(_)"),
     
-    kpress(MOD1.."M",           "mod_menu.menu(_, _sub, 'ctxmenu-floatframe')"),
-    mpress("Button3@tab",       "mod_menu.pmenu(_, _sub, 'ctxmenu-floatframe')"),
+    bdoc("Raise the frame."),
+    mpress("Button1@tab", "WFloatWS.raise(WRegion.manager(_), _)"),
+    mpress("Button1@border", "WFloatWS.raise(WRegion.manager(_), _)"),
+    mclick(MOD1.."Button1", "WFloatWS.raise(WRegion.manager(_), _)"),
+    
+    bdoc("Lower the frame."),
+    mclick(MOD1.."Button3", "WFloatWS.lower(WRegion.manager(_), _)"),
+    
+    bdoc("Move the frame."),
+    mdrag("Button1@tab", "WFrame.p_move(_)"),
+    -- in ion-bindings.lua now:
+    --mdrag(MOD1.."Button1", "WFrame.p_move(_)"),
+    
+    bdoc("Show frame context menu."),
+    kpress(MOD1.."M", "mod_menu.menu(_, _sub, 'ctxmenu-floatframe')"),
+    mpress("Button3@tab", "mod_menu.pmenu(_, _sub, 'ctxmenu-floatframe')"),
 })
 
