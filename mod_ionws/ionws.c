@@ -440,6 +440,7 @@ static WRegion *create_initial_frame(WIonWS *ws, WWindow *parent,
         destroy_obj((Obj*)reg);
         return NULL;
     }
+    ws->split_tree->ws_if_root=ws;
     
     ionws_managed_add(ws, reg);
 
@@ -1234,10 +1235,10 @@ WRegion *ionws_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
         warn(TR("The workspace is empty."));
         destroy_obj((Obj*)ws);
         return NULL;
-    }else{
-        ws->split_tree->ws_if_root=ws;
-        split_restack(ws->split_tree, ws->genws.dummywin, Above);
     }
+    
+    ws->split_tree->ws_if_root=ws;
+    split_restack(ws->split_tree, ws->genws.dummywin, Above);
     
     return (WRegion*)ws;
 }

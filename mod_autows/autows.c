@@ -97,6 +97,9 @@ static bool autows_init_layout(WAutoWS *ws)
     if(ws->ionws.split_tree==NULL)
         ws->ionws.split_tree=(WSplit*)create_splitunused(&REGION_GEOM(ws), ws);
         
+    if(ws->ionws.split_tree!=NULL)
+        ws->ionws.split_tree->ws_if_root=&(ws->ionws);
+    
     return (ws->ionws.split_tree!=NULL);
 }
 
@@ -458,6 +461,7 @@ WRegion *autows_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
         }
     }
     
+    ws->ionws.split_tree->ws_if_root=ws;
     split_restack(ws->ionws.split_tree, ((WGenWS*)ws)->dummywin, Above);
     
     return (WRegion*)ws;

@@ -990,7 +990,8 @@ err:
 void splittree_changeroot(WSplit *root, WSplit *node)
 {
     WIonWS *ws=(WIonWS*)(root->ws_if_root);
-    assert(ws!=NULL && ws->split_tree==root);
+    assert(ws!=NULL);
+    assert(ws->split_tree==root);
     root->ws_if_root=NULL;
     ws->split_tree=node;
     if(node!=NULL){
