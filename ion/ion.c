@@ -108,9 +108,8 @@ void check_new_user_help()
 
 int main(int argc, char*argv[])
 {
-	const char *cfgfile=NULL;
+	const char *cfgfile="ion";
 	const char *display=NULL;
-	const char *msg=NULL;
 	char *cmd=NULL;
 	int stflags=0;
 	int opt;
@@ -129,10 +128,9 @@ int main(int argc, char*argv[])
 	
 	ioncore_add_scriptdir(EXTRABINDIR); /* ion-completefile */
 	ioncore_add_scriptdir(ETCDIR);
-	ioncore_add_scriptdir(ETCDIR"/ion");
 	ioncore_add_scriptdir(SHAREDIR);
 	ioncore_add_moduledir(MODULEDIR);
-	ioncore_set_userdirs("ion");
+	ioncore_set_userdirs("ion2");
 
 	optparser_init(argc, argv, OPTP_MIDLONG, ion_opts, &ion_cinfo);
 	

@@ -1,14 +1,11 @@
 --
--- PWM ioncore main executable configuration file
+-- Ion main configuration file
 --
 
 -- Set default modifier. Alt should usually be mapped to Mod1 on
 -- XFree86-based systems. The flying window keys are probably Mod3
 -- or Mod4; see the output of 'xmodmap'.
 DEFAULT_MOD = "Mod1+"
-
--- Set default workspace type.
-default_ws_type="WFloatWS"
 
 -- Maximum delay between clicks in milliseconds to be considered a
 -- double click.
@@ -20,22 +17,20 @@ default_ws_type="WFloatWS"
 --set_resize_delay(1500)
 
 -- Opaque resize?
-enable_opaque_resize(FALSE)
+enable_opaque_resize(false)
 
 -- Movement commands warp the pointer to frames instead of just
 -- changing focus. Enabled by default.
-enable_warp(FALSE)
+enable_warp(true)
 
 -- Kludges to make apps behave better.
 include("kludges")
 
--- Global and some common bindings. See modules' configuration files for
--- other bindings. This must be executed before loading workspace/frame 
--- modules!
-include("ioncore-bindings")
+-- Make some bindings.
+include("ion-bindings")
 
 -- Define some menus (menu module required to actually use them)
-include("ioncore-menus")
+include("ion-menus")
 
 -- How to shorten window titles when the full title doesn't fit in
 -- the available space? The first-defined matching rule that succeeds 
@@ -48,7 +43,16 @@ add_shortenrule("[^:]+: (.*)", "$1$|$1$<...")
 add_shortenrule("(.*)(<[0-9]+>)", "$1$2$|$1$<...$2")
 add_shortenrule("(.*)", "$1$|$1$<...")
 
+-- List of directories to look for manuals in the F1 man page query.
+query_man_path={
+    "/usr/man",
+    "/usr/share/man",
+    "/usr/X11R6/man",
+    "/usr/local/man"
+}
+
 -- Modules.
-load_module("floatws")
-load_module("menu")
 load_module("query")
+load_module("menu")
+load_module("ionws")
+load_module("floatws")

@@ -67,9 +67,8 @@ static OptParserCommonInfo pwm_cinfo={
 
 int main(int argc, char*argv[])
 {
-	const char *cfgfile=NULL;
+	const char *cfgfile="pwm";
 	const char *display=NULL;
-	const char *msg=NULL;
 	char *cmd=NULL;
 	int stflags=IONCORE_STARTUP_NOXINERAMA;
 	int opt;
@@ -88,10 +87,12 @@ int main(int argc, char*argv[])
 	
 	ioncore_add_scriptdir(EXTRABINDIR); /* ion-completefile */
 	ioncore_add_scriptdir(ETCDIR);
+#ifdef PWM_ETCDIR	
 	ioncore_add_scriptdir(PWM_ETCDIR);
+#endif
 	ioncore_add_scriptdir(SHAREDIR);
 	ioncore_add_moduledir(MODULEDIR);
-	ioncore_set_userdirs("pwm");
+	ioncore_set_userdirs("pwm2");
 
 	optparser_init(argc, argv, OPTP_MIDLONG, pwm_opts, &pwm_cinfo);
 	

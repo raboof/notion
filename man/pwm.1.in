@@ -52,8 +52,22 @@ Show version
 .B \-about
 Show about text (version, copyright)
 
+.SH FILES AND DIRECTORIES
+.TP
+.B ETCDIR/
+System default configuration files
+.TP
+.B ETCDIR/pwm.lua
+System default main configuration file
+.TP
+.B ~/.pwm2/
+User configuration files
+.TP
+.B ~/.pwm2/pwm.lua
+User default configuration file (overrides system default)
+
 .SH SEE ALSO
 
 For more information, see
-.I Ion(1).
+.I ion(1).
 

@@ -1,5 +1,5 @@
 --
--- Menu definitions
+-- Ion menu definitions
 --
 
 
@@ -8,10 +8,12 @@ include("menulib")
 -- Load query support code
 include("querylib")
 
+
 -- Define a function to display an about mesage.
 local function about(mplex)
     query_message(mplex, ioncore_aboutmsg())
 end
+
 
 -- Application menu
 defmenu("appmenu", {

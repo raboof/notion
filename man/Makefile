@@ -8,7 +8,7 @@ include $(TOPDIR)/system-inc.mk
 
 ######################################
 
-TARGETS=ion.1
+TARGETS=ion.1 pwm.1
 
 ######################################
 
@@ -16,12 +16,13 @@ include $(TOPDIR)/rules.mk
 
 ######################################
 
-ion.1: ion.1.in
+%.1: %.1.in
 	sed 's#ETCDIR#$(ETCDIR)#g; s#DOCDIR#$(DOCDIR)#g;' $< > $@
 
 _install:
 	$(INSTALLDIR) $(MANDIR)/man1
 	$(INSTALL) -m $(DATA_MODE) ion.1 $(MANDIR)/man1
+	$(INSTALL) -m $(DATA_MODE) pwm.1 $(MANDIR)/man1
 
 #
 # Awful hack that may not work on the user's system. This is rule is

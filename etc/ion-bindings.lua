@@ -1,7 +1,7 @@
 -- 
--- Ion ioncore bindings configuration file. Global bindings and bindings
--- common to screens and all types of frames only. See modules'
--- configuration files for other bindings.
+-- Ion bindings configuration file. Global bindings and bindings common 
+-- to screens and all types of frames only. See modules' configuration 
+-- files for other bindings.
 --
 
 -- Load a library to create common queries.

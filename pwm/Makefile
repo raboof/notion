@@ -11,10 +11,6 @@ include $(TOPDIR)/modulelist.mk
 
 ######################################
 
-ifndef PWM_ETCDIR
-PWM_ETCDIR = $(ETCDIR)/pwm
-endif
-
 INCLUDES += $(X11_INCLUDES)
 #DIST: INCLUDES += -I.. -I../libtu/include 
 INCLUDES += -I..
@@ -25,9 +21,14 @@ LIBS += $(X11_LIBS) $(XINERAMA_LIBS)
 LIBS += $(LUA_LIBS)
 LIBS += $(LTDL_LIBS)
 
-DEFINES += -DPWM_ETCDIR=\"$(PWM_ETCDIR)\" -DETCDIR=\"$(ETCDIR)\" \
-	   -DSHAREDIR=\"$(SHAREDIR)\" -DEXTRABINDIR=\"$(EXTRABINDIR)\" \
-	   -DMODULEDIR=\"$(MODULEDIR)\"
+DEFINES += -DETCDIR=\"$(ETCDIR)\" -DSHAREDIR=\"$(SHAREDIR)\" \
+	   -DEXTRABINDIR=\"$(EXTRABINDIR)\" -DMODULEDIR=\"$(MODULEDIR)\"
+
+ifndef PWM_ETCDIR
+PWM_ETCDIR = $(ETCDIR)
+else
+DEFINES += -DPWM_ETCDIR=\"$(PWM_ETCDIR)\"
+endif
 
 CFLAGS += $(XOPEN_SOURCE)
 
@@ -59,6 +60,4 @@ _install:
 	$(INSTALL) -m $(BIN_MODE) pwm $(BINDIR)
 	# $(STRIP) $(BINDIR)/pwm
 	$(INSTALLDIR) $(PWM_ETCDIR)
-	$(INSTALL) -m $(DATA_MODE) ioncore.lua $(PWM_ETCDIR)
-	$(INSTALLDIR) $(MANDIR)/man1
-	$(INSTALL) -m $(DATA_MODE) pwm.1 $(MANDIR)/man1
+	$(INSTALL) -m $(DATA_MODE) pwm.lua $(PWM_ETCDIR)

@@ -399,16 +399,16 @@ Context menu
 .B ETCDIR/
 System default configuration files
 .TP
-.B ETCDIR/ioncore.lua
+.B ETCDIR/ion.lua
 System default main configuratio files
 .TP
 .B ETCDIR/look-*.lua
 Colour scheme configuration files
 .TP
-.B ~/.ion/
+.B ~/.ion2/
 User configuration files
 .TP
-.B ~/.ion/ioncore.lua
+.B ~/.ion2/ion.lua
 User default configuration file (overrides system default)
 
 .SH SEE ALSO
@@ -420,5 +420,7 @@ Ion home page.
 .I DOCDIR/
 .PP
 .I X(1x)
+.I pwm(1)
+
 .SH AUTHOR
 Ion was written by Tuomo Valkonen <tuomov at iki.fi>.

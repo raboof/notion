@@ -8,11 +8,11 @@ include $(TOPDIR)/system-inc.mk
 
 ######################################
 
-ETC =	floatws.lua ioncore-bindings.lua ionws.lua kludges.lua \
+ETC =	ion.lua ion-bindings.lua ion-menus.lua kludges.lua \
+	ionws.lua floatws.lua floatws-menus.lua query.lua menu.lua \
 	look-brownsteel.lua look-clean.lua look-dusky.lua \
 	look-greyviolet.lua look-ios.lua look-cleanviolet.lua \
-	look-simpleblue.lua look-wheat2.lua query.lua menu.lua \
-	ioncore.lua ioncore-menus.lua look-cleanios.lua
+	look-simpleblue.lua look-wheat2.lua look-cleanios.lua
 
 ######################################
 
