@@ -1,4 +1,13 @@
 
+=== ion-3ds-20050304 ===
+
+This is mostly a bug fix release, but also features improved
+mod_query.query_exec (F3 key) completion support. Script writers should be
+aware that As a side effect of one of these bug fixes, many hooks are now 
+called in "protected mode" and can not call any functions that modify the 
+internal state of Ion, except ioncore.defer.
+
+
 === ion-3ds-20050227 ===
 
 The most important changes in this release are:
