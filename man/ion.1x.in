@@ -6,6 +6,9 @@ Ion - an X11 window manager
 .I "[options]"
 .SH "DESCRIPTION"
 Ion is an X11 window manager with text-editorish and keyboard friendly feel.
+
+This manual page may be out of date for Ion-devel.
+
 .SH "OPTIONS"
 .TP
 .B \-display host:display.screen
@@ -265,10 +268,10 @@ Keyboard and pointer binding configuration files
 User default configuration file (overrides system default)
 
 .SH SEE ALSO
-The Ion home page, \fIhttp://modeemi.fi/~tuomov/ion/\fP
+The Ion home page, \fIhttp://iki.fi/tuomov/ion/\fP
 .PP
 .I PREFIX/doc/ion/
 .PP
 .I X(1x)
 .SH AUTHOR
-Ion was written by Tuomo Valkonen <tuomov@modeemi.fi>.
+Ion was written by Tuomo Valkonen <tuomov@iki.fi>.
