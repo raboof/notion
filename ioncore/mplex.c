@@ -194,6 +194,8 @@ static void reparent_or_fit(WMPlex *mplex, const WRectangle *geom,
 						  geom->x, geom->y, geom->w, geom->h);
 	}
 	
+	REGION_GEOM(mplex)=*geom;
+	
 	if(move && !wchg && !hchg)
 		region_notify_subregions_move(&(mplex->win.region));
 	else if(wchg || hchg)
