@@ -679,16 +679,20 @@ static bool mplex_do_managed_display(WMPlex *mplex, WRegion *sub)
     
     stdisp=(WRegion*)(mplex->stdispinfo.regwatch.obj);
     
-    if(!l2 && stdisp!=NULL){
-        WRegion *mgr=REGION_MANAGER(stdisp);
-        if(mgr!=sub && OBJ_IS(sub, WGenWS)){
-            if(OBJ_IS(mgr, WGenWS)){
-                genws_unmanage_stdisp((WGenWS*)mgr, FALSE, TRUE);
-                region_detach_manager(stdisp);
-            }
+    if(!l2 && OBJ_IS(sub, WGenWS)){
+        if(stdisp!=NULL){
+            WRegion *mgr=REGION_MANAGER(stdisp);
+            if(mgr!=sub){
+                if(OBJ_IS(mgr, WGenWS)){
+                    genws_unmanage_stdisp((WGenWS*)mgr, FALSE, TRUE);
+                    region_detach_manager(stdisp);
+                }
             
-            genws_manage_stdisp((WGenWS*)sub, stdisp, 
-                                mplex->stdispinfo.pos);
+                genws_manage_stdisp((WGenWS*)sub, stdisp, 
+                                    mplex->stdispinfo.pos);
+            }
+        }else{
+            genws_unmanage_stdisp((WGenWS*)sub, TRUE, TRUE);
         }
     }
     
