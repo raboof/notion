@@ -279,6 +279,8 @@ WViewport *add_viewport(WScreen *scr, int id, WRectangle geom)
 	if(vp==NULL)
 		return NULL;
 	
+	region_set_manager((WRegion*)vp, (WRegion*)scr, NULL);
+	
 	map_region((WRegion*)vp);
 	
 	if(scr->default_viewport==NULL)
