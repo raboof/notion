@@ -1279,7 +1279,7 @@ WRegion *ionws_find_rescue_manager_for(WIonWS *ws, WRegion *reg)
 	WObj *obj;
 	
 	if(REGION_MANAGER(reg)!=(WRegion*)ws)
-		return FALSE;
+		return NULL;
 
 	split=split_of_reg(reg);
 	
