@@ -65,10 +65,10 @@ defbindings("WMPlex", {
     kpress_wait(MOD1.."C",      "WRegion.rqclose_propagate(_, _sub)"),
     kpress_wait(MOD1.."L",      "WClientWin.nudge(_sub)",
                                 "_sub:WClientWin"),
-   kpress_wait(MOD1.."Return",  "WClientWin.toggle_fullscreen(_sub)",
+    kpress_wait(MOD1.."Return", "WClientWin.toggle_fullscreen(_sub)",
                                 "_sub:WClientWin"),
                             
-   submap(MOD1.."K", {
+    submap(MOD1.."K", {
        kpress("AnyModifier+C",  "WClientWin.kill(_sub)", 
                                 "_sub:WClientWin"),
        kpress("AnyModifier+Q",  "WClientWin.quote_next(_sub)",

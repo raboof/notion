@@ -971,8 +971,8 @@ static void convert_geom(WClientWin *cwin, const WRectangle *max_geom,
 
 
 static void clientwin_managed_rqgeom(WClientWin *cwin, WRegion *sub,
-                                           int flags, const WRectangle *geom, 
-                                           WRectangle *geomret)
+                                     int flags, const WRectangle *geom, 
+                                     WRectangle *geomret)
 {
     WRectangle rgeom=cwin->last_fp.g;
 
