@@ -44,10 +44,44 @@ function ioncore.get_dir_for(reg)
     end
 end
 
+
+local function lookup_script_warn(script)
+    local script=ioncore.lookup_script(script)
+    if not script then
+        warn(TR("Could not find %s", script))
+    end
+    return script
+end
+
+
+local function lookup_runinxterm_warn(prog, title)
+    local rx=lookup_script_warn("ion-runinxterm")
+    if rx then
+        if title then
+            rx=rx.." -T "..string.shell_safe(title)
+        end
+        if prog then
+            rx=rx.." "..prog
+        end
+    end
+    return rx
+end
+
+
 --DOC
 -- Run \var{cmd} with the environment variable DISPLAY set to point to the
--- root window of the X screen \var{reg} is on.
+-- root window of the X screen \var{reg} is on. If \var{cmd} is prefixed
+-- by a colon (\code{:}), the following command is executed in an xterm
+-- (or other terminal emulator) with the help of the \command{ion-runinxterm} 
+-- script.
 function ioncore.exec_on(reg, cmd)
+    local _, _, c=string.find(cmd, "^[%s]*:(.*)")
+    if c then
+        cmd=lookup_runinxterm_warn(c)
+        if not cmd then
+            return
+        end
+    end
     return ioncore.do_exec_rw(reg:rootwin_of(), cmd, ioncore.get_dir_for(reg))
 end
 

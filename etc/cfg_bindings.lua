@@ -48,9 +48,6 @@ defbindings("WScreen", {
     kpress(MOD1.."Shift+Left", "ioncore.goto_next_screen()"),
     kpress(MOD1.."Shift+Right", "ioncore.goto_prev_screen()"),
     
-    bdoc("Show the Ion manual page."),
-    kpress(MOD1.."F1", "ioncore.show_manual()"),
-    
     bdoc("Create a new workspace of chosen default type."),
     kpress(MOD1.."F9", "ioncore.create_ws(_)"),
     
@@ -97,7 +94,10 @@ defbindings("WMPlex", {
     }),
 
     bdoc("Query for manual page to be displayed."),
-    kpress(MOD2.."F1", "mod_query.query_man(_)"),
+    kpress(MOD2.."F1", "mod_query.query_man(_, ':man')"),
+
+    bdoc("Show the Ion manual page."),
+    kpress(MOD1.."F1", "ioncore.exec_on(_, ':man ion3')"),
 
     bdoc("Run a terminal emulator."),
     kpress(MOD2.."F2", "ioncore.exec_on(_, 'xterm')"),
@@ -109,7 +109,7 @@ defbindings("WMPlex", {
     kpress(MOD1.."F3", "mod_query.query_lua(_)"),
 
     bdoc("Query for host to connect to with SSH."),
-    kpress(MOD2.."F4", "mod_query.query_ssh(_)"),
+    kpress(MOD2.."F4", "mod_query.query_ssh(_, ':ssh')"),
 
     bdoc("Query for file to edit."),
     kpress(MOD2.."F5", 

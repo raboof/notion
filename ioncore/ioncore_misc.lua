@@ -37,16 +37,6 @@ end
 
 
 --DOC
--- Show manual page for \var{for_what}, or \fnref{ioncore.progname} 
--- if this is unset.
-function ioncore.show_manual(for_what)
-    local script=ioncore.lookup_script("ion-man")
-    if script then
-        ioncore.exec(script.." "..(for_what or ioncore.progname()))
-    end
-end
-
---DOC
 -- gettext+string.format
 function ioncore.TR(s, ...)
     return string.format(ioncore.gettext(s), unpack(arg))

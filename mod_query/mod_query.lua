@@ -93,30 +93,6 @@ function mod_query.query_execwith(mplex, prompt, dflt, prog, completor,
 end
 
 
-function mod_query.lookup_script_warn(mplex, script)
-    local script=ioncore.lookup_script(script)
-    if not script then
-        mod_query.warn(mplex, TR("Could not find %s", script))
-    end
-    return script
-end
-
-
-function mod_query.lookup_runinxterm_warn(mplex, prog, title)
-    local rx=mod_query.lookup_script_warn(mplex, "ion-runinxterm")
-    if rx then
-        if title then
-            rx=rx.." -T "..string.shell_safe(title)
-        end
-        if prog then
-            rx=rx.." "..string.shell_safe(prog)
-        end
-    end
-    
-    return rx
-end
-
-
 function mod_query.get_initdir(mplex)
     --if mod_query.last_dir then
     --    return mod_query.last_dir
@@ -130,7 +106,9 @@ function mod_query.get_initdir(mplex)
     return wd
 end
 
+
 local MAXDEPTH=10
+
 
 function mod_query.lookup_workspace_classes()
     local classes={}
@@ -609,13 +587,6 @@ function mod_query.exec_handler(mplex, cmdline)
     if cmd_overrides[cmd] then
         cmd_overrides[cmd](mplex, table.map(unquote, parts))
     elseif cmd~="" then
-        if cmd==":" then
-            local ix=mod_query.lookup_runinxterm_warn(mplex)
-            if not ix then 
-                return
-            end
-            cmdline=ix.." "..table.concat(parts, " ")
-        end
         ioncore.exec_on(mplex, cmdline)
     end
 end
@@ -704,16 +675,13 @@ end
 function mod_query.query_ssh(mplex, ssh)
     mod_query.get_known_hosts(mplex)
 
+    ssh=(ssh or ":ssh")
+
     local function handle_exec(mplex, str)
         if not (str and string.find(str, "[^%s]")) then
             return
         end
-        if not ssh then
-            ssh=mod_query.lookup_runinxterm_warn(mplex, "ssh", str)
-            if not ssh then
-                return
-            end
-        end
+        
         ioncore.exec_on(mplex, ssh.." "..string.shell_safe(str))
     end
     
@@ -738,15 +706,13 @@ end
 
 
 --DOC
--- This query asks for a manual page to display. It uses the command
--- \file{ion-man} to run \file{man} in a terminal emulator. By customizing
--- this script it is possible use some other man page viewer. The script
--- \file{ion-completeman} is used to complete manual pages.
-function mod_query.query_man(mplex)
-    local script=mod_query.lookup_script_warn(mplex, "ion-man")
-    local prgm=ioncore.progname()
-    local prompt=TR("Manual page (%s):", prgm)
-    mod_query.query_execwith(mplex, prompt, prgm, script, 
+-- This query asks for a manual page to display. By default it runs the
+-- \command{man} command in an \command{xterm} using \command{ion-runinxterm},
+-- but it is possible to pass another program as the \var{prog} argument.
+function mod_query.query_man(mplex, prog)
+    local dflt=ioncore.progname()
+    mod_query.query_execwith(mplex, TR("Manual page (%s):", dflt), 
+                             dflt, prog or ":man", 
                              mod_query.man_completor, "man")
 end
 
