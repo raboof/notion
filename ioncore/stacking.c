@@ -29,33 +29,37 @@
  */
 
 
-/*{{{ Functions to set up stacking management */
+/*{{{ Stack above */
 
 
-static void do_restack_between(WRegion *reg, WWindow *par, 
-                               WRegion *above, WRegion *below)
+static void do_raise_above(WWindow *par, WRegion *reg, WRegion *above)
 {
     Window root=None, parent=None, *children=NULL;
-    uint nchildren=0, i=0;
-    Window regwin=region_xwindow(reg);
-    Window parwin=region_xwindow((WRegion*)par);
-    Window abovewin=(above!=NULL ? region_xwindow(above) : None);
-    Window belowwin=(below!=NULL ? region_xwindow(below) : None);
+    int nchildren=0, i=0;
+    Window stkabove=region_xwindow(above);
     
-    XQueryTree(ioncore_g.dpy, parwin, &root, &parent, &children, &nchildren);
+    XQueryTree(ioncore_g.dpy, region_xwindow((WRegion*)par),
+               &root, &parent, &children, (uint*)&nchildren);
     
     for(i=0; i<nchildren; i++){
-        if(children[i]==abovewin)
-            break;
-        if(children[i]==regwin){
-            region_restack(reg, abovewin, Above);
-            break;
+        WRegion *other=XWINDOW_REGION_OF(children[i]);
+        
+        if(other==reg){
+            stkabove=None;
+            continue;
         }
-        if(children[i]==belowwin){
-            region_restack(reg, belowwin, Below);
-            break;
+        
+        while(other!=NULL){
+            if(other->stacking.above==above){
+                stkabove=children[i];
+                break;
+            }
+            other=other->stacking.above;
         }
     }
+    
+    if(stkabove!=None)
+        region_restack(reg, stkabove, Above);
     
     XFree(children);
 }
@@ -69,10 +73,10 @@ bool region_stack_above(WRegion *reg, WRegion *above)
 {
     WRegion *r2;
     WWindow *par=REGION_PARENT_CHK(reg, WWindow);
-    
+
     if(reg==above || par==NULL || (WRegion*)par!=REGION_PARENT(above))
         return FALSE;
-    
+
     if(region_xwindow(reg)==None || region_xwindow(above)==None ||
        region_xwindow((WRegion*)par)==None){
         return FALSE;
@@ -80,20 +84,19 @@ bool region_stack_above(WRegion *reg, WRegion *above)
     
     region_reset_stacking(reg);
     
-    r2=above->stacking.below_list;
-    if(r2==NULL)
-        r2=above;
-    else
-        r2=r2->stacking.prev;
-    
-    /*region_restack(reg, region_xwindow(r2), Above);*/
-    do_restack_between(reg, par, r2, par->keep_on_top_list);
+    do_raise_above(par, reg, above);
     
     LINK_ITEM(above->stacking.below_list, reg, stacking.next, stacking.prev);
     reg->stacking.above=above;
     
     return TRUE;
 }
+
+
+/*}}}*/
+
+
+/*{{{ Keep on top */
 
 
 /*EXTL_DOC
@@ -121,9 +124,13 @@ void region_keep_on_top(WRegion *reg)
     
     LINK_ITEM(par->keep_on_top_list, reg, stacking.next, stacking.prev);
     reg->flags|=REGION_KEEPONTOP;
-    
-    D(fprintf(stderr, "keep_on_top: %p\n", reg));
 }
+
+
+/*}}}*/
+
+
+/*{{{ Reset */
 
 
 static void do_reset_stacking(WRegion *reg)
@@ -158,43 +165,67 @@ void region_reset_stacking(WRegion *reg)
 }
         
 
-static void movetotop(WRegion *reg)
-{
-    if(reg->stacking.above){
-        UNLINK_ITEM(reg->stacking.above->stacking.below_list,
-                    reg, stacking.next, stacking.prev);
-        LINK_ITEM(reg->stacking.above->stacking.below_list,
-                  reg, stacking.next, stacking.prev);
-    }else if(reg->flags&REGION_KEEPONTOP){
-        WWindow *par=REGION_PARENT_CHK(reg, WWindow);
-        assert(par!=NULL);
-        UNLINK_ITEM(par->keep_on_top_list, reg, stacking.next, stacking.prev);
-        LINK_ITEM(par->keep_on_top_list, reg, stacking.next, stacking.prev);
-    }
-}
-
-
-static void movetobottom(WRegion *reg)
-{
-    if(reg->stacking.above){
-        UNLINK_ITEM(reg->stacking.above->stacking.below_list,
-                    reg, stacking.next, stacking.prev);
-        LINK_ITEM_FIRST(reg->stacking.above->stacking.below_list,
-                        reg, stacking.next, stacking.prev);
-    }else if(reg->flags&REGION_KEEPONTOP){
-        WWindow *par=REGION_PARENT_CHK(reg, WWindow);
-        assert(par!=NULL);
-        UNLINK_ITEM(par->keep_on_top_list, reg, stacking.next, stacking.prev);
-        LINK_ITEM_FIRST(par->keep_on_top_list, reg, stacking.next,
-                        stacking.prev);
-    }
-}
-
-    
 /*}}}*/
 
 
-/*{{{ Functions to restack */
+/*{{{ Raise/init */
+
+
+static Window find_lowest_keep_on_top(WWindow *par)
+{
+    Window root=None, parent=None, *children=NULL;
+    int nchildren=0, i=0;
+    Window lowest=None;
+    
+    if(par->keep_on_top_list==NULL)
+        return None;
+    
+    if(par->keep_on_top_list->stacking.next==NULL)
+        return region_xwindow(par->keep_on_top_list);
+    
+    XQueryTree(ioncore_g.dpy, region_xwindow((WRegion*)par),
+               &root, &parent, &children, (uint*)&nchildren);
+    
+    for(i=0; i<nchildren; i++){
+        WRegion *other=XWINDOW_REGION_OF(children[i]);
+        
+        if(other->flags&REGION_KEEPONTOP){
+            lowest=children[i];
+            break;
+        }
+    }
+    
+    XFree(children);
+    
+    return lowest;
+}
+
+
+static void do_raise_tree(WWindow *par, WRegion *reg, Window sibling, int mode)
+{
+    Window root=None, parent=None, *children=NULL;
+    int nchildren=0, i=0;
+    
+    XQueryTree(ioncore_g.dpy, region_xwindow((WRegion*)par),
+               &root, &parent, &children, (uint*)&nchildren);
+    
+    for(i=nchildren-1; i>=0; i--){
+        WRegion *other=XWINDOW_REGION_OF(children[i]);
+        WRegion *other2=other;
+        
+        while(other2!=NULL && other2!=reg)
+            other2=other2->stacking.above;
+        
+        if(other2==reg){
+            region_restack(other, sibling, mode);
+            sibling=children[i];
+            mode=Below;
+        }
+    }
+    
+    XFree(children);
+}
+
 
 
 /*EXTL_DOC
@@ -205,49 +236,91 @@ static void movetobottom(WRegion *reg)
 EXTL_EXPORT_MEMBER
 void region_raise(WRegion *reg)
 {
-    WRegion *r2;
-    bool st=FALSE;
-    Window w=None;
+    WRegion *r2=NULL;
+    WWindow *par=REGION_PARENT_CHK(reg, WWindow);
+    Window sibling=None;
+    int mode=Above;
 
-    D(fprintf(stderr, "raise: %p\n", reg));
+    if(par==NULL)
+        return;
     
     r2=reg;
-    while(r2->stacking.above!=NULL)
+    while(r2->stacking.above!=NULL){
         r2=r2->stacking.above;
-       
-    if(!(r2->flags&REGION_KEEPONTOP)){
-        /* Stack below lowest keepontop window */
-        WWindow *par=REGION_PARENT_CHK(reg, WWindow);
-        if(par!=NULL && par->keep_on_top_list!=NULL){
-            D(fprintf(stderr, "below %p\n", par->keep_on_top_list));
-            w=region_xwindow(par->keep_on_top_list);
-            w=region_restack(reg, w, Below);
-            st=TRUE;
-        }
-    }else{
-        D(fprintf(stderr, "kept on top\n"));
+        assert(r2!=reg);
     }
-        
-    
-    if(!st)
-        w=region_restack(reg, None, Above);
-    
-    /* Restack window that are stacked above this one */
-    for(r2=reg->stacking.below_list; r2!=NULL; r2=r2->stacking.next)
-        w=region_restack(r2, w, Above);
-    
-    movetotop(reg);
+
+    if(!(r2->flags&REGION_KEEPONTOP)){
+        sibling=find_lowest_keep_on_top(par);
+        if(sibling!=None)
+            mode=Below;
+    }
+
+    do_raise_tree(par, reg, sibling, mode);
 }
 
 
 void window_init_sibling_stacking(WWindow *par, Window win)
 {
-    Window w;
+    Window below=find_lowest_keep_on_top(par);
+    if(below!=None)
+        xwindow_restack(win, below, Below);
+}
+
+
+/*}}}*/
+
+
+/*{{{ Lower */
+
+
+static Window find_highest_normal(WWindow *par)
+{
+    Window root=None, parent=None, *children=NULL;
+    int nchildren=0, i=0;
+    Window highest=None;
     
-    if(par->keep_on_top_list!=NULL){
-        w=region_xwindow(par->keep_on_top_list);
-        xwindow_restack(win, w, Below);
+    XQueryTree(ioncore_g.dpy, region_xwindow((WRegion*)par),
+               &root, &parent, &children, (uint*)&nchildren);
+    
+    for(i=nchildren-1; i>=0; i--){
+        WRegion *other=XWINDOW_REGION_OF(children[i]);
+        
+        if(!(other->flags&REGION_KEEPONTOP)){
+            highest=children[i];
+            break;
+        }
     }
+    
+    XFree(children);
+    
+    return highest;
+}
+
+
+static void do_lower_tree(WWindow *par, WRegion *reg, Window sibling, int mode)
+{
+    Window root=None, parent=None, *children=NULL;
+    int nchildren=0, i=0;
+    
+    XQueryTree(ioncore_g.dpy, region_xwindow((WRegion*)par),
+               &root, &parent, &children, (uint*)&nchildren);
+    
+    for(i=0; i<nchildren; i++){
+        WRegion *other=XWINDOW_REGION_OF(children[i]);
+        WRegion *other2=other;
+        
+        while(other2!=NULL && other2!=reg)
+            other2=other2->stacking.above;
+        
+        if(other2==reg){
+            region_restack(other, sibling, mode);
+            sibling=children[i];
+            mode=Above;
+        }
+    }
+    
+    XFree(children);
 }
 
 
@@ -259,34 +332,27 @@ void window_init_sibling_stacking(WWindow *par, Window win)
 EXTL_EXPORT_MEMBER
 void region_lower(WRegion *reg)
 {
-    WRegion *r2;
-    Window w;
+    WRegion *r2=NULL;
+    WWindow *par=REGION_PARENT_CHK(reg, WWindow);
+    Window sibling=None;
+    int mode=Below;
 
-    D(fprintf(stderr, "lower: %p\n", reg));
-    
+    if(par==NULL)
+        return;
+
     r2=reg;
-    while(reg->stacking.above){
-        reg=reg->stacking.above;
-        /* Check for loops in stack hierarchy */
-        assert(reg!=r2);
+    while(r2->stacking.above!=NULL){
+        r2=r2->stacking.above;
+        assert(r2!=reg);
     }
     
-    if(reg->flags&REGION_KEEPONTOP){
-        /* Stack below lowest keepontop window */
-        WWindow *par=REGION_PARENT_CHK(reg, WWindow);
-        if(par==NULL || par->keep_on_top_list==reg)
-            return;
-        w=region_xwindow(par->keep_on_top_list);
-        w=region_restack(reg, w, Below);
-    }else{
-        w=region_restack(reg, None, Below);
+    if(r2->flags&REGION_KEEPONTOP){
+        sibling=find_highest_normal(par);
+        if(sibling!=None)
+            mode=Above;
     }
     
-    /* Restack window that are stacked above this one */
-    for(r2=reg->stacking.below_list; r2!=NULL; r2=r2->stacking.next)
-        w=region_restack(r2, w, Above);
-
-    movetobottom(reg);
+    do_lower_tree(par, r2, sibling, mode);
 }
 
 
