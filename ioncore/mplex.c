@@ -225,6 +225,39 @@ void mplex_unmap(WMPlex *mplex)
 /*}}}*/
 
 
+/*{{{ Focus  */
+
+
+static void mplex_set_focus_to(WMPlex *mplex, bool warp)
+{
+	if(warp)
+		do_move_pointer_to((WRegion*)mplex);
+
+	if(!WMPLEX_MGD_UNVIEWABLE(mplex)){
+		if(mplex->current_input!=NULL){
+			region_set_focus_to((WRegion*)mplex->current_input, FALSE);
+			return;
+		}else if(mplex->current_sub!=NULL){
+			/* Allow workspaces to position cursor to their liking. */
+			warp=(warp && WOBJ_IS(mplex->current_sub, WGenWS));
+			region_set_focus_to(mplex->current_sub, warp);
+			return;
+		}
+	}
+	
+	SET_FOCUS(WMPLEX_WIN(mplex));
+}
+	
+
+static WRegion *mplex_managed_enter_to_focus(WMPlex *mplex, WRegion *reg)
+{
+	return mplex->current_input;
+}
+
+
+/*}}}*/
+
+
 /*{{{ Managed region switching */
 
 
@@ -245,17 +278,15 @@ static bool mplex_do_display_managed(WMPlex *mplex, WRegion *sub)
 	else
 		region_unmap(sub);
 	
-	if(mplex->current_input==NULL){
-		if(REGION_IS_ACTIVE(mplex))
-			set_focus(sub);
-	}
-	
 	/* Many programs will get upset if the visible, although only such,
 	 * client window is not the lowest window in the mplex. xprop/xwininfo
 	 * will return the information for the lowest window. 'netscape -remote'
 	 * will not work at all if there are no visible netscape windows.
 	 */
 	region_lower(sub);
+
+	if(region_may_control_focus((WRegion*)mplex))
+		warp((WRegion*)mplex);
 	
 	return TRUE;
 }
@@ -289,13 +320,7 @@ WRegion *mplex_nth_managed(WMPlex *mplex, uint n)
 
 static void do_switch(WMPlex *mplex, WRegion *sub)
 {
-	if(sub==NULL)
-		return;
-	
-	/* Allow workspaces to warp on switch */
-	if(region_may_control_focus((WRegion*)mplex) && WOBJ_IS(sub, WGenWS))
-		region_goto(sub);
-	else
+	if(sub!=NULL)
 		region_display_sp(sub);
 }
 
@@ -430,37 +455,6 @@ void mplex_attach_tagged(WMPlex *mplex)
 		}
 		region_add_managed_simple((WRegion*)mplex, reg, 0);
 	}
-}
-
-
-/*}}}*/
-
-
-/*{{{ Focus  */
-
-
-void mplex_focus(WMPlex *mplex, bool warp)
-{
-	if(warp)
-		do_move_pointer_to((WRegion*)mplex);
-	
-	if(!WMPLEX_MGD_UNVIEWABLE(mplex)){
-		if(mplex->current_input!=NULL){
-			region_set_focus_to((WRegion*)mplex->current_input, FALSE);
-			return;
-		}else if(mplex->current_sub!=NULL){
-			region_set_focus_to(mplex->current_sub, FALSE);
-			return;
-		}
-	}
-	
-	SET_FOCUS(WMPLEX_WIN(mplex));
-}
-
-
-static WRegion *mplex_managed_enter_to_focus(WMPlex *mplex, WRegion *reg)
-{
-	return mplex->current_input;
 }
 
 
@@ -605,7 +599,7 @@ static DynFunTab mplex_dynfuntab[]={
 	{region_fit, mplex_fit},
 	{(DynFun*)reparent_region, (DynFun*)mplex_reparent},
 
-	{region_set_focus_to, mplex_focus},
+	{region_set_focus_to, mplex_set_focus_to},
 	{(DynFun*)region_managed_enter_to_focus,
 	 (DynFun*)mplex_managed_enter_to_focus},
 	
