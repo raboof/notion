@@ -139,9 +139,9 @@ void genframe_release(WGenFrame *genframe)
 
 
 static const char *tabdrag_safe_funclist[]={
-	"screen_switch_nth",
-	"screen_switch_next",
-	"screen_switch_prev",
+	"mplex_switch_nth",
+	"mplex_switch_next",
+	"mplex_switch_prev",
 	NULL
 };
 
