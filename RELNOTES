@@ -1,4 +1,20 @@
 
+=== ion-3ds-20050227 ===
+
+The most important changes in this release are:
+
+ * So-called "placeholders". With the help of these the positions of
+   full-screen windows are remembered in their original frames, and don't
+   just get inserted after currently active window when returning from 
+   full-screen mode. Under a session manager placeholders are also used
+   to remember the original order of windows.
+
+ * Improved mod_statusbar and ion-statusd communication, and colouring
+   of important/critical meters.
+
+ * A number of small fixes.
+
+
 === ion-3ds-20041104 ===
 
 This monthly snapshot adds a few new and improved features.
