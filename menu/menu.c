@@ -68,10 +68,11 @@ static void get_inner_geom(WMenu *menu, WRectangle *geom)
 }
 
 
-void menu_draw_entries(WMenu *menu, bool complete)
+void menu_draw_entry(WMenu *menu, int i, const WRectangle *igeom,
+					 bool complete)
 {
 	WRectangle geom;
-	int i;
+	int a;
 
 	static const char *attrs[]={
 		"active-selected-normal",
@@ -87,18 +88,28 @@ void menu_draw_entries(WMenu *menu, bool complete)
 	if(menu->entry_brush==NULL)
 		return;
 	
-	get_inner_geom(menu, &geom);
+	geom=*igeom;
 	geom.h=menu->entry_h;
+	geom.y+=i*(menu->entry_h+menu->entry_spacing);
 	
-	for(i=0; i<menu->n_entries; i++){
-		int a=((REGION_IS_ACTIVE(menu) ? 0 : 4)
-			   |(menu->selected_entry==i ? 0 : 2)
-			   |(menu->entries[i].flags&WMENUENTRY_SUBMENU ? 1 : 0));
+	a=((REGION_IS_ACTIVE(menu) ? 0 : 4)
+	   |(menu->selected_entry==i ? 0 : 2)
+	   |(menu->entries[i].flags&WMENUENTRY_SUBMENU ? 1 : 0));
 
-		grbrush_draw_textbox(menu->entry_brush, MENU_WIN(menu), &geom,
-							 menu->entries[i].title, attrs[a], complete);
-		geom.y+=menu->entry_h+menu->entry_spacing;
-	}
+	grbrush_draw_textbox(menu->entry_brush, MENU_WIN(menu), &geom,
+						 menu->entries[i].title, attrs[a], complete);
+}
+
+	
+void menu_draw_entries(WMenu *menu, bool complete)
+{
+	WRectangle igeom;
+	int i;
+	
+	get_inner_geom(menu, &igeom);
+	
+	for(i=0; i<menu->n_entries; i++)
+		menu_draw_entry(menu, i, &igeom, complete);
 }
 
 
@@ -612,11 +623,14 @@ static void menu_set_focus_to(WMenu *menu, bool warp)
 
 static void menu_do_select_nth(WMenu *menu, int n)
 {
-	if(menu->selected_entry==n)
+	int oldn=menu->selected_entry;
+	
+	if(oldn==n)
 		return;
 	
 	if(menu->submenu!=NULL)
 		destroy_obj((WObj*)menu->submenu);
+	
 	assert(menu->submenu==NULL);
 
 	menu->selected_entry=n;
@@ -626,7 +640,15 @@ static void menu_do_select_nth(WMenu *menu, int n)
 		show_sub(menu, n);
 	}
 	
-	menu_draw_entries(menu, TRUE);
+	/* redraw new and old selected entry */ {
+		WRectangle igeom;
+		get_inner_geom(menu, &igeom);
+
+		if(oldn!=-1)
+			menu_draw_entry(menu, oldn, &igeom, TRUE);
+		if(n!=-1)
+			menu_draw_entry(menu, n, &igeom, TRUE);
+	}
 }
 
 
