@@ -189,7 +189,7 @@ WBinding *region_lookup_keybinding(WRegion *reg, const XKeyEvent *ev,
 								   const WSubmapState *sc,
 								   WRegion **binding_owner_ret)
 {
-	WRegBindingInfo *rbind;
+	WRegBindingInfo *rbind=NULL;
 	WBinding *binding=NULL;
 	const WSubmapState *s=NULL;
 	WBindmap *bindmap=NULL;
@@ -211,8 +211,13 @@ WBinding *region_lookup_keybinding(WRegion *reg, const XKeyEvent *ev,
 			bindmap=binding->submap;
 		}
 		
-		if(bindmap==NULL)
+		if(bindmap==NULL){
+			/* There may be no next iteration so we must reset binding here
+			 * because we have not found a proper binding.
+			 */
+			binding=NULL;
 			continue;
+		}
 
 		binding=lookup_binding(bindmap, ACT_KEYPRESS, ev->state, ev->keycode);
 		
