@@ -376,8 +376,8 @@ void region_detach_manager(WRegion *reg)
 	
 	/* Restore activity state to non-parent manager */
 	if(region_may_control_focus(reg)){
-		WRegion *par=REGION_PARENT_CHK(reg, WRegion);
-		if(par!=NULL && mgr!=par && REGION_PARENT_CHK(mgr, WRegion)==par){
+		WRegion *par=region_parent(reg);
+		if(par!=NULL && mgr!=par && region_parent(mgr)==par){
 			/* REGION_ACTIVE shouldn't be set for windowless regions
 			 * but make the parent's active_sub point to it
 			 * nevertheless so that region_may_control_focus can
@@ -420,11 +420,10 @@ bool _region_may_control_focus(WRegion *reg)
 	if(REGION_IS_ACTIVE(reg))
 		return TRUE;
 	
-	par=REGION_PARENT_CHK(reg, WRegion);
+	par=region_parent(reg);
 	
-	if(par==NULL || !REGION_IS_ACTIVE(par)){
+	if(par==NULL || !REGION_IS_ACTIVE(par))
 		return FALSE;
-	}
 	
 	r2=par->active_sub;
 	while(r2!=NULL && r2!=par){
@@ -452,7 +451,7 @@ void region_got_focus(WRegion *reg)
 		D(fprintf(stderr, "got focus (inact) %s [%p]\n", WOBJ_TYPESTR(reg), reg);)
 		reg->flags|=REGION_ACTIVE;
 		
-		r=REGION_PARENT_CHK(reg, WRegion);
+		r=region_parent(reg);
 		if(r!=NULL)
 			r->active_sub=reg;
 		
@@ -519,7 +518,7 @@ bool region_display(WRegion *reg)
 		return region_display_managed(mgr, reg);
 	}
 	
-	preg=REGION_PARENT_CHK(reg, WRegion);
+	preg=region_parent(reg);
 
 	if(preg!=NULL && !region_display(preg))
 		return FALSE;
@@ -570,7 +569,7 @@ bool region_goto(WRegion *reg)
 
 bool region_is_fully_mapped(WRegion *reg)
 {
-	for(; reg!=NULL; reg=REGION_PARENT_CHK(reg, WRegion)){
+	for(; reg!=NULL; reg=region_parent(reg)){
 		if(!REGION_IS_MAPPED(reg))
 			return FALSE;
 	}
@@ -585,7 +584,7 @@ void region_rootgeom(WRegion *reg, int *xret, int *yret)
 	*yret=REGION_GEOM(reg).y;
 	
 	while(1){
-		reg=REGION_PARENT_CHK(reg, WRegion);
+		reg=region_parent(reg);
 		if(reg==NULL)
 			break;
 		*xret+=REGION_GEOM(reg).x;
@@ -619,7 +618,7 @@ void region_rootpos(WRegion *reg, int *xret, int *yret)
 {
 	WRegion *par;
 
-	par=REGION_PARENT_CHK(reg, WRegion);
+	par=region_parent(reg);
 	
 	if(par==NULL || par==reg){
 		*xret=0;
