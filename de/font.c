@@ -11,6 +11,7 @@
 
 #include <string.h>
 
+#include <libtu/objp.h>
 #include <ioncore/common.h>
 #include "font.h"
 #include "fontset.h"
@@ -226,9 +227,9 @@ uint defont_get_text_width(DEFont *font, const char *text, uint len)
 /*{{{ String drawing */
 
 
-void debrush_do_draw_string(DEBrush *brush, Window win, int x, int y,
-                            const char *str, int len, bool needfill, 
-                            DEColourGroup *colours)
+void debrush_do_draw_string_default(DEBrush *brush, Window win, int x, int y,
+                                    const char *str, int len, bool needfill, 
+                                    DEColourGroup *colours)
 {
     GC gc=brush->d->normal_gc;
 
@@ -265,6 +266,15 @@ void debrush_do_draw_string(DEBrush *brush, Window win, int x, int y,
             XDrawImageString(ioncore_g.dpy, win, gc, x, y, str, len);
         }
     }
+}
+
+
+void debrush_do_draw_string(DEBrush *brush, Window win, int x, int y,
+                            const char *str, int len, bool needfill, 
+                            DEColourGroup *colours)
+{
+    CALL_DYN(debrush_do_draw_string, brush, (brush, win, x, y, str, len,
+                                             needfill, colours));
 }
 
 

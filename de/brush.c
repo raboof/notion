@@ -104,18 +104,6 @@ static void create_tab_gcs(DEStyle *style, WRootWin *rootwin)
 }
 
 
-static void init_sub_ind_w(DEStyle *style)
-{
-    if(style->font==NULL){
-        style->sub_ind_w=0;
-    }else{
-        style->sub_ind_w=defont_get_text_width(style->font, 
-                                               DE_SUB_IND, DE_SUB_IND_LEN);
-    }
-    style->mentbrush_data_ok=TRUE;
-}
-
-
 /*}}}*/
 
 
@@ -210,7 +198,7 @@ static void dump_style(DEStyle *style)
 }
 
 
-static bool destyle_init(DEStyle *style, WRootWin *rootwin, const char *name)
+bool destyle_init(DEStyle *style, WRootWin *rootwin, const char *name)
 {
     style->style=scopy(name);
     if(style->style==NULL){
@@ -335,7 +323,7 @@ void de_deinit_styles()
 /*{{{ Brush creation and releasing */
 
 
-static bool debrush_init(DEBrush *brush, DEStyle *style)
+bool debrush_init(DEBrush *brush, DEStyle *style)
 {
     brush->d=style;
     style->usecount++;
@@ -349,7 +337,7 @@ static bool debrush_init(DEBrush *brush, DEStyle *style)
 }
 
 
-static bool detabbrush_init(DETabBrush *brush, DEStyle *style)
+bool detabbrush_init(DETabBrush *brush, DEStyle *style)
 {
     if(!style->tabbrush_data_ok)
         create_tab_gcs(style, style->rootwin);
@@ -357,11 +345,18 @@ static bool detabbrush_init(DETabBrush *brush, DEStyle *style)
 }
 
 
-static bool dementbrush_init(DEMEntBrush *brush, DEStyle *style)
+bool dementbrush_init(DEMEntBrush *brush, DEStyle *style)
 {
-    if(!style->mentbrush_data_ok)
-        init_sub_ind_w(style);
-    return debrush_init(&(brush->debrush), style);
+    if(!debrush_init(&(brush->debrush), style))
+        return FALSE;
+    
+    if(!style->mentbrush_data_ok){
+        style->sub_ind_w=grbrush_get_text_width((GrBrush*)brush, 
+                                                DE_SUB_IND, DE_SUB_IND_LEN);
+        style->mentbrush_data_ok=TRUE;
+    }
+
+    return TRUE;
 }
 
 
@@ -482,16 +477,6 @@ void destyle_get_border_widths(DEStyle *style, GrBorderWidths *bdw)
 }
 
 
-void destyle_get_mentbrush_border_widths(DEStyle *style, GrBorderWidths *bdw)
-{
-    if(!style->mentbrush_data_ok)
-        init_sub_ind_w(style);
-    destyle_get_border_widths(style, bdw);
-    bdw->right+=style->sub_ind_w;
-    bdw->tb_iright+=style->sub_ind_w;
-}
-
-
 void debrush_get_border_widths(DEBrush *brush, GrBorderWidths *bdw)
 {
     destyle_get_border_widths(brush->d, bdw);
@@ -500,7 +485,9 @@ void debrush_get_border_widths(DEBrush *brush, GrBorderWidths *bdw)
 
 void dementbrush_get_border_widths(DEMEntBrush *brush, GrBorderWidths *bdw)
 {
-    destyle_get_mentbrush_border_widths(brush->debrush.d, bdw);
+    destyle_get_border_widths(brush->debrush.d, bdw);
+    bdw->right+=brush->debrush.d->sub_ind_w;
+    bdw->tb_iright+=brush->debrush.d->sub_ind_w;
 }
 
 
@@ -540,6 +527,7 @@ static DynFunTab debrush_dynfuntab[]={
     {grbrush_draw_border, debrush_draw_border},
     {grbrush_get_border_widths, debrush_get_border_widths},
     {grbrush_draw_string, debrush_draw_string},
+    {debrush_do_draw_string, debrush_do_draw_string_default},
     {grbrush_get_font_extents, debrush_get_font_extents},
     {(DynFun*)grbrush_get_text_width, (DynFun*)debrush_get_text_width},
     {grbrush_draw_textbox, debrush_draw_textbox},

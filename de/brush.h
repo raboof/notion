@@ -119,20 +119,27 @@ DECLCLASS(DEMEntBrush){
 
 /*{{{ Initilisation/deinitialisation */
 
+extern bool destyle_init(DEStyle *style, WRootWin *rootwin, const char *name);
+extern void destyle_deinit(DEStyle *style);
 extern DEStyle *de_create_style(WRootWin *rootwin, const char *name);
-extern DEStyle *de_get_style(WRootWin *rootwin, const char *name);
+
+extern bool debrush_init(DEBrush *brush, DEStyle *style);
+extern bool dementbrush_init(DEMEntBrush *brush, DEStyle *style);
+extern bool detabbrush_init(DETabBrush *brush, DEStyle *style);
+extern void debrush_deinit(DEBrush *brush);
+extern void detabbrush_deinit(DETabBrush *brush);
+extern void dementbrush_deinit(DEMEntBrush *brush);
 extern DEBrush *create_debrush(DEStyle *style);
 extern DETabBrush *create_detabbrush(DEStyle *style);
 extern DEMEntBrush *create_dementbrush(DEStyle *style);
 
+extern DEStyle *de_get_style(WRootWin *rootwin, const char *name);
 extern DEBrush *de_get_brush(WRootWin *rootwin, Window win, 
                              const char *style);
 
 extern DEBrush *debrush_get_slave(DEBrush *brush, WRootWin *rootwin, 
                                   Window win, const char *style);
 
-extern void destyle_deinit(DEStyle *style);
-extern void debrush_deinit(DEBrush *brush);
 extern void debrush_release(DEBrush *brush, Window win);
 
 extern void de_reset();

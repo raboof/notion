@@ -311,7 +311,7 @@ static void debrush_do_draw_textbox(DEBrush *brush, Window win,
         grbrush_get_font_extents(&(brush->grbrush), &fnte);
         
         if(brush->d->textalign!=DEALIGN_LEFT){
-            tw=debrush_get_text_width(brush, text, len);
+            tw=grbrush_get_text_width((GrBrush*)brush, text, len);
             
             if(brush->d->textalign==DEALIGN_CENTER)
                 tx=geom->x+bdw.left+(geom->w-bdw.left-bdw.right-tw)/2;

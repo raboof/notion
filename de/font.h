@@ -34,6 +34,11 @@ extern void debrush_draw_string(DEBrush *brush, Window win, int x, int y,
 extern void debrush_do_draw_string(DEBrush *brush, Window win, int x, int y,
                                    const char *str, int len, bool needfill, 
                                    DEColourGroup *colours);
+extern void debrush_do_draw_string_default(DEBrush *brush, Window win,
+                                           int x, int y,
+                                           const char *str, int len, 
+                                           bool needfill, 
+                                           DEColourGroup *colours);
 
 extern void debrush_get_font_extents(DEBrush *brush, GrFontExtents *fnte);
 
