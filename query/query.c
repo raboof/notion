@@ -20,7 +20,6 @@
 #include <ioncore/focus.h>
 #include <ioncore/names.h>
 #include <ioncore/genws.h>
-#include <ioncore/genframe.h>
 #include <ioncore/reginfo.h>
 #include <ioncore/extl.h>
 #include "query.h"
