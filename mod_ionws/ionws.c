@@ -265,6 +265,13 @@ void ionws_manage_stdisp(WIonWS *ws, WRegion *stdisp, int corner,
     
     split_tree_rqgeom(ws->split_tree, ws->stdispnode, flags, &dg, NULL);
     
+    if(stdisp->geom.x!=ws->stdispnode->geom.x ||
+       stdisp->geom.y!=ws->stdispnode->geom.y ||
+       stdisp->geom.w!=ws->stdispnode->geom.w ||
+       stdisp->geom.h!=ws->stdispnode->geom.h){
+        region_fit(stdisp, &(ws->stdispnode->geom), REGION_FIT_EXACT);
+    }
+    
     if(mcf && act)
         region_set_focus(stdisp);
 }

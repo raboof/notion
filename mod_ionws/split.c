@@ -836,7 +836,7 @@ void split_tree_rqgeom(WSplit *root, WSplit *sub, int flags,
     split_resize_rootward(sub, &geom, hany, vany, 
                           flags&REGION_RQGEOM_TRYONLY, geomret);
 }
-                          
+
 
 /*}}}*/
 
