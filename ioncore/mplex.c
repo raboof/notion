@@ -488,6 +488,85 @@ static WRegion *mplex_control_managed_focus(WMPlex *mplex, WRegion *reg)
 /*{{{ Managed region switching */
 
 
+/*EXTL_DOC
+ * If var \var{reg} is on the l2 list of \var{mplex} and currently shown, 
+ * hide it. if \var{reg} is nil, hide all objects on the l2 list.
+ */
+EXTL_EXPORT_MEMBER
+bool mplex_l2_hide(WMPlex *mplex, WRegion *reg)
+{
+    WRegion *reg2;
+    WRegion *toact=NULL;
+    bool changes=FALSE;
+    bool fixcurrent=FALSE;
+    bool mcf=region_may_control_focus((WRegion*)mplex);
+    
+    FOR_ALL_MANAGED_ON_LIST(mplex->l2_list, reg2){
+        if(!REGION_IS_MAPPED(reg2))
+            continue;
+        if(reg==NULL || reg==reg2){
+            if(reg2==mplex->l2_current){
+                fixcurrent=TRUE;
+                mplex->l2_current=NULL;
+            }
+            changes=TRUE;
+            region_unmap(reg2);
+        }else{
+            toact=reg2;
+        }
+    }
+    
+    if(fixcurrent){
+        if(toact!=NULL){
+            mplex->l2_current=toact;
+            if(mcf)
+                mplex_display_managed(mplex, toact);
+        }else if(mcf){
+            region_set_focus((WRegion*)mplex);
+        }
+    }
+    
+    return changes;
+}
+
+
+/*EXTL_DOC
+ * If var \var{reg} is on the l2 list of \var{mplex} and currently hidden, 
+ * display it. if \var{reg} is nil, display all objects on the l2 list.
+ */
+EXTL_EXPORT_MEMBER
+bool mplex_l2_show(WMPlex *mplex, WRegion *reg)
+{
+    WRegion *reg2;
+    WRegion *toact=NULL;
+    bool fixcurrent=TRUE;
+    bool changes=FALSE;
+    bool mcf=region_may_control_focus((WRegion*)mplex);
+    
+    FOR_ALL_MANAGED_ON_LIST(mplex->l2_list, reg2){
+        if(REGION_IS_MAPPED(reg2)){
+            if(reg2==mplex->l2_current)
+                fixcurrent=FALSE;
+            continue;
+        }
+        fixcurrent=TRUE;
+        if(reg==NULL || reg==reg2){
+            toact=reg2;
+            changes=TRUE;
+            region_map(reg2);
+        }
+    }
+    
+    if(fixcurrent && toact!=NULL){
+        mplex->l2_current=toact;
+        if(mcf)
+            region_set_focus(toact);
+    }
+    
+    return changes;
+}
+
+
 static bool mplex_do_display_managed(WMPlex *mplex, WRegion *sub)
 {
     bool mapped;
