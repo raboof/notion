@@ -13,8 +13,7 @@ ext_statusbar.set{
     -- updating rather often and can be distracting)
     --date_format='%c',
 
-    -- Update interval in seconds. This should divide 60, or it will
-    -- get adjusted.
+    -- Update interval in seconds
     update_interval=10,
     
     -- Mail checking interval
@@ -27,7 +26,7 @@ ext_statusbar.set{
     --   %mail_new    new mail count
     --   %mail_unread unread mail count
     --   %mail_total  total mail count
-    template="%date || load: %load || mail: %mail_new/%mail_total",
+    template="[ %date || load: %load || mail: %mail_new/%mail_total ]",
 }
 
 
