@@ -402,9 +402,8 @@ bool ioncore_init(const char *display, bool onescreen)
 	
 	init_hooks();
 	init_classes();
-	trap_signals();
-	load_cursors();	
 	init_bindings();
+	load_cursors();	
 	
 	for(i=dscr; i<nscr; i++)
 		scr=manage_screen(i);
@@ -414,6 +413,8 @@ bool ioncore_init(const char *display, bool onescreen)
 			warn("Could not find a screen to manage.");
 		return FALSE;
 	}
+
+	trap_signals();
 	
 	return TRUE;
 }
