@@ -542,7 +542,7 @@ EXTL_EXPORT
 void genframe_attach_tagged(WGenFrame *genframe)
 {
 	WRegion *reg;
-	
+
 	while((reg=tag_take_first())!=NULL){
 		if(region_is_ancestor((WRegion*)genframe, reg)){
 			warn("Cannot attach tagged region: ancestor");

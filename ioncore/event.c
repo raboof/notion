@@ -24,6 +24,7 @@
 /*{{{ Time updating */
 
 #define CHKEV(E, T) case E: tm=((T*)ev)->time; break;
+#define CLOCK_SKEW_MS 30000
 
 static Time last_timestamp=CurrentTime;
 
@@ -47,7 +48,8 @@ void update_timestamp(XEvent *ev)
 		return;
 	}
 
-	last_timestamp=tm;
+	if(tm>last_timestamp || last_timestamp - tm > CLOCK_SKEW_MS)
+		last_timestamp=tm;
 }
 
 
