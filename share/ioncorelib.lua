@@ -33,10 +33,10 @@ SECOND_MOD=""
 -- When the key press action \var{keyspec} occurs, Ioncore will wait for
 -- a further key presse and act according to the submap.
 -- For details, see section \ref{sec:bindings}.
-function submap(keyspec, list)
+function submap(kcb_, list)
     if not list then
-        return function(list)
-                   return submap(keyspec, list)
+        return function(lst)
+                   return submap(kcb_, lst)
                end
     end
     return {action = "kpress", kcb = kcb_, submap = list}
