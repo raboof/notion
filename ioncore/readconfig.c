@@ -120,7 +120,10 @@ bool ioncore_set_userdirs(const char *appname)
 	return (fails==0);
 }
 
-
+/*EXLT_DOC
+ * Get user configuration file directory.
+ */
+EXTL_EXPORT
 const char* ioncore_userdir()
 {
 	return userdir;
@@ -148,6 +151,22 @@ bool ioncore_set_sessiondir(const char *session)
 	}
 	
 	return ret;
+}
+
+
+/*EXTL_DOC
+ * Get all directories on search path.
+ */
+EXTL_EXPORT
+ExtlTab ioncore_searchpath()
+{
+	int i;
+	ExtlTab tab=extl_create_table();
+	
+	for(i=0; i<n_scriptpaths; i++)
+		extl_table_seti_s(tab, i+1, scriptpaths[i]);
+	
+	return tab;
 }
 
 
