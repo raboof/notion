@@ -652,7 +652,7 @@ static WRegion *clientwin_do_attach_transient(WClientWin *cwin,
         region_unmap(reg);
     
     if(region_may_control_focus((WRegion*)cwin))
-        region_set_focus(reg);
+        region_warp(reg);
     
     return reg;
 }
@@ -678,7 +678,7 @@ static void clientwin_managed_remove(WClientWin *cwin, WRegion *transient)
         if(reg==NULL)
             reg=&cwin->region;
         
-        region_set_focus(reg);
+        region_warp(reg);
     }
 }
 
