@@ -1,6 +1,6 @@
 /*
  * ion/floatws/floatframe.c
- *
+n *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  *
  * Ion is free software; you can redistribute it and/or modify it under
@@ -35,6 +35,7 @@ static bool floatframe_init(WFloatFrame *frame, WWindow *parent,
 							const WRectangle *geom)
 {
 	frame->bar_w=geom->w;
+	frame->sticky=FALSE;
 	
 	if(!genframe_init((WGenFrame*)frame, parent, geom))
 		return FALSE;
@@ -444,6 +445,32 @@ void floatframe_toggle_shade(WFloatFrame *frame)
 	WRectangle geom;
 	floatframe_bar_geom(frame, &geom);
 	genframe_do_toggle_shade((WGenFrame*)frame, geom.h);
+}
+
+
+/*EXTL_DOC
+ * Toggle \var{frame} stickyness. Only works across frames on 
+ * \type{WFloatWS} that have the same \type{WMPlex} parent.
+ */
+EXTL_EXPORT_MEMBER
+void floatframe_toggle_sticky(WFloatFrame *frame)
+{
+	if(frame->sticky){
+		objlist_remove(&floatws_sticky_list, (WObj*)frame);
+		frame->sticky=FALSE;
+	}else{
+		objlist_insert(&floatws_sticky_list, (WObj*)frame);
+		frame->sticky=TRUE;
+	}
+}
+
+/*EXTL_DOC
+ * Is \var{frame} sticky?
+ */
+EXTL_EXPORT_MEMBER
+bool floatframe_is_sticky(WFloatFrame *frame)
+{
+	return frame->sticky;
 }
 
 

@@ -26,6 +26,7 @@ DECLOBJ(WFloatFrame){
 	
 	double bar_max_width_q;
 	int tab_min_w;
+	bool sticky;
 };
 
 

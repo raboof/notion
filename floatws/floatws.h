@@ -18,6 +18,7 @@
 #include <ioncore/genws.h>
 #include <ioncore/manage.h>
 #include <ioncore/extl.h>
+#include <ioncore/objlist.h>
 
 INTROBJ(WFloatWS);
 
@@ -41,5 +42,7 @@ extern bool add_clientwin_floatws_transient(WClientWin *cwin,
 											const WManageParams *param);
 
 extern WRegion* floatws_current(WFloatWS *floatws);
+
+extern WObjList *floatws_sticky_list;
 
 #endif /* ION_FLOATWS_FLOATWS_H */

@@ -34,6 +34,9 @@
 #include "main.h"
 
 
+WObjList *floatws_sticky_list=NULL;
+
+
 /*{{{ region dynfun implementations */
 
 
@@ -76,13 +79,39 @@ static bool reparent_floatws(WFloatWS *ws, WWindow *parent,
 }
 
 
+static void move_sticky(WFloatWS *ws)
+{
+	WRegion *reg, *par=REGION_PARENT(ws);
+	
+	if(par==NULL || !WOBJ_IS(par, WMPlex))
+		return;
+	
+	ITERATE_OBJLIST(WRegion*, reg, floatws_sticky_list){
+		WFloatWS *rmgr;
+		if(REGION_PARENT(reg)!=par)
+			continue;
+		rmgr=REGION_MANAGER_CHK(reg, WFloatWS);
+		if(rmgr==NULL)
+			continue;
+		if(rmgr->current_managed==reg)
+			rmgr->current_managed=NULL;
+		region_unset_manager(reg, (WRegion*)rmgr, &(rmgr->managed_list));
+		region_set_manager(reg, (WRegion*)ws, &(ws->managed_list));
+		if(REGION_IS_ACTIVE(reg) && ws->current_managed==NULL)
+			ws->current_managed=reg;
+	}
+}
+
+
 static void floatws_map(WFloatWS *ws)
 {
 	WRegion *reg;
 
+	move_sticky(ws);
+
 	MARK_REGION_MAPPED(ws);
 	XMapWindow(wglobal.dpy, ws->dummywin);
-	
+
 	FOR_ALL_MANAGED_ON_LIST(ws->managed_list, reg){
 		region_map(reg);
 	}
