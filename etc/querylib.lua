@@ -394,7 +394,7 @@ QueryLib.query_ssh=QueryLib.make_execwith_fn(
 -- This query asks for a manual page to display. It uses the command
 -- \file{ion-man} to run \file{man} in a terminal emulator. By customizing
 -- this script it is possible use some other man page viewer. To enable
--- tab-completion you must list paths with manuals in the stable
+-- tab-completion you must list paths with manuals in the table
 -- \var{query_man_path}. For example,
 --\begin{verbatim}
 --query_man_path = {
