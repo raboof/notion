@@ -352,7 +352,7 @@ static WSplit *load_splitfloat(WAutoWS *ws, const WRectangle *geom,
         brg.y=geom->y+geom->h-brs;
     }
 
-    splitfloat_update_panewins(split, &tlg, &brg);
+    splitfloat_update_handles(split, &tlg, &brg);
     
     if(extl_table_gets_t(tab, "tl", &subtab)){
         WRectangle g=tlg;

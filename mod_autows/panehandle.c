@@ -1,5 +1,5 @@
 /*
- * ion/autows/panewin.c
+ * ion/autows/panehandle.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -18,14 +18,14 @@
 #include <ioncore/event.h>
 #include <ioncore/gr.h>
 #include <ioncore/regbind.h>
-#include "panewin.h"
+#include "panehandle.h"
 #include "main.h"
 
 
 /*{{{ Init/deinit */
 
 
-static void panewin_getbrush(WPaneWin *pwin)
+static void panehandle_getbrush(WPaneHandle *pwin)
 {
     GrBrush *brush=gr_get_brush(region_rootwin_of((WRegion*)pwin),
                                 pwin->wwin.win, "pane");
@@ -43,7 +43,7 @@ static void panewin_getbrush(WPaneWin *pwin)
 }
 
 
-bool panewin_init(WPaneWin *pwin, WWindow *parent, const WFitParams *fp)
+bool panehandle_init(WPaneHandle *pwin, WWindow *parent, const WFitParams *fp)
 {
     pwin->brush=NULL;
     pwin->bline=GR_BORDERLINE_NONE;
@@ -52,7 +52,7 @@ bool panewin_init(WPaneWin *pwin, WWindow *parent, const WFitParams *fp)
     if(!window_init(&(pwin->wwin), parent, fp))
         return FALSE;
     
-    panewin_getbrush(pwin);
+    panehandle_getbrush(pwin);
     
     if(pwin->brush==NULL){
         GrBorderWidths bdw=GR_BORDER_WIDTHS_INIT;
@@ -65,13 +65,13 @@ bool panewin_init(WPaneWin *pwin, WWindow *parent, const WFitParams *fp)
 }
 
 
-WPaneWin *create_panewin(WWindow *parent, const WFitParams *fp)
+WPaneHandle *create_panehandle(WWindow *parent, const WFitParams *fp)
 {
-    CREATEOBJ_IMPL(WPaneWin, panewin, (p, parent, fp));
+    CREATEOBJ_IMPL(WPaneHandle, panehandle, (p, parent, fp));
 }
 
 
-void panewin_deinit(WPaneWin *pwin)
+void panehandle_deinit(WPaneHandle *pwin)
 {
     assert(pwin->splitfloat==NULL);
     
@@ -90,14 +90,14 @@ void panewin_deinit(WPaneWin *pwin)
 /*{{{ Drawing */
 
 
-static void panewin_updategr(WPaneWin *pwin)
+static void panehandle_updategr(WPaneHandle *pwin)
 {
-    panewin_getbrush(pwin);
+    panehandle_getbrush(pwin);
     region_updategr_default((WRegion*)pwin);
 }
 
 
-static void panewin_draw(WPaneWin *pwin, bool complete)
+static void panehandle_draw(WPaneHandle *pwin, bool complete)
 {
     WRectangle g;
     
@@ -120,14 +120,14 @@ static void panewin_draw(WPaneWin *pwin, bool complete)
 /*{{{ The class */
 
 
-static DynFunTab panewin_dynfuntab[]={
-    {region_updategr, panewin_updategr},
-    {window_draw, panewin_draw},
+static DynFunTab panehandle_dynfuntab[]={
+    {region_updategr, panehandle_updategr},
+    {window_draw, panehandle_draw},
     END_DYNFUNTAB,
 };
 
 
-IMPLCLASS(WPaneWin, WWindow, panewin_deinit, panewin_dynfuntab);
+IMPLCLASS(WPaneHandle, WWindow, panehandle_deinit, panehandle_dynfuntab);
 
 
 /*}}}*/

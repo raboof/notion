@@ -21,7 +21,7 @@
 #include <mod_ionws/split.h>
 #include "splitext.h"
 #include "unusedwin.h"
-#include "panewin.h"
+#include "panehandle.h"
 
 
 #define GEOM(X) (((WSplit*)(X))->geom)
@@ -86,17 +86,13 @@ static void splitfloat_set_borderlines(WSplitFloat *split)
 {
     int dir=split->ssplit.dir;
     
-    if(split->tlpwin!=NULL){
-        split->tlpwin->bline=(dir==SPLIT_HORIZONTAL
-                              ? GR_BORDERLINE_RIGHT
-                              : GR_BORDERLINE_BOTTOM);
-    }
+    split->tlpwin->bline=(dir==SPLIT_HORIZONTAL
+                          ? GR_BORDERLINE_RIGHT
+                          : GR_BORDERLINE_BOTTOM);
 
-    if(split->brpwin!=NULL){
-        split->brpwin->bline=(dir==SPLIT_HORIZONTAL
-                              ? GR_BORDERLINE_LEFT
-                              : GR_BORDERLINE_TOP);
-    }
+    split->brpwin->bline=(dir==SPLIT_HORIZONTAL
+                          ? GR_BORDERLINE_LEFT
+                          : GR_BORDERLINE_TOP);
 }
 
 
@@ -108,32 +104,36 @@ bool splitfloat_init(WSplitFloat *split, const WRectangle *geom,
     
     assert(par!=NULL);
 
-    if(!splitsplit_init(&(split->ssplit), geom, dir))
-        return FALSE;
-    
     fp.g=*geom;
     fp.mode=REGION_FIT_EXACT;
-    split->tlpwin=create_panewin(par, &fp);
-    if(split->tlpwin!=NULL){
-        split->tlpwin->splitfloat=split;
-        ionws_managed_add((WIonWS*)ws, (WRegion*)split->tlpwin);
-    }
+    split->tlpwin=create_panehandle(par, &fp);
+    if(split->tlpwin==NULL)
+        return FALSE;
 
     fp.g=*geom;
     fp.mode=REGION_FIT_EXACT;
-    split->brpwin=create_panewin(par, &fp);
-    if(split->brpwin!=NULL){
-        split->brpwin->splitfloat=split;
-        ionws_managed_add((WIonWS*)ws, (WRegion*)split->brpwin);
+    split->brpwin=create_panehandle(par, &fp);
+    if(split->brpwin==NULL){
+        destroy_obj((Obj*)split->tlpwin);
+        return FALSE;
     }
+    
+    if(!splitsplit_init(&(split->ssplit), geom, dir)){
+        destroy_obj((Obj*)split->brpwin);
+        destroy_obj((Obj*)split->tlpwin);
+        return FALSE;
+    }
+
+    split->tlpwin->splitfloat=split;
+    ionws_managed_add((WIonWS*)ws, (WRegion*)split->tlpwin);
+    split->brpwin->splitfloat=split;
+    ionws_managed_add((WIonWS*)ws, (WRegion*)split->brpwin);
     
     splitfloat_set_borderlines(split);
 
     if(REGION_IS_MAPPED(ws)){
-        if(split->tlpwin!=NULL)
-            region_map((WRegion*)(split->tlpwin));
-        if(split->brpwin!=NULL)
-            region_map((WRegion*)(split->brpwin));
+        region_map((WRegion*)(split->tlpwin));
+        region_map((WRegion*)(split->brpwin));
     }
     
     return TRUE;
@@ -172,14 +172,14 @@ void splitpane_deinit(WSplitPane *split)
 void splitfloat_deinit(WSplitFloat *split)
 {
     if(split->tlpwin!=NULL){
-        WPaneWin *tmp=split->tlpwin;
+        WPaneHandle *tmp=split->tlpwin;
         split->tlpwin=NULL;
         tmp->splitfloat=NULL;
         destroy_obj((Obj*)tmp);
     }
 
     if(split->brpwin!=NULL){
-        WPaneWin *tmp=split->brpwin;
+        WPaneHandle *tmp=split->brpwin;
         split->brpwin=NULL;
         tmp->splitfloat=NULL;
         destroy_obj((Obj*)tmp);
@@ -313,20 +313,16 @@ static void splitfloat_restack(WSplitFloat *split, Window other, int mode)
 
 static void splitfloat_map(WSplitFloat *split)
 {
-    if(split->tlpwin!=NULL)
-        region_map((WRegion*)(split->tlpwin));
-    if(split->brpwin!=NULL)
-        region_map((WRegion*)(split->brpwin));
+    region_map((WRegion*)(split->tlpwin));
+    region_map((WRegion*)(split->brpwin));
     splitinner_forall((WSplitInner*)split, split_map);
 }
 
 
 static void splitfloat_unmap(WSplitFloat *split)
 {
-    if(split->tlpwin!=NULL)
-        region_unmap((WRegion*)(split->tlpwin));
-    if(split->brpwin!=NULL)
-        region_unmap((WRegion*)(split->brpwin));
+    region_unmap((WRegion*)(split->tlpwin));
+    region_unmap((WRegion*)(split->brpwin));
     splitinner_forall((WSplitInner*)split, split_unmap);
 }
 
@@ -369,54 +365,46 @@ static void splitfloat_reparent(WSplitFloat *split, WWindow *target)
 
 void splitfloat_tl_pwin_to_cnt(WSplitFloat *split, WRectangle *g)
 {
-    if(split->tlpwin!=NULL){
-        if(split->ssplit.dir==SPLIT_HORIZONTAL)
-            g->w=maxof(1, g->w-split->tlpwin->bdw.right);
-        else
-            g->h=maxof(1, g->h-split->tlpwin->bdw.bottom);
-    }
+    if(split->ssplit.dir==SPLIT_HORIZONTAL)
+        g->w=maxof(1, g->w-split->tlpwin->bdw.right);
+    else
+        g->h=maxof(1, g->h-split->tlpwin->bdw.bottom);
 }
 
 
 void splitfloat_br_pwin_to_cnt(WSplitFloat *split, WRectangle *g)
 {
-    if(split->brpwin!=NULL){
-        if(split->ssplit.dir==SPLIT_HORIZONTAL){
-            int delta=split->tlpwin->bdw.left;
-            g->w=maxof(1, g->w-delta);
-            g->x+=delta;
-        }else{
-            int delta=split->tlpwin->bdw.top;
-            g->h=maxof(1, g->h-delta);
-            g->y+=delta;
-        }
+    if(split->ssplit.dir==SPLIT_HORIZONTAL){
+        int delta=split->tlpwin->bdw.left;
+        g->w=maxof(1, g->w-delta);
+        g->x+=delta;
+    }else{
+        int delta=split->tlpwin->bdw.top;
+        g->h=maxof(1, g->h-delta);
+        g->y+=delta;
     }
 }
 
 
 void splitfloat_tl_cnt_to_pwin(WSplitFloat *split, WRectangle *g)
 {
-    if(split->tlpwin!=NULL){
-        if(split->ssplit.dir==SPLIT_HORIZONTAL)
-            g->w=maxof(1, g->w+split->tlpwin->bdw.right);
-        else
-            g->h=maxof(1, g->h+split->tlpwin->bdw.bottom);
-    }
+    if(split->ssplit.dir==SPLIT_HORIZONTAL)
+        g->w=maxof(1, g->w+split->tlpwin->bdw.right);
+    else
+        g->h=maxof(1, g->h+split->tlpwin->bdw.bottom);
 }
 
 
 void splitfloat_br_cnt_to_pwin(WSplitFloat *split, WRectangle *g)
 {
-    if(split->brpwin!=NULL){
-        if(split->ssplit.dir==SPLIT_HORIZONTAL){
-            int delta=split->tlpwin->bdw.left;
-            g->w=maxof(1, g->w+delta);
-            g->x-=delta;
-        }else{
-            int delta=split->tlpwin->bdw.top;
-            g->h=maxof(1, g->h+delta);
-            g->y-=delta;
-        }
+    if(split->ssplit.dir==SPLIT_HORIZONTAL){
+        int delta=split->tlpwin->bdw.left;
+        g->w=maxof(1, g->w+delta);
+        g->x-=delta;
+    }else{
+        int delta=split->tlpwin->bdw.top;
+        g->h=maxof(1, g->h+delta);
+        g->y-=delta;
     }
 }
 
@@ -476,14 +464,14 @@ static int splitfloat_get_handle(WSplitFloat *split, int dir,
         return 0;
 
     if(dir==SPLIT_VERTICAL){
-        if(other==split->ssplit.tl && split->tlpwin!=NULL)
+        if(other==split->ssplit.tl)
             return split->tlpwin->bdw.right;
-        else if(other==split->ssplit.br && split->brpwin!=NULL)
+        else if(other==split->ssplit.br)
             return split->tlpwin->bdw.left;
     }else{
-        if(other==split->ssplit.tl && split->tlpwin!=NULL)
+        if(other==split->ssplit.tl)
             return split->tlpwin->bdw.bottom;
-        else if(other==split->ssplit.br && split->brpwin!=NULL)
+        else if(other==split->ssplit.br)
             return split->tlpwin->bdw.top;
     }
     
@@ -554,13 +542,23 @@ static void splitpane_do_resize(WSplitPane *pane, const WRectangle *ng,
 }
 
 
-void splitfloat_update_panewins(WSplitFloat *split, const WRectangle *tlg,
-                                const WRectangle *brg)
+void splitfloat_update_handles(WSplitFloat *split, const WRectangle *tlg_,
+                               const WRectangle *brg_)
 {
-    if(split->tlpwin!=NULL)
-        region_fit((WRegion*)split->tlpwin, tlg, REGION_FIT_EXACT);
-    if(split->brpwin!=NULL)
-        region_fit((WRegion*)split->brpwin, brg, REGION_FIT_EXACT);
+    WRectangle tlg=*tlg_, brg=*brg_;
+    
+    if(split->ssplit.dir==SPLIT_HORIZONTAL){
+        tlg.w=split->tlpwin->bdw.right;
+        tlg.x=tlg_->x+tlg_->w-tlg.w;
+        brg.w=split->brpwin->bdw.left;
+    }else{
+        tlg.h=split->tlpwin->bdw.bottom;
+        tlg.y=tlg_->y+tlg_->h-tlg.h;
+        brg.h=split->brpwin->bdw.top;
+    }
+    
+    region_fit((WRegion*)split->tlpwin, &tlg, REGION_FIT_EXACT);
+    region_fit((WRegion*)split->brpwin, &brg, REGION_FIT_EXACT);
 }
 
 
@@ -654,7 +652,7 @@ static void splitfloat_do_resize(WSplitFloat *split, const WRectangle *ng,
 
     GEOM(split)=*ng;
 
-    splitfloat_update_panewins(split, &ntlg, &nbrg);
+    splitfloat_update_handles(split, &ntlg, &nbrg);
 
     splitfloat_tl_pwin_to_cnt(split, &ntlg);
     split_do_resize(split->ssplit.tl, &ntlg, hprimn, vprimn, FALSE);
@@ -788,10 +786,10 @@ static void splitfloat_do_rqsize(WSplitFloat *split, WSplit *node,
         GEOM(p)=pg;
 
         if(thisnode==PRIMN_TL){
-            splitfloat_update_panewins(split, &nng, &nog);
+            splitfloat_update_handles(split, &nng, &nog);
             splitfloat_br_pwin_to_cnt(split, &nog);
         }else{
-            splitfloat_update_panewins(split, &nog, &nng);
+            splitfloat_update_handles(split, &nog, &nng);
             splitfloat_tl_pwin_to_cnt(split, &nog);
         }
             

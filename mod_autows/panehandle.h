@@ -1,5 +1,5 @@
 /*
- * ion/autows/panewin.h
+ * ion/autows/panehandle.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -9,17 +9,17 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_AUTOWS_PANEWIN_H
-#define ION_AUTOWS_PANEWIN_H
+#ifndef ION_AUTOWS_PANEHANDLE_H
+#define ION_AUTOWS_PANEHANDLE_H
 
 #include <ioncore/common.h>
 #include <ioncore/gr.h>
 
-INTRCLASS(WPaneWin);
+INTRCLASS(WPaneHandle);
 
 #include "splitext.h"
 
-DECLCLASS(WPaneWin){
+DECLCLASS(WPaneHandle){
     WWindow wwin;
     GrBrush *brush;
     GrBorderLine bline;
@@ -27,8 +27,8 @@ DECLCLASS(WPaneWin){
     WSplitFloat *splitfloat;
 };
 
-extern bool panewin_init(WPaneWin *pwin, 
-                         WWindow *parent, const WFitParams *fp);
-extern WPaneWin *create_panewin(WWindow *parent, const WFitParams *fp);
+extern bool panehandle_init(WPaneHandle *pwin, 
+                            WWindow *parent, const WFitParams *fp);
+extern WPaneHandle *create_panehandle(WWindow *parent, const WFitParams *fp);
 
-#endif /* ION_AUTOWS_PANEWIN_H */
+#endif /* ION_AUTOWS_PANEHANDLE_H */

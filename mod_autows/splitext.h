@@ -21,7 +21,7 @@ INTRCLASS(WSplitPane);
 INTRCLASS(WSplitFloat);
 
 #include "autows.h"
-#include "panewin.h"
+#include "panehandle.h"
 #include "autows.h"
 
 DECLCLASS(WSplitUnused){
@@ -36,7 +36,7 @@ DECLCLASS(WSplitPane){
 
 DECLCLASS(WSplitFloat){
     WSplitSplit ssplit;
-    WPaneWin *tlpwin, *brpwin;
+    WPaneHandle *tlpwin, *brpwin;
 };
 
 extern bool splitunused_init(WSplitUnused *split, const WRectangle *geom,
@@ -59,9 +59,9 @@ extern void splitfloat_deinit(WSplitFloat *split);
 extern const char *splitpane_get_marker(WSplitPane *pane);
 extern bool splitpane_set_marker(WSplitPane *pane, const char *s);
 
-extern void splitfloat_update_panewins(WSplitFloat *split, 
-                                       const WRectangle *tlg,
-                                       const WRectangle *brg);
+extern void splitfloat_update_handles(WSplitFloat *split, 
+                                      const WRectangle *tlg,
+                                      const WRectangle *brg);
 extern void splitfloat_tl_pwin_to_cnt(WSplitFloat *split, WRectangle *g);
 extern void splitfloat_br_pwin_to_cnt(WSplitFloat *split, WRectangle *g);
 extern void splitfloat_tl_cnt_to_pwin(WSplitFloat *split, WRectangle *g);
