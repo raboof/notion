@@ -12,7 +12,7 @@ BUILDING AND INSTALLING
 1. Make sure you have the following tools and libraries installed:
 
     * GNU make
-    * Libtool and libltdl. Version 1.4.3 or newer is required; ancient
+    * Libtool and libltdl. Version 1.4.x or newer is required; ancient
       1.3.x will not work. Users of many of the *BSD:s will have to
       manually install a recent libtool because even though a lot of apps
       that use libltdl require 1.4.3 even more recent than libtool-1.4.3
