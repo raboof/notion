@@ -75,8 +75,6 @@ bool splitfloat_init(WSplitFloat *split, const WRectangle *geom,
 
     split->tlpwin->splitfloat=split;
     split->brpwin->splitfloat=split;
-    /*ionws_managed_add((WIonWS*)ws, (WRegion*)split->tlpwin);
-    ionws_managed_add((WIonWS*)ws, (WRegion*)split->brpwin);*/
     
     splitfloat_set_borderlines(split);
 

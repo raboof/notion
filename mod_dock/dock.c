@@ -1268,8 +1268,6 @@ ExtlTab dock_get_configuration(WDock *dock)
     tab=region_get_base_configuration((WRegion*)dock);
     dock_do_get(dock, tab);
 
-#warning "TODO: save&load dockapp configuration"
-    
     return tab;
 }
 

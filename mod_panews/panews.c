@@ -37,13 +37,13 @@
 /*{{{ Create/destroy */
 
 
-void panews_managed_add(WPaneWS *ws, WRegion *reg)
+bool panews_managed_add(WPaneWS *ws, WRegion *reg)
 {
     region_add_bindmap_owned(reg, mod_panews_panews_bindmap, (WRegion*)ws);
     if(OBJ_IS(reg, WFrame))
         region_add_bindmap(reg, mod_panews_frame_bindmap);
     
-    ionws_managed_add_default(&(ws->ionws), reg);
+    return ionws_managed_add_default(&(ws->ionws), reg);
 }
 
 
@@ -244,7 +244,14 @@ static bool filter_no_stdisp_unused(WSplit *split)
 
 bool panews_managed_may_destroy(WPaneWS *ws, WRegion *reg)
 {
-#warning "TODO - don't let panes be destroyed if the ws can not be destroyed."
+    if(region_manager_allows_destroying((WRegion*)ws))
+        return TRUE;
+    
+    if(ionws_do_get_nextto(&(ws->ionws), reg, 
+                           SPLIT_ANY, PRIMN_ANY, FALSE)==NULL){
+        return FALSE;
+    }
+    
     return TRUE;
 }
 
@@ -426,8 +433,8 @@ static DynFunTab panews_dynfuntab[]={
     {(DynFun*)region_managed_may_destroy,
      (DynFun*)panews_managed_may_destroy},
 
-    {ionws_managed_add,
-     panews_managed_add},
+    {(DynFun*)ionws_managed_add,
+     (DynFun*)panews_managed_add},
     
     {(DynFun*)ionws_load_node,
      (DynFun*)panews_load_node},

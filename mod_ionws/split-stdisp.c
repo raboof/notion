@@ -563,8 +563,6 @@ static bool do_try_unsink_stdisp_orth(WSplitSplit *a, WSplitSplit *p,
 {
     bool doit=force;
     
-#warning "Add check that we can shrink or just let stdisp take precedence?"
-    
     assert(p->dir==other_dir(a->dir));
     assert(stdisp_dir_ok(p, stdisp));
     

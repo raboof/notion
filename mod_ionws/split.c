@@ -1012,8 +1012,7 @@ static void splitsplit_replace(WSplitSplit *split, WSplit *child,
     child->parent=NULL;
     
     what->parent=(WSplitInner*)split;
-#warning "Needed?"    
-    what->ws_if_root=NULL;
+    what->ws_if_root=NULL; /* May not be needed. */
 }
 
 

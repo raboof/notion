@@ -393,6 +393,8 @@ void ionws_manage_stdisp(WIonWS *ws, WRegion *stdisp, int corner)
 
     if(ws->stdispnode==NULL){
         ionws_create_stdispnode(ws, stdisp, corner, orientation);
+        if(ws->stdispnode==NULL)
+            return;
     }else{
         WRegion *od=ws->stdispnode->regnode.reg;
         if(od!=NULL){
@@ -406,7 +408,10 @@ void ionws_manage_stdisp(WIonWS *ws, WRegion *stdisp, int corner)
         splittree_set_node_of(stdisp, &(ws->stdispnode->regnode));
     }
     
-    ionws_managed_add(ws, stdisp);
+    if(!ionws_managed_add(ws, stdisp)){
+        ionws_unmanage_stdisp(ws, TRUE, TRUE);
+        return;
+    }
     
     dg=((WSplit*)(ws->stdispnode))->geom;
     
@@ -439,16 +444,13 @@ void ionws_manage_stdisp(WIonWS *ws, WRegion *stdisp, int corner)
 /*{{{ Create/destroy */
 
 
-void ionws_managed_add_default(WIonWS *ws, WRegion *reg)
+bool ionws_managed_add_default(WIonWS *ws, WRegion *reg)
 {
     Window bottom=None, top=None;
     
-    /*region_stacking((WRegion*)ws, &bottom, &top);
-    region_restack(reg, top, Above);*/
-
     if(STDISP_OF(ws)!=reg){
-        #warning "TODO: FIX"
-        assert(ptrlist_insert_last(&(ws->managed_list), reg));
+        if(!ptrlist_insert_last(&(ws->managed_list), reg))
+            return FALSE;
     }
     
     region_set_manager(reg, (WRegion*)ws);
@@ -465,12 +467,16 @@ void ionws_managed_add_default(WIonWS *ws, WRegion *reg)
         if(curr==NULL || !REGION_IS_ACTIVE(curr))
             region_warp(reg);
     }
+    
+    return TRUE;
 }
 
 
-void ionws_managed_add(WIonWS *ws, WRegion *reg)
+bool ionws_managed_add(WIonWS *ws, WRegion *reg)
 {
-    CALL_DYN(ionws_managed_add, ws, (ws, reg));
+    bool ret=FALSE;
+    CALL_DYN_RET(ret, bool, ionws_managed_add, ws, (ws, reg));
+    return ret;
 }
 
 
@@ -489,7 +495,11 @@ static WRegion *create_initial_frame(WIonWS *ws, WWindow *parent,
     }
     ws->split_tree->ws_if_root=ws;
     
-    ionws_managed_add(ws, reg);
+    if(!ionws_managed_add(ws, reg)){
+        destroy_obj((Obj*)reg);
+        destroy_obj((Obj*)ws->split_tree);
+        return NULL;
+    }
 
     return reg;
 }
@@ -778,7 +788,12 @@ static WFrame *ionws_do_split(WIonWS *ws, WSplit *node,
     newframe=OBJ_CAST(nnode->reg, WFrame);
     assert(newframe!=NULL);
 
-    ionws_managed_add(ws, nnode->reg);
+    if(!ionws_managed_add(ws, nnode->reg)){
+        nnode->reg=NULL;
+        destroy_obj((Obj*)nnode);
+        destroy_obj((Obj*)newframe);
+        return NULL;
+    }
 
     /* Restack */
     if(ws->split_tree!=NULL)
@@ -1166,10 +1181,16 @@ WSplit *load_splitregion_doit(WIonWS *ws, const WRectangle *geom, ExtlTab rt)
         
     if(reg!=NULL){
         node=create_splitregion(geom, reg);
-        if(node==NULL)
+        if(node==NULL){
             destroy_obj((Obj*)reg);
-        else
-            ionws_managed_add(ws, reg);
+        }else{
+            if(!ionws_managed_add(ws, reg)){
+                node->reg=NULL;
+                destroy_obj((Obj*)node);
+                destroy_obj((Obj*)reg);
+                return NULL;
+            }
+        }
     }
     
     return (WSplit*)node;
@@ -1406,8 +1427,8 @@ static DynFunTab ionws_dynfuntab[]={
     {(DynFun*)region_current,
      (DynFun*)ionws_current},
 
-    {ionws_managed_add,
-     ionws_managed_add_default},
+    {(DynFun*)ionws_managed_add,
+     (DynFun*)ionws_managed_add_default},
     
     {genws_manage_stdisp,
      ionws_manage_stdisp},

@@ -63,8 +63,8 @@ extern WSplit *ionws_split_of(WIonWS *ws, WRegion *reg);
 
 extern void ionws_do_managed_remove(WIonWS *ws, WRegion *reg);
 
-DYNFUN void ionws_managed_add(WIonWS *ws, WRegion *reg);
-extern void ionws_managed_add_default(WIonWS *ws, WRegion *reg);
+DYNFUN bool ionws_managed_add(WIonWS *ws, WRegion *reg);
+extern bool ionws_managed_add_default(WIonWS *ws, WRegion *reg);
 
 /* Inherited dynfun implementations */
 

@@ -272,7 +272,6 @@ void screen_notify(WScreen *scr, const char *str)
     watch_setup(&(scr->notifywin_watch), (Obj*)iw, NULL);
 
     infowin_set_text(iw, str);
-#warning "Make passive l2?/don't care if l2 overlaps?"
     region_raise((WRegion*)iw);
     region_map((WRegion*)iw);
 }

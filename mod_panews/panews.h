@@ -39,7 +39,7 @@ extern WRegion *panews_load(WWindow *par, const WFitParams *fp, ExtlTab tab);
 
 extern bool panews_managed_may_destroy(WPaneWS *ws, WRegion *reg);
 extern void panews_managed_remove(WPaneWS *ws, WRegion *reg);
-extern void panews_managed_add(WPaneWS *ws, WRegion *reg);
+extern bool panews_managed_add(WPaneWS *ws, WRegion *reg);
 extern WRegion *panews_managed_control_focus(WPaneWS *ws, WRegion *reg);
 
 extern ExtlTab panews_get_configuration(WPaneWS *ws);

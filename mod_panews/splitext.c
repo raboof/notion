@@ -51,7 +51,11 @@ bool splitunused_init(WSplitUnused *split, const WRectangle *geom,
         return FALSE;
     }
     
-    ionws_managed_add(&ws->ionws, (WRegion*)uwin);
+    if(!ionws_managed_add(&ws->ionws, (WRegion*)uwin)){
+        split->regnode.reg=NULL;
+        destroy_obj((Obj*)uwin);
+        return FALSE;
+    }
     
     return TRUE;
 }
@@ -294,8 +298,7 @@ static void splitpane_replace(WSplitPane *pane, WSplit *child, WSplit *what)
     child->parent=NULL;
     pane->contents=what;
     what->parent=(WSplitInner*)pane;
-#warning "Needed?"    
-    what->ws_if_root=NULL;
+    what->ws_if_root=NULL; /* May not be needed */
 }
 
 
