@@ -15,6 +15,7 @@
 #include <ioncore/global.h>
 #include <ioncore/regbind.h>
 #include <ioncore/event.h>
+#include <ioncore/names.h>
 #include "inputp.h"
 
 
@@ -121,6 +122,8 @@ bool input_init(WInput *input, WWindow *par, const WFitParams *fp)
 
     if(!window_init((WWindow*)input, par, fp))
         return FALSE;
+
+    region_register((WRegion*)input);
     
     win=input->win.win;
     

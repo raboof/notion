@@ -314,10 +314,11 @@ static bool clientwin_init(WClientWin *cwin, WWindow *par, Window win,
     cwin->fs_pholder=NULL;
     
     region_init(&(cwin->region), par, &(cwin->last_fp));
-    
+
+    clientwin_register(cwin);
+    clientwin_get_set_name(cwin);
     clientwin_get_colormaps(cwin);
     clientwin_get_protocols(cwin);
-    clientwin_get_set_name(cwin);
     clientwin_get_winprops(cwin);
     clientwin_get_size_hints(cwin);
     

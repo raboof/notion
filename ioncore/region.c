@@ -57,8 +57,6 @@ void region_init(WRegion *reg, WWindow *par, const WFitParams *fp)
     
     reg->mgd_activity=FALSE;
 
-    region_init_name(reg);
-    
     if(par!=NULL){
         reg->rootwin=((WRegion*)par)->rootwin;
         region_set_parent(reg, par);
@@ -103,7 +101,8 @@ void region_deinit(WRegion *reg)
     region_detach_manager(reg);
     region_unset_parent(reg);
     region_remove_bindings(reg);
-    region_do_unuse_name(reg, FALSE);
+    
+    region_unregister(reg);
 
     if(ioncore_g.focus_next==reg){
         D(warn("Region to be focused next destroyed[2]."));

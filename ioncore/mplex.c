@@ -38,6 +38,7 @@
 #include "xwindow.h"
 #include "mplexpholder.h"
 #include "mplexp.h"
+#include "names.h"
 
 
 /*{{{ Layer list stuff */
@@ -196,6 +197,8 @@ bool mplex_do_init(WMPlex *mplex, WWindow *parent, Window win,
         if(!window_do_init((WWindow*)mplex, parent, win, fp))
             return FALSE;
     }
+    
+    region_register((WRegion*)mplex);
     
     mplex->win.region.flags|=REGION_BINDINGS_ARE_GRABBED;
     

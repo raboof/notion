@@ -28,13 +28,14 @@ extern WNamespace ioncore_internal_ns;
 extern WNamespace ioncore_clientwin_ns;
 
 
-extern bool region_init_name(WRegion *reg);
-
+extern bool region_register(WRegion *reg);
 extern bool region_set_name(WRegion *reg, const char *name);
 extern bool region_set_name_exact(WRegion *reg, const char *name);
+
+extern bool clientwin_register(WClientWin *cwin);
 extern bool clientwin_set_name(WClientWin *cwin, const char *name);
 
-extern void region_unuse_name(WRegion *reg);
+extern void region_unregister(WRegion *reg);
 extern void region_do_unuse_name(WRegion *reg, bool insert_unnamed);
 
 extern const char *region_name(WRegion *reg);

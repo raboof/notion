@@ -16,6 +16,7 @@
 #include <libtu/rb.h>
 #include <libtu/minmax.h>
 #include <libtu/objp.h>
+#include <libextl/extl.h>
 
 #include "common.h"
 #include "region.h"
@@ -23,7 +24,6 @@
 #include "names.h"
 #include "strings.h"
 #include "gr.h"
-#include <libextl/extl.h>
 
 
 /*{{{ Implementation */
@@ -194,7 +194,7 @@ static bool separated(const WRegionNameInfo *ni1,
 
 
 
-void region_do_unuse_name(WRegion *reg, bool insert_unnamed)
+void region_unregister(WRegion *reg)
 {
     WNamespace *ns=reg->ni.namespaceinfo;
     Rb_node node;
@@ -218,19 +218,7 @@ void region_do_unuse_name(WRegion *reg, bool insert_unnamed)
         reg->ni.inst_off=0;
     }
     
-    if(insert_unnamed){
-        if(rb_insertg(ns->rb, &(reg->ni), reg, COMPARE_FN))
-            return;
-    }
-
     reg->ni.namespaceinfo=NULL;
-}
-
-
-void region_unuse_name(WRegion *reg)
-{
-    region_do_unuse_name(reg, TRUE);
-    region_notify_change(reg);
 }
 
 
@@ -332,7 +320,7 @@ static bool do_use_name(WRegion *reg, WNamespace *ns, const char *name,
     if(!make_full_name(&ni, name, inst, parsed_inst>=0))
         return FALSE;
 
-    region_do_unuse_name(reg, FALSE);
+    region_unregister(reg);
     
     reg->ni.name=ni.name;
     reg->ni.inst_off=ni.inst_off;
@@ -419,6 +407,9 @@ static bool do_set_name(bool (*fn)(WRegion *reg, WNamespace *ns, const char *p),
 {
     bool ret=TRUE;
     char *nm=NULL;
+
+    if(!initialise_ns(ns))
+        return FALSE;
     
     if(p!=NULL){
         nm=scopy(p);
@@ -426,12 +417,11 @@ static bool do_set_name(bool (*fn)(WRegion *reg, WNamespace *ns, const char *p),
             return FALSE;
         str_stripws(nm);
     }
-    
+
     if(nm==NULL || *nm=='\0'){
-        region_do_unuse_name(reg, TRUE);
+        region_unregister(reg);
+        ret=(rb_insertg(ns->rb, &(reg->ni), reg, COMPARE_FN)!=NULL);
     }else{
-        if(!initialise_ns(ns))
-            return FALSE;
         ret=fn(reg, ns, nm);
     }
     
@@ -444,22 +434,30 @@ static bool do_set_name(bool (*fn)(WRegion *reg, WNamespace *ns, const char *p),
 }
 
 
-bool region_init_name(WRegion *reg)
+bool region_register(WRegion *reg)
 {
-    if(OBJ_IS(reg, WClientWin)){
-        if(!initialise_ns(&ioncore_clientwin_ns))
-            return FALSE;
-        assert(reg->ni.name==NULL);
-        reg->ni.namespaceinfo=&ioncore_clientwin_ns;
-        return (rb_insertg(ioncore_clientwin_ns.rb, &(reg->ni), reg, 
-                           COMPARE_FN)
-                !=NULL);
-    }
-
+    assert(reg->ni.name==NULL);
+    
     if(!initialise_ns(&ioncore_internal_ns))
         return FALSE;
     
     return use_name_anyinst(reg, &ioncore_internal_ns, OBJ_TYPESTR(reg));
+}
+
+
+bool clientwin_register(WClientWin *cwin)
+{
+    WRegion *reg=(WRegion*)cwin;
+    
+    assert(reg->ni.name==NULL);
+    
+    if(!initialise_ns(&ioncore_clientwin_ns))
+        return FALSE;
+    
+    reg->ni.namespaceinfo=&ioncore_clientwin_ns;
+    return (rb_insertg(ioncore_clientwin_ns.rb, &(reg->ni), reg, 
+                       COMPARE_FN)
+            !=NULL);
 }
 
 

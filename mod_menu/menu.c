@@ -27,6 +27,7 @@
 #include <ioncore/focus.h>
 #include <ioncore/event.h>
 #include <ioncore/xwindow.h>
+#include <ioncore/names.h>
 #include "menu.h"
 #include "main.h"
 
@@ -523,6 +524,8 @@ bool menu_init(WMenu *menu, WWindow *par, const WFitParams *fp,
     
     if(!window_init((WWindow*)menu, par, fp))
         goto fail;
+
+    region_register((WRegion*)menu);
 
     win=menu->win.win;
     

@@ -21,6 +21,7 @@
 #include <ioncore/event.h>
 #include <ioncore/resize.h>
 #include <ioncore/gr.h>
+#include <ioncore/names.h>
 
 #include "statusbar.h"
 #include "main.h"
@@ -39,6 +40,8 @@ bool statusbar_init(WStatusBar *p, WWindow *parent, const WFitParams *fp)
 {
     if(!window_init(&(p->wwin), parent, fp))
         return FALSE;
+
+    region_register((WRegion*)p);
 
     p->brush=NULL;
     p->elems=NULL;

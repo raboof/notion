@@ -17,6 +17,7 @@
 #include "genws.h"
 #include "xwindow.h"
 #include "focus.h"
+#include "names.h"
 
 
 /*{{{ Create/destroy */
@@ -32,6 +33,7 @@ bool genws_init(WGenWS *ws, WWindow *par, const WFitParams *fp)
         return FALSE;
 
     region_init(&(ws->reg), par, fp);
+    region_register(&(ws->reg));
 
     XSelectInput(ioncore_g.dpy, ws->dummywin,
                  FocusChangeMask|KeyPressMask|KeyReleaseMask|
