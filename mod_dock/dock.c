@@ -226,7 +226,7 @@ static WDockParam dock_param_pos={
     "pos",
     "dock position",
     dock_pos_map,
-    DOCK_HPOS_RIGHT|DOCK_VPOS_MIDDLE
+    DOCK_HPOS_LEFT|DOCK_VPOS_BOTTOM
 };
 
 
@@ -249,7 +249,7 @@ WDockParam dock_param_grow={
     "grow",
     "growth direction",
     dock_grow_map,
-    DOCK_GROW_DOWN
+    DOCK_GROW_RIGHT
 };
 
 
@@ -358,13 +358,11 @@ static void dock_get_pos_grow(WDock *dock, int *pos, int *grow)
 {
     WMPlex *mplex=OBJ_CAST(REGION_PARENT(dock), WMPlex);
     WRegion *mplex_stdisp;
-    int orientation, corner;
+    int corner;
     
     if(mplex!=NULL){
-        mplex_get_stdisp(mplex, &mplex_stdisp, &corner, &orientation);
+        mplex_get_stdisp(mplex, &mplex_stdisp, &corner);
         if(mplex_stdisp==(WRegion*)dock){
-            bool br_grow=(dock->grow==DOCK_GROW_DOWN ||
-                          dock->grow==DOCK_GROW_RIGHT);
             /* Ok, we're assigned as a status display for mplex, so
              * get parameters from there.
              */
@@ -374,9 +372,7 @@ static void dock_get_pos_grow(WDock *dock, int *pos, int *grow)
                 | ((corner==MPLEX_STDISP_TL || corner==MPLEX_STDISP_TR)
                    ? DOCK_VPOS_TOP
                    : DOCK_VPOS_BOTTOM);
-            *grow=(orientation==REGION_ORIENTATION_HORIZONTAL
-                   ? (br_grow ? DOCK_GROW_RIGHT : DOCK_GROW_LEFT)
-                   : (br_grow ? DOCK_GROW_DOWN : DOCK_GROW_UP));
+            *grow=dock->grow;
             return;
         }
     }
@@ -631,8 +627,9 @@ static void calc_dock_pos(WRectangle *dg, const WRectangle *pg, int pos)
 }
 
 
-static void dock_managed_rqgeom(WDock *dock, WRegion *reg, int flags,
-                                const WRectangle *geom, WRectangle *geomret)
+static void dock_managed_rqgeom_(WDock *dock, WRegion *reg, int flags,
+                                 const WRectangle *geom, WRectangle *geomret,
+                                 bool just_update_minmax)
 {
     WDockApp *dockapp=NULL, *thisdockapp=NULL, thisdockapp_copy;
     WRectangle parent_geom, dock_geom, border_dock_geom;
@@ -761,6 +758,9 @@ static void dock_managed_rqgeom(WDock *dock, WRegion *reg, int flags,
             dock->max_h=g->h;
         }
         
+        if(just_update_minmax)
+            return;
+        
         dock->arrange_called=FALSE;
         region_rqgeom((WRegion*)dock, rqgeomflags, g, NULL);
         if(!dock->arrange_called)
@@ -775,6 +775,11 @@ static void dock_managed_rqgeom(WDock *dock, WRegion *reg, int flags,
     }
 }
 
+static void dock_managed_rqgeom(WDock *dock, WRegion *reg, int flags,
+                                const WRectangle *geom, WRectangle *geomret)
+{
+    dock_managed_rqgeom_(dock, reg, flags, geom, geomret, FALSE);
+}
 
 
 void dock_size_hints(WDock *dock, XSizeHints *hints)
@@ -810,6 +815,14 @@ static bool dock_fitrep(WDock *dock, WWindow *parent, const WFitParams *fp)
         dock_reshape(dock);
     
     return TRUE;
+}
+
+
+static int dock_orientation(WDock *dock)
+{
+    return ((dock->grow==DOCK_GROW_LEFT || dock->grow==DOCK_GROW_RIGHT)
+            ? REGION_ORIENTATION_HORIZONTAL
+            : REGION_ORIENTATION_VERTICAL);
 }
 
 
@@ -896,6 +909,33 @@ static void dock_updategr(WDock *dock)
 /*{{{ Set/get */
 
 
+static void mplexpos(int pos, int *mpos)
+{
+    int hp=pos&DOCK_HPOS_MASK, vp=pos&DOCK_VPOS_MASK;
+    int p;
+    
+    p=(vp!=DOCK_VPOS_MIDDLE
+       ? (vp==DOCK_VPOS_TOP
+          ? (hp!=DOCK_HPOS_CENTER
+             ? (hp==DOCK_HPOS_RIGHT
+                ? MPLEX_STDISP_TR
+                : MPLEX_STDISP_TL)
+             : -1)
+          : (hp!=DOCK_HPOS_CENTER
+             ? (hp==DOCK_HPOS_RIGHT
+                ? MPLEX_STDISP_BR
+                : MPLEX_STDISP_BL)
+             : -1))
+       : -1);
+    
+    if(p==-1)
+        warn("Invalid dock position while as stdisp.");
+    else
+        *mpos=p;
+}
+    
+
+
 /*EXTL_DOC
  * Configure \var{dock}. \var{conftab} is a table of key/value pairs:
  *
@@ -905,11 +945,13 @@ static void dock_updategr(WDock *dock)
  *  \hline
  *  \var{name} & string & Name of dock \\
  *  \var{pos} & string in $\{t,m,b\}\times\{t,c,b\}$ & Dock position. 
- *              Can only be used in floating mode. \\
+ *       Can only be used in floating mode. \\
  *  \var{grow} & up/down/left/right & 
- *       Growth direction where new dockapps are added) \\
+ *       Growth direction where new dockapps are added. Also
+ *       sets orientation for dock when working as WMPlex status
+ *       display (see \fnref{WMPlex.set_stdisp}). \\
  *  \var{is_auto} & bool & 
- *        Should \var{dock} automatically manage new dockapps? \\
+ *       Should \var{dock} automatically manage new dockapps? \\
  * \end{tabularx}
  *
  * Any parameters not explicitly set in \var{conftab} will be left unchanged.
@@ -919,8 +961,9 @@ void dock_set(WDock *dock, ExtlTab conftab)
 {
     char *s;
     bool b;
-    bool resize=FALSE;
-
+    bool growset=FALSE;
+    bool posset=FALSE;
+    
     if(extl_table_gets_s(conftab, dock_param_name.key, &s)){
         if(!region_set_name((WRegion*)dock, s)){
             warn_obj(modname, "Can't set name to \"%s\"", s);
@@ -928,19 +971,35 @@ void dock_set(WDock *dock, ExtlTab conftab)
         free(s);
     }
 
-    if(dock_param_extl_table_set(&dock_param_pos, conftab, &dock->pos)){
-        resize=TRUE;
-    }
-    if(dock_param_extl_table_set(&dock_param_grow, conftab, &dock->grow)){
-        resize=TRUE;
-    }
-    
-    if(extl_table_gets_b(conftab, dock_param_is_auto.key, &b)){
-        dock->is_auto=b;
-    }
+    if(dock_param_extl_table_set(&dock_param_pos, conftab, &dock->pos))
+        posset=TRUE;
 
-    if(resize)
+    if(dock_param_extl_table_set(&dock_param_grow, conftab, &dock->grow))
+        growset=TRUE;
+    
+    if(extl_table_gets_b(conftab, dock_param_is_auto.key, &b))
+        dock->is_auto=b;
+
+    if(growset || posset){
+        WMPlex *par=OBJ_CAST(region_parent((WRegion*)dock), WMPlex);
+        WRegion *stdisp=NULL;
+        int pos;
+        
+        if(par!=NULL){
+            mplex_get_stdisp(par, &stdisp, &pos);
+            if(stdisp==(WRegion*)dock){
+                if(posset)
+                    mplexpos(dock->pos, &pos);
+                if(growset){
+                    /* Update min/max first */
+                    dock_managed_rqgeom_(dock, NULL, 0, NULL, NULL, TRUE);
+                }
+                mplex_set_stdisp(par, (WRegion*)dock, pos);
+            }
+        }
+        
         dock_resize(dock);
+    }
 }
 
 
@@ -1343,6 +1402,7 @@ static DynFunTab dock_dynfuntab[]={
     {(DynFun*)region_get_configuration, (DynFun*)dock_get_configuration},
     {region_size_hints, dock_size_hints},
     {(DynFun*)region_fitrep, (DynFun*)dock_fitrep},
+    {(DynFun*)region_orientation, (DynFun*)dock_orientation},
     END_DYNFUNTAB
 };
 

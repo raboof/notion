@@ -59,7 +59,6 @@ bool mplex_do_init(WMPlex *mplex, WWindow *parent, Window win,
     mplex->l2_list=NULL;
     mplex->l2_current=NULL;
     watch_init(&(mplex->stdispinfo.regwatch));
-    mplex->stdispinfo.orientation=REGION_ORIENTATION_HORIZONTAL;
     mplex->stdispinfo.pos=MPLEX_STDISP_BL;
     
     if(create){
@@ -689,8 +688,7 @@ static bool mplex_do_managed_display(WMPlex *mplex, WRegion *sub)
             }
             
             genws_manage_stdisp((WGenWS*)sub, stdisp, 
-                                mplex->stdispinfo.pos,
-                                mplex->stdispinfo.orientation);
+                                mplex->stdispinfo.pos);
         }
     }
     
@@ -1104,7 +1102,7 @@ static void stdisp_watch_handler(Watch *watch, Obj *obj)
 }
 
 
-bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg, int pos, int orientation)
+bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg, int pos)
 {
     WMPlexSTDispInfo *di=&(mplex->stdispinfo);
     WRegion *oldstdisp=(WRegion*)(di->regwatch.obj);
@@ -1123,7 +1121,6 @@ bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg, int pos, int orientation)
     }
     
     di->pos=pos;
-    di->orientation=orientation;
     
     if(reg==NULL){
         if(mgr!=NULL){
@@ -1142,7 +1139,7 @@ bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg, int pos, int orientation)
             mgr=(WGenWS*)(mplex->l1_current);
         }
         if(mgr!=NULL)
-            genws_manage_stdisp(mgr, reg, di->pos, di->orientation);
+            genws_manage_stdisp(mgr, reg, di->pos);
         else
             region_unmap(reg);
     }
@@ -1153,13 +1150,12 @@ bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg, int pos, int orientation)
 }
 
 
-void mplex_get_stdisp(WMPlex *mplex, WRegion **reg, int *pos, int *orientation)
+void mplex_get_stdisp(WMPlex *mplex, WRegion **reg, int *pos)
 {
     WMPlexSTDispInfo *di=&(mplex->stdispinfo);
     
     *reg=(WRegion*)di->regwatch.obj;
     *pos=di->pos;
-    *orientation=di->orientation;
 }
 
 
@@ -1170,16 +1166,6 @@ static StringIntMap pos_map[]={
     {"br", MPLEX_STDISP_BR},
     {NULL, 0}
 };
-
-
-static StringIntMap orientation_map[]={
-    {"horizontal", REGION_ORIENTATION_HORIZONTAL},
-    {"vertical", REGION_ORIENTATION_VERTICAL},
-    {"h", REGION_ORIENTATION_HORIZONTAL},
-    {"v", REGION_ORIENTATION_VERTICAL},
-    {NULL, 0}
-};
-
 
 
 static WRegion *do_attach_stdisp(WMPlex *mplex, WRegionAttachHandler *handler,
@@ -1200,9 +1186,6 @@ static WRegion *do_attach_stdisp(WMPlex *mplex, WRegionAttachHandler *handler,
  * \begin{tabularx}{\linewidth}{lX}
  *   \var{pos} & The corner of the screen to place the status display
  *               in. One of \code{tl}, \code{tr}, \var{bl} or \var{br}. \\
- *   \var{orientation} & Orientation of the status display, if it does
- *                  not specify one. Either \code{v(ertical)} or 
- *                  \var{h(orizontal)}. \\
  *   \var{action} & If this field is set to \code{keep}, \var{corner}
  *                  and \var{orientation} are changed for the existing
  *                  status display. If this field is set to \var{remove},
@@ -1216,21 +1199,13 @@ EXTL_EXPORT_AS(WMPlex, set_stdisp)
 bool mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t)
 {
     WRegion *stdisp=NULL;
-    int p=mplex->stdispinfo.pos, o=mplex->stdispinfo.orientation;
+    int p=mplex->stdispinfo.pos;
     char *s;
     
     if(extl_table_gets_s(t, "pos", &s)){
         p=stringintmap_value(pos_map, s, -1);
         if(p<0){
             warn("Invalid pos setting");
-            return FALSE;
-        }
-    }
-    
-    if(extl_table_gets_s(t, "orientation", &s)){
-        o=stringintmap_value(orientation_map, s, -1);
-        if(o<0){
-            warn("Invalid orientation setting");
             return FALSE;
         }
     }
@@ -1260,11 +1235,6 @@ bool mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t)
         if(stdisp==NULL)
             return FALSE;
         
-        o2=region_orientation(stdisp);
-        if(o2==REGION_ORIENTATION_HORIZONTAL || 
-           o2==REGION_ORIENTATION_VERTICAL){
-            o=o2;
-        }
     }else if(strcmp(s, "keep")==0){
         stdisp=(WRegion*)(mplex->stdispinfo.regwatch.obj);
     }else if(strcmp(s, "remove")!=0){
@@ -1272,7 +1242,7 @@ bool mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t)
         return FALSE;
     }
     
-    if(!mplex_set_stdisp(mplex, stdisp, p, o)){
+    if(!mplex_set_stdisp(mplex, stdisp, p)){
         destroy_obj((Obj*)stdisp);
         return FALSE;
     }
@@ -1297,12 +1267,8 @@ static ExtlTab mplex_do_get_stdisp_extl(WMPlex *mplex, bool fullconfig)
         extl_table_sets_o(t, "reg", di->regwatch.obj);
     }
     
-    if(t!=extl_table_none()){
+    if(t!=extl_table_none())
         extl_table_sets_s(t, "pos", stringintmap_key(pos_map, di->pos, NULL));
-        extl_table_sets_s(t, "orientation", stringintmap_key(orientation_map, 
-                                                             di->orientation, 
-                                                             NULL));
-    }
     
     return t;
 }

@@ -2,7 +2,11 @@
  * ion/ioncore/mplex.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
- * See the included file LICENSE for details.
+ * 
+ * Ion is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
  */
 
 #ifndef ION_IONCORE_MPLEX_H
@@ -42,7 +46,6 @@ enum{
 typedef struct{
     Watch regwatch;
     int pos;
-    int orientation;
 } WMPlexSTDispInfo;
 
 
@@ -132,10 +135,8 @@ extern void mplex_load_contents(WMPlex *frame, ExtlTab tab);
 
 /* Sticky status display support */
 
-extern bool mplex_set_stdisp(WMPlex *mplex, WRegion *stdisp,
-                             int pos, int orientation);
-extern void mplex_get_stdisp(WMPlex *mplex, WRegion **stdisp, 
-                             int *pos, int *orientation);
+extern bool mplex_set_stdisp(WMPlex *mplex, WRegion *stdisp, int pos);
+extern void mplex_get_stdisp(WMPlex *mplex, WRegion **stdisp, int *pos);
 
 extern bool mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t);
 extern ExtlTab mplex_get_stdisp_extl(WMPlex *mplex);

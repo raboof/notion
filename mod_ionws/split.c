@@ -1269,9 +1269,7 @@ void split_tree_remove(WSplit **root, WSplit *node,
                 *thisptr=un;
                 un->parent=split;
                 replace_ok=TRUE;
-                D(fprintf(stderr, ">>>>\n"));
                 move_down(root, un, un);
-                D(fprintf(stderr, "<<<<\n"));
             }else{
                 warn_err();
             }

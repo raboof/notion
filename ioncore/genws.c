@@ -101,9 +101,9 @@ void genws_do_unmap(WGenWS *ws)
 /*{{{ Dynfuns */
 
 
-void genws_manage_stdisp(WGenWS *ws, WRegion *stdisp, int pos, int orientation)
+void genws_manage_stdisp(WGenWS *ws, WRegion *stdisp, int pos)
 {
-    CALL_DYN(genws_manage_stdisp, ws, (ws, stdisp, pos, orientation));
+    CALL_DYN(genws_manage_stdisp, ws, (ws, stdisp, pos));
 }
 
 

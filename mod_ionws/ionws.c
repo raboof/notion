@@ -219,20 +219,21 @@ static void ionws_create_stdispnode(WIonWS *ws, WRegion *stdisp,
 }
 
 
-void ionws_manage_stdisp(WIonWS *ws, WRegion *stdisp, int corner, 
-                         int orientation)
+void ionws_manage_stdisp(WIonWS *ws, WRegion *stdisp, int corner)
 {
     bool mcf=region_may_control_focus((WRegion*)ws);
-    bool act=FALSE;
     int flags=REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y;
+    int orientation=region_orientation(stdisp);
+    bool act=FALSE;
     WRectangle dg;
     
-    /* corner/orientation not yet supported. */
+    if(orientation!=REGION_ORIENTATION_VERTICAL /*&&
+       orientation!=REGION_ORIENTATION_HORIZONTAL*/){
+        orientation=REGION_ORIENTATION_HORIZONTAL;
+    }
     
-    if(REGION_MANAGER(stdisp)==(WRegion*)ws)
-        return;
-    
-    region_detach_manager(stdisp);
+    if(ws->stdispnode==NULL || ws->stdispnode->u.reg!=stdisp)
+        region_detach_manager(stdisp);
 
     /* Remove old stdisp if corner and orientation don't match.
      */
@@ -240,7 +241,7 @@ void ionws_manage_stdisp(WIonWS *ws, WRegion *stdisp, int corner,
                                 orientation!=ws->stdispnode->u.d.orientation)){
         ionws_unmanage_stdisp(ws, TRUE, TRUE);
     }
-                              
+
     if(ws->stdispnode==NULL){
         ionws_create_stdispnode(ws, stdisp, corner, orientation);
     }else{

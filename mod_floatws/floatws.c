@@ -588,8 +588,7 @@ static void floatws_place_stdisp(WFloatWS *ws, int corner, WRegion *stdisp)
 }
 
 
-void floatws_manage_stdisp(WFloatWS *ws, WRegion *stdisp, 
-                           int corner, int orientation)
+void floatws_manage_stdisp(WFloatWS *ws, WRegion *stdisp, int corner)
 {
     if(REGION_MANAGER(stdisp)==(WRegion*)ws)
         return;
@@ -708,8 +707,8 @@ static ExtlTab floatws_get_configuration(WFloatWS *ws)
     
     par=OBJ_CAST(region_parent((WRegion*)ws), WMPlex);
     if(par!=NULL){
-        int dummyp, dummyo;
-        mplex_get_stdisp(par, &stdisp, &dummyp, &dummyo);
+        int dummyp;
+        mplex_get_stdisp(par, &stdisp, &dummyp);
     }
     
     tab=region_get_base_configuration((WRegion*)ws);
