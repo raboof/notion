@@ -184,7 +184,6 @@ static bool tabdrag_kbd_handler(WRegion *reg, XEvent *xev)
 static void setup_dragwin(WGenFrame *genframe, uint tab)
 {
 	WRectangle g;
-	char *buf;
 	
 	assert(tabdrag_infowin==NULL);
 	
@@ -203,9 +202,11 @@ static void setup_dragwin(WGenFrame *genframe, uint tab)
 										? "active" : "inactive"),
 					  genframe->titles[tab].attr);
 	
-	buf=WINFOWIN_BUFFER(tabdrag_infowin);
-	strncpy(buf, genframe->titles[tab].text, WINFOWIN_BUFFER_LEN-1);
-	buf[WINFOWIN_BUFFER_LEN-1]='\0';
+	if(genframe->titles[tab].text!=NULL){
+		char *buf=WINFOWIN_BUFFER(tabdrag_infowin);
+		strncpy(buf, genframe->titles[tab].text, WINFOWIN_BUFFER_LEN-1);
+		buf[WINFOWIN_BUFFER_LEN-1]='\0';
+	}
 }
 
 
