@@ -326,8 +326,8 @@ void postinit_graphics(WScreen *scr)
 	gcv.fill_style=FillSolid;
 	gcv.font=grdata->font->fid;
 
-	gcvmask=GCForeground|GCBackground|GCLineStyle|GCLineWidth|
-			GCFillStyle|GCJoinStyle|GCCapStyle|GCFont;
+	gcvmask=(GCLineStyle|GCLineWidth|GCFillStyle|
+			 GCJoinStyle|GCCapStyle|GCFont);
 	
 	grdata->gc=XCreateGC(dpy, root, gcvmask, &gcv);
 
