@@ -29,8 +29,8 @@ defbindings("WScreen", {
     kpress(MOD1.."0", "WScreen.switch_nth(_, 9)"),
     
     bdoc("Switch to next/previous object within current screen."),
-    kpress(MOD1.."Right", "WScreen.switch_next(_)"),
-    kpress(MOD1.."Left", "WScreen.switch_prev(_)"),
+    kpress(MOD1.."comma", "WScreen.switch_next(_)"),
+    kpress(MOD1.."period", "WScreen.switch_prev(_)"),
     
     submap(MOD1.."K", {
         bdoc("Go to previous active object."),
@@ -154,8 +154,8 @@ defbindings("WFrame", {
         kpress("P", "WFrame.switch_prev(_)"),
         
         bdoc("Move current object within the frame left/right."),
-        kpress("Left", "WFrame.dec_index(_, _sub)", "_sub:non-nil"),
-        kpress("Right", "WFrame.inc_index(_, _sub)", "_sub:non-nil"),
+        kpress("comma", "WFrame.dec_index(_, _sub)", "_sub:non-nil"),
+        kpress("period", "WFrame.inc_index(_, _sub)", "_sub:non-nil"),
                
         bdoc("Maximize the frame horizontally/vertically."),
         kpress("H", "WFrame.maximize_horiz(_)"),
