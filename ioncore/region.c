@@ -16,7 +16,8 @@
 #include "tags.h"
 #include "names.h"
 #include "stacking.h"
-#include "geom.h"
+#include "extl.h"
+#include "extlconv.h"
 
 
 #define FOR_ALL_SUBREGIONS(REG, SUB) \
@@ -986,6 +987,7 @@ WRegion *region_get_active_leaf(WRegion *reg)
 	
 	return reg;
 }
+
 
 /*}}}*/
 

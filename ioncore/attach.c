@@ -14,7 +14,7 @@
 #include "objp.h"
 #include "clientwin.h"
 #include "saveload.h"
-#include "geom.h"
+#include "extlconv.h"
 
 
 /*{{{ Attach */

@@ -1,13 +1,13 @@
 /*
- * ion/ioncore/geom.c
+ * ion/ioncore/extlconv.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
 #include "common.h"
-#include "geom.h"
 #include "extl.h"
+#include "extlconv.h"
 
 
 bool extltab_to_geom(ExtlTab tab, WRectangle *geomret)
@@ -40,3 +40,19 @@ void pgeom(const char *n, WRectangle g)
 	fprintf(stderr, "%s %d, %d; %d, %d\n", n, g.x, g.y, g.w, g.h);
 }
 
+
+ExtlTab region_list_to_table(WRegion *list, bool (*filter)(WRegion *r))
+{
+	ExtlTab tab=extl_create_table();
+	int i=1;
+	WRegion *r;
+	
+	FOR_ALL_MANAGED_ON_LIST(list, r){
+		if(filter==NULL || filter(r)){
+			if(extl_table_seti_o(tab, i, (WObj*)r))
+				i++;
+		}
+	}
+	
+	return tab;
+}
