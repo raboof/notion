@@ -63,7 +63,8 @@ $(POTFILE): potfiles
 
 _install:
 	for i in $(TRANSLATIONS); do \
-		$(INSTALL) -m $(DATA_MODE) $$i.mo $(LOCALEDIR)/$$i/LC_MESSAGES/ion3.mo; \
+		$(INSTALLDIR) $(LOCALEDIR)/$$i/LC_MESSAGES ; \
+		$(INSTALL) -m $(DATA_MODE) $$i.mo $(LOCALEDIR)/$$i/LC_MESSAGES/ion3.mo ; \
 	done
 
 update_translations: pot

@@ -62,7 +62,7 @@ _install:
 	$(INSTALL) -m $(DATA_MODE) ion3.1 $(MANDIR)/man1
 	$(INSTALL) -m $(DATA_MODE) pwm3.1 $(MANDIR)/man1
 	for tr in $(TRANSLATIONS); do \
-		$(INSTALLDIR) $(MANDIR)/$$tr/man1 \
+		$(INSTALLDIR) $(MANDIR)/$$tr/man1 ; \
 		$(INSTALL) -m $(DATA_MODE) ion3.$$tr.1 $(MANDIR)/$$tr/man1/ion3.1 ; \
 		$(INSTALL) -m $(DATA_MODE) pwm3.$$tr.1 $(MANDIR)/$$tr/man1/pwm3.1 ; \
 	done
