@@ -94,7 +94,7 @@ extern bool extl_call_named(const char *name, const char *spec,
 extern bool extl_register_function(ExtlExportedFnSpec *spec);
 extern void extl_unregister_function(ExtlExportedFnSpec *spec);
 
-extern bool extl_runfile(const char *file);
+extern bool extl_dofile(const char *file);
 extern const char* extl_extension();
 
 extern bool extl_init();

@@ -161,16 +161,18 @@ const char *extl_extension()
 /*{{{ Runfile */
 
 
-bool extl_runfile(const char *file)
+bool extl_dofile(const char *file)
 {
 	int ret, oldtop;
 	
 	fprintf(stderr, "lua_dofile(%s)\n", file);
 	
 	oldtop=lua_gettop(l_st);
-	/*lua_pushstring(l_st, file);
-	lua_setglobal(l_st, "THIS_FILE_NAME");*/
+	lua_pushstring(l_st, file);
+	lua_setglobal(l_st, "CURRENT_FILE");
 	ret=lua_dofile(l_st, file);
+	lua_pushnil(l_st);
+	lua_setglobal(l_st, "CURRENT_FILE");
 	
 	if(ret!=0){
 		warn("%s", lua_tostring(l_st, -1));

@@ -14,6 +14,7 @@
 #include "names.h"
 #include "font.h"
 #include "grdata.h"
+#include "completehelp.h"
 
 
 /*{{{ Name setup */
@@ -226,7 +227,7 @@ again:
 			   continue;
 		}
 		
-		if(!add_to_complist(nam, cp_ret, &n, name))
+		if(!add_to_complist(cp_ret, &n, name))
 			free(name);
 	}
 	

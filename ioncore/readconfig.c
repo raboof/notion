@@ -123,39 +123,80 @@ bool ioncore_add_default_paths(const char *appname, const char *etcdir,
 /*{{{ get_cfgfile */
 
 
-static char *do_get_cfgfile_for(bool core, const char *module,
-								const char *postfix, bool noaccesstest)
+char *search_etcpath2(const char *const *files, bool noaccesstest)
 {
-	int tryno, psfnotset=(postfix==NULL);
-	char *tmp, **dir;
-	
-	if(module==NULL)
-		return NULL;
-	
+	char *tmp=NULL;
+	char *const *dir;
+	const char *const *file;
 	for(dir=etcpaths; *dir!=NULL; dir++){
-		for(tryno=psfnotset; tryno<2; tryno++){
-			if(tryno==0)
-				libtu_asprintf(&tmp, "%s/%s-%s.%s", *dir, module, postfix,
-							   extl_extension());
-			else
-				libtu_asprintf(&tmp, "%s/%s.%s", *dir, module,
-							   extl_extension());
+		for(file=files; *file!=NULL; file++){
+			libtu_asprintf(&tmp, "%s/%s", *dir, *file);
 			if(tmp==NULL){
 				warn_err();
 				continue;
 			}
-
-			if(noaccesstest || access(tmp, F_OK)==0)
+			if(access(tmp, F_OK)==0)
 				return tmp;
-		
+		free(tmp);
+		}
+	}
+	return NULL;
+}
+
+
+EXTL_EXPORT
+void ioncore_include(const char *file, const char *current_dir)
+{
+	const char *files[]={NULL, NULL};
+	char* tmp=NULL;
+	
+	libtu_asprintf(&tmp, "%s/%s", current_dir, file);
+	if(tmp!=NULL){
+		if(access(tmp, F_OK)!=0){
 			free(tmp);
+			tmp=NULL;
 		}
 	}
 	
-	warn("Could not find configuration file %s.%s.", module,
-		 extl_extension());
+	if(tmp==NULL){
+		files[0]=file;
+		tmp=search_etcpath2(files, FALSE);
+	}
 	
-	return NULL;
+	if(tmp==NULL){
+		warn("Could not find file %s in search path", file);
+		return;
+	}
+	
+	extl_dofile(tmp);
+	free(tmp);
+}
+
+
+static char *do_get_cfgfile_for(bool core, const char *module,
+								const char *postfix, bool noaccesstest)
+{
+	char *files[]={NULL, NULL, NULL};
+	char *ret;
+	
+	if(module==NULL)
+		return NULL;
+	
+	if(postfix!=NULL){
+		libtu_asprintf(files+0, "%s-%s.%s", module, postfix,
+					   extl_extension());
+	}
+	libtu_asprintf(files+(postfix==NULL ? 0 : 1), "%s.%s", module,
+				   extl_extension());
+	
+	ret=search_etcpath2((const char**)&files, noaccesstest);
+	
+	if(ret==NULL){
+		warn("Could not find configuration file %s.%s.", module,
+			 extl_extension());
+	}
+	
+	return ret;
 }
 
 
@@ -262,7 +303,7 @@ char *get_savefile_for(const char *module)
 
 bool read_config(const char *cfgfile)
 {
-	return extl_runfile(cfgfile);
+	return extl_dofile(cfgfile);
 }
 
 

@@ -83,8 +83,14 @@ end
 --
 
 function include(file)
-    -- ?
-    dofile("/home/tuomov/.ion-devel/" .. file)
+    local current_dir = "."
+    if CURRENT_FILE ~= nil then
+        local s, e, cdir, cfile=string.find(CURRENT_FILE, "(.*)([^/])");
+        if cdir ~= nil then
+            current_dir = cdir
+        end
+    end
+    ioncore_include(file, current_dir)
 end
 
 
@@ -110,11 +116,3 @@ function winprop(list)
     add_winprop(class, role, instance, list2)
 end
 
-
-
---
--- Compatibility
---
-
--- function region_set_wq(reg, q)
---    local scr=region_

@@ -6,16 +6,26 @@
 %objs;
 %exports;
 %chnds;
+$listmode=0;
 
-if($#ARGV<2){
-	print "Usage: mkexports.pl module files...\n";
-	exit;
+if($#ARGV>=0){
+    if($ARGV[0] eq "-list"){
+	$listmode=1;
+	shift @ARGV;
+    }
 }
 
-$module=$ARGV[0];
-$dest=$ARGV[1];
-shift @ARGV;
-shift @ARGV;
+if($listmode==0){
+    if($#ARGV<2){
+	print "Usage: mkexports.pl module files...\n";
+	exit;
+    }
+
+    $module=$ARGV[0];
+    $dest=$ARGV[1];
+    shift @ARGV;
+    shift @ARGV;
+}
 
 sub desc2ct
 {
@@ -117,7 +127,9 @@ sub get_t
     return ($d, $t);
 }
 
-print "Scanning source for exports...\n";
+if($listmode==0){
+    print "Scanning source for exports...\n";
+}
 
 while(<>){
     next unless /^\s*EXTL_EXPORT(\s|$)/;
@@ -137,8 +149,13 @@ while(<>){
     $a=~s/\n/ /g; 
     $a=~s/\s+/ /g;
     $a=~s/^\s+//g;
+    $a=~s/\s+$//g;
     
-    print "Processing \"$a\"\n";
+    if($listmode==1){
+	print "$a\n";
+    }else{
+	print "Processing \"$a\"\n";
+    }
     
     $a=~/^([a-zA-Z0-9_ *]+(\*|\s))([a-zA-Z0-9_]+) *\((.*)\)/;
     
@@ -174,6 +191,10 @@ while(<>){
     #print ">>$od:$ds\n";
     
     $exports{$fn}=[$od, $ds, $chnd];
+}
+
+if($listmode==1){
+    exit;
 }
 
 open H, ">$dest";
