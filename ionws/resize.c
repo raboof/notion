@@ -138,6 +138,7 @@ void ionframe_end_resize(WIonFrame *frame)
 {
 	if(end_resize()){
 		reset_timer(&resize_timer);
+		warp((WRegion*)frame);
 		grab_remove(resize_handler);
 	}
 }
@@ -152,6 +153,7 @@ void ionframe_cancel_resize(WIonFrame *frame)
 {
 	if(cancel_resize()){
 		reset_timer(&resize_timer);
+		warp((WRegion*)frame);
 		grab_remove(resize_handler);
 	}
 }

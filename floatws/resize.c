@@ -172,6 +172,7 @@ void floatframe_end_resize(WFloatFrame *frame)
 {
 	if(end_resize()){
 		reset_timer(&resize_timer);
+		warp((WRegion*)frame);
 		grab_remove(resize_handler);
 	}
 }
@@ -186,6 +187,7 @@ void floatframe_cancel_resize(WFloatFrame *frame)
 {
 	if(cancel_resize()){
 		reset_timer(&resize_timer);
+		warp((WRegion*)frame);
 		grab_remove(resize_handler);
 	}
 }
