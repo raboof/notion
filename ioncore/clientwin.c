@@ -617,7 +617,7 @@ static WRegion *clientwin_do_attach_transient(WClientWin *cwin,
                                               void *fnparams,
                                               WRegion *thereg)
 {
-    WWindow *par=REGION_PARENT_CHK(cwin, WWindow);
+    WWindow *par=REGION_PARENT(cwin);
     WRegion *reg;
     TransRepar tp, *tpold;
     WFitParams fp;
@@ -724,7 +724,7 @@ static bool reparent_root(WClientWin *cwin)
     if(!XGetWindowAttributes(ioncore_g.dpy, cwin->win, &attr))
         return FALSE;
     
-    par=REGION_PARENT_CHK(cwin, WWindow);
+    par=REGION_PARENT(cwin);
     
     if(par==NULL){
         x=REGION_GEOM(cwin).x;
@@ -1051,7 +1051,7 @@ static bool clientwin_fitrep(WClientWin *cwin, WWindow *np, WFitParams *fp)
     if(np!=NULL){
         region_unset_parent((WRegion*)cwin);
         do_reparent_clientwin(cwin, np->win, geom.x, geom.y);
-        region_set_parent((WRegion*)cwin, (WRegion*)np);
+        region_set_parent((WRegion*)cwin, np);
         sendconfig_clientwin(cwin);
 
         if(!CLIENTWIN_IS_FULLSCREEN(cwin) && 

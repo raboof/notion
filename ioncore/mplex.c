@@ -1156,7 +1156,8 @@ bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg, int pos)
     WGenWS *mgr=NULL;
     
     assert(reg==NULL || (Obj*)reg==di->regwatch.obj ||
-           (REGION_MANAGER(reg)==NULL && REGION_PARENT(reg)==(WRegion*)mplex));
+           (REGION_MANAGER(reg)==NULL && 
+            REGION_PARENT(reg)==(WWindow*)mplex));
     
     if(oldstdisp!=NULL){
         mgr=OBJ_CAST(REGION_MANAGER(oldstdisp), WGenWS);

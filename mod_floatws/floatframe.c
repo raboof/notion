@@ -168,7 +168,7 @@ void floatframe_geom_from_initial_geom(WFloatFrame *frame,
 #else
     geom->x+=xgravity_deltax(gravity, -off.x, off.x+off.w);
     geom->y+=xgravity_deltay(gravity, -off.y, off.y+off.h);
-    region_convert_root_geom(region_parent((WRegion*)ws), geom);
+    region_convert_root_geom(REGION_PARENT_REG(ws), geom);
 #endif
 }
 
@@ -212,7 +212,7 @@ static void floatframe_rqgeom_clientwin(WFloatFrame *frame, WClientWin *cwin,
     else
         geom.y+=xgravity_deltay(gravity, -off.y, off.y+off.h);
 
-    par=region_parent((WRegion*)frame);
+    par=REGION_PARENT_REG(frame);
     region_convert_root_geom(par, &geom);
     if(par!=NULL){
         if(geom.x+geom.w<4)

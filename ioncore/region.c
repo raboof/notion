@@ -61,7 +61,7 @@ void region_init(WRegion *reg, WWindow *par, const WFitParams *fp)
     
     if(par!=NULL){
         reg->rootwin=((WRegion*)par)->rootwin;
-        region_set_parent(reg, (WRegion*)par);
+        region_set_parent(reg, par);
     }else{
         assert(OBJ_IS(reg, WRootWin));/* || OBJ_IS(reg, WScreen));*/
     }
@@ -285,7 +285,7 @@ static bool region_do_goto(WRegion *reg, int flags)
             return FALSE;
         return region_managed_goto(mgr, reg, flags);
     }else{
-        WRegion *par=region_parent(reg);
+        WRegion *par=REGION_PARENT_REG(reg);
         if(par!=NULL){
             if(!region_do_goto(par, flags))
                 return FALSE;
@@ -440,8 +440,8 @@ void region_detach_manager(WRegion *reg)
     
     /* Restore activity state to non-parent manager */
     if(region_may_control_focus(reg)){
-        WRegion *par=region_parent(reg);
-        if(par!=NULL && mgr!=par && region_parent(mgr)==par){
+        WRegion *par=REGION_PARENT_REG(reg);
+        if(par!=NULL && mgr!=par && REGION_PARENT_REG(mgr)==par){
             /* REGION_ACTIVE shouldn't be set for windowless regions
              * but make the parent's active_sub point to it
              * nevertheless so that region_may_control_focus can
@@ -490,17 +490,17 @@ void region_set_manager(WRegion *reg, WRegion *mgr, WRegion **listptr)
 }
 
 
-void region_set_parent(WRegion *reg, WRegion *parent)
+void region_set_parent(WRegion *reg, WWindow *parent)
 {
     assert(reg->parent==NULL && parent!=NULL);
-    LINK_ITEM(parent->children, reg, p_next, p_prev);
+    LINK_ITEM(((WRegion*)parent)->children, reg, p_next, p_prev);
     reg->parent=parent;
 }
 
 
 void region_unset_parent(WRegion *reg)
 {
-    WRegion *p=reg->parent;
+    WRegion *p=REGION_PARENT_REG(reg);
 
     if(p==NULL || p==reg)
         return;
@@ -529,7 +529,7 @@ WRegion *region_manager(WRegion *reg)
  * Returns the parent region of \var{reg}.
  */
 EXTL_EXPORT_MEMBER
-WRegion *region_parent(WRegion *reg)
+WWindow *region_parent(WRegion *reg)
 {
     return reg->parent;
 }
@@ -540,7 +540,7 @@ WRegion *region_manager_or_parent(WRegion *reg)
     if(reg->manager!=NULL)
         return reg->manager;
     else
-        return reg->parent;
+        return (WRegion*)(reg->parent);
 }
 
 
@@ -625,7 +625,7 @@ WScreen *region_screen_of(WRegion *reg)
     while(reg!=NULL){
         if(OBJ_IS(reg, WScreen))
             return (WScreen*)reg;
-        reg=region_parent(reg);
+        reg=REGION_PARENT_REG(reg);
     }
     return NULL;
 }
@@ -649,7 +649,7 @@ bool region_same_rootwin(const WRegion *reg1, const WRegion *reg2)
 EXTL_EXPORT_AS(WRegion, is_mapped)
 bool region_is_fully_mapped(WRegion *reg)
 {
-    for(; reg!=NULL; reg=region_parent(reg)){
+    for(; reg!=NULL; reg=REGION_PARENT_REG(reg)){
         if(!REGION_IS_MAPPED(reg))
             return FALSE;
     }
@@ -664,7 +664,7 @@ void region_rootgeom(WRegion *reg, int *xret, int *yret)
     *yret=REGION_GEOM(reg).y;
     
     while(1){
-        reg=region_parent(reg);
+        reg=REGION_PARENT_REG(reg);
         if(reg==NULL)
             break;
         *xret+=REGION_GEOM(reg).x;
@@ -677,7 +677,7 @@ void region_rootpos(WRegion *reg, int *xret, int *yret)
 {
     WRegion *par;
 
-    par=region_parent(reg);
+    par=REGION_PARENT_REG(reg);
     
     if(par==NULL || par==reg){
         *xret=0;

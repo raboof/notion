@@ -34,7 +34,7 @@
 bool splitunused_init(WSplitUnused *split, const WRectangle *geom,
                       WPaneWS *ws)
 {
-    WWindow *par=REGION_PARENT_CHK(ws, WWindow);
+    WWindow *par=REGION_PARENT(ws);
     WUnusedWin *uwin;
     WFitParams fp;
 
@@ -100,7 +100,7 @@ static void splitfloat_set_borderlines(WSplitFloat *split)
 bool splitfloat_init(WSplitFloat *split, const WRectangle *geom, 
                      WPaneWS *ws, int dir)
 {
-    WWindow *par=REGION_PARENT_CHK(ws, WWindow);
+    WWindow *par=REGION_PARENT(ws);
     WFitParams fp;
     
     assert(par!=NULL);

@@ -219,7 +219,7 @@ static bool moveresmode_init(WMoveresMode *mode, WRegion *reg,
     if(tmpmode!=NULL)
         return FALSE;
     
-    parent=REGION_PARENT_CHK(reg, WWindow);
+    parent=REGION_PARENT(reg);
     
     if(parent==NULL)
         return FALSE;
@@ -253,7 +253,7 @@ static bool moveresmode_init(WMoveresMode *mode, WRegion *reg,
             mode->snapgeom.x=0;
             mode->snapgeom.y=0;    
             mode->snap_enabled=FALSE;
-        }else if(REGION_PARENT(mgr)==(WRegion*)parent){
+        }else if(REGION_PARENT(mgr)==parent){
             mode->snap_enabled=TRUE;
         }
     }

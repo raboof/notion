@@ -14,6 +14,7 @@
 #include "window.h"
 #include "pointer.h"
 #include "grab.h"
+#include "region-iter.h"
 
 
 /*{{{ Resize */
@@ -90,7 +91,7 @@ static void p_moveres_cancel(WWindow *wwin)
 
 static void confine_to_parent(WWindow *wwin)
 {
-    WRegion *par=region_parent((WRegion*)wwin);
+    WRegion *par=REGION_PARENT_REG(wwin);
     if(par!=NULL)
         ioncore_grab_confine_to(region_xwindow(par));
 }

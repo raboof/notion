@@ -644,6 +644,7 @@ static void dock_managed_rqgeom_(WDock *dock, WRegion *reg, int flags,
     int n_dockapps=0, max_w=1, max_h=1, total_w=0, total_h=0;
     int pos, grow;
     WRectangle tile_size;
+    WWindow *par=REGION_PARENT(dock);
     
     /* dock_resize calls with NULL parameters. */
     assert(reg!=NULL || (geomret==NULL && !(flags&REGION_RQGEOM_TRYONLY)));
@@ -653,8 +654,14 @@ static void dock_managed_rqgeom_(WDock *dock, WRegion *reg, int flags,
     /* Determine parent and tile geoms */
     parent_geom.x=0;
     parent_geom.y=0;
-    parent_geom.w=((WRegion*)dock)->parent->geom.w;
-    parent_geom.h=((WRegion*)dock)->parent->geom.h;
+    if(par!=NULL){
+        parent_geom.w=REGION_GEOM(par).w;
+        parent_geom.h=REGION_GEOM(par).h;
+    }else{
+        /* Should not happen in normal operation. */
+        parent_geom.w=1;
+        parent_geom.h=1;
+    }
     
     dock_get_tile_size(dock, &tile_size);
 
@@ -976,7 +983,7 @@ static void dock_do_set(WDock *dock, ExtlTab conftab, bool resize)
         dock->is_auto=b;
 
     if(resize && (growset || posset)){
-        WMPlex *par=OBJ_CAST(region_parent((WRegion*)dock), WMPlex);
+        WMPlex *par=OBJ_CAST(REGION_PARENT(dock), WMPlex);
         WRegion *stdisp=NULL;
         int pos;
         

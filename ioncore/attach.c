@@ -100,7 +100,7 @@ WRegion *region__attach_reparent(WRegion *mgr, WRegion *reg,
             goto err;
     }
     
-    for(reg2=region_parent(mgr); reg2!=NULL; reg2=region_parent(reg2)){
+    for(reg2=REGION_PARENT_REG(mgr); reg2!=NULL; reg2=REGION_PARENT_REG(reg2)){
         if(reg2==reg)
             goto err;
     }

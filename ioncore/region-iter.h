@@ -36,8 +36,8 @@
       (REG)!=NULL;                                                 \
       (REG)=(NEXT), (NEXT)=((REG)==NULL ? NULL : (REG)->mgr_next))
 
-#define REGION_PARENT(NAM) (((WRegion*)NAM)->parent)
-#define REGION_PARENT_CHK(NAM, TYPE) OBJ_CAST(REGION_PARENT(NAM), TYPE)
+#define REGION_PARENT(REG) (((WRegion*)(REG))->parent)
+#define REGION_PARENT_REG(REG) ((WRegion*)REGION_PARENT(REG))
 
 /* Parent -- child */
 

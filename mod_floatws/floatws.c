@@ -445,7 +445,7 @@ static bool floatws_do_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
     if(redir==MANAGE_REDIR_STRICT_YES)
         return FALSE;
 
-    par=REGION_PARENT_CHK(ws, WWindow);
+    par=REGION_PARENT(ws);
     assert(par!=NULL);
     
     /* Create frame with dummy geometry */
@@ -520,7 +520,7 @@ static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
     WFloatFrame *frame;
     WWindow *par;
     
-    par=REGION_PARENT_CHK(ws, WWindow);
+    par=REGION_PARENT(ws);
     
     if(par==NULL)
         return FALSE;
@@ -622,7 +622,7 @@ bool mod_floatws_clientwin_do_manage(WClientWin *cwin,
     if(param->tfor==NULL)
         return FALSE;
 
-    stack_above=(WRegion*)REGION_PARENT_CHK(param->tfor, WFloatFrame);
+    stack_above=OBJ_CAST(REGION_PARENT(param->tfor), WFloatFrame);
     if(stack_above==NULL)
         return FALSE;
     
@@ -939,7 +939,7 @@ void floatws_restack(WFloatWS *ws, Window other, int mode)
     WFloatStacking *st, *stnext, *chain=NULL;
     bool samepar=FALSE;
     Window ref=other;
-    WMPlex *par=REGION_PARENT_CHK(ws, WMPlex);
+    WMPlex *par=OBJ_CAST(REGION_PARENT(ws), WMPlex);
 
     assert(mode==Above || mode==Below);
 
@@ -1209,7 +1209,7 @@ static WRegion *floatws_do_attach(WFloatWS *ws, WRegionAttachHandler *fn,
     WWindow *par;
     WRegion *reg;
 
-    par=REGION_PARENT_CHK(ws, WWindow);
+    par=REGION_PARENT(ws);
     assert(par!=NULL);
     
     reg=fn(par, fp, fnparams);

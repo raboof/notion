@@ -34,8 +34,7 @@
 #define CLIENTWIN_USE_NET_WM_NAME      0x10000
 #define CLIENTWIN_TRANSIENTS_AT_TOP     0x20000
 
-#define CLIENTWIN_IS_FULLSCREEN(cwin) \
-        (REGION_PARENT_CHK(cwin, WScreen)!=NULL)
+#define CLIENTWIN_IS_FULLSCREEN(cwin) OBJ_IS(REGION_PARENT(cwin), WScreen)
 
 
 typedef struct{

@@ -70,7 +70,8 @@ DECLCLASS(WRegion){
     void *rootwin;
     bool flags;
 
-    WRegion *parent, *children;
+    WWindow *parent;
+    WRegion *children;
     WRegion *p_next, *p_prev;
     
     void *bindings;
@@ -138,10 +139,10 @@ extern bool region_is_fully_mapped(WRegion *reg);
 
 extern void region_detach_manager(WRegion *reg);
 
-extern WRegion *region_parent(WRegion *reg);
+extern WWindow *region_parent(WRegion *reg);
 extern WRegion *region_manager(WRegion *reg);
 extern WRegion *region_manager_or_parent(WRegion *reg);
-extern void region_set_parent(WRegion *reg, WRegion *par);
+extern void region_set_parent(WRegion *reg, WWindow *par);
 extern void region_set_manager(WRegion *reg, WRegion *mgr, WRegion **listptr);
 extern void region_unset_manager(WRegion *reg, WRegion *mgr, WRegion **listptr);
 extern void region_unset_parent(WRegion *reg);

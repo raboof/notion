@@ -113,7 +113,7 @@ static void await_watch_handler(Watch *watch, WRegion *prev)
 {
     WRegion *r;
     while(1){
-        r=region_parent(prev);
+        r=REGION_PARENT_REG(prev);
         if(r==NULL)
             break;
         
@@ -143,7 +143,7 @@ static bool region_is_await(WRegion *reg)
     while(aw!=NULL){
         if(aw==reg)
             return TRUE;
-        aw=region_parent(aw);
+        aw=REGION_PARENT_REG(aw);
     }
     
     return FALSE;
@@ -180,7 +180,7 @@ void region_got_focus(WRegion *reg)
         D(fprintf(stderr, "got focus (inact) %s [%p]\n", OBJ_TYPESTR(reg), reg);)
         reg->flags|=REGION_ACTIVE;
         
-        par=region_parent(reg);
+        par=REGION_PARENT_REG(reg);
         if(par!=NULL)
             par->active_sub=reg;
         
@@ -193,7 +193,7 @@ void region_got_focus(WRegion *reg)
              * signal their managers.
              */
             region_managed_activated(mgr, tmp);
-            if(REGION_PARENT(reg)==mgr)
+            if(REGION_PARENT_REG(reg)==mgr)
                 break;
             tmp=mgr;
             mgr=REGION_MANAGER(mgr);
@@ -260,7 +260,7 @@ bool region_may_control_focus(WRegion *reg)
     if(region_is_await(reg))
         return TRUE;
     
-    par=region_parent(reg);
+    par=REGION_PARENT_REG(reg);
     
     if(par==NULL || !REGION_IS_ACTIVE(par))
         return FALSE;

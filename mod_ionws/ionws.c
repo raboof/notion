@@ -676,8 +676,7 @@ WFrame *ionws_split_top(WIonWS *ws, const char *dirstr)
         return NULL;
     
     nnode=splittree_split(ws->split_tree, dir, primn, mins, 
-                          ws->create_frame_fn,
-                          REGION_PARENT_CHK(ws, WWindow));
+                          ws->create_frame_fn, REGION_PARENT(ws));
     
     if(nnode==NULL)
         return NULL;
@@ -725,7 +724,7 @@ WFrame *ionws_split_at(WIonWS *ws, WFrame *frame, const char *dirstr,
     
     nnode=splittree_split((WSplit*)node, dir, primn, mins, 
                           ws->create_frame_fn, 
-                          REGION_PARENT_CHK(ws, WWindow));
+                          REGION_PARENT(ws));
     
     if(nnode==NULL){
         warn(TR("Unable to split."));
@@ -1052,7 +1051,7 @@ WSplit *load_splitst(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
 static WRegion *do_attach(WIonWS *ws, WRegionAttachHandler *handler,
                           void *handlerparams, const WRectangle *geom)
 {
-    WWindow *par=REGION_PARENT_CHK(ws, WWindow);
+    WWindow *par=REGION_PARENT(ws);
     WFitParams fp;
     assert(par!=NULL);
     fp.g=*geom;

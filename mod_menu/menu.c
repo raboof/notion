@@ -627,7 +627,7 @@ static void show_sub(WMenu *menu, int n)
     WMenu *submenu;
     WWindow *par;
     
-    par=REGION_PARENT_CHK(menu, WWindow);
+    par=REGION_PARENT(menu);
     
     if(par==NULL)
         return;
@@ -923,7 +923,7 @@ static int scrolld(int d)
 
 static bool get_parent_g(WMenu *menu, WRectangle *geom)
 {
-    WRegion *p=REGION_PARENT(menu);
+    WRegion *p=REGION_PARENT_REG(menu);
     if(p==NULL)
         return FALSE;
     *geom=REGION_GEOM(p);
@@ -1063,7 +1063,7 @@ static void end_scroll(WMenu *menu)
 
 static void check_scroll(WMenu *menu, int x, int y)
 {
-    WRegion *parent=REGION_PARENT(menu);
+    WRegion *parent=REGION_PARENT_REG(menu);
     int rx, ry;
     WTimerHandler *fn=NULL;
      

@@ -210,7 +210,7 @@ static bool submapgrab_handler(WRegion *reg, XEvent *ev)
             break;
         if(OBJ_IS(reg, WRootWin))
             break;
-        reg=REGION_PARENT(reg);
+        reg=REGION_PARENT_REG(reg);
     }
 
     /* if it is just a modifier, then return. */
@@ -272,7 +272,7 @@ void ioncore_do_handle_keypress(XKeyEvent *ev)
                 break;
             if(OBJ_IS(reg, WRootWin))
                 break;
-            reg=region_parent(reg);
+            reg=REGION_PARENT_REG(reg);
         }while(reg!=NULL);
     }else{
         if(reg->submapstat.key!=None){

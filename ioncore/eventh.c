@@ -318,7 +318,7 @@ void ioncore_handle_enter_window(XEvent *ev)
             while(r2!=NULL){
                 if(r2==reg)
                     break;
-                r2=REGION_PARENT_CHK(r2, WRegion);
+                r2=REGION_PARENT_REG(r2);
             }
             if(r2!=NULL)
                 continue;
@@ -335,7 +335,7 @@ void ioncore_handle_enter_window(XEvent *ev)
     while(reg!=NULL){
         if(reg->flags&REGION_SKIP_FOCUS)
             return;
-        reg=region_parent(reg);
+        reg=REGION_PARENT_REG(reg);
     }
 
     region_goto_flags(freg, (REGION_GOTO_FOCUS|

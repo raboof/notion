@@ -43,7 +43,7 @@ WHook *panews_make_placement_alt=NULL;
 
 static WFrame *create_frame_for(WPaneWS *ws, WRegion *reg)
 {
-    WWindow *par=REGION_PARENT_CHK(ws, WWindow);
+    WWindow *par=REGION_PARENT(ws);
     WFitParams fp;
     WRectangle mg;
     WFrame *frame;
