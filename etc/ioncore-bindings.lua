@@ -65,6 +65,7 @@ global_bindings{
     -- and "F12", respectively, but on SunOS, they're something  else 
     -- (although the keys on the keyboard are the same).
     kpress(SECOND_MOD..KEYF12, make_bigmenu_fn("mainmenu")),
+    mpress("Button2", make_pmenu_fn("windowlist")),
     mpress("Button3", make_pmenu_fn("mainmenu")),
     
     --kpress(DEFAULT_MOD.."Menu", make_bigmenu_fn("mainmenu")),

@@ -18,6 +18,7 @@ if _LOADED["menulib"] then return end
 -- Table to hold defined menus.
 local menus={}
 
+
 --DOC
 -- Define a new menu with \var{name} being the menu's name and \var{tab} 
 -- being a table of menu entries.
@@ -25,12 +26,17 @@ function defmenu(name, tab)
     menus[name]=tab
 end
 
+
 --DOC
 -- If \var{menu_or_name} is a string, returns a menu defined
 -- with \fnref{defmenu}, else return \var{menu_or_name}.
 function getmenu(menu_or_name)
     if type(menu_or_name)=="string" then
-        return menus[menu_or_name]
+        if type(menus[menu_or_name])=="table" then
+            return menus[menu_or_name]
+        elseif type(menus[menu_or_name])=="function" then
+            return menus[menu_or_name]()
+        end
     else
         return menu_or_name
     end
@@ -46,11 +52,12 @@ end
 --DOC
 -- Use this function to define menu entries for submenus.
 function submenu(name, sub_or_name)
-    local sub=getmenu(sub_or_name)
-    if not sub then
-        warn("Submenu unknown or nil")
-    end
-    return {name=name, submenu=sub}
+    return {
+        name=name,
+        submenu_fn=function() 
+                       return getmenu(sub_or_name) 
+                   end
+    }
 end
 
 
@@ -99,6 +106,37 @@ function make_pmenu_fn(menu_or_name)
                return menu_pmenu(win, wrapper, getmenu(menu_or_name))
            end
 end
+
+
+-- Window list
+
+function menus.windowlist()
+    local cwins=complete_clientwin("")
+    table.sort(cwins)
+    local entries={}
+    for i, name in cwins do
+        local cwin=lookup_clientwin(name)
+        entries[i]=menuentry(name, function() cwin:goto() end)
+    end
+    
+    return entries
+end
+
+
+-- Workspace list.
+
+function menus.workspacelist()
+    local wss=complete_workspace("")
+    table.sort(wss)
+    local entries={}
+    for i, name in wss do
+        local ws=lookup_workspace(name)
+        entries[i]=menuentry(name, function() ws:goto() end)
+    end
+    
+    return entries
+end
+
 
 -- Mark ourselves loaded.
 _LOADED["menulib"]=true

@@ -410,6 +410,7 @@ static void menu_release_gr(WMenu *menu, Window win)
 static WMenuEntry *preprocess_menu(ExtlTab tab, int *n_entries)
 {
 	ExtlTab entry, sub;
+	ExtlFn fn;
 	WMenuEntry *entries;
 	int i, n;
 	
@@ -430,7 +431,10 @@ static WMenuEntry *preprocess_menu(ExtlTab tab, int *n_entries)
 	for(i=1; i<=n; i++){
 		entries[i-1].title=NULL;
 		entries[i-1].flags=0;
-		if(extl_table_getis(tab, i, "submenu", 't', &sub)){
+		if(extl_table_getis(tab, i, "submenu_fn", 'f', &fn)){
+			entries[i-1].flags|=WMENUENTRY_SUBMENU;
+			extl_unref_fn(fn);
+		}else if(extl_table_getis(tab, i, "submenu", 't', &sub)){
 			entries[i-1].flags|=WMENUENTRY_SUBMENU;
 			extl_unref_table(sub);
 		}
@@ -601,9 +605,20 @@ static void show_sub(WMenu *menu, int n)
 		fnp.ref_y=REGION_GEOM(menu).y;
 	}
 
-	fnp.handler=extl_ref_fn(menu->handler);
 	fnp.tab=extl_table_none();
-	extl_table_getis(menu->tab, n+1, "submenu", 't', &(fnp.tab));
+	{
+		ExtlFn fn;
+		if(extl_table_getis(menu->tab, n+1, "submenu_fn", 'f', &fn)){
+			extl_call(fn, NULL, "t", &(fnp.tab));
+			extl_unref_fn(fn);
+		}else{
+			extl_table_getis(menu->tab, n+1, "submenu", 't', &(fnp.tab));
+		}
+		if(fnp.tab==extl_table_none())
+			return;
+	}
+	
+	fnp.handler=extl_ref_fn(menu->handler);
 	fnp.pmenu_mode=menu->pmenu_mode;
 	fnp.big_mode=menu->big_mode;
 	fnp.submenu_mode=TRUE;
