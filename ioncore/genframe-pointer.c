@@ -257,41 +257,32 @@ static WRegion *fnd(Window root, int x, int y)
 {
 	Window win=root;
 	int dstx, dsty;
-	WRegion *reg=NULL, *reg2;
-	WRegion *w=NULL;
+	WRegion *reg=NULL;
+	WWindow *w=NULL;
+	WScreen *scr;
 	
-	/* Can't use FIND_WINDOW_T because the XSaveContext association might
-	 * be to a WScreen.
-	 */
-	w=(WRegion*)find_rootwin_for_root(root);
-
-	if(w==NULL)
-		return NULL;
+	FOR_ALL_SCREENS(scr){
+		if(ROOT_OF(scr)==root &&
+		   coords_in_rect(&REGION_GEOM(scr), x, y)){
+			break;
+		}
+	}
 	
-	do{
-		if(!XTranslateCoordinates(wglobal.dpy, root, win,
+	w=(WWindow*)scr;
+	
+	while(w!=NULL){
+		if(HAS_DYN(w, region_handle_drop))
+			reg=(WRegion*)w;
+		
+		if(!XTranslateCoordinates(wglobal.dpy, root, w->win,
 								  x, y, &dstx, &dsty, &win)){
 			return NULL;
 		}
 		
-		if(win==None){
-			x-=REGION_GEOM(w).x;
-			y-=REGION_GEOM(w).y;
-			FOR_ALL_TYPED_CHILDREN(w, reg2, WRegion){
-				if(region_is_fully_mapped(reg2) &&
-				   coords_in_rect(&REGION_GEOM(reg2), x, y) &&
-				   HAS_DYN(reg2, region_handle_drop)){
-					return reg2;
-				}
-			}
-			break;
-		}
-		w=(WRegion*)FIND_WINDOW_T(win, WWindow);
-		if(w==NULL)
-			break;
-		if(HAS_DYN(w, region_handle_drop))
-			reg=(WRegion*)w;
-	}while(1);
+		w=FIND_WINDOW_T(win, WWindow);
+		x=dstx;
+		y=dsty;
+	}
 
 	return reg;
 }

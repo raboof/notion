@@ -545,6 +545,15 @@ void mplex_attach_tagged(WMPlex *mplex)
 static bool mplex_handle_drop(WMPlex *mplex, int x, int y,
 							  WRegion *dropped)
 {
+	if(mplex->current_sub!=NULL &&
+	   HAS_DYN(mplex->current_sub, region_handle_drop)){
+		int rx, ry;
+		region_rootpos(mplex->current_sub, &rx, &ry);
+		if(coords_in_rect(&REGION_GEOM(mplex->current_sub), x-rx, y-ry)){
+			if(region_handle_drop(mplex->current_sub, x, y, dropped))
+				return TRUE;
+		}
+	}
 	return mplex_attach_simple(mplex, dropped, TRUE);
 }
 
