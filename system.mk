@@ -116,14 +116,6 @@ DEFINES += -DCF_XFREE86_TEXTPROP_BUG_WORKAROUND
 #EXTRA_LIBS += -liconv -lutf8 -L/usr/local/lib
 #EXTRA_INCLUDES += -I/usr/local/include
 
-# Uncomment to enable Xft (anti-aliased fonts) support. 
-# NOTE: This feature is a bonus that may or may not work. I have better
-# things to do than test something I strongly dislike after every change to
-# Ion.
-#DEFINES += -DCF_XFT
-#X11_INCLUDES += `xft-config --cflags`
-#X11_LIBS += `xft-config --libs`
-
 
 ##
 ## libc
