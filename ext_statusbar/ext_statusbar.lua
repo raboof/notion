@@ -330,7 +330,7 @@ end
 
 
 -- Mark ourselves loaded.
-_LOADED["mod_menu"]=true
+_LOADED["ext_statusbar"]=true
 
 
 -- Load user configuration file
