@@ -233,7 +233,7 @@ local function refresh_styles()
             return
         end
         for _, s in dirs do
-            cmd=cmd.." "..s.."/look-"
+            cmd=cmd.." "..string.shell_safe(s.."/look-")
         end
         
         popen_bgread(cmd, coroutine.wrap(receive_styles))

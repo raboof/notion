@@ -160,7 +160,7 @@ function querylib.make_execwith_fn(prompt, init, prog, completor)
     local function handle_execwith(frame, str)
         local p, err=getprog(prog)
         if p then
-            exec_in(frame, p.." "..str)
+            exec_in(frame, p.." "..string.shell_safe(str))
         else
             query_fwarn(frame, err)
         end
@@ -185,14 +185,14 @@ function querylib.make_execfile_fn(prompt, prog)
         local p, err=getprog(prog)
         if p then
             querylib.last_dir=string.gsub(str, "^(.*/)[^/]-$", "%1")
-            exec_in(frame, p.." ".. str)
+            exec_in(frame, p.." "..string.shell_safe(str))
         else
             query_fwarn(frame, err)
         end
     end
     
-    return querylib.make_frame_fn(prompt, querylib.get_initdir, handle_execwith, 
-                                  querylib.file_completor)
+    return querylib.make_frame_fn(prompt, querylib.get_initdir, 
+                                  handle_execwith, querylib.file_completor)
 end
 
 
@@ -383,10 +383,9 @@ function querylib.file_completor(wedln, str, wp)
         wedln:set_completions(results)
     end
     
-    str=string.gsub(str, "'", "'\\''")
     local ic=lookup_script("ion-completefile")
     if ic then
-        popen_bgread(ic..(wp or "").." '"..str.."' ",
+        popen_bgread(ic..(wp or " ")..string.shell_safe(str),
                      coroutine.wrap(receive_data))
     end
 end
