@@ -1174,7 +1174,7 @@ WSplit *ionws_load_node_default(WIonWS *ws, const WRectangle *geom,
     else if(strcmp(typestr, "WSplitSplit")==0)
         node=load_splitsplit(ws, geom, tab);
     else if(strcmp(typestr, "WSplitST")==0)
-        node=load_splitst(ws, geom, tab);
+        node=NULL;/*load_splitst(ws, geom, tab);*/
     else
         WARN_FUNC("Unknown split type.");
     
