@@ -91,6 +91,10 @@ static bool sm_do_manage(WClientWin *cwin, const WManageParams *param)
 /*{{{ Init/deinit */
 
 
+extern bool mod_sm_register_exports();
+extern void mod_sm_unregister_exports();
+
+
 static void save_id()
 {
     ExtlTab t=extl_create_table();
@@ -118,24 +122,6 @@ static void load_id()
 }
 
 
-int mod_sm_init()
-{
-    load_id();
-    
-    if(!sm_init_session()){
-        sm_set_ion_id(NULL);
-        return FALSE;
-    }
-
-    ioncore_set_sm_callbacks(mod_sm_add_match, mod_sm_get_configuration);
-    
-    ADD_HOOK(clientwin_do_manage_alt, sm_do_manage);
-    ADD_HOOK(ioncore_save_session_hook, save_id);
-
-    return TRUE;
-}
-
-
 void mod_sm_deinit()
 {
     REMOVE_HOOK(clientwin_do_manage_alt, sm_do_manage);
@@ -143,7 +129,33 @@ void mod_sm_deinit()
 
     ioncore_unset_sm_callbacks(mod_sm_add_match, mod_sm_get_configuration);
     
+    mod_sm_unregister_exports();
+    
     sm_close();
+}
+
+
+int mod_sm_init()
+{
+    load_id();
+    
+    if(!sm_init_session())
+        goto err;
+
+    if(!mod_sm_register_exports())
+        goto err;
+
+    if(!ioncore_set_sm_callbacks(mod_sm_add_match, mod_sm_get_configuration))
+        goto err;
+    
+    ADD_HOOK(clientwin_do_manage_alt, sm_do_manage);
+    ADD_HOOK(ioncore_save_session_hook, save_id);
+
+    return TRUE;
+    
+err:
+    mod_sm_deinit();
+    return FALSE;
 }
 
 
