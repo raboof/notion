@@ -83,7 +83,6 @@ DECLCLASS(WRegion){
     WRegionNameInfo ni;
     
     WRegion *manager;
-    WRegion *mgr_next, *mgr_prev;
     
     int mgd_activity;
 };
@@ -144,8 +143,8 @@ extern WWindow *region_parent(WRegion *reg);
 extern WRegion *region_manager(WRegion *reg);
 extern WRegion *region_manager_or_parent(WRegion *reg);
 extern void region_set_parent(WRegion *reg, WWindow *par);
-extern void region_set_manager(WRegion *reg, WRegion *mgr, WRegion **listptr);
-extern void region_unset_manager(WRegion *reg, WRegion *mgr, WRegion **listptr);
+extern void region_set_manager(WRegion *reg, WRegion *mgr);
+extern void region_unset_manager(WRegion *reg, WRegion *mgr);
 extern void region_unset_parent(WRegion *reg);
 
 extern WRootWin *region_rootwin_of(const WRegion *reg);

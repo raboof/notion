@@ -199,8 +199,8 @@ static void move_sticky(WFloatWS *ws)
             ws->current_managed=st->reg;
         }
         
-        region_unset_manager(st->reg, (WRegion*)ws2, NULL);
-        region_set_manager(st->reg, (WRegion*)ws, NULL);
+        region_unset_manager(st->reg, (WRegion*)ws2);
+        region_set_manager(st->reg, (WRegion*)ws);
     }
 }
 
@@ -305,7 +305,7 @@ static void floatws_managed_remove(WFloatWS *ws, WRegion *reg)
     if(reg==ws->managed_stdisp)
         ws->managed_stdisp=NULL;
     
-    region_unset_manager(reg, (WRegion*)ws, NULL);
+    region_unset_manager(reg, (WRegion*)ws);
     
     region_remove_bindmap_owned(reg, mod_floatws_floatws_bindmap,
                                 (WRegion*)ws);
@@ -439,7 +439,7 @@ static bool floatws_add_managed(WFloatWS *ws, WRegion *reg)
     st->above=NULL;
     st->sticky=FALSE;
 
-    region_set_manager(reg, (WRegion*)ws, NULL);
+    region_set_manager(reg, (WRegion*)ws);
     
     region_add_bindmap_owned(reg, mod_floatws_floatws_bindmap, (WRegion*)ws);
 

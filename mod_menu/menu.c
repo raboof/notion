@@ -620,7 +620,9 @@ static void menu_managed_remove(WMenu *menu, WRegion *sub)
     if(sub!=(WRegion*)menu->submenu)
         return;
 
-    region_unset_manager(sub, (WRegion*)menu, (WRegion**)&(menu->submenu));
+    menu->submenu=NULL;
+    
+    region_unset_manager(sub, (WRegion*)menu);
 
     if(mcf)
         region_do_set_focus((WRegion*)menu, FALSE);
@@ -690,8 +692,9 @@ static void show_sub(WMenu *menu, int n)
     if(submenu==NULL)
         return;
     
-    region_set_manager((WRegion*)submenu, (WRegion*)menu,
-                       (WRegion**)&(menu->submenu));
+    menu->submenu=submenu;
+    region_set_manager((WRegion*)submenu, (WRegion*)menu);
+        
     region_restack((WRegion*)submenu, MENU_WIN(menu), Above);
     region_map((WRegion*)submenu);
     

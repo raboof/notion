@@ -16,9 +16,6 @@
 #include "region.h"
 #include <libextl/extl.h>
 
-extern ExtlTab managed_list_to_table(WRegion *list, 
-                                    bool (*filter)(WRegion *r));
-
 typedef Obj *ObjIterator(void *st);
 
 extern ExtlTab extl_list_to_obj_table(ObjIterator *iter, void *st);

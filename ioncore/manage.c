@@ -190,7 +190,8 @@ static bool do_rescue(WRegion *reg, WRegion *r)
 }
 
 
-bool region_rescue_managed_clientwins(WRegion *reg, WRegion *list)
+#warning "TODO: FIX"
+/*bool region_rescue_managed_clientwins(WRegion *reg, WRegion *list)
 {
     WRegion *r, *next;
     bool res=TRUE;
@@ -205,7 +206,7 @@ bool region_rescue_managed_clientwins(WRegion *reg, WRegion *list)
     reg->flags&=~REGION_CWINS_BEING_RESCUED;
 
     return res;
-}
+}*/
 
 
 bool region_rescue_child_clientwins(WRegion *reg)

@@ -52,8 +52,6 @@ void region_init(WRegion *reg, WWindow *par, const WFitParams *fp)
     reg->ni.namespaceinfo=NULL;
     
     reg->manager=NULL;
-    reg->mgr_next=NULL;
-    reg->mgr_prev=NULL;
     
     reg->mgd_activity=FALSE;
 
@@ -463,28 +461,22 @@ void region_detach_manager(WRegion *reg)
 
 
 /* This should only be called within region_managed_remove */
-void region_unset_manager(WRegion *reg, WRegion *mgr, WRegion **listptr)
+void region_unset_manager(WRegion *reg, WRegion *mgr)
 {
     if(reg->manager!=mgr)
         return;
     reg->manager=NULL;
-    if(listptr!=NULL){
-        UNLINK_ITEM(*listptr, reg, mgr_next, mgr_prev);
-    }
     
     if(!OBJ_IS_BEING_DESTROYED(reg))
         region_manager_changed(reg, NULL);
 }
 
 
-void region_set_manager(WRegion *reg, WRegion *mgr, WRegion **listptr)
+void region_set_manager(WRegion *reg, WRegion *mgr)
 {
     assert(reg->manager==NULL);
     
     reg->manager=mgr;
-    if(listptr!=NULL){
-        LINK_ITEM(*listptr, reg, mgr_next, mgr_prev);
-    }
     
     region_manager_changed(reg, mgr);
 }

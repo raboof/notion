@@ -17,29 +17,10 @@
 #define REGION_MANAGER(R)          (((WRegion*)(R))->manager)
 #define REGION_MANAGER_CHK(R, TYPE) OBJ_CAST(REGION_MANAGER(R), TYPE)
 
-#define REGION_FIRST_MANAGED(LIST)     (LIST)
-#define REGION_LAST_MANAGED(LIST)     ((LIST)==NULL ? NULL              \
-                                     : REGION_PREV_MANAGED_WRAP(LIST, LIST))
-#define REGION_NEXT_MANAGED(LIST, REG) (((WRegion*)(REG))->mgr_next)
-#define REGION_PREV_MANAGED(LIST, REG) ((((WRegion*)(REG))->mgr_prev->mgr_next) ? \
-                                 (((WRegion*)(REG))->mgr_prev) : NULL)
-#define REGION_NEXT_MANAGED_WRAP(LIST, REG) (((REG) && ((WRegion*)(REG))->mgr_next) \
-                                      ? ((WRegion*)(REG))->mgr_next : (LIST))
-#define REGION_PREV_MANAGED_WRAP(LIST, REG) ((REG) ? ((WRegion*)(REG))->mgr_prev \
-                                      : (LIST))
-
-#define FOR_ALL_MANAGED_ON_LIST(LIST, REG) \
-    for((REG)=(WRegion*)(LIST); (REG)!=NULL; (REG)=(REG)->mgr_next)
-
-#define FOR_ALL_MANAGED_ON_LIST_W_NEXT(LIST, REG, NEXT)            \
-  for((REG)=(LIST), (NEXT)=((REG)==NULL ? NULL : (REG)->mgr_next); \
-      (REG)!=NULL;                                                 \
-      (REG)=(NEXT), (NEXT)=((REG)==NULL ? NULL : (REG)->mgr_next))
+/* Parent -- child */
 
 #define REGION_PARENT(REG) (((WRegion*)(REG))->parent)
 #define REGION_PARENT_REG(REG) ((WRegion*)REGION_PARENT(REG))
-
-/* Parent -- child */
 
 #define REGION_FIRST_CHILD(PAR) (((WRegion*)(PAR))->children)
 #define REGION_LAST_CHILD(PAR)                                               \

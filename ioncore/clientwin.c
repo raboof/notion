@@ -647,7 +647,7 @@ static WRegion *clientwin_do_attach_transient(WClientWin *cwin,
         destroy_obj((Obj*)reg);
         return NULL;
     }
-    region_set_manager(reg, (WRegion*)cwin, NULL);
+    region_set_manager(reg, (WRegion*)cwin);
     
     region_stacking((WRegion*)cwin, &bottom, &top);
     region_restack(reg, top, Above);
@@ -678,7 +678,7 @@ static void clientwin_managed_remove(WClientWin *cwin, WRegion *transient)
     bool mcf=region_may_control_focus((WRegion*)cwin);
     
     symlist_remove(&(cwin->transient_list), transient);
-    region_unset_manager(transient, (WRegion*)cwin, NULL);
+    region_unset_manager(transient, (WRegion*)cwin);
     
     if(mcf){
         WRegion *reg=LATEST_TRANSIENT(cwin);

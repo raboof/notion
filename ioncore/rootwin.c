@@ -291,7 +291,7 @@ static WScreen *add_screen(WRootWin *rw, int id, const WRectangle *geom,
     if(scr==NULL)
         return NULL;
     
-    region_set_manager((WRegion*)scr, (WRegion*)rw, NULL);
+    region_set_manager((WRegion*)scr, (WRegion*)rw);
     
     region_map((WRegion*)scr);
 
@@ -483,7 +483,7 @@ static void rootwin_unmap(WRootWin *rootwin)
 
 static void rootwin_managed_remove(WRootWin *rootwin, WRegion *reg)
 {
-    region_unset_manager(reg, (WRegion*)rootwin, NULL);
+    region_unset_manager(reg, (WRegion*)rootwin);
 }
 
 

@@ -1333,7 +1333,7 @@ static WDockApp *do_insert_dockapp(WDock *dock, WRegion *reg,
         LINK_ITEM(dock->dockapps, dockapp, next, prev);
     }
 
-    region_set_manager(reg, (WRegion*)dock, NULL);
+    region_set_manager(reg, (WRegion*)dock);
     
     dock_managed_rqgeom(dock, reg, 
                         REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y,
@@ -1374,7 +1374,7 @@ static void dock_managed_remove(WDock *dock, WRegion *reg)
         warn("Dockapp not found.");
     }
 
-    region_unset_manager(reg, (WRegion*)dock, NULL);
+    region_unset_manager(reg, (WRegion*)dock);
 
     dock_resize(dock);
 

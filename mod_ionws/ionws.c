@@ -452,7 +452,7 @@ void ionws_managed_add_default(WIonWS *ws, WRegion *reg)
         assert(symlist_insert_last(&(ws->managed_list), reg));
     }
     
-    region_set_manager(reg, (WRegion*)ws, NULL);
+    region_set_manager(reg, (WRegion*)ws);
     
     region_add_bindmap_owned(reg, mod_ionws_ionws_bindmap, (WRegion*)ws);
     if(OBJ_IS(reg, WFrame))
@@ -583,7 +583,7 @@ bool ionws_rescue_clientwins(WIonWS *ws)
 
 void ionws_do_managed_remove(WIonWS *ws, WRegion *reg)
 {
-    region_unset_manager(reg, (WRegion*)ws, NULL);
+    region_unset_manager(reg, (WRegion*)ws);
     
     if(STDISP_OF(ws)==reg){
         ws->stdispnode->regnode.reg=NULL;

@@ -853,7 +853,7 @@ static WRegion *mplex_do_attach(WMPlex *mplex, WRegionAttachHandler *hnd,
         mplex->l1_count++;
     }
     
-    region_set_manager(reg, (WRegion*)mplex, NULL);
+    region_set_manager(reg, (WRegion*)mplex);
     
     if(l2){
         if(!sw)
@@ -1063,7 +1063,7 @@ void mplex_managed_remove(WMPlex *mplex, WRegion *sub)
         region_detach_manager(stdisp);
     }
     
-    region_unset_manager(sub, (WRegion*)mplex, NULL);
+    region_unset_manager(sub, (WRegion*)mplex);
 
     node=find_on_list(mplex->l2_list, sub);
     if(node!=NULL){
