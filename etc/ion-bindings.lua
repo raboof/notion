@@ -73,7 +73,16 @@ defbindings("WMPlex", {
                                 "_sub:WClientWin"),
        kpress("AnyModifier+Q",  "WClientWin.quote_next(_sub)",
                                 "_sub:WClientWin"),
-   }),
+    }),    
+    
+    -- Queries
+    kpress(MOD2.."F1",          "querylib.query_man(_)"),
+    kpress(MOD2.."F3",          "querylib.query_exec(_)"),
+    kpress(MOD1.."F3",          "querylib.query_lua(_)"),
+    kpress(MOD2.."F4",          "querylib.query_ssh(_)"),
+    kpress(MOD2.."F5",          "querylib.query_editfile(_)"),
+    kpress(MOD2.."F6",          "querylib.query_runfile(_)"),
+    kpress(MOD2.."F9",          "querylib.query_workspace(_)"),
 })
 
 
@@ -116,13 +125,6 @@ defbindings("WFrame", {
     -- Queries
     kpress(MOD1.."A",           "querylib.query_attachclient(_)"),
     kpress(MOD1.."G",           "querylib.query_gotoclient(_)"),
-    kpress(MOD2.."F1",          "querylib.query_man(_)"),
-    kpress(MOD2.."F3",          "querylib.query_exec(_)"),
-    kpress(MOD1.."F3",          "querylib.query_lua(_)"),
-    kpress(MOD2.."F4",          "querylib.query_ssh(_)"),
-    kpress(MOD2.."F5",          "querylib.query_editfile(_)"),
-    kpress(MOD2.."F6",          "querylib.query_runfile(_)"),
-    kpress(MOD2.."F9",          "querylib.query_workspace(_)"),
            
     -- Menus
     kpress(MOD1.."M",           "menulib.menu(_, _sub, 'ctxmenu')"),
