@@ -290,13 +290,17 @@ static WClientWin *create_clientwin(WRegion *parent, Window win,
 }
 
 
-static bool handle_target_prop(WClientWin *cwin, const WAttachParams *param)
+static bool handle_target_props(WClientWin *cwin, const WAttachParams *param)
 {
 	WRegion *r=NULL;
 	char *target_name=NULL;
 	
-	if(!extl_table_gets_s(cwin->proptab, "target", &target_name))
-		return FALSE;
+	if(!extl_table_gets_s(cwin->proptab, "target", &target_name)){
+		if(!extl_table_is_bool_set(cwin->proptab, "fullscreen"))
+			return FALSE;
+		return clientwin_enter_fullscreen(cwin, 
+										  clientwin_get_switchto(cwin));
+	}
 	
 	r=lookup_region(target_name, NULL);
 	
@@ -449,7 +453,7 @@ again:
 
 	get_transient_for(cwin, &param);
 
-	if(!handle_target_prop(cwin, &param)){
+	if(!handle_target_props(cwin, &param)){
 		bool managed=FALSE;
 		
 		CALL_ALT_B(managed, add_clientwin_alt, (cwin, &param));
