@@ -147,7 +147,7 @@ bool screen_initialize_workspaces(WScreen* scr)
 			return FALSE;
 	}else{
 		if(wsname!=NULL)
-			ws=lookup_region(wsname);
+			ws=lookup_region(wsname, NULL);
 		if(ws==NULL || REGION_MANAGER(ws)!=(WRegion*)scr)
 			ws=FIRST_MANAGED(scr->ws_list);
 		if(ws!=NULL)
