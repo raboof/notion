@@ -158,7 +158,7 @@ static WScreen *current_scr=NULL;
  * for now, but remove eventually.
  */
 EXTL_EXPORT
-bool add_to_screen(ExtlTab tab)
+bool add_to_viewport(ExtlTab tab)
 {
 	if(current_scr==NULL)
 		return FALSE;
