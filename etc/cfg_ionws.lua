@@ -29,7 +29,7 @@ defbindings("WIonWS", {
 -- that are common to all frame types and multiplexes are defined in
 -- ion-bindings.lua.
 
---defbindings("WFrame@WIonWS", {
+--defbindings("WFrame-on-WIonWS", {
 --})
 
 -- WFloatFrame context menu extras

@@ -101,7 +101,7 @@ void mod_ionws_deinit()
     }
     
     if(mod_ionws_frame_bindmap!=NULL){
-        ioncore_free_bindmap("WFrame@WIonWS", mod_ionws_frame_bindmap);
+        ioncore_free_bindmap("WFrame-on-WIonWS", mod_ionws_frame_bindmap);
         mod_ionws_frame_bindmap=NULL;
     }
     

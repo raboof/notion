@@ -68,7 +68,7 @@ void mod_panews_deinit()
     }
     
     if(mod_panews_frame_bindmap!=NULL){
-        ioncore_free_bindmap("WFrame@WPaneWS", mod_panews_frame_bindmap);
+        ioncore_free_bindmap("WFrame-on-WPaneWS", mod_panews_frame_bindmap);
         mod_panews_frame_bindmap=NULL;
     }
     
@@ -116,7 +116,7 @@ bool mod_panews_init()
 
     mod_panews_panews_bindmap=ioncore_alloc_bindmap("WPaneWS", NULL);
     mod_panews_unusedwin_bindmap=ioncore_alloc_bindmap_frame("WUnusedWin");
-    mod_panews_frame_bindmap=ioncore_alloc_bindmap_frame("WFrame@WPaneWS");
+    mod_panews_frame_bindmap=ioncore_alloc_bindmap_frame("WFrame-on-WPaneWS");
 
     if(mod_panews_panews_bindmap==NULL ||
        mod_panews_unusedwin_bindmap==NULL ||
