@@ -589,7 +589,7 @@ static void pointer_handler(XEvent *ev)
 			 * release) as one.
 			 */
 			if(XPeekEvent(wglobal.dpy, &tmp)){
-				if(ev->type==MotionNotify || ev->type==ButtonRelease)
+				if(tmp.type==MotionNotify || tmp.type==ButtonRelease)
 					XNextEvent(wglobal.dpy, ev);
 			}
 		}
