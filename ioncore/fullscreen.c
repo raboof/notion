@@ -134,13 +134,13 @@ bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto)
 	assert(WOBJ_IS(reg, WRegion));
 	
 	/* Set up geometry hints */
-	param.flags|=(REGION_ATTACH_SIZERQ|REGION_ATTACH_POSRQ|
-				  REGION_ATTACH_SWITCHTO|REGION_ATTACH_SIZE_HINTS);
+	param.flags=(REGION_ATTACH_SIZERQ|REGION_ATTACH_POSRQ|
+				 REGION_ATTACH_SWITCHTO|REGION_ATTACH_SIZE_HINTS);
 	
-	region_rootpos(reg, &rootx, &rooty);
 	param.geomrq=cwin->fsinfo.saved_rootrel_geom;
+	/*region_rootpos(reg, &rootx, &rooty);
 	param.geomrq.x-=rootx;
-	param.geomrq.y-=rooty;
+	param.geomrq.y-=rooty;*/
 	
 	hnt=cwin->size_hints;
 	hnt.flags|=PWinGravity;

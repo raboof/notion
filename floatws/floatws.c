@@ -315,7 +315,7 @@ static bool floatws_add_clientwin(WFloatWS *ws,
 		WRectangle fgeom;
 		int gravity=NorthWestGravity;
 		
-		if(!(params->flags&REGION_ATTACH_SIZERQ)){
+		if(params->flags&REGION_ATTACH_SIZERQ){
 			fgeom.w=params->geomrq.w;
 			fgeom.h=params->geomrq.h;
 		}else{
