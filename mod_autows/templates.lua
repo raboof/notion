@@ -261,12 +261,20 @@ function T.scan_layout(p, node)
                 return do_scan_unused(n:tl(), d, forcefit)
             elseif d=="down" then
                 return do_scan_unused(n:br(), d, forcefit)
+            elseif n:tl():type()=="SPLIT_STDISPNODE" then
+                return do_scan_unused(n:br(), d, forcefit)
+            elseif n:br():type()=="SPLIT_STDISPNODE" then
+                return do_scan_unused(n:tl(), d, forcefit)
             end
         elseif t=="SPLIT_HORIZONTAL" then
             if d=="left" then
                 return do_scan_unused(n:tl(), d, forcefit)
             elseif d=="right" then
                 return do_scan_unused(n:br(), d, forcefit)
+            elseif n:tl():type()=="SPLIT_STDISPNODE" then
+                return do_scan_unused(n:br(), d, forcefit)
+            elseif n:br():type()=="SPLIT_STDISPNODE" then
+                return do_scan_unused(n:tl(), d, forcefit)
             end
         elseif t=="SPLIT_UNUSED" then
             -- Found it
@@ -487,6 +495,15 @@ end
 function T.layout_alt_handler(p)
     local n=p.ws:split_tree()
     local t=n:type()
+    
+    if t=="SPLIT_VERTICAL" or t=="SPLIT_HORIZONTAL" then
+        if n:tl():type()=="SPLIT_STDISPNODE" then
+            n=n:br()
+        elseif n:br():type()=="SPLIT_STDISPNODE" then
+            n=n:tl()
+        end
+        t=n:type()
+    end
     
     if t=="SPLIT_UNUSED" then
         -- Initialise layout

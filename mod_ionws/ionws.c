@@ -151,8 +151,12 @@ void ionws_unmanage_stdisp(WIonWS *ws, bool permanent, bool nofocus)
             setfocus=TRUE;
             tofocus=split_closest_leaf(ws->stdispnode, NULL);
         }
-        ionws_do_managed_remove(ws, od);
-        ws->stdispnode->u.reg=NULL;
+        /* Reset node_of info here so ionws_managed_remove will not
+         * remove the node.
+         */
+        split_tree_set_node_of(od, NULL);
+        ionws_managed_remove(ws, od);
+        /*ws->stdispnode->u.reg=NULL;*/
     }
     
     if(permanent){
@@ -264,7 +268,8 @@ void ionws_manage_stdisp(WIonWS *ws, WRegion *stdisp, int corner)
         
         if(ws->stdispnode->u.reg!=NULL){
             act=REGION_IS_ACTIVE(ws->stdispnode->u.reg);
-            ionws_do_managed_remove(ws, ws->stdispnode->u.reg);
+            split_tree_set_node_of(ws->stdispnode->u.reg, NULL);
+            ionws_managed_remove(ws, ws->stdispnode->u.reg);
         }
         
         ws->stdispnode->u.reg=stdisp;
@@ -468,14 +473,18 @@ void ionws_managed_remove(WIonWS *ws, WRegion *reg)
     bool mcf=region_may_control_focus((WRegion*)ws);
     WSplit *other=NULL, *node=get_node_check(ws, reg);
     
-    assert(node!=NULL);
-
     ionws_do_managed_remove(ws, reg);
 
+    if(node==NULL)
+        return;
+    
     other=split_closest_leaf(node, nostdispfilter);
     
-    if(ws->split_tree!=NULL)
+    if(ws->split_tree!=NULL){
+        if(node==ws->stdispnode)
+            ws->stdispnode=NULL;
         split_tree_remove(&(ws->split_tree), node, !ds, FALSE);
+    }
     
     if(!ds){
         if(other==NULL)
