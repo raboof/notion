@@ -71,7 +71,7 @@ void region_init(WRegion *reg, WRegion *parent, const WRectangle *geom)
 	reg->mgd_activity=FALSE;
 
 	if(!WOBJ_IS(reg, WClientWin))
-		region_set_name(reg, WOBJ_TYPESTR(reg));
+		region_init_name(reg, WOBJ_TYPESTR(reg));
 	
 	if(parent!=NULL){
 		reg->rootwin=parent->rootwin;

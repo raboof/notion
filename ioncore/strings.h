@@ -22,5 +22,6 @@ extern bool add_shortenrule(const char *rx, const char *rule, bool always);
 extern int str_nextoff(const char *p, int pos);
 extern int str_prevoff(const char *p, int pos);
 extern wchar_t str_wchar_at(char *p, int max);
+extern char *str_stripws(char *p);
 
 #endif /* ION_IONCORE_FONT_H */

@@ -677,7 +677,7 @@ char* edln_finish(Edln *edln)
 	edln->psize=edln->palloced=0;
 	
 	/*stripws(p);*/
-	return p;
+	return str_stripws(p);
 }
 
 /*}}}*/

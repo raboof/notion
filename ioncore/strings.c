@@ -31,6 +31,53 @@ wchar_t str_wchar_at(char *p, int max)
 }
 	
 
+char *str_stripws(char *p)
+{
+	mbstate_t ps;
+	wchar_t wc;
+	int first=-1, pos=0;
+	int n=strlen(p);
+	int ret;
+	
+	memset(&ps, 0, sizeof(ps));
+	
+	while(1){
+		ret=mbrtowc(&wc, p+pos, n-pos, &ps);
+		if(ret<=0)
+			break;
+		if(!iswspace(wc))
+			break;
+		pos+=ret;
+	}
+	
+	if(pos!=0)
+		memmove(p, p+pos, n-pos+1);
+	
+	if(ret<=0)
+		return p;
+	
+	pos=ret;
+	
+	while(1){
+		ret=mbrtowc(&wc, p+pos, n-pos, &ps);
+		if(ret<=0)
+			break;
+		if(iswspace(wc)){
+			if(first==-1)
+				first=pos;
+		}else{
+			first=-1;
+		}
+		pos+=ret;
+	}
+		
+	if(first!=-1)
+		p[first]='\0';
+	
+	return p;
+}
+
+
 int str_prevoff(const char *p, int pos)
 {
 	if(wglobal.enc_sb)

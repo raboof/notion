@@ -17,6 +17,7 @@
 #include "gr.h"
 #include "extl.h"
 
+extern bool region_init_name(WRegion *reg, const char *name);
 extern bool region_set_name(WRegion *reg, const char *name);
 extern bool region_set_name_exact(WRegion *reg, const char *name);
 extern bool clientwin_set_name(WClientWin *cwin, const char *name);
