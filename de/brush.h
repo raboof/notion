@@ -126,9 +126,6 @@ extern DEMEntBrush *create_dementbrush(DEStyle *style);
 
 extern DEBrush *de_get_brush(WRootWin *rootwin, Window win, 
 							 const char *style);
-extern bool de_get_brush_values(WRootWin *rootwin, const char *style,
-								GrBorderWidths *bdw, GrFontExtents *fnte,
-								ExtlTab *tab);
 
 extern DEBrush *debrush_get_slave(DEBrush *brush, WRootWin *rootwin, 
 								  Window win, const char *style);
@@ -222,13 +219,15 @@ extern void debrush_clear_area(DEBrush *brush, Window win,
 /*{{{ Misc. */
 
 
-DEColourGroup *debrush_get_colour_group2(DEBrush *brush, 
-										 const char *attr_p1,
-										 const char *attr_p2);
+extern DEColourGroup *debrush_get_colour_group2(DEBrush *brush, 
+                                                const char *attr_p1,
+                                                const char *attr_p2);
 
-DEColourGroup *debrush_get_colour_group(DEBrush *brush, const char *attr);
+extern DEColourGroup *debrush_get_colour_group(DEBrush *brush, 
+                                               const char *attr);
 
-extern void debrush_get_extra_values(DEBrush *brush, ExtlTab *tab);
+bool destyle_get_extra(DEStyle *style, const char *key, char type, void *data);
+bool debrush_get_extra(DEBrush *brush, const char *key, char type, void *data);
 
 
 /*}}}*/

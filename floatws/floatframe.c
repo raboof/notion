@@ -68,43 +68,31 @@ static void deinit_floatframe(WFloatFrame *frame)
 #define BAR_H(FRAME) \
     ((FRAME)->frame.flags&WFRAME_TAB_HIDE ? 0 : (FRAME)->frame.bar_h)
 
-static void floatframe_offsets(WRootWin *rootwin, const WFloatFrame *frame,
-							   WRectangle *off)
+void floatframe_offsets(const WFloatFrame *frame, WRectangle *off)
 {
 	GrBorderWidths bdw=GR_BORDER_WIDTHS_INIT;
 	uint bar_h=0;
 	
-	if(frame!=NULL){
-		if(frame->frame.brush!=NULL)
-			grbrush_get_border_widths(frame->frame.brush, &bdw);
-	}else if(rootwin!=NULL){
-		gr_get_brush_values(rootwin, "frame-floatframe", &bdw, NULL, NULL);
-	}
+    if(frame->frame.brush!=NULL)
+        grbrush_get_border_widths(frame->frame.brush, &bdw);
 	
 	off->x=-bdw.left;
 	off->y=-bdw.top;
 	off->w=bdw.left+bdw.right;
 	off->h=bdw.top+bdw.bottom;
 
-	if(frame!=NULL){
-		bar_h=BAR_H(frame);
-	}else if(rootwin!=NULL){
-		GrBorderWidths bdwt=GR_BORDER_WIDTHS_INIT;
-		GrFontExtents fntet=GR_FONT_EXTENTS_INIT;
-		gr_get_brush_values(rootwin, "tab-frame-floatframe", &bdwt, &fntet, 
-							NULL);
-		bar_h=bdwt.top+bdwt.bottom+fntet.max_height;
-	}
+    bar_h=BAR_H(frame);
 
 	off->y-=bar_h;
 	off->h+=bar_h;
 }
 
 
-void managed_to_floatframe_geom(WRootWin *rootwin, WRectangle *geom)
+void floatframe_geom_from_managed_geom(const WFloatFrame *frame, 
+                                       WRectangle *geom)
 {
 	WRectangle off;
-	floatframe_offsets(rootwin, NULL, &off);
+	floatframe_offsets(frame, &off);
 	geom->x+=off.x;
 	geom->y+=off.y;
 	geom->w+=off.w;
@@ -112,20 +100,7 @@ void managed_to_floatframe_geom(WRootWin *rootwin, WRectangle *geom)
 }
 
 
-static void floatframe_to_managed_geom(WRootWin *rootwin,
-									   const WFloatFrame *frame,
-									   WRectangle *geom)
-{
-	WRectangle off;
-	floatframe_offsets(rootwin, frame, &off);
-	geom->x=-off.x;
-	geom->y=-off.y;
-	geom->w-=off.w;
-	geom->h-=off.h;
-}
-
-
-static void floatframe_border_geom(const WFloatFrame *frame, WRectangle *geom)
+void floatframe_border_geom(const WFloatFrame *frame, WRectangle *geom)
 {
 	geom->x=0;
 	geom->y=BAR_H(frame);
@@ -134,7 +109,7 @@ static void floatframe_border_geom(const WFloatFrame *frame, WRectangle *geom)
 }
 
 
-static void floatframe_bar_geom(const WFloatFrame *frame, WRectangle *geom)
+void floatframe_bar_geom(const WFloatFrame *frame, WRectangle *geom)
 {
 	geom->x=0;
 	geom->y=0;
@@ -143,17 +118,25 @@ static void floatframe_bar_geom(const WFloatFrame *frame, WRectangle *geom)
 }
 
 
-static void floatframe_managed_geom(const WFloatFrame *frame, WRectangle *geom)
+void floatframe_managed_geom(const WFloatFrame *frame, WRectangle *geom)
 {
+	WRectangle off;
 	*geom=REGION_GEOM(frame);
-	floatframe_to_managed_geom(NULL, frame, geom);
+	floatframe_offsets(frame, &off);
+	geom->x=-off.x;
+	geom->y=-off.y;
+	geom->w-=off.w;
+	geom->h-=off.h;
 }
 
 
 #define floatframe_border_inner_geom floatframe_managed_geom
 
 
-void initial_to_floatframe_geom(WFloatWS *ws, WRectangle *geom, int gravity)
+void floatframe_geom_from_initial_geom(WFloatFrame *frame, 
+                                       WFloatWS *ws,
+                                       WRectangle *geom, 
+                                       int gravity)
 {
 	WRectangle off;
 #ifndef CF_NO_WSREL_INIT_GEOM
@@ -169,7 +152,7 @@ void initial_to_floatframe_geom(WFloatWS *ws, WRectangle *geom, int gravity)
 	bottom=REGION_GEOM(root).h-top-REGION_GEOM(ws).h;
 #endif
 
-	floatframe_offsets(ROOTWIN_OF(ws), NULL, &off);
+	floatframe_offsets(frame, &off);
 
 	geom->w+=off.w;
 	geom->h+=off.h;
@@ -201,7 +184,7 @@ static void floatframe_request_clientwin_geom(WFloatFrame *frame,
 	if(cwin->size_hints.flags&PWinGravity)
 		gravity=cwin->size_hints.win_gravity;
 
-	floatframe_offsets(NULL, frame, &off);
+	floatframe_offsets(frame, &off);
 
 	frame_resize_hints((WFrame*)frame, &hints, NULL, NULL);
 	correct_size(&(geom.w), &(geom.h), &hints, TRUE);
@@ -250,8 +233,6 @@ static void floatframe_request_clientwin_geom(WFloatFrame *frame,
 
 static void floatframe_brushes_updated(WFloatFrame *frame)
 {
-	ExtlTab tab;
-	
 	/* Get new bar width limits */
 
 	frame->tab_min_w=100;
@@ -260,15 +241,14 @@ static void floatframe_brushes_updated(WFloatFrame *frame)
 	if(frame->frame.brush==NULL)
 		return;
 	
-	grbrush_get_extra_values(frame->frame.brush, &tab);
-	
-	if(extl_table_gets_i(tab, "floatframe_tab_min_w", &(frame->tab_min_w))){
+	if(grbrush_get_extra(frame->frame.brush, "floatframe_tab_min_w",
+                         'i', &(frame->tab_min_w))){
 		if(frame->tab_min_w<=0)
 			frame->tab_min_w=1;
 	}
 
-	if(extl_table_gets_d(tab, "floatframe_bar_max_w_q", 
-						 &(frame->bar_max_width_q))){
+	if(grbrush_get_extra(frame->frame.brush, "floatframe_bar_max_w_q", 
+                         'd', &(frame->bar_max_width_q))){
 		if(frame->bar_max_width_q<=0.0 || frame->bar_max_width_q>1.0)
 			frame->bar_max_width_q=1.0;
 	}

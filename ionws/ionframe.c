@@ -114,9 +114,8 @@ static void ionframe_brushes_updated(WIonFrame *frame)
 	if(frame->frame.brush==NULL)
 		return;
 	
-	grbrush_get_extra_values(frame->frame.brush, &tab);
-	
-	extl_table_gets_b(tab, "ionframe_bar_inside_border", &b);
+    grbrush_get_extra(frame->frame.brush, 
+                      "ionframe_bar_inside_border", 'b', &b);
 	
 	if(b)
 		frame->frame.flags&=~WFRAME_BAR_OUTSIDE;

@@ -119,27 +119,51 @@ static void dock_param_extl_table_get(const WDockParam *param, ExtlTab conftab,
 }
 /* }}} */
 
+/* dock_param_do_set {{{ */
+static bool dock_param_do_set(const WDockParam *param, char *s,
+                                 int *ret)
+{
+	bool changed=FALSE;
+    int i=stringintmap_value(param->map, s, -1);
+    if(i<0){
+        warn_obj(modname, "Invalid %s \"%s\"", param->desc, s);
+    }else{
+        if(*ret!=i){
+            changed=TRUE;
+        }
+        *ret=i;
+    }
+    free(s);
+
+	return changed;
+
+}
+/* }}} */
+
 /* dock_param_extl_table_set {{{ */
 static bool dock_param_extl_table_set(const WDockParam *param, ExtlTab conftab,
 									  int *ret)
 {
 	char *s;
-	bool changed=FALSE;
 
-	if(extl_table_gets_s(conftab, param->key, &s)){
-		int i=stringintmap_value(param->map, s, -1);
-		if(i<0){
-			warn_obj(modname, "Invalid %s \"%s\"", param->desc, s);
-		}else{
-			if(*ret!=i){
-				changed=TRUE;
-			}
-			*ret=i;
-		}
-		free(s);
-	}
+	if(extl_table_gets_s(conftab, param->key, &s))
+        return dock_param_do_set(param, s, ret);
 
-	return changed;
+	return FALSE;
+
+}
+/* }}} */
+
+/* dock_param_brush_set {{{ */
+static bool dock_param_brush_set(const WDockParam *param, GrBrush *brush,
+                                 int *ret)
+{
+	char *s;
+
+	if(grbrush_get_extra(brush, param->key, 's', &s))
+        return dock_param_do_set(param, s, ret);
+
+	return FALSE;
 
 }
 /* }}} */
@@ -177,7 +201,6 @@ DECLOBJ(WDock){ /* {{{ */
 	int vpos, hpos, grow;
 	bool is_auto;
 	GrBrush *brush;
-	ExtlTab brush_extra_values;
 	WDockApp *dockapps;
 };
 /* }}} */
@@ -351,7 +374,8 @@ static void dock_get_outline_style(WDock *dock, int *ret)
 {
 
 	*ret=dock_param_outline_style.dflt;
-	dock_param_extl_table_set(&dock_param_outline_style, dock->brush_extra_values, ret);
+    if(dock->brush!=NULL)
+        dock_param_brush_set(&dock_param_outline_style, dock->brush, ret);
 
 }
 /* }}} */
@@ -365,11 +389,13 @@ static void dock_get_tile_size(WDock *dock, WRectangle *ret)
 	ret->y=0;
 	ret->w=dock_param_tile_width.dflt;
 	ret->h=dock_param_tile_height.dflt;
-	if(extl_table_gets_t(dock->brush_extra_values, "tile_size", &tile_size_table)){
-		extl_table_gets_i(tile_size_table, dock_param_tile_width.key, &ret->w);
-		extl_table_gets_i(tile_size_table, dock_param_tile_height.key, &ret->h);
-		extl_unref_table(tile_size_table);
-	}
+    if(dock->brush==NULL)
+        return;
+    if(grbrush_get_extra(dock->brush, "tile_size", 't', &tile_size_table)){
+        extl_table_gets_i(tile_size_table, dock_param_tile_width.key, &ret->w);
+        extl_table_gets_i(tile_size_table, dock_param_tile_height.key, &ret->h);
+        extl_unref_table(tile_size_table);
+    }
 
 }
 /* }}} */
@@ -838,10 +864,6 @@ void dock_resize(WDock *dock)
 static void dock_brush_release(WDock *dock)
 {
 
-	if(dock->brush_extra_values!=extl_table_none()){
-		extl_unref_table(dock->brush_extra_values);
-		dock->brush_extra_values=extl_table_none();
-	}
 	if(dock->brush){
 		grbrush_release(dock->brush, ((WWindow *)dock)->win);
 		dock->brush=NULL;
@@ -856,10 +878,6 @@ static void dock_brush_get(WDock *dock)
 
 	dock_brush_release(dock);
 	dock->brush=gr_get_brush(ROOTWIN_OF(dock), ((WWindow *)dock)->win, "dock");
-	if(dock->brush){
-		grbrush_get_extra_values(dock->brush, &dock->brush_extra_values);
-	}
-
 }
 /* }}} */
 
@@ -1009,7 +1027,6 @@ static bool dock_init(WDock *dock, int screen, ExtlTab conftab)
 	dock->grow=dock_param_grow.dflt;
 	dock->is_auto=dock_param_is_auto.dflt;
 	dock->brush=NULL;
-	dock->brush_extra_values=extl_table_none();
 	dock->dockapps=NULL;
 	/* }}} */
 

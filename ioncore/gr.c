@@ -26,7 +26,6 @@ INTRSTRUCT(GrEngine);
 DECLSTRUCT(GrEngine){
 	char *name;
 	GrGetBrushFn *fn;
-	GrGetValuesFn *vfn;
 	GrEngine *next, *prev;
 };
 
@@ -34,12 +33,11 @@ DECLSTRUCT(GrEngine){
 static GrEngine *engines=NULL, *current_engine=NULL;
 
 
-bool gr_register_engine(const char *engine, GrGetBrushFn *fn,
-						GrGetValuesFn *vfn)
+bool gr_register_engine(const char *engine, GrGetBrushFn *fn)
 {
 	GrEngine *eng;
 	
-	if(engine==NULL || fn==NULL || vfn==NULL)
+	if(engine==NULL || fn==NULL)
 		return FALSE;
 	
 	eng=ALLOC(GrEngine);
@@ -58,7 +56,6 @@ bool gr_register_engine(const char *engine, GrGetBrushFn *fn,
 	}
 	
 	eng->fn=fn;
-	eng->vfn=vfn;
 	
 	LINK_ITEM(engines, eng, next, prev);
 
@@ -143,19 +140,6 @@ GrBrush *gr_get_brush(WRootWin *rootwin, Window win, const char *style)
 		warn("Unable to find brush for '%s'\n", style);
 		
 	return ret;
-}
-
-
-bool gr_get_brush_values(WRootWin *rootwin, const char *style,
-						 GrBorderWidths *bdw, GrFontExtents *fnte,
-						 ExtlTab *tab)
-{
-	GrEngine *eng=(current_engine!=NULL ? current_engine : engines);
-	
-	if(eng==NULL || eng->fn==NULL)
-		return FALSE;
-	
-	return (eng->vfn)(rootwin, style, bdw, fnte, tab);
 }
 
 
@@ -278,12 +262,13 @@ void grbrush_get_border_widths(GrBrush *brush, GrBorderWidths *bdw)
 }
 
 
-void grbrush_get_extra_values(GrBrush *brush, ExtlTab *tab)
+DYNFUN bool grbrush_get_extra(GrBrush *brush, const char *key, 
+                              char type, void *data)
 {
-	*tab=extl_table_none();
-	{
-		CALL_DYN(grbrush_get_extra_values, brush, (brush, tab));
-	}
+    bool ret=FALSE;
+    CALL_DYN_RET(ret, bool, grbrush_get_extra, brush,
+                 (brush, key, type, data));
+    return ret;
 }
 
 

@@ -989,10 +989,14 @@ bool get_split_dir_primn(const char *str, int *dir, int *primn)
 	}else if(!strcmp(str, "right")){
 		*primn=BOTTOM_OR_RIGHT;
 		*dir=HORIZONTAL;
-	}else if(!strcmp(str, "top") || !strcmp(str, "up")){
+	}else if(!strcmp(str, "top") || 
+             !strcmp(str, "above") || 
+             !strcmp(str, "up")){
 		*primn=TOP_OR_LEFT;
 		*dir=VERTICAL;
-	}else if(!strcmp(str, "bottom") || !strcmp(str, "down")){
+	}else if(!strcmp(str, "bottom") || 
+             !strcmp(str, "below") ||
+             !strcmp(str, "down")){
 		*primn=BOTTOM_OR_RIGHT;
 		*dir=VERTICAL;
 	}else{

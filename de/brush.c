@@ -508,40 +508,23 @@ void dementbrush_get_border_widths(DEMEntBrush *brush, GrBorderWidths *bdw)
 /*{{{ Misc. */
 
 
-void debrush_get_extra_values(DEBrush *brush, ExtlTab *tab)
+bool destyle_get_extra(DEStyle *style, const char *key, char type, void *data)
 {
-	*tab=extl_ref_table(brush->d->data_table);
+    if(extl_table_get(style->data_table, 's', type, key, data))
+        return TRUE;
+    if(style->based_on!=NULL)
+        return destyle_get_extra(style->based_on, key, type, data);
+    return FALSE;
 }
 
 
-bool de_get_brush_values(WRootWin *rootwin, const char *stylename,
-						 GrBorderWidths *bdw, GrFontExtents *fnte,
-						 ExtlTab *tab)
+bool debrush_get_extra(DEBrush *brush, const char *key, char type, void *data)
 {
-	DEStyle *style=de_get_style(rootwin, stylename);
-	
-	if(style==NULL)
-		return FALSE;
-		
-	if(bdw!=NULL){
-		if(MATCHES("tab-menuentry", stylename))
-			destyle_get_mentbrush_border_widths(style, bdw);
-		else
-			destyle_get_border_widths(style, bdw);
-	}
-	
-	if(fnte!=NULL){
-		if(style->font!=NULL)
-			defont_get_font_extents(style->font, fnte);
-		else
-			DE_RESET_FONT_EXTENTS(fnte);
-	}
-	
-	if(tab!=NULL)
-		*tab=extl_ref_table(style->data_table);
-	
-	return TRUE;
+    if(brush->d==NULL)
+        return FALSE;
+    return destyle_get_extra(brush->d, key, type, data);
 }
+
 
 
 /*}}}*/
@@ -565,7 +548,7 @@ static DynFunTab debrush_dynfuntab[]={
 	{grbrush_enable_transparency, debrush_enable_transparency},
 	{grbrush_clear_area, debrush_clear_area},
 	{grbrush_fill_area, debrush_fill_area},
-	{grbrush_get_extra_values, debrush_get_extra_values},
+	{(DynFun*)grbrush_get_extra, (DynFun*)debrush_get_extra},
 	{(DynFun*)grbrush_get_slave, (DynFun*)debrush_get_slave},
 	END_DYNFUNTAB
 };

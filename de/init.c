@@ -229,6 +229,8 @@ bool de_define_style_rootwin(WRootWin *rootwin, const char *name, ExtlTab tab)
 	if(style==NULL)
 		return FALSE;
 
+	style->data_table=extl_ref_table(tab);
+
     if(extl_table_gets_s(tab, "based_on", &based_on_name)){
         based_on=de_get_style(rootwin, based_on_name);
         if(based_on==style){
@@ -267,8 +269,6 @@ bool de_define_style_rootwin(WRootWin *rootwin, const char *name, ExtlTab tab)
 	style->cgrp_alloced=TRUE;
 	get_colour_group(rootwin, &(style->cgrp), tab, based_on);
 	get_extra_cgrps(rootwin, style, tab);
-	
-	style->data_table=extl_ref_table(tab);
 	
 	return TRUE;
 }
@@ -326,8 +326,7 @@ bool de_module_init()
 	if(!de_module_register_exports())
 		return FALSE;
 	
-	if(!gr_register_engine("de", (GrGetBrushFn*)&de_get_brush,
-						   (GrGetValuesFn*)&de_get_brush_values)){
+	if(!gr_register_engine("de", (GrGetBrushFn*)&de_get_brush)){
 		warn("DE module", "Failed to register the drawing engine");
 		goto fail;
 	}

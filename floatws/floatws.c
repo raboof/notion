@@ -389,7 +389,7 @@ static WMPlex *find_existing(WFloatWS *ws)
 static bool floatws_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
 									 const WManageParams *param)
 {
-	WMPlex *target=NULL;
+	WFloatFrame *frame=NULL;
 	WWindow *par;
 	bool respectpos=TRUE;
 	WRectangle fgeom=param->geom;
@@ -397,7 +397,18 @@ static bool floatws_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
 	par=REGION_PARENT_CHK(ws, WWindow);
 	assert(par!=NULL);
 	
-	initial_to_floatframe_geom(ws, &fgeom, param->gravity);
+    /* Create frame with dummy geometry */
+    fgeom=REGION_GEOM(cwin);
+	frame=create_floatframe(par, &fgeom);
+
+	if(frame==NULL){
+		warn("Failed to create a new WFloatFrame for client window");
+		return FALSE;
+	}
+
+	assert(same_rootwin((WRegion*)frame, (WRegion*)cwin));
+    
+    floatframe_geom_from_initial_geom(frame, ws, &fgeom, param->gravity);
 
 	if(param->maprq && wglobal.opmode!=OPMODE_INIT){
 		/* When the window is mapped by application request, position
@@ -421,26 +432,20 @@ static bool floatws_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
 	if(!respectpos)
 		floatws_calc_placement(ws, &fgeom);
 	
-	target=(WMPlex*)create_floatframe(par, &fgeom);
-	
-	if(target==NULL){
-		warn("Failed to create a new WFloatFrame for client window");
+    /* Set proper geometry */
+    region_fit((WRegion*)frame, &fgeom);
+    
+	if(!mplex_attach_simple((WMPlex*)frame, (WRegion*)cwin, param->switchto)){
+		destroy_obj((WObj*)frame);
 		return FALSE;
 	}
 
-	assert(same_rootwin((WRegion*)target, (WRegion*)cwin));
-	
-	if(!mplex_attach_simple(target, (WRegion*)cwin, param->switchto)){
-		destroy_obj((WObj*)target);
-		return FALSE;
-	}
-
-	floatws_add_managed(ws, (WRegion*)target);
+	floatws_add_managed(ws, (WRegion*)frame);
 	
 	/* Don't warp, it is annoying in this case */
 	if(param->switchto && region_may_control_focus((WRegion*)ws)){
-		set_previous_of((WRegion*)target);
-		set_focus((WRegion*)target);
+		set_previous_of((WRegion*)frame);
+		set_focus((WRegion*)frame);
 	}
 	
 	return TRUE;
@@ -451,7 +456,7 @@ static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
 								WRegion *dropped)
 {
 	WRectangle fgeom;
-	WFloatFrame *target;
+	WFloatFrame *frame;
 	WWindow *par;
 	
 	par=REGION_PARENT_CHK(ws, WWindow);
@@ -460,26 +465,29 @@ static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
 		return FALSE;
 	
 	fgeom=REGION_GEOM(dropped);
-	managed_to_floatframe_geom(ROOTWIN_OF(ws), &fgeom);
+	frame=create_floatframe(par, &fgeom);
+	
+	if(frame==NULL){
+		warn("Failed to create a new WFloatFrame.");
+		return FALSE;
+	}
+
+    /* Resize */
+    
+	floatframe_geom_from_managed_geom(frame, &fgeom);
 	/* The x and y arguments are in root coordinate space */
 	region_rootpos((WRegion*)par, &fgeom.x, &fgeom.y);
 	fgeom.x=x-fgeom.x;
 	fgeom.y=y-fgeom.y;
-
-	target=create_floatframe(par, &fgeom);
+    region_fit((WRegion*)frame, &fgeom);
 	
-	if(target==NULL){
-		warn("Failed to create a new WFloatFrame.");
-		return FALSE;
-	}
-	
-	if(!mplex_attach_simple((WMPlex*)target, dropped, TRUE)){
-		destroy_obj((WObj*)target);
+	if(!mplex_attach_simple((WMPlex*)frame, dropped, TRUE)){
+		destroy_obj((WObj*)frame);
 		warn("Failed to attach dropped region to created WFloatFrame");
 		return FALSE;
 	}
 	
-	floatws_add_managed(ws, (WRegion*)target);
+	floatws_add_managed(ws, (WRegion*)frame);
 
 	return TRUE;
 }

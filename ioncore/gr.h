@@ -59,12 +59,8 @@ typedef enum{
 
 typedef GrBrush *GrGetBrushFn(WRootWin *rootwin, Window win, 
 							  const char *style);
-typedef bool GrGetValuesFn(WRootWin *rootwin, const char *style, 
-						   GrBorderWidths *bdw, GrFontExtents *fnte,
-						   ExtlTab *tab);
 
-extern bool gr_register_engine(const char *engine, GrGetBrushFn *fn,
-							   GrGetValuesFn *gvfn);
+extern bool gr_register_engine(const char *engine,  GrGetBrushFn *fn);
 extern void gr_unregister_engine(const char *engine);
 extern bool gr_select_engine(const char *engine);
 extern void gr_refresh();
@@ -72,10 +68,6 @@ extern void gr_read_config();
 
 extern GrBrush *gr_get_brush(WRootWin *rootwin, Window win, 
 							 const char *style);
-
-extern bool gr_get_brush_values(WRootWin *rootwin, const char *style,
-								GrBorderWidths *bdw, GrFontExtents *fnte,
-								ExtlTab *tab);
 
 extern GrBrush *grbrush_get_slave(GrBrush *brush, WRootWin *rootwin, 
 								  Window win, const char *style);
@@ -158,6 +150,7 @@ DYNFUN void grbrush_fill_area(GrBrush *brush, Window win,
 DYNFUN void grbrush_clear_area(GrBrush *brush, Window win, 
 							   const WRectangle *geom);
 
-DYNFUN void grbrush_get_extra_values(GrBrush *brush, ExtlTab *tab);
+DYNFUN bool grbrush_get_extra(GrBrush *brush, const char *key, 
+                              char type, void *data);
 
 #endif /* ION_IONCORE_GR_H */
