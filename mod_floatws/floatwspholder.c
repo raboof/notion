@@ -111,6 +111,17 @@ bool floatwspholder_do_attach(WFloatWSPHolder *ph, WRegionAttachHandler *hnd,
 }
 
 
+bool floatwspholder_do_goto(WFloatWSPHolder *ph)
+{
+    WFloatWS *ws=(WFloatWS*)ph->floatws_watch.obj;
+    
+    if(ws!=NULL)
+        return region_goto((WRegion*)ws);
+    
+    return FALSE;
+}
+
+
 /*}}}*/
 
 
@@ -132,9 +143,14 @@ WFloatWSPHolder *floatws_managed_get_pholder(WFloatWS *floatws, WRegion *mgd)
 static DynFunTab floatwspholder_dynfuntab[]={
     {(DynFun*)pholder_do_attach, 
      (DynFun*)floatwspholder_do_attach},
+
+    {(DynFun*)pholder_do_goto, 
+     (DynFun*)floatwspholder_do_goto},
     
     {(DynFun*)pholder_stale, 
      (DynFun*)floatwspholder_stale},
+    
+    END_DYNFUNTAB
 };
 
 IMPLCLASS(WFloatWSPHolder, WPHolder, floatwspholder_deinit, 

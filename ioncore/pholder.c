@@ -60,6 +60,24 @@ bool pholder_attach(WPHolder *ph, WRegion *reg)
 }
 
 
+bool pholder_do_goto(WPHolder *ph)
+{
+    bool ret=FALSE;
+    CALL_DYN_RET(ret, bool, pholder_do_goto, ph, (ph));
+    return ret;
+}
+
+
+bool pholder_goto(WPHolder *ph)
+{
+    if(ph->redirect!=NULL)
+        return pholder_goto(ph->redirect);
+    else
+        return pholder_do_goto(ph);
+}
+
+
+
 bool pholder_redirect(WPHolder *ph, WRegion *old_target)
 {
     WPHolder *ph2=region_get_rescue_pholder(old_target);

@@ -121,6 +121,20 @@ bool floatwsrescueph_do_attach(WFloatWSRescuePH *ph, WRegionAttachHandler *hnd,
 }
 
 
+bool floatwsrescueph_do_goto(WFloatWSRescuePH *ph)
+{
+    WFloatWS *ws=(WFloatWS*)ph->floatws_watch.obj;
+    WFrame *frame=(WFrame*)ph->frame_watch.obj;
+    
+    if(frame!=NULL)
+        return region_goto((WRegion*)frame);
+    else if(ws!=NULL)
+        return region_goto((WRegion*)ws);
+    
+    return FALSE;
+}
+
+
 /*}}}*/
 
 
@@ -143,9 +157,14 @@ WFloatWSRescuePH *floatws_get_rescue_pholder_for(WFloatWS *floatws,
 static DynFunTab floatwsrescueph_dynfuntab[]={
     {(DynFun*)pholder_do_attach, 
      (DynFun*)floatwsrescueph_do_attach},
+
+    {(DynFun*)pholder_do_goto, 
+     (DynFun*)floatwsrescueph_do_goto},
     
     {(DynFun*)pholder_stale, 
      (DynFun*)floatwsrescueph_stale},
+    
+    END_DYNFUNTAB
 };
 
 IMPLCLASS(WFloatWSRescuePH, WPHolder, floatwsrescueph_deinit, 

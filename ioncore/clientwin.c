@@ -840,10 +840,12 @@ static bool mrsh_u_extl(ExtlFn fn, void *param)
 static void clientwin_do_unmapped(WClientWin *cwin, Window win)
 {
     bool cf=region_may_control_focus((WRegion*)cwin);
+    
     region_rescue_clientwins((WRegion*)cwin);
-#warning "TODO: pholder_goto?"    
-/*    if(cf && cwin->fsinfo.last_mgr_watch.obj!=NULL)
-        region_goto((WRegion*)(cwin->fsinfo.last_mgr_watch.obj));*/
+    
+    if(cf && cwin->fs_pholder!=NULL)
+        pholder_goto(cwin->fs_pholder);
+    
     destroy_obj((Obj*)cwin);
     
     hook_call(clientwin_unmapped_hook, &win, mrsh_u_c, mrsh_u_extl);

@@ -34,6 +34,8 @@ extern void floatwspholder_deinit(WFloatWSPHolder *ph);
 
 extern bool floatwspholder_stale(WFloatWSPHolder *ph);
 
+extern bool floatwspholder_do_goto(WFloatWSPHolder *ph);
+
 extern bool floatwspholder_do_attach(WFloatWSPHolder *ph, 
                                      WRegionAttachHandler *hnd,
                                      void *hnd_param);

@@ -47,6 +47,8 @@ extern bool mplexpholder_do_attach(WMPlexPHolder *ph,
                                    WRegionAttachHandler *hnd,
                                    void *hnd_param);
 
+extern bool mplexpholder_do_goto(WMPlexPHolder *ph);
+
 extern bool mplexpholder_move(WMPlexPHolder *ph, WMPlex *mplex, 
                               WMPlexPHolder *after,
                               WLListNode *or_after, 

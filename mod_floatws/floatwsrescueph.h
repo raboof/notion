@@ -38,6 +38,8 @@ extern void floatwsrescueph_deinit(WFloatWSRescuePH *ph);
 
 extern bool floatwsrescueph_stale(WFloatWSRescuePH *ph);
 
+extern bool floatwsrescueph_do_goto(WFloatWSRescuePH *ph);
+
 extern bool floatwsrescueph_do_attach(WFloatWSRescuePH *ph, 
                                       WRegionAttachHandler *hnd,
                                       void *hnd_param);
