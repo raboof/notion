@@ -18,7 +18,7 @@ mod_panews.set{
     -- Layout template may be one of default|alternative1|alternative2 
     -- or a template table. (The one for 'default' is reproduced below
     -- as an example.)
-    template="alternative1",
+    --template="default",
     -- The scale factor parameter controls the size-based classification 
     -- heuristic. The default of 1.0 is designed for 1280x1024 at 75dpi.
     --scalef=1.0,
