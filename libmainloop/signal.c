@@ -25,13 +25,16 @@
 #include <libtu/output.h>
 
 #include "signal.h"
-
+#include "hooks.h"
 
 static int kill_sig=0;
 #if 1
 static int wait_sig=0;
 #endif
 static bool had_tmr=FALSE;
+
+WHook *mainloop_sigchld_hook=NULL;
+
 
 /*{{{ Timers */
 
@@ -81,6 +84,19 @@ static void do_timer_set()
 }
 
 
+static bool mrsh_chld(void (*fn)(pid_t), pid_t *param)
+{
+    fn(*param);
+    return TRUE;
+}
+
+
+static bool mrsh_chld_extl(ExtlFn fn, pid_t *param)
+{
+    return extl_call(fn, "i", NULL, (int)*param);
+}
+
+
 bool mainloop_check_signals()
 {
     struct timeval current_time;
@@ -92,7 +108,11 @@ bool mainloop_check_signals()
         pid_t pid;
         wait_sig=0;
         while((pid=waitpid(-1, NULL, WNOHANG|WUNTRACED))>0){
-            /* nothing */
+            if(mainloop_sigchld_hook!=NULL){
+                hook_call(mainloop_sigchld_hook, &pid, 
+                          (WHookMarshall*)mrsh_chld,
+                          (WHookMarshallExtl*)mrsh_chld_extl);
+            }
         }
     }
 #endif

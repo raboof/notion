@@ -21,6 +21,8 @@
 #include <libtu/types.h>
 #include <libextl/extl.h>
 
+#include "hooks.h"
+
 INTRCLASS(WTimer);
 
 typedef void WTimerHandler(WTimer *timer);
@@ -49,5 +51,7 @@ extern bool timer_is_set(WTimer *timer);
 extern bool mainloop_check_signals();
 extern void mainloop_trap_signals();
 extern void mainloop_trap_timer();
+
+extern WHook *mainloop_sigchld_hook;
 
 #endif /* ION_LIBMAINLOOP_SIGNAL_H */
