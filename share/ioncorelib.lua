@@ -31,7 +31,6 @@ ioncorelib.RESULT_DATA_LIMIT=1024^2
 include('ioncorelib-luaext')
 include('ioncorelib-bindings')
 include('ioncorelib-winprops')
-include('ioncorelib-hooks')
 include('ioncorelib-extras')
 
 -- Export some important functions into global namespace.
@@ -46,8 +45,7 @@ ioncorelib.export(ioncorelib,
                   "defcmd",
                   "defcmd2",
                   "defbindings",
-                  "defwinprop",
-                  "call_hook") -- C callback
+                  "defwinprop")
 
 --[[ioncorelib.export(ioncore,
                   "warn",

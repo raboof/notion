@@ -111,7 +111,7 @@ void mod_query_deinit()
         mod_query_wedln_bindmap=NULL;
     }
     
-    REMOVE_HOOK(ioncore_save_session_hook, save_history);
+    hook_remove(ioncore_save_session_hook, save_history);
 }
 
 
@@ -134,7 +134,7 @@ bool mod_query_init()
     
     loaded_ok=TRUE;
 
-    ADD_HOOK(ioncore_save_session_hook, save_history);
+    hook_add(ioncore_save_session_hook, save_history);
     
     return TRUE;
     

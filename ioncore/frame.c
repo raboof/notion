@@ -53,6 +53,11 @@ static bool frame_initialise_titles(WFrame *frame);
 static void frame_free_titles(WFrame *frame);
 
 
+WHook *frame_activated_hook=NULL;
+WHook *frame_inactivated_hook=NULL;
+WHook *frame_content_switched_hook=NULL;
+
+
 /*{{{ Destroy/create frame */
 
 
@@ -414,18 +419,14 @@ void frame_resize_hints(WFrame *frame, XSizeHints *hints_ret,
 void frame_inactivated(WFrame *frame)
 {
     window_draw((WWindow*)frame, FALSE);
-    extl_call_named("call_hook", "soo", NULL,
-                    "frame_inactivated",
-                    frame, FRAME_CURRENT(frame));
+    hook_call_o(frame_inactivated_hook, (Obj*)frame);
 }
 
 
 void frame_activated(WFrame *frame)
 {
     window_draw((WWindow*)frame, FALSE);
-    extl_call_named("call_hook", "soo", NULL,
-                    "frame_activated",
-                    frame, FRAME_CURRENT(frame));
+    hook_call_o(frame_activated_hook, (Obj*)frame);
 }
 
 
@@ -542,9 +543,7 @@ static void frame_managed_changed(WFrame *frame, int mode, bool sw,
         update_attrs(frame);
 
     if(sw){
-        extl_call_named("call_hook", "soo", NULL,
-                        "frame_managed_switched",
-                        frame, FRAME_CURRENT(frame));
+        hook_call_o(frame_content_switched_hook, (Obj*)frame); /* +current? */
         if(frame_set_background(frame, FALSE))
             return;
     }

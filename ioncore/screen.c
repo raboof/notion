@@ -40,6 +40,9 @@
 #define SCR_WIN(SCR) ((SCR)->mplex.win.win)
 
 
+WHook *screen_content_switched_hook=NULL;
+
+
 /*{{{ Init/deinit */
 
 
@@ -216,8 +219,7 @@ static void screen_managed_changed(WScreen *scr, int mode, bool sw,
                                     scr->atom_workspace, 
                                     n==NULL ? "" : n);
     
-        extl_call_named("call_hook", "soo", NULL,
-                        "screen_workspace_switched", scr, reg);
+        hook_call_o(screen_content_switched_hook, (Obj*)scr); /* +reg? */
     }
 }
 

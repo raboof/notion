@@ -80,4 +80,9 @@ extern ExtlTab frame_get_configuration(WFrame *frame);
 extern WRegion *frame_load(WWindow *par, const WFitParams *fp, ExtlTab tab);
 extern void frame_do_load(WFrame *frame, ExtlTab tab);
 
+/* Hooks */
+extern WHook *frame_activated_hook;
+extern WHook *frame_inactivated_hook;
+extern WHook *frame_content_switched_hook;
+
 #endif /* ION_IONCORE_FRAME_H */

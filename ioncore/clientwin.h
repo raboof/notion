@@ -114,7 +114,8 @@ extern WClientWin *clientwin_get_transient_for(WClientWin *cwin);
 
 /* Hooks */
 
-extern WHooklist *clientwin_do_manage_alt;
+extern WHook *clientwin_do_manage_alt;
+extern WHook *clientwin_added_hook;
 
 /* Manage */
 

@@ -69,7 +69,9 @@ static const char ioncore_about[]=
     "Lesser General Public License for more details.\n";
 
 
-WHooklist *ioncore_post_layout_setup_hook=NULL;
+WHook *ioncore_post_layout_setup_hook=NULL;
+WHook *ioncore_save_session_hook=NULL;
+WHook *ioncore_deinit_hook=NULL;
 
 
 /*}}}*/
@@ -81,12 +83,29 @@ WHooklist *ioncore_post_layout_setup_hook=NULL;
 extern bool ioncore_register_exports();
 extern void ioncore_unregister_exports();
 
+#define INIT_HOOK_(NM)                            \
+    NM=ioncore_register_hook(#NM, create_hook()); \
+    if(NM==NULL) return FALSE;
 
-static void init_hooks()
+#define INIT_HOOK(NM, DFLT)                           \
+    INIT_HOOK_(NM)                                    \
+    if(!hook_add(NM, (void (*)())DFLT)) return FALSE;
+
+
+static bool init_hooks()
 {
-    ADD_HOOK(clientwin_do_manage_alt, clientwin_do_manage_default);
-    ADD_HOOK(ioncore_handle_event_alt, ioncore_handle_event);
-    ADD_HOOK(region_do_warp_alt, region_do_warp_default);
+    INIT_HOOK_(ioncore_post_layout_setup_hook);
+    INIT_HOOK_(ioncore_save_session_hook);
+    INIT_HOOK_(ioncore_deinit_hook);
+    INIT_HOOK_(screen_content_switched_hook);
+    INIT_HOOK_(frame_content_switched_hook);
+    INIT_HOOK_(frame_activated_hook);
+    INIT_HOOK_(frame_inactivated_hook);
+    INIT_HOOK_(clientwin_added_hook);
+    INIT_HOOK(clientwin_do_manage_alt, clientwin_do_manage_default);
+    INIT_HOOK(ioncore_handle_event_alt, ioncore_handle_event);
+    INIT_HOOK(region_do_warp_alt, region_do_warp_default);
+    return TRUE;
 }
 
 
@@ -144,13 +163,22 @@ bool ioncore_init(int argc, char *argv[])
     ioncore_g.argc=argc;
     ioncore_g.argv=argv;
 
-    if(!ioncore_init_bindmaps())
+    if(!ioncore_init_bindmaps()){
+        warn("Unable to initialise bindmaps.");
         return FALSE;
-    if(!register_classes())
+    }
+    if(!register_classes()){
+        warn("Unable to register classes.");
         return FALSE;
-    init_hooks();
-
-    return ioncore_init_module_support();
+    }
+    if(!init_hooks()){
+        warn("Unable to initialise hooks.");
+        return FALSE;
+    }
+    if(!ioncore_init_module_support()){
+        warn("Unable to initialise module support.");
+        return FALSE;
+    }
 }
 
 
@@ -455,7 +483,7 @@ bool ioncore_startup(const char *display, const char *cfgfile,
         return FALSE;
     }
     
-    CALL_HOOKS(ioncore_post_layout_setup_hook, ());
+    hook_call_v(ioncore_post_layout_setup_hook);
     
     FOR_ALL_ROOTWINS(rootwin)
         rootwin_manage_initial_windows(rootwin);
@@ -472,9 +500,6 @@ bool ioncore_startup(const char *display, const char *cfgfile,
 /*{{{ ioncore_save_session */
 
 
-WHooklist *ioncore_save_session_hook=NULL;
-
-
 /*EXTL_DOC
  * Save session state.
  */
@@ -484,9 +509,7 @@ bool ioncore_save_session()
     if(!ioncore_save_layout())
         return FALSE;
 
-    CALL_HOOKS(ioncore_save_session_hook, ());
-              
-    extl_call_named("call_hook", "s", NULL, "save_session");
+    hook_call_v(ioncore_save_session_hook);
     
     return TRUE;
 }
@@ -511,7 +534,7 @@ void ioncore_deinit()
     if(ioncore_g.save_enabled)
         ioncore_save_session();
 
-    extl_call_named("call_hook", "s", NULL, "deinit");
+    hook_call_v(ioncore_deinit_hook);
     
     while(ioncore_g.screens!=NULL)
         destroy_obj((Obj*)ioncore_g.screens);

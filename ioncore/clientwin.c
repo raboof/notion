@@ -45,7 +45,8 @@ static void set_clientwin_state(WClientWin *cwin, int state);
 static bool send_clientmsg(Window win, Atom a, Time stmp);
 
 
-WHooklist *clientwin_do_manage_alt=NULL;
+WHook *clientwin_do_manage_alt=NULL;
+WHook *clientwin_added_hook=NULL;
 
 
 #define LATEST_TRANSIENT(CWIN) REGION_LAST_MANAGED((CWIN)->transient_list)
@@ -408,6 +409,45 @@ static bool postmanage_check(WClientWin *cwin, XWindowAttributes *attr)
 }
 
 
+static bool do_manage_mrsh(bool (*fn)(WClientWin *cwin, WManageParams *pm),
+                           void **p)
+{
+    return fn((WClientWin*)p[0], (WManageParams*)p[1]);
+}
+
+    bool switchto;
+    bool jumpto;
+    bool userpos;
+    bool dockapp;
+    bool maprq;
+    int gravity;
+    WRectangle geom;
+    WClientWin *tfor;
+
+static bool do_manage_mrsh_extl(ExtlFn fn, void **p)
+{
+    WClientWin *cwin=(WClientWin*)p[0];
+    WManageParams *mp=(WManageParams*)p[1];
+    ExtlTab t=extl_create_table();
+    bool ret=FALSE;
+    
+    extl_table_sets_b(t, "switchto", mp->switchto);
+    extl_table_sets_b(t, "jumpto", mp->jumpto);
+    extl_table_sets_b(t, "userpos", mp->userpos);
+    extl_table_sets_b(t, "dockapp", mp->dockapp);
+    extl_table_sets_b(t, "maprq", mp->maprq);
+    extl_table_sets_i(t, "gravity", mp->gravity);
+    extl_table_sets_rectangle(t, "geom", &(mp->geom));
+    extl_table_sets_o(t, "tfor", (Obj*)(mp->tfor));
+    
+    extl_call(fn, "ot", "b", cwin, t, &ret);
+    
+    extl_unref_table(t);
+    
+    return (ret && REGION_MANAGER(cwin)!=NULL);
+}
+
+
 /* This is called when a window is mapped on the root window.
  * We want to check if we should manage the window and how and
  * act appropriately.
@@ -510,9 +550,15 @@ again:
     param.tfor=clientwin_get_transient_for(cwin);
 
     if(!handle_target_props(cwin, &param)){
-        bool managed=FALSE;
+        bool managed;
+        void *mrshpm[2];
         
-        CALL_ALT_B(managed, clientwin_do_manage_alt, (cwin, &param));
+        mrshpm[0]=cwin;
+        mrshpm[1]=&param;
+        
+        managed=hook_call_alt(clientwin_do_manage_alt, &mrshpm, 
+                              (WHookMarshall*)do_manage_mrsh,
+                              (WHookMarshallExtl*)do_manage_mrsh_extl);
 
         if(!managed){
             warn("Unable to manage client window %x\n", win);
@@ -529,7 +575,7 @@ again:
     if(postmanage_check(cwin, &attr)){
         if(param.jumpto && ioncore_g.focus_next==NULL)
             region_goto((WRegion*)cwin);
-        extl_call_named("call_hook", "so", NULL, "clientwin_added", cwin);
+        hook_call_o(clientwin_added_hook, (Obj*)cwin);
         return cwin;
     }
 

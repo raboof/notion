@@ -272,7 +272,7 @@ bool region_may_control_focus(WRegion *reg)
 /*{{{ set_focus, warp */
 
 
-WHooklist *region_do_warp_alt=NULL;
+WHook *region_do_warp_alt=NULL;
 
 
 bool region_do_warp_default(WRegion *reg)
@@ -305,7 +305,7 @@ bool region_do_warp_default(WRegion *reg)
 
 void region_do_warp(WRegion *reg)
 {
-    CALL_ALT_B_NORET(region_do_warp_alt, (reg));
+    hook_call_alt_o(region_do_warp_alt, (Obj*)reg);
 }
 
 

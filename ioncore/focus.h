@@ -27,7 +27,7 @@ extern WRegion *region_set_focus_mgrctl(WRegion *freg, bool dowarp);
 /* Immediate warp/focus */
 extern void region_do_warp(WRegion *reg);
 extern bool region_do_warp_default(WRegion *reg);
-extern WHooklist *region_do_warp_alt;
+extern WHook *region_do_warp_alt;
 
 /* Awaiting focus state */
 extern void region_set_await_focus(WRegion *reg);

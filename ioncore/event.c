@@ -26,7 +26,7 @@
 /*{{{ Hooks */
 
 
-WHooklist *ioncore_handle_event_alt=NULL;
+WHook *ioncore_handle_event_alt=NULL;
 
 
 /*}}}*/
@@ -173,7 +173,7 @@ void ioncore_x_connection_handler(int conn, void *unused)
     XNextEvent(ioncore_g.dpy, &ev);
     ioncore_update_timestamp(&ev);
 
-    CALL_ALT_B_NORET(ioncore_handle_event_alt, (&ev));
+    hook_call_alt_p(ioncore_handle_event_alt, &ev, NULL);
 }
 
 

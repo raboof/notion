@@ -118,7 +118,7 @@ static void check_and_create()
     int i;
     
     /* No longer needed, free the memory the list uses. */
-    REMOVE_HOOK(ioncore_post_layout_setup_hook, check_and_create);
+    hook_remove(ioncore_post_layout_setup_hook, check_and_create);
     
     FOR_ALL_SCREENS(scr){
         WScratchpad *sp=NULL;
@@ -163,7 +163,7 @@ bool mod_sp_init()
     ioncore_read_config("sp", NULL, FALSE);
     
     if(ioncore_g.opmode==IONCORE_OPMODE_INIT){
-        ADD_HOOK(ioncore_post_layout_setup_hook, check_and_create);
+        hook_add(ioncore_post_layout_setup_hook, check_and_create);
     }else{
         check_and_create();
     }

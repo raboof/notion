@@ -31,7 +31,8 @@ extern bool ioncore_is_i18n();
 
 extern bool ioncore_save_session();
 
-extern WHooklist *ioncore_post_layout_setup_hook;
-extern WHooklist *ioncore_save_session_hook;
+extern WHook *ioncore_post_layout_setup_hook;
+extern WHook *ioncore_save_session_hook;
+extern WHook *ioncore_deinit_hook;
 
 #endif /* ION_IONCORE_IONCORE_H */

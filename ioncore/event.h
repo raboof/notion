@@ -52,6 +52,6 @@ extern void ioncore_get_event(XEvent *ev, long mask);
 extern void ioncore_update_timestamp(XEvent *ev);
 extern Time ioncore_get_timestamp();
 
-extern WHooklist *ioncore_handle_event_alt;
+extern WHook *ioncore_handle_event_alt;
 
 #endif /* ION_IONCORE_EVENT_H */

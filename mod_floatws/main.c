@@ -61,7 +61,8 @@ extern bool mod_floatws_unregister_exports();
 
 void mod_floatws_deinit()
 {
-    REMOVE_HOOK(clientwin_do_manage_alt, mod_floatws_clientwin_do_manage);
+    hook_remove(clientwin_do_manage_alt, 
+                (WHookDummy*)mod_floatws_clientwin_do_manage);
 
     if(mod_floatws_floatws_bindmap!=NULL){
         ioncore_free_bindmap("WFloatWS", mod_floatws_floatws_bindmap);
@@ -110,7 +111,8 @@ bool mod_floatws_init()
 
     ioncore_read_config("floatws", NULL, TRUE);
     
-    ADD_HOOK(clientwin_do_manage_alt, mod_floatws_clientwin_do_manage);
+    hook_add(clientwin_do_manage_alt, 
+             (WHookDummy*)mod_floatws_clientwin_do_manage);
 
     return TRUE;
     

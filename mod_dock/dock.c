@@ -1292,7 +1292,8 @@ bool mod_dock_init()
 
     ioncore_read_config(modname, NULL, TRUE);
 
-    ADD_HOOK(clientwin_do_manage_alt, clientwin_do_manage_hook);
+    hook_add(clientwin_do_manage_alt, 
+             (WHookDummy*)clientwin_do_manage_hook);
 
     return TRUE;
 
@@ -1305,7 +1306,8 @@ void mod_dock_deinit()
     WDock *dock;
     extern void mod_dock_unregister_exports();
 
-    REMOVE_HOOK(clientwin_do_manage_alt, clientwin_do_manage_hook);
+    hook_remove(clientwin_do_manage_alt, 
+                (WHookDummy*)clientwin_do_manage_hook);
 
     /* Destroy all docks {{{ */
     dock=docks;

@@ -17,6 +17,7 @@
 #include "extl.h"
 #include "rectangle.h"
 #include "rootwin.h"
+#include "hooks.h"
 
 #define FOR_ALL_SCREENS(SCR)   \
     for((SCR)=ioncore_g.screens; \
@@ -56,5 +57,7 @@ extern WScreen *ioncore_find_screen_id(int id);
 extern WScreen *ioncore_goto_screen_id(int id);
 extern WScreen *ioncore_goto_next_screen();
 extern WScreen *ioncore_goto_prev_screen();
+
+extern WHook *screen_content_switched_hook;
 
 #endif /* ION_IONCORE_SCREEN_H */

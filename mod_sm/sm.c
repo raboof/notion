@@ -60,8 +60,7 @@ extern void mod_sm_unregister_exports();
 
 void mod_sm_deinit()
 {
-    REMOVE_HOOK(clientwin_do_manage_alt, sm_do_manage);
-    /*REMOVE_HOOK(ioncore_save_session_hook, save_id);*/
+    hook_remove(clientwin_do_manage_alt, (WHookDummy*)sm_do_manage);
 
     ioncore_unset_sm_callbacks(mod_sm_add_match, mod_sm_get_configuration);
     
@@ -85,8 +84,7 @@ int mod_sm_init()
     if(!ioncore_set_sm_callbacks(mod_sm_add_match, mod_sm_get_configuration))
         goto err;
     
-    ADD_HOOK(clientwin_do_manage_alt, sm_do_manage);
-    /*ADD_HOOK(ioncore_save_session_hook, save_id);*/
+    hook_add(clientwin_do_manage_alt, (WHookDummy*)sm_do_manage);
 
     return TRUE;
     

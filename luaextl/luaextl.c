@@ -871,7 +871,7 @@ static bool extl_do_eq(lua_State *st, EqParams *ep)
 }
 
 
-bool extl_eq_fn(ExtlFn fn1, ExtlFn fn2)
+bool extl_fn_eq(ExtlFn fn1, ExtlFn fn2)
 {
     EqParams ep;
     ep.o1=fn1;
@@ -882,7 +882,7 @@ bool extl_eq_fn(ExtlFn fn1, ExtlFn fn2)
 }
 
 
-bool extl_eq_table(ExtlTab t1, ExtlTab t2)
+bool extl_table_eq(ExtlTab t1, ExtlTab t2)
 {
     EqParams ep;
     ep.o1=t1;

@@ -12,69 +12,56 @@
 #ifndef ION_IONCORE_HOOKS_H
 #define ION_IONCORE_HOOKS_H
 
-/* The hooks in this file have nothing to do with the hook mechanism
- * in ../etc/ioncorelib.lua and only the "alternative" hooks are used
- * anymore for alternative handlers to low-level functions.
- */
+#include "common.h"
+#include "extl.h"
 
-#include <libtu/symlist.h>
+INTRSTRUCT(WHookItem);
+INTRCLASS(WHook);
 
+typedef void WHookDummy();
+typedef bool WHookMarshall(WHookDummy *fn, void *param);
+typedef bool WHookMarshallExtl(ExtlFn fn, void *param);
 
-typedef Symlist WHooklist;
+DECLSTRUCT(WHookItem){
+    WHookDummy *fn;
+    ExtlFn efn;
+    WHookItem *next, *prev;
+};
 
-
-#define CALL_HOOKS(HOOK, ARGS)              \
-    {                                       \
-        typedef void HookFn();              \
-        HookFn *hk;                         \
-                                            \
-        ITERATE_SYMLIST(HookFn*, hk, HOOK){ \
-            hk ARGS;                        \
-        }                                   \
-    }
-
-
-#define CALL_ALT_B(RET, ALT, ARGS)        \
-    {                                     \
-        typedef bool AltFn();             \
-        AltFn *hk;                        \
-        RET=FALSE;                        \
-                                          \
-        ITERATE_SYMLIST(AltFn*, hk, ALT){ \
-            RET=hk ARGS;                  \
-            if(RET)                       \
-                break;                    \
-        }                                 \
-    }
+DECLCLASS(WHook){
+    Obj obj;
+    WHookItem *items;
+};
 
 
-#define CALL_ALT_B_NORET(ALT, ARGS)       \
-    {                                     \
-        typedef bool AltFn();             \
-        AltFn *hk;                        \
-                                          \
-        ITERATE_SYMLIST(AltFn*, hk, ALT){ \
-            if(hk ARGS)                   \
-                break;                    \
-        }                                 \
-    }
+/* If hk==NULL to register, new is attempted to be created. */
+extern WHook *ioncore_register_hook(const char *name, WHook *hk);
+extern WHook *ioncore_unregister_hook(const char *name, WHook *hk);
+extern WHook *ioncore_get_hook(const char *name);
 
+extern WHook *create_hook();
+extern bool hook_init(WHook *hk);
+extern void hook_deinit(WHook *hk);
 
-#define CALL_ALT_P(TYPE, RET, ALT, ARGS)  \
-    {                                     \
-        typedef TYPE *AltFn();            \
-        AltFn *hk;                        \
-        RET=NULL;                         \
-                                          \
-        ITERATE_SYMLIST(AltFn*, hk, ALT){ \
-            RET=hk ARGS;                  \
-            if(RET!=NULL)                 \
-                break;                    \
-        }                                 \
-    }
-    
+extern bool hook_add(WHook *hk, WHookDummy *fn);
+extern bool hook_remove(WHook *hk, WHookDummy *fn);
+extern WHookItem *hook_find(WHook *hk, WHookDummy *fn);
 
-#define ADD_HOOK(HOOK, FN) symlist_insert(&(HOOK), (void*)(FN))
-#define REMOVE_HOOK(HOOK, FN) symlist_remove(&(HOOK), (void*)(FN))
+extern bool hook_add_extl(WHook *hk, ExtlFn fn);
+extern bool hook_remove_extl(WHook *hk, ExtlFn fn);
+extern WHookItem *hook_find_extl(WHook *hk, ExtlFn efn);
+
+extern void hook_call(const WHook *hk, void *p,
+                      WHookMarshall *m, WHookMarshallExtl *em);
+extern void hook_call_v(const WHook *hk);
+extern void hook_call_o(const WHook *hk, Obj *o);
+extern void hook_call_p(const WHook *hk, void *p, WHookMarshallExtl *em);
+
+extern bool hook_call_alt(const WHook *hk, void *p,
+                          WHookMarshall *m, WHookMarshallExtl *em);
+extern bool hook_call_alt_v(const WHook *hk);
+extern bool hook_call_alt_o(const WHook *hk, Obj *o);
+extern bool hook_call_alt_p(const WHook *hk, void *p, WHookMarshallExtl *em);
+
 
 #endif /* ION_IONCORE_HOOKS_H */
