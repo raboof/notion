@@ -117,7 +117,6 @@ DECLSTRUCT(WDockApp){
 DECLCLASS(WDock){
     WWindow win;
     WDock *dock_next, *dock_prev;
-    WRegion *managed_list;
     int pos, grow;
     bool is_auto;
     GrBrush *brush;
@@ -1132,7 +1131,7 @@ static void dock_deinit(WDock *dock)
 
 bool dock_rqclose(WDock *dock)
 {
-    if(dock->managed_list!=NULL){
+    if(dock->dockapps!=NULL){
         warn_obj(modname, "Dock \"%s\" is still managing other objects "
                 " -- refusing to close.", region_name((WRegion*)dock));
         return FALSE;
@@ -1334,7 +1333,7 @@ static WDockApp *do_insert_dockapp(WDock *dock, WRegion *reg,
         LINK_ITEM(dock->dockapps, dockapp, next, prev);
     }
 
-    region_set_manager(reg, (WRegion*)dock, &(dock->managed_list));
+    region_set_manager(reg, (WRegion*)dock, NULL);
     
     dock_managed_rqgeom(dock, reg, 
                         REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y,
@@ -1375,7 +1374,7 @@ static void dock_managed_remove(WDock *dock, WRegion *reg)
         warn("Dockapp not found.");
     }
 
-    region_unset_manager(reg, (WRegion*)dock, &(dock->managed_list));
+    region_unset_manager(reg, (WRegion*)dock, NULL);
 
     dock_resize(dock);
 
