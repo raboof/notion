@@ -143,7 +143,6 @@ function QueryLib.complete_function(str)
     local len=string.len(str)
     for k, v in pairs(_G) do
         if type(v)=="function" and string.sub(k, 1, len)==str then
-            print(k)
             table.insert(res, k)
         end
     end

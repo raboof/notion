@@ -810,10 +810,10 @@ static bool extl_do_call_vararg(lua_State *st, int oldtop, bool intab,
 		n=strlen(spec);
 	
 		/* +1 for extl_push_obj */
-		/*if(!lua_checkstack(l_st, n+1)){
+		if(!lua_checkstack(l_st, n+1)){
 			warn("Stack full");
 			return FALSE;
-		}*/
+		}
 		
 		ret=extl_push_args(st, intab, spec, args, &args);
 	}
@@ -1053,10 +1053,10 @@ static int extl_l1_call_handler2(lua_State *st)
 	no=(spec->ospec==NULL ? 0 : strlen(spec->ospec));
 	
 	/* +1 for extl_push_obj */
-	/*if(!lua_checkstack(st, no+1)){
+	if(!lua_checkstack(st, no+1)){
 		warn("Stack full");
 		return 0;
-	}*/
+	}
 	
 	/*for(i=0; i<ni; i++)
 		fprintf(stderr, "%d: %s\n", i+1, lua_typename(st, lua_type(st, i+1)));
