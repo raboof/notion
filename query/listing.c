@@ -44,6 +44,11 @@ static int getbeg(GrBrush *brush, int maxw, char *str, int l, int *wret)
 	int n=0, nprev=0, w;
 	GrFontExtents fnte;
 	
+    if(maxw<=0){
+        *wret=0;
+        return 0;
+    }
+    
 	grbrush_get_font_extents(brush, &fnte);
 	
 	if(fnte.max_width!=0){
@@ -82,6 +87,9 @@ static int string_nrows(GrBrush *brush, int maxw, char *str)
 	int w;
 	int nr=1;
 	
+    if(maxw<=0)
+        return 1;
+    
 	while(1){
 		w=grbrush_get_text_width(brush, str, l);
 		if(w<maxw)
@@ -109,6 +117,9 @@ static void draw_multirow(GrBrush *brush, Window win, int x, int y,
 	int w;
 	int nr=1;
 	
+    if(maxw<=0)
+        return;
+
 	while(1){
 		w=grbrush_get_text_width(brush, str, l);
 		if(w<maxw)
@@ -303,7 +314,7 @@ static void do_draw_listing(GrBrush *brush, Window win,
 	
 	grbrush_set_clipping_rectangle(brush, win, geom);
 	
-	x=geom->x;
+	x=0;
 	c=0;
 	while(1){
 		y=geom->y+fnte.baseline;
@@ -314,7 +325,8 @@ static void do_draw_listing(GrBrush *brush, Window win,
 			if(i>=l->nstrs)
 				goto finished;
 			
-			draw_multirow(brush, win, x, y, geom->w-x, l->itemh, l->strs[i], 
+			draw_multirow(brush, win, geom->x+x, y,
+                          geom->w-x, l->itemh, l->strs[i], 
 						  style);
 
 			y+=l->itemh*ITEMROWS(l, i);
