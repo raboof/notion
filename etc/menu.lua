@@ -18,5 +18,6 @@ defbindings("WMenu", {
     kpress("AnyModifier+N",     "WMenu.select_next(_)"),
     kpress("Up",                "WMenu.select_prev(_)"),
     kpress("Down",              "WMenu.select_next(_)"),
+    kpress("BackSpace",         "WMenu.typeahead_clear(_)"),
 })
 
