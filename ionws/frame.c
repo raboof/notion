@@ -210,26 +210,60 @@ void frame_managed_geom(const WFrame *frame, WRectangle *geom)
 /*{{{ Draw */
 
 
+int frame_tab_at_x(const WFrame *frame, int x)
+{
+	WGRData *grdata=GRDATA_OF(frame);
+	int bar_w=BAR_W(frame, grdata);
+	int bar_x=BAR_X(frame, grdata);
+	
+	x-=bar_x;
+	
+	if(x<0)
+		return -1;
+	
+	return (x*frame->managed_count)/bar_w;
+}
+
+
+int frame_nth_tab_x(const WFrame *frame, int n)
+{
+	WGRData *grdata=GRDATA_OF(frame);
+	int bar_w=BAR_W(frame, grdata);
+	int bar_x=BAR_X(frame, grdata);
+	
+	return (n*bar_w)/frame->managed_count+bar_x;
+}
+
+
+int frame_nth_tab_w(const WFrame *frame, int n)
+{
+	WGRData *grdata=GRDATA_OF(frame);
+	int spc=grdata->tab_spacing;
+	int bar_w=BAR_W(frame, grdata);
+	int bar_x=BAR_X(frame, grdata);
+	int start=frame_nth_tab_x(frame, n);
+	
+	if(n==frame->managed_count-1)
+		return bar_w+bar_x-start;
+	else
+		return frame_nth_tab_x(frame, n+1)-spc-start;
+}
+
+
 void frame_recalc_bar(WFrame *frame)
 {
 	WScreen *scr=SCREEN_OF(frame);
 	int bar_w=BAR_W(frame, &(scr->grdata));
-	int spc=scr->grdata.frame_border.ipad;
-	int tab_w;
-	int textw;
+	int tab_w, textw, n;
 	WRegion *sub;
 	
 	if(frame->managed_count==0){
 		frame->tab_w=bar_w;
 	}else{
-		tab_w=(bar_w-(frame->managed_count-1)*spc)/frame->managed_count;
-		frame->tab_w=tab_w;
-		
-		textw=BORDER_IW(&(scr->grdata.tab_border), tab_w);
-		
+		n=0;
 		FOR_ALL_MANAGED_ON_LIST(frame->managed_list, sub){
-			if(sub==frame->current_input)
-				continue;
+			tab_w=frame_nth_tab_w(frame, n++);
+			textw=BORDER_IW(&(scr->grdata.tab_border), tab_w);
 			REGION_LABEL(sub)=region_make_label(sub, textw,
 												scr->grdata.tab_font);
 		}
@@ -290,6 +324,7 @@ void draw_frame_bar(const WFrame *frame, bool complete)
 	WScreen *scr=SCREEN_OF(frame);
 	WGRData *grdata=&(scr->grdata);
 	WRectangle bg;
+	int n;
 	
 	frame_bar_geom(frame, &bg);
 	
@@ -325,13 +360,11 @@ void draw_frame_bar(const WFrame *frame, bool complete)
 		return;
 	}
 	
-	dinfo->geom.w=frame->tab_w;
-	
-	for(sub=FIRST_MANAGED(frame->managed_list); sub!=NULL; sub=next){
-		next=NEXT_MANAGED(frame->managed_list, sub);
-		
-		if(next==NULL)
-			dinfo->geom.w=bg.w-(X-bg.x);
+	n=0;
+	FOR_ALL_MANAGED_ON_LIST(frame->managed_list, sub){
+		dinfo->geom.w=frame_nth_tab_w(frame, n);
+		dinfo->geom.x=frame_nth_tab_x(frame, n);
+		n++;
 		
 		if(REGION_IS_ACTIVE(frame)){
 			if(sub==frame->current_sub)
@@ -371,8 +404,6 @@ void draw_frame_bar(const WFrame *frame, bool complete)
 			}
 			XFillRectangle(wglobal.dpy, WIN, grdata->stipple_gc, X, Y, W, H);
 		}
-		
-		X+=frame->tab_w+grdata->tab_spacing;
 	}
 }
 

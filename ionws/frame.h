@@ -79,4 +79,8 @@ extern void frame_move_current_tab_left(WFrame *frame);
 
 extern WRegion *frame_nth_managed(WFrame *frame, uint n);
 
+extern int frame_nth_tab_w(const WFrame *frame, int n);
+extern int frame_nth_tab_x(const WFrame *frame, int n);
+extern int frame_tab_at_x(const WFrame *frame, int x);
+
 #endif /* ION_FRAME_H */

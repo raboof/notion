@@ -22,7 +22,7 @@
 #define REGION_LABEL(REG)	((REG)->mgr_data)
 
 
-static int p_tab_x, p_tab_y;
+static int p_tab_x, p_tab_y, p_tabnum;
 static bool p_tabdrag_active=FALSE;
 static bool p_tabdrag_selected=FALSE;
 static int p_dx1mul=0, p_dx2mul=0, p_dy1mul=0, p_dy2mul=0;
@@ -55,12 +55,12 @@ int frame_press(WFrame *frame, XButtonEvent *ev, WThing **thing_ret)
 	WScreen *scr=SCREEN_OF(frame);
 	WRegion *sub;
 	WRectangle g;
-	int tabnum=-1, tw, x;
 	
 	p_dx1mul=0;
 	p_dx2mul=0;
 	p_dy1mul=0;
 	p_dy2mul=0;
+	p_tabnum=-1;
 	
 	/* Check tab */
 	
@@ -74,15 +74,13 @@ int frame_press(WFrame *frame, XButtonEvent *ev, WThing **thing_ret)
 		else if(ev->x>g.x+g.w-RESB)
 			p_dx2mul=1;
 		
-		x=ev->x-g.x;
-		tw=frame->tab_w+scr->grdata.spacing;
-		x/=tw;
+		p_tabnum=frame_tab_at_x(frame, ev->x);
 
 		region_rootpos((WRegion*)frame, &p_tab_x, &p_tab_y);
-		p_tab_x+=x*tw+g.x;
+		p_tab_x+=frame_nth_tab_x(frame, p_tabnum);
 		p_tab_y+=g.y;
 		
-		sub=frame_nth_managed(frame, x);
+		sub=frame_nth_managed(frame, p_tabnum);
 
 		if(sub==NULL)
 			return FRAME_AREA_EMPTY_TAB;
@@ -195,10 +193,10 @@ static void p_tabdrag_begin(WFrame *frame, XMotionEvent *ev, int dx, int dy)
 
 	change_grab_cursor(CURSOR_DRAG);
 		
-	grdata->drag_geom.w=frame->tab_w;
+	grdata->drag_geom.w=frame_nth_tab_w(frame, p_tabnum);
 	grdata->drag_geom.h=grdata->bar_h;
-	XResizeWindow(wglobal.dpy, grdata->drag_win, 
-				  frame->tab_w, grdata->bar_h);
+	XResizeWindow(wglobal.dpy, grdata->drag_win,
+				  grdata->drag_geom.w, grdata->drag_geom.h);
 	/*XSelectInput(wglobal.dpy, grdata->drag_win, ExposureMask);*/
 	
 	/* TODO: drawlist */
