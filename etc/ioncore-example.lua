@@ -32,12 +32,15 @@ include("kludges.lua")
 include("ioncore-bindings.lua")
 
 -- How to shorten window titles when the full title doesn't fit in
--- the available space?
-add_shortenrule("(.*)(<[0-9]+>)", "$1$2$|$1$<...$2")
-add_shortenrule("(.*)", "$1$|$1$<...")
+-- the available space? The first-defined matching rule that succeeds 
+-- in making the title short enough is used.
 add_shortenrule("(.*) - Mozilla(<[0-9]+>)", "$1$2$|$1$<...$2")
 add_shortenrule("(.*) - Mozilla", "$1$|$1$<...")
 add_shortenrule("XMMS - (.*)", "$1$|...$>$1")
+add_shortenrule("[^:]+: (.*)(<[0-9]+>)", "$1$2$|$1$<...$2")
+add_shortenrule("[^:]+: (.*)", "$1$|$1$<...")
+add_shortenrule("(.*)(<[0-9]+>)", "$1$2$|$1$<...$2")
+add_shortenrule("(.*)", "$1$|$1$<...")
 
 -- List of hosts to tab-complete in the F4 ssh query.
 --query_ssh_hosts={"host1", "host2"}
