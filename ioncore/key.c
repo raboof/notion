@@ -143,6 +143,8 @@ static bool submapgrab_handler(WRegion *reg, XEvent *ev)
 	if(binding==NULL){
 		if(ismod(ev->xkey.keycode))
 			return FALSE;
+		clear_subs(reg);
+		return TRUE;
 	}
 	
 	if(binding->submap!=NULL){
