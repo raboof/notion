@@ -367,10 +367,10 @@ void menu_draw_config_updated(WMenu *menu)
 
 static void menu_release_gr(WMenu *menu, Window win)
 {
-	if(menu->brush!=NULL)
-		grbrush_release(menu->brush, win);
 	if(menu->entry_brush!=NULL)
 		grbrush_release(menu->entry_brush, win);
+	if(menu->brush!=NULL)
+		grbrush_release(menu->brush, win);
 }
 
 
