@@ -77,3 +77,17 @@ obsolete("region_get_h", function(reg) return region_geom(reg).h end)
 -- Added 2003-05-21
 obsolete("region_set_w", function(reg, w) region_request_geom(reg, {w=w}) end)
 obsolete("region_set_h", function(reg, h) region_request_geom(reg, {h=h}) end)
+
+-- Added 2003-05-31
+local new_floatframe_do_resize=floatframe_do_resize
+local new_ionframe_do_resize=ionframe_do_resize
+
+obsolete("ionframe_do_resize", function(f, x, y)
+                                   new_ionframe_do_resize(f, x, x, y, y)
+                               end)
+
+obsolete("floatframe_do_resize", function(f, x, y)
+                                     new_floatframe_do_resize(f, x, x, y, y)
+                                 end)
+
+                               
