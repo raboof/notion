@@ -73,37 +73,12 @@ WIonFrame *find_frame_at(WIonWS *ws, int x, int y)
 /*{{{ Split */
 
 
-bool get_splitparams(int *dir, int *primn, const char *str)
-{
-	if(str==NULL)
-		return FALSE;
-	
-	if(!strcmp(str, "left")){
-		*primn=TOP_OR_LEFT;
-		*dir=HORIZONTAL;
-	}else if(!strcmp(str, "right")){
-		*primn=BOTTOM_OR_RIGHT;
-		*dir=HORIZONTAL;
-	}else if(!strcmp(str, "top")){
-		*primn=TOP_OR_LEFT;
-		*dir=VERTICAL;
-	}else if(!strcmp(str, "bottom")){
-		*primn=BOTTOM_OR_RIGHT;
-		*dir=VERTICAL;
-	}else{
-		return FALSE;
-	}
-	
-	return TRUE;
-}
-
-
 static WIonFrame *do_split(WIonFrame *oframe, const char *str, bool attach)
 {
 	WRegion *reg;
 	int dir, primn, mins;
 	
-	if(!get_splitparams(&dir, &primn, str)){
+	if(!get_split_dir_primn(str, &dir, &primn)){
 		warn("Unknown parameter to do_split");
 		return NULL;
 	}
@@ -164,7 +139,7 @@ WIonFrame *ionws_newframe(WIonWS *ws, const char *dirstr)
 	WRegion *reg;
 	int dir, primn, mins;
 	
-	if(!get_splitparams(&dir, &primn, dirstr))
+	if(!get_split_dir_primn(dirstr, &dir, &primn))
 		return NULL;
 	
 	/*mins=(dir==VERTICAL ? GRDATA_OF(ws)->h_unit : GRDATA_OF(ws)->w_unit);*/
