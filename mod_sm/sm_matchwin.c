@@ -118,7 +118,8 @@ static void free_win_match(WWinMatch *match)
 {	
     UNLINK_ITEM(match_list, match, next, prev);
     
-    watch_reset(&(match->target_watch));
+    if(match->pholder!=NULL)
+        destroy_obj((Obj*)match->pholder);
     
     if(match->client_id)
         free(match->client_id);
@@ -224,27 +225,29 @@ static WWinMatch *match_cwin(WClientWin *cwin)
 
 /* Returns frame_id of a match. Called from add_clientwin_alt in sm.c */
 
-WRegion *mod_sm_match_cwin_to_saved(WClientWin *cwin)
+WPHolder *mod_sm_match_cwin_to_saved(WClientWin *cwin)
 {
     WWinMatch *match=NULL;
-    WRegion *reg=NULL;
+    WPHolder *ph=NULL;
 
     if((match=match_cwin(cwin))){
-        reg=(WRegion*)(match->target_watch.obj);
+        ph=match->pholder;
+        match->pholder=NULL;
         free_win_match(match);
     }
-    return reg;
+    
+    return ph;
 }
 
 
-bool mod_sm_add_match(WWindow *par, ExtlTab tab)
+bool mod_sm_add_match(WPHolder *ph, ExtlTab tab)
 {
     WWinMatch *m=NULL;
     
     m=ALLOC(WWinMatch);
     if(m==NULL)
         return FALSE;
-    watch_init(&(m->target_watch));
+    
     m->client_id=NULL;
     m->window_role=NULL;
     m->winstance=NULL;
@@ -259,7 +262,7 @@ bool mod_sm_add_match(WWindow *par, ExtlTab tab)
     extl_table_gets_s(tab, "mod_sm_wm_name", &(m->wm_name));
     extl_table_gets_s(tab, "mod_sm_wm_cmd", &(m->wm_cmd));
     
-    watch_setup(&(m->target_watch), (Obj*)par, NULL);
+    m->pholder=ph;
     
     mod_sm_register_win_match(m);
 

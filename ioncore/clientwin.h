@@ -121,9 +121,4 @@ extern WHook *clientwin_unmapped_hook;
 
 extern WClientWin *ioncore_manage_clientwin(Window win, bool maprq);
 
-extern bool ioncore_set_sm_callbacks(bool (*add)(WWindow *par, ExtlTab tab),
-                                     void (*cfg)(WClientWin *cwin, ExtlTab tab));
-extern void ioncore_unset_sm_callbacks(bool (*add)(WWindow *par, ExtlTab tab),
-                                       void (*cfg)(WClientWin *cwin, ExtlTab tab));
-
 #endif /* ION_IONCORE_CLIENTWIN_H */

@@ -1523,35 +1523,13 @@ double clientwin_xid(WClientWin *cwin)
 
 static int last_checkcode=1;
 
-static bool (*add_cb)(WWindow *par, ExtlTab tab);
-static void (*cfg_cb)(WClientWin *cwin, ExtlTab tab);
-
-bool ioncore_set_sm_callbacks(bool (*add)(WWindow *par, ExtlTab tab),
-                              void (*cfg)(WClientWin *cwin, ExtlTab tab))
-{
-    if(add_cb!=NULL || cfg_cb!=NULL)
-        return FALSE;
-    
-    add_cb=add;
-    cfg_cb=cfg;
-    
-    return TRUE;
-}
-
-void ioncore_unset_sm_callbacks(bool (*add)(WWindow *par, ExtlTab tab),
-                                void (*cfg)(WClientWin *cwin, ExtlTab tab))
-{
-    if(add_cb==add)
-        add_cb=NULL;
-    if(cfg_cb==cfg)
-        cfg_cb=NULL;
-}
-
 
 static ExtlTab clientwin_get_configuration(WClientWin *cwin)
 {
     int chkc=0;
     ExtlTab tab;
+    SMCfgCallback *cfg_cb;
+    SMAddCallback *add_cb;
     
     tab=region_get_base_configuration((WRegion*)cwin);
 
@@ -1563,6 +1541,8 @@ static ExtlTab clientwin_get_configuration(WClientWin *cwin)
                                      chkc);
         extl_table_sets_i(tab, "checkcode", chkc);
     }
+
+    ioncore_get_sm_callbacks(&add_cb, &cfg_cb);
     
     if(cfg_cb!=NULL)
         cfg_cb(cwin, tab);
@@ -1579,6 +1559,7 @@ WRegion *clientwin_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
     WClientWin *cwin=NULL;
     XWindowAttributes attr;
     WRectangle rg;
+    bool got_chkc;
 
     if(!extl_table_gets_d(tab, "windowid", &wind) ||
        !extl_table_gets_i(tab, "checkcode", &chkc)){
@@ -1592,10 +1573,11 @@ WRegion *clientwin_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
         return NULL;
     }
 
-    if(!xwindow_get_integer_property(win, ioncore_g.atom_checkcode, &real_chkc)
-       || real_chkc!=chkc){
-        if(add_cb!=NULL)
-            add_cb(par, tab);
+    got_chkc=xwindow_get_integer_property(win, ioncore_g.atom_checkcode, 
+                                          &real_chkc);
+    
+    if(!got_chkc || real_chkc!=chkc){
+        ioncore_clientwin_load_missing();
         return NULL;
     }
 

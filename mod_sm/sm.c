@@ -19,6 +19,7 @@
 #include <ioncore/common.h>
 #include <ioncore/global.h>
 #include <ioncore/clientwin.h>
+#include <ioncore/saveload.h>
 #include <ioncore/property.h>
 #include <libextl/readconfig.h>
 #include <ioncore/manage.h>
@@ -44,20 +45,25 @@ char mod_sm_ion_api_version[]=ION_API_VERSION;
 
 static bool sm_do_manage(WClientWin *cwin, const WManageParams *param)
 {
-    Window t_hint;
     int transient_mode=TRANSIENT_MODE_OFF;
-    WRegion *reg;
+    WPHolder *ph;
+    bool ret;
     
     if(param->tfor!=NULL)
         return FALSE;
     
-    reg=mod_sm_match_cwin_to_saved(cwin);
-    if(reg==NULL)
+    ph=mod_sm_match_cwin_to_saved(cwin);
+    if(ph==NULL)
         return FALSE;
     
+    ret=pholder_attach(ph, (WRegion*)cwin);
     
-    return region_manage_clientwin(reg, cwin, param, 
-                                   MANAGE_REDIR_PREFER_NO);
+    destroy_obj((Obj*)ph);
+    
+    return ret;
+    
+    /*return region_manage_clientwin(reg, cwin, param, 
+                                     MANAGE_REDIR_PREFER_NO);*/
 }
 
 
@@ -118,7 +124,7 @@ void mod_sm_deinit()
 
     hook_remove(clientwin_do_manage_alt, (WHookDummy*)sm_do_manage);
 
-    ioncore_unset_sm_callbacks(mod_sm_add_match, mod_sm_get_configuration);
+    ioncore_set_sm_callbacks(NULL, NULL);
     
     mod_sm_unregister_exports();
     
@@ -140,8 +146,7 @@ int mod_sm_init()
     if(!mod_sm_register_exports())
         goto err;
 
-    if(!ioncore_set_sm_callbacks(mod_sm_add_match, mod_sm_get_configuration))
-        goto err;
+    ioncore_set_sm_callbacks(mod_sm_add_match, mod_sm_get_configuration);
     
     hook_add(clientwin_do_manage_alt, (WHookDummy*)sm_do_manage);
 

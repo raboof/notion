@@ -32,8 +32,45 @@ static bool loading_layout=FALSE;
 static bool layout_load_error=FALSE;
 
 
-/*{{{ Load support functions */
+/*{{{ Session management module support */
 
+
+static SMAddCallback *add_cb;
+static SMCfgCallback *cfg_cb;
+static SMPHolderCallback *ph_cb;
+static bool clientwin_was_missing=FALSE;
+
+
+void ioncore_set_sm_callbacks(SMAddCallback *add, SMCfgCallback *cfg)
+{
+    add_cb=add;
+    cfg_cb=cfg;
+}
+
+
+void ioncore_get_sm_callbacks(SMAddCallback **add, SMCfgCallback **cfg)
+{
+    *add=add_cb;
+    *cfg=cfg_cb;
+}
+
+
+void ioncore_set_sm_pholder_callback(SMPHolderCallback *phcb)
+{
+    ph_cb=phcb;
+}
+
+
+void ioncore_clientwin_load_missing()
+{
+    clientwin_was_missing=TRUE;
+}
+
+
+/*}}}*/
+
+
+/*{{{ Load support functions */
 
 
 WRegion *create_region_load(WWindow *par, const WFitParams *fp, 
@@ -60,17 +97,28 @@ WRegion *create_region_load(WWindow *par, const WFitParams *fp,
 
     free(objclass);
     
+    clientwin_was_missing=FALSE;
+    
     reg=fn(par, fp, tab);
     
-    if(reg==NULL)
-        return NULL;
-    
-    if(!OBJ_IS(reg, WClientWin)){
-        if(extl_table_gets_s(tab, "name", &name)){
-            region_set_name(reg, name);
-            free(name);
+    if(reg==NULL){
+        if(clientwin_was_missing && add_cb!=NULL && ph_cb!=NULL){
+            WPHolder *ph=ph_cb();
+            if(ph!=NULL){
+                if(!add_cb(ph, tab))
+                    destroy_obj((Obj*)ph);
+            }
+        }
+    }else{
+        if(!OBJ_IS(reg, WClientWin)){
+            if(extl_table_gets_s(tab, "name", &name)){
+                region_set_name(reg, name);
+                free(name);
+            }
         }
     }
+    
+    ph_cb=NULL;
     
     return reg;
 }

@@ -1557,11 +1557,22 @@ ExtlTab mplex_get_configuration(WMPlex *mplex)
 }
 
 
+static int tmp_layer=0;
+static WMPlex *tmp_mplex=NULL;
+
+
+static WPHolder *pholder_callback()
+{
+    assert(tmp_mplex!=NULL);
+    return (WPHolder*)mplex_last_place_holder(tmp_mplex, tmp_layer);
+}
+
+
 void mplex_load_contents(WMPlex *mplex, ExtlTab tab)
 {
     ExtlTab substab, subtab;
     int n, i;
-    
+
     /*if(extl_table_gets_t(tab, "stdisp", &subtab)){
         mplex_set_stdisp_extl(mplex, subtab);
         extl_unref_table(subtab);
@@ -1571,7 +1582,27 @@ void mplex_load_contents(WMPlex *mplex, ExtlTab tab)
         n=extl_table_get_n(substab);
         for(i=1; i<=n; i++){
             if(extl_table_geti_t(substab, i, &subtab)){
-                mplex_attach_new(mplex, subtab);
+                /*mplex_attach_new(mplex, subtab);*/
+                WMPlexAttachParams par;
+                char *tmp=NULL;
+                
+                get_params(subtab, &par);
+                
+                tmp_layer=(par.flags&MPLEX_ATTACH_L2 ? 2 : 1);
+                tmp_mplex=mplex;
+                
+                extl_table_gets_s(subtab, "name", &tmp);
+                fprintf(stderr, "%s\n", tmp);
+                if(tmp!=NULL) free(tmp);
+                
+                ioncore_set_sm_pholder_callback(pholder_callback);
+    
+                region__attach_load((WRegion*)mplex, subtab,
+                                    (WRegionDoAttachFn*)mplex_do_attach, 
+                                    &par);
+
+                tmp_mplex=NULL;
+                
                 extl_unref_table(subtab);
             }
         }
