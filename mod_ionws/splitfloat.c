@@ -789,6 +789,16 @@ WSplit *load_splitfloat(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
     if(split==NULL)
         return NULL;
 
+    if(!extl_table_is_bool_set(tab, "tls_brs_incl_handles")){
+        if(split->ssplit.dir==SPLIT_HORIZONTAL){
+            tls+=split->tlpwin->bdw.right;
+            brs+=split->brpwin->bdw.left;
+        }else{
+            tls+=split->tlpwin->bdw.bottom;
+            brs+=split->brpwin->bdw.top;
+        }
+    }
+                               
     calc_tlg_brg(geom, tls, brs, dir, &tlg, &brg);
     
     splitfloat_update_handles(split, &tlg, &brg);
