@@ -299,23 +299,43 @@ bool ioncore_init_i18n()
 
 static void set_session(const char *display)
 {
-    const char *dpyend;
-    char *tmp, *colon;
-    const char *smdir, *sm;
+    const char *dpyend=NULL;
+    char *tmp=NULL, *colon=NULL;
+    const char *sm=NULL, *smdir=NULL, *id=NULL;
     
     sm=getenv("SESSION_MANAGER");
     smdir=getenv("SM_SAVE_DIR");
+    id=getenv("GNOME_DESKTOP_SESSION_ID");
+    /* kde sm? */
     
-    if(sm!=NULL && smdir!=NULL){
-        /* Probably running under a session manager; use its
-         * save file directory. (User should also load mod_sm.)
+    if(sm!=NULL){
+        /* Running under SM, try to use a directory specific
+         * to the session.
          */
-        libtu_asprintf(&tmp, "%s/ion3", smdir); /* !!! pwm<=>ion */
+        if(smdir!=NULL){
+            tmp=scat(smdir, "/ion3"); /* TODO: pwm<=>ion! */
+        }else if(id!=NULL){
+            tmp=scat("gnome-session-", id);
+            if(tmp!=NULL){
+                char *p=tmp;
+                while(1){
+                    p=strpbrk(p, "/ :?*");
+                    if(p==NULL)
+                        break;
+                    *p='-';
+                    p++;
+                }
+            }
+        }else{
+            tmp=scopy("default-session-sm");
+        }
+        
         if(tmp==NULL){
             warn_err();
             return;
         }
     }else{
+        /* Not running under SM; use display-specific directory */
         dpyend=strchr(display, ':');
         if(dpyend!=NULL)
             dpyend=strchr(dpyend, '.');

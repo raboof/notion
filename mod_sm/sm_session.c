@@ -310,8 +310,6 @@ bool mod_sm_init_session()
         return FALSE;
     }
     
-    fprintf(stderr, "ionid: %s\n", sm_client_id);
-    
     memset(&smcall, 0, sizeof(smcall));
     smcall.save_yourself.callback=&sm_save_yourself;
     smcall.save_yourself.client_data=NULL;
