@@ -80,6 +80,19 @@ static void help()
 }
 
 
+static bool new_informs=FALSE;
+
+
+static void flush_informs()
+{
+    if(new_informs){
+        printf(".\n");
+        fflush(stdout);
+        new_informs=FALSE;
+    }
+}
+
+
 static void mainloop()
 {
     mainloop_trap_timer();
@@ -94,6 +107,8 @@ static void mainloop()
         }
 
         mainloop_execute_deferred();
+
+        flush_informs();
 
         mainloop_select();
     }
@@ -191,5 +206,5 @@ EXTL_EXPORT
 void statusd_inform(const char *name, const char *value)
 {
     printf("%s: %s\n", name, value);
-    fflush(stdout);
+    new_informs=TRUE;
 }
