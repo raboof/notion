@@ -240,15 +240,11 @@ static WScreen *preinit_screen(int xscr)
 	
 	init_window((WWindow*)scr, scr, rootwin, geom);
 	
-	/*scr->root.bindmap=NULL; &(wglobal.main_bindmap);*/
-	
 	scr->xscr=xscr;
 	scr->default_cmap=DefaultColormap(dpy, xscr);
 
 	scr->default_viewport=NULL;
 	
-	/*scr->sub_count=0;
-	scr->current_sub=NULL;*/
 	scr->w_unit=7;
 	scr->h_unit=13;
 	
@@ -268,11 +264,10 @@ static WScreen *preinit_screen(int xscr)
 
 static void postinit_screen(WScreen *scr)
 {
-	/*init_workspaces(scr);*/
-	/*scan_initial_windows(scr);*/
 	set_cursor(scr->root.win, CURSOR_DEFAULT);
 	/* TODO: Need to reorder initilisation code */
 	/*region_add_bindmap((WRegion*)scr, &wmcore_screen_bindmap, TRUE);*/
+	/*init_workspaces(scr);*/
 }
 
 
