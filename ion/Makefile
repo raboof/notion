@@ -50,4 +50,4 @@ ion: $(OBJS) $(EXT_OBJS)
 
 _install:
 	$(INSTALLDIR) $(BINDIR)
-	$(INSTALL) -s -m $(BIN_MODE) ion $(BINDIR)
+	$(INSTALL) -m $(BIN_MODE) ion $(BINDIR)
