@@ -47,7 +47,8 @@ XINERAMA_LIBS=-lXinerama -lXext
 #DEFINES += -DCF_NO_XINERAMA
 
 # Uncomment to enable Xft (anti-aliased fonts) support
-#EXTRA_LIBS += -lXft
+#EXTRA_LIBS += `xft-config --libs`
+#EXTRA_INCLUDES += `xft-config --cflags`
 #DEFINES += -DCF_XFT
 
 
