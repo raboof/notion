@@ -89,10 +89,12 @@ char *make_label(XFontStruct *fnt, const char *str, const char *trailer,
 
 	dw=XTextWidth(fnt, dots, 3);
 	
-	while(--len){
-		w=XTextWidth(fnt, str, len);
-		if(tw+w+dw<=maxw)
-			break;
+	if(len>0){
+		while(--len){
+			w=XTextWidth(fnt, str, len);
+			if(tw+w+dw<=maxw)
+				break;
+		}
 	}
 	
 	if(wret!=NULL)
