@@ -9,4 +9,4 @@ if test x$HOME != x; then
     $DIRARGS"
 fi
 
-exec PREFIX/bin/ioncore "$@" $DIRARGS
+exec BINDIR/ioncore "$@" $DIRARGS

@@ -14,4 +14,4 @@ if test x$HOME != x; then
     $PWMDIRARGS"
 fi
 
-exec PREFIX/bin/ioncore "$@" $PWMDIRARGS $DIRARGS
+exec BINDIR/ioncore "$@" $PWMDIRARGS $DIRARGS

@@ -27,11 +27,11 @@ _install:
 ion: ion.in
 	sed 's#ETCDIR#$(ETCDIR)#g; \
 	     s#LIBDIR#$(LIBDIR)#g; \
-	     s#PREFIX#$(PREFIX)#g;' $< > $@
+	     s#BINDIR#$(BINDIR)#g;' $< > $@
 	chmod $(BIN_MODE) $@
 	
 pwm: pwm.in
 	sed 's#ETCDIR#$(ETCDIR)#g; \
 	     s#LIBDIR#$(LIBDIR)#g; \
-	     s#PREFIX#$(PREFIX)#g;' $< > $@
+	     s#BINDIR#$(BINDIR)#g;' $< > $@
 	chmod $(BIN_MODE) $@
