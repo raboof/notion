@@ -27,6 +27,7 @@
 #include <libextl/readconfig.h>
 #include <libextl/extl.h>
 #include <libmainloop/select.h>
+#include <libmainloop/signal.h>
 
 #include "common.h"
 #include "rootwin.h"
@@ -485,6 +486,8 @@ bool ioncore_startup(const char *display, const char *cfgfile,
     if(!ioncore_init_x(display, stflags))
         return FALSE;
 
+    mainloop_trap_timer();
+    
     gr_read_config();
 
     if(!extl_read_config("ioncore_ext", NULL, TRUE))
