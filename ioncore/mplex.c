@@ -603,12 +603,6 @@ void mplex_do_set_focus(WMPlex *mplex, bool warp)
 }
 
 
-/*}}}*/
-
-
-/*{{{ Managed region switching */
-
-
 void mplex_managed_activated(WMPlex *mplex, WRegion *reg)
 {
     WLListNode *node=llist_find_on(mplex->l2_list, reg);
@@ -621,6 +615,188 @@ void mplex_managed_activated(WMPlex *mplex, WRegion *reg)
     }else if(!(node->flags&LLIST_L2_HIDDEN)){
         mplex->l2_current=node;
     }
+}
+
+
+/*}}}*/
+
+
+/*{{{ Managed region switching */
+
+
+static bool mplex_l2_passive(WMPlex *mplex)
+{
+    WLListNode *node;
+    FOR_ALL_NODES_ON_LLIST(node, mplex->l2_list){
+        if((node->flags&(LLIST_L2_HIDDEN|LLIST_L2_PASSIVE))==0)
+            return FALSE;
+    }
+     
+    return TRUE;
+}
+
+
+static bool mplex_do_node_display(WMPlex *mplex, WLListNode *node,
+                                  bool l2, bool call_changed)
+{
+    WRegion *sub=node->reg;
+    
+    if(l2){
+        if(node==mplex->l2_current)
+            return TRUE;
+    }else{
+        WRegion *stdisp=(WRegion*)(mplex->stdispinfo.regwatch.obj);
+
+        if(node==mplex->l1_current)
+            return mplex_l2_passive(mplex);
+        
+        if(OBJ_IS(sub, WGenWS)){
+            if(stdisp!=NULL){
+                WRegion *mgr=REGION_MANAGER(stdisp);
+                if(mgr!=sub){
+                    if(OBJ_IS(mgr, WGenWS)){
+                        genws_unmanage_stdisp((WGenWS*)mgr, FALSE, FALSE);
+                        region_detach_manager(stdisp);
+                    }
+                    
+                    genws_manage_stdisp((WGenWS*)sub, stdisp, 
+                                        mplex->stdispinfo.pos);
+                }
+            }else{
+                genws_unmanage_stdisp((WGenWS*)sub, TRUE, FALSE);
+            }
+        }
+    }
+    
+    if(REGION_IS_MAPPED(mplex) && !MPLEX_MGD_UNVIEWABLE(mplex))
+        region_map(sub);
+    else
+        region_unmap(sub);
+    
+    if(!l2){
+        if(mplex->l1_current!=NULL && REGION_IS_MAPPED(mplex))
+            region_unmap(mplex->l1_current->reg);
+        
+        mplex->l1_current=node;
+        
+        /* Many programs will get upset if the visible, although only 
+         * such, client window is not the lowest window in the mplex. 
+         * xprop/xwininfo will return the information for the lowest 
+         * window. 'netscape -remote' will not work at all if there are
+         * no visible netscape windows.
+         */
+        if(OBJ_IS(sub, WClientWin))
+            region_lower(sub);
+        
+        /* This call should be unnecessary... */
+        mplex_managed_activated(mplex, sub);
+
+        mplex_managed_changed(mplex, MPLEX_CHANGE_SWITCHONLY, TRUE, sub);
+        return mplex_l2_passive(mplex);
+    }else{
+        mplex_move_phs_before(mplex, node, 2);
+        llist_unlink(&(mplex->l2_list), node);
+        
+        region_raise(sub);
+        
+        llist_link_last(&(mplex->l2_list), node);
+        
+        node->flags&=~LLIST_L2_HIDDEN;
+        /*if(!(node->flags&LLIST_L2_PASSIVE))
+            mplex->l2_current=node;*/
+        return TRUE;
+    }
+}
+
+
+static bool mplex_do_node_goto(WMPlex *mplex, WLListNode *node,
+                               bool l2, bool call_changed, int flags)
+{
+    if(!mplex_do_node_display(mplex, node, l2, call_changed))
+        return FALSE;
+    
+    if(flags&REGION_GOTO_FOCUS){
+        region_maybewarp(node->reg, !(flags&REGION_GOTO_NOWARP));
+        /*region_maybewarp((WRegion*)mplex, !(flags&REGION_GOTO_NOWARP));*/
+    }
+    
+    return TRUE;
+}
+
+
+static bool mplex_do_node_goto_sw(WMPlex *mplex, WLListNode *node,
+                                  bool l2, bool call_changed)
+{
+    bool mcf=region_may_control_focus((WRegion*)mplex);
+    int flags=(mcf ? REGION_GOTO_FOCUS : 0)|REGION_GOTO_NOWARP;
+    return mplex_do_node_goto(mplex, node, l2, FALSE, flags);
+}
+
+
+bool mplex_managed_goto(WMPlex *mplex, WRegion *sub, int flags)
+{
+    bool l2=FALSE;
+    WLListNode *node;
+    
+    node=llist_find_on(mplex->l2_list, sub);
+    
+    if(node!=NULL){
+        l2=TRUE;
+    }else{
+        node=llist_find_on(mplex->l1_list, sub);
+        if(node==NULL)
+            return FALSE;
+    }
+
+    return mplex_do_node_goto(mplex, node, l2, TRUE, flags);
+}
+
+
+static void do_switch(WMPlex *mplex, WLListNode *node)
+{
+    if(node!=NULL){
+        bool mcf=region_may_control_focus((WRegion*)mplex);
+        if(mcf)
+            ioncore_set_previous_of(node->reg);
+        region_managed_goto((WRegion*)mplex, node->reg,
+                            (mcf ? REGION_GOTO_FOCUS : 0));
+        /*mplex_do_node_goto(mplex, node->reg, FALSE, TRUE,
+                             (mcf ? REGION_GOTO_FOCUS : 0));*/
+    }
+}
+
+
+/*EXTL_DOC
+ * Have \var{mplex} display the \var{n}:th object managed by it.
+ */
+EXTL_EXPORT_MEMBER
+void mplex_switch_nth(WMPlex *mplex, uint n)
+{
+    do_switch(mplex, llist_nth_node(mplex->l1_list, n));
+}
+
+
+/*EXTL_DOC
+ * Have \var{mplex} display next (wrt. currently selected) object managed 
+ * by it.
+ */
+EXTL_EXPORT_MEMBER
+void mplex_switch_next(WMPlex *mplex)
+{
+    do_switch(mplex, LIST_NEXT_WRAP(mplex->l1_list, mplex->l1_current, 
+                                    next, prev));
+}
+
+
+/*EXTL_DOC
+ * Have \var{mplex} display previous (wrt. currently selected) object
+ * managed by it.
+ */
+EXTL_EXPORT_MEMBER
+void mplex_switch_prev(WMPlex *mplex)
+{
+    do_switch(mplex, LIST_PREV_WRAP(mplex->l1_list, mplex->l1_current,
+                                    next, prev));
 }
 
 
@@ -684,177 +860,8 @@ bool mplex_l2_show(WMPlex *mplex, WRegion *reg)
     if(node==NULL || !(node->flags&LLIST_L2_HIDDEN))
         return FALSE;
     
-    return mplex_managed_goto(mplex, reg, (mcf ? REGION_GOTO_FOCUS : 0));
-}
-
-
-static bool mplex_l2_passive(WMPlex *mplex)
-{
-    WLListNode *node;
-    FOR_ALL_NODES_ON_LLIST(node, mplex->l2_list){
-        if((node->flags&(LLIST_L2_HIDDEN|LLIST_L2_PASSIVE))==0)
-            return FALSE;
-    }
-     
-    return TRUE;
-}
-
-
-static bool mplex_do_managed_display(WMPlex *mplex, WRegion *sub,
-                                     bool call_changed)
-{
-    bool l2=FALSE;
-    WRegion *stdisp;
-    WLListNode *node;
-    
-    node=llist_find_on(mplex->l2_list, sub);
-    
-    if(node!=NULL){
-        l2=TRUE;
-        if(node==mplex->l2_current)
-            return TRUE;
-    }else{
-        node=llist_find_on(mplex->l1_list, sub);
-        if(node==NULL)
-            return FALSE;
-        if(node==mplex->l1_current)
-            return mplex_l2_passive(mplex);
-    }
-
-    stdisp=(WRegion*)(mplex->stdispinfo.regwatch.obj);
-    
-    if(!l2 && OBJ_IS(sub, WGenWS)){
-        if(stdisp!=NULL){
-            WRegion *mgr=REGION_MANAGER(stdisp);
-            if(mgr!=sub){
-                if(OBJ_IS(mgr, WGenWS)){
-                    genws_unmanage_stdisp((WGenWS*)mgr, FALSE, FALSE);
-                    region_detach_manager(stdisp);
-                }
-            
-                genws_manage_stdisp((WGenWS*)sub, stdisp, 
-                                    mplex->stdispinfo.pos);
-            }
-        }else{
-            genws_unmanage_stdisp((WGenWS*)sub, TRUE, FALSE);
-        }
-    }
-    
-    if(REGION_IS_MAPPED(mplex) && !MPLEX_MGD_UNVIEWABLE(mplex))
-        region_map(sub);
-    else
-        region_unmap(sub);
-    
-    if(!l2){
-        if(mplex->l1_current!=NULL && REGION_IS_MAPPED(mplex))
-            region_unmap(mplex->l1_current->reg);
-        
-        mplex->l1_current=node;
-        
-        /* Many programs will get upset if the visible, although only 
-         * such, client window is not the lowest window in the mplex. 
-         * xprop/xwininfo will return the information for the lowest 
-         * window. 'netscape -remote' will not work at all if there are
-         * no visible netscape windows.
-         */
-        if(OBJ_IS(sub, WClientWin))
-            region_lower(sub);
-        
-        /* This call should be unnecessary... */
-        mplex_managed_activated(mplex, sub);
-
-        mplex_managed_changed(mplex, MPLEX_CHANGE_SWITCHONLY, TRUE, sub);
-        return mplex_l2_passive(mplex);
-    }else{
-        mplex_move_phs_before(mplex, node, 2);
-        llist_unlink(&(mplex->l2_list), node);
-        
-        region_raise(sub);
-        
-        llist_link_last(&(mplex->l2_list), node);
-        
-        node->flags&=~LLIST_L2_HIDDEN;
-        /*if(!(node->flags&LLIST_L2_PASSIVE))
-            mplex->l2_current=node;*/
-        return TRUE;
-    }
-}
-
-
-static bool mplex_do_managed_goto(WMPlex *mplex, WRegion *sub,
-                                  bool call_changed, int flags)
-{
-    if(!mplex_do_managed_display(mplex, sub, call_changed))
-        return FALSE;
-    
-    if(flags&REGION_GOTO_FOCUS){
-        region_maybewarp((WRegion*)sub, !(flags&REGION_GOTO_NOWARP));
-        /*region_maybewarp((WRegion*)mplex, !(flags&REGION_GOTO_NOWARP));*/
-    }
-    
-    return TRUE;
-}
-
-
-static bool mplex_do_managed_goto_sw(WMPlex *mplex, WRegion *sub,
-                                     bool call_changed)
-{
-    bool mcf=region_may_control_focus((WRegion*)mplex);
-    return mplex_do_managed_goto(mplex, sub, FALSE, 
-                                 (mcf ? REGION_GOTO_FOCUS : 0)
-                                 |REGION_GOTO_NOWARP);
-}
-
-
-bool mplex_managed_goto(WMPlex *mplex, WRegion *sub, int flags)
-{
-    return mplex_do_managed_goto(mplex, sub, TRUE, flags);
-}
-
-
-static void do_switch(WMPlex *mplex, WLListNode *node)
-{
-    if(node!=NULL){
-        bool mcf=region_may_control_focus((WRegion*)mplex);
-        if(mcf)
-            ioncore_set_previous_of(node->reg);
-        region_managed_goto((WRegion*)mplex, node->reg,
-                            (mcf ? REGION_GOTO_FOCUS : 0));
-    }
-}
-
-
-/*EXTL_DOC
- * Have \var{mplex} display the \var{n}:th object managed by it.
- */
-EXTL_EXPORT_MEMBER
-void mplex_switch_nth(WMPlex *mplex, uint n)
-{
-    do_switch(mplex, llist_nth_node(mplex->l1_list, n));
-}
-
-
-/*EXTL_DOC
- * Have \var{mplex} display next (wrt. currently selected) object managed 
- * by it.
- */
-EXTL_EXPORT_MEMBER
-void mplex_switch_next(WMPlex *mplex)
-{
-    do_switch(mplex, LIST_NEXT_WRAP(mplex->l1_list, mplex->l1_current, 
-                                    next, prev));
-}
-
-
-/*EXTL_DOC
- * Have \var{mplex} display previous (wrt. currently selected) object
- * managed by it.
- */
-EXTL_EXPORT_MEMBER
-void mplex_switch_prev(WMPlex *mplex)
-{
-    do_switch(mplex, LIST_PREV_WRAP(mplex->l1_list, mplex->l1_current,
-                                    next, prev));
+    return mplex_do_node_goto(mplex, node, TRUE, TRUE,
+                              (mcf ? REGION_GOTO_FOCUS : 0));
 }
 
 
@@ -925,7 +932,7 @@ WLListNode *mplex_do_attach_after(WMPlex *mplex,
         sw=TRUE;
     
     if(sw)
-        mplex_do_managed_goto_sw(mplex, reg, FALSE);
+        mplex_do_node_goto_sw(mplex, node, l2, FALSE);
     else
         region_unmap(reg);
 
@@ -1185,7 +1192,7 @@ void mplex_managed_remove(WMPlex *mplex, WRegion *sub)
         return;
     
     if(next!=NULL && sw)
-        mplex_do_managed_goto_sw(mplex, next->reg, FALSE);
+        mplex_do_node_goto_sw(mplex, next, FALSE, FALSE);
     else if(l2 && region_may_control_focus((WRegion*)mplex))
         region_warp((WRegion*)mplex);
     
