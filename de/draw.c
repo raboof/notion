@@ -67,20 +67,26 @@ static void do_draw_border(Window win, GC gc, int x, int y, int w, int h,
 						   uint tl, uint br, DEColour tlc, DEColour brc)
 {
 	XPoint points[3];
-	uint i=0, a=0;
+	uint i=0, a=0, b=0;
 	
 	w--;
 	h--;
 
 	XSetForeground(wglobal.dpy, gc, tlc);
 
-	for(i=a=0; i<tl; i++){
-		points[0].x=x+i;		points[0].y=y+h-a+1;
+	
+	a=(br!=0);
+	b=0;
+	
+	for(i=0; i<tl; i++){
+		points[0].x=x+i;		points[0].y=y+h+1-b;
 		points[1].x=x+i;		points[1].y=y+i;
-		points[2].x=x+w-a+1;	points[2].y=y+i;
+		points[2].x=x+w+1-a;	points[2].y=y+i;
 
-		if(i<br)
+		if(a<br)
 			a++;
+		if(b<br)
+			b++;
 	
 		XDrawLines(wglobal.dpy, win, gc, points, 3, CoordModeOrigin);
 	}
@@ -88,13 +94,18 @@ static void do_draw_border(Window win, GC gc, int x, int y, int w, int h,
 	
 	XSetForeground(wglobal.dpy, gc, brc);
 
-	for(i=a=0; i<br; i++){	
-		points[0].x=x+w-i;		points[0].y=y+a;
-		points[1].x=x+w-i;		points[1].y=y+h-i;
-		points[2].x=x+a+1;		points[2].y=y+h-i;
+	a=(tl!=0);
+	b=0;
 	
-		if(i<tl)
+	for(i=0; i<br; i++){
+		points[0].x=x+w-i;		points[0].y=y+b;
+		points[1].x=x+w-i;		points[1].y=y+h-i;
+		points[2].x=x+a;		points[2].y=y+h-i;
+	
+		if(a<tl)
 			a++;
+		if(b<tl)
+			b++;
 		
 		XDrawLines(wglobal.dpy, win, gc, points, 3, CoordModeOrigin);
 	}
