@@ -274,6 +274,29 @@ INTRSTRUCT(SR);
 static SR *shortenrules=NULL;
 
 
+/*EXTL_DOC
+ * Add a rule describing how too long titles should be shortened to fit in tabs.
+ * The regular expressing \var{rx} (POSIX, not Lua!) is used to match titles
+ * and when \var{rx} matches, \var{rule} is attempted to use as a replacement
+ * for title. If the resulting title is still too long, next shortening rule
+ * is attempted.
+ *
+ * Similarly to sed's 's' command, \var{rule} may contain characters that are
+ * inserted in the resulting string and specials as follows:
+ * \begin{description}
+ * \item[\$0] Place the original string here.
+ * \item[\$1 to \$9] Insert n:th capture here (as usual,
+ *				captures are surrounded by parentheses in the regex).
+ * \item[\$|] Alternative shortening separator. The shortening described before
+ *   the first this kind of separator is tried first and if it fails to
+ *   make the string short enough, the following next is tried, etc.
+ * \item[\$<]
+ *     Remove characters on the left of this marker to shorten the string.
+ * \item[\$>]
+ *     Remove characters on the right of this marker to shorten the string.
+ *	   Only the first \$< or \$> within an alternative shortening is used.
+ * \end{description}
+ */
 EXTL_EXPORT
 bool add_shortenrule(const char *rx, const char *rule)
 {

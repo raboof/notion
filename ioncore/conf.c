@@ -19,6 +19,9 @@
 #include "font.h"
 
 
+/*EXTL_DOC
+ * Enable/disable opaque move/resize mode.
+ */
 EXTL_EXPORT
 void enable_opaque_resize(bool opaque)
 {
@@ -26,6 +29,9 @@ void enable_opaque_resize(bool opaque)
 }
 
 
+/*EXTL_DOC
+ * Set double click delay in milliseconds.
+ */
 EXTL_EXPORT
 void set_dblclick_delay(int dd)
 {
@@ -33,6 +39,9 @@ void set_dblclick_delay(int dd)
 }
 
 
+/*EXTL_DOC
+ * Set keyboard resize mode auto-finish delay in milliseconds.
+ */
 EXTL_EXPORT
 void set_resize_delay(int rd)
 {
@@ -40,6 +49,9 @@ void set_resize_delay(int rd)
 }
 
 
+/*EXTL_DOC
+ * Enable/disable warping pointer to be contained in activated region.
+ */
 EXTL_EXPORT
 void enable_warp(bool warp)
 {
@@ -47,6 +59,9 @@ void enable_warp(bool warp)
 }
 
 
+/*EXTL_DOC
+ * Add a set of binding available everywhere.
+ */
 EXTL_EXPORT
 void global_bindings(ExtlTab tab)
 {

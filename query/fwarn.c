@@ -14,6 +14,9 @@
 #include <ioncore/objp.h>
 
 
+/*EXTL_DOC
+ * Display an error message box in the frame \var{frame}.
+ */
 EXTL_EXPORT
 void query_fwarn(WGenFrame *frame, const char *p)
 {

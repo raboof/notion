@@ -179,6 +179,9 @@ void region_set_focus_to(WRegion *reg, bool warp)
 }
 
 
+/*EXTL_DOC
+ * Attempt to close/destroy \var{reg}.
+ */
 EXTL_EXPORT
 void region_close(WRegion *reg)
 {
@@ -564,6 +567,9 @@ void region_lost_focus(WRegion *reg)
 /*{{{ Goto */
 
 
+/*EXTL_DOC
+ * Attempt to display \var{reg}.
+ */
 EXTL_EXPORT
 bool region_display(WRegion *reg)
 {
@@ -590,6 +596,10 @@ bool region_display(WRegion *reg)
 }
 
 
+/*EXTL_DOC
+ * Attempt to display \var{reg} and save the current region
+ * activity status for use by \code{goto_previous()}.
+ */
 EXTL_EXPORT
 bool region_display_sp(WRegion *reg)
 {
@@ -604,6 +614,10 @@ bool region_display_sp(WRegion *reg)
 }
 
 
+/* EXTL_DOC
+ * Attempt to display \var{reg}, save region activity status and then
+ * warp to (or simply set focus to if warping is disabled) \var{reg}.
+ */
 EXTL_EXPORT
 bool region_goto(WRegion *reg)
 {
@@ -727,6 +741,9 @@ void region_set_parent(WRegion *reg, WRegion *parent)
 }
 
 
+/*EXTL_DOC
+ * Returns the region that manages \var{reg}.
+ */
 EXTL_EXPORT
 WRegion *region_manager(WRegion *reg)
 {
@@ -734,6 +751,9 @@ WRegion *region_manager(WRegion *reg)
 }
 
 
+/*EXTL_DOC
+ * Returns the parent region of \var{reg}.
+ */
 EXTL_EXPORT
 WRegion *region_parent(WRegion *reg)
 {
@@ -953,6 +973,10 @@ bool region_is_child(WRegion *reg, WRegion *reg2)
 }
 
 
+/*EXTL_DOC
+ * Returns most recently active region below \var{reg} in the
+ * parent--children hierachy of regions.
+ */
 EXTL_EXPORT
 WRegion *region_get_active_leaf(WRegion *reg)
 {

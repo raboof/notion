@@ -15,6 +15,9 @@
 /*{{{ Dynfuns */
 
 
+/*EXTL_EXPORT
+ * Scroll input \var{input} text contents up.
+ */
 EXTL_EXPORT
 void input_scrollup(WInput *input)
 {
@@ -22,6 +25,9 @@ void input_scrollup(WInput *input)
 }
 
 
+/*EXTL_EXPORT
+ * Scroll input \var{input} text contents down.
+ */
 EXTL_EXPORT
 void input_scrolldown(WInput *input)
 {
@@ -123,6 +129,9 @@ void input_deinit(WInput *input)
 }
 
 
+/*EXTL_EXPORT
+ * Close input not calling any possible finish handlers.
+ */
 EXTL_EXPORT
 void input_cancel(WInput *input)
 {
@@ -130,6 +139,9 @@ void input_cancel(WInput *input)
 }
 
 
+/*EXTL_EXPORT
+ * Same as \code{input_cancel}.
+ */
 EXTL_EXPORT
 void input_close(WInput *input)
 {

@@ -35,13 +35,19 @@ WBindmap query_bindmap=BINDMAP_INIT;
 WBindmap query_wedln_bindmap=BINDMAP_INIT;
 
 
+/*EXTL_DOC
+ * Describe bindings common to all \type{WInput}s (\type{WEdln},
+ * \type{WMessage}).
+ */
 EXTL_EXPORT
 void query_bindings(ExtlTab tab)
 {
 	process_bindings(&query_bindmap, NULL, tab);
 }
 
-
+/*EXTL_DOC
+ * Add a set of bindings available in the line editor.
+ */
 EXTL_EXPORT
 void query_wedln_bindings(ExtlTab tab)
 {

@@ -641,6 +641,10 @@ void clear_clipping(DrawInfo *dinfo)
 /*{{{ reread_draw_config */
 
 
+/*EXTL_DOC
+ * Re-read drawing engine configuration from \file{draw.conf} (or
+ * a screen-specific file).
+ */
 EXTL_EXPORT
 void reread_draw_config()
 {

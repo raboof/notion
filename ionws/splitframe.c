@@ -122,22 +122,38 @@ static void do_split(WRegion *oreg, const char *str, bool attach)
 }
 
 
+/*EXTL_DOC
+ * Split \var{reg} creating a new WIonFrame to direction \var{dir}
+ * (one of ''left'', ''right'', ''top'', ''bottom'') of \var{reg}.
+ * If \var{reg} is a frame, the active managed region in that frame
+ * is moved to the new frame.
+ * \note{NOTE: This function will be changed into something else.}
+ */
 EXTL_EXPORT
-void ionws_split(WRegion *reg, const char *str)
+void ionws_split(WRegion *reg, const char *dirstr)
 {
-	do_split(reg, str, TRUE);
+	do_split(reg, dirstr, TRUE);
+}
+
+/*EXTL_DOC
+ * Same as \code{ionws_split} except nothing is moved to the newly
+ * created frame.
+ * \note{NOTE: This function will be changed into something else.}
+ */
+EXTL_EXPORT
+void ionws_split_empty(WRegion *reg, const char *dirstr)
+{
+	do_split(reg, dirstr, FALSE);
 }
 
 
+/*EXTL_DOC
+ * Create new WIonFrame on \var{ws} above/below/left of/right of
+ * all other objects depending on \var{dirstr}
+ * (one of ''left'', ''right'', ''top'', ''bottom'').
+ */
 EXTL_EXPORT
-void ionws_split_empty(WRegion *reg, const char *str)
-{
-	do_split(reg, str, FALSE);
-}
-
-
-EXTL_EXPORT
-void ionws_split_top(WIonWS *ws, const char *str)
+void ionws_split_top(WIonWS *ws, const char *dirstr)
 {
 	WRegion *reg;
 	int dir, primn, mins;
@@ -162,6 +178,10 @@ void ionws_split_top(WIonWS *ws, const char *str)
 /*{{{ Close */
 
 
+/*EXTL_DOC
+ * Try to relocate regions managed by \var{frame} somewhere else
+ * and if possible, destroy the frame.
+ */
 EXTL_EXPORT
 void ionframe_relocate_and_close(WIonFrame *frame)
 {
@@ -180,6 +200,11 @@ void ionframe_relocate_and_close(WIonFrame *frame)
 }
 
 
+/*EXTL_DOC
+ * Destroy \var{frame} unless it manages other regions or it is
+ * otherwised not desirable that the frame is destroyed (e.g.
+ * only frame on only workspace).
+ */
 EXTL_EXPORT
 void ionframe_close(WIonFrame *frame)
 {

@@ -51,6 +51,10 @@ void do_exec(const char *cmd)
 }
 
 
+/*EXTL_DOC
+ * Run \var{cmd} with the environment variable DISPLAY set to
+ * point to \var{scr}.
+ */
 EXTL_EXPORT
 bool exec_on_screen(WScreen *scr, const char *cmd)
 {
@@ -124,6 +128,11 @@ static void process_pipe(int fd, void *p)
 
 #undef BL	
 	
+/*EXTL_DOC
+ * Run \var{cmd} with a read pipe connected to its stdout.
+ * When data is received through the pipe, \var{handler} is called
+ * with that data.
+ */
 EXTL_EXPORT
 bool popen_bgread(const char *cmd, ExtlFn handler)
 {
@@ -228,6 +237,9 @@ static void exitret(int retval)
 }
 
 
+/*EXTL_DOC
+ * Causes the window manager to exit.
+ */
 EXTL_EXPORT
 void exit_wm()
 {
@@ -235,6 +247,9 @@ void exit_wm()
 }
 
 
+/*EXTL_DOC
+ * Attempt to restart another window manager \var{cmd}.
+ */
 EXTL_EXPORT
 void restart_other_wm(const char *cmd)
 {
@@ -247,6 +262,9 @@ void restart_other_wm(const char *cmd)
 }
 
 
+/*EXTL_DOC
+ * Restart Ioncore.
+ */
 EXTL_EXPORT
 void restart_wm()
 {

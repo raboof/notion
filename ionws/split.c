@@ -656,6 +656,9 @@ static WRegion *right_or_lowest_current(WObj *obj, int dir)
 }
 
 
+/*EXTL_DOC
+ * Returns most recently active region on \var{ws}.
+ */
 EXTL_EXPORT
 WRegion *ionws_current(WIonWS *ws)
 {
@@ -742,6 +745,10 @@ static WRegion *up_or_left(WRegion *reg, int dir)
 }
 
 
+/*EXTL_DOC
+ * Returns the most recently active region above \var{reg} on
+ * \var{ws} or NULL.
+ */
 EXTL_EXPORT
 WRegion *ionws_above(WIonWS *ws, WRegion *reg)
 {
@@ -751,6 +758,10 @@ WRegion *ionws_above(WIonWS *ws, WRegion *reg)
 }
 
 
+/*EXTL_DOC
+ * Returns the most recently active region below \var{reg} on
+ * \var{ws} or NULL.
+ */
 EXTL_EXPORT
 WRegion *ionws_below(WIonWS *ws, WRegion *reg)
 {
@@ -760,6 +771,10 @@ WRegion *ionws_below(WIonWS *ws, WRegion *reg)
 }
 
 
+/*EXTL_DOC
+ * Returns the most recently active region left of \var{reg} on
+ * \var{ws} or NULL.
+ */
 EXTL_EXPORT
 WRegion *ionws_left_of(WIonWS *ws, WRegion *reg)
 {
@@ -769,6 +784,10 @@ WRegion *ionws_left_of(WIonWS *ws, WRegion *reg)
 }
 
 
+/*EXTL_DOC
+ * Returns the most recently active region right of \var{reg} on
+ * \var{ws} or NULL.
+ */
 EXTL_EXPORT
 WRegion *ionws_right_of(WIonWS *ws, WRegion *reg)
 {
@@ -777,7 +796,10 @@ WRegion *ionws_right_of(WIonWS *ws, WRegion *reg)
 	return down_or_right(reg, HORIZONTAL);
 }
 
-
+/*EXTL_DOC
+ * Returns the most recently active region on \var{ws} with
+ * no other regions above it.
+ */
 EXTL_EXPORT
 WRegion *ionws_topmost(WIonWS *ws)
 {
@@ -785,6 +807,10 @@ WRegion *ionws_topmost(WIonWS *ws)
 }
 
 
+/*EXTL_DOC
+ * Returns the most recently active region on \var{ws} with
+ * no other regions below it.
+ */
 EXTL_EXPORT
 WRegion *ionws_lowest(WIonWS *ws)
 {
@@ -792,6 +818,10 @@ WRegion *ionws_lowest(WIonWS *ws)
 }
 
 
+/*EXTL_DOC
+ * Returns the most recently active region on \var{ws} with
+ * no other regions left of it.
+ */
 EXTL_EXPORT
 WRegion *ionws_leftmost(WIonWS *ws)
 {
@@ -799,6 +829,10 @@ WRegion *ionws_leftmost(WIonWS *ws)
 }
 
 
+/*EXTL_DOC
+ * Returns the most recently active region on \var{ws} with
+ * no other regions right of it.
+ */
 EXTL_EXPORT
 WRegion *ionws_rightmost(WIonWS *ws)
 {
@@ -815,6 +849,12 @@ static bool goto_reg(WRegion *reg)
 }
 
 
+/*EXTL_DOC
+ * Switch input the most the most recently active region above
+ * the current object on \var{ws} wrapping around to the
+ * lowest most recently active region if there is nothing above
+ * the current object.
+ */
 EXTL_EXPORT
 void ionws_goto_above(WIonWS *ws)
 {
@@ -824,6 +864,9 @@ void ionws_goto_above(WIonWS *ws)
 }
 
 
+/*EXTL_DOC
+ * Similar to \code{ionws_goto_above}.
+ */
 EXTL_EXPORT
 void ionws_goto_below(WIonWS *ws)
 {
@@ -832,6 +875,9 @@ void ionws_goto_below(WIonWS *ws)
 }
 
 
+/*EXTL_DOC
+ * Similar to \code{ionws_goto_above}.
+ */
 EXTL_EXPORT
 void ionws_goto_left(WIonWS *ws)
 {
@@ -840,6 +886,9 @@ void ionws_goto_left(WIonWS *ws)
 }
 
 
+/*EXTL_DOC
+ * Similar to \code{ionws_goto_above}.
+ */
 EXTL_EXPORT
 void ionws_goto_right(WIonWS *ws)
 {

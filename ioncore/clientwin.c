@@ -165,6 +165,10 @@ void clientwin_get_set_name(WClientWin *cwin)
 
 static int switch_to_new_clients=TRUE;
 
+/*EXTL_DOC
+ * Should newly created client window be switched to immediately or
+ * should the active window retain focus by default?
+ */
 EXTL_EXPORT
 void set_switch_to_new_clients(bool sw)
 {
@@ -578,15 +582,25 @@ static void send_clientmsg(Window win, Atom a)
 }
 
 
+/*EXTL_DOC
+ * Attempt to kill (with XKillWindow) the client that owns the X
+ * window correspoding to \var{cwin}.
+ */
 EXTL_EXPORT
-	void clientwin_kill(WClientWin *cwin)
+void clientwin_kill(WClientWin *cwin)
 {
 	XKillClient(wglobal.dpy, cwin->win);
 }
 
 
+/*EXTL_DOC
+ * Request the application that owns the X window corresponding to
+ * \var{cwin} to close the window. This function will fail if the
+ * application is not responding or does not support the WM\_DELETE
+ * protocol. In that case \fnref{clientwin_kill} should be used.
+ */
 EXTL_EXPORT
-	void clientwin_close(WClientWin *cwin)
+void clientwin_close(WClientWin *cwin)
 {
 	if(cwin->flags&CWIN_P_WM_DELETE)
 		send_clientmsg(cwin->win, wglobal.atom_wm_delete);
@@ -930,22 +944,34 @@ static WRegion *clientwin_managed_enter_to_focus(WClientWin *cwin, WRegion *reg)
 /*{{{ Names */
 
 
+/*EXTL_DOC
+ * Similar to \fnref{lookup_region} but only looks for objects of type
+ * \type{WClientWin}.
+ */
 EXTL_EXPORT
-	WClientWin *lookup_clientwin(const char *name)
+WClientWin *lookup_clientwin(const char *name)
 {
 	return (WClientWin*)do_lookup_region(name, &OBJDESCR(WClientWin));
 }
 
 
+/*EXTL_DOC
+ * Similar to \fnref{complete_region} but only includes objects of type
+ * \type{WClientWin}.
+ */
 EXTL_EXPORT
-	ExtlTab complete_clientwin(const char *nam)
+ExtlTab complete_clientwin(const char *nam)
 {
 	return do_complete_region(nam, &OBJDESCR(WClientWin));
 }
 
 
+/*EXTL_DOC
+ * Returns a table containing the class, instance and role properties
+ * for \var{cwin}.
+ */
 EXTL_EXPORT
-	ExtlTab clientwin_get_ident(WClientWin *cwin)
+ExtlTab clientwin_get_ident(WClientWin *cwin)
 {
 	char *winstance=NULL, *wclass=NULL, *wrole=NULL;
 	int n=0, n2=0, tmp=0;
@@ -1163,6 +1189,9 @@ bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto)
 }
 
 
+/*EXTL_DOC
+ * Toggle between full screen and normal (framed) mode.
+ */
 EXTL_EXPORT
 bool clientwin_toggle_fullscreen(WClientWin *cwin)
 {
@@ -1179,6 +1208,10 @@ bool clientwin_toggle_fullscreen(WClientWin *cwin)
 /*{{{ Kludges */
 
 
+/*EXTL_DOC
+ * Attempts to fix window size problems with non-ICCCM compliant
+ * programs.
+ */
 EXTL_EXPORT
 void clientwin_broken_app_resize_kludge(WClientWin *cwin)
 {

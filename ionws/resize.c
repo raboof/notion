@@ -66,6 +66,9 @@ static void end_keyresize()
 }
 
 
+/*EXTL_DOC
+ * Enter resize mode for \var{frame}.
+ */
 EXTL_EXPORT
 void ionframe_begin_resize(WIonFrame *frame)
 {
@@ -75,6 +78,17 @@ void ionframe_begin_resize(WIonFrame *frame)
 }
 
 
+/*EXTL_DOC
+ * Shrink or grow \var{frame} one step horizontally and/or vertically
+ * (must be in move/resize mode):
+ *
+ * \begin{tabular}{rl}
+ * \var{horizmul}/\var{vertmul} & effect \\\hline
+ * -1 & Shrink horizontally/vertically \\
+ * 0 & No effect \\
+ * 1 & Grow horizontally/vertically \\
+ * \end{tabular}
+ */
 EXTL_EXPORT
 void ionframe_do_resize(WIonFrame *frame, int horizmul, int vertmul)
 {
@@ -93,6 +107,10 @@ void ionframe_do_resize(WIonFrame *frame, int horizmul, int vertmul)
 }
 
 
+/*EXTL_DOC
+ * Return from move/resize mode and apply changes unless opaque
+ * move/resize is enabled.
+ */
 EXTL_EXPORT
 void ionframe_end_resize(WIonFrame *frame)
 {
@@ -100,6 +118,10 @@ void ionframe_end_resize(WIonFrame *frame)
 }
 
 
+/*EXTL_DOC
+ * Return from move/resize cancelling changes if opaque
+ * move/resize has not been enabled.
+ */
 EXTL_EXPORT
 void ionframe_cancel_resize(WIonFrame *frame)
 {

@@ -315,6 +315,11 @@ static void p_tabdrag_end(WGenFrame *genframe, XButtonEvent *ev)
 }
 
 
+/*EXTL_DOC
+ * Start dragging the tab that the user pressed on with the pointing device.
+ * This function should only be used by binding it to \emph{mpress} or
+ * \emph{mdrag} action with area ''tab''.
+ */
 EXTL_EXPORT
 void genframe_p_tabdrag(WGenFrame *genframe)
 {
@@ -364,6 +369,11 @@ static void p_resize_end(WGenFrame *genframe, XButtonEvent *ev)
 }
 
 
+/*EXTL_DOC
+ * Start resizing \var{genframe} with the mouse or other pointing device.
+ * This function should only be used by binding it to \emph{mpress} or
+ * \emph{mdrag} action.
+ */
 EXTL_EXPORT
 void genframe_p_resize(WGenFrame *genframe)
 {
@@ -413,7 +423,10 @@ void genframe_p_move(WGenFrame *genframe)
 
 /*{{{ switch_tab */
 
-
+/*EXTL_DOC
+ * Display the region corresponding to the tab that the user pressed on.
+ * This function should only be used by binding it to a mouse action.
+ */
 EXTL_EXPORT
 void genframe_p_switch_tab(WGenFrame *genframe)
 {

@@ -147,6 +147,9 @@ int genframe_nth_tab_w(const WGenFrame *genframe, int n)
 }
 
 
+/*EXTL_DOC
+ * Move currently selected tab to the right.
+ */
 EXTL_EXPORT
 void genframe_move_current_tab_right(WGenFrame *genframe)
 {
@@ -164,6 +167,9 @@ void genframe_move_current_tab_right(WGenFrame *genframe)
 }
 
 
+/*EXTL_DOC
+ * Move currently selected tab to the left.
+ */
 EXTL_EXPORT
 void genframe_move_current_tab_left(WGenFrame *genframe)
 {
@@ -375,6 +381,9 @@ WRegion *genframe_nth_managed(WGenFrame *genframe, uint n)
 }
 
 
+/*EXTL_DOC
+ * Have \var{genframe} display the \var{n}:th object managed by it.
+ */
 EXTL_EXPORT
 void genframe_switch_nth(WGenFrame *genframe, uint n)
 {
@@ -384,6 +393,10 @@ void genframe_switch_nth(WGenFrame *genframe, uint n)
 }
 
 
+/*EXTL_DOC
+ * Have \var{genframe} display next (wrt. currently selected) object managed 
+ * by it.
+ */
 EXTL_EXPORT
 void genframe_switch_next(WGenFrame *genframe)
 {
@@ -393,6 +406,10 @@ void genframe_switch_next(WGenFrame *genframe)
 }
 
 
+/*EXTL_DOC
+ * Have \var{genframe} display previous (wrt. currently selected) object
+ * managed by it.
+ */
 EXTL_EXPORT
 void genframe_switch_prev(WGenFrame *genframe)
 {
@@ -491,6 +508,9 @@ void genframe_remove_managed(WGenFrame *genframe, WRegion *reg)
 }
 
 
+/*EXTL_DOC
+ * Attach all tagged regions to \var{genframe}.
+ */
 EXTL_EXPORT
 void genframe_attach_tagged(WGenFrame *genframe)
 {
@@ -615,6 +635,9 @@ static bool set_genframe_background(WGenFrame *genframe, bool set_always)
 }
 
 
+/*EXTL_DOC
+ * Toggle tab visibility.
+ */
 EXTL_EXPORT
 void genframe_toggle_tab(WGenFrame *genframe)
 {
@@ -663,6 +686,9 @@ static void genframe_size_changed_default(WGenFrame *genframe,
 }
 
 
+/*EXTL_DOC
+ * Return the object managed by and currenly displayed in \var{genframe}.
+ */
 EXTL_EXPORT
 WRegion *genframe_current(WGenFrame *genframe)
 {

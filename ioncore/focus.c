@@ -63,6 +63,9 @@ void unprotect_previous()
 }
 
 
+/*EXTL_DOC
+ * Go to a region that had its activity state previously saved.
+ */
 EXTL_EXPORT
 void goto_previous()
 {

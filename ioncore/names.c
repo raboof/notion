@@ -26,6 +26,9 @@
 static WRegion *region_list=NULL;
 
 
+/*EXTL_DOC
+ * Returns the instance number for \var{reg} of its name.
+ */
 EXTL_EXPORT
 uint region_name_instance(WRegion *reg)
 {
@@ -33,6 +36,9 @@ uint region_name_instance(WRegion *reg)
 }
 
 
+/*EXTL_DOC
+ * Returns the short name for \var{reg} without instance number.
+ */
 EXTL_EXPORT
 const char *region_name(WRegion *reg)
 {
@@ -40,6 +46,10 @@ const char *region_name(WRegion *reg)
 }
 
 
+/*EXTL_DOC
+ * Returns the full name for \var{reg} with instance number in angle
+ * brackets after the short name.
+ */
 EXTL_EXPORT
 char *region_full_name(WRegion *reg)
 {
@@ -150,6 +160,9 @@ void region_unuse_name(WRegion *reg)
 }
 
 
+/*EXTL_DOC
+ * Set the name of \var{reg} to \var{p}.
+ */
 EXTL_EXPORT
 bool region_set_name(WRegion *reg, const char *p)
 {
@@ -245,6 +258,9 @@ again:
 }
 
 
+/*EXTL_DOC
+ * Attempt to find a region with full name \var{name}.
+ */
 EXTL_EXPORT
 WRegion *lookup_region(const char *name)
 {
@@ -252,6 +268,11 @@ WRegion *lookup_region(const char *name)
 }
 
 
+/*EXTL_DOC
+ * Find all regions whose name begins with \var{nam} or, if none
+ * are found and the length of \var{name} is at least two, all
+ * regions whose name contains \var{name}.
+ */
 EXTL_EXPORT
 ExtlTab complete_region(const char *nam)
 {

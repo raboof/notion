@@ -371,6 +371,9 @@ void region_request_geom(WRegion *reg,
 /*{{{ set_width etc. */
 
 
+/*EXTL_DOC
+ * Attempt to set the width of \var{reg} to \var{w} pixels.
+ */
 EXTL_EXPORT
 void region_set_w(WRegion *reg, int w)
 {
@@ -382,6 +385,9 @@ void region_set_w(WRegion *reg, int w)
 }
 
 
+/*EXTL_DOC
+ * Attempt to set the height of \var{reg} to \var{h} pixels.
+ */
 EXTL_EXPORT
 void region_set_h(WRegion *reg, int h)
 {
@@ -392,7 +398,9 @@ void region_set_h(WRegion *reg, int h)
 	}
 }
 
-
+/*EXTL_DOC
+ * Returns the width of \var{reg}.
+ */
 EXTL_EXPORT
 int region_get_w(WRegion *reg)
 {
@@ -400,6 +408,9 @@ int region_get_w(WRegion *reg)
 }
 
 
+/*EXTL_DOC
+ * Returns the height of \var{reg}.
+ */
 EXTL_EXPORT
 int region_get_h(WRegion *reg)
 {
@@ -407,6 +418,9 @@ int region_get_h(WRegion *reg)
 }
 
 
+/*EXTL_DOC
+ * Returns the x-coordinate of \var{reg} within its parent.
+ */
 EXTL_EXPORT
 int region_get_x(WRegion *reg)
 {
@@ -414,6 +428,9 @@ int region_get_x(WRegion *reg)
 }
 
 
+/*EXTL_DOC
+ * Returns the y-coordinate of \var{reg} within its parent.
+ */
 EXTL_EXPORT
 int region_get_y(WRegion *reg)
 {
@@ -451,6 +468,9 @@ int region_get_y(WRegion *reg)
 	}
 
 
+/*EXTL_DOC
+ * Attempt to maximize \var{frame} vertically.
+ */
 EXTL_EXPORT
 void genframe_maximize_vert(WGenFrame *frame)
 {
@@ -458,6 +478,9 @@ void genframe_maximize_vert(WGenFrame *frame)
 }
 
 
+/*EXTL_DOC
+ * Attempt to maximize \var{frame} horizontally.
+ */
 EXTL_EXPORT
 void genframe_maximize_horiz(WGenFrame *frame)
 {

@@ -105,6 +105,15 @@ enum{
 } placement_method=PLACEMENT_LRUD;
 
 
+/*EXTL_DOC
+ * Set placement method for WFloatWS:s. \var{Method} can be one  of ''udlr'',
+ * ''lrud'' (default) and ''random''. The method ''udlr'' looks for free space
+ * starting from top the top left corner of the workspace moving first down
+ * keeping the x coordinate fixed. If it find no free space, it start looking
+ * similarly at next x coordinate unoccupied by other objects and so on.
+ * ''lrud' is the same but with the role of coordinates changed and both
+ * fall back to ''random'' placement if no free area was found.
+ */
 EXTL_EXPORT
 void set_floatws_placement_method(const char *method)
 {

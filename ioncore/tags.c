@@ -15,7 +15,9 @@ static WRegion *taglist;
 
 /*{{{ Adding/removing tags */
 
-
+/*EXTL_DOC
+ * Tag \var{reg}.
+ */
 EXTL_EXPORT
 void region_tag(WRegion *reg)
 {
@@ -31,6 +33,9 @@ void region_tag(WRegion *reg)
 }
 
 
+/*EXTL_DOC
+ * Untag \var{reg}.
+ */
 EXTL_EXPORT
 void region_untag(WRegion *reg)
 {
@@ -44,6 +49,9 @@ void region_untag(WRegion *reg)
 }
 
 
+/*EXTL_DOC
+ * Toggle region \var{reg} tag.
+ */
 EXTL_EXPORT
 void region_toggle_tag(WRegion *reg)
 {
@@ -54,6 +62,19 @@ void region_toggle_tag(WRegion *reg)
 }
 
 
+/*EXTL_DOC
+ * Is \var{reg} tagged?
+ */
+EXTL_EXPORT
+bool region_is_tagged(WRegion *reg)
+{
+	return ((reg->flags&REGION_TAGGED)!=0);
+}
+
+
+/*EXTL_DOC
+ * Untag all regions.
+ */
 EXTL_EXPORT
 void clear_tags()
 {

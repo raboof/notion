@@ -205,6 +205,10 @@ void floatws_deinit(WFloatWS *ws)
 }
 
 
+/*EXTL_DOC
+ * Destroys \var{ws} unless this would put the WM in a possibly unusable
+ * state.
+ */
 EXTL_EXPORT
 bool floatws_destroy(WFloatWS *ws)
 {
@@ -374,6 +378,9 @@ static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
 /*{{{ Circulate */
 
 
+/*EXTL_DOC
+ * Activate next object on \var{ws}.
+ */
 EXTL_EXPORT
 WRegion *floatws_circulate(WFloatWS *ws)
 {
@@ -384,6 +391,9 @@ WRegion *floatws_circulate(WFloatWS *ws)
 }
 
 
+/*EXTL_DOC
+ * Activate previous object on \var{ws}.
+ */
 EXTL_EXPORT
 WRegion *floatws_backcirculate(WFloatWS *ws)
 {

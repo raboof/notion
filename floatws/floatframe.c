@@ -345,6 +345,11 @@ void floatframe_remove_managed(WFloatFrame *frame, WRegion *reg)
 /*{{{ Actions */
 
 
+/*EXTL_DOC
+ * Start moving \var{frame} with the mouse (or other pointing device).
+ * this should only be used by binding to the \emph{mpress} or
+ * \emph{mdrag} actions.
+ */
 EXTL_EXPORT
 void floatframe_p_move(WFloatFrame *frame)
 {
@@ -352,6 +357,9 @@ void floatframe_p_move(WFloatFrame *frame)
 }
 
 
+/*EXTL_DOC
+ * Toggle shade (only titlebar visible) mode.
+ */
 EXTL_EXPORT
 void floatframe_toggle_shade(WFloatFrame *frame)
 {
@@ -360,6 +368,9 @@ void floatframe_toggle_shade(WFloatFrame *frame)
 }
 
 
+/*EXTL_DOC
+ * Is \var{frame} shaded?
+ */
 EXTL_EXPORT
 bool floatframe_is_shaded(WFloatFrame *frame)
 {

@@ -45,6 +45,9 @@ static StringIntMap frame_areas[]={
 };
 
 
+/*EXTL_DOC
+ * Sets up bindings for WFloatFrames.
+ */
 EXTL_EXPORT
 void floatframe_bindings(ExtlTab tab)
 {
@@ -52,6 +55,9 @@ void floatframe_bindings(ExtlTab tab)
 }
 
 
+/*EXTL_DOC
+ * Sets up bindings for move/resize mode of WFloatFrames.
+ */
 EXTL_EXPORT
 void floatframe_moveres_bindings(ExtlTab tab)
 {
@@ -59,6 +65,9 @@ void floatframe_moveres_bindings(ExtlTab tab)
 }
 
 
+/*EXTL_DOC
+ * Sets up bindings available in all objects on WFloatWS:s.
+ */
 EXTL_EXPORT
 void floatws_bindings(ExtlTab tab)
 {

@@ -9,114 +9,177 @@
 #include "edln.h"
 #include "complete.h"
 
+/*EXTL_DOC
+ * Move backward one character.
+ */
 EXTL_EXPORT
 void wedln_back(WEdln *wedln)
 {
     edln_back(&(wedln->edln));
 }
 
+/*EXTL_DOC
+ * Move forward one character.
+ */
 EXTL_EXPORT
 void wedln_forward(WEdln *wedln)
 {
     edln_forward(&(wedln->edln));
 }
 
+/*EXTL_DOC
+ * Go to the beginning of line.
+ */
 EXTL_EXPORT
 void wedln_bol(WEdln *wedln)
 {
     edln_bol(&(wedln->edln));
 }
 
+/*EXTL_DOC
+ * Go to the end of line.
+ */
 EXTL_EXPORT
 void wedln_eol(WEdln *wedln)
 {
     edln_eol(&(wedln->edln));
 }
 
+/*EXTL_DOC
+ * Go to to end of current sequence of whitespace followed by alphanumeric
+ * characters..
+ */
 EXTL_EXPORT
 void wedln_skip_word(WEdln *wedln)
 {
     edln_skip_word(&(wedln->edln));
 }
 
+/*EXTL_DOC
+ * Go to to beginning of current sequence of alphanumeric characters
+ * followed by whitespace.
+ */
 EXTL_EXPORT
 void wedln_bskip_word(WEdln *wedln)
 {
     edln_bskip_word(&(wedln->edln));
 }
 
+/*EXTL_DOC
+ * Delete current character.
+ */
 EXTL_EXPORT
 void wedln_delete(WEdln *wedln)
 {
     edln_delete(&(wedln->edln));
 }
 
+/*EXTL_DOC
+ * Delete previous character.
+ */
 EXTL_EXPORT
 void wedln_backspace(WEdln *wedln)
 {
     edln_backspace(&(wedln->edln));
 }
 
+/*EXTL_DOC
+ * Delete all characters from current to end of line.
+ */
 EXTL_EXPORT
 void wedln_kill_to_eol(WEdln *wedln)
 {
     edln_kill_to_eol(&(wedln->edln));
 }
 
+/*EXTL_DOC
+ * Delete all characters from previous to beginning of line.
+ */
 EXTL_EXPORT
 void wedln_kill_to_bol(WEdln *wedln)
 {
     edln_kill_to_bol(&(wedln->edln));
 }
 
+/*EXTL_DOC
+ * Delete the whole line.
+ */
 EXTL_EXPORT
 void wedln_kill_line(WEdln *wedln)
 {
     edln_kill_line(&(wedln->edln));
 }
 
+/*EXTL_DOC
+ * Starting from the current point, delete possible whitespace and
+ * following alphanumeric characters until next non-alphanumeric character.
+ */
 EXTL_EXPORT
 void wedln_kill_word(WEdln *wedln)
 {
     edln_kill_word(&(wedln->edln));
 }
 
+/*EXTL_DOC
+ * Starting from the previous characters, delete possible whitespace and
+ * preceding alphanumeric characters until previous non-alphanumeric character.
+ */
 EXTL_EXPORT
 void wedln_bkill_word(WEdln *wedln)
 {
     edln_bkill_word(&(wedln->edln));
 }
 
+/*EXTL_DOC
+ * Set \emph{mark} to current cursor position.
+ */
 EXTL_EXPORT
 void wedln_set_mark(WEdln *wedln)
 {
     edln_set_mark(&(wedln->edln));
 }
 
+/*EXTL_DOC
+ * Copy text between \emph{mark} and current cursor position to clipboard
+ * and then delete that sequence.
+ */
 EXTL_EXPORT
 void wedln_cut(WEdln *wedln)
 {
     edln_cut(&(wedln->edln));
 }
 
+/*EXTL_DOC
+ * Copy text between \emph{mark} and current cursor position to clipboard.
+ */
 EXTL_EXPORT
 void wedln_copy(WEdln *wedln)
 {
     edln_copy(&(wedln->edln));
 }
 
+/*EXTL_DOC
+ * Call completion handler with the text between the beginning of line and
+ * current cursor position.
+ */
 EXTL_EXPORT
 void wedln_complete(WEdln *wedln)
 {
     edln_complete(&(wedln->edln));
 }
 
+/*EXTL_DOC
+ * Replace line editor contents with the entry in history if one exists.
+ */
 EXTL_EXPORT
 void wedln_history_next(WEdln *wedln)
 {
     edln_history_next(&(wedln->edln));
 }
 
+/*EXTL_DOC
+ * Replace line editor contents with the previous in history if one exists.
+ */
 EXTL_EXPORT
 void wedln_history_prev(WEdln *wedln)
 {

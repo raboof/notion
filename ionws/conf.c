@@ -27,6 +27,10 @@ static StringIntMap frame_areas[]={
 };
 
 
+/*EXTL_DOC
+ * Add a set of bindings to the bindings available in every object
+ * on WIonWS:s.
+ */
 EXTL_EXPORT
 void ionws_bindings(ExtlTab tab)
 {
@@ -34,6 +38,9 @@ void ionws_bindings(ExtlTab tab)
 }
 
 
+/*EXTL_DOC
+ * Add a set of bindings to the bindings available in WIonFrames.
+ */
 EXTL_EXPORT
 void ionframe_bindings(ExtlTab tab)
 {
@@ -41,6 +48,9 @@ void ionframe_bindings(ExtlTab tab)
 }
 
 
+/*EXTL_DOC
+ * Describe WIonFrame resize mode bindings.
+ */
 EXTL_EXPORT
 void ionframe_moveres_bindings(ExtlTab tab)
 {

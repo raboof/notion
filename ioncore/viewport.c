@@ -278,6 +278,10 @@ static WRegion *nth_ws(WViewport *vp, uint n)
 }
 
 
+/*EXTL_DOC
+ * Display the \var{n}th region (workspace, fullscreen client window)
+ * managed by the viewport \var{vp}.
+ */
 EXTL_EXPORT
 void viewport_switch_nth(WViewport *vp, uint n)
 {
@@ -287,6 +291,10 @@ void viewport_switch_nth(WViewport *vp, uint n)
 }
 
 
+/*EXTL_DOC
+ * Display next region (workspace, fullscreen client window) managed by the
+ * viewport \var{vp}.
+ */
 EXTL_EXPORT
 void viewport_switch_next(WViewport *vp)
 {
@@ -296,6 +304,10 @@ void viewport_switch_next(WViewport *vp)
 }
 
 
+/*EXTL_DOC
+ * Display previous region (workspace, fullscreen client window) managed by
+ * the viewport \var{vp}.
+ */
 EXTL_EXPORT
 void viewport_switch_prev(WViewport *vp)
 {
@@ -311,6 +323,9 @@ void viewport_switch_prev(WViewport *vp)
 /*{{{ Misc. */
 
 
+/*EXTL_DOC
+ * Returns the viewport \var{reg} is on.
+ */
 EXTL_EXPORT
 WViewport *region_viewport_of(WRegion *reg)
 {
@@ -323,6 +338,11 @@ WViewport *region_viewport_of(WRegion *reg)
 }
 
 
+/*EXTL_DOC
+ * Find the viewport with numerical id \var{id}. If Xinerama is
+ * not present, \var{id} corresponds to X screen numbers. Otherwise
+ * the ids are some arbitrary ordering of Xinerama screens.
+ */
 EXTL_EXPORT
 WViewport *find_viewport_id(int id)
 {
@@ -344,6 +364,9 @@ WViewport *find_viewport_id(int id)
 }
 
 
+/*EXTL_DOC
+ * Switch focus to the viewport with id \var{id}.
+ */
 EXTL_EXPORT
 void goto_nth_viewport(int id)
 {
@@ -353,6 +376,9 @@ void goto_nth_viewport(int id)
 }
 
 
+/*EXTL_DOC
+ * Switch focus to the next viewport.
+ */
 EXTL_EXPORT
 void goto_next_viewport()
 {
@@ -367,6 +393,9 @@ void goto_next_viewport()
 }
 
 
+/*EXTL_DOC
+ * Switch focus to the previous viewport.
+ */
 EXTL_EXPORT
 void goto_prev_viewport()
 {
@@ -383,6 +412,10 @@ void goto_prev_viewport()
 }
 
 
+/*EXTL_DOC
+ * Return the region managed by \var{vp} that it displays (usually
+ * a workspace or a fullscreen client window).
+ */
 EXTL_EXPORT
 WRegion *viewport_current(WViewport *vp)
 {
@@ -390,6 +423,9 @@ WRegion *viewport_current(WViewport *vp)
 }
 
 
+/*EXTL_DOC
+ * Return the numerical id for viewport \var{vp}.
+ */
 EXTL_EXPORT
 int viewport_id(WViewport *vp)
 {

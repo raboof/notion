@@ -356,6 +356,13 @@ static void wedln_completion_handler(WEdln *wedln, const char *nam)
 }
 
 
+/*EXTL_DOC
+ * This function should be called in completors (such given as
+ * parameters to \code{query_query}) to return the set of completions
+ * found. The numerical indexes of \var{completions} list the found
+ * completions. If the entry \code{common_part} exists, it gives an
+ * extra common prefix of all found completions.
+ */
 EXTL_EXPORT
 void wedln_set_completions(WEdln *wedln, ExtlTab completions)
 {
@@ -502,6 +509,9 @@ static void wedln_deinit(WEdln *wedln)
 }
 
 
+/*EXTL_DOC
+ * Close \var{wedln} and call any handlers.
+ */
 EXTL_EXPORT
 void wedln_finish(WEdln *wedln)
 {
@@ -529,6 +539,9 @@ void wedln_finish(WEdln *wedln)
 /*{{{ The rest */
 
 
+/*EXTL_DOC
+ * Request selection from application holding such.
+ */
 EXTL_EXPORT
 void wedln_paste(WEdln *wedln)
 {

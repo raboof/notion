@@ -33,6 +33,9 @@ void genws_deinit(WGenWS *ws)
 /*{{{ Names */
 
 
+/*EXTL_DOC
+ * Try to lookup workspace with full name \var{name}.
+ */
 EXTL_EXPORT
 WGenWS *lookup_workspace(const char *name)
 {
@@ -40,6 +43,10 @@ WGenWS *lookup_workspace(const char *name)
 }
 
 
+/*EXTL_DOC
+ * Similar to \fnref{complete_region} but only returns objects
+ * that inherit \type{WGenWS}.
+ */
 EXTL_EXPORT
 ExtlTab complete_workspace(const char *nam)
 {

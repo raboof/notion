@@ -25,6 +25,9 @@
 /*{{{ Functions to set up stacking management */
 
 
+/*EXTL_DOC
+ * Inform that \var{reg} should be stacked above the region \var{above}.
+ */
 EXTL_EXPORT
 void region_stack_above(WRegion *reg, WRegion *above)
 {
@@ -50,6 +53,10 @@ void region_stack_above(WRegion *reg, WRegion *above)
 }
 
 
+/*EXTL_DOC
+ * Inform that \var{reg} should be kept above normally stacked regions
+ * within its parent.
+ */
 EXTL_EXPORT
 void region_keep_on_top(WRegion *reg)
 {
@@ -89,6 +96,9 @@ static void do_reset_stacking(WRegion *reg)
 }
 
 
+/*EXTL_DOC
+ * Inform that \var{reg} should be stacked normally.
+ */
 EXTL_EXPORT
 void region_reset_stacking(WRegion *reg)
 {
@@ -142,6 +152,11 @@ static void movetobottom(WRegion *reg)
 /*{{{ Functions to restack */
 
 
+/*EXTL_DOC
+ * Raise \var{reg} in the stack. The regions marked to be stacked above
+ * \var{reg} will also be raised and normally stacked regions will not
+ * be raised above region marked to be kept on top.
+ */
 EXTL_EXPORT
 void region_raise(WRegion *reg)
 {
@@ -174,6 +189,11 @@ void region_raise(WRegion *reg)
 }
 
 
+/*EXTL_DOC
+ * Lower \var{reg} in the stack. The regions marked to be stacked above
+ * \var{reg} will also be lowerd and regions marked to be kept on top
+ * will not be lowered below normally stacked regions.
+ */
 EXTL_EXPORT
 void region_lower(WRegion *reg)
 {

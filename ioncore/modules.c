@@ -85,9 +85,14 @@ bool init_module_support()
 }
 
 
+/*EXTL_DOC
+ * Attempt to load module \var{modname}. Ion will use libltdl to search
+ * library path (the default setting is \file{\~{}/.ion-devel/libs} and
+ * \file{\$PREFIX/lib/ion-devel}) and also try diffent extensions so only
+ * the module name should usually be necessary to give here.
+ */
 EXTL_EXPORT
-bool load_module(const char *fname)
-/*static bool do_load_module(const char *fname)*/
+bool load_module(const char *modname)
 {
 	lt_dlhandle handle=NULL;
 	Module *m;
@@ -95,10 +100,10 @@ bool load_module(const char *fname)
 	char *n;
 	size_t l;
 	
-	if(fname==NULL)
+	if(modname==NULL)
 		return FALSE;
 	
-	handle=lt_dlopenext(fname);
+	handle=lt_dlopenext(modname);
 	
 	if(handle==NULL){
 		warn("%s", lt_dlerror());
@@ -112,25 +117,25 @@ bool load_module(const char *fname)
 
 	/* Get the module name without directory or extension */
 	
-	p=strrchr(fname, '/');
+	p=strrchr(modname, '/');
 	
 	if(p!=NULL)
-		fname=p+1;
+		modname=p+1;
 	
-	for(p=fname; *p!='\0'; p++){
+	for(p=modname; *p!='\0'; p++){
 		if(!isalnum(*p) && *p!='_')
 			break;
 	}
 	
-	n=ALLOC_N(char, p-fname);
+	n=ALLOC_N(char, p-modname);
 	
 	if(n==NULL){
 		warn_err();
 		goto err1;
 	}
 	 
-	memcpy(n, fname, p-fname);
-	n[p-fname]='\0';
+	memcpy(n, modname, p-modname);
+	n[p-modname]='\0';
 	
 	/* Allocate space for module info */
 	
@@ -147,7 +152,7 @@ bool load_module(const char *fname)
 	
 	/* initialize */
 	if(!check_version(handle, n)){
-		warn_obj(fname, "Module version information not found or version "
+		warn_obj(modname, "Module version information not found or version "
 				 "mismatch. Refusing to use.");
 		goto err3;
 	}
