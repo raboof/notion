@@ -172,6 +172,9 @@ bool ioncore_popen_bgread(const char *cmd, ExtlFn handler)
         return FALSE;
     }
 
+    fcntl(fds[0], F_SETFD, FD_CLOEXEC);
+    fcntl(fds[1], F_SETFD, FD_CLOEXEC);
+
     pid=fork();
     
     if(pid<0){

@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <string.h>
 #include <errno.h>
 #include <sys/types.h>
@@ -377,9 +378,10 @@ static bool ioncore_init_x(const char *display, int stflags)
     }
     
     ioncore_g.dpy=dpy;
-    
-    ioncore_g.conn=ConnectionNumber(dpy);
     ioncore_g.win_context=XUniqueContext();
+    ioncore_g.conn=ConnectionNumber(dpy);
+    
+    fcntl(ioncore_g.conn, F_SETFD, FD_CLOEXEC);
     
     ioncore_g.atom_wm_state=XInternAtom(dpy, "WM_STATE", False);
     ioncore_g.atom_wm_change_state=XInternAtom(dpy, "WM_CHANGE_STATE", False);
