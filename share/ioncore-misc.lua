@@ -15,7 +15,7 @@
 -- set, then a workspace of that type is created. Otherwise
 -- workspace type is taken from the \code{default_ws_type} setting 
 -- returned by \fnref{ioncore.get}.
-function ioncore.create_new_ws(scr, ws_type)
+function ioncore.create_ws(scr, ws_type)
     scr:attach_new({
         type=(ws_type or ioncore.get().default_ws_type),
         switchto=true

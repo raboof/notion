@@ -40,7 +40,7 @@ defbindings("WScreen", {
     
     kpress(MOD1.."F1",          "ioncore.show_manual('pwm')"),
     kpress(MOD2.."F2",          "ioncore.exec_on(_, 'xterm')"),
-    kpress(MOD1.."F9",          "ioncore.create_new_ws(_)"),
+    kpress(MOD1.."F9",          "ioncore.create_ws(_)"),
     
     kpress(MOD2.."F12",         "mod_menu.bigmenu(_, _sub, 'mainmenu')"),
     mpress("Button2",           "mod_menu.pmenu(_, _sub, 'windowlist')"),

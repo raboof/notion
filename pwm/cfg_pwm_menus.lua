@@ -33,7 +33,7 @@ defmenu("sessionmenu", {
 
 -- Workspaces
 defmenu("wsmenu", {
-    menuentry("New",            "ioncore.create_new_ws(_)"),
+    menuentry("New",            "ioncore.create_ws(_)"),
     menuentry("Close",          "WRegion.rqclose(_sub)",
                                 "_sub:WGenWS"),
     submenu("List",             "workspacelist"),
