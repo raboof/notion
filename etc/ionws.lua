@@ -25,6 +25,8 @@ ionframe_bindings{
            function(frame) frame:split("bottom") end),
 
     submap(DEFAULT_MOD .. "K", {
+        kpress("AnyModifier+T", 
+               make_mplex_clientwin_fn(WClientWin.toggle_transients_pos)),
         kpress("AnyModifier+X", WIonFrame.relocate_and_close),
         kpress("AnyModifier+S",
                function(frame) frame:split("right") end),
