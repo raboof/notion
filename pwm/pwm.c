@@ -83,6 +83,8 @@ int main(int argc, char*argv[])
 
 	if(!ioncore_init(argc, argv))
 		return EXIT_FAILURE;
+
+	pwm_cinfo.about=ioncore_aboutmsg();
 	
 	ioncore_add_scriptdir(EXTRABINDIR); /* ion-completefile */
 	ioncore_add_scriptdir(ETCDIR);
@@ -136,7 +138,7 @@ int main(int argc, char*argv[])
 	/* We may have to pass the file to xmessage so just using tmpfile()
 	 * isn't sufficient.
 	 */
-	libtu_asprintf(&efnam, "%s/ion-%d-startup-errorlog", P_tmpdir,
+	libtu_asprintf(&efnam, "%s/pwm-%d-startup-errorlog", P_tmpdir,
 				   getpid());
 	if(efnam==NULL){
 		warn_err("Failed to create error log file");

@@ -124,6 +124,8 @@ int main(int argc, char*argv[])
 
 	if(!ioncore_init(argc, argv))
 		return EXIT_FAILURE;
+
+	ion_cinfo.about=ioncore_aboutmsg();
 	
 	ioncore_add_scriptdir(EXTRABINDIR); /* ion-completefile */
 	ioncore_add_scriptdir(ETCDIR);
