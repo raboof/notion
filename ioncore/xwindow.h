@@ -32,4 +32,6 @@ extern void xwindow_set_cursor(Window win, int cursor);
 
 extern void xwindow_get_sizehints(Window win, XSizeHints *hints);
 
+extern bool xwindow_pointer_pos(Window rel, int *px, int *py);
+
 #endif /* ION_IONCORE_XWINDOW_H */

@@ -99,13 +99,22 @@ void xwindow_do_set_focus(Window win)
 /*}}}*/
 
 
-/*{{{ Cursors */
+/*{{{ Pointer and cursors */
 
 void xwindow_set_cursor(Window win, int cursor)
 {
     XDefineCursor(ioncore_g.dpy, win, ioncore_xcursor(cursor));
 }
 
+
+bool xwindow_pointer_pos(Window rel, int *px, int *py)
+{
+    Window win=None, realroot=None;
+    int wx=0, wy=0;
+    uint mask=0;
+    return XQueryPointer(ioncore_g.dpy, rel, &realroot, &win,
+                         px, py, &wx, &wy, &mask);
+}
 
 /*}}}*/
 

@@ -17,6 +17,7 @@
 #include "region.h"
 #include "colormap.h"
 #include "activity.h"
+#include "xwindow.h"
 
 
 /*{{{ Hooks. */
@@ -313,10 +314,8 @@ static WRegion *find_warp_to_reg(WRegion *reg)
 
 bool region_do_warp_default(WRegion *reg)
 {
-    Window root, win=None, realroot=None;
-    int x, y, w, h;
-    int wx=0, wy=0, px=0, py=0;
-    uint mask=0;
+    int x, y, w, h, px=0, py=0;
+    Window root;
     
     reg=find_warp_to_reg(reg);
     
@@ -326,13 +325,12 @@ bool region_do_warp_default(WRegion *reg)
     D(fprintf(stderr, "region_do_warp %p %s\n", reg, OBJ_TYPESTR(reg)));
     
     root=region_root_of(reg);
+    
     region_rootpos(reg, &x, &y);
+    w=REGION_GEOM(reg).w;
+    h=REGION_GEOM(reg).h;
 
-    if(XQueryPointer(ioncore_g.dpy, root, &realroot, &win,
-                     &px, &py, &wx, &wy, &mask)){
-        w=REGION_GEOM(reg).w;
-        h=REGION_GEOM(reg).h;
-
+    if(xwindow_pointer_pos(root, &px, &py)){
         if(px>=x && py>=y && px<x+w && py<y+h)
             return TRUE;
     }

@@ -289,9 +289,8 @@ static void menu_firstfit(WMenu *menu, bool submenu, int ref_x, int ref_y)
             
             geom.x-=geom.w/2;
             geom.y+=POINTER_OFFSET;
-            
-            if(geom.y+MINIMUM_Y_VISIBILITY>maxg->y+maxg->h)
-            {
+
+            if(geom.y+MINIMUM_Y_VISIBILITY>maxg->y+maxg->h){
                 geom.y=maxg->y+maxg->h-MINIMUM_Y_VISIBILITY;
                 geom.x=ref_x+POINTER_OFFSET;
                 if(geom.x+geom.w>maxg->x+maxg->w)
@@ -989,68 +988,71 @@ ExtlTab mod_menu_get()
     return tab;
 }
 
-static int scrolld(int d)
+
+enum{
+    D_LEFT,
+    D_RIGHT,
+    D_DOWN,
+    D_UP
+};
+
+
+static int calc_diff(const WRectangle *mg, const WRectangle *pg, int d)
 {
-    return minof(maxof(0, d), scroll_amount);
+    switch(d){
+    case D_LEFT:
+        return mg->x+mg->w-pg->w;
+    case D_UP:
+        return mg->y+mg->h-pg->h;
+    case D_RIGHT:
+        return -mg->x;
+    case D_DOWN:
+        return -mg->y;
+    }
+    return 0;
 }
 
 
-static bool get_parent_g(WMenu *menu, WRectangle *geom)
+static int scrolld_subs(WMenu *menu, int d)
 {
+    int diff=0;
     WRegion *p=REGION_PARENT_REG(menu);
+    const WRectangle *pg;
+    
     if(p==NULL)
-        return FALSE;
-    *geom=REGION_GEOM(p);
-    return TRUE;
-}
+        return 0;
 
-
-static int right_diff(WMenu *menu)
-{
-    WRectangle g;
-    if(get_parent_g(menu, &g))
-        return scrolld(REGION_GEOM(menu).x+REGION_GEOM(menu).w-g.x-g.w);
-    return 0;
-}
-
-
-static int bottom_diff(WMenu *menu)
-{
-    WRectangle g;
-    if(get_parent_g(menu, &g))
-        return scrolld(REGION_GEOM(menu).y+REGION_GEOM(menu).h-g.y-g.h);
-    return 0;
-}
-
-
-static int left_diff(WMenu *menu)
-{
-    WRectangle g;
-    if(get_parent_g(menu, &g))
-        return scrolld(g.x-REGION_GEOM(menu).x);
-    return 0;
-}
-
-
-static int top_diff(WMenu *menu)
-{
-    WRectangle g;
-    if(get_parent_g(menu, &g))
-        return scrolld(g.y-REGION_GEOM(menu).y);
-    return 0;
-}
-
-
-static void scroll_left_or_up(WMenu *menu, int xd, int yd)
-{
-    WRectangle g;
+    pg=&REGION_GEOM(p);
     
     while(menu!=NULL){
+        diff=maxof(diff, calc_diff(&REGION_GEOM(menu), pg, d));
+        menu=menu->submenu;
+    }
+    
+    return minof(maxof(0, diff), scroll_amount);
+}
+
+
+static void menu_select_entry_at(WMenu *menu, int px, int py);
+
+
+static void do_scroll(WMenu *menu, int xd, int yd)
+{
+    WRectangle g;
+    int px=-1, py=-1;
+    
+    xwindow_pointer_pos(region_root_of((WRegion*)menu), &px, &py);
+
+    while(menu!=NULL){
         g=REGION_GEOM(menu);
-        g.x-=xd;
-        g.y-=yd;
+        g.x+=xd;
+        g.y+=yd;
+        
         window_do_fitrep((WWindow*)menu, NULL, &g);
-        menu=REGION_MANAGER_CHK(menu, WMenu);
+        
+        menu_select_entry_at(menu, px, py);
+
+        menu=menu->submenu;
     }
 }
 
@@ -1059,14 +1061,12 @@ static void scroll_left(WTimer *timer)
 {
     WMenu *menu=(WMenu*)scroll_watch.obj;
     if(menu!=NULL){
-        menu=menu_tail(menu);
-        scroll_left_or_up(menu, right_diff(menu), 0);
-        if(right_diff(menu)>0){
+        do_scroll(menu, -scrolld_subs(menu, D_LEFT), 0);
+        if(scrolld_subs(menu, D_LEFT)>0){
             timer_set(timer, scroll_time, (WTimerHandler*)scroll_left);
             return;
         }
     }
-    reset_scroll_timer();
 }
 
 
@@ -1074,27 +1074,11 @@ static void scroll_up(WTimer *timer)
 {
     WMenu *menu=(WMenu*)scroll_watch.obj;
     if(menu!=NULL){
-        menu=menu_tail(menu);
-        scroll_left_or_up(menu, 0, bottom_diff(menu));
-        if(bottom_diff(menu)>0){
+        do_scroll(menu, 0, -scrolld_subs(menu, D_UP));
+        if(scrolld_subs(menu, D_UP)>0){
             timer_set(timer, scroll_time, (WTimerHandler*)scroll_up);
             return;
         }
-    }
-    reset_scroll_timer();
-}
-
-
-static void scroll_right_or_down(WMenu *menu, int xd, int yd)
-{
-    WRectangle g;
-    
-    while(menu!=NULL){
-        g=REGION_GEOM(menu);
-        g.x+=xd;
-        g.y+=yd;
-        window_do_fitrep((WWindow*)menu, NULL, &g);
-        menu=menu->submenu;
     }
 }
 
@@ -1103,14 +1087,12 @@ static void scroll_right(WTimer *timer)
 {
     WMenu *menu=(WMenu*)scroll_watch.obj;
     if(menu!=NULL){
-        menu=menu_head(menu);
-        scroll_right_or_down(menu, left_diff(menu), 0);
-        if(left_diff(menu)>0){
+        do_scroll(menu, scrolld_subs(menu, D_RIGHT), 0);
+        if(scrolld_subs(menu, D_RIGHT)>0){
             timer_set(timer, scroll_time, (WTimerHandler*)scroll_right);
             return;
         }
     }
-    reset_scroll_timer();
 }
 
 
@@ -1118,14 +1100,12 @@ static void scroll_down(WTimer *timer)
 {
     WMenu *menu=(WMenu*)scroll_watch.obj;
     if(menu!=NULL){
-        menu=menu_head(menu);
-        scroll_right_or_down(menu, 0, top_diff(menu));
-        if(top_diff(menu)>0){
+        do_scroll(menu, 0, scrolld_subs(menu, D_DOWN));
+        if(scrolld_subs(menu, D_DOWN)>0){
             timer_set(timer, scroll_time, (WTimerHandler*)scroll_down);
             return;
         }
     }
-    reset_scroll_timer();
 }
 
 
@@ -1134,13 +1114,14 @@ static void end_scroll(WMenu *menu)
     reset_scroll_timer();
 }
 
+#define SCROLL_OFFSET 10
 
 static void check_scroll(WMenu *menu, int x, int y)
 {
     WRegion *parent=REGION_PARENT_REG(menu);
     int rx, ry;
     WTimerHandler *fn=NULL;
-     
+
     if(!menu->pmenu_mode)
         return;
     
@@ -1153,13 +1134,13 @@ static void check_scroll(WMenu *menu, int x, int y)
     x-=rx;
     y-=ry;
     
-    if(x<=2){
+    if(x<=SCROLL_OFFSET){
         fn=(WTimerHandler*)scroll_right;
-    }else if(y<=2){
+    }else if(y<=SCROLL_OFFSET){
         fn=(WTimerHandler*)scroll_down;
-    }else if(x>=REGION_GEOM(parent).w-2){
+    }else if(x>=REGION_GEOM(parent).w-SCROLL_OFFSET){
         fn=(WTimerHandler*)scroll_left;
-    }else if(y>=REGION_GEOM(parent).h-2){
+    }else if(y>=REGION_GEOM(parent).h-SCROLL_OFFSET){
         fn=(WTimerHandler*)scroll_up;
     }else{
         end_scroll(menu);
@@ -1173,22 +1154,18 @@ static void check_scroll(WMenu *menu, int x, int y)
            timer_is_set(scroll_timer)){
             return;
         }
+    }else{
+        scroll_timer=create_timer();
+        if(scroll_timer==NULL)
+            return;
     }
     
-    menu=menu_head(menu);
+    watch_setup(&scroll_watch, (Obj*)menu_head(menu), NULL);
+    
+    fn(scroll_timer);
 
-    while(menu!=NULL){
-        if(rectangle_contains(&REGION_GEOM(menu), x, y)){
-            if(scroll_timer==NULL)
-                scroll_timer=create_timer();
-            if(scroll_timer!=NULL){
-                watch_setup(&scroll_watch, (Obj*)menu, NULL);
-                timer_set(scroll_timer, scroll_time, fn);
-            }
-            return;
-        }
-        menu=menu->submenu;
-    }
+    if(!timer_is_set(scroll_timer))
+        watch_reset(&scroll_watch);
 }
 
 
@@ -1244,6 +1221,14 @@ int menu_entry_at_root_tree(WMenu *menu, int root_x, int root_y,
 }
 
 
+static void menu_select_entry_at(WMenu *menu, int px, int py)
+{
+    int entry=menu_entry_at_root_tree(menu, px, py, &menu);
+    if(entry>=0)
+        menu_do_select_nth(menu, entry);
+}
+
+
 void menu_release(WMenu *menu, XButtonEvent *ev)
 {
     int entry=menu_entry_at_root_tree(menu, ev->x_root, ev->y_root, &menu);
@@ -1259,9 +1244,7 @@ void menu_release(WMenu *menu, XButtonEvent *ev)
 
 void menu_motion(WMenu *menu, XMotionEvent *ev, int dx, int dy)
 {
-    int entry=menu_entry_at_root_tree(menu, ev->x_root, ev->y_root, &menu);
-    if(menu->pmenu_mode || entry>=0)
-        menu_do_select_nth(menu, entry);
+    menu_select_entry_at(menu, ev->x_root, ev->y_root);
     check_scroll(menu, ev->x_root, ev->y_root);
 }
 

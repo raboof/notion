@@ -696,21 +696,6 @@ bool region_is_fully_mapped(WRegion *reg)
 }
 
 
-void region_rootgeom(WRegion *reg, int *xret, int *yret)
-{
-    *xret=REGION_GEOM(reg).x;
-    *yret=REGION_GEOM(reg).y;
-    
-    while(1){
-        reg=REGION_PARENT_REG(reg);
-        if(reg==NULL)
-            break;
-        *xret+=REGION_GEOM(reg).x;
-        *yret+=REGION_GEOM(reg).y;
-    }
-}
-
-
 void region_rootpos(WRegion *reg, int *xret, int *yret)
 {
     WRegion *par;

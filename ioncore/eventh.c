@@ -343,6 +343,7 @@ static bool pointer_in_root(Window root1)
     
     XQueryPointer(ioncore_g.dpy, root1, &root2, &win,
                   &x, &y, &wx, &wy, &mask);
+    
     return (root1==root2);
 }
 
