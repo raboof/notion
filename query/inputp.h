@@ -19,7 +19,8 @@
 	 BORDER_BR_TOTAL(&(GRDATA->input_border)))
 
 #define INPUT_MASK (ExposureMask|KeyPressMask| \
-					ButtonPressMask|FocusChangeMask)
+					ButtonPressMask|ButtonReleaseMask| \
+					FocusChangeMask)
 
 #define INPUT_FONT(GRDATA) ((GRDATA)->font)
 
