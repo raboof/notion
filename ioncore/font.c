@@ -276,7 +276,7 @@ static SR *shortenrules=NULL;
 
 /*EXTL_DOC
  * Add a rule describing how too long titles should be shortened to fit in tabs.
- * The regular expressing \var{rx} (POSIX, not Lua!) is used to match titles
+ * The regular expression \var{rx} (POSIX, not Lua!) is used to match titles
  * and when \var{rx} matches, \var{rule} is attempted to use as a replacement
  * for title. If the resulting title is still too long, next shortening rule
  * is attempted.
@@ -307,7 +307,7 @@ bool add_shortenrule(const char *rx, const char *rule)
 		return FALSE;
 	
 	si=ALLOC(SR);
-	
+	pp
 	if(si==NULL)
 		return FALSE;
 	
