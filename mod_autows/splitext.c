@@ -35,14 +35,14 @@ WSplitUnused *create_splitunused(const WRectangle *geom)
 }
 
 
-bool splitpane_init(WSplitPane *split, const WRectangle *geom, WSplit *cnt)
+bool splitpane_init(WSplitPane *pane, const WRectangle *geom, WSplit *cnt)
 {
-    split->contents=cnt;
-    split->marker=NULL;
-    split->contents_h=GEOM(split).h;
-    split->contents_w=GEOM(split).w;
+    pane->contents=cnt;
+    pane->marker=NULL;
+    pane->contents_h=geom->h;
+    pane->contents_w=geom->w;
     
-    return splitinner_init(&(split->isplit), geom);
+    return splitinner_init(&(pane->isplit), geom);
 }
 
 
@@ -178,12 +178,14 @@ static void splitpane_do_resize(WSplitPane *pane, const WRectangle *ng,
 }
 
 
+#define PS(X) ((WSplit*)(X))
+
 static int adjust_w(int *rq, WSplitSplit *par, WSplitPane *pane)
 {
     int chg=0;
     
     if(*rq>0)
-        chg=minof(*rq, GEOM(par).w-pane->contents_w-1);
+        chg=minof(*rq, GEOM(par).w-PS(par)->min_w-pane->contents_w);
     else if(*rq<0)
         chg=maxof(*rq, GEOM(pane).w-pane->contents_w);
     
@@ -198,7 +200,7 @@ static int adjust_h(int *rq, WSplitSplit *par, WSplitPane *pane)
     int chg=0;
     
     if(*rq>0)
-        chg=minof(*rq, GEOM(par).h-pane->contents_h-1);
+        chg=minof(*rq, GEOM(par).h-PS(par)->min_h-pane->contents_h);
     else if(*rq<0)
         chg=maxof(*rq, GEOM(pane).h-pane->contents_h);
     
@@ -219,13 +221,15 @@ static void splitpane_do_rqsize(WSplitPane *pane, WSplit *node,
     assert(!ha->any || ha->tl==0);
     assert(!va->any || va->tl==0);
     assert(node==pane->contents && pane->contents!=NULL);
+    assert(pane->contents_w>=GEOM(pane).w);
+    assert(pane->contents_h>=GEOM(pane).h);
     
     if(par_==NULL){
         *rg=((WSplit*)pane)->geom;
         return;
     }else if(par!=NULL && float_panes){
         assert(par->tl==(WSplit*)pane || par->br==(WSplit*)pane);
-        
+
         if(par->dir==SPLIT_VERTICAL){
             diff_h=pane->contents_h-GEOM(pane).h;
             if(va->any)
@@ -324,15 +328,10 @@ static WSplit *splitpane_current_todir(WSplitPane *pane, int dir, int primn,
 }
 
 
-static WSplit *splitpane_nextto(WSplitPane *pane, WSplit *child,
-                                int dir, int primn, WSplitFilter *filter)
+static void splitpane_forall(WSplitPane *pane, WSplitFn *fn)
 {
-    WSplitInner *parent=((WSplit*)pane)->parent;
-    
-    if(parent==NULL)
-        return NULL;
-    else
-        return splitinner_nextto(parent, (WSplit*)pane, dir, primn, filter);
+    if(pane->contents!=NULL)
+        fn(pane->contents);
 }
 
 
@@ -440,9 +439,9 @@ static DynFunTab splitpane_dynfuntab[]={
     {splitinner_replace, splitpane_replace},
     {splitinner_remove, splitpane_remove},
     {(DynFun*)split_current_todir, (DynFun*)splitpane_current_todir},
-    {(DynFun*)splitinner_nextto, (DynFun*)splitpane_nextto},
     /*{splitinner_mark_current, splitpane_mark_current},*/
     {(DynFun*)split_get_config, (DynFun*)splitpane_get_config},
+    {splitinner_forall, splitpane_forall},
     END_DYNFUNTAB,
 };
 

@@ -25,6 +25,7 @@
 #include <ioncore/defer.h>
 #include <ioncore/frame.h>
 #include <ioncore/region-iter.h>
+#include <ioncore/stacking.h>
 #include <mod_ionws/ionws.h>
 #include <mod_ionws/split.h>
 #include "autows.h"
@@ -191,6 +192,40 @@ bool autows_managed_may_destroy(WAutoWS *ws, WRegion *reg)
 }
 
 
+static void raise_split(WSplit *split)
+{
+    if(OBJ_IS(split, WSplitRegion))
+        region_raise(((WSplitRegion*)split)->reg);
+    else if(OBJ_IS(split, WSplitInner))
+        splitinner_forall((WSplitInner*)split, raise_split);
+}
+
+
+void autows_managed_activated(WAutoWS *ws, WRegion *sub)
+{
+    WSplitRegion *regnode;
+    WSplitInner *par;
+
+    ionws_managed_activated(&(ws->ionws), sub);
+    
+    regnode=get_node_check(ws, sub);
+    
+    assert(regnode!=NULL);
+    
+    par=((WSplit*)regnode)->parent;
+    while(par!=NULL){
+        if(OBJ_IS(par, WSplitPane)){
+            splitinner_forall(par, raise_split);
+            return;
+        }
+        par=((WSplit*)par)->parent;
+    }
+    
+    region_raise(sub);
+    
+}
+
+
 /*}}}*/
 
 
@@ -325,6 +360,8 @@ static DynFunTab autows_dynfuntab[]={
     {(DynFun*)ionws_load_node,
      (DynFun*)autows_load_node},
 
+    {region_managed_activated, autows_managed_activated},
+    
     END_DYNFUNTAB
 };
 

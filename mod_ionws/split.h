@@ -91,6 +91,7 @@ typedef struct{
 
 
 typedef bool WSplitFilter(WSplit *split);
+typedef void WSplitFn(WSplit *split);
 
 
 /* Misc. */
@@ -162,10 +163,11 @@ DYNFUN WSplit *split_current_todir(WSplit *node, int dir, int primn,
                                    WSplitFilter *filter);
 DYNFUN WSplit *splitinner_nextto(WSplitInner *node, WSplit *child,
                                  int dir, int primn, WSplitFilter *filter);
+DYNFUN void splitinner_mark_current(WSplitInner *split, WSplit *child);
+DYNFUN void splitinner_forall(WSplitInner *node, WSplitFn *fn);
 extern WSplit *split_nextto(WSplit *node, int dir, int primn, 
                             WSplitFilter *filter);
 extern WSplit *split_closest_leaf(WSplit *node, WSplitFilter *filter);
-DYNFUN void splitinner_mark_current(WSplitInner *split, WSplit *child);
 extern WMPlex *splittree_find_mplex(WRegion *from);
 /* x and y are in relative to parent */
 /*DYNFUN WRegion *split_region_at(WSplit *node, int x, int y);*/

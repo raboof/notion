@@ -184,12 +184,12 @@ static bool separated(const WRegionNameInfo *ni1,
     if(l1!=l2)
         return TRUE;
         
-    if(strncmp(ni1->name, ni2->name, l1)!=0)
+    if(memcmp(ni1->name, ni2->name, l1)!=0)
         return TRUE;
     
     i2=parseinst_simple(ni2->name+ni2->inst_off);
     
-    return (i2>i1+1);
+    return (i2>(i1+1));
 }
 
 
@@ -305,7 +305,7 @@ static bool do_use_name(WRegion *reg, WNamespace *ns, const char *name,
         if(found){
             while(1){
                 Rb_node next=rb_next(node);
-
+                
                 if(rb_val(node)==(void*)reg){
                     /* The region already has a name of requested form */
                     return TRUE;
@@ -320,6 +320,7 @@ static bool do_use_name(WRegion *reg, WNamespace *ns, const char *name,
                     inst++;
                     break;
                 }
+
                 /* 'inst' should be instance of next after increment 
                  * as separation was one.
                  */

@@ -576,6 +576,7 @@ static void get_minmaxunused(WSplit *node, int dir,
 static void splitsplit_do_resize(WSplitSplit *node, const WRectangle *ng, 
                                  int hprimn, int vprimn, bool transpose)
 {
+    assert(ng->w>=0 && ng->h>=0);
     assert(node->tl!=NULL && node->br!=NULL);
     assert(!transpose || (hprimn==PRIMN_ANY && vprimn==PRIMN_ANY));
     
@@ -700,12 +701,12 @@ static void calc_amount(int *amount, int rs, WSplit *other, int dir)
     
     flexibility(other, dir, &shrink, &stretch);
 
-    *amount=0;
-    
     if(rs>0)
         *amount=minof(rs, shrink);
     else if(rs<0)
         *amount=-minof(-rs, stretch);
+    else
+        *amount=0;
 }
 
 
@@ -743,32 +744,47 @@ static void splitsplit_do_rqsize(WSplitSplit *p, WSplit *node,
         ca->tl-=amount;
     }
     
-    if(((WSplit*)p)->parent==NULL){
+    if(((WSplit*)p)->parent==NULL || 
+       (ha->tl==0 && ha->br==0 && va->tl==0 && va->br==0)){
         pg=((WSplit*)p)->geom;
     }else{
-        splitinner_do_rqsize(((WSplit*)p)->parent, (WSplit*)p, 
-                             ha, va, &pg, tryonly);
+        splitinner_do_rqsize(((WSplit*)p)->parent, (WSplit*)p, ha, va,
+                             &pg, tryonly);
     }
     
+    assert(pg.w>=0 && pg.h>=0);
+
     og=pg;
     ng=pg;
-    
+
     if(p->dir==SPLIT_VERTICAL){
-        og.h=other->geom.h-amount;
-        ng.h=pg.h-og.h;
+        ng.h=maxof(0, node->geom.h+amount);
+        og.h=maxof(0, other->geom.h-amount);
+        adjust_sizes(&(ng.h), &(og.h), pg.h, ng.h+og.h,
+                     node->min_h, other->min_h, node->max_h, other->max_h, 
+                     PRIMN_TL /* node is passed as tl param */);
+        /*og.h=other->geom.h-amount;
+        ng.h=pg.h-og.h;*/
         if(thisnode==PRIMN_TL)
             og.y=pg.y+pg.h-og.h;
         else
             ng.y=pg.y+pg.h-ng.h;
         vprimn=thisnode;
+        /*assert(og.h>=0 && ng.h>=0);*/
     }else{
-        og.w=other->geom.w-amount;
-        ng.w=pg.w-og.w;
+        ng.w=maxof(0, node->geom.w+amount);
+        og.w=maxof(0, other->geom.w-amount);
+        adjust_sizes(&(ng.w), &(og.w), pg.w, ng.w+og.w,
+                     node->min_w, other->min_w, node->max_w, other->max_w, 
+                     PRIMN_TL /* node is passed as tl param */);
+        /*og.w=other->geom.w-amount;
+        ng.w=pg.w-og.w;*/
         if(thisnode==PRIMN_TL)
             og.x=pg.x+pg.w-og.w;
         else
             ng.x=pg.x+pg.w-ng.w;
         hprimn=thisnode;
+        /*assert(og.w>=0 && ng.w>=0);*/
     }
     
     if(!tryonly){
@@ -1273,6 +1289,7 @@ WSplit *split_nextto(WSplit *node, int dir, int primn, WSplitFilter *filter)
 {
     if(node->parent==NULL)
         return NULL;
+    
     return splitinner_nextto(node->parent, node, dir, primn, filter);
 }
 
@@ -1330,37 +1347,20 @@ WMPlex *splittree_find_mplex(WRegion *from)
 }
 
 
-/*}}}*/
-
-
-#if 0
-/*{{{ Misc. */
-
-
-WRegion *split_region_at(WSplit *node, int x, int y)
+static void splitsplit_forall(WSplitSplit *node, WSplitFn *fn)
 {
-    WRegion *ret;
-    
-    CHKNODE(node);
-    
-    if(node->type==SPLIT_UNUSED)
-        return NULL;
+    fn(node->tl);
+    fn(node->br);
+}
 
-    if(!rectangle_contains(&(node->geom), x, y))
-        return NULL;
 
-    if(node->type==SPLIT_REGNODE || node->type==SPLIT_STDISPNODE)
-        return node->u.reg;
-    
-    ret=split_region_at(node->u.s.tl, x, y);
-    if(ret==NULL)
-        ret=split_region_at(node->u.s.br, x, y);
-    return ret;
+void splitinner_forall(WSplitInner *node, WSplitFn *fn)
+{
+    CALL_DYN(splitinner_forall, node, (node, fn));
 }
 
 
 /*}}}*/
-#endif
 
 
 /*{{{ Transpose */
@@ -1599,6 +1599,7 @@ static DynFunTab splitsplit_dynfuntab[]={
     {(DynFun*)splitinner_nextto, (DynFun*)splitsplit_nextto},
     {splitinner_mark_current, splitsplit_mark_current},
     {(DynFun*)split_get_config, (DynFun*)splitsplit_get_config},
+    {splitinner_forall, splitsplit_forall},
     END_DYNFUNTAB,
 };
 
