@@ -131,6 +131,7 @@ DECLSTRUCT(SR){
 	regex_t re;
 	char *rule;
 	SR *next, *prev;
+	bool always;
 };
 
 
@@ -141,7 +142,8 @@ static SR *shortenrules=NULL;
  * Add a rule describing how too long titles should be shortened to fit in tabs.
  * The regular expression \var{rx} (POSIX, not Lua!) is used to match titles
  * and when \var{rx} matches, \var{rule} is attempted to use as a replacement
- * for title. 
+ * for title. If \var{always} is set, the rule is used even if no shortening 
+ * is necessary.
  *
  * Similarly to sed's 's' command, \var{rule} may contain characters that are
  * inserted in the resulting string and specials as follows:
@@ -165,7 +167,7 @@ static SR *shortenrules=NULL;
  * \end{tabularx}
  */
 EXTL_EXPORT
-bool add_shortenrule(const char *rx, const char *rule)
+bool add_shortenrule(const char *rx, const char *rule, bool always)
 {
 	SR *si;
 	int ret;
@@ -186,6 +188,7 @@ bool add_shortenrule(const char *rx, const char *rule)
 	}
 	
 	si->rule=scopy(rule);
+	si->always=always;
 	
 	if(si->rule==NULL)
 		goto fail;
@@ -353,11 +356,16 @@ char *make_label(GrBrush *brush, const char *str, uint maxw)
 	SR *rule;
 	int ret;
 	char *retstr;
+	bool fits=FALSE;
 	
-	/*if(grbrush_get_text_width(brush, str, strlen(str))<=maxw)
-		return scopy(str);*/
+	if(grbrush_get_text_width(brush, str, strlen(str))<=maxw)
+		fits=TRUE;
+		
+		/*return scopy(str);*/
 	
 	for(rule=shortenrules; rule!=NULL; rule=rule->next){
+		if(fits && !rule->always)
+			continue;
 		ret=regexec(&(rule->re), str, nmatch, pmatch, 0);
 		if(ret!=0)
 			continue;
@@ -365,9 +373,13 @@ char *make_label(GrBrush *brush, const char *str, uint maxw)
 		goto rettest;
 	}
 
-	pmatch[0].rm_so=0;
-	pmatch[0].rm_eo=strlen(str)-1;
-	retstr=shorten(brush, str, maxw, "$1$<...", 1, pmatch);
+	if(fits){
+		retstr=scopy(str);
+	}else{
+		pmatch[0].rm_so=0;
+		pmatch[0].rm_eo=strlen(str)-1;
+		retstr=shorten(brush, str, maxw, "$1$<...", 1, pmatch);
+	}
 	
 rettest:
 	if(retstr!=NULL)

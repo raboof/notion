@@ -17,7 +17,7 @@
 #include "gr.h"
 
 extern char *make_label(GrBrush *brush, const char *str, uint maxw);
-extern bool add_shortenrule(const char *rx, const char *rule);
+extern bool add_shortenrule(const char *rx, const char *rule, bool always);
 
 extern int str_nextoff(const char *p, int pos);
 extern int str_prevoff(const char *p, int pos);
