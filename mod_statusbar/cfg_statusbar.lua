@@ -1,10 +1,10 @@
 --
--- Ion statusbar extension configuration file
+-- Ion statusbar module configuration file
 -- 
 
 
 -- Configure format and updating
-ext_statusbar.set{
+mod_statusbar.set{
     -- ISO-8601 date format with additional abbreviated day name
     --date_format='%a %Y-%m-%d %H:%M',
     -- Finnish date format
@@ -25,8 +25,9 @@ ext_statusbar.set{
 
 
 -- Create a statusbar
-ext_statusbar.create{
+mod_statusbar.create{
     -- First screen, bottom left corner
     screen=0,
     pos='bl',
 }
+

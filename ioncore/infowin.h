@@ -38,6 +38,8 @@ extern bool infowin_init(WInfoWin *p, WWindow *parent, const WFitParams *fp,
 extern WInfoWin *create_infowin(WWindow *parent, const WFitParams *fp,
                                 const char *style);
 
+extern void infowin_deinit(WInfoWin *p);
+
 extern void infowin_set_text(WInfoWin *p, const char *s);
 extern bool infowin_set_attr2(WInfoWin *p, const char *a1, const char *a2);
 extern void infowin_set_natural_w(WInfoWin *p, const char *str);

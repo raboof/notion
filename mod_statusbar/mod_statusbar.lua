@@ -1,5 +1,5 @@
 --
--- ion/ext_statusbar/ext_statusbar.lua
+-- ion/mod_statusbar/mod_statusbar.lua
 -- 
 -- Copyright (c) Tuomo Valkonen 2004.
 --
@@ -12,10 +12,16 @@
 -- This is a slight abuse of the _LOADED variable perhaps, but library-like 
 -- packages should handle checking if they're loaded instead of confusing 
 -- the user with require/include differences.
-if _LOADED["ext_statusbar"] then return end
+if _LOADED["mod_statusbar"] then return end
 
-local ext_statusbar={}
-_G["ext_statusbar"]=ext_statusbar
+if not ioncore.load_module("mod_statusbar") then
+    return
+end
+
+--local mod_menu=_G["mod_menu"]
+--assert(mod_menu)
+local mod_statusbar={}
+_G["mod_statusbar"]=mod_statusbar
 
 
 -- Settings etc. {{{
@@ -36,9 +42,9 @@ local infowins={}
 
 --DOC
 -- Set format and update variables.
-function ext_statusbar.set(s)
+function mod_statusbar.set(s)
     settings=table.join(s, settings)
-    local wt=ext_statusbar.get_w_template()
+    local wt=mod_statusbar.get_w_template()
     for iw, _ in infowins do
         iw:set_natural_w(wt)
     end
@@ -47,7 +53,7 @@ end
 
 --DOC
 -- Set format and update variables.
-function ext_statusbar.get()
+function mod_statusbar.get()
     return table.copy(settings)
 end
 
@@ -60,7 +66,7 @@ local meters={}
 
 --DOC
 -- Inform of a value.
-function ext_statusbar.inform(name, value)
+function mod_statusbar.inform(name, value)
     meters[name]=value
 end
 
@@ -75,20 +81,20 @@ local function get_date()
     return os.date(settings.date_format)
 end
 
-function ext_statusbar.set_timer()
+function mod_statusbar.set_timer()
     local t=os.date('*t')
     local d=(60-t.sec)*1000
     
-    timer:set(d, ext_statusbar.timer_handler)
+    timer:set(d, mod_statusbar.timer_handler)
 end
 
-function ext_statusbar.timer_handler(tmr)
-    ext_statusbar.inform("date", get_date())
-    ext_statusbar.update()
-    ext_statusbar.set_timer()
+function mod_statusbar.timer_handler(tmr)
+    mod_statusbar.inform("date", get_date())
+    mod_statusbar.update()
+    mod_statusbar.set_timer()
 end
 
-function ext_statusbar.init_timer()
+function mod_statusbar.init_timer()
     if not timer then
         timer=ioncore.create_timer()
         if not timer then
@@ -97,7 +103,7 @@ function ext_statusbar.init_timer()
     end
     
     if not timer:is_set() then
-        ext_statusbar.timer_handler(timer)
+        mod_statusbar.timer_handler(timer)
     end
 end
 
@@ -120,13 +126,13 @@ local function process_template(fn)
                        end)
 end
 
-function ext_statusbar.get_status()
+function mod_statusbar.get_status()
     return process_template(function(s)
                                 return (meters[s] or "??")
                             end)
 end
 
-function ext_statusbar.get_w_template()
+function mod_statusbar.get_w_template()
     return process_template(function(s)
                                 local m=meters[s]
                                 local w=settings[s.."_wtempl"]
@@ -137,9 +143,9 @@ end
 
 --DOC
 -- Update statusbar contents. To be called after series
--- of \fnref{ext_statusbar.inform} calls.
-function ext_statusbar.update()
-    local s=ext_statusbar.get_status()
+-- of \fnref{mod_statusbar.inform} calls.
+function mod_statusbar.update()
+    local s=mod_statusbar.get_status()
     local found=false
     
     for iw, _ in infowins do
@@ -161,16 +167,16 @@ end
 
 local statusd_running=false
 
-function ext_statusbar.rcv_statusd(str)
+function mod_statusbar.rcv_statusd(str)
     local data=""
 
     local function doline(i)
         if i=="." then
-            ext_statusbar.update()
+            mod_statusbar.update()
         else
             local _, _, m, v=string.find(i, "^([^:]+):%s*(.*)")
             if m and v then
-                ext_statusbar.inform(m, v)
+                mod_statusbar.inform(m, v)
             end
         end
     end
@@ -183,11 +189,11 @@ function ext_statusbar.rcv_statusd(str)
     ioncore.warn(TR("ion-statusd quit."))
     statusd_running=false
     meters={}
-    ext_statusbar.update()
+    mod_statusbar.update()
 end
 
 
-function ext_statusbar.launch_statusd()
+function mod_statusbar.launch_statusd()
     local function get_statusd_params()
         if settings.statusd_params then
             return settings.statusd_params
@@ -215,7 +221,7 @@ function ext_statusbar.launch_statusd()
     end
     
     local cmd=statusd.." "..get_statusd_params()
-    local cr=coroutine.wrap(ext_statusbar.rcv_statusd)
+    local cr=coroutine.wrap(mod_statusbar.rcv_statusd)
 
     statusd_running=ioncore.popen_bgread(cmd, cr)
 end
@@ -228,7 +234,7 @@ end
     
 --DOC
 -- Create a statusbar.
-function ext_statusbar.create(param)
+function mod_statusbar.create(param)
     local scr=ioncore.find_screen_id(param.screen or 0)
     if not scr then
         error(TR("Screen not found."))
@@ -243,23 +249,22 @@ function ext_statusbar.create(param)
     end
     
     local iw=scr:set_stdisp({
-        type="WInfoWin", 
+        type="WStatusBar", 
         pos=(param.pos or "bl"),
         name="*statusbar*",
-        style="stdisp-statusbar"
     })
     
     if not iw then
         error(TR("Failed to create statusbar."))
     end
 
-    ext_statusbar.init_timer()
+    mod_statusbar.init_timer()
     
-    ext_statusbar.launch_statusd()
+    mod_statusbar.launch_statusd()
     
     infowins[iw]=true
-    iw:set_natural_w(ext_statusbar.get_w_template())
-    iw:set_text(ext_statusbar.get_status())
+    iw:set_natural_w(mod_statusbar.get_w_template())
+    iw:set_text(mod_statusbar.get_status())
     
     return iw
 end
@@ -268,7 +273,7 @@ end
 
 
 -- Mark ourselves loaded.
-_LOADED["ext_statusbar"]=true
+_LOADED["mod_statusbar"]=true
 
 
 -- Load user configuration file

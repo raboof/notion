@@ -8,10 +8,19 @@ include $(TOPDIR)/system-inc.mk
 
 ######################################
 
+INCLUDES += $(X11_INCLUDES) $(LIBTU_INCLUDES) $(LIBEXTL_INCLUDES) -I..
+CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
+
+SOURCES=main.c statusbar.c
+
 SUBDIRS = ion-statusd
 INSTALL_SUBDIRS = $(SUBDIRS)
 
-LUA_SOURCES = ext_statusbar.lua
+MAKE_EXPORTS = mod_statusbar
+
+MODULE = mod_statusbar
+MODULE_STUB = mod_statusbar.lua
+
 ETC = cfg_statusbar.lua
 
 ######################################
@@ -20,4 +29,7 @@ include $(TOPDIR)/rules.mk
 
 ######################################
 
-_install: lc_install etc_install
+_install: module_install etc_install symlink_install
+
+symlink_install:
+	ln -s mod_statusbar.lc $(LCDIR)/ext_statusbar.lc

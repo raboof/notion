@@ -10,11 +10,9 @@ include modulelist.mk
 
 ######################################
 
-EXT_LIST=ext_statusbar
-
 INSTALL_SUBDIRS=\
 	ioncore ion pwm etc utils man po \
-	$(MODULE_LIST) $(EXT_LIST)
+	$(MODULE_LIST)
 
 SUBDIRS = $(LIBS_SUBDIRS) $(INSTALL_SUBDIRS)
 
