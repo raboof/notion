@@ -1,5 +1,10 @@
+--
+-- A script to automatically generate exported function registration
+-- code and documentation for those from C source.
+-- 
 
--- {{{ Helper functions
+
+-- Helper functions {{{
 
 function errorf(fmt, ...)
     error(string.format(fmt, unpack(arg)), 2)
@@ -15,7 +20,8 @@ end
 
 -- }}}
 
--- {{{ Some conversion tables
+
+-- Some conversion tables {{{
 
 desc2ct={
     ["v"]="void",
@@ -51,7 +57,8 @@ desc2human={
 
 -- }}}
 
--- {{{ Parser
+
+-- Parser {{{
 
 local fns={}
 local classes={}
@@ -133,7 +140,7 @@ function parse(d)
         doc=s
     end
     
-    -- Handle EXPORT_EXPORT otype fn(args)
+    -- Handle EXTL_EXPORT otype fn(args)
     local function do_export(s)
         local pat="^[%s\n]+EXTL_EXPORT[%s\n]+([%w%s_*]+[%s\n*])([%w_]+)[%s\n]*(%b())"
         local st, en, ot, fn, param=string.find(s, pat)
@@ -203,7 +210,7 @@ end
 -- }}}
 
 
--- {{{ Export output
+-- Export output {{{
 
 function writechnd(h, name, info)
     local oct=desc2ct[info.odesc]
@@ -318,7 +325,7 @@ end
 -- }}}
 
 
--- {{{ Documentation output
+-- Documentation output {{{
 
 function tohuman(desc, objtype)
     if objtype~="" then
@@ -351,19 +358,17 @@ function write_fndoc(h, fn, info)
 end
 
 function write_documentation(h)
-    --fprintf(h, "\\begin{description}\n")
     for fn, info in fns do
         if info.doc then
             write_fndoc(h, fn, info)
         end
     end
-    --fprintf(h, "\\end{description}\n")
 end
 
 -- }}}
 
 
--- {{{ main
+-- main {{{
 
 inputs={}
 outh=io.stdout
