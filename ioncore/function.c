@@ -13,6 +13,9 @@
 #include "objp.h"
 
 
+/* TODO: sort funtabs and use a more efficient search method */
+
+
 /*{{{ lookup_func */
 
 

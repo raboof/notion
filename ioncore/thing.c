@@ -60,7 +60,7 @@ void destroy_subthings(WThing *parent)
 			break;
 		assert(t!=prev);
 		prev=t;
-		/*do_*/destroy_thing(t);
+		destroy_thing(t);
 	}
 	
 	parent->flags&=~WTHING_SUBDEST;
