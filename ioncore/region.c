@@ -712,6 +712,14 @@ ExtlTab region_geom(WRegion *reg)
 }
 
 
+bool region_handle_drop(WRegion *reg, int x, int y, WRegion *dropped)
+{
+    bool ret=FALSE;
+    CALL_DYN_RET(ret, bool, region_handle_drop, reg, (reg, x, y, dropped));
+    return ret;
+}
+
+
 /*}}}*/
 
 

@@ -153,4 +153,6 @@ extern Window region_root_of(const WRegion *reg);
 extern WScreen *region_screen_of(WRegion *reg);
 extern bool region_same_rootwin(const WRegion *reg1, const WRegion *reg2);
 
+DYNFUN bool region_handle_drop(WRegion *reg, int x, int y, WRegion *dropped);
+
 #endif /* ION_IONCORE_REGION_H */

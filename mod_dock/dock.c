@@ -105,7 +105,7 @@ DECLSTRUCT(WDockParam){
 
 DECLSTRUCT(WDockApp){
     WDockApp *next, *prev;
-    WClientWin *cwin;
+    WRegion *reg;
     int pos;
     bool draw_border;
     bool tile;
@@ -319,7 +319,7 @@ static WDockApp *dock_find_dockapp(WDock *dock, WRegion *reg)
     WDockApp *dockapp;
 
     for(dockapp=dock->dockapps; dockapp!=NULL; dockapp=dockapp->next){
-        if((WRegion*)dockapp->cwin==reg){
+        if(dockapp->reg==reg){
             return dockapp;
         }
     }
@@ -414,6 +414,7 @@ static void dock_reshape(WDock *dock)
             
             /* Union with dockapp shapes */
             for(dockapp=dock->dockapps; dockapp!=NULL; dockapp=dockapp->next){
+                WClientWin *cwin=OBJ_CAST(dockapp->reg, WClientWin);
                 if(outline_style==DOCK_OUTLINE_STYLE_EACH
                    && dockapp->draw_border){
                     /* Union with border shape */
@@ -426,17 +427,16 @@ static void dock_reshape(WDock *dock)
                     XShapeCombineRectangles(ioncore_g.dpy, ((WWindow*)dock)->win,
                                             ShapeBounding, 0, 0, &tile_rect, 1,
                                             ShapeUnion, 0);
-                }else{
+                }else if(cwin!=NULL){
                     /* Union with dockapp shape */
                     int count;
                     int ordering;
                     
-                    XRectangle *rects=XShapeGetRectangles(ioncore_g.dpy,
-                                                          dockapp->cwin->win,
+                    XRectangle *rects=XShapeGetRectangles(ioncore_g.dpy, cwin->win,
                                                           ShapeBounding, &count,
                                                           &ordering);
                     if(rects!=NULL){
-                        WRectangle dockapp_geom=REGION_GEOM(dockapp->cwin);
+                        WRectangle dockapp_geom=REGION_GEOM(cwin);
                         XShapeCombineRectangles(ioncore_g.dpy, ((WWindow*)dock)->win,
                                                 ShapeBounding,
                                                 dockapp_geom.x, dockapp_geom.y,
@@ -603,7 +603,7 @@ static void dock_arrange_dockapps(WDock *dock, const WRectangle *bd_dockg,
         }
         
         if(replace_this==NULL)
-            region_fit((WRegion*)da->cwin, &(da->geom), REGION_FIT_BOUNDS);
+            region_fit(da->reg, &(da->geom), REGION_FIT_BOUNDS);
     }
 }
 
@@ -692,7 +692,7 @@ static void dock_managed_rqgeom_(WDock *dock, WRegion *reg, int flags,
     for(dockapp=dock->dockapps; dockapp!=NULL; dockapp=dockapp->next){
         WDockApp *da=dockapp;
         bool update=!(flags&REGION_RQGEOM_TRYONLY);
-        if((WRegion*)(dockapp->cwin)==reg){
+        if(dockapp->reg==reg){
             thisdockapp=dockapp;
             if(flags&REGION_RQGEOM_TRYONLY){
                 thisdockapp_copy=*dockapp;
@@ -1287,56 +1287,76 @@ WRegion *dock_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 /*{{{ Client window management setup */
 
 
-static bool dock_manage_clientwin(WDock *dock, WClientWin *cwin,
-                                  const WManageParams *param UNUSED,
-                                  int redir)
+static WDockApp *do_insert_dockapp(WDock *dock, WRegion *reg, 
+                                   bool draw_border,
+                                   int pos)
 {
     WDockApp *dockapp, *before_dockapp;
     WRectangle geom;
-
-    if(redir==MANAGE_REDIR_STRICT_YES)
-        return FALSE;
     
     /* Create and initialise a new WDockApp struct */
     dockapp=ALLOC(WDockApp);
-    dockapp->cwin=cwin;
-    dockapp->draw_border=TRUE;
-    dockapp->pos=INT_MAX;
-    dockapp->tile=FALSE;
     
-    extl_table_gets_b(cwin->proptab, CLIENTWIN_WINPROP_BORDER,
-                      &dockapp->draw_border);
+    if(dockapp==NULL)
+        return NULL;
+
+    geom.x=0;
+    geom.y=0;
+    geom.w=REGION_GEOM(reg).w;
+    geom.h=REGION_GEOM(reg).h;
+
+    if(!region_reparent(reg, (WWindow*)dock, &geom, REGION_FIT_BOUNDS)){
+        free(dockapp);
+        return NULL;
+    }
+
+    region_detach_manager(reg);
+    
+    dockapp->reg=reg;
+    dockapp->draw_border=draw_border; /*TRUE*/
+    dockapp->pos=pos; /*INT_MAX*/
+    dockapp->tile=FALSE;
 
     /* Insert the dockapp at the correct relative position */
-    extl_table_gets_i(cwin->proptab, CLIENTWIN_WINPROP_POSITION, &dockapp->pos);
     before_dockapp=dock->dockapps;
     for(before_dockapp=dock->dockapps;
         before_dockapp!=NULL && dockapp->pos>=before_dockapp->pos;
         before_dockapp=before_dockapp->next){
     }
+    
     if(before_dockapp!=NULL){
         LINK_ITEM_BEFORE(dock->dockapps, before_dockapp, dockapp, next, prev);
     }else{
         LINK_ITEM(dock->dockapps, dockapp, next, prev);
     }
 
-    region_set_manager((WRegion*)cwin, (WRegion*)dock,
-                       &(dock->managed_list));
+    region_set_manager(reg, (WRegion*)dock, &(dock->managed_list));
     
-    geom.x=0;
-    geom.y=0;
-    geom.w=REGION_GEOM(cwin).w;
-    geom.h=REGION_GEOM(cwin).h;
-    
-    region_reparent((WRegion*)cwin, (WWindow*)dock, &geom, REGION_FIT_BOUNDS);
-    
-    dock_managed_rqgeom(dock, (WRegion*)cwin, 
+    dock_managed_rqgeom(dock, reg, 
                         REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y,
                         &geom, NULL);
     
-    region_map((WRegion*)cwin);
+    region_map(reg);
 
-    return TRUE;
+    return dockapp;
+}
+
+
+static bool dock_manage_clientwin(WDock *dock, WClientWin *cwin,
+                                  const WManageParams *param UNUSED,
+                                  int redir)
+{
+    WRectangle geom;
+    bool draw_border=TRUE;
+    int pos=INT_MAX;
+
+    if(redir==MANAGE_REDIR_STRICT_YES)
+        return FALSE;
+    
+    extl_table_gets_b(cwin->proptab, CLIENTWIN_WINPROP_BORDER, &draw_border);
+    extl_table_gets_i(cwin->proptab, CLIENTWIN_WINPROP_POSITION, &pos);
+    
+    return (do_insert_dockapp(dock, (WRegion*)cwin, draw_border, pos)!=NULL);
 }
 
 
@@ -1482,6 +1502,23 @@ static bool clientwin_do_manage_hook(WClientWin *cwin, const WManageParams *para
 /*}}}*/
 
 
+/*{{{ Drop */
+
+
+static bool dock_handle_drop(WDock *dock, int x, int y,
+                             WRegion *dropped)
+{
+#ifdef CF_EXPERIMENTAL_DOCK_DROP
+    return (do_insert_dockapp(dock, dropped, FALSE, INT_MAX)!=NULL);
+#else
+    return FALSE;
+#endif
+}
+
+
+/*}}}*/
+
+
 /*{{{ Module init/deinit */
 
 
@@ -1568,6 +1605,7 @@ static DynFunTab dock_dynfuntab[]={
     {(DynFun*)region_fitrep, (DynFun*)dock_fitrep},
     {(DynFun*)region_orientation, (DynFun*)dock_orientation},
     {(DynFun*)region_rqclose, (DynFun*)dock_rqclose},
+    {(DynFun*)region_handle_drop, (DynFun*)dock_handle_drop},
     END_DYNFUNTAB
 };
 

@@ -25,7 +25,4 @@ extern int frame_press(WFrame *frame, XButtonEvent *ev,
                           WRegion **reg_ret);
 extern void frame_release(WFrame *frame);
 
-DYNFUN bool region_handle_drop(WRegion *reg, int x, int y,
-                               WRegion *dropped);
-                               
 #endif /* ION_IONCORE_FRAME_POINTER_H */
