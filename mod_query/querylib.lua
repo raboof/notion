@@ -154,7 +154,7 @@ querylib.COLLECT_THRESHOLD=2000
 -- the command should on the first line write the \var{common_part} 
 -- parameter of \fnref{WEdln.set_completions} and a single actual completion
 -- on each of the successive lines.
-function querylib.popen_completions(wedln, cmd)
+function querylib.popen_completions(wedln, cmd, beg)
     
     local pst={wedln=wedln, maybe_stalled=0}
     
@@ -183,7 +183,7 @@ function querylib.popen_completions(wedln, cmd)
                                  -- and the entries in that directory on the
                                  -- following lines.
                                  if not results.common_part then
-                                     results.common_part=a
+                                     results.common_part=(beg or "")..a
                                  else
                                      table.insert(results, a)
                                  end
@@ -196,6 +196,10 @@ function querylib.popen_completions(wedln, cmd)
             end
             
             str=coroutine.yield()
+        end
+        
+        if not results.common_part then
+            results.common_part=beg
         end
         
         wedln:set_completions(results)
@@ -408,11 +412,12 @@ end
 -- Run/view/edit {{{
 
 
-function querylib.file_completor(wedln, str, wp)
+function querylib.file_completor(wedln, str, wp, beg)
     local ic=ioncore.lookup_script("ion-completefile")
     if ic then
         querylib.popen_completions(wedln,
-                                   ic..(wp or " ")..string.shell_safe(str))
+                                   ic..(wp or " ")..string.shell_safe(str),
+                                   beg)
     end
 end
 
@@ -438,8 +443,14 @@ end
 
 
 function querylib.exec_completor(wedln, str)
-    querylib.file_completor(wedln, str, " -wp ")
+    local st, en, beg, tocompl=string.find(str, "^(.-)([^%s]*)$")
+    if string.len(beg)==0 then
+        querylib.file_completor(wedln, tocompl, " -wp ")
+    else
+        querylib.file_completor(wedln, tocompl, " ", beg)
+    end
 end
+
 
 function querylib.exec_handler(frame, cmd)
     if string.sub(cmd, 1, 1)==":" then
