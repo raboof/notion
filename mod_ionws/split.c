@@ -926,29 +926,166 @@ static bool split_tree_remove_split(WSplit **root, WSplit *split,
 }
 
 
+static void inc_s(WSplit *node, WSplit *unused, int dir, int s)
+{
+    if(dir==SPLIT_VERTICAL){
+        node->geom.h+=s;
+        if(node!=unused)
+            unused->geom.h+=s;
+    }else{
+        node->geom.w+=s;
+        if(node!=unused)
+            unused->geom.w+=s;
+    }
+}
+
+
+static void move_down_(WSplit **root, WSplit *node, WSplit *unused);
+
+
+static void move_down(WSplit **root, WSplit *node, WSplit *unused)
+{
+    if(node->parent!=NULL)
+        move_down_(root, node, unused);
+}
+
+
+static void move_down_(WSplit **root, WSplit *node, WSplit *unused)
+{
+    WSplit *p=node->parent;
+    bool tl=(p->u.s.tl==node);
+    WSplit *other=(tl ? p->u.s.br : p->u.s.tl);
+    WSplit *up=unused->parent;
+    bool utl=(up->u.s.tl==unused);
+    WSplit *uother=(utl ? up->u.s.br : up->u.s.tl);
+    int dir=p->type;
+    
+    assert(node==unused || unused==node->u.s.tl || unused==node->u.s.br);
+    
+    if(node!=unused && node->type!=p->type)
+        return;
+
+    if(node==unused || tl!=utl){
+        if(other->type==SPLIT_UNUSED){
+            if(node==unused){
+                /*
+                 *     p             p
+                 *   /   \    =>
+                 * node other
+                 */
+                if(p->is_static)
+                    return;
+                p->type=SPLIT_UNUSED;
+                other->parent=NULL;
+                node->parent=NULL;
+                destroy_obj((Obj*)other);
+                destroy_obj((Obj*)node);
+                move_down(root, p, p);
+            }else{
+                /*          p                     p
+                 *        /   \                 /   \        
+                 *    node     other   =>      _   other
+                 *   /   \           
+                 * (_ unused)       
+                 */
+                if(utl){
+                    node->u.s.tl=NULL;
+                    split_tree_remove_split(root, node, PRIMN_BR, FALSE);
+                }else{
+                    node->u.s.br=NULL;
+                    split_tree_remove_split(root, node, PRIMN_TL, FALSE);
+                }
+                inc_s(other, other, dir, split_size(unused, dir));
+                unused->parent=NULL;
+                destroy_obj((Obj*)unused);
+                move_down(root, p, other);
+            }
+        }else if(other->type==p->type && !other->is_static){
+            if((tl && other->u.s.tl->type==SPLIT_UNUSED) ||
+               (!tl && other->u.s.br->type==SPLIT_UNUSED)){
+                /*          p                     p         
+                 *        /   \                 /   \        
+                 *    node     other   =>    node    y
+                 *   /   \      /   \       /   \     
+                 * (_ unused)unused2 y    (_ unused)
+                 * 
+                 * There shouldn't be any annihilatable unused space left
+                 * in y, so unless node==unused, stop here.
+                 */
+                WSplit *unused2;
+                if(tl){
+                    unused2=other->u.s.tl;
+                    other->u.s.tl=NULL;
+                    split_tree_remove_split(root, other, PRIMN_BR, FALSE);
+                }else{
+                    unused2=other->u.s.br;
+                    other->u.s.br=NULL;
+                    split_tree_remove_split(root, other, PRIMN_TL, FALSE);
+                }
+                 
+                inc_s(node, unused, dir, split_size(unused2, dir));
+                unused2->parent=NULL;
+                destroy_obj((Obj*)unused2);
+                
+                if(node==unused)
+                    move_down(root, p, node);
+            }
+        }else if(node==unused){
+            move_down(root, p, node);
+        }
+    }else{ /* tl==utl */
+        /*     p                    p         
+         *   /  \                 /  \        
+         * other \node    =>    node unused
+         *       / \            / \     
+         *  uother unused   other uother
+         */
+        if(tl){
+            p->u.s.tl=unused;
+            node->u.s.tl=uother;
+            node->u.s.br=other;
+        }else{
+            p->u.s.br=unused;
+            node->u.s.br=uother;
+            node->u.s.tl=other;
+        }
+        other->parent=node;
+        unused->parent=p;
+        
+        if(dir==SPLIT_VERTICAL)
+            node->geom.h=other->geom.h+uother->geom.h;
+        else
+            node->geom.w=other->geom.w+uother->geom.w;
+        
+        move_down(root, p, unused);
+    }
+}
+
+
 WSplit *split_tree_remove(WSplit **root, WSplit *node, bool reclaim_space)
 {
     WSplit *split=node->parent;
     WSplit *other=NULL, *nextfocus=NULL;
     WSplit **thisptr=NULL;
     bool replace_ok=FALSE, tl=FALSE;
+
+    nextfocus=split_find_closest_regnode(node);
     
     if(split!=NULL){
         tl=(split->u.s.tl==node);
         thisptr=(tl ? &(split->u.s.tl) : &(split->u.s.br));
         other=(tl ? split->u.s.br : split->u.s.tl);
-        nextfocus=(tl ? split_current_tl(split->u.s.br, split->type)
-                      : split_current_br(split->u.s.tl, split->type));
-
+        
         assert(other!=NULL);
         
-        if(split->is_static || 
-           (split->is_lazy && other->type!=SPLIT_UNUSED)){
+        if(split->is_static || split->is_lazy){
             WSplit *un=create_split_unused(&(node->geom));
             if(un!=NULL){
                 *thisptr=un;
                 un->parent=split;
                 replace_ok=TRUE;
+                if(split->is_lazy)
+                    move_down(root, un, un);
             }else{
                 warn_err();
             }
@@ -975,66 +1112,11 @@ WSplit *split_tree_remove(WSplit **root, WSplit *node, bool reclaim_space)
 /*}}}*/
 
 
-/*{{{ iowns_manage_rescue */
-
-
-static WMPlex *find_mplex_descend(WSplit *node, int primn)
-{
-    WMPlex *mplex;
-    
-    do{
-        CHKNODE(node);
-        
-        if(node->type==SPLIT_UNUSED)
-            return NULL;
-        
-        if(node->type==SPLIT_REGNODE)
-            return OBJ_CAST(node->u.reg, WMPlex);
-        
-        if(primn==PRIMN_TL)
-            mplex=find_mplex_descend(node->u.s.tl, primn);
-        else
-            mplex=find_mplex_descend(node->u.s.br, primn);
-        
-        if(mplex!=NULL)
-            return mplex;
-        
-        if(primn==PRIMN_TL)
-            node=node->u.s.br;
-        else
-            node=node->u.s.tl;
-    }while(1);
-}
-
-
-WMPlex *split_tree_find_mplex(WRegion *from)
-{
-    WMPlex *nmgr=NULL;
-    WSplit *split=NULL, *node=NULL;
-    
-    node=node_of_reg(from);
-    if(node!=NULL)
-        split=node->parent;
-    
-    while(split!=NULL){
-        if(split->u.s.tl==node)
-            nmgr=find_mplex_descend(split->u.s.br, PRIMN_TL);
-        else
-            nmgr=find_mplex_descend(split->u.s.tl, PRIMN_BR);
-        if(nmgr!=NULL)
-            break;
-        node=split;
-        split=split->parent;
-    }
-    
-    return nmgr;
-}
-
-
-/*}}}*/
-
 
 /*{{{ Tree traversal */
+
+
+static bool (*regfilter)(WRegion *reg)=NULL;
 
 
 WSplit *split_current_tl(WSplit *node, int dir)
@@ -1049,7 +1131,8 @@ WSplit *split_current_tl(WSplit *node, int dir)
     if(node->type==SPLIT_UNUSED){
         /* nothing */
     }else if(node->type==SPLIT_REGNODE){
-        nnode=node;
+        if(regfilter==NULL || regfilter(node->u.reg))
+            nnode=node;
     }else if(node->type==dir || node->u.s.current==0){
         nnode=split_current_tl(node->u.s.tl, dir);
         if(nnode==NULL)
@@ -1169,8 +1252,68 @@ WSplit *split_to_tl(WSplit *node, int dir)
 }
 
 
+WSplit *split_find_closest_regnode(WSplit *node)
+{
+    WSplit *split, *s=NULL;
+    int from;
+    
+    if(node==NULL)
+        return NULL;
+        
+    while(1){
+        split=node->parent;
+        
+        if(split==NULL)
+            break;
+        
+        if(split->u.s.tl==node)
+            s=split_current_tl(split->u.s.br, split->type);
+        else
+            s=split_current_br(split->u.s.tl, split->type);
+        
+        if(s!=NULL)
+            break;
+        
+        node=split;
+    }
+    
+    return s;
+}
+
+
 
 /*}}}*/
+
+
+/*{{{ iowns_manage_rescue */
+
+
+static bool regfilter_mplex(WRegion *reg)
+{
+    return OBJ_IS(reg, WMPlex);
+}
+
+
+WMPlex *split_tree_find_mplex(WRegion *from)
+{
+    WSplit *node=NULL, *node2=NULL;
+    
+    node=node_of_reg(from);
+    if(node!=NULL){
+        regfilter=regfilter_mplex;
+        node2=split_find_closest_regnode(node);
+        regfilter=NULL;
+        
+        if(node2!=NULL)
+            return (WMPlex*)(node2->u.reg);
+    }
+    
+    return NULL;
+}
+
+
+/*}}}*/
+
 
 
 /*{{{ Misc. exports */

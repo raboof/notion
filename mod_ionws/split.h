@@ -107,6 +107,7 @@ extern WRegion *split_region_at(WSplit *node, int x, int y);
 extern WSplit *split_tree_node_of(WRegion *reg);
 extern WSplit *split_tree_split_of(WRegion *reg);
 extern WMPlex *split_tree_find_mplex(WRegion *from);
+extern WSplit *split_find_closest_regnode(WSplit *node);
 
 extern bool split_tree_set_node_of(WRegion *reg, WSplit *split);
 
