@@ -166,7 +166,7 @@ static int try_load(const char *file, void *param)
         goto err1;
     }
     
-    name=ALLOC_N(char, dot-slash);
+    name=ALLOC_N(char, dot-slash+1);
     if(name==NULL){
         warn_err();
         goto err1;
