@@ -28,13 +28,6 @@
 #include "stacking.h"
 
 
-#define TOPMOST_TRANSIENT(CWIN) LAST_MANAGED((CWIN)->transient_list)
-#define LOWEST_TRANSIENT(CWIN) FIRST_MANAGED((CWIN)->transient_list)
-#define HIGHER_TRANSIENT(CWIN, REG) NEXT_MANAGED((CWIN)->transient_list, REG)
-#define LOWER_TRANSIENT(CWIN, REG) PREV_MANAGED((CWIN)->transient_list, REG)
-#define FOR_ALL_TRANSIENTS(CWIN, R) FOR_ALL_MANAGED_ON_LIST((CWIN)->transient_list, R)
-
-
 static void set_clientwin_state(WClientWin *cwin, int state);
 static void send_clientmsg(Window win, Atom a);
 
@@ -162,14 +155,17 @@ void clientwin_get_set_name(WClientWin *cwin)
 
 /* Some standard winprops */
 
+static int switch_to_new_clients=TRUE;
+
+EXTL_EXPORT
+void set_switch_to_new_clients(bool sw)
+{
+	switch_to_new_clients=sw;
+}
+
 bool clientwin_get_switchto(WClientWin *cwin)
 {
-	/* TODO: make configurable */
-#ifdef CF_SWITCH_NEW_CLIENTS
-	bool switchto=TRUE;
-#else
-	bool switchto=FALSE;
-#endif
+	bool switchto=switch_to_new_clients;
 	
 	if(wglobal.opmode==OPMODE_INIT)
 		return FALSE;
@@ -401,7 +397,7 @@ static WRegion *clientwin_do_add_managed(WClientWin *cwin, WRegionAddFn *fn,
 {
 	WRectangle geom=cwin->max_geom;
 	WWindow *par=FIND_PARENT1(cwin, WWindow);
-	WRegion *reg, *t;
+	WRegion *reg;
 
 	if(par==NULL)
 		return NULL;
@@ -424,8 +420,6 @@ static WRegion *clientwin_do_add_managed(WClientWin *cwin, WRegionAddFn *fn,
 	if(reg==NULL)
 		return NULL;
 
-	t=TOPMOST_TRANSIENT(cwin);
-
 	region_set_manager(reg, (WRegion*)cwin, &(cwin->transient_list));
 	region_stack_above(reg, (WRegion*)cwin);
 
@@ -446,9 +440,10 @@ static void clientwin_remove_managed(WClientWin *cwin, WRegion *transient)
 	WRegion *reg;
 	
 	region_unset_manager(transient, (WRegion*)cwin, &(cwin->transient_list));
+	region_reset_stacking(transient);
 	
 	if(REGION_IS_ACTIVE(transient)){
-		reg=TOPMOST_TRANSIENT(cwin);
+		reg=region_topmost_stacked_above((WRegion*)cwin);
 		if(reg==NULL)
 			reg=&cwin->region;
 		set_focus(reg);
@@ -489,6 +484,8 @@ static void reparent_root(WClientWin *cwin)
 
 void clientwin_deinit(WClientWin *cwin)
 {
+	WRegion *reg;
+	
 	UNLINK_ITEM(wglobal.cwin_list, cwin, g_cwin_next, g_cwin_prev);
 	
 	if(cwin->win!=None){
@@ -518,6 +515,8 @@ void clientwin_deinit(WClientWin *cwin)
 void clientwin_unmapped(WClientWin *cwin)
 {
 	region_rescue_managed_on_list((WRegion*)cwin, cwin->transient_list);
+	if(cwin->last_mgr_watch.obj!=NULL)
+		region_goto((WRegion*)(cwin->last_mgr_watch.obj));
 	destroy_obj((WObj*)cwin);
 }
 
@@ -527,8 +526,7 @@ void clientwin_destroyed(WClientWin *cwin)
 {
 	XDeleteContext(wglobal.dpy, cwin->win, wglobal.win_context);
 	cwin->win=None;
-	region_rescue_managed_on_list((WRegion*)cwin, cwin->transient_list);
-	destroy_obj((WObj*)cwin);
+	clientwin_unmapped(cwin);
 }
 
 
@@ -815,8 +813,8 @@ static void clientwin_map(WClientWin *cwin)
 	show_clientwin(cwin);
 	MARK_REGION_MAPPED(cwin);
 	
-	FOR_ALL_TRANSIENTS(cwin, sub){
-		region_map(sub);
+	FOR_ALL_MANAGED_ON_LIST(cwin->transient_list, sub){
+			region_map(sub);
 	}
 }
 
@@ -828,7 +826,7 @@ static void clientwin_unmap(WClientWin *cwin)
 	hide_clientwin(cwin);
 	MARK_REGION_UNMAPPED(cwin);
 	
-	FOR_ALL_TRANSIENTS(cwin, sub){
+	FOR_ALL_MANAGED_ON_LIST(cwin->transient_list, sub){
 		region_unmap(sub);
 	}
 }
@@ -836,7 +834,7 @@ static void clientwin_unmap(WClientWin *cwin)
 
 static void clientwin_set_focus_to(WClientWin *cwin, bool warp)
 {
-	WRegion *reg=TOPMOST_TRANSIENT(cwin);
+	WRegion *reg=region_topmost_stacked_above((WRegion*)cwin);
 	
 	if(warp)
 		do_move_pointer_to((WRegion*)cwin);
@@ -855,40 +853,17 @@ static void clientwin_set_focus_to(WClientWin *cwin, bool warp)
 	
 static bool clientwin_display_managed(WClientWin *cwin, WRegion *sub)
 {
-	if(REGION_IS_MAPPED(cwin))
+	if(!REGION_IS_MAPPED(cwin))
 		return FALSE;
 	region_map(sub);
+	region_raise(sub);
 	return TRUE;
-	
-#if 0
-	WRegion *oldtop=TOPMOST_TRANSIENT(cwin);
-	
-	assert(oldtop==NULL);
-	
-	if(oldtop==sub)
-		return TRUE;
-	
-	/* Relink last (topmost) and raise */
-	unlink_from_parent(sub);
-	link_child((WRegion*)cwin, sub);
-	
-	/* Should raise above oldtop, but TODO: region_topmost_win */
-	region_restack(sub, None, Above);
-	return FALSE;
-#endif
 }
 
 
 static Window clientwin_restack(WClientWin *cwin, Window other, int mode)
 {
-	WRegion *reg;
-	
 	do_restack_window(cwin->win, other, mode);
-	other=cwin->win;
-	
-	for(reg=LOWEST_TRANSIENT(cwin); reg!=NULL; reg=HIGHER_TRANSIENT(cwin, reg))  
-		other=region_restack(reg, other, Above);
-													   
 	return cwin->win;
 }
 
@@ -918,7 +893,7 @@ static void clientwin_resize_hints(WClientWin *cwin, XSizeHints *hints_ret,
 
 static WRegion *clientwin_managed_enter_to_focus(WClientWin *cwin, WRegion *reg)
 {
-	return TOPMOST_TRANSIENT(cwin);
+	return region_topmost_stacked_above((WRegion*)cwin);
 }
 
 
@@ -1018,17 +993,9 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 	WWindow *par;
 	
 	/* check full screen request */
-	/* TODO: viewport check */
-	if((ev->value_mask&(CWX|CWY))==(CWX|CWY) &&
-	   REGION_GEOM(SCREEN_OF(cwin)).w==ev->width &&
-	   REGION_GEOM(SCREEN_OF(cwin)).h==ev->height){
-		WMwmHints *mwm;
-		mwm=get_mwm_hints(cwin->win);
-		if(mwm!=NULL && mwm->flags&MWM_HINTS_DECORATIONS &&
-		   mwm->decorations==0){
-			if(clientwin_enter_fullscreen(cwin, REGION_IS_ACTIVE(cwin)))
-				return;
-		}
+	if((ev->value_mask&(CWWidth|CWHeight))==(CWWidth|CWHeight)){
+		if(clientwin_check_fullscreen_request(cwin, ev->width, ev->height))
+			return;
 	}
 	
 	geom=REGION_GEOM(cwin);
@@ -1089,14 +1056,49 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 /*{{{ Fullscreen */
 
 
+bool clientwin_check_fullscreen_request(WClientWin *cwin, int w, int h)
+{
+	WRegion *reg;
+	WMwmHints *mwm;
+	
+	mwm=get_mwm_hints(cwin->win);
+	if(mwm==NULL || !(mwm->flags&MWM_HINTS_DECORATIONS) ||
+	   mwm->decorations!=0)
+		return FALSE;
+
+	FOR_ALL_MANAGED_ON_LIST(SCREEN_OF(cwin)->viewport_list, reg){
+		if(!WOBJ_IS(reg, WViewport))
+			continue;
+		if(REGION_GEOM(reg).w==w && REGION_GEOM(reg).h==h){
+			return clientwin_fullscreen_vp(cwin, (WViewport*)reg,
+										   clientwin_get_switchto(cwin));
+		}
+	}
+	
+	/* Catch Xinerama-unaware apps here */
+	if(REGION_GEOM(SCREEN_OF(cwin)).w==w && REGION_GEOM(SCREEN_OF(cwin)).h==h){
+		return clientwin_enter_fullscreen(cwin, 
+										  clientwin_get_switchto(cwin));
+	}
+	return FALSE;
+}
+
+
 bool clientwin_fullscreen_vp(WClientWin *cwin, WViewport *vp, bool switchto)
 {
-	if(REGION_MANAGER(cwin)!=NULL)
-		setup_watch(&(cwin->last_mgr_watch), (WObj*)REGION_MANAGER(cwin),
-					NULL);
+	if(REGION_MANAGER(cwin)!=NULL){
+		setup_watch(&(cwin->last_mgr_watch), (WObj*)REGION_MANAGER(cwin), NULL);
+	}else if(vp->current_ws!=NULL){
+		setup_watch(&(cwin->last_mgr_watch), (WObj*)vp->current_ws, NULL);
+	}
 	
-	return region_add_managed((WRegion*)vp, (WRegion*)cwin,
-							  switchto ?  REGION_ATTACH_SWITCHTO : 0);
+	if(!region_add_managed((WRegion*)vp, (WRegion*)cwin,
+						   switchto ?  REGION_ATTACH_SWITCHTO : 0)){
+		warn("Failed to enter full screen mode");
+		return FALSE;
+	}
+	
+	return TRUE;
 }
 
 
@@ -1104,8 +1106,11 @@ bool clientwin_enter_fullscreen(WClientWin *cwin, bool switchto)
 {
 	WViewport *vp=viewport_of((WRegion*)cwin);
 	
-	if(vp==NULL)
-		return FALSE;
+	if(vp==NULL){
+		vp=SCREEN_OF(cwin)->current_viewport;
+		if(vp==NULL)
+			return FALSE;
+	}
 	
 	return clientwin_fullscreen_vp(cwin, vp, switchto);
 }

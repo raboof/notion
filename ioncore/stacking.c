@@ -217,3 +217,17 @@ Window region_restack(WRegion *reg, Window other, int mode)
 
 /*}}}*/
 
+
+/*{{{ Misc */
+
+
+WRegion *region_topmost_stacked_above(WRegion *reg)
+{
+	if(reg->stacking.below_list==NULL)
+		return NULL;
+	return reg->stacking.below_list->stacking.prev;
+}
+
+
+/*}}}*/
+

@@ -129,22 +129,11 @@ bool add_clientwin_default(WClientWin *cwin, const XWindowAttributes *attr,
 	WViewport *vp;
 	int tm;
 	
-	vp=find_suitable_viewport(cwin, attr->x, attr->y);
-	
 	/* check full screen mode */
-	do{
-		WMwmHints *mwm;
-		mwm=get_mwm_hints(cwin->win);
-		if(mwm==NULL)
-			break;
-		if(mwm->flags&MWM_HINTS_DECORATIONS && mwm->decorations==0 &&
-		   REGION_GEOM(SCREEN_OF(cwin)).w==attr->width &&
-		   REGION_GEOM(SCREEN_OF(cwin)).h==attr->height){
-			if(clientwin_fullscreen_vp(cwin, vp, clientwin_get_switchto(cwin)))
-				return TRUE;
-			warn("Failed to enter full screen mode.");
-		}
-	}while(0);
+	if(clientwin_check_fullscreen_request(cwin, attr->width, attr->height))
+		return TRUE;
+	
+	vp=find_suitable_viewport(cwin, attr->x, attr->y);
 	
 	tm=clientwin_get_transient_mode(cwin);
 	

@@ -81,6 +81,7 @@ extern void clientwin_clear_target_id(WClientWin *cwin);
 extern void clientwin_handle_configure_request(WClientWin *cwin,
 											   XConfigureRequestEvent *ev);
 
+extern bool clientwin_check_fullscreen_request(WClientWin *cwin, int w, int h);
 extern bool clientwin_fullscreen_vp(WClientWin *cwin, WViewport *vp,
 									bool switchto);
 extern bool clientwin_toggle_fullscreen(WClientWin *cwin);

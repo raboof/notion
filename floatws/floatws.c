@@ -302,13 +302,12 @@ static bool floatws_do_add_clientwin(WFloatWS *ws,
 		return FALSE;
 	}
 	
-#ifdef CF_SWITCH_NEW_CLIENTS
-	/* TODO: dummy InputOnly window */
-	if(region_manages_active_reg((WRegion*)ws)){
-		region_display_sp((WRegion*)cwin);
-		set_focus((WRegion*)cwin);
+	if(clientwin_get_switchto(cwin)){
+		if(region_manages_active_reg((WRegion*)ws)){
+			region_display_sp((WRegion*)cwin);
+			set_focus((WRegion*)cwin);
+		}
 	}
-#endif
 	
 	return TRUE;
 }

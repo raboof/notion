@@ -9,10 +9,7 @@
 #define INCLUDED_CONFIG_H
 
 
-/* #define CF_MODULE_SUPPORT */
 /* #define CF_NO_LOCK_HACK */
-/* #define CF_NO_XINERAMA */
-#define CF_SWITCH_NEW_CLIENTS
 
 
 /* Configurable
