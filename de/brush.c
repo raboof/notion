@@ -81,15 +81,15 @@ static void create_tab_gcs(DETabBrush *brush, WRootWin *rootwin)
 	XFreePixmap(dpy, stipple_pixmap);
 	
 	/* Create tag pixmap and copying GC */
-	brush->tag_pixmap_w=7;
-	brush->tag_pixmap_h=7;
-	brush->tag_pixmap=XCreatePixmap(dpy, root, 7, 7, 1);
+	brush->tag_pixmap_w=5;
+	brush->tag_pixmap_h=5;
+	brush->tag_pixmap=XCreatePixmap(dpy, root, 5, 5, 1);
 	
 	XSetForeground(dpy, tmp_gc, 0);
-	XFillRectangle(dpy, brush->tag_pixmap, tmp_gc, 0, 0, 7, 7);
+	XFillRectangle(dpy, brush->tag_pixmap, tmp_gc, 0, 0, 5, 5);
 	XSetForeground(dpy, tmp_gc, 1);
-	XFillRectangle(dpy, brush->tag_pixmap, tmp_gc, 0, 2, 5, 2);
-	XFillRectangle(dpy, brush->tag_pixmap, tmp_gc, 3, 4, 2, 3);
+	XFillRectangle(dpy, brush->tag_pixmap, tmp_gc, 0, 0, 5, 2);
+	XFillRectangle(dpy, brush->tag_pixmap, tmp_gc, 3, 2, 2, 3);
 	
 	gcv.foreground=DE_BLACK(rootwin);
 	gcv.background=DE_WHITE(rootwin);
@@ -402,6 +402,7 @@ static DynFunTab debrush_dynfuntab[]={
 
 static DynFunTab detabbrush_dynfuntab[]={
 	{grbrush_draw_textbox, detabbrush_draw_textbox},
+	{grbrush_draw_textboxes, detabbrush_draw_textboxes},
 	END_DYNFUNTAB
 };
 									   

@@ -171,9 +171,8 @@ void debrush_get_border_widths(DEBrush *brush, GrBorderWidths *bdw)
 		break;
 	}
 	
-	tmp=brush->spacing/2;
-	bdw->tb_ileft=bdw->left+tmp;
-	bdw->tb_iright=bdw->right+(brush->spacing-tmp);
+	bdw->tb_ileft=bdw->left;
+	bdw->tb_iright=bdw->right;
 	bdw->spacing=brush->spacing;
 }
 
@@ -212,11 +211,11 @@ static void tabbrush_textbox_extras(DETabBrush *brush, Window win,
 		XSetForeground(wglobal.dpy, brush->copy_gc, cg->fg);
 			
 		copy_masked(brush, brush->tag_pixmap, win, 0, 0,
-					brush->tag_pixmap_w,  brush->tag_pixmap_h,
+					brush->tag_pixmap_w, brush->tag_pixmap_h,
 					g->x+g->w-bdw->right-brush->tag_pixmap_w, 
-					g->x+bdw->top);
-			}
-		
+					g->y+bdw->top);
+	}
+
 	if(MATCHES2("*-*-*-dragged", a1, a2)){
 		XFillRectangle(wglobal.dpy, win, brush->stipple_gc, 
 					   g->x, g->y, g->w, g->h);
@@ -253,32 +252,34 @@ static void debrush_do_draw_textbox(DEBrush *brush, Window win,
 	
 	debrush_do_draw_box(brush, win, geom, cg, needfill);
 	
-	if(text==NULL)
-		return;
-	
-	len=strlen(text);
-	
-	if(len==0)
-		return;
-	
-	debrush_get_border_widths(brush, &bdw);
-	debrush_get_font_extents(brush, &fnte);
-	
-	if(brush->textalign!=DEALIGN_LEFT){
-		tw=debrush_get_text_width(brush, text, len);
+	do{ /*...while(0)*/
+		if(text==NULL)
+			break;
 		
-		if(brush->textalign==DEALIGN_CENTER)
-			tx=geom->x+bdw.left+(geom->w-bdw.left-bdw.right-tw)/2;
-		else
-			tx=geom->x+geom->w-bdw.right-tw;
-	}else{
-		tx=geom->x+bdw.left;
-	}
+		len=strlen(text);
 	
-	ty=(geom->y+bdw.top+fnte.baseline
-		+(geom->h-bdw.top-bdw.bottom-fnte.max_height)/2);
+		if(len==0)
+			break;
 	
-	debrush_do_draw_string(brush, win, tx, ty, text, len, FALSE, cg);
+		debrush_get_border_widths(brush, &bdw);
+		debrush_get_font_extents(brush, &fnte);
+		
+		if(brush->textalign!=DEALIGN_LEFT){
+			tw=debrush_get_text_width(brush, text, len);
+			
+			if(brush->textalign==DEALIGN_CENTER)
+				tx=geom->x+bdw.left+(geom->w-bdw.left-bdw.right-tw)/2;
+			else
+				tx=geom->x+geom->w-bdw.right-tw;
+		}else{
+			tx=geom->x+bdw.left;
+		}
+		
+		ty=(geom->y+bdw.top+fnte.baseline
+			+(geom->h-bdw.top-bdw.bottom-fnte.max_height)/2);
+		
+		debrush_do_draw_string(brush, win, tx, ty, text, len, FALSE, cg);
+	}while(0);
 	
 	if(extrafn!=NULL)
 		extrafn(brush, win, geom, cg, &bdw, a1, a2);
