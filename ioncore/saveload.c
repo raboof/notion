@@ -136,7 +136,7 @@ bool ioncore_init_layout()
     bool ok;
     bool n=0;
     
-    ok=ioncore_read_savefile("layout", &tab);
+    ok=ioncore_read_savefile("saved_layout", &tab);
     
     loading_layout=TRUE;
     layout_load_error=FALSE;
@@ -157,7 +157,7 @@ bool ioncore_init_layout()
 
     if(layout_load_error){
         time_t t=time(NULL);
-        char tm[]="layout.backup-YYYYMMDDHHMMSS\0\0\0\0";
+        char tm[]="saved_layout.backup-YYYYMMDDHHMMSS\0\0\0\0";
         char *backup;
         
         strftime(tm+14, 15, "%Y%m%d%H%M%S", localtime(&t));
@@ -201,7 +201,7 @@ bool ioncore_save_layout()
         }
     }
     
-    ret=ioncore_write_savefile("layout", tab);
+    ret=ioncore_write_savefile("saved_layout", tab);
     
     extl_unref_table(tab);
     

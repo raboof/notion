@@ -57,8 +57,8 @@ static void load_history()
 {
     ExtlTab tab;
     int i, n;
-        
-    if(!ioncore_read_savefile("query_history", &tab))
+
+    if(!ioncore_read_savefile("saved_queryhist", &tab))
         return;
     
     n=extl_table_get_n(tab);
@@ -89,7 +89,7 @@ static void save_history()
         extl_table_seti_s(tab, i+1, histent);
     }
     
-    ioncore_write_savefile("query_history", tab);
+    ioncore_write_savefile("saved_queryhist", tab);
     
     extl_unref_table(tab);
 }
