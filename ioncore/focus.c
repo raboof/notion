@@ -67,9 +67,12 @@ void unprotect_previous()
 void goto_previous()
 {
 	WRegion *reg=(WRegion*)wglobal.previous_screen;
+
+	if(reg==NULL)
+		reg=(WRegion*)wglobal.active_screen;
 	
 	if(reg==NULL)
-		return;
+		reg=(WRegion*)wglobal.screens;
 	
 	while(reg->previous_act!=NULL)
 		reg=reg->previous_act;

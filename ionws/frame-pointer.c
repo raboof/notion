@@ -51,7 +51,7 @@ static void frame_borders(WFrame *frame, WGRData *grdata, WRectangle *geom)
 
 #define RESB 8
 
-int frame_press(WFrame *frame, XButtonEvent *ev)
+int frame_press(WFrame *frame, XButtonEvent *ev, WThing **thing_ret)
 {
 	WScreen *scr=SCREEN_OF(frame);
 	WRegion *sub;
@@ -90,6 +90,9 @@ int frame_press(WFrame *frame, XButtonEvent *ev)
 
 		frame->tab_pressed_sub=sub;
 
+		if(thing_ret!=NULL)
+			*thing_ret=(WThing*)sub;
+		
 		return FRAME_AREA_TAB;
 	}
 	
@@ -256,7 +259,8 @@ static void p_tabdrag_end(WFrame *frame, XButtonEvent *ev)
 
 void p_tabdrag_setup(WFrame *frame)
 {
-	set_drag_handlers((WMotionHandler*)p_tabdrag_begin,
+	set_drag_handlers((WRegion*)frame,
+					  (WMotionHandler*)p_tabdrag_begin,
 					  (WMotionHandler*)p_tabdrag_motion,
 					  (WButtonHandler*)p_tabdrag_end);
 }
@@ -291,7 +295,8 @@ static void p_resize_end(WFrame *frame, XButtonEvent *ev)
 
 void p_resize_setup(WFrame *frame)
 {
-	set_drag_handlers((WMotionHandler*)p_resize_begin,
+	set_drag_handlers((WRegion*)frame,
+					  (WMotionHandler*)p_resize_begin,
 					  (WMotionHandler*)p_resize_motion,
 					  (WButtonHandler*)p_resize_end);
 }

@@ -43,18 +43,23 @@ static WMotionHandler *p_motion_begin_handler=NULL;
 /*{{{ Handler setup */
 
 
-bool set_button_handler(WButtonHandler *handler)
+bool set_button_handler(WRegion *reg,
+						WButtonHandler *handler)
 {
+	if(reg!=p_reg)
+		return FALSE;
+	
 	p_button_handler=handler;
 	return TRUE;
 }
 
 
-bool set_drag_handlers(WMotionHandler *begin,
+bool set_drag_handlers(WRegion *reg,
+					   WMotionHandler *begin,
 					   WMotionHandler *motion,
 					   WButtonHandler *end)
 {
-	if(p_motion==FALSE)
+	if(reg!=p_reg || p_motion==FALSE)
 		return FALSE;
 	
 	p_motion_begin_handler=begin;
@@ -122,7 +127,7 @@ static void call_button(WBinding *binding, XButtonEvent *ev)
 	call_binding(binding, p_thing);
 	
 	if(p_button_handler!=NULL)
-		p_button_handler(p_thing, ev);
+		p_button_handler(p_reg, ev);
 	
 	p_button_handler=NULL;
 }
@@ -132,7 +137,7 @@ static void call_motion(WBinding *binding, XMotionEvent *ev,
 						int dx, int dy)
 {
 	if(p_motion_handler!=NULL)
-		p_motion_handler(p_thing, ev, dx, dy);
+		p_motion_handler(p_reg, ev, dx, dy);
 }
 
 
@@ -147,7 +152,7 @@ static void call_motion_begin(WBinding *binding, XMotionEvent *ev,
 	call_binding(binding, p_thing);
 	
 	if(p_motion_begin_handler!=NULL)
-		p_motion_begin_handler(p_thing, ev, dx, dy);
+		p_motion_begin_handler(p_reg, ev, dx, dy);
 	
 	p_motion_begin_handler=NULL;
 }
@@ -181,7 +186,7 @@ bool handle_button_press(XButtonEvent *ev)
 	
 	p_thing=(WThing*)reg;
 	
-	area=window_press((WWindow*)reg, ev);
+	area=window_press((WWindow*)reg, ev, &p_thing);
 	
 	if(p_clickcnt==1 && time_in_threshold(ev->time) && p_button==button &&
 	   p_state==state && reg==p_reg){
@@ -230,7 +235,7 @@ bool handle_button_release(XButtonEvent *ev)
 		call_button(binding,  ev);
 	}else{
 		if(p_button_handler!=NULL)
-			p_button_handler(p_thing, ev);
+			p_button_handler(p_reg, ev);
 	}
 	
 	/* Allow any temporary settings to be cleared */

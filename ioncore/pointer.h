@@ -9,10 +9,10 @@
 #define WMCORE_POINTER_H
 
 #include "common.h"
-#include "thing.h"
+#include "region.h"
 
-typedef void WButtonHandler(WThing *thing, XButtonEvent *ev);
-typedef void WMotionHandler(WThing *thing, XMotionEvent *ev, int dx, int dy);
+typedef void WButtonHandler(WRegion *reg, XButtonEvent *ev);
+typedef void WMotionHandler(WRegion *reg, XMotionEvent *ev, int dx, int dy);
 
 extern bool handle_button_press(XButtonEvent *ev);
 extern bool handle_button_release(XButtonEvent *ev);
@@ -20,8 +20,8 @@ extern void handle_pointer_motion(XMotionEvent *ev);
 
 extern bool find_window_at(Window rootwin, int x, int y, Window *childret);
 
-extern bool set_button_handler(WButtonHandler *handler);
-extern bool set_drag_handlers(WMotionHandler *begin, WMotionHandler *motion,
-							  WButtonHandler *end);
+extern bool set_button_handler(WRegion *reg, WButtonHandler *handler);
+extern bool set_drag_handlers(WRegion *reg, WMotionHandler *begin,
+							  WMotionHandler *motion, WButtonHandler *end);
 
 #endif /* WMCORE_POINTER_H */

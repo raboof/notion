@@ -170,9 +170,9 @@ bool add_clientwin_default(WClientWin *cwin, const XWindowAttributes *attr,
 		mwm=get_mwm_hints(cwin->win);
 		if(mwm==NULL)
 			break;
-		if(REGION_GEOM(SCREEN_OF(cwin)).w==attr->width &&
-		   REGION_GEOM(SCREEN_OF(cwin)).h==attr->height &&
-		   mwm->flags&MWM_HINTS_DECORATIONS && mwm->decorations==0){
+		if(mwm->flags&MWM_HINTS_DECORATIONS && mwm->decorations==0 &&
+		   REGION_GEOM(SCREEN_OF(cwin)).w==attr->width &&
+		   REGION_GEOM(SCREEN_OF(cwin)).h==attr->height){
 			if(wglobal.opmode!=OPMODE_INIT){
 #ifdef CF_SWITCH_NEW_CLIENTS
 				switchto=TRUE;
