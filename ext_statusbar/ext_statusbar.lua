@@ -128,6 +128,10 @@ function calcmail(fname)
     local in_headers=false
     local had_status=false
     
+    if not f then
+        return 0, 0, 0
+    end
+    
     for l in f:lines() do
         if had_blank and string.find(l, '^From ') then
             total=total+1
@@ -171,9 +175,12 @@ local function update_mail()
     end
     mail_last_check=t
 
-    local mbox=os.getenv('MAIL')
-    if not mbox then
-        return
+    local mbox=settings.mailbox
+    if not mbox or mbox=='' then
+        mbox=os.getenv('MAIL')
+        if not mbox then
+            return
+        end
     end
     
     mail_total, mail_unread, mail_new=calcmail(mbox)
