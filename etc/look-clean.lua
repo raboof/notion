@@ -70,6 +70,8 @@ de_define_style("input", {
     based_on = "*",
     
     foreground_colour = "white",
+
+    spacing = 1,
     
     de_substyle("selection", {
         background_colour = "#8a999e",

@@ -87,6 +87,8 @@ de_define_style("input", {
     
     -- Bigger font for readability
     font = "-*-helvetica-medium-r-normal-*-14-*-*-*-*-*-*-*",
+
+    spacing = 1,
     
     -- Greyish violet background
     highlight_colour = "#eeeeff",
