@@ -106,10 +106,10 @@ extern WSplit *load_splitst(WIonWS *ws, const WRectangle *geom, ExtlTab tab);
 
 typedef PtrListIterTmp WIonWSIterTmp;
 
-#define FOR_ALL_MANAGED_BY_IONWS(WS, VAR, TMP) \
+#define FOR_ALL_MANAGED_BY_IONWS(VAR, WS, TMP) \
     FOR_ALL_ON_PTRLIST(WRegion*, VAR, (WS)->managed_list, TMP)
     
-#define FOR_ALL_MANAGED_BY_IONWS_UNSAFE(WS, VAR) \
+#define FOR_ALL_MANAGED_BY_IONWS_UNSAFE(VAR, WS) \
     FOR_ALL_ON_PTRLIST_UNSAFE(WRegion*, VAR, (WS)->managed_list)
 
 

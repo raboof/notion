@@ -443,18 +443,36 @@ int screen_id(WScreen *scr)
 }
 
 
-
 static bool screen_managed_may_destroy(WScreen *scr, WRegion *reg)
 {
     WLListNode *node;
+    bool onl1list=FALSE;
 
+    if(OBJ_IS(reg, WClientWin))
+        return TRUE;
+    
     FOR_ALL_NODES_ON_LLIST(node, scr->mplex.l1_list){
-        if(OBJ_IS(node->reg, WGenWS) && node->reg!=reg)
+        if(node->reg==reg)
+            onl1list=TRUE;
+        else if(OBJ_IS(node->reg, WGenWS))
             return TRUE;
     }
     
+    if(!onl1list)
+        return TRUE;
+    
+    warn(TR("Only workspace may not be destroyed."));
+    
     return FALSE;
 }
+
+
+static bool screen_may_destroy(WScreen *scr)
+{
+    warn(TR("Screens may not be destroyed."));
+    return FALSE;
+}
+
 
 
 void screen_set_managed_offset(WScreen *scr, const WRectangle *off)
@@ -571,18 +589,29 @@ bool screen_init_layout(WScreen *scr, ExtlTab tab)
 
 
 static DynFunTab screen_dynfuntab[]={
-    {region_map, screen_map},
-    {region_unmap, screen_unmap},
-    {region_activated, screen_activated},
+    {region_map, 
+     screen_map},
+    
+    {region_unmap, 
+     screen_unmap},
+    
+    {region_activated, 
+     screen_activated},
     
     {(DynFun*)region_managed_may_destroy,
      (DynFun*)screen_managed_may_destroy},
 
-    {mplex_managed_changed, screen_managed_changed},
-    
-    {mplex_managed_geom, screen_managed_geom},
+    {(DynFun*)region_may_destroy,
+     (DynFun*)screen_may_destroy},
 
-    {region_managed_notify, screen_managed_notify},
+    {mplex_managed_changed, 
+     screen_managed_changed},
+    
+    {mplex_managed_geom, 
+     screen_managed_geom},
+
+    {region_managed_notify, 
+     screen_managed_notify},
 
     {(DynFun*)region_get_configuration,
      (DynFun*)screen_get_configuration},

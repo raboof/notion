@@ -29,7 +29,7 @@ static WRegion *find_suitable_target(WIonWS *ws)
     WRegion *r=ionws_current(ws);
     
     if(r==NULL){
-        FOR_ALL_MANAGED_BY_IONWS_UNSAFE(ws, r)
+        FOR_ALL_MANAGED_BY_IONWS_UNSAFE(r, ws)
             break;
     }
     

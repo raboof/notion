@@ -116,19 +116,6 @@ void frame_deinit(WFrame *frame)
 }
 
 
-bool frame_rqclose(WFrame *frame)
-{
-    if(FRAME_MCOUNT(frame)!=0 || FRAME_CURRENT(frame)!=NULL){
-        warn(TR("Frame is not empty."));
-    }else if(region_may_destroy((WRegion*)frame)){
-        mainloop_defer_destroy((Obj*)frame);
-        return TRUE;
-    }
-    
-    return FALSE;
-}
-
-
 /*}}}*/
 
 
@@ -661,7 +648,6 @@ WRegion *frame_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 
 
 static DynFunTab frame_dynfuntab[]={
-    {(DynFun*)region_rqclose, (DynFun*)frame_rqclose},
     {region_size_hints, frame_resize_hints},
 
     {mplex_managed_changed, frame_managed_changed},

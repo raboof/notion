@@ -11,6 +11,7 @@
 
 #include <libtu/objp.h>
 #include <libextl/extl.h>
+#include <libmainloop/defer.h>
 
 #include "common.h"
 #include "global.h"
@@ -357,6 +358,26 @@ bool region_reparent(WRegion *reg, WWindow *par,
 /*{{{ Close */
 
 
+static bool region_rqclose_default(WRegion *reg, bool relocate)
+{
+    WRegion *mgr;
+    
+    if((!relocate && !region_may_destroy(reg)) ||
+       !region_manager_allows_destroying(reg)){
+        return FALSE;
+    }
+    
+    if(!region_rescue_clientwins(reg)){
+        warn(TR("Failed to rescue some client windows - not closing."));
+        return FALSE;
+    }
+    
+    mainloop_defer_destroy((Obj*)reg);
+    
+    return TRUE;
+}
+
+
 /*EXTL_DOC
  * Attempt to close/destroy \var{reg}. Whether this operation works
  * depends on whether the particular type of region in question has
@@ -367,10 +388,10 @@ bool region_reparent(WRegion *reg, WWindow *par,
  * region will not have been actually destroyed when this function returns.
  */
 EXTL_EXPORT_MEMBER
-bool region_rqclose(WRegion *reg)
+bool region_rqclose(WRegion *reg, bool relocate)
 {
     bool ret=FALSE;
-    CALL_DYN_RET(ret, bool, region_rqclose, reg, (reg));
+    CALL_DYN_RET(ret, bool, region_rqclose, reg, (reg, relocate));
     return ret;
 }
 
@@ -382,7 +403,7 @@ static WRegion *region_rqclose_propagate_default(WRegion *reg,
         maybe_sub=region_current(reg);
     if(maybe_sub!=NULL)
         return region_rqclose_propagate(maybe_sub, NULL);
-    return (region_rqclose(reg) ? reg : NULL);
+    return (region_rqclose(reg, FALSE) ? reg : NULL);
 }
 
 
@@ -403,6 +424,14 @@ WRegion *region_rqclose_propagate(WRegion *reg, WRegion *maybe_sub)
 }
 
 
+bool region_may_destroy(WRegion *reg)
+{
+    bool ret=TRUE;
+    CALL_DYN_RET(ret, bool, region_may_destroy, reg, (reg));
+    return ret;
+}
+
+
 bool region_managed_may_destroy(WRegion *mgr, WRegion *reg)
 {
     bool ret=TRUE;
@@ -411,13 +440,14 @@ bool region_managed_may_destroy(WRegion *mgr, WRegion *reg)
 }
 
 
-bool region_may_destroy(WRegion *reg)
+bool region_manager_allows_destroying(WRegion *reg)
 {
     WRegion *mgr=REGION_MANAGER(reg);
+    
     if(mgr==NULL)
         return TRUE;
-    else
-        return region_managed_may_destroy(mgr, reg);
+    
+    return region_managed_may_destroy(mgr, reg);
 }
 
 
@@ -737,8 +767,12 @@ static DynFunTab region_dynfuntab[]={
 
     {(DynFun*)region_rqclose_propagate,
      (DynFun*)region_rqclose_propagate_default},
+
+    {(DynFun*)region_rqclose,
+     (DynFun*)region_rqclose_default},
     
-    {region_stacking, region_stacking_default},
+    {region_stacking, 
+     region_stacking_default},
     
     END_DYNFUNTAB
 };

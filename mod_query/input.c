@@ -162,13 +162,6 @@ void input_cancel(WInput *input)
 }
 
 
-bool input_rqclose(WInput *input)
-{
-    input_cancel(input);
-    return TRUE;
-}
-
-
 /*}}}*/
 
 
@@ -196,7 +189,6 @@ static void input_activated(WInput *input)
 static DynFunTab input_dynfuntab[]={
     {(DynFun*)region_fitrep, (DynFun*)input_fitrep},
     {region_updategr, input_updategr},
-    {(DynFun*)region_rqclose, (DynFun*)input_rqclose},
     {region_activated, input_activated},
     {region_inactivated, input_inactivated},
     END_DYNFUNTAB

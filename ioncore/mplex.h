@@ -147,6 +147,7 @@ extern void mplex_managed_activated(WMPlex *mplex, WRegion *reg);
 
 /* Misc */
 extern WRegion *mplex_current(WMPlex *mplex);
+extern bool mplex_may_destroy(WMPlex *mplex);
 
 extern int mplex_layer(WMPlex *mplex, WRegion *reg);
 extern int mplex_lcount(WMPlex *mplex, uint l);

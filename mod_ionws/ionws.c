@@ -97,7 +97,7 @@ bool ionws_fitrep(WIonWS *ws, WWindow *par, const WFitParams *fp)
     
         genws_do_reparent(&(ws->genws), par, fp);
     
-        FOR_ALL_MANAGED_BY_IONWS(ws, sub, tmp){
+        FOR_ALL_MANAGED_BY_IONWS(sub, ws, tmp){
             reparent_mgd(sub, par);
         }
         
@@ -543,11 +543,11 @@ void ionws_deinit(WIonWS *ws)
     WRegion *reg;
     WIonWSIterTmp tmp;
     
-    FOR_ALL_MANAGED_BY_IONWS(ws, reg, tmp){
-        ionws_managed_remove(ws, reg);
+    FOR_ALL_MANAGED_BY_IONWS(reg, ws, tmp){
+        destroy_obj((Obj*)reg);
     }
 
-    FOR_ALL_MANAGED_BY_IONWS(ws, reg, tmp){
+    FOR_ALL_MANAGED_BY_IONWS(reg, ws, tmp){
         assert(FALSE);
     }
     
@@ -562,10 +562,29 @@ void ionws_deinit(WIonWS *ws)
 
 bool ionws_managed_may_destroy(WIonWS *ws, WRegion *reg)
 {
-    if(ws->split_tree!=NULL){
-        WSplitRegion *regnode=OBJ_CAST(ws->split_tree, WSplitRegion);
-        if(regnode!=NULL && regnode->reg==reg)
-            return region_may_destroy((WRegion*)ws);
+    WIonWSIterTmp tmp;
+    WRegion *mgd;
+
+    FOR_ALL_MANAGED_BY_IONWS(mgd, ws, tmp){
+        if(mgd!=STDISP_OF(ws) && mgd!=reg){
+            return TRUE;
+        }
+    }
+    
+    return region_manager_allows_destroying((WRegion*)ws);
+}
+
+
+bool ionws_may_destroy(WIonWS *ws, WRegion *reg)
+{
+    WIonWSIterTmp tmp;
+    WRegion *mgd;
+    
+    FOR_ALL_MANAGED_BY_IONWS(mgd, ws, tmp){
+        if(mgd!=STDISP_OF(ws)){
+            warn(TR("Workspace not empty - refusing to destroy."));
+            return FALSE;
+        }
     }
     
     return TRUE;
@@ -847,12 +866,13 @@ void ionws_unsplit_at(WIonWS *ws, WFrame *frame)
         warn(TR("Nil frame."));
         return;
     }
+    
     if(REGION_MANAGER(frame)!=(WRegion*)ws){
         warn(TR("The frame is not managed by the workspace."));
         return;
     }
     
-    if(!region_may_destroy((WRegion*)frame)){
+    if(!region_managed_may_destroy((WRegion*)ws, (WRegion*)frame)){
         warn(TR("Frame may not be destroyed."));
         return;
     }
@@ -1388,6 +1408,9 @@ static DynFunTab ionws_dynfuntab[]={
 
     {(DynFun*)region_managed_may_destroy,
      (DynFun*)ionws_managed_may_destroy},
+
+    {(DynFun*)region_may_destroy,
+     (DynFun*)ionws_may_destroy},
 
     {(DynFun*)region_current,
      (DynFun*)ionws_current},

@@ -1120,6 +1120,9 @@ static WDock *create_dock(WWindow *parent, const WFitParams *fp)
 
 static void dock_deinit(WDock *dock)
 {
+    while(dock->dockapps!=NULL)
+        destroy_obj((Obj*)dock->dockapps->reg);
+
     UNLINK_ITEM(docks, dock, dock_next, dock_prev);
 
     dock_brush_release(dock);
@@ -1128,16 +1131,15 @@ static void dock_deinit(WDock *dock)
 }
 
 
-bool dock_rqclose(WDock *dock)
+bool dock_may_destroy(WDock *dock)
 {
     if(dock->dockapps!=NULL){
         warn_obj(modname, "Dock \"%s\" is still managing other objects "
                 " -- refusing to close.", region_name((WRegion*)dock));
         return FALSE;
-    }else{
-        mainloop_defer_destroy((Obj*)dock);
-        return TRUE;
     }
+
+    return TRUE;
 }
 
 
@@ -1606,7 +1608,7 @@ static DynFunTab dock_dynfuntab[]={
     {region_size_hints, dock_size_hints},
     {(DynFun*)region_fitrep, (DynFun*)dock_fitrep},
     {(DynFun*)region_orientation, (DynFun*)dock_orientation},
-    {(DynFun*)region_rqclose, (DynFun*)dock_rqclose},
+    {(DynFun*)region_may_destroy, (DynFun*)dock_may_destroy},
     {(DynFun*)region_handle_drop, (DynFun*)dock_handle_drop},
     {(DynFun*)region_rqgeom_clientwin, (DynFun*)dock_rqgeom_clientwin},
     END_DYNFUNTAB

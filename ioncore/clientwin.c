@@ -889,8 +889,13 @@ void clientwin_kill(WClientWin *cwin)
 }
 
 
-bool clientwin_rqclose(WClientWin *cwin)
+bool clientwin_rqclose(WClientWin *cwin, bool relocate_ignored)
 {
+    /* Ignore relocate parameter -- client windows can always be 
+     * destroyed by the application in any case, so way may just as
+     * well assume relocate is always set.
+     */
+    
     if(cwin->flags&CLIENTWIN_P_WM_DELETE){
         send_clientmsg(cwin->win, ioncore_g.atom_wm_delete, 
                        ioncore_get_timestamp());

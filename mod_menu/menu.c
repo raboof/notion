@@ -874,13 +874,6 @@ void menu_cancel(WMenu *menu)
 }
 
 
-bool menu_rqclose(WMenu *menu)
-{
-    menu_cancel(menu);
-    return TRUE;
-}
-
-
 /*}}}*/
 
 
@@ -1320,7 +1313,6 @@ void menu_typeahead_clear(WMenu *menu)
 static DynFunTab menu_dynfuntab[]={
     {(DynFun*)region_fitrep, (DynFun*)menu_fitrep},
     {region_updategr, menu_updategr},
-    {(DynFun*)region_rqclose, (DynFun*)menu_rqclose},
     {window_draw, menu_draw},
     {(DynFun*)window_press, (DynFun*)menu_press},
     {region_managed_remove, menu_managed_remove},

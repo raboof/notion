@@ -250,6 +250,17 @@ void mplex_deinit(WMPlex *mplex)
 }
 
 
+bool mplex_may_destroy(WMPlex *mplex)
+{
+    if(mplex->l1_list!=NULL || mplex->l2_list!=NULL){
+        warn(TR("Refusing to destroy - not empty."));
+        return FALSE;
+    }
+    
+    return TRUE;
+}
+
+
 /*}}}*/
 
 
@@ -1166,11 +1177,13 @@ bool mplex_rescue_clientwins(WMPlex *mplex)
     WLListIterTmp tmp;
     
     llist_iter_init(&tmp, mplex->l1_list);
-    ret1=region_rescue_some_clientwins((WRegion*)mplex, llist_iter_regions,
+    ret1=region_rescue_some_clientwins((WRegion*)mplex, 
+                                       (WRegionIterator*)llist_iter_regions,
                                        &tmp);
 
     llist_iter_init(&tmp, mplex->l2_list);
-    ret2=region_rescue_some_clientwins((WRegion*)mplex, llist_iter_regions,
+    ret2=region_rescue_some_clientwins((WRegion*)mplex, 
+                                       (WRegionIterator*)llist_iter_regions,
                                        &tmp);
     
     ret3=region_rescue_child_clientwins((WRegion*)mplex);
@@ -1652,6 +1665,9 @@ static DynFunTab mplex_dynfuntab[]={
 
     {(DynFun*)region_get_rescue_pholder_for,
      (DynFun*)mplex_get_rescue_pholder_for},
+
+    {(DynFun*)region_may_destroy,
+     (DynFun*)mplex_may_destroy},
     
     END_DYNFUNTAB
 };

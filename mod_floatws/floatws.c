@@ -361,7 +361,7 @@ void floatws_deinit(WFloatWS *ws)
     WRegion *reg;
 
     FOR_ALL_MANAGED_BY_FLOATWS(ws, reg, tmp){
-        floatws_managed_remove(ws, reg);
+        destroy_obj((Obj*)reg);
     }
 
     FOR_ALL_MANAGED_BY_FLOATWS(ws, reg, tmp){
@@ -388,42 +388,25 @@ bool floatws_rescue_clientwins(WFloatWS *ws)
 }
 
 
-/*EXTL_DOC
- * Destroys \var{ws} unless this would put the WM in a possibly unusable
- * state.
- */
-EXTL_EXPORT_MEMBER
-bool floatws_rqclose_relocate(WFloatWS *ws)
+bool floatws_may_destroy(WFloatWS *ws)
 {
-    if(!region_may_destroy((WRegion*)ws)){
-        warn(TR("Workspace may not be destroyed."));
-        return FALSE;
-    }
-    
-    /* TODO: move frames to other workspaces */
-    
-    if(!region_rescue_clientwins((WRegion*)ws)){
-        warn(TR("Failed to rescue some client windows!"));
-        return FALSE;
-    }
-    
-    mainloop_defer_destroy((Obj*)ws);
-    return TRUE;
-}
-
-
-bool floatws_rqclose(WFloatWS *ws)
-{
+    WFloatWSIterTmp tmp;
     WRegion *reg;
     
-    FOR_ALL_MANAGED_BY_FLOATWS_UNSAFE(ws, reg){
+    FOR_ALL_MANAGED_BY_FLOATWS(ws, reg, tmp){
         if(reg!=ws->managed_stdisp){
-            warn(TR("Refusing to close non-empty workspace."));
+            warn(TR("Workspace not empty - refusing to destroy."));
             return FALSE;
         }
     }
     
-    return floatws_rqclose_relocate(ws);
+    return TRUE;
+}
+
+
+static bool floatws_managed_may_destroy(WFloatWS *ws, WRegion *reg)
+{
+    return TRUE;
 }
 
 
@@ -1353,8 +1336,11 @@ static DynFunTab floatws_dynfuntab[]={
     {(DynFun*)region_get_configuration, 
      (DynFun*)floatws_get_configuration},
 
-    {(DynFun*)region_rqclose,
-     (DynFun*)floatws_rqclose},
+    {(DynFun*)region_may_destroy,
+     (DynFun*)floatws_may_destroy},
+
+    {(DynFun*)region_managed_may_destroy,
+     (DynFun*)floatws_managed_may_destroy},
 
     {(DynFun*)region_current,
      (DynFun*)floatws_current},

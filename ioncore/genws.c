@@ -101,7 +101,7 @@ void genws_do_unmap(WGenWS *ws)
 
 WRegion *genws_rqclose_propagate(WGenWS *ws, WRegion *maybe_sub)
 {
-    return (region_rqclose((WRegion*)ws) ? (WRegion*)ws : NULL);
+    return (region_rqclose((WRegion*)ws, FALSE) ? (WRegion*)ws : NULL);
 }
 
 

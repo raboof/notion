@@ -211,13 +211,6 @@ void panews_managed_remove(WPaneWS *ws, WRegion *reg)
 /*{{{ Misc. */
 
 
-bool panews_managed_may_destroy(WPaneWS *ws, WRegion *reg)
-{
-#warning "TODO - don't let panes be destroyed if the ws can not be destroyed."
-    return TRUE;
-}
-
-
 bool panews_managed_goto(WPaneWS *ws, WRegion *reg, int flags)
 {
     if(flags&REGION_GOTO_ENTERWINDOW){
@@ -247,20 +240,20 @@ static bool filter_no_stdisp_unused(WSplit *split)
 }
 
 
-static bool panews_rqclose(WPaneWS *ws)
+bool panews_managed_may_destroy(WPaneWS *ws, WRegion *reg)
+{
+#warning "TODO - don't let panes be destroyed if the ws can not be destroyed."
+    return TRUE;
+}
+
+
+bool panews_may_destroy(WPaneWS *ws)
 {
     if(split_current_todir(ws->ionws.split_tree, SPLIT_ANY, PRIMN_ANY, 
                            filter_no_stdisp_unused)!=NULL){
         warn(TR("Refusing to close non-empty workspace."));
         return FALSE;
     }
-
-    if(!region_may_destroy((WRegion*)ws)){
-        warn(TR("Workspace may not be destroyed."));
-        return FALSE;
-    }
-    
-    mainloop_defer_destroy((Obj*)ws);
     
     return TRUE;
 }
@@ -425,6 +418,9 @@ static DynFunTab panews_dynfuntab[]={
     {(DynFun*)region_get_configuration,
      (DynFun*)panews_get_configuration},
 
+    {(DynFun*)region_may_destroy,
+     (DynFun*)panews_may_destroy},
+
     {(DynFun*)region_managed_may_destroy,
      (DynFun*)panews_managed_may_destroy},
 
@@ -443,8 +439,6 @@ static DynFunTab panews_dynfuntab[]={
     {(DynFun*)region_managed_goto,
      (DynFun*)panews_managed_goto},
 
-    {(DynFun*)region_rqclose,
-     (DynFun*)panews_rqclose},
     /*
     {(DynFun*)region_rqclose_propagate,
      (DynFun*)panews_rqclose_propagate},*/

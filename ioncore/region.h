@@ -103,10 +103,11 @@ DYNFUN Window region_xwindow(const WRegion *reg);
 DYNFUN void region_activated(WRegion *reg);
 DYNFUN void region_inactivated(WRegion *reg);
 DYNFUN void region_updategr(WRegion *reg);
-DYNFUN bool region_rqclose(WRegion *reg);
+DYNFUN bool region_rqclose(WRegion *reg, bool relocate);
 DYNFUN WRegion *region_rqclose_propagate(WRegion *reg, WRegion *maybe_sub);
 DYNFUN WRegion *region_current(WRegion *mgr);
 DYNFUN void region_notify_rootpos(WRegion *reg, int x, int y);
+DYNFUN bool region_may_destroy(WRegion *reg);
 
 DYNFUN WRegion *region_managed_control_focus(WRegion *mgr, WRegion *reg);
 DYNFUN void region_managed_remove(WRegion *reg, WRegion *sub);
@@ -123,6 +124,8 @@ DYNFUN void region_manager_changed(WRegion *reg, WRegion *mgr_or_null);
 DYNFUN void region_restack(WRegion *reg, Window other, int mode);
 DYNFUN void region_stacking(WRegion *reg, Window *bottomret, Window *topret);
 
+DYNFUN bool region_handle_drop(WRegion *reg, int x, int y, WRegion *dropped);
+
 extern void region_raise(WRegion *reg);
 extern void region_lower(WRegion *reg);
 
@@ -132,8 +135,6 @@ extern bool region_reparent(WRegion *reg, WWindow *target,
                             const WRectangle *geom, WRegionFitMode mode);
 
 extern void region_updategr_default(WRegion *reg);
-
-extern bool region_may_destroy(WRegion *reg);
 
 extern void region_rootpos(WRegion *reg, int *xret, int *yret);
 extern void region_notify_change(WRegion *reg);
@@ -158,6 +159,6 @@ extern Window region_root_of(const WRegion *reg);
 extern WScreen *region_screen_of(WRegion *reg);
 extern bool region_same_rootwin(const WRegion *reg1, const WRegion *reg2);
 
-DYNFUN bool region_handle_drop(WRegion *reg, int x, int y, WRegion *dropped);
+extern bool region_manager_allows_destroying(WRegion *reg);
 
 #endif /* ION_IONCORE_REGION_H */
