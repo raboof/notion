@@ -54,9 +54,6 @@ extern void ionws_unsplit_at(WIonWS *ws, WFrame *frame);
 extern WSplit *ionws_split_tree(WIonWS *ws);
 extern WSplit *ionws_split_of(WIonWS *ws, WRegion *reg);
 
-extern WRegion *ionws_load(WWindow *par, const WFitParams *fp, ExtlTab tab);
-extern WSplit *ionws_load_node(WIonWS *ws, const WRectangle *geom, ExtlTab tab);
-
 extern void ionws_do_managed_remove(WIonWS *ws, WRegion *reg);
 
 DYNFUN void ionws_managed_add(WIonWS *ws, WRegion *reg);
@@ -81,5 +78,21 @@ extern bool ionws_managed_may_destroy(WIonWS *ws, WRegion *reg);
 extern void ionws_manage_stdisp(WIonWS *ws, WRegion *stdisp, int corner);
 extern void ionws_unmanage_stdisp(WIonWS *ws, bool permanent, bool nofocus);
 
+/* Loading */
+
+/* Stupid C can't handle recursive 'WSplitLoadFn *fn' here, so we have
+ * to use the void pointer.
+ */
+typedef WSplit *WSplitLoadFn(WIonWS *ws, const WRectangle *geom, ExtlTab tab);
+
+extern WRegion *ionws_load(WWindow *par, const WFitParams *fp, ExtlTab tab);
+
+DYNFUN WSplit *ionws_load_node(WIonWS *ws, const WRectangle *geom, ExtlTab tab);
+extern WSplit *ionws_load_node_default(WIonWS *ws, const WRectangle *geom, ExtlTab tab);
+
+extern WSplit *load_splitregion(WIonWS *ws, const WRectangle *geom, ExtlTab tab);
+extern WSplit *load_splitregion_doit(WIonWS *ws, const WRectangle *geom, ExtlTab rt);
+extern WSplit *load_splitsplit(WIonWS *ws, const WRectangle *geom, ExtlTab tab);
+extern WSplit *load_splitst(WIonWS *ws, const WRectangle *geom, ExtlTab tab);
 
 #endif /* ION_MOD_IONWS_IONWS_H */

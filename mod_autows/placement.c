@@ -30,6 +30,7 @@
 #include <mod_ionws/split.h>
 #include "placement.h"
 #include "autows.h"
+#include "splitext.h"
 
 
 /*{{{ create_frame_for */

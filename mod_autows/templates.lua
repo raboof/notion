@@ -48,20 +48,28 @@ S.templates["default"]={
     dir="horizontal",
     tls=S.b_ratio,
     brs=S.s_ratio,
-    marker=":;T:up",
     tl={
         type="WSplitSplit",
         dir="vertical",
         tls=S.b_ratio2,
         brs=S.s_ratio2,
-        marker="V:single;M:right",
-        tl={},
-        br={},
+        tl={
+            type="WSplitPane",
+            marker="V:single",
+        },
+        br={
+            type="WSplitPane",
+            marker="M:right",
+        },
     },
-    br={},
+    br={
+        type="WSplitPane",
+        marker="T:up",
+    },
 }
 
 
+--[[
 S.templates["alternative1"]={
     type="WSplitSplit",
     dir="horizontal",
@@ -98,7 +106,7 @@ S.templates["alternative2"]={
     },
     br={},
 }
-
+]]
 
 S.template=S.templates["default"]
 
@@ -108,24 +116,6 @@ S.shrink_minimum=32
 
 
 -- Helper code {{{
-
--- Quick&dirty port from old split code..
-local split_types={
-    ["WSplitST"]="SPLIT_STDISPNODE",
-    ["WSplitRegion"]="SPLIT_STDISPNODE",
-    ["WSplitUnused"]="SPLIT_UNUSED",
-    ["vertical"]="SPLIT_VERTICAL",
-    ["horizontal"]="SPLIT_HORIZONTAL",
-}    
-
-
-local function split_type(n)
-    if obj_is(n, "WSplitSplit") then
-        return split_types[n:dir()]
-    end
-    return split_types[obj_typename(n)]
-end
-
 
 local function sfind(s, p)
     local function drop2(a, b, ...)
@@ -223,19 +213,16 @@ end
 -- Layout scan {{{
 
 
-function T.scan_layout(p, node)
-    local cls=T.classify(p.ws, p.cwin)
-    local fg=p.frame:geom()
+function T.scan_pane(p, node, pdir)
     local fsh=p.frame:size_hints()
+    local fg=p.frame:geom()
     
-    -- TODO: dock
-
     local function do_scan_active(n)
-        local t=split_type(n)
-        if t=="SPLIT_REGNODE" then
+        local t=obj_typename(n)
+        if t=="WSplitRegion" then
             p.res_node=n
             return true
-        elseif t=="SPLIT_VERTICAL" or t=="SPLIT_HORIZONTAL" then
+        elseif t=="WSplitSplit" then
             local a, b=n:tl(), n:br()
             if b==n:current() then
                 a, b=b, a
@@ -279,28 +266,23 @@ function T.scan_layout(p, node)
     end
 
     local function do_scan_unused(n, d, forcefit)
-        local t=split_type(n)
-        if t=="SPLIT_VERTICAL" then
-            if d=="up" then
-                return do_scan_unused(n:tl(), d, forcefit)
-            elseif d=="down" then
-                return do_scan_unused(n:br(), d, forcefit)
-            elseif split_type(n:tl())=="SPLIT_STDISPNODE" then
-                return do_scan_unused(n:br(), d, forcefit)
-            elseif split_type(n:br())=="SPLIT_STDISPNODE" then
-                return do_scan_unused(n:tl(), d, forcefit)
+        local t=obj_typename(n)
+        if t=="WSplitSplit" then
+            local sd=n:dir()
+            if sd=="vertical" then
+                if d=="up" then
+                    return do_scan_unused(n:tl(), d, forcefit)
+                elseif d=="down" then
+                    return do_scan_unused(n:br(), d, forcefit)
+                end
+            elseif sd=="horizontal" then
+                if d=="left" then
+                    return do_scan_unused(n:tl(), d, forcefit)
+                elseif d=="right" then
+                    return do_scan_unused(n:br(), d, forcefit)
+                end
             end
-        elseif t=="SPLIT_HORIZONTAL" then
-            if d=="left" then
-                return do_scan_unused(n:tl(), d, forcefit)
-            elseif d=="right" then
-                return do_scan_unused(n:br(), d, forcefit)
-            elseif split_type(n:tl())=="SPLIT_STDISPNODE" then
-                return do_scan_unused(n:br(), d, forcefit)
-            elseif split_type(n:br())=="SPLIT_STDISPNODE" then
-                return do_scan_unused(n:tl(), d, forcefit)
-            end
-        elseif t=="SPLIT_UNUSED" then
+        elseif t=="WSplitUnused" then
             -- Found it
             if d=="single" then
                 p.res_node=n
@@ -311,53 +293,60 @@ function T.scan_layout(p, node)
         end
     end
     
-    local function do_scan_cls(n, d)
-        if do_scan_unused(n, d, false) then
-            return true
-        end
-        if do_scan_active(n, d) then
-            return true
-        end
-        return do_scan_unused(n, d, true)
+    
+    if do_scan_unused(node, pdir, false) then
+        return true
     end
     
-    local function do_scan(n)
-        local t=split_type(n)
-        if t=="SPLIT_VERTICAL" or t=="SPLIT_HORIZONTAL" then
-            local m=n:get_marker()
-            if m then
-                local lt, ld, rt, rd=sfind(m, "(.*):(.*);(.*):(.*)")
-                if lt and lt==cls then
-                    if do_scan_cls(n:tl(), ld) then
-                        return true
-                    end
-                    do_scan(n:br())
-                    return false
-                elseif rt and rt==cls then
-                    if do_scan_cls(n:br(), rd) then
-                        return true
-                    end
-                    do_scan(n:tl())
-                    return false
-                end
-            end
-            
-            return (do_scan(n:tl()) or do_scan(n:br()))
-        elseif not p.res_node then
-            if t=="SPLIT_UNUSED" or t=="SPLIT_REGNODE" then
-                p.res_node=n
-            end
-        end
+    if do_scan_active(node, pdir) then
+        return true
     end
 
-    return do_scan(node)
+    return do_scan_unused(node, pdir, true)
+end
+    
+
+function T.scan_layout(p, node)
+    local cls=T.classify(p.ws, p.cwin)
+    
+    local function do_scan_cls(n)
+        local t=obj_typename(n)
+        if t=="WSplitPane" then
+            local m=n:marker()
+            if m then
+                local pcls, pdir=sfind(m, "(.*):(.*)")
+                if pcls and pcls==cls then
+                    return T.scan_pane(p, n:contents(), pdir)
+                end
+            end
+        elseif t=="WSplitSplit" then
+            return (do_scan_cls(n:tl()) or do_scan_cls(n:br()))
+        end
+    end
+    
+    local function do_scan_fallback(n)
+        local t=obj_typename(n)
+        if t=="WSplitUnused" then
+            p.res_node=n
+            p.res_config={reg=p.frame}
+            return true
+        elseif t=="WSplitRegion" then
+            p.res_node=n
+            return true
+        elseif t=="WSplitPane" then
+            return do_scan_fallback(n:contents())
+        elseif t=="WSplitSplit" then
+            return (do_scan_fallback(n:tl()) or do_scan_fallback(n:br()))
+        end
+    end
+    
+    return (do_scan_cls(node) or do_scan_fallback(node))
 end
 
 -- }}}
 
 
--- Layout templates {{{
-
+-- Layout Initialisation {{{
 
 function T.do_init_layout(p, cls, tmpl)
     local function split2_swap(d, ts, ls, rs, l, r, do_swap)
@@ -398,103 +387,89 @@ function T.do_init_layout(p, cls, tmpl)
     end
 
     -- Variables
-    local found, found2, wrq, hrq
+    local found, wrq, hrq
     
-    -- Leaf?
-    if not tmpl.dir then
-        return
-    end
-    
-    -- Check marker
-    if tmpl.marker then
-        local lt, ld, rt, rd=sfind(tmpl.marker, "(.*):(.*);(.*):(.*)")
-        
-        if lt and lt==cls then
-            tmpl.tl, wrq, hrq=do_place(ld, tmpl._tlw, tmpl._tlh)
-            found="tl"
-        elseif rt and rt==cls then
-            tmpl.br, wrq, hrq=do_place(rd, tmpl._brw, tmpl._brh)
-            found="br"
-        end
-        
-        -- Adjust size requests based on heuristics for classes
-        if cls=="M" then
-            hrq, wrq=nil, nil
-        elseif cls=="V" then
-            if hrq<sh then
-                hrq=nil
-            end
-            if wrq<sw then
-                wrq=nil
+    if tmpl.type=="WSplitPane" then
+        if tmpl.marker then
+            local panec, paned=sfind(tmpl.marker, "(.*):(.*)")
+            if panec and panec==cls then
+                tmpl.contents, wrq, hrq=do_place(paned, tmpl._w, tmpl._h)
+                found=true
+                -- Adjust size requests based on heuristics for classes
+                if cls=="M" then
+                    hrq, wrq=nil, nil
+                elseif cls=="V" then
+                    if hrq<tmpl._w then
+                        hrq=nil
+                    end
+                    if wrq<tmpl._h then
+                        wrq=nil
+                    end
+                end
             end
         end
-    end
-
-    -- Recurse
-    if not found and tmpl.tl then
-        found2, wrq, hrq=T.do_init_layout(p, cls, tmpl.tl)
-        if found2 then
-            found="tl"
-        end
-    end
-    if not found and tmpl.br then
-        found2, wrq, hrq=T.do_init_layout(p, cls, tmpl.br)
-        if found2 then
-            found="br"
-        end
-    end
-
-    if tmpl.dir=="vertical" and hrq then
-        local th=tmpl._tlh+tmpl._brh
-        local h=limit_size(hrq, th)
-        if found=="tl" then
-            tmpl.tls, tmpl.brs=h, th-h
+    elseif tmpl.type=="WSplitSplit" then
+        local found_where
+        found, wrq, hrq=T.do_init_layout(p, cls, tmpl.tl)
+        if found then
+            found_where="tl"
         else
-            tmpl.tls, tmpl.brs=th-h, h
+            found, wrq, hrq=T.do_init_layout(p, cls, tmpl.br)
+            if found then
+                found_where="br"
+            end
         end
-        hrq=nil
-    elseif tmpl.dir=="horizontal" and wrq then
-        local tw=tmpl._tlw+tmpl._brw
-        local w=limit_size(wrq, tw)
-        if found=="tl" then
-            tmpl.tls, tmpl.brs=w, tw-w
-        else
-            tmpl.tls, tmpl.brs=tw-w, w
+
+        if tmpl.dir=="vertical" and hrq then
+            local th=tmpl._h
+            local h=limit_size(hrq, th)
+            if found_where=="tl" then
+                tmpl.tls, tmpl.brs=h, th-h
+            else
+                tmpl.tls, tmpl.brs=th-h, h
+            end
+            hrq=nil
+        elseif tmpl.dir=="horizontal" and wrq then
+            local tw=tmpl._w
+            local w=limit_size(wrq, tw)
+            if found_where=="tl" then
+                tmpl.tls, tmpl.brs=w, tw-w
+            else
+                tmpl.tls, tmpl.brs=tw-w, w
+            end
+            wrq=nil
         end
-        wrq=nil
     end
     
-    return (found~=nil), wrq, hrq
+    return found, wrq, hrq
 end
 
 
 function T.calc_sizes(tmpl, sw, sh)
-    local tmps
+    tmpl._w, tmpl._h=sw, sh
+
+    if tmpl.type=="WSplitSplit" then
+        local tmps, tlw, tlh, brw, brh
+        -- Calculate pixel sizes of things
+        if tmpl.dir=="vertical" then
+            tmps=sh
+        else
+            tmps=sw
+        end
+        
+        tmpl.tls, tmpl.brs=T.div_length(tmps, tmpl.tls, tmpl.brs)
     
-    -- Reached leaf?
-    if not tmpl.dir then
-        return
+        if tmpl.dir=="vertical" then
+            tlw, brw=sw, sw
+            tlh, brh=tmpl.tls, tmpl.brs
+        else
+            tlw, brw=tmpl.tls, tmpl.brs
+            tlh, brh=sh, sh
+        end
+    
+        T.calc_sizes(tmpl.tl, tlw, tlh)
+        T.calc_sizes(tmpl.br, brw, brh)
     end
-    
-    -- Calculate pixel sizes of things
-    if tmpl.dir=="vertical" then
-        tmps=sh
-    else
-        tmps=sw
-    end
-    
-    tmpl.tls, tmpl.brs=T.div_length(tmps, tmpl.tls, tmpl.brs)
-    
-    if tmpl.dir=="vertical" then
-        tmpl._tlw, tmpl._brw=sw, sw
-        tmpl._tlh, tmpl._brh=tmpl.tls, tmpl.brs
-    else
-        tmpl._tlw, tmpl._brw=tmpl.tls, tmpl.brs
-        tmpl._tlh, tmpl._brh=sh, sh
-    end
-    
-    T.calc_sizes(tmpl.tl, tmpl._tlw, tmpl._tlh)
-    T.calc_sizes(tmpl.br, tmpl._brw, tmpl._brh)
 end
 
 
@@ -516,29 +491,22 @@ end
 -- Layout initialisation hook
 function T.layout_alt_handler(p)
     local n=p.ws:split_tree()
-    local t=split_type(n)
+    local t=obj_typename(n)
     
-    if t=="SPLIT_VERTICAL" or t=="SPLIT_HORIZONTAL" then
-        if split_type(n:tl())=="SPLIT_STDISPNODE" then
+    if t=="WSplitSplit" then
+        if obj_typename(n:tl())=="WSplitST" then
             n=n:br()
-        elseif split_type(n:br())=="SPLIT_STDISPNODE" then
+        elseif obj_typename(n:br())=="WSplitST" then
             n=n:tl()
         end
-        t=split_type(n)
+        t=obj_typename(n)
     end
     
-    if t=="SPLIT_UNUSED" then
-        -- Initialise layout
+    if t=="WSplitUnused" then
         return T.init_layout(p, n)
-    elseif t=="SPLIT_REGNODE" then
-        p.res_node=t
-        p.res_config={reg=p.frame}
-        return true
-    elseif t=="SPLIT_VERTICAL" or t=="SPLIT_HORIZONTAL" then
+    else
         return T.scan_layout(p, n)
     end
-    
-    return false
 end
 
 -- }}}

@@ -187,7 +187,6 @@ bool split_init(WSplit *split, const WRectangle *geom)
     split->max_h=INT_MAX;
     split->unused_w=-1;
     split->unused_h=-1;
-    split->marker=NULL;
     return TRUE;
 }
 
@@ -228,13 +227,6 @@ bool splitst_init(WSplitST *split, const WRectangle *geom, WRegion *reg)
 }
 
 
-bool splitunused_init(WSplitUnused *split, const WRectangle *geom)
-{
-    return split_init(&(split->split), geom);
-}
-
-
-
 WSplitSplit *create_splitsplit(const WRectangle *geom, int dir)
 {
     CREATEOBJ_IMPL(WSplitSplit, splitsplit, (p, geom, dir));
@@ -253,12 +245,6 @@ WSplitST *create_splitst(const WRectangle *geom, WRegion *reg)
 }
 
 
-WSplitUnused *create_splitunused(const WRectangle *geom)
-{
-    CREATEOBJ_IMPL(WSplitUnused, splitunused, (p, geom));
-}
-
-
 /*}}}*/
 
 
@@ -268,11 +254,6 @@ WSplitUnused *create_splitunused(const WRectangle *geom)
 void split_deinit(WSplit *split)
 {
     assert(split->parent==NULL);
-    
-    if(split->marker!=NULL){
-        free(split->marker);
-        split->marker=NULL;
-    }
 }
 
 
@@ -314,12 +295,6 @@ void splitst_deinit(WSplitST *split)
 }
 
 
-void splitunused_deinit(WSplitUnused *split)
-{
-    split_deinit(&(split->split));
-}
-
-    
 /*}}}*/
 
 
@@ -373,18 +348,6 @@ static void splitst_update_bounds(WSplitST *node, bool rec)
         snode->min_h=CF_STDISP_MIN_SZ;
         snode->max_h=INT_MAX;
     }
-}
-
-
-static void splitunused_update_bounds(WSplitUnused *node, bool recursive)
-{
-    WSplit *snode=(WSplit*)node;
-    snode->min_w=0;
-    snode->min_h=0;
-    snode->max_w=INT_MAX;
-    snode->max_h=INT_MAX;
-    snode->unused_w=snode->geom.w;
-    snode->unused_h=snode->geom.h;
 }
 
 
@@ -1181,16 +1144,6 @@ static void splitsplit_remove(WSplitSplit *node, WSplit *child, WSplit **root,
         return;
     }
 
-    if(((WSplit*)node)->marker!=NULL){
-        WSplitUnused *un=create_splitunused(&(child->geom));
-        if(un!=NULL){
-            splitinner_replace(&(node->isplit), child, (WSplit*)un);
-            return;
-        }else{
-            warn_err();
-        }
-    }
-    
     parent=((WSplit*)node)->parent;
     if(parent!=NULL){
         splitinner_replace(parent, (WSplit*)node, other);
@@ -1256,8 +1209,8 @@ static WSplit *split_current_todir_default(WSplit *node, int dir, int primn,
 }
 
 
-WSplit *splitsplit_current_todir(WSplitSplit *node, int dir, int primn,
-                                 WSplitFilter *filter)
+static WSplit *splitsplit_current_todir(WSplitSplit *node, int dir, int primn,
+                                        WSplitFilter *filter)
 {
     WSplit *first, *second, *ret;
     
@@ -1487,47 +1440,6 @@ void split_transpose(WSplit *node)
 /*}}}*/
 
 
-/*{{{ Markers */
-
-
-/*EXTL_DOC
- * Get marker.
- */
-EXTL_EXPORT_MEMBER
-const char *split_get_marker(WSplit *node)
-{
-    return node->marker;
-}
-
-
-/*EXTL_DOC
- * Set marker.
- */
-EXTL_EXPORT_MEMBER
-bool split_set_marker(WSplit *node, const char *s)
-{
-    char *s2=NULL;
-    
-    if(s!=NULL){
-        s2=scopy(s);
-        if(s2==NULL){
-            warn_err();
-            return FALSE;
-        }
-    }
-    
-    if(node->marker==NULL)
-        free(node->marker);
-    
-    node->marker=s2;
-    
-    return TRUE;
-}
-
-
-/*}}}*/
-
-
 /*{{{ Exports */
 
 
@@ -1609,11 +1521,10 @@ WRegion *splitregion_reg(WSplitRegion *node)
 /*{{{ Save support */
 
 
-static ExtlTab base_config(WSplit *node)
+ExtlTab split_base_config(WSplit *node)
 {
     ExtlTab t=extl_create_table();
     extl_table_sets_s(t, "type", OBJ_TYPESTR(node));
-    extl_table_sets_s(t, "marker", node->marker);
     return t;
 }
 
@@ -1628,7 +1539,7 @@ static bool splitregion_get_config(WSplitRegion *node, ExtlTab *ret)
     }
     
     rt=region_get_configuration(node->reg);
-    t=base_config(&(node->split));
+    t=split_base_config(&(node->split));
     extl_table_sets_t(t, "regparams", rt);
     extl_unref_table(rt);
     *ret=t;
@@ -1639,17 +1550,9 @@ static bool splitregion_get_config(WSplitRegion *node, ExtlTab *ret)
 
 static bool splitst_get_config(WSplitST *node, ExtlTab *ret)
 {
-    *ret=base_config((WSplit*)node);
+    *ret=split_base_config((WSplit*)node);
     return TRUE;
 }
-
-
-static bool splitunused_get_config(WSplitUnused *node, ExtlTab *ret)
-{
-    *ret=base_config((WSplit*)node);
-    return TRUE;
-}
-
 
 
 static bool splitsplit_get_config(WSplitSplit *node, ExtlTab *ret)
@@ -1665,7 +1568,7 @@ static bool splitsplit_get_config(WSplitSplit *node, ExtlTab *ret)
         return TRUE;
     }
 
-    tab=base_config((WSplit*)node);
+    tab=split_base_config((WSplit*)node);
 
     tls=split_size(node->tl, node->dir);
     brs=split_size(node->br, node->dir);
@@ -1740,19 +1643,12 @@ static DynFunTab splitst_dynfuntab[]={
     END_DYNFUNTAB,
 };
 
-static DynFunTab splitunused_dynfuntab[]={
-    {split_update_bounds, splitunused_update_bounds},
-    {(DynFun*)split_get_config, (DynFun*)splitunused_get_config},
-    END_DYNFUNTAB,
-};
-
 
 IMPLCLASS(WSplit, Obj, split_deinit, split_dynfuntab);
 IMPLCLASS(WSplitInner, WSplit, splitinner_deinit, splitinner_dynfuntab);
 IMPLCLASS(WSplitSplit, WSplitInner, splitsplit_deinit, splitsplit_dynfuntab);
 IMPLCLASS(WSplitRegion, WSplit, splitregion_deinit, splitregion_dynfuntab);
 IMPLCLASS(WSplitST, WSplitRegion, splitst_deinit, splitst_dynfuntab);
-IMPLCLASS(WSplitUnused, WSplit, splitunused_deinit, splitunused_dynfuntab);
 
 
 /*}}}*/

@@ -12,7 +12,7 @@ include $(TOPDIR)/system-inc.mk
 INCLUDES += $(X11_INCLUDES) -I..
 CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
-SOURCES=main.c autows.c placement.c
+SOURCES=main.c autows.c placement.c splitext.c
 
 LUA_SOURCES=templates.lua
 

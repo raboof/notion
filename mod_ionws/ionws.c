@@ -974,16 +974,7 @@ ExtlTab ionws_get_configuration(WIonWS *ws)
 /*{{{ Load */
 
 
-typedef WSplit *LoadNodeFn(WIonWS *ws, const WRectangle *geom, ExtlTab tab);
-
-
-static WSplit *load_unused(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
-{
-    return (WSplit*)create_splitunused(geom);
-}
-
-
-static WSplit *load_st(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
+WSplit *load_splitst(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
 {
     WSplitST *st;
 
@@ -1011,7 +1002,7 @@ static WRegion *do_attach(WIonWS *ws, WRegionAttachHandler *handler,
 }
 
 
-static WSplit *do_load_region(WIonWS *ws, const WRectangle *geom, ExtlTab rt)
+WSplit *load_splitregion_doit(WIonWS *ws, const WRectangle *geom, ExtlTab rt)
 {
     WSplitRegion *node=NULL;
     WRegion *reg;
@@ -1034,7 +1025,7 @@ static WSplit *do_load_region(WIonWS *ws, const WRectangle *geom, ExtlTab rt)
 }
 
 
-static WSplit *load_region(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
+WSplit *load_splitregion(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
 {
     WSplit *node=NULL;
     ExtlTab rt;
@@ -1044,7 +1035,7 @@ static WSplit *load_region(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
         return NULL;
     }
     
-    node=do_load_region(ws, geom, rt);
+    node=load_splitregion_doit(ws, geom, rt);
 
     extl_unref_table(rt);
     
@@ -1054,7 +1045,7 @@ static WSplit *load_region(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
 
 #define MINS 1
 
-static WSplit *load_split(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
+WSplit *load_splitsplit(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
 {
     WSplit *tl=NULL, *br=NULL;
     WSplitSplit *split;
@@ -1137,57 +1128,41 @@ static WSplit *load_split(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
 }
 
 
-typedef struct{
-    const char *clsname;
-    LoadNodeFn *loadfn;
-} KnownSplit;
+WSplit *ionws_load_node_default(WIonWS *ws, const WRectangle *geom, 
+                                ExtlTab tab)
+{
+    char *typestr=NULL;
+    WSplit *node=NULL;
 
-
-static KnownSplit known_splits[]={
-    {"WSplitUnused", load_unused},
-    {"WSplitST", load_st},
-    {"WSplitRegion", load_region},
-    {"WSplitSplit", load_split},
-    {NULL, NULL},
-};
+    extl_table_gets_s(tab, "type", &typestr);
+    
+    if(typestr==NULL){
+        WARN_FUNC("No split type.");
+        return NULL;
+    }
+    
+    if(strcmp(typestr, "WSplitRegion")==0)
+        node=load_splitregion(ws, geom, tab);
+    else if(strcmp(typestr, "WSplitSplit")==0)
+        node=load_splitsplit(ws, geom, tab);
+    else if(strcmp(typestr, "WSplitST")==0)
+        node=load_splitst(ws, geom, tab);
+    else
+        WARN_FUNC("Unknown split type.");
+    
+    free(typestr);
+    
+    return node;
+}
 
 
 WSplit *ionws_load_node(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
 {
-    char *typestr=NULL;
-    WSplit *node=NULL;
-    KnownSplit *k;
-    WRegion *reg=NULL;
-
-    if(!extl_table_gets_s(tab, "type", &typestr)){
-        /* Shortcuts for mod_autows templates.lua */
-        if(extl_table_gets_o(tab, "reg", (Obj**)&reg)){
-            if(OBJ_IS(reg, WRegion))
-                node=do_load_region(ws, geom, tab);
-        }else{
-            node=load_unused(ws, geom, tab);
-        }
-    }else{
-        for(k=known_splits; k->clsname!=NULL; k++){
-            if(strcmp(k->clsname, typestr)==0)
-                break;
-        }
-        
-        free(typestr);
-        
-        if(k->clsname!=NULL)
-            node=k->loadfn(ws, geom, tab);
-        else
-            WARN_FUNC("Unknown split type.");
-    }
-
-    if(node!=NULL){
-        assert(node->marker==NULL);
-        extl_table_gets_s(tab, "marker", &(node->marker));
-    }
-    
-    return node;
+    WSplit *ret=NULL;
+    CALL_DYN_RET(ret, WSplit*, ionws_load_node, ws, (ws, geom, tab));
+    return ret;
 }
+
 
 
 WRegion *ionws_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
@@ -1269,6 +1244,9 @@ static DynFunTab ionws_dynfuntab[]={
     {genws_unmanage_stdisp,
      ionws_unmanage_stdisp},
     
+    {(DynFun*)ionws_load_node,
+     (DynFun*)ionws_load_node_default},
+            
     END_DYNFUNTAB
 };
 

@@ -69,14 +69,6 @@ static void swapptr(WSplit **x, WSplit **y)
 }
 
 
-static void swapstr(char **x, char **y)
-{
-    char *z=*x;
-    *x=*y;
-    *y=z;
-}
-
-
 static int recommended_w(WSplitST *stdisp)
 {
     if(stdisp->regnode.reg==NULL)
@@ -127,11 +119,6 @@ static void rotate_right(WSplitSplit *a, WSplitSplit *p, WSplit *y)
         a->current=SPLIT_CURRENT_BR;
         p->current=SPLIT_CURRENT_TL;
     }
-    
-    /* Marker for a parent i of children j, k will this way stay in
-     * the first common parent of j and k (these nodes included).
-     */
-    swapstr(&(((WSplit*)a)->marker), &(((WSplit*)p)->marker));
 }
 
 
@@ -205,8 +192,6 @@ static void rotate_left(WSplitSplit *a, WSplitSplit *p, WSplit *y)
         a->current=SPLIT_CURRENT_TL;
         p->current=SPLIT_CURRENT_BR;
     }
-
-    swapstr(&(((WSplit*)a)->marker), &(((WSplit*)p)->marker));
 }
 
 
@@ -279,8 +264,6 @@ static void flip_right(WSplitSplit *a, WSplitSplit *p)
     }else if(p->current==SPLIT_CURRENT_BR){
         a->current=SPLIT_CURRENT_BR;
     }
-    
-    swapstr(&(((WSplit*)a)->marker), &(((WSplit*)p)->marker));
 }
 
 
@@ -348,8 +331,6 @@ static void flip_left(WSplitSplit *a, WSplitSplit *p)
     }else if(p->current==SPLIT_CURRENT_TL){
         a->current=SPLIT_CURRENT_TL;
     }
-    
-    swapstr(&(((WSplit*)a)->marker), &(((WSplit*)p)->marker));
 }
 
 

@@ -30,6 +30,7 @@
 #include "autows.h"
 #include "placement.h"
 #include "main.h"
+#include "splitext.h"
 
 
 /*{{{ Create/destroy */
@@ -208,6 +209,70 @@ ExtlTab autows_get_configuration(WAutoWS *ws)
 /*{{{ Load */
 
 
+static WSplit *load_splitunused(WIonWS *ws, const WRectangle *geom, 
+                                ExtlTab tab)
+{
+    return (WSplit*)create_splitunused(geom);
+}
+
+
+static WSplit *load_splitpane(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
+{
+    ExtlTab t;
+    WSplitPane *pane;
+    WSplit *cnt;
+
+    pane=create_splitpane(geom, NULL);
+    if(pane==NULL)
+        return NULL;
+    
+    if(extl_table_gets_t(tab, "contents", &t)){
+        cnt=ionws_load_node(ws, geom, t);
+        extl_unref_table(t);
+    }else{
+        cnt=load_splitunused(ws, geom, extl_table_none());
+    }
+    
+    if(cnt==NULL){
+        destroy_obj((Obj*)pane);
+        return NULL;
+    }
+    
+    pane->contents=cnt;
+    cnt->parent=&(pane->isplit);
+    
+    assert(pane->marker==NULL);
+    extl_table_gets_s(tab, "marker", &(pane->marker));
+
+    return (WSplit*)pane;
+}
+
+
+static WSplit *autows_load_node(WAutoWS *ws, const WRectangle *geom, 
+                                ExtlTab tab)
+{
+    char *s=NULL;
+    
+    if(!extl_table_gets_s(tab, "type", &s)){
+        WRegion *reg=NULL;
+        /* Shortcuts for templates.lua */
+        if(extl_table_gets_o(tab, "reg", (Obj**)&reg)){
+            if(OBJ_IS(reg, WRegion))
+                return load_splitregion_doit(&(ws->ionws), geom, tab);
+        }else{
+            return load_splitunused(&(ws->ionws), geom, tab);
+        }
+    }else{
+        if(strcmp(s, "WSplitPane")==0)
+            return load_splitpane(&(ws->ionws), geom, tab);
+        else if(strcmp(s, "WSplitUnused")==0)
+            return load_splitunused(&(ws->ionws), geom, tab);
+    }
+
+    return ionws_load_node_default(&(ws->ionws), geom, tab);
+}
+
+
 WRegion *autows_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 {
     WAutoWS *ws;
@@ -256,6 +321,9 @@ static DynFunTab autows_dynfuntab[]={
 
     {ionws_managed_add,
      autows_managed_add},
+    
+    {(DynFun*)ionws_load_node,
+     (DynFun*)autows_load_node},
 
     END_DYNFUNTAB
 };

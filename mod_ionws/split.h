@@ -25,7 +25,6 @@ INTRCLASS(WSplitInner);
 INTRCLASS(WSplitSplit);
 INTRCLASS(WSplitRegion);
 INTRCLASS(WSplitST);
-INTRCLASS(WSplitUnused);
 
 
 enum WSplitDir{
@@ -57,8 +56,6 @@ DECLCLASS(WSplit){
     int min_w, min_h;
     int max_w, max_h;
     int unused_w, unused_h;
-
-    char *marker;
 };
 
 
@@ -85,11 +82,6 @@ DECLCLASS(WSplitST){
     WSplitRegion regnode;
     int orientation;
     int corner;
-};
-
-
-DECLCLASS(WSplitUnused){
-    WSplit split;
 };
 
 
@@ -123,13 +115,11 @@ extern bool splitregion_init(WSplitRegion *split,const WRectangle *geom,
                              WRegion *reg);
 extern bool splitst_init(WSplitST *split, const WRectangle *geom,
                          WRegion *reg);
-extern bool splitunused_init(WSplitUnused *split, const WRectangle *geom);
 
 
 extern WSplitSplit *create_splitsplit(const WRectangle *geom, int dir);
 extern WSplitRegion *create_splitregion(const WRectangle *geom, WRegion *reg);
 extern WSplitST *create_splitst(const WRectangle *geom, WRegion *reg);
-extern WSplitUnused *create_splitunused(const WRectangle *geom);
 
 
 extern void split_deinit(WSplit *split);
@@ -137,7 +127,6 @@ extern void splitsplit_deinit(WSplitSplit *split);
 extern void splitinner_deinit(WSplitInner *split);
 extern void splitregion_deinit(WSplitRegion *split);
 extern void splitst_deinit(WSplitST *split);
-extern void splitunused_deinit(WSplitUnused *split);
 
 /* Geometry */
 
@@ -188,13 +177,9 @@ extern WMPlex *splittree_find_mplex(WRegion *from);
 extern void split_transpose(WSplit *split);
 extern void split_transpose_to(WSplit *split, const WRectangle *geom);
 
-/* Markers */
-
-extern const char *split_get_marker(WSplit *node);
-extern bool split_set_marker(WSplit *node, const char *s);
-
 /* Save support */
 
 extern bool split_get_config(WSplit *node, ExtlTab *ret);
+extern ExtlTab split_base_config(WSplit *node);
 
 #endif /* ION_MOD_IONWS_SPLIT_H */
