@@ -15,6 +15,41 @@ end
 
 -- }}}
 
+-- {{{ Some conversion tables
+
+desc2ct={
+    ["v"]="void",
+    ["i"]="int",
+    ["d"]="double",
+    ["b"]="bool",
+    ["t"]="ExtlTab",
+    ["f"]="ExtlFn",
+    ["o"]="WObj*",
+    ["s"]="char*",
+    ["S"]="const char*",
+}
+
+ct2desc={
+    ["uint"] = "i",
+}
+
+for d, t in desc2ct do
+    ct2desc[t]=d
+end
+
+desc2human={
+    ["v"]="void",
+    ["i"]="integer",
+    ["d"]="double",
+    ["b"]="bool",
+    ["t"]="table",
+    ["f"]="function",
+    ["o"]="object",
+    ["s"]="string",
+    ["S"]="string",
+}
+
+-- }}}
 
 -- {{{ Parser
 
@@ -36,14 +71,14 @@ function add_chnd(fnt)
 end
 
 function parse_type(t)
-    local desc, otype="?", ""
+    local desc, otype, varname="?", "", ""
     
     -- Remove whitespace at start end end of the string and compress elsewhere.
     t=string.gsub(trim(t), "[%s\n]+", " ")
     -- Remove spaces around asterisks.
     t=string.gsub(t, " *%* *", "*")
-    -- Add one space at end
-    t=t .. " "
+    -- Add space after asterisks.
+    t=string.gsub(t, "%*", "* ")
     
     -- Check for const
     local is_const=false
@@ -53,47 +88,48 @@ function parse_type(t)
         t=string.sub(t, e+1)
     end
     
+    -- Find variable name part
+    tn=t
+    s, e=string.find(tn, " ")
+    if s then
+        varname=string.sub(tn, e+1)
+        tn=string.sub(tn, 1, s-1)
+        assert(not string.find(varname, " "))
+    end
+    
     -- Try to check for supported types
-    if string.find(t, "^char\*") then
-        if is_const then
-            desc="S"
-        else
-            desc="s"
-        end
-    elseif string.find(t, "int ") or string.find(t, "uint ") then
-        desc="i"
-    elseif string.find(t, "void ") then
-        desc="v"
-    elseif string.find(t, "double ") then
-        desc="d"
-    elseif string.find(t, "bool ") then
-        desc="b"
-    elseif string.find(t, "ExtlTab ") then
-        desc="t"
-    elseif string.find(t, "ExtlFn ") then
-        desc="f"
-    elseif string.find(t, "ExtlRef ") then
-        desc="r"
-    else
-        s, e=string.find(t, "W[%w_]*%*")
+    if ct2desc[tn] then
+        desc=ct2desc[tn]
+    end
+    
+    if desc=="o" or desc=="?" then
+        s, e=string.find(tn, "^W[%w_]*%*$")
         if s then
             desc="o"
-            otype=string.sub(t, s, e-1)
+            otype=string.sub(tn, s, e-1)
             classes[otype]=true
         else
             errorf("Error parsing type from \"%s\"", t)
         end
     end
     
-    return desc, otype
+    return desc, otype, varname
 end
 
 function parse(d)
     local doc=nil
     -- Handle /*EXTL_DOC ... */
     local function do_doc(s)
-        s=string.gsub(s, "/%*EXTL_DOC(.*)\*/", "%1")
-        s=string.gsub(s, "\n[%s]*", "\n")
+        --s=string.gsub(s, "/%*EXTL_DOC(.-)%*/", "%1")
+        local st=string.len("/*EXTL_DOC")
+        local en, _=string.find(s, "%*/")
+        if not en then
+            errorf("Could not find end of comment in \"%s...\"",
+                   string.sub(s, 1, 50))
+        end
+        
+        s=string.sub(s, st+1, en-1)
+        s=string.gsub(s, "\n[%s]*%*", "\n")
         doc=s
     end
     
@@ -106,7 +142,7 @@ function parse(d)
         end
         
         local odesc, otype=parse_type(ot)
-        local idesc, itypes="", {}
+        local idesc, itypes, ivars="", {}, {}
         
         -- Parse arguments
         param=string.sub(param, 2, -2)
@@ -116,9 +152,10 @@ function parse(d)
         param=trim(param)
         if string.len(param)>0 then
             for p in string.gfind(param .. ",", "([^,]*),") do
-                local spec, objtype=parse_type(p)
+                local spec, objtype, varname=parse_type(p)
                 idesc=idesc .. spec
                 table.insert(itypes, objtype)
+                table.insert(ivars, varname)
             end
         end
         
@@ -131,10 +168,13 @@ function parse(d)
             odesc=odesc,
             otype=otype,
             idesc=idesc,
-            itypes=itypes
+            itypes=itypes,
+            ivars=ivars,
         }
-        
         add_chnd(fns[fn])
+        
+        -- Reset
+        doc=nil
     end
     
     local lookfor={
@@ -164,18 +204,6 @@ end
 
 
 -- {{{ Export output
-
-desc2ct={
-    ["v"]="void",
-    ["i"]="int",
-    ["d"]="double",
-    ["b"]="bool",
-    ["t"]="ExtlTab",
-    ["f"]="ExtlFn",
-    ["o"]="WObj*",
-    ["s"]="char*",
-    ["S"]="const char*",
-}
 
 function writechnd(h, name, info)
     local oct=desc2ct[info.odesc]
@@ -292,7 +320,44 @@ end
 
 -- {{{ Documentation output
 
+function tohuman(desc, objtype)
+    if objtype~="" then
+        return objtype
+    else 
+        return desc2human[desc]
+    end
+end
+
+function texfriendly(name)
+    return string.gsub(name, "_", "-")
+end
+
+function write_fndoc(h, fn, info)
+    fprintf(h, "\\begin{function}\n")
+    fprintf(h, "\\index{%s@\\code{%s}}\n", texfriendly(fn), fn)
+    fprintf(h, "\\synopsis{%s %s(", tohuman(info.odesc, info.otype), fn)
+    local comma=""
+    for i, varname in info.ivars do
+        fprintf(h, comma .. "%s", tohuman(string.sub(info.idesc, i, i),
+                                          info.itypes[i]))
+        if varname then
+            fprintf(h, " %s", varname)
+        end
+        comma=", "
+    end
+    fprintf(h, ")}\n")
+    h:write("\\begin{funcdesc}" .. trim(info.doc).. "\\end{funcdesc}\n")
+    fprintf(h, "\\end{function}\n\n")
+end
+
 function write_documentation(h)
+    --fprintf(h, "\\begin{description}\n")
+    for fn, info in fns do
+        if info.doc then
+            write_fndoc(h, fn, info)
+        end
+    end
+    --fprintf(h, "\\end{description}\n")
 end
 
 -- }}}
