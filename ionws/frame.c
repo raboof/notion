@@ -763,7 +763,7 @@ static bool frame_display_managed(WFrame *frame, WRegion *sub)
 	 * will not work at all if there are no visible netscape windows.
 	 */
 	region_restack(sub, None, Below);
-
+	
 	draw_frame_bar(frame, TRUE);
 	
 	return TRUE;

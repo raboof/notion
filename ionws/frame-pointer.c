@@ -386,8 +386,8 @@ void frame_switch_tab(WFrame *frame)
 {
 	if(frame->tab_pressed_sub!=NULL)
 		display_region_sp(frame->tab_pressed_sub);
-	
 }
+
 
 /*}}}*/
 

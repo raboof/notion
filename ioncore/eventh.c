@@ -82,16 +82,16 @@ static void skip_focusenter_but(WRegion *reg)
 		
 		r=FIND_WINDOW_T(ev.xany.window, WRegion);
 		
-		/*while(r!=NULL){*/
+		while(r!=NULL){
 			if(r==reg){
 				if(ev.type==FocusIn)
 					handle_focus_in(&(ev.xfocus));
-				else if(ev.type==EnterNotify)
-					handle_enter_window(&ev);
+				/*else if(ev.type==EnterNotify)
+					handle_enter_window(&ev);*/
 				break;
 			}
 			r=FIND_PARENT1(r, WRegion);
-		/*}*/
+		}
 	}
 }
 
@@ -445,12 +445,12 @@ static void handle_focus_in(const XFocusChangeEvent *ev)
 	if(reg==NULL)
 		return;
 
-	/*fprintf(stderr, "FI: %s %d %d\n", WOBJ_TYPESTR(reg), ev->mode, ev->detail);*/
+	/*fprintf(stderr, "FI: %s %p %d %d\n", WOBJ_TYPESTR(reg), reg, ev->mode, ev->detail);*/
 
     if(ev->mode==NotifyGrab)/* || ev->mode==NotifyWhileGrabbed)*/
 	/*if(ev->mode!=NotifyNormal && ev->mode!=NotifyWhileGrabbed)*/
 		return;
-
+	
 	if(WTHING_IS(reg, WScreen)){
 		if(ev->detail!=NotifyInferior){
 			/* Restore focus */
@@ -490,7 +490,7 @@ static void handle_focus_out(const XFocusChangeEvent *ev)
 	if(reg==NULL)
 		return;
 
-	/*fprintf(stderr, "FO: %s %d %d\n", WOBJ_TYPESTR(reg), ev->mode, ev->detail);*/
+	/*fprintf(stderr, "FO: %s %p %d %d\n", WOBJ_TYPESTR(reg), reg, ev->mode, ev->detail);*/
 
 	if(ev->mode==NotifyGrab)/* || ev->mode==NotifyWhileGrabbed)*/
 	/*if(ev->mode!=NotifyNormal && ev->mode!=NotifyWhileGrabbed)*/
@@ -504,8 +504,8 @@ static void handle_focus_out(const XFocusChangeEvent *ev)
 	
 	if(ev->detail!=NotifyInferior)
 		region_lost_focus(reg);
-	/*else
-		region_got_focus(reg);*/
+	else
+		region_got_focus(reg);
 }
 
 
