@@ -12,20 +12,20 @@
 
 #include "common.h"
 #include "obj.h"
-
-typedef void Action(WObj*);
+#include "defer.h"
 
 INTRSTRUCT(Defer);
 	
 DECLSTRUCT(Defer){
 	WWatch watch;
-	Action *action;
+	DeferredAction *action;
 	Defer *next, *prev;
+	void **list;
 };
 
 static Defer *deferred=NULL;
 
-#define N_DBUF 4
+#define N_DBUF 16
 
 /* To avoid allocating memory all the time, we use a small
  * buffer that should be able to contain the small expected
@@ -62,14 +62,14 @@ static void free_defer(Defer *d)
 }
 
 
-static bool get_next(WObj **obj, Action **action)
+static bool get_next(WObj **obj, DeferredAction **action, Defer **list)
 {
-	Defer *d=deferred;
+	Defer *d=*list;
 	
 	if(d==NULL)
 		return FALSE;
 	
-	UNLINK_ITEM(deferred, d, next, prev);
+	UNLINK_ITEM(*list, d, next, prev);
 	*obj=d->watch.obj;
 	*action=d->action;
 	reset_watch(&(d->watch));
@@ -82,14 +82,14 @@ static void defer_watch_handler(WWatch *w, WObj *obj)
 {
 	Defer *d=(Defer*)w;
 	
-	UNLINK_ITEM(deferred, d, next, prev);
+	UNLINK_ITEM(*(Defer**)(d->list), d, next, prev);
 	free_defer(d);
 	
 	warn("Object destroyed while deferred actions pending.");
 }
 
 	
-bool defer_action(WObj *obj, Action *action)
+bool defer_action_on_list(WObj *obj, DeferredAction *action, void **list)
 {
 	Defer *d;
 	
@@ -101,13 +101,20 @@ bool defer_action(WObj *obj, Action *action)
 	}
 	
 	d->action=action;
+	d->list=list;
 	
 	if(obj!=NULL)
 		setup_watch(&(d->watch), obj, defer_watch_handler);
 	
-	LINK_ITEM(deferred, d, next, prev);
+	LINK_ITEM(*(Defer**)list, d, next, prev);
 	
 	return TRUE;
+}
+
+
+bool defer_action(WObj *obj, DeferredAction *action)
+{
+	return defer_action_on_list(obj, action, (void**)&deferred);
 }
 
 
@@ -117,11 +124,17 @@ bool defer_destroy(WObj *obj)
 }
 	
 
-void execute_deferred()
+void execute_deferred_on_list(void **list)
 {
 	WObj *obj;
 	void (*action)(WObj*);
 	
-	while(get_next(&obj, &action))
+	while(get_next(&obj, &action, (Defer**)list))
 		action(obj);
+}
+
+
+void execute_deferred()
+{
+	execute_deferred_on_list((void**)&deferred);
 }
