@@ -1255,8 +1255,6 @@ WRegion *clientwin_load(WWindow *par, WRectangle geom, ExtlTab tab)
 
 	if(!get_integer_property(win, wglobal.atom_checkcode, &real_chkc))
 		return NULL;
-	
-	set_integer_property(win, wglobal.atom_checkcode, 0);
 
 	if(real_chkc!=chkc || chkc==0){
 		warn("Client window check code mismatch.");
