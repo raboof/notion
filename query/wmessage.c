@@ -179,10 +179,10 @@ static bool wmsg_init(WMessage *wmsg, WWindow *par, const WRectangle *geom,
 		strncpy(cmsg, p, l);
 		cmsg[l]='\0';
 		ptr[k]=cmsg;
+		k++;
 		if(p[l]=='\0')
 			break;
 		p=p+l+1;
-		k++;
 	}
 #endif
 	
