@@ -14,10 +14,16 @@ local ioncorelib=_G.ioncorelib
 local warn=ioncore.warn
 
 --DOC
--- Compile string \var{cmd} into a bindable function. The string \var{guard} 
--- maybe set to pose limits on the second argument (\code{_sub}) passed to 
--- the function. Currently supported guards are \code{_sub:non-nil}  and 
--- \code{_sub:WFoobar}, where \type{WFoobar} is a class.
+-- Compile string \var{cmd} into a bindable function. Within \var{cmd}, the
+-- variable ''\var{_}'' (underscore) can be used to refer to the object 
+-- that was selecting for the bound action and chosen to handle it.
+-- The  variable ''\var{_sub}'' refers to a ''currently active'' sub-object 
+-- of \var{_}, or a sub-object where the action loading to the binding 
+-- being called actually occured.
+-- 
+-- The string \var{guard}  maybe set to pose limits on \code{_sub}. Currently 
+-- supported guards are \code{_sub:non-nil} and \code{_sub:WFoobar}, where 
+-- \type{WFoobar} is a class.
 function ioncorelib.compile_cmd(cmd, guard)
     local guardcode=""
     if guard then

@@ -104,7 +104,7 @@ static bool gr_do_select_engine(const char *engine)
  * \var{engine}. If no engine of such name is known, a module with that name
  * is attempted to be loaded. This function is only intended to be called from
  * colour scheme etc. configuration files and can not be used to change the
- * look of existing objects; for that use \fnref{reread_draw_config}.
+ * look of existing objects; for that use \fnref{gr.read_config}.
  */
 EXTL_EXPORT_AS(gr, select_engine)
 bool gr_select_engine(const char *engine)

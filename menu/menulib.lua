@@ -46,7 +46,10 @@ function menulib.getmenu(menu_or_name)
 end
 
 --DOC
--- Use this function to define normal menu entries.
+-- Use this function to define normal menu entries. The string \var{name} 
+-- is the string shown in the visual representation of menu, and the
+-- parameter \var{cmd} and \var{guard} are similar to those of
+-- \fnref{ioncorelib.defbindings}.
 function menulib.menuentry(name, cmd, guard)
     local fn, gfn=ioncorelib.compile_cmd(cmd, guard)
     if fn then
@@ -55,7 +58,9 @@ function menulib.menuentry(name, cmd, guard)
 end
 
 --DOC
--- Use this function to define menu entries for submenus.
+-- Use this function to define menu entries for submenus. The parameter
+-- \fnref{sub_or_name} is either a table of menu entries or the name
+-- of an already defined menu.
 function menulib.submenu(name, sub_or_name)
     return {
         name=name,
@@ -81,10 +86,22 @@ local function do_menu(reg, sub, menu_or_name, fn)
 end
 
 
+--DOC
+-- Display a menu in the lower-left corner of \var{mplex}.
+-- The variable \var{menu_or_name} is either the name of a menu
+-- defined with \fnref{menulib.defmenu} or directly a table similar
+-- to ones passesd to this function. When this function is
+-- called from a binding handler, \var{sub} should be set to
+-- the second argument of to the binding handler (\var{_sub})
+-- so that the menu handler will get the same parameters as the
+-- binding handler.
 function menulib.menu(mplex, sub, menu_or_name) 
     return do_menu(mplex, sub, menu_or_name, menumod.menu)
 end
 
+--DOC
+-- This function is similar to \fnref{menulib.menu}, but
+-- a style with possibly bigger font and menu entries is used.
 function menulib.bigmenu(mplex, sub, menu_or_name) 
     local function menu_bigmenu(m, s, menu)
         return menumod.menu(m, s, menu, true)
@@ -92,6 +109,10 @@ function menulib.bigmenu(mplex, sub, menu_or_name)
     return do_menu(mplex, sub, menu_or_name, menu_bigmenu)
 end
 
+--DOC
+-- This function displays a drop-down menu and should only
+-- be called from a mouse press handler. The parameters are
+-- similar to thos of \fnref{menulib.menu}.
 function menulib.pmenu(win, sub, menu_or_name) 
     return do_menu(win, sub, menu_or_name, menumod.pmenu)
 end
@@ -173,9 +194,8 @@ local function selectstyle(look, where)
         return
     end
     
-    querylib.do_query_yesno(where, 
-                            "Save look selection in "..fname.."?",
-                            writeit)
+    querylib.query_yesno(where, "Save look selection in "..fname.."?",
+                         writeit)
 end
 
 local function receive_styles(str)

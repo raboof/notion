@@ -336,23 +336,18 @@ function parse_luadoc(d)
         st, en, fn, param=string.find(s, "^\n[%s\n]*function%s*([%w_:%.]+)%s*(%b())")
 
         if not fn then
-            st, en, fn=string.find(s, "^\n[%s\n]*([%w_:%.]+)%s*=")
-        end
-        
-        if not fn then
-            st, en, cls, fn=string.find(s, "\n[%s\n]*defcmd%s*%(%s*\"([%w_]+)\"%s*,%s*\"([@%w_]+)\"")
-            if fn then
-                fn=cls.."."..fn
-            end
-        end
-                                   
-        if not fn then
             errorf("Syntax error while parsing \"%s\"",
                    string.sub(s, 1, 50))
         end
-
-        local cls="global"
-
+        local cls, clsfn
+        st, en, cls, clsfn=string.find(fn, "^([^.]*)%.(.*)$")
+        
+        if cls and clsfn then
+            fn=clsfn
+        else
+            cls="global"
+        end
+        
         fninfo={
             doc=doc, 
             paramstr=param,
@@ -540,44 +535,38 @@ function texfriendly(name)
 end
 
 function write_fndoc(h, fn, info)
+    if not info.doc then
+        return
+    end
     fprintf(h, "\\begin{function}\n")
     if info.exported_name then
         fn=info.exported_name
     end
     
-    if not lua_input then
-        if info.class~="global" then
-            fprintf(h, "\\index{%s@\\type{%s}!", info.class, info.class)
-            fprintf(h, "%s@\\code{%s}}\n", texfriendly(fn), fn)
-        end
-        fprintf(h, "\\index{%s@\\code{%s}}\n", texfriendly(fn), fn)
-    else
-        local fnx=fn
-        fprintf(h, "\\index{")
-        fnx=string.gsub(fnx, "(.-)%.", 
-                        function(s) 
-                            fprintf(h, "%s@\\type{%s}!", texfriendly(s), s)
-                            return ""
-                        end)
-        fprintf(h, "%s@\\code{%s}}\n", texfriendly(fnx), fnx)
+    if info.class~="global" then
+        fprintf(h, "\\index{%s@\\type{%s}!", info.class, info.class)
+        fprintf(h, "%s@\\code{%s}}\n", texfriendly(fn), fn)
     end
+    fprintf(h, "\\index{%s@\\code{%s}}\n", texfriendly(fn), fn)
     
     if info.class~="global" then
         fprintf(h, "\\hyperlabel{fn:%s.%s}", info.class, fn)
     else
         fprintf(h, "\\hyperlabel{fn:%s}", fn)
     end
+    
+    fprintf(h, "\\synopsis{")
+    if info.odesc then
+        h:write(tohuman(info.odesc, info.otype).." ")
+    end
+    
+    if info.class~="global" then
+        fprintf(h, "%s.", info.class)
+    end
+    
     if lua_input then
-        if info.paramstr then
-            fprintf(h, "\\synopsis{%s%s}\n", fn, info.paramstr)
-        else
-            fprintf(h, "\\funcname{%s}\n", fn)
-        end
+        fprintf(h, "%s%s}", fn, info.paramstr)
     else
-        fprintf(h, "\\synopsis{%s ", tohuman(info.odesc, info.otype))
-        if info.class~="global" then
-            fprintf(h, "%s.", info.class)
-        end
         fprintf(h, "%s(", fn)
         local comma=""
         for i, varname in info.ivars do
@@ -590,7 +579,7 @@ function write_fndoc(h, fn, info)
         end
         fprintf(h, ")}\n")
     end
-    h:write("\\begin{funcdesc}\n" .. trim(info.doc or "").. "\n\\end{funcdesc}\n")
+    h:write("\\begin{funcdesc}\n" .. trim(info.doc).. "\n\\end{funcdesc}\n")
     fprintf(h, "\\end{function}\n\n")
 end
 

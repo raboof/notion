@@ -17,15 +17,17 @@
 #include "menu.h"
 #include "mkmenu.h"
 
+
 /*EXTL_DOC
  * Display a menu inside multiplexer. The \var{handler} parameter
  * is a function that gets the selected menu entry as argument and
- * should call it with proper parameters; use \fnref{make_menu_fn}
- * to create functions that pass a proper \var{handler}. The table
- * \var{tab} is a list of menu entries of the form
- * \code{\{name = ???, [ submenu = ??? ]\}}. (The table may and usually
- * does contain other entries as well, such as the function to call
- * when entry is activated, but this is handled by \var{handler}.)
+ * should call it with proper parameters. The table \var{tab} is a
+ * list of menu entries of the form \code{\{name = ???, [ submenu_fn = ??? ]\}}.
+ * The function \var{submenu_fn} return a similar submenu definition 
+ * when called.
+ * 
+ * Do not use this function directly. Use  \fnref{menulib.menu} and
+ * \fnref{menulib.bigmenu}.
  */
 EXTL_EXPORT
 WMenu *menumod_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab, bool big_mode)
@@ -50,6 +52,8 @@ WMenu *menumod_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab, bool big_mode)
  * and the menu will be placed below the point where the press occured.
  * The \var{handler} and \var{tab} parameters are similar to those of
  * \fnref{menu_menu}.
+ * 
+ * Do not use this function directly. Use \fnref{menulib.pmenu}.
  */
 EXTL_EXPORT
 WMenu *menumod_pmenu(WWindow *where, ExtlFn handler, ExtlTab tab)

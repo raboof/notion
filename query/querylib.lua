@@ -37,7 +37,11 @@ function querylib.do_query(mplex, prompt, initvalue, handler, completor)
 end
 
 
-function querylib.do_query_yesno(mplex, prompt, handler)
+--DOC
+-- This function query will display a query with prompt \var{prompt} in
+-- \var{mplex} and if the user answers affirmately, call \var{handler}
+-- with \var{mplex} as parameter.
+function querylib.query_yesno(mplex, prompt, handler)
     local function handle_yesno(str)
         if str=="y" or str=="Y" or str=="yes" then
             handler(mplex)
@@ -137,6 +141,12 @@ local pipes={}
 
 querylib.COLLECT_THRESHOLD=2000
 
+--DOC
+-- This function can be used to read completions from an external source.
+-- The string \var{cmd} is a shell command to be executed. To its  stdout, 
+-- the command should on the first line write the \var{common_part} 
+-- parameter of \fnref{WEdln.set_completions} and a single actual completion
+-- on each of the successive lines.
 function querylib.popen_completions(wedln, cmd)
     
     local pst={wedln=wedln, maybe_stalled=0}
@@ -322,7 +332,7 @@ end
 -- This query asks whether the user wants to have Ioncore exit.
 -- If the answer is 'y', 'Y' or 'yes', so will happen.
 function querylib.query_exit(mplex)
-    querylib.do_query_yesno("Exit Ion (y/n)?", exit_wm)
+    querylib.query_yesno("Exit Ion (y/n)?", exit_wm)
 end
 
 
@@ -330,7 +340,7 @@ end
 -- This query asks whether the user wants restart Ioncore.
 -- If the answer is 'y', 'Y' or 'yes', so will happen.
 function querylib.query_restart(mplex)
-    querylib.do_query_yesno("Restart Ion (y/n)?", restart_wm)
+    querylib.query_yesno("Restart Ion (y/n)?", restart_wm)
 end
 
 
