@@ -177,32 +177,6 @@ void region_do_set_focus(WRegion *reg, bool warp)
 }
 
 
-/*EXTL_DOC
- * Attempt to close/destroy \var{reg}. Whether this operation works
- * depends on whether the particular type of region in question has
- * implemented the feature and, in case of client windows, whether
- * the client supports the \code{WM_DELETE} protocol (see also
- * \fnref{WClientWin.kill}). If the operations is likely to succeed,
- * \code{true} is returned, otherwise \code{false}. In most cases the
- * region will not have been actually destroyed when this function returns.
- */
-EXTL_EXPORT_MEMBER
-bool region_rqclose(WRegion *reg)
-{
-    bool ret=FALSE;
-    CALL_DYN_RET(ret, bool, region_rqclose, reg, (reg));
-    return ret;
-}
-
-
-bool region_managed_may_destroy(WRegion *mgr, WRegion *reg)
-{
-    bool ret=TRUE;
-    CALL_DYN_RET(ret, bool, region_managed_may_destroy, mgr, (mgr, reg));
-    return ret;
-}
-
-    
 /*{{{ Manager region dynfuns */
 
 
@@ -457,6 +431,36 @@ bool region_reparent(WRegion *reg, WWindow *par,
 
 /*{{{ Close */
 
+
+/*EXTL_DOC
+ * Attempt to close/destroy \var{reg}. Whether this operation works
+ * depends on whether the particular type of region in question has
+ * implemented the feature and, in case of client windows, whether
+ * the client supports the \code{WM_DELETE} protocol (see also
+ * \fnref{WClientWin.kill}). If the operations is likely to succeed,
+ * \code{true} is returned, otherwise \code{false}. In most cases the
+ * region will not have been actually destroyed when this function returns.
+ */
+EXTL_EXPORT_MEMBER
+bool region_rqclose(WRegion *reg)
+{
+    bool ret=FALSE;
+    CALL_DYN_RET(ret, bool, region_rqclose, reg, (reg));
+    return ret;
+}
+
+
+static WRegion *region_rqclose_propagate_default(WRegion *reg, 
+                                                 WRegion *maybe_sub)
+{
+    if(maybe_sub==NULL)
+        maybe_sub=region_current(reg);
+    if(maybe_sub!=NULL)
+        return region_rqclose_propagate(maybe_sub, NULL);
+    return (region_rqclose(reg) ? reg : NULL);
+}
+
+
 /*EXTL_DOC
  * Recursively attempt to close a region or one of the regions managed by 
  * it. If \var{sub} is set, it will be used as the managed region, otherwise
@@ -467,11 +471,18 @@ bool region_reparent(WRegion *reg, WWindow *par,
 EXTL_EXPORT_MEMBER
 WRegion *region_rqclose_propagate(WRegion *reg, WRegion *maybe_sub)
 {
-    if(maybe_sub==NULL)
-        maybe_sub=region_current(reg);
-    if(maybe_sub!=NULL)
-        return region_rqclose_propagate(maybe_sub, NULL);
-    return (region_rqclose(reg) ? reg : NULL);
+    WRegion *ret=NULL;
+    CALL_DYN_RET(ret, WRegion*, region_rqclose_propagate, reg,
+                 (reg, maybe_sub));
+    return ret;
+}
+
+
+bool region_managed_may_destroy(WRegion *mgr, WRegion *reg)
+{
+    bool ret=TRUE;
+    CALL_DYN_RET(ret, bool, region_managed_may_destroy, mgr, (mgr, reg));
+    return ret;
 }
 
 
@@ -755,6 +766,9 @@ static DynFunTab region_dynfuntab[]={
 
     {(DynFun*)region_managed_goto,
      (DynFun*)region_managed_goto_default},
+
+    {(DynFun*)region_rqclose_propagate,
+     (DynFun*)region_rqclose_propagate_default},
     
     {region_stacking, region_stacking_default},
     

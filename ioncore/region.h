@@ -97,6 +97,7 @@ DYNFUN void region_activated(WRegion *reg);
 DYNFUN void region_inactivated(WRegion *reg);
 DYNFUN void region_updategr(WRegion *reg);
 DYNFUN bool region_rqclose(WRegion *reg);
+DYNFUN WRegion *region_rqclose_propagate(WRegion *reg, WRegion *maybe_sub);
 DYNFUN WRegion *region_current(WRegion *mgr);
 DYNFUN void region_notify_rootpos(WRegion *reg, int x, int y);
 
@@ -126,8 +127,6 @@ extern bool region_reparent(WRegion *reg, WWindow *target,
 extern void region_updategr_default(WRegion *reg);
 
 extern bool region_may_destroy(WRegion *reg);
-
-extern WRegion *region_rqclose_propagate(WRegion *reg, WRegion *maybe_sub);
 
 extern void region_rootpos(WRegion *reg, int *xret, int *yret);
 extern void region_notify_change(WRegion *reg);

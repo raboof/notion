@@ -256,6 +256,62 @@ bool panews_managed_goto(WPaneWS *ws, WRegion *reg, int flags)
 }
 
 
+static bool filter_no_stdisp_unused(WSplit *split)
+{
+    return (OBJ_IS(split, WSplitRegion)
+            && !OBJ_IS(split, WSplitST)
+            && !OBJ_IS(split, WSplitUnused));
+}
+
+
+static bool panews_rqclose(WPaneWS *ws)
+{
+    if(split_current_todir(ws->ionws.split_tree, SPLIT_ANY, PRIMN_ANY, 
+                           filter_no_stdisp_unused)!=NULL){
+        warn(TR("Refusing to close non-empty workspace."));
+        return FALSE;
+    }
+
+    if(!region_may_destroy((WRegion*)ws)){
+        warn(TR("Workspace may not be destroyed."));
+        return FALSE;
+    }
+    
+    ioncore_defer_destroy((Obj*)ws);
+    
+    return TRUE;
+}
+
+
+static WRegion *panews_rqclose_propagate(WPaneWS *ws, WRegion *sub)
+{
+    WSplitRegion *node=NULL;
+    WRegion *reg=NULL;
+    
+    if(sub==NULL){
+        if(ws->ionws.split_tree!=NULL){
+            node=(WSplitRegion*)split_current_todir(ws->ionws.split_tree, 
+                                                    SPLIT_ANY, PRIMN_ANY, 
+                                                    filter_no_stdisp_unused);
+        }
+        if(node==NULL){
+            ioncore_defer_destroy((Obj*)ws);
+            return (WRegion*)ws;
+        }
+        if(node->reg==NULL)
+            return NULL;
+        sub=node->reg;
+    }else{
+        node=get_node_check(ws, sub);
+        if(node==NULL)
+            return NULL;
+    }
+    
+    
+    return (region_rqclose(sub) ? sub : NULL);
+}
+
+
 /*}}}*/
 
 
@@ -316,6 +372,11 @@ static WSplit *load_splitpane(WPaneWS *ws, const WRectangle *geom, ExtlTab tab)
 
 static void adjust_tls_brs(int *tls, int *brs, int total)
 {
+    if(*tls<=0)
+        *tls=MINS;
+    if(*brs<=0)
+        *brs=MINS;
+    
     if(*tls+*brs<total){
         *tls=total*(*tls)/(*tls+*brs);
         *brs=total-(*tls);
@@ -391,7 +452,7 @@ static WSplit *load_splitfloat(WPaneWS *ws, const WRectangle *geom,
             g=brg;
             splitfloat_br_pwin_to_cnt(split, &g);
         }
-        br=ionws_load_node((WIonWS*)ws, &brg, subtab);
+        br=ionws_load_node((WIonWS*)ws, &g, subtab);
         extl_unref_table(subtab);
     }
     
@@ -502,6 +563,12 @@ static DynFunTab panews_dynfuntab[]={
     {(DynFun*)region_managed_goto,
      (DynFun*)panews_managed_goto},
 
+    {(DynFun*)region_rqclose,
+     (DynFun*)panews_rqclose},
+    
+    {(DynFun*)region_rqclose_propagate,
+     (DynFun*)panews_rqclose_propagate},
+    
     END_DYNFUNTAB
 };
 
