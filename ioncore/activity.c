@@ -97,3 +97,14 @@ void region_clear_activity(WRegion *reg, bool force)
     if(reg->mgd_activity==0)
         propagate_clear(reg);
 }
+
+
+/*EXTL_DOC
+ * Is activity notification set on \var{reg}.
+ */
+EXTL_EXPORT_MEMBER
+bool region_is_activity(WRegion *reg)
+{
+    return (reg->flags&REGION_ACTIVITY);
+}
+
