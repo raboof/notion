@@ -52,6 +52,7 @@ DECLCLASS(WSplit){
     Obj obj;
     WRectangle geom;
     WSplitInner *parent;
+    WSplit **selfptrptr;
     
     int min_w, min_h;
     int max_w, max_h;
@@ -143,21 +144,23 @@ extern ExtlTab split_rqgeom(WSplit *node, ExtlTab g);
 
 /* Split */
 
-extern void splittree_rqgeom(WSplit *root, WSplit *node, int flags, 
+extern void splittree_rqgeom(WSplit *node, int flags, 
                              const WRectangle *geom, WRectangle *geomret);
 
 
 DYNFUN void splitinner_replace(WSplitInner *node, WSplit *child, WSplit *what);
-extern WSplitRegion *splittree_split(WSplit **root, WSplit *node, int dir, 
-                                      int primn, int minsize, 
-                                      WRegionSimpleCreateFn *fn,
-                                      WWindow *parent);
+extern WSplitRegion *splittree_split(WSplit *node, int dir, 
+                                     int primn, int minsize, 
+                                     WRegionSimpleCreateFn *fn,
+                                     WWindow *parent);
+
+extern void splittree_changeroot(WSplit *root, WSplit *node);
 
 /* Remove */
 
-DYNFUN void splitinner_remove(WSplitInner *node, WSplit *child, WSplit **root,
+DYNFUN void splitinner_remove(WSplitInner *node, WSplit *child, 
                               bool reclaim_space);
-extern void splittree_remove(WSplit **root, WSplit *node, bool reclaim_space);
+extern void splittree_remove(WSplit *node, bool reclaim_space);
 
 /* Tree traversal */
 

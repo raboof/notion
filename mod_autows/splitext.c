@@ -280,11 +280,13 @@ static void splitpane_replace(WSplitPane *pane, WSplit *child, WSplit *what)
     
     pane->contents=what;
     what->parent=(WSplitInner*)pane;
+#warning "Needed?"    
+    what->selfptrptr=NULL;
     child->parent=NULL;
 }
 
 
-static void splitpane_remove(WSplitPane *pane, WSplit *child, WSplit **root,
+static void splitpane_remove(WSplitPane *pane, WSplit *child, 
                              bool reclaim_space)
 {
     WSplitUnused *un;
@@ -301,12 +303,10 @@ static void splitpane_remove(WSplitPane *pane, WSplit *child, WSplit **root,
         WSplitInner *parent=((WSplit*)pane)->parent;
         warn(TR("Could not create a WSplitUnused for empty WSplitPane. "
                 "Destroying."));
-        if(parent!=NULL){
-            splitinner_remove(parent, (WSplit*)pane, root, reclaim_space);
-        }else{
-            assert(*root==(WSplit*)pane);
-            *root=NULL;
-        }
+        if(parent!=NULL)
+            splitinner_remove(parent, (WSplit*)pane, reclaim_space);
+        else
+	    splittree_changeroot((WSplit*)pane, NULL);
         destroy_obj((Obj*)pane);
     }
 }

@@ -112,7 +112,7 @@ void ionws_managed_rqgeom(WIonWS *ws, WRegion *mgd,
 {
     WSplitRegion *node=get_node_check(ws, mgd);
     if(node!=NULL && ws->split_tree!=NULL)
-        splittree_rqgeom(ws->split_tree, (WSplit*)node, flags, geom, geomret);
+        splittree_rqgeom((WSplit*)node, flags, geom, geomret);
 }
 
 
@@ -260,7 +260,7 @@ void ionws_unmanage_stdisp(WIonWS *ws, bool permanent, bool nofocus)
     }
     
     if(permanent){
-        splittree_remove(&(ws->split_tree), (WSplit*)(ws->stdispnode), TRUE);
+        splittree_remove((WSplit*)(ws->stdispnode), TRUE);
         ws->stdispnode=NULL;
     }
     
@@ -323,6 +323,7 @@ static void ionws_create_stdispnode(WIonWS *ws, WRegion *stdisp,
     /* Set up new split tree */
     ((WSplit*)stdispnode)->parent=(WSplitInner*)split;
     ws->split_tree->parent=(WSplitInner*)split;
+    ws->split_tree->selfptrptr=NULL;
     
     if((orientation==REGION_ORIENTATION_HORIZONTAL && 
         (corner==MPLEX_STDISP_BL || corner==MPLEX_STDISP_BR)) ||
@@ -336,6 +337,7 @@ static void ionws_create_stdispnode(WIonWS *ws, WRegion *stdisp,
     }
 
     ws->split_tree=(WSplit*)split;
+    ((WSplit*)split)->selfptrptr=&(ws->split_tree);
     ws->stdispnode=stdispnode;
 }
 
@@ -387,8 +389,7 @@ void ionws_manage_stdisp(WIonWS *ws, WRegion *stdisp, int corner)
     else
         dg.w=maxof(CF_STDISP_MIN_SZ, region_min_w(stdisp));
     
-    splittree_rqgeom(ws->split_tree, (WSplit*)(ws->stdispnode), flags, &dg,
-                     FALSE);
+    splittree_rqgeom((WSplit*)(ws->stdispnode), flags, &dg, FALSE);
     
     stdg=&(((WSplit*)ws->stdispnode)->geom);
     
@@ -574,7 +575,7 @@ void ionws_managed_remove(WIonWS *ws, WRegion *reg)
     if(ws->split_tree!=NULL){
         if(node==(WSplitRegion*)(ws->stdispnode))
             ws->stdispnode=NULL;
-        splittree_remove(&(ws->split_tree), (WSplit*)node, !ds);
+        splittree_remove((WSplit*)node, !ds);
     }
     
     if(!ds){
@@ -656,8 +657,8 @@ WFrame *ionws_split_top(WIonWS *ws, const char *dirstr)
     if(ws->split_tree==NULL)
         return NULL;
     
-    nnode=splittree_split(&(ws->split_tree), ws->split_tree, 
-                          dir, primn, mins, ws->create_frame_fn,
+    nnode=splittree_split(ws->split_tree, dir, primn, mins, 
+                          ws->create_frame_fn,
                           REGION_PARENT_CHK(ws, WWindow));
     
     if(nnode==NULL)
@@ -701,8 +702,8 @@ WFrame *ionws_split_at(WIonWS *ws, WFrame *frame, const char *dirstr,
           ? region_min_h((WRegion*)frame)
           : region_min_w((WRegion*)frame));
     
-    nnode=splittree_split(&(ws->split_tree), (WSplit*)node, dir, primn, 
-                          mins, ws->create_frame_fn, 
+    nnode=splittree_split((WSplit*)node, dir, primn, mins, 
+                          ws->create_frame_fn, 
                           REGION_PARENT_CHK(ws, WWindow));
     
     if(nnode==NULL){
@@ -1212,6 +1213,8 @@ WRegion *ionws_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
         warn(TR("The workspace is empty."));
         destroy_obj((Obj*)ws);
         return NULL;
+    }else{
+        ws->split_tree->selfptrptr=&(ws->split_tree);
     }
     
     return (WRegion*)ws;

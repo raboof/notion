@@ -179,6 +179,7 @@ bool splittree_set_node_of(WRegion *reg, WSplitRegion *split)
 bool split_init(WSplit *split, const WRectangle *geom)
 {
     split->parent=NULL;
+    split->selfptrptr=NULL;
     split->geom=*geom;
     split->min_w=0;
     split->min_h=0;
@@ -506,7 +507,7 @@ static void splitst_do_resize(WSplitST *node, const WRectangle *ng,
                               int hprimn, int vprimn, bool transpose)
 {
     saw_stdisp=node;
-    
+
     if(node->regnode.reg==NULL){
         ((WSplit*)node)->geom=*ng;
     }else{
@@ -732,7 +733,7 @@ static void splitsplit_do_rqsize(WSplitSplit *p, WSplit *node,
         other=p->tl;
         thisnode=PRIMN_BR;
     }
-    
+
     ca=(p->dir==SPLIT_VERTICAL ? va : ha);
 
     if(thisnode==PRIMN_TL || ca->any){
@@ -743,8 +744,8 @@ static void splitsplit_do_rqsize(WSplitSplit *p, WSplit *node,
         ca->tl-=amount;
     }
     
-    if(((WSplit*)p)->parent==NULL || 
-       (ha->tl==0 && ha->br==0 && va->tl==0 && va->br==0)){
+    if(((WSplit*)p)->parent==NULL /*|| 
+       (ha->tl==0 && ha->br==0 && va->tl==0 && va->br==0)*/){
         pg=((WSplit*)p)->geom;
     }else{
         splitinner_do_rqsize(((WSplit*)p)->parent, (WSplit*)p, ha, va,
@@ -879,12 +880,21 @@ static void bnd(int *pos, int *sz, int opos, int osz, int minsz, int maxsz)
 }
 
 
-void splittree_rqgeom(WSplit *root, WSplit *sub, int flags, 
-                      const WRectangle *geom_, WRectangle *geomret)
+static WSplit *find_root(WSplit *split)
+{
+    if(split->parent==NULL)
+        return split;
+    return find_root((WSplit*)split->parent);
+}
+
+
+void splittree_rqgeom(WSplit *sub, int flags, const WRectangle *geom_, 
+                      WRectangle *geomret)
 {
     bool hany=flags&REGION_RQGEOM_WEAK_X;
     bool vany=flags&REGION_RQGEOM_WEAK_Y;
     WRectangle geom=*geom_;
+    WSplit *root=find_root(sub);
 
     split_update_bounds(root, TRUE);
     
@@ -944,11 +954,6 @@ ExtlTab split_rqgeom(WSplit *node, ExtlTab g)
 {
     WRectangle geom, ogeom;
     int flags=REGION_RQGEOM_WEAK_ALL;
-    WSplit *root;
-    
-    root=node;
-    while(root->parent!=NULL)
-        root=(WSplit*)(root->parent);
         
     geom=node->geom;
     ogeom=geom;
@@ -965,7 +970,7 @@ ExtlTab split_rqgeom(WSplit *node, ExtlTab g)
     geom.w=maxof(1, geom.w);
     geom.h=maxof(1, geom.h);
 
-    splittree_rqgeom(root, node, flags, &geom, &ogeom);
+    splittree_rqgeom(node, flags, &geom, &ogeom);
     
     return extl_table_from_rectangle(&ogeom);
     
@@ -981,6 +986,19 @@ err:
 /*{{{ Split */
 
 
+void splittree_changeroot(WSplit *root, WSplit *node)
+{
+    WSplit **rptr=root->selfptrptr;
+    assert(rptr!=NULL && *rptr==root);
+    root->selfptrptr=NULL;
+    *rptr=node;
+    if(node!=NULL){
+        node->selfptrptr=rptr;
+        node->parent=NULL;
+    }
+}
+
+
 static void splitsplit_replace(WSplitSplit *split, WSplit *child,
                                WSplit *what)
 {
@@ -992,6 +1010,8 @@ static void splitsplit_replace(WSplitSplit *split, WSplit *child,
         split->br=what;
     
     what->parent=(WSplitInner*)split;
+#warning "Needed?"    
+    what->selfptrptr=NULL;
     child->parent=NULL;
 }
 
@@ -1002,7 +1022,7 @@ void splitinner_replace(WSplitInner *split, WSplit *child, WSplit *what)
 }
 
 
-WSplitRegion *splittree_split(WSplit **root, WSplit *node, int dir, int primn,
+WSplitRegion *splittree_split(WSplit *node, int dir, int primn,
                               int minsize, WRegionSimpleCreateFn *fn, 
                               WWindow *parent)
 {
@@ -1015,7 +1035,7 @@ WSplitRegion *splittree_split(WSplit **root, WSplit *node, int dir, int primn,
     WFitParams fp;
     WRectangle ng, rg;
     
-    assert(root!=NULL && *root!=NULL && node!=NULL && parent!=NULL);
+    assert(node!=NULL && parent!=NULL);
     
     if(OBJ_IS(node, WSplitST)){
         warn(TR("Splitting the status display is not allowed."));
@@ -1027,7 +1047,7 @@ WSplitRegion *splittree_split(WSplit **root, WSplit *node, int dir, int primn,
     if(dir!=SPLIT_HORIZONTAL && dir!=SPLIT_VERTICAL)
         dir=SPLIT_VERTICAL;
 
-    split_update_bounds(*root, TRUE);
+    split_update_bounds(find_root(node), TRUE);
     objmin=(dir==SPLIT_VERTICAL ? node->min_h : node->min_w);
 
     s=split_size(node, dir);
@@ -1122,7 +1142,7 @@ WSplitRegion *splittree_split(WSplit **root, WSplit *node, int dir, int primn,
     if(psplit!=NULL)
         splitinner_replace(psplit, node, (WSplit*)nsplit);
     else
-        *root=(WSplit*)nsplit;
+        splittree_changeroot(node, (WSplit*)nsplit);
         
     node->parent=(WSplitInner*)nsplit;
     ((WSplit*)nnode)->parent=(WSplitInner*)nsplit;
@@ -1147,7 +1167,7 @@ WSplitRegion *splittree_split(WSplit **root, WSplit *node, int dir, int primn,
 /*{{{ Remove */
 
 
-static void splitsplit_remove(WSplitSplit *node, WSplit *child, WSplit **root,
+static void splitsplit_remove(WSplitSplit *node, WSplit *child, 
                               bool reclaim_space)
 {
     static int nstdisp=0;
@@ -1168,19 +1188,17 @@ static void splitsplit_remove(WSplitSplit *node, WSplit *child, WSplit **root,
         split_try_unsink_stdisp(node, FALSE, TRUE);
         assert(child->parent!=NULL);
         nstdisp++;
-        splitinner_remove(child->parent, child, root, reclaim_space);
+        splitinner_remove(child->parent, child, reclaim_space);
         nstdisp--;
         return;
     }
 
     parent=((WSplit*)node)->parent;
-    if(parent!=NULL){
+    
+    if(parent!=NULL)
         splitinner_replace(parent, (WSplit*)node, other);
-    }else{
-        assert(*root==(WSplit*)node);
-        *root=other;
-        other->parent=NULL;
-    }
+    else
+        splittree_changeroot((WSplit*)node, other);
     
     if(reclaim_space)
         split_resize(other, &(((WSplit*)node)->geom), PRIMN_ANY, PRIMN_ANY);
@@ -1194,22 +1212,18 @@ static void splitsplit_remove(WSplitSplit *node, WSplit *child, WSplit **root,
 }
 
 
-void splitinner_remove(WSplitInner *node, WSplit *child, WSplit **root,
-                       bool reclaim_space)
+void splitinner_remove(WSplitInner *node, WSplit *child, bool reclaim_space)
 {
-    CALL_DYN(splitinner_remove, node, (node, child, root, reclaim_space));
+    CALL_DYN(splitinner_remove, node, (node, child, reclaim_space));
 }
 
 
-void splittree_remove(WSplit **root, WSplit *node, bool reclaim_space)
+void splittree_remove(WSplit *node, bool reclaim_space)
 {
-    if(node->parent==NULL){
-        assert(*root==node);
-        *root=NULL;
-        node->parent=NULL;
-    }else{
-        splitinner_remove(node->parent, node, root, reclaim_space);
-    }
+    if(node->parent==NULL)
+        splittree_changeroot(node, NULL);
+    else
+        splitinner_remove(node->parent, node, reclaim_space);
     
     destroy_obj((Obj*)node);
 }

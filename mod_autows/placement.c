@@ -191,7 +191,6 @@ static bool do_replace(WAutoWS *ws, WFrame *frame, WClientWin *cwin,
                        PlacementParams *rs)
 {
     WSplit *u=rs->res_node;
-    WSplitInner *p=rs->res_node->parent;
     WSplit *node=ionws_load_node(&(ws->ionws), &(u->geom), rs->res_config);
     
     assert(OBJ_IS(u, WSplitUnused));
@@ -207,12 +206,10 @@ static bool do_replace(WAutoWS *ws, WFrame *frame, WClientWin *cwin,
         return FALSE;
     }
     
-    if(p==NULL){
-        assert(ws->ionws.split_tree==u);
-        ws->ionws.split_tree=node;
-    }else{
-        splitinner_replace(p, u, node);
-    }
+    if(u->parent!=NULL)
+        splitinner_replace(u->parent, u, node);
+    else
+	splittree_changeroot((WSplit*)u, node);
     
     u->parent=NULL;
     ioncore_defer_destroy((Obj*)u);
@@ -275,7 +272,7 @@ bool autows_manage_clientwin(WAutoWS *ws, WClientWin *cwin,
                     gflags&=~REGION_RQGEOM_WEAK_H;
                 }
                 
-                splittree_rqgeom(*tree, rs.res_node, gflags, &grq, NULL);
+                splittree_rqgeom(rs.res_node, gflags, &grq, NULL);
             }
             
             if(OBJ_IS(rs.res_node, WSplitUnused)){

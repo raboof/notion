@@ -146,7 +146,7 @@ void autows_managed_remove(WAutoWS *ws, WRegion *reg)
     if(ws->ionws.split_tree!=NULL){
         if(node==(WSplitRegion*)(ws->ionws.stdispnode))
             ws->ionws.stdispnode=NULL;
-        splittree_remove(&(ws->ionws.split_tree), (WSplit*)node, !ds);
+        splittree_remove((WSplit*)node, !ds);
     }
     
     if(!ds){

@@ -69,6 +69,14 @@ static void swapptr(WSplit **x, WSplit **y)
 }
 
 
+static void swapgeom(WRectangle *g, WRectangle *h)
+{
+    WRectangle tmp=*g;
+    *g=*h;
+    *h=tmp;
+}
+
+
 static int recommended_w(WSplitST *stdisp)
 {
     if(stdisp->regnode.reg==NULL)
@@ -87,10 +95,34 @@ static int recommended_h(WSplitST *stdisp)
 }
 
 
+static bool stdisp_dir_ok(WSplitSplit *p, WSplitST *stdisp)
+{
+    assert(p->tl==(WSplit*)stdisp || p->br==(WSplit*)stdisp);
+    
+    return (IMPLIES(STDISP_IS_HORIZONTAL(stdisp), p->dir==SPLIT_VERTICAL) &&
+            IMPLIES(STDISP_IS_VERTICAL(stdisp), p->dir==SPLIT_HORIZONTAL));
+}
+
+
 /*}}}*/
 
 
-/*{{{ Rotation and flipping primitives */
+/*{{{ New rotation and flipping primitives */
+
+
+static void replace(WSplitSplit *a, WSplitSplit *p)
+{
+    if(((WSplit*)a)->parent==NULL){
+        WSplit **r=((WSplit*)a)->selfptrptr;
+        assert(r!=NULL && *r==(WSplit*)a);
+        *r=(WSplit*)p;
+        ((WSplit*)p)->selfptrptr=r;
+        ((WSplit*)p)->parent=NULL;
+        ((WSplit*)a)->selfptrptr=NULL;
+    }else{
+        splitinner_replace(((WSplit*)a)->parent, (WSplit*)a, (WSplit*)p);
+    }
+}
 
 
 /* Yes, it is overparametrised */
@@ -99,72 +131,68 @@ static void rotate_right(WSplitSplit *a, WSplitSplit *p, WSplit *y)
     assert(a->tl==(WSplit*)p && p->tl==y);
     
     /* Right rotation:
-     * 
-     *        a             a
+     *        a             p
      *      /  \          /   \
-     *     p    x   =>   y     p
+     *     p    x   =>   y     a
      *   /   \               /   \
      *  y     ?             ?     x
      */
-    a->tl=y;
-    y->parent=(WSplitInner*)a;
-    p->tl=p->br;
-    p->br=a->br;
-    p->br->parent=(WSplitInner*)p;
-    a->br=(WSplit*)p;
     
-    if(a->current==SPLIT_CURRENT_BR){
-        p->current=SPLIT_CURRENT_BR;
-    }else if(p->current==SPLIT_CURRENT_BR){
-        a->current=SPLIT_CURRENT_BR;
-        p->current=SPLIT_CURRENT_TL;
-    }
+    a->tl=p->br;
+    a->tl->parent=(WSplitInner*)a;
+    replace(a, p);
+    p->br=(WSplit*)a;
+    ((WSplit*)a)->parent=(WSplitInner*)p;
 }
 
 
 static void rot_rs_rotate_right(WSplitSplit *a, WSplitSplit *p, WSplit *y)
 {
-    WRectangle xg, yg, pg;
+    WRectangle xg, yg, pg, ag, qg;
+    WSplit *x=a->br, *q=p->br;
     
     assert(a->dir==other_dir(p->dir));
-    
-    xg=GEOM(a->br);
-    yg=GEOM(p->tl);
+
+    qg=GEOM(q);
+    xg=GEOM(x);
+    yg=GEOM(y);
     pg=GEOM(p);
+    ag=GEOM(a);
     
     if(a->dir==SPLIT_HORIZONTAL){
         /* yyxx    yyyy
          * ??xx => ??xx
          * ??xx    ??xx
          */
-        yg.w+=xg.w;
-        xg.h-=yg.h;
-        pg.h-=yg.h;
-        pg.w=GEOM(a).w;
-        pg.y+=yg.h;
-        xg.y+=yg.h;
+        yg.w=ag.w;
+        pg.w=ag.w;
+        xg.h=qg.h;
+        ag.h=qg.h;
+        xg.y=qg.y;
+        ag.y=qg.y;
     }else{
         /* y??    y??
          * y??    y??
          * xxx => yxx
          * xxx    yxx
          */
-        yg.h+=xg.h;
-        xg.w-=yg.w;
-        pg.w-=yg.w;
-        pg.h=GEOM(a).h;
-        pg.x+=yg.w;
-        xg.x+=yg.w;
+        yg.h=ag.h;
+        pg.h=ag.h;
+        xg.w=qg.w;
+        ag.w=qg.w;
+        xg.x=qg.x;
+        ag.x=qg.x;
     }
     
-    swap(&(a->dir), &(p->dir));
+    rotate_right(a, p, y);
     
     GEOM(p)=pg;
-    split_do_resize(a->br, &xg, PRIMN_ANY, PRIMN_ANY, FALSE);
-    split_do_resize(p->tl, &yg, PRIMN_ANY, PRIMN_ANY, FALSE);
+    GEOM(a)=ag;
     
-    rotate_right(a, p, y);
+    split_do_resize(x, &xg, PRIMN_ANY, PRIMN_ANY, FALSE);
+    split_do_resize(y, &yg, PRIMN_ANY, PRIMN_ANY, FALSE);
 }
+
 
 
 static void rotate_left(WSplitSplit *a, WSplitSplit *p, WSplit *y)
@@ -172,71 +200,66 @@ static void rotate_left(WSplitSplit *a, WSplitSplit *p, WSplit *y)
     assert(a->br==(WSplit*)p && p->br==y);
     
     /* Left rotation:
-     * 
-     *     a                  a
+     *     a                  p
      *   /   \              /   \
-     *  x     p     =>     p     y
+     *  x     p     =>     a     y
      *      /   \        /  \
      *     ?     y      x    ?
      */
-    a->br=y;
-    y->parent=(WSplitInner*)a;
-    p->br=p->tl;
-    p->tl=a->tl;
-    p->tl->parent=(WSplitInner*)p;
-    a->tl=(WSplit*)p;
     
-    if(a->current==SPLIT_CURRENT_TL){
-        p->current=SPLIT_CURRENT_TL;
-    }else if(p->current==SPLIT_CURRENT_TL){
-        a->current=SPLIT_CURRENT_TL;
-        p->current=SPLIT_CURRENT_BR;
-    }
+    a->br=p->tl;
+    a->br->parent=(WSplitInner*)a;
+    replace(a, p);
+    p->tl=(WSplit*)a;
+    ((WSplit*)a)->parent=(WSplitInner*)p;
 }
 
 
 static void rot_rs_rotate_left(WSplitSplit *a, WSplitSplit *p, WSplit *y)
 {
-    WRectangle xg, yg, pg;
+    WRectangle xg, yg, pg, ag, qg;
+    WSplit *x=a->tl, *q=p->tl;
     
     assert(a->dir==other_dir(p->dir));
-    
-    xg=GEOM(a->tl);
-    yg=GEOM(p->br);
+
+    qg=GEOM(q);
+    xg=GEOM(x);
+    yg=GEOM(y);
     pg=GEOM(p);
+    ag=GEOM(a);
     
     if(a->dir==SPLIT_HORIZONTAL){
         /* xx??    xx??
          * xx?? => xx??
          * xxyy    yyyy
          */
-        yg.w+=xg.w;
-        xg.h-=yg.h;
-        pg.h-=yg.h;
-        pg.w=GEOM(a).w;
-        pg.x=GEOM(a).x;
-        yg.x=GEOM(a).x;
+        yg.w=ag.w;
+        yg.x=ag.x;
+        pg.w=ag.w;
+        pg.x=ag.x;
+        xg.h=qg.h;
+        ag.h=qg.h;
     }else{
         /* xxx    xxy
          * xxx    xxy
          * ??y => ??y
          * ??y    ??y
          */
-        yg.h+=xg.h;
-        xg.w-=yg.w;
-        pg.w-=yg.w;
-        pg.h=GEOM(a).h;
-        pg.y=GEOM(a).y;
-        yg.y=GEOM(a).y;
+        yg.h=ag.h;
+        yg.y=ag.y;
+        pg.h=ag.h;
+        pg.y=ag.y;
+        xg.w=qg.w;
+        ag.w=qg.w;
     }
-    
-    swap(&(a->dir), &(p->dir));
+
+    rotate_left(a, p, y);
     
     GEOM(p)=pg;
-    split_do_resize(a->tl, &xg, PRIMN_ANY, PRIMN_ANY, FALSE);
-    split_do_resize(p->br, &yg, PRIMN_ANY, PRIMN_ANY, FALSE);
+    GEOM(a)=ag;
     
-    rotate_left(a, p, y);
+    split_do_resize(x, &xg, PRIMN_ANY, PRIMN_ANY, FALSE);
+    split_do_resize(y, &yg, PRIMN_ANY, PRIMN_ANY, FALSE);
 }
 
 
@@ -248,63 +271,62 @@ static void flip_right(WSplitSplit *a, WSplitSplit *p)
     assert(a->tl==(WSplit*)p);
     
     /* Right flip:
-     *        a               a 
+     *        a               p 
      *      /   \           /   \
-     *     p     x   =>    p     y
+     *     p     x   =>    a     y
      *   /  \            /  \
      *  ?    y          ?    x
      */
-    swapptr(&(p->br), &(a->br));
-    a->br->parent=(WSplitInner*)a;
-    p->br->parent=(WSplitInner*)p;
-    
-    if(a->current==SPLIT_CURRENT_BR){
-        a->current=SPLIT_CURRENT_TL;
-        p->current=SPLIT_CURRENT_BR;
-    }else if(p->current==SPLIT_CURRENT_BR){
-        a->current=SPLIT_CURRENT_BR;
-    }
+
+    a->tl=p->tl;
+    a->tl->parent=(WSplitInner*)a;
+    replace(a, p);
+    p->tl=(WSplit*)a;
+    ((WSplit*)a)->parent=(WSplitInner*)p;
 }
 
 
 static void rot_rs_flip_right(WSplitSplit *a, WSplitSplit *p)
 {
-    WRectangle xg, yg, pg;
+    WRectangle xg, yg, pg, ag, qg;
+    WSplit *x=a->br, *q=p->tl, *y=p->br;
     
     assert(a->dir==other_dir(p->dir));
-    
-    xg=GEOM(a->br);
-    yg=GEOM(p->br);
+
+    qg=GEOM(q);
+    xg=GEOM(x);
+    yg=GEOM(y);
     pg=GEOM(p);
+    ag=GEOM(a);
     
     if(a->dir==SPLIT_HORIZONTAL){
         /* ??xx    ??xx
          * ??xx => ??xx
          * yyxx    yyyy
          */
-        yg.w+=xg.w;
-        xg.h-=yg.h;
-        pg.h-=yg.h;
-        pg.w=GEOM(a).w;
+        yg.w=ag.w;
+        pg.w=ag.w;
+        ag.h=qg.h;
+        xg.h=qg.h;
     }else{
         /* ??y    ??y
          * ??y    ??y
          * xxx => xxy
          * xxx    xxy
          */
-        yg.h+=xg.h;
-        xg.w-=yg.w;
-        pg.w-=yg.w;
-        pg.h=GEOM(a).h;
+        yg.h=ag.h;
+        pg.h=ag.h;
+        ag.w=qg.w;
+        xg.w=qg.w;
     }
     
-    swap(&(a->dir), &(p->dir));
+    flip_right(a, p);
     
     GEOM(p)=pg;
-    split_do_resize(a->br, &xg, PRIMN_ANY, PRIMN_ANY, FALSE);
-    split_do_resize(p->br, &yg, PRIMN_ANY, PRIMN_ANY, FALSE);
+    GEOM(a)=ag;
     
-    flip_right(a, p);
+    split_do_resize(x, &xg, PRIMN_ANY, PRIMN_ANY, FALSE);
+    split_do_resize(y, &yg, PRIMN_ANY, PRIMN_ANY, FALSE);
 }
 
 
@@ -315,80 +337,70 @@ static void flip_left(WSplitSplit *a, WSplitSplit *p)
     assert(a->br==(WSplit*)p);
     
     /* Left flip:
-     *     a               a 
+     *     a               p 
      *   /   \           /   \
-     *  x     p    =>   y     p
+     *  x     p    =>   y     a
      *      /  \            /  \
      *     y    ?          x    ?
      */
-    swapptr(&(p->tl), &(a->tl));
-    a->tl->parent=(WSplitInner*)a;
-    p->tl->parent=(WSplitInner*)p;
     
-    if(a->current==SPLIT_CURRENT_TL){
-        a->current=SPLIT_CURRENT_BR;
-        p->current=SPLIT_CURRENT_TL;
-    }else if(p->current==SPLIT_CURRENT_TL){
-        a->current=SPLIT_CURRENT_TL;
-    }
+    a->br=p->br;
+    a->br->parent=(WSplitInner*)a;
+    replace(a, p);
+    p->br=(WSplit*)a;
+    ((WSplit*)a)->parent=(WSplitInner*)p;
 }
 
 
 static void rot_rs_flip_left(WSplitSplit *a, WSplitSplit *p)
 {
-    WRectangle xg, yg, pg;
+    WRectangle xg, yg, pg, ag, qg;
+    WSplit *x=a->tl, *q=p->br, *y=p->tl;
     
     assert(a->dir==other_dir(p->dir));
-    
-    xg=GEOM(a->tl);
-    yg=GEOM(p->tl);
+
+    qg=GEOM(q);
+    xg=GEOM(x);
+    yg=GEOM(y);
     pg=GEOM(p);
+    ag=GEOM(a);
     
     if(a->dir==SPLIT_HORIZONTAL){
         /* xxyy    yyyy
          * xx?? => xx??
          * xx??    xx??
          */
-        yg.w+=xg.w;
-        xg.h-=yg.h;
-        pg.h-=yg.h;
-        pg.w=GEOM(a).w;
-        yg.x=GEOM(a).x;
-        pg.x=GEOM(a).x;
-        pg.y+=yg.h;
-        xg.y+=yg.h;
+        yg.x=ag.x;
+        yg.w=ag.w;
+        pg.x=ag.x;
+        pg.w=ag.w;
+        xg.h=qg.h;
+        xg.y=qg.y;
+        ag.h=qg.h;
+        ag.y=qg.y;
     }else{
         /* xxx    yxx
          * xxx    yxx
          * y?? => y??
          * y??    y??
          */
-        yg.h+=xg.h;
-        xg.w-=yg.w;
-        pg.w-=yg.w;
-        pg.h=GEOM(a).h;
-        yg.y=GEOM(a).y;
-        pg.y=GEOM(a).y;
-        pg.x+=yg.w;
-        xg.x+=yg.w;
+        yg.y=ag.y;
+        yg.h=ag.h;
+        pg.y=ag.y;
+        pg.h=ag.h;
+        xg.w=qg.w;
+        xg.x=qg.x;
+        ag.w=qg.w;
+        ag.x=qg.x;
     }
     
-    swap(&(a->dir), &(p->dir));
+    flip_left(a, p);
     
     GEOM(p)=pg;
-    split_do_resize(a->tl, &xg, PRIMN_ANY, PRIMN_ANY, FALSE);
-    split_do_resize(p->tl, &yg, PRIMN_ANY, PRIMN_ANY, FALSE);
+    GEOM(a)=ag;
     
-    flip_left(a, p);
-}
-
-
-static bool stdisp_dir_ok(WSplitSplit *p, WSplitST *stdisp)
-{
-    assert(p->tl==(WSplit*)stdisp || p->br==(WSplit*)stdisp);
-    
-    return (IMPLIES(STDISP_IS_HORIZONTAL(stdisp), p->dir==SPLIT_VERTICAL) &&
-            IMPLIES(STDISP_IS_VERTICAL(stdisp), p->dir==SPLIT_HORIZONTAL));
+    split_do_resize(x, &xg, PRIMN_ANY, PRIMN_ANY, FALSE);
+    split_do_resize(y, &yg, PRIMN_ANY, PRIMN_ANY, FALSE);
 }
 
 
@@ -418,25 +430,10 @@ static bool do_try_sink_stdisp_orth(WSplitSplit *p, WSplitST *stdisp,
         }
         
         if(doit){
-            if(p->br==(WSplit*)stdisp){
-                /*
-                 *      p               p 
-                 *    /   \           /   \   (direction of other and p
-                 *  other stdisp  =>  other br   changed)
-                 *  /  \            /  \
-                 * tl  br          tl  stdisp
-                 */
+            if(p->br==(WSplit*)stdisp)
                 rot_rs_flip_right(p, other);
-            }else{ /* p->tl==stdisp */
-                /*
-                 *     p                p
-                 *   /   \            /  \      (direction of other and p
-                 * stdisp other  =>  other br      changed)
-                 *      /  \       /  \   
-                 *     tl  br    stdisp tl
-                 */
+            else /* p->tl==stdisp */
                 rot_rs_rotate_left(p, other, other->br);
-            }
         }
     }else{ /* STDISP_GROWS_B_TO_T or STDISP_GROW_R_TO_L */
         if(STDISP_GROWS_R_TO_L(stdisp)){
@@ -450,25 +447,10 @@ static bool do_try_sink_stdisp_orth(WSplitSplit *p, WSplitST *stdisp,
         }
         
         if(doit){
-            if(p->tl==(WSplit*)stdisp){
-                /*
-                 *     p              p
-                 *   /   \          /   \      (direction of other and p
-                 * stdisp other  =>  tl  other    changed)
-                 *      /  \           /  \
-                 *     tl  br        stdisp  br
-                 */
+            if(p->tl==(WSplit*)stdisp)
                 rot_rs_flip_left(p, other);
-            }else{ /* p->br==stdisp */
-                /*
-                 *       p             p
-                 *     /   \         /   \      (direction of other and p
-                 *  other stdisp  =>  tl   other   changed)
-                 *  /  \                 /  \
-                 * tl  br               br  stdisp
-                 */
+            else /* p->br==stdisp */
                 rot_rs_rotate_right(p, other, other->tl);
-            }
         }
     }
     
@@ -494,8 +476,7 @@ static bool do_try_sink_stdisp_para(WSplitSplit *p, WSplitST *stdisp,
     else
         rotate_right(p, other, other->tl);
     
-    
-    splitsplit_update_geom_from_children(other);
+    swapgeom(&GEOM(p), &GEOM(other));
     
     return TRUE;
 }
@@ -533,7 +514,6 @@ bool split_try_sink_stdisp(WSplitSplit *node, bool iterate, bool force)
             if(!do_try_sink_stdisp_para(node, st, other, force))
                 break;
         }
-        node=other;
         didsomething=TRUE;
         more=iterate;
     }
@@ -555,7 +535,7 @@ static bool do_try_unsink_stdisp_orth(WSplitSplit *a, WSplitSplit *p,
     
 #warning "Add check that we can shrink or just let stdisp take precedence?"
     
-    assert(p->dir=other_dir(a->dir));
+    assert(p->dir==other_dir(a->dir));
     assert(stdisp_dir_ok(p, stdisp));
     
     if(STDISP_GROWS_T_TO_B(stdisp) || STDISP_GROWS_L_TO_R(stdisp)){
@@ -647,7 +627,7 @@ static bool do_try_unsink_stdisp_para(WSplitSplit *a, WSplitSplit *p,
         return FALSE;
     }
     
-    splitsplit_update_geom_from_children(p);
+    swapgeom(&GEOM(a), &GEOM(p));
     
     return TRUE;
 }
@@ -685,7 +665,6 @@ bool split_try_unsink_stdisp(WSplitSplit *node, bool iterate, bool force)
                 break;
         }
         
-        node=p;
         didsomething=TRUE;
         more=iterate;
     }
