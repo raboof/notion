@@ -34,5 +34,5 @@ ext_statusbar.set{
 ext_statusbar.create{
     -- First screen, bottom left corner
     screen=0,
-    corner='bl',
+    pos='bl',
 }
