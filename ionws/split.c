@@ -14,6 +14,7 @@
 #include <X11/Xmd.h>
 
 #include <libtu/minmax.h>
+#include <libtu/rb.h>
 #include <libtu/objp.h>
 #include <ioncore/common.h>
 #include <ioncore/focus.h>
@@ -32,6 +33,9 @@
 
     
 IMPLCLASS(WWsSplit, Obj, NULL, NULL);
+
+
+static Rb_node split_of_map=NULL;
 
 
 /*{{{ Misc helper functions */
@@ -138,11 +142,18 @@ static int reg_resize(WRegion *reg, int dir, int npos, int nsize)
 
 static WWsSplit *split_of_reg(WRegion *reg)
 {
-    WWsSplit *split=NULL;
-    WIonWS *ws=REGION_MANAGER_CHK(reg, WIonWS);
-    assert(ws!=NULL);
-    extl_table_get(ws->managed_splits, 'o', 'o', reg, &split);
-    return split;
+    Rb_node node=NULL;
+    int found=0;
+    
+    assert(REGION_MANAGER_CHK(reg, WIonWS)!=NULL);
+    
+    if(split_of_map!=NULL){
+        node=rb_find_pkey_n(split_of_map, reg, &found);
+        if(found)
+            return (WWsSplit*)(node->v.val);
+    }
+    
+    return NULL;
 }
 
     
@@ -157,11 +168,28 @@ WWsSplit *split_of(Obj *obj)
 }
 
 
-void set_split_of_reg(WRegion *reg, WWsSplit *split)
+bool set_split_of_reg(WRegion *reg, WWsSplit *split)
 {
-    WIonWS *ws=REGION_MANAGER_CHK(reg, WIonWS);
-    assert(ws!=NULL);
-    extl_table_set(ws->managed_splits, 'o', 'o', reg, split);
+    Rb_node node=NULL;
+    int found;
+    
+    assert(REGION_MANAGER_CHK(reg, WIonWS)!=NULL);
+
+    if(split_of_map==NULL){
+        if(split==NULL)
+            return TRUE;
+        split_of_map=make_rb();
+        if(split_of_map==NULL){
+            warn_err();
+            return FALSE;
+        }
+    }
+    
+    node=rb_find_pkey_n(split_of_map, reg, &found);
+    if(found)
+        rb_delete_node(node);
+
+    return (rb_insertp(split_of_map, reg, split)!=NULL);
 }
 
 
