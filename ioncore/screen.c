@@ -137,10 +137,21 @@ void screen_deinit(WScreen *scr)
 
 static bool create_initial_workspace_on_scr(WScreen *scr)
 {
-	WRegionSimpleCreateFn *fn;
-	WRegion *reg;
+	WRegionSimpleCreateFn *fn=NULL;
+	WRegion *reg=NULL;
 	
-	fn=lookup_region_simple_create_fn_inh("WGenWS");
+	/* Check default_ws_type */{
+		ExtlTab tab=extl_globals();
+		char *wsclass=NULL;
+		if(extl_table_gets_s(tab, "default_ws_type", &wsclass)){
+			fn=lookup_region_simple_create_fn_inh(wsclass);
+			free(wsclass);
+		}
+		extl_unref_table(tab);
+	}
+		
+	if(fn==NULL)
+		fn=lookup_region_simple_create_fn_inh("WGenWS");
 	
 	if(fn==NULL){
 		warn("Could not find a complete workspace class. "
