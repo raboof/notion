@@ -42,14 +42,25 @@ EXTRABINDIR=$(LIBDIR)/ion-devel
 # though a lot of libltdl-using apps require 1.4.3. 
 LIBTOOL=libtool
 
+# Settings for compiling and linking to ltdl
+LTDL_INCLUDES=
+LTDL_LIBS=-lltdl
+
+# The following should do it if you have manually installed libtool 1.5 in
+# $(LIBTOOLDIR).
+#LIBTOOLDIR=/usr/local/stow/libtool-1.5
+#LIBTOOL=$(LIBTOOLDIR)/bin/libtool
+#LTDL_INCLUDES=-I$(LIBTOOLDIR)/include
+#LTDL_LIBS=-L$(LIBTOOLDIR)/lib -lltdl
+
 # Set PRELOAD_MODULES=1 if your system does not support dynamically loaded
 # modules. 
 #PRELOAD_MODULES=1
 
-# Note to Cygwin users: you must set this option and also LIBTOOL point to 
-# a real libtool script (e.g. /usr/autotool/stable/bin/libtool) instead of
-# some useless autoconf-expecting wrapper. In order to workspace save files
-# to work, you should also add the setting
+# Note to Cygwin users: you must set the above option and also LIBTOOL point 
+# to a real libtool script (e.g. /usr/autotool/stable/bin/libtool) instead 
+# of some useless autoconf-expecting wrapper. In order to workspace save 
+# files to work, you should also add the setting
 #DEFINES+=-DCF_SECOND_RATE_OS_FS
 # to replace colons in save file names with underscores. With these settings
 # Ion should compile on at least the version of Cygwin I installed on
@@ -57,10 +68,6 @@ LIBTOOL=libtool
 
 # List of modules to build (and possibly preload)
 MODULE_LIST=ionws floatws query de
-
-# Settings for compiling and linking to ltdl
-LTDL_INCLUDES=
-LTDL_LIBS=-lltdl
 
 
 ##
