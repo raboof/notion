@@ -107,6 +107,15 @@ bool add_clientwin_default(WClientWin *cwin, const WManageParams *param)
 	if(try_manage((WRegion*)scr, cwin, param, &triedws))
 		return TRUE;
 	
+	if(clientwin_get_transient_mode(cwin)==TRANSIENT_MODE_CURRENT){
+		WRegion *r=mplex_current((WMPlex*)scr);
+		if(r!=NULL && WOBJ_IS(r, WClientWin)){
+			if(clientwin_attach_transient((WClientWin*)r, (WRegion*)cwin)){
+				return TRUE;
+			}
+		}
+	}
+
 	return region_manage_clientwin((WRegion*)scr, cwin, param);
 }
 
