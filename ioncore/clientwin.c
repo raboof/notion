@@ -810,26 +810,28 @@ static void convert_geom(WClientWin *cwin, WRectangle max_geom,
 {
 	WRectangle r;
 	bool bottom=FALSE;
+	int htry=max_geom.h;
 	
 	/* Align transients managed by another client window at bottom. */
 	/*if(cwin->transient_for!=None){*/
 	if(REGION_MANAGER(cwin)!=NULL &&
 	   WOBJ_IS(REGION_MANAGER(cwin), WClientWin)){
 		bottom=TRUE;
-		if(max_geom.h>cwin->last_h_rq){
-			max_geom.y+=max_geom.h-cwin->last_h_rq;
-			max_geom.h=cwin->last_h_rq;
-		}
+		if(max_geom.h>cwin->last_h_rq)
+			htry=cwin->last_h_rq;
 	}
 	
 	geom->w=max_geom.w;
-	geom->h=max_geom.h;
+	geom->h=htry;
 	
 	/* Don't ignore minimum size at first try. */
 	if(bottom)
 		correct_size(&(geom->w), &(geom->h), &(cwin->size_hints), TRUE);
-	if(!bottom || geom->w>max_geom.w || geom->h>max_geom.h)
+	if(!bottom || geom->w>max_geom.w || geom->h>max_geom.h){
+		geom->w=max_geom.w;
+		geom->h=htry;
 		correct_size(&(geom->w), &(geom->h), &(cwin->size_hints), FALSE);
+	}
 
 	geom->x=max_geom.x+max_geom.w/2-geom->w/2;
 	
@@ -866,7 +868,8 @@ static void clientwin_request_managed_geom(WClientWin *cwin, WRegion *sub,
 
 
 
-static void do_fit_clientwin(WClientWin *cwin, WRectangle max_geom, WWindow *np)
+static void do_fit_clientwin(WClientWin *cwin, WRectangle max_geom, 
+							 WWindow *np)
 {
 	WRegion *transient, *next;
 	WRectangle geom;
@@ -1082,6 +1085,10 @@ WClientWin *find_clientwin(Window win)
 /*{{{ ConfigureRequest */
 
 
+#undef MAX
+#define MAX(X, Y) ((X) > (Y) ? (X) : (Y))
+
+
 void clientwin_handle_configure_request(WClientWin *cwin,
 										XConfigureRequestEvent *ev)
 {
@@ -1127,7 +1134,7 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 				geom.x+=gravity_deltax(cwin->size_hints.win_gravity, 0,
 									   ev->width-geom.w);
 			}
-			geom.w=ev->width;
+			geom.w=MAX(ev->width, 1);
 			rqflags&=~REGION_RQGEOM_WEAK_W;
 		}
 		if(ev->value_mask&CWHeight){
@@ -1136,7 +1143,8 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 				geom.y+=gravity_deltay(cwin->size_hints.win_gravity, 0,
 									   ev->height-geom.h);
 			}
-			geom.h=ev->height;
+			geom.h=MAX(ev->height, 1);
+			cwin->last_h_rq=geom.h;
 			rqflags&=~REGION_RQGEOM_WEAK_H;
 		}
 		if(ev->value_mask&CWX){
