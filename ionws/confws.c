@@ -325,8 +325,6 @@ static void dodo_write_workspaces(FILE *file)
 			continue;
 		}
 		
-		fprintf(stderr, "--S %s\n", region_name((WRegion*)ws));
-
 		if(ws->splitree==NULL){
 			warn("Empty workspace -- this cannot happen");
 			continue;
@@ -430,7 +428,6 @@ static bool do_write_workspaces(char *wsconf)
 	
 	fprintf(file, "# This file was created by and is modified by Ion.\n");
 	
-	fprintf(stderr, "[%s]\n", wsconf);
 	dodo_write_workspaces(file);
 	
 	fclose(file);
@@ -444,7 +441,6 @@ bool write_workspaces(WViewport *vp)
 	bool successp;
 	char *wsconf;
 	
-	fprintf(stderr, "<%d>\n", vp->id);
 	wsconf=get_savefile_for_scr("workspaces", vp->id);
 	
 	if(wsconf==NULL)

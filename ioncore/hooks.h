@@ -39,6 +39,18 @@ typedef WSymlist WHooklist;
 	}
 
 
+#define CALL_ALT_B_NORET(ALT, ARGS)       \
+	{                                     \
+		typedef bool AltFn();             \
+		AltFn *hk;                        \
+                                          \
+		ITERATE_SYMLIST(AltFn*, hk, ALT){ \
+			if(hk ARGS)                   \
+			    break;                    \
+		}                                 \
+	}
+
+
 #define CALL_ALT_P(TYPE, RET, ALT, ARGS)  \
 	{                                     \
 		typedef TYPE *AltFn();            \

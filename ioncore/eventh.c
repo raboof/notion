@@ -31,6 +31,15 @@
 #include "regbind.h"
 
 
+/*{{{ Hooks */
+
+
+WHooklist *handle_event_alt=NULL;
+
+
+/*}}}*/
+
+
 /*{{{ Prototypes */
 
 
@@ -134,7 +143,7 @@ static void skip_focusenter_but(WRegion *reg)
 }
 
 
-void handle_event(XEvent *ev)
+void handle_event_default(XEvent *ev)
 {
 	switch(ev->type){
 	CASE_EVENT(MapRequest)
@@ -212,7 +221,8 @@ void mainloop()
 	
 	for(;;){
 		get_event(&ev);
-		handle_event(&ev);
+		
+		CALL_ALT_B_NORET(handle_event_alt, (&ev));
 
 		execute_deferred();
 		

@@ -11,6 +11,8 @@
 #include "common.h"
 
 extern void mainloop();
-extern void handle_event(XEvent *ev);
+extern void handle_event_default(XEvent *ev);
+
+extern WHooklist *handle_event_alt;
 
 #endif /* WMCORE_EVENTH_H */

@@ -27,6 +27,7 @@
 #include "imports.h"
 #include "wsreg.h"
 #include "funtabs.h"
+#include "eventh.h"
 
 
 /*{{{ Global variables */
@@ -43,6 +44,7 @@ WGlobal wglobal;
 static void init_hooks()
 {
 	ADD_HOOK(add_clientwin_alt, add_clientwin_default);
+	ADD_HOOK(handle_event_alt, handle_event_default);
 }
 
 
