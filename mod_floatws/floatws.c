@@ -42,6 +42,7 @@ static WFloatStacking *stacking=NULL;
 
 static void floatws_place_stdisp(WFloatWS *ws, WWindow *parent,
                                  int corner, WRegion *stdisp);
+static void floatws_do_raise(WFloatWS *ws, WRegion *reg, bool initial);
 
 
 /*{{{ region dynfun implementations */
@@ -393,7 +394,7 @@ static bool floatws_add_managed(WFloatWS *ws, WRegion *reg, bool skip_list)
     region_add_bindmap_owned(reg, mod_floatws_floatws_bindmap, (WRegion*)ws);
 
     LINK_ITEM_FIRST(stacking, st, next, prev);
-    floatws_raise(ws, reg);
+    floatws_do_raise(ws, reg, TRUE);
 
     if(region_is_fully_mapped((WRegion*)ws))
         region_map(reg);
@@ -721,28 +722,80 @@ void floatws_manage_stdisp(WFloatWS *ws, WRegion *stdisp, int corner)
 
 
 /*EXTL_DOC
- * Activate next object on \var{ws}.
+ * Activate next object in stacking order on \var{ws}.
  */
 EXTL_EXPORT_MEMBER
 WRegion *floatws_circulate(WFloatWS *ws)
 {
-    WRegion *r=REGION_NEXT_MANAGED_WRAP(ws->managed_list, ws->current_managed);
-    if(r!=NULL)
-        region_goto(r);
-    return r;
+    WFloatStacking *st=NULL, *ststart;
+    
+    if(stacking==NULL)
+        return NULL;
+    
+    if(ws->current_managed!=NULL){
+        st=mod_floatws_find_stacking(ws->current_managed);
+        if(st!=NULL)
+            st=st->next;
+    }
+    
+    if(st==NULL)
+        st=stacking;
+    ststart=st;
+    
+    while(1){
+        if(REGION_MANAGER(st->reg)==(WRegion*)ws
+           && st->reg!=ws->managed_stdisp){
+            break;
+        }
+        st=st->next;
+        if(st==NULL)
+            st=stacking;
+        if(st==ststart)
+            return NULL;
+    }
+        
+    if(region_may_control_focus((WRegion*)ws))
+       region_goto(st->reg);
+    
+    return st->reg;
 }
 
 
 /*EXTL_DOC
- * Activate previous object on \var{ws}.
+ * Activate previous object in stacking order on \var{ws}.
  */
 EXTL_EXPORT_MEMBER
 WRegion *floatws_backcirculate(WFloatWS *ws)
 {
-    WRegion *r=REGION_PREV_MANAGED_WRAP(ws->managed_list, ws->current_managed);
-    if(r!=NULL)
-        region_goto(r);
-    return r;
+    WFloatStacking *st=NULL, *ststart;
+    
+    if(stacking==NULL)
+        return NULL;
+    
+    if(ws->current_managed!=NULL){
+        st=mod_floatws_find_stacking(ws->current_managed);
+        if(st!=NULL)
+            st=st->prev;
+    }
+    
+    if(st==NULL)
+        st=stacking->prev;
+    ststart=st;
+    
+    while(1){
+        if(REGION_MANAGER(st->reg)==(WRegion*)ws
+           && st->reg!=ws->managed_stdisp){
+            break;
+        }
+        st=st->next;
+        if(st==ststart)
+            return NULL;
+    }
+        
+    if(region_may_control_focus((WRegion*)ws))
+       region_goto(st->reg);
+    
+    return st->reg;
 }
 
 
@@ -968,12 +1021,7 @@ void floatws_restack(WFloatWS *ws, Window other, int mode)
 }
 
 
-/*EXTL_DOC
- * Raise \var{reg} that must be managed by \var{ws}.
- * If \var{reg} is \code{nil}, this function silently fails.
- */
-EXTL_EXPORT_MEMBER
-void floatws_raise(WFloatWS *ws, WRegion *reg)
+static void floatws_do_raise(WFloatWS *ws, WRegion *reg, bool initial)
 {
     WFloatStacking *st, *sttop=NULL, *stabove, *stnext;
     Window bottom=None, top=None, other=None;
@@ -1006,9 +1054,12 @@ void floatws_raise(WFloatWS *ws, WRegion *reg)
         UNLINK_ITEM(stacking, st, next, prev);
         region_restack(reg, other, Above);
         LINK_ITEM_AFTER(stacking, sttop, st, next, prev);
-    }else{
+    }else if(initial){
         region_restack(reg, ws->genws.dummywin, Above);
     }
+    
+    if(initial)
+        return;
     
     region_stacking(reg, &bottom, &top);
     if(top==None)
@@ -1022,13 +1073,24 @@ void floatws_raise(WFloatWS *ws, WRegion *reg)
         if(stabove->above==reg){
             UNLINK_ITEM(stacking, stabove, next, prev);
             region_restack(stabove->reg, other, Above);
-            LINK_ITEM_AFTER(stacking, sttop, st, next, prev);
+            LINK_ITEM_AFTER(stacking, sttop, stabove, next, prev);
             region_stacking(stabove->reg, &bottom, &top);
             if(top!=None)
                 other=top;
             sttop=stabove;
         }
     }
+}
+
+
+/*EXTL_DOC
+ * Raise \var{reg} that must be managed by \var{ws}.
+ * If \var{reg} is \code{nil}, this function silently fails.
+ */
+EXTL_EXPORT_MEMBER
+void floatws_raise(WFloatWS *ws, WRegion *reg)
+{
+    floatws_do_raise(ws, reg, FALSE);
 }
 
 
