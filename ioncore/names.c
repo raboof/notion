@@ -67,7 +67,8 @@ static int parseinst(const char *name, const char **startinst)
     return inst;
 }
 
-void region_unuse_name(WRegion *reg)
+
+static void do_unuse_name(WRegion *reg)
 {
     WNamespace *ns=reg->ni.namespaceinfo;
     Rb_node node;
@@ -86,7 +87,12 @@ void region_unuse_name(WRegion *reg)
     free(reg->ni.name);
     reg->ni.name=NULL;
     reg->ni.namespaceinfo=NULL;
-    
+}
+
+
+void region_unuse_name(WRegion *reg)
+{
+    do_unuse_name(reg);
     region_notify_change(reg);
 }
 
@@ -148,10 +154,7 @@ static bool do_use_name(WRegion *reg, WNamespace *ns, const char *name,
     if(parsed_inst>=0 && inst==0 && failchange)
         return FALSE;
     
-    /* We must unuse the old name here already to avoid problems if the
-     * new name is the same. (Should check...)
-     */
-    region_unuse_name(reg);
+    do_unuse_name(reg);
     
     if(instrq>=0){
         fullname=make_full_name(name, instrq, parsed_inst>=0);
@@ -276,7 +279,7 @@ static bool do_set_name(bool (*fn)(WRegion *reg, WNamespace *ns, const char *p),
     }
     
     if(nm==NULL || *nm=='\0'){
-        region_unuse_name(reg);
+        do_unuse_name(reg);
     }else{
         if(!initialise_ns(ns))
             return FALSE;
