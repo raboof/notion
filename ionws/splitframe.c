@@ -14,6 +14,7 @@
 #include <ioncore/clientwin.h>
 #include <ioncore/resize.h>
 #include <ioncore/genframep.h>
+#include <ioncore/defer.h>
 #include "splitframe.h"
 #include "split.h"
 
@@ -193,7 +194,7 @@ void ionframe_relocate_and_close(WIonFrame *frame)
 		return;
 	}
 
-	destroy_obj((WObj*)frame);
+	defer_destroy((WObj*)frame);
 }
 
 

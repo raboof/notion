@@ -16,6 +16,7 @@
 #include <ioncore/event.h>
 #include <ioncore/regbind.h>
 #include <ioncore/extl.h>
+#include <ioncore/defer.h>
 #include "edln.h"
 #include "wedln.h"
 #include "inputp.h"
@@ -508,17 +509,13 @@ static void wedln_deinit(WEdln *wedln)
 }
 
 
-/*EXTL_DOC
- * Close \var{wedln} and call any handlers.
- */
-EXTL_EXPORT
-void wedln_finish(WEdln *wedln)
+static void wedln_do_finish(WEdln *wedln)
 {
 	ExtlFn handler;
 	char *p;
 	
-	handler=extl_ref_fn(wedln->handler);
-	/*parent=((WRegion*)wedln)->parent;*/
+	handler=wedln->handler;
+	wedln->handler=extl_fn_none();
 	p=edln_finish(&(wedln->edln));
 	
 	destroy_obj((WObj*)wedln);
@@ -528,6 +525,16 @@ void wedln_finish(WEdln *wedln)
 	
 	free(p);
 	extl_unref_fn(handler);
+}
+
+
+/*EXTL_DOC
+ * Close \var{wedln} and call any handlers.
+ */
+EXTL_EXPORT
+void wedln_finish(WEdln *wedln)
+{
+	defer_action((WObj*)wedln, (DeferredAction*)wedln_do_finish);
 }
 
 

@@ -9,6 +9,7 @@
 #include <ioncore/window.h>
 #include <ioncore/global.h>
 #include <ioncore/regbind.h>
+#include <ioncore/defer.h>
 #include "inputp.h"
 
 
@@ -136,7 +137,7 @@ void input_deinit(WInput *input)
 EXTL_EXPORT
 void input_cancel(WInput *input)
 {
-	destroy_obj((WObj*)input);
+	defer_destroy((WObj*)input);
 }
 
 

@@ -971,7 +971,7 @@ static bool ionws_remove_split(WIonWS *ws, WWsSplit *split)
 		split_tree_do_resize(other, split->dir, npos, nsize);
 	}
 
-	free(split);
+	destroy_obj((WObj*)split);
 	
 	return TRUE;
 }
