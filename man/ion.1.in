@@ -29,7 +29,7 @@ in the DISPLAY environment variable.
 .TP
 .B \-sessionname seession_name
 Set sesion name. This option affects where workspace and other savefiles are
-put (~/.ion/session_name if option set).
+put (~/.ion2/session_name if option set).
 .TP
 .B \-xinerama 0|1
 If Ion was compiled with Xinerama support, this option can be used to
