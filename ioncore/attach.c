@@ -148,7 +148,7 @@ bool region_move_managed_on_list(WRegion *dest, WRegion *src,
 	assert(region_supports_add_managed(dest));
 	
 	FOR_ALL_MANAGED_ON_LIST_W_NEXT(list, r, next){
-		if(!region_add_managed(dest, r, 0))
+		if(!region_add_managed_simple(dest, r, 0))
 			success=FALSE;
 	}
 	

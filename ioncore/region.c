@@ -428,20 +428,18 @@ void region_detach_manager(WRegion *reg)
 	if(region_may_control_focus(reg)){
 		WRegion *par=FIND_PARENT1(reg, WRegion);
 		if(par!=NULL && mgr!=par && FIND_PARENT1(mgr, WRegion)==par){
-			if(region_x_window(mgr)==None){
-				/* REGION_ACTIVE shouldn't be set for windowless regions
-				 * but make the parent's active_sub point to it
-				 * nevertheless so that region_may_control_focus can
-				 * be made to work.
-				 */
-				D2(fprintf(stderr, "detach mgr %s, %s->active_sub=%s\n",
-						   WOBJ_TYPESTR(reg), WOBJ_TYPESTR(par),
-						   WOBJ_TYPESTR(mgr)));
-				par->active_sub=mgr;
-			}else{
-				D2(fprintf(stderr, "detach mgr %s, set_focus(%s)\n",
-						   WOBJ_TYPESTR(reg), WOBJ_TYPESTR(mgr)));
-				set_focus(mgr);
+			/* REGION_ACTIVE shouldn't be set for windowless regions
+			 * but make the parent's active_sub point to it
+			 * nevertheless so that region_may_control_focus can
+			 * be made to work.
+			 */
+			D2(fprintf(stderr, "detach mgr %s, %s->active_sub=%s\n",
+					   WOBJ_TYPESTR(reg), WOBJ_TYPESTR(par),
+					   WOBJ_TYPESTR(mgr)));
+			par->active_sub=mgr;
+			if(region_x_window(mgr)!=None){
+				D2(fprintf(stderr, "\tdo_set_focus\n"));
+				do_set_focus(mgr, FALSE);
 			}
 		}
 	}
