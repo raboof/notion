@@ -185,7 +185,11 @@ void region_set_focus_to(WRegion *reg, bool warp)
 
 
 /*EXTL_DOC
- * Attempt to close/destroy \var{reg}.
+ * Attempt to close/destroy \var{reg}. Whether this operation works
+ * depends on whether the particular type of region in question has
+ * implemented the feature and, in case of client windows, whether
+ * the client supports the \code{WM_DELETE} protocol (see also
+ * \fnref{WClientWin.kill}).
  */
 EXTL_EXPORT_MEMBER
 void region_close(WRegion *reg)
