@@ -28,9 +28,6 @@ DECLOBJ(WWindow){
 };
 
 
-#include "screen.h"
-
-
 extern bool window_init(WWindow *p, WWindow *parent,
 						Window win, WRectangle geom);
 extern bool window_init_new(WWindow *p, WWindow *parent, WRectangle geom);

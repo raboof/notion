@@ -237,9 +237,6 @@ static WScreen *preinit_screen(int xscr)
 	scr->w_unit=7;
 	scr->h_unit=13;
 	
-	scr->bcount=NULL;
-	scr->n_bcount=0;
-	
 	MARK_REGION_MAPPED(scr);
 	
 	scan_initial_windows(scr);

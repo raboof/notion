@@ -41,9 +41,6 @@ DECLOBJ(WScreen){
 	int tmpnwins;
 	
 	WGRData grdata;
-	
-	void *bcount;
-	int n_bcount;
 };
 
 
