@@ -26,7 +26,7 @@ ionframe_bindings{
            function(frame) ionframe_split(frame, "bottom") end),
 
     submap(DEFAULT_MOD .. "K"){
-        kpress("AnyModifier+X", ionframe_close),
+        kpress("AnyModifier+X", ionframe_relocate_and_close),
         kpress("AnyModifier+S",
                function(frame) ionframe_split(frame, "right") end),
     },

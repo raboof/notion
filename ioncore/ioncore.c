@@ -59,7 +59,7 @@ static OptParserOpt ioncore_opts[]={
 	{'c', 			"conffile", OPT_ARG, "config_file", "Configuration file"},
 	{OPT_ID('o'), 	"oneroot",  0, NULL, "Manage default root window/non-Xinerama screen only"},
 	{OPT_ID('c'), 	"confdir", 	OPT_ARG, "dir", "Search directory for configuration files"},
-	{OPT_ID('l'), 	"libdir", 	OPT_ARG, "dir", "Search directory for modules"},
+	{OPT_ID('l'), 	"moduledir", OPT_ARG, "dir", "Search directory for modules"},
 	END_OPTPARSEROPTS
 };
 
