@@ -66,9 +66,21 @@ end
 
 
 --DOC
+-- Map all entries of \var{t} by \var{f}.
+function table.map(f, t)
+    local res={}
+    for k, v in t do
+        res[k]=f(v)
+    end
+    return res
+end
+
+
+--DOC
 -- Export a list of functions from \var{lib} into global namespace.
 function export(lib, ...)
     for k, v in arg do
         _G[v]=lib[v]
     end
 end
+
