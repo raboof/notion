@@ -118,6 +118,8 @@ void region_unuse_name(WRegion *reg)
 	reg->ni.name=NULL;
 	reg->ni.namespaceinfo=NULL;
 	UNLINK_ITEM(ns->list, reg, ni.ns_next, ni.ns_prev);
+	
+	region_notify_change(reg);
 }
 
 
