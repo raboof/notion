@@ -67,10 +67,10 @@ static OptParserOpt ion_opts[]={
      DUMMY_TR("Do not create startup error log and display it "
               "with xmessage.")},
     
-    {OPT_ID('h'), "help", 0, NULL, 
+    {'h', "help", 0, NULL, 
      DUMMY_TR("Show this help")},
     
-    {OPT_ID('v'), "version", 0, NULL,
+    {'V', "version", 0, NULL,
      DUMMY_TR("Show program version")},
     
     {OPT_ID('a'), "about", 0, NULL,
@@ -205,10 +205,10 @@ int main(int argc, char*argv[])
         case OPT_ID('N'):
             noerrorlog=TRUE;
             break;
-        case OPT_ID('h'):
+        case 'h':
             help();
             return EXIT_SUCCESS;
-        case OPT_ID('v'):
+        case 'V':
             printf("%s\n", ION_VERSION);
             return EXIT_SUCCESS;
         case OPT_ID('a'):
