@@ -219,6 +219,32 @@ static void p_tabdrag_begin(WFrame *frame, XMotionEvent *ev, int dx, int dy)
 }
 
 
+static WFrame *fnd(Window rootwin, int x, int y)
+{
+	int dstx, dsty;
+	Window childret;
+	WFrame *frame=NULL;
+	WWindow *w;
+	
+	do{
+		if(!XTranslateCoordinates(wglobal.dpy, rootwin, rootwin,
+								  x, y, &dstx, &dsty, &childret))
+			return NULL;
+	
+		if(childret==None)
+			return frame;
+		w=FIND_WINDOW_T(childret, WWindow);
+		if(w==NULL)
+			break;
+		if(WTHING_IS(w, WFrame))
+			frame=(WFrame*)w;
+		rootwin=childret;
+	}while(1);
+	
+	return frame;
+}
+
+
 static void p_tabdrag_end(WFrame *frame, XButtonEvent *ev)
 {
 	WGRData *grdata=GRDATA_OF(frame);
@@ -240,8 +266,9 @@ static void p_tabdrag_end(WFrame *frame, XButtonEvent *ev)
 	if(ev->root!=ROOT_OF(sub))
 		return;
 	
-	if(find_window_at(ev->root, ev->x_root, ev->y_root, &win))
-		newframe=find_frame_of(win);
+	/*if(find_window_at(ev->root, ev->x_root, ev->y_root, &win))
+		newframe=find_frame_of(win);*/
+	newframe=fnd(ev->root, ev->x_root, ev->y_root);
 
 	if(newframe==NULL || frame==newframe){
 		draw_frame_bar(frame, TRUE);
