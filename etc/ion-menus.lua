@@ -33,7 +33,7 @@ defmenu("exitmenu", {
 
 -- Context menu (frame/client window actions)
 defmenu("ctxmenu", {
-    menuentry("Close",          "Wegion.rqclose_propagate(_, _sub)"),
+    menuentry("Close",          "WRegion.rqclose_propagate(_, _sub)"),
     menuentry("Kill",           "WClientWin.kill(_sub)",
                                 "_sub:WClientWin"),
     menuentry("(Un)tag",        "WRegion.toggle_tag(_sub)",
