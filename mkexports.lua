@@ -410,6 +410,9 @@ end
 
 function write_fndoc(h, fn, info)
     fprintf(h, "\\begin{function}\n")
+    if info.exported_name then
+        fn=info.exported_name
+    end
     local fnx=fn
     fprintf(h, "\\index{")
     if lua_input then
