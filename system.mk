@@ -36,11 +36,11 @@ EXTRABINDIR=$(LIBDIR)/ion
 ## Modules
 ##
 
-# The path to the libtool script. Version 1.4.0 or newer is required.
+# The path to the libtool script. Version 1.4.3 or newer is required.
 # Users of many of the *BSD:s will have to manually install a a recent
-# libtool because even more-recent-than-libtool-1.4.0 releases of those
+# libtool because even more-recent-than-libtool-1.4.3 releases of those
 # OSes only have an _ancient_ 1.3.x libtool that _will_ _not_ _work even
-# though a lot of libltdl-using apps require 1.4.0. 
+# though a lot of libltdl-using apps require 1.4.3.
 LIBTOOL=libtool
 
 # Settings for compiling and linking to ltdl

@@ -116,11 +116,11 @@ else
 fi
 AC_PATH_PROG([LIBTOOL], [libtool], [], [$libtool_path])
 test "x$LIBTOOL" == x && exit 1
-AC_MSG_CHECKING([for libtool version >= 1.4.0])
+AC_MSG_CHECKING([for libtool version >= 1.4.3])
 libtool_version=$($LIBTOOL --version | head -n 1 | cut -d' ' -f4)
 dnl libtool_version=$($LIBTOOL --version | $EGREP -o '[0-9]+(\.[0-9]+)+' | head -n 1)
 case $libtool_version in
-0.* | 1.0.* | 1.1.* | 1.2.* | 1.3.*)
+0.* | 1.0.* | 1.1.* | 1.2.* | 1.3.* | 1.4.0 | 1.4.1 | 1.4.2)
 	AC_MSG_RESULT([no (found $libtool_version)])
 	exit 1
 	;;

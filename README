@@ -12,7 +12,7 @@ BUILDING AND INSTALLING
 1. Make sure you have the following tools and libraries installed:
 
     * GNU make
-    * Libtool and libltdl, version 1.4.0 or newer
+    * Libtool and libltdl, version 1.4.3 or newer
     * Lua 5.0.1 (see <http://www.lua.org/>)
 
 2. a) Run ./configure; see README.autoconf for details, especially if
