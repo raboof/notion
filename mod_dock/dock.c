@@ -56,6 +56,7 @@
 #include <ioncore/saveload.h>
 #include <ioncore/bindmaps.h>
 #include <ioncore/regbind.h>
+#include <ioncore/defer.h>
 
 /*}}}*/
 
@@ -649,7 +650,11 @@ static void dock_managed_rqgeom_(WDock *dock, WRegion *reg, int flags,
     dock_get_pos_grow(dock, &pos, &grow);
 
     /* Determine parent and tile geoms */
-    parent_geom=((WRegion*)dock)->parent->geom;
+    parent_geom.x=0;
+    parent_geom.y=0;
+    parent_geom.w=((WRegion*)dock)->parent->geom.w;
+    parent_geom.h=((WRegion*)dock)->parent->geom.h;
+    
     dock_get_tile_size(dock, &tile_size);
 
     /* Determine dock and dockapp border widths */
@@ -806,7 +811,7 @@ static bool dock_fitrep(WDock *dock, WWindow *parent, const WFitParams *fp)
         dock_get_pos_grow(dock, &pos, &grow);
         fp2.mode=REGION_FIT_EXACT;
         fp2.g.w=minof(dock->min_w, fp->g.w);
-        fp2.g.w=minof(dock->min_h, fp->g.h);
+        fp2.g.h=minof(dock->min_h, fp->g.h);
         calc_dock_pos(&(fp2.g), &(fp->g), pos);
         fp=&fp2;
     }
@@ -1065,29 +1070,37 @@ static bool dock_init(WDock *dock, WWindow *parent, const WFitParams *fp)
     dock_brush_get(dock);
 
     LINK_ITEM(docks, dock, dock_next, dock_prev);
+    
+    /* Just calculate real min/max size */
+    dock_managed_rqgeom_(dock, NULL, 0, NULL, NULL, TRUE);
+    
+    if(fp->mode==REGION_FIT_BOUNDS){
+        WRectangle dg;
+        dg.w=minof(dock->min_w, fp->g.w);
+        dg.h=minof(dock->min_h, fp->g.h);
+        calc_dock_pos(&dg, &(fp->g), dock->pos);
+        window_do_fitrep((WWindow*)dock, NULL, &dg);
+    }
 
     return TRUE;
 
 }
 
+
+static WDock *create_dock(WWindow *parent, const WFitParams *fp)
+{
+    CREATEOBJ_IMPL(WDock, dock, (p, parent, fp));
+}
+
+
 static void dock_deinit(WDock *dock)
 {
-
     UNLINK_ITEM(docks, dock, dock_next, dock_prev);
 
     dock_brush_release(dock);
 
     window_deinit((WWindow*) dock);
-
 }
-
-static WDock *create_dock(WWindow *parent, const WFitParams *fp)
-{
-
-    CREATEOBJ_IMPL(WDock, dock, (p, parent, fp));
-
-}
-
 
 
 bool dock_rqclose(WDock *dock)
@@ -1154,6 +1167,9 @@ static bool dock_manage_clientwin(WDock *dock, WClientWin *cwin,
     dockapp=ALLOC(WDockApp);
     dockapp->cwin=cwin;
     dockapp->draw_border=TRUE;
+    dockapp->pos=INT_MAX;
+    dockapp->tile=FALSE;
+    
     extl_table_gets_b(cwin->proptab, CLIENTWIN_WINPROP_BORDER,
                       &dockapp->draw_border);
 
@@ -1299,18 +1315,16 @@ static WDock *dock_find_suitable_dock(WClientWin *cwin,
                                       const WManageParams *param)
 {
     WDock *dock;
-    WScreen *cwin_scr;
 
-    cwin_scr=clientwin_find_suitable_screen(cwin, param);
-    for(dock=docks; dock; dock=dock->dock_next)
-    {
-        if(dock->is_auto && region_screen_of((WRegion*)dock)==cwin_scr){
-            break;
-        }
+    for(dock=docks; dock; dock=dock->dock_next){
+        if(!dock->is_auto)
+            continue;
+        if(!region_same_rootwin((WRegion*)dock, (WRegion*)cwin))
+            continue;
+        break;
     }
 
     return dock;
-
 }
 
 
