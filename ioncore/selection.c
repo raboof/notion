@@ -37,7 +37,7 @@ void send_selection(XSelectionRequestEvent *ev)
 
 static void insert_selection(WWindow *wwin, Window win, Atom prop)
 {
-	char **p=get_text_property(win, prop);
+	char **p=get_text_property(win, prop, NULL);
 	if(p!=NULL){
 		window_insstr(wwin, p[0], strlen(p[0]));
 		XFreeStringList(p);

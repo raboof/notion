@@ -72,10 +72,10 @@ static void get_winprops(WClientWin *cwin)
 	if(!extl_call_named("get_winprop", "o", "t", cwin, &tab))
 		return;
 	
+	cwin->proptab=tab;
+	
 	if(tab==extl_table_none())
 		return;
-	
-	cwin->proptab=tab;
 
 	if(extl_table_is_bool_set(tab, "transparent"))
 		cwin->flags|=CWIN_PROP_TRANSPARENT;
@@ -139,13 +139,13 @@ void clientwin_get_set_name(WClientWin *cwin)
 {
 	char **list=NULL;
 #ifdef CF_UTF8
-	list=get_text_property(cwin->win, wglobal.atom_net_wm_name);
+	list=get_text_property(cwin->win, wglobal.atom_net_wm_name, NULL);
 	if(list==NULL)
 		list=get_text_property(cwin->win, XA_WM_NAME);
 	else
 		cwin->flags|=CWIN_USE_NET_WM_NAME;
 #else
-	list=get_text_property(cwin->win, XA_WM_NAME);
+	list=get_text_property(cwin->win, XA_WM_NAME, NULL);
 #endif
 
 	if(list==NULL){
@@ -1021,31 +1021,23 @@ static WRegion *clientwin_managed_enter_to_focus(WClientWin *cwin, WRegion *reg)
 EXTL_EXPORT
 ExtlTab clientwin_get_ident(WClientWin *cwin)
 {
-	char *winstance=NULL, *wclass=NULL, *wrole=NULL;
+	char **p=NULL, *wrole=NULL;
 	int n=0, n2=0, tmp=0;
 	ExtlTab tab;
 	
-	winstance=get_string_property(cwin->win, XA_WM_CLASS, &n);
+	p=get_text_property(cwin->win, XA_WM_CLASS, &n);
 	wrole=get_string_property(cwin->win, wglobal.atom_wm_window_role, &n2);
 	
-	if(winstance!=NULL){
-		tmp=strlen(winstance);
-		if(tmp+1<n)
-			wclass=winstance+tmp+1;
-	}
-	
 	tab=extl_create_table();
-	if(wclass!=NULL)
-		extl_table_sets_s(tab, "class", wclass);
-	if(winstance!=NULL)
-		extl_table_sets_s(tab, "instance", winstance);
+	if(n>=2 && p[1]!=NULL)
+		extl_table_sets_s(tab, "class", p[1]);
+	if(n>=1 && p[0]!=NULL)
+		extl_table_sets_s(tab, "instance", p[0]);
 	if(wrole!=NULL)
 		extl_table_sets_s(tab, "role", wrole);
 	
-	if(winstance!=NULL)
-		free(winstance);
-	if(wrole!=NULL)
-		free(wrole);
+	if(p!=NULL)
+		XFreeStringList(p);
 	
 	return tab;
 }

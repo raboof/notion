@@ -139,13 +139,16 @@ void set_win_state(Window win, int state)
 /* get_text_property
  */
 
-char **get_text_property(Window win, Atom a)
+char **get_text_property(Window win, Atom a, int *nret)
 {
 	XTextProperty prop;
 	char **list=NULL;
 	int n=0;
 	Status st=0;
 	
+	if(nret)
+		*nret=0;
+
 	st=XGetTextProperty(wglobal.dpy, win, &prop, a);
 	
 	if(!st)
@@ -161,6 +164,9 @@ char **get_text_property(Window win, Atom a)
 	
 	if(!st || n==0 || list==NULL)
 		return NULL;
+	
+	if(nret)
+			*nret=n;
 	return list;
 }
 
