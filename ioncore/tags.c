@@ -12,9 +12,10 @@
 
 #include "region.h"
 #include "tags.h"
+#include "objlist.h"
 
 
-static WRegion *taglist;
+static WObjList *taglist=NULL;
 
 
 /*{{{ Adding/removing tags */
@@ -30,7 +31,7 @@ void region_tag(WRegion *reg)
 	
 	/*clear_sub_tags(reg);*/
 	
-	LINK_ITEM(taglist, reg, tag_next, tag_prev);
+	objlist_insert(&taglist, (WObj*)reg);
 	
 	reg->flags|=REGION_TAGGED;
 	region_notify_change(reg);
@@ -46,7 +47,7 @@ void region_untag(WRegion *reg)
 	if(!(reg->flags&REGION_TAGGED))
 		return;
 
-	UNLINK_ITEM(taglist, reg, tag_next, tag_prev);
+	objlist_remove(&taglist, (WObj*)reg);
 	
 	reg->flags&=~REGION_TAGGED;
 	region_notify_change(reg);
@@ -82,8 +83,11 @@ bool region_is_tagged(WRegion *reg)
 EXTL_EXPORT
 void clear_tags()
 {
-	while(taglist!=NULL)
-		region_untag(taglist);
+	WRegion *reg;
+	
+	ITERATE_OBJLIST(WRegion*, reg, taglist){
+		region_untag(reg);
+	}
 }
 
 
@@ -95,13 +99,13 @@ void clear_tags()
 
 WRegion *tag_first()
 {
-	return taglist;
+	return (WRegion*)objlist_init_iter(taglist);
 }
 
 
 WRegion *tag_take_first()
 {
-	WRegion *reg=taglist;
+	WRegion *reg=(WRegion*)objlist_init_iter(taglist);
 	
 	if(reg!=NULL)
 		region_untag(reg);
@@ -112,7 +116,7 @@ WRegion *tag_take_first()
 
 WRegion *tag_next(WRegion *reg)
 {
-	return reg->tag_next;
+	return (WRegion*)objlist_iter(taglist);
 }
 
 

@@ -13,7 +13,14 @@
 #include "symlist.h"
 
 
-bool add_to_symlist(WSymlist **symlist, void *symbol)
+static void free_node(WSymlist **symlist, WSymlist *node)
+{
+	UNLINK_ITEM(*symlist, node, next, prev);
+	free(node);
+}
+
+
+bool symlist_insert(WSymlist **symlist, void *symbol)
 {
 	WSymlist *node;
 	
@@ -33,14 +40,13 @@ bool add_to_symlist(WSymlist **symlist, void *symbol)
 }
 
 
-void remove_from_symlist(WSymlist **symlist, void *symbol)
+void symlist_remove(WSymlist **symlist, void *symbol)
 {
 	WSymlist *node=*symlist;
 	
 	while(node!=NULL){
 		if(node->symbol==symbol){
-			UNLINK_ITEM(*symlist, node, next, prev);
-			free(node);
+			free_node(symlist, node);
 			return;
 		}
 		node=node->next;
@@ -48,33 +54,40 @@ void remove_from_symlist(WSymlist **symlist, void *symbol)
 }
 
 
+void symlist_clear(WSymlist **symlist)
+{
+	while(*symlist!=NULL)
+		free_node(symlist, *symlist);
+}
+
+
 /* Warning: not thread-safe */
 
 
-static WSymlist *next=NULL;
+static WSymlist *iter_next=NULL;
 
 
-void *iter_symlist_init(WSymlist *symlist)
+void *symlist_init_iter(WSymlist *symlist)
 {
 	if(symlist==NULL){
-		next=NULL;
+		iter_next=NULL;
 		return NULL;
 	}
 	
-	next=symlist->next;
+	iter_next=symlist->next;
 	return symlist->symbol;
 }
 
 
-void *iter_symlist()
+void *symlist_iter()
 {
 	WSymlist *ret;
 	
-	if(next==NULL)
+	if(iter_next==NULL)
 		return NULL;
 	
-	ret=next;
-	next=next->next;
+	ret=iter_next;
+	iter_next=iter_next->next;
 	
 	return ret->symbol;
 }

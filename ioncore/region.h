@@ -46,8 +46,6 @@ DECLOBJ(WRegion){
 		WRegion *ns_next, *ns_prev;
 	} ni;
 	
-	WRegion *tag_next, *tag_prev;
-	
 	WRegion *manager;
 	WRegion *mgr_next, *mgr_prev;
 	

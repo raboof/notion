@@ -25,14 +25,15 @@ DECLSTRUCT(WSymlist){
 
 
 #define ITERATE_SYMLIST(TYPE, VAR, LIST)     \
-	for((VAR)=(TYPE)iter_symlist_init(LIST); \
+	for((VAR)=(TYPE)symlist_init_iter(LIST); \
 		(VAR)!=NULL;                         \
-		(VAR)=(TYPE)iter_symlist())
+		(VAR)=(TYPE)symlist_iter())
 
 
-bool add_to_symlist(WSymlist **symlist, void *symbol);
-void remove_from_symlist(WSymlist **symlist, void *symbol);
-void *iter_symlist_init(WSymlist *symlist);
-void *iter_symlist();
+bool symlist_insert(WSymlist **symlist, void *symbol);
+void symlist_remove(WSymlist **symlist, void *symbol);
+void symlist_clear(WSymlist **symlist);
+void *symlist_init_iter(WSymlist *symlist);
+void *symlist_iter();
 
 #endif /* ION_IONCORE_SYMLIST_H */

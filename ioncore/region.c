@@ -17,7 +17,6 @@
 #include "focus.h"
 #include "attach.h"
 #include "regbind.h"
-#include "tags.h"
 #include "names.h"
 #include "stacking.h"
 #include "resize.h"
@@ -119,7 +118,6 @@ void region_deinit(WRegion *reg)
 	
 	region_detach(reg);
 	region_unuse_name(reg);
-	region_untag(reg);
 	region_remove_bindings(reg);
 
 	if(wglobal.focus_next==reg){
