@@ -402,6 +402,8 @@ void rootwin_deinit(WRootWin *rw)
 	
 	XSelectInput(wglobal.dpy, WROOTWIN_ROOT(rw), 0);
 	
+	XFreeGC(wglobal.dpy, rw->xor_gc);
+	
 	window_deinit((WWindow*)rw);
 }
 
