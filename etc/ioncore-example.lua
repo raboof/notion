@@ -17,7 +17,7 @@ DEFAULT_MOD = "Mod1+"
 --set_resize_delay(1500)
 
 -- Opaque resize?
-enable_opaque_resize(TRUE)
+enable_opaque_resize(FALSE)
 
 -- Movement commands warp the pointer to frames instead of just
 -- changing focus. Enabled by default.
