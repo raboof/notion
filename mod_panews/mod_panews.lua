@@ -291,23 +291,59 @@ end
 
 -- Placement code {{{
 
-function private.use_unused(p, n, d, forcefit)
+local max_penalty=5
+local just_some_pixel_count=16
+
+function private.fitlevel_(min1, s1, us1, min2, s2, us2)
+    local p1, p2=4, 0.5
+    
+    if us2>=min2 then
+        p2=0
+    end
+    
+    if us1>=math.max(s1/2, min1) then
+        p1=0
+    elseif us1>=min1+just_some_pixel_count then
+        p1=1
+    elseif us1>=min1 then
+        p1=2
+    elseif us1>0 then
+        p1=3
+    end
+    
+    return p1+p2
+end
+
+function private.fitlevel(frame, node, horiz)
+    local fg=frame:geom()
+    local fsh=frame:size_hints()
+    local sg=node:geom()
+    if not horiz then
+        return private.fitlevel_(fsh.min_h, fg.h, sg.h, fsh.min_w, fg.w, sg.w)
+    else
+        return private.fitlevel_(fsh.min_w, fg.w, sg.w, fsh.min_h, fg.h, sg.h)
+    end
+end
+
+
+function private.use_unused(p, n, d, forcelevel)
+    local f=private.fitlevel(p.frame, n, (d=="left" or d=="right"))
+    if f>forcelevel then
+        return false, f
+    end
+
     if d=="single" then
         p.res_node=n
         p.res_config={reg=p.frame}
-        return true
+        return true, f
     end
 
     -- TODO: Check fit
     local sg=n:geom()
-    local fsh=p.frame:size_hints()
     local fg=p.frame:geom()
     
     if d=="up" or d=="down" then
         p.res_node=n
-        if fsh.min_h>sg.h then
-            return false
-        end
         local fh=math.min(fg.h, sg.h)
         if d=="up" then
             p.res_config=private.split2("vertical", sg.h, nil, fh,
@@ -316,12 +352,9 @@ function private.use_unused(p, n, d, forcefit)
             p.res_config=private.split2("vertical", sg.h, fh, nil,
                                   {reg=p.frame}, {})
         end
-        return true
+        return true, f
     elseif d=="left" or d=="right" then
         p.res_node=n
-        if fsh.min_w>sg.w then
-            return false
-        end
         local fw=math.min(fg.w, sg.w)
         if d=="left" then
             p.res_config=private.split2("horizontal", sg.w, nil, fw,
@@ -330,58 +363,66 @@ function private.use_unused(p, n, d, forcefit)
             p.res_config=private.split2("horizontal", sg.w, fw, nil,
                                   {reg=p.frame}, {})
         end
-        return true
+        return true, f
     end
+    
+    return false, f
 end
 
 
-function private.scan_pane(p, node, pdir)
-    local function do_scan_active(n)
+function private.scan_pane(p, node, d)
+    local function do_scan_active(n, uf)
         local t=obj_typename(n)
         if t=="WSplitRegion" then
-            p.res_node=n
-            return true
+            local f=private.fitlevel(p.frame, n, (d=="left" or d=="right"))
+            if f<uf then
+                p.res_node=n
+                return true
+            end
         elseif t=="WSplitSplit" or t=="WSplitFloat" then
             local a, b=n:tl(), n:br()
             if b==n:current() then
                 a, b=b, a
             end
-            return (do_scan_active(a) or do_scan_active(b))
+            return (do_scan_active(a, uf) or do_scan_active(b, uf))
         end
+        return false
     end
 
-    local function do_scan_unused(n, d, forcefit)
+    local function do_scan_unused(n, forcelevel)
         local t=obj_typename(n)
         if t=="WSplitSplit" or t=="WSplitFloat" then
             local sd=n:dir()
-            if sd=="vertical" then
-                if d=="up" then
-                    return do_scan_unused(n:tl(), d, forcefit)
-                elseif d=="down" then
-                    return do_scan_unused(n:br(), d, forcefit)
-                end
-            elseif sd=="horizontal" then
-                if d=="left" then
-                    return do_scan_unused(n:tl(), d, forcefit)
-                elseif d=="right" then
-                    return do_scan_unused(n:br(), d, forcefit)
-                end
+            local a, b
+            if (d=="up" and sd=="vertical") or (d=="left" and sd=="horizontal") then
+                a, b=n:tl(), n:br()
+            elseif (d=="down" and sd=="vertical") or (d=="right" and sd=="horizontal") then
+                a, b=n:br(), n:tl()
+            else
+                a, b=n:current(), (n:current()==n:tl() and n:br() or n:tl())
             end
+
+            local ok, f, f2
+            ok, f=do_scan_unused(a, forcelevel)
+            if not ok then
+                ok, f2=do_scan_unused(b, forcelevel)
+            end
+            return ok, math.min(f, f2 or max_penalty)
         elseif t=="WSplitUnused" then
             -- Found it
-            return private.use_unused(p, n, d, forcefit)
+            return private.use_unused(p, n, d, forcelevel)
+        end
+        return false, max_penalty
+    end
+    
+    local ok, fitlevel=do_scan_unused(node, 0)
+    if not ok then
+        ok=do_scan_active(node, fitlevel)
+        if not ok then
+            ok=do_scan_unused(node, 3)
         end
     end
-    
-    if do_scan_unused(node, pdir, false) then
-        return true
-    end
-    
-    if do_scan_active(node, pdir) then
-        return true
-    end
-
-    return do_scan_unused(node, pdir, true)
+    return ok
 end
     
 
@@ -398,7 +439,7 @@ function private.make_placement(p)
             pcls, pdir=sfind((n:marker() or ""), "(.*):(.*)")
         end
             
-        return private.use_unused(p, p.specifier, (pdir or "single"), false)
+        return private.use_unused(p, p.specifier, (pdir or "single"), 2)
     end
     
     local cls=private.classify(p.ws, p.reg)
