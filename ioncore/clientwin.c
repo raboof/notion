@@ -318,6 +318,8 @@ static void get_transient_for(WClientWin *cwin, WAttachParams *param)
 	Window tfor;
 	
 	if(XGetTransientForHint(wglobal.dpy, cwin->win, &tfor)){
+		if(tfor==None)
+			return;
 		param->tfor=find_clientwin(tfor);
 		if(param->tfor==cwin){
 			param->tfor=NULL;
