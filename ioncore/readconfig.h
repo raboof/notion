@@ -10,8 +10,10 @@
 
 #include <libtu/parser.h>
 
-extern bool ioncore_set_paths(const char *appname, const char *etcdir,
-							 const char *libdir);
+/*extern bool ioncore_set_paths(const char *appname, const char *etcdir,
+							 const char *libdir);*/
+extern bool ioncore_add_confdir(const char *dir);
+extern bool ioncore_add_libdir(const char *dir);
 
 extern char *get_core_cfgfile_for_scr(const char *module, int xscr);
 extern char *get_core_cfgfile_for(const char *module);

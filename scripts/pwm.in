@@ -1,0 +1,17 @@
+#!/bin/sh
+
+DIRARGS="-confdir PREFIX/etc/ion-devel \
+  -libdir PREFIX/lib/ion-devel"
+PWMDIRARGS="-confdir PREFIX/etc/pwm-devel \
+  -libdir PREFIX/lib/pwm-devel"
+
+if test x$HOME != x; then
+  DIRARGS="-confdir $HOME/.ion-devel \
+    -libdir $HOME/.ion-devel/libs \
+    $DIRARGS"
+  PWMDIRARGS="-confdir $HOME/.pwm-devel \
+    -libdir $HOME/.pwm-devel/libs \
+    $PWMDIRARGS"
+fi
+
+exec PREFIX/bin/ioncore "$@" $PWMDIRARGS $DIRARGS

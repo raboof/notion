@@ -6,6 +6,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 
 #include <libtu/parser.h>
 #include <libtu/map.h>
@@ -118,8 +119,11 @@ static ConfOpt opts[]={
 
 bool ioncore_read_config(const char *cfgfile)
 {
-	if(cfgfile!=NULL)
+	if(cfgfile==NULL){
+		cfgfile="ioncore";
+	}else if(strpbrk(cfgfile, "./")!=NULL){
 		return read_config(cfgfile, opts);
-	else
-		return read_config_for("ioncore", opts);
+	}
+	
+	return read_config_for(cfgfile, opts);
 }

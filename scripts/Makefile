@@ -8,7 +8,9 @@ include $(TOPDIR)/system-inc.mk
 
 ######################################
 
-SCRIPTS=ion-edit ion-man ion-runinxterm ion-ssh ion-view
+TARGETS=ion pwm
+
+SCRIPTS=ion ion-edit ion-man ion-runinxterm ion-ssh ion-view
 
 ######################################
 
@@ -21,3 +23,11 @@ _install:
 	for i in $(SCRIPTS); do \
 		$(INSTALL) -m $(BIN_MODE) $$i $(BINDIR); \
 	done
+
+ion: ion.in
+	sed 's#PREFIX#$(PREFIX)#g' $< > $@
+	chmod $(BIN_MODE) $@
+	
+pwm: pwm.in
+	sed 's#PREFIX#$(PREFIX)#g' $< > $@
+	chmod $(BIN_MODE) $@

@@ -17,60 +17,106 @@
 #include "readconfig.h"
 
 
-static char *etcpaths[]={
-	NULL, NULL, NULL
-};
-
-
-static char *libpaths[]={
-	NULL, NULL, NULL
-};
+static char* dummy_paths=NULL;
+static char **etcpaths=&dummy_paths;
+static int n_etcpaths=0;
+static char **libpaths=&dummy_paths;
+static int n_libpaths=0;
 
 
 /*{{{ Init */
 
 
-bool ioncore_set_paths(const char *appname, const char *etcdir, const char *libdir)
+bool add_dir(char ***pathsptr, int *n_pathsptr, const char *dir)
 {
-	char *p, *home;
-	int libi=0, etci=0;
+	char **paths;
+	char *dircp=scopy(dir);
+	int i;
 	
-	/* Should only be called from ioncore_init */
-	assert(appname!=NULL && etcdir!=NULL && libdir!=NULL);
+	if(dircp==NULL){
+		warn_err();
+		return FALSE;
+	}
+		
+	if(*n_pathsptr==0)
+		paths=ALLOC_N(char*, 2);
+	else
+		paths=REALLOC_N(*pathsptr, char*, (*n_pathsptr)+1, (*n_pathsptr)+2);
+	
+	if(paths==NULL){
+		warn_err();
+		free(dircp);
+		return FALSE;
+	}
+	
+	paths[*n_pathsptr]=dircp;
+	paths[(*n_pathsptr)+1]=NULL;
+	(*n_pathsptr)++;
+	*pathsptr=paths;
+	
+	return TRUE;
+}
+
+
+bool ioncore_add_confdir(const char *dir)
+{
+	return add_dir(&etcpaths, &n_etcpaths, dir);
+}
+
+
+bool ioncore_add_libdir(const char *dir)
+{
+	return add_dir(&libpaths, &n_libpaths, dir);
+}
+
+
+#if 0
+bool ioncore_add_default_paths(const char *appname, const char *etcdir,
+							   const char *libdir)
+{
+	char *home, *tmp, *tmp2;
+	int fails=0;
 	
 	home=getenv("HOME");
 	
 	if(home==NULL){
 		warn("$HOME not set");
 	}else{
-		char *tmp=scat3(home, "/.", appname);
+		tmp=scat3(home, "/.", appname);
 		if(tmp==NULL){
 			warn_err();
 		}else{
-			etcpaths[etci++]=tmp;
-			
-			p=scat(tmp, "/lib");
-			if(p!=NULL)
-				libpaths[libi++]=p;
-			else
+			fails+=!ioncore_add_confdir(tmp);
+			tmp2=scat(tmp, "/lib");
+			if(tmp2==NULL){
 				warn_err();
+			}else{
+				fails+=!ioncore_add_libdir(tmp2);
+				free(tmp2);
+			}
+			free(tmp);
 		}
 	}
 
-	p=scat3(etcdir, "/", appname);
-	if(p!=NULL)
-		etcpaths[etci++]=p;
-	else
+	tmp=scat3(etcdir, "/", appname);
+	if(tmp==NULL){
 		warn_err();
-	
-	p=scat3(libdir, "/", appname);
-	if(p!=NULL)
-		libpaths[libi++]=p;
-	else
+	}else{
+		fails+=!ioncore_add_confdir(tmp);
+		free(tmp);
+	}
+
+	tmp=scat3(libdir, "/", appname);
+	if(tmp==NULL){
 		warn_err();
+	}else{
+		fails+=!ioncore_add_libdir(tmp);
+		free(tmp);
+	}
 	
-	return (etci>0 && libi>0);
+	return (fails==0);
 }
+#endif
 
 
 /*}}}*/
@@ -107,7 +153,7 @@ static char *do_get_cfgfile_for(bool core, const char *module,
 		}
 	}
 	
-	warn("Could not find configuration file %s.conf\n", module);
+	warn("Could not find configuration file %s.conf.", module);
 	
 	return NULL;
 }
@@ -297,7 +343,7 @@ char *find_module(const char *fname)
 		free(tmp);
 	}
 	
-	warn("Could not find module %s\n", fname);
+	warn("Could not find module %s.", fname);
 	
 	return NULL;
 }

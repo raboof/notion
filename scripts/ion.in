@@ -1,0 +1,12 @@
+#!/bin/sh
+
+DIRARGS="-confdir PREFIX/etc/ion-devel \
+  -libdir PREFIX/lib/ion-devel"
+
+if test x$HOME != x; then
+  DIRARGS="-confdir $HOME/.ion-devel \
+    -libdir $HOME/.ion-devel/libs \
+    $DIRARGS"
+fi
+
+exec PREFIX/bin/ioncore "$@" $DIRARGS

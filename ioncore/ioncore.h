@@ -10,7 +10,7 @@
 
 #include "common.h"
 
-bool ioncore_init(const char *name, const char *etcdir, const char *libdir,
+bool ioncore_init(/*const char *name, const char *etcdir, const char *libdir,*/
 				 const char *display, bool onescreen);
 void ioncore_deinit();
 

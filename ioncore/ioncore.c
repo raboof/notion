@@ -51,28 +51,30 @@ WGlobal wglobal;
  * and they don't know of '-display foo' -style args anyway.
  * Instead, I've reinvented the wheel in libtu :(.
  */
-static OptParserOpt opts[]={
+static OptParserOpt ioncore_opts[]={
 	{OPT_ID('d'), 	"display", 	OPT_ARG, "host:dpy.scr", "X display to use"},
-	{'c', 			"cfgfile", 	OPT_ARG, "config_file", "Configuration file"},
+	{'c', 			"conffile", OPT_ARG, "config_file", "Configuration file"},
 	{OPT_ID('o'), 	"onescreen", 0, NULL, "Manage default screen only"},
+	{OPT_ID('c'), 	"confdir", 	OPT_ARG, "dir", "Search directory for configuration files"},
+	{OPT_ID('l'), 	"libdir", 	OPT_ARG, "dir", "Search directory for modules"},
 	END_OPTPARSEROPTS
 };
 
 
-static const char ion_usage_tmpl[]=
+static const char ioncore_usage_tmpl[]=
 	"Usage: $p [options]\n\n$o\n";
 
 
-static const char ion_about[]=
+static const char ioncore_about[]=
 	"Ioncore " ION_VERSION ", copyright (c) Tuomo Valkonen 1999-2003.\n"
 	"This program may be copied and modified under the terms of the "
 	"Clarified Artistic License.\n";
 
 
-static OptParserCommonInfo ion_cinfo={
+static OptParserCommonInfo ioncore_cinfo={
 	ION_VERSION,
-	ion_usage_tmpl,
-	ion_about
+	ioncore_usage_tmpl,
+	ioncore_about
 };
 
 
@@ -93,7 +95,7 @@ int main(int argc, char*argv[])
 	
 	libtu_init(argv[0]);
 	
-	optparser_init(argc, argv, OPTP_MIDLONG, opts, &ion_cinfo);
+	optparser_init(argc, argv, OPTP_MIDLONG, ioncore_opts, &ioncore_cinfo);
 	
 	while((opt=optparser_get_opt())){
 		switch(opt){
@@ -102,6 +104,12 @@ int main(int argc, char*argv[])
 			break;
 		case 'c':
 			cfgfile=optparser_get_arg();
+			break;
+		case OPT_ID('c'):
+			ioncore_add_confdir(optparser_get_arg());
+			break;
+		case OPT_ID('l'):
+			ioncore_add_libdir(optparser_get_arg());
 			break;
 		case OPT_ID('o'):
 			onescreen=TRUE;
@@ -115,7 +123,9 @@ int main(int argc, char*argv[])
 	wglobal.argc=argc;
 	wglobal.argv=argv;
 	
-	if(!ioncore_init("ion-devel", ETCDIR, LIBDIR, display, onescreen))
+	/*ioncore_add_default_dirs("ion-devel", ETCDIR, LIBDIR);*/
+	
+	if(!ioncore_init(display, onescreen))
 		return EXIT_FAILURE;
 	
 	if(!ioncore_read_config(cfgfile)){
@@ -187,8 +197,7 @@ static void initialize_global()
 }
 
 
-bool ioncore_init(const char *appname, const char *appetcdir,
-				  const char *applibdir, const char *display, bool onescreen)
+bool ioncore_init(const char *display, bool onescreen)
 {
 	Display *dpy;
 	WScreen *scr;
@@ -224,9 +233,6 @@ bool ioncore_init(const char *appname, const char *appetcdir,
 	
 	initialize_global();
 	ioncore_init_funclists();
-	
-	if(!ioncore_set_paths(appname, appetcdir, applibdir))
-		return FALSE;
 	
 	/* Open the display. */
 	dpy=XOpenDisplay(display);
