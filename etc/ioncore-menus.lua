@@ -48,4 +48,5 @@ defmenu("ctxmenu", {
     menuentry("Kill", make_mplex_clientwin_fn(WClientWin.kill)),
     menuentry("(Un)tag", make_mplex_sub_fn(WRegion.toggle_tag)),
     menuentry("Attach tagged", WGenFrame.attach_tagged),
+    menuentry("Clear tags", clear_tags),
 })
