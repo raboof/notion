@@ -94,7 +94,7 @@ static bool extl_push_obj(lua_State *st, WObj *obj)
 		return TRUE;
 	}
 
-	watch=(WWatch*)lua_newuserdata(l_st, sizeof(WWatch));
+	watch=(WWatch*)lua_newuserdata(st, sizeof(WWatch));
 	
 	if(watch==NULL)
 		return FALSE;
@@ -218,7 +218,7 @@ static int extl_docpcall(lua_State *st)
 	ExtlCPCallParam *param=(ExtlCPCallParam*)lua_touserdata(st, -1);
 	
 	/* Should be enough for most things */
-	if(!lua_checkstack(l_st, 8)){
+	if(!lua_checkstack(st, 8)){
 		warn("Lua stack full");
 		return 0;
 	}
@@ -228,7 +228,8 @@ static int extl_docpcall(lua_State *st)
 }
 
 							
-static bool extl_cpcall(lua_State *st, ExtlCPCallFn *fn, void *ptr)
+static bool extl_cpcallx(lua_State *st, ExtlCPCallFn *fn, void *ptr, 
+						 bool errors)
 {
 	ExtlCPCallParam param;
 	int oldtop=lua_gettop(st);
@@ -237,19 +238,24 @@ static bool extl_cpcall(lua_State *st, ExtlCPCallFn *fn, void *ptr)
 	param.udata=ptr;
 	param.retval=FALSE;
 	
-	if(lua_cpcall(st, extl_docpcall, &param)!=0){
+	if(lua_cpcall(st, extl_docpcall, &param)!=0 && errors){
 		if(lua_isstring(st, -1)){
 			/* Should be safe... */
 			warn("%s", lua_tostring(st, -1));
 		}else{
 			warn("Unknown Lua error.");
 		}
-			*((char*)0)=1;
 	}
 	
 	lua_settop(st, oldtop);
 	
 	return param.retval;
+}
+
+
+static bool extl_cpcall(lua_State *st, ExtlCPCallFn *fn, void *ptr)
+{
+	return extl_cpcallx(st, fn, ptr, FALSE);
 }
 
 
@@ -495,7 +501,7 @@ static bool extl_stack_push(lua_State *st, char spec, void *ptr)
 	}else if(spec=='s' || spec=='S'){
 		lua_pushstring(st, *(char**)ptr);
 	}else if(spec=='t' || spec=='f'){
-		lua_rawgeti(l_st, LUA_REGISTRYINDEX, *(int*)ptr);
+		lua_rawgeti(st, LUA_REGISTRYINDEX, *(int*)ptr);
 		return !lua_isnil(st, -1);
 	}else{
 		lua_pushnil(st);
@@ -538,7 +544,7 @@ static void extl_free(void *ptr, char spec, int strings)
 
 static bool extl_getref(lua_State *st, int ref)
 {
-	lua_rawgeti(l_st, LUA_REGISTRYINDEX, ref);
+	lua_rawgeti(st, LUA_REGISTRYINDEX, ref);
 	if(lua_isnil(st, -1)){
 		lua_pop(st, 1);
 		return FALSE;
@@ -550,7 +556,7 @@ static bool extl_getref(lua_State *st, int ref)
 
 static bool extl_do_unref(lua_State *st, int *refp)
 {
-	lua_unref(l_st, *refp);
+	lua_unref(st, *refp);
 	return TRUE;
 }
 
@@ -955,32 +961,31 @@ static bool extl_push_args(lua_State *st, bool intab, const char *spec,
 	while(*spec!='\0'){
 		switch(*spec){
 		case 'i':
-			lua_pushnumber(l_st, (double)va_arg(*argsp, int));
+			lua_pushnumber(st, (double)va_arg(*argsp, int));
 			break;
 		case 'd':
-			lua_pushnumber(l_st, va_arg(*argsp, double));
+			lua_pushnumber(st, va_arg(*argsp, double));
 			break;
 		case 'b':
-			lua_pushboolean(l_st, va_arg(*argsp, bool));
+			lua_pushboolean(st, va_arg(*argsp, bool));
 			break;
 		case 'o':
-			if(!extl_push_obj(l_st, va_arg(*argsp, WObj*)))
+			if(!extl_push_obj(st, va_arg(*argsp, WObj*)))
 				return FALSE;
 			break;
 		case 'S':
 		case 's':
-			lua_pushstring(l_st, va_arg(*argsp, char*));
+			lua_pushstring(st, va_arg(*argsp, char*));
 			break;
 		case 'f':
 		case 't':
-			if(!extl_getref(l_st, va_arg(*argsp, int)))
-				return FALSE;
+			lua_rawgeti(st, LUA_REGISTRYINDEX, va_arg(*argsp, int));
 			break;
 		default:
 			return FALSE;
 		}
 		if(intab)
-			lua_rawseti(l_st, -2, i);
+			lua_rawseti(st, -2, i);
 		i++;
 		spec++;
 	}
@@ -1127,7 +1132,7 @@ static bool extl_cpcall_call(lua_State *st, ExtlCPCallFn *fn,
 	
 	param->nret=0;
 	
-	if(extl_cpcall(st, fn, param))
+	if(extl_cpcallx(st, fn, param, TRUE))
 		return TRUE;
 	
 	/* If param.nret>0, there was an error getting some return value and
@@ -1152,7 +1157,7 @@ static bool extl_cpcall_call(lua_State *st, ExtlCPCallFn *fn,
 
 static bool extl_do_call_vararg(lua_State *st, ExtlDoCallParam *param)
 {
-	if(!extl_getref(l_st, *(ExtlFn*)(param->misc)))
+	if(!extl_getref(st, *(ExtlFn*)(param->misc)))
 		return FALSE;
 	return extl_dodo_call_vararg(st, param);
 }
@@ -1197,7 +1202,7 @@ bool extl_call(ExtlFn fnref, const char *spec, const char *rspec, ...)
 
 static bool extl_do_call_named_vararg(lua_State *st, ExtlDoCallParam *param)
 {
-	lua_getglobal(l_st, (const char*)(param->misc));
+	lua_getglobal(st, (const char*)(param->misc));
 	return extl_dodo_call_vararg(st, param);
 }
 
@@ -1244,10 +1249,10 @@ static bool extl_do_dofile_vararg(lua_State *st, ExtlDoCallParam *param)
 	printf("lua_dofile(%s)\n", file);
 	
 	 /* Save CURRENT_FILE.  */
-	lua_getglobal(l_st, "CURRENT_FILE");
+	lua_getglobal(st, "CURRENT_FILE");
 	
-	if(luaL_loadfile(l_st, file)!=0){
-		warn("%s", lua_tostring(l_st, -1));
+	if(luaL_loadfile(st, file)!=0){
+		warn("%s", lua_tostring(st, -1));
 		return FALSE;
 	}
 
@@ -1257,13 +1262,13 @@ static bool extl_do_dofile_vararg(lua_State *st, ExtlDoCallParam *param)
 	 * critical. If Lua fails, we're probably out of memory anyway and
 	 * keeping Ion from crashing is more important.
 	 */
-	lua_pushstring(l_st, file);
-	lua_setglobal(l_st, "CURRENT_FILE");
+	lua_pushstring(st, file);
+	lua_setglobal(st, "CURRENT_FILE");
 
 	ret=extl_dodo_call_vararg(st, param);
 	
 	/* Restore CURRENT_FILE */
-	lua_setglobal(l_st, "CURRENT_FILE");
+	lua_setglobal(st, "CURRENT_FILE");
 
 	return ret;
 }
@@ -1306,8 +1311,8 @@ static bool extl_do_dostring_vararg(lua_State *st, ExtlDoCallParam *param)
 {
 	const char *string=(const char*)param->misc;
 	
-	if(luaL_loadbuffer(l_st, string, strlen(string), string)!=0){
-		warn("%s", lua_tostring(l_st, -1));
+	if(luaL_loadbuffer(st, string, strlen(string), string)!=0){
+		warn("%s", lua_tostring(st, -1));
 		return FALSE;
 	}
 	
@@ -1532,7 +1537,7 @@ static int extl_l1_call_handler(lua_State *st)
 	 */
 	if(ret!=0){
 		param.no=0;
-		p=lua_tostring(l_st, -1);
+		p=lua_tostring(st, -1);
 		notrace=TRUE;
 		warn("%s", p);
 		notrace=FALSE;
@@ -1589,7 +1594,8 @@ static bool extl_do_register_function(lua_State *st, ExtlExportedFnSpec *spec)
 
 bool extl_register_function(ExtlExportedFnSpec *spec)
 {
-	return extl_cpcall(l_st, (ExtlCPCallFn*)extl_do_register_function, spec);
+	return extl_cpcallx(l_st, (ExtlCPCallFn*)extl_do_register_function, spec,
+						TRUE);
 }
 
 
@@ -1624,7 +1630,8 @@ static bool extl_do_unregister_function(lua_State *st, ExtlExportedFnSpec *spec)
 
 void extl_unregister_function(ExtlExportedFnSpec *spec)
 {
-	extl_cpcall(l_st, (ExtlCPCallFn*)extl_do_unregister_function, spec);
+	extl_cpcallx(l_st, (ExtlCPCallFn*)extl_do_unregister_function, spec,
+				 TRUE);
 }
 
 
