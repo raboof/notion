@@ -126,7 +126,7 @@ bool ioncore_set_userdirs(const char *appname)
 	return (fails==0);
 }
 
-/*EXLT_DOC
+/*EXTL_DOC
  * Get user configuration file directory.
  */
 EXTL_EXPORT
