@@ -206,7 +206,7 @@ Broken application resize kludge; try to make that broken application
 that didn't get it the first time to understand the real size of the
 active window
 .TP
-.B Mod1+Q
+.B Mod1+K Q
 Send next key press to active client window.
 
 
