@@ -6,11 +6,11 @@
 -- object on the workspace.
 
 defbindings("WIonWS", {
-    kpress(DEFAULT_MOD.."N", "goto_below"),
-    kpress(DEFAULT_MOD.."P", "goto_above"),
-    kpress(DEFAULT_MOD.."Tab", "goto_right"),
+    kpress(DEFAULT_MOD.."N", "goto_dir", "below"),
+    kpress(DEFAULT_MOD.."P", "goto_dir", "above"),
+    kpress(DEFAULT_MOD.."Tab", "goto_dir", "right"),
     submap(DEFAULT_MOD.."K", {
-        kpress("AnyModifier+Tab", "goto_left"),
+        kpress("AnyModifier+Tab", "goto_dir", "left"),
     }),
 })
 

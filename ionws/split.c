@@ -1032,46 +1032,6 @@ WRegion *ionws_next_to(WIonWS *ws, WRegion *reg, const char *dirstr)
 }
 
 
-/*EXTL_DOC
- * Same as \fnref{WIonWS.next_to}\code{(ws, reg, "up")}.
- */
-EXTL_EXPORT_MEMBER
-WRegion *ionws_above(WIonWS *ws, WRegion *reg)
-{
-	return do_get_next_to(ws, reg, VERTICAL, TOP_OR_LEFT);
-}
-
-
-/*EXTL_DOC
- * Same as \fnref{WIonWS.nextto}\code{(ws, reg, "down")}.
- */
-EXTL_EXPORT_MEMBER
-WRegion *ionws_below(WIonWS *ws, WRegion *reg)
-{
-	return do_get_next_to(ws, reg, VERTICAL, BOTTOM_OR_RIGHT);
-}
-
-
-/*EXTL_DOC
- * Same as \fnref{WIonWS.nextto}\code{(ws, reg, "left")}.
- */
-EXTL_EXPORT_MEMBER
-WRegion *ionws_left_of(WIonWS *ws, WRegion *reg)
-{
-	return do_get_next_to(ws, reg, HORIZONTAL, TOP_OR_LEFT);
-}
-
-
-/*EXTL_DOC
- * Same as \fnref{WIonWS.nextto}\code{(ws, reg, "right")}.
- */
-EXTL_EXPORT_MEMBER
-WRegion *ionws_right_of(WIonWS *ws, WRegion *reg)
-{
-	return do_get_next_to(ws, reg, HORIZONTAL, BOTTOM_OR_RIGHT);
-}
-
-
 static WRegion *do_get_farthest(WIonWS *ws, int dir, int primn)
 {
 	if(primn==TOP_OR_LEFT)
@@ -1095,46 +1055,6 @@ WRegion *ionws_farthest(WIonWS *ws, const char *dirstr)
 		return NULL;
 	
 	return do_get_farthest(ws, dir, primn);
-}
-
-
-/*EXTL_DOC
- * Same as \fnref{WIonWS.farthest}\code{(ws, "up")}.
- */
-EXTL_EXPORT_MEMBER
-WRegion *ionws_topmost(WIonWS *ws)
-{
-	return do_get_farthest(ws, VERTICAL, TOP_OR_LEFT);
-}
-
-
-/*EXTL_DOC
- * Same as \fnref{WIonWS.farthest}\code{(ws, "down")}.
- */
-EXTL_EXPORT_MEMBER
-WRegion *ionws_lowest(WIonWS *ws)
-{
-	return do_get_farthest(ws, VERTICAL, BOTTOM_OR_RIGHT);
-}
-
-
-/*EXTL_DOC
- * Same as \fnref{WIonWS.farthest}\code{(ws, "left")}.
- */
-EXTL_EXPORT_MEMBER
-WRegion *ionws_leftmost(WIonWS *ws)
-{
-	return do_get_farthest(ws, HORIZONTAL, TOP_OR_LEFT);
-}
-
-
-/*EXTL_DOC
- * Same as \fnref{WIonWS.farthest}\code{(ws, "right")}.
- */
-EXTL_EXPORT_MEMBER
-WRegion *ionws_rightmost(WIonWS *ws)
-{
-	return do_get_farthest(ws, HORIZONTAL, BOTTOM_OR_RIGHT);
 }
 
 
@@ -1170,43 +1090,31 @@ WRegion *ionws_goto_dir(WIonWS *ws, const char *dirstr)
 }
 
 
-/*EXTL_DOC
- * Same as \fnref{WIonWS.goto_dir}\code{(ws, "up")}.
- */
-EXTL_EXPORT_MEMBER
-WRegion *ionws_goto_above(WIonWS *ws)
+static WRegion *do_goto_dir_nowrap(WIonWS *ws, int dir, int primn)
 {
-	return do_goto_dir(ws, VERTICAL, TOP_OR_LEFT);
+	int primn2=(primn==TOP_OR_LEFT ? BOTTOM_OR_RIGHT : TOP_OR_LEFT);
+	WRegion *reg=NULL, *curr=ionws_current(ws);
+	if(curr!=NULL)
+		reg=do_get_next_to(ws, curr, dir, primn);
+	if(reg!=NULL)
+		region_goto(reg);
+	return reg;
 }
 
 
 /*EXTL_DOC
- * Same as \fnref{WIonWS.goto_dir}\code{(ws, "down")}.
+ * Go to the most previously active region on \var{ws} next to \var{reg} in
+ * direction \var{dirstr} (up/down/left/right) without wrapping around.
  */
 EXTL_EXPORT_MEMBER
-WRegion *ionws_goto_below(WIonWS *ws)
+WRegion *ionws_goto_dir_nowrap(WIonWS *ws, const char *dirstr)
 {
-	return do_goto_dir(ws, VERTICAL, BOTTOM_OR_RIGHT);
-}
+	int dir=0, primn=0;
 
-
-/*EXTL_DOC
- * Same as \fnref{WIonWS.goto_dir}\code{(ws, "left")}.
- */
-EXTL_EXPORT_MEMBER
-WRegion *ionws_goto_left(WIonWS *ws)
-{
-	return do_goto_dir(ws, HORIZONTAL, TOP_OR_LEFT);
-}
-
-
-/*EXTL_DOC
- * Same as \fnref{WIonWS.goto_dir}\code{(ws, "right")}.
- */
-EXTL_EXPORT_MEMBER
-WRegion *ionws_goto_right(WIonWS *ws)
-{
-	return do_goto_dir(ws, HORIZONTAL, BOTTOM_OR_RIGHT);
+	if(!get_split_dir_primn(dirstr, &dir, &primn))
+		return NULL;
+	
+	return do_goto_dir_nowrap(ws, dir, primn);
 }
 
 
