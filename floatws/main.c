@@ -81,19 +81,26 @@ void floatws_module_deinit()
 bool floatws_module_init()
 {
 	if(!floatws_module_register_exports()){
-		warn_obj("floatws", "failed to register functions.");
+		warn_obj("floatws module", "failed to register functions.");
 		goto err;
 	}
 	
 	if(!register_region_class(&OBJDESCR(WFloatWS),
 							  (WRegionSimpleCreateFn*) create_floatws,
 							  (WRegionLoadCreateFn*) floatws_load)){
-		warn_obj("floatws", "failed to register classes.");
+		warn_obj("floatws module", "failed to register classes.");
 		goto err;
 	}
 
-	if(read_config_for("floatws"))
-		return TRUE;
+	read_config_for("floatws");
+
+	if(floatframe_bindmap.nbindings==0){
+		warn_obj("floatws module", "Inadequate binding configurations. "
+				 "Refusing to load module. Please fix your configuration.");
+		goto err;
+	}
+
+	return TRUE;
 	
 err:
 	floatws_module_deinit();

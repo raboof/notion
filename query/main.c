@@ -68,17 +68,22 @@ void query_module_deinit()
 
 bool query_module_init()
 {
-	bool ret;
+	if(!query_module_register_exports())
+		goto err;
 	
-	ret=query_module_register_exports();
+	read_config_for("query");
+
+	if(query_bindmap.nbindings==0){
+		warn_obj("query module", "Inadequate binding configurations. "
+				 "Refusing to load module. Please fix your configuration.");
+		goto err;
+	}
 	
-	if(ret)
-		ret=read_config_for("query");
+	return TRUE;
 	
-	if(!ret)
-		query_module_deinit();
-		
-	return ret;
+err:
+	query_module_deinit();
+	return FALSE;
 }
 
 

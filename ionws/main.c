@@ -73,8 +73,7 @@ bool ionws_module_init()
 		goto err;
 	}
 	
-	if(!ionws_module_read_config())
-		goto err2;
+	ionws_module_read_config();
 	
 	if(ionframe_bindmap.nbindings==0 ||
 	   ionframe_moveres_bindmap.nbindings==0)
@@ -83,10 +82,8 @@ bool ionws_module_init()
 	return TRUE;
 	
 err2:
-	warn("Unable to load configuration or inadequate binding "
-		 "configurations. Refusing to load module.\nYou *must* "
-		 "install proper configuration files either in ~/.ion or "
-		 ETCDIR"/ion to use Ion.");
+	warn_obj("ionws module", "Inadequate binding configurations. "
+			 "Refusing to load module. Please fix your configuration.");
 	ionws_module_deinit();
 	return FALSE;
 
