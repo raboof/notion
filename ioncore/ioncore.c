@@ -487,3 +487,20 @@ void ioncore_deinit()
 
 /*}}}*/
 
+
+/*{{{ Misc. */
+
+
+/*EXTL_EXPORT
+ * Issue a warning. How the message is displayed depends on the current
+ * warning handler.
+ */
+EXTL_EXPORT_AS(warn)
+void exported_warn(const char *str)
+{
+	warn("%s", str);
+}
+
+
+/*}}}*/
+
