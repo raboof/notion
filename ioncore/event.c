@@ -12,6 +12,7 @@
 #include "cursor.h"
 #include "pointer.h"
 #include "key.h"
+#include "readfds.h"
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -24,6 +25,7 @@
 void get_event(XEvent *ev)
 {
 	fd_set rfds;
+	int nfds=wglobal.conn;
 	
 	while(1){
 		check_signals();
@@ -38,9 +40,14 @@ void get_event(XEvent *ev)
 		FD_ZERO(&rfds);
 		FD_SET(wglobal.conn, &rfds);
 
-		if(select(wglobal.conn+1, &rfds, NULL, NULL, NULL)>0){
-			XNextEvent(wglobal.dpy, ev);
-			return;
+ 		set_input_fds(&rfds, &nfds);
+ 		
+ 		if(select(nfds+1, &rfds, NULL, NULL, NULL)>0){
+ 			check_input_fds(&rfds);
+ 			if(FD_ISSET(wglobal.conn, &rfds)){
+ 				XNextEvent(wglobal.dpy, ev);
+ 				return;
+ 			}
 		}
 	}
 }
