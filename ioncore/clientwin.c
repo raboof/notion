@@ -107,6 +107,11 @@ static void get_winprops(WClientWin *cwin)
 		}
 		extl_unref_table(tab2);
 	}
+	
+	if(extl_table_gets_b(tab, "ignore_resizeinc", &b)){
+		if(b)
+			cwin->flags|=CWIN_PROP_IGNORE_RSZINC;
+	}
 }
 
 
@@ -127,6 +132,9 @@ void clientwin_get_size_hints(WClientWin *cwin)
 		cwin->size_hints.max_aspect=tmp.max_aspect;
 		cwin->size_hints.flags|=PAspect;
 	}
+	
+	if(cwin->flags&CWIN_PROP_IGNORE_RSZINC)
+		cwin->size_hints.flags&=~PResizeInc;
 }
 
 

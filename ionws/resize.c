@@ -16,12 +16,17 @@
 #include "ionframe.h"
 
 
-/*{{{ keyboard handling */
+/*{{{ Keyboard resize handler */
 
 
 static const char* moveres_safe_funclist[]={
-	"ionframe_grow", "ionframe_shrink", "ionframe_end_resize",
-	"ionframe_cancel_resize", NULL
+	"ionframe_grow_vert",
+	"ionframe_shrink_vert",
+	"ionframe_grow_horiz",
+	"ionframe_shrink_horiz",
+	"ionframe_end_resize",
+	"ionframe_cancel_resize",
+	NULL
 };
 
 
@@ -55,10 +60,7 @@ static bool resize_handler(WRegion *reg, XEvent *xev)
 /*}}}*/
 
 
-/*{{{ Keyboard resize */
-
-
-static int tmpdir=0;
+/*{{{ Keyboard resize interface */
 
 
 static void end_keyresize()
@@ -67,62 +69,78 @@ static void end_keyresize()
 }
 
 
-static void begin_keyresize(WRegion *reg, int dir)
+EXTL_EXPORT
+void ionframe_begin_resize(WRegion *reg)
 {
-	XSizeHints hints;
-	uint relw, relh;
-
 	grab_establish((WRegion*)reg, resize_handler,
 				   FocusChangeMask|KeyReleaseMask);
-	
-	tmpdir=dir;
 	begin_resize_atexit(reg, NULL, end_keyresize);
 }
 
 
-#define W_UNIT(REG) (tmpdir==HORIZONTAL ? SCREEN_OF(REG)->w_unit : 0)
-#define H_UNIT(REG) (tmpdir==VERTICAL ? SCREEN_OF(REG)->h_unit : 0)
-
-
-EXTL_EXPORT
-void ionframe_grow(WIonFrame *frame)
+static void ionframe_grow(WIonFrame *frame, int dir)
 {
-	WRegion *reg=(WRegion*)frame;
-	int wu=W_UNIT(reg), hu=H_UNIT(reg);
+	int wu=0, hu=0;
+
+	if(!may_resize((WRegion*)frame))
+		return;
+	
+	genframe_resize_units((WGenFrame*)frame, &wu, &hu);
+	
+	if(dir==VERTICAL)
+		wu=0;
+	else
+		hu=0;
 		
-	if(!may_resize(reg))
+	delta_resize((WRegion*)frame, -(wu-wu/2), wu/2, -(hu-hu/2), hu/2, NULL);
+	set_resize_timer((WRegion*)frame, wglobal.resize_delay);
+}
+
+
+static void ionframe_shrink(WIonFrame *frame, int dir)
+{
+	int wu, hu;
+	
+	if(!may_resize((WRegion*)frame))
 		return;
+
+	genframe_resize_units((WGenFrame*)frame, &wu, &hu);
 	
-	delta_resize(reg, -(wu-wu/2), wu/2, -(hu-hu/2), hu/2, NULL);
-	set_resize_timer(reg, wglobal.resize_delay);
+	if(dir==VERTICAL)
+		wu=0;
+	else
+		hu=0;
+	
+	delta_resize((WRegion*)frame, (wu-wu/2), -wu/2, (hu-hu/2), -hu/2, NULL);
+	set_resize_timer((WRegion*)frame, wglobal.resize_delay);
 }
 
 
 EXTL_EXPORT
-void ionframe_shrink(WIonFrame *frame)
+void ionframe_grow_vert(WIonFrame *frame)
 {
-	WRegion *reg=(WRegion*)frame;
-	int wu=W_UNIT(reg), hu=H_UNIT(reg);
-	
-	if(!may_resize(reg))
-		return;
-	
-	delta_resize(reg, (wu-wu/2), -wu/2, (hu-hu/2), -hu/2, NULL);
-	set_resize_timer(reg, wglobal.resize_delay);
+	ionframe_grow(frame, VERTICAL);
 }
 
 
 EXTL_EXPORT
-void ionframe_resize_vert(WIonFrame *frame)
+void ionframe_shrink_vert(WIonFrame *frame)
 {
-	begin_keyresize((WRegion*)frame, VERTICAL);
+	ionframe_shrink(frame, VERTICAL);
 }
 
 
 EXTL_EXPORT
-void ionframe_resize_horiz(WIonFrame *frame)
+void ionframe_grow_horiz(WIonFrame *frame)
 {
-	begin_keyresize((WRegion*)frame, HORIZONTAL);
+	ionframe_grow(frame, HORIZONTAL);
+}
+
+
+EXTL_EXPORT
+void ionframe_shrink_horiz(WIonFrame *frame)
+{
+	ionframe_shrink(frame, HORIZONTAL);
 }
 
 

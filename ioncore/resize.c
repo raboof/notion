@@ -498,4 +498,27 @@ uint region_min_w(WRegion *reg)
 }
 
 
+void genframe_resize_units(WGenFrame *genframe, int *wret, int *hret)
+{
+	WScreen *scr=SCREEN_OF(genframe);
+	*wret=scr->w_unit;
+	*hret=scr->h_unit;
+	
+	if(genframe->current_sub!=NULL){
+		uint dummyrelw,  dummyrelh;
+		XSizeHints hints;
+		
+		region_resize_hints(genframe->current_sub, &hints,
+							&dummyrelw, &dummyrelh);
+		
+		if(hints.flags&PResizeInc &&
+		   (hints.width_inc>1 || hints.height_inc>1)){
+			*wret=hints.width_inc;
+			*hret=hints.height_inc;
+		}
+	}
+}
+
+
 /*}}}*/
+

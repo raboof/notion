@@ -40,11 +40,14 @@ extern void region_request_geom(WRegion *reg,
 
 extern uint region_min_h(WRegion *reg);
 extern uint region_min_w(WRegion *reg);
+extern void region_set_w(WRegion *reg, int w);
+extern void region_set_h(WRegion *reg, int h);
+extern int region_get_w(WRegion *reg);
+extern int region_get_h(WRegion *reg);
+extern int region_get_x(WRegion *reg);
+extern int region_get_y(WRegion *reg);
 
-extern void set_width(WRegion *reg, int w);
-extern void set_height(WRegion *reg, int h);
-extern void set_widthq(WRegion *reg, double q);
-extern void set_heightq(WRegion *reg, double q);
+extern void genframe_resize_units(WGenFrame *genframe, int *wret, int *hret);
 
 extern void genframe_maximize_vert(WGenFrame *frame);
 extern void genframe_maximize_horiz(WGenFrame *frame);
