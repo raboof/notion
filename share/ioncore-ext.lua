@@ -30,6 +30,7 @@ ioncore.RESULT_DATA_LIMIT=1024^2
 dopath('ioncore-luaext')
 dopath('ioncore-bindings')
 dopath('ioncore-winprops')
+dopath('ioncore-misc')
 
 -- Export some important functions into global namespace.
 export(ioncore, 

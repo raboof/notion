@@ -265,9 +265,9 @@ bool ioncore_do_handle_buttonpress(XButtonEvent *ev)
 
     watch_setup(&p_regwatch, (Obj*)reg, NULL);
     
-    subreg=NULL;
+    subreg=region_current(reg);
     p_area=window_press((WWindow*)reg, ev, &subreg);
-    if(subreg)
+    if(subreg!=NULL)
         watch_setup(&p_subregwatch, (Obj*)subreg, NULL);
 
     if(dblclick){

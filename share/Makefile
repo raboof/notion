@@ -12,7 +12,7 @@ SUBDIRS=ion-completefile
 INSTALL_SUBDIRS=$(SUBDIRS)
 
 LUA_SOURCES = ioncore-ext.lua ioncore-luaext.lua ioncore-bindings.lua \
-	      ioncore-winprops.lua ioncore-efbb.lua ext_misc.lua
+	      ioncore-winprops.lua ioncore-misc.lua ioncore-efbb.lua
 
 SHELLSCRIPTS = ion-edit ion-man ion-runinxterm ion-ssh ion-view \
 	       ion-completeman

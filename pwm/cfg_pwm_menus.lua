@@ -6,7 +6,7 @@
 defmenu("mainmenu", {
     submenu("Programs",         "appmenu"),
     menuentry("Lock screen",    "ioncore.exec('xlock')"),
-    submenu("Workspaces",       "workspacelist"),
+    submenu("Workspaces",       "wsmenu"),
     submenu("Styles",           "stylemenu"),
     submenu("Session",          "sessionmenu"),
 })
@@ -28,6 +28,15 @@ defmenu("sessionmenu", {
     menuentry("Restart Ion",    "ioncore.restart_other('ion')"),
     menuentry("Restart TWM",    "ioncore.restart_other('twm')"),
     menuentry("Exit",           "ioncore.shutdown()"),
+})
+
+
+-- Workspaces
+defmenu("wsmenu", {
+    menuentry("New",            "ioncore.create_new_ws(_)"),
+    menuentry("Close",          "WRegion.rqclose(_sub)",
+                                "_sub:WGenWS"),
+    submenu("List",             "workspacelist"),
 })
 
 

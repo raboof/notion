@@ -23,9 +23,6 @@ local mod_query=_G["mod_query"]
 
 assert(mod_query)
 
--- Load some useful routines
-dopath("ext_misc")
-
 
 -- Generic helper functions {{{
 
@@ -409,7 +406,7 @@ end
 -- This function asks for a name new for the workspace on which the
 -- query resides.
 function mod_query.query_renameworkspace(mplex)
-    local ws=ext_misc.find_manager(mplex, "WGenWS")
+    local ws=ioncore.find_manager(mplex, "WGenWS")
     mod_query.query(mplex, "Workspace name:", ws:name(),
                     function(mplex, str) ws:set_name(str) end,
                     nil)

@@ -53,9 +53,6 @@ dopath("mod_floatws")
 dopath("mod_dock")
 --dopath("mod_sp")
 
--- Load some useful routines needed by cfg_bindings and cfg_menus
-dopath("ext_misc")
-
 -- Load some kludges to make apps behave better.
 dopath("cfg_kludges")
 

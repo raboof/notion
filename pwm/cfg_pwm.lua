@@ -13,6 +13,9 @@
 MOD1="Mod1+"
 MOD2=""
 
+-- Set default workspace type to floating
+DEFAULT_WS_TYPE="WFloatWS"
+
 -- Maximum delay between clicks in milliseconds to be considered a
 -- double click.
 --ioncore.set_dblclick_delay(250)
@@ -49,9 +52,6 @@ ioncore.add_shortenrule("(.*)", "$1$|$1$<...")
 dopath("mod_floatws")
 dopath("mod_menu")
 dopath("mod_dock")
-
--- Load some useful routines needed by cfg_bindings and cfg_menus
-dopath("ext_misc")
 
 -- Load some kludges to make apps behave better.
 dopath("cfg_kludges")
