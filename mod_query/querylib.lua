@@ -705,6 +705,57 @@ end
 -- }}}
 
 
+-- Menu query {{{
+
+--DOC
+-- This query can be used to create a query of a defined menu.
+function querylib.query_menu(mplex, prompt, menuname)
+    local menu=menulib.getmenu(menuname)
+    if not menu then
+        mod_query.warn(mplex, "Unknown menu "..tostring(menuname))
+        return
+    end
+    function complete(str)
+        local results={}
+        local len=string.len(str)
+        for _, m in menu do
+            local mn=m.name
+            if len==0 or string.sub(mn, 1, len)==str then
+                table.insert(results, mn)
+            end
+        end
+        return results
+    end    
+    
+    local function handle(mplex, str)
+        local e
+        for k, v in menu do
+            if v.name==str then
+                e=v
+                break
+            end
+        end
+        if e then
+            if e.func then
+                local err=collect_errors(function() e.func(mplex) end)
+                if err then
+                    mod_query.warn(mplex, err)
+                end
+            elseif e.submenu_fn then
+                querylib.query_menu(mplex, e.name.." menu:", e.submenu_fn())
+            end
+        else
+            mod_query.warn(mplex, "No entry '"..str.."'.")
+        end
+    end
+    
+    querylib.do_query(mplex, prompt, nil, handle,
+                      querylib.make_completor(complete))
+end
+
+-- }}}
+
+
 -- Miscellaneous {{{
 
 
