@@ -9,22 +9,22 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_IONCORE_GENFRAMEP_H
-#define ION_IONCORE_GENFRAMEP_H
+#ifndef ION_IONCORE_FRAMEP_H
+#define ION_IONCORE_FRAMEP_H
 
 #include "frame.h"
 
-#define WGENFRAME_WIN(FRAME) (((WFrame*)(FRAME))->mplex.win.win)
-#define WGENFRAME_DRAW(FRAME) (((WFrame*)(FRAME))->mplex.win.draw)
-#define WGENFRAME_MCOUNT(FRAME) (((WFrame*)(FRAME))->mplex.managed_count)
-#define WGENFRAME_MLIST(FRAME) (((WFrame*)(FRAME))->mplex.managed_list)
-#define WGENFRAME_CURRENT(FRAME) (((WFrame*)(FRAME))->mplex.current_sub)
+#define WFRAME_WIN(FRAME) (((WFrame*)(FRAME))->mplex.win.win)
+#define WFRAME_DRAW(FRAME) (((WFrame*)(FRAME))->mplex.win.draw)
+#define WFRAME_MCOUNT(FRAME) (((WFrame*)(FRAME))->mplex.managed_count)
+#define WFRAME_MLIST(FRAME) (((WFrame*)(FRAME))->mplex.managed_list)
+#define WFRAME_CURRENT(FRAME) (((WFrame*)(FRAME))->mplex.current_sub)
 
 enum{
-	WGENFRAME_AREA_NONE=0,
-	WGENFRAME_AREA_BORDER=1,
-	WGENFRAME_AREA_TAB=2,
-	WGENFRAME_AREA_CLIENT=3
+	WFRAME_AREA_NONE=0,
+	WFRAME_AREA_BORDER=1,
+	WFRAME_AREA_TAB=2,
+	WFRAME_AREA_CLIENT=3
 };
 
-#endif /* ION_IONCORE_GENFRAMEP_H */
+#endif /* ION_IONCORE_FRAMEP_H */

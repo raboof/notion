@@ -18,7 +18,7 @@
 #include "gr.h"
 
 
-#define BAR_INSIDE_BORDER(FRAME) (!((FRAME)->flags&WGENFRAME_BAR_OUTSIDE))
+#define BAR_INSIDE_BORDER(FRAME) (!((FRAME)->flags&WFRAME_BAR_OUTSIDE))
 #define BAR_OFF(FRAME) (0)
 
 
@@ -105,7 +105,7 @@ void frame_border_geom_default(const WFrame *frame, WRectangle *geom)
 	geom->h=REGION_GEOM(frame).h;
 	
 	if(!BAR_INSIDE_BORDER(frame) && 
-	   !(frame->flags&WGENFRAME_TAB_HIDE) &&
+	   !(frame->flags&WFRAME_TAB_HIDE) &&
 	   frame->brush!=NULL){
 		geom->y+=frame->bar_h+BAR_OFF(frame);
 		geom->h-=frame->bar_h+2*BAR_OFF(frame);
@@ -148,7 +148,7 @@ void frame_bar_geom_default(const WFrame *frame, WRectangle *geom)
 	geom->y+=off;
 	geom->w-=2*off;
 
-	geom->h=(frame->flags&WGENFRAME_TAB_HIDE 
+	geom->h=(frame->flags&WFRAME_TAB_HIDE 
 			 ? 0 : frame->bar_h);
 }
 
@@ -164,7 +164,7 @@ void frame_managed_geom_default(const WFrame *frame, WRectangle *geom)
 	geom->w-=2*spacing;
 	geom->h-=2*spacing;
 	
-	if(BAR_INSIDE_BORDER(frame) && !(frame->flags&WGENFRAME_TAB_HIDE)){
+	if(BAR_INSIDE_BORDER(frame) && !(frame->flags&WFRAME_TAB_HIDE)){
 		geom->y+=frame->bar_h+spacing;
 		geom->h-=frame->bar_h+spacing;
 	}
@@ -199,7 +199,7 @@ void frame_recalc_bar_default(WFrame *frame)
 	
 	i=0;
 	
-	if(WGENFRAME_MCOUNT(frame)==0){
+	if(WFRAME_MCOUNT(frame)==0){
 		textw=init_title(frame, i);
 		if(textw>0){
 			title=make_label(frame->bar_brush, CF_STR_EMPTY, textw);
@@ -208,7 +208,7 @@ void frame_recalc_bar_default(WFrame *frame)
 		return;
 	}
 	
-	FOR_ALL_MANAGED_ON_LIST(WGENFRAME_MLIST(frame), sub){
+	FOR_ALL_MANAGED_ON_LIST(WFRAME_MLIST(frame), sub){
 		textw=init_title(frame, i);
 		if(textw>0){
 			title=region_make_label(sub, textw, frame->bar_brush);
@@ -226,14 +226,14 @@ void frame_draw_bar_default(const WFrame *frame, bool complete)
 					   ? "active" : "inactive");
 	
 	if(frame->bar_brush==NULL ||
-	   frame->flags&WGENFRAME_TAB_HIDE ||
+	   frame->flags&WFRAME_TAB_HIDE ||
 	   frame->titles==NULL){
 		return;
 	}
 	
 	frame_bar_geom(frame, &geom);
 	
-	grbrush_draw_textboxes(frame->bar_brush, WGENFRAME_WIN(frame), 
+	grbrush_draw_textboxes(frame->bar_brush, WFRAME_WIN(frame), 
 						   &geom, frame->titles_n, frame->titles,
 						   complete, cattr);
 }
@@ -250,7 +250,7 @@ void frame_draw_default(const WFrame *frame, bool complete)
 	
 	frame_border_geom(frame, &geom);
 	
-	grbrush_draw_border(frame->brush, WGENFRAME_WIN(frame), &geom,
+	grbrush_draw_border(frame->brush, WFRAME_WIN(frame), &geom,
 						attr);
 
 	frame_draw_bar(frame, FALSE);
@@ -277,7 +277,7 @@ const char *frame_tab_style_default(WFrame *frame)
 
 void frame_draw_config_updated(WFrame *frame)
 {
-	Window win=WGENFRAME_WIN(frame);
+	Window win=WFRAME_WIN(frame);
 	WRectangle geom;
 	WRegion *sub;
 	
@@ -300,7 +300,7 @@ void frame_draw_config_updated(WFrame *frame)
 
 void frame_initialise_gr(WFrame *frame)
 {
-	Window win=WGENFRAME_WIN(frame);
+	Window win=WFRAME_WIN(frame);
 	GrBorderWidths bdw;
 	GrFontExtents fnte;
 
@@ -330,12 +330,12 @@ void frame_initialise_gr(WFrame *frame)
 void frame_release_brushes(WFrame *frame)
 {
 	if(frame->bar_brush!=NULL){
-		grbrush_release(frame->bar_brush, WGENFRAME_WIN(frame));
+		grbrush_release(frame->bar_brush, WFRAME_WIN(frame));
 		frame->bar_brush=NULL;
 	}
 	
 	if(frame->brush!=NULL){
-		grbrush_release(frame->brush, WGENFRAME_WIN(frame));
+		grbrush_release(frame->brush, WFRAME_WIN(frame));
 		frame->brush=NULL;
 	}
 }
@@ -345,12 +345,12 @@ bool frame_set_background(WFrame *frame, bool set_always)
 {
 	GrTransparency mode=GR_TRANSPARENCY_DEFAULT;
 	
-	if(WGENFRAME_CURRENT(frame)!=NULL){
-		if(WOBJ_IS(WGENFRAME_CURRENT(frame), WClientWin)){
-			WClientWin *cwin=(WClientWin*)WGENFRAME_CURRENT(frame);
+	if(WFRAME_CURRENT(frame)!=NULL){
+		if(WOBJ_IS(WFRAME_CURRENT(frame), WClientWin)){
+			WClientWin *cwin=(WClientWin*)WFRAME_CURRENT(frame);
 			mode=(cwin->flags&CWIN_PROP_TRANSPARENT
 				  ? GR_TRANSPARENCY_YES : GR_TRANSPARENCY_NO);
-		}else if(!WOBJ_IS(WGENFRAME_CURRENT(frame), WGenWS)){
+		}else if(!WOBJ_IS(WFRAME_CURRENT(frame), WGenWS)){
 			mode=GR_TRANSPARENCY_NO;
 		}
 	}
@@ -359,7 +359,7 @@ bool frame_set_background(WFrame *frame, bool set_always)
 		frame->tr_mode=mode;
 		if(frame->brush!=NULL){
 			grbrush_enable_transparency(frame->brush, 
-										WGENFRAME_WIN(frame), mode);
+										WFRAME_WIN(frame), mode);
 			window_draw((WWindow*)frame, TRUE);
 		}
 		return TRUE;

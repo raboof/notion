@@ -43,10 +43,10 @@ bool mplex_bindings(ExtlTab tab)
 
 
 static StringIntMap frame_areas[]={
-	{"border", 		WGENFRAME_AREA_BORDER},
-	{"tab", 		WGENFRAME_AREA_TAB},
-	{"empty_tab", 	WGENFRAME_AREA_TAB},
-	{"client", 		WGENFRAME_AREA_CLIENT},
+	{"border", 		WFRAME_AREA_BORDER},
+	{"tab", 		WFRAME_AREA_TAB},
+	{"empty_tab", 	WFRAME_AREA_TAB},
+	{"client", 		WFRAME_AREA_CLIENT},
 	END_STRINGINTMAP
 };
 

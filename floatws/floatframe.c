@@ -280,7 +280,7 @@ static void floatframe_set_shape(WFloatFrame *frame)
 		floatframe_bar_geom(frame, gs+0);
 		floatframe_border_geom(frame, gs+1);
 	
-		grbrush_set_window_shape(frame->frame.brush, WGENFRAME_WIN(frame),
+		grbrush_set_window_shape(frame->frame.brush, WFRAME_WIN(frame),
 								 TRUE, 2, gs);
 	}
 }
@@ -317,14 +317,14 @@ static void floatframe_recalc_bar(WFloatFrame *frame)
 	if(frame->frame.bar_brush==NULL)
 		return;
 	
-	m=WGENFRAME_MCOUNT(frame);
+	m=WFRAME_MCOUNT(frame);
 	
 	if(m>0){
 		grbrush_get_border_widths(frame->frame.bar_brush, &bdw);
 		bdtotal=((m-1)*(bdw.tb_ileft+bdw.tb_iright)
 				 +bdw.right+bdw.left);
 
-		FOR_ALL_MANAGED_ON_LIST(WGENFRAME_MLIST(frame), sub){
+		FOR_ALL_MANAGED_ON_LIST(WFRAME_MLIST(frame), sub){
 			p=region_name(sub);
 			if(p==NULL)
 				continue;
@@ -366,7 +366,7 @@ static void floatframe_recalc_bar(WFloatFrame *frame)
 		return;
 	
 	i=0;
-	FOR_ALL_MANAGED_ON_LIST(WGENFRAME_MLIST(frame), sub){
+	FOR_ALL_MANAGED_ON_LIST(WFRAME_MLIST(frame), sub){
 		textw=init_title(frame, i);
 		if(textw>0){
 			title=region_make_label(sub, textw, frame->frame.bar_brush);
@@ -415,7 +415,7 @@ static const char *floatframe_tab_style_default(WFloatFrame *frame)
 void floatframe_remove_managed(WFloatFrame *frame, WRegion *reg)
 {
 	mplex_remove_managed((WMPlex*)frame, reg);
-	if(WGENFRAME_MCOUNT(frame)==0 && !WOBJ_IS_BEING_DESTROYED(frame))
+	if(WFRAME_MCOUNT(frame)==0 && !WOBJ_IS_BEING_DESTROYED(frame))
 		defer_destroy((WObj*)frame);
 }
 
@@ -494,13 +494,13 @@ static bool floatframe_save_to_file(WFloatFrame *frame, FILE *file, int lvl)
 		fprintf(file, "sticky = true,\n");
 	}
 	
-	if(frame->frame.flags&WGENFRAME_SAVED_VERT){
+	if(frame->frame.flags&WFRAME_SAVED_VERT){
 		save_indent_line(file, lvl);
 		fprintf(file, "saved_y = %d, saved_h = %d,\n", 
 				frame->frame.saved_y,
 				frame->frame.saved_h);
 	}
-	if(frame->frame.flags&WGENFRAME_SAVED_HORIZ){
+	if(frame->frame.flags&WFRAME_SAVED_HORIZ){
 		save_indent_line(file, lvl);
 		fprintf(file, "saved_x = %d, saved_w = %d,\n", 
 				frame->frame.saved_x,
@@ -509,11 +509,11 @@ static bool floatframe_save_to_file(WFloatFrame *frame, FILE *file, int lvl)
 		
 	save_indent_line(file, lvl);
 	fprintf(file, "subs = {\n");
-	FOR_ALL_MANAGED_ON_LIST(WGENFRAME_MLIST(frame), sub){
+	FOR_ALL_MANAGED_ON_LIST(WFRAME_MLIST(frame), sub){
 		save_indent_line(file, lvl+1);
 		fprintf(file, "{\n");
 		region_save_to_file((WRegion*)sub, file, lvl+2);
-		if(sub==WGENFRAME_CURRENT(frame)){
+		if(sub==WFRAME_CURRENT(frame)){
 			save_indent_line(file, lvl+2);
 			fprintf(file, "switchto = true,\n");
 		}
@@ -536,7 +536,7 @@ WRegion *floatframe_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
 	
 	frame_do_load((WFrame*)frame, tab);
 	
-	if(WGENFRAME_MCOUNT(frame)==0){
+	if(WFRAME_MCOUNT(frame)==0){
 		/* Nothing to manage, destroy */
 		destroy_obj((WObj*)frame);
 		frame=NULL;

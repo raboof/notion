@@ -51,7 +51,7 @@ static bool try_current(WIonWS *ws, WClientWin *cwin)
 	if(target==NULL || !WOBJ_IS(target, WFrame))
 		return FALSE;
 		
-	target=WGENFRAME_CURRENT(target);
+	target=WFRAME_CURRENT(target);
 	
 	if(target==NULL || !WOBJ_IS(target, WClientWin))
 		return FALSE;

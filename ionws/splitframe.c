@@ -97,8 +97,8 @@ static WIonFrame *do_split(WIonFrame *oframe, const char *str, bool attach)
 
 	assert(WOBJ_IS(reg, WIonFrame));
 	
-	if(attach && WGENFRAME_CURRENT(oframe)!=NULL)
-		mplex_attach_simple((WMPlex*)reg, WGENFRAME_CURRENT(oframe), TRUE);
+	if(attach && WFRAME_CURRENT(oframe)!=NULL)
+		mplex_attach_simple((WMPlex*)reg, WFRAME_CURRENT(oframe), TRUE);
 	
 	if(region_may_control_focus((WRegion*)oframe))
 		region_goto(reg);
@@ -185,7 +185,7 @@ void ionframe_relocate_and_close(WIonFrame *frame)
 
 void ionframe_close(WIonFrame *frame)
 {
-	if(WGENFRAME_MCOUNT(frame)!=0 || WGENFRAME_CURRENT(frame)!=NULL){
+	if(WFRAME_MCOUNT(frame)!=0 || WFRAME_CURRENT(frame)!=NULL){
 		warn("Frame not empty.");
 		return;
 	}

@@ -9,8 +9,8 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_IONCORE_GENFRAME_H
-#define ION_IONCORE_GENFRAME_H
+#ifndef ION_IONCORE_FRAME_H
+#define ION_IONCORE_FRAME_H
 
 #include "common.h"
 #include "window.h"
@@ -21,12 +21,12 @@
 
 INTROBJ(WFrame);
 
-#define WGENFRAME_TAB_HIDE    0x0004
-#define WGENFRAME_SAVED_VERT  0x0008
-#define WGENFRAME_SAVED_HORIZ 0x0010
-#define WGENFRAME_SHADED	  0x0020
-#define WGENFRAME_SETSHADED	  0x0040
-#define WGENFRAME_BAR_OUTSIDE 0x0080
+#define WFRAME_TAB_HIDE    0x0004
+#define WFRAME_SAVED_VERT  0x0008
+#define WFRAME_SAVED_HORIZ 0x0010
+#define WFRAME_SHADED	  0x0020
+#define WFRAME_SETSHADED	  0x0040
+#define WFRAME_BAR_OUTSIDE 0x0080
 
 DECLOBJ(WFrame){
 	WMPlex mplex;
@@ -77,4 +77,4 @@ extern bool frame_save_to_file(WFrame *frame, FILE *file, int lvl);
 extern void frame_load_saved_geom(WFrame* frame, ExtlTab tab);
 extern void frame_do_load(WFrame *frame, ExtlTab tab);
 
-#endif /* ION_IONCORE_GENFRAME_H */
+#endif /* ION_IONCORE_FRAME_H */

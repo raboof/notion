@@ -9,8 +9,8 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_IONCORE_GENFRAME_POINTER_H
-#define ION_IONCORE_GENFRAME_POINTER_H
+#ifndef ION_IONCORE_FRAME_POINTER_H
+#define ION_IONCORE_FRAME_POINTER_H
 
 #include "common.h"
 #include "pointer.h"
@@ -28,4 +28,4 @@ extern void frame_release(WFrame *frame);
 DYNFUN bool region_handle_drop(WRegion *reg, int x, int y,
 							   WRegion *dropped);
 							   
-#endif /* ION_IONCORE_GENFRAME_POINTER_H */
+#endif /* ION_IONCORE_FRAME_POINTER_H */

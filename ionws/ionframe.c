@@ -26,7 +26,7 @@
 #include "splitframe.h"
 
 
-#define BAR_INSIDE_BORDER(FRAME) (!((FRAME)->frame.flags&WGENFRAME_BAR_OUTSIDE))
+#define BAR_INSIDE_BORDER(FRAME) (!((FRAME)->frame.flags&WFRAME_BAR_OUTSIDE))
 #define BAR_OFF(FRAME) (0)
 
 
@@ -119,9 +119,9 @@ static void ionframe_brushes_updated(WIonFrame *frame)
 	extl_table_gets_b(tab, "ionframe_bar_inside_border", &b);
 	
 	if(b)
-		frame->frame.flags&=~WGENFRAME_BAR_OUTSIDE;
+		frame->frame.flags&=~WFRAME_BAR_OUTSIDE;
 	else
-		frame->frame.flags|=WGENFRAME_BAR_OUTSIDE;
+		frame->frame.flags|=WFRAME_BAR_OUTSIDE;
 }
 
 

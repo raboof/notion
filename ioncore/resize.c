@@ -733,13 +733,13 @@ void frame_restore_size(WFrame *frame, bool horiz, bool vert)
 
 	geom=REGION_GEOM(frame);
 	
-	if(vert && frame->flags&WGENFRAME_SAVED_VERT){
+	if(vert && frame->flags&WFRAME_SAVED_VERT){
 		geom.y=frame->saved_y;
 		geom.h=frame->saved_h;
 		rqf&=~(REGION_RQGEOM_WEAK_Y|REGION_RQGEOM_WEAK_H);
 	}
 
-	if(horiz && frame->flags&WGENFRAME_SAVED_HORIZ){
+	if(horiz && frame->flags&WFRAME_SAVED_HORIZ){
 		geom.x=frame->saved_x;
 		geom.w=frame->saved_w;
 		rqf&=~(REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_W);
@@ -795,7 +795,7 @@ void frame_maximize_vert(WFrame *frame)
 {
 	WRegion *mgr=REGION_MANAGER(frame);
 	
-	if(frame->flags&WGENFRAME_SHADED){
+	if(frame->flags&WFRAME_SHADED){
 		frame_do_toggle_shade(frame, 0 /* not used */);
 		return;
 	}
@@ -856,12 +856,12 @@ void frame_do_toggle_shade(WFrame *frame, int shaded_h)
 {
 	WRectangle geom=REGION_GEOM(frame);
 
-	if(frame->flags&WGENFRAME_SHADED){
-		if(!(frame->flags&WGENFRAME_SAVED_VERT))
+	if(frame->flags&WFRAME_SHADED){
+		if(!(frame->flags&WFRAME_SAVED_VERT))
 			return;
 		geom.h=frame->saved_h;
 	}else{
-		if(frame->flags&WGENFRAME_TAB_HIDE)
+		if(frame->flags&WFRAME_TAB_HIDE)
 			return;
 		geom.h=shaded_h;
 	}
@@ -877,7 +877,7 @@ void frame_do_toggle_shade(WFrame *frame, int shaded_h)
 EXTL_EXPORT_MEMBER
 bool frame_is_shaded(WFrame *frame)
 {
-	return ((frame->flags&WGENFRAME_SHADED)!=0);
+	return ((frame->flags&WFRAME_SHADED)!=0);
 }
 
 
@@ -922,10 +922,10 @@ void frame_resize_units(WFrame *frame, int *wret, int *hret)
 	*wret=1;
 	*hret=1;
 	
-	if(WGENFRAME_CURRENT(frame)!=NULL){
+	if(WFRAME_CURRENT(frame)!=NULL){
 		XSizeHints hints;
 		
-		region_resize_hints(WGENFRAME_CURRENT(frame), &hints, NULL, NULL);
+		region_resize_hints(WFRAME_CURRENT(frame), &hints, NULL, NULL);
 		
 		if(hints.flags&PResizeInc &&
 		   (hints.width_inc>1 || hints.height_inc>1)){

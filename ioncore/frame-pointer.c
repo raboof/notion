@@ -120,7 +120,7 @@ int frame_press(WFrame *frame, XButtonEvent *ev, WRegion **reg_ret)
 		if(reg_ret!=NULL)
 			*reg_ret=sub;
 		
-		return WGENFRAME_AREA_TAB;
+		return WFRAME_AREA_TAB;
 	}
 	
 
@@ -129,9 +129,9 @@ int frame_press(WFrame *frame, XButtonEvent *ev, WRegion **reg_ret)
 	frame_border_inner_geom(frame, &g);
 	
 	if(coords_in_rect(&g, ev->x, ev->y))
-		return WGENFRAME_AREA_CLIENT;
+		return WFRAME_AREA_CLIENT;
 	
-	return WGENFRAME_AREA_BORDER;
+	return WFRAME_AREA_BORDER;
 }
 
 
