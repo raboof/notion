@@ -32,9 +32,9 @@ _install:
 	for i in $(SHELLSCRIPTS); do \
 		$(INSTALL) -m $(BIN_MODE) $$i $(SHAREDIR); \
 	done
-	#for i in $(LUA_SOURCES) $(MISC_SHARE); do \
-	#	$(INSTALL) -m $(DATA_MODE) $$i $(SHAREDIR); \
-	#done
+	for i in $(MISC_SHARE); do \
+		$(INSTALL) -m $(DATA_MODE) $$i $(SHAREDIR); \
+	done
 	$(INSTALLDIR) $(LCDIR)
 	for i in $(LUA_COMPILED); do \
 		$(INSTALL) -m $(DATA_MODE) $$i $(LCDIR); \
