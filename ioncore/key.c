@@ -254,6 +254,7 @@ void handle_keypress(XKeyEvent *ev)
 			if(add_sub(reg, ev->keycode, ev->state))
 				submapgrab(reg);
 		}else{
+			XUngrabKeyboard(wglobal.dpy, CurrentTime);
 			dispatch_binding(binding_owner, reg, binding, ev);
 		}
 	}else if(WOBJ_IS(oreg, WWindow)){
