@@ -9,6 +9,7 @@
  * (at your option) any later version.
  */
 
+#include <limits.h>
 #include <X11/Xmd.h>
 
 #include <ioncore/common.h>
@@ -161,243 +162,350 @@ void set_split_of(WObj *obj, WWsSplit *split)
 /*}}}*/
 
 
+static int minof(int x, int y)
+{
+	return (x<y ? x : y);
+}
+
+
+static int maxof(int x, int y)
+{
+	return (x>y ? x : y);
+}
+
+
+/* No, there are not even supposed to be proper/consistent 
+ * Z \cup {\infty, -\infty} calculation rules. 
+ */
+
+static int infadd(int x, int y)
+{
+	if(x==INT_MAX || y==INT_MAX)
+		return INT_MAX;
+	else
+		return x+y;
+}
+
+static int infsub(int x, int y)
+{
+	if(x==INT_MAX)
+		return INT_MAX;
+	else if(y==INT_MAX)
+		return 0;
+	else
+		return x-y;
+}
+
+
+static void bound(int *what, int min, int max)
+{
+	if(*what<min)
+		*what=min;
+	else if(*what>max)
+		*what=max;
+}
+
+
 /*{{{ Low-level resize code */
 
 
-/* Calculate parameters to attempt to resize tree at node_ to nsize in
- * direction dir with primn being the primary node to resize.
- */
-int split_tree_do_calcresize(WObj *node_, int dir, int primn, int nsize)
+static void get_region_bounds(WRegion *reg, int dir, int *min, int *max)
 {
-	WWsSplit *node;
-	WObj *o1, *o2;
-	int s1, s2, ns1, ns2;
+	XSizeHints hints;
+	uint relw, relh;
+	region_resize_hints(reg, &hints, &relw, &relh);
 	
-	assert(node_!=NULL);
-	
-	/* Reached a window? */
-	if(!WOBJ_IS(node_, WWsSplit)){
-		assert(WOBJ_IS(node_, WRegion));
-		return reg_calcresize((WRegion*)node_, dir, nsize);
-	}
-	
-	node=(WWsSplit*)node_;
-	
-	if(node->dir!=dir){
-		/* Found a split in the other direction than the resize */
-		s1=split_tree_do_calcresize(node->tl, dir, primn, nsize);
-		s2=split_tree_do_calcresize(node->br, dir, primn, nsize);
-		
-		if(s1>s2){
-			split_tree_do_calcresize(node->br, dir, primn, s1);
-		}else if(s2>s1){
-			split_tree_do_calcresize(node->tl, dir, primn, s2);
-			s1=s2;
-		}
-		node->res=ANY;
-		node->knowsize=ANY;
-		node->tmpsize=s1;
-		return s1;
+	if(dir==HORIZONTAL){
+		*min=(hints.flags&PMinSize ? hints.min_width : 1)
+			+REGION_GEOM(reg).w-relw;
+		/*if(hints.flags&PMaxSize)
+			*max=hints.max_width + REGION_GEOM(reg).w-relw;
+		else*/
+			*max=INT_MAX;
 	}else{
-		if(primn==TOP_OR_LEFT){
-			/* Resize top or left node first */
-			o1=node->tl;
-			o2=node->br;
-		}else{
-			/* Resize bottom or right node first */
-			o1=node->br;
-			o2=node->tl;
-		}
-		
-		s2=split_tree_size(o2, dir);
-		
-		if(primn==ANY){
-			primn=BOTTOM_OR_RIGHT;
-			s1=split_tree_size(o1, dir);
-			ns1=(nsize*s1+(s1+s2)/2)/(s1+s2);
-		}else{
-			ns1=nsize-s2;
-		}
-		
-		s1=split_tree_do_calcresize(o1, dir, primn, ns1);
-		
-		ns2=nsize-s1;
-		s2=split_tree_do_calcresize(o2, dir, primn, ns2);
-		
-		node->res=ANY;
-		node->knowsize=primn;
-		node->tmpsize=s1;
-		return s1+s2;
+		*min=(hints.flags&PMinSize ? hints.min_height : 1)
+			+REGION_GEOM(reg).h-relh;
+		/*if(hints.flags&PMaxSize)
+			*max=hints.max_height + REGION_GEOM(reg).h-relh;
+		else*/
+			*max=INT_MAX;
 	}
 }
 
 
-/* Resize node_ and its children to nsize in direction dir according to
- * precalculated (above function) values and parameters.
- */
-int split_tree_do_resize(WObj *node_, int dir, int npos, int nsize)
+
+static void split_tree_update_bounds(WObj *node, int dir, int *min, int *max)
 {
-	WWsSplit *node;
-	int tls, brs;
-	int s=0;
-	int pos=npos;
+	int tlmax, tlmin, brmax, brmin;
+	WWsSplit *split;
 	
-	if(node_==NULL){
-		return 0;
-	}
-	assert(node_!=NULL);
-	
-	/* Reached a window? */
-	if(!WOBJ_IS(node_, WWsSplit)){
-		assert(WOBJ_IS(node_, WRegion));
-		return reg_resize((WRegion*)node_, dir, npos, nsize);
+	if(!WOBJ_IS(node, WWsSplit)){
+		assert(WOBJ_IS(node, WRegion));
+		get_region_bounds((WRegion*)node, dir, min, max);
+		return;
 	}
 	
-	node=(WWsSplit*)node_;
+	split=(WWsSplit*)node;
 	
-	if(node->dir!=dir){
-		split_tree_do_resize(node->tl, dir, npos, nsize);
-		s=split_tree_do_resize(node->br, dir, npos, nsize);
+	split_tree_update_bounds(split->tl, dir, &tlmin, &tlmax);
+	split_tree_update_bounds(split->br, dir, &brmin, &brmax);
+	
+	if(split->dir!=dir){
+		*min=maxof(tlmin, brmin);
+		*max=minof(tlmax, brmax);
 	}else{
-		if(node->knowsize==TOP_OR_LEFT){
-			tls=node->tmpsize;
-			brs=nsize-tls;
-		}else if(node->knowsize==BOTTOM_OR_RIGHT){
-			brs=node->tmpsize;
-			tls=nsize-brs;
-		}else{
-			/*fprintf(stderr, "Resize is broken!");*/
-			brs=nsize/2;
-			tls=nsize-brs;
-		}
-		
-		s+=split_tree_do_resize(node->tl, dir, npos, tls);
-		npos+=s;
-		s+=split_tree_do_resize(node->br, dir, npos, brs);
+		*min=infadd(tlmin, brmin);
+		*max=infadd(tlmax, brmax);
 	}
 	
 	if(dir==VERTICAL){
-		node->geom.y=pos;
-		node->geom.h=s;
+		split->max_h=*max;
+		split->min_h=*min;
 	}else{
-		node->geom.x=pos;
-		node->geom.w=s;
+		split->max_w=*max;
+		split->min_w=*min;
 	}
-	
-	return s;
 }
 
 
-/*void split_tree_move(WObj *node, int x, int y)
+static void split_tree_get_bounds(WObj *node, int dir, int *min, int *max)
 {
+	WWsSplit *split;
+	
 	if(!WOBJ_IS(node, WWsSplit)){
-		WRectangle g;
 		assert(WOBJ_IS(node, WRegion));
-		g=REGION_GEOM(node);
-		g.x=x; 
-		g.y=y;
-		region_fit((WRegion*)node, g);
-	}else{
-		WWsSplit *split=(WWsSplit*)node;
-		split->geom.x=x;
-		split->geom.y=y;
-		split_tree_move(split->tl, x, y);
-		if(split->dir==VERTICAL)
-			y+=split_tree_size(split->tl, VERTICAL);
-		else
-			x+=split_tree_size(split->tl, HORIZONTAL);
-		split_tree_move(split->br, x, y);
+		get_region_bounds((WRegion*)node, dir, min, max);
+		return;
 	}
-}*/
 
+	split=(WWsSplit*)node;
 
-/* Calculate parameters for resizing <split> and possibly anything
- * above it so that the <dir>-dimension of <from> becomes <nsize>
- * (if possible).
- */
-static void wcalcres(WWsSplit *split, int dir, int primn,
-					 int nsize, int from, WResizeTmp *ret)
-{
-	int s, s2, ds, rs, rp;
-	WObj *other=(from==TOP_OR_LEFT ? split->br : split->tl);
-	WWsSplit *p;
-	
-	s=split_tree_size((WObj*)split, dir);
-	
-	if(dir!=split->dir){
-		/* It might not be possible to shrink the other as much */
-		ds=split_tree_do_calcresize(other, dir, primn, nsize);
-		nsize=ds;
-		s2=0;
+	if(dir==VERTICAL){
+		*max=split->max_h;
+		*min=split->min_h;
 	}else{
-		if(primn!=from)
-			s2=split_tree_do_calcresize(other, dir, from, s-nsize);
-		else
-			s2=split_tree_do_calcresize(other, dir, from, split_tree_size(other, dir));
+		*max=split->max_w;
+		*min=split->min_w;
 	}
-	ds=nsize+s2;
-
-	p=split->parent;
-	
-	if(p==NULL || ds==s){
-		rs=s;
-		rp=split_tree_pos((WObj*)split, dir);
-		ret->postmp=rp;
-		ret->sizetmp=rs;
-		/* Don't have to resize the other branch if the split is not
-		 * in the wanted direction
-		 */
-		if(split->dir!=dir)
-			ret->startnode=(from==TOP_OR_LEFT ? split->tl : split->br);
-		else
-			ret->startnode=(WObj*)split;
-	}else{
-		wcalcres(p, dir, primn, ds,
-				 (p->tl==(WObj*)split ? TOP_OR_LEFT : BOTTOM_OR_RIGHT),
-				 ret);
-		rp=ret->winpostmp;
-		rs=ret->winsizetmp;
-		
-		if(rs!=ds && dir!=split->dir)
-			split_tree_do_calcresize(other, dir, primn, rs);
-	}
-	
-	nsize=rs-s2;
-	
-	split->knowsize=from;
-	split->tmpsize=nsize;
-	split->res=ANY;
-	
-	if(from==TOP_OR_LEFT)
-		ret->winpostmp=rp;
-	else
-		ret->winpostmp=rp+s2;
-	ret->winsizetmp=nsize;
 }
 
 
-int calcresize_obj(WObj *obj, int dir, int primn, int nsize, 
-				   WResizeTmp *ret)
+static void get_bounds(WWsSplit *split, int dir, WObj *from,
+					   int *tlfree, int *brfree, int *maxsize,
+					   int *tlshrink, int *brshrink, int *minsize)
+{
+	WObj *other=(from==split->tl ? split->br : split->tl);
+	WWsSplit *p=split->parent;
+	int s=split_tree_size((WObj*)split, dir);
+	int omin, omax;
+	
+	if(p==NULL){
+		*tlfree=0;
+		*brfree=0;
+		*maxsize=s;
+		*tlshrink=0;
+		*brshrink=0;
+		*minsize=s;
+	}else{
+		get_bounds(p, dir, (WObj*)split, 
+				   tlfree, brfree, maxsize,
+				   tlshrink, brshrink, minsize);
+	}
+	
+	split_tree_update_bounds(other, dir, &omin, &omax);
+	
+	if(split->dir!=dir){
+		if(p!=NULL){
+			if(*maxsize>omax)
+				*maxsize=omax;
+			if(*minsize<omin)
+				*minsize=omin;
+		}
+	}else{
+		int os=split_tree_size((WObj*)other, dir);
+		
+		*maxsize-=omin;
+		if(*minsize>infsub(s, omax))
+			*minsize=infsub(s, omax);
+		
+		if(other==split->tl){
+			*tlfree+=os-omin;
+			*tlshrink=infadd(*tlshrink, infsub(omax, os));
+		}else{
+			*brfree+=os-omin;
+			*brshrink=infadd(*brshrink, infsub(omax, os));
+		}
+	}
+}
+
+
+static void get_bounds_for(WObj *obj, int dir,
+						   int *tlfree, int *brfree, int *maxsize,
+						   int *tlshrink, int *brshrink, int *minsize)
 {
 	WWsSplit *split=split_of(obj);
 	
-	nsize=split_tree_do_calcresize(obj, dir, primn, nsize);
-	
-	ret->dir=dir;
-	
 	if(split==NULL){
-		ret->winsizetmp=ret->sizetmp=split_tree_size(obj, dir);
-		ret->winpostmp=ret->postmp=split_tree_pos(obj, dir);
-		ret->startnode=NULL;
-		ret->dir=dir;
-	}else{
-		wcalcres(split, dir, primn, nsize, 
-				 (split->tl==obj ? TOP_OR_LEFT : BOTTOM_OR_RIGHT),
-				 ret);
+		*tlfree=0;
+		*brfree=0;
+		*tlshrink=0;
+		*brshrink=0;
+		*maxsize=split_tree_size(obj, dir);
+		*minsize=*maxsize;
+		return;
 	}
-	return ret->winsizetmp;
+	
+	get_bounds(split, dir, obj, tlfree, brfree, maxsize,
+			   tlshrink, brshrink, minsize);
 }
 
+
+
+void split_tree_do_resize(WObj *node, int dir, int primn, int npos, int nsize)
+{
+	WWsSplit *split;
+	
+	if(!WOBJ_IS(node, WWsSplit)){
+		assert(WOBJ_IS(node, WRegion));
+		reg_resize((WRegion*)node, dir, npos, nsize);
+		return;
+	}
+	
+	split=(WWsSplit*)node;
+	
+	if(split->dir!=dir){
+		split_tree_do_resize(split->tl, dir, primn, npos, nsize);
+		split_tree_do_resize(split->br, dir, primn, npos, nsize);
+	}else{
+		int tlmin, tlmax, brmin, brmax, tls, brs, sz;
+		
+		sz=split_tree_size(node, dir);
+		tls=split_tree_size(split->tl, dir);
+		brs=split_tree_size(split->br, dir);
+
+		split_tree_get_bounds(split->tl, dir, &tlmin, &tlmax);
+		split_tree_get_bounds(split->br, dir, &brmin, &brmax);
+		
+		if(primn==TOP_OR_LEFT){
+			tls=tls+nsize-sz;
+			bound(&tls, tlmin, tlmax);
+			brs=nsize-tls;
+		}else if(primn==BOTTOM_OR_RIGHT){
+			brs=brs+nsize-sz;
+			bound(&brs, brmin, brmax);
+			tls=nsize-brs;
+		}else{
+			if(sz==0)
+				tls=nsize/2;
+			else
+				tls=tls*nsize/sz;
+			bound(&tls, tlmin, tlmax);
+			brs=nsize-tls;
+		}
+		
+		split_tree_do_resize(split->tl, dir, primn, npos, tls);
+		split_tree_do_resize(split->br, dir, primn, npos+tls, brs);
+	}
+	
+	if(dir==VERTICAL){
+		split->geom.y=npos;
+		split->geom.h=nsize;
+	}else{
+		split->geom.x=npos;
+		split->geom.w=nsize;
+	}
+}
+
+
+void split_tree_resize(WObj *node, int dir, int primn,
+					   int npos, int nsize)
+{
+	int dummymax, dummymin;
+	split_tree_update_bounds(node, dir, &dummymax, &dummymin);
+	split_tree_do_resize(node, dir, ANY, npos, nsize);
+}
+
+
+static int do_resize_split(WWsSplit *split, int dir, WObj *from, int primn, 
+						   int amount)
+{
+	WObj *other=(from==split->tl ? split->br : split->tl);
+	int os=split_tree_size(other, dir);
+	int pos, fpos;
+	WWsSplit *p=split->parent;
+	
+	if(split->dir!=dir){
+		if(p==NULL){
+			pos=split_tree_pos((WObj*)split, dir);
+		}else{
+			pos=do_resize_split(p, dir, (WObj*)split, primn, amount);
+			split_tree_do_resize(other, dir, ANY, pos, os+amount);
+		}
+		fpos=pos;
+	}else{
+		
+		bool res=(primn==ANY ||
+				  (primn==TOP_OR_LEFT && other==split->tl) ||
+				  (primn==BOTTOM_OR_RIGHT && other==split->br));
+		int osn=os, fsn=amount+split_tree_size(from, dir);
+		
+		if(res){
+			int min, max;
+			osn-=amount;
+			split_tree_get_bounds(other, dir, &min, &max);
+			bound(&osn, min, max);
+			amount=osn-(os-amount);
+		}
+		
+		if(amount!=0 && p!=NULL){
+			pos=do_resize_split(p, dir, (WObj*)split, primn, amount);
+		}else{
+			if(amount!=0){
+				warn("Split tree size calculation bug: resize amount %d!=0 "
+					 "and at root node.", amount);
+			}
+			pos=split_tree_pos((WObj*)split, dir);
+		}
+		
+		if(other==split->tl){
+			split_tree_do_resize(other, dir, BOTTOM_OR_RIGHT, pos, osn);
+			fpos=pos+osn;
+		}else{
+			split_tree_do_resize(other, dir, TOP_OR_LEFT, pos+fsn, osn);
+			fpos=pos;
+		}
+	}
+
+	if(dir==VERTICAL){
+		split->geom.y=pos;
+		split->geom.h=split_tree_size((WObj*)split, dir)+amount;
+	}else{
+		split->geom.x=pos;
+		split->geom.w=split_tree_size((WObj*)split, dir)+amount;
+	}
+	
+	return fpos;
+}
+
+
+static void do_resize_node(WObj *obj, int dir, int primn, int amount)
+{
+	WWsSplit *p=split_of(obj);
+	int s=split_tree_size(obj, dir);
+	int pos;
+	
+	if(p==NULL){
+		pos=split_tree_pos(obj, dir);
+		if(primn==TOP_OR_LEFT)
+			pos-=amount;
+	}else{
+		pos=do_resize_split(p, dir, obj, primn, amount);
+	}
+	
+	split_tree_do_resize(obj, dir, ANY, pos, s+amount);
+}
+
+						
 
 /*}}}*/
 
@@ -405,16 +513,103 @@ int calcresize_obj(WObj *obj, int dir, int primn, int nsize,
 /*{{{ Resize interface */
 
 
-static int calcresize_reg(WRegion *reg, int dir, int primn, int nsize,
-						  WResizeTmp *ret)
+static void adjust_d(int *d, int negmax, int posmax)
 {
-	return calcresize_obj((WObj*)reg, dir, primn, nsize, ret);
+	if(*d<0 && -*d>negmax)
+		*d=-negmax;
+	else if(*d>0 && *d>posmax)
+		*d=posmax;
 }
 
 
-static void resize_tmp(const WResizeTmp *tmp)
+static void ionws_request_managed_geom_dir(WIonWS *ws, WRegion *sub, 
+										   int flags, WRectangle geom,
+										   WRectangle *geomret, int dir)
 {
-	split_tree_do_resize(tmp->startnode, tmp->dir, tmp->postmp, tmp->sizetmp);
+	bool horiz=(dir==HORIZONTAL);
+	int x1d, x2d;
+	int tlfree=0, brfree=0, tlshrink=0, brshrink=0, minsize, maxsize;
+
+	get_bounds_for((WObj*)sub, dir, &tlfree, &brfree, &maxsize,
+				   &tlshrink, &brshrink, &minsize);
+	
+	{
+		int x, w, w2, ox, ow;
+		if(horiz){
+			x=geom.x; w=geom.w;
+			ox=REGION_GEOM(sub).x; ow=REGION_GEOM(sub).w;
+		}else{
+			x=geom.y; w=geom.h;
+			ox=REGION_GEOM(sub).y; ow=REGION_GEOM(sub).h;
+		}
+		
+		x1d=x-ox;
+		x2d=x+w-(ox+ow);
+		
+		/* Bound size so e.g. other objects in the same split don't
+		 * get too small. The change in size difference is proprtionally
+		 * divided between x1 and x2 (ignoring WEAK settings).
+		 */
+		w2=w;
+		bound(&w2, minsize, maxsize);
+		if(w2!=w){
+			int ax1d=abs(x1d), ax2d=abs(x2d);
+			if(ax1d+ax2d!=0){
+				x1d+=(w-w2)*ax1d/(ax1d+ax2d);
+				x2d+=(w2-w)*ax2d/(ax1d+ax2d);
+			}
+		}
+	}
+	
+#if 0
+	if(flags&(horiz ? REGION_RQGEOM_WEAK_X : REGION_RQGEOM_WEAK_Y)){
+		int wd=-x1d+x2d;
+		int x2d2;
+		/* Adjust width/height change to what is possible */
+		adjust_d(&wd, tlshrink+brshrink, tlfree+brfree);
+		/* Adjust x initially */
+		adjust_d(&x1d, tlfree, tlshrink);
+		/* Adjust x2 to grow or shrink the frame */
+		x2d2=wd+x1d;
+		x2d=x2d2;
+		adjust_d(&x2d, brshrink, brfree);
+		/* Readjust x to if the frame could not be grown/shrink enough
+		 * keeping it fixed */
+		x1d+=x2d-x2d2;
+		adjust_d(&x1d, tlfree, tlshrink);
+	}else{
+		/* Just adjust both x:s independently */
+		adjust_d(&x1d, tlfree, tlshrink);
+		adjust_d(&x2d, brshrink, brfree);
+		
+	}
+#else
+	adjust_d(&x1d, tlfree, tlshrink);
+	adjust_d(&x2d, brshrink, brfree);
+#endif
+
+	if(geomret!=NULL){
+		if(horiz){
+			geomret->x=REGION_GEOM(sub).x+x1d;
+			geomret->w=REGION_GEOM(sub).w-x1d+x2d;
+		}else{
+			geomret->y=REGION_GEOM(sub).y+x1d;
+			geomret->h=REGION_GEOM(sub).h-x1d+x2d;
+		}
+	}
+	
+	if(!(flags&REGION_RQGEOM_TRYONLY)){
+		int pos=split_tree_pos((WObj*)sub, dir);
+		int size=split_tree_size((WObj*)sub, dir);
+		WWsSplit *split=split_of((WObj*)sub);
+
+		if(x1d!=0 && split!=NULL)
+			do_resize_split(split, dir, (WObj*)sub, TOP_OR_LEFT, -x1d);
+		if(x2d!=0 && split!=NULL)
+			do_resize_split(split, dir, (WObj*)sub, BOTTOM_OR_RIGHT, x2d);
+		
+		split_tree_do_resize((WObj*)sub, dir, ANY, pos+x1d, size-x1d+x2d);
+	}
 }
 
 
@@ -422,46 +617,8 @@ void ionws_request_managed_geom(WIonWS *ws, WRegion *sub,
 								int flags, WRectangle geom,
 								WRectangle *geomret)
 {
-	int hprimn=ANY, vprimn=ANY;
-	bool tryonly=(flags&REGION_RQGEOM_TRYONLY);
-	WResizeTmp tmp;
-	
-	if(geomret!=NULL)
-		*geomret=REGION_GEOM(sub);
-	
-	if(!(flags&REGION_RQGEOM_WEAK_W) && REGION_GEOM(sub).w!=geom.w){
-		if(!(flags&REGION_RQGEOM_WEAK_X)){
-			if(REGION_GEOM(sub).x==geom.x)
-				hprimn=BOTTOM_OR_RIGHT;
-			else if(REGION_GEOM(sub).x+REGION_GEOM(sub).w==geom.x+geom.w)
-				hprimn=TOP_OR_LEFT;
-		}
-		
-		calcresize_reg(sub, HORIZONTAL, hprimn, geom.w, &tmp);
-		if(geomret!=NULL){
-			geomret->x=tmp.winpostmp;
-			geomret->w=tmp.winsizetmp;
-		}
-		if(!tryonly)
-			resize_tmp(&tmp);
-	}
-	
-	if(!(flags&REGION_RQGEOM_WEAK_H) && REGION_GEOM(sub).h!=geom.h){
-		if(!(flags&REGION_RQGEOM_WEAK_Y)){
-			if(REGION_GEOM(sub).y==geom.y)
-				vprimn=BOTTOM_OR_RIGHT;
-			else if(REGION_GEOM(sub).y+REGION_GEOM(sub).h==geom.y+geom.h)
-				vprimn=TOP_OR_LEFT;
-		}
-		
-		calcresize_reg(sub, VERTICAL, vprimn, geom.h, &tmp);
-		if(geomret!=NULL){
-			geomret->y=tmp.winpostmp;
-			geomret->h=tmp.winsizetmp;
-		}
-		if(!tryonly)
-			resize_tmp(&tmp);
-	}
+	ionws_request_managed_geom_dir(ws, sub, flags, geom, geomret, HORIZONTAL);
+	ionws_request_managed_geom_dir(ws, sub, flags, geom, geomret, VERTICAL);
 }
 
 
@@ -496,11 +653,12 @@ WWsSplit *create_split(int dir, WObj *tl, WObj *br, WRectangle geom)
 static WRegion *do_split_at(WIonWS *ws, WObj *obj, int dir, int primn,
 							int minsize, WRegionSimpleCreateFn *fn)
 {
-	int s, sn, gs, pos;
+	int tlfree, brfree, tlshrink, brshrink, minsizebytree, maxsizebytree;
+	int objmin, objmax;
+	int s, sn, so, pos;
 	WWsSplit *split, *nsplit;
 	WRectangle geom;
 	WRegion *nreg;
-	WResizeTmp rtmp;
 	WWindow *par;
 	
 	assert(obj!=NULL);
@@ -510,28 +668,27 @@ static WRegion *do_split_at(WIonWS *ws, WObj *obj, int dir, int primn,
 	if(dir!=HORIZONTAL && dir!=VERTICAL)
 		dir=VERTICAL;
 	
-	/* First possibly resize <obj> so that the area allocated by it
-	 * is big enough to fit the new object and <obj> itself without
-	 * them becoming too small.
-	 */
+	get_bounds_for(obj, dir, &tlfree, &brfree, &maxsizebytree,
+				   &tlshrink, &brshrink, &minsizebytree);
+	split_tree_update_bounds(obj, dir, &objmin, &objmax);
 	
 	s=split_tree_size(obj, dir);
 	sn=s/2;
+	so=s-sn;
 	
 	if(sn<minsize)
 		sn=minsize;
+	if(so<objmin)
+		so=objmin;
 	
-	gs=split_tree_do_calcresize(obj, dir, primn, s-sn);
-	
-	if(gs+sn>s){
-		s=calcresize_obj(obj, dir, ANY, gs+sn, &rtmp);
-		if(gs+sn>s){
-			warn("Cannot resize: minimum size reached");
+	if(sn+so!=s){
+		if(tlfree+brfree<(sn+so)-s){
+			warn("Unable to split: not enough free space.");
 			return NULL;
 		}
-		resize_tmp(&rtmp);
+		do_resize_node(obj, dir, primn, (sn+so)-s);
 	}
-	
+
 	/* Create split and new window
 	 */
 	geom=split_tree_geom(obj);
@@ -543,11 +700,11 @@ static WRegion *do_split_at(WIonWS *ws, WObj *obj, int dir, int primn,
 	
 	if(dir==VERTICAL){
 		if(primn==BOTTOM_OR_RIGHT)
-			geom.y+=gs;
+			geom.y+=so;
 		geom.h=sn;
 	}else{
 		if(primn==BOTTOM_OR_RIGHT)
-			geom.x+=gs;
+			geom.x+=so;
 		geom.w=sn;
 	}
 	
@@ -563,14 +720,13 @@ static WRegion *do_split_at(WIonWS *ws, WObj *obj, int dir, int primn,
 	
 	ionws_add_managed(ws, nreg);
 	
-	/* Now that everything's ok, resize (and move) the original
-	 * obj.
+	/* Now that everything's ok, resize and move everything.
 	 */
+
 	pos=split_tree_pos(obj, dir);
 	if(primn!=BOTTOM_OR_RIGHT)
 		pos+=sn;
-	s=split_tree_do_calcresize(obj, dir, primn, gs);
-	split_tree_do_resize(obj, dir, pos, s);
+	split_tree_do_resize(obj, dir, primn, pos, so);
 	
 	/* Set up split structure
 	 */
@@ -986,8 +1142,7 @@ static bool ionws_remove_split(WIonWS *ws, WWsSplit *split)
 	if(wglobal.opmode!=OPMODE_DEINIT){
 		nsize=split_tree_size((WObj*)split, split->dir);
 		npos=split_tree_pos((WObj*)split, split->dir);
-		nsize=split_tree_do_calcresize(other, split->dir, primn, nsize);
-		split_tree_do_resize(other, split->dir, npos, nsize);
+		split_tree_resize(other, split->dir, ANY, npos, nsize);
 	}
 
 	destroy_obj((WObj*)split);

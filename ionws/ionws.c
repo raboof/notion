@@ -42,12 +42,8 @@ static void ionws_fit(WIonWS *ws, WRectangle geom)
 	if(ws->split_tree==NULL)
 		return;
 	
-	tmp=split_tree_do_calcresize((WObj*)ws->split_tree, HORIZONTAL, ANY, 
-								 geom.w);
-	split_tree_do_resize((WObj*)ws->split_tree, HORIZONTAL, geom.x, tmp);
-	tmp=split_tree_do_calcresize((WObj*)ws->split_tree, VERTICAL, ANY, 
-								 geom.h);
-	split_tree_do_resize((WObj*)ws->split_tree, VERTICAL, geom.y, tmp);
+	split_tree_resize((WObj*)ws->split_tree, HORIZONTAL, ANY, geom.x,  geom.w);
+	split_tree_resize((WObj*)ws->split_tree, VERTICAL, ANY, geom.y,  geom.h);
 }
 
 
@@ -306,9 +302,15 @@ static WObj *load_split(WIonWS *ws, WWindow *par, WRectangle geom,
 		
 	geom2=geom;
 	if(dir==HORIZONTAL){
-		tls=geom.w*tls/(tls+brs);
+		if(tls+brs==0)
+			tls=geom.w/2;
+		else
+			tls=geom.w*tls/(tls+brs);
 		geom2.w=tls;
 	}else{
+		if(tls+brs==0)
+			tls=geom.h/2;
+		else
 		tls=geom.h*tls/(tls+brs);
 		geom2.h=tls;
 	}
@@ -342,7 +344,7 @@ static WObj *load_split(WIonWS *ws, WWindow *par, WRectangle geom,
 	set_split_of(tl, split);
 	set_split_of(br, split);
 
-	split->tmpsize=tls;
+	/*split->tmpsize=tls;*/
 	split->tl=tl;
 	split->br=br;
 	

@@ -18,7 +18,6 @@
 #include <ioncore/attach.h>
 
 INTROBJ(WWsSplit);
-INTRSTRUCT(WResizeTmp);
 
 #define SPLIT_OF(X) ((X)->mgr_data.p)
 
@@ -39,26 +38,20 @@ DECLOBJ(WWsSplit){
 	WObj obj;
 	int dir;
 	WRectangle geom;
-	int tmpsize, knowsize;
-	int res;
 	int current;
 	WObj *tl, *br;
 	WWsSplit *parent;
-};
-
-
-DECLSTRUCT(WResizeTmp){
-	WObj *startnode;
-	int postmp, sizetmp;
-	int winpostmp, winsizetmp;
-	int dir;
+	uint max_w, min_w, max_h, min_h;
 };
 
 
 extern WWsSplit *create_split(int dir, WObj *tl, WObj *br, WRectangle geom);
 extern int split_tree_do_calcresize(WObj *node_, int dir, int primn, 
 									int nsize);
-extern int split_tree_do_resize(WObj *node_, int dir, int npos, int nsize);
+extern void split_tree_resize(WObj *node, int dir, int primn,
+							  int npos, int nsize);
+extern void split_tree_do_resize(WObj *node, int dir, int primn,
+								 int npos, int nsize);
 
 extern int split_tree_size(WObj *obj, int dir);
 extern int split_tree_pos(WObj *obj, int dir);
