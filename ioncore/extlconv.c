@@ -71,7 +71,7 @@ bool extl_table_is_bool_set(ExtlTab tab, const char *entry)
 {
 	bool b;
 	
-	if(extl_table_gets_s(tab, entry, &b))
+	if(extl_table_gets_b(tab, entry, &b))
 		return b;
 	return FALSE;
 }
