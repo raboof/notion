@@ -1,5 +1,5 @@
 --
--- ion/share/ioncore-mplexfns.lua -- Misc. functions for WMPlex:s
+-- ion/share/ioncorelib-mplexfns.lua -- Misc. functions for WMPlex:s
 -- 
 -- Copyright (c) Tuomo Valkonen 2003.
 --
@@ -9,10 +9,66 @@
 -- (at your option) any later version.
 --
 
-if WMPlex.managed_index then
-    -- Already loaded
-    return
+
+-- Callback creation {{{
+
+--DOC
+-- Create a \type{WMPlex}-bindable function that calls \var{fn} with
+-- parameter either the \type{WMPlex}, the current input in it or 
+-- currently shown or some other object multiplexed in it dependent 
+-- on the passed settings and parameters to the wrapper receives.
+-- \var{noself}: Never call with the mplex itself as parameter.
+-- \var{noinput}: Never call with current input as parameter.
+-- \var{cwincheck}: Only call \var{fn} if the object selected is
+-- a \type{WClientWin}.
+function make_mplex_sub_or_self_fn(fn, noself, noinput, cwincheck)
+    if not fn then
+        warn("nil parameter to make_mplex_sub_fn")
+    end
+    return function(mplex, current)
+               if not noinput then
+                   local ci=mplex:current_input()
+                   if ci then
+                       current=ci
+                   end
+               end
+               if not current then 
+                   current=mplex:current()
+               end
+               if not current then
+                   if noself then
+                       return 
+                   end
+                   current=mplex
+               end
+               if not cwincheck or obj_is(current, "WClientWin") then
+                   fn(current)
+               end
+               
+           end
 end
+
+--DOC
+-- Equivalent to \fnref{make_mplex_sub_or_self_fn}\code{(fn, true, true, false)}.
+function make_mplex_sub_fn(fn)
+    return make_mplex_sub_or_self_fn(fn, true, true, false)
+end
+
+
+--DOC
+-- Equivalent to \fnref{make_mplex_sub_or_self_fn}\code{(fn, true, true, true)}.
+function make_mplex_clientwin_fn(fn)
+    return make_mplex_sub_or_self_fn(fn, true, true, true)
+end
+
+-- Backwards compatibility.
+make_current_fn=make_mplex_sub_fn
+make_current_clientwin_fn=make_mplex_clientwin_fn
+
+-- }}}
+
+
+-- Managed object indexing {{{
 
 --DOC
 -- Returns the index of \var{mgd} in \var{mplex}'s managed list or
@@ -50,3 +106,5 @@ function WMPlex.move_current_to_prev_index(mplex)
     local c=mplex:current()
     if c then mplex:move_to_prev_index(c) end
 end
+
+-- }}}
