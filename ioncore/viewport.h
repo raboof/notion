@@ -50,4 +50,6 @@ extern void goto_prev_viewport();
 
 extern void viewport_add_managed_doit(WViewport *vp, WRegion *reg, int flags);
 
+extern bool init_workspaces_on_vp(WViewport* vp);
+
 #endif /* WMCORE_VIEWPORT_H */

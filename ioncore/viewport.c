@@ -93,6 +93,36 @@ void deinit_viewport(WViewport *vp)
 }
 
 
+extern bool create_initial_workspace_on_vp(WViewport *vp);
+
+
+bool init_workspaces_on_vp(WViewport* vp)
+{
+	WRegion *ws=NULL;
+	char *wsname=NULL;
+
+	if(vp->atom_workspace!=None)
+		wsname=get_string_property(ROOT_OF(vp), vp->atom_workspace, NULL);
+
+	load_workspaces(vp);
+	
+	if(vp->ws_count==0){
+		if(!create_initial_workspace_on_vp(vp))
+			return FALSE;
+	}else{
+		if(wsname!=NULL)
+			ws=lookup_region(wsname);
+		if(ws==NULL || REGION_MANAGER(ws)!=(WRegion*)vp)
+			ws=FIRST_MANAGED(vp->ws_list);
+	}
+	
+	if(wsname!=NULL)
+		free(wsname);
+	
+	return (ws!=NULL);
+}
+
+
 /*}}}*/
 
 

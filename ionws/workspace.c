@@ -33,8 +33,6 @@ static bool reparent_workspace(WWorkspace *ws, WRegion *parent,
 static void map_workspace(WWorkspace *ws);
 static void unmap_workspace(WWorkspace *ws);
 static void focus_workspace(WWorkspace *ws, bool warp);
-extern void workspace_managed_activated(WWorkspace *ws, WRegion *reg);
-
 static bool workspace_save_to_file(WWorkspace *ws, FILE *file, int lvl);
 
 
@@ -194,8 +192,6 @@ static bool init_workspace(WWorkspace *ws, WRegion *parent,
 			return FALSE;
 		}
 	}
-
-	/*region_add_bindmap((WRegion*)ws, &ion_workspace_bindmap, TRUE);*/
 	
 	return TRUE;
 }
@@ -222,6 +218,13 @@ WWorkspace *create_new_workspace_on_vp(WViewport *vp, const char *name)
 }
 
 
+bool create_initial_workspace_on_vp(WViewport *vp)
+{
+	WWorkspace *ws=create_new_workspace_on_vp(vp, "main");
+	return (ws!=NULL);
+}
+
+
 void deinit_workspace(WWorkspace *ws)
 {
 	WRegion *reg;
@@ -237,72 +240,6 @@ void deinit_workspace(WWorkspace *ws)
 /*}}}*/
 
 
-/*{{{ init_workspaces */
-
-
-void init_workspaces(WViewport* vp)
-{
-	WRegion *ws=NULL;
-	char *wsname=NULL;
-
-	if(vp->atom_workspace!=None)
-		wsname=get_string_property(ROOT_OF(vp), vp->atom_workspace, NULL);
-
-	load_workspaces(vp);
-	
-	if(vp->ws_count==0){
-		ws=(WRegion*)create_new_workspace_on_vp(vp, "main");
-	}else{
-		if(wsname!=NULL)
-			ws=(WRegion*)lookup_workspace(wsname);
-		if(ws==NULL)
-			ws=FIRST_MANAGED(vp->ws_list);
-	}
-	
-	if(wsname!=NULL)
-		free(wsname);
-	
-	assert(ws!=NULL);
-	/*if((WRegion*)vp==SCREEN_OF(vp)->default_viewport)
-		goto_region((WRegion*)ws);*/
-}
-
-
-void setup_screens()
-{
-	WScreen *scr;
-	WViewport *vp;
-	
-	FOR_ALL_SCREENS(scr){
-		FOR_ALL_TYPED(scr, vp, WViewport){
-			init_workspaces(vp);
-		}
-		manage_initial_windows(scr);
-	}
-}
-
-
-/*}}}*/
-
-
-/*{{{ Switch */
-
-
-bool goto_workspace_name(const char *str)
-{
-	WWorkspace *ws=lookup_workspace(str);
-	
-	if(ws==NULL)
-		return FALSE;
-
-	goto_region((WRegion*)ws);
-	
-	return TRUE;
-}
-
-
-/*}}}*/
-
 
 /*{{{ Names */
 
@@ -316,6 +253,19 @@ WWorkspace *lookup_workspace(const char *name)
 int complete_workspace(char *nam, char ***cp_ret, char **beg, void *unused)
 {
 	return do_complete_region(nam, cp_ret, beg, &OBJDESCR(WWorkspace));
+}
+
+
+bool goto_workspace_name(const char *str)
+{
+	WWorkspace *ws=lookup_workspace(str);
+	
+	if(ws==NULL)
+		return FALSE;
+
+	goto_region((WRegion*)ws);
+	
+	return TRUE;
 }
 
 

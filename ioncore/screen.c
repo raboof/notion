@@ -466,3 +466,29 @@ bool same_screen(const WRegion *reg1, const WRegion *reg2)
 /*}}}*/
 
 
+
+/*{{{ Workspace and client window management setup */
+
+
+void setup_screens()
+{
+	WScreen *scr;
+	WViewport *vp;
+	int n=0;
+	
+	FOR_ALL_SCREENS(scr){
+		FOR_ALL_TYPED(scr, vp, WViewport){
+			if(!init_workspaces_on_vp(vp))
+				warn("Unable to create workspace on viewport %d\n", vp->id);
+			else
+				n++;
+		}
+		manage_initial_windows(scr);
+	}
+	
+	assert(n!=0);
+}
+
+
+/*}}}*/
+

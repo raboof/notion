@@ -65,9 +65,11 @@ extern WGRData *grdata_of(const WRegion *reg);
 extern Window root_of(const WRegion *reg);
 extern bool same_screen(const WRegion *reg1, const WRegion *reg2);
 
-extern void manage_initial_windows(WScreen *scr);
-
 extern void screen_switch_nth2(int scrnum, int n);
+
+extern void manage_initial_windows(WScreen *scr);
+extern void setup_screens();
+
 
 #endif /* WMCORE_SCREEN_H */
 

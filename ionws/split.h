@@ -59,6 +59,7 @@ extern int split_tree_other_size(WObj *obj, int dir);
 #include "workspace.h"
 
 extern void workspace_add_managed(WWorkspace *ws, WRegion *reg);
+extern void workspace_managed_activated(WWorkspace *ws, WRegion *reg);
 extern WRegion *workspace_do_find_new_manager(WRegion *reg);
 extern WRegion *workspace_find_new_manager(WRegion *reg);
 extern void workspace_request_managed_geom(WWorkspace *ws, WRegion *reg,

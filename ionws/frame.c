@@ -155,8 +155,6 @@ static bool init_frame(WFrame *frame, WRegion *parent, WRectangle geom,
 	
 	frame->target_id=use_target_id((WRegion*)frame, id);
 	
-	frame->tab_w=BAR_W(frame, grdata);
-	
 	XSelectInput(wglobal.dpy, win, FRAME_MASK);
 	
 	region_add_bindmap((WRegion*)frame, &(ion_frame_bindmap), TRUE);
