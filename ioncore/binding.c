@@ -40,6 +40,9 @@ static const uint modmasks[N_MODS]={
 
 static XModifierKeymap *modmap=NULL;
 
+#define KNOWN_MODIFIERS_MASK (ShiftMask|LockMask|ControlMask|Mod1Mask|\
+							  Mod2Mask|Mod3Mask|Mod4Mask|Mod5Mask)
+
 #ifdef CF_HACK_IGNORE_EVIL_LOCKS
 
 #define N_EVILLOCKS 3
@@ -384,6 +387,7 @@ static WBinding *do_lookup_binding(WBindmap *bindmap,
 #ifdef CF_HACK_IGNORE_EVIL_LOCKS
 	state&=~evilignoremask;
 #endif
+	state&=KNOWN_MODIFIERS_MASK;
 	
 	tmp.act=act;
 	tmp.kcb=kcb;
