@@ -17,7 +17,7 @@ file lookup paths and some options.
 X display to manage
 .TP
 .B \-cfgfile configfile
-Config file to use instead of default
+Configuration file to use instead of default
 .TP
 .B \-moduledir dir
 Directory to search for module
@@ -31,7 +31,7 @@ default screen (root window), not all, as given by the -display option or
 in the DISPLAY environment variable.
 .TP
 .B \-sessionname session_name
-Set sesion name. This option affects where workspace and other savefiles are
+Set session name. This option affects where workspace and other save files are
 put (~/.pwm2/session_name if option set).
 .TP
 .B \-xinerama 0|1
@@ -40,7 +40,7 @@ enable/disable (1/0) the use of it. The default is _not_ to use Xinerama
 screen information.
 .TP
 .B \-i18n
-Enable use of multibyte string routines, actual encoding depending on the
+Enable use of multi-byte string routines, actual encoding depending on the
 locale.
 .TP
 .B \-help

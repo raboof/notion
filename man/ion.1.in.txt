@@ -18,7 +18,7 @@ OPTIONS
               X display to manage
 
        -cfgfile configfile
-              Config file to use instead of default
+              Configuration file to use instead of default
 
        -moduledir dir
               Directory to search for module
@@ -32,16 +32,16 @@ OPTIONS
               the -display option or in the DISPLAY environment variable.
 
        -sessionname session_name
-              Set sesion name. This option affects where workspace  and  other
-              savefiles are put (~/.ion2/session_name if option set).
+              Set session name. This option affects where workspace and  other
+              save files are put (~/.ion2/session_name if option set).
 
        -xinerama 0|1
               If  Ion  was  compiled with Xinerama support, this option can be
               used to enable/disable (1/0) the use of it. The  default  is  to
               use Xinerama screen information.
 
-       -i18n  Enable use of multibyte string routines, actual encoding depend-
-              ing on the locale.
+       -i18n  Enable  use  of  multi-byte  string  routines,  actual  encoding
+              depending on the locale.
 
        -help  Show help on command line options
 
@@ -65,10 +65,10 @@ BASIC CONCEPTS
        at a time.
 
        Two types of workspaces currently supported;  tiled  (traditional  Ion-
-       style) and floating (pwm-style). Workspaces are not visible objects but
+       style) and floating (PWM-style). Workspaces are not visible objects but
        rather collections of frames. Frames are the objects  with  decorations
        such as tabs and borders and there are two types of these corresponding
-       to the diffent types of workspaces.
+       to the different types of workspaces.
 
        Frames contain (multiplex) client windows, to each of which corresponds
        a  tab  in  the  frame's  decoration.  Only one client window (or other
@@ -82,8 +82,8 @@ BASIC CONCEPTS
 
 
 KEYS
-       These  are  the  default  keybindings.  Mod1 depends on your system. On
-       PC:s with XFree86 it is probably bound to the left alt key (Alt_L).  On
+       These  are  the  default key bindings.  Mod1 depends on your system. On
+       PC:s with XFree86 it is probably bound to the left Alt key (Alt_L).  On
        Suns  it  is  usually  bound  to the diamond keys (Meta_L, Meta_R). Use
        xmodmap(1x) to find out.
 
@@ -177,7 +177,7 @@ KEYS
               Circulate focus and raise
 
        Mod1+K Tab
-              Backcirculate focus and raise
+              Back-circulate focus and raise
 
 
    Closing and destroying objects.
@@ -387,7 +387,7 @@ FILES AND DIRECTORIES
               System default configuration files
 
        ETCDIR/ion.lua
-              System default main configuratio files
+              System default main configuration files
 
        ETCDIR/look-*.lua
               Colour scheme configuration files

@@ -14,7 +14,7 @@ Ion is a tiling tabbed window manager designed with keyboard users in mind.
 X display to manage
 .TP
 .B \-cfgfile configfile
-Config file to use instead of default
+Configuration file to use instead of default
 .TP
 .B \-moduledir dir
 Directory to search for module
@@ -28,7 +28,7 @@ default screen (root window), not all, as given by the -display option or
 in the DISPLAY environment variable.
 .TP
 .B \-sessionname session_name
-Set sesion name. This option affects where workspace and other savefiles are
+Set session name. This option affects where workspace and other save files are
 put (~/.ion2/session_name if option set).
 .TP
 .B \-xinerama 0|1
@@ -37,7 +37,7 @@ enable/disable (1/0) the use of it. The default is to use Xinerama
 screen information.
 .TP
 .B \-i18n
-Enable use of multibyte string routines, actual encoding depending on the
+Enable use of multi-byte string routines, actual encoding depending on the
 locale.
 .TP
 .B \-help
@@ -64,10 +64,10 @@ full screen mode. Only one of these "multiplexed" objects can be viewed
 at a time. 
 
 Two types of workspaces currently supported; tiled (traditional Ion-style) 
-and floating (pwm-style). Workspaces are not visible objects but rather 
+and floating (PWM-style). Workspaces are not visible objects but rather 
 collections of frames. Frames are the objects with decorations such as 
 tabs and borders and there are two types of these corresponding to the
-diffent types of workspaces.
+different types of workspaces.
 
 Frames contain (multiplex) client windows, to each of which corresponds a
 tab in the frame's decoration. Only one client window (or other object) 
@@ -81,10 +81,10 @@ tab-completion.
 
 .SH KEYS
 
-These are the default keybindings.
+These are the default key bindings.
 .B Mod1
 depends on your system. On PC:s with XFree86 it is probably bound to the left
-alt key (\fBAlt_L\fP).
+Alt key (\fBAlt_L\fP).
 On Suns it is usually bound to the diamond keys (\fBMeta_L\fP, \fBMeta_R\fP). Use
 \fIxmodmap(1x)\fP to find out.
 
@@ -187,7 +187,7 @@ Lower
 Circulate focus and raise
 .TP
 .B Mod1+K Tab
-Backcirculate focus and raise
+Back-circulate focus and raise
 
 .SS Closing and destroying objects.
 
@@ -410,7 +410,7 @@ Context menu
 System default configuration files
 .TP
 .B ETCDIR/ion.lua
-System default main configuratio files
+System default main configuration files
 .TP
 .B ETCDIR/look-*.lua
 Colour scheme configuration files
