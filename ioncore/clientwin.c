@@ -25,7 +25,6 @@
 #include "mwmhints.h"
 #include "viewport.h"
 #include "names.h"
-#include "winprops.h"
 
 
 #define TOPMOST_TRANSIENT(CWIN) LAST_MANAGED((CWIN)->transient_list)
@@ -73,12 +72,16 @@ static void get_winprops(WClientWin *cwin)
 	int i1, i2;
 	bool b;
 
-	tab=find_winproptab_win(cwin->win);
-	cwin->proptab=tab;
+	if(!extl_call_named("get_winprop", "o", "t", cwin, &tab))
+		return;
 	
 	if(tab==extl_table_none())
 		return;
 	
+	fprintf(stderr, "got winprop\n");
+	
+	cwin->proptab=tab;
+
 	if(extl_table_gets_b(tab, "transparent", &b)){
 		if(b)
 			cwin->flags|=CWIN_PROP_TRANSPARENT;
@@ -414,6 +417,7 @@ static WRegion *clientwin_do_add_managed(WClientWin *cwin, WRegionAddFn *fn,
 	}else{
 		/* Put something less than the full height for the size */
 		geom.h/=3;
+		geom.y+=geom.h*2;
 	}
 	
 	reg=fn(par, geom, params);
@@ -940,6 +944,39 @@ EXTL_EXPORT
 ExtlTab complete_clientwin(const char *nam)
 {
 	return do_complete_region(nam, &OBJDESCR(WClientWin));
+}
+
+
+EXTL_EXPORT
+ExtlTab clientwin_get_ident(WClientWin *cwin)
+{
+	char *winstance=NULL, *wclass=NULL, *wrole=NULL;
+	int n=0, n2=0, tmp=0;
+	ExtlTab tab;
+	
+	winstance=get_string_property(cwin->win, XA_WM_CLASS, &n);
+	wrole=get_string_property(cwin->win, wglobal.atom_wm_window_role, &n2);
+	
+	if(winstance!=NULL){
+		tmp=strlen(winstance);
+		if(tmp+1<n)
+			wclass=winstance+tmp+1;
+	}
+
+	tab=extl_create_table();
+	if(wclass!=NULL)
+		extl_table_sets_s(tab, "class", wclass);
+	if(winstance!=NULL)
+		extl_table_sets_s(tab, "instance", winstance);
+	if(wrole!=NULL)
+		extl_table_sets_s(tab, "role", wrole);
+	
+	if(winstance!=NULL)
+		free(winstance);
+	if(wrole!=NULL)
+		free(wrole);
+	
+	return tab;
 }
 
 

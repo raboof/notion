@@ -15,7 +15,6 @@
 #include "mwmhints.h"
 #include "objp.h"
 #include "names.h"
-#include "winprops.h"
 #include "extl.h"
 
 

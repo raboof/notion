@@ -1,14 +1,17 @@
 --
--- Constants
---
+-- Ioncore Lua library
+-- 
+
+
+-- {{{ Constants
 
 TRUE = true
 FALSE = false
 
+-- }}}
 
---
--- Functions to help construct bindmaps
---
+
+-- {{{ Functions to help construct bindmaps
 
 function submap2(kcb_, list)
     return {action = "kpress", kcb = kcb_, submap = list}
@@ -59,10 +62,10 @@ function mpress(kcb_, func_, area_)
     return mact("mpress", kcb_, func_, area_)
 end
 
+-- }}}
 
---
--- Callback creation functions
--- 
+
+-- {{{ Callback creation functions
 
 function make_active_leaf_fn(fn)
     if not fn then
@@ -90,9 +93,8 @@ function make_exec_fn(cmd)
 end
 
 
---
--- Includes
---
+
+-- {{{ Includes
 
 function include(file)
     local current_dir = "."
@@ -106,15 +108,57 @@ function include(file)
     do_include(file, current_dir)
 end
 
+-- }}}
 
---
--- Winprops
---
+
+-- {{{ Winprops
+
+winprops={}
+
+function alternative_winprop_idents(id)
+    local function g()
+        for _, c in {id.class, "*"} do
+            for _, r in {id.role, "*"} do
+                for _, i in {id.instance, "*"} do
+                    coroutine.yield(c, r, i)
+                end
+            end
+        end
+    end
+    return coroutine.wrap(g)
+end
+
+function get_winprop(cwin)
+    local id=clientwin_get_ident(cwin)
+    
+    for c, r, i in alternative_winprops_idents(id) do
+        if pcall(function() prop=winprops[c][r][i] end) then
+            if prop then
+                return prop
+            end
+        end
+    end
+end
+
+function ensure_winproptab(class, role, instance)
+    if not winprops[class] then
+        winprops[class]={}
+    end
+    if not winprops[class][role] then
+        winprops[class][role]={}
+    end
+end    
+
+function do_add_winprop(class, role, instance, props)
+    ensure_winproptab(class, role, instance)
+    print("add winprop ", class, role, instance)
+    winprops[class][role][instance]=props
+end
 
 function winprop(list)
     local list2, class, role, instance = {}, "*", "*", "*"
 
-    for k,v in list do
+    for k, v in list do
 	if k == "class" then
 	    class = v
     	elseif k == "role" then
@@ -126,13 +170,17 @@ function winprop(list)
 	end
     end
     
-    add_winprop(class, role, instance, list2)
+    do_add_winprop(class, role, instance, list2)
 end
 
---
--- Misc
--- 
+-- }}}
+
+
+-- {{{ Misc
 
 function obj_exists(obj)
     return (obj_typename(obj)==nil)
 end
+
+-- }}}
+
