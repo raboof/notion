@@ -8,9 +8,6 @@
 #ifndef INCLUDED_CONFIG_H
 #define INCLUDED_CONFIG_H
 
-#ifndef ETCDIR
-#define ETCDIR "/etc/"
-#endif
 
 /* #define CF_MODULE_SUPPORT */
 /* #define CF_NO_LOCK_HACK */
