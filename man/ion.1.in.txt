@@ -33,7 +33,7 @@ OPTIONS
 
        -sessionname seession_name
               Set sesion name. This option affects where workspace  and  other
-              savefiles are put (~/.ion/session_name if option set).
+              savefiles are put (~/.ion2/session_name if option set).
 
        -xinerama 0|1
               If  Ion  was  compiled with Xinerama support, this option can be
@@ -102,22 +102,25 @@ KEYS
               to run in xterm (ion-runinxterm).
 
        Mod1+F3
-              Call a function (query).
+              Open  a Lua code query. You can call all the functions listed in
+              the Ion configuration document (see section SEE ALSO) here.  The
+              variable  "_"  is  bound  to  the  frame  in which the query was
+              opened.
 
-       F4     Start  new  SSH session (query, uses ion-ssh). Tab-completion of
-              hosts can be enabled by specifying  them  in  the  configuration
+       F4     Start new SSH session (query, uses ion-ssh).  Tab-completion  of
+              hosts  can  be  enabled  by specifying them in the configuration
               variable query_ssh_hosts.
 
-       F5     Open  a file for editing (query). Uses ion-edit which by default
+       F5     Open a file for editing (query). Uses ion-edit which by  default
               uses run-mailcap.
 
-       F6     Open a file for viewing (query). Uses ion-view which by  default
+       F6     Open  a file for viewing (query). Uses ion-view which by default
               uses run-mailcap.
 
        F9     Go to existing workspace or create new (query).
 
        Mod1+F9
-              Create  a new tiled workspace with a name of the form WIonWS<n>.
+              Create a new tiled workspace with a name of the form  WIonWS<n>.
 
        F12    Main menu
 
@@ -200,7 +203,7 @@ KEYS
 
        Tags
 
-       Mod1+T Toggle current client window's tag state (indicated by a  right-
+       Mod1+T Toggle  current client window's tag state (indicated by a right-
               angle in the top-right corner of the window's tab)
 
        Mod1+K T
@@ -237,13 +240,13 @@ KEYS
               Shrink the frame in the specific direction
 
        Mod1+Left, Right, Up Down or Mod1+F, B, P, N
-              On  floating  frame  worskacpes:  move the frame in the specific
+              On floating frame worskacpes: move the  frame  in  the  specific
               direction.
 
 
    Miscellaneous
        Mod1+L Broken application resize kludge; try to make that broken appli-
-              cation  that didn't get it the first time to understand the real
+              cation that didn't get it the first time to understand the  real
               size of the active window
 
        Mod1+K Q
@@ -252,8 +255,8 @@ KEYS
 
 
 LINE-EDITING KEYS
-       These keys can be used in the line editor (queries). They  are  similar
-       to  those  of  joe(1).   Selection works differently, though, while the
+       These  keys  can be used in the line editor (queries). They are similar
+       to those of joe(1).  Selection works  differently,  though,  while  the
        keys are equivalent.
 
 
@@ -336,7 +339,7 @@ LINE-EDITING KEYS
 
 
 POINTING DEVICE BUTTONS
-       The bindings for the two types of frames are  again  different  because
+       The  bindings  for  the two types of frames are again different because
        not all legacy/floating frame actions are available on tiled frames and
        thus those buttons have been mapped to other actions.
 
@@ -357,8 +360,8 @@ POINTING DEVICE BUTTONS
 
    Floating frames
        Button1 (left)
-              Press: raise frame, click tab: switch client, double-click  tab:
-              toggle  shade  mode,  drag  border: resize, drag elsewhere: move
+              Press:  raise frame, click tab: switch client, double-click tab:
+              toggle shade mode, drag border:  resize,  drag  elsewhere:  move
               frame
 
        Button2 (middle) on tab
@@ -378,16 +381,16 @@ FILES AND DIRECTORIES
        ETCDIR/
               System default configuration files
 
-       ETCDIR/ioncore.lua
+       ETCDIR/ion.lua
               System default main configuratio files
 
        ETCDIR/look-*.lua
               Colour scheme configuration files
 
-       ~/.ion/
+       ~/.ion2/
               User configuration files
 
-       ~/.ion/ioncore.lua
+       ~/.ion2/ion.lua
               User default configuration file (overrides system default)
 
 
@@ -399,7 +402,8 @@ SEE ALSO
 
        DOCDIR/
 
-       X(1x)
+       X(1x) pwm(1)
+
 
 AUTHOR
        Ion was written by Tuomo Valkonen <tuomov at iki.fi>.
