@@ -154,7 +154,7 @@ WRegion *region_manage_new(WRegion *mgr, ExtlTab desc)
 }
 
 
-/* EXTL_DOC
+/*EXTL_DOC
  * Requests that \var{mgr} start managing \var{reg}. The optional
  * table argument \var{tab} may contain the fields \var{geom}
  * and \var{selected}; see \fnref{region_manage_new} for details.
