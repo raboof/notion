@@ -85,27 +85,31 @@ bool wmcore_init(const char *appname, const char *appetcdir,
 	WScreen *scr;
 	int i, dscr, nscr;
 	static bool called=FALSE;
-    
-	if(setlocale(LC_ALL, "")==NULL)
-		warn("setlocale() call failed");
-	if(!XSupportsLocale()){
-		warn("XSupportLocale() failed... resetting locale to POSIX");
-		if(setlocale(LC_ALL, "POSIX")==NULL){
-			warn("setlocale() call failed");
-			return FALSE;
-		}
-		if(!XSupportsLocale()){
-			warn("XSupportLocale still failed after setlocale(LC_ALL, \"POSIX\")");
-			return FALSE;
-		}
-	}
-	
+
 	/* Sorry, this function can not be re-entered due to laziness
 	 * towards implementing checking of things already initialized.
 	 * Nobody would call this twice anyway.
 	 */
 	assert(!called);
 	called=TRUE;
+    
+	/* Try to set up locales. If X does not support user-specified locale,
+	 * reset to POSIX so that at least fonts will be loadable if not all
+	 * characters supported.
+	 */
+	if(setlocale(LC_ALL, "")==NULL)
+		warn("setlocale() call failed");
+	if(!XSupportsLocale()){
+		warn("XSupportLocale() failed. Resetting locale to \"POSIX\".");
+		if(setlocale(LC_ALL, "POSIX")==NULL){
+			warn("setlocale() call failed");
+			return FALSE;
+		}
+		if(!XSupportsLocale()){
+			warn("XSupportLocale still failed. Refusing to resume.");
+			return FALSE;
+		}
+	}
 	
 	initialize_global();
 	wmcore_init_funclists();
