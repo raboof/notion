@@ -276,13 +276,13 @@ static int extl_stack_trace(lua_State *st)
 
 	for( ; lua_getstack(st, lvl, &ar); lvl++){
 		if(lua_getinfo(st, "Sln", &ar)==0){
-			lua_pushfstring(st, "\n    (Unable to get debug info for level %d)",
+			lua_pushfstring(st, "\n(Unable to get debug info for level %d)",
 							lvl);
 		}else{
-			lua_pushfstring(st, "\n    %s: line %d, function: %s",
-							ar.source==NULL ? "(unknown)" : ar.source,
+			lua_pushfstring(st, "\n%s: line %d, function: %s",
+							ar.short_src==NULL ? "?" : ar.short_src,
 							ar.currentline,
-							ar.name==NULL ? "(unknown)" : ar.name);
+							ar.name==NULL ? "?" : ar.name);
 		}
 		lua_concat(st, 2);
 	}

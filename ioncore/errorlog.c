@@ -19,17 +19,20 @@
 
 static ErrorLog *current_log=NULL;
 
-static void add_error(ErrorLog *el, const char *message)
+static void add_to_log(ErrorLog *el, const char *message, int l)
 {
-	int l;
-	
 	if(message==NULL)
+		return;
+	
+	/* Also write to stderr */
+	fwrite(message, sizeof(char), l, stderr);
+
+	if(el==NULL)
 		return;
 	
 	if(el->file!=NULL){
 		el->errors=TRUE;
-		fwrite(message, sizeof(char), strlen(message), el->file);
-		fputc('\n', el->file);
+		fwrite(message, sizeof(char), l, el->file);
 		return;
 	}
 
@@ -45,36 +48,42 @@ static void add_error(ErrorLog *el, const char *message)
 			
 	el->errors=TRUE;
 	
-	l=strlen(message)+1;
-	
-	if(l+el->msgs_len+1>ERRORLOG_MAX_SIZE){
+	if(l+el->msgs_len>ERRORLOG_MAX_SIZE-1){
 		int n=0;
-		if(l<ERRORLOG_MAX_SIZE){
-			n=ERRORLOG_MAX_SIZE-l;
-			memmove(el->msgs, el->msgs+ERRORLOG_MAX_SIZE-n, n);
-			el->msgs[n]='\n';
+		if(l<ERRORLOG_MAX_SIZE-1){
+			n=ERRORLOG_MAX_SIZE-1-l;
+			memmove(el->msgs, el->msgs+el->msgs_len-n, n);
 		}
-		memcpy(el->msgs+n, message+l-(ERRORLOG_MAX_SIZE-n),
-			   ERRORLOG_MAX_SIZE-n);
+		memcpy(el->msgs+n, message+l-(ERRORLOG_MAX_SIZE-1-n),
+			   ERRORLOG_MAX_SIZE-1-n);
+		el->msgs[ERRORLOG_MAX_SIZE]='\0';
+		el->msgs_len=ERRORLOG_MAX_SIZE-1;
 	}else{
-		if(el->msgs_len>0){
-			el->msgs[el->msgs_len]='\n';
-			strcpy(el->msgs+el->msgs_len+1, message);
-		}else{
-			strcpy(el->msgs, message);
-		}
+		memcpy(el->msgs+el->msgs_len, message, l);
+		el->msgs[el->msgs_len+l]='\0';
+		el->msgs_len+=l;
 	}
-	el->msgs_len=strlen(el->msgs);
 }
 
 
 static void log_warn_handler(const char *message)
 {
-	if(current_log!=NULL)
-		add_error(current_log, message);
+	const char *p=strchr(message, '\n');
+	static int lineno=0;
+	int alternat=0;
 	
-	/* Also print to stderr */
-	fprintf(stderr, "%s: %s\n", prog_execname(), message);
+	add_to_log(current_log, lineno==0 ? ">> " : "   ", 3);
+	
+	if(p!=NULL){
+		add_to_log(current_log, message, p-message+1);
+		lineno++;
+		log_warn_handler(p+1);
+		lineno--;
+		return;
+	}
+	
+	add_to_log(current_log, message, strlen(message));
+	add_to_log(current_log, "\n", 1);
 }
 
 		   
