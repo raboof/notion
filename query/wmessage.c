@@ -1,5 +1,5 @@
 /*
- * wmcore/wmessage.c
+ * ion/query/wmessage.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
@@ -7,12 +7,12 @@
 
 #include <string.h>
 
-#include <wmcore/common.h>
-#include <wmcore/drawp.h>
-#include <wmcore/thingp.h>
-#include <wmcore/font.h>
-#include <wmcore/global.h>
-#include <wmcore/event.h>
+#include <ioncore/common.h>
+#include <ioncore/drawp.h>
+#include <ioncore/thingp.h>
+#include <ioncore/font.h>
+#include <ioncore/global.h>
+#include <ioncore/event.h>
 #include "wmessage.h"
 #include "inputp.h"
 
@@ -122,7 +122,7 @@ void wmsg_scrolldown(WMessage *wmsg)
 /*{{{ Init, deinit draw config update */
 
 
-static bool init_wmsg(WMessage *wmsg, WRegion *par, WRectangle geom,
+static bool init_wmsg(WMessage *wmsg, WWindow *par, WRectangle geom,
 					  const char *msg)
 {
 	char **ptr;
@@ -159,7 +159,7 @@ static bool init_wmsg(WMessage *wmsg, WRegion *par, WRectangle geom,
 }
 
 
-WMessage *create_wmsg(WRegion *par, WRectangle geom, const char *msg)
+WMessage *create_wmsg(WWindow *par, WRectangle geom, const char *msg)
 {
 	CREATETHING_IMPL(WMessage, wmsg, (p, par, geom, msg));
 }

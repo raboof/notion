@@ -1,14 +1,14 @@
 /*
- * query/main.h
+ * ion/query/main.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef QUERY_MAIN_H
-#define QUERY_MAIN_H
+#ifndef ION_QUERY_MAIN_H
+#define ION_QUERY_MAIN_H
 
-extern bool query_init();
-extern void query_deinit();
+extern bool query_module_init();
+extern void query_module_deinit();
 
-#endif /* QUERY_MAIN_H */
+#endif /* ION_QUERY_MAIN_H */

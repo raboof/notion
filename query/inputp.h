@@ -1,17 +1,17 @@
 /*
- * query/inputp.h
+ * ion/query/inputp.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef QUERY_INPUTP_H
-#define QUERY_INPUTP_H
+#ifndef ION_QUERY_INPUTP_H
+#define ION_QUERY_INPUTP_H
 
-#include <wmcore/common.h>
-#include <wmcore/thingp.h>
-#include <wmcore/drawp.h>
-#include <wmcore/binding.h>
+#include <ioncore/common.h>
+#include <ioncore/thingp.h>
+#include <ioncore/drawp.h>
+#include <ioncore/binding.h>
 #include "input.h"
 
 #define INPUT_BORDER_SIZE(GRDATA) \
@@ -30,9 +30,9 @@ typedef void WInputDrawFn(WInput*, bool complete);
 
 extern void setup_input_dinfo(WInput *input, DrawInfo *dinfo);
 
-extern WBindmap *query_bindmap;
-extern WBindmap *query_edln_bindmap;
+extern WBindmap query_bindmap;
+extern WBindmap query_edln_bindmap;
 extern WFunclist query_input_funclist;
 extern WFunclist query_edln_funclist;
 
-#endif /* QUERY_INPUTP_H */
+#endif /* ION_QUERY_INPUTP_H */

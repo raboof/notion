@@ -1,5 +1,5 @@
 /*
- * wmcore/edln.c
+ * ion/query/edln.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
@@ -8,9 +8,9 @@
 #include <string.h>
 #include <ctype.h>
 #include <string.h>
-#include <wmcore/common.h>
-#include <wmcore/selection.h>
-#include <wmcore/font.h>
+#include <ioncore/common.h>
+#include <ioncore/selection.h>
+#include <ioncore/font.h>
 
 #include "edln.h"
 #include "wedln.h"

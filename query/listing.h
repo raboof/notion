@@ -1,15 +1,15 @@
 /*
- * query/listing.h
+ * ion/query/listing.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef QUERY_LISTING_H
-#define QUERY_LISTING_H
+#ifndef ION_QUERY_LISTING_H
+#define ION_QUERY_LISTING_H
 
-#include <wmcore/common.h>
-#include <wmcore/drawp.h>
+#include <ioncore/common.h>
+#include <ioncore/drawp.h>
 
 INTRSTRUCT(WListing)
 
@@ -31,4 +31,4 @@ extern bool scrollup_listing(WListing *l);
 extern bool scrolldown_listing(WListing *l);
 extern void listing_set_font(WListing *l, WFontPtr font);
 
-#endif /* QUERY_LISTING_H */
+#endif /* ION_QUERY_LISTING_H */

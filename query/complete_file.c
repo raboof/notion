@@ -1,3 +1,7 @@
+/*
+ * ion/query/complete_file.c
+ */
+
 /****************************************************************************/
 /*                                                                          */
 /* Copyright 1992 Simmule Turner and Rich Salz.  All rights reserved.       */
@@ -37,7 +41,7 @@
 /*  awb Dec 30 1998                                                         */
 /*                                                                          */
 /****************************************************************************/
-/*  $Revision: 1.2 $
+/*  $Revision: 1.3 $
  **
  **  History and file completion functions for editline library.
  */
@@ -54,7 +58,7 @@
 #include <sys/stat.h>
 #include <pwd.h>
 
-#include <wmcore/common.h>
+#include <ioncore/common.h>
 #include "complete_file.h"
 
 #define STRDUP(X) scopy(X)

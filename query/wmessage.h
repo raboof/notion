@@ -1,16 +1,16 @@
 /*
- * query/wmessage.h
+ * ion/query/wmessage.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef QUERY_WMESSAGE_H
-#define QUERY_WMESSAGE_H
+#ifndef ION_QUERY_WMESSAGE_H
+#define ION_QUERY_WMESSAGE_H
 
-#include <wmcore/common.h>
-#include <wmcore/thing.h>
-#include <wmcore/window.h>
+#include <ioncore/common.h>
+#include <ioncore/thing.h>
+#include <ioncore/window.h>
 #include "listing.h"
 #include "input.h"
 
@@ -21,8 +21,8 @@ DECLOBJ(WMessage){
 	WListing listing;
 };
 
-extern WMessage *create_wmsg(WRegion *par, WRectangle geom,
+extern WMessage *create_wmsg(WWindow *par, WRectangle geom,
 							 const char *msg);
 extern void deinit_wmsg(WMessage *msg);
 
-#endif /* QUERY_WMESSAGE_H */
+#endif /* ION_QUERY_WMESSAGE_H */

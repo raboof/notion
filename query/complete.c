@@ -1,5 +1,5 @@
 /*
- * ion/complete.c
+ * ion/query/complete.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
@@ -10,7 +10,7 @@
 #include <string.h>
 #include <limits.h>
 
-#include <wmcore/common.h>
+#include <ioncore/common.h>
 #include "complete.h"
 #include "edln.h"
 #include "wedln.h"

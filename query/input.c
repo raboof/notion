@@ -1,14 +1,14 @@
 /*
- * wmcore/input.c
+ * ion/query/input.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#include <wmcore/common.h>
-#include <wmcore/window.h>
-#include <wmcore/global.h>
-#include <wmcore/regbind.h>
+#include <ioncore/common.h>
+#include <ioncore/window.h>
+#include <ioncore/global.h>
+#include <ioncore/regbind.h>
 #include "inputp.h"
 
 
@@ -103,26 +103,23 @@ void input_draw_config_updated(WInput *input)
 /*{{{ Init/deinit */
 
 
-bool init_input(WInput *input, WRegion *par, WRectangle geom)
+bool init_input(WInput *input, WWindow *par, WRectangle geom)
 {
 	WScreen *scr;
 	Window win;
-	
-	if(!WTHING_IS(par, WWindow))
-		return FALSE;
 
 	input->max_geom=geom;
 	scr=SCREEN_OF(par);
-	win=create_simple_window_bg(scr, ((WWindow*)par)->win, geom,
+	win=create_simple_window_bg(scr, par->win, geom,
 								scr->grdata.input_colors.bg);
 	
-	if(!init_window((WWindow*)input, (WWindow*)par, win, geom))
+	if(!init_window((WWindow*)input, par, win, geom))
 		return FALSE;
 
 	input_refit(input);
 	
 	XSelectInput(wglobal.dpy, input->win.win, INPUT_MASK);
-	region_add_bindmap((WRegion*)input, query_bindmap, FALSE);
+	region_add_bindmap((WRegion*)input, &query_bindmap, FALSE);
 	
 	return TRUE;
 }

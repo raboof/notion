@@ -1,15 +1,15 @@
 /*
- * query/edln.h
+ * ion/query/edln.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef QUERY_EDLN_H
-#define QUERY_EDLN_H
+#ifndef ION_QUERY_EDLN_H
+#define ION_QUERY_EDLN_H
 
-#include <wmcore/common.h>
-#include <wmcore/obj.h>
+#include <ioncore/common.h>
+#include <ioncore/obj.h>
 
 INTRSTRUCT(Edln)
 
@@ -72,4 +72,4 @@ bool edln_init(Edln *edln, const char *dflt);
 void edln_deinit(Edln *edln);
 char* edln_finish(Edln *edln);
 
-#endif /* QUERY_EDLN_H */
+#endif /* ION_QUERY_EDLN_H */

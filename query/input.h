@@ -1,15 +1,15 @@
 /*
- * query/input.h
+ * ion/query/input.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef QUERY_INPUT_H
-#define QUERY_INPUT_H
+#ifndef ION_QUERY_INPUT_H
+#define ION_QUERY_INPUT_H
 
-#include <wmcore/common.h>
-#include <wmcore/window.h>
+#include <ioncore/common.h>
+#include <ioncore/window.h>
 
 INTROBJ(WInput)
 
@@ -19,7 +19,7 @@ DECLOBJ(WInput){
 };
 
 
-extern bool init_input(WInput *input, WRegion *par, WRectangle geom);
+extern bool init_input(WInput *input, WWindow *par, WRectangle geom);
 extern void deinit_input(WInput *input);
 
 extern void fit_input(WInput *input, WRectangle geom);
@@ -31,4 +31,4 @@ DYNFUN void input_scrollup(WInput *input);
 DYNFUN void input_scrolldown(WInput *input);
 DYNFUN void input_calc_size(WInput *input, WRectangle *geom);
 
-#endif /* QUERY_INPUT_H */
+#endif /* ION_QUERY_INPUT_H */

@@ -1,26 +1,26 @@
 /*
- * query/query.h
+ * ion/query/query.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef QUERY_QUERY_H
-#define QUERY_QUERY_H
+#ifndef ION_QUERY_QUERY_H
+#define ION_QUERY_QUERY_H
 
-#include <wmcore/common.h>
-#include <src/frame.h>
+#include <ioncore/common.h>
+#include <ioncore/genframe.h>
 
-extern void query_exec(WFrame *frame);
-extern void query_runwith(WFrame *frame, char *cmd, char *prompt);
-extern void query_runfile(WFrame *frame, char *cmd, char *prompt);
-extern void query_attachclient(WFrame *frame);
-extern void query_gotoclient(WFrame *frame);
-extern void query_workspace(WFrame *frame);
-extern void query_workspace_with(WFrame *frame);
-extern void query_yesno(WFrame *frame, char *fn, char *prompt);
-extern void query_function(WFrame *frame);
-extern void query_renameworkspace(WFrame *frame);
-extern void query_renameframe(WFrame *frame);
+extern void query_exec(WGenFrame *frame);
+extern void query_runwith(WGenFrame *frame, char *cmd, char *prompt);
+extern void query_runfile(WGenFrame *frame, char *cmd, char *prompt);
+extern void query_attachclient(WGenFrame *frame);
+extern void query_gotoclient(WGenFrame *frame);
+extern void query_workspace(WGenFrame *frame);
+extern void query_workspace_with(WGenFrame *frame);
+extern void query_yesno(WGenFrame *frame, char *fn, char *prompt);
+extern void query_function(WGenFrame *frame);
+extern void query_renameworkspace(WGenFrame *frame);
+extern void query_renameframe(WGenFrame *frame);
 
-#endif /* QUERY_QUERY_H */
+#endif /* ION_QUERY_QUERY_H */

@@ -1,5 +1,5 @@
 /*
- * wmcore/listing.c
+ * ion/query/listing.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
@@ -7,10 +7,10 @@
 
 #include <string.h>
 
-#include <wmcore/common.h>
-#include <wmcore/drawp.h>
-#include <wmcore/font.h>
-#include <wmcore/global.h>
+#include <ioncore/common.h>
+#include <ioncore/drawp.h>
+#include <ioncore/font.h>
+#include <ioncore/global.h>
 #include "listing.h"
 
 

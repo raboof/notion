@@ -1,5 +1,5 @@
 /*
- * ion/query.c
+ * ion/query/query.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
@@ -9,31 +9,30 @@
 #include <unistd.h>
 #include <string.h>
 
-#include <wmcore/common.h>
-#include <wmcore/global.h>
-#include <wmcore/function.h>
-#include <wmcore/exec.h>
-#include <wmcore/clientwin.h>
-#include <wmcore/focus.h>
-#include <wmcore/commandsq.h>
-#include <wmcore/names.h>
-#include <wmcore/genericws.h>
-#include <src/frame.h>
-#include <src/funtabs.h>
-#include <src/ionws.h>
+#include <ioncore/common.h>
+#include <ioncore/global.h>
+#include <ioncore/function.h>
+#include <ioncore/exec.h>
+#include <ioncore/clientwin.h>
+#include <ioncore/focus.h>
+#include <ioncore/commandsq.h>
+#include <ioncore/names.h>
+#include <ioncore/genws.h>
+#include <ioncore/genframe.h>
+#include <ioncore/reginfo.h>
 #include "query.h"
 #include "wedln.h"
 #include "complete_file.h"
 #include "wmessage.h"
 #include "fwarn.h"
 
-#define FWARN(ARGS) fwarn_free((WFrame*)thing, errmsg ARGS)
+#define FWARN(ARGS) fwarn_free((WGenFrame*)thing, errmsg ARGS)
 
 
 /*{{{ Generic */
 
 
-static WEdln *do_query_edln(WFrame *frame, WEdlnHandler *handler,
+static WEdln *do_query_edln(WGenFrame *frame, WEdlnHandler *handler,
 							const char *prompt, const char *dflt,
 							EdlnCompletionHandler *chandler,
 							void *chandler_data)
@@ -46,12 +45,12 @@ static WEdln *do_query_edln(WFrame *frame, WEdlnHandler *handler,
 	fnp.dflt=dflt;
 	fnp.handler=handler;
 	
-	wedln=(WEdln*)frame_attach_input_new(frame,
-										 (WRegionCreateFn*)create_wedln,
-										 (void*)&fnp);
+	wedln=(WEdln*)genframe_attach_input_new(frame,
+											(WRegionCreateFn*)create_wedln,
+											(void*)&fnp);
 	if(wedln!=NULL){
 		map_region((WRegion*)wedln);
-
+		
 		if(REGION_IS_ACTIVE(frame))
 			set_focus((WRegion*)wedln);
 		
@@ -88,7 +87,7 @@ static const char *my_getwd()
 	return wdbuf;
 }
 
-	
+
 static void handler_runfile(WThing *thing, char *str, char *userdata)
 {
 	char *p;
@@ -134,14 +133,14 @@ static void handler_exec(WThing *thing, char *str, char *userdata)
 }
 
 
-void query_exec(WFrame *frame)
+void query_exec(WGenFrame *frame)
 {
 	do_query_edln(frame, handler_exec, "Run:", NULL,
 				  complete_file_with_path, NULL);
 }
 
 
-void query_runfile(WFrame *frame, char *prompt, char *cmd)
+void query_runfile(WGenFrame *frame, char *prompt, char *cmd)
 {
 	WEdln *wedln=do_query_edln(frame, handler_runfile,
 							   prompt, my_getwd(), complete_file, NULL);
@@ -150,7 +149,7 @@ void query_runfile(WFrame *frame, char *prompt, char *cmd)
 }
 
 
-void query_runwith(WFrame *frame, char *prompt, char *cmd)
+void query_runwith(WGenFrame *frame, char *prompt, char *cmd)
 {
 	WEdln *wedln=do_query_edln(frame, handler_runwith,
 							   prompt, NULL, NULL, NULL);
@@ -165,7 +164,7 @@ void query_runwith(WFrame *frame, char *prompt, char *cmd)
 /*{{{ Navigation */
 
 
-static bool attach_test(WFrame *dst, WRegion *sub, WFrame *thing)
+static bool attach_test(WGenFrame *dst, WRegion *sub, WGenFrame *thing)
 {
 	if(!same_screen(&dst->win.region, sub)){
 		/* complaint should go in 'thing' -frame */
@@ -186,7 +185,7 @@ static void handler_attachclient(WThing *thing, char *str, char *userdata)
 		return;
 	}
 	
-	attach_test((WFrame*)thing, (WRegion*)cwin, (WFrame*)thing);
+	attach_test((WGenFrame*)thing, (WRegion*)cwin, (WGenFrame*)thing);
 }
 
 
@@ -203,14 +202,14 @@ static void handler_gotoclient(WThing *thing, char *str, char *userdata)
 }
 
 
-void query_attachclient(WFrame *frame)
+void query_attachclient(WGenFrame *frame)
 {
 	do_query_edln(frame, handler_attachclient,
 				  "Attach client:", "", complete_clientwin, NULL);
 }
 
 
-void query_gotoclient(WFrame *frame)
+void query_gotoclient(WGenFrame *frame)
 {
 	do_query_edln(frame, handler_gotoclient,
 				  "Goto client:", "", complete_clientwin, NULL);
@@ -223,32 +222,59 @@ bool empty_name(const char *p)
 }
 
 
+static WRegion *create_ws_on_vp(WViewport *vp, char *name)
+{
+	WRegionSimpleCreateFn *fn=NULL;
+	char *p=strchr(name, ':');
+	
+	if(p!=NULL){
+		char *s=ALLOC_N(char, p-name+1);
+		if(s==NULL){
+			warn_err();
+		}else{
+			strncpy(s, name, p-name);
+			name=p+1;
+			fn=lookup_region_simple_create_fn(s);
+			free(s);
+		}
+	}else{
+		fn=lookup_region_simple_create_fn_inh("WGenWS");
+	}
+	
+	if(fn==NULL)
+		return NULL;
+	
+	return region_add_managed_new_simple((WRegion*)vp, fn,
+										 REGION_ATTACH_SWITCHTO);
+}
+
+
 static void handler_workspace(WThing *thing, char *name, char *userdata)
 {
 	WScreen *scr=SCREEN_OF(thing);
-	WGenericWS *ws;
-	WViewport *vp;
+	WRegion *ws=NULL;
+	WViewport *vp=NULL;
 	
 	if(empty_name(name))
 		return;
 	
-	ws=lookup_workspace(name);
+	ws=(WRegion*)lookup_workspace(name);
 	
 	if(ws==NULL){
 		vp=viewport_of((WRegion*)thing);
 		if(vp!=NULL)
-			ws=(WGenericWS*)create_new_ionws_on_vp(vp, name);
+			ws=create_ws_on_vp(vp, name);
 		if(ws==NULL){
 			FWARN(("Unable to create workspace."));
 			return;
 		}
 	}
 	
-	goto_region((WRegion*)ws);
+	goto_region(ws);
 }
-		
-		
-void query_workspace(WFrame *frame)
+
+
+void query_workspace(WGenFrame *frame)
 {
 	do_query_edln(frame, handler_workspace,
 				  "Goto/create workspace:", "", complete_workspace, NULL);
@@ -259,9 +285,9 @@ static void handler_workspace_with(WThing *thing, char *name, char *userdata)
 {
 #if 0
 	WScreen *scr=SCREEN_OF(thing);
-	WGenericWS *ws;
+	WGenWS *ws;
 	WClientWin *cwin;
-	WFrame *frame;
+	WGenFrame *frame;
 	WViewport *vp;
 	
 	if(empty_name(name))
@@ -271,8 +297,8 @@ static void handler_workspace_with(WThing *thing, char *name, char *userdata)
 	cwin=lookup_clientwin(userdata);
 	
 	if(ws!=NULL){
-		frame=(WFrame*)workspace_find_current(ws);
-		if(frame==NULL || !WTHING_IS(frame, WFrame)){
+		frame=(WGenFrame*)workspace_find_current(ws);
+		if(frame==NULL || !WTHING_IS(frame, WGenFrame)){
 			FWARN(("Workspace %s has no current frame", name));
 			return;
 		}
@@ -290,19 +316,19 @@ static void handler_workspace_with(WThing *thing, char *name, char *userdata)
 			FWARN(("Unable to create workspace."));
 			return;
 		}
-	
-		frame=FIRST_THING(ws, WFrame);
-	
+		
+		frame=FIRST_THING(ws, WGenFrame);
+		
 		assert(frame!=NULL);
 	}
 	
-	if(attach_test((WFrame*)frame, (WRegion*)cwin, (WFrame*)thing))
+	if(attach_test((WGenFrame*)frame, (WRegion*)cwin, (WGenFrame*)thing))
 		goto_region((WRegion*)cwin);
 #endif
 }
 
 
-void query_workspace_with(WFrame *frame)
+void query_workspace_with(WGenFrame *frame)
 {
 #if 0
 	WEdln *wedln;
@@ -330,18 +356,18 @@ void query_workspace_with(WFrame *frame)
 
 void handler_renameworkspace(WThing *thing, char *name, char *userdata)
 {
-	WGenericWS *ws=FIND_PARENT(thing, WGenericWS);
-
+	WGenWS *ws=FIND_PARENT(thing, WGenWS);
+	
 	if(ws==NULL || empty_name(name))
 		return;
-
+	
 	region_set_name((WRegion*)ws, name);
 }
 
 
-void query_renameworkspace(WFrame *frame)
+void query_renameworkspace(WGenFrame *frame)
 {
-	WGenericWS *ws=FIND_PARENT(frame, WGenericWS);
+	WGenWS *ws=FIND_PARENT(frame, WGenWS);
 	
 	if(ws==NULL)
 		return;
@@ -358,7 +384,7 @@ void handler_renameframe(WThing *thing, char *name, char *userdata)
 }
 
 
-void query_renameframe(WFrame *frame)
+void query_renameframe(WGenFrame *frame)
 {
 	do_query_edln(frame, handler_renameframe,
 				  "Name of this frame:", region_name((WRegion*)frame),
@@ -382,7 +408,7 @@ static void function_warn_handler(const char *message)
 	last_error_message=scopy(message);
 }
 
-	
+
 void handler_function(WThing *thing, char *fn, char *userdata)
 {
 	WarnHandler *old_warn_handler;
@@ -390,12 +416,12 @@ void handler_function(WThing *thing, char *fn, char *userdata)
 	WWatch watch=WWATCH_INIT;
 	bool error;
 	
-	assert(WTHING_IS(thing, WFrame));
-
+	assert(WTHING_IS(thing, WGenFrame));
+	
 	setup_watch(&watch, thing, NULL);
 	
-	if(((WFrame*)thing)->current_sub!=NULL)
-		thing=(WThing*)(((WFrame*)thing)->current_sub);
+	if(((WGenFrame*)thing)->current_sub!=NULL)
+		thing=(WThing*)(((WGenFrame*)thing)->current_sub);
 	
 	old_warn_handler=set_warn_handler(function_warn_handler);
 	error=!execute_command_sequence(thing, fn);
@@ -410,9 +436,9 @@ void handler_function(WThing *thing, char *fn, char *userdata)
 				   "parse your request"));
 		}
 	}
-
+	
 	reset_watch(&watch);
-
+	
 	if(last_error_message!=NULL){
 		free(last_error_message);
 		last_error_message=NULL;
@@ -429,7 +455,7 @@ static void handler_yesno(WThing *thing, char *yesno, char *fn)
 }
 
 
-void query_yesno(WFrame *frame, char *prompt, char *fn)
+void query_yesno(WGenFrame *frame, char *prompt, char *fn)
 {
 	WEdln *wedln=do_query_edln(frame, handler_yesno,
 							   prompt, NULL, NULL, NULL);
@@ -443,19 +469,19 @@ static int complete_mainfunc(char *nam, char ***cp_ret, char **beg,
 {
 	WRegion *r;
 	
-	if(fr==NULL || !WTHING_IS(fr, WFrame))
+	if(fr==NULL || !WTHING_IS(fr, WGenFrame))
 		return 0;
 	
-	r=((WFrame*)fr)->current_sub;
+	r=((WGenFrame*)fr)->current_sub;
 	
 	if(r==NULL)
 		r=((WRegion*)fr);
-		
+	
 	return complete_func_thing_parents(nam, cp_ret, beg, (WThing*)r);
 }
 
 
-void query_function(WFrame *frame)
+void query_function(WGenFrame *frame)
 {
 	do_query_edln(frame, handler_function,
 				  "Function name:", NULL, complete_mainfunc, frame);

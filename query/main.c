@@ -5,11 +5,12 @@
  * See the included file LICENSE for details.
  */
 
-#include <wmcore/binding.h>
-#include <wmcore/conf-bindings.h>
-#include <wmcore/functionp.h>
-#include <wmcore/readconfig.h>
-#include <src/funtabs.h>
+#include <ioncore/binding.h>
+#include <ioncore/conf-bindings.h>
+#include <ioncore/functionp.h>
+#include <ioncore/readconfig.h>
+#include <ioncore/genframe.h>
+#include <ioncore/funtabs.h>
 
 #include "query.h"
 #include "edln.h"
@@ -18,11 +19,23 @@
 #include "complete.h"
 
 
-WBindmap *query_bindmap=NULL;
-WBindmap *query_edln_bindmap=NULL;
+/*{{{ Module information */
 
 
-/*{{{ Bindable functions */
+#include "../version.h"
+
+char query_module_ion_version[]=ION_VERSION;
+
+
+/*}}}*/
+
+
+
+/*{{{ Bindable functions and binding maps */
+
+
+WBindmap query_bindmap=BINDMAP_INIT;
+WBindmap query_edln_bindmap=BINDMAP_INIT;
 
 
 static void callhnd_edln_void(WThing *thing, WFunction *func,
@@ -82,17 +95,17 @@ static WFunction query_input_funtab[]={
 
 
 static WFunction query_frame_funtab[]={
-	FN(ss, 	generic, WFrame,	"query_runfile",	query_runfile),
-	FN(ss, 	generic, WFrame,	"query_runwith",	query_runwith),
-	FN(ss,	generic, WFrame,	"query_yesno",		query_yesno),
-	FN_VOID(generic, WFrame,	"query_function",	query_function),
-	FN_VOID(generic, WFrame,	"query_exec",		query_exec),
-	FN_VOID(generic, WFrame,	"query_attachclient", query_attachclient),
-	FN_VOID(generic, WFrame,	"query_gotoclient", query_gotoclient),
-	FN_VOID(generic, WFrame,	"query_workspace",	query_workspace),
-	FN_VOID(generic, WFrame,	"query_workspace_with",	query_workspace_with),
-	FN_VOID(generic, WFrame,	"query_renameworkspace", query_renameworkspace),
-	FN_VOID(generic, WFrame,	"query_renameframe", query_renameframe),
+	FN(ss, 	generic, WGenFrame,	"query_runfile",	query_runfile),
+	FN(ss, 	generic, WGenFrame,	"query_runwith",	query_runwith),
+	FN(ss,	generic, WGenFrame,	"query_yesno",		query_yesno),
+	FN_VOID(generic, WGenFrame,	"query_function",	query_function),
+	FN_VOID(generic, WGenFrame,	"query_exec",		query_exec),
+	FN_VOID(generic, WGenFrame,	"query_attachclient", query_attachclient),
+	FN_VOID(generic, WGenFrame,	"query_gotoclient", query_gotoclient),
+	FN_VOID(generic, WGenFrame,	"query_workspace",	query_workspace),
+	FN_VOID(generic, WGenFrame,	"query_workspace_with",	query_workspace_with),
+	FN_VOID(generic, WGenFrame,	"query_renameworkspace", query_renameworkspace),
+	FN_VOID(generic, WGenFrame,	"query_renameframe", query_renameframe),
 	END_FUNTAB
 };
 
@@ -105,19 +118,19 @@ static WFunction query_frame_funtab[]={
 
 static bool query_begin_bindings(Tokenizer *tokz, int n, Token *toks)
 {
-	return wmcore_begin_bindings(query_bindmap, NULL);
+	return ioncore_begin_bindings(&query_bindmap, NULL);
 }
 
 
 static bool query_begin_edln_bindings(Tokenizer *tokz, int n, Token *toks)
 {
-	return wmcore_begin_bindings(query_edln_bindmap, NULL);
+	return ioncore_begin_bindings(&query_edln_bindmap, NULL);
 }
 
 
 static ConfOpt query_opts[]={
-	{"query_bindings", NULL, query_begin_bindings, wmcore_binding_opts},
-	{"edln_bindings", NULL, query_begin_edln_bindings, wmcore_binding_opts},
+	{"query_bindings", NULL, query_begin_bindings, ioncore_binding_opts},
+	{"edln_bindings", NULL, query_begin_edln_bindings, ioncore_binding_opts},
 	END_CONFOPTS
 };
 
@@ -128,25 +141,19 @@ static ConfOpt query_opts[]={
 /*{{{ Init & deinit */
 
 
-void query_deinit();
+void query_module_deinit()
+{
+	clear_funclist(&query_input_funclist);
+	clear_funclist(&query_edln_funclist);
+	deinit_bindmap(&query_bindmap);
+	deinit_bindmap(&query_edln_bindmap);
+}
 
 
-bool query_init()
+bool query_module_init()
 {
 	bool ret;
 	
-	query_bindmap=create_bindmap();
-	
-	if(query_bindmap==NULL)
-		return FALSE;
-
-	query_edln_bindmap=create_bindmap();
-	if(query_edln_bindmap==NULL){
-		free(query_bindmap);
-		query_bindmap=NULL;
-		return FALSE;
-	}
-
 	ret=(add_to_funclist(&query_input_funclist, query_input_funtab) &&
 		 add_to_funclist(&query_edln_funclist, query_edln_funtab));
 	
@@ -154,25 +161,12 @@ bool query_init()
 		ret=read_config_for("query", query_opts);
 	
 	if(ret)
-		ret=add_to_funclist(&ion_frame_funclist, query_frame_funtab);
+		ret=add_to_funclist(&ioncore_genframe_funclist, query_frame_funtab);
 		
 	if(!ret)
-		query_deinit();
+		query_module_deinit();
 		
 	return ret;
-}
-
-
-void query_deinit()
-{
-	clear_funclist(&query_input_funclist);
-	clear_funclist(&query_edln_funclist);
-	remove_from_funclist(&ion_frame_funclist, query_frame_funtab);
-	
-	if(query_bindmap!=NULL){
-		destroy_bindmap(query_bindmap);
-		query_bindmap=NULL;
-	}
 }
 
 

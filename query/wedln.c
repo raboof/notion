@@ -1,20 +1,20 @@
 /*
- * wmcore/wedln.c
+ * ion/query/wedln.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
 #include <string.h>
-#include <wmcore/common.h>
-#include <wmcore/global.h>
-#include <wmcore/drawp.h>
-#include <wmcore/thingp.h>
-#include <wmcore/font.h>
-#include <wmcore/xic.h>
-#include <wmcore/selection.h>
-#include <wmcore/event.h>
-#include <wmcore/regbind.h>
+#include <ioncore/common.h>
+#include <ioncore/global.h>
+#include <ioncore/drawp.h>
+#include <ioncore/thingp.h>
+#include <ioncore/font.h>
+#include <ioncore/xic.h>
+#include <ioncore/selection.h>
+#include <ioncore/event.h>
+#include <ioncore/regbind.h>
 #include "edln.h"
 #include "wedln.h"
 #include "inputp.h"
@@ -398,9 +398,8 @@ static bool wedln_init_prompt(WEdln *wedln, WScreen *scr, const char *prompt)
 }
 
 
-bool init_wedln(WEdln *wedln, WRegion *par, WRectangle geom,
-				WEdlnHandler *handler,
-				const char *prompt, const char *dflt)
+bool init_wedln(WEdln *wedln, WWindow *par, WRectangle geom,
+				WEdlnHandler *handler, const char *prompt, const char *dflt)
 {
 	wedln->vstart=0;
 	wedln->handler=handler;
@@ -429,14 +428,13 @@ bool init_wedln(WEdln *wedln, WRegion *par, WRectangle geom,
 
 	wedln->input.win.xic=create_xic(wedln->input.win.win);
 
-	region_add_bindmap((WRegion*)wedln, query_edln_bindmap, FALSE);
+	region_add_bindmap((WRegion*)wedln, &query_edln_bindmap, FALSE);
 	
 	return TRUE;
 }
 
 
-WEdln *create_wedln(WRegion *par, WRectangle geom,
-					WEdlnCreateParams *fnp)
+WEdln *create_wedln(WWindow *par, WRectangle geom, WEdlnCreateParams *fnp)
 {
 	CREATETHING_IMPL(WEdln, wedln, (p, par, geom, fnp->handler,
 									fnp->prompt, fnp->dflt));
