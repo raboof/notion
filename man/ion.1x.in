@@ -26,6 +26,10 @@ Directory to search for configuration files and other scripts
 On X servers with multiple (traditional non-Xinerama) screens, manage only
 default screen, not all.
 .TP
+.B \-sessionname seession_name
+Set sesion name. This option affects where workspace and other savefiles are
+put (~/.ion-devel/session_name if option set).
+.TP
 .B \-noxinerama
 If Ion was compiled with Xinerama support, this option can be used to
 disable it.
