@@ -42,8 +42,13 @@ X11_INCLUDES=-I$(X11_PREFIX)/include
 #EXTRA_INCLUDES = -I$(PREFIX)/include
 #EXTRA_LIBS = -L$(PREFIX)/lib
 
+# Change commenting to disable Xinerama support
 XINERAMA_LIBS=-lXinerama -lXext
 #DEFINES += -DCF_NO_XINERAMA
+
+# Uncomment to enable Xft (anti-aliased fonts) support
+#EXTRA_LIBS += -lXft
+#DEFINES += -DCF_XFT
 
 
 ##

@@ -686,7 +686,7 @@ char *region_full_name(WRegion *reg)
 }
 
 
-char *region_make_label(WRegion *reg, int maxw, XFontStruct *font)
+char *region_make_label(WRegion *reg, int maxw, WFont *font)
 {
 	const char *str=region_name(reg);
 	char tmp[16];

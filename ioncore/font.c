@@ -8,20 +8,34 @@
 #include <libtu/output.h>
 #include <libtu/misc.h>
 #include <string.h>
-#include "font.h"
 #include "common.h"
+#include "font.h"
+#ifdef CF_XFT
+#include "global.h"
+#endif
 
-
-XFontStruct *load_font(Display *dpy, const char *fontname)
+WFont *load_font(Display *dpy, const char *fontname)
 {
-	XFontStruct *xfnt;
+	WFont *xfnt;
 	
+#ifdef CF_XFT
+	xfnt=XftFontOpenXlfd(dpy, DefaultScreen(dpy), fontname);
+	if(xfnt==NULL)
+		xfnt=XftFontOpenName(dpy, DefaultScreen(dpy), fontname);
+#else
 	xfnt=XLoadQueryFont(dpy, fontname);
+#endif
 	
 	if(xfnt==NULL){
 		warn("Could not load font \"%s\", trying \"%s\"",
 			 fontname, CF_FALLBACK_FONT_NAME);
+#ifdef CF_XFT
+		xfnt=XftFontOpenXlfd(dpy, DefaultScreen(dpy), CF_FALLBACK_FONT_NAME);
+		if(xfnt==NULL)
+			xfnt=XftFontOpenName(dpy, DefaultScreen(dpy), fontname);
+#else
 		xfnt=XLoadQueryFont(dpy, CF_FALLBACK_FONT_NAME);
+#endif
 		if(xfnt==NULL){
 			warn("Failed loading fallback font.");
 			return FALSE;
@@ -30,6 +44,21 @@ XFontStruct *load_font(Display *dpy, const char *fontname)
 	
 	return xfnt;
 }
+
+
+#ifdef CF_XFT
+
+
+int text_width(WFont *font, const char *str, int len)
+{
+    XGlyphInfo extents;
+
+    XftTextExtents8(wglobal.dpy, font, (XftChar8 *) str, len, &extents);
+    return extents.xOff;
+}
+
+
+#endif
 
 
 static char *scatn3(const char *p1, int l1,
@@ -49,7 +78,7 @@ static char *scatn3(const char *p1, int l1,
 }
 
 
-char *make_label(XFontStruct *fnt, const char *str, const char *trailer,
+char *make_label(WFont *fnt, const char *str, const char *trailer,
 				 int maxw, int *wret)
 {
 	static const char *dots="...";
@@ -60,8 +89,8 @@ char *make_label(XFontStruct *fnt, const char *str, const char *trailer,
 	len=strlen(str);
 	tlen=strlen(trailer);
 	
-	w=XTextWidth(fnt, str, len);
-	tw=XTextWidth(fnt, trailer, tlen);
+	w=text_width(fnt, str, len);
+	tw=text_width(fnt, trailer, tlen);
 	
 	if(tw+w<=maxw){
 		if(wret!=NULL)
@@ -74,7 +103,7 @@ char *make_label(XFontStruct *fnt, const char *str, const char *trailer,
 	if(b!=NULL){
 		b++;
 		b+=strspn(b, " ");
-		bw=XTextWidth(fnt, str, b-str);
+		bw=text_width(fnt, str, b-str);
 		
 		if(tw+w-bw<=maxw){
 			if(wret!=NULL)
@@ -87,11 +116,11 @@ char *make_label(XFontStruct *fnt, const char *str, const char *trailer,
 		w=bw;
 	}
 
-	dw=XTextWidth(fnt, dots, 3);
+	dw=text_width(fnt, dots, 3);
 	
 	if(len>0){
 		while(--len){
-			w=XTextWidth(fnt, str, len);
+			w=text_width(fnt, str, len);
 			if(tw+w+dw<=maxw)
 				break;
 		}

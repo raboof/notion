@@ -49,24 +49,25 @@ static int wedln_draw_strsect(DrawInfo *dinfo, int x, const char *str,
 							  int len, int col)
 {
 	int ty=I_Y+I_H/2-FONT_HEIGHT(FONT)/2+FONT_BASELINE(FONT);
+	WColor *fg, *bg;
 
 	if(len==0)
 		return 0;
 	
 	if(col==2){
-		XSetForeground(wglobal.dpy, XGC, COLORS->bg);
-		XSetBackground(wglobal.dpy, XGC, COLORS->fg);
+		fg = &COLORS->bg;
+		bg = &COLORS->fg;
 	}else if(col==1){
-		XSetForeground(wglobal.dpy, XGC, GRDATA->selection_fgcolor);
-		XSetBackground(wglobal.dpy, XGC, GRDATA->selection_bgcolor);
+		fg = &GRDATA->selection_fgcolor;
+		bg = &GRDATA->selection_bgcolor;
 	}else{
-		XSetForeground(wglobal.dpy, XGC, COLORS->fg);
-		XSetBackground(wglobal.dpy, XGC, COLORS->bg);
+		fg = &COLORS->fg;
+		bg = &COLORS->bg;
 	}
 	
-	XDrawImageString(wglobal.dpy, WIN, XGC, I_X+x, ty, str, len);
+	draw_image_string(dinfo, I_X+x, ty, str, len, fg, bg);
 	
-	return XTextWidth(FONT, str, len);
+	return text_width(FONT, str, len);
 }
 
 #define DSTRSECT(LEN, INV) \
@@ -101,7 +102,7 @@ static void wedln_do_draw_str_box(DrawInfo *dinfo, const char *str,
 	DSTRSECT(len, 0);
 	
 	if(tx<I_W){
-		XSetForeground(wglobal.dpy, XGC, COLORS->bg);
+		set_foreground(wglobal.dpy, XGC, COLORS->bg);
 		XFillRectangle(wglobal.dpy, WIN, XGC, I_X+tx, I_Y, I_W-tx, I_H);
 	}
 	XSetClipMask(wglobal.dpy, XGC, None);
@@ -122,13 +123,13 @@ static void wedln_draw_str_box(DrawInfo *dinfo, int vstart, const char *str,
 	point-=vstart+dstart;
 	
 	if(dstart!=0)
-		tx=XTextWidth(FONT, str+vstart, dstart);
+		tx=text_width(FONT, str+vstart, dstart);
 	
 	wedln_do_draw_str_box(dinfo, str+vstart+dstart, point, mark, tx);
 }
 
 
-static bool wedln_update_cursor(WEdln *wedln, XFontStruct *font, int iw)
+static bool wedln_update_cursor(WEdln *wedln, WFont *font, int iw)
 {
 	int cx, l;
 	int vstart=wedln->vstart;
@@ -146,10 +147,10 @@ static bool wedln_update_cursor(WEdln *wedln, XFontStruct *font, int iw)
 	
 	while(vstart<point){
 		if(point==len){
-			cx=XTextWidth(font, str+vstart, point-vstart);
-			cx+=XTextWidth(font, " ", 1);
+			cx=text_width(font, str+vstart, point-vstart);
+			cx+=text_width(font, " ", 1);
 		}else{
-			cx=XTextWidth(font, str+vstart, point-vstart+1);
+			cx=text_width(font, str+vstart, point-vstart+1);
 		}
 		l=cx;
 		
@@ -302,9 +303,8 @@ void wedln_draw_textarea(WEdln *wedln, bool complete)
 	
 	if(wedln->prompt!=NULL){
 		ty=I_Y+I_H/2-FONT_HEIGHT(FONT)/2+FONT_BASELINE(FONT);
-		XSetForeground(wglobal.dpy, XGC, COLORS->fg);
-		XDrawString(wglobal.dpy, WIN, XGC, I_X, ty,
-					wedln->prompt, wedln->prompt_len);
+		draw_image_string(dinfo, I_X, ty, wedln->prompt, wedln->prompt_len,
+				          &COLORS->fg, &COLORS->bg);
 	}
 
 	get_textarea_geom(wedln, dinfo);
@@ -381,7 +381,7 @@ static bool wedln_init_prompt(WEdln *wedln, WScreen *scr, const char *prompt)
 		}
 		wedln->prompt=p;
 		wedln->prompt_len=strlen(p);
-		wedln->prompt_w=XTextWidth(INPUT_FONT(&(scr->grdata)),
+		wedln->prompt_w=text_width(INPUT_FONT(&(scr->grdata)),
 								   p, wedln->prompt_len);
 	}else{
 		wedln->prompt=NULL;

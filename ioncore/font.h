@@ -11,12 +11,32 @@
 #include <libtu/types.h>
 #include <X11/Xlib.h>
 
-#define FONT_HEIGHT(X) ((X)->ascent+(X)->descent)
-#define FONT_BASELINE(X) ((X)->ascent)
-#define MAX_FONT_WIDTH(X) ((X)->max_bounds.width)
+#ifdef CF_XFT
 
-extern XFontStruct *load_font(Display *dpy, const char *fontname);
-extern char *make_label(XFontStruct *fnt, const char *str, const char *trailer,
+#include <X11/Xft/Xft.h>
+
+#define FONT_HEIGHT(X) ((X)->height)
+#define MAX_FONT_WIDTH(X) ((X)->max_advance_width)
+#define MAX_FONT_HEIGHT(X) ((X)->height)
+
+#define free_font XftFontClose
+extern int text_width(WFont *font, const char *str, int len);
+
+#else
+
+#define FONT_HEIGHT(X) ((X)->ascent+(X)->descent)
+#define MAX_FONT_WIDTH(X) ((X)->max_bounds.width)
+#define MAX_FONT_HEIGHT(X) ((X)->max_bounds.ascent+(X)->max_bounds.descent)
+
+#define free_font XFreeFont
+#define text_width XTextWidth
+
+#endif
+
+#define FONT_BASELINE(X) ((X)->ascent)
+
+extern WFont *load_font(Display *dpy, const char *fontname);
+extern char *make_label(WFont *fnt, const char *str, const char *trailer,
 						int maxw, int *wret);
 
 #endif /* WMCORE_FONT_H */

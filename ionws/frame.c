@@ -185,7 +185,7 @@ static bool init_frame(WFrame *frame, WScreen *scr, WWinGeomParams params,
 		attr.background_pixmap=ParentRelative;
 		attrflags=CWBackPixmap;
 	}else{
-		attr.background_pixel=grdata->frame_bgcolor;
+		attr.background_pixel=COLOR_PIXEL(grdata->frame_bgcolor);
 		attrflags=CWBackPixel;
 	}
 	
@@ -302,6 +302,9 @@ void draw_frame(const WFrame *frame, bool complete)
 	WGRData *grdata=GRDATA_OF(frame);
 
 	dinfo->win=FRAME_WIN(frame);
+#ifdef CF_XFT
+	dinfo->draw=FRAME_DRAW(frame);
+#endif
 	dinfo->grdata=grdata;
 	dinfo->gc=grdata->gc;
 	dinfo->geom=grdata->border_off;
@@ -344,6 +347,9 @@ void draw_frame_bar(const WFrame *frame, bool complete)
 	frame_bar_geom(frame, &bg);
 	
 	dinfo->win=FRAME_WIN(frame);
+#ifdef CF_XFT
+	dinfo->draw=FRAME_DRAW(frame);
+#endif
 	dinfo->grdata=grdata;
 	dinfo->gc=grdata->tab_gc;
 	dinfo->geom=bg;
@@ -353,9 +359,9 @@ void draw_frame_bar(const WFrame *frame, bool complete)
 	if(complete){
 		if(!grdata->bar_inside_frame){
 			if(REGION_IS_ACTIVE(frame))
-				XSetForeground(wglobal.dpy, XGC, grdata->act_frame_colors.bg);
+				set_foreground(wglobal.dpy, XGC, grdata->act_frame_colors.bg);
 			else
-				XSetForeground(wglobal.dpy, XGC, grdata->frame_colors.bg);
+				set_foreground(wglobal.dpy, XGC, grdata->frame_colors.bg);
 				
 			XFillRectangle(wglobal.dpy, WIN, XGC, X, Y,
 						   bg.w, H+grdata->spacing);
@@ -399,7 +405,7 @@ void draw_frame_bar(const WFrame *frame, bool complete)
 			draw_textbox(dinfo, "?", CF_TAB_TEXT_ALIGN, TRUE);
 		
 		if(REGION_IS_TAGGED(sub)){
-			XSetForeground(wglobal.dpy, grdata->copy_gc, COLORS->fg);
+			set_foreground(wglobal.dpy, grdata->copy_gc, COLORS->fg);
 			copy_masked(grdata, grdata->stick_pixmap, WIN, 0, 0,
 						grdata->stick_pixmap_w, grdata->stick_pixmap_h,
 						I_X+I_W-grdata->stick_pixmap_w, I_Y);
@@ -410,10 +416,10 @@ void draw_frame_bar(const WFrame *frame, bool complete)
 			/* drag */
 			if(grdata->bar_inside_frame){
 				if(REGION_IS_ACTIVE(frame)){
-					XSetForeground(wglobal.dpy, grdata->stipple_gc,
+					set_foreground(wglobal.dpy, grdata->stipple_gc,
 								   grdata->act_frame_colors.bg);
 				}else{
-					XSetForeground(wglobal.dpy, grdata->stipple_gc,
+					set_foreground(wglobal.dpy, grdata->stipple_gc,
 								   grdata->frame_colors.bg);
 				}
 			}

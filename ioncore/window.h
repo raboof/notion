@@ -29,6 +29,9 @@ DECLOBJ(WWindow){
 	WRegion region;
 	int flags;
 	Window win;
+#ifdef CF_XFT
+	XftDraw *draw;
+#endif
 	XIC xic;
 };
 

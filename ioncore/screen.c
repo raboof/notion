@@ -127,13 +127,13 @@ static int my_error_handler(Display *dpy, XErrorEvent *ev)
 
 
 Window create_simple_window_bg(WScreen *scr, WWinGeomParams params,
-							   ulong background)
+							   WColor background)
 {
 	return XCreateSimpleWindow(wglobal.dpy, params.win,
 							   params.win_x, params.win_y,
 							   params.geom.w, params.geom.h,
 							   0, BlackPixel(wglobal.dpy, scr->xscr),
-							   background);
+							   COLOR_PIXEL(background));
 }
 
 

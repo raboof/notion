@@ -54,19 +54,20 @@ static bool opt_screen_tab_font(Tokenizer *tokz, int n, Token *toks)
 
 static bool opt_screen_term_font(Tokenizer *tokz, int n, Token *toks)
 {
+
 	WScreen *scr;
-	XFontStruct *term_font;
+	WFont *term_font;
 	int w, h;
 	
 	term_font=load_font(wglobal.dpy, TOK_STRING_VAL(&(toks[1])));
 	
 	FOR_ALL_SELECTED_SCREENS(scr){
-		scr->w_unit=term_font->max_bounds.width;
-		scr->h_unit=term_font->max_bounds.ascent+term_font->max_bounds.descent;
+		scr->w_unit=MAX_FONT_WIDTH(term_font);
+		scr->h_unit=MAX_FONT_HEIGHT(term_font);
 	}
 
-	XFreeFont(wglobal.dpy, term_font);
-	
+	free_font(wglobal.dpy, term_font);
+
 	return TRUE;
 }
 

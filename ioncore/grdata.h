@@ -22,7 +22,7 @@ INTRSTRUCT(WBorder)
 #define BORDER_IH(BORDER, H) (H-BORDER_TL_TOTAL(BORDER)-BORDER_BR_TOTAL(BORDER))
 
 DECLSTRUCT(WColorGroup){
-	Pixel bg, hl, sh, fg;
+	WColor bg, hl, sh, fg;
 };
 
 
@@ -37,14 +37,14 @@ DECLSTRUCT(WGRData){
 	WColorGroup act_tab_colors, tab_colors;
 	WColorGroup act_tab_sel_colors, tab_sel_colors;
 	WColorGroup input_colors;
-	Pixel frame_bgcolor, selection_bgcolor, selection_fgcolor;
+	WColor frame_bgcolor, selection_bgcolor, selection_fgcolor;
 	bool transparent_background;
 	
 	WBorder frame_border;
 	WBorder tab_border;
 	WBorder input_border;
 
-	XFontStruct *font, *tab_font;
+	WFont *font, *tab_font;
 
 	/* Ion-specific */
 	bool bar_inside_frame;
@@ -69,8 +69,14 @@ DECLSTRUCT(WGRData){
 	int stick_pixmap_h;
 
 	Window moveres_win;
+#ifdef CF_XFT
+	XftDraw *moveres_draw;
+#endif
 	WRectangle moveres_geom;
 	Window drag_win;
+#ifdef CF_XFT
+	XftDraw *drag_draw;
+#endif
 	WRectangle drag_geom;
 };
 

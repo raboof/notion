@@ -20,12 +20,12 @@
 #define ITEMROWS(L, R) ((L)->itemrows==NULL ? 1 : (L)->itemrows[R])
 
 
-static int strings_maxw(XFontStruct *font, char **strs, int nstrs)
+static int strings_maxw(WFont *font, char **strs, int nstrs)
 {
 	int maxw=0, w, i;
 	
 	for(i=0; i<nstrs; i++){
-		w=XTextWidth(font, strs[i], strlen(strs[i]));
+		w=text_width(font, strs[i], strlen(strs[i]));
 		if(w>maxw)
 			maxw=w;
 	}
@@ -34,13 +34,13 @@ static int strings_maxw(XFontStruct *font, char **strs, int nstrs)
 }
 
 
-static int getbeg(XFontStruct *font, int maxw, char *str, int l, int *wret)
+static int getbeg(WFont *font, int maxw, char *str, int l, int *wret)
 {
 	int n=maxw/MAX_FONT_WIDTH(font);
 	int w;
 
 	while(n<l){
-		w=XTextWidth(font, str, n);
+		w=text_width(font, str, n);
 		if(w>maxw)
 			return n-1;
 		*wret=w;
@@ -51,16 +51,16 @@ static int getbeg(XFontStruct *font, int maxw, char *str, int l, int *wret)
 }
 
 
-static int string_nrows(XFontStruct *font, int maxw, char *str)
+static int string_nrows(WFont *font, int maxw, char *str)
 {
-	int wrapw=XTextWidth(font, "\\", 1);
-	int ciw=XTextWidth(font, CONT_INDENT, CONT_INDENT_LEN);
+	int wrapw=text_width(font, "\\", 1);
+	int ciw=text_width(font, CONT_INDENT, CONT_INDENT_LEN);
 	int l2, l=strlen(str);
 	int w;
 	int nr=1;
 	
 	while(1){
-		w=XTextWidth(font, str, l);
+		w=text_width(font, str, l);
 		if(w<maxw)
 			break;
 		l2=getbeg(font,  maxw-wrapw, str, l, &w);
@@ -80,21 +80,21 @@ static int string_nrows(XFontStruct *font, int maxw, char *str)
 static void draw_multirow(DrawInfo *dinfo, int x, int y,
 						  int maxw, int h, char *str)
 {
-	int wrapw=XTextWidth(FONT, "\\", 1);
-	int ciw=XTextWidth(FONT, CONT_INDENT, CONT_INDENT_LEN);
+	int wrapw=text_width(FONT, "\\", 1);
+	int ciw=text_width(FONT, CONT_INDENT, CONT_INDENT_LEN);
 	int l2, l=strlen(str);
 	int w;
 	int nr=1;
 	
 	while(1){
-		w=XTextWidth(FONT, str, l);
+		w=text_width(FONT, str, l);
 		if(w<maxw)
 			break;
 		l2=getbeg(FONT, maxw-wrapw, str, l, &w);
 		if(l2==0)
 			break;
-		XDrawImageString(wglobal.dpy, WIN, XGC, x, y, str, l2);
-		XDrawImageString(wglobal.dpy, WIN, XGC, x+w, y, "\\", 1);
+		draw_image_string(dinfo, x, y, str, l2, &COLORS->fg, &COLORS->bg);
+		draw_image_string(dinfo, x+w, y, "\\", 1, &COLORS->fg, &COLORS->bg);
 		if(nr==1){
 			maxw-=ciw;
 			x+=ciw;
@@ -105,7 +105,7 @@ static void draw_multirow(DrawInfo *dinfo, int x, int y,
 		str+=l2;
 	}
 	
-	XDrawImageString(wglobal.dpy, WIN, XGC, x, y, str, l);
+	draw_image_string(dinfo, x, y, str, l, &COLORS->fg, &COLORS->bg);
 }
 
 						  
@@ -159,7 +159,7 @@ static bool onedown(WListing *l, int *ip, int *rp)
 }
 
 
-void setup_listing(WListing *l, XFontStruct *font,
+void setup_listing(WListing *l, WFont *font,
 				   char **strs, int nstrs)
 {
 	int maxw;
@@ -251,13 +251,19 @@ static void do_draw_listing(DrawInfo *dinfo, WListing *l)
 {
 	int r, c, i, x, y;
 	XRectangle rect;
+#ifdef CF_XFT
+	Region rgn;
+#endif
 	
 	rect.x=I_X; rect.y=I_Y; rect.width=I_W; rect.height=I_H;
 	XSetClipRectangles(wglobal.dpy, XGC, 0, 0, &rect, 1, Unsorted);
+#ifdef CF_XFT
+	rgn=XCreateRegion();
+	XUnionRectWithRegion(&rect, rgn, rgn);
+	XftDrawSetClip(DRAW, rgn);
+	XDestroyRegion(rgn);
+#endif
 
-	XSetForeground(wglobal.dpy, XGC, COLORS->fg);
-	XSetBackground(wglobal.dpy, XGC, COLORS->bg);
-	
 	x=I_X;
 	c=0;
 	while(1){
@@ -282,6 +288,9 @@ static void do_draw_listing(DrawInfo *dinfo, WListing *l)
 	
 finished:
 	XSetClipMask(wglobal.dpy, XGC, None);
+#ifdef CF_XFT
+	XftDrawSetClip(DRAW, 0);
+#endif
 }
 
 

@@ -53,7 +53,7 @@ DECLOBJ(WScreen){
 
 
 extern Window create_simple_window_bg(WScreen *scr, WWinGeomParams params,
-									  ulong background);
+									  WColor background);
 extern Window create_simple_window(WScreen *scr, WWinGeomParams params);
 
 extern WScreen *manage_screen(int xscr);

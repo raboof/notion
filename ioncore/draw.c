@@ -22,7 +22,7 @@
  * wide with color 'tlc' and bottom and right 'br' pixels with colors 'brc'.
  */
 void do_draw_border(Window win, GC gc, int x, int y, int w, int h,
-					int tl, int br, Pixel tlc, Pixel brc)
+					int tl, int br, WColor tlc, WColor brc)
 {
 	XPoint points[3];
 	int i=0, a=0;
@@ -30,7 +30,7 @@ void do_draw_border(Window win, GC gc, int x, int y, int w, int h,
 	w--;
 	h--;
 
-	XSetForeground(wglobal.dpy, gc, tlc);
+	set_foreground(wglobal.dpy, gc, tlc);
 
 	for(i=a=0; i<tl; i++){
 		points[0].x=x+i;		points[0].y=y+h-a+1;
@@ -44,7 +44,7 @@ void do_draw_border(Window win, GC gc, int x, int y, int w, int h,
 	}
 
 	
-	XSetForeground(wglobal.dpy, gc, brc);
+	set_foreground(wglobal.dpy, gc, brc);
 
 	for(i=a=0; i<br; i++){	
 		points[0].x=x+w-i;		points[0].y=y+a;
@@ -69,7 +69,7 @@ void draw_border(DrawInfo *dinfo)
 void draw_box(DrawInfo *dinfo, bool fill)
 {
 	if(fill){
-		XSetForeground(wglobal.dpy, XGC, COLORS->bg);
+		set_foreground(wglobal.dpy, XGC, COLORS->bg);
 		XFillRectangle(wglobal.dpy, WIN, XGC, C_X, C_Y, C_W, C_H);
 	}
 
@@ -91,7 +91,7 @@ void draw_textbox(DrawInfo *dinfo,
 	len=strlen(str);
 	
 	if(align!=ALIGN_LEFT){
-		tw=XTextWidth(FONT, str, len);
+		tw=text_width(FONT, str, len);
 		
 		if(align==ALIGN_CENTER)
 			tx=I_X+I_W/2-tw/2;
@@ -103,8 +103,28 @@ void draw_textbox(DrawInfo *dinfo,
 	
 	ty=I_Y+I_H/2-FONT_HEIGHT(FONT)/2+FONT_BASELINE(FONT);
 	
+#ifdef CF_XFT
+	XftDrawString8(DRAW, &COLORS->fg, FONT, tx, ty, (XftChar8 *) str, len);
+#else
 	XSetForeground(wglobal.dpy, XGC, COLORS->fg);
 	XDrawString(wglobal.dpy, WIN, XGC, tx, ty, str, len);
+#endif
+}
+
+
+void draw_image_string(DrawInfo *dinfo, int x, int y, const char *str, int len,
+					   WColor *fg, WColor *bg)
+{
+#ifdef CF_XFT
+	XGlyphInfo extents;
+	XftTextExtents8(wglobal.dpy, FONT, (XftChar8 *) str, len, &extents);
+	XftDrawRect(DRAW, bg, x, y - FONT->ascent, extents.xOff, FONT->height);
+	XftDrawString8(DRAW, fg, FONT, x, y, (XftChar8 *) str, len);
+#else
+	set_foreground(wglobal.dpy, XGC, *fg);
+	set_background(wglobal.dpy, XGC, *bg);
+	XDrawImageString(wglobal.dpy, WIN, XGC, x, y, str, len);
+#endif
 }
 
 
@@ -129,8 +149,12 @@ void copy_masked(const WGRData *grdata, Drawable src, Drawable dst,
 /*{{{ Color alloc */
 
 
-bool alloc_color(WScreen *scr, const char *name, Pixel *cret)
+bool alloc_color(WScreen *scr, const char *name, WColor *cret)
 {
+#ifdef CF_XFT
+	return XftColorAllocName(wglobal.dpy, DefaultVisual(wglobal.dpy, scr->xscr),
+			  scr->default_cmap, (char *) name, cret);
+#else
 	XColor c;
 	bool ret=FALSE;
 
@@ -139,13 +163,23 @@ bool alloc_color(WScreen *scr, const char *name, Pixel *cret)
 		*cret=c.pixel;
 	}
 	return ret;
+#endif
 }
-	
 
 
 static void free_cg(WScreen *scr, WColorGroup *cg)
 {
-	Pixel pixels[4];
+#ifdef CF_XFT
+	XftColorFree (wglobal.dpy, DefaultVisual(wglobal.dpy, scr->xscr),
+				  scr->default_cmap, &cg->bg);
+	XftColorFree (wglobal.dpy, DefaultVisual(wglobal.dpy, scr->xscr),
+				  scr->default_cmap, &cg->fg);
+	XftColorFree (wglobal.dpy, DefaultVisual(wglobal.dpy, scr->xscr),
+				  scr->default_cmap, &cg->hl);
+	XftColorFree (wglobal.dpy, DefaultVisual(wglobal.dpy, scr->xscr),
+				  scr->default_cmap, &cg->sh);
+#else
+	WColor pixels[4];
 	
 	pixels[0]=cg->bg;
 	pixels[1]=cg->fg;
@@ -153,11 +187,12 @@ static void free_cg(WScreen *scr, WColorGroup *cg)
 	pixels[3]=cg->sh;
 	
 	XFreeColors(wglobal.dpy, scr->default_cmap, pixels, 4, 0);
+#endif
 }
 
 	
 void setup_color_group(WScreen *scr, WColorGroup *cg,
-					   Pixel hl, Pixel sh, Pixel bg, Pixel fg)
+					   WColor hl, WColor sh, WColor bg, WColor fg)
 {
 	free_cg(scr, cg);
 					
@@ -178,10 +213,23 @@ void setup_color_group(WScreen *scr, WColorGroup *cg,
 void preinit_graphics(WScreen *scr)
 {
 	WGRData *grdata=&(scr->grdata);
-	Pixel black, white;
+	WColor black, white;
 	
+#ifdef CF_XFT
+	black.pixel=BlackPixel(wglobal.dpy, scr->xscr);
+	black.color.red=0;
+	black.color.green=0;
+	black.color.blue=0;
+	black.color.alpha=0xffff;
+	white.pixel=WhitePixel(wglobal.dpy, scr->xscr);
+	white.color.red=0xffff;
+	white.color.green=0xffff;
+	white.color.blue=0xffff;
+	white.color.alpha=0xffff;
+#else
 	black=BlackPixel(wglobal.dpy, scr->xscr);
 	white=WhitePixel(wglobal.dpy, scr->xscr);
+#endif
 
 #define INIT_CG(CG, HL, SH, BG, FG) CG.bg=BG; CG.hl=HL; CG.sh=SH; CG.fg=FG;
 										/* hl, sh,    bg,    fg */
@@ -217,12 +265,12 @@ void preinit_graphics(WScreen *scr)
 }
 
 
-static int max_width(XFontStruct *font, const char *str)
+static int max_width(WFont *font, const char *str)
 {
 	int maxw=0, w;
 	
 	while(*str!='\0'){
-		w=XTextWidth(font, str, 1);
+		w=text_width(font, str, 1);
 		if(w>maxw)
 		maxw=w;
 		str++;
@@ -262,20 +310,25 @@ static void create_wm_windows(WScreen *scr)
 	h=(FONT_HEIGHT(grdata->tab_font)+
 	   BORDER_TL_TOTAL(&(grdata->tab_border))+
 	   BORDER_BR_TOTAL(&(grdata->tab_border)));
-	
+
 	grdata->moveres_geom.x=CF_MOVERES_WIN_X;
 	grdata->moveres_geom.y=CF_MOVERES_WIN_Y;
 	grdata->moveres_geom.w=w;
 	grdata->moveres_geom.h=h;
 
 	attr.save_under=True;
-	attr.background_pixel=grdata->tab_sel_colors.bg;
+	attr.background_pixel=COLOR_PIXEL(grdata->tab_sel_colors.bg);
 
 	grdata->moveres_win=
 		XCreateWindow(wglobal.dpy, scr->root.win,
 					  CF_MOVERES_WIN_X, CF_MOVERES_WIN_Y, w, h, 0,
 					  CopyFromParent, InputOutput, CopyFromParent,
 					  CWSaveUnder|CWBackPixel, &attr);
+#ifdef CF_XFT
+	grdata->moveres_draw=XftDrawCreate(wglobal.dpy, grdata->moveres_win,
+									   DefaultVisual(wglobal.dpy, scr->xscr),
+									   scr->default_cmap);
+#endif
 
 	/* Create tab drag window */
 	grdata->drag_geom.x=0;
@@ -283,14 +336,19 @@ static void create_wm_windows(WScreen *scr)
 	grdata->drag_geom.w=16;
 	grdata->drag_geom.h=16;
 	
-	attr.background_pixel=grdata->frame_colors.bg;
+	attr.background_pixel=COLOR_PIXEL(grdata->frame_colors.bg);
 	
 	grdata->drag_win=
 		XCreateWindow(wglobal.dpy, scr->root.win,
 					  0, 0, 16, 16, 0,
 					  CopyFromParent, InputOutput, CopyFromParent,
 					  CWSaveUnder|CWBackPixel, &attr);
-	
+#ifdef CF_XFT
+	grdata->drag_draw=XftDrawCreate(wglobal.dpy, grdata->drag_win,
+								    DefaultVisual(wglobal.dpy, scr->xscr),
+								    scr->default_cmap);
+#endif
+		
 	XSelectInput(wglobal.dpy, grdata->drag_win, ExposureMask);
 }
 
@@ -303,14 +361,27 @@ void postinit_graphics(WScreen *scr)
 	WGRData *grdata=&(scr->grdata);
 	Window root=scr->root.win;
 
-	Pixel black, white;
+	WColor black, white;
 	XGCValues gcv;
 	ulong gcvmask;
 	Pixmap stipple_pixmap;
 	GC tmp_gc;
 
+#ifdef CF_XFT
+	black.pixel=BlackPixel(wglobal.dpy, scr->xscr);
+	black.color.red=0;
+	black.color.green=0;
+	black.color.blue=0;
+	black.color.alpha=0xffff;
+	white.pixel=WhitePixel(wglobal.dpy, scr->xscr);
+	white.color.red=0xffff;
+	white.color.green=0xffff;
+	white.color.blue=0xffff;
+	white.color.alpha=0xffff;
+#else
 	black=BlackPixel(wglobal.dpy, scr->xscr);
 	white=WhitePixel(wglobal.dpy, scr->xscr);
+#endif
 
 	/* font */
 	if(grdata->font==NULL)
@@ -325,15 +396,22 @@ void postinit_graphics(WScreen *scr)
 	gcv.join_style=JoinBevel;
 	gcv.cap_style=CapButt;
 	gcv.fill_style=FillSolid;
+#ifndef CF_XFT
 	gcv.font=grdata->font->fid;
+#endif
 
 	gcvmask=(GCLineStyle|GCLineWidth|GCFillStyle|
-			 GCJoinStyle|GCCapStyle|GCFont);
+			 GCJoinStyle|GCCapStyle);
+#ifndef CF_XFT
+	gcvmask|=GCFont;
+#endif
 	
 	grdata->gc=XCreateGC(dpy, root, gcvmask, &gcv);
 
 	/* Create tab gc (other font) */
+#ifndef CF_XFT
 	gcv.font=grdata->tab_font->fid;
+#endif
 	
 	grdata->tab_gc=XCreateGC(dpy, root, gcvmask, &gcv);
 
@@ -348,7 +426,7 @@ void postinit_graphics(WScreen *scr)
 	XDrawPoint(dpy, stipple_pixmap, tmp_gc, 0, 1);
 	
 	if(!grdata->bar_inside_frame)
-		gcv.foreground=grdata->frame_bgcolor;
+		gcv.foreground=COLOR_PIXEL(grdata->frame_bgcolor);
 	
 	gcv.fill_style=FillStippled;
 	gcv.stipple=stipple_pixmap;
@@ -371,8 +449,8 @@ void postinit_graphics(WScreen *scr)
 	XFreeGC(dpy, tmp_gc);
 
 	/* Create copy gc */
-	gcv.foreground=black;
-	gcv.background=white;
+	gcv.foreground=COLOR_PIXEL(black);
+	gcv.background=COLOR_PIXEL(white);
 	gcv.line_width=2;
 	grdata->copy_gc=XCreateGC(dpy, root, GCLineWidth|GCForeground|GCBackground,
 							  &gcv);
@@ -454,6 +532,9 @@ static void do_draw_moveres(WScreen *scr, const char *str)
 	WGRData *grdata=&(scr->grdata);
 	
 	dinfo->win=grdata->moveres_win;
+#ifdef CF_XFT
+	dinfo->draw = grdata->moveres_draw;
+#endif
 	dinfo->grdata=grdata;
 	dinfo->gc=grdata->tab_gc;
 	dinfo->geom.x=0;

@@ -19,9 +19,9 @@ extern void draw_rubberbox(WScreen *scr, WRectangle rect);
 extern void set_moveres_pos(WScreen *scr, int x, int y);
 extern void set_moveres_size(WScreen *scr, int w, int h);
 
-extern bool alloc_color(WScreen *scr, const char *name, Pixel *cret);
+extern bool alloc_color(WScreen *scr, const char *name, WColor *cret);
 extern void setup_color_group(WScreen *scr, WColorGroup *cg,
-							  Pixel hl, Pixel sh, Pixel bg, Pixel fg);
+							  WColor hl, WColor sh, WColor bg, WColor fg);
 
 extern void preinit_graphics(WScreen *scr);
 extern void postinit_graphics(WScreen *scr);

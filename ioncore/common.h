@@ -16,12 +16,25 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
+#ifdef CF_XFT
+#include <X11/Xft/Xft.h>
+typedef XftFont WFont;
+typedef XftColor WColor;
+#define set_foreground(dpy, gc, fg) XSetForeground((dpy), (gc), (fg).pixel)
+#define set_background(dpy, gc, bg) XSetBackground((dpy), (gc), (bg).pixel)
+#define COLOR_PIXEL(p) ((p).pixel)
+#else
+typedef XFontStruct WFont;
+typedef unsigned long WColor;
+#define set_foreground XSetForeground
+#define set_background XSetBackground
+#define COLOR_PIXEL(p) (p)
+#endif
+
 typedef struct WRectangle_struct{
 	int x, y;
 	int w, h;
 } WRectangle;
-
-typedef ulong Pixel;
 
 #include "obj.h"
 #include "../config.h"

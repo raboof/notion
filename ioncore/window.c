@@ -70,6 +70,11 @@ bool init_window(WWindow *wwin, WScreen *scr, Window win, WRectangle geom)
 	
 	wwin->flags=0;
 	wwin->win=win;
+#ifdef CF_XFT
+	wwin->draw=XftDrawCreate(wglobal.dpy, win, 
+							 DefaultVisual(wglobal.dpy, scr->xscr),
+							 scr->default_cmap);
+#endif
 	wwin->xic=NULL;
 	/*wwin->bindmap=NULL;*/
 	
@@ -99,6 +104,9 @@ void deinit_window(WWindow *wwin)
 		XDestroyIC(wwin->xic);
 
 	XDeleteContext(wglobal.dpy, wwin->win, wglobal.win_context);
+#ifdef CF_XFT
+	XftDrawDestroy(wwin->draw);
+#endif
 	XDestroyWindow(wglobal.dpy, wwin->win);
 }
 
