@@ -8,36 +8,41 @@
 -- global_bindings {{{
 
 -- Global_bindings are available all the time. The functions given here 
--- should accept WScreens as parameter.
+-- should accept WScreens as parameter. 
+
+-- The variable DEFAULT_MOD should contain a string of the form 'Mod1+'
+-- where Mod1 maybe replaced with the modifier you want to use for most
+-- of the bindings. Similarly SECOND_MOD may be redefined to add a 
+-- modifier to some of the F-key bindings.
 
 global_bindings{
-    kpress(DEFAULT_MOD .. "1", function(s) screen_switch_nth(s, 0) end),
-    kpress(DEFAULT_MOD .. "2", function(s) screen_switch_nth(s, 1) end),
-    kpress(DEFAULT_MOD .. "3", function(s) screen_switch_nth(s, 2) end),
-    kpress(DEFAULT_MOD .. "4", function(s) screen_switch_nth(s, 3) end),
-    kpress(DEFAULT_MOD .. "5", function(s) screen_switch_nth(s, 4) end),
-    kpress(DEFAULT_MOD .. "6", function(s) screen_switch_nth(s, 5) end),
-    kpress(DEFAULT_MOD .. "7", function(s) screen_switch_nth(s, 6) end),
-    kpress(DEFAULT_MOD .. "8", function(s) screen_switch_nth(s, 7) end),
-    kpress(DEFAULT_MOD .. "9", function(s) screen_switch_nth(s, 8) end),
-    kpress(DEFAULT_MOD .. "0", function(s) screen_switch_nth(s, 9) end),
-    kpress(DEFAULT_MOD .. "Left", screen_switch_prev),
-    kpress(DEFAULT_MOD .. "Right", screen_switch_next),
+    kpress(DEFAULT_MOD.."1", function(s) screen_switch_nth(s, 0) end),
+    kpress(DEFAULT_MOD.."2", function(s) screen_switch_nth(s, 1) end),
+    kpress(DEFAULT_MOD.."3", function(s) screen_switch_nth(s, 2) end),
+    kpress(DEFAULT_MOD.."4", function(s) screen_switch_nth(s, 3) end),
+    kpress(DEFAULT_MOD.."5", function(s) screen_switch_nth(s, 4) end),
+    kpress(DEFAULT_MOD.."6", function(s) screen_switch_nth(s, 5) end),
+    kpress(DEFAULT_MOD.."7", function(s) screen_switch_nth(s, 6) end),
+    kpress(DEFAULT_MOD.."8", function(s) screen_switch_nth(s, 7) end),
+    kpress(DEFAULT_MOD.."9", function(s) screen_switch_nth(s, 8) end),
+    kpress(DEFAULT_MOD.."0", function(s) screen_switch_nth(s, 9) end),
+    kpress(DEFAULT_MOD.."Left", screen_switch_prev),
+    kpress(DEFAULT_MOD.."Right", screen_switch_next),
     
-    submap(DEFAULT_MOD .. "K") {
+    submap(DEFAULT_MOD.."K") {
         kpress("AnyModifier+K", goto_previous),
     },
     
-    kpress(DEFAULT_MOD .. "Shift+1", function() goto_nth_screen(0) end),
-    kpress(DEFAULT_MOD .. "Shift+2", function() goto_nth_screen(1) end),
-    kpress(DEFAULT_MOD .. "Shift+Left", goto_next_screen),
-    kpress(DEFAULT_MOD .. "Shift+Right", goto_prev_screen),
+    kpress(DEFAULT_MOD.."Shift+1", function() goto_nth_screen(0) end),
+    kpress(DEFAULT_MOD.."Shift+2", function() goto_nth_screen(1) end),
+    kpress(DEFAULT_MOD.."Shift+Left", goto_next_screen),
+    kpress(DEFAULT_MOD.."Shift+Right", goto_prev_screen),
     
-    kpress(DEFAULT_MOD .. "F1", make_exec_fn("ion-man ion")),
+    kpress(DEFAULT_MOD.."F1", make_exec_fn("ion-man ion")),
     kpress("F2", make_exec_fn("xterm")),
     
     -- Create a new workspace with a default name.
-    kpress(DEFAULT_MOD .. "F9", 
+    kpress(DEFAULT_MOD.."F9", 
            function(scr)
                local r=region_manage_new(scr, {type=default_ws_type})
                if r then region_goto(r) end
@@ -69,13 +74,13 @@ global_bindings{
 -- For details see the document "Ion: Configuring and extending with Lua".
 
 mplex_bindings{
-    kpress_waitrel(DEFAULT_MOD .. "C", close_sub_or_self),
-    kpress_waitrel(DEFAULT_MOD .. "L", 
+    kpress_waitrel(DEFAULT_MOD.."C", close_sub_or_self),
+    kpress_waitrel(DEFAULT_MOD.."L", 
                    make_current_clientwin_fn(clientwin_broken_app_resize_kludge)),
-    kpress_waitrel(DEFAULT_MOD .. "Return", 
+    kpress_waitrel(DEFAULT_MOD.."Return", 
                    make_current_clientwin_fn(clientwin_toggle_fullscreen)),
 
-    submap(DEFAULT_MOD .. "K") {
+    submap(DEFAULT_MOD.."K") {
         kpress("AnyModifier+C",
                make_current_clientwin_fn(clientwin_kill)),
         kpress("AnyModifier+Q", 
@@ -149,21 +154,21 @@ if QueryLib then
         kpress(DEFAULT_MOD.."A", QueryLib.query_attachclient),
         kpress(DEFAULT_MOD.."G", QueryLib.query_gotoclient),
         
-        kpress("F1", QueryLib.query_man),
-        kpress("F3", QueryLib.query_exec),
-        kpress(DEFAULT_MOD .. "F3", QueryLib.query_lua),
-        kpress("F4", QueryLib.query_ssh),
-        kpress("F5", QueryLib.query_editfile),
-        kpress("F6", QueryLib.query_runfile),
-        kpress("F9", QueryLib.query_workspace),
+        kpress(SECOND_MOD.."F1", QueryLib.query_man),
+        kpress(SECOND_MOD.."F3", QueryLib.query_exec),
+        kpress(DEFAULT_MOD.."F3", QueryLib.query_lua),
+        kpress(SECOND_MOD.."F4", QueryLib.query_ssh),
+        kpress(SECOND_MOD.."F5", QueryLib.query_editfile),
+        kpress(SECOND_MOD.."F6", QueryLib.query_runfile),
+        kpress(SECOND_MOD.."F9", QueryLib.query_workspace),
     }
     
     -- Screen-level queries. Queries generally appear in frames to be 
     -- consistent although do not affect the frame, but these two are
     -- special.
     global_bindings{
-        kpress(f11key, QueryLib.query_restart),
-        kpress(f12key, QueryLib.query_exit),
+        kpress(SECOND_MOD..f11key, QueryLib.query_restart),
+        kpress(SECOND_MOD..f12key, QueryLib.query_exit),
     }
 end
 

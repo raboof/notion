@@ -21,6 +21,7 @@ FALSE = false
 
 default_ws_type="WIonWS"
 DEFAULT_MOD="Mod1+"
+SECOND_MOD=""
 
 -- }}}
 
