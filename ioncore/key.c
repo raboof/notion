@@ -225,13 +225,15 @@ void handle_keypress(XKeyEvent *ev)
 {
 	WBinding *binding=NULL;
 	WRegion *reg=NULL, *oreg=NULL, *binding_owner=NULL;
+
 	
-	if(ev->subwindow!=None)
-		reg=(WRegion*)FIND_WINDOW(ev->subwindow);
-	if(reg==NULL)
-		reg=(WRegion*)FIND_WINDOW(ev->window);
+	reg=(WRegion*)FIND_WINDOW(ev->window);
 	if(reg==NULL)
 		return;
+	
+	while(reg->active_sub!=NULL)
+		reg=reg->active_sub;
+	
 	oreg=reg;
 
 	do{
@@ -245,8 +247,8 @@ void handle_keypress(XKeyEvent *ev)
 	
 	if(binding!=NULL){
 		if(binding->submap!=NULL){
-			if(add_sub(reg, ev->keycode, ev->state))
-				submapgrab(reg);
+			if(add_sub(oreg, ev->keycode, ev->state))
+				submapgrab(oreg);
 		}else{
 			dispatch_binding(binding_owner, binding, ev);
 		}

@@ -405,6 +405,9 @@ static void handle_enter_window(XEvent *ev)
 		/* We're only interested in the latest enter event */
 	}
 	
+	if(eev->mode!=NotifyNormal && !wglobal.warp_enabled)
+		return;
+	
 	/*
 	if(eev->window==eev->root){
 		return;
