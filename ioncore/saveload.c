@@ -166,10 +166,17 @@ bool add_to_viewport(ExtlTab tab)
 bool load_workspaces(WViewport *vp)
 {
 	bool successp;
-
+	char *filename;
+	
+	filename=get_cfgfile_for_scr("saves/workspaces", vp->id);
+	if(filename==NULL)
+		return FALSE;
+	
 	current_vp=vp;
-	successp=read_config_for_scr("saves/workspaces", vp->id);
+	successp=read_config(filename);
 	current_vp=NULL;
+	
+	free(filename);
 	
 	return successp;
 }

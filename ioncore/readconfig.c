@@ -175,8 +175,8 @@ void do_include(const char *file, const char *current_dir)
 }
 
 
-static char *do_get_cfgfile_for(bool core, const char *module,
-								const char *postfix, bool noaccesstest)
+static char *do_get_cfgfile_for(const char *module, const char *postfix,
+								bool noaccesstest)
 {
 	char *files[]={NULL, NULL, NULL};
 	char *ret;
@@ -193,17 +193,12 @@ static char *do_get_cfgfile_for(bool core, const char *module,
 	
 	ret=search_etcpath2((const char**)&files, noaccesstest);
 	
-	if(ret==NULL){
-		warn("Could not find configuration file %s.%s.", module,
-			 extl_extension());
-	}
-	
 	return ret;
 }
 
 
-static char *do_get_cfgfile_for_scr(bool core, const char *module,
-									int xscr, bool noaccesstest)
+static char *do_get_cfgfile_for_scr(const char *module, int xscr,
+									bool noaccesstest)
 {
 	char *ret, *tmp, *display, *dpyend;
 	
@@ -243,56 +238,41 @@ static char *do_get_cfgfile_for_scr(bool core, const char *module,
 	}
 #endif
 	
-	ret=do_get_cfgfile_for(core, module, tmp, noaccesstest);
+	ret=do_get_cfgfile_for(module, tmp, noaccesstest);
 	
 	free(tmp);
 	
 	return ret;
 
 fallback:
-	ret=do_get_cfgfile_for(core, module, NULL, noaccesstest);
+	ret=do_get_cfgfile_for(module, NULL, noaccesstest);
 	return ret;
-}
-
-
-char *get_core_cfgfile_for_scr(const char *module, int xscr)
-{
-	return do_get_cfgfile_for_scr(TRUE, module, xscr, FALSE);
-	
-}
-
-
-char *get_core_cfgfile_for(const char *module)
-{
-	return do_get_cfgfile_for(TRUE, module, NULL, FALSE);
-	
 }
 
 
 char *get_cfgfile_for_scr(const char *module, int xscr)
 {
-	return do_get_cfgfile_for_scr(FALSE, module, xscr, FALSE);
+	return do_get_cfgfile_for_scr(module, xscr, FALSE);
 	
 }
 
 
 char *get_cfgfile_for(const char *module)
 {
-	return do_get_cfgfile_for(FALSE, module, NULL, FALSE);
-	
+	return do_get_cfgfile_for(module, NULL, FALSE);
 }
 
 
 char *get_savefile_for_scr(const char *module, int xscr)
 {
-	return do_get_cfgfile_for_scr(FALSE, module, xscr, TRUE);
+	return do_get_cfgfile_for_scr(module, xscr, TRUE);
 	
 }
 
 
 char *get_savefile_for(const char *module)
 {
-	return do_get_cfgfile_for(FALSE, module, NULL, TRUE);
+	return do_get_cfgfile_for(module, NULL, TRUE);
 	
 }
 
@@ -309,10 +289,12 @@ bool read_config(const char *cfgfile)
 }
 
 
-static bool do_read_config_for(char *cfgfile)
+static bool do_read_config_for(const char *module, char *cfgfile)
 {
 	bool ret=TRUE;
-	if(cfgfile!=NULL){
+	if(cfgfile==NULL){
+		warn("Could not find configuration file for \"%s\".", module);
+	}else{
 		ret=read_config(cfgfile);
 		free(cfgfile);
 	}
@@ -320,27 +302,15 @@ static bool do_read_config_for(char *cfgfile)
 }
 
 
-bool read_core_config_for(const char *module)
-{
-	return do_read_config_for(get_core_cfgfile_for(module));
-}
-
-
-bool read_core_config_for_scr(const char *module, int xscr)
-{
-	return do_read_config_for(get_core_cfgfile_for_scr(module, xscr));
-}
-
-
 bool read_config_for(const char *module)
 {
-	return do_read_config_for(get_cfgfile_for(module));
+	return do_read_config_for(module, get_cfgfile_for(module));
 }
 
 
 bool read_config_for_scr(const char *module, int xscr)
 {
-	return do_read_config_for(get_cfgfile_for_scr(module, xscr));
+	return do_read_config_for(module, get_cfgfile_for_scr(module, xscr));
 }
 
 
