@@ -74,7 +74,7 @@ void ionframe_begin_resize(WIonFrame *frame)
 {
 	grab_establish((WRegion*)frame, resize_handler,
 				   FocusChangeMask|KeyReleaseMask);
-	begin_resize_atexit((WRegion*)frame, NULL, end_keyresize);
+	begin_resize_atexit((WRegion*)frame, NULL, FALSE, end_keyresize);
 }
 
 

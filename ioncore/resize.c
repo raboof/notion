@@ -29,6 +29,7 @@ static WDrawRubberbandFn *tmprubfn=NULL;
 static void (*resize_atexit)();
 static int parent_rx, parent_ry;
 static enum {MOVERES_SIZE, MOVERES_POS} moveres_mode=MOVERES_SIZE;
+static bool resize_cumulative=FALSE;
 
 
 /*{{{ Dynfuns */
@@ -140,7 +141,8 @@ bool may_resize(WRegion *reg)
 }
 
 
-static bool begin_moveres(WRegion *reg, WDrawRubberbandFn *rubfn)
+static bool begin_moveres(WRegion *reg, WDrawRubberbandFn *rubfn,
+						  bool cumulative)
 {
 	WScreen *scr=SCREEN_OF(reg);
 	WRegion *parent;
@@ -166,6 +168,7 @@ static bool begin_moveres(WRegion *reg, WDrawRubberbandFn *rubfn)
 	tmpdy2=0;
 	tmpreg=reg;
 	tmprubfn=rubfn;
+	resize_cumulative=cumulative;
 	
 	resize_mode=TRUE;
 	
@@ -193,23 +196,24 @@ static bool begin_moveres(WRegion *reg, WDrawRubberbandFn *rubfn)
 }
 
 
-bool begin_resize(WRegion *reg, WDrawRubberbandFn *rubfn)
+bool begin_resize(WRegion *reg, WDrawRubberbandFn *rubfn, bool cumulative)
 {
 	moveres_mode=MOVERES_SIZE;
-	return begin_moveres(reg, rubfn);
+	return begin_moveres(reg, rubfn, cumulative);
 }
 
 
-bool begin_move(WRegion *reg, WDrawRubberbandFn *rubfn)
+bool begin_move(WRegion *reg, WDrawRubberbandFn *rubfn, bool cumulative)
 {
 	moveres_mode=MOVERES_POS;
-	return begin_moveres(reg, rubfn);
+	return begin_moveres(reg, rubfn, cumulative);
 }
 
 
-bool begin_resize_atexit(WRegion *reg, WDrawRubberbandFn *rubfn, void (*exitfn)())
+bool begin_resize_atexit(WRegion *reg, WDrawRubberbandFn *rubfn, 
+						 bool cumulative, void (*exitfn)())
 {
-	if(begin_resize(reg, rubfn)){
+	if(begin_resize(reg, rubfn, cumulative)){
 		resize_atexit=exitfn;
 		return TRUE;
 	}
@@ -226,14 +230,25 @@ static void delta_moveres(WRegion *reg, int dx1, int dx2, int dy1, int dy2,
 	
 	assert(tmpreg==reg);
 	
-	tmpdx1+=dx1;
-	tmpdx2+=dx2;
-	tmpdy1+=dy1;
-	tmpdy2+=dy2;
-	
-	geom=tmporiggeom;
+	if(!resize_cumulative){
+		tmpdx1=dx1;
+		tmpdx2=dx2;
+		tmpdy1=dy1;
+		tmpdy2=dy2;
+		geom=tmpgeom;
+	}else{
+		tmpdx1+=dx1;
+		tmpdx2+=dx2;
+		tmpdy1+=dy1;
+		tmpdy2+=dy2;
+		geom=tmporiggeom;
+	}
 	w=tmprelw-tmpdx1+tmpdx2;
 	h=tmprelh-tmpdy1+tmpdy2;
+	if(w<=0)
+		w=tmphints.min_width;
+	if(h<=0)
+		h=tmphints.min_height;
 	/* If the region has only been moved, don't try to correct the size */
 	correct_size(&w, &h, &tmphints, TRUE);
 	/* Do not alter sizes that were not changed */
@@ -244,21 +259,26 @@ static void delta_moveres(WRegion *reg, int dx1, int dx2, int dy1, int dy2,
 	
 	geom.w=geom.w-tmprelw+w;
 	geom.h=geom.h-tmprelh+h;
-	
+
+	if(!resize_cumulative){
+		tmprelw=w;
+		tmprelh=h;
+	}
+
 	/* If top/left delta is not zero, don't move bottom/right side
 	 * if the respective delta is zero
 	 */
 	
 	if(tmpdx1!=0){
 		if(tmpdx2==0)
-			geom.x+=tmporiggeom.w-geom.w;
+			geom.x+=(resize_cumulative ? tmporiggeom.w : tmpgeom.w)-geom.w;
 		else
 			geom.x+=tmpdx1;
 	}
 
 	if(tmpdy1!=0){
 		if(tmpdy2==0)
-			geom.y+=tmporiggeom.h-geom.h;
+			geom.y+=(resize_cumulative ? tmporiggeom.h : tmpgeom.h)-geom.h;
 		else
 			geom.y+=tmpdy1;
 	}

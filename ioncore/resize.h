@@ -14,10 +14,12 @@
 
 typedef void WDrawRubberbandFn(WScreen *scr, WRectangle geom);
 
-extern bool begin_resize(WRegion *reg, WDrawRubberbandFn *rubfn);
-extern bool begin_resize_atexit(WRegion *reg, WDrawRubberbandFn *rubfn, void (*exitfn)());
-extern bool begin_move(WRegion *reg, WDrawRubberbandFn *rubfn);
-extern bool begin_move_atexit(WRegion *reg, WDrawRubberbandFn *rubfn, void (*exitfn)());
+extern bool begin_resize(WRegion *reg, WDrawRubberbandFn *rubfn,
+						 bool cumulative);
+extern bool begin_resize_atexit(WRegion *reg, WDrawRubberbandFn *rubfn, 
+								bool cumulative, void (*exitfn)());
+extern bool begin_move(WRegion *reg, WDrawRubberbandFn *rubfn,
+					   bool cumulative);
 /* dx1/dx2/dy1/dy2: left/right/top/bottom difference to previous values. 
  * left/top negative, bottom/right positive increases size.
  */

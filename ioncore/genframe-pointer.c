@@ -358,7 +358,7 @@ static void p_resize_motion(WGenFrame *genframe, XMotionEvent *ev, int dx, int d
 
 static void p_resize_begin(WGenFrame *genframe, XMotionEvent *ev, int dx, int dy)
 {
-	begin_resize((WRegion*)genframe, NULL);
+	begin_resize((WRegion*)genframe, NULL, TRUE);
 	p_resize_motion(genframe, ev, dx, dy);
 }
 
@@ -398,7 +398,7 @@ static void p_move_motion(WGenFrame *genframe, XMotionEvent *ev, int dx, int dy)
 
 static void p_move_begin(WGenFrame *genframe, XMotionEvent *ev, int dx, int dy)
 {
-	begin_move((WRegion*)genframe, NULL);
+	begin_move((WRegion*)genframe, NULL, TRUE);
 	p_move_motion(genframe, ev, dx, dy);
 }
 
