@@ -271,60 +271,33 @@ static void init_global()
 }
 
 
-#ifdef CF_UTF8
-static bool test_fallback_font(Display *dpy)
-{
-	char **dummy_missing=NULL;
-	int dummy_missing_n=0;
-	char *dummy_def=NULL;
-	XFontSet fnt=NULL;
-	
-	fnt=XCreateFontSet(dpy, CF_FALLBACK_FONT_NAME, &dummy_missing,
-					   &dummy_missing_n, &dummy_def);
-	
-	if(fnt==NULL){
-		warn("Failed to load fallback font \"%s\"", CF_FALLBACK_FONT_NAME);
-		return FALSE;
-	}
-	
-	XFreeFontSet(dpy, fnt);
-	return TRUE;
-}
-
-
 static bool set_up_locales(Display *dpy)
 {
 	bool tryno=0;
+	char *p;
 	
-	if(setlocale(LC_ALL, "")==NULL)
+	p=setlocale(LC_ALL, "");
+	
+	if(p==NULL){
 		warn("setlocale() call failed");
-
-	while(1){
-		if(XSupportsLocale()){
-			if(test_fallback_font(dpy)){
-				if(tryno==1){
-					warn("This seems to work but support for non-ASCII "
-						 "characters will be crippled. Please set up your "
-						 "locales properly.");
-				}
-				return TRUE;
-			}
-		}else{
-			warn("XSupportsLocale() failed%s",
-				 tryno==0 ? " for your locale settings." : "");
-		}
-		
-		if(tryno==1)
-			return FALSE;
-		
-		warn("Resetting locale to \"POSIX\".");
-		if(setlocale(LC_ALL, "POSIX")==NULL){
-			warn("setlocale() call failed");
-		}
-		tryno++;
+		return FALSE;
 	}
+
+	if(strcmp(p, "C")==0 || strcmp(p, "POSIX")==0){
+		
+	}
+	
+	if(XSupportsLocale())
+		return TRUE;
+	
+	warn("XSupportsLocale() failed. Resetting back to C.");
+	
+	if(setlocale(LC_ALL, "C")==NULL){
+		warn("setlocale() call failed");
+	}
+	
+	return FALSE;
 }
-#endif
 
 
 static void set_session(const char *display)
@@ -386,12 +359,10 @@ static bool init_x(const char *display, int stflags)
 		return FALSE;
 	}
 
-#ifdef CF_UTF8
 	if(!set_up_locales(dpy)){
-		warn("There's something wrong with your system. Attempting to "
-			 "continue nevertheless, but expect problems.");
+		warn("There's something wrong with your locale settings. "
+			 "Please fix them.");
 	}
-#endif
 
 	if(stflags&IONCORE_STARTUP_ONEROOT){
 		drw=DefaultScreen(dpy);

@@ -129,16 +129,17 @@ XFontSet de_create_font_set(const char *fontname)
 			XFreeStringList(missing);
 		
 		lc=setlocale(LC_CTYPE, NULL);
-		if(lc!=NULL)
+		if(lc!=NULL && strcmp(lc, "POSIX")!=0 && strcmp(lc, "C")!=0)
 			lcc=scopy(lc);
 		
 		setlocale(LC_CTYPE, "C");
 		
 		fs = XCreateFontSet(wglobal.dpy, fontname, &missing, &nmissing, &def);
 		
-		setlocale(LC_CTYPE, lcc ? lcc : "");
-		if(lcc!=NULL)
+		if(lcc!=NULL){
+			setlocale(LC_CTYPE, lcc);
 			free(lcc);
+		}
 	}
 	
 	if (fs) {
