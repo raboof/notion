@@ -179,7 +179,7 @@ bool finish_add_clientwin(WRegion *reg, WClientWin *cwin,
 	   param->init_state==IconicState)
 		param2.flags=0;
 	
-	return do_add_clientwin(reg, (WRegion*)cwin, &param2);
+	return do_add_clientwin(reg, cwin, &param2);
 }
 
 
