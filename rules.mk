@@ -8,7 +8,7 @@
 
 ifdef MODULE
 ifeq ($(PRELOAD_MODULES),1)
-MODULE_TARGETS := $(ODULE).a $(MODULE).lc
+MODULE_TARGETS := $(MODULE).a $(MODULE).lc
 else
 MODULE_TARGETS := $(MODULE).so $(MODULE).lc
 endif
@@ -110,9 +110,6 @@ $(MODULE).a: $(OBJS) $(EXT_OBJS)
 	$(AR) $(ARFLAGS) $@ $+
 	$(RANLIB) $@
 
-$(MODULE).lc: $(MODULE).a
-	echo "ioncore.load_module('$(MODULE)')" | $(LUAC) -o $@ -
-
 module_install: module_stub_install
 
 endif # PRELOAD_MODULES
@@ -123,7 +120,7 @@ module_stub_install:
 
 ifndef MODULE_STUB
 
-$(MODULE).lc: $(MODULE).so
+$(MODULE).lc:
 	echo "ioncore.load_module('$(MODULE)')" \
 	| $(LUAC) -o $@ -
 else
@@ -178,7 +175,7 @@ _realclean: clean_target
 
 ifdef SOURCES
 
-_depend:
+_depend: $(DEPEND_DEPENDS)
 	$(MAKE_DEPEND)
 
 else #!SOURCES

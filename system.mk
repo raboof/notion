@@ -42,7 +42,7 @@ VARDIR=/var/cache/ion
 
 # Set PRELOAD_MODULES=1 if your system does not support dynamically loaded
 # modules through 'libdl' or has non-standard naming conventions.
-#PRELOAD_MODULES=1
+PRELOAD_MODULES=1
 
 # Flags to link with libdl.
 DL_LIBS=-ldl

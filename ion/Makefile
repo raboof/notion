@@ -33,6 +33,7 @@ SOURCES=ion.c
 
 ifeq ($(PRELOAD_MODULES),1)
 EXT_OBJS += $(foreach mod, $(MODULE_LIST), ../$(mod)/$(mod).a)
+DEPEND_DEPENDS += preload.c
 SOURCES += preload.c
 TO_CLEAN += preload.c
 LIBS += -lSM -lICE
