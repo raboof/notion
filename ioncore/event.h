@@ -21,15 +21,15 @@
 
 #define IONCORE_EVENTMASK_PTRLOOP (IONCORE_EVENTMASK_PTRGRAB|ExposureMask| \
                                    KeyPressMask|KeyReleaseMask|            \
-					               EnterWindowMask|FocusChangeMask)
+                                   EnterWindowMask|FocusChangeMask)
 
-#define IONCORE_EVENTMASK_ROOT	(SubstructureRedirectMask|          \
+#define IONCORE_EVENTMASK_ROOT    (SubstructureRedirectMask|          \
                                  ColormapChangeMask|                \
                                  ButtonPressMask|ButtonReleaseMask| \
                                  PropertyChangeMask|KeyPressMask|   \
                                  FocusChangeMask|EnterWindowMask)
 
-#define IONCORE_EVENTMASK_FRAME	(FocusChangeMask|          \
+#define IONCORE_EVENTMASK_FRAME    (FocusChangeMask|          \
                                  ButtonPressMask|          \
                                  ButtonReleaseMask|        \
                                  KeyPressMask|             \

@@ -24,14 +24,14 @@
 
 
 typedef struct{
-	bool switchto;
-	bool jumpto;
-	bool userpos;
-	bool dockapp;
-	bool maprq;
-	int gravity;
-	WRectangle geom;
-	WClientWin *tfor;
+    bool switchto;
+    bool jumpto;
+    bool userpos;
+    bool dockapp;
+    bool maprq;
+    int gravity;
+    WRectangle geom;
+    WClientWin *tfor;
 } WManageParams;
 
 
@@ -42,7 +42,7 @@ extern WScreen *clientwin_find_suitable_screen(WClientWin *cwin,
                                                const WManageParams *param);
 
 DYNFUN bool region_manage_clientwin(WRegion *reg, WClientWin *cwin,
-									const WManageParams *par);
+                                    const WManageParams *par);
 
 extern bool region_has_manage_clientwin(WRegion *reg);
 

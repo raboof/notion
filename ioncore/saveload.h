@@ -19,7 +19,7 @@
 #include "rectangle.h"
 
 extern WRegion *create_region_load(WWindow *par, const WRectangle *geom, 
-								   ExtlTab tab);
+                                   ExtlTab tab);
 
 extern bool region_supports_save(WRegion *reg);
 DYNFUN bool region_save_to_file(WRegion *reg, FILE *file, int lvl);

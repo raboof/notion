@@ -26,30 +26,30 @@ INTRCLASS(WEdln);
 INTRSTRUCT(WEdlnCreateParams);
 
 DECLSTRUCT(WEdlnCreateParams){
-	const char *prompt;
-	const char *dflt;
-	ExtlFn handler;
-	ExtlFn completor;
+    const char *prompt;
+    const char *dflt;
+    ExtlFn handler;
+    ExtlFn completor;
 };
 
 
 DECLCLASS(WEdln){
-	WInput input;
+    WInput input;
 
-	WListing complist;
-	Edln edln;
+    WListing complist;
+    Edln edln;
 
-	char *prompt;
-	int prompt_len;
-	int prompt_w;
-	int vstart;
-	
-	ExtlFn handler;
-	ExtlFn completor;
+    char *prompt;
+    int prompt_len;
+    int prompt_w;
+    int vstart;
+    
+    ExtlFn handler;
+    ExtlFn completor;
 };
 
 extern WEdln *create_wedln(WWindow *par, const WRectangle *geom,
-						   WEdlnCreateParams *p);
+                           WEdlnCreateParams *p);
 extern void wedln_finish(WEdln *wedln);
 extern void wedln_paste(WEdln *wedln);
 extern void wedln_draw(WEdln *wedln, bool complete);

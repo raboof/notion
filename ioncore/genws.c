@@ -21,13 +21,13 @@
 
 void genws_init(WGenWS *ws, WWindow *parent, const WRectangle *geom)
 {
-	region_init(&(ws->reg), (WRegion*)parent, geom);
+    region_init(&(ws->reg), (WRegion*)parent, geom);
 }
 
 
 void genws_deinit(WGenWS *ws)
 {
-	region_deinit(&(ws->reg));
+    region_deinit(&(ws->reg));
 }
 
 

@@ -36,10 +36,10 @@ static long actmax=200, uptmin=50;
 
 static void accel_reset()
 {
-	last_accel_mode=0;
-	accel=1.0;
-	last_action_tv.tv_sec=-1;
-	last_action_tv.tv_usec=-1;
+    last_accel_mode=0;
+    accel=1.0;
+    last_action_tv.tv_sec=-1;
+    last_action_tv.tv_usec=-1;
 }
 
 
@@ -63,63 +63,63 @@ EXTL_EXPORT
 void ioncore_set_moveres_accel(int t_max, int t_min, 
                                double step, double maxacc)
 {
-	actmax=(t_max>0 ? t_max : INT_MAX);
-	uptmin=(t_min>0 ? t_min : INT_MAX);
-	accelinc=(step>0 ? step : 1);
-	accelmax=(maxacc>0 ? maxacc*maxacc : 1);
+    actmax=(t_max>0 ? t_max : INT_MAX);
+    uptmin=(t_min>0 ? t_min : INT_MAX);
+    accelinc=(step>0 ? step : 1);
+    accelmax=(maxacc>0 ? maxacc*maxacc : 1);
 }
 
 
 static int sign(int x)
 {
-	return (x>0 ? 1 : (x<0 ? -1 : 0));
+    return (x>0 ? 1 : (x<0 ? -1 : 0));
 }
 
 
 static long tvdiffmsec(struct timeval *tv1, struct timeval *tv2)
 {
-	double t1=1000*(double)tv1->tv_sec+(double)tv1->tv_usec/1000;
-	double t2=1000*(double)tv2->tv_sec+(double)tv2->tv_usec/1000;
-	
-	return (int)(t1-t2);
+    double t1=1000*(double)tv1->tv_sec+(double)tv1->tv_usec/1000;
+    double t2=1000*(double)tv2->tv_sec+(double)tv2->tv_usec/1000;
+    
+    return (int)(t1-t2);
 }
 
 #define SIGN_NZ(X) ((X) < 0 ? -1 : 1)
 
 static double max(double a, double b)
 {
-	return (a<b ? b : a);
+    return (a<b ? b : a);
 }
 
 void moveresmode_accel(WMoveresMode *mode, int *wu, int *hu, int accel_mode)
 {
-	struct timeval tv;
-	long adiff, udiff;
-	
-	gettimeofday(&tv, NULL);
-	
-	adiff=tvdiffmsec(&tv, &last_action_tv);
-	udiff=tvdiffmsec(&tv, &last_update_tv);
-	
-	if(last_accel_mode==accel_mode && adiff<actmax){
-		if(udiff>uptmin){
-			accel+=accelinc;
-			if(accel>accelmax)
-				accel=accelmax;
-			last_update_tv=tv;
-		}
-	}else{
-		accel=1.0;
-		last_update_tv=tv;
-	}
-	
-	last_accel_mode=accel_mode;
-	last_action_tv=tv;
-	
-	if(*wu!=0)
-		*wu=(*wu)*ceil(sqrt(accel)/abs(*wu));
-	if(*hu!=0)
-		*hu=(*hu)*ceil(sqrt(accel)/abs(*hu));
+    struct timeval tv;
+    long adiff, udiff;
+    
+    gettimeofday(&tv, NULL);
+    
+    adiff=tvdiffmsec(&tv, &last_action_tv);
+    udiff=tvdiffmsec(&tv, &last_update_tv);
+    
+    if(last_accel_mode==accel_mode && adiff<actmax){
+        if(udiff>uptmin){
+            accel+=accelinc;
+            if(accel>accelmax)
+                accel=accelmax;
+            last_update_tv=tv;
+        }
+    }else{
+        accel=1.0;
+        last_update_tv=tv;
+    }
+    
+    last_accel_mode=accel_mode;
+    last_action_tv=tv;
+    
+    if(*wu!=0)
+        *wu=(*wu)*ceil(sqrt(accel)/abs(*wu));
+    if(*hu!=0)
+        *hu=(*hu)*ceil(sqrt(accel)/abs(*hu));
 }
 
 
@@ -130,46 +130,46 @@ void moveresmode_accel(WMoveresMode *mode, int *wu, int *hu, int accel_mode)
 
 
 static ExtlSafelist moveres_safe_funclist[]={
-	(ExtlExportedFn*)&moveresmode_resize,
-	(ExtlExportedFn*)&moveresmode_move,
-	(ExtlExportedFn*)&moveresmode_finish,
-	(ExtlExportedFn*)&moveresmode_cancel,
-	NULL
+    (ExtlExportedFn*)&moveresmode_resize,
+    (ExtlExportedFn*)&moveresmode_move,
+    (ExtlExportedFn*)&moveresmode_finish,
+    (ExtlExportedFn*)&moveresmode_cancel,
+    NULL
 };
 
 
 static bool resize_handler(WRegion *reg, XEvent *xev)
 {
-	XKeyEvent *ev=&xev->xkey;
-	WBinding *binding=NULL;
-	WBindmap **bindptr;
-	WMoveresMode *mode;
+    XKeyEvent *ev=&xev->xkey;
+    WBinding *binding=NULL;
+    WBindmap **bindptr;
+    WMoveresMode *mode;
     
-	if(ev->type==KeyRelease)
-		return FALSE;
-	
+    if(ev->type==KeyRelease)
+        return FALSE;
+    
     if(reg==NULL)
         return FALSE;
-	
+    
     mode=moveres_mode(reg);
     
     if(mode==NULL)
         return FALSE;
     
-	binding=bindmap_lookup_binding(&ioncore_moveres_bindmap, BINDING_KEYPRESS,
-						   ev->state, ev->keycode);
-	
-	if(!binding)
-		return FALSE;
-	
-	if(binding!=NULL){
-		const ExtlSafelist *old_safelist=
-			extl_set_safelist(moveres_safe_funclist);
-		extl_call(binding->func, "o", NULL, mode);
-		extl_set_safelist(old_safelist);
-	}
-	
-	return (moveres_mode(reg)==NULL);
+    binding=bindmap_lookup_binding(&ioncore_moveres_bindmap, BINDING_KEYPRESS,
+                           ev->state, ev->keycode);
+    
+    if(!binding)
+        return FALSE;
+    
+    if(binding!=NULL){
+        const ExtlSafelist *old_safelist=
+            extl_set_safelist(moveres_safe_funclist);
+        extl_call(binding->func, "o", NULL, mode);
+        extl_set_safelist(old_safelist);
+    }
+    
+    return (moveres_mode(reg)==NULL);
 }
 
 
@@ -197,33 +197,33 @@ static WTimer resize_timer=TIMER_INIT(tmr_end_resize);
 
 
 static int limit_and_encode_mode(int *left, int *right, 
-								 int *top, int *bottom)
+                                 int *top, int *bottom)
 {
-	*left=sign(*left);
-	*right=sign(*right);
-	*top=sign(*top);
-	*bottom=sign(*bottom);
+    *left=sign(*left);
+    *right=sign(*right);
+    *top=sign(*top);
+    *bottom=sign(*bottom);
 
-	return (*left)+(*right)*3+(*top)*9+(*bottom)*27;
+    return (*left)+(*right)*3+(*top)*9+(*bottom)*27;
 }
 
 
 static void resize_units(WMoveresMode *mode, int *wret, int *hret)
 {
-	/**wret=1;
-	*hret=1;
-	
-	if(FRAME_CURRENT(frame)!=NULL){
-		XSizeHints hints;
-		
-		region_resize_hints(FRAME_CURRENT(frame), &hints, NULL, NULL);
-		
-		if(hints.flags&PResizeInc &&
-		   (hints.width_inc>1 || hints.height_inc>1)){
-			*wret=hints.width_inc;
-			*hret=hints.height_inc;
-		}
-	}*/
+    /**wret=1;
+    *hret=1;
+    
+    if(FRAME_CURRENT(frame)!=NULL){
+        XSizeHints hints;
+        
+        region_resize_hints(FRAME_CURRENT(frame), &hints, NULL, NULL);
+        
+        if(hints.flags&PResizeInc &&
+           (hints.width_inc>1 || hints.height_inc>1)){
+            *wret=hints.width_inc;
+            *hret=hints.height_inc;
+        }
+    }*/
 
     XSizeHints *h=&(mode->hints);
     *wret=1;
@@ -251,17 +251,17 @@ EXTL_EXPORT_MEMBER
 void moveresmode_resize(WMoveresMode *mode, 
                         int left, int right, int top, int bottom)
 {
-	int wu=0, hu=0;
-	int accel_mode=0;
-	
-	accel_mode=3*limit_and_encode_mode(&left, &right, &top, &bottom);
-	resize_units(mode, &wu, &hu);
-	moveresmode_accel(mode, &wu, &hu, accel_mode);
+    int wu=0, hu=0;
+    int accel_mode=0;
+    
+    accel_mode=3*limit_and_encode_mode(&left, &right, &top, &bottom);
+    resize_units(mode, &wu, &hu);
+    moveresmode_accel(mode, &wu, &hu, accel_mode);
 
-	moveresmode_delta_resize(mode, -left*wu, right*wu, -top*hu, bottom*hu, 
+    moveresmode_delta_resize(mode, -left*wu, right*wu, -top*hu, bottom*hu, 
                              NULL);
-	
-	timer_set(&resize_timer, ioncore_g.resize_delay);
+    
+    timer_set(&resize_timer, ioncore_g.resize_delay);
 }
 
 
@@ -279,15 +279,15 @@ void moveresmode_resize(WMoveresMode *mode,
 EXTL_EXPORT_MEMBER
 void moveresmode_move(WMoveresMode *mode, int horizmul, int vertmul)
 {
-	int accel_mode=0, dummy=0;
-	
-	accel_mode=1+3*limit_and_encode_mode(&horizmul, &vertmul, &dummy, &dummy);
-	moveresmode_accel(mode, &horizmul, &vertmul, accel_mode);
+    int accel_mode=0, dummy=0;
+    
+    accel_mode=1+3*limit_and_encode_mode(&horizmul, &vertmul, &dummy, &dummy);
+    moveresmode_accel(mode, &horizmul, &vertmul, accel_mode);
 
-	moveresmode_delta_resize(mode, horizmul, horizmul, vertmul, vertmul, 
+    moveresmode_delta_resize(mode, horizmul, horizmul, vertmul, vertmul, 
                              NULL);
-	
-	timer_set(&resize_timer, ioncore_g.resize_delay);
+    
+    timer_set(&resize_timer, ioncore_g.resize_delay);
 }
 
 
@@ -300,10 +300,10 @@ void moveresmode_finish(WMoveresMode *mode)
 {
     WRegion *reg=moveresmode_target(mode);
     if(moveresmode_do_end(mode, TRUE)){
-		timer_reset(&resize_timer);
-		region_warp(reg);
-		ioncore_grab_remove(resize_handler);
-	}
+        timer_reset(&resize_timer);
+        region_warp(reg);
+        ioncore_grab_remove(resize_handler);
+    }
 }
 
 
@@ -316,10 +316,10 @@ void moveresmode_cancel(WMoveresMode *mode)
 {
     WRegion *reg=moveresmode_target(mode);
     if(moveresmode_do_end(mode, FALSE)){
-		timer_reset(&resize_timer);
-		region_warp(reg);
-		ioncore_grab_remove(resize_handler);
-	}
+        timer_reset(&resize_timer);
+        region_warp(reg);
+        ioncore_grab_remove(resize_handler);
+    }
 }
 
 
@@ -346,12 +346,12 @@ WMoveresMode *frame_begin_moveres(WFrame *frame)
     if(mode==NULL)
         return NULL;
     
-	accel_reset();
-	
-	ioncore_grab_establish((WRegion*)frame, resize_handler,
+    accel_reset();
+    
+    ioncore_grab_establish((WRegion*)frame, resize_handler,
                            (GrabKilledHandler*)cancel_moveres, 0);
-	
-	timer_set(&resize_timer, ioncore_g.resize_delay);
+    
+    timer_set(&resize_timer, ioncore_g.resize_delay);
     
     return mode;
     

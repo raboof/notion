@@ -16,8 +16,8 @@
 
 #include <libtu/obj.h>
 
-#define EXTL_EXTENSION	"lua"
-#define EXTL_COMPILED_EXTENSION	"lc"
+#define EXTL_EXTENSION    "lua"
+#define EXTL_COMPILED_EXTENSION    "lc"
 
 /* o: userdata/Obj
  * i: integer
@@ -38,26 +38,26 @@ typedef int ExtlTab;
 typedef int ExtlFn;
 
 typedef union{
-	Obj *o;
-	int i;
-	double d;
-	bool b;
-	const char *s;
-	ExtlFn f;
-	ExtlTab t;
+    Obj *o;
+    int i;
+    double d;
+    bool b;
+    const char *s;
+    ExtlFn f;
+    ExtlTab t;
 } ExtlL2Param;
 
 typedef bool ExtlL2CallHandler(void (*fn)(), ExtlL2Param *in,
-							   ExtlL2Param *out);
+                               ExtlL2Param *out);
 
 typedef void ExtlExportedFn(void);
 
 typedef struct{
-	const char *name;
-	ExtlExportedFn *fn;
-	const char *ispec;
-	const char *ospec;
-	ExtlL2CallHandler *l2handler;
+    const char *name;
+    ExtlExportedFn *fn;
+    const char *ispec;
+    const char *ospec;
+    ExtlL2CallHandler *l2handler;
 } ExtlExportedFnSpec;
 
 typedef ExtlExportedFn *ExtlSafelist;
@@ -77,7 +77,7 @@ extern ExtlTab extl_globals();
 
 /* Table/get */
 extern bool extl_table_get_vararg(ExtlTab ref, char itype, char type, 
-								  va_list *args);
+                                  va_list *args);
 extern bool extl_table_get(ExtlTab ref, char itype, char type, ...);
 
 extern bool extl_table_gets_o(ExtlTab ref, const char *entry, Obj **ret);
@@ -99,7 +99,7 @@ extern bool extl_table_geti_t(ExtlTab ref, int entry, ExtlTab *ret);
 
 /* Table/set */
 extern bool extl_table_set_vararg(ExtlTab ref, char itype, char type, 
-								  va_list *args);
+                                  va_list *args);
 extern bool extl_table_set(ExtlTab ref, char itype, char type, ...);
 
 extern bool extl_table_sets_o(ExtlTab ref, const char *entry, Obj *val);
@@ -131,14 +131,14 @@ extern bool extl_table_cleari(ExtlTab ref, int entry);
 extern const ExtlSafelist *extl_set_safelist(const ExtlSafelist *sl);
 
 extern bool extl_call_vararg(ExtlFn fnref, const char *spec,
-							 const char *rspec, va_list *args);
+                             const char *rspec, va_list *args);
 extern bool extl_call(ExtlFn fnref, const char *spec,
-					  const char *rspec, ...);
+                      const char *rspec, ...);
 
 extern bool extl_call_named_vararg(const char *name, const char *spec,
-								   const char *rspec, va_list *args);
+                                   const char *rspec, va_list *args);
 extern bool extl_call_named(const char *name, const char *spec,
-							const char *rspec, ...);
+                            const char *rspec, ...);
 
 /* Load file/string */
 
@@ -153,7 +153,7 @@ extern bool extl_register_functions(ExtlExportedFnSpec *spec);
 extern void extl_unregister_functions(ExtlExportedFnSpec *spec);
 
 bool extl_register_class(const char *cls, ExtlExportedFnSpec *fns,
-						 const char *parent);
+                         const char *parent);
 void extl_unregister_class(const char *cls, ExtlExportedFnSpec *fns);
 
 bool extl_register_module(const char *cls, ExtlExportedFnSpec *fns);

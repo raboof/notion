@@ -37,167 +37,167 @@
  * Instead, I've reinvented the wheel in libtu :(.
  */
 static OptParserOpt pwm_opts[]={
-	{OPT_ID('d'), 	"display", 	OPT_ARG, "host:dpy.scr", "X display to use"},
-	{'c', 			"conffile", OPT_ARG, "config_file", "Configuration file"},
-	{OPT_ID('o'), 	"oneroot",  0, NULL, "Manage default root window/non-Xinerama screen only"},
-	{OPT_ID('c'), 	"confdir", 	OPT_ARG, "dir", "Search directory for configuration files"},
-	{OPT_ID('l'), 	"moduledir", OPT_ARG, "dir", "Search directory for modules"},
-#ifndef CF_NOXINERAMA	
-	{OPT_ID('x'), 	"xinerama", OPT_ARG, "1|0", "Use Xinerama screen information (default: 0/no)"},
+    {OPT_ID('d'),     "display",     OPT_ARG, "host:dpy.scr", "X display to use"},
+    {'c',             "conffile", OPT_ARG, "config_file", "Configuration file"},
+    {OPT_ID('o'),     "oneroot",  0, NULL, "Manage default root window/non-Xinerama screen only"},
+    {OPT_ID('c'),     "confdir",     OPT_ARG, "dir", "Search directory for configuration files"},
+    {OPT_ID('l'),     "moduledir", OPT_ARG, "dir", "Search directory for modules"},
+#ifndef CF_NOXINERAMA    
+    {OPT_ID('x'),     "xinerama", OPT_ARG, "1|0", "Use Xinerama screen information (default: 0/no)"},
 #else
-	{OPT_ID('x'), 	"xinerama", OPT_ARG, "?", "Ignored: not compiled with Xinerama support"},
+    {OPT_ID('x'),     "xinerama", OPT_ARG, "?", "Ignored: not compiled with Xinerama support"},
 #endif
-	{OPT_ID('s'),   "sessionname", OPT_ARG, "session_name", "Name of session (affects savefiles)"},
-	{OPT_ID('i'),   "i18n", 0, NULL, "Enable use of multibyte string routines, actual "
-									 "encoding depending on the locale."},
-	END_OPTPARSEROPTS
+    {OPT_ID('s'),   "sessionname", OPT_ARG, "session_name", "Name of session (affects savefiles)"},
+    {OPT_ID('i'),   "i18n", 0, NULL, "Enable use of multibyte string routines, actual "
+                                     "encoding depending on the locale."},
+    END_OPTPARSEROPTS
 };
 
 
 static const char pwm_usage_tmpl[]=
-	"Usage: $p [options]\n\n$o\n";
+    "Usage: $p [options]\n\n$o\n";
 
 
 static OptParserCommonInfo pwm_cinfo={
-	ION_VERSION,
-	pwm_usage_tmpl,
-	NULL,
+    ION_VERSION,
+    pwm_usage_tmpl,
+    NULL,
 };
 
 
 int main(int argc, char*argv[])
 {
-	const char *cfgfile="pwm";
-	const char *display=NULL;
-	char *cmd=NULL;
-	int stflags=IONCORE_STARTUP_NOXINERAMA;
-	int opt;
-	ErrorLog el;
-	FILE *ef=NULL;
-	char *efnam=NULL;
-	bool may_continue=FALSE;
-	bool i18n=FALSE;
-	
-	libtu_init(argv[0]);
+    const char *cfgfile="pwm";
+    const char *display=NULL;
+    char *cmd=NULL;
+    int stflags=IONCORE_STARTUP_NOXINERAMA;
+    int opt;
+    ErrorLog el;
+    FILE *ef=NULL;
+    char *efnam=NULL;
+    bool may_continue=FALSE;
+    bool i18n=FALSE;
+    
+    libtu_init(argv[0]);
 
-	if(!ioncore_init(argc, argv))
-		return EXIT_FAILURE;
+    if(!ioncore_init(argc, argv))
+        return EXIT_FAILURE;
 
-	pwm_cinfo.about=ioncore_aboutmsg();
-	
-	ioncore_add_scriptdir(EXTRABINDIR); /* ion-completefile */
-	ioncore_add_scriptdir(ETCDIR);
-#ifdef PWM_ETCDIR	
-	ioncore_add_scriptdir(PWM_ETCDIR);
+    pwm_cinfo.about=ioncore_aboutmsg();
+    
+    ioncore_add_scriptdir(EXTRABINDIR); /* ion-completefile */
+    ioncore_add_scriptdir(ETCDIR);
+#ifdef PWM_ETCDIR    
+    ioncore_add_scriptdir(PWM_ETCDIR);
 #endif
-	ioncore_add_scriptdir(SHAREDIR);
-	ioncore_add_moduledir(MODULEDIR);
-	ioncore_set_userdirs("pwm3");
+    ioncore_add_scriptdir(SHAREDIR);
+    ioncore_add_moduledir(MODULEDIR);
+    ioncore_set_userdirs("pwm3");
 
-	optparser_init(argc, argv, OPTP_MIDLONG, pwm_opts, &pwm_cinfo);
-	
-	while((opt=optparser_get_opt())){
-		switch(opt){
-		case OPT_ID('d'):
-			display=optparser_get_arg();
-			break;
-		case 'c':
-			cfgfile=optparser_get_arg();
-			break;
-		case OPT_ID('c'):
-			ioncore_add_scriptdir(optparser_get_arg());
-			break;
-		case OPT_ID('l'):
-			ioncore_add_moduledir(optparser_get_arg());
-			break;
-		case OPT_ID('o'):
-			stflags|=IONCORE_STARTUP_ONEROOT;
-			break;
-		case OPT_ID('x'):
-			{
-				const char *p=optparser_get_arg();
-				if(strcmp(p, "1")==0)
-					stflags&=~IONCORE_STARTUP_NOXINERAMA;
-				else if(strcmp(p, "0")==0)
-					stflags|=IONCORE_STARTUP_NOXINERAMA;
-				else
-					warn("Invalid parameter to -xinerama.");
-			}
-			break;
-		case OPT_ID('s'):
-			ioncore_set_sessiondir(optparser_get_arg());
-			break;
-		case OPT_ID('i'):
-			i18n=TRUE;
-			break;
-		default:
-			optparser_print_error();
-			return EXIT_FAILURE;
-		}
-	}
+    optparser_init(argc, argv, OPTP_MIDLONG, pwm_opts, &pwm_cinfo);
+    
+    while((opt=optparser_get_opt())){
+        switch(opt){
+        case OPT_ID('d'):
+            display=optparser_get_arg();
+            break;
+        case 'c':
+            cfgfile=optparser_get_arg();
+            break;
+        case OPT_ID('c'):
+            ioncore_add_scriptdir(optparser_get_arg());
+            break;
+        case OPT_ID('l'):
+            ioncore_add_moduledir(optparser_get_arg());
+            break;
+        case OPT_ID('o'):
+            stflags|=IONCORE_STARTUP_ONEROOT;
+            break;
+        case OPT_ID('x'):
+            {
+                const char *p=optparser_get_arg();
+                if(strcmp(p, "1")==0)
+                    stflags&=~IONCORE_STARTUP_NOXINERAMA;
+                else if(strcmp(p, "0")==0)
+                    stflags|=IONCORE_STARTUP_NOXINERAMA;
+                else
+                    warn("Invalid parameter to -xinerama.");
+            }
+            break;
+        case OPT_ID('s'):
+            ioncore_set_sessiondir(optparser_get_arg());
+            break;
+        case OPT_ID('i'):
+            i18n=TRUE;
+            break;
+        default:
+            optparser_print_error();
+            return EXIT_FAILURE;
+        }
+    }
 
-	/* We may have to pass the file to xmessage so just using tmpfile()
-	 * isn't sufficient.
-	 */
-	libtu_asprintf(&efnam, "%s/pwm-%d-startup-errorlog", P_tmpdir,
-				   getpid());
-	if(efnam==NULL){
-		warn_err("Failed to create error log file");
-	}else{
-		ef=fopen(efnam, "wt");
-		if(ef==NULL){
-			warn_err_obj(efnam);
-			free(efnam);
-			efnam=NULL;
-		}
-		fprintf(ef, "PWM startup error log:\n");
-		errorlog_begin_file(&el, ef);
-	}
+    /* We may have to pass the file to xmessage so just using tmpfile()
+     * isn't sufficient.
+     */
+    libtu_asprintf(&efnam, "%s/pwm-%d-startup-errorlog", P_tmpdir,
+                   getpid());
+    if(efnam==NULL){
+        warn_err("Failed to create error log file");
+    }else{
+        ef=fopen(efnam, "wt");
+        if(ef==NULL){
+            warn_err_obj(efnam);
+            free(efnam);
+            efnam=NULL;
+        }
+        fprintf(ef, "PWM startup error log:\n");
+        errorlog_begin_file(&el, ef);
+    }
 
-	/* Set up locale and detect encoding.
-	 */
-	if(i18n)
-		ioncore_init_i18n();
-	
-	if(ioncore_startup(display, cfgfile, stflags))
-		may_continue=TRUE;
+    /* Set up locale and detect encoding.
+     */
+    if(i18n)
+        ioncore_init_i18n();
+    
+    if(ioncore_startup(display, cfgfile, stflags))
+        may_continue=TRUE;
 
 fail:
-	if(!may_continue)
-		warn("Refusing to start due to encountered errors.");
-	
-	if(ef!=NULL){
-		pid_t pid=-1;
-		if(errorlog_end(&el)){
-			fclose(ef);
-			pid=fork();
-			if(pid==0){
-				ioncore_setup_environ(DefaultScreen(ioncore_g.dpy));
-				if(!may_continue)
-					XCloseDisplay(ioncore_g.dpy);
-				else
-					close(ioncore_g.conn);
-				libtu_asprintf(&cmd, CF_XMESSAGE " %s", efnam);
-				if(system(cmd)==-1)
-					warn_err_obj(cmd);
-				unlink(efnam);
-				exit(EXIT_SUCCESS);
-			}
-			if(!may_continue && pid>0)
-				waitpid(pid, NULL, 0);
-		}else{
-			fclose(ef);
-		}
-		if(pid<0)
-			unlink(efnam);
-		free(efnam);
-	}
+    if(!may_continue)
+        warn("Refusing to start due to encountered errors.");
+    
+    if(ef!=NULL){
+        pid_t pid=-1;
+        if(errorlog_end(&el)){
+            fclose(ef);
+            pid=fork();
+            if(pid==0){
+                ioncore_setup_environ(DefaultScreen(ioncore_g.dpy));
+                if(!may_continue)
+                    XCloseDisplay(ioncore_g.dpy);
+                else
+                    close(ioncore_g.conn);
+                libtu_asprintf(&cmd, CF_XMESSAGE " %s", efnam);
+                if(system(cmd)==-1)
+                    warn_err_obj(cmd);
+                unlink(efnam);
+                exit(EXIT_SUCCESS);
+            }
+            if(!may_continue && pid>0)
+                waitpid(pid, NULL, 0);
+        }else{
+            fclose(ef);
+        }
+        if(pid<0)
+            unlink(efnam);
+        free(efnam);
+    }
 
-	if(!may_continue)
-		return EXIT_FAILURE;
-	
-	ioncore_mainloop();
-	
-	/* The code should never return here */
-	return EXIT_SUCCESS;
+    if(!may_continue)
+        return EXIT_FAILURE;
+    
+    ioncore_mainloop();
+    
+    /* The code should never return here */
+    return EXIT_SUCCESS;
 }

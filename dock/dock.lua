@@ -4,16 +4,16 @@
 
 -- create a new dock on screen 0
 dock = dockmod.create_dock(0, {
-    name="dock",	-- name for use in target="..." winprops
-    hpos="right",	-- horizontal position left|center|right
-    vpos="bottom",	-- vertical position top|middle|bottom
-    grow="left",	-- growth direction up|down|left|right
-    is_auto=true,	-- whether new dockapps should be added automatically
+    name="dock",    -- name for use in target="..." winprops
+    hpos="right",    -- horizontal position left|center|right
+    vpos="bottom",    -- vertical position top|middle|bottom
+    grow="left",    -- growth direction up|down|left|right
+    is_auto=true,    -- whether new dockapps should be added automatically
 })
 
 defcmd("global", "toggle_dock",
         function()
-            WDock.toggle(dock)	-- toggle map/unmapped state
+            WDock.toggle(dock)    -- toggle map/unmapped state
         end)
 
 defbindings("WScreen", {
@@ -33,14 +33,14 @@ defbindings("WScreen", {
 -- This is only effective if outline_style="each" (see dock-draw.lua).
 
 defwinprop{
-	instance="gkrellm2",
-	dockposition=-100,	-- place first
-	dockborder=false,	-- do not draw border if outline_style="each"
+    instance="gkrellm2",
+    dockposition=-100,    -- place first
+    dockborder=false,    -- do not draw border if outline_style="each"
 }
 
 -- kludges
 
 defwinprop{
-	instance="wmxmms",
-	target="dock",
+    instance="wmxmms",
+    target="dock",
 }

@@ -29,11 +29,11 @@ extern DEFont *de_load_font(const char *fontname);
 extern void de_free_font(DEFont *font);
 
 extern void debrush_draw_string(DEBrush *brush, Window win, int x, int y,
-								const char *str, int len, bool needfill,
-								const char *attrib);
+                                const char *str, int len, bool needfill,
+                                const char *attrib);
 extern void debrush_do_draw_string(DEBrush *brush, Window win, int x, int y,
-								   const char *str, int len, bool needfill, 
-								   DEColourGroup *colours);
+                                   const char *str, int len, bool needfill, 
+                                   DEColourGroup *colours);
 
 extern void debrush_get_font_extents(DEBrush *brush, GrFontExtents *fnte);
 

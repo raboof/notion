@@ -20,10 +20,10 @@
 INTRSTRUCT(WTimer);
 
 DECLSTRUCT(WTimer){
-	struct timeval when;
-	void (*handler)();
-	WTimer *next;
-	Watch paramwatch;
+    struct timeval when;
+    void (*handler)();
+    WTimer *next;
+    Watch paramwatch;
 };
 
 #define TIMER_INIT(FUN) {{0, 0}, FUN, NULL, WWATCH_INIT}

@@ -19,17 +19,17 @@
 
 
 DECLCLASS(WWindow){
-	WRegion region;
-	Window win;
-	XIC xic;
-	WRegion *keep_on_top_list;
+    WRegion region;
+    Window win;
+    XIC xic;
+    WRegion *keep_on_top_list;
 };
 
 
 extern bool window_init_new(WWindow *p, WWindow *parent, 
-							const WRectangle *geom);
+                            const WRectangle *geom);
 extern bool window_init(WWindow *p, WWindow *parent, Window win, 
-						const WRectangle *geom);
+                        const WRectangle *geom);
 extern void window_deinit(WWindow *win);
 
 DYNFUN void window_draw(WWindow *wwin, bool complete);
@@ -43,12 +43,12 @@ extern void window_unmap(WWindow *wwin);
 extern void window_do_set_focus(WWindow *wwin, bool warp);
 extern void window_fit(WWindow *wwin, const WRectangle *geom);
 extern bool window_reparent(WWindow *wwin, WWindow *parent, 
-							const WRectangle *geom);
+                            const WRectangle *geom);
 
 extern Window window_restack(WWindow *wwin, Window other, int mode);
 
 DYNFUN bool region_reparent(WRegion *reg, WWindow *target, 
-							const WRectangle *geom);
+                            const WRectangle *geom);
 
 
 #define XWINDOW_REGION_OF_T(WIN, TYPE) (TYPE*)xwindow_region_of_t(WIN, &CLASSDESCR(TYPE))

@@ -28,29 +28,29 @@
 WScreen *clientwin_find_suitable_screen(WClientWin *cwin, 
                                         const WManageParams *param)
 {
-	WScreen *scr=NULL, *found=NULL;
-	bool respectpos=(param->tfor!=NULL || param->userpos);
-	
-	FOR_ALL_SCREENS(scr){
-		if(!region_same_rootwin((WRegion*)scr, (WRegion*)cwin))
-			continue;
-		if(REGION_IS_ACTIVE(scr)){
-			found=scr;
-			if(!respectpos)
-				break;
-		}
-		
-		if(rectangle_contains(&REGION_GEOM(scr), param->geom.x, param->geom.y)){
-			found=scr;
-			if(respectpos)
-				break;
-		}
-		
-		if(found==NULL)
-			found=scr;
-	}
-	
-	return found;
+    WScreen *scr=NULL, *found=NULL;
+    bool respectpos=(param->tfor!=NULL || param->userpos);
+    
+    FOR_ALL_SCREENS(scr){
+        if(!region_same_rootwin((WRegion*)scr, (WRegion*)cwin))
+            continue;
+        if(REGION_IS_ACTIVE(scr)){
+            found=scr;
+            if(!respectpos)
+                break;
+        }
+        
+        if(rectangle_contains(&REGION_GEOM(scr), param->geom.x, param->geom.y)){
+            found=scr;
+            if(respectpos)
+                break;
+        }
+        
+        if(found==NULL)
+            found=scr;
+    }
+    
+    return found;
 }
 
 
@@ -58,75 +58,75 @@ WScreen *clientwin_find_suitable_screen(WClientWin *cwin,
  * given by region_current() calls starting from chosen screen.
  */
 static bool try_manage(WRegion *reg, WClientWin *cwin,
-					   const WManageParams *param, bool *triedws)
+                       const WManageParams *param, bool *triedws)
 {
-	WRegion *r2=region_current(reg);
-	
-	if(r2!=NULL){
-		if(try_manage(r2, cwin, param, triedws))
-			return TRUE;
-	}
+    WRegion *r2=region_current(reg);
+    
+    if(r2!=NULL){
+        if(try_manage(r2, cwin, param, triedws))
+            return TRUE;
+    }
 
-	if(OBJ_IS(reg, WGenWS))
-		*triedws=TRUE;
-	
-	if(!*triedws)
-		return FALSE;
-	
-	return region_manage_clientwin(reg, cwin, param);
+    if(OBJ_IS(reg, WGenWS))
+        *triedws=TRUE;
+    
+    if(!*triedws)
+        return FALSE;
+    
+    return region_manage_clientwin(reg, cwin, param);
 }
 
 
 bool clientwin_do_manage_default(WClientWin *cwin, 
                                  const WManageParams *param)
 {
-	WRegion *r=NULL, *r2;
-	WScreen *scr=NULL;
-	bool triedws=FALSE;
-	int fs;
-	
-	/* Transients are managed by their transient_for client window unless the
-	 * behaviour is overridden before this function.
-	 */
-	if(param->tfor!=NULL){
-		if(clientwin_attach_transient(param->tfor, (WRegion*)cwin))
-			return TRUE;
-	}
-	
-	/* Check fullscreen mode */
-	
-	fs=netwm_check_initial_fullscreen(cwin, param->switchto);
-	
-	if(fs<0){
-		fs=clientwin_check_fullscreen_request(cwin, 
-											  param->geom.w,
-											  param->geom.h,
-											  param->switchto);
-	}
+    WRegion *r=NULL, *r2;
+    WScreen *scr=NULL;
+    bool triedws=FALSE;
+    int fs;
+    
+    /* Transients are managed by their transient_for client window unless the
+     * behaviour is overridden before this function.
+     */
+    if(param->tfor!=NULL){
+        if(clientwin_attach_transient(param->tfor, (WRegion*)cwin))
+            return TRUE;
+    }
+    
+    /* Check fullscreen mode */
+    
+    fs=netwm_check_initial_fullscreen(cwin, param->switchto);
+    
+    if(fs<0){
+        fs=clientwin_check_fullscreen_request(cwin, 
+                                              param->geom.w,
+                                              param->geom.h,
+                                              param->switchto);
+    }
 
-	if(fs>0)
-		return TRUE;
+    if(fs>0)
+        return TRUE;
 
-	/* Find a suitable screen */
-	scr=clientwin_find_suitable_screen(cwin, param);
-	if(scr==NULL){
-		warn("Unable to find a screen for a new client window.");
-		return FALSE;
-	}
+    /* Find a suitable screen */
+    scr=clientwin_find_suitable_screen(cwin, param);
+    if(scr==NULL){
+        warn("Unable to find a screen for a new client window.");
+        return FALSE;
+    }
 
-	if(try_manage((WRegion*)scr, cwin, param, &triedws))
-		return TRUE;
-	
-	if(clientwin_get_transient_mode(cwin)==TRANSIENT_MODE_CURRENT){
-		WRegion *r=mplex_current((WMPlex*)scr);
-		if(r!=NULL && OBJ_IS(r, WClientWin)){
-			if(clientwin_attach_transient((WClientWin*)r, (WRegion*)cwin)){
-				return TRUE;
-			}
-		}
-	}
+    if(try_manage((WRegion*)scr, cwin, param, &triedws))
+        return TRUE;
+    
+    if(clientwin_get_transient_mode(cwin)==TRANSIENT_MODE_CURRENT){
+        WRegion *r=mplex_current((WMPlex*)scr);
+        if(r!=NULL && OBJ_IS(r, WClientWin)){
+            if(clientwin_attach_transient((WClientWin*)r, (WRegion*)cwin)){
+                return TRUE;
+            }
+        }
+    }
 
-	return region_manage_clientwin((WRegion*)scr, cwin, param);
+    return region_manage_clientwin((WRegion*)scr, cwin, param);
 }
 
 
@@ -137,17 +137,17 @@ bool clientwin_do_manage_default(WClientWin *cwin,
 
 
 bool region_manage_clientwin(WRegion *reg, WClientWin *cwin,
-							 const WManageParams *param)
+                             const WManageParams *param)
 {
-	bool ret=FALSE;
-	CALL_DYN_RET(ret, bool, region_manage_clientwin, reg, (reg, cwin, param));
-	return ret;
+    bool ret=FALSE;
+    CALL_DYN_RET(ret, bool, region_manage_clientwin, reg, (reg, cwin, param));
+    return ret;
 }
 
 
 bool region_has_manage_clientwin(WRegion *reg)
 {
-	return HAS_DYN(reg, region_manage_clientwin);
+    return HAS_DYN(reg, region_manage_clientwin);
 }
 
 

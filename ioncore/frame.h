@@ -23,40 +23,40 @@
 #define FRAME_TAB_HIDE    0x0004
 #define FRAME_SAVED_VERT  0x0008
 #define FRAME_SAVED_HORIZ 0x0010
-#define FRAME_SHADED	  0x0020
-#define FRAME_SETSHADED	  0x0040
+#define FRAME_SHADED      0x0020
+#define FRAME_SETSHADED      0x0040
 #define FRAME_BAR_OUTSIDE 0x0080
 
 DECLCLASS(WFrame){
-	WMPlex mplex;
-	
-	int flags;
-	int saved_w, saved_h;
-	int saved_x, saved_y;
-	
-	int tab_dragged_idx;
-	
-	GrBrush *brush;
-	GrBrush *bar_brush;
-	GrTransparency tr_mode;
-	int bar_h;
-	GrTextElem *titles;
-	int titles_n;
+    WMPlex mplex;
+    
+    int flags;
+    int saved_w, saved_h;
+    int saved_x, saved_y;
+    
+    int tab_dragged_idx;
+    
+    GrBrush *brush;
+    GrBrush *bar_brush;
+    GrTransparency tr_mode;
+    int bar_h;
+    GrTextElem *titles;
+    int titles_n;
 };
 
 
 /* Create/destroy */
 extern WFrame *create_frame(WWindow *parent, const WRectangle *geom);
 extern bool frame_init(WFrame *frame, WWindow *parent,
-						  const WRectangle *geom);
+                          const WRectangle *geom);
 extern void frame_deinit(WFrame *frame);
 
 /* Resize and reparent */
 extern bool frame_reparent(WFrame *frame, WWindow *parent,
-							  const WRectangle *geom);
+                              const WRectangle *geom);
 extern void frame_fit(WFrame *frame, const WRectangle *geom);
 extern void frame_resize_hints(WFrame *frame, XSizeHints *hints_ret,
-								  uint *relw_ret, uint *relh_ret);
+                                  uint *relw_ret, uint *relh_ret);
 
 /* Focus */
 extern void frame_activated(WFrame *frame);

@@ -19,8 +19,8 @@
 INTRSTRUCT(WRectangle);
 
 DECLSTRUCT(WRectangle){
-	int x, y;
-	int w, h;
+    int x, y;
+    int w, h;
 };
 
 extern bool rectangle_contains(const WRectangle *g, int x, int y);

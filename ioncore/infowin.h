@@ -20,21 +20,21 @@
 #define INFOWIN_BUFFER_LEN 256
 
 DECLCLASS(WInfoWin){
-	WWindow wwin;
-	GrBrush *brush;
-	char *buffer;
-	char *attr;
+    WWindow wwin;
+    GrBrush *brush;
+    char *buffer;
+    char *attr;
 };
 
 #define INFOWIN_BRUSH(INFOWIN) ((INFOWIN)->brush)
 #define INFOWIN_BUFFER(INFOWIN) ((INFOWIN)->buffer)
 
 extern bool infowin_init(WInfoWin *p, WWindow *parent, 
-						 const WRectangle *geom,
-						 const char *style);
+                         const WRectangle *geom,
+                         const char *style);
 extern WInfoWin *create_infowin(WWindow *parent, const WRectangle *geom,
-								const char *style);
+                                const char *style);
 extern bool infowin_set_attr2(WInfoWin *p, const char *attr1,
-							  const char *attr2);
+                              const char *attr2);
 
 #endif /* ION_IONCORE_INFOWIN_H */

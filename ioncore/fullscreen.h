@@ -17,9 +17,9 @@
 #include "clientwin.h"
 
 extern bool clientwin_check_fullscreen_request(WClientWin *cwin, 
-											   int w, int h, bool switchto);
+                                               int w, int h, bool switchto);
 extern bool clientwin_fullscreen_scr(WClientWin *cwin, WScreen *vp,
-									 bool switchto);
+                                     bool switchto);
 extern bool clientwin_toggle_fullscreen(WClientWin *cwin);
 extern bool clientwin_enter_fullscreen(WClientWin *cwin, bool switchto);
 extern bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto);

@@ -24,13 +24,13 @@
 
 
 typedef WRegion *WRegionAttachHandler(WWindow *parent, 
-									  const WRectangle *geom, 
-									  void *param);
-	
+                                      const WRectangle *geom, 
+                                      void *param);
+    
 typedef WRegion *WRegionDoAttachFn(WRegion *reg, 
-								   WRegionAttachHandler *handler,
-								   void *handlerparams,
-								   void *param);
+                                   WRegionAttachHandler *handler,
+                                   void *handlerparams,
+                                   void *param);
 
 
 extern bool region__attach_reparent(WRegion *mgr, WRegion *reg, 

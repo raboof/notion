@@ -43,14 +43,14 @@ WBindmap querymod_wedln_bindmap=BINDMAP_INIT;
 EXTL_EXPORT_AS(global, __defbindings_WInput)
 bool querymod_defbindings_WInput(ExtlTab tab)
 {
-	return bindmap_do_table(&querymod_input_bindmap, NULL, tab);
+    return bindmap_do_table(&querymod_input_bindmap, NULL, tab);
 }
 
 
 EXTL_EXPORT_AS(global, __defbindings_WEdln)
 bool querymod_defbindings_WEdln(ExtlTab tab)
 {
-	return bindmap_do_table(&querymod_wedln_bindmap, NULL, tab);
+    return bindmap_do_table(&querymod_wedln_bindmap, NULL, tab);
 }
 
 /*}}}*/
@@ -65,52 +65,52 @@ extern void querymod_unregister_exports();
 
 static void load_history()
 {
-	ioncore_read_config("query_history", NULL, FALSE);
+    ioncore_read_config("query_history", NULL, FALSE);
 }
 
 
 static void save_history()
 {
-	char *fname;
-	const char *histent;
-	FILE *file;
-	int i=0;
-	
-	fname=ioncore_get_savefile("query_history");
-	
-	if(fname==NULL){
-		warn("Unable to save query history");
-		return;
-	}
-	
-	file=fopen(fname, "w");
-	
-	if(file==NULL){
-		warn_err_obj(fname);
-		return;
-	}
-	
-	free(fname);
-	
-	fprintf(file, "local saves={\n");
-	
-	while(1){
-		histent=querymod_history_get(i);
-		if(histent==NULL)
-			break;
-		fprintf(file, "    ");
-		file_write_escaped_string(file, histent);
-		fprintf(file, ",\n");
-		i++;
-	}
-	
-	fprintf(file, "}\n");
-	fprintf(file, "for k=table.getn(saves),1,-1 do "
-			"querymod.history_push(saves[k]) end\n");
-	
-	querymod_history_clear();
-	
-	fclose(file);
+    char *fname;
+    const char *histent;
+    FILE *file;
+    int i=0;
+    
+    fname=ioncore_get_savefile("query_history");
+    
+    if(fname==NULL){
+        warn("Unable to save query history");
+        return;
+    }
+    
+    file=fopen(fname, "w");
+    
+    if(file==NULL){
+        warn_err_obj(fname);
+        return;
+    }
+    
+    free(fname);
+    
+    fprintf(file, "local saves={\n");
+    
+    while(1){
+        histent=querymod_history_get(i);
+        if(histent==NULL)
+            break;
+        fprintf(file, "    ");
+        file_write_escaped_string(file, histent);
+        fprintf(file, ",\n");
+        i++;
+    }
+    
+    fprintf(file, "}\n");
+    fprintf(file, "for k=table.getn(saves),1,-1 do "
+            "querymod.history_push(saves[k]) end\n");
+    
+    querymod_history_clear();
+    
+    fclose(file);
 }
 
 
@@ -118,31 +118,31 @@ static bool loaded_ok=FALSE;
 
 void querymod_deinit()
 {
-	querymod_unregister_exports();
-	bindmap_deinit(&querymod_input_bindmap);
-	bindmap_deinit(&querymod_wedln_bindmap);
-	
-	if(loaded_ok)
-		save_history();
+    querymod_unregister_exports();
+    bindmap_deinit(&querymod_input_bindmap);
+    bindmap_deinit(&querymod_wedln_bindmap);
+    
+    if(loaded_ok)
+        save_history();
 }
 
 
 bool querymod_init()
 {
-	if(!querymod_register_exports())
-		goto err;
-	
-	ioncore_read_config("query", NULL, TRUE);
+    if(!querymod_register_exports())
+        goto err;
+    
+    ioncore_read_config("query", NULL, TRUE);
 
-	load_history();
-	
-	loaded_ok=TRUE;
-	
-	return TRUE;
-	
+    load_history();
+    
+    loaded_ok=TRUE;
+    
+    return TRUE;
+    
 err:
-	querymod_deinit();
-	return FALSE;
+    querymod_deinit();
+    return FALSE;
 }
 
 

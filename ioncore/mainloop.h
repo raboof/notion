@@ -21,10 +21,10 @@
 INTRSTRUCT(WInputFd);
 
 DECLSTRUCT(WInputFd){
-	int fd;
-	void *data;
-	void (*process_input_fn)(int fd, void *data);
-	WInputFd *next, *prev;
+    int fd;
+    void *data;
+    void (*process_input_fn)(int fd, void *data);
+    WInputFd *next, *prev;
 };
 
 extern bool ioncore_register_input_fd(int fd, void *data,

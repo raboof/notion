@@ -42,25 +42,25 @@ WBindmap floatframe_bindmap=BINDMAP_INIT;
 
 
 static StringIntMap frame_areas[]={
-	{"border", 		FRAME_AREA_BORDER},
-	{"tab", 		FRAME_AREA_TAB},
-	{"empty_tab", 	FRAME_AREA_TAB},
-	{"client", 		FRAME_AREA_CLIENT},
-	END_STRINGINTMAP
+    {"border",         FRAME_AREA_BORDER},
+    {"tab",         FRAME_AREA_TAB},
+    {"empty_tab",     FRAME_AREA_TAB},
+    {"client",         FRAME_AREA_CLIENT},
+    END_STRINGINTMAP
 };
 
 
 EXTL_EXPORT_AS(global, __defbindings_WFloatFrame)
 bool floatwsmod_defbindings_WFloatFrame(ExtlTab tab)
 {
-	return bindmap_do_table(&floatframe_bindmap, frame_areas, tab);
+    return bindmap_do_table(&floatframe_bindmap, frame_areas, tab);
 }
 
 
 EXTL_EXPORT_AS(global, __defbindings_WFloatWS)
 void floatwsmod_defbindings_WFloatWS(ExtlTab tab)
 {
-	bindmap_do_table(&floatws_bindmap, NULL, tab);
+    bindmap_do_table(&floatws_bindmap, NULL, tab);
 }
 
 
@@ -76,43 +76,43 @@ extern bool floatwsmod_unregister_exports();
 
 void floatwsmod_deinit()
 {
-	REMOVE_HOOK(clientwin_do_manage_alt, 
+    REMOVE_HOOK(clientwin_do_manage_alt, 
                 floatwsmod_clientwin_do_manage);
 
-	floatwsmod_unregister_exports();
-	bindmap_deinit(&floatws_bindmap);
-	bindmap_deinit(&floatframe_bindmap);
-	ioncore_unregister_regclass(&CLASSDESCR(WFloatWS));
-	ioncore_unregister_regclass(&CLASSDESCR(WFloatFrame));
+    floatwsmod_unregister_exports();
+    bindmap_deinit(&floatws_bindmap);
+    bindmap_deinit(&floatframe_bindmap);
+    ioncore_unregister_regclass(&CLASSDESCR(WFloatWS));
+    ioncore_unregister_regclass(&CLASSDESCR(WFloatFrame));
 }
 
 
 
 bool floatwsmod_init()
 {
-	if(!floatwsmod_register_exports()){
-		warn_obj("floatws module", "failed to register functions.");
-		goto err;
-	}
-	
-	if(!ioncore_register_regclass(&CLASSDESCR(WFloatWS),
-							  (WRegionSimpleCreateFn*) create_floatws,
-							  (WRegionLoadCreateFn*) floatws_load) ||
-	   !ioncore_register_regclass(&CLASSDESCR(WFloatFrame), NULL,
-							  (WRegionLoadCreateFn*) floatframe_load)){
-		warn_obj("floatws module", "failed to register classes.");
-		goto err;
-	}
+    if(!floatwsmod_register_exports()){
+        warn_obj("floatws module", "failed to register functions.");
+        goto err;
+    }
+    
+    if(!ioncore_register_regclass(&CLASSDESCR(WFloatWS),
+                              (WRegionSimpleCreateFn*) create_floatws,
+                              (WRegionLoadCreateFn*) floatws_load) ||
+       !ioncore_register_regclass(&CLASSDESCR(WFloatFrame), NULL,
+                              (WRegionLoadCreateFn*) floatframe_load)){
+        warn_obj("floatws module", "failed to register classes.");
+        goto err;
+    }
 
-	ioncore_read_config("floatws", NULL, TRUE);
-	
-	ADD_HOOK(clientwin_do_manage_alt, floatwsmod_clientwin_do_manage);
+    ioncore_read_config("floatws", NULL, TRUE);
+    
+    ADD_HOOK(clientwin_do_manage_alt, floatwsmod_clientwin_do_manage);
 
-	return TRUE;
-	
+    return TRUE;
+    
 err:
-	floatwsmod_deinit();
-	return FALSE;
+    floatwsmod_deinit();
+    return FALSE;
 }
 
 

@@ -24,55 +24,55 @@ typedef Symlist WHooklist;
 
 
 #define CALL_HOOKS(HOOK, ARGS)              \
-	{                                       \
-		typedef void HookFn();              \
-		HookFn *hk;                         \
+    {                                       \
+        typedef void HookFn();              \
+        HookFn *hk;                         \
                                             \
-		ITERATE_SYMLIST(HookFn*, hk, HOOK){ \
-			hk ARGS;                        \
-		}                                   \
-	}
+        ITERATE_SYMLIST(HookFn*, hk, HOOK){ \
+            hk ARGS;                        \
+        }                                   \
+    }
 
 
 #define CALL_ALT_B(RET, ALT, ARGS)        \
-	{                                     \
-		typedef bool AltFn();             \
-		AltFn *hk;                        \
-		RET=FALSE;                        \
+    {                                     \
+        typedef bool AltFn();             \
+        AltFn *hk;                        \
+        RET=FALSE;                        \
                                           \
-		ITERATE_SYMLIST(AltFn*, hk, ALT){ \
-			RET=hk ARGS;                  \
-			if(RET)                       \
-				break;                    \
-		}                                 \
-	}
+        ITERATE_SYMLIST(AltFn*, hk, ALT){ \
+            RET=hk ARGS;                  \
+            if(RET)                       \
+                break;                    \
+        }                                 \
+    }
 
 
 #define CALL_ALT_B_NORET(ALT, ARGS)       \
-	{                                     \
-		typedef bool AltFn();             \
-		AltFn *hk;                        \
+    {                                     \
+        typedef bool AltFn();             \
+        AltFn *hk;                        \
                                           \
-		ITERATE_SYMLIST(AltFn*, hk, ALT){ \
-			if(hk ARGS)                   \
-			    break;                    \
-		}                                 \
-	}
+        ITERATE_SYMLIST(AltFn*, hk, ALT){ \
+            if(hk ARGS)                   \
+                break;                    \
+        }                                 \
+    }
 
 
 #define CALL_ALT_P(TYPE, RET, ALT, ARGS)  \
-	{                                     \
-		typedef TYPE *AltFn();            \
-		AltFn *hk;                        \
-		RET=NULL;                         \
+    {                                     \
+        typedef TYPE *AltFn();            \
+        AltFn *hk;                        \
+        RET=NULL;                         \
                                           \
-		ITERATE_SYMLIST(AltFn*, hk, ALT){ \
-			RET=hk ARGS;                  \
-			if(RET!=NULL)                 \
-				break;                    \
-		}                                 \
-	}
-	
+        ITERATE_SYMLIST(AltFn*, hk, ALT){ \
+            RET=hk ARGS;                  \
+            if(RET!=NULL)                 \
+                break;                    \
+        }                                 \
+    }
+    
 
 #define ADD_HOOK(HOOK, FN) symlist_insert(&(HOOK), (void*)(FN))
 #define REMOVE_HOOK(HOOK, FN) symlist_remove(&(HOOK), (void*)(FN))

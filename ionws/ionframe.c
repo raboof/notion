@@ -36,26 +36,26 @@
 
 
 static bool ionframe_init(WIonFrame *frame, WWindow *parent, 
-						  const WRectangle *geom)
+                          const WRectangle *geom)
 {
-	if(!frame_init((WFrame*)frame, parent, geom))
-		return FALSE;
-	
-	region_add_bindmap((WRegion*)frame, &(ionframe_bindmap));
-	
-	return TRUE;
+    if(!frame_init((WFrame*)frame, parent, geom))
+        return FALSE;
+    
+    region_add_bindmap((WRegion*)frame, &(ionframe_bindmap));
+    
+    return TRUE;
 }
 
 
 WIonFrame *create_ionframe(WWindow *parent, const WRectangle *geom)
 {
-	CREATEOBJ_IMPL(WIonFrame, ionframe, (p, parent, geom));
+    CREATEOBJ_IMPL(WIonFrame, ionframe, (p, parent, geom));
 }
 
 
 static void ionframe_deinit(WIonFrame *frame)
 {
-	frame_deinit((WFrame*)frame);
+    frame_deinit((WFrame*)frame);
 }
 
 
@@ -71,17 +71,17 @@ static void ionframe_deinit(WIonFrame *frame)
 EXTL_EXPORT_MEMBER
 void ionframe_toggle_shade(WIonFrame *frame)
 {
-	GrBorderWidths bdw;
-	int h=frame->frame.bar_h;
+    GrBorderWidths bdw;
+    int h=frame->frame.bar_h;
 
-	if(BAR_INSIDE_BORDER(frame) && frame->frame.brush!=NULL){
-		grbrush_get_border_widths(frame->frame.brush, &bdw);
-		h+=bdw.top+bdw.bottom+2*bdw.spacing;
-	}else{
-		h+=2*BAR_OFF(frame);
-	}
+    if(BAR_INSIDE_BORDER(frame) && frame->frame.brush!=NULL){
+        grbrush_get_border_widths(frame->frame.brush, &bdw);
+        h+=bdw.top+bdw.bottom+2*bdw.spacing;
+    }else{
+        h+=2*BAR_OFF(frame);
+    }
 
-	frame_do_toggle_shade((WFrame*)frame, h);
+    frame_do_toggle_shade((WFrame*)frame, h);
 }
 
 
@@ -92,49 +92,49 @@ void ionframe_toggle_shade(WIonFrame *frame)
 
 
 static void ionframe_resize_hints(WIonFrame *frame, XSizeHints *hints_ret,
-								  uint *relw_ret, uint *relh_ret)
+                                  uint *relw_ret, uint *relh_ret)
 {
-	frame_resize_hints((WFrame*)frame, hints_ret, relw_ret, relh_ret);
-	
-	if(!(hints_ret->flags&PResizeInc)){
-		/*hints_ret->flags|=PResizeInc;
-		hints_ret->width_inc=grdata->w_unit;
-		hints_ret->height_inc=grdata->h_unit;*/
-	}
-	
-	hints_ret->flags|=PMinSize;
-	hints_ret->min_width=1;
-	hints_ret->min_height=0;
+    frame_resize_hints((WFrame*)frame, hints_ret, relw_ret, relh_ret);
+    
+    if(!(hints_ret->flags&PResizeInc)){
+        /*hints_ret->flags|=PResizeInc;
+        hints_ret->width_inc=grdata->w_unit;
+        hints_ret->height_inc=grdata->h_unit;*/
+    }
+    
+    hints_ret->flags|=PMinSize;
+    hints_ret->min_width=1;
+    hints_ret->min_height=0;
 }
 
 
 static void ionframe_brushes_updated(WIonFrame *frame)
 {
-	ExtlTab tab;
-	bool b=TRUE;
+    ExtlTab tab;
+    bool b=TRUE;
 
-	if(frame->frame.brush==NULL)
-		return;
-	
+    if(frame->frame.brush==NULL)
+        return;
+    
     grbrush_get_extra(frame->frame.brush, 
                       "ionframe_bar_inside_border", 'b', &b);
-	
-	if(b)
-		frame->frame.flags&=~FRAME_BAR_OUTSIDE;
-	else
-		frame->frame.flags|=FRAME_BAR_OUTSIDE;
+    
+    if(b)
+        frame->frame.flags&=~FRAME_BAR_OUTSIDE;
+    else
+        frame->frame.flags|=FRAME_BAR_OUTSIDE;
 }
 
 
 static const char *ionframe_style(WIonFrame *frame)
 {
-	return "frame-ionframe";
+    return "frame-ionframe";
 }
 
 
 static const char *ionframe_tab_style(WIonFrame *frame)
 {
-	return "tab-frame-ionframe";
+    return "tab-frame-ionframe";
 }
 
 
@@ -151,28 +151,28 @@ static const char *ionframe_tab_style(WIonFrame *frame)
 EXTL_EXPORT_MEMBER
 void ionframe_relocate_and_close(WIonFrame *frame)
 {
-	if(!region_may_destroy((WRegion*)frame)){
-		warn("Frame may not be destroyed");
-		return;
-	}
+    if(!region_may_destroy((WRegion*)frame)){
+        warn("Frame may not be destroyed");
+        return;
+    }
 
-	if(!region_rescue_clientwins((WRegion*)frame)){
-		warn("Failed to rescue managed objects.");
-		return;
-	}
+    if(!region_rescue_clientwins((WRegion*)frame)){
+        warn("Failed to rescue managed objects.");
+        return;
+    }
 
-	ioncore_defer_destroy((Obj*)frame);
+    ioncore_defer_destroy((Obj*)frame);
 }
 
 
 void ionframe_close(WIonFrame *frame)
 {
-	if(FRAME_MCOUNT(frame)!=0 || FRAME_CURRENT(frame)!=NULL){
-		warn("Frame not empty.");
-		return;
-	}
-	
-	ionframe_relocate_and_close(frame);
+    if(FRAME_MCOUNT(frame)!=0 || FRAME_CURRENT(frame)!=NULL){
+        warn("Frame not empty.");
+        return;
+    }
+    
+    ionframe_relocate_and_close(frame);
 }
 
 
@@ -191,12 +191,12 @@ void ionframe_close(WIonFrame *frame)
 EXTL_EXPORT_MEMBER
 WIonFrame *ionframe_split(WIonFrame *frame, const char *dirstr)
 {
-	WIonWS *ws=REGION_MANAGER_CHK(frame, WIonWS);
+    WIonWS *ws=REGION_MANAGER_CHK(frame, WIonWS);
     
     if(ws==NULL)
         return NULL;
 
-	return ionws_newframe_at(ws, frame, dirstr, TRUE);
+    return ionws_newframe_at(ws, frame, dirstr, TRUE);
 }
 
 /*EXTL_DOC
@@ -206,12 +206,12 @@ WIonFrame *ionframe_split(WIonFrame *frame, const char *dirstr)
 EXTL_EXPORT_MEMBER
 WIonFrame *ionframe_split_empty(WIonFrame *frame, const char *dirstr)
 {
-	WIonWS *ws=REGION_MANAGER_CHK(frame, WIonWS);
+    WIonWS *ws=REGION_MANAGER_CHK(frame, WIonWS);
     
     if(ws==NULL)
         return NULL;
 
-	return ionws_newframe_at(ws, frame, dirstr, FALSE);
+    return ionws_newframe_at(ws, frame, dirstr, FALSE);
 }
 
 
@@ -223,10 +223,10 @@ WIonFrame *ionframe_split_empty(WIonFrame *frame, const char *dirstr)
 
 WRegion *ionframe_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
 {
-	WIonFrame *frame=create_ionframe(par, geom);
-	if(frame!=NULL)
-		frame_do_load((WFrame*)frame, tab);
-	return (WRegion*)frame;
+    WIonFrame *frame=create_ionframe(par, geom);
+    if(frame!=NULL)
+        frame_do_load((WFrame*)frame, tab);
+    return (WRegion*)frame;
 }
 
 
@@ -237,20 +237,20 @@ WRegion *ionframe_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
 
 
 static DynFunTab ionframe_dynfuntab[]={
-	{region_resize_hints, ionframe_resize_hints},
+    {region_resize_hints, ionframe_resize_hints},
 
-	{region_close, ionframe_close},
+    {region_close, ionframe_close},
 
-	{(DynFun*)frame_style, (DynFun*)ionframe_style},
-	{(DynFun*)frame_tab_style, (DynFun*)ionframe_tab_style},
-	
-	{frame_brushes_updated, ionframe_brushes_updated},
-	
-	END_DYNFUNTAB
+    {(DynFun*)frame_style, (DynFun*)ionframe_style},
+    {(DynFun*)frame_tab_style, (DynFun*)ionframe_tab_style},
+    
+    {frame_brushes_updated, ionframe_brushes_updated},
+    
+    END_DYNFUNTAB
 };
-									   
+                                       
 
 IMPLCLASS(WIonFrame, WFrame, ionframe_deinit, ionframe_dynfuntab);
 
-	
+    
 /*}}}*/

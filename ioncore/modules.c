@@ -27,66 +27,66 @@ static lt_dlcaller_id ltid=0;
 
 static void *get_module_symbol(lt_dlhandle handle, char *name)
 {
-	const lt_dlinfo *info;
-	char *p;
-	void *ret;
-	
-	info=lt_dlgetinfo(handle);
-	
-	if(info==NULL || info->name==NULL){
-		warn("lt_dlgetinfo() failed to return module name.");
-		return NULL;
-	}
+    const lt_dlinfo *info;
+    char *p;
+    void *ret;
+    
+    info=lt_dlgetinfo(handle);
+    
+    if(info==NULL || info->name==NULL){
+        warn("lt_dlgetinfo() failed to return module name.");
+        return NULL;
+    }
 
-	p=scat(info->name, name);
-	if(p==NULL){
-		warn_err();
-		return NULL;
-	}
-	
-	ret=lt_dlsym(handle, p);
-	
-	free(p);
-	
-	return ret;
+    p=scat(info->name, name);
+    if(p==NULL){
+        warn_err();
+        return NULL;
+    }
+    
+    ret=lt_dlsym(handle, p);
+    
+    free(p);
+    
+    return ret;
 }
-							   
+                               
 
 static bool check_version(lt_dlhandle handle)
 {
-	char *versionstr=(char*)get_module_symbol(handle, "_ion_api_version");
-	if(versionstr==NULL)
-		return FALSE;
-	return (strcmp(versionstr, ION_API_VERSION)==0);
+    char *versionstr=(char*)get_module_symbol(handle, "_ion_api_version");
+    if(versionstr==NULL)
+        return FALSE;
+    return (strcmp(versionstr, ION_API_VERSION)==0);
 }
 
 
 static bool call_init(lt_dlhandle handle)
 {
-	bool (*initfn)(void);
-	
-	initfn=(bool (*)())get_module_symbol(handle, "_init");
-	
-	if(initfn==NULL)
-		return TRUE;
-	
-	return initfn();
+    bool (*initfn)(void);
+    
+    initfn=(bool (*)())get_module_symbol(handle, "_init");
+    
+    if(initfn==NULL)
+        return TRUE;
+    
+    return initfn();
 }
 
 
 bool ioncore_init_module_support()
 {
 #ifdef CF_PRELOAD_MODULES
-	LTDL_SET_PRELOADED_SYMBOLS();
+    LTDL_SET_PRELOADED_SYMBOLS();
 #endif
-	if(lt_dlinit()!=0){
-		warn("lt_dlinit: %s", lt_dlerror());
-		return FALSE;
-	}
-	
-	ltid=lt_dlcaller_register();
-	
-	return TRUE;
+    if(lt_dlinit()!=0){
+        warn("lt_dlinit: %s", lt_dlerror());
+        return FALSE;
+    }
+    
+    ltid=lt_dlcaller_register();
+    
+    return TRUE;
 }
 
 
@@ -99,37 +99,37 @@ bool ioncore_init_module_support()
 EXTL_EXPORT
 bool ioncore_load_module(const char *modname)
 {
-	lt_dlhandle handle=NULL;
-	
-	if(modname==NULL)
-		return FALSE;
-	
-	handle=lt_dlopenext(modname);
-	
-	if(handle==NULL){
-		warn("Failed to load module %s: %s", modname, lt_dlerror());
-		return FALSE;
-	}
-	
-	if(lt_dlcaller_set_data(ltid, handle, &ltid)!=NULL){
-		warn("Module %s already loaded", modname);
-		return TRUE;
-	}
-	
-	if(!check_version(handle)){
-		warn_obj(modname, "Module version information not found or version "
-				 "mismatch. Refusing to use.");
-		goto err;
-	}
-	
-	if(!call_init(handle))
-		goto err;
-	
-	return TRUE;
-	
+    lt_dlhandle handle=NULL;
+    
+    if(modname==NULL)
+        return FALSE;
+    
+    handle=lt_dlopenext(modname);
+    
+    if(handle==NULL){
+        warn("Failed to load module %s: %s", modname, lt_dlerror());
+        return FALSE;
+    }
+    
+    if(lt_dlcaller_set_data(ltid, handle, &ltid)!=NULL){
+        warn("Module %s already loaded", modname);
+        return TRUE;
+    }
+    
+    if(!check_version(handle)){
+        warn_obj(modname, "Module version information not found or version "
+                 "mismatch. Refusing to use.");
+        goto err;
+    }
+    
+    if(!call_init(handle))
+        goto err;
+    
+    return TRUE;
+    
 err:
-	lt_dlclose(handle);
-	return FALSE;
+    lt_dlclose(handle);
+    return FALSE;
 }
 
 /*}}}*/
@@ -140,35 +140,35 @@ err:
 
 static void call_deinit(lt_dlhandle handle, char *name)
 {
-	void (*deinitfn)(void);
-	
-	deinitfn=(void (*)())get_module_symbol(handle, "_deinit");
-	
-	if(deinitfn!=NULL)
-		deinitfn();
+    void (*deinitfn)(void);
+    
+    deinitfn=(void (*)())get_module_symbol(handle, "_deinit");
+    
+    if(deinitfn!=NULL)
+        deinitfn();
 }
 
 
 static int do_unload_module(lt_dlhandle handle, void *unused)
 {
-	const lt_dlinfo *info;
+    const lt_dlinfo *info;
 
-	info=lt_dlgetinfo(handle);
-	if(info==NULL || info->name==NULL){
-		warn("Unable to get module name.");
-	}else{
-		call_deinit(handle, info->name);
-	}
+    info=lt_dlgetinfo(handle);
+    if(info==NULL || info->name==NULL){
+        warn("Unable to get module name.");
+    }else{
+        call_deinit(handle, info->name);
+    }
 
-	lt_dlclose(handle);
-	
-	return 0;
+    lt_dlclose(handle);
+    
+    return 0;
 }
 
 
 void ioncore_unload_modules()
 {
-	lt_dlforeach(do_unload_module, NULL);
+    lt_dlforeach(do_unload_module, NULL);
 }
 
 

@@ -34,198 +34,198 @@ static bool had_tmr=FALSE;
 static WTimer queue=TIMER_INIT(NULL);
 
 #define TIMEVAL_LATER(a, b) \
-	((a.tv_sec > b.tv_sec) || \
-	((a.tv_sec == b.tv_sec) && \
-	 (a.tv_usec > b.tv_usec)))
+    ((a.tv_sec > b.tv_sec) || \
+    ((a.tv_sec == b.tv_sec) && \
+     (a.tv_usec > b.tv_usec)))
 
 
 static void do_timer_set()
 {
-	struct itimerval val={{0, 0}, {0, 0}};
-	
-	if(queue.next==NULL){
-		setitimer(ITIMER_REAL, &val, NULL);
-		return;
-	}
+    struct itimerval val={{0, 0}, {0, 0}};
+    
+    if(queue.next==NULL){
+        setitimer(ITIMER_REAL, &val, NULL);
+        return;
+    }
 
-	/* Subtract queue time from current time, don't go below zero */
-	gettimeofday(&(val.it_value), NULL);
-	if(TIMEVAL_LATER((queue.next)->when, val.it_value)){
-		if(queue.next->when.tv_usec<val.it_value.tv_usec){
-			queue.next->when.tv_usec+=1000000;
-			queue.next->when.tv_sec--;
-		}
-		val.it_value.tv_usec=queue.next->when.tv_usec-val.it_value.tv_usec;
-		val.it_value.tv_sec=queue.next->when.tv_sec-val.it_value.tv_sec;
-		if(val.it_value.tv_usec<0)
-			val.it_value.tv_usec=0;
-		if(val.it_value.tv_sec<0)
-			val.it_value.tv_sec=0;
-	}else{
-		had_tmr=TRUE;
-		return;
-	}
+    /* Subtract queue time from current time, don't go below zero */
+    gettimeofday(&(val.it_value), NULL);
+    if(TIMEVAL_LATER((queue.next)->when, val.it_value)){
+        if(queue.next->when.tv_usec<val.it_value.tv_usec){
+            queue.next->when.tv_usec+=1000000;
+            queue.next->when.tv_sec--;
+        }
+        val.it_value.tv_usec=queue.next->when.tv_usec-val.it_value.tv_usec;
+        val.it_value.tv_sec=queue.next->when.tv_sec-val.it_value.tv_sec;
+        if(val.it_value.tv_usec<0)
+            val.it_value.tv_usec=0;
+        if(val.it_value.tv_sec<0)
+            val.it_value.tv_sec=0;
+    }else{
+        had_tmr=TRUE;
+        return;
+    }
 
-	val.it_interval.tv_usec=val.it_value.tv_usec;
-	val.it_interval.tv_sec=val.it_value.tv_sec;
-	
-	if((setitimer(ITIMER_REAL, &val, NULL))){
-		had_tmr=TRUE;
-	}
+    val.it_interval.tv_usec=val.it_value.tv_usec;
+    val.it_interval.tv_sec=val.it_value.tv_sec;
+    
+    if((setitimer(ITIMER_REAL, &val, NULL))){
+        had_tmr=TRUE;
+    }
 }
 
 
 void ioncore_check_signals()
 {
-	char *tmp=NULL;
-	struct timeval current_time;
-	WTimer *q;
+    char *tmp=NULL;
+    struct timeval current_time;
+    WTimer *q;
 
-#if 1	
-	if(wait_sig!=0){
-		pid_t pid;
-		wait_sig=0;
-		while((pid=waitpid(-1, NULL, WNOHANG|WUNTRACED))>0){
-			/* nothing */
-		}
-	}
+#if 1    
+    if(wait_sig!=0){
+        pid_t pid;
+        wait_sig=0;
+        while((pid=waitpid(-1, NULL, WNOHANG|WUNTRACED))>0){
+            /* nothing */
+        }
+    }
 #endif
-	
-	if(kill_sig!=0){
-		if(kill_sig==SIGUSR1){
-			ioncore_restart_other(tmp);
-			assert(0);
-		} 
-		if(kill_sig==SIGTERM)
-			ioncore_exit();
+    
+    if(kill_sig!=0){
+        if(kill_sig==SIGUSR1){
+            ioncore_restart_other(tmp);
+            assert(0);
+        } 
+        if(kill_sig==SIGTERM)
+            ioncore_exit();
 
-		ioncore_deinit();
-		kill(getpid(), kill_sig);
-	}
+        ioncore_deinit();
+        kill(getpid(), kill_sig);
+    }
 
-	/* Check for timer events in the queue */
-	while(had_tmr && queue.next!=NULL){
-		had_tmr=FALSE;
-		gettimeofday(&current_time, NULL);
-		while(queue.next!=NULL){
-			if((TIMEVAL_LATER(current_time, queue.next->when))){
-				Obj *obj;
-				q=queue.next;
-				queue.next=q->next;
-				q->next=NULL;
-				obj=q->paramwatch.obj;
-				watch_reset(&(q->paramwatch));
-				q->handler(q, obj);
-			}else{
-				break;
-			}
-		}
-		do_timer_set();
-	}
+    /* Check for timer events in the queue */
+    while(had_tmr && queue.next!=NULL){
+        had_tmr=FALSE;
+        gettimeofday(&current_time, NULL);
+        while(queue.next!=NULL){
+            if((TIMEVAL_LATER(current_time, queue.next->when))){
+                Obj *obj;
+                q=queue.next;
+                queue.next=q->next;
+                q->next=NULL;
+                obj=q->paramwatch.obj;
+                watch_reset(&(q->paramwatch));
+                q->handler(q, obj);
+            }else{
+                break;
+            }
+        }
+        do_timer_set();
+    }
 }
 
 
 static void add_to_current_time(struct timeval *when, uint msecs)
 {
-	long tmp_usec;
+    long tmp_usec;
 
-	gettimeofday(when, NULL);
-	tmp_usec=when->tv_usec + (msecs * 1000);
-	when->tv_usec=tmp_usec % 1000000;
-	when->tv_sec+=tmp_usec / 1000000;
+    gettimeofday(when, NULL);
+    tmp_usec=when->tv_usec + (msecs * 1000);
+    when->tv_usec=tmp_usec % 1000000;
+    when->tv_sec+=tmp_usec / 1000000;
 }
 
 
 void kill_timer(Watch *watch, Obj *obj)
 {
-	WTimer *tmr;
-	warn("Timer handler parameter destroyed.");
-	for(tmr=queue.next; tmr!=NULL; tmr=tmr->next){
-		if(&(tmr->paramwatch)==watch){
-			timer_reset(tmr);
-		}
-	}
+    WTimer *tmr;
+    warn("Timer handler parameter destroyed.");
+    for(tmr=queue.next; tmr!=NULL; tmr=tmr->next){
+        if(&(tmr->paramwatch)==watch){
+            timer_reset(tmr);
+        }
+    }
 }
 
 
 bool timer_is_set(WTimer *timer)
 {
-	WTimer *tmr;
-	for(tmr=queue.next; tmr!=NULL; tmr=tmr->next){
-		if(tmr==timer)
-			return TRUE;
-	}
-	return FALSE;
+    WTimer *tmr;
+    for(tmr=queue.next; tmr!=NULL; tmr=tmr->next){
+        if(tmr==timer)
+            return TRUE;
+    }
+    return FALSE;
 }
 
 
 void timer_set_param(WTimer *timer, uint msecs, Obj *obj)
 {
-	WTimer *q;
+    WTimer *q;
 
-	/* Check for an existing timer event in the queue */
-	q=&queue;
-	while(q->next!=NULL){
-		if(q->next==timer){
-			q->next=timer->next;
-			break;
-		}
-		q=q->next;
-	}
+    /* Check for an existing timer event in the queue */
+    q=&queue;
+    while(q->next!=NULL){
+        if(q->next==timer){
+            q->next=timer->next;
+            break;
+        }
+        q=q->next;
+    }
 
-	/* Initialize the new queue timer event */
-	add_to_current_time(&(timer->when), msecs);
-	timer->next=NULL;
+    /* Initialize the new queue timer event */
+    add_to_current_time(&(timer->when), msecs);
+    timer->next=NULL;
 
-	/* Add timerevent in place to queue */
-	q=&queue;
-	for(;;){
-		if(q->next==NULL){
-			q->next=timer;
-			break;
-		}
-		if(TIMEVAL_LATER(timer->when, q->next->when)){
-			q=q->next;
-			continue;
-		}else{
-			timer->next=q->next;
-			q->next=timer;
-			break;
-		}
-	}
+    /* Add timerevent in place to queue */
+    q=&queue;
+    for(;;){
+        if(q->next==NULL){
+            q->next=timer;
+            break;
+        }
+        if(TIMEVAL_LATER(timer->when, q->next->when)){
+            q=q->next;
+            continue;
+        }else{
+            timer->next=q->next;
+            q->next=timer;
+            break;
+        }
+    }
 
-	do_timer_set();
-	
-	if(obj!=NULL)
-		watch_setup(&(timer->paramwatch), obj, kill_timer);
+    do_timer_set();
+    
+    if(obj!=NULL)
+        watch_setup(&(timer->paramwatch), obj, kill_timer);
 }
 
 
 void timer_set(WTimer *timer, uint msecs)
 {
-	timer_set_param(timer, msecs, NULL);
+    timer_set_param(timer, msecs, NULL);
 }
 
 
 void timer_reset(WTimer *timer)
 {
-	WTimer *q;
-	WTimer *tmpq;
+    WTimer *q;
+    WTimer *tmpq;
 
-	watch_reset(&(timer->paramwatch));
-	
-	q=&queue;
-	while(q->next!=NULL){
-		tmpq=q->next;
-		if(q->next==timer){
-			q->next=timer->next;
-			timer->next=NULL;
-			/*free(tmpq);*/
-			do_timer_set();
-			return;
-		}
-		q=q->next;
-	}
+    watch_reset(&(timer->paramwatch));
+    
+    q=&queue;
+    while(q->next!=NULL){
+        tmpq=q->next;
+        if(q->next==timer){
+            q->next=timer->next;
+            timer->next=NULL;
+            /*free(tmpq);*/
+            do_timer_set();
+            return;
+        }
+        q=q->next;
+    }
 }
 
 
@@ -234,54 +234,54 @@ void timer_reset(WTimer *timer)
 
 static void fatal_signal_handler(int signal_num)
 {
-	set_warn_handler(NULL);
-	warn("Caught fatal signal %d. Dying without deinit.", signal_num); 
-	signal(signal_num, SIG_DFL);
-	kill(getpid(), signal_num);
+    set_warn_handler(NULL);
+    warn("Caught fatal signal %d. Dying without deinit.", signal_num); 
+    signal(signal_num, SIG_DFL);
+    kill(getpid(), signal_num);
 }
 
-		   
+           
 static void deadly_signal_handler(int signal_num)
 {
-	set_warn_handler(NULL);
-	warn("Caught signal %d. Dying.", signal_num);
-	signal(signal_num, SIG_DFL);
-	if(ioncore_g.opmode==IONCORE_OPMODE_INIT)
-		kill(getpid(), signal_num);
-	else
-		kill_sig=signal_num;
+    set_warn_handler(NULL);
+    warn("Caught signal %d. Dying.", signal_num);
+    signal(signal_num, SIG_DFL);
+    if(ioncore_g.opmode==IONCORE_OPMODE_INIT)
+        kill(getpid(), signal_num);
+    else
+        kill_sig=signal_num;
 }
 
 
 static void chld_handler(int signal_num)
 {
 #if 0
-	pid_t pid;
+    pid_t pid;
 
-	while((pid=waitpid(-1, NULL, WNOHANG|WUNTRACED))>0){
-		/* nothing */
-	}
+    while((pid=waitpid(-1, NULL, WNOHANG|WUNTRACED))>0){
+        /* nothing */
+    }
 #else
-	wait_sig=1;
+    wait_sig=1;
 #endif
 }
 
 
 static void exit_handler(int signal_num)
 {
-	kill_sig=signal_num;
+    kill_sig=signal_num;
 }
 
 
 static void timer_handler(int signal_num)
 {
-	had_tmr=TRUE;
+    had_tmr=TRUE;
 }
 
 
 static void ignore_handler(int signal_num)
 {
-	
+    
 }
 
 
@@ -296,49 +296,49 @@ static void ignore_handler(int signal_num)
 
 void ioncore_trap_signals()
 {
-	struct sigaction sa;
-	sigset_t set, oldset;
+    struct sigaction sa;
+    sigset_t set, oldset;
 
-	sigemptyset(&set);
-	sigemptyset(&oldset);
-	sigprocmask(SIG_SETMASK, &set, &oldset);
-	
+    sigemptyset(&set);
+    sigemptyset(&oldset);
+    sigprocmask(SIG_SETMASK, &set, &oldset);
+    
 #define DEADLY(X) signal(X, deadly_signal_handler);
 #define FATAL(X) signal(X, fatal_signal_handler);
 #define IGNORE(X) signal(X, SIG_IGN)
-	
-	DEADLY(SIGHUP);
-	DEADLY(SIGQUIT);
-	DEADLY(SIGINT);
-	DEADLY(SIGABRT);
-	
-	FATAL(SIGILL);
-	FATAL(SIGSEGV);
-	FATAL(SIGFPE);
-	FATAL(SIGBUS);
-	
-	IGNORE(SIGTRAP);
-	/*IGNORE(SIGWINCH);*/
+    
+    DEADLY(SIGHUP);
+    DEADLY(SIGQUIT);
+    DEADLY(SIGINT);
+    DEADLY(SIGABRT);
+    
+    FATAL(SIGILL);
+    FATAL(SIGSEGV);
+    FATAL(SIGFPE);
+    FATAL(SIGBUS);
+    
+    IGNORE(SIGTRAP);
+    /*IGNORE(SIGWINCH);*/
 
-	sigemptyset(&(sa.sa_mask));
-	sa.sa_handler=chld_handler;
-	sa.sa_flags=SA_NOCLDSTOP|SA_RESTART;
-	sigaction(SIGCHLD, &sa, NULL);
+    sigemptyset(&(sa.sa_mask));
+    sa.sa_handler=chld_handler;
+    sa.sa_flags=SA_NOCLDSTOP|SA_RESTART;
+    sigaction(SIGCHLD, &sa, NULL);
 
-	sa.sa_handler=exit_handler;
-	sa.sa_flags=SA_RESTART;
-	sigaction(SIGTERM, &sa, NULL);
-	sigaction(SIGUSR1, &sa, NULL);
-	
-	sa.sa_handler=timer_handler;
-	sigaction(SIGALRM, &sa, NULL);
+    sa.sa_handler=exit_handler;
+    sa.sa_flags=SA_RESTART;
+    sigaction(SIGTERM, &sa, NULL);
+    sigaction(SIGUSR1, &sa, NULL);
+    
+    sa.sa_handler=timer_handler;
+    sigaction(SIGALRM, &sa, NULL);
 
-	/* SIG_IGN is preserved over execve and since the the default action
-	 * for SIGPIPE is not to ignore it, some programs may get upset if
-	 * the behaviour is not the default.
-	 */
-	sa.sa_handler=ignore_handler;
-	sigaction(SIGPIPE, &sa, NULL);
+    /* SIG_IGN is preserved over execve and since the the default action
+     * for SIGPIPE is not to ignore it, some programs may get upset if
+     * the behaviour is not the default.
+     */
+    sa.sa_handler=ignore_handler;
+    sigaction(SIGPIPE, &sa, NULL);
 
 #undef IGNORE
 #undef FATAL

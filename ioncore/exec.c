@@ -39,56 +39,56 @@
 
 void ioncore_do_exec(const char *cmd)
 {
-	char *argv[4];
-	char *tmp=NULL;
+    char *argv[4];
+    char *tmp=NULL;
 
-	close(ioncore_g.conn);
-	
-	libtu_asprintf(&tmp, "exec %s", cmd);
-	if(tmp!=NULL)
-		cmd=tmp;
-	
-	ioncore_g.dpy=NULL;
-	
+    close(ioncore_g.conn);
+    
+    libtu_asprintf(&tmp, "exec %s", cmd);
+    if(tmp!=NULL)
+        cmd=tmp;
+    
+    ioncore_g.dpy=NULL;
+    
 #ifndef CF_NO_SETPGID
-	setpgid(0, 0);
+    setpgid(0, 0);
 #endif
-	
-	argv[0]=SHELL_NAME;
-	argv[1]=SHELL_ARG;
-	argv[2]=(char*)cmd; /* stupid execve... */
-	argv[3]=NULL;
-	execvp(SHELL_PATH, argv);
+    
+    argv[0]=SHELL_NAME;
+    argv[1]=SHELL_ARG;
+    argv[2]=(char*)cmd; /* stupid execve... */
+    argv[3]=NULL;
+    execvp(SHELL_PATH, argv);
 
-	die_err_obj(cmd);
+    die_err_obj(cmd);
 }
 
 
 static bool do_exec_on_rootwin(int xscr, const char *cmd)
 {
-	int pid;
-	
-	if(cmd==NULL)
-		return FALSE;
+    int pid;
+    
+    if(cmd==NULL)
+        return FALSE;
 
-	XSync(ioncore_g.dpy, False);
-	
-	pid=fork();
-	
-	if(pid<0){
-		warn_err();
-		return FALSE;
-	}
-	
-	if(pid!=0)
-		return TRUE;
-	
-	ioncore_setup_environ(xscr);
-	
-	ioncore_do_exec(cmd);
-	
-	/* We should not get here */
-	return FALSE;
+    XSync(ioncore_g.dpy, False);
+    
+    pid=fork();
+    
+    if(pid<0){
+        warn_err();
+        return FALSE;
+    }
+    
+    if(pid!=0)
+        return TRUE;
+    
+    ioncore_setup_environ(xscr);
+    
+    ioncore_do_exec(cmd);
+    
+    /* We should not get here */
+    return FALSE;
 }
 
 
@@ -98,7 +98,7 @@ static bool do_exec_on_rootwin(int xscr, const char *cmd)
  */
 bool ioncore_exec_on(WRootWin *rootwin, const char *cmd)
 {
-	return do_exec_on_rootwin(rootwin->xscr, cmd);
+    return do_exec_on_rootwin(rootwin->xscr, cmd);
 }
 
 
@@ -110,7 +110,7 @@ bool ioncore_exec_on(WRootWin *rootwin, const char *cmd)
 EXTL_EXPORT
 bool ioncore_exec(const char *cmd)
 {
-	return do_exec_on_rootwin(-1, cmd);
+    return do_exec_on_rootwin(-1, cmd);
 }
 
 
@@ -118,38 +118,38 @@ bool ioncore_exec(const char *cmd)
 
 static void process_pipe(int fd, void *p)
 {
-	char buf[BL];
-	int n;
-	
-	while(1){
-		n=read(fd, buf, BL-1);
-		if(n<0){
-			warn_err_obj("pipe read");
-			return;
-		}
-		if(n>0){
-			buf[n]='\0';
-			if(!extl_call(*(ExtlFn*)p, "s", NULL, &buf))
-				break;
-		}
-		if(n==0){
-			/* Call with no argument/NULL string to signify EOF */
-			extl_call(*(ExtlFn*)p, NULL, NULL);
-			break;
-		}
-		if(n<BL-1)
-			return;
-	}
-	
-	/* We get here on EOL or if the handler failed */
-	ioncore_unregister_input_fd(fd);
-	close(fd);
-	extl_unref_fn(*(ExtlFn*)p);
-	free(p);
+    char buf[BL];
+    int n;
+    
+    while(1){
+        n=read(fd, buf, BL-1);
+        if(n<0){
+            warn_err_obj("pipe read");
+            return;
+        }
+        if(n>0){
+            buf[n]='\0';
+            if(!extl_call(*(ExtlFn*)p, "s", NULL, &buf))
+                break;
+        }
+        if(n==0){
+            /* Call with no argument/NULL string to signify EOF */
+            extl_call(*(ExtlFn*)p, NULL, NULL);
+            break;
+        }
+        if(n<BL-1)
+            return;
+    }
+    
+    /* We get here on EOL or if the handler failed */
+    ioncore_unregister_input_fd(fd);
+    close(fd);
+    extl_unref_fn(*(ExtlFn*)p);
+    free(p);
 }
 
-#undef BL	
-	
+#undef BL    
+    
 /*EXTL_DOC
  * Run \var{cmd} with a read pipe connected to its stdout.
  * When data is received through the pipe, \var{handler} is called
@@ -158,85 +158,85 @@ static void process_pipe(int fd, void *p)
 EXTL_EXPORT
 bool ioncore_popen_bgread(const char *cmd, ExtlFn handler)
 {
-	int pid;
-	int fds[2];
-	
-	if(pipe(fds)!=0){
-		warn_err_obj("pipe()");
-		return FALSE;
-	}
+    int pid;
+    int fds[2];
+    
+    if(pipe(fds)!=0){
+        warn_err_obj("pipe()");
+        return FALSE;
+    }
 
-	pid=fork();
-	
-	if(pid<0){
-		close(fds[0]);
-		close(fds[1]);
-		warn_err();
-	}
-	
-	if(pid!=0){
-		ExtlFn *p;
-		close(fds[1]);
-		fcntl(fds[0], O_NONBLOCK);
-		p=ALLOC(ExtlFn);
-		if(p!=NULL){
-			*(ExtlFn*)p=extl_ref_fn(handler);
-			if(ioncore_register_input_fd(fds[0], p, process_pipe))
-				return TRUE;
-			extl_unref_fn(*(ExtlFn*)p);
-			free(p);
-		}
-		close(fds[0]);
-		return FALSE;
-	}
-	
-	/* Redirect stdout */
-	close(fds[0]);
-	close(1);
-	dup(fds[1]);
-	
-	ioncore_setup_environ(-1);
-	
-	ioncore_do_exec(cmd);
-	
-	/* We should not get here */
-	return FALSE;
+    pid=fork();
+    
+    if(pid<0){
+        close(fds[0]);
+        close(fds[1]);
+        warn_err();
+    }
+    
+    if(pid!=0){
+        ExtlFn *p;
+        close(fds[1]);
+        fcntl(fds[0], O_NONBLOCK);
+        p=ALLOC(ExtlFn);
+        if(p!=NULL){
+            *(ExtlFn*)p=extl_ref_fn(handler);
+            if(ioncore_register_input_fd(fds[0], p, process_pipe))
+                return TRUE;
+            extl_unref_fn(*(ExtlFn*)p);
+            free(p);
+        }
+        close(fds[0]);
+        return FALSE;
+    }
+    
+    /* Redirect stdout */
+    close(fds[0]);
+    close(1);
+    dup(fds[1]);
+    
+    ioncore_setup_environ(-1);
+    
+    ioncore_do_exec(cmd);
+    
+    /* We should not get here */
+    return FALSE;
 }
 
 
 void ioncore_setup_environ(int xscr)
 {
-	char *tmp, *ptr;
-	char *display;
-	
-	display=XDisplayName(ioncore_g.display);
-	
-	/* %ui, UINT_MAX is used to ensure there is enough space for the screen
-	 * number
-	 */
-	libtu_asprintf(&tmp, "DISPLAY=%s.0123456789a", display);
+    char *tmp, *ptr;
+    char *display;
+    
+    display=XDisplayName(ioncore_g.display);
+    
+    /* %ui, UINT_MAX is used to ensure there is enough space for the screen
+     * number
+     */
+    libtu_asprintf(&tmp, "DISPLAY=%s.0123456789a", display);
 
-	if(tmp==NULL){
-		warn_err();
-		return;
-	}
+    if(tmp==NULL){
+        warn_err();
+        return;
+    }
 
-	ptr=strchr(tmp, ':');
-	if(ptr!=NULL){
-		ptr=strchr(ptr, '.');
-		if(ptr!=NULL)
-			*ptr='\0';
-	}
+    ptr=strchr(tmp, ':');
+    if(ptr!=NULL){
+        ptr=strchr(ptr, '.');
+        if(ptr!=NULL)
+            *ptr='\0';
+    }
 
-	if(xscr>=0)
-		snprintf(tmp+strlen(tmp), 11, ".%u", (unsigned)xscr);
-	
-	putenv(tmp);
-	
-	/* No need to free it, we'll execve soon */
-	/*free(tmp);*/
+    if(xscr>=0)
+        snprintf(tmp+strlen(tmp), 11, ".%u", (unsigned)xscr);
+    
+    putenv(tmp);
+    
+    /* No need to free it, we'll execve soon */
+    /*free(tmp);*/
 
-	/*XFree(display);*/
+    /*XFree(display);*/
 }
 
 
@@ -247,9 +247,9 @@ void ioncore_setup_environ(int xscr)
 
 
 static void exitret(int retval)
-{	
-	ioncore_deinit();
-	exit(retval);
+{    
+    ioncore_deinit();
+    exit(retval);
 }
 
 
@@ -259,7 +259,7 @@ static void exitret(int retval)
 EXTL_EXPORT
 void ioncore_exit()
 {
-	exitret(EXIT_SUCCESS);
+    exitret(EXIT_SUCCESS);
 }
 
 
@@ -269,14 +269,14 @@ void ioncore_exit()
 EXTL_EXPORT
 void ioncore_restart_other(const char *cmd)
 {
-	ioncore_deinit();
-	if(cmd!=NULL){
-		if(ioncore_g.display!=NULL)
-			ioncore_setup_environ(-1);
-		ioncore_do_exec(cmd);
-	}
-	execvp(ioncore_g.argv[0], ioncore_g.argv);
-	die_err_obj(ioncore_g.argv[0]);
+    ioncore_deinit();
+    if(cmd!=NULL){
+        if(ioncore_g.display!=NULL)
+            ioncore_setup_environ(-1);
+        ioncore_do_exec(cmd);
+    }
+    execvp(ioncore_g.argv[0], ioncore_g.argv);
+    die_err_obj(ioncore_g.argv[0]);
 }
 
 
@@ -286,7 +286,7 @@ void ioncore_restart_other(const char *cmd)
 EXTL_EXPORT
 void ioncore_restart()
 {
-	ioncore_restart_other(NULL);
+    ioncore_restart_other(NULL);
 }
 
 

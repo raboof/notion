@@ -77,19 +77,19 @@ end
 -- Define a winprop. For more information, see section \ref{sec:winprops}.
 function ioncorelib.defwinprop(list)
     local list2, class, role, instance, name = {}, "*", "*", "*", 0
-
+    
     for k, v in list do
-	if k == "class" then
-	    class = v
-    	elseif k == "role" then
-	    role = v
-	elseif k == "instance" then
-	    instance = v
-	elseif k == "name" then
-	    name = v
-	else
-	    list2[k] = v
-	end
+        if k == "class" then
+            class = v
+        elseif k == "role" then
+            role = v
+        elseif k == "instance" then
+            instance = v
+        elseif k == "name" then
+            name = v
+        else
+            list2[k] = v
+        end
     end
     
     do_add_winprop(class, role, instance, name, list2)

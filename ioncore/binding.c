@@ -34,14 +34,14 @@
 #define N_MODS 8
 
 static const uint modmasks[N_MODS]={
-	ShiftMask, LockMask, ControlMask, Mod1Mask, Mod2Mask, Mod3Mask,
-	Mod4Mask, Mod5Mask
+    ShiftMask, LockMask, ControlMask, Mod1Mask, Mod2Mask, Mod3Mask,
+    Mod4Mask, Mod5Mask
 };
 
 static XModifierKeymap *modmap=NULL;
 
 #define KNOWN_MODIFIERS_MASK (ShiftMask|LockMask|ControlMask|Mod1Mask|\
-							  Mod2Mask|Mod3Mask|Mod4Mask|Mod5Mask)
+                              Mod2Mask|Mod3Mask|Mod4Mask|Mod5Mask)
 
 #ifdef CF_HACK_IGNORE_EVIL_LOCKS
 
@@ -49,11 +49,11 @@ static XModifierKeymap *modmap=NULL;
 #define N_LOOKUPEVIL 2
 
 static uint evillockmasks[N_EVILLOCKS]={
-	 0, 0, LockMask
+     0, 0, LockMask
 };
 
 static const KeySym evillocks[N_LOOKUPEVIL]={
-	XK_Num_Lock, XK_Scroll_Lock
+    XK_Num_Lock, XK_Scroll_Lock
 };
 
 static uint evilignoremask=LockMask;
@@ -61,20 +61,20 @@ static uint evilignoremask=LockMask;
 static void lookup_evil_locks();
 
 static void evil_grab_key(Display *display, uint keycode, uint modifiers,
-						  Window grab_window, bool owner_events,
-						  int pointer_mode, int keyboard_mode);
+                          Window grab_window, bool owner_events,
+                          int pointer_mode, int keyboard_mode);
 
 static void evil_grab_button(Display *display, uint button, uint modifiers,
-							 Window grab_window, bool owner_events,
-							 uint event_mask, int pointer_mode,
-							 int keyboard_mode, Window confine_to,
-							 Cursor cursor);
+                             Window grab_window, bool owner_events,
+                             uint event_mask, int pointer_mode,
+                             int keyboard_mode, Window confine_to,
+                             Cursor cursor);
 
 static void evil_ungrab_key(Display *display, uint keycode, uint modifiers,
-							Window grab_window);
+                            Window grab_window);
 
 static void evil_ungrab_button(Display *display, uint button, uint modifiers,
-							   Window grab_window);
+                               Window grab_window);
 
 #endif
 
@@ -83,20 +83,20 @@ static void evil_ungrab_button(Display *display, uint button, uint modifiers,
 
 static int compare_bindings(const void *a_, const void *b_)
 {
-	const WBinding *a=(WBinding*)a_, *b=(WBinding*)b_;
-	int r=CVAL(a, b, act);
-	if(r==0){
-		r=CVAL(a, b, kcb);
-		if(r==0){
-			r=CVAL(a, b, state);
-			if(r==0){
-				r=CVAL(a, b, area);
-			}
-		}
-	}
-	return r;
+    const WBinding *a=(WBinding*)a_, *b=(WBinding*)b_;
+    int r=CVAL(a, b, act);
+    if(r==0){
+        r=CVAL(a, b, kcb);
+        if(r==0){
+            r=CVAL(a, b, state);
+            if(r==0){
+                r=CVAL(a, b, area);
+            }
+        }
+    }
+    return r;
 }
-					
+                    
 #undef CVAL
 
 
@@ -105,234 +105,234 @@ static WBindmap *known_bindmaps=NULL;
 
 bool init_bindmap(WBindmap *bindmap)
 {
-	bindmap->nbindings=0;
-	bindmap->bindings=NULL;
-	bindmap->rbind_list=NULL;
-	bindmap->next_known=NULL;
-	bindmap->prev_known=NULL;
-	return TRUE;
+    bindmap->nbindings=0;
+    bindmap->bindings=NULL;
+    bindmap->rbind_list=NULL;
+    bindmap->next_known=NULL;
+    bindmap->prev_known=NULL;
+    return TRUE;
 }
 
 
 WBindmap *create_bindmap()
 {
-	WBindmap *bindmap=ALLOC(WBindmap);
-	
-	if(bindmap==NULL){
-		warn_err();
-		return NULL;
-	}
-	
-	init_bindmap(bindmap);
-	
-	return bindmap;
+    WBindmap *bindmap=ALLOC(WBindmap);
+    
+    if(bindmap==NULL){
+        warn_err();
+        return NULL;
+    }
+    
+    init_bindmap(bindmap);
+    
+    return bindmap;
 }
 
 
 void binding_deinit(WBinding *binding)
 {
-	int i;
-	
-	if(binding->submap!=NULL){
-		bindmap_deinit(binding->submap);
-		free(binding->submap);
-		binding->submap=NULL;
-	}
+    int i;
+    
+    if(binding->submap!=NULL){
+        bindmap_deinit(binding->submap);
+        free(binding->submap);
+        binding->submap=NULL;
+    }
 
-	binding->func=extl_unref_fn(binding->func);
+    binding->func=extl_unref_fn(binding->func);
 }
 
 
 void bindmap_deinit(WBindmap *bindmap)
 {
-	int i;
-	WBinding *binding;
+    int i;
+    WBinding *binding;
 
-	UNLINK_ITEM(known_bindmaps, bindmap, next_known, prev_known);
+    UNLINK_ITEM(known_bindmaps, bindmap, next_known, prev_known);
 
-	while(bindmap->rbind_list!=NULL){
-		region_remove_bindmap(bindmap->rbind_list->reg,
-							  bindmap);
-	}
-		
-	binding=bindmap->bindings;
-	
-	for(i=0; i<bindmap->nbindings; i++, binding++)
-		binding_deinit(binding);
-	
-	free(bindmap->bindings);
-	bindmap->bindings=NULL;
-	bindmap->nbindings=0;
+    while(bindmap->rbind_list!=NULL){
+        region_remove_bindmap(bindmap->rbind_list->reg,
+                              bindmap);
+    }
+        
+    binding=bindmap->bindings;
+    
+    for(i=0; i<bindmap->nbindings; i++, binding++)
+        binding_deinit(binding);
+    
+    free(bindmap->bindings);
+    bindmap->bindings=NULL;
+    bindmap->nbindings=0;
 }
 
 
 static void refresh_bindmap(WBindmap *bindmap)
 {
-	WRegBindingInfo *rbind;
-	WBinding *b;
-	int i;
-	
-	for(i=0, b=bindmap->bindings; i<bindmap->nbindings; i++, b++){
-		if(b->act!=BINDING_KEYPRESS)
-			continue;
-		for(rbind=bindmap->rbind_list; rbind!=NULL; rbind=rbind->bm_next)
-			rbind_binding_removed(rbind, b, bindmap);
-	}
+    WRegBindingInfo *rbind;
+    WBinding *b;
+    int i;
+    
+    for(i=0, b=bindmap->bindings; i<bindmap->nbindings; i++, b++){
+        if(b->act!=BINDING_KEYPRESS)
+            continue;
+        for(rbind=bindmap->rbind_list; rbind!=NULL; rbind=rbind->bm_next)
+            rbind_binding_removed(rbind, b, bindmap);
+    }
 
-	for(i=0, b=bindmap->bindings; i<bindmap->nbindings; i++, b++){
-		if(b->act!=BINDING_KEYPRESS)
-			continue;
-		b->kcb=XKeysymToKeycode(ioncore_g.dpy, b->ksb);
-	}
-	
-	qsort((void*)(bindmap->bindings), bindmap->nbindings, sizeof(WBinding), 
-		  compare_bindings);
-	
-	for(i=0, b=bindmap->bindings; i<bindmap->nbindings; i++, b++){
-		if(b->act!=BINDING_KEYPRESS)
-			continue;
-		for(rbind=bindmap->rbind_list; rbind!=NULL; rbind=rbind->bm_next)
-			rbind_binding_added(rbind, b, bindmap);
-	}
+    for(i=0, b=bindmap->bindings; i<bindmap->nbindings; i++, b++){
+        if(b->act!=BINDING_KEYPRESS)
+            continue;
+        b->kcb=XKeysymToKeycode(ioncore_g.dpy, b->ksb);
+    }
+    
+    qsort((void*)(bindmap->bindings), bindmap->nbindings, sizeof(WBinding), 
+          compare_bindings);
+    
+    for(i=0, b=bindmap->bindings; i<bindmap->nbindings; i++, b++){
+        if(b->act!=BINDING_KEYPRESS)
+            continue;
+        for(rbind=bindmap->rbind_list; rbind!=NULL; rbind=rbind->bm_next)
+            rbind_binding_added(rbind, b, bindmap);
+    }
 }
 
 
 void ioncore_refresh_bindings()
 {
-	WBindmap *bindmap;
-	
-	ioncore_update_modmap();
-	
-	for(bindmap=known_bindmaps; bindmap!=NULL; bindmap=bindmap->next_known)
-		refresh_bindmap(bindmap);
+    WBindmap *bindmap;
+    
+    ioncore_update_modmap();
+    
+    for(bindmap=known_bindmaps; bindmap!=NULL; bindmap=bindmap->next_known)
+        refresh_bindmap(bindmap);
 }
 
 
 bool bindmap_add_binding(WBindmap *bindmap, const WBinding *b)
 {
-	WBinding *binding;
-	int i, j;
-	
-	if(bindmap==NULL)
-		return FALSE;
+    WBinding *binding;
+    int i, j;
+    
+    if(bindmap==NULL)
+        return FALSE;
 
-	if(bindmap->prev_known==NULL){
-		LINK_ITEM(known_bindmaps, bindmap, next_known, prev_known);
-	}
+    if(bindmap->prev_known==NULL){
+        LINK_ITEM(known_bindmaps, bindmap, next_known, prev_known);
+    }
 
-	binding=bindmap->bindings;
-	
-	for(i=0; i<bindmap->nbindings; i++){
-		switch(compare_bindings((void*)b, (void*)(binding+i))){
-		case 1:
-			continue;
-		case 0:
-			binding_deinit(binding+i);
-			goto subst;
-		}
-		break;
-	}
+    binding=bindmap->bindings;
+    
+    for(i=0; i<bindmap->nbindings; i++){
+        switch(compare_bindings((void*)b, (void*)(binding+i))){
+        case 1:
+            continue;
+        case 0:
+            binding_deinit(binding+i);
+            goto subst;
+        }
+        break;
+    }
 
-	binding=REALLOC_N(binding, WBinding, bindmap->nbindings,
-					  bindmap->nbindings+1);
-	
-	if(binding==NULL){
-		warn_err();
-		return FALSE;
-	}
-	
-	memmove(&(binding[i+1]), &(binding[i]),
-			sizeof(WBinding)*(bindmap->nbindings-i));
-	
-	bindmap->bindings=binding;
-	bindmap->nbindings++;
-	
-	{
-		WRegBindingInfo *rbind;
-		for(rbind=bindmap->rbind_list; rbind!=NULL; rbind=rbind->bm_next)
-			rbind_binding_added(rbind, b, bindmap);
-	}
-	
+    binding=REALLOC_N(binding, WBinding, bindmap->nbindings,
+                      bindmap->nbindings+1);
+    
+    if(binding==NULL){
+        warn_err();
+        return FALSE;
+    }
+    
+    memmove(&(binding[i+1]), &(binding[i]),
+            sizeof(WBinding)*(bindmap->nbindings-i));
+    
+    bindmap->bindings=binding;
+    bindmap->nbindings++;
+    
+    {
+        WRegBindingInfo *rbind;
+        for(rbind=bindmap->rbind_list; rbind!=NULL; rbind=rbind->bm_next)
+            rbind_binding_added(rbind, b, bindmap);
+    }
+    
 subst:
-	memcpy(binding+i, b, sizeof(WBinding));
-	
-	return TRUE;
+    memcpy(binding+i, b, sizeof(WBinding));
+    
+    return TRUE;
 }
 
 
 bool bindmap_remove_binding(WBindmap *bindmap, const WBinding *b)
 {
-	WBinding *binding;
-	int i, j;
-	
-	if(bindmap==NULL)
-		return FALSE;
+    WBinding *binding;
+    int i, j;
+    
+    if(bindmap==NULL)
+        return FALSE;
 
-	binding=bindmap->bindings;
-	
-	for(i=0; i<bindmap->nbindings; i++){
-		switch(compare_bindings((void*)b, (void*)(binding+i))){
-		case 1:
-			continue;
-		case 0:
-			goto rmove;
-		}
-		break;
-	}
-	
-	return FALSE;
+    binding=bindmap->bindings;
+    
+    for(i=0; i<bindmap->nbindings; i++){
+        switch(compare_bindings((void*)b, (void*)(binding+i))){
+        case 1:
+            continue;
+        case 0:
+            goto rmove;
+        }
+        break;
+    }
+    
+    return FALSE;
 
 rmove:
-	binding_deinit(binding+i);
+    binding_deinit(binding+i);
 
-	{
-		WRegBindingInfo *rbind;
-		for(rbind=bindmap->rbind_list; rbind!=NULL; rbind=rbind->bm_next){
-			rbind_binding_removed(rbind, b, bindmap);
-		}
-	}
+    {
+        WRegBindingInfo *rbind;
+        for(rbind=bindmap->rbind_list; rbind!=NULL; rbind=rbind->bm_next){
+            rbind_binding_removed(rbind, b, bindmap);
+        }
+    }
 
-	memmove(&(binding[i]), &(binding[i+1]),
-			sizeof(WBinding)*(bindmap->nbindings-i));
+    memmove(&(binding[i]), &(binding[i+1]),
+            sizeof(WBinding)*(bindmap->nbindings-i));
 
-	bindmap->nbindings--;
-	
-	if(bindmap->nbindings==0){
-		free(binding);
-		bindmap->bindings=NULL;
-	}else{
-		binding=REALLOC_N(binding, WBinding, bindmap->nbindings,
-						  bindmap->nbindings);
-		if(binding==NULL)
-			warn_err();
-		else
-			bindmap->bindings=binding;
-	}
-	
-	return TRUE;
+    bindmap->nbindings--;
+    
+    if(bindmap->nbindings==0){
+        free(binding);
+        bindmap->bindings=NULL;
+    }else{
+        binding=REALLOC_N(binding, WBinding, bindmap->nbindings,
+                          bindmap->nbindings);
+        if(binding==NULL)
+            warn_err();
+        else
+            bindmap->bindings=binding;
+    }
+    
+    return TRUE;
 }
 
 
 void ioncore_init_bindings()
 {
-	modmap=XGetModifierMapping(ioncore_g.dpy);
-	
-	assert(modmap!=NULL);
+    modmap=XGetModifierMapping(ioncore_g.dpy);
+    
+    assert(modmap!=NULL);
 
 #ifdef CF_HACK_IGNORE_EVIL_LOCKS
-	lookup_evil_locks();
+    lookup_evil_locks();
 #endif
 }
 
 
 void ioncore_update_modmap()
 {
-	XModifierKeymap *nm=XGetModifierMapping(ioncore_g.dpy);
-	
-	if(nm!=NULL){
-		XFreeModifiermap(modmap);
-		modmap=nm;
-	}
+    XModifierKeymap *nm=XGetModifierMapping(ioncore_g.dpy);
+    
+    if(nm!=NULL){
+        XFreeModifiermap(modmap);
+        modmap=nm;
+    }
 }
 
 
@@ -341,60 +341,60 @@ void ioncore_update_modmap()
 
 void binding_grab_on(const WBinding *binding, Window win)
 {
-	if(binding->act==BINDING_KEYPRESS){
-#ifndef CF_HACK_IGNORE_EVIL_LOCKS			
-		XGrabKey(ioncore_g.dpy, binding->kcb, binding->state, win,
-				 True, GrabModeAsync, GrabModeAsync);
-#else		
-		evil_grab_key(ioncore_g.dpy, binding->kcb, binding->state, win,
-					  True, GrabModeAsync, GrabModeAsync);
-#endif			
-	}
-	
-	if(binding->act!=BINDING_BUTTONPRESS &&
-	   binding->act!=BINDING_BUTTONCLICK &&
-	   binding->act!=BINDING_BUTTONDBLCLICK &&
-	   binding->act!=BINDING_BUTTONMOTION)
-		return;
-	
-	if(binding->state==0)
-		return;
-	
-#ifndef CF_HACK_IGNORE_EVIL_LOCKS			
-	XGrabButton(ioncore_g.dpy, binding->kcb, binding->state, win,
-				True, IONCORE_EVENTMASK_PTRGRAB, GrabModeAsync, GrabModeAsync,
-				None, None);
-#else			
-	evil_grab_button(ioncore_g.dpy, binding->kcb, binding->state, win,
-					 True, IONCORE_EVENTMASK_PTRGRAB, GrabModeAsync, GrabModeAsync,
-					 None, None);
+    if(binding->act==BINDING_KEYPRESS){
+#ifndef CF_HACK_IGNORE_EVIL_LOCKS            
+        XGrabKey(ioncore_g.dpy, binding->kcb, binding->state, win,
+                 True, GrabModeAsync, GrabModeAsync);
+#else        
+        evil_grab_key(ioncore_g.dpy, binding->kcb, binding->state, win,
+                      True, GrabModeAsync, GrabModeAsync);
+#endif            
+    }
+    
+    if(binding->act!=BINDING_BUTTONPRESS &&
+       binding->act!=BINDING_BUTTONCLICK &&
+       binding->act!=BINDING_BUTTONDBLCLICK &&
+       binding->act!=BINDING_BUTTONMOTION)
+        return;
+    
+    if(binding->state==0)
+        return;
+    
+#ifndef CF_HACK_IGNORE_EVIL_LOCKS            
+    XGrabButton(ioncore_g.dpy, binding->kcb, binding->state, win,
+                True, IONCORE_EVENTMASK_PTRGRAB, GrabModeAsync, GrabModeAsync,
+                None, None);
+#else            
+    evil_grab_button(ioncore_g.dpy, binding->kcb, binding->state, win,
+                     True, IONCORE_EVENTMASK_PTRGRAB, GrabModeAsync, GrabModeAsync,
+                     None, None);
 #endif
 }
 
 
 void binding_ungrab_on(const WBinding *binding, Window win)
 {
-	if(binding->act==BINDING_KEYPRESS){
+    if(binding->act==BINDING_KEYPRESS){
 #ifndef CF_HACK_IGNORE_EVIL_LOCKS
-		XUngrabKey(ioncore_g.dpy, binding->kcb, binding->state, win);
+        XUngrabKey(ioncore_g.dpy, binding->kcb, binding->state, win);
 #else
-		evil_ungrab_key(ioncore_g.dpy, binding->kcb, binding->state, win);
+        evil_ungrab_key(ioncore_g.dpy, binding->kcb, binding->state, win);
 #endif
-	}
-	
-	if(binding->act!=BINDING_BUTTONPRESS &&
-	   binding->act!=BINDING_BUTTONCLICK &&
-	   binding->act!=BINDING_BUTTONDBLCLICK &&
-	   binding->act!=BINDING_BUTTONMOTION)
-		return;
-	
-	if(binding->state==0)
-		return;
+    }
+    
+    if(binding->act!=BINDING_BUTTONPRESS &&
+       binding->act!=BINDING_BUTTONCLICK &&
+       binding->act!=BINDING_BUTTONDBLCLICK &&
+       binding->act!=BINDING_BUTTONMOTION)
+        return;
+    
+    if(binding->state==0)
+        return;
 
 #ifndef CF_HACK_IGNORE_EVIL_LOCKS
-	XUngrabButton(ioncore_g.dpy, binding->kcb, binding->state, win);
+    XUngrabButton(ioncore_g.dpy, binding->kcb, binding->state, win);
 #else
-	evil_ungrab_button(ioncore_g.dpy, binding->kcb, binding->state, win);
+    evil_ungrab_button(ioncore_g.dpy, binding->kcb, binding->state, win);
 #endif
 }
 
@@ -402,12 +402,12 @@ void binding_ungrab_on(const WBinding *binding, Window win)
 #if 0
 void binding_grab_ons(WBindmap *bindmap, Window win)
 {
-	WBinding *binding;
-	int i;
-	
-	binding=bindmap->bindings;
-	for(i=0; i<bindmap->nbindings; i++, binding++)
-		binding_grab_on(binding, win);
+    WBinding *binding;
+    int i;
+    
+    binding=bindmap->bindings;
+    for(i=0; i<bindmap->nbindings; i++, binding++)
+        binding_grab_on(binding, win);
 }
 #endif
 
@@ -417,72 +417,72 @@ void binding_grab_ons(WBindmap *bindmap, Window win)
 
 static WBinding *search_binding(WBindmap *bindmap, WBinding *binding)
 {
-	return (WBinding*)bsearch((void*)binding, (void*)(bindmap->bindings),
-							  bindmap->nbindings, sizeof(WBinding),
-							  compare_bindings);
+    return (WBinding*)bsearch((void*)binding, (void*)(bindmap->bindings),
+                              bindmap->nbindings, sizeof(WBinding),
+                              compare_bindings);
 }
 
 
 static WBinding *do_bindmap_lookup_binding(WBindmap *bindmap,
-								   int act, uint state, uint kcb, int area)
+                                   int act, uint state, uint kcb, int area)
 {
-	WBinding *binding, tmp;
+    WBinding *binding, tmp;
 
-	if(bindmap->nbindings==0)
-		return NULL;
+    if(bindmap->nbindings==0)
+        return NULL;
 
 #ifdef CF_HACK_IGNORE_EVIL_LOCKS
-	state&=~evilignoremask;
+    state&=~evilignoremask;
 #endif
-	state&=KNOWN_MODIFIERS_MASK;
-	
-	tmp.act=act;
-	tmp.kcb=kcb;
-	tmp.state=state;
-	tmp.area=area;
-	
-	binding=search_binding(bindmap, &tmp);
+    state&=KNOWN_MODIFIERS_MASK;
+    
+    tmp.act=act;
+    tmp.kcb=kcb;
+    tmp.state=state;
+    tmp.area=area;
+    
+    binding=search_binding(bindmap, &tmp);
 
-	if(binding==NULL){
-		tmp.state=AnyModifier;
-		binding=search_binding(bindmap, &tmp);
+    if(binding==NULL){
+        tmp.state=AnyModifier;
+        binding=search_binding(bindmap, &tmp);
 
-		if(binding==NULL){
-			tmp.state=state;
-			tmp.kcb=(act==BINDING_KEYPRESS ? AnyKey : AnyButton);
-			binding=search_binding(bindmap, &tmp);
+        if(binding==NULL){
+            tmp.state=state;
+            tmp.kcb=(act==BINDING_KEYPRESS ? AnyKey : AnyButton);
+            binding=search_binding(bindmap, &tmp);
 
-			if(binding==NULL){
-				tmp.state=AnyModifier;
-				binding=search_binding(bindmap, &tmp);
-			}
-		}
-	}
-				
-	return binding;
+            if(binding==NULL){
+                tmp.state=AnyModifier;
+                binding=search_binding(bindmap, &tmp);
+            }
+        }
+    }
+                
+    return binding;
 }
 
 
 WBinding *bindmap_lookup_binding(WBindmap *bindmap, int act, uint state, uint kcb)
 {
-	return do_bindmap_lookup_binding(bindmap, act, state, kcb, 0);
+    return do_bindmap_lookup_binding(bindmap, act, state, kcb, 0);
 }
 
 
 WBinding *bindmap_lookup_binding_area(WBindmap *bindmap,
-							  int act, uint state, uint kcb, int area)
+                              int act, uint state, uint kcb, int area)
 {
-	WBinding *binding;
-	
-	binding=do_bindmap_lookup_binding(bindmap, act, state, kcb, area);
-	
-	if(binding==NULL)
-		binding=do_bindmap_lookup_binding(bindmap, act, state, kcb, 0);
-	
-	return binding;
+    WBinding *binding;
+    
+    binding=do_bindmap_lookup_binding(bindmap, act, state, kcb, area);
+    
+    if(binding==NULL)
+        binding=do_bindmap_lookup_binding(bindmap, act, state, kcb, 0);
+    
+    return binding;
 }
 
-	
+    
 /*
  * A dirty hack to deal with (==ignore) evil locking modifier keys.
  */
@@ -490,186 +490,186 @@ WBinding *bindmap_lookup_binding_area(WBindmap *bindmap,
 
 int ioncore_unmod(int state, int keycode)
 {
-	int j;
-	
+    int j;
+    
 #ifdef CF_HACK_IGNORE_EVIL_LOCKS
-	state&=~evilignoremask;
+    state&=~evilignoremask;
 #endif
 
-	for(j=0; j<N_MODS*modmap->max_keypermod; j++){
-		if(modmap->modifiermap[j]==keycode)
-			return state&~modmasks[j/modmap->max_keypermod];
-	}
-	
-	return state;
+    for(j=0; j<N_MODS*modmap->max_keypermod; j++){
+        if(modmap->modifiermap[j]==keycode)
+            return state&~modmasks[j/modmap->max_keypermod];
+    }
+    
+    return state;
 }
 
 
 bool ioncore_ismod(int keycode)
 {
-	int j;
-	
-	for(j=0; j<N_MODS*modmap->max_keypermod; j++){
-		if(modmap->modifiermap[j]==keycode)
-			return TRUE;
-	}
-	
-	return FALSE;
+    int j;
+    
+    for(j=0; j<N_MODS*modmap->max_keypermod; j++){
+        if(modmap->modifiermap[j]==keycode)
+            return TRUE;
+    }
+    
+    return FALSE;
 }
-	
+    
 
 #ifdef CF_HACK_IGNORE_EVIL_LOCKS
 
 static void lookup_evil_locks()
 {
-	uint keycodes[N_LOOKUPEVIL];
-	int i, j;
-	
-	for(i=0; i<N_LOOKUPEVIL; i++)
-		keycodes[i]=XKeysymToKeycode(ioncore_g.dpy, evillocks[i]);
-	
-	for(j=0; j<N_MODS*modmap->max_keypermod; j++){
-		for(i=0; i<N_LOOKUPEVIL; i++){
-			if(keycodes[i]==None)
-				continue;
-			if(modmap->modifiermap[j]==keycodes[i]){
-				evillockmasks[i]=modmasks[j/modmap->max_keypermod];
-				evilignoremask|=evillockmasks[i];
-			}
-		}
-	}
+    uint keycodes[N_LOOKUPEVIL];
+    int i, j;
+    
+    for(i=0; i<N_LOOKUPEVIL; i++)
+        keycodes[i]=XKeysymToKeycode(ioncore_g.dpy, evillocks[i]);
+    
+    for(j=0; j<N_MODS*modmap->max_keypermod; j++){
+        for(i=0; i<N_LOOKUPEVIL; i++){
+            if(keycodes[i]==None)
+                continue;
+            if(modmap->modifiermap[j]==keycodes[i]){
+                evillockmasks[i]=modmasks[j/modmap->max_keypermod];
+                evilignoremask|=evillockmasks[i];
+            }
+        }
+    }
 }
 
 
 static void evil_grab_key(Display *display, uint keycode, uint modifiers,
-						  Window grab_window, bool owner_events,
-						  int pointer_mode, int keyboard_mode)
+                          Window grab_window, bool owner_events,
+                          int pointer_mode, int keyboard_mode)
 {
-	uint mods;
-	int i, j;
-	
-	XGrabKey(display, keycode, modifiers, grab_window, owner_events,
-			 pointer_mode, keyboard_mode);
+    uint mods;
+    int i, j;
+    
+    XGrabKey(display, keycode, modifiers, grab_window, owner_events,
+             pointer_mode, keyboard_mode);
 
-	if(modifiers==AnyModifier)
-		return;
-	
-	for(i=0; i<N_EVILLOCKS; i++){
-		if(evillockmasks[i]==0)
-			continue;
-		mods=modifiers;
-		for(j=i; j<N_EVILLOCKS; j++){
-			if(evillockmasks[j]==0)
-				continue;			
-			mods|=evillockmasks[j];			
-			XGrabKey(display, keycode, mods,
-					 grab_window, owner_events, pointer_mode, keyboard_mode);
-			if(i==j)
-				continue;
-			XGrabKey(display, keycode,
-					 modifiers|evillockmasks[i]|evillockmasks[j],
-					 grab_window, owner_events, pointer_mode, keyboard_mode);
-		}
-	}	
+    if(modifiers==AnyModifier)
+        return;
+    
+    for(i=0; i<N_EVILLOCKS; i++){
+        if(evillockmasks[i]==0)
+            continue;
+        mods=modifiers;
+        for(j=i; j<N_EVILLOCKS; j++){
+            if(evillockmasks[j]==0)
+                continue;            
+            mods|=evillockmasks[j];            
+            XGrabKey(display, keycode, mods,
+                     grab_window, owner_events, pointer_mode, keyboard_mode);
+            if(i==j)
+                continue;
+            XGrabKey(display, keycode,
+                     modifiers|evillockmasks[i]|evillockmasks[j],
+                     grab_window, owner_events, pointer_mode, keyboard_mode);
+        }
+    }    
 }
 
 
 static void evil_grab_button(Display *display, uint button, uint modifiers,
-							 Window grab_window, bool owner_events,
-							 uint event_mask, int pointer_mode,
-							 int keyboard_mode, Window confine_to,
-							 Cursor cursor)
+                             Window grab_window, bool owner_events,
+                             uint event_mask, int pointer_mode,
+                             int keyboard_mode, Window confine_to,
+                             Cursor cursor)
 {
-	uint mods;
-	int i, j;
+    uint mods;
+    int i, j;
 
-	XGrabButton(display, button, modifiers,
-				grab_window, owner_events, event_mask, pointer_mode,
-				keyboard_mode, confine_to, cursor);
+    XGrabButton(display, button, modifiers,
+                grab_window, owner_events, event_mask, pointer_mode,
+                keyboard_mode, confine_to, cursor);
 
-	if(modifiers==AnyModifier)
-		return;
-	
-	for(i=0; i<N_EVILLOCKS; i++){
-		if(evillockmasks[i]==0)
-			continue;
-		mods=modifiers;
-		for(j=i; j<N_EVILLOCKS; j++){			
-			if(evillockmasks[j]==0)
-				continue;			
-			mods|=evillockmasks[j];			
-			XGrabButton(display, button, mods,
-						grab_window, owner_events, event_mask, pointer_mode,
-						keyboard_mode, confine_to, cursor);
-			if(i==j)
-				continue;
-			XGrabButton(display, button,
-						modifiers|evillockmasks[i]|evillockmasks[j],
-						grab_window, owner_events, event_mask, pointer_mode,
-						keyboard_mode, confine_to, cursor);
-		}			
-	}
+    if(modifiers==AnyModifier)
+        return;
+    
+    for(i=0; i<N_EVILLOCKS; i++){
+        if(evillockmasks[i]==0)
+            continue;
+        mods=modifiers;
+        for(j=i; j<N_EVILLOCKS; j++){            
+            if(evillockmasks[j]==0)
+                continue;            
+            mods|=evillockmasks[j];            
+            XGrabButton(display, button, mods,
+                        grab_window, owner_events, event_mask, pointer_mode,
+                        keyboard_mode, confine_to, cursor);
+            if(i==j)
+                continue;
+            XGrabButton(display, button,
+                        modifiers|evillockmasks[i]|evillockmasks[j],
+                        grab_window, owner_events, event_mask, pointer_mode,
+                        keyboard_mode, confine_to, cursor);
+        }            
+    }
 }
 
 
 static void evil_ungrab_key(Display *display, uint keycode, uint modifiers,
-							Window grab_window)
+                            Window grab_window)
 {
-	uint mods;
-	int i, j;
-	
-	XUngrabKey(display, keycode, modifiers, grab_window);
+    uint mods;
+    int i, j;
+    
+    XUngrabKey(display, keycode, modifiers, grab_window);
 
-	if(modifiers==AnyModifier)
-		return;
-	
-	for(i=0; i<N_EVILLOCKS; i++){
-		if(evillockmasks[i]==0)
-			continue;
-		mods=modifiers;
-		for(j=i; j<N_EVILLOCKS; j++){
-			if(evillockmasks[j]==0)
-				continue;			
-			mods|=evillockmasks[j];			
-			XUngrabKey(display, keycode, mods, grab_window);
-			if(i==j)
-				continue;
-			XUngrabKey(display, keycode,
-					   modifiers|evillockmasks[i]|evillockmasks[j],
-					   grab_window);
-		}
-	}	
+    if(modifiers==AnyModifier)
+        return;
+    
+    for(i=0; i<N_EVILLOCKS; i++){
+        if(evillockmasks[i]==0)
+            continue;
+        mods=modifiers;
+        for(j=i; j<N_EVILLOCKS; j++){
+            if(evillockmasks[j]==0)
+                continue;            
+            mods|=evillockmasks[j];            
+            XUngrabKey(display, keycode, mods, grab_window);
+            if(i==j)
+                continue;
+            XUngrabKey(display, keycode,
+                       modifiers|evillockmasks[i]|evillockmasks[j],
+                       grab_window);
+        }
+    }    
 }
 
 
 static void evil_ungrab_button(Display *display, uint button, uint modifiers,
-							   Window grab_window)
+                               Window grab_window)
 {
-	uint mods;
-	int i, j;
-	
-	XUngrabButton(display, button, modifiers, grab_window);
+    uint mods;
+    int i, j;
+    
+    XUngrabButton(display, button, modifiers, grab_window);
 
-	if(modifiers==AnyModifier)
-		return;
-	
-	for(i=0; i<N_EVILLOCKS; i++){
-		if(evillockmasks[i]==0)
-			continue;
-		mods=modifiers;
-		for(j=i; j<N_EVILLOCKS; j++){			
-			if(evillockmasks[j]==0)
-				continue;			
-			mods|=evillockmasks[j];			
-			XUngrabButton(display, button, mods, grab_window);
-			if(i==j)
-				continue;
-			XUngrabButton(display, button,
-						  modifiers|evillockmasks[i]|evillockmasks[j], 
-						  grab_window);
-		}			
-	}
-	
+    if(modifiers==AnyModifier)
+        return;
+    
+    for(i=0; i<N_EVILLOCKS; i++){
+        if(evillockmasks[i]==0)
+            continue;
+        mods=modifiers;
+        for(j=i; j<N_EVILLOCKS; j++){            
+            if(evillockmasks[j]==0)
+                continue;            
+            mods|=evillockmasks[j];            
+            XUngrabButton(display, button, mods, grab_window);
+            if(i==j)
+                continue;
+            XUngrabButton(display, button,
+                          modifiers|evillockmasks[i]|evillockmasks[j], 
+                          grab_window);
+        }            
+    }
+    
 }
 
 #endif /* CF_HACK_IGNORE_EVIL_LOCKS */

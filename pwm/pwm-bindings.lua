@@ -153,7 +153,7 @@ defbindings("WMoveresMode", {
     kpress("Up",   "resize", 0, 0, 1, 0),
     kpress("Down", "resize", 0, 0, 0, 1),
     kpress("F",    "resize", 1, 0, 0, 0),
-    kpress("B",	   "resize", 0, 1, 0, 0),
+    kpress("B",       "resize", 0, 1, 0, 0),
     kpress("P",    "resize", 0, 0, 1, 0),
     kpress("N",    "resize", 0, 0, 0, 1),
 
@@ -168,11 +168,11 @@ defbindings("WMoveresMode", {
 
     kpress(DEFAULT_MOD.."Left", "move",-1, 0),
     kpress(DEFAULT_MOD.."Right","move", 1, 0),
-    kpress(DEFAULT_MOD.."Up", 	"move", 0,-1),
+    kpress(DEFAULT_MOD.."Up",     "move", 0,-1),
     kpress(DEFAULT_MOD.."Down", "move", 0, 1),
     kpress(DEFAULT_MOD.."F",    "move",-1, 0),
     kpress(DEFAULT_MOD.."B",    "move", 1, 0),
-    kpress(DEFAULT_MOD.."P", 	"move", 0,-1),
+    kpress(DEFAULT_MOD.."P",     "move", 0,-1),
     kpress(DEFAULT_MOD.."N",    "move", 0, 1),
 })
 

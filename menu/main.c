@@ -37,7 +37,7 @@ WBindmap menumod_menu_bindmap=BINDMAP_INIT;
 EXTL_EXPORT_AS(global, __defbindings_WMenu)
 bool menumod_defbindings_WMenu(ExtlTab tab)
 {
-	return bindmap_do_table(&menumod_menu_bindmap, NULL, tab);
+    return bindmap_do_table(&menumod_menu_bindmap, NULL, tab);
 }
 
 
@@ -53,21 +53,21 @@ extern void menumod_unregister_exports();
 
 void menumod_deinit()
 {
-	menumod_unregister_exports();
-	bindmap_deinit(&menumod_menu_bindmap);
+    menumod_unregister_exports();
+    bindmap_deinit(&menumod_menu_bindmap);
 }
 
 
 bool menumod_init()
 {
-	if(!menumod_register_exports()){
-		menumod_deinit();
-		return FALSE;
-	}
-	
-	ioncore_read_config("menu", NULL, TRUE);
-	
-	return TRUE;
+    if(!menumod_register_exports()){
+        menumod_deinit();
+        return FALSE;
+    }
+    
+    ioncore_read_config("menu", NULL, TRUE);
+    
+    return TRUE;
 }
 
 

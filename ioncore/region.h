@@ -16,66 +16,66 @@
 #include <libtu/obj.h>
 #include "rectangle.h"
 
-#define REGION_MAPPED		0x0001
-#define REGION_ACTIVE		0x0002
-#define REGION_HAS_GRABS 	0x0004
-#define REGION_TAGGED		0x0008
+#define REGION_MAPPED        0x0001
+#define REGION_ACTIVE        0x0002
+#define REGION_HAS_GRABS     0x0004
+#define REGION_TAGGED        0x0008
 #define REGION_BINDINGS_ARE_GRABBED 0x0020
-#define REGION_KEEPONTOP 	0x0080
-#define REGION_ACTIVITY		0x0100
-#define REGION_SKIP_FOCUS 	0x0200
+#define REGION_KEEPONTOP     0x0080
+#define REGION_ACTIVITY        0x0100
+#define REGION_SKIP_FOCUS     0x0200
 
 /* Use region_is_fully_mapped instead for most cases. */
-#define REGION_IS_MAPPED(R)		(((WRegion*)(R))->flags&REGION_MAPPED)
-#define REGION_MARK_MAPPED(R)	(((WRegion*)(R))->flags|=REGION_MAPPED)
-#define REGION_MARK_UNMAPPED(R)	(((WRegion*)(R))->flags&=~REGION_MAPPED)
-#define REGION_IS_ACTIVE(R)		(((WRegion*)(R))->flags&REGION_ACTIVE)
-#define REGION_IS_TAGGED(R)		(((WRegion*)(R))->flags&REGION_TAGGED)
-#define REGION_IS_URGENT(R)		(((WRegion*)(R))->flags&REGION_URGENT)
-#define REGION_GEOM(R)  		(((WRegion*)(R))->geom)
-#define REGION_ACTIVE_SUB(R)  	(((WRegion*)(R))->active_sub)
+#define REGION_IS_MAPPED(R)        (((WRegion*)(R))->flags&REGION_MAPPED)
+#define REGION_MARK_MAPPED(R)    (((WRegion*)(R))->flags|=REGION_MAPPED)
+#define REGION_MARK_UNMAPPED(R)    (((WRegion*)(R))->flags&=~REGION_MAPPED)
+#define REGION_IS_ACTIVE(R)        (((WRegion*)(R))->flags&REGION_ACTIVE)
+#define REGION_IS_TAGGED(R)        (((WRegion*)(R))->flags&REGION_TAGGED)
+#define REGION_IS_URGENT(R)        (((WRegion*)(R))->flags&REGION_URGENT)
+#define REGION_GEOM(R)          (((WRegion*)(R))->geom)
+#define REGION_ACTIVE_SUB(R)      (((WRegion*)(R))->active_sub)
 
 INTRSTRUCT(WSubmapState);
 DECLSTRUCT(WSubmapState){
-	uint key, state;
-	WSubmapState *next;
+    uint key, state;
+    WSubmapState *next;
 };
 
 DECLCLASS(WRegion){
-	Obj obj;
-	
-	WRectangle geom;
-	void *rootwin;
-	bool flags;
+    Obj obj;
+    
+    WRectangle geom;
+    void *rootwin;
+    bool flags;
 
-	WRegion *parent, *children;
-	WRegion *p_next, *p_prev;
-	
-	void *bindings;
-	WSubmapState submapstat;
-	
-	WRegion *active_sub;
-	
-	struct{
-		char *name;
-		void *namespaceinfo;
-		WRegion *ns_next, *ns_prev;
-	} ni;
-	
-	WRegion *manager;
-	WRegion *mgr_next, *mgr_prev;
-	
-	struct{
-		WRegion *below_list;
-		WRegion *above;
-		WRegion *next, *prev;
-	} stacking;
-	
-	int mgd_activity;
+    WRegion *parent, *children;
+    WRegion *p_next, *p_prev;
+    
+    void *bindings;
+    WSubmapState submapstat;
+    
+    WRegion *active_sub;
+    
+    struct{
+        char *name;
+        void *namespaceinfo;
+        WRegion *ns_next, *ns_prev;
+    } ni;
+    
+    WRegion *manager;
+    WRegion *mgr_next, *mgr_prev;
+    
+    struct{
+        WRegion *below_list;
+        WRegion *above;
+        WRegion *next, *prev;
+    } stacking;
+    
+    int mgd_activity;
 };
 
 extern void region_init(WRegion *reg, WRegion *parent, 
-						const WRectangle *geom);
+                        const WRectangle *geom);
 extern void region_deinit(WRegion *reg);
 
 DYNFUN void region_fit(WRegion *reg, const WRectangle *geom);

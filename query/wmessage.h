@@ -22,11 +22,11 @@
 INTRCLASS(WMessage);
 
 DECLCLASS(WMessage){
-	WInput input;
-	WListing listing;
+    WInput input;
+    WListing listing;
 };
 
 extern WMessage *create_wmsg(WWindow *par, const WRectangle *geom,
-							 const char *msg);
+                             const char *msg);
 
 #endif /* ION_QUERY_WMESSAGE_H */

@@ -33,88 +33,88 @@
 
 void region_init(WRegion *reg, WRegion *parent, const WRectangle *geom)
 {
-	reg->geom=*geom;
-	reg->flags=0;
-	reg->bindings=NULL;
-	reg->rootwin=NULL;
-	
-	reg->children=NULL;
-	reg->parent=NULL;
-	reg->p_next=NULL;
-	reg->p_prev=NULL;
-	
-	reg->active_sub=NULL;
-	
-	reg->ni.name=NULL;
-	reg->ni.namespaceinfo=NULL;
-	reg->ni.ns_next=NULL;
-	reg->ni.ns_prev=NULL;
-	
-	reg->manager=NULL;
-	reg->mgr_next=NULL;
-	reg->mgr_prev=NULL;
-	
-	reg->stacking.below_list=NULL;
-	reg->stacking.next=NULL;
-	reg->stacking.prev=NULL;
-	reg->stacking.above=NULL;
-	
-	reg->mgd_activity=FALSE;
+    reg->geom=*geom;
+    reg->flags=0;
+    reg->bindings=NULL;
+    reg->rootwin=NULL;
+    
+    reg->children=NULL;
+    reg->parent=NULL;
+    reg->p_next=NULL;
+    reg->p_prev=NULL;
+    
+    reg->active_sub=NULL;
+    
+    reg->ni.name=NULL;
+    reg->ni.namespaceinfo=NULL;
+    reg->ni.ns_next=NULL;
+    reg->ni.ns_prev=NULL;
+    
+    reg->manager=NULL;
+    reg->mgr_next=NULL;
+    reg->mgr_prev=NULL;
+    
+    reg->stacking.below_list=NULL;
+    reg->stacking.next=NULL;
+    reg->stacking.prev=NULL;
+    reg->stacking.above=NULL;
+    
+    reg->mgd_activity=FALSE;
 
-	if(!OBJ_IS(reg, WClientWin))
-		region_init_name(reg, OBJ_TYPESTR(reg));
-	
-	if(parent!=NULL){
-		reg->rootwin=parent->rootwin;
-		region_set_parent(reg, parent);
-	}else{
-		assert(OBJ_IS(reg, WRootWin));/* || OBJ_IS(reg, WScreen));*/
-	}
+    if(!OBJ_IS(reg, WClientWin))
+        region_init_name(reg, OBJ_TYPESTR(reg));
+    
+    if(parent!=NULL){
+        reg->rootwin=parent->rootwin;
+        region_set_parent(reg, parent);
+    }else{
+        assert(OBJ_IS(reg, WRootWin));/* || OBJ_IS(reg, WScreen));*/
+    }
 }
 
 
 static void destroy_children(WRegion *reg)
 {
-	WRegion *sub, *prev=NULL;
-	bool complained=FALSE;
-	
-	/* destroy children */
-	while(1){
-		sub=reg->children;
-		if(sub==NULL)
-			break;
-		assert(!OBJ_IS_BEING_DESTROYED(sub));
-		assert(sub!=prev);
-		if(ioncore_g.opmode!=IONCORE_OPMODE_DEINIT && !complained && OBJ_IS(reg, WClientWin)){
-			warn("Destroying object \"%s\" with client windows as children.", 
-				 region_name(reg));
-			complained=TRUE;
-		}
-		prev=sub;
-		destroy_obj((Obj*)sub);
-	}
+    WRegion *sub, *prev=NULL;
+    bool complained=FALSE;
+    
+    /* destroy children */
+    while(1){
+        sub=reg->children;
+        if(sub==NULL)
+            break;
+        assert(!OBJ_IS_BEING_DESTROYED(sub));
+        assert(sub!=prev);
+        if(ioncore_g.opmode!=IONCORE_OPMODE_DEINIT && !complained && OBJ_IS(reg, WClientWin)){
+            warn("Destroying object \"%s\" with client windows as children.", 
+                 region_name(reg));
+            complained=TRUE;
+        }
+        prev=sub;
+        destroy_obj((Obj*)sub);
+    }
 }
 
 
 void region_deinit(WRegion *reg)
 {
-	/*rescue_child_clientwins(reg);*/
-	
-	destroy_children(reg);
+    /*rescue_child_clientwins(reg);*/
+    
+    destroy_children(reg);
 
-	if(ioncore_g.focus_next==reg){
-		D(warn("Region to be focused next destroyed[1]."));
-		ioncore_g.focus_next=NULL;
-	}
-	
-	region_detach(reg);
-	region_unuse_name(reg);
-	region_remove_bindings(reg);
+    if(ioncore_g.focus_next==reg){
+        D(warn("Region to be focused next destroyed[1]."));
+        ioncore_g.focus_next=NULL;
+    }
+    
+    region_detach(reg);
+    region_unuse_name(reg);
+    region_remove_bindings(reg);
 
-	if(ioncore_g.focus_next==reg){
-		D(warn("Region to be focused next destroyed[2]."));
-		ioncore_g.focus_next=NULL;
-	}
+    if(ioncore_g.focus_next==reg){
+        D(warn("Region to be focused next destroyed[2]."));
+        ioncore_g.focus_next=NULL;
+    }
 }
 
 
@@ -126,57 +126,57 @@ void region_deinit(WRegion *reg)
 
 void region_fit(WRegion *reg, const WRectangle *geom)
 {
-	CALL_DYN(region_fit, reg, (reg, geom));
+    CALL_DYN(region_fit, reg, (reg, geom));
 }
 
 
 void region_draw_config_updated(WRegion *reg)
 {
-	CALL_DYN(region_draw_config_updated, reg, (reg));
+    CALL_DYN(region_draw_config_updated, reg, (reg));
 }
 
 
 void region_map(WRegion *reg)
 {
-	CALL_DYN(region_map, reg, (reg));
+    CALL_DYN(region_map, reg, (reg));
 }
 
 
 void region_unmap(WRegion *reg)
 {
-	CALL_DYN(region_unmap, reg, (reg));
+    CALL_DYN(region_unmap, reg, (reg));
 }
 
 
 void region_notify_rootpos(WRegion *reg, int x, int y)
 {
-	CALL_DYN(region_notify_rootpos, reg, (reg, x, y));
+    CALL_DYN(region_notify_rootpos, reg, (reg, x, y));
 }
 
 
 Window region_xwindow(const WRegion *reg)
 {
-	Window ret=None;
-	CALL_DYN_RET(ret, Window, region_xwindow, reg, (reg));
-	return ret;
+    Window ret=None;
+    CALL_DYN_RET(ret, Window, region_xwindow, reg, (reg));
+    return ret;
 }
 
 
 void region_activated(WRegion *reg)
 {
-	CALL_DYN(region_activated, reg, (reg));
+    CALL_DYN(region_activated, reg, (reg));
 }
 
 
 void region_inactivated(WRegion *reg)
 {
-	CALL_DYN(region_inactivated, reg, (reg));
+    CALL_DYN(region_inactivated, reg, (reg));
 }
 
 
 void region_do_set_focus(WRegion *reg, bool warp)
 {
-	CALL_DYN(region_do_set_focus, reg, (reg, warp));
+    CALL_DYN(region_do_set_focus, reg, (reg, warp));
 }
 
 
@@ -190,66 +190,66 @@ void region_do_set_focus(WRegion *reg, bool warp)
 EXTL_EXPORT_MEMBER
 void region_close(WRegion *reg)
 {
-	CALL_DYN(region_close, reg, (reg));
+    CALL_DYN(region_close, reg, (reg));
 }
 
 
 bool region_may_destroy_managed(WRegion *mgr, WRegion *reg)
 {
-	bool ret=TRUE;
-	CALL_DYN_RET(ret, bool, region_may_destroy_managed, mgr, (mgr, reg));
-	return ret;
+    bool ret=TRUE;
+    CALL_DYN_RET(ret, bool, region_may_destroy_managed, mgr, (mgr, reg));
+    return ret;
 }
 
-	
+    
 /*{{{ Manager region dynfuns */
 
 
 void region_managed_activated(WRegion *mgr, WRegion *reg)
 {
-	CALL_DYN(region_managed_activated, mgr, (mgr, reg));
+    CALL_DYN(region_managed_activated, mgr, (mgr, reg));
 }
 
 
 void region_managed_inactivated(WRegion *mgr, WRegion *reg)
 {
-	CALL_DYN(region_managed_inactivated, mgr, (mgr, reg));
+    CALL_DYN(region_managed_inactivated, mgr, (mgr, reg));
 }
 
 
 bool region_display_managed(WRegion *mgr, WRegion *reg)
 {
-	bool ret=TRUE;
-	CALL_DYN_RET(ret, bool, region_display_managed, mgr, (mgr, reg));
-	return ret;
+    bool ret=TRUE;
+    CALL_DYN_RET(ret, bool, region_display_managed, mgr, (mgr, reg));
+    return ret;
 }
 
 
 void region_notify_managed_change(WRegion *mgr, WRegion *reg)
 {
-	CALL_DYN(region_notify_managed_change, mgr, (mgr, reg));
+    CALL_DYN(region_notify_managed_change, mgr, (mgr, reg));
 }
 
 
 void region_remove_managed(WRegion *mgr, WRegion *reg)
 {
-	CALL_DYN(region_remove_managed, mgr, (mgr, reg));
+    CALL_DYN(region_remove_managed, mgr, (mgr, reg));
 }
 
 
 WRegion *region_control_managed_focus(WRegion *mgr, WRegion *reg)
 {
-	WRegion *ret=NULL;
-	CALL_DYN_RET(ret, WRegion*, region_control_managed_focus, mgr, (mgr, reg));
-	return ret;
+    WRegion *ret=NULL;
+    CALL_DYN_RET(ret, WRegion*, region_control_managed_focus, mgr, (mgr, reg));
+    return ret;
 }
 
 
 WRegion *region_current(WRegion *mgr)
 {
-	WRegion *ret=NULL;
-	CALL_DYN_RET(ret, WRegion*, region_current, mgr, (mgr));
-	return ret;
+    WRegion *ret=NULL;
+    CALL_DYN_RET(ret, WRegion*, region_current, mgr, (mgr));
+    return ret;
 }
 
 
@@ -264,17 +264,17 @@ WRegion *region_current(WRegion *mgr)
 
 static void region_notify_rootpos_default(WRegion *reg, int x, int y)
 {
-	region_notify_subregions_rootpos(reg, x, y);
+    region_notify_subregions_rootpos(reg, x, y);
 }
 
 
 void region_draw_config_updated_default(WRegion *reg)
 {
-	WRegion *sub=NULL;
-	
-	FOR_ALL_CHILDREN(reg, sub){
-		region_draw_config_updated(sub);
-	}
+    WRegion *sub=NULL;
+    
+    FOR_ALL_CHILDREN(reg, sub){
+        region_draw_config_updated(sub);
+    }
 }
 
 
@@ -286,71 +286,71 @@ void region_draw_config_updated_default(WRegion *reg)
 
 void region_detach_parent(WRegion *reg)
 {
-	WRegion *p=reg->parent;
+    WRegion *p=reg->parent;
 
-	region_reset_stacking(reg);
+    region_reset_stacking(reg);
 
-	if(p==NULL || p==reg)
-		return;
-	
-	UNLINK_ITEM(p->children, reg, p_next, p_prev);
-	reg->parent=NULL;
+    if(p==NULL || p==reg)
+        return;
+    
+    UNLINK_ITEM(p->children, reg, p_next, p_prev);
+    reg->parent=NULL;
 
-	if(p->active_sub==reg){
-		p->active_sub=NULL;
-		
-		/* Removed: seems to confuse floatws:s when frames are
-		 * destroyd.
-		 */
-		/*if(REGION_IS_ACTIVE(reg) && ioncore_g.focus_next==NULL)
-			set_focus(p);*/
-	}
+    if(p->active_sub==reg){
+        p->active_sub=NULL;
+        
+        /* Removed: seems to confuse floatws:s when frames are
+         * destroyd.
+         */
+        /*if(REGION_IS_ACTIVE(reg) && ioncore_g.focus_next==NULL)
+            set_focus(p);*/
+    }
 }
 
 
 void region_detach_manager(WRegion *reg)
 {
-	WRegion *mgr;
-	
-	mgr=REGION_MANAGER(reg);
-	
-	if(mgr==NULL)
-		return;
-	
-	D2(fprintf(stderr, "detach %s (mgr:%s)\n", OBJ_TYPESTR(reg),
-			   OBJ_TYPESTR(mgr)));
-	
-	/* Restore activity state to non-parent manager */
-	if(region_may_control_focus(reg)){
-		WRegion *par=region_parent(reg);
-		if(par!=NULL && mgr!=par && region_parent(mgr)==par){
-			/* REGION_ACTIVE shouldn't be set for windowless regions
-			 * but make the parent's active_sub point to it
-			 * nevertheless so that region_may_control_focus can
-			 * be made to work.
-			 */
-			D2(fprintf(stderr, "detach mgr %s, %s->active_sub=%s\n",
-					   OBJ_TYPESTR(reg), OBJ_TYPESTR(par),
-					   OBJ_TYPESTR(mgr)));
-			par->active_sub=mgr;
-			/*if(region_xwindow(mgr)!=None){*/
-				region_do_set_focus(mgr, FALSE);
-			/*}*/
-		}
-	}
+    WRegion *mgr;
+    
+    mgr=REGION_MANAGER(reg);
+    
+    if(mgr==NULL)
+        return;
+    
+    D2(fprintf(stderr, "detach %s (mgr:%s)\n", OBJ_TYPESTR(reg),
+               OBJ_TYPESTR(mgr)));
+    
+    /* Restore activity state to non-parent manager */
+    if(region_may_control_focus(reg)){
+        WRegion *par=region_parent(reg);
+        if(par!=NULL && mgr!=par && region_parent(mgr)==par){
+            /* REGION_ACTIVE shouldn't be set for windowless regions
+             * but make the parent's active_sub point to it
+             * nevertheless so that region_may_control_focus can
+             * be made to work.
+             */
+            D2(fprintf(stderr, "detach mgr %s, %s->active_sub=%s\n",
+                       OBJ_TYPESTR(reg), OBJ_TYPESTR(par),
+                       OBJ_TYPESTR(mgr)));
+            par->active_sub=mgr;
+            /*if(region_xwindow(mgr)!=None){*/
+                region_do_set_focus(mgr, FALSE);
+            /*}*/
+        }
+    }
 
-	region_clear_activity(reg);
+    region_clear_activity(reg);
 
-	region_remove_managed(mgr, reg);
-	
-	assert(REGION_MANAGER(reg)==NULL);
+    region_remove_managed(mgr, reg);
+    
+    assert(REGION_MANAGER(reg)==NULL);
 }
 
 
 void region_detach(WRegion *reg)
 {
-	region_detach_manager(reg);
-	region_detach_parent(reg);
+    region_detach_manager(reg);
+    region_detach_parent(reg);
 }
 
 
@@ -366,26 +366,26 @@ void region_detach(WRegion *reg)
 EXTL_EXPORT_MEMBER
 bool region_display(WRegion *reg)
 {
-	WRegion *mgr, *preg;
+    WRegion *mgr, *preg;
 
-	if(region_is_fully_mapped(reg))
-		return TRUE;
-	
-	mgr=REGION_MANAGER(reg);
-	
-	if(mgr!=NULL){
-		if(!region_display(mgr))
-			return FALSE;
-		return region_display_managed(mgr, reg);
-	}
-	
-	preg=region_parent(reg);
+    if(region_is_fully_mapped(reg))
+        return TRUE;
+    
+    mgr=REGION_MANAGER(reg);
+    
+    if(mgr!=NULL){
+        if(!region_display(mgr))
+            return FALSE;
+        return region_display_managed(mgr, reg);
+    }
+    
+    preg=region_parent(reg);
 
-	if(preg!=NULL && !region_display(preg))
-		return FALSE;
+    if(preg!=NULL && !region_display(preg))
+        return FALSE;
 
-	region_map(reg);
-	return TRUE;
+    region_map(reg);
+    return TRUE;
 }
 
 
@@ -396,14 +396,14 @@ bool region_display(WRegion *reg)
 EXTL_EXPORT_MEMBER
 bool region_display_sp(WRegion *reg)
 {
-	bool ret;
-	
-	ioncore_set_previous_of(reg);
-	ioncore_protect_previous();
-	ret=region_display(reg);
-	ioncore_unprotect_previous();
+    bool ret;
+    
+    ioncore_set_previous_of(reg);
+    ioncore_protect_previous();
+    ret=region_display(reg);
+    ioncore_unprotect_previous();
 
-	return ret;
+    return ret;
 }
 
 
@@ -414,15 +414,15 @@ bool region_display_sp(WRegion *reg)
 EXTL_EXPORT_MEMBER
 bool region_goto(WRegion *reg)
 {
-	bool ret=FALSE;
+    bool ret=FALSE;
 
-	ioncore_set_previous_of(reg);
-	ioncore_protect_previous();
-	if(region_display(reg))
-		ret=(reg==region_set_focus_mgrctl(reg, TRUE));
-	ioncore_unprotect_previous();
-	
-	return ret;
+    ioncore_set_previous_of(reg);
+    ioncore_protect_previous();
+    if(region_display(reg))
+        ret=(reg==region_set_focus_mgrctl(reg, TRUE));
+    ioncore_unprotect_previous();
+    
+    return ret;
 }
 
 
@@ -438,113 +438,113 @@ bool region_goto(WRegion *reg)
 EXTL_EXPORT_AS(WRegion, is_mapped)
 bool region_is_fully_mapped(WRegion *reg)
 {
-	for(; reg!=NULL; reg=region_parent(reg)){
-		if(!REGION_IS_MAPPED(reg))
-			return FALSE;
-	}
-	
-	return TRUE;
+    for(; reg!=NULL; reg=region_parent(reg)){
+        if(!REGION_IS_MAPPED(reg))
+            return FALSE;
+    }
+    
+    return TRUE;
 }
 
 
 void region_rootgeom(WRegion *reg, int *xret, int *yret)
 {
-	*xret=REGION_GEOM(reg).x;
-	*yret=REGION_GEOM(reg).y;
-	
-	while(1){
-		reg=region_parent(reg);
-		if(reg==NULL)
-			break;
-		*xret+=REGION_GEOM(reg).x;
-		*yret+=REGION_GEOM(reg).y;
-	}
+    *xret=REGION_GEOM(reg).x;
+    *yret=REGION_GEOM(reg).y;
+    
+    while(1){
+        reg=region_parent(reg);
+        if(reg==NULL)
+            break;
+        *xret+=REGION_GEOM(reg).x;
+        *yret+=REGION_GEOM(reg).y;
+    }
 }
 
 
 void region_notify_subregions_move(WRegion *reg)
 {
-	int x, y;
-	
-	region_rootgeom(reg, &x, &y);
-	region_notify_subregions_rootpos(reg, x, y);
+    int x, y;
+    
+    region_rootgeom(reg, &x, &y);
+    region_notify_subregions_rootpos(reg, x, y);
 }
 
 
 void region_notify_subregions_rootpos(WRegion *reg, int x, int y)
 {
-	WRegion *sub=NULL;
-	
-	FOR_ALL_CHILDREN(reg, sub){
-		region_notify_rootpos(sub,
-							  x+REGION_GEOM(sub).x,
-							  y+REGION_GEOM(sub).y);
-	}
+    WRegion *sub=NULL;
+    
+    FOR_ALL_CHILDREN(reg, sub){
+        region_notify_rootpos(sub,
+                              x+REGION_GEOM(sub).x,
+                              y+REGION_GEOM(sub).y);
+    }
 }
 
 
 void region_rootpos(WRegion *reg, int *xret, int *yret)
 {
-	WRegion *par;
+    WRegion *par;
 
-	par=region_parent(reg);
-	
-	if(par==NULL || par==reg){
-		*xret=0;
-		*yret=0;
-		return;
-	}
-	
-	region_rootpos(par, xret, yret);
-	
-	*xret+=REGION_GEOM(reg).x;
-	*yret+=REGION_GEOM(reg).y;
+    par=region_parent(reg);
+    
+    if(par==NULL || par==reg){
+        *xret=0;
+        *yret=0;
+        return;
+    }
+    
+    region_rootpos(par, xret, yret);
+    
+    *xret+=REGION_GEOM(reg).x;
+    *yret+=REGION_GEOM(reg).y;
 }
 
 
 void region_notify_change(WRegion *reg)
 {
-	WRegion *mgr=REGION_MANAGER(reg);
-	
-	if(mgr!=NULL)
-		region_notify_managed_change(mgr, reg);
+    WRegion *mgr=REGION_MANAGER(reg);
+    
+    if(mgr!=NULL)
+        region_notify_managed_change(mgr, reg);
 }
 
 
 void region_set_manager(WRegion *reg, WRegion *mgr, WRegion **listptr)
 {
-	assert(reg->manager==NULL);
-	
-	reg->manager=mgr;
-	if(listptr!=NULL){
-		LINK_ITEM(*listptr, reg, mgr_next, mgr_prev);
-	}
+    assert(reg->manager==NULL);
+    
+    reg->manager=mgr;
+    if(listptr!=NULL){
+        LINK_ITEM(*listptr, reg, mgr_next, mgr_prev);
+    }
 }
 
 
 void region_unset_manager(WRegion *reg, WRegion *mgr, WRegion **listptr)
 {
-	if(reg->manager!=mgr)
-		return;
-	reg->manager=NULL;
-	if(listptr!=NULL){
-		UNLINK_ITEM(*listptr, reg, mgr_next, mgr_prev);
-	}
+    if(reg->manager!=mgr)
+        return;
+    reg->manager=NULL;
+    if(listptr!=NULL){
+        UNLINK_ITEM(*listptr, reg, mgr_next, mgr_prev);
+    }
 }
 
 
 void region_set_parent(WRegion *reg, WRegion *parent)
 {
-	assert(reg->parent==NULL && parent!=NULL);
-	LINK_ITEM(parent->children, reg, p_next, p_prev);
-	reg->parent=parent;
+    assert(reg->parent==NULL && parent!=NULL);
+    LINK_ITEM(parent->children, reg, p_next, p_prev);
+    reg->parent=parent;
 }
 
 
 void region_attach_parent(WRegion *reg, WRegion *parent)
 {
-	region_set_parent(reg, parent);
-	region_raise(reg);
+    region_set_parent(reg, parent);
+    region_raise(reg);
 }
 
 
@@ -554,7 +554,7 @@ void region_attach_parent(WRegion *reg, WRegion *parent)
 EXTL_EXPORT_MEMBER
 WRegion *region_manager(WRegion *reg)
 {
-	return reg->manager;
+    return reg->manager;
 }
 
 
@@ -564,16 +564,16 @@ WRegion *region_manager(WRegion *reg)
 EXTL_EXPORT_MEMBER
 WRegion *region_parent(WRegion *reg)
 {
-	return reg->parent;
+    return reg->parent;
 }
 
 
 WRegion *region_manager_or_parent(WRegion *reg)
 {
-	if(reg->manager!=NULL)
-		return reg->manager;
-	else
-		return reg->parent;
+    if(reg->manager!=NULL)
+        return reg->manager;
+    else
+        return reg->parent;
 }
 
 
@@ -584,31 +584,31 @@ WRegion *region_manager_or_parent(WRegion *reg)
 EXTL_EXPORT_MEMBER
 ExtlTab region_geom(WRegion *reg)
 {
-	return extl_table_from_rectangle(&REGION_GEOM(reg));
+    return extl_table_from_rectangle(&REGION_GEOM(reg));
 }
 
 
 bool region_may_destroy(WRegion *reg)
 {
-	WRegion *mgr=REGION_MANAGER(reg);
-	if(mgr==NULL)
-		return TRUE;
-	else
-		return region_may_destroy_managed(mgr, reg);
+    WRegion *mgr=REGION_MANAGER(reg);
+    if(mgr==NULL)
+        return TRUE;
+    else
+        return region_may_destroy_managed(mgr, reg);
 }
 
 
 WRegion *region_get_manager_chk(WRegion *p, const ClassDescr *descr)
 {
-	WRegion *mgr=NULL;
-	
-	if(p!=NULL){
-		mgr=REGION_MANAGER(p);
-		if(obj_is((Obj*)mgr, descr))
-			return mgr;
-	}
-	
-	return NULL;
+    WRegion *mgr=NULL;
+    
+    if(p!=NULL){
+        mgr=REGION_MANAGER(p);
+        if(obj_is((Obj*)mgr, descr))
+            return mgr;
+    }
+    
+    return NULL;
 }
 
 
@@ -621,23 +621,23 @@ WRegion *region_get_manager_chk(WRegion *p, const ClassDescr *descr)
 EXTL_EXPORT_MEMBER
 WRootWin *region_rootwin_of(const WRegion *reg)
 {
-	WRootWin *rw;
-	assert(reg!=NULL); /* Lua interface should not pass NULL reg. */
-	rw=(WRootWin*)(reg->rootwin);
-	assert(rw!=NULL);
-	return rw;
+    WRootWin *rw;
+    assert(reg!=NULL); /* Lua interface should not pass NULL reg. */
+    rw=(WRootWin*)(reg->rootwin);
+    assert(rw!=NULL);
+    return rw;
 }
 
 
 Window region_root_of(const WRegion *reg)
 {
-	return WROOTWIN_ROOT(region_rootwin_of(reg));
+    return WROOTWIN_ROOT(region_rootwin_of(reg));
 }
 
 
 bool region_same_rootwin(const WRegion *reg1, const WRegion *reg2)
 {
-	return (reg1->rootwin==reg2->rootwin);
+    return (reg1->rootwin==reg2->rootwin);
 }
 
 
@@ -648,7 +648,7 @@ bool region_same_rootwin(const WRegion *reg1, const WRegion *reg2)
 EXTL_EXPORT_MEMBER
 WRegion *region_active_sub(WRegion *reg)
 {
-	return reg->active_sub;
+    return reg->active_sub;
 }
 
 
@@ -659,27 +659,27 @@ WRegion *region_active_sub(WRegion *reg)
 
 
 static DynFunTab region_dynfuntab[]={
-	{region_notify_rootpos, 
+    {region_notify_rootpos, 
      region_notify_rootpos_default},
-	
-	{region_request_managed_geom,
-	 region_request_managed_geom_allow},
-	
-	{region_draw_config_updated, 
-	 region_draw_config_updated_default},
-	
-	{(DynFun*)region_find_rescue_manager_for, 
-	 (DynFun*)region_find_rescue_manager_for_default},
-	
-	{(DynFun*)region_do_rescue_clientwins,
-	 (DynFun*)region_do_rescue_child_clientwins},
-	
-	END_DYNFUNTAB
+    
+    {region_request_managed_geom,
+     region_request_managed_geom_allow},
+    
+    {region_draw_config_updated, 
+     region_draw_config_updated_default},
+    
+    {(DynFun*)region_find_rescue_manager_for, 
+     (DynFun*)region_find_rescue_manager_for_default},
+    
+    {(DynFun*)region_do_rescue_clientwins,
+     (DynFun*)region_do_rescue_child_clientwins},
+    
+    END_DYNFUNTAB
 };
 
 
 IMPLCLASS(WRegion, Obj, region_deinit, region_dynfuntab);
 
-	
+    
 /*}}}*/
 

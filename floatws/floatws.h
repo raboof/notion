@@ -24,10 +24,10 @@
 INTRCLASS(WFloatWS);
 
 DECLCLASS(WFloatWS){
-	WGenWS genws;
-	Window dummywin;
-	WRegion *managed_list;
-	WRegion *current_managed;
+    WGenWS genws;
+    Window dummywin;
+    WRegion *managed_list;
+    WRegion *current_managed;
 };
 
 
@@ -37,7 +37,7 @@ extern WRegion *floatws_circulate(WFloatWS *ws);
 extern WRegion *floatws_backcirculate(WFloatWS *ws);
 
 extern WRegion *floatws_load(WWindow *par, const WRectangle *geom, 
-							 ExtlTab tab);
+                             ExtlTab tab);
 
 extern WRegion* floatws_current(WFloatWS *floatws);
 

@@ -18,6 +18,6 @@
 #include "extl.h"
 
 extern bool bindmap_do_table(WBindmap *bindmap, StringIntMap *areamap,
-							 ExtlTab tab);
+                             ExtlTab tab);
 
 #endif /* ION_IONCORE_CONF_BINDINGS_H */

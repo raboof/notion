@@ -25,24 +25,24 @@
 EXTL_EXPORT
 WMessage *querymod_warn(WMPlex *mplex, const char *p)
 {
-	char *p2;
-	WMessage *wmsg;
-	
-	if(p==NULL)
-		return NULL;
-	
-	p2=scat("Error:\n", p);
-	
-	if(p2==NULL){
-		warn_err();
-		return NULL;
-	}
-	
-	wmsg=querymod_message(mplex, p2);
-	
-	free(p2);
-	
-	return wmsg;
+    char *p2;
+    WMessage *wmsg;
+    
+    if(p==NULL)
+        return NULL;
+    
+    p2=scat("Error:\n", p);
+    
+    if(p2==NULL){
+        warn_err();
+        return NULL;
+    }
+    
+    wmsg=querymod_message(mplex, p2);
+    
+    free(p2);
+    
+    return wmsg;
 }
 
 /*EXTL_DOC
@@ -51,11 +51,11 @@ WMessage *querymod_warn(WMPlex *mplex, const char *p)
 EXTL_EXPORT
 WMessage *querymod_message(WMPlex *mplex, const char *p)
 {
-	if(p==NULL || mplex_current_input(mplex)!=NULL)
-		return NULL;
+    if(p==NULL || mplex_current_input(mplex)!=NULL)
+        return NULL;
 
-	return (WMessage*)mplex_add_input(mplex,
-									  (WRegionAttachHandler*)create_wmsg,
-									  (void*)p);
+    return (WMessage*)mplex_add_input(mplex,
+                                      (WRegionAttachHandler*)create_wmsg,
+                                      (void*)p);
 }
 

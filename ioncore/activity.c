@@ -16,62 +16,62 @@
 
 bool region_activity(WRegion *reg)
 {
-	return (reg->flags&REGION_ACTIVITY || reg->mgd_activity!=0);
+    return (reg->flags&REGION_ACTIVITY || reg->mgd_activity!=0);
 }
 
 
 static void propagate_activity(WRegion *reg)
 {
-	WRegion *mgr=region_manager(reg);
-	bool mgr_marked;
-	
-	if(mgr==NULL)
-		return;
-	
-	mgr_marked=region_activity(mgr);
-	mgr->mgd_activity++;
-	region_notify_managed_change(mgr, reg);
-	
-	if(!mgr_marked)
-		propagate_activity(mgr);
+    WRegion *mgr=region_manager(reg);
+    bool mgr_marked;
+    
+    if(mgr==NULL)
+        return;
+    
+    mgr_marked=region_activity(mgr);
+    mgr->mgd_activity++;
+    region_notify_managed_change(mgr, reg);
+    
+    if(!mgr_marked)
+        propagate_activity(mgr);
 }
 
 
 void region_notify_activity(WRegion *reg)
 {
-	if(reg->flags&REGION_ACTIVITY || REGION_IS_ACTIVE(reg))
-		return;
-	
-	reg->flags|=REGION_ACTIVITY;
-	
-	if(reg->mgd_activity==0)
-		propagate_activity(reg);
+    if(reg->flags&REGION_ACTIVITY || REGION_IS_ACTIVE(reg))
+        return;
+    
+    reg->flags|=REGION_ACTIVITY;
+    
+    if(reg->mgd_activity==0)
+        propagate_activity(reg);
 }
 
 
 static void propagate_clear(WRegion *reg)
 {
-	WRegion *mgr=region_manager(reg);
-	bool mgr_notify_always;
-	
-	if(mgr==NULL)
-		return;
-	
-	mgr->mgd_activity--;
-	region_notify_managed_change(mgr, reg);
-	
-	if(!region_activity(mgr))
-		propagate_clear(mgr);
+    WRegion *mgr=region_manager(reg);
+    bool mgr_notify_always;
+    
+    if(mgr==NULL)
+        return;
+    
+    mgr->mgd_activity--;
+    region_notify_managed_change(mgr, reg);
+    
+    if(!region_activity(mgr))
+        propagate_clear(mgr);
 }
 
-	
+    
 void region_clear_activity(WRegion *reg)
 {
-	if(!(reg->flags&REGION_ACTIVITY))
-		return;
-	
-	reg->flags&=~REGION_ACTIVITY;
-	
-	if(reg->mgd_activity==0)
-		propagate_clear(reg);
+    if(!(reg->flags&REGION_ACTIVITY))
+        return;
+    
+    reg->flags&=~REGION_ACTIVITY;
+    
+    if(reg->mgd_activity==0)
+        propagate_clear(reg);
 }

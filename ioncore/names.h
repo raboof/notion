@@ -21,7 +21,7 @@ extern bool region_init_name(WRegion *reg, const char *name);
 extern bool region_set_name(WRegion *reg, const char *name);
 extern bool region_set_name_exact(WRegion *reg, const char *name);
 extern bool clientwin_set_name(WClientWin *cwin, const char *name);
-extern void	region_unuse_name(WRegion *reg);
+extern void    region_unuse_name(WRegion *reg);
 
 extern const char *region_name(WRegion *reg);
 

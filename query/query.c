@@ -33,17 +33,17 @@ EXTL_EXPORT
 WEdln *querymod_query(WMPlex *mplex, const char *prompt, const char *dflt,
                       ExtlFn handler, ExtlFn completor)
 {
-	WRectangle geom;
-	WEdlnCreateParams fnp;
-	
-	fnp.prompt=prompt;
-	fnp.dflt=dflt;
-	fnp.handler=handler;
-	fnp.completor=completor;
-	
-	return (WEdln*)mplex_add_input(mplex,
-								   (WRegionAttachHandler*)create_wedln,
-								   (void*)&fnp);
+    WRectangle geom;
+    WEdlnCreateParams fnp;
+    
+    fnp.prompt=prompt;
+    fnp.dflt=dflt;
+    fnp.handler=handler;
+    fnp.completor=completor;
+    
+    return (WEdln*)mplex_add_input(mplex,
+                                   (WRegionAttachHandler*)create_wedln,
+                                   (void*)&fnp);
 }
 
 

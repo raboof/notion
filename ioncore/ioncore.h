@@ -21,7 +21,7 @@
 extern bool ioncore_init(int argc, char *argv[]);
 extern bool ioncore_init_i18n();
 extern bool ioncore_startup(const char *display, const char *cfgfile, 
-							int flags);
+                            int flags);
 extern void ioncore_deinit();
 
 extern const char *ioncore_aboutmsg();

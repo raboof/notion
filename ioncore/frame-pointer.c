@@ -42,97 +42,97 @@ static WInfoWin *tabdrag_infowin=NULL;
 
 static WRegion *sub_at_tab(WFrame *frame)
 {
-	return mplex_nth_managed((WMPlex*)frame, p_tabnum);
+    return mplex_nth_managed((WMPlex*)frame, p_tabnum);
 }
 
 
 int frame_press(WFrame *frame, XButtonEvent *ev, WRegion **reg_ret)
 {
-	WRegion *sub;
-	WRectangle g;
-	
-	p_dx1mul=0;
-	p_dx2mul=0;
-	p_dy1mul=0;
-	p_dy2mul=0;
-	p_tabnum=-1;
+    WRegion *sub;
+    WRectangle g;
+    
+    p_dx1mul=0;
+    p_dx2mul=0;
+    p_dy1mul=0;
+    p_dy2mul=0;
+    p_tabnum=-1;
 
 
-	/* Check resize directions */
-	{
-		int ww=REGION_GEOM(frame).w/2;
-		int hh=REGION_GEOM(frame).h/2;
-		int xdiv, ydiv;
-		int tmpx, tmpy, atmpx, atmpy;
-		
-		tmpx=ev->x-ww;
-		tmpy=hh-ev->y;
-		xdiv=ww/2;
-		ydiv=hh/2;
-		atmpx=abs(tmpx);
-		atmpy=abs(tmpy);
-		
-		if(xdiv<MINCORNER && xdiv>1){
-			xdiv=ww-MINCORNER;
-			if(xdiv<1)
-				xdiv=1;
-		}
+    /* Check resize directions */
+    {
+        int ww=REGION_GEOM(frame).w/2;
+        int hh=REGION_GEOM(frame).h/2;
+        int xdiv, ydiv;
+        int tmpx, tmpy, atmpx, atmpy;
+        
+        tmpx=ev->x-ww;
+        tmpy=hh-ev->y;
+        xdiv=ww/2;
+        ydiv=hh/2;
+        atmpx=abs(tmpx);
+        atmpy=abs(tmpy);
+        
+        if(xdiv<MINCORNER && xdiv>1){
+            xdiv=ww-MINCORNER;
+            if(xdiv<1)
+                xdiv=1;
+        }
 
-		if(ydiv<MINCORNER && ydiv>1){
-			ydiv=hh-MINCORNER;
-			if(ydiv<1)
-				ydiv=1;
-		}
+        if(ydiv<MINCORNER && ydiv>1){
+            ydiv=hh-MINCORNER;
+            if(ydiv<1)
+                ydiv=1;
+        }
 
-		if(xdiv==0){
-			p_dx2mul=1;
-		}else if(hh*atmpx/xdiv>=tmpy && -hh*atmpx/xdiv<=tmpy){
-			p_dx1mul=(tmpx<0);
-			p_dx2mul=(tmpx>=0);
-		}
+        if(xdiv==0){
+            p_dx2mul=1;
+        }else if(hh*atmpx/xdiv>=tmpy && -hh*atmpx/xdiv<=tmpy){
+            p_dx1mul=(tmpx<0);
+            p_dx2mul=(tmpx>=0);
+        }
 
-		if(ydiv==0){
-			p_dy2mul=1;
-		}else if(ww*atmpy/ydiv>=tmpx && -ww*atmpy/ydiv<=tmpx){
-			p_dy1mul=(tmpy>0);
-			p_dy2mul=(tmpy<=0);
-		}
-	}
-	
-	/* Check tab */
-	
-	frame_bar_geom(frame, &g);
-	
-	/* Borders act like tabs at top of the parent region */
-	if(REGION_GEOM(frame).y==0){
-		g.h+=g.y;
-		g.y=0;
-	}
+        if(ydiv==0){
+            p_dy2mul=1;
+        }else if(ww*atmpy/ydiv>=tmpx && -ww*atmpy/ydiv<=tmpx){
+            p_dy1mul=(tmpy>0);
+            p_dy2mul=(tmpy<=0);
+        }
+    }
+    
+    /* Check tab */
+    
+    frame_bar_geom(frame, &g);
+    
+    /* Borders act like tabs at top of the parent region */
+    if(REGION_GEOM(frame).y==0){
+        g.h+=g.y;
+        g.y=0;
+    }
 
-	if(rectangle_contains(&g, ev->x, ev->y)){
-		p_tabnum=frame_tab_at_x(frame, ev->x);
+    if(rectangle_contains(&g, ev->x, ev->y)){
+        p_tabnum=frame_tab_at_x(frame, ev->x);
 
-		region_rootpos((WRegion*)frame, &p_tab_x, &p_tab_y);
-		p_tab_x+=frame_nth_tab_x(frame, p_tabnum);
-		p_tab_y+=g.y;
-		
-		sub=mplex_nth_managed(&(frame->mplex), p_tabnum);
+        region_rootpos((WRegion*)frame, &p_tab_x, &p_tab_y);
+        p_tab_x+=frame_nth_tab_x(frame, p_tabnum);
+        p_tab_y+=g.y;
+        
+        sub=mplex_nth_managed(&(frame->mplex), p_tabnum);
 
-		if(reg_ret!=NULL)
-			*reg_ret=sub;
-		
-		return FRAME_AREA_TAB;
-	}
-	
+        if(reg_ret!=NULL)
+            *reg_ret=sub;
+        
+        return FRAME_AREA_TAB;
+    }
+    
 
-	/* Check border */
-	
-	frame_border_inner_geom(frame, &g);
-	
-	if(rectangle_contains(&g, ev->x, ev->y))
-		return FRAME_AREA_CLIENT;
-	
-	return FRAME_AREA_BORDER;
+    /* Check border */
+    
+    frame_border_inner_geom(frame, &g);
+    
+    if(rectangle_contains(&g, ev->x, ev->y))
+        return FRAME_AREA_CLIENT;
+    
+    return FRAME_AREA_BORDER;
 }
 
 
@@ -143,195 +143,195 @@ int frame_press(WFrame *frame, XButtonEvent *ev, WRegion **reg_ret)
 
 
 static ExtlSafelist tabdrag_safe_funclist[]={
-	(ExtlExportedFn*)&mplex_switch_nth,
-	(ExtlExportedFn*)&mplex_switch_next,
-	(ExtlExportedFn*)&mplex_switch_prev,
-	NULL
+    (ExtlExportedFn*)&mplex_switch_nth,
+    (ExtlExportedFn*)&mplex_switch_next,
+    (ExtlExportedFn*)&mplex_switch_prev,
+    NULL
 };
 
 
 #define BUTTONS_MASK \
-	(Button1Mask|Button2Mask|Button3Mask|Button4Mask|Button5Mask)
+    (Button1Mask|Button2Mask|Button3Mask|Button4Mask|Button5Mask)
 
 
 static bool tabdrag_kbd_handler(WRegion *reg, XEvent *xev)
 {
-	XKeyEvent *ev=&xev->xkey;
-	WBinding *binding=NULL;
-	WBindmap **bindptr;
-	
-	if(ev->type==KeyRelease)
-		return FALSE;
-	
-	assert(reg!=NULL);
+    XKeyEvent *ev=&xev->xkey;
+    WBinding *binding=NULL;
+    WBindmap **bindptr;
+    
+    if(ev->type==KeyRelease)
+        return FALSE;
+    
+    assert(reg!=NULL);
 
-	binding=bindmap_lookup_binding(&ioncore_rootwin_bindmap, BINDING_KEYPRESS,
-						   ev->state&~BUTTONS_MASK, ev->keycode);
-	
-	if(binding!=NULL && binding->func!=extl_fn_none()){
-		const ExtlSafelist *old_safelist=
-			extl_set_safelist(tabdrag_safe_funclist);
-		extl_call(binding->func, "o", NULL, region_screen_of(reg));
-		extl_set_safelist(old_safelist);
-	}
-	
-	return FALSE;
+    binding=bindmap_lookup_binding(&ioncore_rootwin_bindmap, BINDING_KEYPRESS,
+                           ev->state&~BUTTONS_MASK, ev->keycode);
+    
+    if(binding!=NULL && binding->func!=extl_fn_none()){
+        const ExtlSafelist *old_safelist=
+            extl_set_safelist(tabdrag_safe_funclist);
+        extl_call(binding->func, "o", NULL, region_screen_of(reg));
+        extl_set_safelist(old_safelist);
+    }
+    
+    return FALSE;
 }
 
 
 static void setup_dragwin(WFrame *frame, uint tab)
 {
-	WRectangle g;
-	WRootWin *rw;
+    WRectangle g;
+    WRootWin *rw;
     
-	assert(tabdrag_infowin==NULL);
-	
-	g.x=p_tab_x;
-	g.y=p_tab_y;
-	g.w=frame_nth_tab_w(frame, tab);
-	g.h=frame->bar_h;
+    assert(tabdrag_infowin==NULL);
+    
+    g.x=p_tab_x;
+    g.y=p_tab_y;
+    g.w=frame_nth_tab_w(frame, tab);
+    g.h=frame->bar_h;
 
     /* region_rootwin_of cannot fail */
     rw=region_rootwin_of((WRegion*)frame);
-	tabdrag_infowin=create_infowin((WWindow*)rw, &g, frame_tab_style(frame));
-	
-	if(tabdrag_infowin==NULL)
-		return;
-	
-	infowin_set_attr2(tabdrag_infowin, (REGION_IS_ACTIVE(frame) 
-										? "active" : "inactive"),
-					  frame->titles[tab].attr);
-	
-	if(frame->titles[tab].text!=NULL){
-		char *buf=INFOWIN_BUFFER(tabdrag_infowin);
-		strncpy(buf, frame->titles[tab].text, INFOWIN_BUFFER_LEN-1);
-		buf[INFOWIN_BUFFER_LEN-1]='\0';
-	}
+    tabdrag_infowin=create_infowin((WWindow*)rw, &g, frame_tab_style(frame));
+    
+    if(tabdrag_infowin==NULL)
+        return;
+    
+    infowin_set_attr2(tabdrag_infowin, (REGION_IS_ACTIVE(frame) 
+                                        ? "active" : "inactive"),
+                      frame->titles[tab].attr);
+    
+    if(frame->titles[tab].text!=NULL){
+        char *buf=INFOWIN_BUFFER(tabdrag_infowin);
+        strncpy(buf, frame->titles[tab].text, INFOWIN_BUFFER_LEN-1);
+        buf[INFOWIN_BUFFER_LEN-1]='\0';
+    }
 }
 
 
 static void p_tabdrag_motion(WFrame *frame, XMotionEvent *ev,
-							 int dx, int dy)
+                             int dx, int dy)
 {
-	WRootWin *rootwin=region_rootwin_of((WRegion*)frame);
+    WRootWin *rootwin=region_rootwin_of((WRegion*)frame);
 
-	p_tab_x+=dx;
-	p_tab_y+=dy;
-	
-	if(tabdrag_infowin!=NULL){
-		WRectangle g;
-		g.x=p_tab_x;
-		g.y=p_tab_y;
-		g.w=REGION_GEOM(tabdrag_infowin).w;
-		g.h=REGION_GEOM(tabdrag_infowin).h;
-		region_fit((WRegion*)tabdrag_infowin, &g);
-	}
+    p_tab_x+=dx;
+    p_tab_y+=dy;
+    
+    if(tabdrag_infowin!=NULL){
+        WRectangle g;
+        g.x=p_tab_x;
+        g.y=p_tab_y;
+        g.w=REGION_GEOM(tabdrag_infowin).w;
+        g.h=REGION_GEOM(tabdrag_infowin).h;
+        region_fit((WRegion*)tabdrag_infowin, &g);
+    }
 }
 
 
 static void p_tabdrag_begin(WFrame *frame, XMotionEvent *ev,
-							int dx, int dy)
+                            int dx, int dy)
 {
-	WRootWin *rootwin=region_rootwin_of((WRegion*)frame);
+    WRootWin *rootwin=region_rootwin_of((WRegion*)frame);
 
-	if(p_tabnum<0)
-		return;
-	
-	ioncore_change_grab_cursor(IONCORE_CURSOR_DRAG);
-		
-	setup_dragwin(frame, p_tabnum);
-	
-	frame->tab_dragged_idx=p_tabnum;
-	frame_update_attr_nth(frame, p_tabnum);
+    if(p_tabnum<0)
+        return;
+    
+    ioncore_change_grab_cursor(IONCORE_CURSOR_DRAG);
+        
+    setup_dragwin(frame, p_tabnum);
+    
+    frame->tab_dragged_idx=p_tabnum;
+    frame_update_attr_nth(frame, p_tabnum);
 
-	frame_draw_bar(frame, FALSE);
-	
-	p_tabdrag_motion(frame, ev, dx, dy);
-	
-	if(tabdrag_infowin!=NULL)
-		window_map((WWindow*)tabdrag_infowin);
+    frame_draw_bar(frame, FALSE);
+    
+    p_tabdrag_motion(frame, ev, dx, dy);
+    
+    if(tabdrag_infowin!=NULL)
+        window_map((WWindow*)tabdrag_infowin);
 }
 
 
 static WRegion *fnd(Window root, int x, int y)
 {
-	Window win=root;
-	int dstx, dsty;
-	WRegion *reg=NULL;
-	WWindow *w=NULL;
-	WScreen *scr;
-	
-	FOR_ALL_SCREENS(scr){
-		if(region_root_of((WRegion*)scr)==root &&
-		   rectangle_contains(&REGION_GEOM(scr), x, y)){
-			break;
-		}
-	}
-	
-	w=(WWindow*)scr;
-	
-	while(w!=NULL){
-		if(HAS_DYN(w, region_handle_drop))
-			reg=(WRegion*)w;
-		
-		if(!XTranslateCoordinates(ioncore_g.dpy, root, w->win,
-								  x, y, &dstx, &dsty, &win)){
-			return NULL;
-		}
-		
-		w=XWINDOW_REGION_OF_T(win, WWindow);
-		x=dstx;
-		y=dsty;
-	}
+    Window win=root;
+    int dstx, dsty;
+    WRegion *reg=NULL;
+    WWindow *w=NULL;
+    WScreen *scr;
+    
+    FOR_ALL_SCREENS(scr){
+        if(region_root_of((WRegion*)scr)==root &&
+           rectangle_contains(&REGION_GEOM(scr), x, y)){
+            break;
+        }
+    }
+    
+    w=(WWindow*)scr;
+    
+    while(w!=NULL){
+        if(HAS_DYN(w, region_handle_drop))
+            reg=(WRegion*)w;
+        
+        if(!XTranslateCoordinates(ioncore_g.dpy, root, w->win,
+                                  x, y, &dstx, &dsty, &win)){
+            return NULL;
+        }
+        
+        w=XWINDOW_REGION_OF_T(win, WWindow);
+        x=dstx;
+        y=dsty;
+    }
 
-	return reg;
+    return reg;
 }
 
 
 static void tabdrag_deinit(WFrame *frame)
 {
-	int idx=frame->tab_dragged_idx;
-	frame->tab_dragged_idx=-1;
-	frame_update_attr_nth(frame, idx);
-	
-	if(tabdrag_infowin!=NULL){
-		destroy_obj((Obj*)tabdrag_infowin);
-		tabdrag_infowin=NULL;
-	}
+    int idx=frame->tab_dragged_idx;
+    frame->tab_dragged_idx=-1;
+    frame_update_attr_nth(frame, idx);
+    
+    if(tabdrag_infowin!=NULL){
+        destroy_obj((Obj*)tabdrag_infowin);
+        tabdrag_infowin=NULL;
+    }
 }
 
 
 static void tabdrag_killed(WFrame *frame)
 {
-	tabdrag_deinit(frame);
-	if(!OBJ_IS_BEING_DESTROYED(frame))
-		frame_draw_bar(frame, TRUE);
+    tabdrag_deinit(frame);
+    if(!OBJ_IS_BEING_DESTROYED(frame))
+        frame_draw_bar(frame, TRUE);
 }
 
 
 static void p_tabdrag_end(WFrame *frame, XButtonEvent *ev)
 {
-	WRegion *sub=NULL;
-	WRegion *dropped_on;
-	Window win=None;
+    WRegion *sub=NULL;
+    WRegion *dropped_on;
+    Window win=None;
 
-	sub=sub_at_tab(frame);
-	
-	tabdrag_deinit(frame);
-	
-	/* Must be same root window */
-	if(sub==NULL || ev->root!=region_root_of(sub))
-		return;
-	
-	dropped_on=fnd(ev->root, ev->x_root, ev->y_root);
+    sub=sub_at_tab(frame);
+    
+    tabdrag_deinit(frame);
+    
+    /* Must be same root window */
+    if(sub==NULL || ev->root!=region_root_of(sub))
+        return;
+    
+    dropped_on=fnd(ev->root, ev->x_root, ev->y_root);
 
-	if(dropped_on==NULL || dropped_on==(WRegion*)frame || dropped_on==sub){
-		frame_draw_bar(frame, TRUE);
-		return;
-	}
-	
-	if(region_handle_drop(dropped_on, p_tab_x, p_tab_y, sub))
-		region_set_focus(dropped_on);
+    if(dropped_on==NULL || dropped_on==(WRegion*)frame || dropped_on==sub){
+        frame_draw_bar(frame, TRUE);
+        return;
+    }
+    
+    if(region_handle_drop(dropped_on, p_tab_x, p_tab_y, sub))
+        region_set_focus(dropped_on);
 }
 
 
@@ -343,25 +343,25 @@ static void p_tabdrag_end(WFrame *frame, XButtonEvent *ev)
 EXTL_EXPORT_MEMBER
 void frame_p_tabdrag(WFrame *frame)
 {
-	if(p_tabnum<0)
-		return;
-	
-	ioncore_set_drag_handlers((WRegion*)frame,
-						(WMotionHandler*)p_tabdrag_begin,
-						(WMotionHandler*)p_tabdrag_motion,
-						(WButtonHandler*)p_tabdrag_end,
-						tabdrag_kbd_handler,
-						(GrabKilledHandler*)tabdrag_killed);
+    if(p_tabnum<0)
+        return;
+    
+    ioncore_set_drag_handlers((WRegion*)frame,
+                        (WMotionHandler*)p_tabdrag_begin,
+                        (WMotionHandler*)p_tabdrag_motion,
+                        (WButtonHandler*)p_tabdrag_end,
+                        tabdrag_kbd_handler,
+                        (GrabKilledHandler*)tabdrag_killed);
 }
 
 
 bool region_handle_drop(WRegion *reg, int x, int y, WRegion *dropped)
 {
-	bool ret=FALSE;
-	CALL_DYN_RET(ret, bool, region_handle_drop, reg, (reg, x, y, dropped));
-	return ret;
+    bool ret=FALSE;
+    CALL_DYN_RET(ret, bool, region_handle_drop, reg, (reg, x, y, dropped));
+    return ret;
 }
-	
+    
 
 /*}}}*/
 
@@ -387,9 +387,9 @@ static void p_moveres_cancel(WFrame *frame)
 
 static void confine_to_parent(WFrame *frame)
 {
-	WRegion *par=region_parent((WRegion*)frame);
-	if(par!=NULL)
-		ioncore_grab_confine_to(region_xwindow(par));
+    WRegion *par=region_parent((WRegion*)frame);
+    if(par!=NULL)
+        ioncore_grab_confine_to(region_xwindow(par));
 }
 
 
@@ -405,8 +405,8 @@ static void p_resize_motion(WFrame *frame, XMotionEvent *ev, int dx, int dy)
 
 static void p_resize_begin(WFrame *frame, XMotionEvent *ev, int dx, int dy)
 {
-	region_begin_resize((WRegion*)frame, NULL, TRUE);
-	p_resize_motion(frame, ev, dx, dy);
+    region_begin_resize((WRegion*)frame, NULL, TRUE);
+    p_resize_motion(frame, ev, dx, dy);
 }
 
 
@@ -418,15 +418,15 @@ static void p_resize_begin(WFrame *frame, XMotionEvent *ev, int dx, int dy)
 EXTL_EXPORT_MEMBER
 void frame_p_resize(WFrame *frame)
 {
-	if(!ioncore_set_drag_handlers((WRegion*)frame,
-							(WMotionHandler*)p_resize_begin,
-							(WMotionHandler*)p_resize_motion,
-							(WButtonHandler*)p_moveres_end,
-							NULL, 
-							(GrabKilledHandler*)p_moveres_cancel))
-		return;
-	
-	confine_to_parent(frame);
+    if(!ioncore_set_drag_handlers((WRegion*)frame,
+                            (WMotionHandler*)p_resize_begin,
+                            (WMotionHandler*)p_resize_motion,
+                            (WButtonHandler*)p_moveres_end,
+                            NULL, 
+                            (GrabKilledHandler*)p_moveres_cancel))
+        return;
+    
+    confine_to_parent(frame);
 }
 
 
@@ -446,22 +446,22 @@ static void p_move_motion(WFrame *frame, XMotionEvent *ev, int dx, int dy)
 
 static void p_move_begin(WFrame *frame, XMotionEvent *ev, int dx, int dy)
 {
-	region_begin_move((WRegion*)frame, NULL, TRUE);
-	p_move_motion(frame, ev, dx, dy);
+    region_begin_move((WRegion*)frame, NULL, TRUE);
+    p_move_motion(frame, ev, dx, dy);
 }
 
 
 void frame_p_move(WFrame *frame)
 {
-	if(!ioncore_set_drag_handlers((WRegion*)frame,
-							(WMotionHandler*)p_move_begin,
-							(WMotionHandler*)p_move_motion,
-							(WButtonHandler*)p_moveres_end,
-							NULL, 
-							(GrabKilledHandler*)p_moveres_cancel))
-		return;
-	
-	confine_to_parent(frame);
+    if(!ioncore_set_drag_handlers((WRegion*)frame,
+                            (WMotionHandler*)p_move_begin,
+                            (WMotionHandler*)p_move_motion,
+                            (WButtonHandler*)p_moveres_end,
+                            NULL, 
+                            (GrabKilledHandler*)p_moveres_cancel))
+        return;
+    
+    confine_to_parent(frame);
 }
 
 
@@ -478,15 +478,15 @@ void frame_p_move(WFrame *frame)
 EXTL_EXPORT_MEMBER
 void frame_p_switch_tab(WFrame *frame)
 {
-	WRegion *sub;
-	
-	if(ioncore_pointer_grab_region()!=(WRegion*)frame)
-		return;
-	
-	sub=sub_at_tab(frame);
-	
-	if(sub!=NULL)
-		region_display_sp(sub);
+    WRegion *sub;
+    
+    if(ioncore_pointer_grab_region()!=(WRegion*)frame)
+        return;
+    
+    sub=sub_at_tab(frame);
+    
+    if(sub!=NULL)
+        region_display_sp(sub);
 }
 
 

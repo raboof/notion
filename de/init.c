@@ -32,45 +32,45 @@
 
 static void get_border_val(uint *val, ExtlTab tab, const char *what)
 {
-	int g;
-	
-	if(extl_table_gets_i(tab, what, &g)){
-		if(g>CF_BORDER_VAL_SANITY_CHECK || g<0)
-			warn("Border attribute %s sanity check failed.", what);
-		else
-			*val=g;
-	}
+    int g;
+    
+    if(extl_table_gets_i(tab, what, &g)){
+        if(g>CF_BORDER_VAL_SANITY_CHECK || g<0)
+            warn("Border attribute %s sanity check failed.", what);
+        else
+            *val=g;
+    }
 }
 
 
 static void get_border_style(uint *ret, ExtlTab tab)
 {
-	char *style=NULL;
-	
-	if(!extl_table_gets_s(tab, "border_style", &style))
-		return;
-	
-	if(strcmp(style, "inlaid")==0)
-		*ret=DEBORDER_INLAID;
-	else if(strcmp(style, "elevated")==0)
-		*ret=DEBORDER_ELEVATED;
-	else if(strcmp(style, "groove")==0)
-		*ret=DEBORDER_GROOVE;
-	else if(strcmp(style, "ridge")==0)
-		*ret=DEBORDER_RIDGE;
-	else
-		warn("Unknown border style \"%s\".", style);
-	
-	free(style);
+    char *style=NULL;
+    
+    if(!extl_table_gets_s(tab, "border_style", &style))
+        return;
+    
+    if(strcmp(style, "inlaid")==0)
+        *ret=DEBORDER_INLAID;
+    else if(strcmp(style, "elevated")==0)
+        *ret=DEBORDER_ELEVATED;
+    else if(strcmp(style, "groove")==0)
+        *ret=DEBORDER_GROOVE;
+    else if(strcmp(style, "ridge")==0)
+        *ret=DEBORDER_RIDGE;
+    else
+        warn("Unknown border style \"%s\".", style);
+    
+    free(style);
 }
 
 
 static void get_border(DEBorder *border, ExtlTab tab)
 {
-	get_border_val(&(border->sh), tab, "shadow_pixels");
-	get_border_val(&(border->hl), tab, "highlight_pixels");
-	get_border_val(&(border->pad), tab, "padding_pixels");
-	get_border_style(&(border->style), tab);
+    get_border_val(&(border->sh), tab, "shadow_pixels");
+    get_border_val(&(border->hl), tab, "highlight_pixels");
+    get_border_val(&(border->pad), tab, "padding_pixels");
+    get_border_style(&(border->style), tab);
 }
 
 
@@ -81,90 +81,90 @@ static void get_border(DEBorder *border, ExtlTab tab)
 
 
 static bool get_colour(WRootWin *rootwin, DEColour *ret, 
-					   ExtlTab tab, DEStyle *based_on,
+                       ExtlTab tab, DEStyle *based_on,
                        const char *what, DEColour substitute)
 {
-	char *name=NULL;
-	bool ok=FALSE;
-	
-	if(extl_table_gets_s(tab, what, &name)){
-		ok=de_alloc_colour(rootwin, ret, name);
-	
-		if(!ok)
-			warn("Unable to allocate colour \"%s\".", name);
+    char *name=NULL;
+    bool ok=FALSE;
+    
+    if(extl_table_gets_s(tab, what, &name)){
+        ok=de_alloc_colour(rootwin, ret, name);
+    
+        if(!ok)
+            warn("Unable to allocate colour \"%s\".", name);
 
-		free(name);
-	}
-	
-	if(!ok && based_on!=NULL){
+        free(name);
+    }
+    
+    if(!ok && based_on!=NULL){
         return get_colour(rootwin, ret, based_on->data_table,
                           based_on->based_on, what, substitute);
     }else if(!ok){
-		return de_duplicate_colour(rootwin, substitute, ret);
+        return de_duplicate_colour(rootwin, substitute, ret);
     }
-	
-	return ok;
+    
+    return ok;
 }
 
 
 static void get_colour_group(WRootWin *rootwin, DEColourGroup *cg, 
-							 ExtlTab tab, DEStyle *based_on)
+                             ExtlTab tab, DEStyle *based_on)
 {
-	get_colour(rootwin, &(cg->hl), tab, based_on, "highlight_colour",
-			   DE_WHITE(rootwin));
-	get_colour(rootwin, &(cg->sh), tab, based_on, "shadow_colour",
-			   DE_WHITE(rootwin));
-	get_colour(rootwin, &(cg->bg), tab, based_on, "background_colour",
-			   DE_BLACK(rootwin));
-	get_colour(rootwin, &(cg->fg), tab, based_on, "foreground_colour",
-			   DE_WHITE(rootwin));
-	get_colour(rootwin, &(cg->pad), tab, based_on, "padding_colour", cg->bg);
+    get_colour(rootwin, &(cg->hl), tab, based_on, "highlight_colour",
+               DE_WHITE(rootwin));
+    get_colour(rootwin, &(cg->sh), tab, based_on, "shadow_colour",
+               DE_WHITE(rootwin));
+    get_colour(rootwin, &(cg->bg), tab, based_on, "background_colour",
+               DE_BLACK(rootwin));
+    get_colour(rootwin, &(cg->fg), tab, based_on, "foreground_colour",
+               DE_WHITE(rootwin));
+    get_colour(rootwin, &(cg->pad), tab, based_on, "padding_colour", cg->bg);
 }
 
 
 static void get_extra_cgrps(WRootWin *rootwin, DEStyle *style, ExtlTab tab)
 {
-	
-	uint i=0, nfailed=0, n=extl_table_get_n(tab);
-	char *name;
-	ExtlTab sub;
-	
-	if(n==0)
-		return;
-	
-	style->extra_cgrps=ALLOC_N(DEColourGroup, n);
-	
-	if(style->extra_cgrps==NULL){
-		warn_err();
-		return;
-	}
+    
+    uint i=0, nfailed=0, n=extl_table_get_n(tab);
+    char *name;
+    ExtlTab sub;
+    
+    if(n==0)
+        return;
+    
+    style->extra_cgrps=ALLOC_N(DEColourGroup, n);
+    
+    if(style->extra_cgrps==NULL){
+        warn_err();
+        return;
+    }
 
-	for(i=0; i<n-nfailed; i++){
-		if(!extl_table_geti_t(tab, i+1, &sub))
-			goto err;
-		if(!extl_table_gets_s(sub, "substyle_pattern", &name)){
-			extl_unref_table(sub);
-			goto err;
-		}
-		
-		/*de_init_colour_group(rootwin, style->extra_cgrps+i-nfailed);*/
-		style->extra_cgrps[i-nfailed].spec=name;
-		get_colour_group(rootwin, style->extra_cgrps+i-nfailed, sub, style);
-		
-		extl_unref_table(sub);
-		continue;
-		
-	err:
-		warn("Corrupt substyle table %d.", i);
-		nfailed++;
-	}
-	
-	if(n-nfailed==0){
-		free(style->extra_cgrps);
-		style->extra_cgrps=NULL;
-	}
-	
-	style->n_extra_cgrps=n-nfailed;
+    for(i=0; i<n-nfailed; i++){
+        if(!extl_table_geti_t(tab, i+1, &sub))
+            goto err;
+        if(!extl_table_gets_s(sub, "substyle_pattern", &name)){
+            extl_unref_table(sub);
+            goto err;
+        }
+        
+        /*de_init_colour_group(rootwin, style->extra_cgrps+i-nfailed);*/
+        style->extra_cgrps[i-nfailed].spec=name;
+        get_colour_group(rootwin, style->extra_cgrps+i-nfailed, sub, style);
+        
+        extl_unref_table(sub);
+        continue;
+        
+    err:
+        warn("Corrupt substyle table %d.", i);
+        nfailed++;
+    }
+    
+    if(n-nfailed==0){
+        free(style->extra_cgrps);
+        style->extra_cgrps=NULL;
+    }
+    
+    style->n_extra_cgrps=n-nfailed;
 }
 
 
@@ -176,30 +176,30 @@ static void get_extra_cgrps(WRootWin *rootwin, DEStyle *style, ExtlTab tab)
 
 static void get_text_align(int *alignret, ExtlTab tab)
 {
-	char *align=NULL;
-	
-	if(!extl_table_gets_s(tab, "text_align", &align))
-		return;
-	
-	if(strcmp(align, "left")==0)
-		*alignret=DEALIGN_LEFT;
-	else if(strcmp(align, "right")==0)
-		*alignret=DEALIGN_RIGHT;
-	else if(strcmp(align, "center")==0)
-		*alignret=DEALIGN_CENTER;
-	else
-		warn("Unknown text alignment \"%s\".", align);
-	
-	free(align);
+    char *align=NULL;
+    
+    if(!extl_table_gets_s(tab, "text_align", &align))
+        return;
+    
+    if(strcmp(align, "left")==0)
+        *alignret=DEALIGN_LEFT;
+    else if(strcmp(align, "right")==0)
+        *alignret=DEALIGN_RIGHT;
+    else if(strcmp(align, "center")==0)
+        *alignret=DEALIGN_CENTER;
+    else
+        warn("Unknown text alignment \"%s\".", align);
+    
+    free(align);
 }
 
 
 static void get_transparent_background(uint *mode, ExtlTab tab)
 {
-	if(extl_table_is_bool_set(tab, "transparent_background"))
-		*mode=GR_TRANSPARENCY_YES;
-	else
-		*mode=GR_TRANSPARENCY_NO;
+    if(extl_table_is_bool_set(tab, "transparent_background"))
+        *mode=GR_TRANSPARENCY_YES;
+    else
+        *mode=GR_TRANSPARENCY_NO;
 }
 
 
@@ -215,21 +215,21 @@ static void get_transparent_background(uint *mode, ExtlTab tab)
 EXTL_EXPORT
 bool de_defstyle_rootwin(WRootWin *rootwin, const char *name, ExtlTab tab)
 {
-	DEStyle *style;
-	char *fnt;
-	uint n;
+    DEStyle *style;
+    char *fnt;
+    uint n;
     DEStyle *based_on=NULL;
     char *based_on_name=NULL;
 
-	if(name==NULL)
-		return FALSE;
-	
-	style=de_create_style(rootwin, name);
+    if(name==NULL)
+        return FALSE;
+    
+    style=de_create_style(rootwin, name);
 
-	if(style==NULL)
-		return FALSE;
+    if(style==NULL)
+        return FALSE;
 
-	style->data_table=extl_ref_table(tab);
+    style->data_table=extl_ref_table(tab);
 
     if(extl_table_gets_s(tab, "based_on", &based_on_name)){
         based_on=de_get_style(rootwin, based_on_name);
@@ -249,28 +249,28 @@ bool de_defstyle_rootwin(WRootWin *rootwin, const char *name, ExtlTab tab)
         free(based_on_name);
     }
     
-	get_border(&(style->border), tab);
-	get_border_val(&(style->spacing), tab, "spacing");
+    get_border(&(style->border), tab);
+    get_border_val(&(style->spacing), tab, "spacing");
 
-	get_text_align(&(style->textalign), tab);
+    get_text_align(&(style->textalign), tab);
 
-	get_transparent_background(&(style->transparency_mode), tab);
-	
-	if(extl_table_gets_s(tab, "font", &fnt)){
-		de_load_font_for_style(style, fnt);
-		free(fnt);
-	}else{
+    get_transparent_background(&(style->transparency_mode), tab);
+    
+    if(extl_table_gets_s(tab, "font", &fnt)){
+        de_load_font_for_style(style, fnt);
+        free(fnt);
+    }else{
         de_set_font_for_style(style, based_on->font);
     }
     
     if(style->font==NULL)
         de_load_font_for_style(style, CF_FALLBACK_FONT_NAME);
-	
-	style->cgrp_alloced=TRUE;
-	get_colour_group(rootwin, &(style->cgrp), tab, based_on);
-	get_extra_cgrps(rootwin, style, tab);
-	
-	return TRUE;
+    
+    style->cgrp_alloced=TRUE;
+    get_colour_group(rootwin, &(style->cgrp), tab, based_on);
+    get_extra_cgrps(rootwin, style, tab);
+    
+    return TRUE;
 }
 
 
@@ -320,42 +320,42 @@ extern void de_unregister_exports();
 
 bool de_init()
 {
-	WRootWin *rootwin;
-	DEStyle *style;
-	
-	if(!de_register_exports())
-		return FALSE;
-	
-	if(!gr_register_engine("de", (GrGetBrushFn*)&de_get_brush)){
-		warn("DE module", "Failed to register the drawing engine");
-		goto fail;
-	}
-	
-	/* Create fallback brushes */
-	FOR_ALL_ROOTWINS(rootwin){
-		style=de_create_style(rootwin, "*");
-		if(style==NULL){
-			warn_obj("DE module", "Could not initialise fallback style for "
-					 "root window %d.\n", rootwin->xscr);
-		}else{
-			style->is_fallback=TRUE;
-			de_load_font_for_style(style, CF_FALLBACK_FONT_NAME);
-		}
-	}
-	
-	return TRUE;
-	
+    WRootWin *rootwin;
+    DEStyle *style;
+    
+    if(!de_register_exports())
+        return FALSE;
+    
+    if(!gr_register_engine("de", (GrGetBrushFn*)&de_get_brush)){
+        warn("DE module", "Failed to register the drawing engine");
+        goto fail;
+    }
+    
+    /* Create fallback brushes */
+    FOR_ALL_ROOTWINS(rootwin){
+        style=de_create_style(rootwin, "*");
+        if(style==NULL){
+            warn_obj("DE module", "Could not initialise fallback style for "
+                     "root window %d.\n", rootwin->xscr);
+        }else{
+            style->is_fallback=TRUE;
+            de_load_font_for_style(style, CF_FALLBACK_FONT_NAME);
+        }
+    }
+    
+    return TRUE;
+    
 fail:
-	de_unregister_exports();
-	return FALSE;
+    de_unregister_exports();
+    return FALSE;
 }
 
 
 void de_deinit()
 {
-	gr_unregister_engine("de");
-	de_unregister_exports();
-	de_deinit_styles();
+    gr_unregister_engine("de");
+    de_unregister_exports();
+    de_deinit_styles();
 }
 
 

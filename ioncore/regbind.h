@@ -20,24 +20,24 @@
 
 extern bool region_add_bindmap(WRegion *reg, WBindmap *bindmap);
 extern bool region_add_bindmap_owned(WRegion *reg, WBindmap *bindmap,
-									 WRegion *owner);
+                                     WRegion *owner);
 extern void region_remove_bindmap(WRegion *reg, WBindmap *bindmap);
 extern void region_remove_bindmap_owned(WRegion *reg, WBindmap *bindmap,
-										WRegion *owner);
+                                        WRegion *owner);
 extern void region_remove_bindings(WRegion *reg);
 
 extern WBinding *region_lookup_keybinding(WRegion *reg, const XKeyEvent *ev,
-										  const WSubmapState *sc,
-										  WRegion **binding_owner_ret);
+                                          const WSubmapState *sc,
+                                          WRegion **binding_owner_ret);
 extern WBinding *region_lookup_binding(WRegion *reg, int act, uint state,
-											uint kcb, int area);
+                                            uint kcb, int area);
 
 extern void rbind_binding_added(const WRegBindingInfo *rbind, 
-								const WBinding *binding,
-								const WBindmap *bindmap);
+                                const WBinding *binding,
+                                const WBindmap *bindmap);
 extern void rbind_binding_removed(const WRegBindingInfo *rbind, 
-								  const WBinding *binding,
-								  const WBindmap *bindmap);
+                                  const WBinding *binding,
+                                  const WBindmap *bindmap);
 
 #endif /* ION_IONCORE_REGBIND_H */
 

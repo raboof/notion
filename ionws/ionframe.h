@@ -20,14 +20,14 @@
 INTRCLASS(WIonFrame);
 
 DECLCLASS(WIonFrame){
-	WFrame frame;
+    WFrame frame;
 };
 
 extern WIonFrame* create_ionframe(WWindow *parent, const WRectangle *geom);
 extern void ionframe_draw_config_updated(WIonFrame *frame);
 extern void ionframe_toggle_shade(WIonFrame *frame);
 extern WRegion *ionframe_load(WWindow *par, const WRectangle *geom, 
-							  ExtlTab tab);
+                              ExtlTab tab);
 
 extern void ionframe_close(WIonFrame *frame);
 extern void ionframe_close_if_empty(WIonFrame *frame);

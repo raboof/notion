@@ -14,11 +14,11 @@
 
 /* Manager -- managed */
 
-#define REGION_MANAGER(R)  		(((WRegion*)(R))->manager)
+#define REGION_MANAGER(R)          (((WRegion*)(R))->manager)
 #define REGION_MANAGER_CHK(R, TYPE) OBJ_CAST(REGION_MANAGER(R), TYPE)
 
-#define REGION_FIRST_MANAGED(LIST) 	(LIST)
-#define REGION_LAST_MANAGED(LIST) 	((LIST)==NULL ? NULL              \
+#define REGION_FIRST_MANAGED(LIST)     (LIST)
+#define REGION_LAST_MANAGED(LIST)     ((LIST)==NULL ? NULL              \
                                      : PREV_MANAGED_WRAP(LIST, LIST))
 #define REGION_NEXT_MANAGED(LIST, REG) (((WRegion*)(REG))->mgr_next)
 #define REGION_PREV_MANAGED(LIST, REG) ((((WRegion*)(REG))->mgr_prev->mgr_next) ? \
@@ -29,12 +29,12 @@
                                       : (LIST))
 
 #define FOR_ALL_MANAGED_ON_LIST(LIST, REG) \
-	for((REG)=(WRegion*)(LIST); (REG)!=NULL; (REG)=(REG)->mgr_next)
+    for((REG)=(WRegion*)(LIST); (REG)!=NULL; (REG)=(REG)->mgr_next)
 
 #define FOR_ALL_MANAGED_ON_LIST_W_NEXT(LIST, REG, NEXT)            \
   for((REG)=(LIST), (NEXT)=((REG)==NULL ? NULL : (REG)->mgr_next); \
       (REG)!=NULL;                                                 \
-	  (REG)=(NEXT), (NEXT)=((REG)==NULL ? NULL : (REG)->mgr_next))
+      (REG)=(NEXT), (NEXT)=((REG)==NULL ? NULL : (REG)->mgr_next))
 
 #define REGION_PARENT(NAM) (((WRegion*)NAM)->parent)
 #define REGION_PARENT_CHK(NAM, TYPE) OBJ_CAST(REGION_PARENT(NAM), TYPE)
@@ -56,11 +56,11 @@
   : REGION_FIRST_CHILD(PAR))
 
 #define FOR_ALL_CHILDREN(PAR, REG) \
-	for((REG)=((WRegion*)(PAR))->children; (REG)!=NULL; (REG)=(REG)->p_next)
+    for((REG)=((WRegion*)(PAR))->children; (REG)!=NULL; (REG)=(REG)->p_next)
 
 #define FOR_ALL_CHILDREN_W_NEXT(PAR, REG, NEXT)                              \
   for((REG)=((WRegion*)(PAR))->children, (NEXT)=((REG)==NULL ? NULL : (REG)->p_next);\
       (REG)!=NULL;                                                            \
-	  (REG)=(NEXT), (NEXT)=((REG)==NULL ? NULL : (REG)->p_next))
+      (REG)=(NEXT), (NEXT)=((REG)==NULL ? NULL : (REG)->p_next))
 
 #endif /* ION_IONCORE_REGION_ITER_H */

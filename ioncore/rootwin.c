@@ -55,46 +55,46 @@ static bool ignore_badwindow=TRUE;
 
 static int my_redirect_error_handler(Display *dpy, XErrorEvent *ev)
 {
-	redirect_error=TRUE;
-	return 0;
+    redirect_error=TRUE;
+    return 0;
 }
 
 
 static int my_error_handler(Display *dpy, XErrorEvent *ev)
 {
-	static char msg[128], request[64], num[32];
-	
-	/* Just ignore bad window and similar errors; makes the rest of
-	 * the code simpler.
-	 */
-	if((ev->error_code==BadWindow ||
-		(ev->error_code==BadMatch && ev->request_code==X_SetInputFocus) ||
-		(ev->error_code==BadDrawable && ev->request_code==X_GetGeometry)) &&
-	   ignore_badwindow)
-		return 0;
+    static char msg[128], request[64], num[32];
+    
+    /* Just ignore bad window and similar errors; makes the rest of
+     * the code simpler.
+     */
+    if((ev->error_code==BadWindow ||
+        (ev->error_code==BadMatch && ev->request_code==X_SetInputFocus) ||
+        (ev->error_code==BadDrawable && ev->request_code==X_GetGeometry)) &&
+       ignore_badwindow)
+        return 0;
 
 #if 0
-	XmuPrintDefaultErrorMessage(dpy, ev, stderr);
+    XmuPrintDefaultErrorMessage(dpy, ev, stderr);
 #else
-	XGetErrorText(dpy, ev->error_code, msg, 128);
-	snprintf(num, 32, "%d", ev->request_code);
-	XGetErrorDatabaseText(dpy, "XRequest", num, "", request, 64);
+    XGetErrorText(dpy, ev->error_code, msg, 128);
+    snprintf(num, 32, "%d", ev->request_code);
+    XGetErrorDatabaseText(dpy, "XRequest", num, "", request, 64);
 
-	if(request[0]=='\0')
-		snprintf(request, 64, "<unknown request>");
+    if(request[0]=='\0')
+        snprintf(request, 64, "<unknown request>");
 
-	if(ev->minor_code!=0){
-		warn("[%d] %s (%d.%d) %#lx: %s", ev->serial, request,
-			 ev->request_code, ev->minor_code, ev->resourceid,msg);
-	}else{
-		warn("[%d] %s (%d) %#lx: %s", ev->serial, request,
-			 ev->request_code, ev->resourceid,msg);
-	}
+    if(ev->minor_code!=0){
+        warn("[%d] %s (%d.%d) %#lx: %s", ev->serial, request,
+             ev->request_code, ev->minor_code, ev->resourceid,msg);
+    }else{
+        warn("[%d] %s (%d) %#lx: %s", ev->serial, request,
+             ev->request_code, ev->resourceid,msg);
+    }
 #endif
 
-	kill(getpid(), SIGTRAP);
-	
-	return 0;
+    kill(getpid(), SIGTRAP);
+    
+    return 0;
 }
 
 
@@ -114,8 +114,8 @@ Window create_xwindow(WRootWin *rw, Window par, const WRectangle *geom)
     if(h<=0)
         h=1;
     
-	return XCreateSimpleWindow(ioncore_g.dpy, par, geom->x, geom->y, w, h,
-							   0, 0, BlackPixel(ioncore_g.dpy, rw->xscr));
+    return XCreateSimpleWindow(ioncore_g.dpy, par, geom->x, geom->y, w, h,
+                               0, 0, BlackPixel(ioncore_g.dpy, rw->xscr));
 }
 
 
@@ -127,163 +127,163 @@ Window create_xwindow(WRootWin *rw, Window par, const WRectangle *geom)
 
 static void scan_initial_windows(WRootWin *rootwin)
 {
-	Window dummy_root, dummy_parent, *wins=NULL;
-	uint nwins=0, i, j;
-	XWMHints *hints;
-	
-	XQueryTree(ioncore_g.dpy, WROOTWIN_ROOT(rootwin), &dummy_root, &dummy_parent,
-			   &wins, &nwins);
-	
-	for(i=0; i<nwins; i++){
-		if(wins[i]==None)
-			continue;
-		hints=XGetWMHints(ioncore_g.dpy, wins[i]);
-		if(hints!=NULL && hints->flags&IconWindowHint){
-			for(j=0; j<nwins; j++){
-				if(wins[j]==hints->icon_window){
-					wins[j]=None;
-					break;
-				}
-			}
-		}
-		if(hints!=NULL)
-			XFree((void*)hints);
-	}
-	
-	rootwin->tmpwins=wins;
-	rootwin->tmpnwins=nwins;
+    Window dummy_root, dummy_parent, *wins=NULL;
+    uint nwins=0, i, j;
+    XWMHints *hints;
+    
+    XQueryTree(ioncore_g.dpy, WROOTWIN_ROOT(rootwin), &dummy_root, &dummy_parent,
+               &wins, &nwins);
+    
+    for(i=0; i<nwins; i++){
+        if(wins[i]==None)
+            continue;
+        hints=XGetWMHints(ioncore_g.dpy, wins[i]);
+        if(hints!=NULL && hints->flags&IconWindowHint){
+            for(j=0; j<nwins; j++){
+                if(wins[j]==hints->icon_window){
+                    wins[j]=None;
+                    break;
+                }
+            }
+        }
+        if(hints!=NULL)
+            XFree((void*)hints);
+    }
+    
+    rootwin->tmpwins=wins;
+    rootwin->tmpnwins=nwins;
 }
 
 
 void rootwin_manage_initial_windows(WRootWin *rootwin)
 {
-	Window *wins=rootwin->tmpwins;
-	Window tfor=None;
-	int i, nwins=rootwin->tmpnwins;
+    Window *wins=rootwin->tmpwins;
+    Window tfor=None;
+    int i, nwins=rootwin->tmpnwins;
 
-	rootwin->tmpwins=NULL;
-	rootwin->tmpnwins=0;
-	
-	for(i=0; i<nwins; i++){
-		if(XWINDOW_REGION_OF(wins[i])!=NULL)
-			wins[i]=None;
-		if(wins[i]==None)
-			continue;
-		if(XGetTransientForHint(ioncore_g.dpy, wins[i], &tfor))
-			continue;
-		ioncore_manage_clientwin(wins[i], FALSE);
-		wins[i]=None;
-	}
+    rootwin->tmpwins=NULL;
+    rootwin->tmpnwins=0;
+    
+    for(i=0; i<nwins; i++){
+        if(XWINDOW_REGION_OF(wins[i])!=NULL)
+            wins[i]=None;
+        if(wins[i]==None)
+            continue;
+        if(XGetTransientForHint(ioncore_g.dpy, wins[i], &tfor))
+            continue;
+        ioncore_manage_clientwin(wins[i], FALSE);
+        wins[i]=None;
+    }
 
-	for(i=0; i<nwins; i++){
-		if(wins[i]==None)
-			continue;
-		ioncore_manage_clientwin(wins[i], FALSE);
-	}
-	
-	XFree((void*)wins);
+    for(i=0; i<nwins; i++){
+        if(wins[i]==None)
+            continue;
+        ioncore_manage_clientwin(wins[i], FALSE);
+    }
+    
+    XFree((void*)wins);
 }
 
 
 static void create_wm_windows(WRootWin *rootwin)
 {
-	rootwin->dummy_win=XCreateWindow(ioncore_g.dpy, WROOTWIN_ROOT(rootwin),
-									 0, 0, 1, 1, 0,
-									 CopyFromParent, InputOnly,
-									 CopyFromParent, 0, NULL);
+    rootwin->dummy_win=XCreateWindow(ioncore_g.dpy, WROOTWIN_ROOT(rootwin),
+                                     0, 0, 1, 1, 0,
+                                     CopyFromParent, InputOnly,
+                                     CopyFromParent, 0, NULL);
 
-	XSelectInput(ioncore_g.dpy, rootwin->dummy_win, PropertyChangeMask);
+    XSelectInput(ioncore_g.dpy, rootwin->dummy_win, PropertyChangeMask);
 }
 
 
 static void preinit_gr(WRootWin *rootwin)
 {
-	XGCValues gcv;
-	ulong gcvmask;
+    XGCValues gcv;
+    ulong gcvmask;
 
-	/* Create XOR gc (for resize) */
-	gcv.line_style=LineSolid;
-	gcv.join_style=JoinBevel;
-	gcv.cap_style=CapButt;
-	gcv.fill_style=FillSolid;
-	gcv.line_width=2;
-	gcv.subwindow_mode=IncludeInferiors;
-	gcv.function=GXxor;
-	gcv.foreground=~0L;
-	
-	gcvmask=(GCLineStyle|GCLineWidth|GCFillStyle|
-			 GCJoinStyle|GCCapStyle|GCFunction|
-			 GCSubwindowMode|GCForeground);
+    /* Create XOR gc (for resize) */
+    gcv.line_style=LineSolid;
+    gcv.join_style=JoinBevel;
+    gcv.cap_style=CapButt;
+    gcv.fill_style=FillSolid;
+    gcv.line_width=2;
+    gcv.subwindow_mode=IncludeInferiors;
+    gcv.function=GXxor;
+    gcv.foreground=~0L;
+    
+    gcvmask=(GCLineStyle|GCLineWidth|GCFillStyle|
+             GCJoinStyle|GCCapStyle|GCFunction|
+             GCSubwindowMode|GCForeground);
 
-	rootwin->xor_gc=XCreateGC(ioncore_g.dpy, WROOTWIN_ROOT(rootwin), 
-							  gcvmask, &gcv);
+    rootwin->xor_gc=XCreateGC(ioncore_g.dpy, WROOTWIN_ROOT(rootwin), 
+                              gcvmask, &gcv);
 }
 
 
 static WRootWin *preinit_rootwin(int xscr)
 {
-	Display *dpy=ioncore_g.dpy;
-	WRootWin *rootwin;
-	WRectangle geom;
-	Window root;
-	int i;
-	
-	/* Try to select input on the root window */
-	root=RootWindow(dpy, xscr);
-	
-	redirect_error=FALSE;
+    Display *dpy=ioncore_g.dpy;
+    WRootWin *rootwin;
+    WRectangle geom;
+    Window root;
+    int i;
+    
+    /* Try to select input on the root window */
+    root=RootWindow(dpy, xscr);
+    
+    redirect_error=FALSE;
 
-	XSetErrorHandler(my_redirect_error_handler);
-	XSelectInput(dpy, root, IONCORE_EVENTMASK_ROOT);
-	XSync(dpy, 0);
-	XSetErrorHandler(my_error_handler);
+    XSetErrorHandler(my_redirect_error_handler);
+    XSelectInput(dpy, root, IONCORE_EVENTMASK_ROOT);
+    XSync(dpy, 0);
+    XSetErrorHandler(my_error_handler);
 
-	if(redirect_error){
-		warn("Unable to redirect root window events for screen %d.", xscr);
-		return NULL;
-	}
-	
-	rootwin=ALLOC(WRootWin);
-	
-	if(rootwin==NULL){
-		warn_err();
-		return NULL;
-	}
-	
-	/* Init the struct */
-	OBJ_INIT(rootwin, WRootWin);
+    if(redirect_error){
+        warn("Unable to redirect root window events for screen %d.", xscr);
+        return NULL;
+    }
+    
+    rootwin=ALLOC(WRootWin);
+    
+    if(rootwin==NULL){
+        warn_err();
+        return NULL;
+    }
+    
+    /* Init the struct */
+    OBJ_INIT(rootwin, WRootWin);
 
-	rootwin->xscr=xscr;
-	rootwin->default_cmap=DefaultColormap(dpy, xscr);
-	rootwin->screen_list=NULL;
-	rootwin->tmpwins=NULL;
-	rootwin->tmpnwins=0;
-	rootwin->dummy_win=None;
-	rootwin->xor_gc=None;
-	
-	geom.x=0; geom.y=0;
-	geom.w=DisplayWidth(dpy, xscr);
-	geom.h=DisplayHeight(dpy, xscr);
-	
-	if(!window_init((WWindow*)rootwin, NULL, root, &geom)){
-		free(rootwin);
-		return NULL;
-	}
+    rootwin->xscr=xscr;
+    rootwin->default_cmap=DefaultColormap(dpy, xscr);
+    rootwin->screen_list=NULL;
+    rootwin->tmpwins=NULL;
+    rootwin->tmpnwins=0;
+    rootwin->dummy_win=None;
+    rootwin->xor_gc=None;
+    
+    geom.x=0; geom.y=0;
+    geom.w=DisplayWidth(dpy, xscr);
+    geom.h=DisplayHeight(dpy, xscr);
+    
+    if(!window_init((WWindow*)rootwin, NULL, root, &geom)){
+        free(rootwin);
+        return NULL;
+    }
 
-	((WRegion*)rootwin)->flags|=REGION_BINDINGS_ARE_GRABBED;
-	((WRegion*)rootwin)->rootwin=rootwin;
-	
-	REGION_MARK_MAPPED(rootwin);
-	
-	scan_initial_windows(rootwin);
+    ((WRegion*)rootwin)->flags|=REGION_BINDINGS_ARE_GRABBED;
+    ((WRegion*)rootwin)->rootwin=rootwin;
+    
+    REGION_MARK_MAPPED(rootwin);
+    
+    scan_initial_windows(rootwin);
 
-	create_wm_windows(rootwin);
-	preinit_gr(rootwin);
-	netwm_init_rootwin(rootwin);
-	
-	region_add_bindmap((WRegion*)rootwin, &ioncore_rootwin_bindmap);
-	
-	return rootwin;
+    create_wm_windows(rootwin);
+    preinit_gr(rootwin);
+    netwm_init_rootwin(rootwin);
+    
+    region_add_bindmap((WRegion*)rootwin, &ioncore_rootwin_bindmap);
+    
+    return rootwin;
 }
 
 
@@ -291,130 +291,130 @@ static Atom net_virtual_roots=None;
 
 
 static WScreen *add_screen(WRootWin *rw, int id, const WRectangle *geom, 
-						   bool useroot)
+                           bool useroot)
 {
-	WScreen *scr;
-	CARD32 p[1];
-	
+    WScreen *scr;
+    CARD32 p[1];
+    
 #ifdef CF_ALWAYS_VIRTUAL_ROOT
-	useroot=FALSE;
+    useroot=FALSE;
 #endif
 
-	scr=create_screen(rw, id, geom, useroot);
-	
-	if(scr==NULL)
-		return NULL;
-	
-	region_set_manager((WRegion*)scr, (WRegion*)rw, &(rw->screen_list));
-	
-	region_map((WRegion*)scr);
+    scr=create_screen(rw, id, geom, useroot);
+    
+    if(scr==NULL)
+        return NULL;
+    
+    region_set_manager((WRegion*)scr, (WRegion*)rw, &(rw->screen_list));
+    
+    region_map((WRegion*)scr);
 
-	if(!useroot){
-		p[0]=region_xwindow((WRegion*)scr);
-		XChangeProperty(ioncore_g.dpy, WROOTWIN_ROOT(rw), net_virtual_roots,
-						XA_WINDOW, 32, PropModeAppend, (uchar*)&(p[1]), 1);
-	}
+    if(!useroot){
+        p[0]=region_xwindow((WRegion*)scr);
+        XChangeProperty(ioncore_g.dpy, WROOTWIN_ROOT(rw), net_virtual_roots,
+                        XA_WINDOW, 32, PropModeAppend, (uchar*)&(p[1]), 1);
+    }
 
-	return scr;
+    return scr;
 }
 
 
 WRootWin *ioncore_manage_rootwin(int xscr, bool noxinerama)
 {
-	WRootWin *rootwin;
-	int nxi=0;
+    WRootWin *rootwin;
+    int nxi=0;
 #ifndef CF_NO_XINERAMA
-	XineramaScreenInfo *xi=NULL;
-	int i;
-	int event_base, error_base;
-	
-	if(!noxinerama){
-		if(XineramaQueryExtension(ioncore_g.dpy, &event_base, &error_base)){
-			xi=XineramaQueryScreens(ioncore_g.dpy, &nxi);
-			
-			if(xi!=NULL && ioncore_g.rootwins!=NULL){
-				warn("Don't know how to get Xinerama information for "
-					 "multiple X root windows.");
-				XFree(xi);
-				return NULL;
-			}
-		}
-	}
+    XineramaScreenInfo *xi=NULL;
+    int i;
+    int event_base, error_base;
+    
+    if(!noxinerama){
+        if(XineramaQueryExtension(ioncore_g.dpy, &event_base, &error_base)){
+            xi=XineramaQueryScreens(ioncore_g.dpy, &nxi);
+            
+            if(xi!=NULL && ioncore_g.rootwins!=NULL){
+                warn("Don't know how to get Xinerama information for "
+                     "multiple X root windows.");
+                XFree(xi);
+                return NULL;
+            }
+        }
+    }
 #endif
-	
-	rootwin=preinit_rootwin(xscr);
+    
+    rootwin=preinit_rootwin(xscr);
 
-	if(rootwin==NULL){
+    if(rootwin==NULL){
 #ifndef CF_NO_XINERAMA
-		if(xi!=NULL)
-			XFree(xi);
+        if(xi!=NULL)
+            XFree(xi);
 #endif
-		return NULL;
-	}
+        return NULL;
+    }
 
-	net_virtual_roots=XInternAtom(ioncore_g.dpy, "_NET_VIRTUAL_ROOTS", False);
-	XDeleteProperty(ioncore_g.dpy, WROOTWIN_ROOT(rootwin), net_virtual_roots);
-	
+    net_virtual_roots=XInternAtom(ioncore_g.dpy, "_NET_VIRTUAL_ROOTS", False);
+    XDeleteProperty(ioncore_g.dpy, WROOTWIN_ROOT(rootwin), net_virtual_roots);
+    
 #ifndef CF_NO_XINERAMA
-	if(xi!=NULL && nxi!=0){
-		bool useroot=FALSE;
-		WRectangle geom;
+    if(xi!=NULL && nxi!=0){
+        bool useroot=FALSE;
+        WRectangle geom;
 
-		for(i=0; i<nxi; i++){
-			geom.x=xi[i].x_org;
-			geom.y=xi[i].y_org;
-			geom.w=xi[i].width;
-			geom.h=xi[i].height;
-			/*if(nxi==1)
-				useroot=(geom.x==0 && geom.y==0);*/
-			if(!add_screen(rootwin, i, &geom, useroot))
-				warn("Unable to add viewport for Xinerama screen %d", i);
-		}
-		XFree(xi);
-	}else
+        for(i=0; i<nxi; i++){
+            geom.x=xi[i].x_org;
+            geom.y=xi[i].y_org;
+            geom.w=xi[i].width;
+            geom.h=xi[i].height;
+            /*if(nxi==1)
+                useroot=(geom.x==0 && geom.y==0);*/
+            if(!add_screen(rootwin, i, &geom, useroot))
+                warn("Unable to add viewport for Xinerama screen %d", i);
+        }
+        XFree(xi);
+    }else
 #endif
-	{
-		nxi=1;
-		add_screen(rootwin, xscr, &REGION_GEOM(rootwin), TRUE);
-	}
-	
-	if(rootwin->screen_list==NULL){
-		warn("Unable to add a viewport to X screen %d.", xscr);
-		destroy_obj((Obj*)rootwin);
-		return NULL;
-	}
-	
-	/* */ {
-		/* TODO: typed LINK_ITEM */
-		WRegion *tmp=(WRegion*)ioncore_g.rootwins;
-		LINK_ITEM(tmp, (WRegion*)rootwin, p_next, p_prev);
-		ioncore_g.rootwins=(WRootWin*)tmp;
-	}
+    {
+        nxi=1;
+        add_screen(rootwin, xscr, &REGION_GEOM(rootwin), TRUE);
+    }
+    
+    if(rootwin->screen_list==NULL){
+        warn("Unable to add a viewport to X screen %d.", xscr);
+        destroy_obj((Obj*)rootwin);
+        return NULL;
+    }
+    
+    /* */ {
+        /* TODO: typed LINK_ITEM */
+        WRegion *tmp=(WRegion*)ioncore_g.rootwins;
+        LINK_ITEM(tmp, (WRegion*)rootwin, p_next, p_prev);
+        ioncore_g.rootwins=(WRootWin*)tmp;
+    }
 
-	xwindow_set_cursor(WROOTWIN_ROOT(rootwin), IONCORE_CURSOR_DEFAULT);
-	
-	return rootwin;
+    xwindow_set_cursor(WROOTWIN_ROOT(rootwin), IONCORE_CURSOR_DEFAULT);
+    
+    return rootwin;
 }
 
 
 void rootwin_deinit(WRootWin *rw)
 {
-	WRegion *reg, *next;
+    WRegion *reg, *next;
 
-	while(rw->screen_list!=NULL)
-		destroy_obj((Obj*)rw->screen_list);
-	
-	/* */ {
-		WRegion *tmp=(WRegion*)ioncore_g.rootwins;
-		UNLINK_ITEM(tmp, (WRegion*)rw, p_next, p_prev);
-		ioncore_g.rootwins=(WRootWin*)tmp;
-	}
-	
-	XSelectInput(ioncore_g.dpy, WROOTWIN_ROOT(rw), 0);
-	
-	XFreeGC(ioncore_g.dpy, rw->xor_gc);
-	
-	window_deinit((WWindow*)rw);
+    while(rw->screen_list!=NULL)
+        destroy_obj((Obj*)rw->screen_list);
+    
+    /* */ {
+        WRegion *tmp=(WRegion*)ioncore_g.rootwins;
+        UNLINK_ITEM(tmp, (WRegion*)rw, p_next, p_prev);
+        ioncore_g.rootwins=(WRootWin*)tmp;
+    }
+    
+    XSelectInput(ioncore_g.dpy, WROOTWIN_ROOT(rw), 0);
+    
+    XFreeGC(ioncore_g.dpy, rw->xor_gc);
+    
+    window_deinit((WWindow*)rw);
 }
 
 
@@ -426,59 +426,59 @@ void rootwin_deinit(WRootWin *rw)
 
 static void rootwin_do_set_focus(WRootWin *rootwin, bool warp)
 {
-	WRegion *sub;
-	
-	sub=REGION_ACTIVE_SUB(rootwin);
-	
-	if(sub==NULL || !REGION_IS_MAPPED(sub)){
-		FOR_ALL_MANAGED_ON_LIST(rootwin->screen_list, sub){
-			if(REGION_IS_MAPPED(sub))
-				break;
-		}
-	}
+    WRegion *sub;
+    
+    sub=REGION_ACTIVE_SUB(rootwin);
+    
+    if(sub==NULL || !REGION_IS_MAPPED(sub)){
+        FOR_ALL_MANAGED_ON_LIST(rootwin->screen_list, sub){
+            if(REGION_IS_MAPPED(sub))
+                break;
+        }
+    }
 
-	if(sub!=NULL)
-		region_do_set_focus(sub, warp);
-	else
-		xwindow_do_set_focus(WROOTWIN_ROOT(rootwin));
+    if(sub!=NULL)
+        region_do_set_focus(sub, warp);
+    else
+        xwindow_do_set_focus(WROOTWIN_ROOT(rootwin));
 }
 
 
 static void rootwin_fit(WRootWin *rootwin, const WRectangle *geom)
 {
-	warn("Don't know how to rootwin_fit");
+    warn("Don't know how to rootwin_fit");
 }
 
 
 static void rootwin_map(WRootWin *rootwin)
 {
-	warn("Attempt to map a root window.");
+    warn("Attempt to map a root window.");
 }
 
 
 static void rootwin_unmap(WRootWin *rootwin)
 {
-	warn("Attempt to unmap a root window -- impossible");
+    warn("Attempt to unmap a root window -- impossible");
 }
 
 
 static bool reparent_rootwin(WRootWin *rootwin, WWindow *par, 
-							 const WRectangle *geom)
+                             const WRectangle *geom)
 {
-	warn("Attempt to reparent a root window -- impossible");
-	return FALSE;
+    warn("Attempt to reparent a root window -- impossible");
+    return FALSE;
 }
 
 
 static void rootwin_remove_managed(WRootWin *rootwin, WRegion *reg)
 {
-	region_unset_manager(reg, (WRegion*)rootwin, &(rootwin->screen_list));
+    region_unset_manager(reg, (WRegion*)rootwin, &(rootwin->screen_list));
 }
 
 
 static Window rootwin_x_window(WRootWin *rootwin)
 {
-	return WROOTWIN_ROOT(rootwin);
+    return WROOTWIN_ROOT(rootwin);
 }
 
 
@@ -490,7 +490,7 @@ static Window rootwin_x_window(WRootWin *rootwin)
 
 static bool scr_ok(WRegion *r)
 {
-	return (OBJ_IS(r, WScreen) && REGION_IS_MAPPED(r));
+    return (OBJ_IS(r, WScreen) && REGION_IS_MAPPED(r));
 }
 
 
@@ -500,19 +500,19 @@ static bool scr_ok(WRegion *r)
 EXTL_EXPORT_MEMBER
 WScreen *rootwin_current_scr(WRootWin *rootwin)
 {
-	WRegion *r=REGION_ACTIVE_SUB(rootwin);
-	
-	/* There should be no non-WScreen as children or managed by us, but... */
-	
-	if(r!=NULL && scr_ok(r))
-		return (WScreen*)r;
-	
-	FOR_ALL_MANAGED_ON_LIST(rootwin->screen_list, r){
-		if(scr_ok(r))
-			break;
-	}
-	
-	return (WScreen*)r;
+    WRegion *r=REGION_ACTIVE_SUB(rootwin);
+    
+    /* There should be no non-WScreen as children or managed by us, but... */
+    
+    if(r!=NULL && scr_ok(r))
+        return (WScreen*)r;
+    
+    FOR_ALL_MANAGED_ON_LIST(rootwin->screen_list, r){
+        if(scr_ok(r))
+            break;
+    }
+    
+    return (WScreen*)r;
 }
 
 
@@ -522,14 +522,14 @@ WScreen *rootwin_current_scr(WRootWin *rootwin)
 EXTL_EXPORT
 ExtlTab ioncore_root_windows()
 {
-	WRootWin *rootwin;
-	ExtlTab tab=extl_create_table();
-	
-	FOR_ALL_ROOTWINS(rootwin){
-		extl_table_seti_o(tab, rootwin->xscr, (Obj*)rootwin);
-	}
+    WRootWin *rootwin;
+    ExtlTab tab=extl_create_table();
+    
+    FOR_ALL_ROOTWINS(rootwin){
+        extl_table_seti_o(tab, rootwin->xscr, (Obj*)rootwin);
+    }
 
-	return tab;
+    return tab;
 }
 
 
@@ -541,22 +541,22 @@ ExtlTab ioncore_root_windows()
 
 bool ioncore_setup_rootwins()
 {
-	WRootWin *rootwin;
-	WRegion *reg;
-	int n=0;
-	
-	ioncore_load_workspaces();
-	
-	FOR_ALL_ROOTWINS(rootwin){
-		FOR_ALL_MANAGED_ON_LIST(rootwin->screen_list, reg){
-			if(OBJ_IS(reg, WScreen) &&
-			   screen_initialize_workspaces((WScreen*)reg))
-				n++;
-		}
-		rootwin_manage_initial_windows(rootwin);
-	}
-	
-	return (n!=0);
+    WRootWin *rootwin;
+    WRegion *reg;
+    int n=0;
+    
+    ioncore_load_workspaces();
+    
+    FOR_ALL_ROOTWINS(rootwin){
+        FOR_ALL_MANAGED_ON_LIST(rootwin->screen_list, reg){
+            if(OBJ_IS(reg, WScreen) &&
+               screen_initialize_workspaces((WScreen*)reg))
+                n++;
+        }
+        rootwin_manage_initial_windows(rootwin);
+    }
+    
+    return (n!=0);
 }
 
 
@@ -567,18 +567,18 @@ bool ioncore_setup_rootwins()
 
 
 static DynFunTab rootwin_dynfuntab[]={
-	{region_fit, rootwin_fit},
-	{region_map, rootwin_map},
-	{region_unmap, rootwin_unmap},
-	{region_do_set_focus, rootwin_do_set_focus},
-	{(DynFun*)region_xwindow, (DynFun*)rootwin_x_window},
-	{(DynFun*)region_reparent, (DynFun*)reparent_rootwin},
-	{region_remove_managed, rootwin_remove_managed},
-	END_DYNFUNTAB
+    {region_fit, rootwin_fit},
+    {region_map, rootwin_map},
+    {region_unmap, rootwin_unmap},
+    {region_do_set_focus, rootwin_do_set_focus},
+    {(DynFun*)region_xwindow, (DynFun*)rootwin_x_window},
+    {(DynFun*)region_reparent, (DynFun*)reparent_rootwin},
+    {region_remove_managed, rootwin_remove_managed},
+    END_DYNFUNTAB
 };
 
 
 IMPLCLASS(WRootWin, WWindow, rootwin_deinit, rootwin_dynfuntab);
 
-	
+    
 /*}}}*/

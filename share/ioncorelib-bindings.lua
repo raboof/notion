@@ -106,8 +106,8 @@ end
 local function mact(act_, kcb_, cmd, guard)
     local st, en, kcb2_, area_=string.find(kcb_, "([^@]*)@(.*)")
     return putcmd(cmd, guard, {
-    	action = act_,
-	kcb = (kcb2_ or kcb_),
+        action = act_,
+        kcb = (kcb2_ or kcb_),
         area = area_,
     })
 end

@@ -32,26 +32,26 @@
 
 static size_t dummywc_mbrlen(const char *s, size_t n, mbstate_t *ps)
 {
-	size_t i;
-	for(i=0; i<n; i++){
-		if(*s=='\0')
-			break;
-	}
-	return i;
+    size_t i;
+    for(i=0; i<n; i++){
+        if(*s=='\0')
+            break;
+    }
+    return i;
 }
 
 static int dummywc_mbtowc(wchar_t *pwc, const char *s, size_t n)
 {
-	if(n>0 && *s!='\0'){
-		*pwc=*s;
-		return 1;
-	}
-	return 0;
+    if(n>0 && *s!='\0'){
+        *pwc=*s;
+        return 1;
+    }
+    return 0;
 }
 
 static size_t dummywc_mbrtowc(wchar_t *pwc, const char *s, size_t n, mbstate_t *ps)
 {
-	return mbtowc(pwc, s, n);
+    return mbtowc(pwc, s, n);
 }
 
 #endif /* ION_IONCORE_DUMMYWC_H */

@@ -21,18 +21,18 @@
 #define FRAME_CURRENT(FRAME) (((WFrame*)(FRAME))->mplex.current_sub)
 
 enum{
-	FRAME_AREA_NONE=0,
-	FRAME_AREA_BORDER=1,
-	FRAME_AREA_TAB=2,
-	FRAME_AREA_CLIENT=3
+    FRAME_AREA_NONE=0,
+    FRAME_AREA_BORDER=1,
+    FRAME_AREA_TAB=2,
+    FRAME_AREA_CLIENT=3
 };
 
-#define IONCORE_EVENTMASK_FRAME	(FocusChangeMask|          \
-					 ButtonPressMask|          \
-					 ButtonReleaseMask|        \
-					 KeyPressMask|             \
-					 EnterWindowMask|          \
-					 ExposureMask|             \
-					 SubstructureRedirectMask)
+#define IONCORE_EVENTMASK_FRAME    (FocusChangeMask|          \
+                     ButtonPressMask|          \
+                     ButtonReleaseMask|        \
+                     KeyPressMask|             \
+                     EnterWindowMask|          \
+                     ExposureMask|             \
+                     SubstructureRedirectMask)
 
 #endif /* ION_IONCORE_FRAMEP_H */

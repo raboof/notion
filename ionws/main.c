@@ -38,50 +38,50 @@ extern void ionwsmod_unregister_exports();
 
 void ionwsmod_deinit()
 {
-	ionwsmod_unregister_exports();
-	bindmap_deinit(&ionws_bindmap);
-	bindmap_deinit(&ionframe_bindmap);
-	ioncore_unregister_regclass(&CLASSDESCR(WIonWS));
-	ioncore_unregister_regclass(&CLASSDESCR(WIonFrame));
+    ionwsmod_unregister_exports();
+    bindmap_deinit(&ionws_bindmap);
+    bindmap_deinit(&ionframe_bindmap);
+    ioncore_unregister_regclass(&CLASSDESCR(WIonWS));
+    ioncore_unregister_regclass(&CLASSDESCR(WIonFrame));
 }
 
 
 static bool register_regions()
 {
-	if(!ioncore_register_regclass(&CLASSDESCR(WIonFrame), NULL,
-							  (WRegionLoadCreateFn*) ionframe_load)){
-		return FALSE;
-	}
-	
-	if(!ioncore_register_regclass(&CLASSDESCR(WIonWS),
-							  (WRegionSimpleCreateFn*) create_ionws_simple,
-							  (WRegionLoadCreateFn*) ionws_load)){
-	   return FALSE;
-	}
-	
-	return TRUE;
+    if(!ioncore_register_regclass(&CLASSDESCR(WIonFrame), NULL,
+                              (WRegionLoadCreateFn*) ionframe_load)){
+        return FALSE;
+    }
+    
+    if(!ioncore_register_regclass(&CLASSDESCR(WIonWS),
+                              (WRegionSimpleCreateFn*) create_ionws_simple,
+                              (WRegionLoadCreateFn*) ionws_load)){
+       return FALSE;
+    }
+    
+    return TRUE;
 }
 
 
 bool ionwsmod_init()
 {
-	if(!ionwsmod_register_exports()){
-		warn_obj("ionwsmod", "Unable to register exports");
-		goto err;
-	}
-	
-	if(!register_regions()){
-		warn_obj("ionwsmod", "Unable to register classes");
-		goto err;
-	}
-	
-	ioncore_read_config("ionws", NULL, TRUE);
+    if(!ionwsmod_register_exports()){
+        warn_obj("ionwsmod", "Unable to register exports");
+        goto err;
+    }
+    
+    if(!register_regions()){
+        warn_obj("ionwsmod", "Unable to register classes");
+        goto err;
+    }
+    
+    ioncore_read_config("ionws", NULL, TRUE);
 
-	return TRUE;
-	
+    return TRUE;
+    
 err:
-	ionwsmod_deinit();
-	return FALSE;
+    ionwsmod_deinit();
+    return FALSE;
 }
 
 

@@ -18,25 +18,25 @@
 static Cursor cursors[IONCORE_N_CURSORS];
 
 #define LCURS(TYPE) \
-	cursors[IONCORE_CURSOR_##TYPE]=XCreateFontCursor(ioncore_g.dpy, CF_CURSOR_##TYPE)
+    cursors[IONCORE_CURSOR_##TYPE]=XCreateFontCursor(ioncore_g.dpy, CF_CURSOR_##TYPE)
 
 void ioncore_init_cursors()
 {
-	LCURS(DEFAULT);
-	LCURS(RESIZE);
-	LCURS(MOVE);
-	LCURS(DRAG);
-	LCURS(WAITKEY);
+    LCURS(DEFAULT);
+    LCURS(RESIZE);
+    LCURS(MOVE);
+    LCURS(DRAG);
+    LCURS(WAITKEY);
 }
 
 
 Cursor ioncore_xcursor(int cursor)
 {
-	return cursors[cursor];
+    return cursors[cursor];
 }
 
 
 void xwindow_set_cursor(Window win, int cursor)
 {
-	XDefineCursor(ioncore_g.dpy, win, ioncore_xcursor(cursor));
+    XDefineCursor(ioncore_g.dpy, win, ioncore_xcursor(cursor));
 }

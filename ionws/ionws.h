@@ -24,18 +24,18 @@ INTRCLASS(WIonWS);
 #include "split.h"
 
 DECLCLASS(WIonWS){
-	WGenWS genws;
-	Obj *split_tree;
-	WRegion *managed_list;
-	ExtlTab managed_splits;
+    WGenWS genws;
+    Obj *split_tree;
+    WRegion *managed_list;
+    ExtlTab managed_splits;
 };
 
 
 extern WIonWS *create_ionws(WWindow *parent, const WRectangle *bounds, 
-							bool ci);
+                            bool ci);
 extern WIonWS *create_ionws_simple(WWindow *parent, 
-								   const WRectangle *bounds);
+                                   const WRectangle *bounds);
 extern WRegion *ionws_load(WWindow *par, const WRectangle *geom, 
-						   ExtlTab tab);
+                           ExtlTab tab);
 
 #endif /* ION_IONWS_IONWS_H */

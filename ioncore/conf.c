@@ -28,7 +28,7 @@
 EXTL_EXPORT
 void ioncore_set_opaque_resize(bool opaque)
 {
-	ioncore_g.opaque_resize=opaque;
+    ioncore_g.opaque_resize=opaque;
 }
 
 
@@ -38,7 +38,7 @@ void ioncore_set_opaque_resize(bool opaque)
 EXTL_EXPORT
 void ioncore_set_dblclick_delay(int dd)
 {
-	ioncore_g.dblclick_delay=(dd<0 ? 0 : dd);
+    ioncore_g.dblclick_delay=(dd<0 ? 0 : dd);
 }
 
 
@@ -48,7 +48,7 @@ void ioncore_set_dblclick_delay(int dd)
 EXTL_EXPORT
 void ioncore_set_resize_delay(int rd)
 {
-	ioncore_g.resize_delay=(rd<0 ? 0 : rd);
+    ioncore_g.resize_delay=(rd<0 ? 0 : rd);
 }
 
 
@@ -58,7 +58,7 @@ void ioncore_set_resize_delay(int rd)
 EXTL_EXPORT
 void ioncore_set_warp(bool warp)
 {
-	ioncore_g.warp_enabled=warp;
+    ioncore_g.warp_enabled=warp;
 }
 
 
@@ -68,7 +68,7 @@ void ioncore_set_warp(bool warp)
 EXTL_EXPORT
 void ioncore_set_workspace_saves(bool enable)
 {
-	ioncore_g.ws_save_enabled=enable;
+    ioncore_g.ws_save_enabled=enable;
 }
 
 
@@ -85,22 +85,22 @@ void ioncore_set_switchto(bool sw)
 
 bool ioncore_read_main_config(const char *cfgfile)
 {
-	bool ret;
-	int unset=0;
+    bool ret;
+    int unset=0;
 
-	if(cfgfile==NULL)
-		cfgfile="ioncore";
-	
-	ret=ioncore_read_config(cfgfile, ".", TRUE);
-	
-	unset+=(ioncore_rootwin_bindmap.nbindings==0);
-	unset+=(ioncore_mplex_bindmap.nbindings==0);
-	unset+=(ioncore_frame_bindmap.nbindings==0);
-	
-	if(unset>0){
-		warn("Some bindmaps were empty, loading ioncore-efbb");
-		ioncore_read_config("ioncore-efbb", NULL, TRUE);
-	}
-	
-	return (ret && unset==0);
+    if(cfgfile==NULL)
+        cfgfile="ioncore";
+    
+    ret=ioncore_read_config(cfgfile, ".", TRUE);
+    
+    unset+=(ioncore_rootwin_bindmap.nbindings==0);
+    unset+=(ioncore_mplex_bindmap.nbindings==0);
+    unset+=(ioncore_frame_bindmap.nbindings==0);
+    
+    if(unset>0){
+        warn("Some bindmaps were empty, loading ioncore-efbb");
+        ioncore_read_config("ioncore-efbb", NULL, TRUE);
+    }
+    
+    return (ret && unset==0);
 }

@@ -21,57 +21,57 @@
 
 
 bool infowin_init(WInfoWin* p, WWindow *parent, const WRectangle *geom,
-				  const char *style)
+                  const char *style)
 {
-	XSetWindowAttributes attr;
-	
-	if(!window_init_new(&(p->wwin), parent, geom))
-		return FALSE;
-	
-	p->buffer=ALLOC_N(char, INFOWIN_BUFFER_LEN);
-	if(p->buffer==NULL)
-		goto fail;
-	p->buffer[0]='\0';
-	p->attr=NULL;
+    XSetWindowAttributes attr;
+    
+    if(!window_init_new(&(p->wwin), parent, geom))
+        return FALSE;
+    
+    p->buffer=ALLOC_N(char, INFOWIN_BUFFER_LEN);
+    if(p->buffer==NULL)
+        goto fail;
+    p->buffer[0]='\0';
+    p->attr=NULL;
 
-	p->brush=gr_get_brush(region_rootwin_of((WRegion*)parent),
+    p->brush=gr_get_brush(region_rootwin_of((WRegion*)parent),
                           p->wwin.win, style);
-	if(p->brush==NULL)
-		goto fail2;
-	
-	/* Enable save unders */
-	attr.save_under=True;
-	XChangeWindowAttributes(ioncore_g.dpy, p->wwin.win,
-							CWSaveUnder, &attr);
-	XSelectInput(ioncore_g.dpy, p->wwin.win, ExposureMask);
-	
-	return TRUE;
+    if(p->brush==NULL)
+        goto fail2;
+    
+    /* Enable save unders */
+    attr.save_under=True;
+    XChangeWindowAttributes(ioncore_g.dpy, p->wwin.win,
+                            CWSaveUnder, &attr);
+    XSelectInput(ioncore_g.dpy, p->wwin.win, ExposureMask);
+    
+    return TRUE;
 
-fail2:	
-	free(p->buffer);
-fail:	
-	window_deinit(&(p->wwin));
-	return FALSE;
+fail2:    
+    free(p->buffer);
+fail:    
+    window_deinit(&(p->wwin));
+    return FALSE;
 }
 
 
 WInfoWin *create_infowin(WWindow *parent, const WRectangle *geom,
-						 const char *style)
+                         const char *style)
 {
-	CREATEOBJ_IMPL(WInfoWin, infowin, (p, parent, geom, style));
+    CREATEOBJ_IMPL(WInfoWin, infowin, (p, parent, geom, style));
 }
 
 
 void infowin_deinit(WInfoWin *p)
 {
-	if(p->buffer!=NULL)
-		free(p->buffer);
-	if(p->attr!=NULL)
-		free(p->attr);
-	if(p->brush!=NULL)
-		grbrush_release(p->brush, p->wwin.win);
-	
-	window_deinit(&(p->wwin));
+    if(p->buffer!=NULL)
+        free(p->buffer);
+    if(p->attr!=NULL)
+        free(p->attr);
+    if(p->brush!=NULL)
+        grbrush_release(p->brush, p->wwin.win);
+    
+    window_deinit(&(p->wwin));
 }
 
 
@@ -83,23 +83,23 @@ void infowin_deinit(WInfoWin *p)
 
 bool infowin_set_attr2(WInfoWin *p, const char *attr1, const char *attr2)
 {
-	char *p2=NULL;
-	
-	if(attr1!=NULL){
-		if(attr2==NULL)
-			p2=scopy(attr1);
-		else
-			libtu_asprintf(&p2, "%s-%s", attr1, attr2);
-		if(p2==NULL)
-			return FALSE;
-	}
-	
-	if(p->attr)
-		free(p->attr);
-	
-	p->attr=p2;
-	
-	return TRUE;
+    char *p2=NULL;
+    
+    if(attr1!=NULL){
+        if(attr2==NULL)
+            p2=scopy(attr1);
+        else
+            libtu_asprintf(&p2, "%s-%s", attr1, attr2);
+        if(p2==NULL)
+            return FALSE;
+    }
+    
+    if(p->attr)
+        free(p->attr);
+    
+    p->attr=p2;
+    
+    return TRUE;
 }
 
 
@@ -111,18 +111,18 @@ bool infowin_set_attr2(WInfoWin *p, const char *attr1, const char *attr2)
 
 void infowin_draw(WInfoWin *p, bool complete)
 {
-	WRectangle g;
-	
-	if(p->brush==NULL)
-		return;
-	
-	g.x=0;
-	g.y=0;
-	g.w=REGION_GEOM(p).w;
-	g.h=REGION_GEOM(p).h;
-	
-	grbrush_draw_textbox(p->brush, p->wwin.win, &g, p->buffer, p->attr,
-						 complete);
+    WRectangle g;
+    
+    if(p->brush==NULL)
+        return;
+    
+    g.x=0;
+    g.y=0;
+    g.w=REGION_GEOM(p).w;
+    g.h=REGION_GEOM(p).h;
+    
+    grbrush_draw_textbox(p->brush, p->wwin.win, &g, p->buffer, p->attr,
+                         complete);
 }
 
 
@@ -133,13 +133,13 @@ void infowin_draw(WInfoWin *p, bool complete)
 
 
 static DynFunTab infowin_dynfuntab[]={
-	{window_draw, infowin_draw},
-	END_DYNFUNTAB
+    {window_draw, infowin_draw},
+    END_DYNFUNTAB
 };
 
 
 IMPLCLASS(WInfoWin, WWindow, infowin_deinit, infowin_dynfuntab);
 
-	
+    
 /*}}}*/
 

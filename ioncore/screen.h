@@ -19,24 +19,24 @@
 #include "rootwin.h"
 
 #define FOR_ALL_SCREENS(SCR)   \
-	for((SCR)=ioncore_g.screens; \
-		(SCR)!=NULL;           \
-		(SCR)=(SCR)->next_scr)
+    for((SCR)=ioncore_g.screens; \
+        (SCR)!=NULL;           \
+        (SCR)=(SCR)->next_scr)
 
 
 DECLCLASS(WScreen){
-	WMPlex mplex;
-	int id;
-	Atom atom_workspace;
-	bool uses_root;
-	bool configured;
-	WRectangle managed_off;
-	WScreen *next_scr, *prev_scr;
+    WMPlex mplex;
+    int id;
+    Atom atom_workspace;
+    bool uses_root;
+    bool configured;
+    WRectangle managed_off;
+    WScreen *next_scr, *prev_scr;
 };
 
 extern WScreen *create_screen(WRootWin *rootwin, int id, 
-							  const WRectangle *geom,
-							  bool useroot);
+                              const WRectangle *geom,
+                              bool useroot);
 
 extern bool screen_initialize_workspaces(WScreen *scr);
 extern WRegion *screen_current(WScreen *scr);

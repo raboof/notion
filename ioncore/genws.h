@@ -18,7 +18,7 @@
 #include "rectangle.h"
 
 DECLCLASS(WGenWS){
-	WRegion reg;
+    WRegion reg;
 };
 
 extern void genws_init(WGenWS *ws, WWindow *parent, const WRectangle *geom);

@@ -27,7 +27,7 @@
 EXTL_EXPORT_MEMBER
 void input_scrollup(WInput *input)
 {
-	CALL_DYN(input_scrollup, input, (input));
+    CALL_DYN(input_scrollup, input, (input));
 }
 
 
@@ -37,21 +37,21 @@ void input_scrollup(WInput *input)
 EXTL_EXPORT_MEMBER
 void input_scrolldown(WInput *input)
 {
-	CALL_DYN(input_scrolldown, input, (input));
+    CALL_DYN(input_scrolldown, input, (input));
 }
 
 
 void input_calc_size(WInput *input, WRectangle *geom)
 {
-	CALL_DYN(input_calc_size, input, (input, geom));
+    CALL_DYN(input_calc_size, input, (input, geom));
 }
 
 
 const char *input_style(WInput *input)
 {
-	const char *ret="input";
-	CALL_DYN_RET(ret, const char*, input_style, input, (input));
-	return ret;
+    const char *ret="input";
+    CALL_DYN_RET(ret, const char*, input_style, input, (input));
+    return ret;
 }
 
 
@@ -63,38 +63,38 @@ const char *input_style(WInput *input)
 
 void input_refit(WInput *input)
 {
-	WRectangle geom=input->max_geom;
-	input_calc_size(input, &geom);
-	window_fit(&input->win, &geom);
+    WRectangle geom=input->max_geom;
+    input_calc_size(input, &geom);
+    window_fit(&input->win, &geom);
 }
 
 
 void input_fit(WInput *input, const WRectangle *geom)
 {
-	input->max_geom=*geom;
-	input_refit(input);
+    input->max_geom=*geom;
+    input_refit(input);
 }
 
 
 void input_draw_config_updated(WInput *input)
 {
-	GrBrush *brush;
-	
-	brush=gr_get_brush(region_rootwin_of((WRegion*)input),
+    GrBrush *brush;
+    
+    brush=gr_get_brush(region_rootwin_of((WRegion*)input),
                        input->win.win,
-					   input_style(input));
-	
-	if(brush==NULL)
-		return;
-	
-	if(input->brush!=NULL)
-		grbrush_release(input->brush, input->win.win);
-	input->brush=brush;
-	input_refit(input);
-	
-	region_draw_config_updated_default((WRegion*)input);
-	
-	window_draw((WWindow*)input, TRUE);
+                       input_style(input));
+    
+    if(brush==NULL)
+        return;
+    
+    if(input->brush!=NULL)
+        grbrush_release(input->brush, input->win.win);
+    input->brush=brush;
+    input_refit(input);
+    
+    region_draw_config_updated_default((WRegion*)input);
+    
+    window_draw((WWindow*)input, TRUE);
 }
 
 
@@ -106,39 +106,39 @@ void input_draw_config_updated(WInput *input)
 
 bool input_init(WInput *input, WWindow *par, const WRectangle *geom)
 {
-	Window win;
+    Window win;
 
-	input->max_geom=*geom;
+    input->max_geom=*geom;
 
-	if(!window_init_new((WWindow*)input, par, geom))
-		return FALSE;
-	
-	win=input->win.win;
-	
-	input->brush=gr_get_brush(region_rootwin_of((WRegion*)par),
+    if(!window_init_new((WWindow*)input, par, geom))
+        return FALSE;
+    
+    win=input->win.win;
+    
+    input->brush=gr_get_brush(region_rootwin_of((WRegion*)par),
                               win, input_style(input));
-	
-	if(input->brush==NULL)
-		goto fail;
-	
-	input_refit(input);
-	XSelectInput(ioncore_g.dpy, input->win.win, IONCORE_EVENTMASK_INPUT);
-	region_add_bindmap((WRegion*)input, &querymod_input_bindmap);
-	
-	return TRUE;
-	
+    
+    if(input->brush==NULL)
+        goto fail;
+    
+    input_refit(input);
+    XSelectInput(ioncore_g.dpy, input->win.win, IONCORE_EVENTMASK_INPUT);
+    region_add_bindmap((WRegion*)input, &querymod_input_bindmap);
+    
+    return TRUE;
+    
 fail:
-	window_deinit((WWindow*)input);
-	return FALSE;
+    window_deinit((WWindow*)input);
+    return FALSE;
 }
 
 
 void input_deinit(WInput *input)
 {
-	if(input->brush!=NULL)
-		grbrush_release(input->brush, input->win.win);
-	
-	window_deinit((WWindow*)input);
+    if(input->brush!=NULL)
+        grbrush_release(input->brush, input->win.win);
+    
+    window_deinit((WWindow*)input);
 }
 
 
@@ -148,7 +148,7 @@ void input_deinit(WInput *input)
 EXTL_EXPORT_MEMBER
 void input_cancel(WInput *input)
 {
-	ioncore_defer_destroy((Obj*)input);
+    ioncore_defer_destroy((Obj*)input);
 }
 
 
@@ -158,7 +158,7 @@ void input_cancel(WInput *input)
 EXTL_EXPORT_MEMBER
 void input_close(WInput *input)
 {
-	input_cancel(input);
+    input_cancel(input);
 }
 
 
@@ -170,13 +170,13 @@ void input_close(WInput *input)
 
 static void input_inactivated(WInput *input)
 {
-	window_draw((WWindow*)input, FALSE);
+    window_draw((WWindow*)input, FALSE);
 }
 
 
 static void input_activated(WInput *input)
 {
-	window_draw((WWindow*)input, FALSE);
+    window_draw((WWindow*)input, FALSE);
 }
 
 
@@ -187,16 +187,16 @@ static void input_activated(WInput *input)
 
 
 static DynFunTab input_dynfuntab[]={
-	{region_fit, input_fit},
-	{region_draw_config_updated, input_draw_config_updated},
-	{region_close, input_close},
-	{region_activated, input_activated},
-	{region_inactivated, input_inactivated},
-	END_DYNFUNTAB
+    {region_fit, input_fit},
+    {region_draw_config_updated, input_draw_config_updated},
+    {region_close, input_close},
+    {region_activated, input_activated},
+    {region_inactivated, input_inactivated},
+    END_DYNFUNTAB
 };
 
 
 IMPLCLASS(WInput, WWindow, input_deinit, input_dynfuntab);
 
-	
+    
 /*}}}*/

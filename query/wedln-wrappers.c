@@ -206,7 +206,7 @@ void wedln_history_prev(WEdln *wedln)
 EXTL_EXPORT_AS(WEdln, insstr)
 void wedln_insstr_exported(WEdln *wedln, const char *str)
 {
-	edln_insstr(&(wedln->edln), str);
+    edln_insstr(&(wedln->edln), str);
 }
 
 
@@ -216,7 +216,7 @@ void wedln_insstr_exported(WEdln *wedln, const char *str)
 EXTL_EXPORT_MEMBER
 const char *wedln_contents(WEdln *wedln)
 {
-	return wedln->edln.p;
+    return wedln->edln.p;
 }
 
 /*EXTL_DOC
@@ -226,7 +226,7 @@ const char *wedln_contents(WEdln *wedln)
 EXTL_EXPORT_MEMBER
 int wedln_point(WEdln *wedln)
 {
-	return wedln->edln.point;
+    return wedln->edln.point;
 }
 
 /*EXTL_DOC
@@ -237,5 +237,5 @@ int wedln_point(WEdln *wedln)
 EXTL_EXPORT_MEMBER
 int wedln_mark(WEdln *wedln)
 {
-	return wedln->edln.mark;
+    return wedln->edln.mark;
 }

@@ -20,9 +20,9 @@
 INTRCLASS(WInput);
 
 DECLCLASS(WInput){
-	WWindow win;
-	WRectangle max_geom;
-	GrBrush *brush;
+    WWindow win;
+    WRectangle max_geom;
+    GrBrush *brush;
 };
 
 

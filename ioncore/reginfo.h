@@ -20,16 +20,16 @@
 #include "rectangle.h"
 
 typedef WRegion *WRegionLoadCreateFn(WWindow *par, const WRectangle *geom,
-									 ExtlTab tab);
+                                     ExtlTab tab);
 typedef WRegion *WRegionSimpleCreateFn(WWindow *par, const WRectangle *geom);
 
 INTRSTRUCT(WRegClassInfo);
-	
+    
 DECLSTRUCT(WRegClassInfo){
-	ClassDescr *descr;
-	WRegionSimpleCreateFn *sc_fn;
-	WRegionLoadCreateFn *lc_fn;
-	WRegClassInfo *next, *prev;
+    ClassDescr *descr;
+    WRegionSimpleCreateFn *sc_fn;
+    WRegionLoadCreateFn *lc_fn;
+    WRegClassInfo *next, *prev;
 };
 
 

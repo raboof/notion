@@ -16,18 +16,18 @@
 
 bool rectangle_contains(const WRectangle *g, int x, int y)
 {
-	return (x>=g->x && x<g->x+g->w && y>=g->y && y<g->y+g->h);
+    return (x>=g->x && x<g->x+g->w && y>=g->y && y<g->y+g->h);
 }
 
 
 void rectangle_debugprint(const WRectangle *g, const char *n)
 {
-	fprintf(stderr, "%s %d, %d; %d, %d\n", n, g->x, g->y, g->w, g->h);
+    fprintf(stderr, "%s %d, %d; %d, %d\n", n, g->x, g->y, g->w, g->h);
 }
 
 
 void rectangle_writecode(const WRectangle *geom, FILE *file)
 {
-	fprintf(file, "geom = { x = %d, y = %d, w = %d, h = %d},\n",
-			geom->x, geom->y, geom->w, geom->h);
+    fprintf(file, "geom = { x = %d, y = %d, w = %d, h = %d},\n",
+            geom->x, geom->y, geom->w, geom->h);
 }

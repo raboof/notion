@@ -20,25 +20,25 @@
 
 #define WROOTWIN_ROOT(X) ((X)->wwin.win)
 #define FOR_ALL_ROOTWINS(RW)         \
-	for(RW=ioncore_g.rootwins;         \
-		RW!=NULL;                    \
-		RW=OBJ_CAST(((WRegion*)RW)->p_next, WRootWin))
+    for(RW=ioncore_g.rootwins;         \
+        RW!=NULL;                    \
+        RW=OBJ_CAST(((WRegion*)RW)->p_next, WRootWin))
 
 
 DECLCLASS(WRootWin){
-	WWindow wwin;
-	int xscr;
-	
-	WRegion *screen_list;
-	
-	Colormap default_cmap;
-	
-	Window *tmpwins;
-	int tmpnwins;
-	
-	Window dummy_win;
-	
-	GC xor_gc;
+    WWindow wwin;
+    int xscr;
+    
+    WRegion *screen_list;
+    
+    Colormap default_cmap;
+    
+    Window *tmpwins;
+    int tmpnwins;
+    
+    Window dummy_win;
+    
+    GC xor_gc;
 };
 
 

@@ -25,15 +25,15 @@ static ObjList *taglist=NULL;
 EXTL_EXPORT_MEMBER
 void region_tag(WRegion *reg)
 {
-	if(reg->flags&REGION_TAGGED)
-		return;
-	
-	/*clear_sub_tags(reg);*/
-	
-	objlist_insert(&taglist, (Obj*)reg);
-	
-	reg->flags|=REGION_TAGGED;
-	region_notify_change(reg);
+    if(reg->flags&REGION_TAGGED)
+        return;
+    
+    /*clear_sub_tags(reg);*/
+    
+    objlist_insert(&taglist, (Obj*)reg);
+    
+    reg->flags|=REGION_TAGGED;
+    region_notify_change(reg);
 }
 
 
@@ -43,13 +43,13 @@ void region_tag(WRegion *reg)
 EXTL_EXPORT_MEMBER
 void region_untag(WRegion *reg)
 {
-	if(!(reg->flags&REGION_TAGGED))
-		return;
+    if(!(reg->flags&REGION_TAGGED))
+        return;
 
-	objlist_remove(&taglist, (Obj*)reg);
-	
-	reg->flags&=~REGION_TAGGED;
-	region_notify_change(reg);
+    objlist_remove(&taglist, (Obj*)reg);
+    
+    reg->flags&=~REGION_TAGGED;
+    region_notify_change(reg);
 }
 
 
@@ -59,10 +59,10 @@ void region_untag(WRegion *reg)
 EXTL_EXPORT_MEMBER
 void region_toggle_tag(WRegion *reg)
 {
-	if(reg->flags&REGION_TAGGED)
-		region_untag(reg);
-	else
-		region_tag(reg);
+    if(reg->flags&REGION_TAGGED)
+        region_untag(reg);
+    else
+        region_tag(reg);
 }
 
 
@@ -72,7 +72,7 @@ void region_toggle_tag(WRegion *reg)
 EXTL_EXPORT_MEMBER
 bool region_is_tagged(WRegion *reg)
 {
-	return ((reg->flags&REGION_TAGGED)!=0);
+    return ((reg->flags&REGION_TAGGED)!=0);
 }
 
 
@@ -82,11 +82,11 @@ bool region_is_tagged(WRegion *reg)
 EXTL_EXPORT
 void ioncore_clear_tags()
 {
-	WRegion *reg;
-	
-	FOR_ALL_ON_OBJLIST(WRegion*, reg, taglist){
-		region_untag(reg);
-	}
+    WRegion *reg;
+    
+    FOR_ALL_ON_OBJLIST(WRegion*, reg, taglist){
+        region_untag(reg);
+    }
 }
 
 
@@ -98,24 +98,24 @@ void ioncore_clear_tags()
 
 WRegion *ioncore_tags_first()
 {
-	return (WRegion*)objlist_init_iter(taglist);
+    return (WRegion*)objlist_init_iter(taglist);
 }
 
 
 WRegion *ioncore_tags_take_first()
 {
-	WRegion *reg=(WRegion*)objlist_init_iter(taglist);
-	
-	if(reg!=NULL)
-		region_untag(reg);
-	
-	return reg;
+    WRegion *reg=(WRegion*)objlist_init_iter(taglist);
+    
+    if(reg!=NULL)
+        region_untag(reg);
+    
+    return reg;
 }
 
 
 WRegion *ioncore_tags_next(WRegion *reg)
 {
-	return (WRegion*)objlist_iter(taglist);
+    return (WRegion*)objlist_iter(taglist);
 }
 
 

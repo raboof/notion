@@ -18,33 +18,33 @@
 #define MPLEX_MANAGED_UNVIEWABLE 0x0002
 
 enum{
-	MPLEX_CHANGE_SWITCHONLY=0,
-	MPLEX_CHANGE_REORDER=1,
-	MPLEX_CHANGE_ADD=2,
-	MPLEX_CHANGE_REMOVE=3
+    MPLEX_CHANGE_SWITCHONLY=0,
+    MPLEX_CHANGE_REORDER=1,
+    MPLEX_CHANGE_ADD=2,
+    MPLEX_CHANGE_REMOVE=3
 };
 
 
 DECLCLASS(WMPlex){
-	WWindow win;
-	int flags;
-	int managed_count;
-	WRegion *managed_list;
-	WRegion *current_sub;
-	WRegion *current_input;
+    WWindow win;
+    int flags;
+    int managed_count;
+    WRegion *managed_list;
+    WRegion *current_sub;
+    WRegion *current_input;
 };
 
 
 /* Create/destroy */
 extern bool mplex_init(WMPlex *mplex, WWindow *parent, Window win,
-					   const WRectangle *geom);
+                       const WRectangle *geom);
 extern bool mplex_init_new(WMPlex *mplex, WWindow *parent, 
-						   const WRectangle *geom);
+                           const WRectangle *geom);
 extern void mplex_deinit(WMPlex *mplex);
 
 /* Resize and reparent */
 extern bool mplex_reparent(WMPlex *mplex, WWindow *parent,
-						   const WRectangle *geom);
+                           const WRectangle *geom);
 extern void mplex_fit(WMPlex *mplex, const WRectangle *geom);
 extern void mplex_fit_managed(WMPlex *mplex);
 
@@ -55,12 +55,12 @@ extern void mplex_unmap(WMPlex *mplex);
 /* Attach */
 extern bool mplex_attach_simple(WMPlex *mplex, WRegion *reg, bool switchto);
 extern WRegion *mplex_attach_new_simple(WMPlex *mplex, WRegionSimpleCreateFn *fn,
-										bool switchto);
+                                        bool switchto);
 extern bool mplex_attach(WMPlex *mplex, WRegion *reg, ExtlTab param);
 extern WRegion *mplex_attach_new(WMPlex *mplex, ExtlTab param);
 extern void mplex_attach_tagged(WMPlex *mplex);
 extern WRegion *mplex_add_input(WMPlex *mplex, WRegionAttachHandler *fn,
-								void *fnp);
+                                void *fnp);
 
 extern void mplex_remove_managed(WMPlex *mplex, WRegion *reg);
 
@@ -84,6 +84,6 @@ extern WRegion *mplex_current_input(WMPlex *mplex);
 DYNFUN void mplex_managed_geom(const WMPlex *mplex, WRectangle *geom);
 DYNFUN void mplex_size_changed(WMPlex *mplex, bool wchg, bool hchg);
 DYNFUN void mplex_managed_changed(WMPlex *mplex, int what, bool sw,
-								  WRegion *mgd);
+                                  WRegion *mgd);
 
 #endif /* ION_IONCORE_MPLEX_H */

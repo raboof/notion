@@ -24,37 +24,37 @@ INTRCLASS(WWsSplit);
 
 
 enum WSplitDir{
-	HORIZONTAL,
-	VERTICAL
+    HORIZONTAL,
+    VERTICAL
 };
 
 
 enum PrimaryNode{
-	ANY,
-	TOP_OR_LEFT,
-	BOTTOM_OR_RIGHT
+    ANY,
+    TOP_OR_LEFT,
+    BOTTOM_OR_RIGHT
 };
 
 
 DECLCLASS(WWsSplit){
-	Obj obj;
-	int dir;
-	WRectangle geom;
-	int current;
-	Obj *tl, *br;
-	WWsSplit *parent;
-	uint max_w, min_w, max_h, min_h;
+    Obj obj;
+    int dir;
+    WRectangle geom;
+    int current;
+    Obj *tl, *br;
+    WWsSplit *parent;
+    uint max_w, min_w, max_h, min_h;
 };
 
 
 extern WWsSplit *create_split(int dir, Obj *tl, Obj *br, 
-							  const WRectangle *geom);
+                              const WRectangle *geom);
 extern int split_tree_do_calcresize(Obj *node_, int dir, int primn, 
-									int nsize);
+                                    int nsize);
 extern void split_tree_resize(Obj *node, int dir, int primn,
-							  int npos, int nsize);
+                              int npos, int nsize);
 extern void split_tree_do_resize(Obj *node, int dir, int primn,
-								 int npos, int nsize);
+                                 int npos, int nsize);
 
 extern int split_tree_size(Obj *obj, int dir);
 extern int split_tree_pos(Obj *obj, int dir);
@@ -66,8 +66,8 @@ extern void ionws_add_managed(WIonWS *ws, WRegion *reg);
 extern void ionws_managed_activated(WIonWS *ws, WRegion *reg);
 extern WRegion *ionws_find_rescue_manager_for(WIonWS *ws, WRegion *reg);
 extern void ionws_request_managed_geom(WIonWS *ws, WRegion *reg,
-									   int flags, const WRectangle *geom,
-									   WRectangle *geomret);
+                                       int flags, const WRectangle *geom,
+                                       WRectangle *geomret);
 extern void ionws_remove_managed(WIonWS *ws, WRegion *reg);
 
 extern WRegion *ionws_current(WIonWS *ws);

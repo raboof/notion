@@ -22,19 +22,19 @@ typedef void EdlnUpdateHandler(void*, int, bool moved);
 
 
 DECLSTRUCT(Edln){
-	char *p;
-	char *tmp_p;
-	int point;
-	int mark;
-	int psize;
-	int palloced;
-	int tmp_palloced;
-	int modified;
-	int histent;
-	void *uiptr;
+    char *p;
+    char *tmp_p;
+    int point;
+    int mark;
+    int psize;
+    int palloced;
+    int tmp_palloced;
+    int modified;
+    int histent;
+    void *uiptr;
 
-	EdlnCompletionHandler *completion_handler;
-	EdlnUpdateHandler *ui_update;
+    EdlnCompletionHandler *completion_handler;
+    EdlnUpdateHandler *ui_update;
 };
 
 

@@ -20,25 +20,25 @@
 
 
 static StringIntMap frame_areas[]={
-	{"border", 		FRAME_AREA_BORDER},
-	{"tab", 		FRAME_AREA_TAB},
-	{"empty_tab", 	FRAME_AREA_TAB},
-	{"client", 		FRAME_AREA_CLIENT},
-	END_STRINGINTMAP
+    {"border",         FRAME_AREA_BORDER},
+    {"tab",         FRAME_AREA_TAB},
+    {"empty_tab",     FRAME_AREA_TAB},
+    {"client",         FRAME_AREA_CLIENT},
+    END_STRINGINTMAP
 };
 
 
 EXTL_EXPORT_AS(global, __defbindings_WIonWS)
 bool ionwsmod_defbindings_WIonWS(ExtlTab tab)
 {
-	return bindmap_do_table(&ionws_bindmap, NULL, tab);
+    return bindmap_do_table(&ionws_bindmap, NULL, tab);
 }
 
 
 EXTL_EXPORT_AS(global, __defbindings_WIonFrame)
 bool ionwsmod_defbindings_WIonFrame(ExtlTab tab)
 {
-	return bindmap_do_table(&ionframe_bindmap, frame_areas, tab);
+    return bindmap_do_table(&ionframe_bindmap, frame_areas, tab);
 }
 
 
