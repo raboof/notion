@@ -330,12 +330,13 @@ void genframe_p_tabdrag(WGenFrame *genframe)
 	if(genframe->tab_pressed_sub==NULL)
 		return;
 
-	set_drag_handlers((WRegion*)genframe,
-					  (WMotionHandler*)p_tabdrag_begin,
-					  (WMotionHandler*)p_tabdrag_motion,
-					  (WButtonHandler*)p_tabdrag_end);
+	if(!set_drag_handlers((WRegion*)genframe,
+						  (WMotionHandler*)p_tabdrag_begin,
+						  (WMotionHandler*)p_tabdrag_motion,
+						  (WButtonHandler*)p_tabdrag_end))
+		return;
 	
-	grab_establish((WRegion*)genframe, tabdrag_kbd_handler, 0);
+	grab_establish((WRegion*)genframe, tabdrag_kbd_handler, FocusChangeMask);
 }
 
 
@@ -373,6 +374,14 @@ static void p_resize_end(WGenFrame *genframe, XButtonEvent *ev)
 }
 
 
+static void confine_to_parent(WGenFrame *genframe)
+{
+	WRegion *par=region_parent((WRegion*)genframe);
+	if(par!=NULL)
+		grab_confine_to(region_x_window(par));
+}
+
+
 /*EXTL_DOC
  * Start resizing \var{genframe} with the mouse or other pointing device.
  * This function should only be used by binding it to \emph{mpress} or
@@ -381,10 +390,13 @@ static void p_resize_end(WGenFrame *genframe, XButtonEvent *ev)
 EXTL_EXPORT
 void genframe_p_resize(WGenFrame *genframe)
 {
-	set_drag_handlers((WRegion*)genframe,
-					  (WMotionHandler*)p_resize_begin,
-					  (WMotionHandler*)p_resize_motion,
-					  (WButtonHandler*)p_resize_end);
+	if(!set_drag_handlers((WRegion*)genframe,
+						  (WMotionHandler*)p_resize_begin,
+						  (WMotionHandler*)p_resize_motion,
+						  (WButtonHandler*)p_resize_end))
+		return;
+	
+	confine_to_parent(genframe);
 }
 
 
@@ -415,10 +427,13 @@ static void p_move_end(WGenFrame *genframe, XButtonEvent *ev)
 
 void genframe_p_move(WGenFrame *genframe)
 {
-	set_drag_handlers((WRegion*)genframe,
-					  (WMotionHandler*)p_move_begin,
-					  (WMotionHandler*)p_move_motion,
-					  (WButtonHandler*)p_move_end);
+	if(!set_drag_handlers((WRegion*)genframe,
+						  (WMotionHandler*)p_move_begin,
+						  (WMotionHandler*)p_move_motion,
+						  (WButtonHandler*)p_move_end))
+		return;
+	
+	confine_to_parent(genframe);
 }
 
 

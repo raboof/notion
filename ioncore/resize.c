@@ -14,6 +14,8 @@
 #include "event.h"
 #include "cursor.h"
 #include "objp.h"
+#include "grab.h"
+
 
 #define XOR_RESIZE (!wglobal.opaque_resize)
 
@@ -142,7 +144,7 @@ bool may_resize(WRegion *reg)
 
 
 static bool begin_moveres(WRegion *reg, WDrawRubberbandFn *rubfn,
-						  bool cumulative)
+						  bool cumulative, int cursor)
 {
 	WRootWin *rootwin=ROOTWIN_OF(reg);
 	WRegion *parent;
@@ -190,7 +192,7 @@ static bool begin_moveres(WRegion *reg, WDrawRubberbandFn *rubfn,
 	if(XOR_RESIZE)
 		res_draw_rubberband(rootwin);
 
-	change_grab_cursor(CURSOR_RESIZE);
+	change_grab_cursor(cursor);
 	
 	return TRUE;
 }
@@ -199,14 +201,14 @@ static bool begin_moveres(WRegion *reg, WDrawRubberbandFn *rubfn,
 bool begin_resize(WRegion *reg, WDrawRubberbandFn *rubfn, bool cumulative)
 {
 	moveres_mode=MOVERES_SIZE;
-	return begin_moveres(reg, rubfn, cumulative);
+	return begin_moveres(reg, rubfn, cumulative, CURSOR_RESIZE);
 }
 
 
 bool begin_move(WRegion *reg, WDrawRubberbandFn *rubfn, bool cumulative)
 {
 	moveres_mode=MOVERES_POS;
-	return begin_moveres(reg, rubfn, cumulative);
+	return begin_moveres(reg, rubfn, cumulative, CURSOR_MOVE);
 }
 
 

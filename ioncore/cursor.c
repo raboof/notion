@@ -26,13 +26,6 @@ void load_cursors()
 }
 
 
-void change_grab_cursor(int cursor)
-{
-	XChangeActivePointerGrab(wglobal.dpy, GRAB_POINTER_MASK,
-							 cursors[cursor], CurrentTime);
-}
-
-
 void set_cursor(Window win, int cursor)
 {
 	XDefineCursor(wglobal.dpy, win, cursors[cursor]);

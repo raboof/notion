@@ -1,8 +1,7 @@
 /*
  * ion/grab.c
  *
- * Copyright (c) Lukas Schroeder 2002.
- * See the included file LICENSE for details.
+ * Based on the contributed code "(c) Lukas Schroeder 2002".
  */
 
 #include <stdlib.h>
@@ -26,7 +25,8 @@ typedef struct _grab_status{
 	long flags;
 
 	bool remove;	/* TRUE, if entry marked for removal by do_grab_remove() */
-	int suspended;
+	int cursor;
+	Window confine_to;
 }GrabStatus;
 
 #define MAX_GRABS 10
@@ -46,9 +46,9 @@ static void grab_watch_handler(WWatch *w, WObj *obj)
 static void do_grab_install(GrabStatus *grab)
 {
 	setup_watch(&grab->watch, (WObj*)grab->holder, grab_watch_handler);
-	do_grab_kb_ptr(ROOT_OF(grab->holder), grab->holder, ~grab->events);
+	do_grab_kb_ptr(ROOT_OF(grab->holder), grab->confine_to, grab->cursor,
+				   ~grab->events);
 	current_grab=grab;
-	change_grab_cursor(CURSOR_WAITKEY);
 }
 
 static void do_grab_remove()
@@ -63,7 +63,7 @@ static void do_grab_remove()
 
 	assert(idx_grab>=0);
 
-	if(idx_grab>0 && !grabs[idx_grab-1].suspended){
+	if(idx_grab>0){
 		current_grab=&grabs[idx_grab-1];
 		do_grab_install(current_grab);
 	}
@@ -104,7 +104,26 @@ bool call_grab_handler(XEvent *ev)
 
 bool grab_held()
 {
-	return (idx_grab>0 && !grabs[idx_grab-1].suspended);
+	return idx_grab>0;
+}
+
+void change_grab_cursor(int cursor)
+{
+	if(current_grab!=NULL){
+		current_grab->cursor=cursor;
+		XChangeActivePointerGrab(wglobal.dpy, GRAB_POINTER_MASK,
+								 x_cursor(cursor), CurrentTime);
+	}
+}
+
+void grab_confine_to(Window confine_to)
+{
+	if(current_grab!=NULL){
+		current_grab->confine_to=confine_to;
+		XGrabPointer(wglobal.dpy, ROOT_OF(current_grab->holder), True,
+					 GRAB_POINTER_MASK, GrabModeAsync, GrabModeAsync, 
+					 confine_to, x_cursor(CURSOR_DEFAULT), CurrentTime);
+	}
 }
 
 void grab_establish(WRegion *reg, GrabHandler *func, long eventmask)
@@ -115,8 +134,8 @@ void grab_establish(WRegion *reg, GrabHandler *func, long eventmask)
 		current_grab->handler=func;
 		current_grab->events=~eventmask;
 		current_grab->remove=FALSE;
-		current_grab->suspended=0;
-
+		current_grab->cursor=CURSOR_DEFAULT;
+		current_grab->confine_to=ROOT_OF(reg);
 		do_grab_install(current_grab);
 	}
 }
@@ -163,22 +182,3 @@ WRegion *grab_get_my_holder(GrabHandler *func)
 			return grabs[i].holder;
 	return NULL;
 }
-
-void grab_suspend()
-{
-	if(idx_grab>0){
-		if(!grabs[idx_grab-1].suspended)
-			ungrab_kb_ptr();
-		grabs[idx_grab-1].suspended++;
-	}
-}
-
-void grab_resume()
-{
-	if(idx_grab>0 && grabs[idx_grab-1].suspended){
-		current_grab=&grabs[idx_grab-1];
-		current_grab->suspended--;
-		do_grab_install(current_grab);
-	}
-}
-

@@ -577,7 +577,7 @@ static void pointer_handler(XEvent *ev)
 		switch(ev->type){
 		CASE_EVENT(ButtonRelease)
 			if(handle_button_release(&ev->xbutton)){
-				ungrab_kb_ptr();
+				/*ungrab_kb_ptr();*/
 				wglobal.grab_released=FALSE;
 				/* Don't ignore following UngrabNotify EnterWindow events in
 				 * case of pointer action originated grabs.

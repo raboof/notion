@@ -19,7 +19,6 @@
 #define N_CURSORS		5
 
 extern void load_cursors();
-extern void change_grab_cursor(int cursor);
 extern void set_cursor(Window win, int cursor);
 extern Cursor x_cursor(int cursor);
 

@@ -144,25 +144,26 @@ void get_event_mask(XEvent *ev, long mask)
 /*{{{ Grab */
 
 
-void do_grab_kb_ptr(Window win, WRegion *reg, long eventmask)
+void do_grab_kb_ptr(Window win, Window confine_to, int cursor, long eventmask)
 {
 	wglobal.input_mode=INPUT_GRAB;
 	
 	XSelectInput(wglobal.dpy, win, ROOT_MASK&~eventmask);
 	XGrabPointer(wglobal.dpy, win, True, GRAB_POINTER_MASK,
-				 GrabModeAsync, GrabModeAsync, win,
-				 x_cursor(CURSOR_DEFAULT), CurrentTime);
+				 GrabModeAsync, GrabModeAsync, confine_to,
+				 x_cursor(cursor), CurrentTime);
 	XGrabKeyboard(wglobal.dpy, win, False, GrabModeAsync,
 				  GrabModeAsync, CurrentTime);
+	XSync(wglobal.dpy, False);
 	XSelectInput(wglobal.dpy, win, ROOT_MASK);
 	wglobal.grab_released=FALSE;
 }
 
 
-void grab_kb_ptr(WRegion *reg)
+/*void grab_kb_ptr(WRegion *reg)
 {
 	do_grab_kb_ptr(ROOT_OF(reg), reg, FocusChangeMask);
-}
+}*/
 
 
 void ungrab_kb_ptr()

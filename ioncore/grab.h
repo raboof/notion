@@ -1,8 +1,7 @@
 /*
  * ion/ioncore/grab.h
  *
- * Copyright (c) Lukas Schroeder 2002.
- * See the included file LICENSE for details.
+ * Based on the contributed code "(c) Lukas Schroeder 2002".
  */
 
 #ifndef ION_IONCORE_GRAB_H
@@ -28,10 +27,9 @@ extern void grab_remove(GrabHandler *func);
 extern void grab_holder_remove(WRegion *holder);
 extern WRegion *grab_get_holder();
 extern WRegion *grab_get_my_holder(GrabHandler *func);
-extern void grab_suspend();
-extern void grab_resume();
 extern bool grab_held();
-
+extern void change_grab_cursor(int cursor);
+extern void grab_confine_to(Window confine_to);
 
 #endif /* ION_IONCORE_GRAB_H */
 

@@ -12,6 +12,7 @@
 #include "global.h"
 #include "focus.h"
 #include "regbind.h"
+#include "grab.h"
 
 
 /*{{{ Variables */
@@ -153,14 +154,14 @@ static void call_motion_begin(WBinding *binding, XMotionEvent *ev,
 /*}}}*/
 
 
-/*{{{ Watch handler */
-
-
-/*}}}*/
-
-
 /*{{{ handle_button_press/release/motion */
 
+
+bool handle_key_dummy(WRegion *reg, XEvent *ev)
+{
+	return FALSE;
+}
+	
 
 bool handle_button_press(XButtonEvent *ev)
 {
@@ -221,7 +222,8 @@ bool handle_button_press(XButtonEvent *ev)
 	setup_watch(&p_subregwatch, (WObj*)subreg, NULL);
 
 	
-	do_grab_kb_ptr(ev->root, reg, FocusChangeMask);
+	/*do_grab_kb_ptr(ev->root, reg, FocusChangeMask);*/
+	grab_establish(reg, handle_key_dummy, 0);
 	
 end:
 	/*p_reg=reg;*/
@@ -264,6 +266,7 @@ bool handle_button_release(XButtonEvent *ev)
 		}
 		
 		/* Allow any temporary settings to be cleared */
+		grab_remove(handle_key_dummy);
 		window_release((WWindow*)p_reg);
 	}
 	
