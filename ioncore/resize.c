@@ -12,7 +12,6 @@
 #include "common.h"
 #include "global.h"
 #include "resize.h"
-#include "signal.h"
 #include "draw.h"
 #include "sizehint.h"
 #include "event.h"
@@ -35,7 +34,6 @@ static WRectangle tmporiggeom;
 static WRectangle tmpgeom;
 static WRegion *tmpreg=NULL;
 static WDrawRubberbandFn *tmprubfn=NULL;
-static void (*resize_atexit)();
 static int parent_rx, parent_ry;
 static enum {MOVERES_SIZE, MOVERES_POS} moveres_mode=MOVERES_SIZE;
 static bool resize_cumulative=FALSE;
@@ -58,33 +56,6 @@ void region_resize_hints(WRegion *reg, XSizeHints *hints_ret,
 	{
 		CALL_DYN(region_resize_hints, reg, (reg, hints_ret, relw_ret, relh_ret));
 	}
-}
-
-
-/*}}}*/
-
-
-/*{{{ Resize timer */
-
-
-static void tmr_end_resize(WTimer *unused)
-{
-	if(!resize_mode)
-		return;
-	
-	assert(tmpreg!=NULL);
-	
-	end_resize(tmpreg);
-}
-
-
-static WTimer resize_timer=INIT_TIMER(tmr_end_resize);
-
-
-void set_resize_timer(WRegion *reg, uint timeout)
-{
-	assert(tmpreg==reg && tmpreg!=NULL);
-	set_timer(&resize_timer, timeout);
 }
 
 
@@ -222,16 +193,6 @@ bool begin_move(WRegion *reg, WDrawRubberbandFn *rubfn, bool cumulative)
 }
 
 
-bool begin_resize_atexit(WRegion *reg, WDrawRubberbandFn *rubfn, 
-						 bool cumulative, void (*exitfn)())
-{
-	if(begin_resize(reg, rubfn, cumulative)){
-		resize_atexit=exitfn;
-		return TRUE;
-	}
-	return FALSE;
-}
-
 
 static void delta_moveres(WRegion *reg, int dx1, int dx2, int dy1, int dy2,
 						  WRectangle *rret)
@@ -352,16 +313,17 @@ static void set_saved(WRegion *reg)
 }
 
 
-void end_resize(WRegion *reg)
+bool end_resize()
 {
-	WRootWin *rootwin=ROOTWIN_OF(reg);
-	
-	assert(tmpreg==reg);
+	WRootWin *rootwin;
+	WRegion *reg=tmpreg;
 
-	resize_mode=FALSE;
-	tmpreg=NULL;
+	if(reg==NULL)
+		return FALSE;
 	
-	reset_timer(&resize_timer);
+	tmpreg=NULL;
+	resize_mode=FALSE;
+	rootwin=ROOTWIN_OF(reg);
 	
 	if(XOR_RESIZE){
 		res_draw_rubberband(rootwin);
@@ -373,24 +335,22 @@ void end_resize(WRegion *reg)
 	set_saved(reg);
 	
 	XUnmapWindow(wglobal.dpy, rootwin->grdata.moveres_win);
-
-	if(resize_atexit){
-		resize_atexit();
-		resize_atexit=NULL;
-	}
+	
+	return TRUE;
 }
 
 
-void cancel_resize(WRegion *reg)
+bool cancel_resize()
 {
-	WRootWin *rootwin=ROOTWIN_OF(reg);
+	WRootWin *rootwin;
+	WRegion *reg=tmpreg;
 
-	assert(tmpreg==reg);
+	if(reg==NULL)
+		return FALSE;
 	
 	resize_mode=FALSE;
 	tmpreg=NULL;
-	
-	reset_timer(&resize_timer);
+	rootwin=ROOTWIN_OF(reg);
 	
 	if(XOR_RESIZE){
 		res_draw_rubberband(rootwin);
@@ -400,11 +360,8 @@ void cancel_resize(WRegion *reg)
 	}
 	
 	XUnmapWindow(wglobal.dpy, rootwin->grdata.moveres_win);
-
-	if(resize_atexit){
-		resize_atexit();
-		resize_atexit=NULL;
-	}
+	
+	return TRUE;
 }
 
 

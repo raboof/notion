@@ -14,6 +14,7 @@
 #include <ioncore/resize.h>
 #include <ioncore/grab.h>
 #include <ioncore/binding.h>
+#include <ioncore/signal.h>
 #include "resize.h"
 #include "split.h"
 #include "bindmaps.h"
@@ -61,26 +62,24 @@ static bool resize_handler(WRegion *reg, XEvent *xev)
 /*}}}*/
 
 
+/*{{{ Resize timer */
+
+
+static void tmr_end_resize(WTimer *unused)
+{
+	if(end_resize())
+		grab_remove(resize_handler);
+}
+
+
+static WTimer resize_timer=INIT_TIMER(tmr_end_resize);
+
+
+/*}}}*/
+
+
+
 /*{{{ Keyboard resize interface */
-
-
-static void end_keyresize()
-{
-	grab_remove(resize_handler);
-}
-
-
-/*EXTL_DOC
- * Enter resize mode for \var{frame}.
- */
-EXTL_EXPORT
-void ionframe_begin_resize(WIonFrame *frame)
-{
-	grab_establish((WRegion*)frame, resize_handler,
-				   FocusChangeMask|KeyReleaseMask);
-	begin_resize_atexit((WRegion*)frame, NULL, FALSE, end_keyresize);
-	set_resize_timer((WRegion*)frame, wglobal.resize_delay);
-}
 
 
 /*EXTL_DOC
@@ -104,7 +103,8 @@ void ionframe_do_resize(WIonFrame *frame, int left, int right,
 	
 	delta_resize((WRegion*)frame, -left*wu, right*wu, -top*hu, bottom*hu,
 				 NULL);
-	set_resize_timer((WRegion*)frame, wglobal.resize_delay);
+	
+	set_timer(&resize_timer, wglobal.resize_delay);
 }
 
 
@@ -115,7 +115,10 @@ void ionframe_do_resize(WIonFrame *frame, int left, int right,
 EXTL_EXPORT
 void ionframe_end_resize(WIonFrame *frame)
 {
-	end_resize((WRegion*)frame);
+	if(end_resize()){
+		reset_timer(&resize_timer);
+		grab_remove(resize_handler);
+	}
 }
 
 
@@ -126,7 +129,25 @@ void ionframe_end_resize(WIonFrame *frame)
 EXTL_EXPORT
 void ionframe_cancel_resize(WIonFrame *frame)
 {
-	cancel_resize((WRegion*)frame);
+	if(cancel_resize()){
+		reset_timer(&resize_timer);
+		grab_remove(resize_handler);
+	}
+}
+
+
+/*EXTL_DOC
+ * Enter resize mode for \var{frame}.
+ */
+EXTL_EXPORT
+void ionframe_begin_resize(WIonFrame *frame)
+{
+	if(!begin_resize((WRegion*)frame, NULL, FALSE))
+		return;
+	grab_establish((WRegion*)frame, resize_handler,
+				   /*ionframe_cancel_resize,*/
+				   FocusChangeMask|KeyReleaseMask);
+	set_timer(&resize_timer, wglobal.resize_delay);
 }
 
 

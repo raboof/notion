@@ -381,7 +381,7 @@ static void p_resize_begin(WGenFrame *genframe, XMotionEvent *ev, int dx, int dy
 
 static void p_resize_end(WGenFrame *genframe, XButtonEvent *ev)
 {
-	end_resize((WRegion*)genframe);
+	end_resize();
 }
 
 
@@ -432,7 +432,7 @@ static void p_move_begin(WGenFrame *genframe, XMotionEvent *ev, int dx, int dy)
 
 static void p_move_end(WGenFrame *genframe, XButtonEvent *ev)
 {
-	end_resize((WRegion*)genframe);
+	end_resize();
 }
 
 

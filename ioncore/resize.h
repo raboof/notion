@@ -40,8 +40,6 @@ typedef void WDrawRubberbandFn(WRootWin *rw, WRectangle geom);
 
 extern bool begin_resize(WRegion *reg, WDrawRubberbandFn *rubfn,
 						 bool cumulative);
-extern bool begin_resize_atexit(WRegion *reg, WDrawRubberbandFn *rubfn, 
-								bool cumulative, void (*exitfn)());
 extern bool begin_move(WRegion *reg, WDrawRubberbandFn *rubfn,
 					   bool cumulative);
 /* dx1/dx2/dy1/dy2: left/right/top/bottom difference to previous values. 
@@ -50,10 +48,8 @@ extern bool begin_move(WRegion *reg, WDrawRubberbandFn *rubfn,
 extern void delta_resize(WRegion *reg, int dx1, int dx2, int dy1, int dy2,
 						 WRectangle *rret);
 extern void delta_move(WRegion *reg, int dx, int dy, WRectangle *rret);
-extern void end_resize(WRegion *reg);
-extern void cancel_resize(WRegion *reg);
-extern void set_resize_timer(WRegion *reg, uint timeout);
-
+extern bool end_resize();
+extern bool cancel_resize();
 extern bool is_resizing();
 extern bool may_resize(WRegion *reg);
 
