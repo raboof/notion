@@ -1221,10 +1221,10 @@ void splitinner_remove(WSplitInner *node, WSplit *child, bool reclaim_space)
 
 void splittree_remove(WSplit *node, bool reclaim_space)
 {
-    if(node->parent==NULL)
-        splittree_changeroot(node, NULL);
-    else
+    if(node->parent!=NULL)
         splitinner_remove(node->parent, node, reclaim_space);
+    else if(node->selfptrptr!=NULL)
+        splittree_changeroot(node, NULL);
     
     destroy_obj((Obj*)node);
 }

@@ -125,9 +125,9 @@ bool splitfloat_init(WSplitFloat *split, const WRectangle *geom,
     }
 
     split->tlpwin->splitfloat=split;
-    ionws_managed_add((WIonWS*)ws, (WRegion*)split->tlpwin);
     split->brpwin->splitfloat=split;
-    ionws_managed_add((WIonWS*)ws, (WRegion*)split->brpwin);
+    /*ionws_managed_add((WIonWS*)ws, (WRegion*)split->tlpwin);
+    ionws_managed_add((WIonWS*)ws, (WRegion*)split->brpwin);*/
     
     splitfloat_set_borderlines(split);
 
@@ -960,8 +960,8 @@ WRegion *autows_do_get_nextto(WAutoWS *ws, WRegion *reg,
         node=(WSplit*)(node->parent);
     }
     
-    if(node!=NULL && OBJ_IS(node, WSplitRegion))
-        return ((WSplitRegion*)node)->reg;
+    if(nextto!=NULL && OBJ_IS(nextto, WSplitRegion))
+        return ((WSplitRegion*)nextto)->reg;
     return NULL;
 }
 

@@ -186,11 +186,9 @@ void autows_managed_remove(WAutoWS *ws, WRegion *reg)
     other=(WSplitRegion*)split_closest_leaf((WSplit*)node, 
                                             plainregionfilter);
 
-    if(ws->ionws.split_tree!=NULL){
-        if(node==(WSplitRegion*)(ws->ionws.stdispnode))
-            ws->ionws.stdispnode=NULL;
-        splittree_remove((WSplit*)node, !ds);
-    }
+    if(node==(WSplitRegion*)(ws->ionws.stdispnode))
+        ws->ionws.stdispnode=NULL;
+    splittree_remove((WSplit*)node, !ds);
     
     if(!ds){
         if(other==NULL){
