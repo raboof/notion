@@ -93,6 +93,8 @@ WMenu *mod_menu_pmenu(WWindow *where, ExtlFn handler, ExtlTab tab)
     if(menu==NULL)
         return NULL;
 
+    region_keep_on_top((WRegion*)menu);
+    region_raise((WRegion*)menu);
     /*region_stack_above((WRegion*)menu, (WRegion*)where);*/
     
     if(!ioncore_set_drag_handlers((WRegion*)menu,
