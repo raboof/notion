@@ -45,7 +45,8 @@ static bool send_clientmsg(Window win, Atom a, Time stmp);
 
 
 WHook *clientwin_do_manage_alt=NULL;
-WHook *clientwin_added_hook=NULL;
+WHook *clientwin_mapped_hook=NULL;
+WHook *clientwin_unmapped_hook=NULL;
 
 
 #define LATEST_TRANSIENT(CWIN) REGION_LAST_MANAGED((CWIN)->transient_list)
@@ -557,7 +558,7 @@ again:
     if(postmanage_check(cwin, &attr)){
         if(param.jumpto && ioncore_g.focus_next==NULL)
             region_goto((WRegion*)cwin);
-        hook_call_o(clientwin_added_hook, (Obj*)cwin);
+        hook_call_o(clientwin_mapped_hook, (Obj*)cwin);
         return cwin;
     }
 
@@ -789,25 +790,46 @@ void clientwin_deinit(WClientWin *cwin)
 }
 
 
-/* Used when the window was unmapped */
-void clientwin_unmapped(WClientWin *cwin)
+
+static bool mrsh_u_c(WHookDummy *fn, void *param)
+{
+    fn(*(Window*)param);
+    return TRUE;
+}
+
+static bool mrsh_u_extl(ExtlFn fn, void *param)
+{
+    extl_call(fn, "d", NULL, *(Window*)param);
+    return TRUE;
+}
+
+static void clientwin_do_unmapped(WClientWin *cwin, Window win)
 {
     bool cf=region_may_control_focus((WRegion*)cwin);
     region_rescue_clientwins((WRegion*)cwin);
     if(cf && cwin->fsinfo.last_mgr_watch.obj!=NULL)
         region_goto((WRegion*)(cwin->fsinfo.last_mgr_watch.obj));
     destroy_obj((Obj*)cwin);
+    
+    hook_call(clientwin_unmapped_hook, &win, mrsh_u_c, mrsh_u_extl);
+}
+
+/* Used when the window was unmapped */
+void clientwin_unmapped(WClientWin *cwin)
+{
+    clientwin_do_unmapped(cwin, cwin->win);
 }
 
 
 /* Used when the window was deastroyed */
 void clientwin_destroyed(WClientWin *cwin)
 {
+    Window win=cwin->win;
     XRemoveFromSaveSet(ioncore_g.dpy, cwin->win);
     XDeleteContext(ioncore_g.dpy, cwin->win, ioncore_g.win_context);
     xwindow_unmanaged_selectinput(cwin->win, 0);
     cwin->win=None;
-    clientwin_unmapped(cwin);
+    clientwin_do_unmapped(cwin, win);
 }
 
 
