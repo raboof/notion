@@ -67,7 +67,8 @@ extern bool gr_register_engine(const char *engine, GrGetBrushFn *fn,
 							   GrGetValuesFn *gvfn);
 extern void gr_unregister_engine(const char *engine);
 extern bool gr_select_engine(const char *engine);
-extern void reread_draw_config();
+extern void gr_refresh();
+extern void gr_read_config();
 
 extern GrBrush *gr_get_brush(WRootWin *rootwin, Window win, 
 							 const char *style);

@@ -400,19 +400,26 @@ void grbrush_clear_area(GrBrush *brush, Window win, const WRectangle *geom)
 /*}}}*/
 
 
-/*{{{ reread_draw_config */
+/*{{{ read_config/refresh */
 
 
 /*EXTL_DOC
- * Re-read drawing engine configuration from \file{draw.conf} (or
- * a screen-specific file).
+ * Read drawing engine configuration file \file{draw.lua}.
  */
 EXTL_EXPORT
-void reread_draw_config()
+void gr_read_config()
+{
+	read_config_for("draw");
+}
+
+
+/*EXTL_DOC
+ * Refresh objects' brushes to update them to use newly loaded style.
+ */
+EXTL_EXPORT
+void gr_refresh()
 {
 	WRootWin *rootwin;
-
-	read_config_for("draw");
 	
 	FOR_ALL_ROOTWINS(rootwin){
 		region_draw_config_updated((WRegion*)rootwin);

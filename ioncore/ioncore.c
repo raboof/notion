@@ -474,7 +474,7 @@ bool ioncore_startup(const char *display, const char *cfgfile,
 	if(!init_x(display, stflags))
 		return FALSE;
 
-	reread_draw_config();
+	gr_read_config();
 
 	if(!ioncore_read_config(cfgfile)){
 		/* Let's not fail, it might be a minor error */
