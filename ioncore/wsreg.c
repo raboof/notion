@@ -13,6 +13,7 @@
 #include "property.h"
 #include "targetid.h"
 #include "wsreg.h"
+#include "mwmhints.h"
 
 
 /* This file contains the add_clientwin_default handler for managing
@@ -73,7 +74,11 @@ static bool add_transient(WClientWin *tfor, WClientWin *cwin,
 		p=FIND_PARENT1(p, WRegion);
 	}
 	
-	return FALSE;
+	/* No parent workspace found that would want to handle transients.
+	 * tfor is probably a full screen client window so let's just attach
+	 * the transient to it like Ion normally does.
+	 */
+	return clientwin_attach_sub(tfor, (WRegion*)cwin, 0);
 }
 
 
@@ -128,6 +133,21 @@ bool add_clientwin_default(WClientWin *cwin, const XWindowAttributes *attr,
 	WRegion *target=NULL, *ws=NULL;
 	WWinProp *props;
 
+	/* check full screen mode */
+	
+	do{
+		WMwmHints *mwm;
+		mwm=get_mwm_hints(cwin->win);
+		if(mwm==NULL)
+			break;
+		if(REGION_GEOM(SCREEN_OF(cwin)).w==attr->width &&
+		   REGION_GEOM(SCREEN_OF(cwin)).h==attr->height &&
+		   mwm->flags&MWM_HINTS_DECORATIONS && mwm->decorations==0){
+			if(clientwin_enter_fullscreen(cwin))
+				return TRUE;
+		}
+	}while(0);
+		
 	/* Get and set winprops */
 	props=setup_get_winprops(cwin);
 	

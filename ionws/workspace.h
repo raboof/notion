@@ -44,4 +44,9 @@ extern bool switch_workspace_name(const char *str);
 
 extern WWorkspace *create_new_workspace_on_scr(WScreen *scr, const char *name);
 
+extern void workspace_goto_above(WWorkspace *ws);
+extern void workspace_goto_below(WWorkspace *ws);
+extern void workspace_goto_left(WWorkspace *ws);
+extern void workspace_goto_right(WWorkspace *ws);
+
 #endif /* ION_WORKSPACEGEN_H */

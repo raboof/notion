@@ -104,7 +104,7 @@ bool get_splitparams(int *dir, int *primn, const char *str)
 }
 
 
-static void do_split(WFrame *frame, const char *str, bool attach)
+static void do_split(WRegion *oreg, const char *str, bool attach)
 {
 	WRegion *reg;
 	int dir, primn, mins;
@@ -112,29 +112,29 @@ static void do_split(WFrame *frame, const char *str, bool attach)
 	if(!get_splitparams(&dir, &primn, str))
 		return;
 
-	mins=(dir==VERTICAL
-		  ? region_min_h((WRegion*)frame)
-		  : region_min_w((WRegion*)frame));
+	mins=(dir==VERTICAL ? region_min_h(oreg) : region_min_w(oreg));
 	
-	reg=split_reg((WRegion*)frame, dir, primn, mins, split_create_frame);
+	reg=split_reg(oreg, dir, primn, mins, split_create_frame);
 
 	if(reg!=NULL){
-		if(frame->current_sub!=NULL && attach)
-			frame_attach_sub((WFrame*)reg, frame->current_sub, TRUE);
+		if(attach && WTHING_IS(oreg, WFrame) &&
+		   ((WFrame*)oreg)->current_sub!=NULL){
+			frame_attach_sub((WFrame*)reg, ((WFrame*)oreg)->current_sub, TRUE);
+		}
 		goto_region(reg);
 	}
 }
 
 
-void split(WFrame *frame, const char *str)
+void split(WRegion *reg, const char *str)
 {
-	do_split(frame, str, TRUE);
+	do_split(reg, str, TRUE);
 }
 
 
-void split_empty(WFrame *frame, const char *str)
+void split_empty(WRegion *reg, const char *str)
 {
-	do_split(frame, str, FALSE);
+	do_split(reg, str, FALSE);
 }
 
 

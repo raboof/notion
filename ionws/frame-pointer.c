@@ -51,7 +51,7 @@ static void frame_borders(WFrame *frame, WGRData *grdata, WRectangle *geom)
 
 #define RESB 8
 
-int frame_press(WFrame *frame, XButtonEvent *ev, WRegion **reg_ret)
+int frame_press(WFrame *frame, XButtonEvent *ev, WThing **thing_ret)
 {
 	WScreen *scr=SCREEN_OF(frame);
 	WRegion *sub;
@@ -83,8 +83,8 @@ int frame_press(WFrame *frame, XButtonEvent *ev, WRegion **reg_ret)
 		if(sub==NULL)
 			return FRAME_AREA_EMPTY_TAB;
 		
-		if(reg_ret!=NULL)
-			*reg_ret=sub;
+		if(thing_ret!=NULL)
+			*thing_ret=(WThing*)sub;
 		
 		return FRAME_AREA_TAB;
 	}

@@ -11,7 +11,8 @@
 #include <wmcore/function.h>
 #include <wmcore/thing.h>
 
-extern WFunclist ion_main_funclist;
+extern WFunclist ion_workspace_funclist;
+extern WFunclist ion_frame_funclist;
 extern WFunclist ion_moveres_funclist;
 
 extern void init_funclists();

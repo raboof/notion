@@ -44,10 +44,10 @@ void window_insstr(WWindow *wwin, const char *buf, size_t n)
 }
 
 
-int window_press(WWindow *wwin, XButtonEvent *ev, WRegion **reg)
+int window_press(WWindow *wwin, XButtonEvent *ev, WThing **thing_ret)
 {
 	int area=0;
-	CALL_DYN_RET(area, int, window_press, wwin, (wwin, ev, reg));
+	CALL_DYN_RET(area, int, window_press, wwin, (wwin, ev, thing_ret));
 	return area;
 }
 
@@ -65,7 +65,7 @@ bool init_window(WWindow *wwin, WScreen *scr, Window win, WRectangle geom)
 	wwin->flags=0;
 	wwin->win=win;
 	wwin->xic=NULL;
-	wwin->bindmap=NULL;
+	/*wwin->bindmap=NULL;*/
 	
 	XSaveContext(wglobal.dpy, win, wglobal.win_context, (XPointer)wwin);
 	

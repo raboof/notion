@@ -697,6 +697,9 @@ static WRegion *right_or_down(WRegion *reg, int dir)
 	WWsSplit *split;
 	int from;
 
+	if(reg==NULL)
+		return NULL;
+	
 	while(1){
 		split=find_split(prev, dir, &from);
 
@@ -719,6 +722,9 @@ static WRegion *up_or_left(WRegion *reg, int dir)
 	WWorkspace *ws;
 	WWsSplit *split;
 	int from;
+
+	if(reg==NULL)
+		return NULL;
 
 	while(1){
 		split=find_split(prev, dir, &from);
@@ -743,28 +749,27 @@ static void goto_reg(WRegion *reg)
 }
 
 
-void goto_above(WRegion *reg)
+void workspace_goto_above(WWorkspace *ws)
 {
-	if(reg!=NULL)
-		goto_reg(up_or_left(reg, VERTICAL));
+	goto_reg(up_or_left(REGION_ACTIVE_SUB(ws), VERTICAL));
 }
 
-void goto_below(WRegion *reg)
+
+void workspace_goto_below(WWorkspace *ws)
 {
-	if(reg!=NULL)
-		goto_reg(right_or_down(reg, VERTICAL));
+	goto_reg(right_or_down(REGION_ACTIVE_SUB(ws), VERTICAL));
 }
 
-void goto_left(WRegion *reg)
+
+void workspace_goto_left(WWorkspace *ws)
 {
-	if(reg!=NULL)
-		goto_reg(up_or_left(reg, HORIZONTAL));
+	goto_reg(up_or_left(REGION_ACTIVE_SUB(ws), HORIZONTAL));
 }
 
-void goto_right(WRegion *reg)
+
+void workspace_goto_right(WWorkspace *ws)
 {
-	if(reg!=NULL)
-		goto_reg(right_or_down(reg, HORIZONTAL));
+	goto_reg(right_or_down(REGION_ACTIVE_SUB(ws), HORIZONTAL));
 }
 
 

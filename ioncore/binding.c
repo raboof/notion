@@ -61,6 +61,12 @@ static void evil_grab_button(Display *display, uint button, uint modifiers,
 							 int keyboard_mode, Window confine_to,
 							 Cursor cursor);
 
+static void evil_ungrab_key(Display *display, uint keycode, uint modifiers,
+							Window grab_window);
+
+static void evil_ungrab_button(Display *display, uint button, uint modifiers,
+							   Window grab_window);
+
 #endif
 
 
@@ -91,7 +97,7 @@ bool init_bindmap(WBindmap *bindmap)
 	bindmap->nbindings=0;
 	bindmap->bindings=NULL;
 	bindmap->parent=NULL;
-	bindmap->extends=NULL;
+	bindmap->ggrab_cntr=0;
 	bindmap->confdefmod=0;
 	return TRUE;
 }
@@ -172,39 +178,12 @@ subst:
 }
 
 
-#if 0
-static void bind_simple(WBindmap *bindmap, int ftab,
-						int state, int key, char *fn)
-{
-	WBinding binding;
-	
-	binding.func=lookup_func(fn, ftab);
-	binding.state=state;
-	binding.kcb=XKeysymToKeycode(wglobal.dpy, key);
-	binding.act=ACT_KEYPRESS;
-	binding.nargs=0;
-	binding.submap=NULL;
-	
-	add_binding(bindmap, &binding);
-}
-#endif
-
 
 void init_bindings()
 {
 	modmap=XGetModifierMapping(wglobal.dpy);
 	
 	assert(modmap!=NULL);
-#if 0
-	init_bindmap(&(wglobal.main_bindmap));
-	init_bindmap(&(wglobal.tab_bindmap));
-	init_bindmap(&(wglobal.input_bindmap));
-	init_bindmap(&(wglobal.moveres_bindmap));
-	
-	/* There must be a way to get out of resize mode */
-	bind_simple(&(wglobal.moveres_bindmap), FUNTAB_MOVERES,
-				0, XK_Escape, "cancel_resize");
-#endif
 
 #ifdef CF_HACK_IGNORE_EVIL_LOCKS
 	lookup_evil_locks();
@@ -226,47 +205,77 @@ void update_modmap()
 /* */
 
 
+void grab_binding(const WBinding *binding, Window win)
+{
+	if(binding->act==ACT_KEYPRESS){
+#ifndef CF_HACK_IGNORE_EVIL_LOCKS			
+		XGrabKey(wglobal.dpy, binding->kcb, binding->state, win,
+				 True, GrabModeAsync, GrabModeAsync);
+#else		
+		evil_grab_key(wglobal.dpy, binding->kcb, binding->state, win,
+					  True, GrabModeAsync, GrabModeAsync);
+#endif			
+	}
+	
+	if(binding->act!=ACT_BUTTONPRESS &&
+	   binding->act!=ACT_BUTTONCLICK &&
+	   binding->act!=ACT_BUTTONDBLCLICK &&
+	   binding->act!=ACT_BUTTONMOTION)
+		return;
+	
+	if(binding->state==0)
+		return;
+	
+#ifndef CF_HACK_IGNORE_EVIL_LOCKS			
+	XGrabButton(wglobal.dpy, binding->kcb, binding->state, win,
+				True, GRAB_POINTER_MASK, GrabModeAsync, GrabModeAsync,
+				None, None);
+#else			
+	evil_grab_button(wglobal.dpy, binding->kcb, binding->state, win,
+					 True, GRAB_POINTER_MASK, GrabModeAsync, GrabModeAsync,
+					 None, None);
+#endif
+}
+
+
+void ungrab_binding(const WBinding *binding, Window win)
+{
+	if(binding->act==ACT_KEYPRESS){
+#ifndef CF_HACK_IGNORE_EVIL_LOCKS
+		XUngrabKey(wglobal.dpy, binding->kcb, binding->state, win);
+#else
+		evil_ungrab_key(wglobal.dpy, binding->kcb, binding->state, win);
+#endif
+	}
+	
+	if(binding->act!=ACT_BUTTONPRESS &&
+	   binding->act!=ACT_BUTTONCLICK &&
+	   binding->act!=ACT_BUTTONDBLCLICK &&
+	   binding->act!=ACT_BUTTONMOTION)
+		return;
+	
+	if(binding->state==0)
+		return;
+
+#ifndef CF_HACK_IGNORE_EVIL_LOCKS
+	XUngrabButton(wglobal.dpy, binding->kcb, binding->state, win);
+#else
+	evil_ungrab_button(wglobal.dpy, binding->kcb, binding->state, win);
+#endif
+}
+
+
+#if 0
 void grab_bindings(WBindmap *bindmap, Window win)
 {
 	WBinding *binding;
 	int i;
 	
-	for(; bindmap!=NULL; bindmap=bindmap->extends){
-		binding=bindmap->bindings;
-		
-		for(i=0; i<bindmap->nbindings; i++, binding++){
-			if(binding->act==ACT_KEYPRESS){
-#ifndef CF_HACK_IGNORE_EVIL_LOCKS			
-				XGrabKey(wglobal.dpy, binding->kcb, binding->state, win,
-						 True, GrabModeAsync, GrabModeAsync);
-#else		
-				evil_grab_key(wglobal.dpy, binding->kcb, binding->state, win,
-							  True, GrabModeAsync, GrabModeAsync);
-#endif			
-			}
-			
-			if(binding->act!=ACT_BUTTONPRESS &&
-			   binding->act!=ACT_BUTTONCLICK &&
-			   binding->act!=ACT_BUTTONDBLCLICK &&
-			   binding->act!=ACT_BUTTONMOTION)
-				continue;
-			
-			if(binding->state==0)
-				continue;
-			
-#ifndef CF_HACK_IGNORE_EVIL_LOCKS			
-			XGrabButton(wglobal.dpy, binding->kcb, binding->state, win,
-						True, GRAB_POINTER_MASK, GrabModeAsync, GrabModeAsync,
-						None, None);
-#else			
-			evil_grab_button(wglobal.dpy, binding->kcb, binding->state, win,
-							 True, GRAB_POINTER_MASK, GrabModeAsync, GrabModeAsync,
-							 None, None);
-#endif
-			
-		}
-	}
+	binding=bindmap->bindings;
+	for(i=0; i<bindmap->nbindings; i++, binding++)
+		grab_binding(binding, win);
 }
+#endif
 
 
 /* */
@@ -274,17 +283,9 @@ void grab_bindings(WBindmap *bindmap, Window win)
 
 static WBinding *search_binding(WBindmap *bindmap, WBinding *binding)
 {
-	WBinding *bindingr=NULL;
-	
-	for(; bindmap!=NULL; bindmap=bindmap->extends){
-		bindingr=(WBinding*)bsearch((void*)binding, (void*)(bindmap->bindings),
-									bindmap->nbindings, sizeof(WBinding),
-									compare_bindings);
-		if(bindingr!=NULL)
-			break;
-	}
-	
-	return bindingr;
+	return (WBinding*)bsearch((void*)binding, (void*)(bindmap->bindings),
+							  bindmap->nbindings, sizeof(WBinding),
+							  compare_bindings);
 }
 
 
@@ -344,7 +345,7 @@ WBinding *lookup_binding_area(WBindmap *bindmap,
 }
 
 	
-void call_binding(WBinding *binding, WThing *thing)
+void call_binding(const WBinding *binding, WThing *thing)
 {
 	if(binding->func==NULL)
 		return;
@@ -477,6 +478,61 @@ static void evil_grab_button(Display *display, uint button, uint modifiers,
 						keyboard_mode, confine_to, cursor);
 		}			
 	}
+}
+
+
+static void evil_ungrab_key(Display *display, uint keycode, uint modifiers,
+							Window grab_window)
+{
+	uint mods;
+	int i, j;
+	
+	XUngrabKey(display, keycode, modifiers, grab_window);
+	
+	for(i=0; i<N_EVILLOCKS; i++){
+		if(evillockmasks[i]==0)
+			continue;
+		mods=modifiers;
+		for(j=i; j<N_EVILLOCKS; j++){
+			if(evillockmasks[j]==0)
+				continue;			
+			mods|=evillockmasks[j];			
+			XUngrabKey(display, keycode, mods, grab_window);
+			if(i==j)
+				continue;
+			XUngrabKey(display, keycode,
+					   modifiers|evillockmasks[i]|evillockmasks[j],
+					   grab_window);
+		}
+	}	
+}
+
+
+static void evil_ungrab_button(Display *display, uint button, uint modifiers,
+							   Window grab_window)
+{
+	uint mods;
+	int i, j;
+	
+	XUngrabButton(display, button, modifiers, grab_window);
+	
+	for(i=0; i<N_EVILLOCKS; i++){
+		if(evillockmasks[i]==0)
+			continue;
+		mods=modifiers;
+		for(j=i; j<N_EVILLOCKS; j++){			
+			if(evillockmasks[j]==0)
+				continue;			
+			mods|=evillockmasks[j];			
+			XUngrabButton(display, button, mods, grab_window);
+			if(i==j)
+				continue;
+			XUngrabButton(display, button,
+						  modifiers|evillockmasks[i]|evillockmasks[j], 
+						  grab_window);
+		}			
+	}
+	
 }
 
 #endif /* CF_HACK_IGNORE_EVIL_LOCKS */

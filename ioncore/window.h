@@ -20,8 +20,6 @@ INTROBJ(WWindow)
 #define WWINDOW_UNFOCUSABLE	0x0004
 #define WWINDOW_WFORCED		0x0010
 #define WWINDOW_HFORCED		0x0020
-#define WWINDOW_CLIENTCONT	0x0040 /* If set, key.c grabs keyboard and pointer
-									* on submap */
 
 #define FIND_WINDOW_T(WIN, TYPE) (TYPE*)find_window_t(WIN, &OBJDESCR(TYPE))
 #define FIND_WINDOW(WIN) find_window(WIN)
@@ -32,7 +30,7 @@ DECLOBJ(WWindow){
 	int flags;
 	Window win;
 	XIC xic;
-	WBindmap *bindmap;
+	/*WBindmap *bindmap;*/
 	
 	/*?*/int min_w, min_h;
 	/*?*/int saved_w, saved_h;
@@ -51,7 +49,7 @@ extern WThing *find_window_t(Window win, const WObjDescr *descr);
 
 DYNFUN void draw_window(WWindow *wwin, bool complete);
 DYNFUN void window_insstr(WWindow *wwin, const char *buf, size_t n);
-DYNFUN int window_press(WWindow *wwin, XButtonEvent *ev, WRegion **reg);
+DYNFUN int window_press(WWindow *wwin, XButtonEvent *ev, WThing **thing_ret);
 
 /* Only to be used by regions that inherit this */
 extern void map_window(WWindow *wwin);

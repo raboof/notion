@@ -20,7 +20,7 @@
 #include <wmcore/exec.h>
 #include <query/main.h>
 #include "conf.h"
-#include "funtab.h"
+#include "funtabs.h"
 #include "../version.h"
 #include "placement.h"
 #include "workspace.h"
@@ -105,7 +105,7 @@ int main(int argc, char*argv[])
 	if(!ion_read_config(cfgfile))
 		goto configfail;
 	
-	if(ion_main_bindmap.nbindings==0 ||
+	if(ion_frame_bindmap.nbindings==0 ||
 	   ion_moveres_bindmap.nbindings==0)
 		goto configfail;
 	

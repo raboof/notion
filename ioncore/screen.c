@@ -30,7 +30,8 @@
 #include "property.h"
 #include "attach.h"
 #include "focus.h"
-
+#include "funtabs.h"
+#include "regbind.h"
 
 static void screen_remove_sub(WScreen *scr, WRegion *sub);
 static void fit_screen(WScreen *scr, WRectangle geom);
@@ -239,7 +240,7 @@ static WScreen *preinit_screen(int xscr)
 	
 	init_window((WWindow*)scr, scr, rootwin, geom);
 	
-	scr->root.bindmap=NULL;/*&(wglobal.main_bindmap);*/
+	/*scr->root.bindmap=NULL; &(wglobal.main_bindmap);*/
 	
 	scr->xscr=xscr;
 	scr->default_cmap=DefaultColormap(dpy, xscr);
@@ -248,6 +249,9 @@ static WScreen *preinit_screen(int xscr)
 	scr->current_sub=NULL;
 	scr->w_unit=7;
 	scr->h_unit=13;
+	
+	scr->bcount=NULL;
+	scr->n_bcount=0;
 	
 	MARK_REGION_MAPPED(scr);
 	
@@ -265,6 +269,8 @@ static void postinit_screen(WScreen *scr)
 	/*init_workspaces(scr);*/
 	/*scan_initial_windows(scr);*/
 	set_cursor(scr->root.win, CURSOR_DEFAULT);
+	/* TODO: Need to reorder initilisation code */
+	/*region_add_bindmap((WRegion*)scr, &wmcore_screen_bindmap, TRUE);*/
 }
 
 

@@ -74,7 +74,7 @@ static DynFunTab frame_dynfuntab[]={
 	
 	END_DYNFUNTAB
 };
-
+									   
 
 IMPLOBJ(WFrame, WWindow, deinit_frame, frame_dynfuntab)
 
@@ -203,9 +203,12 @@ static bool init_frame(WFrame *frame, WScreen *scr, WWinGeomParams params,
 	
 	/* Input */
 	XSelectInput(wglobal.dpy, win, FRAME_MASK);
-	frame->win.flags=WWINDOW_CLIENTCONT;
+	
+	/*frame->win.flags=WWINDOW_CLIENTCONT;
 	frame->win.bindmap=&(ion_main_bindmap);
-	grab_bindings(&(ion_main_bindmap), win);
+	grab_bindings(&(ion_main_bindmap), win);*/
+	
+	region_add_bindmap((WRegion*)frame, &(ion_frame_bindmap), TRUE);
 	
 	return TRUE;
 }
@@ -399,6 +402,8 @@ void draw_frame_bar(const WFrame *frame, bool complete)
 		
 		if(REGION_LABEL(sub)!=NULL)
 			draw_textbox(dinfo, REGION_LABEL(sub), CF_TAB_TEXT_ALIGN, TRUE);
+		else
+			draw_textbox(dinfo, "?", CF_TAB_TEXT_ALIGN, TRUE);
 		
 #define IS_TAGGED(X) 0
 		/* TODO: IS_TAGGED */

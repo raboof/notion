@@ -15,6 +15,8 @@
 #include "cursor.h"
 #include "objp.h"
 #include "grab.h"
+#include "regbind.h"
+
 
 static void waitrelease(WScreen *screen);
 
@@ -41,17 +43,6 @@ static void insstr(WWindow *wwin, XKeyEvent *ev)
 	window_insstr(wwin, buf, n);
 }
 
-static WBinding *lookup_binding_from_event(WWindow *thing, XKeyEvent *ev)
-{   
-	WBinding *binding;
-	WBindmap **bindptr;
-	
-	bindptr=&thing->bindmap;
-	assert(*bindptr!=NULL);
-	
-	binding=lookup_binding(*bindptr, ACT_KEYPRESS, ev->state, ev->keycode);
-	return binding;
-}
 
 /* dispatch_binding
  * the return values are those expected by GrabHandler's, i.e.
@@ -92,25 +83,83 @@ static void waitrelease(WScreen *screen)
 }
 
 
-static bool submapgrab_handler(WRegion *reg, XEvent *ev)
+static void kgrab_binding_and_reg(WBinding **binding_ret, WRegion **reg_ret,
+								  WRegion *reg, XKeyEvent *ev)
 {
 	WBinding *binding;
+	WSubmapState *subchain;
+	
+	*binding_ret=NULL;
+	*reg_ret=reg;
+	
+	subchain=(((WRegion*)SCREEN_OF(reg))->submapstat.key==None
+			  ? NULL
+			  : &(((WRegion*)SCREEN_OF(reg))->submapstat));
+	
+	while(reg!=NULL){
+		binding=region_lookup_keybinding(reg, ev, TRUE, subchain);
+		if(binding!=NULL){
+			*binding_ret=binding;
+			*reg_ret=reg;
+			return;
+		}
+		if(IS_SCREEN(reg))
+			break;
+		reg=FIND_PARENT1(reg, WRegion);
+	}
+}
+
+
+static void clear_subs(WRegion *reg)
+{
+	reg->submapstat.key=None;
+}
+
+
+static bool add_sub(WRegion *reg, uint key, uint state)
+{
+	if(reg->submapstat.key!=None)
+		return FALSE;
+	   
+	reg->submapstat.key=key;
+	reg->submapstat.state=state;
+	
+	return TRUE;
+}
+
+
+static bool submapgrab_handler(WRegion *reg, XEvent *ev)
+{
+	WBinding *binding=NULL;
+	WRegion *rreg=NULL;
 	
 	if(ev->type==KeyRelease)
 		return FALSE;
 	
-	binding=lookup_binding_from_event((WWindow*)reg, &ev->xkey);
-	
+	kgrab_binding_and_reg(&binding, &rreg, wglobal.ggrab_top, &ev->xkey);
+
 	/* if it is just a modifier, then return
 	 */
-	if(binding==NULL)
-		if(ismod(ev->xkey.keycode)){
+	if(binding==NULL){
+		if(ismod(ev->xkey.keycode))
 			return FALSE;
-		}
+	}
 	
-	return dispatch_binding(reg, binding, &ev->xkey);
+	if(binding->submap!=NULL){
+		if(add_sub(reg, ev->xkey.keycode, ev->xkey.state)){
+			return FALSE;
+		}else{
+			clear_subs(reg);
+			return TRUE;
+		}
+	}
+	
+	clear_subs(reg);
+	
+	return dispatch_binding(rreg, binding, &ev->xkey);
 }
     
+
 static void submapgrab(WRegion *reg)
 {
 	grab_establish(reg, submapgrab_handler, FocusChangeMask|KeyReleaseMask);
@@ -119,57 +168,52 @@ static void submapgrab(WRegion *reg)
 
 void handle_keypress(XKeyEvent *ev)
 {
-	WRegion *reg=NULL;
+	WRegion *reg=NULL, *rreg=NULL;
 	WBinding *binding=NULL;
-	WBindmap **bindptr;
-	WScreen *scr;
+	bool grabit=FALSE;
 	bool topmap=TRUE;
-	bool toplvl=FALSE;
 	
 	/* Lookup the object that should receive the event and
 	 * the action.
 	 */
-	/* this function gets called with grab_holder==NULL
-	 */
 
-		reg=(WRegion*)FIND_WINDOW(ev->window);
+	reg=(WRegion*)FIND_WINDOW(ev->window);
 	
 	if(reg==NULL || !WTHING_IS(reg, WWindow))
 		return;
-	
-	bindptr=&(((WWindow*)reg)->bindmap);
-	
-	if(*bindptr==NULL)
-		return;
-	
-	toplvl=((WWindow*)reg)->flags&WWINDOW_CLIENTCONT;
-	
-	/* Restore object's bindmap pointer to the its toplevel bindmap
-	 * (if in submap mode).
-	 */
-	while((*bindptr)->parent!=NULL){
-		topmap=FALSE;
-		*bindptr=(*bindptr)->parent;
+
+	if(IS_SCREEN(reg)){
+		/* Got to handle grabbed keys */
+		kgrab_binding_and_reg(&binding, &rreg, wglobal.ggrab_top, ev);
+		grabit=TRUE;
+	}else{
+		topmap=(reg->submapstat.key==None);
+		rreg=reg;
+		binding=region_lookup_keybinding(reg, ev, FALSE,
+										 topmap ? NULL : &(reg->submapstat));
 	}
 	
-	binding=lookup_binding_from_event((WWindow*)reg, ev);
-
 	/* Is it a submap? Then handle it accordingly...
 	 */
 	if(binding!=NULL && binding->submap!=NULL){
-		*bindptr=binding->submap;
-		if(toplvl)
-			submapgrab(reg);
+		if(add_sub(reg, ev->keycode, ev->state)){
+			if(grabit)
+				submapgrab(reg); /* reg==screen */
+		}else{	
+			if(!topmap)
+				clear_subs(reg);
+		}
 		return;
 	}
 
+	if(!topmap)
+		clear_subs(reg);
+	
 	/* Call the handler.
 	 */
-	if(binding!=NULL)
-		dispatch_binding(reg, binding, ev);
-	else if(topmap){
-		insstr((WWindow*)reg, ev);
+	if(binding!=NULL){
+		dispatch_binding(rreg, binding, ev);
+	}else if(topmap && WTHING_IS(reg, WWindow)){
+		insstr((WWindow*)rreg, ev);
 	}
 }
-
-

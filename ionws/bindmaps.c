@@ -8,6 +8,7 @@
 #include <wmcore/binding.h>
 #include "bindmaps.h"
 
-WBindmap ion_main_bindmap=BINDMAP_INIT;
+WBindmap ion_workspace_bindmap=BINDMAP_INIT;
+WBindmap ion_frame_bindmap=BINDMAP_INIT;
 WBindmap ion_moveres_bindmap=BINDMAP_INIT;
 

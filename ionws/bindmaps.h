@@ -9,8 +9,10 @@
 #define ION_BINDMAPS_H
 
 #include <wmcore/binding.h>
+#include <wmcore/regbind.h>
 
-extern WBindmap ion_main_bindmap;
+extern WBindmap ion_workspace_bindmap;
+extern WBindmap ion_frame_bindmap;
 extern WBindmap ion_moveres_bindmap;
 
 #endif /* ION_BINDMAPS_H */

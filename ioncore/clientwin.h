@@ -73,6 +73,7 @@ extern void clientwin_handle_configure_request(WClientWin *cwin,
 
 extern bool clientwin_attach_sub(WClientWin *cwin, WRegion *sub, int flags);
 
+extern bool clientwin_enter_fullscreen(WClientWin *cwin);
 
 /* Hooks */
 

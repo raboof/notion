@@ -56,11 +56,6 @@ extern int calcresize_window(WWindow *wwin, int dir, int prim, int nsize,
 extern void resize_tmp(const WResizeTmp *tmp);
 extern int tree_do_resize(WObj *node_, int dir, int npos, int nsize);
 
-extern void goto_above(WRegion *reg);
-extern void goto_below(WRegion *reg);
-extern void goto_right(WRegion *reg);
-extern void goto_left(WRegion *reg);
-
 extern WRegion *workspace_find_new_home(WRegion *reg);
 
 #endif /* ION_SPLIT_H */

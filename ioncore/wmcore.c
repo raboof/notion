@@ -26,6 +26,7 @@
 #include "modules.h"
 #include "imports.h"
 #include "wsreg.h"
+#include "funtabs.h"
 
 
 /*{{{ Global variables */
@@ -60,6 +61,8 @@ static void initialize_global()
 	
 	wglobal.active_screen=NULL;
 	wglobal.previous_screen=NULL;
+
+	wglobal.ggrab_top=NULL;
 	
 	wglobal.input_mode=INPUT_NORMAL;
 	wglobal.opmode=OPMODE_INIT;
@@ -86,6 +89,7 @@ bool wmcore_init(const char *appname, const char *appetcdir,
 	called=TRUE;
 	
 	initialize_global();
+	wmcore_init_funclists();
 	
 	if(!wmcore_set_cfgpath(appname, appetcdir))
 		return FALSE;
@@ -130,6 +134,7 @@ bool wmcore_init(const char *appname, const char *appetcdir,
 	wglobal.atom_frame_id=XInternAtom(dpy, "_ION_FRAME_ID", False);
 	wglobal.atom_workspace=XInternAtom(dpy, "_ION_WORKSPACE", False);
 	wglobal.atom_selection=XInternAtom(dpy, "_ION_SELECTION_STRING", False);
+	wglobal.atom_mwm_hints=XInternAtom(dpy, "_MOTIF_WM_HINTS", False);
 	
 	init_hooks();
 	trap_signals();

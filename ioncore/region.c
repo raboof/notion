@@ -17,6 +17,7 @@
 #include "focus.h"
 #include "attach.h"
 #include "close.h"
+#include "regbind.h"
 
 
 #if 0
@@ -75,7 +76,8 @@ void init_region(WRegion *reg, void *scr, WRectangle geom)
 	reg->geom=geom;
 	reg->flags=0;
 	reg->uldata=NULL;
-
+	reg->bindings=NULL;
+	
 	reg->active_sub=NULL;
 	
 	reg->ni.name=NULL;
@@ -91,6 +93,7 @@ void deinit_region(WRegion *reg)
 {
 	detach_region(reg);
 	region_unuse_name(reg);
+	region_remove_bindings(reg);
 }
 
 
@@ -352,9 +355,6 @@ static WRegion *default_selected_sub(WRegion *reg)
 
 static void region_check_active_sub(WRegion *reg, WRegion *sub)
 {
-	/*if(reg->previous_sub==sub)
-		reg->previous_sub==NULL;
-	*/
 	if(reg->active_sub!=sub)
 		return;
 	
@@ -368,6 +368,12 @@ static void region_check_active_sub(WRegion *reg, WRegion *sub)
 void detach_region(WRegion *reg)
 {
 	WThing *p=reg->thing.t_parent;
+
+	/* Links are broken right below so modifying ggrab_top must be done
+	 * before releasing the grabs at the end of this function.
+	 */
+	if(wglobal.ggrab_top==reg)
+		wglobal.ggrab_top=FIND_PARENT1(reg, WRegion);
 	
 	if(p!=NULL){
 		if(WTHING_IS(p, WRegion))
@@ -375,9 +381,9 @@ void detach_region(WRegion *reg)
 		
 		region_remove_sub((WRegion*)p, reg);
 	}
-	
-	unlink_thing((WThing*)reg);
 
+	unlink_thing((WThing*)reg);
+		
 	/* remove_sub might need the active flag to restore focus where
 	 * appropriate so we do not zero the flags in check_active_sub.
 	 * However, because the parent might have been destroyed at this point
@@ -387,6 +393,7 @@ void detach_region(WRegion *reg)
 
 	while(reg!=NULL && REGION_IS_ACTIVE(reg)){
 		D(fprintf(stderr, "detach-deact %s [%p]!\n", WOBJ_TYPESTR(reg), reg);)
+		release_ggrabs(reg);
 		reg->flags&=~REGION_ACTIVE;
 		reg=reg->active_sub;
 	}
@@ -423,6 +430,9 @@ void region_got_focus(WRegion *reg, WRegion *sub)
 		D(fprintf(stderr, "got focus (inact) %s [%p:%p]\n", WOBJ_TYPESTR(reg), reg, sub);)
 		reg->flags|=REGION_ACTIVE;
 		reg->active_sub=sub;
+		
+		activate_ggrabs(reg);
+		
 		r=FIND_PARENT1(reg, WRegion);
 		if(r!=NULL){
 			D(fprintf(stderr, "p--> ");)
@@ -430,6 +440,8 @@ void region_got_focus(WRegion *reg, WRegion *sub)
 			region_got_focus(r, reg);
 		}
 		region_activated(reg);
+		
+		wglobal.ggrab_top=reg;
 	}
 	
 	/* Install default colour map only if there is no active subregion;
@@ -444,6 +456,11 @@ void region_got_focus(WRegion *reg, WRegion *sub)
 
 void region_lost_focus(WRegion *reg)
 {
+	release_ggrabs(reg);
+	
+	if(wglobal.ggrab_top==reg)
+		wglobal.ggrab_top=FIND_PARENT1(reg, WRegion);
+
 	if(!REGION_IS_ACTIVE(reg)){
 		D(fprintf(stderr, "lost focus (inact) %s [%p:]\n", WOBJ_TYPESTR(reg), reg);)
 		return;

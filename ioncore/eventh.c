@@ -346,6 +346,7 @@ static void handle_property(const XPropertyEvent *ev)
 			get_protocols(cwin);
 			return;
 		}
+		return;
 	}
 }
 

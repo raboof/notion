@@ -9,9 +9,9 @@
 #include "pointer.h"
 #include "cursor.h"
 #include "event.h"
-#include "binding.h"
 #include "global.h"
 #include "focus.h"
+#include "regbind.h"
 
 
 /* TODO: Monitor p_thing */
@@ -20,7 +20,6 @@
 
 
 static uint p_button=0, p_state=0;
-static WBindmap *p_bindmap=NULL;
 static int p_x=-1, p_y=-1;
 static int p_orig_x=-1, p_orig_y=-1;
 static bool p_motion=FALSE;
@@ -28,7 +27,8 @@ static int p_clickcnt=0;
 static Time p_time=0;
 static bool p_motiontmp_dirty;
 static WBinding *p_motiontmp=NULL;
-static WThing *p_thing=NULL, *p_dbltmp=NULL;
+static WThing *p_thing=NULL;
+static WRegion *p_reg=NULL;
 static WScreen *p_screen=NULL;
 static int p_area=0;
 
@@ -39,7 +39,7 @@ static int p_area=0;
 /*{{{ Misc. */
 
 
-static bool time_in_treshold(Time time)
+static bool time_in_threshold(Time time)
 {
 	Time t;
 	
@@ -52,7 +52,7 @@ static bool time_in_treshold(Time time)
 }
 
 
-static bool motion_in_treshold(int x, int y)
+static bool motion_in_threshold(int x, int y)
 {
 	return (x>p_x-CF_DRAG_TRESHOLD && x<p_x+CF_DRAG_TRESHOLD &&
 			y>p_y-CF_DRAG_TRESHOLD && y<p_y+CF_DRAG_TRESHOLD);
@@ -165,11 +165,11 @@ bool handle_button_press(XButtonEvent *ev)
 	WBinding *pressbind=NULL;
 	WRegion *reg=NULL;
 	uint button, state;
-	WBindmap *bindmap=NULL;
+	/*WBindmap *bindmap=NULL;*/
 	int area=0;
 	
-	p_thing=NULL;
 	p_motiontmp=NULL;
+	p_thing=NULL;
 	
 	state=ev->state;
 	button=ev->button;
@@ -178,27 +178,25 @@ bool handle_button_press(XButtonEvent *ev)
 	
 	if(reg==NULL)
 		return FALSE;
-	
+
 	do_grab_kb_ptr(ev->root, reg, FocusChangeMask);
-	bindmap=((WWindow*)reg)->bindmap;
-	
-	area=window_press((WWindow*)reg, ev, &reg);
 	
 	p_thing=(WThing*)reg;
+	area=window_press((WWindow*)reg, ev, &p_thing);
 	
-	if(p_clickcnt==1 && time_in_treshold(ev->time) && p_button==button &&
-	   p_state==state && p_thing==p_dbltmp && p_bindmap==bindmap){
-		pressbind=lookup_binding_area(bindmap, ACT_BUTTONDBLCLICK, state,
-									  button, area);
+	if(p_clickcnt==1 && time_in_threshold(ev->time) && p_button==button &&
+	   p_state==state && reg==p_reg){
+		pressbind=region_lookup_binding_area(reg, ACT_BUTTONDBLCLICK, state,
+											 button, area);
 	}
 	
-	if(pressbind==NULL)
-		pressbind=lookup_binding_area(bindmap, ACT_BUTTONPRESS, state,
-									  button, area);
+	if(pressbind==NULL){
+		pressbind=region_lookup_binding_area(reg, ACT_BUTTONPRESS, state,
+											 button, area);
+	}
 	
 end:
-	p_dbltmp=p_thing;
-	p_bindmap=bindmap;
+	p_reg=reg;
 	p_button=button;
 	p_state=state;
 	p_orig_x=p_x=ev->x_root;
@@ -225,11 +223,11 @@ bool handle_button_release(XButtonEvent *ev)
 
 	if(p_motion==FALSE){
 		p_clickcnt=1;
-		binding=lookup_binding_area(p_bindmap, ACT_BUTTONCLICK,
-									p_state, p_button, p_area);
+		binding=region_lookup_binding_area(p_reg, ACT_BUTTONCLICK,
+										   p_state, p_button, p_area);
 	}else if(p_motiontmp_dirty){
-		binding=lookup_binding_area(p_bindmap, ACT_BUTTONMOTION,
-									p_state, p_button, p_area);
+		binding=region_lookup_binding_area(p_reg, ACT_BUTTONMOTION,
+										   p_state, p_button, p_area);
 	}else{
 		binding=p_motiontmp;
 	}
@@ -245,12 +243,12 @@ void handle_pointer_motion(XMotionEvent *ev)
 	WThing *tmp;
 	int dx, dy;
 	
-	if(p_motion==FALSE && motion_in_treshold(ev->x_root, ev->y_root))
+	if(p_motion==FALSE && motion_in_threshold(ev->x_root, ev->y_root))
 		return;
 	
 	if(p_motiontmp_dirty){
-		p_motiontmp=lookup_binding_area(p_bindmap, ACT_BUTTONMOTION,
-										p_state, p_button, p_area);
+		p_motiontmp=region_lookup_binding_area(p_reg, ACT_BUTTONMOTION,
+											   p_state, p_button, p_area);
 		p_motiontmp_dirty=FALSE;
 	}
 

@@ -24,7 +24,7 @@
 #define BINDING_MAXARGS		3
 #define BINDING_INIT		\
 	{0, 0, 0, 0, FALSE, NULL, NULL, 0, {TOK_INIT, TOK_INIT, TOK_INIT}}
-#define BINDMAP_INIT		{0, 0, NULL, NULL, NULL}
+#define BINDMAP_INIT		{0, 0, NULL, NULL, 0}
 
 
 INTRSTRUCT(WBinding)
@@ -57,7 +57,7 @@ DECLSTRUCT(WBindmap){
 	uint confdefmod;
 	WBinding *bindings;
 	WBindmap *parent;
-	WBindmap *extends;
+	int ggrab_cntr;
 };
 
 extern void init_bindings();
@@ -65,12 +65,14 @@ extern WBindmap *create_bindmap();
 extern void destroy_bindmap(WBindmap *bindmap);
 extern void destroy_binding(WBinding *binding);
 extern bool add_binding(WBindmap *bindmap, const WBinding *binding);
-extern WBinding *lookup_binding(WBindmap *bindmap, int act, uint state,
-								uint kcb);
-extern WBinding *lookup_binding_area(WBindmap *bindmap, int act, uint state,
-								uint kcb, int area);
-extern void grab_bindings(WBindmap *bindmap, Window win);
-extern void call_binding(WBinding *binding, WThing *thing);
+extern WBinding *lookup_binding(WBindmap *bindmap, int act,
+								uint state, uint kcb);
+extern WBinding *lookup_binding_area(WBindmap *bindmap, int act,
+									 uint state, uint kcb, int area);
+extern void grab_binding(const WBinding *binding, Window win);
+extern void ungrab_binding(const WBinding *binding, Window win);
+/*extern void grab_bindings(WBindmap *bindmap, Window win);*/
+extern void call_binding(const WBinding *binding, WThing *thing);
 extern int unmod(int state, int keycode);
 extern bool ismod(int keycode);
 extern void update_modmap();

@@ -16,7 +16,8 @@
 #include <wmcore/binding.h>
 #include <wmcore/conf-bindings.h>
 #include <wmcore/modules.h>
-#include "funtab.h"
+#include <wmcore/funtabs.h>
+#include "funtabs.h"
 #include "winprops.h"
 #include "frame.h"
 #include "frame-pointer.h"
@@ -77,17 +78,40 @@ static StringIntMap frame_areas[]={
 };
 
 	
-static bool opt_bindings(Tokenizer *tokz, int n, Token *toks)
+static bool opt_workspace_bindings(Tokenizer *tokz, int n, Token *toks)
 {
-	wmcore_begin_bindings(&ion_main_bindmap, &ion_main_funclist, frame_areas);
-	return TRUE;
+	return wmcore_begin_bindings(&ion_workspace_bindmap,
+								 &ion_workspace_funclist, NULL);
+}
+
+
+static bool opt_frame_bindings(Tokenizer *tokz, int n, Token *toks)
+{
+	return wmcore_begin_bindings(&ion_frame_bindmap,
+								 &ion_frame_funclist, frame_areas);
 }
 
 
 static bool opt_moveres_bindings(Tokenizer *tokz, int n, Token *toks)
 {
-	wmcore_begin_bindings(&ion_moveres_bindmap, &ion_moveres_funclist, NULL);
-	return TRUE;
+	return wmcore_begin_bindings(&ion_moveres_bindmap,
+								 &ion_moveres_funclist, NULL);
+}
+
+
+/* The following two functions should go into wmcore code */
+
+static bool opt_clientwin_bindings(Tokenizer *tokz, int n, Token *toks)
+{
+	return wmcore_begin_bindings(&wmcore_clientwin_bindmap,
+								 &wmcore_clientwin_funclist, NULL);
+}
+
+
+static bool opt_global_bindings(Tokenizer *tokz, int n, Token *toks)
+{
+	return wmcore_begin_bindings(&wmcore_screen_bindmap,
+								 &wmcore_screen_funclist, NULL);
 }
 
 
@@ -117,8 +141,13 @@ static ConfOpt opts[]={
 	{"winprop" , "s", ion_begin_winprop, ion_winprop_opts},
 
 	/* bindings */
-	{"bindings", NULL, opt_bindings, wmcore_binding_opts},
+	{"workspace_bindings", NULL, opt_workspace_bindings, wmcore_binding_opts},
+	{"frame_bindings", NULL, opt_frame_bindings, wmcore_binding_opts},
 	{"moveres_bindings", NULL, opt_moveres_bindings, wmcore_binding_opts},
+
+	/* Temporary */
+	{"clientwin_bindings", NULL, opt_clientwin_bindings, wmcore_binding_opts},
+	{"global_bindings", NULL, opt_global_bindings, wmcore_binding_opts},
 	
 	/* modules */
 	{"module", "s", opt_module, NULL},

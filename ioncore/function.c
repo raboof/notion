@@ -204,4 +204,11 @@ void remove_from_funclist(WFunclist *funclist, WFunction *funtab)
 }
 
 
+void clear_funclist(WFunclist *funclist)
+{
+	while(funclist->funtabs!=NULL)
+		remove_from_funclist(funclist, (WFunction*)funclist->funtabs);
+}
+
+
 /*}}}*/

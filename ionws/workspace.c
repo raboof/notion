@@ -15,6 +15,8 @@
 #include <wmcore/thingp.h>
 #include <wmcore/region.h>
 #include <wmcore/wsreg.h>
+#include <wmcore/funtabs.h>
+#include "bindmaps.h"
 #include "placement.h"
 #include "workspace.h"
 #include "split.h"
@@ -175,6 +177,8 @@ static bool init_workspace(WWorkspace *ws, WScreen *scr,
 			return FALSE;
 		}
 	}
+
+	region_add_bindmap((WRegion*)ws, &ion_workspace_bindmap, TRUE);
 	
 	return TRUE;
 }
@@ -245,6 +249,8 @@ void setup_screens()
 	FOR_ALL_SCREENS(scr){
 		init_workspaces(scr);
 		manage_initial_windows(scr);
+		/* TODO: Should be moved somewhere else */
+		region_add_bindmap((WRegion*)scr, &wmcore_screen_bindmap, TRUE);
 	}
 }
 

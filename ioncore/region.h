@@ -13,14 +13,25 @@
 
 INTROBJ(WRegion)
 INTRSTRUCT(WWinGeomParams)
-		   
+INTRSTRUCT(WSubmapState)
+
+
+DECLSTRUCT(WSubmapState){
+	uint key, state;
+	WSubmapState *next;
+};
+
+
 DECLOBJ(WRegion){
 	WThing thing;
 	WRectangle geom;
 	void *screen;
 	bool flags;
 	void *uldata;
-
+	
+	void *bindings;
+	WSubmapState submapstat;
+	
 	WRegion *active_sub, *previous_act;
 	
 	struct{
@@ -38,9 +49,10 @@ DECLSTRUCT(WWinGeomParams){
 	WRectangle geom;
 };
 
-
-#define REGION_MAPPED	0x0001
-#define REGION_ACTIVE	0x0002
+		
+#define REGION_MAPPED		0x0001
+#define REGION_ACTIVE		0x0002
+#define REGION_HAS_GRABS	0x0004
 
 #define MARK_REGION_MAPPED(R)	(((WRegion*)(R))->flags|=REGION_MAPPED)
 #define MARK_REGION_UNMAPPED(R)	(((WRegion*)(R))->flags&=~REGION_MAPPED)

@@ -22,6 +22,9 @@
 #include "resize.h"
 #include "close.h"
 #include "attach.h"
+#include "funtabs.h"
+#include "regbind.h"
+#include "mwmhints.h"
 
 
 #define TOPMOST_TRANSIENT(CWIN) LAST_THING(CWIN, WRegion)
@@ -197,6 +200,8 @@ static bool init_clientwin(WClientWin *cwin, WScreen *scr,
 		configure_cwin_bw(win, 0);
 	
 	LINK_ITEM(wglobal.cwin_list, cwin, g_cwin_next, g_cwin_prev);
+	
+	region_add_bindmap((WRegion*)cwin, &wmcore_clientwin_bindmap, TRUE);
 	
 	return TRUE;
 }
@@ -882,12 +887,25 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 	int dx=0, dy=0;
 	int rx, ry;
 	bool sz=FALSE, pos=FALSE;
+
+	/* check full screen request */
+	if((ev->value_mask&(CWX|CWY))==(CWX|CWY) &&
+	   REGION_GEOM(SCREEN_OF(cwin)).w==ev->width &&
+	   REGION_GEOM(SCREEN_OF(cwin)).h==ev->height){
+		WMwmHints *mwm;
+		mwm=get_mwm_hints(cwin->win);
+		if(mwm!=NULL && mwm->flags&MWM_HINTS_DECORATIONS &&
+		   mwm->decorations==0){
+			if(clientwin_enter_fullscreen(cwin))
+				return;
+		}
+	}
 	
 	geom=cwin->win_geom;
 	region_rootpos(&(cwin->region), &rx, &ry);
 	rx+=geom.x;
 	ry+=geom.y;
-
+	
 	if(ev->value_mask&CWX){
 		dx=ev->x-rx;
 		geom.x+=dx;
@@ -906,14 +924,14 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 			geom.w=1;
 		sz=TRUE;
 	}
-
+	
 	if(ev->value_mask&CWHeight){
 		geom.h=ev->height;
 		if(geom.h<1)
 			geom.h=1;
 		sz=TRUE;
 	}
-
+	
 	if(ev->value_mask&CWBorderWidth)
 		cwin->orig_bw=ev->border_width;
 	
@@ -922,7 +940,7 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 			sendconfig_clientwin(cwin);
 		return;
 	}
-
+	
 	/* TODO */
 #if 0
 	region_request_geom(&(cwin->region), geom, NULL, FALSE);
@@ -934,3 +952,22 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 
 /*}}}*/
 
+
+/*{{{ Fullscreen */
+
+
+bool clientwin_enter_fullscreen(WClientWin *cwin)
+{
+	WScreen *scr=SCREEN_OF(cwin);
+	
+	/* TODO: Remember last parent */
+	
+	if(scr==NULL)
+		return FALSE;
+	
+	return region_attach_sub((WRegion*)scr, (WRegion*)cwin,
+							 REGION_ATTACH_SWITCHTO);
+}
+
+
+/*}}}*/

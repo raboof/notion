@@ -47,5 +47,6 @@ extern int complete_func_ex(const char *nam, char ***cp_ret, char **beg,
 
 extern bool add_to_funclist(WFunclist *funclist, WFunction *funtab);
 extern void remove_from_funclist(WFunclist *funclist, WFunction *funtab);
+extern void clear_funclist(WFunclist *funclist);
 
 #endif /* WMCORE_FUNCTION_H */

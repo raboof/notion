@@ -23,6 +23,6 @@ enum{
 extern WDragHandler frame_tabdrag_handler;
 extern WDragHandler frame_resize_handler;
 
-extern int frame_press(WFrame *frame, XButtonEvent *ev, WRegion **reg_ret);
+extern int frame_press(WFrame *frame, XButtonEvent *ev, WThing **thing_ret);
 
 #endif /* ION_FRAME_POINTER_H */
