@@ -454,7 +454,7 @@ static WRegion *mplex_do_attach(WMPlex *mplex, WRegionAttachHandler *fn,
 	
 	if(mplex->managed_count==1 || param->switchto){
 		mplex_do_display_managed(mplex, reg);
-		mplex_managed_changed(mplex, MPLEX_CHANGE_ADD, FALSE, reg);
+		mplex_managed_changed(mplex, MPLEX_CHANGE_ADD, TRUE, reg);
 	}else{
 		region_unmap(reg);
 		mplex_managed_changed(mplex, MPLEX_CHANGE_ADD, FALSE, reg);
@@ -606,7 +606,7 @@ static void mplex_do_remove(WMPlex *mplex, WRegion *sub)
 		bool sw=(next!=NULL || mplex->managed_count==0);
 		if(next!=NULL)
 			mplex_do_display_managed(mplex, next);
-		mplex_managed_changed(mplex,  MPLEX_CHANGE_ADD, sw, sub);
+		mplex_managed_changed(mplex,  MPLEX_CHANGE_REMOVE, sw, sub);
 	}
 }
 
