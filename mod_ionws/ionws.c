@@ -763,43 +763,45 @@ static ExtlTab get_node_config(WSplit *node)
     
     assert(node!=NULL);
     
-    if(node->type==SPLIT_UNUSED)
-        return extl_create_table();
-
     if(node->type==SPLIT_REGNODE){
         if(region_supports_save(node->u.reg))
             return region_get_configuration(node->u.reg);
         return extl_table_none();
     }
-    
+
     tab=extl_create_table();
-    
-    tls=split_size(node->u.s.tl, node->type);
-    brs=split_size(node->u.s.br, node->type);
-    
-    extl_table_sets_s(tab, "split_dir",(node->type==SPLIT_VERTICAL
-                                        ? "vertical" : "horizontal"));
-    
-    extl_table_sets_i(tab, "split_tls", tls);
-    extl_table_sets_i(tab, "split_brs", brs);
-    
-    stab=get_node_config(node->u.s.tl);
-    if(stab==extl_table_none()){
-        warn("Could not get configuration for split TL (a %s).", 
-             OBJ_TYPESTR(node->u.s.tl));
-    }else{
-        extl_table_sets_t(tab, "tl", stab);
-        extl_unref_table(stab);
+
+    if(node->type!=SPLIT_UNUSED){
+        tls=split_size(node->u.s.tl, node->type);
+        brs=split_size(node->u.s.br, node->type);
+        
+        extl_table_sets_s(tab, "split_dir",(node->type==SPLIT_VERTICAL
+                                            ? "vertical" : "horizontal"));
+        
+        extl_table_sets_i(tab, "split_tls", tls);
+        extl_table_sets_i(tab, "split_brs", brs);
+        
+        stab=get_node_config(node->u.s.tl);
+        if(stab==extl_table_none()){
+            warn("Could not get configuration for split TL (a %s).", 
+                 OBJ_TYPESTR(node->u.s.tl));
+        }else{
+            extl_table_sets_t(tab, "tl", stab);
+            extl_unref_table(stab);
+        }
+        
+        stab=get_node_config(node->u.s.br);
+        if(stab==extl_table_none()){
+            warn("Could not get configuration for split BR (a %s).", 
+                 OBJ_TYPESTR(node->u.s.br));
+        }else{
+            extl_table_sets_t(tab, "br", stab);
+            extl_unref_table(stab);
+        }
     }
-    
-    stab=get_node_config(node->u.s.br);
-    if(stab==extl_table_none()){
-        warn("Could not get configuration for split BR (a %s).", 
-             OBJ_TYPESTR(node->u.s.br));
-    }else{
-        extl_table_sets_t(tab, "br", stab);
-        extl_unref_table(stab);
-    }
+
+    if(node->is_static)
+        extl_table_sets_b(tab, "static", TRUE);
 
     return tab;
 }
@@ -911,6 +913,8 @@ static WSplit *load_split(WIonWS *ws, WWindow *par, const WRectangle *geom,
         free(split);
         return (tl==NULL ? br : tl);
     }
+    
+    extl_table_gets_b(tab, "static", &(split->is_static));
     
     tl->parent=split;
     br->parent=split;

@@ -669,6 +669,7 @@ static WSplit *do_create_split(const WRectangle *geom)
         split->max_h=INT_MAX;
         split->used_w=0;
         split->used_h=0;
+        split->is_static=FALSE;
     }
     return split;
 }
@@ -895,23 +896,44 @@ static bool split_tree_remove_split(WSplit **root, WSplit *split,
 WSplit *split_tree_remove(WSplit **root, WSplit *node, bool reclaim_space)
 {
     WSplit *split=node->parent;
+    WSplit **thisptr;
     WSplit *other=NULL;
+    bool replace_ok=FALSE, tl=FALSE;
     
     if(split!=NULL){
-        if(split->u.s.tl==node){
-            split->u.s.tl=NULL;
+        tl=(split->u.s.tl==node);
+        thisptr=(tl ? &(split->u.s.tl) : &(split->u.s.br));
+        
+        if(tl)
             other=split_current_tl(split->u.s.br, split->type);
-            split_tree_remove_split(root, split, PRIMN_BR, reclaim_space);
-        }else{
-            split->u.s.br=NULL;
+        else
             other=split_current_br(split->u.s.tl, split->type);
-            split_tree_remove_split(root, split, PRIMN_TL, reclaim_space);
+
+        if(split->is_static){
+            WSplit *un=create_split_unused(&(node->geom));
+            if(un!=NULL){
+                *thisptr=un;
+                un->parent=split;
+                replace_ok=TRUE;
+            }else{
+                warn_err();
+            }
         }
-        node->parent=NULL;
+
+        if(!replace_ok){
+            *thisptr=NULL;
+            if(tl)
+                split_tree_remove_split(root, split, PRIMN_BR, reclaim_space);
+            else
+                split_tree_remove_split(root, split, PRIMN_TL, reclaim_space);
+        }
     }else{
         *root=NULL;
     }
+    
+    node->parent=NULL;
     destroy_obj((Obj*)node);
+    
     return other;
 }
 

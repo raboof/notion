@@ -45,6 +45,8 @@ DECLCLASS(WSplit){
     int min_w, min_h;
     int max_w, max_h;
     int used_w, used_h;
+
+    bool is_static;
     
     union{
         struct{
