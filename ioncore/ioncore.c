@@ -33,11 +33,9 @@
 #include "modules.h"
 #include "mainloop.h"
 #include "eventh.h"
-#include "event.h"
 #include "saveload.h"
 #include "ioncore.h"
 #include "manage.h"
-#include "exec.h"
 #include "conf.h"
 #include "binding.h"
 #include "bindmaps.h"
@@ -47,6 +45,7 @@
 #include "xic.h"
 #include "netwm.h"
 #include "focus.h"
+#include "frame.h"
 #include "../version.h"
 
 
@@ -91,7 +90,11 @@ static void init_hooks()
 static bool register_classes()
 {
     if(!ioncore_register_regclass(&CLASSDESCR(WClientWin), NULL,
-                              (WRegionLoadCreateFn*) clientwin_load)){
+                                  (WRegionLoadCreateFn*)clientwin_load)){
+        return FALSE;
+    }
+    if(!ioncore_register_regclass(&CLASSDESCR(WFrame), NULL,
+                                  (WRegionLoadCreateFn*)frame_load)){
         return FALSE;
     }
     return TRUE;

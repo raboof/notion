@@ -667,10 +667,10 @@ void frame_maximize_vert(WFrame *frame)
     WRegion *mgr=REGION_MANAGER(frame);
     
     if(frame->flags&FRAME_SHADED){
-        frame_do_toggle_shade(frame, 0 /* not used */);
+        frame_toggle_shade(frame);
         return;
     }
-        
+
     if(mgr==NULL)
         return;
 
@@ -720,35 +720,6 @@ void frame_maximize_horiz(WFrame *frame)
     }
     
     trymaxh(frame, mgr, 0);
-}
-
-
-void frame_do_toggle_shade(WFrame *frame, int shaded_h)
-{
-    WRectangle geom=REGION_GEOM(frame);
-
-    if(frame->flags&FRAME_SHADED){
-        if(!(frame->flags&FRAME_SAVED_VERT))
-            return;
-        geom.h=frame->saved_h;
-    }else{
-        if(frame->flags&FRAME_TAB_HIDE)
-            return;
-        geom.h=shaded_h;
-    }
-    
-    region_request_geom((WRegion*)frame, REGION_RQGEOM_H_ONLY,
-                        &geom, NULL);
-}
-
-
-/*EXTL_DOC
- * Is \var{frame} shaded?
- */
-EXTL_EXPORT_MEMBER
-bool frame_is_shaded(WFrame *frame)
-{
-    return ((frame->flags&FRAME_SHADED)!=0);
 }
 
 

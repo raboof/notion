@@ -38,4 +38,6 @@ extern WIonWS *create_ionws_simple(WWindow *parent,
 extern WRegion *ionws_load(WWindow *par, const WRectangle *geom, 
                            ExtlTab tab);
 
+extern bool ionws_rescue_clientwins(WIonWS *ws);
+
 #endif /* ION_IONWS_IONWS_H */

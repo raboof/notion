@@ -121,9 +121,6 @@ extern uint region_min_w(WRegion *reg);
 extern void frame_maximize_vert(WFrame *frame);
 extern void frame_maximize_horiz(WFrame *frame);
 
-extern void frame_do_toggle_shade(WFrame *frame, int shaded_h);
-extern bool frame_is_shaded(WFrame *frame);
-
 extern void region_convert_root_geom(WRegion *reg, WRectangle *geom);
 
 #endif /* ION_IONCORE_RESIZE_H */

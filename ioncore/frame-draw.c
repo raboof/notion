@@ -265,6 +265,23 @@ void frame_draw_default(const WFrame *frame, bool complete)
 }
 
 
+void frame_brushes_updated_default(WFrame *frame)
+{
+    ExtlTab tab;
+    bool b=TRUE;
+
+    if(frame->brush==NULL)
+        return;
+    
+    grbrush_get_extra(frame->brush, "bar_inside_border", 'b', &b);
+    
+    if(b)
+        frame->flags&=~FRAME_BAR_OUTSIDE;
+    else
+        frame->flags|=FRAME_BAR_OUTSIDE;
+}
+
+
 const char *frame_style_default(WFrame *frame)
 {
     return "frame";

@@ -19,6 +19,7 @@
 #include "window.h"
 #include "rectangle.h"
 #include "attach.h"
+#include "manage.h"
 
 #define CLIENTWIN_P_WM_DELETE          0x00001
 #define CLIENTWIN_P_WM_TAKE_FOCUS      0x00002
@@ -88,6 +89,8 @@ extern void clientwin_close(WClientWin *cwin);
 extern void clientwin_tfor_changed(WClientWin *cwin);
 
 extern bool clientwin_attach_transient(WClientWin *cwin, WRegion *transient);
+extern bool clientwin_manage_clientwin(WClientWin *cwin, WClientWin *cwin2,
+                                       const WManageParams *param, int redir);
 
 extern void clientwin_get_set_name(WClientWin *cwin);
 

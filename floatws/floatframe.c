@@ -43,6 +43,8 @@ static bool floatframe_init(WFloatFrame *frame, WWindow *parent,
     
     if(!frame_init((WFrame*)frame, parent, geom))
         return FALSE;
+    
+    frame->frame.flags|=FRAME_BAR_OUTSIDE;
 
     region_add_bindmap((WRegion*)frame, &(floatframe_bindmap));
     
@@ -53,12 +55,6 @@ static bool floatframe_init(WFloatFrame *frame, WWindow *parent,
 WFloatFrame *create_floatframe(WWindow *parent, const WRectangle *geom)
 {
     CREATEOBJ_IMPL(WFloatFrame, floatframe, (p, parent, geom));
-}
-
-
-static void deinit_floatframe(WFloatFrame *frame)
-{
-    frame_deinit((WFrame*)frame);
 }
 
 
@@ -194,7 +190,7 @@ static void floatframe_request_clientwin_geom(WFloatFrame *frame,
 
     floatframe_offsets(frame, &off);
 
-    frame_resize_hints((WFrame*)frame, &hints, NULL, NULL);
+    region_resize_hints((WRegion*)frame, &hints, NULL, NULL);
     xsizehints_correct(&hints, &(geom.w), &(geom.h), TRUE);
     
     geom.w+=off.w;
@@ -232,6 +228,33 @@ static void floatframe_request_clientwin_geom(WFloatFrame *frame,
     }
 
     region_request_geom((WRegion*)frame, REGION_RQGEOM_NORMAL, &geom, NULL);
+}
+
+
+void floatframe_resize_hints(WFloatFrame *frame, XSizeHints *hints_ret,
+                             uint *relw_ret, uint *relh_ret)
+{
+    WRectangle subgeom;
+    uint wdummy, hdummy;
+    
+    mplex_managed_geom((WMPlex*)frame, &subgeom);
+    if(relw_ret!=NULL)
+        *relw_ret=subgeom.w;
+    if(relh_ret!=NULL)
+        *relh_ret=subgeom.h;
+    
+    if(FRAME_CURRENT(frame)!=NULL){
+        region_resize_hints(FRAME_CURRENT(frame), hints_ret,
+                            &wdummy, &hdummy);
+    }else{
+        hints_ret->flags=0;
+    }
+    
+    xsizehints_adjust_for(hints_ret, FRAME_MLIST(frame));
+    
+    hints_ret->flags|=PMinSize;
+    hints_ret->min_width=1;
+    hints_ret->min_height=0;
 }
 
 
@@ -437,18 +460,6 @@ void floatframe_p_move(WFloatFrame *frame)
 
 
 /*EXTL_DOC
- * Toggle shade (only titlebar visible) mode.
- */
-EXTL_EXPORT_MEMBER
-void floatframe_toggle_shade(WFloatFrame *frame)
-{
-    WRectangle geom;
-    floatframe_bar_geom(frame, &geom);
-    frame_do_toggle_shade((WFrame*)frame, geom.h);
-}
-
-
-/*EXTL_DOC
  * Toggle \var{frame} stickyness. Only works across frames on 
  * \type{WFloatWS} that have the same \type{WMPlex} parent.
  */
@@ -535,15 +546,15 @@ static DynFunTab floatframe_dynfuntab[]={
     {(DynFun*)frame_style, (DynFun*)floatframe_style_default},
     {(DynFun*)frame_tab_style, (DynFun*)floatframe_tab_style_default},
     
-    /*{region_draw_config_updated, floatframe_draw_config_updated},*/
-    
     {frame_brushes_updated, floatframe_brushes_updated},
+    
+    {region_resize_hints, floatframe_resize_hints},
     
     END_DYNFUNTAB
 };
 
 
-IMPLCLASS(WFloatFrame, WFrame, deinit_floatframe, floatframe_dynfuntab);
+IMPLCLASS(WFloatFrame, WFrame, NULL, floatframe_dynfuntab);
 
         
 /*}}}*/

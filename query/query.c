@@ -41,9 +41,10 @@ WEdln *querymod_query(WMPlex *mplex, const char *prompt, const char *dflt,
     fnp.handler=handler;
     fnp.completor=completor;
     
-    return (WEdln*)mplex_add_input(mplex,
-                                   (WRegionAttachHandler*)create_wedln,
-                                   (void*)&fnp);
+    return (WEdln*)mplex_attach_hnd(mplex,
+                                    (WRegionAttachHandler*)create_wedln,
+                                    (void*)&fnp, 
+                                    MPLEX_ATTACH_L2|MPLEX_ATTACH_SWITCHTO);
 }
 
 

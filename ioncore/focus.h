@@ -45,8 +45,8 @@ extern bool region_is_active(WRegion *reg);
 
 /* Previously active region tracking */
 extern void ioncore_set_previous_of(WRegion *reg);
-extern void ioncore_goto_previous();
 extern void ioncore_protect_previous();
 extern void ioncore_unprotect_previous();
+extern WRegion *ioncore_goto_previous();
 
 #endif /* ION_IONCORE_FOCUS_H */

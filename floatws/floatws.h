@@ -41,9 +41,21 @@ extern WRegion *floatws_load(WWindow *par, const WRectangle *geom,
 
 extern WRegion* floatws_current(WFloatWS *floatws);
 
-extern ObjList *floatws_sticky_list;
+extern bool floatws_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
+                                     const WManageParams *param, int redir);
+
+extern bool floatws_manage_rescue(WFloatWS *ws, WClientWin *cwin,
+                                  WRegion *from);
+
+extern bool floatws_rescue_clientwins(WFloatWS *ws);
+
+/* */
 
 extern bool floatwsmod_clientwin_do_manage(WClientWin *cwin, 
                                            const WManageParams *param);
+
+/* */
+
+extern ObjList *floatws_sticky_list;
 
 #endif /* ION_FLOATWS_FLOATWS_H */

@@ -83,7 +83,7 @@ void ioncore_unprotect_previous()
  * Go to a region that had its activity state previously saved.
  */
 EXTL_EXPORT
-void ioncore_goto_previous()
+WRegion *ioncore_goto_previous()
 {
     WRegion *r=(WRegion*)prev_watch.obj;
     
@@ -91,6 +91,8 @@ void ioncore_goto_previous()
         watch_reset(&prev_watch);
         region_goto(r);
     }
+    
+    return r;
 }
 
 

@@ -13,17 +13,26 @@
 #define ION_IONCORE_MANAGE_H
 
 #include "common.h"
+
+INTRSTRUCT(WManageParams);
+
 #include "clientwin.h"
 #include "genws.h"
 #include "attach.h"
 #include "rectangle.h"
 
 
-#define MANAGEPARAMS_INIT \
+#define MANAGEPARAMS_INIT                                                \
   {FALSE, FALSE, FALSE, FALSE, FALSE, ForgetGravity, {0, 0, 0, 0}, NULL}
 
+enum{
+    MANAGE_REDIR_PREFER_YES,
+    MANAGE_REDIR_PREFER_NO,
+    MANAGE_REDIR_STRICT_YES,
+    MANAGE_REDIR_STRICT_NO
+};
 
-typedef struct{
+DECLSTRUCT(WManageParams){
     bool switchto;
     bool jumpto;
     bool userpos;
@@ -32,19 +41,36 @@ typedef struct{
     int gravity;
     WRectangle geom;
     WClientWin *tfor;
-} WManageParams;
+};
 
-
-extern bool clientwin_do_manage_default(WClientWin *cwin,
-                                        const WManageParams *param);
 
 extern WScreen *clientwin_find_suitable_screen(WClientWin *cwin,
                                                const WManageParams *param);
 
-DYNFUN bool region_manage_clientwin(WRegion *reg, WClientWin *cwin,
-                                    const WManageParams *par);
+/* Manage */
 
-extern bool region_has_manage_clientwin(WRegion *reg);
+extern bool clientwin_do_manage_default(WClientWin *cwin,
+                                        const WManageParams *param);
+
+DYNFUN bool region_manage_clientwin(WRegion *reg, WClientWin *cwin,
+                                    const WManageParams *par, int redir);
+
+extern bool region_manage_clientwin_default(WRegion *reg, WClientWin *cwin,
+                                            const WManageParams *par, 
+                                            int redir);
+
+/* Rescue */
+
+extern bool region_rescue_clientwins(WRegion *reg);
+extern bool region_rescue_child_clientwins(WRegion *reg);
+extern bool region_rescue_managed_clientwins(WRegion *reg, WRegion *list);
+
+DYNFUN bool region_manage_rescue(WRegion *reg, WClientWin *cwin,
+                                 WRegion *from);
+
+extern bool region_manage_rescue_default(WRegion *reg, WClientWin *cwin,
+                                         WRegion *from);
+
 
 
 #endif /* ION_IONCORE_MANAGE_H */

@@ -50,6 +50,7 @@ extern WFrame *create_frame(WWindow *parent, const WRectangle *geom);
 extern bool frame_init(WFrame *frame, WWindow *parent,
                           const WRectangle *geom);
 extern void frame_deinit(WFrame *frame);
+extern void frame_close(WFrame *frame);
 
 /* Resize and reparent */
 extern bool frame_reparent(WFrame *frame, WWindow *parent,
@@ -67,12 +68,16 @@ extern int frame_nth_tab_w(const WFrame *frame, int n);
 extern int frame_nth_tab_iw(const WFrame *frame, int n);
 extern int frame_nth_tab_x(const WFrame *frame, int n);
 extern int frame_tab_at_x(const WFrame *frame, int x);
-extern void frame_toggle_tab(WFrame *frame);
 extern void frame_update_attr_nth(WFrame *frame, int i);
+
+extern bool frame_toggle_tabbar(WFrame *frame);
+extern bool frame_toggle_shade(WFrame *frame);
+extern bool frame_is_shaded(WFrame *frame);
+extern bool frame_has_tabbar(WFrame *frame);
 
 /* Misc */
 extern ExtlTab frame_get_configuration(WFrame *frame);
-extern void frame_load_saved_geom(WFrame* frame, ExtlTab tab);
+extern WRegion *frame_load(WWindow *par, const WRectangle *geom, ExtlTab tab);
 extern void frame_do_load(WFrame *frame, ExtlTab tab);
 
 #endif /* ION_IONCORE_FRAME_H */

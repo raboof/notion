@@ -51,11 +51,12 @@ WMessage *querymod_warn(WMPlex *mplex, const char *p)
 EXTL_EXPORT
 WMessage *querymod_message(WMPlex *mplex, const char *p)
 {
-    if(p==NULL || mplex_current_input(mplex)!=NULL)
+    if(p==NULL)
         return NULL;
 
-    return (WMessage*)mplex_add_input(mplex,
-                                      (WRegionAttachHandler*)create_wmsg,
-                                      (void*)p);
+    return (WMessage*)mplex_attach_hnd(mplex, 
+                                       (WRegionAttachHandler*)create_wmsg,
+                                       (void*)p,
+                                       MPLEX_ATTACH_L2|MPLEX_ATTACH_SWITCHTO);
 }
 

@@ -20,6 +20,7 @@
 
 #include "ionframe.h"
 
+
 INTRCLASS(WWsSplit);
 
 
@@ -64,7 +65,7 @@ extern int split_tree_other_size(Obj *obj, int dir);
 
 extern void ionws_add_managed(WIonWS *ws, WRegion *reg);
 extern void ionws_managed_activated(WIonWS *ws, WRegion *reg);
-extern WRegion *ionws_find_rescue_manager_for(WIonWS *ws, WRegion *reg);
+extern bool ionws_manage_rescue(WIonWS *ws, WClientWin *cwin, WRegion *from);
 extern void ionws_request_managed_geom(WIonWS *ws, WRegion *reg,
                                        int flags, const WRectangle *geom,
                                        WRectangle *geomret);
@@ -77,13 +78,15 @@ extern WRegion *ionws_goto_dir(WIonWS *ws, const char *str);
 
 extern WRegion *ionws_region_at(WIonWS *ws, int x, int y);
 
-extern WIonFrame *ionws_newframe(WIonWS *ws, const char *dirstr);
-extern WIonFrame *ionws_newframe_at(WIonWS *ws, WIonFrame *oframe,
-                                    const char *str, bool attach);
-
 extern WRegion *ionws_do_split_at(WIonWS *ws, Obj *obj, int dir, 
                                   int primn, int minsize, int oprimn,
                                   WRegionSimpleCreateFn *fn);
+extern WIonFrame *ionws_split_top(WIonWS *ws, const char *dirstr);
+extern WIonFrame *ionws_split_at(WIonWS *ws, WIonFrame *frame, 
+                                 const char *dirstr, bool attach_current);
+
+extern void ionws_unsplit_at(WIonWS *ws, WIonFrame *frame);
+
 
 #endif /* ION_IONWS_SPLIT_H */
 

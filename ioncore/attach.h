@@ -15,12 +15,6 @@
 #include "region.h"
 #include "reginfo.h"
 #include "window.h"
-#include "clientwin.h"
-#include "genws.h"
-#include "rectangle.h"
-
-
-/* Attach helpers */
 
 
 typedef WRegion *WRegionAttachHandler(WWindow *parent, 
@@ -33,8 +27,8 @@ typedef WRegion *WRegionDoAttachFn(WRegion *reg,
                                    void *param);
 
 
-extern bool region__attach_reparent(WRegion *mgr, WRegion *reg, 
-                                    WRegionDoAttachFn *fn, void *param);
+extern WRegion *region__attach_reparent(WRegion *mgr, WRegion *reg, 
+                                        WRegionDoAttachFn *fn, void *param);
 
 extern WRegion *region__attach_new(WRegion *mgr, WRegionSimpleCreateFn *cfn,
                                    WRegionDoAttachFn *fn, void *param);
@@ -42,17 +36,5 @@ extern WRegion *region__attach_new(WRegion *mgr, WRegionSimpleCreateFn *cfn,
 extern WRegion *region__attach_load(WRegion *mgr, ExtlTab tab,
                                     WRegionDoAttachFn *fn, void *param);
 
-
-/* Rescue */
-
-extern WRegion *region_find_rescue_manager(WRegion *reg);
-DYNFUN WRegion *region_find_rescue_manager_for(WRegion *reg, WRegion *todst);
-extern WRegion *region_find_rescue_manager_for_default(WRegion *reg, WRegion *todst);
-
-extern bool region_rescue_clientwins(WRegion *reg);
-extern bool region_do_rescue_managed_clientwins(WRegion *reg, WRegion *dest, WRegion *list);
-extern bool region_do_rescue_child_clientwins(WRegion *reg, WRegion *dest);
-/* dest may be NULL */
-DYNFUN bool region_do_rescue_clientwins(WRegion *reg, WRegion *dest);
 
 #endif /* ION_IONCORE_ATTACH_H */

@@ -27,7 +27,6 @@
 #include <ioncore/manage.h>
 #include <ioncore/region-iter.h>
 #include "ionws.h"
-#include "ionframe.h"
 #include "split.h"
 #include "bindmaps.h"
 
@@ -831,51 +830,13 @@ WRegion *ionws_do_split_at(WIonWS *ws, Obj *obj, int dir, int primn,
 }
 
 
-WIonFrame *ionws_newframe_at(WIonWS *ws, WIonFrame *oframe,
-                             const char *str, bool attach)
-{
-    WRegion *reg, *curr;
-    int dir, primn, mins;
-    
-    if(!get_split_dir_primn(str, &dir, &primn)){
-        warn("Unknown parameter to do_split");
-        return NULL;
-    }
-    
-    mins=(dir==VERTICAL
-          ? region_min_h((WRegion*)oframe)
-          : region_min_w((WRegion*)oframe));
-
-    
-    reg=ionws_do_split_at(ws, (Obj*)oframe, dir, primn, mins, primn,
-                          (WRegionSimpleCreateFn*)create_ionframe);
-    
-    if(reg==NULL){
-        warn("Unable to split");
-        return NULL;
-    }
-
-    assert(OBJ_IS(reg, WIonFrame));
-    
-    curr=mplex_current(&(oframe->frame.mplex));
-    
-    if(attach && curr!=NULL)
-        mplex_attach_simple((WMPlex*)reg, curr, TRUE);
-    
-    if(region_may_control_focus((WRegion*)oframe))
-        region_goto(reg);
-
-    return (WIonFrame*)reg;
-}
-
-
 /*EXTL_DOC
  * Create new WIonFrame on \var{ws} above/below/left of/right of
  * all other objects depending on \var{dirstr}
  * (one of ''left'', ''right'', ''top'' or ''bottom'').
  */
 EXTL_EXPORT_MEMBER
-WIonFrame *ionws_newframe(WIonWS *ws, const char *dirstr)
+WIonFrame *ionws_split_top(WIonWS *ws, const char *dirstr)
 {
     WRegion *reg=NULL;
     int dir, primn, mins;
@@ -893,6 +854,55 @@ WIonFrame *ionws_newframe(WIonWS *ws, const char *dirstr)
     if(reg!=NULL)
         region_warp(reg);
     
+    return (WIonFrame*)reg;
+}
+
+
+/*EXTL_DOC
+ * Split \var{frame} creating a new WIonFrame to direction \var{dir}
+ * (one of ''left'', ''right'', ''top'' or ''bottom'') of \var{frame}.
+ * If \var{attach_current} is set, the region currently displayed in
+ * \var{frame}, if any, is moved to thenew frame.
+ */
+EXTL_EXPORT_MEMBER
+WIonFrame *ionws_split_at(WIonWS *ws, WIonFrame *frame, const char *dirstr, 
+                          bool attach_current)
+{
+    WRegion *reg, *curr;
+    int dir, primn, mins;
+    
+    if(REGION_MANAGER(frame)!=(WRegion*)ws){
+        warn("Frame not managed by the workspace.");
+        return NULL;
+    }
+    
+    if(!get_split_dir_primn(dirstr, &dir, &primn)){
+        warn("Unknown direction parameter to split_at");
+        return NULL;
+    }
+    
+    mins=(dir==VERTICAL
+          ? region_min_h((WRegion*)frame)
+          : region_min_w((WRegion*)frame));
+    
+    reg=ionws_do_split_at(ws, (Obj*)frame, dir, primn, mins, primn,
+                          (WRegionSimpleCreateFn*)create_ionframe);
+    
+    if(reg==NULL){
+        warn("Unable to split");
+        return NULL;
+    }
+
+    assert(OBJ_IS(reg, WIonFrame));
+    
+    curr=mplex_l1_current(&(frame->frame.mplex));
+    
+    if(attach_current && curr!=NULL)
+        mplex_attach_simple((WMPlex*)reg, curr, MPLEX_ATTACH_SWITCHTO);
+    
+    if(region_may_control_focus((WRegion*)frame))
+        region_goto(reg);
+
     return (WIonFrame*)reg;
 }
 
@@ -1233,7 +1243,7 @@ void ionws_remove_managed(WIonWS *ws, WRegion *reg)
     WWsSplit *split;
     
     split=split_of_reg(reg);
-    
+
     if(split!=NULL){
         WRegion *other;
         if(split->tl==(Obj*)reg){
@@ -1284,19 +1294,17 @@ void ionws_managed_activated(WIonWS *ws, WRegion *reg)
 /*}}}*/
 
 
-/*{{{ iowns_find_rescue_manager_for */
+/*{{{ iowns_manage_rescue */
 
 
-static WRegion *do_find_nmgr(Obj *ptr, int primn)
+static WMPlex *do_find_nmgr(Obj *ptr, int primn)
 {
-    WRegion *reg;
+    WMPlex *reg;
     WWsSplit *split;
     
     do{
-        if(OBJ_IS(ptr, WRegion)){
-            return (region_has_manage_clientwin((WRegion*)ptr)
-                    ? (WRegion*)ptr : NULL);
-        }
+        if(OBJ_IS(ptr, WMPlex))
+            return (WMPlex*)ptr;
         
         if(!OBJ_IS(ptr, WWsSplit))
             return NULL;
@@ -1319,18 +1327,18 @@ static WRegion *do_find_nmgr(Obj *ptr, int primn)
 }
                       
 
-WRegion *ionws_find_rescue_manager_for(WIonWS *ws, WRegion *reg)
+bool ionws_manage_rescue(WIonWS *ws, WClientWin *cwin, WRegion *from)
 {
     WWsSplit *split;
-    WRegion *nmgr;
+    WMPlex *nmgr;
     Obj *obj;
     
-    if(REGION_MANAGER(reg)!=(WRegion*)ws)
-        return NULL;
+    if(REGION_MANAGER(from)!=(WRegion*)ws)
+        return FALSE;
 
-    split=split_of_reg(reg);
+    split=split_of_reg(from);
     
-    obj=(Obj*)reg;
+    obj=(Obj*)from;
     while(split!=NULL){
         if(split->tl==obj)
             nmgr=do_find_nmgr(split->br, TOP_OR_LEFT);
@@ -1338,13 +1346,13 @@ WRegion *ionws_find_rescue_manager_for(WIonWS *ws, WRegion *reg)
             nmgr=do_find_nmgr(split->tl, BOTTOM_OR_RIGHT);
         
         if(nmgr!=NULL)
-            return nmgr;
+            return (NULL!=mplex_attach_simple(nmgr, (WRegion*)cwin, 0));
         
         obj=(Obj*)split;
         split=split->parent;
     }
     
-    return NULL;
+    return FALSE;
 }
 
 
@@ -1510,4 +1518,35 @@ WRegion *ionws_region_at(WIonWS *ws, int x, int y)
 
 /*}}}*/
 
+
+/*{{{ Unsplit */
+
+
+/*EXTL_DOC
+ * Try to relocate regions managed by \var{frame} to another frame
+ * and, if possible, destroy the frame.
+ */
+EXTL_EXPORT_MEMBER
+void ionws_unsplit_at(WIonWS *ws, WIonFrame *frame)
+{
+    if(REGION_MANAGER(frame)!=(WRegion*)ws){
+        warn("The frame is not managed by the workspace.");
+        return;
+    }
+    
+    if(!region_may_destroy((WRegion*)frame)){
+        warn("Frame may not be destroyed");
+        return;
+    }
+
+    if(!region_rescue_clientwins((WRegion*)frame)){
+        warn("Failed to rescue managed objects.");
+        return;
+    }
+
+    ioncore_defer_destroy((Obj*)frame);
+}
+
+
+/*}}}*/
 

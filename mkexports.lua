@@ -272,7 +272,7 @@ function parse(d)
     end
     
     local function do_implobj(s)
-        local pat="^[%s\n]+IMPLCLASS%(%s*([%w_]+)%s*,%s*([%w_]+)%s*, [^)]*%)"
+        local pat="^[%s\n]+IMPLCLASS%(%s*([%w_]+)%s*,%s*([%w_]+)%s*,[^)]*%)"
         local st, en, cls, par=string.find(s, pat)
         if not st then matcherr(s) end
         add_class(cls)

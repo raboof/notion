@@ -22,8 +22,9 @@
 #define REGION_TAGGED        0x0008
 #define REGION_BINDINGS_ARE_GRABBED 0x0020
 #define REGION_KEEPONTOP     0x0080
-#define REGION_ACTIVITY        0x0100
-#define REGION_SKIP_FOCUS     0x0200
+#define REGION_ACTIVITY      0x0100
+#define REGION_SKIP_FOCUS    0x0200
+#define REGION_CWINS_BEING_RESCUED 0x0400
 
 /* Use region_is_fully_mapped instead for most cases. */
 #define REGION_IS_MAPPED(R)        (((WRegion*)(R))->flags&REGION_MAPPED)

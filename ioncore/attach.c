@@ -25,10 +25,8 @@
 #include "region-iter.h"
 
 
-/*{{{ Attach */
 
-
-/* new */
+/*{{{ New */
 
 
 static WRegion *add_fn_new(WWindow *par, const WRectangle *geom,
@@ -45,7 +43,10 @@ WRegion *region__attach_new(WRegion *mgr, WRegionSimpleCreateFn *cfn,
 }
 
 
-/* load */
+/*}}}*/
+
+
+/*{{{ Load */
 
 
 static WRegion *add_fn_load(WWindow *par, const WRectangle *geom, 
@@ -62,7 +63,10 @@ WRegion *region__attach_load(WRegion *mgr, ExtlTab tab,
 }
 
 
-/* reparent */
+/*}}}*/
+
+
+/*{{{ Reparent */
 
 
 static WRegion *add_fn_reparent(WWindow *par, const WRectangle *geom, 
@@ -77,13 +81,13 @@ static WRegion *add_fn_reparent(WWindow *par, const WRectangle *geom,
 }
 
 
-bool region__attach_reparent(WRegion *mgr, WRegion *reg, 
-                             WRegionDoAttachFn *fn, void *param)
+WRegion *region__attach_reparent(WRegion *mgr, WRegion *reg, 
+                                 WRegionDoAttachFn *fn, void *param)
 {
     WRegion *reg2;
     
     if(REGION_MANAGER(reg)==mgr)
-        return TRUE;
+        return reg;
     
     /* Check that reg is not a parent or manager of mgr */
     reg2=mgr;
@@ -91,7 +95,7 @@ bool region__attach_reparent(WRegion *mgr, WRegion *reg,
         if(reg2==reg){
             warn("Trying to make a %s manage a %s above it in management "
                  "hierarchy", OBJ_TYPESTR(mgr), OBJ_TYPESTR(reg));
-            return FALSE;
+            return NULL;
         }
     }
     
@@ -99,126 +103,15 @@ bool region__attach_reparent(WRegion *mgr, WRegion *reg,
         if(reg2==reg){
             warn("Trying to make a %s manage its ancestor (a %s)",
                  OBJ_TYPESTR(mgr), OBJ_TYPESTR(reg));
-            return FALSE;
+            return NULL;
         }
     }
     
-    reg2=fn(mgr, (WRegionAttachHandler*)add_fn_reparent, (void*)reg, param);
-    
-    return (reg2!=NULL);
+    return fn(mgr, (WRegionAttachHandler*)add_fn_reparent,
+              (void*)reg, param);
 }
-
 
 
 /*}}}*/
 
-
-/*{{{ Rescue */
-
-
-WRegion *region_find_rescue_manager_for_default(WRegion *reg, WRegion *chld)
-{
-    if(region_has_manage_clientwin(reg))
-        return reg;
-    return NULL;
-}
-
-
-WRegion *region_find_rescue_manager_for(WRegion *r2, WRegion *reg)
-{
-    WRegion *ret=NULL;
-    CALL_DYN_RET(ret, WRegion*, region_find_rescue_manager_for, r2, (r2, reg));
-    return ret;
-}
-
-
-/* Find new manager for the WClientWins in reg */
-WRegion *region_find_rescue_manager(WRegion *reg)
-{
-    WRegion *p;
-    
-    while(1){
-        p=region_manager_or_parent(reg);
-        if(p==NULL)
-            break;
-        if(!OBJ_IS_BEING_DESTROYED(p)){
-            WRegion *nm=region_find_rescue_manager_for(p, reg);
-            if(nm!=NULL)
-                return nm;
-        }
-        reg=p;
-    }
-    
-    return NULL;
-}
-
-
-static bool do_rescue(WRegion *dest, WRegion *r)
-{
-    WManageParams param=MANAGEPARAMS_INIT;
-    bool res=FALSE;
-    
-    if(!OBJ_IS(r, WClientWin)){
-        res=region_do_rescue_clientwins(r, dest);
-    }else if(dest!=NULL){
-        region_rootpos(dest, &(param.geom.x), &(param.geom.y));
-        param.geom.w=REGION_GEOM(r).w;
-        param.geom.h=REGION_GEOM(r).h;
-        res=region_manage_clientwin(dest, (WClientWin*)r, &param);
-    }
-    
-    if(!res)
-        warn("Unable to rescue \"%s\".", region_name(r));
-    
-    return res;
-}
-
-
-bool region_do_rescue_managed_clientwins(WRegion *reg, WRegion *dest, 
-                                         WRegion *list)
-{
-    WRegion *r, *next;
-    bool res=TRUE;
-    
-    FOR_ALL_MANAGED_ON_LIST_W_NEXT(list, r, next){
-        if(!do_rescue(dest, r))
-            res=FALSE;
-    }
-    
-    return res;
-}
-
-
-bool region_do_rescue_child_clientwins(WRegion *reg, WRegion *dest)
-{
-    WRegion *r, *next;
-    bool res=TRUE;
-    
-    for(r=reg->children; r!=NULL; r=next){
-        next=r->p_next;
-        
-        if(!do_rescue(dest, r))
-            res=FALSE;
-    }
-    
-    return res;
-}
-
-
-bool region_do_rescue_clientwins(WRegion *reg, WRegion *dest)
-{
-    bool ret=FALSE;
-    CALL_DYN_RET(ret, bool, region_do_rescue_clientwins, reg, (reg, dest));
-    return ret;
-}
-
-
-bool region_rescue_clientwins(WRegion *reg)
-{
-    WRegion *dest=region_find_rescue_manager(reg);
-    return region_do_rescue_clientwins(reg, dest);
-}
-
-
-/*}}}*/
 

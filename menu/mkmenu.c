@@ -40,9 +40,10 @@ WMenu *menumod_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab, bool big_mode)
     fnp.submenu_mode=FALSE;
     fnp.big_mode=big_mode;
     
-    return (WMenu*)mplex_add_input(mplex,
-                                   (WRegionAttachHandler*)create_menu,
-                                   (void*)&fnp);
+    return (WMenu*)mplex_attach_hnd(mplex,
+                                    (WRegionAttachHandler*)create_menu,
+                                    (void*)&fnp, 
+                                    MPLEX_ATTACH_L2|MPLEX_ATTACH_SWITCHTO);
 }
 
 

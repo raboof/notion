@@ -33,6 +33,13 @@ function querylib.do_query(mplex, prompt, initvalue, handler, completor)
     local function handle_it(str)
         handler(mplex, str)
     end
+    -- Check that no other queries are open in the mplex.
+    local l=mplex:l2_list()
+    for i, r in l do
+        if obj_is(r, "WEdln") then
+            return
+        end
+    end
     querymod.query(mplex, prompt, initvalue, handle_it, completor)
 end
 
@@ -42,12 +49,12 @@ end
 -- \var{mplex} and if the user answers affirmately, call \var{handler}
 -- with \var{mplex} as parameter.
 function querylib.query_yesno(mplex, prompt, handler)
-    local function handle_yesno(str)
+    local function handler_yesno(mplex, str)
         if str=="y" or str=="Y" or str=="yes" then
             handler(mplex)
         end
     end
-    return querymod.query(mplex, prompt, nil, handle_yesno, nil)
+    return querylib.do_query(mplex, prompt, nil, handler_yesno, nil)
 end
 
 
@@ -248,7 +255,7 @@ function querylib.attachclient_handler(frame, str)
 end
 
 
-function querylib.workspace_handler(frame, name)
+function querylib.workspace_handler(mplex, name)
     local ws=ioncore.lookup_region(name, "WGenWS")
     if ws then
         ws:goto()
@@ -262,10 +269,10 @@ function querylib.workspace_handler(frame, name)
         wedln:set_completions(results)
     end
     
-    local function handler(cls)
-        local scr=frame:screen_of()
+    local function handler(mplex, cls)
+        local scr=mplex:screen_of()
         if not scr then
-            querymod.warn(frame, "Unable to create workspace: no screen.")
+            querymod.warn(mplex, "Unable to create workspace: no screen.")
             return
         end
         
@@ -281,13 +288,13 @@ function querylib.workspace_handler(frame, name)
                                      })
                                  end)
         if not ws then
-            querymod.warn(frame, err or "Unknown error")
+            querymod.warn(mplex, err or "Unknown error")
         end
     end
     
     local prompt="Workspace type ("..DEFAULT_WS_TYPE.."):"
     
-    querymod.query(frame, prompt, "", handler, completor)
+    querylib.do_query(mplex, prompt, "", handler, completor)
 end
 
 
@@ -410,7 +417,7 @@ function querylib.exec_handler(frame, cmd)
         if not ix then return end
         cmd=ix.." "..string.sub(cmd, 2)
     end
-    exec_in(frame, cmd)
+    ioncore.exec_on(frame:rootwin_of(), cmd)
 end
 
 --DOC
@@ -632,8 +639,8 @@ function querylib.query_lua(mplex)
         return querylib.do_handle_lua(mplex, env, code)
     end
     
-    querymod.query(mplex, "Lua code to run: ", nil, handle, 
-                   complete)
+    querylib.query_check(mplex, "Lua code to run: ", nil, handle, 
+                         complete)
 end
 
 -- }}}

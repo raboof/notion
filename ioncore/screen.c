@@ -31,9 +31,8 @@
 #include "region-iter.h"
 #include <libtu/minmax.h>
 
-#define SCR_MLIST(SCR) ((SCR)->mplex.managed_list)
-#define SCR_MCOUNT(SCR) ((SCR)->mplex.managed_count)
-#define SCR_CURRENT(SCR) ((SCR)->mplex.current_sub)
+#define SCR_MLIST(SCR) ((SCR)->mplex.l1_list)
+#define SCR_MCOUNT(SCR) ((SCR)->mplex.l1_count)
 #define SCR_WIN(SCR) ((SCR)->mplex.win.win)
 
 
@@ -127,9 +126,6 @@ void screen_deinit(WScreen *scr)
 {
     UNLINK_ITEM(ioncore_g.screens, scr, next_scr, prev_scr);
     
-    while(SCR_MLIST(scr)!=NULL)
-        region_unset_manager(SCR_MLIST(scr), (WRegion*)scr, &(SCR_MLIST(scr)));
-
     if(scr->uses_root)
         SCR_WIN(scr)=None;
     
@@ -154,19 +150,20 @@ void screen_managed_geom(WScreen *scr, WRectangle *geom)
 }
 
 
-static bool screen_handle_drop(WScreen *screen, int x, int y, WRegion *dropped)
+static bool screen_handle_drop(WScreen *scr, int x, int y, WRegion *dropped)
 {
-    WMPlex *mplex=(WMPlex*)screen;
-    
-    if(mplex->current_sub!=NULL &&
-       HAS_DYN(mplex->current_sub, region_handle_drop)){
+    WRegion *curr=mplex_l1_current(&(scr->mplex));
+
+    /* This code should handle dropping tabs on floating workspaces. */
+    if(curr && HAS_DYN(curr, region_handle_drop)){
         int rx, ry;
-        region_rootpos(mplex->current_sub, &rx, &ry);
-        if(rectangle_contains(&REGION_GEOM(mplex->current_sub), x-rx, y-ry)){
-            if(region_handle_drop(mplex->current_sub, x, y, dropped))
+        region_rootpos(curr, &rx, &ry);
+        if(rectangle_contains(&REGION_GEOM(curr), x-rx, y-ry)){
+            if(region_handle_drop(curr, x, y, dropped))
                 return TRUE;
         }
     }
+    
     /* Do not attach to ourselves unlike generic WMPlex. */
     return FALSE;
 }
@@ -205,7 +202,7 @@ static void screen_managed_changed(WScreen *scr, int mode, bool sw,
     if(!sw)
         return;
     
-    reg=SCR_CURRENT(scr);
+    reg=mplex_l1_current(&(scr->mplex));
 
     if(scr->atom_workspace!=None && ioncore_g.opmode!=IONCORE_OPMODE_DEINIT){
         if(reg!=NULL)
@@ -218,42 +215,6 @@ static void screen_managed_changed(WScreen *scr, int mode, bool sw,
         extl_call_named("call_hook", "soo", NULL,
                         "screen_workspace_switched", scr, reg);
     }
-}
-
-
-static WRegion *screen_find_rescue_manager_for(WScreen *scr, WRegion *todst)
-{
-    WRegion *other;
-    
-    /* TODO: checking that todst is on the managed list should be done
-     * more cleanly.
-     */
-    if(REGION_MANAGER(todst)!=(WRegion*)scr || todst==scr->mplex.current_input)
-        return FALSE;
-
-    other=todst;
-    while(1){
-        other=REGION_PREV_MANAGED(SCR_MLIST(scr), other);
-        if(other==NULL)
-            break;
-        if(region_has_manage_clientwin(other) && 
-           !OBJ_IS_BEING_DESTROYED(other)){
-            return other;
-        }
-    }
-
-    other=todst;
-    while(1){
-        other=REGION_NEXT_MANAGED(SCR_MLIST(scr), other);
-        if(other==NULL)
-            break;
-        if(region_has_manage_clientwin(other) && 
-           !OBJ_IS_BEING_DESTROYED(other)){
-            return other;
-        }
-    }
-    
-    return NULL;
 }
 
 
@@ -409,28 +370,7 @@ void screen_set_managed_offset(WScreen *scr, const WRectangle *off)
 
 ExtlTab screen_get_configuration(WScreen *scr)
 {
-    WRegion *sub=NULL;
-    int n=0;
-    ExtlTab tab, subs;
-    
-    tab=region_get_base_configuration((WRegion*)scr);
-        
-    subs=extl_create_table();
-    extl_table_sets_t(tab, "subs", subs);
-    
-    FOR_ALL_MANAGED_ON_LIST(SCR_MLIST(scr), sub){
-        ExtlTab st=region_get_configuration(sub);
-        if(st!=extl_table_none()){
-            if(sub==SCR_CURRENT(scr))
-                extl_table_sets_b(st, "switchto", TRUE);
-            extl_table_seti_t(subs, ++n, st);
-            extl_unref_table(st);
-        }
-    }
-    
-    extl_unref_table(subs);
-    
-    return tab;
+    return mplex_get_base_configuration(&scr->mplex);
 }
 
 
@@ -465,7 +405,7 @@ static bool create_initial_ws(WScreen *scr)
         return FALSE;
     }
     
-    reg=mplex_attach_new_simple((WMPlex*)scr, fn, TRUE);
+    reg=mplex_attach_hnd(&scr->mplex, (WRegionAttachHandler*)fn, NULL, 0);
     
     if(reg==NULL){
         warn("Unable to create a workspace on screen %d\n", scr->id);
@@ -486,22 +426,7 @@ bool screen_init_layout(WScreen *scr, ExtlTab tab)
     if(tab==extl_table_none())
         return create_initial_ws(scr);
     
-    if(extl_table_gets_s(tab, "name", &name)){
-        region_set_name((WRegion*)scr, name);
-        free(name);
-    }
-
-    if(!extl_table_gets_t(tab, "subs", &substab))
-        return TRUE;
-    
-    n=extl_table_get_n(substab);
-    for(i=1; i<=n; i++){
-        if(extl_table_geti_t(substab, i, &subtab)){
-            mplex_attach_new((WMPlex*)scr, subtab);
-            extl_unref_table(subtab);
-        }
-    }
-    extl_unref_table(substab);
+    mplex_load_contents(&scr->mplex, tab);
     
     return TRUE;
 }
@@ -521,9 +446,6 @@ static DynFunTab screen_dynfuntab[]={
     {(DynFun*)region_may_destroy_managed,
      (DynFun*)screen_may_destroy_managed},
 
-    {(DynFun*)region_find_rescue_manager_for,
-     (DynFun*)screen_find_rescue_manager_for},
-    
     {mplex_managed_changed, screen_managed_changed},
     
     {mplex_managed_geom, screen_managed_geom},

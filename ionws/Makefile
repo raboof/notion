@@ -12,8 +12,7 @@ include $(TOPDIR)/system-inc.mk
 INCLUDES += $(X11_INCLUDES) -I..
 CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
-SOURCES=bindmaps.c conf.c ionframe.c main.c placement.c \
-	split.c ionws.c
+SOURCES=bindmaps.c conf.c main.c placement.c split.c ionws.c ionframe.c
 
 MAKE_EXPORTS=ionwsmod
 

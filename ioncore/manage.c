@@ -9,17 +9,17 @@
  * (at your option) any later version.
  */
 
+#include <libtu/objp.h>
 #include "global.h"
 #include "common.h"
 #include "region.h"
-#include "attach.h"
 #include "manage.h"
-#include <libtu/objp.h>
 #include "names.h"
 #include "fullscreen.h"
 #include "pointer.h"
 #include "extl.h"
 #include "netwm.h"
+#include "region-iter.h"
 
 
 /*{{{ Add */
@@ -54,35 +54,11 @@ WScreen *clientwin_find_suitable_screen(WClientWin *cwin,
 }
 
 
-/* Try the deepest WGenWS first and then anything before it on the path
- * given by region_current() calls starting from chosen screen.
- */
-static bool try_manage(WRegion *reg, WClientWin *cwin,
-                       const WManageParams *param, bool *triedws)
-{
-    WRegion *r2=region_current(reg);
-    
-    if(r2!=NULL){
-        if(try_manage(r2, cwin, param, triedws))
-            return TRUE;
-    }
-
-    if(OBJ_IS(reg, WGenWS))
-        *triedws=TRUE;
-    
-    if(!*triedws)
-        return FALSE;
-    
-    return region_manage_clientwin(reg, cwin, param);
-}
-
-
 bool clientwin_do_manage_default(WClientWin *cwin, 
                                  const WManageParams *param)
 {
     WRegion *r=NULL, *r2;
     WScreen *scr=NULL;
-    bool triedws=FALSE;
     int fs;
     
     /* Transients are managed by their transient_for client window unless the
@@ -114,19 +90,8 @@ bool clientwin_do_manage_default(WClientWin *cwin,
         return FALSE;
     }
 
-    if(try_manage((WRegion*)scr, cwin, param, &triedws))
-        return TRUE;
-    
-    if(clientwin_get_transient_mode(cwin)==TRANSIENT_MODE_CURRENT){
-        WRegion *r=mplex_current((WMPlex*)scr);
-        if(r!=NULL && OBJ_IS(r, WClientWin)){
-            if(clientwin_attach_transient((WClientWin*)r, (WRegion*)cwin)){
-                return TRUE;
-            }
-        }
-    }
-
-    return region_manage_clientwin((WRegion*)scr, cwin, param);
+    return region_manage_clientwin((WRegion*)scr, cwin, param,
+                                   MANAGE_REDIR_PREFER_YES);
 }
 
 
@@ -137,17 +102,135 @@ bool clientwin_do_manage_default(WClientWin *cwin,
 
 
 bool region_manage_clientwin(WRegion *reg, WClientWin *cwin,
-                             const WManageParams *param)
+                             const WManageParams *param, int redir)
 {
     bool ret=FALSE;
-    CALL_DYN_RET(ret, bool, region_manage_clientwin, reg, (reg, cwin, param));
+    CALL_DYN_RET(ret, bool, region_manage_clientwin, reg, 
+                 (reg, cwin, param, redir));
     return ret;
 }
 
 
-bool region_has_manage_clientwin(WRegion *reg)
+bool region_manage_clientwin_default(WRegion *reg, WClientWin *cwin,
+                                     const WManageParams *param, int redir)
 {
-    return HAS_DYN(reg, region_manage_clientwin);
+    WRegion *curr;
+    
+    if(redir==MANAGE_REDIR_STRICT_NO)
+        return FALSE;
+    
+    curr=region_current(reg);
+    
+    if(curr==NULL)
+        return FALSE;
+        
+    return region_manage_clientwin(curr, cwin, param, 
+                                   MANAGE_REDIR_PREFER_YES);
+}
+
+
+/*}}}*/
+
+
+/*{{{ Rescue */
+
+
+bool region_manage_rescue(WRegion *reg, WClientWin *cwin, WRegion *from)
+{
+    bool ret=FALSE;
+    CALL_DYN_RET(ret, bool, region_manage_rescue, reg, (reg, cwin, from));
+    return ret;
+}
+
+
+bool region_manage_rescue_default(WRegion *reg, WClientWin *cwin,
+                                  WRegion *from)
+{
+    WRegion *curr=region_current(reg);
+    WManageParams param=MANAGEPARAMS_INIT;
+    
+    if(curr==from)
+        return FALSE;
+    
+    if(OBJ_IS_BEING_DESTROYED(curr))
+        return FALSE;
+
+    region_rootpos((WRegion*)cwin, &(param.geom.x), &(param.geom.y));
+    param.geom.w=REGION_GEOM(cwin).w;
+    param.geom.h=REGION_GEOM(cwin).h;
+    
+    return region_manage_clientwin(curr, cwin, &param, 
+                                   MANAGE_REDIR_STRICT_NO);
+}
+
+
+static bool do_rescue(WRegion *reg, WRegion *r)
+{
+    WRegion *mgr;
+    
+    if(!OBJ_IS(r, WClientWin))
+        return region_rescue_clientwins(r);
+
+    while(1){
+        mgr=region_manager_or_parent(reg);
+        if(mgr==NULL)
+            break;
+        if(!OBJ_IS_BEING_DESTROYED(mgr) &&
+           !(mgr->flags&REGION_CWINS_BEING_RESCUED)){
+            if(region_manage_rescue(mgr, (WClientWin*)r, reg))
+                return TRUE;
+        }
+        reg=mgr;
+    }
+    
+    warn("Unable to rescue \"%s\".", region_name(r));
+    
+    return FALSE;
+}
+
+
+bool region_rescue_managed_clientwins(WRegion *reg, WRegion *list)
+{
+    WRegion *r, *next;
+    bool res=TRUE;
+    
+    reg->flags|=REGION_CWINS_BEING_RESCUED;
+    
+    FOR_ALL_MANAGED_ON_LIST_W_NEXT(list, r, next){
+        if(!do_rescue(reg, r))
+            res=FALSE;
+    }
+    
+    reg->flags&=REGION_CWINS_BEING_RESCUED;
+
+    return res;
+}
+
+
+bool region_rescue_child_clientwins(WRegion *reg)
+{
+    WRegion *r, *next;
+    bool res=TRUE;
+    
+    reg->flags|=REGION_CWINS_BEING_RESCUED;
+
+    for(r=reg->children; r!=NULL; r=next){
+        next=r->p_next;
+        if(!do_rescue(reg, r))
+            res=FALSE;
+    }
+    
+    reg->flags&=~REGION_CWINS_BEING_RESCUED;
+
+    return res;
+}
+
+
+bool region_rescue_clientwins(WRegion *reg)
+{
+    bool ret=FALSE;
+    CALL_DYN_RET(ret, bool, region_rescue_clientwins, reg, (reg));
+    return ret;
 }
 
 

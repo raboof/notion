@@ -14,11 +14,11 @@
 #include <libtu/objp.h>
 #include "region.h"
 #include "focus.h"
-#include "attach.h"
 #include "regbind.h"
 #include "names.h"
 #include "stacking.h"
 #include "resize.h"
+#include "manage.h"
 #include "extl.h"
 #include "extlconv.h"
 #include "activity.h"
@@ -248,6 +248,11 @@ WRegion *region_control_managed_focus(WRegion *mgr, WRegion *reg)
 }
 
 
+/*EXTL_DOC
+ * Return the object, if any, that is considered ''currently active''
+ * within the objects managed by \var{mplex}.
+ */
+EXTL_EXPORT_MEMBER
 WRegion *region_current(WRegion *mgr)
 {
     WRegion *ret=NULL;
@@ -671,11 +676,14 @@ static DynFunTab region_dynfuntab[]={
     {region_draw_config_updated, 
      region_draw_config_updated_default},
     
-    {(DynFun*)region_find_rescue_manager_for, 
-     (DynFun*)region_find_rescue_manager_for_default},
-    
-    {(DynFun*)region_do_rescue_clientwins,
-     (DynFun*)region_do_rescue_child_clientwins},
+    {(DynFun*)region_rescue_clientwins,
+     (DynFun*)region_rescue_child_clientwins},
+
+    {(DynFun*)region_manage_clientwin,
+     (DynFun*)region_manage_clientwin_default},
+
+    {(DynFun*)region_manage_rescue,
+     (DynFun*)region_manage_rescue_default},
     
     END_DYNFUNTAB
 };

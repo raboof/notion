@@ -344,9 +344,9 @@ static bool handle_target_props(WClientWin *cwin, const WManageParams *param)
         free(target_name);
     
         if(r!=NULL){
-            if(region_has_manage_clientwin(r))
-                if(region_manage_clientwin(r, cwin, param))
-                    return TRUE;
+            if(region_manage_clientwin(r, cwin, param, 
+                                       MANAGE_REDIR_PREFER_NO))
+                return TRUE;
         }
     }
     
@@ -624,10 +624,10 @@ static WRegion *clientwin_do_attach_transient(WClientWin *cwin,
 
 bool clientwin_attach_transient(WClientWin *cwin, WRegion *transient)
 {
-    return region__attach_reparent((WRegion*)cwin, transient,
-                                   ((WRegionDoAttachFn*)
-                                    clientwin_do_attach_transient), 
-                                   transient);
+    return (region__attach_reparent((WRegion*)cwin, transient,
+                                    ((WRegionDoAttachFn*)
+                                     clientwin_do_attach_transient), 
+                                    transient)!=NULL);
 }
 
 
@@ -647,15 +647,29 @@ static void clientwin_remove_managed(WClientWin *cwin, WRegion *transient)
 }
 
 
-static bool clientwin_do_rescue_clientwins(WClientWin *cwin, WRegion *dst)
+static bool clientwin_rescue_clientwins(WClientWin *cwin)
 {
     bool ret1, ret2;
     
-    ret1=region_do_rescue_managed_clientwins((WRegion*)cwin, dst,
-                                             cwin->transient_list);
-    ret2=region_do_rescue_child_clientwins((WRegion*)cwin, dst);
+    ret1=region_rescue_managed_clientwins((WRegion*)cwin,
+                                          cwin->transient_list);
+    ret2=region_rescue_child_clientwins((WRegion*)cwin);
     
     return (ret1 && ret2);
+}
+
+
+bool clientwin_manage_clientwin(WClientWin *cwin, WClientWin *cwin2,
+                                const WManageParams *param, int redir)
+{
+    if(redir==MANAGE_REDIR_STRICT_YES)
+        return FALSE;
+    
+    /* Only catch windows with transient mode set to current here. */
+    if(clientwin_get_transient_mode(cwin2)!=TRANSIENT_MODE_CURRENT)
+        return FALSE;
+    
+    return clientwin_attach_transient(cwin, (WRegion*)cwin2);
 }
 
 
@@ -1492,9 +1506,12 @@ static DynFunTab clientwin_dynfuntab[]={
     {(DynFun*)region_get_configuration,
      (DynFun*)clientwin_get_configuration},
     
-    {(DynFun*)region_do_rescue_clientwins,
-     (DynFun*)clientwin_do_rescue_clientwins},
+    {(DynFun*)region_rescue_clientwins,
+     (DynFun*)clientwin_rescue_clientwins},
     
+    {(DynFun*)region_manage_clientwin,
+     (DynFun*)clientwin_manage_clientwin},
+
     END_DYNFUNTAB
 };
 

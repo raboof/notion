@@ -10,6 +10,7 @@
  */
 
 #include <string.h>
+#include <libtu/objp.h>
 
 #include "common.h"
 #include "global.h"
@@ -18,7 +19,6 @@
 #include "screen.h"
 #include "saveload.h"
 #include "names.h"
-#include <libtu/objp.h>
 #include "attach.h"
 #include "reginfo.h"
 #include "extl.h"

@@ -48,14 +48,14 @@ void ionwsmod_deinit()
 
 static bool register_regions()
 {
-    if(!ioncore_register_regclass(&CLASSDESCR(WIonFrame), NULL,
-                              (WRegionLoadCreateFn*) ionframe_load)){
-        return FALSE;
-    }
-    
     if(!ioncore_register_regclass(&CLASSDESCR(WIonWS),
-                              (WRegionSimpleCreateFn*) create_ionws_simple,
-                              (WRegionLoadCreateFn*) ionws_load)){
+                                  (WRegionSimpleCreateFn*)create_ionws_simple,
+                                  (WRegionLoadCreateFn*)ionws_load)){
+       return FALSE;
+    }
+    if(!ioncore_register_regclass(&CLASSDESCR(WIonFrame),
+                                  (WRegionSimpleCreateFn*)create_ionframe,
+                                  (WRegionLoadCreateFn*)ionframe_load)){
        return FALSE;
     }
     

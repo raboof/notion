@@ -276,10 +276,9 @@ void floatws_deinit(WFloatWS *ws)
 }
 
 
-static bool floatws_do_rescue_clientwins(WFloatWS *ws, WRegion *dst)
+bool floatws_rescue_clientwins(WFloatWS *ws)
 {
-    return region_do_rescue_managed_clientwins((WRegion*)ws, dst,
-                                               ws->managed_list);
+    return region_rescue_managed_clientwins((WRegion*)ws, ws->managed_list);
 }
 
 
@@ -335,44 +334,7 @@ static void floatws_add_managed(WFloatWS *ws, WRegion *reg)
 }
 
 
-static WRegion *floatws_do_attach(WFloatWS *ws, WRegionAttachHandler *fn,
-                                  void *fnparams, const WRectangle *geom)
-{
-    WWindow *par;
-    WRegion *reg;
-
-    par=REGION_PARENT_CHK(ws, WWindow);
-    assert(par!=NULL);
-    
-    reg=fn(par, geom, fnparams);
-
-    if(reg!=NULL)
-        floatws_add_managed(ws, reg);
-    
-    return reg;
-}
-
-
-
-static WRegion *floatws_attach_load(WFloatWS *ws, ExtlTab param)
-{
-    WRectangle geom;
-    
-    if(!extl_table_gets_rectangle(param, "geom", &geom)){
-        warn("No geometry specified");
-        return NULL;
-    }
-
-    geom.w=maxof(geom.w, 0);
-    geom.h=maxof(geom.h, 0);
-    
-    return region__attach_load((WRegion*)ws, param, 
-                               (WRegionDoAttachFn*)floatws_do_attach,
-                               &geom);
-}
-
-
-#define REG_OK(R) region_has_manage_clientwin(R)
+#define REG_OK(R) OBJ_IS(R, WMPlex)
 
 
 static WMPlex *find_existing(WFloatWS *ws)
@@ -391,13 +353,26 @@ static WMPlex *find_existing(WFloatWS *ws)
 }
 
 
-static bool floatws_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
-                                     const WManageParams *param)
+bool floatws_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
+                              const WManageParams *param, int redir)
 {
     WFloatFrame *frame=NULL;
     WWindow *par;
     bool respectpos=TRUE;
     WRectangle fgeom=param->geom;
+    int swf;
+    
+    if(redir==MANAGE_REDIR_PREFER_YES){
+        WMPlex *m=find_existing(ws);
+        if(m!=NULL){
+            if(region_manage_clientwin((WRegion*)m, cwin, param,
+                                       MANAGE_REDIR_STRICT_YES))
+                return TRUE;
+        }
+    }
+    
+    if(redir==MANAGE_REDIR_STRICT_YES)
+        return FALSE;
 
     par=REGION_PARENT_CHK(ws, WWindow);
     assert(par!=NULL);
@@ -440,7 +415,8 @@ static bool floatws_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
     /* Set proper geometry */
     region_fit((WRegion*)frame, &fgeom);
     
-    if(!mplex_attach_simple((WMPlex*)frame, (WRegion*)cwin, param->switchto)){
+    swf=(param->switchto ? MPLEX_ATTACH_SWITCHTO : 0);
+    if(!mplex_attach_simple((WMPlex*)frame, (WRegion*)cwin, swf)){
         destroy_obj((Obj*)frame);
         return FALSE;
     }
@@ -486,7 +462,7 @@ static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
     fgeom.y=y-fgeom.y;
     region_fit((WRegion*)frame, &fgeom);
     
-    if(!mplex_attach_simple((WMPlex*)frame, dropped, TRUE)){
+    if(!mplex_attach_simple((WMPlex*)frame, dropped, MPLEX_ATTACH_SWITCHTO)){
         destroy_obj((Obj*)frame);
         warn("Failed to attach dropped region to created WFloatFrame");
         return FALSE;
@@ -518,12 +494,25 @@ bool floatwsmod_clientwin_do_manage(WClientWin *cwin,
     if(ws==NULL)
         return FALSE;
     
-    if(!floatws_manage_clientwin(ws, cwin, param))
+    if(!floatws_manage_clientwin(ws, cwin, param, MANAGE_REDIR_PREFER_NO))
         return FALSE;
 
     region_stack_above(REGION_MANAGER(cwin), stack_above);
 
     return TRUE;
+}
+
+
+bool floatws_manage_rescue(WFloatWS *ws, WClientWin *cwin, WRegion *from)
+{
+    WManageParams param=MANAGEPARAMS_INIT;
+    
+    region_rootpos((WRegion*)cwin, &(param.geom.x), &(param.geom.y));
+    param.geom.w=REGION_GEOM(cwin).w;
+    param.geom.h=REGION_GEOM(cwin).h;
+    
+    return region_manage_clientwin((WRegion*)ws, cwin, &param,
+                                   MANAGE_REDIR_PREFER_NO);
 }
 
 
@@ -649,6 +638,43 @@ static ExtlTab floatws_get_configuration(WFloatWS *ws)
 }
 
 
+static WRegion *floatws_do_attach(WFloatWS *ws, WRegionAttachHandler *fn,
+                                  void *fnparams, const WRectangle *geom)
+{
+    WWindow *par;
+    WRegion *reg;
+
+    par=REGION_PARENT_CHK(ws, WWindow);
+    assert(par!=NULL);
+    
+    reg=fn(par, geom, fnparams);
+
+    if(reg!=NULL)
+        floatws_add_managed(ws, reg);
+    
+    return reg;
+}
+
+
+
+static WRegion *floatws_attach_load(WFloatWS *ws, ExtlTab param)
+{
+    WRectangle geom;
+    
+    if(!extl_table_gets_rectangle(param, "geom", &geom)){
+        warn("No geometry specified");
+        return NULL;
+    }
+
+    geom.w=maxof(geom.w, 0);
+    geom.h=maxof(geom.h, 0);
+    
+    return region__attach_load((WRegion*)ws, param, 
+                               (WRegionDoAttachFn*)floatws_do_attach,
+                               &geom);
+}
+
+
 WRegion *floatws_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
 {
     WFloatWS *ws;
@@ -720,8 +746,8 @@ static DynFunTab floatws_dynfuntab[]={
     {(DynFun*)region_current,
      (DynFun*)floatws_current},
     
-    {(DynFun*)region_do_rescue_clientwins,
-     (DynFun*)floatws_do_rescue_clientwins},
+    {(DynFun*)region_rescue_clientwins,
+     (DynFun*)floatws_rescue_clientwins},
     
     END_DYNFUNTAB
 };

@@ -28,8 +28,8 @@
 #include <libtu/minmax.h>
 #include "placement.h"
 #include "ionws.h"
-#include "split.h"
 #include "ionframe.h"
+#include "split.h"
 
 
 /*{{{ region dynfun implementations */
@@ -202,10 +202,9 @@ static bool ionws_may_destroy_managed(WIonWS *ws, WRegion *reg)
 }
 
 
-static bool ionws_do_rescue_clientwins(WIonWS *ws, WRegion *dst)
+bool ionws_rescue_clientwins(WIonWS *ws)
 {
-    return region_do_rescue_managed_clientwins((WRegion*)ws, dst,
-                                               ws->managed_list);
+    return region_rescue_managed_clientwins((WRegion*)ws, ws->managed_list);
 }
 
 
@@ -443,9 +442,6 @@ static DynFunTab ionws_dynfuntab[]={
     {(DynFun*)region_reparent,
      (DynFun*)reparent_ionws},
     
-    {(DynFun*)region_manage_clientwin, 
-     (DynFun*)ionws_manage_clientwin},
-
     {region_request_managed_geom, ionws_request_managed_geom},
     {region_managed_activated, ionws_managed_activated},
     {region_remove_managed, ionws_remove_managed},
@@ -453,11 +449,13 @@ static DynFunTab ionws_dynfuntab[]={
     {(DynFun*)region_display_managed,
      (DynFun*)ionws_display_managed},
     
-    {(DynFun*)region_find_rescue_manager_for, 
-     (DynFun*)ionws_find_rescue_manager_for},
+    {(DynFun*)region_manage_clientwin, 
+     (DynFun*)ionws_manage_clientwin},
+    {(DynFun*)region_manage_rescue,
+     (DynFun*)ionws_manage_rescue},
     
-    {(DynFun*)region_do_rescue_clientwins,
-     (DynFun*)ionws_do_rescue_clientwins},
+    {(DynFun*)region_rescue_clientwins,
+     (DynFun*)ionws_rescue_clientwins},
     
     {(DynFun*)region_get_configuration,
      (DynFun*)ionws_get_configuration},

@@ -76,12 +76,23 @@ end
 
 -- Menu commands {{{
 
-local function do_menu(reg, sub, menu_or_name, fn)
+local function do_menu(reg, sub, menu_or_name, fn, check)
+    if check then
+        -- Check that no other menus are open in reg.
+        local l=reg:l2_list()
+        for i, r in l do
+            if obj_is(r, "WMenu") then
+                return
+            end
+        end
+    end
+
     local function wrapper(entry)
         if entry.func then
             entry.func(reg, sub)
         end
     end
+    
     return fn(reg, wrapper, menulib.getmenu(menu_or_name))
 end
 
@@ -96,7 +107,7 @@ end
 -- so that the menu handler will get the same parameters as the
 -- binding handler.
 function menulib.menu(mplex, sub, menu_or_name) 
-    return do_menu(mplex, sub, menu_or_name, menumod.menu)
+    return do_menu(mplex, sub, menu_or_name, menumod.menu, true)
 end
 
 --DOC
@@ -106,7 +117,7 @@ function menulib.bigmenu(mplex, sub, menu_or_name)
     local function menu_bigmenu(m, s, menu)
         return menumod.menu(m, s, menu, true)
     end
-    return do_menu(mplex, sub, menu_or_name, menu_bigmenu)
+    return do_menu(mplex, sub, menu_or_name, menu_bigmenu, true)
 end
 
 --DOC

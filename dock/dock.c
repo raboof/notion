@@ -1091,11 +1091,15 @@ WDock *create_dock(int screen, ExtlTab conftab)
 
 /* dock_manage_clientwin {{{ */
 static bool dock_manage_clientwin(WDock *dock, WClientWin *cwin,
-                                  const WManageParams *param UNUSED)
+                                  const WManageParams *param UNUSED,
+                                  int redir)
 {
     WDockApp *dockapp, *before_dockapp;
     WRectangle geom;
 
+    if(redir==MANAGE_REDIR_STRICT_YES)
+        return FALSE;
+    
     /* Create and initialise a new WDockApp struct {{{ */
     dockapp=ALLOC(WDockApp);
     dockapp->cwin=cwin;
@@ -1262,9 +1266,10 @@ static bool clientwin_do_manage_hook(WClientWin *cwin, const WManageParams *para
         return FALSE;
     }
 
-    return region_manage_clientwin((WRegion *)dock, cwin, param);
-
+    return region_manage_clientwin((WRegion *)dock, cwin, param,
+                                   MANAGE_REDIR_PREFER_NO);
 }
+
 /* }}} */
 
 /* dockmod_init {{{ */

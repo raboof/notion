@@ -16,9 +16,9 @@
 
 #define FRAME_WIN(FRAME) (((WFrame*)(FRAME))->mplex.win.win)
 #define FRAME_DRAW(FRAME) (((WFrame*)(FRAME))->mplex.win.draw)
-#define FRAME_MCOUNT(FRAME) (((WFrame*)(FRAME))->mplex.managed_count)
-#define FRAME_MLIST(FRAME) (((WFrame*)(FRAME))->mplex.managed_list)
-#define FRAME_CURRENT(FRAME) (((WFrame*)(FRAME))->mplex.current_sub)
+#define FRAME_MCOUNT(FRAME) (((WFrame*)(FRAME))->mplex.l1_count)
+#define FRAME_MLIST(FRAME) (((WFrame*)(FRAME))->mplex.l1_list)
+#define FRAME_CURRENT(FRAME) (((WFrame*)(FRAME))->mplex.l1_current)
 
 enum{
     FRAME_AREA_NONE=0,

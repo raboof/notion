@@ -33,6 +33,7 @@ extern void frame_border_geom_default(const WFrame *frame, WRectangle *geom);
 extern void frame_border_inner_geom_default(const WFrame *frame, WRectangle *geom);
 extern void frame_bar_geom_default(const WFrame *frame, WRectangle *geom);
 extern void frame_managed_geom_default(const WFrame *frame, WRectangle *geom);
+extern void frame_brushes_updated_default(WFrame *frame);
 
 extern void frame_initialise_gr(WFrame *frame);
 extern void frame_release_brushes(WFrame *frame);

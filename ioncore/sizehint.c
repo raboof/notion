@@ -10,6 +10,7 @@
  */
 
 #include <string.h>
+#include <libtu/minmax.h>
 
 #include "common.h"
 #include "global.h"
@@ -178,9 +179,6 @@ void xwindow_get_sizehints(Window win, XSizeHints *hints)
 /*{{{ xsizehints_adjust_for */
 
 
-#define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
-
-
 void xsizehints_adjust_for(XSizeHints *hints, WRegion *list)
 {
     WRegion *reg;
@@ -196,18 +194,18 @@ void xsizehints_adjust_for(XSizeHints *hints, WRegion *list)
                 hints->min_width=tmp_hints.min_width;
                 hints->min_height=tmp_hints.min_height;
             }else{
-                hints->min_width=MAX(hints->min_width,
-                                         tmp_hints.min_width);
-                hints->min_height=MAX(hints->min_height,
-                                          tmp_hints.min_height);
+                hints->min_width=maxof(hints->min_width,
+                                       tmp_hints.min_width);
+                hints->min_height=maxof(hints->min_height,
+                                        tmp_hints.min_height);
             }
         }
         
         if(tmp_hints.flags&PMaxSize && hints->flags&PMaxSize){
-            hints->max_width=MAX(hints->max_width,
-                                     tmp_hints.max_width);
-            hints->max_height=MAX(hints->max_height,
-                                      tmp_hints.max_height);
+            hints->max_width=maxof(hints->max_width,
+                                   tmp_hints.max_width);
+            hints->max_height=maxof(hints->max_height,
+                                    tmp_hints.max_height);
         }else{
             hints->flags&=~PMaxSize;
         }

@@ -63,7 +63,8 @@ static void lastmgr_watchhandler(Watch *watch, Obj *obj)
     
     assert(OBJ_IS(obj, WRegion));
     
-    r=region_find_rescue_manager((WRegion*)obj);
+    /* TODO: It'd be nicer if we didn't access obj. */
+    r=region_manager_or_parent((WRegion*)obj);
     
     if(r!=NULL)
         watch_setup(&(fsinfo->last_mgr_watch), (Obj*)r, lastmgr_watchhandler);
@@ -74,6 +75,7 @@ bool clientwin_fullscreen_scr(WClientWin *cwin, WScreen *scr, bool switchto)
 {
     int rootx, rooty;
     bool wasfs=TRUE;
+    int swf=(switchto ? MPLEX_ATTACH_SWITCHTO : 0);
     
     if(cwin->fsinfo.last_mgr_watch.obj==NULL){
         wasfs=FALSE;
@@ -82,9 +84,9 @@ bool clientwin_fullscreen_scr(WClientWin *cwin, WScreen *scr, bool switchto)
             watch_setup(&(cwin->fsinfo.last_mgr_watch),
                         (Obj*)REGION_MANAGER(cwin),
                         lastmgr_watchhandler);
-        }else if(scr->mplex.current_sub!=NULL){
+        }else if(scr->mplex.l1_current!=NULL){
             watch_setup(&(cwin->fsinfo.last_mgr_watch),
-                        (Obj*)scr->mplex.current_sub, 
+                        (Obj*)scr->mplex.l1_current, 
                         lastmgr_watchhandler);
         }
         region_rootpos((WRegion*)cwin, &rootx, &rooty);
@@ -94,7 +96,7 @@ bool clientwin_fullscreen_scr(WClientWin *cwin, WScreen *scr, bool switchto)
         cwin->fsinfo.saved_rootrel_geom.h=REGION_GEOM(cwin).h;
     }
     
-    if(!mplex_attach_simple((WMPlex*)scr, (WRegion*)cwin, switchto)){
+    if(!mplex_attach_simple((WMPlex*)scr, (WRegion*)cwin, swf)){
         warn("Failed to enter full screen mode");
         if(!wasfs)
             watch_reset(&(cwin->fsinfo.last_mgr_watch));
@@ -143,15 +145,19 @@ bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto)
     param.dockapp=FALSE;
     param.gravity=StaticGravity;
     
-    if(!region_manage_clientwin(reg, cwin, &param)){
-        warn("WClientWin failed to return from full screen mode; remaining "
-             "manager or parent from previous location refused to manage us.");
-        return FALSE;
+    while(reg!=NULL){
+        if(region_manage_clientwin(reg, cwin, &param, 
+                                   MANAGE_REDIR_PREFER_NO)){
+            if(!cf)
+                return TRUE;
+            return region_goto((WRegion*)cwin);
+        }
+        reg=region_manager_or_parent(reg);
     }
-    
-    if(!cf)
-        return TRUE;
-    return region_goto((WRegion*)cwin);
+
+    warn("WClientWin failed to return from full screen mode; remaining "
+         "manager or parent from previous location refused to manage us.");
+    return FALSE;
 }
 
 

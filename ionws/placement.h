@@ -19,6 +19,7 @@
 
 
 extern bool ionws_manage_clientwin(WIonWS *ws, WClientWin *cwin,
-                                   const WManageParams *param);
+                                   const WManageParams *param,
+                                   int redir);
 
 #endif /* ION_IONWS_PLACEMENT_H */
