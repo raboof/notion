@@ -172,7 +172,6 @@ void mainloop()
 				   CurrentTime);
 	((WRegion*)wglobal.screens)->flags|=REGION_ACTIVE;
 	wglobal.active_screen=wglobal.screens;
-	/*activate_ggrabs((WRegion*)wglobal.screens);*/
 	
 	
 	for(;;){
@@ -185,11 +184,13 @@ void mainloop()
 		XSync(wglobal.dpy, False);
 		
 		if(wglobal.focus_next!=NULL){
-			/*SKIP_ENTER_EVENTS(&ev);*/
 			skip_focusenter_but(wglobal.focus_next);
 			do_set_focus(wglobal.focus_next, wglobal.warp_next);
 			wglobal.focus_next=NULL;
 			wglobal.warp_next=FALSE;
+		}else if(wglobal.grab_released){
+			wglobal.grab_released=FALSE;
+			skip_focusenter_but(NULL);
 		}
 	}
 }
@@ -404,9 +405,12 @@ static void handle_enter_window(XEvent *ev)
 	while(XCheckMaskEvent(wglobal.dpy, EnterWindowMask, ev)){
 		/* We're only interested in the latest enter event */
 	}
-	
-	if(eev->mode!=NotifyNormal && !wglobal.warp_enabled)
+
+	/*
+	if((eev->mode!=NotifyNormal && eev->mode!=NotifyUngrab) &&
+	   !wglobal.warp_enabled)
 		return;
+	*/
 	
 	/*
 	if(eev->window==eev->root){
@@ -546,24 +550,11 @@ static void pointer_handler(XEvent *ev)
 		CASE_EVENT(ButtonRelease)
 			if(handle_button_release(&ev->xbutton)){
 				ungrab_kb_ptr();
-				mouse_grab_held=FALSE;
-
-				/*
-				 * XUngrab*() generate events carrying mode==NotifyUngrab (see
-				 * handle_enter_window() for more info).
-				 * we'll try to catch the offending ButtonPress-triggered
-				 * EnterNotify and use set_focus() to generate deferred
-				 * FocusChange/EnterNotify events which do not carry mode=NotifyUngrab
-				 * anymore and get interpreted just fine. argh.
+				wglobal.grab_released=FALSE;
+				/* Don't ignore following UngrabNotify EnterWindow events in
+				 * case of pointer action originated grabs.
 				 */
-				/*XSync(wglobal.dpy, False);
-				justeat=(wglobal.focus_next!=NULL);
-				if(XCheckTypedWindowEvent(wglobal.dpy, win_pressed, EnterNotify, &tmp)){
-					t=(WThing*)FIND_WINDOW_T(win_pressed, WWindow);
-					if(t && !justeat){
-						set_focus(t);
-					}
-				}*/
+				mouse_grab_held=FALSE;
 			}
 			break;
 		CASE_EVENT(MotionNotify)

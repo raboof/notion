@@ -95,6 +95,7 @@ void do_grab_kb_ptr(Window win, WRegion *reg, long eventmask)
 	XGrabKeyboard(wglobal.dpy, win, False, GrabModeAsync,
 				  GrabModeAsync, CurrentTime);
 	XSelectInput(wglobal.dpy, win, ROOT_MASK);
+	wglobal.grab_released=FALSE;
 }
 
 
@@ -111,6 +112,7 @@ void ungrab_kb_ptr()
 	
 	wglobal.input_mode=INPUT_NORMAL;
 	wglobal.draw_dragwin=NULL;
+	wglobal.grab_released=TRUE;
 }
 
 

@@ -72,6 +72,7 @@ DECLSTRUCT(WGlobal){
 	WScreen *active_screen, *previous_screen;
 	
 	int input_mode;
+	bool grab_released;
 	int opmode;
 	int previous_protect;
 
@@ -79,6 +80,7 @@ DECLSTRUCT(WGlobal){
 	Time dblclick_delay;
 	int opaque_resize;
 	bool warp_enabled;
+	
 };
 
 extern WGlobal wglobal;

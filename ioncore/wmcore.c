@@ -72,6 +72,8 @@ static void initialize_global()
 	wglobal.resize_delay=CF_RESIZE_DELAY;
 	wglobal.opaque_resize=0;
 	wglobal.warp_enabled=TRUE;
+	
+	wglobal.grab_released=FALSE;
 }
 
 
