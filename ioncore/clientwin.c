@@ -397,7 +397,6 @@ static WClientWin *postmanage_check(WClientWin *cwin,
 	
 	warn("Window %#x disappeared", cwin->win);
 	
-	clientwin_destroyed(cwin);
 	return NULL;
 }
 
@@ -519,7 +518,7 @@ again:
 	}
 
 failure:
-	clientwin_unmapped(cwin);
+	clientwin_destroyed(cwin);
 
 fail2:
 	XSelectInput(wglobal.dpy, win, 0);
