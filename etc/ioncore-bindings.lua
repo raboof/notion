@@ -85,8 +85,8 @@ global_bindings{
 -- managed by the screen or frame or the frame itself. Essentially e.g.
 -- make_mplex_clientwin_fn(fn) expands to
 -- 
--- function(mplex)
---     local reg=mplex:current()
+-- function(mplex, sub)
+--     local reg=(sub or mplex:current())
 --     if obj_is(reg, "WClientWin") then 
 --         fn(reg)
 --     end
@@ -95,7 +95,7 @@ global_bindings{
 -- For details see the document "Ion: Configuring and extending with Lua".
 
 mplex_bindings{
-    kpress_waitrel(DEFAULT_MOD.."C", WRegion.close_sub_or_self),
+    kpress_waitrel(DEFAULT_MOD.."C", WMPlex.close_sub_or_self),
     kpress_waitrel(DEFAULT_MOD.."L", 
                    make_mplex_clientwin_fn(WClientWin.broken_app_resize_kludge)),
     kpress_waitrel(DEFAULT_MOD.."Return", 

@@ -73,10 +73,6 @@ function make_mplex_clientwin_fn(fn)
     return make_mplex_sub_or_self_fn(fn, true, true, true)
 end
 
--- Backwards compatibility.
-make_current_fn=make_mplex_sub_fn
-make_current_clientwin_fn=make_mplex_clientwin_fn
-
 -- }}}
 
 
@@ -118,5 +114,30 @@ function WMPlex.move_current_to_prev_index(mplex)
     local c=mplex:current()
     if c then mplex:move_to_prev_index(c) end
 end
+
+-- }}}
+
+
+-- {{{ Misc. functions
+
+local function propagate_close(reg)
+    if obj_is(reg, "WClientWin") then
+        local l=reg:managed_list()
+        if l then
+            local r2=l[table.getn(l)]
+            if r2 then
+                return propagate_close(r2)
+            end
+        end
+    end
+    reg:close()
+end                               
+
+--DOC
+-- Close a \type{WMPlex} or some child of it using \fnref{WRegion.close} as 
+-- chosen by \fnref{make_mplex_sub_or_self}, but also, when the chosen object
+-- is a \type{WClientWin}, propagate the close call to transients managed
+-- by the \type{WClientWin}.
+WMPlex.close_sub_or_self=make_mplex_sub_or_self_fn(propagate_close)
 
 -- }}}

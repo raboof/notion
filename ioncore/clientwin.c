@@ -1258,6 +1258,22 @@ void clientwin_broken_app_resize_kludge(WClientWin *cwin)
 /*}}}*/
 
 
+/*{{{ Misc. */
+
+
+/*EXTL_DOC
+ * Returns a list of regions managed by the clientwin (transients, mostly).
+ */
+EXTL_EXPORT_MEMBER
+ExtlTab clientwin_managed_list(WClientWin *cwin)
+{
+	return managed_list_to_table(cwin->transient_list, NULL);
+}
+
+
+/*}}}*/
+
+
 /*{{{ Save/load */
 
 

@@ -244,12 +244,6 @@ function obj_exists(obj)
     return (obj_typename(obj)~=nil)
 end
 
---DOC
--- Attempt to close using \fnref{WRegion.close} most recently active 
--- child (\fnref{WRegion.active_sub}) of, or if this is nil, \var{reg} itself.
-function WRegion.close_sub_or_self(reg)
-    WRegion.close(reg:active_sub() or reg)
-end
 
 -- }}}
 
@@ -307,6 +301,18 @@ end
 
 
 include('ioncorelib-mplexfns')
+
+
+-- Backwards Compatibility {{{
+
+make_current_fn=make_mplex_sub_fn
+make_current_clientwin_fn=make_mplex_clientwin_fn
+
+function WRegion.close_sub_or_self(reg)
+    WRegion.close(reg:active_sub() or reg)
+end
+
+-- }}}
 
 
 -- Mark ourselves loaded.
