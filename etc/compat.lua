@@ -5,14 +5,14 @@
 -- of configuration files.
 -- 
 
-function obsolete(name, fn)
+local function obsolete(name, fn)
     function obswrap(...)
         io.stderr:write("Warning: function " .. name .. " is obsolete.\n")
         fn(unpack(arg))
     end
     _G[name]=obswrap
 end
-    
+
 -- Added 2003-04-22
 obsolete("floatframe_raise", region_raise)
 obsolete("floatframe_lower", region_lower)
