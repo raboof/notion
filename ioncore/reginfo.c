@@ -10,6 +10,7 @@
  */
 
 #include <string.h>
+#include <ctype.h>
 
 #include "common.h"
 #include "region.h"
@@ -34,6 +35,20 @@ DECLSTRUCT(RegClassInfo){
 static RegClassInfo *reg_class_infos;
 
 
+#ifdef CF_NO_STRCASECMP
+static bool my_strcaseeq(const char *s1, const char *s2) 
+{
+	while(*s1!='\0' && toupper(*s2)==toupper(*s1)){
+		s1++;
+		s2++;
+	}
+	
+	return (*s1=='\0' && *s2=='\0');
+}
+#else
+#define my_strcaseeq(X, Y) (strcasecmp(X, Y)==0)
+#endif
+
 static RegClassInfo *lookup_reg_class_info_by_name(const char *name)
 {
 	RegClassInfo *info;
@@ -42,7 +57,7 @@ static RegClassInfo *lookup_reg_class_info_by_name(const char *name)
 		return NULL;
 	
 	for(info=reg_class_infos; info!=NULL; info=info->next){
-		if(strcmp(info->descr->name, name)==0)
+		if(my_strcaseeq(info->descr->name, name))
 			return info;
 	}
 	return NULL;
