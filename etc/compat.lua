@@ -73,3 +73,7 @@ obsolete("region_get_y", function(reg) return region_geom(reg).y end)
 obsolete("region_get_w", function(reg) return region_geom(reg).w end)
 obsolete("region_get_h", function(reg) return region_geom(reg).h end)
 
+
+-- Added 2003-05-21
+obsolete("region_set_w", function(reg, w) region_request_geom(reg, {w=w}) end)
+obsolete("region_set_h", function(reg, h) region_request_geom(reg, {h=h}) end)
