@@ -105,6 +105,9 @@ static bool check_encoding()
         return FALSE;
     }
 
+    if(strcmp(ctype, "C")==0 || strcmp(ctype, "POSIX")==0)
+        return TRUE;
+    
     a=langi; 
     b=strchr(ctype, '.');
     if(b!=NULL){
