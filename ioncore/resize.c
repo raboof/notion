@@ -304,6 +304,9 @@ static void delta_moveres(WRegion *reg, int dx1, int dx2, int dy1, int dy2,
 		else
 			geom.y+=tmpdy1;
 	}
+
+	if(XOR_RESIZE)
+		res_draw_rubberband(rootwin);
 	
 	region_request_geom(reg, tmprqflags, geom, &tmpgeom);
 
@@ -317,9 +320,6 @@ static void delta_moveres(WRegion *reg, int dx1, int dx2, int dy1, int dy2,
 		tmporiggeom=tmpgeom;
 	}
 	
-	if(XOR_RESIZE)
-		res_draw_rubberband(rootwin);
-
 	res_draw_moveres(rootwin);
 	
 	if(XOR_RESIZE)
