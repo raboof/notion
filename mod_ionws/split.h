@@ -20,12 +20,18 @@
 #include <ioncore/mplex.h>
 
 
-enum WSplitType{
-    SPLIT_REGNODE,
+INTRCLASS(WSplit);
+INTRCLASS(WSplitInner);
+INTRCLASS(WSplitSplit);
+INTRCLASS(WSplitRegion);
+INTRCLASS(WSplitST);
+INTRCLASS(WSplitUnused);
+
+
+enum WSplitDir{
     SPLIT_HORIZONTAL,
     SPLIT_VERTICAL,
-    SPLIT_UNUSED,
-    SPLIT_STDISPNODE
+    SPLIT_ANY /* Should only be used as parameter to *_nextto */
 };
 
 
@@ -42,113 +48,153 @@ enum WSplitCurrent{
 };
 
 
-INTRCLASS(WSplit);
 DECLCLASS(WSplit){
     Obj obj;
-    int type;
+    int dir;
     WRectangle geom;
-    WSplit *parent;
+    WSplitInner *parent;
     
     int min_w, min_h;
     int max_w, max_h;
     int unused_w, unused_h;
 
     char *marker;
-    
-    union{
-        struct{
-            int current;
-            WSplit *tl, *br;
-        } s;
-        struct{
-            WRegion *reg;
-            int orientation;
-            int corner;
-        } d;
-        WRegion *reg;
-    } u;
 };
 
 
+DECLCLASS(WSplitInner){
+    WSplit split;
+};
+
+
+DECLCLASS(WSplitSplit){
+    WSplitInner isplit;
+    int dir;
+    WSplit *tl, *br;
+    int current;
+};
+
+
+DECLCLASS(WSplitRegion){
+    WSplit split;
+    WRegion *reg;
+};
+
+
+DECLCLASS(WSplitST){
+    WSplitRegion regnode;
+    int orientation;
+    int corner;
+};
+
+
+DECLCLASS(WSplitUnused){
+    WSplit split;
+};
+
+
+typedef struct{
+    int tltot, brtot;
+    int tlforce, brforce;
+    bool any;
+} RootwardAmount;
+
+
 typedef bool WSplitFilter(WSplit *split);
-    
 
-extern WSplit *create_split(const WRectangle *geom, int dir);
-extern WSplit *create_split_regnode(const WRectangle *geom, WRegion *reg);
-extern WSplit *create_split_unused(const WRectangle *geom);
 
-extern void split_deinit(WSplit *split);
+/* Misc. */
 
 extern int split_size(WSplit *split, int dir);
 extern int split_pos(WSplit *split, int dir);
 extern int split_other_size(WSplit *split, int dir);
 extern int split_other_pos(WSplit *split, int dir);
 
-extern Obj *split_hoist(WSplit *split);
+extern WSplitRegion *splittree_node_of(WRegion *reg);
+extern bool splittree_set_node_of(WRegion *reg, WSplitRegion *split);
 
-extern void split_mark_current(WSplit *split);
+/* Init/deinit */
 
-extern WSplit *split_current_tl(WSplit *node, int dir, WSplitFilter *filter);
-extern WSplit *split_current_br(WSplit *node, int dir, WSplitFilter *filter);
-extern WSplit *split_to_tl(WSplit *node, int dir, WSplitFilter *filter);
-extern WSplit *split_to_br(WSplit *node, int dir, WSplitFilter *filter);
-extern WSplit *split_closest_leaf(WSplit *node, WSplitFilter *filter);
+extern bool split_init(WSplit *split, const WRectangle *geom);
+extern bool splitinner_init(WSplitInner *split, const WRectangle *geom);
+extern bool splitsplit_init(WSplitSplit *split, const WRectangle *geom, 
+                            int dir);
+extern bool splitregion_init(WSplitRegion *split,const WRectangle *geom,
+                             WRegion *reg);
+extern bool splitst_init(WSplitST *split, const WRectangle *geom,
+                         WRegion *reg);
+extern bool splitunused_init(WSplitUnused *split, const WRectangle *geom);
 
-extern void split_update_bounds(WSplit *node, bool recursive);
+
+extern WSplitSplit *create_splitsplit(const WRectangle *geom, int dir);
+extern WSplitRegion *create_splitregion(const WRectangle *geom, WRegion *reg);
+extern WSplitST *create_splitst(const WRectangle *geom, WRegion *reg);
+extern WSplitUnused *create_splitunused(const WRectangle *geom);
+
+
+extern void split_deinit(WSplit *split);
+extern void splitsplit_deinit(WSplitSplit *split);
+extern void splitinner_deinit(WSplitInner *split);
+extern void splitregion_deinit(WSplitRegion *split);
+extern void splitst_deinit(WSplitST *split);
+extern void splitunused_deinit(WSplitUnused *split);
+
+/* Geometry */
+
+DYNFUN void split_update_bounds(WSplit *node, bool recursive);
+extern void splitsplit_update_geom_from_children(WSplitSplit *node);
+DYNFUN void split_do_resize(WSplit *node, const WRectangle *ng, 
+                            int hprimn, int vprimn, bool transpose);
 extern void split_resize(WSplit *node, const WRectangle *ng, 
                          int hprimn, int vprimn);
-extern bool split_do_resize(WSplit *node, const WRectangle *ng, 
-                            int hprimn, int vprimn, bool transpose,
-                            void (*justcheck)(WSplit *node, 
-                                              const WRectangle *g));
-extern void split_tree_rqgeom(WSplit *root, WSplit *node, int flags, 
-                              const WRectangle *geom, WRectangle *geomret);
+DYNFUN void splitinner_do_rqsize(WSplitInner *p, WSplit *node, 
+                                 RootwardAmount *ha, RootwardAmount *va, 
+                                 WRectangle *rg, bool tryonly);
 
-extern WSplit *split_tree_split(WSplit **root, WSplit *node, int dir, 
-                                int primn, int minsize, 
-                                WRegionSimpleCreateFn *fn,
-                                WWindow *parent);
-extern void split_tree_remove(WSplit **root, WSplit *node,
-                              bool reclaim_space, bool lazy);
+/* Split */
 
+extern void splittree_rqgeom(WSplit *root, WSplit *node, int flags, 
+                             const WRectangle *geom, WRectangle *geomret);
+
+
+DYNFUN void splitinner_replace(WSplitInner *node, WSplit *child, WSplit *what);
+extern WSplitRegion *splittree_split(WSplit **root, WSplit *node, int dir, 
+                                      int primn, int minsize, 
+                                      WRegionSimpleCreateFn *fn,
+                                      WWindow *parent);
+
+/* Remove */
+
+DYNFUN void splitinner_remove(WSplitInner *node, WSplit *child, WSplit **root,
+                              bool reclaim_space);
+extern void splittree_remove(WSplit **root, WSplit *node, bool reclaim_space);
+
+/* Tree traversal */
+
+DYNFUN WSplit *split_current_todir(WSplit *node, int dir, int primn,
+                                   WSplitFilter *filter);
+DYNFUN WSplit *splitinner_nextto(WSplitInner *node, WSplit *child,
+                                 int dir, int primn, WSplitFilter *filter);
+extern WSplit *split_nextto(WSplit *node, int dir, int primn, 
+                            WSplitFilter *filter);
+extern WSplit *split_closest_leaf(WSplit *node, WSplitFilter *filter);
+DYNFUN void splitinner_mark_current(WSplitInner *split, WSplit *child);
+extern WMPlex *splittree_find_mplex(WRegion *from);
 /* x and y are in relative to parent */
-extern WRegion *split_region_at(WSplit *node, int x, int y);
+/*DYNFUN WRegion *split_region_at(WSplit *node, int x, int y);*/
 
-extern WSplit *split_tree_node_of(WRegion *reg);
-extern WSplit *split_tree_split_of(WRegion *reg);
-extern WMPlex *split_tree_find_mplex(WRegion *from);
-
-extern bool split_tree_set_node_of(WRegion *reg, WSplit *split);
+/* Transpose */
 
 extern void split_transpose(WSplit *split);
 extern void split_transpose_to(WSplit *split, const WRectangle *geom);
 
-extern void split_update_geom_from_children(WSplit *node);
+/* Markers */
 
 extern const char *split_get_marker(WSplit *node);
 extern bool split_set_marker(WSplit *node, const char *s);
 
-#define CHKNODE_(NODE)                                             \
-    assert(((NODE)->type==SPLIT_REGNODE && (NODE)->u.reg!=NULL) || \
-           ((NODE)->type==SPLIT_STDISPNODE) ||                     \
-           ((NODE)->type==SPLIT_UNUSED) ||                         \
-           (((NODE)->type==SPLIT_VERTICAL ||                       \
-             (NODE)->type==SPLIT_HORIZONTAL)                       \
-            && ((NODE)->u.s.tl!=NULL && (NODE)->u.s.br!=NULL)))
+/* Save support */
 
-
-#define CHKNODE(NODE)                                               \
-    assert((NODE)->type==SPLIT_REGNODE ||                           \
-           (NODE)->type==SPLIT_STDISPNODE ||                        \
-           (NODE)->type==SPLIT_UNUSED ||                            \
-           (NODE)->type==SPLIT_VERTICAL ||                          \
-           (NODE)->type==SPLIT_HORIZONTAL);                         \
-    assert((NODE)->type!=SPLIT_REGNODE || (NODE)->u.reg!=NULL);     \
-    /*assert((NODE)->type!=SPLIT_STDISPNODE || (NODE)->u.reg!=NULL);*/  \
-    assert((NODE)->type!=SPLIT_VERTICAL || (NODE)->u.s.tl!=NULL);   \
-    assert((NODE)->type!=SPLIT_VERTICAL || (NODE)->u.s.br!=NULL);   \
-    assert((NODE)->type!=SPLIT_HORIZONTAL || (NODE)->u.s.tl!=NULL); \
-    assert((NODE)->type!=SPLIT_HORIZONTAL || (NODE)->u.s.br!=NULL);
-            
+extern bool split_get_config(WSplit *node, ExtlTab *ret);
 
 #endif /* ION_MOD_IONWS_SPLIT_H */

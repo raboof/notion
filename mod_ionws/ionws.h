@@ -25,7 +25,7 @@ INTRCLASS(WIonWS);
 DECLCLASS(WIonWS){
     WGenWS genws;
     WSplit *split_tree;
-    WSplit *stdispnode;
+    WSplitST *stdispnode;
     WRegion *managed_list;
     WRegionSimpleCreateFn *create_frame_fn;
 };
@@ -38,7 +38,7 @@ extern WIonWS *create_ionws(WWindow *parent, const WFitParams *fp,
 extern WIonWS *create_ionws_simple(WWindow *parent, const WFitParams *fp);
 extern void ionws_deinit(WIonWS *ws);
 
-extern ExtlTab ionws_resize_tree(WIonWS *ws, Obj *node, ExtlTab g);
+extern ExtlTab ionws_resize_tree(WIonWS *ws, WSplit *node, ExtlTab g);
 
 extern WRegion *ionws_current(WIonWS *ws);
 extern WRegion *ionws_next_to(WIonWS *ws, WRegion *reg, const char *str);

@@ -11,8 +11,10 @@
 
 #include <limits.h>
 #include <math.h>
+#include <string.h>
 
 #include <libtu/minmax.h>
+#include <libtu/objp.h>
 
 #include <ioncore/common.h>
 #include <ioncore/global.h>
@@ -128,12 +130,12 @@ static bool mrsh_layout_extl(ExtlFn fn, PlacementParams *p)
                 goto err;
             }
             
-            if(p->res_node->type==SPLIT_UNUSED){
+            if(OBJ_IS(p->res_node, WSplitUnused)){
                 if(!extl_table_gets_t(t, "res_config", &(p->res_config))){
                     WARN_FUNC("Malfunctioning hook; config missing.");
                     goto err;
                 }
-            }else if(p->res_node->type!=SPLIT_REGNODE){
+            }else if(!OBJ_IS(p->res_node, WSplitRegion)){
                 WARN_FUNC("Malfunctioning hook; not SPLIT_UNUSED or "
                           "SPLIT_REGNODE");
                 goto err;
@@ -152,34 +154,34 @@ err:
 }
 
 
-static bool fallback_layout_(WSplit *node, PlacementParams *p)
+static bool plainregionfilter(WSplit *node)
 {
-    if(node==NULL)
-        return FALSE;
-    
-    if(node->type==SPLIT_UNUSED){
-        p->res_config=extl_create_table();
-        if(p->res_config==extl_table_none())
-            return FALSE;
-        extl_table_sets_o(p->res_config, "reg", (Obj*)(p->frame));
-        p->res_node=node;
-        return TRUE;
-    }else if(node->type==SPLIT_REGNODE){
-        p->res_node=node;
-        return TRUE;
-    }else if(node->type==SPLIT_VERTICAL || node->type==SPLIT_HORIZONTAL){
-        if(fallback_layout_(node->u.s.tl, p))
-            return TRUE;
-        if(fallback_layout_(node->u.s.br, p))
-            return TRUE;
-    }
-    return FALSE;
+    return (strcmp(OBJ_TYPESTR(node), "WSplitRegion")==0);
+}
+
+
+static bool fallback_filter(WSplit *node)
+{
+    return (OBJ_IS(node, WSplitUnused) || plainregionfilter(node));
 }
 
 
 static bool fallback_layout(PlacementParams *p)
 {
-    return fallback_layout_(p->ws->ionws.split_tree, p);
+    if(p->ws->ionws.split_tree==NULL)
+        return FALSE;
+    
+    p->res_node=split_current_todir(p->ws->ionws.split_tree, SPLIT_ANY,
+                                    PRIMN_ANY, fallback_filter);
+
+    if(p->res_node!=NULL && OBJ_IS(p->res_node, WSplitUnused)){
+        p->res_config=extl_create_table();
+        if(p->res_config==extl_table_none())
+            return FALSE;
+        extl_table_sets_o(p->res_config, "reg", (Obj*)(p->frame));
+    }
+    
+    return (p->res_node!=NULL);
 }
 
 
@@ -193,10 +195,10 @@ static bool do_replace(WAutoWS *ws, WFrame *frame, WClientWin *cwin,
                        PlacementParams *rs)
 {
     WSplit *u=rs->res_node;
-    WSplit *p=u->parent;
+    WSplitInner *p=rs->res_node->parent;
     WSplit *node=ionws_load_node(&(ws->ionws), &(u->geom), rs->res_config);
     
-    assert(u->type==SPLIT_UNUSED);
+    assert(OBJ_IS(u, WSplitUnused));
     
     if(node==NULL){
         WARN_FUNC("Malfunctioning hook #1.");
@@ -212,14 +214,9 @@ static bool do_replace(WAutoWS *ws, WFrame *frame, WClientWin *cwin,
     if(p==NULL){
         assert(ws->ionws.split_tree==u);
         ws->ionws.split_tree=node;
-    }else if(p->u.s.tl==u){
-        p->u.s.tl=node;
     }else{
-        assert(p->u.s.br==u);
-        p->u.s.br=node;
+        splitinner_replace(p, u, node);
     }
-    
-    node->parent=p;
     
     u->parent=NULL;
     ioncore_defer_destroy((Obj*)u);
@@ -279,14 +276,14 @@ bool autows_manage_clientwin(WAutoWS *ws, WClientWin *cwin,
                     gflags&=~REGION_RQGEOM_WEAK_H;
                 }
                 
-                split_tree_rqgeom(*tree, rs.res_node, gflags, &grq, NULL);
+                splittree_rqgeom(*tree, rs.res_node, gflags, &grq, NULL);
             }
             
-            if(rs.res_node->type==SPLIT_UNUSED){
+            if(OBJ_IS(rs.res_node, WSplitUnused)){
                 if(do_replace(ws, frame, cwin, &rs))
                     target=(WRegion*)frame;
-            }else if(rs.res_node->type==SPLIT_REGNODE){
-                target=rs.res_node->u.reg;
+            }else if(OBJ_IS(rs.res_node, WSplitRegion)){
+                target=((WSplitRegion*)rs.res_node)->reg;
             }else{
                 WARN_FUNC("Bug in placement code.");
             }

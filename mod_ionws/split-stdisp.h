@@ -14,8 +14,8 @@
 
 #include "split.h"
 
-extern bool split_try_sink_stdisp(WSplit *node, bool iterate, bool force);
-extern bool split_try_unsink_stdisp(WSplit *node, bool iterate, bool force);
-extern bool split_regularise_stdisp(WSplit *stdisp);
+extern bool split_try_sink_stdisp(WSplitSplit *node, bool iterate, bool force);
+extern bool split_try_unsink_stdisp(WSplitSplit *node, bool iterate, bool force);
+extern bool split_regularise_stdisp(WSplitST *stdisp);
 
 #endif /* ION_MOD_IONWS_SPLIT_STDISP_H */

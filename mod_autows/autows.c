@@ -53,7 +53,7 @@ static WRegion *create_frame_autows(WWindow *parent, const WFitParams *fp)
 
 static bool autows_create_initial_unused(WAutoWS *ws)
 {
-    ws->ionws.split_tree=create_split_unused(&REGION_GEOM(ws));
+    ws->ionws.split_tree=(WSplit*)create_splitunused(&REGION_GEOM(ws));
     return (ws->ionws.split_tree!=NULL);
 }
 
@@ -95,14 +95,14 @@ void autows_deinit(WAutoWS *ws)
 }
 
 
-static WSplit *get_node_check(WAutoWS *ws, WRegion *reg)
+static WSplitRegion *get_node_check(WAutoWS *ws, WRegion *reg)
 {
-    WSplit *node;
+    WSplitRegion *node;
 
     if(reg==NULL)
         return NULL;
     
-    node=split_tree_node_of(reg);
+    node=splittree_node_of(reg);
     
     if(node==NULL || REGION_MANAGER(reg)!=(WRegion*)ws)
         return NULL;
@@ -120,10 +120,11 @@ static void autows_do_managed_remove(WAutoWS *ws, WRegion *reg)
 }
 
 
-static bool nostdispfilter(WSplit *node)
+static bool plainregionfilter(WSplit *node)
 {
-    return (node->type==SPLIT_REGNODE && node->u.reg!=NULL);
+    return (strcmp(OBJ_TYPESTR(node), "WSplitRegion")==0);
 }
+
 
 
 void autows_managed_remove(WAutoWS *ws, WRegion *reg)
@@ -131,19 +132,26 @@ void autows_managed_remove(WAutoWS *ws, WRegion *reg)
     bool ds=OBJ_IS_BEING_DESTROYED(ws);
     bool act=REGION_IS_ACTIVE(reg);
     bool mcf=region_may_control_focus((WRegion*)ws);
-    WSplit *other=NULL, *node=get_node_check(ws, reg);
+    WSplitRegion *other=NULL, *node=get_node_check(ws, reg);
     
-    assert(node!=NULL);
-
     autows_do_managed_remove(ws, reg);
 
-    other=split_closest_leaf(node, nostdispfilter);
+    if(node==NULL)
+        return;
 
-    if(ws->ionws.split_tree!=NULL)
-        split_tree_remove(&(ws->ionws.split_tree), node, !ds, FALSE);
+    other=(WSplitRegion*)split_closest_leaf((WSplit*)node, 
+                                            plainregionfilter);
+
+    if(ws->ionws.split_tree!=NULL){
+        if(node==(WSplitRegion*)(ws->ionws.stdispnode))
+            ws->ionws.stdispnode=NULL;
+        splittree_remove(&(ws->ionws.split_tree), (WSplit*)node, !ds);
+    }
     
     if(!ds){
         if(other==NULL){
+#warning "Dock reinitissä"            
+#if 0
             if(ws->ionws.split_tree!=NULL){
                 ioncore_defer_destroy((Obj*)(ws->ionws.split_tree));
                 ws->ionws.split_tree=NULL;
@@ -155,6 +163,7 @@ void autows_managed_remove(WAutoWS *ws, WRegion *reg)
                 warn("Unable to re-initialise workspace. Destroying.");
                 ioncore_defer_destroy((Obj*)ws);
             }
+#endif
 
             if(act && mcf){
                 /* We don't want to give the stdisp focus, even if one exists. 
@@ -163,7 +172,7 @@ void autows_managed_remove(WAutoWS *ws, WRegion *reg)
                 genws_fallback_focus((WGenWS*)ws, FALSE);
             }
         }else if(act && mcf){
-            region_set_focus(other->u.reg);
+            region_set_focus(other->reg);
         }
     }
 }
