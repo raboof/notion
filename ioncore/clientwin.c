@@ -349,6 +349,24 @@ static void get_transient_for(WClientWin *cwin, WAttachParams *param)
 }
 
 
+static WClientWin *postmanage_check(WClientWin *cwin,
+									XWindowAttributes *attr)
+{
+	/* Check that the window exists. The previous check and selectinput
+	 * do not seem to catch all cases of window destroyal.
+	 */
+	XSync(wglobal.dpy, False);
+	
+	if(XGetWindowAttributes(wglobal.dpy, cwin->win, attr))
+		return cwin;
+	
+	warn("Window %#x disappeared", cwin->win);
+	
+	clientwin_destroyed(cwin);
+	return NULL;
+}
+
+
 /* This is called when a window is mapped on the root window.
  * We want to check if we should manage the window and how and
  * act appropriately.
@@ -412,7 +430,8 @@ again:
 	}
 
 	if(!XGetWindowAttributes(wglobal.dpy, win, &attr)){
-		warn("Window disappeared");
+		if(!(mflags&MANAGE_INITIAL))
+			warn("Window %#x disappeared", win);
 		goto fail2;
 	}
 	
@@ -472,24 +491,12 @@ again:
 		}
 	}
 	
-	/* Check that the window exists. The previous check and selectinput
-	 * do not seem to catch all cases of window destroyal.
-	 */
-	XSync(wglobal.dpy, False);
-	
-	if(XGetWindowAttributes(wglobal.dpy, win, &attr))
-		return cwin;
-	
-	warn("Window disappeared");
-	
-	clientwin_destroyed(cwin);
-	return NULL;
+	return postmanage_check(cwin, &attr);
 
 failure:
 	clientwin_unmapped(cwin);
 
 fail2:
-
 	XSelectInput(wglobal.dpy, win, 0);
 	return NULL;
 }
@@ -1253,7 +1260,7 @@ WRegion *clientwin_load(WWindow *par, WRectangle geom, ExtlTab tab)
 	/* Found it! */
 	
 	if(!XGetWindowAttributes(wglobal.dpy, win, &attr)){
-		warn("Window disappeared");
+		warn("Window %#x disappeared", win);
 		return NULL;
 	}
 	
@@ -1278,7 +1285,7 @@ WRegion *clientwin_load(WWindow *par, WRectangle geom, ExtlTab tab)
 		XResizeWindow(wglobal.dpy, win, geom.w, geom.h);
 	}
 
-	return (WRegion*)cwin;
+	return (WRegion*)postmanage_check(cwin, &attr);
 }
 
 
