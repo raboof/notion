@@ -142,10 +142,10 @@ static bool extl_cpcall(lua_State *st, ExtlCPCallFn *fn, void *ptr)
 /*{{{ Obj userdata handling -- unsafe */
 
 
-static int obj_cache_ref=LUA_NOREF;
+static int owned_cache_ref=LUA_NOREF;
 
 
-static Obj *extl_get_wobj(lua_State *st, int pos)
+static Obj *extl_get_obj(lua_State *st, int pos)
 {
     Watch *watch;
     int val;
@@ -200,8 +200,15 @@ static void extl_push_obj(lua_State *st, Obj *obj)
     }
 
     if(obj->flags&OBJ_EXTL_CACHED){
-        lua_pushlightuserdata(st, obj);
-        lua_rawget(st, LUA_REGISTRYINDEX);
+        if(obj->flags&OBJ_EXTL_OWNED){
+            lua_rawgeti(st, LUA_REGISTRYINDEX, owned_cache_ref);
+            lua_pushlightuserdata(st, obj);
+            lua_rawget(st, -2);
+            lua_remove(st, -2); /* owned_cache */
+        }else{
+            lua_pushlightuserdata(st, obj);
+            lua_rawget(st, LUA_REGISTRYINDEX);
+        }
         if(lua_isuserdata(st, -1)){
             D(fprintf(stderr, "found %p cached\n", obj));
             return;
@@ -226,9 +233,17 @@ static void extl_push_obj(lua_State *st, Obj *obj)
         lua_setmetatable(st, -2);
         
         /* Store in cache */
-        lua_pushlightuserdata(st, obj);
-        lua_pushvalue(st, -2);
-        lua_rawset_check(st, LUA_REGISTRYINDEX);
+        if(obj->flags&OBJ_EXTL_OWNED){
+            lua_rawgeti(st, LUA_REGISTRYINDEX, owned_cache_ref);
+            lua_pushlightuserdata(st, obj);
+            lua_pushvalue(st, -3);  /* the WWatch */
+            lua_rawset_check(st, -3);
+            lua_pop(st, 1); /* owned_cache */
+        }else{
+            lua_pushlightuserdata(st, obj);
+            lua_pushvalue(st, -2); /* the WWatch */
+            lua_rawset_check(st, LUA_REGISTRYINDEX);
+        }
         obj->flags|=OBJ_EXTL_CACHED;
     }
 }
@@ -240,22 +255,28 @@ static void extl_push_obj(lua_State *st, Obj *obj)
 static int extl_obj_gc_handler(lua_State *st)
 {
     Watch *watch;
+    Obj *obj;
     
-    if(extl_get_wobj(st, 1)==NULL)
+    obj=extl_get_obj(st, 1);
+    
+    if(obj==NULL){
+        /* This should not happen, actually. Our object cache should
+         * hold references to all objects seen on the Lua side until
+         * they are destroyed.
+         */
         return 0;
+    }
 
-    /* This should not happen, actually. Our object cache should
-     * hold references to all objects seen on the Lua side until
-     * they are destroyed.
-     */
-    
     watch=(Watch*)lua_touserdata(st, 1);
     
     if(watch!=NULL){
-        if(watch->obj!=NULL)
-            watch->obj->flags&=~OBJ_EXTL_CACHED;
+        assert(watch->obj==obj);
+        obj->flags&=~OBJ_EXTL_CACHED;
         watch_reset(watch);
     }
+    
+    if(obj->flags&OBJ_EXTL_OWNED)
+        destroy_obj(obj);
     
     return 0;
 }
@@ -398,12 +419,12 @@ static bool extl_init_obj_info(lua_State *st)
     
     /* Create cache */
     lua_newtable(st);
-    /*lua_newtable(st);
+    lua_newtable(st);
     lua_pushstring(st, "__mode");
     lua_pushstring(st, "v");
     lua_rawset_check(st, -3);
-    lua_setmetatable(st, -2);*/
-    obj_cache_ref=lua_ref(st, -1);
+    lua_setmetatable(st, -2);
+    owned_cache_ref=lua_ref(st, -1);
 
     lua_pushcfunction(st, extl_obj_typename);
     lua_setglobal(st, "obj_typename");
@@ -643,7 +664,7 @@ static bool extl_stack_get(lua_State *st, int pos, char type, bool copystring,
     }
 
     if(type=='o'){
-        Obj *obj=extl_get_wobj(st, pos);
+        Obj *obj=extl_get_obj(st, pos);
         if(obj==NULL)
             return FALSE;
         if(valret){

@@ -180,6 +180,9 @@ static bool resize_handler(WRegion *reg, XEvent *xev)
 /*{{{ Resize timer */
 
 
+static WTimer *resize_timer=NULL;
+
+
 static void tmr_end_resize(WTimer *unused)
 {
     WMoveresMode *mode=moveres_mode(NULL);
@@ -188,7 +191,30 @@ static void tmr_end_resize(WTimer *unused)
 }
 
 
-static WTimer resize_timer=TIMER_INIT(tmr_end_resize);
+static bool setup_resize_timer()
+{
+    if(resize_timer==NULL){
+        resize_timer=create_timer();
+        if(resize_timer==NULL){
+            warn_err();
+            return FALSE;
+        }
+    }
+    
+    timer_set(resize_timer, ioncore_g.resize_delay, tmr_end_resize);
+    
+    return TRUE;
+}
+
+
+static void reset_resize_timer()
+{
+    if(resize_timer!=NULL){
+        timer_reset(resize_timer);
+        destroy_obj((Obj*)resize_timer);
+        resize_timer=NULL;
+    }
+}
 
 
 /*}}}*/
@@ -255,14 +281,15 @@ void moveresmode_resize(WMoveresMode *mode,
     int wu=0, hu=0;
     int accel_mode=0;
     
+    if(!setup_resize_timer())
+        return;
+    
     accel_mode=3*limit_and_encode_mode(&left, &right, &top, &bottom);
     resize_units(mode, &wu, &hu);
     moveresmode_accel(mode, &wu, &hu, accel_mode);
 
     moveresmode_delta_resize(mode, -left*wu, right*wu, -top*hu, bottom*hu, 
                              NULL);
-    
-    timer_set(&resize_timer, ioncore_g.resize_delay);
 }
 
 
@@ -281,14 +308,15 @@ EXTL_EXPORT_MEMBER
 void moveresmode_move(WMoveresMode *mode, int horizmul, int vertmul)
 {
     int accel_mode=0, dummy=0;
+
+    if(!setup_resize_timer())
+        return;
     
     accel_mode=1+3*limit_and_encode_mode(&horizmul, &vertmul, &dummy, &dummy);
     moveresmode_accel(mode, &horizmul, &vertmul, accel_mode);
 
     moveresmode_delta_resize(mode, horizmul, horizmul, vertmul, vertmul, 
                              NULL);
-    
-    timer_set(&resize_timer, ioncore_g.resize_delay);
 }
 
 
@@ -301,7 +329,7 @@ void moveresmode_finish(WMoveresMode *mode)
 {
     WRegion *reg=moveresmode_target(mode);
     if(moveresmode_do_end(mode, TRUE)){
-        timer_reset(&resize_timer);
+        reset_resize_timer();
         region_warp(reg);
         ioncore_grab_remove(resize_handler);
     }
@@ -317,7 +345,7 @@ void moveresmode_cancel(WMoveresMode *mode)
 {
     WRegion *reg=moveresmode_target(mode);
     if(moveresmode_do_end(mode, FALSE)){
-        timer_reset(&resize_timer);
+        reset_resize_timer();
         region_warp(reg);
         ioncore_grab_remove(resize_handler);
     }
@@ -347,12 +375,13 @@ WMoveresMode *frame_begin_moveres(WFrame *frame)
     if(mode==NULL)
         return NULL;
     
+    if(!setup_resize_timer())
+        return NULL;
+
     accel_reset();
     
     ioncore_grab_establish((WRegion*)frame, resize_handler,
                            (GrabKilledHandler*)cancel_moveres, 0);
-    
-    timer_set(&resize_timer, ioncore_g.resize_delay);
     
     return mode;
     

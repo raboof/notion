@@ -13,6 +13,8 @@
 #include <limits.h>
 
 #include <libtu/minmax.h>
+#include <libtu/objp.h>
+#include <libtu/obj.h>
 #include <ioncore/common.h>
 #include <ioncore/window.h>
 #include <ioncore/global.h>
@@ -24,7 +26,6 @@
 #include <ioncore/signal.h>
 #include <ioncore/focus.h>
 #include <ioncore/event.h>
-#include <libtu/objp.h>
 #include <ioncore/region-iter.h>
 #include "menu.h"
 #include "main.h"
@@ -840,7 +841,18 @@ bool menu_rqclose(WMenu *menu)
 
 static int scroll_time=20;
 static int scroll_amount=3;
-static WTimer scroll_timer=TIMER_INIT(NULL);
+static WTimer *scroll_timer=NULL;
+static Watch scroll_watch=WATCH_INIT;
+
+
+static void reset_scroll_timer()
+{
+    if(scroll_timer!=NULL){
+        destroy_obj((Obj*)scroll_timer);
+        scroll_timer=NULL;
+    }
+    watch_reset(&scroll_watch);
+}
 
 
 /*EXTL_DOC
@@ -923,21 +935,33 @@ static void scroll_left_or_up(WMenu *menu, int xd, int yd)
 }
 
 
-static void scroll_left(WTimer *timer, WMenu *menu)
+static void scroll_left(WTimer *timer)
 {
-    menu=menu_tail(menu);
-    scroll_left_or_up(menu, right_diff(menu), 0);
-    if(right_diff(menu)>0)
-        timer_set_param(timer, scroll_time, (Obj*)menu);
+    WMenu *menu=(WMenu*)scroll_watch.obj;
+    if(menu!=NULL){
+        menu=menu_tail(menu);
+        scroll_left_or_up(menu, right_diff(menu), 0);
+        if(right_diff(menu)>0){
+            timer_set(timer, scroll_time, (WTimerHandler*)scroll_left);
+            return;
+        }
+    }
+    reset_scroll_timer();
 }
 
 
-static void scroll_up(WTimer *timer, WMenu *menu)
+static void scroll_up(WTimer *timer)
 {
-    menu=menu_tail(menu);
-    scroll_left_or_up(menu, 0, bottom_diff(menu));
-    if(bottom_diff(menu)>0)
-        timer_set_param(timer, scroll_time, (Obj*)menu);
+    WMenu *menu=(WMenu*)scroll_watch.obj;
+    if(menu!=NULL){
+        menu=menu_tail(menu);
+        scroll_left_or_up(menu, 0, bottom_diff(menu));
+        if(bottom_diff(menu)>0){
+            timer_set(timer, scroll_time, (WTimerHandler*)scroll_up);
+            return;
+        }
+    }
+    reset_scroll_timer();
 }
 
 
@@ -955,27 +979,39 @@ static void scroll_right_or_down(WMenu *menu, int xd, int yd)
 }
 
 
-static void scroll_right(WTimer *timer, WMenu *menu)
+static void scroll_right(WTimer *timer)
 {
-    menu=menu_head(menu);
-    scroll_right_or_down(menu, left_diff(menu), 0);
-    if(left_diff(menu)>0)
-        timer_set_param(timer, scroll_time, (Obj*)menu);
+    WMenu *menu=(WMenu*)scroll_watch.obj;
+    if(menu!=NULL){
+        menu=menu_head(menu);
+        scroll_right_or_down(menu, left_diff(menu), 0);
+        if(left_diff(menu)>0){
+            timer_set(timer, scroll_time, (WTimerHandler*)scroll_right);
+            return;
+        }
+    }
+    reset_scroll_timer();
 }
 
 
-static void scroll_down(WTimer *timer, WMenu *menu)
+static void scroll_down(WTimer *timer)
 {
-    menu=menu_head(menu);
-    scroll_right_or_down(menu, 0, top_diff(menu));
-    if(top_diff(menu)>0)
-        timer_set_param(timer, scroll_time, (Obj*)menu);
+    WMenu *menu=(WMenu*)scroll_watch.obj;
+    if(menu!=NULL){
+        menu=menu_head(menu);
+        scroll_right_or_down(menu, 0, top_diff(menu));
+        if(top_diff(menu)>0){
+            timer_set(timer, scroll_time, (WTimerHandler*)scroll_down);
+            return;
+        }
+    }
+    reset_scroll_timer();
 }
 
 
 static void end_scroll(WMenu *menu)
 {
-    timer_reset(&(scroll_timer));
+    reset_scroll_timer();
 }
 
 
@@ -983,8 +1019,8 @@ static void check_scroll(WMenu *menu, int x, int y)
 {
     WRegion *parent=REGION_PARENT(menu);
     int rx, ry;
-    void (*fn)(void)=NULL;
-    
+    WTimerHandler *fn=NULL;
+     
     if(!menu->pmenu_mode)
         return;
     
@@ -997,14 +1033,14 @@ static void check_scroll(WMenu *menu, int x, int y)
     x-=rx;
     y-=ry;
     
-    if(x<=1){
-        fn=(void(*)(void))scroll_right;
-    }else if(y<=1){
-        fn=(void(*)(void))scroll_down;
-    }else if(x>=REGION_GEOM(parent).w-1){
-        fn=(void(*)(void))scroll_left;
-    }else if(y>=REGION_GEOM(parent).h-1){
-        fn=(void(*)(void))scroll_up;
+    if(x<=2){
+        fn=(WTimerHandler*)scroll_right;
+    }else if(y<=2){
+        fn=(WTimerHandler*)scroll_down;
+    }else if(x>=REGION_GEOM(parent).w-2){
+        fn=(WTimerHandler*)scroll_left;
+    }else if(y>=REGION_GEOM(parent).h-2){
+        fn=(WTimerHandler*)scroll_up;
     }else{
         end_scroll(menu);
         return;
@@ -1012,13 +1048,22 @@ static void check_scroll(WMenu *menu, int x, int y)
     
     assert(fn!=NULL);
     
+    if(scroll_timer!=NULL){
+        if(scroll_timer->handler==(WTimerHandler*)fn &&
+           timer_is_set(scroll_timer)){
+            return;
+        }
+    }
+    
     menu=menu_head(menu);
 
     while(menu!=NULL){
         if(rectangle_contains(&REGION_GEOM(menu), x, y)){
-            if(scroll_timer.handler!=fn || !timer_is_set(&scroll_timer)){
-                scroll_timer.handler=fn;
-                timer_set_param(&scroll_timer, scroll_time, (Obj*)menu);
+            if(scroll_timer==NULL)
+                scroll_timer=create_timer();
+            if(scroll_timer!=NULL){
+                watch_setup(&scroll_watch, (Obj*)menu, NULL);
+                timer_set(scroll_timer, scroll_time, fn);
             }
             return;
         }

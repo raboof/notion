@@ -23,7 +23,7 @@
 /*{{{ Previous active region tracking */
 
 
-static Watch prev_watch=WWATCH_INIT;
+static Watch prev_watch=WATCH_INIT;
 
 
 static void prev_watch_handler(Watch *watch, WRegion *prev)
@@ -106,7 +106,7 @@ WRegion *ioncore_goto_previous()
 /*{{{ Await focus */
 
 
-static Watch await_watch=WWATCH_INIT;
+static Watch await_watch=WATCH_INIT;
 
 
 static void await_watch_handler(Watch *watch, WRegion *prev)

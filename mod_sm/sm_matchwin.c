@@ -28,9 +28,7 @@
 #define TIME_OUT 60000
 
 static WWinMatch *match_list=NULL;
-
-static void mod_sm_purge_matches(WTimer *timer);
-static WTimer purge_timer=TIMER_INIT(mod_sm_purge_matches);
+static WTimer *purge_timer=NULL;
 
 
 char *mod_sm_get_window_role(Window window)
@@ -137,6 +135,10 @@ static void free_win_match(WWinMatch *match)
 
 static void mod_sm_purge_matches(WTimer *timer)
 {
+    assert(timer==purge_timer);
+    purge_timer=NULL;
+    destroy_obj((Obj*)timer);
+    
 #ifdef DEBUG
     warn("purging remaining matches\n");
 #endif
@@ -146,7 +148,10 @@ static void mod_sm_purge_matches(WTimer *timer)
 
 void mod_sm_start_purge_timer()
 {
-    timer_set(&purge_timer, TIME_OUT);
+    if(purge_timer==NULL)
+        purge_timer=create_timer();
+    if(purge_timer!=NULL)
+        timer_set(purge_timer, TIME_OUT, mod_sm_purge_matches);
 }
 
 void mod_sm_register_win_match(WWinMatch *match)

@@ -38,7 +38,7 @@ static WMotionHandler *p_motion_begin_handler=NULL;
 static GrabHandler *p_key_handler=NULL;
 static GrabKilledHandler *p_killed_handler=NULL;
 
-static Watch p_regwatch=WWATCH_INIT, p_subregwatch=WWATCH_INIT;
+static Watch p_regwatch=WATCH_INIT, p_subregwatch=WATCH_INIT;
 
 #define p_reg ((WRegion*)p_regwatch.obj)
 #define p_subreg ((WRegion*)p_subregwatch.obj)

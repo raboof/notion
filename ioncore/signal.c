@@ -18,6 +18,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include <libtu/objp.h>
 #include "common.h"
 #include "property.h"
 #include "signal.h"
@@ -31,7 +32,12 @@ static int kill_sig=0;
 static int wait_sig=0;
 #endif
 static bool had_tmr=FALSE;
-static WTimer queue=TIMER_INIT(NULL);
+
+/*{{{ Timers */
+
+
+static WTimer *queue=NULL;
+
 
 #define TIMEVAL_LATER(a, b) \
     ((a.tv_sec > b.tv_sec) || \
@@ -43,20 +49,20 @@ static void do_timer_set()
 {
     struct itimerval val={{0, 0}, {0, 0}};
     
-    if(queue.next==NULL){
+    if(queue==NULL){
         setitimer(ITIMER_REAL, &val, NULL);
         return;
     }
 
     /* Subtract queue time from current time, don't go below zero */
     gettimeofday(&(val.it_value), NULL);
-    if(TIMEVAL_LATER((queue.next)->when, val.it_value)){
-        if(queue.next->when.tv_usec<val.it_value.tv_usec){
-            queue.next->when.tv_usec+=1000000;
-            queue.next->when.tv_sec--;
+    if(TIMEVAL_LATER((queue)->when, val.it_value)){
+        if(queue->when.tv_usec<val.it_value.tv_usec){
+            queue->when.tv_usec+=1000000;
+            queue->when.tv_sec--;
         }
-        val.it_value.tv_usec=queue.next->when.tv_usec-val.it_value.tv_usec;
-        val.it_value.tv_sec=queue.next->when.tv_sec-val.it_value.tv_sec;
+        val.it_value.tv_usec=queue->when.tv_usec-val.it_value.tv_usec;
+        val.it_value.tv_sec=queue->when.tv_sec-val.it_value.tv_sec;
         if(val.it_value.tv_usec<0)
             val.it_value.tv_usec=0;
         if(val.it_value.tv_sec<0)
@@ -107,19 +113,25 @@ bool ioncore_check_signals()
     }
 
     /* Check for timer events in the queue */
-    while(had_tmr && queue.next!=NULL){
+    while(had_tmr && queue!=NULL){
         had_tmr=FALSE;
         ret=TRUE;
         gettimeofday(&current_time, NULL);
-        while(queue.next!=NULL){
-            if((TIMEVAL_LATER(current_time, queue.next->when))){
-                Obj *obj;
-                q=queue.next;
-                queue.next=q->next;
+        while(queue!=NULL){
+            if(TIMEVAL_LATER(current_time, queue->when)){
+                q=queue;
+                queue=q->next;
                 q->next=NULL;
-                obj=q->paramwatch.obj;
-                watch_reset(&(q->paramwatch));
-                q->handler(q, obj);
+                if(q->handler!=NULL){
+                    WTimerHandler *handler=q->handler;
+                    q->handler=NULL;
+                    handler(q);
+                }else if(q->extl_handler!=extl_fn_none()){
+                    ExtlFn fn=q->extl_handler;
+                    q->extl_handler=extl_fn_none();
+                    extl_call(fn, NULL, NULL);
+                    extl_unref_fn(fn);
+                }
             }else{
                 break;
             }
@@ -142,22 +154,14 @@ static void add_to_current_time(struct timeval *when, uint msecs)
 }
 
 
-void kill_timer(Watch *watch, Obj *obj)
-{
-    WTimer *tmr;
-    warn("Timer handler parameter destroyed.");
-    for(tmr=queue.next; tmr!=NULL; tmr=tmr->next){
-        if(&(tmr->paramwatch)==watch){
-            timer_reset(tmr);
-        }
-    }
-}
-
-
+/*EXTL_DOC
+ * Is timer active?
+ */
+EXTL_EXPORT_MEMBER
 bool timer_is_set(WTimer *timer)
 {
     WTimer *tmr;
-    for(tmr=queue.next; tmr!=NULL; tmr=tmr->next){
+    for(tmr=queue; tmr!=NULL; tmr=tmr->next){
         if(tmr==timer)
             return TRUE;
     }
@@ -165,77 +169,120 @@ bool timer_is_set(WTimer *timer)
 }
 
 
-void timer_set_param(WTimer *timer, uint msecs, Obj *obj)
+static void timer_do_set(WTimer *timer, uint msecs, WTimerHandler *handler,
+                         ExtlFn fn)
 {
-    WTimer *q;
-
-    /* Check for an existing timer event in the queue */
-    q=&queue;
-    while(q->next!=NULL){
-        if(q->next==timer){
-            q->next=timer->next;
-            break;
-        }
-        q=q->next;
-    }
+    WTimer *q, **qptr;
+    bool set=FALSE;
+    
+    timer_reset(timer);
 
     /* Initialize the new queue timer event */
     add_to_current_time(&(timer->when), msecs);
     timer->next=NULL;
+    timer->handler=handler;
+    timer->extl_handler=fn;
 
     /* Add timerevent in place to queue */
-    q=&queue;
-    for(;;){
-        if(q->next==NULL){
-            q->next=timer;
-            break;
-        }
-        if(TIMEVAL_LATER(timer->when, q->next->when)){
-            q=q->next;
-            continue;
-        }else{
-            timer->next=q->next;
-            q->next=timer;
-            break;
-        }
-    }
-
-    do_timer_set();
+    q=queue;
+    qptr=&queue;
     
-    if(obj!=NULL)
-        watch_setup(&(timer->paramwatch), obj, kill_timer);
-}
-
-
-void timer_set(WTimer *timer, uint msecs)
-{
-    timer_set_param(timer, msecs, NULL);
-}
-
-
-void timer_reset(WTimer *timer)
-{
-    WTimer *q;
-    WTimer *tmpq;
-
-    watch_reset(&(timer->paramwatch));
-    
-    q=&queue;
-    while(q->next!=NULL){
-        tmpq=q->next;
-        if(q->next==timer){
-            q->next=timer->next;
-            timer->next=NULL;
-            /*free(tmpq);*/
-            do_timer_set();
-            return;
-        }
+    while(q!=NULL){
+        if(TIMEVAL_LATER(q->when, timer->when))
+            break;
+        qptr=&(q->next);
         q=q->next;
     }
+    
+    timer->next=q;
+    *qptr=timer;
+
+    do_timer_set();
 }
 
 
-/* */
+void timer_set(WTimer *timer, uint msecs, WTimerHandler *handler)
+{
+    timer_do_set(timer, msecs, handler, extl_fn_none());
+}
+
+    
+/*EXTL_DOC
+ * Set timer handler and timeout in milliseconds, and start timing.
+ */
+EXTL_EXPORT_AS(WTimer, set)
+void timer_set_extl(WTimer *timer, uint msecs, ExtlFn fn)
+{
+    timer_do_set(timer, msecs, NULL, extl_ref_fn(fn));
+}
+
+
+/*EXTL_DOC
+ * Reset timer (clear handler and stop timing).
+ */
+EXTL_EXPORT_MEMBER
+void timer_reset(WTimer *timer)
+{
+    WTimer *q=queue, **qptr=&queue;
+    
+    while(q!=NULL){
+        if(q==timer){
+            *qptr=timer->next;
+            do_timer_set();
+            break;
+        }
+        qptr=&(q->next);
+        q=q->next;
+        
+    }
+    
+    timer->handler=NULL;
+    extl_unref_fn(timer->extl_handler);
+    timer->extl_handler=extl_fn_none();
+}
+
+
+bool timer_init(WTimer *timer)
+{
+    timer->when.tv_sec=0;
+    timer->when.tv_usec=0;
+    timer->next=NULL;
+    timer->handler=NULL;
+    timer->extl_handler=extl_fn_none();
+    return TRUE;
+}
+
+void timer_deinit(WTimer *timer)
+{
+    timer_reset(timer);
+}
+
+
+WTimer *create_timer()
+{
+    CREATEOBJ_IMPL(WTimer, timer, (p));
+}
+
+/*EXTL_DOC
+ * Create a new timer.
+ */
+EXTL_EXPORT_AS(ioncore, create_timer)
+WTimer *create_timer_extl_owned()
+{
+    WTimer *timer=create_timer();
+    if(timer!=NULL)
+        ((Obj*)timer)->flags|=OBJ_EXTL_OWNED;
+    return timer;
+}
+
+
+IMPLCLASS(WTimer, Obj, timer_deinit, NULL);
+
+
+/*}}}*/
+
+
+/*{{{ Signal handling */
 
 
 static void fatal_signal_handler(int signal_num)
@@ -350,4 +397,7 @@ void ioncore_trap_signals()
 #undef FATAL
 #undef DEADLY
 }
+
+
+/*}}}*/
 
