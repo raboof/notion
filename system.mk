@@ -111,6 +111,10 @@ DEFINES += -DCF_XFREE86_TEXTPROP_BUG_WORKAROUND
 # an UTF8 locale given the -i18n command line option?
 #DEFINES += -DCF_DE_USE_XUTF8
 
+# Remap F11 key to SunF36 and F12 to SunF37? You may want to set this
+# on SunOS.
+#DEFINES += -DCF_SUN_F1X_REMAP
+
 
 ##
 ## libc

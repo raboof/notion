@@ -11,6 +11,9 @@
 
 #include <string.h>
 
+#define XK_MISCELLANY
+#include <X11/keysymdef.h>
+
 #include <libtu/map.h>
 
 #include "common.h"
@@ -27,23 +30,23 @@
 #define BUTTON1_NDX 9
 
 static StringIntMap state_map[]={
-    {"Shift",        ShiftMask},
+    {"Shift",       ShiftMask},
     {"Lock",        LockMask},
-    {"Control",        ControlMask},
+    {"Control",     ControlMask},
     {"Mod1",        Mod1Mask},
     {"Mod2",        Mod2Mask},
     {"Mod3",        Mod3Mask},
     {"Mod4",        Mod4Mask},
     {"Mod5",        Mod5Mask},
-    {"AnyModifier",    AnyModifier},
-    {"Button1",        Button1},
-    {"Button2",        Button2},
-    {"Button3",        Button3},
-    {"Button4",        Button4},
-    {"Button5",        Button5},
-    {"Button6",        6},
-    {"Button7",        7},
-    {"AnyButton",    AnyButton},
+    {"AnyModifier", AnyModifier},
+    {"Button1",     Button1},
+    {"Button2",     Button2},
+    {"Button3",     Button3},
+    {"Button4",     Button4},
+    {"Button5",     Button5},
+    {"Button6",     6},
+    {"Button7",     7},
+    {"AnyButton",   AnyButton},
     {NULL,          0},
 };
 
@@ -71,8 +74,15 @@ static bool parse_keybut(const char *str, uint *mod_ret, uint *ksb_ret,
         if(p2!=NULL)
             *p2='\0';
         
-        if(!button)
+        if(!button){
             keysym=XStringToKeysym(p);
+#ifdef CF_SUN_F1X_REMAP
+            if(keysym==XK_F11)
+                keysym=XK_SunF36;
+            else if(keysym==XK_F12)
+                keysym=XK_SunF37;
+#endif
+        }
         
         if(!button && keysym!=NoSymbol){
             int tmp;

@@ -27,15 +27,6 @@ DEFAULT_WS_TYPE="WIonWS"
 -- How many characters of result data to completions do we allow?
 ioncorelib.RESULT_DATA_LIMIT=1024^2
 
--- If we're on SunOS, we need to remap some keys.
-KEYF11, KEYF12="F11", "F12"
-
-if os.execute('uname -s|grep "SunOS" > /dev/null')==0 then
-    print("ioncorelib.lua: Uname test reported SunOS; ".. 
-          "mapping F11=Sun36, F12=SunF37.")
-    KEYF11, KEYF12="SunF36", "SunF37"
-end
-
 -- Bindings, winprops, hooks and extra commands
 include('ioncorelib-luaext')
 include('ioncorelib-bindings')

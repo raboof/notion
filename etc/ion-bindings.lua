@@ -43,7 +43,7 @@ defbindings("WScreen", {
     
     kpress(MOD1.."F9",          "ioncorelib.create_new_ws(_)"),
     
-    kpress(MOD2..KEYF12,        "menulib.bigmenu(_, _sub, 'mainmenu')"),
+    kpress(MOD2.."F12",         "menulib.bigmenu(_, _sub, 'mainmenu')"),
     mpress("Button2",           "menulib.pmenu(_, _sub, 'windowlist')"),
     mpress("Button3",           "menulib.pmenu(_, _sub, 'mainmenu')"),
 })
