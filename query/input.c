@@ -54,9 +54,8 @@ void setup_input_dinfo(WInput *input, DrawInfo *dinfo)
 	WGRData *grdata=&(scr->grdata);
 	
 	dinfo->win=input->win.win;
-#ifdef CF_XFT
 	dinfo->draw=input->win.draw;
-#endif
+
 	dinfo->gc=grdata->gc;
 	dinfo->grdata=grdata;
 	dinfo->colors=&(grdata->input_colors);

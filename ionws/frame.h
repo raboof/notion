@@ -20,9 +20,8 @@ INTROBJ(WFrame)
 #define FRAME_W(FRAME) (REGION_GEOM(FRAME).w)
 #define FRAME_H(FRAME) (REGION_GEOM(FRAME).h)
 #define FRAME_WIN(FRAME) ((FRAME)->win.win)
-#ifdef CF_XFT
 #define FRAME_DRAW(FRAME) ((FRAME)->win.draw)
-#endif
+
 #define FRAME_CLIENT_WOFF(SCR) ((SCR)->grdata.client_off.w)
 #define FRAME_CLIENT_HOFF(SCR) ((SCR)->grdata.client_off.h)
 

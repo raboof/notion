@@ -69,14 +69,11 @@ DECLSTRUCT(WGRData){
 	int stick_pixmap_h;
 
 	Window moveres_win;
-#ifdef CF_XFT
-	XftDraw *moveres_draw;
-#endif
+	WExtraDrawInfo *moveres_draw;
 	WRectangle moveres_geom;
+	
 	Window drag_win;
-#ifdef CF_XFT
-	XftDraw *drag_draw;
-#endif
+	WExtraDrawInfo *drag_draw;
 	WRectangle drag_geom;
 };
 

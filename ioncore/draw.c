@@ -566,3 +566,36 @@ void set_moveres_size(WScreen *scr, int w, int h)
 /*}}}*/
 
 
+/*{{{ Clipping */
+
+
+void set_clipping_rectangle(DrawInfo *dinfo, int x, int y, int w, int h)
+{
+	XRectangle rect;
+#ifdef CF_XFT
+	Region rgn;
+#endif
+	
+	rect.x=x; rect.y=y; rect.width=w; rect.height=h;
+	
+	XSetClipRectangles(wglobal.dpy, XGC, 0, 0, &rect, 1, Unsorted);
+#ifdef CF_XFT
+	rgn=XCreateRegion();
+	XUnionRectWithRegion(&rect, rgn, rgn);
+	XftDrawSetClip(DRAW, rgn);
+	XDestroyRegion(rgn);
+#endif
+}
+
+
+void clear_clipping(DrawInfo *dinfo)
+{
+	XSetClipMask(wglobal.dpy, XGC, None);
+#ifdef CF_XFT
+	XftDrawSetClip(DRAW, 0);
+#endif
+}
+
+
+/*}}}*/
+

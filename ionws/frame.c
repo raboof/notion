@@ -302,9 +302,8 @@ void draw_frame(const WFrame *frame, bool complete)
 	WGRData *grdata=GRDATA_OF(frame);
 
 	dinfo->win=FRAME_WIN(frame);
-#ifdef CF_XFT
 	dinfo->draw=FRAME_DRAW(frame);
-#endif
+
 	dinfo->grdata=grdata;
 	dinfo->gc=grdata->gc;
 	dinfo->geom=grdata->border_off;
@@ -347,9 +346,8 @@ void draw_frame_bar(const WFrame *frame, bool complete)
 	frame_bar_geom(frame, &bg);
 	
 	dinfo->win=FRAME_WIN(frame);
-#ifdef CF_XFT
 	dinfo->draw=FRAME_DRAW(frame);
-#endif
+
 	dinfo->grdata=grdata;
 	dinfo->gc=grdata->tab_gc;
 	dinfo->geom=bg;

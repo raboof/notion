@@ -74,6 +74,8 @@ bool init_window(WWindow *wwin, WScreen *scr, Window win, WRectangle geom)
 	wwin->draw=XftDrawCreate(wglobal.dpy, win, 
 							 DefaultVisual(wglobal.dpy, scr->xscr),
 							 scr->default_cmap);
+#else
+	wwin->draw=NULL;
 #endif
 	wwin->xic=NULL;
 	/*wwin->bindmap=NULL;*/

@@ -147,9 +147,7 @@ static void draw_tabdrag(const WRegion *reg)
 	const char *label=NULL;
 	
 	dinfo->win=grdata->drag_win;
-#ifdef CF_XFT
 	dinfo->draw=grdata->drag_draw;
-#endif
 	dinfo->grdata=grdata;
 	dinfo->gc=grdata->tab_gc;
 	dinfo->geom.x=0;

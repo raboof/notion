@@ -20,9 +20,7 @@ enum{
 
 DECLSTRUCT(DrawInfo){
 	Window win;
-#ifdef CF_XFT
-	XftDraw *draw;
-#endif
+	WExtraDrawInfo *draw;
 	GC gc;
 	WRectangle geom;
 	WColorGroup *colors;
@@ -67,5 +65,9 @@ extern void draw_image_string(DrawInfo *dinfo, int x, int y, const char *str,
 extern void copy_masked(const WGRData *grdata, Drawable src, Drawable dst,
 						int src_x, int src_y, int w, int h,
 						int dst_x, int dst_y);
+
+extern void set_clipping_rectangle(DrawInfo *dinfo,
+								   int x, int y, int w, int h);
+extern void clear_clipping(DrawInfo *dinfo);
 
 #endif /* WMCORE_DRAWP_H */

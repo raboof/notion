@@ -250,19 +250,8 @@ void init_listing(WListing *l)
 static void do_draw_listing(DrawInfo *dinfo, WListing *l)
 {
 	int r, c, i, x, y;
-	XRectangle rect;
-#ifdef CF_XFT
-	Region rgn;
-#endif
 	
-	rect.x=I_X; rect.y=I_Y; rect.width=I_W; rect.height=I_H;
-	XSetClipRectangles(wglobal.dpy, XGC, 0, 0, &rect, 1, Unsorted);
-#ifdef CF_XFT
-	rgn=XCreateRegion();
-	XUnionRectWithRegion(&rect, rgn, rgn);
-	XftDrawSetClip(DRAW, rgn);
-	XDestroyRegion(rgn);
-#endif
+	set_clipping_rectangle(dinfo, I_X, I_Y, I_W, I_H);
 
 	x=I_X;
 	c=0;
@@ -287,10 +276,7 @@ static void do_draw_listing(DrawInfo *dinfo, WListing *l)
 	}
 	
 finished:
-	XSetClipMask(wglobal.dpy, XGC, None);
-#ifdef CF_XFT
-	XftDrawSetClip(DRAW, 0);
-#endif
+	clear_clipping(dinfo);
 }
 
 
