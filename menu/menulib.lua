@@ -228,7 +228,7 @@ end
 local function refresh_styles()
     local cmd=lookup_script("ion-completefile")
     if cmd then
-        local dirs=ioncore_searchpath()
+        local dirs=ioncore_get_scriptdirs()
         if table.getn(dirs)==0 then
             return
         end

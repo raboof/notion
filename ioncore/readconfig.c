@@ -75,6 +75,10 @@ static bool add_dir(char ***pathsptr, int *n_pathsptr, const char *dir)
 }
 
 
+/*EXTL_DOC
+ * Add a search path.
+ */
+EXTL_EXPORT
 bool ioncore_add_scriptdir(const char *dir)
 {
 	return add_dir(&scriptpaths, &n_scriptpaths, dir);
@@ -158,7 +162,7 @@ bool ioncore_set_sessiondir(const char *session)
  * Get all directories on search path.
  */
 EXTL_EXPORT
-ExtlTab ioncore_searchpath()
+ExtlTab ioncore_get_scriptdirs()
 {
 	int i;
 	ExtlTab tab=extl_create_table();
