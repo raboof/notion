@@ -198,6 +198,7 @@ void preinit_graphics(WScreen *scr)
 #undef INIT_CG
 
 	grdata->frame_bgcolor=black;
+	grdata->transparent_background=FALSE;
 	grdata->selection_bgcolor=white;
 	grdata->selection_fgcolor=black;
 	

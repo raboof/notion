@@ -38,6 +38,7 @@ DECLSTRUCT(WGRData){
 	WColorGroup act_tab_sel_colors, tab_sel_colors;
 	WColorGroup input_colors;
 	Pixel frame_bgcolor, selection_bgcolor, selection_fgcolor;
+	bool transparent_background;
 	
 	WBorder frame_border;
 	WBorder tab_border;

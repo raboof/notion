@@ -170,7 +170,6 @@ static bool init_frame(WFrame *frame, WScreen *scr, WWinGeomParams params,
 	WGRData *grdata=&(scr->grdata);
 	int sp=grdata->spacing;
 	int attrflags=0;
-	int transparent=0;
 	
 	frame->flags=flags;
 	frame->sub_count=0;
@@ -182,7 +181,7 @@ static bool init_frame(WFrame *frame, WScreen *scr, WWinGeomParams params,
 	frame->saved_y=FRAME_NO_SAVED_WH;
 	frame->tab_pressed_sub=NULL;
 	
-	if(transparent){
+	if(grdata->transparent_background){
 		attr.background_pixmap=ParentRelative;
 		attrflags=CWBackPixmap;
 	}else{

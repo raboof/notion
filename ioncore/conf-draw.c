@@ -267,6 +267,24 @@ static int opt_screen_bar_widths(Tokenizer *tokz, int n, Token *toks)
 /*}}}*/
 
 
+/*{{{ Misc. */
+
+
+static bool opt_screen_transparent_background(Tokenizer *tokz, int n, Token *toks)
+{
+	WScreen *scr;
+	
+	FOR_ALL_SELECTED_SCREENS(scr){
+		scr->grdata.transparent_background=TOK_BOOL_VAL(&(toks[1]));
+	}
+	
+	return TRUE;
+}
+
+
+/*}}}*/
+
+
 static ConfOpt screen_opts[]={
 	{"font", "s", opt_screen_font, NULL},
 	{"tab_font", "s", opt_screen_tab_font, NULL},
@@ -284,6 +302,7 @@ static ConfOpt screen_opts[]={
 	{"frame_colors", "ssss", opt_screen_frame_colors, NULL},
 	{"input_colors", "ssss", opt_screen_input_colors, NULL},
 	{"background_color", "s", opt_screen_frame_bgcolor, NULL},
+	{"transparent_background", "b", opt_screen_transparent_background, NULL},
 	{"selection_colors", "ss", opt_screen_selection_colors, NULL},
 	
 	{"ion_spacing", "l", opt_screen_spacing, NULL},
@@ -291,6 +310,7 @@ static ConfOpt screen_opts[]={
 	
 	{"pwm_bar_widths", "ldl", opt_screen_bar_widths, NULL},
 
+	
 	/*{"#end", NULL, end_screen, NULL},
 	{"#cancel", NULL, end_screen, NULL},*/
 	
