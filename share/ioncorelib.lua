@@ -308,6 +308,14 @@ function obj_exists(obj)
     return (obj_typename(obj)~=nil)
 end
 
+--DOC
+-- Attempt to close using \fnref{region_close} most recently active 
+-- child (\fnref{region_active_sub}) of, or if this is nil, \var{reg} itself.
+function close_sub_or_self(reg)
+    local r2=region_active_sub(reg)
+    region_close(r2 or reg)
+end
+
 -- }}}
 
 

@@ -100,3 +100,14 @@ obsolete("make_active_leaf_fn",
                         fn(region_get_active_leaf(reg))
                     end
          end)
+
+-- Added 2003-06-17
+obsolete("region_get_active_leaf",
+         function(reg)
+             local r=reg
+             repeat
+                 reg=r
+                 r=region_active_sub(reg)
+             until r==nil
+             return reg
+         end)
