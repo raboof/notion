@@ -275,14 +275,20 @@ static void init_global()
 #ifdef CF_UTF8
 static bool test_fallback_font(Display *dpy)
 {
-	XFontStruct *fnt=XLoadQueryFont(dpy, CF_FALLBACK_FONT_NAME);
+	char **dummy_missing=NULL;
+	int dummy_missing_n=0;
+	char *dummy_def=NULL;
+	XFontSet fnt=NULL;
+	
+	fnt=XCreateFontSet(dpy, CF_FALLBACK_FONT_NAME, &dummy_missing,
+					   &dummy_missing_n, &dummy_def);
 	
 	if(fnt==NULL){
 		warn("Failed to load fallback font \"%s\"", CF_FALLBACK_FONT_NAME);
 		return FALSE;
 	}
 	
-	XFreeFont(dpy, fnt);
+	XFreeFontSet(dpy, fnt);
 	return TRUE;
 }
 
