@@ -28,7 +28,6 @@
 /*{{{ parse_keybut */
 
 
-#define BUTTON1_NDX 9
 #define MOD5_NDX 7
 
 static StringIntMap state_map[]={
@@ -41,6 +40,10 @@ static StringIntMap state_map[]={
     {"Mod4",        Mod4Mask},
     {"Mod5",        Mod5Mask},
     {"AnyModifier", AnyModifier},
+    {NULL,          0},
+};
+
+static StringIntMap button_map[]={
     {"Button1",     Button1},
     {"Button2",     Button2},
     {"Button3",     Button3},
@@ -101,16 +104,18 @@ static bool parse_keybut(const char *str, uint *mod_ret, uint *ksb_ret,
             i=stringintmap_ndx(state_map, p);
 
             if(i<0){
-                warn("\"%s\" unknown", p);
-                break;
-            }
+                i=stringintmap_ndx(button_map, p);
+                
+                if(i<0){
+                    warn("\"%s\" unknown", p);
+                    break;
+                }
             
-            if(i>=BUTTON1_NDX){
                 if(!button || *ksb_ret!=NoSymbol){
                     warn_obj(str, "Insane button combination");
                     break;
                 }
-                *ksb_ret=state_map[i].value;
+                *ksb_ret=button_map[i].value;
             }else{
                 if(*mod_ret==AnyModifier || 
                    (*mod_ret!=0 && state_map[i].value==AnyModifier)){
@@ -234,9 +239,9 @@ static bool do_entry(WBindmap *bindmap, ExtlTab tab,
 {
     bool ret=FALSE;
     char *action_str=NULL, *ksb_str=NULL, *area_str=NULL;
-    int action;
-    uint ksb, mod;
-    WBinding *bnd;
+    int action=0;
+    uint ksb=0, mod=0;
+    WBinding *bnd=NULL;
     ExtlTab subtab;
     ExtlFn func;
     bool wr=FALSE;
@@ -351,7 +356,7 @@ static char *get_mods(uint state)
         for(i=0; i<=MOD5_NDX; i++){
             if(ret==NULL)
                 break;
-            if(state&state_map[i].value){
+            if((int)(state&state_map[i].value)==state_map[i].value){
                 char *ret2=ret;
                 ret=scat3(ret, state_map[i].string, "+");
                 free(ret2);
@@ -366,9 +371,9 @@ static char *get_mods(uint state)
 }
 
 
-static char *get_key(char *mods, uint kcb)
+static char *get_key(char *mods, uint ksb)
 {
-    const char *s=XKeysymToString(kcb);
+    const char *s=XKeysymToString(ksb);
     char *ret=NULL;
     
     if(s==NULL){
@@ -385,9 +390,9 @@ static char *get_key(char *mods, uint kcb)
 }
 
 
-static char *get_button(char *mods, uint kcb)
+static char *get_button(char *mods, uint ksb)
 {
-    const char *s=value2str(state_map, kcb);
+    const char *s=value2str(button_map, ksb);
     char *ret=NULL;
     
     if(s==NULL){
