@@ -28,13 +28,16 @@ local appmenu={
     menuentry("Mozilla Firebird", make_exec_fn("MozillaFirebird")),
     menuentry("Xdvi", make_exec_fn("xdvi")),
     menuentry("GV", make_exec_fn("gv")),
+    menuentry("Run...", querylib.query_exec),
 }
 
 local exitmenu={
-    menuentry("Exit", querylib.query_exit),
-    menuentry("Restart", querylib.query_restart),
+    --menuentry("Restart", querylib.query_restart),
+    menuentry("Restart", restart_wm),
     menuentry("Restart PWM", function() restart_other_wm("pwm") end),
     menuentry("Restart TWM", function() restart_other_wm("twm") end),
+    --menuentry("Exit", querylib.query_exit),
+    menuentry("Exit", exit_wm),
 }
 
 local mainmenu={
