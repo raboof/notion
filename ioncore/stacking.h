@@ -17,7 +17,7 @@
 #include "window.h"
 
 /* Functions to set up stacking management */
-extern void region_stack_above(WRegion *reg, WRegion *above);
+extern bool region_stack_above(WRegion *reg, WRegion *above);
 extern void region_keep_on_top(WRegion *reg);
 extern void region_reset_stacking(WRegion *reg);
 extern void stacking_init_window(WWindow *parent, Window win);

@@ -470,6 +470,9 @@ bool mplex_attach_simple(WMPlex *mplex, WRegion *reg, bool switchto)
 {
 	MPlexAttachParams par;
 	
+	if(reg==(WRegion*)mplex)
+		return FALSE;
+
 	par.index=-1;
 	par.switchto=switchto;
 	
@@ -511,6 +514,9 @@ bool mplex_attach(WMPlex *mplex, WRegion *reg, ExtlTab param)
 {
 	MPlexAttachParams par;
 	get_params(param, &par);
+
+	if(reg==(WRegion*)mplex)
+		return FALSE;
 	
 	return attach_reparent_helper((WRegion*)mplex, reg,
 								  (WRegionDoAttachFn*)mplex_do_attach, 

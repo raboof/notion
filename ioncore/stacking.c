@@ -33,14 +33,17 @@
  * Inform that \var{reg} should be stacked above the region \var{above}.
  */
 EXTL_EXPORT_MEMBER
-void region_stack_above(WRegion *reg, WRegion *above)
+bool region_stack_above(WRegion *reg, WRegion *above)
 {
 	WRegion *r2;
 	
-	if(region_x_window(reg)==None || region_x_window(above)==None){
-		warn("Stack-managed regions must have a window associated to them.");
-		return;
+	if(reg==above || REGION_PARENT(reg)==NULL ||
+	   REGION_PARENT(reg)!=REGION_PARENT(above)){
+		return FALSE;
 	}
+	
+	if(region_x_window(reg)==None || region_x_window(above)==None)
+		return FALSE;
 	
 	region_reset_stacking(reg);
 	
@@ -54,6 +57,8 @@ void region_stack_above(WRegion *reg, WRegion *above)
 	
 	LINK_ITEM(above->stacking.below_list, reg, stacking.next, stacking.prev);
 	reg->stacking.above=above;
+	
+	return TRUE;
 }
 
 
