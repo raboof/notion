@@ -10,7 +10,7 @@ XGETTEXT = xgettext
 MSGFMT = msgfmt -c
 MSGMERGE = msgmerge
 
-TRANSLATIONS := 
+TRANSLATIONS := fi
 MO_FILES := $(patsubst %,%.mo, $(TRANSLATIONS))
 
 POTDIRS=../ioncore \

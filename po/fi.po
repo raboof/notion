@@ -1,0 +1,1216 @@
+#
+# Finnish language translations for Ion3.
+#
+# Copyright (c) Tuomo Valkonen 2004.
+#
+# This file is distributed under the same license as the Ion3 package.
+# Tuomo Valkonen <tuomov@iki.fi>, 2004.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Ion3\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2004-07-31 23:50+0300\n"
+"PO-Revision-Date: 2004-07-31 23:50+0300\n"
+"Last-Translator: Tuomo Valkonen <tuomov at iki.fi>\n"
+"Language-Team: none\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=iso-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../ioncore/conf-bindings.c:95
+msgid "Insane key combination."
+msgstr "Järjetön näppäinyhdistelmä."
+
+#: ../ioncore/conf-bindings.c:99
+msgid "Could not convert keysym to keycode."
+msgstr "Ei pystytty muuntamaan näppäinsymbolia näppäinkoodiksi."
+
+#: ../ioncore/conf-bindings.c:110
+#, c-format
+msgid "Unknown button \"%s\"."
+msgstr "Tuntematon nappi \"%s\"."
+
+#: ../ioncore/conf-bindings.c:115
+msgid "Insane button combination."
+msgstr "Järjetön nappiyhdistelmä."
+
+#: ../ioncore/conf-bindings.c:122
+msgid "Insane modifier combination."
+msgstr "Järjestön näppäinmuunninyhdistelmä."
+
+#: ../ioncore/conf-bindings.c:158
+#, c-format
+msgid "Can not wait on modifiers when no modifiers set in \"%s\"."
+msgstr ""
+"Näppäinmuuntimia ei voida odottaa sidonnassa \"%s\", koska siinä ei ole "
+"niitä."
+
+#: ../ioncore/conf-bindings.c:176
+#, c-format
+msgid "Unable to add binding %s."
+msgstr "Ei voitu lisätä sidontaa %s."
+
+#: ../ioncore/conf-bindings.c:181
+#, c-format
+msgid "Unable to remove binding %s."
+msgstr "Ei voitu poistaa sidontaa %s."
+
+#: ../ioncore/conf-bindings.c:220
+#, c-format
+msgid "Unable to add submap for binding %s."
+msgstr "Ei voida lisätä alikarttaa sidonnalle %s."
+
+#
+#: ../ioncore/conf-bindings.c:250
+msgid "Binding type not set."
+msgstr "Sidonnan tyyppiä ei ole asetettu."
+
+#: ../ioncore/conf-bindings.c:260
+#, c-format
+msgid "Unknown binding type \"%s\"."
+msgstr "Sidonnalle annettu tyyppi \"%s\" on tuntematon."
+
+#: ../ioncore/conf-bindings.c:281
+#, c-format
+msgid "Unknown area \"%s\" for binding %s."
+msgstr "Sidonnalle %s asetettu tuntematon alue \"%s.\""
+
+#: ../ioncore/conf-bindings.c:322
+#, c-format
+msgid "Unable to get bindmap entry %d."
+msgstr "Sidontakartan alkion %d haussa epäonnistuttiin."
+
+#: ../ioncore/conf-bindings.c:364
+msgid "Unable to convert keysym to string."
+msgstr "Ei pystytty muuntamaan näppäinsymbolia merkkijonoksi."
+
+#: ../ioncore/conf-bindings.c:378
+msgid "Unable to convert button to string."
+msgstr "Ei pystytty muuntamaan napin tunnistettua merkkijonoksi."
+
+#
+#: ../ioncore/event.c:78
+msgid "Time request from X server failed."
+msgstr "Ajan pyyntö X-palvelimelta epäonnistui."
+
+#
+#: ../ioncore/exec.c:101
+msgid "Could not find a root window."
+msgstr "Juuri-ikkunaa ei löytynyt."
+
+#: ../ioncore/exec.c:134
+msgid "reading a pipe"
+msgstr "putken luku"
+
+#
+#: ../ioncore/exec.c:296
+msgid "Not saving state: running under session manager."
+msgstr "Tilaa ei talleteta, koska olemme istunnonhallinnan alaisia."
+
+#: ../ioncore/strings.c:107 ../ioncore/strings.c:143
+msgid "Invalid multibyte string."
+msgstr "Virheellinen multibyte-merkkijono."
+
+#: ../ioncore/strings.c:234
+#, c-format
+msgid "Error compiling regular expression: %s"
+msgstr "Virhe säännölisen lausekkeen käännöksessä: %s"
+
+#: ../ioncore/modules.c:158
+msgid "Invalid module name."
+msgstr "Moduulin nimi on tuntematon."
+
+#
+#: ../ioncore/modules.c:170
+msgid "The module is already loaded."
+msgstr "Moduuli on jo ladattu."
+
+#: ../ioncore/modules.c:185
+msgid ""
+"Module version information not found or version mismatch. Refusing to use."
+msgstr ""
+"Moduulin versiotieto joko puuttuu tai on väärä. Näin ollen sitä "
+"kieltäydytään käyttämästä."
+
+#: ../ioncore/modules.c:196
+#, c-format
+msgid "Unable to initialise module %s."
+msgstr "Virhe moduulin %s alustuksessa."
+
+#: ../ioncore/modules.c:220 ../ioncore/readconfig.c:413
+#, c-format
+msgid "Unable to find '%s' on search path."
+msgstr "Hakupolulta ei löytynyt '%s':ää."
+
+#: ../ioncore/modules.c:291
+msgid "Unknown module."
+msgstr "Tuntematon moduuli."
+
+#: ../ioncore/modules.c:299
+msgid "Unable to initialise module."
+msgstr "Ei pystytty alustamaan moduulia."
+
+#: ../ioncore/modules.c:344
+msgid "No module to load given."
+msgstr "Ladattava moduulia ei ole annettu."
+
+#: ../ioncore/readconfig.c:87
+msgid "$HOME not set"
+msgstr "Ympäristömuuttujaa HOME ei ole asetettu."
+
+#: ../ioncore/readconfig.c:114
+msgid "User directory not set. Unable to set session directory."
+msgstr ""
+"Käyttäjän hakemistoa ei ole asetettu, joten istuntohakemistoa ei voida "
+"asettaa."
+
+#: ../ioncore/readconfig.c:172
+msgid "User directory can not be set."
+msgstr "Käyttäjän hakemistoa ei pystytä asettamaan."
+
+#: ../ioncore/readconfig.c:292
+#, c-format
+msgid "Falling back to %s."
+msgstr "Yritetään tiedostoa %s."
+
+#: ../ioncore/readconfig.c:486
+#, c-format
+msgid "Unable to create session directory \"%s\"."
+msgstr "Istuntohakemiston \"%s\" luonti epäonnistui."
+
+#: ../ioncore/screen.c:301
+msgid "act: "
+msgstr "act: "
+
+#: ../ioncore/screen.c:490
+msgid "Invalid offset."
+msgstr "Virheellinen poikkeama."
+
+#: ../ioncore/screen.c:535
+msgid "Could not find a complete workspace class. Please load some modules."
+msgstr ""
+"Yhtäkään täydellistä työpöytäluokkaa ei löydy. Ole hyvä ja lataa joitakin "
+"moduuleita."
+
+#: ../ioncore/screen.c:545
+#, c-format
+msgid "Unable to create a workspace on screen %d."
+msgstr "Työpöydän luonti ruudulle %d epäonnistui."
+
+#: ../ioncore/screen.c:549
+msgid "main"
+msgstr "ensisijainen"
+
+#: ../ioncore/signal.c:291
+#, c-format
+msgid "Caught fatal signal %d. Dying without deinit."
+msgstr ""
+"Lopetetaan ilman jälkien putsausta tuhoisan signaalin %d vastaanottoon."
+
+#: ../ioncore/signal.c:300
+#, c-format
+msgid "Caught signal %d. Dying."
+msgstr "Lopetetaan signaalin %d vastaanottoon."
+
+#: ../ioncore/sizehint.c:150
+msgid "Invalid client-supplied width/height increment."
+msgstr "Virheelinen asiakkaan kertoma pysty/vaakalisäys koolle."
+
+#: ../ioncore/sizehint.c:158
+msgid "Invalid client-supplied aspect-ratio."
+msgstr "Virheellinen asiakkaan kertoma sivusuhde."
+
+#: ../ioncore/ioncore.c:66
+msgid ""
+"This program is free software; you can redistribute it and/or\n"
+"modify it under the terms of the GNU Lesser General Public\n"
+"License as published by the Free Software Foundation; either\n"
+"version 2.1 of the License, or (at your option) any later version.\n"
+"\n"
+"This program is distributed in the hope that it will be useful,\n"
+"but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
+"MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU\n"
+"Lesser General Public License for more details.\n"
+msgstr ""
+"Tämä ohjelma on vapaa; tätä ohjelmaa on sallittu levittää edelleen\n"
+"ja muuttaa GNU vähäisemmän yleisen lisenssin (LGPL lisenssin) ehtojen\n"
+"mukaan sellaisina kuin Free Software Foundation on ne julkaissut; joko\n"
+"Lisenssin version 2.1, tai (valinnan mukaan) minkä tahansa myöhemmän\n"
+"version mukaisesti.\n"
+"\n"
+"Tätä ohjelmaa levitetään siinä toivossa, että se olisi hyödyllinen,\n"
+"mutta ilman mitään takuuta; ilman edes hiljaista takuuta kaupallisesti\n"
+"hyväksyttävästä laadusta tai soveltuvuudesta tiettyyn tarkoitukseen.\n"
+"Katso LGPL lisenssistä lisää yksityiskohtia.\n"
+
+#: ../ioncore/ioncore.c:379
+#, c-format
+msgid "Could not connect to X display '%s'"
+msgstr "Yhteydenotto X-palvelimeen '%s' epäonnistui."
+
+#: ../ioncore/ioncore.c:432
+msgid "Could not find a screen to manage."
+msgstr "Yhtään hallittavissa olevaa juuri-ikkunaa ei löytynyt."
+
+#: ../ioncore/xic.c:43
+msgid "Failed to open input method."
+msgstr "Syöttömenetelmän avaaminen epäonnistui."
+
+#: ../ioncore/xic.c:48
+msgid "Input method doesn't support any style."
+msgstr "Syöttömenetelmä ei tue yhtään syöttötapaa."
+
+#: ../ioncore/xic.c:63
+msgid "input method doesn't support my preedit type."
+msgstr "Syöttömenetelmä ei tue kaivattua esimuokkaustyyliä."
+
+#: ../ioncore/xic.c:91
+msgid "Failed to create input context."
+msgstr "Syöttökontekstin luonti epäonnistui."
+
+#: ../ioncore/clientwin.c:375
+#, c-format
+msgid "The transient_for hint for \"%s\" points to itself."
+msgstr "Ikkunan \"%s\" transient_for neuvo osoittaa itseensä."
+
+#: ../ioncore/clientwin.c:379
+#, c-format
+msgid ""
+"Client window \"%s\" has broken transient_for hint. (\"Extended WM hints\" "
+"multi-parent brain damage?)"
+msgstr "Ikkunan \"%s\" transient_for neuvo on rikki."
+
+#: ../ioncore/clientwin.c:384
+#, c-format
+msgid "The transient_for window for \"%s\" is not on the same screen."
+msgstr "Ikkunan \"%s\" transient_for neuvo osoittaa eri näytölle."
+
+#: ../ioncore/clientwin.c:404 ../ioncore/clientwin.c:491
+#: ../ioncore/clientwin.c:1521
+#, c-format
+msgid "Window %#x disappeared."
+msgstr "Ikkuna %#x katosi."
+
+#: ../ioncore/clientwin.c:511
+msgid "Unable to find a matching root window!"
+msgstr "Vastaavaa juuri-ikkunaa ei löytynyt."
+
+#: ../ioncore/clientwin.c:546
+#, c-format
+msgid "Unable to manage client window %#x."
+msgstr "Asiakasikkunan %x hallittavaksi saattaminen epäonnistui."
+
+#: ../ioncore/clientwin.c:596
+msgid "Changes is WM_TRANSIENT_FOR property are unsupported."
+msgstr "Muutoksia WM_TRANSIENT_FOR ominaisuudessa ei tueta."
+
+#
+#: ../ioncore/clientwin.c:853
+msgid "Client does not support the WM_DELETE protocol."
+msgstr "Asiakasikkuna ei tue WM_DELETE-protokollaa."
+
+#: ../ioncore/clientwin.c:1082 ../mod_ionws/ionws.c:75
+#: ../mod_floatws/floatws.c:98
+#, c-format
+msgid "Error reparenting %s."
+msgstr "Virhe alueen %s vanhemman vaihdossa."
+
+#: ../ioncore/clientwin.c:1527
+msgid "Saved client window does not want to be managed."
+msgstr "Talletettu asiakasikkuna ei halua sitä hallittavan."
+
+#
+#: ../ioncore/colormap.c:96
+msgid "Unable to store colourmap watch info."
+msgstr "Värikartan valvonnan alustaminen epäonnistui."
+
+#: ../ioncore/region.c:36
+msgid "Creating region with negative width or height!"
+msgstr "Yritys luoda korkeudeltaan tai leveydeltään negatiivinen alue."
+
+#: ../ioncore/region.c:84
+#, c-format
+msgid "Destroying object \"%s\" with client windows as children."
+msgstr "Olio \"%s\", jolla on vielä asiakasikkunoita lapsena, tuhotaan."
+
+#: ../ioncore/attach.c:80
+msgid "Unable to reparent."
+msgstr "Vanhemman vaihto epäonnistui."
+
+#: ../ioncore/attach.c:112 ../ioncore/frame-pointer.c:340
+#, c-format
+msgid "Attempt to make region %s manage its ancestor %s."
+msgstr "Yritys saattaa alue %s hallitsemaan sen esivanhempaa %s."
+
+#
+#: ../ioncore/defer.c:93
+msgid "Object destroyed while deferred actions are still pending."
+msgstr "Viivästettyä toimintoja jonossa vielä oliota tuhottaessa."
+
+#: ../ioncore/manage.c:90
+msgid "Unable to find a screen for a new client window."
+msgstr "Uudelle asiakasikkunalle ei löytynyt näyttöä."
+
+#: ../ioncore/manage.c:187
+#, c-format
+msgid "Unable to rescue \"%s\"."
+msgstr "Alueen \"%s\" pelastaminen epäonnistui."
+
+#: ../ioncore/rootwin.c:222
+#, c-format
+msgid "Unable to redirect root window events for screen %d."
+msgstr "Juuri-ikkunan %d viestien uudelleenohjaus epäonnistui."
+
+#: ../ioncore/rootwin.c:316
+msgid "Xinerama sanity check failed; overlapping screens detected."
+msgstr "Xinerama-tiedon järkevyystarkastus havaitsi päällekkäisiä ruutuja."
+
+#: ../ioncore/rootwin.c:342
+msgid "Don't know how to get Xinerama information for multiple X root windows."
+msgstr "Xinerama-tietoa ei osata käyttää usealle juuri-ikkunalle."
+
+#: ../ioncore/rootwin.c:378
+#, c-format
+msgid "Unable to setup Xinerama screen %d."
+msgstr "Xinerama-ruudun %d hallittavaksi saattaminen epäonnistui."
+
+#: ../ioncore/rootwin.c:389
+#, c-format
+msgid "Unable to setup X screen %d."
+msgstr "X-ruudun %d hallittavaksi saattaminen epäonnistui."
+
+#: ../ioncore/names.c:90
+#, c-format
+msgid "Corrupt instance number %s."
+msgstr "Rikkinäinen instanssinumero %s."
+
+#: ../ioncore/saveload.c:55
+#, c-format
+msgid "Unknown class \"%s\", cannot create region."
+msgstr "Luokka \"%s\" on tuntematon. Aluetta ei voida luoda."
+
+#: ../ioncore/saveload.c:124
+#, c-format
+msgid ""
+"There were errors loading layout. Backing up current layout savefile as\n"
+"%s.\n"
+"If you are _not_ running under a session manager and wish to restore your\n"
+"old layout, copy this backup file over the layout savefile found in the\n"
+"same directory while Ion is not running and after having fixed your other\n"
+"configuration files that are causing this problem. (Maybe a missing\n"
+"module?)"
+msgstr ""
+"Talletetun sijoittelun latauksessa oli virheitä. Siitä tehdään varmuuskopio\n"
+"%s.\n"
+"Jos _et_ käytä istunnonhallintaohjelmaa ja haluat palauttaa edellisen\n"
+"sijoittelun, kopioi tämä varmuuskopio uuden talletustiedoston päälle\n"
+"samassa hakemistossa kun Ion ei ole ajossa, ja kun olet korjannut tämän\n"
+"tilanteen aiheuttavat virheet (mahdollisesti puuttuva moduuli?) muissa\n"
+"asetustiedostoissasi."
+
+#: ../ioncore/saveload.c:167
+msgid "Unable to get file for layout backup."
+msgstr "Sijoittelun varmuuskopiolle ei voitu muodostaa tiedostonimeä."
+
+#: ../ioncore/saveload.c:171
+#, c-format
+msgid "Backup file %s already exists."
+msgstr "Varmuuskopio %s on jo olemassa."
+
+#: ../ioncore/saveload.c:177
+msgid "Failed backup."
+msgstr "Varmuuskopionti epäonnistui."
+
+#
+#: ../ioncore/saveload.c:182
+msgid "Unable to initialise layout on any screen."
+msgstr "Sijoittelun alustus epäonnistui kaikilla näytöillä."
+
+#: ../ioncore/saveload.c:202
+#, c-format
+msgid "Unable to get configuration for screen %d."
+msgstr "Ruudun %d asetukset puuttuvat."
+
+#: ../ioncore/saveload.c:215
+msgid "Unable to save layout."
+msgstr "Sijoittelun talletus epäonnistui."
+
+#: ../ioncore/frame.c:123
+msgid "Frame is not empty."
+msgstr "Kehys ei ole tyhjä."
+
+#: ../ioncore/conf.c:127
+msgid "Some bindmaps were empty, loading ioncore-efbb."
+msgstr "Jotkut sidontakartat olivat tyhjiä. Ladataan ioncore-efbb."
+
+#: ../ioncore/fullscreen.c:100
+msgid "Failed to enter full screen mode."
+msgstr "Kokoruudun tilaan vaihto epäonnistui."
+
+#: ../ioncore/fullscreen.c:158
+msgid ""
+"WClientWin failed to return from full screen mode; remaining manager or "
+"parent from previous location refused to manage us."
+msgstr ""
+"Asiakasikkunan paluu kokoruudun tilasta epäonnistui; edellinen hallitsija "
+"tai vanhempi kieltäytyi hallitsemasta ikkunaa."
+
+#
+#: ../ioncore/mplex.c:1252
+msgid "Invalid position setting."
+msgstr "Virheellinen paikka-asetus."
+
+#
+#: ../ioncore/mplex.c:1285
+msgid "Invalid action setting."
+msgstr "Virheellinen toiminto-asetus."
+
+#: ../ioncore/gr.c:119
+#, c-format
+msgid "Drawing engine %s is not registered!"
+msgstr "Piirtomoottoria %s ei ole rekisteröity!"
+
+#: ../ioncore/gr.c:138
+#, c-format
+msgid "Unable to find brush for style '%s'."
+msgstr "Tyylille '%s' ei löytynyt pensseliä."
+
+#: ../ioncore/gr.c:401
+msgid "No drawing engines loaded, trying \"de\"."
+msgstr "Yhtään piirtomoottoria ei ole ladattu. Yritetään oletusta \"de\"."
+
+#
+#: ../ioncore/hooks.c:219
+msgid "No function given."
+msgstr "Funktiota ei ole annettu."
+
+#: ../luaextl/luaextl.c:111
+msgid "Lua stack full."
+msgstr "Luan pino on täysi."
+
+#
+#: ../luaextl/luaextl.c:137
+msgid "Unknown Lua error."
+msgstr "Tuntematon Lua:n virhe."
+
+#: ../luaextl/luaextl.c:462
+msgid "Stack trace:"
+msgstr "Pinojälki:"
+
+#: ../luaextl/luaextl.c:469
+#, c-format
+msgid ""
+"\n"
+"(Unable to get debug info for level %d)"
+msgstr ""
+"\n"
+"(Debuggaustiedot eivät ole saatavilla tasolle %d)"
+
+#: ../luaextl/luaextl.c:487
+msgid ""
+"\n"
+"  [Skipping unnamed C functions.]"
+msgstr ""
+"\n"
+"  [Ohitetaan nimettömiä C-funktioita.]"
+
+#: ../luaextl/luaextl.c:536
+msgid "Internal error."
+msgstr "Sisäinen virhe."
+
+#: ../luaextl/luaextl.c:553
+msgid "Unable to initialize Lua."
+msgstr "Lua:n alustus epäonnistui."
+
+#: ../luaextl/luaextl.c:1277
+msgid ""
+"Too many return values. Use a C compiler that has va_copy to support more."
+msgstr ""
+"Liian monta paluuarvoa. Useamman tukemiseksi käytä C-kääntäjää, joka tukee "
+"va_copy:ä."
+
+#: ../luaextl/luaextl.c:1295
+#, c-format
+msgid "Invalid return value (expected '%c', got lua type \"%s\")."
+msgstr ""
+"Virheellinen paluuarvo (odotettiin tyyppiä '%c', mutta saatiin Lua:n tyyppi "
+"\"%s\")."
+
+#: ../luaextl/luaextl.c:1330 ../luaextl/luaextl.c:1594
+msgid "Stack full."
+msgstr "Pino täysi."
+
+#: ../luaextl/luaextl.c:1570
+msgid "L1 call handler upvalues corrupt."
+msgstr "Tason 1 kutsunkäsittelijän \"upvalue\":t rikki."
+
+#: ../luaextl/luaextl.c:1575
+msgid "Called function has been unregistered."
+msgstr "Kutsuttu funktio on poistettu."
+
+#: ../luaextl/luaextl.c:1587
+#, c-format
+msgid "Attempt to call an unsafe function \"%s\" in restricted mode."
+msgstr "Yritys kutsua turvatonta funktiota \"%s\" rajoitetussa tilassa."
+
+#: ../luaextl/luaextl.c:1603
+#, c-format
+msgid ""
+"Argument %d to %s is of invalid type. (Argument template is '%s', got lua "
+"type %s)."
+msgstr ""
+"Parameteri %d funktiolle %s on väärää tyyppiä. (Parametripohja on '%s', "
+"saatiin Lua:n tyyppi '%s'.)"
+
+#: ../luaextl/luaextl.c:1770
+#, c-format
+msgid ""
+"Function '%s' has more parameters than the level 1 call handler can handle"
+msgstr ""
+"Funktiolla %s on enemmän parametrejä kuin mihin tason yksi kutsunkäsittelijä "
+"kykenee."
+
+#
+#: ../luaextl/luaextl.c:2187
+msgid "Maximal serialisation depth reached."
+msgstr "Suurin mahdollinen talletuksen rekursiosyvyys saavutettu."
+
+#: ../luaextl/luaextl.c:2208
+#, c-format
+msgid "Unable to serialise type %s."
+msgstr "Tyyppiä %s ei voida tallettaa."
+
+#: ../luaextl/luaextl.c:2239
+msgid "-- This file has been generated by Ion. Do no edit.\n"
+msgstr "-- Tämä tiedosto on Ionin luoma. Älä editoi sitä.\n"
+
+#: ../mod_ionws/ionws.c:305
+msgid "Unable to create a node for status display."
+msgstr "Solmun luonti tilanäytölle epäonnistui."
+
+#: ../mod_ionws/ionws.c:317
+msgid "Unable to create new split for status display."
+msgstr "Uuden jaon tekeminen tilanäytölle epäonnistui."
+
+#
+#: ../mod_ionws/ionws.c:691
+msgid "Frame not managed by the workspace."
+msgstr "Kehys ei ole tämän työpöydän hallitsema."
+
+#
+#: ../mod_ionws/ionws.c:696
+msgid "Invalid direction parameter."
+msgstr "Tuntematon suuntaparametri."
+
+#
+#: ../mod_ionws/ionws.c:709
+msgid "Unable to split."
+msgstr "Halkaisu ei ole mahdollista."
+
+#: ../mod_ionws/ionws.c:741
+msgid "Nil frame."
+msgstr "Kehys on asettamatta."
+
+#: ../mod_ionws/ionws.c:745
+msgid "The frame is not managed by the workspace."
+msgstr "Kehys ei ole tämän työpöydän hallinnoima."
+
+#: ../mod_ionws/ionws.c:750
+msgid "Frame may not be destroyed."
+msgstr "Kehystä ei saa tuhota."
+
+#: ../mod_ionws/ionws.c:755
+msgid "Failed to rescue managed objects."
+msgstr "Hallittujen olioiden pelastaminen epäonnistui."
+
+#: ../mod_ionws/ionws.c:945
+msgid "Nil parameter."
+msgstr "Parametri on asettamatta."
+
+#: ../mod_ionws/ionws.c:950
+msgid "Manager doesn't match."
+msgstr "Hallitsija on väärä."
+
+#
+#: ../mod_ionws/ionws.c:986
+msgid "Could not get split tree."
+msgstr "Halkaisupuu puuttuu."
+
+#: ../mod_ionws/ionws.c:1007
+msgid "Workspace already has a status display node."
+msgstr "Työpöydällä on jo solmu tilanäytölle."
+
+#
+#: ../mod_ionws/ionws.c:1057
+msgid "Missing region parameters."
+msgstr "Alueen parameterit puuttuu."
+
+#: ../mod_ionws/ionws.c:1093
+msgid "Invalid direction."
+msgstr "Virheellinen suunta."
+
+#
+#: ../mod_ionws/ionws.c:1161
+msgid "No split type given."
+msgstr "Halkaisun tyyppiä ei ole asetettu."
+
+#: ../mod_ionws/ionws.c:1172
+msgid "Unknown split type."
+msgstr "Tuntematon halkaisutyyppi."
+
+#
+#
+#: ../mod_ionws/ionws.c:1212
+msgid "The workspace is empty."
+msgstr "Työpöytä on tyhjä."
+
+#: ../mod_ionws/placement.c:97 ../mod_autows/placement.c:307
+#, c-format
+msgid ""
+"Ooops... could not find a region to attach client window to on workspace %s."
+msgstr "Työpöydältä %s ei löytynyt aluetta johon liittää asiakasikkuna."
+
+#: ../mod_ionws/split.c:895
+msgid "REGION_RQGEOM_TRYONLY unsupported for status display."
+msgstr "REGION_RQGEOM_TRYONLY:ä ei tueta tilanäytölle."
+
+#
+#: ../mod_ionws/split.c:973
+msgid "Invalid node."
+msgstr "Epäkelpo solmu."
+
+#
+#: ../mod_ionws/split.c:1021
+msgid "Splitting the status display is not allowed."
+msgstr "Tilanäytön halkaisu ei ole sallittu."
+
+#: ../mod_ionws/split.c:1049
+msgid "Unable to split: not enough free space."
+msgstr "Ei voida halkaista: liian vähän tilaa."
+
+#
+#: ../mod_ionws/split.c:1441
+msgid "Unable to move the status display out of way of transpose."
+msgstr "Tilanäyttöä ei voida siirtää pois transpoosin tieltä."
+
+#: ../mod_ionws/split.c:1561
+#, c-format
+msgid "Unable to get configuration for %s."
+msgstr "Alueelle \"%s\" ei saatu asetuksia."
+
+#: ../mod_ionws/split-stdisp.c:581 ../mod_ionws/split-stdisp.c:606
+msgid "Status display in bad split configuration."
+msgstr "Tilanäyttö huonossa halkaisuasetelmassa."
+
+#: ../mod_ionws/split-stdisp.c:646
+msgid "Status display badly located in split tree."
+msgstr "Tilanäyttö on huonosti sijoittuneena halkaisupuuhun."
+
+#: ../mod_floatws/floatws.c:341
+msgid "Workspace may not be destroyed."
+msgstr "Työpöytää ei saa tuhota."
+
+#: ../mod_floatws/floatws.c:348
+msgid "Failed to rescue some client windows!"
+msgstr "Joidenkin asiakasikkunoiden pelastaminen epäonnistui."
+
+#: ../mod_floatws/floatws.c:360
+msgid "Refusing to close non-empty workspace."
+msgstr "Työpöydän tuhoamisesta kieltäydytään, koska se ei ole tyhjä."
+
+#
+#: ../mod_floatws/floatws.c:452
+msgid "Failure to create a new frame."
+msgstr "Uuden kehyksen luonti epäonnistui."
+
+#
+#: ../mod_floatws/floatws.c:1027 ../mod_floatws/floatws.c:1105
+msgid "Region not managed by the workspace."
+msgstr "Alue ei ole työpöydän hallinnassa."
+
+#: ../mod_floatws/floatws.c:1226
+msgid "No geometry specified."
+msgstr "Geometria on asettamatta."
+
+#: ../mod_floatws/placement.c:125
+#, c-format
+msgid "Unknown placement method \"%s\"."
+msgstr "Tuntematon sijoittelumenetelmä \"%s\"."
+
+#: ../mod_autows/autows.c:164
+msgid "Unable to re-initialise workspace. Destroying."
+msgstr "Työpöydän uudelleenalustus epäonnistui, joten se tuhotaan."
+
+#: ../mod_autows/placement.c:132 ../mod_autows/placement.c:136
+#: ../mod_autows/placement.c:200 ../mod_autows/placement.c:205
+#, c-format
+msgid "Malfunctioning placement hook; condition #%d."
+msgstr "Rikkinäinen koukku; tapaus #%d."
+
+#: ../mod_autows/splitext.c:302
+msgid "Could not create a WSplitUnused for empty WSplitPane. Destroying."
+msgstr ""
+"Ei voitu luoda WSplitUnused:ia tyhjälle WSplitPane:lle, joten se tuhotaan."
+
+#: ../mod_query/fwarn.c:34
+msgid "Error:\n"
+msgstr "Virhe:\n"
+
+#
+#: ../mod_menu/menu.c:490
+msgid "Empty menu."
+msgstr "Tyhjä valikko."
+
+#
+#: ../mod_sm/sm.c:110
+msgid "Failed to set session directory."
+msgstr "Istuntohakemiston asetus epäonnistui."
+
+#: ../mod_sm/sm_session.c:85
+msgid "Too many ICE connections."
+msgstr "Liian monta ICE-yhteyttä."
+
+#: ../mod_sm/sm_session.c:227
+msgid "Failed to save session state"
+msgstr "Istunnon tilan tallentaminen epäonnistui."
+
+#: ../mod_sm/sm_session.c:246
+msgid "Failed to request save-yourself-phase2 from session manager."
+msgstr "Save-yourself vaiheen kaksi pyyntö istunnonhallitsijalta epäonnistui."
+
+#
+#: ../mod_sm/sm_session.c:295
+msgid "SESSION_MANAGER environment variable not set."
+msgstr "Ympäristömuuttujaa SESSION_MANAGER ei ole asetettu."
+
+#: ../mod_sm/sm_session.c:300
+msgid "Session Manager: IceAddConnectionWatch failed."
+msgstr "Virhe istunnonhallinan kutsussa IceAddConnectionWatch."
+
+#
+#: ../mod_sm/sm_session.c:325
+msgid "Unable to connect to the session manager."
+msgstr "Yhteydenotto istunnonhallintaohjelmaan epäonnistui."
+
+#: ../mod_sp/main.c:137
+#, c-format
+msgid "Unable to create scratchpad for screen %d."
+msgstr "Suttupöydän luonti ruudulle %d epäonnistui."
+
+#: ../de/init.c:40
+#, c-format
+msgid "Border attribute %s sanity check failed."
+msgstr "Reunan arvon '%s' järkevyystarkistus epäonnistui."
+
+#: ../de/init.c:63
+#, c-format
+msgid "Unknown border style \"%s\"."
+msgstr "Reunan tyyli \"%s\" on tuntematon."
+
+#: ../de/init.c:95
+#, c-format
+msgid "Unable to allocate colour \"%s\"."
+msgstr "Värin \"%s\" varaaminen epäonnistui."
+
+#: ../de/init.c:159
+#, c-format
+msgid "Corrupt substyle table %d."
+msgstr "Alityylin %d taulu on rikki."
+
+#: ../de/init.c:192
+#, c-format
+msgid "Unknown text alignment \"%s\"."
+msgstr "Tuntematon tekstin tasaus \"%s\"."
+
+#: ../de/init.c:262
+#, c-format
+msgid "'based_on' for %s points back to the style itself."
+msgstr "Tyylin %s 'based_on' -asetus osoittaa itseensä."
+
+#: ../de/init.c:265
+#, c-format
+msgid "Unknown base style \"%s\"."
+msgstr "Tuntematon pohjatyyli \"%s\"."
+
+#: ../de/font.c:47
+#, c-format
+msgid ""
+"Fontset for font pattern '%s' implements context dependent drawing, which is "
+"unsupported. Expect clutter."
+msgstr ""
+"Kirjaisinjoukko kirjaisinmallille '%s' vaatii kontekstiriippuvaista piirtoa, "
+"jota ei tueta. Odotettavissa on sotkua."
+
+#: ../de/font.c:58
+#, c-format
+msgid "Could not load font \"%s\", trying \"%s\""
+msgstr "Kirjaisinta \"%s\" lataaminen epäonnistui. Yritetään \"%s\":ää."
+
+#: ../de/style.c:314
+#, c-format
+msgid "Style %s still in use [%d] but the module is being unloaded!"
+msgstr "Tyyli %s on vielä käytössä [%d], mutta moduulia poistetaan!"
+
+#: ../ion/ion.c:46 ../pwm/pwm.c:41
+msgid "X display to use"
+msgstr "Käytettävä X-palvelin/näyttö"
+
+#: ../ion/ion.c:49 ../pwm/pwm.c:44
+msgid "Configuration file"
+msgstr "Ensisijainen asetustiedosto"
+
+#: ../ion/ion.c:52 ../pwm/pwm.c:47
+msgid "Add directory to search path"
+msgstr "Lisää hakemisto hakupolulle"
+
+#: ../ion/ion.c:55 ../pwm/pwm.c:50
+msgid "Manage default root window/non-Xinerama screen only"
+msgstr ""
+"Hallitse vain oletusarvoista juuri-ikkunaa. (Vastaa ensisijaista näyttöä jos "
+"Xinerama ei ole käytössä.)"
+
+#: ../ion/ion.c:59
+msgid "Use Xinerama screen information (default: 1/yes)"
+msgstr "Hyödynnä Xineramaa (oletus: 1/kyllä)"
+
+#: ../ion/ion.c:62 ../pwm/pwm.c:57
+msgid "Ignored: not compiled with Xinerama support"
+msgstr "Jätetään huomiotta: ohjelmaa ei ole käännetty Xinerama-tuella"
+
+#: ../ion/ion.c:66 ../pwm/pwm.c:61
+msgid "Name of session (affects savefiles)"
+msgstr "Istunnon nimi (vaikuttaa talletustiedostoihin)"
+
+#: ../ion/ion.c:69 ../pwm/pwm.c:64
+msgid "Session manager client ID"
+msgstr "Istunnonhallinnan asiakastunniste"
+
+#: ../ion/ion.c:72 ../pwm/pwm.c:67
+msgid "Do not create startup error log and display it with xmessage."
+msgstr "Älä luo käynnistysvirhelokia ja näytä sitä xmessage:lla."
+
+#: ../ion/ion.c:76 ../pwm/pwm.c:71
+msgid "Show this help"
+msgstr "Näytä tämä aputeksti"
+
+#: ../ion/ion.c:79 ../pwm/pwm.c:74
+msgid "Show program version"
+msgstr "Näytä ohjelman versio"
+
+#: ../ion/ion.c:82 ../pwm/pwm.c:77
+msgid "Show about text"
+msgstr "Näytä tietoja ohjelmasta"
+
+#: ../ion/ion.c:95
+msgid "Could not get user configuration file directory."
+msgstr "Käyttäjän asetustiedostohakemisto puuttuu, eikä sitä voitu luoda."
+
+#: ../ion/ion.c:128 ../pwm/pwm.c:86
+#, c-format
+msgid ""
+"Usage: %s [options]\n"
+"\n"
+msgstr ""
+"Käyttö: %s [valintoja]\n"
+"\n"
+
+#: ../ion/ion.c:188 ../pwm/pwm.c:149
+msgid "Invalid parameter to -xinerama."
+msgstr "Virheellinen parametri -xinerama:lle"
+
+#: ../ion/ion.c:207 ../pwm/pwm.c:168
+#
+msgid "Invalid command line."
+msgstr "Virheellinen komentorivi."
+
+#: ../ion/ion.c:228
+msgid "Ion startup error log:\n"
+msgstr "Ionin käynnistysvirheloki:\n"
+
+#: ../ion/ion.c:238 ../pwm/pwm.c:199
+msgid "Refusing to start due to encountered errors."
+msgstr "Kieltäydytään käynnistymästä tavattujen virheiden johdosta."
+
+#: ../pwm/pwm.c:54
+msgid "Use Xinerama screen information (default: 0/no)"
+msgstr "Hyödynnä Xineramaa (oletus: 0/ei)"
+
+#: ../pwm/pwm.c:189
+msgid "PWM startup error log:\n"
+msgstr "PWM:n käynnistysvirheloki:\n"
+
+#: ../mod_query/mod_query.lua:793
+msgid ""
+"\n"
+"Transients:\n"
+msgstr ""
+"\n"
+"Väliaikaisikkunat:\n"
+
+#: ../etc/cfg_menus.lua:45 ../etc/cfg_menus.lua:59
+msgid "Clear tags"
+msgstr "Poista merkinnät"
+
+#: ../mod_query/mod_query.lua:724
+msgid "Unknown menu %s."
+msgstr "Tuntematon valikko %s."
+
+#: ../mod_query/mod_query.lua:381
+msgid "Exit Ion/Shutdown session (y/n)?"
+msgstr "Poistu Ionista/Lopeta istunto (kyllä: y, ei: n)?"
+
+#: ../etc/cfg_menus.lua:60
+msgid "(Un)stick"
+msgstr "Aseta tahmaus"
+
+#: ../mod_query/mod_query.lua:291
+msgid "Cannot attach: different root windows."
+msgstr "Ei voida liittää: eri juuri-ikkunat."
+
+#: ../mod_menu/mod_menu.lua:206
+msgid "Save look selection in %s?"
+msgstr "Talletaanko ulkonäköasetus tiedostoon %s?"
+
+#: ../ext_statusbar/ext_statusbar.lua:304
+msgid "Failed to create statusbar."
+msgstr "Epäonnistuttiin tilarivin luonnissa"
+
+#: ../pwm/cfg_pwm_menus.lua:16 ../etc/cfg_menus.lua:12
+msgid "Help"
+msgstr "Ohjeet"
+
+#: ../etc/cfg_menus.lua:46
+msgid "Window info"
+msgstr "Ikkunan tiedot"
+
+#: ../etc/cfg_menus.lua:44 ../etc/cfg_menus.lua:58
+msgid "Attach tagged"
+msgstr "Liitä merkityt"
+
+#: ../ext_statusbar/ext_statusbar.lua:314
+msgid "Failed to create a timer for statusbar."
+msgstr "Epäonnistuttiin ajastimen luonnissa tilariville."
+
+#: ../pwm/cfg_pwm_menus.lua:20 ../etc/cfg_menus.lua:15
+msgid "Session"
+msgstr "Istunto"
+
+#: ../pwm/cfg_pwm_menus.lua:26
+msgid "New"
+msgstr "Uusi"
+
+#: ../mod_query/mod_query.lua:398
+msgid "Frame name:"
+msgstr "Kehyksen nimi:"
+
+#: ../mod_query/mod_query.lua:181 ../mod_menu/mod_menu.lua:216
+msgid "Too much result data"
+msgstr "Liian suuri vastaus"
+
+#: ../mod_query/mod_query.lua:336
+msgid "Workspace type (%s):"
+msgstr "Työpöydän tyyppi (%s):"
+
+#: ../etc/cfg_menus.lua:30
+msgid "Restart"
+msgstr "Uudelleenkäynnistä"
+
+#: ../mod_query/mod_query.lua:553
+msgid "SSH to:"
+msgstr "Avaa SSH-yhteys:"
+
+#: ../mod_menu/mod_menu.lua:202
+msgid "Cannot save selection."
+msgstr "Ei voida tallettaa valintaa."
+
+#: ../mod_query/mod_query.lua:279 ../mod_query/mod_query.lua:289
+msgid "Could not find client window %s."
+msgstr "Asiakasikkunaa %s ei löytynyt."
+
+#: ../share/ioncore-efbb.lua:12
+msgid ""
+"Making the following minimal emergency mappings:\n"
+"  F2 -> xterm\n"
+"  F11 -> restart\n"
+"  F12 -> exit\n"
+"  Mod1+C -> close\n"
+"  Mod1+K P/N -> WFrame.switch_next/switch_prev\n"
+msgstr ""
+"Tehdään seuraavat vähimmäiset hätäsidonnat:\n"
+"  F2 -> xterm\n"
+"  F11 -> uudelleenkäynnistys\n"
+"  F12 -> lopetus\n"
+"  Mod1+C -> sulkeminen  Mod1+K P/N -> vaihto kehyksen sisällä\n"
+
+#: ../etc/cfg_menus.lua:33
+msgid "Exit"
+msgstr "Poistu"
+
+#: ../mod_menu/mod_menu.lua:242
+msgid "Refresh list"
+msgstr "Virkistä lista"
+
+#: ../etc/cfg_menus.lua:32
+msgid "Restart TWM"
+msgstr "Käynnistä TWM"
+
+#: ../mod_query/mod_query.lua:754
+msgid "%s menu:"
+msgstr "Valikko %s"
+
+#: ../mod_query/mod_query.lua:476
+msgid "Run:"
+msgstr "Suorita:"
+
+#: ../etc/cfg_menus.lua:31
+msgid "Restart PWM"
+msgstr "Käynnistä PWM"
+
+#: ../etc/cfg_menus.lua:29
+msgid "Save"
+msgstr "Talleta"
+
+#: ../mod_query/mod_query.lua:336
+msgid "none"
+msgstr "ei mikään"
+
+#: ../mod_query/mod_query.lua:581
+msgid "Manual page (%s):"
+msgstr "Ohjesivu (%s):"
+
+#: ../pwm/cfg_pwm_menus.lua:19 ../etc/cfg_menus.lua:14
+msgid "Styles"
+msgstr "Tyylit"
+
+#: ../etc/cfg_menus.lua:40 ../etc/cfg_menus.lua:54
+msgid "Kill"
+msgstr "Tapa"
+
+#: ../mod_query/mod_query.lua:315
+msgid "Unable to create workspace: no screen."
+msgstr "Ei voida luoda työpöytää: ei ruutua."
+
+#: ../share/ioncore-bindings.lua:68
+msgid "Invalid command"
+msgstr "Virheellinen komento"
+
+#: ../mod_query/mod_query.lua:790
+msgid ""
+"Title: %s\n"
+"Class: %s\n"
+"Role: %s\n"
+"Instance: %s\n"
+"XID: 0x%x"
+msgstr ""
+"Otsikko: %s\n"
+"Luokka(class): %s\n"
+"Rooli(role): %s\n"
+"Instanssi(instance): %s\n"
+"XID: 0x%x"
+
+#: ../pwm/cfg_pwm_menus.lua:29
+msgid "List"
+msgstr "Lista"
+
+#: ../pwm/cfg_pwm_menus.lua:15 ../etc/cfg_menus.lua:11
+msgid "Lock screen"
+msgstr "Lukitse näyttö"
+
+#: ../mod_query/mod_query.lua:437
+msgid "Edit file:"
+msgstr "Muokkaa tiedostoa:"
+
+#: ../share/ioncore-bindings.lua:45
+msgid "Error compiling guard: %s"
+msgstr "Virhe vahdin käännössä. %s"
+
+#: ../share/ioncore-bindings.lua:34
+msgid "Invalid guard %s."
+msgstr "Virheellinen vahti %s."
+
+#: ../mod_query/mod_query.lua:331
+msgid "Unknown error"
+msgstr "Tuntematon virhe"
+
+#: ../share/ioncore-luaext.lua:30
+msgid "Recursive table - unable to deepcopy"
+msgstr "Rekursiivinen taulu - ei voida syväkopioida."
+
+#: ../share/ioncore-bindings.lua:53
+msgid "Error in command string: "
+msgstr "Virhe komentojonossa:"
+
+#: ../mod_query/mod_query.lua:91
+msgid "Could not find %s"
+msgstr "Ei löydettyä %s:ää."
+
+#: ../ext_statusbar/ext_statusbar.lua:291
+msgid "Screen already has an stdisp. Refusing to create a statusbar."
+msgstr "Ruudulla on jo tilanäyttö. Kieltäydytään luomasta tilariviä."
+
+#: ../pwm/cfg_pwm_menus.lua:27 ../etc/cfg_menus.lua:39 ../etc/cfg_menus.lua:53
+msgid "Close"
+msgstr "Sulje"
+
+#: ../etc/cfg_menus.lua:42 ../etc/cfg_menus.lua:56
+msgid "(Un)tag"
+msgstr "Vaihda merkintä"
+
+#: ../mod_query/mod_query.lua:447
+msgid "View file:"
+msgstr "Näytä tiedosto:"
+
+#
+#: ../pwm/cfg_pwm_menus.lua:18
+msgid "Workspaces"
+msgstr "Työpöydät"
+
+#: ../pwm/cfg_pwm_menus.lua:17 ../etc/cfg_menus.lua:13
+msgid "About Ion"
+msgstr "Tietoja Ionista"
+
+#: ../pwm/cfg_pwm_menus.lua:14 ../etc/cfg_menus.lua:10
+msgid "Programs"
+msgstr "Ohjelmat"
+
+#: ../mod_query/mod_query.lua:390
+msgid "Restart Ion (y/n)?"
+msgstr "Uudelleenkäynnistä Ion (kyllä: y, ei: n)?"
+
+#: ../mod_query/mod_query.lua:758
+msgid "No entry '%s'"
+msgstr "Kirjausta '%s' ei löydy."
+
+#: ../mod_query/mod_query.lua:409
+msgid "Workspace name:"
+msgstr "Työpöydän nimi:"
+
+#: ../ext_statusbar/ext_statusbar.lua:285
+msgid "Screen not found."
+msgstr "Ruutua ei löytynyt."
+
+#: ../mod_query/mod_query.lua:370
+msgid "Go to or create workspace:"
+msgstr "Mene tai luo työpöytä:"
+
+#
+#: ../etc/cfg_menus.lua:23
+msgid "Run..."
+msgstr "Suorita..."
+
+#: ../mod_query/mod_query.lua:710
+msgid "Lua code: "
+msgstr "Lua-koodia:"
+
+#: ../mod_query/mod_query.lua:498
+msgid "Failed to open ~/.ssh/known_hosts"
+msgstr "Ei pystytty avaamaan tiedostoa ~/.ssh/known_hosts."
+
+#: ../mod_query/mod_query.lua:357
+msgid "Attach window:"
+msgstr "Liitä ikkuna:"
+
+#: ../mod_query/mod_query.lua:347
+msgid "Go to window:"
+msgstr "Mene ikkunaan:"
