@@ -173,7 +173,7 @@ defbindings("WFrame", {
     mpress("Button3", "mod_menu.pmenu(_, _sub, 'ctxmenu')"),
     
     bdoc("Begin move/resize mode."),
-    kpress(MOD1.."R", "WFrame.begin_moveres(_)"),
+    kpress(MOD1.."R", "WFrame.begin_kbresize(_)"),
     
     bdoc("Switch the frame to display the object indicated by the tab."),
     mclick("Button1@tab", "WFrame.p_switch_tab(_)"),
@@ -196,7 +196,7 @@ defbindings("WFrame", {
 -- WMoveresMode context bindings
 -- 
 -- These bindings are available keyboard move/resize mode. The mode
--- is activated on frames with the command begin_moveres (bound to
+-- is activated on frames with the command begin_kbresize (bound to
 -- MOD1.."R" above by default).
 
 defbindings("WMoveresMode", {

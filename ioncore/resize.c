@@ -708,7 +708,7 @@ static bool trymaxv(WFrame *frame, WRegion *mgr, int tryonlyflag)
  * Attempt to maximize \var{frame} vertically.
  */
 EXTL_EXPORT_MEMBER
-    void frame_maximize_vert(WFrame *frame)
+void frame_maximize_vert(WFrame *frame)
 {
     WRegion *mgr=REGION_MANAGER(frame);
     
@@ -752,7 +752,7 @@ static bool trymaxh(WFrame *frame, WRegion *mgr, int tryonlyflag)
  * Attempt to maximize \var{frame} horizontally.
  */
 EXTL_EXPORT_MEMBER
-    void frame_maximize_horiz(WFrame *frame)
+void frame_maximize_horiz(WFrame *frame)
 {
     WRegion *mgr=REGION_MANAGER(frame);
     

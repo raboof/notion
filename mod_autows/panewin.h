@@ -17,11 +17,14 @@
 
 INTRCLASS(WPaneWin);
 
+#include "splitext.h"
+
 DECLCLASS(WPaneWin){
     WWindow wwin;
     GrBrush *brush;
     GrBorderLine bline;
     GrBorderWidths bdw;
+    WSplitFloat *splitfloat;
 };
 
 extern bool panewin_init(WPaneWin *pwin, 

@@ -114,10 +114,18 @@ bool splitfloat_init(WSplitFloat *split, const WRectangle *geom,
     fp.g=*geom;
     fp.mode=REGION_FIT_EXACT;
     split->tlpwin=create_panewin(par, &fp);
-    
+    if(split->tlpwin!=NULL){
+        split->tlpwin->splitfloat=split;
+        ionws_managed_add((WIonWS*)ws, (WRegion*)split->tlpwin);
+    }
+
     fp.g=*geom;
     fp.mode=REGION_FIT_EXACT;
     split->brpwin=create_panewin(par, &fp);
+    if(split->brpwin!=NULL){
+        split->brpwin->splitfloat=split;
+        ionws_managed_add((WIonWS*)ws, (WRegion*)split->brpwin);
+    }
     
     splitfloat_set_borderlines(split);
 
@@ -166,12 +174,14 @@ void splitfloat_deinit(WSplitFloat *split)
     if(split->tlpwin!=NULL){
         WPaneWin *tmp=split->tlpwin;
         split->tlpwin=NULL;
+        tmp->splitfloat=NULL;
         destroy_obj((Obj*)tmp);
     }
 
     if(split->brpwin!=NULL){
         WPaneWin *tmp=split->brpwin;
         split->brpwin=NULL;
+        tmp->splitfloat=NULL;
         destroy_obj((Obj*)tmp);
     }
     

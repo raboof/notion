@@ -15,12 +15,13 @@
 #include <ioncore/common.h>
 #include <ioncore/gr.h>
 #include <mod_ionws/split.h>
-#include "autows.h"
-#include "panewin.h"
 
 INTRCLASS(WSplitUnused);
 INTRCLASS(WSplitPane);
 INTRCLASS(WSplitFloat);
+
+#include "autows.h"
+#include "panewin.h"
 
 DECLCLASS(WSplitUnused){
     WSplitRegion regnode;

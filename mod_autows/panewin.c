@@ -47,6 +47,7 @@ bool panewin_init(WPaneWin *pwin, WWindow *parent, const WFitParams *fp)
 {
     pwin->brush=NULL;
     pwin->bline=GR_BORDERLINE_NONE;
+    pwin->splitfloat=NULL;
     
     if(!window_init(&(pwin->wwin), parent, fp))
         return FALSE;
@@ -72,6 +73,8 @@ WPaneWin *create_panewin(WWindow *parent, const WFitParams *fp)
 
 void panewin_deinit(WPaneWin *pwin)
 {
+    assert(pwin->splitfloat==NULL);
+    
     if(pwin->brush!=NULL){
         grbrush_release(pwin->brush, pwin->wwin.win);
         pwin->brush=NULL;

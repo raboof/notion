@@ -17,7 +17,7 @@
 #include "resize.h"
 #include "extl.h"
 
-extern void frame_moveres_begin(WFrame *frame);
+extern WMoveresMode *region_begin_kbresize(WRegion *reg);
 
 extern void ioncore_set_moveres_accel(ExtlTab tab);
 extern void ioncore_get_moveres_accel(ExtlTab tab);

@@ -23,7 +23,6 @@
 #include "signal.h"
 #include "focus.h"
 #include "bindmaps.h"
-#include "framep.h"
 
 
 /*{{{ Resize accelerator */
@@ -239,21 +238,6 @@ static int limit_and_encode_mode(int *left, int *right,
 
 static void resize_units(WMoveresMode *mode, int *wret, int *hret)
 {
-    /**wret=1;
-    *hret=1;
-    
-    if(FRAME_CURRENT(frame)!=NULL){
-        XSizeHints hints;
-        
-        region_size_hints(FRAME_CURRENT(frame), &hints, NULL, NULL);
-        
-        if(hints.flags&PResizeInc &&
-           (hints.width_inc>1 || hints.height_inc>1)){
-            *wret=hints.width_inc;
-            *hret=hints.height_inc;
-        }
-    }*/
-
     XSizeHints *h=&(mode->hints);
     *wret=1;
     *hret=1;
@@ -363,16 +347,16 @@ static void cancel_moveres(WRegion *reg)
 
     
 /*EXTL_DOC
- * Enter move/resize mode for \var{frame}. The bindings set with
+ * Enter move/resize mode for \var{reg}. The bindings set with
  * \fnref{WMoveresMode.bindings} are used in this mode and of
  * of the exported functions only \fnref{WMoveresMode.resize}, 
  * \fnref{WMoveresMode.move}, \fnref{WMoveresMode.cancel} and
  * \fnref{WMoveresMode.end} are allowed to be called.
  */
 EXTL_EXPORT_MEMBER
-WMoveresMode *frame_begin_moveres(WFrame *frame)
+WMoveresMode *region_begin_kbresize(WRegion *reg)
 {
-    WMoveresMode *mode=region_begin_resize((WRegion*)frame, NULL, FALSE);
+    WMoveresMode *mode=region_begin_resize(reg, NULL, FALSE);
 
     if(mode==NULL)
         return NULL;
@@ -382,11 +366,10 @@ WMoveresMode *frame_begin_moveres(WFrame *frame)
 
     accel_reset();
     
-    ioncore_grab_establish((WRegion*)frame, resize_handler,
+    ioncore_grab_establish(reg, resize_handler,
                            (GrabKilledHandler*)cancel_moveres, 0);
     
     return mode;
-    
 }
 
 

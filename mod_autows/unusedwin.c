@@ -18,6 +18,8 @@
 #include <ioncore/event.h>
 #include <ioncore/gr.h>
 #include <ioncore/regbind.h>
+#include <ioncore/framep.h>
+#include <ioncore/presize.h>
 #include "unusedwin.h"
 #include "main.h"
 
@@ -79,6 +81,56 @@ void unusedwin_deinit(WUnusedWin *uwin)
 /*}}}*/
 
 
+/*{{{ unusedwin_press */
+
+
+static void unusedwin_border_inner_geom(const WUnusedWin *uwin, 
+                                        WRectangle *geom)
+{
+    GrBorderWidths bdw;
+    
+    geom->x=0;
+    geom->y=0;
+    geom->w=REGION_GEOM(uwin).w;
+    geom->h=REGION_GEOM(uwin).h;
+    
+    if(uwin->brush!=NULL){
+        grbrush_get_border_widths(uwin->brush, &bdw);
+
+        geom->x+=bdw.left;
+        geom->y+=bdw.top;
+        geom->w-=bdw.left+bdw.right;
+        geom->h-=bdw.top+bdw.bottom;
+    }
+    
+    geom->w=maxof(geom->w, 0);
+    geom->h=maxof(geom->h, 0);
+}
+
+
+static int unusedwin_press(WUnusedWin *uwin, XButtonEvent *ev, 
+                           WRegion **reg_ret)
+{
+    WRectangle g;
+    
+    *reg_ret=NULL;
+    
+    window_p_resize_prepare(&uwin->wwin, ev);
+    
+    /* Check border */
+    
+    unusedwin_border_inner_geom(uwin, &g);
+    
+    if(rectangle_contains(&g, ev->x, ev->y))
+        return FRAME_AREA_CLIENT;
+    
+    return FRAME_AREA_BORDER;
+}
+
+
+/*}}}*/
+
+
 /*{{{ Drawing */
 
 
@@ -117,6 +169,7 @@ static void unusedwin_draw(WUnusedWin *uwin, bool complete)
 static DynFunTab unusedwin_dynfuntab[]={
     {region_updategr, unusedwin_updategr},
     {window_draw, unusedwin_draw},
+    {(DynFun*)window_press, (DynFun*)unusedwin_press},
     END_DYNFUNTAB,
 };
 
