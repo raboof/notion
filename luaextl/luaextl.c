@@ -1010,16 +1010,17 @@ bool extl_dofile_vararg(const char *file, const char *spec,
 	printf("lua_dofile(%s)\n", file);
 	
 	oldtop=lua_gettop(l_st);
+	lua_getglobal(l_st, "CURRENT_FILE");
 	lua_pushstring(l_st, file);
 	lua_setglobal(l_st, "CURRENT_FILE");
 	if(luaL_loadfile(l_st, file)!=0){
 		warn("%s", lua_tostring(l_st, -1));
 	}else{
-		ret=extl_do_call_vararg(l_st, oldtop, TRUE, spec, rspec, args);
+		ret=extl_do_call_vararg(l_st, oldtop+1, TRUE, spec, rspec, args);
 	}
 
 restore:
-	lua_pushnil(l_st);
+	/*lua_pushnil(l_st);*/
 	lua_setglobal(l_st, "CURRENT_FILE");
 	
 	lua_settop(l_st, oldtop);
