@@ -13,19 +13,9 @@
 #include <unistd.h>
 #include <string.h>
 
-#include <ioncore/common.h>
-#include <ioncore/global.h>
-#include <ioncore/exec.h>
-#include <ioncore/clientwin.h>
-#include <ioncore/focus.h>
-#include <ioncore/names.h>
-#include <ioncore/genws.h>
-#include <ioncore/reginfo.h>
 #include <ioncore/extl.h>
 #include "query.h"
 #include "wedln.h"
-#include "wmessage.h"
-#include "fwarn.h"
 
 
 /*{{{ Generic */
