@@ -265,10 +265,10 @@ Keyboard and pointer binding configuration files
 User default configuration file (overrides system default)
 
 .SH SEE ALSO
-The Ion home page, \fIhttp://www.students.tut.fi/~tuomov/ion/\fP
+The Ion home page, \fIhttp://modeemi.fi/~tuomov/ion/\fP
 .PP
 .I PREFIX/doc/ion/
 .PP
 .I X(1x)
 .SH AUTHOR
-Ion was written by Tuomo Valkonen <tuomov@cc.tut.fi>.
+Ion was written by Tuomo Valkonen <tuomov@modeemi.fi>.
