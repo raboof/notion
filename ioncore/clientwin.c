@@ -1251,21 +1251,19 @@ static void clientwin_resize_hints(WClientWin *cwin, XSizeHints *hints_ret)
 
 /*EXTL_DOC
  * Returns a table containing the properties \code{WM_CLASS} (table entries
- * \var{instance} and \var{class}),  \code{WM_WINDOW_ROLE} (and \var{role})
- * and \code{_ION_KLUDGES} (\var{kludges}) properties for \var{cwin}.
- * If a property is not set, the corresponding field(s) are unset in the 
- * table.
+ * \var{instance} and \var{class}) and  \code{WM_WINDOW_ROLE} (\var{role})
+ * properties for \var{cwin}. If a property is not set, the corresponding 
+ * field(s) are unset in the  table.
  */
 EXTL_EXPORT_MEMBER
 ExtlTab clientwin_get_ident(WClientWin *cwin)
 {
-    char **p=NULL, *wrole=NULL, *kludges=NULL;
+    char **p=NULL, *wrole=NULL;
     int n=0, n2=0, n3=0, tmp=0;
     ExtlTab tab;
     
     p=xwindow_get_text_property(cwin->win, XA_WM_CLASS, &n);
     wrole=xwindow_get_string_property(cwin->win, ioncore_g.atom_wm_window_role, &n2);
-    kludges=xwindow_get_string_property(cwin->win, ioncore_g.atom_kludges, &n3);
     
     tab=extl_create_table();
     if(n>=2 && p[1]!=NULL)
@@ -1274,15 +1272,11 @@ ExtlTab clientwin_get_ident(WClientWin *cwin)
         extl_table_sets_s(tab, "instance", p[0]);
     if(wrole!=NULL)
         extl_table_sets_s(tab, "role", wrole);
-    if(kludges!=NULL)
-        extl_table_sets_s(tab, "kludges", kludges);
     
     if(p!=NULL)
         XFreeStringList(p);
     if(wrole!=NULL)
         free(wrole);
-    if(kludges!=NULL)
-        free(kludges);
     
     return tab;
 }

@@ -419,7 +419,6 @@ static bool ioncore_init_x(const char *display, int stflags)
     ioncore_g.atom_wm_window_role=XInternAtom(dpy, "WM_WINDOW_ROLE", False);
     ioncore_g.atom_checkcode=XInternAtom(dpy, "_ION_CWIN_RESTART_CHECKCODE", False);
     ioncore_g.atom_selection=XInternAtom(dpy, "_ION_SELECTION_STRING", False);
-    ioncore_g.atom_kludges=XInternAtom(dpy, "_ION_KLUDGES", False);
     ioncore_g.atom_mwm_hints=XInternAtom(dpy, "_MOTIF_WM_HINTS", False);
 
     ioncore_init_xim();
