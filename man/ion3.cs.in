@@ -1,0 +1,158 @@
+.TH ION 1
+.SH NÁZEV
+Ion - správce oken systému X11
+.SH PØEHLED
+.B ion3
+.I "[volby]"
+.SH "POPIS"
+
+Ion je dla¾dicový správce oken se zálo¾kami navr¾ený pro klávesnicové u¾ivatele.
+ 
+.SH "VOLBY"
+.TP
+.B \-display poèítaè:displej.obrazovka
+X displej, který se má spravovat
+.TP
+.B \-conffile soubor
+Konfiguraèní soubor, který se má pou¾ít
+.TP
+.B \-searchdir adresáø
+Adresáø, ve kterém se budou hledat konfiguraèní soubory a ostatní skripty
+.TP
+.B \-oneroot
+Na X serverech s více obrazovkami (ne-Xinerama) bude spravovat pouze výchozí
+obrazovku (koøenové okno). (Tedy ne v¹echny, které byly zadány v parametru
+-display nebo v promìnné DISPLAY.)
+.TP
+.B \-sessionname název_sezení
+Nastaví název sezení. Tato volba ovlivní, kam se ulo¾í pracovní plochy
+a ostatní soubory. Pokud není nastavená, pou¾ije se ~/.ion3/session_name.
+.TP
+.B \-xinerama 0|1
+Jestli¾e byl Ion sestaven s podporou Xineramy, mù¾ete touto volbou
+povolit/zakázat (1/0) její pou¾ití. Implicitnì je Xinerama povolena.
+.TP
+.B \-help
+Zobrazí nápovìdu k pøíkazovým parametrùm
+.TP
+.B \-version
+Zobrazí verzi
+.TP
+.B \-about
+Zobrazí informace o programu (verze, copyright)
+
+.SH Základní pojetí
+
+Tato sekce pøiná¹í pøehled typù objektù, které se objevují na X displeji
+spravovaném Ionem. To je nezbytné pro pochopení operací s objekty a pro 
+pochopení, proè jsou rùzná klávesová pøiøazení dostupná jen u nìkterých
+objektù. Podrobnìj¹í popis nutný pro psaní vlastních pøizpùsobení naleznete
+na webových stránkách Ionu.
+
+Nejvy¹¹ími objekty jsou \fBobrazovky\fP, které odpovídají fyzickým
+obrazovkám. Obrazovky obsahují \fBpracovní plochy\fP a 
+\fBklientská okna\fP v celoobrazovkovém re¾imu. V jeden okam¾ik mù¾e být
+na obrazovce zobrazen právì jeden takový objekt.
+
+Ion momentálnì podporuje dva typy pracovních ploch: tradièní
+\fBdla¾dicový\fP (klasický Ion) a bì¾nìj¹í \fBplovoucí\fP (PWM).
+Pracovní plochy samy o sobì nejsou vidìt a slou¾í hlavnì jako kontejnery
+pro skupiny \fBrámù\fP.
+
+Podobnì jako obrazovky obsahují i rámy dal¹í objekty, ale v tomto pøípadì
+ji¾ jde vìt¹inou o klientská okna. Po vìt¹inu èasu bývají rámy jedinou
+viditelnou èástí Ionu - volitelnì mohou mít kolem sebe orámování a pro
+ka¾dého potomka zobrazují \fBzálo¾ku\fP.
+
+Dal¹í viditelnou èástí jsou \fBdotazy\fP. Nejde o nic jiného ne¾ obdélníky,
+které se objeví ve spodní èásti rámù nebo obrazovek v¾dy, kdy¾ se Ion ptá
+na nìjakou informaci (tøeba název okna pro pøipojení, nebo název programu,
+který se má spustit). Vìt¹ina dotazù podporuje doplòování klávesou tab.
+
+
+.SH PØIØAZENÍ
+
+Toto jsou implicitní pøiøazení klávesových zkratek. Pøiøazení modifikátoru
+(\fBMod1\fP) závisí na systému. Na PCèkách s XFree86 bude nejspí¹ navázán
+na levou klávesu Alt (\fBAlt_L\fP). Na Sunech je obvykle namapován na klávesy
+s diamanty (\fBMeta_L\fP, \fBMeta_R\fP). Konkrétní pøiøazení zjistíte
+programem \fIxmodmap(1x)\fP.
+
+Øetìzec v hranatých závorkách urèuje modul, jeho¾ konfiguraèní soubor
+definuje toto pøiøazení.
+
+.SS Globální pøiøazení
+
+BINDINGS:WScreen
+
+.".SS Pøiøazení pro práci s rámy a obrazovkami a jejich potomky
+
+BINDINGS:WMPlex
+
+.SS Pøiøazení pro práci s rámy a jejich potomky
+
+BINDINGS:WFrame
+
+.SS Pøiøazení pro pøesun/zmìnu velikosti
+
+BINDINGS:WMoveresMode
+
+.SS Pøiøazení pro dla¾dicové pracovní plochy [mod_ionws]
+
+BINDINGS:WIonWS
+
+.SS Pøiøazení pro plovoucí pracovní plochy a rámy [mod_floatws]
+
+BINDINGS:WFloatWS
+
+BINDINGS:WFloatFrame
+
+.SS Pøiøazení pro zprávy a dotazy [mod_query]
+
+BINDINGS:WInput
+
+.SS Pøiøazení pro úpravu dotazù [mod_query]
+
+Tyto jsou podobné jako v textovém editoru \fIjoe(1)\fP.
+Vyjmutí, kopírování a vlo¾ení sice pracují mírnì konvenènìji, ale
+klávesy jsou shodné.
+
+BINDINGS:WEdln
+
+.SS Pøiøazení pro menu [mod_menu]
+
+BINDINGS:WMenu
+
+
+.SH SOUBORY A ADRESÁØE
+.TP
+.B ETCDIR/cfg_ion.lua
+Hlavní systémový konfiguraèní soubor
+.TP
+.B ETCDIR/cfg_*.lua
+Ostatní konfiguraèní soubory
+.TP
+.B ETCDIR/look_*.lua
+Soubory nastavující barevné schéma
+.TP
+.B ~/.ion3/
+U¾ivatelské konfiguraèní soubory
+.TP
+.B ~/.ion3/cfg_ion.lua
+Hlavní u¾ivatelský konfiguraèní soubor (pøepisuje systémové nastavení)
+
+.SH VIZ TAKÉ
+Domovská stránka Ionu \fIhttp://iki.fi/tuomov/ion/\fP
+.PP
+Dokument "Ion: Configuring and extending with Lua" k nalezení
+tamté¾.
+.PP
+.I DOCDIR/
+.PP
+\fIX(7x)\fP, \fIpwm3(1)\fP, \fIjoe(1)\fP
+
+.SH AUTOR
+Ion napsal Tuomo Valkonen <tuomov at iki.fi>.
+
+.SH PØEKLAD
+Do èe¹tiny pøelo¾il Miroslav Kuøe <kurem at debian.cz>.
