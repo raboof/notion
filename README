@@ -35,7 +35,17 @@ BUILDING AND INSTALLING
    will refuse to start if it can not find all the necessary uncorrupt
    configuration files either in $PREFIX/etc/ion-devel/ or in ~/.ion-devel/.
 
-5. The scripts 'ion-edit' and 'ion-view' in $SHAREDIR and bound to the
+5. How to best set up 'startx' or whatever to start Ion instead of your
+   current window manager depends on your system's setup. A good guess
+   is creating or modifying an executable shell script .xsession in your
+   home directory to start Ion. This should also work if you're using some
+   X display/login manager (unless the person who configured it is totally
+   brain damaged and has not set it up to allow selecting .xsession). 
+   If ~/.xsession does not help and you're not using a display manager, 
+   modifying ~/.xinitrc or creating one based on your system's xinitrc
+   (wherever that may be; use locate) may be what you need to do.
+
+6. The scripts 'ion-edit' and 'ion-view' in $SHAREDIR and bound to the
    F5 and F6 keys expect the program 'run-mailcap' to be found. This 
    program opens a viewer/editor for a file based on its MIME type. 
    Unless you are using Debian, most likely you don't have it, but any
