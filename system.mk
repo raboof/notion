@@ -102,9 +102,8 @@ XINERAMA_LIBS=-lXinerama
 # function, encoding names unfortunately aren't and thus these also have to
 # specified here.
 #
-# Note that released versions of XFree86 libraries [as of 2003-06-17] have 
-# a bug that will cause Ion to segfault if Opera is used when UTF8 support 
-# is enabled.
+# Note that XFree86 libraries up to 4.3.0 have a bug that will cause Ion to
+# segfault if Opera is used when UTF8 support is enabled.
 
 # GNU/Linux and other glibc-2.2 based systems.
 #DEFINES += -DCF_UTF8 -DCF_ICONV_TARGET=\"WCHAR_T\" -DCF_ICONV_SOURCE=\"UTF-8\"
