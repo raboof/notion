@@ -257,7 +257,7 @@ function mod_menu.refresh_styles()
                                  if s=="" then
                                      return ""
                                  else
-                                     return " "..string.shell_safe(s)
+                                     return " "..string.shell_safe(s).."/look-"
                                  end
                              end)
         
