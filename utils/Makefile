@@ -11,8 +11,7 @@ include $(TOPDIR)/system-inc.mk
 SUBDIRS=ion-completefile
 INSTALL_SUBDIRS=$(SUBDIRS)
 
-SHELLSCRIPTS = ion-edit ion-man ion-runinxterm ion-ssh ion-view \
-	       ion-completeman
+SHELLSCRIPTS = ion-man ion-runinxterm ion-ssh ion-completeman
 
 TARGETS=ion-ssh ion-man ion-completeman
 

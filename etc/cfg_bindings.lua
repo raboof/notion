@@ -112,10 +112,12 @@ defbindings("WMPlex", {
     kpress(MOD2.."F4", "mod_query.query_ssh(_)"),
 
     bdoc("Query for file to edit."),
-    kpress(MOD2.."F5", "mod_query.query_editfile(_)"),
+    kpress(MOD2.."F5", 
+           "mod_query.query_editfile(_, 'run-mailcap --action=edit')"),
 
     bdoc("Query for file to view."),
-    kpress(MOD2.."F6", "mod_query.query_runfile(_)"),
+    kpress(MOD2.."F6", 
+           "mod_query.query_runfile(_, 'run-mailcap --action=view')"),
 
     bdoc("Query for workspace to go to or create a new one."),
     kpress(MOD2.."F9", "mod_query.query_workspace(_)"),

@@ -441,22 +441,25 @@ end
 
 
 --DOC
--- Asks for a file to be edited. It uses the script \file{ion-edit} to
--- start a program to edit the file. This script uses \file{run-mailcap}
--- by default, but if you don't have it, you may customise the script.
-function mod_query.query_editfile(mplex)
-    local script=mod_query.lookup_script_warn(mplex, "ion-edit")
-    mod_query.query_execfile(mplex, TR("Edit file:"), script)
+-- Asks for a file to be edited. This script uses 
+-- \command{run-mailcap --mode=edit} by default, but you may provide an
+-- alternative script to use. The default prompt is "Edit file:" (translated).
+function mod_query.query_editfile(mplex, script, prompt)
+    mod_query.query_execfile(mplex, 
+                             prompt or TR("Edit file:"), 
+                             script or "run-mailcap --action=edit")
 end
 
 
 --DOC
--- Asks for a file to be viewed. It uses the script \file{ion-view} to
--- start a program to view the file. This script uses \file{run-mailcap}
--- by default, but if you don't have it, you may customise the script.
-function mod_query.query_runfile(mplex)
-    local script=mod_query.lookup_script_warn(mplex, "ion-view")
-    mod_query.query_execfile(mplex, TR("View file:"), script)
+-- Asks for a file to be viewed. This script uses 
+-- \command{run-mailcap --action=view} by default, but you may provide an
+-- alternative script to use. The default prompt is "View file:" (translated).
+function mod_query.query_runfile(mplex, script, prompt)
+    mod_query.query_execfile(mplex, 
+                             prompt or TR("View file:"), 
+                             script or "run-mailcap --action=view")
+
 end
 
 
