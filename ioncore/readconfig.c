@@ -118,11 +118,14 @@ bool ioncore_add_userdirs(const char *appname)
 }
 
 
-static bool ioncore_set_sessiondir(const char *appname, const char *session)
+bool ioncore_set_sessiondir(const char *appname, const char *session)
 {
 	const char *home=getenv("HOME");
 	char *tmp;
 	bool ret=FALSE;
+	
+	if(sessiondir!=NULL)
+		return FALSE;
 	
 	if(home!=NULL){
 		libtu_asprintf(&tmp, "%s/.%s/%s", home, appname, session);
@@ -149,7 +152,7 @@ bool ioncore_add_default_dirs()
 	fails-=ioncore_add_scriptdir(SHAREDIR);
 	fails-=ioncore_add_moduledir(MODULEDIR);
 	fails-=ioncore_add_userdirs("ion-devel");
-	fails-=ioncore_set_sessiondir("ion-devel", "saves");
+	/*fails-=ioncore_set_sessiondir("ion-devel", "default-session");*/
 	
 	return (fails==0);
 }
@@ -316,90 +319,20 @@ bool do_include(const char *file, const char *current_file_dir)
 /*{{{ try_config */
 
 
-static char *construct_scr_name(const char *name, int scr)
+int try_config_for(const char *module, TryConfigFn *tryfn, void *tryfnparam)
 {
-	char *tmp, *display, *dpyend;
-	
-	display=XDisplayName(wglobal.display);
-	
-	dpyend=strchr(display, ':');
-	if(dpyend==NULL)
-		return NULL;
-	
-	dpyend=strchr(dpyend, '.');
-	
-	if(dpyend==NULL) {
-		libtu_asprintf(&tmp, "%s-%s.%d", name, display, scr);
-	}else{
-		libtu_asprintf(&tmp, "%s-%.*s.%d", name, 
-					   (int)(dpyend-display), display, scr);
-	}
-	
-	/* It seems Xlib doesn't want this freed */
-	/*XFree(display);*/
-	
-	if(tmp==NULL){
-		warn_err();
-		return NULL;
-	}
-
-	/* Some second-rate OSes/filesystems don't like the colon */
-#ifdef CF_SECOND_RATE_OS_FS
-	{
-		char *colon=tmp;
-		while(1){
-			colon=strchr(colon, ':');
-			if(colon==NULL)
-				break;
-			*colon='_';
-		}
-	}
-#endif
-	
-	return tmp;
-}
-
-
-static int do_try_config_for(const char *basename, const char *scrbasename,
-							TryConfigFn *tryfn, void *tryfnparam)
-{
-	char *files[]={NULL, NULL, NULL};
+	char *files[]={NULL, NULL};
 	int ret;
 	
-	libtu_asprintf(files+0, "%s.%s", basename, extl_extension());
+	libtu_asprintf(files+0, "%s.%s", module, extl_extension());
 	if(files[0]==NULL){
 		warn_err();
 		return TRYCONFIG_MEMERROR;
 	}
-	libtu_asprintf(files+1, "%s.%s", scrbasename, extl_extension());
-	if(files[1]==NULL)
-		warn_err();
 	
 	ret=try_etcpath2((const char**)&files, tryfn, tryfnparam);
 	
 	free(files[0]);
-	if(files[1]!=NULL)
-		free(files[1]);
-	
-	return ret;
-}
-
-
-int try_config_for(const char *module, TryConfigFn *tryfn, void *tryfnparam)
-{
-	return do_try_config_for(module, NULL, tryfn, tryfnparam);
-}
-
-
-int try_config_for_scr(const char *module, int scr,
-					   TryConfigFn *tryfn, void *tryfnparam)
-{
-	int ret;
-	char *tmp;
-	
-	tmp=construct_scr_name(module, scr);
-	ret=do_try_config_for(module, tmp, tryfn, tryfnparam);
-	free(tmp);
 	
 	return ret;
 }
@@ -426,17 +359,11 @@ bool read_config(const char *cfgfile)
 
 bool read_config_for(const char *module)
 {
-	return read_config_for_args(module, -1, TRUE, NULL, NULL);
+	return read_config_for_args(module, TRUE, NULL, NULL);
 }
 
 
-bool read_config_for_scr(const char *module, int scr)
-{
-	return read_config_for_args(module, scr, TRUE, NULL, NULL);
-}
-
-
-bool read_config_for_args(const char *module, int scr, bool warn_nx,
+bool read_config_for_args(const char *module, bool warn_nx,
 						  const char *spec, const char *rspec, ...)
 {
 	bool ret;
@@ -447,10 +374,8 @@ bool read_config_for_args(const char *module, int scr, bool warn_nx,
 	param.rspec=rspec;
 	
 	va_start(param.args, rspec);
-	if(scr<0)
-		ret=try_config_for(module, (TryConfigFn*)try_call, &param);
-	else
-		ret=try_config_for_scr(module, scr, (TryConfigFn*)try_call, &param);
+	
+	ret=try_config_for(module, (TryConfigFn*)try_call, &param);
 	
 	if(ret==TRYCONFIG_NOTFOUND && warn_nx){
 		warn("Unable to find configuration file '%s' on search path", 
@@ -467,20 +392,6 @@ bool read_config_for_args(const char *module, int scr, bool warn_nx,
 
 
 /*{{{ get_savefile_for */
-
-
-char *get_savefile_for_scr(const char *file, int scr)
-{
-	char *tmp=NULL, *res=NULL;
-	
-	tmp=construct_scr_name(file, scr);
-	if(tmp!=NULL){
-		res=get_savefile_for(tmp);
-		free(tmp);
-	}
-	
-	return res;
-}
 
 
 char *get_savefile_for(const char *file)

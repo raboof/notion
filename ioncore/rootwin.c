@@ -40,6 +40,7 @@
 #include "bindmaps.h"
 #include "readconfig.h"
 #include "resize.h"
+#include "saveload.h"
 
 
 
@@ -561,6 +562,8 @@ bool setup_rootwins()
 	WRootWin *rootwin;
 	WRegion *reg;
 	int n=0;
+	
+	load_workspaces();
 	
 	FOR_ALL_ROOTWINS(rootwin){
 		FOR_ALL_MANAGED_ON_LIST(rootwin->screen_list, reg){

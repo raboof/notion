@@ -161,11 +161,11 @@ void save_geom(WRectangle geom, FILE *file, int lvl)
 /*{{{ save_workspaces, load_workspaces */
 
 
-bool load_workspaces(WScreen *vp)
+bool load_workspaces()
 {
 	bool ret;
 	loading_workspaces=TRUE;
-	ret=read_config_for_args("workspaces", vp->id, FALSE, "o", NULL, vp);
+	ret=read_config_for_args("workspaces", FALSE, NULL, NULL);
 	loading_workspaces=FALSE;
 	return ret;
 }
@@ -203,52 +203,14 @@ static bool ensuredir(char *f)
 }
 
 
-static bool do_save_workspaces(WScreen *scr, char *wsconf)
+bool save_workspaces()
 {
-	FILE *file;
-	WRegion *reg;
-	const char *name;
-	
-	if(!ensuredir(wsconf))
-		return FALSE;
-	
-	file=fopen(wsconf, "w");
-	
-	if(file==NULL){
-		warn_err_obj(wsconf);
-		return FALSE;
-	}
-	
-	fprintf(file, "-- This file was created by and is modified by Ion.\n");
-	
-	name=region_name((WRegion*)scr);
-	if(name!=NULL){
-		fprintf(file, "WRegion.set_name(arg[1], ");
-		write_escaped_string(file, name);
-		fprintf(file, ")\n");
-	}
-	
-	FOR_ALL_MANAGED_ON_LIST(scr->mplex.managed_list, reg){
-		if(region_supports_save(reg)){
-			fprintf(file, "WMPlex.attach_new(arg[1], {\n");
-			region_save_to_file(reg, file, 1);
-			fprintf(file, "})\n");
-		}
-	}
-	
-	
-	fclose(file);
-	
-	return TRUE;
-}
-
-
-bool save_workspaces(WScreen *scr)
-{
-	bool successp;
+	bool successp=TRUE;
 	char *wsconf;
+	FILE *file;
+	WScreen *scr;
 	
-	wsconf=get_savefile_for_scr("workspaces", scr->id);
+	wsconf=get_savefile_for("workspaces");
 
 	if(wsconf==NULL)
 		return FALSE;
@@ -256,7 +218,24 @@ bool save_workspaces(WScreen *scr)
 	if(!ensuredir(wsconf))
 		return FALSE;
 
-	successp=do_save_workspaces(scr, wsconf);
+	file=fopen(wsconf, "w");
+
+	if(file==NULL){
+		warn_err_obj(wsconf);
+		free(wsconf);
+		return FALSE;
+	}
+
+	fprintf(file, "-- This file was created by and is modified by Ion.\n\n");
+
+	FOR_ALL_SCREENS(scr){
+		fprintf(file, "initialise_screen_id(%d, {\n", scr->id);
+		if(!region_save_to_file((WRegion*)scr, file, 1))
+			successp=FALSE;
+		fprintf(file, "})\n\n");
+	}
+	
+	fclose(file);
 	
 	free(wsconf);
 	

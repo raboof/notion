@@ -17,6 +17,8 @@
 INTROBJ(WScreen);
 
 #include "mplex.h"
+#include "extl.h"
+
 
 #define FOR_ALL_SCREENS(SCR)   \
 	for((SCR)=wglobal.screens; \
@@ -29,6 +31,7 @@ DECLOBJ(WScreen){
 	int id;
 	Atom atom_workspace;
 	bool uses_root;
+	bool configured;
 	WRectangle managed_off;
 	WScreen *next_scr, *prev_scr;
 };
@@ -39,6 +42,7 @@ extern WScreen *create_screen(WRootWin *rootwin, int id, WRectangle geom,
 							  bool useroot);
 
 extern bool screen_initialize_workspaces(WScreen *scr);
+extern bool initialise_screen_id(int id, ExtlTab tab);
 
 /*extern void screen_switch_nth(WScreen *scr, uint n);
 extern void screen_switch_next(WScreen *scr);

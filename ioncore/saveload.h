@@ -26,8 +26,8 @@ extern void begin_saved_region(WRegion *reg, FILE *file, int lvl);
 /*extern void end_saved_region(WRegion *reg, FILE *file, int lvl);*/
 extern void save_indent_line(FILE *file, int lvl);
 
-extern bool load_workspaces(WScreen *vp);
-extern bool save_workspaces(WScreen *vp);
+extern bool load_workspaces();
+extern bool save_workspaces();
 
 extern WRegion *region_add_managed_load(WRegion *mgr, ExtlTab tab);
 

@@ -30,19 +30,16 @@ extern bool ioncore_add_scriptdir(const char *dir);
 extern bool ioncore_add_moduledir(const char *dir);
 extern bool ioncore_add_userdirs(const char *appname);
 extern bool ioncore_add_default_dirs();
+extern bool ioncore_set_sessiondir(const char *appname, const char *session);
 
 extern int try_config_for(const char *module, TryConfigFn *tryfn, 
 						  void *tryfnparam);
-extern int try_config_for_scr(const char *module, int xscr,
-							  TryConfigFn *tryfn, void *tryfnparam);
 
 extern bool read_config(const char *cfgfile);
 extern bool read_config_for(const char *module);
-extern bool read_config_for_scr(const char *module, int scr);
-extern bool read_config_for_args(const char *module, int scr, bool warn_nx,
+extern bool read_config_for_args(const char *module, bool warn_nx,
 								 const char *spec, const char *rspec, ...);
 
-extern char *get_savefile_for_scr(const char *module, int xscr);
 extern char *get_savefile_for(const char *module);
 
 #endif /* ION_IONCORE_READCONFIG_H */

@@ -70,6 +70,7 @@ static OptParserOpt ioncore_opts[]={
 #else
 	{OPT_ID('x'), 	"noxinerama", 0, NULL, "Ignored: not compiled with Xinerama support"},
 #endif
+	{OPT_ID('s'),   "sessionname", OPT_ARG, "session_name", "Name of session (affects savefiles)"},
 	END_OPTPARSEROPTS
 };
 
@@ -145,6 +146,9 @@ int main(int argc, char*argv[])
 			break;
 		case OPT_ID('x'):
 			stflags|=IONCORE_STARTUP_NOXINERAMA;
+			break;
+		case OPT_ID('s'):
+			ioncore_set_sessiondir("ion-devel", optparser_get_arg());
 			break;
 		default:
 			optparser_print_error();
@@ -318,6 +322,39 @@ static bool set_up_locales(Display *dpy)
 #endif
 
 
+static void set_session(const char *display)
+{
+	const char *dpyend;
+	char *tmp, *colon;
+	
+	dpyend=strchr(display, ':');
+	if(dpyend!=NULL)
+		dpyend=strchr(dpyend, '.');
+	if(dpyend==NULL){	
+		libtu_asprintf(&tmp, "default-session-%s", display);
+	}else{
+		libtu_asprintf(&tmp, "default-session-%.*s",
+					   (int)(dpyend-display), display);
+	}
+
+	if(tmp==NULL){
+		warn_err();
+		return;
+	}
+
+	colon=tmp;
+	while(1){
+		colon=strchr(colon, ':');
+		if(colon==NULL)
+			break;
+		*colon='-';
+	}
+	
+	ioncore_set_sessiondir("ion-devel", tmp);
+	free(tmp);
+}
+	
+
 static bool init_x(const char *display, int stflags)
 {
 	Display *dpy;
@@ -368,6 +405,8 @@ static bool init_x(const char *display, int stflags)
 			return FALSE;
 		}
 	}
+	
+	set_session(XDisplayName(display));
 	
 	wglobal.dpy=dpy;
 	
@@ -462,7 +501,6 @@ void ioncore_deinit()
 {
 	Display *dpy;
 	WRootWin *rootwin;
-	WScreen *scr;
 	
 	wglobal.opmode=OPMODE_DEINIT;
 	
@@ -470,9 +508,7 @@ void ioncore_deinit()
 		return;
 	
 	if(wglobal.ws_save_enabled){
-		FOR_ALL_SCREENS(scr){
-			save_workspaces(scr);
-		}
+		save_workspaces();
 	}else{
 		warn("Not saving workspace layout.");
 	}

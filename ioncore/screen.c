@@ -47,6 +47,7 @@ static bool screen_init(WScreen *scr, WRootWin *rootwin,
 	scr->id=id;
 	scr->atom_workspace=None;
 	scr->uses_root=useroot;
+	scr->configured=FALSE;
 	scr->managed_off.x=0;
 	scr->managed_off.y=0;
 	scr->managed_off.w=0;
@@ -163,29 +164,11 @@ static bool create_initial_workspace_on_scr(WScreen *scr)
 bool screen_initialize_workspaces(WScreen* scr)
 {
 	WRegion *ws=NULL;
-	char *wsname=NULL;
 
-	if(scr->atom_workspace!=None)
-		wsname=get_string_property(ROOT_OF(scr), scr->atom_workspace, NULL);
-
-	load_workspaces(scr);
+	if(scr->configured || SCR_MCOUNT(scr)>0)
+		return TRUE;
 	
-	if(SCR_MCOUNT(scr)==0){
-		if(!create_initial_workspace_on_scr(scr))
-			return FALSE;
-	}else{
-		if(wsname!=NULL)
-			ws=lookup_region(wsname, NULL);
-		if(ws==NULL || REGION_MANAGER(ws)!=(WRegion*)scr)
-			ws=FIRST_MANAGED(SCR_MLIST(scr));
-		if(ws!=NULL)
-			region_display_managed((WRegion*)scr, ws);
-	}
-	
-	if(wsname!=NULL)
-		free(wsname);
-	
-	return TRUE;
+	return create_initial_workspace_on_scr(scr);
 }
 
 
@@ -407,6 +390,7 @@ int screen_id(WScreen *scr)
 }
 
 
+
 static bool screen_may_destroy_managed(WScreen *scr, WRegion *reg)
 {
 	WRegion *r2;
@@ -430,6 +414,75 @@ void screen_set_managed_offset(WScreen *scr, const WRectangle *off)
 
 /*}}}*/
 
+/*{{{ Save/load */
+
+
+static bool screen_save_to_file(WScreen *scr, FILE *file, int lvl)
+{
+	WRegion *sub;
+	
+	begin_saved_region((WRegion*)scr, file, lvl);
+	save_indent_line(file, lvl);
+	fprintf(file, "subs = {\n");
+	FOR_ALL_MANAGED_ON_LIST(SCR_MLIST(scr), sub){
+		save_indent_line(file, lvl+1);
+		fprintf(file, "{\n");
+		region_save_to_file((WRegion*)sub, file, lvl+2);
+		if(sub==SCR_CURRENT(scr)){
+			save_indent_line(file, lvl+2);
+			fprintf(file, "switchto = true,\n");
+		}
+		save_indent_line(file, lvl+1);
+		fprintf(file, "},\n");
+	}
+	save_indent_line(file, lvl);
+	fprintf(file, "},\n");
+	
+	return TRUE;
+}
+
+
+/*EXTL_DOC
+ * (Intended to be called from workspace savefiles.)
+ * Set screen name and initial workspaces etc.
+ */
+EXTL_EXPORT
+bool initialise_screen_id(int id, ExtlTab tab)
+{
+	char *name;
+	WScreen *scr=find_screen_id(id);
+	ExtlTab substab, subtab;
+	int n, i;
+
+	if(scr==NULL){
+		warn("No screen #%d\n", id);
+		return FALSE;
+	}
+	
+	scr->configured=TRUE;
+	
+	if(extl_table_gets_s(tab, "name", &name)){
+		region_set_name((WRegion*)scr, name);
+		free(name);
+	}
+
+	if(!extl_table_gets_t(tab, "subs", &substab))
+		return TRUE;
+	
+	n=extl_table_get_n(substab);
+	for(i=1; i<=n; i++){
+		if(extl_table_geti_t(substab, i, &subtab)){
+			mplex_attach_new((WMPlex*)scr, subtab);
+			extl_unref_table(subtab);
+		}
+	}
+	extl_unref_table(substab);
+	
+	return TRUE;
+}
+
+/*}}}*/
+
 
 /*{{{ Dynamic function table and class implementation */
 
@@ -449,6 +502,9 @@ static DynFunTab screen_dynfuntab[]={
 	{mplex_managed_changed, screen_managed_changed},
 	
 	{mplex_managed_geom, screen_managed_geom},
+
+	{(DynFun*)region_save_to_file,
+	 (DynFun*)screen_save_to_file},
 	
 	END_DYNFUNTAB
 };

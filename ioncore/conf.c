@@ -63,6 +63,5 @@ void enable_warp(bool warp)
 
 bool ioncore_read_config(const char *cfgfile)
 {
-	return read_config_for_args("ioncore-startup", -1, TRUE,
-								"S", NULL, cfgfile);
+	return read_config_for_args("ioncore-startup", TRUE, "S", NULL, cfgfile);
 }
