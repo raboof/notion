@@ -66,9 +66,6 @@ extern void menu_fit(WMenu *menu, const WRectangle *geom);
 extern void menu_cancel(WMenu *menu);
 extern void menu_draw_config_updated(WMenu *menu);
 
-extern const char *menu_style(WMenu *menu);
-extern const char *menu_entry_style(WMenu *menu);
-
 extern int menu_entry_at_root(WMenu *menu, int root_x, int root_y);
 extern void menu_release(WMenu *menu, XButtonEvent *ev);
 extern void menu_motion(WMenu *menu, XMotionEvent *ev, int dx, int dy);

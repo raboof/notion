@@ -114,28 +114,6 @@ void menu_draw(WMenu *menu, bool complete)
 /*}}}*/
 
 
-/*{{{ Dynfuns */
-
-
-const char *menu_style(WMenu *menu)
-{
-	return (menu->pmenu_mode
-			? "input-menu-pmenu"
-			: "input-menu-normal");
-}
-
-
-const char *menu_entry_style(WMenu *menu)
-{
-	return (menu->pmenu_mode
-			? "input-menu-entry-pmenu"
-			: "input-menu-entry-normal");
-}
-
-
-/*}}}*/
-
-
 /*{{{ Resize */
 
 
@@ -335,14 +313,25 @@ static void calc_entry_dimens(WMenu *menu)
 static bool menu_init_gr(WMenu *menu, WRootWin *rootwin, Window win)
 {
 	GrBrush *brush, *entry_brush;
+	char *st;
 	
-	brush=gr_get_brush(rootwin, win, menu_style(menu));
+	if(extl_table_gets_s(menu->tab, "menu_style", &st)){
+		brush=gr_get_brush(rootwin, win, st);
+		free(st);
+	}else{
+		brush=gr_get_brush(rootwin, win, "input-menu");
+	}
 	
 	if(brush==NULL)
 		return FALSE;
 
-	entry_brush=grbrush_get_slave(brush, rootwin, win,
-								  menu_entry_style(menu));
+	if(extl_table_gets_s(menu->tab, "menu_entry_style", &st)){
+		entry_brush=grbrush_get_slave(brush, rootwin, win, st);
+		free(st);
+	}else{
+		entry_brush=grbrush_get_slave(brush, rootwin, win, 
+									  "input-menu-entry");
+	}
 	
 	if(entry_brush==NULL){
 		grbrush_release(brush, win);

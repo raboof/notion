@@ -41,3 +41,13 @@ function make_pmenu_fn(entries)
            end
 end
 
+function make_ctxmenu_fn(fn)
+    return function(frame, cwin)
+               if not cwin or frame==cwin then
+                   cwin=frame:current()
+               end
+               if cwin then 
+                   fn(cwin) 
+               end
+           end
+end

@@ -2,19 +2,7 @@
 -- Menu bindings
 --
 
-
-menu_bindings{
-    kpress("Escape", WMenu.cancel),
-    kpress("Control+G", WMenu.cancel),
-    kpress("Control+C", WMenu.cancel),
-    kpress("Control+P", WMenu.select_prev),
-    kpress("Control+N", WMenu.select_next),
-    kpress("Up", WMenu.select_prev),
-    kpress("Down", WMenu.select_next),
-    kpress("Return", WMenu.finish),
-    kpress("KP_Enter", WMenu.finish),
-    kpress("Control+M", WMenu.finish),
-}
+-- The menus
 
 include('menulib.lua')
 
@@ -42,35 +30,60 @@ local appmenu={
     menuentry("GV", make_exec_fn("gv")),
 }
 
+local exitmenu={
+    menuentry("Exit", querylib.query_exit),
+    menuentry("Restart", querylib.query_restart),
+--    menuentry("Restart PWM", function() restart_other_wm("pwm") end),
+--    menuentry("Restart TWM", function() restart_other_wm("twm") end),
+}
+
 local mainmenu={
+    -- Use a bigger font (depending on the style/drawing engine)
+    menu_entry_style="input-menu-entry-big",
+    
     submenu("Programs", appmenu),
+    menuentry("Lock screen", make_exec_fn("xlock")),
     menuentry("Help", querylib.query_man),
     menuentry("About Ion", about),
-    menuentry("Restart", querylib.query_restart),
-    menuentry("Exit", querylib.query_exit),
+    submenu("Exit", exitmenu),
+}
+    
+local ctxmenu={
+    menuentry("Close", make_ctxmenu_fn(WRegion.close)),
+    menuentry("Kill", make_ctxmenu_fn(WClientWin.kill)),
+    menuentry("(Un)tag", make_ctxmenu_fn(WRegion.toggle_tag)),
+    menuentry("Attach tagged", WGenFrame.attach_tagged),
+    --menuentry("(Un)shade", function(frame) frame:toggle_shade() end),
 }
 
-local function make_tab_fn(fn)
-    return function(frame, cwin)
-               if cwin then fn(cwin) end
-           end
-end
 
-local tabmenu={
-    menuentry("Close", make_tab_fn(WRegion.close)),
-    menuentry("Kill", make_tab_fn(WClientWin.kill)),
-    menuentry("(Un)tag", make_tab_fn(WRegion.toggle_tag)),
-    menuentry("(Un)shade", function(frame) frame:toggle_shade() end),
-}
-
+-- Bindings to display menus
 
 genframe_bindings{
-    mpress("Button3", make_pmenu_fn(tabmenu), "tab"),
+    mpress("Button3", make_pmenu_fn(ctxmenu), "tab"),
+    kpress(DEFAULT_MOD.."M", make_menu_fn(ctxmenu)),
+    --kpress(DEFAULT_MOD.."Menu", make_menu_fn(ctxmenu)),
 }
 
 global_bindings{
     -- Rebind F12
     kpress("F12", make_menu_fn(mainmenu)),
-    -- kpress("Menu", make_menu_fn(mainmenu)),
+    --kpress("Menu", make_menu_fn(mainmenu)),
+}
+
+
+-- Menu bindings
+
+menu_bindings{
+    kpress("Escape", WMenu.cancel),
+    kpress("Control+G", WMenu.cancel),
+    kpress("Control+C", WMenu.cancel),
+    kpress("AnyModifier+P", WMenu.select_prev),
+    kpress("AnyModifier+N", WMenu.select_next),
+    kpress("Up", WMenu.select_prev),
+    kpress("Down", WMenu.select_next),
+    kpress("Return", WMenu.finish),
+    kpress("KP_Enter", WMenu.finish),
+    kpress("Control+M", WMenu.finish),
 }
 
