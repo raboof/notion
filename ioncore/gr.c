@@ -410,6 +410,14 @@ EXTL_EXPORT
 void gr_read_config()
 {
 	read_config_for("draw");
+	
+	/* If nothing has been loaded, try the default engine with
+	 * default settings.
+	 */
+	if(engines==NULL){
+		warn("No drawing engines loaded, trying \"de\".");
+		gr_select_engine("de");
+	}
 }
 
 
