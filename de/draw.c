@@ -431,7 +431,7 @@ void debrush_enable_transparency(DEBrush *brush, Window win,
 {
     XSetWindowAttributes attr;
     ulong attrflags=0;
-    
+
     if(mode==GR_TRANSPARENCY_DEFAULT)
         mode=brush->d->transparency_mode;
     

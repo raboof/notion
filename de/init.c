@@ -199,10 +199,10 @@ void de_get_text_align(int *alignret, ExtlTab tab)
 
 void de_get_transparent_background(uint *mode, ExtlTab tab)
 {
-    if(extl_table_is_bool_set(tab, "transparent_background"))
-        *mode=GR_TRANSPARENCY_YES;
-    else
-        *mode=GR_TRANSPARENCY_NO;
+    bool b;
+    
+    if(extl_table_gets_b(tab, "transparent_background", &b))
+        *mode=b;
 }
 
 
