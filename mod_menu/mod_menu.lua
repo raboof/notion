@@ -55,9 +55,9 @@ function mod_menu.getctxmenu(name)
 end
 
 
-function mod_menu.evalmenu(ms, menu, args)
+function mod_menu.evalmenu(menu, args)
     if type(menu)=="string" then
-        return mod_menu.evalmenu({}, ms[menu], args)
+        return mod_menu.evalmenu(menus[menu], args)
     elseif type(menu)=="function" then
         if args then
             return menu(unpack(args))
@@ -93,7 +93,7 @@ function mod_menu.submenu(name, sub_or_name, initial)
         name=ioncore.gettext(name),
         initial=initial or 0,
         submenu_fn=function()
-                       return mod_menu.evalmenu(menus, sub_or_name)
+                       return mod_menu.evalmenu(sub_or_name)
                    end
     }
 end
@@ -115,19 +115,9 @@ local function menu_(reg, sub, menu_or_name, fn, check)
         end
     end
 
-    local function wrapper(entry)
-        if entry.func then
-            if entry._reg then
-                entry.func(entry._reg, entry._sub)
-            else
-                entry.func(reg, sub)
-            end
-        end
-    end
+    menu=mod_menu.evalmenu(menu_or_name, {reg, sub})
     
-    menu=mod_menu.evalmenu(menus, menu_or_name, {reg, sub})
-    
-    return fn(reg, wrapper, menu)
+    return fn(reg, function(e) e.func(reg, sub) end, menu)
 end
 
 
@@ -338,22 +328,27 @@ local function get_ctxmenu(reg, sub, is_par)
     local m={}
     
     local function cp(m2)
-        m3={}
+        local m3={}
         for k, v in m2 do
-            v2=table.copy(v)
+            local v2=table.copy(v)
+            
+            if v2.func then
+                local ofunc=v2.func
+                v2.func=function() return ofunc(reg, sub) end
+            end
+            
             if v2.submenu_fn then
                 local ofn=v2.submenu_fn
                 v2.submenu_fn=function() return cp(ofn()) end
             end
-            v2._reg=reg
-            v2._sub=sub
+            
             m3[k]=v2
         end
         return m3
     end
     
     for s in classes(reg) do
-        local m2=mod_menu.evalmenu(menus, "ctxmenu-"..s)
+        local m2=mod_menu.evalmenu("ctxmenu-"..s)
         if m2 then
             if is_par then
                 m=table.icat(m, cp(m2))

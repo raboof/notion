@@ -851,12 +851,14 @@ end
 --DOC
 -- This query can be used to create a query of a defined menu.
 function mod_query.query_menu(mplex, prompt, menuname)
-    local menu=mod_menu.getmenu(menuname)
+    local _sub=mplex:current()
+    local menu=mod_menu.evalmenu(menuname, {mplex, _sub})
     
     if not menu then
         mod_query.warn(mplex, TR("Unknown menu %s.", tostring(menuname)))
         return
     end
+    
     function complete(str)
         local results={}
         local len=string.len(str)
@@ -879,7 +881,9 @@ function mod_query.query_menu(mplex, prompt, menuname)
         end
         if e then
             if e.func then
-                local err=collect_errors(function() e.func(mplex) end)
+                local err=collect_errors(function() 
+                                             e.func(mplex, _sub) 
+                                         end)
                 if err then
                     mod_query.warn(mplex, err)
                 end
