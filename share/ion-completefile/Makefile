@@ -28,6 +28,6 @@ ion-completefile: $(SOURCES)
 	$(CC) $< $(CFLAGS) $(LDFLAGS) -o $@
 
 _install:
-	$(INSTALLDIR) $(BINDIR)
-	$(INSTALL) -m $(BIN_MODE) ion-completefile $(BINDIR)
-	# $(STRIP) $(BINDIR)/ion-completefile
+	$(INSTALLDIR) $(EXTRABINDIR)
+	$(INSTALL) -m $(BIN_MODE) ion-completefile $(EXTRABINDIR)
+	# $(STRIP) $(EXTRABINDIR)/ion-completefile

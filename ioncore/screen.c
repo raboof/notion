@@ -253,7 +253,8 @@ static void screen_fit(WScreen *scr, WRectangle geom)
 		geom.x=0;
 		geom.y=0;
 	}else{
-		geom=REGION_GEOM(scr);
+		/*geom=REGION_GEOM(scr);*/
+		return;
 	}
 
 	FOR_ALL_MANAGED_ON_LIST(scr->ws_list, sub){

@@ -1,12 +1,3 @@
 #!/bin/sh
 
-DIRARGS="-confdir ETCDIR/ion-devel \
-  -libdir LIBDIR/ion-devel"
-
-if test x$HOME != x; then
-  DIRARGS="-confdir $HOME/.ion-devel \
-    -libdir $HOME/.ion-devel/libs \
-    $DIRARGS"
-fi
-
-exec BINDIR/ioncore "$@" $DIRARGS
+exec BINDIR/ioncore "$@"

@@ -12,7 +12,8 @@ include $(TOPDIR)/system-inc.mk
 LIBS += -ltu -lm $(X11_LIBS) $(XINERAMA_LIBS)
 #DIST: INCLUDES += -I../libtu/include $(X11_INCLUDES) -I..
 INCLUDES += $(X11_INCLUDES) -I..
-DEFINES += -DETCDIR=\"$(ETCDIR)\" -DLIBDIR=\"$(LIBDIR)\"
+DEFINES += -DETCDIR=\"$(ETCDIR)\" -DSHAREDIR=\"$(SHAREDIR)\" \
+           -DEXTRABINDIR=\"$(EXTRABINDIR)\" -DMODULEDIR=\"$(MODULEDIR)\"
 CFLAGS += $(XOPEN_SOURCE)
 
 # libtool
@@ -25,7 +26,6 @@ LINKOPTS = -R$(MODULEDIR)
 else
 LINKOPTS = -export-dynamic -R$(MODULEDIR)
 endif
-MODULEDIR = $(LIBDIR)/ion-devel
 
 # Lua support setup
 EXT_OBJS := $(EXT_OBJS) ../luaextl/luaextl.a

@@ -17,10 +17,8 @@
 
 
 static char* dummy_paths=NULL;
-static char **etcpaths=&dummy_paths;
-static int n_etcpaths=0;
-/*static char **libpaths=&dummy_paths;
-static int n_libpaths=0;*/
+static char **scriptpaths=&dummy_paths;
+static int n_scriptpaths=0;
 
 
 /*{{{ Init */
@@ -62,28 +60,26 @@ static bool add_dir(char ***pathsptr, int *n_pathsptr, const char *dir)
 }
 
 
-bool ioncore_add_confdir(const char *dir)
+bool ioncore_add_scriptdir(const char *dir)
 {
-	return add_dir(&etcpaths, &n_etcpaths, dir);
+	return add_dir(&scriptpaths, &n_scriptpaths, dir);
 }
 
 
-bool ioncore_add_libdir(const char *dir)
+bool ioncore_add_moduledir(const char *dir)
 {
 	return (lt_dladdsearchdir(dir)==0);
-	/*return add_dir(&libpaths, &n_libpaths, dir);*/
 }
 
 
-#if 0
-bool ioncore_add_default_paths(const char *appname, const char *etcdir,
-							   const char *libdir)
+bool ioncore_add_userdirs(const char *appname)
 {
-	char *home, *tmp, *tmp2;
-	int fails=0;
+	const char *home;
+	char *tmp, *tmp2;
+	int fails=2;
 	
 	home=getenv("HOME");
-	
+
 	if(home==NULL){
 		warn("$HOME not set");
 	}else{
@@ -91,37 +87,35 @@ bool ioncore_add_default_paths(const char *appname, const char *etcdir,
 		if(tmp==NULL){
 			warn_err();
 		}else{
-			fails+=!ioncore_add_confdir(tmp);
+			fails-=ioncore_add_scriptdir(tmp);
 			tmp2=scat(tmp, "/lib");
 			if(tmp2==NULL){
 				warn_err();
 			}else{
-				fails+=!ioncore_add_libdir(tmp2);
+				fails-=ioncore_add_moduledir(tmp2);
 				free(tmp2);
 			}
 			free(tmp);
 		}
 	}
-
-	tmp=scat3(etcdir, "/", appname);
-	if(tmp==NULL){
-		warn_err();
-	}else{
-		fails+=!ioncore_add_confdir(tmp);
-		free(tmp);
-	}
-
-	tmp=scat3(libdir, "/", appname);
-	if(tmp==NULL){
-		warn_err();
-	}else{
-		fails+=!ioncore_add_libdir(tmp);
-		free(tmp);
-	}
 	
 	return (fails==0);
 }
-#endif
+
+
+bool ioncore_add_default_dirs()
+{
+	int fails=4;
+	
+	fails-=ioncore_add_scriptdir(EXTRABINDIR); /* ion-completefile */
+	fails-=ioncore_add_scriptdir(SHAREDIR);
+	fails-=ioncore_add_scriptdir(ETCDIR);
+	fails-=ioncore_add_userdirs("ion-devel");
+	
+	fails-=ioncore_add_moduledir(MODULEDIR);
+	
+	return (fails==0);
+}
 
 
 /*}}}*/
@@ -133,11 +127,12 @@ bool ioncore_add_default_paths(const char *appname, const char *etcdir,
 static char *search_etcpath2(const char *const *files, bool noaccesstest)
 {
 	char *tmp=NULL;
-	char *const *dir;
 	const char *const *file;
-	for(dir=etcpaths; *dir!=NULL; dir++){
+	int i;
+	
+	for(i=n_scriptpaths-1; i>=0; i--){
 		for(file=files; *file!=NULL; file++){
-			libtu_asprintf(&tmp, "%s/%s", *dir, *file);
+			libtu_asprintf(&tmp, "%s/%s", scriptpaths[i], *file);
 			if(tmp==NULL){
 				warn_err();
 				continue;
@@ -152,45 +147,47 @@ static char *search_etcpath2(const char *const *files, bool noaccesstest)
 
 
 EXTL_EXPORT
-void do_include(const char *file, const char *current_dir)
+char *lookup_script(const char *file, const char *try_in_dir)
 {
 	const char *files[]={NULL, NULL};
 	char* tmp=NULL;
-	
+
 	if(file==NULL)
-		return;
+		return NULL;
 	
 	if(file[0]=='/'){
 		if(access(file, F_OK)!=0)
-			goto fail;
-		extl_dofile(file, NULL, NULL);
-		return;
+			return NULL;
+		return scopy(file);
 	}
-	if(current_dir==NULL)
-		current_dir=".";
 	
-	libtu_asprintf(&tmp, "%s/%s", current_dir, file);
-	if(tmp!=NULL){
-		if(access(tmp, F_OK)!=0){
+	if(try_in_dir!=NULL){
+		libtu_asprintf(&tmp, "%s/%s", try_in_dir, file);
+		
+		if(tmp!=NULL){
+			if(access(tmp, F_OK)==0)
+				return tmp;
 			free(tmp);
-			tmp=NULL;
 		}
 	}
 	
-	if(tmp==NULL){
-		files[0]=file;
-		tmp=search_etcpath2(files, FALSE);
-	}
+	files[0]=file;
+	return search_etcpath2(files, FALSE);
+}
+
+
+EXTL_EXPORT
+void do_include(const char *file, const char *current_file_dir)
+{
+	char *tmp=lookup_script(file, current_file_dir);
 	
-	if(tmp==NULL)
-		goto fail;
+	if(tmp==NULL){
+		warn("Could not find file %s in search path", file);
+		return;
+	}
 	
 	extl_dofile(tmp, NULL, NULL);
 	free(tmp);
-	return;
-	
-fail:
-	warn("Could not find file %s in search path", file);
 }
 
 
@@ -331,39 +328,6 @@ bool read_config_for_scr(const char *module, int xscr)
 {
 	return do_read_config_for(module, get_cfgfile_for_scr(module, xscr));
 }
-
-
-/*}}}*/
-
-
-/*{{{ find_module */
-
-
-/*char *find_module(const char *fname)
-{
-	char *tmp, **dir;
-
-	if(fname==NULL)
-		return NULL;
-	
-	for(dir=libpaths; *dir!=NULL; dir++){
-		libtu_asprintf(&tmp, "%s/%s", *dir, fname);
-
-		if(tmp==NULL){
-			warn_err();
-			continue;
-		}
-	
-		if(access(tmp, F_OK)==0)
-			return tmp;
-		
-		free(tmp);
-	}
-	
-	warn("Could not find module %s.", fname);
-	
-	return NULL;
-}*/
 
 
 /*}}}*/

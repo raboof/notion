@@ -8,10 +8,10 @@
 #ifndef ION_IONCORE_READCONFIG_H
 #define ION_IONCORE_READCONFIG_H
 
-/*extern bool ioncore_set_paths(const char *appname, const char *etcdir,
-							 const char *libdir);*/
-extern bool ioncore_add_confdir(const char *dir);
-extern bool ioncore_add_libdir(const char *dir);
+extern bool ioncore_add_scriptdir(const char *dir);
+extern bool ioncore_add_moduledir(const char *dir);
+extern bool ioncore_add_userdirs(const char *appname);
+extern bool ioncore_add_default_dirs();
 
 extern char *get_cfgfile_for_scr(const char *module, int xscr);
 extern char *get_cfgfile_for(const char *module);

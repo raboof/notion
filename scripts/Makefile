@@ -10,7 +10,7 @@ include $(TOPDIR)/system-inc.mk
 
 TARGETS=ion pwm
 
-SCRIPTS=ion ion-edit ion-man ion-runinxterm ion-ssh ion-view
+SCRIPTS=ion
 
 ######################################
 
@@ -29,7 +29,7 @@ ion: ion.in
 	     s#LIBDIR#$(LIBDIR)#g; \
 	     s#BINDIR#$(BINDIR)#g;' $< > $@
 	chmod $(BIN_MODE) $@
-	
+
 pwm: pwm.in
 	sed 's#ETCDIR#$(ETCDIR)#g; \
 	     s#LIBDIR#$(LIBDIR)#g; \

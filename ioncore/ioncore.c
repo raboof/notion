@@ -106,13 +106,10 @@ int main(int argc, char*argv[])
 
 	libtu_init(argv[0]);
 
+	ioncore_add_default_dirs();
+	
 	if(!init_module_support())
 		return EXIT_FAILURE;
-	
-	if(argc<2){
-		warn("Do not run ioncore directly.");
-		return EXIT_FAILURE;
-	}
 	
 	optparser_init(argc, argv, OPTP_MIDLONG, ioncore_opts, &ioncore_cinfo);
 	
@@ -125,10 +122,10 @@ int main(int argc, char*argv[])
 			cfgfile=optparser_get_arg();
 			break;
 		case OPT_ID('c'):
-			ioncore_add_confdir(optparser_get_arg());
+			ioncore_add_scriptdir(optparser_get_arg());
 			break;
 		case OPT_ID('l'):
-			ioncore_add_libdir(optparser_get_arg());
+			ioncore_add_moduledir(optparser_get_arg());
 			break;
 		case OPT_ID('o'):
 			oneroot=TRUE;
@@ -142,8 +139,6 @@ int main(int argc, char*argv[])
 	wglobal.argc=argc;
 	wglobal.argv=argv;
 	
-	/*ioncore_add_default_dirs("ion-devel", ETCDIR, LIBDIR);*/
-
 	/* We may have to pass the file to xmessage so just using tmpfile()
 	 * isn't sufficient */
 	

@@ -10,7 +10,6 @@ include $(TOPDIR)/system-inc.mk
 
 #DIST: INCLUDES += -I../libtu/include $(X11_INCLUDES) -I..
 INCLUDES += $(X11_INCLUDES) -I..
-MODULEDIR = $(LIBDIR)/ion-devel
 CFLAGS += $(XOPEN_SOURCE)
 
 SOURCES=main.c floatws.c floatframe.c placement.c resize.c
