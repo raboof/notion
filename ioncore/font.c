@@ -286,19 +286,23 @@ static SR *shortenrules=NULL;
  *
  * Similarly to sed's 's' command, \var{rule} may contain characters that are
  * inserted in the resulting string and specials as follows:
- * \begin{description}
- * \item[\$0] Place the original string here.
- * \item[\$1 to \$9] Insert n:th capture here (as usual,
- *				captures are surrounded by parentheses in the regex).
- * \item[\$|] Alternative shortening separator. The shortening described before
- *   the first this kind of separator is tried first and if it fails to
- *   make the string short enough, the next is tried, and so on.
- * \item[\$<]
- *     Remove characters on the left of this marker to shorten the string.
- * \item[\$>]
- *     Remove characters on the right of this marker to shorten the string.
- *	   Only the first \$< or \$> within an alternative shortening is used.
- * \end{description}
+ * \begin{tabularx}{\linewidth}{lX}
+ *  \hline
+ *  Special & Description \\
+ *  \hline
+ *  \$0 & 		 Place the original string here. \\
+ *  \$1 to \$9 & Insert n:th capture here (as usual,captures are surrounded
+ *				 by parentheses in the regex). \\
+ *  \$| & 		 Alternative shortening separator. The shortening described
+ *				 before the first this kind of separator is tried first and
+ *				 if it fails to make the string short enough, the next is 
+ *			 	 tried, and so on. \\
+ *  \$< &		 Remove characters on the left of this marker to shorten the
+ *				 string. \\
+ *  \$> &		 Remove characters on the right of this marker to shorten the
+ *				 string. Only the first \$< or \$> within an alternative 
+ *				 shortening is used. \\
+ * \end{tabularx}
  */
 EXTL_EXPORT
 bool add_shortenrule(const char *rx, const char *rule)
