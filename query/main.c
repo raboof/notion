@@ -82,7 +82,7 @@ void query_history_push(const char *str)
 
 static void load_history()
 {
-	read_config_for_args("query_history", -1, FALSE, NULL, NULL);
+	read_config_for_args("query_history", FALSE, NULL, NULL);
 }
 
 
