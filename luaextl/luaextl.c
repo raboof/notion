@@ -28,6 +28,7 @@ static lua_State *l_st=NULL;
 static bool extl_stack_get(lua_State *st, int pos, char type, bool copystring,
 						   void *valret);
 
+
 /*{{{ WObj userdata handling */
 
 
@@ -95,6 +96,19 @@ static int extl_obj_gc_handler(lua_State *st)
 }
 
 
+static int extl_obj_eq_handler(lua_State *st)
+{
+	WObj *o1, *o2;
+	
+	o1=extl_get_wobj(st, 1);
+	o2=extl_get_wobj(st, 2);
+	
+	lua_pushboolean(st, (o1==o2));
+	
+	return 1;
+}
+
+
 static bool extl_push_obj(lua_State *st, WObj *obj)
 {
 	WWatch *watch;
@@ -157,6 +171,9 @@ static bool extl_init_obj_info(lua_State *st)
 	lua_pushstring(st, "__gc");
 	lua_pushcfunction(st, extl_obj_gc_handler);
 	lua_settable(st, -3); /* set metatable.__gc=extl_obj_gc_handler */
+	lua_pushstring(st, "__eq");
+	lua_pushcfunction(st, extl_obj_eq_handler);
+	lua_settable(st, -3); /* set metatable.__eq=extl_obj_eq_handler */
 	lua_settable(st, -3); /* set registry.WObj_metatable=metatable */
 	lua_pop(st, 1); /* pop registry */
 
