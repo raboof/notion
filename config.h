@@ -29,6 +29,8 @@
 #define CF_TAB_TEXT_ALIGN ALIGN_CENTER
 #define CF_RESIZE_DELAY 1500
 
+#define CF_XMESSAGE "xmessage -file "
+
 /* Cursors
  */
 
@@ -53,5 +55,6 @@
 #define CF_MIN_WIDTH 20
 #define CF_MIN_HEIGHT 3
 #define CF_STUBBORN_TRESH 1
+
 
 #endif /* INCLUDED_CONFIG_H */
