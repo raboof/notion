@@ -1102,6 +1102,10 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 		int rqflags=REGION_RQGEOM_WEAK_ALL;
 		int gdx=0, gdy=0;
 
+		/* Do I need to insert another disparaging comment on the person who
+		 * invented special server-supported window borders that are not 
+		 * accounted for in the window size? Keep it simple, stupid!
+		 */
 		if(cwin->size_hints.flags&PWinGravity){
 			gdx=gravity_deltax(cwin->size_hints.win_gravity, 
 							   -cwin->orig_bw, -cwin->orig_bw);
