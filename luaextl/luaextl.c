@@ -343,6 +343,8 @@ static bool extl_stack_get(lua_State *st, int pos, char type, bool copystring,
 		}else if(type=='s' || type=='S'){
 			if(valret)
 				*((char**)valret)=NULL;
+		}else{
+			return FALSE;
 		}
 		return TRUE;
 	}
@@ -388,8 +390,11 @@ static bool extl_stack_get(lua_State *st, int pos, char type, bool copystring,
 		WObj *obj=extl_get_wobj(st, pos);
 		if(obj==NULL)
 			return FALSE;
-		if(valret)
+		if(valret){
 			*((WObj**)valret)=obj;
+			D(fprintf(stderr, "Got obj %p, ", obj);
+			  fprintf(stderr, "%s\n", WOBJ_TYPESTR(obj)));
+		}
 		return TRUE;
 	}
 	
