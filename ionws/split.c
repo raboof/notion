@@ -135,27 +135,43 @@ static int reg_resize(WRegion *reg, int dir, int npos, int nsize)
 }
 
 
-static WWsSplit *split_of(WObj *obj)
+static WWsSplit *split_of_reg(WRegion *reg)
 {
-	if(WOBJ_IS(obj, WRegion))
-		return SPLIT_OF((WRegion*)obj);
+	WWsSplit *split=NULL;
+	WIonWS *ws=REGION_MANAGER_CHK(reg, WIonWS);
+	assert(ws!=NULL);
+	extl_table_get(ws->managed_splits, 'o', 'o', reg, &split);
+	return split;
+}
+
 	
-	assert(WOBJ_IS(obj, WWsSplit));
-	
-	return ((WWsSplit*)obj)->parent;
+WWsSplit *split_of(WObj *obj)
+{
+	if(WOBJ_IS(obj, WWsSplit)){
+		return ((WWsSplit*)obj)->parent;
+	}else{
+		assert(WOBJ_IS(obj, WRegion));
+		return split_of_reg((WRegion*)obj);
+	}
+}
+
+
+void set_split_of_reg(WRegion *reg, WWsSplit *split)
+{
+	WIonWS *ws=REGION_MANAGER_CHK(reg, WIonWS);
+	assert(ws!=NULL);
+	extl_table_set(ws->managed_splits, 'o', 'o', reg, split);
 }
 
 
 void set_split_of(WObj *obj, WWsSplit *split)
 {
-	if(WOBJ_IS(obj, WRegion)){
-		SPLIT_OF((WRegion*)obj)=split;
-		return;
+	if(WOBJ_IS(obj, WWsSplit)){
+		((WWsSplit*)obj)->parent=split;
+	}else{
+		assert(WOBJ_IS(obj, WRegion));
+		set_split_of_reg((WRegion*)obj, split);
 	}
-	
-	assert(WOBJ_IS(obj, WWsSplit));
-	
-	((WWsSplit*)obj)->parent=split;
 }
 
 
@@ -628,7 +644,7 @@ static void ionws_request_managed_geom_dir(WIonWS *ws, WRegion *sub,
 	if(!(flags&REGION_RQGEOM_TRYONLY)){
 		int pos=split_tree_pos((WObj*)sub, dir);
 		int size=split_tree_size((WObj*)sub, dir);
-		WWsSplit *split=split_of((WObj*)sub);
+		WWsSplit *split=split_of_reg(sub);
 
 		if(x1d!=0 && split!=NULL){
 			do_resize_split(split, dir, (WObj*)sub, TOP_OR_LEFT, -x1d, size);
@@ -764,7 +780,7 @@ static WRegion *do_split_at(WIonWS *ws, WObj *obj, int dir, int primn,
 	split=split_of(obj);
 	
 	set_split_of(obj, nsplit);
-	SPLIT_OF(nreg)=nsplit;
+	set_split_of_reg(nreg, nsplit);
 	
 	if(primn==BOTTOM_OR_RIGHT){
 		nsplit->tl=obj;
@@ -892,10 +908,7 @@ static WWsSplit *find_split(WObj *obj, int dir, int *from)
 {
 	WWsSplit *split;
 	
-	if(WOBJ_IS(obj, WRegion))
-		split=SPLIT_OF((WRegion*)obj);
-	else
-		split=((WWsSplit*)obj)->parent;
+	split=split_of(obj);
 	
 	while(split!=NULL){
 		if(split->dir==dir){
@@ -1165,10 +1178,7 @@ static bool ionws_remove_split(WIonWS *ws, WWsSplit *split)
 	if(other==NULL)
 		return FALSE;
 	
-	if(WOBJ_IS(other, WRegion))
-		SPLIT_OF((WRegion*)other)=split2;
-	else
-		((WWsSplit*)other)->parent=split2;
+	set_split_of(other, split2);
 	
 	if(wglobal.opmode!=OPMODE_DEINIT){
 		nsize=split_tree_size((WObj*)split, split->dir);
@@ -1186,11 +1196,7 @@ void ionws_remove_managed(WIonWS *ws, WRegion *reg)
 {
 	WWsSplit *split;
 	
-	region_unset_manager(reg, (WRegion*)ws, &(ws->managed_list));
-
-	region_remove_bindmap_owned(reg, &ionws_bindmap, (WRegion*)ws);
-
-	split=SPLIT_OF(reg);
+	split=split_of_reg(reg);
 	
 	if(split!=NULL){
 		WRegion *other;
@@ -1202,7 +1208,7 @@ void ionws_remove_managed(WIonWS *ws, WRegion *reg)
 			other=right_or_lowest_current(split->tl, split->dir);
 		}
 		
-		SPLIT_OF(reg)=NULL;
+		set_split_of_reg(reg, NULL);
 		
 		ionws_remove_split(ws, split);
 		
@@ -1211,6 +1217,9 @@ void ionws_remove_managed(WIonWS *ws, WRegion *reg)
 	}else{
 		ws->split_tree=NULL;
 	}
+
+	region_unset_manager(reg, (WRegion*)ws, &(ws->managed_list));
+	region_remove_bindmap_owned(reg, &ionws_bindmap, (WRegion*)ws);
 	
 	if(ws->split_tree==NULL)
 		defer_destroy((WObj*)ws);
@@ -1225,7 +1234,7 @@ void ionws_remove_managed(WIonWS *ws, WRegion *reg)
 
 void ionws_managed_activated(WIonWS *ws, WRegion *reg)
 {
-	WWsSplit *split=SPLIT_OF(reg);
+	WWsSplit *split=split_of_reg(reg);
 	WObj *prev=(WObj*)reg;
 	
 	while(split!=NULL){
@@ -1283,7 +1292,7 @@ WRegion *ionws_find_rescue_manager_for(WIonWS *ws, WRegion *reg)
 	if(REGION_MANAGER(reg)!=(WRegion*)ws)
 		return FALSE;
 
-	split=SPLIT_OF(reg);
+	split=split_of_reg(reg);
 	
 	obj=(WObj*)reg;
 	while(split!=NULL){
@@ -1321,7 +1330,7 @@ WWsSplit *ionws_split_of(WIonWS *ws, WRegion *reg)
 		return NULL;
 	}
 	
-	return split_of((WObj*)reg);
+	return split_of_reg(reg);
 }
 
 

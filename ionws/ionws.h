@@ -26,6 +26,7 @@ DECLOBJ(WIonWS){
 	WGenWS genws;
 	WObj *split_tree;
 	WRegion *managed_list;
+	ExtlTab managed_splits;
 };
 
 

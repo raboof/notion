@@ -145,12 +145,17 @@ static WIonFrame *create_initial_frame(WIonWS *ws, WWindow *parent,
 static bool ionws_init(WIonWS *ws, WWindow *parent, const WRectangle *bounds, 
 					   bool ci)
 {
+	ws->managed_splits=extl_create_table();
+	if(ws->managed_splits==extl_table_none())
+		return FALSE;
+
 	genws_init(&(ws->genws), parent, bounds);
 	ws->split_tree=NULL;
 	
 	if(ci){
 		if(create_initial_frame(ws, parent, bounds)==NULL){
 			genws_deinit(&(ws->genws));
+			extl_unref_table(ws->managed_splits);
 			return FALSE;
 		}
 	}
@@ -179,6 +184,8 @@ void ionws_deinit(WIonWS *ws)
 		ionws_remove_managed(ws, ws->managed_list);
 
 	genws_deinit(&(ws->genws));
+	
+	extl_unref_table(ws->managed_splits);
 }
 
 
