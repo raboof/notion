@@ -16,6 +16,8 @@ SUBDIRS = ioncore luaextl $(INSTALL_SUBDIRS)
 
 DOCS = README LICENSE ChangeLog
 
+TO_REALCLEAN = system-ac.mk
+
 ######################################
 
 include rules.mk

@@ -411,6 +411,21 @@ dnl }}}
 
 dnl }}}
 
+dnl _DCF_NO_MB_SUPPORT {{{
+
+AC_SUBST([_DCF_NO_MB_SUPPORT])
+
+_DCF_NO_MB_SUPPORT="-DCF_NO_MB_SUPPORT"
+AC_CHECK_HEADER([wchar.h],
+                [AC_CHECK_HEADER([wctype.h],
+		                 [AC_CHECK_FUNC([mbrlen],
+                                 [_DCF_NO_MB_SUPPORT=""], [])],
+                                 [])],
+                [])
+
+dnl }}}
+						    
+
 AC_OUTPUT([system-ac.mk])
 
 if test "x$lua_version" == "x5.0"; then

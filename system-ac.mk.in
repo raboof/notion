@@ -120,6 +120,12 @@ DEFINES += @_DCF_DE_USE_XUTF8@
 HAS_SYSTEM_ASPRINTF=@HAS_SYSTEM_ASPRINTF@
 
 
+# If you're on an archaic system (such as relatively recent *BSD releases)
+# without even dummy multibyte/widechar support, you may have to uncomment
+# the following line:
+DEFINES += @_DCF_NO_MB_SUPPORT@
+
+
 ##
 ## C compiler
 ##
