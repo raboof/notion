@@ -402,8 +402,11 @@ static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
 	
 	fgeom=initial_to_floatframe_geom(GRDATA_OF(ws), REGION_GEOM(dropped),
 									 ForgetGravity);
-	fgeom.x=x;
-	fgeom.y=y;
+	
+	/* The x and y arguments are in root coordinate space */
+	region_rootpos((WRegion*)par, &fgeom.x, &fgeom.y);
+	fgeom.x=x-fgeom.x;
+	fgeom.y=y-fgeom.y;
 
 	target=(WRegion*)create_floatframe(par, fgeom, 0);
 	
