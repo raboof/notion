@@ -74,9 +74,6 @@ bool scratchpad_fitrep(WScratchpad *sp, WWindow *parent, const WFitParams *fp)
 {
     WFitParams lazyfp;
     
-    if(!region_same_rootwin((WRegion*)sp, (WRegion*)parent))
-        return FALSE;
-
     if(fp->mode==REGION_FIT_EXACT){
         lazyfp=*fp;
     }else{
