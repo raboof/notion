@@ -42,9 +42,9 @@ endif
 
 EXT_OBJS += ../ioncore/ioncore.a ../luaextl/luaextl.a
 
-SOURCES=pwm.c
-
-TARGETS=pwm
+SOURCES = pwm.c
+ETC = pwm.lua pwm-menus.lua
+TARGETS = pwm
 
 ######################################
 
@@ -60,4 +60,6 @@ _install:
 	$(INSTALL) -m $(BIN_MODE) pwm $(BINDIR)
 	# $(STRIP) $(BINDIR)/pwm
 	$(INSTALLDIR) $(PWM_ETCDIR)
-	$(INSTALL) -m $(DATA_MODE) pwm.lua $(PWM_ETCDIR)
+	for i in $(ETC); do \
+		$(INSTALL) -m $(DATA_MODE) $$i $(PWM_ETCDIR); \
+	done

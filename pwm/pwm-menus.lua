@@ -1,5 +1,5 @@
 --
--- Ion menu definitions
+-- PWM menu definitions
 --
 
 
@@ -13,8 +13,7 @@ include("querylib")
 defmenu("mainmenu", {
     submenu("Programs", "appmenu"),
     menuentry("Lock screen", make_exec_fn("xlock")),
-    menuentry("Help", querylib.query_man),
-    menuentry("About Ion", querylib.show_aboutmsg),
+    submenu("Workspaces", "wsmenu"),
     submenu("Styles", "stylemenu"),
     submenu("Exit", "exitmenu"),
 })
@@ -24,8 +23,8 @@ defmenu("mainmenu", {
 defmenu("appmenu", {
     menuentry("XTerm", make_exec_fn("xterm")),
     menuentry("Mozilla Firebird", make_exec_fn("MozillaFirebird")),
-    -- The query module must also be loaded for this binding to work.
-    menuentry("Run...", querylib.query_exec),
+    menuentry("Xdvi", make_exec_fn("xdvi")),
+    menuentry("GV", make_exec_fn("gv")),
 })
 
 
@@ -33,10 +32,22 @@ defmenu("appmenu", {
 defmenu("exitmenu", {
     --menuentry("Restart", querylib.query_restart),
     menuentry("Restart", restart_wm),
-    menuentry("Restart PWM", function() restart_other_wm("pwm") end),
+    menuentry("Restart Ion", function() restart_other_wm("ion") end),
     menuentry("Restart TWM", function() restart_other_wm("twm") end),
     --menuentry("Exit", querylib.query_exit),
     menuentry("Exit", exit_wm),
+})
+
+
+-- Workspaces
+defmenu("wsmenu", {
+    menuentry("New", function(m) 
+                         m:screen_of():attach_new({
+                             type=(default_ws_type or "WFloatWS"), 
+                             switchto=true,}) 
+                     end),
+    menuentry("Close", function(m) m:screen_of():current():close() end),
+    submenu("List", "workspacelist"),
 })
 
 

@@ -33,7 +33,7 @@ include("kludges")
 include("ion-bindings")
 
 -- Define some menus (menu module required to actually use them)
-include("ion-menus")
+include("pwm-menus")
 
 -- How to shorten window titles when the full title doesn't fit in
 -- the available space? The first-defined matching rule that succeeds 
@@ -57,5 +57,5 @@ query_man_path={
 -- Modules.
 load_module("floatws")
 load_module("menu")
-load_module("query")
+--load_module("query")
 load_module("dock")

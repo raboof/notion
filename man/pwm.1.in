@@ -52,6 +52,12 @@ Show version
 .B \-about
 Show about text (version, copyright)
 
+.SH KEYS
+
+See the Ion manual page. The bindings are the same except that the query
+module is not loaded by PWM configuration files by default, so that 
+queries won't work.
+
 .SH FILES AND DIRECTORIES
 .TP
 .B ETCDIR/

@@ -1373,7 +1373,7 @@ WRegion *clientwin_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
 		return NULL;
 
 	if(real_chkc!=chkc){
-		warn("Client window check code mismatch.");
+		/*warn("Client window check code mismatch.");*/
 		return NULL;
 	}
 

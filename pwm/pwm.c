@@ -150,7 +150,7 @@ int main(int argc, char*argv[])
 			free(efnam);
 			efnam=NULL;
 		}
-		fprintf(ef, "Ion startup error log:\n");
+		fprintf(ef, "PWM startup error log:\n");
 		begin_errorlog_file(&el, ef);
 	}
 

@@ -154,7 +154,6 @@ genframe_bindings{
     kpress(SECOND_MOD.."F9", querylib.query_workspace),
     -- Menus
     kpress(DEFAULT_MOD.."M", make_menu_fn("ctxmenu")),
-    kpress(DEFAULT_MOD.."Menu", make_menu_fn("ctxmenu")),
     mpress("Button3", make_pmenu_fn("ctxmenu"), "tab"),
 }
 
