@@ -36,6 +36,8 @@ static lua_State *l_st=NULL;
 static bool extl_stack_get(lua_State *st, int pos, char type, bool copystring,
 						   void *valret);
 
+static void flushtrace();
+
 
 /*{{{ WObj userdata handling -- unsafe */
 
@@ -270,21 +272,37 @@ static bool extl_cpcall(lua_State *st, ExtlCPCallFn *fn, void *ptr)
 static int extl_stack_trace(lua_State *st)
 {
 	lua_Debug ar;
-	int lvl=1;
+	int lvl=0;
+	int n_c=0;
 	
 	lua_pushstring(st, "Stack trace:");
 
 	for( ; lua_getstack(st, lvl, &ar); lvl++){
+		bool is_c=FALSE;
 		if(lua_getinfo(st, "Sln", &ar)==0){
 			lua_pushfstring(st, "\n(Unable to get debug info for level %d)",
 							lvl);
-		}else{
-			lua_pushfstring(st, "\n%s: line %d, function: %s",
+			lua_concat(st, 2);
+			continue;
+		}
+		
+		is_c=(ar.what!=NULL && strcmp(ar.what, "C")==0 && ar.name==NULL);
+
+		if(!is_c){
+			lua_pushfstring(st, "\n%d %s: line %d, function: %s", lvl, 
 							ar.short_src==NULL ? "?" : ar.short_src,
 							ar.currentline,
 							ar.name==NULL ? "?" : ar.name);
+			lua_concat(st, 2);
+			n_c=0;
+		}else{
+			if(n_c==0){
+				lua_pushstring(st, "\n  [Skipping unnamed C functions.]");
+				/*lua_pushstring(st, "\n...skipping...");*/
+				lua_concat(st, 2);
+			}
+			n_c++;
 		}
-		lua_concat(st, 2);
 	}
 	return 1;
 }
@@ -1119,6 +1137,8 @@ static bool extl_dodo_call_vararg(lua_State *st, ExtlDoCallParam *param)
 	if(param->rspec!=NULL)
 		m=strlen(param->rspec);
 	
+	flushtrace();
+	
 	if(lua_pcall(st, n, m, 0)!=0){
 		warn("%s", lua_tostring(st, -1));
 		return FALSE;
@@ -1468,12 +1488,13 @@ static void extl_l1_finalize(L1Param *param)
 INTRSTRUCT(WarnChain);
 DECLSTRUCT(WarnChain){
 	bool need_trace;
+	lua_State *st;
 	WarnHandler *old_handler;
 	WarnChain *prev;
 };
 
 
-static WarnChain *warnchain;
+static WarnChain *warnchain=NULL;
 static bool notrace=FALSE;
 
 
@@ -1495,14 +1516,38 @@ static void l1_warn_handler(const char *message)
 }
 
 
+static void do_trace(WarnChain *ch)
+{
+	const char *p;
+
+	if(notrace)
+		return;
+	
+	extl_stack_trace(ch->st);
+	p=lua_tostring(ch->st, -1);
+	notrace=TRUE;
+	warn(p);
+	notrace=FALSE;
+	ch->need_trace=FALSE;
+	lua_pop(ch->st, 1);
+}
+
+
+static void flushtrace()
+{
+	if(warnchain && warnchain->need_trace)
+		do_trace(warnchain);
+}
+
+
 static int extl_l1_call_handler(lua_State *st)
 {
 	WarnChain ch;
 	L1Param param={{NULL, }, {NULL, }, NULL, 0, 0, 0};
 	L1Param *old_param;
-	const char *p;
 	int ret;
 	int n=lua_gettop(st);
+	
 	
 	/* Get the info we need on the function and then set up a safe
 	 * environment for extl_l1_call_handler2. 
@@ -1516,6 +1561,7 @@ static int extl_l1_call_handler(lua_State *st)
 	
 	ch.old_handler=set_warn_handler(l1_warn_handler);
 	ch.need_trace=FALSE;
+	ch.st=st;
 	ch.prev=warnchain;
 	warnchain=&ch;
 	
@@ -1537,6 +1583,7 @@ static int extl_l1_call_handler(lua_State *st)
 	 * leaking.
 	 */
 	if(ret!=0){
+		const char *p;
 		param.no=0;
 		p=lua_tostring(st, -1);
 		notrace=TRUE;
@@ -1544,14 +1591,8 @@ static int extl_l1_call_handler(lua_State *st)
 		notrace=FALSE;
 	}
 
-	if(ch.need_trace || ret!=0){
-		extl_stack_trace(st);
-		p=lua_tostring(st, -1);
-		notrace=TRUE;
-		warn(p);
-		notrace=FALSE;
-		lua_pop(st, 1);
-	}
+	if(ret!=0 || ch.need_trace)
+		do_trace(&ch);
 	
 	return param.no;
 }
