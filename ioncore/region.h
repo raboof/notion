@@ -119,8 +119,6 @@ extern bool region_may_destroy(WRegion *reg);
 extern WRegion *region_rqclose_propagate(WRegion *reg, WRegion *maybe_sub);
 
 extern void region_rootpos(WRegion *reg, int *xret, int *yret);
-extern void region_notify_subregions_rootpos(WRegion *reg, int x, int y);
-extern void region_notify_subregions_move(WRegion *reg);
 extern void region_notify_change(WRegion *reg);
 
 extern bool region_display(WRegion *reg);

@@ -19,6 +19,7 @@
 #include "region.h"
 #include "stacking.h"
 #include "xwindow.h"
+#include "region-iter.h"
 
 
 /*{{{ Dynfuns */
@@ -106,6 +107,26 @@ void window_deinit(WWindow *wwin)
 /*{{{ Region dynfuns */
 
 
+static void window_notify_subs_rootpos(WWindow *wwin, int x, int y)
+{
+    WRegion *sub;
+    
+    FOR_ALL_CHILDREN(wwin, sub){
+        region_notify_rootpos(sub,
+                              x+REGION_GEOM(sub).x, 
+                              y+REGION_GEOM(sub).y);
+    }
+}
+
+
+void window_notify_subs_move(WWindow *wwin)
+{
+    int x=0, y=0;
+    region_rootpos(&(wwin->region), &x, &y);
+    window_notify_subs_rootpos(wwin, x, y);
+}
+
+
 void window_do_fitrep(WWindow *wwin, WWindow *par, const WRectangle *geom)
 {
     bool move=(REGION_GEOM(wwin).x!=geom->x ||
@@ -125,7 +146,7 @@ void window_do_fitrep(WWindow *wwin, WWindow *par, const WRectangle *geom)
     REGION_GEOM(wwin)=*geom;
 
     if(move)
-        region_notify_subregions_move(&(wwin->region));
+        window_notify_subs_move(wwin);
 }
 
 
@@ -186,6 +207,7 @@ static DynFunTab window_dynfuntab[]={
     {(DynFun*)region_fitrep, (DynFun*)window_fitrep},
     {(DynFun*)region_restack, (DynFun*)window_restack},
     {(DynFun*)region_xwindow, (DynFun*)window_xwindow},
+    {region_notify_rootpos, window_notify_subs_rootpos},
     END_DYNFUNTAB
 };
 

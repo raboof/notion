@@ -273,12 +273,6 @@ WRegion *region_current(WRegion *mgr)
 /*{{{ Dynfun defaults */
 
 
-static void region_notify_rootpos_default(WRegion *reg, int x, int y)
-{
-    region_notify_subregions_rootpos(reg, x, y);
-}
-
-
 void region_updategr_default(WRegion *reg)
 {
     WRegion *sub=NULL;
@@ -513,27 +507,6 @@ void region_rootgeom(WRegion *reg, int *xret, int *yret)
 }
 
 
-void region_notify_subregions_move(WRegion *reg)
-{
-    int x, y;
-    
-    region_rootgeom(reg, &x, &y);
-    region_notify_subregions_rootpos(reg, x, y);
-}
-
-
-void region_notify_subregions_rootpos(WRegion *reg, int x, int y)
-{
-    WRegion *sub=NULL;
-    
-    FOR_ALL_CHILDREN(reg, sub){
-        region_notify_rootpos(sub,
-                              x+REGION_GEOM(sub).x,
-                              y+REGION_GEOM(sub).y);
-    }
-}
-
-
 void region_rootpos(WRegion *reg, int *xret, int *yret)
 {
     WRegion *par;
@@ -725,9 +698,6 @@ WRegion *region_active_sub(WRegion *reg)
 
 
 static DynFunTab region_dynfuntab[]={
-    {region_notify_rootpos, 
-     region_notify_rootpos_default},
-    
     {region_managed_rqgeom,
      region_managed_rqgeom_allow},
     

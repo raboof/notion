@@ -47,6 +47,7 @@ extern void window_do_fitrep(WWindow *wwin, WWindow *parent,
                              const WRectangle *geom);
 extern bool window_fitrep(WWindow *wwin, WWindow *parent, 
                           const WFitParams *fp);
+extern void window_notify_subs_move(WWindow *wwin);
 
 extern Window window_restack(WWindow *wwin, Window other, int mode);
 
