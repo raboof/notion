@@ -102,6 +102,21 @@ function mod_query.lookup_script_warn(mplex, script)
 end
 
 
+function mod_query.lookup_runinxterm_warn(mplex, prog, title)
+    local rx=mod_query.lookup_script_warn(mplex, "ion-runinxterm")
+    if rx then
+        if title then
+            rx=rx.." -T "..string.shell_safe(title)
+        end
+        if prog then
+            rx=rx.." "..string.shell_safe(prog)
+        end
+    end
+    
+    return rx
+end
+
+
 function mod_query.get_initdir(mplex)
     --if mod_query.last_dir then
     --    return mod_query.last_dir
@@ -595,7 +610,7 @@ function mod_query.exec_handler(mplex, cmdline)
         cmd_overrides[cmd](mplex, table.map(unquote, parts))
     elseif cmd~="" then
         if cmd==":" then
-            local ix=mod_query.lookup_script_warn(mplex, "ion-runinxterm")
+            local ix=mod_query.lookup_runinxterm_warn(mplex)
             if not ix then 
                 return
             end
@@ -684,17 +699,28 @@ end
 
 
 --DOC
--- This query asks for a host to connect to with SSH. It starts
--- up ssh in a terminal using \file{ion-ssh}. Hosts to tab-complete
--- are read from \file{\~{}/.ssh/known\_hosts}.
-function mod_query.query_ssh(mplex)
+-- This query asks for a host to connect to with SSH. 
+-- Hosts to tab-complete are read from \file{\~{}/.ssh/known\_hosts}.
+function mod_query.query_ssh(mplex, ssh)
     mod_query.get_known_hosts(mplex)
-    local script=mod_query.lookup_script_warn(mplex, "ion-ssh")
-    mod_query.query_execwith(mplex, TR("SSH to:"), nil, script,
-                             mod_query.make_completor(mod_query.complete_ssh),
-                             "ssh")
-end
 
+    local function handle_exec(mplex, str)
+        if not (str and string.find(str, "[^%s]")) then
+            return
+        end
+        if not ssh then
+            ssh=mod_query.lookup_runinxterm_warn(mplex, "ssh", str)
+            if not ssh then
+                return
+            end
+        end
+        ioncore.exec_on(mplex, ssh.." "..string.shell_safe(str))
+    end
+    
+    return mod_query.query(mplex, TR("SSH to:"), nil, handle_exec,
+                           mod_query.make_completor(mod_query.complete_ssh),
+                           "ssh")
+end
 
 -- }}}
 
