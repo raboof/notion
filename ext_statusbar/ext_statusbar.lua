@@ -108,23 +108,26 @@ end
 -- Status update {{{
 
 local function process_template(fn)
-    return string.gsub(settings.template, '%%([a-zA-Z0-9_]*)', fn)
+    return string.gsub(settings.template, '%%(%%?[a-zA-Z0-9_]*)', 
+                       function(s)
+                           if string.sub(s, 1, 1)=='%' then
+                               return s
+                           elseif s=="" then
+                               return ""
+                           else
+                               return fn(s)
+                           end
+                       end)
 end
 
 function ext_statusbar.get_status()
     return process_template(function(s)
-                                if s=="" then
-                                    return ""
-                                end
                                 return (meters[s] or "??")
                             end)
 end
 
 function ext_statusbar.get_w_template()
     return process_template(function(s)
-                                if s=="" then
-                                    return ""
-                                end
                                 local m=meters[s]
                                 local w=settings[s.."_wtempl"]
                                 return (w or m or "??")
