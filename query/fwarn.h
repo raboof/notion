@@ -12,9 +12,10 @@
 #ifndef ION_QUERY_FWARN_H
 #define ION_QUERY_FWARN_H
 
-#include <ioncore/genframe.h>
+#include <ioncore/mplex.h>
+#include "wmessage.h"
 
-extern void query_message(WGenFrame *frame, const char *p);
-extern void query_fwarn(WGenFrame *frame, const char *p);
+extern WMessage *query_message(WMPlex *mplex, const char *p);
+extern WMessage *query_fwarn(WMPlex *mplex, const char *p);
 
 #endif /* ION_QUERY_FWARN_H */

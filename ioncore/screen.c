@@ -26,7 +26,10 @@
 #include "event.h"
 
 
-static bool screen_display_managed(WScreen *scr, WRegion *reg);
+#define SCR_MLIST(SCR) ((SCR)->mplex.managed_list)
+#define SCR_MCOUNT(SCR) ((SCR)->mplex.managed_count)
+#define SCR_CURRENT(SCR) ((SCR)->mplex.current_sub)
+#define SCR_WIN(SCR) ((SCR)->mplex.win.win)
 
 
 /*{{{ Init/deinit */
@@ -39,9 +42,6 @@ static bool screen_init(WScreen *scr, WRootWin *rootwin,
 	XSetWindowAttributes attr;
 	ulong attrflags=0;
 	
-	scr->ws_count=0;
-	scr->current_ws=NULL;
-	scr->ws_list=NULL;
 	scr->id=id;
 	scr->atom_workspace=None;
 	scr->uses_root=useroot;
@@ -63,16 +63,17 @@ static bool screen_init(WScreen *scr, WRootWin *rootwin,
 			return FALSE;
 	}
 
-	if(!window_init((WWindow*)scr, NULL, win, geom)){
+	if(!mplex_init((WMPlex*)scr, NULL, win, geom)){
 		XDestroyWindow(wglobal.dpy, win);
 		return FALSE;
 	}
 
-	scr->wwin.region.rootwin=rootwin;
+	scr->mplex.win.region.rootwin=rootwin;
 	region_set_parent((WRegion*)scr, (WRegion*)rootwin);
-	scr->wwin.region.flags|=REGION_BINDINGS_ARE_GRABBED;
+	scr->mplex.flags|=WMPLEX_ADD_TO_END;
+	scr->mplex.win.region.flags|=REGION_BINDINGS_ARE_GRABBED;
 	if(useroot)
-		scr->wwin.region.flags|=REGION_MAPPED;
+		scr->mplex.win.region.flags|=REGION_MAPPED;
 	
 	XSelectInput(wglobal.dpy, win, 
 				 FocusChangeMask|EnterWindowMask|
@@ -118,13 +119,13 @@ void screen_deinit(WScreen *scr)
 {
 	UNLINK_ITEM(wglobal.screens, scr, next_scr, prev_scr);
 	
-	while(scr->ws_list!=NULL)
-		region_unset_manager(scr->ws_list, (WRegion*)scr, &(scr->ws_list));
+	while(SCR_MLIST(scr)!=NULL)
+		region_unset_manager(SCR_MLIST(scr), (WRegion*)scr, &(SCR_MLIST(scr)));
 
 	if(scr->uses_root)
-		scr->wwin.win=None;
+		SCR_WIN(scr)=None;
 	
-	window_deinit((WWindow*)scr);
+	mplex_deinit((WMPlex*)scr);
 }
 
 
@@ -163,16 +164,16 @@ bool screen_initialize_workspaces(WScreen* scr)
 
 	load_workspaces(scr);
 	
-	if(scr->ws_count==0){
+	if(SCR_MCOUNT(scr)==0){
 		if(!create_initial_workspace_on_scr(scr))
 			return FALSE;
 	}else{
 		if(wsname!=NULL)
 			ws=lookup_region(wsname, NULL);
 		if(ws==NULL || REGION_MANAGER(ws)!=(WRegion*)scr)
-			ws=FIRST_MANAGED(scr->ws_list);
+			ws=FIRST_MANAGED(SCR_MLIST(scr));
 		if(ws!=NULL)
-			screen_display_managed(scr, ws);
+			region_display_managed((WRegion*)scr, ws);
 	}
 	
 	if(wsname!=NULL)
@@ -188,53 +189,12 @@ bool screen_initialize_workspaces(WScreen* scr)
 /*{{{ Attach/detach */
 
 
-static WRegion *screen_do_add_managed(WScreen *scr, WRegionAddFn *fn,
-									  void *fnparams, 
-									  const WAttachParams *param)
+void screen_managed_geom(WScreen *scr, WRectangle *geom)
 {
-	WRegion *reg;
-	WRectangle geom;
-	
-	geom.x=0;
-	geom.y=0;
-	geom.w=REGION_GEOM(scr).w;
-	geom.h=REGION_GEOM(scr).h;
-	
-	reg=fn((WWindow*)scr, geom, fnparams);
-
-	if(reg==NULL)
-		return NULL;
-
-	region_set_manager(reg, (WRegion*)scr, &(scr->ws_list));
-	scr->ws_count++;
-	
-	if(scr->current_ws==NULL || param->flags&REGION_ATTACH_SWITCHTO)
-		screen_display_managed(scr, reg);
-	else
-		region_unmap(reg);
-	
-	return reg;
-}
-
-
-static void screen_remove_managed(WScreen *scr, WRegion *reg)
-{
-	WRegion *next=NULL;
-
-	if(scr->current_ws==reg){
-		next=PREV_MANAGED(scr->ws_list, reg);
-		if(next==NULL)
-			next=NEXT_MANAGED(scr->ws_list, reg);
-		scr->current_ws=NULL;
-	}
-	
-	region_unset_manager(reg, (WRegion*)scr, &(scr->ws_list));
-	scr->ws_count--;
-	
-	if(wglobal.opmode!=OPMODE_DEINIT){
-		if(next!=NULL)
-			screen_display_managed(scr, next);
-	}
+	geom->x=0;
+	geom->y=0;
+	geom->w=REGION_GEOM(scr).w;
+	geom->h=REGION_GEOM(scr).h;
 }
 
 
@@ -248,66 +208,38 @@ static void screen_fit(WScreen *scr, WRectangle geom)
 {
 	WRegion *sub;
 	
-	if(!scr->uses_root){
-		REGION_GEOM(scr)=geom;
+	if(scr->uses_root){
+		screen_managed_geom(scr, &geom);
 	
-		XMoveResizeWindow(wglobal.dpy, scr->wwin.win,
-						  geom.x, geom.y, geom.w, geom.h);
-	
-		geom.x=0;
-		geom.y=0;
+		FOR_ALL_MANAGED_ON_LIST(SCR_MLIST(scr), sub){
+			region_fit(sub, geom);
+		}
 	}else{
-		/*geom=REGION_GEOM(scr);*/
+		mplex_fit((WMPlex*)scr, geom);
+	}
+}
+
+
+static void screen_managed_changed(WScreen *scr, bool sw)
+{
+	WRegion *reg;
+	const char *n=NULL;
+	
+	if(!sw)
 		return;
-	}
-
-	FOR_ALL_MANAGED_ON_LIST(scr->ws_list, sub){
-		region_fit(sub, geom);
-	}
-}
-
-
-static void screen_set_focus_to(WScreen *scr, bool warp)
-{
-	if(scr->current_ws!=NULL){
-		region_set_focus_to(scr->current_ws, warp);
-	}else{
-		if(warp)
-			do_move_pointer_to((WRegion*)scr);
-		SET_FOCUS(scr->wwin.win);
-	}
-}
-
-
-static bool screen_display_managed(WScreen *scr, WRegion *reg)
-{
-	const char *n;
 	
-	if(reg==scr->current_ws)
-		return FALSE;
+	reg=SCR_CURRENT(scr);
 
-	if(region_is_fully_mapped((WRegion*)scr))
-		region_map(reg);
-	
-	if(scr->current_ws!=NULL)
-		region_unmap(scr->current_ws);
-	
-	scr->current_ws=reg;
-	
 	if(scr->atom_workspace!=None && wglobal.opmode!=OPMODE_DEINIT){
-		n=region_name(reg);
+		if(reg!=NULL)
+			n=region_name(reg);
 		
 		set_string_property(ROOT_OF(scr), scr->atom_workspace, 
 							n==NULL ? "" : n);
 	}
 	
-	if(wglobal.opmode!=OPMODE_DEINIT && region_may_control_focus((WRegion*)scr))
-		warp(reg);
-	
 	extl_call_named("call_hook", "soo", NULL,
 					"screen_workspace_switched", scr, reg);
-	
-	return TRUE;
 }
 
 
@@ -315,12 +247,15 @@ static WRegion *screen_find_rescue_manager_for(WScreen *scr, WRegion *reg)
 {
 	WRegion *other;
 	
-	if(REGION_MANAGER(reg)!=(WRegion*)scr)
+	/* TODO: checking that reg is on the managed list should be done
+	 * more cleanly.
+	 */
+	if(REGION_MANAGER(reg)!=(WRegion*)scr || reg==scr->mplex.current_input)
 		return NULL;
 
 	other=reg;
 	while(1){
-		other=PREV_MANAGED(scr->ws_list, other);
+		other=PREV_MANAGED(SCR_MLIST(scr), other);
 		if(other==reg)
 			break;
 		if(WOBJ_IS(other, WGenWS) && region_can_manage_clientwins(other))
@@ -334,10 +269,7 @@ static void screen_map(WScreen *scr)
 {
 	if(scr->uses_root)
 		return;
-	
-	window_map((WWindow*)scr);
-	if(scr->current_ws!=NULL)
-		region_map(scr->current_ws);
+	mplex_map((WMPlex*)scr);
 }
 
 
@@ -345,76 +277,13 @@ static void screen_unmap(WScreen *scr)
 {
 	if(scr->uses_root)
 		return;
-	
-	window_unmap((WWindow*)scr);
-	if(scr->current_ws!=NULL)
-		region_unmap(scr->current_ws);
+	mplex_unmap((WMPlex*)scr);
 }
 
 
 static void screen_activated(WScreen *scr)
 {
 	wglobal.active_screen=scr;
-}
-
-
-/*}}}*/
-
-
-/*{{{ Workspace switch */
-
-
-static WRegion *nth_ws(WScreen *scr, uint n)
-{
-	WRegion *r=scr->ws_list;
-	
-	/*return NTH_MANAGED(scr->ws_list, n);*/
-	while(n-->0){
-		r=NEXT_MANAGED(scr->ws_list, r);
-		if(r==NULL)
-			break;
-	}
-	
-	return r;
-}
-
-
-/*EXTL_DOC
- * Display the \var{n}th region (workspace, fullscreen client window)
- * managed by the screen \var{scr}.
- */
-EXTL_EXPORT
-void screen_switch_nth(WScreen *scr, uint n)
-{
-	WRegion *sub=nth_ws(scr, n);
-	if(sub!=NULL)
-		region_display_sp(sub);
-}
-
-
-/*EXTL_DOC
- * Display next region (workspace, fullscreen client window) managed by the
- * screen \var{scr}.
- */
-EXTL_EXPORT
-void screen_switch_next(WScreen *scr)
-{
-	WRegion *reg=NEXT_MANAGED_WRAP(scr->ws_list, scr->current_ws);
-	if(reg!=NULL)
-		region_display_sp(reg);
-}
-
-
-/*EXTL_DOC
- * Display previous region (workspace, fullscreen client window) managed by
- * the screen \var{scr}.
- */
-EXTL_EXPORT
-void screen_switch_prev(WScreen *scr)
-{
-	WRegion *reg=PREV_MANAGED_WRAP(scr->ws_list, scr->current_ws);
-	if(reg!=NULL)
-		region_display_sp(reg);
 }
 
 
@@ -509,17 +378,6 @@ void goto_prev_screen()
 
 
 /*EXTL_DOC
- * Return the region managed and currently being displayed by the screen
- * \var{scr} (usually a workspace or a fullscreen client window).
- */
-EXTL_EXPORT
-WRegion *screen_current(WScreen *scr)
-{
-	return scr->current_ws;
-}
-
-
-/*EXTL_DOC
  * Return the numerical id for screen \var{scr}.
  */
 EXTL_EXPORT
@@ -533,7 +391,7 @@ static bool screen_may_destroy_managed(WScreen *scr, WRegion *reg)
 {
 	WRegion *r2;
 	
-	FOR_ALL_MANAGED_ON_LIST(scr->ws_list, r2){
+	FOR_ALL_MANAGED_ON_LIST(SCR_MLIST(scr), r2){
 		if(WOBJ_IS(r2, WGenWS) && r2!=reg)
 			return TRUE;
 	}
@@ -551,15 +409,9 @@ static bool screen_may_destroy_managed(WScreen *scr, WRegion *reg)
 
 static DynFunTab screen_dynfuntab[]={
 	{region_fit, screen_fit},
-	{region_set_focus_to, screen_set_focus_to},
     {region_map, screen_map},
 	{region_unmap, screen_unmap},
 	{region_activated, screen_activated},
-	
-	{(DynFun*)region_display_managed, (DynFun*)screen_display_managed},
-	{region_request_managed_geom, region_request_managed_geom_unallow},
-	{(DynFun*)region_do_add_managed, (DynFun*)screen_do_add_managed},
-	{region_remove_managed, screen_remove_managed},
 	
 	{(DynFun*)region_may_destroy_managed,
 	 (DynFun*)screen_may_destroy_managed},
@@ -567,10 +419,15 @@ static DynFunTab screen_dynfuntab[]={
 	{(DynFun*)region_find_rescue_manager_for,
 	 (DynFun*)screen_find_rescue_manager_for},
 	
+	{mplex_managed_changed, screen_managed_changed},
+	
+	{mplex_managed_geom, screen_managed_geom},
+	
 	END_DYNFUNTAB
 };
 
 
-IMPLOBJ(WScreen, WWindow, screen_deinit, screen_dynfuntab);
+IMPLOBJ(WScreen, WMPlex, screen_deinit, screen_dynfuntab);
+
 
 /*}}}*/

@@ -244,7 +244,7 @@ static bool do_save_workspaces(WScreen *scr, char *wsconf)
 		fprintf(file, ")\n");
 	}
 	
-	FOR_ALL_MANAGED_ON_LIST(scr->ws_list, reg){
+	FOR_ALL_MANAGED_ON_LIST(scr->mplex.managed_list, reg){
 		if(region_supports_save(reg)){
 			fprintf(file, "region_manage_new(arg[1], {\n");
 			region_save_to_file(reg, file, 1);

@@ -13,10 +13,11 @@
 #define ION_QUERY_QUERY_H
 
 #include <ioncore/common.h>
-#include <ioncore/genframe.h>
+#include <ioncore/mplex.h>
 #include <ioncore/extl.h>
+#include "wedln.h"
 
-extern void query_query(WGenFrame *frame, const char *prompt, const char *dflt,
-						ExtlFn handler, ExtlFn completor);
+extern WEdln *query_query(WMPlex *mplex, const char *prompt, 
+						  const char *dflt, ExtlFn handler, ExtlFn completor);
 
 #endif /* ION_QUERY_QUERY_H */

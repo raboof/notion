@@ -100,7 +100,7 @@ int genframe_press(WGenFrame *genframe, XButtonEvent *ev, WRegion **reg_ret)
 		p_tab_x+=genframe_nth_tab_x(genframe, p_tabnum);
 		p_tab_y+=g.y;
 		
-		sub=genframe_nth_managed(genframe, p_tabnum);
+		sub=mplex_nth_managed(&(genframe->mplex), p_tabnum);
 
 		if(sub==NULL)
 			return WGENFRAME_AREA_EMPTY_TAB;
@@ -242,7 +242,8 @@ static void p_tabdrag_begin(WGenFrame *genframe, XMotionEvent *ev,
 	wglobal.draw_dragwin_arg=(WRegion*)genframe;
 	
 	p_tabdrag_active=REGION_IS_ACTIVE(genframe);
-	p_tabdrag_selected=(genframe->current_sub==genframe->tab_pressed_sub);
+	p_tabdrag_selected=(WGENFRAME_CURRENT(genframe)
+						==genframe->tab_pressed_sub);
 	
 	genframe->flags|=WGENFRAME_TAB_DRAGGED;
 		

@@ -42,7 +42,7 @@ static bool floatframe_init(WFloatFrame *frame, WWindow *parent,
 	frame->bar_w=geom.w;
 	frame->genframe.tab_spacing=0;
 	
-	genframe_recalc_bar((WGenFrame*)frame, FALSE);
+	genframe_recalc_bar((WGenFrame*)frame);
 	
 	region_add_bindmap((WRegion*)frame, &(floatframe_bindmap));
 	
@@ -221,7 +221,7 @@ static void floatframe_set_shape(WFloatFrame *frame)
 
 #define CF_TAB_MAX_TEXT_X_OFF 10
 
-static void floatframe_recalc_bar(WFloatFrame *frame, bool draw)
+static void floatframe_recalc_bar(WFloatFrame *frame)
 {
 	WGRData *grdata=GRDATA_OF(frame);
 	int bar_w=0, maxw=0, tmaxw=0;
@@ -229,8 +229,8 @@ static void floatframe_recalc_bar(WFloatFrame *frame, bool draw)
 	WRegion *sub;
 	const char *p;
 	
-	if(frame->genframe.managed_count!=0){
-		FOR_ALL_MANAGED_ON_LIST(frame->genframe.managed_list, sub){
+	if(WGENFRAME_MCOUNT(frame)!=0){
+		FOR_ALL_MANAGED_ON_LIST(WGENFRAME_MLIST(frame), sub){
 			p=region_name(sub);
 			if(p!=NULL){
 				tab_w=(text_width(grdata->tab_font, p, strlen(p))
@@ -246,14 +246,14 @@ static void floatframe_recalc_bar(WFloatFrame *frame, bool draw)
 		   REGION_GEOM(frame).w>grdata->pwm_tab_min_width)
 			maxw=grdata->pwm_tab_min_width;
 		
-		tmp=maxw-tmaxw*frame->genframe.managed_count;
+		tmp=maxw-tmaxw*WGENFRAME_MCOUNT(frame);
 		if(tmp>0){
 			/* No label truncation needed. good. See how much can be padded */
-			tmp/=frame->genframe.managed_count*2;
+			tmp/=WGENFRAME_MCOUNT(frame)*2;
 			if(tmp>CF_TAB_MAX_TEXT_X_OFF)
 				tmp=CF_TAB_MAX_TEXT_X_OFF;
 			tab_w=tmaxw+tmp*2;
-			bar_w=tab_w*frame->genframe.managed_count;
+			bar_w=tab_w*WGENFRAME_MCOUNT(frame);
 		}else{
 			/* Some labels must be truncated */
 			bar_w=maxw;
@@ -269,17 +269,14 @@ static void floatframe_recalc_bar(WFloatFrame *frame, bool draw)
 		floatframe_set_shape(frame);
 	}
 
-	if(frame->genframe.managed_count!=0){
+	if(WGENFRAME_MCOUNT(frame)!=0){
 		int n=0;
-		FOR_ALL_MANAGED_ON_LIST(frame->genframe.managed_list, sub){
+		FOR_ALL_MANAGED_ON_LIST(WGENFRAME_MLIST(frame), sub){
 			tab_w=genframe_nth_tab_w((WGenFrame*)frame, n++);
 			textw=BORDER_IW(&(grdata->tab_border), tab_w);
 			REGION_LABEL(sub)=region_make_label(sub, textw, grdata->tab_font);
 		}
 	}
-	
-	if(draw)
-		genframe_draw_bar((WGenFrame*)frame, TRUE);
 }
 
 
@@ -288,7 +285,7 @@ static void floatframe_size_changed(WFloatFrame *frame, bool wchg, bool hchg)
 	int bar_w=frame->bar_w;
 	
 	if(wchg)
-		floatframe_recalc_bar(frame, FALSE);
+		floatframe_recalc_bar(frame);
 	if(hchg || (wchg && bar_w==frame->bar_w))
 		floatframe_set_shape(frame);
 }
@@ -337,8 +334,8 @@ static void floatframe_draw(const WFloatFrame *frame, bool complete)
 
 void floatframe_remove_managed(WFloatFrame *frame, WRegion *reg)
 {
-	genframe_remove_managed((WGenFrame*)frame, reg);
-	if(frame->genframe.managed_count==0)
+	mplex_remove_managed((WMPlex*)frame, reg);
+	if(WGENFRAME_MCOUNT(frame)==0)
 		defer_destroy((WObj*)frame);
 }
 
@@ -388,11 +385,11 @@ static bool floatframe_save_to_file(WFloatFrame *frame, FILE *file, int lvl)
 	fprintf(file, "flags = %d,\n", frame->genframe.flags);
 	save_indent_line(file, lvl);
 	fprintf(file, "subs = {\n");
-	FOR_ALL_MANAGED_ON_LIST(frame->genframe.managed_list, sub){
+	FOR_ALL_MANAGED_ON_LIST(WGENFRAME_MLIST(frame), sub){
 		save_indent_line(file, lvl+1);
 		fprintf(file, "{\n");
 		region_save_to_file((WRegion*)sub, file, lvl+2);
-		if(sub==frame->genframe.current_sub){
+		if(sub==WGENFRAME_CURRENT(frame)){
 			save_indent_line(file, lvl+2);
 			fprintf(file, "selected = true,\n");
 		}
@@ -433,7 +430,7 @@ WRegion *floatframe_load(WWindow *par, WRectangle geom, ExtlTab tab)
 	
 	extl_unref_table(substab);
 	
-	if(frame->genframe.managed_count==0){
+	if(WGENFRAME_MCOUNT(frame)==0){
 		/* Nothing to manage, destroy */
 		destroy_obj((WObj*)frame);
 		frame=NULL;
@@ -451,10 +448,10 @@ WRegion *floatframe_load(WWindow *par, WRectangle geom, ExtlTab tab)
 
 static DynFunTab floatframe_dynfuntab[]={
 	{draw_window, floatframe_draw},
-	{genframe_size_changed, floatframe_size_changed},
+	{mplex_size_changed, floatframe_size_changed},
 	{genframe_recalc_bar, floatframe_recalc_bar},
 
-	{genframe_managed_geom, floatframe_managed_geom},
+	{mplex_managed_geom, floatframe_managed_geom},
 	{genframe_bar_geom, floatframe_bar_geom},
 	{genframe_border_inner_geom, floatframe_border_inner_geom},
 	{region_remove_managed, floatframe_remove_managed},

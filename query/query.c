@@ -33,7 +33,7 @@
 
 
 /*EXTL_DOC
- * Show a query window in \var{frame} with prompt \var{prompt}, initial
+ * Show a query window in \var{mplex} with prompt \var{prompt}, initial
  * contents \var{dflt}. The function \var{handler} is called with
  * the entered string as the sole argument when \fnref{wedln_finish}
  * is called. The function \var{completor} is called with the created
@@ -41,11 +41,10 @@
  * second argument when \fnref{wedln_complete} is called.
  */
 EXTL_EXPORT
-void query_query(WGenFrame *frame, const char *prompt, const char *dflt,
-				 ExtlFn handler, ExtlFn completor)
+WEdln *query_query(WMPlex *mplex, const char *prompt, const char *dflt,
+				   ExtlFn handler, ExtlFn completor)
 {
 	WRectangle geom;
-	WEdln *wedln;
 	WEdlnCreateParams fnp;
 	
 	/*fprintf(stderr, "query_query called %s %s %d %d\n", prompt, dflt,
@@ -56,14 +55,8 @@ void query_query(WGenFrame *frame, const char *prompt, const char *dflt,
 	fnp.handler=handler;
 	fnp.completor=completor;
 	
-	wedln=(WEdln*)genframe_add_input(frame, (WRegionAddFn*)create_wedln,
-									 (void*)&fnp);
-	if(wedln!=NULL){
-		region_map((WRegion*)wedln);
-		
-		if(REGION_IS_ACTIVE(frame))
-			set_focus((WRegion*)wedln);
-	}
+	return (WEdln*)mplex_add_input(mplex, (WRegionAddFn*)create_wedln,
+								   (void*)&fnp);
 }
 
 

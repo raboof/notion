@@ -38,14 +38,14 @@ static bool ws_ok(WRegion *r)
 }
 	
 	
-static WGenWS *find_suitable_workspace(WScreen *vp)
+static WGenWS *find_suitable_workspace(WScreen *scr)
 {
-	WRegion *r=vp->current_ws;
+	WRegion *r=scr->mplex.current_sub;
 	
 	if(ws_ok(r))
 		return (WGenWS*)r;
 
-	FOR_ALL_MANAGED_ON_LIST(vp->ws_list, r){
+	FOR_ALL_MANAGED_ON_LIST(scr->mplex.managed_list, r){
 		if(ws_ok(r))
 			return (WGenWS*)r;
 	}

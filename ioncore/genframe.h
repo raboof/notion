@@ -15,6 +15,7 @@
 #include "common.h"
 #include "window.h"
 #include "attach.h"
+#include "mplex.h"
 
 INTROBJ(WGenFrame);
 
@@ -27,17 +28,13 @@ INTROBJ(WGenFrame);
 #define WGENFRAME_SETSHADED	  0x0040
 	
 DECLOBJ(WGenFrame){
-	WWindow win;
+	WMPlex mplex;
+	
 	int flags;
 	int saved_w, saved_h;
 	int saved_x, saved_y;
 	
 	int tab_spacing;
-	
-	int managed_count;
-	WRegion *managed_list;
-	WRegion *current_sub;
-	WRegion *current_input;
 	WRegion *tab_pressed_sub;
 };
 
@@ -55,21 +52,7 @@ extern void genframe_fit(WGenFrame *genframe, WRectangle geom);
 extern void genframe_resize_hints(WGenFrame *genframe, XSizeHints *hints_ret,
 								  uint *relw_ret, uint *relh_ret);
 
-/* Attach */
-extern void genframe_move_managed(WGenFrame *dest, WGenFrame *src);
-extern void genframe_attach_tagged(WGenFrame *genframe);
-extern WRegion *genframe_add_input(WGenFrame *genframe, WRegionAddFn *fn,
-								   void *fnp);
-extern void genframe_remove_managed(WGenFrame *genframe, WRegion *reg);
-
-/* Switch */
-extern bool genframe_display_managed(WGenFrame *genframe, WRegion *sub);
-extern void genframe_switch_nth(WGenFrame *genframe, uint n);
-extern void genframe_switch_next(WGenFrame *genframe);
-extern void genframe_switch_prev(WGenFrame *genframe);
-
 /* Focus */
-extern void genframe_focus(WGenFrame *genframe, bool warp);
 extern void genframe_activated(WGenFrame *genframe);
 extern void genframe_inactivated(WGenFrame *genframe);
 
@@ -77,27 +60,22 @@ extern void genframe_inactivated(WGenFrame *genframe);
 extern int genframe_nth_tab_w(const WGenFrame *genframe, int n);
 extern int genframe_nth_tab_x(const WGenFrame *genframe, int n);
 extern int genframe_tab_at_x(const WGenFrame *genframe, int x);
-extern void genframe_move_current_tab_right(WGenFrame *genframe);
-extern void genframe_move_current_tab_left(WGenFrame *genframe);
 extern void genframe_toggle_tab(WGenFrame *genframe);
 
 /* Misc */
-extern WRegion *genframe_nth_managed(WGenFrame *genframe, uint n);
-extern WRegion *genframe_current_input(WGenFrame *genframe);
-extern void genframe_fit_managed(WGenFrame *genframe);
 extern void genframe_draw_config_updated(WGenFrame *genframe);
 extern void genframe_toggle_sub_tag(WGenFrame *genframe);
+extern void genframe_managed_geom(const WGenFrame *genframe, 
+								  WRectangle *geom);
 
 /* Dynfuns */
-DYNFUN void genframe_recalc_bar(WGenFrame *genframe, bool draw);
+DYNFUN void genframe_recalc_bar(WGenFrame *genframe);
 DYNFUN void genframe_draw_bar(const WGenFrame *genframe, bool complete);
-DYNFUN void genframe_managed_geom(const WGenFrame *genframe, WRectangle *geom);
 DYNFUN void genframe_bar_geom(const WGenFrame *genframe, WRectangle *geom);
 DYNFUN void genframe_border_inner_geom(const WGenFrame *genframe,
 									   WRectangle *geom);
-DYNFUN void genframe_size_changed(WGenFrame *genframe, bool wchg, bool hchg);
-
-extern void genframe_draw_bar_default(const WGenFrame *genframe, bool complete);
+extern void genframe_draw_bar_default(const WGenFrame *genframe, 
+									  bool complete);
 
 
 #endif /* ION_IONCORE_GENFRAME_H */

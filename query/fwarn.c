@@ -23,42 +23,38 @@
  * Display an error message box in the frame \var{frame}.
  */
 EXTL_EXPORT
-void query_fwarn(WGenFrame *frame, const char *p)
+WMessage *query_fwarn(WMPlex *mplex, const char *p)
 {
 	char *p2;
+	WMessage *wmsg;
 	
 	if(p==NULL)
-		return;
+		return NULL;
 	
 	p2=scat("-Error- ", p);
 	
 	if(p2==NULL){
 		warn_err();
-		return;
+		return NULL;
 	}
 	
-	query_message(frame, p2);
+	wmsg=query_message(mplex, p2);
 	
 	free(p2);
+	
+	return wmsg;
 }
 
 /*EXTL_DOC
  * Display a mesage in the frame \var{frame}.
  */
 EXTL_EXPORT
-void query_message(WGenFrame *frame, const char *p)
+WMessage *query_message(WMPlex *mplex, const char *p)
 {
-	WMessage *wmsg;
-	
-	if(p==NULL || genframe_current_input(frame)!=NULL)
-		return;
+	if(p==NULL || mplex_current_input(mplex)!=NULL)
+		return NULL;
 
-	wmsg=(WMessage*)genframe_add_input(frame, (WRegionAddFn*)create_wmsg,
-									   (void*)p);
-	
-	region_map((WRegion*)wmsg);
-
-	if(REGION_IS_ACTIVE(frame))
-		set_focus((WRegion*)wmsg);
+	return (WMessage*)mplex_add_input(mplex, (WRegionAddFn*)create_wmsg,
+									  (void*)p);
 }
 

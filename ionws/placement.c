@@ -15,6 +15,7 @@
 #include <ioncore/attach.h>
 #include <ioncore/manage.h>
 #include <ioncore/extl.h>
+#include <ioncore/genframep.h>
 #include "placement.h"
 #include "ionframe.h"
 #include "splitframe.h"
@@ -47,10 +48,9 @@ bool ionws_add_clientwin(WIonWS *ws, WClientWin *cwin,
 	if(clientwin_get_transient_mode(cwin)==TRANSIENT_MODE_CURRENT){
 		target=find_suitable_frame(ws);
 		if(target!=NULL && WOBJ_IS(target, WGenFrame)){
-			if(((WGenFrame*)target)->current_sub!=NULL &&
-			   WOBJ_IS(((WGenFrame*)target)->current_sub, WClientWin)){
-				if(finish_add_clientwin(((WGenFrame*)target)->current_sub,
-										cwin, param))
+			WRegion *curr=WGENFRAME_CURRENT(target);
+			if(curr!=NULL && WOBJ_IS(curr, WClientWin)){
+				if(finish_add_clientwin(curr, cwin, param))
 					return TRUE;
 			}
 		}

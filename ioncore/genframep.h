@@ -14,8 +14,11 @@
 
 #include "genframe.h"
 
-#define WGENFRAME_WIN(FRAME) (((WGenFrame*)(FRAME))->win.win)
-#define WGENFRAME_DRAW(FRAME) (((WGenFrame*)(FRAME))->win.draw)
+#define WGENFRAME_WIN(FRAME) (((WGenFrame*)(FRAME))->mplex.win.win)
+#define WGENFRAME_DRAW(FRAME) (((WGenFrame*)(FRAME))->mplex.win.draw)
+#define WGENFRAME_MCOUNT(FRAME) (((WGenFrame*)(FRAME))->mplex.managed_count)
+#define WGENFRAME_MLIST(FRAME) (((WGenFrame*)(FRAME))->mplex.managed_list)
+#define WGENFRAME_CURRENT(FRAME) (((WGenFrame*)(FRAME))->mplex.current_sub)
 
 #define REGION_LABEL(REG) ((REG)->mgr_data.p)
 

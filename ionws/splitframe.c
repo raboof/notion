@@ -120,8 +120,8 @@ static void do_split(WIonFrame *oframe, const char *str, bool attach)
 		return;
 	}
 
-	if(attach && oframe->genframe.current_sub!=NULL){
-		region_add_managed_simple(reg, oframe->genframe.current_sub,
+	if(attach && WGENFRAME_CURRENT(oframe)!=NULL){
+		region_add_managed_simple(reg, WGENFRAME_CURRENT(oframe),
 								  REGION_ATTACH_SWITCHTO);
 	}
 	region_goto(reg);
@@ -192,8 +192,7 @@ void ionframe_relocate_and_close(WIonFrame *frame)
 		return;
 	}
 
-	if(!rescue_managed_clientwins((WRegion*)frame,
-								  frame->genframe.managed_list)){
+	if(!rescue_managed_clientwins((WRegion*)frame, WGENFRAME_MLIST(frame))){
 		warn("Failed to rescue managed client windows.");
 		return;
 	}
@@ -210,8 +209,7 @@ void ionframe_relocate_and_close(WIonFrame *frame)
 EXTL_EXPORT
 void ionframe_close(WIonFrame *frame)
 {
-	if(frame->genframe.managed_count!=0 ||
-	   frame->genframe.current_input!=NULL){
+	if(WGENFRAME_MCOUNT(frame)!=0 || WGENFRAME_CURRENT(frame)!=NULL){
 		warn("Frame not empty.");
 		return;
 	}

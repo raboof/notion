@@ -21,6 +21,7 @@
 #include "extl.h"
 #include "extlconv.h"
 #include "grab.h"
+#include "genframep.h"
 
 
 #define XOR_RESIZE (!wglobal.opaque_resize)
@@ -688,10 +689,10 @@ void genframe_resize_units(WGenFrame *genframe, int *wret, int *hret)
 	*wret=grdata->w_unit;
 	*hret=grdata->h_unit;
 	
-	if(genframe->current_sub!=NULL){
+	if(WGENFRAME_CURRENT(genframe)!=NULL){
 		XSizeHints hints;
 		
-		region_resize_hints(genframe->current_sub, &hints, NULL, NULL);
+		region_resize_hints(WGENFRAME_CURRENT(genframe), &hints, NULL, NULL);
 		
 		if(hints.flags&PResizeInc &&
 		   (hints.width_inc>1 || hints.height_inc>1)){

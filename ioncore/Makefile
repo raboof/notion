@@ -40,7 +40,7 @@ SOURCES=binding.c conf-bindings.c conf-draw.c cursor.c draw.c event.c     \
 	region.c eventh.c  attach.c resize.c defer.c grab.c     	  \
 	manage.c readfds.c regbind.c rootwin.c tags.c names.c saveload.c  \
 	genws.c genframe.c genframe-pointer.c conf.c reginfo.c errorlog.c \
-	stacking.c extlconv.c fullscreen.c
+	stacking.c extlconv.c fullscreen.c mplex.c
 
 MAKE_EXPORTS=ioncore
 

@@ -203,7 +203,7 @@ void ionframe_toggle_shade(WIonFrame *frame)
 /*{{{ Drawing routines and such */
 
 
-static void ionframe_recalc_bar(WIonFrame *frame, bool draw)
+static void ionframe_recalc_bar(WIonFrame *frame)
 {
 	WGRData *grdata=GRDATA_OF(frame);
 	int bar_w, tab_w, textw, n;
@@ -215,18 +215,15 @@ static void ionframe_recalc_bar(WIonFrame *frame, bool draw)
 		bar_w=geom.w;
 	}
 	
-	if(frame->genframe.managed_count!=0){
+	if(WGENFRAME_MCOUNT(frame)!=0){
 		n=0;
-		FOR_ALL_MANAGED_ON_LIST(frame->genframe.managed_list, sub){
+		FOR_ALL_MANAGED_ON_LIST(WGENFRAME_MLIST(frame), sub){
 			tab_w=genframe_nth_tab_w((WGenFrame*)frame, n++);
 			textw=BORDER_IW(&(grdata->tab_border), tab_w);
 			REGION_LABEL(sub)=region_make_label(sub, textw,
 												grdata->tab_font);
 		}
 	}
-	
-	if(draw)
-		genframe_draw_bar((WGenFrame*)frame, TRUE);
 }
 
 
@@ -315,11 +312,11 @@ static bool ionframe_save_to_file(WIonFrame *frame, FILE *file, int lvl)
 	fprintf(file, "flags = %d,\n", frame->genframe.flags);
 	save_indent_line(file, lvl);
 	fprintf(file, "subs = {\n");
-	FOR_ALL_MANAGED_ON_LIST(frame->genframe.managed_list, sub){
+	FOR_ALL_MANAGED_ON_LIST(WGENFRAME_MLIST(frame), sub){
 		save_indent_line(file, lvl+1);
 		fprintf(file, "{\n");
 		region_save_to_file((WRegion*)sub, file, lvl+2);
-		if(sub==frame->genframe.current_sub){
+		if(sub==WGENFRAME_CURRENT(frame)){
 			save_indent_line(file, lvl+2);
 			fprintf(file, "selected = true,\n");
 		}
@@ -374,7 +371,7 @@ static DynFunTab ionframe_dynfuntab[]={
 	{genframe_draw_bar, ionframe_draw_bar},
 	{genframe_recalc_bar, ionframe_recalc_bar},
 	
-	{genframe_managed_geom, ionframe_managed_geom},
+	{mplex_managed_geom, ionframe_managed_geom},
 	{genframe_bar_geom, ionframe_bar_geom},
 	{genframe_border_inner_geom, ionframe_border_inner_geom},
 	{region_resize_hints, ionframe_resize_hints},
