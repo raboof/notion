@@ -230,7 +230,7 @@ static void floatframe_rqgeom_clientwin(WFloatFrame *frame, WClientWin *cwin,
 void floatframe_resize_hints(WFloatFrame *frame, XSizeHints *hints_ret)
 {
     WRectangle subgeom;
-    WLListNode *node;
+    WLListIterTmp tmp;
     WRegion *sub;
     int woff, hoff;
     
@@ -245,7 +245,7 @@ void floatframe_resize_hints(WFloatFrame *frame, XSizeHints *hints_ret)
         hints_ret->flags=0;
     }
     
-    FRAME_L1_FOR_ALL(&(frame->frame), node, sub){
+    FRAME_L1_FOR_ALL(sub, &(frame->frame), tmp){
         xsizehints_adjust_for(hints_ret, sub);
     }
     
@@ -334,7 +334,7 @@ static int init_title(WFloatFrame *frame, int i)
 static void floatframe_recalc_bar(WFloatFrame *frame)
 {
     int bar_w=0, textw=0, tmaxw=frame->tab_min_w, tmp=0;
-    WLListNode *node;
+    WLListIterTmp itmp;
     WRegion *sub;
     const char *p;
     GrBorderWidths bdw;
@@ -352,7 +352,7 @@ static void floatframe_recalc_bar(WFloatFrame *frame)
         bdtotal=((m-1)*(bdw.tb_ileft+bdw.tb_iright)
                  +bdw.right+bdw.left);
 
-        FRAME_L1_FOR_ALL(&(frame->frame), node, sub){
+        FRAME_L1_FOR_ALL(sub, &(frame->frame), itmp){
             p=region_name(sub);
             if(p==NULL)
                 continue;
@@ -394,7 +394,7 @@ static void floatframe_recalc_bar(WFloatFrame *frame)
         return;
     
     i=0;
-    FRAME_L1_FOR_ALL(&(frame->frame), node, sub){
+    FRAME_L1_FOR_ALL(sub, &(frame->frame), itmp){
         textw=init_title(frame, i);
         if(textw>0){
             title=region_make_label(sub, textw, frame->frame.bar_brush);

@@ -62,9 +62,11 @@ WLListNode *llist_iter(WLListIterTmp *tmp)
 WRegion *llist_iter_regions(WLListIterTmp *tmp)
 {
     WLListNode *mgd=*tmp;
-    if(mgd!=NULL)
+    if(mgd!=NULL){
         *tmp=mgd->next;
-    return mgd->reg;
+        return mgd->reg;
+    }
+    return NULL;
 }
 
 
