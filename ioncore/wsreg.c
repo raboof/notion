@@ -123,7 +123,7 @@ static WViewport *find_suitable_viewport(WClientWin *cwin, int x, int y)
 	WScreen *scr=SCREEN_OF(cwin);
 	WViewport *vp;
 	
-	if(x>CF_STUBBORN_TRESH && y>CF_STUBBORN_TRESH &&
+	if(x>CF_STUBBORN_TRESH || y>CF_STUBBORN_TRESH ||
 	   cwin->size_hints.win_gravity!=ForgetGravity){
 		FOR_ALL_TYPED(scr, vp, WViewport){
 			WRectangle geom=REGION_GEOM(vp);
