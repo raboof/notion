@@ -537,9 +537,8 @@ end
 
 
 local function unquote(str)
-    str=string.gsub(str, "\"\"", "")
-    str=string.gsub(str, "\"(.-[^\\])\"", "%1")
-    str=string.gsub(str, "'(.-)'", "%1")
+    str=string.gsub(str, "^['\"]", "")
+    str=string.gsub(str, "([^\\])['\"]", "%1")
     str=string.gsub(str, "\\(.)", "%1")
     return str
 end
