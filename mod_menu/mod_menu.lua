@@ -38,14 +38,14 @@ end
 --DOC
 -- Returns a menu defined with \fnref{mod_menu.defmenu}.
 function mod_menu.getmenu(name)
-    return menus[menu]
+    return menus[name]
 end
 
 --DOC
 -- Define context menu for context \var{ctx}, \var{tab} being a table 
 -- of menu entries.
-function mod_menu.defctxmenu(name, tab)
-    menus["ctxmenu-"..name]=tab
+function mod_menu.defctxmenu(ctx, tab)
+    menus["ctxmenu-"..ctx]=tab
 end
 
 --DOC
