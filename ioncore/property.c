@@ -242,6 +242,9 @@ void xwindow_set_text_property(Window win, Atom a, const char **ptr, int n)
 /*{{{ Exports */
 
 
+/*EXTL_DOC
+ * Create a new atom. See \code{XInternAtom}(3) manual page for details.
+ */
 EXTL_EXPORT
 int ioncore_x_intern_atom(const char *name, bool only_if_exists)
 {
@@ -249,6 +252,10 @@ int ioncore_x_intern_atom(const char *name, bool only_if_exists)
 }
 
 
+/*EXTL_DOC
+ * Get the name of an atom. See \code{XGetAtomName}(3) manual page for 
+ * details.
+ */
 EXTL_EXPORT
 char *ioncore_x_get_atom_name(const char *name, int atom)
 {
@@ -263,6 +270,14 @@ char *ioncore_x_get_atom_name(const char *name, int atom)
     }
 
 
+/*EXTL_DOC
+ * Get a property \var{atom} of type \var{atom_type} for window \var{win}. 
+ * The \var{n32expected} parameter indicates the expected number of 32bit
+ * words, and \var{more} indicates whether all or just this amount of data
+ * should be fetched. Each 8, 16 or 32bit element of the property, as
+ * deciphered from \var{atom_type} is a field in the returned table.
+ * See \code{XGetWindowProperty}(3) manual page for more information.
+ */
 EXTL_EXPORT
 ExtlTab ioncore_x_get_window_property(int win, int atom, int atom_type,
                                       int n32expected, bool more)
@@ -322,6 +337,12 @@ static bool get_mode(const char *mode, int *m)
 }
 
 
+/*EXTL_DOC
+ * Modify a window property. The \var{mode} is one of
+ * \code{"replace"}, \code{"prepend"} or \code{"append"}, and format
+ * is either 8, 16 or 32. Also see \fnref{ioncore.x_get_window_property}
+ * and the \code{XChangeProperty}(3) manual page.
+ */
 EXTL_EXPORT
 void ioncore_x_change_property(int win, int atom, int atom_type,
                                int format, const char *mode, ExtlTab tab)
@@ -349,6 +370,9 @@ void ioncore_x_change_property(int win, int atom, int atom_type,
 }
 
 
+/*EXTL_DOC
+ * Delete a window property.
+ */
 EXTL_EXPORT
 void ioncore_x_delete_property(int win, int atom)
 {
@@ -356,6 +380,12 @@ void ioncore_x_delete_property(int win, int atom)
 }
 
 
+/*EXTL_DOC
+ * Get a text property for a window (\code{STRING}, \code{COMPOUND_TEXT},
+ * or \code{UTF8_STRING} property converted). The fields in the returned
+ * table (starting from 1) are the null-separated parts of the property.
+ * See the \code{XGetTextProperty}(3) manual page for more information.
+ */
 EXTL_EXPORT
 ExtlTab ioncore_x_get_text_property(int win, int atom)
 {
@@ -378,6 +408,11 @@ ExtlTab ioncore_x_get_text_property(int win, int atom)
 }
 
 
+/*EXTL_DOC
+ * Set a text property for a window. The fields of \var{tab} starting from
+ * 1 should be the different null-separated parts of the property.
+ * See the \code{XSetTextProperty}(3) manual page for more information.
+ */
 EXTL_EXPORT
 void ioncore_x_set_text_property(int win, int atom, ExtlTab tab)
 {
