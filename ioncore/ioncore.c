@@ -188,7 +188,8 @@ fail:
 				else
 					close(wglobal.conn);
 				libtu_asprintf(&cmd, CF_XMESSAGE " %s", efnam);
-				system(cmd);
+				if(system(cmd)==-1)
+					warn_err_obj(cmd);
 				unlink(efnam);
 				exit(EXIT_SUCCESS);
 			}
@@ -469,6 +470,8 @@ void ioncore_deinit()
 		FOR_ALL_SCREENS(scr){
 			save_workspaces(scr);
 		}
+	}else{
+		warn("Not saving workspace layout.");
 	}
 	
 	while(wglobal.rootwins!=NULL)

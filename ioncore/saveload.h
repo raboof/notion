@@ -33,5 +33,7 @@ extern WRegion *region_add_managed_load(WRegion *mgr, ExtlTab tab);
 
 extern void save_geom(WRectangle geom, FILE *file, int lvl);
 
+extern void enable_workspace_saves(bool enable);
+
 #endif /* ION_IONCORE_SAVELOAD_H */
 

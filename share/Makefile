@@ -9,9 +9,9 @@ include $(TOPDIR)/system-inc.mk
 ######################################
 
 LUACODE = ioncorelib.lua ioncore-aliases.lua ioncore-mplexfns.lua \
-	  querylib.lua compat.lua
+	  querylib.lua compat.lua ioncore-startup.lua
 
-SHELLSCRIPTS = ion-edit ion-man ion-runinxterm ion-ssh ion-view 
+SHELLSCRIPTS = ion-edit ion-man ion-runinxterm ion-ssh ion-view
 
 TARGETS=ion-ssh ion-man
 
@@ -30,10 +30,6 @@ _install:
 		$(INSTALL) -m $(DATA_MODE) $$i $(SHAREDIR); \
 	done
 
-ion-ssh: ion-ssh.in
-	sed 's#SHAREDIR#$(SHAREDIR)#g' $< > $@
-	chmod $(BIN_MODE) $@
-
-ion-man: ion-man.in
+%: %.in
 	sed 's#SHAREDIR#$(SHAREDIR)#g' $< > $@
 	chmod $(BIN_MODE) $@

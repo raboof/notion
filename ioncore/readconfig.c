@@ -23,6 +23,16 @@
 static char* dummy_paths=NULL;
 static char **scriptpaths=&dummy_paths;
 static int n_scriptpaths=0;
+static char *sessiondir=NULL;
+
+
+typedef struct{
+	ExtlFn fn;
+	int status;
+	va_list args;
+	const char *spec;
+	const char *rspec;
+} TryCallParam;
 
 
 /*{{{ Init */
@@ -100,7 +110,7 @@ bool ioncore_add_moduledir(const char *dir)
 bool ioncore_add_userdirs(const char *appname)
 {
 	const char *home;
-	char *tmp, *tmp2;
+	char *tmp;
 	int fails=2;
 	
 	home=getenv("HOME");
@@ -108,18 +118,19 @@ bool ioncore_add_userdirs(const char *appname)
 	if(home==NULL){
 		warn("$HOME not set");
 	}else{
-		tmp=scat3(home, "/.", appname);
+		libtu_asprintf(&tmp, "%s/.%s", home, appname);
 		if(tmp==NULL){
 			warn_err();
 		}else{
 			fails-=ioncore_add_scriptdir(tmp);
-			tmp2=scat(tmp, "/lib");
-			if(tmp2==NULL){
-				warn_err();
-			}else{
-				fails-=ioncore_add_moduledir(tmp2);
-				free(tmp2);
-			}
+			free(tmp);
+		}
+		
+		libtu_asprintf(&tmp, "%s/.%s/lib", home, appname);
+		if(tmp==NULL){
+			warn_err();
+		}else{
+			fails-=ioncore_add_moduledir(tmp);
 			free(tmp);
 		}
 	}
@@ -128,15 +139,38 @@ bool ioncore_add_userdirs(const char *appname)
 }
 
 
+static bool ioncore_set_sessiondir(const char *appname, const char *session)
+{
+	const char *home=getenv("HOME");
+	char *tmp;
+	bool ret=FALSE;
+	
+	if(home!=NULL){
+		libtu_asprintf(&tmp, "%s/.%s/%s", home, appname, session);
+		if(tmp==NULL){
+			warn_err();
+		}else{
+			ret=ioncore_add_scriptdir(tmp);
+			if(sessiondir!=NULL)
+				free(sessiondir);
+			sessiondir=tmp;
+		}
+	}
+	
+	return ret;
+}
+
+
 bool ioncore_add_default_dirs()
 {
-	int fails=4;
+	int fails=6;
 	
 	fails-=ioncore_add_scriptdir(EXTRABINDIR); /* ion-completefile */
 	fails-=ioncore_add_scriptdir(ETCDIR);
 	fails-=ioncore_add_scriptdir(SHAREDIR);
 	fails-=ioncore_add_moduledir(MODULEDIR);
 	fails-=ioncore_add_userdirs("ion-devel");
+	fails-=ioncore_set_sessiondir("ion-devel", "saves");
 	
 	return (fails==0);
 }
@@ -145,128 +179,181 @@ bool ioncore_add_default_dirs()
 /*}}}*/
 
 
-/*{{{ get_cfgfile */
+/*{{{ try_etcpath, do_include, etc. */
 
 
-static char *search_etcpath2(const char *const *files, bool noaccesstest)
+static int try_etcpath2(const char *const *files, TryConfigFn *tryfn,
+						void *tryfnparam)
 {
 	char *tmp=NULL;
 	const char *const *file;
-	int i;
+	int i, ret;
 	
 	for(i=n_scriptpaths-1; i>=0; i--){
 		for(file=files; *file!=NULL; file++){
 			libtu_asprintf(&tmp, "%s/%s", scriptpaths[i], *file);
 			if(tmp==NULL){
 				warn_err();
-				continue;
+				return TRYCONFIG_MEMERROR;
 			}
-			if(noaccesstest || access(tmp, F_OK)==0)
-				return tmp;
+			ret=tryfn(tmp, tryfnparam);
 			free(tmp);
+			if(ret>=0)
+				return ret;
 		}
 	}
-	return NULL;
+	
+	return TRYCONFIG_NOTFOUND;
 }
 
 
-EXTL_EXPORT
-char *lookup_script(const char *file, const char *try_in_dir)
+static int try_lookup(const char *file, char **ptr)
+{
+	if(access(file, F_OK)!=0)
+		return TRYCONFIG_NOTFOUND;
+	*ptr=scopy(file);
+	if(*ptr==NULL)
+		warn_err();
+	return (*ptr!=NULL);
+}
+	
+
+static int try_load(const char *file, TryCallParam *param)
+{
+	if(access(file, F_OK)!=0)
+		return TRYCONFIG_NOTFOUND;
+
+	if(param->status==1)
+		warn("Falling back to %s", file);
+	
+	if(!extl_loadfile(file, &(param->fn))){
+		param->status=1;
+		return TRYCONFIG_LOAD_FAILED;
+	}
+	
+	return TRYCONFIG_OK;
+}
+
+
+static int try_call(const char *file, TryCallParam *param)
+{
+	int ret=try_load(file, param);
+	
+	if(ret!=TRYCONFIG_OK)
+		return ret;
+	
+	ret=extl_call_vararg(param->fn, param->spec, param->rspec,  param->args);
+	
+	extl_unref_fn(param->fn);
+	
+	return (ret ? TRYCONFIG_OK : TRYCONFIG_CALL_FAILED);
+}
+
+
+static int try_call_nargs(const char *file, TryCallParam *param)
+{
+	int ret=try_load(file, param);
+	
+	if(ret!=TRYCONFIG_OK)
+		return ret;
+	
+	ret=extl_call(param->fn, NULL, NULL);
+	
+	extl_unref_fn(param->fn);
+	
+	return (ret ? TRYCONFIG_OK : TRYCONFIG_CALL_FAILED);
+}
+
+
+int do_lookup_script(const char *file, const char *try_in_dir,
+					 TryConfigFn *tryfn, void *tryfnparam)
 {
 	const char *files[]={NULL, NULL};
 	char* tmp=NULL;
+	int retval;
 
 	if(file==NULL)
-		return NULL;
+		return TRYCONFIG_NOTFOUND;
 	
 	if(file[0]=='/'){
-		if(access(file, F_OK)!=0)
-			return NULL;
-		return scopy(file);
+		retval=tryfn(file, tryfnparam);
+		if(retval>=0)
+			return retval;
 	}
 	
 	if(try_in_dir!=NULL){
 		libtu_asprintf(&tmp, "%s/%s", try_in_dir, file);
-		
-		if(tmp!=NULL){
-			if(access(tmp, F_OK)==0)
-				return tmp;
-			free(tmp);
+		if(tmp==NULL){
+			warn_err();
+			return TRYCONFIG_MEMERROR;
 		}
+		retval=tryfn(file, tryfnparam);
+		free(tmp);
+		if(retval>=0)
+			return retval;
 	}
 	
 	files[0]=file;
-	return search_etcpath2(files, FALSE);
+	return try_etcpath2(files, tryfn, tryfnparam);
+}
+
+
+/*EXTL_DOC
+ * This function will return the path to the first file with name
+ * \var{file} on the script and configuration file search path. The
+ * directory \var{try_in_dir} if checked before the search path if
+ * specified.
+ */
+EXTL_EXPORT
+char *lookup_script(const char *file, const char *try_in_dir)
+{
+	char *tmp=NULL;
+	do_lookup_script(file, try_in_dir, (TryConfigFn*)try_lookup, &tmp);
+	return tmp;
 }
 
 
 EXTL_EXPORT
 bool do_include(const char *file, const char *current_file_dir)
 {
-	char *tmp=lookup_script(file, current_file_dir);
-	bool successp=FALSE;
-	ExtlFn fn;
+	TryCallParam param;
+	int retval;
 	
-	if(tmp==NULL){
-		warn("Could not find file %s in search path", file);
-		return FALSE;
-	}
+	param.status=0;
+
+	retval=do_lookup_script(file, current_file_dir,
+							(TryConfigFn*)try_call_nargs, &param);
 	
-	if(extl_loadfile(tmp, &fn)){
-		successp=extl_call(fn, NULL, NULL);
-		extl_unref_fn(fn);
-	}
-	free(tmp);
-	
-	return successp;
+	if(retval==TRYCONFIG_NOTFOUND)
+		warn("Unable to find '%s' on search path", file);
+
+	return (retval==TRYCONFIG_OK);
 }
 
 
-static char *do_get_cfgfile_for(const char *module, const char *postfix,
-								bool noaccesstest)
-{
-	char *files[]={NULL, NULL, NULL};
-	char *ret;
-	
-	if(module==NULL)
-		return NULL;
-	
-	if(postfix!=NULL){
-		libtu_asprintf(files+0, "%s-%s.%s", module, postfix,
-					   extl_extension());
-	}
-	libtu_asprintf(files+(postfix==NULL ? 0 : 1), "%s.%s", module,
-				   extl_extension());
-	
-	ret=search_etcpath2((const char**)&files, noaccesstest);
-	
-	if(files[0]!=NULL)
-		free(files[0]);
-	if(files[1]!=NULL)
-		free(files[1]);
-	
-	return ret;
-}
+/*}}}*/
 
 
-static char *do_get_cfgfile_for_scr(const char *module, int xscr,
-									bool noaccesstest)
+/*{{{ try_config */
+
+
+static char *construct_scr_name(const char *name, int scr)
 {
-	char *ret, *tmp, *display, *dpyend;
+	char *tmp, *display, *dpyend;
 	
 	display=XDisplayName(wglobal.display);
 	
 	dpyend=strchr(display, ':');
 	if(dpyend==NULL)
-		goto fallback;
+		return NULL;
 	
 	dpyend=strchr(dpyend, '.');
 	
 	if(dpyend==NULL) {
-		libtu_asprintf(&tmp, "%s.%d", display, xscr);
+		libtu_asprintf(&tmp, "%s-%s.%d", name, display, scr);
 	}else{
-		libtu_asprintf(&tmp, "%.*s.%d", (int)(dpyend-display),
-				   						display, xscr);
+		libtu_asprintf(&tmp, "%s-%.*s.%d", name, 
+					   (int)(dpyend-display), display, scr);
 	}
 	
 	/* It seems Xlib doesn't want this freed */
@@ -274,7 +361,7 @@ static char *do_get_cfgfile_for_scr(const char *module, int xscr,
 	
 	if(tmp==NULL){
 		warn_err();
-		goto fallback;
+		return NULL;
 	}
 
 	/* Some second-rate OSes/filesystems don't like the colon */
@@ -290,42 +377,52 @@ static char *do_get_cfgfile_for_scr(const char *module, int xscr,
 	}
 #endif
 	
-	ret=do_get_cfgfile_for(module, tmp, noaccesstest);
+	return tmp;
+}
+
+
+static int do_try_config_for(const char *basename, const char *scrbasename,
+							TryConfigFn *tryfn, void *tryfnparam)
+{
+	char *files[]={NULL, NULL, NULL};
+	int ret;
 	
+	libtu_asprintf(files+0, "%s.%s", basename, extl_extension());
+	if(files[0]==NULL){
+		warn_err();
+		return TRYCONFIG_MEMERROR;
+	}
+	libtu_asprintf(files+1, "%s.%s", scrbasename, extl_extension());
+	if(files[1]==NULL)
+		warn_err();
+	
+	ret=try_etcpath2((const char**)&files, tryfn, tryfnparam);
+	
+	free(files[0]);
+	if(files[1]!=NULL)
+		free(files[1]);
+	
+	return ret;
+}
+
+
+int try_config_for(const char *module, TryConfigFn *tryfn, void *tryfnparam)
+{
+	return do_try_config_for(module, NULL, tryfn, tryfnparam);
+}
+
+
+int try_config_for_scr(const char *module, int scr,
+					   TryConfigFn *tryfn, void *tryfnparam)
+{
+	int ret;
+	char *tmp;
+	
+	tmp=construct_scr_name(module, scr);
+	ret=do_try_config_for(module, tmp, tryfn, tryfnparam);
 	free(tmp);
 	
 	return ret;
-
-fallback:
-	ret=do_get_cfgfile_for(module, NULL, noaccesstest);
-	return ret;
-}
-
-
-char *get_cfgfile_for_scr(const char *module, int xscr)
-{
-	return do_get_cfgfile_for_scr(module, xscr, FALSE);
-	
-}
-
-
-char *get_cfgfile_for(const char *module)
-{
-	return do_get_cfgfile_for(module, NULL, FALSE);
-}
-
-
-char *get_savefile_for_scr(const char *module, int xscr)
-{
-	return do_get_cfgfile_for_scr(module, xscr, TRUE);
-	
-}
-
-
-char *get_savefile_for(const char *module)
-{
-	return do_get_cfgfile_for(module, NULL, TRUE);
-	
 }
 
 
@@ -337,41 +434,87 @@ char *get_savefile_for(const char *module)
 
 bool read_config(const char *cfgfile)
 {
-	bool successp=FALSE;
-	ExtlFn fn;
+	int retval;
+	TryCallParam param;
 	
-	if(extl_loadfile(cfgfile, &fn)){
-		successp=extl_call(fn, NULL, NULL);
-		extl_unref_fn(fn);
-	}
-	return successp;
-}
-
-
-static bool do_read_config_for(const char *module, char *cfgfile)
-{
-	bool ret=TRUE;
-	if(cfgfile==NULL){
-		warn("Could not find configuration file for \"%s\".", module);
-	}else{
-		ret=read_config(cfgfile);
-		free(cfgfile);
-	}
-	return ret;
+	param.status=0;
+	retval=try_call_nargs(cfgfile, &param);
+	if(retval==-2)
+		warn_err_obj(cfgfile);
+	return (retval==1);
 }
 
 
 bool read_config_for(const char *module)
 {
-	return do_read_config_for(module, get_cfgfile_for(module));
+	return read_config_for_args(module, -1, TRUE, NULL, NULL);
 }
 
 
-bool read_config_for_scr(const char *module, int xscr)
+bool read_config_for_scr(const char *module, int scr)
 {
-	return do_read_config_for(module, get_cfgfile_for_scr(module, xscr));
+	return read_config_for_args(module, scr, TRUE, NULL, NULL);
+}
+
+
+bool read_config_for_args(const char *module, int scr, bool warn_nx,
+						  const char *spec, const char *rspec, ...)
+{
+	bool ret;
+	TryCallParam param;
+	
+	param.status=0;
+	param.spec=spec;
+	param.rspec=rspec;
+	
+	va_start(param.args, rspec);
+	if(scr<0)
+		ret=try_config_for(module, (TryConfigFn*)try_call, &param);
+	else
+		ret=try_config_for_scr(module, scr, (TryConfigFn*)try_call, &param);
+	
+	if(ret==TRYCONFIG_NOTFOUND && warn_nx){
+		warn("Unable to find configuration file '%s' on search path", 
+			 module);
+	}
+
+	va_end(param.args);
+	
+	return (ret==TRYCONFIG_OK);
 }
 
 
 /*}}}*/
 
+
+/*{{{ get_savefile_for */
+
+
+char *get_savefile_for_scr(const char *file, int scr)
+{
+	char *tmp=NULL, *res=NULL;
+	
+	tmp=construct_scr_name(file, scr);
+	if(tmp!=NULL){
+		res=get_savefile_for(tmp);
+		free(tmp);
+	}
+	
+	return res;
+}
+
+
+char *get_savefile_for(const char *file)
+{
+	char *res=NULL;
+	
+	if(sessiondir!=NULL){
+		libtu_asprintf(&res, "%s/%s.%s", sessiondir, file,
+					   extl_extension());
+	}
+	
+	return res;
+}
+
+
+/*}}}*/

@@ -45,18 +45,18 @@ WBindmap query_wedln_bindmap=BINDMAP_INIT;
  * \type{WMessage}).
  */
 EXTL_EXPORT
-void query_bindings(ExtlTab tab)
+bool query_bindings(ExtlTab tab)
 {
-	process_bindings(&query_bindmap, NULL, tab);
+	return process_bindings(&query_bindmap, NULL, tab);
 }
 
 /*EXTL_DOC
  * Add a set of bindings available in the line editor.
  */
 EXTL_EXPORT
-void query_wedln_bindings(ExtlTab tab)
+bool query_wedln_bindings(ExtlTab tab)
 {
-	process_bindings(&query_wedln_bindmap, NULL, tab);
+	return process_bindings(&query_wedln_bindmap, NULL, tab);
 }
 
 /*}}}*/
@@ -77,15 +77,11 @@ void wedln_history_push(const char *str)
 {
 	edlnhist_push(str);
 }
-	
+
 
 static void load_history()
 {
-	char *filename=get_cfgfile_for("saves/wedln_history");
-	if(filename!=NULL){
-		read_config(filename);
-		free(filename);
-	}
+	read_config_for_args("wedln_history", -1, FALSE, NULL, NULL);
 }
 
 
@@ -96,7 +92,7 @@ static void save_history()
 	FILE *file;
 	int i=0;
 	
-	fname=get_savefile_for("saves/wedln_history");
+	fname=get_savefile_for("wedln_history");
 	
 	if(fname==NULL){
 		warn("Unable to save wedln history");
@@ -149,12 +145,6 @@ bool query_module_init()
 		goto err;
 	
 	read_config_for("query");
-
-	if(query_bindmap.nbindings==0){
-		warn_obj("query module", "Inadequate binding configurations. "
-				 "Refusing to load module. Please fix your configuration.");
-		goto err;
-	}
 
 	load_history();
 	

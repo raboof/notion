@@ -261,7 +261,16 @@ static WRegion *screen_find_rescue_manager_for(WScreen *scr, WRegion *reg)
 	other=reg;
 	while(1){
 		other=PREV_MANAGED(SCR_MLIST(scr), other);
-		if(other==reg)
+		if(other==NULL)
+			break;
+		if(WOBJ_IS(other, WGenWS) && region_can_manage_clientwins(other))
+			return other;
+	}
+
+	other=reg;
+	while(1){
+		other=NEXT_MANAGED(SCR_MLIST(scr), other);
+		if(other==NULL)
 			break;
 		if(WOBJ_IS(other, WGenWS) && region_can_manage_clientwins(other))
 			return other;

@@ -12,21 +12,37 @@
 #ifndef ION_IONCORE_READCONFIG_H
 #define ION_IONCORE_READCONFIG_H
 
+#include "common.h"
+#include "extl.h"
+
+typedef int TryConfigFn(const char *file, void *param);
+
+enum{
+	TRYCONFIG_MEMERROR=-3,
+	TRYCONFIG_NOTFOUND=-2,
+	TRYCONFIG_LOAD_FAILED=-1,
+	TRYCONFIG_CALL_FAILED=0,
+	TRYCONFIG_OK=1
+};
+
+
 extern bool ioncore_add_scriptdir(const char *dir);
 extern bool ioncore_add_moduledir(const char *dir);
 extern bool ioncore_add_userdirs(const char *appname);
 extern bool ioncore_add_default_dirs();
 
-extern char *get_cfgfile_for_scr(const char *module, int xscr);
-extern char *get_cfgfile_for(const char *module);
-extern char *get_savefile_for_scr(const char *module, int xscr);
-extern char *get_savefile_for(const char *module);
+extern int try_config_for(const char *module, TryConfigFn *tryfn, 
+						  void *tryfnparam);
+extern int try_config_for_scr(const char *module, int xscr,
+							  TryConfigFn *tryfn, void *tryfnparam);
 
 extern bool read_config(const char *cfgfile);
 extern bool read_config_for(const char *module);
-extern bool read_config_for_scr(const char *module, int xscr);
+extern bool read_config_for_scr(const char *module, int scr);
+extern bool read_config_for_args(const char *module, int scr, bool warn_nx,
+								 const char *spec, const char *rspec, ...);
 
-/* The library path stuff is in readconfig.c */
-extern char *find_module(const char *fname);
+extern char *get_savefile_for_scr(const char *module, int xscr);
+extern char *get_savefile_for(const char *module);
 
 #endif /* ION_IONCORE_READCONFIG_H */

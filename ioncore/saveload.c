@@ -15,6 +15,7 @@
 #include <sys/types.h>
 
 #include "common.h"
+#include "global.h"
 #include "region.h"
 #include "readconfig.h"
 #include "screen.h"
@@ -29,6 +30,7 @@
 
 /*{{{ Load support functions */
 
+static bool loading_workspaces=FALSE;
 
 WRegion *load_create_region(WWindow *par, WRectangle geom, ExtlTab tab)
 {
@@ -42,7 +44,15 @@ WRegion *load_create_region(WWindow *par, WRectangle geom, ExtlTab tab)
 	fn=lookup_region_load_create_fn(objclass);
 	
 	if(fn==NULL){
-		warn("Unknown class \"%s\", cannot create region", objclass);
+		warn("Unknown class \"%s\", cannot create region.", objclass);
+		if(loading_workspaces && wglobal.ws_save_enabled){
+			wglobal.ws_save_enabled=FALSE;
+			warn("Disabling workspace saving on exit to prevent savefile "
+				 "corruption.\n"
+				 "Call enable_workspace_saves(TRUE) to re-enable saves or\n"
+				 "fix your configuration files and restart.");
+		}
+		
 		free(objclass);
 		return NULL;
 	}
@@ -154,7 +164,7 @@ void save_geom(WRectangle geom, FILE *file, int lvl)
 static WScreen *current_scr=NULL;
 
 
-/* 2003-10-05, TODO: keep for savefile backwards compatibility 
+/* 2003-05-10, TODO: keep for savefile backwards compatibility 
  * for now, but remove eventually.
  */
 EXTL_EXPORT
@@ -167,27 +177,13 @@ bool add_to_viewport(ExtlTab tab)
 }
 
 
-
 bool load_workspaces(WScreen *vp)
 {
-	bool successp=FALSE;
-	ExtlFn fn;
-	char *filename;
-	
-	filename=get_cfgfile_for_scr("saves/workspaces", vp->id);
-	if(filename==NULL)
-		return FALSE;
-	
-	current_scr=vp;
-	if(extl_loadfile(filename, &fn)){
-		successp=extl_call(fn, "o", NULL, vp);
-		extl_unref_fn(fn);
-	}
-	current_scr=NULL;
-	
-	free(filename);
-	
-	return successp;
+	bool ret;
+	loading_workspaces=TRUE;
+	ret=read_config_for_args("workspaces", vp->id, FALSE, "o", NULL, vp);
+	loading_workspaces=FALSE;
+	return ret;
 }
 
 
@@ -268,7 +264,7 @@ bool save_workspaces(WScreen *scr)
 	bool successp;
 	char *wsconf;
 	
-	wsconf=get_savefile_for_scr("saves/workspaces", scr->id);
+	wsconf=get_savefile_for_scr("workspaces", scr->id);
 
 	if(wsconf==NULL)
 		return FALSE;
@@ -281,6 +277,22 @@ bool save_workspaces(WScreen *scr)
 	free(wsconf);
 	
 	return successp;
+}
+
+
+/*}}}*/
+
+
+/*{{{ Misc. */
+
+
+/*EXTL_EXPROT
+ * Enable or disable workspaces saving on exit.
+ */
+EXTL_EXPORT
+void enable_workspace_saves(bool enable)
+{
+	wglobal.ws_save_enabled=enable;
 }
 
 
