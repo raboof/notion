@@ -412,10 +412,10 @@ static void handle_enter_window(XEvent *ev)
 		return;
 
 	do{
-		/*if(eev->mode!=NotifyNormal && !wglobal.warp_enabled)
-            return;*/
+		if(eev->mode!=NotifyNormal && !wglobal.warp_enabled)
+            continue;
 		/*if(eev->detail==NotifyNonlinearVirtual)
-		    return;*/
+		    continue;*/
 
 		reg=FIND_WINDOW_T(eev->window, WRegion);
 		
