@@ -24,7 +24,7 @@ static void calc_frame_offs(WGRData *grdata)
 	int sp=grdata->spacing;
 	int isp=grdata->frame_border.ipad;
 	
-	grdata->bar_h=(FONT_HEIGHT(grdata->tab_font)+
+	grdata->bar_h=(MAX_FONT_HEIGHT(grdata->tab_font)+
 				   BORDER_TL_TOTAL(tab_border)+BORDER_BR_TOTAL(tab_border));
 	
 #if 0

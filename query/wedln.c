@@ -21,7 +21,7 @@
 
 
 #define TEXT_AREA_HEIGHT(GRDATA) \
-	(FONT_HEIGHT(INPUT_FONT(GRDATA))+INPUT_BORDER_SIZE(GRDATA))
+	(MAX_FONT_HEIGHT(INPUT_FONT(GRDATA))+INPUT_BORDER_SIZE(GRDATA))
 
 
 static void wedln_calc_size(WEdln *wedln, WRectangle *geom);
@@ -50,7 +50,7 @@ IMPLOBJ(WEdln, WInput, deinit_wedln, wedln_dynfuntab, &query_edln_funclist)
 static int wedln_draw_strsect(DrawInfo *dinfo, int x, const char *str,
 							  int len, int col)
 {
-	int ty=I_Y+I_H/2-FONT_HEIGHT(FONT)/2+FONT_BASELINE(FONT);
+	int ty=I_Y+I_H/2-MAX_FONT_HEIGHT(FONT)/2+FONT_BASELINE(FONT);
 	WColor *fg, *bg;
 
 	if(len==0)
@@ -307,7 +307,7 @@ void wedln_draw_textarea(WEdln *wedln, bool complete)
 	draw_box(dinfo, FALSE);
 	
 	if(wedln->prompt!=NULL){
-		ty=I_Y+I_H/2-FONT_HEIGHT(FONT)/2+FONT_BASELINE(FONT);
+		ty=I_Y+I_H/2-MAX_FONT_HEIGHT(FONT)/2+FONT_BASELINE(FONT);
 		draw_image_string(dinfo, I_X, ty, wedln->prompt, wedln->prompt_len,
 				          &COLORS->fg, &COLORS->bg);
 	}

@@ -177,7 +177,7 @@ void listing_set_font(WListing *l, WFontPtr font)
 {
 	int maxw=strings_maxw(font, l->strs, l->nstrs);
 	l->itemw=maxw+COL_SPACING;
-	l->itemh=FONT_HEIGHT(font);
+	l->itemh=MAX_FONT_HEIGHT(font);
 }
 
 

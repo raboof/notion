@@ -15,7 +15,6 @@
 
 #include <X11/Xft/Xft.h>
 
-#define FONT_HEIGHT(X) ((X)->height)
 #define MAX_FONT_WIDTH(X) ((X)->max_advance_width)
 #define MAX_FONT_HEIGHT(X) ((X)->height)
 #define FONT_BASELINE(X) ((X)->ascent)
@@ -32,7 +31,6 @@ extern int fontset_max_width(XFontSet fntset);
 extern int fontset_text_width(XFontSet fntset, const char *str, int len);
 extern int fontset_baseline(XFontSet fntset);
 
-#define FONT_HEIGHT(X) fontset_height(X)
 #define MAX_FONT_WIDTH(X) fontset_max_width(X)
 #define MAX_FONT_HEIGHT(X) fontset_height(X)
 #define FONT_BASELINE(X) fontset_baseline(X)
@@ -43,9 +41,8 @@ extern int fontset_baseline(XFontSet fntset);
 
 #else /* !CF_UTF8 */
 
-#define FONT_HEIGHT(X) ((X)->ascent+(X)->descent)
 #define MAX_FONT_WIDTH(X) ((X)->max_bounds.width)
-#define MAX_FONT_HEIGHT(X) ((X)->max_bounds.ascent+(X)->max_bounds.descent)
+#define MAX_FONT_HEIGHT(X) ((X)->ascent+(X)->descent)
 #define FONT_BASELINE(X) ((X)->ascent)
 
 #define free_font XFreeFont

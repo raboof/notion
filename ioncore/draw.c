@@ -103,7 +103,7 @@ void draw_textbox(DrawInfo *dinfo,
 		tx=I_X;
 	}
 	
-	ty=I_Y+I_H/2-FONT_HEIGHT(FONT)/2+FONT_BASELINE(FONT);
+	ty=I_Y+I_H/2-MAX_FONT_HEIGHT(FONT)/2+FONT_BASELINE(FONT);
 	
 #ifdef CF_XFT
 #ifdef CF_UTF8
@@ -332,7 +332,7 @@ static void create_wm_windows(WScreen *scr)
 	w+=(BORDER_TL_TOTAL(&(grdata->tab_border))+
 		BORDER_BR_TOTAL(&(grdata->tab_border)));
 	
-	h=(FONT_HEIGHT(grdata->tab_font)+
+	h=(MAX_FONT_HEIGHT(grdata->tab_font)+
 	   BORDER_TL_TOTAL(&(grdata->tab_border))+
 	   BORDER_BR_TOTAL(&(grdata->tab_border)));
 
