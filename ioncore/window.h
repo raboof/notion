@@ -26,10 +26,10 @@ DECLCLASS(WWindow){
 };
 
 
-extern bool window_init_new(WWindow *p, WWindow *parent,
-                            const WFitParams *fp);
-extern bool window_init(WWindow *p, WWindow *parent, Window win, 
+extern bool window_init(WWindow *p, WWindow *parent, 
                         const WFitParams *fp);
+extern bool window_do_init(WWindow *p, WWindow *parent, Window win, 
+                           const WFitParams *fp);
 extern void window_deinit(WWindow *win);
 
 DYNFUN void window_draw(WWindow *wwin, bool complete);

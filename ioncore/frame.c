@@ -73,13 +73,14 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp)
     frame->brush=NULL;
     frame->bar_brush=NULL;
 
-    if(!mplex_init_new((WMPlex*)frame, parent, fp))
+    if(!mplex_init((WMPlex*)frame, parent, fp))
         return FALSE;
     
     frame_initialise_gr(frame);
     frame_initialise_titles(frame);
     
-    XSelectInput(ioncore_g.dpy, FRAME_WIN(frame), IONCORE_EVENTMASK_FRAME);
+    /*XSelectInput(ioncore_g.dpy, FRAME_WIN(frame), 
+     IONCORE_EVENTMASK_FRAME);*/
 
     region_add_bindmap((WRegion*)frame, ioncore_frame_bindmap);
 
@@ -560,7 +561,7 @@ static void frame_managed_changed(WFrame *frame, int mode, bool sw,
 
 ExtlTab frame_get_configuration(WFrame *frame)
 {
-    ExtlTab tab=mplex_get_base_configuration(&frame->mplex);
+    ExtlTab tab=mplex_get_configuration(&frame->mplex);
     
     extl_table_sets_i(tab, "flags", frame->flags);
     if(frame->flags&FRAME_SAVED_VERT){

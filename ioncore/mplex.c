@@ -46,7 +46,7 @@
 /*{{{ Destroy/create mplex */
 
 
-static bool mplex_do_init(WMPlex *mplex, WWindow *parent, Window win,
+bool mplex_do_init(WMPlex *mplex, WWindow *parent, Window win,
                           const WFitParams *fp, bool create)
 {
     mplex->flags=0;
@@ -58,33 +58,34 @@ static bool mplex_do_init(WMPlex *mplex, WWindow *parent, Window win,
     mplex->l2_current=NULL;
     
     if(create){
-        if(!window_init_new((WWindow*)mplex, parent, fp))
+        if(!window_init((WWindow*)mplex, parent, fp))
             return FALSE;
     }else{
-        if(!window_init((WWindow*)mplex, parent, win, fp))
+        if(!window_do_init((WWindow*)mplex, parent, win, fp))
             return FALSE;
     }
-    
+
     mplex->win.region.flags|=REGION_BINDINGS_ARE_GRABBED;
 
+    XSelectInput(ioncore_g.dpy, MPLEX_WIN(mplex), IONCORE_EVENTMASK_FRAME);
+    
     region_add_bindmap((WRegion*)mplex, ioncore_mplex_bindmap);
 
     return TRUE;
 }
 
 
-bool mplex_init(WMPlex *mplex, WWindow *parent, Window win,
-                const WFitParams *fp)
-{
-    return mplex_do_init(mplex, parent, win, fp, FALSE);
-}
-
-
-bool mplex_init_new(WMPlex *mplex, WWindow *parent, const WFitParams *fp)
+bool mplex_init(WMPlex *mplex, WWindow *parent, const WFitParams *fp)
 {
     return mplex_do_init(mplex, parent, None, fp, TRUE);
 }
     
+
+WMPlex *create_mplex(WWindow *parent, const WFitParams *fp)
+{
+    CREATEOBJ_IMPL(WMPlex, mplex, (p, parent, fp));
+}
+
 
 void mplex_deinit(WMPlex *mplex)
 {
@@ -928,6 +929,15 @@ bool mplex_rescue_clientwins(WMPlex *mplex)
 /*{{{ Dynfuns */
 
 
+void mplex_managed_geom_default(const WMPlex *mplex, WRectangle *geom)
+{
+    geom->x=0;
+    geom->y=0;
+    geom->w=REGION_GEOM(mplex).w;
+    geom->h=REGION_GEOM(mplex).h;
+}
+
+
 void mplex_managed_geom(const WMPlex *mplex, WRectangle *geom)
 {
     CALL_DYN(mplex_managed_geom, mplex, (mplex, geom));
@@ -952,7 +962,7 @@ void mplex_managed_changed(WMPlex *mplex, int mode, bool sw, WRegion *mgd)
 /*{{{ Save/load */
 
 
-ExtlTab mplex_get_base_configuration(WMPlex *mplex)
+ExtlTab mplex_get_configuration(WMPlex *mplex)
 {
     WRegion *sub=NULL;
     int n=0;
@@ -1008,6 +1018,15 @@ void mplex_load_contents(WMPlex *mplex, ExtlTab tab)
 }
 
 
+WRegion *mplex_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
+{
+    WMPlex *mplex=create_mplex(par, fp);
+    if(mplex!=NULL)
+        mplex_load_contents(mplex, tab);
+    return (WRegion*)mplex;
+}
+
+
 /*}}}*/
 
 
@@ -1039,6 +1058,12 @@ static DynFunTab mplex_dynfuntab[]={
     
     {(DynFun*)region_manage_rescue,
      (DynFun*)mplex_manage_rescue},
+
+    {(DynFun*)region_get_configuration,
+     (DynFun*)mplex_get_configuration},
+
+    {mplex_managed_geom, 
+     mplex_managed_geom_default},
 
     {(DynFun*)region_fitrep,
      (DynFun*)mplex_fitrep},

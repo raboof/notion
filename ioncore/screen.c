@@ -78,7 +78,7 @@ static bool screen_init(WScreen *scr, WRootWin *rootwin,
             return FALSE;
     }
 
-    if(!mplex_init((WMPlex*)scr, (WWindow*)rootwin, win, fp))
+    if(!mplex_do_init((WMPlex*)scr, (WWindow*)rootwin, win, fp, FALSE))
         return FALSE;
 
     /*scr->mplex.win.region.rootwin=rootwin;
@@ -487,7 +487,7 @@ void screen_set_managed_offset(WScreen *scr, const WRectangle *off)
 
 ExtlTab screen_get_configuration(WScreen *scr)
 {
-    return mplex_get_base_configuration(&scr->mplex);
+    return mplex_get_configuration(&scr->mplex);
 }
 
 

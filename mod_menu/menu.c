@@ -509,7 +509,7 @@ bool menu_init(WMenu *menu, WWindow *par, const WFitParams *fp,
     menu->submenu=NULL;
     menu->typeahead=NULL;
     
-    if(!window_init_new((WWindow*)menu, par, fp))
+    if(!window_init((WWindow*)menu, par, fp))
         goto fail;
 
     win=menu->win.win;

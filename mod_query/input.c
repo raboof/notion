@@ -119,7 +119,7 @@ bool input_init(WInput *input, WWindow *par, const WFitParams *fp)
 
     input->last_fp=*fp;
 
-    if(!window_init_new((WWindow*)input, par, fp))
+    if(!window_init((WWindow*)input, par, fp))
         return FALSE;
     
     win=input->win.win;

@@ -57,8 +57,8 @@ void window_release(WWindow *wwin)
 /*{{{ Init, create */
 
 
-bool window_init(WWindow *wwin, WWindow *par, Window win, 
-                 const WFitParams *fp)
+bool window_do_init(WWindow *wwin, WWindow *par, Window win,
+                    const WFitParams *fp)
 {
     wwin->win=win;
     wwin->xic=NULL;
@@ -74,7 +74,7 @@ bool window_init(WWindow *wwin, WWindow *par, Window win,
 }
 
 
-bool window_init_new(WWindow *wwin, WWindow *par, const WFitParams *fp)
+bool window_init(WWindow *wwin, WWindow *par, const WFitParams *fp)
 {
     Window win;
     
@@ -83,7 +83,7 @@ bool window_init_new(WWindow *wwin, WWindow *par, const WFitParams *fp)
     if(win==None)
         return FALSE;
     /* window_init does not fail */
-    return window_init(wwin, par, win, fp);
+    return window_do_init(wwin, par, win, fp);
 }
 
 

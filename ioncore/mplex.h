@@ -44,10 +44,11 @@ DECLCLASS(WMPlex){
 
 
 /* Create/destroy */
-extern bool mplex_init(WMPlex *mplex, WWindow *parent, Window win,
+extern WMPlex *create_mplex(WWindow *parent, const WFitParams *fp);
+extern bool mplex_init(WMPlex *mplex, WWindow *parent,
                        const WFitParams *fp);
-extern bool mplex_init_new(WMPlex *mplex, WWindow *parent, 
-                           const WFitParams *fp);
+extern bool mplex_do_init(WMPlex *mplex, WWindow *parent, Window win,
+                          const WFitParams *fp, bool create);
 extern void mplex_deinit(WMPlex *mplex);
 
 /* Resize and reparent */
@@ -109,7 +110,8 @@ DYNFUN void mplex_managed_changed(WMPlex *mplex, int what, bool sw,
 
 /* Save/load */
 
-extern ExtlTab mplex_get_base_configuration(WMPlex *mplex);
+extern ExtlTab mplex_get_configuration(WMPlex *mplex);
+extern WRegion *mplex_load(WWindow *par, const WFitParams *fp, ExtlTab tab);
 extern void mplex_load_contents(WMPlex *frame, ExtlTab tab);
 
 #endif /* ION_IONCORE_MPLEX_H */

@@ -92,15 +92,16 @@ static void init_hooks()
 
 static bool register_classes()
 {
-    if(!ioncore_register_regclass(&CLASSDESCR(WClientWin), NULL,
-                                  (WRegionLoadCreateFn*)clientwin_load)){
-        return FALSE;
-    }
-    if(!ioncore_register_regclass(&CLASSDESCR(WFrame), NULL,
-                                  (WRegionLoadCreateFn*)frame_load)){
-        return FALSE;
-    }
-    return TRUE;
+    int fail=0;
+    
+    fail|=!ioncore_register_regclass(&CLASSDESCR(WClientWin), NULL,
+                                     (WRegionLoadCreateFn*)clientwin_load);
+    fail|=!ioncore_register_regclass(&CLASSDESCR(WMPlex), NULL,
+                                     (WRegionLoadCreateFn*)mplex_load);
+    fail|=!ioncore_register_regclass(&CLASSDESCR(WFrame), NULL,
+                                     (WRegionLoadCreateFn*)frame_load);
+    
+    return !fail;
 }
 
 

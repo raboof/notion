@@ -246,7 +246,7 @@ static WRootWin *preinit_rootwin(int xscr)
     fp.g.w=DisplayWidth(dpy, xscr);
     fp.g.h=DisplayHeight(dpy, xscr);
     
-    if(!window_init((WWindow*)rootwin, NULL, root, &fp)){
+    if(!window_do_init((WWindow*)rootwin, NULL, root, &fp)){
         free(rootwin);
         return NULL;
     }

@@ -1030,7 +1030,7 @@ static bool dock_init(WDock *dock, int screen, ExtlTab conftab)
     dock->dockapps=NULL;
     /* }}} */
 
-    if(!window_init_new((WWindow *)dock, parent, &fp)){
+    if(!window_init((WWindow *)dock, parent, &fp)){
         return FALSE;
     }
     
