@@ -543,22 +543,19 @@ bool mplex_l2_hide(WMPlex *mplex, WRegion *reg)
     if(REGION_IS_MAPPED(mplex) && !MPLEX_MGD_UNVIEWABLE(mplex))
         region_unmap(reg);
     
-    if(reg==mplex->l2_current)
-        mplex->l2_current=NULL;
-    
     FOR_ALL_MANAGED_ON_LIST(mplex->l2_list, reg2){
         if(!l2_is_hidden(reg2))
             toact=reg2;
     }
 
-    mplex->l2_current=toact;
+    if(reg==mplex->l2_current)
+        mplex->l2_current=toact;
+
+    if(mcf)
+        region_warp((WRegion*)mplex);
     
-    if(mcf){
-        if(toact!=NULL)
-            mplex_managed_display(mplex, toact);
-        else
-            region_warp((WRegion*)mplex);
-    }
+    mplex_managed_changed(mplex, MPLEX_CHANGE_SWITCHONLY, TRUE, 
+                          toact ? toact : mplex->l1_current);
     
     return TRUE;
 }
@@ -571,8 +568,9 @@ bool mplex_l2_hide(WMPlex *mplex, WRegion *reg)
 EXTL_EXPORT_MEMBER
 bool mplex_l2_show(WMPlex *mplex, WRegion *reg)
 {
-    WRegion *reg2, *toact=NULL;
+    /*WRegion *reg2, *toact=NULL;
     bool mcf=region_may_control_focus((WRegion*)mplex);
+    */
     
     if(!l2_is_hidden(reg))
         return FALSE;
@@ -581,6 +579,9 @@ bool mplex_l2_show(WMPlex *mplex, WRegion *reg)
     if(REGION_IS_MAPPED(mplex) && !MPLEX_MGD_UNVIEWABLE(mplex))
         region_map(reg);
     
+#if 1
+    return mplex_managed_display(mplex, reg);
+#else    
     FOR_ALL_MANAGED_ON_LIST(mplex->l2_list, reg2){
         if(!l2_is_hidden(reg2))
             toact=reg2;
@@ -594,8 +595,8 @@ bool mplex_l2_show(WMPlex *mplex, WRegion *reg)
         else
             region_warp((WRegion*)mplex);
     }
-    
     return TRUE;
+#endif    
 }
 
 
