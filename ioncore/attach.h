@@ -10,7 +10,6 @@
 
 #include "region.h"
 #include "reginfo.h"
-#include "rootwin.h"
 #include "window.h"
 #include "clientwin.h"
 

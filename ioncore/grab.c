@@ -1,5 +1,5 @@
 /*
- * ion/grab.c
+ * ion/ioncore/grab.c
  *
  * Based on the contributed code "(c) Lukas Schroeder 2002".
  */

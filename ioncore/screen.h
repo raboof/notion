@@ -5,8 +5,8 @@
  * See the included file LICENSE for details.
  */
 
-#ifndef ION_IONCORE_VIEWPORT_H
-#define ION_IONCORE_VIEWPORT_H
+#ifndef ION_IONCORE_SCREEN_H
+#define ION_IONCORE_SCREEN_H
 
 #include "common.h"
 
@@ -58,4 +58,4 @@ extern void goto_screen_id(int id);
 extern void goto_next_screen();
 extern void goto_prev_screen();
 
-#endif /* ION_IONCORE_VIEWPORT_H */
+#endif /* ION_IONCORE_SCREEN_H */

@@ -1,5 +1,5 @@
 /*
- * ion/eventh.c
+ * ion/ioncore/eventh.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.

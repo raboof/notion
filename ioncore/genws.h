@@ -1,5 +1,5 @@
 /*
- * pwm/genws.h
+ * ion/ioncore/genws.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
