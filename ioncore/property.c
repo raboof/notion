@@ -158,6 +158,18 @@ char **get_text_property(Window win, Atom a, int *nret)
 	if(!st)
 		return NULL;
 
+#ifdef CF_XFREE86_TEXTPROP_BUG_WORKAROUND
+	{
+		uint i;
+		for(i=0; i<prop.nitems; i++){
+			if(prop.value[i]=='\0'){
+				prop.nitems=i;
+				break;
+			}
+		}
+	}
+#endif
+
 #ifndef CF_UTF8
 	st=XTextPropertyToStringList(&prop, &list, &n);
 #else
