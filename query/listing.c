@@ -159,8 +159,8 @@ static bool onedown(WListing *l, int *ip, int *rp)
 }
 
 
-void setup_listing(WListing *l, WFontPtr font,
-				   char **strs, int nstrs)
+void setup_listing(WListing *l, WFontPtr font, char **strs, int nstrs,
+				   bool onecol)
 {
 	if(l->strs!=NULL)
 		deinit_listing(l);
@@ -168,6 +168,7 @@ void setup_listing(WListing *l, WFontPtr font,
 	l->itemrows=ALLOC_N(int, nstrs);
 	l->strs=strs;
 	l->nstrs=nstrs;
+	l->onecol=onecol;
 	
 	listing_set_font(l, font);
 }
@@ -187,7 +188,10 @@ void fit_listing(DrawInfo *dinfo, WListing *l)
 	int i;
 	int w=I_W, h=I_H;
 	
-	ncol=col_fit(w, l->itemw-COL_SPACING, COL_SPACING);
+	if(l->onecol)
+		ncol=1;
+	else
+		ncol=col_fit(w, l->itemw-COL_SPACING, COL_SPACING);
 
 	if(l->itemrows!=NULL){
 		for(i=0; i<l->nstrs; i++){

@@ -410,14 +410,20 @@ void query_renameframe(WGenFrame *frame)
 /*{{{ Misc. */
 
 
-static char *last_error_message=NULL;
+static char *error_message=NULL;
 
 
 static void function_warn_handler(const char *message)
 {
-	if(last_error_message!=NULL)
-		free(last_error_message);
-	last_error_message=scopy(message);
+	char *tmp;
+	
+	if(error_message==NULL){
+		error_message=scopy(message);
+	}else{
+		tmp=scat3(error_message, "\n", message);
+		if(tmp!=NULL)
+			error_message=tmp;
+	}
 }
 
 
@@ -440,8 +446,8 @@ void handler_commands(WObj *obj, char *cmds, char *userdata)
 	
 	if(watch.obj!=NULL){
 		obj=watch.obj;
-		if(last_error_message!=NULL){
-			FWARN(("%s", last_error_message));
+		if(error_message!=NULL){
+			FWARN(("%s", error_message));
 		}else if(error){
 			FWARN(("An unknown error occurred while trying to "
 				   "parse your request"));
@@ -450,9 +456,9 @@ void handler_commands(WObj *obj, char *cmds, char *userdata)
 	
 	reset_watch(&watch);
 	
-	if(last_error_message!=NULL){
-		free(last_error_message);
-		last_error_message=NULL;
+	if(error_message!=NULL){
+		free(error_message);
+		error_message=NULL;
 	}
 }
 

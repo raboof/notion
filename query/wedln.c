@@ -315,7 +315,7 @@ void wedln_draw(WEdln *wedln, bool complete)
 void wedln_show_completions(WEdln *wedln, char **strs, int nstrs)
 {
 	setup_listing(&(wedln->complist), INPUT_FONT(GRDATA_OF(wedln)),
-				  strs, nstrs);
+				  strs, nstrs, FALSE);
 	input_refit((WInput*)wedln);
 	/*?*/ wedln_draw_completions(wedln, TRUE);
 }

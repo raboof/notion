@@ -107,8 +107,12 @@ static bool wmsg_init(WMessage *wmsg, WWindow *par, WRectangle geom,
 					  const char *msg)
 {
 	char **ptr;
+	int k, n=0;
 	char *cmsg;
+	const char *p;
+	size_t l;
 	
+#if 0
 	cmsg=scopy(msg);
 	
 	if(cmsg==NULL){
@@ -117,21 +121,61 @@ static bool wmsg_init(WMessage *wmsg, WWindow *par, WRectangle geom,
 	}
 	
 	ptr=ALLOC_N(char*, 1);
-	
 	if(ptr==NULL){
 		warn_err();
 		free(cmsg);
 		return FALSE;
 	}
+	ptr[0]=cmsg;
+	n=1;
+#else	
+	p=msg;
+	while(p!=NULL){
+		n=n+1;
+		p=strchr(p+1, '\n');
+	}
 	
-	*ptr=cmsg;
-
+	if(n==0)
+		return FALSE;
+		
+	ptr=ALLOC_N(char*, n);
+	
+	if(ptr==NULL){
+		warn_err();
+		return FALSE;
+	}
+	
+	for(k=0; k<n; k++)
+		ptr[k]=NULL;
+	
+	p=msg;
+	k=0;
+	while(1){
+		assert(k<n);
+		l=strcspn(p, "\n");
+		cmsg=ALLOC_N(char, l+1);
+		if(cmsg==NULL){
+			while(k>0){
+				k--;
+				free(ptr[k]);
+			}
+			free(ptr);
+			return FALSE;
+		}
+		strncpy(cmsg, p, l);
+		cmsg[l]='\0';
+		ptr[k]=cmsg;
+		if(p[l]=='\0')
+			break;
+		p=p+l+1;
+		k++;
+	}
+#endif
+	
 	init_listing(&(wmsg->listing));
-	setup_listing(&(wmsg->listing), INPUT_FONT(GRDATA_OF(par)), ptr, 1);
+	setup_listing(&(wmsg->listing), INPUT_FONT(GRDATA_OF(par)), ptr, n, TRUE);
 	
 	if(!input_init((WInput*)wmsg, par, geom)){
-		free(cmsg);
-		free(ptr);
 		deinit_listing(&(wmsg->listing));
 		return FALSE;
 	}
