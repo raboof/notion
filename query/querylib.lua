@@ -442,7 +442,7 @@ function querylib.get_known_hosts(mplex)
         f=io.open(h.."/.ssh/known_hosts")
     end
     if not f then 
-        query_message(mplex, "Failed to open ~/.ssh/known_hosts") 
+        warn("Failed to open ~/.ssh/known_hosts") 
         return
     end
     for l in f:lines() do
