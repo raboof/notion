@@ -113,7 +113,7 @@ end
 
 -- {{{ Winprops
 
-winprops={}
+local winprops={}
 
 function alternative_winprop_idents(id)
     local function g()
@@ -183,3 +183,30 @@ end
 
 -- }}}
 
+
+-- {{{ Hooks
+
+local hooks={}
+
+function call_hook(hookname, ...)
+    if hooks[hookname] then
+        for _, fn in hooks[hookname] do
+            fn(unpack(arg))
+        end
+    end
+end
+
+function add_to_hook(hookname, fn)
+    if not hooks[hookname] then
+        hooks[hookname]={}
+    end
+    hooks[hookname][fn]=fn
+end
+
+function remove_from_hook(hookname, fn)
+    if hooks[hookname] then
+        hooks[hookname][fn]=nil
+    end
+end
+
+-- }}}
