@@ -320,10 +320,12 @@ static void handle_property(const XPropertyEvent *ev)
 		XWMHints *hints;
 		hints=XGetWMHints(wglobal.dpy, ev->window);
 		/* region_notify/clear_activity take care of checking current state */
-		if(hints->flags&XUrgencyHint)
-			region_notify_activity((WRegion*)cwin);
-		else
-			region_clear_activity((WRegion*)cwin);
+		if(hints!=NULL){
+			if(hints->flags&XUrgencyHint)
+				region_notify_activity((WRegion*)cwin);
+			else
+				region_clear_activity((WRegion*)cwin);
+		}
 		XFree(hints);
 	}else if(ev->atom==XA_WM_NORMAL_HINTS){
 		clientwin_get_size_hints(cwin);
