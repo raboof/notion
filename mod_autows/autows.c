@@ -62,20 +62,21 @@ void autows_deinit(WAutoWS *ws)
 void autows_managed_remove(WAutoWS *ws, WRegion *reg)
 {
     bool ds=OBJ_IS_BEING_DESTROYED(ws);
+    bool mcf=region_may_control_focus((WRegion*)ws);
     WRegion *other=ionws_do_managed_remove(&(ws->ionws), reg, !ds);
     
     region_remove_bindmap_owned(reg, mod_autows_autows_bindmap, (WRegion*)ws);
     region_remove_bindmap(reg, mod_autows_frame_bindmap);
     
     if(other==NULL){
-        if(region_may_control_focus((WRegion*)ws))
+        if(mcf)
             genws_fallback_focus((WGenWS*)ws, FALSE);
         if(ws->ionws.managed_list==NULL && ws->ionws.split_tree!=NULL){
             ioncore_defer_destroy((Obj*)(ws->ionws.split_tree));
             ws->ionws.split_tree=NULL;
         }
     }else{
-        if(!ds && region_may_control_focus((WRegion*)ws))
+        if(!ds && mcf)
             region_set_focus(other);
     }
 }
