@@ -16,7 +16,20 @@
 #include "fontset.h"
 #include "brush.h"
 
-#include <iconv.h>
+
+/*{{{ The DEFont structure */
+
+
+DECLSTRUCT(DEFont){
+	char *pattern;
+	int refcount;
+	XFontSet fontset;
+	XFontStruct *fontstruct;
+	DEFont *next, *prev;
+};
+
+
+/*}}}*/
 
 
 /*{{{ Load/free */
@@ -86,6 +99,22 @@ DEFont *de_load_font(const char *fontname)
 }
 
 
+bool de_load_font_for_style(DEStyle *style, const char *fontname)
+{
+	style->font=de_load_font(fontname);
+
+	if(style->font==NULL)
+		return FALSE;
+	
+	if(style->font->fontstruct!=NULL){
+		XSetFont(wglobal.dpy, style->normal_gc, 
+				 style->font->fontstruct->fid);
+	}
+	
+	return TRUE;
+}
+
+
 void de_free_font(DEFont *font)
 {
 	if(--font->refcount!=0)
@@ -111,48 +140,60 @@ void de_free_font(DEFont *font)
 
 void debrush_get_font_extents(DEBrush *brush, GrFontExtents *fnte)
 {
-	if(brush->font==NULL)
+	if(brush->d->font==NULL){
+		DE_RESET_FONT_EXTENTS(fnte);
 		return;
+	}
 	
-	if(brush->font->fontset!=NULL){
-		XFontSetExtents *ext=XExtentsOfFontSet(brush->font->fontset);
+	defont_get_font_extents(brush->d->font, fnte);
+}
+
+
+void defont_get_font_extents(DEFont *font, GrFontExtents *fnte)
+{
+	if(font->fontset!=NULL){
+		XFontSetExtents *ext=XExtentsOfFontSet(font->fontset);
 		if(ext==NULL)
 			goto fail;
 		fnte->max_height=ext->max_logical_extent.height;
 		fnte->max_width=ext->max_logical_extent.width;
 		fnte->baseline=-ext->max_logical_extent.y;
 		return;
-	}else if(brush->font->fontstruct!=NULL){
-		XFontStruct *fnt=brush->font->fontstruct;
+	}else if(font->fontstruct!=NULL){
+		XFontStruct *fnt=font->fontstruct;
         fnte->max_height=fnt->ascent+fnt->descent;
 		fnte->max_width=fnt->max_bounds.width;
 		fnte->baseline=fnt->ascent;
 		return;
 	}
 	
-	fail:	
-	fnte->max_height=0;
-	fnte->max_width=0;
-	fnte->baseline=0;
+fail:
+	DE_RESET_FONT_EXTENTS(fnte);
 }
 
 
 uint debrush_get_text_width(DEBrush *brush, const char *text, uint len)
 {
-	if(brush->font==NULL || text==NULL || len==0)
+	if(brush->d->font==NULL || text==NULL || len==0)
 		return 0;
 	
-	if(brush->font->fontset!=NULL){
+	return defont_get_text_width(brush->d->font, text, len);
+}
+
+
+uint defont_get_text_width(DEFont *font, const char *text, uint len)
+{
+	if(font->fontset!=NULL){
 		XRectangle lext;
 #ifdef CF_DE_USE_XUTF8
 		if(wglobal.enc_utf8)
-			Xutf8TextExtents(brush->font->fontset, text, len, NULL, &lext);
+			Xutf8TextExtents(font->fontset, text, len, NULL, &lext);
 		else
 #endif
-			XmbTextExtents(brush->font->fontset, text, len, NULL, &lext);
+			XmbTextExtents(font->fontset, text, len, NULL, &lext);
 		return lext.width;
-	}else if(brush->font->fontstruct!=NULL){
-		return XTextWidth(brush->font->fontstruct, text, len);
+	}else if(font->fontstruct!=NULL){
+		return XTextWidth(font->fontstruct, text, len);
 	}else{
 		return 0;
 	}
@@ -169,38 +210,38 @@ void debrush_do_draw_string(DEBrush *brush, Window win, int x, int y,
 							const char *str, int len, bool needfill, 
 							DEColourGroup *colours)
 {
-	GC gc=brush->normal_gc;
+	GC gc=brush->d->normal_gc;
 
-	if(brush->font==NULL)
+	if(brush->d->font==NULL)
 		return;
 	
 	XSetForeground(wglobal.dpy, gc, colours->fg);
 	
 	if(!needfill){
-		if(brush->font->fontset!=NULL){
+		if(brush->d->font->fontset!=NULL){
 #ifdef CF_DE_USE_XUTF8
 			if(wglobal.enc_utf8)
-				Xutf8DrawString(wglobal.dpy, win, brush->font->fontset,
+				Xutf8DrawString(wglobal.dpy, win, brush->d->font->fontset,
 								gc, x, y, str, len);
 			else
 #endif
-				XmbDrawString(wglobal.dpy, win, brush->font->fontset,
+				XmbDrawString(wglobal.dpy, win, brush->d->font->fontset,
 							  gc, x, y, str, len);
-		}else if(brush->font->fontstruct!=NULL){
+		}else if(brush->d->font->fontstruct!=NULL){
 			XDrawString(wglobal.dpy, win, gc, x, y, str, len);
 		}
 	}else{
 		XSetBackground(wglobal.dpy, gc, colours->bg);
-		if(brush->font->fontset!=NULL){
+		if(brush->d->font->fontset!=NULL){
 #ifdef CF_DE_USE_XUTF8
 			if(wglobal.enc_utf8)
-				Xutf8DrawImageString(wglobal.dpy, win, brush->font->fontset,
+				Xutf8DrawImageString(wglobal.dpy, win, brush->d->font->fontset,
 									 gc, x, y, str, len);
 			else
 #endif
-				XmbDrawImageString(wglobal.dpy, win, brush->font->fontset,
+				XmbDrawImageString(wglobal.dpy, win, brush->d->font->fontset,
 								   gc, x, y, str, len);
-		}else if(brush->font->fontstruct!=NULL){
+		}else if(brush->d->font->fontstruct!=NULL){
 			XDrawImageString(wglobal.dpy, win, gc, x, y, str, len);
 		}
 	}

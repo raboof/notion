@@ -31,8 +31,8 @@ DEColourGroup *debrush_get_colour_group2(DEBrush *brush,
 	int i, maxi=-1;
 	int score, maxscore=0;
 	
-	for(i=0; i<brush->n_extra_cgrps; i++){
-		score=gr_stylespec_score2(brush->extra_cgrps[i].spec,
+	for(i=0; i<brush->d->n_extra_cgrps; i++){
+		score=gr_stylespec_score2(brush->d->extra_cgrps[i].spec,
 								  attr_p1, attr_p2);
 		if(score>maxscore){
 			maxi=i;
@@ -41,9 +41,9 @@ DEColourGroup *debrush_get_colour_group2(DEBrush *brush,
 	}
 	
 	if(maxi==-1)
-		return &(brush->cgrp);
+		return &(brush->d->cgrp);
 	else
-		return &(brush->extra_cgrps[maxi]);
+		return &(brush->d->extra_cgrps[maxi]);
 }
 
 
@@ -127,8 +127,8 @@ static void draw_border(Window win, GC gc, WRectangle *geom,
 void debrush_do_draw_border(DEBrush *brush, Window win, WRectangle geom,
 							DEColourGroup *cg)
 {
-	DEBorder *bd=&(brush->border);
-	GC gc=brush->normal_gc;
+	DEBorder *bd=&(brush->d->border);
+	GC gc=brush->d->normal_gc;
 	
 	switch(bd->style){
 	case DEBORDER_RIDGE:
@@ -161,42 +161,6 @@ void debrush_draw_border(DEBrush *brush, Window win,
 }
 
 
-void debrush_get_border_widths(DEBrush *brush, GrBorderWidths *bdw)
-{
-	DEBorder *bd=&(brush->border);
-	uint tmp;
-	
-	switch(bd->style){
-	case DEBORDER_RIDGE:
-	case DEBORDER_GROOVE:
-		tmp=bd->sh+bd->hl+bd->pad;
-		bdw->top=tmp; bdw->bottom=tmp; bdw->left=tmp; bdw->right=tmp;
-		break;
-	case DEBORDER_INLAID:
-		tmp=bd->sh+bd->pad; bdw->top=tmp; bdw->left=tmp;
-		tmp=bd->hl+bd->pad; bdw->bottom=tmp; bdw->right=tmp;
-		break;
-	case DEBORDER_ELEVATED:
-	default:
-		tmp=bd->hl+bd->pad; bdw->top=tmp; bdw->left=tmp;
-		tmp=bd->sh+bd->pad; bdw->bottom=tmp; bdw->right=tmp;
-		break;
-	}
-	
-	bdw->tb_ileft=bdw->left;
-	bdw->tb_iright=bdw->right;
-	bdw->spacing=brush->spacing;
-}
-
-
-void dementbrush_get_border_widths(DEMEntBrush *brush, GrBorderWidths *bdw)
-{
-	debrush_get_border_widths(&(brush->debrush), bdw);
-	bdw->right+=brush->sub_ind_w;
-	bdw->tb_iright+=brush->sub_ind_w;
-}
-
-
 /*}}}*/
 
 
@@ -214,7 +178,7 @@ static void copy_masked(DETabBrush *brush, Drawable src, Drawable dst,
 						int dst_x, int dst_y)
 {
 	
-	GC copy_gc=brush->copy_gc;
+	GC copy_gc=brush->debrush.d->copy_gc;
 	
 	XSetClipMask(wglobal.dpy, copy_gc, src);
 	XSetClipOrigin(wglobal.dpy, copy_gc, dst_x, dst_y);
@@ -229,17 +193,19 @@ static void tabbrush_textbox_extras(DETabBrush *brush, Window win,
 									GrFontExtents *fnte,
 									const char *a1, const char *a2)
 {
+	DEStyle *d=brush->debrush.d;
+	
 	if(MATCHES2("*-*-tagged", a1, a2)){
-		XSetForeground(wglobal.dpy, brush->copy_gc, cg->fg);
+		XSetForeground(wglobal.dpy, d->copy_gc, cg->fg);
 			
-		copy_masked(brush, brush->tag_pixmap, win, 0, 0,
-					brush->tag_pixmap_w, brush->tag_pixmap_h,
-					g->x+g->w-bdw->right-brush->tag_pixmap_w, 
+		copy_masked(brush, d->tag_pixmap, win, 0, 0,
+					d->tag_pixmap_w, d->tag_pixmap_h,
+					g->x+g->w-bdw->right-d->tag_pixmap_w, 
 					g->y+bdw->top);
 	}
 
 	if(MATCHES2("*-*-*-dragged", a1, a2)){
-		XFillRectangle(wglobal.dpy, win, brush->stipple_gc, 
+		XFillRectangle(wglobal.dpy, win, d->stipple_gc, 
 					   g->x, g->y, g->w, g->h);
 	}
 }
@@ -269,7 +235,7 @@ void debrush_do_draw_box(DEBrush *brush, Window win,
 						 const WRectangle *geom, DEColourGroup *cg,
 						 bool needfill)
 {
-	GC gc=brush->normal_gc;
+	GC gc=brush->d->normal_gc;
 	
 	if(TRUE/*needfill*/){
 		XSetForeground(wglobal.dpy, gc, cg->bg);
@@ -306,10 +272,10 @@ static void debrush_do_draw_textbox(DEBrush *brush, Window win,
 		grbrush_get_border_widths(&(brush->grbrush), &bdw);
 		grbrush_get_font_extents(&(brush->grbrush), &fnte);
 		
-		if(brush->textalign!=DEALIGN_LEFT){
+		if(brush->d->textalign!=DEALIGN_LEFT){
 			tw=debrush_get_text_width(brush, text, len);
 			
-			if(brush->textalign==DEALIGN_CENTER)
+			if(brush->d->textalign==DEALIGN_CENTER)
 				tx=geom->x+bdw.left+(geom->w-bdw.left-bdw.right-tw)/2;
 			else
 				tx=geom->x+geom->w-bdw.right-tw;
@@ -352,7 +318,7 @@ static void do_draw_textboxes(DEBrush *brush, Window win,
 		g.x+=g.w;
 		if(bdw.spacing>0 && needfill){
 			XClearArea(wglobal.dpy, win, g.x, g.y,
-					   brush->spacing, g.h, False);
+					   brush->d->spacing, g.h, False);
 		}
 		g.x+=bdw.spacing;
 	}
@@ -449,14 +415,14 @@ void debrush_set_clipping_rectangle(DEBrush *brush, Window unused,
 	rect.width=geom->w;
 	rect.height=geom->h;
 	
-	XSetClipRectangles(wglobal.dpy, brush->normal_gc,
+	XSetClipRectangles(wglobal.dpy, brush->d->normal_gc,
 					   0, 0, &rect, 1, Unsorted);
 }
 
 
 void debrush_clear_clipping_rectangle(DEBrush *brush, Window unused)
 {
-	XSetClipMask(wglobal.dpy, brush->normal_gc, None);
+	XSetClipMask(wglobal.dpy, brush->d->normal_gc, None);
 }
 
 
@@ -495,14 +461,14 @@ void debrush_enable_transparency(DEBrush *brush, Window win,
 	ulong attrflags=0;
 	
 	if(mode==GR_TRANSPARENCY_DEFAULT)
-		mode=brush->transparency_mode;
+		mode=brush->d->transparency_mode;
 	
 	if(mode==GR_TRANSPARENCY_YES){
 		attrflags=CWBackPixmap;
 		attr.background_pixmap=ParentRelative;
 	}else{
 		attrflags=CWBackPixel;
-		attr.background_pixel=brush->cgrp.bg;
+		attr.background_pixel=brush->d->cgrp.bg;
 	}
 	
 	XChangeWindowAttributes(wglobal.dpy, win, attrflags, &attr);
@@ -514,7 +480,7 @@ void debrush_fill_area(DEBrush *brush, Window win, const WRectangle *geom,
 					   const char *attr)
 {
 	DEColourGroup *cg=debrush_get_colour_group(brush, attr);
-	GC gc=brush->normal_gc;
+	GC gc=brush->d->normal_gc;
 
 	if(cg==NULL)
 		return;

@@ -17,21 +17,15 @@
 
 INTRSTRUCT(DEFont);
 
-DECLSTRUCT(DEFont){
-	char *pattern;
-	int refcount;
-	XFontSet fontset;
-	XFontStruct *fontstruct;
-	DEFont *next, *prev;
-};
-
 #include "brush.h"
 #include "colour.h"
 
+#define DE_RESET_FONT_EXTENTS(FNTE) \
+   {(FNTE)->max_height=0; (FNTE)->max_width=0; (FNTE)->baseline=0;}
 
+extern bool de_load_font_for_style(DEStyle *style, const char *fontname);
 extern DEFont *de_load_font(const char *fontname);
 extern void de_free_font(DEFont *font);
-
 
 extern void debrush_draw_string(DEBrush *brush, Window win, int x, int y,
 								const char *str, int len, bool needfill,
@@ -43,5 +37,8 @@ extern void debrush_do_draw_string(DEBrush *brush, Window win, int x, int y,
 extern void debrush_get_font_extents(DEBrush *brush, GrFontExtents *fnte);
 
 extern uint debrush_get_text_width(DEBrush *brush, const char *text, uint len);
+
+extern uint defont_get_text_width(DEFont *font, const char *text, uint len);
+extern void defont_get_font_extents(DEFont *font, GrFontExtents *fnte);
 
 #endif /* ION_DE_FONT_H */

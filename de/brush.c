@@ -20,12 +20,13 @@
 #include "brush.h"
 #include "font.h"
 #include "colour.h"
+#include "misc.h"
 
 
 /*{{{ GC creation */
 
 
-static void create_normal_gc(DEBrush *brush, WRootWin *rootwin)
+static void create_normal_gc(DEStyle *style, WRootWin *rootwin)
 {
 	XGCValues gcv;
 	ulong gcvmask;
@@ -40,17 +41,11 @@ static void create_normal_gc(DEBrush *brush, WRootWin *rootwin)
 	gcvmask=(GCLineStyle|GCLineWidth|GCFillStyle|
 			 GCJoinStyle|GCCapStyle);
 	
-	if(brush->font!=NULL && brush->font->fontstruct!=NULL){
-		gcv.font=brush->font->fontstruct->fid;
-		gcvmask|=GCFont;
-	}
-	
-	brush->normal_gc=XCreateGC(wglobal.dpy, ROOT_OF(rootwin), gcvmask, &gcv);
+	style->normal_gc=XCreateGC(wglobal.dpy, ROOT_OF(rootwin), gcvmask, &gcv);
 }
 
 
-/* This should be called after reading the configuration file */
-static void create_tab_gcs(DETabBrush *brush, WRootWin *rootwin)
+static void create_tab_gcs(DEStyle *style, WRootWin *rootwin)
 {
 	Pixmap stipple_pixmap;
 	XGCValues gcv;
@@ -76,255 +71,355 @@ static void create_tab_gcs(DETabBrush *brush, WRootWin *rootwin)
 	gcv.stipple=stipple_pixmap;
 	gcvmask=GCFillStyle|GCStipple|GCFunction;
 		
-	brush->stipple_gc=XCreateGC(dpy, root, gcvmask, &gcv);
+	style->stipple_gc=XCreateGC(dpy, root, gcvmask, &gcv);
 	
 	XFreePixmap(dpy, stipple_pixmap);
 	
 	/* Create tag pixmap and copying GC */
-	brush->tag_pixmap_w=5;
-	brush->tag_pixmap_h=5;
-	brush->tag_pixmap=XCreatePixmap(dpy, root, 5, 5, 1);
+	style->tag_pixmap_w=5;
+	style->tag_pixmap_h=5;
+	style->tag_pixmap=XCreatePixmap(dpy, root, 5, 5, 1);
 	
 	XSetForeground(dpy, tmp_gc, 0);
-	XFillRectangle(dpy, brush->tag_pixmap, tmp_gc, 0, 0, 5, 5);
+	XFillRectangle(dpy, style->tag_pixmap, tmp_gc, 0, 0, 5, 5);
 	XSetForeground(dpy, tmp_gc, 1);
-	XFillRectangle(dpy, brush->tag_pixmap, tmp_gc, 0, 0, 5, 2);
-	XFillRectangle(dpy, brush->tag_pixmap, tmp_gc, 3, 2, 2, 3);
+	XFillRectangle(dpy, style->tag_pixmap, tmp_gc, 0, 0, 5, 2);
+	XFillRectangle(dpy, style->tag_pixmap, tmp_gc, 3, 2, 2, 3);
 	
 	gcv.foreground=DE_BLACK(rootwin);
 	gcv.background=DE_WHITE(rootwin);
 	gcv.line_width=2;
 	gcvmask=GCLineWidth|GCForeground|GCBackground;
 	
-	brush->copy_gc=XCreateGC(dpy, root, gcvmask, &gcv);
+	style->copy_gc=XCreateGC(dpy, root, gcvmask, &gcv);
 	
 	XFreeGC(dpy, tmp_gc);
+	
+	style->tabbrush_data_ok=TRUE;
+}
+
+
+static void init_sub_ind_w(DEStyle *style)
+{
+	if(style->font==NULL){
+		style->sub_ind_w=0;
+	}else{
+		style->sub_ind_w=defont_get_text_width(style->font, 
+											   DE_SUB_IND, DE_SUB_IND_LEN);
+	}
+	style->mentbrush_data_ok=TRUE;
 }
 
 
 /*}}}*/
 
 
-/*{{{ Brush lookup */
+/*{{{ Style lookup */
 
 
-static DEBrush *brushes=NULL;
+static DEStyle *styles=NULL;
 
 
-static DEBrush *do_get_brush(WRootWin *rootwin, const char *style, bool inc)
+static DEStyle *de_get_style(WRootWin *rootwin, const char *stylename)
 {
-	DEBrush *brush, *maxbrush=NULL;
+	DEStyle *style, *maxstyle=NULL;
 	int score, maxscore=0;
 	
-	for(brush=brushes; brush!=NULL; brush=brush->next){
-		if(brush->rootwin!=rootwin)
+	for(style=styles; style!=NULL; style=style->next){
+		if(style->rootwin!=rootwin)
 			continue;
-		score=gr_stylespec_score(brush->style, style);
+		score=gr_stylespec_score(style->style, stylename);
 		if(score>maxscore){
-			maxbrush=brush;
+			maxstyle=style;
 			maxscore=score;
 		}
 	}
 	
-	if(maxbrush!=NULL && inc)
-		maxbrush->usecount++;
-	
-	return maxbrush;
-}
-
-
-DEBrush *de_get_brush(WRootWin *rootwin, Window win, const char *style)
-{
-	DEBrush *brush=do_get_brush(rootwin, style, TRUE);
-	
-	/* Set background colour */
-	if(brush!=NULL)
-		grbrush_enable_transparency(&(brush->grbrush), win,
-									GR_TRANSPARENCY_DEFAULT);
-	
-	return brush;
-}
-
-
-DEBrush *debrush_get_slave(DEBrush *master, WRootWin *rootwin, 
-						   Window win, const char *style)
-{
-	return do_get_brush(rootwin, style, TRUE);
+	return maxstyle;
 }
 
 
 /*}}}*/
 
 
-/*{{{ Brush initialisation and deinitialisation */
+/*{{{ Style initialisation and deinitialisation */
 
 
-static bool debrush_init(DEBrush *brush, WRootWin *rootwin, const char *name)
+void destyle_deinit(DEStyle *style)
 {
-	if(!grbrush_init(&(brush->grbrush)))
-		return FALSE;
-	   
-	brush->style=scopy(name);
-	if(brush->style==NULL){
+	int i;
+	
+	UNLINK_ITEM(styles, style, next, prev);
+	
+	if(style->style!=NULL)
+		free(style->style);
+	
+	if(style->font!=NULL){
+		de_free_font(style->font);
+		style->font=NULL;
+	}
+	
+	if(style->cgrp_alloced)
+		de_free_colour_group(style->rootwin, &(style->cgrp));
+	
+	for(i=0; i<style->n_extra_cgrps; i++)
+		de_free_colour_group(style->rootwin, style->extra_cgrps+i);
+	
+	XSync(wglobal.dpy, False);
+	
+	if(style->extra_cgrps!=NULL)
+		free(style->extra_cgrps);
+	
+	extl_unref_table(style->data_table);
+	
+	XFreeGC(wglobal.dpy, style->normal_gc);
+	
+	if(style->tabbrush_data_ok){
+		XFreeGC(wglobal.dpy, style->copy_gc);
+		XFreeGC(wglobal.dpy, style->stipple_gc);
+		XFreePixmap(wglobal.dpy, style->tag_pixmap);
+	}
+}
+
+
+static void unref_style(DEStyle *style)
+{
+	style->usecount--;
+	if(style->usecount==0){
+		destyle_deinit(style);
+		free(style);
+	}
+}
+	
+static void dump_style(DEStyle *style)
+{
+	/* Allow the style still be used but get if off the list. */
+	UNLINK_ITEM(styles, style, next, prev);
+	unref_style(style);
+}
+
+
+static bool destyle_init(DEStyle *style, WRootWin *rootwin, const char *name)
+{
+	style->style=scopy(name);
+	if(style->style==NULL){
 		warn_err();
 		return FALSE;
 	}
 	
-	brush->usecount=1;
+	style->usecount=1;
 	/* Fallback brushes are not released on de_reset() */
-	brush->is_fallback=FALSE;
+	style->is_fallback=FALSE;
 	
-	brush->rootwin=rootwin;
+	style->rootwin=rootwin;
 	
-	brush->border.sh=1;
-	brush->border.hl=1;
-	brush->border.pad=1;
-	brush->border.style=DEBORDER_INLAID;
+	style->border.sh=1;
+	style->border.hl=1;
+	style->border.pad=1;
+	style->border.style=DEBORDER_INLAID;
 
-	brush->spacing=0;
+	style->spacing=0;
 	
-	brush->textalign=DEALIGN_CENTER;
+	style->textalign=DEALIGN_CENTER;
 
-	brush->cgrp_alloced=FALSE;
-	brush->cgrp.spec=NULL;
-	brush->cgrp.bg=DE_BLACK(rootwin);
-	brush->cgrp.pad=DE_BLACK(rootwin);
-	brush->cgrp.fg=DE_WHITE(rootwin);
-	brush->cgrp.hl=DE_WHITE(rootwin);
-	brush->cgrp.sh=DE_WHITE(rootwin);
+	style->cgrp_alloced=FALSE;
+	style->cgrp.spec=NULL;
+	style->cgrp.bg=DE_BLACK(rootwin);
+	style->cgrp.pad=DE_BLACK(rootwin);
+	style->cgrp.fg=DE_WHITE(rootwin);
+	style->cgrp.hl=DE_WHITE(rootwin);
+	style->cgrp.sh=DE_WHITE(rootwin);
 	
-	brush->font=NULL;
+	style->font=NULL;
 	
-	brush->transparency_mode=GR_TRANSPARENCY_NO;
+	style->transparency_mode=GR_TRANSPARENCY_NO;
 	
-	brush->n_extra_cgrps=0;
-	brush->extra_cgrps=NULL;
+	style->n_extra_cgrps=0;
+	style->extra_cgrps=NULL;
 	
-	brush->data_table=extl_table_none();
+	style->data_table=extl_table_none();
 	
-	create_normal_gc(brush, rootwin);
+	create_normal_gc(style, rootwin);
+	
+	style->tabbrush_data_ok=FALSE;
+	style->mentbrush_data_ok=FALSE;
 	
 	return TRUE;
 }
 
 
-static bool detabbrush_init(DETabBrush *brush, WRootWin *rootwin, 
-							const char *name)
+static DEStyle *do_create_style(WRootWin *rootwin, const char *name)
 {
-	if(!debrush_init(&(brush->debrush), rootwin, name))
-		return FALSE;
-	create_tab_gcs(brush, rootwin);
-	return TRUE;
+	DEStyle *style=ALLOC(DEStyle);
+	if(style!=NULL){
+		if(!destyle_init(style, rootwin, name)){
+			free(style);
+			return NULL;
+		}
+	}
+	return style;
 }
 
 
-static bool dementbrush_init(DEMEntBrush *brush, WRootWin *rootwin, 
-							 const char *name)
+DEStyle *de_create_style(WRootWin *rootwin, const char *name)
 {
-	if(!debrush_init(&(brush->debrush), rootwin, name))
-		return FALSE;
-	brush->sub_ind_w=20;
-	return TRUE;
-}
+	DEStyle *oldstyle, *style;
 
-
-DEBrush *create_debrush(WRootWin *rootwin, const char *name)
-{
-	CREATEOBJ_IMPL(DEBrush, debrush, (p, rootwin, name));
-}
-
-
-DETabBrush *create_detabbrush(WRootWin *rootwin, const char *name)
-{
-	CREATEOBJ_IMPL(DETabBrush, detabbrush, (p, rootwin, name));
-}
-
-
-DEMEntBrush *create_dementbrush(WRootWin *rootwin, const char *name)
-{
-	CREATEOBJ_IMPL(DEMEntBrush, dementbrush, (p, rootwin, name));
-}
-
-
-static void dump_brush(DEBrush *brush)
-{
-	/* Allow the brush still be used but get if off the list. */
-	UNLINK_ITEM(brushes, brush, next, prev);
-	debrush_release(brush, None);
-}
-
-
-DEBrush *de_find_or_create_brush(WRootWin *rootwin, const char *name)
-{
-	DEBrush *oldbrush, *brush;
-	Window root=ROOT_OF(rootwin);
+	style=do_create_style(rootwin, name);
 	
-	for(oldbrush=brushes; oldbrush!=NULL; oldbrush=oldbrush->next){
-		if(oldbrush->rootwin==rootwin && oldbrush->style!=NULL && 
-		   strcmp(oldbrush->style, name)==0){
+	if(style==NULL)
+		return NULL;
+	
+	for(oldstyle=styles; oldstyle!=NULL; oldstyle=oldstyle->next){
+		if(oldstyle->rootwin==rootwin && oldstyle->style!=NULL && 
+		   strcmp(oldstyle->style, name)==0){
 			break;
 		}
 	}
-
-	if(MATCHES("tab-frame", name))
-		brush=(DEBrush*)create_detabbrush(rootwin, name);
-	else if(MATCHES("tab-menuentry", name))
-		brush=(DEBrush*)create_dementbrush(rootwin, name);
-	else
-		brush=create_debrush(rootwin, name);
 	
-	if(brush==NULL)
+	if(oldstyle!=NULL && !oldstyle->is_fallback)
+		dump_style(oldstyle);
+	
+	LINK_ITEM_FIRST(styles, style, next, prev);
+	
+	return style;
+}
+
+
+
+/*EXTL_DOC
+ * Clear all styles from drawing engine memory.
+ */
+EXTL_EXPORT
+	void de_reset()
+{
+	DEStyle *style, *next;
+	for(style=styles; style!=NULL; style=next){
+		next=style->next;
+		if(!style->is_fallback)
+			dump_style(style);
+	}
+}
+
+
+void de_deinit_styles()
+{
+	DEStyle *style, *next;
+	for(style=styles; style!=NULL; style=next){
+		next=style->next;
+		if(style->usecount>1){
+			warn_obj("DE module", "Style %s still in use [%d] but the module "
+					 "is being unloaded!", style->style, style->usecount);
+		}
+		dump_style(style);
+	}
+}
+
+
+/*}}}*/
+
+
+/*{{{ Brush creation and releasing */
+
+
+static bool debrush_init(DEBrush *brush, DEStyle *style)
+{
+	brush->d=style;
+	style->usecount++;
+	
+	if(!grbrush_init(&(brush->grbrush))){
+		style->usecount--;
+		return FALSE;
+	}
+	
+	return TRUE;
+}
+
+
+static bool detabbrush_init(DETabBrush *brush, DEStyle *style)
+{
+	if(!style->tabbrush_data_ok)
+		create_tab_gcs(style, style->rootwin);
+	return debrush_init(&(brush->debrush), style);
+}
+
+
+static bool dementbrush_init(DEMEntBrush *brush, DEStyle *style)
+{
+	if(!style->mentbrush_data_ok)
+		init_sub_ind_w(style);
+	return debrush_init(&(brush->debrush), style);
+}
+
+
+DEBrush *create_debrush(DEStyle *style)
+{
+	CREATEOBJ_IMPL(DEBrush, debrush, (p, style));
+}
+
+
+DETabBrush *create_detabbrush(DEStyle *style)
+{
+	CREATEOBJ_IMPL(DETabBrush, detabbrush, (p, style));
+}
+
+
+DEMEntBrush *create_dementbrush(DEStyle *style)
+{
+	CREATEOBJ_IMPL(DEMEntBrush, dementbrush, (p, style));
+}
+
+
+static DEBrush *do_get_brush(WRootWin *rootwin, Window win, 
+							 const char *stylename, bool slave)
+{
+	DEStyle *style=de_get_style(rootwin, stylename);
+	DEBrush *brush;
+	
+	if(style==NULL)
 		return NULL;
 	
-	if(oldbrush!=NULL && !oldbrush->is_fallback)
-		dump_brush(oldbrush);
+	if(MATCHES("tab-frame", stylename))
+		brush=(DEBrush*)create_detabbrush(style);
+	else if(MATCHES("tab-menuentry", stylename))
+		brush=(DEBrush*)create_dementbrush(style);
+	else
+		brush=create_debrush(style);
 	
-	LINK_ITEM_FIRST(brushes, brush, next, prev);
+	/* Set background colour */
+	if(brush!=NULL && ! slave){
+		grbrush_enable_transparency(&(brush->grbrush), win,
+									GR_TRANSPARENCY_DEFAULT);
+	}
 	
 	return brush;
+}
+
+
+DEBrush *de_get_brush(WRootWin *rootwin, Window win, const char *stylename)
+{
+	return do_get_brush(rootwin, win, stylename, FALSE);
+}
+
+
+DEBrush *debrush_get_slave(DEBrush *master, WRootWin *rootwin, 
+						   Window win, const char *stylename)
+{
+	return do_get_brush(rootwin, win, stylename, TRUE);
 }
 
 
 void debrush_deinit(DEBrush *brush)
 {
-	int i;
-
+	unref_style(brush->d);
+	brush->d=NULL;
 	grbrush_deinit(&(brush->grbrush));
-
-	UNLINK_ITEM(brushes, brush, next, prev);
-
-	if(brush->style!=NULL)
-		free(brush->style);
-	
-	if(brush->font!=NULL){
-		de_free_font(brush->font);
-		brush->font=NULL;
-	}
-	
-	if(brush->cgrp_alloced)
-		de_free_colour_group(brush->rootwin, &(brush->cgrp));
-	
-	for(i=0; i<brush->n_extra_cgrps; i++)
-		de_free_colour_group(brush->rootwin, brush->extra_cgrps+i);
-
-	XSync(wglobal.dpy, False);
-	
-	if(brush->extra_cgrps!=NULL)
-		free(brush->extra_cgrps);
-	
-	extl_unref_table(brush->data_table);
-	
-	XFreeGC(wglobal.dpy, brush->normal_gc);
 }
 
 
 void detabbrush_deinit(DETabBrush *brush)
 {
 	debrush_deinit(&(brush->debrush));
-	
-	XFreeGC(wglobal.dpy, brush->copy_gc);
-	XFreeGC(wglobal.dpy, brush->stipple_gc);
-	XFreePixmap(wglobal.dpy, brush->tag_pixmap);
 }
 
 
@@ -336,40 +431,63 @@ void dementbrush_deinit(DEMEntBrush *brush)
 
 void debrush_release(DEBrush *brush, Window win)
 {
-	brush->usecount--;
-	if(brush->usecount<=0)
-		destroy_obj((WObj*)brush);
+	destroy_obj((WObj*)brush);
 }
 
 
-/*EXTL_DOC
- * Clear all styles from drawing engine memory.
- */
-EXTL_EXPORT
-void de_reset()
+/*}}}*/
+
+
+/*{{{ Border widths */
+
+
+void destyle_get_border_widths(DEStyle *style, GrBorderWidths *bdw)
 {
-	DEBrush *brush, *next;
-	for(brush=brushes; brush!=NULL; brush=next){
-		next=brush->next;
-		if(!brush->is_fallback)
-			dump_brush(brush);
+	DEBorder *bd=&(style->border);
+	uint tmp;
+	
+	switch(bd->style){
+	case DEBORDER_RIDGE:
+	case DEBORDER_GROOVE:
+		tmp=bd->sh+bd->hl+bd->pad;
+		bdw->top=tmp; bdw->bottom=tmp; bdw->left=tmp; bdw->right=tmp;
+		break;
+	case DEBORDER_INLAID:
+		tmp=bd->sh+bd->pad; bdw->top=tmp; bdw->left=tmp;
+		tmp=bd->hl+bd->pad; bdw->bottom=tmp; bdw->right=tmp;
+		break;
+	case DEBORDER_ELEVATED:
+	default:
+		tmp=bd->hl+bd->pad; bdw->top=tmp; bdw->left=tmp;
+		tmp=bd->sh+bd->pad; bdw->bottom=tmp; bdw->right=tmp;
+		break;
 	}
+	
+	bdw->tb_ileft=bdw->left;
+	bdw->tb_iright=bdw->right;
+	bdw->spacing=style->spacing;
 }
 
 
-void de_deinit_brushes()
+void destyle_get_mentbrush_border_widths(DEStyle *style, GrBorderWidths *bdw)
 {
-	DEBrush *brush, *next;
-	for(brush=brushes; brush!=NULL; brush=next){
-		next=brush->next;
-		brush->usecount--;
-		if(brush->usecount>0){
-			warn_obj("DE module", "Brush %s still in use [%d] but the module "
-					 "is being unloaded!", brush->style, brush->usecount);
-		}else{
-			destroy_obj((WObj*)brush);
-		}
-	}
+	if(!style->mentbrush_data_ok)
+		init_sub_ind_w(style);
+	destyle_get_border_widths(style, bdw);
+	bdw->right+=style->sub_ind_w;
+	bdw->tb_iright+=style->sub_ind_w;
+}
+
+
+void debrush_get_border_widths(DEBrush *brush, GrBorderWidths *bdw)
+{
+	destyle_get_border_widths(brush->d, bdw);
+}
+
+
+void dementbrush_get_border_widths(DEMEntBrush *brush, GrBorderWidths *bdw)
+{
+	destyle_get_mentbrush_border_widths(brush->debrush.d, bdw);
 }
 
 
@@ -381,25 +499,35 @@ void de_deinit_brushes()
 
 void debrush_get_extra_values(DEBrush *brush, ExtlTab *tab)
 {
-	*tab=extl_ref_table(brush->data_table);
+	*tab=extl_ref_table(brush->d->data_table);
 }
 
 
-bool de_get_brush_values(WRootWin *rootwin, const char *style,
+bool de_get_brush_values(WRootWin *rootwin, const char *stylename,
 						 GrBorderWidths *bdw, GrFontExtents *fnte,
 						 ExtlTab *tab)
 {
-	DEBrush *brush=do_get_brush(rootwin, style, FALSE);
+	DEStyle *style=de_get_style(rootwin, stylename);
 	
-	if(brush==NULL)
+	if(style==NULL)
 		return FALSE;
+		
+	if(bdw!=NULL){
+		if(MATCHES("tab-menuentry", stylename))
+			destyle_get_mentbrush_border_widths(style, bdw);
+		else
+			destyle_get_border_widths(style, bdw);
+	}
 	
-	if(bdw!=NULL)
-		grbrush_get_border_widths(&(brush->grbrush), bdw);
-	if(fnte!=NULL)
-		grbrush_get_font_extents(&(brush->grbrush), fnte);
+	if(fnte!=NULL){
+		if(style->font!=NULL)
+			defont_get_font_extents(style->font, fnte);
+		else
+			DE_RESET_FONT_EXTENTS(fnte);
+	}
+	
 	if(tab!=NULL)
-		grbrush_get_extra_values(&(brush->grbrush), tab);
+		*tab=extl_ref_table(style->data_table);
 	
 	return TRUE;
 }
@@ -430,14 +558,14 @@ static DynFunTab debrush_dynfuntab[]={
 	{(DynFun*)grbrush_get_slave, (DynFun*)debrush_get_slave},
 	END_DYNFUNTAB
 };
-									   
+
 
 static DynFunTab detabbrush_dynfuntab[]={
 	{grbrush_draw_textbox, detabbrush_draw_textbox},
 	{grbrush_draw_textboxes, detabbrush_draw_textboxes},
 	END_DYNFUNTAB
 };
-									   
+
 
 static DynFunTab dementbrush_dynfuntab[]={
 	{grbrush_draw_textbox, dementbrush_draw_textbox},
@@ -445,7 +573,7 @@ static DynFunTab dementbrush_dynfuntab[]={
 	{grbrush_get_border_widths, dementbrush_get_border_widths},
 	END_DYNFUNTAB
 };
-									   
+
 
 IMPLOBJ(DEBrush, GrBrush, debrush_deinit, debrush_dynfuntab);
 IMPLOBJ(DETabBrush, DEBrush, detabbrush_deinit, detabbrush_dynfuntab);
@@ -453,4 +581,6 @@ IMPLOBJ(DEMEntBrush, DEBrush, dementbrush_deinit, dementbrush_dynfuntab);
 
 
 /*}}}*/
+
+
 

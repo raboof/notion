@@ -24,7 +24,8 @@
 /*{{{ Classes and structures */
 
 
-INTROBJ(DEBorder);
+INTRSTRUCT(DEBorder);
+INTRSTRUCT(DEStyle);
 INTROBJ(DEBrush);
 INTROBJ(DETabBrush);
 INTROBJ(DEMEntBrush);
@@ -55,8 +56,7 @@ DECLSTRUCT(DEBorder){
 };
 
 
-DECLOBJ(DEBrush){
-	GrBrush grbrush;
+DECLSTRUCT(DEStyle){
 	char *style;
 	int usecount;
 	bool is_fallback;
@@ -76,26 +76,37 @@ DECLOBJ(DEBrush){
 	uint spacing;
 	
 	ExtlTab data_table;
-	
-	DEBrush *next, *prev;
-};
 
-
-DECLOBJ(DETabBrush){
-	DEBrush debrush;
-	
+	/* Only initialised if used as a DETabBrush */
+	bool tabbrush_data_ok;
 	GC stipple_gc;
 	GC copy_gc;
 	
 	Pixmap tag_pixmap;
 	int tag_pixmap_w;
 	int tag_pixmap_h;
+	
+	/* Only initialised if used as a DEMentBrush */
+	bool mentbrush_data_ok;
+	int sub_ind_w;
+	
+	DEStyle *next, *prev;
+};
+
+
+DECLOBJ(DEBrush){
+	GrBrush grbrush;
+	DEStyle *d;
+};
+
+
+DECLOBJ(DETabBrush){
+	DEBrush debrush;
 };
 
 
 DECLOBJ(DEMEntBrush){
 	DEBrush debrush;
-	int sub_ind_w;
 };
 
 
@@ -104,12 +115,10 @@ DECLOBJ(DEMEntBrush){
 
 /*{{{ Initilisation/deinitialisation */
 
-
-extern DEBrush *create_debrush(WRootWin *rootwin, const char *name);
-extern DETabBrush *create_detabbrush(WRootWin *rootwin, const char *name);
-extern DEMEntBrush *create_dementbrush(WRootWin *rootwin, 
-									   const char *name);
-extern DEBrush *de_find_or_create_brush(WRootWin *rootwin, const char *name);
+extern DEStyle *de_create_style(WRootWin *rootwin, const char *name);
+extern DEBrush *create_debrush(DEStyle *style);
+extern DETabBrush *create_detabbrush(DEStyle *style);
+extern DEMEntBrush *create_dementbrush(DEStyle *style);
 
 extern DEBrush *de_get_brush(WRootWin *rootwin, Window win, 
 							 const char *style);
@@ -120,14 +129,12 @@ extern bool de_get_brush_values(WRootWin *rootwin, const char *style,
 extern DEBrush *debrush_get_slave(DEBrush *brush, WRootWin *rootwin, 
 								  Window win, const char *style);
 
+extern void destyle_deinit(DEStyle *style);
+extern void debrush_deinit(DEBrush *brush);
 extern void debrush_release(DEBrush *brush, Window win);
 
-extern void debrush_deinit(DEBrush *brush);
-extern void detabbrush_deinit(DETabBrush *brush);
-extern void dementbrush_deinit(DEMEntBrush *brush);
-
 extern void de_reset();
-extern void de_deinit_brushes();
+extern void de_deinit_styles();
 
 
 /*}}}*/
@@ -145,6 +152,10 @@ extern void debrush_draw_border(DEBrush *brush, Window win,
 extern void debrush_get_border_widths(DEBrush *brush, GrBorderWidths *bdw);
 extern void dementbrush_get_border_widths(DEMEntBrush *brush, 
 										  GrBorderWidths *bdw);
+
+extern void destyle_get_border_widths(DEStyle *style, GrBorderWidths *bdw);
+extern void destyle_get_mentbrush_border_widths(DEStyle *style,
+												GrBorderWidths *bdw);
 
 
 /* Textboxes */
@@ -214,6 +225,7 @@ DEColourGroup *debrush_get_colour_group2(DEBrush *brush,
 DEColourGroup *debrush_get_colour_group(DEBrush *brush, const char *attr);
 
 extern void debrush_get_extra_values(DEBrush *brush, ExtlTab *tab);
+
 
 /*}}}*/
 

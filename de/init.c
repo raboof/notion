@@ -117,7 +117,7 @@ static void get_colour_group(WRootWin *rootwin, DEColourGroup *cg,
 }
 
 
-static void get_extra_cgrps(WRootWin *rootwin, DEBrush *brush, ExtlTab tab)
+static void get_extra_cgrps(WRootWin *rootwin, DEStyle *style, ExtlTab tab)
 {
 	
 	uint i=0, nfailed=0, n=extl_table_get_n(tab);
@@ -127,9 +127,9 @@ static void get_extra_cgrps(WRootWin *rootwin, DEBrush *brush, ExtlTab tab)
 	if(n==0)
 		return;
 	
-	brush->extra_cgrps=ALLOC_N(DEColourGroup, n);
+	style->extra_cgrps=ALLOC_N(DEColourGroup, n);
 	
-	if(brush->extra_cgrps==NULL){
+	if(style->extra_cgrps==NULL){
 		warn_err();
 		return;
 	}
@@ -142,9 +142,9 @@ static void get_extra_cgrps(WRootWin *rootwin, DEBrush *brush, ExtlTab tab)
 			goto err;
 		}
 		
-		/*de_init_colour_group(rootwin, brush->extra_cgrps+i-nfailed);*/
-		brush->extra_cgrps[i-nfailed].spec=name;
-		get_colour_group(rootwin, brush->extra_cgrps+i-nfailed, sub);
+		/*de_init_colour_group(rootwin, style->extra_cgrps+i-nfailed);*/
+		style->extra_cgrps[i-nfailed].spec=name;
+		get_colour_group(rootwin, style->extra_cgrps+i-nfailed, sub);
 		
 		extl_unref_table(sub);
 		continue;
@@ -155,11 +155,11 @@ static void get_extra_cgrps(WRootWin *rootwin, DEBrush *brush, ExtlTab tab)
 	}
 	
 	if(n-nfailed==0){
-		free(brush->extra_cgrps);
-		brush->extra_cgrps=NULL;
+		free(style->extra_cgrps);
+		style->extra_cgrps=NULL;
 	}
 	
-	brush->n_extra_cgrps=n-nfailed;
+	style->n_extra_cgrps=n-nfailed;
 }
 
 
@@ -204,13 +204,6 @@ static void get_transparent_background(uint *mode, ExtlTab tab)
 /*{{{ de_define_style */
 
 
-static void dementbrush_postinit(DEMEntBrush *brush)
-{
-	brush->sub_ind_w=grbrush_get_text_width((GrBrush*)brush, 
-											DE_SUB_IND, DE_SUB_IND_LEN);
-}
-
-
 /*EXTL_DOC
  * Define a style for the root window \var{rootwin}. Use
  * \fnref{de_define_style} instead to define for all root windows.
@@ -218,45 +211,37 @@ static void dementbrush_postinit(DEMEntBrush *brush)
 EXTL_EXPORT
 bool de_do_define_style(WRootWin *rootwin, const char *name, ExtlTab tab)
 {
-	DEBrush *brush;
+	DEStyle *style;
 	char *fnt;
 	uint n;
 
 	if(name==NULL)
 		return FALSE;
 	
-	brush=de_find_or_create_brush(rootwin, name);
+	style=de_create_style(rootwin, name);
 
-	if(brush==NULL)
+	if(style==NULL)
 		return FALSE;
 
-	get_border(&(brush->border), tab);
-	get_border_val(&(brush->spacing), tab, "spacing");
+	get_border(&(style->border), tab);
+	get_border_val(&(style->spacing), tab, "spacing");
 
-	get_text_align(&(brush->textalign), tab);
+	get_text_align(&(style->textalign), tab);
 
-	get_transparent_background(&(brush->transparency_mode), tab);
+	get_transparent_background(&(style->transparency_mode), tab);
 	
 	if(extl_table_gets_s(tab, "font", &fnt)){
-		brush->font=de_load_font(fnt);
+		de_load_font_for_style(style, fnt);
 		free(fnt);
 	}else{
-		brush->font=de_load_font(CF_FALLBACK_FONT_NAME);
+		de_load_font_for_style(style, CF_FALLBACK_FONT_NAME);
 	}
 	
-	if(brush->font!=NULL && brush->font->fontstruct!=NULL){
-		XSetFont(wglobal.dpy, brush->normal_gc, 
-				 brush->font->fontstruct->fid);
-	}
-
-	brush->cgrp_alloced=TRUE;
-	get_colour_group(rootwin, &(brush->cgrp), tab);
-	get_extra_cgrps(rootwin, brush, tab);
+	style->cgrp_alloced=TRUE;
+	get_colour_group(rootwin, &(style->cgrp), tab);
+	get_extra_cgrps(rootwin, style, tab);
 	
-	brush->data_table=extl_ref_table(tab);
-	
-	if(WOBJ_IS(brush, DEMEntBrush))
-		dementbrush_postinit((DEMEntBrush*)brush);
+	style->data_table=extl_ref_table(tab);
 	
 	return TRUE;
 }
@@ -280,7 +265,7 @@ extern void de_module_unregister_exports();
 bool de_module_init()
 {
 	WRootWin *rootwin;
-	DEBrush *brush;
+	DEStyle *style;
 	
 	if(!de_module_register_exports())
 		return FALSE;
@@ -296,13 +281,14 @@ bool de_module_init()
 	
 	/* Create fallback brushes */
 	FOR_ALL_ROOTWINS(rootwin){
-		brush=de_find_or_create_brush(rootwin, "*");
-		if(brush==NULL){
-			warn_obj("DE module", "Could not initialise fallback brush for "
+		style=de_create_style(rootwin, "*");
+		if(style==NULL){
+			warn_obj("DE module", "Could not initialise fallback style for "
 					 "root window %d.\n", rootwin->xscr);
+		}else{
+			style->is_fallback=TRUE;
+			de_load_font_for_style(style, CF_FALLBACK_FONT_NAME);
 		}
-		brush->is_fallback=TRUE;
-		brush->font=de_load_font(CF_FALLBACK_FONT_NAME);
 	}
 	
 	return TRUE;
@@ -317,7 +303,7 @@ void de_module_deinit()
 {
 	gr_unregister_engine("de");
 	de_module_unregister_exports();
-	de_deinit_brushes();
+	de_deinit_styles();
 }
 
 
