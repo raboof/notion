@@ -85,6 +85,9 @@ DYNFUN void genframe_draw_bar(const WGenFrame *genframe, bool complete);
 DYNFUN void genframe_bar_geom(const WGenFrame *genframe, WRectangle *geom);
 DYNFUN void genframe_border_inner_geom(const WGenFrame *genframe,
 									   WRectangle *geom);
+DYNFUN void genframe_brushes_updated(WGenFrame *genframe);
+
+
 extern void genframe_draw_bar_default(const WGenFrame *genframe, 
 									  bool complete);
 extern void genframe_draw_default(const WGenFrame *genframe, bool complete);

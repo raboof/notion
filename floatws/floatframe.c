@@ -28,6 +28,8 @@
 #include "main.h"
 
 
+static void floatframe_get_bar_width_limits(WFloatFrame *frame);
+	
 	
 /*{{{ Destroy/create frame */
 
@@ -35,15 +37,11 @@
 static bool floatframe_init(WFloatFrame *frame, WWindow *parent,
 							const WRectangle *geom)
 {
+	frame->bar_w=geom->w;
+	
 	if(!genframe_init((WGenFrame*)frame, parent, geom))
 		return FALSE;
 
-	frame->bar_w=geom->w;
-	frame->tab_min_w=100;
-	frame->bar_max_width_q=0.95;
-	
-	genframe_recalc_bar((WGenFrame*)frame);
-	
 	region_add_bindmap((WRegion*)frame, &(floatframe_bindmap));
 	
 	return TRUE;
@@ -247,6 +245,33 @@ static void floatframe_request_clientwin_geom(WFloatFrame *frame,
 /*{{{ Drawing routines and such */
 
 
+static void floatframe_brushes_updated(WFloatFrame *frame)
+{
+	ExtlTab tab;
+	
+	/* Get new bar width limits */
+
+	frame->tab_min_w=100;
+	frame->bar_max_width_q=0.95;
+
+	if(frame->genframe.brush==NULL)
+		return;
+	
+	grbrush_get_extra_values(frame->genframe.brush, &tab);
+	
+	if(extl_table_gets_i(tab, "floatframe_tab_min_w", &(frame->tab_min_w))){
+		if(frame->tab_min_w<=0)
+			frame->tab_min_w=1;
+	}
+
+	if(extl_table_gets_d(tab, "floatframe_bar_max_w_q", 
+						 &(frame->bar_max_width_q))){
+		if(frame->bar_max_width_q<=0.0 || frame->bar_max_width_q>1.0)
+			frame->bar_max_width_q=1.0;
+	}
+}
+
+
 static void floatframe_set_shape(WFloatFrame *frame)
 {
 	WRectangle gs[2];
@@ -281,20 +306,22 @@ static int init_title(WFloatFrame *frame, int i)
 
 static void floatframe_recalc_bar(WFloatFrame *frame)
 {
-	int bar_w=0, textw=0, tmaxw=0, tmp=0;
+	int bar_w=0, textw=0, tmaxw=frame->tab_min_w, tmp=0;
 	WRegion *sub;
 	const char *p;
 	GrBorderWidths bdw;
 	char *title;
 	uint bdtotal;
-	int i;
+	int i, m;
 	
 	if(frame->genframe.bar_brush==NULL)
 		return;
 	
-	if(WGENFRAME_MCOUNT(frame)>0){
+	m=WGENFRAME_MCOUNT(frame);
+	
+	if(m>0){
 		grbrush_get_border_widths(frame->genframe.bar_brush, &bdw);
-		bdtotal=((WGENFRAME_MCOUNT(frame)-1)*(bdw.tb_ileft+bdw.tb_iright)
+		bdtotal=((m-1)*(bdw.tb_ileft+bdw.tb_iright)
 				 +bdw.right+bdw.left);
 
 		FOR_ALL_MANAGED_ON_LIST(WGENFRAME_MLIST(frame), sub){
@@ -313,14 +340,14 @@ static void floatframe_recalc_bar(WFloatFrame *frame)
 		   REGION_GEOM(frame).w>frame->tab_min_w)
 			bar_w=frame->tab_min_w;
 		
-		tmp=bar_w-bdtotal-WGENFRAME_MCOUNT(frame)*tmaxw;
+		tmp=bar_w-bdtotal-m*tmaxw;
 		
 		if(tmp>0){
 			/* No label truncation needed, good. See how much can be padded. */
-			tmp/=WGENFRAME_MCOUNT(frame)*2;
+			tmp/=m*2;
 			if(tmp>CF_TAB_MAX_TEXT_X_OFF)
 				tmp=CF_TAB_MAX_TEXT_X_OFF;
-			bar_w=(tmaxw+tmp*2)*WGENFRAME_MCOUNT(frame)+bdtotal;
+			bar_w=(tmaxw+tmp*2)*m+bdtotal;
 		}else{
 			/* Some labels must be truncated */
 		}
@@ -335,7 +362,7 @@ static void floatframe_recalc_bar(WFloatFrame *frame)
 		floatframe_set_shape(frame);
 	}
 
-	if(WGENFRAME_MCOUNT(frame)==0 || frame->genframe.titles==NULL)
+	if(m==0 || frame->genframe.titles==NULL)
 		return;
 	
 	i=0;
@@ -516,6 +543,8 @@ static DynFunTab floatframe_dynfuntab[]={
 	{(DynFun*)genframe_tab_style, (DynFun*)floatframe_tab_style_default},
 	
 	{region_draw_config_updated, floatframe_draw_config_updated},
+	
+	{genframe_brushes_updated, floatframe_brushes_updated},
 	
 	END_DYNFUNTAB
 };

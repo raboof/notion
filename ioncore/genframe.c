@@ -610,6 +610,12 @@ void genframe_border_inner_geom(const WGenFrame *genframe, WRectangle *geom)
 }
 
 
+void genframe_brushes_updated(WGenFrame *genframe)
+{
+	CALL_DYN(genframe_brushes_updated, genframe, (genframe));
+}
+
+
 /*}}}*/
 
 
@@ -640,6 +646,8 @@ static void genframe_initialise_gr(WGenFrame *genframe)
 	grbrush_get_font_extents(genframe->bar_brush, &fnte);
 	
 	genframe->bar_h=bdw.top+bdw.bottom+fnte.max_height;
+	
+	genframe_brushes_updated(genframe);
 }
 
 

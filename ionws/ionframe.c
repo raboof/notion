@@ -25,7 +25,8 @@
 #include "splitframe.h"
 
 
-#define BAR_INSIDE_FRAME (TRUE)
+#define BAR_INSIDE_BORDER(FRAME) ((FRAME)->bar_inside_border)
+#define BAR_OFF(FRAME) (0)
 
 
 /*{{{ Destroy/create frame */
@@ -34,6 +35,8 @@
 static bool ionframe_init(WIonFrame *frame, WWindow *parent, 
 						  const WRectangle *geom)
 {
+	frame->bar_inside_border=TRUE;
+	
 	if(!genframe_init((WGenFrame*)frame, parent, geom))
 		return FALSE;
 	
@@ -81,11 +84,12 @@ static void ionframe_border_geom(const WIonFrame *frame, WRectangle *geom)
 	geom->w=REGION_GEOM(frame).w;
 	geom->h=REGION_GEOM(frame).h;
 	
-/*	if(!BAR_INSIDE_FRAME && !(frame->genframe.flags&WGENFRAME_TAB_HIDE) &&
+	if(!BAR_INSIDE_BORDER(frame) && 
+	   !(frame->genframe.flags&WGENFRAME_TAB_HIDE) &&
 	   frame->genframe.brush!=NULL){
-		geom->y+=frame->genframe.bar_h;
-		geom->h-=frame->genframe.bar_h;
-	}*/
+		geom->y+=frame->genframe.bar_h+BAR_OFF(frame);
+		geom->h-=frame->genframe.bar_h+2*BAR_OFF(frame);
+	}
 }
 
 
@@ -109,17 +113,20 @@ static void ionframe_border_inner_geom(const WIonFrame *frame,
 
 static void ionframe_bar_geom(const WIonFrame *frame, WRectangle *geom)
 {
-	/*if(BAR_INSIDE_FRAME){*/
-		uint spacing=get_spacing(frame);
-		
-		genframe_border_inner_geom((const WGenFrame*)frame, geom);
+	uint off;
 	
-		geom->x+=spacing;
-		geom->y+=spacing;
-		geom->w-=2*spacing;
-	/*}else{
-		*geom=REGION_GEOM(frame);
-	}*/
+	if(BAR_INSIDE_BORDER(frame)){
+		off=get_spacing(frame);
+		genframe_border_inner_geom((const WGenFrame*)frame, geom);
+	}else{
+		off=BAR_OFF(frame);
+		geom->x=0;
+		geom->y=0;
+		geom->w=REGION_GEOM(frame).w;
+	}
+	geom->x+=off;
+	geom->y+=off;
+	geom->w-=2*off;
 
 	geom->h=(frame->genframe.flags&WGENFRAME_TAB_HIDE 
 			 ? 0 : frame->genframe.bar_h);
@@ -137,7 +144,7 @@ static void ionframe_managed_geom(const WIonFrame *frame, WRectangle *geom)
 	geom->w-=2*spacing;
 	geom->h-=2*spacing;
 	
-	if(/*BAR_INSIDE_FRAME &&*/ !(frame->genframe.flags&WGENFRAME_TAB_HIDE)){
+	if(BAR_INSIDE_BORDER(frame) && !(frame->genframe.flags&WGENFRAME_TAB_HIDE)){
 		geom->y+=frame->genframe.bar_h+spacing;
 		geom->h-=frame->genframe.bar_h+spacing;
 	}
@@ -169,11 +176,13 @@ void ionframe_toggle_shade(WIonFrame *frame)
 {
 	GrBorderWidths bdw;
 	int h=frame->genframe.bar_h;
-	/*
-	if(!BAR_INSIDE_FRAME && frame->genframe.brush!=NULL){
+
+	if(!BAR_INSIDE_BORDER(frame) && frame->genframe.brush!=NULL){
 		grbrush_get_border_widths(frame->genframe.brush, &bdw);
 		h+=bdw.top+bdw.bottom+2*bdw.spacing;
-	}*/
+	}else{
+		h+=2*BAR_OFF(frame);
+	}
 
 	genframe_do_toggle_shade((WGenFrame*)frame, h);
 }
@@ -231,6 +240,22 @@ static void ionframe_recalc_bar(WIonFrame *frame)
 		}
 		i++;
 	}
+}
+
+
+static void ionframe_brushes_updated(WIonFrame *frame)
+{
+	ExtlTab tab;
+	
+	frame->bar_inside_border=TRUE;
+
+	if(frame->genframe.brush==NULL)
+		return;
+	
+	grbrush_get_extra_values(frame->genframe.brush, &tab);
+	
+	extl_table_gets_b(tab, "ionframe_bar_inside_border", 
+					  &(frame->bar_inside_border));
 }
 
 
@@ -333,6 +358,8 @@ static DynFunTab ionframe_dynfuntab[]={
 
 	{(DynFun*)genframe_style, (DynFun*)ionframe_style},
 	{(DynFun*)genframe_tab_style, (DynFun*)ionframe_tab_style},
+	
+	{genframe_brushes_updated, ionframe_brushes_updated},
 	
 	END_DYNFUNTAB
 };

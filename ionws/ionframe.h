@@ -20,6 +20,7 @@ INTROBJ(WIonFrame);
 
 DECLOBJ(WIonFrame){
 	WGenFrame genframe;
+	bool bar_inside_border;
 };
 
 
