@@ -249,7 +249,6 @@ function querylib.lookup_workspace_classes()
         local m=getmetatable(v)
         if m and m.__index==WGenWS then
             table.insert(classes, k)
-            print(k)
         end
     end
     
