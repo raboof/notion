@@ -1,5 +1,5 @@
 --
--- ion/share/ioncore-luaext.lua
+-- ion/share/ioncore_luaext.lua
 -- 
 -- Copyright (c) Tuomo Valkonen 2004.
 --

@@ -1,5 +1,5 @@
 --
--- ion/share/ioncore-winprops.lua
+-- ion/share/ioncore_winprops.lua
 -- 
 -- Copyright (c) Tuomo Valkonen 2004.
 --

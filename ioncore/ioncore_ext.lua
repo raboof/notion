@@ -1,5 +1,5 @@
 --
--- ion/share/ioncore.lua -- Ioncore Lua library
+-- ion/share/ioncore_ext.lua -- Ioncore Lua library
 -- 
 -- Copyright (c) Tuomo Valkonen 2004.
 --
@@ -22,11 +22,11 @@ MOD2=""
 ioncore.RESULT_DATA_LIMIT=1024^2
 
 -- Bindings, winprops, hooks and extra commands
-dopath('ioncore-luaext')
-dopath('ioncore-bindings')
-dopath('ioncore-winprops')
-dopath('ioncore-misc')
-dopath('ioncore-wd')
+dopath('ioncore_luaext')
+dopath('ioncore_bindings')
+dopath('ioncore_winprops')
+dopath('ioncore_misc')
+dopath('ioncore_wd')
 
 -- Export some important functions into global namespace.
 export(ioncore, 

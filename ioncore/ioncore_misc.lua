@@ -1,5 +1,5 @@
 --
--- ion/share/ioncore-misc.lua
+-- ion/share/ioncore_misc.lua
 -- 
 -- Copyright (c) Tuomo Valkonen 2004.
 --

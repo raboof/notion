@@ -1,5 +1,5 @@
 --
--- ion/share/ioncore-wd.lua
+-- ion/share/ioncore_wd.lua
 -- 
 -- Copyright (c) Tuomo Valkonen 2004.
 --
