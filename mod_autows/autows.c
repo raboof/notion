@@ -12,6 +12,7 @@
 #include <string.h>
 
 #include <libtu/objp.h>
+#include <libtu/minmax.h>
 #include <ioncore/common.h>
 #include <ioncore/global.h>
 #include <ioncore/region.h>
@@ -48,7 +49,7 @@ void autows_managed_add(WAutoWS *ws, WRegion *reg)
 
 static WRegion *create_frame_autows(WWindow *parent, const WFitParams *fp)
 {
-    return (WRegion*)create_frame(parent, fp, "frame-autoframe");
+    return (WRegion*)create_frame(parent, fp, "frame-tiled-autows");
 }
 
 
@@ -191,39 +192,12 @@ bool autows_managed_may_destroy(WAutoWS *ws, WRegion *reg)
 }
 
 
-static void raise_split(WSplit *split)
+/*WRegion *autows_managed_control_focus(WAutoWS *ws, WRegion *reg)
 {
-    if(OBJ_IS(split, WSplitRegion))
-        region_raise(((WSplitRegion*)split)->reg);
-    else if(OBJ_IS(split, WSplitInner))
-        splitinner_forall((WSplitInner*)split, raise_split);
-}
-
-
-void autows_managed_activated(WAutoWS *ws, WRegion *sub)
-{
-    WSplitRegion *regnode;
-    WSplitInner *par;
-
-    ionws_managed_activated(&(ws->ionws), sub);
-    
-    regnode=get_node_check(ws, sub);
-    
-    assert(regnode!=NULL);
-    
-    par=((WSplit*)regnode)->parent;
-    while(par!=NULL){
-        if(OBJ_IS(par, WSplitPane)){
-            splitinner_forall(par, raise_split);
-            return;
-        }
-        par=((WSplit*)par)->parent;
+    if(OBJ_IS(reg, WPaneWin)){
     }
-    
-    region_raise(sub);
-    
 }
-
+*/
 
 /*}}}*/
 
@@ -250,7 +224,7 @@ static WSplit *load_splitunused(WIonWS *ws, const WRectangle *geom,
 }
 
 
-static WSplit *load_splitpane(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
+static WSplit *load_splitpane(WAutoWS *ws, const WRectangle *geom, ExtlTab tab)
 {
     ExtlTab t;
     WSplitPane *pane;
@@ -261,10 +235,10 @@ static WSplit *load_splitpane(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
         return NULL;
     
     if(extl_table_gets_t(tab, "contents", &t)){
-        cnt=ionws_load_node(ws, geom, t);
+        cnt=ionws_load_node(&(ws->ionws), geom, t);
         extl_unref_table(t);
     }else{
-        cnt=load_splitunused(ws, geom, extl_table_none());
+        cnt=load_splitunused(&(ws->ionws), geom, extl_table_none());
     }
     
     if(cnt==NULL){
@@ -279,6 +253,104 @@ static WSplit *load_splitpane(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
     extl_table_gets_s(tab, "marker", &(pane->marker));
 
     return (WSplit*)pane;
+}
+
+#define MINS 8
+
+static void adjust_tls_brs(int *tls, int *brs, int total)
+{
+    if(*tls+*brs<total){
+        *tls=total*(*tls)/(*tls+*brs);
+        *brs=total-(*tls);
+    }
+        
+    *tls=minof(maxof(MINS, *tls), total);
+    *brs=minof(maxof(MINS, *brs), total);
+}
+
+
+static WSplit *load_splitfloat(WAutoWS *ws, const WRectangle *geom, 
+                               ExtlTab tab)
+{
+    WSplit *tl=NULL, *br=NULL;
+    WSplitFloat *split;
+    char *dir_str;
+    int dir, brs, tls;
+    ExtlTab subtab;
+    WRectangle tlg, brg;
+    int set=0;
+
+    set+=(extl_table_gets_i(tab, "tls", &tls)==TRUE);
+    set+=(extl_table_gets_i(tab, "brs", &brs)==TRUE);
+    set+=(extl_table_gets_s(tab, "dir", &dir_str)==TRUE);
+    
+    if(set!=3)
+        return NULL;
+    
+    if(strcmp(dir_str, "vertical")==0){
+        dir=SPLIT_VERTICAL;
+    }else if(strcmp(dir_str, "horizontal")==0){
+        dir=SPLIT_HORIZONTAL;
+    }else{
+        warn(TR("Invalid direction."));
+        free(dir_str);
+        return NULL;
+    }
+    free(dir_str);
+
+    split=create_splitfloat(geom, ws, dir);
+    if(split==NULL)
+        return NULL;
+
+    tlg=*geom;
+    brg=*geom;
+    
+    if(dir==SPLIT_HORIZONTAL){
+        adjust_tls_brs(&tls, &brs, geom->w);
+        tlg.w=tls;
+        brg.w=brs;
+        brg.x=geom->x+geom->w-brs;
+    }else{
+        adjust_tls_brs(&tls, &brs, geom->h);
+        tlg.h=tls;
+        brg.h=brs;
+        brg.y=geom->y+geom->h-brs;
+    }
+
+    splitfloat_update_panewins(split, &tlg, &brg);
+    
+    if(extl_table_gets_t(tab, "tl", &subtab)){
+        WRectangle g=tlg;
+        splitfloat_tl_pwin_to_cnt(split, &g);
+        tl=ionws_load_node((WIonWS*)ws, &g, subtab);
+        extl_unref_table(subtab);
+    }
+    
+    if(extl_table_gets_t(tab, "br", &subtab)){
+        WRectangle g;
+        if(tl==NULL){
+            g=*geom;
+        }else{
+            g=brg;
+            splitfloat_br_pwin_to_cnt(split, &g);
+        }
+        br=ionws_load_node((WIonWS*)ws, &brg, subtab);
+        extl_unref_table(subtab);
+    }
+    
+    if(tl==NULL || br==NULL){
+        destroy_obj((Obj*)split);
+        return (tl==NULL ? br : tl);
+    }
+    
+    tl->parent=(WSplitInner*)split;
+    br->parent=(WSplitInner*)split;
+
+    /*split->tmpsize=tls;*/
+    split->ssplit.tl=tl;
+    split->ssplit.br=br;
+    
+    return (WSplit*)split;
 }
 
 
@@ -298,9 +370,11 @@ static WSplit *autows_load_node(WAutoWS *ws, const WRectangle *geom,
         }
     }else{
         if(strcmp(s, "WSplitPane")==0)
-            return load_splitpane(&(ws->ionws), geom, tab);
+            return load_splitpane(ws, geom, tab);
         else if(strcmp(s, "WSplitUnused")==0)
             return load_splitunused(&(ws->ionws), geom, tab);
+        else if(strcmp(s, "WSplitFloat")==0)
+            return load_splitfloat(ws, geom, tab);
     }
 
     return ionws_load_node_default(&(ws->ionws), geom, tab);
@@ -330,6 +404,8 @@ WRegion *autows_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
         }
     }
     
+    split_restack(ws->ionws.split_tree, ((WGenWS*)ws)->dummywin, Above);
+    
     return (WRegion*)ws;
 }
 
@@ -358,9 +434,10 @@ static DynFunTab autows_dynfuntab[]={
     
     {(DynFun*)ionws_load_node,
      (DynFun*)autows_load_node},
-
-    {region_managed_activated, autows_managed_activated},
-    
+/*
+    {(DynFun*)region_managed_control_focus,
+     (DynFun*)autows_managed_control_focus},
+    */
     END_DYNFUNTAB
 };
 

@@ -26,7 +26,7 @@ de.defstyle("frame", {
 })
 
 
-de.defstyle("frame-ionframe", {
+de.defstyle("frame-tiled", {
     based_on = "frame",
     shadow_pixels = 0,
     highlight_pixels = 0,
@@ -74,7 +74,7 @@ de.defstyle("tab-frame", {
     }),
 })
 
-de.defstyle("tab-frame-ionframe", {
+de.defstyle("tab-frame-tiled", {
     based_on = "tab-frame",
     spacing = 1,
 })

@@ -573,8 +573,8 @@ static void get_minmaxunused(WSplit *node, int dir,
 }
 
 
-static void splitsplit_do_resize(WSplitSplit *node, const WRectangle *ng, 
-                                 int hprimn, int vprimn, bool transpose)
+void splitsplit_do_resize(WSplitSplit *node, const WRectangle *ng, 
+                          int hprimn, int vprimn, bool transpose)
 {
     assert(ng->w>=0 && ng->h>=0);
     assert(node->tl!=NULL && node->br!=NULL);
@@ -585,9 +585,10 @@ static void splitsplit_do_resize(WSplitSplit *node, const WRectangle *ng,
          * Or perhaps where this is called from?
          */
         WSplit *tl=node->tl, *br=node->br;
-        int sz=split_size((WSplit*)node, node->dir);
         int tls=split_size((WSplit*)tl, node->dir);
         int brs=split_size((WSplit*)br, node->dir);
+        /*int sz=split_size((WSplit*)node, node->dir);*/
+        int sz=tls+brs;
         /* Status display can not be transposed. */
         int dir=((transpose && !stdisp_immediate_child(node))
                  ? other_dir(node->dir)
@@ -608,7 +609,7 @@ static void splitsplit_do_resize(WSplitSplit *node, const WRectangle *ng,
             if(primn==PRIMN_ANY && (tlunused>=0 || brunused>=0)){
                 if(nsize<=tlused+brused){
                     /* Need to shrink a tangible node */
-                    adjust_sizes(&tls, &brs, nsize, tls+brs, 
+                    adjust_sizes(&tls, &brs, nsize, sz,
                                  tlmin, brmin, tlused, brused, primn);
                 }else{
                     /* Just expand or shrink unused space */
@@ -1435,6 +1436,145 @@ WSplit *splitinner_current(WSplitInner *node)
 /*}}}*/
 
 
+/*{{{ X window handling */
+
+
+static void splitregion_stacking(WSplitRegion *split, 
+                                 Window *bottomret, Window *topret)
+{
+    *bottomret=None;
+    *topret=None;
+    if(split->reg!=NULL)
+        region_stacking(split->reg, bottomret, topret);
+}
+
+void splitsplit_stacking(WSplitSplit *split, 
+                         Window *bottomret, Window *topret)
+{
+    Window tlb=None, tlt=None;
+    Window brb=None, brt=None;
+    
+    split_stacking(split->tl, &tlb, &tlt);
+    split_stacking(split->br, &brb, &brt);
+    
+#warning "Nothing is done to ensure that this would hold."    
+    if(split->current==SPLIT_CURRENT_TL){
+        *topret=(tlt!=None ? tlt : brt);
+        *bottomret=(brb!=None ? brb : tlb);
+    }else{
+        *topret=(brt!=None ? brt : tlt);
+        *bottomret=(tlb!=None ? tlb : brb);
+    }
+}
+
+void split_stacking(WSplit *split, Window *bottomret, Window *topret)
+{
+    *bottomret=None;
+    *topret=None;
+    {
+        CALL_DYN(split_stacking, split, (split, bottomret, topret));
+    }
+}
+
+
+static void splitregion_restack(WSplitRegion *split, Window other, int mode)
+{
+    if(split->reg!=NULL)
+        region_restack(split->reg, other, mode);
+}
+
+void splitsplit_restack(WSplitSplit *split, Window other, int mode)
+{
+    Window bottom=None, top=None;
+    WSplit *first, *second;
+    
+    if(split->current==SPLIT_CURRENT_TL){
+        first=split->br;
+        second=split->tl;
+    }else{
+        first=split->tl;
+        second=split->br;
+    }
+    
+    split_restack(first, other, mode);
+    split_stacking(first, &bottom, &top);
+    if(top!=None){
+        other=top;
+        mode=Above;
+    }
+    split_restack(second, other, mode);
+}
+
+void split_restack(WSplit *split, Window other, int mode)
+{
+    CALL_DYN(split_restack, split, (split, other, mode));
+}
+
+
+static void splitregion_map(WSplitRegion *split)
+{
+    if(split->reg!=NULL)
+        region_map(split->reg);
+}
+
+static void splitinner_map(WSplitInner *split)
+{
+    splitinner_forall(split, split_map);
+}
+
+void split_map(WSplit *split)
+{
+    CALL_DYN(split_map, split, (split));
+}
+
+
+static void splitregion_unmap(WSplitRegion *split)
+{
+    if(split->reg!=NULL)
+        region_unmap(split->reg);
+}
+
+static void splitinner_unmap(WSplitInner *split)
+{
+    splitinner_forall(split, split_unmap);
+}
+
+void split_unmap(WSplit *split)
+{
+    CALL_DYN(split_unmap, split, (split));
+}
+
+
+static void splitregion_reparent(WSplitRegion *split, WWindow *wwin)
+{
+    if(split->reg!=NULL){
+        WRectangle g=split->split.geom;
+        region_reparent(split->reg, wwin, &g, REGION_FIT_EXACT);
+    }
+}
+
+
+static void splitsplit_reparent(WSplitSplit *split, WWindow *wwin)
+{
+    if(split->current==SPLIT_CURRENT_TL){
+        split_reparent(split->br, wwin);
+        split_reparent(split->tl, wwin);
+    }else{
+        split_reparent(split->tl, wwin);
+        split_reparent(split->br, wwin);
+    }
+}
+
+
+void split_reparent(WSplit *split, WWindow *wwin)
+{
+    CALL_DYN(split_reparent, split, (split, wwin));
+}
+
+
+/*}}}*/
+
+
 /*{{{ Transpose */
 
 
@@ -1652,6 +1792,8 @@ static DynFunTab split_dynfuntab[]={
 static DynFunTab splitinner_dynfuntab[]={
     {(DynFun*)splitinner_nextto, (DynFun*)splitinner_nextto_default},
     {splitinner_mark_current, splitinner_mark_current_default},
+    {split_map, splitinner_map},
+    {split_unmap, splitinner_unmap},
     END_DYNFUNTAB,
 };
 
@@ -1667,6 +1809,9 @@ static DynFunTab splitsplit_dynfuntab[]={
     {splitinner_mark_current, splitsplit_mark_current},
     {(DynFun*)split_get_config, (DynFun*)splitsplit_get_config},
     {splitinner_forall, splitsplit_forall},
+    {split_restack, splitsplit_restack},
+    {split_stacking, splitsplit_stacking},
+    {split_reparent, splitsplit_reparent},
     END_DYNFUNTAB,
 };
 
@@ -1674,6 +1819,11 @@ static DynFunTab splitregion_dynfuntab[]={
     {split_update_bounds, splitregion_update_bounds},
     {split_do_resize, splitregion_do_resize},
     {(DynFun*)split_get_config, (DynFun*)splitregion_get_config},
+    {split_map, splitregion_map},
+    {split_unmap, splitregion_unmap},
+    {split_restack, splitregion_restack},
+    {split_stacking, splitregion_stacking},
+    {split_reparent, splitregion_reparent},
     END_DYNFUNTAB,
 };
 

@@ -50,22 +50,25 @@ S.s_ratio2=1
 S.templates={}
 
 S.templates["default"]={
-    type="WSplitSplit",
+    type="WSplitFloat",
     dir="horizontal",
     tls=S.b_ratio,
     brs=S.s_ratio,
     tl={
-        type="WSplitSplit",
-        dir="vertical",
-        tls=S.b_ratio2,
-        brs=S.s_ratio2,
-        tl={
-            type="WSplitPane",
-            marker="V:single",
-        },
-        br={
-            type="WSplitPane",
-            marker="M:right",
+        type="WSplitPane",
+        contents={
+            type="WSplitFloat",
+            dir="vertical",
+            tls=S.b_ratio2,
+            brs=S.s_ratio2,
+            tl={
+                type="WSplitPane",
+                marker="V:single",
+            },
+            br={
+                type="WSplitPane",
+                marker="M:right",
+            },
         },
     },
     br={
@@ -228,7 +231,7 @@ function T.scan_pane(p, node, pdir)
         if t=="WSplitRegion" then
             p.res_node=n
             return true
-        elseif t=="WSplitSplit" then
+        elseif t=="WSplitSplit" or t=="WSplitFloat" then
             local a, b=n:tl(), n:br()
             if b==n:current() then
                 a, b=b, a
@@ -273,7 +276,7 @@ function T.scan_pane(p, node, pdir)
 
     local function do_scan_unused(n, d, forcefit)
         local t=obj_typename(n)
-        if t=="WSplitSplit" then
+        if t=="WSplitSplit" or t=="WSplitFloat" then
             local sd=n:dir()
             if sd=="vertical" then
                 if d=="up" then
@@ -324,8 +327,10 @@ function T.scan_layout(p, node)
                 if pcls and pcls==cls then
                     return T.scan_pane(p, n:contents(), pdir)
                 end
+            else
+                return do_scan_cls(n:contents())
             end
-        elseif t=="WSplitSplit" then
+        elseif t=="WSplitSplit" or t=="WSplitFloat" then
             return (do_scan_cls(n:tl()) or do_scan_cls(n:br()))
         end
     end
@@ -341,7 +346,7 @@ function T.scan_layout(p, node)
             return true
         elseif t=="WSplitPane" then
             return do_scan_fallback(n:contents())
-        elseif t=="WSplitSplit" then
+        elseif t=="WSplitSplit" or t=="WSplitFloat" then
             return (do_scan_fallback(n:tl()) or do_scan_fallback(n:br()))
         end
     end
@@ -413,8 +418,10 @@ function T.do_init_layout(p, cls, tmpl)
                     end
                 end
             end
+        else
+            found, wrq, hrq=T.do_init_layout(p, cls, tmpl.contents)
         end
-    elseif tmpl.type=="WSplitSplit" then
+    elseif tmpl.type=="WSplitSplit" or tmpl.type=="WSplitFloat" then
         local found_where
         found, wrq, hrq=T.do_init_layout(p, cls, tmpl.tl)
         if found then
@@ -454,7 +461,7 @@ end
 function T.calc_sizes(tmpl, sw, sh)
     tmpl._w, tmpl._h=sw, sh
 
-    if tmpl.type=="WSplitSplit" then
+    if tmpl.type=="WSplitSplit" or tmpl.type=="WSplitFloat" then
         local tmps, tlw, tlh, brw, brh
         -- Calculate pixel sizes of things
         if tmpl.dir=="vertical" then
@@ -499,7 +506,7 @@ function T.layout_alt_handler(p)
     local n=p.ws:split_tree()
     local t=obj_typename(n)
     
-    if t=="WSplitSplit" then
+    if t=="WSplitSplit" or t=="WSplitFloat" then
         if obj_typename(n:tl())=="WSplitST" then
             n=n:br()
         elseif obj_typename(n:br())=="WSplitST" then

@@ -13,6 +13,11 @@
 #include <libtu/objp.h>
 #include <libtu/minmax.h>
 #include <ioncore/common.h>
+#include <ioncore/global.h>
+#include <ioncore/rootwin.h>
+#include <ioncore/xwindow.h>
+#include <ioncore/window.h>
+#include <ioncore/region-iter.h>
 #include <mod_ionws/split.h>
 #include "splitext.h"
 
@@ -39,16 +44,73 @@ bool splitpane_init(WSplitPane *pane, const WRectangle *geom, WSplit *cnt)
 {
     pane->contents=cnt;
     pane->marker=NULL;
-    pane->contents_h=geom->h;
-    pane->contents_w=geom->w;
     
-    return splitinner_init(&(pane->isplit), geom);
+    if(!splitinner_init(&(pane->isplit), geom))
+        return FALSE;
+
+    return TRUE;
 }
 
 
 WSplitPane *create_splitpane(const WRectangle *geom, WSplit *cnt)
 {
     CREATEOBJ_IMPL(WSplitPane, splitpane, (p, geom, cnt));
+}
+
+
+static void splitfloat_set_borderlines(WSplitFloat *split)
+{
+    int dir=split->ssplit.dir;
+    
+    if(split->tlpwin!=NULL){
+        split->tlpwin->bline=(dir==SPLIT_HORIZONTAL
+                              ? GR_BORDERLINE_RIGHT
+                              : GR_BORDERLINE_BOTTOM);
+    }
+
+    if(split->brpwin!=NULL){
+        split->brpwin->bline=(dir==SPLIT_HORIZONTAL
+                              ? GR_BORDERLINE_LEFT
+                              : GR_BORDERLINE_TOP);
+    }
+}
+
+
+bool splitfloat_init(WSplitFloat *split, const WRectangle *geom, 
+                     WAutoWS *ws, int dir)
+{
+    WWindow *par=REGION_PARENT_CHK(ws, WWindow);
+    WFitParams fp;
+    
+    assert(par!=NULL);
+
+    if(!splitsplit_init(&(split->ssplit), geom, dir))
+        return FALSE;
+    
+    fp.g=*geom;
+    fp.mode=REGION_FIT_EXACT;
+    split->tlpwin=create_panewin(par, &fp);
+    
+    fp.g=*geom;
+    fp.mode=REGION_FIT_EXACT;
+    split->brpwin=create_panewin(par, &fp);
+    
+    splitfloat_set_borderlines(split);
+
+    if(REGION_IS_MAPPED(ws)){
+        if(split->tlpwin!=NULL)
+            region_map((WRegion*)(split->tlpwin));
+        if(split->brpwin!=NULL)
+            region_map((WRegion*)(split->brpwin));
+    }
+    
+    return TRUE;
+}
+
+
+WSplitFloat *create_splitfloat(const WRectangle *geom, WAutoWS *ws, int dir)
+{
+    CREATEOBJ_IMPL(WSplitFloat, splitfloat, (p, geom, ws, dir));
 }
 
 
@@ -70,36 +132,256 @@ void splitpane_deinit(WSplitPane *split)
 }
 
 
+void splitfloat_deinit(WSplitFloat *split)
+{
+    if(split->tlpwin!=NULL){
+        WPaneWin *tmp=split->tlpwin;
+        split->tlpwin=NULL;
+        destroy_obj((Obj*)tmp);
+    }
+
+    if(split->brpwin!=NULL){
+        WPaneWin *tmp=split->brpwin;
+        split->brpwin=NULL;
+        destroy_obj((Obj*)tmp);
+    }
+    
+    splitsplit_deinit(&(split->ssplit));
+}
+
+
+/*}}}*/
+
+
+/*{{{ X window handling */
+
+
+static void splitpane_stacking(WSplitPane *pane, 
+                               Window *bottomret, Window *topret)
+{
+
+    *bottomret=None;
+    *topret=None;
+    
+    if(pane->contents!=NULL)
+        split_stacking(pane->contents, bottomret, topret);
+}
+
+
+static void stack_stacking_reg(WRegion *reg, 
+                               Window *bottomret, Window *topret)
+{
+    Window b=None, t=None;
+    
+    if(reg!=NULL){
+        region_stacking(reg, &b, &t);
+        if(*bottomret==None)
+            *bottomret=b;
+        if(t!=None)
+            *topret=t;
+    }
+}
+
+
+static void stack_stacking_split(WSplit *split,
+                                 Window *bottomret, Window *topret)
+{
+    Window b=None, t=None;
+    
+    if(split!=NULL){
+        split_stacking(split, &b, &t);
+        if(*bottomret==None)
+            *bottomret=b;
+        if(t!=None)
+            *topret=t;
+    }
+}
+
+
+static void splitfloat_stacking(WSplitFloat *split, 
+                                Window *bottomret, Window *topret)
+{
+    *bottomret=None;
+    *topret=None;
+    
+    if(split->ssplit.current!=SPLIT_CURRENT_TL){
+        stack_stacking_reg((WRegion*)split->tlpwin, bottomret, topret);
+        stack_stacking_split(split->ssplit.tl, bottomret, topret);
+        stack_stacking_reg((WRegion*)split->brpwin, bottomret, topret);
+        stack_stacking_split(split->ssplit.br, bottomret, topret);
+    }else{
+        stack_stacking_reg((WRegion*)split->brpwin, bottomret, topret);
+        stack_stacking_split(split->ssplit.br, bottomret, topret);
+        stack_stacking_reg((WRegion*)split->tlpwin, bottomret, topret);
+        stack_stacking_split(split->ssplit.tl, bottomret, topret);
+    }
+}
+
+
+static void splitpane_restack(WSplitPane *pane, Window other, int mode)
+{
+    if(pane->contents!=None)
+        split_restack(pane->contents, other, mode);
+}
+
+
+static void stack_restack_reg(WRegion *reg, Window *other, int *mode)
+{
+    Window b=None, t=None;
+    
+    if(reg!=NULL){
+        region_restack(reg, *other, *mode);
+        region_stacking(reg, &b, &t);
+        if(t!=None){
+            *other=t;
+            *mode=Above;
+        }
+    }
+}
+
+
+static void stack_restack_split(WSplit *split, Window *other, int *mode)
+{
+    Window b=None, t=None;
+    
+    if(split!=NULL){
+        split_restack(split, *other, *mode);
+        split_stacking(split, &b, &t);
+        if(t!=None){
+            *other=t;
+            *mode=Above;
+        }
+    }
+}
+
+
+
+static void splitfloat_restack(WSplitFloat *split, Window other, int mode)
+{
+    if(split->ssplit.current!=SPLIT_CURRENT_TL){
+        stack_restack_reg((WRegion*)split->tlpwin, &other, &mode);
+        stack_restack_split(split->ssplit.tl, &other, &mode);
+        stack_restack_reg((WRegion*)split->brpwin, &other, &mode);
+        stack_restack_split(split->ssplit.br, &other, &mode);
+    }else{
+        stack_restack_reg((WRegion*)split->brpwin, &other, &mode);
+        stack_restack_split(split->ssplit.br, &other, &mode);
+        stack_restack_reg((WRegion*)split->tlpwin, &other, &mode);
+        stack_restack_split(split->ssplit.tl, &other, &mode);
+    }
+}
+
+
+static void splitfloat_map(WSplitFloat *split)
+{
+    if(split->tlpwin!=NULL)
+        region_map((WRegion*)(split->tlpwin));
+    if(split->brpwin!=NULL)
+        region_map((WRegion*)(split->brpwin));
+    splitinner_forall((WSplitInner*)split, split_map);
+}
+
+
+static void splitfloat_unmap(WSplitFloat *split)
+{
+    if(split->tlpwin!=NULL)
+        region_unmap((WRegion*)(split->tlpwin));
+    if(split->brpwin!=NULL)
+        region_unmap((WRegion*)(split->brpwin));
+    splitinner_forall((WSplitInner*)split, split_unmap);
+}
+
+
+static void splitpane_reparent(WSplitPane *pane, WWindow *target)
+{
+    if(pane->contents!=NULL)
+        split_reparent(pane->contents, target);
+}
+
+
+static void reparentreg(WRegion *reg, WWindow *target)
+{
+    WRectangle g=REGION_GEOM(reg);
+    region_reparent(reg, target, &g, REGION_FIT_EXACT);
+}
+
+
+static void splitfloat_reparent(WSplitFloat *split, WWindow *target)
+{
+    if(split->ssplit.current!=SPLIT_CURRENT_TL){
+        reparentreg((WRegion*)split->tlpwin, target);
+        split_reparent(split->ssplit.tl, target);
+        reparentreg((WRegion*)split->brpwin, target);
+        split_reparent(split->ssplit.br, target);
+    }else{
+        reparentreg((WRegion*)split->brpwin, target);
+        split_reparent(split->ssplit.br, target);
+        reparentreg((WRegion*)split->tlpwin, target);
+        split_reparent(split->ssplit.tl, target);
+    }
+}
+
+
 /*}}}*/
 
 
 /*{{{ Geometry */
 
 
-static bool float_panes=TRUE;
-
-
-/*EXTL_DOC
- * Are floating panes enabled?
- */
-EXTL_EXPORT
-bool mod_autows_get_float_panes()
+void splitfloat_tl_pwin_to_cnt(WSplitFloat *split, WRectangle *g)
 {
-    return float_panes;
+    if(split->tlpwin!=NULL){
+        if(split->ssplit.dir==SPLIT_HORIZONTAL)
+            g->w=maxof(1, g->w-split->tlpwin->bdw.right);
+        else
+            g->h=maxof(1, g->h-split->tlpwin->bdw.bottom);
+    }
 }
 
 
-/*EXTL_DOC
- * Set whether floating panes are enabled. If floating is disabled, currently
- * floating panes will still float until resized again.
- */
-EXTL_EXPORT
-void mod_autows_set_float_panes(bool enable)
+void splitfloat_br_pwin_to_cnt(WSplitFloat *split, WRectangle *g)
 {
-    float_panes=enable;
+    if(split->brpwin!=NULL){
+        if(split->ssplit.dir==SPLIT_HORIZONTAL){
+            int delta=split->tlpwin->bdw.left;
+            g->w=maxof(1, g->w-delta);
+            g->x+=delta;
+        }else{
+            int delta=split->tlpwin->bdw.top;
+            g->h=maxof(1, g->h-delta);
+            g->y+=delta;
+        }
+    }
 }
 
 
+void splitfloat_tl_cnt_to_pwin(WSplitFloat *split, WRectangle *g)
+{
+    if(split->tlpwin!=NULL){
+        if(split->ssplit.dir==SPLIT_HORIZONTAL)
+            g->w=maxof(1, g->w+split->tlpwin->bdw.right);
+        else
+            g->h=maxof(1, g->h+split->tlpwin->bdw.bottom);
+    }
+}
+
+
+void splitfloat_br_cnt_to_pwin(WSplitFloat *split, WRectangle *g)
+{
+    if(split->brpwin!=NULL){
+        if(split->ssplit.dir==SPLIT_HORIZONTAL){
+            int delta=split->tlpwin->bdw.left;
+            g->w=maxof(1, g->w+delta);
+            g->x-=delta;
+        }else{
+            int delta=split->tlpwin->bdw.top;
+            g->h=maxof(1, g->h+delta);
+            g->y-=delta;
+        }
+    }
+}
+
+    
 static void set_unused_bounds(WSplit *node)
 {
     node->min_w=0;
@@ -131,7 +413,8 @@ static void splitunused_update_bounds(WSplitUnused *node, bool recursive)
 static void splitpane_update_bounds(WSplitPane *node, bool recursive)
 {
     if(node->contents!=NULL){
-        split_update_bounds(node->contents, recursive);
+        if(recursive)
+            split_update_bounds(node->contents, recursive);
         copy_bounds((WSplit*)node, node->contents);
     }else{
         set_unused_bounds((WSplit*)node);
@@ -139,74 +422,205 @@ static void splitpane_update_bounds(WSplitPane *node, bool recursive)
 }
 
 
+static int infadd(int x, int y)
+{
+    return ((x==INT_MAX || y==INT_MAX) ? INT_MAX : (x+y));
+}
+
+
+static int splitfloat_get_handle(WSplitFloat *split, int dir, 
+                                  WSplit *other)
+{
+    assert(other==split->ssplit.tl || other==split->ssplit.br);
+    
+    if(dir!=split->ssplit.dir)
+        return 0;
+
+    if(dir==SPLIT_VERTICAL){
+        if(other==split->ssplit.tl && split->tlpwin!=NULL)
+            return split->tlpwin->bdw.right;
+        else if(other==split->ssplit.br && split->brpwin!=NULL)
+            return split->tlpwin->bdw.left;
+    }else{
+        if(other==split->ssplit.tl && split->tlpwin!=NULL)
+            return split->tlpwin->bdw.bottom;
+        else if(other==split->ssplit.br && split->brpwin!=NULL)
+            return split->tlpwin->bdw.top;
+    }
+    
+    return 0;
+}
+
+
+static int splitfloat_get_max(WSplitFloat *split, int dir, WSplit *other)
+{
+    return infadd((dir==SPLIT_VERTICAL ? other->max_h : other->max_w),
+                  splitfloat_get_handle(split, dir, other));
+}
+
+
+static int splitfloat_get_min(WSplitFloat *split, int dir, WSplit *other)
+{
+    return ((dir==SPLIT_VERTICAL ? other->min_h : other->min_w)
+            +splitfloat_get_handle(split, dir, other));
+}
+
+
+static void splitfloat_update_bounds(WSplitFloat *split, bool recursive)
+{
+    WSplit *tl=split->ssplit.tl, *br=split->ssplit.br;
+    WSplit *node=(WSplit*)split;
+    int tl_max_w, br_max_w, tl_max_h, br_max_h;
+    int tl_min_w, br_min_w, tl_min_h, br_min_h;
+    
+    if(recursive){
+        split_update_bounds(tl, recursive);
+        split_update_bounds(br, recursive);
+    }
+
+    tl_max_w=splitfloat_get_max(split, SPLIT_HORIZONTAL, tl);
+    br_max_w=splitfloat_get_max(split, SPLIT_HORIZONTAL, br);
+    tl_max_h=splitfloat_get_max(split, SPLIT_VERTICAL, tl);
+    br_max_h=splitfloat_get_max(split, SPLIT_VERTICAL, br);
+    tl_min_w=splitfloat_get_min(split, SPLIT_HORIZONTAL, tl);
+    br_min_w=splitfloat_get_min(split, SPLIT_HORIZONTAL, br);
+    tl_min_h=splitfloat_get_min(split, SPLIT_VERTICAL, tl);
+    br_min_h=splitfloat_get_min(split, SPLIT_VERTICAL, br);
+    
+    if(split->ssplit.dir==SPLIT_HORIZONTAL){
+        node->max_w=infadd(tl_max_w, br_max_w);
+        node->min_w=minof(tl_min_w, br_min_w);
+        node->unused_w=0;
+        node->min_h=maxof(tl_min_h, br_min_h);
+        node->max_h=maxof(minof(tl_max_h, br_max_h), node->min_h);
+        node->unused_h=minof(tl->unused_h, br->unused_h);
+    }else{
+        node->max_h=infadd(tl_max_h, br_max_h);
+        node->min_h=minof(tl_min_h, br_min_h);
+        node->unused_h=0;
+        node->min_w=maxof(tl_min_w, br_min_w);
+        node->max_w=maxof(minof(tl_max_w, br_max_w), node->min_w);
+        node->unused_w=minof(tl->unused_w, br->unused_w);
+    }
+}
+
+
 static void splitpane_do_resize(WSplitPane *pane, const WRectangle *ng, 
                                 int hprimn, int vprimn, bool transpose)
 {
-    WSplitSplit *par=OBJ_CAST(((WSplit*)pane)->parent, WSplitSplit);
-    WRectangle ig;
-
-    GEOM(pane)=*ng;
-    
-    if(par==NULL || !float_panes){
-        pane->contents_w=ng->w;
-        pane->contents_h=ng->h;
-        ig=*ng;
-    }else{
-        assert(par->tl==(WSplit*)pane || par->br==(WSplit*)pane);
-        
-        if(par->dir==SPLIT_VERTICAL){
-            pane->contents_w=ng->w;
-            pane->contents_h=maxof(minof(pane->contents_h, GEOM(par).h-1),
-                                   ng->h);
-            ig=*ng;
-            ig.h=pane->contents_h;
-            if(par->br==(WSplit*)pane)
-                ig.y-=pane->contents_h-ng->h;
-        }else{
-            pane->contents_h=ng->h;
-            pane->contents_w=maxof(minof(pane->contents_w, GEOM(par).w-1),
-                                   ng->w);
-            ig=*ng;
-            ig.w=pane->contents_w;
-            if(par->br==(WSplit*)pane)
-                ig.x-=pane->contents_w-ng->w;
-        }
-    }
+    ((WSplit*)pane)->geom=*ng;
     
     if(pane->contents!=NULL)
-        split_do_resize(pane->contents, &ig, hprimn, vprimn, FALSE);
+        split_do_resize(pane->contents, ng, hprimn, vprimn, transpose);
 }
 
 
-#define PS(X) ((WSplit*)(X))
-
-static int adjust_w(int *rq, WSplitSplit *par, WSplitPane *pane)
+void splitfloat_update_panewins(WSplitFloat *split, const WRectangle *tlg,
+                                const WRectangle *brg)
 {
-    int chg=0;
-    
-    if(*rq>0)
-        chg=minof(*rq, GEOM(par).w-PS(par)->min_w-pane->contents_w);
-    else if(*rq<0)
-        chg=maxof(*rq, GEOM(pane).w-pane->contents_w);
-    
-    *rq-=chg;
-    
-    return chg;
+    if(split->tlpwin!=NULL)
+        region_fit((WRegion*)split->tlpwin, tlg, REGION_FIT_EXACT);
+    if(split->brpwin!=NULL)
+        region_fit((WRegion*)split->brpwin, brg, REGION_FIT_EXACT);
 }
 
 
-static int adjust_h(int *rq, WSplitSplit *par, WSplitPane *pane)
+static void bound(int *what, int min, int max)
 {
-    int chg=0;
+    if(*what<min)
+        *what=min;
+    else if(*what>max)
+        *what=max;
+}
+
+
+static void adjust_sizes(int *tls_, int *brs_, int nsize, 
+                         int tlmin, int brmin, int tlmax, int brmax,
+                         int primn)
+{
+    int tls=maxof(0, *tls_);
+    int brs=maxof(0, *brs_);
+    nsize=maxof(1, nsize);
     
-    if(*rq>0)
-        chg=minof(*rq, GEOM(par).h-PS(par)->min_h-pane->contents_h);
-    else if(*rq<0)
-        chg=maxof(*rq, GEOM(pane).h-pane->contents_h);
+    if(primn==PRIMN_TL){
+        tls=maxof(1, nsize-brs);
+        bound(&tls, tlmin, tlmax);
+        brs=nsize-tls;
+        bound(&brs, brmin, brmax);
+        tls=nsize-brs;
+        bound(&tls, tlmin, tlmax);
+    }else if(primn==PRIMN_BR){
+        brs=maxof(1, nsize-tls);
+        bound(&brs, brmin, brmax);
+        tls=nsize-brs;
+        bound(&tls, tlmin, tlmax);
+        brs=nsize-tls;
+        bound(&brs, brmin, brmax);
+    }else{ /* && PRIMN_ANY */
+        tls=tls*nsize/maxof(2, tls+brs);
+        bound(&tls, tlmin, tlmax);
+        brs=nsize-tls;
+        bound(&brs, brmin, brmax);
+        tls=nsize-brs;
+        bound(&tls, tlmin, tlmax);
+    }
     
-    *rq-=chg;
+    *tls_=tls;
+    *brs_=brs;
+}
+
+
+static void splitfloat_do_resize(WSplitFloat *split, const WRectangle *ng, 
+                                 int hprimn, int vprimn, bool transpose)
+{
+    WRectangle tlg=GEOM(split->ssplit.tl);
+    WRectangle brg=GEOM(split->ssplit.br);
+    WRectangle ntlg=*ng, nbrg=*ng;
+    int dir=split->ssplit.dir;
     
-    return chg;
+    splitfloat_tl_cnt_to_pwin(split, &tlg);
+    splitfloat_br_cnt_to_pwin(split, &brg);
+
+    if(dir==SPLIT_VERTICAL){
+        if(ng->h>tlg.h+brg.h){
+            ntlg.h=tlg.h;
+            nbrg.h=brg.h;
+            adjust_sizes(&ntlg.h, &nbrg.h, ng->h,
+                         splitfloat_get_min(split, dir, split->ssplit.tl),
+                         splitfloat_get_min(split, dir, split->ssplit.br),
+                         splitfloat_get_max(split, dir, split->ssplit.tl),
+                         splitfloat_get_max(split, dir, split->ssplit.br),
+                         vprimn);
+        }else{
+            ntlg.h=minof(ng->h, tlg.h);
+            nbrg.h=minof(ng->h, brg.h);
+        }
+        nbrg.y=ng->y+ng->h-nbrg.h;
+    }else{
+        if(ng->w>tlg.w+brg.w){
+            ntlg.w=tlg.w;
+            nbrg.w=brg.w;
+            adjust_sizes(&ntlg.w, &nbrg.w, ng->w,
+                         splitfloat_get_min(split, dir, split->ssplit.tl),
+                         splitfloat_get_min(split, dir, split->ssplit.br),
+                         splitfloat_get_max(split, dir, split->ssplit.tl),
+                         splitfloat_get_max(split, dir, split->ssplit.br),
+                         hprimn);
+        }else{
+            ntlg.w=minof(ng->w, tlg.w);
+            nbrg.w=minof(ng->w, brg.w);
+        }
+        nbrg.x=ng->x+ng->w-nbrg.w;
+    }
+
+    GEOM(split)=*ng;
+
+    splitfloat_update_panewins(split, &ntlg, &nbrg);
+
+    splitfloat_tl_pwin_to_cnt(split, &ntlg);
+    split_do_resize(split->ssplit.tl, &ntlg, hprimn, vprimn, FALSE);
+    splitfloat_br_pwin_to_cnt(split, &nbrg);
+    split_do_resize(split->ssplit.br, &nbrg, hprimn, vprimn, FALSE);
 }
 
 
@@ -214,57 +628,143 @@ static void splitpane_do_rqsize(WSplitPane *pane, WSplit *node,
                                 RootwardAmount *ha, RootwardAmount *va, 
                                 WRectangle *rg, bool tryonly)
 {
-    WSplitInner *par_=((WSplit*)pane)->parent;
-    WSplitSplit *par=OBJ_CAST(par_, WSplitSplit);
-    int diff_h=0, diff_w=0, diff_x=0, diff_y=0;
-
-    assert(!ha->any || ha->tl==0);
-    assert(!va->any || va->tl==0);
-    assert(node==pane->contents && pane->contents!=NULL);
-    assert(pane->contents_w>=GEOM(pane).w);
-    assert(pane->contents_h>=GEOM(pane).h);
+    WSplitInner *par=((WSplit*)pane)->parent;
     
-    if(par_==NULL){
-        *rg=((WSplit*)pane)->geom;
-        return;
-    }else if(par!=NULL && float_panes){
-        assert(par->tl==(WSplit*)pane || par->br==(WSplit*)pane);
+    if(par!=NULL){
+        splitinner_do_rqsize(par, (WSplit*)pane, ha, va, rg, tryonly);
+        if(!tryonly)
+            ((WSplit*)pane)->geom=*rg;
+    }else{
+        *rg=GEOM(pane);
+    }
+}
 
-        if(par->dir==SPLIT_VERTICAL){
-            diff_h=pane->contents_h-GEOM(pane).h;
-            if(va->any)
-                diff_h+=adjust_h(&(va->br), par, pane);
-            else if(par->tl==(WSplit*)pane)
-                diff_h+=adjust_h(&(va->br), par, pane);
-            else
-                diff_h+=adjust_h(&(va->tl), par, pane);
-            diff_y=((WSplit*)pane==par->br ? -diff_h : 0);
+
+static void calc_amount(int *amount, int *oamount,
+                        int rs, WSplitSplit *p, int omax,
+                        const WRectangle *ng, const WRectangle *og)
+{
+    *oamount=0;
+    
+    if(rs>=0){
+        if(p->dir==SPLIT_VERTICAL)
+            *amount=maxof(0, minof(rs, GEOM(p).h-ng->h));
+        else
+            *amount=maxof(0, minof(rs, GEOM(p).w-ng->w));
+    }else{
+        if(p->dir==SPLIT_VERTICAL){
+            int overlap=maxof(0, og->h-(GEOM(p).h-ng->h));
+            *amount=-minof(-rs, overlap);
+            *oamount=maxof(0, minof(*amount-rs, omax-og->h));
+            *amount-=*oamount;
         }else{
-            diff_w=pane->contents_w-GEOM(pane).w;
-            if(ha->any)
-                diff_w+=adjust_w(&(ha->br), par, pane);
-            else if(par->tl==(WSplit*)pane)
-                diff_w+=adjust_w(&(ha->br), par, pane);
-            else
-                diff_w+=adjust_w(&(ha->tl), par, pane);
-            diff_x=((WSplit*)pane==par->br ? -diff_w : 0);
+            int overlap=maxof(0, og->w-(GEOM(p).w-ng->w));
+            *amount=-minof(-rs, overlap);
+            *oamount=maxof(0, minof(*amount-rs, omax-og->w));
+            *amount-=*oamount;
         }
     }
+}
+
+
+static void splitfloat_do_rqsize(WSplitFloat *split, WSplit *node, 
+                                 RootwardAmount *ha, RootwardAmount *va, 
+                                 WRectangle *rg, bool tryonly)
+{
+    int hprimn=PRIMN_ANY, vprimn=PRIMN_ANY;
+    WRectangle pg, og, ng, nog, nng;
+    RootwardAmount *ca;
+    WSplit *other;
+    int amount=0, oamount=0, omax;
+    int thisnode;
+    WSplitSplit *p=&(split->ssplit);
     
-    splitinner_do_rqsize(par_, (WSplit*)pane, ha, va, rg, tryonly);
+    assert(!ha->any || ha->tl==0);
+    assert(!va->any || va->tl==0);
+    assert(p->tl==node || p->br==node);
     
-    if(!tryonly)
-        ((WSplit*)pane)->geom=*rg;
+    if(p->tl==node){
+        other=p->br;
+        thisnode=PRIMN_TL;
+    }else{
+        other=p->tl;
+        thisnode=PRIMN_BR;
+    }
+
+    ng=GEOM(node);
+    og=GEOM(other);
     
-    rg->w+=diff_w;
-    rg->h+=diff_h;
-    rg->x+=diff_x;
-    rg->y+=diff_y;
+    if(thisnode==PRIMN_TL){
+        splitfloat_tl_cnt_to_pwin(split, &ng);
+        splitfloat_br_cnt_to_pwin(split, &og);
+    }else{
+        splitfloat_br_cnt_to_pwin(split, &ng);
+        splitfloat_tl_cnt_to_pwin(split, &og);
+    }
+
+    ca=(p->dir==SPLIT_VERTICAL ? va : ha);
+    
+    omax=splitfloat_get_max(split, p->dir, other);
+    
+    if(thisnode==PRIMN_TL || ca->any){
+        calc_amount(&amount, &oamount, ca->br, p, omax, &ng, &og);
+        ca->br-=amount;
+    }else/*if(thisnode==PRIMN_BR)*/{
+        calc_amount(&amount, &oamount, ca->tl, p, omax, &ng, &og);
+        ca->tl-=amount;
+    }
+    
+    if(((WSplit*)p)->parent==NULL /*|| 
+       (ha->tl==0 && ha->br==0 && va->tl==0 && va->br==0)*/){
+        pg=((WSplit*)p)->geom;
+    }else{
+        splitinner_do_rqsize(((WSplit*)p)->parent, (WSplit*)p, ha, va,
+                             &pg, tryonly);
+    }
+    
+    assert(pg.w>=0 && pg.h>=0);
+
+    nog=pg;
+    nng=pg;
+
+    if(p->dir==SPLIT_VERTICAL){
+        nog.h=minof(pg.h, maxof(0, og.h+oamount));
+        nng.h=minof(pg.h, maxof(0, ng.h+amount+pg.h-GEOM(p).h));
+        if(thisnode==PRIMN_TL)
+            nog.y=pg.y+pg.h-nog.h;
+        else
+            nng.y=pg.y+pg.h-nng.h;
+        vprimn=thisnode;
+    }else{
+        nog.w=minof(pg.w, maxof(0, og.w+oamount));
+        nng.w=minof(pg.w, maxof(0, ng.w+amount+pg.w-GEOM(p).w));
+        if(thisnode==PRIMN_TL)
+            nog.x=pg.x+pg.w-nog.w;
+        else
+            nng.x=pg.x+pg.w-nng.w;
+        hprimn=thisnode;
+    }
     
     if(!tryonly){
-        pane->contents_h=rg->h;
-        pane->contents_w=rg->w;
+        GEOM(p)=pg;
+
+        if(thisnode==PRIMN_TL){
+            splitfloat_update_panewins(split, &nng, &nog);
+            splitfloat_br_pwin_to_cnt(split, &nog);
+        }else{
+            splitfloat_update_panewins(split, &nog, &nng);
+            splitfloat_tl_pwin_to_cnt(split, &nog);
+        }
+            
+        /* Entä jos 'other' on stdisp? */
+        split_do_resize(other, &nog, hprimn, vprimn, FALSE);
     }
+    
+    *rg=nng;
+    if(thisnode==PRIMN_TL)
+        splitfloat_tl_pwin_to_cnt(split, rg);
+    else
+        splitfloat_br_pwin_to_cnt(split, rg);
 }
     
 
@@ -286,29 +786,33 @@ static void splitpane_replace(WSplitPane *pane, WSplit *child, WSplit *what)
 }
 
 
+#define RECREATE_UNUSED TRUE
+
 static void splitpane_remove(WSplitPane *pane, WSplit *child, 
                              bool reclaim_space)
 {
+    WSplitInner *parent=((WSplit*)pane)->parent;
     WSplitUnused *un;
     
     assert(child==pane->contents);
+    
     pane->contents=NULL;
     child->parent=NULL;
-    
-    un=create_splitunused(&(child->geom));
-    if(un!=NULL){
-        pane->contents=(WSplit*)un;
-        ((WSplit*)un)->parent=(WSplitInner*)pane;
-    }else{
-        WSplitInner *parent=((WSplit*)pane)->parent;
-        warn(TR("Could not create a WSplitUnused for empty WSplitPane. "
-                "Destroying."));
-        if(parent!=NULL)
-            splitinner_remove(parent, (WSplit*)pane, reclaim_space);
-        else
-	    splittree_changeroot((WSplit*)pane, NULL);
-        destroy_obj((Obj*)pane);
+
+    if(RECREATE_UNUSED){
+        pane->contents=(WSplit*)create_splitunused(&GEOM(pane));
+        if(pane->contents!=NULL){
+            pane->contents->parent=(WSplitInner*)pane;
+            return;
+        }
     }
+    
+    if(parent!=NULL)
+        splitinner_remove(parent, (WSplit*)pane, reclaim_space);
+    else
+        splittree_changeroot((WSplit*)pane, NULL);
+    
+    destroy_obj((Obj*)pane);
 }
 
 
@@ -447,12 +951,29 @@ static DynFunTab splitpane_dynfuntab[]={
     /*{splitinner_mark_current, splitpane_mark_current},*/
     {(DynFun*)split_get_config, (DynFun*)splitpane_get_config},
     {splitinner_forall, splitpane_forall},
+    {split_stacking, splitpane_stacking},
+    {split_restack, splitpane_restack},
+    {split_reparent, splitpane_reparent},
+    END_DYNFUNTAB,
+};
+
+
+static DynFunTab splitfloat_dynfuntab[]={
+    {split_update_bounds, splitfloat_update_bounds},
+    {split_do_resize, splitfloat_do_resize},
+    {splitinner_do_rqsize, splitfloat_do_rqsize},
+    {split_stacking, splitfloat_stacking},
+    {split_restack, splitfloat_restack},
+    {split_reparent, splitfloat_reparent},
+    {split_map, splitfloat_map},
+    {split_unmap, splitfloat_unmap},
     END_DYNFUNTAB,
 };
 
 
 IMPLCLASS(WSplitUnused, WSplit, splitunused_deinit, splitunused_dynfuntab);
 IMPLCLASS(WSplitPane, WSplitInner, splitpane_deinit, splitpane_dynfuntab);
+IMPLCLASS(WSplitFloat, WSplitSplit, splitfloat_deinit, splitfloat_dynfuntab);
 
 
 /*}}}*/

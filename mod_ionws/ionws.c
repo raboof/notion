@@ -118,31 +118,19 @@ void ionws_managed_rqgeom(WIonWS *ws, WRegion *mgd,
 
 void ionws_map(WIonWS *ws)
 {
-    WRegion *reg;
-
     genws_do_map(&(ws->genws));
     
-    FOR_ALL_MANAGED_ON_LIST(ws->managed_list, reg){
-        region_map(reg);
-    }
-    
-    if(STDISP_OF(ws)!=NULL)
-        region_map(STDISP_OF(ws));
+    if(ws->split_tree!=NULL)
+        split_map(ws->split_tree);
 }
 
 
 void ionws_unmap(WIonWS *ws)
 {
-    WRegion *reg;
-    
     genws_do_unmap(&(ws->genws));
-    
-    FOR_ALL_MANAGED_ON_LIST(ws->managed_list, reg){
-        region_unmap(reg);
-    }
-    
-    if(STDISP_OF(ws)!=NULL)
-        region_unmap(STDISP_OF(ws));
+
+    if(ws->split_tree!=NULL)
+        split_unmap(ws->split_tree);
 }
 
 
@@ -168,23 +156,9 @@ bool ionws_managed_display(WIonWS *ws, WRegion *reg)
 
 void ionws_restack(WIonWS *ws, Window other, int mode)
 {
-    WRegion *reg;
-    
     xwindow_restack(ws->genws.dummywin, other, mode);
-    other=ws->genws.dummywin;
-    mode=Above;
-    
-    FOR_ALL_MANAGED_ON_LIST(ws->managed_list, reg){
-        Window bottom=None, top=None;
-        region_restack(reg, other, Above);
-        region_stacking(reg, &bottom, &top);
-        if(top!=None)
-            other=top;
-    }
-
-    reg=STDISP_OF(ws);
-    if(reg!=NULL)
-        region_restack(reg, other, Above);
+    if(ws->split_tree!=NULL)
+        split_restack(ws->split_tree, ws->genws.dummywin, Above);
 }
 
 
@@ -192,7 +166,8 @@ static void ionws_do_stacking(WIonWS *ws, Window *bottomret, Window *topret,
                               bool incl_stdisp)
 {
     WRegion *reg;
-    
+
+#warning "Eroon tästä?"    
     *bottomret=ws->genws.dummywin;
     *topret=ws->genws.dummywin;
 
@@ -223,7 +198,13 @@ static void ionws_do_stacking(WIonWS *ws, Window *bottomret, Window *topret,
 
 void ionws_stacking(WIonWS *ws, Window *bottomret, Window *topret)
 {
-    ionws_do_stacking(ws, bottomret, topret, TRUE);
+    Window sbottom=None, stop=None;
+    
+    if(ws->split_tree!=None)
+        split_stacking(ws->split_tree, &sbottom, &stop);
+    
+    *bottomret=ws->genws.dummywin;
+    *topret=(stop!=None ? stop : ws->genws.dummywin);
 }
 
 
@@ -397,6 +378,10 @@ void ionws_manage_stdisp(WIonWS *ws, WRegion *stdisp, int corner)
        stdisp->geom.w!=stdg->w || stdisp->geom.h!=stdg->h){
         region_fit(stdisp, stdg, REGION_FIT_EXACT);
     }
+
+    /* Restack to ensure the split tree is stacked in the expected order. */
+    if(ws->split_tree!=NULL)
+        split_restack(ws->split_tree, ws->genws.dummywin, Above);
     
     if(mcf && act)
         region_set_focus(stdisp);
@@ -464,7 +449,7 @@ static WRegion *create_initial_frame(WIonWS *ws, WWindow *parent,
 
 static WRegion *create_frame_ionws(WWindow *parent, const WFitParams *fp)
 {
-    return (WRegion*)create_frame(parent, fp, "frame-ionframe");
+    return (WRegion*)create_frame(parent, fp, "frame-tiled-ionws");
 }
 
 
@@ -664,6 +649,9 @@ WFrame *ionws_split_top(WIonWS *ws, const char *dirstr)
     if(nnode==NULL)
         return NULL;
 
+    if(ws->split_tree!=NULL)
+        split_restack(ws->split_tree, ws->genws.dummywin, Above);
+
     ionws_managed_add(ws, nnode->reg);
     region_warp(nnode->reg);
     
@@ -710,6 +698,12 @@ WFrame *ionws_split_at(WIonWS *ws, WFrame *frame, const char *dirstr,
         warn(TR("Unable to split."));
         return NULL;
     }
+
+    /* We must restack here to ensure the split tree is stacked in the
+     * expected order.
+     */
+    if(ws->split_tree!=NULL)
+        split_restack(ws->split_tree, ws->genws.dummywin, Above);
 
     newframe=OBJ_CAST(nnode->reg, WFrame);
     assert(newframe!=NULL);
@@ -965,8 +959,16 @@ WSplitRegion *ionws_node_of(WIonWS *ws, WRegion *reg)
 void ionws_managed_activated(WIonWS *ws, WRegion *reg)
 {
     WSplitRegion *node=get_node_check(ws, reg);
+    
     if(node!=NULL && node->split.parent!=NULL)
         splitinner_mark_current(node->split.parent, &(node->split));
+    
+    /* WSplitSplit uses activity based stacking as required on WAutoWS,
+     * so we must restack here.
+     */
+    if(ws->split_tree!=NULL)
+        split_restack(ws->split_tree, ws->genws.dummywin, Above);
+
 }
 
 
@@ -1135,7 +1137,7 @@ WSplit *load_splitsplit(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
     }
     
     if(tl==NULL || br==NULL){
-        free(split);
+        destroy_obj((Obj*)split);
         return (tl==NULL ? br : tl);
     }
     
@@ -1215,6 +1217,7 @@ WRegion *ionws_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
         return NULL;
     }else{
         ws->split_tree->selfptrptr=&(ws->split_tree);
+        split_restack(ws->split_tree, ws->genws.dummywin, Above);
     }
     
     return (WRegion*)ws;

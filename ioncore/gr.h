@@ -55,6 +55,7 @@ typedef enum{
 } GrTransparency;
 
 typedef enum{
+    GR_BORDERLINE_NONE,
     GR_BORDERLINE_LEFT,
     GR_BORDERLINE_RIGHT,
     GR_BORDERLINE_TOP,

@@ -40,6 +40,7 @@ extern WRegion *autows_load(WWindow *par, const WFitParams *fp, ExtlTab tab);
 extern bool autows_managed_may_destroy(WAutoWS *ws, WRegion *reg);
 extern void autows_managed_remove(WAutoWS *ws, WRegion *reg);
 extern void autows_managed_add(WAutoWS *ws, WRegion *reg);
+extern WRegion *autows_managed_control_focus(WAutoWS *ws, WRegion *reg);
 
 extern ExtlTab autows_get_configuration(WAutoWS *ws);
 extern WRegion *autows_load(WWindow *par, const WFitParams *fp, ExtlTab tab);

@@ -217,6 +217,9 @@ static bool do_replace(WAutoWS *ws, WFrame *frame, WClientWin *cwin,
     if(ws->ionws.stdispnode!=NULL)
         split_regularise_stdisp(ws->ionws.stdispnode);
 
+    if(ws->ionws.split_tree!=NULL)
+        split_restack(ws->ionws.split_tree, ((WGenWS*)ws)->dummywin, Above);
+
     return TRUE;
 }
 

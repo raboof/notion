@@ -135,6 +135,8 @@ DYNFUN void split_update_bounds(WSplit *node, bool recursive);
 extern void splitsplit_update_geom_from_children(WSplitSplit *node);
 DYNFUN void split_do_resize(WSplit *node, const WRectangle *ng, 
                             int hprimn, int vprimn, bool transpose);
+extern void splitsplit_do_resize(WSplitSplit *node, const WRectangle *ng, 
+                                 int hprimn, int vprimn, bool transpose);
 extern void split_resize(WSplit *node, const WRectangle *ng, 
                          int hprimn, int vprimn);
 DYNFUN void splitinner_do_rqsize(WSplitInner *p, WSplit *node, 
@@ -175,6 +177,14 @@ extern WSplit *split_nextto(WSplit *node, int dir, int primn,
                             WSplitFilter *filter);
 extern WSplit *split_closest_leaf(WSplit *node, WSplitFilter *filter);
 extern WMPlex *splittree_find_mplex(WRegion *from);
+
+/* X window handling */
+
+void split_restack(WSplit *split, Window win, int mode);
+void split_stacking(WSplit *split, Window *bottom_ret, Window *top_ret);
+void split_map(WSplit *split);
+void split_unmap(WSplit *split);
+void split_reparent(WSplit *split, WWindow *wwin);
 
 /* Transpose */
 

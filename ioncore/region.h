@@ -26,14 +26,14 @@
 #define REGION_CWINS_BEING_RESCUED 0x0400
 
 /* Use region_is_fully_mapped instead for most cases. */
-#define REGION_IS_MAPPED(R)        (((WRegion*)(R))->flags&REGION_MAPPED)
-#define REGION_MARK_MAPPED(R)    (((WRegion*)(R))->flags|=REGION_MAPPED)
-#define REGION_MARK_UNMAPPED(R)    (((WRegion*)(R))->flags&=~REGION_MAPPED)
-#define REGION_IS_ACTIVE(R)        (((WRegion*)(R))->flags&REGION_ACTIVE)
-#define REGION_IS_TAGGED(R)        (((WRegion*)(R))->flags&REGION_TAGGED)
-#define REGION_IS_URGENT(R)        (((WRegion*)(R))->flags&REGION_URGENT)
+#define REGION_IS_MAPPED(R)     (((WRegion*)(R))->flags&REGION_MAPPED)
+#define REGION_MARK_MAPPED(R)   (((WRegion*)(R))->flags|=REGION_MAPPED)
+#define REGION_MARK_UNMAPPED(R) (((WRegion*)(R))->flags&=~REGION_MAPPED)
+#define REGION_IS_ACTIVE(R)     (((WRegion*)(R))->flags&REGION_ACTIVE)
+#define REGION_IS_TAGGED(R)     (((WRegion*)(R))->flags&REGION_TAGGED)
+#define REGION_IS_URGENT(R)     (((WRegion*)(R))->flags&REGION_URGENT)
 #define REGION_GEOM(R)          (((WRegion*)(R))->geom)
-#define REGION_ACTIVE_SUB(R)      (((WRegion*)(R))->active_sub)
+#define REGION_ACTIVE_SUB(R)    (((WRegion*)(R))->active_sub)
 
 typedef enum{
     REGION_FIT_EXACT,

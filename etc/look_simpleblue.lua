@@ -35,14 +35,14 @@ de.defstyle("frame", {
     }),
 })
 
-de.defstyle("frame-ionframe", {
+de.defstyle("frame-tiled", {
     based_on = "frame",
     border_style = "inlaid",
     padding_pixels = 0,
     spacing = 1,
 })
 
-de.defstyle("frame-floatframe", {
+de.defstyle("frame-floating", {
     based_on = "frame",
     border_style = "ridge"
 })
@@ -87,7 +87,7 @@ de.defstyle("tab-frame", {
     }),
 })
 
-de.defstyle("tab-frame-ionframe", {
+de.defstyle("tab-frame-tiled", {
     based_on = "tab-frame",
     spacing = 1,
 })
