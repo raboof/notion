@@ -530,24 +530,6 @@ WScreen *rootwin_current_scr(WRootWin *rootwin)
 }
 
 
-/*EXTL_DOC
- * Returns a table of root windows indexed by the X screen id.
- */
-EXTL_SAFE
-EXTL_EXPORT
-ExtlTab ioncore_root_windows()
-{
-    WRootWin *rootwin;
-    ExtlTab tab=extl_create_table();
-    
-    FOR_ALL_ROOTWINS(rootwin){
-        extl_table_seti_o(tab, rootwin->xscr, (Obj*)rootwin);
-    }
-
-    return tab;
-}
-
-
 /*}}}*/
 
 
