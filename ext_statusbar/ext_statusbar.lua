@@ -130,6 +130,9 @@ function ext_statusbar.get_w_template()
                        end)
 end
 
+--DOC
+-- Update statusbar contents. To be called after series
+-- of \fnref{ext_statusbar.inform} calls.
 function ext_statusbar.update()
     local s=ext_statusbar.get_status()
     local found=false
