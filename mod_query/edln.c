@@ -10,6 +10,8 @@
  */
 
 #include <string.h>
+
+#include <libtu/minmax.h>
 #include <ioncore/common.h>
 #include <ioncore/selection.h>
 #include <ioncore/strings.h>
@@ -513,7 +515,7 @@ bool edln_set_context(Edln *edln, const char *str)
 }
 
 
-static void edln_do_set_hist(Edln *edln, int e)
+static void edln_do_set_hist(Edln *edln, int e, bool match)
 {
     const char *str=mod_query_history_get(e), *s2;
     if(str!=NULL){
@@ -530,7 +532,9 @@ static void edln_do_set_hist(Edln *edln, int e)
         
         edln->histent=e;
         edln_setstr(edln, str);
-        edln->point=edln->psize;
+        edln->point=(match
+                     ? minof(edln->point, edln->psize) 
+                     : edln->psize);
         edln->mark=-1;
         edln->modified=FALSE;
         UPDATE_NEW();
@@ -538,25 +542,47 @@ static void edln_do_set_hist(Edln *edln, int e)
 }
 
 
-void edln_history_prev(Edln *edln)
-{
-    int e=mod_query_history_search(edln->context, edln->histent+1, FALSE);
-    if(e>=0)
-        edln_do_set_hist(edln, e);
-}
-
-
-void edln_history_next(Edln *edln)
+static int search(Edln *edln, int from, bool bwd, bool match)
 {
     int e;
     
+    if(match && edln->point>0){
+        char *tmpstr;
+        char tmp=edln->p[edln->point];
+        edln->p[edln->point]='\0';
+        tmpstr=scat(edln->context ? edln->context : "*:", edln->p);
+        edln->p[edln->point]=tmp;
+        if(tmpstr==NULL)
+            return edln->histent;
+        e=mod_query_history_search(tmpstr, from, bwd);
+        free(tmpstr);
+    }else{
+        e=mod_query_history_search(edln->context, from, bwd);
+    }
+    
+    return e;
+}
+
+
+void edln_history_prev(Edln *edln, bool match)
+{
+    int e=search(edln, edln->histent+1, FALSE, match);
+    if(e>=0)
+        edln_do_set_hist(edln, e, match);
+}
+
+
+void edln_history_next(Edln *edln, bool match)
+{
+    int e=edln->histent;
+    
     if(edln->histent<0)
         return;
-    
-    e=mod_query_history_search(edln->context, edln->histent-1, TRUE);
+
+    e=search(edln, edln->histent-1, TRUE, match);
     
     if(e>=0){
-        edln_do_set_hist(edln, e);
+        edln_do_set_hist(edln, e, match);
     }else{
         edln->histent=-1;
         if(edln->p!=NULL)

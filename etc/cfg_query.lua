@@ -42,11 +42,13 @@ defbindings("WEdln", {
     bdoc("Delete the whole line."),
     kpress("Control+Y", "WEdln.kill_line(_)"),
     
-    bdoc("Select next/previous history entry."),
-    kpress("Control+N", "WEdln.history_next(_)"),
+    bdoc("Select next/previous (matching) history entry."),
     kpress("Control+P", "WEdln.history_prev(_)"),
+    kpress("Control+N", "WEdln.history_next(_)"),
     kpress("Up", "WEdln.history_prev(_)"),
     kpress("Down", "WEdln.history_next(_)"),
+    kpress("Control+Up", "WEdln.history_prev(_, true)"),
+    kpress("Control+Down", "WEdln.history_next(_, true)"),
 
     bdoc("Paste from the clipboard."),
     mclick("Button2", "WEdln.paste(_)"),

@@ -98,8 +98,19 @@ void mod_query_history_clear()
 
 static bool match(const char *h, const char *b)
 {
+    const char *h_;
+    
     if(b==NULL)
         return TRUE;
+    
+    /* Special case: search in any context. */
+    if(*b=='*' && *(b+1)==':'){
+        b=b+2;
+        h_=strchr(h, ':');
+        if(h_!=NULL)
+            h=h_+1;
+    }
+        
     return (strncmp(h, b, strlen(b))==0);
 }
 

@@ -182,21 +182,25 @@ void wedln_complete(WEdln *wedln)
 }
 
 /*EXTL_DOC
- * Replace line editor contents with the entry in history if one exists.
+ * Replace line editor contents with next entry in history if one exists.
+ * If \var{match} is \code{true}, the initial part of the history entry
+ * must match the current line from beginning to point.
  */
 EXTL_EXPORT_MEMBER
-void wedln_history_next(WEdln *wedln)
+void wedln_history_next(WEdln *wedln, bool match)
 {
-    edln_history_next(&(wedln->edln));
+    edln_history_next(&(wedln->edln), match);
 }
 
 /*EXTL_DOC
- * Replace line editor contents with the previous in history if one exists.
+ * Replace line editor contents with previous in history if one exists.
+ * If \var{match} is \code{true}, the initial part of the history entry
+ * must match the current line from beginning to point.
  */
 EXTL_EXPORT_MEMBER
-void wedln_history_prev(WEdln *wedln)
+void wedln_history_prev(WEdln *wedln, bool match)
 {
-    edln_history_prev(&(wedln->edln));
+    edln_history_prev(&(wedln->edln), match);
 }
 
 
