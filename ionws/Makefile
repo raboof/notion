@@ -3,7 +3,8 @@
 ##
 
 # System-specific configuration is in system.mk
-include ../system.mk
+TOPDIR=..
+include $(TOPDIR)/system-inc.mk
 
 ######################################
 
