@@ -18,6 +18,8 @@
 #include <langinfo.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #include <libtu/util.h>
 #include <libtu/optparser.h>
@@ -48,6 +50,10 @@
 
 #ifndef CF_APPNAME
 #define CF_APPNAME "ion-devel"
+#endif
+
+#ifndef CF_NEW_USER_MESSAGE
+#define CF_NEW_USER_MESSAGE SHAREDIR"/welcome_message.txt"
 #endif
 
 
@@ -116,6 +122,41 @@ static OptParserCommonInfo ioncore_cinfo={
 /*{{{ Main */
 
 
+void check_new_user_help()
+{
+	const char *userdir=ioncore_userdir();
+	char *oldbeard=NULL;
+	pid_t pid;
+
+	if(userdir==NULL){
+		warn("Could not get user configuration file directory.");
+		return;
+	}
+	
+	libtu_asprintf(&oldbeard, "%s/.welcome_msg_displayed", userdir);
+	
+	if(oldbeard==NULL){
+		warn_err();
+		return;
+	}
+	
+	if(access(oldbeard, F_OK)==0){
+		free(oldbeard);
+		return;
+	}
+
+	if(!exec(CF_XMESSAGE" "CF_NEW_USER_MESSAGE))
+		return;
+
+	/* This should actually be done when less or xmessage returns,
+	 * but that would mean yet another script...
+	 */
+	mkdir(userdir, 0700);
+	if(open(oldbeard, O_CREAT|O_RDWR)<0)
+		warn_err_obj(oldbeard);
+}
+
+
 int main(int argc, char*argv[])
 {
 	const char *cfgfile=NULL;
@@ -136,7 +177,7 @@ int main(int argc, char*argv[])
 		return EXIT_FAILURE;
 	
 	ioncore_add_default_dirs();
-	ioncore_add_userdirs(CF_APPNAME);
+	ioncore_set_userdirs(CF_APPNAME);
 
 	optparser_init(argc, argv, OPTP_MIDLONG, ioncore_opts, &ioncore_cinfo);
 	
@@ -161,7 +202,7 @@ int main(int argc, char*argv[])
 			stflags|=IONCORE_STARTUP_NOXINERAMA;
 			break;
 		case OPT_ID('s'):
-			ioncore_set_sessiondir(CF_APPNAME, optparser_get_arg());
+			ioncore_set_sessiondir(optparser_get_arg());
 			break;
 		case OPT_ID('i'):
 			i18n=TRUE;
@@ -203,6 +244,8 @@ int main(int argc, char*argv[])
 fail:
 	if(!may_continue)
 		warn("Refusing to start due to encountered errors.");
+	else
+		check_new_user_help();
 	
 	if(ef!=NULL){
 		pid_t pid=-1;
@@ -449,7 +492,7 @@ static void set_session(const char *display)
 		*colon='-';
 	}
 	
-	ioncore_set_sessiondir("ion-devel", tmp);
+	ioncore_set_sessiondir(tmp);
 	free(tmp);
 }
 	

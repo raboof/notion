@@ -20,6 +20,7 @@
 #include "extl.h"
 
 
+static char *userdir;
 static char* dummy_paths=NULL;
 static char **scriptpaths=&dummy_paths;
 static int n_scriptpaths=0;
@@ -86,23 +87,25 @@ bool ioncore_add_moduledir(const char *dir)
 }
 
 
-bool ioncore_add_userdirs(const char *appname)
+bool ioncore_set_userdirs(const char *appname)
 {
 	const char *home;
 	char *tmp;
 	int fails=2;
+	
+	if(userdir!=NULL)
+		return FALSE;
 	
 	home=getenv("HOME");
 	
 	if(home==NULL){
 		warn("$HOME not set");
 	}else{
-		libtu_asprintf(&tmp, "%s/.%s", home, appname);
-		if(tmp==NULL){
+		libtu_asprintf(&userdir, "%s/.%s", home, appname);
+		if(userdir==NULL){
 			warn_err();
 		}else{
-			fails-=ioncore_add_scriptdir(tmp);
-			free(tmp);
+			fails-=ioncore_add_scriptdir(userdir);
 		}
 		
 		libtu_asprintf(&tmp, "%s/.%s/lib", home, appname);
@@ -118,17 +121,22 @@ bool ioncore_add_userdirs(const char *appname)
 }
 
 
-bool ioncore_set_sessiondir(const char *appname, const char *session)
+const char* ioncore_userdir()
 {
-	const char *home=getenv("HOME");
+	return userdir;
+}
+
+
+bool ioncore_set_sessiondir(const char *session)
+{
 	char *tmp;
 	bool ret=FALSE;
 	
 	if(sessiondir!=NULL)
 		return FALSE;
 	
-	if(home!=NULL){
-		libtu_asprintf(&tmp, "%s/.%s/%s", home, appname, session);
+	if(userdir!=NULL){
+		libtu_asprintf(&tmp, "%s/%s", userdir, session);
 		if(tmp==NULL){
 			warn_err();
 		}else{

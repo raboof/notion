@@ -17,7 +17,7 @@
 
 extern void do_exec(const char *cmd);
 extern bool exec_on_rootwin(WRootWin *rootwin, const char *cmd);
-extern bool exec_on_wm_display(const char *cmd);
+extern bool exec(const char *cmd);
 extern void restart_other_wm(const char *cmd);
 extern void restart_wm();
 extern void exit_wm();
