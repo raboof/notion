@@ -144,10 +144,9 @@ function QueryLib.handler_lua(frame, code)
     local env=getfenv(f)
     env._=frame
     env.arg={frame, genframe_current(frame)}
-    setfenv(f, env)
     err=collect_errors(f)
-    if errors then
-        query_fwarn(frame, errors)
+    if err then
+        query_fwarn(frame, err)
     end
 end
 
