@@ -96,6 +96,7 @@ local function get_script_warn(frame, script)
     if not s then
         query_fwarn(frame, s)
     end
+    return s
 end
     
 local function getprog(prog)
@@ -142,7 +143,7 @@ function QueryLib.exec_handler(frame, cmd)
     if string.sub(cmd, 1, 1)==":" then
         local ix=get_script_warn(frame, "ion-runinxterm")
         if not ix then return end
-        cmd=ix..string.sub(cmd, 2)
+        cmd=ix.." "..string.sub(cmd, 2)
     end
     exec_in_frame(frame, cmd)
 end
