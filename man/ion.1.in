@@ -105,7 +105,9 @@ Run an xterm.
 Run a program (query). Precede the program name with a colon (:) to run in xterm (ion-runinxterm).
 .TP
 .B Mod1+F3
-Call a function (query).
+Open a Lua code query. You can call all the functions listed in the
+Ion configuration document (see section SEE ALSO) here. The 
+variable "_" is bound to the frame in which the query was opened.
 .TP
 .B F4
 Start new SSH session (query, uses ion-ssh). Tab-completion of hosts can be
