@@ -129,41 +129,55 @@ end
 
 local pipes={}
 
+querylib.COLLECT_THRESHOLD=2000
+
 function querylib.popen_completions(wedln, cmd)
     
     local pst={wedln=wedln, maybe_stalled=false}
     
     local function rcv(str)
         local data=""
+        local results={}
+        local totallen=0
+        local lines=0
         
         while str do
             if pst.maybe_stalled then
                 pipes[rcv]=nil
                 return
             end
-            data=data .. str
-            if string.len(data)>ioncorelib.RESULT_DATA_LIMIT then
+            
+            totallen=totallen+string.len(str)
+            if totallen>ioncorelib.RESULT_DATA_LIMIT then
                 error("Too much result data")
             end
+
+            data=string.gsub(data..str, "([^\n]*)\n",
+                             function(a)
+                                 -- ion-completefile will return possible 
+                                 -- common part of path on  the first line 
+                                 -- and the entries in that directory on the
+                                 -- following lines.
+                                 if not results.common_part then
+                                     results.common_part=a
+                                 else
+                                     table.insert(results, a)
+                                 end
+                                 lines=lines+1
+                             end)
+            
+            if lines>querylib.COLLECT_THRESHOLD then
+                collectgarbage()
+            end
+            
             str=coroutine.yield()
         end
         
-        local results={}
-        
-        -- ion-completefile will return possible common part of path on
-        -- the first line and the entries in that directory on the
-        -- following lines.
-        for a in string.gfind(data, "([^\n]*)\n") do
-            table.insert(results, a)
-        end
-        
-        results.common_part=results[1]
-        table.remove(results, 1)
-        
         wedln:set_completions(results)
         
+        collectgarbage()
+        
         pipes[rcv]=nil
-        return
     end
     
     local found_clean=false
@@ -181,6 +195,7 @@ function querylib.popen_completions(wedln, cmd)
         popen_bgread(cmd, coroutine.wrap(rcv))
     end
 end
+
 
 -- }}}
 
