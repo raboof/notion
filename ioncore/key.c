@@ -75,7 +75,7 @@ static bool dispatch_binding(WRegion *mgr, WRegion *reg, WBinding *binding,
 		/* Get the screen now for waitrel grab - the object might
 		 * have been destroyed when call_binding returns.
 		 */
-		extl_call(binding->func, "oo", NULL, mgr, reg);
+		extl_call(binding->func, "oo", NULL, mgr, (mgr==reg ? NULL : reg));
 		if(ev->state!=0 && binding->waitrel)
 			waitrelease(reg);
 	}
