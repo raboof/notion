@@ -31,9 +31,9 @@
 #include <ioncore/defer.h>
 #include "placement.h"
 #include "ionws.h"
-#include "ionframe.h"
 #include "split.h"
 #include "main.h"
+#include "ionframe.h"
 
 
 /*{{{ region dynfun implementations */
@@ -135,32 +135,34 @@ static void ionws_managed_add(WIonWS *ws, WRegion *reg)
 }
 
 
-static WIonFrame *create_initial_frame(WIonWS *ws, WWindow *parent,
-                                       const WFitParams *fp)
+static WRegion *create_initial_frame(WIonWS *ws, WWindow *parent,
+                                     const WFitParams *fp)
 {
-    WIonFrame *frame;
-    
-    frame=create_ionframe(parent, fp);
+    WRegion *reg=ws->create_frame_fn(parent, fp);
 
-    if(frame==NULL)
+    if(reg==NULL)
         return NULL;
     
-    ws->split_tree=create_split_regnode((WRegion*)frame, &(fp->g));
+    ws->split_tree=create_split_regnode(reg, &(fp->g));
     if(ws->split_tree==NULL){
         warn_err();
-        destroy_obj((Obj*)frame);
+        destroy_obj((Obj*)reg);
         return NULL;
     }
     
-    ionws_managed_add(ws, (WRegion*)frame);
+    ionws_managed_add(ws, reg);
 
-    return frame;
+    return reg;
 }
 
 
-static bool ionws_init(WIonWS *ws, WWindow *parent, const WFitParams *fp,
-                       bool ci)
+bool ionws_init(WIonWS *ws, WWindow *parent, const WFitParams *fp,
+                bool ci, WRegionSimpleCreateFn *create_frame_fn)
 {
+    if(create_frame_fn==NULL)
+        create_frame_fn=(WRegionSimpleCreateFn*)create_ionframe;
+    
+    ws->create_frame_fn=create_frame_fn;
     ws->managed_splits=extl_create_table();
     
     if(ws->managed_splits==extl_table_none())
@@ -182,15 +184,16 @@ static bool ionws_init(WIonWS *ws, WWindow *parent, const WFitParams *fp,
 }
 
 
-WIonWS *create_ionws(WWindow *parent, const WFitParams *fp, bool ci)
+WIonWS *create_ionws(WWindow *parent, const WFitParams *fp, bool ci,
+                     WRegionSimpleCreateFn *create_frame_fn)
 {
-    CREATEOBJ_IMPL(WIonWS, ionws, (p, parent, fp, ci));
+    CREATEOBJ_IMPL(WIonWS, ionws, (p, parent, fp, ci, create_frame_fn));
 }
 
 
 WIonWS *create_ionws_simple(WWindow *parent, const WFitParams *fp)
 {
-    return create_ionws(parent, fp, TRUE);
+    return create_ionws(parent, fp, TRUE, NULL);
 }
 
 
@@ -391,12 +394,12 @@ static bool get_split_dir_primn(const char *str, int *dir, int *primn)
 
 
 /*EXTL_DOC
- * Create new WIonFrame on \var{ws} above/below/left of/right of
+ * Create a new frame on \var{ws} above/below/left of/right of
  * all other objects depending on \var{dirstr}
  * (one of ''left'', ''right'', ''top'' or ''bottom'').
  */
 EXTL_EXPORT_MEMBER
-WIonFrame *ionws_split_top(WIonWS *ws, const char *dirstr)
+WFrame *ionws_split_top(WIonWS *ws, const char *dirstr)
 {
     int dir, primn, mins;
     WSplit *nnode=NULL;
@@ -411,7 +414,7 @@ WIonFrame *ionws_split_top(WIonWS *ws, const char *dirstr)
     
     nnode=split_tree_split(&(ws->split_tree), ws->split_tree, 
                            dir, primn, mins, PRIMN_ANY,
-                           (WRegionSimpleCreateFn*)create_ionframe,
+                           ws->create_frame_fn,
                            REGION_PARENT_CHK(ws, WWindow));
     
     if(nnode==NULL)
@@ -420,23 +423,24 @@ WIonFrame *ionws_split_top(WIonWS *ws, const char *dirstr)
     ionws_managed_add(ws, nnode->u.reg);
     region_warp(nnode->u.reg);
     
-    return OBJ_CAST(nnode->u.reg, WIonFrame);
+    return OBJ_CAST(nnode->u.reg, WFrame);
 }
 
 
 /*EXTL_DOC
- * Split \var{frame} creating a new WIonFrame to direction \var{dir}
+ * Split \var{frame} creating a new frame to direction \var{dir}
  * (one of ''left'', ''right'', ''top'' or ''bottom'') of \var{frame}.
  * If \var{attach_current} is set, the region currently displayed in
  * \var{frame}, if any, is moved to thenew frame.
  */
 EXTL_EXPORT_MEMBER
-WIonFrame *ionws_split_at(WIonWS *ws, WIonFrame *frame, const char *dirstr, 
-                          bool attach_current)
+WFrame *ionws_split_at(WIonWS *ws, WFrame *frame, const char *dirstr, 
+                       bool attach_current)
 {
     WRegion *curr;
     int dir, primn, mins;
     WSplit *node, *nnode;
+    WFrame *newframe;
     
     node=get_node_check(ws, (WRegion*)frame);
     
@@ -455,7 +459,7 @@ WIonFrame *ionws_split_at(WIonWS *ws, WIonFrame *frame, const char *dirstr,
           : region_min_w((WRegion*)frame));
     
     nnode=split_tree_split(&(ws->split_tree), node, dir, primn, mins, primn,
-                           (WRegionSimpleCreateFn*)create_ionframe,
+                           ws->create_frame_fn,
                            REGION_PARENT_CHK(ws, WWindow));
     
     if(nnode==NULL){
@@ -463,21 +467,20 @@ WIonFrame *ionws_split_at(WIonWS *ws, WIonFrame *frame, const char *dirstr,
         return NULL;
     }
 
-    assert(OBJ_IS(nnode->u.reg, WIonFrame));
+    newframe=OBJ_CAST(nnode->u.reg, WFrame);
+    assert(newframe!=NULL);
 
     ionws_managed_add(ws, nnode->u.reg);
     
-    curr=mplex_l1_current(&(frame->frame.mplex));
+    curr=mplex_l1_current(&(frame->mplex));
     
-    if(attach_current && curr!=NULL){
-        mplex_attach_simple((WMPlex*)nnode->u.reg, curr, 
-                            MPLEX_ATTACH_SWITCHTO);
-    }
+    if(attach_current && curr!=NULL)
+        mplex_attach_simple(&(newframe->mplex), curr, MPLEX_ATTACH_SWITCHTO);
     
     if(region_may_control_focus((WRegion*)frame))
         region_goto(nnode->u.reg);
 
-    return (WIonFrame*)nnode->u.reg;
+    return newframe;
 }
 
 
@@ -486,7 +489,7 @@ WIonFrame *ionws_split_at(WIonWS *ws, WIonFrame *frame, const char *dirstr,
  * and, if possible, destroy the frame.
  */
 EXTL_EXPORT_MEMBER
-void ionws_unsplit_at(WIonWS *ws, WIonFrame *frame)
+void ionws_unsplit_at(WIonWS *ws, WFrame *frame)
 {
     if(frame==NULL){
         WARN_FUNC("nil frame");
@@ -931,7 +934,7 @@ WRegion *ionws_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
     if(extl_table_gets_t(tab, "split_tree", &treetab))
         ci=FALSE;
     
-    ws=create_ionws(par, fp, ci);
+    ws=create_ionws(par, fp, ci, NULL);
     
     if(ws==NULL){
         if(!ci)

@@ -19,7 +19,6 @@
 #include <ioncore/extl.h>
 #include <ioncore/rectangle.h>
 #include "split.h"
-#include "ionframe.h"
 
 
 INTRCLASS(WIonWS);
@@ -28,10 +27,14 @@ DECLCLASS(WIonWS){
     WSplit *split_tree;
     WRegion *managed_list;
     ExtlTab managed_splits;
+    WRegionSimpleCreateFn *create_frame_fn;
 };
 
 
-extern WIonWS *create_ionws(WWindow *parent, const WFitParams *fp, bool ci);
+extern bool ionws_init(WIonWS *ws, WWindow *parent, const WFitParams *fp,
+                       bool ci, WRegionSimpleCreateFn *create_frame_fn);
+extern WIonWS *create_ionws(WWindow *parent, const WFitParams *fp, bool ci,
+                            WRegionSimpleCreateFn *create_frame_fn);
 extern WIonWS *create_ionws_simple(WWindow *parent, const WFitParams *fp);
 extern WRegion *ionws_load(WWindow *par, const WFitParams *fp, ExtlTab tab);
 
@@ -52,12 +55,11 @@ extern WRegion *ionws_farthest(WIonWS *ws, const char *str);
 extern WRegion *ionws_goto_dir(WIonWS *ws, const char *str);
 extern WRegion *ionws_region_at(WIonWS *ws, int x, int y);
 
-extern WIonFrame *ionws_split_top(WIonWS *ws, const char *dirstr);
-extern WIonFrame *ionws_split_at(WIonWS *ws, WIonFrame *frame, 
-                                 const char *dirstr, bool attach_current);
-extern void ionws_unsplit_at(WIonWS *ws, WIonFrame *frame);
+extern WFrame *ionws_split_top(WIonWS *ws, const char *dirstr);
+extern WFrame *ionws_split_at(WIonWS *ws, WFrame *frame, 
+                              const char *dirstr, bool attach_current);
+extern void ionws_unsplit_at(WIonWS *ws, WFrame *frame);
 
 extern WSplit *ionws_split_of(WIonWS *ws, WRegion *reg);
-
 
 #endif /* ION_IONWS_IONWS_H */
