@@ -726,7 +726,10 @@ static bool get_split_dir_primn(const char *str, int *dir, int *primn)
     if(str==NULL)
         return FALSE;
     
-    if(!strcmp(str, "left")){
+    if(!strcmp(str, "any")){
+        *primn=PRIMN_ANY;
+        *dir=SPLIT_ANY;
+    }else if(!strcmp(str, "left")){
         *primn=PRIMN_TL;
         *dir=SPLIT_HORIZONTAL;
     }else if(!strcmp(str, "right")){
@@ -1038,12 +1041,13 @@ WRegion *ionws_farthest(WIonWS *ws, const char *dirstr, bool any)
 
 static WRegion *do_goto_dir(WIonWS *ws, int dir, int primn)
 {
-    int primn2=(primn==PRIMN_TL ? PRIMN_BR : PRIMN_TL);
     WRegion *reg=NULL, *curr=ionws_current(ws);
     if(curr!=NULL)
         reg=ionws_do_get_nextto(ws, curr, dir, primn, FALSE);
-    if(reg==NULL)
+    if(reg==NULL && primn!=PRIMN_ANY){
+        int primn2=(primn==PRIMN_TL ? PRIMN_BR : PRIMN_TL);
         reg=ionws_do_get_farthest(ws, dir, primn2, FALSE);
+    }
     if(reg!=NULL)
         region_goto(reg);
     return reg;
@@ -1073,7 +1077,6 @@ WRegion *ionws_goto_dir(WIonWS *ws, const char *dirstr)
 
 static WRegion *do_goto_dir_nowrap(WIonWS *ws, int dir, int primn)
 {
-    int primn2=(primn==PRIMN_TL ? PRIMN_BR : PRIMN_TL);
     WRegion *reg=NULL, *curr=ionws_current(ws);
     if(curr!=NULL)
         reg=ionws_do_get_nextto(ws, curr, dir, primn, FALSE);
