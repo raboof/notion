@@ -354,7 +354,7 @@ static bool floatws_do_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
     
     /* Create frame with dummy geometry */
     fp.mode=REGION_FIT_EXACT;
-    fp.g=REGION_GEOM(cwin);
+    fp.g=param->geom;/*REGION_GEOM(cwin);*/
     frame=create_floatframe(par, &fp);
 
     if(frame==NULL){
@@ -484,6 +484,8 @@ bool floatws_attach(WFloatWS *ws, WClientWin *cwin, ExtlTab p)
         return FALSE;
     
     param.gravity=ForgetGravity;
+    param.geom.x=0;
+    param.geom.y=0;
     param.geom.w=REGION_GEOM(cwin).w;
     param.geom.h=REGION_GEOM(cwin).h;
     
@@ -547,6 +549,8 @@ bool floatws_manage_rescue(WFloatWS *ws, WClientWin *cwin, WRegion *from)
     WManageParams param=MANAGEPARAMS_INIT;
     
     region_rootpos((WRegion*)cwin, &(param.geom.x), &(param.geom.y));
+    param.geom.x=0;
+    param.geom.y=0;
     param.geom.w=REGION_GEOM(cwin).w;
     param.geom.h=REGION_GEOM(cwin).h;
     
