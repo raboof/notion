@@ -90,8 +90,8 @@ int main(int argc, char*argv[])
 #ifdef PWM_ETCDIR    
     ioncore_add_scriptdir(PWM_ETCDIR);
 #endif
-    ioncore_add_scriptdir(LCDIR);
     ioncore_add_scriptdir(SHAREDIR);
+    ioncore_add_scriptdir(LCDIR);
     ioncore_add_moduledir(MODULEDIR);
     ioncore_set_userdirs("pwm3");
 
