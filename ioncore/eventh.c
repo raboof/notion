@@ -173,13 +173,13 @@ void mainloop()
 		
 		XSync(wglobal.dpy, False);
 		if(wglobal.focus_next!=NULL && wglobal.input_mode==INPUT_NORMAL){
+			bool warp=wglobal.warp_next;
+			WRegion *next=wglobal.focus_next;
 			skip_focusenter();
-			do_set_focus(wglobal.focus_next, wglobal.warp_next);
-			wglobal.focus_next=NULL;
-			wglobal.warp_next=FALSE;
-		}else if(wglobal.grab_released){
+			do_set_focus(next, warp);
+		}/*else if(wglobal.grab_released && !wglobal.warp_enabled){
 			skip_focusenter();
-		}
+		}*/
 
 		wglobal.grab_released=FALSE;
 	}
