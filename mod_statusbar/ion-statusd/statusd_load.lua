@@ -61,7 +61,6 @@ local function get_hint(l)
     local lds={string.find(l, '^(%d+%.%d+).*(%d+%.%d+).*(%d+%.%d+)')}
     local v=tonumber(lds[settings.load_hint+2])
     local i="normal"
-    print(v)
     if v then
         if v>settings.critical_threshold then
             i="critical"
