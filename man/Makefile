@@ -19,7 +19,7 @@ TARGETS=ion3.1 $(foreach tr, $(TRANSLATIONS), ion3.$(tr).1) \
 	$(WELCOME_TARGETS)
 
 MKMAN=$(LUA) ../build/mkman.lua
-GROFF=groff -man -Tlatin1
+NROFF=nroff -man -Tlatin1
 #FILTERCRAP=perl -p -i -e 's/.\10//g'
 FILTERCRAP=$(LUA) -e 'io.write((string.gsub(io.read("*a"), ".\8", "")))'
 
@@ -55,7 +55,7 @@ pwm3.%.1: pwm3.%.in $(PWM_CONFIGS) ../po/%.po
 
 welcome%txt: welcome%head ion3%1
 	(cat welcome$*head; \
-	$(GROFF) ion3$*1 | $(FILTERCRAP)) > $@
+	$(NROFF) ion3$*1 | $(FILTERCRAP)) > $@
 
 _install:
 	$(INSTALLDIR) $(MANDIR)/man1
