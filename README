@@ -15,34 +15,37 @@ BUILDING AND INSTALLING
     * Libtool and libltdl, version 1.4.0 or newer
     * Lua 5.0.1 (see <http://www.lua.org/>)
 
-2. Edit system.mk to suit your system. If heavy modifications are required,
-   you might want to save the file somewhere for future use. (Most GNU/Linux
-   users should need very little of any modifications.) 
-   If you want to build some extra modules now or do not want to build
+2. a) Run ./configure; see README.autoconf for details, especially if
+      you are using the Debian Lua packages.
+   b) Alternatively, edit system.mk to suit your system. If the autoconf
+      script failed for some reason and you are falling back to this choice
+      because of that, remove system-ac.mk. Most GNU/Linux users should
+      need very little modifications to ssytem.mk.
+
+3. If you want to build some extra modules now or do not want to build
    some of the standard modules, edit modulelist.mk.
    
-3. Run 'make'. Note that 'make' here refers to GNU make which is usually
+4. Run 'make'. Note that 'make' here refers to GNU make which is usually
    named 'gmake' on systems with some other implementation of make as 
    default.
    
-4. Run 'make install', as root if you set $PREFIX in system.mk to a directory
+5. Run 'make install', as root if you set $PREFIX in system.mk to a directory
    that requires those privileges.
    
    YOU SHOULD NOT SKIP THIS STEP unless you know what you are doing. Ion
    will refuse to start if it can not find all the necessary uncorrupt
    configuration files either in $PREFIX/etc/ion/ or in ~/.ion2/.
 
-5. How to best set up 'startx' or whatever to start Ion instead of your
+6. How to best set up 'startx' or whatever to start Ion instead of your
    current window manager depends on your system's setup. A good guess
    is creating or modifying an executable shell script .xsession in your
-   home directory to start Ion. This should also work if you're using some
-   X display/login manager (unless the person who configured it is totally
-   brain damaged and has not set it up to allow selecting .xsession). 
-   If ~/.xsession does not help and you're not using a display manager, 
-   modifying ~/.xinitrc or creating one based on your system's xinitrc
-   (wherever that may be; use locate) may be what you need to do.
+   home directory to start Ion. This should usually (but not always) work
+   if you're using some X display/login manager. If ~/.xsession does not 
+   help and you're not using a display manager, modifying ~/.xinitrc or 
+   creating one based on your system's xinitrc (wherever that may be; 
+   use locate) may be what you need to do.
 
-6. The scripts 'ion-edit' and 'ion-view' in $SHAREDIR and bound to the
+7. The scripts 'ion-edit' and 'ion-view' in $SHAREDIR and bound to the
    F5 and F6 keys expect the program 'run-mailcap' to be found. This 
    program opens a viewer/editor for a file based on its MIME type. 
    Unless you are using Debian, most likely you don't have it, but any
@@ -57,7 +60,7 @@ BUILDING AND INSTALLING
 CONFIGURATION
 
 For help on modifying Ion's configuration files, PLEASE READ THE DOCUMENT
-"Ion: Configuring and extending with Lua" available from the Ion web page.
+"Ion: Configuring and extending with Lua" available from the Ion web page,
 listed at the top of this file.
 
 
@@ -71,6 +74,8 @@ listed at the top of this file.
 CREDITS
 
 Ion was written by Tuomo Valkonen.
+
+The autoconf script written by Tom Payne for the most part.
 
 The dock module was written by Tom Payne and Per Olofsson.
 

@@ -1,0 +1,195 @@
+##
+## System settings
+##
+
+
+##
+## Installation paths
+##
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+
+# Unless you are creating a package conforming to some OS's standards, you
+# probably do not want to modify the following directories:
+
+# Main binaries
+BINDIR=@bindir@
+# Configuration .lua files
+ETCDIR=@sysconfdir@/@PACKAGE_TARNAME@
+# Some .lua files and ion-* shell scripts
+SHAREDIR=@datadir@/@PACKAGE_TARNAME@
+# Manual pages
+MANDIR=@mandir@
+# Some documents
+DOCDIR=${prefix}/doc/@PACKAGE_TARNAME@
+# Nothing at the moment
+INCDIR=@includedir@
+# Nothing at the moment
+LIBDIR=@libdir@
+# Modules
+MODULEDIR=@libdir@/@PACKAGE_TARNAME@
+# ion-completefile (does not belong in SHAREDIR being a binary file)
+EXTRABINDIR=@libexecdir@/@PACKAGE_TARNAME@
+
+##
+## Modules
+##
+
+# The path to the libtool script. Version 1.4.3 or newer is required.
+# Users of many of the *BSD:s will have to manually install a a recent
+# libtool because even more-recent-than-libtool-1.4.3 releases of those
+# OSes only have an _ancient_ 1.3.x libtool that _will_ _not_ _work even
+# though a lot of libltdl-using apps require 1.4.3. 
+LIBTOOL=@LIBTOOL@
+
+# Settings for compiling and linking to ltdl
+LTDL_INCLUDES=@LTDL_INCLUDES@
+LTDL_LIBS=@LTDL_LIBS@
+
+# The following should do it if you have manually installed libtool 1.5 in
+# $(LIBTOOLDIR).
+#LIBTOOLDIR=/usr/local/stow/libtool-1.5
+#LIBTOOL=$(LIBTOOLDIR)/bin/libtool
+#LTDL_INCLUDES=-I$(LIBTOOLDIR)/include
+#LTDL_LIBS=-L$(LIBTOOLDIR)/lib -lltdl
+
+# Set PRELOAD_MODULES=1 if your system does not support dynamically loaded
+# modules. 
+PRELOAD_MODULES=@PRELOAD_MODULES@
+
+# Note to Cygwin users: you must set the above option and also LIBTOOL point 
+# to a real libtool script (e.g. /usr/autotool/stable/bin/libtool) instead 
+# of some useless autoconf-expecting wrapper. With these settings Ion should
+# compile on at least the version of Cygwin I installed on 2003-06-17 on WinXP.
+
+##
+## Lua
+##
+
+# If you have installed Lua 5.0 from the official tarball without changing
+# paths, this so do it.
+#LUA_DIR=/usr/local
+LUA_LIBS = @LUA_LIBS@
+LUA_INCLUDES = @LUA_INCLUDES@
+LUA=@LUA@
+LUAC=@LUAC@
+
+# If you are using the Debian packages, the following settings should be
+# what you want.
+#LUA_DIR=/usr
+#LUA_LIBS = -llua50 -llualib50
+#LUA_INCLUDES = -I$(LUA_DIR)/include/lua50
+#LUA=$(LUA_DIR)/bin/lua50
+#LUAC=$(LUA_DIR)/bin/luac50
+
+
+##
+## X libraries, includes and options
+##
+
+#X11_PREFIX=/usr/X11R6
+# SunOS/Solaris
+#X11_PREFIX=/usr/openwin
+
+X11_LIBS=@X_EXTRA_LIBS@ @X_PRE_LIBS@ -lX11 @X_LIBS@
+X11_INCLUDES=@X_CFLAGS@
+
+# Change commenting to disable Xinerama support
+XINERAMA_LIBS=@XINERAMA_LIBS@
+DEFINES += @_DCF_NO_XINERAMA@
+
+# XFree86 libraries up to 4.3.0 have a bug that will cause Ion to segfault
+# if Opera is used when i18n support is enabled. The following setting
+# should work around that situation.
+DEFINES += @_DCF_XFREE86_TEXTPROP_BUG_WORKAROUND@
+
+# Use the Xutf8 routines (XFree86 extension) instead of Xmb routines in
+# an UTF8 locale given the -i18n command line option?
+DEFINES += @_DCF_DE_USE_XUTF8@
+
+
+##
+## libc
+##
+
+# You may uncomment this if you know your system has
+# asprintf and vasprintf in the c library. (gnu libc has.)
+# If HAS_SYSTEM_ASPRINTF is not defined, an implementation
+# in sprintf_2.2/ is used.
+HAS_SYSTEM_ASPRINTF=@HAS_SYSTEM_ASPRINTF@
+
+
+##
+## C compiler
+##
+
+CC=@CC@
+
+# The POSIX_SOURCE, XOPEN_SOURCE and WARN options should not be necessary,
+# they're mainly for development use. So, if they cause trouble (not
+# the ones that should be used on your system or the system is broken),
+# just comment them out.
+
+# libtu/ uses POSIX_SOURCE
+
+POSIX_SOURCE=-ansi -D_POSIX_SOURCE
+
+# and . (ion) XOPEN_SOURCE.
+# There is variation among systems what should be used and how they interpret
+# it so it is perhaps better not using anything at all.
+
+# Most systems
+XOPEN_SOURCE=@XOPEN_SOURCE@
+# sunos, (irix)
+#XOPEN_SOURCE=-ansi -D__EXTENSIONS__
+
+# Same as '-Wall -pedantic' without '-Wunused' as callbacks often
+# have unused variables.
+WARN=	-W -Wimplicit -Wreturn-type -Wswitch -Wcomment \
+	-Wtrigraphs -Wformat -Wchar-subscripts \
+	-Wparentheses -pedantic -Wuninitialized
+
+# If you have a recent C compiler (e.g. gcc 3.x) then uncommenting the
+# following should optimize function calls to Lua a little.
+C99_SOURCE=@C99_SOURCE@
+DEFINES += @_DCF_HAS_VA_COPY@
+
+CFLAGS=@CFLAGS@ $(WARN) $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES)
+LDFLAGS=@CFLAGS@ $(LIBS) $(EXTRA_LIBS)
+
+
+##
+## make depend
+##
+
+DEPEND_FILE=.depend
+DO_MAKE_DEPEND=$(CC) -MM $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES)
+MAKE_DEPEND=$(DO_MAKE_DEPEND) $(SOURCES) > $(DEPEND_FILE)
+MAKE_DEPEND_MOD=$(DO_MAKE_DEPEND) $(SOURCES) | sed 's/\.o/\.lo/' > $(DEPEND_FILE)
+
+##
+## AR
+##
+
+AR=@AR@
+ARFLAGS=cr
+RANLIB=@RANLIB@
+
+
+##
+## Install & strip
+##
+
+# Should work almost everywhere
+INSTALL=@INSTALL@
+# On a system with pure BSD install, -c might be preferred
+#INSTALL=install -c
+
+INSTALLDIR=mkdir -p
+
+BIN_MODE=755
+DATA_MODE=644
+
+STRIP=@STRIP@
+
