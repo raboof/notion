@@ -32,8 +32,8 @@ BUILDING AND INSTALLING
    named 'gmake' on systems with some other implementation of make as 
    default.
    
-5. Run 'make install', as root if you set $PREFIX in system.mk to a directory
-   that requires those privileges.
+5. Run 'make install', as root if you set $PREFIX in system.mk to a 
+   directory that requires those privileges.
    
    YOU SHOULD NOT SKIP THIS STEP unless you know what you are doing. Ion
    will refuse to start if it can not find all the necessary uncorrupt
@@ -48,16 +48,43 @@ BUILDING AND INSTALLING
    creating one based on your system's xinitrc (wherever that may be; 
    use locate) may be what you need to do.
 
-7. The scripts 'ion-edit' and 'ion-view' in $SHAREDIR and bound to the
-   F5 and F6 keys expect the program 'run-mailcap' to be found. This 
-   program opens a viewer/editor for a file based on its MIME type. 
-   Unless you are using Debian, most likely you don't have it, but any
-   other similar program (or just plain old text editor) will do as
-   well - just modify the scripts. Of course, if you don't want to use
-   the feature at this time or never, you may simply skip this step. 
-   If you want to use run-mailcap, it can be found from the address
+
+SOME OPTIONAL INSTALLATION STEPS
+
+1. The scripts 'ion-edit' and 'ion-view' in $SHAREDIR and bound to the F5
+   and F6 keys expect the program 'run-mailcap' to be found. This program
+   opens a viewer/editor for a file based on its MIME type. Unless you are
+   using Debian, most likely you don't have it, but any other similar 
+   program (or just plain old text editor) will do as well - just modify the
+   scripts. Of course, if you don't want to use the feature at this time or 
+   never, you may simply skip this step. If you want to use run-mailcap, it
+   can be found from the following address, as a source tarball as well:
+   
    <http://www.debian.org/Packages/unstable/net/mime-support.html>
-   as tarball as well.
+
+2. Ion supports caching known man-pages in a file for faster man-page
+   completion in the F1 man page query. To enable this feature, you must
+   periodically run a cronjob to build this list. To create a system-wide
+   man page cache, run 'crontab -e' (might vary depending on platform) as
+   root and enter a line such as follows:
+
+15 05 * * * $SHAREDIR/ion-completeman -mksyscache
+
+   Replace $SHAREDIR with the setting from system.mk (or system-ac.mk if you
+   used autoconf). This example runs daily at 05:15, but you may modify the 
+   run times to your needs; see the crontab manual. 
+   
+   If you can't or do not want to build a system-wide man page cache, run
+   'crontab -e' as your normal user and replace '-mksyscache' with
+   '-mkusercache' above. The cache file will be ~/.ion3/mancache.
+   
+   It may also be useful to run ion-completeman with the suitable
+   '-mk*cache' argument once manually to build the initial cache.
+   
+   If the MANPATH environment variable is not set on your system does and
+   it does not have the 'manpath' command (or it does not print anything 
+   sensible), you may also with to set the ION_MC_MANPATH environment
+   variable to the list of paths where the system stores manual pages.
 
 
 CONFIGURATION
