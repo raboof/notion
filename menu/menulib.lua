@@ -89,14 +89,14 @@ end
 -- 
 -- See also: \fnref{menu_pmenu}, \fnref{make_menu_fn}.
 function make_pmenu_fn(menu_or_name)
-    return function(mplex, ...)
+    return function(win, ...)
                local params=arg
                local function wrapper(entry)
                    if entry.fn then
-                       entry.fn(mplex, unpack(params))
+                       entry.fn(win, unpack(params))
                    end
                end
-               return menu_pmenu(mplex, wrapper, getmenu(menu_or_name))
+               return menu_pmenu(win, wrapper, getmenu(menu_or_name))
            end
 end
 
