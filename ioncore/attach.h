@@ -30,8 +30,8 @@ extern bool region_add_managed(WRegion *reg, WRegion *sub, int flags);
 
 /* */
 
-DYNFUN WRegion *region_do_find_new_manager(WRegion *reg);
-extern WRegion *default_do_find_new_manager(WRegion *reg);
+DYNFUN WRegion *region_do_find_new_manager(WRegion *reg, WRegion *todst);
+extern WRegion *default_do_find_new_manager(WRegion *reg, WRegion *todst);
 extern WRegion *region_find_new_manager(WRegion *reg);
 
 extern bool region_move_managed_on_list(WRegion *dest, WRegion *src,

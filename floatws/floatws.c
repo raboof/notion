@@ -205,6 +205,20 @@ void floatws_deinit(WFloatWS *ws)
 }
 
 
+EXTL_EXPORT
+bool floatws_destroy(WFloatWS *ws)
+{
+	if(!region_may_destroy((WGenWS*)ws))
+		return FALSE;
+	
+	if(!region_rescue_managed_on_list((WRegion*)ws, ws->managed_list))
+		return FALSE;
+	
+	destroy_obj((WObj*)ws);
+	return TRUE;
+}
+
+
 /*}}}*/
 
 
@@ -303,7 +317,7 @@ static bool floatws_do_add_clientwin(WFloatWS *ws,
 	}
 	
 	if(clientwin_get_switchto(cwin)){
-		if(region_manages_active_reg((WRegion*)ws)){
+		if(region_may_control_focus((WRegion*)ws)){
 			region_display_sp((WRegion*)cwin);
 			set_focus((WRegion*)cwin);
 		}

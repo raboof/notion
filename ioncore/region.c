@@ -98,14 +98,19 @@ void region_deinit(WRegion *reg)
 	destroy_children(reg);
 
 	if(wglobal.focus_next==reg){
-		/*warn("Region to be focused next destroyed.");*/
+		D(warn("Region to be focused next destroyed[1]."));
 		wglobal.focus_next=NULL;
 	}
-
+	
 	region_detach(reg);
 	region_unuse_name(reg);
 	region_untag(reg);
 	region_remove_bindings(reg);
+
+	if(wglobal.focus_next==reg){
+		D(warn("Region to be focused next destroyed[2]."));
+		wglobal.focus_next=NULL;
+	}
 }
 
 
@@ -178,6 +183,14 @@ void region_close(WRegion *reg)
 }
 
 
+bool region_may_destroy_managed(WRegion *mgr, WRegion *reg)
+{
+	bool ret=TRUE;
+	CALL_DYN_RET(ret, bool, region_may_destroy_managed, mgr, (mgr, reg));
+	return ret;
+}
+
+	
 /*{{{ Manager region dynfuns */
 
 
@@ -321,7 +334,7 @@ void region_request_managed_geom_constrain(WRegion *mgr, WRegion *reg,
 		/* mgr and reg have the same parent */
 		g=REGION_GEOM(mgr);
 	}else{
-		/* Don't know how to contrain */
+		/* Don't know how to constrain */
 		goto doit;
 	}
 	
@@ -393,13 +406,6 @@ void region_detach_parent(WRegion *reg)
 		/*if(REGION_IS_ACTIVE(reg) && wglobal.focus_next==NULL)
 			set_focus(p);*/
 	}
-
-	while(reg!=NULL && REGION_IS_ACTIVE(reg)){
-		D(fprintf(stderr, "detach-deact %s [%p]!\n", WOBJ_TYPESTR(reg), reg);)
-		/*release_ggrabs(reg);*/
-		reg->flags&=~REGION_ACTIVE;
-		reg=reg->active_sub;
-	}
 }
 
 
@@ -412,7 +418,25 @@ void region_detach_manager(WRegion *reg)
 	if(mgr==NULL)
 		return;
 	
+	/* Restore activity state to non-parent manager */
+	if(region_may_control_focus(reg)){
+		WRegion *par=FIND_PARENT1(reg, WRegion);
+		if(par!=NULL && mgr!=par && FIND_PARENT1(mgr, WRegion)==par){
+			if(region_x_window(mgr)==None){
+				/* REGION_ACTIVE shouldn't be set for windowless regions
+				 * but make the parent's active_sub point to it
+				 * nevertheless so that region_may_control_focus can
+				 * be made to work.
+				 */
+				par->active_sub=mgr;
+			}else{
+				set_focus(mgr);
+			}
+		}
+	}
+
 	region_remove_managed(mgr, reg);
+	
 	assert(REGION_MANAGER(reg)==NULL);
 }
 
@@ -430,6 +454,28 @@ void region_detach(WRegion *reg)
 /*{{{ Focus */
 
 
+bool region_may_control_focus(WRegion *reg)
+{
+	WRegion *par;
+	
+	if(REGION_IS_ACTIVE(reg))
+		return TRUE;
+	
+	par=FIND_PARENT1(reg, WRegion);
+	
+	if(par==NULL || !REGION_IS_ACTIVE(par))
+		return FALSE;
+	
+	do{
+		if(par->active_sub==reg)
+			return TRUE;
+		reg=REGION_MANAGER(reg);
+	}while(reg!=par && reg!=NULL);
+
+	return FALSE;
+}
+
+
 void region_got_focus(WRegion *reg)
 {
 	WRegion *r;
@@ -440,6 +486,10 @@ void region_got_focus(WRegion *reg)
 		
 		r=FIND_PARENT1(reg, WRegion);
 		if(r!=NULL){
+			/*if(r->active_sub!=NULL){
+				if(region_x_window(r->active_sub)==None)
+					r->active_sub->flags&=~REGION_ACTIVE;
+			}*/
 			r->active_sub=reg;
 			if(WOBJ_IS(r, WScreen)){
 				D(fprintf(stderr, "cvp: %p, %p [%s]\n", r, viewport_of(reg), WOBJ_TYPESTR(reg)));
@@ -447,15 +497,14 @@ void region_got_focus(WRegion *reg)
 			}
 		}
 		
+		region_activated(reg);
 		r=REGION_MANAGER(reg);
 		if(r!=NULL)
 			region_managed_activated(r, reg);
-
-		region_activated(reg);
 	}else{
 		D(fprintf(stderr, "got focus (act) %s [%p]\n", WOBJ_TYPESTR(reg), reg);)
     }
-	
+
 	/* Install default colour map only if there is no active subregion;
 	 * their maps should come first. WClientWins will install their maps
 	 * in region_activated. Other regions are supposed to use the same
@@ -478,9 +527,7 @@ void region_lost_focus(WRegion *reg)
 	D(fprintf(stderr, "lost focus (act) %s [%p:]\n", WOBJ_TYPESTR(reg), reg);)
 	
 	reg->flags&=~REGION_ACTIVE;
-	
 	region_inactivated(reg);
-	
 	r=REGION_MANAGER(reg);
 	if(r!=NULL)
 		region_managed_inactivated(r, reg);
@@ -656,40 +703,6 @@ void region_set_parent(WRegion *reg, WRegion *parent)
 }
 
 
-
-bool region_manages_active_reg(WRegion *reg)
-{
-	WRegion *p;
-	WRegion *reg2;
-	
-	/* This should cover regions that have children */
-	if(REGION_IS_ACTIVE(reg)){
-		return TRUE;
-	}
-	
-	/* Otherwise check the parent */
-	
-	p=FIND_PARENT1(reg, WRegion);
-	
-	if(p==NULL || p->active_sub==NULL)
-		return FALSE;
-	
-	reg2=p->active_sub;
-	
-	while(1){
-		if(REGION_MANAGER(reg2)==reg)
-			return TRUE;
-		reg2=REGION_MANAGER(reg2);
-		if(reg2==NULL)
-			break;
-		if(FIND_PARENT1(reg2, WRegion)!=p)
-			break;
-	}
-	
-	return FALSE;
-}
-
-
 EXTL_EXPORT
 WRegion *region_manager(WRegion *reg)
 {
@@ -701,6 +714,16 @@ EXTL_EXPORT
 WRegion *region_parent(WRegion *reg)
 {
 	return reg->parent;
+}
+
+
+bool region_may_destroy(WRegion *reg)
+{
+	WRegion *mgr=REGION_MANAGER(reg);
+	if(mgr==NULL)
+		return TRUE;
+	else
+		return region_may_destroy_managed(mgr, reg);
 }
 
 
@@ -936,3 +959,4 @@ IMPLOBJ(WRegion, WObj, region_deinit, region_dynfuntab);
 
 	
 /*}}}*/
+

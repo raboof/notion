@@ -17,6 +17,7 @@
 #include "names.h"
 #include "reginfo.h"
 #include "saveload.h"
+#include "genws.h"
 
 
 static bool viewport_display_managed(WViewport *vp, WRegion *reg);
@@ -249,10 +250,8 @@ static bool viewport_display_managed(WViewport *vp, WRegion *reg)
 		}
 	}
 	
-	if(wglobal.opmode!=OPMODE_DEINIT && 
-	   region_manages_active_reg((WRegion*)vp)){
+	if(wglobal.opmode!=OPMODE_DEINIT && region_may_control_focus((WRegion*)vp))
 		set_focus(reg);
-	}
 	
 	return TRUE;
 }
@@ -420,6 +419,21 @@ void screen_switch_prev_on_cvp(WScreen *scr)
 }
 
 
+
+static bool viewport_may_destroy_managed(WViewport *vp, WRegion *reg)
+{
+	WRegion *r2;
+	
+	FOR_ALL_MANAGED_ON_LIST(vp->ws_list, r2){
+		if(WOBJ_IS(r2, WGenWS) && r2!=reg)
+			return TRUE;
+	}
+	
+	warn("Cannot destroy only workspace.");
+	return FALSE;
+}
+
+
 /*}}}*/
 
 
@@ -436,6 +450,9 @@ static DynFunTab viewport_dynfuntab[]={
 	{region_request_managed_geom, region_request_managed_geom_unallow},
 	{(DynFun*)region_do_add_managed, (DynFun*)viewport_do_add_managed},
 	{region_remove_managed, viewport_remove_managed},
+	
+	{(DynFun*)region_may_destroy_managed,
+	 (DynFun*)viewport_may_destroy_managed},
 	
 	END_DYNFUNTAB
 };

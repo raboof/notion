@@ -629,7 +629,7 @@ static WRegion *left_or_topmost_current(WObj *obj, int dir)
 }
 
 
-static WRegion *right_or_bottomost_current(WObj *obj, int dir)
+static WRegion *right_or_bottommost_current(WObj *obj, int dir)
 {
 	WWsSplit *split;
 
@@ -731,12 +731,12 @@ static WRegion *up_or_left(WRegion *reg, int dir)
 			break;
 		
 		if(from==BOTTOM_OR_RIGHT)
-			return right_or_bottomost_current(split->tl, dir);
+			return right_or_bottommost_current(split->tl, dir);
 		
 		prev=(WObj*)split;
 	}
 	
-	return right_or_bottomost_current(prev, dir);
+	return right_or_bottommost_current(prev, dir);
 }
 
 
@@ -829,35 +829,7 @@ void ionws_add_managed(WIonWS *ws, WRegion *reg)
 }
 
 
-void ionws_remove_managed(WIonWS *ws, WRegion *reg)
-{
-	WWsSplit *split;
-	
-	region_unset_manager(reg, (WRegion*)ws, &(ws->managed_list));
-
-	region_remove_bindmap_owned(reg, &ionws_bindmap, (WRegion*)ws);
-
-	split=SPLIT_OF(reg);
-	
-	if(split!=NULL){
-		if(split->tl==(WObj*)reg)
-			split->tl=NULL;
-		else
-			split->br=NULL;
-		
-		SPLIT_OF(reg)=NULL;
-		
-		ionws_remove_split(ws, split);
-	}else{
-		ws->split_tree=NULL;
-	}
-	
-	if(ws->split_tree==NULL)
-		defer_destroy((WObj*)ws);
-}
-
-
-bool ionws_remove_split(WIonWS *ws, WWsSplit *split)
+static bool ionws_remove_split(WIonWS *ws, WWsSplit *split)
 {
 	WWsSplit *split2;
 	WObj *other;
@@ -901,6 +873,41 @@ bool ionws_remove_split(WIonWS *ws, WWsSplit *split)
 	free(split);
 	
 	return TRUE;
+}
+
+
+void ionws_remove_managed(WIonWS *ws, WRegion *reg)
+{
+	WWsSplit *split;
+	
+	region_unset_manager(reg, (WRegion*)ws, &(ws->managed_list));
+
+	region_remove_bindmap_owned(reg, &ionws_bindmap, (WRegion*)ws);
+
+	split=SPLIT_OF(reg);
+	
+	if(split!=NULL){
+		WRegion *other;
+		if(split->tl==(WObj*)reg){
+			split->tl=NULL;
+			other=left_or_topmost_current(split->br, split->dir);
+		}else{
+			split->br=NULL;
+			other=right_or_bottommost_current(split->tl, split->dir);
+		}
+		
+		SPLIT_OF(reg)=NULL;
+		
+		ionws_remove_split(ws, split);
+		
+		if(region_may_control_focus(ws))
+			set_focus(other!=NULL ? other : (WRegion*)ws);
+	}else{
+		ws->split_tree=NULL;
+	}
+	
+	if(ws->split_tree==NULL)
+		defer_destroy((WObj*)ws);
 }
 
 
@@ -962,38 +969,32 @@ static WRegion *do_find_nmgr(WObj *ptr, int primn)
 }
 					  
 
-WRegion *ionws_find_new_manager(WRegion *reg)
+WRegion *ionws_do_find_new_manager(WIonWS *ws, WRegion *reg)
 {
-	WWsSplit *split=SPLIT_OF(reg);
+	WWsSplit *split;
+	WRegion *nmgr;
+	WObj *obj;
 	
+	if(REGION_MANAGER(reg)!=(WRegion*)ws)
+		return do_find_nmgr(ws->split_tree, TOP_OR_LEFT);
+
+	split=SPLIT_OF(reg);
+	
+	obj=(WObj*)reg;
 	while(split!=NULL){
-		if(split->tl==(WObj*)reg)
-			reg=do_find_nmgr(split->br, TOP_OR_LEFT);
+		if(split->tl==obj)
+			nmgr=do_find_nmgr(split->br, TOP_OR_LEFT);
 		else
-			reg=do_find_nmgr(split->tl, BOTTOM_OR_RIGHT);
+			nmgr=do_find_nmgr(split->tl, BOTTOM_OR_RIGHT);
 		
-		if(reg!=NULL)
-			return reg;
+		if(nmgr!=NULL)
+			return nmgr;
 		
+		obj=(WObj*)split;
 		split=split->parent;
 	}
-
-	return NULL;
-}
-
-
-WRegion *ionws_do_find_new_manager(WRegion *reg)
-{
-	WWsSplit *split=SPLIT_OF(reg);
-	WRegion *r;
 	
-	if(split!=NULL){
-		r=ionws_find_new_manager(reg);
-		if(r!=NULL)
-			return r;
-	}
-		
-	return default_do_find_new_manager(reg);
+	return NULL;
 }
 
 

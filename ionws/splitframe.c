@@ -164,46 +164,17 @@ void ionws_split_top(WIonWS *ws, const char *str)
 EXTL_EXPORT
 void ionframe_relocate_and_close(WIonFrame *frame)
 {
-	WIonWS *ws;
-	WViewport *vp;
-	WRegion *other;
-	bool was_active=REGION_IS_ACTIVE(frame);
-	
-	ws=(WIonWS*)REGION_MANAGER(frame);
-	
-	if(ws==NULL || !WOBJ_IS(ws, WIonWS)){
-		region_rescue_managed_on_list((WRegion*)frame,
-									  frame->genframe.managed_list);
-		destroy_obj((WObj*)frame);
+	if(!region_may_destroy((WRegion*)frame)){
+		warn("Frame may not be destroyed");
 		return;
 	}
-	
-	vp=(WViewport*)REGION_MANAGER(ws);
-	
-	if(vp!=NULL && WOBJ_IS(vp, WViewport)){
-		if(vp->ws_count<=1 && ws->split_tree==(WObj*)frame){
-			warn("Cannot destroy only frame on only ionws.");
-			return;
-		}
-	}
-	
-	other=ionws_find_new_manager((WRegion*)frame);
-	
-	if(frame->genframe.managed_count!=0){
-		if(other==NULL || WOBJ_IS(other, WScreen)){
-			warn("Last frame on workspace and not empty: refusing to "
-				 "destroy.");
-			return;
-		}
-		region_move_managed_on_list(other, (WRegion*)frame,
-									frame->genframe.managed_list);
-		if(frame->genframe.managed_count==0)
-			warn("Could not move all managed objects.");
+
+	if(!region_rescue_managed_on_list((WRegion*)frame,
+									  frame->genframe.managed_list)){
+		warn("Failed to rescue managed subregions.");
+		return;
 	}
 
-	if(other!=NULL && was_active)
-		set_focus(other);
-				 
 	destroy_obj((WObj*)frame);
 }
 
@@ -212,8 +183,10 @@ EXTL_EXPORT
 void ionframe_close(WIonFrame *frame)
 {
 	if(frame->genframe.managed_count!=0 ||
-	   frame->genframe.current_input!=NULL)
+	   frame->genframe.current_input!=NULL){
+		warn("Frame not empty.");
 		return;
+	}
 	
 	ionframe_relocate_and_close(frame);
 }

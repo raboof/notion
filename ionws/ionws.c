@@ -177,6 +177,15 @@ void ionws_deinit(WIonWS *ws)
 }
 
 
+static bool ionws_may_destroy_managed(WIonWS *ws, WRegion *reg)
+{
+	if(ws->split_tree==(WObj*)reg)
+		return region_may_destroy((WRegion*)ws);
+	else
+		return TRUE;
+}
+
+
 /*}}}*/
 
 
@@ -406,6 +415,9 @@ static DynFunTab ionws_dynfuntab[]={
 	{(DynFun*)region_do_find_new_manager, (DynFun*)ionws_do_find_new_manager},
 	
 	{(DynFun*)region_save_to_file, (DynFun*)ionws_save_to_file},
+
+	{(DynFun*)region_may_destroy_managed,
+	 (DynFun*)ionws_may_destroy_managed},
 
 	END_DYNFUNTAB
 };

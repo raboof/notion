@@ -112,6 +112,7 @@ DYNFUN void region_inactivated(WRegion *reg);
 DYNFUN void region_draw_config_updated(WRegion *reg);
 DYNFUN void region_close(WRegion *reg);
 extern void region_default_draw_config_updated(WRegion *reg);
+extern bool region_may_destroy(WRegion *reg);
 
 extern void region_rootpos(WRegion *reg, int *xret, int *yret);
 extern void region_notify_subregions_rootpos(WRegion *reg, int x, int y);
@@ -124,9 +125,9 @@ extern bool region_goto(WRegion *reg);
 extern void region_init(WRegion *reg, WRegion *parent, WRectangle geom);
 extern void region_deinit(WRegion *reg);
 
-/* --> window? */
 extern void region_got_focus(WRegion *reg);
 extern void region_lost_focus(WRegion *reg);
+extern bool region_may_control_focus(WRegion *reg);
 
 extern bool region_is_fully_mapped(WRegion *reg);
 extern void region_notify_change(WRegion *reg);
@@ -138,7 +139,6 @@ extern void region_detach_manager(WRegion *reg);
 extern void region_set_parent(WRegion *reg, WRegion *par);
 extern void region_set_manager(WRegion *reg, WRegion *mgr, WRegion **listptr);
 extern void region_unset_manager(WRegion *reg, WRegion *mgr, WRegion **listptr);
-extern bool region_manages_active_reg(WRegion *reg);
 
 DYNFUN WRegion *region_managed_enter_to_focus(WRegion *mgr, WRegion *reg);
 DYNFUN void region_remove_managed(WRegion *reg, WRegion *sub);
@@ -146,6 +146,7 @@ DYNFUN bool region_display_managed(WRegion *reg, WRegion *sub);
 DYNFUN void region_managed_activated(WRegion *reg, WRegion *sub);
 DYNFUN void region_managed_inactivated(WRegion *reg, WRegion *sub);
 DYNFUN void region_notify_managed_change(WRegion *reg, WRegion *sub);
+DYNFUN bool region_may_destroy_managed(WRegion *mgr, WRegion *reg);
 DYNFUN void region_request_managed_geom(WRegion *reg, WRegion *sub,
 										WRectangle geom, WRectangle *geomret,
 										bool tryonly);

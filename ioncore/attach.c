@@ -78,7 +78,7 @@ bool region_add_managed(WRegion *mgr, WRegion *reg, int flags)
 /*{{{ find_new_manager */
 
 
-WRegion *default_do_find_new_manager(WRegion *reg)
+WRegion *default_do_find_new_manager(WRegion *reg, WRegion *todst)
 {
 	WRegion *p;
 	
@@ -93,16 +93,17 @@ WRegion *default_do_find_new_manager(WRegion *reg)
 			return NULL;
 	}
 	
-	return region_do_find_new_manager(p);
+	reg=region_do_find_new_manager(p, todst);
+	if(reg!=NULL)
+		return reg;
+	return default_do_find_new_manager(p, todst);
 }
 
 
-WRegion *region_do_find_new_manager(WRegion *reg)
+WRegion *region_do_find_new_manager(WRegion *r2, WRegion *reg)
 {
 	WRegion *ret=NULL;
-	CALL_DYN_RET(ret, WRegion*, region_do_find_new_manager, reg, (reg));
-	if(funnotfound)
-		ret=default_do_find_new_manager(reg);
+	CALL_DYN_RET(ret, WRegion*, region_do_find_new_manager, r2, (r2, reg));
 	return ret;
 }
 
@@ -110,12 +111,18 @@ WRegion *region_do_find_new_manager(WRegion *reg)
 
 WRegion *region_find_new_manager(WRegion *reg)
 {
-	WRegion *p=FIND_PARENT1(reg, WRegion);
+	WRegion *p=REGION_MANAGER(reg), *nm;
+
+	if(p==NULL){
+		p=FIND_PARENT1(reg, WRegion);
+		if(p==NULL)
+			return NULL;
+	}
 	
-	if(p!=NULL)
-		p=region_do_find_new_manager(p);
-	
-	return p;
+	nm=region_do_find_new_manager(p, reg);
+	if(nm!=NULL)
+		return nm;
+	return default_do_find_new_manager(p, reg);
 }
 
 
@@ -154,8 +161,8 @@ bool region_rescue_managed_on_list(WRegion *reg, WRegion *list)
 	 * properly in a tree with a WScreen root.
 	 */
 	
-	warn("Unable to move subregions of a (to-be-destroyed) %s "
-		 "somewhere else.", WOBJ_TYPESTR(reg));
+	warn("Unable to move managed regions of a %s somewhere else.",
+		 WOBJ_TYPESTR(reg));
 	
 	return FALSE;
 }

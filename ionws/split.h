@@ -61,13 +61,11 @@ extern int split_tree_other_size(WObj *obj, int dir);
 
 extern void ionws_add_managed(WIonWS *ws, WRegion *reg);
 extern void ionws_managed_activated(WIonWS *ws, WRegion *reg);
-extern WRegion *ionws_do_find_new_manager(WRegion *reg);
-extern WRegion *ionws_find_new_manager(WRegion *reg);
+extern WRegion *ionws_do_find_new_manager(WIonWS *ws, WRegion *todest);
 extern void ionws_request_managed_geom(WIonWS *ws, WRegion *reg,
 										 WRectangle geom,
 										 WRectangle *geomret, bool tryonly);
 extern void ionws_remove_managed(WIonWS *ws, WRegion *reg);
-extern bool ionws_remove_split(WIonWS *ws, WWsSplit *split);
 extern WRegion *ionws_find_current(WIonWS *ws);
 
 extern WRegion *split_reg(WRegion *reg, int dir, int primn,
