@@ -750,11 +750,35 @@ void genframe_restore_size(WGenFrame *frame, bool horiz, bool vert)
 }
 
 
+static void correct_frame_size(WGenFrame *frame, int *w, int *h)
+{
+	XSizeHints hints;
+	uint relw, relh;
+	int wdiff, hdiff;
+	
+	region_resize_hints((WRegion*)frame, &hints, &relw, &relh);
+	
+	wdiff=REGION_GEOM(frame).w-relw;
+	hdiff=REGION_GEOM(frame).h-relh;
+	*w-=wdiff;
+	*h-=hdiff;
+	correct_size(w, h, &hints, TRUE);
+	*w+=wdiff;
+	*h+=hdiff;
+}
+
+
 static bool trymaxv(WGenFrame *frame, WRegion *mgr, int tryonlyflag)
 {
 	WRectangle geom=REGION_GEOM(frame), rgeom;
 	geom.y=0;
 	geom.h=REGION_GEOM(mgr).h;
+	
+	{
+		int dummy_w=geom.w;
+		correct_frame_size(frame, &dummy_w, &(geom.h));
+	}
+	
 	region_request_geom((WRegion*)frame, 
 						tryonlyflag|REGION_RQGEOM_VERT_ONLY, 
 						&geom, &rgeom);
@@ -794,6 +818,12 @@ static bool trymaxh(WGenFrame *frame, WRegion *mgr, int tryonlyflag)
 	WRectangle geom=REGION_GEOM(frame), rgeom;
 	geom.x=0;
 	geom.w=REGION_GEOM(mgr).w;
+	
+	{
+		int dummy_h=geom.h;
+		correct_frame_size(frame, &(geom.w), &dummy_h);
+	}
+	
 	region_request_geom((WRegion*)frame, 
 						tryonlyflag|REGION_RQGEOM_HORIZ_ONLY, 
 						&geom, &rgeom);
