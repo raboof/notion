@@ -556,6 +556,14 @@ function texfriendly(name)
     return string.gsub(name, "_", "-")
 end
 
+function texfriendly_typeormod(nm)
+    if string.find(nm, "A-Z") then
+        return "\\type{"..string.gsub(nm, '_', '\_').."}"
+    else
+        return "\\code{"..nm.."}"
+    end
+end
+
 function write_fndoc(h, fn, info)
     if not info.doc then
         return
@@ -566,7 +574,8 @@ function write_fndoc(h, fn, info)
     end
     
     if info.class~="global" then
-        fprintf(h, "\\index{%s@\\type{%s}!", info.class, info.class)
+        fprintf(h, "\\index{%s@%s!", texfriendly(info.class), 
+                texfriendly_typeormod(info.class));
         fprintf(h, "%s@\\code{%s}}\n", texfriendly(fn), fn)
     end
     fprintf(h, "\\index{%s@\\code{%s}}\n", texfriendly(fn), fn)
