@@ -33,12 +33,12 @@
 
 
 static bool floatframe_init(WFloatFrame *frame, WWindow *parent,
-							WRectangle geom)
+							const WRectangle *geom)
 {
 	if(!genframe_init((WGenFrame*)frame, parent, geom))
 		return FALSE;
 
-	frame->bar_w=geom.w;
+	frame->bar_w=geom->w;
 	frame->tab_min_w=100;
 	frame->bar_max_width_q=0.95;
 	
@@ -50,7 +50,7 @@ static bool floatframe_init(WFloatFrame *frame, WWindow *parent,
 }
 
 
-WFloatFrame *create_floatframe(WWindow *parent, WRectangle geom)
+WFloatFrame *create_floatframe(WWindow *parent, const WRectangle *geom)
 {
 	CREATEOBJ_IMPL(WFloatFrame, floatframe, (p, parent, geom));
 }
@@ -188,12 +188,14 @@ void initial_to_floatframe_geom(WFloatWS *ws, WRectangle *geom, int gravity)
 /* geom parameter==client requested geometry minus border crap */
 static void floatframe_request_clientwin_geom(WFloatFrame *frame, 
 											  WClientWin *cwin,
-											  int rqflags, WRectangle geom)
+											  int rqflags, 
+											  const WRectangle *geom_)
 {
 	int gravity=NorthWestGravity;
 	XSizeHints hints;
 	WRectangle off;
 	WRegion *par;
+	WRectangle geom=*geom_;
 	
 	if(cwin->size_hints.flags&PWinGravity)
 		gravity=cwin->size_hints.win_gravity;
@@ -235,7 +237,7 @@ static void floatframe_request_clientwin_geom(WFloatFrame *frame,
 			geom.y=REGION_GEOM(par).h-4;
 	}
 
-	region_request_geom((WRegion*)frame, REGION_RQGEOM_NORMAL, geom, NULL);
+	region_request_geom((WRegion*)frame, REGION_RQGEOM_NORMAL, &geom, NULL);
 }
 
 
@@ -456,7 +458,7 @@ static bool floatframe_save_to_file(WFloatFrame *frame, FILE *file, int lvl)
 }
 
 
-WRegion *floatframe_load(WWindow *par, WRectangle geom, ExtlTab tab)
+WRegion *floatframe_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
 {
 	int flags=0;
 	ExtlTab substab, subtab;
@@ -506,8 +508,6 @@ static DynFunTab floatframe_dynfuntab[]={
 	{genframe_border_geom, floatframe_border_geom},
 	{region_remove_managed, floatframe_remove_managed},
 	
-	/*{region_request_managed_geom, floatframe_request_managed_geom},*/
-
 	{region_request_clientwin_geom, floatframe_request_clientwin_geom},
 	
 	{(DynFun*)region_save_to_file, (DynFun*)floatframe_save_to_file},

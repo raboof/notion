@@ -34,7 +34,7 @@ static void ggeom(WRegion *reg, WRectangle *geom)
 }
 
 
-static WRegion* is_occupied(WFloatWS *ws, WRectangle r)
+static WRegion* is_occupied(WFloatWS *ws, const WRectangle *r)
 {
 	WRegion *reg;
 	WRectangle p;
@@ -42,13 +42,13 @@ static WRegion* is_occupied(WFloatWS *ws, WRectangle r)
 	FOR_ALL_MANAGED_ON_LIST(ws->managed_list, reg){
 		ggeom(reg, &p);
 		
-		if(r.x>=p.x+p.w)
+		if(r->x>=p.x+p.w)
 			continue;
-		if(r.y>=p.y+p.h)
+		if(r->y>=p.y+p.h)
 			continue;
-		if(r.x+r.w<=p.x)
+		if(r->x+r->w<=p.x)
 			continue;
-		if(r.y+r.h<=p.y)
+		if(r->y+r->h<=p.y)
 			continue;
 		return reg;
 	}
@@ -137,11 +137,11 @@ static bool tiling_placement(WFloatWS *ws, WRectangle *g)
 	
 	if(placement_method==PLACEMENT_UDLR){
 		while(r.x<maxx){
-			p=is_occupied(ws, r);
+			p=is_occupied(ws, &r);
 			while(p!=NULL && r.y+r.h<maxy){
 				ggeom(p, &r2);
 				r.y=r2.y+r2.h+1;
-				p=is_occupied(ws, r);
+				p=is_occupied(ws, &r);
 			}
 			if(r.y+r.h<maxy && r.x+r.w<maxx){
 				g->x=r.x;
@@ -154,11 +154,11 @@ static bool tiling_placement(WFloatWS *ws, WRectangle *g)
 		}
 	}else{
 		while(r.y<maxy){
-			p=is_occupied(ws, r);
+			p=is_occupied(ws, &r);
 			while(p!=NULL && r.x+r.w<maxx){
 				ggeom(p, &r2);
 				r.x=r2.x+r2.w+1;
-				p=is_occupied(ws, r);
+				p=is_occupied(ws, &r);
 			}
 			if(r.y+r.h<maxy && r.x+r.w<maxx){
 				g->x=r.x;

@@ -114,7 +114,7 @@ static void wmsg_scrolldown(WMessage *wmsg)
 /*{{{ Init, deinit draw config update */
 
 
-static bool wmsg_init(WMessage *wmsg, WWindow *par, WRectangle geom,
+static bool wmsg_init(WMessage *wmsg, WWindow *par, const WRectangle *geom,
 					  const char *msg)
 {
 	char **ptr;
@@ -195,7 +195,7 @@ static bool wmsg_init(WMessage *wmsg, WWindow *par, WRectangle geom,
 }
 
 
-WMessage *create_wmsg(WWindow *par, WRectangle geom, const char *msg)
+WMessage *create_wmsg(WWindow *par, const WRectangle *geom, const char *msg)
 {
 	CREATEOBJ_IMPL(WMessage, wmsg, (p, par, geom, msg));
 }

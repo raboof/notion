@@ -505,7 +505,7 @@ static bool wedln_init_prompt(WEdln *wedln, const char *prompt)
 }
 
 
-static bool wedln_init(WEdln *wedln, WWindow *par, WRectangle geom, 
+static bool wedln_init(WEdln *wedln, WWindow *par, const WRectangle *geom, 
 					   WEdlnCreateParams *params)
 {
 	wedln->vstart=0;
@@ -541,7 +541,8 @@ static bool wedln_init(WEdln *wedln, WWindow *par, WRectangle geom,
 }
 
 
-WEdln *create_wedln(WWindow *par, WRectangle geom, WEdlnCreateParams *params)
+WEdln *create_wedln(WWindow *par, const WRectangle *geom, 
+					WEdlnCreateParams *params)
 {
 	CREATEOBJ_IMPL(WEdln, wedln, (p, par, geom, params));
 }

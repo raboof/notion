@@ -36,7 +36,7 @@
 #define REGION_RQGEOM_H_ONLY	(REGION_RQGEOM_VERT_ONLY|REGION_RQGEOM_WEAK_Y)
 #define REGION_RQGEOM_W_ONLY	(REGION_RQGEOM_HORIZ_ONLY|REGION_RQGEOM_WEAK_X)
 
-typedef void WDrawRubberbandFn(WRootWin *rw, WRectangle geom);
+typedef void WDrawRubberbandFn(WRootWin *rw, const WRectangle *geom);
 
 extern bool begin_resize(WRegion *reg, WDrawRubberbandFn *rubfn,
 						 bool cumulative);
@@ -56,29 +56,32 @@ extern bool may_resize(WRegion *reg);
 /* Note: even if REGION_RQGEOM_(X|Y|W|H) are not all specified, the
  * geom parameter should contain a proper geometry!
  */
-DYNFUN void region_request_managed_geom(WRegion *reg, WRegion *sub,
-										int flags, WRectangle geom,
+DYNFUN void region_request_managed_geom(WRegion *reg, WRegion *sub,int flags, 
+										const WRectangle *geom,
 										WRectangle *geomret);
 
-extern void region_request_geom(WRegion *reg, int flags, WRectangle geom,
+extern void region_request_geom(WRegion *reg, int flags, 
+								const WRectangle *geom,
 								WRectangle *geomret);
 
 /* Implementation for regions that do not allow subregions to resize
  * themselves; default is to give the size the region wants.
  */
 extern void region_request_managed_geom_unallow(WRegion *reg, WRegion *sub,
-												int flags, WRectangle geom,
+												int flags, 
+												const WRectangle *geom,
 												WRectangle *geomret);
 /* default */
 extern void region_request_managed_geom_allow(WRegion *reg, WRegion *sub,
-											  int flags, WRectangle geom, 
+											  int flags, 
+											  const WRectangle *geom, 
 											  WRectangle *geomret);
 
 /* This function expects a root-relative geometry and the client expects
  * the gravity size hint be taken into account.
  */
 DYNFUN void region_request_clientwin_geom(WRegion *reg, WClientWin *cwin,
-										  int flags, WRectangle geom);
+										  int flags, const WRectangle *geom);
 
 DYNFUN void region_resize_hints(WRegion *reg, XSizeHints *hints_ret,
 								uint *relw_ret, uint *relh_ret);

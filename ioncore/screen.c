@@ -38,7 +38,7 @@
 
 
 static bool screen_init(WScreen *scr, WRootWin *rootwin,
-						int id, WRectangle geom, bool useroot)
+						int id, const WRectangle *geom, bool useroot)
 {
 	Window win;
 	XSetWindowAttributes attr;
@@ -60,7 +60,7 @@ static bool screen_init(WScreen *scr, WRootWin *rootwin,
 		attrflags=CWBackPixmap;
 		
 		win=XCreateWindow(wglobal.dpy, WROOTWIN_ROOT(rootwin),
-						  geom.x, geom.y, geom.w, geom.h, 0, 
+						  geom->x, geom->y, geom->w, geom->h, 0, 
 						  DefaultDepth(wglobal.dpy, rootwin->xscr),
 						  InputOutput,
 						  DefaultVisual(wglobal.dpy, rootwin->xscr),
@@ -115,7 +115,7 @@ static bool screen_init(WScreen *scr, WRootWin *rootwin,
 }
 
 
-WScreen *create_screen(WRootWin *rootwin, int id, WRectangle geom,
+WScreen *create_screen(WRootWin *rootwin, int id, const WRectangle *geom,
 					   bool useroot)
 {
 	CREATEOBJ_IMPL(WScreen, screen, (p, rootwin, id, geom, useroot));
@@ -193,15 +193,17 @@ void screen_managed_geom(WScreen *scr, WRectangle *geom)
 /*{{{ region dynfun implementations */
 
 
-static void screen_fit(WScreen *scr, WRectangle geom)
+static void screen_fit(WScreen *scr, const WRectangle *geom)
 {
 	WRegion *sub;
 	
 	if(scr->uses_root){
-		screen_managed_geom(scr, &geom);
+		WRectangle mg;
+		
+		screen_managed_geom(scr, &mg);
 	
 		FOR_ALL_MANAGED_ON_LIST(SCR_MLIST(scr), sub){
-			region_fit(sub, geom);
+			region_fit(sub, &mg);
 		}
 	}else{
 		mplex_fit((WMPlex*)scr, geom);

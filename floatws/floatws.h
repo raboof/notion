@@ -29,12 +29,13 @@ DECLOBJ(WFloatWS){
 };
 
 
-extern WFloatWS *create_floatws(WWindow *parent, WRectangle bounds);
+extern WFloatWS *create_floatws(WWindow *parent, const WRectangle *bounds);
 
 extern WRegion *floatws_circulate(WFloatWS *ws);
 extern WRegion *floatws_backcirculate(WFloatWS *ws);
 
-extern WRegion *floatws_load(WWindow *par, WRectangle geom, ExtlTab tab);
+extern WRegion *floatws_load(WWindow *par, const WRectangle *geom, 
+							 ExtlTab tab);
 
 extern bool add_clientwin_floatws_transient(WClientWin *cwin, 
 											const WManageParams *param);

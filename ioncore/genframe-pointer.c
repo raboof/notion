@@ -223,7 +223,7 @@ static void p_tabdrag_motion(WGenFrame *genframe, XMotionEvent *ev,
 		g.y=p_tab_y;
 		g.w=REGION_GEOM(tabdrag_infowin).w;
 		g.h=REGION_GEOM(tabdrag_infowin).h;
-		region_fit((WRegion*)tabdrag_infowin, g);
+		region_fit((WRegion*)tabdrag_infowin, &g);
 	}
 }
 

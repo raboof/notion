@@ -31,7 +31,8 @@
 /*{{{ Destroy/create frame */
 
 
-static bool ionframe_init(WIonFrame *frame, WWindow *parent, WRectangle geom)
+static bool ionframe_init(WIonFrame *frame, WWindow *parent, 
+						  const WRectangle *geom)
 {
 	if(!genframe_init((WGenFrame*)frame, parent, geom))
 		return FALSE;
@@ -42,7 +43,7 @@ static bool ionframe_init(WIonFrame *frame, WWindow *parent, WRectangle geom)
 }
 
 
-WIonFrame *create_ionframe(WWindow *parent, WRectangle geom)
+WIonFrame *create_ionframe(WWindow *parent, const WRectangle *geom)
 {
 	CREATEOBJ_IMPL(WIonFrame, ionframe, (p, parent, geom));
 }
@@ -278,7 +279,7 @@ static bool ionframe_save_to_file(WIonFrame *frame, FILE *file, int lvl)
 }
 
 
-WRegion *ionframe_load(WWindow *par, WRectangle geom, ExtlTab tab)
+WRegion *ionframe_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
 {
 	int flags=0;
 	ExtlTab substab, subtab;

@@ -33,21 +33,24 @@
 /*{{{ region dynfun implementations */
 
 
-static void ionws_fit(WIonWS *ws, WRectangle geom)
+static void ionws_fit(WIonWS *ws, const WRectangle *geom)
 {
 	int tmp;
 	
-	REGION_GEOM(ws)=geom;
+	REGION_GEOM(ws)=*geom;
 	
 	if(ws->split_tree==NULL)
 		return;
 	
-	split_tree_resize((WObj*)ws->split_tree, HORIZONTAL, ANY, geom.x,  geom.w);
-	split_tree_resize((WObj*)ws->split_tree, VERTICAL, ANY, geom.y,  geom.h);
+	split_tree_resize((WObj*)ws->split_tree, HORIZONTAL, ANY, 
+					  geom->x, geom->w);
+	split_tree_resize((WObj*)ws->split_tree, VERTICAL, ANY, 
+					  geom->y,  geom->h);
 }
 
 
-static bool reparent_ionws(WIonWS *ws, WWindow *parent, WRectangle geom)
+static bool reparent_ionws(WIonWS *ws, WWindow *parent, 
+						   const WRectangle *geom)
 {
 	WRegion *sub, *next;
 	bool rs;
@@ -59,7 +62,7 @@ static bool reparent_ionws(WIonWS *ws, WWindow *parent, WRectangle geom)
 	region_set_parent((WRegion*)ws, (WRegion*)parent);
 	
 	FOR_ALL_MANAGED_ON_LIST_W_NEXT(ws->managed_list, sub, next){
-		if(!reparent_region(sub, parent, REGION_GEOM(sub))){
+		if(!reparent_region(sub, parent, &REGION_GEOM(sub))){
 			warn("Problem: can't reparent a %s managed by a WIonWS"
 				 "being reparented. Detaching from this object.",
 				 WOBJ_TYPESTR(sub));
@@ -123,7 +126,7 @@ static bool ionws_display_managed(WIonWS *ws, WRegion *reg)
 
 
 static WIonFrame *create_initial_frame(WIonWS *ws, WWindow *parent,
-									   WRectangle geom)
+									   const WRectangle *geom)
 {
 	WIonFrame *frame;
 	
@@ -139,7 +142,8 @@ static WIonFrame *create_initial_frame(WIonWS *ws, WWindow *parent,
 }
 
 
-static bool ionws_init(WIonWS *ws, WWindow *parent, WRectangle bounds, bool ci)
+static bool ionws_init(WIonWS *ws, WWindow *parent, const WRectangle *bounds, 
+					   bool ci)
 {
 	genws_init(&(ws->genws), parent, bounds);
 	ws->split_tree=NULL;
@@ -155,13 +159,13 @@ static bool ionws_init(WIonWS *ws, WWindow *parent, WRectangle bounds, bool ci)
 }
 
 
-WIonWS *create_ionws(WWindow *parent, WRectangle bounds, bool ci)
+WIonWS *create_ionws(WWindow *parent, const WRectangle *bounds, bool ci)
 {
 	CREATEOBJ_IMPL(WIonWS, ionws, (p, parent, bounds, ci));
 }
 
 
-WIonWS *create_ionws_simple(WWindow *parent, WRectangle bounds)
+WIonWS *create_ionws_simple(WWindow *parent, const WRectangle *bounds)
 {
 	return create_ionws(parent, bounds, TRUE);
 }
@@ -265,10 +269,11 @@ static bool ionws_save_to_file(WIonWS *ws, FILE *file, int lvl)
 
 
 extern void set_split_of(WObj *obj, WWsSplit *split);
-static WObj *load_obj(WIonWS *ws, WWindow *par, WRectangle geom, ExtlTab tab);
+static WObj *load_obj(WIonWS *ws, WWindow *par, const WRectangle *geom, 
+					  ExtlTab tab);
 
 
-static WObj *load_split(WIonWS *ws, WWindow *par, WRectangle geom,
+static WObj *load_split(WIonWS *ws, WWindow *par, const WRectangle *geom,
 						ExtlTab tab)
 {
 	WWsSplit *split;
@@ -300,27 +305,27 @@ static WObj *load_split(WIonWS *ws, WWindow *par, WRectangle geom,
 		return NULL;
 	}
 		
-	geom2=geom;
+	geom2=*geom;
 	if(dir==HORIZONTAL){
 		if(tls+brs==0)
-			tls=geom.w/2;
+			tls=geom->w/2;
 		else
-			tls=geom.w*tls/(tls+brs);
+			tls=geom->w*tls/(tls+brs);
 		geom2.w=tls;
 	}else{
 		if(tls+brs==0)
-			tls=geom.h/2;
+			tls=geom->h/2;
 		else
-		tls=geom.h*tls/(tls+brs);
+		tls=geom->h*tls/(tls+brs);
 		geom2.h=tls;
 	}
 	
 	if(extl_table_gets_t(tab, "tl", &subtab)){
-		tl=load_obj(ws, par, geom2, subtab);
+		tl=load_obj(ws, par, &geom2, subtab);
 		extl_unref_table(subtab);
 	}
 
-	geom2=geom;
+	geom2=*geom;
 	if(tl!=NULL){
 		if(dir==HORIZONTAL){
 			geom2.w-=tls;
@@ -332,7 +337,7 @@ static WObj *load_split(WIonWS *ws, WWindow *par, WRectangle geom,
 	}
 			
 	if(extl_table_gets_t(tab, "br", &subtab)){
-		br=load_obj(ws, par, geom2, subtab);
+		br=load_obj(ws, par, &geom2, subtab);
 		extl_unref_table(subtab);
 	}
 	
@@ -352,7 +357,7 @@ static WObj *load_split(WIonWS *ws, WWindow *par, WRectangle geom,
 }
 
 
-static WObj *load_obj(WIonWS *ws, WWindow *par, WRectangle geom,
+static WObj *load_obj(WIonWS *ws, WWindow *par, const WRectangle *geom,
 					  ExtlTab tab)
 {
 	char *typestr;
@@ -370,7 +375,7 @@ static WObj *load_obj(WIonWS *ws, WWindow *par, WRectangle geom,
 }
 
 
-WRegion *ionws_load(WWindow *par, WRectangle geom, ExtlTab tab)
+WRegion *ionws_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
 {
 	WIonWS *ws;
 	ExtlTab treetab;

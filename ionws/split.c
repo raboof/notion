@@ -129,7 +129,7 @@ static int reg_resize(WRegion *reg, int dir, int npos, int nsize)
 		/*wwin->flags&=~WWINDOW_WFORCED;*/
 	}
 	
-	region_fit(reg, geom);
+	region_fit(reg, &geom);
 	
 	return nsize;
 }
@@ -550,7 +550,7 @@ static void adjust_d(int *d, int negmax, int posmax)
 
 
 static void ionws_request_managed_geom_dir(WIonWS *ws, WRegion *sub, 
-										   int flags, WRectangle geom,
+										   int flags, const WRectangle *geom,
 										   WRectangle *geomret, int dir)
 {
 	bool horiz=(dir==HORIZONTAL);
@@ -563,10 +563,10 @@ static void ionws_request_managed_geom_dir(WIonWS *ws, WRegion *sub,
 	{
 		int x, w, w2, ox, ow;
 		if(horiz){
-			x=geom.x; w=geom.w;
+			x=geom->x; w=geom->w;
 			ox=REGION_GEOM(sub).x; ow=REGION_GEOM(sub).w;
 		}else{
-			x=geom.y; w=geom.h;
+			x=geom->y; w=geom->h;
 			ox=REGION_GEOM(sub).y; ow=REGION_GEOM(sub).h;
 		}
 		
@@ -645,7 +645,7 @@ static void ionws_request_managed_geom_dir(WIonWS *ws, WRegion *sub,
 
 
 void ionws_request_managed_geom(WIonWS *ws, WRegion *sub, 
-								int flags, WRectangle geom,
+								int flags, const WRectangle *geom,
 								WRectangle *geomret)
 {
 	ionws_request_managed_geom_dir(ws, sub, flags, geom, geomret, HORIZONTAL);
@@ -659,7 +659,7 @@ void ionws_request_managed_geom(WIonWS *ws, WRegion *sub,
 /*{{{ Split */
 
 
-WWsSplit *create_split(int dir, WObj *tl, WObj *br, WRectangle geom)
+WWsSplit *create_split(int dir, WObj *tl, WObj *br, const WRectangle *geom)
 {
 	WWsSplit *split=ALLOC(WWsSplit);
 	
@@ -673,7 +673,7 @@ WWsSplit *create_split(int dir, WObj *tl, WObj *br, WRectangle geom)
 	split->dir=dir;
 	split->tl=tl;
 	split->br=br;
-	split->geom=geom;
+	split->geom=*geom;
 	split->parent=NULL;
 	split->current=0;
 	
@@ -724,7 +724,7 @@ static WRegion *do_split_at(WIonWS *ws, WObj *obj, int dir, int primn,
 	 */
 	geom=split_tree_geom(obj);
 	
-	nsplit=create_split(dir, NULL, NULL, geom);
+	nsplit=create_split(dir, NULL, NULL, &geom);
 	
 	if(nsplit==NULL)
 		return NULL;
@@ -742,7 +742,7 @@ static WRegion *do_split_at(WIonWS *ws, WObj *obj, int dir, int primn,
 	par=REGION_PARENT_CHK(ws, WWindow);
 	assert(par!=NULL);
 	
-	nreg=fn(par, geom);
+	nreg=fn(par, &geom);
 	
 	if(nreg==NULL){
 		free(nsplit);

@@ -23,12 +23,13 @@ DECLOBJ(WIonFrame){
 };
 
 
-extern WIonFrame* create_ionframe(WWindow *parent, WRectangle geom);
+extern WIonFrame* create_ionframe(WWindow *parent, const WRectangle *geom);
 extern void ionframe_draw_config_updated(WIonFrame *frame);
 extern void ionframe_draw_bar(const WIonFrame *frame, bool complete);
 extern void ionframe_draw(const WIonFrame *frame, bool complete);
 
-extern WRegion *ionframe_load(WWindow *par, WRectangle geom, ExtlTab tab);
+extern WRegion *ionframe_load(WWindow *par, const WRectangle *geom, 
+							  ExtlTab tab);
 
 extern void ionframe_toggle_shade(WIonFrame *frame);
 

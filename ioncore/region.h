@@ -103,7 +103,7 @@ DECLOBJ(WRegion){
 								 : PREV_MANAGED_WRAP(LIST, LIST))
 
 
-DYNFUN void region_fit(WRegion *reg, WRectangle geom);
+DYNFUN void region_fit(WRegion *reg, const WRectangle *geom);
 DYNFUN void region_map(WRegion *reg);
 DYNFUN void region_unmap(WRegion *reg);
 /* Use set_focus instead of region_set_focus_to handler itself when
@@ -128,7 +128,8 @@ extern bool region_display(WRegion *reg);
 extern bool region_display_sp(WRegion *reg);
 extern bool region_goto(WRegion *reg);
 
-extern void region_init(WRegion *reg, WRegion *parent, WRectangle geom);
+extern void region_init(WRegion *reg, WRegion *parent, 
+						const WRectangle *geom);
 extern void region_deinit(WRegion *reg);
 
 extern void region_got_focus(WRegion *reg);

@@ -18,9 +18,9 @@
 #include "window.h"
 #include "extl.h"
 
-typedef WRegion *WRegionLoadCreateFn(WWindow *par, WRectangle geom,
+typedef WRegion *WRegionLoadCreateFn(WWindow *par, const WRectangle *geom,
 									 ExtlTab tab);
-typedef WRegion *WRegionSimpleCreateFn(WWindow *par, WRectangle geom);
+typedef WRegion *WRegionSimpleCreateFn(WWindow *par, const WRectangle *geom);
 
 
 extern bool register_region_class(WObjDescr *descr,

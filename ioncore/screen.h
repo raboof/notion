@@ -38,7 +38,8 @@ DECLOBJ(WScreen){
 
 #include "rootwin.h"
 
-extern WScreen *create_screen(WRootWin *rootwin, int id, WRectangle geom,
+extern WScreen *create_screen(WRootWin *rootwin, int id, 
+							  const WRectangle *geom,
 							  bool useroot);
 
 extern bool screen_initialize_workspaces(WScreen *scr);

@@ -68,9 +68,9 @@ bool extl_table_gets_geom(ExtlTab tab, const char *nam,
 }
 
 
-void pgeom(const char *n, WRectangle g)
+void pgeom(const char *n, const WRectangle *g)
 {
-	fprintf(stderr, "%s %d, %d; %d, %d\n", n, g.x, g.y, g.w, g.h);
+	fprintf(stderr, "%s %d, %d; %d, %d\n", n, g->x, g->y, g->w, g->h);
 }
 
 

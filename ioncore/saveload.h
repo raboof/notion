@@ -19,7 +19,8 @@
 
 extern bool region_supports_save(WRegion *reg);
 DYNFUN bool region_save_to_file(WRegion *reg, FILE *file, int lvl);
-extern WRegion *load_create_region(WWindow *par, WRectangle geom, ExtlTab tab);
+extern WRegion *load_create_region(WWindow *par, const WRectangle *geom, 
+								   ExtlTab tab);
 
 extern void write_escaped_string(FILE *file, const char *str);
 extern void begin_saved_region(WRegion *reg, FILE *file, int lvl);
@@ -31,7 +32,7 @@ extern bool save_workspaces();
 
 extern WRegion *region_add_managed_load(WRegion *mgr, ExtlTab tab);
 
-extern void save_geom(WRectangle geom, FILE *file, int lvl);
+extern void save_geom(const WRectangle *geom, FILE *file, int lvl);
 
 extern void enable_workspace_saves(bool enable);
 

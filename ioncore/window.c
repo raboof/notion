@@ -47,7 +47,7 @@ void window_release(WWindow *wwin)
 }
 
 
-bool reparent_region(WRegion *reg, WWindow *par, WRectangle geom)
+bool reparent_region(WRegion *reg, WWindow *par, const WRectangle *geom)
 {
 	bool ret=FALSE;
 	CALL_DYN_RET(ret, bool, reparent_region, reg, (reg, par, geom));
@@ -61,7 +61,8 @@ bool reparent_region(WRegion *reg, WWindow *par, WRectangle geom)
 /*{{{ Init, create */
 
 
-bool window_init(WWindow *wwin, WWindow *parent, Window win, WRectangle geom)
+bool window_init(WWindow *wwin, WWindow *parent, Window win, 
+				 const WRectangle *geom)
 {
 	region_init(&(wwin->region), (WRegion*)parent, geom);
 	
@@ -75,7 +76,7 @@ bool window_init(WWindow *wwin, WWindow *parent, Window win, WRectangle geom)
 }
 
 
-bool window_init_new(WWindow *p, WWindow *parent, WRectangle geom)
+bool window_init_new(WWindow *p, WWindow *parent, const WRectangle *geom)
 {
 	Window win;
 	
@@ -140,27 +141,27 @@ WRegion *find_window_t(Window win, const WObjDescr *descr)
 
 
 static void reparent_or_fit_window(WWindow *wwin, Window parwin,
-								   WRectangle geom)
+								   const WRectangle *geom)
 {
-	bool move=(REGION_GEOM(wwin).x!=geom.x ||
-			   REGION_GEOM(wwin).y!=geom.y);
+	bool move=(REGION_GEOM(wwin).x!=geom->x ||
+			   REGION_GEOM(wwin).y!=geom->y);
 
 	if(parwin!=None){
-		XReparentWindow(wglobal.dpy, wwin->win, parwin, geom.x, geom.y);
-		XResizeWindow(wglobal.dpy, wwin->win, geom.w, geom.h);
+		XReparentWindow(wglobal.dpy, wwin->win, parwin, geom->x, geom->y);
+		XResizeWindow(wglobal.dpy, wwin->win, geom->w, geom->h);
 	}else{
-		XMoveResizeWindow(wglobal.dpy, wwin->win, geom.x, geom.y,
-						  geom.w, geom.h);
+		XMoveResizeWindow(wglobal.dpy, wwin->win, geom->x, geom->y,
+						  geom->w, geom->h);
 	}
 	
-	REGION_GEOM(wwin)=geom;
+	REGION_GEOM(wwin)=*geom;
 
 	if(move)
 		region_notify_subregions_move(&(wwin->region));
 }
 
 
-bool reparent_window(WWindow *wwin, WWindow *parent, WRectangle geom)
+bool reparent_window(WWindow *wwin, WWindow *parent, const WRectangle *geom)
 {
 	if(!same_rootwin((WRegion*)wwin, (WRegion*)parent))
 		return FALSE;
@@ -172,7 +173,7 @@ bool reparent_window(WWindow *wwin, WWindow *parent, WRectangle geom)
 }
 
 
-void window_fit(WWindow *wwin, WRectangle geom)
+void window_fit(WWindow *wwin, const WRectangle *geom)
 {
 	reparent_or_fit_window(wwin, None, geom);
 }

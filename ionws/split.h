@@ -45,7 +45,8 @@ DECLOBJ(WWsSplit){
 };
 
 
-extern WWsSplit *create_split(int dir, WObj *tl, WObj *br, WRectangle geom);
+extern WWsSplit *create_split(int dir, WObj *tl, WObj *br, 
+							  const WRectangle *geom);
 extern int split_tree_do_calcresize(WObj *node_, int dir, int primn, 
 									int nsize);
 extern void split_tree_resize(WObj *node, int dir, int primn,
@@ -63,7 +64,7 @@ extern void ionws_add_managed(WIonWS *ws, WRegion *reg);
 extern void ionws_managed_activated(WIonWS *ws, WRegion *reg);
 extern WRegion *ionws_find_rescue_manager_for(WIonWS *ws, WRegion *reg);
 extern void ionws_request_managed_geom(WIonWS *ws, WRegion *reg,
-									   int flags, WRectangle geom,
+									   int flags, const WRectangle *geom,
 									   WRectangle *geomret);
 extern void ionws_remove_managed(WIonWS *ws, WRegion *reg);
 

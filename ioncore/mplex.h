@@ -30,13 +30,13 @@ DECLOBJ(WMPlex){
 
 /* Create/destroy */
 extern bool mplex_init(WMPlex *mplex, WWindow *parent,
-					   Window win, WRectangle geom);
+					   Window win, const WRectangle *geom);
 extern void mplex_deinit(WMPlex *mplex);
 
 /* Resize and reparent */
 extern bool mplex_reparent(WMPlex *mplex, WWindow *parent,
-						   WRectangle geom);
-extern void mplex_fit(WMPlex *mplex, WRectangle geom);
+						   const WRectangle *geom);
+extern void mplex_fit(WMPlex *mplex, const WRectangle *geom);
 extern void mplex_fit_managed(WMPlex *mplex);
 
 /* Mapping */

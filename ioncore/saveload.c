@@ -32,7 +32,8 @@
 
 static bool loading_workspaces=FALSE;
 
-WRegion *load_create_region(WWindow *par, WRectangle geom, ExtlTab tab)
+WRegion *load_create_region(WWindow *par, const WRectangle *geom, 
+							ExtlTab tab)
 {
 	char *objclass, *name;
 	WRegionLoadCreateFn* fn;
@@ -147,11 +148,11 @@ void begin_saved_region(WRegion *reg, FILE *file, int lvl)
 }*/
 
 
-void save_geom(WRectangle geom, FILE *file, int lvl)
+void save_geom(const WRectangle *geom, FILE *file, int lvl)
 {
 	save_indent_line(file, lvl);
 	fprintf(file, "geom = { x = %d, y = %d, w = %d, h = %d},\n",
-			geom.x, geom.y, geom.w, geom.h);
+			geom->x, geom->y, geom->w, geom->h);
 }
 
 

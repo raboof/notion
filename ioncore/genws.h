@@ -22,7 +22,7 @@ DECLOBJ(WGenWS){
 	WRegion reg;
 };
 
-extern void genws_init(WGenWS *ws, WWindow *parent, WRectangle geom);
+extern void genws_init(WGenWS *ws, WWindow *parent, const WRectangle *geom);
 extern void genws_deinit(WGenWS *ws);
 
 #endif /* ION_IONCORE_GENWS_H */

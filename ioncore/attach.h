@@ -22,7 +22,8 @@
 /* Attach helpers */
 
 
-typedef WRegion *WRegionAttachHandler(WWindow *parent, WRectangle geom, 
+typedef WRegion *WRegionAttachHandler(WWindow *parent, 
+									  const WRectangle *geom, 
 									  void *param);
 	
 typedef WRegion *WRegionDoAttachFn(WRegion *reg, 

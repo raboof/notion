@@ -30,7 +30,7 @@ extern void extl_table_sets_geom(ExtlTab tab, const char *nam,
 extern bool extl_table_is_bool_set(ExtlTab tab, const char *entry);
 
 /* Debugging */
-extern void pgeom(const char *n, WRectangle g);
+extern void pgeom(const char *n, const WRectangle *g);
 
 #endif /* ION_IONCORE_EXTLCONV_H */
 

@@ -45,15 +45,15 @@ DECLOBJ(WGenFrame){
 
 
 /* Create/destroy */
-extern WGenFrame *create_genframe(WWindow *parent, WRectangle geom);
+extern WGenFrame *create_genframe(WWindow *parent, const WRectangle *geom);
 extern bool genframe_init(WGenFrame *genframe, WWindow *parent,
-						  WRectangle geom);
+						  const WRectangle *geom);
 extern void genframe_deinit(WGenFrame *genframe);
 
 /* Resize and reparent */
 extern bool genframe_reparent(WGenFrame *genframe, WWindow *parent,
-							  WRectangle geom);
-extern void genframe_fit(WGenFrame *genframe, WRectangle geom);
+							  const WRectangle *geom);
+extern void genframe_fit(WGenFrame *genframe, const WRectangle *geom);
 extern void genframe_resize_hints(WGenFrame *genframe, XSizeHints *hints_ret,
 								  uint *relw_ret, uint *relh_ret);
 

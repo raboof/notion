@@ -40,9 +40,9 @@
 /*{{{ Init & deinit */
 
 
-void region_init(WRegion *reg, WRegion *parent, WRectangle geom)
+void region_init(WRegion *reg, WRegion *parent, const WRectangle *geom)
 {
-	reg->geom=geom;
+	reg->geom=*geom;
 	reg->flags=0;
 	reg->bindings=NULL;
 	
@@ -128,7 +128,7 @@ void region_deinit(WRegion *reg)
 /*{{{ Dynfuns */
 
 
-void region_fit(WRegion *reg, WRectangle geom)
+void region_fit(WRegion *reg, const WRectangle *geom)
 {
 	CALL_DYN(region_fit, reg, (reg, geom));
 }

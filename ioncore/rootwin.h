@@ -61,7 +61,7 @@ extern void rootwin_manage_initial_windows(WRootWin *rootwin);
 extern bool setup_rootwins();
 
 extern Window create_simple_window(WRootWin *rootwin, Window par,
-								   WRectangle geom);
+								   const WRectangle *geom);
 
 extern WRootWin *find_rootwin_for_root(Window root);
 

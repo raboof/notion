@@ -51,7 +51,8 @@ static void genframe_free_titles(WGenFrame *genframe);
 /*{{{ Destroy/create genframe */
 
 
-bool genframe_init(WGenFrame *genframe, WWindow *parent, WRectangle geom)
+bool genframe_init(WGenFrame *genframe, WWindow *parent, 
+				   const WRectangle *geom)
 {
 	Window win;
 	
@@ -86,7 +87,7 @@ bool genframe_init(WGenFrame *genframe, WWindow *parent, WRectangle geom)
 }
 
 
-WGenFrame *create_genframe(WWindow *parent, WRectangle geom)
+WGenFrame *create_genframe(WWindow *parent, const WRectangle *geom)
 {
 	CREATEOBJ_IMPL(WGenFrame, genframe, (p, parent, geom));
 }
@@ -380,22 +381,23 @@ static void reparent_or_fit(WGenFrame *genframe, const WRectangle *geom,
 }
 
 
-bool genframe_reparent(WGenFrame *genframe, WWindow *parent, WRectangle geom)
+bool genframe_reparent(WGenFrame *genframe, WWindow *parent, 
+					   const WRectangle *geom)
 {
 	if(!same_rootwin((WRegion*)genframe, (WRegion*)parent))
 		return FALSE;
 	
 	region_detach_parent((WRegion*)genframe);
 	region_set_parent((WRegion*)genframe, (WRegion*)parent);
-	reparent_or_fit(genframe, &geom, parent);
+	reparent_or_fit(genframe, geom, parent);
 	
 	return TRUE;
 }
 
 
-void genframe_fit(WGenFrame *genframe, WRectangle geom)
+void genframe_fit(WGenFrame *genframe, const WRectangle *geom)
 {
-	reparent_or_fit(genframe, &geom, NULL);
+	reparent_or_fit(genframe, geom, NULL);
 }
 
 
@@ -656,7 +658,7 @@ void genframe_draw_config_updated(WGenFrame *genframe)
 	FOR_ALL_TYPED_CHILDREN(genframe, sub, WRegion){
 		region_draw_config_updated(sub);
 		if(REGION_MANAGER(sub)==(WRegion*)genframe)
-			region_fit(sub, geom);
+			region_fit(sub, &geom);
 	}
 	
 	genframe_recalc_bar(genframe);

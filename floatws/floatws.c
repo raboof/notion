@@ -37,13 +37,14 @@
 /*{{{ region dynfun implementations */
 
 
-static void floatws_fit(WFloatWS *ws, WRectangle geom)
+static void floatws_fit(WFloatWS *ws, const WRectangle *geom)
 {
-	REGION_GEOM(ws)=geom;
+	REGION_GEOM(ws)=*geom;
 }
 
 
-static bool reparent_floatws(WFloatWS *ws, WWindow *parent, WRectangle geom)
+static bool reparent_floatws(WFloatWS *ws, WWindow *parent, 
+							 const WRectangle *geom)
 {
 	WRegion *sub, *next;
 	bool rs;
@@ -52,19 +53,19 @@ static bool reparent_floatws(WFloatWS *ws, WWindow *parent, WRectangle geom)
 	if(!same_rootwin((WRegion*)ws, (WRegion*)parent))
 		return FALSE;
 	
-	XReparentWindow(wglobal.dpy, ws->dummywin, parent->win, geom.x, geom.h);
+	XReparentWindow(wglobal.dpy, ws->dummywin, parent->win, geom->x, geom->h);
 					
 	region_detach_parent((WRegion*)ws);
 	region_set_parent((WRegion*)ws, (WRegion*)parent);
 	
-	xdiff=geom.x-REGION_GEOM(ws).x;
-	ydiff=geom.y-REGION_GEOM(ws).y;
+	xdiff=geom->x-REGION_GEOM(ws).x;
+	ydiff=geom->y-REGION_GEOM(ws).y;
 	
 	FOR_ALL_MANAGED_ON_LIST_W_NEXT(ws->managed_list, sub, next){
 		WRectangle g=REGION_GEOM(sub);
 		g.x+=xdiff;
 		g.y+=ydiff;
-		if(!reparent_region(sub, parent, g)){
+		if(!reparent_region(sub, parent, &g)){
 			warn("Problem: can't reparent a %s managed by a WFloatWS"
 				 "being reparented. Detaching from this object.",
 				 WOBJ_TYPESTR(sub));
@@ -180,13 +181,14 @@ WRegion* floatws_current(WFloatWS *ws)
 /*{{{ Create/destroy */
 
 
-static bool floatws_init(WFloatWS *ws, WWindow *parent, WRectangle bounds)
+static bool floatws_init(WFloatWS *ws, WWindow *parent, 
+						 const WRectangle *bounds)
 {
 	if(!WOBJ_IS(parent, WWindow))
 		return FALSE;
 
 	ws->dummywin=XCreateWindow(wglobal.dpy, parent->win,
-								bounds.x, bounds.y, 1, 1, 0,
+								bounds->x, bounds->y, 1, 1, 0,
 								CopyFromParent, InputOnly,
 								CopyFromParent, 0, NULL);
 	if(ws->dummywin==None)
@@ -209,7 +211,7 @@ static bool floatws_init(WFloatWS *ws, WWindow *parent, WRectangle bounds)
 }
 
 
-WFloatWS *create_floatws(WWindow *parent, WRectangle bounds)
+WFloatWS *create_floatws(WWindow *parent, const WRectangle *bounds)
 {
 	CREATEOBJ_IMPL(WFloatWS, floatws, (p, parent, bounds));
 }
@@ -284,7 +286,7 @@ static WRegion *floatws_do_attach(WFloatWS *ws, WRegionAttachHandler *fn,
 	par=REGION_PARENT_CHK(ws, WWindow);
 	assert(par!=NULL);
 	
-	reg=fn(par, *geom, fnparams);
+	reg=fn(par, geom, fnparams);
 
 	if(reg!=NULL)
 		floatws_add_managed(ws, reg);
@@ -370,7 +372,7 @@ static bool floatws_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
 		if(!respectpos)
 			floatws_calc_placement(ws, &fgeom);
 		
-		target=(WMPlex*)create_floatframe(par, fgeom);
+		target=(WMPlex*)create_floatframe(par, &fgeom);
 	
 		if(target==NULL){
 			warn("Failed to create a new WFloatFrame for client window");
@@ -419,7 +421,7 @@ static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
 	fgeom.x=x-fgeom.x;
 	fgeom.y=y-fgeom.y;
 
-	target=create_floatframe(par, fgeom);
+	target=create_floatframe(par, &fgeom);
 	
 	if(target==NULL){
 		warn("Failed to create a new WFloatFrame.");
@@ -532,7 +534,7 @@ static bool floatws_save_to_file(WFloatWS *ws, FILE *file, int lvl)
 		save_indent_line(file, lvl+1);
 		fprintf(file, "{\n");
 		if(region_save_to_file((WRegion*)mgd, file, lvl+2))
-			save_geom(REGION_GEOM(mgd), file, lvl+2);
+			save_geom(&REGION_GEOM(mgd), file, lvl+2);
 		save_indent_line(file, lvl+1);
 		fprintf(file, "},\n");
 	}
@@ -543,7 +545,7 @@ static bool floatws_save_to_file(WFloatWS *ws, FILE *file, int lvl)
 }
 
 
-WRegion *floatws_load(WWindow *par, WRectangle geom, ExtlTab tab)
+WRegion *floatws_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
 {
 	WFloatWS *ws;
 	ExtlTab substab, subtab;

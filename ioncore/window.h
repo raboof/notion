@@ -32,8 +32,9 @@ DECLOBJ(WWindow){
 
 
 extern bool window_init(WWindow *p, WWindow *parent,
-						Window win, WRectangle geom);
-extern bool window_init_new(WWindow *p, WWindow *parent, WRectangle geom);
+						Window win, const WRectangle *geom);
+extern bool window_init_new(WWindow *p, WWindow *parent, 
+							const WRectangle *geom);
 extern void window_deinit(WWindow *win);
 
 extern WRegion *find_window(Window win);
@@ -48,12 +49,14 @@ DYNFUN void window_release(WWindow *wwin);
 extern void window_map(WWindow *wwin);
 extern void window_unmap(WWindow *wwin);
 extern void window_set_focus_to(WWindow *wwin, bool warp);
-extern void window_fit(WWindow *wwin, WRectangle geom);
-extern bool reparent_window(WWindow *wwin, WWindow *parent, WRectangle geom);
+extern void window_fit(WWindow *wwin, const WRectangle *geom);
+extern bool reparent_window(WWindow *wwin, WWindow *parent, 
+							const WRectangle *geom);
 
 extern Window window_restack(WWindow *wwin, Window other, int mode);
 extern void do_restack_window(Window win, Window other, int stack_mode);
 
-DYNFUN bool reparent_region(WRegion *reg, WWindow *target, WRectangle geom);
+DYNFUN bool reparent_region(WRegion *reg, WWindow *target, 
+							const WRectangle *geom);
 
 #endif /* ION_IONCORE_WINDOW_H */

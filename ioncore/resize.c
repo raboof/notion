@@ -72,20 +72,20 @@ void region_resize_hints(WRegion *reg, XSizeHints *hints_ret,
 /*{{{ Size/position display and rubberband */
 
 
-static void draw_rubberbox(WRootWin *rw, WRectangle rect)
+static void draw_rubberbox(WRootWin *rw, const WRectangle *rect)
 {
 	XPoint fpts[5];
 	
-	fpts[0].x=rect.x;
-	fpts[0].y=rect.y;
-	fpts[1].x=rect.x+rect.w;
-	fpts[1].y=rect.y;
-	fpts[2].x=rect.x+rect.w;
-	fpts[2].y=rect.y+rect.h;
-	fpts[3].x=rect.x;
-	fpts[3].y=rect.y+rect.h;
-	fpts[4].x=rect.x;
-	fpts[4].y=rect.y;
+	fpts[0].x=rect->x;
+	fpts[0].y=rect->y;
+	fpts[1].x=rect->x+rect->w;
+	fpts[1].y=rect->y;
+	fpts[2].x=rect->x+rect->w;
+	fpts[2].y=rect->y+rect->h;
+	fpts[3].x=rect->x;
+	fpts[3].y=rect->y+rect->h;
+	fpts[4].x=rect->x;
+	fpts[4].y=rect->y;
 	
 	XDrawLines(wglobal.dpy, WROOTWIN_ROOT(rw), rw->xor_gc, fpts, 5, 
 			   CoordModeOrigin);
@@ -152,7 +152,7 @@ static void setup_moveres_display(WWindow *parent, int cx, int cy)
 	g.x=cx-g.w/2;
 	g.y=cy-g.h/2;
 	
-	region_fit((WRegion*)moveres_infowin, g);
+	region_fit((WRegion*)moveres_infowin, &g);
 	region_map((WRegion*)moveres_infowin);
 }
 
@@ -204,9 +204,9 @@ static void res_draw_rubberband(WRootWin *rootwin)
 	rgeom.y+=parent_ry;
 
 	if(tmprubfn==NULL)
-		draw_rubberbox(rootwin, rgeom);
+		draw_rubberbox(rootwin, &rgeom);
 	else
-		tmprubfn(rootwin, rgeom);
+		tmprubfn(rootwin, &rgeom);
 }
 
 
@@ -261,8 +261,9 @@ static void do_end_resize(WRegion *reg, bool dors)
 	if(XOR_RESIZE){
 		res_draw_rubberband(rootwin);
 		if(dors){
+			WRectangle g2=tmpgeom;
 			region_request_geom(reg, tmprqflags&~REGION_RQGEOM_TRYONLY,
-								tmpgeom, &tmpgeom);
+								&g2, &tmpgeom);
 		}
 		XUngrabServer(wglobal.dpy);
 	}
@@ -409,7 +410,7 @@ static void delta_moveres(WRegion *reg, int dx1, int dx2, int dy1, int dy2,
 	if(XOR_RESIZE)
 		res_draw_rubberband(rootwin);
 	
-	region_request_geom(reg, tmprqflags, geom, &tmpgeom);
+	region_request_geom(reg, tmprqflags, &geom, &tmpgeom);
 
 	if(!resize_cumulative){
 		tmpdx1=0;
@@ -478,7 +479,7 @@ bool cancel_resize()
 /*{{{ Request */
 
 
-void region_request_geom(WRegion *reg, int flags, WRectangle geom,
+void region_request_geom(WRegion *reg, int flags, const WRectangle *geom,
 						 WRectangle *geomret)
 {
 	bool tryonly=(flags&REGION_RQGEOM_TRYONLY);
@@ -508,6 +509,7 @@ EXTL_EXPORT_MEMBER_AS(WRegion, request_geom)
 ExtlTab region_request_geom_extl(WRegion *reg, ExtlTab g)
 {
 	WRectangle geom=REGION_GEOM(reg);
+	WRectangle ogeom=REGION_GEOM(reg);
 	int flags=REGION_RQGEOM_WEAK_ALL;
 	
 	if(extl_table_gets_i(g, "x", &(geom.x)))
@@ -519,14 +521,14 @@ ExtlTab region_request_geom_extl(WRegion *reg, ExtlTab g)
 	if(extl_table_gets_i(g, "h", &(geom.h)))
 	   flags&=~REGION_RQGEOM_WEAK_H;
 	
-	region_request_geom(reg, flags, geom, &geom);
+	region_request_geom(reg, flags, &geom, &ogeom);
 	
-	return geom_to_extltab(&geom);
+	return geom_to_extltab(&ogeom);
 }
 
 
 void region_request_managed_geom(WRegion *mgr, WRegion *reg,
-								 int flags, WRectangle geom,
+								 int flags, const WRectangle *geom,
 								 WRectangle *geomret)
 {
 	CALL_DYN(region_request_managed_geom, mgr,
@@ -535,18 +537,18 @@ void region_request_managed_geom(WRegion *mgr, WRegion *reg,
 
 
 void region_request_clientwin_geom(WRegion *mgr, WClientWin *cwin,
-								   int flags, WRectangle geom)
+								   int flags, const WRectangle *geom)
 {
 	CALL_DYN(region_request_clientwin_geom, mgr, (mgr, cwin, flags, geom));
 }
 
 
 void region_request_managed_geom_allow(WRegion *mgr, WRegion *reg,
-									   int flags, WRectangle geom,
+									   int flags, const WRectangle *geom,
 									   WRectangle *geomret)
 {
 	if(geomret!=NULL)
-		*geomret=geom;
+		*geomret=*geom;
 	
 	if(!(flags&REGION_RQGEOM_TRYONLY))
 		region_fit(reg, geom);
@@ -554,7 +556,7 @@ void region_request_managed_geom_allow(WRegion *mgr, WRegion *reg,
 
 
 void region_request_managed_geom_unallow(WRegion *mgr, WRegion *reg,
-										 int flags, WRectangle geom,
+										 int flags, const WRectangle *geom,
 										 WRectangle *geomret)
 {
 	if(geomret!=NULL)
@@ -588,20 +590,20 @@ void genframe_restore_size(WGenFrame *frame, bool horiz, bool vert)
 	}
 	
 	if((rqf&REGION_RQGEOM_WEAK_ALL)!=REGION_RQGEOM_WEAK_ALL)
-		region_request_geom((WRegion*)frame, rqf, geom, NULL);
+		region_request_geom((WRegion*)frame, rqf, &geom, NULL);
 }
 
 
 static bool trymaxv(WGenFrame *frame, WRegion *mgr, int tryonlyflag)
 {
-	WRectangle geom=REGION_GEOM(frame);
+	WRectangle geom=REGION_GEOM(frame), rgeom;
 	geom.y=0;
 	geom.h=REGION_GEOM(mgr).h;
 	region_request_geom((WRegion*)frame, 
 						tryonlyflag|REGION_RQGEOM_VERT_ONLY, 
-						geom, &geom);
-	return (abs(geom.y-REGION_GEOM(frame).y)>1 ||
-			abs(geom.h-REGION_GEOM(frame).h)>1);
+						&geom, &rgeom);
+	return (abs(rgeom.y-REGION_GEOM(frame).y)>1 ||
+			abs(rgeom.h-REGION_GEOM(frame).h)>1);
 }
 
 
@@ -633,14 +635,14 @@ void genframe_maximize_vert(WGenFrame *frame)
 
 static bool trymaxh(WGenFrame *frame, WRegion *mgr, int tryonlyflag)
 {
-	WRectangle geom=REGION_GEOM(frame);
+	WRectangle geom=REGION_GEOM(frame), rgeom;
 	geom.x=0;
 	geom.w=REGION_GEOM(mgr).w;
 	region_request_geom((WRegion*)frame, 
 						tryonlyflag|REGION_RQGEOM_HORIZ_ONLY, 
-						geom, &geom);
-	return (abs(geom.x-REGION_GEOM(frame).x)>1 ||
-			abs(geom.w-REGION_GEOM(frame).w)>1);
+						&geom, &rgeom);
+	return (abs(rgeom.x-REGION_GEOM(frame).x)>1 ||
+			abs(rgeom.w-REGION_GEOM(frame).w)>1);
 }
 				   
 /*EXTL_DOC
@@ -679,7 +681,7 @@ void genframe_do_toggle_shade(WGenFrame *frame, int shaded_h)
 	}
 	
 	region_request_geom((WRegion*)frame, REGION_RQGEOM_H_ONLY,
-						geom, NULL);
+						&geom, NULL);
 }
 
 

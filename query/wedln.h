@@ -47,7 +47,7 @@ DECLOBJ(WEdln){
 	ExtlFn completor;
 };
 
-extern WEdln *create_wedln(WWindow *par, WRectangle geom,
+extern WEdln *create_wedln(WWindow *par, const WRectangle *geom,
 						   WEdlnCreateParams *p);
 extern void wedln_finish(WEdln *wedln);
 extern void wedln_paste(WEdln *wedln);

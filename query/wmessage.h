@@ -25,7 +25,7 @@ DECLOBJ(WMessage){
 	WListing listing;
 };
 
-extern WMessage *create_wmsg(WWindow *par, WRectangle geom,
+extern WMessage *create_wmsg(WWindow *par, const WRectangle *geom,
 							 const char *msg);
 
 #endif /* ION_QUERY_WMESSAGE_H */

@@ -26,10 +26,10 @@
 /*{{{ Find */
 
 
-static bool coord_not_in_rect(int x, int y, WRectangle geom)
+static bool coord_not_in_rect(int x, int y, const WRectangle *geom)
 {
-	return (x<geom.x || x>=(geom.x+geom.w) ||
-			y<geom.y || y>=(geom.y+geom.h));
+	return (x<geom->x || x>=(geom->x+geom->w) ||
+			y<geom->y || y>=(geom->y+geom->h));
 }
 
 
@@ -40,14 +40,14 @@ static WObj *do_find_at(WObj *obj, int x, int y)
 	if(!WOBJ_IS(obj, WWsSplit)){
 		if(!WOBJ_IS(obj, WRegion))
 			return NULL;
-		if(coord_not_in_rect(x, y, REGION_GEOM((WRegion*)obj)))
+		if(coord_not_in_rect(x, y, &REGION_GEOM((WRegion*)obj)))
 			return NULL;
 		return obj;
 	}
 	
 	split=(WWsSplit*)obj;
 	
-	if(coord_not_in_rect(x, y, split->geom))
+	if(coord_not_in_rect(x, y, &(split->geom)))
 		return NULL;
 	
 	obj=do_find_at(split->tl, x, y);

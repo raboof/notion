@@ -42,7 +42,7 @@
 
 
 bool mplex_init(WMPlex *mplex, WWindow *parent, Window win,
-				WRectangle geom)
+				const WRectangle *geom)
 {
 	mplex->managed_count=0;
 	mplex->managed_list=NULL;
@@ -146,22 +146,22 @@ static void reparent_or_fit(WMPlex *mplex, const WRectangle *geom,
 }
 
 
-bool mplex_reparent(WMPlex *mplex, WWindow *parent, WRectangle geom)
+bool mplex_reparent(WMPlex *mplex, WWindow *parent, const WRectangle *geom)
 {
 	if(!same_rootwin((WRegion*)mplex, (WRegion*)parent))
 		return FALSE;
 	
 	region_detach_parent((WRegion*)mplex);
 	region_set_parent((WRegion*)mplex, (WRegion*)parent);
-	reparent_or_fit(mplex, &geom, parent);
+	reparent_or_fit(mplex, geom, parent);
 	
 	return TRUE;
 }
 
 
-void mplex_fit(WMPlex *mplex, WRectangle geom)
+void mplex_fit(WMPlex *mplex, const WRectangle *geom)
 {
-	reparent_or_fit(mplex, &geom, NULL);
+	reparent_or_fit(mplex, geom, NULL);
 }
 
 
@@ -176,26 +176,27 @@ void mplex_fit_managed(WMPlex *mplex)
 	mplex_managed_geom(mplex, &geom);
 	
 	FOR_ALL_MANAGED_ON_LIST(mplex->managed_list, sub){
-		region_fit(sub, geom);
+		region_fit(sub, &geom);
 	}
 	
 	if(mplex->current_input!=NULL)
-		region_fit(mplex->current_input, geom);
+		region_fit(mplex->current_input, &geom);
 }
 
 
 static void mplex_request_managed_geom(WMPlex *mplex, WRegion *sub,
-									   int flags, WRectangle geom, 
+									   int flags, const WRectangle *geom, 
 									   WRectangle *geomret)
 {
+	WRectangle mg;
 	/* Just try to give it the maximum size */
-	mplex_managed_geom(mplex, &geom);
+	mplex_managed_geom(mplex, &mg);
 	
 	if(geomret!=NULL)
-		*geomret=geom;
+		*geomret=mg;
 	
 	if(!(flags&REGION_RQGEOM_TRYONLY))
-		region_fit(sub, geom);
+		region_fit(sub, &mg);
 }
 
 
@@ -386,7 +387,7 @@ static WRegion *mplex_do_attach(WMPlex *mplex, WRegionAttachHandler *fn,
 	
 	mplex_managed_geom(mplex, &geom);
 	
-	reg=fn((WWindow*)mplex, geom, fnparams);
+	reg=fn((WWindow*)mplex, &geom, fnparams);
 	
 	if(reg==NULL)
 		return NULL;
@@ -598,7 +599,7 @@ WRegion *mplex_add_input(WMPlex *mplex, WRegionAttachHandler *fn, void *fnp)
 		return NULL;
 	
 	mplex_managed_geom(mplex, &geom);
-	sub=fn((WWindow*)mplex, geom, fnp);
+	sub=fn((WWindow*)mplex, &geom, fnp);
 	
 	if(sub==NULL)
 		return NULL;

@@ -24,7 +24,7 @@ bool infowin_init(WInfoWin* p, WWindow *parent, const WRectangle *geom,
 {
 	XSetWindowAttributes attr;
 	
-	if(!window_init_new(&(p->wwin), parent, *geom))
+	if(!window_init_new(&(p->wwin), parent, geom))
 		return FALSE;
 
 	p->buffer=ALLOC_N(char, WINFOWIN_BUFFER_LEN);

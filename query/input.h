@@ -25,10 +25,10 @@ DECLOBJ(WInput){
 };
 
 
-extern bool input_init(WInput *input, WWindow *par, WRectangle geom);
+extern bool input_init(WInput *input, WWindow *par, const WRectangle *geom);
 extern void input_deinit(WInput *input);
 
-extern void input_fit(WInput *input, WRectangle geom);
+extern void input_fit(WInput *input, const WRectangle *geom);
 extern void input_refit(WInput *input);
 extern void input_cancel(WInput *input);
 extern void input_draw_config_updated(WInput *input);

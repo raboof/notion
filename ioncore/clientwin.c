@@ -270,7 +270,7 @@ static bool clientwin_init(WClientWin *cwin, WRegion *parent,
 							   -cwin->orig_bw, -cwin->orig_bw);
 	}
 
-	region_init(&(cwin->region), parent, geom);
+	region_init(&(cwin->region), parent, &geom);
 
 	cwin->max_geom=geom;
 	cwin->last_h_rq=geom.h;
@@ -369,7 +369,7 @@ static void get_transient_for(WClientWin *cwin, WManageParams *param)
 }
 
 
-static WClientWin *postmanage_check(WClientWin *cwin,
+static WClientWin *postmanage_check (WClientWin *cwin,
 									XWindowAttributes *attr)
 {
 	/* Check that the window exists. The previous check and selectinput
@@ -531,7 +531,7 @@ static WRegion *clientwin_do_attach_transient(WClientWin *cwin,
 		geom.y+=geom.h*2;
 	}
 	
-	reg=fn(par, geom, fnparams);
+	reg=fn(par, &geom, fnparams);
 	
 	if(reg==NULL)
 		return NULL;
@@ -811,40 +811,40 @@ static void do_reparent_clientwin(WClientWin *cwin, Window win, int x, int y)
 }
 
 
-static void convert_geom(WClientWin *cwin, WRectangle max_geom,
+static void convert_geom(WClientWin *cwin, const WRectangle *max_geom,
 						 WRectangle *geom)
 {
 	WRectangle r;
 	bool bottom=FALSE;
-	int htry=max_geom.h;
+	int htry=max_geom->h;
 	
 	/* Align transients managed by another client window at bottom. */
 	/*if(cwin->transient_for!=None){*/
 	if(REGION_MANAGER(cwin)!=NULL &&
 	   WOBJ_IS(REGION_MANAGER(cwin), WClientWin)){
 		bottom=TRUE;
-		if(max_geom.h>cwin->last_h_rq)
+		if(max_geom->h>cwin->last_h_rq)
 			htry=cwin->last_h_rq;
 	}
 	
-	geom->w=max_geom.w;
+	geom->w=max_geom->w;
 	geom->h=htry;
 	
 	/* Don't ignore minimum size at first try. */
 	if(bottom)
 		correct_size(&(geom->w), &(geom->h), &(cwin->size_hints), TRUE);
-	if(!bottom || geom->w>max_geom.w || geom->h>max_geom.h){
-		geom->w=max_geom.w;
+	if(!bottom || geom->w>max_geom->w || geom->h>max_geom->h){
+		geom->w=max_geom->w;
 		geom->h=htry;
 		correct_size(&(geom->w), &(geom->h), &(cwin->size_hints), FALSE);
 	}
 
-	geom->x=max_geom.x+max_geom.w/2-geom->w/2;
+	geom->x=max_geom->x+max_geom->w/2-geom->w/2;
 	
 	if(bottom)
-		geom->y=max_geom.y+max_geom.h-geom->h;
+		geom->y=max_geom->y+max_geom->h-geom->h;
 	else
-		geom->y=max_geom.y+max_geom.h/2-geom->h/2;
+		geom->y=max_geom->y+max_geom->h/2-geom->h/2;
 	
 	if(geom->h<=1)
 		geom->h=1;
@@ -860,7 +860,7 @@ static void convert_geom(WClientWin *cwin, WRectangle max_geom,
 
 
 static void clientwin_request_managed_geom(WClientWin *cwin, WRegion *sub,
-										   int flags, WRectangle geom, 
+										   int flags, const WRectangle *geom, 
 										   WRectangle *geomret)
 {
 	WRectangle rgeom=cwin->max_geom;
@@ -869,12 +869,12 @@ static void clientwin_request_managed_geom(WClientWin *cwin, WRegion *sub,
 		*geomret=rgeom;
 	
 	if(!(flags&REGION_RQGEOM_TRYONLY))
-		region_fit(sub, rgeom);
+		region_fit(sub, &rgeom);
 }
 
 
 
-static void do_fit_clientwin(WClientWin *cwin, WRectangle max_geom, 
+static void do_fit_clientwin(WClientWin *cwin, const WRectangle *max_geom, 
 							 WWindow *np)
 {
 	WRegion *transient, *next;
@@ -889,7 +889,7 @@ static void do_fit_clientwin(WClientWin *cwin, WRectangle max_geom,
 			 REGION_GEOM(cwin).w!=geom.w ||
 			 REGION_GEOM(cwin).h!=geom.h);
 	
-	cwin->max_geom=max_geom;
+	cwin->max_geom=*max_geom;
 	REGION_GEOM(cwin)=geom;
 	
 	if(np==NULL && !changes)
@@ -900,7 +900,7 @@ static void do_fit_clientwin(WClientWin *cwin, WRectangle max_geom,
 	
 	if(cwin->flags&CWIN_PROP_ACROBATIC && !REGION_IS_MAPPED(cwin)){
 		XMoveResizeWindow(wglobal.dpy, cwin->win,
-						  -2*max_geom.w, -2*max_geom.h, geom.w, geom.h);
+						  -2*max_geom->w, -2*max_geom->h, geom.w, geom.h);
 	}else{
 		XMoveResizeWindow(wglobal.dpy, cwin->win,
 						  geom.x, geom.y, geom.w, geom.h);
@@ -924,13 +924,14 @@ static void do_fit_clientwin(WClientWin *cwin, WRectangle max_geom,
 }
 
 
-static void clientwin_fit(WClientWin *cwin, WRectangle geom)
+static void clientwin_fit(WClientWin *cwin, const WRectangle *geom)
 {
 	do_fit_clientwin(cwin, geom, NULL);
 }
 
 
-static bool reparent_clientwin(WClientWin *cwin, WWindow *par, WRectangle geom)
+static bool reparent_clientwin(WClientWin *cwin, WWindow *par, 
+							   const WRectangle *geom)
 {
 	int rootx, rooty;
 	
@@ -1165,11 +1166,11 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 		mgr=region_manager((WRegion*)cwin);
 		if(mgr!=NULL && HAS_DYN(mgr, region_request_clientwin_geom)){
 			/* Manager gets to decide how to handle position request. */
-			region_request_clientwin_geom(mgr, cwin, rqflags, geom);
+			region_request_clientwin_geom(mgr, cwin, rqflags, &geom);
 		}else{
 			region_convert_root_geom(region_parent((WRegion*)cwin),
 									 &geom);
-			region_request_geom((WRegion*)cwin, rqflags, geom, NULL);
+			region_request_geom((WRegion*)cwin, rqflags, &geom, NULL);
 		}
 	}
 
@@ -1229,13 +1230,14 @@ static bool clientwin_save_to_file(WClientWin *cwin, FILE *file, int lvl)
 }
 
 
-WRegion *clientwin_load(WWindow *par, WRectangle geom, ExtlTab tab)
+WRegion *clientwin_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
 {
 	double wind=0;
 	Window win=None;
 	int chkc=0, real_chkc=0;
 	WClientWin *cwin=NULL;
 	XWindowAttributes attr;
+	WRectangle rg;
 
 	if(!extl_table_gets_d(tab, "windowid", &wind) ||
 	   !extl_table_gets_i(tab, "checkcode", &chkc)){
@@ -1265,21 +1267,22 @@ WRegion *clientwin_load(WWindow *par, WRectangle geom, ExtlTab tab)
 		return NULL;
 	}
 
-	attr.x=geom.x;
-	attr.y=geom.y;
-	attr.width=geom.w;
-	attr.height=geom.h;
+	attr.x=geom->x;
+	attr.y=geom->y;
+	attr.width=geom->w;
+	attr.height=geom->h;
 
 	cwin=create_clientwin((WRegion*)par, win, &attr);
 	
-	if(cwin!=NULL){
-		/* Reparent and resize taking limits set by size hints into account */
-		convert_geom(cwin, geom, &geom);
-		REGION_GEOM(cwin)=geom;
-		do_reparent_clientwin(cwin, par->win, geom.x, geom.y);
-		XResizeWindow(wglobal.dpy, win, geom.w, geom.h);
-	}
-
+	if(cwin==NULL)
+		return FALSE;
+	
+	/* Reparent and resize taking limits set by size hints into account */
+	convert_geom(cwin, geom, &rg);
+	REGION_GEOM(cwin)=rg;
+	do_reparent_clientwin(cwin, par->win, rg.x, rg.y);
+	XResizeWindow(wglobal.dpy, win, rg.w, rg.h);
+	
 	return (WRegion*)postmanage_check(cwin, &attr);
 }
 

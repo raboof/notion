@@ -102,10 +102,10 @@ static int my_error_handler(Display *dpy, XErrorEvent *ev)
 /*{{{ Utility functions */
 
 
-Window create_simple_window(WRootWin *rw, Window par, WRectangle geom)
+Window create_simple_window(WRootWin *rw, Window par, const WRectangle *geom)
 {
 	return XCreateSimpleWindow(wglobal.dpy, par,
-							   geom.x, geom.y, geom.w, geom.h,
+							   geom->x, geom->y, geom->w, geom->h,
 							   0, 0, BlackPixel(wglobal.dpy, rw->xscr));
 }
 
@@ -248,7 +248,7 @@ static WRootWin *preinit_rootwin(int xscr)
 	geom.w=DisplayWidth(dpy, xscr);
 	geom.h=DisplayHeight(dpy, xscr);
 	
-	window_init((WWindow*)rootwin, NULL, root, geom);
+	window_init((WWindow*)rootwin, NULL, root, &geom);
 	
 	((WRegion*)rootwin)->flags|=REGION_BINDINGS_ARE_GRABBED;
 	((WRegion*)rootwin)->rootwin=rootwin;
@@ -272,7 +272,7 @@ static WRootWin *preinit_rootwin(int xscr)
 static Atom net_virtual_roots=None;
 
 
-static WScreen *add_screen(WRootWin *rw, int id, WRectangle geom, 
+static WScreen *add_screen(WRootWin *rw, int id, const WRectangle *geom, 
 						   bool useroot)
 {
 	WScreen *scr;
@@ -349,7 +349,7 @@ WRootWin *manage_rootwin(int xscr, bool noxinerama)
 			geom.h=xi[i].height;
 			/*if(nxi==1)
 				useroot=(geom.x==0 && geom.y==0);*/
-			if(!add_screen(rootwin, i, geom, useroot))
+			if(!add_screen(rootwin, i, &geom, useroot))
 				warn("Unable to add viewport for Xinerama screen %d", i);
 		}
 		XFree(xi);
@@ -357,7 +357,7 @@ WRootWin *manage_rootwin(int xscr, bool noxinerama)
 #endif
 	{
 		nxi=1;
-		add_screen(rootwin, xscr, REGION_GEOM(rootwin), TRUE);
+		add_screen(rootwin, xscr, &REGION_GEOM(rootwin), TRUE);
 	}
 	
 	if(rootwin->screen_list==NULL){
@@ -424,7 +424,7 @@ static void rootwin_set_focus_to(WRootWin *rootwin, bool warp)
 }
 
 
-static void rootwin_fit(WRootWin *rootwin, WRectangle geom)
+static void rootwin_fit(WRootWin *rootwin, const WRectangle *geom)
 {
 	warn("Don't know how to rootwin_fit");
 }
@@ -442,7 +442,8 @@ static void rootwin_unmap(WRootWin *rootwin)
 }
 
 
-static bool reparent_rootwin(WRootWin *rootwin, WWindow *par, WRectangle geom)
+static bool reparent_rootwin(WRootWin *rootwin, WWindow *par, 
+							 const WRectangle *geom)
 {
 	warn("Attempt to reparent a root window -- impossible");
 	return FALSE;
@@ -591,7 +592,6 @@ static DynFunTab rootwin_dynfuntab[]={
 	{region_set_focus_to, rootwin_set_focus_to},
 	{(DynFun*)region_x_window, (DynFun*)rootwin_x_window},
 	{(DynFun*)reparent_region, (DynFun*)reparent_rootwin},
-	/*{region_request_managed_geom, region_request_managed_geom_unallow},*/
 	{region_remove_managed, rootwin_remove_managed},
 	END_DYNFUNTAB
 };

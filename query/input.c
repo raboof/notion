@@ -64,13 +64,13 @@ void input_refit(WInput *input)
 {
 	WRectangle geom=input->max_geom;
 	input_calc_size(input, &geom);
-	window_fit(&input->win, geom);
+	window_fit(&input->win, &geom);
 }
 
 
-void input_fit(WInput *input, WRectangle geom)
+void input_fit(WInput *input, const WRectangle *geom)
 {
-	input->max_geom=geom;
+	input->max_geom=*geom;
 	input_refit(input);
 }
 
@@ -102,11 +102,11 @@ void input_draw_config_updated(WInput *input)
 /*{{{ Init/deinit */
 
 
-bool input_init(WInput *input, WWindow *par, WRectangle geom)
+bool input_init(WInput *input, WWindow *par, const WRectangle *geom)
 {
 	Window win;
 
-	input->max_geom=geom;
+	input->max_geom=*geom;
 	
 	win=create_simple_window(ROOTWIN_OF(par), par->win, geom);
 	
