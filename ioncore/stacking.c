@@ -49,8 +49,8 @@ static Window find_lowest_keep_on_top(WWindow *par)
     
     for(i=0; i<nchildren; i++){
         WRegion *other=XWINDOW_REGION_OF(children[i]);
-        
-        if(other->flags&REGION_KEEPONTOP){
+
+        if(other!=NULL && other->flags&REGION_KEEPONTOP){
             lowest=children[i];
             break;
         }
@@ -74,7 +74,7 @@ static Window find_highest_normal(WWindow *par)
     for(i=nchildren-1; i>=0; i--){
         WRegion *other=XWINDOW_REGION_OF(children[i]);
         
-        if(!(other->flags&REGION_KEEPONTOP)){
+        if(other!=NULL && !(other->flags&REGION_KEEPONTOP)){
             highest=children[i];
             break;
         }
