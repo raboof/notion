@@ -87,7 +87,7 @@ void region_unuse_name(WRegion *reg)
 		*startinst='\0';
 	else
 		inst=0;
-	
+
 	if(extl_table_gets_t(ns->alloc_tab, reg->ni.name, &nrtab)){
 		int start=0, n=0;
 		extl_table_cleari(nrtab, inst);
@@ -145,8 +145,6 @@ static int try_inst(WRegion *reg, Namespace *ns, ExtlTab nrtab,
 		return -1;
 	}
 
-	region_unuse_name(reg);
-	
 	reg->ni.name=newname;
 	reg->ni.namespaceinfo=ns;
 	LINK_ITEM(ns->list, reg, ni.ns_next, ni.ns_prev);
@@ -175,16 +173,21 @@ static bool do_use_name(WRegion *reg, Namespace *ns, const char *name,
 	if(parsed_inst>=0 && failchange)
 		return FALSE;
 	
+	/* We must unuse the old name here already to avoid problems if the
+	 * new name is the same. (Should check...)
+	 */
+	region_unuse_name(reg);
+
 	if(!extl_table_gets_t(ns->alloc_tab, name, &nrtab)){
 		nrtab=extl_create_table();
 		extl_table_sets_t(ns->alloc_tab, name, nrtab);
 	}
-	
+
 	if(instrq>=0){
 		ret=try_inst(reg, ns, nrtab, instrq, parsed_inst>=0, name);
 	
-	if(ret!=0 || failchange)
-		extl_unref_table(nrtab);
+		if(ret!=0 || failchange)
+			extl_unref_table(nrtab);
 		return (ret==1);
 	}
 	
@@ -222,7 +225,7 @@ static bool use_name_parseinst(WRegion *reg, Namespace *ns,
 	inst=parseinst(name, &startinst);
 	if(inst>=0){
 		int realnamelen=startinst-name;
-		char *realname=ALLOC_N(char, realnamelen);
+		char *realname=ALLOC_N(char, realnamelen+1);
 		if(realname==NULL){
 			warn_err();
 			/* No return is intended here. */
