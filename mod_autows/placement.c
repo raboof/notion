@@ -89,30 +89,15 @@ static WRegion *find_suitable_target(WIonWS *ws)
 /*}}}*/
 
 
-/*{{{ Code for looking up free space */
-
-
-enum{
-    ACT_NOT_FOUND,
-    ACT_SPLIT_VERTICAL,
-    ACT_SPLIT_HORIZONTAL,
-    ACT_REPLACE_UNUSED,
-    ACT_ATTACH
-};
-
-typedef struct{
-    WSplit *split;
-    int action;
-    int penalty;
-    int split_primn;
-    int dest_w, dest_h;
-} Res;
+/*{{{ Placement penalties */
 
 #define PENALTY_NEVER    INT_MAX
 #define PENALTY_INIT     (INT_MAX-1)
 #define PENALTY_ENDSCALE (-1)
 
-#define REGFIT_FIT_OFFSET 10
+#define FIT_FIT_OFFSET 0
+#define FIT_ACTIVEREG_OFFSET 100
+#define FIT_INACTIVEREG_OFFSET 300
 
 /* grow or shrink pixels */
 static int fit_penalty_scale[][2]={
@@ -165,12 +150,12 @@ static int interp1(int scale[][2], int v)
 static int fit_penalty(int s, int ss)
 {
     int d=ss-s;
-    
-    return interp1(fit_penalty_scale, ss-s);
+    int res=interp1(fit_penalty_scale, ss-s);
+    return (res==PENALTY_NEVER ? res : res+FIT_FIT_OFFSET);
 }
 
-#define hfit_penalty(S1, S2, U, DS) fit_penalty(S1, S2)
-#define vfit_penalty(S1, S2, U, DS) fit_penalty(S1, S2)
+#define hfit_penalty(S, CWIN, SZ, U, DS) fit_penalty(SZ, (S)->geom.w)
+#define vfit_penalty(S, CWIN, SZ, U, DS) fit_penalty(SZ, (S)->geom.h)
 
 
 static int slack_penalty(int s, int ss, int slack, int islack)
@@ -190,10 +175,10 @@ static int slack_penalty(int s, int ss, int slack, int islack)
 
 }
 
-#define hslack_penalty(S1, S2, U, DS) \
-    slack_penalty(S1, S2, (U)->tot_h, (U)->l+(U)->r)
-#define vslack_penalty(S1, S2, U, DS) \
-    slack_penalty(S1, S2, (U)->tot_v, (U)->t+(U)->b)
+#define hslack_penalty(S, CWIN, SZ, U, DS) \
+    slack_penalty(SZ, (S)->geom.w, (U)->tot_h, (U)->l+(U)->r)
+#define vslack_penalty(S, CWIN, SZ, U, DS) \
+    slack_penalty(SZ, (S)->geom.h, (U)->tot_v, (U)->t+(U)->b)
 
 
 static int split_penalty(int s, int ss, int slack)
@@ -201,19 +186,27 @@ static int split_penalty(int s, int ss, int slack)
     return interp1(split_penalty_scale, ss-s);
 }
 
-#define hsplit_penalty(S1, S2, U, DS) split_penalty(S1, S2, (U)->tot_h)
-#define vsplit_penalty(S1, S2, U, DS) split_penalty(S1, S2, (U)->tot_v)
+#define hsplit_penalty(S, CWIN, SZ, U, DS) \
+    split_penalty(SZ, (S)->geom.w, (U)->tot_h)
+#define vsplit_penalty(S, CWIN, SZ, U, DS) \
+    split_penalty(SZ, (S)->geom.h, (U)->tot_v)
 
 
-static int regfit_penalty(int s, int ss)
+static int regfit_penalty(int s, int ss, WRegion *reg)
 {
     int d=ss-s;
     int res=interp1(fit_penalty_scale, ss-s);
-    return (res==PENALTY_NEVER ? res : res+REGFIT_FIT_OFFSET);
+    return (res==PENALTY_NEVER
+            ? res
+            : res+(REGION_IS_ACTIVE(reg)
+                   ? FIT_ACTIVEREG_OFFSET
+                   : FIT_INACTIVEREG_OFFSET));
 }
 
-#define hregfit_penalty(S1, S2) regfit_penalty(S1, S2)
-#define vregfit_penalty(S1, S2) regfit_penalty(S1, S2)
+#define hregfit_penalty(S, CWIN, SZ) \
+    regfit_penalty(SZ, (S)->geom.w, (S)->u.reg)
+#define vregfit_penalty(S, CWIN, SZ) \
+    regfit_penalty(SZ, (S)->geom.h, (S)->u.reg)
 
 
 static int combine(int h, int v)
@@ -225,7 +218,26 @@ static int combine(int h, int v)
 }
 
 
-/* Only split orthogonally to deepest previous 'static' split? */
+/*}}}*/
+
+
+/*{{{ Placement scan */
+
+enum{
+    ACT_NOT_FOUND,
+    ACT_SPLIT_VERTICAL,
+    ACT_SPLIT_HORIZONTAL,
+    ACT_REPLACE_UNUSED,
+    ACT_ATTACH
+};
+
+typedef struct{
+    WSplit *split;
+    int action;
+    int penalty;
+    int split_primn;
+    int dest_w, dest_h;
+} Res;
 
 enum{ 
     P_FIT=0, 
@@ -234,29 +246,38 @@ enum{
     P_N=3
 };
 
-static void scan(WSplit *split, int depth, const WRectangle *geom,
-                 const WSplitUnused *unused, Res *best)
+static void scan(WSplit *split, WClientWin *cwin, int depth, 
+                 const WRectangle *geom, const WSplitUnused *uspc, 
+                 int last_static_dir, Res *best)
 {
     if(split->type==SPLIT_UNUSED){
         int d_w[P_N]={-1, -1, -1};
         int d_h[P_N]={-1, -1, -1};
         int p, p_h[P_N], p_v[P_N];
-        int rqw=geom->w, rqh=geom->h, sw=split->geom.w, sh=split->geom.h;
         int i, j;
         
-        p_h[P_FIT]=hfit_penalty(rqw, sw, unused, &d_w[P_FIT]);
-        p_v[P_FIT]=vfit_penalty(rqh, sh, unused, &d_h[P_FIT]);
-        p_h[P_SLACK]=hslack_penalty(rqw, sw, unused, d_w[P_SLACK]);
-        p_v[P_SLACK]=vslack_penalty(rqh, sh, unused, d_h[P_SLACK]);
-        p_h[P_SPLIT]=hsplit_penalty(rqw, sw, unused, d_w[P_SPLIT]);
-        p_v[P_SPLIT]=vsplit_penalty(rqh, sh, unused, d_h[P_SPLIT]);
+        p_h[P_FIT]=hfit_penalty(split, cwin, geom->w, uspc, &d_w[P_FIT]);
+        p_v[P_FIT]=vfit_penalty(split, cwin, geom->h, uspc, &d_h[P_FIT]);
+        p_h[P_SLACK]=hslack_penalty(split, cwin, geom->w, uspc, d_w[P_SLACK]);
+        p_v[P_SLACK]=vslack_penalty(split, cwin, geom->h, uspc, d_h[P_SLACK]);
+        p_h[P_SPLIT]=hsplit_penalty(split, cwin, geom->w, uspc, d_w[P_SPLIT]);
+        p_v[P_SPLIT]=vsplit_penalty(split, cwin, geom->h, uspc, d_h[P_SPLIT]);
         
-        for(i=0; i<P_N; i++){
-            for(j=0; j<P_N; j++){
+        for(i=0; i<P_N; i++){ /* horizontal loop */
+            for(j=0; j<P_N; j++){ /* vertical loop */
+                
                 /* Don't split both ways. */
                 if(i==P_SPLIT && j==P_SPLIT)
                     continue;
                 
+                /* Only split orthogonally to previous static split, if
+                 * there is one.
+                 */
+                if(last_static_dir==SPLIT_VERTICAL && j==P_SPLIT)
+                    continue;
+                if(last_static_dir==SPLIT_HORIZONTAL && i==P_SPLIT)
+                    continue;
+
                 p=combine(p_h[i], p_v[j]);
                 if(p<best->penalty){
                     best->split=split;
@@ -279,8 +300,8 @@ static void scan(WSplit *split, int depth, const WRectangle *geom,
         
     }else if(split->type==SPLIT_REGNODE){
         int rqw=geom->w, rqh=geom->h, sw=split->geom.w, sh=split->geom.h;
-        int p_h=hregfit_penalty(rqw, sw);
-        int p_v=vregfit_penalty(rqh, sh);
+        int p_h=hregfit_penalty(split, cwin, rqw);
+        int p_v=vregfit_penalty(split, cwin, rqh);
         int p=combine(p_h, p_v);
 
         if(p<best->penalty && OBJ_IS(split->u.reg, WFrame)){
@@ -294,27 +315,30 @@ static void scan(WSplit *split, int depth, const WRectangle *geom,
     }else if(split->type==SPLIT_VERTICAL || split->type==SPLIT_HORIZONTAL){
         WSplit *tl=split->u.s.tl, *br=split->u.s.br;
         WSplitUnused tlunused, brunused, un;
+        
+        if(split->is_static)
+            last_static_dir=split->type;
 
         split_get_unused(tl, &tlunused);
         split_get_unused(br, &brunused);
         if(split->type==SPLIT_VERTICAL){
-            un=*unused;
+            un=*uspc;
             UNUSED_B_ADD(un, brunused, br);
             un.tot_v=brunused.tot_v;
-            scan(tl, depth+1, geom, &un, best);
-            un=*unused;
+            scan(tl, cwin, depth+1, geom, &un, last_static_dir, best);
+            un=*uspc;
             UNUSED_T_ADD(un, tlunused, tl);
             un.tot_v=tlunused.tot_v;
-            scan(br, depth+1, geom, &un, best);
+            scan(br, cwin, depth+1, geom, &un, last_static_dir, best);
         }else if(split->type==SPLIT_HORIZONTAL){
-            un=*unused;
+            un=*uspc;
             UNUSED_R_ADD(un, brunused, br);
             un.tot_h=brunused.tot_h;
-            scan(tl, depth+1, geom, &un, best);
-            un=*unused;
+            scan(tl, cwin, depth+1, geom, &un, last_static_dir, best);
+            un=*uspc;
             UNUSED_L_ADD(un, tlunused, tl);
             un.tot_h=tlunused.tot_h;
-            scan(br, depth+1, geom, &un, best);
+            scan(br, cwin, depth+1, geom, &un, last_static_dir, best);
         }
     }
 }
@@ -468,7 +492,7 @@ bool autows_manage_clientwin(WAutoWS *ws, WClientWin *cwin,
         WSplit **tree=&(ws->ionws.split_tree);
         
         split_update_bounds(*tree, TRUE);
-        scan(*tree, 0, &REGION_GEOM(frame), &unused, &rs);
+        scan(*tree, cwin, 0, &REGION_GEOM(frame), &unused, SPLIT_UNUSED, &rs);
         
         /* Resize */
         if(rs.dest_w>0 || rs.dest_h>0){

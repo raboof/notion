@@ -22,6 +22,7 @@
 #include <ioncore/extl.h>
 #include <ioncore/regbind.h>
 #include <ioncore/extlconv.h>
+#include <ioncore/defer.h>
 #include <mod_ionws/ionws.h>
 #include <mod_ionws/split.h>
 #include "autows.h"
@@ -66,8 +67,17 @@ void autows_managed_remove(WAutoWS *ws, WRegion *reg)
     
     region_remove_bindmap_owned(reg, mod_autows_autows_bindmap, (WRegion*)ws);
     
-    if(other!=NULL && !ds && region_may_control_focus((WRegion*)ws))
-        region_set_focus(other);
+    if(other==NULL){
+        if(region_may_control_focus((WRegion*)ws))
+            genws_fallback_focus((WGenWS*)ws, FALSE);
+        if(ws->ionws.managed_list==NULL && ws->ionws.split_tree!=NULL){
+            ioncore_defer_destroy((Obj*)(ws->ionws.split_tree));
+            ws->ionws.split_tree=NULL;
+        }
+    }else{
+        if(!ds && region_may_control_focus((WRegion*)ws))
+            region_set_focus(other);
+    }
 }
 
 
