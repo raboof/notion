@@ -13,43 +13,54 @@ local ioncore=_G.ioncore
 
 local winprops={}
 
-local function alternative_winprop_idents(id)
-    local function g()
-        for _, c in {id.class, "*"} do
-            for _, r in {id.role, "*"} do
-                for _, i in {id.instance, "*"} do
-                    coroutine.yield(c, r, i)
-                end
+local function ifnil(...)
+    local n=table.getn(arg)
+    local function nxt(_, i)
+        local j=i+1
+        if i==n then
+            return nil
+        else
+            local j=i+1
+            if not arg[j] then
+                return nxt(nil, j)
+            else
+                return j, arg[j]
             end
         end
     end
-    return coroutine.wrap(g)
+            
+    return nxt, nil, 0
+end
+
+local function ipairs_r(tab)
+    local function nxt(_, n)
+        if n==1 then
+            return nil
+        else
+            return n-1, tab[n-1]
+        end
+    end
+    return nxt, nil, table.getn(tab)+1
 end
 
 --DOC
 -- Find winprop table for \var{cwin}.
 function ioncore.getwinprop(cwin)
-    local id, nm=cwin:get_ident(), (cwin:name() or "")
-    local names, prop
+    local id=cwin:get_ident()
+    local props, prop
 
-    for c, r, i in alternative_winprop_idents(id) do
-        names={}
-        pcall(function() names=winprops[c][r][i] or {} end)
-        local match, matchl=names[0], 0
-        for name, prop in names do
-            if type(name)=="string" then
-                local st, en=string.find(nm, name)
-                if st and en then
-                    if en-st>matchl then
-                        match=prop
-                        matchl=en-st
+    for _, c in ifnil(id.class, "*") do
+        for _, r in ifnil(id.role, "*") do
+            for _, i in ifnil(id.instance, "*") do
+                --printpp(c, r, i)
+                props={}
+                pcall(function() props=winprops[c][r][i] or {} end)
+                for _, prop in ipairs_r(props) do
+                    if prop:match(cwin) then
+                        return prop
                     end
                 end
             end
-        end
-        -- no regexp match, use default winprop
-        if match then
-            return match
         end
     end
 end
@@ -68,15 +79,29 @@ local function ensure_winproptab(class, role, instance)
     end
 end    
 
-local function do_add_winprop(class, role, instance, name, props)
+local function do_add_winprop(class, role, instance, name, prop)
     ensure_winproptab(class, role, instance)
-    winprops[class][role][instance][name]=props
+    table.insert(winprops[class][role][instance], prop)
+end
+
+
+local function match_name(prop, cwin)
+    local nm=cwin:name()
+    if not prop.name then
+        return true
+    elseif nm then
+        local st, en=string.find(nm, name)
+        return (st and en)
+    else
+        return false
+    end
 end
 
 --DOC
 -- Define a winprop. For more information, see section \ref{sec:winprops}.
 function ioncore.defwinprop(list)
-    local list2, class, role, instance, name = {}, "*", "*", "*", 0
+    local list2 = {}
+    local class, role, instance = "*", "*", "*"
     
     for k, v in list do
         if k == "class" then
@@ -85,11 +110,12 @@ function ioncore.defwinprop(list)
             role = v
         elseif k == "instance" then
             instance = v
-        elseif k == "name" then
-            name = v
-        else
-            list2[k] = v
         end
+        list2[k] = v
+    end
+    
+    if not list2.match then
+        list2.match=match_name
     end
     
     do_add_winprop(class, role, instance, name, list2)
