@@ -51,6 +51,9 @@ LUA_PATH=/usr/local/lib
 LUA_LIBS = -L$(LUA_PATH) -R$(LUA_PATH) -llua -llualib
 LUA_INCLUDES = -I$(LUA_PATH)/include
 
+# The location of the Lua interpreter is needed for mkexports.lua
+LUA=lua
+
 
 ##
 ## X libraries, includes and options
@@ -167,10 +170,4 @@ BIN_MODE=755
 DATA_MODE=664
 
 STRIP=strip
-
-##
-## Perl (mkexports.pl)
-##
-
-PERL=perl
 
