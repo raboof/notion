@@ -65,8 +65,8 @@ bool edln_init(Edln *edln, const char *dflt);
 void edln_deinit(Edln *edln);
 char* edln_finish(Edln *edln);
 
-void querymod_history_push(const char *str);
-const char *querymod_history_get(int n);
-void querymod_history_clear();
+void mod_query_history_push(const char *str);
+const char *mod_query_history_get(int n);
+void mod_query_history_clear();
 
 #endif /* ION_QUERY_EDLN_H */

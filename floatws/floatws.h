@@ -51,7 +51,7 @@ extern bool floatws_rescue_clientwins(WFloatWS *ws);
 
 /* */
 
-extern bool floatwsmod_clientwin_do_manage(WClientWin *cwin, 
+extern bool mod_floatws_clientwin_do_manage(WClientWin *cwin, 
                                            const WManageParams *param);
 
 /* */

@@ -14,10 +14,10 @@
 
 #include <ioncore/binding.h>
 
-extern bool menumod_init();
-extern void menumod_deinit();
+extern bool mod_menu_init();
+extern void mod_menu_deinit();
 
-extern WBindmap menumod_menu_bindmap;
+extern WBindmap mod_menu_menu_bindmap;
 
 
 #endif /* ION_MENU_MAIN_H */

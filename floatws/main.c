@@ -28,7 +28,7 @@
 
 #include "../version.h"
 
-char floatwsmod_ion_api_version[]=ION_API_VERSION;
+char mod_floatws_ion_api_version[]=ION_API_VERSION;
 
 
 /*}}}*/
@@ -51,14 +51,14 @@ static StringIntMap frame_areas[]={
 
 
 EXTL_EXPORT_AS(global, __defbindings_WFloatFrame)
-bool floatwsmod_defbindings_WFloatFrame(ExtlTab tab)
+bool mod_floatws_defbindings_WFloatFrame(ExtlTab tab)
 {
     return bindmap_do_table(&floatframe_bindmap, frame_areas, tab);
 }
 
 
 EXTL_EXPORT_AS(global, __defbindings_WFloatWS)
-void floatwsmod_defbindings_WFloatWS(ExtlTab tab)
+void mod_floatws_defbindings_WFloatWS(ExtlTab tab)
 {
     bindmap_do_table(&floatws_bindmap, NULL, tab);
 }
@@ -70,16 +70,16 @@ void floatwsmod_defbindings_WFloatWS(ExtlTab tab)
 /*{{{ Init & deinit */
 
 
-extern bool floatwsmod_register_exports();
-extern bool floatwsmod_unregister_exports();
+extern bool mod_floatws_register_exports();
+extern bool mod_floatws_unregister_exports();
 
 
-void floatwsmod_deinit()
+void mod_floatws_deinit()
 {
     REMOVE_HOOK(clientwin_do_manage_alt, 
-                floatwsmod_clientwin_do_manage);
+                mod_floatws_clientwin_do_manage);
 
-    floatwsmod_unregister_exports();
+    mod_floatws_unregister_exports();
     bindmap_deinit(&floatws_bindmap);
     bindmap_deinit(&floatframe_bindmap);
     ioncore_unregister_regclass(&CLASSDESCR(WFloatWS));
@@ -88,9 +88,9 @@ void floatwsmod_deinit()
 
 
 
-bool floatwsmod_init()
+bool mod_floatws_init()
 {
-    if(!floatwsmod_register_exports()){
+    if(!mod_floatws_register_exports()){
         warn_obj("floatws module", "failed to register functions.");
         goto err;
     }
@@ -106,12 +106,12 @@ bool floatwsmod_init()
 
     ioncore_read_config("floatws", NULL, TRUE);
     
-    ADD_HOOK(clientwin_do_manage_alt, floatwsmod_clientwin_do_manage);
+    ADD_HOOK(clientwin_do_manage_alt, mod_floatws_clientwin_do_manage);
 
     return TRUE;
     
 err:
-    floatwsmod_deinit();
+    mod_floatws_deinit();
     return FALSE;
 }
 

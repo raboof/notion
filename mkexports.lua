@@ -241,15 +241,17 @@ function parse(d)
         
         if not st then matcherr(s) end
         
-        if module==global then
+        if module==global or not module then
             mdl=module
             efn=fn
         else
-            st, en, mdl, efn=string.find(fn, "([^_]+)_(.*)")
-            if not mdl or mdl~=module or not efn or efn=="" then
+            mdl=module
+            pfx=mdl.."_"
+            if string.sub(fn, 1, string.len(pfx))~=pfx then
                 error('"'..fn..'" is not a valid function name of format '..
                       'modulename_fnname.')
             end
+            efn=string.sub(fn, string.len(pfx)+1)
         end
         do_do_export(mdl, efn, ot, fn, param)
     end

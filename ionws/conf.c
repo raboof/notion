@@ -29,14 +29,14 @@ static StringIntMap frame_areas[]={
 
 
 EXTL_EXPORT_AS(global, __defbindings_WIonWS)
-bool ionwsmod_defbindings_WIonWS(ExtlTab tab)
+bool mod_ionws_defbindings_WIonWS(ExtlTab tab)
 {
     return bindmap_do_table(&ionws_bindmap, NULL, tab);
 }
 
 
 EXTL_EXPORT_AS(global, __defbindings_WIonFrame)
-bool ionwsmod_defbindings_WIonFrame(ExtlTab tab)
+bool mod_ionws_defbindings_WIonFrame(ExtlTab tab)
 {
     return bindmap_do_table(&ionframe_bindmap, frame_areas, tab);
 }

@@ -12,7 +12,7 @@
 #ifndef ION_IONWS_MAIN_H
 #define ION_IONWS_MAIN_H
 
-extern bool ionwsmod_init();
-extern void ionwsmod_deinit();
+extern bool mod_ionws_init();
+extern void mod_ionws_deinit();
 
 #endif /* ION_IONWS_MAIN_H */

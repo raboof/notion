@@ -30,7 +30,7 @@
  * \fnref{menulib.bigmenu}.
  */
 EXTL_EXPORT
-WMenu *menumod_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab, bool big_mode)
+WMenu *mod_menu_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab, bool big_mode)
 {
     WMenuCreateParams fnp;
 
@@ -57,7 +57,7 @@ WMenu *menumod_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab, bool big_mode)
  * Do not use this function directly. Use \fnref{menulib.pmenu}.
  */
 EXTL_EXPORT
-WMenu *menumod_pmenu(WWindow *where, ExtlFn handler, ExtlTab tab)
+WMenu *mod_menu_pmenu(WWindow *where, ExtlFn handler, ExtlTab tab)
 {
     WScreen *scr;
     WMenuCreateParams fnp;

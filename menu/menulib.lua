@@ -107,7 +107,7 @@ end
 -- so that the menu handler will get the same parameters as the
 -- binding handler.
 function menulib.menu(mplex, sub, menu_or_name) 
-    return do_menu(mplex, sub, menu_or_name, menumod.menu, true)
+    return do_menu(mplex, sub, menu_or_name, mod_menu.menu, true)
 end
 
 --DOC
@@ -115,7 +115,7 @@ end
 -- a style with possibly bigger font and menu entries is used.
 function menulib.bigmenu(mplex, sub, menu_or_name) 
     local function menu_bigmenu(m, s, menu)
-        return menumod.menu(m, s, menu, true)
+        return mod_menu.menu(m, s, menu, true)
     end
     return do_menu(mplex, sub, menu_or_name, menu_bigmenu, true)
 end
@@ -125,7 +125,7 @@ end
 -- be called from a mouse press handler. The parameters are
 -- similar to thos of \fnref{menulib.menu}.
 function menulib.pmenu(win, sub, menu_or_name) 
-    return do_menu(win, sub, menu_or_name, menumod.pmenu)
+    return do_menu(win, sub, menu_or_name, mod_menu.pmenu)
 end
 
 -- }}}
@@ -181,14 +181,14 @@ local function selectstyle(look, where)
     local function writeit()
         local f, err=io.open(fname, 'w')
         if not f then
-            querymod.message(where, err)
+            mod_query.message(where, err)
         else
             f:write(string.format('include("%s")\n', look))
             f:close()
         end
     end
 
-    if not querylib or not querymod then
+    if not querylib or not mod_query then
         if fname then
             writeit()
         end

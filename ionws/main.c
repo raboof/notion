@@ -23,7 +23,7 @@
 
 #include "../version.h"
 
-char ionwsmod_ion_api_version[]=ION_API_VERSION;
+char mod_ionws_ion_api_version[]=ION_API_VERSION;
 
 
 /*}}}*/
@@ -32,13 +32,13 @@ char ionwsmod_ion_api_version[]=ION_API_VERSION;
 /*{{{ Module init & deinit */
 
 
-extern bool ionwsmod_register_exports();
-extern void ionwsmod_unregister_exports();
+extern bool mod_ionws_register_exports();
+extern void mod_ionws_unregister_exports();
 
 
-void ionwsmod_deinit()
+void mod_ionws_deinit()
 {
-    ionwsmod_unregister_exports();
+    mod_ionws_unregister_exports();
     bindmap_deinit(&ionws_bindmap);
     bindmap_deinit(&ionframe_bindmap);
     ioncore_unregister_regclass(&CLASSDESCR(WIonWS));
@@ -63,15 +63,15 @@ static bool register_regions()
 }
 
 
-bool ionwsmod_init()
+bool mod_ionws_init()
 {
-    if(!ionwsmod_register_exports()){
-        warn_obj("ionwsmod", "Unable to register exports");
+    if(!mod_ionws_register_exports()){
+        warn_obj("mod_ionws", "Unable to register exports");
         goto err;
     }
     
     if(!register_regions()){
-        warn_obj("ionwsmod", "Unable to register classes");
+        warn_obj("mod_ionws", "Unable to register classes");
         goto err;
     }
     
@@ -80,7 +80,7 @@ bool ionwsmod_init()
     return TRUE;
     
 err:
-    ionwsmod_deinit();
+    mod_ionws_deinit();
     return FALSE;
 }
 

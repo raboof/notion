@@ -495,7 +495,7 @@ bool menu_init(WMenu *menu, WWindow *par, const WRectangle *geom,
     menu_firstfit(menu, params->submenu_mode, params->ref_x, params->ref_y);
     
     XSelectInput(ioncore_g.dpy, win, IONCORE_EVENTMASK_INPUT);
-    region_add_bindmap((WRegion*)menu, &menumod_menu_bindmap);
+    region_add_bindmap((WRegion*)menu, &mod_menu_menu_bindmap);
     
     return TRUE;
 
@@ -823,7 +823,7 @@ static WTimer scroll_timer=TIMER_INIT(NULL);
  * pixels every 20msec.
  */
 EXTL_EXPORT
-void menumod_set_scroll_params(int delay, int amount)
+void mod_menu_set_scroll_params(int delay, int amount)
 {
     scroll_amount=maxof(0, amount);
     scroll_time=maxof(1, delay);

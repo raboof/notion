@@ -63,7 +63,7 @@
 
 /* Global variables {{{ */
 static const char *modname="dock";
-const char dockmod_ion_api_version[]=ION_API_VERSION;
+const char mod_dock_ion_api_version[]=ION_API_VERSION;
 bool shape_extension=FALSE;
 int shape_event_basep=0;
 int shape_error_basep=0;
@@ -1080,7 +1080,7 @@ static void dock_deinit(WDock *dock)
  * appear. \var{conftab} is the initial configuration table passed to
  * \fnref{WDock.set}.
  */
-EXTL_EXPORT_AS(dockmod, create_dock)
+EXTL_EXPORT_AS(mod_dock, create_dock)
 WDock *create_dock(int screen, ExtlTab conftab)
 {
 
@@ -1272,10 +1272,10 @@ static bool clientwin_do_manage_hook(WClientWin *cwin, const WManageParams *para
 
 /* }}} */
 
-/* dockmod_init {{{ */
-bool dockmod_init()
+/* mod_dock_init {{{ */
+bool mod_dock_init()
 {
-    extern bool dockmod_register_exports();
+    extern bool mod_dock_register_exports();
 
     if(XShapeQueryExtension(ioncore_g.dpy, &shape_event_basep,
                             &shape_error_basep)){
@@ -1284,7 +1284,7 @@ bool dockmod_init()
         XMissingExtension(ioncore_g.dpy, "SHAPE");
     }
 
-    if(!dockmod_register_exports()){
+    if(!mod_dock_register_exports()){
         return FALSE;
     }
 
@@ -1297,11 +1297,11 @@ bool dockmod_init()
 }
 /* }}} */
 
-/* dockmod_deinit {{{ */
-void dockmod_deinit()
+/* mod_dock_deinit {{{ */
+void mod_dock_deinit()
 {
     WDock *dock;
-    extern void dockmod_unregister_exports();
+    extern void mod_dock_unregister_exports();
 
     REMOVE_HOOK(clientwin_do_manage_alt, clientwin_do_manage_hook);
 
@@ -1314,7 +1314,7 @@ void dockmod_deinit()
     }
     /* }}} */
 
-    dockmod_unregister_exports();
+    mod_dock_unregister_exports();
 
 }
 /* }}} */

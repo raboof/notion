@@ -123,7 +123,7 @@ bool input_init(WInput *input, WWindow *par, const WRectangle *geom)
     
     input_refit(input);
     XSelectInput(ioncore_g.dpy, input->win.win, IONCORE_EVENTMASK_INPUT);
-    region_add_bindmap((WRegion*)input, &querymod_input_bindmap);
+    region_add_bindmap((WRegion*)input, &mod_query_input_bindmap);
     
     return TRUE;
     

@@ -76,6 +76,6 @@ extern void menu_motion(WMenu *menu, XMotionEvent *ev, int dx, int dy);
 extern void menu_button(WMenu *menu, XButtonEvent *ev);
 extern int menu_press(WMenu *menu, XButtonEvent *ev, WRegion **reg_ret);
 
-extern void menumod_set_scroll_params(int delay, int amount);
+extern void mod_menu_set_scroll_params(int delay, int amount);
 
 #endif /* ION_MENU_MENU_H */

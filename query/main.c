@@ -28,7 +28,7 @@
 
 #include "../version.h"
 
-char querymod_ion_api_version[]=ION_API_VERSION;
+char mod_query_ion_api_version[]=ION_API_VERSION;
 
 
 /*}}}*/
@@ -37,21 +37,21 @@ char querymod_ion_api_version[]=ION_API_VERSION;
 /*{{{ Bindmaps w/ config */
 
 
-WBindmap querymod_input_bindmap=BINDMAP_INIT;
-WBindmap querymod_wedln_bindmap=BINDMAP_INIT;
+WBindmap mod_query_input_bindmap=BINDMAP_INIT;
+WBindmap mod_query_wedln_bindmap=BINDMAP_INIT;
 
 
 EXTL_EXPORT_AS(global, __defbindings_WInput)
-bool querymod_defbindings_WInput(ExtlTab tab)
+bool mod_query_defbindings_WInput(ExtlTab tab)
 {
-    return bindmap_do_table(&querymod_input_bindmap, NULL, tab);
+    return bindmap_do_table(&mod_query_input_bindmap, NULL, tab);
 }
 
 
 EXTL_EXPORT_AS(global, __defbindings_WEdln)
-bool querymod_defbindings_WEdln(ExtlTab tab)
+bool mod_query_defbindings_WEdln(ExtlTab tab)
 {
-    return bindmap_do_table(&querymod_wedln_bindmap, NULL, tab);
+    return bindmap_do_table(&mod_query_wedln_bindmap, NULL, tab);
 }
 
 /*}}}*/
@@ -60,8 +60,8 @@ bool querymod_defbindings_WEdln(ExtlTab tab)
 /*{{{ Init & deinit */
 
 
-extern bool querymod_register_exports();
-extern void querymod_unregister_exports();
+extern bool mod_query_register_exports();
+extern void mod_query_unregister_exports();
 
 
 static void load_history()
@@ -77,7 +77,7 @@ static void load_history()
     for(i=n; i>=1; i--){
         char *s=NULL;
         if(extl_table_geti_s(tab, i, &s)){
-            querymod_history_push(s);
+            mod_query_history_push(s);
             free(s);
         }
     }
@@ -94,7 +94,7 @@ static void save_history()
     tab=extl_create_table();
 
     for(i=0; ; i++){
-        const char *histent=querymod_history_get(i);
+        const char *histent=mod_query_history_get(i);
         if(!histent)
             break;
         extl_table_seti_s(tab, i+1, histent);
@@ -108,20 +108,20 @@ static void save_history()
 
 static bool loaded_ok=FALSE;
 
-void querymod_deinit()
+void mod_query_deinit()
 {
-    querymod_unregister_exports();
-    bindmap_deinit(&querymod_input_bindmap);
-    bindmap_deinit(&querymod_wedln_bindmap);
+    mod_query_unregister_exports();
+    bindmap_deinit(&mod_query_input_bindmap);
+    bindmap_deinit(&mod_query_wedln_bindmap);
     
     if(loaded_ok)
         save_history();
 }
 
 
-bool querymod_init()
+bool mod_query_init()
 {
-    if(!querymod_register_exports())
+    if(!mod_query_register_exports())
         goto err;
     
     ioncore_read_config("query", NULL, TRUE);
@@ -133,7 +133,7 @@ bool querymod_init()
     return TRUE;
     
 err:
-    querymod_deinit();
+    mod_query_deinit();
     return FALSE;
 }
 

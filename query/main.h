@@ -12,7 +12,7 @@
 #ifndef ION_QUERY_MAIN_H
 #define ION_QUERY_MAIN_H
 
-extern bool querymod_init();
-extern void querymod_deinit();
+extern bool mod_query_init();
+extern void mod_query_deinit();
 
 #endif /* ION_QUERY_MAIN_H */

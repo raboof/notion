@@ -17,9 +17,9 @@ SOURCES=complete.c edln.c input.c listing.c main.c wedln.c \
 
 LUA_SOURCES=querylib.lua
 
-MAKE_EXPORTS=querymod
+MAKE_EXPORTS=mod_query
 
-MODULE=querymod
+MODULE=mod_query
 
 ######################################
 

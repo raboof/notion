@@ -14,9 +14,9 @@ CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
 SOURCES=bindmaps.c conf.c main.c placement.c split.c ionws.c ionframe.c
 
-MAKE_EXPORTS=ionwsmod
+MAKE_EXPORTS=mod_ionws
 
-MODULE=ionwsmod
+MODULE=mod_ionws
 
 ######################################
 

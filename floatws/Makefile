@@ -14,9 +14,9 @@ CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
 SOURCES=main.c floatws.c floatframe.c placement.c
 
-MAKE_EXPORTS=floatwsmod
+MAKE_EXPORTS=mod_floatws
 
-MODULE=floatwsmod
+MODULE=mod_floatws
 
 ######################################
 

@@ -468,7 +468,7 @@ static void wedln_completion_handler(WEdln *wedln, const char *nam)
 
 /*EXTL_DOC
  * This function should be called in completors (such given as
- * parameters to \code{querymod.query}) to return the set of completions
+ * parameters to \code{mod_query.query}) to return the set of completions
  * found. The numerical indexes of \var{completions} list the found
  * completions. If the entry \var{common_part} exists, it gives an
  * extra common prefix of all found completions.
@@ -582,7 +582,7 @@ static bool wedln_init(WEdln *wedln, WWindow *par, const WRectangle *geom,
     wedln->handler=extl_ref_fn(params->handler);
     wedln->completor=extl_ref_fn(params->completor);
 
-    region_add_bindmap((WRegion*)wedln, &querymod_wedln_bindmap);
+    region_add_bindmap((WRegion*)wedln, &mod_query_wedln_bindmap);
     
     return TRUE;
 }

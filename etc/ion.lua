@@ -49,8 +49,8 @@ ioncore.add_shortenrule("(.*)(<[0-9]+>)", "$1$2$|$1$<...$2")
 ioncore.add_shortenrule("(.*)", "$1$|$1$<...")
 
 -- Modules.
-ioncore.load_module("querymod")
-ioncore.load_module("menumod")
-ioncore.load_module("ionwsmod")
-ioncore.load_module("floatwsmod")
---ioncore.load_module("dockmod")
+ioncore.load_module("mod_query")
+ioncore.load_module("mod_menu")
+ioncore.load_module("mod_ionws")
+ioncore.load_module("mod_floatws")
+--ioncore.load_module("mod_dock")

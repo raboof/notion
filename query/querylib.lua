@@ -40,7 +40,7 @@ function querylib.do_query(mplex, prompt, initvalue, handler, completor)
             return
         end
     end
-    querymod.query(mplex, prompt, initvalue, handle_it, completor)
+    mod_query.query(mplex, prompt, initvalue, handle_it, completor)
 end
 
 
@@ -83,7 +83,7 @@ end
 function querylib.lookup_script_warn(mplex, script)
     local script=ioncore.lookup_script(script)
     if not script then
-        querymod.warn(mplex, "Could not find "..script)
+        mod_query.warn(mplex, "Could not find "..script)
     end
     return script
 end
@@ -234,7 +234,7 @@ function querylib.gotoclient_handler(frame, str)
     local cwin=ioncore.lookup_clientwin(str)
     
     if cwin==nil then
-        querymod.warn(frame, string.format('Could not find client window '..
+        mod_query.warn(frame, string.format('Could not find client window '..
                                            'named "%s".', str))
     else
         cwin:goto()
@@ -245,10 +245,10 @@ function querylib.attachclient_handler(frame, str)
     local cwin=ioncore.lookup_clientwin(str)
     
     if not cwin then
-        querymod.warn(frame, string.format('Could not find client window '..
+        mod_query.warn(frame, string.format('Could not find client window '..
                                             'named "%s".', str))
     elseif frame:rootwin_of()~=cwin:rootwin_of() then
-        querymod.warn(frame, "Cannot attach: not on same root window.")
+        mod_query.warn(frame, "Cannot attach: not on same root window.")
     else
         frame:attach(cwin, { switchto = true })
     end
@@ -272,7 +272,7 @@ function querylib.workspace_handler(mplex, name)
     local function handler(mplex, cls)
         local scr=mplex:screen_of()
         if not scr then
-            querymod.warn(mplex, "Unable to create workspace: no screen.")
+            mod_query.warn(mplex, "Unable to create workspace: no screen.")
             return
         end
         
@@ -288,7 +288,7 @@ function querylib.workspace_handler(mplex, name)
                                      })
                                  end)
         if not ws then
-            querymod.warn(mplex, err or "Unknown error")
+            mod_query.warn(mplex, err or "Unknown error")
         end
     end
     
@@ -536,13 +536,13 @@ end
 function querylib.do_handle_lua(mplex, env, code)
     local f, err=loadstring(code)
     if not f then
-        querymod.warn(mplex, err)
+        mod_query.warn(mplex, err)
         return
     end
     setfenv(f, env)
     err=collect_errors(f)
     if err then
-        querymod.warn(mplex, err)
+        mod_query.warn(mplex, err)
     end
 end
 
@@ -651,7 +651,7 @@ end
 --DOC 
 -- Display an "About Ion" message in \var{mplex}.
 function querylib.show_about_ion(mplex)
-    querymod.message(mplex, ioncore.aboutmsg())
+    mod_query.message(mplex, ioncore.aboutmsg())
 end
 
 

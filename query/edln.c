@@ -506,7 +506,7 @@ static char *hist[EDLN_HISTORY_SIZE];
  * Push an entry into line editor history.
  */
 EXTL_EXPORT
-void querymod_history_push(const char *str)
+void mod_query_history_push(const char *str)
 {
     char *strc;
     
@@ -537,7 +537,7 @@ void querymod_history_push(const char *str)
  * Get entry at index \var{n} in line editor history, 0 being the latest.
  */
 EXTL_EXPORT
-const char *querymod_history_get(int n)
+const char *mod_query_history_get(int n)
 {
     int i=0;
     int e=hist_head;
@@ -554,7 +554,7 @@ const char *querymod_history_get(int n)
  * Clear line editor history.
  */
 EXTL_EXPORT
-void querymod_history_clear()
+void mod_query_history_clear()
 {
     while(hist_count!=0){
         free(hist[hist_head]);
@@ -670,7 +670,7 @@ char* edln_finish(Edln *edln)
     char *p=edln->p;
     
     /*if(edln->modified)*/
-    querymod_history_push(p);
+    mod_query_history_push(p);
     
     edln->p=NULL;
     edln->psize=edln->palloced=0;

@@ -23,7 +23,7 @@
  * Display an error message box in the multiplexer \var{mplex}.
  */
 EXTL_EXPORT
-WMessage *querymod_warn(WMPlex *mplex, const char *p)
+WMessage *mod_query_warn(WMPlex *mplex, const char *p)
 {
     char *p2;
     WMessage *wmsg;
@@ -38,7 +38,7 @@ WMessage *querymod_warn(WMPlex *mplex, const char *p)
         return NULL;
     }
     
-    wmsg=querymod_message(mplex, p2);
+    wmsg=mod_query_message(mplex, p2);
     
     free(p2);
     
@@ -49,7 +49,7 @@ WMessage *querymod_warn(WMPlex *mplex, const char *p)
  * Display a message in the \var{mplex}.
  */
 EXTL_EXPORT
-WMessage *querymod_message(WMPlex *mplex, const char *p)
+WMessage *mod_query_message(WMPlex *mplex, const char *p)
 {
     if(p==NULL)
         return NULL;

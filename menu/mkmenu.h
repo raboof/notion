@@ -16,8 +16,8 @@
 #include <ioncore/extl.h>
 #include "menu.h"
 
-extern WMenu *menumod_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab, 
+extern WMenu *mod_menu_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab, 
                            bool big_mode);
-extern WMenu *menumod_pmenu(WWindow *where, ExtlFn handler, ExtlTab tab);
+extern WMenu *mod_menu_pmenu(WWindow *where, ExtlFn handler, ExtlTab tab);
 
 #endif /* ION_MENU_MKMENU_H */

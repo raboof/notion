@@ -17,7 +17,7 @@
 #include <ioncore/extl.h>
 #include "wedln.h"
 
-extern WEdln *querymod_query(WMPlex *mplex, const char *prompt, 
+extern WEdln *mod_query_query(WMPlex *mplex, const char *prompt, 
                              const char *dflt, ExtlFn handler, 
                              ExtlFn completor);
 

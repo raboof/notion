@@ -16,6 +16,6 @@
 #include "floatws.h"
 
 extern void floatws_calc_placement(WFloatWS *ws, WRectangle *geom);
-extern void floatwsmod_set_placement_method(const char *method);
+extern void mod_floatws_set_placement_method(const char *method);
 
 #endif /* ION_FLOATWS__PLACEMENT_H */

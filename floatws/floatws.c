@@ -536,7 +536,7 @@ bool floatws_attach(WFloatWS *ws, WClientWin *cwin, ExtlTab p)
 /* A handler for clientwin_do_manage_alt hook to handle transients for windows
  * on WFloatWS:s differently from the normal behaviour.
  */
-bool floatwsmod_clientwin_do_manage(WClientWin *cwin, 
+bool mod_floatws_clientwin_do_manage(WClientWin *cwin, 
                                     const WManageParams *param)
 {
     WRegion *stack_above;

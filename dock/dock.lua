@@ -3,7 +3,7 @@
 --
 
 -- create a new dock on screen 0
-dock = dockmod.create_dock(0, {
+dock = mod_dock.create_dock(0, {
     name="dock",    -- name for use in target="..." winprops
     hpos="right",    -- horizontal position left|center|right
     vpos="bottom",    -- vertical position top|middle|bottom
