@@ -603,7 +603,8 @@ ExtlTab extl_create_table()
 
 static bool extl_do_globals(lua_State *st, int *refp)
 {
-	*refp=lua_ref(st, LUA_GLOBALSINDEX);
+	lua_pushvalue(st, LUA_GLOBALSINDEX);
+	*refp=lua_ref(st, 1);
 	return TRUE;
 }
 
