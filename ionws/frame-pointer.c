@@ -14,6 +14,9 @@
 #include <wmcore/drawp.h>
 #include <wmcore/attach.h>
 #include <wmcore/resize.h>
+#include <wmcore/funtabs.h>
+#include <wmcore/functionp.h>
+#include <wmcore/grab.h>
 #include "frame.h"
 #include "frame-pointer.h"
 #include "resize.h"
@@ -22,7 +25,7 @@
 #define REGION_LABEL(REG)	((REG)->mgr_data)
 
 
-static int p_tab_x, p_tab_y, p_tabnum;
+static int p_tab_x, p_tab_y, p_tabnum=-1;
 static bool p_tabdrag_active=FALSE;
 static bool p_tabdrag_selected=FALSE;
 static int p_dx1mul=0, p_dx2mul=0, p_dy1mul=0, p_dy2mul=0;
@@ -137,6 +140,45 @@ void frame_release(WFrame *frame)
 /*{{{ Tab drag */
 
 
+static WFunction tabdrag_safe_funtab[]={
+	FN_GLOBAL(l,   "switch_ws_nth",			switch_ws_nth),
+	FN_GLOBAL_VOID("switch_ws_next",		switch_ws_next),
+	FN_GLOBAL_VOID("switch_ws_prev",		switch_ws_prev),
+
+	END_FUNTAB
+};
+
+
+static WFunclist tabdrag_safe_funclist=INIT_FUNCLIST;
+
+
+#define BUTTONS_MASK \
+	(Button1Mask|Button2Mask|Button3Mask|Button4Mask|Button5Mask)
+
+static bool tabdrag_kbd_handler(WRegion *thing, XEvent *xev)
+{
+	XKeyEvent *ev=&xev->xkey;
+	WScreen *scr;
+	WBinding *binding=NULL;
+	WBindmap **bindptr;
+	
+	if(ev->type==KeyRelease)
+		return FALSE;
+	
+	assert(thing && WTHING_IS(thing, WWindow));
+
+	binding=lookup_binding(&wmcore_screen_bindmap, ACT_KEYPRESS,
+						   ev->state&~BUTTONS_MASK, ev->keycode);
+	
+	if(binding!=NULL){
+		call_binding_restricted(binding, (WThing*)viewport_of(thing),
+								&tabdrag_safe_funclist);
+	}
+	
+	return FALSE;
+}
+
+
 static void draw_tabdrag(const WRegion *reg)
 {
 	DrawInfo _dinfo, *dinfo=&_dinfo;
@@ -249,6 +291,8 @@ static void p_tabdrag_end(WFrame *frame, XButtonEvent *ev)
 	WRegion *sub=NULL;
 	Window win=None;
 	
+	grab_remove(tabdrag_kbd_handler);
+
 	wglobal.draw_dragwin=NULL;
 
 	sub=frame->tab_pressed_sub;
@@ -281,11 +325,18 @@ void p_tabdrag_setup(WFrame *frame)
 {
 	if(frame->tab_pressed_sub==NULL)
 		return;
+
+	if(tabdrag_safe_funclist.funtabs==NULL){
+		add_to_funclist(&tabdrag_safe_funclist,
+						tabdrag_safe_funtab);
+	}
 	
 	set_drag_handlers((WRegion*)frame,
 					  (WMotionHandler*)p_tabdrag_begin,
 					  (WMotionHandler*)p_tabdrag_motion,
 					  (WButtonHandler*)p_tabdrag_end);
+	
+	grab_establish((WRegion*)frame, tabdrag_kbd_handler, 0);
 }
 
 

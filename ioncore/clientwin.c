@@ -166,7 +166,8 @@ static bool init_clientwin(WClientWin *cwin, WWindow *parent,
 	cwin->win_geom.w=attr->width;
 	
 	init_region(&(cwin->region), &(parent->region), geom);
-
+	((WRegion*)cwin)->flags|=REGION_HANDLES_MANAGED_ENTER_FOCUS;
+	
 	cwin->flags=0;
 	cwin->win=win;
 	cwin->orig_bw=attr->border_width;
@@ -368,7 +369,7 @@ static void clientwin_add_managed_doit(WClientWin *cwin, WRegion *transient,
 	Window win=None;
 	
 	region_set_manager(transient, (WRegion*)cwin, &(cwin->transient_list));
-
+	
 #if 0
 	/* TODO: restack */
 	t=TOPMOST_TRANSIENT(cwin);

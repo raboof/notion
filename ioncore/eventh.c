@@ -131,7 +131,7 @@ bool handle_event_default(XEvent *ev)
 		handle_expose(&(ev->xexpose));
 		break;
 	CASE_EVENT(KeyPress)
-			keyboard_handler(ev);
+		keyboard_handler(ev);
 		break;
 	CASE_EVENT(KeyRelease)
 		keyboard_handler(ev);
@@ -400,7 +400,7 @@ static void handle_expose(const XExposeEvent *ev)
 static void handle_enter_window(XEvent *ev)
 {
 	XEnterWindowEvent *eev=&(ev->xcrossing);
-	WRegion *reg=NULL;
+	WRegion *reg=NULL, *mgr;
 
 	while(XCheckMaskEvent(wglobal.dpy, EnterWindowMask, ev)){
 		/* We're only interested in the latest enter event */
@@ -419,23 +419,14 @@ static void handle_enter_window(XEvent *ev)
 	if(REGION_IS_ACTIVE(reg))
 		return;
 	
-	/*fprintf(stderr, "Enter %p\n", reg);*/
-
-	/* Client window enter notifies should only be handled when mapped
-	 * directly on the root window: query box focus might be stolen
-	 * if when moving the pointer into a client window in a frame with
-	 * a query box if we always focus on enter window event.
-	 */
-	/*
-	if(WTHING_IS(reg, WClientWin)){
-		WRegion *par=FIND_PARENT1(reg, WRegion);
-		if(par!=NULL && !WTHING_IS(par, WScreen)){
-			if(REGION_IS_ACTIVE(par))
-				return;
-			reg=par;
-		}
-		
-	}*/
+	mgr=reg;
+	while(1){
+		mgr=REGION_MANAGER(mgr);
+		if(mgr==NULL)
+			break;
+		if(mgr->flags&REGION_HANDLES_MANAGED_ENTER_FOCUS)
+			reg=mgr;
+	}
 	
 	set_previous_of(reg);
 	set_focus(reg);
@@ -500,11 +491,11 @@ static void handle_focus_out(const XFocusChangeEvent *ev)
 		return;
 
 	/*fprintf(stderr, "FO: %s %d %d\n", WOBJ_TYPESTR(reg), ev->mode, ev->detail);*/
-	
+
 	if(ev->mode==NotifyGrab)/* || ev->mode==NotifyWhileGrabbed)*/
 	/*if(ev->mode!=NotifyNormal && ev->mode!=NotifyWhileGrabbed)*/
 		return;
-	
+
 	if(WTHING_IS(reg, WWindow)){
 		wwin=(WWindow*)reg;
 		if(wwin->xic!=NULL)
@@ -513,8 +504,8 @@ static void handle_focus_out(const XFocusChangeEvent *ev)
 	
 	if(ev->detail!=NotifyInferior)
 		region_lost_focus(reg);
-	else
-		region_got_focus(reg);
+	/*else
+		region_got_focus(reg);*/
 }
 
 
@@ -578,6 +569,16 @@ static void pointer_handler(XEvent *ev)
 			break;
 		CASE_EVENT(Expose)
 			handle_expose(&(ev->xexpose));
+			break;
+		CASE_EVENT(KeyPress)
+		CASE_EVENT(KeyRelease)
+			call_grab_handler(ev);
+			break;
+		CASE_EVENT(FocusIn)
+			handle_focus_in(&(ev->xfocus));
+			break;
+		CASE_EVENT(FocusOut)
+			handle_focus_out(&(ev->xfocus));
 			break;
 		}
 	}

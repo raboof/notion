@@ -52,8 +52,9 @@ DECLOBJ(WRegion){
 
 #define REGION_MAPPED		0x0001
 #define REGION_ACTIVE		0x0002
-#define REGION_HAS_GRABS	0x0004
+#define REGION_HAS_GRABS 	0x0004
 #define REGION_TAGGED		0x0008
+#define REGION_HANDLES_MANAGED_ENTER_FOCUS 0x0010
 
 #define MARK_REGION_MAPPED(R)	(((WRegion*)(R))->flags|=REGION_MAPPED)
 #define MARK_REGION_UNMAPPED(R)	(((WRegion*)(R))->flags&=~REGION_MAPPED)
@@ -62,7 +63,6 @@ DECLOBJ(WRegion){
 #define REGION_IS_MAPPED(R)		(((WRegion*)(R))->flags&REGION_MAPPED)
 #define REGION_IS_ACTIVE(R)		(((WRegion*)(R))->flags&REGION_ACTIVE)
 #define REGION_IS_TAGGED(R)		(((WRegion*)(R))->flags&REGION_TAGGED)
-
 #define REGION_GEOM(R)  		(((WRegion*)(R))->geom)
 #define REGION_ACTIVE_SUB(R)  	(((WRegion*)(R))->active_sub)
 #define REGION_MANAGER(R)  		(((WRegion*)(R))->manager)

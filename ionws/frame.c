@@ -152,6 +152,7 @@ static bool init_frame(WFrame *frame, WRegion *parent, WRectangle geom,
 		XDestroyWindow(wglobal.dpy, win);
 		return FALSE;
 	}
+	((WRegion*)frame)->flags|=REGION_HANDLES_MANAGED_ENTER_FOCUS;
 	
 	frame->target_id=use_target_id((WRegion*)frame, id);
 	
