@@ -7,8 +7,8 @@
 
 -- global_bindings {{{
 
--- Global_bindings apply to screens. The functions given here should accept
--- WScreens as parameter.
+-- Global_bindings are available all the time. The functions given here 
+-- should accept WScreens as parameter.
 
 global_bindings{
     kpress(DEFAULT_MOD .. "1", function(s) screen_switch_nth(s, 0) end),
@@ -56,8 +56,17 @@ global_bindings{
 -- frame.)
 -- 
 -- The make_*_fn functions are used to call functions on the object currently 
--- managed by the screen or frame or the frame itself. For details see the
--- document "Ion: Configuring and extending with Lua".
+-- managed by the screen or frame or the frame itself. Essentially e.g.
+-- make_current_clientwin_fn(fn) expands to
+-- 
+-- function(mplex)
+--     local reg=mplex_current(mplex)
+--     if obj_is(reg, "WClientWin") then 
+--         fn(reg)
+--     end
+-- end
+-- 
+-- For details see the document "Ion: Configuring and extending with Lua".
 
 mplex_bindings{
     kpress_waitrel(DEFAULT_MOD .. "C", make_current_or_self_fn(region_close)),
@@ -80,8 +89,8 @@ mplex_bindings{
 -- genframe_bindings {{{
 
 -- These bindings are common to all types of frames. The rest of frame
--- bindings are defined in the modules' configuration files, which depend 
--- on this table having been defined.
+-- bindings that differ between frame types are defined in the modules' 
+-- configuration files.
 
 genframe_bindings{
     submap(DEFAULT_MOD.."K") {
@@ -149,8 +158,9 @@ if QueryLib then
         kpress("F9", QueryLib.query_workspace),
     }
     
-    -- Screen-level queries. Queries generally appear in frames to be consistent 
-    -- although do not affect the frame, but these two are special.
+    -- Screen-level queries. Queries generally appear in frames to be 
+    -- consistent although do not affect the frame, but these two are
+    -- special.
     global_bindings{
         kpress(f11key, QueryLib.query_restart),
         kpress(f12key, QueryLib.query_exit),

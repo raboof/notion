@@ -2,8 +2,8 @@
 -- Ion floatws module configuration file
 --
 
--- Workspace bindings for (PWM-style) floating frame workspaces.
--- These should work on any object on the workspace.
+-- Bindings for PWM-style floating frame workspaces. These should work
+-- on any object on the workspace.
 
 floatws_bindings{
     kpress(DEFAULT_MOD .. "Tab",

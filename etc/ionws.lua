@@ -2,8 +2,8 @@
 -- Ion ionws module configuration file
 --
 
--- Workspace bindings for the tiled workspaces.
--- These should work on any object on the workspace.
+-- Bindings for the tiled workspaces (ionws). These should work on any 
+-- object on the workspace.
 
 ionws_bindings{
     kpress(DEFAULT_MOD .. "N", ionws_goto_below),
