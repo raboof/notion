@@ -247,7 +247,7 @@ end
 -- Simple queries for internal actions {{{
 
 
-local function complete_name(str, list)
+function mod_query.complete_name(str, list)
     local entries={}
     local l=string.len(str)
     for i, reg in list do
@@ -268,15 +268,15 @@ local function complete_name(str, list)
 end
 
 function mod_query.complete_clientwin(str)
-    return complete_name(str, ioncore.clientwin_list())
+    return mod_query.complete_name(str, ioncore.clientwin_list())
 end
 
 function mod_query.complete_workspace(str)
-    return complete_name(str, ioncore.region_list("WGenWS"))
+    return mod_query.complete_name(str, ioncore.region_list("WGenWS"))
 end
 
 function mod_query.complete_region(str)
-    return complete_name(str, ioncore.region_list())
+    return mod_query.complete_name(str, ioncore.region_list())
 end
 
 
