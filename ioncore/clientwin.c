@@ -231,7 +231,7 @@ WClientWin* manage_clientwin(Window win, int mflags)
 	
 again:
 	
-	/* Select for UnmapNotify and DestroyNotify  as the
+	/* Select for UnmapNotify and DestroyNotify as the
 	 * window might get destroyed or unmapped in the meanwhile.
 	 */
 	XSelectInput(wglobal.dpy, win, StructureNotifyMask);
@@ -320,7 +320,6 @@ again:
 
 failure:
 	clientwin_unmapped(cwin);
-	return NULL;
 
 fail2:
 	XSelectInput(wglobal.dpy, win, 0);

@@ -134,10 +134,10 @@ static char *do_get_cfgfile_for_scr(bool core, const char *module,
 	
 	dpyend=strchr(dpyend, '.');
 	
-	if(dpyend!=NULL)
+	if(dpyend==NULL)
 		return do_get_cfgfile_for(core, module, display, noaccesstest);
 	
-	libtu_asprintf(&tmp, "%.*s.%d", (int)(dpyend-display)-1,
+	libtu_asprintf(&tmp, "%.*s.%d", (int)(dpyend-display),
 				   display, xscr);
 	
 	if(tmp==NULL){
