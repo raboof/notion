@@ -1047,6 +1047,9 @@ static bool extl_dodo_call_vararg(lua_State *st, ExtlDoCallParam *param)
 {
 	bool ret=TRUE;
 	int n=0, m=0;
+	
+	if(lua_isnil(st, -1))
+		return FALSE;
 
 	if(param->spec!=NULL)
 		n=strlen(param->spec);
