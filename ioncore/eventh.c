@@ -466,6 +466,21 @@ static void handle_enter_window(XEvent *ev)
 
 	/*fprintf(stderr, "Enter %p\n", reg);*/
 
+	/* Client window enter notifies should only be handled when mapped
+	 * directly on the root window: query box focus might be stolen
+	 * if when moving the pointer into a client window in a frame with
+	 * a query box if we always focus on enter window event.
+	 */
+	if(WTHING_IS(reg, WClientWin)){
+		WRegion *par=FIND_PARENT1(reg, WRegion);
+		if(!WTHING_IS(par, WScreen)){
+			if(REGION_IS_ACTIVE(par))
+				return;
+			reg=par;
+		}
+		
+	}
+	
 	set_previous_of(reg);
 	set_focus(reg);
 }
