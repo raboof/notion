@@ -8,6 +8,11 @@
 #ifndef ION_IONCORE_HOOKS_H
 #define ION_IONCORE_HOOKS_H
 
+/* The hooks in this file have nothing to do with the hook mechanism
+ * in ../etc/ioncorelib.lua and only the "alternative" hooks are used
+ * anymore for alternative handlers to low-level functions.
+ */
+
 #include "symlist.h"
 
 
