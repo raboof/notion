@@ -49,7 +49,7 @@ DECLSTRUCT(WManageParams){
 typedef WRegion *WRegionIterator(void *st);
 
 
-extern ExtlTab manageparams_to_table(WManageParams *mp);
+extern ExtlTab manageparams_to_table(const WManageParams *mp);
 
 
 extern WScreen *clientwin_find_suitable_screen(WClientWin *cwin,

@@ -37,60 +37,67 @@ static WRegion *find_suitable_target(WIonWS *ws)
 }
 
 
-static bool placement_mrsh(bool (*fn)(WClientWin *cwin, WIonWS *ws,
-                                      WManageParams *pm),
-                           void **p)
+static bool placement_mrsh_extl(ExtlFn fn, WIonWSPlacementParams *param)
 {
-    return fn((WClientWin*)p[0], 
-              (WIonWS*)p[1],
-              (WManageParams*)p[2]);
-}
-
-
-
-static bool placement_mrsh_extl(ExtlFn fn, void **p)
-{
-    WClientWin *cwin=(WClientWin*)p[0];
-    WIonWS *ws=(WIonWS*)p[1];
-    WManageParams *mp=(WManageParams*)p[2];
-    ExtlTab t=manageparams_to_table(mp);
+    ExtlTab t, mp;
     bool ret=FALSE;
     
-    extl_call(fn, "oot", "b", cwin, ws, t, &ret);
+    t=extl_create_table();
     
+    mp=manageparams_to_table(param->mp);
+    
+    extl_table_sets_o(t, "ws", (Obj*)param->ws);
+    extl_table_sets_o(t, "reg", (Obj*)param->reg);
+    extl_table_sets_t(t, "mp", mp);
+    
+    extl_unref_table(mp);
+    
+    extl_protect(NULL);
+    ret=extl_call(fn, "t", "b", t, &ret);
+    extl_unprotect(NULL);
+    
+    if(ret){
+        Obj *tmp;
+        
+        extl_table_gets_o(t, "res_frame", &tmp);
+        
+        param->res_frame=OBJ_CAST(tmp, WFrame);
+        ret=(param->res_frame!=NULL);
+    }
+            
     extl_unref_table(t);
     
-    return (ret && REGION_MANAGER(cwin)!=NULL);
+    return ret;
 }
 
 
 bool ionws_manage_clientwin(WIonWS *ws, WClientWin *cwin,
-                            const WManageParams *param,
-                            int redir)
+                            const WManageParams *mp, int redir)
 {
     WRegion *target=NULL;
-    
+    WIonWSPlacementParams param;
+    bool ret;
+
     if(redir==MANAGE_REDIR_STRICT_NO)
         return FALSE;
 
-    {
-        void *mrshpm[3];
-        bool managed;
+    param.ws=ws;
+    param.reg=(WRegion*)cwin;
+    param.mp=mp;
+    param.res_frame=NULL;
+    
+    ret=hook_call_alt_p(ionws_placement_alt, &param, 
+                        (WHookMarshallExtl*)placement_mrsh_extl);
         
-        mrshpm[0]=cwin;
-        mrshpm[1]=ws;
-        mrshpm[2]=&param;
+    if(ret && param.res_frame!=NULL &&
+       REGION_MANAGER(param.res_frame)==(WRegion*)ws){
         
-#warning "TODO: protect/change parameters?"
+        target=(WRegion*)param.res_frame;
         
-        managed=hook_call_alt(ionws_placement_alt, &mrshpm, 
-                              (WHookMarshall*)placement_mrsh,
-                              (WHookMarshallExtl*)placement_mrsh_extl);
-        
-        if(managed && REGION_MANAGER(cwin)!=NULL)
+        if(region_manage_clientwin(target, cwin, mp, redir))
             return TRUE;
     }
-    
+
     target=find_suitable_target(ws);
     
     if(target==NULL){
@@ -99,7 +106,6 @@ bool ionws_manage_clientwin(WIonWS *ws, WClientWin *cwin,
         return FALSE;
     }
     
-    return region_manage_clientwin(target, cwin, param, 
-                                   MANAGE_REDIR_PREFER_YES);
+    return region_manage_clientwin(target, cwin, mp, redir);
 }
 

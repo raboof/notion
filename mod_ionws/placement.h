@@ -18,6 +18,15 @@
 #include <ioncore/hooks.h>
 #include "ionws.h"
 
+
+typedef struct{
+    WIonWS *ws;
+    WRegion *reg;
+    const WManageParams *mp;
+    
+    WFrame *res_frame;
+} WIonWSPlacementParams;
+
 /* Handlers of this hook should take (WClientWin*, WIonWS*, WManageParams*) 
  * as parameter. 
  */

@@ -194,7 +194,7 @@ bool region_rescue_clientwins(WRegion *reg, WPHolder *ph)
 /*{{{ Misc. */
 
 
-ExtlTab manageparams_to_table(WManageParams *mp)
+ExtlTab manageparams_to_table(const WManageParams *mp)
 {
     ExtlTab t=extl_create_table();
     extl_table_sets_b(t, "switchto", mp->switchto);
