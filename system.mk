@@ -82,17 +82,19 @@ X11_INCLUDES=-I$(X11_PREFIX)/include
 XINERAMA_LIBS=-lXinerama
 #DEFINES += -DCF_NO_XINERAMA
 
-# Uncomment to enable Xft (anti-aliased fonts) support
-#DEFINES += -DCF_XFT
-#X11_INCLUDES += `xft-config --cflags`
-#X11_LIBS += `xft-config --libs`
-
 # Uncomment to enable UTF8 support. You must have XFree86 (4.x?) and C99
 # wide char support available (either libc directly or maybe libutf8+libiconv).
 # Although iconv (that is needed to convert to wchar_t -- which is not
 # necessarily ucs-4 -- to test character properties) is a standardised
 # function, encoding names unfortunately aren't and thus these also have to
 # specified here.
+
+# Uncomment to enable Xft (ugly anti-aliased fonts) support. 
+# NOTE: This feature is a bonus that may or may not work. I have better
+# things to do than test it after every change to Ion.
+DEFINES += -DCF_XFT
+X11_INCLUDES += `xft-config --cflags`
+X11_LIBS += `xft-config --libs`
 
 # GNU/Linux and other glibc-2.2 based systems.
 #DEFINES += -DCF_UTF8 -DCF_ICONV_TARGET=\"WCHAR_T\" -DCF_ICONV_SOURCE=\"UTF-8\"
