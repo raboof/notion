@@ -60,7 +60,7 @@ static bool dispatch_binding(WRegion *reg, WBinding *binding, XKeyEvent *ev)
 	WScreen *scr;
 	
 	if(binding){
-		/* Get the screen now for waitrel grab - the thing might
+		/* Get the screen now for waitrel grab - the object might
 		 * have been destroyed when call_binding returns.
 		 */
 		scr=SCREEN_OF(reg);
@@ -92,7 +92,7 @@ static bool quote_next_handler(WRegion *reg, XEvent *xev)
 		return FALSE;
 	if(ismod(ev->keycode))
 		return FALSE;
-	assert(WTHING_IS(reg, WClientWin));
+	assert(WOBJ_IS(reg, WClientWin));
 	send_key(xev, (WClientWin*)reg);
 	return TRUE; /* remove the grab */
 }
@@ -104,7 +104,7 @@ void quote_next(WClientWin *cwin)
 }
 
 
-static bool waitrelease_handler(WRegion *thing, XEvent *ev)
+static bool waitrelease_handler(WRegion *reg, XEvent *ev)
 {
 	if(!unmod(ev->xkey.state, ev->xkey.keycode))
 		return TRUE;
@@ -140,7 +140,7 @@ static void kgrab_binding_and_reg(WBinding **binding_ret,
 			*binding_ret=binding;
 			return;
 		}
-		if(WTHING_IS(reg, WScreen))
+		if(WOBJ_IS(reg, WScreen))
 			break;
 		reg=FIND_PARENT1(reg, WRegion);
 	}
@@ -246,7 +246,7 @@ void handle_keypress(XKeyEvent *ev)
 		binding=region_lookup_keybinding(reg, ev, NULL, &binding_owner);
 		if(binding!=NULL)
 			break;
-		if(WTHING_IS(reg, WScreen))
+		if(WOBJ_IS(reg, WScreen))
 			break;
 		reg=FIND_PARENT1(reg, WRegion);
 	}while(reg!=NULL);
@@ -258,7 +258,7 @@ void handle_keypress(XKeyEvent *ev)
 		}else{
 			dispatch_binding(binding_owner, binding, ev);
 		}
-	}else if(WTHING_IS(oreg, WWindow)){
+	}else if(WOBJ_IS(oreg, WWindow)){
 		insstr((WWindow*)oreg, ev);
 	}
 }

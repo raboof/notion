@@ -7,7 +7,6 @@
 
 #include "common.h"
 #include "focus.h"
-#include "thingp.h"
 #include "global.h"
 #include "window.h"
 

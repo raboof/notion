@@ -169,8 +169,8 @@ static int split_tree_calcresize(WObj *node_, int dir, int primn,
 	assert(node_!=NULL);
 	
 	/* Reached a window? */
-	if(!WTHING_IS(node_, WWsSplit)){
-		assert(WTHING_IS(node_, WRegion));
+	if(!WOBJ_IS(node_, WWsSplit)){
+		assert(WOBJ_IS(node_, WRegion));
 		return reg_calcresize((WRegion*)node_, dir, nsize);
 	}
 	
@@ -243,8 +243,8 @@ int split_tree_do_resize(WObj *node_, int dir, int npos, int nsize)
 	assert(node_!=NULL);
 	
 	/* Reached a window? */
-	if(!WTHING_IS(node_, WWsSplit)){
-		assert(WTHING_IS(node_, WRegion));
+	if(!WOBJ_IS(node_, WWsSplit)){
+		assert(WOBJ_IS(node_, WRegion));
 		return reg_resize((WRegion*)node_, dir, npos, nsize);
 	}
 	
@@ -580,7 +580,7 @@ WRegion *split_reg(WRegion *reg, int dir, int primn, int minsize,
 				   WRegionSimpleCreateFn *fn)
 {
 	WRegion *mgr=REGION_MANAGER(reg);
-	assert(mgr!=NULL && WTHING_IS(mgr, WIonWS));
+	assert(mgr!=NULL && WOBJ_IS(mgr, WIonWS));
 	
 	return do_split_at((WIonWS*)mgr, (WObj*)reg, dir, primn, minsize, fn);
 }
@@ -751,7 +751,7 @@ static void goto_reg(WRegion *reg)
 static void check_mgr(WRegion *reg)
 {
 	assert(REGION_MANAGER(reg)!=NULL && 
-		   WTHING_IS(REGION_MANAGER(reg), WIonWS));
+		   WOBJ_IS(REGION_MANAGER(reg), WIonWS));
 }
 
 
@@ -849,7 +849,7 @@ void ionws_remove_managed(WIonWS *ws, WRegion *reg)
 	}
 	
 	if(ws->split_tree==NULL)
-		defer_destroy((WThing*)ws);
+		defer_destroy((WObj*)ws);
 }
 
 

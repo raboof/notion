@@ -10,7 +10,7 @@
 
 #include "global.h" /* for InputHandler and InputHandlerContext */
 #include "common.h"
-#include "thing.h"
+#include "region.h"
 
 /* GrabHandler:
    the default_keyboard_handler now simplifies access to subsequent keypresses
@@ -19,11 +19,11 @@
    if your GrabHandler returns TRUE, your grab will be removed, otherwise it's
    kept active and you get more grabbed events passed to your handler.
  */
-typedef bool GrabHandler(WRegion *thing, XEvent *ev);
+typedef bool GrabHandler(WRegion *reg, XEvent *ev);
 
 extern bool call_grab_handler(XEvent *ev);
 
-extern void grab_establish(WRegion *thing, GrabHandler *func, long eventmask);
+extern void grab_establish(WRegion *reg, GrabHandler *func, long eventmask);
 extern void grab_remove(GrabHandler *func);
 extern void grab_holder_remove(WRegion *holder);
 extern WRegion *grab_get_holder();

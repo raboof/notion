@@ -133,7 +133,7 @@ void deinit_input(WInput *input)
 
 void input_cancel(WInput *input)
 {
-	destroy_thing((WThing*)input);
+	destroy_obj((WObj*)input);
 }
 
 

@@ -9,7 +9,6 @@
 #define ION_IONWS_FUNTAB_H
 
 #include <ioncore/function.h>
-#include <ioncore/thing.h>
 
 extern WFunclist ionws_funclist;
 extern WFunclist ionframe_funclist;

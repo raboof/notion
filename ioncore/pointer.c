@@ -34,8 +34,8 @@ static WMotionHandler *p_motion_begin_handler=NULL;
 
 static WWatch p_regwatch=WWATCH_INIT, p_subregwatch=WWATCH_INIT;
 
-#define p_reg ((WRegion*)p_regwatch.thing)
-#define p_subreg ((WRegion*)p_subregwatch.thing)
+#define p_reg ((WRegion*)p_regwatch.obj)
+#define p_subreg ((WRegion*)p_subregwatch.obj)
 
 
 /*}}}*/
@@ -175,7 +175,7 @@ bool handle_button_press(XButtonEvent *ev)
 {
 	WBinding *pressbind=NULL;
 	WRegion *reg=NULL;
-	WThing *subreg=NULL;
+	WRegion *subreg=NULL;
 	uint button, state;
 	int area=0;
 	
@@ -191,7 +191,7 @@ bool handle_button_press(XButtonEvent *ev)
 
 	do_grab_kb_ptr(ev->root, reg, FocusChangeMask);
 	
-	subreg=(WThing*)reg;
+	subreg=reg;
 	area=window_press((WWindow*)reg, ev, &subreg);
 	
 	if(p_clickcnt==1 && time_in_threshold(ev->time) && p_button==button &&
@@ -205,8 +205,8 @@ bool handle_button_press(XButtonEvent *ev)
 											 button, area);
 	}
 	
-	setup_watch(&p_regwatch, (WThing*)reg, NULL);
-	setup_watch(&p_subregwatch, (WThing*)subreg, NULL);
+	setup_watch(&p_regwatch, (WObj*)reg, NULL);
+	setup_watch(&p_subregwatch, (WObj*)subreg, NULL);
 	
 end:
 	/*p_reg=reg;*/
@@ -261,7 +261,6 @@ bool handle_button_release(XButtonEvent *ev)
 
 void handle_pointer_motion(XMotionEvent *ev)
 {
-	WThing *tmp;
 	int dx, dy;
 	
 	if(p_reg==NULL)

@@ -12,7 +12,7 @@
 #include <ioncore/screen.h>
 #include <ioncore/focus.h>
 #include <ioncore/global.h>
-#include <ioncore/thingp.h>
+#include <ioncore/objp.h>
 #include <ioncore/region.h>
 #include <ioncore/wsreg.h>
 #include <ioncore/funtabs.h>
@@ -195,7 +195,7 @@ static bool init_ionws(WIonWS *ws, WWindow *parent, WRectangle bounds, bool ci)
 
 WIonWS *create_ionws(WWindow *parent, WRectangle bounds, bool ci)
 {
-	CREATETHING_IMPL(WIonWS, ionws, (p, parent, bounds, ci));
+	CREATEOBJ_IMPL(WIonWS, ionws, (p, parent, bounds, ci));
 }
 
 
@@ -482,7 +482,7 @@ WRegion *ionws_load(WWindow *par, WRectangle geom, Tokenizer *tokz)
 	
 	if(ws->split_tree==NULL){
 		warn("Workspace empty");
-		destroy_thing((WThing*)ws);
+		destroy_obj((WObj*)ws);
 		return NULL;
 	}
 	

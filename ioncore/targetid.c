@@ -32,10 +32,8 @@ static int last_target[N_TABS]={0, };
 static void change_id(WRegion *reg, int id)
 {
 	WClientWin *cwin;
-
-	for(cwin=FIRST_THING(reg, WClientWin);
-		cwin!=NULL;
-		cwin=NEXT_THING(cwin, WClientWin)){
+	
+	FOR_ALL_TYPED_CHILDREN(reg, cwin, WClientWin){
 		clientwin_set_target_id(cwin, id);
 	}
 }
@@ -197,7 +195,7 @@ WRegion *find_target_by_id(int id)
 
 void set_target_id(WRegion *reg, int id)
 {
-	if(WTHING_IS(reg, WClientWin))
+	if(WOBJ_IS(reg, WClientWin))
 		clientwin_set_target_id((WClientWin*)reg, id);
 }
 

@@ -93,7 +93,7 @@ static WRegBindingInfo *find_rbind(WRegion *reg, WBindmap *bindmap)
 
 /*{{{ Interface */
 
-#define REGION_SUPPORTS_BINDINGS(reg) WTHING_IS(reg, WWindow)
+#define REGION_SUPPORTS_BINDINGS(reg) WOBJ_IS(reg, WWindow)
 
 bool region_add_bindmap_owned(WRegion *reg, WBindmap *bindmap, WRegion *owner)
 {

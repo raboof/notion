@@ -10,11 +10,11 @@
 #include <limits.h>
 
 #include "common.h"
+#include "objp.h"
 #include "global.h"
 #include "property.h"
 #include "focus.h"
 #include "sizehint.h"
-#include "thingp.h"
 #include "hooks.h"
 #include "event.h"
 #include "clientwin.h"
@@ -245,7 +245,7 @@ static bool init_clientwin(WClientWin *cwin, WWindow *parent,
 static WClientWin *create_clientwin(WWindow *parent, Window win,
 									const XWindowAttributes *attr)
 {
-	CREATETHING_IMPL(WClientWin, clientwin, (p, parent, win, attr));
+	CREATEOBJ_IMPL(WClientWin, clientwin, (p, parent, win, attr));
 }
 
 
@@ -447,7 +447,7 @@ static void reparent_root(WClientWin *cwin)
 	
 	par=FIND_PARENT1(cwin, WWindow);
 	
-	if(par==NULL || WTHING_IS(par, WScreen)){
+	if(par==NULL || WOBJ_IS(par, WScreen)){
 		x=REGION_GEOM(cwin).x;
 		y=REGION_GEOM(cwin).y;
 	}else{
@@ -492,7 +492,7 @@ void deinit_clientwin(WClientWin *cwin)
 void clientwin_unmapped(WClientWin *cwin)
 {
 	region_rescue_managed_on_list((WRegion*)cwin, cwin->transient_list);
-	destroy_thing((WThing*)cwin);
+	destroy_obj((WObj*)cwin);
 }
 
 
@@ -502,7 +502,7 @@ void clientwin_destroyed(WClientWin *cwin)
 	XDeleteContext(wglobal.dpy, cwin->win, wglobal.win_context);
 	cwin->win=None;
 	region_rescue_managed_on_list((WRegion*)cwin, cwin->transient_list);
-	destroy_thing((WThing*)cwin);
+	destroy_obj((WObj*)cwin);
 }
 
 
@@ -648,7 +648,7 @@ static void convert_geom(WClientWin *cwin, WRectangle max_geom,
 	bool bottom=FALSE;
 	
 	if(REGION_MANAGER(cwin)!=NULL &&
-	   WTHING_IS(REGION_MANAGER(cwin), WClientWin)){
+	   WOBJ_IS(REGION_MANAGER(cwin), WClientWin)){
 			bottom=TRUE;
 	}
 
@@ -841,8 +841,8 @@ static bool clientwin_display_managed(WClientWin *cwin, WRegion *sub)
 		return TRUE;
 	
 	/* Relink last (topmost) and raise */
-	unlink_thing((WThing*)sub);
-	link_thing((WThing*)cwin, (WThing*)sub);
+	unlink_from_parent(sub);
+	link_child((WRegion*)cwin, sub);
 	
 	/* Should raise above oldtop, but TODO: region_topmost_win */
 	region_restack(sub, None, Above);
@@ -980,7 +980,7 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 	 * frame if such exists.
 	 */
 	par=FIND_PARENT1(cwin, WWindow);
-	if(par==NULL || WTHING_IS(par, WScreen))
+	if(par==NULL || WOBJ_IS(par, WScreen))
 		region_rootpos((WRegion*)cwin, &rx, &ry);
 	else
 		region_rootpos((WRegion*)par, &rx, &ry);
@@ -1035,7 +1035,7 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 bool clientwin_fullscreen_vp(WClientWin *cwin, WViewport *vp, bool switchto)
 {
 	if(REGION_MANAGER(cwin)!=NULL)
-		setup_watch(&(cwin->last_mgr_watch), (WThing*)REGION_MANAGER(cwin),
+		setup_watch(&(cwin->last_mgr_watch), (WObj*)REGION_MANAGER(cwin),
 					NULL);
 	
 	return region_add_managed((WRegion*)vp, (WRegion*)cwin,
@@ -1058,12 +1058,12 @@ bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto)
 {	
 	WRegion *reg;
 	
-	if(cwin->last_mgr_watch.thing==NULL)
+	if(cwin->last_mgr_watch.obj==NULL)
 		return FALSE;
 
-	reg=(WRegion*)cwin->last_mgr_watch.thing;
+	reg=(WRegion*)cwin->last_mgr_watch.obj;
 	reset_watch(&(cwin->last_mgr_watch));
-	if(!WTHING_IS(reg, WRegion))
+	if(!WOBJ_IS(reg, WRegion))
 		return FALSE;
 	if(!region_supports_add_managed(reg))
 		return FALSE;
@@ -1075,7 +1075,7 @@ bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto)
 
 bool clientwin_toggle_fullscreen(WClientWin *cwin)
 {
-	if(cwin->last_mgr_watch.thing!=NULL)
+	if(cwin->last_mgr_watch.obj!=NULL)
 		return clientwin_leave_fullscreen(cwin, TRUE);
 	
 	return clientwin_enter_fullscreen(cwin, TRUE);

@@ -35,12 +35,12 @@ extern bool init_window(WWindow *p, WWindow *parent,
 extern bool init_window_new(WWindow *p, WWindow *parent, WRectangle geom);
 extern void deinit_window(WWindow *win);
 
-extern WThing *find_window(Window win);
-extern WThing *find_window_t(Window win, const WObjDescr *descr);
+extern WRegion *find_window(Window win);
+extern WRegion *find_window_t(Window win, const WObjDescr *descr);
 
 DYNFUN void draw_window(WWindow *wwin, bool complete);
 DYNFUN void window_insstr(WWindow *wwin, const char *buf, size_t n);
-DYNFUN int window_press(WWindow *wwin, XButtonEvent *ev, WThing **thing_ret);
+DYNFUN int window_press(WWindow *wwin, XButtonEvent *ev, WRegion **reg_ret);
 DYNFUN void window_release(WWindow *wwin);
 
 /* Only to be used by regions that inherit this */

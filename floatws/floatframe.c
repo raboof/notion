@@ -14,7 +14,7 @@
 #include <ioncore/saveload.h>
 #include <ioncore/names.h>
 #include <ioncore/objp.h>
-#include <ioncore/thingp.h>
+#include <ioncore/objp.h>
 #include <ioncore/drawp.h>
 #include <ioncore/regbind.h>
 #include <ioncore/defer.h>
@@ -88,7 +88,7 @@ static bool init_floatframe(WFloatFrame *frame, WWindow *parent,
 
 WFloatFrame *create_floatframe(WWindow *parent, WRectangle geom, int id)
 {
-	CREATETHING_IMPL(WFloatFrame, floatframe, (p, parent, geom, id));
+	CREATEOBJ_IMPL(WFloatFrame, floatframe, (p, parent, geom, id));
 }
 
 
@@ -341,7 +341,7 @@ void floatframe_remove_managed(WFloatFrame *frame, WRegion *reg)
 {
 	genframe_remove_managed((WGenFrame*)frame, reg);
 	if(frame->genframe.managed_count==0)
-		defer_destroy((WThing*)frame);
+		defer_destroy((WObj*)frame);
 }
 
 

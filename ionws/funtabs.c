@@ -29,41 +29,41 @@
 /*{{{ Call handlers */
 
 
-#define WSCURRENT_HANDLE(HND, T, G)               \
-	WRegion *reg;                                 \
-	typedef void Func(WThing*, T);                \
-	assert(WTHING_IS(thing, WIonWS));             \
-	reg=ionws_find_current((WIonWS*)thing);       \
-	if(reg!=NULL)                                 \
-		((Func*)func->fn)((WThing*)reg, G(args));
+#define WSCURRENT_HANDLE(HND, T, G)             \
+	WRegion *reg;                               \
+	typedef void Func(WObj*, T);                \
+	assert(WOBJ_IS(obj, WIonWS));               \
+	reg=ionws_find_current((WIonWS*)obj);       \
+	if(reg!=NULL)                               \
+		((Func*)func->fn)((WObj*)reg, G(args));
 
-void callhnd_wscurrent_void(WThing *thing, WFunction *func,
+void callhnd_wscurrent_void(WObj *obj, WFunction *func,
 							int n, const Token *args)
 {
 	WRegion *reg;
-	typedef void Func(WThing*);
-	assert(WTHING_IS(thing, WIonWS));
-	reg=ionws_find_current((WIonWS*)thing);
+	typedef void Func(WObj*);
+	assert(WOBJ_IS(obj, WIonWS));
+	reg=ionws_find_current((WIonWS*)obj);
 	if(reg!=NULL)
-		((Func*)func->fn)((WThing*)reg);
+		((Func*)func->fn)((WObj*)reg);
 }
 
 
-void callhnd_wscurrent_l(WThing *thing, WFunction *func,
+void callhnd_wscurrent_l(WObj *obj, WFunction *func,
 						 int n, const Token *args)
 {
 	WSCURRENT_HANDLE(callhnd_generic_l, long, TOK_LONG_VAL);
 }
 
 
-void callhnd_wscurrent_d(WThing *thing, WFunction *func,
+void callhnd_wscurrent_d(WObj *obj, WFunction *func,
 						 int n, const Token *args)
 {
 	WSCURRENT_HANDLE(callhnd_generic_d, double, TOK_DOUBLE_VAL);
 }
 
 
-void callhnd_wscurrent_s(WThing *thing, WFunction *func,
+void callhnd_wscurrent_s(WObj *obj, WFunction *func,
 						 int n, const Token *args)
 {
 	WSCURRENT_HANDLE(callhnd_generic_s, const char*, TOK_STRING_VAL);

@@ -20,7 +20,6 @@
 #include "signal.h"
 #include "draw.h"
 #include "selection.h"
-#include "thing.h"
 #include "event.h"
 #include "eventh.h"
 #include "clientwin.h"
@@ -195,12 +194,12 @@ void mainloop()
 
 static void handle_map_request(const XMapRequestEvent *ev)
 {
-	WThing *thing;
+	WRegion *reg;
 	WScreen *scr;
 	
-	thing=FIND_WINDOW(ev->window);
+	reg=FIND_WINDOW(ev->window);
 	
-	if(thing!=NULL)
+	if(reg!=NULL)
 		return;
 	
 	manage_clientwin(ev->window, 0);
@@ -475,7 +474,7 @@ static void handle_focus_in(const XFocusChangeEvent *ev)
 			return;
 	}
 	
-	if(WTHING_IS(reg, WScreen)){
+	if(WOBJ_IS(reg, WScreen)){
 		if(ev->detail!=NotifyInferior){
 			/* Restore focus */
 			set_focus(reg);
@@ -484,7 +483,7 @@ static void handle_focus_in(const XFocusChangeEvent *ev)
 	}
 
 	/* Input contexts */
-	if(WTHING_IS(reg, WWindow)){
+	if(WOBJ_IS(reg, WWindow)){
 		wwin=(WWindow*)reg;
 		if(wwin->xic!=NULL)
 			XSetICFocus(wwin->xic);
@@ -511,7 +510,7 @@ static void handle_focus_out(const XFocusChangeEvent *ev)
 	if(ev->mode==NotifyGrab)
 		return;
 
-	if(WTHING_IS(reg, WWindow)){
+	if(WOBJ_IS(reg, WWindow)){
 		wwin=(WWindow*)reg;
 		if(wwin->xic!=NULL)
 			XUnsetICFocus(wwin->xic);
@@ -538,7 +537,6 @@ static void pointer_handler(XEvent *ev)
 {
 	XEvent tmp;
 	Window win_pressed;
-	WThing *t;
 	bool mouse_grab_held=FALSE;
 
 	if(grab_held())

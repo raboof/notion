@@ -9,7 +9,7 @@
 
 #include <ioncore/common.h>
 #include <ioncore/drawp.h>
-#include <ioncore/thingp.h>
+#include <ioncore/objp.h>
 #include <ioncore/font.h>
 #include <ioncore/global.h>
 #include <ioncore/event.h>
@@ -161,7 +161,7 @@ static bool init_wmsg(WMessage *wmsg, WWindow *par, WRectangle geom,
 
 WMessage *create_wmsg(WWindow *par, WRectangle geom, const char *msg)
 {
-	CREATETHING_IMPL(WMessage, wmsg, (p, par, geom, msg));
+	CREATEOBJ_IMPL(WMessage, wmsg, (p, par, geom, msg));
 }
 
 

@@ -9,7 +9,7 @@
 #define ION_QUERY_WMESSAGE_H
 
 #include <ioncore/common.h>
-#include <ioncore/thing.h>
+#include <ioncore/obj.h>
 #include <ioncore/window.h>
 #include "listing.h"
 #include "input.h"

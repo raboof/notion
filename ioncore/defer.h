@@ -10,8 +10,8 @@
 
 #include "common.h"
 
-extern bool defer_action(WThing *thing, void (*action)(WThing*));
-extern bool defer_destroy(WThing *thing);
+extern bool defer_action(WObj *obj, void (*action)(WObj*));
+extern bool defer_destroy(WObj *obj);
 extern void execute_deferred();
 
 #endif /* ION_IONCORE_DEFER_H */

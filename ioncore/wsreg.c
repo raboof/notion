@@ -127,7 +127,7 @@ static WViewport *find_suitable_viewport(WClientWin *cwin, int x, int y)
 #ifdef CF_PLACEMENT_GEOM
 	if(x>CF_STUBBORN_TRESH || y>CF_STUBBORN_TRESH ||
 	   cwin->size_hints.win_gravity!=ForgetGravity){
-		FOR_ALL_TYPED(scr, vp, WViewport){
+		FOR_ALL_TYPED_CHILDREN(scr, vp, WViewport){
 			WRectangle geom=REGION_GEOM(vp);
 			if(x>=geom.x && x<geom.x+geom.w &&
 			   y>=geom.y && y<geom.y+geom.h)

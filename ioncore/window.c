@@ -6,10 +6,10 @@
  */
 
 #include "common.h"
+#include "objp.h"
 #include "global.h"
 #include "window.h"
 #include "focus.h"
-#include "thingp.h"
 #include "screen.h"
 
 
@@ -58,10 +58,10 @@ void window_insstr(WWindow *wwin, const char *buf, size_t n)
 }
 
 
-int window_press(WWindow *wwin, XButtonEvent *ev, WThing **thing_ret)
+int window_press(WWindow *wwin, XButtonEvent *ev, WRegion **reg_ret)
 {
 	int area=0;
-	CALL_DYN_RET(area, int, window_press, wwin, (wwin, ev, thing_ret));
+	CALL_DYN_RET(area, int, window_press, wwin, (wwin, ev, reg_ret));
 	return area;
 }
 
@@ -139,32 +139,32 @@ void deinit_window(WWindow *wwin)
 /*}}}*/
 
 
-/*{{{ Find, X Window -> thing */
+/*{{{ Find, X Window -> WRegion */
 
 
-WThing *find_window(Window win)
+WRegion *find_window(Window win)
 {
-	WThing *thing;
+	WRegion *reg;
 	
 	if(XFindContext(wglobal.dpy, win, wglobal.win_context,
-					(XPointer*)&thing)!=0)
+					(XPointer*)&reg)!=0)
 		return NULL;
 	
-	return thing;
+	return reg;
 }
 
 
-WThing *find_window_t(Window win, const WObjDescr *descr)
+WRegion *find_window_t(Window win, const WObjDescr *descr)
 {
-	WThing *thing=find_window(win);
+	WRegion *reg=find_window(win);
 	
-	if(thing==NULL)
+	if(reg==NULL)
 		return NULL;
 	
-	if(!wobj_is((WObj*)thing, descr))
+	if(!wobj_is((WObj*)reg, descr))
 		return NULL;
 	
-	return thing;
+	return reg;
 }
 
 

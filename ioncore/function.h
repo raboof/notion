@@ -10,7 +10,6 @@
 
 #include <libtu/tokenizer.h>
 #include "common.h"
-#include "thing.h"
 #include "symlist.h"
 #include "hooks.h"
 #include "region.h"
@@ -18,7 +17,7 @@
 INTRSTRUCT(WFunction)
 INTRSTRUCT(WFunclist)
 
-typedef void WFuncHandler(WThing *thing, WFunction *func,
+typedef void WFuncHandler(WObj *obj, WFunction *func,
 						  int n, const Token *args);
 
 
@@ -41,12 +40,12 @@ DECLSTRUCT(WFunclist){
 
 extern WFunction *lookup_func(const char *name, WFunction *func);
 extern WFunction *lookup_func_ex(const char *name, WFunclist *funclist);
-extern WFunction *lookup_func_thing(WThing *thing, const char *name);
+extern WFunction *lookup_func_obj(WObj *obj, const char *name);
 extern bool add_to_funclist(WFunclist *funclist, WFunction *funtab);
 extern void remove_from_funclist(WFunclist *funclist, WFunction *funtab);
 extern void clear_funclist(WFunclist *funclist);
-extern int complete_func_thing(const char *nam, char ***cp_ret, char **beg,
-							   WThing *thing);
+extern int complete_func_obj(const char *nam, char ***cp_ret, char **beg,
+							 WObj *obj);
 extern int complete_func_reg_mgrs(const char *nam, char ***cp_ret,
 								  char **beg, WRegion *reg);
 

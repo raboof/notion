@@ -32,8 +32,8 @@ static WObj *do_find_at(WObj *obj, int x, int y)
 {
 	WWsSplit *split;
 	
-	if(!WTHING_IS(obj, WWsSplit)){
-		if(!WTHING_IS(obj, WRegion))
+	if(!WOBJ_IS(obj, WWsSplit)){
+		if(!WOBJ_IS(obj, WRegion))
 			return NULL;
 		if(coord_not_in_rect(x, y, REGION_GEOM((WRegion*)obj)))
 			return NULL;
@@ -58,7 +58,7 @@ WIonFrame *find_frame_at(WIonWS *ws, int x, int y)
 	
 	obj=do_find_at(obj, x, y);
 	
-	return WTHING_IS(obj, WIonFrame) ? (WIonFrame*)obj : NULL;
+	return WOBJ_IS(obj, WIonFrame) ? (WIonFrame*)obj : NULL;
 }
 
 
@@ -109,7 +109,7 @@ static void do_split(WRegion *oreg, const char *str, bool attach)
 				  (WRegionSimpleCreateFn*)create_ionframe_simple);
 	
 	if(reg!=NULL){
-		if(attach && WTHING_IS(oreg, WIonFrame) &&
+		if(attach && WOBJ_IS(oreg, WIonFrame) &&
 		   ((WIonFrame*)oreg)->genframe.current_sub!=NULL){
 			region_add_managed(reg, ((WIonFrame*)oreg)->genframe.current_sub,
 							   TRUE);
@@ -167,16 +167,16 @@ void ionframe_close(WIonFrame *frame)
 	
 	ws=(WIonWS*)REGION_MANAGER(frame);
 	
-	if(ws==NULL || !WTHING_IS(ws, WIonWS)){
+	if(ws==NULL || !WOBJ_IS(ws, WIonWS)){
 		region_rescue_managed_on_list((WRegion*)frame,
 									  frame->genframe.managed_list);
-		destroy_thing((WThing*)frame);
+		destroy_obj((WObj*)frame);
 		return;
 	}
 	
 	vp=(WViewport*)REGION_MANAGER(ws);
 	
-	if(vp!=NULL && WTHING_IS(vp, WViewport)){
+	if(vp!=NULL && WOBJ_IS(vp, WViewport)){
 		if(vp->ws_count<=1 && ws->split_tree==(WObj*)frame){
 			warn("Cannot destroy only frame on only ionws.");
 			return;
@@ -186,7 +186,7 @@ void ionframe_close(WIonFrame *frame)
 	other=ionws_find_new_manager((WRegion*)frame);
 	
 	if(frame->genframe.managed_count!=0){
-		if(other==NULL || WTHING_IS(other, WScreen)){
+		if(other==NULL || WOBJ_IS(other, WScreen)){
 			warn("Last frame on workspace and not empty: refusing to "
 				 "destroy.");
 			return;
@@ -200,7 +200,7 @@ void ionframe_close(WIonFrame *frame)
 	if(other!=NULL && was_active)
 		set_focus(other);
 				 
-	destroy_thing((WThing*)frame);
+	destroy_obj((WObj*)frame);
 }
 
 

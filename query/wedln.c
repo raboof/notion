@@ -9,7 +9,7 @@
 #include <ioncore/common.h>
 #include <ioncore/global.h>
 #include <ioncore/drawp.h>
-#include <ioncore/thingp.h>
+#include <ioncore/objp.h>
 #include <ioncore/font.h>
 #include <ioncore/xic.h>
 #include <ioncore/selection.h>
@@ -436,8 +436,8 @@ bool init_wedln(WEdln *wedln, WWindow *par, WRectangle geom,
 
 WEdln *create_wedln(WWindow *par, WRectangle geom, WEdlnCreateParams *fnp)
 {
-	CREATETHING_IMPL(WEdln, wedln, (p, par, geom, fnp->handler,
-									fnp->prompt, fnp->dflt));
+	CREATEOBJ_IMPL(WEdln, wedln, (p, par, geom, fnp->handler,
+								  fnp->prompt, fnp->dflt));
 }
 
 
@@ -468,21 +468,21 @@ void deinit_wedln(WEdln *wedln)
 
 void wedln_finish(WEdln *wedln)
 {
-	WThing *parent;
+	WRegion *parent;
 	WEdlnHandler *handler;
 	char *p;
 	char *userdata;
 	
 	handler=wedln->handler;
-	parent=((WThing*)wedln)->t_parent;
+	parent=((WRegion*)wedln)->parent;
 	p=edln_finish(&(wedln->edln));
 	userdata=wedln->userdata;
 	wedln->userdata=NULL;
 	
-	destroy_thing((WThing*)wedln);
+	destroy_obj((WObj*)wedln);
 	
 	if(handler!=NULL)
-		handler(parent, p, userdata);
+		handler((WObj*)parent, p, userdata);
 	
 	if(userdata!=NULL)
 		free(userdata);

@@ -44,9 +44,9 @@ bool ionws_add_clientwin(WIonWS *ws, WClientWin *cwin,
 
 	if(props!=NULL && props->transient_mode==TRANSIENT_MODE_CURRENT){
 		target=find_suitable_frame(ws);
-		if(target!=NULL && WTHING_IS(target, WGenFrame)){
+		if(target!=NULL && WOBJ_IS(target, WGenFrame)){
 			if(((WGenFrame*)target)->current_sub!=NULL &&
-			   WTHING_IS(((WGenFrame*)target)->current_sub, WClientWin)){
+			   WOBJ_IS(((WGenFrame*)target)->current_sub, WClientWin)){
 				return region_add_managed(((WGenFrame*)target)->current_sub,
 										  (WRegion*)cwin, 0);
 			}

@@ -9,7 +9,7 @@
 #define ION_QUERY_INPUTP_H
 
 #include <ioncore/common.h>
-#include <ioncore/thingp.h>
+#include <ioncore/objp.h>
 #include <ioncore/drawp.h>
 #include <ioncore/binding.h>
 #include "input.h"

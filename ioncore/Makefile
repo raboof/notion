@@ -26,7 +26,7 @@ LDFLAGS += $(MODULE_SUPPORT_LDFLAGS)
 OBJS=	binding.o conf-bindings.o conf-draw.o cursor.o draw.o event.o	\
 	exec.o focus.o font.o function.o key.o modules.o mwmhints.o	\
 	obj.o pointer.o property.o readconfig.o screen.o signal.o	\
-	sizehint.o thing.o window.o ioncore.o xic.o selection.o		\
+	sizehint.o window.o ioncore.o xic.o selection.o			\
 	completehelp.o symlist.o clientwin.o colormap.o region.o	\
 	eventh.o winprops.o targetid.o attach.o resize.o defer.o grab.o \
 	wsreg.o commandsq.o readfds.o regbind.o	funtabs.o viewport.o 	\

@@ -9,8 +9,8 @@
 #define ION_IONCORE_FOCUS_H
 
 #include "common.h"
-#include "thing.h"
 #include "window.h"
+#include "region.h"
 
 #define SET_FOCUS(WIN) \
 	XSetInputFocus(wglobal.dpy, WIN, RevertToParent, CurrentTime);

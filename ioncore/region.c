@@ -7,7 +7,7 @@
 
 #include "common.h"
 #include "global.h"
-#include "thingp.h"
+#include "objp.h"
 #include "region.h"
 #include "colormap.h"
 #include "focus.h"
@@ -18,12 +18,12 @@
 
 
 #define FOR_ALL_SUBREGIONS(REG, SUB) \
-	FOR_ALL_TYPED(REG, SUB, WRegion)
+	FOR_ALL_TYPED_CHILDREN(REG, SUB, WRegion)
 
 #define FOR_ALL_SUBREGIONS_REVERSE(REG, SUB) \
-	for((SUB)=LAST_THING(REG, WRegion);      \
+	for((SUB)=LAST_CHILD(REG, WRegion);      \
 		(SUB)!=NULL;                         \
-		(SUB)=PREV_THING(SUB, WRegion))
+		(SUB)=PREV_CHILD(SUB, WRegion))
 
 
 static void default_notify_rootpos(WRegion *reg, int x, int y);
@@ -43,7 +43,7 @@ static DynFunTab region_dynfuntab[]={
 };
 
 
-IMPLOBJ(WRegion, WThing, deinit_region, region_dynfuntab, NULL)
+IMPLOBJ(WRegion, WObj, deinit_region, region_dynfuntab, NULL)
 
 	
 /*{{{ Init & deinit */
@@ -54,11 +54,17 @@ void init_region(WRegion *reg, WRegion *parent, WRectangle geom)
 	reg->geom=geom;
 	reg->flags=0;
 	reg->bindings=NULL;
+	
+	reg->children=NULL;
+	reg->parent=NULL;
+	reg->p_next=NULL;
+	reg->p_prev=NULL;
+	
 	if(parent!=NULL){
 		reg->screen=parent->screen;
-		link_thing((WThing*)parent, (WThing*)reg);
+		link_child(parent, reg);
 	}else{
-		assert(WTHING_IS(reg, WScreen));
+		assert(WOBJ_IS(reg, WScreen));
 		reg->screen=reg;
 	}
 	
@@ -80,8 +86,37 @@ void init_region(WRegion *reg, WRegion *parent, WRectangle geom)
 }
 
 
+void destroy_children(WRegion *reg)
+{
+	WRegion *sub, *prev=NULL;
+
+	assert(!(reg->flags&REGION_SUBDEST));
+	
+	reg->flags|=REGION_SUBDEST;
+	
+	/* destroy children */
+	while(1){
+		sub=reg->children;
+		if(sub==NULL)
+			break;
+		assert(sub!=prev);
+		prev=sub;
+		destroy_obj((WObj*)sub);
+	}
+	
+	reg->flags&=~REGION_SUBDEST;
+}
+
+
 void deinit_region(WRegion *reg)
 {
+	destroy_children(reg);
+
+	if(wglobal.focus_next==reg){
+		/*warn("Region to be focused next destroyed.");*/
+		wglobal.focus_next=NULL;
+	}
+
 	region_detach(reg);
 	region_unuse_name(reg);
 	untag_region(reg);
@@ -340,7 +375,7 @@ void default_draw_config_updated(WRegion *reg)
 {
 	WRegion *sub;
 	
-	FOR_ALL_TYPED(reg, sub, WRegion){
+	FOR_ALL_TYPED_CHILDREN(reg, sub, WRegion){
 		region_draw_config_updated(sub);
 	}
 }
@@ -354,22 +389,22 @@ void default_draw_config_updated(WRegion *reg)
 
 void region_detach_parent(WRegion *reg)
 {
-	WThing *p=reg->thing.t_parent;
+	WRegion *p=reg->parent;
 
 	if(p==NULL)
 		return;
 	
-	unlink_thing((WThing*)reg);
+	unlink_from_parent(reg);
 	
-	if(p!=NULL && WTHING_IS(p, WRegion)){
-		if(((WRegion*)p)->active_sub==reg){
-			((WRegion*)p)->active_sub=NULL;
+	if(p!=NULL){
+		if(p->active_sub==reg){
+			p->active_sub=NULL;
 			
 			/*region_remove_sub((WRegion*)p, reg);*/
 			
 			/* ??? Maybe manager should handle this all? */
 			if(REGION_IS_ACTIVE(reg) && wglobal.focus_next==NULL)
-				set_focus(((WRegion*)p));
+				set_focus(p);
 		}else{
 			/*region_remove_sub((WRegion*)p, reg);*/
 		}
@@ -429,7 +464,7 @@ void region_got_focus(WRegion *reg)
 		r=FIND_PARENT1(reg, WRegion);
 		if(r!=NULL)
 			r->active_sub=reg;
-		if(WTHING_IS(r, WScreen))
+		if(WOBJ_IS(r, WScreen))
 			((WScreen*)r)->current_viewport=viewport_of(reg);
 		
 		r=REGION_MANAGER(reg);
@@ -446,7 +481,7 @@ void region_got_focus(WRegion *reg)
 	 * in region_activated. Other regions are supposed to use the same
 	 * default map.
 	 */
-	if(reg->active_sub==NULL && !WTHING_IS(reg, WClientWin))
+	if(reg->active_sub==NULL && !WOBJ_IS(reg, WClientWin))
 		install_cmap(SCREEN_OF(reg), None); 
 }
 
@@ -585,7 +620,7 @@ void region_rootpos(WRegion *reg, int *xret, int *yret)
 
 	par=FIND_PARENT1(reg, WRegion);
 	
-	if(par==NULL || WTHING_IS(reg, WScreen)){
+	if(par==NULL || WOBJ_IS(reg, WScreen)){
 		*xret=0;
 		*yret=0;
 		return;
@@ -631,8 +666,8 @@ void region_unset_manager(WRegion *reg, WRegion *mgr, WRegion **listptr)
 
 void region_set_parent(WRegion *reg, WRegion *par)
 {
-	assert(reg->thing.t_parent==NULL && par!=NULL);
-	link_thing((WThing*)par, (WThing*)reg);
+	assert(reg->parent==NULL && par!=NULL);
+	link_child(par, reg);
 }
 
 
@@ -667,3 +702,206 @@ bool region_manages_active_reg(WRegion *reg)
 
 
 /*}}}*/
+
+
+/*{{{ Children linking */
+
+
+void link_child(WRegion *parent, WRegion *child)
+{
+	LINK_ITEM(parent->children, child, p_next, p_prev);
+	child->parent=parent;
+}
+
+
+void link_child_before(WRegion *before, WRegion *child)
+{
+	WRegion *parent=before->parent;
+	LINK_ITEM_BEFORE(parent->children, before, child, p_next, p_prev);
+	child->parent=parent;
+}
+
+
+void link_child_after(WRegion *after, WRegion *child)
+{
+	WRegion *parent=after->parent;
+	LINK_ITEM_AFTER(parent->children, after, child, p_next, p_prev);
+	child->parent=parent;
+}
+
+
+void unlink_from_parent(WRegion *reg)
+{
+	WRegion *parent=reg->parent;
+
+	if(parent==NULL)
+		return;
+	
+	UNLINK_ITEM(parent->children, reg, p_next, p_prev);
+	reg->parent=NULL;
+}
+
+
+/*}}}*/
+
+
+/*{{{ Scan */
+
+
+static WRegion *get_next_child(WRegion *first, const WObjDescr *descr)
+{
+	while(first!=NULL){
+		if(wobj_is((WObj*)first, descr))
+			break;
+		first=first->p_next;
+	}
+	
+	return first;
+}
+
+
+static WRegion *get_prev_child(WRegion *first, const WObjDescr *descr)
+{
+	if(first==NULL)
+		return NULL;
+	
+	while(1){
+		first=first->p_prev;
+		if(first->p_next==NULL)
+			return NULL;
+		if(wobj_is((WObj*)first, descr))
+			break;
+	}
+	
+	return first;
+}
+
+
+WRegion *next_child(WRegion *first, const WObjDescr *descr)
+{
+	if(first==NULL)
+		return NULL;
+	
+	return get_next_child(first->p_next, descr);
+}
+
+
+WRegion *next_child_fb(WRegion *first, const WObjDescr *descr, WRegion *fb)
+{
+	WRegion *r=NULL;
+	if(first!=NULL)
+		r=next_child(first, descr);
+	if(r==NULL)
+		r=fb;
+	return r;
+}
+
+
+WRegion *prev_child(WRegion *first, const WObjDescr *descr)
+{
+	if(first==NULL)
+		return NULL;
+	
+	return get_prev_child(first, descr);
+}
+
+
+WRegion *prev_child_fb(WRegion *first, const WObjDescr *descr, WRegion *fb)
+{
+	WRegion *r=NULL;
+	if(first!=NULL)
+		r=prev_child(first, descr);
+	if(r==NULL)
+		r=fb;
+	return r;
+}
+
+
+WRegion *first_child(WRegion *parent, const WObjDescr *descr)
+{
+	if(parent==NULL)
+		return NULL;
+	
+	return get_next_child(parent->children, descr);
+}
+
+
+WRegion *last_child(WRegion *parent, const WObjDescr *descr)
+{
+	WRegion *p;
+	
+	if(parent==NULL)
+		return NULL;
+	
+	p=parent->children;
+	
+	if(p==NULL)
+		return NULL;
+	
+	p=p->p_prev;
+	
+	if(wobj_is((WObj*)p, descr))
+		return p;
+	
+	return get_prev_child(p, descr);
+}
+
+
+WRegion *find_parent(WRegion *p, const WObjDescr *descr)
+{
+	while(p!=NULL){
+		if(wobj_is((WObj*)p, descr))
+			break;
+		p=p->parent;
+	}
+	
+	return p;
+}
+
+
+WRegion *find_parent1(WRegion *p, const WObjDescr *descr)
+{
+	if(p==NULL || p->parent==NULL)
+		return NULL;
+	if(wobj_is((WObj*)p->parent, descr))
+		return p->parent;
+	return NULL;
+}
+
+
+WRegion *nth_child(WRegion *parent, int n, const WObjDescr *descr)
+{
+	WRegion *p;
+	
+	if(n<0)
+		return NULL;
+	
+	p=first_child(parent, descr);
+	   
+	while(n-- && p!=NULL)
+		p=next_child(p, descr);
+
+	return p;
+}
+
+
+bool region_is_ancestor(WRegion *reg, WRegion *reg2)
+{
+	while(reg!=NULL){
+		if(reg==reg2)
+			return TRUE;
+		reg=reg->parent;
+	}
+	
+	return FALSE;
+}
+
+
+bool region_is_child(WRegion *reg, WRegion *reg2)
+{
+	return reg2->parent==reg;
+}
+
+
+/*}}}*/
+

@@ -32,7 +32,8 @@ DECLSTRUCT(WObjDescr){
 		WObjDescr OBJDESCR(OBJ)={#OBJ, &OBJDESCR(ANCESTOR), FUNTAB, DFN, \
 				(void*)FL};
 
-#define WOBJ_INIT(O, TYPE) ((WObj*)(O))->obj_type=&OBJDESCR(TYPE)
+#define WOBJ_INIT(O, TYPE) {((WObj*)(O))->obj_type=&OBJDESCR(TYPE); \
+	((WObj*)(O))->obj_watches=NULL;}
 
 #define CREATESTRUCT_IMPL_(OBJ, LOWOBJ, INIT, ARGS)                  \
 	OBJ *p;  p=ALLOC(OBJ); if(p==NULL){ warn_err(); return NULL; }   \
@@ -45,11 +46,21 @@ DECLSTRUCT(WObjDescr){
 #define SIMPLECREATESTRUCT_IMPL(OBJ, LOWOBJ, ARGS) \
 	CREATESTRUCT_IMPL_(OBJ, LOWOBJ, /* */, (p))
 
-#define CREATEOBJ_IMPL(OBJ, LOWOBJ, ARGS) \
+/*#define CREATEOBJ_IMPL(OBJ, LOWOBJ, ARGS) \
 	CREATESTRUCT_IMPL_(OBJ, LOWOBJ, WOBJ_INIT(p, OBJ), ARGS)
 
 #define SIMPLECREATEOBJ_IMPL(OBJ, LOWOBJ, ARGS) \
-	CREATESTRUCT_IMPL_(OBJ, LOWOBJ, WOBJ_INIT(p, OBJ), (p))
+	CREATESTRUCT_IMPL_(OBJ, LOWOBJ, WOBJ_INIT(p, OBJ), (p))*/
+
+#define CREATEOBJ_IMPL(OBJ, LOWOBJ, INIT_ARGS)                          \
+	OBJ *p;  p=ALLOC(OBJ); if(p==NULL){ warn_err(); return NULL; }      \
+	WOBJ_INIT(p, OBJ);                                                  \
+	if(!init_##LOWOBJ INIT_ARGS){ free((void*)p); return NULL; } return p
+
+#define SIMPLECREATEOBJ_IMPL(OBJ, LOWOBJ, INIT_ARGS)                    \
+	OBJ *p;  p=ALLOC(OBJ); if(p==NULL){ warn_err(); return NULL; }      \
+	WOBJ_INIT(p, OBJ);                                                  \
+	return p;
 
 #define END_DYNFUNTAB {NULL, NULL}
 

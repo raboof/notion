@@ -9,7 +9,7 @@
 #define ION_IONCORE_REGION_H
 
 #include "common.h"
-#include "thing.h"
+#include "obj.h"
 
 INTROBJ(WRegion)
 INTRSTRUCT(WSubmapState)
@@ -22,10 +22,14 @@ DECLSTRUCT(WSubmapState){
 
 
 DECLOBJ(WRegion){
-	WThing thing;
+	WObj obj;
+	
 	WRectangle geom;
 	void *screen;
 	bool flags;
+
+	WRegion *parent, *children;
+	WRegion *p_next, *p_prev;
 	
 	void *bindings;
 	WSubmapState submapstat;
@@ -54,6 +58,7 @@ DECLOBJ(WRegion){
 #define REGION_HAS_GRABS 	0x0004
 #define REGION_TAGGED		0x0008
 #define REGION_BINDINGS_ARE_GRABBED 0x0020
+#define REGION_SUBDEST 0x0040
 
 #define MARK_REGION_MAPPED(R)	(((WRegion*)(R))->flags|=REGION_MAPPED)
 #define MARK_REGION_UNMAPPED(R)	(((WRegion*)(R))->flags&=~REGION_MAPPED)
@@ -154,5 +159,38 @@ extern void region_request_managed_geom_allow(WRegion *reg, WRegion *sub,
 											  WRectangle geom, WRectangle *geomret,
 											  bool tryonly);
 
+
+/* Old WThing stuff */
+
+#define FIRST_CHILD(NAM, TYPE) (TYPE*)first_child((WRegion*)NAM, &OBJDESCR(TYPE))
+#define NEXT_CHILD(NAM, TYPE) (TYPE*)next_child((WRegion*)NAM, &OBJDESCR(TYPE))
+#define NEXT_CHILD_FB(NAM, TYPE, FB) (TYPE*)next_child_fb((WRegion*)NAM, &OBJDESCR(TYPE), (WRegion*)FB)
+#define LAST_CHILD(NAM, TYPE) (TYPE*)last_child((WRegion*)NAM, &OBJDESCR(TYPE))
+#define PREV_CHILD(NAM, TYPE) (TYPE*)prev_child((WRegion*)NAM, &OBJDESCR(TYPE))
+#define PREV_CHILD_FB(NAM, TYPE, FB) (TYPE*)prev_child_fb((WRegion*)NAM, &OBJDESCR(TYPE), (WRegion*)FB)
+#define FIND_PARENT(NAM, TYPE) (TYPE*)find_parent((WRegion*)NAM, &OBJDESCR(TYPE))
+#define FIND_PARENT1(NAM, TYPE) (TYPE*)find_parent1((WRegion*)NAM, &OBJDESCR(TYPE))
+#define NTH_CHILD(NAM, N, TYPE) (TYPE*)nth_child((WRegion*)NAM, N, &OBJDESCR(TYPE))
+#define FOR_ALL_TYPED_CHILDREN(NAM, NAM2, TYPE) \
+	for(NAM2=FIRST_CHILD(NAM, TYPE); NAM2!=NULL; NAM2=NEXT_CHILD(NAM2, TYPE))
+
+extern void link_child(WRegion *parent, WRegion *child);
+extern void link_child_before(WRegion *before, WRegion *child);
+extern void link_child_after(WRegion *after, WRegion *reg);
+extern void unlink_from_parent(WRegion *reg);
+extern void destroy_children(WRegion *reg);
+
+extern WRegion *next_child(WRegion *first, const WObjDescr *descr);
+extern WRegion *next_child_fb(WRegion *first, const WObjDescr *descr, WRegion *fb);
+extern WRegion *prev_child(WRegion *first, const WObjDescr *descr);
+extern WRegion *prev_child_fb(WRegion *first, const WObjDescr *descr, WRegion *fb);
+extern WRegion *first_child(WRegion *parent, const WObjDescr *descr);
+extern WRegion *last_child(WRegion *parent, const WObjDescr *descr);
+extern WRegion *find_parent(WRegion *p, const WObjDescr *descr);
+extern WRegion *find_parent1(WRegion *p, const WObjDescr *descr);
+extern WRegion *nth_child(WRegion *parent, int n, const WObjDescr *descr);
+
+extern bool region_is_ancestor(WRegion *reg, WRegion *reg2);
+extern bool region_is_child(WRegion *reg, WRegion *reg2);
 
 #endif /* ION_IONCORE_REGION_H */

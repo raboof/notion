@@ -21,13 +21,13 @@
 #endif
 
 #include "common.h"
+#include "objp.h"
 #include "screen.h"
 #include "cursor.h"
 #include "global.h"
 #include "event.h"
 #include "drawp.h"
 #include "grdata.h"
-#include "thingp.h"
 #include "conf-draw.h"
 #include "clientwin.h"
 #include "property.h"
@@ -236,7 +236,7 @@ static WScreen *preinit_screen(int xscr)
 	}
 	
 	/* Init the struct */
-	WTHING_INIT(scr, WScreen);
+	WOBJ_INIT(scr, WScreen);
 	
 	geom.x=0; geom.y=0;
 	geom.w=DisplayWidth(dpy, xscr);
@@ -349,14 +349,14 @@ WScreen *manage_screen(int xscr)
 	
 	if(scr->default_viewport==NULL){
 		warn("Unable to add a viewport to X screen %d.", xscr);
-		destroy_thing((WThing*)scr);
+		destroy_obj((WObj*)scr);
 		return NULL;
 	}
 	
 	/* */ {
 		/* TODO: typed LINK_ITEM */
-		WThing *tmp=(WThing*)wglobal.screens;
-		LINK_ITEM(tmp, (WThing*)scr, t_next, t_prev);
+		WRegion *tmp=(WRegion*)wglobal.screens;
+		LINK_ITEM(tmp, (WRegion*)scr, p_next, p_prev);
 		wglobal.screens=(WScreen*)tmp;
 	}
 	
@@ -379,8 +379,8 @@ void deinit_screen(WScreen *scr)
 	}
 	
 	/* */ {
-		WThing *tmp=(WThing*)wglobal.screens;
-		UNLINK_ITEM(tmp, (WThing*)scr, t_next, t_prev);
+		WRegion *tmp=(WRegion*)wglobal.screens;
+		UNLINK_ITEM(tmp, (WRegion*)scr, p_next, p_prev);
 		wglobal.screens=(WScreen*)tmp;
 	}
 	
@@ -419,9 +419,9 @@ static void focus_screen(WScreen *scr, bool warp)
 	sub=REGION_ACTIVE_SUB(scr);
 	
 	if(sub==NULL){
-		sub=FIRST_THING(scr, WRegion);
-		while(sub!=NULL && !REGION_IS_MAPPED(sub)){
-			sub=NEXT_THING(sub, WRegion);
+		FOR_ALL_TYPED_CHILDREN(scr, sub, WRegion){
+			if(REGION_IS_MAPPED(sub))
+				break;
 		}
 	}
 		
@@ -504,7 +504,7 @@ bool setup_screens()
 	int n=0;
 	
 	FOR_ALL_SCREENS(scr){
-		FOR_ALL_TYPED(scr, vp, WViewport){
+		FOR_ALL_TYPED_CHILDREN(scr, vp, WViewport){
 			if(init_workspaces_on_vp(vp))
 				n++;
 		}

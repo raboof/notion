@@ -30,7 +30,6 @@ char query_module_ion_version[]=ION_VERSION;
 /*}}}*/
 
 
-
 /*{{{ Bindable functions and binding maps */
 
 
@@ -38,16 +37,16 @@ WBindmap query_bindmap=BINDMAP_INIT;
 WBindmap query_edln_bindmap=BINDMAP_INIT;
 
 
-static void callhnd_edln_void(WThing *thing, WFunction *func,
+static void callhnd_edln_void(WObj *obj, WFunction *func,
 							  int n, const Token *args)
 {
 	WEdln *wedln;
 	typedef void Func(Edln*);
 	
-	if(!WTHING_IS(thing, WEdln))
+	if(!WOBJ_IS(obj, WEdln))
 		return;
 	
-	wedln=(WEdln*)thing;
+	wedln=(WEdln*)obj;
 	
 	((Func*)func->fn)(&(wedln->edln));
 }

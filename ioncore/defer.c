@@ -11,9 +11,9 @@
  */
 
 #include "common.h"
-#include "thing.h"
+#include "obj.h"
 
-typedef void Action(WThing*);
+typedef void Action(WObj*);
 
 INTRSTRUCT(Defer)
 	
@@ -62,7 +62,7 @@ static void free_defer(Defer *d)
 }
 
 
-static bool get_next(WThing **thing, Action **action)
+static bool get_next(WObj **obj, Action **action)
 {
 	Defer *d=deferred;
 	
@@ -70,7 +70,7 @@ static bool get_next(WThing **thing, Action **action)
 		return FALSE;
 	
 	UNLINK_ITEM(deferred, d, next, prev);
-	*thing=d->watch.thing;
+	*obj=d->watch.obj;
 	*action=d->action;
 	reset_watch(&(d->watch));
 	free_defer(d);
@@ -78,18 +78,18 @@ static bool get_next(WThing **thing, Action **action)
 }
 
 
-static void defer_watch_handler(WWatch *w, WThing *t)
+static void defer_watch_handler(WWatch *w, WObj *obj)
 {
 	Defer *d=(Defer*)w;
 	
 	UNLINK_ITEM(deferred, d, next, prev);
 	free_defer(d);
 	
-	warn("Thing destroyed while deferred actions pending.");
+	warn("Object destroyed while deferred actions pending.");
 }
 
 	
-bool defer_action(WThing *thing, Action *action)
+bool defer_action(WObj *obj, Action *action)
 {
 	Defer *d;
 	
@@ -102,8 +102,8 @@ bool defer_action(WThing *thing, Action *action)
 	
 	d->action=action;
 	
-	if(thing!=NULL)
-		setup_watch(&(d->watch), thing, defer_watch_handler);
+	if(obj!=NULL)
+		setup_watch(&(d->watch), obj, defer_watch_handler);
 	
 	LINK_ITEM(deferred, d, next, prev);
 	
@@ -111,17 +111,17 @@ bool defer_action(WThing *thing, Action *action)
 }
 
 
-bool defer_destroy(WThing *thing)
+bool defer_destroy(WObj *obj)
 {
-	return defer_action(thing, destroy_thing);
+	return defer_action(obj, destroy_obj);
 }
 	
 
 void execute_deferred()
 {
-	WThing *thing;
-	void (*action)(WThing*);
+	WObj *obj;
+	void (*action)(WObj*);
 	
-	while(get_next(&thing, &action))
-		action(thing);
+	while(get_next(&obj, &action))
+		action(obj);
 }

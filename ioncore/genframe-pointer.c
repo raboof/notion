@@ -41,7 +41,7 @@ static bool inrect(WRectangle g, int x, int y)
 #define RESB 8
 
 
-int genframe_press(WGenFrame *genframe, XButtonEvent *ev, WThing **thing_ret)
+int genframe_press(WGenFrame *genframe, XButtonEvent *ev, WRegion **reg_ret)
 {
 	WScreen *scr=SCREEN_OF(genframe);
 	WRegion *sub;
@@ -78,8 +78,8 @@ int genframe_press(WGenFrame *genframe, XButtonEvent *ev, WThing **thing_ret)
 
 		genframe->tab_pressed_sub=sub;
 
-		if(thing_ret!=NULL)
-			*thing_ret=(WThing*)sub;
+		if(reg_ret!=NULL)
+			*reg_ret=sub;
 		
 		return WGENFRAME_AREA_TAB;
 	}
@@ -264,7 +264,7 @@ static WRegion *fnd(WWindow *w, int x, int y)
 		if(childret==None){
 			x-=REGION_GEOM(w).x;
 			y-=REGION_GEOM(w).y;
-			FOR_ALL_TYPED(w, reg2, WRegion){
+			FOR_ALL_TYPED_CHILDREN(w, reg2, WRegion){
 				if(region_is_fully_mapped(reg2) &&
 				   inrect(REGION_GEOM(reg2), x, y) &&
 				   HAS_DYN(reg2, region_handle_drop)){

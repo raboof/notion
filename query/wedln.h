@@ -9,7 +9,7 @@
 #define ION_QUERY_WEDLN_H
 
 #include <ioncore/common.h>
-#include <ioncore/thing.h>
+#include <ioncore/obj.h>
 #include <ioncore/window.h>
 #include <ioncore/xic.h>
 #include "listing.h"
@@ -19,7 +19,7 @@
 INTROBJ(WEdln)
 INTRSTRUCT(WEdlnCreateParams)
 
-typedef void WEdlnHandler(WThing *p, char *str, char *userdata);
+typedef void WEdlnHandler(WObj *p, char *str, char *userdata);
 
 
 DECLSTRUCT(WEdlnCreateParams){

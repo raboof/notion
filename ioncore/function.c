@@ -50,15 +50,15 @@ WFunction *lookup_func_ex(const char *name, WFunclist *funclist)
 }
 
 
-WFunction *lookup_func_thing(WThing *thing, const char *name)
+WFunction *lookup_func_obj(WObj *obj, const char *name)
 {
 	WObjDescr *descr;
 	WFunction *func;
 	
-	if(thing==NULL)
+	if(obj==NULL)
 		return NULL;
 	
-	descr=thing->obj.obj_type;
+	descr=obj->obj_type;
 	
 	while(descr!=NULL){
 		func=lookup_func_ex(name, (WFunclist*)descr->funclist);
@@ -107,12 +107,12 @@ static int complete_func_ex(const char *nam, char ***cp_ret, char **beg,
 }
 
 
-static int do_complete_func_thing(const char *nam, char ***cp_ret, char **beg,
-								  int n, WThing *thing)
+static int do_complete_func_obj(const char *nam, char ***cp_ret, char **beg,
+								int n, WObj *obj)
 {
 	WObjDescr *descr;
 	
-	descr=thing->obj.obj_type;
+	descr=obj->obj_type;
 	
 	while(descr!=NULL){
 		n=complete_func_ex(nam, cp_ret, beg, n,
@@ -124,10 +124,10 @@ static int do_complete_func_thing(const char *nam, char ***cp_ret, char **beg,
 }
 
 
-int complete_func_thing(const char *nam, char ***cp_ret, char **beg,
-						WThing *thing)
+int complete_func_obj(const char *nam, char ***cp_ret, char **beg,
+					  WObj *obj)
 {
-	return do_complete_func_thing(nam, cp_ret, beg, 0, thing);
+	return do_complete_func_obj(nam, cp_ret, beg, 0, obj);
 }
 
 
@@ -137,7 +137,7 @@ int complete_func_reg_mgrs(const char *nam, char ***cp_ret, char **beg,
 	int n=0;
 	
 	while(reg!=NULL){
-		n=do_complete_func_thing(nam, cp_ret, beg, n, (WThing*)reg);
+		n=do_complete_func_obj(nam, cp_ret, beg, n, (WObj*)reg);
 		reg=REGION_MANAGER(reg);
 	}
 	
@@ -151,69 +151,69 @@ int complete_func_reg_mgrs(const char *nam, char ***cp_ret, char **beg,
 /*{{{ Call handlers */
 
 
-void callhnd_direct(WThing *thing, WFunction *func,
+void callhnd_direct(WObj *obj, WFunction *func,
 					int n, const Token *args)
 {
-	typedef void Func(WThing*, int, const Token*);
-	((Func*)func->fn)(thing, n, args);
+	typedef void Func(WObj*, int, const Token*);
+	((Func*)func->fn)(obj, n, args);
 }
 
 
-void callhnd_generic_void(WThing *thing, WFunction *func,
+void callhnd_generic_void(WObj *obj, WFunction *func,
 						  int n, const Token *args)
 {
-	typedef void Func(WThing*);
-	if(thing!=NULL && wobj_is((WObj*)thing, func->objdescr))
-		((Func*)func->fn)(thing);
+	typedef void Func(WObj*);
+	if(obj!=NULL && wobj_is((WObj*)obj, func->objdescr))
+		((Func*)func->fn)(obj);
 }
 
 
-void callhnd_generic_l(WThing *thing, WFunction *func,
+void callhnd_generic_l(WObj *obj, WFunction *func,
 					   int n, const Token *args)
 {
-	typedef void Func(WThing*, int);
-	if(thing!=NULL && wobj_is((WObj*)thing, func->objdescr))
-		((Func*)func->fn)(thing, TOK_LONG_VAL(args));
+	typedef void Func(WObj*, int);
+	if(obj!=NULL && wobj_is((WObj*)obj, func->objdescr))
+		((Func*)func->fn)(obj, TOK_LONG_VAL(args));
 }
 
 
-void callhnd_generic_b(WThing *thing, WFunction *func,
+void callhnd_generic_b(WObj *obj, WFunction *func,
 					   int n, const Token *args)
 {
-	typedef void Func(WThing*, bool);
-	if(thing!=NULL && wobj_is((WObj*)thing, func->objdescr))
-		((Func*)func->fn)(thing, TOK_BOOL_VAL(args));
+	typedef void Func(WObj*, bool);
+	if(obj!=NULL && wobj_is((WObj*)obj, func->objdescr))
+		((Func*)func->fn)(obj, TOK_BOOL_VAL(args));
 }
 
 
-void callhnd_generic_d(WThing *thing, WFunction *func,
+void callhnd_generic_d(WObj *obj, WFunction *func,
 					   int n, const Token *args)
 {
-	typedef void Func(WThing*, double);
-	if(thing!=NULL && wobj_is((WObj*)thing, func->objdescr))
-		((Func*)func->fn)(thing, TOK_DOUBLE_VAL(args));
+	typedef void Func(WObj*, double);
+	if(obj!=NULL && wobj_is((WObj*)obj, func->objdescr))
+		((Func*)func->fn)(obj, TOK_DOUBLE_VAL(args));
 }
 
 
-void callhnd_generic_s(WThing *thing, WFunction *func,
+void callhnd_generic_s(WObj *obj, WFunction *func,
 					   int n, const Token *args)
 {
-	typedef void Func(WThing*, char*);
-	if(thing!=NULL && wobj_is((WObj*)thing, func->objdescr))
-		((Func*)func->fn)(thing, TOK_STRING_VAL(args));
+	typedef void Func(WObj*, char*);
+	if(obj!=NULL && wobj_is((WObj*)obj, func->objdescr))
+		((Func*)func->fn)(obj, TOK_STRING_VAL(args));
 }
 
 
-void callhnd_generic_ss(WThing *thing, WFunction *func,
+void callhnd_generic_ss(WObj *obj, WFunction *func,
 						int n, const Token *args)
 {
-	typedef void Func(WThing*, char*, char*);
-	if(thing!=NULL && wobj_is((WObj*)thing, func->objdescr))
-		((Func*)func->fn)(thing, TOK_STRING_VAL(args), TOK_STRING_VAL(args+1));
+	typedef void Func(WObj*, char*, char*);
+	if(obj!=NULL && wobj_is((WObj*)obj, func->objdescr))
+		((Func*)func->fn)(obj, TOK_STRING_VAL(args), TOK_STRING_VAL(args+1));
 }
 
 
-void callhnd_global_void(WThing *thing, WFunction *func,
+void callhnd_global_void(WObj *obj, WFunction *func,
 						 int n, const Token *args)
 {
 	typedef void Func();
@@ -221,7 +221,7 @@ void callhnd_global_void(WThing *thing, WFunction *func,
 }
 
 
-void callhnd_global_l(WThing *thing, WFunction *func,
+void callhnd_global_l(WObj *obj, WFunction *func,
 					  int n, const Token *args)
 {
 	typedef void Func(int);
@@ -229,7 +229,7 @@ void callhnd_global_l(WThing *thing, WFunction *func,
 }
 
 
-void callhnd_global_ll(WThing *thing, WFunction *func,
+void callhnd_global_ll(WObj *obj, WFunction *func,
 					   int n, const Token *args)
 {
 	typedef void Func(int, int);
@@ -237,7 +237,7 @@ void callhnd_global_ll(WThing *thing, WFunction *func,
 }
 
 
-void callhnd_global_s(WThing *thing, WFunction *func,
+void callhnd_global_s(WObj *obj, WFunction *func,
 					  int n, const Token *args)
 {
 	typedef void Func(char*);

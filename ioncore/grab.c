@@ -12,7 +12,6 @@
 #include "common.h"
 #include "global.h"
 #include "event.h"
-#include "thing.h"
 #include "screen.h"
 #include "cursor.h"
 #include "grab.h"
@@ -38,15 +37,15 @@ static int idx_grab=0;
 /*}}}*/
 
 
-static void grab_watch_handler(WWatch *w, WThing *t)
+static void grab_watch_handler(WWatch *w, WObj *obj)
 {
-	grab_holder_remove((WRegion *)t);
-	/*warn("Thing destroyed while it's a grab->holder!");*/
+	grab_holder_remove((WRegion*)obj);
+	/*warn("Object destroyed while it's a grab->holder!");*/
 }
 
 static void do_grab_install(GrabStatus *grab)
 {
-	setup_watch(&grab->watch, (WThing*)grab->holder, grab_watch_handler);
+	setup_watch(&grab->watch, (WObj*)grab->holder, grab_watch_handler);
 	do_grab_kb_ptr(ROOT_OF(grab->holder), grab->holder, ~grab->events);
 	current_grab=grab;
 	change_grab_cursor(CURSOR_WAITKEY);
@@ -108,11 +107,11 @@ bool grab_held()
 	return (idx_grab>0 && !grabs[idx_grab-1].suspended);
 }
 
-void grab_establish(WRegion *thing, GrabHandler *func, long eventmask)
+void grab_establish(WRegion *reg, GrabHandler *func, long eventmask)
 {
 	if(idx_grab<MAX_GRABS){
 		current_grab=&grabs[idx_grab++];
-		current_grab->holder=thing;
+		current_grab->holder=reg;
 		current_grab->handler=func;
 		current_grab->events=~eventmask;
 		current_grab->remove=FALSE;

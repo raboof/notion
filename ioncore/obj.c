@@ -13,6 +13,35 @@
 WObjDescr OBJDESCR(WObj)={"WObj", NULL, NULL, NULL, NULL};
 
 
+/*{{{ Destroy */
+
+
+void destroy_obj(WObj *obj)
+{
+	WObjDescr *d;
+	
+	call_watches(obj);
+	
+	d=obj->obj_type;
+	
+	while(d!=NULL){
+		if(d->destroy_fn!=NULL){
+			d->destroy_fn(obj);
+			break;
+		}
+		d=d->ancestor;
+	}
+	
+	free(obj);
+}
+
+
+/*}}}*/
+
+
+/*{{{ is/cast */
+
+
 bool wobj_is(const WObj *obj, const WObjDescr *descr)
 {
 	WObjDescr *d;
@@ -47,6 +76,12 @@ const void *wobj_cast(const WObj *obj, const WObjDescr *descr)
 	}
 	return NULL;
 }
+
+
+/*}}}*/
+
+
+/*{{{ Dynamic functions */
 
 
 /* This function is called when no handler is found.
@@ -94,3 +129,75 @@ bool has_dynfun(const WObj *obj, DynFun *func)
 	lookup_dynfun(obj, func, &funnotfound);
 	return !funnotfound;
 }
+
+
+/*}}}*/
+
+
+/*{{{ Watches */
+
+
+void setup_watch(WWatch *watch, WObj *obj, WWatchHandler *handler)
+{
+	reset_watch(watch);
+	
+	watch->handler=handler;
+	LINK_ITEM(obj->obj_watches, watch, next, prev);
+	watch->obj=obj;
+}
+
+void do_reset_watch(WWatch *watch, bool call)
+{
+	WWatchHandler *handler=watch->handler;
+	WObj *obj=watch->obj;
+	
+	watch->handler=NULL;
+	
+	if(obj==NULL)
+		return;
+	
+	UNLINK_ITEM(obj->obj_watches, watch, next, prev);
+	watch->obj=NULL;
+	
+	if(call && handler!=NULL)
+		handler(watch, obj);
+}
+
+
+void reset_watch(WWatch *watch)
+{
+	do_reset_watch(watch, FALSE);
+}
+
+
+bool watch_ok(WWatch *watch)
+{
+	return watch->obj!=NULL;
+}
+
+
+void call_watches(WObj *obj)
+{
+	WWatch *watch, *next;
+
+	watch=obj->obj_watches;
+	
+	while(watch!=NULL){
+		next=watch->next;
+		do_reset_watch(watch, TRUE);
+		watch=next;
+	}
+}
+
+
+void init_watch(WWatch *watch)
+{
+	watch->obj=NULL;
+	watch->next=NULL;
+	watch->prev=NULL;
+	watch->handler=NULL;
+}
+
+
+/*}}}*/
+

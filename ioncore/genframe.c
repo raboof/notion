@@ -7,9 +7,9 @@
 
 #include <libtu/parser.h>
 #include "common.h"
+#include "objp.h"
 #include "window.h"
 #include "global.h"
-#include "thingp.h"
 #include "screen.h"
 #include "focus.h"
 #include "drawp.h"
@@ -139,18 +139,16 @@ bool init_genframe(WGenFrame *genframe, WWindow *parent, WRectangle geom,
 
 WGenFrame *create_genframe(WWindow *parent, WRectangle geom, int id)
 {
-	CREATETHING_IMPL(WGenFrame, genframe, (p, parent, geom, id));
+	CREATEOBJ_IMPL(WGenFrame, genframe, (p, parent, geom, id));
 }
 
 
 void deinit_genframe(WGenFrame *genframe)
 {
-	WThing *t;
-	
 	while(genframe->managed_list!=NULL)
-		destroy_thing((WThing*)genframe->managed_list);
+		destroy_obj((WObj*)genframe->managed_list);
 	if(genframe->current_input!=NULL)
-		destroy_thing((WThing*)genframe->current_input);
+		destroy_obj((WObj*)genframe->current_input);
 	
 	deinit_window((WWindow*)genframe);
 	free_target_id(genframe->target_id);
@@ -527,7 +525,7 @@ void genframe_attach_tagged(WGenFrame *genframe)
 	WRegion *reg;
 	
 	while((reg=tag_take_first())!=NULL){
-		if(thing_is_ancestor((WThing*)genframe, (WThing*)reg)){
+		if(region_is_ancestor((WRegion*)genframe, reg)){
 			warn("Cannot attach tagged region: ancestor");
 			continue;
 		}
@@ -617,7 +615,7 @@ static bool set_genframe_background(WGenFrame *genframe, bool set_always)
 	if(genframe->managed_count==0){
 		tr=grdata->transparent_background;
 	}else if(genframe->current_sub!=NULL &&
-			 WTHING_IS(genframe->current_sub, WClientWin)){
+			 WOBJ_IS(genframe->current_sub, WClientWin)){
 		tr=((WClientWin*)genframe->current_sub)->flags&CWIN_PROP_TRANSPARENT;
 	}
 	
@@ -665,7 +663,7 @@ void genframe_draw_config_updated(WGenFrame *genframe)
 	
 	genframe_managed_geom(genframe, &geom);
 	
-	FOR_ALL_TYPED(genframe, sub, WRegion){
+	FOR_ALL_TYPED_CHILDREN(genframe, sub, WRegion){
 		region_draw_config_updated(sub);
 		if(REGION_MANAGER(sub)==(WRegion*)genframe)
 			fit_region(sub, geom);

@@ -8,6 +8,7 @@
 #ifndef ION_IONCORE_FUNCTIONP_H
 #define ION_IONCORE_FUNCTIONP_H
 
+#include "common.h"
 #include "function.h"
 
 #define FN_(CALLHND, ARGTSTR, OBJT, NAME, FUN) \
@@ -34,36 +35,36 @@
 #define END_FUNTAB {NULL, NULL, NULL, NULL, NULL}
 
 
-extern void callhnd_direct(WThing *thing, WFunction *func,
+extern void callhnd_direct(WObj *obj, WFunction *func,
 						   int n, const Token *args);
-extern void callhnd_generic_void(WThing *thing, WFunction *func,
+extern void callhnd_generic_void(WObj *obj, WFunction *func,
 								 int n, const Token *args);
 /* Notice: although the libtu token type l(ong) is used, functions
  * are expected to take an int argument.
  */
-extern void callhnd_generic_l(WThing *thing, WFunction *func,
+extern void callhnd_generic_l(WObj *obj, WFunction *func,
 							  int n, const Token *args);
-extern void callhnd_generic_b(WThing *thing, WFunction *func,
+extern void callhnd_generic_b(WObj *obj, WFunction *func,
 							  int n, const Token *args);
-extern void callhnd_generic_d(WThing *thing, WFunction *func,
+extern void callhnd_generic_d(WObj *obj, WFunction *func,
 							  int n, const Token *args);
-extern void callhnd_generic_s(WThing *thing, WFunction *func,
+extern void callhnd_generic_s(WObj *obj, WFunction *func,
 							  int n, const Token *args);
-extern void callhnd_generic_ss(WThing *thing, WFunction *func,
+extern void callhnd_generic_ss(WObj *obj, WFunction *func,
 							   int n, const Token *args);
-extern void callhnd_global_void(WThing *thing, WFunction *func,
+extern void callhnd_global_void(WObj *obj, WFunction *func,
 								int n, const Token *args);
-extern void callhnd_global_l(WThing *thing, WFunction *func,
+extern void callhnd_global_l(WObj *obj, WFunction *func,
 							 int n, const Token *args);
-extern void callhnd_global_ll(WThing *thing, WFunction *func,
+extern void callhnd_global_ll(WObj *obj, WFunction *func,
 							  int n, const Token *args);
-extern void callhnd_global_s(WThing *thing, WFunction *func,
+extern void callhnd_global_s(WObj *obj, WFunction *func,
 							 int n, const Token *args);
-extern void callhnd_button_void(WThing *thing, WFunction *func,
+extern void callhnd_button_void(WObj *obj, WFunction *func,
 								int n, const Token *args);
-extern void callhnd_drag_void(WThing *thing, WFunction *func,
+extern void callhnd_drag_void(WObj *obj, WFunction *func,
 							  int n, const Token *args);
-extern void callhnd_cclient_void(WThing *thing, WFunction *func,
+extern void callhnd_cclient_void(WObj *obj, WFunction *func,
 								 int n, const Token *args);
 
 #endif /* ION_IONCORE_FUNCTIONP_H */

@@ -318,12 +318,12 @@ void ioncore_deinit()
 		return;
 	
 	for(scr=wglobal.screens; scr!=NULL; scr=next){
-		next=NEXT_THING(scr, WScreen);
+		next=NEXT_CHILD(scr, WScreen);
 		
-		FOR_ALL_TYPED(scr, vp, WViewport){
+		FOR_ALL_TYPED_CHILDREN(scr, vp, WViewport){
 			save_workspaces(vp);
 		}
-		destroy_thing((WThing*)scr);
+		destroy_obj((WObj*)scr);
 	}
 
 	/*unload_modules();*/

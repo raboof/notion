@@ -26,7 +26,7 @@ void clear_sub_tags(WRegion *reg)
 	
 	untag_region(reg);
 	
-	FOR_ALL_TYPED(reg, sub, WRegion){
+	FOR_ALL_TYPED_CHILDREN(reg, sub, WRegion){
 		clear_sub_tags(sub);
 	}
 }

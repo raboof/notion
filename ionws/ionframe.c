@@ -12,7 +12,7 @@
 #include <ioncore/saveload.h>
 #include <ioncore/names.h>
 #include <ioncore/objp.h>
-#include <ioncore/thingp.h>
+#include <ioncore/objp.h>
 #include <ioncore/drawp.h>
 #include <ioncore/resize.h>
 #include <ioncore/targetid.h>
@@ -84,7 +84,7 @@ static bool init_ionframe(WIonFrame *frame, WWindow *parent, WRectangle geom,
 
 WIonFrame *create_ionframe(WWindow *parent, WRectangle geom, int id, int flags)
 {
-	CREATETHING_IMPL(WIonFrame, ionframe, (p, parent, geom, id, flags));
+	CREATEOBJ_IMPL(WIonFrame, ionframe, (p, parent, geom, id, flags));
 }
 
 
@@ -401,7 +401,7 @@ WRegion *ionframe_load(WWindow *par, WRectangle geom, Tokenizer *tokz)
 	tmp_geom=geom;
 	
 	if(!parse_config_tokz(tokz, ionframe_opts)){
-		destroy_thing((WThing*)tmp_frame);
+		destroy_obj((WObj*)tmp_frame);
 		return NULL;
 	}
 

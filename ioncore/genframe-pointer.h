@@ -18,7 +18,7 @@ extern void genframe_p_move_setup(WGenFrame *genframe);
 extern void genframe_switch_tab(WGenFrame *genframe);
 
 extern int genframe_press(WGenFrame *genframe, XButtonEvent *ev,
-						  WThing **thing_ret);
+						  WRegion **reg_ret);
 extern void genframe_release(WGenFrame *genframe);
 
 DYNFUN bool region_handle_drop(WRegion *reg, int x, int y,

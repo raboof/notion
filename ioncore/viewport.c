@@ -11,7 +11,7 @@
 #include "region.h"
 #include "attach.h"
 #include "funtabs.h"
-#include "thingp.h"
+#include "objp.h"
 #include "focus.h"
 #include "regbind.h"
 #include "property.h"
@@ -84,7 +84,7 @@ static bool init_viewport(WViewport *vp, WScreen *scr,
 
 WViewport *create_viewport(WScreen *scr, int id, WRectangle geom)
 {
-	CREATETHING_IMPL(WViewport, viewport, (p, scr, id, geom));
+	CREATEOBJ_IMPL(WViewport, viewport, (p, scr, id, geom));
 }
 
 
@@ -341,7 +341,7 @@ void viewport_display_prev(WViewport *vp)
 WViewport *viewport_of(WRegion *reg)
 {
 	while(reg!=NULL){
-		if(WTHING_IS(reg, WViewport))
+		if(WOBJ_IS(reg, WViewport))
 			return (WViewport*)reg;
 		reg=REGION_MANAGER(reg);
 	}
@@ -369,8 +369,8 @@ WViewport *find_viewport_id(int id)
 	WScreen *scr;
 	WViewport *vp, *maxvp=NULL;
 	
-	for(scr=wglobal.screens; scr!=NULL; scr=NEXT_THING(scr, WScreen)){
-		FOR_ALL_TYPED(scr, vp, WViewport){
+	for(scr=wglobal.screens; scr!=NULL; scr=NEXT_CHILD(scr, WScreen)){
+		FOR_ALL_TYPED_CHILDREN(scr, vp, WViewport){
 			if(id==-1){
 				if(maxvp==NULL || vp->id>maxvp->id)
 					maxvp=vp;

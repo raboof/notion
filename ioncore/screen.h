@@ -23,7 +23,7 @@ INTROBJ(WScreen)
 #define FOR_ALL_SCREENS(SCR)                     \
 	for(SCR=wglobal.screens;                     \
 		SCR!=NULL;                               \
-		SCR=NEXT_THING(SCR, WScreen))
+		SCR=NEXT_CHILD(SCR, WScreen))
 
 #define SCREEN_MAX_STACK 3
 

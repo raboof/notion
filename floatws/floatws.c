@@ -12,7 +12,7 @@
 #include <ioncore/screen.h>
 #include <ioncore/focus.h>
 #include <ioncore/global.h>
-#include <ioncore/thingp.h>
+#include <ioncore/objp.h>
 #include <ioncore/region.h>
 #include <ioncore/wsreg.h>
 #include <ioncore/funtabs.h>
@@ -223,7 +223,7 @@ static Window floatws_x_window(const WFloatWS *ws)
 
 static bool init_floatws(WFloatWS *ws, WWindow *parent, WRectangle bounds)
 {
-	if(!WTHING_IS(parent, WWindow))
+	if(!WOBJ_IS(parent, WWindow))
 		return FALSE;
 
 	ws->dummywin=XCreateWindow(wglobal.dpy, parent->win,
@@ -252,7 +252,7 @@ static bool init_floatws(WFloatWS *ws, WWindow *parent, WRectangle bounds)
 
 WFloatWS *create_floatws(WWindow *parent, WRectangle bounds)
 {
-	CREATETHING_IMPL(WFloatWS, floatws, (p, parent, bounds));
+	CREATEOBJ_IMPL(WFloatWS, floatws, (p, parent, bounds));
 }
 
 
@@ -343,7 +343,7 @@ static bool floatws_add_clientwin(WFloatWS *ws, WClientWin *cwin,
 	
 	if(!finish_add_clientwin(target, cwin, init_state, props)){
 		if(newreg)
-			destroy_thing((WThing*)target);
+			destroy_obj((WObj*)target);
 		return FALSE;
 	}
 	
@@ -398,7 +398,7 @@ static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
 	}
 	
 	if(!region_add_managed(target, dropped, REGION_ATTACH_SWITCHTO)){
-		destroy_thing((WThing*)target);
+		destroy_obj((WObj*)target);
 		warn("Failed to attach dropped region to created WFloatFrame");
 		return FALSE;
 	}

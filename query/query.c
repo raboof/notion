@@ -26,7 +26,7 @@
 #include "wmessage.h"
 #include "fwarn.h"
 
-#define FWARN(ARGS) fwarn_free((WGenFrame*)thing, errmsg ARGS)
+#define FWARN(ARGS) fwarn_free((WGenFrame*)obj, errmsg ARGS)
 
 
 /*{{{ Generic */
@@ -87,7 +87,7 @@ static const char *my_getwd()
 }
 
 
-static void handler_runfile(WThing *thing, char *str, char *userdata)
+static void handler_runfile(WObj *obj, char *str, char *userdata)
 {
 	char *p;
 	
@@ -95,7 +95,7 @@ static void handler_runfile(WThing *thing, char *str, char *userdata)
 		return;
 	
 	if(userdata!=NULL)
-		do_open_with(SCREEN_OF(thing), userdata, str);
+		do_open_with(SCREEN_OF(obj), userdata, str);
 	
 	p=strrchr(str, '/');
 	if(p==NULL){
@@ -107,9 +107,9 @@ static void handler_runfile(WThing *thing, char *str, char *userdata)
 }
 
 
-static void handler_runwith(WThing *thing, char *str, char *userdata)
+static void handler_runwith(WObj *obj, char *str, char *userdata)
 {
-	WScreen *scr=SCREEN_OF(thing);
+	WScreen *scr=SCREEN_OF(obj);
 	
 	if(userdata==NULL)
 		return;
@@ -121,9 +121,9 @@ static void handler_runwith(WThing *thing, char *str, char *userdata)
 }
 
 
-static void handler_exec(WThing *thing, char *str, char *userdata)
+static void handler_exec(WObj *obj, char *str, char *userdata)
 {
-	WScreen *scr=SCREEN_OF(thing);
+	WScreen *scr=SCREEN_OF(obj);
 	
 	if(*str==':')
 		do_open_with(scr, "ion-runinxterm", str+1);
@@ -163,10 +163,10 @@ void query_runwith(WGenFrame *frame, char *prompt, char *cmd)
 /*{{{ Navigation */
 
 
-static bool attach_test(WGenFrame *dst, WRegion *sub, WGenFrame *thing)
+static bool attach_test(WGenFrame *dst, WRegion *sub, WGenFrame *obj)
 {
 	if(!same_screen(&dst->win.region, sub)){
-		/* complaint should go in 'thing' -frame */
+		/* complaint should go in 'obj' -frame */
 		FWARN(("Cannot attach: not on same screen."));
 		return FALSE;
 	}
@@ -175,7 +175,7 @@ static bool attach_test(WGenFrame *dst, WRegion *sub, WGenFrame *thing)
 }
 
 
-static void handler_attachclient(WThing *thing, char *str, char *userdata)
+static void handler_attachclient(WObj *obj, char *str, char *userdata)
 {
 	WClientWin *cwin=lookup_clientwin(str);
 	
@@ -184,11 +184,11 @@ static void handler_attachclient(WThing *thing, char *str, char *userdata)
 		return;
 	}
 	
-	attach_test((WGenFrame*)thing, (WRegion*)cwin, (WGenFrame*)thing);
+	attach_test((WGenFrame*)obj, (WRegion*)cwin, (WGenFrame*)obj);
 }
 
 
-static void handler_gotoclient(WThing *thing, char *str, char *userdata)
+static void handler_gotoclient(WObj *obj, char *str, char *userdata)
 {
 	WClientWin *cwin=lookup_clientwin(str);
 	
@@ -253,9 +253,9 @@ static WRegion *create_ws_on_vp(WViewport *vp, char *name)
 }
 
 
-static void handler_workspace(WThing *thing, char *name, char *userdata)
+static void handler_workspace(WObj *obj, char *name, char *userdata)
 {
-	WScreen *scr=SCREEN_OF(thing);
+	WScreen *scr=SCREEN_OF(obj);
 	WRegion *ws=NULL;
 	WViewport *vp=NULL;
 	
@@ -265,7 +265,7 @@ static void handler_workspace(WThing *thing, char *name, char *userdata)
 	ws=(WRegion*)lookup_workspace(name);
 	
 	if(ws==NULL){
-		vp=viewport_of((WRegion*)thing);
+		vp=viewport_of((WRegion*)obj);
 		if(vp!=NULL)
 			ws=create_ws_on_vp(vp, name);
 		if(ws==NULL){
@@ -285,10 +285,10 @@ void query_workspace(WGenFrame *frame)
 }
 
 
-static void handler_workspace_with(WThing *thing, char *name, char *userdata)
+static void handler_workspace_with(WObj *obj, char *name, char *userdata)
 {
 #if 0
-	WScreen *scr=SCREEN_OF(thing);
+	WScreen *scr=SCREEN_OF(obj);
 	WGenWS *ws;
 	WClientWin *cwin;
 	WGenFrame *frame;
@@ -302,7 +302,7 @@ static void handler_workspace_with(WThing *thing, char *name, char *userdata)
 	
 	if(ws!=NULL){
 		frame=(WGenFrame*)workspace_find_current(ws);
-		if(frame==NULL || !WTHING_IS(frame, WGenFrame)){
+		if(frame==NULL || !WOBJ_IS(frame, WGenFrame)){
 			FWARN(("Workspace %s has no current frame", name));
 			return;
 		}
@@ -312,7 +312,7 @@ static void handler_workspace_with(WThing *thing, char *name, char *userdata)
 			return;
 		}
 		
-		vp=viewport_of((WRegion*)thing);
+		vp=viewport_of((WRegion*)obj);
 		if(vp!=NULL)
 			ws=create_new_ionws_on_vp(vp, name);
 		
@@ -321,12 +321,12 @@ static void handler_workspace_with(WThing *thing, char *name, char *userdata)
 			return;
 		}
 		
-		frame=FIRST_THING(ws, WGenFrame);
+		frame=FIRST_CHILD(ws, WGenFrame);
 		
 		assert(frame!=NULL);
 	}
 	
-	if(attach_test((WGenFrame*)frame, (WRegion*)cwin, (WGenFrame*)thing))
+	if(attach_test((WGenFrame*)frame, (WRegion*)cwin, (WGenFrame*)obj))
 		goto_region((WRegion*)cwin);
 #endif
 }
@@ -358,9 +358,9 @@ void query_workspace_with(WGenFrame *frame)
 }
 
 
-void handler_renameworkspace(WThing *thing, char *name, char *userdata)
+void handler_renameworkspace(WObj *obj, char *name, char *userdata)
 {
-	WGenWS *ws=FIND_PARENT(thing, WGenWS);
+	WGenWS *ws=FIND_PARENT((WRegion*)obj, WGenWS);
 	
 	if(ws==NULL || empty_name(name))
 		return;
@@ -382,9 +382,9 @@ void query_renameworkspace(WGenFrame *frame)
 }
 
 
-void handler_renameframe(WThing *thing, char *name, char *userdata)
+void handler_renameframe(WObj *obj, char *name, char *userdata)
 {
-	region_set_name((WRegion*)thing, name);
+	region_set_name((WRegion*)obj, name);
 }
 
 
@@ -413,26 +413,26 @@ static void function_warn_handler(const char *message)
 }
 
 
-void handler_function(WThing *thing, char *fn, char *userdata)
+void handler_function(WObj *obj, char *fn, char *userdata)
 {
 	WarnHandler *old_warn_handler;
 	Tokenizer *tokz;
 	WWatch watch=WWATCH_INIT;
 	bool error;
 	
-	assert(WTHING_IS(thing, WGenFrame));
+	assert(WOBJ_IS(obj, WGenFrame));
 	
-	setup_watch(&watch, thing, NULL);
+	setup_watch(&watch, obj, NULL);
 	
-	if(((WGenFrame*)thing)->current_sub!=NULL)
-		thing=(WThing*)(((WGenFrame*)thing)->current_sub);
+	if(((WGenFrame*)obj)->current_sub!=NULL)
+		obj=(WObj*)(((WGenFrame*)obj)->current_sub);
 	
 	old_warn_handler=set_warn_handler(function_warn_handler);
-	error=!execute_command_sequence((WRegion*)thing, fn);
+	error=!execute_command_sequence((WRegion*)obj, fn);
 	set_warn_handler(old_warn_handler);
 	
-	if(watch.thing!=NULL){
-		thing=watch.thing;
+	if(watch.obj!=NULL){
+		obj=watch.obj;
 		if(last_error_message!=NULL){
 			FWARN(("%s", last_error_message));
 		}else if(error){
@@ -450,12 +450,12 @@ void handler_function(WThing *thing, char *fn, char *userdata)
 }
 
 
-static void handler_yesno(WThing *thing, char *yesno, char *fn)
+static void handler_yesno(WObj *obj, char *yesno, char *fn)
 {
 	if(strcasecmp(yesno, "y") && strcasecmp(yesno, "yes"))
 		return;
 	
-	handler_function(thing, fn, NULL);
+	handler_function(obj, fn, NULL);
 }
 
 
@@ -472,7 +472,7 @@ static int complete_func(char *nam, char ***cp_ret, char **beg, void *fr)
 {
 	WRegion *r;
 	
-	if(fr==NULL || !WTHING_IS(fr, WGenFrame))
+	if(fr==NULL || !WOBJ_IS(fr, WGenFrame))
 		return 0;
 	
 	r=((WGenFrame*)fr)->current_sub;

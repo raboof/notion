@@ -8,7 +8,8 @@
 #ifndef ION_IONCORE_COMMANDSQ_H
 #define ION_IONCORE_COMMANDSQ_H
 
-#include "thing.h"
+#include "common.h"
+#include "region.h"
 #include "function.h"
 
 extern bool execute_command_sequence(WRegion *reg, char *fn);
