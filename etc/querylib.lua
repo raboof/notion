@@ -152,6 +152,49 @@ function QueryLib.complete_function(str)
     return res
 end
 
+-- Use weak references to cache found manuals.
+QueryLib.mancache={__mode="v"}
+
+function QueryLib.complete_man(str)
+    local function find_manuals()
+        local manuals={}
+        -- Maybe we should attempt to grep /etc/manpath.config and
+        -- check the MANPATH environment variable?
+        local dirs=table.concat(query_man_path, " ")
+        if dirs==nil then
+            return {}
+        end
+        local h=io.popen("find "..dirs.." -type f", "r");
+        for l in h:lines() do
+            -- Extract page name part and try to ignore non-manpage files
+            for a in string.gfind(l, ".*/([^/.]+)%.%d.*") do
+                table.insert(manuals, a)
+            end
+        end
+        h:close()
+        return manuals
+    end
+    
+    manuals=QueryLib.mancache.manuals
+    if not manuals then
+        -- Manuals were not cached, find them
+        manuals=find_manuals()
+        QueryLib.mancache.manuals=manuals
+    end
+
+    local results={}
+    local len=string.len(str)
+    if len==0 then
+        return manuals
+    end
+    
+    for _, m in manuals do
+        if string.sub(m, 1, len)==str then
+            table.insert(results, m)
+        end
+    end
+    return results
+end
 
 --    
 -- The queries
@@ -191,8 +234,10 @@ QueryLib.query_renameworkspace=QueryLib.make_rename_fn("Workspace name: ",
 QueryLib.query_ssh=QueryLib.make_execwith_fn("SSH to:", nil, "ion-ssh",
                                              QueryLib.complete_ssh)
 
-QueryLib.query_man=QueryLib.make_execwith_fn("Manual page (ion):", nil,
-                                             "ion-man", nil)
+QueryLib.query_man=QueryLib.make_execwith_fn("Manual page (ion):",
+                                             nil,
+                                             "ion-man",
+                                             QueryLib.complete_man)
 
 QueryLib.query_editfile=QueryLib.make_execwith_fn("Edit file:",
                                                   QueryLib.get_initdir,
