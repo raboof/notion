@@ -267,6 +267,9 @@ static void get_placement_offs(WMenu *menu, int *xoff, int *yoff)
 }
     
     
+#define MINIMUM_Y_VISIBILITY 20
+#define POINTER_OFFSET 5
+
 static void menu_firstfit(WMenu *menu, bool submenu, int ref_x, int ref_y)
 {
     WRectangle geom;
@@ -279,40 +282,46 @@ static void menu_firstfit(WMenu *menu, bool submenu, int ref_x, int ref_y)
     }else if(menu->pmenu_mode){
         geom.x=ref_x;
         geom.y=ref_y;
+        
         if(!submenu){
+            const WRectangle *maxg = 
+                &REGION_GEOM(REGION_PARENT((WRegion*)menu));
+            
             geom.x-=geom.w/2;
-            geom.y+=5;
+            geom.y+=POINTER_OFFSET;
+            
+            if(geom.y+MINIMUM_Y_VISIBILITY>maxg->y+maxg->h)
+            {
+                geom.y=maxg->y+maxg->h-MINIMUM_Y_VISIBILITY;
+                geom.x=ref_x+POINTER_OFFSET;
+                if(geom.x+geom.w>maxg->x+maxg->w)
+                    geom.x=ref_x-geom.w-POINTER_OFFSET;
+            }else{
+                if(geom.x<0)
+                    geom.x=0;
+                else if(geom.x+geom.w>maxg->x+maxg->w)
+                    geom.x=maxg->x+maxg->w-geom.w;
+            }
         }
     }else{
-        WRectangle maxg=menu->last_fp.g;
+        const WRectangle *maxg=&(menu->last_fp.g);
         if(submenu){
             int xoff, yoff, x2, y2;
             get_placement_offs(menu, &xoff, &yoff);
-            x2=minof(ref_x+xoff, maxg.x+maxg.w);
-            y2=maxof(ref_y-yoff, maxg.y);
-            geom.x=maxg.x+xoff;
+            x2=minof(ref_x+xoff, maxg->x+maxg->w);
+            y2=maxof(ref_y-yoff, maxg->y);
+            geom.x=maxg->x+xoff;
             if(geom.x+geom.w<x2)
                 geom.x=x2-geom.w;
-            geom.y=maxg.y+maxg.h-yoff-geom.h;
+            geom.y=maxg->y+maxg->h-yoff-geom.h;
             if(geom.y>y2)
                 geom.y=y2;
             
         }else{
-            geom.x=maxg.x;
-            geom.y=maxg.y+maxg.h-geom.h;
+            geom.x=maxg->x;
+            geom.y=maxg->y+maxg->h-geom.h;
         }
     }
-    /***********************/
-#define MINIMUM_Y_VISIBILITY    20
-    WRectangle maxg = menu->last_fp.g;
-    if(geom.y + MINIMUM_Y_VISIBILITY > maxg.y + maxg.h)
-    {
-        geom.y = maxg.y + maxg.h - MINIMUM_Y_VISIBILITY;
-        geom.x = ref_x;
-        if(geom.x+geom.w > maxg.x+maxg.w)
-            geom.x = ref_x - geom.w;
-    }
-    /***********************/
     
     window_do_fitrep(&menu->win, NULL, &geom);
 }
@@ -331,12 +340,12 @@ static void menu_do_refit(WMenu *menu, WWindow *par, const WFitParams *oldfp)
         geom.x=REGION_GEOM(menu).x;
         geom.y=REGION_GEOM(menu).y;
     }else{
-        WRectangle maxg=menu->last_fp.g;
+        const WRectangle *maxg=&(menu->last_fp.g);
         int xdiff=REGION_GEOM(menu).x-oldfp->g.x;
         int ydiff=(REGION_GEOM(menu).y+REGION_GEOM(menu).h
                    -(oldfp->g.y+oldfp->g.h));
-        geom.x=maxof(0, minof(maxg.x+xdiff, maxg.x+maxg.w-geom.w));
-        geom.y=maxof(0, minof(maxg.y+maxg.h+ydiff, maxg.y+maxg.h)-geom.h);
+        geom.x=maxof(0, minof(maxg->x+xdiff, maxg->x+maxg->w-geom.w));
+        geom.y=maxof(0, minof(maxg->y+maxg->h+ydiff, maxg->y+maxg->h)-geom.h);
     }
     
     window_do_fitrep(&menu->win, par, &geom);
