@@ -131,9 +131,10 @@ CC=@CC@
 # the ones that should be used on your system or the system is broken),
 # just comment them out.
 
-# libtu/ uses POSIX_SOURCE
+# libtu/ uses these
 
-POSIX_SOURCE=-ansi -D_POSIX_SOURCE
+C89_SOURCE=-ansi
+POSIX_SOURCE=-D_POSIX_SOURCE
 
 # and . (ion) XOPEN_SOURCE.
 # There is variation among systems what should be used and how they interpret

@@ -306,10 +306,10 @@ if test "x$enable_xopen_source" == xyes; then
 	case $host in
 	# FIXME: what flags are required for other hosts/compilers?
 	*-*-solaris* | *-*-sunos*)
-		XOPEN_SOURCE="-ansi -D__EXTENSIONS__"
+		XOPEN_SOURCE="-D__EXTENSIONS__"
 		;;
 	*)
-		XOPEN_SOURCE="-ansi -D_XOPEN_SOURCE -D_XOPEN_SOURCE_EXTENDED"
+		XOPEN_SOURCE="-D_XOPEN_SOURCE -D_XOPEN_SOURCE_EXTENDED"
 		;;
 	esac
 	AC_MSG_RESULT([$XOPEN_SOURCE])
@@ -345,6 +345,8 @@ AC_SUBST([_DCF_HAS_VA_COPY])
 dnl check for va_copy {{{
 
 AC_MSG_CHECKING([for va_copy])
+save_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS $C99_SOURCE"
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
 
 #include <stdarg.h>
@@ -369,15 +371,16 @@ int main()
 				  [AC_MSG_RESULT([yes])
 				   _DCF_HAS_VA_COPY="-DCF_HAVE_VA_COPY"],
 				  [AC_MSG_RESULT([no])])
+CFLAGS="$save_CFLAGS"
 
 dnl }}}
 
 dnl check whether -ansi breaks va_copy {{{
 
-if test "x${XOPEN_SOURCE/-ansi /}" != "x$XOPEN_SOURCE"; then
-	AC_MSG_CHECKING([whether -ansi breaks va_copy])
+if test "x${XOPEN_SOURCE}" != "x"; then
+	AC_MSG_CHECKING([whether XOPEN_SOURCE breaks va_copy])
 	save_CFLAGS="$CFLAGS"
-	CFLAGS="$CFLAGS -ansi"
+	CFLAGS="$CFLAGS $XOPEN_SOURCE $C99_SOURCE"
 	AC_LINK_IFELSE([AC_LANG_SOURCE([[
 
 #include <stdarg.h>
@@ -400,8 +403,8 @@ int main()
 
 ]])],
 					  [AC_MSG_RESULT([no])],
-					  [AC_MSG_RESULT([yes, stripping -ansi from X/Open C flags])
-					   XOPEN_SOURCE="${XOPEN_SOURCE/-ansi /}"])
+					  [AC_MSG_RESULT([yes, clearing XOPEN_SOURCE])
+					   XOPEN_SOURCE=""])
 	CFLAGS="$save_CFLAGS"
 fi
 dnl }}}

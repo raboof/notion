@@ -133,25 +133,6 @@ DEFINES += -DCF_XFREE86_TEXTPROP_BUG_WORKAROUND
 
 CC=gcc
 
-# The POSIX_SOURCE, XOPEN_SOURCE and WARN options are mainly for development
-# use and should not be needed. 
-
-#POSIX_SOURCE=-ansi -D_POSIX_SOURCE
-
-# and . (ion) XOPEN_SOURCE.
-# There is variation among systems what should be used and how they interpret
-# it so it is perhaps better not using anything at all.
-
-# Most systems
-#XOPEN_SOURCE=-ansi -D_XOPEN_SOURCE -D_XOPEN_SOURCE_EXTENDED
-# sunos, (irix)
-#XOPEN_SOURCE=-ansi -D__EXTENSIONS__
-
-# If you have a recent C compiler (e.g. gcc 3.x) then uncommenting the
-# following should optimize function calls to Lua a little. You should
-# also uncomment this if you define XOPEN_SOURCE.
-#C99_SOURCE=-std=c99 -DCF_HAS_VA_COPY
-
 # Same as '-Wall -pedantic' without '-Wunused' as callbacks often
 # have unused variables.
 WARN=	-W -Wimplicit -Wreturn-type -Wswitch -Wcomment \
@@ -160,6 +141,29 @@ WARN=	-W -Wimplicit -Wreturn-type -Wswitch -Wcomment \
 
 CFLAGS=-g -Os $(WARN) $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES)
 LDFLAGS=-g -Os $(LIBS) $(EXTRA_LIBS)
+
+# The following options are mainly for development use and can be used
+# to check that the code seems to conform to some standards. Depending
+# on the version and vendor of you libc, the options may or may not have
+# expected results. If you define one of C99_SOURCE or XOPEN_SOURCE, you
+# may also have to define the other. 
+
+#C89_SOURCE=-ansi
+
+#POSIX_SOURCE=-D_POSIX_SOURCE
+
+# Most systems
+#XOPEN_SOURCE=-D_XOPEN_SOURCE -D_XOPEN_SOURCE_EXTENDED
+# SunOS, (Irix)
+#XOPEN_SOURCE=-D__EXTENSIONS__
+
+#C99_SOURCE=-std=c99 -DCF_HAS_VA_COPY
+
+# The -DCF_HAS_VA_COPY option should allow for some optimisations, and 
+# in some cases simply defining
+#C99_SOURCE=-DCF_HAS_VA_COPY
+# might allow for those optimisations to be taken without any  special
+# libc or compiler options.
 
 
 ##
