@@ -16,7 +16,7 @@
 #include "wedln.h"
 
 
-static int str_common_part_l(char *p1, char *p2)
+static int str_common_part_l(const char *p1, const char *p2)
 {
 	int i=0;
 	
@@ -59,25 +59,6 @@ static int get_common_part_rmdup(char **completions, int *ncomp)
 }
 
 
-static void free_comp(char **completions, int ncomp)
-{
-	while(ncomp--)
-		free(completions[ncomp]);
-	free(completions);
-}
-
-static void show_completions(Edln *edln, char **completions, int ncomp)
-{
-	edln->ui_show_completions(edln->uiptr, completions, ncomp);
-}
-
-
-static void hide_completions(Edln *edln)
-{
-	edln->ui_hide_completions(edln->uiptr);
-}
-
-
 static int compare(const void *p1, const void *p2)
 {
     const char **v1, **v2;
@@ -91,10 +72,7 @@ static int compare(const void *p1, const void *p2)
 void edln_complete(Edln *edln)
 {
 	char *p;
-	char *beg=NULL;
 	int len;
-	char **completions=NULL;
-	int ncomp;
 	
 	if(edln->completion_handler==NULL)
 		return;
@@ -111,35 +89,34 @@ void edln_complete(Edln *edln)
 	memcpy(p, edln->p, len);
 	p[len]='\0';
 	
-	ncomp=edln->completion_handler(edln->uiptr, p, &completions, &beg);
+	edln->completion_handler(edln->uiptr, p);
 	
 	free(p);
+}
+
+
+int edln_do_completions(Edln *edln, char **completions, int ncomp,
+						 const char *beg)
+{
+	int len;
 	
 	if(ncomp==0){
-		hide_completions(edln);
-		return;
+		return 0;
 	}else if(ncomp==1){
 		len=strlen(completions[0]);
-		hide_completions(edln);
 	}else{
 		qsort(completions, ncomp, sizeof(char**), compare);
 		len=get_common_part_rmdup(completions, &ncomp);
-		if(ncomp==1)
-			hide_completions(edln);
-		else
-			show_completions(edln, completions, ncomp);
 	}
 	
 	edln_kill_to_bol(edln);
 	
-	if(beg!=NULL){
+	if(beg!=NULL)
 		edln_insstr(edln, beg);
-		free(beg);
-	}
 	
 	if(len!=0)
 		edln_insstr_n(edln, completions[0], len);
 	
-	if(ncomp==1)
-		free_comp(completions, ncomp);
+	return ncomp;
 }
+

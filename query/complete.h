@@ -10,6 +10,8 @@
 
 #include "edln.h"
 
-void edln_complete(Edln *edln);
+extern void edln_complete(Edln *edln);
+extern int edln_do_completions(Edln *edln, char **completions, int ncomp,
+							   const char *beg);
 
 #endif /* ION_QUERY_COMPLETE_H */

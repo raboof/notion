@@ -51,5 +51,7 @@ extern WEdln *create_wedln(WWindow *par, WRectangle geom,
 extern void wedln_finish(WEdln *wedln);
 extern void wedln_paste(WEdln *wedln);
 extern void wedln_draw(WEdln *wedln, bool complete);
+extern void wedln_set_completions(WEdln *wedln, ExtlTab completions);
+extern void wedln_hide_completions(WEdln *wedln);
 
 #endif /* ION_QUERY_WEDLN_H */

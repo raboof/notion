@@ -19,6 +19,7 @@
 #include "edln.h"
 #include "wedln.h"
 #include "inputp.h"
+#include "complete.h"
 
 
 #define TEXT_AREA_HEIGHT(GRDATA) \
@@ -313,7 +314,7 @@ void wedln_draw(WEdln *wedln, bool complete)
 /*{{{ Completions */
 
 
-void wedln_show_completions(WEdln *wedln, char **strs, int nstrs)
+static void wedln_show_completions(WEdln *wedln, char **strs, int nstrs)
 {
 	setup_listing(&(wedln->complist), INPUT_FONT(GRDATA_OF(wedln)),
 				  strs, nstrs, FALSE);
@@ -349,49 +350,60 @@ void wedln_scrolldown_completions(WEdln *wedln)
 }
 
 
-static int wedln_completion_handler(WEdln *wedln, const char *nam, char ***ret,
-									char **beg)
+static void wedln_completion_handler(WEdln *wedln, const char *nam)
 {
-	ExtlTab tab=extl_table_none();
-	int i, n;
-	char **ptr, *p;
+	extl_call(wedln->completor, "os", NULL, wedln, nam);
+}
+
+
+EXTL_EXPORT
+void wedln_set_completions(WEdln *wedln, ExtlTab completions)
+{
+	int n=0, i=0;
+	char **ptr,  *p, *beg=NULL;
 	
-	if(!extl_call(wedln->completor, "s", "t", nam, &tab))
-		return 0;
+	n=extl_table_get_n(completions);
 	
-	n=extl_table_get_n(tab);
-	if(n>0){
-		ptr=ALLOC_N(char*, n);
-		if(ptr==NULL){
-			warn_err();
-			goto fail;
-		}
-		for(i=0; i<n; i++){
-			if(!extl_table_geti_s(tab, i+1, &p))
-				goto allocfail;
-			ptr[i]=p;
-		}
-		*ret=ptr;
+	if(n==0){
+		wedln_hide_completions(wedln);
+		return;
 	}
 	
-	if(extl_table_gets_s(tab, "common_part", &p))
-		*beg=p;
+	ptr=ALLOC_N(char*, n);
+	if(ptr==NULL){
+		warn_err();
+		goto allocfail;
+	}
+	for(i=0; i<n; i++){
+		if(!extl_table_geti_s(completions, i+1, &p)){
+			goto allocfail;
+		}
+		ptr[i]=p;
+	}
+
+	if(extl_table_gets_s(completions, "common_part", &p))
+		beg=p;
 	
-	extl_unref_table(tab);
-	return n;
+	n=edln_do_completions(&(wedln->edln), ptr, n, beg);
+	i=n;
+
+	if(beg!=NULL)
+		free(beg);
+	
+	if(n>1){
+		wedln_show_completions(wedln, ptr, n);
+		return;
+	}
 	
 allocfail:
+	wedln_hide_completions(wedln);
 	while(i>0){
 		i--;
 		free(ptr[i]);
 	}
 	free(ptr);
-fail:
-	extl_unref_table(tab);
-	return 0;
 }
 
-	
 /*}}}*/
 
 
@@ -438,8 +450,6 @@ static bool wedln_init(WEdln *wedln, WWindow *par, WRectangle geom,
 	
 	wedln->edln.uiptr=wedln;
 	wedln->edln.ui_update=(EdlnUpdateHandler*)wedln_update_handler;
-	wedln->edln.ui_show_completions=(EdlnShowComplHandler*)wedln_show_completions;
-	wedln->edln.ui_hide_completions=(EdlnHideComplHandler*)wedln_hide_completions;
 	wedln->edln.completion_handler=(EdlnCompletionHandler*)wedln_completion_handler;
 
 	init_listing(&(wedln->complist));

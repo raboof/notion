@@ -21,7 +21,6 @@
 #include <ioncore/extl.h>
 #include "query.h"
 #include "wedln.h"
-#include "complete_file.h"
 #include "wmessage.h"
 #include "fwarn.h"
 
@@ -194,64 +193,3 @@ static void handler_workspace_with(WObj *obj, char *name, char *userdata)
 /*}}}*/
 
 
-/*{{{ Files */
-
-
-int do_complete_file(char *pathname, char ***avp, char **beg, void *unused);
-int do_complete_file_with_path(char *pathname, char ***avp, char **beg,
-							   void *unused);
-
-
-/* TODO: Put the values directly in the Lua table instead of this
- * memory-wasting bandwidth-abusing conversion.
- */
-
-static ExtlTab complete(char *pathname, int (*cfn)(char *pathname,
-												   char ***avp,
-												   char **beg, 
-												   void *unused))
-{
-	int i, n;
-	char **avp=NULL;
-	char *beg=NULL;
-	ExtlTab tab;
-	
-	if(pathname==NULL)
-		return extl_table_none();
-	
-	n=cfn(pathname, &avp, &beg, NULL);
-	
-	if(n==0)
-		return extl_table_none();
-	
-	tab=extl_create_table();
-	
-	for(i=0;i<n;i++){
-		extl_table_seti_s(tab, i+1, avp[i]);
-		free(avp[i]);
-	}
-	free(avp);
-	
-	if(beg!=NULL){
-		extl_table_sets_s(tab, "common_part", beg);
-		free(beg);
-	}
-
-	return tab;
-}
-
-EXTL_EXPORT
-ExtlTab complete_file(char *pathname)
-{
-	return complete(pathname, do_complete_file);
-}
-
-	
-EXTL_EXPORT
-ExtlTab complete_file_with_path(char *pathname)
-{
-	return complete(pathname, do_complete_file_with_path);
-}
-
-
-/*}}}*/
