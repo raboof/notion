@@ -289,14 +289,10 @@ WScreen *manage_screen(int xscr)
 	
 	read_draw_config(scr);
 	
-	if(wglobal.screens==NULL){
-		wglobal.screens=scr;
-	}else{
-		/* TODO: typed LINK_ITEM */
-		tmp=(WThing*)wglobal.screens;
-		LINK_ITEM(tmp, (WThing*)scr, t_next, t_prev);
-		wglobal.screens=(WScreen*)tmp;
-	}
+	/* TODO: typed LINK_ITEM */
+	tmp=(WThing*)wglobal.screens;
+	LINK_ITEM(tmp, (WThing*)scr, t_next, t_prev);
+	wglobal.screens=(WScreen*)tmp;
 
 	postinit_graphics(scr);
 	
