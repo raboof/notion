@@ -32,4 +32,5 @@ include $(TOPDIR)/rules.mk
 _install: module_install etc_install symlink_install
 
 symlink_install:
+	rm -f $(LCDIR)/ext_statusbar.lc
 	ln -s mod_statusbar.lc $(LCDIR)/ext_statusbar.lc
