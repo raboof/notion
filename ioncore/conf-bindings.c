@@ -173,8 +173,13 @@ static bool do_submap(WBindmap *bindmap, const char *str,
 					  ExtlTab subtab, uint action, uint mod, uint ksb)
 {
 	WBinding binding, *bnd;
+	uint kcb;
 
-	bnd=lookup_binding(bindmap, action, mod, ksb);
+	if(action!=ACT_KEYPRESS)
+		return FALSE;
+	
+	kcb=XKeysymToKeycode(wglobal.dpy, ksb);
+	bnd=lookup_binding(bindmap, action, mod, kcb);
 	
 	if(bnd!=NULL && bnd->submap!=NULL && bnd->state==mod)
 		return process_bindings(bnd->submap, NULL, subtab);
@@ -183,7 +188,7 @@ static bool do_submap(WBindmap *bindmap, const char *str,
 	binding.act=ACT_KEYPRESS;
 	binding.state=mod;
 	binding.ksb=ksb;
-	binding.kcb=XKeysymToKeycode(wglobal.dpy, ksb);
+	binding.kcb=kcb;
 	binding.area=0;
 	binding.func=extl_fn_none();
 	binding.submap=create_bindmap();
