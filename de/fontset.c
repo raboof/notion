@@ -95,7 +95,7 @@ XFontSet de_create_font_set(const char *fontname)
         return fs;
     
     /* Not a warning, nothing serious */
-    FNT_D(fprintf(stderr, "Failed to load fonset.\n"));
+    FNT_D(fprintf(stderr, "Failed to load fontset.\n"));
     
     if (! fs) {
         char *lcc=NULL;
