@@ -42,6 +42,49 @@ static bool extl_stack_get(lua_State *st, int pos, char type, bool copystring,
 static void flushtrace();
 
 
+/*{{{ Safer rawget/set/getn */
+
+
+#define CHECK_TABLE(ST, INDEX) luaL_checktype(ST, INDEX, LUA_TTABLE)
+
+static int luaL_getn_check(lua_State *st, int index)
+{
+	CHECK_TABLE(st, index);
+	return luaL_getn(st, index);
+}
+
+
+static void lua_rawset_check(lua_State *st, int index)
+{
+	CHECK_TABLE(st, index);
+	lua_rawset(st, index);
+}
+
+
+static void lua_rawseti_check(lua_State *st, int index, int n)
+{
+	CHECK_TABLE(st, index);
+	lua_rawseti(st, index, n);
+}
+
+
+static void lua_rawget_check(lua_State *st, int index)
+{
+	CHECK_TABLE(st, index);
+	lua_rawget(st, index);
+}
+
+
+static void lua_rawgeti_check(lua_State *st, int index, int n)
+{
+	CHECK_TABLE(st, index);
+	lua_rawgeti(st, index, n);
+}
+
+
+/*}}}*/
+
+
 /*{{{ WObj userdata handling -- unsafe */
 
 
@@ -126,7 +169,7 @@ static void extl_push_obj(lua_State *st, WObj *obj)
 		lua_rawgeti(st, LUA_REGISTRYINDEX, obj_cache_ref);
 		lua_pushlightuserdata(st, obj);
 		lua_pushvalue(st, -3);
-		lua_rawset(st, -3);
+		lua_rawset_check(st, -3);
 		lua_pop(st, 1);
 		obj->flags|=WOBJ_EXTL_CACHED;
 	}
@@ -202,7 +245,7 @@ static bool extl_init_obj_info(lua_State *st)
 	lua_newtable(st);
 	lua_pushstring(st, "__mode");
 	lua_pushstring(st, "v");
-	lua_rawset(st, -3);
+	lua_rawset_check(st, -3);
 	lua_setmetatable(st, -2);
 	obj_cache_ref=lua_ref(st, -1);
 
@@ -755,7 +798,7 @@ typedef struct{
 static bool extl_table_do_get_n(lua_State *st, GetNParams *params)
 {
 	lua_rawgeti(st, LUA_REGISTRYINDEX, params->ref);
-	params->n=luaL_getn(st, -1);
+	params->n=luaL_getn_check(st, -1);
 	return TRUE;
 }
 
@@ -847,7 +890,7 @@ static bool extl_table_dodo_sets(lua_State *st, TableParams *params)
 	lua_rawgeti(st, LUA_REGISTRYINDEX, params->ref);
 	lua_pushstring(st, params->sentry);
 	extl_stack_push(st, params->type, params->val);
-	lua_rawset(st, -3);
+	lua_rawset_check(st, -3);
 	return TRUE;
 }
 
@@ -908,7 +951,7 @@ static bool extl_table_do_clears(lua_State *st, TableParams *params)
 	lua_rawgeti(st, LUA_REGISTRYINDEX, params->ref);
 	lua_pushstring(st, params->sentry);
 	lua_pushnil(st);
-	lua_rawset(st, -3);
+	lua_rawset_check(st, -3);
 	return TRUE;
 }
 
@@ -929,9 +972,9 @@ static bool extl_table_dodo_seti(lua_State *st, TableParams *params)
 	int n, i;
 	lua_rawgeti(st, LUA_REGISTRYINDEX, params->ref);
 	extl_stack_push(st, params->type, params->val);
-	n=luaL_getn(st, -2);
+	n=luaL_getn_check(st, -2);
 	i=(params->insertlast ? n+1 : params->ientry);
-	lua_rawseti(st, -2, i);
+	lua_rawseti_check(st, -2, i);
 	if(i>n)
 		luaL_setn(st, -1, i);
 	   
@@ -994,7 +1037,7 @@ static bool extl_table_do_cleari(lua_State *st, TableParams *params)
 {
 	lua_rawgeti(st, LUA_REGISTRYINDEX, params->ref);
 	lua_pushnil(st);
-	lua_rawseti(st, -2, params->ientry);
+	lua_rawseti_check(st, -2, params->ientry);
 	return TRUE;
 }
 
@@ -1286,13 +1329,13 @@ static int call_loaded(lua_State *st)
 		lua_newtable(st);
 		for(i=1; i<=nargs; i++){
 			lua_pushvalue(st, i);
-			lua_rawseti(st, -2, i);
+			lua_rawseti_check(st, -2, i);
 		}
 	}else{
 		lua_pushnil(st);
 	}
 	
-	lua_rawset(st, -3);
+	lua_rawset_check(st, -3);
 	lua_pop(st, 1);
 	lua_call(st, 0, LUA_MULTRET);
 	return (lua_gettop(st)-nargs);
@@ -1325,16 +1368,16 @@ static bool extl_do_load(lua_State *st, ExtlLoadParam *param)
 	if(param->isfile){
 		lua_pushstring(st, "CURRENT_FILE");
 		lua_pushstring(st, param->src);
-		lua_rawset(st, -3);
+		lua_rawset_check(st, -3);
 	}
 	/* Now there's fn, newenv in stack */
 	lua_newtable(st); /* Create metatable */
 	lua_pushstring(st, "__index");
 	lua_getfenv(st, -4); /* Get old environment */
-	lua_rawset(st, -3); /* Set metatable.__index */
+	lua_rawset_check(st, -3); /* Set metatable.__index */
 	lua_pushstring(st, "__newindex");
 	lua_getfenv(st, -4); /* Get old environment */
-	lua_rawset(st, -3); /* Set metatable.__newindex */
+	lua_rawset_check(st, -3); /* Set metatable.__newindex */
 	/* Now there's fn, newenv, meta in stack */
 	lua_setmetatable(st, -2); /* Set metatable for new environment */
 	lua_setfenv(st, -2);
@@ -1640,10 +1683,10 @@ static bool extl_do_register_function(lua_State *st, RegData *data)
 	lua_pushvalue(st, -2); /* Get spec2 */
 	lua_pushfstring(st, "luaextl_%s_%s_upvalue", 
 					data->cls, spec->name);
-	lua_rawset(st, -3); /* Set registry.luaextl_fn_upvalue=spec2 */
+	lua_rawset_check(st, -3); /* Set registry.luaextl_fn_upvalue=spec2 */
 	lua_pop(st, 1); /* Pop registry */
 	lua_pushcclosure(st, extl_l1_call_handler, 1);
-	lua_rawset(st, ind);
+	lua_rawset_check(st, ind);
 
 	return TRUE;
 }
@@ -1706,7 +1749,7 @@ static bool extl_do_unregister_function(lua_State *st, RegData *data)
 
 	lua_pop(st, 1); /* Pop the upvalue */
 	lua_pushnil(st);
-	lua_rawset(st, -3); /* Clear registry.luaextl_fn_upvalue */
+	lua_rawset_check(st, -3); /* Clear registry.luaextl_fn_upvalue */
 	
 	if(data->table!=LUA_NOREF){
 		lua_rawgeti(st, LUA_REGISTRYINDEX, data->table);
@@ -1714,7 +1757,7 @@ static bool extl_do_unregister_function(lua_State *st, RegData *data)
 	}
 	
 	lua_pushnil(st); /* Clear table.fn */
-	lua_rawset(st, ind);
+	lua_rawset_check(st, ind);
 	
 	return TRUE;
 }
@@ -1789,7 +1832,7 @@ static bool extl_do_register_class(lua_State *st, ClassData *data)
 		/* Stack: cls, parent_meta, meta, "__index", "__index" */
 		lua_gettable(st, -4);
 		/* Stack: cls, parent_meta, meta, "__index", parent_meta.__index */
-		lua_rawset(st, -3);
+		lua_rawset_check(st, -3);
 		/* Stack: cls, parent_meta, meta */
 		lua_setmetatable(st, -3);
 		lua_pop(st, 1);
@@ -1819,14 +1862,14 @@ static bool extl_do_register_class(lua_State *st, ClassData *data)
 
 	lua_pushnumber(st, MAGIC);
 	lua_pushnumber(st, MAGIC);
-	lua_rawset(st, -3);
+	lua_rawset_check(st, -3);
 	
 	lua_pushstring(st, "__index");
 	lua_pushvalue(st, -3);
-	lua_rawset(st, -3); /* set metatable.__index=WFoobar created above */
+	lua_rawset_check(st, -3); /* set metatable.__index=WFoobar created above */
 	lua_pushstring(st, "__gc");
 	lua_pushcfunction(st, extl_obj_gc_handler);
-	lua_rawset(st, -3); /* set metatable.__gc=extl_obj_gc_handler */
+	lua_rawset_check(st, -3); /* set metatable.__gc=extl_obj_gc_handler */
 	lua_pushfstring(st, "luaextl_%s_metatable", data->cls);
 	lua_insert(st, -2);
 	lua_rawset(st, LUA_REGISTRYINDEX);
