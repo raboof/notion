@@ -25,6 +25,7 @@ DECLSTRUCT(DynFunTab){
 DECLSTRUCT(WObjDescr){
 	const char *name;
 	WObjDescr *ancestor;
+	int funtab_n;
 	DynFunTab *funtab;
 	void (*destroy_fn)();
 };
@@ -32,7 +33,7 @@ DECLSTRUCT(WObjDescr){
 #define WOBJ_TYPESTR(OBJ) (((WObj*)OBJ)->obj_type->name)
 
 #define IMPLOBJ(OBJ, ANCESTOR, DFN, DYN)                         \
-		WObjDescr OBJDESCR(OBJ)={#OBJ, &OBJDESCR(ANCESTOR), DYN, \
+		WObjDescr OBJDESCR(OBJ)={#OBJ, &OBJDESCR(ANCESTOR), -1, DYN, \
 								 (void (*)())DFN}
 
 #define WOBJ_INIT(O, TYPE) {((WObj*)(O))->obj_type=&OBJDESCR(TYPE); \

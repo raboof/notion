@@ -16,7 +16,7 @@
 #include "objp.h"
 
 
-WObjDescr OBJDESCR(WObj)={"WObj", NULL, NULL, NULL};
+WObjDescr OBJDESCR(WObj)={"WObj", NULL, 0, NULL, NULL};
 
 
 static void do_watches(WObj *obj, bool call);
@@ -125,11 +125,22 @@ static void dummy_dyn()
 }
 
 
+static int comp_fun(const void *a, const void *b)
+{
+	void *af=(void*)((DynFunTab*)a)->func;
+	void *bf=(void*)((DynFunTab*)b)->func;
+	
+	return (af<bf ? -1 : (af==bf ? 0 : 1));
+}
+
+			
 DynFun *lookup_dynfun(const WObj *obj, DynFun *func,
 					  bool *funnotfound)
 {
-	const WObjDescr *descr;
-	const DynFunTab *df;
+	WObjDescr *descr;
+	DynFunTab *df;
+	/*DynFunTab dummy={NULL, NULL};*/
+	/*dummy.func=func;*/
 	
 	if(obj==NULL)
 		return NULL;
@@ -137,23 +148,56 @@ DynFun *lookup_dynfun(const WObj *obj, DynFun *func,
 	descr=obj->obj_type;
 	
 	for(; descr!=&WObj_objdescr; descr=descr->ancestor){
-		df=descr->funtab;
-	
-		if(df==NULL)
+		if(descr->funtab==NULL)
 			continue;
 		
-		/* Naïve linear search --- could become too slow if there are a
-		 * lot of "dynamic" functions. Let's hope there aren't. A simple
-		 * but ugly solution would to sort the table runtime at first
-		 * occurence of the object (yuck!) with qsort and then search
-		 * with bsearch.
-		 */
-		while(df->func!=NULL){
-			if(df->func==func){
-				*funnotfound=FALSE;
-				return df->handler;
+		if(descr->funtab_n==-1){
+			/* Need to sort the table. */
+			descr->funtab_n=0;
+			df=descr->funtab;
+			while(df->func!=NULL){
+				descr->funtab_n++;
+				df++;
 			}
-			df++;
+			
+			if(descr->funtab_n>0){
+				qsort(descr->funtab, descr->funtab_n, sizeof(DynFunTab),
+					  comp_fun);
+			}
+		}
+		
+		/*
+		if(descr->funtab_n==0)
+			continue;
+		
+		df=(DynFunTab*)bsearch(&dummy, descr->funtab, descr->funtab_n,
+							   sizeof(DynFunTab), comp_fun);
+		if(df!=NULL){
+			*funnotfound=FALSE;
+			return df->handler;
+		}
+		*/
+		
+		/* Using custom bsearch instead of the one in libc is probably 
+		 * faster as the overhead of calling a comparison function would
+		 * be significant given that the comparisons are simple and 
+		 * funtab_n not that big.
+		 */
+		{
+			int min=0, max=descr->funtab_n-1;
+			int ndx;
+			df=descr->funtab;
+			while(max>=min){
+				ndx=(max+min)/2;
+				if((void*)df[ndx].func==(void*)func){
+					*funnotfound=FALSE;
+					return df[ndx].handler;
+				}
+				if((void*)df[ndx].func<(void*)func)
+					min=ndx+1;
+				else
+					max=ndx-1;
+			}
 		}
 	}
 	
