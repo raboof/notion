@@ -106,7 +106,7 @@ local function get_load_uptime()
     end
     local s=f:read('*l')
     f:close()
-    local st, en, load=string.find(s, 'load average: (%d+%.%d+, %d+%.%d+, %d+%.%d+)')
+    local st, en, load=string.find(s, 'load average:%s*(.*)')
     return (load or "")
 end
 
