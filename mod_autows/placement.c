@@ -12,6 +12,8 @@
 #include <limits.h>
 #include <math.h>
 
+#include <libtu/minmax.h>
+
 #include <ioncore/common.h>
 #include <ioncore/global.h>
 #include <ioncore/clientwin.h>
@@ -21,7 +23,7 @@
 #include <ioncore/framep.h>
 #include <ioncore/names.h>
 #include <ioncore/region-iter.h>
-#include <libtu/minmax.h>
+#include <ioncore/resize.h>
 #include <mod_ionws/split.h>
 #include "placement.h"
 #include "autoframe.h"
@@ -92,12 +94,20 @@ static WRegion *find_suitable_target(WIonWS *ws)
 
 #define WS_REALLY_FULL(ws) FALSE
 
+enum{
+    ACT_NOT_FOUND,
+    ACT_SPLIT_VERTICAL,
+    ACT_SPLIT_HORIZONTAL,
+    ACT_REPLACE_UNUSED,
+    ACT_ATTACH
+};
+
 typedef struct{
     WSplit *split;
+    int action;
     int penalty;
-    int dir;
-    int primn;
-    bool grow;
+    int split_primn;
+    int dest_w, dest_h;
 } Res;
 
 #define PENALTY_NEVER    INT_MAX
@@ -164,8 +174,8 @@ static int fit_penalty(int s, int ss, int slack)
     return interp1(fit_penalty_scale, ss-s);
 }
 
-#define hfit_penalty(S1, S2, T, I) fit_penalty(S1, S2, (T)->l+(T)->r)
-#define vfit_penalty(S1, S2, T, I) fit_penalty(S1, S2, (T)->t+(T)->b)
+#define hfit_penalty(S1, S2, T, I, DS) fit_penalty(S1, S2, (T)->l+(T)->r)
+#define vfit_penalty(S1, S2, T, I, DS) fit_penalty(S1, S2, (T)->t+(T)->b)
 
 
 static int slack_penalty(int s, int ss, int slack)
@@ -179,8 +189,8 @@ static int slack_penalty(int s, int ss, int slack)
 
 }
 
-#define hslack_penalty(S1, S2, T, I) slack_penalty(S1, S2, (T)->l+(T)->r)
-#define vslack_penalty(S1, S2, T, I) slack_penalty(S1, S2, (T)->t+(T)->b)
+#define hslack_penalty(S1, S2, T, I, DS) slack_penalty(S1, S2, (T)->l+(T)->r)
+#define vslack_penalty(S1, S2, T, I, DS) slack_penalty(S1, S2, (T)->t+(T)->b)
 
 
 static int split_penalty(int s, int ss, int slack)
@@ -188,8 +198,8 @@ static int split_penalty(int s, int ss, int slack)
     return interp1(split_penalty_scale, ss-s);
 }
 
-#define hsplit_penalty(S1, S2, T, I) split_penalty(S1, S2, (T)->l+(T)->r)
-#define vsplit_penalty(S1, S2, T, I) split_penalty(S1, S2, (T)->t+(T)->b)
+#define hsplit_penalty(S1, S2, T, I, DS) split_penalty(S1, S2, (T)->l+(T)->r)
+#define vsplit_penalty(S1, S2, T, I, DS) split_penalty(S1, S2, (T)->t+(T)->b)
 
 
 static int combine(int h, int v)
@@ -201,68 +211,57 @@ static int combine(int h, int v)
 }
 
 
+/* Only split orthogonally to deepest previous 'static' split? */
+
+enum{ 
+    P_FIT=0, 
+    P_SLACK=1,
+    P_SPLIT=2,
+    P_N=3
+};
+        
 static void scan(WSplit *split, int depth, const WRectangle *geom,
                  const WSplitUnused *un_tot, const WSplitUnused *un_immed, 
                  Res *best)
 {
-    int h_gof, v_gof, h_gol, v_gol;
-    
-    /*
-     hslack=0;
-     vslack=0;
-     */
-    
-    /* Use penalty instead */
-    /* Only use SPLIT_UNUSED */
-    /* Only split orthogonally to deepest previous 'static' split? */
-    
     if(split->type==SPLIT_UNUSED){
-        int phfit=hfit_penalty(geom->w, split->geom.w, un_tot, un_immed);
-        int pvfit=vfit_penalty(geom->h, split->geom.h, un_tot, un_immed);
-        int phslack=hslack_penalty(geom->w, split->geom.w, un_tot, un_immed);
-        int pvslack=vslack_penalty(geom->h, split->geom.h, un_tot, un_immed);
-        int phsplit=hsplit_penalty(geom->w, split->geom.w, un_tot, un_immed);
-        int pvsplit=vsplit_penalty(geom->h, split->geom.h, un_tot, un_immed);
-        int p;
+        int d_w[P_N]={-1, -1, -1};
+        int d_h[P_N]={-1, -1, -1};
+        int p, p_h[P_N], p_v[P_N];
+        int rqw=geom->w, rqh=geom->h, sw=split->geom.w, sh=split->geom.h;
+        int i, j;
         
-        p=combine(phfit, pvfit);
-        fprintf(stderr, "FP: %d\n", p);
-        if(p<best->penalty){
-            best->split=split;
-            best->penalty=p;
-            best->dir=SPLIT_UNUSED;
-            best->primn=PRIMN_BR;
-            best->grow=FALSE;
-        }
-    
-        p=combine(phslack, pvslack);
-        fprintf(stderr, "SP: %d\n", p);
-        if(p<best->penalty){
-            best->split=split;
-            best->penalty=p;
-            best->dir=SPLIT_UNUSED;
-            best->primn=PRIMN_BR;
-            best->grow=TRUE;
-        }
+        p_h[P_FIT]=hfit_penalty(rqw, sw, un_tot, un_immed, &d_w[P_FIT]);
+        p_v[P_FIT]=vfit_penalty(rqh, sh, un_tot, un_immed, &d_h[P_FIT]);
+        p_h[P_SLACK]=hslack_penalty(rqw, sw, un_tot, un_immed, &d_w[P_SLACK]);
+        p_v[P_SLACK]=vslack_penalty(rqh, sh, un_tot, un_immed, &d_h[P_SLACK]);
+        p_h[P_SPLIT]=hsplit_penalty(rqw, sw, un_tot, un_immed, &d_w[P_SPLIT]);
+        p_v[P_SPLIT]=vsplit_penalty(rqh, sh, un_tot, un_immed, &d_h[P_SPLIT]);
         
-        p=combine(phfit, pvsplit);
-        fprintf(stderr, "VSP: %d\n", p);
-        if(p<best->penalty){
-            best->split=split;
-            best->penalty=p;
-            best->dir=SPLIT_VERTICAL;
-            best->primn=PRIMN_TL; /* Should decide this based on borders */
-            best->grow=FALSE;
-        }
-
-        p=combine(phsplit, pvfit);
-        fprintf(stderr, "HSP: %d\n", p);
-        if(p<best->penalty){
-            best->split=split;
-            best->penalty=p;
-            best->dir=SPLIT_HORIZONTAL;
-            best->primn=PRIMN_TL; /* Should decide this based on borders */
-            best->grow=FALSE;
+        for(i=0; i<P_N; i++){
+            for(j=0; j<P_N; j++){
+                /* Don't split both ways. */
+                if(i==P_SPLIT && j==P_SPLIT)
+                    continue;
+                
+                p=combine(p_h[i], p_v[j]);
+                if(p<best->penalty){
+                    best->split=split;
+                    best->penalty=p;
+                    best->dest_w=d_w[i];
+                    best->dest_h=d_h[j];
+                
+                    if(i==P_SPLIT || j==P_SPLIT){
+                        best->action=(i==P_SPLIT
+                                      ? ACT_SPLIT_HORIZONTAL
+                                      : ACT_SPLIT_VERTICAL);
+                         /* Should decide this based on location of split */
+                        best->split_primn=PRIMN_TL;
+                    }else{
+                        best->action=ACT_REPLACE_UNUSED;
+                    }
+                }
+            }
         }
     }
 
@@ -376,7 +375,23 @@ ret:
 /*}}}*/
 
 
-/*{{{ The main dynfun */
+/*{{{ Split/replace unused code */
+
+
+static bool do_replace(Res *rs, WSplit **tree, WFrame *frame)
+{
+    fprintf(stderr, "use unused!\n");
+
+    if(split_tree_set_node_of((WRegion*)frame, rs->split)){
+        rs->split->type=SPLIT_REGNODE;
+        rs->split->u.reg=(WRegion*)frame;
+        region_fit((WRegion*)frame, &(rs->split->geom), REGION_FIT_EXACT);
+        return TRUE;
+    }
+    
+    return FALSE;
+}
+
 
 
 static WFrame *mke_frame=NULL;
@@ -390,15 +405,38 @@ static WRegion *mke(WWindow *par, const WFitParams *fp)
 }
 
 
+static bool do_split(Res *rs, WSplit **tree, WFrame *frame)
+{
+    WSplit *node;
+    int dir=(rs->action==ACT_SPLIT_VERTICAL
+             ? SPLIT_VERTICAL
+             : SPLIT_HORIZONTAL);
+    int mins=(rs->action==ACT_SPLIT_VERTICAL 
+              ? REGION_GEOM(frame).h
+              : REGION_GEOM(frame).w);
+    WWindow *par=REGION_PARENT_CHK(frame, WWindow);
+    
+    fprintf(stderr, "split %d\n", dir==SPLIT_VERTICAL);
+    
+    assert(mke_frame==NULL);
+    mke_frame=frame;
+    node=split_tree_split(tree, rs->split, dir, rs->split_primn, 
+                          mins, mke, par);
+    mke_frame=NULL;
+    return (node!=NULL);
+}
+
+
+/*}}}*/
+
+
+/*{{{ The main dynfun */
+
 
 bool autows_manage_clientwin(WAutoWS *ws, WClientWin *cwin,
                              const WManageParams *param, int redir)
 {
     WRegion *target=NULL;
-    WWindow *par=REGION_PARENT_CHK(ws, WWindow);
-    
-    if(par==NULL)
-        return FALSE;
     
     if(!WS_REALLY_FULL(ws)){
         WFrame *frame=create_frame_for(ws, (WRegion*)cwin);
@@ -413,39 +451,42 @@ bool autows_manage_clientwin(WAutoWS *ws, WClientWin *cwin,
                 target=(WRegion*)frame;
             }
         }else if(frame!=NULL){
+            /*      split action         penalty       primn      w    h */
+            Res rs={NULL, ACT_NOT_FOUND, PENALTY_INIT, PRIMN_ANY, -1, -1};
             WSplitUnused tot={0, 0, 0, 0}, immed={0, 0, 0, 0};
-            Res rs={NULL, PENALTY_INIT, SPLIT_VERTICAL, PRIMN_ANY, FALSE};
+            WSplit **tree=&(ws->ionws.split_tree);
+
+            split_update_bounds(*tree, TRUE);
+            scan(*tree, 0, &REGION_GEOM(frame), &tot, &immed, &rs);
             
-            split_update_bounds(ws->ionws.split_tree, TRUE);
-            scan(ws->ionws.split_tree, 0, &REGION_GEOM(frame), &tot, &immed, 
-                 &rs);
-            
-            if(rs.split!=NULL && rs.dir==SPLIT_UNUSED){
-                fprintf(stderr, "use unused!\n");
-                if(split_tree_set_node_of((WRegion*)frame, rs.split)){
-                    target=(WRegion*)frame;
-                    rs.split->type=SPLIT_REGNODE;
-                    rs.split->u.reg=target;
-                    region_fit(target, &(rs.split->geom), REGION_FIT_EXACT);
+            /* Resize */
+            if(rs.dest_w>0 || rs.dest_h>0){
+                WRectangle grq=rs.split->geom;
+                int gflags=REGION_RQGEOM_WEAK_ALL;
+                
+                if(rs.dest_w>0){
+                    grq.w=rs.dest_w;
+                    gflags&=~REGION_RQGEOM_WEAK_W;
                 }
-            }else if(rs.split!=NULL){
-                WSplit *node;
-                int mins=(rs.dir==SPLIT_VERTICAL 
-                          ? REGION_GEOM(frame).h
-                          : REGION_GEOM(frame).w);
-                fprintf(stderr, "split %d\n", rs.dir==SPLIT_VERTICAL);
-                /* Should resize first! */
-                assert(mke_frame==NULL);
-                mke_frame=frame;
-                /*fprintf(stderr, "vert: %d\n", rs.dir==SPLIT_VERTICAL);
-                rectangle_debugprint(&REGION_GEOM(frame), "fIg");
-                rectangle_debugprint(&(rs.split->geom), "sg");*/
-                node=split_tree_split(&(ws->ionws.split_tree), rs.split, 
-                                      rs.dir, rs.primn, mins, mke, par);
-                /*rectangle_debugprint(&(rs.split->geom), "sRg");*/
-                mke_frame=NULL;
-                if(node!=NULL)
+                
+                if(rs.dest_h>0){
+                    grq.h=rs.dest_h;
+                    gflags&=~REGION_RQGEOM_WEAK_H;
+                }
+                
+                split_tree_rqgeom(*tree, rs.split, gflags, &grq, NULL);
+            }
+
+            /* Put the frame there */
+            if(rs.action==ACT_SPLIT_HORIZONTAL || 
+               rs.action==ACT_SPLIT_VERTICAL){
+                if(do_split(&rs, tree, frame))
                     target=(WRegion*)frame;
+            }else if(rs.action==ACT_REPLACE_UNUSED){
+                if(do_replace(&rs, tree, frame))
+                    target=(WRegion*)frame;
+            }else{
+                warn("Placement method unimplemented.");
             }
             
             if(target==NULL)
