@@ -382,18 +382,24 @@ static bool menu_init_gr(WMenu *menu, WRootWin *rootwin, Window win)
 {
     GrBrush *brush, *entry_brush;
     char *st;
+    const char *style=(menu->big_mode 
+                       ? "input-menu-big"
+                       : (menu->pmenu_mode
+                          ? "input-menu-pmenu"
+                          : "input-menu-normal"));
+
+    const char *entry_style=(menu->big_mode
+                                   ? "tab-menuentry-big"
+                                   : (menu->pmenu_mode
+                                      ? "tab-menuentry-pmenu"
+                                      : "tab-menuentry-normal"));
     
-    brush=gr_get_brush(rootwin, win,  (menu->big_mode
-                                       ? "input-menu-big"
-                                       : "input-menu-normal"));
+    brush=gr_get_brush(rootwin, win,  style);
     
     if(brush==NULL)
         return FALSE;
 
-    entry_brush=grbrush_get_slave(brush, rootwin, win, 
-                                  (menu->big_mode
-                                   ? "tab-menuentry-big"
-                                   : "tab-menuentry-normal"));
+    entry_brush=grbrush_get_slave(brush, rootwin, win, entry_style);
     
     if(entry_brush==NULL){
         grbrush_release(brush, win);
