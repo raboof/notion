@@ -49,11 +49,11 @@ X11_PREFIX=/usr/X11R6
 # SunOS/Solaris
 #X11_PREFIX=/usr/openwin
 
-X11_LIBS=-L$(X11_PREFIX)/lib
+X11_LIBS=-L$(X11_PREFIX)/lib -lX11 -lXext
 X11_INCLUDES=-I$(X11_PREFIX)/include
 
 # Change commenting to disable Xinerama support
-XINERAMA_LIBS=-lXinerama -lXext
+XINERAMA_LIBS=-lXinerama
 #DEFINES += -DCF_NO_XINERAMA
 
 # Uncomment to enable Xft (anti-aliased fonts) support
