@@ -464,9 +464,9 @@ void ionws_do_managed_remove(WIonWS *ws, WRegion *reg)
 }
 
 
-static bool plainregionfilter(WSplit *node)
+static bool nostdispfilter(WSplit *node)
 {
-    return (strcmp(OBJ_TYPESTR(node), "WSplitRegion")==0);
+    return (OBJ_IS(node, WSplitRegion) && !OBJ_IS(node, WSplitST));
 }
 
 
@@ -482,8 +482,7 @@ void ionws_managed_remove(WIonWS *ws, WRegion *reg)
     if(node==NULL)
         return;
     
-    other=(WSplitRegion*)split_closest_leaf((WSplit*)node, 
-                                            plainregionfilter);
+    other=(WSplitRegion*)split_closest_leaf((WSplit*)node, nostdispfilter);
     
     if(ws->split_tree!=NULL){
         if(node==(WSplitRegion*)(ws->stdispnode))
@@ -778,11 +777,12 @@ WSplit *ionws_split_tree(WIonWS *ws)
 }
 
 
-static WRegion *do_get_next_to(WIonWS *ws, WRegion *reg, int dir, int primn)
+static WRegion *do_get_next_to(WIonWS *ws, WRegion *reg, int dir, int primn,
+                               WSplitFilter *filter)
 {
     WSplitRegion *node=get_node_check(ws, reg);
     if(node!=NULL)
-        node=(WSplitRegion*)split_nextto((WSplit*)node, dir, primn, NULL);
+        node=(WSplitRegion*)split_nextto((WSplit*)node, dir, primn, filter);
     return (node ? node->reg : NULL);
 }
 
@@ -800,17 +800,18 @@ WRegion *ionws_next_to(WIonWS *ws, WRegion *reg, const char *dirstr)
     if(!get_split_dir_primn(dirstr, &dir, &primn))
         return NULL;
     
-    return do_get_next_to(ws, reg, dir, primn);
+    return do_get_next_to(ws, reg, dir, primn, NULL);
 }
 
 
-static WRegion *do_get_farthest(WIonWS *ws, int dir, int primn)
+static WRegion *do_get_farthest(WIonWS *ws, int dir, int primn,
+                                WSplitFilter *filter)
 {
     WSplitRegion *node=NULL;
     
     if(ws->split_tree!=NULL){
-        node=(WSplitRegion*)split_current_todir(ws->split_tree, 
-                                                dir, primn, NULL);
+        node=(WSplitRegion*)split_current_todir(ws->split_tree, dir, primn, 
+                                                filter);
     }
     
     return (node ? node->reg : NULL);
@@ -830,7 +831,7 @@ WRegion *ionws_farthest(WIonWS *ws, const char *dirstr)
     if(!get_split_dir_primn(dirstr, &dir, &primn))
         return NULL;
     
-    return do_get_farthest(ws, dir, primn);
+    return do_get_farthest(ws, dir, primn, NULL);
 }
 
 
@@ -839,9 +840,9 @@ static WRegion *do_goto_dir(WIonWS *ws, int dir, int primn)
     int primn2=(primn==PRIMN_TL ? PRIMN_BR : PRIMN_TL);
     WRegion *reg=NULL, *curr=ionws_current(ws);
     if(curr!=NULL)
-        reg=do_get_next_to(ws, curr, dir, primn);
+        reg=do_get_next_to(ws, curr, dir, primn, nostdispfilter);
     if(reg==NULL)
-        reg=do_get_farthest(ws, dir, primn2);
+        reg=do_get_farthest(ws, dir, primn2, nostdispfilter);
     if(reg!=NULL)
         region_goto(reg);
     return reg;
@@ -874,7 +875,7 @@ static WRegion *do_goto_dir_nowrap(WIonWS *ws, int dir, int primn)
     int primn2=(primn==PRIMN_TL ? PRIMN_BR : PRIMN_TL);
     WRegion *reg=NULL, *curr=ionws_current(ws);
     if(curr!=NULL)
-        reg=do_get_next_to(ws, curr, dir, primn);
+        reg=do_get_next_to(ws, curr, dir, primn, nostdispfilter);
     if(reg!=NULL)
         region_goto(reg);
     return reg;
