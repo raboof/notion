@@ -660,16 +660,19 @@ static void dock_managed_rqgeom(WDock *dock, WRegion *reg, int flags,
     /* Calculate widths and heights */
     for(dockapp=dock->dockapps; dockapp!=NULL; dockapp=dockapp->next){
         WDockApp *da=dockapp;
+        bool update=!(flags&REGION_RQGEOM_TRYONLY);
         if((WRegion*)(dockapp->cwin)==reg){
             thisdockapp=dockapp;
             if(flags&REGION_RQGEOM_TRYONLY){
                 thisdockapp_copy=*dockapp;
                 thisdockapp_copy.geom=*geom;
                 da=&thisdockapp_copy;
+                update=TRUE;
             }
-            
             da->geom=*geom;
         }
+        
+        if(update){
             /* Determine whether dockapp should be placed on a tile */
             da->tile=da->geom.w<=tile_size.w && da->geom.h<=tile_size.h;
             
@@ -685,7 +688,7 @@ static void dock_managed_rqgeom(WDock *dock, WRegion *reg, int flags,
             /* Calculate border width and height */
             da->border_geom.w=dockapp_bdw.left+da->tile_geom.w+dockapp_bdw.right;
             da->border_geom.h=dockapp_bdw.top+da->tile_geom.h+dockapp_bdw.right;
-        
+        }
         
         /* Calculate maximum and accumulated widths and heights */
         if(da->border_geom.w>max_w)
@@ -755,6 +758,7 @@ static void dock_managed_rqgeom(WDock *dock, WRegion *reg, int flags,
     
     /* Fit dock to new geom if required */
     if(!(flags&REGION_RQGEOM_TRYONLY)){
+        int rqgeomflags=REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y;
         WRectangle *g=&border_dock_geom;
         dock->min_w=g->w;
         dock->min_h=g->h;
@@ -767,7 +771,7 @@ static void dock_managed_rqgeom(WDock *dock, WRegion *reg, int flags,
         }
         
         dock->arrange_called=FALSE;
-        region_rqgeom((WRegion*)dock, REGION_RQGEOM_NORMAL, g, NULL);
+        region_rqgeom((WRegion*)dock, rqgeomflags, g, NULL);
         if(!dock->arrange_called)
             dock_arrange_dockapps(dock, &REGION_GEOM(dock), NULL, NULL);
         if(geomret!=NULL)

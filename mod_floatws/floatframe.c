@@ -178,6 +178,7 @@ static void floatframe_rqgeom_clientwin(WFloatFrame *frame, WClientWin *cwin,
 {
     int gravity=NorthWestGravity;
     XSizeHints hints;
+    uint relw=0, relh=0;
     WRectangle off;
     WRegion *par;
     WRectangle geom=*geom_;
@@ -187,7 +188,7 @@ static void floatframe_rqgeom_clientwin(WFloatFrame *frame, WClientWin *cwin,
 
     floatframe_offsets(frame, &off);
 
-    region_size_hints((WRegion*)frame, &hints, NULL, NULL);
+    region_size_hints((WRegion*)frame, &hints, &relw, &relh);
     xsizehints_correct(&hints, &(geom.w), &(geom.h), TRUE);
     
     geom.w=maxof(geom.w, 0);

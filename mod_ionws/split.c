@@ -1249,7 +1249,7 @@ void split_tree_remove(WSplit **root, WSplit *node,
     WSplit **thisptr=NULL;
     bool replace_ok=FALSE, tl=FALSE;
 
-    if(split!=NULL){
+    if(split!=NULL && reclaim_space){
         if((split->u.s.tl!=node && split->u.s.tl->type==SPLIT_STDISPNODE) ||
            (split->u.s.br!=node && split->u.s.br->type==SPLIT_STDISPNODE)){
             /* Try to move stdisp out of the way. */

@@ -159,7 +159,7 @@ static void ionws_create_stdispnode(WIonWS *ws, WRegion *stdisp,
     WSplit *stdispnode, *split;
     WRectangle *wg=&REGION_GEOM(ws);
     WRectangle dg;
-    int flags=REGION_RQGEOM_NORMAL;
+    int flags=REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y;
     
     if(orientation==REGION_ORIENTATION_HORIZONTAL){
         dg.x=wg->x;
@@ -216,23 +216,6 @@ static void ionws_create_stdispnode(WIonWS *ws, WRegion *stdisp,
 
     ws->split_tree=split;
     ws->stdispnode=stdispnode;
-    
-    ionws_managed_add(ws, stdisp);
-
-    /* Adjust stdisp geometry. */
-    
-    split_regularise_stdisp(stdispnode);
-    dg=stdispnode->geom;
-    
-    if(orientation==REGION_ORIENTATION_HORIZONTAL){
-        dg.h=maxof(CF_STDISP_MIN_SZ, region_min_h(stdisp));
-        flags|=REGION_RQGEOM_WEAK_Y;
-    }else{
-        dg.w=maxof(CF_STDISP_MIN_SZ, region_min_w(stdisp));
-        flags|=REGION_RQGEOM_WEAK_X;
-    }
-    
-    split_tree_rqgeom(ws->split_tree, stdispnode, flags, &dg, NULL);
 }
 
 
@@ -241,6 +224,8 @@ void ionws_manage_stdisp(WIonWS *ws, WRegion *stdisp, int corner,
 {
     bool mcf=region_may_control_focus((WRegion*)ws);
     bool act=FALSE;
+    int flags=REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y;
+    WRectangle dg;
     
     /* corner/orientation not yet supported. */
     
@@ -259,6 +244,7 @@ void ionws_manage_stdisp(WIonWS *ws, WRegion *stdisp, int corner,
     if(ws->stdispnode==NULL){
         ionws_create_stdispnode(ws, stdisp, corner, orientation);
     }else{
+        
         if(ws->stdispnode->u.reg!=NULL){
             act=REGION_IS_ACTIVE(ws->stdispnode->u.reg);
             ionws_do_managed_remove(ws, ws->stdispnode->u.reg);
@@ -266,16 +252,21 @@ void ionws_manage_stdisp(WIonWS *ws, WRegion *stdisp, int corner,
         
         ws->stdispnode->u.reg=stdisp;
         split_tree_set_node_of(stdisp, ws->stdispnode);
-        
-        ionws_managed_add(ws, stdisp);
-        
-        region_fit(stdisp, &(ws->stdispnode->geom), REGION_FIT_EXACT);
-        
-        split_regularise_stdisp(ws->stdispnode);
-        
-        if(mcf && act)
-            region_set_focus(stdisp);
     }
+    
+    ionws_managed_add(ws, stdisp);
+    
+    dg=ws->stdispnode->geom;
+    
+    if(orientation==REGION_ORIENTATION_HORIZONTAL)
+        dg.h=maxof(CF_STDISP_MIN_SZ, region_min_h(stdisp));
+    else
+        dg.w=maxof(CF_STDISP_MIN_SZ, region_min_w(stdisp));
+    
+    split_tree_rqgeom(ws->split_tree, ws->stdispnode, flags, &dg, NULL);
+    
+    if(mcf && act)
+        region_set_focus(stdisp);
 }
 
 
