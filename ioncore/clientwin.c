@@ -198,9 +198,9 @@ int clientwin_get_transient_mode(WClientWin *cwin)
 	int mode=TRANSIENT_MODE_NORMAL;
 	
 	if(extl_table_gets_s(cwin->proptab, "transient_mode", &s)){
-		if(strcmp(s, "current"))
+		if(strcmp(s, "current")==0)
 			mode=TRANSIENT_MODE_CURRENT;
-		else if(strcmp(s, "off"))
+		else if(strcmp(s, "off")==0)
 			mode=TRANSIENT_MODE_OFF;
 		free(s);
 	}
