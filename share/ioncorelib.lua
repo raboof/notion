@@ -63,12 +63,9 @@ function mact(act_, kcb_, func_, area_)
     local ret={
     	action = act_,
 	kcb = kcb_,
-	func = func_
+        func = func_,
+        area = area_,
     }
-    
-    if area_ ~= nil then
-	ret.area = area_
-    end
     
     return ret
 end
