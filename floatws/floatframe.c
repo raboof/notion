@@ -34,7 +34,7 @@
 
 
 static bool floatframe_init(WFloatFrame *frame, WWindow *parent,
-							WRectangle geom, int unused_flags)
+							WRectangle geom)
 {
 	if(!genframe_init((WGenFrame*)frame, parent, geom))
 		return FALSE;
@@ -50,9 +50,9 @@ static bool floatframe_init(WFloatFrame *frame, WWindow *parent,
 }
 
 
-WFloatFrame *create_floatframe(WWindow *parent, WRectangle geom, int flags)
+WFloatFrame *create_floatframe(WWindow *parent, WRectangle geom)
 {
-	CREATEOBJ_IMPL(WFloatFrame, floatframe, (p, parent, geom, flags));
+	CREATEOBJ_IMPL(WFloatFrame, floatframe, (p, parent, geom));
 }
 
 
@@ -416,7 +416,7 @@ WRegion *floatframe_load(WWindow *par, WRectangle geom, ExtlTab tab)
 	if(!extl_table_gets_t(tab, "subs", &substab))
 		return NULL;
 
-	frame=create_floatframe(par, geom, flags);
+	frame=create_floatframe(par, geom);
 	
 	if(frame!=NULL){
 		n=extl_table_get_n(substab);

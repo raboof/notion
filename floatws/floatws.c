@@ -362,7 +362,7 @@ static bool floatws_add_clientwin(WFloatWS *ws,
 		if(!respectpos)
 			floatws_calc_placement(ws, &fgeom);
 		
-		target=(WRegion*)create_floatframe(par, fgeom, 0);
+		target=(WRegion*)create_floatframe(par, fgeom);
 	
 		if(target==NULL){
 			warn("Failed to create a new WFloatFrame for client window");
@@ -413,7 +413,7 @@ static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
 	fgeom.x=x-fgeom.x;
 	fgeom.y=y-fgeom.y;
 
-	target=(WRegion*)create_floatframe(par, fgeom, 0);
+	target=(WRegion*)create_floatframe(par, fgeom);
 	
 	if(target==NULL){
 		warn("Failed to create a new WFloatFrame.");

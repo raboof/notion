@@ -25,8 +25,7 @@ DECLOBJ(WFloatFrame){
 };
 
 
-extern WFloatFrame *create_floatframe(WWindow *parent, WRectangle geom,
-									  int flags);
+extern WFloatFrame *create_floatframe(WWindow *parent, WRectangle geom);
 
 extern void floatframe_remove_managed(WFloatFrame *frame, WRegion *reg);
 
