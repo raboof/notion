@@ -17,9 +17,10 @@
 #include <wmcore/focus.h>
 #include <wmcore/commandsq.h>
 #include <wmcore/names.h>
+#include <wmcore/genericws.h>
 #include <src/frame.h>
-#include <src/workspace.h>
 #include <src/funtabs.h>
+#include <src/ionws.h>
 #include "query.h"
 #include "wedln.h"
 #include "complete_file.h"
@@ -225,7 +226,7 @@ bool empty_name(const char *p)
 static void handler_workspace(WThing *thing, char *name, char *userdata)
 {
 	WScreen *scr=SCREEN_OF(thing);
-	WWorkspace *ws;
+	WGenericWS *ws;
 	WViewport *vp;
 	
 	if(empty_name(name))
@@ -236,7 +237,7 @@ static void handler_workspace(WThing *thing, char *name, char *userdata)
 	if(ws==NULL){
 		vp=viewport_of((WRegion*)thing);
 		if(vp!=NULL)
-			ws=create_new_workspace_on_vp(vp, name);
+			ws=(WGenericWS*)create_new_ionws_on_vp(vp, name);
 		if(ws==NULL){
 			FWARN(("Unable to create workspace."));
 			return;
@@ -256,8 +257,9 @@ void query_workspace(WFrame *frame)
 
 static void handler_workspace_with(WThing *thing, char *name, char *userdata)
 {
+#if 0
 	WScreen *scr=SCREEN_OF(thing);
-	WWorkspace *ws;
+	WGenericWS *ws;
 	WClientWin *cwin;
 	WFrame *frame;
 	WViewport *vp;
@@ -282,7 +284,7 @@ static void handler_workspace_with(WThing *thing, char *name, char *userdata)
 		
 		vp=viewport_of((WRegion*)thing);
 		if(vp!=NULL)
-			ws=create_new_workspace_on_vp(vp, name);
+			ws=create_new_ionws_on_vp(vp, name);
 		
 		if(ws==NULL){
 			FWARN(("Unable to create workspace."));
@@ -296,11 +298,13 @@ static void handler_workspace_with(WThing *thing, char *name, char *userdata)
 	
 	if(attach_test((WFrame*)frame, (WRegion*)cwin, (WFrame*)thing))
 		goto_region((WRegion*)cwin);
+#endif
 }
 
 
 void query_workspace_with(WFrame *frame)
 {
+#if 0
 	WEdln *wedln;
 	WRegion *sub=frame->current_sub;
 	char *p;
@@ -319,12 +323,14 @@ void query_workspace_with(WFrame *frame)
 		free(p);
 	else
 		wedln->userdata=p;
+#endif
+	fwarn(frame, "This feature is not available at the moment");
 }
 
 
 void handler_renameworkspace(WThing *thing, char *name, char *userdata)
 {
-	WWorkspace *ws=FIND_PARENT(thing, WWorkspace);
+	WGenericWS *ws=FIND_PARENT(thing, WGenericWS);
 
 	if(ws==NULL || empty_name(name))
 		return;
@@ -335,7 +341,7 @@ void handler_renameworkspace(WThing *thing, char *name, char *userdata)
 
 void query_renameworkspace(WFrame *frame)
 {
-	WWorkspace *ws=FIND_PARENT(frame, WWorkspace);
+	WGenericWS *ws=FIND_PARENT(frame, WGenericWS);
 	
 	if(ws==NULL)
 		return;
