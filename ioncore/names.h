@@ -14,8 +14,10 @@
 
 
 extern bool region_set_name(WRegion *reg, const char *name);
+extern bool region_set_name_instrq(WRegion *reg, const char *p, int instrq);
+
+extern int region_name_instance(WRegion *reg);
 extern const char *region_name(WRegion *reg);
-extern uint region_name_instance(WRegion *reg);
 
 /* Returns a newly allocated copy of the name with the instance
  * number appended. */

@@ -161,10 +161,11 @@ WRegion *region_add_managed_load(WRegion *mgr, ExtlTab tab)
  *  \var{geom} & Geometry \emph{request}; a table with fields
  *				 \var{x}, \var{y}, \var{w} and \var{h}. \\
  * 	\var{selected} & Boolean value indicating whether the new region should
- 					 be made the selected one within \var{mgr}. \\
+ *					 be made the selected one within \var{mgr}. \\
  *  \var{name} & The (short) name of the region. Note that this name
  *               should not be used to reference the object but the full
  * 				 name with instance number (\fnref{region_full_name}). \\
+ *  \var{name_instance} & Request for instance number of name. \\
  * \end{tabularx}
  */
 EXTL_EXPORT

@@ -155,7 +155,6 @@ void clientwin_get_set_name(WClientWin *cwin)
 	if(list==NULL){
 		region_unuse_name((WRegion*)cwin);
 	}else{
-		stripws(*list);
 		region_set_name((WRegion*)cwin, *list);
 		XFreeStringList(list);
 	}

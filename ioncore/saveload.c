@@ -52,7 +52,9 @@ WRegion *load_create_region(WWindow *par, WRectangle geom, ExtlTab tab)
 	
 	if(region_name(reg)==NULL){
 		if(extl_table_gets_s(tab, "name", &name)){
-			region_set_name(reg, name);
+			int instrq=-1;
+			extl_table_gets_i(tab, "name_instance", &instrq);
+			region_set_name_instrq(reg, name, instrq);
 			free(name);
 		}
 	}
@@ -122,6 +124,8 @@ void begin_saved_region(WRegion *reg, FILE *file, int lvl)
 		fprintf(file, "name = ");
 		write_escaped_string(file, name);
 		fprintf(file, ",\n");
+		save_indent_line(file, lvl);
+		fprintf(file, "name_instance = %d,\n", region_name_instance(reg));
 	}
 }
 
