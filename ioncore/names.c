@@ -252,15 +252,3 @@ ExtlTab complete_region(const char *nam)
 	return do_complete_region(nam, &OBJDESCR(WObj));
 }
 
-
-EXTL_EXPORT
-void goto_named_region(char *name)
-{
-	WRegion *reg=lookup_region(name);
-	
-	if(reg!=NULL)
-		region_goto(reg);
-}
-
-
-

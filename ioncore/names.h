@@ -27,7 +27,6 @@ extern ExtlTab do_complete_region(const char *nam, WObjDescr *descr);
 extern WRegion *lookup_region(const char *cname);
 extern ExtlTab complete_region(const char *nam);
 
-extern void goto_named_region(char *name);
 extern void	region_unuse_name(WRegion *reg);
 
 #endif /* ION_IONCORE_NAMES_H */

@@ -47,20 +47,6 @@ ExtlTab complete_workspace(const char *nam)
 }
 
 
-EXTL_EXPORT
-bool goto_workspace_name(const char *str)
-{
-	WGenWS *ws=lookup_workspace(str);
-	
-	if(ws==NULL)
-		return FALSE;
-
-	region_goto((WRegion*)ws);
-	
-	return TRUE;
-}
-
-
 /*}}}*/
 
 
