@@ -267,7 +267,7 @@ int main()
 		printf("Error: lua_version() does not match LUA_VERSION. ");
 		exit(EXIT_FAILURE);
 	}
-	printf("(found \"%s\")... ", lua_version());
+	printf("(found %s)... ", lua_version());
 	if(strcmp(lua_version(), "Lua 5.0")<0)
 		exit(EXIT_FAILURE);
 	exit(EXIT_SUCCESS);
