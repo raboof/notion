@@ -474,6 +474,16 @@ void region_lost_focus(WRegion *reg)
 }
 
 
+/*EXTL_DOC
+ * Is \var{reg} active/does it or one of it's children of focus?
+ */
+EXTL_EXPORT_MEMBER
+bool region_is_active(WRegion *reg)
+{
+	return REGION_IS_ACTIVE(reg);
+}
+
+
 /*}}}*/
 
 	
@@ -548,6 +558,10 @@ bool region_goto(WRegion *reg)
 /*{{{ Helpers/misc */
 
 
+/*EXTL_DOC
+ * Is \var{reg} visible/is it and all it's ancestors mapped?
+ */
+EXTL_EXPORT_MEMBER_AS(WRegion, is_mapped)
 bool region_is_fully_mapped(WRegion *reg)
 {
 	for(; reg!=NULL; reg=region_parent(reg)){

@@ -135,6 +135,7 @@ extern void region_deinit(WRegion *reg);
 extern void region_got_focus(WRegion *reg);
 extern void region_lost_focus(WRegion *reg);
 extern bool region_may_control_focus(WRegion *reg);
+extern bool region_is_active(WRegion *reg);
 extern WRegion *region_get_active_leaf(WRegion *reg);
 
 extern bool region_is_fully_mapped(WRegion *reg);
