@@ -10,7 +10,7 @@
 --
 
 local defaults={
-    update_interval=60*1000,
+    update_interval=10*1000,
     mbox=os.getenv("MAIL")
 }
 
@@ -61,26 +61,34 @@ local function calcmail(fname)
 end
 
 local mail_timer
+local mail_timestamp=-2.0
 
 local function update_mail()
     assert(settings.mbox)
     
-    local mail_total, mail_unread, mail_new=calcmail(settings.mbox)
+    local old_tm=mail_timestamp
+    mail_timestamp=statusd.last_modified(settings.mbox)
     
-    statusd.inform("mail_new", tostring(mail_new))
-    statusd.inform("mail_unread", tostring(mail_unread))
-    statusd.inform("mail_total", tostring(mail_total))
+    print(old_tm, mail_timestamp)
     
-    if mail_new>0 then
-        statusd.inform("mail_new_hint", "important")
-    else
-        statusd.inform("mail_new_hint", "normal")
-    end
-
-    if mail_unread>0 then
-        statusd.inform("mail_unread_hint", "important")
-    else
-        statusd.inform("mail_unread_hint", "normal")
+    if mail_timestamp>old_tm then
+        local mail_total, mail_unread, mail_new=calcmail(settings.mbox)
+        
+        statusd.inform("mail_new", tostring(mail_new))
+        statusd.inform("mail_unread", tostring(mail_unread))
+        statusd.inform("mail_total", tostring(mail_total))
+        
+        if mail_new>0 then
+            statusd.inform("mail_new_hint", "important")
+        else
+            statusd.inform("mail_new_hint", "normal")
+        end
+        
+        if mail_unread>0 then
+            statusd.inform("mail_unread_hint", "important")
+        else
+            statusd.inform("mail_unread_hint", "normal")
+        end
     end
 
     mail_timer:set(settings.update_interval, update_mail)

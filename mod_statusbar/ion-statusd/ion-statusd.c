@@ -10,7 +10,10 @@
  */
 
 #include <string.h>
-#include <sys/poll.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
 #include <libtu/util.h>
 #include <libtu/optparser.h>
 #include <libtu/errorlog.h>
@@ -244,5 +247,25 @@ ExtlTab statusd_get_config(const char *name)
         else
             return extl_create_table();
     }
+}
+
+
+/*EXTL_DOC
+ * Get last file modification time.
+ */
+EXTL_EXPORT
+double statusd_last_modified(const char *fname)
+{
+    struct stat st;
+    
+    if(fname==NULL)
+        return (double)(-1);
+    
+    if(stat(fname, &st)!=0){
+        warn_err(fname);
+        return (double)(-1);
+    }
+    
+    return (double)(st.st_mtime>st.st_ctime ? st.st_mtime : st.st_ctime);
 }
 
