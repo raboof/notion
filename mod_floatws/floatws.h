@@ -34,7 +34,6 @@ DECLSTRUCT(WFloatStacking){
 
 DECLCLASS(WFloatWS){
     WGenWS genws;
-    WRegion *managed_list;
     WRegion *managed_stdisp;
     int stdisp_corner;
     WRegion *current_managed;
@@ -71,5 +70,27 @@ extern bool mod_floatws_clientwin_do_manage(WClientWin *cwin,
                                             const WManageParams *param);
 
 extern WFloatStacking *mod_floatws_find_stacking(WRegion *r);
+
+/* */
+
+typedef struct{
+    WFloatWS *ws;
+    WFloatStacking *st;
+} WFloatWSIterTmp;
+
+extern void floatws_iter_init(WFloatWSIterTmp *tmp, WFloatWS *ws);
+extern WRegion *floatws_iter(WFloatWSIterTmp *tmp);
+
+#define FOR_ALL_MANAGED_BY_FLOATWS(WS, VAR, TMP) \
+    for(floatws_iter_init(&(TMP), WS),           \
+         VAR=floatws_iter(&(TMP));               \
+        VAR!=NULL;                               \
+        VAR=floatws_iter(&(TMP)))
+    
+extern WFloatWSIterTmp floatws_iter_default_tmp;
+
+#define FOR_ALL_MANAGED_BY_FLOATWS_UNSAFE(WS, VAR) \
+    FOR_ALL_MANAGED_BY_FLOATWS(WS, VAR, floatws_iter_default_tmp)
+
 
 #endif /* ION_MOD_FLOATWS_FLOATWS_H */

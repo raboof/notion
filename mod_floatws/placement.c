@@ -40,7 +40,7 @@ static WRegion* is_occupied(WFloatWS *ws, const WRectangle *r)
     WRegion *reg;
     WRectangle p;
     
-    FOR_ALL_MANAGED_ON_LIST(ws->managed_list, reg){
+    FOR_ALL_MANAGED_BY_FLOATWS_UNSAFE(ws, reg){
         ggeom(reg, &p);
         
         if(r->x>=p.x+p.w)
@@ -64,7 +64,7 @@ static int next_least_x(WFloatWS *ws, int x)
     WRectangle p;
     int retx=REGION_GEOM(ws).x+REGION_GEOM(ws).w;
     
-    FOR_ALL_MANAGED_ON_LIST(ws->managed_list, reg){
+    FOR_ALL_MANAGED_BY_FLOATWS_UNSAFE(ws, reg){
         ggeom(reg, &p);
         
         if(p.x+p.w>x && p.x+p.w<retx)
@@ -81,7 +81,7 @@ static int next_lowest_y(WFloatWS *ws, int y)
     WRectangle p;
     int rety=REGION_GEOM(ws).y+REGION_GEOM(ws).h;
     
-    FOR_ALL_MANAGED_ON_LIST(ws->managed_list, reg){
+    FOR_ALL_MANAGED_BY_FLOATWS_UNSAFE(ws, reg){
         ggeom(reg, &p);
         
         if(p.y+p.h>y && p.y+p.h<rety)
