@@ -29,7 +29,7 @@ DECLCLASS(WMPlexPHolder){
  * and finally 'or_layer' if this is also unset
  */
 
-extern WMPlexPHolder *mplexpholder_create(WMPlex *mplex, 
+extern WMPlexPHolder *create_mplexpholder(WMPlex *mplex, 
                                           WMPlexPHolder *after,
                                           WMPlexManaged *or_after, 
                                           int or_layer);
@@ -43,9 +43,9 @@ extern int mplexpholder_layer(WMPlexPHolder *ph);
 
 extern bool mplexpholder_stale(WMPlexPHolder *ph);
 
-extern bool mplexpholder_attach(WMPlexPHolder *ph, 
-                                WRegionAttachHandler *hnd,
-                                void *hnd_param);
+extern bool mplexpholder_do_attach(WMPlexPHolder *ph, 
+                                   WRegionAttachHandler *hnd,
+                                   void *hnd_param);
 
 extern bool mplexpholder_move(WMPlexPHolder *ph, WMPlex *mplex, 
                               WMPlexPHolder *after,
@@ -59,6 +59,9 @@ extern void mplex_move_phs(WMPlex *mplex, WMPlexManaged *node,
 extern void mplex_move_phs_before(WMPlex *mplex, WMPlexManaged *node, 
                                   int layer);
 
-extern WMPlexPHolder *mplex_managed_get_pholder(WMPlex *mplex, WRegion *mgd);
+extern WMPlexPHolder *mplex_managed_get_pholder(WMPlex *mplex, 
+                                                WRegion *mgd);
+extern WMPlexPHolder *mplex_get_rescue_pholder_for(WMPlex *mplex, 
+                                                       WRegion *mgd);
 
 #endif /* ION_IONCORE_MPLEXPHOLDER_H */

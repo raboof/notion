@@ -134,8 +134,6 @@ extern bool mplex_rescue_clientwins(WMPlex *mplex);
 
 extern bool mplex_manage_clientwin(WMPlex *mplex, WClientWin *cwin,
                                    const WManageParams *param, int redir);
-extern bool mplex_manage_rescue(WMPlex *mplex, WClientWin *cwin,
-                                WRegion *from);
 
 /* Switch */
 extern bool mplex_managed_goto(WMPlex *mplex, WRegion *sub, bool cfocus);

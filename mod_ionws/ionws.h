@@ -19,6 +19,7 @@
 #include <ioncore/screen.h>
 #include <ioncore/genws.h>
 #include <ioncore/rectangle.h>
+#include <ioncore/pholder.h>
 #include "split.h"
 
 
@@ -76,8 +77,8 @@ extern void ionws_managed_rqgeom(WIonWS *ws, WRegion *reg,
                                  WRectangle *geomret);
 extern void ionws_managed_remove(WIonWS *ws, WRegion *reg);
 extern void ionws_managed_activated(WIonWS *ws, WRegion *reg);
-extern bool ionws_managed_rescue(WIonWS *ws, WClientWin *cwin, WRegion *from);
 extern bool ionws_rescue_clientwins(WIonWS *ws);
+extern WPHolder *ionws_get_rescue_pholder_for(WIonWS *ws, WRegion *mgd);
 extern void ionws_do_set_focus(WIonWS *ws, bool warp);
 extern bool ionws_managed_goto(WIonWS *ws, WRegion *reg, bool cfocus);
 extern bool ionws_managed_may_destroy(WIonWS *ws, WRegion *reg);

@@ -17,6 +17,7 @@
 #include <libextl/extl.h>
 
 typedef Obj *ObjIterator(void *st);
+typedef WRegion *WRegionIterator(void *st);
 
 extern ExtlTab extl_list_to_obj_table(ObjIterator *iter, void *st);
 

@@ -690,18 +690,34 @@ static void clientwin_managed_remove(WClientWin *cwin, WRegion *transient)
 }
 
 
-static bool clientwin_rescue_clientwins(WClientWin *cwin)
+static WRegion *iter_just_cwins(SymlistIterTmp *tmp)
 {
+    WRegion *r;
+    
+    while(TRUE){
+        r=(WRegion*)symlist_iter(tmp);
+        if(r==NULL || OBJ_IS(r, WClientWin))
+            break;
+    }
+    
+    return r;
+}
+
+
+bool clientwin_rescue_clientwins(WClientWin *cwin)
+{
+    SymlistIterTmp tmp;
     bool ret1, ret2;
     
-#warning "TODO: FIX"
-/*    ret1=region_rescue_managed_clientwins((WRegion*)cwin,
-                                          cwin->transient_list);
+    symlist_iter_init(&tmp, cwin->transient_list);
+    
+    ret1=region_rescue_some_clientwins((WRegion*)cwin, 
+                                       (WRegionIterator*)iter_just_cwins, 
+                                       &tmp);
+
     ret2=region_rescue_child_clientwins((WRegion*)cwin);
     
-    return (ret1 && ret2);*/
-    
-    return FALSE;
+    return (ret1 && ret2);
 }
 
 

@@ -731,9 +731,6 @@ static DynFunTab region_dynfuntab[]={
     {(DynFun*)region_manage_clientwin,
      (DynFun*)region_manage_clientwin_default},
 
-    {(DynFun*)region_manage_rescue,
-     (DynFun*)region_manage_rescue_default},
-
     {(DynFun*)region_managed_goto,
      (DynFun*)region_managed_goto_default},
 

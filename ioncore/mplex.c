@@ -172,6 +172,24 @@ static ExtlTab llist_to_table(WMPlexManaged *list)
 }
 
 
+typedef WMPlexManaged *LListIterTmp;
+
+
+void llist_iter_init(LListIterTmp *tmp, WMPlexManaged *llist)
+{
+    *tmp=llist;
+}
+
+
+WMPlexManaged *llist_iter(LListIterTmp *tmp)
+{
+    WMPlexManaged *mgd=*tmp;
+    if(mgd!=NULL)
+        *tmp=mgd->next;
+    return mgd;
+}
+
+
 /*}}}*/
 
 
@@ -875,6 +893,7 @@ WMPlexManaged *mplex_do_attach_after(WMPlex *mplex,
     
     node->reg=reg;
     node->flags=0;
+    node->phs=NULL;
     
     if(l2){
         link_after(&(mplex->l2_list), after, node);
@@ -1087,12 +1106,6 @@ bool mplex_manage_clientwin(WMPlex *mplex, WClientWin *cwin,
 }
 
 
-bool mplex_manage_rescue(WMPlex *mplex, WClientWin *cwin, WRegion *from)
-{
-    return (NULL!=mplex_attach_simple(mplex, (WRegion*)cwin, 0));
-}
-
-
 /*}}}*/
 
 
@@ -1169,18 +1182,42 @@ void mplex_managed_remove(WMPlex *mplex, WRegion *sub)
 }
 
 
+static WRegion *iter_just_cwins(LListIterTmp *tmp)
+{
+    WMPlexManaged *mgd;
+    
+    while(TRUE){
+        mgd=llist_iter(tmp);
+        if(mgd==NULL)
+            break;
+        if(OBJ_IS(mgd->reg, WClientWin))
+            return mgd->reg;
+    }
+    
+    return NULL;
+}
+
+
 bool mplex_rescue_clientwins(WMPlex *mplex)
 {
-    /*bool ret1, ret2, ret3;*/
+    bool ret1, ret2, ret3;
+    LListIterTmp tmp;
     
-#warning "TOFIX"    
-    /*ret1=region_rescue_managed_clientwins((WRegion*)mplex, mplex->l1_list);
-    ret2=region_rescue_managed_clientwins((WRegion*)mplex, mplex->l2_list);
+    llist_iter_init(&tmp, mplex->l1_list);
+    ret1=region_rescue_some_clientwins((WRegion*)mplex, 
+                                       (WRegionIterator*)iter_just_cwins, 
+                                       &tmp);
+
+    llist_iter_init(&tmp, mplex->l2_list);
+    ret2=region_rescue_some_clientwins((WRegion*)mplex, 
+                                       (WRegionIterator*)iter_just_cwins, 
+                                       &tmp);
+    
     ret3=region_rescue_child_clientwins((WRegion*)mplex);
     
-    return (ret1 && ret2 && ret3);*/
-    return FALSE;
+    return (ret1 && ret2 && ret3);
 }
+
 
 
 void mplex_child_removed(WMPlex *mplex, WRegion *sub)
@@ -1608,9 +1645,6 @@ static DynFunTab mplex_dynfuntab[]={
     {(DynFun*)region_rescue_clientwins,
      (DynFun*)mplex_rescue_clientwins},
     
-    {(DynFun*)region_manage_rescue,
-     (DynFun*)mplex_manage_rescue},
-    
     {(DynFun*)region_get_configuration,
      (DynFun*)mplex_get_configuration},
     
@@ -1628,6 +1662,9 @@ static DynFunTab mplex_dynfuntab[]={
 
     {(DynFun*)region_managed_get_pholder,
      (DynFun*)mplex_managed_get_pholder},
+
+    {(DynFun*)region_get_rescue_pholder_for,
+     (DynFun*)mplex_get_rescue_pholder_for},
     
     END_DYNFUNTAB
 };

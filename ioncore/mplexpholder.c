@@ -59,17 +59,25 @@ static void do_link_ph(WMPlexPHolder *ph,
     assert(mplex==(WMPlex*)ph->mplex_watch.obj && mplex!=NULL);
     
     if(after!=NULL){
-        assert(after->mplex_watch.obj==(Obj*)mplex);
-        assert(after->after!=NULL);
-        LINK_ITEM_AFTER(after->after->phs, after, ph, next, prev);
+        if(after->after!=NULL){
+            LINK_ITEM_AFTER(after->after->phs, after, ph, next, prev);
+        }else if(on_ph_list(mplex->l1_phs, after)){
+            LINK_ITEM_AFTER(mplex->l1_phs, after, ph, next, prev);
+        }else if(on_ph_list(mplex->l2_phs, after)){
+            LINK_ITEM_AFTER(mplex->l2_phs, after, ph, next, prev);
+        }else{
+            assert(FALSE);
+        }
         ph->after=after->after;
     }else if(or_after!=NULL){
         LINK_ITEM_FIRST(or_after->phs, ph, next, prev);
         ph->after=or_after;
     }else if(or_layer==1){
         LINK_ITEM_FIRST(mplex->l1_phs, ph, next, prev);
+        ph->after=NULL;
     }else if(or_layer==2){
         LINK_ITEM_FIRST(mplex->l2_phs, ph, next, prev);
+        ph->after=NULL;
     }else{
         assert(FALSE);
     }
@@ -107,6 +115,7 @@ static void mplex_watch_handler(Watch *watch, Obj *mplex)
 {
     WMPlexPHolder *ph=FIELD_TO_STRUCT(WMPlexPHolder, mplex_watch, watch);
     do_unlink_ph(ph, (WMPlex*)mplex);
+    pholder_redirect(&(ph->ph), (WRegion*)mplex);
 }
 
 
@@ -136,7 +145,7 @@ bool mplexpholder_init(WMPlexPHolder *ph, WMPlex *mplex,
 }
  
 
-WMPlexPHolder *mplexpholder_create(WMPlex *mplex, 
+WMPlexPHolder *create_mplexpholder(WMPlex *mplex, 
                                    WMPlexPHolder *after,
                                    WMPlexManaged *or_after, 
                                    int or_layer)
@@ -191,8 +200,8 @@ bool mplexpholder_stale(WMPlexPHolder *ph)
 }
 
 
-bool mplexpholder_attach(WMPlexPHolder *ph, WRegionAttachHandler *hnd,
-                         void *hnd_param)
+bool mplexpholder_do_attach(WMPlexPHolder *ph, WRegionAttachHandler *hnd,
+                            void *hnd_param)
 {
     WMPlex *mplex=(WMPlex*)ph->mplex_watch.obj;
     WMPlexManaged *nnode;
@@ -308,13 +317,27 @@ WMPlexPHolder *mplex_managed_get_pholder(WMPlex *mplex, WRegion *mgd)
     
     node=find_on_list(mplex->l2_list, mgd);
     if(node!=NULL)
-        return mplexpholder_create(mplex, NULL, node, 2);
+        return create_mplexpholder(mplex, NULL, node, 2);
 
     node=find_on_list(mplex->l1_list, mgd);
     if(node!=NULL)
-        return mplexpholder_create(mplex, NULL, node, 1);
+        return create_mplexpholder(mplex, NULL, node, 1);
         
     return NULL;
+}
+
+
+WMPlexPHolder *mplex_get_rescue_pholder_for(WMPlex *mplex, WRegion *mgd)
+{
+    WMPlexPHolder *ph=mplex_managed_get_pholder(mplex, mgd);
+    
+    if(ph==NULL){
+        /* Just put stuff at the end. We don't want rescues to fail. */
+        ph=create_mplexpholder(mplex, NULL,
+                               LIST_LAST(mplex->l1_list, next, prev), 1);
+    }
+    
+    return ph;
 }
 
 
@@ -325,8 +348,8 @@ WMPlexPHolder *mplex_managed_get_pholder(WMPlex *mplex, WRegion *mgd)
 
 
 static DynFunTab mplexpholder_dynfuntab[]={
-    {(DynFun*)pholder_attach, 
-     (DynFun*)mplexpholder_attach},
+    {(DynFun*)pholder_do_attach, 
+     (DynFun*)mplexpholder_do_attach},
     
     {(DynFun*)pholder_stale, 
      (DynFun*)mplexpholder_stale},

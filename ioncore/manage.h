@@ -12,6 +12,7 @@
 #ifndef ION_IONCORE_MANAGE_H
 #define ION_IONCORE_MANAGE_H
 
+#include <libextl/extl.h>
 #include "common.h"
 
 INTRSTRUCT(WManageParams);
@@ -20,7 +21,7 @@ INTRSTRUCT(WManageParams);
 #include "genws.h"
 #include "attach.h"
 #include "rectangle.h"
-#include <libextl/extl.h>
+#include "extlconv.h"
 
 
 #define MANAGEPARAMS_INIT                                                \
@@ -67,14 +68,8 @@ extern bool region_manage_clientwin_default(WRegion *reg, WClientWin *cwin,
 
 extern bool region_rescue_clientwins(WRegion *reg);
 extern bool region_rescue_child_clientwins(WRegion *reg);
-extern bool region_rescue_managed_clientwins(WRegion *reg, WRegion *list);
-
-DYNFUN bool region_manage_rescue(WRegion *reg, WClientWin *cwin,
-                                 WRegion *from);
-
-extern bool region_manage_rescue_default(WRegion *reg, WClientWin *cwin,
-                                         WRegion *from);
-
+extern bool region_rescue_some_clientwins(WRegion *reg, 
+                                          WRegionIterator *iter, void *st);
 
 
 #endif /* ION_IONCORE_MANAGE_H */

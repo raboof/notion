@@ -13,15 +13,16 @@
 #define ION_MOD_FLOATWS_FLOATWS_H
 
 #include <libtu/objlist.h>
+#include <libextl/extl.h>
 #include <ioncore/common.h>
 #include <ioncore/region.h>
 #include <ioncore/screen.h>
 #include <ioncore/genws.h>
 #include <ioncore/manage.h>
-#include <libextl/extl.h>
 #include <ioncore/rectangle.h>
 
-INTRCLASS(WFloatWS);
+#include "classes.h"
+
 INTRSTRUCT(WFloatStacking);
 
 DECLSTRUCT(WFloatStacking){
@@ -50,11 +51,12 @@ extern WRegion *floatws_load(WWindow *par, const WFitParams *fp,
 
 extern WRegion* floatws_current(WFloatWS *floatws);
 
+extern WFloatFrame *floatws_create_frame(WFloatWS *ws, 
+                                         const WRectangle *geom, int gravity, 
+                                         bool inner_geom, bool respect_pos);
+
 extern bool floatws_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
                                      const WManageParams *param, int redir);
-
-extern bool floatws_manage_rescue(WFloatWS *ws, WClientWin *cwin,
-                                  WRegion *from);
 
 extern bool floatws_add_managed(WFloatWS *ws, WRegion *reg);
 

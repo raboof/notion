@@ -12,14 +12,13 @@
 #ifndef ION_MOD_FLOATWS_FLOATFRAME_H
 #define ION_MOD_FLOATWS_FLOATFRAME_H
 
+#include <libextl/extl.h>
 #include <ioncore/common.h>
 #include <ioncore/frame.h>
 #include <ioncore/window.h>
-#include <libextl/extl.h>
 #include <ioncore/rectangle.h>
-#include "floatws.h"
 
-INTRCLASS(WFloatFrame);
+#include "classes.h"
 
 DECLCLASS(WFloatFrame){
     WFrame frame;

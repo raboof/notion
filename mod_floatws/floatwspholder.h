@@ -24,12 +24,7 @@ DECLCLASS(WFloatWSPHolder){
     WRectangle geom;
 };
 
-
-/* If 'after' is set, it is used, otherwise 'or_after', 
- * and finally 'or_layer' if this is also unset
- */
-
-extern WFloatWSPHolder *floatwspholder_create(WFloatWS *floatws, 
+extern WFloatWSPHolder *create_floatwspholder(WFloatWS *floatws, 
                                               const WRectangle *geom);
 
 extern bool floatwspholder_init(WFloatWSPHolder *ph, WFloatWS *floatws,
@@ -39,9 +34,9 @@ extern void floatwspholder_deinit(WFloatWSPHolder *ph);
 
 extern bool floatwspholder_stale(WFloatWSPHolder *ph);
 
-extern bool floatwspholder_attach(WFloatWSPHolder *ph, 
-                                  WRegionAttachHandler *hnd,
-                                  void *hnd_param);
+extern bool floatwspholder_do_attach(WFloatWSPHolder *ph, 
+                                     WRegionAttachHandler *hnd,
+                                     void *hnd_param);
 
 extern WFloatWSPHolder *floatws_managed_get_pholder(WFloatWS *floatws, 
                                                     WRegion *mgd);

@@ -16,21 +16,63 @@
 
 bool pholder_init(WPHolder *ph)
 {
+    ph->redirect=NULL;
     return TRUE;
 }
 
 
 void pholder_deinit(WPHolder *ph)
 {
+    if(ph->redirect!=NULL)
+        destroy_obj((Obj*)ph->redirect);
 }
 
 
-bool pholder_attach(WPHolder *ph, 
-                    WRegionAttachHandler *hnd, void *hnd_param)
+bool pholder_do_attach(WPHolder *ph, 
+                       WRegionAttachHandler *hnd, void *hnd_param)
 {
     bool ret=FALSE;
-    CALL_DYN_RET(ret, bool, pholder_attach, ph, (ph, hnd, hnd_param));
+    CALL_DYN_RET(ret, bool, pholder_do_attach, ph, (ph, hnd, hnd_param));
     return ret;
+}
+
+
+static WRegion *add_fn_reparent(WWindow *par, const WFitParams *fp, 
+                                WRegion *reg)
+{
+    if(!region_fitrep(reg, par, fp)){
+        warn(TR("Unable to reparent."));
+        return NULL;
+    }
+    region_detach_manager(reg);
+    return reg;
+}
+
+
+bool pholder_attach(WPHolder *ph, WRegion *reg)
+{
+    if(ph->redirect!=NULL){
+        return pholder_attach(ph->redirect, reg);
+    }else{
+        return pholder_do_attach(ph, (WRegionAttachHandler*)add_fn_reparent, 
+                                 reg);
+    }
+}
+
+
+bool pholder_redirect(WPHolder *ph, WRegion *old_target)
+{
+    WPHolder *ph2=region_get_rescue_pholder(old_target);
+    
+    if(ph2==NULL)
+        return FALSE;
+    
+    if(ph->redirect!=NULL)
+        destroy_obj((Obj*)ph->redirect);
+
+    ph->redirect=ph2;
+    
+    return TRUE;
 }
 
 
@@ -48,6 +90,39 @@ WPHolder *region_managed_get_pholder(WRegion *reg, WRegion *mgd)
     CALL_DYN_RET(ret, WPHolder*, region_managed_get_pholder, 
                  reg, (reg, mgd));
     return ret;
+}
+
+
+WPHolder *region_get_rescue_pholder_for(WRegion *reg, WRegion *mgd)
+{
+    if(OBJ_IS_BEING_DESTROYED(reg) || reg->flags&REGION_CWINS_BEING_RESCUED){
+        return FALSE;
+    }else{
+        WPHolder *ret=NULL;
+    
+        CALL_DYN_RET(ret, WPHolder*, region_get_rescue_pholder_for,
+                     reg, (reg, mgd));
+        return ret;
+    }
+}
+
+
+WPHolder *region_get_rescue_pholder(WRegion *reg)
+{
+    WRegion *mgr;
+    WPHolder *ph=NULL;
+
+    while(1){
+        mgr=region_manager_or_parent(reg);
+        if(mgr==NULL)
+            break;
+        ph=region_get_rescue_pholder_for(mgr, reg);
+        if(ph!=NULL)
+            break;
+        reg=mgr;
+    }
+    
+    return ph;
 }
 
 

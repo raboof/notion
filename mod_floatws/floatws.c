@@ -34,6 +34,7 @@
 
 #include "floatws.h"
 #include "floatwspholder.h"
+#include "floatwsrescueph.h"
 #include "floatframe.h"
 #include "placement.h"
 #include "main.h"
@@ -374,12 +375,29 @@ void floatws_deinit(WFloatWS *ws)
 }
 
 
+static WRegion *iter_just_cwins(WFloatWSIterTmp *tmp)
+{
+    WRegion *r;
+    
+    while(TRUE){
+        r=(WRegion*)floatws_iter(tmp);
+        if(r==NULL || OBJ_IS(r, WClientWin))
+            break;
+    }
+    
+    return r;
+}
+
+
 bool floatws_rescue_clientwins(WFloatWS *ws)
 {
-#warning "TODO: FIX"
-    return FALSE;
-    /*return region_rescue_managed_clientwins((WRegion*)ws, ws->managed_list);
-    */
+    WFloatWSIterTmp tmp;
+    
+    floatws_iter_init(&tmp, ws);
+    
+    return region_rescue_some_clientwins((WRegion*)ws, 
+                                         (WRegionIterator*)iter_just_cwins, 
+                                         &tmp);
 }
 
 
@@ -473,12 +491,58 @@ static WMPlex *find_existing(WFloatWS *ws)
 }
 
 
-static bool floatws_do_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
-                                        const WManageParams *param, 
-                                        int redir, bool respectpos)
+WFloatFrame *floatws_create_frame(WFloatWS *ws, 
+                                  const WRectangle *geom, int gravity, 
+                                  bool inner_geom, bool respect_pos)
 {
     WFloatFrame *frame=NULL;
+    WFitParams fp;
     WWindow *par;
+
+    par=REGION_PARENT(ws);
+    assert(par!=NULL);
+
+    /* Create frame with dummy geometry */
+    fp.mode=REGION_FIT_EXACT;
+    fp.g=*geom;
+    
+    frame=create_floatframe(par, &fp);
+
+    if(frame==NULL){
+        warn(TR("Failure to create a new frame."));
+        return NULL;
+    }
+
+    if(inner_geom)
+        floatframe_geom_from_initial_geom(frame, ws, &fp.g, gravity);
+    
+    /* If the requested geometry does not overlap the workspaces's geometry, 
+     * position request is never honoured.
+     */
+    if((fp.g.x+fp.g.w<=REGION_GEOM(ws).x) ||
+       (fp.g.y+fp.g.h<=REGION_GEOM(ws).y) ||
+       (fp.g.x>=REGION_GEOM(ws).x+REGION_GEOM(ws).w) ||
+       (fp.g.y>=REGION_GEOM(ws).y+REGION_GEOM(ws).h)){
+        respect_pos=FALSE;
+    }
+    
+    if(!respect_pos)
+        floatws_calc_placement(ws, &fp.g);
+
+    /* Set proper geometry */
+    region_fit((WRegion*)frame, &fp.g, REGION_FIT_EXACT);
+
+    floatws_add_managed(ws, (WRegion*)frame);
+
+    return frame;
+}
+
+
+static bool floatws_do_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
+                                        const WManageParams *param, 
+                                        int redir, bool respect_pos)
+{
+    WFloatFrame *frame=NULL;
     WFitParams fp;
     int swf;
     
@@ -494,56 +558,29 @@ static bool floatws_do_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
     if(redir==MANAGE_REDIR_STRICT_YES)
         return FALSE;
 
-    par=REGION_PARENT(ws);
-    assert(par!=NULL);
-    
-    /* Create frame with dummy geometry */
-    fp.mode=REGION_FIT_EXACT;
-    fp.g=param->geom;/*REGION_GEOM(cwin);*/
-    frame=create_floatframe(par, &fp);
-
-    if(frame==NULL){
-        warn(TR("Failure to create a new frame."));
-        return FALSE;
-    }
-
-    assert(region_same_rootwin((WRegion*)frame, (WRegion*)cwin));
-    
-    floatframe_geom_from_initial_geom(frame, ws, &fp.g, param->gravity);
-
     if(param->maprq && ioncore_g.opmode!=IONCORE_OPMODE_INIT){
         /* When the window is mapped by application request, position
          * request is only honoured if the position was given by the user
          * and in case of a transient (the app may know better where to 
          * place them) or if we're initialising.
          */
-        respectpos=(param->tfor!=NULL || param->userpos);
+        respect_pos=(param->tfor!=NULL || param->userpos);
     }
+
+    frame=floatws_create_frame(ws, &(param->geom), param->gravity,
+                               TRUE, respect_pos);
     
-    /* However, if the requested geometry does not overlap the
-     * workspaces's geometry, position request is never honoured.
-     */
-    if((fp.g.x+fp.g.w<=REGION_GEOM(ws).x) ||
-       (fp.g.y+fp.g.h<=REGION_GEOM(ws).y) ||
-       (fp.g.x>=REGION_GEOM(ws).x+REGION_GEOM(ws).w) ||
-       (fp.g.y>=REGION_GEOM(ws).y+REGION_GEOM(ws).h)){
-        respectpos=FALSE;
-    }
+    if(frame==NULL)
+        return FALSE;
     
-    if(!respectpos)
-        floatws_calc_placement(ws, &fp.g);
-    
-    /* Set proper geometry */
-    region_fit((WRegion*)frame, &fp.g, REGION_FIT_EXACT);
-    
+    assert(region_same_rootwin((WRegion*)frame, (WRegion*)cwin));
+
     swf=(param->switchto ? MPLEX_ATTACH_SWITCHTO : 0);
     if(!mplex_attach_simple((WMPlex*)frame, (WRegion*)cwin, swf)){
         destroy_obj((Obj*)frame);
         return FALSE;
     }
 
-    floatws_add_managed(ws, (WRegion*)frame);
-    
     /* Don't warp, it is annoying in this case */
     if(param->switchto && region_may_control_focus((WRegion*)ws)){
         ioncore_set_previous_of((WRegion*)frame);
@@ -565,30 +602,16 @@ bool floatws_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
 static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
                                 WRegion *dropped)
 {
-    WFitParams fp;
     WFloatFrame *frame;
-    WWindow *par;
+    WRectangle g=REGION_GEOM(dropped);
     
-    par=REGION_PARENT(ws);
-    
-    if(par==NULL)
-        return FALSE;
-    
-    fp.mode=REGION_FIT_EXACT;
-    fp.g=REGION_GEOM(dropped);
-    frame=create_floatframe(par, &fp);
+    g.x=x;
+    g.y=y;
+
+    frame=floatws_create_frame(ws, &g, NorthWestGravity, TRUE, TRUE);
     
     if(frame==NULL)
         return FALSE;
-
-    /* Resize */
-    
-    floatframe_geom_from_managed_geom(frame, &fp.g);
-    /* The x and y arguments are in root coordinate space */
-    region_rootpos((WRegion*)par, &fp.g.x, &fp.g.y);
-    fp.g.x=x-fp.g.x;
-    fp.g.y=y-fp.g.y;
-    region_fitrep((WRegion*)frame, NULL, &fp);
     
     if(!mplex_attach_simple((WMPlex*)frame, dropped, MPLEX_ATTACH_SWITCHTO)){
         destroy_obj((Obj*)frame);
@@ -696,21 +719,6 @@ bool mod_floatws_clientwin_do_manage(WClientWin *cwin,
     }
 
     return TRUE;
-}
-
-
-bool floatws_manage_rescue(WFloatWS *ws, WClientWin *cwin, WRegion *from)
-{
-    WManageParams param=MANAGEPARAMS_INIT;
-    
-    region_rootpos((WRegion*)cwin, &(param.geom.x), &(param.geom.y));
-    param.geom.x=0;
-    param.geom.y=0;
-    param.geom.w=REGION_GEOM(cwin).w;
-    param.geom.h=REGION_GEOM(cwin).h;
-    
-    return region_manage_clientwin((WRegion*)ws, cwin, &param,
-                                   MANAGE_REDIR_PREFER_NO);
 }
 
 
@@ -1380,6 +1388,9 @@ static DynFunTab floatws_dynfuntab[]={
 
     {(DynFun*)region_managed_get_pholder,
      (DynFun*)floatws_managed_get_pholder},
+
+    {(DynFun*)region_get_rescue_pholder_for,
+     (DynFun*)floatws_get_rescue_pholder_for},
     
     END_DYNFUNTAB
 };

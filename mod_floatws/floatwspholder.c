@@ -11,7 +11,7 @@
 
 #include <libtu/objp.h>
 #include <libtu/obj.h>
-/*#include <libtu/pointer.h>*/
+#include <libtu/pointer.h>
 
 #include <ioncore/common.h>
 #include <ioncore/region-iter.h>
@@ -27,7 +27,9 @@ static void floatws_watch_handler(Watch *watch, Obj *floatws);
 
 static void floatws_watch_handler(Watch *watch, Obj *floatws)
 {
-    /*WFloatWSPHolder *ph=FIELD_TO_STRUCT(WFloatWSPHolder, floatws_watch, watch);*/
+    WFloatWSPHolder *ph=FIELD_TO_STRUCT(WFloatWSPHolder, 
+                                        floatws_watch, watch);
+    pholder_redirect(&(ph->ph), (WRegion*)floatws);
 }
 
 
@@ -53,7 +55,7 @@ bool floatwspholder_init(WFloatWSPHolder *ph, WFloatWS *floatws,
 }
  
 
-WFloatWSPHolder *floatwspholder_create(WFloatWS *floatws,
+WFloatWSPHolder *create_floatwspholder(WFloatWS *floatws,
                                        const WRectangle *geom)
 {
     CREATEOBJ_IMPL(WFloatWSPHolder, floatwspholder, 
@@ -80,8 +82,8 @@ bool floatwspholder_stale(WFloatWSPHolder *ph)
 }
 
 
-bool floatwspholder_attach(WFloatWSPHolder *ph, WRegionAttachHandler *hnd,
-                           void *hnd_param)
+bool floatwspholder_do_attach(WFloatWSPHolder *ph, WRegionAttachHandler *hnd,
+                              void *hnd_param)
 {
     WFloatWS *ws=(WFloatWS*)ph->floatws_watch.obj;
     WFitParams fp;
@@ -129,8 +131,8 @@ WFloatWSPHolder *floatws_managed_get_pholder(WFloatWS *floatws, WRegion *mgd)
 
 
 static DynFunTab floatwspholder_dynfuntab[]={
-    {(DynFun*)pholder_attach, 
-     (DynFun*)floatwspholder_attach},
+    {(DynFun*)pholder_do_attach, 
+     (DynFun*)floatwspholder_do_attach},
     
     {(DynFun*)pholder_stale, 
      (DynFun*)floatwspholder_stale},

@@ -14,11 +14,13 @@
 
 #include "common.h"
 #include "attach.h"
+#include "extlconv.h"
 
 /* Note: PHolders should be destroyed by their acquirer. */
 
 DECLCLASS(WPHolder){
     Obj obj;
+    WPHolder *redirect;
 };
 
 extern bool pholder_init(WPHolder *ph);
@@ -26,10 +28,16 @@ extern void pholder_deinit(WPHolder *ph);
 
 DYNFUN bool pholder_stale(WPHolder *ph);
 
-DYNFUN bool pholder_attach(WPHolder *ph, 
-                           WRegionAttachHandler *hnd, void *hnd_param);
+DYNFUN bool pholder_do_attach(WPHolder *ph, 
+                              WRegionAttachHandler *hnd, void *hnd_param);
 
+extern bool pholder_attach(WPHolder *ph, WRegion *reg);
+
+extern bool pholder_redirect(WPHolder *ph, WRegion *old_target);
 
 DYNFUN WPHolder *region_managed_get_pholder(WRegion *reg, WRegion *mgd);
+DYNFUN WPHolder *region_get_rescue_pholder_for(WRegion *reg, WRegion *mgd);
+
+extern WPHolder *region_get_rescue_pholder(WRegion *reg);
 
 #endif /* ION_IONCORE_PHOLDER_H */

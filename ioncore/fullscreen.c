@@ -100,19 +100,6 @@ bool clientwin_enter_fullscreen(WClientWin *cwin, bool switchto)
     return clientwin_fullscreen_scr(cwin, scr, switchto);
 }
 
-#warning "TODO: some changes in wrappers stuff."
-
-static WRegion *add_fn_reparent(WWindow *par, const WFitParams *fp, 
-                                WRegion *reg)
-{
-    if(!region_fitrep(reg, par, fp)){
-        warn(TR("Unable to reparent."));
-        return NULL;
-    }
-    region_detach_manager(reg);
-    return reg;
-}
-
 
 bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto)
 {    
@@ -123,7 +110,7 @@ bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto)
     
     cf=region_may_control_focus((WRegion*)cwin);
     
-    if(!pholder_attach(cwin->fs_pholder, add_fn_reparent, cwin)){
+    if(!pholder_attach(cwin->fs_pholder, (WRegion*)cwin)){
         warn(TR("WClientWin failed to return from full screen mode; "
                 "remaining manager or parent from previous location "
                 "refused to manage us."));

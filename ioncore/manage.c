@@ -136,95 +136,55 @@ bool region_manage_clientwin_default(WRegion *reg, WClientWin *cwin,
 /*{{{ Rescue */
 
 
-bool region_manage_rescue(WRegion *reg, WClientWin *cwin, WRegion *from)
+static WRegion *iter_child_cwins(void *st)
 {
-    bool ret=FALSE;
-    CALL_DYN_RET(ret, bool, region_manage_rescue, reg, (reg, cwin, from));
-    return ret;
+    WRegion **nextp=(WRegion**)st;
+    WRegion *next;
+    
+    do{
+        next=*nextp;
+        *nextp=(next==NULL ? NULL : next->p_next);
+    }while(next!=NULL && !OBJ_IS(next, WClientWin));
+        
+    return next;   
 }
-
-
-bool region_manage_rescue_default(WRegion *reg, WClientWin *cwin,
-                                  WRegion *from)
-{
-    WRegion *curr=region_current(reg);
-    WManageParams param=MANAGEPARAMS_INIT;
-    
-    if(curr==from)
-        return FALSE;
-    
-    if(OBJ_IS_BEING_DESTROYED(curr))
-        return FALSE;
-
-    region_rootpos((WRegion*)cwin, &(param.geom.x), &(param.geom.y));
-    param.geom.w=REGION_GEOM(cwin).w;
-    param.geom.h=REGION_GEOM(cwin).h;
-    
-    return region_manage_clientwin(curr, cwin, &param, 
-                                   MANAGE_REDIR_STRICT_NO);
-}
-
-
-static bool do_rescue(WRegion *reg, WRegion *r)
-{
-    WRegion *mgr;
-    
-    if(!OBJ_IS(r, WClientWin))
-        return region_rescue_clientwins(r);
-
-    while(1){
-        mgr=region_manager_or_parent(reg);
-        if(mgr==NULL)
-            break;
-        if(!OBJ_IS_BEING_DESTROYED(mgr) &&
-           !(mgr->flags&REGION_CWINS_BEING_RESCUED)){
-            if(region_manage_rescue(mgr, (WClientWin*)r, reg))
-                return TRUE;
-        }
-        reg=mgr;
-    }
-    
-    warn(TR("Unable to rescue \"%s\"."), region_name(r));
-    
-    return FALSE;
-}
-
-
-#warning "TODO: FIX"
-/*bool region_rescue_managed_clientwins(WRegion *reg, WRegion *list)
-{
-    WRegion *r, *next;
-    bool res=TRUE;
-    
-    reg->flags|=REGION_CWINS_BEING_RESCUED;
-    
-    FOR_ALL_MANAGED_ON_LIST_W_NEXT(list, r, next){
-        if(!do_rescue(reg, r))
-            res=FALSE;
-    }
-    
-    reg->flags&=~REGION_CWINS_BEING_RESCUED;
-
-    return res;
-}*/
 
 
 bool region_rescue_child_clientwins(WRegion *reg)
 {
-    WRegion *r, *next;
-    bool res=TRUE;
-    
-    reg->flags|=REGION_CWINS_BEING_RESCUED;
+    WRegion *next=reg->children;
+    bool res=region_rescue_some_clientwins(reg, iter_child_cwins, &next);
+    assert(!res || reg->children==NULL);
+    return res;
+}
 
-    for(r=reg->children; r!=NULL; r=next){
-        next=r->p_next;
-        if(!do_rescue(reg, r))
-            res=FALSE;
+
+bool region_rescue_some_clientwins(WRegion *reg, 
+                                   WRegionIterator *iter, void *st)
+{
+    WPHolder *ph;
+    bool res=FALSE;
+    int fails=0;
+
+    reg->flags|=REGION_CWINS_BEING_RESCUED;
+    
+    while(TRUE){
+        WRegion *tosave=iter(st);
+        if(tosave==NULL)
+            break;
+        
+        ph=region_get_rescue_pholder(reg);
+        
+        if(ph==NULL)
+            return FALSE;
+
+        if(!pholder_attach(ph, tosave))
+            fails++;
     }
     
     reg->flags&=~REGION_CWINS_BEING_RESCUED;
 
-    return res;
+    return (fails==0);
 }
 
 

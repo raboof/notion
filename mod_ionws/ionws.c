@@ -573,11 +573,29 @@ bool ionws_managed_may_destroy(WIonWS *ws, WRegion *reg)
 }
 
 
+static WRegion *iter_just_cwins(WIonWSIterTmp *tmp)
+{
+    WRegion *r;
+    
+    while(TRUE){
+        r=(WRegion*)symlist_iter(tmp);
+        if(r==NULL || OBJ_IS(r, WClientWin))
+            break;
+    }
+    
+    return r;
+}
+
+
 bool ionws_rescue_clientwins(WIonWS *ws)
 {
-#warning "TODO: FIX"
-    /*return region_rescue_managed_clientwins((WRegion*)ws, ws->managed_list);*/
-    return FALSE;
+    WIonWSIterTmp tmp;
+    
+    symlist_iter_init(&tmp, ws->managed_list);
+    
+    return region_rescue_some_clientwins((WRegion*)ws, 
+                                         (WRegionIterator*)iter_just_cwins, 
+                                         &tmp);
 }
 
 
@@ -641,20 +659,24 @@ static bool mplexfilter(WSplit *node)
 }
 
 
-bool ionws_manage_rescue(WIonWS *ws, WClientWin *cwin, WRegion *from)
+WPHolder *ionws_get_rescue_pholder_for(WIonWS *ws, WRegion *mgd)
 {
-    WSplitRegion *node=get_node_check(ws, from), *other;
+    WSplit *node=(WSplit*)get_node_check(ws, mgd);
+    WSplitRegion *other;
+    WPHolder *ph=NULL;
     
-    if(REGION_MANAGER(from)!=(WRegion*)ws || node==NULL)
-        return FALSE;
-
-    other=(WSplitRegion*)split_nextto((WSplit*)node, SPLIT_ANY, PRIMN_ANY,
-                                      mplexfilter);
-
-    if(other==NULL || other->reg==NULL)
-        return FALSE;
-    
-    return (NULL!=mplex_attach_simple((WMPlex*)other->reg, (WRegion*)cwin, 0));
+    while(node!=NULL){
+        other=(WSplitRegion*)split_nextto(node,  SPLIT_ANY, PRIMN_ANY,
+                                          mplexfilter);
+        if(other!=NULL && other->reg!=NULL){
+            ph=region_get_rescue_pholder_for(other->reg, mgd);
+            if(ph!=NULL)
+                break;
+        }
+        node=(WSplit*)node->parent;
+    }
+     
+    return ph;
 }
 
 
@@ -1369,11 +1391,12 @@ static DynFunTab ionws_dynfuntab[]={
     
     {(DynFun*)region_manage_clientwin, 
      (DynFun*)ionws_manage_clientwin},
-    {(DynFun*)region_manage_rescue,
-     (DynFun*)ionws_manage_rescue},
     
     {(DynFun*)region_rescue_clientwins,
      (DynFun*)ionws_rescue_clientwins},
+
+    {(DynFun*)region_get_rescue_pholder_for,
+     (DynFun*)ionws_get_rescue_pholder_for},
     
     {(DynFun*)region_get_configuration,
      (DynFun*)ionws_get_configuration},
