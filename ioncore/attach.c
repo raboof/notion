@@ -129,18 +129,18 @@ WRegion *region_add_managed_load(WRegion *mgr, ExtlTab tab)
 
 
 /*EXTL_DOC
- * Creates a new region to be managed by \var{mgr}, which should 
- * implement \code{region_do_add_managed}. The table \var{desc}
+ * Create a new region to be managed by \var{mgr}. The manager
+ * must implement \code{region_do_add_managed}. The table \var{desc}
  * should contain the type of region to create in the field \var{type}.
  * The following optional generic fields are also known, but the
  * table may also contain additional parameters that depend on the type
  * of region being created.
- * \begin{tabularx}{lX}
+ * \begin{tabularx}{\linewidth}{lX}
  *  \hline
  *  Field & Description \\
  *  \hline
- * 	\var{type} & Class name of the object to create (mandatory) \\
- *  \var{geom} & Geometry \emph{request}; a table with field
+ * 	\var{type} & Class name of the object to create (mandatory). \\
+ *  \var{geom} & Geometry \emph{request}; a table with fields
  *				 \var{x}, \var{y}, \var{w} and \var{h}. \\
  * 	\var{selected} & Boolean value indicating whether the new region should
  					 be made the selected one within \var{mgr}. \\
