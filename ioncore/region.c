@@ -437,10 +437,13 @@ void region_got_focus(WRegion *reg)
 		reg->flags|=REGION_ACTIVE;
 		
 		r=FIND_PARENT1(reg, WRegion);
-		if(r!=NULL)
+		if(r!=NULL){
 			r->active_sub=reg;
-		if(WOBJ_IS(r, WScreen))
-			((WScreen*)r)->current_viewport=viewport_of(reg);
+			if(WOBJ_IS(r, WScreen)){
+				D(fprintf(stderr, "cvp: %p, %p [%s]\n", r, viewport_of(reg), WOBJ_TYPESTR(reg)));
+				((WScreen*)r)->current_viewport=viewport_of(reg);
+			}
+		}
 		
 		r=REGION_MANAGER(reg);
 		if(r!=NULL)

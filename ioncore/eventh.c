@@ -479,7 +479,7 @@ static void handle_focus_in(const XFocusChangeEvent *ev)
 			/* Restore focus */
 			set_focus(reg);
 		}
-		return;
+		/*return;*/
 	}
 
 	/* Input contexts */

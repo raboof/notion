@@ -325,13 +325,12 @@ WViewport *current_vp(WScreen *scr)
 	if(scr==NULL)
 		return NULL;
 	
-	if(scr->current_viewport!=NULL)
-		return scr->current_viewport;
+	if(scr->current_viewport==NULL){
+		if(REGION_ACTIVE_SUB(scr)!=NULL)
+			scr->current_viewport=viewport_of(REGION_ACTIVE_SUB(scr));
+	}
 	
-	if(REGION_ACTIVE_SUB(scr)!=NULL)
-		return viewport_of(REGION_ACTIVE_SUB(scr));
-	
-	return NULL;
+	return scr->current_viewport;
 }
 
 
@@ -367,9 +366,7 @@ void goto_viewport_id(int id)
 EXTL_EXPORT
 void goto_next_viewport()
 {
-	WViewport *vp;
-	
-	vp=current_vp(wglobal.active_screen);
+	WViewport *vp=current_vp(wglobal.active_screen);
 	
 	if(vp!=NULL)
 		vp=find_viewport_id(vp->id+1);
@@ -383,10 +380,7 @@ void goto_next_viewport()
 EXTL_EXPORT
 void goto_prev_viewport()
 {
-	WScreen *scr=wglobal.active_screen;
-	WViewport *vp;
-	
-	vp=current_vp(wglobal.active_screen);
+	WViewport *vp=current_vp(wglobal.active_screen);
 	
 	if(vp==NULL)
 		vp=find_viewport_id(0);
