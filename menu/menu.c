@@ -72,6 +72,7 @@ void menu_draw_entries(WMenu *menu, bool complete)
 {
 	WRectangle geom;
 	int i;
+
 	static const char *attrs[]={
 		"active-selected-normal",
 		"active-selected-submenu",
@@ -927,7 +928,7 @@ static void check_scroll(WMenu *menu, int x, int y)
 
 int menu_entry_at_root(WMenu *menu, int root_x, int root_y)
 {
-	int rx, ry, x, y;
+	int rx, ry, x, y, entry;
 	WRectangle ig;
 	region_rootpos((WRegion*)menu, &rx, &ry);
 	
@@ -936,10 +937,12 @@ int menu_entry_at_root(WMenu *menu, int root_x, int root_y)
 	x=root_x-rx-ig.x;
 	y=root_y-ry-ig.y;
 	
-	if(x<0 || x>ig.w || y<0  || y>ig.h)
+	if(x<0 || x>=ig.w || y<0  || y>=ig.h)
 		return -1;
 	
-	return y/(menu->entry_h+menu->entry_spacing);
+	entry=y/(menu->entry_h+menu->entry_spacing);
+	
+	return (entry<menu->n_entries ? entry : -1);
 }
 
 
