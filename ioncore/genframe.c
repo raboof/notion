@@ -623,6 +623,7 @@ static bool set_genframe_background(WGenFrame *genframe, bool set_always)
 }
 
 
+EXTL_EXPORT
 void genframe_toggle_tab(WGenFrame *genframe)
 {
 	if(genframe->flags&WGENFRAME_TAB_HIDE)

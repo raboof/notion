@@ -193,6 +193,7 @@ void reset_timer(WTimer *timer)
 
 static void fatal_signal_handler(int signal_num)
 {
+	set_warn_handler(NULL);
 	warn("Caught fatal signal %d. Dying without deinit.", signal_num); 
 	signal(signal_num, SIG_DFL);
 	kill(getpid(), signal_num);
@@ -201,6 +202,7 @@ static void fatal_signal_handler(int signal_num)
 		   
 static void deadly_signal_handler(int signal_num)
 {
+	set_warn_handler(NULL);
 	warn("Caught signal %d. Dying.", signal_num);
 	kill_sig=signal_num;
 	

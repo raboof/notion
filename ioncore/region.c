@@ -387,9 +387,11 @@ void region_detach_parent(WRegion *reg)
 	if(p->active_sub==reg){
 		p->active_sub=NULL;
 			
-		/* ??? Maybe manager should handle this all? */
-		if(REGION_IS_ACTIVE(reg) && wglobal.focus_next==NULL)
-			set_focus(p);
+		/* Removed: seems to confuse floatws:s when frames are
+		 * destroyd.
+		 */
+		/*if(REGION_IS_ACTIVE(reg) && wglobal.focus_next==NULL)
+			set_focus(p);*/
 	}
 
 	while(reg!=NULL && REGION_IS_ACTIVE(reg)){
