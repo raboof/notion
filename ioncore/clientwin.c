@@ -1400,6 +1400,17 @@ static WRegion *clientwin_current(WClientWin *cwin)
     return LATEST_TRANSIENT(cwin);
 }
 
+
+/*EXTL_DOC
+ * Return the X window id for the client window.
+ */
+EXTL_EXPORT_MEMBER
+double clientwin_xid(WClientWin *cwin)
+{
+    return cwin->win;
+}
+
+
 /*}}}*/
 
 
