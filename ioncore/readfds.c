@@ -68,11 +68,12 @@ void set_input_fds(fd_set *rfds, int *nfds)
 
 void check_input_fds(fd_set *rfds)
 {
-	InputFd *tmp=input_fds;
+	InputFd *tmp=input_fds, *next=NULL;
 	
 	while(tmp){
+		next=tmp->next;
 		if(FD_ISSET(tmp->fd, rfds))
 			tmp->process_input_fn(tmp->fd, tmp->data);
-		tmp=tmp->next;
+		tmp=next;
 	}
 }
