@@ -20,7 +20,11 @@
 #include <ioncore/regbind.h>
 #include <ioncore/framep.h>
 #include <ioncore/presize.h>
+#include <ioncore/region-iter.h>
+#include <ioncore/frame-pointer.h>
 #include "unusedwin.h"
+#include "splitext.h"
+#include "placement.h"
 #include "main.h"
 
 
@@ -131,6 +135,26 @@ static int unusedwin_press(WUnusedWin *uwin, XButtonEvent *ev,
 /*}}}*/
 
 
+/*{{{ unusedwin_handle_drop */
+
+
+static bool unusedwin_handle_drop(WUnusedWin *uwin, int x, int y,
+                                  WRegion *dropped)
+{
+    WSplitUnused *us=OBJ_CAST(splittree_node_of((WRegion*)uwin),
+                              WSplitUnused);
+    WAutoWS *ws=REGION_MANAGER_CHK(uwin, WAutoWS);
+    
+    if(us==NULL || ws==NULL)
+        return FALSE;
+    
+    return autows_handle_unused_drop(ws, us, dropped);
+}
+
+
+/*}}}*/
+
+
 /*{{{ Drawing */
 
 
@@ -170,6 +194,7 @@ static DynFunTab unusedwin_dynfuntab[]={
     {region_updategr, unusedwin_updategr},
     {window_draw, unusedwin_draw},
     {(DynFun*)window_press, (DynFun*)unusedwin_press},
+    {(DynFun*)region_handle_drop, (DynFun*)unusedwin_handle_drop},
     END_DYNFUNTAB,
 };
 

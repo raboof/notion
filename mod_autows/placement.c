@@ -76,40 +76,19 @@ static WFrame *create_frame_for(WAutoWS *ws, WRegion *reg)
 /*}}}*/
 
 
-/*{{{ Code to find a suitable frame when there is no more free space */
-
-
-static WRegion *find_suitable_target(WIonWS *ws)
-{
-    WRegion *r=ionws_current(ws);
-    
-    if(r!=NULL)
-        return r;
-    
-    FOR_ALL_MANAGED_ON_LIST(ws->managed_list, r)
-        return r;
-    
-    return NULL;
-}
-
-
-/*}}}*/
-
-
 /*{{{ Placement scan */
 
 
 typedef struct{
     WAutoWS *ws;
     WFrame *frame;
-    WClientWin *cwin;
+    WRegion *reg;
+    WSplitUnused *specifier;
     
     WSplit *res_node;
     ExtlTab res_config;
     int res_w, res_h;
 } PlacementParams;
-
-
 
 
 static bool mrsh_layout_extl(ExtlFn fn, PlacementParams *p)
@@ -119,7 +98,8 @@ static bool mrsh_layout_extl(ExtlFn fn, PlacementParams *p)
     
     extl_table_sets_o(t, "ws", (Obj*)p->ws);
     extl_table_sets_o(t, "frame", (Obj*)p->frame);
-    extl_table_sets_o(t, "cwin", (Obj*)p->cwin);
+    extl_table_sets_o(t, "reg", (Obj*)p->reg);
+    extl_table_sets_o(t, "specifier", (Obj*)p->specifier);
 
     extl_call(fn, "t", "b", t, &ret);
     
@@ -170,8 +150,12 @@ static bool fallback_layout(PlacementParams *p)
     if(p->ws->ionws.split_tree==NULL)
         return FALSE;
     
-    p->res_node=split_current_todir(p->ws->ionws.split_tree, SPLIT_ANY,
-                                    PRIMN_ANY, fallback_filter);
+    if(p->specifier!=NULL){
+        p->res_node=(WSplit*)p->specifier;
+    }else{
+        p->res_node=split_current_todir(p->ws->ionws.split_tree, SPLIT_ANY,
+                                        PRIMN_ANY, fallback_filter);
+    }
 
     if(p->res_node!=NULL && OBJ_IS(p->res_node, WSplitUnused)){
         p->res_config=extl_create_table();
@@ -190,7 +174,7 @@ static bool fallback_layout(PlacementParams *p)
 /*{{{ Split/replace unused code */
 
 
-static bool do_replace(WAutoWS *ws, WFrame *frame, WClientWin *cwin, 
+static bool do_replace(WAutoWS *ws, WFrame *frame, WRegion *reg, 
                        PlacementParams *rs)
 {
     WSplit *u=rs->res_node;
@@ -232,11 +216,11 @@ static bool do_replace(WAutoWS *ws, WFrame *frame, WClientWin *cwin,
 /*{{{ The main dynfun */
 
 
-bool autows_manage_clientwin(WAutoWS *ws, WClientWin *cwin,
-                             const WManageParams *param, int redir)
+static WRegion *autows_get_target(WAutoWS *ws, WSplitUnused *specifier,
+                                  WRegion *reg)
 {
     WRegion *target=NULL;
-    WFrame *frame=create_frame_for(ws, (WRegion*)cwin);
+    WFrame *frame=create_frame_for(ws, reg);
     
     assert(ws->ionws.split_tree!=NULL);
     
@@ -246,7 +230,8 @@ bool autows_manage_clientwin(WAutoWS *ws, WClientWin *cwin,
         
         rs.ws=ws;
         rs.frame=frame;
-        rs.cwin=cwin;
+        rs.reg=reg;
+        rs.specifier=specifier;
         rs.res_node=NULL;
         rs.res_config=extl_table_none();
         rs.res_w=-1;
@@ -259,7 +244,7 @@ bool autows_manage_clientwin(WAutoWS *ws, WClientWin *cwin,
         hook_call_p(autows_make_placement_alt, &rs,
                     (WHookMarshallExtl*)mrsh_layout_extl);
         
-        if(rs.res_node==NULL)
+        if(rs.res_node==NULL && specifier==NULL)
             fallback_layout(&rs);
         
         if(rs.res_node!=NULL){
@@ -282,7 +267,7 @@ bool autows_manage_clientwin(WAutoWS *ws, WClientWin *cwin,
             }
             
             if(OBJ_IS(rs.res_node, WSplitUnused)){
-                if(do_replace(ws, frame, cwin, &rs))
+                if(do_replace(ws, frame, reg, &rs))
                     target=(WRegion*)frame;
             }else{
                 assert(OBJ_IS(rs.res_node, WSplitRegion));
@@ -296,20 +281,38 @@ bool autows_manage_clientwin(WAutoWS *ws, WClientWin *cwin,
             destroy_obj((Obj*)frame);
     }
     
-    if(target==NULL)
-        target=find_suitable_target(&(ws->ionws));
+    return target;
+}
 
+
+bool autows_manage_clientwin(WAutoWS *ws, WClientWin *cwin,
+                             const WManageParams *param, int redir)
+{
+    WRegion *target=autows_get_target(ws, NULL, (WRegion*)cwin);
+    
     if(target!=NULL){
-        if(region_manage_clientwin(target, cwin, param, 
+        if(region_manage_clientwin(target, cwin, param,
                                    MANAGE_REDIR_PREFER_YES)){
             return TRUE;
         }
     }
 
-err:
     warn(TR("Ooops... could not find a region to attach client window to "
             "on workspace %s."), region_name((WRegion*)ws));
     return FALSE;
+}
+
+
+bool autows_handle_unused_drop(WAutoWS *ws, WSplitUnused *specifier, 
+                               WRegion *reg)
+{
+    WRegion *target=autows_get_target(ws, specifier, reg);
+    
+    if(target==NULL || !OBJ_IS(target, WMPlex))
+        return FALSE;
+    
+    return (mplex_attach_simple((WMPlex*)target, reg, 
+                                MPLEX_ATTACH_SWITCHTO)!=NULL);
 }
 
 

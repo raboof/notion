@@ -17,6 +17,7 @@
 #include <ioncore/manage.h>
 #include <ioncore/hooks.h>
 #include "autows.h"
+#include "splitext.h"
 
 
 extern WHook *autows_init_layout_alt;
@@ -26,5 +27,7 @@ extern WHook *autows_make_placement_alt;
 extern bool autows_manage_clientwin(WAutoWS *ws, WClientWin *cwin,
                                     const WManageParams *param,
                                     int redir);
+extern bool autows_handle_unused_drop(WAutoWS *ws, WSplitUnused *specifier, 
+                                      WRegion *reg);
 
 #endif /* ION_MOD_AUTOWS_PLACEMENT_H */

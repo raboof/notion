@@ -81,7 +81,6 @@ void mod_autows_deinit()
         destroy_obj((Obj*)autows_make_placement_alt);
         autows_make_placement_alt=NULL;
     }
-
 }
 
 

@@ -187,23 +187,25 @@ end
 
 -- Classification {{{
 
-function T.classify(ws, cwin)
-    -- Check if there's a winprop override
-    local wp=ioncore.getwinprop(cwin)
-    if wp and wp.autows_classification then
-        if S.valid_classifications[wp.autows_classification] then
-            return wp.autows_classification
+function T.classify(ws, reg)
+    if obj_is(reg, "WClientWin") then
+        -- Check if there's a winprop override
+        local wp=ioncore.getwinprop(reg)
+        if wp and wp.autows_classification then
+            if S.valid_classifications[wp.autows_classification] then
+                return wp.autows_classification
+            end
+        end
+        
+        -- Handle known terminal emulators.
+        local id=reg:get_ident()
+        if S.terminal_emulators[id.class] then
+            return "T"
         end
     end
     
-    -- Handle known terminal emulators.
-    local id=cwin:get_ident()
-    if S.terminal_emulators[id.class] then
-        return "T"
-    end
-    
     -- Try size heuristics.
-    local cg=cwin:geom()
+    local cg=reg:geom()
 
     if cg.w<3/8*(1280*S.scalef) then
         return "M"
@@ -221,11 +223,51 @@ end
 
 -- Placement code {{{
 
+function T.use_unused(p, n, d, forcefit)
+    if d=="single" then
+        p.res_node=n
+        p.res_config={reg=p.frame}
+        return true
+    end
 
-function T.scan_pane(p, node, pdir)
+    -- TODO: Check fit
+    local sg=n:geom()
     local fsh=p.frame:size_hints()
     local fg=p.frame:geom()
     
+    if d=="up" or d=="down" then
+        p.res_node=n
+        if fsh.min_h>sg.h then
+            return false
+        end
+        local fh=math.min(fg.h, sg.h)
+        if d=="up" then
+            p.res_config=T.split2("vertical", sg.h, nil, fh,
+                                  {}, {reg=p.frame})
+        else
+            p.res_config=T.split2("vertical", sg.h, fh, nil,
+                                  {reg=p.frame}, {})
+        end
+        return true
+    elseif d=="left" or d=="right" then
+        p.res_node=n
+        if fsh.min_w>sg.w then
+            return false
+        end
+        local fw=math.min(fg.w, sg.w)
+        if d=="left" then
+            p.res_config=T.split2("horizontal", sg.w, nil, fw,
+                                  {}, {reg=p.frame})
+        else
+            p.res_config=T.split2("horizontal", sg.w, fw, nil,
+                                  {reg=p.frame}, {})
+        end
+        return true
+    end
+end
+
+
+function T.scan_pane(p, node, pdir)
     local function do_scan_active(n)
         local t=obj_typename(n)
         if t=="WSplitRegion" then
@@ -237,40 +279,6 @@ function T.scan_pane(p, node, pdir)
                 a, b=b, a
             end
             return (do_scan_active(a) or do_scan_active(b))
-        end
-    end
-    
-    local function try_use_unused(n, d)
-        -- TODO: Check fit
-        local sg=n:geom()
-        if d=="up" or d=="down" then
-            p.res_node=n
-            if fsh.min_h>sg.h then
-                return false
-            end
-            local fh=math.min(fg.h, sg.h)
-            if d=="up" then
-                p.res_config=T.split2("vertical", sg.h, nil, fh,
-                                      {}, {reg=p.frame})
-            else
-                p.res_config=T.split2("vertical", sg.h, fh, nil,
-                                      {reg=p.frame}, {})
-            end
-            return true
-        elseif d=="left" or d=="right" then
-            p.res_node=n
-            if fsh.min_w>sg.w then
-                return false
-            end
-            local fw=math.min(fg.w, sg.w)
-            if d=="left" then
-                p.res_config=T.split2("horizontal", sg.w, nil, fw,
-                                      {}, {reg=p.frame})
-            else
-                p.res_config=T.split2("horizontal", sg.w, fw, nil,
-                                      {reg=p.frame}, {})
-            end
-            return true
         end
     end
 
@@ -293,15 +301,9 @@ function T.scan_pane(p, node, pdir)
             end
         elseif t=="WSplitUnused" then
             -- Found it
-            if d=="single" then
-                p.res_node=n
-                p.res_config={reg=p.frame}
-                return true
-            end
-            return try_use_unused(n, d, forcefit)
+            return T.use_unused(p, n, d, forcefit)
         end
     end
-    
     
     if do_scan_unused(node, pdir, false) then
         return true
@@ -316,7 +318,22 @@ end
     
 
 function T.make_placement(p)
-    local cls=T.classify(p.ws, p.cwin)
+    if p.specifier then
+        local n=p.specifier
+        local pcls, pdir
+        
+        while n and not obj_is(n, "WSplitPane") do
+            n=n:parent()
+        end
+        
+        if n then
+            pcls, pdir=sfind((n:marker() or ""), "(.*):(.*)")
+        end
+            
+        return T.use_unused(p, p.specifier, (pdir or "single"), false)
+    end
+    
+    local cls=T.classify(p.ws, p.reg)
     
     local function do_scan_cls(n)
         local t=obj_typename(n)
@@ -358,7 +375,7 @@ end
 -- }}}
 
 
--- Layout Initialisation {{{
+-- Layout initialisation {{{
 
 
 function T.calc_sizes(tmpl, sw, sh)
