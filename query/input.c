@@ -152,13 +152,10 @@ void input_cancel(WInput *input)
 }
 
 
-/*EXTL_DOC
- * Same as \fnref{WInput.cancel}.
- */
-EXTL_EXPORT_MEMBER
-void input_close(WInput *input)
+bool input_rqclose(WInput *input)
 {
     input_cancel(input);
+    return TRUE;
 }
 
 
@@ -189,7 +186,7 @@ static void input_activated(WInput *input)
 static DynFunTab input_dynfuntab[]={
     {region_fit, input_fit},
     {region_draw_config_updated, input_draw_config_updated},
-    {region_close, input_close},
+    {(DynFun*)region_rqclose, (DynFun*)input_rqclose},
     {region_activated, input_activated},
     {region_inactivated, input_inactivated},
     END_DYNFUNTAB

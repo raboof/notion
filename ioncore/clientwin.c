@@ -48,6 +48,9 @@ static bool send_clientmsg(Window win, Atom a, Time stmp);
 WHooklist *clientwin_do_manage_alt=NULL;
 
 
+#define LATEST_TRANSIENT(CWIN) REGION_LAST_MANAGED((CWIN)->transient_list)
+
+
 /*{{{ Get properties */
 
 
@@ -634,9 +637,12 @@ static void clientwin_remove_managed(WClientWin *cwin, WRegion *transient)
     region_reset_stacking(transient);
     
     if(mcf){
-        WRegion *reg=region_topmost_stacked_above((WRegion*)cwin);
+        WRegion *reg=LATEST_TRANSIENT(cwin);
         if(reg==NULL)
             reg=&cwin->region;
+        /*else
+            region_raise(reg);*/
+        
         region_set_focus(reg);
     }
 }
@@ -796,20 +802,16 @@ void clientwin_kill(WClientWin *cwin)
 }
 
 
-/*EXTL_DOC
- * Request the application that owns the X window corresponding to
- * \var{cwin} to close the window. This function will fail if the
- * application is not responding or does not support the WM\_DELETE
- * protocol. In that case \fnref{WClientWin.kill} should be used.
- */
-EXTL_EXPORT_MEMBER
-void clientwin_close(WClientWin *cwin)
+bool clientwin_rqclose(WClientWin *cwin)
 {
-    if(cwin->flags&CLIENTWIN_P_WM_DELETE)
+    if(cwin->flags&CLIENTWIN_P_WM_DELETE){
         send_clientmsg(cwin->win, ioncore_g.atom_wm_delete, 
                        ioncore_get_timestamp());
-    else
+        return TRUE;
+    }else{
         warn("Client does not support WM_DELETE.");
+        return FALSE;
+    }
 }
 
 
@@ -1091,7 +1093,7 @@ static void clientwin_unmap(WClientWin *cwin)
 
 static void clientwin_do_set_focus(WClientWin *cwin, bool warp)
 {
-    WRegion *reg=region_topmost_stacked_above((WRegion*)cwin);
+    WRegion *reg=LATEST_TRANSIENT(cwin);
     
     if(warp)
         region_do_warp((WRegion*)cwin);
@@ -1156,7 +1158,7 @@ static void clientwin_resize_hints(WClientWin *cwin, XSizeHints *hints_ret,
 
 static WRegion *clientwin_managed_focus(WClientWin *cwin, WRegion *reg)
 {
-    return region_topmost_stacked_above((WRegion*)cwin);
+    return LATEST_TRANSIENT(cwin);
 }
 
 
@@ -1360,6 +1362,11 @@ void clientwin_toggle_transients_pos(WClientWin *cwin)
 }
 
 
+static WRegion *clientwin_current(WClientWin *cwin)
+{
+    return LATEST_TRANSIENT(cwin);
+}
+
 /*}}}*/
 
 
@@ -1458,6 +1465,9 @@ WRegion *clientwin_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
 
 
 static DynFunTab clientwin_dynfuntab[]={
+    {(DynFun*)region_current,
+     (DynFun*)clientwin_current},
+    
     {region_fit,
      clientwin_fit},
     
@@ -1500,8 +1510,8 @@ static DynFunTab clientwin_dynfuntab[]={
     {region_request_managed_geom, 
      clientwin_request_managed_geom},
     
-    {region_close, 
-     clientwin_close},
+    {(DynFun*)region_rqclose, 
+     (DynFun*)clientwin_rqclose},
     
     {(DynFun*)region_get_configuration,
      (DynFun*)clientwin_get_configuration},

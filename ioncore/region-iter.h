@@ -19,7 +19,7 @@
 
 #define REGION_FIRST_MANAGED(LIST)     (LIST)
 #define REGION_LAST_MANAGED(LIST)     ((LIST)==NULL ? NULL              \
-                                     : PREV_MANAGED_WRAP(LIST, LIST))
+                                     : REGION_PREV_MANAGED_WRAP(LIST, LIST))
 #define REGION_NEXT_MANAGED(LIST, REG) (((WRegion*)(REG))->mgr_next)
 #define REGION_PREV_MANAGED(LIST, REG) ((((WRegion*)(REG))->mgr_prev->mgr_next) ? \
                                  (((WRegion*)(REG))->mgr_prev) : NULL)

@@ -27,7 +27,7 @@ defbindings("WScreen", {
 })
 
 defbindings("WMPlex", {
-    kpress_waitrel("Mod1+C", ioncorelib.propagate_close),
+    kpress_waitrel("Mod1+C", WRegion.rqclose_propagate),
 })
 
 defbindings("WFrame", {

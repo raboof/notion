@@ -85,7 +85,7 @@ DYNFUN Window region_xwindow(const WRegion *reg);
 DYNFUN void region_activated(WRegion *reg);
 DYNFUN void region_inactivated(WRegion *reg);
 DYNFUN void region_draw_config_updated(WRegion *reg);
-DYNFUN void region_close(WRegion *reg);
+DYNFUN bool region_rqclose(WRegion *reg);
 DYNFUN WRegion *region_control_managed_focus(WRegion *mgr, WRegion *reg);
 DYNFUN void region_remove_managed(WRegion *reg, WRegion *sub);
 DYNFUN bool region_display_managed(WRegion *reg, WRegion *sub);
@@ -99,6 +99,8 @@ DYNFUN void region_notify_rootpos(WRegion *reg, int x, int y);
 extern void region_draw_config_updated_default(WRegion *reg);
 
 extern bool region_may_destroy(WRegion *reg);
+
+extern WRegion *region_rqclose_propagate(WRegion *reg, WRegion *maybe_sub);
 
 extern void region_rootpos(WRegion *reg, int *xret, int *yret);
 extern void region_notify_subregions_rootpos(WRegion *reg, int x, int y);

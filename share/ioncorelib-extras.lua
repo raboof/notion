@@ -11,23 +11,6 @@
 
 local ioncorelib=_G.ioncorelib
 
---DOC
--- Try to choose region to close wisely.
-function ioncorelib.propagate_close(reg, sub)
-    if sub then reg=sub end
-
-    if obj_is(reg, "WClientWin") then
-        local l=reg:managed_list()
-        if l then
-            local r2=l[table.getn(l)]
-            if r2 then
-                return ioncorelib.propagate_close(r2)
-            end
-        end
-    end
-    reg:close()
-end                               
-
 
 --DOC
 -- Create new workspace on screen \var{scr}. If \var{ws_type} is

@@ -70,6 +70,7 @@ extern void menu_deinit(WMenu *menu);
 
 extern void menu_fit(WMenu *menu, const WRectangle *geom);
 extern void menu_cancel(WMenu *menu);
+extern bool menu_rqclose(WMenu *menu);
 extern void menu_draw_config_updated(WMenu *menu);
 
 extern int menu_entry_at_root(WMenu *menu, int root_x, int root_y);

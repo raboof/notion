@@ -28,7 +28,4 @@ extern void region_lower(WRegion *reg);
 
 DYNFUN Window region_restack(WRegion *reg, Window other, int mode);
 
-/* Misc */
-extern WRegion *region_topmost_stacked_above(WRegion *reg);
-
 #endif /* ION_IONCORE_STACKING_H */

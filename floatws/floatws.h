@@ -49,6 +49,9 @@ extern bool floatws_manage_rescue(WFloatWS *ws, WClientWin *cwin,
 
 extern bool floatws_rescue_clientwins(WFloatWS *ws);
 
+extern bool floatws_rqclose(WFloatWS *ws);
+extern bool floatws_rqclose_relocate(WFloatWS *ws);
+
 /* */
 
 extern bool mod_floatws_clientwin_do_manage(WClientWin *cwin, 

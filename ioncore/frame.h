@@ -50,7 +50,7 @@ extern WFrame *create_frame(WWindow *parent, const WRectangle *geom);
 extern bool frame_init(WFrame *frame, WWindow *parent,
                           const WRectangle *geom);
 extern void frame_deinit(WFrame *frame);
-extern void frame_close(WFrame *frame);
+extern bool frame_rqclose(WFrame *frame);
 
 /* Resize and reparent */
 extern bool frame_reparent(WFrame *frame, WWindow *parent,

@@ -81,7 +81,7 @@ extern void clientwin_get_size_hints(WClientWin *cwin);
 extern void clientwin_unmapped(WClientWin *cwin);
 extern void clientwin_destroyed(WClientWin *cwin);
 extern void clientwin_kill(WClientWin *cwin);
-extern void clientwin_close(WClientWin *cwin);
+extern bool clientwin_rqclose(WClientWin *cwin);
 
 extern void clientwin_tfor_changed(WClientWin *cwin);
 

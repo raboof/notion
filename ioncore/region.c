@@ -185,12 +185,16 @@ void region_do_set_focus(WRegion *reg, bool warp)
  * depends on whether the particular type of region in question has
  * implemented the feature and, in case of client windows, whether
  * the client supports the \code{WM_DELETE} protocol (see also
- * \fnref{WClientWin.kill}).
+ * \fnref{WClientWin.kill}). If the operations is likely to succeed,
+ * \code{true} is returned, otherwise \code{false}. In most cases the
+ * region will not have been actually destroyed when this function returns.
  */
 EXTL_EXPORT_MEMBER
-void region_close(WRegion *reg)
+bool region_rqclose(WRegion *reg)
 {
-    CALL_DYN(region_close, reg, (reg));
+    bool ret=FALSE;
+    CALL_DYN_RET(ret, bool, region_rqclose, reg, (reg));
+    return ret;
 }
 
 
@@ -438,6 +442,24 @@ bool region_goto(WRegion *reg)
 
 
 /*{{{ Helpers/misc */
+
+
+/*EXTL_DOC
+ * Recursively attempt to close a region or one of the regions managed by 
+ * it. If \var{sub} is set, it will be used as the managed region, otherwise
+ * \fnref{WRegion.current}\code{(reg)}. The object to be closed is
+ * returned or NULL if nothing can be closed. Also see notes for
+ * \fnref{WRegion.rqclose_propagate}.
+ */
+EXTL_EXPORT_MEMBER
+WRegion *region_rqclose_propagate(WRegion *reg, WRegion *maybe_sub)
+{
+    if(maybe_sub==NULL)
+        maybe_sub=region_current(reg);
+    if(maybe_sub!=NULL)
+        return region_rqclose_propagate(maybe_sub, NULL);
+    return (region_rqclose(reg) ? reg : NULL);
+}
 
 
 /*EXTL_DOC

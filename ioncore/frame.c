@@ -107,15 +107,16 @@ void frame_deinit(WFrame *frame)
 }
 
 
-void frame_close(WFrame *frame)
+bool frame_rqclose(WFrame *frame)
 {
     if(FRAME_MCOUNT(frame)!=0 || FRAME_CURRENT(frame)!=NULL){
         warn("Frame not empty.");
-        return;
+    }else if(region_may_destroy((WRegion*)frame)){
+        ioncore_defer_destroy((Obj*)frame);
+        return TRUE;
     }
     
-    if(region_may_destroy((WRegion*)frame))
-        ioncore_defer_destroy((Obj*)frame);
+    return FALSE;
 }
 
 
@@ -649,14 +650,11 @@ WRegion *frame_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
 /*}}}*/
 
 
-/*}}}*/
-
-
 /*{{{ Dynfuntab and class info */
 
 
 static DynFunTab frame_dynfuntab[]={
-    {region_close, frame_close},
+    {(DynFun*)region_rqclose, (DynFun*)frame_rqclose},
     {region_fit, frame_fit},
     {(DynFun*)region_reparent, (DynFun*)frame_reparent},
     {region_resize_hints, frame_resize_hints},

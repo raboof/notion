@@ -34,7 +34,7 @@ defmenu("exitmenu", {
 
 -- Context menu (frame/client window actions)
 defmenu("ctxmenu", {
-    menuentry("Close",          "ioncorelib.propagate_close(_, _sub)"),
+    menuentry("Close",          "WRegion.rqclose_propagate(_, _sub)"),
     menuentry("Kill",           "WClientWin.kill(_sub)",
                                 "_sub:WClientWin"),
     menuentry("(Un)tag",        "WRegion.toggle_tag(_sub)",
@@ -46,7 +46,7 @@ defmenu("ctxmenu", {
 
 -- Context menu for floating frames -- add sticky toggle.
 defmenu("ctxmenu-floatframe", {
-    menuentry("Close",          "ioncorelib.propagate_close(_, _sub)"),
+    menuentry("Close",          "WRegion.rqclose_propagate(_, _sub)"),
     menuentry("Kill",           "WClientWin.kill(_sub)",
                                 "_sub:WClientWin"),
     menuentry("(Un)tag",        "WRegion.toggle_tag(_sub)",

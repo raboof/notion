@@ -62,7 +62,7 @@ defbindings("WScreen", {
 -- document "Ion: Configuring and extending with Lua".
 
 defbindings("WMPlex", {
-    kpress_wait(MOD1.."C",      "ioncorelib.propagate_close(_, _sub)"),
+    kpress_wait(MOD1.."C",      "WRegion.rqclose_propagate(_, _sub)"),
     kpress_wait(MOD1.."L",      "WClientWin.nudge(_sub)",
                                 "_sub:WClientWin"),
    kpress_wait(MOD1.."Return",  "WClientWin.toggle_fullscreen(_sub)",

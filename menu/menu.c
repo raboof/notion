@@ -808,13 +808,10 @@ void menu_cancel(WMenu *menu)
 }
 
 
-/*EXTL_DOC
- * Same as \fnref{WMenu.cancel}.
- */
-EXTL_EXPORT_MEMBER
-void menu_close(WMenu *menu)
+bool menu_rqclose(WMenu *menu)
 {
     menu_cancel(menu);
+    return TRUE;
 }
 
 
@@ -1189,7 +1186,7 @@ void menu_typeahead_clear(WMenu *menu)
 static DynFunTab menu_dynfuntab[]={
     {region_fit, menu_fit},
     {region_draw_config_updated, menu_draw_config_updated},
-    {region_close, menu_close},
+    {(DynFun*)region_rqclose, (DynFun*)menu_rqclose},
     {window_draw, menu_draw},
     {(DynFun*)window_press, (DynFun*)menu_press},
     {region_remove_managed, menu_remove_managed},

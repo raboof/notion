@@ -32,6 +32,7 @@ extern void input_deinit(WInput *input);
 extern void input_fit(WInput *input, const WRectangle *geom);
 extern void input_refit(WInput *input);
 extern void input_cancel(WInput *input);
+extern bool input_rqclose(WInput *input);
 extern void input_draw_config_updated(WInput *input);
 
 DYNFUN void input_scrollup(WInput *input);

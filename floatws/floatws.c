@@ -288,7 +288,7 @@ bool floatws_rescue_clientwins(WFloatWS *ws)
  * state.
  */
 EXTL_EXPORT_MEMBER
-bool floatws_relocate_and_close(WFloatWS *ws)
+bool floatws_rqclose_relocate(WFloatWS *ws)
 {
     if(!region_may_destroy((WRegion*)ws)){
         warn("Workspace may not be destroyed.");
@@ -307,15 +307,15 @@ bool floatws_relocate_and_close(WFloatWS *ws)
 }
 
 
-void floatws_close(WFloatWS *ws)
+bool floatws_rqclose(WFloatWS *ws)
 {
     if(ws->managed_list!=NULL){
         warn("Workspace %s is still managing other objects "
              " -- refusing to close.", region_name((WRegion*)ws));
-        return;
+        return FALSE;
     }
     
-    floatws_relocate_and_close(ws);
+    return floatws_rqclose_relocate(ws);
 }
 
 
@@ -803,8 +803,8 @@ static DynFunTab floatws_dynfuntab[]={
     {(DynFun*)region_xwindow,
      (DynFun*)floatws_xwindow},
 
-    {region_close,
-     floatws_close},
+    {(DynFun*)region_rqclose,
+     (DynFun*)floatws_rqclose},
 
     {(DynFun*)region_current,
      (DynFun*)floatws_current},
