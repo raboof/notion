@@ -696,15 +696,15 @@ static WRegion *clientwin_do_attach_transient(WClientWin *cwin,
     
     if(reg==NULL)
         return NULL;
+
+    region_stacking((WRegion*)cwin, &bottom, &top);
+    region_restack(reg, top, Above);
     
     if(!ptrlist_insert_last(&(cwin->transient_list), reg)){
         destroy_obj((Obj*)reg);
         return NULL;
     }
     region_set_manager(reg, (WRegion*)cwin);
-    
-    region_stacking((WRegion*)cwin, &bottom, &top);
-    region_restack(reg, top, Above);
     
     if(REGION_IS_MAPPED((WRegion*)cwin))
         region_map(reg);
