@@ -673,7 +673,7 @@ WRegion *ionws_current(WIonWS *ws)
 EXTL_EXPORT
 ExtlTab ionws_managed_list(WIonWS *ws)
 {
-	return region_list_to_table(ws->managed_list, NULL);
+	return managed_list_to_table(ws->managed_list, NULL);
 }
 
 

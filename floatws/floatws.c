@@ -491,7 +491,7 @@ WRegion *floatws_backcirculate(WFloatWS *ws)
 EXTL_EXPORT
 ExtlTab floatws_managed_list(WFloatWS *ws)
 {
-	return region_list_to_table(ws->managed_list, NULL);
+	return managed_list_to_table(ws->managed_list, NULL);
 }
 
 

@@ -50,7 +50,7 @@ void pgeom(const char *n, WRectangle g)
 /*{{{ Region lists */
 
 
-ExtlTab region_list_to_table(WRegion *list, bool (*filter)(WRegion *r))
+ExtlTab managed_list_to_table(WRegion *list, bool (*filter)(WRegion *r))
 {
 	ExtlTab tab=extl_create_table();
 	int i=1;
