@@ -10,6 +10,7 @@
  */
 
 #include <libtu/objlist.h>
+#include <libtu/setparam.h>
 #include "region.h"
 #include "tags.h"
 
@@ -19,50 +20,35 @@ static ObjList *taglist=NULL;
 
 /*{{{ Adding/removing tags */
 
-/*EXTL_DOC
- * Tag \var{reg}.
- */
-EXTL_EXPORT_MEMBER
-void region_tag(WRegion *reg)
+
+bool region_set_tagged(WRegion *reg, int sp)
 {
-    if(reg->flags&REGION_TAGGED)
-        return;
+    bool set=(reg->flags&REGION_TAGGED);
+    bool nset=libtu_do_setparam(sp, set);
     
-    /*clear_sub_tags(reg);*/
-    
-    objlist_insert_last(&taglist, (Obj*)reg);
-    
-    reg->flags|=REGION_TAGGED;
-    region_notify_change(reg);
+    if(XOR(nset, set)){
+        if(reg->flags&REGION_TAGGED){
+            reg->flags&=~REGION_TAGGED;
+            objlist_remove(&taglist, (Obj*)reg);
+        }else{
+            reg->flags|=REGION_TAGGED;
+            objlist_insert_last(&taglist, (Obj*)reg);
+        }
+        region_notify_change(reg);
+    }
+
+    return nset;
 }
 
 
 /*EXTL_DOC
- * Untag \var{reg}.
+ * Change tagging state of \var{reg} as defined by \var{how}
+ * (set/unset/toggle). Resulting state is returned.
  */
-EXTL_EXPORT_MEMBER
-void region_untag(WRegion *reg)
+EXTL_EXPORT_AS(WRegion, set_tagged)
+bool region_set_tagged_extl(WRegion *reg, const char *how)
 {
-    if(!(reg->flags&REGION_TAGGED))
-        return;
-
-    objlist_remove(&taglist, (Obj*)reg);
-    
-    reg->flags&=~REGION_TAGGED;
-    region_notify_change(reg);
-}
-
-
-/*EXTL_DOC
- * Toggle region \var{reg} tag.
- */
-EXTL_EXPORT_MEMBER
-void region_toggle_tag(WRegion *reg)
-{
-    if(reg->flags&REGION_TAGGED)
-        region_untag(reg);
-    else
-        region_tag(reg);
+    return region_set_tagged(reg, libtu_string_to_setparam(how));
 }
 
 
@@ -87,7 +73,8 @@ void ioncore_clear_tags()
     ObjListIterTmp tmp;
     
     FOR_ALL_ON_OBJLIST(WRegion*, reg, taglist, tmp){
-        region_untag(reg);
+        reg->flags&=~REGION_TAGGED;
+        objlist_remove(&taglist, (Obj*)reg);
     }
 }
 

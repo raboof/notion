@@ -12,11 +12,11 @@
 #ifndef ION_IONCORE_TAGS_H
 #define ION_IONCORE_TAGS_H
 
+#include <libtu/setparam.h>
 #include "region.h"
 
-extern void region_tag(WRegion *reg);
-extern void region_untag(WRegion *reg);
-extern void region_toggle_tag(WRegion *reg);
+extern bool region_set_tagged(WRegion *reg, int sp);
+extern bool region_is_tagged(WRegion *reg);
 
 extern void ioncore_clear_tags();
 extern WRegion *ioncore_tags_first();

@@ -14,6 +14,7 @@
 
 #include <libextl/extl.h>
 #include <libtu/iterable.h>
+#include <libtu/setparam.h>
 #include "common.h"
 #include "region.h"
 

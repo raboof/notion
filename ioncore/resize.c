@@ -714,7 +714,7 @@ void frame_maximize_vert(WFrame *frame)
     WRegion *mgr=REGION_MANAGER(frame);
     
     if(frame->flags&FRAME_SHADED){
-        frame_toggle_shade(frame);
+        frame_set_shaded(frame, SETPARAM_TOGGLE);
         return;
     }
     

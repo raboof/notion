@@ -9,6 +9,7 @@
  * (at your option) any later version.
  */
 
+#include <libtu/setparam.h>
 #include "common.h"
 #include "global.h"
 #include "sizehint.h"
@@ -19,7 +20,6 @@
 #include "fullscreen.h"
 #include "mwmhints.h"
 #include "focus.h"
-
 
 
 bool clientwin_check_fullscreen_request(WClientWin *cwin, int w, int h,
@@ -128,14 +128,16 @@ bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto)
 }
 
 
-/*EXTL_DOC
- * Toggle between full screen and normal (framed) mode.
- */
-EXTL_EXPORT_MEMBER
-bool clientwin_toggle_fullscreen(WClientWin *cwin)
+bool clientwin_set_fullscreen(WClientWin *cwin, int sp)
 {
-    if(!CLIENTWIN_IS_FULLSCREEN(cwin)){
-        return clientwin_enter_fullscreen(cwin, TRUE);
+    bool set=CLIENTWIN_IS_FULLSCREEN(cwin);
+    bool nset=libtu_do_setparam(sp, set);
+    
+    if(!XOR(nset, set))
+        return set;
+
+    if(nset){
+        clientwin_enter_fullscreen(cwin, TRUE);
     }else{
         if(cwin->fs_pholder==NULL){
             WPHolder *ph=region_get_rescue_pholder((WRegion*)cwin);
@@ -145,7 +147,32 @@ bool clientwin_toggle_fullscreen(WClientWin *cwin)
             else
                 cwin->fs_pholder=ph;
         }
-        
-        return clientwin_leave_fullscreen(cwin, TRUE);
+        clientwin_leave_fullscreen(cwin, TRUE);
     }
+    
+    return CLIENTWIN_IS_FULLSCREEN(cwin);
 }
+
+
+/*EXTL_DOC
+ * Set client window \var{cwin} full screen state according to the 
+ * parameter \var{how} (set/unset/toggle). Resulting state is returned,
+ * which may not be what was requested.
+ */
+EXTL_EXPORT_AS(WClientWin, set_fullscreen)
+bool clientwin_set_fullscreen_extl(WClientWin *cwin, const char *how)
+{
+    return clientwin_set_fullscreen(cwin, libtu_string_to_setparam(how));
+}
+
+
+/*EXTL_DOC
+ * Is \var{cwin} in full screen mode?
+ */
+EXTL_SAFE
+EXTL_EXPORT_MEMBER
+bool clientwin_is_fullscreen(WClientWin *cwin)
+{
+    return CLIENTWIN_IS_FULLSCREEN(cwin);
+}
+

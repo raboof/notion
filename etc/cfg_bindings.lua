@@ -82,7 +82,8 @@ defbindings("WMPlex", {
 
     bdoc("Toggle fullscreen mode of current client window."),
     kpress_wait(MOD1.."Return", 
-                "WClientWin.toggle_fullscreen(_sub)", "_sub:WClientWin"),
+                "WClientWin.set_fullscreen(_sub, 'toggle')", 
+                "_sub:WClientWin"),
 
     submap(MOD1.."K", {
        bdoc("Kill client owning current client window."),
@@ -135,7 +136,7 @@ defbindings("WMPlex", {
 
 defbindings("WFrame", {
     bdoc("Tag current object within the frame."),
-    kpress(MOD1.."T", "WRegion.toggle_tag(_sub)", "_sub:non-nil"),
+    kpress(MOD1.."T", "WRegion.set_tagged(_sub, 'toggle')", "_sub:non-nil"),
 
     submap(MOD1.."K", {
         bdoc("Switch to n:th object within the frame."),

@@ -58,28 +58,20 @@ static StringIntMap frame_areas[]={
 /*{{{ Exports */
 
 
-static bool do_toggle(WMPlex *mplex, WScratchpad *sp)
-{
-    if(mplex_l2_hidden(mplex, (WRegion*)sp))
-        return mplex_l2_show(mplex, (WRegion*)sp);
-    else
-        return mplex_l2_hide(mplex, (WRegion*)sp);
-}
-
-
 /*EXTL_DOC
- * Toggle displayed status of some scratchpad on \var{mplex} if one is 
- * found.
+ * Change displayed status of some scratchpad on \var{mplex} if one is 
+ * found. The parameter \var{how} is one of (set/unset/toggle).
  */
 EXTL_EXPORT
-bool mod_sp_toggle_on(WMPlex *mplex)
+bool mod_sp_set_shown_on(WMPlex *mplex, const char *how)
 {
     int i;
+    int setpar=libtu_setparam_invert(libtu_string_to_setparam(how));
     
     for(i=mplex_lcount(mplex, 2)-1; i>=0; i--){
         WScratchpad *sp=OBJ_CAST(mplex_lnth(mplex, 2, i), WScratchpad);
         if(sp!=NULL)
-            return do_toggle(mplex, sp);
+            return mplex_l2_set_hidden(mplex, (WRegion*)sp, setpar);
     }
    
     return FALSE;
@@ -88,14 +80,16 @@ bool mod_sp_toggle_on(WMPlex *mplex)
 
 /*EXTL_DOC
  * Toggle displayed status of \var{sp}.
+ * The parameter \var{how} is one of (set/unset/toggle).
  */
 EXTL_EXPORT
-bool mod_sp_toggle(WScratchpad *sp)
+bool mod_sp_set_shown(WScratchpad *sp, const char *how)
 {
     if(sp!=NULL){
+        int setpar=libtu_setparam_invert(libtu_string_to_setparam(how));
         WMPlex *mplex=OBJ_CAST(REGION_MANAGER(sp), WMPlex);
-        if(mplex!=NULL /*&& mplex_layer(mplex, (WRegion*)sp)==2*/)
-            return do_toggle(mplex, sp);
+        if(mplex!=NULL)
+            return mplex_l2_set_hidden(mplex, (WRegion*)sp, setpar);
     }
     
     return FALSE;

@@ -421,17 +421,30 @@ static void floatframe_size_changed(WFloatFrame *frame, bool wchg, bool hchg)
 /*{{{ Actions */
 
 
-/*EXTL_DOC
- * Toggle \var{frame} stickyness. Only works across frames on 
- * \type{WFloatWS} that have the same \type{WMPlex} parent.
- */
-EXTL_EXPORT_MEMBER
-void floatframe_toggle_sticky(WFloatFrame *frame)
+bool floatframe_set_sticky(WFloatFrame *frame, int sp)
 {
     WFloatStacking *st=mod_floatws_find_stacking((WRegion*)frame);
-    if(st!=NULL)
-        st->sticky=!st->sticky;
+    
+    if(st==NULL)
+        return FALSE;
+    
+    st->sticky=libtu_do_setparam(sp, st->sticky);
+    
+    return st->sticky;
 }
+
+
+/*EXTL_DOC
+ * Set \var{frame} stickyness accoding to \var{how} (set/unset/toggle).
+ * The resulting state is returned. This function only works across frames
+ * on  \type{WFloatWS} that have the same \type{WMPlex} parent.
+ */
+EXTL_EXPORT_AS(WFloatFrame, set_sticky)
+bool floatframe_set_sticky_extl(WFloatFrame *frame, const char *how)
+{
+    return floatframe_set_sticky(frame, libtu_string_to_setparam(how));
+}
+
 
 /*EXTL_DOC
  * Is \var{frame} sticky?

@@ -146,9 +146,8 @@ extern bool mplex_managed_goto(WMPlex *mplex, WRegion *sub, bool cfocus);
 extern void mplex_switch_nth(WMPlex *mplex, uint n);
 extern void mplex_switch_next(WMPlex *mplex);
 extern void mplex_switch_prev(WMPlex *mplex);
-extern bool mplex_l2_hide(WMPlex *mplex, WRegion *reg);
-extern bool mplex_l2_show(WMPlex *mplex, WRegion *reg);
 extern bool mplex_l2_hidden(WMPlex *mplex, WRegion *reg);
+extern bool mplex_l2_set_hidden(WMPlex *mplex, WRegion *reg, bool sp);
 
 /* Focus */
 

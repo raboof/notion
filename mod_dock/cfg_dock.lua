@@ -26,7 +26,7 @@ mod_dock.create{
 -- For floating docks, you may want the following toggle binding.
 defbindings("WScreen", {
     bdoc("Toggle floating dock."),
-    kpress(MOD1.."D", "mod_dock.toggle_floating_on(_)")
+    kpress(MOD1.."D", "mod_dock.set_floating_shown_on(_, 'toggle')")
 })
 
 

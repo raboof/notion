@@ -12,6 +12,7 @@
 #ifndef ION_IONCORE_FULLSCREEN_H
 #define ION_IONCORE_FULLSCREEN_H
 
+#include <libtu/setparam.h>
 #include "common.h"
 #include "screen.h"
 #include "clientwin.h"
@@ -22,8 +23,9 @@ extern bool clientwin_check_fullscreen_request(WClientWin *cwin,
                                                int w, int h, bool switchto);
 extern bool clientwin_fullscreen_scr(WClientWin *cwin, WScreen *vp,
                                      bool switchto);
-extern bool clientwin_toggle_fullscreen(WClientWin *cwin);
 extern bool clientwin_enter_fullscreen(WClientWin *cwin, bool switchto);
 extern bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto);
+extern bool clientwin_set_fullscreen(WClientWin *cwin, int sp);
+extern bool clientwin_is_fullscreen(WClientWin *cwin);
 
 #endif /* ION_IONCORE_FULLSCREEN_H */

@@ -13,13 +13,14 @@
 #define ION_IONCORE_FRAME_H
 
 #include <libtu/stringstore.h>
+#include <libtu/setparam.h>
+#include <libextl/extl.h>
 
 #include "common.h"
 #include "window.h"
 #include "attach.h"
 #include "mplex.h"
 #include "gr.h"
-#include <libextl/extl.h>
 #include "rectangle.h"
 
 #define FRAME_TAB_HIDE    0x0004
@@ -74,10 +75,10 @@ extern int frame_nth_tab_x(const WFrame *frame, int n);
 extern int frame_tab_at_x(const WFrame *frame, int x);
 extern void frame_update_attr_nth(WFrame *frame, int i);
 
-extern bool frame_toggle_tabbar(WFrame *frame);
-extern bool frame_toggle_shade(WFrame *frame);
+extern bool frame_set_tabbar(WFrame *frame, int sp);
+extern bool frame_is_tabbar(WFrame *frame);
+extern bool frame_set_shaded(WFrame *frame, int sp);
 extern bool frame_is_shaded(WFrame *frame);
-extern bool frame_has_tabbar(WFrame *frame);
 
 /* Misc */
 extern void frame_managed_notify(WFrame *frame, WRegion *sub);

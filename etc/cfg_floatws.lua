@@ -24,7 +24,7 @@ defbindings("WFloatWS", {
 
 defbindings("WFloatFrame", {
     bdoc("Toggle shade mode"),
-    mdblclick("Button1@tab", "WFloatFrame.toggle_shade(_)"),
+    mdblclick("Button1@tab", "WFloatFrame.set_shaded(_, 'toggle')"),
     
     bdoc("Raise the frame."),
     mpress("Button1@tab", "WFloatWS.raise(WRegion.manager(_), _)"),

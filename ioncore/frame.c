@@ -434,13 +434,15 @@ void frame_activated(WFrame *frame)
 /*{{{ Misc. */
 
 
-/*EXTL_DOC
- * Toggle tab-bar visibility.
- */
-EXTL_EXPORT_MEMBER
-bool frame_toggle_tabbar(WFrame *frame)
+bool frame_set_tabbar(WFrame *frame, int sp)
 {
-    if(!(frame->flags&FRAME_SHADED)){
+    bool set=(frame->flags&FRAME_TAB_HIDE);
+    bool nset=libtu_do_setparam(sp, set);
+    
+    if(nset && frame->flags&FRAME_SHADED)
+        return set;
+    
+    if(XOR(nset, set)){
         frame->flags^=FRAME_TAB_HIDE;
         mplex_size_changed(&(frame->mplex), FALSE, TRUE);
         mplex_fit_managed(&(frame->mplex));
@@ -448,6 +450,29 @@ bool frame_toggle_tabbar(WFrame *frame)
         window_draw((WWindow*)frame, TRUE);
     }
     
+    return (frame->flags&FRAME_TAB_HIDE);
+}
+
+
+/*EXTL_DOC
+ * Set tab-bar visibility according to the parameter \var{how} 
+ * (set/unset/toggle). Resulting state is returned, which may not be
+ * what was requested.
+ */
+EXTL_EXPORT_AS(WFrame, set_tabbar)
+bool frame_set_tabbar_extl(WFrame *frame, const char *how)
+{
+    return frame_set_tabbar(frame, libtu_string_to_setparam(how));
+}
+
+
+/*EXTL_DOC
+ * Is \var{frame}'s tab-bar visible?
+ */
+EXTL_SAFE
+EXTL_EXPORT_MEMBER
+bool frame_is_tabbar(WFrame *frame)
+{
     return (frame->flags&FRAME_TAB_HIDE);
 }
 
@@ -470,25 +495,36 @@ static void frame_do_toggle_shade(WFrame *frame, int shaded_h)
 }
 
 
-/*EXTL_DOC
- * Toggle shade (only titlebar visible) mode.
- */
-EXTL_EXPORT_MEMBER
-bool frame_toggle_shade(WFrame *frame)
+bool frame_set_shaded(WFrame *frame, int sp)
 {
+    bool set=(frame->flags&FRAME_SHADED);
+    bool nset=libtu_do_setparam(sp, set);
     GrBorderWidths bdw;
     int h=frame->bar_h;
 
+    if(!XOR(nset, set))
+        return nset;
+    
     if(!(frame->flags&FRAME_BAR_OUTSIDE) && frame->brush!=NULL){
         grbrush_get_border_widths(frame->brush, &bdw);
         h+=bdw.top+bdw.bottom+2*bdw.spacing;
-    }/*else{
-        h+=2*BAR_OFF(frame);
-    }*/
+    }
 
     frame_do_toggle_shade((WFrame*)frame, h);
     
     return (frame->flags&FRAME_SHADED);
+}
+
+
+/*EXTL_DOC
+ * Set shading state according to the parameter \var{how} 
+ * (set/unset/toggle). Resulting state is returned, which may not be
+ * what was requested.
+ */
+EXTL_EXPORT_AS(WFrame, set_shaded)
+bool frame_set_shaded_extl(WFrame *frame, const char *how)
+{
+    return frame_set_shaded(frame, libtu_string_to_setparam(how));
 }
 
 
@@ -500,17 +536,6 @@ EXTL_EXPORT_MEMBER
 bool frame_is_shaded(WFrame *frame)
 {
     return ((frame->flags&FRAME_SHADED)!=0);
-}
-
-
-/*EXTL_DOC
- * Is \var{frame}'s tab-bar displayed?
- */
-EXTL_SAFE
-EXTL_EXPORT_MEMBER
-bool frame_is_tabbar_hidden(WFrame *frame)
-{
-    return ((frame->flags&FRAME_TAB_HIDE)!=0);
 }
 
 

@@ -666,68 +666,66 @@ void mplex_switch_prev(WMPlex *mplex)
 }
 
 
+bool mplex_l2_set_hidden(WMPlex *mplex, WRegion *reg, bool sp)
+{
+    bool mcf=region_may_control_focus((WRegion*)mplex);
+    WLListNode *node=llist_find_on(mplex->l2_list, reg);
+    bool hidden, nhidden;
+    
+    if(node==NULL)
+        return FALSE;
+    
+    hidden=(node->flags&LLIST_L2_HIDDEN);
+    nhidden=libtu_do_setparam(sp, hidden);
+    
+    if(!hidden && nhidden){
+        node->flags|=LLIST_L2_HIDDEN;
+        
+        if(REGION_IS_MAPPED(mplex) && !MPLEX_MGD_UNVIEWABLE(mplex))
+            region_unmap(reg);
+        
+        if(mplex->l2_current==node){
+            WLListNode *node2;
+            mplex->l2_current=NULL;
+            FOR_ALL_NODES_ON_LLIST(node2, mplex->l2_list){
+                if((node2->flags&(LLIST_L2_HIDDEN|LLIST_L2_PASSIVE))==0)
+                    mplex->l2_current=node2;
+            }
+        }
+        
+        if(mcf)
+            region_warp((WRegion*)mplex);
+    }else if(hidden && !nhidden){
+        mplex_do_node_goto(mplex, node, TRUE,
+                           (mcf ? REGION_GOTO_FOCUS : 0));
+    }
+    
+    return !(node->flags&LLIST_L2_HIDDEN);
+}
+
+
+/*EXTL_DOC
+ * Set the visibility of the layer2 region \var{reg} on \var{mplex}
+ * as specified with the parameter \var{how} (set/unset/toggle).
+ * The resulting state is returned.
+ */
+EXTL_EXPORT_AS(WMPlex, l2_set_hidden)
+bool mplex_l2_set_hidden_extl(WMPlex *mplex, WRegion *reg, const char *how)
+{
+    return mplex_l2_set_hidden(mplex, reg, libtu_string_to_setparam(how));
+}
+
+
 /*EXTL_DOC
  * Is \var{reg} on the layer2 of \var{mplex}, but hidden?
  */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
-bool mplex_l2_hidden(WMPlex *mplex, WRegion *reg)
+bool mplex_l2_is_hidden(WMPlex *mplex, WRegion *reg)
 {
     WLListNode *node=llist_find_on(mplex->l2_list, reg);
     
     return (node!=NULL && node->flags&LLIST_L2_HIDDEN);
-}
-
-
-/*EXTL_DOC
- * If var \var{reg} is on the l2 list of \var{mplex} and currently shown, 
- * hide it. 
- */
-EXTL_EXPORT_MEMBER
-bool mplex_l2_hide(WMPlex *mplex, WRegion *reg)
-{
-    bool mcf=region_may_control_focus((WRegion*)mplex);
-    WLListNode *node=llist_find_on(mplex->l2_list, reg);
-
-    if(node==NULL || node->flags&LLIST_L2_HIDDEN)
-        return FALSE;
-    
-    node->flags|=LLIST_L2_HIDDEN;
-    
-    if(REGION_IS_MAPPED(mplex) && !MPLEX_MGD_UNVIEWABLE(mplex))
-        region_unmap(reg);
-    
-    if(mplex->l2_current==node){
-        WLListNode *node2;
-        mplex->l2_current=NULL;
-        FOR_ALL_NODES_ON_LLIST(node2, mplex->l2_list){
-            if((node2->flags&(LLIST_L2_HIDDEN|LLIST_L2_PASSIVE))==0)
-                mplex->l2_current=node2;
-        }
-    }
-    
-    if(mcf)
-        region_warp((WRegion*)mplex);
-    
-    return TRUE;
-}
-
-
-/*EXTL_DOC
- * If var \var{reg} is on the l2 list of \var{mplex} and currently hidden, 
- * display it. 
- */
-EXTL_EXPORT_MEMBER
-bool mplex_l2_show(WMPlex *mplex, WRegion *reg)
-{
-    bool mcf=region_may_control_focus((WRegion*)mplex);
-    WLListNode *node=llist_find_on(mplex->l2_list, reg);
-
-    if(node==NULL || !(node->flags&LLIST_L2_HIDDEN))
-        return FALSE;
-    
-    return mplex_do_node_goto(mplex, node, TRUE,
-                              (mcf ? REGION_GOTO_FOCUS : 0));
 }
 
 

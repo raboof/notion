@@ -1238,17 +1238,15 @@ WDock *mod_dock_create(ExtlTab tab)
  * Toggle floating docks on \var{mplex}.
  */
 EXTL_EXPORT
-void mod_dock_toggle_floating_on(WMPlex *mplex)
+void mod_dock_set_floating_shown_on(WMPlex *mplex, const char *how)
 {
+    int setpar=libtu_setparam_invert(libtu_string_to_setparam(how));
     WDock *dock;
     
     for(dock=docks; dock; dock=dock->dock_next){
         if(REGION_MANAGER(dock)==(WRegion*)mplex &&
            mplex_layer(mplex, (WRegion*)dock)==2){
-            if(mplex_l2_hidden(mplex, (WRegion*)dock))
-                mplex_l2_show(mplex, (WRegion*)dock);
-            else
-                mplex_l2_hide(mplex, (WRegion*)dock);
+            mplex_l2_set_hidden(mplex, (WRegion*)dock, setpar);
         }
     }
 }

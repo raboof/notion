@@ -12,6 +12,7 @@
 #ifndef ION_MOD_FLOATWS_FLOATFRAME_H
 #define ION_MOD_FLOATWS_FLOATFRAME_H
 
+#include <libtu/setparam.h>
 #include <libextl/extl.h>
 #include <ioncore/common.h>
 #include <ioncore/frame.h>
@@ -50,5 +51,10 @@ extern void floatframe_geom_from_initial_geom(WFloatFrame *frame,
 extern void floatframe_managed_geom(const WFloatFrame *frame, WRectangle *geom);
 extern void floatframe_bar_geom(const WFloatFrame *frame, WRectangle *geom);
 extern void floatframe_border_geom(const WFloatFrame *frame, WRectangle *geom);
+
+/* Misc. */
+
+extern bool floatframe_set_sticky(WFloatFrame *frame, int sp);
+extern bool floatframe_is_sticky(WFloatFrame *frame);
 
 #endif /* ION_MOD_FLOATWS_FLOATFRAME_H */

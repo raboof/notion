@@ -9,8 +9,10 @@
  * (at your option) any later version.
  */
 
-#include "common.h"
+#include <string.h>
+
 #include <libextl/extl.h>
+#include "common.h"
 #include "extlconv.h"
 
 
@@ -109,4 +111,5 @@ bool extl_table_gets_rectangle(ExtlTab tab, const char *nam,
 
 
 /*}}}*/
+
 
