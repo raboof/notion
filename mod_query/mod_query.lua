@@ -473,7 +473,7 @@ end
 local cmd_overrides={}
 
 --DOC
--- Define a command override for the query_exec query.
+-- Define a command override for the \fnrefx{mod_query}{query_exec} query.
 function mod_query.defcmd(cmd, fn)
     cmd_overrides[cmd]=fn
 end
