@@ -56,3 +56,5 @@ dopath("cfg_bindings")
 
 -- Define some menus (mod_menu required)
 dopath("cfg_menus")
+
+dopath("cfg_user", true)
