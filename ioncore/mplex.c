@@ -919,12 +919,12 @@ WRegion *mplex_attach_hnd(WMPlex *mplex, WRegionAttachHandler *hnd,
 }
 
 
-static void get_params(ExtlTab tab, WMPlexAttachParams *par)
+static void get_params(WMPlex *mplex, ExtlTab tab, WMPlexAttachParams *par)
 {
     int layer=1;
     
     par->flags=0;
-    par->index=INDEX_AFTER_CURRENT;
+    par->index=DEFAULT_INDEX(mplex);
     
     extl_table_gets_i(tab, "layer", &layer);
     if(layer==2){
@@ -956,7 +956,7 @@ EXTL_EXPORT_MEMBER
 WRegion *mplex_attach(WMPlex *mplex, WRegion *reg, ExtlTab param)
 {
     WMPlexAttachParams par;
-    get_params(param, &par);
+    get_params(mplex, param, &par);
     
     /* region__attach_reparent should do better checks. */
     if(reg==NULL || reg==(WRegion*)mplex)
@@ -991,7 +991,7 @@ EXTL_EXPORT_MEMBER
 WRegion *mplex_attach_new(WMPlex *mplex, ExtlTab param)
 {
     WMPlexAttachParams par;
-    get_params(param, &par);
+    get_params(mplex, param, &par);
     
     return region__attach_load((WRegion*)mplex, param,
                                (WRegionDoAttachFn*)mplex_do_attach, 
@@ -1549,7 +1549,7 @@ void mplex_load_contents(WMPlex *mplex, ExtlTab tab)
                 WMPlexAttachParams par;
                 char *tmp=NULL;
                 
-                get_params(subtab, &par);
+                get_params(mplex, subtab, &par);
                 
                 par.index=-1;
                 
