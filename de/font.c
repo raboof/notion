@@ -13,6 +13,7 @@
 
 #include <ioncore/common.h>
 #include "font.h"
+#include "fontset.h"
 #include "brush.h"
 
 
@@ -33,8 +34,8 @@ DEFontPtr de_load_font(const char *fontname)
 		return 0;
 	}
 	
-	xfnt=XCreateFontSet(wglobal.dpy, fontname, &dummy_missing,
-						&dummy_missing_n, &dummy_def);
+	xfnt=de_create_font_set(fontname);
+	
 #else
 	xfnt=XLoadQueryFont(wglobal.dpy, fontname);
 #endif
@@ -43,8 +44,7 @@ DEFontPtr de_load_font(const char *fontname)
 		warn("Could not load font \"%s\", trying \"%s\"",
 			 fontname, CF_FALLBACK_FONT_NAME);
 #ifdef CF_UTF8
-		xfnt=XCreateFontSet(wglobal.dpy, CF_FALLBACK_FONT_NAME, &dummy_missing,
-							&dummy_missing_n, &dummy_def);
+		xfnt=de_create_font_set(CF_FALLBACK_FONT_NAME);
 #else
 		xfnt=XLoadQueryFont(wglobal.dpy, CF_FALLBACK_FONT_NAME);
 #endif
