@@ -478,12 +478,12 @@ function break_cmdline(str, no_ws)
         concat=table.getn(res)
     end
 
-    st, en, beg, rest=string.find(str, "^(%s*):(.*)")
+    st, en, beg, ch, rest=string.find(str, "^(%s*)(:+)(.*)")
     if beg then
         if string.len(beg)>0 then
             ins_space(beg)
         end
-        ins(":")
+        ins(ch)
         ins_space("")
         str=rest
     end
@@ -551,7 +551,7 @@ function mod_query.exec_completor(wedln, str)
     local beg=table.concat(parts)
     local wp=" "
     
-    if string.find(beg, "^%s*:?%s*$") then
+    if string.find(beg, "^%s*:*%s*$") then
         wp=" -wp "
     end
 
@@ -596,7 +596,8 @@ end
 -- This function asks for a command to execute with \file{/bin/sh}.
 -- If the command is prefixed with a colon (':'), the command will
 -- be run in an XTerm (or other terminal emulator) using the script
--- \file{ion-runinxterm}.
+-- \file{ion-runinxterm}. Two colons ('::') will ask you to press 
+-- enter after the command has finished.
 function mod_query.query_exec(mplex)
     mod_query.query(mplex, TR("Run:"), nil, mod_query.exec_handler, 
                     mod_query.exec_completor,

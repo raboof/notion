@@ -54,14 +54,17 @@ local function lookup_script_warn(script)
 end
 
 
-local function lookup_runinxterm_warn(prog, title)
+local function lookup_runinxterm_warn(prog, title, wait)
     local rx=lookup_script_warn("ion-runinxterm")
     if rx then
+        if wait then
+            rx=rx.." -w"
+        end
         if title then
             rx=rx.." -T "..string.shell_safe(title)
         end
         if prog then
-            rx=rx.." "..prog
+            rx=rx.." -- "..prog
         end
     end
     return rx
@@ -73,11 +76,13 @@ end
 -- root window of the X screen \var{reg} is on. If \var{cmd} is prefixed
 -- by a colon (\code{:}), the following command is executed in an xterm
 -- (or other terminal emulator) with the help of the \command{ion-runinxterm} 
--- script.
+-- script. If the command is prefixed by two colons, \command{ion-runinxterm}
+-- will ask you to press enter after the command is finished, even if it
+-- returns succesfully.
 function ioncore.exec_on(reg, cmd)
-    local _, _, c=string.find(cmd, "^[%s]*:(.*)")
-    if c then
-        cmd=lookup_runinxterm_warn(c)
+    local _, _, col, c=string.find(cmd, "^[%s]*(:+)(.*)")
+    if col then
+        cmd=lookup_runinxterm_warn(c, nil, string.len(col)>1)
         if not cmd then
             return
         end
