@@ -252,7 +252,7 @@ bool handle_button_release(XButtonEvent *ev)
 		window_release((WWindow*)p_reg);
 	}
 	
-	reset_watch(&p_regwatch);
+	/*reset_watch(&p_regwatch);*/
 	reset_watch(&p_subregwatch);
 
 	return TRUE;
