@@ -18,17 +18,55 @@ if _LOADED["templates"] then return end
 local T={}
 _G.templates=T
 
+-- Settings {{{
 
 local S={}
 S.valid_classifications={["W"]=true, ["TE"]=true, ["TB"]=true,}
-S.terminal_emulators={["XTerm"]=true,}
+-- Xterm, rxvt, aterm, etc. all have class XTerm
+S.terminal_emulators={["XTerm"]=true,} 
+
 S.b_ratio=(1+math.sqrt(5))/2
 S.s_ratio=1
 
+S.templates={}
+
+S.templates["default"]={
+    split_dir="horizontal",
+    split_tls=S.b_ratio,
+    split_brs=S.s_ratio,
+    marker=":;TE:up",
+    tl={
+        split_dir="vertical",
+        split_tls=S.b_ratio,
+        split_brs=S.s_ratio/2,
+        marker="W:single;TB:right",
+        tl={},
+        br={},
+    },
+    br={},
+}
+
+S.template=S.templates["default"]
+
+S.shrink_minimum=32
+
+-- }}}
+
+
 -- Helper code {{{
 
+
+local function sfind(s, p)
+    local function drop2(a, b, ...)
+        return unpack(arg)
+    end
+    return drop2(string.find(s, p))
+end
+
+
 function T.div_length(w, r1, r2)
-    return w*r1/(r1+r2), w*r2/(r1+r2)
+    local a=math.ceil(w*r1/(r1+r2))
+    return a, w-a
 end
 
 function T.split3(d, ls, cs, rs, lo, co, ro)
@@ -209,7 +247,7 @@ function T.scan_layout(p, node)
         if t=="SPLIT_VERTICAL" or t=="SPLIT_HORIZONTAL" then
             local m=n:get_marker()
             if m then
-                local st, en, lt, ld, rt, rd=string.find(m, "(.*):(.*);(.*):(.*)")
+                local lt, ld, rt, rd=sfind(m, "(.*):(.*);(.*):(.*)")
                 if lt and lt==cls then
                     if do_scan_cls(n:tl(), ld) then
                         return true
@@ -241,50 +279,157 @@ end
 
 -- Layout templates {{{
 
-function T.init_layout_layout1(p)
-    local wg, fg=p.ws:geom(), p.frame:geom()
-    local cls=T.classify(p.ws, p.cwin)
-    local ts, bs=T.div_length(wg.h, S.b_ratio, S.s_ratio)
-    local ls, rs=T.div_length(wg.w, S.b_ratio, S.s_ratio)
-    local lo, ro
+
+function T.do_init_layout(p, cls, tmpl)
+    local function split2_swap(d, ts, ls, rs, l, r, do_swap)
+        if do_swap then
+            ls, l, rs, r=rs, r, ls, l
+        end
+        return T.split2(d, ts, ls, rs, l, r)
+    end
     
-    if cls=="TE" then
-        local th=math.min(fg.h, wg.h)
-        rs=math.min(fg.w, wg.w)
-        ls=wg.w-rs;
-        lo=T.split2("vertical", wg.h, ts, bs, {}, {})
-        ro=T.split2("vertical", wg.h, nil, th, {}, {reg=p.frame})
-    elseif cls=="W" then
-        ls=math.min(fg.w, wg.w) -- TODO: minimum size for TE
-        rs=wg.w-rs
-        ts=math.min(wg.h, math.max(ts, fg.h))
-        bs=wg.h-ts
-        lo=T.split2("vertical", wg.h, ts, bs, {reg=p.frame}, {})
-        ro={}
-    elseif cls=="TB" then
-        local tw=math.min(fg.w, ls)
-        bs=math.min(bs, fg.h)
-        ts=wg.h-bs
-        lo=T.split2("vertical", wg.h, ts, bs, {},
-                    T.split2("horizontal", ls, tw, nil, {reg=p.frame}, {}))
-        ro={}
-    else
-        return false
+    local function do_place(dir, sw2, sh2)
+        local fg=p.frame:geom()
+        local fnode={reg=p.frame}
+        if dir=="single" then
+            return fnode, fg.w, fg.h
+        elseif dir=="up" or dir=="down" then
+            local fsz=math.min(sh2, fg.h)
+            local split=split2_swap("vertical", sh2, fsz, nil, fnode, {},
+                                    dir=="up")
+            return split, fg.w, nil
+        elseif dir=="left" or dir=="right" then
+            local fsz=math.min(sw2, fg.w)
+            local split=split2_swap("horizontal", sw2, fsz, nil, fnode, {},
+                                    dir=="left")
+            return split, nil, fg.h
+        else
+            error('Invalid direction in marker')
+        end
+    end
+    
+    local function limit_size(rq, avail)
+        if rq>(avail-S.shrink_minimum) then
+            rq=avail-S.shrink_minimum
+            if rq<=0 then
+                rq=avail/2
+            end
+        end
+        return rq
     end
 
-    lo.marker="W:single;TB:right"
-    p.res_config=T.split2("horizontal", wg.w, ls, rs, lo, ro)
-    p.res_config.marker=":;TE:up"
-    return true
+    -- Variables
+    local found, found2, wrq, hrq
+    
+    -- Leaf?
+    if not tmpl.split_dir then
+        return
+    end
+    
+    -- Check marker
+    if tmpl.marker then
+        local lt, ld, rt, rd=sfind(tmpl.marker, "(.*):(.*);(.*):(.*)")
+        
+        if lt and lt==cls then
+            tmpl.tl, wrq, hrq=do_place(ld, tmpl._tlw, tmpl._tlh)
+            found="tl"
+        elseif rt and rt==cls then
+            tmpl.br, wrq, hrq=do_place(rd, tmpl._brw, tmpl._brh)
+            found="br"
+        end
+        
+        -- Adjust size requests based on heuristics for classes
+        if cls=="TB" then
+            hrq, wrq=nil, nil
+        elseif cls=="W" then
+            if hrq<sh then
+                hrq=nil
+            end
+            if wrq<sw then
+                wrq=nil
+            end
+        end
+    end
+
+    -- Recurse
+    if not found and tmpl.tl then
+        found2, wrq, hrq=T.do_init_layout(p, cls, tmpl.tl)
+        if found2 then
+            found="tl"
+        end
+    end
+    if not found and tmpl.br then
+        found2, wrq, hrq=T.do_init_layout(p, cls, tmpl.br)
+        if found2 then
+            found="br"
+        end
+    end
+
+    if tmpl.split_dir=="vertical" and hrq then
+        local th=tmpl._tlh+tmpl._brh
+        local h=limit_size(hrq, th)
+        if found=="tl" then
+            tmpl.split_tls, tmpl.split_brs=h, th-h
+        else
+            tmpl.split_tls, tmpl.split_brs=th-h, h
+        end
+        hrq=nil
+    elseif tmpl.split_dir=="horizontal" and wrq then
+        local tw=tmpl._tlw+tmpl._brw
+        local w=limit_size(wrq, tw)
+        if found=="tl" then
+            tmpl.split_tls, tmpl.split_brs=w, tw-w
+        else
+            tmpl.split_tls, tmpl.split_brs=tw-w, w
+        end
+        wrq=nil
+    end
+    
+    return (found~=nil), wrq, hrq
+end
+
+
+function T.calc_sizes(tmpl, sw, sh)
+    local tmps
+    
+    -- Reached leaf?
+    if not tmpl.split_dir then
+        return
+    end
+    
+    -- Calculate pixel sizes of things
+    if tmpl.split_dir=="vertical" then
+        tmps=sh
+    else
+        tmps=sw
+    end
+    
+    tmpl.split_tls, tmpl.split_brs=T.div_length(tmps, 
+                                                tmpl.split_tls, 
+                                                tmpl.split_brs)
+    
+    if tmpl.split_dir=="vertical" then
+        tmpl._tlw, tmpl._brw=sw, sw
+        tmpl._tlh, tmpl._brh=tmpl.split_tls, tmpl.split_brs
+    else
+        tmpl._tlw, tmpl._brw=tmpl.split_tls, tmpl.split_brs
+        tmpl._tlh, tmpl._brh=sh, sh
+    end
+    
+    T.calc_sizes(tmpl.tl, tmpl._tlw, tmpl._tlh)
+    T.calc_sizes(tmpl.br, tmpl._brw, tmpl._brh)
 end
 
 
 function T.init_layout(p, n)
+    local cls=T.classify(p.ws, p.cwin)
+    local tmpl=table.copy(S.template, true) -- deep copy template
+    local wg=p.ws:geom()
+    T.calc_sizes(tmpl, wg.w, wg.h)
     p.res_node=n
-    return T.init_layout_layout1(p)
+    p.res_config=tmpl
+    return T.do_init_layout(p, cls, tmpl, wg.w, wg.h)
 end
-
-
 
 -- }}}
 
