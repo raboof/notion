@@ -311,7 +311,8 @@ static bool xinerama_sanity_check(XineramaScreenInfo *xi, int nxi)
     
     for(i=0; i<nxi; i++){
         for(j=0; j<nxi; j++){
-            if((xi[j].x_org>=xi[i].x_org && xi[j].x_org<xi[i].x_org+xi[i].width) &&
+            if(i!=j &&
+               (xi[j].x_org>=xi[i].x_org && xi[j].x_org<xi[i].x_org+xi[i].width) &&
                (xi[j].y_org>=xi[i].y_org  && xi[j].y_org<xi[i].y_org+xi[i].height)){
                 warn("Xinerama sanity check failed; overlapping screens detected.");
                 return FALSE;
