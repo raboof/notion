@@ -1,0 +1,68 @@
+
+GRAPHICS CONFIGURATION
+
+For each screen, Ion will first attempt to read the user's
+'draw-$DISPLAY.SCR#.conf'. After that user's 'draw.conf' is attempted.
+Finally system-wide versions of both these files are tried.
+
+
+DRAW.CONF STRUCTURE
+
+# Font used in terminal emulators (xterm, etc.)
+# CF_WIDTH/HEIGHT_UNIT that grow/shrink use are taken from this.
+term_font "font"
+
+# Font
+font "fontname"
+
+# Tab font
+tab_font "fontname"
+
+# Frame border
+#  tl - top and left border width
+#  br - bottom and right border width
+#  ipad - contents padding
+frame_border tl, br, ipad
+
+# Tab border
+tab_border tl, br, ipad
+
+# Input (line-editor) border
+input_border tl, br, ipad
+
+# Frame and tab spacing
+ion_spacing pixels
+
+# Place bar inside or outside frame border?
+ion_bar_inside_frame TRUE/FALSE?
+
+# Active frame, unselected tab colors
+#  tl - top and left border
+#  br - bottom and right border
+#  bg - background
+#  fg - foreground (text)
+# The colors are normal X color specifications. See the
+# manual page for XParserColor(3x) for more.
+act_tab_colors "tl", "br", "bg", "fg"
+
+# Active frame, selected tab colors
+act_tab_sel_colors "tl", "br", "bg", "fg"
+
+# Inactive frame, unselected tab colors
+tab_colors "tl", "br", "bg", "fg"
+
+# Inactive frame, selected tab clors
+tab_sel_colors "tl", "br", "bg", "fg"
+
+# Frame colors
+frame_colors "tl", "br", "bg", "fg"
+
+# Workspace background
+background_color "bg"
+
+# Input (line-editor) colors
+input_colors "tl", "br", "bg", "fg"
+
+# Selected text colors
+selection_colors "bg", "fg",
+

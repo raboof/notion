@@ -1,0 +1,91 @@
+
+ION CONFIGURATION FILE
+
+Here is the structure and options of Ion configuration file commented.
+Note that graphics and line editor bindings configuration are now
+separate from the main file; see draw.txt and query.txt.
+
+---
+
+# Include another file
+include "file"
+
+# Double click delay (default: 250ms)
+dblclick_delay msec
+
+# Timeout before automatically leaving resize mode (default: 1.5s)
+resize_delay msec
+
+# Opaque resize? (default: no)
+opaque_resize TRUE/FALSE
+
+# Warp pointer to frame on movement command instead of just focusing.
+warp_enabled TRUE/FALSE
+
+
+# Settings for window "class.instance"  (e.g. XTerm.xterm)
+winprop "class.instance" {
+	# Maximum size (overrides size hints)
+	max_size w, h
+
+	# Aspect ratio (overrides size hints)
+	aspect w, h
+
+	# Kludge to get acrobat reader work
+	acrobatic
+
+	# Switch to newly created client? (default: yes)
+	switchto TRUE/FALSE
+
+	# Stubborn window placement? Used with CF_PLACEMENT_GEOM
+	# to ignore client-supplied coordinates of badly behaving
+	# windows. (default: no)
+	stubborn TRUE/FALSE
+	
+	# current - force window become a transient for active client
+	# off - force window not be interpreted as a transient
+	transient_mode normal|current|off
+}
+
+
+# Key and pointer bindings
+# Key names are passed to XStringToKeysym and are those defined in
+# /whereever_x_is/include/keysymdef.h without the XK_ -prefix.
+bindings {
+	# Set default modifier
+	set_mod "modifier"
+
+	# Key press
+	kpress "[modifiers+]key", "function" [, args]
+
+	# Key press, wait for pointer release
+	kpress_waitrel "[modifiers+]key", "function" [, args]
+
+	# Pointer button press
+	mpress "[modifiers+]ButtonX", "function" [, args]
+
+	# Pointer drag
+	mdrag "[modifiers+]ButtonX", "function" [, args]
+
+	# Click
+	mclick "[modifiers+]ButtonX", "function" [, args]
+
+	# Double click
+	mdblclick "[modifiers+]ButtonX", "function" [, args]
+
+	submap "[modifiers+]key" {
+		# ...
+	}
+}
+
+
+# Tab bindings (keys not useful)
+tab_bindings {
+	# ...
+}
+
+
+# Resize-mode bindings
+moveres_bindings {
+	# ...
+}

@@ -1,0 +1,71 @@
+
+
+                                     Ion
+                 
+                   Copyright (c) Tuomo Valkonen 1999-2002.
+            
+                             <tuomov@cc.tut.fi>
+                  <http://www.students.tut.fi/~tuomov/ion/>
+          
+          
+
+BUILDING AND INSTALLING
+
+You will need a C-compiler, gnu make :-( and an editor.
+
+    1. Edit system.mk to suit your system. If heavy modifications
+       are required, you might want to save the file somewhere for
+       future use (and hope that I don't change the makefile-system...).
+    2. If you want to customize ion above what is possible with
+       ion.conf, edit config.h (this step is optional)
+    3. make depend && make. Note that 'make' here refers to gnu make
+       which is usually named 'gmake' on systems with their own version
+       of make.
+    4. make install (not required if you manually setup configuration
+       files).
+
+
+NOTICE: ION WILL NOT WORK WITHOUT A PROPER CONFIGURATION FILE!
+
+Without a configuration file no keys or mouse buttons will be bound to
+any actions and you will get a  black and white color scheme. Either
+personal ~/.ion/ion.conf or system-wide $(PREFIX)/etc/ion/ion.conf
+must exist unless another specified on the command line. $(PREFIX)
+is the path where you told to install Ion in the Makefile and the
+default setting is /usr/local. 
+
+NOTE: The paths are temporarily ~/.ion-devel/ and /usr/local/ion-devel.
+
+The scripts 'ion-edit' and 'ion-view' (F5 and F6 keys) expect the
+program 'run-mailcap' to be found. This program opens a viewer/editor
+for a file based on its mime-type. Most likely you don't have it, but
+any other similar program (or just plain old text editor) will do as
+well - just modify the scripts. Unless you don't want to use them,
+of course. If you want to use run-mailcap, it can be found at
+<http://www.debian.org/Packages/unstable/net/mime-support.html>
+(as .tar.gz as well).
+
+
+
+CONFIGURATION
+
+Have a look at doc/  and the default configuration files.
+If you do nothing else, you may at least want to change term_font
+from the default 7x13 to whatever font you use in xterm and such.
+Ion takes the units by which it resizes frames from this font.
+
+
+
+CREDITS
+
+Ion was written by Tuomo Valkonen.
+
+query/complete_file.c is based on editline, (c) 1992 Simmule Turner and
+Rich Salz. See the file for details.
+
+libtu/snprintf_2.2/ was written by Mark Martinec, see the README there
+or <http://www.ijs.si/software/snprintf/> for more. I made some minor
+modifications. 
+
+Various patches have been contributed by other individuals unlisted here.
+(See the mailing list archives.)

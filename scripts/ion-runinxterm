@@ -1,0 +1,30 @@
+#!/bin/sh
+
+test "$XTERMCMD" || XTERMCMD="xterm"
+
+if test $# -lt 1; then
+	echo error
+	exit 0
+fi
+
+if test "$1" = "--"; then
+	shift
+	eval "$@" || {
+		echo "Press enter..."
+		read nothing
+	}
+	exit
+fi
+
+if test "$1" = "-T"; then
+	if test $# -lt 3; then
+		echo error
+		exit 0
+	fi
+	title="$2"
+	shift 2
+else
+	title="$1"
+fi
+
+exec $XTERMCMD -T "$title" -e $0 -- "$@"

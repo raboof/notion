@@ -1,0 +1,71 @@
+/*
+ * ion/frame.h
+ *
+ * Copyright (c) Tuomo Valkonen 1999-2002. 
+ * See the included file LICENSE for details.
+ */
+
+#ifndef ION_FRAME_H
+#define ION_FRAME_H
+
+#include <wmcore/common.h>
+#include <wmcore/window.h>
+#include <wmcore/screen.h>
+#include <wmcore/attach.h>
+
+INTROBJ(WFrame)
+
+#define FRAME_X(FRAME) (REGION_GEOM(FRAME).x)
+#define FRAME_Y(FRAME) (REGION_GEOM(FRAME).y)
+#define FRAME_W(FRAME) (REGION_GEOM(FRAME).w)
+#define FRAME_H(FRAME) (REGION_GEOM(FRAME).h)
+#define FRAME_WIN(FRAME) ((FRAME)->win.win)
+#define FRAME_CLIENT_WOFF(SCR) ((SCR)->grdata.client_off.w)
+#define FRAME_CLIENT_HOFF(SCR) ((SCR)->grdata.client_off.h)
+
+#define FRAME_NO_SAVED_WH -1
+	
+DECLOBJ(WFrame){
+	WWindow win;
+	int flags;
+	int target_id;
+	int tab_w;
+	int saved_w, saved_h;
+	
+	int sub_count;
+	WRegion *current_sub;
+	WRegion *current_input;
+	WRegion *dragged_sub;
+};
+
+
+extern WFrame *create_frame(WScreen *scr, WWinGeomParams params,
+							int id, int flags);
+
+extern void frame_bar_geom(const WFrame *frame, WRectangle *geom);
+extern void frame_sub_geom(const WFrame *frame, WRectangle *geom);
+
+extern void frame_recalc_bar(WFrame *frame);
+extern void draw_frame(const WFrame *frame, bool complete);
+extern void draw_frame_bar(const WFrame *frame, bool complete);
+
+extern WRegion *frame_current_input(WFrame *frame);
+extern WRegion *frame_attach_input_new(WFrame *frame, WRegionCreateFn *fn,
+									   void *fnp);
+
+extern void frame_switch_nth(WFrame *frame, uint n);
+extern void frame_switch_next(WFrame *frame);
+extern void frame_switch_prev(WFrame *frame);
+
+extern void frame_attach_sub(WFrame *frame, WRegion *sub, int flags);
+/*extern void frame_detach_sub(WFrame *frame, WRegion *sub);*/
+extern void frame_move_subs(WFrame *dest, WFrame *src);
+extern void frame_fit_subs(WFrame *frame);
+
+extern void activate_frame(WFrame *frame);
+extern void deactivate_frame(WFrame *frame);
+
+extern WFrame *find_frame_of(Window win);
+extern void frame_attach_tagged(WFrame *frame);
+
+#endif /* ION_FRAME_H */

@@ -1,0 +1,92 @@
+
+ION FUNCTIONS
+
+These functions can be used in the 'bindings' section of the configuration
+file. See also query.txt for functions provided by the built-in query
+module.
+
+
+Navigation
+----------
+
+switch_nth, n		Switch to n:th client within frame
+switch_next		Switch to next client within frame
+switch_prev		Switch to previous client within frame
+goto_above_frame	Go to above frame
+goto_below_frame	Go to below frame
+goto_right_frame	Go to next frame left
+goto_left_frame		Go to next frame right
+goto_previous		Goto previously active client
+switch_ws_name, "name"	Go to named workspace
+switch_ws_nth, n	Go to n:th workspace
+switch_ws_nth2, scrn, n Go to n:th workspace on screen scrn; current
+		        if n is less than zero.
+switch_ws_next		Go to next workspace
+switch_ws_prev		Go to previous workspace
+goto_client_name "name"	Go to named client
+
+
+Resize and split
+----------------
+
+resize_vert		Start resizing vertically
+resize_horiz		Start resizing horizontally
+maximize_vert		Maximize vertically
+maximize_horiz		Maximize horizontally
+split "side"		Split current frame creating a new one
+      			above/below/left/right of it.
+			(side=top/bottom/left/right, respectively.)
+split_empty "side"	Same as above but the current client is
+	    		not attached to the newly created frame.
+split_top "side"	Create a new frame above/below/left of/right of
+	  		all other frames.
+
+
+
+In resize mode (moveres_bindings):
+
+grow			Increase frame size  by CF_WIDTH/HEIGHT_UNIT
+shrink			Decrease frame size  by CF_WIDTH/HEIGHT_UNIT
+end_resize		Leave resize mode
+cancel_resize		Leave resize mode, size unchanged if xor-resize
+			enabled
+
+
+Close and destroy
+-----------------
+
+close			Close current client
+kill			Kill current client
+closedestroy		Close current client if any or destroy_frame
+destroy_frame		Destroy current frame moving remaining clients to
+			"sister" frame. If the frame is last on the
+			workspace, the workspace is destoyed as well, unless
+			no other workspaces are left, when any action is
+			refused.
+
+
+General
+-------
+
+restart			Restart Ion
+restart_other, "cmd"	Restart other window manager
+exec, "cmd"		Run command
+exit			Exit Ion
+
+
+Tags
+----
+
+toggle_tagged		Toggle client tagged-flag
+clear_tags		Clear all clients' tagged-flag
+attach_tagged		Attach tagged clients to frame
+
+
+Pointer
+-------
+
+tab_switch		Switch to client
+p_tabdrag		Drag tab
+p_resize		Resize
+
+

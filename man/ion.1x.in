@@ -1,0 +1,268 @@
+.TH ION 1
+.SH NAME
+Ion - an X11 window manager
+.SH SYNOPSIS
+.B ion
+.I "[options]"
+.SH "DESCRIPTION"
+Ion is an X11 window manager with text-editorish and keyboard friendly feel.
+.SH "OPTIONS"
+.TP
+.B \-display host:display.screen
+X display to manage
+.TP
+.B \-cfgfile configfile
+Config file to use instead of default
+.TP
+.B \-onescreen
+On X servers with multiple screens, manage only default screen, not all.
+.TP
+.B \-help
+Show help on command line options
+.TP
+.B \-version
+Show version
+.TP
+.B \-about
+Show about text
+
+.SH KEYS
+
+These are the default keybindings.
+.B Mod1
+depends on your system. On PC:s with XFree86 it is probably bound to the left
+alt key (\fBAlt_L\fP).
+On Suns it is usually bound to the diamond keys (\fBMeta_L\fP, \fBMeta_R\fP). Use
+\fIxmodmap(1x)\fP to find out.
+
+.SS F-keys
+
+.TP
+.B F1
+Show manual page (query, uses ion-man).
+.TP
+.B Mod1+F1
+Show Ion manual page.
+.TP
+.B F2
+Run an xterm.
+.TP
+.B F3
+Run a program (query). Precede the program name with a colon (:) to run in xterm (ion-runinxterm).
+.TP
+.B Mod1+F3
+Call a function (query).
+.TP
+.B F4
+Start new SSH session (query, uses ion-ssh).
+.TP
+.B F5
+Open a file for editing (query). Uses ion-edit which by default uses run-mailcap.
+.TP
+.B F6
+Open a file for viewing (query). Uses ion-view which by default uses run-mailcap.
+.TP
+.B F9
+Goto existing workspace or create new (query).
+.TP
+.B Mod1+F9
+Create new workspace with active client.
+.TP
+.B F11
+Restart Ion (query)
+.TP
+.B F12
+Exit Ion (query)
+
+.SS Navigation
+
+.TP
+.B Mod1+N
+Goto below frame
+.TP
+.B Mod1+P
+Goto above frame
+.TP
+.B Mod1+Tab
+Goto right frame
+.TP
+.B Mod1+K Tab
+Goto left frame
+.TP
+.B Mod1+n
+Goto n:th workspace (n=1..9, 0)
+.TP
+.B Mod1+K N
+Goto next client within frame
+.TP
+.B Mod1+K P
+Goto previous client within frame
+.TP
+.B Mod1+K n
+Goto n:th client within frame (n=1..9, 0)
+.TP
+.B Mod1+K K
+Goto previously active client
+.TP
+.B Mod1+A
+Attach client in current frame (query)
+.TP
+.B Mod1+G
+Goto client (query)
+
+
+.SS Resize and split
+
+.TP
+.B Mod1+V
+Resize vertically. In resize-mode, use \fBS\fP to shrink, \fBV\fP to grow and \fBEnter\fP to
+finish before timeout (1.5s by default).
+.TP
+.B Mod1+H
+Resize horizontally
+.TP
+.B Mod1+K V
+Maximize vertically
+.TP
+.B Mod1+K H
+Maximize horizontally
+.TP
+.B Mod1+S
+Split vertically
+.TP
+.B Mod1+K S
+Split horizontally
+
+.SS Close and all
+
+.TP
+.B Mod1+C
+Close client or destroy empty frame
+.TP
+.B Mod1+K C
+Kill client
+.TP
+.B Mod1+K X
+Destroy frame
+
+.SH LINE-EDITING KEYS
+
+These keys can be used in the line editor (queries). They are similar to
+those of \fIjoe(1)\fP.
+Selection works differently, though, while the keys are equivalent.
+
+.SS Movement
+
+.TP
+.B Control+F, Right arrow
+Go forward character
+.TP
+.B Control+B, Left arrow
+Go backward character
+.TP
+.B Control+E, End
+Go to end of line
+.TP
+.B Control+A, Home
+Go to beginning of line
+.TP
+.B Control+Z
+Backward skip word
+.TP
+.B Control+X
+Forward skip word
+
+.SS Delete
+
+.TP
+.B Control+D, Delete
+Delete next character
+.TP
+.B Control+H, Backspace
+Delete previous character
+.TP
+.B Control+J
+Delete to end of line
+.TP
+.B Control+Y
+Delete whole line
+.TP
+.B Control+W
+Delete word
+.TP
+.B Control+O
+Backward delete word
+
+.SS Selections
+
+.TP
+.B Control+K B
+Set mark (begin selection)
+.TP
+.B Control+K K
+Copy selection
+.TP
+.B Control+K Y
+Cut selection
+.TP
+.B Control+K C
+Paste
+
+.SS Completion and history
+
+.TP
+.B Tab
+Complete or list possible completions (if available)
+.TP
+.B Control+U, Page up
+Scroll completions up
+.TP
+.B Control+V, Page down
+Scroll completions down
+.TP
+.B Control+P, Up arrow
+Previous history entry
+.TP
+.B Control+N, Down arrow
+Next history entry
+
+.SS Cancel, accept
+
+.TP
+.B Control+C, Escape
+Cancel
+.TP
+.B Control+M, Enter
+Accept
+
+.SH BUTTONS
+
+.TP
+.B Button1 (left)
+Click on tab: switch client. Drag tab: move clients between frames.
+.TP
+.B Button3 (right)
+Drag border: resize.
+
+.SH FILES
+.TP
+.B PREFIX/etc/ion/ion.conf
+System default configuration file
+.TP
+.B PREFIX/etc/ion/look-*.conf
+Color scheme configuration files
+.TP
+.B PREFIX/etc/ion/bindings-*.conf
+Keyboard and pointer binding configuration files
+.TP
+.B ~/.ion/ion.conf
+User default configuration file (overrides system default)
+
+.SH SEE ALSO
+The Ion home page, \fIhttp://www.students.tut.fi/~tuomov/ion/\fP
+.PP
+.I PREFIX/doc/ion/
+.PP
+.I X(1x)
+.SH AUTHOR
+Ion was written by Tuomo Valkonen <tuomov@cc.tut.fi>.

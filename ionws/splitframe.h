@@ -1,0 +1,26 @@
+/*
+ * ion/splitframe.h
+ *
+ * Copyright (c) Tuomo Valkonen 1999-2002. 
+ * See the included file LICENSE for details.
+ */
+
+#ifndef ION_SPLITFRAME_H
+#define ION_SPLITFRAME_H
+
+#include <wmcore/common.h>
+#include "split.h"
+#include "frame.h"
+#include "workspace.h"
+
+extern WFrame *find_frame_at(WWorkspace *ws, int x, int y);
+
+extern void split(WFrame *frame, const char *str);
+extern void split_empty(WFrame *frame, const char *str);
+extern void split_top(WWorkspace *ws, const char *str);
+
+extern void destroy_frame(WFrame *frame);
+extern void closedestroy(WFrame *frame);
+
+#endif /* ION_SPLITFRAME_H */
+

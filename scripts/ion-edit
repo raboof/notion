@@ -1,0 +1,2 @@
+#!/bin/sh
+exec run-mailcap --action=edit "$1" > /dev/null

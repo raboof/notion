@@ -1,0 +1,2 @@
+#!/bin/sh
+test $# -ge 1 && exec ion-runinxterm -T $1 ssh $1

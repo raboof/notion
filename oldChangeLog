@@ -1,0 +1,307 @@
+
+2002-04-05:
+  * Resolved some problems with resize/workspace_request_sub_geom
+
+2002-03-27:
+  * Applied an input handling and resize mode patch.
+
+2002-03-17:
+  * Added 'split_top "dir"' command to create a new frame
+    above/below/left of/right of all other frames
+    (dir=top/bottom/left/right, respectively). Removed
+    split_vert/horiz and replaced them with 'split "dir"'.  Also
+    added 'split_empty "dir"' that will not attach current client to
+    the newly created frame.
+
+2002-03-16:
+  * Added set_width/height/widthq/heightq commands. The versions with
+    the q postfix take a value in [0,1] and the others take an
+    integer value. The behaviour is obvious.
+
+2002-02-06:
+  * Fixed region_move_subregions so that destroy_frame should work
+    now.
+
+2002-01-30:
+  * Transients fixed (at least partially).
+  * Some focusing fixes.
+
+2002-01-27:
+  * Fixed some resize stuff. Simultaneous vertical and horizontal
+    resize is now possible. Keyboard resize is not working yet:
+    better "resize mode" binding handling wanted.
+  * look-*.conf:s updated. 'frame_colors *, *, bg, *' and
+    'background_color bg' have changed places. That is, the
+    'background_color' option now sets the client area background
+    while frame_colors sets the colours of the frame's border.
+  * Some frame drawing changes.
+
+2002-01-26:
+  * Command sequences based on the query_function patch.
+  * Support for deferred actions, deferred destroy particularly,
+    called when the program returns to the main loop.
+  * Added information about the 'warp_enabled' configuration file
+    option to config.txt. The old CF_WARP and CF_WARP_WS compile-time
+    options are gone. This option has the same effect as those two
+    combined and _is enabled by default_.
+  * Split stuff from config.txt and functions.txt to draw.txt and
+    query.txt.
+  * look-dusky.conf is now default.
+  * Updated the LICENSE file to the clarified version of the artistic
+    license. (The license used to be the original artistic license.)
+
+2002-01-19:
+  * Applied a patch to have query_function finally support functions
+    with arguments.
+  * Fixed a possible problem with missing configuration files.
+  * Complain and refuse to start if configuration files are missing
+    or bindings are inadequate (not the above fix :-). Also attempt
+    to view this complaint with xmessage.
+
+2002-01-12:
+  * Installation prefix now (temporarily) defaults to
+    /usr/local/ion-devel and configuration files will be expected to
+    be found in this directory under etc/ion-devel or in
+    ~/.ion-devel.
+
+2001-12-29:
+  * query_renameworkspace is back
+
+2001-12-28:
+  * Old confws.c updated to compile as a temporary (incomplete)
+    implementation of workspace saving features
+
+2001-08-28:
+  * fit_clientwin changes
+
+2001-08-19:
+  * query/ compiles.
+
+2001-08-12:
+  * Added generic resize code
+
+2001-08-08:
+  * The generic window management library part, 'wmcore' is finally
+    in compilable state again after having been fit to use abstract
+    WRegions instead of specific frames, client windows, etc. where
+    possible. It still needs much work, though.
+
+2001-06-27:
+  * Function list changes
+
+2001-06-23:
+  * look-*.confs updated
+  * Makefile updates
+  * sample.conf updates
+
+2001-06-19:
+  * Configuration file changes
+
+2001-05-28:
+  * Attach current client of a frame to the new frame when splitting.
+
+2001-05-27:
+  * New registration-based hooks and function list extensions.
+
+2001-05-26:
+  * Initial commit with wmcore/. Much more work still needed, though.
+
+2001-04-25:
+  * Added missing functions to documentation
+
+2001-04-19:
+  * switch_ws_next/prev wrap around
+  * Fixed a problem with some programs' popups
+
+2001-04-01:
+  * Unmap;map race condition fix.
+
+2001-03-12:
+  * Added CALL_ALT and the 'add_clientwin_alt' alternative hook.
+  * Hook changes
+
+2001-03-05:
+  * transient_mode winprop
+
+2001-03-04:
+  * Changes for easier completion support in modules
+
+2001-03-03:
+  * system.mk options to disable module support on systems without
+    dynamic linking support and/or dlopen and friends.
+  * Added read_config_for
+
+2001-03-02:
+  * Enhanced timer support
+  * Added goto_client_name
+  * Experimental module support
+
+2001-02-26:
+  * Completion fix (for the case where all possible completions are
+    duplicates).
+
+2001-02-24:
+  * Added rename_workspace patch.
+  * Oops kind of fix in key.c
+
+2001-02-16:
+  * complete_file_with_path fix and complete normally if no
+    completions found in $PATH.
+
+2001-02-15:
+  * Some ICCCM and other fixes to make some programs not break as
+    badly.
+  * Call setpgid(0, 0) before running a program.
+  * Oops. A few missing lines were causing bad things to happen when
+    trying to resize only frame on a workspace.
+
+2001-02-13:
+  * Applied patch to allow command completion (using $PATH) with
+    query_exec.
+
+2001-02-12:
+  * Destroying the first workspace on a screen could cause a
+    segfault.
+
+2001-01-21:
+  * Added 'stubborn' winprop --- ignore coordinates --- for use with
+    badly behaving windows when CF_PLACEMENT_GEOM is enabled.
+
+2001-01-20:
+  * Frame ID management fixes for multiple screens/broken workspace
+    configuration files.
+  * The functions 'goto_*_frame' changed to 'goto_*' --- check your
+    bindings.
+
+2001-01-16:
+  * goto_previous fix
+  * Other previous active window clean-up
+
+2001-01-15:
+  * Added CF_PLACEMENT_GEOM kludge --- Place new windows that have
+    position specified in the frame under that coordinate.
+
+2001-01-05:
+  * 'query_runwith' runs the program without arguments if the user
+    inputs an empty string.
+  * 'query_workspace_with' didn't work after multihead update.
+  * Trailing and leading whitespace of user input to queries are
+    stripped.
+  * Strip trailing and leading whitespace from window names.
+
+2001-01-02:
+  * Preliminary support for multiple screens within single process.
+  * The command 'switch_ws_nth <num>' switches between workspaces of
+    current screen. 'switch_ws_nth2 <scr>, <num>' can be used to go
+    to specific, numbered workspace. Setting <num> to -1 will go to
+    active workspace on <scr>. 'query_workspace' works as before (new
+    workspace is, of course, created on the active screen).
+  * Fixed a typo in same_screen
+
+2001-01-01:
+  * Some extra code removed
+
+2000-12-30:
+  * Focus newly splitted frame instead of the old one
+  * Added CF_WARP_WS for perhaps nicer focusing on workspace switch
+    when CF_WARP is enabled.
+  * Don't map tabdrag window before moving
+  * Default config: Button 1 click instead of press to switch client
+
+2000-12-28:
+  * Added a few missing 'void's
+  * Makefile/path setting changes
+
+2000-12-21:
+  * Better focus handling for CF_WARP (pointer should always stay
+    within boundaries of the active frame)
+  * Added a word on (mouse) button bindings to the manual page.
+
+2000-12-20:
+  * Added 'close_main' for closing client main window, not possible
+    transients first.
+  * Colormap changing fixes
+
+2000-12-02:
+  * Resize fix
+
+2000-11-12:
+  * Added bindings-sun.conf where exit and restart are bound to
+    SunF36/SunF37.
+  * Correctly indicate active client with multiple screens (better
+    multihead support still to be written...)
+
+2000-11-07:
+  * Automatically create ~/.ion if it does not exist when trying to
+    save workspaces.
+
+2000-11-05:
+  * Added CF_WARP for warping the pointer to active frame, enable
+    from config.h.
+
+2000-11-04:
+  * 'query_workspace_with' now attaches client to current frame on a
+    workspace if the workspace already exists.
+  * Line editor cursor positioning fix
+
+2000-10-29:
+  * Added 'switch_ws_next' and 'switch_ws_prev'
+
+2000-10-27:
+  * The functions 'scrollup_compl' and 'scrolldown_compl' are now
+    just 'scrollup' and 'scrolldown' (used to scroll messages as
+    well).
+  * Changed 'edln_bindings' section of the config file to
+    'input_bindings' as 'cancel' and the scroll functions affect
+    messages as well.
+  * Changed warnings in query.c be displayed on screen instead of
+    stderr.
+  * Added 'query_function' for calling ion functions. Only simple
+    functions that have no arguments from FUNTAB_MAIN are supported.
+    'query_function' is bound to Mod1+F3 in the default
+    configuration.
+  * Included snprintf_2.2 for implementations of asprintf and
+    vasprintf on platforms that don't have them.
+
+2000-10-24:
+  * Completion list wrapping
+  * Added WMessage for displaying messages
+
+2000-10-22:
+  * Do not ignore base size hint to display xterm size correctly
+  * Move size information window in the middle of the frame being
+    resized
+
+2000-10-16:
+  * Minor pointer focusing change
+
+2000-10-07:
+  * Fixed problem with transients not getting resized
+
+2000-10-04:
+  * Fixed problems with some programs' expectations
+
+2000-09-09:
+  * Line editor cosmetic fix
+
+2000-09-03:
+  * Added goto_previous
+
+2000-08-31:
+  * Client numbering fix
+
+2000-08-30:
+  * Initial public release
+
+2000-08-29:
+  * Added keybindings to the manual page
+  * Added doc/config.txt
+  * Added doc/functions.txt
+
+2000-08-28:
+  * Added kpress_waitrel-kludge to prevent accidental multiple-window
+    closes
+  * Current frame is remembered over workspace switch now
+  * Added query_workspace_with
+  * Fixes and a small diet
+  * Portability fixes
