@@ -331,19 +331,6 @@ bool ioncore_do_defbindings(WBindmap *bindmap, ExtlTab tab)
 /*{{{ ioncore_getbindings */
 
 
-static const char *value2str(const StringIntMap *map, int value)
-{
-    int i;
-    
-    for(i=0; map[i].string!=NULL; i++){
-        if(map[i].value==value)
-            return map[i].string;
-    }
-    
-    return NULL;
-}
-
-
 static char *get_mods(uint state)
 {
     char *ret=NULL;
@@ -392,7 +379,7 @@ static char *get_key(char *mods, uint ksb)
 
 static char *get_button(char *mods, uint ksb)
 {
-    const char *s=value2str(button_map, ksb);
+    const char *s=stringintmap_key(button_map, ksb, NULL);
     char *ret=NULL;
     
     if(s==NULL){
@@ -451,7 +438,7 @@ static bool get_mact(WBindmap *bindmap, WBinding *b, ExtlTab t)
     char *mods;
     char *button;
     
-    extl_table_sets_s(t, "action", value2str(action_map, b->act));
+    extl_table_sets_s(t, "action", stringintmap_key(action_map, b->act, NULL));
     
     mods=get_mods(b->state);
     
@@ -470,7 +457,8 @@ static bool get_mact(WBindmap *bindmap, WBinding *b, ExtlTab t)
     free(button);
     
     if(b->area!=0 && bindmap->areamap!=NULL)
-        extl_table_sets_s(t, "area", value2str(bindmap->areamap, b->area));
+        extl_table_sets_s(t, "area", 
+                          stringintmap_key(bindmap->areamap, b->area, NULL));
 
     extl_table_sets_f(t, "func", b->func);
     
