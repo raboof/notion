@@ -547,11 +547,16 @@ void edln_history_prev(Edln *edln)
 
 void edln_history_next(Edln *edln)
 {
-    if(edln->histent>0){
-        int e=mod_query_history_search(edln->context, edln->histent-1, TRUE);
-        if(e>=0)
-            edln_do_set_hist(edln, e);
-    }else if(edln->histent==0){
+    int e;
+    
+    if(edln->histent<0)
+        return;
+    
+    e=mod_query_history_search(edln->context, edln->histent-1, TRUE);
+    
+    if(e>=0){
+        edln_do_set_hist(edln, e);
+    }else{
         edln->histent=-1;
         if(edln->p!=NULL)
             free(edln->p);
