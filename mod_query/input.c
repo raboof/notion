@@ -131,7 +131,8 @@ bool input_init(WInput *input, WWindow *par, const WFitParams *fp)
         goto fail;
     
     input_refit(input);
-    XSelectInput(ioncore_g.dpy, input->win.win, IONCORE_EVENTMASK_NORMAL);
+    window_select_input(&(input->win), IONCORE_EVENTMASK_NORMAL);
+
     region_add_bindmap((WRegion*)input, mod_query_input_bindmap);
     
     return TRUE;

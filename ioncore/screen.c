@@ -91,11 +91,11 @@ static bool screen_init(WScreen *scr, WRootWin *rootwin,
     if(useroot)
         scr->mplex.win.region.flags|=REGION_MAPPED;
     
-    XSelectInput(ioncore_g.dpy, win, 
-                 FocusChangeMask|EnterWindowMask|
-                 KeyPressMask|KeyReleaseMask|
-                 ButtonPressMask|ButtonReleaseMask|
-                 (useroot ? IONCORE_EVENTMASK_ROOT : 0));
+    window_select_input(&(scr->mplex.win),
+                        FocusChangeMask|EnterWindowMask|
+                        KeyPressMask|KeyReleaseMask|
+                        ButtonPressMask|ButtonReleaseMask|
+                        (useroot ? IONCORE_EVENTMASK_ROOT : 0));
 
     if(id==0){
         scr->atom_workspace=XInternAtom(ioncore_g.dpy, 

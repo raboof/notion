@@ -61,7 +61,10 @@ bool window_do_init(WWindow *wwin, WWindow *par, Window win,
 {
     wwin->win=win;
     wwin->xic=NULL;
+    wwin->event_mask=0;
+    
     region_init(&(wwin->region), par, fp);
+    
     if(win!=None){
         XSaveContext(ioncore_g.dpy, win, ioncore_g.win_context, 
                      (XPointer)wwin);
@@ -192,6 +195,12 @@ Window window_xwindow(const WWindow *wwin)
 }
 
 
+/*}}}*/
+
+
+/*{{{ Misc. */
+
+
 /*EXTL_DOC
  * Return the X window id for \var{wwin}.
  */
@@ -199,6 +208,13 @@ EXTL_EXPORT_MEMBER
 double window_xid(WWindow *wwin)
 {
     return wwin->win;
+}
+
+
+void window_select_input(WWindow *wwin, long event_mask)
+{
+    XSelectInput(ioncore_g.dpy, wwin->win, event_mask);
+    wwin->event_mask=event_mask;
 }
 
 

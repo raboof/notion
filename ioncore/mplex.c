@@ -70,7 +70,7 @@ bool mplex_do_init(WMPlex *mplex, WWindow *parent, Window win,
     
     mplex->win.region.flags|=REGION_BINDINGS_ARE_GRABBED;
     
-    XSelectInput(ioncore_g.dpy, MPLEX_WIN(mplex), IONCORE_EVENTMASK_CWINMGR);
+    window_select_input(&(mplex->win), IONCORE_EVENTMASK_CWINMGR);
     
     region_add_bindmap((WRegion*)mplex, ioncore_mplex_bindmap);
     

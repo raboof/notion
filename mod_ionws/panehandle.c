@@ -61,7 +61,7 @@ bool panehandle_init(WPaneHandle *pwin, WWindow *parent, const WFitParams *fp)
         memcpy(&(pwin->bdw), &bdw, sizeof(bdw));
     }
 
-    XSelectInput(ioncore_g.dpy, pwin->wwin.win, IONCORE_EVENTMASK_NORMAL);
+    window_select_input(&(pwin->wwin), IONCORE_EVENTMASK_NORMAL);
     
     return TRUE;
 }

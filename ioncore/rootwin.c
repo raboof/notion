@@ -239,7 +239,7 @@ static WRootWin *preinit_rootwin(int xscr)
     rootwin->tmpnwins=0;
     rootwin->dummy_win=None;
     rootwin->xor_gc=None;
-    
+
     fp.mode=REGION_FIT_EXACT;
     fp.g.x=0; fp.g.y=0;
     fp.g.w=DisplayWidth(dpy, xscr);
@@ -250,6 +250,9 @@ static WRootWin *preinit_rootwin(int xscr)
         return NULL;
     }
 
+    /* Note: this mask isn't right if some WScreen auses the same window. */
+    ((WWindow*)rootwin)->event_mask=IONCORE_EVENTMASK_ROOT;
+    
     ((WRegion*)rootwin)->flags|=REGION_BINDINGS_ARE_GRABBED|REGION_PLEASE_WARP;
     ((WRegion*)rootwin)->rootwin=rootwin;
     

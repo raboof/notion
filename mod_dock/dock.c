@@ -1092,8 +1092,7 @@ static bool dock_init(WDock *dock, WWindow *parent, const WFitParams *fp)
 
     ((WRegion*)dock)->flags|=REGION_SKIP_FOCUS;
 
-    XSelectInput(ioncore_g.dpy, ((WWindow*)dock)->win,
-                 IONCORE_EVENTMASK_CWINMGR);
+    window_select_input(&(dock->win), IONCORE_EVENTMASK_CWINMGR);
 
     dock_brush_get(dock);
 

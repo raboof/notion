@@ -59,8 +59,8 @@ bool unusedwin_init(WUnusedWin *uwin, WWindow *parent, const WFitParams *fp)
     
     region_add_bindmap((WRegion*)uwin, mod_panews_unusedwin_bindmap);
 
-    XSelectInput(ioncore_g.dpy, uwin->wwin.win, IONCORE_EVENTMASK_NORMAL);
-    
+    window_select_input(&(uwin->wwin), IONCORE_EVENTMASK_NORMAL);
+
     ((WRegion*)uwin)->flags|=REGION_PLEASE_WARP;
     
     return TRUE;

@@ -22,6 +22,7 @@ DECLCLASS(WWindow){
     WRegion region;
     Window win;
     XIC xic;
+    long event_mask;
 };
 
 
@@ -49,5 +50,7 @@ extern bool window_fitrep(WWindow *wwin, WWindow *parent,
 extern void window_notify_subs_move(WWindow *wwin);
 
 extern void window_restack(WWindow *wwin, Window other, int mode);
+
+extern void window_select_input(WWindow *wwin, long event_mask);
 
 #endif /* ION_IONCORE_WINDOW_H */

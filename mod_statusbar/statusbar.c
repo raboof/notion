@@ -53,7 +53,7 @@ bool statusbar_init(WStatusBar *p, WWindow *parent, const WFitParams *fp)
         return FALSE;
     }
     
-    XSelectInput(ioncore_g.dpy, p->wwin.win, IONCORE_EVENTMASK_NORMAL);
+    window_select_input(&(p->wwin), IONCORE_EVENTMASK_NORMAL);
 
     region_add_bindmap((WRegion*)p, mod_statusbar_statusbar_bindmap);
     

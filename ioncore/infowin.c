@@ -58,8 +58,8 @@ bool infowin_init(WInfoWin *p, WWindow *parent, const WFitParams *fp,
     attr.save_under=True;
     XChangeWindowAttributes(ioncore_g.dpy, p->wwin.win, CWSaveUnder, &attr);
     
-    XSelectInput(ioncore_g.dpy, p->wwin.win, IONCORE_EVENTMASK_NORMAL);
-    
+    window_select_input(&(p->wwin), IONCORE_EVENTMASK_NORMAL);
+
     return TRUE;
 
 fail3:    
