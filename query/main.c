@@ -69,17 +69,6 @@ extern bool query_module_register_exports();
 extern void query_module_unregister_exports();
 
 
-/*EXTL_DOC
- * Push an entry into \type{Wedln} history.
- */
-/*_XTL_EXPORT_MEMBER_AS(WEdln, history_push)*/
-EXTL_EXPORT
-void query_history_push(const char *str)
-{
-	edlnhist_push(str);
-}
-
-
 static void load_history()
 {
 	read_config_for_args("query_history", FALSE, NULL, NULL);
@@ -110,7 +99,7 @@ static void save_history()
 	fprintf(file, "local saves={\n");
 	
 	while(1){
-		histent=edlnhist_get(i);
+		histent=query_history_get(i);
 		if(histent==NULL)
 			break;
 		fprintf(file, "    ");
@@ -122,6 +111,8 @@ static void save_history()
 	fprintf(file, "}\n");
 	fprintf(file, "for k=table.getn(saves),1,-1 do "
 			"query_history_push(saves[k]) end\n");
+	
+	query_history_clear();
 	
 	fclose(file);
 }

@@ -199,3 +199,31 @@ void wedln_history_prev(WEdln *wedln)
     edln_history_prev(&(wedln->edln));
 }
 
+
+/*EXTL_DOC
+ * Input \var{str} in wedln at current editing point.
+ */
+EXTL_EXPORT_MEMBER_AS(WEdln, insstr)
+void wedln_insstr_exported(WEdln *wedln, const char *str)
+{
+	edln_insstr(&(wedln->edln), str);
+}
+
+
+/*EXTL_DOC
+ * Get line editor contents.
+ */
+EXTL_EXPORT_MEMBER
+const char *wedln_contents(WEdln *wedln)
+{
+	return wedln->edln.p;
+}
+
+/*EXTL_DOC
+ * Get current editing point.
+ */
+EXTL_EXPORT_MEMBER
+int wedln_point(WEdln *wedln)
+{
+	return wedln->edln.point;
+}

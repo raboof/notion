@@ -190,6 +190,7 @@ bool edln_ovrch(Edln *edln, char ch)
 }
 #endif
 
+
 bool edln_insstr(Edln *edln, const char *str)
 {
 	int l;
@@ -522,7 +523,12 @@ static int hist_count=0;
 static char *hist[EDLN_HISTORY_SIZE];
 
 
-void edlnhist_push(const char *str)
+
+/*EXTL_DOC
+ * Push an entry into line editor history.
+ */
+EXTL_EXPORT
+void query_history_push(const char *str)
 {
 	char *strc;
 	
@@ -549,12 +555,16 @@ void edlnhist_push(const char *str)
 }
 
 
-const char *edlnhist_get(uint n)
+/*EXTL_DOC
+ * Get entry at index \var{n} in line editor history, 0 being the latest.
+ */
+EXTL_EXPORT
+const char *query_history_get(int n)
 {
 	int i=0;
 	int e=hist_head;
 	
-	if(n>=(uint)hist_count)
+	if(n>=hist_count || n<0)
 		return NULL;
 	
 	n=(hist_head+n)%EDLN_HISTORY_SIZE;
@@ -562,7 +572,11 @@ const char *edlnhist_get(uint n)
 }
 
 
-void edlnhist_clear()
+/*EXTL_DOC
+ * Clear line editor history.
+ */
+EXTL_EXPORT
+void query_history_clear()
 {
 	while(hist_count!=0){
 		free(hist[hist_head]);
@@ -678,7 +692,7 @@ char* edln_finish(Edln *edln)
 	char *p=edln->p;
 	
 	/*if(edln->modified)*/
-	edlnhist_push(p);
+	query_history_push(p);
 	
 	edln->p=NULL;
 	edln->psize=edln->palloced=0;
