@@ -30,6 +30,9 @@
 #define FRAME_SETSHADED   0x0040
 #define FRAME_BAR_OUTSIDE 0x0080
 #define FRAME_DEST_EMPTY  0x0100
+#define FRAME_MAXED_VERT  0x0200
+#define FRAME_MAXED_HORIZ 0x0400
+#define FRAME_MIN_HORIZ   0x0800
 
 typedef void WFrameStyleFn(const char **, const char **);
 

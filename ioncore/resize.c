@@ -652,30 +652,6 @@ ExtlTab region_size_hints_extl(WRegion *reg)
 /*{{{ Restore size, maximize, shade */
 
 
-void frame_restore_size(WFrame *frame, bool horiz, bool vert)
-{
-    WRectangle geom;
-    int rqf=REGION_RQGEOM_WEAK_ALL;
-    
-    geom=REGION_GEOM(frame);
-    
-    if(vert && frame->flags&FRAME_SAVED_VERT){
-        geom.y=frame->saved_y;
-        geom.h=frame->saved_h;
-        rqf&=~(REGION_RQGEOM_WEAK_Y|REGION_RQGEOM_WEAK_H);
-    }
-    
-    if(horiz && frame->flags&FRAME_SAVED_HORIZ){
-        geom.x=frame->saved_x;
-        geom.w=frame->saved_w;
-        rqf&=~(REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_W);
-    }
-    
-    if((rqf&REGION_RQGEOM_WEAK_ALL)!=REGION_RQGEOM_WEAK_ALL)
-        region_rqgeom((WRegion*)frame, rqf, &geom, NULL);
-}
-
-
 static void correct_frame_size(WFrame *frame, int *w, int *h)
 {
     XSizeHints hints;
@@ -686,88 +662,104 @@ static void correct_frame_size(WFrame *frame, int *w, int *h)
 }
 
 
-static bool trymaxv(WFrame *frame, WRegion *mgr, int tryonlyflag)
+static bool rqh(WFrame *frame, int y, int h)
 {
-    WRectangle geom=REGION_GEOM(frame), rgeom;
-    geom.y=0;
-    geom.h=REGION_GEOM(mgr).h;
+    WRectangle geom, rgeom;
+    int dummy_w;
     
-    {
-        int dummy_w=geom.w;
-        correct_frame_size(frame, &dummy_w, &(geom.h));
-    }
+    geom.x=REGION_GEOM(frame).x;
+    geom.w=REGION_GEOM(frame).w;
+    geom.y=y;
+    geom.h=h;
     
-    region_rqgeom((WRegion*)frame, 
-                  tryonlyflag|REGION_RQGEOM_VERT_ONLY, 
-                  &geom, &rgeom);
+    dummy_w=geom.w;
+    correct_frame_size(frame, &dummy_w, &(geom.h));
+    
+    region_rqgeom((WRegion*)frame, REGION_RQGEOM_VERT_ONLY, &geom, &rgeom);
+    
     return (abs(rgeom.y-REGION_GEOM(frame).y)>1 ||
             abs(rgeom.h-REGION_GEOM(frame).h)>1);
 }
 
 
 /*EXTL_DOC
- * Attempt to maximize \var{frame} vertically.
+ * Attempt to toggle vertical maximisation of \var{frame}.
  */
 EXTL_EXPORT_MEMBER
 void frame_maximize_vert(WFrame *frame)
 {
-    WRegion *mgr=REGION_MANAGER(frame);
+    WRegion *mp=region_manager((WRegion*)frame);
+    int oy, oh;
     
-    if(frame->flags&FRAME_SHADED){
-        frame_set_shaded(frame, SETPARAM_TOGGLE);
+    if(frame->flags&FRAME_SHADED || frame->flags&FRAME_MAXED_VERT){
+        if(frame->flags&FRAME_SAVED_VERT)
+            rqh(frame, frame->saved_y, frame->saved_h);
+        frame->flags&=~(FRAME_MAXED_VERT|FRAME_SAVED_VERT);
         return;
     }
-    
-    if(mgr==NULL)
+
+    if(mp==NULL)
         return;
     
-    if(!trymaxv(frame, mgr, REGION_RQGEOM_TRYONLY)){
-        /* Could not maximize further, restore */
-        frame_restore_size(frame, FALSE, TRUE);
-        return;
-    }
+    oy=REGION_GEOM(frame).y;
+    oh=REGION_GEOM(frame).h;
     
-    trymaxv(frame, mgr, 0);
+    rqh(frame, 0, REGION_GEOM(mp).h);
+
+    frame->flags|=(FRAME_MAXED_VERT|FRAME_SAVED_VERT);
+    frame->saved_y=oy;
+    frame->saved_h=oh;
 }
 
-
-static bool trymaxh(WFrame *frame, WRegion *mgr, int tryonlyflag)
+static bool rqw(WFrame *frame, int x, int w)
 {
-    WRectangle geom=REGION_GEOM(frame), rgeom;
-    geom.x=0;
-    geom.w=REGION_GEOM(mgr).w;
+    WRectangle geom, rgeom;
+    int dummy_h;
+
+    geom.x=x;
+    geom.w=w;
+    geom.y=REGION_GEOM(frame).y;
+    geom.h=REGION_GEOM(frame).h;
     
-    {
-        int dummy_h=geom.h;
-        correct_frame_size(frame, &(geom.w), &dummy_h);
-    }
+    dummy_h=geom.h;
+    correct_frame_size(frame, &(geom.w), &dummy_h);
     
-    region_rqgeom((WRegion*)frame, 
-                  tryonlyflag|REGION_RQGEOM_HORIZ_ONLY, 
-                  &geom, &rgeom);
+    region_rqgeom((WRegion*)frame, REGION_RQGEOM_HORIZ_ONLY, &geom, &rgeom);
+    
     return (abs(rgeom.x-REGION_GEOM(frame).x)>1 ||
             abs(rgeom.w-REGION_GEOM(frame).w)>1);
 }
 
+
 /*EXTL_DOC
- * Attempt to maximize \var{frame} horizontally.
+ * Attempt to toggle horizontal maximisation of \var{frame}.
  */
 EXTL_EXPORT_MEMBER
 void frame_maximize_horiz(WFrame *frame)
 {
-    WRegion *mgr=REGION_MANAGER(frame);
+    WRegion *mp=region_manager((WRegion*)frame);
+    int ox, ow;
     
-    if(mgr==NULL)
-        return;
-    
-    if(!trymaxh(frame, mgr, REGION_RQGEOM_TRYONLY)){
-        /* Could not maximize further, restore */
-        frame_restore_size(frame, TRUE, FALSE);
+    if(frame->flags&FRAME_MIN_HORIZ || frame->flags&FRAME_MAXED_HORIZ){
+        if(frame->flags&FRAME_SAVED_HORIZ)
+            rqw(frame, frame->saved_x, frame->saved_w);
+        frame->flags&=~(FRAME_MAXED_HORIZ|FRAME_SAVED_HORIZ);
         return;
     }
+
+    if(mp==NULL)
+        return;
     
-    trymaxh(frame, mgr, 0);
+    ox=REGION_GEOM(frame).x;
+    ow=REGION_GEOM(frame).w;
+    
+    rqw(frame, 0, REGION_GEOM(mp).w);
+        
+    frame->flags|=(FRAME_MAXED_HORIZ|FRAME_SAVED_HORIZ);
+    frame->saved_x=ox;
+    frame->saved_w=ow;
 }
+
 
 
 /*}}}*/

@@ -339,25 +339,28 @@ bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp)
     
     window_do_fitrep(&(frame->mplex.win), par, &(fp->g));
 
-    if(hchg){
-        frame->flags|=FRAME_SAVED_VERT;
-        frame->saved_y=old_geom.y;
-        frame->saved_h=old_geom.h;
-    }
-
-    if(wchg){
-        frame->flags|=FRAME_SAVED_HORIZ;
-        frame->saved_x=old_geom.x;
-        frame->saved_w=old_geom.w;
-    }
-
     mplex_managed_geom((WMPlex*)frame, &mg);
     
-    if(hchg && mg.h<=1){
-        if(!(frame->flags&(FRAME_SHADED|FRAME_TAB_HIDE)))
-            frame->flags|=FRAME_SHADED;
-    }else if(hchg){
-        frame->flags&=~FRAME_SHADED;
+    if(hchg){
+        if(mg.h<=1){
+            frame->flags|=(FRAME_SHADED|FRAME_SAVED_VERT);
+            frame->saved_y=old_geom.y;
+            frame->saved_h=old_geom.h;
+        }else{
+            frame->flags&=~FRAME_SHADED;
+        }
+        frame->flags&=~FRAME_MAXED_VERT;
+    }
+    
+    if(wchg){
+        if(mg.w<=1){
+            frame->flags|=(FRAME_MIN_HORIZ|FRAME_SAVED_HORIZ);
+            frame->saved_x=old_geom.x;
+            frame->saved_w=old_geom.w;
+        }else{
+            frame->flags&=~FRAME_MIN_HORIZ;
+        }
+        frame->flags&=~FRAME_MAXED_HORIZ;
     }
 
     if(wchg || hchg){
@@ -629,7 +632,7 @@ void frame_do_load(WFrame *frame, ExtlTab tab)
         frame->flags|=FRAME_TAB_HIDE;
     }
 
-    frame->flags|=(flags&FRAME_DEST_EMPTY);
+    frame->flags|=flags&(FRAME_DEST_EMPTY|FRAME_MAXED_VERT|FRAME_MAXED_HORIZ);
     
     if(extl_table_gets_i(tab, "saved_x", &p) &&
        extl_table_gets_i(tab, "saved_w", &s)){
