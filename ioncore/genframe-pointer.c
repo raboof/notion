@@ -316,7 +316,7 @@ static void p_tabdrag_end(WGenFrame *genframe, XButtonEvent *ev)
 	tabdrag_deinit(genframe);
 	
 	/* Must be same root window */
-	if(ev->root!=ROOT_OF(sub))
+	if(sub==NULL || ev->root!=ROOT_OF(sub))
 		return;
 	
 	dropped_on=fnd(ev->root, ev->x_root, ev->y_root);
@@ -339,6 +339,9 @@ static void p_tabdrag_end(WGenFrame *genframe, XButtonEvent *ev)
 EXTL_EXPORT_MEMBER
 void genframe_p_tabdrag(WGenFrame *genframe)
 {
+	if(p_tabnum<0)
+		return;
+	
 	p_set_drag_handlers((WRegion*)genframe,
 						(WMotionHandler*)p_tabdrag_begin,
 						(WMotionHandler*)p_tabdrag_motion,
