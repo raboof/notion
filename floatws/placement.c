@@ -112,7 +112,7 @@ void set_floatws_placement_method(const char *method)
 	else if(strcmp(method, "random")==0)
 		placement_method=PLACEMENT_RANDOM;
 	else
-		warn("Unknown placement method");
+		warn("Unknown placement method \"%s\".", method);
 }
 
 
