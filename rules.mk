@@ -56,7 +56,7 @@ _exports: $(EXPORTS_C)
 
 $(EXPORTS_H): $(EXPORTS_C)
 
-$(EXPORTS_C):
+$(EXPORTS_C): $(SOURCES)
 	$(MKEXPORTS) -module $(MAKE_EXPORTS) -o $(EXPORTS_C) -h $(EXPORTS_H) $(SOURCES)
 
 else # !MAKE_EXPORTS
