@@ -134,7 +134,7 @@ void split(WFrame *frame, const char *str)
 
 void split_empty(WFrame *frame, const char *str)
 {
-	do_split(frame, str, TRUE);
+	do_split(frame, str, FALSE);
 }
 
 
