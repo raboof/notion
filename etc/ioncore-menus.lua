@@ -5,6 +5,8 @@
 
 -- Load a library with some convenience functions.
 include("menulib")
+-- Load query support code
+include("querylib")
 
 -- Define a function to display an about mesage.
 local function about(mplex)
