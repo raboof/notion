@@ -213,6 +213,11 @@ static char *do_get_cfgfile_for(const char *module, const char *postfix,
 	
 	ret=search_etcpath2((const char**)&files, noaccesstest);
 	
+	if(files[0]!=NULL)
+		free(files[0]);
+	if(files[1]!=NULL)
+		free(files[1]);
+	
 	return ret;
 }
 
