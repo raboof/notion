@@ -19,20 +19,29 @@ static InputFd *find_input_fd(int fd)
 	return tmp;
 }
 
-void register_input_fd(int fd, void (*process_input_fn)(int fd))
+bool register_input_fd(int fd, void *data,
+					   void (*process_input_fn)(int fd, void *d))
 {
 	InputFd *tmp;
 	
 	if(find_input_fd(fd)!=NULL){
 		warn("File descriptor already registered\n");
-		return;
+		return FALSE;
 	}
 	
 	tmp=ALLOC(InputFd);
+	if(tmp==NULL){
+		warn_err();
+		return FALSE;
+	}
+	
 	tmp->fd=fd;
+	tmp->data=data;
 	tmp->process_input_fn=process_input_fn;
 	
 	LINK_ITEM(input_fds, tmp, next, prev);
+	
+	return TRUE;
 }
 
 void unregister_input_fd(int fd)
@@ -63,7 +72,7 @@ void check_input_fds(fd_set *rfds)
 	
 	while(tmp){
 		if(FD_ISSET(tmp->fd, rfds))
-			tmp->process_input_fn(tmp->fd);
+			tmp->process_input_fn(tmp->fd, tmp->data);
 		tmp=tmp->next;
 	}
 }

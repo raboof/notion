@@ -15,11 +15,13 @@ INTRSTRUCT(InputFd);
 	
 DECLSTRUCT(InputFd){
 	int fd;
-	void (*process_input_fn)(int fd);
+	void *data;
+	void (*process_input_fn)(int fd, void *data);
 	InputFd *next, *prev;
 };
 
-extern void register_input_fd(int fd, void (*process_input_fn)(int fd));
+extern bool register_input_fd(int fd, void *data,
+							  void (*process_input_fn)(int fd, void *data));
 extern void unregister_input_fd(int fd);
 extern void set_input_fds(fd_set *rfds, int *nfds);
 extern void check_input_fds(fd_set *rfds);
