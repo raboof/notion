@@ -27,7 +27,7 @@ MODULE_LIST=ionws floatws query
 # For dynamically loaded modules
 MODULE_SUPPORT_LDFLAGS=-export-dynamic -ldl
 MODULE_LDFLAGS=-shared
-MODULE_CFLAGS=-shared
+MODULE_CFLAGS=-fPIC
 
 # Some strangely behaving OSes (NetBSD, OpenBSD, ...) might need this.
 #MODULE_SUPPORT_CFLAGS=-DCF_UNDERSCORED_MODULE_SYMBOLS
