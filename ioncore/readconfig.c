@@ -137,9 +137,9 @@ char *search_etcpath2(const char *const *files, bool noaccesstest)
 				warn_err();
 				continue;
 			}
-			if(access(tmp, F_OK)==0)
+			if(noaccesstest || access(tmp, F_OK)==0)
 				return tmp;
-		free(tmp);
+			free(tmp);
 		}
 	}
 	return NULL;

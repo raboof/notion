@@ -176,22 +176,32 @@ bool load_workspaces(WViewport *vp)
 static bool ensuredir(char *f)
 {
 	char *p=strrchr(f, '/');
-
+	int tryno=0;
+	bool ret=TRUE;
+	
 	if(p==NULL)
 		return TRUE;
 	
 	*p='\0';
 	
-	if(access(f, F_OK)){
-		if(mkdir(f, 0700)){
-			warn_err_obj(f);
-			*p='/';
-			return FALSE;
-		}
+	if(access(f, F_OK)!=0){
+		ret=FALSE;
+		do{
+			if(mkdir(f, 0700)==0){
+				ret=TRUE;
+				break;
+			}
+			if(!ensuredir(f))
+				break;
+			tryno++;
+		}while(tryno<2);
+		
+		if(!ret)
+			warn_obj(f, "Unable to create directory");
 	}
 
 	*p='/';
-	return TRUE;
+	return ret;
 }
 
 
@@ -232,10 +242,13 @@ bool save_workspaces(WViewport *vp)
 	char *wsconf;
 	
 	wsconf=get_savefile_for_scr("saves/workspaces", vp->id);
-	
+
 	if(wsconf==NULL)
 		return FALSE;
-	
+
+	if(!ensuredir(wsconf))
+		return FALSE;
+
 	current_vp=vp;
 	successp=do_save_workspaces(vp, wsconf);
 	current_vp=NULL;
