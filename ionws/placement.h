@@ -10,16 +10,11 @@
 
 #include <ioncore/common.h>
 #include <ioncore/clientwin.h>
+#include <ioncore/attach.h>
 #include "ionws.h"
 
 
-/* These implement dynfuns introduced in ioncore/wsreg.h */
-
 extern bool ionws_add_clientwin(WIonWS *ws, WClientWin *cwin,
-								const XWindowAttributes *attr, int init_state);
-
-extern bool ionws_add_transient(WIonWS *ws, WClientWin *tfor,
-								WClientWin *cwin, const XWindowAttributes *attr,
-								int init_state);
+								const WAttachParams *param);
 
 #endif /* ION_IONWS_PLACEMENT_H */

@@ -54,7 +54,6 @@ DECLOBJ(WClientWin){
 	int n_cmapwins;
 
 	XSizeHints size_hints;
-	char *name;
 	
 	WWatch last_mgr_watch;
 	

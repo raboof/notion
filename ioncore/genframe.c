@@ -406,15 +406,15 @@ void genframe_switch_prev(WGenFrame *genframe)
 
 
 static WRegion *genframe_do_add_managed(WGenFrame *genframe, WRegionAddFn *fn,
-										void *params, int flags,
-										WRectangle *geomrq)
+										void *fnparams, 
+										const WAttachParams *param)
 {
 	WRectangle geom;
 	WRegion *reg;
 
 	genframe_managed_geom(genframe, &geom);
 	
-	reg=fn((WWindow*)genframe, geom, params);
+	reg=fn((WWindow*)genframe, geom, fnparams);
 
 	if(reg==NULL)
 		return NULL;
@@ -431,10 +431,7 @@ static WRegion *genframe_do_add_managed(WGenFrame *genframe, WRegionAddFn *fn,
 	
 	genframe->managed_count++;
 	
-	if(genframe->managed_count==1)
-		flags|=REGION_ATTACH_SWITCHTO;
-	
-	if(flags&REGION_ATTACH_SWITCHTO){
+	if(genframe->managed_count==1 || param->flags&REGION_ATTACH_SWITCHTO){
 		genframe_recalc_bar(genframe, FALSE);
 		genframe_display_managed(genframe, reg);
 	}else{
@@ -501,7 +498,7 @@ void genframe_attach_tagged(WGenFrame *genframe)
 			warn("Cannot attach tagged region: ancestor");
 			continue;
 		}
-		region_add_managed((WRegion*)genframe, reg, 0);
+		region_add_managed_simple((WRegion*)genframe, reg, 0);
 	}
 }
 
@@ -673,8 +670,8 @@ WRegion *genframe_current(WGenFrame *genframe)
 static bool genframe_handle_drop(WGenFrame *genframe, int x, int y,
 								 WRegion *dropped)
 {
-	return region_add_managed((WRegion*)genframe, dropped,
-							  REGION_ATTACH_SWITCHTO);
+	return region_add_managed_simple((WRegion*)genframe, dropped,
+									 REGION_ATTACH_SWITCHTO);
 }
 
 

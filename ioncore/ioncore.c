@@ -28,7 +28,7 @@
 #include "eventh.h"
 #include "saveload.h"
 #include "ioncore.h"
-#include "wsreg.h"
+#include "manage.h"
 #include "exec.h"
 #include "conf.h"
 #include "binding.h"

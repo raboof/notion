@@ -13,7 +13,7 @@
 #include <ioncore/global.h>
 #include <ioncore/objp.h>
 #include <ioncore/region.h>
-#include <ioncore/wsreg.h>
+#include <ioncore/manage.h>
 #include <ioncore/viewport.h>
 #include <ioncore/names.h>
 #include <ioncore/saveload.h>
@@ -249,26 +249,30 @@ WRegion *find_existing(WFloatWS *ws)
 }
 
 
-static bool floatws_do_add_clientwin(WFloatWS *ws,
-									 WRegion *stack_above,
-									 WClientWin *cwin,
-									 const XWindowAttributes *attr,
-									 int init_state)
+static bool floatws_add_clientwin(WFloatWS *ws,
+								  WClientWin *cwin,
+								  const WAttachParams *params)
 {
 	WRegion *target=NULL;
 	WWindow *par;
+	WRegion *stack_above=NULL;
 	bool newreg=FALSE;
 	bool respectpos=FALSE;
-	bool b;
 
+	if(params->flags&REGION_ATTACH_TFOR){
+		stack_above=(WRegion*)FIND_PARENT1(params->tfor, WRegion);
+		if(stack_above!=NULL && REGION_MANAGER(stack_above)!=(WRegion*)ws)
+			stack_above=NULL;
+	}
+	
 	par=FIND_PARENT1(ws, WWindow);
 	assert(par!=NULL);
-
+	
 #ifdef CF_FLOATWS_ATTACH_TO_CURRENT
 	if(target==NULL)
 		target=find_existing(ws);
 #endif
-		
+	
 	if(target==NULL){
 		WRectangle fgeom=REGION_GEOM(cwin);
 		fgeom.w+=2*cwin->orig_bw;
@@ -280,15 +284,16 @@ static bool floatws_do_add_clientwin(WFloatWS *ws,
 		if(cwin->transient_for!=None)
 			respectpos=TRUE;
 		
-		if(respectpos){
-			if((attr->x+attr->width<=REGION_GEOM(ws).x) ||
-			   (attr->y+attr->height<=REGION_GEOM(ws).y) ||
-			   (attr->x<=REGION_GEOM(ws).x+REGION_GEOM(ws).w) ||
-			   (attr->y<=REGION_GEOM(ws).y+REGION_GEOM(ws).h))
+		if(respectpos && params->flags&REGION_ATTACH_GEOMRQ){
+			if((params->geomrq.x+params->geomrq.w<=REGION_GEOM(ws).x) ||
+			   (params->geomrq.y+params->geomrq.h<=REGION_GEOM(ws).y) ||
+			   (params->geomrq.x<=REGION_GEOM(ws).x+REGION_GEOM(ws).w) ||
+			   (params->geomrq.y<=REGION_GEOM(ws).y+REGION_GEOM(ws).h))
 				respectpos=FALSE;
 		}
-
-		if(cwin->size_hints.flags&USPosition || wglobal.opmode==OPMODE_INIT)
+		
+		if(params->flags&REGION_ATTACH_MAPRQ &&
+		   (cwin->size_hints.flags&USPosition || wglobal.opmode==OPMODE_INIT))
 			respectpos=TRUE;
 
 		if(!respectpos)
@@ -310,7 +315,7 @@ static bool floatws_do_add_clientwin(WFloatWS *ws,
 
 	assert(SCREEN_OF(target)==SCREEN_OF(cwin));
 	
-	if(!finish_add_clientwin(target, cwin, init_state)){
+	if(!finish_add_clientwin(target, cwin, params)){
 		if(newreg)
 			destroy_obj((WObj*)target);
 		return FALSE;
@@ -324,26 +329,6 @@ static bool floatws_do_add_clientwin(WFloatWS *ws,
 	}
 	
 	return TRUE;
-}
-
-
-static bool floatws_add_clientwin(WFloatWS *ws, WClientWin *cwin,
-								  const XWindowAttributes *attr, int init_state)
-{
-	return floatws_do_add_clientwin(ws, NULL, cwin, attr, init_state);
-}
-
-
-static bool floatws_add_transient(WFloatWS *ws, WClientWin *tfor,
-								  WClientWin *cwin,
-								  const XWindowAttributes *attr, int init_state)
-{
-	WRegion *r=(WRegion*)FIND_PARENT1(tfor, WFloatFrame);
-	
-	if(r!=NULL && REGION_MANAGER(r)!=(WRegion*)ws)
-		r=NULL;
-	
-	return floatws_do_add_clientwin(ws, r, cwin, attr, init_state);
 }
 
 
@@ -371,7 +356,7 @@ static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
 		return FALSE;
 	}
 	
-	if(!region_add_managed(target, dropped, REGION_ATTACH_SWITCHTO)){
+	if(!region_add_managed_simple(target, dropped, REGION_ATTACH_SWITCHTO)){
 		destroy_obj((WObj*)target);
 		warn("Failed to attach dropped region to created WFloatFrame");
 		return FALSE;
@@ -441,8 +426,7 @@ static DynFunTab floatws_dynfuntab[]={
 	{region_set_focus_to, floatws_set_focus_to},
 	{(DynFun*)reparent_region, (DynFun*)reparent_floatws},
 	
-	{(DynFun*)region_ws_add_clientwin, (DynFun*)floatws_add_clientwin},
-	{(DynFun*)region_ws_add_transient, (DynFun*)floatws_add_transient},
+	{(DynFun*)genws_add_clientwin, (DynFun*)floatws_add_clientwin},
 
 	{region_managed_activated, floatws_managed_activated},
 	{region_remove_managed, floatws_remove_managed},

@@ -130,8 +130,8 @@ bool viewport_initialize_workspaces(WViewport* vp)
 
 
 static WRegion *viewport_do_add_managed(WViewport *vp, WRegionAddFn *fn,
-										void *params, int flags,
-										WRectangle *geomrq)
+										void *fnparams, 
+										const WAttachParams *param)
 {
 	WWindow *par=FIND_PARENT1(vp, WWindow);
 	WRegion *reg;
@@ -139,7 +139,7 @@ static WRegion *viewport_do_add_managed(WViewport *vp, WRegionAddFn *fn,
 	if(par==NULL)
 		return NULL;
 	
-	reg=fn(par, REGION_GEOM(vp), params);
+	reg=fn(par, REGION_GEOM(vp), fnparams);
 	
 	if(reg==NULL)
 		return NULL;
@@ -147,10 +147,7 @@ static WRegion *viewport_do_add_managed(WViewport *vp, WRegionAddFn *fn,
 	region_set_manager(reg, (WRegion*)vp, &(vp->ws_list));
 	vp->ws_count++;
 	
-	if(vp->current_ws==NULL)
-		flags|=REGION_ATTACH_SWITCHTO;
-
-	if(flags&REGION_ATTACH_SWITCHTO)
+	if(vp->current_ws==NULL || param->flags&REGION_ATTACH_SWITCHTO)
 		viewport_display_managed(vp, reg);
 	else
 		region_unmap(reg);

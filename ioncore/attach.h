@@ -12,21 +12,38 @@
 #include "reginfo.h"
 #include "screen.h"
 #include "window.h"
+#include "clientwin.h"
 
 #define REGION_ATTACH_SWITCHTO	0x0001
+#define REGION_ATTACH_GEOMRQ	0x0002
+#define REGION_ATTACH_INITSTATE	0x0004 /* only set by add_clientwin */
+#define REGION_ATTACH_DOCKAPP	0x0008 /* only set by add_clientwin */
+#define REGION_ATTACH_TFOR		0x0010 /* only set by add_clientwin */
+#define REGION_ATTACH_MAPRQ 	0x0020 /* only setd by add_clientwin;
+										  implies GEOMRQ */
+
+typedef struct{
+	int flags;
+	int init_state;
+	WRectangle geomrq;
+	WClientWin *tfor;
+} WAttachParams;
+
 
 typedef WRegion *WRegionAddFn(WWindow *parent, WRectangle geom, void *param);
 
+
 DYNFUN WRegion *region_do_add_managed(WRegion *reg, WRegionAddFn *fn,
-									  void *param, int flags,
-									  WRectangle *geomrq);
+									  void *fnpar, const WAttachParams *par);
 
 extern bool region_supports_add_managed(WRegion *reg);
 
 extern WRegion *region_add_managed_new_simple(WRegion *reg,
 											  WRegionSimpleCreateFn *fn,
 											  int flags);
-extern bool region_add_managed(WRegion *reg, WRegion *sub, int flags);
+extern bool region_add_managed_simple(WRegion *reg, WRegion *sub, int flags);
+extern bool region_add_managed(WRegion *reg, WRegion *sub,
+							   const WAttachParams *par);
 
 /* */
 

@@ -18,12 +18,12 @@
 /*{{{ Attach */
 
 
-WRegion *region_do_add_managed(WRegion *reg, WRegionAddFn *fn, void *param,
-							   int flags, WRectangle *geomrq)
+WRegion *region_do_add_managed(WRegion *reg, WRegionAddFn *fn, void *fnparam,
+							   const WAttachParams *param)
 {
 	WRegion *ret=NULL;
 	CALL_DYN_RET(ret, WRegion*, region_do_add_managed, reg,
-				 (reg, fn, param, flags, geomrq));
+				 (reg, fn, fnparam, param));
 	return ret;
 }
 
@@ -44,8 +44,11 @@ static WRegion *add_fn_new(WWindow *par, WRectangle geom,
 WRegion *region_add_managed_new_simple(WRegion *mgr, WRegionSimpleCreateFn *fn,
 									   int flags)
 {
+	WAttachParams param;
+	param.flags=flags&(REGION_ATTACH_SWITCHTO|REGION_ATTACH_DOCKAPP);
+	
 	return region_do_add_managed(mgr, (WRegionAddFn*)add_fn_new,
-								 (void*)fn, flags, NULL);
+								 (void*)fn, &param);
 }
 
 
@@ -60,15 +63,25 @@ static WRegion *add_fn_reparent(WWindow *par, WRectangle geom, WRegion *reg)
 }
 
 
-bool region_add_managed(WRegion *mgr, WRegion *reg, int flags)
+bool region_add_managed_simple(WRegion *mgr, WRegion *reg, int flags)
 {
-	WRectangle geom=REGION_GEOM(reg);
-	
+	WAttachParams param;
+	param.flags=flags&(REGION_ATTACH_SWITCHTO|REGION_ATTACH_DOCKAPP);
+	/*param.flags|=REGION_ATTACH_GEOMRQ;
+	param.geomrq=REGION_GEOM(reg);*/
+
+	return region_add_managed(mgr, reg, &param);
+}
+
+
+bool region_add_managed(WRegion *mgr, WRegion *reg, 
+						const WAttachParams *param)
+{
 	if(REGION_MANAGER(reg)==mgr)
 		return TRUE;
 	
 	return (region_do_add_managed(mgr, (WRegionAddFn*)add_fn_reparent,
-								  (void*)reg, flags, &geom)!=NULL);
+								  (void*)reg, param)!=NULL);
 }
 
 

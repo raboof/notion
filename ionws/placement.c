@@ -10,7 +10,7 @@
 #include <ioncore/screen.h>
 #include <ioncore/clientwin.h>
 #include <ioncore/attach.h>
-#include <ioncore/wsreg.h>
+#include <ioncore/manage.h>
 #include "placement.h"
 #include "ionframe.h"
 #include "splitframe.h"
@@ -34,32 +34,63 @@ static WRegion *find_suitable_frame(WIonWS *ws)
 }
 
 
+static bool finish_add_transient(WRegion *reg, WClientWin *cwin,
+								 const WAttachParams *param)
+{
+	WAttachParams param2;
+
+	param2.flags=0;
+	
+	assert(reg!=NULL);
+	
+	if(clientwin_get_switchto(cwin))
+		param2.flags|=REGION_ATTACH_SWITCHTO;
+	
+	if(param->flags&REGION_ATTACH_INITSTATE &&
+	   param->init_state==IconicState)
+		param2.flags=0;
+	
+	return region_add_managed(reg, (WRegion*)cwin, &param2);
+}
+
+
+
 bool ionws_add_clientwin(WIonWS *ws, WClientWin *cwin,
-						 const XWindowAttributes *attr, int init_state)
+						 const WAttachParams *param)
 {
 	WRegion *target=NULL;
-	bool geomset, b;
 	int tm;
-
-	tm=clientwin_get_transient_mode(cwin);
 	
+	if(param->flags&REGION_ATTACH_TFOR){
+		if(finish_add_transient((WRegion*)param->tfor, cwin, 
+								param))
+			return TRUE;
+	}
+	
+	tm=clientwin_get_transient_mode(cwin);
 	if(tm==TRANSIENT_MODE_CURRENT){
 		target=find_suitable_frame(ws);
 		if(target!=NULL && WOBJ_IS(target, WGenFrame)){
 			if(((WGenFrame*)target)->current_sub!=NULL &&
 			   WOBJ_IS(((WGenFrame*)target)->current_sub, WClientWin)){
-				return region_add_managed(((WGenFrame*)target)->current_sub,
-										  (WRegion*)cwin, 0);
+				if(finish_add_transient(((WGenFrame*)target)->current_sub,
+										cwin, param))
+					return TRUE;
 			}
 		}
 	}else{
-#ifdef CF_PLACEMENT_GEOM
-		geomset=(cwin->size_hints.win_gravity!=ForgetGravity &&
-				 (attr->x>CF_STUBBORN_TRESH &&
-				  attr->y>CF_STUBBORN_TRESH));
-		if(geomset && extl_table_gets_b(cwin->proptab, "stubborn", &b)){
-			if(b)
-				target=(WRegion*)find_frame_at(ws, attr->x, attr->y);
+#ifndef CF_IONWS_IGNORE_USER_POSITION
+		if(param->flags&REGION_ATTACH_MAPRQ &&
+		   cwin->size_hints.flags&USPosition){
+			/* MAPRQ implies GEOMRQ */
+			
+			/* Maybe gravity should be taken into account so that user
+			 * specified position -0-0 would put to the frame in the
+			 * lower right corner. 
+			 */
+			
+			target=(WRegion*)find_frame_at(ws, param->geomrq.x,
+										   param->geomrq.y);
 		}
 		if(target==NULL)
 #endif
@@ -73,12 +104,6 @@ bool ionws_add_clientwin(WIonWS *ws, WClientWin *cwin,
 	
 	assert(SCREEN_OF(target)==SCREEN_OF(cwin));
 	
-	return finish_add_clientwin(target, cwin, init_state);
+	return finish_add_clientwin(target, cwin, param);
 }
 
-
-bool ionws_add_transient(WIonWS *ws, WClientWin *tfor, WClientWin *cwin,
-						 const XWindowAttributes *attr, int init_state)
-{
-	return region_add_managed((WRegion*)tfor, (WRegion*)cwin, 0);
-}

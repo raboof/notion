@@ -66,8 +66,13 @@ static WRegion *add_fn_load(WWindow *par, WRectangle geom, ExtlTab *tab)
 
 WRegion *region_add_managed_load(WRegion *mgr, ExtlTab tab)
 {
+	WAttachParams param;
+	param.flags=0;
+	
+	/* TODO: Maybe fill in some fields from tab to param? */
+
 	return region_do_add_managed(mgr, (WRegionAddFn*)&add_fn_load,
-								 (void*)&tab, 0, NULL);
+								 (void*)&tab, &param);
 }
 
 

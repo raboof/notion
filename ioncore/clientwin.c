@@ -278,11 +278,14 @@ static WClientWin *create_clientwin(WWindow *parent, Window win,
 WClientWin* manage_clientwin(Window win, int mflags)
 {
 	WScreen *scr;
-	WClientWin *cwin;
+	WClientWin *cwin=NULL;
 	XWindowAttributes attr;
 	XWMHints *hints;
 	int state=NormalState;
-	bool dock=FALSE, managed=FALSE;
+	bool managed=FALSE;
+	WAttachParams param;
+	
+	param.flags=0;
 	
 again:
 	
@@ -299,7 +302,7 @@ again:
 	if(hints!=NULL && hints->flags&StateHint)
 		state=hints->initial_state;
 	
-	if(!dock && state==WithdrawnState &&
+	if(!(param.flags&REGION_ATTACH_DOCKAPP) && state==WithdrawnState &&
 	   hints->flags&IconWindowHint && hints->icon_window!=None){
 		/* The dockapp might be displaying its "main" window if no
 		 * wm that understands dockapps has been managing it.
@@ -319,25 +322,30 @@ again:
 		/* It is a dock, do everything again from the beginning, now
 		 * with the icon window.
 		 */
-		dock=TRUE;
+		param.flags|=REGION_ATTACH_DOCKAPP;
 		goto again;
 	}
 	
-	if(hints!=NULL)
+	if(hints!=NULL){
+		if(hints->flags&StateHint){
+			param.init_state=hints->initial_state;
+			param.flags|=REGION_ATTACH_INITSTATE;
+		}
+		
 		XFree((void*)hints);
+	}
 
 	if(!XGetWindowAttributes(wglobal.dpy, win, &attr)){
 		warn("Window disappeared");
 		goto fail2;
 	}
 	
-
 	/* Get the actual state if any */
-	get_win_state(win, &state);
+	/*get_win_state(win, &state);*/
 	
 	/* Do we really want to manage it? */
-	if(!dock && (attr.override_redirect ||
-				 (mflags&MANAGE_INITIAL && attr.map_state!=IsViewable))){
+	if(!(param.flags&REGION_ATTACH_DOCKAPP) && (attr.override_redirect || 
+		(mflags&MANAGE_INITIAL && attr.map_state!=IsViewable))){
 		goto fail2;
 	}
 
@@ -346,16 +354,27 @@ again:
 	if(scr==NULL)
 		goto fail2;
 
-	if(state!=NormalState && state!=IconicState)
-		state=NormalState;
+	/*if(state!=NormalState && state!=IconicState)
+		state=NormalState;*/
+
+	/* Set up some additional parameters */
+
+	/*if(clientwin_get_switchto(cwin))
+		param.flags|=REGION_ATTACH_SWITCHTO;
 	
+	if(param.flags&REGION_ATTACH_INITSTATE && param.init_state==IconicState)
+		param.flags&=~REGION_ATTACH_SWITCHTO;*/
+
 	/* Allocate and initialize */
-	cwin=create_clientwin((WWindow*)scr, win, /*state, */ &attr);
+	cwin=create_clientwin((WWindow*)scr, win, &attr);
 	
 	if(cwin==NULL)
 		goto fail2;
 
-	CALL_ALT_B(managed, add_clientwin_alt, (cwin, &attr, state, dock));
+	param.flags|=(REGION_ATTACH_GEOMRQ|REGION_ATTACH_MAPRQ);
+	param.geomrq=REGION_GEOM(cwin);
+
+	CALL_ALT_B(managed, add_clientwin_alt, (cwin, &param));
 
 	if(!managed){
 		warn("Unable to manage client window %d\n", win);
@@ -391,9 +410,9 @@ fail2:
 /*{{{ Add/remove managed */
 
 
-static WRegion *clientwin_do_add_managed(WClientWin *cwin, WRegionAddFn *fn,
-										 void *params, int flags,
-										 WRectangle *geomrq)
+static WRegion *clientwin_do_add_managed(WClientWin *cwin, 
+										 WRegionAddFn *fn, void *fnparams, 
+										 const WAttachParams *param)
 {
 	WRectangle geom=cwin->max_geom;
 	WWindow *par=FIND_PARENT1(cwin, WWindow);
@@ -402,9 +421,9 @@ static WRegion *clientwin_do_add_managed(WClientWin *cwin, WRegionAddFn *fn,
 	if(par==NULL)
 		return NULL;
 	
-	if(geomrq!=NULL && geomrq->h>0){
+	if(param->flags&REGION_ATTACH_GEOMRQ && param->geomrq.h>0){
 		/* Don't increase the height of the transient */
-		int diff=geom.h-geomrq->h;
+		int diff=geom.h-param->geomrq.h;
 		if(diff>0){
 			geom.y+=diff;
 			geom.h-=diff;
@@ -415,14 +434,14 @@ static WRegion *clientwin_do_add_managed(WClientWin *cwin, WRegionAddFn *fn,
 		geom.y+=geom.h*2;
 	}
 	
-	reg=fn(par, geom, params);
+	reg=fn(par, geom, fnparams);
 	
 	if(reg==NULL)
 		return NULL;
-
+	
 	region_set_manager(reg, (WRegion*)cwin, &(cwin->transient_list));
 	region_stack_above(reg, (WRegion*)cwin);
-
+	
 	if(REGION_IS_MAPPED((WRegion*)cwin))
 		region_map(reg);
 	else
@@ -490,12 +509,12 @@ void clientwin_deinit(WClientWin *cwin)
 	
 	if(cwin->win!=None){
 		XSelectInput(wglobal.dpy, cwin->win, 0);
-
+		
 		reparent_root(cwin);
 		
 		if(cwin->orig_bw!=0)
 			configure_cwin_bw(cwin->win, cwin->orig_bw);
-
+		
 		XRemoveFromSaveSet(wglobal.dpy, cwin->win);
 		XDeleteContext(wglobal.dpy, cwin->win, wglobal.win_context);
 		
@@ -552,14 +571,14 @@ static void send_clientmsg(Window win, Atom a)
 
 
 EXTL_EXPORT
-void clientwin_kill(WClientWin *cwin)
+	void clientwin_kill(WClientWin *cwin)
 {
 	XKillClient(wglobal.dpy, cwin->win);
 }
 
 
 EXTL_EXPORT
-void clientwin_close(WClientWin *cwin)
+	void clientwin_close(WClientWin *cwin)
 {
 	if(cwin->flags&CWIN_P_WM_DELETE)
 		send_clientmsg(cwin->win, wglobal.atom_wm_delete);
@@ -590,7 +609,7 @@ static void hide_clientwin(WClientWin *cwin)
 					-2*cwin->max_geom.w, -2*cwin->max_geom.h);
 		return;
 	}
-			
+	
 	set_clientwin_state(cwin, IconicState);
 	XSelectInput(wglobal.dpy, cwin->win,
 				 cwin->event_mask&~(StructureNotifyMask|EnterWindowMask));
@@ -607,7 +626,7 @@ static void show_clientwin(WClientWin *cwin)
 		if(cwin->state==NormalState)
 			return;
 	}
-
+	
 	XSelectInput(wglobal.dpy, cwin->win,
 				 cwin->event_mask&~(StructureNotifyMask|EnterWindowMask));
 	XMapWindow(wglobal.dpy, cwin->win);
@@ -626,12 +645,12 @@ void clientwin_notify_rootpos(WClientWin *cwin, int rootx, int rooty)
 {
 	XEvent ce;
 	Window win;
-
+	
 	if(cwin==NULL)
 		return;
 	
 	win=cwin->win;
-
+	
 	ce.xconfigure.type=ConfigureNotify;
 	ce.xconfigure.event=win;
 	ce.xconfigure.window=win;
@@ -642,7 +661,7 @@ void clientwin_notify_rootpos(WClientWin *cwin, int rootx, int rooty)
 	ce.xconfigure.border_width=cwin->orig_bw;
 	ce.xconfigure.above=None;
 	ce.xconfigure.override_redirect=False;
-
+	
 	XSelectInput(wglobal.dpy, win, cwin->event_mask&~StructureNotifyMask);
 	XSendEvent(wglobal.dpy, win, False, StructureNotifyMask, &ce);
 	XSelectInput(wglobal.dpy, win, cwin->event_mask);
@@ -675,17 +694,17 @@ static void convert_geom(WClientWin *cwin, WRectangle max_geom,
 	
 	if(REGION_MANAGER(cwin)!=NULL &&
 	   WOBJ_IS(REGION_MANAGER(cwin), WClientWin)){
-			bottom=TRUE;
+		bottom=TRUE;
 	}
-
+	
 	geom->w=max_geom.w;
 	geom->h=max_geom.h;
 	
 	correct_size(&(geom->w), &(geom->h), &(cwin->size_hints), FALSE);
 	/*
-	if(!rq && bottom && geom->h>REGION_GEOM(cwin).h)
-	   geom->h=REGION_GEOM(cwin).h;
-	*/
+	 if(!rq && bottom && geom->h>REGION_GEOM(cwin).h)
+	 geom->h=REGION_GEOM(cwin).h;
+	 */
 	geom->x=max_geom.x+max_geom.w/2-geom->w/2;
 	
 	if(bottom)
@@ -706,7 +725,7 @@ static void clientwin_request_managed_geom(WClientWin *cwin, WRegion *sub,
 										   bool tryonly)
 {
 	WRectangle rgeom=cwin->max_geom;
-
+	
 	if(rgeom.h>geom.h){
 		rgeom.h=geom.h;
 		rgeom.y+=cwin->max_geom.h-geom.h;
@@ -737,10 +756,10 @@ static void do_fit_clientwin(WClientWin *cwin, WRectangle max_geom, WWindow *np)
 	
 	cwin->max_geom=max_geom;
 	REGION_GEOM(cwin)=geom;
-
+	
 	if(np==NULL && !changes)
 		return;
-
+	
 	if(np!=NULL)
 		do_reparent_clientwin(cwin, np->win, geom.x, geom.y);
 	
@@ -751,7 +770,7 @@ static void do_fit_clientwin(WClientWin *cwin, WRectangle max_geom, WWindow *np)
 		XMoveResizeWindow(wglobal.dpy, cwin->win,
 						  geom.x, geom.y, geom.w, geom.h);
 	}
-
+	
 	cwin->flags&=~CWIN_NEED_CFGNTFY;
 	
 	geom2.x=max_geom.x;
@@ -767,7 +786,7 @@ static void do_fit_clientwin(WClientWin *cwin, WRectangle max_geom, WWindow *np)
 		}
 		
 		if(np==NULL){
-		   region_fit(transient, geom2);
+			region_fit(transient, geom2);
 		}else{
 			if(!reparent_region(transient, np, geom2)){
 				warn("Problem: can't reparent a %s managed by a WClientWin"
@@ -792,10 +811,10 @@ static bool reparent_clientwin(WClientWin *cwin, WWindow *par, WRectangle geom)
 	
 	if(!same_screen((WRegion*)cwin, (WRegion*)par))
 		return FALSE;
-
+	
 	region_detach_parent((WRegion*)cwin);
 	region_set_parent((WRegion*)cwin, (WRegion*)par);
-
+	
 	do_fit_clientwin(cwin, geom, par);
 	
 	sendconfig_clientwin(cwin);
@@ -814,7 +833,7 @@ static void clientwin_map(WClientWin *cwin)
 	MARK_REGION_MAPPED(cwin);
 	
 	FOR_ALL_MANAGED_ON_LIST(cwin->transient_list, sub){
-			region_map(sub);
+		region_map(sub);
 	}
 }
 
@@ -850,7 +869,7 @@ static void clientwin_set_focus_to(WClientWin *cwin, bool warp)
 		send_clientmsg(cwin->win, wglobal.atom_wm_take_focus);
 }
 
-	
+
 static bool clientwin_display_managed(WClientWin *cwin, WRegion *sub)
 {
 	if(!REGION_IS_MAPPED(cwin))
@@ -904,21 +923,21 @@ static WRegion *clientwin_managed_enter_to_focus(WClientWin *cwin, WRegion *reg)
 
 
 EXTL_EXPORT
-WClientWin *lookup_clientwin(const char *name)
+	WClientWin *lookup_clientwin(const char *name)
 {
 	return (WClientWin*)do_lookup_region(name, &OBJDESCR(WClientWin));
 }
 
 
 EXTL_EXPORT
-ExtlTab complete_clientwin(const char *nam)
+	ExtlTab complete_clientwin(const char *nam)
 {
 	return do_complete_region(nam, &OBJDESCR(WClientWin));
 }
 
 
 EXTL_EXPORT
-ExtlTab clientwin_get_ident(WClientWin *cwin)
+	ExtlTab clientwin_get_ident(WClientWin *cwin)
 {
 	char *winstance=NULL, *wclass=NULL, *wrole=NULL;
 	int n=0, n2=0, tmp=0;
@@ -932,7 +951,7 @@ ExtlTab clientwin_get_ident(WClientWin *cwin)
 		if(tmp+1<n)
 			wclass=winstance+tmp+1;
 	}
-
+	
 	tab=extl_create_table();
 	if(wclass!=NULL)
 		extl_table_sets_s(tab, "class", wclass);
@@ -976,7 +995,7 @@ void clientwin_clear_target_id(WClientWin *cwin)
 	XDeleteProperty(wglobal.dpy, cwin->win, wglobal.atom_frame_id);
 }
 
-						
+
 /*}}}*/
 
 
@@ -1037,7 +1056,7 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 	
 	if(ev->value_mask&CWBorderWidth)
 		cwin->orig_bw=ev->border_width;
-
+	
 	cwin->flags|=CWIN_NEED_CFGNTFY;
 	
 	if(sz || pos)
@@ -1065,7 +1084,7 @@ bool clientwin_check_fullscreen_request(WClientWin *cwin, int w, int h)
 	if(mwm==NULL || !(mwm->flags&MWM_HINTS_DECORATIONS) ||
 	   mwm->decorations!=0)
 		return FALSE;
-
+	
 	FOR_ALL_MANAGED_ON_LIST(SCREEN_OF(cwin)->viewport_list, reg){
 		if(!WOBJ_IS(reg, WViewport))
 			continue;
@@ -1092,8 +1111,8 @@ bool clientwin_fullscreen_vp(WClientWin *cwin, WViewport *vp, bool switchto)
 		setup_watch(&(cwin->last_mgr_watch), (WObj*)vp->current_ws, NULL);
 	}
 	
-	if(!region_add_managed((WRegion*)vp, (WRegion*)cwin,
-						   switchto ?  REGION_ATTACH_SWITCHTO : 0)){
+	if(!region_add_managed_simple((WRegion*)vp, (WRegion*)cwin, switchto ? 
+								  REGION_ATTACH_SWITCHTO : 0)){
 		warn("Failed to enter full screen mode");
 		return FALSE;
 	}
@@ -1129,7 +1148,8 @@ bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto)
 		return FALSE;
 	if(!region_supports_add_managed(reg))
 		return FALSE;
-	if(!region_add_managed(reg, (WRegion*)cwin, REGION_ATTACH_SWITCHTO))
+	/* TODO: geomrq for correct placement on floatws:s */
+	if(!region_add_managed_simple(reg, (WRegion*)cwin, REGION_ATTACH_SWITCHTO))
 		return FALSE;
 	return region_goto(reg);
 }

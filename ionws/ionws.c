@@ -13,7 +13,7 @@
 #include <ioncore/global.h>
 #include <ioncore/objp.h>
 #include <ioncore/region.h>
-#include <ioncore/wsreg.h>
+#include <ioncore/manage.h>
 #include <ioncore/viewport.h>
 #include <ioncore/names.h>
 #include <ioncore/saveload.h>
@@ -404,8 +404,7 @@ static DynFunTab ionws_dynfuntab[]={
 	{region_set_focus_to, ionws_set_focus_to},
 	{(DynFun*)reparent_region, (DynFun*)reparent_ionws},
 	
-	{(DynFun*)region_ws_add_clientwin, (DynFun*)ionws_add_clientwin},
-	{(DynFun*)region_ws_add_transient, (DynFun*)ionws_add_transient},
+	{(DynFun*)genws_add_clientwin, (DynFun*)ionws_add_clientwin},
 
 	{region_request_managed_geom, ionws_request_managed_geom},
 	{region_managed_activated, ionws_managed_activated},
