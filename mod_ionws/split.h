@@ -18,6 +18,7 @@
 #include <ioncore/attach.h>
 #include <ioncore/rectangle.h>
 #include <ioncore/mplex.h>
+#include <ioncore/extl.h>
 
 
 INTRCLASS(WSplit);
@@ -138,6 +139,7 @@ extern void split_resize(WSplit *node, const WRectangle *ng,
 DYNFUN void splitinner_do_rqsize(WSplitInner *p, WSplit *node, 
                                  RootwardAmount *ha, RootwardAmount *va, 
                                  WRectangle *rg, bool tryonly);
+extern ExtlTab split_rqgeom(WSplit *node, ExtlTab g);
 
 /* Split */
 

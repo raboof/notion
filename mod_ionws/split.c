@@ -819,9 +819,9 @@ static void initra(RootwardAmount *ra, int p, int s, int op, int os,
 }
 
 
-static void split_rqgeom_(WSplit *node, const WRectangle *ng, 
-                          bool hany, bool vany, WRectangle *rg, 
-                          bool tryonly)
+static void split_do_rqgeom_(WSplit *node, const WRectangle *ng, 
+                             bool hany, bool vany, WRectangle *rg, 
+                             bool tryonly)
 {
     RootwardAmount ha, va;
 
@@ -837,9 +837,9 @@ static void split_rqgeom_(WSplit *node, const WRectangle *ng,
 }
 
 
-static void split_rqgeom(WSplit *node, const WRectangle *ng, 
-                         bool hany, bool vany, WRectangle *rg,
-                         bool tryonly)
+static void split_do_rqgeom(WSplit *node, const WRectangle *ng, 
+                            bool hany, bool vany, WRectangle *rg,
+                            bool tryonly)
 {
     WRectangle rg_;
     
@@ -848,7 +848,7 @@ static void split_rqgeom(WSplit *node, const WRectangle *ng,
 
     begin_resize_segment();
     
-    split_rqgeom_(node, ng, hany, vany, rg, tryonly);
+    split_do_rqgeom_(node, ng, hany, vany, rg, tryonly);
     
     if(!tryonly){
         split_do_resize(node, rg, PRIMN_ANY, PRIMN_ANY, FALSE);
@@ -930,7 +930,49 @@ void splittree_rqgeom(WSplit *root, WSplit *sub, int flags,
         geom.y=sub->geom.y;
     }
     
-    split_rqgeom(sub, &geom, hany, vany, geomret, flags&REGION_RQGEOM_TRYONLY);
+    split_do_rqgeom(sub, &geom, hany, vany, geomret, 
+                    flags&REGION_RQGEOM_TRYONLY);
+}
+
+
+/*EXTL_DOC
+ * Attempt to resize and/or move the split tree starting at \var{node}.
+ * Behaviour and the \var{g} parameter are as for \fnref{WRegion.rqgeom} 
+ * operating on \var{node} (if it were a \type{WRegion}).
+ */
+EXTL_EXPORT_MEMBER
+ExtlTab split_rqgeom(WSplit *node, ExtlTab g)
+{
+    WRectangle geom, ogeom;
+    int flags=REGION_RQGEOM_WEAK_ALL;
+    WSplit *root;
+    
+    root=node;
+    while(root->parent!=NULL)
+        root=(WSplit*)(root->parent);
+        
+    geom=node->geom;
+    ogeom=geom;
+
+    if(extl_table_gets_i(g, "x", &(geom.x)))
+        flags&=~REGION_RQGEOM_WEAK_X;
+    if(extl_table_gets_i(g, "y", &(geom.y)))
+        flags&=~REGION_RQGEOM_WEAK_Y;
+    if(extl_table_gets_i(g, "w", &(geom.w)))
+        flags&=~REGION_RQGEOM_WEAK_W;
+    if(extl_table_gets_i(g, "h", &(geom.h)))
+        flags&=~REGION_RQGEOM_WEAK_H;
+    
+    geom.w=maxof(1, geom.w);
+    geom.h=maxof(1, geom.h);
+
+    splittree_rqgeom(root, node, flags, &geom, &ogeom);
+    
+    return extl_table_from_rectangle(&ogeom);
+    
+err:
+    warn("Invalid node.");
+    return extl_table_none();
 }
 
 
@@ -1002,13 +1044,13 @@ WSplitRegion *splittree_split(WSplit **root, WSplit *node, int dir, int primn,
             ng.h=sn+so;
         else
             ng.w=sn+so;
-        split_rqgeom_(node, &ng, TRUE, TRUE, &rg, TRUE);
+        split_do_rqgeom_(node, &ng, TRUE, TRUE, &rg, TRUE);
         rs=(dir==SPLIT_VERTICAL ? rg.h : rg.w);
         if(rs<minsize+objmin){
             WARN_FUNC("Unable to split: not enough free space.");
             return NULL;
         }
-        split_rqgeom_(node, &ng, TRUE, TRUE, &rg, FALSE);
+        split_do_rqgeom_(node, &ng, TRUE, TRUE, &rg, FALSE);
         rs=(dir==SPLIT_VERTICAL ? rg.h : rg.w);
         if(minsize>rs/2){
             sn=minsize;

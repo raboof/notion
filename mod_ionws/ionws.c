@@ -37,8 +37,30 @@
 #include "main.h"
 
 
+/*{{{ Some helper routines */
+
+
 #define STDISP_OF(WS) \
      ((WS)->stdispnode!=NULL ? (WS)->stdispnode->regnode.reg : NULL)
+
+
+static WSplitRegion *get_node_check(WIonWS *ws, WRegion *reg)
+{
+    WSplitRegion *node;
+
+    if(reg==NULL)
+        return NULL;
+    
+    node=splittree_node_of(reg);
+    
+    if(node==NULL || REGION_MANAGER(reg)!=(WRegion*)ws)
+        return NULL;
+    
+    return node;
+}
+
+
+/*}}}*/
 
 
 /*{{{ Dynfun implementations */
@@ -83,6 +105,16 @@ bool ionws_fitrep(WIonWS *ws, WWindow *par, const WFitParams *fp)
     split_resize(ws->split_tree, &(fp->g), PRIMN_ANY, PRIMN_ANY);
     
     return TRUE;
+}
+
+
+void ionws_managed_rqgeom(WIonWS *ws, WRegion *mgd, 
+                          int flags, const WRectangle *geom,
+                          WRectangle *geomret)
+{
+    WSplitRegion *node=get_node_check(ws, mgd);
+    if(node!=NULL && ws->split_tree!=NULL)
+        splittree_rqgeom(ws->split_tree, (WSplit*)node, flags, geom, geomret);
 }
 
 
@@ -507,22 +539,6 @@ bool ionws_rescue_clientwins(WIonWS *ws)
 }
 
 
-static WSplitRegion *get_node_check(WIonWS *ws, WRegion *reg)
-{
-    WSplitRegion *node;
-
-    if(reg==NULL)
-        return NULL;
-    
-    node=splittree_node_of(reg);
-    
-    if(node==NULL || REGION_MANAGER(reg)!=(WRegion*)ws)
-        return NULL;
-    
-    return node;
-}
-
-
 void ionws_do_managed_remove(WIonWS *ws, WRegion *reg)
 {
     if(STDISP_OF(ws)==reg){
@@ -586,69 +602,6 @@ bool ionws_manage_rescue(WIonWS *ws, WClientWin *cwin, WRegion *from)
         return (NULL!=mplex_attach_simple(nmgr, (WRegion*)cwin, 0));
     
     return FALSE;
-}
-
-
-/*}}}*/
-
-
-/*{{{ Resize */
-
-
-void ionws_managed_rqgeom(WIonWS *ws, WRegion *mgd, 
-                          int flags, const WRectangle *geom,
-                          WRectangle *geomret)
-{
-    WSplitRegion *node=get_node_check(ws, mgd);
-    if(node!=NULL && ws->split_tree!=NULL)
-        splittree_rqgeom(ws->split_tree, (WSplit*)node, flags, geom, geomret);
-}
-
-
-/*EXTL_DOC
- * Attempt to resize and/or move the split tree starting at \var{node}
- * Behaviour and the \var{g} parameter are as for \fnref{WRegion.rqgeom} 
- * operating on \var{node} (if it were a \type{WRegion}).
- */
-EXTL_EXPORT_MEMBER
-ExtlTab ionws_resize_tree(WIonWS *ws, WSplit *node, ExtlTab g)
-{
-    WRectangle geom, ogeom;
-    int flags=REGION_RQGEOM_WEAK_ALL;
-    WSplit *checknode;
-    
-    if(node==NULL)
-        goto err;
-    
-    checknode=node;
-    while(checknode->parent!=NULL)
-        checknode=(WSplit*)(checknode->parent);
-    
-    if(checknode!=ws->split_tree)
-        goto err;
-        
-    geom=node->geom;
-    ogeom=geom;
-
-    if(extl_table_gets_i(g, "x", &(geom.x)))
-        flags&=~REGION_RQGEOM_WEAK_X;
-    if(extl_table_gets_i(g, "y", &(geom.y)))
-        flags&=~REGION_RQGEOM_WEAK_Y;
-    if(extl_table_gets_i(g, "w", &(geom.w)))
-        flags&=~REGION_RQGEOM_WEAK_W;
-    if(extl_table_gets_i(g, "h", &(geom.h)))
-        flags&=~REGION_RQGEOM_WEAK_H;
-    
-    geom.w=maxof(1, geom.w);
-    geom.h=maxof(1, geom.h);
-
-    splittree_rqgeom(ws->split_tree, node, flags, &geom, &ogeom);
-    
-    return extl_table_from_rectangle(&ogeom);
-    
-err:
-    warn("Invalid node.");
-    return extl_table_none();
 }
 
 
