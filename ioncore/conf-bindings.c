@@ -75,7 +75,7 @@ static bool parse_keybut(const char *str, uint *mod_ret, uint *kcb_ret,
 			}
 			*kcb_ret=XKeysymToKeycode(wglobal.dpy, keysym);
 			if(*kcb_ret==0){
-				warn("Could not convert keysym to keycode");
+				warn_obj(str, "Could not convert keysym to keycode");
 				break;
 			}
 		}else{
@@ -119,13 +119,14 @@ static bool parse_keybut(const char *str, uint *mod_ret, uint *kcb_ret,
 /*{{{ process_bindings */
 
 
-static bool do_action(WBindmap *bindmap, ExtlFn func, uint act,
-					  uint mod, uint kcb, int area, bool wr)
+static bool do_action(WBindmap *bindmap, const char *str,
+					  ExtlFn func, uint act, uint mod, uint kcb,
+					  int area, bool wr)
 {
 	WBinding binding;
 	
 	if(wr && mod==0){
-		warn("Cannot waitrel when no modifiers set. Sorry.");
+		warn("Cannot waitrel when no modifiers set in \"%s\". Sorry.", str);
 		wr=FALSE;
 	}
 
@@ -142,14 +143,14 @@ static bool do_action(WBindmap *bindmap, ExtlFn func, uint act,
 
 	deinit_binding(&binding);
 	
-	warn("Unable to add binding.");
+	warn("Unable to add binding %s.", str);
 	
 	return FALSE;
 }
 
 
-static bool do_submap(WBindmap *bindmap, ExtlTab subtab, uint action,
-					  uint mod, uint kcb)
+static bool do_submap(WBindmap *bindmap, const char *str,
+					  ExtlTab subtab, uint action, uint mod, uint kcb)
 {
 	WBinding binding, *bnd;
 
@@ -176,7 +177,7 @@ static bool do_submap(WBindmap *bindmap, ExtlTab subtab, uint action,
 
 	deinit_binding(&binding);
 	
-	warn("Unable to add submap.");
+	warn("Unable to add submap for binding %s.", str);
 	
 	return FALSE;
 }
@@ -213,7 +214,7 @@ static bool do_entry(WBindmap *bindmap, ExtlTab tab, StringIntMap *areamap)
 	}else{
 		action=stringintmap_value(action_map, action_str, -1);
 		if(action<0){
-			warn("Unknown action");
+			warn("Unknown binding action %s.", action_str);
 			goto fail;
 		}
 	}
@@ -227,24 +228,24 @@ static bool do_entry(WBindmap *bindmap, ExtlTab tab, StringIntMap *areamap)
 	}
 	
 	if(extl_table_gets_t(tab, "submap", &subtab)){
-		ret=do_submap(bindmap, subtab, action, mod, kcb);
+		ret=do_submap(bindmap, kcb_str, subtab, action, mod, kcb);
 		extl_unref_table(subtab);
 	}else{
 		if(areamap!=NULL){
 			if(extl_table_gets_s(tab, "area", &area_str)){
 				area=stringintmap_value(areamap, area_str, -1);
 				if(area<0){
-					warn("Unknown area.");
+					warn("Unknown area %s for binding %s.", area_str, kcb_str);
 					area=0;
 				}
 			}
 		}
 		
 		if(!extl_table_gets_f(tab, "func", &func)){
-			warn("Function not set");
+			warn("Function for binding %s not set/nil/undefined.", kcb_str);
 			goto fail;
 		}
-		ret=do_action(bindmap, func, action, mod, kcb, area, wr);
+		ret=do_action(bindmap, kcb_str, func, action, mod, kcb, area, wr);
 		if(!ret)
 			extl_unref_fn(func);
 	}
