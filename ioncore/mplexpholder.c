@@ -165,12 +165,7 @@ int mplexpholder_layer(WMPlexPHolder *ph)
         return -1;
     
     if(ph->after!=NULL){
-        if(llist_is_node_on(mplex->l2_list, ph->after))
-            return 2;
-        
-        assert(llist_is_node_on(mplex->l1_list, ph->after));
-        
-        return 1;
+        return LLIST_LAYER(ph->after);
     }else{
         if(on_ph_list(mplex->l2_phs, ph))
             return 2;
@@ -299,10 +294,11 @@ static WMPlexPHolder *node_last_ph(WMPlex *mplex,
 }
 
 
-void mplex_move_phs_before(WMPlex *mplex, WLListNode *node, int layer)
+void mplex_move_phs_before(WMPlex *mplex, WLListNode *node)
 {
     WMPlexPHolder *after=NULL;
     WLListNode *or_after;
+    int layer=(node->flags&LLIST_L2 ? 2 : 1);
     
     or_after=(layer==2 
               ? LIST_PREV(mplex->l2_list, node, next, prev)

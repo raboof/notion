@@ -142,16 +142,16 @@ bool mplex_may_destroy(WMPlex *mplex)
 /*{{{ Higher-level layer list stuff */
 
 
-static bool on_l1_list(WMPlex *mplex, WRegion *reg)
+WLListNode *mplex_find_node(WMPlex *mplex, WRegion *reg)
 {
-    return llist_is_on(mplex->l1_list, reg);
+    WLListNode *node=llist_find_on(mplex->l2_list, reg);
+    
+    if(node==NULL)
+        node=llist_find_on(mplex->l1_list, reg);
+    
+    return node;
 }
 
-
-static bool on_l2_list(WMPlex *mplex, WRegion *reg)
-{
-    return llist_is_on(mplex->l2_list, reg);
-}
 
 
 WRegion *mplex_current(WMPlex *mplex)
@@ -170,11 +170,12 @@ EXTL_SAFE
 EXTL_EXPORT_MEMBER
 int mplex_layer(WMPlex *mplex, WRegion *reg)
 {
-    if(on_l1_list(mplex, reg))
-        return 1;
-    if(on_l2_list(mplex, reg))
-        return 2;
-    return -1;
+    WLListNode *node=mplex_find_node(mplex, reg);
+    
+    if(node==NULL)
+        return -1;
+    else
+        return LLIST_LAYER(node);
 }
 
 
@@ -256,7 +257,7 @@ void mplex_set_index(WMPlex *mplex, WRegion *reg, int index)
     if(node==NULL)
         return;
     
-    mplex_move_phs_before(mplex, node, 1);
+    mplex_move_phs_before(mplex, node);
     llist_unlink(&(mplex->l1_list), node);
     
     after=llist_index_to_after(mplex->l1_list, mplex->l1_current, index);
@@ -434,7 +435,7 @@ static void mplex_managed_rqgeom(WMPlex *mplex, WRegion *sub,
     
     mplex_managed_geom(mplex, &mg);
     
-    if(on_l2_list(mplex, sub)){
+    if(llist_is_on(mplex->l2_list, sub)){
         /* allow changes but constrain with managed area */
         rg=*geom;
         rectangle_constrain(&rg, &mg);
@@ -509,9 +510,10 @@ static bool mplex_l2_passive(WMPlex *mplex)
 
 
 static bool mplex_do_node_display(WMPlex *mplex, WLListNode *node,
-                                  bool l2, bool call_changed)
+                                  bool call_changed)
 {
     WRegion *sub=node->reg;
+    bool l2=node->flags&LLIST_L2;
     
     if(l2){
         if(node==mplex->l2_current)
@@ -566,7 +568,7 @@ static bool mplex_do_node_display(WMPlex *mplex, WLListNode *node,
         mplex_managed_changed(mplex, MPLEX_CHANGE_SWITCHONLY, TRUE, sub);
         return mplex_l2_passive(mplex);
     }else{
-        mplex_move_phs_before(mplex, node, 2);
+        mplex_move_phs_before(mplex, node);
         llist_unlink(&(mplex->l2_list), node);
         
         region_raise(sub);
@@ -582,9 +584,9 @@ static bool mplex_do_node_display(WMPlex *mplex, WLListNode *node,
 
 
 static bool mplex_do_node_goto(WMPlex *mplex, WLListNode *node,
-                               bool l2, bool call_changed, int flags)
+                               bool call_changed, int flags)
 {
-    if(!mplex_do_node_display(mplex, node, l2, call_changed))
+    if(!mplex_do_node_display(mplex, node, call_changed))
         return FALSE;
     
     if(flags&REGION_GOTO_FOCUS){
@@ -597,30 +599,22 @@ static bool mplex_do_node_goto(WMPlex *mplex, WLListNode *node,
 
 
 static bool mplex_do_node_goto_sw(WMPlex *mplex, WLListNode *node,
-                                  bool l2, bool call_changed)
+                                  bool call_changed)
 {
     bool mcf=region_may_control_focus((WRegion*)mplex);
     int flags=(mcf ? REGION_GOTO_FOCUS : 0)|REGION_GOTO_NOWARP;
-    return mplex_do_node_goto(mplex, node, l2, FALSE, flags);
+    return mplex_do_node_goto(mplex, node, call_changed, flags);
 }
 
 
 bool mplex_managed_goto(WMPlex *mplex, WRegion *sub, int flags)
 {
-    bool l2=FALSE;
-    WLListNode *node;
+    WLListNode *node=mplex_find_node(mplex, sub);
     
-    node=llist_find_on(mplex->l2_list, sub);
-    
-    if(node!=NULL){
-        l2=TRUE;
-    }else{
-        node=llist_find_on(mplex->l1_list, sub);
-        if(node==NULL)
-            return FALSE;
-    }
-
-    return mplex_do_node_goto(mplex, node, l2, TRUE, flags);
+    if(node==NULL)
+        return FALSE;
+    else
+        return mplex_do_node_goto(mplex, node, TRUE, flags);
 }
 
 
@@ -632,7 +626,7 @@ static void do_switch(WMPlex *mplex, WLListNode *node)
             ioncore_set_previous_of(node->reg);
         region_managed_goto((WRegion*)mplex, node->reg,
                             (mcf ? REGION_GOTO_FOCUS : 0));
-        /*mplex_do_node_goto(mplex, node->reg, FALSE, TRUE,
+        /*mplex_do_node_goto(mplex, node->reg, TRUE,
                              (mcf ? REGION_GOTO_FOCUS : 0));*/
     }
 }
@@ -732,7 +726,7 @@ bool mplex_l2_show(WMPlex *mplex, WRegion *reg)
     if(node==NULL || !(node->flags&LLIST_L2_HIDDEN))
         return FALSE;
     
-    return mplex_do_node_goto(mplex, node, TRUE, TRUE,
+    return mplex_do_node_goto(mplex, node, TRUE,
                               (mcf ? REGION_GOTO_FOCUS : 0));
 }
 
@@ -744,10 +738,10 @@ bool mplex_l2_show(WMPlex *mplex, WRegion *reg)
 
 
 WLListNode *mplex_do_attach_after(WMPlex *mplex, 
-                                     WLListNode *after, 
-                                     WMPlexAttachParams *param,
-                                     WRegionAttachHandler *hnd,
-                                     void *hnd_param)
+                                  WLListNode *after, 
+                                  WMPlexAttachParams *param,
+                                  WRegionAttachHandler *hnd,
+                                  void *hnd_param)
 {
     WRegion *reg;
     WFitParams fp;
@@ -780,7 +774,7 @@ WLListNode *mplex_do_attach_after(WMPlex *mplex,
     }
     
     node->reg=reg;
-    node->flags=0;
+    node->flags=(l2 ? LLIST_L2 : 0);
     node->phs=NULL;
     
     if(l2){
@@ -804,7 +798,7 @@ WLListNode *mplex_do_attach_after(WMPlex *mplex,
         sw=TRUE;
     
     if(sw)
-        mplex_do_node_goto_sw(mplex, node, l2, FALSE);
+        mplex_do_node_goto_sw(mplex, node, FALSE);
     else
         region_unmap(reg);
 
@@ -1021,7 +1015,7 @@ void mplex_managed_remove(WMPlex *mplex, WRegion *sub)
     if(node!=NULL){
         l2=TRUE;
         
-        mplex_move_phs_before(mplex, node, 2);
+        mplex_move_phs_before(mplex, node);
         llist_unlink(&(mplex->l2_list), node);
         mplex->l2_count--;
 
@@ -1053,7 +1047,7 @@ void mplex_managed_remove(WMPlex *mplex, WRegion *sub)
             }
         }
         
-        mplex_move_phs_before(mplex, node, 1);
+        mplex_move_phs_before(mplex, node);
         llist_unlink(&(mplex->l1_list), node);
         mplex->l1_count--;
     }
@@ -1064,7 +1058,7 @@ void mplex_managed_remove(WMPlex *mplex, WRegion *sub)
         return;
     
     if(next!=NULL && sw)
-        mplex_do_node_goto_sw(mplex, next, FALSE, FALSE);
+        mplex_do_node_goto_sw(mplex, next, FALSE);
     else if(l2 && region_may_control_focus((WRegion*)mplex))
         region_warp((WRegion*)mplex);
     

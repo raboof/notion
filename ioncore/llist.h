@@ -19,8 +19,9 @@
 #include "extlconv.h"
 
 
-#define LLIST_L2_HIDDEN 0x0001
+#define LLIST_L2_HIDDEN  0x0001
 #define LLIST_L2_PASSIVE 0x0002
+#define LLIST_L2         0x0004
 
 
 DECLSTRUCT(WLListNode){
@@ -34,6 +35,8 @@ DECLSTRUCT(WLListNode){
 typedef WLListNode *WLListIterTmp;
 
 #define LLIST_REG(NODE) ((NODE)!=NULL ? (NODE)->reg : NULL)
+#define LLIST_LAYER(NODE) ((NODE)->flags&LLIST_L2 ? 2 : 1)
+
 
 #define FOR_ALL_NODES_ON_LLIST(NODE, LL) \
     LIST_FOR_ALL(LL, NODE, next, prev)

@@ -58,8 +58,7 @@ extern void mplex_move_phs(WMPlex *mplex, WLListNode *node,
                            WMPlexPHolder *after,
                            WLListNode *or_after, 
                            int or_layer);
-extern void mplex_move_phs_before(WMPlex *mplex, WLListNode *node, 
-                                  int layer);
+extern void mplex_move_phs_before(WMPlex *mplex, WLListNode *node);
 
 extern WMPlexPHolder *mplex_managed_get_pholder(WMPlex *mplex, 
                                                 WRegion *mgd);
