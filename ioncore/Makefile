@@ -13,19 +13,24 @@ LIBS += -ltu -lm $(X11_LIBS) $(XINERAMA_LIBS)
 #DIST: INCLUDES += -I../libtu/include $(X11_INCLUDES) -I..
 INCLUDES += $(X11_INCLUDES) -I..
 DEFINES += -DETCDIR=\"$(ETCDIR)\" -DLIBDIR=\"$(LIBDIR)\"
+CFLAGS += $(XOPEN_SOURCE)
 
-ifeq ($(STATIC_MODULES),1)
-DEFINES += -DCF_STATIC_MODULES
-EXT_OBJS := $(foreach mod, $(MODULE_LIST), ../$(mod)/$(mod).a)
-TO_CLEAN := $(TO_CLEAN) static-modules.h
+# libtool
+INCLUDES += $(LTDL_INCLUDES)
+LIBS += $(LTDL_LIBS)
+ifeq ($(PRELOAD_MODULES),1)
+LDFLAGS += $(foreach mod, $(MODULE_LIST), -dlpreopen ../$(mod)/$(mod).la)
+CFLAGS += -DCF_PRELOAD_MODULES
+LINKOPTS = -R$(MODULEDIR)
+else
+LINKOPTS = -export-dynamic -R$(MODULEDIR)
 endif
-
-CFLAGS += $(XOPEN_SOURCE) $(MODULE_SUPPORT_CFLAGS)
-LDFLAGS += $(MODULE_SUPPORT_LDFLAGS)
+MODULEDIR = $(LIBDIR)/ion-devel
 
 # Lua support setup
 EXT_OBJS := $(EXT_OBJS) ../luaextl/luaextl.a
-LIBS := $(LIBS) $(LUA_LIBS)
+ICNLUDES += $(LUA_INCLUDES)
+LIBS += $(LUA_LIBS)
 
 SOURCES=binding.c conf-bindings.c conf-draw.c cursor.c draw.c event.c	\
 	exec.c focus.c font.c key.c modules.c mwmhints.c	\
@@ -48,25 +53,7 @@ include $(TOPDIR)/rules.mk
 ######################################
 
 ioncore: $(OBJS) $(EXT_OBJS)
-	$(CC) $(OBJS) $(EXT_OBJS) $(LDFLAGS) -o $@
-
-ifeq ($(STATIC_MODULES),1)
-
-modules.c: static-modules.h
-
-.PHONY: static-modules.h
-
-static-modules.h:
-	for i in $(MODULE_LIST); do \
-		echo "#include \"../$$i/main.h\""; \
-	done > static-modules.h; \
-	echo "static StatModInfo available_modules[]={" >> static-modules.h; \
-	for i in $(MODULE_LIST); do \
-		echo "{\"$$i\", $${i}_module_init, $${i}_module_deinit, FALSE},"; \
-	done >> static-modules.h; \
-	echo "{NULL, NULL, NULL, FALSE}," >> static-modules.h;
-	echo "};" >> static-modules.h
-endif
+	$(LIBTOOL) $(CC) $(LINKOPTS) $(OBJS) $(EXT_OBJS) $(LDFLAGS) -o $@
 
 _install:
 	$(INSTALLDIR) $(BINDIR)

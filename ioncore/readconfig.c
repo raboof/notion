@@ -7,6 +7,7 @@
 
 #include <string.h>
 #include <unistd.h>
+#include <ltdl.h>
 #include <libtu/output.h>
 
 #include "common.h"
@@ -18,8 +19,8 @@
 static char* dummy_paths=NULL;
 static char **etcpaths=&dummy_paths;
 static int n_etcpaths=0;
-static char **libpaths=&dummy_paths;
-static int n_libpaths=0;
+/*static char **libpaths=&dummy_paths;
+static int n_libpaths=0;*/
 
 
 /*{{{ Init */
@@ -64,7 +65,8 @@ bool ioncore_add_confdir(const char *dir)
 
 bool ioncore_add_libdir(const char *dir)
 {
-	return add_dir(&libpaths, &n_libpaths, dir);
+	return (lt_dladdsearchdir(dir)==0);
+	/*return add_dir(&libpaths, &n_libpaths, dir);*/
 }
 
 
@@ -348,7 +350,7 @@ bool read_config_for_scr(const char *module, int xscr)
 /*{{{ find_module */
 
 
-char *find_module(const char *fname)
+/*char *find_module(const char *fname)
 {
 	char *tmp, **dir;
 
@@ -372,7 +374,7 @@ char *find_module(const char *fname)
 	warn("Could not find module %s.", fname);
 	
 	return NULL;
-}
+}*/
 
 
 /*}}}*/

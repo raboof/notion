@@ -5,9 +5,7 @@
  * See the included file LICENSE for details.
  */
 
-#ifndef CF_STATIC_MODULES
-
-#include <dlfcn.h>
+#include <ltdl.h>
 #include <string.h>
 #include <ctype.h>
 
@@ -20,7 +18,7 @@
 INTRSTRUCT(Module);
 	
 DECLSTRUCT(Module){
-	void *handle;
+	lt_dlhandle handle;
 	char *name;
 	Module *next, *prev;
 };
@@ -28,26 +26,13 @@ DECLSTRUCT(Module){
 static Module *modules=NULL;
 
 
-/*{{{ Symbols */
-
-static char *module_symbol_cat(const char *s1, const char *s2)
-{
-#ifdef CF_UNDERSCORED_MODULE_SYMBOLS
-	return scat3("_", s1, s2);
-#else
-	return scat(s1, s2);
-#endif
-}
-
-/*}}}*/
-
 
 /*{{{ Loading and initialization code */
 
 
-static bool check_version(void *handle, char *name)
+static bool check_version(lt_dlhandle handle, char *name)
 {
-	char *p=module_symbol_cat(name, "_module_ion_version");
+	char *p=scat(name, "_module_ion_version");
 	char *versionstr;
 
 	if(p==NULL){
@@ -55,7 +40,7 @@ static bool check_version(void *handle, char *name)
 		return FALSE;
 	}
 	
-	versionstr=(char*)dlsym(handle, p);
+	versionstr=(char*)lt_dlsym(handle, p);
 	
 	free(p);
 	
@@ -66,9 +51,9 @@ static bool check_version(void *handle, char *name)
 }
 
 
-static bool call_init(void *handle, char *name)
+static bool call_init(lt_dlhandle handle, char *name)
 {
-	char *p=module_symbol_cat(name, "_module_init");
+	char *p=scat(name, "_module_init");
 	bool (*initfn)(void);
 
 	if(p==NULL){
@@ -76,7 +61,7 @@ static bool call_init(void *handle, char *name)
 		return FALSE;
 	}
 	
-	initfn=(bool (*)())dlsym(handle, p);
+	initfn=(bool (*)())lt_dlsym(handle, p);
 	
 	free(p);
 	
@@ -87,26 +72,41 @@ static bool call_init(void *handle, char *name)
 }
 
 
-static bool do_load_module(const char *fname)
+bool init_module_support()
 {
-	void *handle;
+#ifdef CF_PRELOAD_MODULES
+	LTDL_SET_PRELOADED_SYMBOLS();
+#endif
+	if(lt_dlinit()!=0){
+		warn("lt_dlinit: %s", lt_dlerror());
+		return FALSE;
+	}
+	return TRUE;
+}
+
+
+EXTL_EXPORT
+bool load_module(const char *fname)
+/*static bool do_load_module(const char *fname)*/
+{
+	lt_dlhandle handle=NULL;
 	Module *m;
 	const char *p;
 	char *n;
 	size_t l;
 	
-	handle=dlopen(fname, RTLD_NOW|RTLD_GLOBAL);
+	handle=lt_dlopenext(fname);
 	
 	if(handle==NULL){
-		warn_obj(fname, "%s", dlerror());
+		warn("%s", lt_dlerror());
 		return FALSE;
 	}
-
+	
 	for(m=modules; m!=NULL; m=m->next){
 		if(m->handle==handle)
 			return TRUE;
 	}
-	
+
 	/* Get the module name without directory or extension */
 	
 	p=strrchr(fname, '/');
@@ -161,12 +161,12 @@ err3:
 err2:
 	free(n);
 err1:
-	dlclose(handle);
+	lt_dlclose(handle);
 	return FALSE;
 }
 
 
-EXTL_EXPORT
+/*EXTL_EXPORT
 bool load_module(const char *name)
 {
 	char *name2=NULL;
@@ -176,7 +176,7 @@ bool load_module(const char *name)
 		return do_load_module(name);
 
 	if(strchr(name, '.')==NULL){
-		name2=scat(name, ".so");
+		name2=scat(name, ".la");
 		if(name2==NULL){
 			warn_err();
 			return FALSE;
@@ -194,7 +194,7 @@ bool load_module(const char *name)
 	}
 	
 	return ret;
-}
+}*/
 
 
 /*}}}*/
@@ -203,9 +203,9 @@ bool load_module(const char *name)
 /*{{{ Deinit */
 
 
-static void call_deinit(void *handle, char *name)
+static void call_deinit(lt_dlhandle handle, char *name)
 {
-	char *p=module_symbol_cat(name, "_module_deinit");
+	char *p=scat(name, "_module_deinit");
 	void (*deinitfn)(void);
 
 	if(p==NULL){
@@ -213,7 +213,7 @@ static void call_deinit(void *handle, char *name)
 		return;
 	}
 	
-	deinitfn=(void (*)())dlsym(handle, p);
+	deinitfn=(void (*)())lt_dlsym(handle, p);
 	
 	free(p);
 	
@@ -226,7 +226,7 @@ static void do_unload_module(Module *m)
 {
 	call_deinit(m->handle, m->name);
 
-	dlclose(m->handle);
+	lt_dlclose(m->handle);
 	if(m->name!=NULL)
 		free(m->name);
 	free(m);
@@ -248,68 +248,3 @@ void unload_modules()
 /*}}}*/
 
 
-#else /* CF_STATIC_MODULES */
-
-
-#include "common.h"
-
-INTRSTRUCT(StatModInfo);
-
-DECLSTRUCT(StatModInfo){
-	char *name;
-	bool (*initfn)();
-	void (*deinitfn)();
-	bool loaded;
-};
-
-#include "static-modules.h"
-
-/*{{{ Dummy functions for systems without sufficient dynamic
- * linking support
- */
-
-
-EXTL_EXPORT
-bool load_module(const char *name)
-{
-	int i;
-	StatModInfo *smi=available_modules;
-		
-	for( ; smi->name!=NULL; smi++){
-		if(strcmp(smi->name, name)==0)
-			break;
-	}
-	
-	if(smi->name==NULL){
-		warn_obj(name, "No such statically compiled module found");
-		return FALSE;
-	}
-	
-	if(smi->loaded)
-		return TRUE;
-	
-	if(!smi->initfn())
-		return FALSE;
-		
-	smi->loaded=TRUE;
-	return TRUE;
-}
-
-
-void unload_modules()
-{
-	StatModInfo *smi=available_modules;
-		
-	for( ; smi->name!=NULL; smi++){
-		if(!smi->loaded)
-			continue;
-		smi->deinitfn();
-		smi->loaded=FALSE;
-	}
-}
-
-
-/*}}}*/
-
-
-#endif /* CF_STATIC_MODULES */

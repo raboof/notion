@@ -2,16 +2,13 @@
 ## Some make rules
 ##
 
+
+# Main targets
 ######################################
 
 ifdef MODULE
-ifneq ($(STATIC_MODULES),1)
-TARGETS := $(TARGETS) $(MODULE).so
-else
-TARGETS := $(TARGETS) $(MODULE).a
+TARGETS := $(TARGETS) $(MODULE).la
 endif
-endif
-
 
 ifdef SUBDIRS
 
@@ -45,68 +42,97 @@ install: _install
 
 endif
 
-######################################
 
-OBJS=$(subst .c,.o,$(SOURCES))
+# The rules
+######################################
 
 ifdef MAKE_EXPORTS
 
 TO_CLEAN := $(TO_CLEAN) exports.c
 
-OBJS := $(OBJS) exports.o
+EXPORTS_C = exports.c
 
 exports.c: $(SOURCES)
 	$(PERL) $(TOPDIR)/mkexports.pl $(MAKE_EXPORTS) exports.c $(SOURCES)
 
-endif
+else # !MAKE_EXPORTS
+
+EXPORTS_C = 
+
+endif # !MAKE_EXPORTS
 
 ifdef MODULE
 
-ifneq ($(STATIC_MODULES),1)
+OBJS=$(subst .c,.lo,$(SOURCES) $(EXPORTS_C))
 
-$(MODULE).so: $(OBJS) $(EXT_OBJS)
-	$(CC) $(CFLAGS) $(LDFLAGS) $(MODULE_LDFLAGS) $(OBJS) $(EXT_OBJS) -o $@
+ifneq ($(PRELOAD_MODULES),1)
+PICOPT=-prefer-pic
+LINKOPT=-module -avoid-version
+else
+PICOPT=-static -prefer-non-pic
+LINKOPT=-static -module -avoid-version
+endif
+
+%.lo: %.c
+	$(LIBTOOL) --mode=compile $(CC) $(PICOPT) $(CFLAGS) -c $< -o $@
+
+$(MODULE).la: $(OBJS) $(EXT_OBJS)
+	$(LIBTOOL) --mode=link $(CC) $(LINKOPT) $(LDFLAGS) \
+ 	-rpath $(MODULEDIR) $(OBJS) $(EXT_OBJS) -o $@
 
 module_install:
 	$(INSTALLDIR) $(MODULEDIR)
-	$(INSTALL) -m $(BIN_MODE) $(MODULE).so $(MODULEDIR)
+	$(LIBTOOL) --mode=install $(INSTALL) -m $(BIN_MODE) $(MODULE).la $(MODULEDIR)
 	# $(STRIP) $(MODULEDIR)/$(MODULE).so
 
-else
+clean_objs:
+	$(LIBTOOL) --mode=clean $(RM) -f $(OBJS)
 
-$(MODULE).a: $(OBJS)
-	$(AR) $(ARFLAGS) $@ $+
-	$(RANLIB) $@
+clean_target:
+	$(LIBTOOL) --mode=clean $(RM) -f $(MODULE).la
 
-module_install:
+else #!MODULE
 
-endif
+ifdef SOURCES
 
-.c.o:
-	$(CC) $(CFLAGS) $(MODULE_CFLAGS) -c $< -o $@
+OBJS=$(subst .c,.o,$(SOURCES) $(EXPORTS_C))
 
-else
+clean_objs:
+	$(RM) -f $(OBJS)
 
-.c.o:
+else #!SOURCES
+
+clean_objs:
+
+endif #!SOURCES
+
+%.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-endif
+clean_target:
+	rm -f $(TARGETS)
 
-_clean: 
-	rm -f core $(DEPEND_FILE) $(OBJS) $(TO_CLEAN)
+endif #!MODULE
 
-_realclean:
-	rm -f $(TARGETS) $(TO_REALCLEAN)
+_clean: clean_objs
+	rm -f core $(DEPEND_FILE) $(TO_CLEAN)
+
+_realclean: clean_target
+	rm -f $(TO_REALCLEAN)
 
 
 ifdef SOURCES
+
 _depend:
 	$(MAKE_DEPEND) $(SOURCES)
-else
+else #!SOURCES
+
 _depend:
 	
-endif
+endif #!SOURCES
 
+
+# Subdirectories
 ######################################
 
 subdirs:
@@ -124,6 +150,8 @@ subdirs-realclean:
 subdirs-install:
 	set -e; for i in $(INSTALL_SUBDIRS); do $(MAKE) -C $$i install; done
 
+
+# Dependencies
 ######################################
 
 ifeq ($(DEPEND_FILE),$(wildcard $(DEPEND_FILE)))

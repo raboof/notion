@@ -23,40 +23,31 @@ INCDIR=$(PREFIX)/include
 ## Modules
 ##
 
+LIBTOOL=libtool
+
+# Set PRELOAD_MODULES=1 if your system does not support dynamically
+# loaded modules. 
+#PRELOAD_MODULES=1
+
+# List of modules to build (and possibly preload)
 MODULE_LIST=ionws floatws query
 
-# For dynamically loaded modules
-MODULE_SUPPORT_LDFLAGS=-export-dynamic -ldl
-MODULE_LDFLAGS=-shared
-MODULE_CFLAGS=-fPIC
-
-# Some strangely behaving OSes (NetBSD, OpenBSD, ...) might need this.
-#MODULE_SUPPORT_CFLAGS=-DCF_UNDERSCORED_MODULE_SYMBOLS
-MODULE_SUPPORT_CFLAGS=
-
-# Statically loaded modules
-#STATIC_MODULES=1
-#MODULE_SUPPORT_CFLAGS=
-#MODULE_SUPPORT_LDFLAGS=
-#MODULE_LDFLAGS=
-#MODULE_CFLAGS=
+# Settings for compiling and linking to ltdl
+LTDL_INCLUDES=
+LTDL_LIBS=-lltdl
 
 ##
 ## Lua
 ##
 
-# If you have Lua 5.0 in /usr/lib, the following should do:
+# If you have Lua 5.0 in /usr/lib, the following should do it:
 #LUA_LIBS = -llua -llualib
 #LUA_INCLUDES =
 
 # If you, for example, have lua 4.0 in /usr/lib and 5.0 somewhere else,
-# the following settings might be what you need. Lame ld.so on my system
-# searches /usr/lib before /usr/local/lib or anything in ld.so.conf so
-# the -Xlinker -rpath $(LUA_PATH) option is used to force sane library
-# lookup order instead of having the user set LD_LIBRARY_PATH. If you're
-# linking to static libraries, this option is not needed.
+# the following settings might be what you need. 
 LUA_PATH=/usr/local/lib
-LUA_LIBS = -L$(LUA_PATH) -Xlinker -rpath $(LUA_PATH) -llua -llualib
+LUA_LIBS = -L$(LUA_PATH) -R$(LUA_PATH) -llua -llualib
 LUA_INCLUDES = -I$(LUA_PATH)/include
 
 

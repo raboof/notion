@@ -12,5 +12,6 @@
 
 extern bool load_module(const char *name);
 extern void unload_modules();
+extern bool init_module_support();
 
 #endif /* ION_IONCORE_MODULES_H */

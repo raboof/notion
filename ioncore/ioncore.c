@@ -97,6 +97,9 @@ int main(int argc, char*argv[])
 	int opt;
 	
 	libtu_init(argv[0]);
+
+	if(!init_module_support())
+		return EXIT_FAILURE;
 	
 	if(argc<2){
 		warn("Do not run ioncore directly.");
