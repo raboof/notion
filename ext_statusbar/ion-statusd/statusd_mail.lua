@@ -58,7 +58,9 @@ local function calcmail(fname)
     return total, total-read, total-old
 end
 
-local function update_mail(timer)
+local mail_timer
+
+local function update_mail()
     assert(settings.mbox)
     
     local mail_total, mail_unread, mail_new=calcmail(settings.mbox)
@@ -67,9 +69,9 @@ local function update_mail(timer)
     statusd.inform("mail_unread", tostring(mail_unread))
     statusd.inform("mail_total", tostring(mail_total))
 
-    timer:set(settings.interval, update_mail)
+    mail_timer:set(settings.interval, update_mail)
 end
 
 -- Init
-local timer=statusd.create_timer()
-update_mail(timer)
+mail_timer=statusd.create_timer()
+update_mail()
