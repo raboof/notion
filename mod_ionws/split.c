@@ -766,7 +766,7 @@ WSplit *split_tree_split(WSplit **root, WSplit *node, int dir, int primn,
     if(dir!=SPLIT_HORIZONTAL && dir!=SPLIT_VERTICAL)
         dir=SPLIT_VERTICAL;
 
-    split_update_bounds(node, TRUE);
+    split_update_bounds(*root, TRUE);
     objmin=(dir==SPLIT_VERTICAL ? node->min_h : node->min_w);
 
     s=split_size(node, dir);
@@ -847,12 +847,12 @@ WSplit *split_tree_split(WSplit **root, WSplit *node, int dir, int primn,
         if(primn==PRIMN_TL)
             ng.x+=sn;
     }
-    
+
     split_do_resize(node, &ng, 
                     (dir==SPLIT_HORIZONTAL ? primn : PRIMN_ANY),
                     (dir==SPLIT_VERTICAL ? primn : PRIMN_ANY),
                     FALSE);
-    
+
     /* Set up split structure
      */
     psplit=node->parent;

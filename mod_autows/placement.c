@@ -24,6 +24,7 @@
 #include <ioncore/names.h>
 #include <ioncore/region-iter.h>
 #include <ioncore/resize.h>
+#include <ioncore/defer.h>
 #include <mod_ionws/split.h>
 #include "placement.h"
 #include "autows.h"
@@ -87,244 +88,137 @@ static WRegion *find_suitable_target(WIonWS *ws)
 /*}}}*/
 
 
-/*{{{ Placement penalties */
-
-#define PENALTY_NEVER    INT_MAX
-#define PENALTY_INIT     (INT_MAX-1)
-#define PENALTY_ENDSCALE (-1)
-
-#define FIT_FIT_OFFSET 0
-#define FIT_ACTIVEREG_OFFSET 100
-#define FIT_INACTIVEREG_OFFSET 500
-
-/* grow or shrink percentage */
-static int fit_penalty_scale[][2]={
-    {  10, 9000},
-    {  33, 1000},
-    {  80,  100},
-    { 100,    0},
-    { 120,  100},
-    { 200,  200},
-    { 500, 9000},
-    {   0, PENALTY_ENDSCALE}
-};
-
-/* slack pixels used */
-static int slack_penalty_scale[][2]={
-    {   0,    0},
-    {  50,  200},
-    { 200, 1000},
-    { 200, PENALTY_NEVER},
-    {   0, PENALTY_ENDSCALE}
-};
-
-
-/* pixels remaining in other side of split */
-static int split_penalty_scale[][2]={
-    {  10, PENALTY_NEVER},
-    {  10, 1000},
-    { 100,    0},
-    {   0, PENALTY_ENDSCALE}
-};
-
-
-static int interp1(int scale[][2], int v)
-{
-    assert(scale[0][1]!=PENALTY_ENDSCALE);
-    
-    if(v<=scale[0][0] || scale[1][1]==PENALTY_ENDSCALE)
-        return scale[0][1];
-    
-    if(v<scale[1][0]){
-        if(scale[0][1]==PENALTY_NEVER || scale[1][1]==PENALTY_NEVER)
-            return PENALTY_NEVER;
-        
-        return ((scale[1][1]*(v-scale[0][0])+scale[0][1]*(scale[1][0]-v))
-                /(scale[1][0]-scale[0][0]));
-    }
-
-    return interp1(scale+1, v);
-}
-
-
-static int fit_penalty(int ms, int s, int ss)
-{
-    int res, d=100*ss/maxof(1, s);
-   
-    if(ss<ms)
-        return PENALTY_NEVER; /* Should just penalise more. */
-    
-    res=interp1(fit_penalty_scale, d);
-    return (res==PENALTY_NEVER ? res : res+FIT_FIT_OFFSET);
-}
-
-#define hfit_penalty(S, CWIN, FRAME_SZH, SZ, U, DS) \
-    fit_penalty(FRAME_SZH->min_width, SZ, (S)->geom.w)
-#define vfit_penalty(S, CWIN, FRAME_SZH, SZ, U, DS) \
-    fit_penalty(FRAME_SZH->min_height, SZ, (S)->geom.h)
-
-
-static int slack_penalty(int ms, int s, int ss, int slack, int islack)
-{
-    int ds=ss-s;
-
-    if(ss<ms)
-        return PENALTY_NEVER; /* Should just penalise more. */
-    
-    if(ds>=0)
-        return PENALTY_NEVER; /* fit will do */
-    
-    /* If there's enough "immediate" slack, don't penalise more
-     * than normal fit would penalise stretching ss to s.
-     */
-    if(-ds<=islack)
-        return interp1(fit_penalty_scale, 100*ss/maxof(1, s));
-    
-    return interp1(slack_penalty_scale, -ds);
-
-}
-
-#define hslack_penalty(S, CWIN, FRAME_SZH, SZ, U, DS) \
-    slack_penalty(FRAME_SZH->min_width, SZ, (S)->geom.w, (U)->tot_h, (U)->l+(U)->r)
-#define vslack_penalty(S, CWIN, FRAME_SZH, SZ, U, DS) \
-    slack_penalty(FRAME_SZH->min_height, SZ, (S)->geom.h, (U)->tot_v, (U)->t+(U)->b)
-
-
-static int split_penalty(int ms, int s, int ss, int slack)
-{    
-    if(s>=ss)
-        return PENALTY_NEVER;
-    
-    if(ss<ms)
-        return PENALTY_NEVER; /* Should just penalise more. */
-
-    return interp1(split_penalty_scale, 100*(ss-s)/maxof(1, s));
-}
-
-#define hsplit_penalty(S, CWIN, FRAME_SZH, SZ, U, DS) \
-    split_penalty(FRAME_SZH->min_width, SZ, (S)->geom.w, (U)->tot_h)
-#define vsplit_penalty(S, CWIN, FRAME_SZH, SZ, U, DS) \
-    split_penalty(FRAME_SZH->min_height, SZ, (S)->geom.h, (U)->tot_v)
-
-
-static int regfit_penalty(int s, int ss, WClientWin *cwin, WRegion *reg)
-{
-    int res=interp1(fit_penalty_scale, 100*ss/maxof(1, s));
-    return (res==PENALTY_NEVER
-            ? res
-            : res+(REGION_IS_ACTIVE(reg)
-                   ? FIT_ACTIVEREG_OFFSET
-                   : FIT_INACTIVEREG_OFFSET));
-}
-
-#define hregfit_penalty(S, CWIN, SZ) \
-    regfit_penalty(SZ, (S)->geom.w, CWIN, (S)->u.reg)
-#define vregfit_penalty(S, CWIN, SZ) \
-    regfit_penalty(SZ, (S)->geom.h, CWIN, (S)->u.reg)
-
-
-static int combine(int h, int v)
-{
-    if(h==PENALTY_NEVER || v==PENALTY_NEVER)
-        return PENALTY_NEVER;
-    
-    return maxof(h, v);
-}
-
-
-/*}}}*/
-
-
 /*{{{ Placement scan */
 
-enum{
-    ACT_NOT_FOUND,
-    ACT_SPLIT_VERTICAL,
-    ACT_SPLIT_HORIZONTAL,
-    ACT_REPLACE_UNUSED,
-    ACT_ATTACH
-};
+#define PENALTY_NEVER    -1
+#define PENALTY_INIT     (INT_MAX-1)
+#define PENALTY_MAX      (INT_MAX-2)
+
 
 typedef struct{
     WSplit *split;
-    int action;
     int penalty;
-    int split_primn;
     int dest_w, dest_h;
+    ExtlTab config;
 } Res;
 
-enum{ 
-    P_FIT=0, 
-    P_SLACK=1,
-    P_SPLIT=2,
-    P_N=3
-};
 
-static void scan(WSplit *split, WClientWin *cwin, int depth, 
-                 const WRectangle *geom, XSizeHints *szh,
-                 const WSplitUnused *uspc, int last_static_dir, 
-                 Res *best)
+typedef struct{
+    WAutoWS *ws;
+    WSplit *node;
+    WFrame *frame;
+    WClientWin *cwin;
+    int depth;
+    int last_static_dir;
+    const WSplitUnused *unused;
+    Res res;
+} PenaltyParams;
+
+
+WHook *autows_layout_alt=NULL;
+
+
+static bool mrsh_layout_extl(ExtlFn fn, PenaltyParams *p)
 {
-    if(split->type==SPLIT_UNUSED){
-        int d_w[P_N]={-1, -1, -1};
-        int d_h[P_N]={-1, -1, -1};
-        int p, p_h[P_N], p_v[P_N];
-        int i, j;
-        
-        p_h[P_FIT]=hfit_penalty(split, cwin, szh, geom->w, uspc, &d_w[P_FIT]);
-        p_v[P_FIT]=vfit_penalty(split, cwin, szh, geom->h, uspc, &d_h[P_FIT]);
-        p_h[P_SLACK]=hslack_penalty(split, cwin, szh, geom->w, uspc, d_w[P_SLACK]);
-        p_v[P_SLACK]=vslack_penalty(split, cwin, szh, geom->h, uspc, d_h[P_SLACK]);
-        p_h[P_SPLIT]=hsplit_penalty(split, cwin, szh, geom->w, uspc, d_w[P_SPLIT]);
-        p_v[P_SPLIT]=vsplit_penalty(split, cwin, szh, geom->h, uspc, d_h[P_SPLIT]);
-        
-        for(i=0; i<P_N; i++){ /* horizontal loop */
-            for(j=0; j<P_N; j++){ /* vertical loop */
-                
-                /* Don't split both ways. */
-                if(i==P_SPLIT && j==P_SPLIT)
-                    continue;
-                
-                /* Only split orthogonally to previous static split, if
-                 * there is one.
-                 */
-                if(last_static_dir==SPLIT_VERTICAL && j==P_SPLIT)
-                    continue;
-                if(last_static_dir==SPLIT_HORIZONTAL && i==P_SPLIT)
-                    continue;
+    ExtlTab t=extl_create_table(), ut=extl_create_table();
+    bool ret=FALSE;
+    
+    extl_table_sets_o(t, "ws", (Obj*)p->ws);
+    extl_table_sets_o(t, "node", (Obj*)p->node);
+    extl_table_sets_o(t, "frame", (Obj*)p->frame);
+    extl_table_sets_o(t, "cwin", (Obj*)p->cwin);
+    extl_table_sets_i(t, "depth", p->depth);
+    extl_table_sets_b(t, "last_static_vert", 
+                      (p->last_static_dir==SPLIT_VERTICAL));
+    extl_table_sets_i(ut, "l", p->unused->l);
+    extl_table_sets_i(ut, "r", p->unused->r);
+    extl_table_sets_i(ut, "t", p->unused->t);
+    extl_table_sets_i(ut, "b", p->unused->b);
+    extl_table_sets_i(ut, "tot_v", p->unused->tot_v);
+    extl_table_sets_i(ut, "tot_h", p->unused->tot_h);
+    extl_table_sets_t(t, "unused", ut);
 
-                p=combine(p_h[i], p_v[j]);
-                if(p<best->penalty){
-                    best->split=split;
-                    best->penalty=p;
-                    best->dest_w=d_w[i];
-                    best->dest_h=d_h[j];
-                
-                    if(i==P_SPLIT || j==P_SPLIT){
-                        best->action=(i==P_SPLIT
-                                      ? ACT_SPLIT_HORIZONTAL
-                                      : ACT_SPLIT_VERTICAL);
-                         /* Should decide this based on location of split */
-                        best->split_primn=PRIMN_TL;
-                    }else{
-                        best->action=ACT_REPLACE_UNUSED;
-                    }
-                }
+    extl_call(fn, "t", "b", t, &ret);
+    
+    if(ret){
+        Res *r=&(p->res);
+        r->split=p->node;
+        r->penalty=PENALTY_NEVER;
+        r->dest_w=-1;
+        r->dest_h=-1;
+        r->config=extl_table_none();
+
+        extl_table_gets_i(t, "dest_w", &(r->dest_w));
+        extl_table_gets_i(t, "dest_h", &(r->dest_h));
+        extl_table_gets_i(t, "penalty", &(r->penalty));
+        ret=(extl_table_gets_t(t, "config", &(r->config))
+             || r->split->type==SPLIT_REGNODE);
+    }
+    
+    extl_unref_table(ut);
+    extl_unref_table(t);
+    
+    return ret;
+}
+
+
+typedef bool PenaltyFn(PenaltyParams *p);
+
+
+static bool pfn_hook(PenaltyParams *p)
+{
+    return hook_call_alt_p(autows_layout_alt, p, 
+                           (WHookMarshallExtl*)mrsh_layout_extl);
+}
+
+
+static bool pfn_fallback(PenaltyParams *p)
+{
+    p->res.split=p->node;
+    p->res.penalty=PENALTY_MAX;
+    p->res.dest_w=-1;
+    p->res.dest_h=-1;
+
+    if(p->node->type==SPLIT_UNUSED){
+        p->res.config=extl_create_table();
+        if(p->res.config==extl_table_none())
+            return FALSE;
+        extl_table_sets_o(p->res.config, "reference", (Obj*)(p->frame));
+    }else if(p->node->type==SPLIT_REGNODE){
+        p->res.config=extl_table_none();
+    }else{
+        return FALSE;
+    }
+    
+    return TRUE;
+}
+
+
+static void scan(WSplit *split, PenaltyFn *pfn, WAutoWS *ws, WFrame *frame, 
+                 WClientWin *cwin, int depth, int last_static_dir, 
+                 const WSplitUnused *uspc, Res *best)
+{
+    if(split->type==SPLIT_REGNODE && !OBJ_IS(split->u.reg, WMPlex))
+        return;
+    
+    if(split->type==SPLIT_UNUSED || split->type==SPLIT_REGNODE){
+        PenaltyParams p;
+
+        p.ws=ws;
+        p.node=split;
+        p.frame=frame;
+        p.cwin=cwin;
+        p.depth=depth;
+        p.last_static_dir=last_static_dir;
+        p.unused=uspc;
+
+        if(pfn(&p)){
+            if(p.res.penalty!=PENALTY_NEVER && 
+               p.res.penalty<best->penalty){
+                *best=p.res;
+            }else{
+                extl_unref_table(p.res.config);
             }
-        }
-        
-    }else if(split->type==SPLIT_REGNODE){
-        int rqw=geom->w, rqh=geom->h, sw=split->geom.w, sh=split->geom.h;
-        int p_h=hregfit_penalty(split, cwin, rqw);
-        int p_v=vregfit_penalty(split, cwin, rqh);
-        int p=combine(p_h, p_v);
-
-        if(p<best->penalty && OBJ_IS(split->u.reg, WFrame)){
-            best->split=split;
-            best->penalty=p;
-            best->dest_w=-1;
-            best->dest_h=-1;
-            best->action=ACT_ATTACH;
         }
         
     }else if(split->type==SPLIT_VERTICAL || split->type==SPLIT_HORIZONTAL){
@@ -340,89 +234,22 @@ static void scan(WSplit *split, WClientWin *cwin, int depth,
             un=*uspc;
             UNUSED_B_ADD(un, brunused, br);
             un.tot_v=brunused.tot_v;
-            scan(tl, cwin, depth+1, geom, szh, &un, last_static_dir, best);
+            scan(tl, pfn, ws, frame, cwin, depth+1, last_static_dir, &un, best);
             un=*uspc;
             UNUSED_T_ADD(un, tlunused, tl);
             un.tot_v=tlunused.tot_v;
-            scan(br, cwin, depth+1, geom, szh, &un, last_static_dir, best);
+            scan(br, pfn, ws, frame, cwin, depth+1, last_static_dir, &un, best);
         }else if(split->type==SPLIT_HORIZONTAL){
             un=*uspc;
             UNUSED_R_ADD(un, brunused, br);
             un.tot_h=brunused.tot_h;
-            scan(tl, cwin, depth+1, geom, szh, &un, last_static_dir, best);
+            scan(tl, pfn, ws, frame, cwin, depth+1, last_static_dir, &un, best);
             un=*uspc;
             UNUSED_L_ADD(un, tlunused, tl);
             un.tot_h=tlunused.tot_h;
-            scan(br, cwin, depth+1, geom, szh, &un, last_static_dir, best);
+            scan(br, pfn, ws, frame, cwin, depth+1, last_static_dir, &un, best);
         }
     }
-}
-
-
-/*}}}*/
-
-
-/*{{{ Layout initialisation */
-
-
-WHook *autows_init_layout_alt=NULL;
-
-    
-static bool mrsh_init_extl(ExtlFn fn, WAutoWSInitLayoutParam *p)
-{
-    ExtlTab t=extl_create_table();
-    bool ret=FALSE;
-    
-    extl_table_sets_o(t, "ws", (Obj*)p->ws);
-    extl_table_sets_o(t, "reg", (Obj*)p->reg);
-    
-    extl_call(fn, "t", "b", t, &ret);
-    
-    if(ret)
-        ret=extl_table_gets_t(t, "config", &(p->config));
-    
-    extl_unref_table(t);
-    
-    return ret;
-}
-
-
-static void create_initial_configuration(WAutoWS *ws, WRegion *reg)
-{
-    WAutoWSInitLayoutParam p;
-
-    p.ws=ws;
-    p.reg=reg;
-    p.config=extl_table_none();
-    
-    hook_call_alt_p(autows_init_layout_alt, &p, 
-                    (WHookMarshallExtl*)mrsh_init_extl);
-    
-    if(ws->ionws.split_tree!=NULL){
-        WARN_FUNC("Malfunctioning hook/#1.");
-        goto ret;
-    }
-
-    if(p.config!=extl_table_none()){
-        ws->ionws.split_tree=ionws_load_node(&(ws->ionws), &REGION_GEOM(ws), 
-                                             p.config);
-        
-        if(ws->ionws.split_tree!=NULL){
-            if(REGION_MANAGER(reg)!=(WRegion*)ws)
-                WARN_FUNC("Malfunctioning hook/#2.");
-            goto ret;
-        }
-    }
-    
-    ws->ionws.split_tree=create_split_regnode(&REGION_GEOM(ws), reg);
-    if(ws->ionws.split_tree!=NULL){
-        region_fit(reg, &REGION_GEOM(ws), REGION_FIT_BOUNDS);
-        ionws_managed_add(&(ws->ionws), reg);
-    }
-
-ret:
-    extl_unref_table(p.config);
-    return;
 }
 
 
@@ -432,51 +259,42 @@ ret:
 /*{{{ Split/replace unused code */
 
 
-static bool do_replace(Res *rs, WSplit **tree, WFrame *frame)
+static bool do_replace(WAutoWS *ws, WFrame *frame, WClientWin *cwin, 
+                       Res *rs)
 {
-    if(split_tree_set_node_of((WRegion*)frame, rs->split)){
-        rs->split->type=SPLIT_REGNODE;
-        rs->split->u.reg=(WRegion*)frame;
-        region_fit((WRegion*)frame, &(rs->split->geom), REGION_FIT_EXACT);
-        return TRUE;
+    WSplit *u=rs->split;
+    WSplit *p=u->parent;
+    WSplit *node=ionws_load_node(&(ws->ionws), &(u->geom), rs->config);
+    
+    assert(u->type==SPLIT_UNUSED);
+    
+    if(node==NULL){
+        WARN_FUNC("Malfunctioning hook #1.");
+        return FALSE;
+    }
+
+    if(REGION_MANAGER(frame)!=(WRegion*)ws){
+        WARN_FUNC("Malfunctioning hook #2.");
+        destroy_obj((Obj*)node);
+        return FALSE;
     }
     
-    return FALSE;
-}
-
-
-
-static WFrame *mke_frame=NULL;
-
-static WRegion *mke(WWindow *par, const WFitParams *fp)
-{
-    assert(mke_frame!=NULL);
-    /*rectangle_debugprint(&(fp->g), "rg");*/
-    region_fitrep((WRegion*)mke_frame, par, fp);
-    return (WRegion*)mke_frame;
-}
-
-
-static bool do_split(Res *rs, WSplit **tree, WFrame *frame)
-{
-    WSplit *node;
-    int dir=(rs->action==ACT_SPLIT_VERTICAL
-             ? SPLIT_VERTICAL
-             : SPLIT_HORIZONTAL);
-    int mins=(rs->action==ACT_SPLIT_VERTICAL 
-              ? REGION_GEOM(frame).h
-              : REGION_GEOM(frame).w);
-    WWindow *par=REGION_PARENT_CHK(frame, WWindow);
+    if(p==NULL){
+        assert(ws->ionws.split_tree==u);
+        ws->ionws.split_tree=node;
+    }else if(p->u.s.tl==u){
+        p->u.s.tl=node;
+    }else{
+        assert(p->u.s.br==u);
+        p->u.s.br=node;
+    }
     
-    assert(mke_frame==NULL);
-    mke_frame=frame;
-    node=split_tree_split(tree, rs->split, dir, rs->split_primn, 
-                          mins, mke, par);
-    if(node!=NULL)
-        node->parent->is_lazy=TRUE;
+    node->parent=p;
     
-    mke_frame=NULL;
-    return (node!=NULL);
+    u->parent=NULL;
+    ioncore_defer_destroy((Obj*)u);
+    
+    return TRUE;
 }
 
 /*}}}*/
@@ -491,78 +309,74 @@ bool autows_manage_clientwin(WAutoWS *ws, WClientWin *cwin,
     WRegion *target=NULL;
     WFrame *frame=create_frame_for(ws, (WRegion*)cwin);
     
-    if(frame!=NULL && ws->ionws.split_tree==NULL){
-        create_initial_configuration(ws, (WRegion*)frame);
+    assert(ws->ionws.split_tree!=NULL);
+    
+    if(frame!=NULL){
+        int i;
+        PenaltyFn *pfns[]={pfn_hook, pfn_fallback};
         
-        if(REGION_MANAGER(frame)==NULL){
-            destroy_obj((Obj*)frame);
-            warn("Unable to initialise layout for a new window.");
-        }else{
-            target=(WRegion*)frame;
-        }
-    }else if(frame!=NULL){
-        /*      split action         penalty       primn      w    h */
-        Res rs={NULL, ACT_NOT_FOUND, PENALTY_INIT, PRIMN_ANY, -1, -1};
-        WSplitUnused unused={0, 0, 0, 0, 0, 0};
-        WSplit **tree=&(ws->ionws.split_tree);
-        XSizeHints szh;
-        uint dummyw, dummyh;
-
-        split_update_bounds(*tree, TRUE);
-        region_resize_hints((WRegion*)frame, &szh, &dummyw, &dummyh);
-        scan(*tree, cwin, 0, &REGION_GEOM(frame), &szh, &unused, SPLIT_UNUSED,
-             &rs);
-        
-        /* Resize */
-        if(rs.dest_w>0 || rs.dest_h>0){
-            WRectangle grq=rs.split->geom;
-            int gflags=REGION_RQGEOM_WEAK_ALL;
+        for(i=0; i<2; i++){
+            /*      split action         penalty       primn      w    h */
+            Res rs={NULL, PENALTY_INIT, -1, -1, 0};
+            WSplitUnused unused={0, 0, 0, 0, 0, 0};
+            WSplit **tree=&(ws->ionws.split_tree);
             
-            if(rs.dest_w>0){
-                grq.w=rs.dest_w;
-                gflags&=~REGION_RQGEOM_WEAK_W;
+            rs.config=extl_table_none();
+            
+            split_update_bounds(*tree, TRUE);
+            scan(*tree, pfns[i], ws, frame, cwin, 0, SPLIT_UNUSED, &unused, 
+                 &rs);
+            
+            if(rs.split!=NULL){
+                /* Resize */
+                if(rs.dest_w>0 || rs.dest_h>0){
+                    WRectangle grq=rs.split->geom;
+                    int gflags=REGION_RQGEOM_WEAK_ALL;
+                    
+                    if(rs.dest_w>0){
+                        grq.w=rs.dest_w;
+                        gflags&=~REGION_RQGEOM_WEAK_W;
+                    }
+                    
+                    if(rs.dest_h>0){
+                        grq.h=rs.dest_h;
+                        gflags&=~REGION_RQGEOM_WEAK_H;
+                    }
+                    
+                    split_tree_rqgeom(*tree, rs.split, gflags, &grq, NULL);
+                }
+                
+                if(rs.split->type==SPLIT_UNUSED){
+                    if(do_replace(ws, frame, cwin, &rs))
+                        target=(WRegion*)frame;
+                }else if(rs.split->type==SPLIT_REGNODE){
+                    target=rs.split->u.reg;
+                }else{
+                    warn("There's a bug in placement code.");
+                }
+                
+                extl_unref_table(rs.config);
             }
             
-            if(rs.dest_h>0){
-                grq.h=rs.dest_h;
-                gflags&=~REGION_RQGEOM_WEAK_H;
+            if(target==NULL){
+                warn("Scan #%d failed to find a placement for new client "
+                     "window/frame.", i);
+            }else{
+                break;
             }
-            
-            split_tree_rqgeom(*tree, rs.split, gflags, &grq, NULL);
-        }
-        
-        /* Put the frame there */
-        if(rs.action==ACT_SPLIT_HORIZONTAL || 
-           rs.action==ACT_SPLIT_VERTICAL){
-            if(do_split(&rs, tree, frame))
-                target=(WRegion*)frame;
-        }else if(rs.action==ACT_REPLACE_UNUSED){
-            if(do_replace(&rs, tree, frame))
-                target=(WRegion*)frame;
-        }else if(rs.action==ACT_ATTACH){
-            target=rs.split->u.reg;
-        }else{
-            warn("Placement method unimplemented.");
         }
         
         if(target!=(WRegion*)frame)
             destroy_obj((Obj*)frame);
-        else
-            ionws_managed_add(&(ws->ionws), (WRegion*)frame);
-        
+    }else{
+        target=find_suitable_target(&(ws->ionws));
     }
 
-    if(target!=NULL && REGION_MANAGER(target)==(WRegion*)ws){
-        if(region_manage_clientwin(target, cwin, param, 
-                                   MANAGE_REDIR_PREFER_YES))
-            return TRUE;
-    }
-
-    target=find_suitable_target(&(ws->ionws));
-    
     if(target!=NULL){
-        return region_manage_clientwin(target, cwin, param, 
-                                       MANAGE_REDIR_PREFER_YES);
+        if(region_manage_clientwin(target, cwin, param, 
+                                   MANAGE_REDIR_PREFER_YES)){
+            return TRUE;
+        }
     }
     
 err:

@@ -29,8 +29,10 @@ DECLCLASS(WAutoWS){
 
 
 extern void autows_deinit(WAutoWS *ws);
-extern bool autows_init(WAutoWS *ws, WWindow *parent, const WFitParams *fp);
-extern WAutoWS *create_autows(WWindow *parent, const WFitParams *fp);
+extern bool autows_init(WAutoWS *ws, WWindow *parent, const WFitParams *fp,
+                        bool cu);
+extern WAutoWS *create_autows(WWindow *parent, const WFitParams *fp, bool cu);
+extern WAutoWS *create_autows_simple(WWindow *parent, const WFitParams *fp);
 extern WRegion *autows_load(WWindow *par, const WFitParams *fp, ExtlTab tab);
 
 /* Dynfun implementations */

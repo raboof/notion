@@ -594,6 +594,8 @@ void frame_do_load(WFrame *frame, ExtlTab tab)
     if(flags&FRAME_TAB_HIDE)
         frame_toggle_tab((WFrame*)frame);
 
+    frame->flags|=(flags&FRAME_DEST_EMPTY);
+    
     if(extl_table_gets_i(tab, "saved_x", &p) &&
        extl_table_gets_i(tab, "saved_w", &s)){
         frame->saved_x=p;

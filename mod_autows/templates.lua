@@ -19,6 +19,166 @@ local T={}
 _G.templates=T
 
 
+-- Penalty calculation {{{
+
+local PENALTY_NEVER=-1
+local S={}
+
+S.fit_fit_offset=0
+S.fit_activereg_offset=100
+S.fit_inactivereg_offset=500
+
+-- grow or shrink percentage 
+S.fit_penalty_scale={
+    {  10, 9000},
+    {  33, 1000},
+    {  80,  100},
+    { 100,    0},
+    { 120,  100},
+    { 200,  200},
+    { 500, 9000},
+}
+
+-- slack pixels used 
+S.slack_penalty_scale={
+    {   0,    0},
+    {  50,  200},
+    { 200, 1000},
+    { 200, PENALTY_NEVER},
+}
+
+
+-- pixels remaining in other side of split
+S.split_penalty_scale={
+    {  10, PENALTY_NEVER},
+    {  10, 1000},
+    { 100,    0},
+}
+
+
+function T.interp1(scale, v)
+    local offset=0
+    local function acc(i, j)
+        return (scale[offset+i] and scale[offset+i][j])
+    end
+    while true do
+        assert(acc(1, 2));
+        
+        if v<=acc(1, 1) or not acc(2, 1) then
+            return acc(1, 2)
+        end
+        
+        if v<acc(2, 1) then
+            if acc(1, 2)==PENALTY_NEVER or acc(2, 1)==PENALTY_NEVER then
+                return PENALTY_NEVER;
+            end
+            
+            return ((acc(2, 1)*(v-acc(1, 1))+acc(1, 2)*(acc(2, 1)-v))/
+                    (acc(2, 1)-acc(1, 1)))
+        end
+        offset=offset+1
+    end
+end
+
+function T.frac(ss, s)
+    return math.floor(100*ss/math.max(1, s));
+end
+
+function T.valif(b, v1, v2)
+    if b then return v1 else return v2 end
+end
+
+function T.add_p(p1, p2)
+    if p1==PENALTY_NEVER or p2==PENALTY_NEVER then
+        return PENALTY_NEVER
+    else
+        return p1+p2
+    end
+end
+
+function T.fit_penalty(ms, s, ss)
+    local d=T.frac(ss, s)
+   
+    if ss<ms then
+        return PENALTY_NEVER -- Should just penalise more
+    end
+    
+    return T.add_p(T.interp1(S.fit_penalty_scale, d),
+                   S.fit_fit_offset)
+end
+
+--#define hfit_penalty(S, CWIN, FRAME_SZH, SZ, U, DS) \
+--    fit_penalty(FRAME_SZH->min_width, SZ, (S)->geom.w)
+--#define vfit_penalty(S, CWIN, FRAME_SZH, SZ, U, DS) \
+--    fit_penalty(FRAME_SZH->min_height, SZ, (S)->geom.h)
+
+
+function T.slack_penalty(ms, s, ss, slack, islack)
+    local ds=ss-s;
+
+    if ss<ms then
+        return PENALTY_NEVER -- Should just penalise more.
+    end
+    
+    if ds>=0 then
+        return PENALTY_NEVER -- fit will do 
+    end
+    
+    -- If there's enough "immediate" slack, don't penalise more
+    -- than normal fit would penalise stretching ss to s.
+    if -ds<=islack then
+        return T.interp1(S.fit_penalty_scale, T.frac(ss, s))
+    end
+    
+    return T.interp1(S.slack_penalty_scale, -ds);
+end
+
+--#define hslack_penalty(S, CWIN, FRAME_SZH, SZ, U, DS) \
+--    slack_penalty(FRAME_SZH->min_width, SZ, (S)->geom.w, (U)->tot_h, (U)->l+(U)->r)
+--#define vslack_penalty(S, CWIN, FRAME_SZH, SZ, U, DS) \
+--    slack_penalty(FRAME_SZH->min_height, SZ, (S)->geom.h, (U)->tot_v, (U)->t+(U)->b)
+
+
+function T.split_penalty(ms, s, ss, slack)
+    if s>=ss then
+        return PENALTY_NEVER
+    end
+    
+    if ss<ms then
+        return PENALTY_NEVER -- Should just penalise more.
+    end
+
+    return T.interp1(S.split_penalty_scale, T.frac(ss-s, s))
+end
+
+--#define hsplit_penalty(S, CWIN, FRAME_SZH, SZ, U, DS) \
+--    split_penalty(FRAME_SZH->min_width, SZ, (S)->geom.w, (U)->tot_h)
+--#define vsplit_penalty(S, CWIN, FRAME_SZH, SZ, U, DS) \
+--    split_penalty(FRAME_SZH->min_height, SZ, (S)->geom.h, (U)->tot_v)
+
+
+function T.regfit_penalty(s, ss, cwin, reg)
+    local res=T.interp1(S.fit_penalty_scale, T.frac(ss, s))
+    return T.add_p(res, T.valif(reg:is_active(),
+                                S.fit_activereg_offset,
+                                S.fit_inactivereg_offset))
+end
+
+--#define hregfit_penalty(S, CWIN, SZ) \
+--    regfit_penalty(SZ, (S)->geom.w, CWIN, (S)->u.reg)
+--#define vregfit_penalty(S, CWIN, SZ) \
+--    regfit_penalty(SZ, (S)->geom.h, CWIN, (S)->u.reg)
+
+
+function T.combine(h, v)
+    return T.valif(h==PENALTY_NEVER or v==PENALTY_NEVER,
+                   PENALTY_NEVER,
+                   math.max(h, v))
+end
+
+-- }}}
+
+
 -- Helper code {{{
 
 function T.set_static(t)
@@ -87,8 +247,8 @@ function T.default_layout(ws, reg)
                                }, 
                                nil,
                                T.set_lazy), 
-                     nil,          
-                     T.set_static)
+                     nil,
+                     T.set_lazy)
 end
 
 -- Extended default. Has additional zero-width/height extendable unused 
@@ -101,8 +261,8 @@ function T.default_layout_ext(ws, reg)
                                T.default_layout(ws, reg),
                                nil,
                                T.set_static),
-                     nil,          
-                     T.set_static)
+                     nil,
+                     T.set_lazy)
 end
 
 -- }}}
@@ -110,10 +270,41 @@ end
 
 -- Callbacks {{{
 
+function T.handle_unused(p)
+    -- Dummy implementation. To be rewritten.
+    local fg=p.frame:geom()
+    local sg=p.node:geom()
+    if p.depth==0 then
+        p.penalty=0
+        p.config=T.default_layout(p.ws, p.frame)
+    else
+        p.penalty=T.combine(T.fit_penalty(0, fg.w, sg.w),
+                            T.fit_penalty(0, fg.h, sg.h))
+        p.config={
+            reference=p.frame
+        }
+    end
+    return true
+end
+
+function T.handle_regfit(p)
+    local cwg=p.cwin:geom()
+    local sg=p.node:geom() -- Should use WMPlex.managed_geom instead
+    local r=p.node:reg()
+    p.penalty=T.combine(T.regfit_penalty(cwg.w, sg.w, p.cwin, r),
+                        T.regfit_penalty(cwg.h, sg.h, p.cwin, r))
+    
+    return true
+end
+
 -- Layout initialisation hook
-function T.init_layout_alt(p)
-    p.config=T.default_layout(p.ws, p.reg)
-    return (p.config~=nil)
+function T.layout_alt_handler(p)
+    local t=p.node:type()
+    if t=="SPLIT_REGNODE" then
+        return T.handle_regfit(p)
+    elseif t=="SPLIT_UNUSED" then
+        return T.handle_unused(p)
+    end
 end
 
 -- }}}
@@ -122,13 +313,13 @@ end
 -- Initialisation {{{
 
 function T.setup_hook()
-    local hkname="autows_init_layout_alt"
+    local hkname="autows_layout_alt"
     local hk=ioncore.get_hook(hkname)
     if not hk then
         error("No hook "..hkname)
     end
     
-    if not hk:add(T.init_layout_alt) then
+    if not hk:add(T.layout_alt_handler) then
         error("Unable to hook to "..hkname)
     end
 end

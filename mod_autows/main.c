@@ -66,9 +66,9 @@ void mod_autows_deinit()
         mod_autows_frame_bindmap=NULL;
     }
     
-    if(autows_init_layout_alt!=NULL){
-        destroy_obj((Obj*)autows_init_layout_alt);
-        autows_init_layout_alt=NULL;
+    if(autows_layout_alt!=NULL){
+        destroy_obj((Obj*)autows_layout_alt);
+        autows_layout_alt=NULL;
     }
 
 }
@@ -77,7 +77,7 @@ void mod_autows_deinit()
 static bool register_regions()
 {
     if(!ioncore_register_regclass(&CLASSDESCR(WAutoWS),
-                                  (WRegionSimpleCreateFn*)create_autows,
+                                  (WRegionSimpleCreateFn*)create_autows_simple,
                                   (WRegionLoadCreateFn*)autows_load)){
         return FALSE;
     }
@@ -93,7 +93,7 @@ static bool register_regions()
 
 static bool init_hooks()
 {
-    INIT_HOOK_(autows_init_layout_alt);
+    INIT_HOOK_(autows_layout_alt);
     return TRUE;
 }
 

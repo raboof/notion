@@ -48,16 +48,41 @@ static WRegion *create_frame_autows(WWindow *parent, const WFitParams *fp)
 }
 
 
-bool autows_init(WAutoWS *ws, WWindow *parent, const WFitParams *fp)
+static bool autows_create_initial_unused(WAutoWS *ws)
 {
-    return ionws_init(&(ws->ionws), parent, fp, 
-                      create_frame_autows, FALSE);
+    ws->ionws.split_tree=create_split_unused(&REGION_GEOM(ws));
+    return (ws->ionws.split_tree!=NULL);
 }
 
 
-WAutoWS *create_autows(WWindow *parent, const WFitParams *fp)
+bool autows_init(WAutoWS *ws, WWindow *parent, const WFitParams *fp, bool cu)
 {
-    CREATEOBJ_IMPL(WAutoWS, autows, (p, parent, fp));
+    if(!ionws_init(&(ws->ionws), parent, fp, 
+                   create_frame_autows, FALSE))
+        return FALSE;
+    
+    assert(ws->ionws.split_tree==NULL);
+    
+    if(cu){
+        if(!autows_create_initial_unused(ws)){
+            autows_deinit(ws);
+            return FALSE;
+        }
+    }
+    
+    return TRUE;
+}
+
+
+WAutoWS *create_autows(WWindow *parent, const WFitParams *fp, bool cu)
+{
+    CREATEOBJ_IMPL(WAutoWS, autows, (p, parent, fp, cu));
+}
+
+
+WAutoWS *create_autows_simple(WWindow *parent, const WFitParams *fp)
+{
+    return create_autows(parent, fp, TRUE);
 }
 
 
@@ -79,9 +104,12 @@ void autows_managed_remove(WAutoWS *ws, WRegion *reg)
     if(other==NULL){
         if(mcf)
             genws_fallback_focus((WGenWS*)ws, FALSE);
-        if(ws->ionws.managed_list==NULL && ws->ionws.split_tree!=NULL){
-            ioncore_defer_destroy((Obj*)(ws->ionws.split_tree));
-            ws->ionws.split_tree=NULL;
+        if(ws->ionws.split_tree==NULL){
+            autows_create_initial_unused(ws);
+            if(ws->ionws.split_tree==NULL){
+                warn("Unable to re-initialise workspace. Destroying.");
+                ioncore_defer_destroy((Obj*)ws);
+            }
         }
     }else{
         if(!ds && mcf)
@@ -125,15 +153,22 @@ WRegion *autows_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
     WAutoWS *ws;
     ExtlTab treetab;
 
-    ws=create_autows(par, fp);
+    ws=create_autows(par, fp, FALSE);
     
     if(ws==NULL)
         return NULL;
 
     if(extl_table_gets_t(tab, "split_tree", &treetab)){
         ws->ionws.split_tree=ionws_load_node(&(ws->ionws), &REGION_GEOM(ws), 
-											 treetab);
+                                             treetab);
         extl_unref_table(treetab);
+    }
+    
+    if(ws->ionws.split_tree==NULL){
+        if(!autows_create_initial_unused(ws)){
+            destroy_obj((Obj*)ws);
+            return NULL;
+        }
     }
     
     return (WRegion*)ws;

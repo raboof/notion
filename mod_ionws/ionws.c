@@ -492,8 +492,11 @@ WFrame *ionws_split_at(WIonWS *ws, WFrame *frame, const char *dirstr,
     
     curr=mplex_lcurrent(&(frame->mplex), 1);
     
-    if(attach_current && curr!=NULL)
+    if(attach_current && curr!=NULL){
+        if(mplex_lcount(&(frame->mplex), 1)<=1)
+            frame->flags&=~FRAME_DEST_EMPTY;
         mplex_attach_simple(&(newframe->mplex), curr, MPLEX_ATTACH_SWITCHTO);
+    }
     
     if(region_may_control_focus((WRegion*)frame))
         region_goto(nnode->u.reg);
@@ -938,17 +941,15 @@ static WRegion *do_attach(WIonWS *ws, WRegionAttachHandler *handler,
 WSplit *ionws_load_node(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
 {
     char *typestr=NULL;
-    char *reference=NULL;
+    Obj *reference=NULL;
     
     if(extl_table_gets_s(tab, "type", &typestr) ||
-       extl_table_gets_s(tab, "reference", &reference)){
+       extl_table_gets_o(tab, "reference", &reference)){
         WSplit *node=NULL;
         WRegion *reg;
         
         if(typestr!=NULL)
             free(typestr);
-        if(reference!=NULL)
-            free(reference);
         
         reg=region__attach_load((WRegion*)ws,
                                 tab, (WRegionDoAttachFn*)do_attach, 
