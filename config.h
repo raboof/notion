@@ -28,6 +28,8 @@
 
 #define CF_EDGE_RESISTANCE 16
 
+#define CF_RAISE_DELAY 500
+
 /* Cursors
  */
 

@@ -30,6 +30,7 @@
 #include <ioncore/extlconv.h>
 #include <ioncore/defer.h>
 #include <ioncore/xwindow.h>
+#include <ioncore/signal.h>
 #include "placement.h"
 #include "ionws.h"
 #include "split.h"
@@ -148,10 +149,37 @@ void ionws_do_set_focus(WIonWS *ws, bool warp)
 }
 
 
+static WTimer *restack_timer=NULL;
+static Watch restack_watch=WATCH_INIT;
+
+
+static void expire(WTimer *tmr, bool done)
+{
+    WIonWS *ws=(WIonWS*)restack_watch.obj;
+    
+    if(ws!=NULL)
+        split_restack(ws->split_tree, ws->genws.dummywin, Above);
+    
+    watch_reset(&restack_watch);
+    
+    if(done && restack_timer!=NULL){
+        destroy_obj((Obj*)restack_timer);
+        restack_timer=NULL;
+    }
+}
+
+
+static void restack_handler(WTimer *tmr)
+{
+    expire(tmr, TRUE);
+}
+
+
 bool ionws_managed_goto(WIonWS *ws, WRegion *reg, int flags)
 {
     WSplitRegion *node=get_node_check(ws, reg);
-    
+    int rd=mod_ionws_raise_delay;
+
     if(!REGION_IS_MAPPED(ws))
         return FALSE;
 
@@ -161,9 +189,26 @@ bool ionws_managed_goto(WIonWS *ws, WRegion *reg, int flags)
     /* WSplitSplit uses activity based stacking as required on WAutoWS,
      * so we must restack here.
      */
-    if(ws->split_tree!=NULL)
-        split_restack(ws->split_tree, ws->genws.dummywin, Above);
-    
+    if(ws->split_tree!=NULL){
+        bool use_timer=rd>0 && flags&REGION_GOTO_ENTERWINDOW;
+        
+        if(use_timer){
+            if(restack_timer!=NULL){
+                if(restack_watch.obj!=(Obj*)ws)
+                    expire(restack_timer, FALSE);
+            }else{
+                restack_timer=create_timer();
+            }
+        }
+        
+        if(use_timer && restack_timer!=NULL){
+            watch_setup(&restack_watch, (Obj*)ws, NULL);
+            timer_set(restack_timer, rd, restack_handler);
+        }else{
+            split_restack(ws->split_tree, ws->genws.dummywin, Above);
+        }
+    }
+
     if(flags&REGION_GOTO_FOCUS)
         region_maybewarp(reg, !(flags&REGION_GOTO_NOWARP));
 

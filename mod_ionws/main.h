@@ -21,4 +21,6 @@ extern void mod_ionws_deinit();
 extern WBindmap *mod_ionws_ionws_bindmap;
 extern WBindmap *mod_ionws_frame_bindmap;
 
+extern int mod_ionws_raise_delay;
+
 #endif /* ION_MOD_IONWS_MAIN_H */

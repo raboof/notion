@@ -34,14 +34,53 @@ char mod_ionws_ion_api_version[]=ION_API_VERSION;
 /*}}}*/
 
 
-/*{{{ Bindmaps */
+/*{{{ Bindmaps and configuration variables */
 
 
 WBindmap *mod_ionws_ionws_bindmap=NULL;
 WBindmap *mod_ionws_frame_bindmap=NULL;
 
+int mod_ionws_raise_delay=CF_RAISE_DELAY;
+
 
 /*}}}*/
+
+
+/*{{{ Configuration */
+
+
+/*EXTL_DOC
+ * Set parameters. Currently only \var{raise_delay} (in milliseconds)
+ * is supported.
+ */
+EXTL_EXPORT
+void mod_ionws_set(ExtlTab tab)
+{
+    int d;
+    if(extl_table_gets_i(tab, "raise_delay", &d)){
+        if(d>=0)
+            mod_ionws_raise_delay=d;
+    }
+}
+
+
+/*EXTL_DOC
+ * Get parameters. For details see \fnref{mod_ionws.set}.
+ */
+EXTL_EXPORT
+ExtlTab mod_ionws_get()
+{
+    ExtlTab tab=extl_create_table();
+    
+    extl_table_sets_i(tab, "raise_delay", mod_ionws_raise_delay);
+    
+    return tab;
+}
+
+
+
+/*}}}*/
+
 
 
 /*{{{ Module init & deinit */
