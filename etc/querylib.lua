@@ -307,7 +307,7 @@ QueryLib.query_renameworkspace=QueryLib.make_rename_fn(
 -- Queries for starting external programs
 
 QueryLib.query_exec=QueryLib.make_frame_fn(
-    "Run:", nil, exec_on_screen, QueryLib.exec_completor
+    "Run:", nil, QueryLib.exec_handler, QueryLib.exec_completor
 )
 
 QueryLib.query_ssh=QueryLib.make_execwith_fn(
