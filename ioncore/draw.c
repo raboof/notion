@@ -235,7 +235,7 @@ void preinit_graphics(WScreen *scr)
 	white=WhitePixel(wglobal.dpy, scr->xscr);
 #endif
 	grdata->black=black;
-	grdata->white=black;
+	grdata->white=white;
 
 #define INIT_CG(CG, HL, SH, BG, FG) CG.bg=BG; CG.hl=HL; CG.sh=SH; CG.fg=FG;
 										/* hl, sh,    bg,    fg */
