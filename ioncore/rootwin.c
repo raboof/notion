@@ -252,6 +252,10 @@ static WScreen *add_screen(WRootWin *rw, int id, WRectangle geom,
 	WScreen *scr;
 	CARD32 p[1];
 	
+#ifdef CF_ALWAYS_VIRTUAL_ROOT
+	useroot=FALSE;
+#endif
+
 	scr=create_screen(rw, id, geom, useroot);
 	
 	if(scr==NULL)

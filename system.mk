@@ -7,7 +7,7 @@
 ## Installation paths
 ##
 
-PREFIX=/usr/local/ion-devel
+PREFIX=/usr/local/stow/ion-20030524
 
 # Unless you are creating a package conforming to some OS's standards, you
 # probably do not want to modify the following directories:
