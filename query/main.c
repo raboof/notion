@@ -71,7 +71,7 @@ extern void query_module_unregister_exports();
 
 static void load_history()
 {
-	read_config_for_args("query_history", FALSE, NULL, NULL);
+	read_config_args("query_history", FALSE, NULL, NULL);
 }
 
 
@@ -82,7 +82,7 @@ static void save_history()
 	FILE *file;
 	int i=0;
 	
-	fname=get_savefile_for("query_history");
+	fname=get_savefile("query_history");
 	
 	if(fname==NULL){
 		warn("Unable to save query history");
@@ -138,7 +138,7 @@ bool query_module_init()
 	if(!query_module_register_exports())
 		goto err;
 	
-	read_config_for("query");
+	read_config("query");
 
 	load_history();
 	

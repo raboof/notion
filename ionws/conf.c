@@ -64,5 +64,5 @@ bool ionframe_moveres_bindings(ExtlTab tab)
 
 bool ionws_module_read_config()
 {
-	return read_config_for("ionws");
+	return read_config("ionws");
 }

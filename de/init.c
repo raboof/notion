@@ -270,7 +270,7 @@ bool de_module_init()
 	if(!de_module_register_exports())
 		return FALSE;
 	
-	if(!read_config_for("delib"))
+	if(!read_config("delib"))
 		goto fail;
 	
 	if(!gr_register_engine("de", (GrGetBrushFn*)&de_get_brush,

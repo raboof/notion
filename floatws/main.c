@@ -120,7 +120,7 @@ bool floatws_module_init()
 		goto err;
 	}
 
-	read_config_for("floatws");
+	read_config("floatws");
 	
 	ADD_HOOK(add_clientwin_alt, add_clientwin_floatws_transient);
 

@@ -68,8 +68,8 @@ bool menu_module_init()
 		return FALSE;
 	}
 	
-	/*read_config_for("menulib");*/
-	read_config_for("menu");
+	/*read_config("menulib");*/
+	read_config("menu");
 	
 	return TRUE;
 }
