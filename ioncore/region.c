@@ -857,20 +857,14 @@ bool region_is_child(WRegion *reg, WRegion *reg2)
 
 
 /*EXTL_DOC
- * Returns most recently active region below \var{reg} in the
- * parent--children hierachy of regions.
+ * Returns most recently active region that has \var{reg} as its
+ * parent.
  */
 EXTL_EXPORT
-WRegion *region_get_active_leaf(WRegion *reg)
+WRegion *region_active_sub(WRegion *reg)
 {
-	if(reg!=NULL){
-		while(reg->active_sub!=NULL)
-			reg=reg->active_sub;
-	}
-	
-	return reg;
+	return reg->active_sub;
 }
-
 
 /*}}}*/
 

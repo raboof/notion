@@ -48,7 +48,9 @@ void set_previous_of(WRegion *reg)
 	if(REGION_IS_ACTIVE(reg))
 		return;
 	
-	r2=region_get_active_leaf((WRegion*)wglobal.active_screen);
+	r2=(WRegion*)wglobal.active_screen;
+	while(r2->active_sub!=NULL)
+		r2=r2->active_sub;
 	
 	if(r2!=NULL)
 		setup_watch(&prev_watch, (WObj*)r2, (WWatchHandler*)prev_watch_handler);
