@@ -145,6 +145,8 @@ char **get_text_property(Window win, Atom a)
 #else
 	st=Xutf8TextPropertyToTextList(wglobal.dpy, &prop, &list, &n);
 #endif
+	XFree(prop.value);
+	
 	if(st || n==0 || list==NULL)
 		return NULL;
 	return list;
@@ -169,4 +171,5 @@ void set_text_property(Window win, Atom a, const char *str)
 		return;
 	
 	XSetTextProperty(wglobal.dpy, win, &prop, a);
+	XFree(prop.value);
 }

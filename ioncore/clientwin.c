@@ -139,7 +139,7 @@ char **get_name_list(Window win)
 {
 	XTextProperty prop;
 	char **list=NULL;
-	int n,i;
+	int n;
 	Status st;
 	
 	st=XGetWMName(wglobal.dpy, win, &prop);
@@ -152,7 +152,8 @@ char **get_name_list(Window win)
 #else
 	st=Xutf8TextPropertyToTextList(wglobal.dpy, &prop, &list, &n);
 #endif
-	if(n==0 || list==NULL)
+	XFree(prop.value);
+	if(st || n==0 || list==NULL)
 		return NULL;
 	return list;
 }
