@@ -67,7 +67,7 @@ void region_keep_on_top(WRegion *reg)
 		return;
 	}
 	
-	par=FIND_PARENT1(reg, WWindow);
+	par=REGION_PARENT_CHK(reg, WWindow);
 	
 	if(par==NULL)
 		return;
@@ -88,7 +88,7 @@ static void do_reset_stacking(WRegion *reg)
 					reg, stacking.next, stacking.prev);
 		reg->stacking.above=NULL;
 	}else if(reg->flags&REGION_KEEPONTOP){
-		WWindow *par=FIND_PARENT1(reg, WWindow);
+		WWindow *par=REGION_PARENT_CHK(reg, WWindow);
 		assert(par!=NULL);
 		UNLINK_ITEM(par->keep_on_top_list, reg, stacking.next, stacking.prev);
 		reg->flags&=~REGION_KEEPONTOP;
@@ -121,7 +121,7 @@ static void movetotop(WRegion *reg)
 		LINK_ITEM(reg->stacking.above->stacking.below_list,
 				  reg, stacking.next, stacking.prev);
 	}else if(reg->flags&REGION_KEEPONTOP){
-		WWindow *par=FIND_PARENT1(reg, WWindow);
+		WWindow *par=REGION_PARENT_CHK(reg, WWindow);
 		assert(par!=NULL);
 		UNLINK_ITEM(par->keep_on_top_list, reg, stacking.next, stacking.prev);
 		LINK_ITEM(par->keep_on_top_list, reg, stacking.next, stacking.prev);
@@ -137,7 +137,7 @@ static void movetobottom(WRegion *reg)
 		LINK_ITEM_FIRST(reg->stacking.above->stacking.below_list,
 						reg, stacking.next, stacking.prev);
 	}else if(reg->flags&REGION_KEEPONTOP){
-		WWindow *par=FIND_PARENT1(reg, WWindow);
+		WWindow *par=REGION_PARENT_CHK(reg, WWindow);
 		assert(par!=NULL);
 		UNLINK_ITEM(par->keep_on_top_list, reg, stacking.next, stacking.prev);
 		LINK_ITEM_FIRST(par->keep_on_top_list, reg, stacking.next,
@@ -170,7 +170,7 @@ void region_raise(WRegion *reg)
 	   
 	if(!(r2->flags&REGION_KEEPONTOP)){
 		/* Stack below lowest keepontop window */
-		WWindow *par=FIND_PARENT1(reg, WWindow);
+		WWindow *par=REGION_PARENT_CHK(reg, WWindow);
 		if(par!=NULL && par->keep_on_top_list!=NULL){
 			w=region_x_window(par->keep_on_top_list);
 			w=region_restack(reg, w, Below);
@@ -209,7 +209,7 @@ void region_lower(WRegion *reg)
 	
 	if(reg->flags&REGION_KEEPONTOP){
 		/* Stack below lowest keepontop window */
-		WWindow *par=FIND_PARENT1(reg, WWindow);
+		WWindow *par=REGION_PARENT_CHK(reg, WWindow);
 		if(par==NULL || par->keep_on_top_list==reg)
 			return;
 		w=region_x_window(par->keep_on_top_list);

@@ -400,7 +400,7 @@ static void handle_enter_window(XEvent *ev)
 			while(r2!=NULL){
 				if(r2==freg)
 					break;
-				r2=FIND_PARENT1(r2, WRegion);
+				r2=REGION_PARENT_CHK(r2, WRegion);
 			}
 			if(r2==NULL)
 				continue;
@@ -469,7 +469,7 @@ static void handle_focus_in(const XFocusChangeEvent *ev)
 		while(r2!=NULL){
 			if(r2==reg)
 				break;
-			r2=FIND_PARENT1(r2, WRegion);
+			r2=REGION_PARENT_CHK(r2, WRegion);
 		}
 		if(r2==NULL)
 			return;

@@ -176,8 +176,7 @@ extern void region_request_managed_geom_allow(WRegion *reg, WRegion *sub,
 #define LAST_CHILD(NAM, TYPE) (TYPE*)last_child((WRegion*)NAM, &OBJDESCR(TYPE))
 #define PREV_CHILD(NAM, TYPE) (TYPE*)prev_child((WRegion*)NAM, &OBJDESCR(TYPE))
 #define PREV_CHILD_FB(NAM, TYPE, FB) (TYPE*)prev_child_fb((WRegion*)NAM, &OBJDESCR(TYPE), (WRegion*)FB)
-#define FIND_PARENT(NAM, TYPE) (TYPE*)find_parent((WRegion*)NAM, &OBJDESCR(TYPE))
-#define FIND_PARENT1(NAM, TYPE) (TYPE*)find_parent1((WRegion*)NAM, &OBJDESCR(TYPE))
+#define REGION_PARENT_CHK(NAM, TYPE) (TYPE*)region_get_parent_chk((WRegion*)NAM, &OBJDESCR(TYPE))
 #define NTH_CHILD(NAM, N, TYPE) (TYPE*)nth_child((WRegion*)NAM, N, &OBJDESCR(TYPE))
 #define FOR_ALL_TYPED_CHILDREN(NAM, NAM2, TYPE) \
 	for(NAM2=FIRST_CHILD(NAM, TYPE); NAM2!=NULL; NAM2=NEXT_CHILD(NAM2, TYPE))
@@ -194,9 +193,8 @@ extern WRegion *prev_child(WRegion *first, const WObjDescr *descr);
 extern WRegion *prev_child_fb(WRegion *first, const WObjDescr *descr, WRegion *fb);
 extern WRegion *first_child(WRegion *parent, const WObjDescr *descr);
 extern WRegion *last_child(WRegion *parent, const WObjDescr *descr);
-extern WRegion *find_parent(WRegion *p, const WObjDescr *descr);
-extern WRegion *find_parent1(WRegion *p, const WObjDescr *descr);
 extern WRegion *nth_child(WRegion *parent, int n, const WObjDescr *descr);
+extern WRegion *region_get_parent_chk(WRegion *p, const WObjDescr *descr);
 
 extern bool region_is_ancestor(WRegion *reg, WRegion *reg2);
 extern bool region_is_child(WRegion *reg, WRegion *reg2);

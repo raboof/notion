@@ -101,7 +101,7 @@ WRegion *default_do_find_new_manager(WRegion *reg, WRegion *todst)
 	p=REGION_MANAGER(reg);
 
 	if(p==NULL){
-		p=FIND_PARENT1(reg, WRegion);
+		p=REGION_PARENT_CHK(reg, WRegion);
 		if(p==NULL)
 			return NULL;
 	}
@@ -127,7 +127,7 @@ WRegion *region_find_new_manager(WRegion *reg)
 	WRegion *p=REGION_MANAGER(reg), *nm;
 
 	if(p==NULL){
-		p=FIND_PARENT1(reg, WRegion);
+		p=REGION_PARENT_CHK(reg, WRegion);
 		if(p==NULL)
 			return NULL;
 	}

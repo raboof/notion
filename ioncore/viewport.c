@@ -133,7 +133,7 @@ static WRegion *viewport_do_add_managed(WViewport *vp, WRegionAddFn *fn,
 										void *fnparams, 
 										const WAttachParams *param)
 {
-	WWindow *par=FIND_PARENT1(vp, WWindow);
+	WWindow *par=REGION_PARENT_CHK(vp, WWindow);
 	WRegion *reg;
 	
 	if(par==NULL)

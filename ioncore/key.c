@@ -186,7 +186,7 @@ static bool submapgrab_handler(WRegion *reg, XEvent *ev)
 			break;
 		if(WOBJ_IS(reg, WScreen))
 			break;
-		reg=FIND_PARENT1(reg, WRegion);
+		reg=REGION_PARENT_CHK(reg, WRegion);
 	}
 
 	/* if it is just a modifier, then return. */
@@ -238,7 +238,7 @@ void handle_keypress(XKeyEvent *ev)
 			break;
 		if(WOBJ_IS(reg, WScreen))
 			break;
-		reg=FIND_PARENT1(reg, WRegion);
+		reg=REGION_PARENT_CHK(reg, WRegion);
 	}while(reg!=NULL);
 	
 	if(binding!=NULL){

@@ -526,7 +526,7 @@ static WRegion *do_split_at(WIonWS *ws, WObj *obj, int dir, int primn,
 		geom.w=sn;
 	}
 	
-	par=FIND_PARENT1(ws, WWindow);
+	par=REGION_PARENT_CHK(ws, WWindow);
 	assert(par!=NULL);
 	
 	nreg=fn(par, geom);

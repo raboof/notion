@@ -328,7 +328,7 @@ void region_request_managed_geom_constrain(WRegion *mgr, WRegion *reg,
 	int diff;
 	WRegion *par;
 	
-	par=FIND_PARENT1(reg, WRegion);
+	par=REGION_PARENT_CHK(reg, WRegion);
 	
 	if(par==mgr){
 		/* mgr is also the parent of reg */
@@ -336,7 +336,7 @@ void region_request_managed_geom_constrain(WRegion *mgr, WRegion *reg,
 		g.y=0;
 		g.w=REGION_GEOM(mgr).w;
 		g.h=REGION_GEOM(mgr).h;
-	}else if(FIND_PARENT1(mgr, WRegion)==par){
+	}else if(REGION_PARENT_CHK(mgr, WRegion)==par){
 		/* mgr and reg have the same parent */
 		g=REGION_GEOM(mgr);
 	}else{
@@ -429,8 +429,8 @@ void region_detach_manager(WRegion *reg)
 	
 	/* Restore activity state to non-parent manager */
 	if(region_may_control_focus(reg)){
-		WRegion *par=FIND_PARENT1(reg, WRegion);
-		if(par!=NULL && mgr!=par && FIND_PARENT1(mgr, WRegion)==par){
+		WRegion *par=REGION_PARENT_CHK(reg, WRegion);
+		if(par!=NULL && mgr!=par && REGION_PARENT_CHK(mgr, WRegion)==par){
 			/* REGION_ACTIVE shouldn't be set for windowless regions
 			 * but make the parent's active_sub point to it
 			 * nevertheless so that region_may_control_focus can
@@ -473,7 +473,7 @@ bool _region_may_control_focus(WRegion *reg)
 	if(REGION_IS_ACTIVE(reg))
 		return TRUE;
 	
-	par=FIND_PARENT1(reg, WRegion);
+	par=REGION_PARENT_CHK(reg, WRegion);
 	
 	if(par==NULL || !REGION_IS_ACTIVE(par)){
 		return FALSE;
@@ -511,7 +511,7 @@ void region_got_focus(WRegion *reg)
 		D(fprintf(stderr, "got focus (inact) %s [%p]\n", WOBJ_TYPESTR(reg), reg);)
 		reg->flags|=REGION_ACTIVE;
 		
-		r=FIND_PARENT1(reg, WRegion);
+		r=REGION_PARENT_CHK(reg, WRegion);
 		if(r!=NULL){
 			/*if(r->active_sub!=NULL){
 				if(region_x_window(r->active_sub)==None)
@@ -586,7 +586,7 @@ bool region_display(WRegion *reg)
 		return region_display_managed(mgr, reg);
 	}
 	
-	preg=FIND_PARENT1(reg, WRegion);
+	preg=REGION_PARENT_CHK(reg, WRegion);
 
 	if(preg!=NULL && !region_display(preg))
 		return FALSE;
@@ -637,7 +637,7 @@ bool region_goto(WRegion *reg)
 
 bool region_is_fully_mapped(WRegion *reg)
 {
-	for(; reg!=NULL; reg=FIND_PARENT1(reg, WRegion)){
+	for(; reg!=NULL; reg=REGION_PARENT_CHK(reg, WRegion)){
 		if(!REGION_IS_MAPPED(reg))
 			return FALSE;
 	}
@@ -652,7 +652,7 @@ void region_rootgeom(WRegion *reg, int *xret, int *yret)
 	*yret=REGION_GEOM(reg).y;
 	
 	while(1){
-		reg=FIND_PARENT1(reg, WRegion);
+		reg=REGION_PARENT_CHK(reg, WRegion);
 		if(reg==NULL)
 			break;
 		*xret+=REGION_GEOM(reg).x;
@@ -686,7 +686,7 @@ void region_rootpos(WRegion *reg, int *xret, int *yret)
 {
 	WRegion *par;
 
-	par=FIND_PARENT1(reg, WRegion);
+	par=REGION_PARENT_CHK(reg, WRegion);
 	
 	if(par==NULL || WOBJ_IS(reg, WScreen)){
 		*xret=0;
@@ -917,19 +917,7 @@ WRegion *last_child(WRegion *parent, const WObjDescr *descr)
 }
 
 
-WRegion *find_parent(WRegion *p, const WObjDescr *descr)
-{
-	while(p!=NULL){
-		if(wobj_is((WObj*)p, descr))
-			break;
-		p=p->parent;
-	}
-	
-	return p;
-}
-
-
-WRegion *find_parent1(WRegion *p, const WObjDescr *descr)
+WRegion *region_get_parent_chk(WRegion *p, const WObjDescr *descr)
 {
 	if(p==NULL || p->parent==NULL)
 		return NULL;

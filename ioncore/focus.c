@@ -30,7 +30,7 @@ void set_previous_of(WRegion *reg)
 	 * be found starting from both reg and the root.
 	 */
 	while(1){
-		r2=FIND_PARENT1(reg, WRegion);
+		r2=REGION_PARENT_CHK(reg, WRegion);
 		if(r2==NULL)
 			break;
 		r2->previous_act=NULL;

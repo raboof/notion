@@ -427,7 +427,7 @@ static WRegion *clientwin_do_add_managed(WClientWin *cwin,
 										 const WAttachParams *param)
 {
 	WRectangle geom=cwin->max_geom;
-	WWindow *par=FIND_PARENT1(cwin, WWindow);
+	WWindow *par=REGION_PARENT_CHK(cwin, WWindow);
 	WRegion *reg;
 
 	if(par==NULL)
@@ -497,7 +497,7 @@ static void reparent_root(WClientWin *cwin)
 	
 	XGetWindowAttributes(wglobal.dpy, cwin->win, &attr);
 	
-	par=FIND_PARENT1(cwin, WWindow);
+	par=REGION_PARENT_CHK(cwin, WWindow);
 	
 	if(par==NULL || WOBJ_IS(par, WScreen)){
 		x=REGION_GEOM(cwin).x;
@@ -1031,7 +1031,7 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 	/* ConfigureRequest coordinates are coordinates of the window manager
 	 * frame if such exists.
 	 */
-	par=FIND_PARENT1(cwin, WWindow);
+	par=REGION_PARENT_CHK(cwin, WWindow);
 	if(par==NULL || WOBJ_IS(par, WScreen))
 		region_rootpos((WRegion*)cwin, &rx, &ry);
 	else

@@ -150,7 +150,7 @@ static bool begin_moveres(WRegion *reg, WDrawRubberbandFn *rubfn)
 	
 	region_resize_hints(reg, &tmphints, &tmprelw, &tmprelh);
 
-	parent=FIND_PARENT1(reg, WRegion);
+	parent=REGION_PARENT_CHK(reg, WRegion);
 	if(parent==NULL){
 		parent_rx=0;
 		parent_ry=0;
@@ -445,7 +445,7 @@ int region_get_y(WRegion *reg)
 
 
 #define DO_MAXIMIZE(FRAME, WH, POS)                              \
-	WRegion *par=FIND_PARENT1(FRAME, WRegion);                   \
+	WRegion *par=REGION_PARENT_CHK(FRAME, WRegion);                   \
 	WRectangle geom=REGION_GEOM(FRAME);                          \
 	int tmp, tmp2;                                               \
                                                                  \

@@ -255,7 +255,7 @@ static WRegion *floatws_do_add_managed(WFloatWS *ws, WRegionAddFn *fn,
 		return NULL;
 	}
 	
-	par=FIND_PARENT1(ws, WWindow);
+	par=REGION_PARENT_CHK(ws, WWindow);
 	assert(par!=NULL);
 	
 	reg=fn(par, geom, fnparams);
@@ -292,12 +292,12 @@ static bool floatws_add_clientwin(WFloatWS *ws,
 	bool respectpos=FALSE;
 
 	if(params->flags&REGION_ATTACH_TFOR){
-		stack_above=(WRegion*)FIND_PARENT1(params->tfor, WRegion);
+		stack_above=(WRegion*)REGION_PARENT_CHK(params->tfor, WRegion);
 		if(stack_above!=NULL && REGION_MANAGER(stack_above)!=(WRegion*)ws)
 			stack_above=NULL;
 	}
 	
-	par=FIND_PARENT1(ws, WWindow);
+	par=REGION_PARENT_CHK(ws, WWindow);
 	assert(par!=NULL);
 	
 #ifdef CF_FLOATWS_ATTACH_TO_CURRENT
@@ -371,7 +371,7 @@ static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
 	WRegion *target;
 	WWindow *par;
 	
-	par=FIND_PARENT1(ws, WWindow);
+	par=REGION_PARENT_CHK(ws, WWindow);
 	
 	if(par==NULL)
 		return FALSE;
