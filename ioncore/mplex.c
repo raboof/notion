@@ -551,9 +551,10 @@ static void mplex_do_remove(WMPlex *mplex, WRegion *sub)
 	mplex->managed_count--;
 	
 	if(wglobal.opmode!=OPMODE_DEINIT){
+		bool sw=(next!=NULL || mplex->managed_count==0);
 		if(next!=NULL)
 			mplex_do_display_managed(mplex, next);
-		mplex_managed_removed(mplex, sub, next!=NULL);
+		mplex_managed_removed(mplex, sub, sw);
 	}
 }
 

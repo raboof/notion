@@ -439,6 +439,7 @@ void debrush_enable_transparency(DEBrush *brush, Window win,
 	}
 	
 	XChangeWindowAttributes(wglobal.dpy, win, attrflags, &attr);
+	XClearWindow(wglobal.dpy, win);
 }
 
 
