@@ -11,6 +11,8 @@
 #include <string.h>
 #include <errno.h>
 #include <locale.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #include <libtu/util.h>
 #include <libtu/optparser.h>
@@ -32,6 +34,7 @@
 #include "binding.h"
 #include "font.h"
 #include "extl.h"
+#include "errorlog.h"
 #include "../version.h"
 
 
@@ -96,7 +99,11 @@ int main(int argc, char*argv[])
 	char *cmd=NULL;
 	bool onescreen=FALSE;
 	int opt;
-	
+	ErrorLog el;
+	FILE *ef=NULL;
+	char *efnam=NULL;
+	bool may_continue=FALSE;
+
 	libtu_init(argv[0]);
 
 	if(!init_module_support())
@@ -137,40 +144,87 @@ int main(int argc, char*argv[])
 	
 	/*ioncore_add_default_dirs("ion-devel", ETCDIR, LIBDIR);*/
 
+	/* We may have to pass the file to xmessage so just using tmpfile()
+	 * isn't sufficient */
+	
+	libtu_asprintf(&efnam, "%s/ion-%d-startup-errorlog", P_tmpdir,
+				   getpid());
+	if(efnam==NULL){
+		warn_err("Failed to create error log file");
+	}else{
+		ef=fopen(efnam, "wt");
+		if(ef==NULL){
+			warn_err_obj(efnam);
+			free(efnam);
+			efnam=NULL;
+		}
+		fprintf(ef, "Ion startup error log:\n");
+		begin_errorlog_file(&el, ef);
+	}
+	
 	if(!extl_init())
-		return EXIT_FAILURE;
+		goto fail;
 
 	ioncore_register_exports();
-	read_config_for("ioncore-lib");
+	
+	if(!read_config_for("ioncore-lib"))
+		goto fail;
 	
 	if(!ioncore_init(display, onescreen))
-		return EXIT_FAILURE;
+		goto fail;
 
 	if(!ioncore_read_config(cfgfile)){
-		msg="Unable to load configuration file. Refusing to start. "
-			"You *must* install proper configuration files "
-			"either in ~/.ion-devel or "ETCDIR"/ion-devel to use Ion.";
-		goto fail;
+		/* Let's not fail, it might be a minor error */
+		/*
+		warn("Unable to load configuration file. Refusing to start. "
+			 "You *must* install proper configuration files to use Ion.");
+		goto fail;*/
 	}
 	
 	if(!setup_screens()){
-		msg="Unable to set up any screens. Refusing to start.";
+		warn("Unable to set up any screens.");
 		goto fail;
 	}
+	
+	may_continue=TRUE;
+	
+fail:
+	if(!may_continue)
+		warn("Refusing to start due to encountered errors.");
+	
+	if(ef!=NULL){
+		pid_t pid=-1;
+		if(end_errorlog(&el)){
+			fclose(ef);
+			pid=fork();
+			if(pid==0){
+				setup_environ(DefaultScreen(wglobal.dpy));
+				if(!may_continue)
+					XCloseDisplay(wglobal.dpy);
+				else
+					close(wglobal.conn);
+				libtu_asprintf(&cmd, CF_XMESSAGE " %s", efnam);
+				system(cmd);
+				unlink(efnam);
+				exit(EXIT_SUCCESS);
+			}
+			if(!may_continue && pid>0)
+				waitpid(pid, NULL, 0);
+		}else{
+			fclose(ef);
+		}
+		if(pid<0)
+			unlink(efnam);
+		free(efnam);
+	}
+
+	if(!may_continue)
+		return EXIT_FAILURE;
 	
 	mainloop();
 	
 	/* The code should never return here */
 	return EXIT_SUCCESS;
-	
-fail:
-	warn(msg);
-	setup_environ(DefaultScreen(wglobal.dpy));
-	XCloseDisplay(wglobal.dpy);
-	libtu_asprintf(&cmd, "xmessage '%s'", msg);
-	if(cmd!=NULL)
-		do_exec(cmd);
-	return EXIT_FAILURE;
 }
 
 
