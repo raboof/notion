@@ -55,6 +55,8 @@ static void keyboard_handler(XEvent *ev);
 /*	fprintf(stderr, "[%#lx] %s\n", ev->xany.window, #X);*/
 
 
+#if 0
+
 #define SKIP_FOCUSENTER_EVENTS(EV) while(XCheckMaskEvent(wglobal.dpy, \
 	EnterWindowMask|FocusChangeMask, EV)) /*nothing */;
 
@@ -99,6 +101,8 @@ static void skip_focusenter()
 			handle_focus_in(&(ev.xfocus));
 	}
 }
+
+#endif
 
 
 static void skip_focusenter_but(WRegion *reg)

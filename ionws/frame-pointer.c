@@ -144,7 +144,7 @@ static void draw_tabdrag(const WRegion *reg)
 {
 	DrawInfo _dinfo, *dinfo=&_dinfo;
 	WGRData *grdata=GRDATA_OF(reg);
-	const char *label;
+	const char *label=NULL;
 	
 	dinfo->win=grdata->drag_win;
 	dinfo->grdata=grdata;
