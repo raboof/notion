@@ -94,6 +94,7 @@ extern bool extl_table_sets_b(ExtlTab ref, const char *entry, bool val);
 extern bool extl_table_sets_s(ExtlTab ref, const char *entry, const char *val);
 extern bool extl_table_sets_f(ExtlTab ref, const char *entry, ExtlFn val);
 extern bool extl_table_sets_t(ExtlTab ref, const char *entry, ExtlTab val);
+extern bool extl_table_clears(ExtlTab ref, const char *entry);
 
 extern bool extl_table_seti_o(ExtlTab ref, int entry, WObj *val);
 extern bool extl_table_seti_i(ExtlTab ref, int entry, int val);
@@ -102,6 +103,7 @@ extern bool extl_table_seti_b(ExtlTab ref, int entry, bool val);
 extern bool extl_table_seti_s(ExtlTab ref, int entry, const char *val);
 extern bool extl_table_seti_f(ExtlTab ref, int entry, ExtlFn val);
 extern bool extl_table_seti_t(ExtlTab ref, int entry, ExtlTab val);
+extern bool extl_table_cleari(ExtlTab ref, int entry);
 
 /* Call */
 
