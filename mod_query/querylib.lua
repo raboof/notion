@@ -766,6 +766,33 @@ function querylib.show_about_ion(mplex)
 end
 
 
+--DOC
+-- Show information about a client window.
+function querylib.show_clientwin(mplex, cwin)
+    local function indent(s)
+        local i="    "
+        return i..string.gsub(s, "\n", "\n"..i)
+    end
+    
+    local function get_info(cwin)
+        local function n(s) return (s or "") end
+        local f="Title: %s\nClass: %s\nRole: %s\nInstance: %s"
+        local i=cwin:get_ident()
+        local s=string.format(f, n(cwin:name()), n(i.class), n(i.role), 
+                              n(i.instance))
+        local t="\nTransients:\n"
+        for k, v in cwin:managed_list() do
+            if obj_is(v, "WClientWin") then
+                s=s..t..indent(get_info(v))
+                t="\n"
+            end
+        end
+        return s
+    end
+    
+    mod_query.message(mplex, get_info(cwin))
+end
+
 -- }}}
 
 

@@ -41,6 +41,8 @@ defmenu("ctxmenu", {
                                 "_sub:non-nil"),
     menuentry("Attach tagged",  "WFrame.attach_tagged(_)"),
     menuentry("Clear tags",     "ioncore.clear_tags()"),
+    menuentry("Window info",    "querylib.show_clientwin(_, _sub)",
+                                "_sub:WClientWin"),
 })
 
 
