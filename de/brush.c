@@ -39,12 +39,12 @@ static void create_normal_gc(DEBrush *brush, WRootWin *rootwin)
 	gcv.fill_style=FillSolid;
 	gcvmask=(GCLineStyle|GCLineWidth|GCFillStyle|
 			 GCJoinStyle|GCCapStyle);
-#ifndef CF_UTF8
-	if(brush->font!=NULL){
-		gcv.font=brush->font->fid;
+	
+	if(brush->font!=NULL && brush->font->fontstruct!=NULL){
+		gcv.font=brush->font->fontstruct->fid;
 		gcvmask|=GCFont;
 	}
-#endif
+	
 	brush->normal_gc=XCreateGC(wglobal.dpy, ROOT_OF(rootwin), gcvmask, &gcv);
 }
 

@@ -15,20 +15,22 @@
 #include <ioncore/common.h>
 #include <ioncore/gr.h>
 
+INTRSTRUCT(DEFont);
 
-#ifdef CF_UTF8
-typedef XFontSet DEFontPtr;
-#else /* !CF_UTF8 */
-typedef XFontStruct* DEFontPtr;
-#endif /* !CF_UTF8 */
-
+DECLSTRUCT(DEFont){
+	char *pattern;
+	int refcount;
+	XFontSet fontset;
+	XFontStruct *fontstruct;
+	DEFont *next, *prev;
+};
 
 #include "brush.h"
 #include "colour.h"
 
 
-extern DEFontPtr de_load_font(const char *fontname);
-extern void de_free_font(DEFontPtr font);
+extern DEFont *de_load_font(const char *fontname);
+extern void de_free_font(DEFont *font);
 
 
 extern void debrush_draw_string(DEBrush *brush, Window win, int x, int y,

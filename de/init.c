@@ -243,10 +243,10 @@ bool de_do_define_style(WRootWin *rootwin, const char *name, ExtlTab tab)
 	}else{
 		brush->font=de_load_font(CF_FALLBACK_FONT_NAME);
 	}
-#ifndef CF_UTF8
+/*#ifndef CF_UTF8
 	if(brush->font!=NULL)
 		XSetFont(wglobal.dpy, brush->normal_gc, brush->font->fid);
-#endif
+#endif*/
 
 	brush->cgrp_alloced=TRUE;
 	get_colour_group(rootwin, &(brush->cgrp), tab);
@@ -280,17 +280,6 @@ bool de_module_init()
 {
 	WRootWin *rootwin;
 	DEBrush *brush;
-	
-#ifndef CF_UTF8
-	if(ioncore_is_utf8()){
-		warn_obj("DE module", "Ioncore uses UTF8 but the module was not "
-				 "compiled with UTF8 support.");
-	}
-#else
-	if(!ioncore_is_utf8()){
-		warn("Ioncore does not use UTF8 but module expects UTF8 strings.");
-	}
-#endif
 	
 	if(!de_module_register_exports())
 		return FALSE;

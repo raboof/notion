@@ -20,51 +20,84 @@
 /*{{{ Load/free */
 
 
-DEFontPtr de_load_font(const char *fontname)
+static DEFont *fonts=NULL;
+
+
+DEFont *de_load_font(const char *fontname)
 {
-	DEFontPtr xfnt;
-	
-#ifdef CF_UTF8
-	char **dummy_missing;
-	int dummy_missing_n;
-	char *dummy_def;
+	DEFont *fnt;
+	XFontSet fontset=NULL;
+	XFontStruct *fontstruct=NULL;
 	
 	if(fontname==NULL){
 		warn("Attempt to load NULL as font");
-		return 0;
+		return NULL;
 	}
 	
-	xfnt=de_create_font_set(fontname);
-	
-#else
-	xfnt=XLoadQueryFont(wglobal.dpy, fontname);
-#endif
-	
-	if(xfnt==NULL && strcmp(fontname, CF_FALLBACK_FONT_NAME)!=0){
-		warn("Could not load font \"%s\", trying \"%s\"",
-			 fontname, CF_FALLBACK_FONT_NAME);
-#ifdef CF_UTF8
-		xfnt=de_create_font_set(CF_FALLBACK_FONT_NAME);
-#else
-		xfnt=XLoadQueryFont(wglobal.dpy, CF_FALLBACK_FONT_NAME);
-#endif
-		if(xfnt==NULL){
-			warn("Failed loading fallback font.");
-			return 0;
+	/* There shouldn't be that many fonts... */
+	for(fnt=fonts; fnt!=NULL; fnt=fnt->next){
+		if(strcmp(fnt->pattern, fontname)==0){
+			fnt->refcount++;
+			return fnt;
 		}
 	}
+
+	if(wglobal.utf8_mode){
+		fontset=de_create_font_set(fontname);
+		if(fontset!=NULL){
+			if(XContextDependentDrawing(fontset)){
+				warn("Fontset for font pattern '%s' implements context "
+					 "dependent drawing, which is unsupported. Expect "
+					 "clutter.", fontname);
+			}
+		}
+	}else{
+		fontstruct=XLoadQueryFont(wglobal.dpy, fontname);
+	}
+
+	if(fontstruct==NULL && fontset==NULL){
+		if(strcmp(fontname, CF_FALLBACK_FONT_NAME)!=0){
+			warn("Could not load font \"%s\", trying \"%s\"",
+				 fontname, CF_FALLBACK_FONT_NAME);
+			return de_load_font(CF_FALLBACK_FONT_NAME);
+		}
+		return NULL;
+	}
 	
-	return xfnt;
+	fnt=ALLOC(DEFont);
+	
+	if(fnt==NULL){
+		warn_err();
+		return NULL;
+	}
+	
+	fnt->fontset=fontset;
+	fnt->fontstruct=fontstruct;
+	fnt->pattern=scopy(fontname);
+	fnt->next=NULL;
+	fnt->prev=NULL;
+	fnt->refcount=1;
+
+	LINK_ITEM(fonts, fnt, next, prev);
+	
+	return fnt;
 }
 
 
-void de_free_font(DEFontPtr font)
+void de_free_font(DEFont *font)
 {
-#ifdef CF_UTF8
-	XFreeFontSet(wglobal.dpy, font);
-#else
-	XFreeFont(wglobal.dpy, font);
-#endif
+	if(--font->refcount!=0)
+		return;
+	
+	if(font->fontset!=NULL)
+		XFreeFontSet(wglobal.dpy, font->fontset);
+	if(font->fontstruct!=NULL)
+		XFreeFont(wglobal.dpy, font->fontstruct);
+	if(font->pattern!=NULL)
+		free(font->pattern);
+	
+	UNLINK_ITEM(fonts, font, next, prev);
+	free(font);
 }
 
 
@@ -77,26 +110,23 @@ void de_free_font(DEFontPtr font)
 void debrush_get_font_extents(DEBrush *brush, GrFontExtents *fnte)
 {
 	if(brush->font==NULL)
-		goto fail;
-
-#ifdef CF_UTF8
-	{
-		XFontSetExtents *ext=XExtentsOfFontSet(brush->font);
+		return;
+	
+	if(brush->font->fontset!=NULL){
+		XFontSetExtents *ext=XExtentsOfFontSet(brush->font->fontset);
 		if(ext==NULL)
 			goto fail;
 		fnte->max_height=ext->max_logical_extent.height;
 		fnte->max_width=ext->max_logical_extent.width;
 		fnte->baseline=-ext->max_logical_extent.y;
-	}
-#else
-	{
-		DEFontPtr fnt=brush->font;
-		fnte->max_height=fnt->ascent+fnt->descent;
+		return;
+	}else if(brush->font->fontstruct!=NULL){
+		XFontStruct *fnt=brush->font->fontstruct;
+        fnte->max_height=fnt->ascent+fnt->descent;
 		fnte->max_width=fnt->max_bounds.width;
 		fnte->baseline=fnt->ascent;
+		return;
 	}
-#endif
-    return;
 
 fail:	
 	fnte->max_height=0;
@@ -109,15 +139,16 @@ uint debrush_get_text_width(DEBrush *brush, const char *text, uint len)
 {
 	if(brush->font==NULL)
 		return 0;
-#ifdef CF_UTF8
-	{
+	
+	if(brush->font->fontset!=NULL){
 		XRectangle lext;
-		Xutf8TextExtents(brush->font, text, len, NULL, &lext);
+		Xutf8TextExtents(brush->font->fontset, text, len, NULL, &lext);
 		return lext.width;
+	}else if(brush->font->fontstruct!=NULL){
+		return XTextWidth(brush->font->fontstruct, text, len);
+	}else{
+		return 0;
 	}
-#else
-	return XTextWidth(brush->font, text, len);
-#endif
 }
 
 
@@ -132,25 +163,33 @@ void debrush_do_draw_string(DEBrush *brush, Window win, int x, int y,
 							DEColourGroup *colours)
 {
 	GC gc=brush->normal_gc;
-	
+
 	if(brush->font==NULL)
 		return;
 	
 	XSetForeground(wglobal.dpy, gc, colours->fg);
+	
 	if(!needfill){
-#ifdef CF_UTF8
-		Xutf8DrawString(wglobal.dpy, win, brush->font, gc, x, y, str, len);
-#else
-		XDrawString(wglobal.dpy, win, gc, x, y, str, len);
+#ifdef CF_UTF8		
+		if(brush->font->fontset!=NULL){
+			Xutf8DrawString(wglobal.dpy, win, brush->font->fontset,
+							gc, x, y, str, len);
+		}else 
 #endif
+		if(brush->font->fontstruct!=NULL){
+			XDrawString(wglobal.dpy, win, gc, x, y, str, len);
+		}
 	}else{
 		XSetBackground(wglobal.dpy, gc, colours->bg);
-#ifdef CF_UTF8
-		Xutf8DrawImageString(wglobal.dpy, win, brush->font, gc, 
-							 x, y, str, len);
-#else
-		XDrawImageString(wglobal.dpy, win, gc, x, y, str, len);
-#endif
+#ifdef CF_UTF8		
+		if(brush->font->fontset!=NULL){
+			Xutf8DrawImageString(wglobal.dpy, win, brush->font->fontset,
+								 gc, x, y, str, len);
+		}else 
+#endif			
+		if(brush->font->fontstruct!=NULL){
+			XDrawImageString(wglobal.dpy, win, gc, x, y, str, len);
+		}
 	}
 }
 

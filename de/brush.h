@@ -71,7 +71,7 @@ DECLOBJ(DEBrush){
 	int n_extra_cgrps;
 	DEColourGroup *extra_cgrps;
 	GrTransparency transparency_mode;
-	DEFontPtr font;
+	DEFont *font;
 	int textalign;
 	uint spacing;
 	
