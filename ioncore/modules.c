@@ -13,6 +13,7 @@
 
 #include "common.h"
 #include "modules.h"
+#include "readconfig.h"
 
 
 INTRSTRUCT(Module)
@@ -50,7 +51,7 @@ static bool call_init(void *handle, char *name)
 }
 
 
-bool load_module(const char *fname)
+static bool do_load_module(const char *fname)
 {
 	void *handle;
 	Module *m;
@@ -65,6 +66,11 @@ bool load_module(const char *fname)
 		return FALSE;
 	}
 
+	for(m=modules; m!=NULL; m=m->next){
+		if(m->handle==handle)
+			return TRUE;
+	}
+	
 	/* Get the module name without directory or extension */
 	
 	p=strrchr(fname, '/');
@@ -121,6 +127,25 @@ err2:
 err1:
 	dlclose(handle);
 	return FALSE;
+}
+
+
+bool load_module(const char *name)
+{
+	char *name2=NULL;
+	bool ret=FALSE;
+	
+	if(strchr(name, '/')!=NULL)
+		return do_load_module(name);
+
+	name2=find_module(name);
+	
+	if(name2!=NULL){
+		ret=do_load_module(name2);
+		free(name2);
+	}
+	
+	return ret;
 }
 
 

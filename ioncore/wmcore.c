@@ -77,7 +77,7 @@ static void initialize_global()
 
 
 bool wmcore_init(const char *appname, const char *appetcdir,
-				 const char *display, bool onescreen)
+				 const char *applibdir, const char *display, bool onescreen)
 {
 	Display *dpy;
 	WScreen *scr;
@@ -94,9 +94,9 @@ bool wmcore_init(const char *appname, const char *appetcdir,
 	initialize_global();
 	wmcore_init_funclists();
 	
-	if(!wmcore_set_cfgpath(appname, appetcdir))
+	if(!wmcore_set_paths(appname, appetcdir, applibdir))
 		return FALSE;
-		
+	
 	/* Open the display. */
 	dpy=XOpenDisplay(display);
 	

@@ -10,8 +10,9 @@
 
 #include <libtu/parser.h>
 
-extern bool wmcore_set_cfgpath(const char *appname, const char *etcdir);
-	
+extern bool wmcore_set_paths(const char *appname, const char *etcdir,
+							 const char *libdir);
+
 extern char *get_core_cfgfile_for_scr(const char *module, int xscr);
 extern char *get_core_cfgfile_for(const char *module);
 extern char *get_cfgfile_for_scr(const char *module, int xscr);
@@ -26,5 +27,9 @@ extern bool read_config_for_scr(const char *module, int xscr,
 extern bool read_core_config_for(const char *module, const ConfOpt *opts);
 extern bool read_core_config_for_scr(const char *module, int xscr,
 									 const ConfOpt *opts);
+
+
+/* The library path stuff is in readconfig.c */
+extern char *find_module(const char *fname);
 
 #endif /* WMCORE_READCONFIG_H */

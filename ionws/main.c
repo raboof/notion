@@ -96,7 +96,7 @@ int main(int argc, char*argv[])
 	wglobal.argc=argc;
 	wglobal.argv=argv;
 	
-	if(!wmcore_init("ion-devel", ETCDIR, display, onescreen))
+	if(!wmcore_init("ion-devel", ETCDIR, LIBDIR, display, onescreen))
 		return EXIT_FAILURE;
 	
 	init_funclists();

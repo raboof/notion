@@ -17,38 +17,59 @@
 #include "readconfig.h"
 
 
-static char *appname=NULL, *appetcdir=NULL;
+static char *etcpaths[]={
+	NULL, NULL, NULL
+};
 
-/* Use application settings for the moment as there is only one program
- * using this library.
- */
-#define WMCORENAME appname
-#undef ETCDIR
-#define ETCDIR appetcdir
+
+static char *libpaths[]={
+	NULL, NULL, NULL
+};
 
 
 /*{{{ Init */
 
 
-bool wmcore_set_cfgpath(const char *name, const char *etcdir)
+bool wmcore_set_paths(const char *appname, const char *etcdir, const char *libdir)
 {
+	char *p, *home;
+	int libi=0, etci=0;
+	
 	/* Should only be called from wmcore_init */
-	assert(appname==NULL);
+	assert(appname!=NULL && etcdir!=NULL && libdir!=NULL);
 	
-	appname=scopy(name);
-	if(appname==NULL){
-		warn_err();
-		return FALSE;
+	home=getenv("HOME");
+	
+	if(home==NULL){
+		warn("$HOME not set");
+	}else{
+		char *tmp=scat3(home, "/.", appname);
+		if(tmp==NULL){
+			warn_err();
+		}else{
+			etcpaths[etci++]=tmp;
+			
+			p=scat(tmp, "/lib");
+			if(p!=NULL)
+				libpaths[libi++]=p;
+			else
+				warn_err();
+		}
 	}
-	
-	appetcdir=scopy(etcdir);
-	if(appetcdir==NULL){
+
+	p=scat3(etcdir, "/", appname);
+	if(p!=NULL)
+		etcpaths[etci++]=p;
+	else
 		warn_err();
-		free(appname);
-		return FALSE;
-	}
 	
-	return TRUE;
+	p=scat3(libdir, "/", appname);
+	if(p!=NULL)
+		libpaths[libi++]=p;
+	else
+		warn_err();
+	
+	return (etci>0 && libi>0);
 }
 
 
@@ -62,62 +83,33 @@ static char *do_get_cfgfile_for(bool core, const char *module,
 								const char *postfix, bool noaccesstest)
 {
 	int tryno, psfnotset=(postfix==NULL);
-	char *tmp, *home, *etc, *nm;
-
+	char *tmp, **dir;
+	
 	if(module==NULL)
 		return NULL;
 	
-	home=getenv("HOME");
-	
-	tryno=psfnotset+(home==NULL ? 0 : 2);
-	
-	if(core){
-		nm=WMCORENAME;
-		etc=ETCDIR;
-	}else{
-		nm=appname;
-		etc=appetcdir;
-	}
-	
-	for(tryno=psfnotset; tryno<4; tryno+=1+psfnotset){
-		switch(tryno){
-		case 0:
-			/* ~/.appname/module-postfix.conf */
-			libtu_asprintf(&tmp, "%s/.%s/%s-%s.conf",
-						   home, nm, module, postfix);
-			break;
-		case 1:
-			/* ~/.appname/module.conf */
-			libtu_asprintf(&tmp, "%s/.%s/%s.conf",
-						   home, nm, module);
-			break;
-		case 2:
-			/* ETCDIR/appname/module-postfix.conf */
-			libtu_asprintf(&tmp, "%s/%s/%s-%s.conf",
-						   etc, nm, module, postfix);
-			break;
-		case 3:
-			/* ETCDIR/appname/module.conf */
-			libtu_asprintf(&tmp, "%s/%s/%s.conf",
-						   etc, nm, module);
-			break;
-		}
+	for(dir=etcpaths; *dir!=NULL; dir++){
+		for(tryno=psfnotset; tryno<2; tryno++){
+			if(tryno==0)
+				libtu_asprintf(&tmp, "%s/%s-%s.conf", *dir, module, postfix);
+			else
+				libtu_asprintf(&tmp, "%s/%s.conf", *dir, module);
 		
-		if(tmp==NULL){
-			warn_err();
-			continue;
-		}
-	
-		if(!noaccesstest && access(tmp, F_OK)!=0){
-			if(tryno!=3){
-				free(tmp);
+			if(tmp==NULL){
+				warn_err();
 				continue;
 			}
+	
+			if(noaccesstest || access(tmp, F_OK)==0)
+				return tmp;
+		
+			free(tmp);
 		}
-		break;
 	}
 	
-	return tmp;
+	warn("Could not find configuration file %s.conf\n", module);
+	
+	return NULL;
 }
 
 
@@ -206,11 +198,6 @@ char *get_savefile_for(const char *module)
 /*{{{ read_config */
 
 
-char *includepaths[]={
-	NULL, NULL
-};
-
-
 bool read_config(const char *cfgfile, const ConfOpt *opts)
 {
 	bool retval=FALSE;
@@ -221,10 +208,8 @@ bool read_config(const char *cfgfile, const ConfOpt *opts)
 	if(tokz==NULL)
 		return FALSE;
 	
-	includepaths[0]=appetcdir;
-	
 	tokz->flags=TOKZ_ERROR_TOLERANT;
-	tokz_set_includepaths(tokz, includepaths);
+	tokz_set_includepaths(tokz, etcpaths);
 	retval=parse_config_tokz(tokz, opts);
 	tokz_close(tokz);
 	
@@ -266,6 +251,39 @@ bool read_config_for_scr(const char *module, int xscr,
 						 const ConfOpt *opts)
 {
 	return do_read_config_for(get_cfgfile_for_scr(module, xscr), opts);
+}
+
+
+/*}}}*/
+
+
+/*{{{ find_module */
+
+
+char *find_module(const char *fname)
+{
+	char *tmp, **dir;
+
+	if(fname==NULL)
+		return NULL;
+	
+	for(dir=libpaths; *dir!=NULL; dir++){
+		libtu_asprintf(&tmp, "%s/%s", *dir, fname);
+
+		if(tmp==NULL){
+			warn_err();
+			continue;
+		}
+	
+		if(access(tmp, F_OK)==0)
+			return tmp;
+		
+		free(tmp);
+	}
+	
+	warn("Could not find module %s\n", fname);
+	
+	return NULL;
 }
 
 

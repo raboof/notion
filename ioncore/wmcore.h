@@ -10,7 +10,7 @@
 
 #include "common.h"
 
-bool wmcore_init(const char *name, const char *etcdir,
+bool wmcore_init(const char *name, const char *etcdir, const char *libdir,
 				 const char *display, bool onescreen);
 void wmcore_deinit();
 
