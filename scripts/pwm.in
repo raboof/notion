@@ -2,7 +2,7 @@
 
 if test x$HOME != x; then
   PWMDIRARGS="-confdir $HOME/.pwm-devel \
-    -libdir $HOME/.pwm-devel/libs \
+    -moduledir $HOME/.pwm-devel/libs \
     $PWMDIRARGS"
 fi
 
