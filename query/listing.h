@@ -32,7 +32,7 @@ extern void setup_listing(WListing *l, char **strs, int nstrs, bool onecol);
 extern void deinit_listing(WListing *l);
 extern void fit_listing(GrBrush *brush, const WRectangle *geom, WListing *l);
 extern void draw_listing(GrBrush *brush, Window win, const WRectangle *geom,
-						 WListing *l, bool complete);
+						 WListing *l, bool complete, const char *style);
 extern bool scrollup_listing(WListing *l);
 extern bool scrolldown_listing(WListing *l);
 

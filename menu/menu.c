@@ -73,10 +73,14 @@ void menu_draw_entries(WMenu *menu, bool complete)
 	WRectangle geom;
 	int i;
 	static const char *attrs[]={
-		"selected-normal",
-		"unselected-normal",
-		"selected-submenu",
-		"unselected-submenu"
+		"active-selected-normal",
+		"active-selected-submenu",
+		"active-unselected-normal",
+		"active-unselected-submenu",
+		"inactive-selected-normal",
+		"inactive-selected-submenu",
+		"inactive-unselected-normal",
+		"inactive-unselected-submenu",
 	};
 	
 	if(menu->entry_brush==NULL)
@@ -86,8 +90,9 @@ void menu_draw_entries(WMenu *menu, bool complete)
 	geom.h=menu->entry_h;
 	
 	for(i=0; i<menu->n_entries; i++){
-		int a=((menu->selected_entry==i ? 0 : 1)
-			   |(menu->entries[i].flags&WMENUENTRY_SUBMENU ? 2 : 0));
+		int a=((REGION_IS_ACTIVE(menu) ? 0 : 4)
+			   |(menu->selected_entry==i ? 0 : 2)
+			   |(menu->entries[i].flags&WMENUENTRY_SUBMENU ? 1 : 0));
 
 		grbrush_draw_textbox(menu->entry_brush, MENU_WIN(menu), &geom,
 							 menu->entries[i].title, attrs[a], complete);
@@ -99,13 +104,14 @@ void menu_draw_entries(WMenu *menu, bool complete)
 void menu_draw(WMenu *menu, bool complete)
 {
 	WRectangle geom;
+	const char *substyle=(REGION_IS_ACTIVE(menu) ? "active" : "inactive");
 	
 	if(menu->brush==NULL)
 		return;
 	
 	get_outer_geom(menu, &geom);
 	
-	grbrush_draw_border(menu->brush, MENU_WIN(menu), &geom, NULL);
+	grbrush_draw_border(menu->brush, MENU_WIN(menu), &geom, substyle);
 	
 	menu_draw_entries(menu, FALSE);
 }
@@ -315,23 +321,17 @@ static bool menu_init_gr(WMenu *menu, WRootWin *rootwin, Window win)
 	GrBrush *brush, *entry_brush;
 	char *st;
 	
-	if(extl_table_gets_s(menu->tab, "menu_style", &st)){
-		brush=gr_get_brush(rootwin, win, st);
-		free(st);
-	}else{
-		brush=gr_get_brush(rootwin, win, "input-menu");
-	}
+	brush=gr_get_brush(rootwin, win,  (menu->big_mode
+									   ? "input-menu-big"
+									   : "input-menu-normal"));
 	
 	if(brush==NULL)
 		return FALSE;
 
-	if(extl_table_gets_s(menu->tab, "menu_entry_style", &st)){
-		entry_brush=grbrush_get_slave(brush, rootwin, win, st);
-		free(st);
-	}else{
-		entry_brush=grbrush_get_slave(brush, rootwin, win, 
-									  "input-menu-entry");
-	}
+	entry_brush=grbrush_get_slave(brush, rootwin, win, 
+								  (menu->big_mode
+								   ? "tab-menuentry-big"
+								   : "tab-menuentry-normal"));
 	
 	if(entry_brush==NULL){
 		grbrush_release(brush, win);
@@ -430,6 +430,7 @@ bool menu_init(WMenu *menu, WWindow *par, const WRectangle *geom,
 	menu->tab=extl_ref_table(params->tab);
 	menu->handler=extl_ref_fn(params->handler);
 	menu->pmenu_mode=params->pmenu_mode;
+	menu->big_mode=params->big_mode;
 
 	menu->max_geom=*geom;
 	menu->selected_entry=(params->pmenu_mode ? -1 : 0);
@@ -497,6 +498,24 @@ void menu_deinit(WMenu *menu)
 /*}}}*/
 
 
+/*{{{ Focus  */
+
+
+static void menu_inactivated(WMenu *menu)
+{
+	window_draw((WWindow*)menu, FALSE);
+}
+
+
+static void menu_activated(WMenu *menu)
+{
+	window_draw((WWindow*)menu, FALSE);
+}
+
+
+/*}}}*/
+
+
 /*{{{ Submenus */
 
 
@@ -558,6 +577,7 @@ static void show_sub(WMenu *menu, int n)
 	fnp.tab=extl_table_none();
 	extl_table_getis(menu->tab, n+1, "submenu", 't', &(fnp.tab));
 	fnp.pmenu_mode=menu->pmenu_mode;
+	fnp.big_mode=menu->big_mode;
 	fnp.submenu_mode=TRUE;
 	
 	submenu=create_menu(par, &g, &fnp);
@@ -1007,6 +1027,8 @@ static DynFunTab menu_dynfuntab[]={
 	{(DynFun*)window_press, (DynFun*)menu_press},
 	{region_remove_managed, menu_remove_managed},
 	{region_set_focus_to, menu_set_focus_to},
+	{region_activated, menu_activated},
+	{region_inactivated, menu_inactivated},
 	END_DYNFUNTAB
 };
 

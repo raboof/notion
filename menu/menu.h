@@ -34,6 +34,7 @@ DECLOBJ(WMenu){
 	WRectangle max_geom;
 	
 	bool pmenu_mode;
+	bool big_mode;
 	int n_entries, selected_entry;
 	int max_entry_w, entry_h, entry_spacing;
 	WMenuEntry *entries;
@@ -52,6 +53,7 @@ DECLSTRUCT(WMenuCreateParams){
 	ExtlTab tab;
 	bool pmenu_mode;
 	bool submenu_mode;
+	bool big_mode;
 	int ref_x, ref_y;
 };
 

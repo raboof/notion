@@ -267,7 +267,7 @@ static const char *ionframe_style(WIonFrame *frame)
 
 static const char *ionframe_tab_style(WIonFrame *frame)
 {
-	return "frame-tab-ionframe";
+	return "tab-frame-ionframe";
 }
 
 

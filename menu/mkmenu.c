@@ -27,7 +27,7 @@
  * \fnref{menuentry} maybe also used to create these entries.
  */
 EXTL_EXPORT
-WMenu *menu_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab)
+WMenu *menu_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab, bool big_mode)
 {
 	WMenuCreateParams fnp;
 
@@ -35,6 +35,7 @@ WMenu *menu_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab)
 	fnp.tab=tab;
 	fnp.pmenu_mode=FALSE;
 	fnp.submenu_mode=FALSE;
+	fnp.big_mode=big_mode;
 	
 	return (WMenu*)mplex_add_input(mplex,
 								   (WRegionAttachHandler*)create_menu,
@@ -62,6 +63,7 @@ WMenu *menu_pmenu(WWindow *where, ExtlFn handler, ExtlTab tab)
 	fnp.handler=handler;
 	fnp.tab=tab;
 	fnp.pmenu_mode=TRUE;
+	fnp.big_mode=FALSE;
 	fnp.submenu_mode=FALSE;
 	fnp.ref_x=ev->xbutton.x_root-REGION_GEOM(scr).x;
 	fnp.ref_y=ev->xbutton.y_root-REGION_GEOM(scr).y;

@@ -266,9 +266,9 @@ DEBrush *de_find_or_create_brush(WRootWin *rootwin, const char *name)
 		}
 	}
 
-	if(MATCHES("frame-tab", name))
+	if(MATCHES("tab-frame", name))
 		brush=(DEBrush*)create_detabbrush(rootwin, name);
-	else if(MATCHES("input-menu-entry", name))
+	else if(MATCHES("tab-menuentry", name))
 		brush=(DEBrush*)create_dementbrush(rootwin, name);
 	else
 		brush=create_debrush(rootwin, name);

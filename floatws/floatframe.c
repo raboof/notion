@@ -28,9 +28,6 @@
 #include "main.h"
 
 
-static void floatframe_get_bar_width_limits(WFloatFrame *frame);
-	
-	
 /*{{{ Destroy/create frame */
 
 
@@ -396,16 +393,14 @@ static const char *floatframe_style_default(WFloatFrame *frame)
 
 static const char *floatframe_tab_style_default(WFloatFrame *frame)
 {
-	return "frame-tab-floatframe";
+	return "tab-frame-floatframe";
 }
 
 
-static void floatframe_draw_config_updated(WFloatFrame *floatframe)
+/*static void floatframe_draw_config_updated(WFloatFrame *floatframe)
 {
 	genframe_draw_config_updated((WGenFrame*)floatframe);
-	/* vai missä?*/
-	/*get_bar_widths(floatframe);*/
-}
+}*/
 
 
 /*}}}*/
@@ -542,7 +537,7 @@ static DynFunTab floatframe_dynfuntab[]={
 	{(DynFun*)genframe_style, (DynFun*)floatframe_style_default},
 	{(DynFun*)genframe_tab_style, (DynFun*)floatframe_tab_style_default},
 	
-	{region_draw_config_updated, floatframe_draw_config_updated},
+	/*{region_draw_config_updated, floatframe_draw_config_updated},*/
 	
 	{genframe_brushes_updated, floatframe_brushes_updated},
 	

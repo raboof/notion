@@ -163,6 +163,24 @@ void input_close(WInput *input)
 /*}}}*/
 
 
+/*{{{ Focus  */
+
+
+static void input_inactivated(WInput *input)
+{
+	window_draw((WWindow*)input, FALSE);
+}
+
+
+static void input_activated(WInput *input)
+{
+	window_draw((WWindow*)input, FALSE);
+}
+
+
+/*}}}*/
+
+
 /*{{{ Dynamic function table and class implementation */
 
 
@@ -170,6 +188,8 @@ static DynFunTab input_dynfuntab[]={
 	{region_fit, input_fit},
 	{region_draw_config_updated, input_draw_config_updated},
 	{region_close, input_close},
+	{region_activated, input_activated},
+	{region_inactivated, input_inactivated},
 	END_DYNFUNTAB
 };
 
