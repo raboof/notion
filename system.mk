@@ -77,11 +77,10 @@ LUAC=$(LUA_DIR)/bin/luac
 
 # If you are using the Debian packages, the following settings should be
 # what you want.
-#LUA_DIR=/usr
-#LUA_LIBS = -llua50 -llualib50
-#LUA_INCLUDES = -I$(LUA_DIR)/include/lua50
-#LUA=$(LUA_DIR)/bin/lua50
-#LUAC=$(LUA_DIR)/bin/luac50
+#LUA_LIBS=`lua-config50 --libs`
+#LUA_INCLUDES=`lua-config50 --include`
+#LUA=lua50
+#LUAC=luac50
 
 
 ##
