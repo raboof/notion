@@ -25,4 +25,3 @@ include $(TOPDIR)/rules.mk
 ######################################
 
 _install: module_install
-	$(INSTALLDIR) $(SHAREDIR)

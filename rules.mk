@@ -2,10 +2,6 @@
 ## Some make rules
 ##
 
-
-# Main targets
-######################################
-
 ifdef MODULE
 ifeq ($(PRELOAD_MODULES),1)
 MODULE_TARGETS := $(MODULE).a $(MODULE).lc
@@ -15,14 +11,22 @@ endif
 TARGETS := $(TARGETS) $(MODULE_TARGETS)
 endif
 
-
 ifdef LUA_SOURCES
 LUA_COMPILED := $(subst .lua,.lc, $(LUA_SOURCES))
 TARGETS := $(TARGETS) $(LUA_COMPILED)
 endif
 
 
-ifdef SUBDIRS
+# Main targets
+######################################
+
+.PHONY: subdirs
+.PHONY: subdirs-clean
+.PHONY: subdirs-realclean
+.PHONY: subdirs-depend
+.PHONY: subdirs-install
+.PHONY: _install
+.PHONY: _depend
 
 all: subdirs $(TARGETS)
 
@@ -32,27 +36,7 @@ realclean: subdirs-realclean _clean _realclean
 
 depend: subdirs-depend _depend
 
-else
-
-all: $(TARGETS)
-
-clean: _clean
-
-realclean: _clean _realclean
-
-depend: _depend
-
-endif
-
-ifdef INSTALL_SUBDIRS
-
 install: subdirs-install _install
-
-else
-
-install: _install
-
-endif
 
 
 # Exports
@@ -79,7 +63,6 @@ endif # !MAKE_EXPORTS
 ######################################
 
 OBJS=$(subst .c,.o,$(SOURCES) $(EXPORTS_C))
-
 
 ifdef MODULE
 
@@ -143,25 +126,11 @@ endif# !MODULE
 # Clean rules
 ######################################
 
-ifdef SOURCES
+_clean:
+	$(RM) -f $(TO_CLEAN) core $(DEPEND_FILE) $(OBJS)
 
-clean_objs:
-	$(RM) -f $(OBJS)
-
-else #!SOURCES
-
-clean_objs:
-
-endif #!SOURCES
-
-clean_target:
-	$(RM) -f $(TARGETS)
-
-_clean: clean_objs
-	$(RM) -f core $(DEPEND_FILE) $(TO_CLEAN)
-
-_realclean: clean_target
-	$(RM) -f $(TO_REALCLEAN)
+_realclean:
+	$(RM) -f $(TO_REALCLEAN) $(TARGETS)
 
 # Lua rules
 ######################################
@@ -169,6 +138,17 @@ _realclean: clean_target
 %.lc: %.lua
 	$(LUAC) -o $@ $<
 
+lc_install:
+	$(INSTALLDIR) $(LCDIR)
+	for i in $(LUA_COMPILED); do \
+		$(INSTALL) -m $(DATA_MODE) $$i $(LCDIR); \
+	done
+
+etc_install:
+	$(INSTALLDIR) $(ETCDIR)
+	for i in $(ETC); do \
+		$(INSTALL) -m $(DATA_MODE) $$i $(ETCDIR); \
+	done
 
 # Dependencies
 ######################################
@@ -178,15 +158,16 @@ ifdef SOURCES
 _depend: $(DEPEND_DEPENDS)
 	$(MAKE_DEPEND)
 
-else #!SOURCES
+ifeq ($(DEPEND_FILE),$(wildcard $(DEPEND_FILE)))
+include $(DEPEND_FILE)
+endif
 
-_depend:
-	
-endif #!SOURCES
-
+endif
 
 # Subdirectories
 ######################################
+
+ifdef SUBDIRS
 
 subdirs:
 	set -e; for i in $(SUBDIRS); do $(MAKE) -C $$i; done
@@ -203,14 +184,7 @@ subdirs-realclean:
 subdirs-install:
 	set -e; for i in $(INSTALL_SUBDIRS); do $(MAKE) -C $$i install; done
 
-
-# Dependencies
-######################################
-
-ifeq ($(DEPEND_FILE),$(wildcard $(DEPEND_FILE)))
-include $(DEPEND_FILE)
 endif
-
 
 # Localisation
 ######################################

@@ -20,10 +20,6 @@ include $(TOPDIR)/rules.mk
 
 ######################################
 
-_install:
-	$(INSTALLDIR) $(ETCDIR)
-	for i in $(ETC); do \
-		$(INSTALL) -m $(DATA_MODE) $$i $(ETCDIR); \
-	done
+_install: etc_install
 	rm -f $(ETCDIR)/look.lua
 	ln -s look_cleanviolet.lua $(ETCDIR)/look.lua

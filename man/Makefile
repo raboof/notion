@@ -65,6 +65,7 @@ _install:
 		$(INSTALL) -m $(DATA_MODE) ion3.$$tr.1 $(MANDIR)/$$tr/man1/ion3.1 ; \
 		$(INSTALL) -m $(DATA_MODE) pwm3.$$tr.1 $(MANDIR)/$$tr/man1/pwm3.1 ; \
 	done
+	$(INSTALLDIR) $(SHAREDIR)
 	for i in $(WELCOME_TARGETS); do \
 		$(INSTALL) -m $(DATA_MODE) $$i $(SHAREDIR) ; \
 	done

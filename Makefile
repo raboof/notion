@@ -12,9 +12,12 @@ include modulelist.mk
 
 EXT_LIST=ext_statusbar
 
-INSTALL_SUBDIRS = $(MODULE_LIST) $(EXT_LIST) ion pwm man etc share po
-#DIST: SUBDIRS = libtu ioncore luaextl $(INSTALL_SUBDIRS)
-SUBDIRS = ioncore luaextl $(INSTALL_SUBDIRS)
+INSTALL_SUBDIRS=\
+	$(MODULE_LIST) $(EXT_LIST) \
+	ioncore ion pwm etc utils man po
+
+#DIST: SUBDIRS = libtu $(INSTALL_SUBDIRS)
+SUBDIRS = $(INSTALL_SUBDIRS)
 
 DOCS = README LICENSE ChangeLog RELNOTES
 

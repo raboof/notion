@@ -25,6 +25,10 @@ SOURCES=binding.c conf-bindings.c cursor.c event.c exec.c focus.c         \
 	bindmaps.c gr.c infowin.c activity.c netwm.c frame-draw.c         \
 	kbresize.c rectangle.c xwindow.c hooks.c
 
+LUA_SOURCES=\
+	ioncore-ext.lua ioncore-luaext.lua ioncore-bindings.lua \
+	ioncore-winprops.lua ioncore-misc.lua ioncore-efbb.lua
+
 ifeq ($(PRELOAD_MODULES),1)
 CFLAGS += -DCF_PRELOAD_MODULES
 endif
@@ -43,5 +47,4 @@ ioncore.a: $(OBJS)
 	$(AR) $(ARFLAGS) $@ $+
 	$(RANLIB) $@
 
-_install:
-
+_install: lc_install

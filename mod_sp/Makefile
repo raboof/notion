@@ -25,8 +25,4 @@ include $(TOPDIR)/rules.mk
 
 ######################################
 
-_install: module_install
-	$(INSTALLDIR) $(ETCDIR)
-	for i in $(ETC); do \
-		$(INSTALL) -m $(DATA_MODE) $$i $(ETCDIR); \
-	done
+_install: module_install etc_install

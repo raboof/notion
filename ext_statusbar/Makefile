@@ -19,12 +19,4 @@ include $(TOPDIR)/rules.mk
 
 ######################################
 
-_install:
-	$(INSTALLDIR) $(LCDIR)
-	for i in $(LUA_COMPILED); do \
-		$(INSTALL) -m $(DATA_MODE) $$i $(LCDIR); \
-	done
-	$(INSTALLDIR) $(ETCDIR)
-	for i in $(ETC); do \
-		$(INSTALL) -m $(DATA_MODE) $$i $(ETCDIR); \
-	done
+_install: lc_install etc_install

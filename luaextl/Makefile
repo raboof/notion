@@ -29,4 +29,3 @@ luaextl.a: $(OBJS)
 	$(AR) $(ARFLAGS) $@ $+
 	$(RANLIB) $@
 
-_install:
