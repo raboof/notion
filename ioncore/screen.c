@@ -441,6 +441,9 @@ static void screen_remove_managed(WScreen *scr, WRegion *reg)
 /*{{{ Misc */
 
 
+/*EXTL_DOC
+ * Returns the screen \var{reg} is on.
+ */
 EXTL_EXPORT
 WScreen *region_screen_of(const WRegion *reg)
 {
@@ -472,6 +475,9 @@ bool same_screen(const WRegion *reg1, const WRegion *reg2)
 }
 
 
+/*EXTL_DOC
+ * Returns previously active viewport on screen \var{scr}.
+ */
 EXTL_EXPORT
 WViewport *screen_current_vp(WScreen *scr)
 {
@@ -487,6 +493,10 @@ WViewport *screen_current_vp(WScreen *scr)
 }
 
 
+/*EXTL_DOC
+ * Switch to \var{n}th workspace (or full-screen client window, etc.) on the
+ * current viewport (see \fnref{screen_current_vp}) on \var{scr}.
+ */
 EXTL_EXPORT
 void screen_switch_nth_on_cvp(WScreen *scr, uint n)
 {
@@ -496,6 +506,10 @@ void screen_switch_nth_on_cvp(WScreen *scr, uint n)
 }
 
 
+/*EXTL_DOC
+ * Have \fnref{screen_current_vp}\code{(scr)} switch to next region managed
+ * by it.
+ */
 EXTL_EXPORT
 void screen_switch_next_on_cvp(WScreen *scr)
 {
@@ -505,6 +519,10 @@ void screen_switch_next_on_cvp(WScreen *scr)
 }
 
 
+/*EXTL_DOC
+ * Have \fnref{screen_current_vp}\code{(scr)} switch to previous region managed
+ * by it.
+ */
 EXTL_EXPORT
 void screen_switch_prev_on_cvp(WScreen *scr)
 {
