@@ -35,7 +35,7 @@ function set_term_font(fnt)
 end
 
 function enable_ion_bar_inside_frame(enable)
-    bar_inside_frame=enable
+    bar_inside_border=enable
 end
 
 function set_ion_spacing(spc)
@@ -132,7 +132,7 @@ local function output(nm)
     if spacing then
         print(string.format('    spacing = %d,', spacing))
     end
-    if bar_inside_frame==false then
+    if bar_inside_border==false then
         print('    ionframe_bar_inside_border = false,')
     end
     print('})\n')
@@ -150,6 +150,13 @@ local function output(nm)
     print_extra_cg("active-selected", "act_tab_sel_colours")
     print_extra_cg("active-unselected", "act_tab_colours")
     print_extra_cg("inactive-selected", "tab_sel_colours")
+    print_extra_cg("inactive-unselected", "tab_colours")
+    if _G["tab_colours"] then
+        _G["tab_colours"].foreground_colour="#eeeeee";
+        _G["tab_colours"].background_colour="#990000";
+        print_extra_cg("*-*-*-*-activity", "tab_colours")
+    end
+        
     print('    text_align = "center",')
     print('})\n')
     

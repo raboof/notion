@@ -56,6 +56,13 @@ de_define_style("frame-tab", {
         background_colour = "#8a999e",
         foreground_colour = "white",
     }),
+
+    de_substyle("*-*-*-*-activity", {
+        highlight_colour = "grey",
+        shadow_colour = "grey",
+        background_colour = "#545d75",
+        foreground_colour = "#990000",
+    }),
 })
 
 

@@ -40,7 +40,6 @@ de_define_style("frame-ionframe", {
     border_style = "inlaid",
     padding_pixels = 1,
     spacing = 0,
-    bar_inside_frame = true,
 })
 
 de_define_style("frame-floatframe", {
@@ -68,6 +67,18 @@ de_define_style("frame-tab", {
         highlight_colour = "#efefef",
         background_colour = "#a8a8a8",
         foreground_colour = "#000000",
+    }),
+    de_substyle("inactive-unselected", {
+        shadow_colour = "#606060",
+        highlight_colour = "#ffffff",
+        background_colour = "#d8d8d8",
+        foreground_colour = "#000000",
+    }),
+    de_substyle("*-*-*-*-activity", {
+        shadow_colour = "#606060",
+        highlight_colour = "#ffffff",
+        background_colour = "#990000",
+        foreground_colour = "#eeeeee",
     }),
     text_align = "center",
 })

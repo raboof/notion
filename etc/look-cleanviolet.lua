@@ -65,11 +65,11 @@ de_define_style("frame-tab", {
         foreground_colour = "#000000",
     }),
 
-    de_substyle("*-*-*-urgent", { -- ???
+    de_substyle("*-*-*-*-activity", {
         -- Red tab
         highlight_colour = "#eeeeff",
         shadow_colour = "#eeeeff",
-        background_colour = "#ff0000",
+        background_colour = "#990000",
         foreground_colour = "#eeeeee",
     }),
 })
