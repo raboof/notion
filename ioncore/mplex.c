@@ -509,12 +509,22 @@ WRegion *mplex_current(WMPlex *mplex)
 }
 
 /*EXTL_DOC
- * Returns a list of regions managed by the frame.
+ * Returns a list of regions managed by \var{mplex}.
  */
 EXTL_EXPORT
 ExtlTab mplex_managed_list(WMPlex *mplex)
 {
 	return managed_list_to_table(mplex->managed_list, NULL);
+}
+
+
+/*EXTL_DOC
+ * Returns the number of regions managed/multiplexed by \var{mplex}.
+ */
+EXTL_EXPORT
+int mplex_managed_count(WMPlex *mplex)
+{
+	return mplex->managed_count;
 }
 
 

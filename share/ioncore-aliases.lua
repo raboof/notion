@@ -50,6 +50,14 @@ genframe_current=mplex_current
 -- Same as \fnref{mplex_managed_list} for \type{WGenFrame}s.
 genframe_managed_list=mplex_managed_list
 
+--EXTL_DOC
+-- Same as \fnref{mplex_managed_count} for \type{WGenFrame}s.
+genframe_managed_count=mplex_managed_count
+
+--EXTL_DOC
+-- Same as \fnref{mplex_nth_managed} for \type{WGenFrame}s.
+genframe_nth_managed=mplex_nth_managed
+
 -- }}}
 
 
@@ -79,5 +87,14 @@ screen_current=mplex_current
 -- Same as \fnref{mplex_managed_list} for \type{WScreen}s.
 screen_managed_list=mplex_managed_list
 
+--EXTL_DOC
+-- Same as \fnref{mplex_managed_count} for \type{WScreen}s.
+screen_managed_count=mplex_managed_count
+
+--EXTL_DOC
+-- Same as \fnref{mplex_nth_managed} for \type{WScreen}s.
+screen_nth_managed=mplex_nth_managed
+
 -- }}}
+
 
