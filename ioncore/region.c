@@ -16,6 +16,7 @@
 #include "tags.h"
 #include "names.h"
 #include "stacking.h"
+#include "geom.h"
 
 
 #define FOR_ALL_SUBREGIONS(REG, SUB) \
@@ -758,6 +759,16 @@ EXTL_EXPORT
 WRegion *region_parent(WRegion *reg)
 {
 	return reg->parent;
+}
+
+/*EXTL_DOC
+ * Returns the geometry of \var{reg} within its parent; a table with fields
+ * \var{x}, \var{y}, \var{w} and \var{h}.
+ */
+EXTL_EXPORT
+ExtlTab region_geom(WRegion *reg)
+{
+	return geom_to_extltab(REGION_GEOM(reg));
 }
 
 

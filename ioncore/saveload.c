@@ -20,6 +20,7 @@
 #include "attach.h"
 #include "reginfo.h"
 #include "extl.h"
+#include "geom.h"
 
 
 /*{{{ Load support functions */
@@ -137,18 +138,6 @@ void save_geom(WRectangle geom, FILE *file, int lvl)
 	save_indent_line(file, lvl);
 	fprintf(file, "geom = { x = %d, y = %d, w = %d, h = %d},\n",
 			geom.x, geom.y, geom.w, geom.h);
-}
-
-
-bool extltab_to_geom(ExtlTab tab, WRectangle *geomret)
-{
-	if(!extl_table_gets_i(tab, "x", &(geomret->x)) ||
-	   !extl_table_gets_i(tab, "y", &(geomret->y)) ||
-	   !extl_table_gets_i(tab, "w", &(geomret->w)) ||
-	   !extl_table_gets_i(tab, "h", &(geomret->h)))
-	   return FALSE;
-	
-	return TRUE;
 }
 
 

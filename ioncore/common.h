@@ -55,8 +55,6 @@ typedef struct WRectangle_struct{
 
 #include "obj.h"
 
-extern void pgeom(const char *n, WRectangle g);
-
 #if 0
 #define D(X) X
 #else

@@ -42,10 +42,6 @@ extern uint region_min_h(WRegion *reg);
 extern uint region_min_w(WRegion *reg);
 extern void region_set_w(WRegion *reg, int w);
 extern void region_set_h(WRegion *reg, int h);
-extern int region_get_w(WRegion *reg);
-extern int region_get_h(WRegion *reg);
-extern int region_get_x(WRegion *reg);
-extern int region_get_y(WRegion *reg);
 
 extern void genframe_resize_units(WGenFrame *genframe, int *wret, int *hret);
 

@@ -39,7 +39,7 @@ SOURCES=binding.c conf-bindings.c conf-draw.c cursor.c draw.c event.c     \
 	region.c eventh.c  attach.c resize.c defer.c grab.c     	  \
 	manage.c readfds.c regbind.c viewport.c tags.c names.c saveload.c \
 	genws.c genframe.c genframe-pointer.c conf.c reginfo.c errorlog.c \
-	stacking.c
+	stacking.c geom.c
 
 MAKE_EXPORTS=ioncore
 

@@ -398,45 +398,6 @@ void region_set_h(WRegion *reg, int h)
 	}
 }
 
-/*EXTL_DOC
- * Returns the width of \var{reg}.
- */
-EXTL_EXPORT
-int region_get_w(WRegion *reg)
-{
-	return REGION_GEOM(reg).w;
-}
-
-
-/*EXTL_DOC
- * Returns the height of \var{reg}.
- */
-EXTL_EXPORT
-int region_get_h(WRegion *reg)
-{
-	return REGION_GEOM(reg).h;
-}
-
-
-/*EXTL_DOC
- * Returns the x-coordinate of \var{reg} within its parent.
- */
-EXTL_EXPORT
-int region_get_x(WRegion *reg)
-{
-	return REGION_GEOM(reg).x;
-}
-
-
-/*EXTL_DOC
- * Returns the y-coordinate of \var{reg} within its parent.
- */
-EXTL_EXPORT
-int region_get_y(WRegion *reg)
-{
-	return REGION_GEOM(reg).y;
-}
-
 
 /*}}}*/
 

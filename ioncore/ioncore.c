@@ -456,15 +456,3 @@ void ioncore_deinit()
 
 /*}}}*/
 
-
-/*{{{ Misc. */
-
-
-void pgeom(const char *n, WRectangle g)
-{
-	fprintf(stderr, "%s %d, %d; %d, %d\n", n, g.x, g.y, g.w, g.h);
-}
-
-
-/*}}}*/
-

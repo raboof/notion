@@ -28,7 +28,6 @@ extern bool save_workspaces(WViewport *vp);
 extern WRegion *region_add_managed_load(WRegion *mgr, ExtlTab tab);
 
 extern void save_geom(WRectangle geom, FILE *file, int lvl);
-extern bool extltab_to_geom(ExtlTab tab, WRectangle *geomret);
 
 #endif /* ION_IONCORE_SAVELOAD_H */
 
