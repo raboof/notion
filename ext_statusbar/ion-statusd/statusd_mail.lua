@@ -70,9 +70,6 @@ local function update_mail(timer)
     timer:set(settings.interval, update_mail)
 end
 
-local function init()
-    update_mail(statusd.create_timer())
-end
-
-init()
-
+-- Init
+local timer=statusd.create_timer()
+update_mail(timer)

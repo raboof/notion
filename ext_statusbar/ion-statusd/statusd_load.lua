@@ -50,17 +50,15 @@ local function detect_load_fn()
     end
 end
 
-local get_load
+local get_load, timer
 
 local function update_load(timer)
     statusd.inform("load", get_load())
     timer:set(settings.interval, update_load)
 end
 
-local function init()
-    get_load=detect_load_fn()
-    update_load(statusd.create_timer())
-end
-
-init()
+-- Init
+get_load=detect_load_fn()
+timer=statusd.create_timer()
+update_load(timer)
 
