@@ -11,17 +11,16 @@ include $(TOPDIR)/modulelist.mk
 
 ######################################
 
-INCLUDES += $(X11_INCLUDES)
-#DIST: INCLUDES += -I.. -I../libtu/include 
+INCLUDES += $(X11_INCLUDES) 
+INCLUDES += $(LIBTU_INCLUDES) $(LIBEXTL_INCLUDES)
 INCLUDES += -I..
 
 LIBS += -lm
 LIBS += $(X11_LIBS) $(XINERAMA_LIBS)
-LIBS += $(LUA_LIBS)
-LIBS += $(DL_LIBS)
-EXT_OBJS += ../ioncore/ioncore.a ../libextl/libextl.a
-#DIST: EXT_OBJS += ../libtu/libtu.a
-LIBS += -ltu
+LIBS += $(LUA_LIBS) $(DL_LIBS)
+LIBS += $(LIBTU_LIBS) $(LIBEXTL_LIBS)
+
+EXT_OBJS += ../ioncore/ioncore.a
 
 DEFINES += -DETCDIR=\"$(ETCDIR)\" -DSHAREDIR=\"$(SHAREDIR)\" \
 	   -DEXTRABINDIR=\"$(EXTRABINDIR)\" -DMODULEDIR=\"$(MODULEDIR)\" \

@@ -1,0 +1,9 @@
+
+LIBS_SUBDIRS = libtu libextl
+
+LIBTU_INCLUDES = -I$(TOPDIR)/libtu/include
+LIBTU_LIBS = -L$(TOPDIR)/libtu -ltu
+
+LIBEXTL_INCLUDES = -I$(TOPDIR)/libextl/include
+LIBEXTL_LIBS = -L$(TOPDIR)/libextl -lextl
+

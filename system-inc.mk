@@ -12,3 +12,4 @@ else
   include $(TOPDIR)/system.mk
 endif
 
+include $(TOPDIR)/libs.mk

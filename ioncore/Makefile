@@ -8,10 +8,7 @@ include $(TOPDIR)/system-inc.mk
 
 ######################################
 
-INCLUDES += $(X11_INCLUDES)
-INCLUDES += $(LTDL_INCLUDES)
-#DIST: INCLUDES += -I../libtu/include -I..
-INCLUDES += -I..
+INCLUDES += $(X11_INCLUDES) $(LIBTU_INCLUDES) $(LIBEXTL_INCLUDES) -I..
 
 CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 

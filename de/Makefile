@@ -8,8 +8,7 @@ include $(TOPDIR)/system-inc.mk
 
 ######################################
 
-#DIST: INCLUDES += -I../libtu/include $(X11_INCLUDES) -I..
-INCLUDES += $(X11_INCLUDES) -I..
+INCLUDES += $(X11_INCLUDES) $(LIBTU_INCLUDES) $(LIBEXTL_INCLUDES) -I..
 CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
 SOURCES=init.c draw.c font.c colour.c brush.c fontset.c style.c

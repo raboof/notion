@@ -8,8 +8,7 @@ include $(TOPDIR)/system-inc.mk
 
 ######################################
 
-#DIST: INCLUDES += -I../libtu/include $(X11_INCLUDES) -I..
-INCLUDES += $(X11_INCLUDES) -I..
+INCLUDES += $(X11_INCLUDES) $(LIBTU_INCLUDES) $(LIBEXTL_INCLUDES) -I..
 CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
 SOURCES=main.c ionws.c placement.c split.c split-stdisp.c
