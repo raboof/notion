@@ -108,7 +108,7 @@ void write_escaped_string(FILE *file, const char *str)
 	fputc('"', file);
 
 	while(str && *str){
-		if(((*str)&0x7f)<32 || *str=='"'){
+		if(((*str)&0x7f)<32 || *str=='"' || *str=='\\'){
 			/* Lua uses decimal in escapes */
 			fprintf(file, "\\%03d", (int)(uchar)(*str));
 		}else{
