@@ -494,7 +494,7 @@ void ioncore_deinit()
 /*{{{ Misc. */
 
 
-/*EXTL_EXPORT
+/*EXTL_DOC
  * Issue a warning. How the message is displayed depends on the current
  * warning handler.
  */
