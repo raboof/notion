@@ -208,7 +208,9 @@ ExtlTab find_winproptab_win(Window win)
 {
 	WWinProp *winprop=do_find_winprop_win(winprop_list, win);
 	
-	#warning Should create a new reference and have the window free it on delete?
+	/* TODO: Should create a new reference and have the window free it on
+	 * delete?
+	 */
 	if(winprop!=NULL)
 		return winprop->proptab;
 	else
