@@ -16,7 +16,7 @@ INSTALL_SUBDIRS = $(MODULE_LIST) $(EXT_LIST) ion pwm man etc share
 #DIST: SUBDIRS = libtu ioncore luaextl $(INSTALL_SUBDIRS)
 SUBDIRS = ioncore luaextl $(INSTALL_SUBDIRS)
 
-DOCS = README LICENSE ChangeLog
+DOCS = README LICENSE ChangeLog RELNOTES
 
 TO_REALCLEAN = system-ac.mk
 

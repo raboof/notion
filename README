@@ -51,6 +51,10 @@ BUILDING AND INSTALLING
    use locate) may be what you need to do.
 
 
+Please see the file RELNOTES for additional release-specific installation
+and configuration notes.
+
+
 SOME OPTIONAL INSTALLATION STEPS
 
 1. The scripts 'ion-edit' and 'ion-view' in $SHAREDIR and bound to the F5
