@@ -93,6 +93,26 @@ static WRegion *find_suitable_workspace(WScreen *scr)
 }
 
 
+static void find_prop_target(WClientWin *cwin, WWinProp *props,
+							 WRegion **target, WRegion **ws)
+{
+	WRegion *r;
+	
+	if(props==NULL || props->target_name==NULL)
+		return;
+	
+	/* Potential problem: numbering */
+	r=lookup_region(props->target_name);
+	
+	if(r!=NULL && SCREEN_OF(r)==SCREEN_OF(cwin)){
+		if(ws!=NULL && HAS_DYN(r, region_ws_add_clientwin))
+			*ws=r;
+		else if(target!=NULL)
+			*target=r;
+	}
+}
+
+
 /*}}}*/
 
 
@@ -120,10 +140,12 @@ bool add_clientwin_default(WClientWin *cwin, const XWindowAttributes *attr,
 	}
 	
 	get_integer_property(win, wglobal.atom_frame_id, &target_id);
-	
+
 	if(target_id!=0)
 		target=find_target_by_id(target_id);
-	
+
+	find_prop_target(cwin, props, target==NULL ? &target : NULL, &ws);
+
 	if(target!=NULL){
 		if(!region_supports_attach(target)){
 			warn("Target region of window %#x does not support primitive "
@@ -141,7 +163,9 @@ bool add_clientwin_default(WClientWin *cwin, const XWindowAttributes *attr,
 		return finish_add_clientwin(target, cwin, init_state, props);
 
 	/* No, need to find a workspace and let it handle this. */
-	ws=find_suitable_workspace(SCREEN_OF(cwin));
+
+	if(ws==NULL)
+		ws=find_suitable_workspace(SCREEN_OF(cwin));
 
 	if(ws==NULL)
 		return FALSE;
