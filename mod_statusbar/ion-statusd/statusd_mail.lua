@@ -11,20 +11,26 @@
 
 local defaults={
     update_interval=10*1000,
+    retry_interval=60*10*1000,
     mbox=os.getenv("MAIL")
 }
+
+local function TR(s, ...)
+    return string.format(statusd.gettext(s), unpack(arg))
+end
 
 local settings=table.join(statusd.get_config("mail"), defaults)
 
 local function calcmail(fname)
-    local f=io.open(fname, 'r')
+    local f, err=io.open(fname, 'r')
     local total, read, old=0, 0, 0
     local had_blank=true
     local in_headers=false
     local had_status=false
     
     if not f then
-        return 0, 0, 0
+        statusd.warn(err)
+        return
     end
     
     for l in f:lines() do
@@ -69,10 +75,16 @@ local function update_mail()
     local old_tm=mail_timestamp
     mail_timestamp=statusd.last_modified(settings.mbox)
     
-    print(old_tm, mail_timestamp)
-    
     if mail_timestamp>old_tm then
         local mail_total, mail_unread, mail_new=calcmail(settings.mbox)
+        
+        if not mail_total then
+            statusd.warn(TR("Disabling mail monitor for %d seconds.",
+                            settings.retry_interval/1000))
+            mail_timestamp=-2.0
+            mail_timer:set(settings.retry_interval, update_mail)
+            return
+        end
         
         statusd.inform("mail_new", tostring(mail_new))
         statusd.inform("mail_unread", tostring(mail_unread))

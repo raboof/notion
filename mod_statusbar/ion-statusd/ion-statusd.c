@@ -262,7 +262,7 @@ double statusd_last_modified(const char *fname)
         return (double)(-1);
     
     if(stat(fname, &st)!=0){
-        warn_err(fname);
+        /*warn_err_obj(fname);*/
         return (double)(-1);
     }
     
