@@ -322,6 +322,9 @@ static WBinding *do_lookup_binding(WBindmap *bindmap,
 {
 	WBinding *binding, tmp;
 
+	if(bindmap->nbindings==0)
+		return NULL;
+
 #ifdef CF_HACK_IGNORE_EVIL_LOCKS
 	state&=~evilignoremask;
 #endif
