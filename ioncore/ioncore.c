@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/init.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2003. 
+ * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
  * Ion is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by
@@ -52,7 +52,7 @@ WGlobal wglobal;
 
 
 static const char ioncore_about[]=
-    "Ion " ION_VERSION ", copyright (c) Tuomo Valkonen 1999-2003.\n"
+    "Ion " ION_VERSION ", copyright (c) Tuomo Valkonen 1999-2004.\n"
     "\n"
     "This program is free software; you can redistribute it and/or\n"
     "modify it under the terms of the GNU Lesser General Public\n"

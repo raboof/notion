@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/mplex.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2003. 
+ * Copyright (c) Tuomo Valkonen 1999-2004. 
  * See the included file LICENSE for details.
  */
 

@@ -2,7 +2,7 @@
 -- ion/share/delib.lua -- Helper functions for defining drawing engine 
 -- styles
 -- 
--- Copyright (c) Tuomo Valkonen 2003.
+-- Copyright (c) Tuomo Valkonen 2004.
 --
 -- Ion is free software; you can redistribute it and/or modify it under
 -- the terms of the GNU Lesser General Public License as published by
