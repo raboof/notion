@@ -67,7 +67,7 @@ end
 function mod_query.query_execfile(mplex, prompt, prog)
     assert(prog~=nil)
     local function handle_execwith(mplex, str)
-        ioncore.exec(prog.." "..string.shell_safe(str))
+        ioncore.exec_on(mplex, prog.." "..string.shell_safe(str))
     end
     return mod_query.query(mplex, prompt, mod_query.get_initdir(),
                            handle_execwith, mod_query.file_completor)
@@ -79,7 +79,7 @@ function mod_query.query_execwith(mplex, prompt, dflt, prog, completor)
         if not str or str=="" then
             str=dflt
         end
-        ioncore.exec(prog.." "..string.shell_safe(str))
+        ioncore.exec_on(mplex, prog.." "..string.shell_safe(str))
     end
     return mod_query.query(mplex, prompt, nil, handle_execwith, completor)
 end
@@ -464,7 +464,7 @@ function mod_query.exec_handler(frame, cmd)
         if not ix then return end
         cmd=ix.." "..string.sub(cmd, 2)
     end
-    ioncore.exec_on(frame:rootwin_of(), cmd)
+    ioncore.exec_on(frame, cmd)
 end
 
 --DOC
