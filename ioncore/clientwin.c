@@ -28,6 +28,8 @@
 #include "stacking.h"
 #include "saveload.h"
 #include "manage.h"
+#include "extl.h"
+#include "extlconv.h"
 
 
 static void set_clientwin_state(WClientWin *cwin, int state);
@@ -66,7 +68,6 @@ static void get_winprops(WClientWin *cwin)
 {
 	ExtlTab tab, tab2;
 	int i1, i2;
-	bool b;
 
 	if(!extl_call_named("get_winprop", "o", "t", cwin, &tab))
 		return;
@@ -76,15 +77,11 @@ static void get_winprops(WClientWin *cwin)
 	
 	cwin->proptab=tab;
 
-	if(extl_table_gets_b(tab, "transparent", &b)){
-		if(b)
-			cwin->flags|=CWIN_PROP_TRANSPARENT;
-	}
+	if(extl_table_is_bool_set(tab, "transparent"))
+		cwin->flags|=CWIN_PROP_TRANSPARENT;
 
-	if(extl_table_gets_b(tab, "acrobatic", &b)){
-		if(b)
-			cwin->flags|=CWIN_PROP_ACROBATIC;
-	}
+	if(extl_table_is_bool_set(tab, "acrobatic"))
+		cwin->flags|=CWIN_PROP_ACROBATIC;
 	
 	if(extl_table_gets_t(tab, "max_size", &tab2)){
 		if(extl_table_gets_i(tab2, "w", &i1) &&
@@ -110,10 +107,8 @@ static void get_winprops(WClientWin *cwin)
 		extl_unref_table(tab2);
 	}
 	
-	if(extl_table_gets_b(tab, "ignore_resizeinc", &b)){
-		if(b)
-			cwin->flags|=CWIN_PROP_IGNORE_RSZINC;
-	}
+	if(extl_table_is_bool_set(tab, "ignore_resizeinc"))
+		cwin->flags|=CWIN_PROP_IGNORE_RSZINC;
 }
 
 
@@ -178,14 +173,10 @@ void set_switch_to_new_clients(bool sw)
 
 bool clientwin_get_switchto(WClientWin *cwin)
 {
-	bool switchto=switch_to_new_clients;
-	
 	if(wglobal.opmode==OPMODE_INIT)
 		return FALSE;
 	
-	extl_table_gets_b(cwin->proptab, "switchto", &switchto);
-	
-	return switchto;
+	return extl_table_is_bool_set(cwin->proptab, "switchto");
 }
 
 

@@ -18,6 +18,8 @@ extern ExtlTab geom_to_extltab(WRectangle geom);
 extern ExtlTab region_list_to_table(WRegion *list, 
 									bool (*filter)(WRegion *r));
 
+extern bool extl_table_is_bool_set(ExtlTab tab, const char *entry);
+
 /* Debugging */
 extern void pgeom(const char *n, WRectangle g);
 

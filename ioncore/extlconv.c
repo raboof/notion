@@ -10,6 +10,9 @@
 #include "extlconv.h"
 
 
+/*{{{ Geometries */
+
+
 bool extltab_to_geom(ExtlTab tab, WRectangle *geomret)
 {
 	if(!extl_table_gets_i(tab, "x", &(geomret->x)) ||
@@ -41,6 +44,12 @@ void pgeom(const char *n, WRectangle g)
 }
 
 
+/*}}}*/
+
+
+/*{{{ Region lists */
+
+
 ExtlTab region_list_to_table(WRegion *list, bool (*filter)(WRegion *r))
 {
 	ExtlTab tab=extl_create_table();
@@ -56,3 +65,16 @@ ExtlTab region_list_to_table(WRegion *list, bool (*filter)(WRegion *r))
 	
 	return tab;
 }
+
+
+bool extl_table_is_bool_set(ExtlTab tab, const char *entry)
+{
+	bool b;
+	
+	if(extl_table_gets_s(tab, entry, &b))
+		return b;
+	return FALSE;
+}
+
+
+/*}}}*/

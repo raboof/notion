@@ -131,10 +131,8 @@ static void get_attach_params(ExtlTab tab, WAttachParams *param)
 		extl_unref_table(geomtab);
 	}
 
-	if(extl_table_gets_b(tab, "selected", &sel)){
-		if(sel)
-			param->flags|=REGION_ATTACH_SWITCHTO;
-	}
+	if(extl_table_is_bool_set(tab, "selected"))
+		param->flags|=REGION_ATTACH_SWITCHTO;
 }
 
 
