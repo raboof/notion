@@ -17,7 +17,6 @@ DOCDIR=$(PREFIX)/doc
 LIBDIR=$(PREFIX)/lib
 INCDIR=$(PREFIX)/include
 
-#EXTRA_LIBS=-lefence
 
 ##
 ## Modules
