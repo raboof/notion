@@ -985,7 +985,7 @@ static void get_params(ExtlTab tab, WMPlexAttachParams *par)
     int layer=1;
     
     par->flags=0;
-    par->index=-1;
+    par->index=INDEX_AFTER_CURRENT;
     
     extl_table_gets_i(tab, "layer", &layer);
     if(layer==2){
