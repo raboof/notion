@@ -104,19 +104,22 @@ void check_signals()
 	}
 
 	/* Check for timer events in the queue */
-	if(had_tmr && queue.next!=NULL){
+	while(had_tmr && queue.next!=NULL){
+		had_tmr=FALSE;
 		gettimeofday(&current_time, NULL);
 		while(queue.next!=NULL){
-			if((TIMEVAL_LATER(current_time, queue.next->when))) {
+			if((TIMEVAL_LATER(current_time, queue.next->when))){
+				WObj *obj;
 				q=queue.next;
 				queue.next=q->next;
-				q->handler(q);
-				/*free(q);*/
+				q->next=NULL;
+				obj=q->paramwatch.obj;
+				reset_watch(&(q->paramwatch));
+				q->handler(q, obj);
 			}else{
 				break;
 			}
 		}
-		had_tmr=FALSE;
 		do_set_timer();
 	}
 }
@@ -133,7 +136,30 @@ static void add_to_current_time(struct timeval *when, uint msecs)
 }
 
 
-void set_timer(WTimer *timer, uint msecs)
+void kill_timer(WWatch *watch, WObj *obj)
+{
+	WTimer *tmr;
+	warn("Timer handler parameter destroyed.");
+	for(tmr=queue.next; tmr!=NULL; tmr=tmr->next){
+		if(&(tmr->paramwatch)==watch){
+			reset_timer(tmr);
+		}
+	}
+}
+
+
+bool timer_is_set(WTimer *timer)
+{
+	WTimer *tmr;
+	for(tmr=queue.next; tmr!=NULL; tmr=tmr->next){
+		if(tmr==timer)
+			return TRUE;
+	}
+	return FALSE;
+}
+
+
+void set_timer_param(WTimer *timer, uint msecs, WObj *obj)
 {
 	WTimer *q;
 
@@ -169,6 +195,15 @@ void set_timer(WTimer *timer, uint msecs)
 	}
 
 	do_set_timer();
+	
+	if(obj!=NULL)
+		setup_watch(&(timer->paramwatch), obj, kill_timer);
+}
+
+
+void set_timer(WTimer *timer, uint msecs)
+{
+	set_timer_param(timer, msecs, NULL);
 }
 
 
@@ -176,6 +211,8 @@ void reset_timer(WTimer *timer)
 {
 	WTimer *q;
 	WTimer *tmpq;
+
+	reset_watch(&(timer->paramwatch));
 	
 	q=&queue;
 	while(q->next!=NULL){

@@ -21,15 +21,18 @@ INTRSTRUCT(WTimer);
 
 DECLSTRUCT(WTimer){
 	struct timeval when;
-	void (*handler)(WTimer *timer);
+	void (*handler)();
 	WTimer *next;
+	WWatch paramwatch;
 };
 
-#define INIT_TIMER(FUN) {{0, 0}, FUN, NULL}
+#define INIT_TIMER(FUN) {{0, 0}, FUN, NULL, WWATCH_INIT}
 
 extern void check_signals();
 extern void trap_signals();
 extern void set_timer(WTimer *timer, uint msecs);
+extern void set_timer_param(WTimer *timer, uint msecs, WObj *param);
 extern void reset_timer(WTimer *timer);
+extern bool timer_is_set(WTimer *timer);
 
 #endif /* ION_IONCORE_SIGNAL_H */
