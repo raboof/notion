@@ -22,7 +22,9 @@ BUILDING AND INSTALLING
 
 2. Edit system.mk to suit your system. If heavy modifications are required,
    you might want to save the file somewhere for future use. (Most GNU/Linux
-   users should need very little of any modifications.)
+   users should need very little of any modifications.) 
+   If you want to build some extra modules now or do not want to build
+   some of the standard modules, edit modulelist.mk.
    
 3. Run 'make'. Note that 'make' here refers to GNU make which is usually
    named 'gmake' on systems with some other implementation of make as 
