@@ -318,7 +318,7 @@ void debrush_release(DEBrush *brush, Window win)
 }
 
 
-/*EXTL_EXPORT
+/*EXTL_DOC
  * Clear all styles from drawing engine memory.
  */
 EXTL_EXPORT

@@ -203,6 +203,10 @@ static void get_transparent_background(uint *mode, ExtlTab tab)
 /*{{{ de_define_style */
 
 
+/*EXTL_DOC
+ * Define a style for the root window \var{rootwin}. Use
+ * \fnref{de_define_style} instead to define for all root windows.
+ */
 EXTL_EXPORT
 bool de_do_define_style(WRootWin *rootwin, const char *name, ExtlTab tab)
 {

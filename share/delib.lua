@@ -30,7 +30,9 @@ local function base_on(name, list)
     return true
 end
 
-
+--DOC
+-- Define a new style for the default drawing engine (that must've
+-- been loaded with \fnref{gr_select_engine}.
 function de_define_style(name, list)    
     if not list then
         return function(list2)
@@ -54,6 +56,10 @@ function de_define_style(name, list)
 end
 
 
+--DOC 
+-- Define a substyle for the default drawing engine. This function
+-- is to be used in constructing style definitions for 
+-- \fnref{de_define_style}.
 function de_substyle(pattern, list)
     if not list then
         return function(list2)
