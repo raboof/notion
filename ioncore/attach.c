@@ -1,5 +1,5 @@
 /*
- * wmcore/attach.c
+ * ion/ioncore/attach.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
@@ -18,7 +18,7 @@
 /*{{{ Attach */
 
 
-void region_add_managed_params(const WRegion *reg, WRegion **par,
+void region_add_managed_params(const WRegion *reg, WWindow **par,
 							   WRectangle *geom)
 {
 	CALL_DYN(region_add_managed_params, reg, (reg, par, geom));
@@ -42,7 +42,7 @@ WRegion *region_add_managed_new(WRegion *mgr, WRegionCreateFn *fn,
 {
 	WRectangle geom;
 	WRegion *reg;
-	WRegion *par=NULL;
+	WWindow *par=NULL;
 
 	geom.x=0;
 	geom.y=0;
@@ -63,11 +63,38 @@ WRegion *region_add_managed_new(WRegion *mgr, WRegionCreateFn *fn,
 	return reg;
 }
 
+
+WRegion *region_add_managed_new_simple(WRegion *mgr, WRegionSimpleCreateFn *fn,
+									   int flags)
+{
+	WRectangle geom;
+	WRegion *reg;
+	WWindow *par=NULL;
+
+	geom.x=0;
+	geom.y=0;
+	geom.w=0;
+	geom.h=0;
+	
+	{ /* CALL_DYN defines variables */
+		CALL_DYN(region_add_managed_params, mgr, (mgr, &par, &geom));
+		if(funnotfound)
+			return NULL;
+	}
+	
+	reg=fn(par, geom);
+	
+	if(reg!=NULL)
+		region_add_managed_doit(mgr, reg, flags);
+	
+	return reg;
+}
+
 	
 bool region_add_managed(WRegion *mgr, WRegion *reg, int flags)
 {
 	WRectangle geom;
-	WRegion *par=NULL;
+	WWindow *par=NULL;
 	
 	if(REGION_MANAGER(reg)==mgr)
 		return TRUE;
@@ -81,7 +108,7 @@ bool region_add_managed(WRegion *mgr, WRegion *reg, int flags)
 			return FALSE;
 	}
 	
-	if(FIND_PARENT1(reg, WRegion)!=par){
+	if(FIND_PARENT1(reg, WWindow)!=par){
 		if(!reparent_region(reg, par, geom)){
 			warn("Unable to reparent.");
 			return FALSE;

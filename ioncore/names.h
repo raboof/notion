@@ -1,12 +1,12 @@
 /*
- * wmcore/names.h
+ * ion/ioncore/names.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2002. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_NAMES_H
-#define WMCORE_NAMES_H
+#ifndef ION_IONCORE_NAMES_H
+#define ION_IONCORE_NAMES_H
 
 #include "region.h"
 #include "font.h"
@@ -31,4 +31,4 @@ extern int complete_region(char *nam, char ***cp_ret, char **beg,
 extern void goto_named_region(char *name);
 extern void	region_unuse_name(WRegion *reg);
 
-#endif /* WMCORE_NAMES_H */
+#endif /* ION_IONCORE_NAMES_H */

@@ -1,5 +1,5 @@
 /*
- * wmcore/viewport.c
+ * ion/ioncore/viewport.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
@@ -16,6 +16,7 @@
 #include "regbind.h"
 #include "property.h"
 #include "names.h"
+#include "reginfo.h"
 #include "saveload.h"
 
 
@@ -90,11 +91,36 @@ WViewport *create_viewport(WScreen *scr, int id, WRectangle geom)
 
 void deinit_viewport(WViewport *vp)
 {
-	return;
+	while(vp->ws_list!=NULL)
+		region_unset_manager(vp->ws_list, (WRegion*)vp, &(vp->ws_list));
+		
+	deinit_region((WRegion*)vp);
 }
 
 
-extern bool create_initial_workspace_on_vp(WViewport *vp);
+static bool create_initial_workspace_on_vp(WViewport *vp)
+{
+	WRegionSimpleCreateFn *fn;
+	WRegion *reg;
+	
+	fn=lookup_region_simple_create_fn_inh("WGenWS");
+	
+	if(fn==NULL){
+		warn("Could not find a complete workspace class. "
+			 "Please load some modules.");
+		return FALSE;
+	}
+	
+	reg=region_add_managed_new_simple((WRegion*)vp, fn, 0);
+	
+	if(reg==NULL){
+		warn("Unable to create a workspace on viewport %d\n", vp->id);
+		return FALSE;
+	}
+	
+	region_set_name(reg, "main");
+	return FALSE;
+}
 
 
 bool init_workspaces_on_vp(WViewport* vp)
@@ -122,7 +148,7 @@ bool init_workspaces_on_vp(WViewport* vp)
 	if(wsname!=NULL)
 		free(wsname);
 	
-	return (vp->ws_count!=0);
+	return TRUE;
 }
 
 
@@ -246,8 +272,10 @@ static bool viewport_display_managed(WViewport *vp, WRegion *reg)
 		}
 	}
 	
-	if(region_manages_active_reg((WRegion*)vp))
+	if(wglobal.opmode!=OPMODE_DEINIT && 
+	   region_manages_active_reg((WRegion*)vp)){
 		warp(reg);
+	}
 	
 	return TRUE;
 }
@@ -320,10 +348,13 @@ WViewport *current_vp(WScreen *scr)
 	if(scr==NULL)
 		return NULL;
 	
-	if(REGION_ACTIVE_SUB(scr)==NULL)
-		return NULL;
+	if(scr->current_viewport!=NULL)
+		return scr->current_viewport;
 	
-	return viewport_of(REGION_ACTIVE_SUB(scr));
+	if(REGION_ACTIVE_SUB(scr)!=NULL)
+		return viewport_of(REGION_ACTIVE_SUB(scr));
+	
+	return NULL;
 }
 
 

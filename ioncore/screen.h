@@ -1,12 +1,12 @@
 /*
- * wmcore/screen.h
+ * ion/ioncore/screen.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_SCREEN_H
-#define WMCORE_SCREEN_H
+#ifndef ION_IONCORE_SCREEN_H
+#define ION_IONCORE_SCREEN_H
 
 #include "common.h"
 
@@ -14,6 +14,7 @@ INTROBJ(WScreen)
 
 #include "grdata.h"
 #include "window.h"
+#include "viewport.h"
 
 	
 #define SCREEN_OF(X) screen_of((WRegion*)X)
@@ -32,7 +33,8 @@ INTROBJ(WScreen)
 DECLOBJ(WScreen){
 	WWindow root;
 	int xscr;
-	WRegion *default_viewport;
+	WViewport *default_viewport;
+	WViewport *current_viewport;
 	
 	Colormap default_cmap;
 	
@@ -68,8 +70,7 @@ extern bool same_screen(const WRegion *reg1, const WRegion *reg2);
 extern void screen_switch_nth2(int scrnum, int n);
 
 extern void manage_initial_windows(WScreen *scr);
-extern void setup_screens();
+extern bool setup_screens();
 
-
-#endif /* WMCORE_SCREEN_H */
+#endif /* ION_IONCORE_SCREEN_H */
 

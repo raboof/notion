@@ -1,12 +1,12 @@
 /*
- * wmcore/pointer.h
+ * ion/ioncore/pointer.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_POINTER_H
-#define WMCORE_POINTER_H
+#ifndef ION_IONCORE_POINTER_H
+#define ION_IONCORE_POINTER_H
 
 #include "common.h"
 #include "region.h"
@@ -24,4 +24,4 @@ extern bool set_button_handler(WRegion *reg, WButtonHandler *handler);
 extern bool set_drag_handlers(WRegion *reg, WMotionHandler *begin,
 							  WMotionHandler *motion, WButtonHandler *end);
 
-#endif /* WMCORE_POINTER_H */
+#endif /* ION_IONCORE_POINTER_H */

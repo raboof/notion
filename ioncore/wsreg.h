@@ -1,12 +1,12 @@
 /*
- * wmcore/wsreg.h
+ * ion/ioncore/wsreg.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_WSREG_H
-#define WMCORE_WSREG_H
+#ifndef ION_IONCORE_WSREG_H
+#define ION_IONCORE_WSREG_H
 
 #include "clientwin.h"
 #include "winprops.h"
@@ -31,4 +31,4 @@ DYNFUN bool region_ws_add_transient(WRegion *reg, WClientWin *tfor,
 extern bool finish_add_clientwin(WRegion *reg, WClientWin *cwin,
 								 bool init_state, const WWinProp *props);
 
-#endif /* WMCORE_WSREG_H */
+#endif /* ION_IONCORE_WSREG_H */

@@ -1,12 +1,12 @@
 /*
- * wmcore/function.h
+ * ion/ioncore/function.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_FUNCTION_H
-#define WMCORE_FUNCTION_H
+#ifndef ION_IONCORE_FUNCTION_H
+#define ION_IONCORE_FUNCTION_H
 
 #include <libtu/tokenizer.h>
 #include "common.h"
@@ -49,4 +49,4 @@ extern int complete_func_thing(const char *nam, char ***cp_ret, char **beg,
 extern int complete_func_thing_parents(const char *nam, char ***cp_ret,
 									   char **beg, WThing *thing);
 
-#endif /* WMCORE_FUNCTION_H */
+#endif /* ION_IONCORE_FUNCTION_H */

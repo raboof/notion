@@ -1,5 +1,5 @@
 /*
- * wmcore/key.c
+ * ion/ioncore/key.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
@@ -233,7 +233,6 @@ void handle_keypress(XKeyEvent *ev)
 	WBinding *binding=NULL;
 	WRegion *reg=NULL, *oreg=NULL, *binding_owner=NULL;
 
-	
 	reg=(WRegion*)FIND_WINDOW(ev->window);
 	if(reg==NULL)
 		return;

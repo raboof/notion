@@ -1,12 +1,12 @@
 /*
- * wmcore/draw.h
+ * ion/ioncore/draw.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_DRAW_H
-#define WMCORE_DRAW_H
+#ifndef ION_IONCORE_DRAW_H
+#define ION_IONCORE_DRAW_H
 
 #include "common.h"
 #include "screen.h"
@@ -28,4 +28,4 @@ extern void postinit_graphics(WScreen *scr);
 
 extern void reread_draw_config();
 
-#endif /* WMCORE_DRAW_H */
+#endif /* ION_IONCORE_DRAW_H */

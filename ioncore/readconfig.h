@@ -1,16 +1,16 @@
 /*
- * wmcore/readconfig.h
+ * ion/ioncore/readconfig.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_READCONFIG_H
-#define WMCORE_READCONFIG_H
+#ifndef ION_IONCORE_READCONFIG_H
+#define ION_IONCORE_READCONFIG_H
 
 #include <libtu/parser.h>
 
-extern bool wmcore_set_paths(const char *appname, const char *etcdir,
+extern bool ioncore_set_paths(const char *appname, const char *etcdir,
 							 const char *libdir);
 
 extern char *get_core_cfgfile_for_scr(const char *module, int xscr);
@@ -32,4 +32,4 @@ extern bool read_core_config_for_scr(const char *module, int xscr,
 /* The library path stuff is in readconfig.c */
 extern char *find_module(const char *fname);
 
-#endif /* WMCORE_READCONFIG_H */
+#endif /* ION_IONCORE_READCONFIG_H */

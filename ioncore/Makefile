@@ -1,5 +1,5 @@
 ##
-## wmcore Makefile
+## Ioncore Makefile
 ##
 
 # System-specific configuration is in system.mk
@@ -8,36 +8,37 @@ include $(TOPDIR)/system-inc.mk
 
 ######################################
 
-#DIST: LIBS += -L../libtu -ltu -lm $(X11_LIBS) -lX11
-LIBS += -ltu -lm $(X11_LIBS) -lX11
+#DIST: LIBS += -L../libtu -ltu -lm $(X11_LIBS) -lX11 $(XINERAMA_LIBS)
+LIBS += -ltu -lm $(X11_LIBS) -lX11 $(XINERAMA_LIBS)
 #DIST: INCLUDES += -I../libtu/include $(X11_INCLUDES) -I..
 INCLUDES += $(X11_INCLUDES) -I..
-#DIST: DEFINES += -DETCDIR=\"$(ETCDIR)\"
 DEFINES += -DETCDIR=\"$(ETCDIR)\" -DLIBDIR=\"$(LIBDIR)\"
 
-CFLAGS += $(XOPEN_SOURCE) $(MODULE_SUPPORT)
+CFLAGS += $(XOPEN_SOURCE) $(MODULE_SUPPORT_CFLAGS)
 LDFLAGS += $(MODULE_SUPPORT_LDFLAGS)
 
 OBJS=	binding.o conf-bindings.o conf-draw.o cursor.o draw.o event.o	\
 	exec.o focus.o font.o function.o key.o modules.o mwmhints.o	\
 	obj.o pointer.o property.o readconfig.o screen.o signal.o	\
-	sizehint.o thing.o window.o wmcore.o xic.o selection.o		\
+	sizehint.o thing.o window.o ioncore.o xic.o selection.o		\
 	completehelp.o symlist.o clientwin.o colormap.o region.o	\
 	eventh.o winprops.o targetid.o attach.o resize.o defer.o grab.o \
 	wsreg.o commandsq.o readfds.o regbind.o	funtabs.o viewport.o 	\
-	tags.o names.o saveload.o genericws.o
+	tags.o names.o saveload.o genws.o genframe.o genframe-pointer.o	\
+	conf.o conf-winprops.o reginfo.o
 
-
-TARGETS=wmcore.a
-
-######################################
-
-include ../rules.mk
+TARGETS=ioncore
 
 ######################################
 
-wmcore.a: $(OBJS)
-	$(AR) $(ARFLAGS) $@ $+
-	$(RANLIB) $@
+include $(TOPDIR)/rules.mk
+
+######################################
+
+ioncore: $(OBJS) $(EXT_OBJS)
+	$(CC) $(OBJS) $(EXT_OBJS) $(LDFLAGS) -o $@
 
 _install:
+	$(INSTALLDIR) $(BINDIR)
+	$(INSTALL) -m $(BIN_MODE) ioncore $(BINDIR)
+	$(STRIP) $(BINDIR)/ioncore

@@ -1,5 +1,5 @@
 /*
- * wmcore/font.c
+ * ion/ioncore/font.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
@@ -402,7 +402,7 @@ static char *shorten(WFontPtr fnt, const char *str, int maxw,
 	}while(more);
 		
 	free(s);
-	warn("Failed to shorten title");
+	/*warn("Failed to shorten title");*/
 	return NULL;
 }
 

@@ -1,5 +1,5 @@
 /*
- * wmcore/tags.c
+ * ion/ioncore/tags.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.

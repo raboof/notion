@@ -1,12 +1,12 @@
 /*
- * wmcore/global.h
+ * ion/ioncore/global.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_GLOBAL_H
-#define WMCORE_GLOBAL_H
+#ifndef ION_IONCORE_GLOBAL_H
+#define ION_IONCORE_GLOBAL_H
 
 #include "common.h"
 
@@ -85,4 +85,4 @@ DECLSTRUCT(WGlobal){
 
 extern WGlobal wglobal;
 
-#endif /* WMCORE_GLOBAL_H */
+#endif /* ION_IONCORE_GLOBAL_H */

@@ -1,12 +1,12 @@
 /*
- * wmcore/hooks.h
+ * ion/ioncore/hooks.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_HOOKS_H
-#define WMCORE_HOOKS_H
+#ifndef ION_IONCORE_HOOKS_H
+#define ION_IONCORE_HOOKS_H
 
 #include "symlist.h"
 
@@ -68,4 +68,4 @@ typedef WSymlist WHooklist;
 #define ADD_HOOK(HOOK, FN) add_to_symlist(&(HOOK), (void*)(FN))
 #define REMOVE_HOOK(HOOK, FN) remove_from_symlist(&(HOOK), (void*)(FN))
 
-#endif /* WMCORE_HOOKS_H */
+#endif /* ION_IONCORE_HOOKS_H */

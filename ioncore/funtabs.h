@@ -1,24 +1,24 @@
 /*
- * wmcore/funtabs.h
+ * ion/ioncore/funtabs.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_FUNTABS_H
-#define WMCORE_FUNTABS_H
+#ifndef ION_IONCORE_FUNTABS_H
+#define ION_IONCORE_FUNTABS_H
 
 #include "function.h"
 #include "binding.h"
 
-extern WFunclist wmcore_screen_funclist;
-extern WFunclist wmcore_clientwin_funclist;
-extern WFunclist wmcore_viewport_funclist;
+extern WFunclist ioncore_screen_funclist;
+extern WFunclist ioncore_clientwin_funclist;
+extern WFunclist ioncore_viewport_funclist;
+extern WFunclist ioncore_genframe_funclist;
+/*extern WFunclist ioncore_moveres_funclist;*/
 
-extern void wmcore_init_funclists();
+extern void ioncore_init_funclists();
 
-extern WBindmap wmcore_screen_bindmap;
-extern WBindmap wmcore_clientwin_bindmap;
-extern WBindmap wmcore_viewport_bindmap;
+extern WBindmap ioncore_screen_bindmap;
 
-#endif /* WMCORE_FUNTABS_H */
+#endif /* ION_IONCORE_FUNTABS_H */

@@ -1,5 +1,5 @@
 /*
- * wmcore/window.c
+ * ion/ioncore/window.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
@@ -13,20 +13,34 @@
 #include "screen.h"
 
 
+/*{{{ Static function declarations */
+
+
+static Window window_x_window(const WWindow *wwin);
+
+
+/*}}}*/
+
+
+/*{{{ Dynfuntab and class implementation */
+
+
 static DynFunTab window_dynfuntab[]={
 	{fit_region, fit_window},
 	{map_region, map_window},
 	{unmap_region, unmap_window},
 	{focus_region, focus_window},
-	/*{region_rect_params, window_rect_params},*/
 	{(DynFun*)reparent_region, (DynFun*)reparent_window},
 	{(DynFun*)region_restack, (DynFun*)window_restack},
-	{(DynFun*)region_lowest_win, (DynFun*)window_lowest_win},
+	{(DynFun*)region_x_window, (DynFun*)window_x_window},
 	END_DYNFUNTAB
 };
 
 
 IMPLOBJ(WWindow, WRegion, deinit_window, window_dynfuntab, NULL)
+
+	
+/*}}}*/
 
 
 /*{{{ Dynfuns */
@@ -55,6 +69,14 @@ int window_press(WWindow *wwin, XButtonEvent *ev, WThing **thing_ret)
 void window_release(WWindow *wwin)
 {
 	CALL_DYN(window_release, wwin, (wwin));
+}
+
+
+bool reparent_region(WRegion *reg, WWindow *par, WRectangle geom)
+{
+	bool ret=FALSE;
+	CALL_DYN_RET(ret, bool, reparent_region, reg, (reg, par, geom));
+	return ret;
 }
 
 
@@ -183,14 +205,14 @@ static void reparent_or_fit_window(WWindow *wwin, Window parwin,
 }
 
 
-bool reparent_window(WWindow *wwin, WRegion *parent, WRectangle geom)
+bool reparent_window(WWindow *wwin, WWindow *parent, WRectangle geom)
 {
-	if(!WTHING_IS(parent, WWindow) || !same_screen((WRegion*)wwin, parent))
+	if(!same_screen((WRegion*)wwin, (WRegion*)parent))
 		return FALSE;
 	
 	region_detach((WRegion*)wwin);
-	region_set_parent((WRegion*)wwin, parent);
-	reparent_or_fit_window(wwin, ((WWindow*)parent)->win, geom);
+	region_set_parent((WRegion*)wwin, (WRegion*)parent);
+	reparent_or_fit_window(wwin, parent->win, geom);
 	return TRUE;
 }
 
@@ -244,7 +266,7 @@ Window window_restack(WWindow *wwin, Window other, int mode)
 }
 
 
-Window window_lowest_win(WWindow *wwin)
+Window window_x_window(const WWindow *wwin)
 {
 	return wwin->win;
 }

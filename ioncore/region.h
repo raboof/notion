@@ -1,18 +1,17 @@
 /*
- * wmcore/region.h
+ * ion/ioncore/region.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_REGION_H
-#define WMCORE_REGION_H
+#ifndef ION_IONCORE_REGION_H
+#define ION_IONCORE_REGION_H
 
 #include "common.h"
 #include "thing.h"
 
 INTROBJ(WRegion)
-INTRSTRUCT(WWinGeomParams)
 INTRSTRUCT(WSubmapState)
 
 
@@ -89,7 +88,6 @@ DECLOBJ(WRegion){
 
 
 DYNFUN void fit_region(WRegion *reg, WRectangle geom);
-DYNFUN bool reparent_region(WRegion *reg, WRegion *target, WRectangle geom);
 DYNFUN void map_region(WRegion *reg);
 DYNFUN void unmap_region(WRegion *reg);
 /* Use set_focus instead except in focus_region handler itself 
@@ -99,10 +97,9 @@ DYNFUN void focus_region(WRegion *reg, bool warp);
 DYNFUN void region_notify_rootpos(WRegion *reg, int x, int y);
 /* mode==Above, return topmost; mode==Below, return bottomost */
 DYNFUN Window region_restack(WRegion *reg, Window other, int mode);
-DYNFUN Window region_lowest_win(WRegion *reg);
+DYNFUN Window region_x_window(const WRegion *reg);
 DYNFUN void region_activated(WRegion *reg);
 DYNFUN void region_inactivated(WRegion *reg);
-/*?*/DYNFUN WRegion *region_selected_sub(WRegion *reg);
 DYNFUN void region_draw_config_updated(WRegion *reg);
 extern void default_draw_config_updated(WRegion *reg);
 
@@ -157,4 +154,4 @@ extern void region_request_managed_geom_allow(WRegion *reg, WRegion *sub,
 											  bool tryonly);
 
 
-#endif /* WMCORE_REGION_H */
+#endif /* ION_IONCORE_REGION_H */

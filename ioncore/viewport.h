@@ -1,18 +1,19 @@
 /*
- * wmcore/viewport.h
+ * ion/ioncore/viewport.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_VIEWPORT_H
-#define WMCORE_VIEWPORT_H
+#ifndef ION_IONCORE_VIEWPORT_H
+#define ION_IONCORE_VIEWPORT_H
 
 #include "common.h"
 #include "region.h"
-#include "screen.h"
 
 INTROBJ(WViewport)
+
+#include "screen.h"
 
 DECLOBJ(WViewport){
 	WRegion reg;
@@ -52,4 +53,4 @@ extern void viewport_add_managed_doit(WViewport *vp, WRegion *reg, int flags);
 
 extern bool init_workspaces_on_vp(WViewport* vp);
 
-#endif /* WMCORE_VIEWPORT_H */
+#endif /* ION_IONCORE_VIEWPORT_H */

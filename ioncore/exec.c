@@ -1,5 +1,5 @@
 /*
- * wmcore/exec.c
+ * ion/ioncore/exec.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
@@ -18,7 +18,7 @@
 #include "property.h"
 #include "signal.h"
 #include "global.h"
-#include "wmcore.h"
+#include "ioncore.h"
 
 
 #define SHELL_PATH "/bin/sh"
@@ -147,7 +147,7 @@ void setup_environ(int scr)
 
 void wm_exitret(int retval)
 {	
-	wmcore_deinit();
+	ioncore_deinit();
 	exit(retval);
 }
 
@@ -160,7 +160,7 @@ void wm_exit()
 
 void wm_restart_other(const char *cmd)
 {
-	wmcore_deinit();
+	ioncore_deinit();
 	if(cmd!=NULL){
 		wm_do_exec(cmd);
 	}

@@ -1,5 +1,5 @@
 /*
- * wmcore/wsreg.c
+ * ion/ioncore/wsreg.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
@@ -72,7 +72,7 @@ static bool add_transient(WClientWin *tfor, WClientWin *cwin,
 		if(HAS_DYN(p, region_ws_add_transient))
 			return region_ws_add_transient(p, tfor, cwin, attr,
 										   init_state, props);
-		p=FIND_PARENT1(p, WRegion);
+		p=REGION_MANAGER(p);
 	}
 	
 	/* No parent workspace found that would want to handle transients.

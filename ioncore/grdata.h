@@ -1,12 +1,12 @@
 /*
- * wmcore/grdata.h
+ * ion/ioncore/grdata.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_GRDATA_H
-#define WMCORE_GRDATA_H
+#ifndef ION_IONCORE_GRDATA_H
+#define ION_IONCORE_GRDATA_H
 
 #include "common.h"
 
@@ -16,6 +16,7 @@ INTRSTRUCT(WBorder)
 
 #define BORDER_TL_TOTAL(BORDER) ((BORDER)->tl+(BORDER)->ipad)
 #define BORDER_BR_TOTAL(BORDER) ((BORDER)->br+(BORDER)->ipad)
+#define BORDER_TOTAL(BORDER) (BORDER_TL_TOTAL(BORDER)+BORDER_BR_TOTAL(BORDER))
 #define BORDER_IX(BORDER, X) (X+BORDER_TL_TOTAL(BORDER))
 #define BORDER_IY(BORDER, Y) (Y+BORDER_TL_TOTAL(BORDER))
 #define BORDER_IW(BORDER, W) (W-BORDER_TL_TOTAL(BORDER)-BORDER_BR_TOTAL(BORDER))
@@ -51,12 +52,11 @@ DECLSTRUCT(WGRData){
 	int spacing;
 	
 	/* PWM-specific */
-	int bar_min_width, tab_min_width;
-	float bar_max_width_q;
+	int pwm_tab_min_width;
+	float pwm_bar_max_width_q;
 
 	/* calculated data (from configurable) */
 	int bar_h, tab_spacing;
-	WRectangle client_off, bar_off, border_off;
 	
 	/* other data */
 	GC gc;
@@ -78,4 +78,4 @@ DECLSTRUCT(WGRData){
 	WRectangle drag_geom;
 };
 
-#endif /* WMCORE_GRDATA_H */
+#endif /* ION_IONCORE_GRDATA_H */

@@ -1,12 +1,12 @@
 /*
- * wmcore/property.h
+ * ion/ioncore/property.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_PROPERTY_H
-#define WMCORE_PROPERTY_H
+#ifndef ION_IONCORE_PROPERTY_H
+#define ION_IONCORE_PROPERTY_H
 
 #include <X11/Xatom.h>
 
@@ -21,5 +21,5 @@ extern void set_integer_property(Window win, Atom a, int value);
 extern bool get_win_state(Window win, int *state);
 extern void set_win_state(Window win, int state);
 
-#endif /* WMCORE_PROPERTY_H */
+#endif /* ION_IONCORE_PROPERTY_H */
 

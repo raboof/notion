@@ -1,5 +1,5 @@
 /*
- * wmcore/draw.c
+ * ion/ioncore/draw.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
@@ -12,7 +12,6 @@
 #include "draw.h"
 #include "font.h"
 #include "drawp.h"
-#include "imports.h"
 #include "conf-draw.h"
 #include "region.h"
 
@@ -65,6 +64,19 @@ void draw_border(DrawInfo *dinfo)
 {
 	do_draw_border(WIN, XGC, X, Y, W, H, BORDER->tl, BORDER->br, 
 				   COLORS->hl, COLORS->sh);
+}
+
+
+void draw_border_inverted(DrawInfo *dinfo, bool draw_pad)
+{
+	if(draw_pad){
+		do_draw_border(WIN, XGC, X, Y, W, H, BORDER->ipad, BORDER->ipad,
+					   COLORS->bg, COLORS->bg);
+	}
+
+	do_draw_border(WIN, XGC, X+BORDER->ipad, Y+BORDER->ipad,
+				   W-2*BORDER->ipad, H-2*BORDER->ipad,
+				   BORDER->br, BORDER->tl, COLORS->sh, COLORS->hl);
 }
 
 
@@ -284,6 +296,8 @@ void preinit_graphics(WScreen *scr)
 #undef INIT_BD
 
 	grdata->bar_inside_frame=FALSE;
+	grdata->pwm_bar_max_width_q=0.95;
+	grdata->pwm_tab_min_width=50;
 	grdata->spacing=1;
 	grdata->font=NULL;
 	grdata->tab_font=NULL;
@@ -324,7 +338,7 @@ static void create_wm_windows(WScreen *scr)
 	XSetWindowAttributes attr;
 	int w, h;
 	
-	/* Create move/resize positwmcore/size display window */
+	/* Create move/resize position/size display window */
 	w=3;
 	w+=chars_for_num(REGION_GEOM(scr).w);
 	w+=chars_for_num(REGION_GEOM(scr).h);
@@ -377,6 +391,13 @@ static void create_wm_windows(WScreen *scr)
 	XSelectInput(wglobal.dpy, grdata->drag_win, ExposureMask);
 }
 
+
+static void calc_grdata(WGRData *grdata)
+{
+	/* Calculate some commonly used data */
+	grdata->bar_h=(MAX_FONT_HEIGHT(grdata->tab_font)+
+				   BORDER_TOTAL(&(grdata->tab_border)));
+}
 
 
 /* This should be called after reading the configuration file */
@@ -476,9 +497,8 @@ void postinit_graphics(WScreen *scr)
 
 	grdata->xor_gc=XCreateGC(dpy, root, gcvmask, &gcv);
 
-	/* the rest */
-	
-	calc_grdata(scr);
+	/* the reset */
+	calc_grdata(grdata);
 	
 	create_wm_windows(scr);
 }
@@ -532,7 +552,7 @@ void draw_rubberband(WScreen *scr, WRectangle rect, bool vertical)
 /*}}}*/
 
 
-/*{{{ Move/resize positwmcore/size display */
+/*{{{ Move/resize position/size display */
 
 
 static char moveres_tmpstr[CF_MAX_MOVERES_STR_SIZE];
@@ -629,7 +649,7 @@ void reread_draw_config()
 				 scr->grdata.tab_font->fid);
 #endif
 #endif		
-		calc_grdata(scr);
+		calc_grdata(&(scr->grdata));
 		region_draw_config_updated((WRegion*)scr);
 	}
 }

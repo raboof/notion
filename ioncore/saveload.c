@@ -1,5 +1,5 @@
 /*
- * wmcore/saveload.c
+ * ion/ioncore/saveload.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
@@ -21,87 +21,13 @@
 #include "names.h"
 #include "objp.h"
 #include "attach.h"
-
-/*{{{ Register class load/create function */
-
-
-INTRSTRUCT(RegLoadInfo)
-	
-DECLSTRUCT(RegLoadInfo){
-	char *name;
-	WRegionLoadCreateFn *fn;
-	RegLoadInfo *next, *prev;
-};
-
-
-static RegLoadInfo *reg_load_infos;
-
-
-static RegLoadInfo *lookup_reg_load_info(const char *name)
-{
-	RegLoadInfo *info;
-	
-	for(info=reg_load_infos; info!=NULL; info=info->next){
-		if(strcmp(info->name, name)==0)
-			return info;
-	}
-	return NULL;
-}
-
-
-bool register_region_load_create_fn(const char *name, WRegionLoadCreateFn *fn)
-{
-	RegLoadInfo *info;
-	
-	if(name==NULL || fn==NULL)
-		return FALSE;
-	
-	info=ALLOC(RegLoadInfo);
-	if(info==NULL){
-		warn_err();
-		return FALSE;
-	}
-	
-	info->name=scopy(name);
-	if(info->name==NULL){
-		warn_err();
-		free(info);
-		return FALSE;
-	}
-	
-	info->fn=fn;
-	LINK_ITEM(reg_load_infos, info, next, prev);
-	
-	return TRUE;
-}
-
-
-void unregister_region_load_create_fn(const char *name)
-{
-	RegLoadInfo *info=lookup_reg_load_info(name);
-	
-	if(info!=NULL){
-		UNLINK_ITEM(reg_load_infos, info, next, prev);
-		free(info->name);
-		free(info);
-	}
-}
-
-
-WRegionLoadCreateFn *lookup_reg_load_create_fn(const char *name)
-{
-	RegLoadInfo *info=lookup_reg_load_info(name);
-	return (info==NULL ? NULL : info->fn);
-}
-
-
-/*}}}*/
+#include "reginfo.h"
 
 
 /*{{{ Load support functions */
 
 
-WRegion *load_create_region(WRegion *par, WRectangle geom,
+WRegion *load_create_region(WWindow *par, WRectangle geom,
 							Tokenizer *tokz, int n, Token *toks)
 {
 	char *objclass, *name;
@@ -112,7 +38,7 @@ WRegion *load_create_region(WRegion *par, WRectangle geom,
 	assert(TOK_IS_STRING(&(toks[1])));
 	
 	objclass=TOK_STRING_VAL(&(toks[1]));
-	fn=lookup_reg_load_create_fn(objclass);
+	fn=lookup_region_load_create_fn(objclass);
 	
 	if(fn==NULL){
 		warn("Unknown class \"%s\", cannot create region", objclass);
@@ -197,7 +123,7 @@ static bool opt_viewport_region(Tokenizer *tokz, int n, Token *toks)
 	WRegion *reg;
 	WRectangle geom;
 	
-	reg=load_create_region((WRegion*)SCREEN_OF(current_vp),
+	reg=load_create_region((WWindow*)SCREEN_OF(current_vp),
 						   REGION_GEOM(current_vp),
 						   tokz, n, toks);
 
@@ -210,13 +136,8 @@ static bool opt_viewport_region(Tokenizer *tokz, int n, Token *toks)
 }
 
 
-static ConfOpt dummy_opts[]={
-	END_CONFOPTS
-};
-
-
 static ConfOpt wsconf_opts[]={
-	{"region", "s?s", opt_viewport_region, dummy_opts},
+	{"region", "s?s", opt_viewport_region, CONFOPTS_NOT_SET},
 	END_CONFOPTS
 };
 
@@ -226,7 +147,7 @@ bool load_workspaces(WViewport *vp)
 	bool successp;
 
 	current_vp=vp;
-	successp=read_config_for_scr("workspaces", vp->id, wsconf_opts);
+	successp=read_config_for_scr("saves/workspaces", vp->id, wsconf_opts);
 	current_vp=NULL;
 	
 	return successp;
@@ -288,7 +209,7 @@ bool save_workspaces(WViewport *vp)
 	bool successp;
 	char *wsconf;
 	
-	wsconf=get_savefile_for_scr("workspaces", vp->id);
+	wsconf=get_savefile_for_scr("saves/workspaces", vp->id);
 	
 	if(wsconf==NULL)
 		return FALSE;

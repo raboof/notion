@@ -1,12 +1,12 @@
 /*
- * wmcore/symlist.h
+ * ion/ioncore/symlist.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_SYMLIST_H
-#define WMCORE_SYMLIST_H
+#ifndef ION_IONCORE_SYMLIST_H
+#define ION_IONCORE_SYMLIST_H
 
 #include "common.h"
 
@@ -31,4 +31,4 @@ void remove_from_symlist(WSymlist **symlist, void *symbol);
 void *iter_symlist_init(WSymlist *symlist);
 void *iter_symlist();
 
-#endif /* WMCORE_SYMLIST_H */
+#endif /* ION_IONCORE_SYMLIST_H */

@@ -1,5 +1,5 @@
 /*
- * wmcore/binding.c
+ * ion/ioncore/binding.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
@@ -116,7 +116,7 @@ void deinit_binding(WBinding *binding)
 	int i;
 	
 	if(binding->submap!=NULL){
-		destroy_bindmap(binding->submap);
+		deinit_bindmap(binding->submap);
 		free(binding->submap);
 	}
 	
@@ -128,7 +128,7 @@ void deinit_binding(WBinding *binding)
 }
 
 
-void destroy_bindmap(WBindmap *bindmap)
+void deinit_bindmap(WBindmap *bindmap)
 {
 	int i;
 	WBinding *binding;
@@ -144,6 +144,9 @@ void destroy_bindmap(WBindmap *bindmap)
 		deinit_binding(binding);
 	
 	free(bindmap->bindings);
+	bindmap->bindings=NULL;
+	bindmap->nbindings=0;
+	bindmap->parent=NULL;
 }
 
 

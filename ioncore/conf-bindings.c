@@ -1,5 +1,5 @@
 /*
- * wmcore/conf-bindings.c
+ * ion/ioncore/conf-bindings.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
@@ -278,7 +278,7 @@ static bool end_bindings(Tokenizer *tokz, int n, Token *toks)
 /*{{{ Exports */
 
 
-bool wmcore_begin_bindings(WBindmap *bindmap, const StringIntMap *areas)
+bool ioncore_begin_bindings(WBindmap *bindmap, const StringIntMap *areas)
 {
 	tmp_bindmap=bindmap;
 	tmp_areamap=areas;
@@ -286,9 +286,9 @@ bool wmcore_begin_bindings(WBindmap *bindmap, const StringIntMap *areas)
 }
 
 
-ConfOpt wmcore_binding_opts[]={
+ConfOpt ioncore_binding_opts[]={
 	{"set_mod", "s", opt_set_mod, NULL},
-	{"submap", "s", opt_submap, wmcore_binding_opts},
+	{"submap", "s", opt_submap, ioncore_binding_opts},
 	
 	{"kpress", "ss", opt_kpress, NULL},
 	{"kpress_waitrel", "ss", opt_kpress_waitrel, NULL},

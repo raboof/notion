@@ -1,12 +1,12 @@
 /*
- * wmcore/common.h
+ * ion/ioncore/common.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_COMMON_H
-#define WMCORE_COMMON_H
+#ifndef ION_IONCORE_COMMON_H
+#define ION_IONCORE_COMMON_H
 
 #include <libtu/types.h>
 #include <libtu/output.h>
@@ -63,4 +63,4 @@ extern void pgeom(const char *n, WRectangle g);
 #define D(X)
 #endif
 
-#endif /* WMCORE_COMMON_H */
+#endif /* ION_IONCORE_COMMON_H */

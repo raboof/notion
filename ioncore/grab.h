@@ -1,12 +1,12 @@
 /*
- * ion/grab.h
+ * ion/ioncore/grab.h
  *
  * Copyright (c) Lukas Schroeder 2002.
  * See the included file LICENSE for details.
  */
 
-#ifndef INCLUDED_GRAB_H
-#define INCLUDED_GRAB_H
+#ifndef ION_IONCORE_GRAB_H
+#define ION_IONCORE_GRAB_H
 
 #include "global.h" /* for InputHandler and InputHandlerContext */
 #include "common.h"
@@ -33,5 +33,5 @@ extern void grab_resume();
 extern bool grab_held();
 
 
-#endif /* INCLUDED_GRAB_H */
+#endif /* ION_IONCORE_GRAB_H */
 

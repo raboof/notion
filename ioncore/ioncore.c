@@ -1,5 +1,5 @@
 /*
- * wmcore/init.c
+ * ion/ioncore/init.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
@@ -13,7 +13,7 @@
 #include <locale.h>
 
 #include <libtu/util.h>
-#include <X11/Xlib.h>
+#include <libtu/optparser.h>
 
 #include "common.h"
 #include "screen.h"
@@ -25,17 +25,125 @@
 #include "global.h"
 #include "draw.h"
 #include "modules.h"
-#include "imports.h"
 #include "wsreg.h"
 #include "funtabs.h"
 #include "eventh.h"
 #include "saveload.h"
+#include "ioncore.h"
+#include "exec.h"
+#include "conf.h"
+#include "../version.h"
 
 
 /*{{{ Global variables */
 
 
 WGlobal wglobal;
+
+
+/*}}}*/
+
+
+/*{{{ Optparser data */
+
+
+/* Options. Getopt is not used because getopt_long is quite gnu-specific
+ * and they don't know of '-display foo' -style args anyway.
+ * Instead, I've reinvented the wheel in libtu :(.
+ */
+static OptParserOpt opts[]={
+	{OPT_ID('d'), 	"display", 	OPT_ARG, "host:dpy.scr", "X display to use"},
+	{'c', 			"cfgfile", 	OPT_ARG, "config_file", "Configuration file"},
+	{OPT_ID('o'), 	"onescreen", 0, NULL, "Manage default screen only"},
+	END_OPTPARSEROPTS
+};
+
+
+static const char ion_usage_tmpl[]=
+	"Usage: $p [options]\n\n$o\n";
+
+
+static const char ion_about[]=
+	"Ioncore " ION_VERSION ", copyright (c) Tuomo Valkonen 1999-2003.\n"
+	"This program may be copied and modified under the terms of the "
+	"Clarified Artistic License.\n";
+
+
+static OptParserCommonInfo ion_cinfo={
+	ION_VERSION,
+	ion_usage_tmpl,
+	ion_about
+};
+
+
+/*}}}*/
+
+
+/*{{{ Main */
+
+
+int main(int argc, char*argv[])
+{
+	const char *cfgfile=NULL;
+	const char *display=NULL;
+	const char *msg=NULL;
+	char *cmd=NULL;
+	bool onescreen=FALSE;
+	int opt;
+	
+	libtu_init(argv[0]);
+	
+	optparser_init(argc, argv, OPTP_MIDLONG, opts, &ion_cinfo);
+	
+	while((opt=optparser_get_opt())){
+		switch(opt){
+		case OPT_ID('d'):
+			display=optparser_get_arg();
+			break;
+		case 'c':
+			cfgfile=optparser_get_arg();
+			break;
+		case OPT_ID('o'):
+			onescreen=TRUE;
+			break;
+		default:
+			optparser_print_error();
+			return EXIT_FAILURE;
+		}
+	}
+
+	wglobal.argc=argc;
+	wglobal.argv=argv;
+	
+	if(!ioncore_init("ion-devel", ETCDIR, LIBDIR, display, onescreen))
+		return EXIT_FAILURE;
+	
+	if(!ioncore_read_config(cfgfile)){
+		msg="Unable to load configuration file. Refusing to start. "
+			"You *must* install proper configuration files "
+			"either in ~/.ion-devel or "ETCDIR"/ion-devel to use Ion.";
+		goto fail;
+	}
+	
+	if(!setup_screens()){
+		msg="Unable to set up any screens. Refusing to start.";
+		goto fail;
+	}
+	
+	mainloop();
+	
+	/* The code should never return here */
+	return EXIT_SUCCESS;
+	
+fail:
+	warn(msg);
+	setup_environ(DefaultScreen(wglobal.dpy));
+	XCloseDisplay(wglobal.dpy);
+	libtu_asprintf(&cmd, "xmessage '%s'", msg);
+	if(cmd!=NULL)
+		wm_do_exec(cmd);
+	return EXIT_FAILURE;
+}
 
 
 /*}}}*/
@@ -78,7 +186,7 @@ static void initialize_global()
 }
 
 
-bool wmcore_init(const char *appname, const char *appetcdir,
+bool ioncore_init(const char *appname, const char *appetcdir,
 				 const char *applibdir, const char *display, bool onescreen)
 {
 	Display *dpy;
@@ -112,9 +220,9 @@ bool wmcore_init(const char *appname, const char *appetcdir,
 	}
 	
 	initialize_global();
-	wmcore_init_funclists();
+	ioncore_init_funclists();
 	
-	if(!wmcore_set_paths(appname, appetcdir, applibdir))
+	if(!ioncore_set_paths(appname, appetcdir, applibdir))
 		return FALSE;
 	
 	/* Open the display. */
@@ -184,7 +292,7 @@ bool wmcore_init(const char *appname, const char *appetcdir,
 /*{{{ Deinit */
 
 
-void wmcore_deinit()
+void ioncore_deinit()
 {
 	Display *dpy;
 	WScreen *scr;
@@ -195,14 +303,14 @@ void wmcore_deinit()
 	if(wglobal.dpy==NULL)
 		return;
 	
-	unload_modules();
-	
 	FOR_ALL_SCREENS(scr){
 		FOR_ALL_TYPED(scr, vp, WViewport){
 			save_workspaces(vp);
 		}
-		deinit_screen(scr);
+		destroy_thing((WThing*)scr);
 	}
+
+	/*unload_modules();*/
 	
 	dpy=wglobal.dpy;
 	wglobal.dpy=NULL;

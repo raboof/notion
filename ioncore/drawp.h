@@ -1,12 +1,12 @@
 /*
- * wmcore/drawp.h
+ * ion/ioncore/drawp.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_DRAWP_H
-#define WMCORE_DRAWP_H
+#ifndef ION_IONCORE_DRAWP_H
+#define ION_IONCORE_DRAWP_H
 
 #include "common.h"
 #include "draw.h"
@@ -55,6 +55,7 @@ DECLSTRUCT(DrawInfo){
 extern void do_draw_border(Window win, GC gc, int x, int y, int w, int h,
 						   int tl, int br, WColor tlc, WColor brc);
 extern void draw_border(DrawInfo *dinfo);
+extern void draw_border_inverted(DrawInfo *dinfo, bool draw_pad);
 extern void draw_box(DrawInfo *dinfo, bool fill);
 extern void draw_textbox(DrawInfo *dinfo,
 						 const char *str, int align, bool fill);
@@ -68,4 +69,4 @@ extern void set_clipping_rectangle(DrawInfo *dinfo,
 								   int x, int y, int w, int h);
 extern void clear_clipping(DrawInfo *dinfo);
 
-#endif /* WMCORE_DRAWP_H */
+#endif /* ION_IONCORE_DRAWP_H */

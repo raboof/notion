@@ -1,12 +1,12 @@
 /*
- * ion/regbind.h
+ * ion/ioncore/regbind.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef INCLUDED_REGBIND_H
-#define INCLUDED_REGBIND_H
+#ifndef ION_IONCORE_REGBIND_H
+#define ION_IONCORE_REGBIND_H
 
 #include "global.h"
 #include "common.h"
@@ -31,5 +31,5 @@ extern WBinding *region_lookup_binding_area(WRegion *reg, int act, uint state,
 extern void rbind_binding_added(const WRegBindingInfo *rbind, const WBinding *binding,
 								const WBindmap *bindmap);
 
-#endif /* INCLUDED_REGBIND_H */
+#endif /* ION_IONCORE_REGBIND_H */
 

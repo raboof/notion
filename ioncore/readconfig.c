@@ -1,5 +1,5 @@
 /*
- * wmcore/readconfig.c
+ * ion/ioncore/readconfig.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
@@ -30,12 +30,12 @@ static char *libpaths[]={
 /*{{{ Init */
 
 
-bool wmcore_set_paths(const char *appname, const char *etcdir, const char *libdir)
+bool ioncore_set_paths(const char *appname, const char *etcdir, const char *libdir)
 {
 	char *p, *home;
 	int libi=0, etci=0;
 	
-	/* Should only be called from wmcore_init */
+	/* Should only be called from ioncore_init */
 	assert(appname!=NULL && etcdir!=NULL && libdir!=NULL);
 	
 	home=getenv("HOME");

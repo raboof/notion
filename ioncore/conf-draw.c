@@ -1,5 +1,5 @@
 /*
- * wmcore/conf-draw.c
+ * ion/ioncore/conf-draw.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
@@ -225,16 +225,14 @@ static int opt_screen_bar_widths(Tokenizer *tokz, int n, Token *toks)
 	
 	i=TOK_LONG_VAL(&(toks[1]));
 	j=TOK_DOUBLE_VAL(&(toks[2]));
-	k=TOK_LONG_VAL(&(toks[3]));
 	
-	if(i<0 || j<0.0 || k<0 || k>i){
+	if(i<0 || j<0.0){
 		warn_obj_line(tokz->name, toks[1].line, "Erroneous values");
 		return FALSE;
 	}
 	
-	tmp_screen->grdata.bar_min_width=i;
-	tmp_screen->grdata.bar_max_width_q=j;
-	tmp_screen->grdata.tab_min_width=k;
+	tmp_screen->grdata.pwm_tab_min_width=i;
+	tmp_screen->grdata.pwm_bar_max_width_q=j;
 	
 	return TRUE;
 }
@@ -284,7 +282,7 @@ static ConfOpt screen_opts[]={
 	{"ion_spacing", "l", opt_screen_spacing, NULL},
 	{"ion_bar_inside_frame", "b", opt_screen_bar_inside_frame, NULL},
 	
-	{"pwm_bar_widths", "ldl", opt_screen_bar_widths, NULL},
+	{"pwm_bar_widths", "ld", opt_screen_bar_widths, NULL},
 
 	{NULL, NULL, NULL, NULL}
 };

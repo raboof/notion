@@ -1,25 +1,29 @@
 /*
- * wmcore/resize.h
+ * ion/ioncore/resize.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_RESIZE_H
-#define WMCORE_RESIZE_H
+#ifndef ION_IONCORE_RESIZE_H
+#define ION_IONCORE_RESIZE_H
 
 #include "common.h"
 #include "screen.h"
+#include "genframe.h"
 
 typedef void WDrawRubberbandFn(WScreen *scr, WRectangle geom);
 
 extern bool begin_resize(WRegion *reg, WDrawRubberbandFn *rubfn);
 extern bool begin_resize_atexit(WRegion *reg, WDrawRubberbandFn *rubfn, void (*exitfn)());
+extern bool begin_move(WRegion *reg, WDrawRubberbandFn *rubfn);
+extern bool begin_move_atexit(WRegion *reg, WDrawRubberbandFn *rubfn, void (*exitfn)());
 /* dx1/dx2/dy1/dy2: left/right/top/bottom difference to previous values. 
  * left/top negative, bottom/right positive increases size.
  */
 extern void delta_resize(WRegion *reg, int dx1, int dx2, int dy1, int dy2,
 						 WRectangle *rret);
+extern void delta_move(WRegion *reg, int dx, int dy, WRectangle *rret);
 extern void end_resize(WRegion *reg);
 extern void cancel_resize(WRegion *reg);
 extern void set_resize_timer(WRegion *reg, uint timeout);
@@ -42,4 +46,7 @@ extern void set_height(WRegion *reg, int h);
 extern void set_widthq(WRegion *reg, double q);
 extern void set_heightq(WRegion *reg, double q);
 
-#endif /* WMCORE_RESIZE_H */
+extern void genframe_maximize_vert(WGenFrame *frame);
+extern void genframe_maximize_horiz(WGenFrame *frame);
+
+#endif /* ION_IONCORE_RESIZE_H */

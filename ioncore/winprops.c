@@ -1,5 +1,5 @@
 /*
- * wmcore/winprops.c
+ * ion/ioncore/winprops.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.

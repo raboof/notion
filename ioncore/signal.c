@@ -1,5 +1,5 @@
 /*
- * wmcore/signal.c
+ * ion/ioncore/signal.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
@@ -19,7 +19,7 @@
 #include "signal.h"
 #include "exec.h"
 #include "global.h"
-#include "wmcore.h"
+#include "ioncore.h"
 
 
 static int kill_sig=0;
@@ -82,7 +82,7 @@ void check_signals()
 		if(kill_sig==SIGTERM)
 			wm_exit();
 
-		wmcore_deinit();
+		ioncore_deinit();
 		kill(getpid(), kill_sig);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * wmcore/thing.c
+ * ion/ioncore/thing.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
@@ -27,13 +27,13 @@ void destroy_thing(WThing *t)
 
 	call_watches(t);
 	
-	destroy_subthings(t);
-
 	if(t->obj.obj_type->destroy_fn!=NULL)
 		t->obj.obj_type->destroy_fn(t);
 
+	destroy_subthings(t);
+
 	unlink_thing(t);
-	
+
 	free(t);
 
 	/* TODO: These should be "watches" */

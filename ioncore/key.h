@@ -1,12 +1,12 @@
 /*
- * wmcore/key.h
+ * ion/ioncore/key.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_KEY_H
-#define WMCORE_KEY_H
+#ifndef ION_IONCORE_KEY_H
+#define ION_IONCORE_KEY_H
 
 #include <X11/keysym.h>
 
@@ -16,4 +16,4 @@
 extern void handle_keypress(XKeyEvent *ev);
 extern void quote_next(WClientWin *cwin);
 
-#endif /* WMCORE_KEY_H */
+#endif /* ION_IONCORE_KEY_H */

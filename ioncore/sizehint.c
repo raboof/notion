@@ -1,5 +1,5 @@
 /*
- * wmcore/sizehint.c
+ * ion/ioncore/sizehint.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
@@ -62,6 +62,7 @@ void correct_size(int *wp, int *hp, const XSizeHints *hints, bool min)
 {
 	int w=*wp;
 	int h=*hp;
+	int bs=0;
 	
 	if(min){
 		if(w<hints->min_width)
@@ -75,19 +76,21 @@ void correct_size(int *wp, int *hp, const XSizeHints *hints, bool min)
 			correct_aspect(w, h, hints, &w, &h);
 	}
 	
-	if(hints->flags&PResizeInc){
-		/* base size should be set to 0 if none given by user program */
-		if(w>hints->min_width)
-			w=((w-hints->min_width)/hints->width_inc)*hints->width_inc+hints->min_width;
-		if(h>hints->min_height)
-			h=((h-hints->min_height)/hints->height_inc)*hints->height_inc+hints->min_height;
-	}
-	
 	if(hints->flags&PMaxSize){
 		if(w>hints->max_width)
 			w=hints->max_width;
 		if(h>hints->max_height)
 			h=hints->max_height;
+	}
+
+	if(hints->flags&PResizeInc){
+		/* base size should be set to 0 if none given by user program */
+		bs=(hints->flags&PBaseSize ? hints->base_width : 0);
+		if(w>bs)
+			w=((w-bs)/hints->width_inc)*hints->width_inc+bs;
+		bs=(hints->flags&PBaseSize ? hints->base_height : 0);
+		if(h>bs)
+			h=((h-bs)/hints->height_inc)*hints->height_inc+bs;
 	}
 	
 	*wp=w;
@@ -113,13 +116,15 @@ void get_sizehints(WScreen *scr, Window win, XSizeHints *hints)
 
 	if(!(hints->flags&PMinSize) || hints->min_width<CWIN_MIN_W)
 		hints->min_width=CWIN_MIN_W;
-	/*if(!(hints->flags&PBaseSize) || hints->base_width<hints->min_width)
-		hints->base_width=hints->min_width;*/
-
 	if(!(hints->flags&PMinSize) || hints->min_height<CWIN_MIN_H)
 		hints->min_height=CWIN_MIN_H;
-	/*if(!(hints->flags&PBaseSize) || hints->base_height<hints->min_height)
-		hints->base_height=hints->min_height;*/
+	hints->flags|=PMinSize;
+	
+	if(!(hints->flags&PBaseSize)){
+		hints->flags|=PBaseSize;
+		hints->base_width=hints->min_width;
+		hints->base_height=hints->min_height;
+	}
 
 	if(hints->flags&PMaxSize){
 		if(hints->max_width<hints->min_width)

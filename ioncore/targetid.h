@@ -1,12 +1,12 @@
 /*
- * wmcore/targetid.h
+ * ion/ioncore/targetid.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_TARGETID_H
-#define WMCORE_TARGETID_H
+#ifndef ION_IONCORE_TARGETID_H
+#define ION_IONCORE_TARGETID_H
 
 #include "common.h"
 #include "region.h"
@@ -17,4 +17,4 @@ extern int alloc_target_id(WRegion *reg);
 extern void free_target_id(int id);
 extern void	set_target_id(WRegion *reg, int id);
 
-#endif /* WMCORE_TARGETID_H */
+#endif /* ION_IONCORE_TARGETID_H */

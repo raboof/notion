@@ -1,5 +1,5 @@
 /*
- * wmcore/funtabs.c
+ * ion/ioncore/funtabs.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * 
@@ -19,15 +19,17 @@
 #include "names.h"
 #include "draw.h"
 #include "commandsq.h"
+#include "genframe.h"
+#include "genframe-pointer.h"
+#include "resize.h"
 
 
-WBindmap wmcore_screen_bindmap=BINDMAP_INIT;
-WBindmap wmcore_clientwin_bindmap=BINDMAP_INIT;
+WBindmap ioncore_screen_bindmap=BINDMAP_INIT;
 
 
-WFunclist wmcore_screen_funclist=INIT_FUNCLIST;
+WFunclist ioncore_screen_funclist=INIT_FUNCLIST;
 
-static WFunction wmcore_screen_funtab[]={
+static WFunction ioncore_screen_funtab[]={
 	FN_SCREEN(s,   "exec",					wm_exec),
 	FN_GLOBAL_VOID("goto_previous",			goto_previous),
 	FN_GLOBAL_VOID("restart",				wm_restart),
@@ -49,9 +51,9 @@ static WFunction wmcore_screen_funtab[]={
 };
 
 
-WFunclist wmcore_clientwin_funclist=INIT_FUNCLIST;
+WFunclist ioncore_clientwin_funclist=INIT_FUNCLIST;
 
-static WFunction wmcore_clientwin_funtab[]={
+static WFunction ioncore_clientwin_funtab[]={
 	FN_VOID(generic, WClientWin,	"clientwin_close",	close_clientwin),
 	FN_VOID(generic, WClientWin,	"clientwin_kill",	kill_clientwin),
 	FN_VOID(generic, WClientWin,	"clientwin_toggle_fullscreen",	clientwin_toggle_fullscreen),
@@ -63,10 +65,57 @@ static WFunction wmcore_clientwin_funtab[]={
 };
 
 
-void wmcore_init_funclists()
+WFunclist ioncore_genframe_funclist=INIT_FUNCLIST;
+
+static WFunction ioncore_genframe_funtab[]={
+	FN(l,	generic, WGenFrame,	"genframe_switch_nth",		genframe_switch_nth),
+	FN_VOID(generic, WGenFrame, "genframe_switch_next",		genframe_switch_next),
+	FN_VOID(generic, WGenFrame, "genframe_switch_prev",		genframe_switch_prev),
+	FN_VOID(generic, WGenFrame,	"genframe_attach_tagged",	genframe_attach_tagged),
+	FN_VOID(generic, WGenFrame,	"genframe_toggle_sub_tag",	genframe_toggle_sub_tag),
+
+	FN_VOID(generic, WGenFrame,	"genframe_maximize_vert", 	genframe_maximize_vert),
+	FN_VOID(generic, WGenFrame,	"genframe_maximize_horiz", 	genframe_maximize_horiz),
+	
+	FN(l,	generic, WRegion,	"genframe_set_width",		set_width),
+	FN(l,	generic, WRegion,	"genframe_set_height",		set_height),
+	FN(d,	generic, WRegion,	"genframe_set_widthq",		set_widthq),
+	FN(d,	generic, WRegion,	"genframe_set_heightq",		set_heightq),
+
+	/* mouse move/resize and tab drag */
+	FN_VOID(generic, WGenFrame,	"genframe_p_resize",		genframe_p_resize_setup),
+	FN_VOID(generic, WGenFrame,	"genframe_p_tabdrag", 		genframe_p_tabdrag_setup),
+	FN_VOID(generic, WGenFrame,	"genframe_p_switch_tab",	genframe_switch_tab),
+
+	FN_VOID(generic, WGenFrame,	"genframe_move_current_tab_left", genframe_move_current_tab_left),
+	FN_VOID(generic, WGenFrame,	"genframe_move_current_tab_right", genframe_move_current_tab_right),
+
+	END_FUNTAB
+};
+
+/*
+WFunclist ioncore_moveres_funclist=INIT_FUNCLIST;
+
+static WFunction ioncore_moveres_funtab[]={
+	FN_VOID(generic, WWindow,	"end_resize",		end_resize),
+	FN_VOID(generic, WWindow,	"cancel_resize",	cancel_resize),
+	FN_VOID(generic, WWindow,	"grow",				grow),
+	FN_VOID(generic, WWindow,	"shrink",			shrink),
+	
+	END_FUNTAB
+};
+*/
+
+void ioncore_init_funclists()
 {
-	assert(add_to_funclist(&wmcore_screen_funclist,
-						   wmcore_screen_funtab));
-	assert(add_to_funclist(&wmcore_clientwin_funclist,
-						   wmcore_clientwin_funtab));
+	assert(add_to_funclist(&ioncore_screen_funclist,
+						   ioncore_screen_funtab));
+	assert(add_to_funclist(&ioncore_clientwin_funclist,
+						   ioncore_clientwin_funtab));
+	assert(add_to_funclist(&ioncore_genframe_funclist,
+						   ioncore_genframe_funtab));
+	/*
+	assert(add_to_funclist(&ioncore_moveres_funclist,
+						   ioncore_moveres_funtab));
+	 */
 }

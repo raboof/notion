@@ -1,5 +1,5 @@
 /*
- * wmcore/colormap.c
+ * ion/ioncore/colormap.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * 

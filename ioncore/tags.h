@@ -1,12 +1,12 @@
 /*
- * wmcore/tag.h
+ * ion/ioncore/tag.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_TAG_H
-#define WMCORE_TAG_H
+#ifndef ION_IONCORE_TAG_H
+#define ION_IONCORE_TAG_H
 
 #include "region.h"
 
@@ -20,4 +20,4 @@ extern WRegion *tag_first();
 extern WRegion *tag_take_first();
 extern WRegion *tag_next(WRegion *reg);
 
-#endif /* WMCORE_WSREG_H */
+#endif /* ION_IONCORE_WSREG_H */

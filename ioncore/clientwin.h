@@ -1,12 +1,12 @@
 /*
- * wmcore/clientwin.h
+ * ion/ioncore/clientwin.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_CLIENTWIN_H
-#define WMCORE_CLIENTWIN_H
+#ifndef ION_IONCORE_CLIENTWIN_H
+#define ION_IONCORE_CLIENTWIN_H
 
 #include "common.h"
 #include "region.h"
@@ -92,4 +92,4 @@ extern void clientwin_get_set_name(WClientWin *cwin);
 extern WHooklist *add_clientwin_alt;
 
 
-#endif /* WMCORE_CLIENTWIN_H */
+#endif /* ION_IONCORE_CLIENTWIN_H */

@@ -1,5 +1,5 @@
 /*
- * wmcore/region.c
+ * ion/ioncore/region.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
@@ -31,7 +31,6 @@ static void default_notify_rootpos(WRegion *reg, int x, int y);
 static void default_request_managed_geom(WRegion *mgr, WRegion *reg,
 										 WRectangle geom, WRectangle *geomret,
 										 bool tryonly);
-static WRegion *default_selected_sub(WRegion *reg);
 void default_draw_config_updated(WRegion *reg);
 
 
@@ -39,7 +38,6 @@ static DynFunTab region_dynfuntab[]={
 	{region_notify_rootpos, default_notify_rootpos},
 	/*{(DynFun*)region_restack, (DynFun*)default_restack},*/
 	{region_request_managed_geom, region_request_managed_geom_allow},
-	{(DynFun*)region_selected_sub, (DynFun*)default_selected_sub},
 	{region_draw_config_updated, default_draw_config_updated},
 	END_DYNFUNTAB
 };
@@ -121,14 +119,6 @@ void unmap_region(WRegion *reg)
 }
 
 
-bool reparent_region(WRegion *reg, WRegion *par, WRectangle geom)
-{
-	bool ret=FALSE;
-	CALL_DYN_RET(ret, bool, reparent_region, reg, (reg, par, geom));
-	return ret;
-}
-
-
 void region_notify_rootpos(WRegion *reg, int x, int y)
 {
 	CALL_DYN(region_notify_rootpos, reg, (reg, x, y));
@@ -143,10 +133,10 @@ Window region_restack(WRegion *reg, Window other, int mode)
 }
 
 
-Window region_lowest_win(WRegion *reg)
+Window region_x_window(const WRegion *reg)
 {
 	Window ret=None;
-	CALL_DYN_RET(ret, Window, region_lowest_win, reg, (reg));
+	CALL_DYN_RET(ret, Window, region_x_window, reg, (reg));
 	return ret;
 }
 
@@ -166,14 +156,6 @@ void region_inactivated(WRegion *reg)
 void focus_region(WRegion *reg, bool warp)
 {
 	CALL_DYN(focus_region, reg, (reg, warp));
-}
-
-
-WRegion *region_selected_sub(WRegion *reg)
-{
-	WRegion *ret=NULL;
-	CALL_DYN_RET(ret, WRegion*, region_selected_sub, reg, (reg));
-	return ret;
 }
 
 
@@ -219,6 +201,7 @@ void region_remove_managed(WRegion *mgr, WRegion *reg)
 {
 	CALL_DYN(region_remove_managed, mgr, (mgr, reg));
 }
+
 
 /*}}}*/
 
@@ -410,7 +393,6 @@ void region_detach_manager(WRegion *reg)
 		return;
 	
 	region_remove_managed(mgr, reg);
-	
 	assert(REGION_MANAGER(reg)==NULL);
 }
 
@@ -439,6 +421,8 @@ void region_got_focus(WRegion *reg)
 		r=FIND_PARENT1(reg, WRegion);
 		if(r!=NULL)
 			r->active_sub=reg;
+		if(WTHING_IS(r, WScreen))
+			((WScreen*)r)->current_viewport=viewport_of(reg);
 		
 		r=REGION_MANAGER(reg);
 		if(r!=NULL)
@@ -647,8 +631,13 @@ void region_set_parent(WRegion *reg, WRegion *par)
 
 bool region_manages_active_reg(WRegion *reg)
 {
-	WRegion *p=FIND_PARENT1(reg, WRegion);
+	WRegion *p;
 	WRegion *reg2;
+	
+	if(REGION_IS_ACTIVE(reg))
+		return TRUE;
+	
+	p=FIND_PARENT1(reg, WRegion);
 	
 	if(p==NULL || p->active_sub==NULL)
 		return FALSE;

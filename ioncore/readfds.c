@@ -1,5 +1,5 @@
 /*
- * wmcore/readfds.c
+ * ion/ioncore/readfds.c
  */
 
 #include "readfds.h"

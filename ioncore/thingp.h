@@ -1,12 +1,12 @@
 /*
- * wmcore/thingp.h
+ * ion/ioncore/thingp.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_THINGP_H
-#define WMCORE_THINGP_H
+#ifndef ION_IONCORE_THINGP_H
+#define ION_IONCORE_THINGP_H
 
 #include "common.h"
 #include "thing.h"
@@ -32,4 +32,4 @@ typedef void WThingRemoveChildFn(WThing*, WThing*);
 	((WThing*)(P))->t_next=NULL;     \
 	((WThing*)(P))->t_prev=NULL;
 
-#endif /* WMCORE_THINGP_H */
+#endif /* ION_IONCORE_THINGP_H */

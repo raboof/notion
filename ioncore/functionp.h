@@ -1,12 +1,12 @@
 /*
- * wmcore/functionp.h
+ * ion/ioncore/functionp.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_FUNCTIONP_H
-#define WMCORE_FUNCTIONP_H
+#ifndef ION_IONCORE_FUNCTIONP_H
+#define ION_IONCORE_FUNCTIONP_H
 
 #include "function.h"
 
@@ -66,4 +66,4 @@ extern void callhnd_drag_void(WThing *thing, WFunction *func,
 extern void callhnd_cclient_void(WThing *thing, WFunction *func,
 								 int n, const Token *args);
 
-#endif /* WMCORE_FUNCTIONP_H */
+#endif /* ION_IONCORE_FUNCTIONP_H */

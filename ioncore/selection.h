@@ -1,12 +1,12 @@
 /*
- * wmcore/selection.h
+ * ion/ioncore/selection.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_SELECTION_H
-#define WMCORE_SELECTION_H
+#ifndef ION_IONCORE_SELECTION_H
+#define ION_IONCORE_SELECTION_H
 
 #include "common.h"
 
@@ -16,4 +16,4 @@ void clear_selection();
 void set_selection(const char *p, int n);
 void request_selection(Window win);
 
-#endif /* WMCORE_SELECTION_H */
+#endif /* ION_IONCORE_SELECTION_H */

@@ -1,12 +1,12 @@
 /*
- * wmcore/event.h
+ * ion/ioncore/event.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_EVENT_H
-#define WMCORE_EVENT_H
+#ifndef ION_IONCORE_EVENT_H
+#define ION_IONCORE_EVENT_H
 
 #include "common.h"
 #include "region.h"
@@ -39,4 +39,4 @@ extern void do_grab_kb_ptr(Window win, WRegion *reg, long eventmask);
 extern void grab_kb_ptr(WRegion *reg);
 extern void ungrab_kb_ptr();
 
-#endif /* WMCORE_EVENT_H */
+#endif /* ION_IONCORE_EVENT_H */

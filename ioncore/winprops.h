@@ -1,12 +1,12 @@
 /*
- * wmcore/winprops.h
+ * ion/ioncore/winprops.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_WINPROPS_H
-#define WMCORE_WINPROPS_H
+#ifndef ION_IONCORE_WINPROPS_H
+#define ION_IONCORE_WINPROPS_H
 
 enum TransientMode{
 	TRANSIENT_MODE_NORMAL,
@@ -38,4 +38,4 @@ extern WWinProp *find_winprop_win(Window win);
 extern void free_winprop(WWinProp *winprop);
 extern void free_winprops();
 
-#endif /* WMCORE_WINPROPS_H */
+#endif /* ION_IONCORE_WINPROPS_H */

@@ -1,0 +1,125 @@
+/*
+ * ion/ioncore/conf.c
+ *
+ * Copyright (c) Tuomo Valkonen 1999-2003. 
+ * See the included file LICENSE for details.
+ */
+
+#include <stdlib.h>
+
+#include <libtu/parser.h>
+#include <libtu/map.h>
+
+#include "common.h"
+#include "global.h"
+#include "readconfig.h"
+#include "binding.h"
+#include "conf-bindings.h"
+#include "conf-winprops.h"
+#include "modules.h"
+#include "funtabs.h"
+#include "font.h"
+
+
+/*{{{ Misc */
+
+
+static bool opt_opaque_resize(Tokenizer *tokz, int n, Token *toks)
+{
+	wglobal.opaque_resize=TOK_BOOL_VAL(&(toks[1]));
+	
+	return TRUE;
+}
+
+
+static bool opt_dblclick_delay(Tokenizer *tokz, int n, Token *toks)
+{
+	int dd=TOK_LONG_VAL(&(toks[1]));
+
+	wglobal.dblclick_delay=(dd<0 ? 0 : dd);
+	
+	return TRUE;
+}
+
+
+static bool opt_resize_delay(Tokenizer *tokz, int n, Token *toks)
+{
+	int rd=TOK_LONG_VAL(&(toks[1]));
+
+	wglobal.resize_delay=(rd<0 ? 0 : rd);
+	
+	return TRUE;
+}
+
+
+static bool opt_warp_enabled(Tokenizer *tokz, int n, Token *toks)
+{
+	wglobal.warp_enabled=TOK_BOOL_VAL(&(toks[1]));
+	
+	return TRUE;
+}
+
+
+static bool opt_shorten_rule(Tokenizer *tokz, int n, Token *toks)
+{
+	return add_shortenrule(TOK_STRING_VAL(&(toks[1])),
+						   TOK_STRING_VAL(&(toks[2])));
+}
+
+
+/*}}}*/
+
+
+/*{{{ Bindings*/
+
+
+static bool opt_global_bindings(Tokenizer *tokz, int n, Token *toks)
+{
+	return ioncore_begin_bindings(&ioncore_screen_bindmap, NULL);
+}
+
+
+/*}}}*/
+
+
+/*{{{ Modules */
+
+
+static bool opt_module(Tokenizer *tokz, int n, Token *toks)
+{
+	return load_module(TOK_STRING_VAL(&(toks[1])));
+}
+
+
+/*}}}*/
+
+
+static ConfOpt opts[]={
+	/* misc */
+	{"dblclick_delay", "l", opt_dblclick_delay, NULL},
+	{"resize_delay", "l", opt_resize_delay, NULL},
+	{"opaque_resize", "b", opt_opaque_resize, NULL},
+	{"warp_enabled", "b", opt_warp_enabled, NULL},
+	{"shorten_rule", "ss", opt_shorten_rule, NULL},
+	
+	/* window props */
+	{"winprop" , "sss", ioncore_begin_winprop, ioncore_winprop_opts},
+	
+	/* bindings */
+	{"global_bindings", NULL, opt_global_bindings, ioncore_binding_opts},
+	
+	/* modules */
+	{"module", "s", opt_module, NULL},
+	
+	END_CONFOPTS
+};
+
+
+
+bool ioncore_read_config(const char *cfgfile)
+{
+	if(cfgfile!=NULL)
+		return read_config(cfgfile, opts);
+	else
+		return read_config_for("ioncore", opts);
+}

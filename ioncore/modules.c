@@ -1,5 +1,5 @@
 /*
- * wmcore/modules.c
+ * ion/ioncore/modules.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
@@ -14,6 +14,7 @@
 #include "common.h"
 #include "modules.h"
 #include "readconfig.h"
+#include "../version.h"
 
 
 INTRSTRUCT(Module)
@@ -21,18 +22,39 @@ INTRSTRUCT(Module)
 DECLSTRUCT(Module){
 	void *handle;
 	char *name;
-	Module *next;
+	Module *next, *prev;
 };
 
-static Module *modules=NULL, *last_module=NULL;
+static Module *modules=NULL;
 
 
 /*{{{ Loading and initialization code */
 
 
+static bool check_version(void *handle, char *name)
+{
+	char *p=scat(name, "_module_ion_version");
+	char *versionstr;
+
+	if(p==NULL){
+		warn_err();
+		return FALSE;
+	}
+	
+	versionstr=(char*)dlsym(handle, p);
+	
+	free(p);
+	
+	if(versionstr==NULL)
+		return FALSE;
+	
+	return (strcmp(versionstr, ION_VERSION)==0);
+}
+
+
 static bool call_init(void *handle, char *name)
 {
-	char *p=scat(name, "_init");
+	char *p=scat(name, "_module_init");
 	bool (*initfn)(void);
 
 	if(p==NULL){
@@ -59,7 +81,7 @@ static bool do_load_module(const char *fname)
 	char *n;
 	size_t l;
 	
-	handle=dlopen(fname, RTLD_LAZY);
+	handle=dlopen(fname, RTLD_NOW|RTLD_GLOBAL);
 	
 	if(handle==NULL){
 		warn_obj(fname, "%s", dlerror());
@@ -107,16 +129,16 @@ static bool do_load_module(const char *fname)
 	m->next=NULL;
 	
 	/* initialize */
+	if(!check_version(handle, n)){
+		warn_obj(fname, "Module version information not found or version "
+				 "mismatch. Refusing to use.");
+		goto err3;
+	}
 	
 	if(!call_init(handle, n))
 		goto err3;
 
-	if(last_module==NULL){
-		modules=last_module=m;
-	}else{
-		last_module->next=m;
-		last_module=m;
-	}
+	LINK_ITEM(modules, m, next, prev);
 	
 	return TRUE;
 	
@@ -138,6 +160,17 @@ bool load_module(const char *name)
 	if(strchr(name, '/')!=NULL)
 		return do_load_module(name);
 
+	if(strchr(name, '.')==NULL){
+		name2=scat(name, ".so");
+		if(name2==NULL){
+			warn_err();
+			return FALSE;
+		}
+		ret=load_module(name2);
+		free(name2);
+		return ret;
+	}
+
 	name2=find_module(name);
 	
 	if(name2!=NULL){
@@ -157,7 +190,7 @@ bool load_module(const char *name)
 
 static void call_deinit(void *handle, char *name)
 {
-	char *p=scat(name, "_deinit");
+	char *p=scat(name, "_module_deinit");
 	void (*deinitfn)(void);
 
 	if(p==NULL){
@@ -187,14 +220,13 @@ static void do_unload_module(Module *m)
 
 void unload_modules()
 {
-	Module *m, *next;
+	Module *m;
 	
-	for(m=modules; m!=NULL; m=next){
-		next=m->next;
+	while(modules!=NULL){
+		m=modules->prev;
+		UNLINK_ITEM(modules, m, next, prev);
 		do_unload_module(m);
 	}
-	modules=NULL;
-	last_module=NULL;
 }
 
 

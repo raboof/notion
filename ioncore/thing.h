@@ -1,12 +1,12 @@
 /*
- * wmcore/thing.h
+ * ion/ioncore/thing.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_THING_H
-#define WMCORE_THING_H
+#ifndef ION_IONCORE_THING_H
+#define ION_IONCORE_THING_H
 
 #include "common.h"
 
@@ -83,4 +83,4 @@ DECLOBJ(WThing){
 	WThing *t_next, *t_prev;
 };
 
-#endif /* WMCORE_THING_H */
+#endif /* ION_IONCORE_THING_H */

@@ -1,5 +1,5 @@
 /*
- * wmcore/function.c
+ * ion/ioncore/function.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
@@ -87,15 +87,6 @@ static int complete_funtab(const char *nam, char ***cp_ret, char **beg,
 			continue;
 		
 		add_to_complist_copy(cp_ret, &n, name);
-
-/*	{
-		int i;
-		fprintf(stderr, "-->%d [%s]\n", n, name);
-		for(i=1; i<n; i++){
-			fprintf(stderr, "%s\n", *cp_ret+i);
-		}
-		fprintf(stderr, "-------------\n");
-	}*/
 	}
 	return n;
 }
@@ -276,7 +267,7 @@ void remove_from_funclist(WFunclist *funclist, WFunction *funtab)
 void clear_funclist(WFunclist *funclist)
 {
 	while(funclist->funtabs!=NULL)
-		remove_from_funclist(funclist, (WFunction*)funclist->funtabs);
+		remove_from_funclist(funclist, (WFunction*)funclist->funtabs->symbol);
 }
 
 

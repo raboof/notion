@@ -1,12 +1,12 @@
 /*
- * wmcore/objp.h
+ * ion/ioncore/objp.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_WOBJP_H
-#define WMCORE_WOBJP_H
+#ifndef ION_IONCORE_WOBJP_H
+#define ION_IONCORE_WOBJP_H
 
 #include "obj.h"
 
@@ -72,4 +72,4 @@ extern bool has_dynfun(const WObj *obj, DynFun *func);
 
 #define HAS_DYN(OBJ, FUNC) has_dynfun((WObj*)OBJ, (DynFun*)FUNC)
 
-#endif /* WMCORE_WOBJP_H */
+#endif /* ION_IONCORE_WOBJP_H */

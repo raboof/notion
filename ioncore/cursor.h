@@ -1,12 +1,12 @@
 /*
- * wmcore/cursor.h
+ * ion/ioncore/cursor.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_CURSOR_H
-#define WMCORE_CURSOR_H
+#ifndef ION_IONCORE_CURSOR_H
+#define ION_IONCORE_CURSOR_H
 
 #include <X11/Xlib.h>
 #include <X11/cursorfont.h>
@@ -23,4 +23,4 @@ extern void change_grab_cursor(int cursor);
 extern void set_cursor(Window win, int cursor);
 extern Cursor x_cursor(int cursor);
 
-#endif /* WMCORE_CURSOR_H */
+#endif /* ION_IONCORE_CURSOR_H */

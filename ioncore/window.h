@@ -1,12 +1,12 @@
 /*
- * wmcore/window.h
+ * ion/ioncore/window.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_WINDOW_H
-#define WMCORE_WINDOW_H
+#ifndef ION_IONCORE_WINDOW_H
+#define ION_IONCORE_WINDOW_H
 
 #include "common.h"
 
@@ -49,10 +49,12 @@ extern void map_window(WWindow *wwin);
 extern void unmap_window(WWindow *wwin);
 extern void focus_window(WWindow *wwin, bool warp);
 extern void fit_window(WWindow *wwin, WRectangle geom);
-extern bool reparent_window(WWindow *wwin, WRegion *parent, WRectangle geom);
+extern bool reparent_window(WWindow *wwin, WWindow *parent, WRectangle geom);
 
 extern Window window_restack(WWindow *wwin, Window other, int mode);
 extern Window window_lowest_win(WWindow *wwin);
 extern void do_restack_window(Window win, Window other, int stack_mode);
 
-#endif /* WMCORE_WINDOW_H */
+DYNFUN bool reparent_region(WRegion *reg, WWindow *target, WRectangle geom);
+
+#endif /* ION_IONCORE_WINDOW_H */

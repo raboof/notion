@@ -1,12 +1,12 @@
 /*
- * wmcore/obj.h
+ * ion/ioncore/obj.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_WOBJ_H
-#define WMCORE_WOBJ_H
+#ifndef ION_IONCORE_WOBJ_H
+#define ION_IONCORE_WOBJ_H
 
 #define OBJDESCR(TYPE) TYPE##_objdescr
 
@@ -33,4 +33,4 @@ DECLOBJ(WObj){
 
 #define DYNFUN
 
-#endif /* WMCORE_WOBJ_H */
+#endif /* ION_IONCORE_WOBJ_H */

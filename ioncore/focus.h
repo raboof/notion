@@ -1,12 +1,12 @@
 /*
- * wmcore/focus.h
+ * ion/ioncore/focus.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_FOCUS_H
-#define WMCORE_FOCUS_H
+#ifndef ION_IONCORE_FOCUS_H
+#define ION_IONCORE_FOCUS_H
 
 #include "common.h"
 #include "thing.h"
@@ -25,4 +25,4 @@ extern void protect_previous();
 extern void unprotect_previous();
 extern void goto_previous();
 
-#endif /* WMCORE_FOCUS_H */
+#endif /* ION_IONCORE_FOCUS_H */

@@ -1,5 +1,5 @@
 /*
- * wmcore/clientwin.c
+ * ion/ioncore/clientwin.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * 
@@ -36,14 +36,14 @@
 
 static void deinit_clientwin(WClientWin *cwin);
 static void fit_clientwin(WClientWin *cwin, WRectangle geom);
-static bool reparent_clientwin(WClientWin *cwin, WRegion *par, WRectangle geom);
+static bool reparent_clientwin(WClientWin *cwin, WWindow *par, WRectangle geom);
 static void map_clientwin(WClientWin *cwin);
 static void unmap_clientwin(WClientWin *cwin);
 static void focus_clientwin(WClientWin *cwin, bool warp);
 static bool clientwin_display_managed(WClientWin *cwin, WRegion *reg);
 static void clientwin_notify_rootpos(WClientWin *cwin, int x, int y);
 static Window clientwin_restack(WClientWin *cwin, Window other, int mode);
-static Window clientwin_lowest_win(WClientWin *cwin);
+static Window clientwin_x_window(WClientWin *cwin);
 static void clientwin_activated(WClientWin *cwin);
 static void clientwin_resize_hints(WClientWin *cwin, XSizeHints *hints_ret,
 								   uint *relw_ret, uint *relh_ret);
@@ -63,7 +63,7 @@ static DynFunTab clientwin_dynfuntab[]={
 	{(DynFun*)region_display_managed, (DynFun*)clientwin_display_managed},
 	{region_notify_rootpos, clientwin_notify_rootpos},
 	{(DynFun*)region_restack, (DynFun*)clientwin_restack},
-	{(DynFun*)region_lowest_win, (DynFun*)clientwin_lowest_win},
+	{(DynFun*)region_x_window, (DynFun*)clientwin_x_window},
 	{region_activated, clientwin_activated},
 	{region_resize_hints, clientwin_resize_hints},
 	
@@ -78,7 +78,7 @@ static DynFunTab clientwin_dynfuntab[]={
 
 
 IMPLOBJ(WClientWin, WRegion, deinit_clientwin, clientwin_dynfuntab,
-		&wmcore_clientwin_funclist)
+		&ioncore_clientwin_funclist)
 
 
 static void set_clientwin_state(WClientWin *cwin, int state);
@@ -238,7 +238,7 @@ static bool init_clientwin(WClientWin *cwin, WWindow *parent,
 	
 	LINK_ITEM(wglobal.cwin_list, cwin, g_cwin_next, g_cwin_prev);
 	
-	/*region_add_bindmap((WRegion*)cwin, &wmcore_clientwin_bindmap, TRUE);*/
+	/*region_add_bindmap((WRegion*)cwin, &ioncore_clientwin_bindmap, TRUE);*/
 	
 	return TRUE;
 }
@@ -402,15 +402,12 @@ static void clientwin_add_managed_doit(WClientWin *cwin, WRegion *transient,
 	
 	region_set_manager(transient, (WRegion*)cwin, &(cwin->transient_list));
 	
-#if 0
-	/* TODO: restack */
 	t=TOPMOST_TRANSIENT(cwin);
 	if(t!=NULL)
-		win=topmost_win(transient);
+		win=region_x_window(transient);
 	else
 		win=cwin->win;
 	region_restack(transient, win, Above);
-#endif
 
 	if(REGION_IS_MAPPED((WRegion*)cwin))
 	   map_region(transient);
@@ -781,7 +778,7 @@ static void do_fit_clientwin(WClientWin *cwin, WRectangle geom,
 		if(np==NULL){
 		   fit_region(transient, geom2);
 		}else{
-			if(!reparent_region(transient, (WRegion*)np, geom2)){
+			if(!reparent_region(transient, np, geom2)){
 				warn("Problem: can't reparent a %s managed by a WClientWin"
 					 "being reparented. Detaching from this object.",
 					 WOBJ_TYPESTR(transient));
@@ -798,17 +795,17 @@ static void fit_clientwin(WClientWin *cwin, WRectangle geom)
 }
 
 
-static bool reparent_clientwin(WClientWin *cwin, WRegion *par, WRectangle geom)
+static bool reparent_clientwin(WClientWin *cwin, WWindow *par, WRectangle geom)
 {
 	int rootx, rooty;
 	
-	if(!WTHING_IS(par, WWindow) || !same_screen((WRegion*)cwin, par))
+	if(!same_screen((WRegion*)cwin, (WRegion*)par))
 		return FALSE;
 
 	region_detach_parent((WRegion*)cwin);
-	region_set_parent((WRegion*)cwin, par);
+	region_set_parent((WRegion*)cwin, (WRegion*)par);
 
-	do_fit_clientwin(cwin, geom, FALSE, (WWindow*)par);
+	do_fit_clientwin(cwin, geom, FALSE, par);
 	
 	sendconfig_clientwin(cwin);
 	
@@ -903,7 +900,7 @@ static Window clientwin_restack(WClientWin *cwin, Window other, int mode)
 }
 
 
-static Window clientwin_lowest_win(WClientWin *cwin)
+static Window clientwin_x_window(WClientWin *cwin)
 {
 	return cwin->win;
 }

@@ -1,5 +1,5 @@
 /*
- * wmcore/screen.c
+ * ion/ioncore/screen.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
@@ -40,9 +40,11 @@ static void fit_screen(WScreen *scr, WRectangle geom);
 static void map_screen(WScreen *scr);
 static void unmap_screen(WScreen *scr);
 static void focus_screen(WScreen *scr, bool warp);
-static bool reparent_screen(WScreen *scr, WRegion *par, WRectangle geom);
+static bool reparent_screen(WScreen *scr, WWindow *par, WRectangle geom);
 static void screen_sub_params(const WScreen *scr, WRectangle **geom);
 static void screen_activated(WScreen *scr);
+static void screen_remove_managed(WScreen *scr, WRegion *reg);
+
 
 static DynFunTab screen_dynfuntab[]={
 	{fit_region, fit_screen},
@@ -52,13 +54,13 @@ static DynFunTab screen_dynfuntab[]={
 	{(DynFun*)reparent_region, (DynFun*)reparent_screen},
 	/*{region_request_managed_geom, region_request_managed_geom_unallow},*/
 	{region_activated, screen_activated},
-	
+	{region_remove_managed, screen_remove_managed},
 	END_DYNFUNTAB
 };
 
 
 IMPLOBJ(WScreen, WWindow, deinit_screen, screen_dynfuntab,
-		&wmcore_screen_funclist)
+		&ioncore_screen_funclist)
 
 
 /*{{{ Error handling */
@@ -246,6 +248,7 @@ static WScreen *preinit_screen(int xscr)
 	scr->xscr=xscr;
 	scr->default_cmap=DefaultColormap(dpy, xscr);
 	scr->default_viewport=NULL;
+	scr->current_viewport=NULL;
 	
 	scr->w_unit=7;
 	scr->h_unit=13;
@@ -260,7 +263,7 @@ static WScreen *preinit_screen(int xscr)
 	
 	scan_initial_windows(scr);
 
-	region_add_bindmap((WRegion*)scr, &wmcore_screen_bindmap, TRUE);
+	region_add_bindmap((WRegion*)scr, &ioncore_screen_bindmap, TRUE);
 	
 	return scr;
 }
@@ -284,7 +287,7 @@ WViewport *add_viewport(WScreen *scr, int id, WRectangle geom)
 	map_region((WRegion*)vp);
 	
 	if(scr->default_viewport==NULL)
-		scr->default_viewport=(WRegion*)vp;
+		scr->default_viewport=vp;
 	
 	return vp;
 }
@@ -304,7 +307,7 @@ WScreen *manage_screen(int xscr)
 		xi=XineramaQueryScreens(wglobal.dpy, &nxi);
 	
 		if(xi!=NULL && wglobal.screens!=NULL){
-			warn("Unable to support both Xinerama and normal multihead.\n");
+			warn("Unable to support both Xinerama and normal multihead.");
 			XFree(xi);
 			return NULL;
 		}
@@ -336,7 +339,7 @@ WScreen *manage_screen(int xscr)
 			geom.h=xi[i].height;
 			/*pgeom("Detected Xinerama screen", geom);*/
 			if(!add_viewport(scr, i, geom))
-				warn("Unable to add viewport for Xinerama screen %d\n", i);
+				warn("Unable to add viewport for Xinerama screen %d", i);
 		}
 		XFree(xi);
 	}else
@@ -344,7 +347,7 @@ WScreen *manage_screen(int xscr)
 	add_viewport(scr, xscr, REGION_GEOM(scr));
 	
 	if(scr->default_viewport==NULL){
-		warn("Unable to add a viewport to X screen %d\n", xscr);
+		warn("Unable to add a viewport to X screen %d.", xscr);
 		destroy_thing((WThing*)scr);
 		return NULL;
 	}
@@ -364,8 +367,16 @@ WScreen *manage_screen(int xscr)
 
 void deinit_screen(WScreen *scr)
 {
+	WViewport *vp;
+	
 	if(wglobal.active_screen==scr)
 		wglobal.active_screen=NULL;
+	
+	FOR_ALL_TYPED(scr, vp, WViewport){
+		region_unset_manager((WRegion*)vp, (WRegion*)scr, NULL);
+	}
+		
+	deinit_region((WRegion*)scr);
 }
 
 
@@ -413,7 +424,7 @@ static void focus_screen(WScreen *scr, bool warp)
 }
 
 
-static bool reparent_screen(WScreen *scr, WRegion *par, WRectangle geom)
+static bool reparent_screen(WScreen *scr, WWindow *par, WRectangle geom)
 {
 	warn("Attempt to reparent a screen -- impossible");
 	return FALSE;
@@ -423,6 +434,15 @@ static bool reparent_screen(WScreen *scr, WRegion *par, WRectangle geom)
 static void screen_activated(WScreen *scr)
 {
 	wglobal.active_screen=scr;
+}
+
+
+static void screen_remove_managed(WScreen *scr, WRegion *reg)
+{
+	if((WRegion*)scr->current_viewport==reg)
+		scr->current_viewport=NULL;
+	
+	region_unset_manager(reg, (WRegion*)scr, NULL);
 }
 
 
@@ -469,7 +489,7 @@ bool same_screen(const WRegion *reg1, const WRegion *reg2)
 /*{{{ Workspace and client window management setup */
 
 
-void setup_screens()
+bool setup_screens()
 {
 	WScreen *scr;
 	WViewport *vp;
@@ -477,15 +497,13 @@ void setup_screens()
 	
 	FOR_ALL_SCREENS(scr){
 		FOR_ALL_TYPED(scr, vp, WViewport){
-			if(!init_workspaces_on_vp(vp))
-				warn("Unable to create workspace on viewport %d\n", vp->id);
-			else
+			if(init_workspaces_on_vp(vp))
 				n++;
 		}
 		manage_initial_windows(scr);
 	}
 	
-	assert(n!=0);
+	return (n!=0);
 }
 
 

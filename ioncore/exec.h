@@ -1,12 +1,12 @@
 /*
- * wmcore/exec.h
+ * ion/ioncore/exec.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_EXEC_H
-#define WMCORE_EXEC_H
+#ifndef ION_IONCORE_EXEC_H
+#define ION_IONCORE_EXEC_H
 
 #include "common.h"
 #include "screen.h"
@@ -21,4 +21,4 @@ extern void wm_exit();
 extern void wm_exitret();
 extern void setup_environ(int scr);
 
-#endif /* WMCORE_EXEC_H */
+#endif /* ION_IONCORE_EXEC_H */

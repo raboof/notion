@@ -1,0 +1,417 @@
+/*
+ * ion/ioncore/genframe-pointer.c
+ *
+ * Copyright (c) Tuomo Valkonen 1999-2003. 
+ * See the included file LICENSE for details.
+ */
+
+#include "common.h"
+#include "global.h"
+#include "pointer.h"
+#include "grdata.h"
+#include "cursor.h"
+#include "focus.h"
+#include "drawp.h"
+#include "attach.h"
+#include "resize.h"
+#include "funtabs.h"
+#include "functionp.h"
+#include "grab.h"
+#include "genframe.h"
+#include "genframe-pointer.h"
+#include "genframep.h"
+
+
+/*?*/
+#include "resize.h"
+
+
+static int p_tab_x, p_tab_y, p_tabnum=-1;
+static bool p_tabdrag_active=FALSE;
+static bool p_tabdrag_selected=FALSE;
+static int p_dx1mul=0, p_dx2mul=0, p_dy1mul=0, p_dy2mul=0;
+
+
+/*{{{ Frame press */
+
+
+static bool inrect(WRectangle g, int x, int y)
+{
+	return (x>=g.x && x<g.x+g.w && y>=g.y && y<g.y+g.h);
+}
+
+
+#define RESB 8
+
+
+int genframe_press(WGenFrame *genframe, XButtonEvent *ev, WThing **thing_ret)
+{
+	WScreen *scr=SCREEN_OF(genframe);
+	WRegion *sub;
+	WRectangle g;
+	
+	p_dx1mul=0;
+	p_dx2mul=0;
+	p_dy1mul=0;
+	p_dy2mul=0;
+	p_tabnum=-1;
+	
+	/* Check tab */
+	
+	genframe_bar_geom(genframe, &g);
+		
+	if(inrect(g, ev->x, ev->y)){
+		p_dy1mul=1;
+
+		if(ev->x<g.x+RESB)
+			p_dx1mul=1;
+		else if(ev->x>g.x+g.w-RESB)
+			p_dx2mul=1;
+		
+		p_tabnum=genframe_tab_at_x(genframe, ev->x);
+
+		region_rootpos((WRegion*)genframe, &p_tab_x, &p_tab_y);
+		p_tab_x+=genframe_nth_tab_x(genframe, p_tabnum);
+		p_tab_y+=g.y;
+		
+		sub=genframe_nth_managed(genframe, p_tabnum);
+
+		if(sub==NULL)
+			return WGENFRAME_AREA_EMPTY_TAB;
+
+		genframe->tab_pressed_sub=sub;
+
+		if(thing_ret!=NULL)
+			*thing_ret=(WThing*)sub;
+		
+		return WGENFRAME_AREA_TAB;
+	}
+	
+	/* Check borders */
+
+	genframe_border_inner_geom(genframe, &g);
+	
+	if(ev->x<g.x+RESB)
+		p_dx1mul=1;
+	else if(ev->x>g.x+g.w-RESB)
+		p_dx2mul=1;
+	if(ev->y<g.y+RESB)
+		p_dy1mul=1;
+	else if(ev->y>g.y+g.h-RESB)
+		p_dy2mul=1;
+	
+	
+	if(p_dx1mul+p_dx2mul+p_dy1mul+p_dy2mul!=0)
+		return WGENFRAME_AREA_BORDER;
+	
+	/* Neither of those */
+	
+	if(ev->x<REGION_GEOM(genframe).w/2)
+		p_dx1mul=1;
+	else
+		p_dx2mul=1;
+	if(ev->y<REGION_GEOM(genframe).h/2)
+		p_dy1mul=1;
+	else
+		p_dy2mul=1;
+
+	return 0;
+}
+
+
+void genframe_release(WGenFrame *genframe)
+{
+	genframe->tab_pressed_sub=NULL;
+}
+
+
+/*}}}*/
+
+
+/*{{{ Tab drag */
+
+
+static WFunction tabdrag_safe_funtab[]={
+	FN_GLOBAL(l,   "switch_ws_nth",			switch_ws_nth),
+	FN_GLOBAL_VOID("switch_ws_next",		switch_ws_next),
+	FN_GLOBAL_VOID("switch_ws_prev",		switch_ws_prev),
+
+	END_FUNTAB
+};
+
+
+static WFunclist tabdrag_safe_funclist=INIT_FUNCLIST;
+
+
+#define BUTTONS_MASK \
+	(Button1Mask|Button2Mask|Button3Mask|Button4Mask|Button5Mask)
+
+
+static bool tabdrag_kbd_handler(WRegion *thing, XEvent *xev)
+{
+	XKeyEvent *ev=&xev->xkey;
+	WScreen *scr;
+	WBinding *binding=NULL;
+	WBindmap **bindptr;
+	
+	if(ev->type==KeyRelease)
+		return FALSE;
+	
+	assert(thing && WTHING_IS(thing, WWindow));
+
+	binding=lookup_binding(&ioncore_screen_bindmap, ACT_KEYPRESS,
+						   ev->state&~BUTTONS_MASK, ev->keycode);
+	
+	if(binding!=NULL){
+		call_binding_restricted(binding, (WThing*)viewport_of(thing),
+								&tabdrag_safe_funclist);
+	}
+	
+	return FALSE;
+}
+
+
+static void draw_tabdrag(const WRegion *reg)
+{
+	DrawInfo _dinfo, *dinfo=&_dinfo;
+	WGRData *grdata=GRDATA_OF(reg);
+	const char *label=NULL;
+	
+	dinfo->win=grdata->drag_win;
+	dinfo->draw=grdata->drag_draw;
+	dinfo->grdata=grdata;
+	dinfo->gc=grdata->tab_gc;
+	dinfo->geom.x=0;
+	dinfo->geom.y=0;
+	dinfo->geom.w=grdata->drag_geom.w;
+	dinfo->geom.h=grdata->drag_geom.h;
+	dinfo->border=&(grdata->tab_border);
+	dinfo->font=grdata->tab_font;
+
+	if(p_tabdrag_active){
+		if(p_tabdrag_selected)
+			dinfo->colors=&(grdata->act_tab_sel_colors);
+		else
+			dinfo->colors=&(grdata->act_tab_colors);
+	}else{
+		if(p_tabdrag_selected)
+			dinfo->colors=&(grdata->tab_sel_colors);
+		else
+			dinfo->colors=&(grdata->tab_colors);
+	}
+	
+	
+	if(((WGenFrame*)reg)->tab_pressed_sub!=NULL)
+		label=REGION_LABEL(((WGenFrame*)reg)->tab_pressed_sub);
+	if(label==NULL)
+		label="";
+	
+	draw_textbox(dinfo, label, ALIGN_CENTER, TRUE);
+}
+
+
+static void p_tabdrag_motion(WGenFrame *genframe, XMotionEvent *ev,
+							 int dx, int dy)
+{
+	WGRData *grdata=GRDATA_OF(genframe);
+
+	p_tab_x+=dx;
+	p_tab_y+=dy;
+	
+	XMoveWindow(wglobal.dpy, grdata->drag_win, p_tab_x, p_tab_y);
+}	
+
+
+static void p_tabdrag_begin(WGenFrame *genframe, XMotionEvent *ev,
+							int dx, int dy)
+{
+	WGRData *grdata=GRDATA_OF(genframe);
+
+	change_grab_cursor(CURSOR_DRAG);
+		
+	grdata->drag_geom.w=genframe_nth_tab_w(genframe, p_tabnum);
+	grdata->drag_geom.h=grdata->bar_h;
+	XResizeWindow(wglobal.dpy, grdata->drag_win,
+				  grdata->drag_geom.w, grdata->drag_geom.h);
+	/*XSelectInput(wglobal.dpy, grdata->drag_win, ExposureMask);*/
+	
+	wglobal.draw_dragwin=(WDrawDragwinFn*)draw_tabdrag;
+	wglobal.draw_dragwin_arg=(WRegion*)genframe;
+	
+	p_tabdrag_active=REGION_IS_ACTIVE(genframe);
+	p_tabdrag_selected=(genframe->current_sub==genframe->tab_pressed_sub);
+	
+	genframe->flags|=WGENFRAME_TAB_DRAGGED;
+		
+	genframe_draw_bar(genframe, FALSE);
+	
+	p_tabdrag_motion(genframe, ev, dx, dy);
+	
+	XMapRaised(wglobal.dpy, grdata->drag_win);
+}
+
+
+static WGenFrame *fnd(Window rootwin, int x, int y)
+{
+	int dstx, dsty;
+	Window childret;
+	WGenFrame *genframe=NULL;
+	WWindow *w;
+	
+	do{
+		if(!XTranslateCoordinates(wglobal.dpy, rootwin, rootwin,
+								  x, y, &dstx, &dsty, &childret))
+			return NULL;
+	
+		if(childret==None)
+			return genframe;
+		w=FIND_WINDOW_T(childret, WWindow);
+		if(w==NULL)
+			break;
+		if(WTHING_IS(w, WGenFrame))
+			genframe=(WGenFrame*)w;
+		rootwin=childret;
+	}while(1);
+	
+	return genframe;
+}
+
+
+static void p_tabdrag_end(WGenFrame *genframe, XButtonEvent *ev)
+{
+	WGRData *grdata=GRDATA_OF(genframe);
+	WGenFrame *newgenframe=NULL;
+	WRegion *sub=NULL;
+	Window win=None;
+	
+	grab_remove(tabdrag_kbd_handler);
+
+	wglobal.draw_dragwin=NULL;
+
+	sub=genframe->tab_pressed_sub;
+	genframe->tab_pressed_sub=NULL;
+	genframe->flags&=~WGENFRAME_TAB_DRAGGED;
+	
+	XUnmapWindow(wglobal.dpy, grdata->drag_win);	
+	/*XSelectInput(wglobal.dpy, grdata->drag_win, 0);*/
+	
+	/* Must be same screen */
+	
+	if(ev->root!=ROOT_OF(sub))
+		return;
+	
+	newgenframe=fnd(ev->root, ev->x_root, ev->y_root);
+
+	if(newgenframe==NULL || genframe==newgenframe){
+		genframe_draw_bar(genframe, TRUE);
+		return;
+	}
+	
+	region_add_managed((WRegion*)newgenframe, sub, REGION_ATTACH_SWITCHTO);
+	set_focus((WRegion*)newgenframe);
+}
+
+
+void genframe_p_tabdrag_setup(WGenFrame *genframe)
+{
+	if(genframe->tab_pressed_sub==NULL)
+		return;
+
+	if(tabdrag_safe_funclist.funtabs==NULL){
+		add_to_funclist(&tabdrag_safe_funclist,
+						tabdrag_safe_funtab);
+	}
+	
+	set_drag_handlers((WRegion*)genframe,
+					  (WMotionHandler*)p_tabdrag_begin,
+					  (WMotionHandler*)p_tabdrag_motion,
+					  (WButtonHandler*)p_tabdrag_end);
+	
+	grab_establish((WRegion*)genframe, tabdrag_kbd_handler, 0);
+}
+
+
+/*}}}*/
+
+
+/*{{{ Resize */
+
+
+static void p_resize_motion(WGenFrame *genframe, XMotionEvent *ev, int dx, int dy)
+{
+	delta_resize((WRegion*)genframe, p_dx1mul*dx, p_dx2mul*dx,
+				 p_dy1mul*dy, p_dy2mul*dy, NULL);
+}
+
+
+static void p_resize_begin(WGenFrame *genframe, XMotionEvent *ev, int dx, int dy)
+{
+	begin_resize((WRegion*)genframe, NULL);
+	p_resize_motion(genframe, ev, dx, dy);
+}
+
+
+static void p_resize_end(WGenFrame *genframe, XButtonEvent *ev)
+{
+	end_resize((WRegion*)genframe);
+}
+
+
+void genframe_p_resize_setup(WGenFrame *genframe)
+{
+	set_drag_handlers((WRegion*)genframe,
+					  (WMotionHandler*)p_resize_begin,
+					  (WMotionHandler*)p_resize_motion,
+					  (WButtonHandler*)p_resize_end);
+}
+
+
+/*}}}*/
+
+
+/*{{{ move */
+
+
+static void p_move_motion(WGenFrame *genframe, XMotionEvent *ev, int dx, int dy)
+{
+	delta_move((WRegion*)genframe, dx, dy, NULL);
+}
+
+
+static void p_move_begin(WGenFrame *genframe, XMotionEvent *ev, int dx, int dy)
+{
+	begin_move((WRegion*)genframe, NULL);
+	p_move_motion(genframe, ev, dx, dy);
+}
+
+
+static void p_move_end(WGenFrame *genframe, XButtonEvent *ev)
+{
+	end_resize((WRegion*)genframe);
+}
+
+
+void genframe_p_move_setup(WGenFrame *genframe)
+{
+	set_drag_handlers((WRegion*)genframe,
+					  (WMotionHandler*)p_move_begin,
+					  (WMotionHandler*)p_move_motion,
+					  (WButtonHandler*)p_move_end);
+}
+
+
+/*}}}*/
+
+
+/*{{{ switch_tab */
+
+
+void genframe_switch_tab(WGenFrame *genframe)
+{
+	if(genframe->tab_pressed_sub!=NULL)
+		display_region_sp(genframe->tab_pressed_sub);
+}
+
+
+/*}}}*/
+

@@ -1,12 +1,12 @@
 /*
- * wmcore/mwmhints.h
+ * ion/ioncore/mwmhints.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_MWMHINTS_H
-#define WMCORE_MWMHINTS_H
+#ifndef ION_IONCORE_MWMHINTS_H
+#define ION_IONCORE_MWMHINTS_H
 
 #include <X11/Xmd.h>
 
@@ -56,4 +56,4 @@ extern WMwmHints *get_mwm_hints(Window win);
 extern void check_mwm_hints_nodecor(Window win, bool *nodecor);
 
 
-#endif /* WMCORE_MWMHINTS_H */
+#endif /* ION_IONCORE_MWMHINTS_H */

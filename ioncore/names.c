@@ -1,5 +1,5 @@
 /*
- * wmcore/names.c
+ * ion/ioncore/names.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2002. 
  * See the included file LICENSE for details.

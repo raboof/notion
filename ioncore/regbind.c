@@ -19,7 +19,7 @@
 static void do_grab_ungrab_binding(const WRegion *reg, const WBinding *binding,
 								   const WBindmap *bindmap, bool grab)
 {
-	Window win=((WWindow*)reg)->win;
+	Window win=region_x_window(reg);
 	WRegBindingInfo *r;
 	
 	for(r=reg->bindings; r!=NULL; r=r->next){
@@ -100,7 +100,7 @@ bool region_add_bindmap_owned(WRegion *reg, WBindmap *bindmap, bool grab,
 {
 	WRegBindingInfo *rbind;
 	
-	if(!REGION_SUPPORTS_BINDINGS(reg))
+	if(region_x_window(reg)==None)
 		return FALSE;
 	
 	if(bindmap==NULL)

@@ -1,12 +1,12 @@
 /*
- * wmcore/font.h
+ * ion/ioncore/font.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_FONT_H
-#define WMCORE_FONT_H
+#ifndef ION_IONCORE_FONT_H
+#define ION_IONCORE_FONT_H
 
 #include <libtu/types.h>
 #include <X11/Xlib.h>
@@ -70,4 +70,4 @@ extern int str_prevoff(const char *p, int pos);
 extern wchar_t str_wchar_at(char *p, int max);
 #endif
 
-#endif /* WMCORE_FONT_H */
+#endif /* ION_IONCORE_FONT_H */

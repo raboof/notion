@@ -1,5 +1,5 @@
 /* 
- * wmcore/resize.c
+ * ion/ioncore/resize.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
@@ -28,6 +28,7 @@ static WRegion *tmpreg=NULL;
 static WDrawRubberbandFn *tmprubfn=NULL;
 static void (*resize_atexit)();
 static int parent_rx, parent_ry;
+static enum {MOVERES_SIZE, MOVERES_POS} moveres_mode=MOVERES_SIZE;
 
 
 /*{{{ Dynfuns */
@@ -82,23 +83,26 @@ void set_resize_timer(WRegion *reg, uint timeout)
 
 static void res_draw_moveres(WScreen *scr)
 {
-	int w, h;
-	
-	w=tmpgeom.w-(tmporiggeom.w-tmprelw);
-	h=tmpgeom.h-(tmporiggeom.h-tmprelh);
+	if(moveres_mode==MOVERES_SIZE){
+		int w, h;
+		
+		w=(tmpgeom.w-tmporiggeom.w)+tmprelw;
+		h=(tmpgeom.h-tmporiggeom.h)+tmprelh;
 
-	if(tmphints.flags&PBaseSize){
-		w-=tmphints.base_width;
-		h-=tmphints.base_height;
-	}
+		if(tmphints.flags&PResizeInc &&
+		   tmphints.width_inc>1 || tmphints.height_inc>1){
+			if(tmphints.flags&PBaseSize){
+				w-=tmphints.base_width;
+				h-=tmphints.base_height;
+			}
+			w/=tmphints.width_inc;
+			h/=tmphints.height_inc;
+		}
 	
-	if(tmphints.flags&PResizeInc &&
-	   tmphints.width_inc>0 && tmphints.height_inc>0){
-		w/=tmphints.width_inc;
-		h/=tmphints.height_inc;
+		set_moveres_size(scr, w, h);
+	}else{
+		set_moveres_pos(scr, tmpgeom.x, tmpgeom.y);
 	}
-	
-	set_moveres_size(scr, w, h);
 }
 
 
@@ -136,7 +140,7 @@ bool may_resize(WRegion *reg)
 }
 
 
-bool begin_resize(WRegion *reg, WDrawRubberbandFn *rubfn)
+static bool begin_moveres(WRegion *reg, WDrawRubberbandFn *rubfn)
 {
 	WScreen *scr=SCREEN_OF(reg);
 	WRegion *parent;
@@ -189,6 +193,20 @@ bool begin_resize(WRegion *reg, WDrawRubberbandFn *rubfn)
 }
 
 
+bool begin_resize(WRegion *reg, WDrawRubberbandFn *rubfn)
+{
+	moveres_mode=MOVERES_SIZE;
+	return begin_moveres(reg, rubfn);
+}
+
+
+bool begin_move(WRegion *reg, WDrawRubberbandFn *rubfn)
+{
+	moveres_mode=MOVERES_POS;
+	return begin_moveres(reg, rubfn);
+}
+
+
 bool begin_resize_atexit(WRegion *reg, WDrawRubberbandFn *rubfn, void (*exitfn)())
 {
 	if(begin_resize(reg, rubfn)){
@@ -199,8 +217,8 @@ bool begin_resize_atexit(WRegion *reg, WDrawRubberbandFn *rubfn, void (*exitfn)(
 }
 
 
-void delta_resize(WRegion *reg, int dx1, int dx2, int dy1, int dy2,
-				  WRectangle *rret)
+static void delta_moveres(WRegion *reg, int dx1, int dx2, int dy1, int dy2,
+						  WRectangle *rret)
 {
 	WScreen *scr=SCREEN_OF(reg);
 	WRectangle geom;
@@ -216,7 +234,9 @@ void delta_resize(WRegion *reg, int dx1, int dx2, int dy1, int dy2,
 	geom=tmporiggeom;
 	w=tmprelw-tmpdx1+tmpdx2;
 	h=tmprelh-tmpdy1+tmpdy2;
-	correct_size(&w, &h, &tmphints, TRUE);
+	/* If the region has only been moved, don't try to correct the size */
+	if(tmpdx1!=tmpdx2 || tmpdy1!=tmpdy2)
+		correct_size(&w, &h, &tmphints, TRUE);
 	geom.w=geom.w-tmprelw+w;
 	geom.h=geom.h-tmprelh+h;
 	
@@ -252,6 +272,21 @@ void delta_resize(WRegion *reg, int dx1, int dx2, int dy1, int dy2,
 	
 	if(rret!=NULL)
 		*rret=tmpgeom;
+}
+
+
+void delta_resize(WRegion *reg, int dx1, int dx2, int dy1, int dy2,
+				  WRectangle *rret)
+{
+	moveres_mode=MOVERES_SIZE;
+	delta_moveres(reg, dx1, dx2, dy1, dy2, rret);
+}
+
+
+void delta_move(WRegion *reg, int dx, int dy, WRectangle *rret)
+{
+	moveres_mode=MOVERES_POS;
+	delta_moveres(reg, dx, dx, dy, dy, rret);
 }
 
 
@@ -333,39 +368,6 @@ void region_request_geom(WRegion *reg,
 /*}}}*/
 
 
-/*{{{ Misc. */
-
-
-#define REG_MIN_WH(REG, WHL)                            \
-	XSizeHints hints;                                   \
-	uint relwidth, relheight;                                    \
-	region_resize_hints(reg, &hints, &relwidth, &relheight);     \
-	return (hints.flags&PMinSize ? hints.min_##WHL : 1);
-	
-	
-uint region_min_h(WRegion *reg)
-{
-	XSizeHints hints;
-	uint relw, relh;
-	region_resize_hints(reg, &hints, &relw, &relh);
-	return (hints.flags&PMinSize ? hints.min_height : 1)
-		+REGION_GEOM(reg).h-relh;
-}
-
-
-uint region_min_w(WRegion *reg)
-{
-	XSizeHints hints;
-	uint relw, relh;
-	region_resize_hints(reg, &hints, &relw, &relh);
-	return (hints.flags&PMinSize ? hints.min_width : 1)
-		+REGION_GEOM(reg).w-relw;
-}
-
-
-/*}}}*/
-
-
 
 /*{{{ set_width etc. */
 
@@ -406,3 +408,77 @@ void set_heightq(WRegion *reg, double q)
 
 /*}}}*/
 
+
+/*{{{ Maximize */
+
+
+#define DO_MAXIMIZE(FRAME, WH, POS)                              \
+	WRegion *par=FIND_PARENT1(FRAME, WRegion);                   \
+	WRectangle geom=REGION_GEOM(FRAME);                          \
+	int tmp, tmp2;                                               \
+                                                                 \
+	if(par==NULL)                                                \
+		return;                                                  \
+                                                                 \
+	if((FRAME)->saved_##WH!=WGENFRAME_NO_SAVED_WH){              \
+		geom.WH=(FRAME)->saved_##WH;                             \
+		geom.POS=(FRAME)->saved_##POS;                           \
+		region_request_geom((WRegion*)FRAME, geom, NULL, FALSE); \
+		(FRAME)->saved_##WH=WGENFRAME_NO_SAVED_WH;               \
+	}else{                                                       \
+		tmp=geom.WH;                                             \
+		tmp2=geom.POS;                                           \
+		geom.WH=REGION_GEOM(par).WH;                             \
+		geom.POS=0; /* Needed to resize both up and down */		 \
+		region_request_geom((WRegion*)FRAME, geom, NULL, FALSE); \
+		(FRAME)->saved_##WH=tmp;                                 \
+		(FRAME)->saved_##POS=tmp2;                               \
+	}
+
+						
+void genframe_maximize_vert(WGenFrame *frame)
+{
+	DO_MAXIMIZE(frame, h, y);
+}
+
+
+void genframe_maximize_horiz(WGenFrame *frame)
+{
+	DO_MAXIMIZE(frame, w, x);
+}
+
+
+/*}}}*/
+
+
+/*{{{ Misc. */
+
+
+#define REG_MIN_WH(REG, WHL)                                 \
+	XSizeHints hints;                                        \
+	uint relwidth, relheight;                                \
+	region_resize_hints(reg, &hints, &relwidth, &relheight); \
+	return (hints.flags&PMinSize ? hints.min_##WHL : 1);
+	
+	
+uint region_min_h(WRegion *reg)
+{
+	XSizeHints hints;
+	uint relw, relh;
+	region_resize_hints(reg, &hints, &relw, &relh);
+	return (hints.flags&PMinSize ? hints.min_height : 1)
+		+REGION_GEOM(reg).h-relh;
+}
+
+
+uint region_min_w(WRegion *reg)
+{
+	XSizeHints hints;
+	uint relw, relh;
+	region_resize_hints(reg, &hints, &relw, &relh);
+	return (hints.flags&PMinSize ? hints.min_width : 1)
+		+REGION_GEOM(reg).w-relw;
+}
+
+
+/*}}}*/

@@ -1,12 +1,12 @@
 /*
- * wmcore/binding.h
+ * ion/ioncore/binding.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_BINDING_H
-#define WMCORE_BINDING_H
+#ifndef ION_IONCORE_BINDING_H
+#define ION_IONCORE_BINDING_H
 
 #include <libtu/tokenizer.h>
 
@@ -26,7 +26,7 @@
 #define BINDING_INIT		\
 	{0, 0, 0, 0, FALSE, NULL, NULL}
 /*	{0, 0, 0, 0, FALSE, NULL, NULL, 0, {TOK_INIT, TOK_INIT, TOK_INIT}}*/
-#define BINDMAP_INIT		{0, 0, NULL, NULL, 0}
+#define BINDMAP_INIT		{0, 0, NULL, NULL, NULL}
 
 
 INTRSTRUCT(WBinding)
@@ -76,7 +76,7 @@ DECLSTRUCT(WBindmap){
 
 extern void init_bindings();
 extern WBindmap *create_bindmap();
-extern void destroy_bindmap(WBindmap *bindmap);
+extern void deinit_bindmap(WBindmap *bindmap);
 extern void deinit_binding(WBinding *binding);
 extern bool add_binding(WBindmap *bindmap, const WBinding *binding);
 extern WBinding *lookup_binding(WBindmap *bindmap, int act,
@@ -93,4 +93,4 @@ extern int unmod(int state, int keycode);
 extern bool ismod(int keycode);
 extern void update_modmap();
 
-#endif /* WMCORE_BINDING_H */
+#endif /* ION_IONCORE_BINDING_H */

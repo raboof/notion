@@ -1,12 +1,12 @@
 /*
- * wmcore/signal.h
+ * ion/ioncore/signal.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef WMCORE_SIGNAL_H
-#define WMCORE_SIGNAL_H
+#ifndef ION_IONCORE_SIGNAL_H
+#define ION_IONCORE_SIGNAL_H
 
 #include <sys/time.h>
 #include <time.h>
@@ -28,4 +28,4 @@ extern void trap_signals();
 extern void set_timer(WTimer *timer, uint msecs);
 extern void reset_timer(WTimer *timer);
 
-#endif /* WMCORE_SIGNAL_H */
+#endif /* ION_IONCORE_SIGNAL_H */
