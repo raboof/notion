@@ -1,5 +1,5 @@
 --
--- ion/share/mod_menu.lua -- Helper functions for defining menus.
+-- ion/mod_menu/mod_menu.lua -- Helper functions for defining menus.
 -- 
 -- Copyright (c) Tuomo Valkonen 2004.
 --

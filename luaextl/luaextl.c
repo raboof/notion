@@ -381,16 +381,17 @@ err:
 
 static int extl_dopath(lua_State *st)
 {
-    bool res;
     const char *toincl, *cfdir;
+    bool res, complain;
     
     toincl=luaL_checkstring(st, 1);
+    complain=!lua_toboolean(st, 2);
     
     if(extl_current_file_or_dir(st, TRUE)!=1){
-        res=ioncore_read_config(toincl, NULL, TRUE);
+        res=ioncore_read_config(toincl, NULL, complain);
     }else{
         cfdir=lua_tostring(st, -1);
-        res=ioncore_read_config(toincl, cfdir, TRUE);
+        res=ioncore_read_config(toincl, cfdir, complain);
         lua_pop(st, 1);
     }
     lua_pushboolean(st, res);

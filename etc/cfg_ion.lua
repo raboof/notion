@@ -42,7 +42,7 @@ ioncore.add_shortenrule("(.*)", "$1$|$1$<...")
 
 
 --
--- Load some modules and other configuration files
+-- Load some modules, extensions and other configuration files
 --
 
 -- Load some modules.
@@ -50,8 +50,9 @@ dopath("mod_query")
 dopath("mod_menu")
 dopath("mod_ionws")
 dopath("mod_floatws")
-dopath("mod_dock")
+--dopath("mod_dock")
 --dopath("mod_sp")
+dopath("ext_statusbar")
 
 -- Load some kludges to make apps behave better.
 dopath("cfg_kludges")
