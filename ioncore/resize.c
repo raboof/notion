@@ -260,20 +260,12 @@ static void delta_moveres(WRegion *reg, int dx1, int dx2, int dy1, int dy2,
 	
 	if(tmpreg!=reg || reg==NULL)
 		return;
-	
-	if(!resize_cumulative){
-		tmpdx1=dx1;
-		tmpdx2=dx2;
-		tmpdy1=dy1;
-		tmpdy2=dy2;
-		geom=tmpgeom;
-	}else{
-		tmpdx1+=dx1;
-		tmpdx2+=dx2;
-		tmpdy1+=dy1;
-		tmpdy2+=dy2;
-		geom=tmporiggeom;
-	}
+
+	tmpdx1+=dx1;
+	tmpdx2+=dx2;
+	tmpdy1+=dy1;
+	tmpdy2+=dy2;
+	geom=tmporiggeom;
 	
 	w=tmprelw-tmpdx1+tmpdx2;
 	h=tmprelh-tmpdy1+tmpdy2;
@@ -293,36 +285,41 @@ static void delta_moveres(WRegion *reg, int dx1, int dx2, int dy1, int dy2,
 	geom.w=geom.w-tmprelw+w;
 	geom.h=geom.h-tmprelh+h;
 
-	if(!resize_cumulative){
-		tmprelw=w;
-		tmprelh=h;
-	}
-
 	/* If top/left delta is not zero, don't move bottom/right side
 	 * if the respective delta is zero
 	 */
 	
+	/* TODO: Set weak attrs. */
+	
 	if(tmpdx1!=0){
 		if(tmpdx2==0)
-			geom.x+=(resize_cumulative ? tmporiggeom.w : tmpgeom.w)-geom.w;
+			geom.x+=tmporiggeom.w-geom.w;
 		else
 			geom.x+=tmpdx1;
 	}
 
 	if(tmpdy1!=0){
 		if(tmpdy2==0)
-			geom.y+=(resize_cumulative ? tmporiggeom.h : tmpgeom.h)-geom.h;
+			geom.y+=tmporiggeom.h-geom.h;
 		else
 			geom.y+=tmpdy1;
 	}
 	
-	region_request_geom(reg, tmprqflags, geom, &geom);
+	region_request_geom(reg, tmprqflags, geom, &tmpgeom);
 
+	if(!resize_cumulative){
+		tmpdx1=0;
+		tmpdx2=0;
+		tmpdy1=0;
+		tmpdy2=0;
+		tmprelw=(tmpgeom.w-tmporiggeom.w)+tmprelw;
+		tmprelh=(tmpgeom.h-tmporiggeom.h)+tmprelh;
+		tmporiggeom=tmpgeom;
+	}
+	
 	if(XOR_RESIZE)
 		res_draw_rubberband(rootwin);
 
-	tmpgeom=geom;
-	
 	res_draw_moveres(rootwin);
 	
 	if(XOR_RESIZE)
