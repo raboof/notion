@@ -220,10 +220,22 @@ const char *wedln_contents(WEdln *wedln)
 }
 
 /*EXTL_DOC
- * Get current editing point.
+ * Get current editing point. 
+ * Beginning of the edited line is point 0.
  */
 EXTL_EXPORT_MEMBER
 int wedln_point(WEdln *wedln)
 {
 	return wedln->edln.point;
+}
+
+/*EXTL_DOC
+ * Get current mark (start of selection) for \var{wedln}.
+ * Return value of -1 indicates that there is no mark, and
+ * 0 is the beginning of the line.
+ */
+EXTL_EXPORT_MEMBER
+int wedln_mark(WEdln *wedln)
+{
+	return wedln->edln.mark;
 }
