@@ -11,13 +11,13 @@
 
 #include <string.h>
 
-#include <X11/extensions/shape.h>
-
 #include <ioncore/global.h>
 #include <ioncore/common.h>
 #include <ioncore/gr.h>
 #include "brush.h"
 #include "font.h"
+
+#include <X11/extensions/shape.h>
 
 
 /*{{{ Colour group lookup */
