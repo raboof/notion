@@ -19,6 +19,9 @@ static void add_error(ErrorLog *el, const char *message)
 {
 	int l;
 	
+	if(message==NULL)
+		return;
+	
 	if(el->file!=NULL){
 		el->errors=TRUE;
 		fwrite(message, sizeof(char), strlen(message), el->file);

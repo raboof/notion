@@ -12,9 +12,7 @@
 #include "screen.h"
 
 extern void do_exec(const char *cmd);
-extern void exec_on_screen(WScreen *scr, const char *cmd);
-extern void do_open_with(WScreen *scr, const char *cmd,
-						 const char *filename);
+extern bool exec_on_screen(WScreen *scr, const char *cmd);
 extern void restart_other_wm(const char *cmd);
 extern void restart_wm();
 extern void exit_wm();

@@ -184,11 +184,17 @@ void copy_masked(const WGRData *grdata, Drawable src, Drawable dst,
 bool alloc_color(WScreen *scr, const char *name, WColor *cret)
 {
 #ifdef CF_XFT
+	if(name==NULL)
+		return FALSE;
+	
 	return XftColorAllocName(wglobal.dpy, DefaultVisual(wglobal.dpy, scr->xscr),
 			  scr->default_cmap, (char *) name, cret);
 #else
 	XColor c;
 	bool ret=FALSE;
+
+	if(name==NULL)
+		return FALSE;
 
 	if(*cret!=scr->grdata.black && *cret!=scr->grdata.white)
 		XFreeColors(wglobal.dpy, scr->default_cmap, cret, 1, 0);
@@ -308,7 +314,7 @@ static int max_width(WFontPtr font, const char *str)
 {
 	int maxw=0, w;
 	
-	while(*str!='\0'){
+	while(str && *str!='\0'){
 		w=text_width(font, str, 1);
 		if(w>maxw)
 		maxw=w;

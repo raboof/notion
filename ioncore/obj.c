@@ -66,7 +66,7 @@ bool wobj_is_str(const WObj *obj, const char *str)
 {
 	WObjDescr *d;
 	
-	if(obj==NULL)
+	if(obj==NULL || str==NULL)
 		return FALSE;
 	
 	d=obj->obj_type;

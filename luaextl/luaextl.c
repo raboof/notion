@@ -319,10 +319,13 @@ static bool extl_stack_get(lua_State *st, int pos, char type, bool copystring,
 	}
 
 	if(lua_type(st, pos)==LUA_TNIL || lua_type(st, pos)==LUA_TNONE){
-		if(type!='t' && type!='f')
-			return FALSE;
-		if(valret)
-			*((int*)valret)=LUA_NOREF;
+		if(type=='t' || type=='f'){
+			if(valret)
+				*((int*)valret)=LUA_NOREF;
+		}else if(type=='s' || type=='S'){
+			if(valret)
+				*((char**)valret)=NULL;
+		}
 		return TRUE;
 	}
 	
@@ -817,7 +820,8 @@ static void extl_free(void *ptr, char spec, int strings)
 {
 	if(((spec=='s' && strings!=STRINGS_NONE) ||
 		(spec=='S' && strings==STRINGS_ALL)) && *(char**)ptr!=NULL){
-		free(*(char**)ptr);
+		if(*(char**)ptr!=NULL)
+			free(*(char**)ptr);
 		*(char**)ptr=NULL;
 	}else if(spec=='t'){
 		extl_unref_table(*(ExtlTab*)ptr);

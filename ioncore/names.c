@@ -176,6 +176,9 @@ WRegion *do_lookup_region(const char *cname, WObjDescr *descr)
 {
 	WRegion *reg;
 	char *name;
+	
+	if(cname==NULL)
+		return NULL;
 
 	for(reg=region_list; reg!=NULL; reg=reg->ni.g_next){
 		if(!wobj_is((WObj*)reg, descr))
@@ -207,6 +210,9 @@ ExtlTab do_complete_region(const char *nam, WObjDescr *descr)
 	int lnum=0, l=strlen(nam);
 	int n=0;
 	ExtlTab tab=extl_create_table();
+	
+	if(nam==NULL)
+		nam="";
 	
 again:
 	

@@ -35,9 +35,6 @@ void do_exec(const char *cmd)
 	
 	wglobal.dpy=NULL;
 	
-	if(cmd==NULL)
-		return;
-	
 #ifndef CF_NO_SETPGID
 	setpgid(0, 0);
 #endif
@@ -53,18 +50,23 @@ void do_exec(const char *cmd)
 
 
 EXTL_EXPORT
-void exec_on_screen(WScreen *scr, const char *cmd)
+bool exec_on_screen(WScreen *scr, const char *cmd)
 {
 	int pid;
 	char *tmp;
+	
+	if(cmd==NULL)
+		return FALSE;
 
 	pid=fork();
 	
-	if(pid<0)
+	if(pid<0){
 		warn_err();
+		return FALSE;
+	}
 	
 	if(pid!=0)
-		return;
+		return TRUE;
 	
 	setup_environ(scr->xscr);
 	
@@ -78,33 +80,9 @@ void exec_on_screen(WScreen *scr, const char *cmd)
 	sprintf(tmp, "exec %s", cmd);
 	
 	do_exec(tmp);
-}
-
-
-void do_open_with(WScreen *scr, const char *cmd, const char *file)
-{
-	int pid;
-	char *tmp;
-
-	pid=fork();
 	
-	if(pid<0)
-		warn_err();
-	
-	if(pid!=0)
-		return;
-	
-	setup_environ(scr->xscr);
-	
-	close(wglobal.conn);
-	
-	tmp=ALLOC_N(char, strlen(cmd)+strlen(file)+10);
-	
-	if(tmp==NULL)
-		die_err();
-	
-	sprintf(tmp, "exec %s '%s'", cmd, file);
-	do_exec(tmp);
+	/* We should not get here */
+	return FALSE;
 }
 
 

@@ -108,6 +108,9 @@ enum{
 EXTL_EXPORT
 void set_floatws_placement_method(const char *method)
 {
+	if(method==NULL)
+		return;
+	
 	if(strcmp(method, "udlr")==0)
 		placement_method=PLACEMENT_UDLR;
 	else if(strcmp(method, "lrud")==0)

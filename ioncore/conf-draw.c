@@ -134,6 +134,11 @@ static bool do_colorgroup(WScreen *scr, WColorGroup *cg,
 						  const char *bg, const char *fg)
 {
 	int cnt=0;
+	
+	if(hl==NULL || sh==NULL || bg==NULL || fg==NULL){
+		warn("Color specification contains NULL strings");
+		return FALSE;
+	}
 
 	/* alloc_color wil free cg->xx */
 	cnt+=alloc_color(scr, hl, &(cg->hl));
@@ -224,6 +229,11 @@ EXTL_EXPORT
 bool set_background_color(const char *bg)
 {
 	CHK_SCR;
+	if(bg==NULL){
+		warn("Color set to NULL.");
+		return FALSE;
+	}
+	   
 	if(!alloc_color(tmp_screen, bg, &(tmp_screen->grdata.frame_bgcolor))){
 		warn("Unable to allocate one or more colors");
 		return FALSE;
@@ -237,6 +247,12 @@ EXTL_EXPORT
 bool set_selection_colors(const char *bg, const char *fg)
 {
 	CHK_SCR;
+	
+	if(bg==NULL || fg==NULL){
+		warn("Color set to NULL.");
+		return FALSE;
+	}
+
 	if(!alloc_color(tmp_screen, bg, &(tmp_screen->grdata.selection_bgcolor)) ||
 	   !alloc_color(tmp_screen, fg, &(tmp_screen->grdata.selection_fgcolor))){
 		warn("Unable to allocate one or more colors");

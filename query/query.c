@@ -67,6 +67,9 @@ void query_handler_attachclient(WGenFrame *frame, const char *str)
 {
 	WClientWin *cwin=lookup_clientwin(str);
 	
+	if(str==NULL)
+		return;
+	
 	if(cwin==NULL){
 		query_fwarn_free(frame, errmsg("No client named '%s'", str));
 		return;
@@ -80,12 +83,6 @@ void query_handler_attachclient(WGenFrame *frame, const char *str)
 	
 	region_add_managed((WRegion*)frame, (WRegion*)cwin,
 					   REGION_ATTACH_SWITCHTO);
-}
-
-
-bool empty_name(const char *p)
-{
-	return (strspn(p, " \t")==strlen(p));
 }
 
 
@@ -128,7 +125,7 @@ void query_handler_workspace(WGenFrame *frame, const char *name)
 	WRegion *ws=NULL;
 	WViewport *vp=NULL;
 	
-	if(empty_name(name))
+	if(name==NULL || strspn(name, " \t")==strlen(name))
 		return;
 	
 	ws=(WRegion*)lookup_workspace(name);
@@ -218,6 +215,9 @@ static ExtlTab complete(char *pathname, int (*cfn)(char *pathname,
 	char **avp=NULL;
 	char *beg=NULL;
 	ExtlTab tab;
+	
+	if(pathname==NULL)
+		return extl_table_none();
 	
 	n=cfn(pathname, &avp, &beg, NULL);
 	

@@ -34,6 +34,9 @@ static RegClassInfo *lookup_reg_class_info_by_name(const char *name)
 {
 	RegClassInfo *info;
 	
+	if(name==NULL)
+		return NULL;
+	
 	for(info=reg_class_infos; info!=NULL; info=info->next){
 		if(strcmp(info->descr->name, name)==0)
 			return info;
@@ -46,6 +49,9 @@ static RegClassInfo *lookup_reg_class_info_by_name_inh(const char *name)
 {
 	RegClassInfo *info;
 	WObjDescr *descr;
+
+	if(name==NULL)
+		return NULL;
 	
 	for(info=reg_class_infos; info!=NULL; info=info->next){
 		descr=info->descr;

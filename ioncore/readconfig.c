@@ -26,11 +26,16 @@ static int n_libpaths=0;*/
 /*{{{ Init */
 
 
-bool add_dir(char ***pathsptr, int *n_pathsptr, const char *dir)
+static bool add_dir(char ***pathsptr, int *n_pathsptr, const char *dir)
 {
 	char **paths;
-	char *dircp=scopy(dir);
+	char *dircp;
 	int i;
+	
+	if(dir==NULL)
+		return FALSE;
+	
+	dircp=scopy(dir);
 	
 	if(dircp==NULL){
 		warn_err();
@@ -125,7 +130,7 @@ bool ioncore_add_default_paths(const char *appname, const char *etcdir,
 /*{{{ get_cfgfile */
 
 
-char *search_etcpath2(const char *const *files, bool noaccesstest)
+static char *search_etcpath2(const char *const *files, bool noaccesstest)
 {
 	char *tmp=NULL;
 	char *const *dir;
@@ -151,6 +156,12 @@ void do_include(const char *file, const char *current_dir)
 {
 	const char *files[]={NULL, NULL};
 	char* tmp=NULL;
+	
+	if(file==NULL)
+		return;
+	
+	if(current_dir==NULL)
+		current_dir=".";
 	
 	libtu_asprintf(&tmp, "%s/%s", current_dir, file);
 	if(tmp!=NULL){

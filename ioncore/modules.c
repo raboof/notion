@@ -95,6 +95,9 @@ bool load_module(const char *fname)
 	char *n;
 	size_t l;
 	
+	if(fname==NULL)
+		return FALSE;
+	
 	handle=lt_dlopenext(fname);
 	
 	if(handle==NULL){

@@ -154,6 +154,11 @@ WFontPtr load_font(Display *dpy, const char *fontname)
 	int dummy_missing_n;
 	char *dummy_def;
 	
+	if(fontname==NULL){
+		warn("Attempt to load NULL as font");
+		return 0;
+	}
+	
 	xfnt=XCreateFontSet(dpy, fontname, &dummy_missing,
 						&dummy_missing_n, &dummy_def);
 #else
@@ -175,7 +180,7 @@ WFontPtr load_font(Display *dpy, const char *fontname)
 #endif
 		if(xfnt==NULL){
 			warn("Failed loading fallback font.");
-			return FALSE;
+			return 0;
 		}
 	}
 	
@@ -274,6 +279,9 @@ bool add_shortenrule(const char *rx, const char *rule)
 {
 	SR *si;
 	int ret;
+	
+	if(rx==NULL || rule==NULL)
+		return FALSE;
 	
 	si=ALLOC(SR);
 	
