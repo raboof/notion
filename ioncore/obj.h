@@ -42,6 +42,8 @@ DECLOBJ(WObj){
 };
 
 #define WOBJ_DEST 0x0001
+#define WOBJ_EXTL_CACHED 0x0002
+
 #define WOBJ_IS_BEING_DESTROYED(OBJ) (((WObj*)(OBJ))->flags&WOBJ_DEST)
 
 #define DYNFUN

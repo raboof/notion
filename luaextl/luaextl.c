@@ -41,6 +41,7 @@ static bool extl_stack_get(lua_State *st, int pos, char type, bool copystring,
 
 
 static int wobj_metaref=LUA_NOREF;
+static int obj_cache_ref=LUA_NOREF;
 
 
 static void extl_get_wobj_metatable(lua_State *st)
@@ -98,6 +99,20 @@ static void extl_push_obj(lua_State *st, WObj *obj)
 		return;
 	}
 
+	if(obj->flags&WOBJ_EXTL_CACHED){
+		lua_rawgeti(st, LUA_REGISTRYINDEX, obj_cache_ref);
+		lua_pushlightuserdata(st, obj);
+		lua_gettable(st, -2);
+		if(lua_isuserdata(st, -1)){
+			D(fprintf(stderr, "found %p cached\n", obj));
+			lua_remove(st, -2);
+			return;
+		}
+		lua_pop(st, 2);
+	}
+
+	D(fprintf(stderr, "Creating %p\n", obj));
+	
 	watch=(WWatch*)lua_newuserdata(st, sizeof(WWatch));
 	
 	/* Lua shouldn't return if the allocation fails */
@@ -107,6 +122,13 @@ static void extl_push_obj(lua_State *st, WObj *obj)
 	
 	extl_get_wobj_metatable(st);
 	lua_setmetatable(st, -2);
+
+	lua_rawgeti(st, LUA_REGISTRYINDEX, obj_cache_ref);
+	lua_pushlightuserdata(st, obj);
+	lua_pushvalue(st, -3);
+	lua_settable(st, -3);
+	lua_pop(st, 1);
+	obj->flags|=WOBJ_EXTL_CACHED;
 }
 	
 	
@@ -119,28 +141,20 @@ static int extl_obj_gc_handler(lua_State *st)
 	
 	if(extl_get_wobj(st, 1)==NULL)
 		return 0;
-	
+
 	watch=(WWatch*)lua_touserdata(st, 1);
 	
-	if(watch!=NULL)
+	if(watch!=NULL){
+		D(fprintf(stderr, "Collecting %p\n", watch->obj));
+		if(watch->obj!=NULL){
+			D(fprintf(stderr, "was cached\n"));
+			watch->obj->flags&=~WOBJ_EXTL_CACHED;
+		}
 		reset_watch(watch);
+	}
 	
 	return 0;
 }
-
-
-static int extl_obj_eq_handler(lua_State *st)
-{
-	WObj *o1, *o2;
-	
-	o1=extl_get_wobj(st, 1);
-	o2=extl_get_wobj(st, 2);
-	
-	lua_pushboolean(st, (o1==o2));
-	
-	return 1;
-}
-
 
 
 static int extl_obj_typename(lua_State *st)
@@ -177,12 +191,17 @@ static int extl_obj_is(lua_State *st)
 static bool extl_init_obj_info(lua_State *st)
 {
 	lua_newtable(st);
+	lua_newtable(st);
+	lua_pushstring(st, "__mode");
+	lua_pushstring(st, "v");
+	lua_settable(st, -3);
+	lua_setmetatable(st, -2);
+	obj_cache_ref=lua_ref(st, -1);
+	
+	lua_newtable(st);
 	lua_pushstring(st, "__gc");
 	lua_pushcfunction(st, extl_obj_gc_handler);
 	lua_settable(st, -3); /* set metatable.__gc=extl_obj_gc_handler */
-	lua_pushstring(st, "__eq");
-	lua_pushcfunction(st, extl_obj_eq_handler);
-	lua_settable(st, -3); /* set metatable.__eq=extl_obj_eq_handler */
 	wobj_metaref=lua_ref(st, -1);
 
 	lua_pushcfunction(st, extl_obj_typename);
