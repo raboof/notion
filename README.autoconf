@@ -10,23 +10,15 @@ The Ion-specific options to ./configure are:
     --disable-xfree86-textprop-bug-workaround
     --enable-Xutf8
     --disable-shared
-    --with-libtool (see *BSD NOTES below)
     --with-lua* (see DEBIAN NOTES below)
     --enable-c99-source
     --enable-xopen-source
+    --disable-locale
+    --enable-sun-f1x-remap
 
 Run ./configure --help for more information on these options. The
 defaults are chosen to generate a configuration very similar to the
 Ion default.
-
-
-*BSD NOTES
-
-Many *BSD versions come with a very old version of libtool. Use the
---with-libtool option to use a more recent version installed
-elsewhere, e.g.
-
-    ./configure --with-libtool=/usr/local/stow/libtool-1.5
 
 
 DEBIAN NOTES

@@ -98,39 +98,26 @@ fi
 
 dnl }}}
 
-dnl LIBTOOL, LTDL_INCLUDES, LTDL_LIBS {{{
+dnl _DCF_SUN_F1X_REMAP {{{
 
-AC_SUBST([LTDL_INCLUDES])
-AC_SUBST([LTDL_LIBS])
+AC_SUBST([_DCF_SUN_F1X_REMAP])
 
-AC_ARG_WITH([libtool],
-            [AS_HELP_STRING([--with-libtool=DIR],
-                            [Libtool files are in DIR])])
+AC_ARG_ENABLE([sun-f1x-remap],
+			  [AS_HELP_STRING([--enable-sun-f1x-remap],
+							  [Remap F11 key to SunF36 and F12 to SunF37])])
 
-if test "x$with_libtool" != x; then
-    LTDL_INCLUDES="-I$with_libtool/include"
-    LTDL_LIBS="-L$with_libtool/lib"
-    libtool_path="$with_libtool/bin"
-else
-    libtool_path="$PATH"
+if test "x$enable_sun_f1x_remap" == xyes; then
+	_DCF_SUN_F1X_REMAP="1"
 fi
-AC_PATH_PROG([LIBTOOL], [libtool], [], [$libtool_path])
-test "x$LIBTOOL" = x && exit 1
-AC_MSG_CHECKING([for libtool version >= 1.4.3])
-libtool_version=$($LIBTOOL --version | head -n 1 | cut -d' ' -f4)
-dnl libtool_version=$($LIBTOOL --version | $EGREP -o '[0-9]+(\.[0-9]+)+' | head -n 1)
-case $libtool_version in
-0.* | 1.0.* | 1.1.* | 1.2.* | 1.3.* | 1.4.0 | 1.4.1 | 1.4.2)
-    AC_MSG_RESULT([no (found $libtool_version)])
-    exit 1
-    ;;
-*)
-    AC_MSG_RESULT([yes (found $libtool_version)])
-    ;;
-esac
 
-AC_CHECK_HEADER([ltdl.h], [], [exit 1], [$LDTL_INCLUDES])
-AC_CHECK_LIB([ltdl], [lt_dlinit], [LTDL_LIBS="-lltdl"], [exit 1], [$LTDL_LIBS])
+dnl }}}
+
+dnl DL_LIBS {{{
+
+AC_SUBST([DL_LIBS])
+
+AC_CHECK_HEADER([dlfcn.h], [], [exit 1])
+AC_CHECK_LIB([dl], [dlopen], [DL_LIBS="-ldl"], [exit 1])
 
 dnl }}}
 
@@ -411,20 +398,20 @@ dnl }}}
 
 dnl }}}
 
-dnl _DCF_NO_MB_SUPPORT {{{
+dnl _DCF_NO_LOCALE {{{
 
-AC_SUBST([_DCF_NO_MB_SUPPORT])
+AC_SUBST([_DCF_NO_LOCALE])
 
-_DCF_NO_MB_SUPPORT="-DCF_NO_MB_SUPPORT"
-AC_CHECK_HEADER([wchar.h],
-                [AC_CHECK_HEADER([wctype.h],
-                         [AC_CHECK_FUNC([mbrlen],
-                                 [_DCF_NO_MB_SUPPORT=""], [])],
-                                 [])],
-                [])
+AC_ARG_ENABLE([locale],
+			  [AS_HELP_STRING([--disable-locale],
+							  [Disable locale support])])
+
+if test "x$enable_locale" == xno; then
+	_DCF_NO_LOCALE="-DCF_NO_LOCALE"
+fi
 
 dnl }}}
-                            
+
 
 AC_OUTPUT([system-ac.mk])
 

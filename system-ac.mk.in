@@ -36,44 +36,28 @@ EXTRABINDIR=@libexecdir@/@PACKAGE_TARNAME@/bin
 # For ion-completeman system-wide cache
 #VARDIR=@localstatedir@/cache/@PACKAGE_TARNAME@
 VARDIR=/var/cache/@PACKAGE_TARNAME@
+# Message catalogs
+LOCALEDIR=@prefix@/share/locale
+
 
 ##
 ## Modules
 ##
 
-# The path to the libtool script. Version 1.4.3 or newer is required.
-# Users of many of the *BSD:s will have to manually install a a recent
-# libtool because even more-recent-than-libtool-1.4.3 releases of those
-# OSes only have an _ancient_ 1.3.x libtool that _will_ _not_ _work even
-# though a lot of libltdl-using apps require 1.4.3. 
-LIBTOOL=@LIBTOOL@
-
-# Settings for compiling and linking to ltdl
-LTDL_INCLUDES=@LTDL_INCLUDES@
-LTDL_LIBS=@LTDL_LIBS@
-
-# The following should do it if you have manually installed libtool 1.5 in
-# $(LIBTOOLDIR).
-#LIBTOOLDIR=/usr/local/stow/libtool-1.5
-#LIBTOOL=$(LIBTOOLDIR)/bin/libtool
-#LTDL_INCLUDES=-I$(LIBTOOLDIR)/include
-#LTDL_LIBS=-L$(LIBTOOLDIR)/lib -lltdl
-
 # Set PRELOAD_MODULES=1 if your system does not support dynamically loaded
-# modules. 
+# modules through 'libdl' or has non-standard naming conventions.
 PRELOAD_MODULES=@PRELOAD_MODULES@
 
-# Note to Cygwin users: you must set the above option and also LIBTOOL point 
-# to a real libtool script (e.g. /usr/autotool/stable/bin/libtool) instead 
-# of some useless autoconf-expecting wrapper. With these settings Ion should
-# compile on at least the version of Cygwin I installed on 2003-06-17 on WinXP.
+# Flags to link with libdl.
+DL_LIBS=@DL_LIBS@
+
 
 ##
 ## Lua
 ##
 
 # If you have installed Lua 5.0 from the official tarball without changing
-# paths, this so do it.
+# paths, this should do it.
 #LUA_DIR=/usr/local
 LUA_LIBS = @LUA_LIBS@
 LUA_INCLUDES = @LUA_INCLUDES@
@@ -82,11 +66,10 @@ LUAC=@LUAC@
 
 # If you are using the Debian packages, the following settings should be
 # what you want.
-#LUA_DIR=/usr
-#LUA_LIBS = -llua50 -llualib50
-#LUA_INCLUDES = -I$(LUA_DIR)/include/lua50
-#LUA=$(LUA_DIR)/bin/lua50
-#LUAC=$(LUA_DIR)/bin/luac50
+#LUA_LIBS=`lua-config50 --libs`
+#LUA_INCLUDES=`lua-config50 --include`
+#LUA=lua50
+#LUAC=luac50
 
 
 ##
@@ -113,6 +96,10 @@ DEFINES += @_DCF_XFREE86_TEXTPROP_BUG_WORKAROUND@
 # an UTF8 locale given the -i18n command line option?
 DEFINES += @_DCF_DE_USE_XUTF8@
 
+# Remap F11 key to SunF36 and F12 to SunF37? You may want to set this
+# on SunOS.
+DEFINES += @_DCF_SUN_F1X_REMAP@
+
 
 ##
 ## libc
@@ -126,9 +113,9 @@ HAS_SYSTEM_ASPRINTF=@HAS_SYSTEM_ASPRINTF@
 
 
 # If you're on an archaic system (such as relatively recent *BSD releases)
-# without even dummy multibyte/widechar support, you may have to uncomment
-# the following line:
-DEFINES += @_DCF_NO_MB_SUPPORT@
+# without even dummy multibyte/widechar and localisation support, you may
+# have to uncomment the following line:
+DEFINES += @_DCF_NO_LOCALE@
 
 
 ##
@@ -137,38 +124,37 @@ DEFINES += @_DCF_NO_MB_SUPPORT@
 
 CC=@CC@
 
-# The POSIX_SOURCE, XOPEN_SOURCE and WARN options should not be necessary,
-# they're mainly for development use. So, if they cause trouble (not
-# the ones that should be used on your system or the system is broken),
-# just comment them out.
-
-# libtu/ uses these
-
-C89_SOURCE=-ansi
-POSIX_SOURCE=-D_POSIX_SOURCE
-
-# and . (ion) XOPEN_SOURCE.
-# There is variation among systems what should be used and how they interpret
-# it so it is perhaps better not using anything at all.
-
-# Most systems
-XOPEN_SOURCE=@XOPEN_SOURCE@
-# sunos, (irix)
-#XOPEN_SOURCE=-ansi -D__EXTENSIONS__
-
 # Same as '-Wall -pedantic' without '-Wunused' as callbacks often
 # have unused variables.
 WARN=	-W -Wimplicit -Wreturn-type -Wswitch -Wcomment \
 	-Wtrigraphs -Wformat -Wchar-subscripts \
 	-Wparentheses -pedantic -Wuninitialized
 
-# If you have a recent C compiler (e.g. gcc 3.x) then uncommenting the
-# following should optimize function calls to Lua a little.
-C99_SOURCE=@C99_SOURCE@
-DEFINES += @_DCF_HAS_VA_COPY@
-
 CFLAGS=@CFLAGS@ $(WARN) $(DEFINES) $(EXTRA_INCLUDES) $(INCLUDES)
 LDFLAGS=@LDFLAGS@ $(EXTRA_LIBS) $(LIBS)
+
+# The following options are mainly for development use and can be used
+# to check that the code seems to conform to some standards. Depending
+# on the version and vendor of you libc, the options may or may not have
+# expected results. If you define one of C99_SOURCE or XOPEN_SOURCE, you
+# may also have to define the other.
+
+#C89_SOURCE=-ansi
+
+POSIX_SOURCE=@_D_POSIX_SOURCE@
+
+# Most systems
+#XOPEN_SOURCE=-D_XOPEN_SOURCE -D_XOPEN_SOURCE_EXTENDED
+# SunOS, (Irix)
+#XOPEN_SOURCE=-D__EXTENSIONS__
+
+#C99_SOURCE=-std=c99 -DCF_HAS_VA_COPY
+
+# The -DCF_HAS_VA_COPY option should allow for some optimisations, and
+# in some cases simply defining
+C99_SOURCE=@_DCF_HAS_VA_COPY@
+# might allow for those optimisations to be taken without any  special
+# libc or compiler options.
 
 
 ##
@@ -178,7 +164,6 @@ LDFLAGS=@LDFLAGS@ $(EXTRA_LIBS) $(LIBS)
 DEPEND_FILE=.depend
 DO_MAKE_DEPEND=$(CC) -MM $(DEFINES) $(EXTRA_INCLUDES) $(INCLUDES)
 MAKE_DEPEND=$(DO_MAKE_DEPEND) $(SOURCES) > $(DEPEND_FILE)
-MAKE_DEPEND_MOD=$(DO_MAKE_DEPEND) $(SOURCES) | sed 's/\.o/\.lo/' > $(DEPEND_FILE)
 
 ##
 ## AR
@@ -193,11 +178,7 @@ RANLIB=@RANLIB@
 ## Install & strip
 ##
 
-# Should work almost everywhere
 INSTALL=@INSTALL@
-# On a system with pure BSD install, -c might be preferred
-#INSTALL=install -c
-
 INSTALLDIR=mkdir -p
 
 BIN_MODE=755
@@ -205,3 +186,4 @@ DATA_MODE=644
 
 STRIP=@STRIP@
 
+RM=rm
