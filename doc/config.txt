@@ -1,4 +1,7 @@
 
+*** The information contained in this file is out of date! ***
+
+
 ION CONFIGURATION FILE
 
 Here is the structure and options of Ion configuration file commented.

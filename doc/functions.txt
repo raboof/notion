@@ -1,4 +1,7 @@
 
+*** The information contained in this file is out of date! ***
+
+
 ION FUNCTIONS
 
 These functions can be used in the 'bindings' section of the configuration
