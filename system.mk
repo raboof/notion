@@ -28,6 +28,8 @@ INCDIR=$(PREFIX)/include/ion
 LIBDIR=$(PREFIX)/lib
 # Modules
 MODULEDIR=$(LIBDIR)/ion
+# Compiled Lua source code
+LCDIR=$(LIBDIR)/ion/lc
 # ion-completefile (does not belong in SHAREDIR being a binary file)
 EXTRABINDIR=$(LIBDIR)/ion
 # For ion-completeman system-wide cache
@@ -145,8 +147,8 @@ WARN=	-W -Wimplicit -Wreturn-type -Wswitch -Wcomment \
 	-Wtrigraphs -Wformat -Wchar-subscripts \
 	-Wparentheses -pedantic -Wuninitialized
 
-CFLAGS=-g -Os $(WARN) $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES)
-LDFLAGS=-g -Os $(LIBS) $(EXTRA_LIBS)
+CFLAGS=-g -Os $(WARN) $(DEFINES) $(EXTRA_INCLUDES) $(INCLUDES)
+LDFLAGS=-g -Os $(EXTRA_LIBS) $(LIBS)
 
 # The following options are mainly for development use and can be used
 # to check that the code seems to conform to some standards. Depending
@@ -177,7 +179,7 @@ LDFLAGS=-g -Os $(LIBS) $(EXTRA_LIBS)
 ##
 
 DEPEND_FILE=.depend
-DO_MAKE_DEPEND=$(CC) -MM $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES)
+DO_MAKE_DEPEND=$(CC) -MM $(DEFINES) $(EXTRA_INCLUDES) $(INCLUDES)
 MAKE_DEPEND=$(DO_MAKE_DEPEND) $(SOURCES) > $(DEPEND_FILE)
 MAKE_DEPEND_MOD=$(DO_MAKE_DEPEND) $(SOURCES) | sed 's/\.o/\.lo/' > $(DEPEND_FILE)
 

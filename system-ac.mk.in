@@ -29,6 +29,8 @@ INCDIR=@includedir@
 LIBDIR=@libdir@
 # Modules
 MODULEDIR=@libdir@/@PACKAGE_TARNAME@
+# Compiled Lua source code
+LCDIR=@libdir@/@PACKAGE_TARNAME@/lc
 # ion-completefile (does not belong in SHAREDIR being a binary file)
 EXTRABINDIR=@libexecdir@/@PACKAGE_TARNAME@
 # For ion-completeman system-wide cache
@@ -165,8 +167,8 @@ WARN=	-W -Wimplicit -Wreturn-type -Wswitch -Wcomment \
 C99_SOURCE=@C99_SOURCE@
 DEFINES += @_DCF_HAS_VA_COPY@
 
-CFLAGS=@CFLAGS@ $(WARN) $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES)
-LDFLAGS=@LDFLAGS@ $(LIBS) $(EXTRA_LIBS)
+CFLAGS=@CFLAGS@ $(WARN) $(DEFINES) $(EXTRA_INCLUDES) $(INCLUDES)
+LDFLAGS=@LDFLAGS@ $(EXTRA_LIBS) $(LIBS)
 
 
 ##
@@ -174,7 +176,7 @@ LDFLAGS=@LDFLAGS@ $(LIBS) $(EXTRA_LIBS)
 ##
 
 DEPEND_FILE=.depend
-DO_MAKE_DEPEND=$(CC) -MM $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES)
+DO_MAKE_DEPEND=$(CC) -MM $(DEFINES) $(EXTRA_INCLUDES) $(INCLUDES)
 MAKE_DEPEND=$(DO_MAKE_DEPEND) $(SOURCES) > $(DEPEND_FILE)
 MAKE_DEPEND_MOD=$(DO_MAKE_DEPEND) $(SOURCES) | sed 's/\.o/\.lo/' > $(DEPEND_FILE)
 

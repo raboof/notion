@@ -24,7 +24,8 @@ EXT_OBJS += ../ioncore/ioncore.a ../luaextl/luaextl.a
 LIBS += -ltu
 
 DEFINES += -DETCDIR=\"$(ETCDIR)\" -DSHAREDIR=\"$(SHAREDIR)\" \
-	   -DEXTRABINDIR=\"$(EXTRABINDIR)\" -DMODULEDIR=\"$(MODULEDIR)\"
+	   -DEXTRABINDIR=\"$(EXTRABINDIR)\" -DMODULEDIR=\"$(MODULEDIR)\" \
+	   -DLCDIR=\"$(LCDIR)\"
 
 ifndef PWM_ETCDIR
 PWM_ETCDIR = $(ETCDIR)
