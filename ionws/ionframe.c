@@ -180,7 +180,7 @@ static void ionframe_resize_hints(WIonFrame *frame, XSizeHints *hints_ret,
 
 static void ionframe_recalc_bar(WIonFrame *frame, bool draw)
 {
-	WScreen *scr=SCREEN_OF(frame);
+	WGRData *grdata=GRDATA_OF(frame);
 	int bar_w, tab_w, textw, n;
 	WRegion *sub;
 
@@ -194,9 +194,9 @@ static void ionframe_recalc_bar(WIonFrame *frame, bool draw)
 		n=0;
 		FOR_ALL_MANAGED_ON_LIST(frame->genframe.managed_list, sub){
 			tab_w=genframe_nth_tab_w((WGenFrame*)frame, n++);
-			textw=BORDER_IW(&(scr->grdata.tab_border), tab_w);
+			textw=BORDER_IW(&(grdata->tab_border), tab_w);
 			REGION_LABEL(sub)=region_make_label(sub, textw,
-												scr->grdata.tab_font);
+												grdata->tab_font);
 		}
 	}
 	

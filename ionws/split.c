@@ -8,7 +8,6 @@
 #include <X11/Xmd.h>
 
 #include <ioncore/common.h>
-#include <ioncore/screen.h>
 #include <ioncore/focus.h>
 #include <ioncore/global.h>
 #include <ioncore/window.h>

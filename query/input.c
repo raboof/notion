@@ -49,8 +49,7 @@ void input_calc_size(WInput *input, WRectangle *geom)
 
 void setup_input_dinfo(WInput *input, DrawInfo *dinfo)
 {
-	WScreen *scr=SCREEN_OF(input);
-	WGRData *grdata=&(scr->grdata);
+	WGRData *grdata=GRDATA_OF(input);
 	
 	dinfo->win=input->win.win;
 	dinfo->draw=input->win.draw;

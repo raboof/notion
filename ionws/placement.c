@@ -7,7 +7,6 @@
 
 #include <ioncore/common.h>
 #include <ioncore/global.h>
-#include <ioncore/screen.h>
 #include <ioncore/clientwin.h>
 #include <ioncore/attach.h>
 #include <ioncore/manage.h>

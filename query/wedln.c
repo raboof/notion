@@ -209,8 +209,7 @@ static void setup_wedln_dinfo(WEdln *wedln, DrawInfo *dinfo,
 
 static void wedln_calc_size(WEdln *wedln, WRectangle *geom)
 {
-	WScreen *scr=SCREEN_OF(wedln);
-	WGRData *grdata=&(scr->grdata);
+	WGRData *grdata=GRDATA_OF(wedln);
 	int h, th;
 	WRectangle max_geom=*geom;
 	DrawInfo dinfo_;
@@ -227,7 +226,7 @@ static void wedln_calc_size(WEdln *wedln, WRectangle *geom)
 		fit_listing(&dinfo_, &(wedln->complist));
 
 		h=wedln->complist.toth;
-		th+=scr->grdata.spacing+INPUT_BORDER_SIZE(grdata);
+		th+=grdata->spacing+INPUT_BORDER_SIZE(grdata);
 		
 		if(h+th>max_geom.h)
 			h=max_geom.h-th;
@@ -417,7 +416,7 @@ allocfail:
 /*{{{ Init, deinit and config update */
 
 
-static bool wedln_init_prompt(WEdln *wedln, WScreen *scr, const char *prompt)
+static bool wedln_init_prompt(WEdln *wedln, WGRData *grdata, const char *prompt)
 {
 	char *p;
 	
@@ -430,7 +429,7 @@ static bool wedln_init_prompt(WEdln *wedln, WScreen *scr, const char *prompt)
 		}
 		wedln->prompt=p;
 		wedln->prompt_len=strlen(p);
-		wedln->prompt_w=text_width(INPUT_FONT(&(scr->grdata)),
+		wedln->prompt_w=text_width(INPUT_FONT(grdata),
 								   p, wedln->prompt_len);
 	}else{
 		wedln->prompt=NULL;
@@ -447,7 +446,7 @@ static bool wedln_init(WEdln *wedln, WWindow *par, WRectangle geom,
 {
 	wedln->vstart=0;
 
-	if(!wedln_init_prompt(wedln, SCREEN_OF(par), params->prompt))
+	if(!wedln_init_prompt(wedln, GRDATA_OF(par), params->prompt))
 		return FALSE;
 	
 	if(!edln_init(&(wedln->edln), params->dflt)){
