@@ -253,7 +253,7 @@ void frame_update_attr_nth(WFrame *frame, int i)
     if(i<0 || i>=frame->titles_n)
         return;
 
-    update_attr(frame, i, mplex_l1_nth((WMPlex*)frame, i));
+    update_attr(frame, i, mplex_lnth((WMPlex*)frame, 1, i));
 }
 
 

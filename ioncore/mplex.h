@@ -93,14 +93,10 @@ extern void mplex_do_set_focus(WMPlex *mplex, bool warp);
 /* Misc */
 extern WRegion *mplex_current(WMPlex *mplex);
 
-extern int mplex_l1_count(WMPlex *mplex);
-extern int mplex_l2_count(WMPlex *mplex);
-extern WRegion *mplex_l1_nth(WMPlex *mplex, uint n);
-extern WRegion *mplex_l2_nth(WMPlex *mplex, uint n);
-extern ExtlTab mplex_l1_list(WMPlex *mplex);
-extern ExtlTab mplex_l2_list(WMPlex *mplex);
-extern WRegion *mplex_l1_current(WMPlex *mplex);
-extern WRegion *mplex_l2_current(WMPlex *mplex);
+extern int mplex_lcount(WMPlex *mplex, uint l);
+extern WRegion *mplex_lnth(WMPlex *mplex, uint l, uint n);
+extern ExtlTab mplex_llist(WMPlex *mplex, uint l);
+extern WRegion *mplex_lcurrent(WMPlex *mplex, uint l);
 
 /* Dynfuns */
 DYNFUN void mplex_managed_geom(const WMPlex *mplex, WRectangle *geom);

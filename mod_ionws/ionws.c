@@ -492,7 +492,7 @@ WFrame *ionws_split_at(WIonWS *ws, WFrame *frame, const char *dirstr,
 
     ionws_managed_add(ws, nnode->u.reg);
     
-    curr=mplex_l1_current(&(frame->mplex));
+    curr=mplex_lcurrent(&(frame->mplex), 1);
     
     if(attach_current && curr!=NULL)
         mplex_attach_simple(&(newframe->mplex), curr, MPLEX_ATTACH_SWITCHTO);

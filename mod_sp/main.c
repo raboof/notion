@@ -66,8 +66,8 @@ bool mod_sp_toggle_on(WMPlex *mplex)
 {
     int i;
     
-    for(i=mplex_l2_count(mplex)-1; i>=0; i--){
-        WScratchpad *sp=OBJ_CAST(mplex_l2_nth(mplex, i), WScratchpad);
+    for(i=mplex_lcount(mplex, 2)-1; i>=0; i--){
+        WScratchpad *sp=OBJ_CAST(mplex_lnth(mplex, 2, i), WScratchpad);
         if(sp!=NULL){
             if(REGION_IS_MAPPED(sp))
                 return mplex_l2_hide(mplex, (WRegion*)sp);
@@ -125,8 +125,8 @@ static void check_and_create()
         /* This is really inefficient, but most likely there's just
          * the scratchpad on the list... 
          */
-        for(i=0; i<mplex_l2_count((WMPlex*)scr); i++){
-            sp=OBJ_CAST(mplex_l2_nth((WMPlex*)scr, i), WScratchpad);
+        for(i=0; i<mplex_lcount((WMPlex*)scr, 2); i++){
+            sp=OBJ_CAST(mplex_lnth((WMPlex*)scr, 2, i), WScratchpad);
             if(sp!=NULL)
                 break;
         }

@@ -43,7 +43,7 @@ static WInfoWin *tabdrag_infowin=NULL;
 
 static WRegion *sub_at_tab(WFrame *frame)
 {
-    return mplex_l1_nth((WMPlex*)frame, p_tabnum);
+    return mplex_lnth((WMPlex*)frame, 1, p_tabnum);
 }
 
 
@@ -117,7 +117,7 @@ int frame_press(WFrame *frame, XButtonEvent *ev, WRegion **reg_ret)
         p_tab_x+=frame_nth_tab_x(frame, p_tabnum);
         p_tab_y+=g.y;
         
-        sub=mplex_l1_nth(&(frame->mplex), p_tabnum);
+        sub=mplex_lnth(&(frame->mplex), 1, p_tabnum);
 
         if(reg_ret!=NULL)
             *reg_ret=sub;

@@ -34,7 +34,7 @@ function querylib.do_query(mplex, prompt, initvalue, handler, completor)
         handler(mplex, str)
     end
     -- Check that no other queries are open in the mplex.
-    local l=mplex:l2_list()
+    local l=mplex:llist(2)
     for i, r in l do
         if obj_is(r, "WEdln") then
             return
