@@ -309,6 +309,7 @@ static bool extl_stack_get(lua_State *st, int pos, char type, bool copystring,
 			return FALSE;
 		
 		d=lua_tonumber(st, pos);
+		
 		if(type=='i'){
 			if(d-floor(d)!=0)
 				return FALSE;
