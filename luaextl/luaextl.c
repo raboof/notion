@@ -1464,7 +1464,7 @@ static int extl_l1_call_handler2(lua_State *st)
 				 lua_typename(st, lua_type(st, i+1)));
 			return 0;
 		}
-		param->ii=i;
+		param->ii=i+1;
 	}
 	
 	if(!spec->l2handler(spec->fn, param->ip, param->op))
@@ -1484,7 +1484,7 @@ static void extl_l1_finalize(L1Param *param)
 	ExtlExportedFnSpec *spec=param->spec;
 	int i;
 	
-	for(i=0; i<=param->ii; i++)
+	for(i=0; i<param->ii; i++)
 		extl_free((void*)&(param->ip[i]), spec->ispec[i], STRINGS_NONE);
 
 	for(i=0; i<param->no; i++)
