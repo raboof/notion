@@ -237,9 +237,8 @@ static char *shorten(GrBrush *brush, const char *str, uint maxw,
 			pos+=len;
 		}
 	}
-	
+
 	/* Stupid alloc rule that wastes space */
-	
 	rulelen=strlen(rule);
 	slen=rulelen;
 	
@@ -320,7 +319,7 @@ static char *shorten(GrBrush *brush, const char *str, uint maxw,
 			while(1){
 				/* el+bl may not be the actual length, but close enough. */
 				if(el+bl<=maxw){
-					strcpy(s+i, s+j);
+					memmove(s+i, s+j, slen-j+1);
 					return s;
 				}
 				
