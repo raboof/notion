@@ -247,10 +247,10 @@ static WRegion *floatws_do_add_managed(WFloatWS *ws, WRegionAddFn *fn,
 	WWindow *par;
 	WRegion *reg;
 
-	if(param->flags&REGION_ATTACH_GEOMRQ){
+	if(REGION_ATTACH_IS_GEOMRQ(param->flags)){
 		geom=param->geomrq;
 	}else{
-		warn("Attempt to add a region that does not request geometry on a "
+		warn("Attempt to add region that does not request geometry on a "
 			 "WFloatWS");
 		return NULL;
 	}
@@ -306,27 +306,53 @@ static bool floatws_add_clientwin(WFloatWS *ws,
 #endif
 	
 	if(target==NULL){
-		WRectangle fgeom=REGION_GEOM(cwin);
+		WRectangle fgeom;
+		
+		if(params->flags&REGION_ATTACH_SIZERQ){
+			fgeom.w=params->geomrq.w;
+			fgeom.h=params->geomrq.h;
+		}else{
+			fgeom.w=REGION_GEOM(cwin).w;
+			fgeom.h=REGION_GEOM(cwin).h;
+		}
+		
 		fgeom.w+=2*cwin->orig_bw;
 		fgeom.h+=2*cwin->orig_bw;
+
+		if(params->flags&REGION_ATTACH_POSRQ){
+			fgeom.x=params->geomrq.x;
+			fgeom.y=params->geomrq.y;
+			respectpos=TRUE;
+		}else{
+			fgeom.x=0;
+			fgeom.y=0;
+		}
+		
 		fgeom=initial_to_floatframe_geom(GRDATA_OF(ws), fgeom,
 										 (cwin->size_hints.flags&PWinGravity
 										  ? cwin->size_hints.win_gravity
 										  : NorthWestGravity));
-		if(cwin->transient_for!=None)
-			respectpos=TRUE;
-		
-		if(respectpos && params->flags&REGION_ATTACH_GEOMRQ){
-			if((params->geomrq.x+params->geomrq.w<=REGION_GEOM(ws).x) ||
-			   (params->geomrq.y+params->geomrq.h<=REGION_GEOM(ws).y) ||
-			   (params->geomrq.x<=REGION_GEOM(ws).x+REGION_GEOM(ws).w) ||
-			   (params->geomrq.y<=REGION_GEOM(ws).y+REGION_GEOM(ws).h))
-				respectpos=FALSE;
+
+		if(params->flags&REGION_ATTACH_MAPRQ && wglobal.opmode!=OPMODE_INIT){
+			/* When the window is mapped by application request, position
+			 * request is only honoured if the position was given by the user
+			 * and in case of a transient (the may know better where to place
+			 * them).
+			 */
+			respectpos=(cwin->transient_for!=None ||
+						cwin->size_hints.flags&USPosition);
 		}
-		
-		if(params->flags&REGION_ATTACH_MAPRQ &&
-		   (cwin->size_hints.flags&USPosition || wglobal.opmode==OPMODE_INIT))
-			respectpos=TRUE;
+
+		/* However, if the requested geometry does not overlap the
+		 * workspaces's geometry, position request is never honoured.
+		 */
+		if((fgeom.x+fgeom.w<=REGION_GEOM(ws).x) ||
+		   (fgeom.y+fgeom.h<=REGION_GEOM(ws).y) ||
+		   (fgeom.x>=REGION_GEOM(ws).x+REGION_GEOM(ws).w) ||
+		   (fgeom.y>=REGION_GEOM(ws).y+REGION_GEOM(ws).h)){
+			fprintf(stderr, "doh!\n");
+			respectpos=FALSE;
+		}
 
 		if(!respectpos)
 			floatws_calc_placement(ws, &fgeom);

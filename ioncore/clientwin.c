@@ -383,7 +383,7 @@ again:
 	if(cwin==NULL)
 		goto fail2;
 
-	param.flags|=(REGION_ATTACH_GEOMRQ|REGION_ATTACH_MAPRQ);
+	param.flags|=(REGION_ATTACH_SIZERQ|REGION_ATTACH_POSRQ|REGION_ATTACH_MAPRQ);
 	param.geomrq=REGION_GEOM(cwin);
 
 	CALL_ALT_B(managed, add_clientwin_alt, (cwin, &param));
@@ -433,7 +433,7 @@ static WRegion *clientwin_do_add_managed(WClientWin *cwin,
 	if(par==NULL)
 		return NULL;
 	
-	if(param->flags&REGION_ATTACH_GEOMRQ && param->geomrq.h>0){
+	if(param->flags&REGION_ATTACH_SIZERQ && param->geomrq.h>0){
 		/* Don't increase the height of the transient */
 		int diff=geom.h-param->geomrq.h;
 		if(diff>0){
@@ -530,8 +530,13 @@ void clientwin_deinit(WClientWin *cwin)
 		XRemoveFromSaveSet(wglobal.dpy, cwin->win);
 		XDeleteContext(wglobal.dpy, cwin->win, wglobal.win_context);
 		
-		if(wglobal.opmode==OPMODE_DEINIT)
+		if(wglobal.opmode==OPMODE_DEINIT){
 			XMapWindow(wglobal.dpy, cwin->win);
+			/* Make sure the topmost window has focus; it doesn't really
+			 * matter which one has as long as some has.
+			 */
+			SET_FOCUS(cwin->win);
+		}
 	}
 	clear_colormaps(cwin);
 	

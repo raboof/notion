@@ -37,22 +37,8 @@ static WRegion *find_suitable_frame(WIonWS *ws)
 static bool finish_add_transient(WRegion *reg, WClientWin *cwin,
 								 const WAttachParams *param)
 {
-	WAttachParams param2;
-
-	param2.flags=0;
-	
-	assert(reg!=NULL);
-	
-	if(clientwin_get_switchto(cwin))
-		param2.flags|=REGION_ATTACH_SWITCHTO;
-	
-	if(param->flags&REGION_ATTACH_INITSTATE &&
-	   param->init_state==IconicState)
-		param2.flags=0;
-	
-	return region_add_managed(reg, (WRegion*)cwin, &param2);
+	return finish_add_clientwin(reg, cwin, param);
 }
-
 
 
 bool ionws_add_clientwin(WIonWS *ws, WClientWin *cwin,
@@ -82,7 +68,7 @@ bool ionws_add_clientwin(WIonWS *ws, WClientWin *cwin,
 #ifndef CF_IONWS_IGNORE_USER_POSITION
 		if(param->flags&REGION_ATTACH_MAPRQ &&
 		   cwin->size_hints.flags&USPosition){
-			/* MAPRQ implies GEOMRQ */
+			/* MAPRQ implies POSRQ and SIZERQ */
 			
 			/* Maybe gravity should be taken into account so that user
 			 * specified position -0-0 would put to the frame in the

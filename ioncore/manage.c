@@ -78,7 +78,7 @@ static WViewport *find_suitable_viewport(WClientWin *cwin,
 	WScreen *scr=SCREEN_OF(cwin);
 	WViewport *vp;
 
-	if(param->flags&REGION_ATTACH_GEOMRQ){
+	if(param->flags&REGION_ATTACH_POSRQ){
 		FOR_ALL_TYPED_CHILDREN(scr, vp, WViewport){
 			WRectangle geom=REGION_GEOM(vp);
 			if(param->geomrq.x>=geom.x && param->geomrq.x<geom.x+geom.w &&
@@ -109,7 +109,7 @@ bool add_clientwin_default(WClientWin *cwin, WAttachParams *param)
 	
 	/* check full screen mode */
 	
-	if(param->flags&REGION_ATTACH_GEOMRQ){ /* flag should always be set */
+	if(param->flags&REGION_ATTACH_POSRQ){ /* flag should always be set */
 		if(clientwin_check_fullscreen_request(cwin, param->geomrq.w,
 											  param->geomrq.h))
 			return TRUE;
@@ -213,6 +213,12 @@ bool finish_add_clientwin(WRegion *reg, WClientWin *cwin,
 	
 	if(clientwin_get_switchto(cwin))
 		param2.flags|=REGION_ATTACH_SWITCHTO;
+	
+	if(param->flags&REGION_ATTACH_SIZERQ){
+		param2.flags|=REGION_ATTACH_SIZERQ;
+		param2.geomrq.w=param->geomrq.w;
+		param2.geomrq.h=param->geomrq.h;
+	}
 	
 	if(param->flags&REGION_ATTACH_INITSTATE &&
 	   param->init_state==IconicState)

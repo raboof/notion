@@ -68,8 +68,6 @@ bool region_add_managed_simple(WRegion *mgr, WRegion *reg, int flags)
 {
 	WAttachParams param;
 	param.flags=flags&(REGION_ATTACH_SWITCHTO|REGION_ATTACH_DOCKAPP);
-	/*param.flags|=REGION_ATTACH_GEOMRQ;
-	param.geomrq=REGION_GEOM(reg);*/
 
 	return region_add_managed(mgr, reg, &param);
 }
@@ -108,7 +106,7 @@ static void get_attach_params(ExtlTab tab, WAttachParams *param)
 	
 	if(extl_table_gets_t(tab, "geom", &geomtab)){
 		if(extltab_to_geom(geomtab, &(param->geomrq)))
-			param->flags|=REGION_ATTACH_GEOMRQ;
+			param->flags|=(REGION_ATTACH_SIZERQ|REGION_ATTACH_POSRQ);
 		extl_unref_table(geomtab);
 	}
 

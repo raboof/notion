@@ -15,12 +15,17 @@
 #include "clientwin.h"
 
 #define REGION_ATTACH_SWITCHTO	0x0001
-#define REGION_ATTACH_GEOMRQ	0x0002
-#define REGION_ATTACH_INITSTATE	0x0004 /* only set by add_clientwin */
-#define REGION_ATTACH_DOCKAPP	0x0008 /* only set by add_clientwin */
-#define REGION_ATTACH_TFOR		0x0010 /* only set by add_clientwin */
-#define REGION_ATTACH_MAPRQ 	0x0020 /* only setd by add_clientwin;
+#define REGION_ATTACH_POSRQ		0x0002
+#define REGION_ATTACH_SIZERQ	0x0004
+#define REGION_ATTACH_INITSTATE	0x0010 /* only set by add_clientwin */
+#define REGION_ATTACH_DOCKAPP	0x0020 /* only set by add_clientwin */
+#define REGION_ATTACH_TFOR		0x0040 /* only set by add_clientwin */
+#define REGION_ATTACH_MAPRQ 	0x0080 /* only setd by add_clientwin;
 										  implies GEOMRQ */
+
+#define REGION_ATTACH_IS_GEOMRQ(FLAGS) \
+ (((FLAGS)&(REGION_ATTACH_POSRQ|REGION_ATTACH_SIZERQ)) \
+	  ==(REGION_ATTACH_POSRQ|REGION_ATTACH_SIZERQ))
 
 typedef struct{
 	int flags;
