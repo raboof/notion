@@ -140,11 +140,6 @@ extern bool extl_call_vararg(ExtlFn fnref, const char *spec,
 extern bool extl_call(ExtlFn fnref, const char *spec,
                       const char *rspec, ...);
 
-extern bool extl_call_named_vararg(const char *name, const char *spec,
-                                   const char *rspec, va_list *args);
-extern bool extl_call_named(const char *name, const char *spec,
-                            const char *rspec, ...);
-
 /* Files */
 
 extern bool extl_loadfile(const char *file, ExtlFn *ret);

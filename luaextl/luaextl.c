@@ -1372,9 +1372,6 @@ static bool extl_cpcall_call(lua_State *st, ExtlCPCallFn *fn,
 }
 
 
-/*{{{ extl_call */
-
-
 static bool extl_do_call_vararg(lua_State *st, ExtlDoCallParam *param)
 {
     if(!extl_getref(st, *(ExtlFn*)(param->misc)))
@@ -1411,49 +1408,6 @@ bool extl_call(ExtlFn fnref, const char *spec, const char *rspec, ...)
     
     return retval;
 }
-
-
-/*}}}*/
-
-
-/*{{{ extl_call_named */
-
-
-static bool extl_do_call_named_vararg(lua_State *st, ExtlDoCallParam *param)
-{
-    lua_getglobal(st, (const char*)(param->misc));
-    return extl_dodo_call_vararg(st, param);
-}
-
-
-bool extl_call_named_vararg(const char *name, const char *spec,
-                            const char *rspec, va_list *args)
-{
-    ExtlDoCallParam param;
-    param.spec=spec;
-    param.rspec=rspec;
-    param.args=args;
-    param.misc=(void*)name;
-
-    return extl_cpcall_call(l_st, (ExtlCPCallFn*)extl_do_call_named_vararg,
-                            &param);
-}
-
-
-bool extl_call_named(const char *name, const char *spec, const char *rspec, ...)
-{
-    bool retval;
-    va_list args;
-    
-    va_start(args, rspec);
-    retval=extl_call_named_vararg(name, spec, rspec, &args);
-    va_end(args);
-    
-    return retval;
-}
-
-
-/*}}}*/
 
 
 /*}}}*/
