@@ -140,8 +140,9 @@ extern char *region_make_label(WRegion *reg, int maxw, XFontStruct *font);
 
 extern WRegion *do_lookup_region(const char *cname, WObjDescr *descr);
 extern int do_complete_region(char *nam, char ***cp_ret, char **beg,
-							 WObjDescr *descr);
+							  WObjDescr *descr);
 extern WRegion *lookup_region(const char *cname);
-extern int complete_region(char *nam, char ***cp_ret, char **beg);
+extern int complete_region(char *nam, char ***cp_ret, char **beg,
+						   void *unused);
 
 #endif /* WMCORE_REGION_H */

@@ -294,7 +294,7 @@ WWorkspace *lookup_workspace(const char *name)
 }
 
 
-int complete_workspace(char *nam, char ***cp_ret, char **beg)
+int complete_workspace(char *nam, char ***cp_ret, char **beg, void *unused)
 {
 	return do_complete_region(nam, cp_ret, beg, &OBJDESCR(WWorkspace));
 }

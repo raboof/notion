@@ -24,7 +24,6 @@ typedef void WEdlnHandler(WThing *p, char *str, char *userdata);
 
 DECLSTRUCT(WEdlnCreateParams){
 	WEdlnHandler *handler;
-	EdlnCompletionHandler *chandler;
 	const char *prompt;
 	const char *dflt;
 };
@@ -47,7 +46,10 @@ DECLOBJ(WEdln){
 
 extern WEdln *create_wedln(WScreen *scr, WWinGeomParams params,
 						   WEdlnCreateParams *p);
+extern void wedln_set_completion_handler(WEdln *wedln,
+										 EdlnCompletionHandler *h, void *d);
 extern void deinit_wedln(WEdln *edln);
+
 extern void wedln_finish(WEdln *wedln);
 extern void wedln_paste(WEdln *wedln);
 extern void wedln_draw(WEdln *wedln, bool complete);

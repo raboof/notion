@@ -33,7 +33,8 @@
 
 static WEdln *do_query_edln(WFrame *frame, WEdlnHandler *handler,
 							const char *prompt, const char *dflt,
-							EdlnCompletionHandler *chnd)
+							EdlnCompletionHandler *chandler,
+							void *chandler_data)
 {
 	WRectangle geom;
 	WEdln *wedln;
@@ -42,17 +43,18 @@ static WEdln *do_query_edln(WFrame *frame, WEdlnHandler *handler,
 	fnp.prompt=prompt;
 	fnp.dflt=dflt;
 	fnp.handler=handler;
-	fnp.chandler=chnd;
-	
 	
 	wedln=(WEdln*)frame_attach_input_new(frame,
 										 (WRegionCreateFn*)create_wedln,
 										 (void*)&fnp);
-	if(wedln!=NULL)
+	if(wedln!=NULL){
 		map_region((WRegion*)wedln);
 
-	if(REGION_IS_ACTIVE(frame)){
-		set_focus((WRegion*)wedln);
+		if(REGION_IS_ACTIVE(frame))
+			set_focus((WRegion*)wedln);
+		
+		if(chandler!=NULL)
+			wedln_set_completion_handler(wedln, chandler, chandler_data);
 	}
 	
 	return wedln;
@@ -132,14 +134,15 @@ static void handler_exec(WThing *thing, char *str, char *userdata)
 
 void query_exec(WFrame *frame)
 {
-	do_query_edln(frame, handler_exec, "Run:", NULL, complete_file_with_path);
+	do_query_edln(frame, handler_exec, "Run:", NULL,
+				  complete_file_with_path, NULL);
 }
 
 
 void query_runfile(WFrame *frame, char *prompt, char *cmd)
 {
 	WEdln *wedln=do_query_edln(frame, handler_runfile,
-							   prompt, my_getwd(), complete_file);
+							   prompt, my_getwd(), complete_file, NULL);
 	if(wedln!=NULL)
 		wedln->userdata=scopy(cmd);
 }
@@ -148,7 +151,7 @@ void query_runfile(WFrame *frame, char *prompt, char *cmd)
 void query_runwith(WFrame *frame, char *prompt, char *cmd)
 {
 	WEdln *wedln=do_query_edln(frame, handler_runwith,
-							   prompt, NULL, NULL);
+							   prompt, NULL, NULL, NULL);
 	if(wedln!=NULL)
 		wedln->userdata=scopy(cmd);
 }
@@ -201,14 +204,14 @@ static void handler_gotoclient(WThing *thing, char *str, char *userdata)
 void query_attachclient(WFrame *frame)
 {
 	do_query_edln(frame, handler_attachclient,
-				  "Attach client:", "", complete_clientwin);
+				  "Attach client:", "", complete_clientwin, NULL);
 }
 
 
 void query_gotoclient(WFrame *frame)
 {
 	do_query_edln(frame, handler_gotoclient,
-				  "Goto client:", "", complete_clientwin);
+				  "Goto client:", "", complete_clientwin, NULL);
 }
 
 
@@ -246,7 +249,7 @@ static void handler_workspace(WThing *thing, char *name, char *userdata)
 void query_workspace(WFrame *frame)
 {
 	do_query_edln(frame, handler_workspace,
-				  "Goto/create workspace:", "", complete_workspace);
+				  "Goto/create workspace:", "", complete_workspace, NULL);
 }
 
 
@@ -309,7 +312,8 @@ void query_workspace_with(WFrame *frame)
 	p=region_full_name(sub);
 	
 	wedln=do_query_edln(frame, handler_workspace_with,
-						"Create workspace/attach:", p, complete_workspace);
+						"Create workspace/attach:", p,
+						complete_workspace, NULL);
 	if(wedln==NULL)
 		free(p);
 	else
@@ -337,7 +341,7 @@ void query_renameworkspace(WFrame *frame)
 	
 	do_query_edln(frame, handler_renameworkspace,
 				  "Rename workspace to:", region_name((WRegion*)ws),
-				  NULL);
+				  NULL, NULL);
 }
 
 
@@ -351,7 +355,7 @@ void query_renameframe(WFrame *frame)
 {
 	do_query_edln(frame, handler_renameframe,
 				  "Name of this frame:", region_name((WRegion*)frame),
-				  NULL);
+				  NULL, NULL);
 }
 
 
@@ -421,23 +425,33 @@ static void handler_yesno(WThing *thing, char *yesno, char *fn)
 void query_yesno(WFrame *frame, char *prompt, char *fn)
 {
 	WEdln *wedln=do_query_edln(frame, handler_yesno,
-							   prompt, NULL, NULL);
+							   prompt, NULL, NULL, NULL);
 	if(wedln!=NULL)
 		wedln->userdata=scopy(fn);
 }
 
 
-static int complete_mainfunc(char *nam, char ***cp_ret,
-								   char **beg)
+static int complete_mainfunc(char *nam, char ***cp_ret, char **beg,
+							 void *fr)
 {
-	return complete_func_ex(nam, cp_ret, beg, &ion_frame_funclist);
+	WRegion *r;
+	
+	if(fr==NULL || !WTHING_IS(fr, WFrame))
+		return 0;
+	
+	r=((WFrame*)fr)->current_sub;
+	
+	if(r==NULL)
+		r=((WRegion*)fr);
+		
+	return complete_func_thing_parents(nam, cp_ret, beg, (WThing*)r);
 }
 
 
 void query_function(WFrame *frame)
 {
 	do_query_edln(frame, handler_function,
-				  "Function name:", NULL, complete_mainfunc);
+				  "Function name:", NULL, complete_mainfunc, frame);
 }
 
 

@@ -839,8 +839,6 @@ int do_complete_region(char *nam, char ***cp_ret, char **beg, WObjDescr *descr)
 	int n=0, l=strlen(nam);
 	int lnum=0;
 	
-	*cp_ret=NULL;
-	
 again:
 	
 	for(reg=region_list; reg!=NULL; reg=reg->ni.g_next){
@@ -886,7 +884,7 @@ WRegion *lookup_region(const char *name)
 }
 
 
-int complete_region(char *nam, char ***cp_ret, char **beg)
+int complete_region(char *nam, char ***cp_ret, char **beg, void *unused)
 {
 	return do_complete_region(nam, cp_ret, beg, &OBJDESCR(WObj));
 }

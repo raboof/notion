@@ -77,46 +77,83 @@ static int complete_funtab(const char *nam, char ***cp_ret, char **beg,
 	char *name;
 	char **cp;
 	int l=strlen(nam);
-	
+
 	for(; func->callhnd!=NULL; func++){
 		
 		if((name=func->name)==NULL)
 			continue;
 		
-		/*if(func->argtypes!=NULL && strcmp(func->argtypes, ""))
-			continue;*/
-		
 		if(l && strncmp(name, nam, l))
 			continue;
 		
 		add_to_complist_copy(cp_ret, &n, name);
+
+/*	{
+		int i;
+		fprintf(stderr, "-->%d [%s]\n", n, name);
+		for(i=1; i<n; i++){
+			fprintf(stderr, "%s\n", *cp_ret+i);
+		}
+		fprintf(stderr, "-------------\n");
+	}*/
 	}
-	
 	return n;
 }
 
 
-int complete_func_ex(const char *nam, char ***cp_ret, char **beg,
-					 WFunclist *funclist)
+static int complete_func_ex(const char *nam, char ***cp_ret, char **beg,
+							int n, WFunclist *funclist)
 {
 	WFunction *func;
-	int n=0;
 	
-	*cp_ret=NULL;
-
-	ITERATE_SYMLIST(WFunction*, func, funclist->funtabs){
-		n=complete_funtab(nam, cp_ret, beg, n, func);
+	if(funclist!=NULL){
+		ITERATE_SYMLIST(WFunction*, func, funclist->funtabs){
+			n=complete_funtab(nam, cp_ret, beg, n, func);
+		}
 	}
-	
+
 	return n;
 }
 
 
-int complete_func(const char *nam, char ***cp_ret, char **beg,
-				  WFunction *func)
+static int do_complete_func_thing(const char *nam, char ***cp_ret, char **beg,
+								  int n, WThing *thing)
 {
-	*cp_ret=NULL;
-	return complete_funtab(nam, cp_ret, beg, 0, func);
+	WObjDescr *descr;
+	
+	fprintf(stderr, "%s\n", WOBJ_TYPESTR(thing));
+	descr=thing->obj.obj_type;
+	
+	while(descr!=NULL){
+		fprintf(stderr, "->%s\n", descr->name);
+
+		n=complete_func_ex(nam, cp_ret, beg, n,
+						   (WFunclist*)descr->funclist);
+		descr=descr->ancestor;
+	}
+
+	return n;
+}
+
+
+int complete_func_thing(const char *nam, char ***cp_ret, char **beg,
+						WThing *thing)
+{
+	return do_complete_func_thing(nam, cp_ret, beg, 0, thing);
+}
+
+
+int complete_func_thing_parents(const char *nam, char ***cp_ret, char **beg,
+								WThing *thing)
+{
+	int n=0;
+	
+	while(thing!=NULL){
+		n=do_complete_func_thing(nam, cp_ret, beg, n, thing);
+		thing=thing->t_parent;
+	}
+	
+	return n;
 }
 
 

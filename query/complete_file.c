@@ -37,7 +37,7 @@
 /*  awb Dec 30 1998                                                         */
 /*                                                                          */
 /****************************************************************************/
-/*  $Revision: 1.1 $
+/*  $Revision: 1.2 $
  **
  **  History and file completion functions for editline library.
  */
@@ -509,7 +509,8 @@ static int tilde_complete(char *path, char **retpath)
 /*
  **  Return all possible completions.
  */
-int complete_file(char *pathname, char ***avp, char **beg)
+int complete_file(char *pathname, char ***avp, char **beg,
+				  void *unused)
 {
     char	*dir;
     char	*file, *path=NULL, *tt;
@@ -564,7 +565,8 @@ int complete_file(char *pathname, char ***avp, char **beg)
 /*
  **  Return all possible completions.
  */
-int complete_file_with_path(char *pathname, char ***avp, char **beg)
+int complete_file_with_path(char *pathname, char ***avp, char **beg,
+							void *unused)
 {
     char	*dir;
     char	*file, *path=NULL, *tt;

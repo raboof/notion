@@ -395,7 +395,6 @@ static bool wedln_init_prompt(WEdln *wedln, WScreen *scr, const char *prompt)
 
 bool init_wedln(WEdln *wedln, WScreen *scr, WWinGeomParams params,
 				WEdlnHandler *handler,
-				EdlnCompletionHandler *chandler,
 				const char *prompt, const char *dflt)
 {
 	wedln->vstart=0;
@@ -425,8 +424,6 @@ bool init_wedln(WEdln *wedln, WScreen *scr, WWinGeomParams params,
 
 	wedln->input.win.xic=create_xic(wedln->input.win.win);
 
-	wedln->edln.completion_handler=chandler;
-	
 	region_add_bindmap((WRegion*)wedln, query_edln_bindmap, FALSE);
 	
 	return TRUE;
@@ -436,8 +433,7 @@ bool init_wedln(WEdln *wedln, WScreen *scr, WWinGeomParams params,
 WEdln *create_wedln(WScreen *scr, WWinGeomParams params,
 					WEdlnCreateParams *fnp)
 {
-	CREATETHING_IMPL(WEdln, wedln, (p, scr, params,
-									fnp->handler, fnp->chandler,
+	CREATETHING_IMPL(WEdln, wedln, (p, scr, params, fnp->handler,
 									fnp->prompt, fnp->dflt));
 }
 
@@ -497,6 +493,14 @@ void wedln_insstr(WEdln *wedln, const char *buf, size_t n)
 {
 	edln_insstr_n(&(wedln->edln), buf, n);
 	wedln_draw(wedln, FALSE);
+}
+
+
+void wedln_set_completion_handler(WEdln *wedln, EdlnCompletionHandler *h,
+								  void *d)
+{
+	wedln->edln.completion_handler=h;
+	wedln->edln.completion_handler_data=d;
 }
 
 

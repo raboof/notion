@@ -587,6 +587,7 @@ bool edln_init(Edln *edln, const char *p)
 	edln->histent=-1;
 	edln->modified=FALSE;
 	edln->completion_handler=NULL;
+	edln->completion_handler_data=NULL;
 	edln->tmp_p=NULL;
 	
 	return TRUE;

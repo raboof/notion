@@ -39,7 +39,8 @@ extern void init_workspaces(WViewport *vp);
 extern void setup_screens();
 
 extern WWorkspace *lookup_workspace(const char *name);
-extern int complete_workspace(char *nam, char ***cp_ret, char **beg);
+extern int complete_workspace(char *nam, char ***cp_ret, char **beg,
+							  void *unused);
 
 extern bool switch_workspace_name(const char *str);
 

@@ -41,13 +41,12 @@ DECLSTRUCT(WFunclist){
 extern WFunction *lookup_func(const char *name, WFunction *func);
 extern WFunction *lookup_func_ex(const char *name, WFunclist *funclist);
 extern WFunction *lookup_func_thing(WThing *thing, const char *name);
-extern int complete_func(const char *nam, char ***cp_ret, char **beg,
-							WFunction *func);
-extern int complete_func_ex(const char *nam, char ***cp_ret, char **beg,
-							WFunclist *funclist);
-
 extern bool add_to_funclist(WFunclist *funclist, WFunction *funtab);
 extern void remove_from_funclist(WFunclist *funclist, WFunction *funtab);
 extern void clear_funclist(WFunclist *funclist);
+extern int complete_func_thing(const char *nam, char ***cp_ret, char **beg,
+							   WThing *thing);
+extern int complete_func_thing_parents(const char *nam, char ***cp_ret,
+									   char **beg, WThing *thing);
 
 #endif /* WMCORE_FUNCTION_H */
