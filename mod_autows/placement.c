@@ -34,6 +34,10 @@
 #include "splitext.h"
 
 
+WHook *autows_init_layout_alt=NULL;
+WHook *autows_make_placement_alt=NULL;
+
+
 /*{{{ create_frame_for */
 
 
@@ -106,7 +110,6 @@ typedef struct{
 } PlacementParams;
 
 
-WHook *autows_layout_alt=NULL;
 
 
 static bool mrsh_layout_extl(ExtlFn fn, PlacementParams *p)
@@ -209,7 +212,7 @@ static bool do_replace(WAutoWS *ws, WFrame *frame, WClientWin *cwin,
     if(u->parent!=NULL)
         splitinner_replace(u->parent, u, node);
     else
-	splittree_changeroot((WSplit*)u, node);
+        splittree_changeroot((WSplit*)u, node);
     
     u->parent=NULL;
     ioncore_defer_destroy((Obj*)u);
@@ -251,9 +254,9 @@ bool autows_manage_clientwin(WAutoWS *ws, WClientWin *cwin,
 
         split_update_bounds(*tree, TRUE);
         
-        assert(autows_layout_alt!=NULL);
+        assert(autows_make_placement_alt!=NULL);
         
-        hook_call_p(autows_layout_alt, &rs,
+        hook_call_p(autows_make_placement_alt, &rs,
                     (WHookMarshallExtl*)mrsh_layout_extl);
         
         if(rs.res_node==NULL)

@@ -53,14 +53,56 @@ static WRegion *create_frame_autows(WWindow *parent, const WFitParams *fp)
 }
 
 
-static bool autows_create_initial_unused(WAutoWS *ws)
+
+typedef struct{
+    WAutoWS *ws;
+    ExtlTab layout;
+} InitParams;
+
+
+static bool mrsh_init_layout_extl(ExtlFn fn, InitParams *p)
 {
-    ws->ionws.split_tree=(WSplit*)create_splitunused(&REGION_GEOM(ws));
+    ExtlTab t=extl_create_table();
+    bool ret=FALSE;
+    
+    extl_table_sets_o(t, "ws", (Obj*)p->ws);
+
+    ret=extl_call(fn, "t", "b", t, &ret);
+    
+    if(ret)
+        ret=extl_table_gets_t(t, "layout", &(p->layout));
+        
+    extl_unref_table(t);
+    return ret;
+}
+
+
+static bool autows_init_layout(WAutoWS *ws)
+{
+    InitParams p;
+    
+    p.ws=ws;
+    p.layout=extl_table_none();
+	
+    hook_call_p(autows_init_layout_alt, &p,
+                (WHookMarshallExtl*)mrsh_init_layout_extl);
+
+    if(p.layout!=extl_table_none()){            
+        ws->ionws.split_tree=ionws_load_node(&(ws->ionws),
+                                             &REGION_GEOM(ws), 
+                                             p.layout);
+        extl_unref_table(p.layout);
+    }
+         
+    if(ws->ionws.split_tree==NULL)
+        ws->ionws.split_tree=(WSplit*)create_splitunused(&REGION_GEOM(ws));
+        
     return (ws->ionws.split_tree!=NULL);
 }
 
 
-bool autows_init(WAutoWS *ws, WWindow *parent, const WFitParams *fp, bool cu)
+bool autows_init(WAutoWS *ws, WWindow *parent, const WFitParams *fp, 
+                 bool ilo)
 {
     if(!ionws_init(&(ws->ionws), parent, fp, 
                    create_frame_autows, FALSE))
@@ -68,8 +110,8 @@ bool autows_init(WAutoWS *ws, WWindow *parent, const WFitParams *fp, bool cu)
     
     assert(ws->ionws.split_tree==NULL);
     
-    if(cu){
-        if(!autows_create_initial_unused(ws)){
+    if(ilo){
+        if(!autows_init_layout(ws)){
             autows_deinit(ws);
             return FALSE;
         }
@@ -390,7 +432,7 @@ WRegion *autows_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
     
     if(ws==NULL)
         return NULL;
-
+ 
     if(extl_table_gets_t(tab, "split_tree", &treetab)){
         ws->ionws.split_tree=ionws_load_node(&(ws->ionws), &REGION_GEOM(ws), 
                                              treetab);
@@ -398,7 +440,7 @@ WRegion *autows_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
     }
     
     if(ws->ionws.split_tree==NULL){
-        if(!autows_create_initial_unused(ws)){
+        if(!autows_init_layout(ws)){
             destroy_obj((Obj*)ws);
             return NULL;
         }

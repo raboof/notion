@@ -72,9 +72,14 @@ void mod_autows_deinit()
         mod_autows_frame_bindmap=NULL;
     }
     
-    if(autows_layout_alt!=NULL){
-        destroy_obj((Obj*)autows_layout_alt);
-        autows_layout_alt=NULL;
+    if(autows_init_layout_alt!=NULL){
+        destroy_obj((Obj*)autows_init_layout_alt);
+        autows_init_layout_alt=NULL;
+    }
+
+    if(autows_make_placement_alt!=NULL){
+        destroy_obj((Obj*)autows_make_placement_alt);
+        autows_make_placement_alt=NULL;
     }
 
 }
@@ -98,7 +103,8 @@ static bool register_regions()
 
 static bool init_hooks()
 {
-    INIT_HOOK_(autows_layout_alt);
+    INIT_HOOK_(autows_init_layout_alt);
+    INIT_HOOK_(autows_make_placement_alt);
     return TRUE;
 }
 

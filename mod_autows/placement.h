@@ -19,7 +19,8 @@
 #include "autows.h"
 
 
-extern WHook *autows_layout_alt;
+extern WHook *autows_init_layout_alt;
+extern WHook *autows_make_placement_alt;
 
 
 extern bool autows_manage_clientwin(WAutoWS *ws, WClientWin *cwin,
