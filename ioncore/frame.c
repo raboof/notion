@@ -9,6 +9,8 @@
  * (at your option) any later version.
  */
 
+#include <string.h>
+
 #include <libtu/obj.h>
 #include <libtu/objp.h>
 #include <libtu/minmax.h>
@@ -59,9 +61,14 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
                 const char *style)
 {
     WRectangle mg;
-    
+
     if(style==NULL)
         style="frame";
+#warning "TODO: remove eventually"
+    else if(strcmp(style, "frame-ionframe")==0)
+        style="frame-tiled-ionws";
+    else if(strcmp(style, "frame-floatframe")==0)
+        style="frame-floating-floatws";
     
     frame->flags=0;
     frame->saved_w=0;
