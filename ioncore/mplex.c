@@ -1591,10 +1591,6 @@ void mplex_load_contents(WMPlex *mplex, ExtlTab tab)
                 tmp_layer=(par.flags&MPLEX_ATTACH_L2 ? 2 : 1);
                 tmp_mplex=mplex;
                 
-                extl_table_gets_s(subtab, "name", &tmp);
-                fprintf(stderr, "%s\n", tmp);
-                if(tmp!=NULL) free(tmp);
-                
                 ioncore_set_sm_pholder_callback(pholder_callback);
     
                 region__attach_load((WRegion*)mplex, subtab,
