@@ -13,6 +13,7 @@
 #include "attach.h"
 #include "objp.h"
 #include "clientwin.h"
+#include "saveload.h"
 
 
 /*{{{ Attach */
@@ -82,6 +83,90 @@ bool region_add_managed(WRegion *mgr, WRegion *reg,
 	
 	return (region_do_add_managed(mgr, (WRegionAddFn*)add_fn_reparent,
 								  (void*)reg, param)!=NULL);
+}
+
+
+/*}}}*/
+
+
+/*{{{ Attach Lua interface */
+
+
+static WRegion *add_fn_load(WWindow *par, WRectangle geom, ExtlTab *tab)
+{
+	return load_create_region(par, geom, *tab);
+}
+
+
+static void get_attach_params(ExtlTab tab, WAttachParams *param)
+{
+	ExtlTab geomtab;
+	bool sel;
+	char *typestr;
+	
+	param->flags=0;
+	
+	if(extl_table_gets_t(tab, "geom", &geomtab)){
+		if(extltab_to_geom(geomtab, &(param->geomrq)))
+			param->flags|=REGION_ATTACH_GEOMRQ;
+		extl_unref_table(geomtab);
+	}
+
+	if(extl_table_gets_b(tab, "selected", &sel)){
+		if(sel)
+			param->flags|=REGION_ATTACH_SWITCHTO;
+	}
+}
+
+
+WRegion *region_add_managed_load(WRegion *mgr, ExtlTab tab)
+{
+	WAttachParams param;
+	get_attach_params(tab, &param);
+	return region_do_add_managed(mgr, (WRegionAddFn*)add_fn_load,
+								 (void*)&tab, &param);
+}
+
+
+/*EXTL_DOC
+ * Creates a new region to be managed by \var{mgr}, which should 
+ * implement \code{region_do_add_managed}. The table \var{desc}
+ * should contain the type of region to create in the field \var{type}.
+ * The following optional generic fields are also known, but the
+ * table may also contain additional parameters that depend on the type
+ * of region being created.
+ * \begin{tabularx}{lX}
+ *  \hline
+ *  Field & Description \\
+ *  \hline
+ * 	\var{type} & Class name of the object to create (mandatory) \\
+ *  \var{geom} & Geometry \emph{request}; a table with field
+ *				 \var{x}, \var{y}, \var{w} and \var{h}. \\
+ * 	\var{selected} & Boolean value indicating whether the new region should
+ 					 be made the selected one within \var{mgr}. \\
+ *  \var{name} & The (short) name of the region. Note that this name
+ *               should not be used to reference the object but the full
+ * 				 name with instance number (\fnref{region_full_name}). \\
+ * \end{tabularx}
+ */
+EXTL_EXPORT
+WRegion *region_manage_new(WRegion *mgr, ExtlTab desc)
+{
+	return region_add_managed_load(mgr, desc);
+}
+
+
+/* EXTL_DOC
+ * Requests that \var{mgr} start managing \var{reg}. The optional
+ * table argument \var{tab} may contain the fields \var{geom}
+ * and \var{selected}; see \fnref{region_manage_new} for details.
+ */
+EXTL_EXPORT
+bool region_manage(WRegion *mgr, WRegion *reg, ExtlTab tab)
+{
+	WAttachParams param;
+	get_attach_params(tab, &param);
+	return region_add_managed(mgr, reg, &param);
 }
 
 

@@ -59,38 +59,7 @@ WRegion *load_create_region(WWindow *par, WRectangle geom, ExtlTab tab)
 	return reg;
 }
 
-
-static WRegion *add_fn_load(WWindow *par, WRectangle geom, ExtlTab *tab)
-{
-	return load_create_region(par, geom, *tab);
-}
-
-
-WRegion *region_add_managed_load(WRegion *mgr, ExtlTab tab)
-{
-	ExtlTab geomtab;
-	bool sel;
-	WAttachParams param;
-	char *typestr;
 	
-	param.flags=0;
-	
-	if(extl_table_gets_t(tab, "geom", &geomtab)){
-		if(extltab_to_geom(geomtab, &(param.geomrq)))
-			param.flags|=REGION_ATTACH_GEOMRQ;
-		extl_unref_table(geomtab);
-	}
-
-	if(extl_table_gets_b(tab, "selected", &sel)){
-		if(sel)
-			param.flags|=REGION_ATTACH_SWITCHTO;
-	}
-
-	return region_do_add_managed(mgr, (WRegionAddFn*)&add_fn_load,
-								 (void*)&tab, &param);
-}
-
-
 /*}}}*/
 
 
