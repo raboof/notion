@@ -32,7 +32,6 @@ DECLOBJ(WRootWin){
 	int xscr;
 	
 	WRegion *screen_list;
-	WScreen *current_screen;
 	
 	Colormap default_cmap;
 	

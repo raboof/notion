@@ -104,7 +104,7 @@ bool clientwin_enter_fullscreen(WClientWin *cwin, bool switchto)
 	WScreen *scr=region_screen_of((WRegion*)cwin);
 	
 	if(scr==NULL){
-		scr=ROOTWIN_OF(cwin)->current_screen;
+		scr=rootwin_current_scr(ROOTWIN_OF(cwin));
 		if(scr==NULL)
 			return FALSE;
 	}

@@ -231,7 +231,6 @@ static WRootWin *preinit_rootwin(int xscr)
 	rootwin->root=root;
 	rootwin->xscr=xscr;
 	rootwin->default_cmap=DefaultColormap(dpy, xscr);
-	rootwin->current_screen=NULL;
 	rootwin->screen_list=NULL;
 	
 	MARK_REGION_MAPPED(rootwin);
@@ -390,9 +389,9 @@ static void rootwin_set_focus_to(WRootWin *rootwin, bool warp)
 {
 	WRegion *sub;
 	
-	sub=(WRegion*)rootwin->current_screen;
+	sub=REGION_ACTIVE_SUB(rootwin);
 	
-	if(sub==NULL){
+	if(sub==NULL || !REGION_IS_MAPPED(sub)){
 		FOR_ALL_MANAGED_ON_LIST(rootwin->screen_list, sub){
 			if(REGION_IS_MAPPED(sub))
 				break;
@@ -433,9 +432,6 @@ static bool reparent_rootwin(WRootWin *rootwin, WWindow *par, WRectangle geom)
 
 static void rootwin_remove_managed(WRootWin *rootwin, WRegion *reg)
 {
-	if((WRegion*)rootwin->current_screen==reg)
-		rootwin->current_screen=NULL;
-	
 	region_unset_manager(reg, (WRegion*)rootwin, &(rootwin->screen_list));
 }
 
@@ -484,13 +480,31 @@ bool same_rootwin(const WRegion *reg1, const WRegion *reg2)
 }
 
 
+static bool scr_ok(WRegion *r)
+{
+	return (WOBJ_IS(r, WScreen) && REGION_IS_MAPPED(r));
+}
+
+
 /*EXTL_DOC
  * Returns previously active screen on root window \var{rootwin}.
  */
 EXTL_EXPORT
 WScreen *rootwin_current_scr(WRootWin *rootwin)
 {
-	return rootwin->current_screen;
+	WRegion *r=REGION_ACTIVE_SUB(rootwin);
+	
+	/* There should be no non-WScreen as children or managed by us, but... */
+	
+	if(r!=NULL && scr_ok(r))
+		return (WScreen*)r;
+	
+	FOR_ALL_MANAGED_ON_LIST(rootwin->screen_list, r){
+		if(scr_ok(r))
+			break;
+	}
+	
+	return (WScreen*)r;
 }
 
 

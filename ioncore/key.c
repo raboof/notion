@@ -222,9 +222,6 @@ void handle_keypress(XKeyEvent *ev)
 
 	reg=(WRegion*)FIND_WINDOW(ev->window);
 	
-	/*if(reg!=NULL && WOBJ_IS(reg, WRootWin))
-		reg=(WRegion*)((WRootWin*)reg)->current_screen;*/
-
 	if(reg==NULL)
 		return;
 	

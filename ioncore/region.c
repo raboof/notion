@@ -453,19 +453,11 @@ void region_got_focus(WRegion *reg)
 		reg->flags|=REGION_ACTIVE;
 		
 		r=REGION_PARENT_CHK(reg, WRegion);
-		if(r!=NULL){
-			/*if(r->active_sub!=NULL){
-				if(region_x_window(r->active_sub)==None)
-					r->active_sub->flags&=~REGION_ACTIVE;
-			}*/
+		if(r!=NULL)
 			r->active_sub=reg;
-			/*if(WOBJ_IS(r, WRootWin)){
-				D(fprintf(stderr, "cvp: %p, %d [%s]\n", r, region_screen_of(reg)->id, WOBJ_TYPESTR(reg)));
-				((WRootWin*)r)->current_screen=region_screen_of(reg);
-			}*/
-		}
 		
 		region_activated(reg);
+		
 		r=REGION_MANAGER(reg);
 		if(r!=NULL)
 			region_managed_activated(r, reg);
