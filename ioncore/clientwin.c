@@ -351,7 +351,7 @@ bool clientwin_attach_sub(WClientWin *cwin, WRegion *sub, int flags)
 	
 	link_thing((WThing*)cwin, (WThing*)sub);
 	
-	if(region_is_fully_mapped((WRegion*)cwin))
+	if(REGION_IS_MAPPED((WRegion*)cwin))
 	   map_region(sub);
 	   
 	if(REGION_IS_ACTIVE(cwin))
