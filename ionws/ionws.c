@@ -367,19 +367,23 @@ WRegion *ionws_load(WWindow *par, WRectangle geom, ExtlTab tab)
 {
 	WIonWS *ws;
 	ExtlTab treetab;
+	bool ci=TRUE;
+
+	if(extl_table_gets_t(tab, "split_tree", &treetab))
+		ci=FALSE;
 	
-	if(!extl_table_gets_t(tab, "split_tree", &treetab))
-		return NULL;
-	   
-	ws=create_ionws(par, geom, FALSE);
+	ws=create_ionws(par, geom, ci);
 	
 	if(ws==NULL){
-		extl_unref_table(treetab);
+		if(!ci)
+			extl_unref_table(treetab);
 		return NULL;
 	}
 
-	ws->split_tree=load_obj(ws, par, geom, treetab);
-	extl_unref_table(treetab);
+	if(!ci){
+		ws->split_tree=load_obj(ws, par, geom, treetab);
+		extl_unref_table(treetab);
+	}
 	
 	if(ws->split_tree==NULL){
 		warn("Workspace empty");
