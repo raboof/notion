@@ -12,6 +12,7 @@
 #include <lualib.h>
 #include <lauxlib.h>
 
+#include <libtu/util.h>
 #include <ioncore/common.h>
 #include <ioncore/obj.h>
 #include <ioncore/objp.h>
@@ -811,14 +812,14 @@ const char **extl_set_safelist(const char **newlist)
 #define MAX_PARAMS 16
 
 
-static int extl_l1_call_handler(lua_State *st)
+static int extl_l1_call_handler2(lua_State *st)
 {
 	ExtlL2Param ip[MAX_PARAMS]={NULL, };
 	ExtlL2Param op[MAX_PARAMS]={NULL, };
 	ExtlExportedFnSpec *spec;
 	int i, ni, no, top;
 	bool ret;
-	
+
 	top=lua_gettop(st);
 	
 	spec=(ExtlExportedFnSpec*)lua_touserdata(st, lua_upvalueindex(1));
@@ -876,6 +877,81 @@ static int extl_l1_call_handler(lua_State *st)
 		extl_stack_push(st, spec->ospec[i], (void*)&(op[i]));
 
 	return no;
+}
+
+
+
+
+static bool need_trace=FALSE;
+static WarnHandler *old_warn_handler=NULL;
+static bool wh_has_been_set=FALSE;
+
+static void l1_warn_handler(const char *message)
+{
+	static int called=0;
+	
+	if(old_warn_handler!=NULL && called==0){
+		called++;
+		old_warn_handler(message);
+		called--;
+	}else{
+		fprintf(stderr, "%s: %s\n", prog_execname(), message);
+	}
+	
+	need_trace=TRUE;
+}
+
+
+static void extl_stack_trace(lua_State *st)
+{
+	lua_Debug ar;
+	int lvl=1;
+	
+	warn("Stack trace: ");
+				 
+	for( ; lua_getstack(st, lvl, &ar); lvl++){
+		if(lua_getinfo(st, "Sln", &ar)==0){
+			warn("  (Unable to get debug info for level %d)", lvl);
+		}else{
+			warn("  %s\n   current line: %d, function: %s",
+				 ar.source, ar.currentline, ar.name);
+		}
+	}
+}
+
+
+static void clean_warn_handler(const char *msg)
+{
+	fwrite(msg, sizeof(char), strlen(msg), stderr);
+	fputc('\n', stderr);
+}
+
+
+static int extl_l1_call_handler(lua_State *st)
+{
+	bool old_need_trace=need_trace;
+	WarnHandler *old_old_warn_handler=old_warn_handler;
+	int ret;
+	
+	old_warn_handler=set_warn_handler(l1_warn_handler);
+	
+	ret=extl_l1_call_handler2(st);
+
+	if(need_trace){
+		if(old_warn_handler==NULL)
+			set_warn_handler(clean_warn_handler);
+		else
+			set_warn_handler(old_warn_handler);
+		extl_stack_trace(st);
+		set_warn_handler(l1_warn_handler);
+	}
+	
+	set_warn_handler(old_warn_handler);
+	old_warn_handler=old_old_warn_handler;
+	
+	need_trace=old_need_trace;
+	
+	return ret;
 }
 
 
