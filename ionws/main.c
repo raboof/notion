@@ -11,9 +11,8 @@
 
 #include <ioncore/common.h>
 #include <ioncore/reginfo.h>
-#include <query/main.h>
+#include <ioncore/readconfig.h>
 
-#include "conf.h"
 #include "bindmaps.h"
 #include "ionws.h"
 #include "ionframe.h"
@@ -24,7 +23,7 @@
 
 #include "../version.h"
 
-char ionws_module_ion_api_version[]=ION_API_VERSION;
+char ionwsmod_ion_api_version[]=ION_API_VERSION;
 
 
 /*}}}*/
@@ -33,28 +32,28 @@ char ionws_module_ion_api_version[]=ION_API_VERSION;
 /*{{{ Module init & deinit */
 
 
-extern bool ionws_module_register_exports();
-extern void ionws_module_unregister_exports();
+extern bool ionwsmod_register_exports();
+extern void ionwsmod_unregister_exports();
 
 
-void ionws_module_deinit()
+void ionwsmod_deinit()
 {
-	ionws_module_unregister_exports();
-	deinit_bindmap(&ionws_bindmap);
-	deinit_bindmap(&ionframe_bindmap);
-	unregister_region_class(&OBJDESCR(WIonWS));
-	unregister_region_class(&OBJDESCR(WIonFrame));
+	ionwsmod_unregister_exports();
+	bindmap_deinit(&ionws_bindmap);
+	bindmap_deinit(&ionframe_bindmap);
+	ioncore_unregister_regclass(&CLASSDESCR(WIonWS));
+	ioncore_unregister_regclass(&CLASSDESCR(WIonFrame));
 }
 
 
 static bool register_regions()
 {
-	if(!register_region_class(&OBJDESCR(WIonFrame), NULL,
+	if(!ioncore_register_regclass(&CLASSDESCR(WIonFrame), NULL,
 							  (WRegionLoadCreateFn*) ionframe_load)){
 		return FALSE;
 	}
 	
-	if(!register_region_class(&OBJDESCR(WIonWS),
+	if(!ioncore_register_regclass(&CLASSDESCR(WIonWS),
 							  (WRegionSimpleCreateFn*) create_ionws_simple,
 							  (WRegionLoadCreateFn*) ionws_load)){
 	   return FALSE;
@@ -64,24 +63,24 @@ static bool register_regions()
 }
 
 
-bool ionws_module_init()
+bool ionwsmod_init()
 {
-	if(!ionws_module_register_exports()){
-		warn_obj("ionws module", "Unable to register exports");
+	if(!ionwsmod_register_exports()){
+		warn_obj("ionwsmod", "Unable to register exports");
 		goto err;
 	}
 	
 	if(!register_regions()){
-		warn_obj("ionws module", "Unable to register classes");
+		warn_obj("ionwsmod", "Unable to register classes");
 		goto err;
 	}
 	
-	ionws_module_read_config();
-	
+	ioncore_read_config("ionws", NULL, TRUE);
+
 	return TRUE;
 	
 err:
-	ionws_module_deinit();
+	ionwsmod_deinit();
 	return FALSE;
 }
 

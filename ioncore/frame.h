@@ -18,17 +18,16 @@
 #include "mplex.h"
 #include "gr.h"
 #include "extl.h"
+#include "rectangle.h"
 
-INTROBJ(WFrame);
+#define FRAME_TAB_HIDE    0x0004
+#define FRAME_SAVED_VERT  0x0008
+#define FRAME_SAVED_HORIZ 0x0010
+#define FRAME_SHADED	  0x0020
+#define FRAME_SETSHADED	  0x0040
+#define FRAME_BAR_OUTSIDE 0x0080
 
-#define WFRAME_TAB_HIDE    0x0004
-#define WFRAME_SAVED_VERT  0x0008
-#define WFRAME_SAVED_HORIZ 0x0010
-#define WFRAME_SHADED	  0x0020
-#define WFRAME_SETSHADED	  0x0040
-#define WFRAME_BAR_OUTSIDE 0x0080
-
-DECLOBJ(WFrame){
+DECLCLASS(WFrame){
 	WMPlex mplex;
 	
 	int flags;
@@ -72,7 +71,6 @@ extern void frame_toggle_tab(WFrame *frame);
 extern void frame_update_attr_nth(WFrame *frame, int i);
 
 /* Misc */
-extern void frame_toggle_sub_tag(WFrame *frame);
 extern bool frame_save_to_file(WFrame *frame, FILE *file, int lvl);
 extern void frame_load_saved_geom(WFrame* frame, ExtlTab tab);
 extern void frame_do_load(WFrame *frame, ExtlTab tab);

@@ -13,6 +13,7 @@
 
 #include <ioncore/common.h>
 #include <ioncore/region.h>
+#include <ioncore/region-iter.h>
 
 #include "placement.h"
 #include "floatws.h"
@@ -106,7 +107,7 @@ enum{
  * fall back to ''random'' placement if no free area was found.
  */
 EXTL_EXPORT
-void set_floatws_placement_method(const char *method)
+void floatwsmod_set_placement_method(const char *method)
 {
 	if(method==NULL)
 		return;

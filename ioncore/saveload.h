@@ -16,25 +16,20 @@
 #include "region.h"
 #include "screen.h"
 #include "extl.h"
+#include "rectangle.h"
+
+extern WRegion *create_region_load(WWindow *par, const WRectangle *geom, 
+								   ExtlTab tab);
 
 extern bool region_supports_save(WRegion *reg);
 DYNFUN bool region_save_to_file(WRegion *reg, FILE *file, int lvl);
-extern WRegion *load_create_region(WWindow *par, const WRectangle *geom, 
-								   ExtlTab tab);
+extern void region_save_identity(WRegion *reg, FILE *file, int lvl);
 
-extern void write_escaped_string(FILE *file, const char *str);
-extern void begin_saved_region(WRegion *reg, FILE *file, int lvl);
-/*extern void end_saved_region(WRegion *reg, FILE *file, int lvl);*/
-extern void save_indent_line(FILE *file, int lvl);
+extern void file_write_escaped_string(FILE *file, const char *str);
+extern void file_indent(FILE *file, int lvl);
 
-extern bool load_workspaces();
-extern bool save_workspaces();
-
-extern WRegion *region_add_managed_load(WRegion *mgr, ExtlTab tab);
-
-extern void save_geom(const WRectangle *geom, FILE *file, int lvl);
-
-extern void enable_workspace_saves(bool enable);
+extern bool ioncore_load_workspaces();
+extern bool ioncore_save_workspaces();
 
 #endif /* ION_IONCORE_SAVELOAD_H */
 

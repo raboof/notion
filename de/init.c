@@ -206,14 +206,14 @@ static void get_transparent_background(uint *mode, ExtlTab tab)
 /*}}}*/
 
 
-/*{{{ de_define_style */
+/*{{{ de_defstyle */
 
 
 /*EXTL_DOC
  * Define a style for the root window \var{rootwin}. 
  */
 EXTL_EXPORT
-bool de_define_style_rootwin(WRootWin *rootwin, const char *name, ExtlTab tab)
+bool de_defstyle_rootwin(WRootWin *rootwin, const char *name, ExtlTab tab)
 {
 	DEStyle *style;
 	char *fnt;
@@ -278,13 +278,13 @@ bool de_define_style_rootwin(WRootWin *rootwin, const char *name, ExtlTab tab)
  * Define a style.
  */
 EXTL_EXPORT
-bool de_define_style(const char *name, ExtlTab tab)
+bool de_defstyle(const char *name, ExtlTab tab)
 {
     bool ok=TRUE;
     WRootWin *rw;
     
     FOR_ALL_ROOTWINS(rw){
-        if(!de_define_style_rootwin(rw, name, tab))
+        if(!de_defstyle_rootwin(rw, name, tab))
             ok=FALSE;
     }
     
@@ -311,19 +311,19 @@ ExtlTab de_substyle(const char *pattern, ExtlTab tab)
 
 #include "../version.h"
 
-char de_module_ion_api_version[]=ION_API_VERSION;
+char de_ion_api_version[]=ION_API_VERSION;
 
 
-extern bool de_module_register_exports();
-extern void de_module_unregister_exports();
+extern bool de_register_exports();
+extern void de_unregister_exports();
 
 
-bool de_module_init()
+bool de_init()
 {
 	WRootWin *rootwin;
 	DEStyle *style;
 	
-	if(!de_module_register_exports())
+	if(!de_register_exports())
 		return FALSE;
 	
 	if(!gr_register_engine("de", (GrGetBrushFn*)&de_get_brush)){
@@ -346,15 +346,15 @@ bool de_module_init()
 	return TRUE;
 	
 fail:
-	de_module_unregister_exports();
+	de_unregister_exports();
 	return FALSE;
 }
 
 
-void de_module_deinit()
+void de_deinit()
 {
 	gr_unregister_engine("de");
-	de_module_unregister_exports();
+	de_unregister_exports();
 	de_deinit_styles();
 }
 

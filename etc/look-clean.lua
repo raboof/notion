@@ -1,10 +1,10 @@
 -- look-clean.lua drawing engine configuration file for Ion.
 
-if not gr_select_engine("de") then return end
+if not gr.select_engine("de") then return end
 
-de_reset()
+de.reset()
 
-de_define_style("*", {
+de.defstyle("*", {
     shadow_colour = "grey",
     highlight_colour = "grey",
     background_colour = "#545d75",
@@ -17,11 +17,11 @@ de_define_style("*", {
     text_align = "center",
 })
 
-de_define_style("frame", {
+de.defstyle("frame", {
     based_on = "*",
     padding_colour = "#545d75",
     background_colour = "black",
-    de_substyle("active", {
+    de.substyle("active", {
         shadow_colour = "grey",
         highlight_colour = "grey",
         padding_colour = "#545d75",
@@ -29,7 +29,7 @@ de_define_style("frame", {
     }),
 })
 
-de_define_style("frame-ionframe", {
+de.defstyle("frame-ionframe", {
     based_on = "frame",
     padding_pixels = 0,
     highlight_pixels = 0,
@@ -38,28 +38,28 @@ de_define_style("frame-ionframe", {
 })
 
 
-de_define_style("tab", {
+de.defstyle("tab", {
     based_on = "*",
     font = "fixed",
-    de_substyle("active-selected", {
+    de.substyle("active-selected", {
         shadow_colour = "white",
         highlight_colour = "white",
         background_colour = "#8a999e",
         foreground_colour = "white",
     }),
-    de_substyle("active-unselected", {
+    de.substyle("active-unselected", {
         shadow_colour = "grey",
         highlight_colour = "grey",
         background_colour = "#545d75",
         foreground_colour = "grey",
     }),
-    de_substyle("inactive-selected", {
+    de.substyle("inactive-selected", {
         shadow_colour = "grey",
         highlight_colour = "grey",
         background_colour = "#545d75",
         foreground_colour = "grey",
     }),
-    de_substyle("inactive-unselected", {
+    de.substyle("inactive-unselected", {
         shadow_colour = "grey",
         highlight_colour = "grey",
         background_colour = "#545d75",
@@ -68,9 +68,9 @@ de_define_style("tab", {
     text_align = "center",
 })
 
-de_define_style("tab-frame", {
+de.defstyle("tab-frame", {
     based_on = "tab",
-    de_substyle("*-*-*-*-activity", {
+    de.substyle("*-*-*-*-activity", {
         shadow_colour = "grey",
         highlight_colour = "grey",
         background_colour = "#990000",
@@ -78,15 +78,15 @@ de_define_style("tab-frame", {
     }),
 })
 
-de_define_style("tab-frame-ionframe", {
+de.defstyle("tab-frame-ionframe", {
     based_on = "tab-frame",
     spacing = 1,
 })
 
-de_define_style("tab-menuentry", {
+de.defstyle("tab-menuentry", {
     based_on = "tab",
     text_align = "left",
-    de_substyle("inactive-selected", {
+    de.substyle("inactive-selected", {
         shadow_colour = "grey",
         highlight_colour = "grey",
         background_colour = "#8a999e",
@@ -94,13 +94,13 @@ de_define_style("tab-menuentry", {
     }),
 })
 
-de_define_style("tab-menuentry-big", {
+de.defstyle("tab-menuentry-big", {
     based_on = "tab-menuentry",
 --    font = "-*-fixed-medium-r-normal-*-17-*-*-*-*-*-*-*",
     padding_pixels = 7,
 })
 
-de_define_style("input", {
+de.defstyle("input", {
     based_on = "*",
     shadow_colour = "grey",
     highlight_colour = "grey",
@@ -110,16 +110,16 @@ de_define_style("input", {
     highlight_pixels = 1,
     shadow_pixels = 1,
     border_style = "elevated",
-    de_substyle("*-cursor", {
+    de.substyle("*-cursor", {
         background_colour = "white",
         foreground_colour = "#545d75",
     }),
-    de_substyle("*-selection", {
+    de.substyle("*-selection", {
         background_colour = "#aaaaaa",
         foreground_colour = "black",
     }),
     font = "fixed",
 })
 
-gr_refresh()
+gr.refresh()
 

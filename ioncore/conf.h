@@ -10,8 +10,8 @@
  */
 
 #ifndef ION_IONCORE_CONF_H
-#define WMCORe_CONF_H
+#define ION_IONCORE_CONF_H
 
-extern bool ioncore_read_config(const char *cfgfile);
+extern bool ioncore_read_main_config(const char *cfgfile);
 
 #endif /* ION_IONCORE_CONF_H */

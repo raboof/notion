@@ -9,42 +9,30 @@
 -- (at your option) any later version.
 --
 
-local groups={}
-local mappings={}
+warn([[
+Some binding groups were empty. Making the following minimal emergency
+mappings:
+  F2 -> xterm
+  F11 -> restart
+  F12 -> exit
+  Mod1+C -> close
+  Mod1+K P/N -> WFrame.switch_next/switch_prev
+]])
 
-if string.find(arg[1], "g") then
-    table.insert(mappings, "F2 -> xterm\nF11 -> restart_wm\nF12 -> exit_wm")
-    table.insert(groups, "WScreen")
-    defbindings("WScreen", {
-        kpress("F2", "exec", "xterm"),
-        kpress("F11", "restart_wm"),
-        kpress("F12", "exit_wm"),
+
+defbindings("WScreen", {
+    kpress("F2", function() ioncore.exec('xterm')  end),
+    kpress("F11", function() ioncore.restart() end),
+    kpress("F12", function() ioncore.exit() end),
+})
+
+defbindings("WMPlex", {
+    kpress_waitrel("Mod1+C", ioncorelib.propagate_close),
+})
+
+defbindings("WFrame", {
+    submap("Mod1+K", {
+        kpress("AnyModifier+N", function(f) f:switch_next() end),
+        kpress("AnyModifier+P", function(f) f:switch_prev() end),
     })
-end
-
-if string.find(arg[1], "m") then
-    table.insert(mappings, "Mod1+C -> WRegion.close_sub_or_self")
-    table.insert(groups, "WMPlex")
-    defbindings("WMPlex", {
-        kpress_waitrel("Mod1+C", "close_sub_or_self"),
-    })
-end
-
-if string.find(arg[1], "f") then
-    table.insert(mappings, "Mod1+K P/N -> WFrame.switch_next/prev")
-    table.insert(groups, "WFrame")
-    defbindings("WFrame", {
-        submap("Mod1+K", {
-            kpress("AnyModifier+N", "switch_next"),
-            kpress("AnyModifier+P", "witch_prev"),
-        })
-    })
-end
-
-if table.getn(groups)>0 then
-    warn("The binding group(s) " .. table.concat(groups, ", ") .. 
-         "\nwere empty so the following emergency mappings have " ..
-         "been made:\n" .. table.concat(mappings, "\n") .. 
-         "\nPlease fix your configuration files!")
-end
-
+})

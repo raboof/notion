@@ -16,9 +16,10 @@
 #include "clientwin.h"
 #include "genws.h"
 #include "attach.h"
+#include "rectangle.h"
 
 
-#define INIT_WMANAGEPARAMS \
+#define MANAGEPARAMS_INIT \
   {FALSE, FALSE, FALSE, FALSE, FALSE, ForgetGravity, {0, 0, 0, 0}, NULL}
 
 
@@ -34,16 +35,16 @@ typedef struct{
 } WManageParams;
 
 
+extern bool clientwin_do_manage_default(WClientWin *cwin,
+                                        const WManageParams *param);
 
-extern bool add_clientwin_default(WClientWin *cwin,
-								  const WManageParams *param);
+extern WScreen *clientwin_find_suitable_screen(WClientWin *cwin,
+                                               const WManageParams *param);
 
 DYNFUN bool region_manage_clientwin(WRegion *reg, WClientWin *cwin,
 									const WManageParams *par);
 
 extern bool region_has_manage_clientwin(WRegion *reg);
 
-extern WScreen *find_suitable_screen(WClientWin *cwin,
-									 const WManageParams *param);
 
 #endif /* ION_IONCORE_MANAGE_H */

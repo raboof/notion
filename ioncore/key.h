@@ -17,7 +17,7 @@
 #include "common.h"
 #include "clientwin.h"
 
-extern void handle_keypress(XKeyEvent *ev);
+extern void ioncore_do_handle_keypress(XKeyEvent *ev);
 extern void clientwin_quote_next(WClientWin *cwin);
 
 #endif /* ION_IONCORE_KEY_H */

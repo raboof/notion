@@ -13,25 +13,19 @@
 #define ION_IONCORE_ROOTWIN_H
 
 #include "common.h"
-
-INTROBJ(WRootWin);
-
 #include "window.h"
 #include "screen.h"
 #include "gr.h"
+#include "rectangle.h"
 
 #define WROOTWIN_ROOT(X) ((X)->wwin.win)
-
-#define ROOTWIN_OF(X) region_rootwin_of((WRegion*)X)
-#define ROOT_OF(X) region_root_of((WRegion*)X)
-#define GRDATA_OF(X) region_grdata_of((WRegion*)X)
 #define FOR_ALL_ROOTWINS(RW)         \
-	for(RW=wglobal.rootwins;         \
+	for(RW=ioncore_g.rootwins;         \
 		RW!=NULL;                    \
-		RW=NEXT_CHILD(RW, WRootWin))
+		RW=OBJ_CAST(((WRegion*)RW)->p_next, WRootWin))
 
 
-DECLOBJ(WRootWin){
+DECLCLASS(WRootWin){
 	WWindow wwin;
 	int xscr;
 	
@@ -48,22 +42,15 @@ DECLOBJ(WRootWin){
 };
 
 
-extern WRootWin *manage_rootwin(int xscr, bool noxinerama);
 extern void rootwin_deinit(WRootWin *rootwin);
-
-extern WRootWin *region_rootwin_of(const WRegion *reg);
-extern Window region_root_of(const WRegion *reg);
-extern bool same_rootwin(const WRegion *reg1, const WRegion *reg2);
-
 extern WScreen *rootwin_current_scr(WRootWin *rootwin);
-
 extern void rootwin_manage_initial_windows(WRootWin *rootwin);
-extern bool setup_rootwins();
 
-extern Window create_simple_window(WRootWin *rootwin, Window par,
-								   const WRectangle *geom);
+extern WRootWin *ioncore_manage_rootwin(int xscr, bool noxinerama);
+extern bool ioncore_setup_rootwins();
 
-extern WRootWin *find_rootwin_for_root(Window root);
+extern Window create_xwindow(WRootWin *rootwin, Window par,
+                             const WRectangle *geom);
 
 #endif /* ION_IONCORE_ROOTWIN_H */
 

@@ -14,8 +14,7 @@
 
 #include <stdarg.h>
 
-#include <ioncore/common.h>
-#include <ioncore/objp.h>
+#include <ioncore/obj.h>
 
 #define EXTL_EXTENSION	"lua"
 #define EXTL_COMPILED_EXTENSION	"lc"

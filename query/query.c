@@ -30,14 +30,11 @@
  * second argument when \fnref{WEdln.complete} is called.
  */
 EXTL_EXPORT
-WEdln *query_query(WMPlex *mplex, const char *prompt, const char *dflt,
-				   ExtlFn handler, ExtlFn completor)
+WEdln *querymod_query(WMPlex *mplex, const char *prompt, const char *dflt,
+                      ExtlFn handler, ExtlFn completor)
 {
 	WRectangle geom;
 	WEdlnCreateParams fnp;
-	
-	/*fprintf(stderr, "query_query called %s %s %d %d\n", prompt, dflt,
-			handler, completor);*/
 	
 	fnp.prompt=prompt;
 	fnp.dflt=dflt;

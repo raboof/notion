@@ -22,15 +22,7 @@
 #include "extl.h"
 #include "extlconv.h"
 #include "activity.h"
-
-
-#define FOR_ALL_SUBREGIONS(REG, SUB) \
-	FOR_ALL_TYPED_CHILDREN(REG, SUB, WRegion)
-
-#define FOR_ALL_SUBREGIONS_REVERSE(REG, SUB) \
-	for((SUB)=LAST_CHILD(REG, WRegion);      \
-		(SUB)!=NULL;                         \
-		(SUB)=PREV_CHILD(SUB, WRegion))
+#include "region-iter.h"
 
 
 #define D2(X)
@@ -69,14 +61,14 @@ void region_init(WRegion *reg, WRegion *parent, const WRectangle *geom)
 	
 	reg->mgd_activity=FALSE;
 
-	if(!WOBJ_IS(reg, WClientWin))
-		region_init_name(reg, WOBJ_TYPESTR(reg));
+	if(!OBJ_IS(reg, WClientWin))
+		region_init_name(reg, OBJ_TYPESTR(reg));
 	
 	if(parent!=NULL){
 		reg->rootwin=parent->rootwin;
 		region_set_parent(reg, parent);
 	}else{
-		assert(WOBJ_IS(reg, WRootWin));/* || WOBJ_IS(reg, WScreen));*/
+		assert(OBJ_IS(reg, WRootWin));/* || OBJ_IS(reg, WScreen));*/
 	}
 }
 
@@ -91,9 +83,9 @@ static void destroy_children(WRegion *reg)
 		sub=reg->children;
 		if(sub==NULL)
 			break;
-		assert(!WOBJ_IS_BEING_DESTROYED(sub));
+		assert(!OBJ_IS_BEING_DESTROYED(sub));
 		assert(sub!=prev);
-		if(wglobal.opmode!=OPMODE_DEINIT && !complained && WOBJ_IS(reg, WClientWin)){
+		if(ioncore_g.opmode!=IONCORE_OPMODE_DEINIT && !complained && OBJ_IS(reg, WClientWin)){
 			warn("Destroying object \"%s\" with client windows as children.", 
 				 region_name(reg));
 			complained=TRUE;
@@ -110,18 +102,18 @@ void region_deinit(WRegion *reg)
 	
 	destroy_children(reg);
 
-	if(wglobal.focus_next==reg){
+	if(ioncore_g.focus_next==reg){
 		D(warn("Region to be focused next destroyed[1]."));
-		wglobal.focus_next=NULL;
+		ioncore_g.focus_next=NULL;
 	}
 	
 	region_detach(reg);
 	region_unuse_name(reg);
 	region_remove_bindings(reg);
 
-	if(wglobal.focus_next==reg){
+	if(ioncore_g.focus_next==reg){
 		D(warn("Region to be focused next destroyed[2]."));
-		wglobal.focus_next=NULL;
+		ioncore_g.focus_next=NULL;
 	}
 }
 
@@ -162,10 +154,10 @@ void region_notify_rootpos(WRegion *reg, int x, int y)
 }
 
 
-Window region_x_window(const WRegion *reg)
+Window region_xwindow(const WRegion *reg)
 {
 	Window ret=None;
-	CALL_DYN_RET(ret, Window, region_x_window, reg, (reg));
+	CALL_DYN_RET(ret, Window, region_xwindow, reg, (reg));
 	return ret;
 }
 
@@ -182,9 +174,9 @@ void region_inactivated(WRegion *reg)
 }
 
 
-void region_set_focus_to(WRegion *reg, bool warp)
+void region_do_set_focus(WRegion *reg, bool warp)
 {
-	CALL_DYN(region_set_focus_to, reg, (reg, warp));
+	CALL_DYN(region_do_set_focus, reg, (reg, warp));
 }
 
 
@@ -270,43 +262,17 @@ WRegion *region_current(WRegion *mgr)
 /*{{{ Dynfun defaults */
 
 
-static void default_notify_rootpos(WRegion *reg, int x, int y)
+static void region_notify_rootpos_default(WRegion *reg, int x, int y)
 {
 	region_notify_subregions_rootpos(reg, x, y);
 }
 
 
-#if 0
-static Window default_restack(WRegion *reg, Window other, int mode)
+void region_draw_config_updated_default(WRegion *reg)
 {
+	WRegion *sub=NULL;
 	
-	WRegion *sub;	
-	Window w;
-	
-	if(mode==Above){
-		FOR_ALL_SUBREGIONS(reg, sub){
-			w=region_restack(sub, other, mode);
-			if(w!=None)
-				other=w;
-		}
-	}else{ /* mode==Below */
-		FOR_ALL_SUBREGIONS_REVERSE(reg, sub){
-			w=region_restack(sub, other, mode);
-			if(w!=None)
-				other=w;
-		}
-	}
-	
-	return other;
-}
-#endif
-
-
-void region_default_draw_config_updated(WRegion *reg)
-{
-	WRegion *sub;
-	
-	FOR_ALL_TYPED_CHILDREN(reg, sub, WRegion){
+	FOR_ALL_CHILDREN(reg, sub){
 		region_draw_config_updated(sub);
 	}
 }
@@ -336,7 +302,7 @@ void region_detach_parent(WRegion *reg)
 		/* Removed: seems to confuse floatws:s when frames are
 		 * destroyd.
 		 */
-		/*if(REGION_IS_ACTIVE(reg) && wglobal.focus_next==NULL)
+		/*if(REGION_IS_ACTIVE(reg) && ioncore_g.focus_next==NULL)
 			set_focus(p);*/
 	}
 }
@@ -351,8 +317,8 @@ void region_detach_manager(WRegion *reg)
 	if(mgr==NULL)
 		return;
 	
-	D2(fprintf(stderr, "detach %s (mgr:%s)\n", WOBJ_TYPESTR(reg),
-			   WOBJ_TYPESTR(mgr)));
+	D2(fprintf(stderr, "detach %s (mgr:%s)\n", OBJ_TYPESTR(reg),
+			   OBJ_TYPESTR(mgr)));
 	
 	/* Restore activity state to non-parent manager */
 	if(region_may_control_focus(reg)){
@@ -364,12 +330,11 @@ void region_detach_manager(WRegion *reg)
 			 * be made to work.
 			 */
 			D2(fprintf(stderr, "detach mgr %s, %s->active_sub=%s\n",
-					   WOBJ_TYPESTR(reg), WOBJ_TYPESTR(par),
-					   WOBJ_TYPESTR(mgr)));
+					   OBJ_TYPESTR(reg), OBJ_TYPESTR(par),
+					   OBJ_TYPESTR(mgr)));
 			par->active_sub=mgr;
-			/*if(region_x_window(mgr)!=None){*/
-				D2(fprintf(stderr, "\tdo_set_focus\n"));
-				do_set_focus(mgr, FALSE);
+			/*if(region_xwindow(mgr)!=None){*/
+				region_do_set_focus(mgr, FALSE);
 			/*}*/
 		}
 	}
@@ -433,10 +398,10 @@ bool region_display_sp(WRegion *reg)
 {
 	bool ret;
 	
-	set_previous_of(reg);
-	protect_previous();
+	ioncore_set_previous_of(reg);
+	ioncore_protect_previous();
 	ret=region_display(reg);
-	unprotect_previous();
+	ioncore_unprotect_previous();
 
 	return ret;
 }
@@ -451,11 +416,11 @@ bool region_goto(WRegion *reg)
 {
 	bool ret=FALSE;
 
-	set_previous_of(reg);
-	protect_previous();
+	ioncore_set_previous_of(reg);
+	ioncore_protect_previous();
 	if(region_display(reg))
-		ret=(reg==set_focus_mgrctl(reg, TRUE));
-	unprotect_previous();
+		ret=(reg==region_set_focus_mgrctl(reg, TRUE));
+	ioncore_unprotect_previous();
 	
 	return ret;
 }
@@ -470,7 +435,7 @@ bool region_goto(WRegion *reg)
 /*EXTL_DOC
  * Is \var{reg} visible/is it and all it's ancestors mapped?
  */
-EXTL_EXPORT_MEMBER_AS(WRegion, is_mapped)
+EXTL_EXPORT_AS(WRegion, is_mapped)
 bool region_is_fully_mapped(WRegion *reg)
 {
 	for(; reg!=NULL; reg=region_parent(reg)){
@@ -508,9 +473,9 @@ void region_notify_subregions_move(WRegion *reg)
 
 void region_notify_subregions_rootpos(WRegion *reg, int x, int y)
 {
-	WRegion *sub;
+	WRegion *sub=NULL;
 	
-	FOR_ALL_SUBREGIONS(reg, sub){
+	FOR_ALL_CHILDREN(reg, sub){
 		region_notify_rootpos(sub,
 							  x+REGION_GEOM(sub).x,
 							  y+REGION_GEOM(sub).y);
@@ -619,7 +584,7 @@ WRegion *region_manager_or_parent(WRegion *reg)
 EXTL_EXPORT_MEMBER
 ExtlTab region_geom(WRegion *reg)
 {
-	return geom_to_extltab(&REGION_GEOM(reg));
+	return extl_table_from_rectangle(&REGION_GEOM(reg));
 }
 
 
@@ -633,13 +598,13 @@ bool region_may_destroy(WRegion *reg)
 }
 
 
-WRegion *region_get_manager_chk(WRegion *p, const WObjDescr *descr)
+WRegion *region_get_manager_chk(WRegion *p, const WClassDescr *descr)
 {
 	WRegion *mgr=NULL;
 	
 	if(p!=NULL){
 		mgr=REGION_MANAGER(p);
-		if(wobj_is((WObj*)mgr, descr))
+		if(obj_is((WObj*)mgr, descr))
 			return mgr;
 	}
 	
@@ -647,152 +612,32 @@ WRegion *region_get_manager_chk(WRegion *p, const WObjDescr *descr)
 }
 
 
-/*}}}*/
+/*{{{ Misc. */
 
 
-/*{{{ Scan */
-
-
-static WRegion *get_next_child(WRegion *first, const WObjDescr *descr)
+/*EXTL_DOC
+ * Returns the root window \var{reg} is on.
+ */
+EXTL_EXPORT_MEMBER
+WRootWin *region_rootwin_of(const WRegion *reg)
 {
-	while(first!=NULL){
-		if(wobj_is((WObj*)first, descr))
-			break;
-		first=first->p_next;
-	}
-	
-	return first;
+	WRootWin *rw;
+	assert(reg!=NULL); /* Lua interface should not pass NULL reg. */
+	rw=(WRootWin*)(reg->rootwin);
+	assert(rw!=NULL);
+	return rw;
 }
 
 
-static WRegion *get_prev_child(WRegion *first, const WObjDescr *descr)
+Window region_root_of(const WRegion *reg)
 {
-	if(first==NULL)
-		return NULL;
-	
-	while(1){
-		first=first->p_prev;
-		if(first->p_next==NULL)
-			return NULL;
-		if(wobj_is((WObj*)first, descr))
-			break;
-	}
-	
-	return first;
+	return WROOTWIN_ROOT(region_rootwin_of(reg));
 }
 
 
-WRegion *next_child(WRegion *first, const WObjDescr *descr)
+bool region_same_rootwin(const WRegion *reg1, const WRegion *reg2)
 {
-	if(first==NULL)
-		return NULL;
-	
-	return get_next_child(first->p_next, descr);
-}
-
-
-WRegion *next_child_fb(WRegion *first, const WObjDescr *descr, WRegion *fb)
-{
-	WRegion *r=NULL;
-	if(first!=NULL)
-		r=next_child(first, descr);
-	if(r==NULL)
-		r=fb;
-	return r;
-}
-
-
-WRegion *prev_child(WRegion *first, const WObjDescr *descr)
-{
-	if(first==NULL)
-		return NULL;
-	
-	return get_prev_child(first, descr);
-}
-
-
-WRegion *prev_child_fb(WRegion *first, const WObjDescr *descr, WRegion *fb)
-{
-	WRegion *r=NULL;
-	if(first!=NULL)
-		r=prev_child(first, descr);
-	if(r==NULL)
-		r=fb;
-	return r;
-}
-
-
-WRegion *first_child(WRegion *parent, const WObjDescr *descr)
-{
-	if(parent==NULL)
-		return NULL;
-	
-	return get_next_child(parent->children, descr);
-}
-
-
-WRegion *last_child(WRegion *parent, const WObjDescr *descr)
-{
-	WRegion *p;
-	
-	if(parent==NULL)
-		return NULL;
-	
-	p=parent->children;
-	
-	if(p==NULL)
-		return NULL;
-	
-	p=p->p_prev;
-	
-	if(wobj_is((WObj*)p, descr))
-		return p;
-	
-	return get_prev_child(p, descr);
-}
-
-
-WRegion *region_get_parent_chk(WRegion *p, const WObjDescr *descr)
-{
-	if(p==NULL || p->parent==NULL)
-		return NULL;
-	if(wobj_is((WObj*)p->parent, descr))
-		return p->parent;
-	return NULL;
-}
-
-
-WRegion *nth_child(WRegion *parent, int n, const WObjDescr *descr)
-{
-	WRegion *p;
-	
-	if(n<0)
-		return NULL;
-	
-	p=first_child(parent, descr);
-	   
-	while(n-- && p!=NULL)
-		p=next_child(p, descr);
-
-	return p;
-}
-
-
-bool region_is_ancestor(WRegion *reg, WRegion *reg2)
-{
-	while(reg!=NULL){
-		if(reg==reg2)
-			return TRUE;
-		reg=reg->parent;
-	}
-	
-	return FALSE;
-}
-
-
-bool region_is_child(WRegion *reg, WRegion *reg2)
-{
-	return reg2->parent==reg;
+	return (reg1->rootwin==reg2->rootwin);
 }
 
 
@@ -806,6 +651,7 @@ WRegion *region_active_sub(WRegion *reg)
 	return reg->active_sub;
 }
 
+
 /*}}}*/
 
 
@@ -814,16 +660,16 @@ WRegion *region_active_sub(WRegion *reg)
 
 static DynFunTab region_dynfuntab[]={
 	{region_notify_rootpos, 
-	 default_notify_rootpos},
+     region_notify_rootpos_default},
 	
 	{region_request_managed_geom,
 	 region_request_managed_geom_allow},
 	
 	{region_draw_config_updated, 
-	 region_default_draw_config_updated},
+	 region_draw_config_updated_default},
 	
 	{(DynFun*)region_find_rescue_manager_for, 
-	 (DynFun*)default_find_rescue_manager_for},
+	 (DynFun*)region_find_rescue_manager_for_default},
 	
 	{(DynFun*)region_do_rescue_clientwins,
 	 (DynFun*)region_do_rescue_child_clientwins},
@@ -832,7 +678,7 @@ static DynFunTab region_dynfuntab[]={
 };
 
 
-IMPLOBJ(WRegion, WObj, region_deinit, region_dynfuntab);
+IMPLCLASS(WRegion, WObj, region_deinit, region_dynfuntab);
 
 	
 /*}}}*/

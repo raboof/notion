@@ -18,9 +18,9 @@ SOURCES=dock.c
 ETC=dock.lua dock-draw.lua
 DOCS=LICENSE README.dock
 
-MAKE_EXPORTS=dock_module
+MAKE_EXPORTS=dockmod
 
-MODULE=dock
+MODULE=dockmod
 
 ######################################
 

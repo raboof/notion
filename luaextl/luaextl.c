@@ -126,7 +126,7 @@ static WObj *extl_get_wobj(lua_State *st, int pos)
 static void extl_obj_dest_handler(WWatch *watch, WObj *obj)
 {
 	D(warn("%s destroyed while Lua code is still referencing it.",
-		   WOBJ_TYPESTR(obj)));
+		   OBJ_TYPESTR(obj)));
 }
 
 
@@ -139,7 +139,7 @@ static void extl_push_obj(lua_State *st, WObj *obj)
 		return;
 	}
 
-	if(obj->flags&WOBJ_EXTL_CACHED){
+	if(obj->flags&OBJ_EXTL_CACHED){
 		lua_rawgeti(st, LUA_REGISTRYINDEX, obj_cache_ref);
 		lua_pushlightuserdata(st, obj);
 		lua_gettable(st, -2);
@@ -157,10 +157,10 @@ static void extl_push_obj(lua_State *st, WObj *obj)
 	
 	/* Lua shouldn't return if the allocation fails */
 	
-	init_watch(watch);
-	setup_watch(watch, obj, extl_obj_dest_handler);
+	watch_init(watch);
+	watch_setup(watch, obj, extl_obj_dest_handler);
 	
-	lua_pushfstring(st, "luaextl_%s_metatable", WOBJ_TYPESTR(obj));
+	lua_pushfstring(st, "luaextl_%s_metatable", OBJ_TYPESTR(obj));
 	lua_gettable(st, LUA_REGISTRYINDEX);
 	if(lua_isnil(st, -1)){
 		lua_pop(st, 2);		 
@@ -174,7 +174,7 @@ static void extl_push_obj(lua_State *st, WObj *obj)
 		lua_pushvalue(st, -3);
 		lua_rawset_check(st, -3);
 		lua_pop(st, 1);
-		obj->flags|=WOBJ_EXTL_CACHED;
+		obj->flags|=OBJ_EXTL_CACHED;
 	}
 }
 	
@@ -195,9 +195,9 @@ static int extl_obj_gc_handler(lua_State *st)
 		D(fprintf(stderr, "Collecting %p\n", watch->obj));
 		if(watch->obj!=NULL){
 			D(fprintf(stderr, "was cached\n"));
-			watch->obj->flags&=~WOBJ_EXTL_CACHED;
+			watch->obj->flags&=~OBJ_EXTL_CACHED;
 		}
-		reset_watch(watch);
+		watch_reset(watch);
 	}
 	
 	return 0;
@@ -211,7 +211,7 @@ static int extl_obj_typename(lua_State *st)
 	if(!extl_stack_get(st, 1, 'o', FALSE, &obj))
 		return 0;
 	
-	lua_pushstring(st, WOBJ_TYPESTR(obj));
+	lua_pushstring(st, OBJ_TYPESTR(obj));
 	return 1;
 }
 
@@ -220,8 +220,8 @@ static int extl_obj_typename(lua_State *st)
 /*EXTL_DOC
  * Return type name of \var{obj}.
  */
-EXTL_EXPORT_AS(obj_typename)
-const char *obj_typename(WObj *obj);
+EXTL_EXPORT_AS(global, obj_typename)
+const char *__obj_typename(WObj *obj);
 
 
 static int extl_obj_exists(lua_State *st)
@@ -236,8 +236,8 @@ static int extl_obj_exists(lua_State *st)
 /*EXTL_DOC
  * Does \var{obj} still exist on the C side of Ion?
  */
-EXTL_EXPORT_AS(obj_exists)
-static bool obj_exists(WObj *obj);
+EXTL_EXPORT_AS(global, obj_exists)
+bool __obj_exists(WObj *obj);
 
 
 static int extl_obj_is(lua_State *st)
@@ -249,7 +249,7 @@ static int extl_obj_is(lua_State *st)
 		lua_pushboolean(st, 0);
 	}else{
 		tn=lua_tostring(st, 2);
-		lua_pushboolean(st, wobj_is_str(obj, tn));
+		lua_pushboolean(st, obj_is_str(obj, tn));
 	}
 	
 	return 1;
@@ -260,8 +260,8 @@ static int extl_obj_is(lua_State *st)
 /*EXTL_DOC
  * Is \var{obj} of type \var{typename}.
  */
-EXTL_EXPORT_AS(obj_is)
-bool obj_is(WObj *obj, const char *typename);
+EXTL_EXPORT_AS(global, obj_is)
+bool __obj_is(WObj *obj, const char *typename);
 
 
 static int extl_current_file_or_dir(lua_State *st, bool dir)
@@ -306,10 +306,10 @@ static int extl_include(lua_State *st)
 	toincl=luaL_checkstring(st, 1);
 	
 	if(extl_current_file_or_dir(st, TRUE)!=1){
-		res=do_include(toincl, NULL);
+		res=ioncore_read_config(toincl, NULL, TRUE);
 	}else{
 		cfdir=lua_tostring(st, -1);
-		res=do_include(toincl, cfdir);
+		res=ioncore_read_config(toincl, cfdir, TRUE);
 		lua_pop(st, 1);
 	}
 	lua_pushboolean(st, res);
@@ -321,7 +321,7 @@ static int extl_include(lua_State *st)
 /*EXTL_DOC
  * Execute another file with Lua code.
  */
-EXTL_EXPORT_AS(include)
+EXTL_EXPORT_AS(global, include)
 bool include(const char *what);
 
 
@@ -458,7 +458,7 @@ static int extl_stack_trace(lua_State *st)
 static int extl_do_collect_errors(lua_State *st)
 {
 	int n, err;
-	ErrorLog *el=(ErrorLog*)lua_touserdata(st, -1);
+	WErrorLog *el=(WErrorLog*)lua_touserdata(st, -1);
 
 	lua_pop(st, 1);
 	
@@ -477,7 +477,7 @@ static int extl_do_collect_errors(lua_State *st)
 
 int extl_collect_errors(lua_State *st)
 {
-	ErrorLog el;
+	WErrorLog el;
 	int n=lua_gettop(st);
 	int err;
 	
@@ -485,12 +485,12 @@ int extl_collect_errors(lua_State *st)
 	lua_insert(st, 1);
 	lua_pushlightuserdata(st, &el);
 	
-	begin_errorlog(&el);
+	errorlog_begin(&el);
 	
 	err=lua_pcall(st, n+1, 1, 0);
 	
-	end_errorlog(&el);
-	deinit_errorlog(&el);
+	errorlog_end(&el);
+	errorlog_deinit(&el);
 	
 	if(err!=0)
 		warn("collect_errors internal error");
@@ -636,7 +636,7 @@ static bool extl_stack_get(lua_State *st, int pos, char type, bool copystring,
 		if(valret){
 			*((WObj**)valret)=obj;
 			D(fprintf(stderr, "Got obj %p, ", obj);
-			  fprintf(stderr, "%s\n", WOBJ_TYPESTR(obj)));
+			  fprintf(stderr, "%s\n", OBJ_TYPESTR(obj)));
 		}
 		return TRUE;
 	}
@@ -1894,6 +1894,7 @@ void extl_unregister_functions(ExtlExportedFnSpec *spec)
 typedef struct{
 	const char *cls, *parent;
 	int refret;
+    bool hide;
 } ClassData;
 
 		
@@ -1948,8 +1949,7 @@ static bool extl_do_register_class(lua_State *st, ClassData *data)
 	/* Set the global WFoobar */
 	lua_pushvalue(st, -1);
 	data->refret=lua_ref(st, 1); /* TODO: free on failure */
-	if(data->parent){
-		/* WObj is hidden, other classes should have a parent. */
+	if(!data->hide){
 		lua_pushstring(st, data->cls);
 		lua_pushvalue(st, -2);
 		lua_rawset(st, LUA_GLOBALSINDEX);
@@ -1987,6 +1987,7 @@ bool extl_register_class(const char *cls, ExtlExportedFnSpec *fns,
 	clsdata.cls=cls;
 	clsdata.parent=parent;
 	clsdata.refret=LUA_NOREF;
+    clsdata.hide=(strcmp(cls, "WObj")==0);/*(fns==NULL);*/
 	
 	D(assert(strcmp(cls, "WObj")==0 || parent!=NULL));
 		   
@@ -2030,7 +2031,8 @@ void extl_unregister_class(const char *cls, ExtlExportedFnSpec *fns)
 	clsdata.cls=cls;
 	clsdata.parent=NULL;
 	clsdata.refret=LUA_NOREF;
-	
+	clsdata.hide=FALSE; /* unused, but initialise */
+    
 	if(!extl_cpcall(l_st, (ExtlCPCallFn*)extl_do_unregister_class, 
 					&clsdata))
 		return;
@@ -2073,7 +2075,8 @@ bool extl_register_module(const char *mdl, ExtlExportedFnSpec *fns)
 	clsdata.cls=mdl;
 	clsdata.parent=NULL;
 	clsdata.refret=LUA_NOREF;
-	
+	clsdata.hide=FALSE; /* unused, but initialise */
+    
 	if(!extl_cpcall(l_st, (ExtlCPCallFn*)extl_do_register_module, &clsdata)){
 		warn("Unable to register module %s.\n", mdl);
 		return FALSE;
@@ -2105,6 +2108,7 @@ void extl_unregister_module(const char *mdl, ExtlExportedFnSpec *fns)
 	clsdata.cls=mdl;
 	clsdata.parent=NULL;
 	clsdata.refret=LUA_NOREF;
+	clsdata.hide=FALSE; /* unused, but initialise */
 	
 	if(!extl_cpcall(l_st, (ExtlCPCallFn*)extl_do_unregister_module, &clsdata))
 		return;

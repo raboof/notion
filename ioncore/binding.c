@@ -129,12 +129,12 @@ WBindmap *create_bindmap()
 }
 
 
-void deinit_binding(WBinding *binding)
+void binding_deinit(WBinding *binding)
 {
 	int i;
 	
 	if(binding->submap!=NULL){
-		deinit_bindmap(binding->submap);
+		bindmap_deinit(binding->submap);
 		free(binding->submap);
 		binding->submap=NULL;
 	}
@@ -143,7 +143,7 @@ void deinit_binding(WBinding *binding)
 }
 
 
-void deinit_bindmap(WBindmap *bindmap)
+void bindmap_deinit(WBindmap *bindmap)
 {
 	int i;
 	WBinding *binding;
@@ -158,7 +158,7 @@ void deinit_bindmap(WBindmap *bindmap)
 	binding=bindmap->bindings;
 	
 	for(i=0; i<bindmap->nbindings; i++, binding++)
-		deinit_binding(binding);
+		binding_deinit(binding);
 	
 	free(bindmap->bindings);
 	bindmap->bindings=NULL;
@@ -173,23 +173,23 @@ static void refresh_bindmap(WBindmap *bindmap)
 	int i;
 	
 	for(i=0, b=bindmap->bindings; i<bindmap->nbindings; i++, b++){
-		if(b->act!=ACT_KEYPRESS)
+		if(b->act!=BINDING_KEYPRESS)
 			continue;
 		for(rbind=bindmap->rbind_list; rbind!=NULL; rbind=rbind->bm_next)
 			rbind_binding_removed(rbind, b, bindmap);
 	}
 
 	for(i=0, b=bindmap->bindings; i<bindmap->nbindings; i++, b++){
-		if(b->act!=ACT_KEYPRESS)
+		if(b->act!=BINDING_KEYPRESS)
 			continue;
-		b->kcb=XKeysymToKeycode(wglobal.dpy, b->ksb);
+		b->kcb=XKeysymToKeycode(ioncore_g.dpy, b->ksb);
 	}
 	
 	qsort((void*)(bindmap->bindings), bindmap->nbindings, sizeof(WBinding), 
 		  compare_bindings);
 	
 	for(i=0, b=bindmap->bindings; i<bindmap->nbindings; i++, b++){
-		if(b->act!=ACT_KEYPRESS)
+		if(b->act!=BINDING_KEYPRESS)
 			continue;
 		for(rbind=bindmap->rbind_list; rbind!=NULL; rbind=rbind->bm_next)
 			rbind_binding_added(rbind, b, bindmap);
@@ -197,18 +197,18 @@ static void refresh_bindmap(WBindmap *bindmap)
 }
 
 
-void refresh_bindings()
+void ioncore_refresh_bindings()
 {
 	WBindmap *bindmap;
 	
-	update_modmap();
+	ioncore_update_modmap();
 	
 	for(bindmap=known_bindmaps; bindmap!=NULL; bindmap=bindmap->next_known)
 		refresh_bindmap(bindmap);
 }
 
 
-bool add_binding(WBindmap *bindmap, const WBinding *b)
+bool bindmap_add_binding(WBindmap *bindmap, const WBinding *b)
 {
 	WBinding *binding;
 	int i, j;
@@ -227,7 +227,7 @@ bool add_binding(WBindmap *bindmap, const WBinding *b)
 		case 1:
 			continue;
 		case 0:
-			deinit_binding(binding+i);
+			binding_deinit(binding+i);
 			goto subst;
 		}
 		break;
@@ -260,7 +260,7 @@ subst:
 }
 
 
-bool remove_binding(WBindmap *bindmap, const WBinding *b)
+bool bindmap_remove_binding(WBindmap *bindmap, const WBinding *b)
 {
 	WBinding *binding;
 	int i, j;
@@ -283,7 +283,7 @@ bool remove_binding(WBindmap *bindmap, const WBinding *b)
 	return FALSE;
 
 rmove:
-	deinit_binding(binding+i);
+	binding_deinit(binding+i);
 
 	{
 		WRegBindingInfo *rbind;
@@ -313,9 +313,9 @@ rmove:
 }
 
 
-void init_bindings()
+void ioncore_init_bindings()
 {
-	modmap=XGetModifierMapping(wglobal.dpy);
+	modmap=XGetModifierMapping(ioncore_g.dpy);
 	
 	assert(modmap!=NULL);
 
@@ -325,9 +325,9 @@ void init_bindings()
 }
 
 
-void update_modmap()
+void ioncore_update_modmap()
 {
-	XModifierKeymap *nm=XGetModifierMapping(wglobal.dpy);
+	XModifierKeymap *nm=XGetModifierMapping(ioncore_g.dpy);
 	
 	if(nm!=NULL){
 		XFreeModifiermap(modmap);
@@ -339,75 +339,75 @@ void update_modmap()
 /* */
 
 
-void grab_binding(const WBinding *binding, Window win)
+void binding_grab_on(const WBinding *binding, Window win)
 {
-	if(binding->act==ACT_KEYPRESS){
+	if(binding->act==BINDING_KEYPRESS){
 #ifndef CF_HACK_IGNORE_EVIL_LOCKS			
-		XGrabKey(wglobal.dpy, binding->kcb, binding->state, win,
+		XGrabKey(ioncore_g.dpy, binding->kcb, binding->state, win,
 				 True, GrabModeAsync, GrabModeAsync);
 #else		
-		evil_grab_key(wglobal.dpy, binding->kcb, binding->state, win,
+		evil_grab_key(ioncore_g.dpy, binding->kcb, binding->state, win,
 					  True, GrabModeAsync, GrabModeAsync);
 #endif			
 	}
 	
-	if(binding->act!=ACT_BUTTONPRESS &&
-	   binding->act!=ACT_BUTTONCLICK &&
-	   binding->act!=ACT_BUTTONDBLCLICK &&
-	   binding->act!=ACT_BUTTONMOTION)
+	if(binding->act!=BINDING_BUTTONPRESS &&
+	   binding->act!=BINDING_BUTTONCLICK &&
+	   binding->act!=BINDING_BUTTONDBLCLICK &&
+	   binding->act!=BINDING_BUTTONMOTION)
 		return;
 	
 	if(binding->state==0)
 		return;
 	
 #ifndef CF_HACK_IGNORE_EVIL_LOCKS			
-	XGrabButton(wglobal.dpy, binding->kcb, binding->state, win,
-				True, GRAB_POINTER_MASK, GrabModeAsync, GrabModeAsync,
+	XGrabButton(ioncore_g.dpy, binding->kcb, binding->state, win,
+				True, IONCORE_EVENTMASK_PTRGRAB, GrabModeAsync, GrabModeAsync,
 				None, None);
 #else			
-	evil_grab_button(wglobal.dpy, binding->kcb, binding->state, win,
-					 True, GRAB_POINTER_MASK, GrabModeAsync, GrabModeAsync,
+	evil_grab_button(ioncore_g.dpy, binding->kcb, binding->state, win,
+					 True, IONCORE_EVENTMASK_PTRGRAB, GrabModeAsync, GrabModeAsync,
 					 None, None);
 #endif
 }
 
 
-void ungrab_binding(const WBinding *binding, Window win)
+void binding_ungrab_on(const WBinding *binding, Window win)
 {
-	if(binding->act==ACT_KEYPRESS){
+	if(binding->act==BINDING_KEYPRESS){
 #ifndef CF_HACK_IGNORE_EVIL_LOCKS
-		XUngrabKey(wglobal.dpy, binding->kcb, binding->state, win);
+		XUngrabKey(ioncore_g.dpy, binding->kcb, binding->state, win);
 #else
-		evil_ungrab_key(wglobal.dpy, binding->kcb, binding->state, win);
+		evil_ungrab_key(ioncore_g.dpy, binding->kcb, binding->state, win);
 #endif
 	}
 	
-	if(binding->act!=ACT_BUTTONPRESS &&
-	   binding->act!=ACT_BUTTONCLICK &&
-	   binding->act!=ACT_BUTTONDBLCLICK &&
-	   binding->act!=ACT_BUTTONMOTION)
+	if(binding->act!=BINDING_BUTTONPRESS &&
+	   binding->act!=BINDING_BUTTONCLICK &&
+	   binding->act!=BINDING_BUTTONDBLCLICK &&
+	   binding->act!=BINDING_BUTTONMOTION)
 		return;
 	
 	if(binding->state==0)
 		return;
 
 #ifndef CF_HACK_IGNORE_EVIL_LOCKS
-	XUngrabButton(wglobal.dpy, binding->kcb, binding->state, win);
+	XUngrabButton(ioncore_g.dpy, binding->kcb, binding->state, win);
 #else
-	evil_ungrab_button(wglobal.dpy, binding->kcb, binding->state, win);
+	evil_ungrab_button(ioncore_g.dpy, binding->kcb, binding->state, win);
 #endif
 }
 
 
 #if 0
-void grab_bindings(WBindmap *bindmap, Window win)
+void binding_grab_ons(WBindmap *bindmap, Window win)
 {
 	WBinding *binding;
 	int i;
 	
 	binding=bindmap->bindings;
 	for(i=0; i<bindmap->nbindings; i++, binding++)
-		grab_binding(binding, win);
+		binding_grab_on(binding, win);
 }
 #endif
 
@@ -423,7 +423,7 @@ static WBinding *search_binding(WBindmap *bindmap, WBinding *binding)
 }
 
 
-static WBinding *do_lookup_binding(WBindmap *bindmap,
+static WBinding *do_bindmap_lookup_binding(WBindmap *bindmap,
 								   int act, uint state, uint kcb, int area)
 {
 	WBinding *binding, tmp;
@@ -449,7 +449,7 @@ static WBinding *do_lookup_binding(WBindmap *bindmap,
 
 		if(binding==NULL){
 			tmp.state=state;
-			tmp.kcb=(act==ACT_KEYPRESS ? AnyKey : AnyButton);
+			tmp.kcb=(act==BINDING_KEYPRESS ? AnyKey : AnyButton);
 			binding=search_binding(bindmap, &tmp);
 
 			if(binding==NULL){
@@ -463,21 +463,21 @@ static WBinding *do_lookup_binding(WBindmap *bindmap,
 }
 
 
-WBinding *lookup_binding(WBindmap *bindmap, int act, uint state, uint kcb)
+WBinding *bindmap_lookup_binding(WBindmap *bindmap, int act, uint state, uint kcb)
 {
-	return do_lookup_binding(bindmap, act, state, kcb, 0);
+	return do_bindmap_lookup_binding(bindmap, act, state, kcb, 0);
 }
 
 
-WBinding *lookup_binding_area(WBindmap *bindmap,
+WBinding *bindmap_lookup_binding_area(WBindmap *bindmap,
 							  int act, uint state, uint kcb, int area)
 {
 	WBinding *binding;
 	
-	binding=do_lookup_binding(bindmap, act, state, kcb, area);
+	binding=do_bindmap_lookup_binding(bindmap, act, state, kcb, area);
 	
 	if(binding==NULL)
-		binding=do_lookup_binding(bindmap, act, state, kcb, 0);
+		binding=do_bindmap_lookup_binding(bindmap, act, state, kcb, 0);
 	
 	return binding;
 }
@@ -488,7 +488,7 @@ WBinding *lookup_binding_area(WBindmap *bindmap,
  */
 
 
-int unmod(int state, int keycode)
+int ioncore_unmod(int state, int keycode)
 {
 	int j;
 	
@@ -505,7 +505,7 @@ int unmod(int state, int keycode)
 }
 
 
-bool ismod(int keycode)
+bool ioncore_ismod(int keycode)
 {
 	int j;
 	
@@ -526,7 +526,7 @@ static void lookup_evil_locks()
 	int i, j;
 	
 	for(i=0; i<N_LOOKUPEVIL; i++)
-		keycodes[i]=XKeysymToKeycode(wglobal.dpy, evillocks[i]);
+		keycodes[i]=XKeysymToKeycode(ioncore_g.dpy, evillocks[i]);
 	
 	for(j=0; j<N_MODS*modmap->max_keypermod; j++){
 		for(i=0; i<N_LOOKUPEVIL; i++){

@@ -19,21 +19,21 @@
 
 #define ERRORLOG_MAX_SIZE (1024*4)
 
-INTRSTRUCT(ErrorLog);
-DECLSTRUCT(ErrorLog){
+INTRSTRUCT(WErrorLog);
+DECLSTRUCT(WErrorLog){
 	char *msgs;
 	int msgs_len;
 	FILE *file;
 	bool errors;
-	ErrorLog *prev;
+	WErrorLog *prev;
 	WarnHandler *old_handler;
 };
 
 /* el is assumed to be uninitialised  */
-extern void begin_errorlog(ErrorLog *el);
-extern void begin_errorlog_file(ErrorLog *el, FILE *file);
-/* For end_errorlog el Must be the one begin_errorlog was last called with */
-extern bool end_errorlog(ErrorLog *el);
-extern void deinit_errorlog(ErrorLog *el);
+extern void errorlog_begin(WErrorLog *el);
+extern void errorlog_begin_file(WErrorLog *el, FILE *file);
+/* For errorlog_end el Must be the one errorlog_begin was last called with */
+extern bool errorlog_end(WErrorLog *el);
+extern void errorlog_deinit(WErrorLog *el);
 
 #endif /* ION_IONCORE_ERRORLOG_H */

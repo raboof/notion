@@ -18,8 +18,8 @@ local ioncorelib={}
 _G.ioncorelib=ioncorelib
 
 -- Default modifiers
-DEFAULT_MOD="Mod1+"
-SECOND_MOD=""
+MOD1="Mod1+"
+MOD2=""
 
 -- Default workspace type
 DEFAULT_WS_TYPE="WIonWS"
@@ -47,7 +47,7 @@ include('ioncorelib-extras')
 ioncorelib.export(ioncorelib, 
                   "submap",
                   "kpress",
-                  "kpress_waitrel",
+                  "kpress_wait",
                   "mpress",
                   "mclick",
                   "mdblclick",
@@ -55,9 +55,12 @@ ioncorelib.export(ioncorelib,
                   "defcmd",
                   "defcmd2",
                   "defbindings",
-                  "winprop",
-                  "get_winprop", -- C callback
+                  "defwinprop",
                   "call_hook") -- C callback
+
+--[[ioncorelib.export(ioncore,
+                  "warn",
+                  "exec")--]]
 
 -- Mark ourselves loaded.
 _LOADED["ioncorelib"]=true

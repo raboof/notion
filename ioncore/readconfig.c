@@ -32,9 +32,6 @@ static char *sessiondir=NULL;
 typedef struct{
 	ExtlFn fn;
 	int status;
-	va_list args;
-	const char *spec;
-	const char *rspec;
 } TryCallParam;
 
 
@@ -78,7 +75,7 @@ static bool add_dir(char ***pathsptr, int *n_pathsptr, const char *dir)
 
 
 /*EXTL_DOC
- * Add a search path.
+ * Add a script search path.
  */
 EXTL_EXPORT
 bool ioncore_add_scriptdir(const char *dir)
@@ -87,6 +84,10 @@ bool ioncore_add_scriptdir(const char *dir)
 }
 
 
+/*EXTL_DOC
+ * Add a module search path.
+ */
+EXTL_EXPORT
 bool ioncore_add_moduledir(const char *dir)
 {
 	return (lt_dlinsertsearchdir(lt_dlgetsearchpath(), dir)==0);
@@ -182,7 +183,7 @@ ExtlTab ioncore_get_scriptdirs()
 /*{{{ try_etcpath, do_include, etc. */
 
 
-static int do_try(const char *dir, const char *file, TryConfigFn *tryfn,
+static int do_try(const char *dir, const char *file, WTryConfigFn *tryfn,
 				  void *tryfnparam)
 {
 	char *tmp=NULL;
@@ -191,7 +192,7 @@ static int do_try(const char *dir, const char *file, TryConfigFn *tryfn,
 	libtu_asprintf(&tmp, "%s/%s", dir, file);
 	if(tmp==NULL){
 		warn_err();
-		return TRYCONFIG_MEMERROR;
+		return IONCORE_TRYCONFIG_MEMERROR;
 	}
 	ret=tryfn(tmp, tryfnparam);
 	free(tmp);
@@ -200,7 +201,7 @@ static int do_try(const char *dir, const char *file, TryConfigFn *tryfn,
 
 
 static int try_dir(const char *const *files, const char *cfdir,
-				   TryConfigFn *tryfn, void *tryfnparam)
+				   WTryConfigFn *tryfn, void *tryfnparam)
 {
 	const char *const *file;
 	int ret;
@@ -213,12 +214,12 @@ static int try_dir(const char *const *files, const char *cfdir,
 		}
 	}
 	
-	return TRYCONFIG_NOTFOUND;
+	return IONCORE_TRYCONFIG_NOTFOUND;
 }
 
 
 static int try_etcpath(const char *const *files, 
-						TryConfigFn *tryfn, void *tryfnparam)
+						WTryConfigFn *tryfn, void *tryfnparam)
 {
 	const char *const *file;
 	int i, ret;
@@ -231,14 +232,14 @@ static int try_etcpath(const char *const *files,
 		}
 	}
 	
-	return TRYCONFIG_NOTFOUND;
+	return IONCORE_TRYCONFIG_NOTFOUND;
 }
 
 
 static int try_lookup(const char *file, char **ptr)
 {
 	if(access(file, F_OK)!=0)
-		return TRYCONFIG_NOTFOUND;
+		return IONCORE_TRYCONFIG_NOTFOUND;
 	*ptr=scopy(file);
 	if(*ptr==NULL)
 		warn_err();
@@ -249,17 +250,17 @@ static int try_lookup(const char *file, char **ptr)
 static int try_load(const char *file, TryCallParam *param)
 {
 	if(access(file, F_OK)!=0)
-		return TRYCONFIG_NOTFOUND;
+		return IONCORE_TRYCONFIG_NOTFOUND;
 	
 	if(param->status==1)
 		warn("Falling back to %s", file);
 	
 	if(!extl_loadfile(file, &(param->fn))){
 		param->status=1;
-		return TRYCONFIG_LOAD_FAILED;
+		return IONCORE_TRYCONFIG_LOAD_FAILED;
 	}
 	
-	return TRYCONFIG_OK;
+	return IONCORE_TRYCONFIG_OK;
 }
 
 
@@ -267,34 +268,19 @@ static int try_call(const char *file, TryCallParam *param)
 {
 	int ret=try_load(file, param);
 	
-	if(ret!=TRYCONFIG_OK)
-		return ret;
-	
-	ret=extl_call_vararg(param->fn, param->spec, param->rspec, &(param->args));
-	
-	extl_unref_fn(param->fn);
-	
-	return (ret ? TRYCONFIG_OK : TRYCONFIG_CALL_FAILED);
-}
-
-
-static int try_call_nargs(const char *file, TryCallParam *param)
-{
-	int ret=try_load(file, param);
-	
-	if(ret!=TRYCONFIG_OK)
+	if(ret!=IONCORE_TRYCONFIG_OK)
 		return ret;
 	
 	ret=extl_call(param->fn, NULL, NULL);
 	
 	extl_unref_fn(param->fn);
 	
-	return (ret ? TRYCONFIG_OK : TRYCONFIG_CALL_FAILED);
+	return (ret ? IONCORE_TRYCONFIG_OK : IONCORE_TRYCONFIG_CALL_FAILED);
 }
 
 
 static int do_try_config(const char *fname, const char *cfdir,
-						 TryConfigFn *tryfn, void *tryfnparam)
+						 WTryConfigFn *tryfn, void *tryfnparam)
 {
 	char *files[]={NULL, NULL, NULL};
 	int n=0, ret;
@@ -338,14 +324,19 @@ static int do_try_config(const char *fname, const char *cfdir,
 }
 
 
-int try_config(const char *module, TryConfigFn *tryfn, void *tryfnparam)
+int ioncore_try_config(const char *module, WTryConfigFn *tryfn, 
+                       void *tryfnparam)
 {
 	return do_try_config(module, NULL, tryfn, tryfnparam);
 }
 
 
+/*EXTL_DOC
+ * Lookup script \var{file}. If \var{try_in_dir} is set, it is tried
+ * before the standard search path.
+ */
 EXTL_EXPORT
-char *lookup_script(const char *file, const char *try_in_dir)
+char *ioncore_lookup_script(const char *file, const char *sp)
 {
 	const char *files[]={NULL, NULL};
 	char* tmp=NULL;
@@ -353,17 +344,17 @@ char *lookup_script(const char *file, const char *try_in_dir)
 	if(file!=NULL){
 		files[0]=file;
 
-		if(try_in_dir!=NULL)
-			try_dir(files, try_in_dir, (TryConfigFn*)try_lookup, &tmp);
+		if(sp!=NULL)
+			try_dir(files, sp, (WTryConfigFn*)try_lookup, &tmp);
 		if(tmp==NULL)
-			try_etcpath(files, (TryConfigFn*)try_lookup, &tmp);
+			try_etcpath(files, (WTryConfigFn*)try_lookup, &tmp);
 	}
 	
 	return tmp;
 }
 
 
-bool do_include(const char *file, const char *current_file_dir)
+bool ioncore_read_config(const char *file, const char *sp, bool warn_nx)
 {
 	TryCallParam param;
 	int retval;
@@ -375,57 +366,19 @@ bool do_include(const char *file, const char *current_file_dir)
 	
 	param.status=0;
 	
-	retval=do_try_config(file, current_file_dir,
-						 (TryConfigFn*)try_call_nargs, &param);
+	retval=do_try_config(file, sp, (WTryConfigFn*)try_call, &param);
 	
-	if(retval==TRYCONFIG_NOTFOUND)
-		warn("Unable to find '%s'.", file);
+	if(retval==IONCORE_TRYCONFIG_NOTFOUND && warn_nx)
+		warn("Unable to find '%s' on configuration file search path.", file);
 	
-	return (retval==TRYCONFIG_OK);
+	return (retval==IONCORE_TRYCONFIG_OK);
 }
 
 
 /*}}}*/
 
 
-/*{{{ read_config */
-
-
-bool read_config(const char *module)
-{
-	return read_config_args(module, TRUE, NULL, NULL);
-}
-
-
-bool read_config_args(const char *module, bool warn_nx,
-					  const char *spec, const char *rspec, ...)
-{
-	bool ret;
-	TryCallParam param;
-	
-	param.status=0;
-	param.spec=spec;
-	param.rspec=rspec;
-	
-	va_start(param.args, rspec);
-	
-	ret=try_config(module, (TryConfigFn*)try_call, &param);
-	
-	if(ret==TRYCONFIG_NOTFOUND && warn_nx){
-		warn("Unable to find configuration file '%s' on search path", 
-			 module);
-	}
-	
-	va_end(param.args);
-	
-	return (ret==TRYCONFIG_OK);
-}
-
-
-/*}}}*/
-
-
-/*{{{ get_savefile */
+/*{{{ ioncore_get_savefile */
 
 
 static bool ensuredir(char *f)
@@ -460,11 +413,11 @@ static bool ensuredir(char *f)
 
 
 /*EXTL_DOC
- * Get a file name to save (session) data in. The string \var{basename} should
- * contain no path or extension components.
+ * Get a file name to save (session) data in. The string \var{basename} 
+ * should contain no path or extension components.
  */
 EXTL_EXPORT
-char *get_savefile(const char *basename)
+char *ioncore_get_savefile(const char *basename)
 {
 	char *res=NULL;
 	

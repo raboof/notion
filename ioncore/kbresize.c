@@ -60,7 +60,8 @@ static void accel_reset()
  * the changes?)
  */
 EXTL_EXPORT
-void set_resize_accel_params(int t_max, int t_min, double step, double maxacc)
+void ioncore_set_moveres_accel(int t_max, int t_min, 
+                               double step, double maxacc)
 {
 	actmax=(t_max>0 ? t_max : INT_MAX);
 	uptmin=(t_min>0 ? t_min : INT_MAX);
@@ -131,7 +132,7 @@ void moveresmode_accel(WMoveresMode *mode, int *wu, int *hu, int accel_mode)
 static ExtlSafelist moveres_safe_funclist[]={
 	(ExtlExportedFn*)&moveresmode_resize,
 	(ExtlExportedFn*)&moveresmode_move,
-	(ExtlExportedFn*)&moveresmode_end,
+	(ExtlExportedFn*)&moveresmode_finish,
 	(ExtlExportedFn*)&moveresmode_cancel,
 	NULL
 };
@@ -155,7 +156,7 @@ static bool resize_handler(WRegion *reg, XEvent *xev)
     if(mode==NULL)
         return FALSE;
     
-	binding=lookup_binding(&ioncore_moveres_bindmap, ACT_KEYPRESS,
+	binding=bindmap_lookup_binding(&ioncore_moveres_bindmap, BINDING_KEYPRESS,
 						   ev->state, ev->keycode);
 	
 	if(!binding)
@@ -186,7 +187,7 @@ static void tmr_end_resize(WTimer *unused)
 }
 
 
-static WTimer resize_timer=INIT_TIMER(tmr_end_resize);
+static WTimer resize_timer=TIMER_INIT(tmr_end_resize);
 
 
 /*}}}*/
@@ -212,10 +213,10 @@ static void resize_units(WMoveresMode *mode, int *wret, int *hret)
 	/**wret=1;
 	*hret=1;
 	
-	if(WFRAME_CURRENT(frame)!=NULL){
+	if(FRAME_CURRENT(frame)!=NULL){
 		XSizeHints hints;
 		
-		region_resize_hints(WFRAME_CURRENT(frame), &hints, NULL, NULL);
+		region_resize_hints(FRAME_CURRENT(frame), &hints, NULL, NULL);
 		
 		if(hints.flags&PResizeInc &&
 		   (hints.width_inc>1 || hints.height_inc>1)){
@@ -260,7 +261,7 @@ void moveresmode_resize(WMoveresMode *mode,
 	moveresmode_delta_resize(mode, -left*wu, right*wu, -top*hu, bottom*hu, 
                              NULL);
 	
-	set_timer(&resize_timer, wglobal.resize_delay);
+	timer_set(&resize_timer, ioncore_g.resize_delay);
 }
 
 
@@ -286,7 +287,7 @@ void moveresmode_move(WMoveresMode *mode, int horizmul, int vertmul)
 	moveresmode_delta_resize(mode, horizmul, horizmul, vertmul, vertmul, 
                              NULL);
 	
-	set_timer(&resize_timer, wglobal.resize_delay);
+	timer_set(&resize_timer, ioncore_g.resize_delay);
 }
 
 
@@ -295,13 +296,13 @@ void moveresmode_move(WMoveresMode *mode, int horizmul, int vertmul)
  * move/resize is enabled.
  */
 EXTL_EXPORT_MEMBER
-void moveresmode_end(WMoveresMode *mode)
+void moveresmode_finish(WMoveresMode *mode)
 {
     WRegion *reg=moveresmode_target(mode);
     if(moveresmode_do_end(mode, TRUE)){
-		reset_timer(&resize_timer);
-		warp(reg);
-		grab_remove(resize_handler);
+		timer_reset(&resize_timer);
+		region_warp(reg);
+		ioncore_grab_remove(resize_handler);
 	}
 }
 
@@ -315,9 +316,9 @@ void moveresmode_cancel(WMoveresMode *mode)
 {
     WRegion *reg=moveresmode_target(mode);
     if(moveresmode_do_end(mode, FALSE)){
-		reset_timer(&resize_timer);
-		warp(reg);
-		grab_remove(resize_handler);
+		timer_reset(&resize_timer);
+		region_warp(reg);
+		ioncore_grab_remove(resize_handler);
 	}
 }
 
@@ -340,17 +341,17 @@ static void cancel_moveres(WRegion *reg)
 EXTL_EXPORT_MEMBER
 WMoveresMode *frame_begin_moveres(WFrame *frame)
 {
-    WMoveresMode *mode=begin_resize((WRegion*)frame, NULL, FALSE);
+    WMoveresMode *mode=region_begin_resize((WRegion*)frame, NULL, FALSE);
 
     if(mode==NULL)
         return NULL;
     
 	accel_reset();
 	
-	grab_establish((WRegion*)frame, resize_handler,
-				   (GrabKilledHandler*)cancel_moveres, 0);
+	ioncore_grab_establish((WRegion*)frame, resize_handler,
+                           (GrabKilledHandler*)cancel_moveres, 0);
 	
-	set_timer(&resize_timer, wglobal.resize_delay);
+	timer_set(&resize_timer, ioncore_g.resize_delay);
     
     return mode;
     

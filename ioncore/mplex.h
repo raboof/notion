@@ -12,9 +12,10 @@
 #include "window.h"
 #include "attach.h"
 #include "extl.h"
+#include "rectangle.h"
 
-#define WMPLEX_ADD_TO_END 0x0001
-#define WMPLEX_MANAGED_UNVIEWABLE 0x0002
+#define MPLEX_ADD_TO_END 0x0001
+#define MPLEX_MANAGED_UNVIEWABLE 0x0002
 
 enum{
 	MPLEX_CHANGE_SWITCHONLY=0,
@@ -23,9 +24,8 @@ enum{
 	MPLEX_CHANGE_REMOVE=3
 };
 
-INTROBJ(WMPlex);
 
-DECLOBJ(WMPlex){
+DECLCLASS(WMPlex){
 	WWindow win;
 	int flags;
 	int managed_count;
@@ -71,7 +71,7 @@ extern void mplex_switch_next(WMPlex *mplex);
 extern void mplex_switch_prev(WMPlex *mplex);
 
 /* Focus */
-extern void mplex_focus(WMPlex *mplex, bool warp);
+extern void mplex_do_set_focus(WMPlex *mplex, bool warp);
 
 /* Misc */
 extern WRegion *mplex_nth_managed(WMPlex *mplex, uint n);
@@ -79,8 +79,6 @@ extern int mplex_managed_count(WMPlex *mplex);
 extern ExtlTab mplex_managed_list(WMPlex *mplex);
 extern WRegion *mplex_current(WMPlex *mplex);
 extern WRegion *mplex_current_input(WMPlex *mplex);
-extern void mplex_move_current_right(WMPlex *mplex);
-extern void mplex_move_current_left(WMPlex *mplex);
 
 /* Dynfuns */
 DYNFUN void mplex_managed_geom(const WMPlex *mplex, WRectangle *geom);

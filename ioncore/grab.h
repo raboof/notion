@@ -27,17 +27,17 @@
 typedef bool GrabHandler(WRegion *reg, XEvent *ev);
 typedef void GrabKilledHandler(WRegion *reg);
 
-extern bool call_grab_handler(XEvent *ev);
+extern void ioncore_grab_establish(WRegion *reg, GrabHandler *func,
+                                   GrabKilledHandler *kh,long eventmask);
+extern void ioncore_grab_remove(GrabHandler *func);
+extern void ioncore_grab_holder_remove(WRegion *holder);
+extern WRegion *ioncore_grab_get_holder();
+extern WRegion *ioncore_grab_get_my_holder(GrabHandler *func);
+extern bool ioncore_grab_held();
+extern void ioncore_change_grab_cursor(int cursor);
+extern void ioncore_grab_confine_to(Window confine_to);
 
-extern void grab_establish(WRegion *reg, GrabHandler *func,
-						   GrabKilledHandler *kh,long eventmask);
-extern void grab_remove(GrabHandler *func);
-extern void grab_holder_remove(WRegion *holder);
-extern WRegion *grab_get_holder();
-extern WRegion *grab_get_my_holder(GrabHandler *func);
-extern bool grab_held();
-extern void change_grab_cursor(int cursor);
-extern void grab_confine_to(Window confine_to);
+extern bool ioncore_handle_grabs(XEvent *ev);
 
 #endif /* ION_IONCORE_GRAB_H */
 

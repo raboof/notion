@@ -12,72 +12,10 @@
 #include "common.h"
 #include "extl.h"
 #include "extlconv.h"
+#include "region-iter.h"
 
 
-/*{{{ Geometries */
-
-
-bool extltab_to_geom(ExtlTab tab, WRectangle *geomret)
-{
-	if(!extl_table_gets_i(tab, "x", &(geomret->x)) ||
-	   !extl_table_gets_i(tab, "y", &(geomret->y)) ||
-	   !extl_table_gets_i(tab, "w", &(geomret->w)) ||
-	   !extl_table_gets_i(tab, "h", &(geomret->h)))
-	   return FALSE;
-	
-	return TRUE;
-}
-
-
-ExtlTab geom_to_extltab(const WRectangle *geom)
-{
-	ExtlTab tab=extl_create_table();
-	
-	extl_table_sets_i(tab, "x", geom->x);
-	extl_table_sets_i(tab, "y", geom->y);
-	extl_table_sets_i(tab, "w", geom->w);
-	extl_table_sets_i(tab, "h", geom->h);
-	
-	return tab;
-}
-
-
-void extl_table_sets_geom(ExtlTab tab, const char *nam, 
-						  const WRectangle *geom)
-{
-	ExtlTab g=geom_to_extltab(geom);
-	extl_table_sets_t(tab, nam, g);
-	extl_unref_table(g);
-}
-
-
-bool extl_table_gets_geom(ExtlTab tab, const char *nam, 
-						  WRectangle *geom)
-{
-	ExtlTab g;
-	bool ok;
-	
-	if(!extl_table_gets_t(tab, nam, &g))
-		return FALSE;
-	
-	ok=extltab_to_geom(g, geom);
-	
-	extl_unref_table(g);
-	
-	return ok;
-}
-
-
-void pgeom(const char *n, const WRectangle *g)
-{
-	fprintf(stderr, "%s %d, %d; %d, %d\n", n, g->x, g->y, g->w, g->h);
-}
-
-
-/*}}}*/
-
-
-/*{{{ Region lists */
+/*{{{ Region list */
 
 
 ExtlTab managed_list_to_table(WRegion *list, bool (*filter)(WRegion *r))
@@ -97,6 +35,12 @@ ExtlTab managed_list_to_table(WRegion *list, bool (*filter)(WRegion *r))
 }
 
 
+/*}}}*/
+
+
+/*{{{ Booleans */
+
+
 bool extl_table_is_bool_set(ExtlTab tab, const char *entry)
 {
 	bool b;
@@ -108,3 +52,61 @@ bool extl_table_is_bool_set(ExtlTab tab, const char *entry)
 
 
 /*}}}*/
+
+
+/*{{{ Rectangles */
+
+
+bool extl_table_to_rectangle(ExtlTab tab, WRectangle *rectret)
+{
+	if(!extl_table_gets_i(tab, "x", &(rectret->x)) ||
+	   !extl_table_gets_i(tab, "y", &(rectret->y)) ||
+	   !extl_table_gets_i(tab, "w", &(rectret->w)) ||
+	   !extl_table_gets_i(tab, "h", &(rectret->h)))
+	   return FALSE;
+	
+	return TRUE;
+}
+
+
+ExtlTab extl_table_from_rectangle(const WRectangle *rect)
+{
+	ExtlTab tab=extl_create_table();
+	
+	extl_table_sets_i(tab, "x", rect->x);
+	extl_table_sets_i(tab, "y", rect->y);
+	extl_table_sets_i(tab, "w", rect->w);
+	extl_table_sets_i(tab, "h", rect->h);
+	
+	return tab;
+}
+
+
+void extl_table_sets_rectangle(ExtlTab tab, const char *nam, 
+                               const WRectangle *rect)
+{
+	ExtlTab g=extl_table_from_rectangle(rect);
+	extl_table_sets_t(tab, nam, g);
+	extl_unref_table(g);
+}
+
+
+bool extl_table_gets_rectangle(ExtlTab tab, const char *nam, 
+                               WRectangle *rect)
+{
+	ExtlTab g;
+	bool ok;
+	
+	if(!extl_table_gets_t(tab, nam, &g))
+		return FALSE;
+	
+	ok=extl_table_to_rectangle(g, rect);
+	
+	extl_unref_table(g);
+	
+	return ok;
+}
+
+
+/*}}}*/
+

@@ -9,16 +9,17 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_QUERY_INPUT_H
-#define ION_QUERY_INPUT_H
+#ifndef ION_QUERY_IONCORE_INPUTMODE_H
+#define ION_QUERY_IONCORE_INPUTMODE_H
 
 #include <ioncore/common.h>
 #include <ioncore/window.h>
 #include <ioncore/gr.h>
+#include <ioncore/rectangle.h>
 
-INTROBJ(WInput);
+INTRCLASS(WInput);
 
-DECLOBJ(WInput){
+DECLCLASS(WInput){
 	WWindow win;
 	WRectangle max_geom;
 	GrBrush *brush;
@@ -38,4 +39,4 @@ DYNFUN void input_scrolldown(WInput *input);
 DYNFUN void input_calc_size(WInput *input, WRectangle *geom);
 DYNFUN const char *input_style(WInput *input);
 
-#endif /* ION_QUERY_INPUT_H */
+#endif /* ION_QUERY_IONCORE_INPUTMODE_H */

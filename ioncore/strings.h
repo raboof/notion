@@ -23,10 +23,11 @@
 
 #include "gr.h"
 
+extern bool ioncore_add_shortenrule(const char *rx, const char *rule,
+                                    bool always);
 
-extern char *make_label(GrBrush *brush, const char *str, uint maxw);
-extern bool add_shortenrule(const char *rx, const char *rule, bool always);
-
+extern char *grbrush_make_label(GrBrush *brush, const char *str, uint maxw);
+                                       
 extern int str_nextoff(const char *p, int pos);
 extern int str_prevoff(const char *p, int pos);
 extern wchar_t str_wchar_at(char *p, int max);

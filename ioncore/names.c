@@ -271,7 +271,7 @@ char *region_make_label(WRegion *reg, int maxw, GrBrush *brush)
 	if(reg->ni.name==NULL)
 		return NULL;
 	
-	return make_label(brush, reg->ni.name, maxw);
+	return grbrush_make_label(brush, reg->ni.name, maxw);
 }
 
 
@@ -369,7 +369,7 @@ static WRegion *do_lookup_region(Namespace *ns, const char *cname,
 				continue;
 		}
 		
-		if(typenam!=NULL && !wobj_is_str((WObj*)reg, typenam))
+		if(typenam!=NULL && !obj_is_str((WObj*)reg, typenam))
 			continue;
 
 		return reg;
@@ -384,7 +384,7 @@ static WRegion *do_lookup_region(Namespace *ns, const char *cname,
  * inheriting \var{typenam}.
  */
 EXTL_EXPORT
-WRegion *lookup_region(const char *name, const char *typenam)
+WRegion *ioncore_lookup_region(const char *name, const char *typenam)
 {
 	return do_lookup_region(&internal_ns, name, typenam);
 }
@@ -394,7 +394,7 @@ WRegion *lookup_region(const char *name, const char *typenam)
  * Attempt to find a client window with name \var{name}.
  */
 EXTL_EXPORT
-WClientWin *lookup_clientwin(const char *name)
+WClientWin *ioncore_lookup_clientwin(const char *name)
 {
 	return (WClientWin*)do_lookup_region(&clientwin_ns, name, "WClientWin");
 }
@@ -429,7 +429,7 @@ again:
 				continue;
 		}
 
-		if(typenam!=NULL && !wobj_is_str((WObj*)reg, typenam))
+		if(typenam!=NULL && !obj_is_str((WObj*)reg, typenam))
 			continue;
 			
 		if(extl_table_seti_s(tab, n+1, name))
@@ -451,7 +451,7 @@ again:
  * \var{name}.
  */
 EXTL_EXPORT
-ExtlTab complete_region(const char *nam, const char *typenam)
+ExtlTab ioncore_complete_region(const char *nam, const char *typenam)
 {
 	return do_complete_region(&internal_ns, nam, typenam);
 }
@@ -462,7 +462,7 @@ ExtlTab complete_region(const char *nam, const char *typenam)
  * found, all whose name contains \var{name}.
  */
 EXTL_EXPORT
-ExtlTab complete_clientwin(const char *nam)
+ExtlTab ioncore_complete_clientwin(const char *nam)
 {
 	return do_complete_region(&clientwin_ns, nam, NULL);
 }

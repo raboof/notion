@@ -27,7 +27,7 @@
 
 #include "../version.h"
 
-char query_module_ion_api_version[]=ION_API_VERSION;
+char querymod_ion_api_version[]=ION_API_VERSION;
 
 
 /*}}}*/
@@ -36,21 +36,21 @@ char query_module_ion_api_version[]=ION_API_VERSION;
 /*{{{ Bindmaps w/ config */
 
 
-WBindmap query_bindmap=BINDMAP_INIT;
-WBindmap query_wedln_bindmap=BINDMAP_INIT;
+WBindmap querymod_input_bindmap=BINDMAP_INIT;
+WBindmap querymod_wedln_bindmap=BINDMAP_INIT;
 
 
-EXTL_EXPORT
-bool __defbindings_WInput(ExtlTab tab)
+EXTL_EXPORT_AS(global, __defbindings_WInput)
+bool querymod_defbindings_WInput(ExtlTab tab)
 {
-	return process_bindings(&query_bindmap, NULL, tab);
+	return bindmap_do_table(&querymod_input_bindmap, NULL, tab);
 }
 
 
-EXTL_EXPORT
-bool __defbindings_WEdln(ExtlTab tab)
+EXTL_EXPORT_AS(global, __defbindings_WEdln)
+bool querymod_defbindings_WEdln(ExtlTab tab)
 {
-	return process_bindings(&query_wedln_bindmap, NULL, tab);
+	return bindmap_do_table(&querymod_wedln_bindmap, NULL, tab);
 }
 
 /*}}}*/
@@ -59,13 +59,13 @@ bool __defbindings_WEdln(ExtlTab tab)
 /*{{{ Init & deinit */
 
 
-extern bool query_module_register_exports();
-extern void query_module_unregister_exports();
+extern bool querymod_register_exports();
+extern void querymod_unregister_exports();
 
 
 static void load_history()
 {
-	read_config_args("query_history", FALSE, NULL, NULL);
+	ioncore_read_config("query_history", NULL, FALSE);
 }
 
 
@@ -76,7 +76,7 @@ static void save_history()
 	FILE *file;
 	int i=0;
 	
-	fname=get_savefile("query_history");
+	fname=ioncore_get_savefile("query_history");
 	
 	if(fname==NULL){
 		warn("Unable to save query history");
@@ -95,20 +95,20 @@ static void save_history()
 	fprintf(file, "local saves={\n");
 	
 	while(1){
-		histent=query_history_get(i);
+		histent=querymod_history_get(i);
 		if(histent==NULL)
 			break;
 		fprintf(file, "    ");
-		write_escaped_string(file, histent);
+		file_write_escaped_string(file, histent);
 		fprintf(file, ",\n");
 		i++;
 	}
 	
 	fprintf(file, "}\n");
 	fprintf(file, "for k=table.getn(saves),1,-1 do "
-			"query_history_push(saves[k]) end\n");
+			"querymod.history_push(saves[k]) end\n");
 	
-	query_history_clear();
+	querymod_history_clear();
 	
 	fclose(file);
 }
@@ -116,23 +116,23 @@ static void save_history()
 
 static bool loaded_ok=FALSE;
 
-void query_module_deinit()
+void querymod_deinit()
 {
-	query_module_unregister_exports();
-	deinit_bindmap(&query_bindmap);
-	deinit_bindmap(&query_wedln_bindmap);
+	querymod_unregister_exports();
+	bindmap_deinit(&querymod_input_bindmap);
+	bindmap_deinit(&querymod_wedln_bindmap);
 	
 	if(loaded_ok)
 		save_history();
 }
 
 
-bool query_module_init()
+bool querymod_init()
 {
-	if(!query_module_register_exports())
+	if(!querymod_register_exports())
 		goto err;
 	
-	read_config("query");
+	ioncore_read_config("query", NULL, TRUE);
 
 	load_history();
 	
@@ -141,7 +141,7 @@ bool query_module_init()
 	return TRUE;
 	
 err:
-	query_module_deinit();
+	querymod_deinit();
 	return FALSE;
 }
 

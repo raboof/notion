@@ -12,11 +12,11 @@
 #include "readfds.h"
 
 
-static InputFd *input_fds=NULL;
+static WInputFd *input_fds=NULL;
 
-static InputFd *find_input_fd(int fd)
+static WInputFd *find_input_fd(int fd)
 {
-	InputFd *tmp=input_fds;
+	WInputFd *tmp=input_fds;
 	
 	while(tmp){
 		if(tmp->fd==fd)
@@ -26,17 +26,17 @@ static InputFd *find_input_fd(int fd)
 	return tmp;
 }
 
-bool register_input_fd(int fd, void *data,
-					   void (*process_input_fn)(int fd, void *d))
+bool ioncore_register_input_fd(int fd, void *data,
+                               void (*callback)(int fd, void *d))
 {
-	InputFd *tmp;
+	WInputFd *tmp;
 	
 	if(find_input_fd(fd)!=NULL){
 		warn("File descriptor already registered\n");
 		return FALSE;
 	}
 	
-	tmp=ALLOC(InputFd);
+	tmp=ALLOC(WInputFd);
 	if(tmp==NULL){
 		warn_err();
 		return FALSE;
@@ -44,16 +44,16 @@ bool register_input_fd(int fd, void *data,
 	
 	tmp->fd=fd;
 	tmp->data=data;
-	tmp->process_input_fn=process_input_fn;
+	tmp->process_input_fn=callback;
 	
 	LINK_ITEM(input_fds, tmp, next, prev);
 	
 	return TRUE;
 }
 
-void unregister_input_fd(int fd)
+void ioncore_unregister_input_fd(int fd)
 {
-	InputFd *tmp=find_input_fd(fd);
+	WInputFd *tmp=find_input_fd(fd);
 	
 	if(tmp!=NULL){
 		UNLINK_ITEM(input_fds, tmp, next, prev);
@@ -61,9 +61,9 @@ void unregister_input_fd(int fd)
 	}
 }
 
-void set_input_fds(fd_set *rfds, int *nfds)
+void ioncore_set_input_fds(fd_set *rfds, int *nfds)
 {
-	InputFd *tmp=input_fds;
+	WInputFd *tmp=input_fds;
 	
 	while(tmp){
 		FD_SET(tmp->fd, rfds);
@@ -73,9 +73,9 @@ void set_input_fds(fd_set *rfds, int *nfds)
 	}
 }
 
-void check_input_fds(fd_set *rfds)
+void ioncore_check_input_fds(fd_set *rfds)
 {
-	InputFd *tmp=input_fds, *next=NULL;
+	WInputFd *tmp=input_fds, *next=NULL;
 	
 	while(tmp){
 		next=tmp->next;

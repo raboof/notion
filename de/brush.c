@@ -16,6 +16,7 @@
 #include <ioncore/extl.h>
 #include <ioncore/extlconv.h>
 #include <ioncore/ioncore.h>
+#include <ioncore/objp.h>
 
 #include "brush.h"
 #include "font.h"
@@ -41,7 +42,8 @@ static void create_normal_gc(DEStyle *style, WRootWin *rootwin)
 	gcvmask=(GCLineStyle|GCLineWidth|GCFillStyle|
 			 GCJoinStyle|GCCapStyle);
 	
-	style->normal_gc=XCreateGC(wglobal.dpy, ROOT_OF(rootwin), gcvmask, &gcv);
+	style->normal_gc=XCreateGC(ioncore_g.dpy, WROOTWIN_ROOT(rootwin), 
+                               gcvmask, &gcv);
 }
 
 
@@ -51,8 +53,8 @@ static void create_tab_gcs(DEStyle *style, WRootWin *rootwin)
 	XGCValues gcv;
 	ulong gcvmask;
 	GC tmp_gc;
-	Display *dpy=wglobal.dpy;
-	Window root=ROOT_OF(rootwin);
+	Display *dpy=ioncore_g.dpy;
+	Window root=WROOTWIN_ROOT(rootwin);
 
 	/* Create a temporary 1-bit GC for drawing the tag and stipple pixmaps */
 	stipple_pixmap=XCreatePixmap(dpy, root, 2, 2, 1);
@@ -183,15 +185,15 @@ void destyle_deinit(DEStyle *style)
 	
 	extl_unref_table(style->data_table);
 	
-	XFreeGC(wglobal.dpy, style->normal_gc);
+	XFreeGC(ioncore_g.dpy, style->normal_gc);
 	
 	if(style->tabbrush_data_ok){
-		XFreeGC(wglobal.dpy, style->copy_gc);
-		XFreeGC(wglobal.dpy, style->stipple_gc);
-		XFreePixmap(wglobal.dpy, style->tag_pixmap);
+		XFreeGC(ioncore_g.dpy, style->copy_gc);
+		XFreeGC(ioncore_g.dpy, style->stipple_gc);
+		XFreePixmap(ioncore_g.dpy, style->tag_pixmap);
 	}
     
-    XSync(wglobal.dpy, False);
+    XSync(ioncore_g.dpy, False);
     
     if(style->based_on!=NULL){
         unref_style(style->based_on);
@@ -569,9 +571,9 @@ static DynFunTab dementbrush_dynfuntab[]={
 };
 
 
-IMPLOBJ(DEBrush, GrBrush, debrush_deinit, debrush_dynfuntab);
-IMPLOBJ(DETabBrush, DEBrush, detabbrush_deinit, detabbrush_dynfuntab);
-IMPLOBJ(DEMEntBrush, DEBrush, dementbrush_deinit, dementbrush_dynfuntab);
+IMPLCLASS(DEBrush, GrBrush, debrush_deinit, debrush_dynfuntab);
+IMPLCLASS(DETabBrush, DEBrush, detabbrush_deinit, detabbrush_dynfuntab);
+IMPLCLASS(DEMEntBrush, DEBrush, dementbrush_deinit, dementbrush_dynfuntab);
 
 
 /*}}}*/

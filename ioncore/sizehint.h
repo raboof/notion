@@ -15,10 +15,12 @@
 #include "common.h"
 #include "region.h"
 
-extern void correct_size(int *wp, int *hp, const XSizeHints *hints, bool min);
-extern void get_sizehints(Window win, XSizeHints *hints);
-extern void adjust_size_hints_for_managed(XSizeHints *hints, WRegion *list);
-extern int gravity_deltax(int gravity, int left, int right);
-extern int gravity_deltay(int gravity, int top, int bottom);
+extern void xwindow_get_sizehints(Window win, XSizeHints *hints);
+
+extern void xsizehints_correct(const XSizeHints *hints, int *wp, int *hp,  bool min);
+extern void xsizehints_adjust_for(XSizeHints *hints, WRegion *list);
+
+extern int xgravity_deltax(int gravity, int left, int right);
+extern int xgravity_deltay(int gravity, int top, int bottom);
 
 #endif /* ION_IONCORE_SIZEHINT_H */

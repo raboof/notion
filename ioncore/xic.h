@@ -13,8 +13,12 @@
 #define ION_IONCORE_XIC_H
 
 #include "common.h"
+#include "window.h"
 
-extern XIC create_xic(Window win);
-extern void init_xim(void);
+extern XIC xwindow_create_xic(Window win);
+
+extern bool window_create_xic(WWindow *wwin);
+
+extern void ioncore_init_xim(void);
 
 #endif /* ION_IONCORE_XIC_H */

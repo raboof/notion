@@ -15,10 +15,9 @@
 #include "region.h"
 #include "window.h"
 #include "extl.h"
+#include "rectangle.h"
 
-INTROBJ(WGenWS);
-
-DECLOBJ(WGenWS){
+DECLCLASS(WGenWS){
 	WRegion reg;
 };
 

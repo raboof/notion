@@ -33,12 +33,13 @@
 #include "gr.h"
 #include "genws.h"
 #include "activity.h"
+#include "region-iter.h"
 
 
-#define SET_SHADE_FLAG(F) ((F)->flags|=WFRAME_SHADED, \
-						   (F)->mplex.flags|=WMPLEX_MANAGED_UNVIEWABLE)
-#define UNSET_SHADE_FLAG(F) ((F)->flags&=~WFRAME_SHADED, \
-							 (F)->mplex.flags&=~WMPLEX_MANAGED_UNVIEWABLE)
+#define SET_SHADE_FLAG(F) ((F)->flags|=FRAME_SHADED, \
+						   (F)->mplex.flags|=MPLEX_MANAGED_UNVIEWABLE)
+#define UNSET_SHADE_FLAG(F) ((F)->flags&=~FRAME_SHADED, \
+							 (F)->mplex.flags&=~MPLEX_MANAGED_UNVIEWABLE)
 
 
 extern bool frame_set_background(WFrame *frame, bool set_always);
@@ -75,7 +76,7 @@ bool frame_init(WFrame *frame, WWindow *parent,
 	frame_initialise_gr(frame);
 	frame_initialise_titles(frame);
 	
-	XSelectInput(wglobal.dpy, WFRAME_WIN(frame), FRAME_MASK);
+	XSelectInput(ioncore_g.dpy, FRAME_WIN(frame), IONCORE_EVENTMASK_FRAME);
 
 	region_add_bindmap((WRegion*)frame, &ioncore_frame_bindmap);
 
@@ -120,7 +121,7 @@ int frame_tab_at_x(const WFrame *frame, int x)
 	
 	tx=bg.x;
 
-	for(tab=0; tab<WFRAME_MCOUNT(frame); tab++){
+	for(tab=0; tab<FRAME_MCOUNT(frame); tab++){
 		tx+=frame_nth_tab_w(frame, tab);
 		if(x<tx)
 			break;
@@ -146,7 +147,7 @@ static int frame_nth_tab_w_iw(const WFrame *frame, int n, bool inner)
 {
 	WRectangle bg;
 	GrBorderWidths bdw=GR_BORDER_WIDTHS_INIT;
-	int m=WFRAME_MCOUNT(frame);
+	int m=FRAME_MCOUNT(frame);
 	uint w;
 	
 	frame_bar_geom(frame, &bg);
@@ -216,7 +217,7 @@ static void update_attr(WFrame *frame, int i, WRegion *reg)
 		return;
 	}
 	
-	if(reg==WFRAME_CURRENT(frame))
+	if(reg==FRAME_CURRENT(frame))
 		flags|=0x01;
 	if(reg!=NULL && reg->flags&REGION_TAGGED)
 		flags|=0x02;
@@ -245,7 +246,7 @@ static void update_attrs(WFrame *frame)
 	int i=0;
 	WRegion *sub;
 	
-	FOR_ALL_MANAGED_ON_LIST(WFRAME_MLIST(frame), sub){
+	FOR_ALL_MANAGED_ON_LIST(FRAME_MLIST(frame), sub){
 		update_attr(frame, i, sub);
 		i++;
 	}
@@ -278,7 +279,7 @@ static void do_init_title(WFrame *frame, int i, WRegion *sub)
 	
 static bool frame_initialise_titles(WFrame *frame)
 {
-	int i, n=WFRAME_MCOUNT(frame);
+	int i, n=FRAME_MCOUNT(frame);
 	WRegion *sub;
 	
 	frame_free_titles(frame);
@@ -291,11 +292,11 @@ static bool frame_initialise_titles(WFrame *frame)
 		return FALSE;
 	frame->titles_n=n;
 	
-	if(WFRAME_MCOUNT(frame)==0){
+	if(FRAME_MCOUNT(frame)==0){
 		do_init_title(frame, 0, NULL);
 	}else{
 		i=0;
-		FOR_ALL_MANAGED_ON_LIST(WFRAME_MLIST(frame), sub){
+		FOR_ALL_MANAGED_ON_LIST(FRAME_MLIST(frame), sub){
 			do_init_title(frame, i, sub);
 			i++;
 		}
@@ -324,12 +325,12 @@ static void reparent_or_fit(WFrame *frame, const WRectangle *geom,
 	
 	if(parent!=NULL){
 		region_detach_parent((WRegion*)frame);
-		XReparentWindow(wglobal.dpy, WFRAME_WIN(frame), parent->win,
+		XReparentWindow(ioncore_g.dpy, FRAME_WIN(frame), parent->win,
 						geom->x, geom->y);
-		XResizeWindow(wglobal.dpy, WFRAME_WIN(frame), geom->w, geom->h);
+		XResizeWindow(ioncore_g.dpy, FRAME_WIN(frame), geom->w, geom->h);
 		region_attach_parent((WRegion*)frame, (WRegion*)parent);
 	}else{
-		XMoveResizeWindow(wglobal.dpy, WFRAME_WIN(frame),
+		XMoveResizeWindow(ioncore_g.dpy, FRAME_WIN(frame),
 						  geom->x, geom->y, geom->w, geom->h);
 	}
 	
@@ -337,28 +338,28 @@ static void reparent_or_fit(WFrame *frame, const WRectangle *geom,
 	REGION_GEOM(frame)=*geom;
 
 	if(hchg){
-		frame->flags|=WFRAME_SAVED_VERT;
+		frame->flags|=FRAME_SAVED_VERT;
 		frame->saved_y=old_geom.y;
 		frame->saved_h=old_geom.h;
 	}
 
 	if(wchg){
-		frame->flags|=WFRAME_SAVED_HORIZ;
+		frame->flags|=FRAME_SAVED_HORIZ;
 		frame->saved_x=old_geom.x;
 		frame->saved_w=old_geom.w;
 	}
 
 	mplex_managed_geom((WMPlex*)frame, &mg);
 	if(hchg && mg.h<=1){
-		if(!(frame->flags&(WFRAME_SHADED|WFRAME_TAB_HIDE))){
+		if(!(frame->flags&(FRAME_SHADED|FRAME_TAB_HIDE))){
 			SET_SHADE_FLAG(frame);
-			if(WFRAME_CURRENT(frame)!=NULL)
-				region_unmap(WFRAME_CURRENT(frame));
+			if(FRAME_CURRENT(frame)!=NULL)
+				region_unmap(FRAME_CURRENT(frame));
 		}
 	}else if(hchg){
-		if(frame->flags&WFRAME_SHADED && REGION_IS_MAPPED(frame)){
-			if(WFRAME_CURRENT(frame)!=NULL)
-				region_map(WFRAME_CURRENT(frame));
+		if(frame->flags&FRAME_SHADED && REGION_IS_MAPPED(frame)){
+			if(FRAME_CURRENT(frame)!=NULL)
+				region_map(FRAME_CURRENT(frame));
 		}
 		UNSET_SHADE_FLAG(frame);
 	}
@@ -376,7 +377,7 @@ static void reparent_or_fit(WFrame *frame, const WRectangle *geom,
 bool frame_reparent(WFrame *frame, WWindow *parent, 
 					   const WRectangle *geom)
 {
-	if(!same_rootwin((WRegion*)frame, (WRegion*)parent))
+	if(!region_same_rootwin((WRegion*)frame, (WRegion*)parent))
 		return FALSE;
 	
 	reparent_or_fit(frame, geom, parent);
@@ -396,7 +397,7 @@ void frame_resize_hints(WFrame *frame, XSizeHints *hints_ret,
 	WRectangle subgeom;
 	uint wdummy, hdummy;
 	
-	/*if(WFRAME_CURRENT(frame)==NULL){*/
+	/*if(FRAME_CURRENT(frame)==NULL){*/
 		mplex_managed_geom((WMPlex*)frame, &subgeom);
 		if(relw_ret!=NULL)
 			*relw_ret=subgeom.w;
@@ -404,19 +405,19 @@ void frame_resize_hints(WFrame *frame, XSizeHints *hints_ret,
 			*relh_ret=subgeom.h;
 	/*}else{
 		if(relw_ret!=NULL)
-			*relw_ret=REGION_GEOM(WFRAME_CURRENT(frame)).w;
+			*relw_ret=REGION_GEOM(FRAME_CURRENT(frame)).w;
 		if(relh_ret!=NULL)
-			*relh_ret=REGION_GEOM(WFRAME_CURRENT(frame)).h;
+			*relh_ret=REGION_GEOM(FRAME_CURRENT(frame)).h;
 	}*/
 	
-	if(WFRAME_CURRENT(frame)!=NULL){
-		region_resize_hints(WFRAME_CURRENT(frame), hints_ret,
+	if(FRAME_CURRENT(frame)!=NULL){
+		region_resize_hints(FRAME_CURRENT(frame), hints_ret,
 							&wdummy, &hdummy);
 	}else{
 		hints_ret->flags=0;
 	}
 	
-	adjust_size_hints_for_managed(hints_ret, WFRAME_MLIST(frame));
+	xsizehints_adjust_for(hints_ret, FRAME_MLIST(frame));
 }
 
 
@@ -431,7 +432,7 @@ void frame_inactivated(WFrame *frame)
 	window_draw((WWindow*)frame, FALSE);
 	extl_call_named("call_hook", "soo", NULL,
 					"frame_inactivated",
-					frame, WFRAME_CURRENT(frame));
+					frame, FRAME_CURRENT(frame));
 }
 
 
@@ -440,7 +441,7 @@ void frame_activated(WFrame *frame)
 	window_draw((WWindow*)frame, FALSE);
 	extl_call_named("call_hook", "soo", NULL,
 					"frame_activated",
-					frame, WFRAME_CURRENT(frame));
+					frame, FRAME_CURRENT(frame));
 }
 
 
@@ -456,13 +457,13 @@ void frame_activated(WFrame *frame)
 EXTL_EXPORT_MEMBER
 void frame_toggle_tab(WFrame *frame)
 {
-	if(frame->flags&WFRAME_SHADED)
+	if(frame->flags&FRAME_SHADED)
 		return;
 	
-	frame->flags^=WFRAME_TAB_HIDE;
+	frame->flags^=FRAME_TAB_HIDE;
     mplex_size_changed(&(frame->mplex), FALSE, TRUE);
 	mplex_fit_managed(&(frame->mplex));
-	XClearWindow(wglobal.dpy, WFRAME_WIN(frame));
+	XClearWindow(ioncore_g.dpy, FRAME_WIN(frame));
 	window_draw((WWindow*)frame, TRUE);
 }
 
@@ -497,7 +498,7 @@ static void frame_managed_changed(WFrame *frame, int mode, bool sw,
 	if(sw){
 		extl_call_named("call_hook", "soo", NULL,
 						"frame_managed_switched",
-						frame, WFRAME_CURRENT(frame));
+						frame, FRAME_CURRENT(frame));
 		if(frame_set_background(frame, FALSE))
 			return;
 	}
@@ -516,35 +517,35 @@ bool frame_save_to_file(WFrame *frame, FILE *file, int lvl)
 {
 	WRegion *sub;
 	
-	begin_saved_region((WRegion*)frame, file, lvl);
-	save_indent_line(file, lvl);
+	region_save_identity((WRegion*)frame, file, lvl);
+	file_indent(file, lvl);
 	fprintf(file, "flags = %d,\n", frame->flags);
 	
-	if(frame->flags&WFRAME_SAVED_VERT){
-		save_indent_line(file, lvl);
+	if(frame->flags&FRAME_SAVED_VERT){
+		file_indent(file, lvl);
 		fprintf(file, "saved_y = %d, saved_h = %d,\n", 
 				frame->saved_y, frame->saved_h);
 	}
-	if(frame->flags&WFRAME_SAVED_HORIZ){
-		save_indent_line(file, lvl);
+	if(frame->flags&FRAME_SAVED_HORIZ){
+		file_indent(file, lvl);
 		fprintf(file, "saved_x = %d, saved_w = %d,\n", 
 				frame->saved_x, frame->saved_w);
 	}
 	
-	save_indent_line(file, lvl);
+	file_indent(file, lvl);
 	fprintf(file, "subs = {\n");
-	FOR_ALL_MANAGED_ON_LIST(WFRAME_MLIST(frame), sub){
-		save_indent_line(file, lvl+1);
+	FOR_ALL_MANAGED_ON_LIST(FRAME_MLIST(frame), sub){
+		file_indent(file, lvl+1);
 		fprintf(file, "{\n");
 		region_save_to_file((WRegion*)sub, file, lvl+2);
-		if(sub==WFRAME_CURRENT(frame)){
-			save_indent_line(file, lvl+2);
+		if(sub==FRAME_CURRENT(frame)){
+			file_indent(file, lvl+2);
 			fprintf(file, "switchto = true,\n");
 		}
-		save_indent_line(file, lvl+1);
+		file_indent(file, lvl+1);
 		fprintf(file, "},\n");
 	}
-	save_indent_line(file, lvl);
+	file_indent(file, lvl);
 	fprintf(file, "},\n");
 	
 	return TRUE;
@@ -559,14 +560,14 @@ void frame_load_saved_geom(WFrame* frame, ExtlTab tab)
 	   extl_table_gets_i(tab, "saved_w", &s)){
 		frame->saved_x=p;
 		frame->saved_w=s;
-		frame->flags|=WFRAME_SAVED_HORIZ;
+		frame->flags|=FRAME_SAVED_HORIZ;
 	}
 
 	if(extl_table_gets_i(tab, "saved_y", &p) &&
 	   extl_table_gets_i(tab, "saved_h", &s)){
 		frame->saved_y=p;
 		frame->saved_h=s;
-		frame->flags|=WFRAME_SAVED_VERT;
+		frame->flags|=FRAME_SAVED_VERT;
 	}
 }
 
@@ -579,7 +580,7 @@ void frame_do_load(WFrame *frame, ExtlTab tab)
 	
 	extl_table_gets_i(tab, "flags", &flags);
 	
-	if(flags&WFRAME_TAB_HIDE)
+	if(flags&FRAME_TAB_HIDE)
 		frame_toggle_tab((WFrame*)frame);
 
 	frame_load_saved_geom((WFrame*)frame, tab);
@@ -646,7 +647,7 @@ static DynFunTab frame_dynfuntab[]={
 };
 									   
 
-IMPLOBJ(WFrame, WMPlex, frame_deinit, frame_dynfuntab);
+IMPLCLASS(WFrame, WMPlex, frame_deinit, frame_dynfuntab);
 
 
 /*}}}*/

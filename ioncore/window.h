@@ -13,17 +13,12 @@
 #define ION_IONCORE_WINDOW_H
 
 #include "common.h"
-
-INTROBJ(WWindow);
-
 #include "region.h"
 #include "binding.h"
-
-#define FIND_WINDOW_T(WIN, TYPE) (TYPE*)find_window_t(WIN, &OBJDESCR(TYPE))
-#define FIND_WINDOW(WIN) find_window(WIN)
+#include "rectangle.h"
 
 
-DECLOBJ(WWindow){
+DECLCLASS(WWindow){
 	WRegion region;
 	Window win;
 	XIC xic;
@@ -37,9 +32,6 @@ extern bool window_init(WWindow *p, WWindow *parent, Window win,
 						const WRectangle *geom);
 extern void window_deinit(WWindow *win);
 
-extern WRegion *find_window(Window win);
-extern WRegion *find_window_t(Window win, const WObjDescr *descr);
-
 DYNFUN void window_draw(WWindow *wwin, bool complete);
 DYNFUN void window_insstr(WWindow *wwin, const char *buf, size_t n);
 DYNFUN int window_press(WWindow *wwin, XButtonEvent *ev, WRegion **reg_ret);
@@ -48,15 +40,23 @@ DYNFUN void window_release(WWindow *wwin);
 /* Only to be used by regions that inherit this */
 extern void window_map(WWindow *wwin);
 extern void window_unmap(WWindow *wwin);
-extern void window_set_focus_to(WWindow *wwin, bool warp);
+extern void window_do_set_focus(WWindow *wwin, bool warp);
 extern void window_fit(WWindow *wwin, const WRectangle *geom);
-extern bool reparent_window(WWindow *wwin, WWindow *parent, 
+extern bool window_reparent(WWindow *wwin, WWindow *parent, 
 							const WRectangle *geom);
 
 extern Window window_restack(WWindow *wwin, Window other, int mode);
-extern void do_restack_window(Window win, Window other, int stack_mode);
 
 DYNFUN bool region_reparent(WRegion *reg, WWindow *target, 
 							const WRectangle *geom);
+
+
+#define XWINDOW_REGION_OF_T(WIN, TYPE) (TYPE*)xwindow_region_of_t(WIN, &CLASSDESCR(TYPE))
+#define XWINDOW_REGION_OF(WIN) xwindow_region_of(WIN)
+
+extern WRegion *xwindow_region_of(Window win);
+extern WRegion *xwindow_region_of_t(Window win, const WClassDescr *descr);
+
+extern void xwindow_restack(Window win, Window other, int stack_mode);
 
 #endif /* ION_IONCORE_WINDOW_H */

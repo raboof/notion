@@ -15,8 +15,9 @@
 #include <ioncore/common.h>
 #include <ioncore/window.h>
 #include <ioncore/gr.h>
+#include <ioncore/rectangle.h>
 
-INTROBJ(WMenu);
+INTRCLASS(WMenu);
 INTRSTRUCT(WMenuEntry);
 
 #define WMENUENTRY_SUBMENU 0x0001
@@ -26,7 +27,7 @@ DECLSTRUCT(WMenuEntry){
 	int flags;
 };
 
-DECLOBJ(WMenu){
+DECLCLASS(WMenu){
 	WWindow win;
 	GrBrush *brush;
 	GrBrush *entry_brush;
@@ -74,5 +75,7 @@ extern void menu_release(WMenu *menu, XButtonEvent *ev);
 extern void menu_motion(WMenu *menu, XMotionEvent *ev, int dx, int dy);
 extern void menu_button(WMenu *menu, XButtonEvent *ev);
 extern int menu_press(WMenu *menu, XButtonEvent *ev, WRegion **reg_ret);
+
+extern void menumod_set_scroll_params(int delay, int amount);
 
 #endif /* ION_MENU_MENU_H */

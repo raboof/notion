@@ -14,6 +14,7 @@
 #include "window.h"
 #include "infowin.h"
 #include "gr.h"
+#include "objp.h"
 
 
 /*{{{ Init/deinit */
@@ -27,21 +28,22 @@ bool infowin_init(WInfoWin* p, WWindow *parent, const WRectangle *geom,
 	if(!window_init_new(&(p->wwin), parent, geom))
 		return FALSE;
 	
-	p->buffer=ALLOC_N(char, WINFOWIN_BUFFER_LEN);
+	p->buffer=ALLOC_N(char, INFOWIN_BUFFER_LEN);
 	if(p->buffer==NULL)
 		goto fail;
 	p->buffer[0]='\0';
 	p->attr=NULL;
 
-	p->brush=gr_get_brush(ROOTWIN_OF(parent), p->wwin.win, style);
+	p->brush=gr_get_brush(region_rootwin_of((WRegion*)parent),
+                          p->wwin.win, style);
 	if(p->brush==NULL)
 		goto fail2;
 	
 	/* Enable save unders */
 	attr.save_under=True;
-	XChangeWindowAttributes(wglobal.dpy, p->wwin.win,
+	XChangeWindowAttributes(ioncore_g.dpy, p->wwin.win,
 							CWSaveUnder, &attr);
-	XSelectInput(wglobal.dpy, p->wwin.win, ExposureMask);
+	XSelectInput(ioncore_g.dpy, p->wwin.win, ExposureMask);
 	
 	return TRUE;
 
@@ -136,7 +138,7 @@ static DynFunTab infowin_dynfuntab[]={
 };
 
 
-IMPLOBJ(WInfoWin, WWindow, infowin_deinit, infowin_dynfuntab);
+IMPLCLASS(WInfoWin, WWindow, infowin_deinit, infowin_dynfuntab);
 
 	
 /*}}}*/

@@ -22,6 +22,7 @@
 #include "manage.h"
 #include "extlconv.h"
 #include "names.h"
+#include "region-iter.h"
 
 
 /*{{{ Attach */
@@ -37,8 +38,8 @@ static WRegion *add_fn_new(WWindow *par, const WRectangle *geom,
 }
 
 
-WRegion *attach_new_helper(WRegion *mgr, WRegionSimpleCreateFn *cfn,
-						   WRegionDoAttachFn *fn, void *param)
+WRegion *region__attach_new(WRegion *mgr, WRegionSimpleCreateFn *cfn,
+                            WRegionDoAttachFn *fn, void *param)
 {
 	return fn(mgr, (WRegionAttachHandler*)add_fn_new, (void*)cfn, param);
 }
@@ -50,12 +51,12 @@ WRegion *attach_new_helper(WRegion *mgr, WRegionSimpleCreateFn *cfn,
 static WRegion *add_fn_load(WWindow *par, const WRectangle *geom, 
 							ExtlTab *tab)
 {
-	return load_create_region(par, geom, *tab);
+	return create_region_load(par, geom, *tab);
 }
 
 
-WRegion *attach_load_helper(WRegion *mgr, ExtlTab tab,
-							WRegionDoAttachFn *fn, void *param)
+WRegion *region__attach_load(WRegion *mgr, ExtlTab tab,
+                             WRegionDoAttachFn *fn, void *param)
 {
 	return fn(mgr, (WRegionAttachHandler*)add_fn_load, (void*)&tab, param);
 }
@@ -76,8 +77,8 @@ static WRegion *add_fn_reparent(WWindow *par, const WRectangle *geom,
 }
 
 
-bool attach_reparent_helper(WRegion *mgr, WRegion *reg, 
-							WRegionDoAttachFn *fn, void *param)
+bool region__attach_reparent(WRegion *mgr, WRegion *reg, 
+                             WRegionDoAttachFn *fn, void *param)
 {
 	WRegion *reg2;
 	
@@ -89,7 +90,7 @@ bool attach_reparent_helper(WRegion *mgr, WRegion *reg,
 	for(reg2=mgr; reg2!=NULL; reg2=REGION_MANAGER(reg2)){
 		if(reg2==reg){
 			warn("Trying to make a %s manage a %s above it in management "
-				 "hierarchy", WOBJ_TYPESTR(mgr), WOBJ_TYPESTR(reg));
+				 "hierarchy", OBJ_TYPESTR(mgr), OBJ_TYPESTR(reg));
 			return FALSE;
 		}
 	}
@@ -97,7 +98,7 @@ bool attach_reparent_helper(WRegion *mgr, WRegion *reg,
 	for(reg2=region_parent(mgr); reg2!=NULL; reg2=region_parent(reg2)){
 		if(reg2==reg){
 			warn("Trying to make a %s manage its ancestor (a %s)",
-				 WOBJ_TYPESTR(mgr), WOBJ_TYPESTR(reg));
+				 OBJ_TYPESTR(mgr), OBJ_TYPESTR(reg));
 			return FALSE;
 		}
 	}
@@ -115,7 +116,7 @@ bool attach_reparent_helper(WRegion *mgr, WRegion *reg,
 /*{{{ Rescue */
 
 
-WRegion *default_find_rescue_manager_for(WRegion *reg, WRegion *chld)
+WRegion *region_find_rescue_manager_for_default(WRegion *reg, WRegion *chld)
 {
 	if(region_has_manage_clientwin(reg))
 		return reg;
@@ -140,7 +141,7 @@ WRegion *region_find_rescue_manager(WRegion *reg)
 		p=region_manager_or_parent(reg);
 		if(p==NULL)
 			break;
-		if(!WOBJ_IS_BEING_DESTROYED(p)){
+		if(!OBJ_IS_BEING_DESTROYED(p)){
 			WRegion *nm=region_find_rescue_manager_for(p, reg);
 			if(nm!=NULL)
 				return nm;
@@ -154,10 +155,10 @@ WRegion *region_find_rescue_manager(WRegion *reg)
 
 static bool do_rescue(WRegion *dest, WRegion *r)
 {
-	WManageParams param=INIT_WMANAGEPARAMS;
+	WManageParams param=MANAGEPARAMS_INIT;
 	bool res=FALSE;
 	
-	if(!WOBJ_IS(r, WClientWin)){
+	if(!OBJ_IS(r, WClientWin)){
 		res=region_do_rescue_clientwins(r, dest);
 	}else if(dest!=NULL){
 		region_rootpos(dest, &(param.geom.x), &(param.geom.y));

@@ -14,6 +14,7 @@
 
 #include <ioncore/common.h>
 #include <ioncore/gr.h>
+#include <ioncore/rectangle.h>
 
 INTRSTRUCT(WListing);
 

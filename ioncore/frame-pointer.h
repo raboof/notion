@@ -19,7 +19,7 @@
 extern void frame_p_resize(WFrame *frame);
 extern void frame_p_tabdrag(WFrame *frame);
 extern void frame_p_move(WFrame *frame);
-extern void frame_switch_tab(WFrame *frame);
+extern void frame_p_switch_tab(WFrame *frame);
 
 extern int frame_press(WFrame *frame, XButtonEvent *ev,
 						  WRegion **reg_ret);

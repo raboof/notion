@@ -464,7 +464,7 @@ static void wedln_completion_handler(WEdln *wedln, const char *nam)
 
 /*EXTL_DOC
  * This function should be called in completors (such given as
- * parameters to \code{query_query}) to return the set of completions
+ * parameters to \code{querymod.query}) to return the set of completions
  * found. The numerical indexes of \var{completions} list the found
  * completions. If the entry \var{common_part} exists, it gives an
  * extra common prefix of all found completions.
@@ -573,12 +573,12 @@ static bool wedln_init(WEdln *wedln, WWindow *par, const WRectangle *geom,
 		return FALSE;
 	}
 
-	wedln->input.win.xic=create_xic(wedln->input.win.win);
+    window_create_xic(&wedln->input.win);
 	
 	wedln->handler=extl_ref_fn(params->handler);
 	wedln->completor=extl_ref_fn(params->completor);
 
-	region_add_bindmap((WRegion*)wedln, &query_wedln_bindmap);
+	region_add_bindmap((WRegion*)wedln, &querymod_wedln_bindmap);
 	
 	return TRUE;
 }
@@ -632,7 +632,7 @@ static void wedln_do_finish(WEdln *wedln)
 EXTL_EXPORT_MEMBER
 void wedln_finish(WEdln *wedln)
 {
-	defer_action((WObj*)wedln, (DeferredAction*)wedln_do_finish);
+	ioncore_defer_action((WObj*)wedln, (WDeferredAction*)wedln_do_finish);
 }
 
 
@@ -648,7 +648,7 @@ void wedln_finish(WEdln *wedln)
 EXTL_EXPORT_MEMBER
 void wedln_paste(WEdln *wedln)
 {
-	request_selection(wedln->input.win.win);
+	ioncore_request_selection_for(wedln->input.win.win);
 }
 
 
@@ -682,7 +682,7 @@ static DynFunTab wedln_dynfuntab[]={
 };
 
 
-IMPLOBJ(WEdln, WInput, wedln_deinit, wedln_dynfuntab);
+IMPLCLASS(WEdln, WInput, wedln_deinit, wedln_dynfuntab);
 
 	
 /*}}}*/

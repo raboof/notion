@@ -14,15 +14,12 @@
 #include "common.h"
 #include "global.h"
 
-/*#define X_LOCALE
-#include <X11/Xlocale.h>*/
-
 
 static XIM input_method=NULL;
 static XIMStyle input_style=(XIMPreeditNothing|XIMStatusNothing);
 
 
-void init_xim(void)
+void ioncore_init_xim(void)
 {
 	char *p;
 	int i;
@@ -31,10 +28,10 @@ void init_xim(void)
   	bool found=FALSE;
 
 	if((p=XSetLocaleModifiers(""))!=NULL && *p)
-	    xim=XOpenIM(wglobal.dpy, NULL, NULL, NULL);
+	    xim=XOpenIM(ioncore_g.dpy, NULL, NULL, NULL);
 	
 	if(xim==NULL && (p=XSetLocaleModifiers("@im=none"))!=NULL && *p)
-	    xim=XOpenIM(wglobal.dpy, NULL, NULL, NULL);
+	    xim=XOpenIM(ioncore_g.dpy, NULL, NULL, NULL);
 
     if(xim==NULL){
 		warn("Failed to open input method");
@@ -66,7 +63,7 @@ void init_xim(void)
 }
 
 
-XIC create_xic(Window win)
+XIC xwindow_create_xic(Window win)
 {
 	/*static bool tried=FALSE;*/
 	XIC xic;
@@ -90,3 +87,10 @@ XIC create_xic(Window win)
 	return xic;
 }
 
+
+bool window_create_xic(WWindow *wwin)
+{
+    if(wwin->xic==NULL)
+        wwin->xic=xwindow_create_xic(wwin->win);
+    return (wwin->xic!=NULL);
+}

@@ -20,6 +20,7 @@
 #include "grab.h"
 #include "regbind.h"
 #include "extl.h"
+#include "region-iter.h"
 #include "strings.h"
 
 
@@ -48,7 +49,7 @@ static void insstr(WWindow *wwin, XKeyEvent *ev)
 		return;
 	
 	/* Won't catch bad strings, but should filter out most crap. */
-	if(wglobal.use_mb){
+	if(ioncore_g.use_mb){
 		if(!iswprint(str_wchar_at(buf, 32)))
 			return;
 	}else{
@@ -64,18 +65,26 @@ static void insstr(WWindow *wwin, XKeyEvent *ev)
  * the return values are those expected by GrabHandler's, i.e.
  * you can just pass through the retval obtained from this function
  */
-static bool dispatch_binding(WRegion *mgr, WRegion *reg, WBinding *binding,
+static bool dispatch_binding(WRegion *binding_owner, 
+                             WRegion *grab_reg, WBinding *binding,
 							 XKeyEvent *ev)
 {
 	WRootWin *rootwin;
-	
+	WRegion *subctx;
+    
 	if(binding!=NULL){
 		/* Get the screen now for waitrel grab - the object might
 		 * have been destroyed when call_binding returns.
 		 */
-		extl_call(binding->func, "oo", NULL, mgr, (mgr==reg ? NULL : reg));
+        if(grab_reg==binding_owner || grab_reg==NULL)
+            subctx=region_current(binding_owner);
+        else
+            subctx=grab_reg;
+        
+		extl_call(binding->func, "oo", NULL, binding_owner, subctx);
+        
 		if(ev->state!=0 && binding->waitrel)
-			waitrelease(reg);
+			waitrelease(grab_reg);
 	}
 	return TRUE;
 }
@@ -86,7 +95,7 @@ static void send_key(XEvent *ev, WClientWin *cwin)
 	Window win=cwin->win;
 	ev->xkey.window=win;
 	ev->xkey.subwindow=None;
-	XSendEvent(wglobal.dpy, win, False, KeyPressMask, ev);
+	XSendEvent(ioncore_g.dpy, win, False, KeyPressMask, ev);
 }
 
 
@@ -95,9 +104,9 @@ static bool quote_next_handler(WRegion *reg, XEvent *xev)
 	XKeyEvent *ev=&xev->xkey;
  	if(ev->type!=KeyPress)
 		return FALSE;
-	if(ismod(ev->keycode))
+	if(ioncore_ismod(ev->keycode))
 		return FALSE;
-	assert(WOBJ_IS(reg, WClientWin));
+	assert(OBJ_IS(reg, WClientWin));
 	send_key(xev, (WClientWin*)reg);
 	return TRUE; /* remove the grab */
 }
@@ -109,14 +118,14 @@ static bool quote_next_handler(WRegion *reg, XEvent *xev)
 EXTL_EXPORT_MEMBER
 void clientwin_quote_next(WClientWin *cwin)
 {
-    grab_establish((WRegion*)cwin, quote_next_handler, NULL, 0);
-	change_grab_cursor(CURSOR_WAITKEY);
+    ioncore_grab_establish((WRegion*)cwin, quote_next_handler, NULL, 0);
+	ioncore_change_grab_cursor(IONCORE_CURSOR_WAITKEY);
 }
 
 
 static bool waitrelease_handler(WRegion *reg, XEvent *ev)
 {
-	if(!unmod(ev->xkey.state, ev->xkey.keycode))
+	if(!ioncore_unmod(ev->xkey.state, ev->xkey.keycode))
 		return TRUE;
 	return FALSE;
 }
@@ -125,13 +134,14 @@ static bool waitrelease_handler(WRegion *reg, XEvent *ev)
 static void waitrelease(WRegion *reg)
 {
 	/* We need to grab on the root window as <reg> might have been
-	 * defer_destroy:ed by the binding handler (the most common case
+	 * ioncore_defer_destroy:ed by the binding handler (the most common case
 	 * for using this kpress_waitrel!). In such a case the grab may
 	 * be removed before the modifiers are released.
 	 */
-	grab_establish((WRegion*)region_rootwin_of(reg), waitrelease_handler, 
-				   NULL, 0);
-	change_grab_cursor(CURSOR_WAITKEY);
+	ioncore_grab_establish((WRegion*)region_rootwin_of(reg), 
+                           waitrelease_handler, 
+                           NULL, 0);
+	ioncore_change_grab_cursor(IONCORE_CURSOR_WAITKEY);
 }
 
 
@@ -194,14 +204,14 @@ static bool submapgrab_handler(WRegion *reg, XEvent *ev)
 										 &binding_owner);
 		if(binding!=NULL)
 			break;
-		if(WOBJ_IS(reg, WRootWin))
+		if(OBJ_IS(reg, WRootWin))
 			break;
-		reg=REGION_PARENT_CHK(reg, WRegion);
+		reg=REGION_PARENT(reg);
 	}
 
 	/* if it is just a modifier, then return. */
 	if(binding==NULL){
-		if(ismod(ev->xkey.keycode))
+		if(ioncore_ismod(ev->xkey.keycode))
 			return FALSE;
 		clear_subs(oreg);
 		return TRUE;
@@ -224,18 +234,18 @@ static bool submapgrab_handler(WRegion *reg, XEvent *ev)
 
 static void submapgrab(WRegion *reg)
 {
-	grab_establish(reg, submapgrab_handler, clear_subs, 0);
-	change_grab_cursor(CURSOR_WAITKEY);
+	ioncore_grab_establish(reg, submapgrab_handler, clear_subs, 0);
+	ioncore_change_grab_cursor(IONCORE_CURSOR_WAITKEY);
 }
 
 
-void handle_keypress(XKeyEvent *ev)
+void ioncore_do_handle_keypress(XKeyEvent *ev)
 {
 	WBinding *binding=NULL;
 	WRegion *reg=NULL, *oreg=NULL, *binding_owner=NULL;
 	bool grabbed;
 
-	reg=(WRegion*)FIND_WINDOW(ev->window);
+	reg=(WRegion*)XWINDOW_REGION_OF(ev->window);
 	
 	if(reg==NULL)
 		return;
@@ -256,7 +266,7 @@ void handle_keypress(XKeyEvent *ev)
 			}
 			if(binding!=NULL)
 				break;
-			if(WOBJ_IS(reg, WRootWin))
+			if(OBJ_IS(reg, WRootWin))
 				break;
 			reg=region_parent(reg);
 		}while(reg!=NULL);
@@ -276,10 +286,10 @@ void handle_keypress(XKeyEvent *ev)
 			}
 		}else{
 			if(grabbed)
-				XUngrabKeyboard(wglobal.dpy, CurrentTime);
+				XUngrabKeyboard(ioncore_g.dpy, CurrentTime);
 			dispatch_binding(binding_owner, reg, binding, ev);
 		}
-	}else if(WOBJ_IS(oreg, WWindow)){
+	}else if(OBJ_IS(oreg, WWindow)){
 		insstr((WWindow*)oreg, ev);
 	}
 }

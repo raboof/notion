@@ -16,11 +16,12 @@
 #include <ioncore/frame.h>
 #include <ioncore/window.h>
 #include <ioncore/extl.h>
+#include <ioncore/rectangle.h>
 #include "floatws.h"
 
-INTROBJ(WFloatFrame);
+INTRCLASS(WFloatFrame);
 
-DECLOBJ(WFloatFrame){
+DECLCLASS(WFloatFrame){
 	WFrame frame;
 	int bar_w;
 	

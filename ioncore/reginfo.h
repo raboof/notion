@@ -17,20 +17,31 @@
 #include "region.h"
 #include "window.h"
 #include "extl.h"
+#include "rectangle.h"
 
 typedef WRegion *WRegionLoadCreateFn(WWindow *par, const WRectangle *geom,
 									 ExtlTab tab);
 typedef WRegion *WRegionSimpleCreateFn(WWindow *par, const WRectangle *geom);
 
+INTRSTRUCT(WRegClassInfo);
+	
+DECLSTRUCT(WRegClassInfo){
+	WClassDescr *descr;
+	WRegionSimpleCreateFn *sc_fn;
+	WRegionLoadCreateFn *lc_fn;
+	WRegClassInfo *next, *prev;
+};
 
-extern bool register_region_class(WObjDescr *descr,
-								  WRegionSimpleCreateFn *sc_fn,
-								  WRegionLoadCreateFn *lc_fn);
-extern void unregister_region_class(WObjDescr *descr);
 
-extern WRegionLoadCreateFn *lookup_region_load_create_fn(const char *name);
-extern WRegionSimpleCreateFn *lookup_region_simple_create_fn(const char *name);
-extern WRegionSimpleCreateFn *lookup_region_simple_create_fn_inh(const char *name);
+extern bool ioncore_register_regclass(WClassDescr *descr,
+                                      WRegionSimpleCreateFn *sc_fn,
+                                      WRegionLoadCreateFn *lc_fn);
+extern void ioncore_unregister_regclass(WClassDescr *descr);
+
+extern WRegClassInfo *ioncore_lookup_regclass(const char *name, 
+                                              bool inheriting_ok,
+                                              bool need_simplefn,
+                                              bool need_loadfn);
 
 #endif /* ION_IONCORE_REGINFO_H */
 

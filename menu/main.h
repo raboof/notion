@@ -12,7 +12,12 @@
 #ifndef ION_MENU_MAIN_H
 #define ION_MENU_MAIN_H
 
-extern bool menu_module_init();
-extern void menu_module_deinit();
+#include <ioncore/binding.h>
+
+extern bool menumod_init();
+extern void menumod_deinit();
+
+extern WBindmap menumod_menu_bindmap;
+
 
 #endif /* ION_MENU_MAIN_H */

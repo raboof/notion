@@ -12,6 +12,7 @@
 #ifndef ION_IONCORE_WOBJP_H
 #define ION_IONCORE_WOBJP_H
 
+#include <libtu/types.h>
 #include "obj.h"
 
 typedef void DynFun();
@@ -22,31 +23,31 @@ DECLSTRUCT(DynFunTab){
 	DynFun *func, *handler;
 };
 
-DECLSTRUCT(WObjDescr){
+DECLSTRUCT(WClassDescr){
 	const char *name;
-	WObjDescr *ancestor;
+	WClassDescr *ancestor;
 	int funtab_n;
 	DynFunTab *funtab;
 	void (*destroy_fn)();
 };
 
-#define WOBJ_TYPESTR(OBJ) (((WObj*)OBJ)->obj_type->name)
+#define OBJ_TYPESTR(OBJ) (((WObj*)OBJ)->obj_type->name)
 
-#define IMPLOBJ(OBJ, ANCESTOR, DFN, DYN)                         \
-		WObjDescr OBJDESCR(OBJ)={#OBJ, &OBJDESCR(ANCESTOR), -1, DYN, \
-								 (void (*)())DFN}
+#define IMPLCLASS(CLS, ANCESTOR, DFN, DYN)                         \
+		WClassDescr CLASSDESCR(CLS)={                              \
+			#CLS, &CLASSDESCR(ANCESTOR), -1, DYN, (void (*)())DFN}
 
-#define WOBJ_INIT(O, TYPE) {((WObj*)(O))->obj_type=&OBJDESCR(TYPE); \
+#define OBJ_INIT(O, TYPE) {((WObj*)(O))->obj_type=&CLASSDESCR(TYPE); \
 	((WObj*)(O))->obj_watches=NULL; ((WObj*)(O))->flags=0;}
 
 #define CREATEOBJ_IMPL(OBJ, LOWOBJ, INIT_ARGS)                     \
 	OBJ *p;  p=ALLOC(OBJ); if(p==NULL){ warn_err(); return NULL; } \
-	WOBJ_INIT(p, OBJ);                                             \
+	OBJ_INIT(p, OBJ);                                             \
 	if(!LOWOBJ ## _init INIT_ARGS) { free((void*)p); return NULL; } return p
 
 #define SIMPLECREATEOBJ_IMPL(OBJ, LOWOBJ)                          \
 	OBJ *p;  p=ALLOC(OBJ); if(p==NULL){ warn_err(); return NULL; } \
-	WOBJ_INIT(p, OBJ);                                             \
+	OBJ_INIT(p, OBJ);                                             \
 	return p;
 
 #define END_DYNFUNTAB {NULL, NULL}

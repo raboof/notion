@@ -26,7 +26,7 @@ DECLSTRUCT(WObjList){
 };
 
 
-#define ITERATE_OBJLIST(TYPE, VAR, LIST)     \
+#define FOR_ALL_ON_OBJLIST(TYPE, VAR, LIST)  \
 	for((VAR)=(TYPE)objlist_init_iter(LIST); \
 		(VAR)!=NULL;                         \
 		(VAR)=(TYPE)objlist_iter())

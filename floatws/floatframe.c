@@ -25,6 +25,7 @@
 #include <ioncore/resize.h>
 #include <ioncore/sizehint.h>
 #include <ioncore/extlconv.h>
+#include <ioncore/region-iter.h>
 #include "floatframe.h"
 #include "floatws.h"
 #include "main.h"
@@ -66,7 +67,7 @@ static void deinit_floatframe(WFloatFrame *frame)
 /*{{{ Geometry */
 
 #define BAR_H(FRAME) \
-    ((FRAME)->frame.flags&WFRAME_TAB_HIDE ? 0 : (FRAME)->frame.bar_h)
+    ((FRAME)->frame.flags&FRAME_TAB_HIDE ? 0 : (FRAME)->frame.bar_h)
 
 void floatframe_offsets(const WFloatFrame *frame, WRectangle *off)
 {
@@ -157,13 +158,13 @@ void floatframe_geom_from_initial_geom(WFloatFrame *frame,
 	geom->w+=off.w;
 	geom->h+=off.h;
 #ifndef CF_NO_WSREL_INIT_GEOM
-	geom->x+=gravity_deltax(gravity, -off.x+left, off.x+off.w+right);
-	geom->y+=gravity_deltay(gravity, -off.y+top, off.y+off.h+bottom);
+	geom->x+=xgravity_deltax(gravity, -off.x+left, off.x+off.w+right);
+	geom->y+=xgravity_deltay(gravity, -off.y+top, off.y+off.h+bottom);
 	geom->x+=REGION_GEOM(ws).x;
 	geom->y+=REGION_GEOM(ws).y;
 #else
-	geom->x+=gravity_deltax(gravity, -off.x, off.x+off.w);
-	geom->y+=gravity_deltay(gravity, -off.y, off.y+off.h);
+	geom->x+=xgravity_deltax(gravity, -off.x, off.x+off.w);
+	geom->y+=xgravity_deltay(gravity, -off.y, off.y+off.h);
 	region_convert_root_geom(region_parent((WRegion*)ws), geom);
 #endif
 }
@@ -187,7 +188,7 @@ static void floatframe_request_clientwin_geom(WFloatFrame *frame,
 	floatframe_offsets(frame, &off);
 
 	frame_resize_hints((WFrame*)frame, &hints, NULL, NULL);
-	correct_size(&(geom.w), &(geom.h), &hints, TRUE);
+	xsizehints_correct(&hints, &(geom.w), &(geom.h), TRUE);
 	
 	geom.w+=off.w;
 	geom.h+=off.h;
@@ -201,12 +202,12 @@ static void floatframe_request_clientwin_geom(WFloatFrame *frame,
 	if(rqflags&REGION_RQGEOM_WEAK_X)
 		geom.x+=off.x;
 	else
-		geom.x+=gravity_deltax(gravity, -off.x, off.x+off.w);
+		geom.x+=xgravity_deltax(gravity, -off.x, off.x+off.w);
 
 	if(rqflags&REGION_RQGEOM_WEAK_Y)
 		geom.y+=off.y;  /* geom.y was clientwin root relative y */
 	else
-		geom.y+=gravity_deltay(gravity, -off.y, off.y+off.h);
+		geom.y+=xgravity_deltay(gravity, -off.y, off.y+off.h);
 
 	par=region_parent((WRegion*)frame);
 	region_convert_root_geom(par, &geom);
@@ -261,14 +262,14 @@ static void floatframe_set_shape(WFloatFrame *frame)
 	int n=0;
     
 	if(frame->frame.brush!=NULL){
-        if(!(frame->frame.flags&WFRAME_TAB_HIDE)){
+        if(!(frame->frame.flags&FRAME_TAB_HIDE)){
             floatframe_bar_geom(frame, gs+n);
             n++;
         }
 		floatframe_border_geom(frame, gs+n);
         n++;
 	
-		grbrush_set_window_shape(frame->frame.brush, WFRAME_WIN(frame),
+		grbrush_set_window_shape(frame->frame.brush, FRAME_WIN(frame),
 								 TRUE, n, gs);
 	}
 }
@@ -305,14 +306,14 @@ static void floatframe_recalc_bar(WFloatFrame *frame)
 	if(frame->frame.bar_brush==NULL)
 		return;
 	
-	m=WFRAME_MCOUNT(frame);
+	m=FRAME_MCOUNT(frame);
 	
 	if(m>0){
 		grbrush_get_border_widths(frame->frame.bar_brush, &bdw);
 		bdtotal=((m-1)*(bdw.tb_ileft+bdw.tb_iright)
 				 +bdw.right+bdw.left);
 
-		FOR_ALL_MANAGED_ON_LIST(WFRAME_MLIST(frame), sub){
+		FOR_ALL_MANAGED_ON_LIST(FRAME_MLIST(frame), sub){
 			p=region_name(sub);
 			if(p==NULL)
 				continue;
@@ -354,7 +355,7 @@ static void floatframe_recalc_bar(WFloatFrame *frame)
 		return;
 	
 	i=0;
-	FOR_ALL_MANAGED_ON_LIST(WFRAME_MLIST(frame), sub){
+	FOR_ALL_MANAGED_ON_LIST(FRAME_MLIST(frame), sub){
 		textw=init_title(frame, i);
 		if(textw>0){
 			title=region_make_label(sub, textw, frame->frame.bar_brush);
@@ -403,8 +404,8 @@ static const char *floatframe_tab_style_default(WFloatFrame *frame)
 void floatframe_remove_managed(WFloatFrame *frame, WRegion *reg)
 {
 	mplex_remove_managed((WMPlex*)frame, reg);
-	if(WFRAME_MCOUNT(frame)==0 && !WOBJ_IS_BEING_DESTROYED(frame))
-		defer_destroy((WObj*)frame);
+	if(FRAME_MCOUNT(frame)==0 && !OBJ_IS_BEING_DESTROYED(frame))
+		ioncore_defer_destroy((WObj*)frame);
 }
 
 
@@ -474,41 +475,41 @@ static bool floatframe_save_to_file(WFloatFrame *frame, FILE *file, int lvl)
 {
 	WRegion *sub;
 	
-	begin_saved_region((WRegion*)frame, file, lvl);
-	save_indent_line(file, lvl);
+	region_save_identity((WRegion*)frame, file, lvl);
+	file_indent(file, lvl);
 	fprintf(file, "flags = %d,\n", frame->frame.flags);
 	if(frame->sticky){
-		save_indent_line(file, lvl);
+		file_indent(file, lvl);
 		fprintf(file, "sticky = true,\n");
 	}
 	
-	if(frame->frame.flags&WFRAME_SAVED_VERT){
-		save_indent_line(file, lvl);
+	if(frame->frame.flags&FRAME_SAVED_VERT){
+		file_indent(file, lvl);
 		fprintf(file, "saved_y = %d, saved_h = %d,\n", 
 				frame->frame.saved_y,
 				frame->frame.saved_h);
 	}
-	if(frame->frame.flags&WFRAME_SAVED_HORIZ){
-		save_indent_line(file, lvl);
+	if(frame->frame.flags&FRAME_SAVED_HORIZ){
+		file_indent(file, lvl);
 		fprintf(file, "saved_x = %d, saved_w = %d,\n", 
 				frame->frame.saved_x,
 				frame->frame.saved_w);
 	}
 		
-	save_indent_line(file, lvl);
+	file_indent(file, lvl);
 	fprintf(file, "subs = {\n");
-	FOR_ALL_MANAGED_ON_LIST(WFRAME_MLIST(frame), sub){
-		save_indent_line(file, lvl+1);
+	FOR_ALL_MANAGED_ON_LIST(FRAME_MLIST(frame), sub){
+		file_indent(file, lvl+1);
 		fprintf(file, "{\n");
 		region_save_to_file((WRegion*)sub, file, lvl+2);
-		if(sub==WFRAME_CURRENT(frame)){
-			save_indent_line(file, lvl+2);
+		if(sub==FRAME_CURRENT(frame)){
+			file_indent(file, lvl+2);
 			fprintf(file, "switchto = true,\n");
 		}
-		save_indent_line(file, lvl+1);
+		file_indent(file, lvl+1);
 		fprintf(file, "},\n");
 	}
-	save_indent_line(file, lvl);
+	file_indent(file, lvl);
 	fprintf(file, "},\n");
 	
 	return TRUE;
@@ -524,7 +525,7 @@ WRegion *floatframe_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
 	
 	frame_do_load((WFrame*)frame, tab);
 	
-	if(WFRAME_MCOUNT(frame)==0){
+	if(FRAME_MCOUNT(frame)==0){
 		/* Nothing to manage, destroy */
 		destroy_obj((WObj*)frame);
 		frame=NULL;
@@ -567,7 +568,7 @@ static DynFunTab floatframe_dynfuntab[]={
 };
 
 
-IMPLOBJ(WFloatFrame, WFrame, deinit_floatframe, floatframe_dynfuntab);
+IMPLCLASS(WFloatFrame, WFrame, deinit_floatframe, floatframe_dynfuntab);
 
 		
 /*}}}*/

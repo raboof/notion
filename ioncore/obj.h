@@ -9,42 +9,44 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_IONCORE_WOBJ_H
-#define ION_IONCORE_WOBJ_H
+#ifndef ION_IONCORE_OBJ_H
+#define ION_IONCORE_OBJ_H
 
-#define OBJDESCR(TYPE) TYPE##_objdescr
+#include <libtu/types.h>
 
-#define WOBJ_IS(OBJ, TYPE) wobj_is((WObj*)OBJ, &OBJDESCR(TYPE))
-/*#define WOBJ_CAST(OBJ, TYPE) (TYPE*)wobj_cast((WObj*)OBJ, &OBJDESCR(TYPE))*/
+#define CLASSDESCR(TYPE) TYPE##_classdescr
+
+#define OBJ_IS(OBJ, TYPE) obj_is((WObj*)OBJ, &CLASSDESCR(TYPE))
+#define OBJ_CAST(OBJ, TYPE) (TYPE*)obj_cast((WObj*)OBJ, &CLASSDESCR(TYPE))
 
 #define INTRSTRUCT(STRU) \
 	struct STRU##_struct; typedef struct STRU##_struct STRU
 #define DECLSTRUCT(STRU)  \
 	struct STRU##_struct
 
-#define INTROBJ(OBJ) INTRSTRUCT(OBJ); extern WObjDescr OBJDESCR(OBJ)
-#define DECLOBJ(OBJ) DECLSTRUCT(OBJ)
+#define INTRCLASS(OBJ) INTRSTRUCT(OBJ); extern WClassDescr CLASSDESCR(OBJ)
+#define DECLCLASS(OBJ) DECLSTRUCT(OBJ)
 
-INTRSTRUCT(WObjDescr);
-INTROBJ(WObj);
+INTRSTRUCT(WClassDescr);
+INTRCLASS(WObj);
 INTRSTRUCT(WWatch);
 
-extern bool wobj_is(const WObj *obj, const WObjDescr *descr);
-extern bool wobj_is_str(const WObj *obj, const char *str);
-/*extern const void *wobj_cast(const WObj *obj, const WObjDescr *descr);*/
+extern bool obj_is(const WObj *obj, const WClassDescr *descr);
+extern bool obj_is_str(const WObj *obj, const char *str);
+extern const void *obj_cast(const WObj *obj, const WClassDescr *descr);
 
 extern void destroy_obj(WObj *obj);
 
-DECLOBJ(WObj){
-	WObjDescr *obj_type;
+DECLCLASS(WObj){
+	WClassDescr *obj_type;
 	WWatch *obj_watches;
 	int flags;
 };
 
-#define WOBJ_DEST 0x0001
-#define WOBJ_EXTL_CACHED 0x0002
+#define OBJ_DEST 0x0001
+#define OBJ_EXTL_CACHED 0x0002
 
-#define WOBJ_IS_BEING_DESTROYED(OBJ) (((WObj*)(OBJ))->flags&WOBJ_DEST)
+#define OBJ_IS_BEING_DESTROYED(OBJ) (((WObj*)(OBJ))->flags&OBJ_DEST)
 
 #define DYNFUN
 
@@ -58,11 +60,11 @@ DECLSTRUCT(WWatch){
 	WWatchHandler *handler;
 };
 
-extern bool setup_watch(WWatch *watch, WObj *obj,
+extern bool watch_setup(WWatch *watch, WObj *obj,
 						WWatchHandler *handler);
-extern void reset_watch(WWatch *watch);
+extern void watch_reset(WWatch *watch);
 extern bool watch_ok(WWatch *watch);
-extern void init_watch(WWatch *watch);
-extern void call_watches(WObj *obj);
+extern void watch_init(WWatch *watch);
+extern void watch_calles(WObj *obj);
 
-#endif /* ION_IONCORE_WOBJ_H */
+#endif /* ION_IONCORE_OBJ_H */

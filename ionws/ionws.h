@@ -17,12 +17,13 @@
 #include <ioncore/screen.h>
 #include <ioncore/genws.h>
 #include <ioncore/extl.h>
+#include <ioncore/rectangle.h>
 
-INTROBJ(WIonWS);
+INTRCLASS(WIonWS);
 
 #include "split.h"
 
-DECLOBJ(WIonWS){
+DECLCLASS(WIonWS){
 	WGenWS genws;
 	WObj *split_tree;
 	WRegion *managed_list;

@@ -28,10 +28,10 @@ defmenu("appmenu", {
 
 -- Menu with restart/exit alternatives
 defmenu("exitmenu", {
-    menuentry("Restart", "restart_wm"),
-    menuentry("Restart Ion", "restart_other_wm", "ion"),
-    menuentry("Restart TWM", "restart_other_wm", "twm"),
-    menuentry("Exit", "exit_wm"),
+    menuentry("Restart", "restart"),
+    menuentry("Restart Ion", "restart_other", "ion"),
+    menuentry("Restart TWM", "restart_other", "twm"),
+    menuentry("Exit", "exit"),
 })
 
 

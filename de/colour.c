@@ -21,8 +21,8 @@ bool de_alloc_colour(WRootWin *rootwin, DEColour *ret, const char *name)
 	if(name==NULL)
 		return FALSE;
 
-	if(XParseColor(wglobal.dpy, rootwin->default_cmap, name, &c)){
-		ok=XAllocColor(wglobal.dpy, rootwin->default_cmap, &c);
+	if(XParseColor(ioncore_g.dpy, rootwin->default_cmap, name, &c)){
+		ok=XAllocColor(ioncore_g.dpy, rootwin->default_cmap, &c);
 		if(ok)
 			*ret=c.pixel;
 	}
@@ -35,8 +35,8 @@ bool de_duplicate_colour(WRootWin *rootwin, DEColour in, DEColour *out)
 {
 	XColor c;
 	c.pixel=in;
-	XQueryColor(wglobal.dpy, rootwin->default_cmap, &c);
-	if(XAllocColor(wglobal.dpy, rootwin->default_cmap, &c)){
+	XQueryColor(ioncore_g.dpy, rootwin->default_cmap, &c);
+	if(XAllocColor(ioncore_g.dpy, rootwin->default_cmap, &c)){
 		*out=c.pixel;
 		return TRUE;
 	}
@@ -54,7 +54,7 @@ void de_free_colour_group(WRootWin *rootwin, DEColourGroup *cg)
 	pixels[3]=cg->sh;
 	pixels[4]=cg->pad;
 	
-	XFreeColors(wglobal.dpy, rootwin->default_cmap, pixels, 5, 0);
+	XFreeColors(ioncore_g.dpy, rootwin->default_cmap, pixels, 5, 0);
     
     if(cg->spec!=NULL){
         free(cg->spec);
@@ -69,6 +69,6 @@ void de_free_colour(WRootWin *rootwin, DEColour col)
 	
 	pixels[0]=col;
 	
-	XFreeColors(wglobal.dpy, rootwin->default_cmap, pixels, 1, 0);
+	XFreeColors(ioncore_g.dpy, rootwin->default_cmap, pixels, 1, 0);
 }
 

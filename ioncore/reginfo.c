@@ -19,79 +19,21 @@
 #include "reginfo.h"
 
 
-/*{{{ Region class registration */
+static WRegClassInfo *reg_class_infos;
 
 
-INTRSTRUCT(RegClassInfo);
-	
-DECLSTRUCT(RegClassInfo){
-	WObjDescr *descr;
-	WRegionSimpleCreateFn *sc_fn;
-	WRegionLoadCreateFn *lc_fn;
-	RegClassInfo *next, *prev;
-};
+/*{{{ Registration */
 
 
-static RegClassInfo *reg_class_infos;
-
-
-static RegClassInfo *lookup_reg_class_info_by_name(const char *name)
+bool ioncore_register_regclass(WClassDescr *descr, WRegionSimpleCreateFn *sc_fn,
+                               WRegionLoadCreateFn *lc_fn)
 {
-	RegClassInfo *info;
-	
-	if(name==NULL)
-		return NULL;
-	
-	for(info=reg_class_infos; info!=NULL; info=info->next){
-		if(strcmp(info->descr->name, name)==0)
-			return info;
-	}
-	return NULL;
-}
-
-
-static RegClassInfo *lookup_reg_class_info_by_name_inh(const char *name)
-{
-	RegClassInfo *info;
-	WObjDescr *descr;
-
-	if(name==NULL)
-		return NULL;
-	
-	for(info=reg_class_infos; info!=NULL; info=info->next){
-		descr=info->descr;
-		while(descr!=NULL){
-			if(strcmp(descr->name, name)==0){
-				return info;
-			}
-			descr=descr->ancestor;
-		}
-	}
-	return NULL;
-}
-
-
-static RegClassInfo *lookup_reg_class_info(WObjDescr *descr)
-{
-	RegClassInfo *info;
-	
-	for(info=reg_class_infos; info!=NULL; info=info->next){
-		if(info->descr==descr)
-			return info;
-	}
-	return NULL;
-}
-
-
-bool register_region_class(WObjDescr *descr, WRegionSimpleCreateFn *sc_fn,
-						   WRegionLoadCreateFn *lc_fn)
-{
-	RegClassInfo *info;
+	WRegClassInfo *info;
 	
 	if(descr==NULL)
 		return FALSE;
 	
-	info=ALLOC(RegClassInfo);
+	info=ALLOC(WRegClassInfo);
 	if(info==NULL){
 		warn_err();
 		return FALSE;
@@ -106,35 +48,52 @@ bool register_region_class(WObjDescr *descr, WRegionSimpleCreateFn *sc_fn,
 }
 
 
-void unregister_region_class(WObjDescr *descr)
+void ioncore_unregister_regclass(WClassDescr *descr)
 {
-	RegClassInfo *info=lookup_reg_class_info(descr);
+    WRegClassInfo *info;
+    
+	for(info=reg_class_infos; info!=NULL; info=info->next){
+		if(descr==info->descr){
+            UNLINK_ITEM(reg_class_infos, info, next, prev);
+            free(info);
+            return;
+        }
+    }
+}
+
+
+/*}}}*/
+
+
+/*{{{ Lookup */
+
+
+WRegClassInfo *ioncore_lookup_regclass(const char *name, 
+                                       bool inheriting_ok,
+                                       bool need_simplefn,
+                                       bool need_loadfn)
+{
+	WRegClassInfo *info;
+	WClassDescr *descr;
+
+	if(name==NULL)
+		return NULL;
 	
-	if(info!=NULL){
-		UNLINK_ITEM(reg_class_infos, info, next, prev);
-		free(info);
+	for(info=reg_class_infos; info!=NULL; info=info->next){
+		for(descr=info->descr; 
+            descr!=NULL; 
+            descr=(inheriting_ok ? descr->ancestor : NULL)){
+            
+			if(strcmp(descr->name, name)==0){
+                if(need_simplefn && !info->sc_fn)
+                    break;
+                if(need_loadfn && !info->lc_fn)
+                    break;
+                return info;
+			}
+		}
 	}
-}
-
-
-WRegionLoadCreateFn *lookup_region_load_create_fn(const char *name)
-{
-	RegClassInfo *info=lookup_reg_class_info_by_name(name);
-	return (info==NULL ? NULL : info->lc_fn);
-}
-
-
-WRegionSimpleCreateFn *lookup_region_simple_create_fn(const char *name)
-{
-	RegClassInfo *info=lookup_reg_class_info_by_name(name);
-	return (info==NULL ? NULL : info->sc_fn);
-}
-
-
-WRegionSimpleCreateFn *lookup_region_simple_create_fn_inh(const char *name)
-{
-	RegClassInfo *info=lookup_reg_class_info_by_name_inh(name);
-	return (info==NULL ? NULL : info->sc_fn);
+	return NULL;
 }
 
 

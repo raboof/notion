@@ -29,8 +29,8 @@ DECLSTRUCT(DEColourGroup){
 };
 
 
-#define DE_BLACK(rootwin) BlackPixel(wglobal.dpy, rootwin->xscr)
-#define DE_WHITE(rootwin) WhitePixel(wglobal.dpy, rootwin->xscr)
+#define DE_BLACK(rootwin) BlackPixel(ioncore_g.dpy, rootwin->xscr)
+#define DE_WHITE(rootwin) WhitePixel(ioncore_g.dpy, rootwin->xscr)
 
 bool de_init_colour_group(WRootWin *rootwin, DEColourGroup *cg);
 bool de_alloc_colour(WRootWin *rootwin, DEColour *ret, const char *name);

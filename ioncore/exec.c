@@ -37,18 +37,18 @@
 /*{{{ Exec */
 
 
-void do_exec(const char *cmd)
+void ioncore_do_exec(const char *cmd)
 {
 	char *argv[4];
 	char *tmp=NULL;
 
-	close(wglobal.conn);
+	close(ioncore_g.conn);
 	
 	libtu_asprintf(&tmp, "exec %s", cmd);
 	if(tmp!=NULL)
 		cmd=tmp;
 	
-	wglobal.dpy=NULL;
+	ioncore_g.dpy=NULL;
 	
 #ifndef CF_NO_SETPGID
 	setpgid(0, 0);
@@ -71,7 +71,7 @@ static bool do_exec_on_rootwin(int xscr, const char *cmd)
 	if(cmd==NULL)
 		return FALSE;
 
-	XSync(wglobal.dpy, False);
+	XSync(ioncore_g.dpy, False);
 	
 	pid=fork();
 	
@@ -83,9 +83,9 @@ static bool do_exec_on_rootwin(int xscr, const char *cmd)
 	if(pid!=0)
 		return TRUE;
 	
-	setup_environ(xscr);
+	ioncore_setup_environ(xscr);
 	
-	do_exec(cmd);
+	ioncore_do_exec(cmd);
 	
 	/* We should not get here */
 	return FALSE;
@@ -96,8 +96,7 @@ static bool do_exec_on_rootwin(int xscr, const char *cmd)
  * Run \var{cmd} with the environment variable DISPLAY set to point to the
  * root window \var{rootwin} of the X display the WM is running on.
  */
-EXTL_EXPORT_MEMBER_AS(WRootWin, exec_on)
-bool exec_on_rootwin(WRootWin *rootwin, const char *cmd)
+bool ioncore_exec_on(WRootWin *rootwin, const char *cmd)
 {
 	return do_exec_on_rootwin(rootwin->xscr, cmd);
 }
@@ -109,7 +108,7 @@ bool exec_on_rootwin(WRootWin *rootwin, const char *cmd)
  * \fnref{WRootWin.exec_on}.
  */
 EXTL_EXPORT
-bool exec(const char *cmd)
+bool ioncore_exec(const char *cmd)
 {
 	return do_exec_on_rootwin(-1, cmd);
 }
@@ -143,7 +142,7 @@ static void process_pipe(int fd, void *p)
 	}
 	
 	/* We get here on EOL or if the handler failed */
-	unregister_input_fd(fd);
+	ioncore_unregister_input_fd(fd);
 	close(fd);
 	extl_unref_fn(*(ExtlFn*)p);
 	free(p);
@@ -157,7 +156,7 @@ static void process_pipe(int fd, void *p)
  * with that data.
  */
 EXTL_EXPORT
-bool popen_bgread(const char *cmd, ExtlFn handler)
+bool ioncore_popen_bgread(const char *cmd, ExtlFn handler)
 {
 	int pid;
 	int fds[2];
@@ -182,7 +181,7 @@ bool popen_bgread(const char *cmd, ExtlFn handler)
 		p=ALLOC(ExtlFn);
 		if(p!=NULL){
 			*(ExtlFn*)p=extl_ref_fn(handler);
-			if(register_input_fd(fds[0], p, process_pipe))
+			if(ioncore_register_input_fd(fds[0], p, process_pipe))
 				return TRUE;
 			extl_unref_fn(*(ExtlFn*)p);
 			free(p);
@@ -196,21 +195,21 @@ bool popen_bgread(const char *cmd, ExtlFn handler)
 	close(1);
 	dup(fds[1]);
 	
-	setup_environ(-1);
+	ioncore_setup_environ(-1);
 	
-	do_exec(cmd);
+	ioncore_do_exec(cmd);
 	
 	/* We should not get here */
 	return FALSE;
 }
 
 
-void setup_environ(int xscr)
+void ioncore_setup_environ(int xscr)
 {
 	char *tmp, *ptr;
 	char *display;
 	
-	display=XDisplayName(wglobal.display);
+	display=XDisplayName(ioncore_g.display);
 	
 	/* %ui, UINT_MAX is used to ensure there is enough space for the screen
 	 * number
@@ -258,7 +257,7 @@ static void exitret(int retval)
  * Causes the window manager to exit.
  */
 EXTL_EXPORT
-void exit_wm()
+void ioncore_exit()
 {
 	exitret(EXIT_SUCCESS);
 }
@@ -268,16 +267,16 @@ void exit_wm()
  * Attempt to restart another window manager \var{cmd}.
  */
 EXTL_EXPORT
-void restart_other_wm(const char *cmd)
+void ioncore_restart_other(const char *cmd)
 {
 	ioncore_deinit();
 	if(cmd!=NULL){
-		if(wglobal.display!=NULL)
-			setup_environ(-1);
-		do_exec(cmd);
+		if(ioncore_g.display!=NULL)
+			ioncore_setup_environ(-1);
+		ioncore_do_exec(cmd);
 	}
-	execvp(wglobal.argv[0], wglobal.argv);
-	die_err_obj(wglobal.argv[0]);
+	execvp(ioncore_g.argv[0], ioncore_g.argv);
+	die_err_obj(ioncore_g.argv[0]);
 }
 
 
@@ -285,9 +284,9 @@ void restart_other_wm(const char *cmd)
  * Restart Ioncore.
  */
 EXTL_EXPORT
-void restart_wm()
+void ioncore_restart()
 {
-	restart_other_wm(NULL);
+	ioncore_restart_other(NULL);
 }
 
 

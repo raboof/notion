@@ -31,7 +31,7 @@ static int kill_sig=0;
 static int wait_sig=0;
 #endif
 static bool had_tmr=FALSE;
-static WTimer queue=INIT_TIMER(NULL);
+static WTimer queue=TIMER_INIT(NULL);
 
 #define TIMEVAL_LATER(a, b) \
 	((a.tv_sec > b.tv_sec) || \
@@ -39,7 +39,7 @@ static WTimer queue=INIT_TIMER(NULL);
 	 (a.tv_usec > b.tv_usec)))
 
 
-static void do_set_timer()
+static void do_timer_set()
 {
 	struct itimerval val={{0, 0}, {0, 0}};
 	
@@ -75,7 +75,7 @@ static void do_set_timer()
 }
 
 
-void check_signals()
+void ioncore_check_signals()
 {
 	char *tmp=NULL;
 	struct timeval current_time;
@@ -93,11 +93,11 @@ void check_signals()
 	
 	if(kill_sig!=0){
 		if(kill_sig==SIGUSR1){
-			restart_other_wm(tmp);
+			ioncore_restart_other(tmp);
 			assert(0);
 		} 
 		if(kill_sig==SIGTERM)
-			exit_wm();
+			ioncore_exit();
 
 		ioncore_deinit();
 		kill(getpid(), kill_sig);
@@ -114,13 +114,13 @@ void check_signals()
 				queue.next=q->next;
 				q->next=NULL;
 				obj=q->paramwatch.obj;
-				reset_watch(&(q->paramwatch));
+				watch_reset(&(q->paramwatch));
 				q->handler(q, obj);
 			}else{
 				break;
 			}
 		}
-		do_set_timer();
+		do_timer_set();
 	}
 }
 
@@ -142,7 +142,7 @@ void kill_timer(WWatch *watch, WObj *obj)
 	warn("Timer handler parameter destroyed.");
 	for(tmr=queue.next; tmr!=NULL; tmr=tmr->next){
 		if(&(tmr->paramwatch)==watch){
-			reset_timer(tmr);
+			timer_reset(tmr);
 		}
 	}
 }
@@ -159,7 +159,7 @@ bool timer_is_set(WTimer *timer)
 }
 
 
-void set_timer_param(WTimer *timer, uint msecs, WObj *obj)
+void timer_set_param(WTimer *timer, uint msecs, WObj *obj)
 {
 	WTimer *q;
 
@@ -194,25 +194,25 @@ void set_timer_param(WTimer *timer, uint msecs, WObj *obj)
 		}
 	}
 
-	do_set_timer();
+	do_timer_set();
 	
 	if(obj!=NULL)
-		setup_watch(&(timer->paramwatch), obj, kill_timer);
+		watch_setup(&(timer->paramwatch), obj, kill_timer);
 }
 
 
-void set_timer(WTimer *timer, uint msecs)
+void timer_set(WTimer *timer, uint msecs)
 {
-	set_timer_param(timer, msecs, NULL);
+	timer_set_param(timer, msecs, NULL);
 }
 
 
-void reset_timer(WTimer *timer)
+void timer_reset(WTimer *timer)
 {
 	WTimer *q;
 	WTimer *tmpq;
 
-	reset_watch(&(timer->paramwatch));
+	watch_reset(&(timer->paramwatch));
 	
 	q=&queue;
 	while(q->next!=NULL){
@@ -221,7 +221,7 @@ void reset_timer(WTimer *timer)
 			q->next=timer->next;
 			timer->next=NULL;
 			/*free(tmpq);*/
-			do_set_timer();
+			do_timer_set();
 			return;
 		}
 		q=q->next;
@@ -246,7 +246,7 @@ static void deadly_signal_handler(int signal_num)
 	set_warn_handler(NULL);
 	warn("Caught signal %d. Dying.", signal_num);
 	signal(signal_num, SIG_DFL);
-	if(wglobal.opmode==OPMODE_INIT)
+	if(ioncore_g.opmode==IONCORE_OPMODE_INIT)
 		kill(getpid(), signal_num);
 	else
 		kill_sig=signal_num;
@@ -294,7 +294,7 @@ static void ignore_handler(int signal_num)
 #endif
 
 
-void trap_signals()
+void ioncore_trap_signals()
 {
 	struct sigaction sa;
 	sigset_t set, oldset;

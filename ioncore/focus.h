@@ -17,24 +17,36 @@
 #include "region.h"
 #include "hooks.h"
 
-#define SET_FOCUS(WIN) \
-    {set_await_focus(find_window(WIN)); \
-	XSetInputFocus(wglobal.dpy, WIN, RevertToParent, CurrentTime);}
+DYNFUN void region_do_set_focus(WRegion *reg, bool warp);
 
-extern void do_set_focus(WRegion *reg, bool warp);
-extern void set_focus(WRegion *reg);
-extern void warp(WRegion *reg);
-extern WRegion *set_focus_mgrctl(WRegion *freg, bool dowarp);
-extern void set_previous_of(WRegion *reg);
-extern void goto_previous();
-extern void protect_previous();
-extern void unprotect_previous();
-extern void goto_previous();
+/* Delayed (until return to main loop) warp/focus */
+extern void region_warp(WRegion *reg);
+extern void region_set_focus(WRegion *reg);
+extern WRegion *region_set_focus_mgrctl(WRegion *freg, bool dowarp);
 
-extern void do_warp(WRegion *reg);
-extern bool do_warp_default(WRegion *reg);
-extern WHooklist *do_warp_alt;
+/* Immediate warp/focus */
+extern void region_do_warp(WRegion *reg);
+extern bool region_do_warp_default(WRegion *reg);
+extern WHooklist *region_do_warp_alt;
+extern void xwindow_do_set_focus(Window win);
 
-extern void set_await_focus(WRegion *reg);
+/* Awaiting focus state */
+extern void region_set_await_focus(WRegion *reg);
+
+/* Event handling */
+extern void region_got_focus(WRegion *reg);
+extern void region_lost_focus(WRegion *reg);
+
+/* May reg transfer focus to its children? */
+extern bool region_may_control_focus(WRegion *reg);
+
+/* Does reg have focus? */
+extern bool region_is_active(WRegion *reg);
+
+/* Previously active region tracking */
+extern void ioncore_set_previous_of(WRegion *reg);
+extern void ioncore_goto_previous();
+extern void ioncore_protect_previous();
+extern void ioncore_unprotect_previous();
 
 #endif /* ION_IONCORE_FOCUS_H */

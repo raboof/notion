@@ -21,13 +21,8 @@
 #include <X11/Xutil.h>
 
 #include "../config.h"
-
-typedef struct WRectangle_struct{
-	int x, y;
-	int w, h;
-} WRectangle;
-
 #include "obj.h"
+#include "classes.h"
 
 #if 0
 #define D(X) X
@@ -36,8 +31,7 @@ typedef struct WRectangle_struct{
 #endif
 
 #define EXTL_EXPORT
-#define EXTL_EXPORT_AS(X)
+#define EXTL_EXPORT_AS(T, F)
 #define EXTL_EXPORT_MEMBER
-#define EXTL_EXPORT_MEMBER_AS(X, Y)
 
 #endif /* ION_IONCORE_COMMON_H */

@@ -1,14 +1,13 @@
 -- 
--- PWM bindings configuration file. Global bindings and bindings common 
+-- Ion bindings configuration file. Global bindings and bindings common 
 -- to screens and all types of frames only. See modules' configuration 
 -- files for other bindings.
 --
 
 
--- global_bindings
+-- WScreen context bindings
 --
--- Global bindings are available all the time. The functions given here 
--- should accept WScreens as parameter. 
+-- The bindings in this context are available all the time.
 --
 -- The variable DEFAULT_MOD should contain a string of the form 'Mod1+'
 -- where Mod1 maybe replaced with the modifier you want to use for most
@@ -50,31 +49,22 @@ defbindings("WScreen", {
 })
 
 
--- mplex_bindings
+-- WMPlex context bindings
 --
 -- These bindings work in frames and on screens. The innermost of such
--- objects always gets to handle the key press. Essentially these bindings
--- are used to define actions on client windows. (Remember that client
--- windows can be put in fullscreen mode and therefore may not have a
+-- contexts/objects always gets to handle the key press. Essentially these 
+-- bindings are used to define actions on client windows. (Remember that 
+-- client windows can be put in fullscreen mode and therefore may not have a
 -- frame.)
 -- 
--- The make_*_fn functions are used to call functions on the object currently 
--- managed by the screen or frame or the frame itself. Essentially e.g.
--- make_mplex_clientwin_fn(fn) expands to
--- 
--- function(mplex, sub)
---     local reg=(sub or mplex:current())
---     if obj_is(reg, "WClientWin") then 
---         fn(reg)
---     end
--- end
--- 
--- For details see the document "Ion: Configuring and extending with Lua".
+-- The @sub_cwin commands are used to call the parameter command on a
+-- current client window managed by the multiplexer. For details see the 
+-- document "Ion: Configuring and extending with Lua".
 
 defbindings("WMPlex", {
     kpress_waitrel(DEFAULT_MOD.."C", "close_sub_or_self"),
     kpress_waitrel(DEFAULT_MOD.."L", "@sub_cwin", "broken_app_resize_kludge"),
-    kpress_waitrel(DEFAULT_MOD.."Return", "@sub", "toggle_fullscreen"),
+    kpress_waitrel(DEFAULT_MOD.."Return", "@sub_cwin", "toggle_fullscreen"),
 
     submap(DEFAULT_MOD.."K", {
         kpress("AnyModifier+C", "@sub_cwin", "kill"),
@@ -83,7 +73,7 @@ defbindings("WMPlex", {
 })
 
 
--- frame_bindings
+-- WFrame context bindings
 --
 -- These bindings are common to all types of frames. The rest of frame
 -- bindings that differ between frame types are defined in the modules' 
@@ -116,8 +106,8 @@ defbindings("WFrame", {
         kpress("AnyModifier+A", "attach_tagged"),
     }),
     
-    --[[
     -- Queries
+    --[[
     kpress(DEFAULT_MOD.."A", "query_attachclient"),
     kpress(DEFAULT_MOD.."G", "query_gotoclient"),
     kpress(SECOND_MOD.."F1", "query_man"),
@@ -128,13 +118,31 @@ defbindings("WFrame", {
     kpress(SECOND_MOD.."F6", "query_runfile"),
     kpress(SECOND_MOD.."F9", "query_workspace"),
     --]]
+
     -- Menus
     kpress(DEFAULT_MOD.."M", "menu", "ctxmenu"),
     mpress("Button3", "pmenu", "ctxmenu"),
+    
+    -- Move/resize mode
+    kpress(DEFAULT_MOD.."R", "begin_moveres"),
+    
+    -- Pointing device
+    mclick("Button1@tab", "p_switch_tab"),
+    mdrag("Button1@tab", "p_tabdrag"),
+    mdrag("Button1@border", "p_resize"),
+    
+    mclick("Button2@tab", "p_switch_tab"),
+    mdrag("Button2@tab", "p_tabdrag"),
+    
+    mdrag(DEFAULT_MOD.."Button3", "p_resize"),
 })
 
 
--- Move/resize mode bindings.
+-- WMoveresMode context bindings
+-- 
+-- These bindings are available keyboard move/resize mode. The mode
+-- is activated on frames with the command begin_moveres (bound to
+-- DEFAULT_MOD.."R" above by default).
 
 defbindings("WMoveresMode", {
     kpress("AnyModifier+Escape", "cancel"),

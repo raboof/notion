@@ -17,9 +17,10 @@
 #include "hooks.h"
 #include "colormap.h"
 #include "activity.h"
+#include "region-iter.h"
 
 
-/*{{{ Previous active region */
+/*{{{ Previous active region tracking */
 
 
 static WWatch prev_watch=WWATCH_INIT;
@@ -33,7 +34,7 @@ static void prev_watch_handler(WWatch *watch, WRegion *prev)
 		if(r==NULL)
 			break;
 		
-		if(setup_watch(&prev_watch, (WObj*)r, 
+		if(watch_setup(&prev_watch, (WObj*)r, 
 					   (WWatchHandler*)prev_watch_handler))
 			break;
 		prev=r;
@@ -41,17 +42,17 @@ static void prev_watch_handler(WWatch *watch, WRegion *prev)
 }
 
 
-void set_previous_of(WRegion *reg)
+void ioncore_set_previous_of(WRegion *reg)
 {
 	WRegion *r2=NULL, *r3=NULL;
 	
-	if(reg==NULL || wglobal.previous_protect!=0)
+	if(reg==NULL || ioncore_g.previous_protect!=0)
 		return;
 
 	if(REGION_IS_ACTIVE(reg))
 		return;
 	
-    r3=(WRegion*)wglobal.active_screen;
+    r3=(WRegion*)ioncore_g.active_screen;
 	
 	while(r3!=NULL){
 		r2=r3;
@@ -61,20 +62,20 @@ void set_previous_of(WRegion *reg)
 	}
 
 	if(r2!=NULL)
-		setup_watch(&prev_watch, (WObj*)r2, (WWatchHandler*)prev_watch_handler);
+		watch_setup(&prev_watch, (WObj*)r2, (WWatchHandler*)prev_watch_handler);
 }
 
 
-void protect_previous()
+void ioncore_protect_previous()
 {
-	wglobal.previous_protect++;
+	ioncore_g.previous_protect++;
 }
 
 
-void unprotect_previous()
+void ioncore_unprotect_previous()
 {
-	assert(wglobal.previous_protect>0);
-	wglobal.previous_protect--;
+	assert(ioncore_g.previous_protect>0);
+	ioncore_g.previous_protect--;
 }
 
 
@@ -82,12 +83,12 @@ void unprotect_previous()
  * Go to a region that had its activity state previously saved.
  */
 EXTL_EXPORT
-void goto_previous()
+void ioncore_goto_previous()
 {
 	WRegion *r=(WRegion*)prev_watch.obj;
 	
 	if(r!=NULL){
-		reset_watch(&prev_watch);
+		watch_reset(&prev_watch);
 		region_goto(r);
 	}
 }
@@ -110,7 +111,7 @@ static void await_watch_handler(WWatch *watch, WRegion *prev)
 		if(r==NULL)
 			break;
 		
-		if(setup_watch(&await_watch, (WObj*)r, 
+		if(watch_setup(&await_watch, (WObj*)r, 
 					   (WWatchHandler*)await_watch_handler))
 			break;
 		prev=r;
@@ -118,16 +119,18 @@ static void await_watch_handler(WWatch *watch, WRegion *prev)
 }
 
 
-void set_await_focus(WRegion *reg)
+void region_set_await_focus(WRegion *reg)
 {
-    if(reg!=NULL){
-        setup_watch(&await_watch, (WObj*)reg,
+    if(reg==NULL){
+        watch_reset(&await_watch);
+    }else{
+        watch_setup(&await_watch, (WObj*)reg,
                     (WWatchHandler*)await_watch_handler);
     }
 }
 
 
-static bool is_await(WRegion *reg)
+static bool region_is_await(WRegion *reg)
 {
     WRegion *aw=(WRegion*)await_watch.obj;
     
@@ -146,30 +149,99 @@ static bool is_await(WRegion *reg)
  */
 static void check_clear_await(WRegion *reg)
 {
-    if(is_await(reg) && reg!=(WRegion*)await_watch.obj)
+    if(region_is_await(reg) && reg!=(WRegion*)await_watch.obj)
         return;
     
-    reset_watch(&await_watch);
+    watch_reset(&await_watch);
 }
 
 
 /*}}}*/
 
 
-/*{{{ Region stuff */
+/*{{{ Events */
+
+
+void region_got_focus(WRegion *reg)
+{
+	WRegion *r;
+	
+    check_clear_await(reg);
+    
+	region_clear_activity(reg);
+	
+	if(!REGION_IS_ACTIVE(reg)){
+		D(fprintf(stderr, "got focus (inact) %s [%p]\n", OBJ_TYPESTR(reg), reg);)
+		reg->flags|=REGION_ACTIVE;
+		
+		r=region_parent(reg);
+		if(r!=NULL)
+			r->active_sub=reg;
+		
+		region_activated(reg);
+		
+		r=REGION_MANAGER(reg);
+		if(r!=NULL)
+			region_managed_activated(r, reg);
+	}else{
+		D(fprintf(stderr, "got focus (act) %s [%p]\n", OBJ_TYPESTR(reg), reg);)
+    }
+
+	/* Install default colour map only if there is no active subregion;
+	 * their maps should come first. WClientWins will install their maps
+	 * in region_activated. Other regions are supposed to use the same
+	 * default map.
+	 */
+	if(reg->active_sub==NULL && !OBJ_IS(reg, WClientWin))
+		rootwin_install_colormap(region_rootwin_of(reg), None); 
+}
+
+
+void region_lost_focus(WRegion *reg)
+{
+	WRegion *r;
+	
+	if(!REGION_IS_ACTIVE(reg)){
+		D(fprintf(stderr, "lost focus (inact) %s [%p:]\n", OBJ_TYPESTR(reg), reg);)
+		return;
+	}
+	
+	D(fprintf(stderr, "lost focus (act) %s [%p:]\n", OBJ_TYPESTR(reg), reg);)
+	
+	reg->flags&=~REGION_ACTIVE;
+	region_inactivated(reg);
+	r=REGION_MANAGER(reg);
+	if(r!=NULL)
+		region_managed_inactivated(r, reg);
+}
+
+
+/*}}}*/
+
+
+/*{{{ Focus status requests */
+
+/*EXTL_DOC
+ * Is \var{reg} active/does it or one of it's children of focus?
+ */
+EXTL_EXPORT_MEMBER
+bool region_is_active(WRegion *reg)
+{
+	return REGION_IS_ACTIVE(reg);
+}
 
 
 bool region_may_control_focus(WRegion *reg)
 {
 	WRegion *par, *r2;
 	
-	if(WOBJ_IS_BEING_DESTROYED(reg))
+	if(OBJ_IS_BEING_DESTROYED(reg))
 		return FALSE;
 
 	if(REGION_IS_ACTIVE(reg))
 		return TRUE;
 	
-    if(is_await(reg))
+    if(region_is_await(reg))
         return TRUE;
     
 	par=region_parent(reg);
@@ -188,92 +260,28 @@ bool region_may_control_focus(WRegion *reg)
 }
 
 
-void region_got_focus(WRegion *reg)
-{
-	WRegion *r;
-	
-    check_clear_await(reg);
-    
-	region_clear_activity(reg);
-	
-	if(!REGION_IS_ACTIVE(reg)){
-		D(fprintf(stderr, "got focus (inact) %s [%p]\n", WOBJ_TYPESTR(reg), reg);)
-		reg->flags|=REGION_ACTIVE;
-		
-		r=region_parent(reg);
-		if(r!=NULL)
-			r->active_sub=reg;
-		
-		region_activated(reg);
-		
-		r=REGION_MANAGER(reg);
-		if(r!=NULL)
-			region_managed_activated(r, reg);
-	}else{
-		D(fprintf(stderr, "got focus (act) %s [%p]\n", WOBJ_TYPESTR(reg), reg);)
-    }
-
-	/* Install default colour map only if there is no active subregion;
-	 * their maps should come first. WClientWins will install their maps
-	 * in region_activated. Other regions are supposed to use the same
-	 * default map.
-	 */
-	if(reg->active_sub==NULL && !WOBJ_IS(reg, WClientWin))
-		install_cmap(ROOTWIN_OF(reg), None); 
-}
-
-
-void region_lost_focus(WRegion *reg)
-{
-	WRegion *r;
-	
-	if(!REGION_IS_ACTIVE(reg)){
-		D(fprintf(stderr, "lost focus (inact) %s [%p:]\n", WOBJ_TYPESTR(reg), reg);)
-		return;
-	}
-	
-	D(fprintf(stderr, "lost focus (act) %s [%p:]\n", WOBJ_TYPESTR(reg), reg);)
-	
-	reg->flags&=~REGION_ACTIVE;
-	region_inactivated(reg);
-	r=REGION_MANAGER(reg);
-	if(r!=NULL)
-		region_managed_inactivated(r, reg);
-}
-
-
-/*EXTL_DOC
- * Is \var{reg} active/does it or one of it's children of focus?
- */
-EXTL_EXPORT_MEMBER
-bool region_is_active(WRegion *reg)
-{
-	return REGION_IS_ACTIVE(reg);
-}
-
-
 /*}}}*/
 
 
 /*{{{ set_focus, warp */
 
 
-WHooklist *do_warp_alt=NULL;
+WHooklist *region_do_warp_alt=NULL;
 
 
-bool do_warp_default(WRegion *reg)
+bool region_do_warp_default(WRegion *reg)
 {
 	Window root, win=None, realroot=None;
 	int x, y, w, h;
 	int wx=0, wy=0, px=0, py=0;
 	uint mask=0;
 	
-	D(fprintf(stderr, "do_warp %p %s\n", reg, WOBJ_TYPESTR(reg)));
+	D(fprintf(stderr, "region_do_warp %p %s\n", reg, OBJ_TYPESTR(reg)));
 	
-	root=ROOT_OF(reg);
+	root=region_root_of(reg);
 	region_rootpos(reg, &x, &y);
 
-	if(XQueryPointer(wglobal.dpy, root, &realroot, &win,
+	if(XQueryPointer(ioncore_g.dpy, root, &realroot, &win,
 					 &px, &py, &wx, &wy, &mask)){
 		w=REGION_GEOM(reg).w;
 		h=REGION_GEOM(reg).h;
@@ -282,45 +290,36 @@ bool do_warp_default(WRegion *reg)
 			return TRUE;
 	}
 	
-	XWarpPointer(wglobal.dpy, None, root, 0, 0, 0, 0,
+	XWarpPointer(ioncore_g.dpy, None, root, 0, 0, 0, 0,
 				 x+5, y+5);
 	
 	return TRUE;
 }
 
 
-void do_warp(WRegion *reg)
+void region_do_warp(WRegion *reg)
 {
-	CALL_ALT_B_NORET(do_warp_alt, (reg));
+	CALL_ALT_B_NORET(region_do_warp_alt, (reg));
 }
 
 
-void do_set_focus(WRegion *reg, bool warp)
+void region_set_focus(WRegion *reg)
 {
-	if(reg==NULL || !region_is_fully_mapped(reg))
-		return;
-	D(fprintf(stderr, "do_set_focus %p %s\n", reg, WOBJ_TYPESTR(reg)));
-	region_set_focus_to(reg, warp);
+	D(fprintf(stderr, "set_focus %p %s\n", reg, OBJ_TYPESTR(reg)));
+	ioncore_g.focus_next=reg;
+	ioncore_g.warp_next=FALSE;
 }
 
 
-void set_focus(WRegion *reg)
+void region_warp(WRegion *reg)
 {
-	D(fprintf(stderr, "set_focus %p %s\n", reg, WOBJ_TYPESTR(reg)));
-	wglobal.focus_next=reg;
-	wglobal.warp_next=FALSE;
+	D(fprintf(stderr, "warp %p %s\n", reg, OBJ_TYPESTR(reg)));
+	ioncore_g.focus_next=reg;
+	ioncore_g.warp_next=ioncore_g.warp_enabled;
 }
 
 
-void warp(WRegion *reg)
-{
-	D(fprintf(stderr, "warp %p %s\n", reg, WOBJ_TYPESTR(reg)));
-	wglobal.focus_next=reg;
-	wglobal.warp_next=wglobal.warp_enabled;
-}
-
-
-WRegion *set_focus_mgrctl(WRegion *freg, bool dowarp)
+WRegion *region_set_focus_mgrctl(WRegion *freg, bool dowarp)
 {
 	WRegion *mgr=freg;
 	WRegion *reg;
@@ -336,13 +335,18 @@ WRegion *set_focus_mgrctl(WRegion *freg, bool dowarp)
 	}
 	
 	if(!REGION_IS_ACTIVE(freg)){
-		if(dowarp)
-			warp(freg);
-		else
-			set_focus(freg);
+        ioncore_g.focus_next=freg;
+        ioncore_g.warp_next=(ioncore_g.warp_enabled && dowarp);
 	}
 
 	return freg;
+}
+
+
+void xwindow_do_set_focus(Window win)
+{
+    region_set_await_focus(xwindow_region_of(win));
+	XSetInputFocus(ioncore_g.dpy, win, RevertToParent, CurrentTime);
 }
 
 

@@ -14,36 +14,43 @@
 
 #include "common.h"
 #include "region.h"
+#include "hooks.h"
 
-#define GRAB_POINTER_MASK (ButtonPressMask|ButtonReleaseMask|\
-						   ButtonMotionMask)
+#define IONCORE_EVENTMASK_PTRGRAB (ButtonPressMask|ButtonReleaseMask| \
+                                   ButtonMotionMask)
 
-#define ROOT_MASK	(SubstructureRedirectMask|          \
-					 ColormapChangeMask|                \
-					 ButtonPressMask|ButtonReleaseMask| \
-					 PropertyChangeMask|KeyPressMask|   \
-					 FocusChangeMask|EnterWindowMask)
+#define IONCORE_EVENTMASK_PTRLOOP (IONCORE_EVENTMASK_PTRGRAB|ExposureMask| \
+                                   KeyPressMask|KeyReleaseMask|            \
+					               EnterWindowMask|FocusChangeMask)
 
-#define FRAME_MASK	(FocusChangeMask|          \
-					 ButtonPressMask|          \
-					 ButtonReleaseMask|        \
-					 KeyPressMask|             \
-					 EnterWindowMask|          \
-					 ExposureMask|             \
-					 SubstructureRedirectMask)
+#define IONCORE_EVENTMASK_ROOT	(SubstructureRedirectMask|          \
+                                 ColormapChangeMask|                \
+                                 ButtonPressMask|ButtonReleaseMask| \
+                                 PropertyChangeMask|KeyPressMask|   \
+                                 FocusChangeMask|EnterWindowMask)
 
-#define CLIENT_MASK (ColormapChangeMask| \
-					 PropertyChangeMask|FocusChangeMask| \
-					 StructureNotifyMask|EnterWindowMask)
+#define IONCORE_EVENTMASK_FRAME	(FocusChangeMask|          \
+                                 ButtonPressMask|          \
+                                 ButtonReleaseMask|        \
+                                 KeyPressMask|             \
+                                 EnterWindowMask|          \
+                                 ExposureMask|             \
+                                 SubstructureRedirectMask)
 
+#define IONCORE_EVENTMASK_CLIENTWIN (ColormapChangeMask|                  \
+                                     PropertyChangeMask|FocusChangeMask|  \
+                                     StructureNotifyMask|EnterWindowMask)
 
-extern void get_event(XEvent *ev);
-extern void get_event_mask(XEvent *ev, long mask);
-extern void do_grab_kb_ptr(Window win, Window confine_to, int cursor,
-						   long eventmask);
-/*extern void grab_kb_ptr(WRegion *reg);*/
-extern void ungrab_kb_ptr();
-extern void update_timestamp(XEvent *ev);
-extern Time get_timestamp();
+#define IONCORE_EVENTMASK_INPUT (ExposureMask|KeyPressMask|         \
+                                 ButtonPressMask|ButtonReleaseMask| \
+                                 FocusChangeMask)
+
+extern void ioncore_mainloop();
+extern void ioncore_get_event(XEvent *ev);
+extern void ioncore_get_event_mask(XEvent *ev, long mask);
+extern void ioncore_update_timestamp(XEvent *ev);
+extern Time ioncore_get_timestamp();
+
+extern WHooklist *ioncore_handle_event_alt;
 
 #endif /* ION_IONCORE_EVENT_H */

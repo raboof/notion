@@ -8,15 +8,15 @@
 
 
 defbindings("WMenu", {
-    kpress("Escape", "cancel"),
-    kpress("Control+G", "cancel"),
-    kpress("Control+C", "cancel"),
-    kpress("AnyModifier+P", "select_prev"),
-    kpress("AnyModifier+N", "select_next"),
-    kpress("Up", "select_prev"),
-    kpress("Down", "select_next"),
-    kpress("Return", "finish"),
-    kpress("KP_Enter", "finish"),
-    kpress("Control+M", "finish"),
+    kpress("Escape", 		"WMenu.cancel(_)"),
+    kpress("Control+G",		"WMenu.cancel(_)"),
+    kpress("Control+C", 	"WMenu.cancel(_)"),
+    kpress("Return",		"WMenu.finish(_)"),
+    kpress("KP_Enter",		"WMenu.finish(_)"),
+    kpress("Control+M", 	"WMenu.finish(_)"),
+    kpress("AnyModifier+P", 	"WMenu.select_prev(_)"),
+    kpress("AnyModifier+N", 	"WMenu.select_next(_)"),
+    kpress("Up", 		"WMenu.select_prev(_)"),
+    kpress("Down", 		"WMenu.select_next(_)"),
 })
 

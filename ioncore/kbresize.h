@@ -19,7 +19,10 @@
 
 extern void frame_moveres_begin(WFrame *frame);
 
-extern void moveresmode_end(WMoveresMode *mode);
+extern void ioncore_set_moveres_accel(int t_max, int t_min, 
+                                      double step, double maxacc);
+
+extern void moveresmode_finish(WMoveresMode *mode);
 extern void moveresmode_cancel(WMoveresMode *mode);
 extern void moveresmode_move(WMoveresMode *mode, 
                              int horizmul, int vertmul);

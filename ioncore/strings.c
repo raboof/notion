@@ -79,10 +79,10 @@ char *str_stripws(char *p)
 
 int str_prevoff(const char *p, int pos)
 {
-	if(wglobal.enc_sb)
+	if(ioncore_g.enc_sb)
 		return (pos>0 ? 1 : 0);
 
-	if(wglobal.enc_utf8){
+	if(ioncore_g.enc_utf8){
 		int opos=pos;
 		
 		while(pos>0){
@@ -93,7 +93,7 @@ int str_prevoff(const char *p, int pos)
 		return opos-pos;
 	}
 	
-	assert(wglobal.use_mb);
+	assert(ioncore_g.use_mb);
 	{
         /* *sigh* */
 		int l, prev=0;
@@ -118,10 +118,10 @@ int str_prevoff(const char *p, int pos)
 
 int str_nextoff(const char *p, int opos)
 {
-	if(wglobal.enc_sb)
+	if(ioncore_g.enc_sb)
 		return (*(p+opos)=='\0' ? 0 : 1);
 
-	if(wglobal.enc_utf8){
+	if(ioncore_g.enc_utf8){
 		int pos=opos;
 		
 		while(p[pos]){
@@ -132,7 +132,7 @@ int str_nextoff(const char *p, int opos)
 		return pos-opos;
 	}
 
-	assert(wglobal.use_mb);
+	assert(ioncore_g.use_mb);
 	{
 		mbstate_t ps;
 		int l;
@@ -213,7 +213,7 @@ static SR *shortenrules=NULL;
  * \end{tabularx}
  */
 EXTL_EXPORT
-bool add_shortenrule(const char *rx, const char *rule, bool always)
+bool ioncore_add_shortenrule(const char *rx, const char *rule, bool always)
 {
 	SR *si;
 	int ret;
@@ -262,7 +262,7 @@ static char *shorten(GrBrush *brush, const char *str, uint maxw,
 	bool more=FALSE;
 	
 	/* Ensure matches are at character boundaries */
-	if(!wglobal.enc_sb){
+	if(!ioncore_g.enc_sb){
 		int pos=0, len, strl;
 		mbstate_t ps;
 		memset(&ps, 0, sizeof(ps));
@@ -395,7 +395,7 @@ static char *shorten(GrBrush *brush, const char *str, uint maxw,
 }
 
 
-char *make_label(GrBrush *brush, const char *str, uint maxw)
+char *grbrush_make_label(GrBrush *brush, const char *str, uint maxw)
 {
 	size_t nmatch=10;
 	regmatch_t pmatch[10];

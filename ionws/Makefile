@@ -13,11 +13,11 @@ INCLUDES += $(X11_INCLUDES) -I..
 CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
 SOURCES=bindmaps.c conf.c ionframe.c main.c placement.c \
-	split.c splitframe.c ionws.c
+	split.c ionws.c
 
-MAKE_EXPORTS=ionws_module
+MAKE_EXPORTS=ionwsmod
 
-MODULE=ionws
+MODULE=ionwsmod
 
 ######################################
 

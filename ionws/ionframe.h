@@ -15,10 +15,11 @@
 #include <ioncore/common.h>
 #include <ioncore/frame.h>
 #include <ioncore/extl.h>
+#include <ioncore/rectangle.h>
 
-INTROBJ(WIonFrame);
+INTRCLASS(WIonFrame);
 
-DECLOBJ(WIonFrame){
+DECLCLASS(WIonFrame){
 	WFrame frame;
 };
 
@@ -27,5 +28,10 @@ extern void ionframe_draw_config_updated(WIonFrame *frame);
 extern void ionframe_toggle_shade(WIonFrame *frame);
 extern WRegion *ionframe_load(WWindow *par, const WRectangle *geom, 
 							  ExtlTab tab);
+
+extern void ionframe_close(WIonFrame *frame);
+extern void ionframe_close_if_empty(WIonFrame *frame);
+extern WIonFrame *ionframe_split(WIonFrame *frame, const char *dirstr);
+extern WIonFrame *ionframe_split_empty(WIonFrame *frame, const char *dirstr);
 
 #endif /* ION_IONWS_IONFRAME_H */

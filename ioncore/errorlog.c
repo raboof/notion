@@ -17,9 +17,9 @@
 #include "common.h"
 #include "errorlog.h"
 
-static ErrorLog *current_log=NULL;
+static WErrorLog *current_log=NULL;
 
-static void add_to_log(ErrorLog *el, const char *message, int l)
+static void add_to_log(WErrorLog *el, const char *message, int l)
 {
 	if(message==NULL)
 		return;
@@ -87,7 +87,7 @@ static void log_warn_handler(const char *message)
 }
 
 		   
-void begin_errorlog_file(ErrorLog *el, FILE *file)
+void errorlog_begin_file(WErrorLog *el, FILE *file)
 {
 	el->msgs=NULL;
 	el->msgs_len=0;
@@ -99,13 +99,13 @@ void begin_errorlog_file(ErrorLog *el, FILE *file)
 }
 
 
-void begin_errorlog(ErrorLog *el)
+void errorlog_begin(WErrorLog *el)
 {
-	begin_errorlog_file(el, NULL);
+	errorlog_begin_file(el, NULL);
 }
 
 
-bool end_errorlog(ErrorLog *el)
+bool errorlog_end(WErrorLog *el)
 {
 	current_log=el->prev;
 	set_warn_handler(el->old_handler);
@@ -115,7 +115,7 @@ bool end_errorlog(ErrorLog *el)
 }
 
 
-void deinit_errorlog(ErrorLog *el)
+void errorlog_deinit(WErrorLog *el)
 {
 	if(el->msgs!=NULL)
 		free(el->msgs);

@@ -15,13 +15,14 @@
 #include "global.h"
 
 
-WMwmHints *get_mwm_hints(Window win)
+WMwmHints *xwindow_get_mwmhints(Window win)
 {
 	WMwmHints *hints=NULL;
 	int n;
 	
-	n=get_property(wglobal.dpy, win, wglobal.atom_mwm_hints,
-				   wglobal.atom_mwm_hints, MWM_N_HINTS, FALSE, (uchar**)&hints);
+	n=xwindow_get_property(win, ioncore_g.atom_mwm_hints,
+                           ioncore_g.atom_mwm_hints, 
+                           MWM_N_HINTS, FALSE, (uchar**)&hints);
 	
 	if(n<MWM_N_HINTS && hints!=NULL){
 		XFree((void*)hints);
@@ -32,13 +33,14 @@ WMwmHints *get_mwm_hints(Window win)
 }
 
 
-void check_mwm_hints_nodecor(Window win, bool *nodecor)
+void xwindow_check_mwmhints_nodecor(Window win, bool *nodecor)
 {
 	WMwmHints *hints;
 	int n;
 	
-	n=get_property(wglobal.dpy, win, wglobal.atom_mwm_hints,
-				   wglobal.atom_mwm_hints, MWM_N_HINTS, FALSE, (uchar**)&hints);
+	n=xwindow_get_property(win, ioncore_g.atom_mwm_hints, 
+                           ioncore_g.atom_mwm_hints, 
+                           MWM_N_HINTS, FALSE, (uchar**)&hints);
 	
 	if(n<MWM_DECOR_NDX)
 		return;

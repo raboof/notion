@@ -26,13 +26,14 @@ DECLSTRUCT(WTimer){
 	WWatch paramwatch;
 };
 
-#define INIT_TIMER(FUN) {{0, 0}, FUN, NULL, WWATCH_INIT}
+#define TIMER_INIT(FUN) {{0, 0}, FUN, NULL, WWATCH_INIT}
 
-extern void check_signals();
-extern void trap_signals();
-extern void set_timer(WTimer *timer, uint msecs);
-extern void set_timer_param(WTimer *timer, uint msecs, WObj *param);
-extern void reset_timer(WTimer *timer);
+extern void ioncore_check_signals();
+extern void ioncore_trap_signals();
+
+extern void timer_set(WTimer *timer, uint msecs);
+extern void timer_set_param(WTimer *timer, uint msecs, WObj *param);
+extern void timer_reset(WTimer *timer);
 extern bool timer_is_set(WTimer *timer);
 
 #endif /* ION_IONCORE_SIGNAL_H */

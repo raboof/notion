@@ -22,7 +22,7 @@
 
 #include "../version.h"
 
-char menu_module_ion_api_version[]=ION_API_VERSION;
+char menumod_ion_api_version[]=ION_API_VERSION;
 
 
 /*}}}*/
@@ -31,13 +31,13 @@ char menu_module_ion_api_version[]=ION_API_VERSION;
 /*{{{ Bindmaps w/ config */
 
 
-WBindmap menu_bindmap=BINDMAP_INIT;
+WBindmap menumod_menu_bindmap=BINDMAP_INIT;
 
 
-EXTL_EXPORT
-bool __defbindings_WMenu(ExtlTab tab)
+EXTL_EXPORT_AS(global, __defbindings_WMenu)
+bool menumod_defbindings_WMenu(ExtlTab tab)
 {
-	return process_bindings(&menu_bindmap, NULL, tab);
+	return bindmap_do_table(&menumod_menu_bindmap, NULL, tab);
 }
 
 
@@ -47,26 +47,25 @@ bool __defbindings_WMenu(ExtlTab tab)
 /*{{{ Init & deinit */
 
 
-extern bool menu_module_register_exports();
-extern void menu_module_unregister_exports();
+extern bool menumod_register_exports();
+extern void menumod_unregister_exports();
 
 
-void menu_module_deinit()
+void menumod_deinit()
 {
-	menu_module_unregister_exports();
-	deinit_bindmap(&menu_bindmap);
+	menumod_unregister_exports();
+	bindmap_deinit(&menumod_menu_bindmap);
 }
 
 
-bool menu_module_init()
+bool menumod_init()
 {
-	if(!menu_module_register_exports()){
-		menu_module_deinit();
+	if(!menumod_register_exports()){
+		menumod_deinit();
 		return FALSE;
 	}
 	
-	/*read_config("menulib");*/
-	read_config("menu");
+	ioncore_read_config("menu", NULL, TRUE);
 	
 	return TRUE;
 }

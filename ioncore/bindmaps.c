@@ -22,48 +22,48 @@ WBindmap ioncore_frame_bindmap=BINDMAP_INIT;
 WBindmap ioncore_moveres_bindmap=BINDMAP_INIT;
 
 
-EXTL_EXPORT
-bool __defbindings_WScreen(ExtlTab tab)
+EXTL_EXPORT_AS(global, __defbindings_WScreen)
+bool ioncore_defbindings_WScreen(ExtlTab tab)
 {
-	return process_bindings(&ioncore_rootwin_bindmap, NULL, tab);
+	return bindmap_do_table(&ioncore_rootwin_bindmap, NULL, tab);
 }
 
 
-EXTL_EXPORT
-bool __defbindings_WMPlex(ExtlTab tab)
+EXTL_EXPORT_AS(global, __defbindings_WMPlex)
+bool ioncore_defbindings_WMPlex(ExtlTab tab)
 {
-	return process_bindings(&ioncore_mplex_bindmap, NULL, tab);
+	return bindmap_do_table(&ioncore_mplex_bindmap, NULL, tab);
 }
 
 
 static StringIntMap frame_areas[]={
-	{"border", 		WFRAME_AREA_BORDER},
-	{"tab", 		WFRAME_AREA_TAB},
-	{"empty_tab", 	WFRAME_AREA_TAB},
-	{"client", 		WFRAME_AREA_CLIENT},
+	{"border", 		FRAME_AREA_BORDER},
+	{"tab", 		FRAME_AREA_TAB},
+	{"empty_tab", 	FRAME_AREA_TAB},
+	{"client", 		FRAME_AREA_CLIENT},
 	END_STRINGINTMAP
 };
 
 
-EXTL_EXPORT
-bool __defbindings_WFrame(ExtlTab tab)
+EXTL_EXPORT_AS(global, __defbindings_WFrame)
+bool ioncore_defbindings_WFrame(ExtlTab tab)
 {
-	return process_bindings(&ioncore_frame_bindmap, frame_areas, tab);
+	return bindmap_do_table(&ioncore_frame_bindmap, frame_areas, tab);
 }
 
 
-EXTL_EXPORT
-bool __defbindings_WMoveresMode(ExtlTab tab)
+EXTL_EXPORT_AS(global, __defbindings_WMoveresMode)
+bool ioncore_defbindings_WMoveresMode(ExtlTab tab)
 {
-	return process_bindings(&ioncore_moveres_bindmap, NULL, tab);
+	return bindmap_do_table(&ioncore_moveres_bindmap, NULL, tab);
 }
 
 
 void ioncore_deinit_bindmaps()
 {
-	deinit_bindmap(&ioncore_rootwin_bindmap);
-	deinit_bindmap(&ioncore_mplex_bindmap);
-	deinit_bindmap(&ioncore_frame_bindmap);
-	deinit_bindmap(&ioncore_moveres_bindmap);
+	bindmap_deinit(&ioncore_rootwin_bindmap);
+	bindmap_deinit(&ioncore_mplex_bindmap);
+	bindmap_deinit(&ioncore_frame_bindmap);
+	bindmap_deinit(&ioncore_moveres_bindmap);
 }
 

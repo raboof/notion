@@ -10,15 +10,17 @@
  */
 
 #include <X11/Xatom.h>
+#include <X11/Xmd.h>
 
 #include <libtu/util.h>
 #include "common.h"
-#include "mwmhints.h"
 #include "global.h"
 #include "fullscreen.h"
 #include "clientwin.h"
 #include "netwm.h"
 #include "property.h"
+#include "focus.h"
+#include "region-iter.h"
 
 
 static Atom atom_net_wm_state_fullscreen=0;
@@ -31,12 +33,12 @@ static Atom atom_net_virtual_roots=0;
 
 void netwm_init()
 {
-	wglobal.atom_net_wm_name=XInternAtom(wglobal.dpy, "_NET_WM_NAME", False);
-	wglobal.atom_net_wm_state=XInternAtom(wglobal.dpy, "_NET_WM_STATE", False);
-	atom_net_supported=XInternAtom(wglobal.dpy, "_NET_SUPPORTED", False);
-	atom_net_supporting_wm_check=XInternAtom(wglobal.dpy, "_NET_SUPPORTING_WM_CHECK", False);
-	atom_net_wm_state_fullscreen=XInternAtom(wglobal.dpy, "_NET_WM_STATE_FULLSCREEN", False);
-	atom_net_virtual_roots=XInternAtom(wglobal.dpy, "_NET_VIRTUAL_ROOTS", False);
+	ioncore_g.atom_net_wm_name=XInternAtom(ioncore_g.dpy, "_NET_WM_NAME", False);
+	ioncore_g.atom_net_wm_state=XInternAtom(ioncore_g.dpy, "_NET_WM_STATE", False);
+	atom_net_supported=XInternAtom(ioncore_g.dpy, "_NET_SUPPORTED", False);
+	atom_net_supporting_wm_check=XInternAtom(ioncore_g.dpy, "_NET_SUPPORTING_WM_CHECK", False);
+	atom_net_wm_state_fullscreen=XInternAtom(ioncore_g.dpy, "_NET_WM_STATE_FULLSCREEN", False);
+	atom_net_virtual_roots=XInternAtom(ioncore_g.dpy, "_NET_VIRTUAL_ROOTS", False);
 }
 
 
@@ -44,21 +46,21 @@ void netwm_init_rootwin(WRootWin *rw)
 {
 	Atom atoms[N_NETWM];
 
-	atoms[0]=wglobal.atom_net_wm_name;
-	atoms[1]=wglobal.atom_net_wm_state;
+	atoms[0]=ioncore_g.atom_net_wm_name;
+	atoms[1]=ioncore_g.atom_net_wm_state;
 	atoms[2]=atom_net_wm_state_fullscreen;
 	atoms[3]=atom_net_supporting_wm_check;
 	atoms[4]=atom_net_virtual_roots;
 	
 	FOR_ALL_ROOTWINS(rw){
-		XChangeProperty(wglobal.dpy, WROOTWIN_ROOT(rw),
+		XChangeProperty(ioncore_g.dpy, WROOTWIN_ROOT(rw),
 						atom_net_supporting_wm_check, XA_WINDOW,
 						32, PropModeReplace, (uchar*)&(rw->dummy_win), 1);
-		XChangeProperty(wglobal.dpy, WROOTWIN_ROOT(rw),
+		XChangeProperty(ioncore_g.dpy, WROOTWIN_ROOT(rw),
 						atom_net_supported, XA_ATOM,
 						32, PropModeReplace, (uchar*)atoms, N_NETWM);
 		/* Something else should probably be used as WM name here. */
-		set_text_property(rw->dummy_win, wglobal.atom_net_wm_name,
+		xwindow_set_text_property(rw->dummy_win, ioncore_g.atom_net_wm_name,
 						  prog_execname());
 	}
 }
@@ -97,7 +99,7 @@ int netwm_check_initial_fullscreen(WClientWin *cwin, bool sw)
 	int ret=0;
 	long *data;
 	
-	n=get_property(wglobal.dpy, cwin->win, wglobal.atom_net_wm_state, XA_ATOM,
+	n=xwindow_get_property(cwin->win, ioncore_g.atom_net_wm_state, XA_ATOM,
 				   1, TRUE, (uchar**)&data);
 	
 	if(n<0)
@@ -124,7 +126,7 @@ void netwm_update_state(WClientWin *cwin)
 	if(CLIENTWIN_IS_FULLSCREEN(cwin))
 		data[n++]=atom_net_wm_state_fullscreen;
 
-	XChangeProperty(wglobal.dpy, cwin->win, wglobal.atom_net_wm_state, 
+	XChangeProperty(ioncore_g.dpy, cwin->win, ioncore_g.atom_net_wm_state, 
 					XA_ATOM, 32, PropModeReplace, (uchar*)data, n);
 }
 

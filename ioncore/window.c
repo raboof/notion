@@ -15,6 +15,7 @@
 #include "window.h"
 #include "focus.h"
 #include "rootwin.h"
+#include "region.h"
 #include "stacking.h"
 
 
@@ -69,9 +70,9 @@ bool window_init(WWindow *wwin, WWindow *parent, Window win,
 	wwin->keep_on_top_list=NULL;
 	region_init(&(wwin->region), (WRegion*)parent, geom);
 	if(win!=None){
-		XSaveContext(wglobal.dpy, win, wglobal.win_context, (XPointer)wwin);
+		XSaveContext(ioncore_g.dpy, win, ioncore_g.win_context, (XPointer)wwin);
 		if(parent!=NULL)
-			stacking_init_window(parent, win);
+			window_init_sibling_stacking(parent, win);
 	}
 	return TRUE;
 }
@@ -81,7 +82,7 @@ bool window_init_new(WWindow *wwin, WWindow *parent, const WRectangle *geom)
 {
 	Window win;
 	
-	win=create_simple_window(ROOTWIN_OF(parent), parent->win, geom);
+	win=create_xwindow(region_rootwin_of((WRegion*)parent), parent->win, geom);
 	if(win==None)
 		return FALSE;
 	/* window_init does not fail */
@@ -97,8 +98,8 @@ void window_deinit(WWindow *wwin)
 		XDestroyIC(wwin->xic);
 
 	if(wwin->win!=None){
-		XDeleteContext(wglobal.dpy, wwin->win, wglobal.win_context);
-		XDestroyWindow(wglobal.dpy, wwin->win);
+		XDeleteContext(ioncore_g.dpy, wwin->win, ioncore_g.win_context);
+		XDestroyWindow(ioncore_g.dpy, wwin->win);
 	}
 }
 
@@ -109,11 +110,11 @@ void window_deinit(WWindow *wwin)
 /*{{{ Find, X Window -> WRegion */
 
 
-WRegion *find_window(Window win)
+WRegion *xwindow_region_of(Window win)
 {
 	WRegion *reg;
 	
-	if(XFindContext(wglobal.dpy, win, wglobal.win_context,
+	if(XFindContext(ioncore_g.dpy, win, ioncore_g.win_context,
 					(XPointer*)&reg)!=0)
 		return NULL;
 	
@@ -121,14 +122,14 @@ WRegion *find_window(Window win)
 }
 
 
-WRegion *find_window_t(Window win, const WObjDescr *descr)
+WRegion *xwindow_region_of_t(Window win, const WClassDescr *descr)
 {
-	WRegion *reg=find_window(win);
+	WRegion *reg=xwindow_region_of(win);
 	
 	if(reg==NULL)
 		return NULL;
 	
-	if(!wobj_is((WObj*)reg, descr))
+	if(!obj_is((WObj*)reg, descr))
 		return NULL;
 	
 	return reg;
@@ -149,11 +150,11 @@ static void reparent_or_fit_window(WWindow *wwin, WWindow *parent,
 
 	if(parent!=NULL){
 		region_detach_parent((WRegion*)wwin);
-		XReparentWindow(wglobal.dpy, wwin->win, parent->win, geom->x, geom->y);
-		XResizeWindow(wglobal.dpy, wwin->win, geom->w, geom->h);
+		XReparentWindow(ioncore_g.dpy, wwin->win, parent->win, geom->x, geom->y);
+		XResizeWindow(ioncore_g.dpy, wwin->win, geom->w, geom->h);
 		region_attach_parent((WRegion*)wwin, (WRegion*)parent);
 	}else{
-		XMoveResizeWindow(wglobal.dpy, wwin->win, geom->x, geom->y,
+		XMoveResizeWindow(ioncore_g.dpy, wwin->win, geom->x, geom->y,
 						  geom->w, geom->h);
 	}
 	
@@ -164,9 +165,9 @@ static void reparent_or_fit_window(WWindow *wwin, WWindow *parent,
 }
 
 
-bool reparent_window(WWindow *wwin, WWindow *parent, const WRectangle *geom)
+bool window_reparent(WWindow *wwin, WWindow *parent, const WRectangle *geom)
 {
-	if(!same_rootwin((WRegion*)wwin, (WRegion*)parent))
+	if(!region_same_rootwin((WRegion*)wwin, (WRegion*)parent))
 		return FALSE;
 	reparent_or_fit_window(wwin, parent, geom);
 	return TRUE;
@@ -181,27 +182,27 @@ void window_fit(WWindow *wwin, const WRectangle *geom)
 
 void window_map(WWindow *wwin)
 {
-	XMapWindow(wglobal.dpy, wwin->win);
-	MARK_REGION_MAPPED(wwin);
+	XMapWindow(ioncore_g.dpy, wwin->win);
+	REGION_MARK_MAPPED(wwin);
 }
 
 
 void window_unmap(WWindow *wwin)
 {
-	XUnmapWindow(wglobal.dpy, wwin->win);
-	MARK_REGION_UNMAPPED(wwin);
+	XUnmapWindow(ioncore_g.dpy, wwin->win);
+	REGION_MARK_UNMAPPED(wwin);
 }
 
 
-void window_set_focus_to(WWindow *wwin, bool warp)
+void window_do_set_focus(WWindow *wwin, bool warp)
 {
 	if(warp)
-		do_warp((WRegion*)wwin);
-	SET_FOCUS(wwin->win);
+		region_do_warp((WRegion*)wwin);
+	xwindow_do_set_focus(wwin->win);
 }
 
 
-void do_restack_window(Window win, Window other, int stack_mode)
+void xwindow_restack(Window win, Window other, int stack_mode)
 {
 	XWindowChanges wc;
 	int wcmask;
@@ -211,18 +212,18 @@ void do_restack_window(Window win, Window other, int stack_mode)
 	if((wc.sibling=other)!=None)
 		wcmask|=CWSibling;
 
-	XConfigureWindow(wglobal.dpy, win, wcmask, &wc);
+	XConfigureWindow(ioncore_g.dpy, win, wcmask, &wc);
 }
 
 
 Window window_restack(WWindow *wwin, Window other, int mode)
 {
-	do_restack_window(wwin->win, other, mode);
+	xwindow_restack(wwin->win, other, mode);
 	return wwin->win;
 }
 
 
-Window window_x_window(const WWindow *wwin)
+Window window_xwindow(const WWindow *wwin)
 {
 	return wwin->win;
 }
@@ -238,15 +239,15 @@ static DynFunTab window_dynfuntab[]={
 	{region_fit, window_fit},
 	{region_map, window_map},
 	{region_unmap, window_unmap},
-	{region_set_focus_to, window_set_focus_to},
-	{(DynFun*)region_reparent, (DynFun*)reparent_window},
+	{region_do_set_focus, window_do_set_focus},
+	{(DynFun*)region_reparent, (DynFun*)window_reparent},
 	{(DynFun*)region_restack, (DynFun*)window_restack},
-	{(DynFun*)region_x_window, (DynFun*)window_x_window},
+	{(DynFun*)region_xwindow, (DynFun*)window_xwindow},
 	END_DYNFUNTAB
 };
 
 
-IMPLOBJ(WWindow, WRegion, window_deinit, window_dynfuntab);
+IMPLCLASS(WWindow, WRegion, window_deinit, window_dynfuntab);
 
 	
 /*}}}*/

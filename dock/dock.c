@@ -63,7 +63,7 @@
 
 /* Global variables {{{ */
 static const char *modname="dock";
-const char dock_module_ion_api_version[]=ION_API_VERSION;
+const char dockmod_ion_api_version[]=ION_API_VERSION;
 bool shape_extension=FALSE;
 int shape_event_basep=0;
 int shape_error_basep=0;
@@ -95,9 +95,9 @@ static const char *stringintmap_reverse_value(const StringIntMap *map,
 
 /* WDockParam {{{ */
 
-INTROBJ(WDockParam);
+INTRCLASS(WDockParam);
 
-DECLOBJ(WDockParam){ /* {{{ */
+DECLCLASS(WDockParam){ /* {{{ */
 	const char *key;
 	const char *desc;
 	const StringIntMap *map;
@@ -173,9 +173,9 @@ static bool dock_param_brush_set(const WDockParam *param, GrBrush *brush,
 
 /* WDockApp {{{ */
 
-INTROBJ(WDockApp);
+INTRCLASS(WDockApp);
 
-DECLOBJ(WDockApp){ /* {{{ */
+DECLCLASS(WDockApp){ /* {{{ */
 	WDockApp *next, *prev;
 	WClientWin *cwin;
 	int pos;
@@ -192,9 +192,9 @@ DECLOBJ(WDockApp){ /* {{{ */
 
 /* WDock {{{ */
 
-INTROBJ(WDock);
+INTRCLASS(WDock);
 
-DECLOBJ(WDock){ /* {{{ */
+DECLCLASS(WDock){ /* {{{ */
 	WWindow win;
 	WDock *dock_next, *dock_prev;
 	WRegion *managed_list;
@@ -418,7 +418,7 @@ static void dock_reshape(WDock *dock)
 			WDockApp *dockapp;
 
 			/* Start with an empty set {{{ */
-			XShapeCombineRectangles(wglobal.dpy, ((WWindow *)dock)->win,
+			XShapeCombineRectangles(ioncore_g.dpy, ((WWindow *)dock)->win,
 									ShapeBounding, 0, 0, NULL, 0, ShapeSet, 0);
 			/* }}} */
 
@@ -433,7 +433,7 @@ static void dock_reshape(WDock *dock)
 					tile_rect.y=dockapp->border_geom.y;
 					tile_rect.width=dockapp->border_geom.w;
 					tile_rect.height=dockapp->border_geom.h;
-					XShapeCombineRectangles(wglobal.dpy, ((WWindow *)dock)->win,
+					XShapeCombineRectangles(ioncore_g.dpy, ((WWindow *)dock)->win,
 											ShapeBounding, 0, 0, &tile_rect, 1,
 											ShapeUnion, 0);
 					/* }}} */
@@ -442,13 +442,13 @@ static void dock_reshape(WDock *dock)
 					int count;
 					int ordering;
 
-					XRectangle *rects=XShapeGetRectangles(wglobal.dpy,
+					XRectangle *rects=XShapeGetRectangles(ioncore_g.dpy,
 														  dockapp->cwin->win,
 														  ShapeBounding, &count,
 														  &ordering);
 					if(rects!=NULL){
 						WRectangle dockapp_geom=REGION_GEOM(dockapp->cwin);
-						XShapeCombineRectangles(wglobal.dpy, ((WWindow *)dock)->win,
+						XShapeCombineRectangles(ioncore_g.dpy, ((WWindow *)dock)->win,
 												ShapeBounding,
 												dockapp_geom.x, dockapp_geom.y,
 												rects, count, ShapeUnion, ordering);
@@ -473,7 +473,7 @@ static void dock_reshape(WDock *dock)
 			rect.y=0;
 			rect.width=geom.w;
 			rect.height=geom.h;
-			XShapeCombineRectangles(wglobal.dpy, ((WWindow *)dock)->win,
+			XShapeCombineRectangles(ioncore_g.dpy, ((WWindow *)dock)->win,
 									ShapeBounding, 0, 0, &rect, 1, ShapeSet, 0);
 		}
 		break;
@@ -809,7 +809,7 @@ static void dock_draw(WDock *dock, bool complete UNUSED)
 		return;
 	}
 
-	XClearWindow(wglobal.dpy, ((WWindow *)dock)->win);
+	XClearWindow(ioncore_g.dpy, ((WWindow *)dock)->win);
 
 	/* Draw border(s) {{{ */
 	if(dock->brush){
@@ -877,7 +877,8 @@ static void dock_brush_get(WDock *dock)
 {
 
 	dock_brush_release(dock);
-	dock->brush=gr_get_brush(ROOTWIN_OF(dock), ((WWindow *)dock)->win, "dock");
+	dock->brush=gr_get_brush(region_rootwin_of((WRegion*)dock), 
+                             ((WWindow *)dock)->win, "dock");
 }
 /* }}} */
 
@@ -1011,9 +1012,7 @@ static bool dock_init(WDock *dock, int screen, ExtlTab conftab)
 	WWindow *parent;
 
 	/* Find screen {{{ */
-	for(scr=wglobal.screens; screen && scr;
-		--screen, scr=NEXT_CHILD(scr, WScreen)){
-	}
+    scr=ioncore_find_screen_id(screen);
 	if(!scr){
 		warn_obj(modname, "Unknown screen %d", screen);
 		return FALSE;
@@ -1038,7 +1037,7 @@ static bool dock_init(WDock *dock, int screen, ExtlTab conftab)
 
 	region_keep_on_top((WRegion *)dock);
 
-	XSelectInput(wglobal.dpy, ((WWindow *)dock)->win,
+	XSelectInput(ioncore_g.dpy, ((WWindow *)dock)->win,
 				 EnterWindowMask|ExposureMask|FocusChangeMask|KeyPressMask
 				 |SubstructureRedirectMask);
 
@@ -1081,7 +1080,7 @@ static void dock_deinit(WDock *dock)
  * appear. \var{conftab} is the initial configuration table passed to
  * \fnref{WDock.set}.
  */
-EXTL_EXPORT
+EXTL_EXPORT_AS(dockmod, create_dock)
 WDock *create_dock(int screen, ExtlTab conftab)
 {
 
@@ -1159,7 +1158,7 @@ static DynFunTab dock_dynfuntab[]={ /* {{{ */
 };
 /* }}} */
 
-IMPLOBJ(WDock, WWindow, dock_deinit, dock_dynfuntab);
+IMPLCLASS(WDock, WWindow, dock_deinit, dock_dynfuntab);
 
 /* }}} */
 
@@ -1189,16 +1188,16 @@ static bool dock_clientwin_is_dockapp(WClientWin *cwin,
 		unsigned char *prop;
 
 		if(atom__net_wm_window_type==None){
-			atom__net_wm_window_type=XInternAtom(wglobal.dpy,
+			atom__net_wm_window_type=XInternAtom(ioncore_g.dpy,
 												 "_NET_WM_WINDOW_TYPE",
 												 False);
 		}
 		if(atom__net_wm_window_type_dock==None){
-			atom__net_wm_window_type_dock=XInternAtom(wglobal.dpy,
+			atom__net_wm_window_type_dock=XInternAtom(ioncore_g.dpy,
 													 "_NET_WM_WINDOW_TYPE_DOCK",
 													  False);
 		}
-		XGetWindowProperty(wglobal.dpy, cwin->win, atom__net_wm_window_type, 0,
+		XGetWindowProperty(ioncore_g.dpy, cwin->win, atom__net_wm_window_type, 0,
 						   sizeof(Atom), False, XA_ATOM, &actual_type,
 						   &actual_format, &nitems, &bytes_after, &prop);
 		if(actual_type==XA_ATOM && nitems>=1
@@ -1214,7 +1213,7 @@ static bool dock_clientwin_is_dockapp(WClientWin *cwin,
 		char **p;
 		int n;
 
-		p=get_text_property(cwin->win, XA_WM_CLASS, &n);
+		p=xwindow_get_text_property(cwin->win, XA_WM_CLASS, &n);
 		if(p!=NULL){
 			if(n>=2 && strcmp(p[1], "DockApp")==0){
 				is_dockapp=TRUE;
@@ -1236,7 +1235,7 @@ static WDock *dock_find_suitable_dock(WClientWin *cwin,
 	WDock *dock;
 	WScreen *cwin_scr;
 
-	cwin_scr=find_suitable_screen(cwin, param);
+	cwin_scr=clientwin_find_suitable_screen(cwin, param);
 	for(dock=docks; dock; dock=dock->dock_next)
 	{
 		if(dock->is_auto && region_screen_of((WRegion *)dock)==cwin_scr){
@@ -1249,8 +1248,8 @@ static WDock *dock_find_suitable_dock(WClientWin *cwin,
 }
 /* }}} */
 
-/* add_clientwin_hook {{{ */
-static bool add_clientwin_hook(WClientWin *cwin, const WManageParams *param)
+/* clientwin_do_manage_hook {{{ */
+static bool clientwin_do_manage_hook(WClientWin *cwin, const WManageParams *param)
 {
 	WDock *dock;
 
@@ -1268,38 +1267,38 @@ static bool add_clientwin_hook(WClientWin *cwin, const WManageParams *param)
 }
 /* }}} */
 
-/* dock_module_init {{{ */
-bool dock_module_init()
+/* dockmod_init {{{ */
+bool dockmod_init()
 {
-	extern bool dock_module_register_exports();
+	extern bool dockmod_register_exports();
 
-	if(XShapeQueryExtension(wglobal.dpy, &shape_event_basep,
+	if(XShapeQueryExtension(ioncore_g.dpy, &shape_event_basep,
 							&shape_error_basep)){
 		shape_extension=TRUE;
 	}else{
-		XMissingExtension(wglobal.dpy, "SHAPE");
+		XMissingExtension(ioncore_g.dpy, "SHAPE");
 	}
 
-	if(!dock_module_register_exports()){
+	if(!dockmod_register_exports()){
 		return FALSE;
 	}
 
-	read_config(modname);
+	ioncore_read_config(modname, NULL, TRUE);
 
-	ADD_HOOK(add_clientwin_alt, add_clientwin_hook);
+	ADD_HOOK(clientwin_do_manage_alt, clientwin_do_manage_hook);
 
 	return TRUE;
 
 }
 /* }}} */
 
-/* dock_module_deinit {{{ */
-void dock_module_deinit()
+/* dockmod_deinit {{{ */
+void dockmod_deinit()
 {
 	WDock *dock;
-	extern void dock_module_unregister_exports();
+	extern void dockmod_unregister_exports();
 
-	REMOVE_HOOK(add_clientwin_alt, add_clientwin_hook);
+	REMOVE_HOOK(clientwin_do_manage_alt, clientwin_do_manage_hook);
 
 	/* Destroy all docks {{{ */
 	dock=docks;
@@ -1310,7 +1309,7 @@ void dock_module_deinit()
 	}
 	/* }}} */
 
-	dock_module_unregister_exports();
+	dockmod_unregister_exports();
 
 }
 /* }}} */

@@ -24,21 +24,18 @@
 
 
 enum{
-	INPUT_NORMAL,
-	INPUT_GRAB,
-	INPUT_SUBMAPGRAB,
-	INPUT_WAITRELEASE
+	IONCORE_INPUTMODE_NORMAL,
+	IONCORE_INPUTMODE_GRAB,
+	IONCORE_INPUTMODE_WAITRELEASE
 };
 
 enum{
-	OPMODE_INIT,
-	OPMODE_NORMAL,
-	OPMODE_DEINIT
+	IONCORE_OPMODE_INIT,
+	IONCORE_OPMODE_NORMAL,
+	IONCORE_OPMODE_DEINIT
 };
 
 INTRSTRUCT(WGlobal);
-
-typedef void WDrawDragwinFn(WRegion *reg);
 
 DECLSTRUCT(WGlobal){
 	int argc;
@@ -82,6 +79,7 @@ DECLSTRUCT(WGlobal){
 	Time dblclick_delay;
 	int opaque_resize;
 	bool warp_enabled;
+    bool switchto_new;
 	
 	bool ws_save_enabled;
 	
@@ -91,6 +89,6 @@ DECLSTRUCT(WGlobal){
 };
 
 
-extern WGlobal wglobal;
+extern WGlobal ioncore_g;
 
 #endif /* ION_IONCORE_GLOBAL_H */

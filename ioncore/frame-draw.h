@@ -13,6 +13,7 @@
 #define ION_IONCORE_FRAME_DRAW_H
 
 #include "frame.h"
+#include "rectangle.h"
 
 DYNFUN void frame_draw_bar(const WFrame *frame, bool complete);
 DYNFUN const char *frame_style(WFrame *frame);

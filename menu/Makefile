@@ -16,9 +16,9 @@ SOURCES=main.c menu.c mkmenu.c
 
 LUA_SOURCES=menulib.lua
 
-MAKE_EXPORTS=menu_module
+MAKE_EXPORTS=menumod
 
-MODULE=menu
+MODULE=menumod
 
 ######################################
 

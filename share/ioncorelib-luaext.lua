@@ -41,3 +41,6 @@ function table.copy(t, deep)
 end
 
 
+function os.execute()
+    warn("Do not use os.execute. Use ioncore.exec.")
+end

@@ -2,12 +2,14 @@
 -- Ion-devel dock module configuration
 --
 
-dock = create_dock(0, {	-- create a new dock on screen 0
-	name="dock",	-- name for use in target="..." winprops
-	hpos="right",	-- horizontal position left|center|right
-	vpos="bottom",	-- vertical position top|middle|bottom
-	grow="left",	-- growth direction up|down|left|right
-	is_auto=true})	-- whether new dockapps should be added automatically
+-- create a new dock on screen 0
+dock = dockmod.create_dock(0, {
+    name="dock",	-- name for use in target="..." winprops
+    hpos="right",	-- horizontal position left|center|right
+    vpos="bottom",	-- vertical position top|middle|bottom
+    grow="left",	-- growth direction up|down|left|right
+    is_auto=true,	-- whether new dockapps should be added automatically
+})
 
 defcmd("global", "toggle_dock",
         function()
@@ -30,7 +32,7 @@ defbindings("WScreen", {
 -- Use dockappborder=false to disable the drawing of a border around a dockapp.
 -- This is only effective if outline_style="each" (see dock-draw.lua).
 
-winprop{
+defwinprop{
 	instance="gkrellm2",
 	dockposition=-100,	-- place first
 	dockborder=false,	-- do not draw border if outline_style="each"
@@ -38,7 +40,7 @@ winprop{
 
 -- kludges
 
-winprop{
+defwinprop{
 	instance="wmxmms",
 	target="dock",
 }

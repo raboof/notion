@@ -37,7 +37,7 @@ void genws_deinit(WGenWS *ws)
 /*{{{ Class implementation */
 
 
-IMPLOBJ(WGenWS, WRegion, genws_deinit, NULL);
+IMPLCLASS(WGenWS, WRegion, genws_deinit, NULL);
 
 
 /*}}}*/

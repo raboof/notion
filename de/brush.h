@@ -15,6 +15,7 @@
 #include <ioncore/common.h>
 #include <ioncore/gr.h>
 #include <ioncore/extl.h>
+#include <ioncore/rectangle.h>
 
 
 #define MATCHES(S, A) (gr_stylespec_score(S, A)>0)
@@ -26,9 +27,9 @@
 
 INTRSTRUCT(DEBorder);
 INTRSTRUCT(DEStyle);
-INTROBJ(DEBrush);
-INTROBJ(DETabBrush);
-INTROBJ(DEMEntBrush);
+INTRCLASS(DEBrush);
+INTRCLASS(DETabBrush);
+INTRCLASS(DEMEntBrush);
 
 
 #include "font.h"
@@ -97,18 +98,18 @@ DECLSTRUCT(DEStyle){
 };
 
 
-DECLOBJ(DEBrush){
+DECLCLASS(DEBrush){
 	GrBrush grbrush;
 	DEStyle *d;
 };
 
 
-DECLOBJ(DETabBrush){
+DECLCLASS(DETabBrush){
 	DEBrush debrush;
 };
 
 
-DECLOBJ(DEMEntBrush){
+DECLCLASS(DEMEntBrush){
 	DEBrush debrush;
 };
 

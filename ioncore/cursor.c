@@ -15,12 +15,12 @@
 #include "global.h"
 
 
-static Cursor cursors[N_CURSORS];
+static Cursor cursors[IONCORE_N_CURSORS];
 
 #define LCURS(TYPE) \
-	cursors[CURSOR_##TYPE]=XCreateFontCursor(wglobal.dpy, CF_CURSOR_##TYPE)
+	cursors[IONCORE_CURSOR_##TYPE]=XCreateFontCursor(ioncore_g.dpy, CF_CURSOR_##TYPE)
 
-void load_cursors()
+void ioncore_init_cursors()
 {
 	LCURS(DEFAULT);
 	LCURS(RESIZE);
@@ -30,13 +30,13 @@ void load_cursors()
 }
 
 
-void set_cursor(Window win, int cursor)
+Cursor ioncore_xcursor(int cursor)
 {
-	XDefineCursor(wglobal.dpy, win, cursors[cursor]);
+	return cursors[cursor];
 }
 
 
-Cursor x_cursor(int cursor)
+void xwindow_set_cursor(Window win, int cursor)
 {
-	return cursors[cursor];
+	XDefineCursor(ioncore_g.dpy, win, ioncore_xcursor(cursor));
 }

@@ -54,7 +54,7 @@ static void *get_module_symbol(lt_dlhandle handle, char *name)
 
 static bool check_version(lt_dlhandle handle)
 {
-	char *versionstr=(char*)get_module_symbol(handle, "_module_ion_api_version");
+	char *versionstr=(char*)get_module_symbol(handle, "_ion_api_version");
 	if(versionstr==NULL)
 		return FALSE;
 	return (strcmp(versionstr, ION_API_VERSION)==0);
@@ -65,7 +65,7 @@ static bool call_init(lt_dlhandle handle)
 {
 	bool (*initfn)(void);
 	
-	initfn=(bool (*)())get_module_symbol(handle, "_module_init");
+	initfn=(bool (*)())get_module_symbol(handle, "_init");
 	
 	if(initfn==NULL)
 		return TRUE;
@@ -74,7 +74,7 @@ static bool call_init(lt_dlhandle handle)
 }
 
 
-bool init_module_support()
+bool ioncore_init_module_support()
 {
 #ifdef CF_PRELOAD_MODULES
 	LTDL_SET_PRELOADED_SYMBOLS();
@@ -97,7 +97,7 @@ bool init_module_support()
  * the module name should usually be necessary to give here.
  */
 EXTL_EXPORT
-bool load_module(const char *modname)
+bool ioncore_load_module(const char *modname)
 {
 	lt_dlhandle handle=NULL;
 	
@@ -142,7 +142,7 @@ static void call_deinit(lt_dlhandle handle, char *name)
 {
 	void (*deinitfn)(void);
 	
-	deinitfn=(void (*)())get_module_symbol(handle, "_module_deinit");
+	deinitfn=(void (*)())get_module_symbol(handle, "_deinit");
 	
 	if(deinitfn!=NULL)
 		deinitfn();
@@ -166,7 +166,7 @@ static int do_unload_module(lt_dlhandle handle, void *unused)
 }
 
 
-void unload_modules()
+void ioncore_unload_modules()
 {
 	lt_dlforeach(do_unload_module, NULL);
 }

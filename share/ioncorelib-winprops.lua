@@ -54,6 +54,8 @@ function ioncorelib.get_winprop(cwin)
     end
 end
 
+ioncore.set_get_winprop_fn(ioncorelib.get_winprop)
+
 local function ensure_winproptab(class, role, instance)
     if not winprops[class] then
         winprops[class]={}
@@ -73,7 +75,7 @@ end
 
 --DOC
 -- Define a winprop. For more information, see section \ref{sec:winprops}.
-function ioncorelib.winprop(list)
+function ioncorelib.defwinprop(list)
     local list2, class, role, instance, name = {}, "*", "*", "*", 0
 
     for k, v in list do

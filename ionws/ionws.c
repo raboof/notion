@@ -24,6 +24,7 @@
 #include <ioncore/attach.h>
 #include <ioncore/resize.h>
 #include <ioncore/extl.h>
+#include <ioncore/region-iter.h>
 #include "placement.h"
 #include "ionws.h"
 #include "split.h"
@@ -55,7 +56,7 @@ static bool reparent_ionws(WIonWS *ws, WWindow *parent,
 	WRegion *sub, *next;
 	bool rs;
 	
-	if(!same_rootwin((WRegion*)ws, (WRegion*)parent))
+	if(!region_same_rootwin((WRegion*)ws, (WRegion*)parent))
 		return FALSE;
 	
 	region_detach_parent((WRegion*)ws);
@@ -65,7 +66,7 @@ static bool reparent_ionws(WIonWS *ws, WWindow *parent,
 		if(!region_reparent(sub, parent, &REGION_GEOM(sub))){
 			warn("Problem: can't reparent a %s managed by a WIonWS"
 				 "being reparented. Detaching from this object.",
-				 WOBJ_TYPESTR(sub));
+				 OBJ_TYPESTR(sub));
 			region_detach_manager(sub);
 		}
 	}
@@ -80,7 +81,7 @@ static void ionws_map(WIonWS *ws)
 {
 	WRegion *reg;
 
-	MARK_REGION_MAPPED(ws);
+	REGION_MARK_MAPPED(ws);
 	
 	FOR_ALL_MANAGED_ON_LIST(ws->managed_list, reg){
 		region_map(reg);
@@ -92,7 +93,7 @@ static void ionws_unmap(WIonWS *ws)
 {
 	WRegion *reg;
 	
-	MARK_REGION_UNMAPPED(ws);
+	REGION_MARK_UNMAPPED(ws);
 	
 	FOR_ALL_MANAGED_ON_LIST(ws->managed_list, reg){
 		region_unmap(reg);
@@ -100,7 +101,7 @@ static void ionws_unmap(WIonWS *ws)
 }
 
 
-static void ionws_set_focus_to(WIonWS *ws, bool warp)
+static void ionws_do_set_focus(WIonWS *ws, bool warp)
 {
 	WRegion *sub=ionws_current(ws);
 	
@@ -109,7 +110,7 @@ static void ionws_set_focus_to(WIonWS *ws, bool warp)
 		return;
 	}
 
-	region_set_focus_to(sub, warp);
+	region_do_set_focus(sub, warp);
 }
 
 
@@ -222,7 +223,7 @@ static void write_obj(WObj *obj, FILE *file, int lvl)
 	if(obj==NULL)
 		goto fail2;
 	
-	if(WOBJ_IS(obj, WRegion)){
+	if(OBJ_IS(obj, WRegion)){
 		if(region_supports_save((WRegion*)obj)){
 			if(region_save_to_file((WRegion*)obj, file, lvl))
 				return;
@@ -230,7 +231,7 @@ static void write_obj(WObj *obj, FILE *file, int lvl)
 		goto fail;
 	}
 	
-	if(!WOBJ_IS(obj, WWsSplit))
+	if(!OBJ_IS(obj, WWsSplit))
 		goto fail;
 	
 	split=(WWsSplit*)obj;
@@ -238,29 +239,29 @@ static void write_obj(WObj *obj, FILE *file, int lvl)
 	tls=split_tree_size(split->tl, split->dir);
 	brs=split_tree_size(split->br, split->dir);
 	
-	save_indent_line(file, lvl);
+	file_indent(file, lvl);
 	fprintf(file, "split_dir = \"%s\",\n", (split->dir==VERTICAL
 										   ? "vertical" : "horizontal"));
 	
-	save_indent_line(file, lvl);
+	file_indent(file, lvl);
 	fprintf(file, "split_tls = %d, split_brs = %d,\n", tls, brs);
 	
-	save_indent_line(file, lvl);
+	file_indent(file, lvl);
 	fprintf(file, "tl = {\n");
 	write_obj(split->tl, file, lvl+1);
-	save_indent_line(file, lvl);
+	file_indent(file, lvl);
 	fprintf(file, "},\n");
 			
-	save_indent_line(file, lvl);
+	file_indent(file, lvl);
 	fprintf(file, "br = {\n");
 	write_obj(split->br, file, lvl+1);
-	save_indent_line(file, lvl);
+	file_indent(file, lvl);
 	fprintf(file, "},\n");
 
 	return;
 	
 fail:		
-	warn("Unable to save a %s\n", WOBJ_TYPESTR(obj));
+	warn("Unable to save a %s\n", OBJ_TYPESTR(obj));
 fail2:
 	fprintf(file, "{},\n");
 }
@@ -268,11 +269,11 @@ fail2:
 
 static bool ionws_save_to_file(WIonWS *ws, FILE *file, int lvl)
 {
-	begin_saved_region((WRegion*)ws, file, lvl);
-	save_indent_line(file, lvl);
+	region_save_identity((WRegion*)ws, file, lvl);
+	file_indent(file, lvl);
 	fprintf(file, "split_tree = {\n");
 	write_obj(ws->split_tree, file, lvl+1);
-	save_indent_line(file, lvl);
+	file_indent(file, lvl);
 	fprintf(file, "},\n");
 	return TRUE;
 }
@@ -381,7 +382,7 @@ static WObj *load_obj(WIonWS *ws, WWindow *par, const WRectangle *geom,
 	
 	if(extl_table_gets_s(tab, "type", &typestr)){
 		free(typestr);
-		reg=load_create_region(par, geom, tab);
+		reg=create_region_load(par, geom, tab);
 		if(reg!=NULL)
 			ionws_add_managed(ws, reg);
 		return (WObj*)reg;
@@ -433,7 +434,7 @@ static DynFunTab ionws_dynfuntab[]={
 	{region_fit, ionws_fit},
 	{region_map, ionws_map},
 	{region_unmap, ionws_unmap},
-	{region_set_focus_to, ionws_set_focus_to},
+	{region_do_set_focus, ionws_do_set_focus},
 	{(DynFun*)region_reparent,
      (DynFun*)reparent_ionws},
 	
@@ -466,7 +467,7 @@ static DynFunTab ionws_dynfuntab[]={
 };
 
 
-IMPLOBJ(WIonWS, WGenWS, ionws_deinit, ionws_dynfuntab);
+IMPLCLASS(WIonWS, WGenWS, ionws_deinit, ionws_dynfuntab);
 
 	
 /*}}}*/

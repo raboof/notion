@@ -33,7 +33,7 @@ function querylib.do_query(mplex, prompt, initvalue, handler, completor)
     local function handle_it(str)
         handler(mplex, str)
     end
-    query_query(mplex, prompt, initvalue, handle_it, completor)
+    querymod.query(mplex, prompt, initvalue, handle_it, completor)
 end
 
 
@@ -73,10 +73,9 @@ end
 
 
 function querylib.lookup_script_warn(mplex, script)
-    local script=lookup_script(script)
+    local script=ioncore.lookup_script(script)
     if not script then
-        query_fwarn(mplex, "Could not find "..script)
-        warn("Could not find "..script)
+        querymod.warn(mplex, "Could not find "..script)
     end
     return script
 end
@@ -95,14 +94,24 @@ function querylib.get_initdir()
     return wd
 end
 
+local MAXDEPTH=10
 
 function querylib.lookup_workspace_classes()
     local classes={}
     
     for k, v in _G do
-        local m=getmetatable(v)
-        if m and m.__index==WGenWS then
-            table.insert(classes, k)
+        if type(v)=="table" and v.__typename then
+            v2=v.__parentclass
+            for i=1, MAXDEPTH do
+                if not v2 then 
+                    break
+                end
+                if v2.__typename=="WGenWS" then
+                    table.insert(classes, v.__typename)
+                    break
+                end
+                v2=v2.__parentclass
+            end
         end
     end
     
@@ -196,7 +205,7 @@ function querylib.popen_completions(wedln, cmd)
     
     if not found_clean then
         pipes[rcv]=pst
-        popen_bgread(cmd, coroutine.wrap(rcv))
+        ioncore.popen_bgread(cmd, coroutine.wrap(rcv))
     end
 end
 
@@ -208,36 +217,32 @@ end
 
 
 function querylib.gotoclient_handler(frame, str)
-    local cwin=lookup_clientwin(str)
+    local cwin=ioncore.lookup_clientwin(str)
     
     if cwin==nil then
-        query_fwarn(frame, string.format("Could not find client window named"
-                                         .. ' "%s".', str))
+        querymod.warn(frame, string.format('Could not find client window '..
+                                           'named "%s".', str))
     else
         cwin:goto()
     end
 end
 
 function querylib.attachclient_handler(frame, str)
-    local cwin=lookup_clientwin(str)
+    local cwin=ioncore.lookup_clientwin(str)
     
-    if cwin==nil then
-        query_fwarn(frame, string.format("Could not find client window named"
-                                         .. ' "%s".', str))
-        return
+    if not cwin then
+        querymod.warn(frame, string.format('Could not find client window '..
+                                            'named "%s".', str))
+    elseif frame:rootwin_of()~=cwin:rootwin_of() then
+        querymod.warn(frame, "Cannot attach: not on same root window.")
+    else
+        frame:attach(cwin, { switchto = true })
     end
-    
-    if frame:rootwin_of()~=cwin:rootwin_of() then
-        query_fwarn(frame, "Cannot attach: not on same root window.")
-        return
-    end
-    
-    frame:attach(cwin, { switchto = true })
 end
 
 
 function querylib.workspace_handler(frame, name)
-    local ws=lookup_region(name, "WGenWS")
+    local ws=ioncore.lookup_region(name, "WGenWS")
     if ws then
         ws:goto()
         return
@@ -253,14 +258,14 @@ function querylib.workspace_handler(frame, name)
     local function handler(cls)
         local scr=frame:screen_of()
         if not scr then
-            query_fwarn(frame, "Unable to create workspace: no screen.")
+            querymod.warn(frame, "Unable to create workspace: no screen.")
             return
         end
         
         if not cls or cls=="" then
             cls=DEFAULT_WS_TYPE
         end
-    
+        
         local err=collect_errors(function()
                                      ws=scr:attach_new({ 
                                          type=cls, 
@@ -269,37 +274,36 @@ function querylib.workspace_handler(frame, name)
                                      })
                                  end)
         if not ws then
-            query_fwarn(frame, err or "Unknown error")
+            querymod.warn(frame, err or "Unknown error")
         end
     end
-
+    
     local prompt="Workspace type ("..DEFAULT_WS_TYPE.."):"
     
-    query_query(frame, prompt, "", handler, completor)
+    querymod.query(frame, prompt, "", handler, completor)
 end
 
 
 --DOC
 -- This query asks for the name of a client window and attaches
 -- it to the frame the query was opened in. It uses the completion
--- function \fnref{complete_clientwin}.
-defcmd("WMPlex", "query_gotoclient",
-       function(mplex)
-           querylib.do_query(mplex, "Go to window:", nil,
-                             querylib.gotoclient_handler,
-                             querylib.make_completor(complete_clientwin))
-       end)
+-- function \fnref{ioncore.complete_clientwin}.
+function querylib.query_gotoclient(mplex)
+    querylib.do_query(mplex, "Go to window:", nil,
+                      querylib.gotoclient_handler,
+                      querylib.make_completor(ioncore.complete_clientwin))
+end
 
 --DOC
 -- This query asks for the name of a client window and switches
 -- focus to the one entered. It uses the completion function
--- \fnref{complete_clientwin}.
-defcmd("WMPlex", "query_attachclient",
-       function(mplex)
-           querylib.do_query(mplex, "Attach window:", nil,
-                             querylib.attachclient_handler, 
-                             querylib.make_completor(complete_clientwin))
-       end)
+-- \fnref{ioncore.complete_clientwin}.
+function querylib.query_attachclient(mplex)
+    querylib.do_query(mplex, "Attach window:", nil,
+                      querylib.attachclient_handler, 
+                      querylib.make_completor(ioncore.complete_clientwin))
+end
+
 
 --DOC
 -- This query asks for the name of a workspace. If a workspace
@@ -307,53 +311,51 @@ defcmd("WMPlex", "query_attachclient",
 -- it will be switched to. Otherwise a new workspace with the
 -- entered name will be created and the user will be queried for
 -- the type of the workspace.
-defcmd("WMPlex", "query_workspace",
-       function(mplex)
-           local function complete_workspace(nm)
-               return complete_region(nm, "WGenWS")
-           end
-           querylib.do_query(mplex, "Go to or create workspace:", nil, 
-                             querylib.workspace_handler,
-                             querylib.make_completor(complete_workspace))
-       end)
+function querylib.query_workspace(mplex)
+    local function complete_workspace(nm)
+        return ioncore.complete_region(nm, "WGenWS")
+    end
+    querylib.do_query(mplex, "Go to or create workspace:", nil, 
+                      querylib.workspace_handler,
+                      querylib.make_completor(ioncore.complete_workspace))
+end
+
 
 --DOC
 -- This query asks whether the user wants to have Ioncore exit.
 -- If the answer is 'y', 'Y' or 'yes', so will happen.
-defcmd("WMPlex", "query_exit",
-       function(mplex)
-           querylib.do_query_yesno("Exit Ion (y/n)?", exit_wm)
-       end)
+function querylib.query_exit(mplex)
+    querylib.do_query_yesno("Exit Ion (y/n)?", exit_wm)
+end
+
 
 --DOC
 -- This query asks whether the user wants restart Ioncore.
 -- If the answer is 'y', 'Y' or 'yes', so will happen.
-defcmd("WMPlex", "query_restart",
-       function(mplex)
-           querylib.do_query_yesno("Restart Ion (y/n)?", restart_wm)
-       end)
+function querylib.query_restart(mplex)
+    querylib.do_query_yesno("Restart Ion (y/n)?", restart_wm)
+end
 
 
 --DOC
 -- This function asks for a name new for the frame where the query
 -- was created.
-defcmd("WFrame", "query_renameframe",
-       function(frame)
-           querylib.do_query(frame, "Frame name:", frame:name(),
-                             function(frame, str) frame:set_name(str) end,
-                             nil)
-       end)
+function querylib.query_renameframe(frame)
+    querylib.do_query(frame, "Frame name:", frame:name(),
+                      function(frame, str) frame:set_name(str) end,
+                      nil)
+end
+
 
 --DOC
 -- This function asks for a name new for the workspace on which the
 -- query resides.
-defcmd("WMPlex", "query_renameworkspace",
-       function(mplex)
-           local ws=ioncorelib.find_manager(ws, "WGenWS")
-           querylib.do_query(frame, "Workspace name:", ws:name(),
-                             function(mplex, str) ws:set_name(str) end,
-                             nil)
-       end)
+function querylib.query_renameworkspace(mplex)
+    local ws=ioncorelib.find_manager(ws, "WGenWS")
+    querylib.do_query(frame, "Workspace name:", ws:name(),
+                      function(mplex, str) ws:set_name(str) end,
+                      nil)
+end
 
 
 -- }}}
@@ -363,7 +365,7 @@ defcmd("WMPlex", "query_renameworkspace",
 
 
 function querylib.file_completor(wedln, str, wp)
-    local ic=lookup_script("ion-completefile")
+    local ic=ioncore.lookup_script("ion-completefile")
     if ic then
         querylib.popen_completions(wedln,
                                    ic..(wp or " ")..string.shell_safe(str))
@@ -375,22 +377,20 @@ end
 -- Asks for a file to be edited. It uses the script \file{ion-edit} to
 -- start a program to edit the file. This script uses \file{run-mailcap}
 -- by default, but if you don't have it, you may customise the script.
-defcmd("WMPlex", "query_editfile",
-       function(mplex)
-           local script=querylib.lookup_script_warn(mplex, "ion-edit")
-           querylib.do_query_execfile(mplex, "Edit file:", script)
-       end)
+function querylib.query_editfile(mplex)
+    local script=querylib.lookup_script_warn(mplex, "ion-edit")
+    querylib.do_query_execfile(mplex, "Edit file:", script)
+end
 
 
 --DOC
 -- Asks for a file to be viewed. It uses the script \file{ion-view} to
 -- start a program to view the file. This script uses \file{run-mailcap}
 -- by default, but if you don't have it, you may customise the script.
-defcmd("WMPlex", "query_runfile",
-       function(mplex)
-           local script=querylib.lookup_script_warn(mplex, "ion-view")
-           querylib.do_query_execfile(mplex, "View file:", script)
-       end)
+function querylib.query_runfile(mplex)
+    local script=querylib.lookup_script_warn(mplex, "ion-view")
+    querylib.do_query_execfile(mplex, "View file:", script)
+end
 
 
 function querylib.exec_completor(wedln, str)
@@ -411,11 +411,10 @@ end
 -- If the command is prefixed with a colon (':'), the command will
 -- be run in an XTerm (or other terminal emulator) using the script
 -- \file{ion-runinxterm}.
-defcmd("WMPlex", "query_exec",
-       function(mplex)
-           querylib.do_query(mplex, "Run:", nil, 
-                       querylib.exec_handler, querylib.exec_completor)
-       end)
+function querylib.query_exec(mplex)
+    querylib.do_query(mplex, "Run:", nil, 
+                      querylib.exec_handler, querylib.exec_completor)
+end
 
 
 -- }}}
@@ -455,8 +454,8 @@ function querylib.complete_ssh(str)
     
     local res={}
     for _, v in ipairs(querylib.known_hosts) do
-    	local s, e=string.find(v, str, 1, true)
-	if s==1 and e>=1 then
+        local s, e=string.find(v, str, 1, true)
+        if s==1 and e>=1 then
             table.insert(res, v)
         end
     end
@@ -468,13 +467,12 @@ end
 -- This query asks for a host to connect to with SSH. It starts
 -- up ssh in a terminal using \file{ion-ssh}. Hosts to tab-complete
 -- are read from \file{\~{}/.ssh/known\_hosts}.
-defcmd("WMPlex", "query_ssh",
-       function(mplex)
-           querylib.get_known_hosts(mplex)
-           local script=querylib.lookup_script_warn(mplex, "ion-ssh")
-           querylib.do_query_execwith(mplex, "SSH to:", nil, script,
-                                      querylib.make_completor(querylib.complete_ssh))
-       end)
+function querylib.query_ssh(mplex)
+    querylib.get_known_hosts(mplex)
+    local script=querylib.lookup_script_warn(mplex, "ion-ssh")
+    querylib.do_query_execwith(mplex, "SSH to:", nil, script,
+                               querylib.make_completor(querylib.complete_ssh))
+end
 
 
 -- }}}
@@ -484,7 +482,7 @@ defcmd("WMPlex", "query_ssh",
 
 
 function querylib.man_completor(wedln, str)
-    local mc=lookup_script("ion-completeman")
+    local mc=ioncore.lookup_script("ion-completeman")
     if mc then
         querylib.popen_completions(wedln, mc.." -complete "..string.shell_safe(str))
     end
@@ -496,12 +494,11 @@ end
 -- \file{ion-man} to run \file{man} in a terminal emulator. By customizing
 -- this script it is possible use some other man page viewer. The script
 -- \file{ion-completeman} is used to complete manual pages.
-defcmd("WMPlex", "query_man", 
-       function(mplex)
-           local script=querylib.lookup_script_warn(mplex, "ion-man")
-           querylib.do_query_execwith(mplex, "Manual page (ion):", "ion",
-                                      script, querylib.man_completor)
-       end)
+function querylib.query_man(mplex)
+    local script=querylib.lookup_script_warn(mplex, "ion-man")
+    querylib.do_query_execwith(mplex, "Manual page (ion):", "ion",
+                               script, querylib.man_completor)
+end
 
 
 -- }}}
@@ -513,21 +510,24 @@ defcmd("WMPlex", "query_man",
 function querylib.create_run_env(mplex)
     local origenv=getfenv()
     local meta={__index=origenv, __newindex=origenv}
-    local env={_=mplex, arg={mplex, mplex:current()}}
+    local env={
+        _=mplex, 
+        _sub=mplex:current(),
+    }
     setmetatable(env, meta)
     return env
 end
-    
+
 function querylib.do_handle_lua(mplex, env, code)
     local f, err=loadstring(code)
     if not f then
-        query_fwarn(mplex, err)
+        querymod.warn(mplex, err)
         return
     end
     setfenv(f, env)
     err=collect_errors(f)
     if err then
-        query_fwarn(mplex, err)
+        querymod.warn(mplex, err)
     end
 end
 
@@ -566,14 +566,14 @@ function querylib.do_complete_lua(env, str)
     end
     
     if not comptab then return {} end
-
+    
     local compl={}
     
     -- Get the actual variable to complete without containing tables
     _, _, compl.common_part, tocomp=string.find(str, "(.-)([%w_]*)$")
-
+    
     local l=string.len(tocomp)
-
+    
     local tab=comptab
     local seen={}
     while true do
@@ -613,20 +613,20 @@ end
 -- in the local environment of the string to point to the mplex where the
 -- query was created. It also sets the table \var{arg} in the local
 -- environment to \code{\{_, _:current()\}}.
-defcmd("WMPlex", "query_lua", 
-       function(mplex)
-           local env=querylib.create_run_env(mplex)
-           
-           local function complete(wedln, code)
-               wedln:set_completions(querylib.do_complete_lua(env, code))
-           end
-           
-           local function handle(code)
-               return querylib.do_handle_lua(mplex, env, code)
-           end
-           
-           query_query(mplex, "Lua code to run: ", nil, handle, complete)
-       end)
+function querylib.query_lua(mplex)
+    local env=querylib.create_run_env(mplex)
+    
+    local function complete(wedln, code)
+        wedln:set_completions(querylib.do_complete_lua(env, code))
+    end
+    
+    local function handle(code)
+        return querylib.do_handle_lua(mplex, env, code)
+    end
+    
+    querymod.query(mplex, "Lua code to run: ", nil, handle, 
+                   complete)
+end
 
 -- }}}
 
@@ -636,10 +636,9 @@ defcmd("WMPlex", "query_lua",
 
 --DOC 
 -- Display an "About Ion" message in \var{mplex}.
-defcmd("WMPlex", "show_about_ion",
-       function(mplex)
-           query_message(mplex, ioncore_aboutmsg())
-       end)
+function querylib.show_about_ion(mplex)
+    querymod.message(mplex, ioncore.aboutmsg())
+end
 
 
 -- }}}

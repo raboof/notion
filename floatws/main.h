@@ -14,8 +14,8 @@
 
 #include <ioncore/binding.h>
 
-extern bool floatws_module_init();
-extern void floatws_module_deinit();
+extern bool floatwsmod_init();
+extern void floatwsmod_deinit();
 
 extern WBindmap floatws_bindmap;
 extern WBindmap floatframe_bindmap;

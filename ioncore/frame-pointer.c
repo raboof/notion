@@ -27,6 +27,7 @@
 #include "bindmaps.h"
 #include "infowin.h"
 #include "defer.h"
+#include "rectangle.h"
 
 
 static int p_tab_x=0, p_tab_y=0, p_tabnum=-1;
@@ -108,7 +109,7 @@ int frame_press(WFrame *frame, XButtonEvent *ev, WRegion **reg_ret)
 		g.y=0;
 	}
 
-	if(coords_in_rect(&g, ev->x, ev->y)){
+	if(rectangle_contains(&g, ev->x, ev->y)){
 		p_tabnum=frame_tab_at_x(frame, ev->x);
 
 		region_rootpos((WRegion*)frame, &p_tab_x, &p_tab_y);
@@ -120,7 +121,7 @@ int frame_press(WFrame *frame, XButtonEvent *ev, WRegion **reg_ret)
 		if(reg_ret!=NULL)
 			*reg_ret=sub;
 		
-		return WFRAME_AREA_TAB;
+		return FRAME_AREA_TAB;
 	}
 	
 
@@ -128,10 +129,10 @@ int frame_press(WFrame *frame, XButtonEvent *ev, WRegion **reg_ret)
 	
 	frame_border_inner_geom(frame, &g);
 	
-	if(coords_in_rect(&g, ev->x, ev->y))
-		return WFRAME_AREA_CLIENT;
+	if(rectangle_contains(&g, ev->x, ev->y))
+		return FRAME_AREA_CLIENT;
 	
-	return WFRAME_AREA_BORDER;
+	return FRAME_AREA_BORDER;
 }
 
 
@@ -164,7 +165,7 @@ static bool tabdrag_kbd_handler(WRegion *reg, XEvent *xev)
 	
 	assert(reg!=NULL);
 
-	binding=lookup_binding(&ioncore_rootwin_bindmap, ACT_KEYPRESS,
+	binding=bindmap_lookup_binding(&ioncore_rootwin_bindmap, BINDING_KEYPRESS,
 						   ev->state&~BUTTONS_MASK, ev->keycode);
 	
 	if(binding!=NULL && binding->func!=extl_fn_none()){
@@ -181,16 +182,18 @@ static bool tabdrag_kbd_handler(WRegion *reg, XEvent *xev)
 static void setup_dragwin(WFrame *frame, uint tab)
 {
 	WRectangle g;
-	
+	WRootWin *rw;
+    
 	assert(tabdrag_infowin==NULL);
 	
 	g.x=p_tab_x;
 	g.y=p_tab_y;
 	g.w=frame_nth_tab_w(frame, tab);
 	g.h=frame->bar_h;
-	
-	tabdrag_infowin=create_infowin((WWindow*)ROOTWIN_OF(frame), &g, 
-								   frame_tab_style(frame));
+
+    /* region_rootwin_of cannot fail */
+    rw=region_rootwin_of((WRegion*)frame);
+	tabdrag_infowin=create_infowin((WWindow*)rw, &g, frame_tab_style(frame));
 	
 	if(tabdrag_infowin==NULL)
 		return;
@@ -200,9 +203,9 @@ static void setup_dragwin(WFrame *frame, uint tab)
 					  frame->titles[tab].attr);
 	
 	if(frame->titles[tab].text!=NULL){
-		char *buf=WINFOWIN_BUFFER(tabdrag_infowin);
-		strncpy(buf, frame->titles[tab].text, WINFOWIN_BUFFER_LEN-1);
-		buf[WINFOWIN_BUFFER_LEN-1]='\0';
+		char *buf=INFOWIN_BUFFER(tabdrag_infowin);
+		strncpy(buf, frame->titles[tab].text, INFOWIN_BUFFER_LEN-1);
+		buf[INFOWIN_BUFFER_LEN-1]='\0';
 	}
 }
 
@@ -210,7 +213,7 @@ static void setup_dragwin(WFrame *frame, uint tab)
 static void p_tabdrag_motion(WFrame *frame, XMotionEvent *ev,
 							 int dx, int dy)
 {
-	WRootWin *rootwin=ROOTWIN_OF(frame);
+	WRootWin *rootwin=region_rootwin_of((WRegion*)frame);
 
 	p_tab_x+=dx;
 	p_tab_y+=dy;
@@ -229,12 +232,12 @@ static void p_tabdrag_motion(WFrame *frame, XMotionEvent *ev,
 static void p_tabdrag_begin(WFrame *frame, XMotionEvent *ev,
 							int dx, int dy)
 {
-	WRootWin *rootwin=ROOTWIN_OF(frame);
+	WRootWin *rootwin=region_rootwin_of((WRegion*)frame);
 
 	if(p_tabnum<0)
 		return;
 	
-	change_grab_cursor(CURSOR_DRAG);
+	ioncore_change_grab_cursor(IONCORE_CURSOR_DRAG);
 		
 	setup_dragwin(frame, p_tabnum);
 	
@@ -259,8 +262,8 @@ static WRegion *fnd(Window root, int x, int y)
 	WScreen *scr;
 	
 	FOR_ALL_SCREENS(scr){
-		if(ROOT_OF(scr)==root &&
-		   coords_in_rect(&REGION_GEOM(scr), x, y)){
+		if(region_root_of((WRegion*)scr)==root &&
+		   rectangle_contains(&REGION_GEOM(scr), x, y)){
 			break;
 		}
 	}
@@ -271,12 +274,12 @@ static WRegion *fnd(Window root, int x, int y)
 		if(HAS_DYN(w, region_handle_drop))
 			reg=(WRegion*)w;
 		
-		if(!XTranslateCoordinates(wglobal.dpy, root, w->win,
+		if(!XTranslateCoordinates(ioncore_g.dpy, root, w->win,
 								  x, y, &dstx, &dsty, &win)){
 			return NULL;
 		}
 		
-		w=FIND_WINDOW_T(win, WWindow);
+		w=XWINDOW_REGION_OF_T(win, WWindow);
 		x=dstx;
 		y=dsty;
 	}
@@ -301,7 +304,7 @@ static void tabdrag_deinit(WFrame *frame)
 static void tabdrag_killed(WFrame *frame)
 {
 	tabdrag_deinit(frame);
-	if(!WOBJ_IS_BEING_DESTROYED(frame))
+	if(!OBJ_IS_BEING_DESTROYED(frame))
 		frame_draw_bar(frame, TRUE);
 }
 
@@ -317,7 +320,7 @@ static void p_tabdrag_end(WFrame *frame, XButtonEvent *ev)
 	tabdrag_deinit(frame);
 	
 	/* Must be same root window */
-	if(sub==NULL || ev->root!=ROOT_OF(sub))
+	if(sub==NULL || ev->root!=region_root_of(sub))
 		return;
 	
 	dropped_on=fnd(ev->root, ev->x_root, ev->y_root);
@@ -328,7 +331,7 @@ static void p_tabdrag_end(WFrame *frame, XButtonEvent *ev)
 	}
 	
 	if(region_handle_drop(dropped_on, p_tab_x, p_tab_y, sub))
-		set_focus(dropped_on);
+		region_set_focus(dropped_on);
 }
 
 
@@ -343,7 +346,7 @@ void frame_p_tabdrag(WFrame *frame)
 	if(p_tabnum<0)
 		return;
 	
-	p_set_drag_handlers((WRegion*)frame,
+	ioncore_set_drag_handlers((WRegion*)frame,
 						(WMotionHandler*)p_tabdrag_begin,
 						(WMotionHandler*)p_tabdrag_motion,
 						(WButtonHandler*)p_tabdrag_end,
@@ -386,7 +389,7 @@ static void confine_to_parent(WFrame *frame)
 {
 	WRegion *par=region_parent((WRegion*)frame);
 	if(par!=NULL)
-		grab_confine_to(region_x_window(par));
+		ioncore_grab_confine_to(region_xwindow(par));
 }
 
 
@@ -402,7 +405,7 @@ static void p_resize_motion(WFrame *frame, XMotionEvent *ev, int dx, int dy)
 
 static void p_resize_begin(WFrame *frame, XMotionEvent *ev, int dx, int dy)
 {
-	begin_resize((WRegion*)frame, NULL, TRUE);
+	region_begin_resize((WRegion*)frame, NULL, TRUE);
 	p_resize_motion(frame, ev, dx, dy);
 }
 
@@ -415,7 +418,7 @@ static void p_resize_begin(WFrame *frame, XMotionEvent *ev, int dx, int dy)
 EXTL_EXPORT_MEMBER
 void frame_p_resize(WFrame *frame)
 {
-	if(!p_set_drag_handlers((WRegion*)frame,
+	if(!ioncore_set_drag_handlers((WRegion*)frame,
 							(WMotionHandler*)p_resize_begin,
 							(WMotionHandler*)p_resize_motion,
 							(WButtonHandler*)p_moveres_end,
@@ -443,14 +446,14 @@ static void p_move_motion(WFrame *frame, XMotionEvent *ev, int dx, int dy)
 
 static void p_move_begin(WFrame *frame, XMotionEvent *ev, int dx, int dy)
 {
-	begin_move((WRegion*)frame, NULL, TRUE);
+	region_begin_move((WRegion*)frame, NULL, TRUE);
 	p_move_motion(frame, ev, dx, dy);
 }
 
 
 void frame_p_move(WFrame *frame)
 {
-	if(!p_set_drag_handlers((WRegion*)frame,
+	if(!ioncore_set_drag_handlers((WRegion*)frame,
 							(WMotionHandler*)p_move_begin,
 							(WMotionHandler*)p_move_motion,
 							(WButtonHandler*)p_moveres_end,
@@ -477,7 +480,7 @@ void frame_p_switch_tab(WFrame *frame)
 {
 	WRegion *sub;
 	
-	if(pointer_grab_region()!=(WRegion*)frame)
+	if(ioncore_pointer_grab_region()!=(WRegion*)frame)
 		return;
 	
 	sub=sub_at_tab(frame);

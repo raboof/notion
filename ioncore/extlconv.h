@@ -16,21 +16,18 @@
 #include "region.h"
 #include "extl.h"
 
-extern bool extltab_to_geom(ExtlTab tab, WRectangle *geomret);
-extern ExtlTab geom_to_extltab(const WRectangle *geom);
-
 extern ExtlTab managed_list_to_table(WRegion *list, 
 									bool (*filter)(WRegion *r));
 
-extern bool extl_table_gets_geom(ExtlTab tab, const char *nam,
-								 WRectangle *geom);
-extern void extl_table_sets_geom(ExtlTab tab, const char *nam,
-								 const WRectangle *geom);
-
 extern bool extl_table_is_bool_set(ExtlTab tab, const char *entry);
 
-/* Debugging */
-extern void pgeom(const char *n, const WRectangle *g);
+extern bool extl_table_to_rectangle(ExtlTab tab, WRectangle *rect);
+extern ExtlTab extl_table_from_rectangle(const WRectangle *rect);
+
+extern bool extl_table_gets_rectangle(ExtlTab tab, const char *nam,
+                                      WRectangle *rect);
+extern void extl_table_sets_rectangle(ExtlTab tab, const char *nam,
+                                      const WRectangle *rect);
 
 #endif /* ION_IONCORE_EXTLCONV_H */
 

@@ -15,17 +15,14 @@
 #include <ioncore/common.h>
 #include <ioncore/objp.h>
 #include <ioncore/binding.h>
+#include <ioncore/rectangle.h>
 #include "input.h"
-
-#define INPUT_MASK (ExposureMask|KeyPressMask| \
-					ButtonPressMask|ButtonReleaseMask| \
-					FocusChangeMask)
 
 typedef void WInputCalcSizeFn(WInput*, WRectangle*);
 typedef void WInputScrollFn(WInput*);
 typedef void WInputDrawFn(WInput*, bool complete);
 
-extern WBindmap query_bindmap;
-extern WBindmap query_wedln_bindmap;
+extern WBindmap querymod_input_bindmap;
+extern WBindmap querymod_wedln_bindmap;
 
 #endif /* ION_QUERY_INPUTP_H */

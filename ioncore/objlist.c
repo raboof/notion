@@ -48,8 +48,8 @@ bool objlist_insert(WObjList **objlist, WObj *obj)
 	if(node==NULL)
 		return FALSE;
 		
-	init_watch(&(node->watch));
-	setup_watch(&(node->watch), obj, watch_handler);
+	watch_init(&(node->watch));
+	watch_setup(&(node->watch), obj, watch_handler);
 	node->list=objlist;
 	
 	LINK_ITEM_FIRST(*objlist, node, next, prev);
@@ -64,7 +64,7 @@ void objlist_remove(WObjList **objlist, WObj *obj)
 	
 	while(node!=NULL){
 		if(node->watch.obj==obj){
-			reset_watch(&(node->watch));
+			watch_reset(&(node->watch));
 			free_node(objlist, node);
 			return;
 		}
@@ -76,7 +76,7 @@ void objlist_remove(WObjList **objlist, WObj *obj)
 void objlist_clear(WObjList **objlist)
 {
 	while(*objlist!=NULL){
-		reset_watch(&((*objlist)->watch));
+		watch_reset(&((*objlist)->watch));
 		free_node(objlist, *objlist);
 	}
 }

@@ -27,6 +27,8 @@
 #include "bindmaps.h"
 #include "regbind.h"
 #include "frame-pointer.h"
+#include "rectangle.h"
+#include "region-iter.h"
 
 
 #define SCR_MLIST(SCR) ((SCR)->mplex.managed_list)
@@ -62,11 +64,11 @@ static bool screen_init(WScreen *scr, WRootWin *rootwin,
 		attr.background_pixmap=ParentRelative;
 		attrflags=CWBackPixmap;
 		
-		win=XCreateWindow(wglobal.dpy, WROOTWIN_ROOT(rootwin),
+		win=XCreateWindow(ioncore_g.dpy, WROOTWIN_ROOT(rootwin),
 						  geom->x, geom->y, geom->w, geom->h, 0, 
-						  DefaultDepth(wglobal.dpy, rootwin->xscr),
+						  DefaultDepth(ioncore_g.dpy, rootwin->xscr),
 						  InputOutput,
-						  DefaultVisual(wglobal.dpy, rootwin->xscr),
+						  DefaultVisual(ioncore_g.dpy, rootwin->xscr),
 						  attrflags, &attr);
 		if(win==None)
 			return FALSE;
@@ -77,26 +79,26 @@ static bool screen_init(WScreen *scr, WRootWin *rootwin,
 
 	/*scr->mplex.win.region.rootwin=rootwin;
 	region_set_parent((WRegion*)scr, (WRegion*)rootwin);*/
-	scr->mplex.flags|=WMPLEX_ADD_TO_END;
+	scr->mplex.flags|=MPLEX_ADD_TO_END;
 	scr->mplex.win.region.flags|=REGION_BINDINGS_ARE_GRABBED;
 	if(useroot)
 		scr->mplex.win.region.flags|=REGION_MAPPED;
 	
-	XSelectInput(wglobal.dpy, win, 
+	XSelectInput(ioncore_g.dpy, win, 
 				 FocusChangeMask|EnterWindowMask|
 				 KeyPressMask|KeyReleaseMask|
 				 ButtonPressMask|ButtonReleaseMask|
-				 (useroot ? ROOT_MASK : 0));
+				 (useroot ? IONCORE_EVENTMASK_ROOT : 0));
 
 	if(id==0){
-		scr->atom_workspace=XInternAtom(wglobal.dpy, "_ION_WORKSPACE", False);
+		scr->atom_workspace=XInternAtom(ioncore_g.dpy, "_ION_WORKSPACE", False);
 	}else if(id>=0){
 		char *str;
 		libtu_asprintf(&str, "_ION_WORKSPACE%d", id);
 		if(str==NULL){
 			warn_err();
 		}else{
-			scr->atom_workspace=XInternAtom(wglobal.dpy, str, False);
+			scr->atom_workspace=XInternAtom(ioncore_g.dpy, str, False);
 			free(str);
 		}
 	}
@@ -106,10 +108,10 @@ static bool screen_init(WScreen *scr, WRootWin *rootwin,
 	 */
 	region_add_bindmap((WRegion*)scr, &ioncore_rootwin_bindmap);
 
-	LINK_ITEM(wglobal.screens, scr, next_scr, prev_scr);
+	LINK_ITEM(ioncore_g.screens, scr, next_scr, prev_scr);
 	
-	if(wglobal.active_screen==NULL)
-		wglobal.active_screen=scr;
+	if(ioncore_g.active_screen==NULL)
+		ioncore_g.active_screen=scr;
 
 	return TRUE;
 }
@@ -124,7 +126,7 @@ WScreen *create_screen(WRootWin *rootwin, int id, const WRectangle *geom,
 
 void screen_deinit(WScreen *scr)
 {
-	UNLINK_ITEM(wglobal.screens, scr, next_scr, prev_scr);
+	UNLINK_ITEM(ioncore_g.screens, scr, next_scr, prev_scr);
 	
 	while(SCR_MLIST(scr)!=NULL)
 		region_unset_manager(SCR_MLIST(scr), (WRegion*)scr, &(SCR_MLIST(scr)));
@@ -144,15 +146,22 @@ static bool create_initial_workspace_on_scr(WScreen *scr)
 	/* Check default_ws_type */{
 		ExtlTab tab=extl_globals();
 		char *wsclass=NULL;
-		if(extl_table_gets_s(tab, "default_ws_type", &wsclass)){
-			fn=lookup_region_simple_create_fn_inh(wsclass);
+		if(extl_table_gets_s(tab, "DEFAULT_WS_TYPE", &wsclass)){
+            WRegClassInfo *info=ioncore_lookup_regclass(wsclass,
+                                                        FALSE, TRUE, FALSE);
+            if(info!=NULL)
+                fn=info->sc_fn;
 			free(wsclass);
 		}
 		extl_unref_table(tab);
 	}
 		
-	if(fn==NULL)
-		fn=lookup_region_simple_create_fn_inh("WGenWS");
+	if(fn==NULL){
+        WRegClassInfo *info=ioncore_lookup_regclass("WGenWS",
+                                                    TRUE, TRUE, FALSE);
+        if(info!=NULL)
+            fn=info->sc_fn;
+    }
 	
 	if(fn==NULL){
 		warn("Could not find a complete workspace class. "
@@ -206,7 +215,7 @@ static bool screen_handle_drop(WScreen *screen, int x, int y, WRegion *dropped)
 	   HAS_DYN(mplex->current_sub, region_handle_drop)){
 		int rx, ry;
 		region_rootpos(mplex->current_sub, &rx, &ry);
-		if(coords_in_rect(&REGION_GEOM(mplex->current_sub), x-rx, y-ry)){
+		if(rectangle_contains(&REGION_GEOM(mplex->current_sub), x-rx, y-ry)){
 			if(region_handle_drop(mplex->current_sub, x, y, dropped))
 				return TRUE;
 		}
@@ -251,12 +260,13 @@ static void screen_managed_changed(WScreen *scr, int mode, bool sw,
 	
 	reg=SCR_CURRENT(scr);
 
-	if(scr->atom_workspace!=None && wglobal.opmode!=OPMODE_DEINIT){
+	if(scr->atom_workspace!=None && ioncore_g.opmode!=IONCORE_OPMODE_DEINIT){
 		if(reg!=NULL)
 			n=region_name(reg);
 		
-		set_string_property(ROOT_OF(scr), scr->atom_workspace, 
-							n==NULL ? "" : n);
+		xwindow_set_string_property(region_root_of((WRegion*)scr),
+                                    scr->atom_workspace, 
+                                    n==NULL ? "" : n);
 	
 		extl_call_named("call_hook", "soo", NULL,
 						"screen_workspace_switched", scr, reg);
@@ -276,22 +286,22 @@ static WRegion *screen_find_rescue_manager_for(WScreen *scr, WRegion *todst)
 
 	other=todst;
 	while(1){
-		other=PREV_MANAGED(SCR_MLIST(scr), other);
+		other=REGION_PREV_MANAGED(SCR_MLIST(scr), other);
 		if(other==NULL)
 			break;
 		if(region_has_manage_clientwin(other) && 
-		   !WOBJ_IS_BEING_DESTROYED(other)){
+		   !OBJ_IS_BEING_DESTROYED(other)){
 			return other;
 		}
 	}
 
 	other=todst;
 	while(1){
-		other=NEXT_MANAGED(SCR_MLIST(scr), other);
+		other=REGION_NEXT_MANAGED(SCR_MLIST(scr), other);
 		if(other==NULL)
 			break;
 		if(region_has_manage_clientwin(other) && 
-		   !WOBJ_IS_BEING_DESTROYED(other)){
+		   !OBJ_IS_BEING_DESTROYED(other)){
 			return other;
 		}
 	}
@@ -318,7 +328,7 @@ static void screen_unmap(WScreen *scr)
 
 static void screen_activated(WScreen *scr)
 {
-	wglobal.active_screen=scr;
+	ioncore_g.active_screen=scr;
 }
 
 
@@ -335,7 +345,7 @@ EXTL_EXPORT_MEMBER
 WScreen *region_screen_of(WRegion *reg)
 {
 	while(reg!=NULL){
-		if(WOBJ_IS(reg, WScreen))
+		if(OBJ_IS(reg, WScreen))
 			return (WScreen*)reg;
 		reg=region_parent(reg);
 	}
@@ -349,7 +359,7 @@ WScreen *region_screen_of(WRegion *reg)
  * the ids are some arbitrary ordering of Xinerama rootwins.
  */
 EXTL_EXPORT
-WScreen *find_screen_id(int id)
+WScreen *ioncore_find_screen_id(int id)
 {
 	WScreen *scr, *maxscr=NULL;
 	
@@ -370,9 +380,9 @@ WScreen *find_screen_id(int id)
  * Switch focus to the screen with id \var{id}.
  */
 EXTL_EXPORT
-void goto_nth_screen(int id)
+void ioncore_goto_nth_screen(int id)
 {
-	WScreen *scr=find_screen_id(id);
+	WScreen *scr=ioncore_find_screen_id(id);
 	if(scr!=NULL)
 		region_goto((WRegion*)scr);
 }
@@ -382,14 +392,14 @@ void goto_nth_screen(int id)
  * Switch focus to the next screen.
  */
 EXTL_EXPORT
-void goto_next_screen()
+void ioncore_goto_next_screen()
 {
-	WScreen *scr=wglobal.active_screen;
+	WScreen *scr=ioncore_g.active_screen;
 	
 	if(scr!=NULL)
 		scr=scr->next_scr;
 	if(scr==NULL)
-		scr=wglobal.screens;
+		scr=ioncore_g.screens;
 	if(scr!=NULL)
 		region_goto((WRegion*)scr);
 }
@@ -399,14 +409,14 @@ void goto_next_screen()
  * Switch focus to the previous screen.
  */
 EXTL_EXPORT
-void goto_prev_screen()
+void ioncore_goto_prev_screen()
 {
-	WScreen *scr=wglobal.active_screen;
+	WScreen *scr=ioncore_g.active_screen;
 
 	if(scr!=NULL)
 		scr=scr->prev_scr;
 	else
-		scr=wglobal.screens;
+		scr=ioncore_g.screens;
 	if(scr!=NULL)
 		region_goto((WRegion*)scr);
 }
@@ -428,7 +438,7 @@ static bool screen_may_destroy_managed(WScreen *scr, WRegion *reg)
 	WRegion *r2;
 	
 	FOR_ALL_MANAGED_ON_LIST(SCR_MLIST(scr), r2){
-		if(WOBJ_IS(r2, WGenWS) && r2!=reg)
+		if(OBJ_IS(r2, WGenWS) && r2!=reg)
 			return TRUE;
 	}
 	
@@ -454,21 +464,21 @@ static bool screen_save_to_file(WScreen *scr, FILE *file, int lvl)
 {
 	WRegion *sub;
 	
-	begin_saved_region((WRegion*)scr, file, lvl);
-	save_indent_line(file, lvl);
+	region_save_identity((WRegion*)scr, file, lvl);
+	file_indent(file, lvl);
 	fprintf(file, "subs = {\n");
 	FOR_ALL_MANAGED_ON_LIST(SCR_MLIST(scr), sub){
-		save_indent_line(file, lvl+1);
+		file_indent(file, lvl+1);
 		fprintf(file, "{\n");
 		region_save_to_file((WRegion*)sub, file, lvl+2);
 		if(sub==SCR_CURRENT(scr)){
-			save_indent_line(file, lvl+2);
+			file_indent(file, lvl+2);
 			fprintf(file, "switchto = true,\n");
 		}
-		save_indent_line(file, lvl+1);
+		file_indent(file, lvl+1);
 		fprintf(file, "},\n");
 	}
-	save_indent_line(file, lvl);
+	file_indent(file, lvl);
 	fprintf(file, "},\n");
 	
 	return TRUE;
@@ -480,10 +490,10 @@ static bool screen_save_to_file(WScreen *scr, FILE *file, int lvl)
  * Set screen name and initial workspaces etc.
  */
 EXTL_EXPORT
-bool initialise_screen_id(int id, ExtlTab tab)
+bool ioncore_initialise_screen_id(int id, ExtlTab tab)
 {
 	char *name;
-	WScreen *scr=find_screen_id(id);
+	WScreen *scr=ioncore_find_screen_id(id);
 	ExtlTab substab, subtab;
 	int n, i;
 
@@ -546,7 +556,7 @@ static DynFunTab screen_dynfuntab[]={
 };
 
 
-IMPLOBJ(WScreen, WMPlex, screen_deinit, screen_dynfuntab);
+IMPLCLASS(WScreen, WMPlex, screen_deinit, screen_dynfuntab);
 
 
 /*}}}*/

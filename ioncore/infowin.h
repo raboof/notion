@@ -15,20 +15,19 @@
 #include "common.h"
 #include "window.h"
 #include "gr.h"
+#include "rectangle.h"
 
-#define WINFOWIN_BUFFER_LEN 256
+#define INFOWIN_BUFFER_LEN 256
 
-INTROBJ(WInfoWin);
-
-DECLOBJ(WInfoWin){
+DECLCLASS(WInfoWin){
 	WWindow wwin;
 	GrBrush *brush;
 	char *buffer;
 	char *attr;
 };
 
-#define WINFOWIN_BRUSH(INFOWIN) ((INFOWIN)->brush)
-#define WINFOWIN_BUFFER(INFOWIN) ((INFOWIN)->buffer)
+#define INFOWIN_BRUSH(INFOWIN) ((INFOWIN)->brush)
+#define INFOWIN_BUFFER(INFOWIN) ((INFOWIN)->buffer)
 
 extern bool infowin_init(WInfoWin *p, WWindow *parent, 
 						 const WRectangle *geom,

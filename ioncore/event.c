@@ -10,19 +10,29 @@
  */
 
 #include <X11/Xmd.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/time.h>
 
 #include "common.h"
 #include "global.h"
 #include "signal.h"
 #include "event.h"
 #include "cursor.h"
-#include "pointer.h"
-#include "key.h"
 #include "readfds.h"
+#include "eventh.h"
+#include "defer.h"
+#include "focus.h"
 
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/time.h>
+
+
+/*{{{ Hooks */
+
+
+WHooklist *ioncore_handle_event_alt=NULL;
+
+
+/*}}}*/
 
 
 /*{{{ Time updating */
@@ -32,7 +42,7 @@
 
 static Time last_timestamp=CurrentTime;
 
-void update_timestamp(XEvent *ev)
+void ioncore_update_timestamp(XEvent *ev)
 {
 	Time tm;
 	
@@ -57,7 +67,7 @@ void update_timestamp(XEvent *ev)
 }
 
 
-Time get_timestamp()
+Time ioncore_get_timestamp()
 {
 	if(last_timestamp==CurrentTime){
 		/* Idea blatantly copied from wmx */
@@ -66,7 +76,7 @@ Time get_timestamp()
 		
 		D(fprintf(stderr, "Attempting to get time from X server."));
 		
-		dummy=XInternAtom(wglobal.dpy, "_ION_TIMEREQUEST", False);
+		dummy=XInternAtom(ioncore_g.dpy, "_ION_TIMEREQUEST", False);
 		if(dummy==None){
 			warn("Time request failed.");
 			return 0;
@@ -74,11 +84,11 @@ Time get_timestamp()
 		/* TODO: use some other window that should also function as a
 		 * NET_WM support check window.
 		 */
-		XChangeProperty(wglobal.dpy, wglobal.rootwins->dummy_win,
+		XChangeProperty(ioncore_g.dpy, ioncore_g.rootwins->dummy_win,
 						dummy, dummy, 8, PropModeAppend,
 						(unsigned char*)"", 0);
-		get_event_mask(&ev, PropertyChangeMask);
-		XPutBackEvent(wglobal.dpy, &ev);
+		ioncore_get_event_mask(&ev, PropertyChangeMask);
+		XPutBackEvent(ioncore_g.dpy, &ev);
 	}
 	
 	return last_timestamp;
@@ -91,32 +101,32 @@ Time get_timestamp()
 /*{{{ Event reading */
 
 
-void get_event(XEvent *ev)
+void ioncore_get_event(XEvent *ev)
 {
 	fd_set rfds;
-	int nfds=wglobal.conn;
+	int nfds=ioncore_g.conn;
 	
 	while(1){
-		check_signals();
+		ioncore_check_signals();
 		
-		if(QLength(wglobal.dpy)>0){
-			XNextEvent(wglobal.dpy, ev);
-			update_timestamp(ev);
+		if(QLength(ioncore_g.dpy)>0){
+			XNextEvent(ioncore_g.dpy, ev);
+			ioncore_update_timestamp(ev);
 			return;
 		}
 		
-		XFlush(wglobal.dpy);
+		XFlush(ioncore_g.dpy);
 		
 		FD_ZERO(&rfds);
-		FD_SET(wglobal.conn, &rfds);
+		FD_SET(ioncore_g.conn, &rfds);
 		
-		set_input_fds(&rfds, &nfds);
+		ioncore_set_input_fds(&rfds, &nfds);
 		
 		if(select(nfds+1, &rfds, NULL, NULL, NULL)>0){
-			check_input_fds(&rfds);
-			if(FD_ISSET(wglobal.conn, &rfds)){
-				XNextEvent(wglobal.dpy, ev);
-				update_timestamp(ev);
+			ioncore_check_input_fds(&rfds);
+			if(FD_ISSET(ioncore_g.conn, &rfds)){
+				XNextEvent(ioncore_g.dpy, ev);
+				ioncore_update_timestamp(ev);
 				return;
 			}
 		}
@@ -124,22 +134,22 @@ void get_event(XEvent *ev)
 }
 
 
-void get_event_mask(XEvent *ev, long mask)
+void ioncore_get_event_mask(XEvent *ev, long mask)
 {
 	fd_set rfds;
 	
 	while(1){
-		check_signals();
+		ioncore_check_signals();
 		
-		if(XCheckMaskEvent(wglobal.dpy, mask, ev)){
-			update_timestamp(ev);
+		if(XCheckMaskEvent(ioncore_g.dpy, mask, ev)){
+			ioncore_update_timestamp(ev);
 			return;
 		}
 		
 		FD_ZERO(&rfds);
-		FD_SET(wglobal.conn, &rfds);
+		FD_SET(ioncore_g.conn, &rfds);
 		
-		select(wglobal.conn+1, &rfds, NULL, NULL, NULL);
+		select(ioncore_g.conn+1, &rfds, NULL, NULL, NULL);
 	}
 }
 
@@ -147,30 +157,83 @@ void get_event_mask(XEvent *ev, long mask)
 /*}}}*/
 
 
-/*{{{ Grab */
+/*{{{ Mainloop */
 
 
-void do_grab_kb_ptr(Window win, Window confine_to, int cursor, long eventmask)
+static void skip_focusenter()
 {
-	wglobal.input_mode=INPUT_GRAB;
+	XEvent ev;
+	WRegion *r;
 	
-	XSelectInput(wglobal.dpy, win, ROOT_MASK&~eventmask);
-	XGrabPointer(wglobal.dpy, win, True, GRAB_POINTER_MASK,
-				 GrabModeAsync, GrabModeAsync, confine_to,
-				 x_cursor(cursor), CurrentTime);
-	XGrabKeyboard(wglobal.dpy, win, False, GrabModeAsync,
-				  GrabModeAsync, CurrentTime);
-	XSync(wglobal.dpy, False);
-	XSelectInput(wglobal.dpy, win, ROOT_MASK);
+	XSync(ioncore_g.dpy, False);
+	
+	while(XCheckMaskEvent(ioncore_g.dpy,
+						  EnterWindowMask|FocusChangeMask, &ev)){
+		ioncore_update_timestamp(&ev);
+		if(ev.type==FocusOut)
+			ioncore_handle_focus_out(&(ev.xfocus));
+		else if(ev.type==FocusIn)
+			ioncore_handle_focus_in(&(ev.xfocus));
+		/*else if(ev.type==EnterNotify)
+			handle_enter_window(&ev);*/
+	}
 }
 
 
-void ungrab_kb_ptr()
+static void set_initial_focus()
 {
-	XUngrabKeyboard(wglobal.dpy, CurrentTime);
-	XUngrabPointer(wglobal.dpy, CurrentTime);
+	Window root=None, win=None;
+	int x, y, wx, wy;
+	uint mask;
+	WScreen *scr;
+	WWindow *wwin;
 	
-	wglobal.input_mode=INPUT_NORMAL;
+	XQueryPointer(ioncore_g.dpy, None, &root, &win,
+				  &x, &y, &wx, &wy, &mask);
+	
+	FOR_ALL_SCREENS(scr){
+        Window scrroot=region_root_of((WRegion*)scr);
+		if(scrroot==root && rectangle_contains(&REGION_GEOM(scr), x, y)){
+			break;
+		}
+	}
+	
+	if(scr==NULL)
+		scr=ioncore_g.screens;
+	
+	ioncore_g.active_screen=scr;
+	region_do_set_focus((WRegion*)scr, FALSE);
+}
+
+
+void ioncore_mainloop()
+{
+	XEvent ev;
+
+	ioncore_g.opmode=IONCORE_OPMODE_NORMAL;
+	
+	set_initial_focus();
+	
+	for(;;){
+		ioncore_get_event(&ev);
+		
+		CALL_ALT_B_NORET(ioncore_handle_event_alt, (&ev));
+
+		ioncore_execute_deferred();
+		
+		XSync(ioncore_g.dpy, False);
+		if(ioncore_g.focus_next!=NULL && ioncore_g.input_mode==IONCORE_INPUTMODE_NORMAL){
+			bool warp=ioncore_g.warp_next;
+			WRegion *next=ioncore_g.focus_next;
+			ioncore_g.focus_next=NULL;
+			skip_focusenter();
+			region_do_set_focus(next, warp);
+		}/*else if(ioncore_g.grab_released && !ioncore_g.warp_enabled){
+			skip_focusenter();
+		}
+		ioncore_g.grab_released=FALSE;
+		  */
+	}
 }
 
 

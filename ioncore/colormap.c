@@ -14,26 +14,28 @@
 #include "property.h"
 #include "clientwin.h"
 #include "colormap.h"
+#include "region.h"
 
 
 /*{{{ Installing colormaps */
 
 
-void install_cmap(WRootWin *rootwin, Colormap cmap)
+void rootwin_install_colormap(WRootWin *rootwin, Colormap cmap)
 {
 	if(cmap==None)
 		cmap=rootwin->default_cmap;
-	XInstallColormap(wglobal.dpy, cmap);
+	XInstallColormap(ioncore_g.dpy, cmap);
 }
 
 
-void install_cwin_cmap(WClientWin *cwin)
+void clientwin_install_colormap(WClientWin *cwin)
 {
-	int i;
+    WRootWin *rw=region_rootwin_of((WRegion*)cwin);
 	bool found=FALSE;
+	int i;
 
 	for(i=cwin->n_cmapwins-1; i>=0; i--){
-		install_cmap(ROOTWIN_OF(cwin), cwin->cmaps[i]);
+		rootwin_install_colormap(rw, cwin->cmaps[i]);
 		if(cwin->cmapwins[i]==cwin->win)
 			found=TRUE;
 	}
@@ -41,38 +43,7 @@ void install_cwin_cmap(WClientWin *cwin)
 	if(found)
 		return;
 	
-	install_cmap(ROOTWIN_OF(cwin), cwin->cmap);
-}
-
-
-void handle_cwin_cmap(WClientWin *cwin, const XColormapEvent *ev)
-{
-	int i;
-	
-	if(ev->window==cwin->win){
-		cwin->cmap=ev->colormap;
-		if(REGION_IS_ACTIVE(cwin))
-			install_cwin_cmap(cwin);
-	}else{
-		for(i=0; i<cwin->n_cmapwins; i++){
-			if(cwin->cmapwins[i]!=ev->window)
-				continue;
-			cwin->cmaps[i]=ev->colormap;
-			if(REGION_IS_ACTIVE(cwin))
-				install_cwin_cmap(cwin);
-			break;
-		}
-	}
-}
-
-
-void handle_all_cmaps(const XColormapEvent *ev)
-{
-	WClientWin *cwin;
-
-	FOR_ALL_CLIENTWINS(cwin){
-		handle_cwin_cmap(cwin, ev);
-	}
+	rootwin_install_colormap(rw, cwin->cmap);
 }
 
 
@@ -88,7 +59,7 @@ void clientwin_get_colormaps(WClientWin *cwin)
 	XWindowAttributes attr;
 	int i, n;
 	
-	n=get_property(wglobal.dpy, cwin->win, wglobal.atom_wm_colormaps,
+	n=xwindow_get_property(cwin->win, ioncore_g.atom_wm_colormaps,
 				   XA_WINDOW, 100L, TRUE, (uchar**)&wins);
 	
 	if(cwin->n_cmapwins!=0){
@@ -119,8 +90,8 @@ void clientwin_get_colormaps(WClientWin *cwin)
 		if(wins[i]==cwin->win){
 			cwin->cmaps[i]=cwin->cmap;
 		}else{
-			XSelectInput(wglobal.dpy, wins[i], ColormapChangeMask);
-			XGetWindowAttributes(wglobal.dpy, wins[i], &attr);
+			XSelectInput(ioncore_g.dpy, wins[i], ColormapChangeMask);
+			XGetWindowAttributes(ioncore_g.dpy, wins[i], &attr);
 			cwin->cmaps[i]=attr.colormap;
 		}
 	}
@@ -135,12 +106,68 @@ void clientwin_clear_colormaps(WClientWin *cwin)
 		return;
 	
 	for(i=0; i<cwin->n_cmapwins; i++)
-		XSelectInput(wglobal.dpy, cwin->cmapwins[i], 0);
+		XSelectInput(ioncore_g.dpy, cwin->cmapwins[i], 0);
 	
 	free(cwin->cmapwins);
 	free(cwin->cmaps);
 	cwin->cmapwins=NULL;
 	cwin->cmaps=NULL;
+}
+
+
+/*}}}*/
+
+
+/*{{{ Event handling */
+
+
+static void handle_cwin_cmap(WClientWin *cwin, const XColormapEvent *ev)
+{
+	int i;
+	
+	if(ev->window==cwin->win){
+		cwin->cmap=ev->colormap;
+		if(REGION_IS_ACTIVE(cwin))
+			clientwin_install_colormap(cwin);
+	}else{
+		for(i=0; i<cwin->n_cmapwins; i++){
+			if(cwin->cmapwins[i]!=ev->window)
+				continue;
+			cwin->cmaps[i]=ev->colormap;
+			if(REGION_IS_ACTIVE(cwin))
+				clientwin_install_colormap(cwin);
+			break;
+		}
+	}
+}
+
+
+static void handle_all_cmaps(const XColormapEvent *ev)
+{
+	WClientWin *cwin;
+
+	FOR_ALL_CLIENTWINS(cwin){
+		handle_cwin_cmap(cwin, ev);
+	}
+}
+
+
+
+void ioncore_handle_colormap_notify(const XColormapEvent *ev)
+{
+	WClientWin *cwin;
+	
+	if(!ev->new)
+		return;
+
+	cwin=XWINDOW_REGION_OF_T(ev->window, WClientWin);
+
+	if(cwin!=NULL){
+		handle_cwin_cmap(cwin, ev);
+		/*set_cmap(cwin, ev->colormap);*/
+	}else{
+		handle_all_cmaps(ev);
+	}
 }
 
 

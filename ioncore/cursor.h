@@ -15,15 +15,16 @@
 #include <X11/Xlib.h>
 #include <X11/cursorfont.h>
 
-#define CURSOR_DEFAULT 	0
-#define CURSOR_RESIZE 	1
-#define CURSOR_MOVE 	2
-#define CURSOR_DRAG		3
-#define CURSOR_WAITKEY	4
-#define N_CURSORS		5
+#define IONCORE_CURSOR_DEFAULT 	0
+#define IONCORE_CURSOR_RESIZE 	1
+#define IONCORE_CURSOR_MOVE 	2
+#define IONCORE_CURSOR_DRAG		3
+#define IONCORE_CURSOR_WAITKEY	4
+#define IONCORE_N_CURSORS		5
 
-extern void load_cursors();
-extern void set_cursor(Window win, int cursor);
-extern Cursor x_cursor(int cursor);
+extern void ioncore_init_cursors();
+extern Cursor ioncore_xcursor(int cursor);
+
+extern void xwindow_set_cursor(Window win, int cursor);
 
 #endif /* ION_IONCORE_CURSOR_H */

@@ -49,14 +49,14 @@ static WWatch p_regwatch=WWATCH_INIT, p_subregwatch=WWATCH_INIT;
 /*{{{ Handler setup */
 
 
-bool p_set_drag_handlers(WRegion *reg,
+bool ioncore_set_drag_handlers(WRegion *reg,
 						 WMotionHandler *begin,
 						 WMotionHandler *motion,
 						 WButtonHandler *end,
 						 GrabHandler *keypress,
 						 GrabKilledHandler *killed)
 {
-	if(pointer_grab_region()==NULL || p_motion)
+	if(ioncore_pointer_grab_region()==NULL || p_motion)
 		return FALSE;
 	
 	/* A motion handler set at this point may not set a begin handler */
@@ -64,8 +64,8 @@ bool p_set_drag_handlers(WRegion *reg,
 		return FALSE;
 	
 	if(p_reg!=reg){
-		setup_watch(&p_regwatch, (WObj*)reg, NULL);
-		reset_watch(&p_subregwatch);
+		watch_setup(&p_regwatch, (WObj*)reg, NULL);
+		watch_reset(&p_subregwatch);
 	}
 	
 	p_motion_begin_handler=begin;
@@ -85,12 +85,6 @@ bool p_set_drag_handlers(WRegion *reg,
 /*{{{ Misc. */
 
 
-bool coords_in_rect(const WRectangle *g, int x, int y)
-{
-	return (x>=g->x && x<g->x+g->w && y>=g->y && y<g->y+g->h);
-}
-
-
 static bool time_in_threshold(Time time)
 {
 	Time t;
@@ -100,7 +94,7 @@ static bool time_in_threshold(Time time)
 	else
 		t=time-p_time;
 	
-	return t<wglobal.dblclick_delay;
+	return t<ioncore_g.dblclick_delay;
 }
 
 
@@ -111,7 +105,7 @@ static bool motion_in_threshold(int x, int y)
 }
 
 
-WRegion *pointer_grab_region()
+WRegion *ioncore_pointer_grab_region()
 {
 	if(p_grabstate==ST_NO)
 		return NULL;
@@ -128,7 +122,7 @@ WRegion *pointer_grab_region()
 static XEvent *p_curr_event=NULL;
 
 
-XEvent *p_current_event()
+XEvent *ioncore_current_pointer_event()
 {
 	return p_curr_event;
 }
@@ -191,7 +185,7 @@ static void call_motion_begin(WBinding *binding, XMotionEvent *ev,
 /*}}}*/
 
 
-/*{{{ handle_button_press/release/motion */
+/*{{{ ioncore_handle_button_press/release/motion */
 
 
 static void finish_pointer()
@@ -199,7 +193,7 @@ static void finish_pointer()
 	if(p_reg!=NULL)
 		window_release((WWindow*)p_reg);
 	p_grabstate=ST_NO;
-	reset_watch(&p_subregwatch);
+	watch_reset(&p_subregwatch);
 }
 
 
@@ -219,12 +213,12 @@ static void pointer_grab_killed(WRegion *unused)
 {
 	if(p_reg!=NULL && p_killed_handler!=NULL)
 		p_killed_handler(p_reg);
-	reset_watch(&p_regwatch);
+	watch_reset(&p_regwatch);
 	finish_pointer();
 }
 
 
-bool handle_button_press(XButtonEvent *ev)
+bool ioncore_do_handle_buttonpress(XButtonEvent *ev)
 {
 	WBinding *pressbind=NULL;
 	WRegion *reg=NULL;
@@ -235,7 +229,7 @@ bool handle_button_press(XButtonEvent *ev)
 	state=ev->state;
 	button=ev->button;
 	
-	reg=(WRegion*)FIND_WINDOW_T(ev->window, WWindow);
+	reg=(WRegion*)XWINDOW_REGION_OF_T(ev->window, WWindow);
 	
 	if(reg==NULL)
 		return FALSE;
@@ -243,10 +237,10 @@ bool handle_button_press(XButtonEvent *ev)
 	if(ev->subwindow!=None){
 		XButtonEvent ev2=*ev;
 		ev2.window=ev->subwindow;
-		if(XTranslateCoordinates(wglobal.dpy, ev->window, ev2.window,
+		if(XTranslateCoordinates(ioncore_g.dpy, ev->window, ev2.window,
 								 ev->x, ev->y, &(ev2.x), &(ev2.y),
 								 &(ev2.subwindow))){
-			if(handle_button_press(&ev2))
+			if(ioncore_do_handle_buttonpress(&ev2))
 				return TRUE;
 		}
 	}
@@ -268,24 +262,24 @@ bool handle_button_press(XButtonEvent *ev)
 	p_time=ev->time;
 	p_clickcnt=0;
 
-	setup_watch(&p_regwatch, (WObj*)reg, NULL);
+	watch_setup(&p_regwatch, (WObj*)reg, NULL);
 	
 	subreg=NULL;
 	p_area=window_press((WWindow*)reg, ev, &subreg);
 	if(subreg)
-		setup_watch(&p_subregwatch, (WObj*)subreg, NULL);
+		watch_setup(&p_subregwatch, (WObj*)subreg, NULL);
 
 	if(dblclick){
-		pressbind=region_lookup_binding_area(reg, ACT_BUTTONDBLCLICK, state,
+		pressbind=region_lookup_binding(reg, BINDING_BUTTONDBLCLICK, state,
 											 button, p_area);
 	}
 	
 	if(pressbind==NULL){
-		pressbind=region_lookup_binding_area(reg, ACT_BUTTONPRESS, state,
+		pressbind=region_lookup_binding(reg, BINDING_BUTTONPRESS, state,
 											 button, p_area);
 	}
 	
-	grab_establish(reg, handle_key, pointer_grab_killed, 0);
+	ioncore_grab_establish(reg, handle_key, pointer_grab_killed, 0);
 	p_grabstate=ST_HELD;
 	
 	call_button(pressbind, ev);
@@ -294,7 +288,7 @@ bool handle_button_press(XButtonEvent *ev)
 }
 
 
-bool handle_button_release(XButtonEvent *ev)
+bool ioncore_do_handle_buttonrelease(XButtonEvent *ev)
 {
 	WBinding *binding=NULL;
 	
@@ -304,7 +298,7 @@ bool handle_button_release(XButtonEvent *ev)
 	if(p_reg!=NULL){
 		if(p_motion==FALSE){
 			p_clickcnt=1;
-			binding=region_lookup_binding_area(p_reg, ACT_BUTTONCLICK,
+			binding=region_lookup_binding(p_reg, BINDING_BUTTONCLICK,
 											   p_state, p_button, p_area);
 			call_button(binding, ev);
 		}else{
@@ -313,14 +307,14 @@ bool handle_button_release(XButtonEvent *ev)
 		
 	}
 	
-	grab_remove(handle_key);
+	ioncore_grab_remove(handle_key);
 	finish_pointer();
 	
 	return TRUE;
 }
 
 
-void handle_pointer_motion(XMotionEvent *ev)
+void ioncore_do_handle_motionnotify(XMotionEvent *ev)
 {
 	int dx, dy;
 	WBinding *binding=NULL;
@@ -331,7 +325,7 @@ void handle_pointer_motion(XMotionEvent *ev)
 	if(!p_motion){
 		if(motion_in_threshold(ev->x_root, ev->y_root))
 			return;
-		binding=region_lookup_binding_area(p_reg, ACT_BUTTONMOTION,
+		binding=region_lookup_binding(p_reg, BINDING_BUTTONMOTION,
 										   p_state, p_button, p_area);
 	}
 	

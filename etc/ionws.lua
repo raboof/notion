@@ -6,11 +6,11 @@
 -- object on the workspace.
 
 defbindings("WIonWS", {
-    kpress(DEFAULT_MOD.."N", "goto_dir", "below"),
-    kpress(DEFAULT_MOD.."P", "goto_dir", "above"),
-    kpress(DEFAULT_MOD.."Tab", "goto_dir", "right"),
-    submap(DEFAULT_MOD.."K", {
-        kpress("AnyModifier+Tab", "goto_dir", "left"),
+    kpress(MOD1.."N",		"WIonWS.goto_dir(_, 'below')"),
+    kpress(MOD1.."P",		"WIonWS.goto_dir(_, 'above')"),
+    kpress(MOD1.."Tab",		"WIonWS.goto_dir(_, 'right')"),
+    submap(MOD1.."K", {
+        kpress("AnyModifier+Tab", "WIonWS.goto_dir(_, 'left')"),
     }),
 })
 
@@ -20,20 +20,9 @@ defbindings("WIonWS", {
 -- ion-bindings.lua.
 
 defbindings("WIonFrame", {
-    kpress(DEFAULT_MOD.."S", "split", "bottom"),
-    submap(DEFAULT_MOD.."K", {
-        --kpress("AnyModifier+T", "@sub_cwin", "toggle_transients_pos"),
-        kpress("AnyModifier+X", "relocate_and_close"),
-        kpress("AnyModifier+S", "split", "right"),
+    kpress(MOD1.."S", 		"WIonFrame.split(_, 'bottom')"),
+    submap(MOD1.."K", {
+        kpress("AnyModifier+X", "WIonFrame.relocate_and_close(_)"),
+        kpress("AnyModifier+S", "WIonFrame.split(_, 'right')"),
     }),
-    
-    mclick("Button1@tab", "p_switch_tab"),
-    mdblclick("Button1@tab", "toggle_shade"),
-    mdrag("Button1@tab", "p_tabdrag"),
-    mdrag("Button1@border", "p_resize"),
-    
-    mclick("Button2@tab", "p_switch_tab"),
-    mdrag("Button2@tab", "p_tabdrag"),
-    
-    mdrag(DEFAULT_MOD.."Button3", "p_resize"),
 })

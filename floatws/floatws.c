@@ -27,6 +27,7 @@
 #include <ioncore/stacking.h>
 #include <ioncore/extlconv.h>
 #include <ioncore/defer.h>
+#include <ioncore/region-iter.h>
 
 #include "floatws.h"
 #include "floatframe.h"
@@ -53,11 +54,11 @@ static bool reparent_floatws(WFloatWS *ws, WWindow *parent,
 	bool rs;
 	int xdiff, ydiff;
 	
-	if(!same_rootwin((WRegion*)ws, (WRegion*)parent))
+	if(!region_same_rootwin((WRegion*)ws, (WRegion*)parent))
 		return FALSE;
 	
 	region_detach_parent((WRegion*)ws);
-	XReparentWindow(wglobal.dpy, ws->dummywin, parent->win, geom->x, geom->h);
+	XReparentWindow(ioncore_g.dpy, ws->dummywin, parent->win, geom->x, geom->h);
 	region_attach_parent((WRegion*)ws, (WRegion*)parent);
 	
 	xdiff=geom->x-REGION_GEOM(ws).x;
@@ -70,7 +71,7 @@ static bool reparent_floatws(WFloatWS *ws, WWindow *parent,
 		if(!region_reparent(sub, parent, &g)){
 			warn("Problem: can't reparent a %s managed by a WFloatWS"
 				 "being reparented. Detaching from this object.",
-				 WOBJ_TYPESTR(sub));
+				 OBJ_TYPESTR(sub));
 			region_detach_manager(sub);
 		}
 	}
@@ -83,10 +84,10 @@ static void move_sticky(WFloatWS *ws)
 {
 	WRegion *reg, *par=REGION_PARENT(ws);
 	
-	if(par==NULL || !WOBJ_IS(par, WMPlex))
+	if(par==NULL || !OBJ_IS(par, WMPlex))
 		return;
 	
-	ITERATE_OBJLIST(WRegion*, reg, floatws_sticky_list){
+	FOR_ALL_ON_OBJLIST(WRegion*, reg, floatws_sticky_list){
 		WFloatWS *rmgr;
 		if(REGION_PARENT(reg)!=par)
 			continue;
@@ -109,8 +110,8 @@ static void floatws_map(WFloatWS *ws)
 
 	move_sticky(ws);
 
-	MARK_REGION_MAPPED(ws);
-	XMapWindow(wglobal.dpy, ws->dummywin);
+	REGION_MARK_MAPPED(ws);
+	XMapWindow(ioncore_g.dpy, ws->dummywin);
 
 	FOR_ALL_MANAGED_ON_LIST(ws->managed_list, reg){
 		region_map(reg);
@@ -122,8 +123,8 @@ static void floatws_unmap(WFloatWS *ws)
 {
 	WRegion *reg;
 	
-	MARK_REGION_UNMAPPED(ws);
-	XUnmapWindow(wglobal.dpy, ws->dummywin);
+	REGION_MARK_UNMAPPED(ws);
+	XUnmapWindow(ioncore_g.dpy, ws->dummywin);
 	
 	FOR_ALL_MANAGED_ON_LIST(ws->managed_list, reg){
 		region_unmap(reg);
@@ -140,11 +141,11 @@ static WRegion *floatws_get_focus_to(WFloatWS *ws)
 		Window root=None, parent=None, *children=NULL;
 		uint nchildren=0;
 		WRegion *r;
-		XQueryTree(wglobal.dpy, region_x_window((WRegion*)par),
+		XQueryTree(ioncore_g.dpy, region_xwindow((WRegion*)par),
 				   &root, &parent, &children, &nchildren);
 		while(nchildren>0){
 			nchildren--;
-			r=find_window(children[nchildren]);
+			r=xwindow_region_of(children[nchildren]);
 			if(r!=NULL && REGION_MANAGER(r)==(WRegion*)ws){
 				next=r;
 				break;
@@ -157,7 +158,7 @@ static WRegion *floatws_get_focus_to(WFloatWS *ws)
 }
 
 
-static void floatws_set_focus_to(WFloatWS *ws, bool warp)
+static void floatws_do_set_focus(WFloatWS *ws, bool warp)
 {
 	WRegion *r=ws->current_managed;
 		
@@ -165,13 +166,13 @@ static void floatws_set_focus_to(WFloatWS *ws, bool warp)
 		r=floatws_get_focus_to(ws);
 
 	if(r==NULL){
-		SET_FOCUS(ws->dummywin);
+		xwindow_do_set_focus(ws->dummywin);
 		if(warp)
-			do_warp((WRegion*)ws);
+			region_do_warp((WRegion*)ws);
 		return;
 	}
 	
-	region_set_focus_to(r, warp);
+	region_do_set_focus(r, warp);
 }
 
 
@@ -203,7 +204,7 @@ static void floatws_remove_managed(WFloatWS *ws, WRegion *reg)
 		else
 			next=floatws_get_focus_to(ws);
 		
-		do_set_focus(next!=NULL ? next : (WRegion*)ws, FALSE);
+		region_do_set_focus(next!=NULL ? next : (WRegion*)ws, FALSE);
 	}
 }
 
@@ -214,7 +215,7 @@ static void floatws_managed_activated(WFloatWS *ws, WRegion *reg)
 }
 
 
-static Window floatws_x_window(const WFloatWS *ws)
+static Window floatws_xwindow(const WFloatWS *ws)
 {
 	return ws->dummywin;
 }
@@ -229,20 +230,20 @@ static Window floatws_x_window(const WFloatWS *ws)
 static bool floatws_init(WFloatWS *ws, WWindow *parent, 
 						 const WRectangle *bounds)
 {
-	if(!WOBJ_IS(parent, WWindow))
+	if(!OBJ_IS(parent, WWindow))
 		return FALSE;
 
-	ws->dummywin=XCreateWindow(wglobal.dpy, parent->win,
+	ws->dummywin=XCreateWindow(ioncore_g.dpy, parent->win,
 								bounds->x, bounds->y, 1, 1, 0,
 								CopyFromParent, InputOnly,
 								CopyFromParent, 0, NULL);
 	if(ws->dummywin==None)
 		return FALSE;
 
-	XSelectInput(wglobal.dpy, ws->dummywin,
+	XSelectInput(ioncore_g.dpy, ws->dummywin,
 				 FocusChangeMask|KeyPressMask|KeyReleaseMask|
 				 ButtonPressMask|ButtonReleaseMask);
-	XSaveContext(wglobal.dpy, ws->dummywin, wglobal.win_context,
+	XSaveContext(ioncore_g.dpy, ws->dummywin, ioncore_g.win_context,
 				 (XPointer)ws);
 	
 	ws->managed_list=NULL;
@@ -269,8 +270,8 @@ void floatws_deinit(WFloatWS *ws)
 
 	genws_deinit(&(ws->genws));
 
-	XDeleteContext(wglobal.dpy, ws->dummywin, wglobal.win_context);
-	XDestroyWindow(wglobal.dpy, ws->dummywin);
+	XDeleteContext(ioncore_g.dpy, ws->dummywin, ioncore_g.win_context);
+	XDestroyWindow(ioncore_g.dpy, ws->dummywin);
 }
 
 
@@ -300,7 +301,7 @@ bool floatws_relocate_and_close(WFloatWS *ws)
 		return FALSE;
 	}
 	
-	defer_destroy((WObj*)ws);
+	ioncore_defer_destroy((WObj*)ws);
 	return TRUE;
 }
 
@@ -356,14 +357,14 @@ static WRegion *floatws_attach_load(WFloatWS *ws, ExtlTab param)
 {
 	WRectangle geom;
 	
-	if(!extl_table_gets_geom(param, "geom", &geom)){
+	if(!extl_table_gets_rectangle(param, "geom", &geom)){
 		warn("No geometry specified");
 		return NULL;
 	}
 	
-	return attach_load_helper((WRegion*)ws, param, 
-							  (WRegionDoAttachFn*)floatws_do_attach,
-							  &geom);
+	return region__attach_load((WRegion*)ws, param, 
+                               (WRegionDoAttachFn*)floatws_do_attach,
+                               &geom);
 }
 
 
@@ -406,11 +407,11 @@ static bool floatws_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
 		return FALSE;
 	}
 
-	assert(same_rootwin((WRegion*)frame, (WRegion*)cwin));
+	assert(region_same_rootwin((WRegion*)frame, (WRegion*)cwin));
     
     floatframe_geom_from_initial_geom(frame, ws, &fgeom, param->gravity);
 
-	if(param->maprq && wglobal.opmode!=OPMODE_INIT){
+	if(param->maprq && ioncore_g.opmode!=IONCORE_OPMODE_INIT){
 		/* When the window is mapped by application request, position
 		 * request is only honoured if the position was given by the user
 		 * and in case of a transient (the app may know better where to 
@@ -444,8 +445,8 @@ static bool floatws_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
 	
 	/* Don't warp, it is annoying in this case */
 	if(param->switchto && region_may_control_focus((WRegion*)ws)){
-		set_previous_of((WRegion*)frame);
-		set_focus((WRegion*)frame);
+		ioncore_set_previous_of((WRegion*)frame);
+		region_set_focus((WRegion*)frame);
 	}
 	
 	return TRUE;
@@ -493,11 +494,11 @@ static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
 }
 
 
-/* A handler for add_clientwin_alt hook to handle transients for windows
+/* A handler for clientwin_do_manage_alt hook to handle transients for windows
  * on WFloatWS:s differently from the normal behaviour.
  */
-bool add_clientwin_floatws_transient(WClientWin *cwin, 
-									 const WManageParams *param)
+bool floatwsmod_clientwin_do_manage(WClientWin *cwin, 
+                                    const WManageParams *param)
 {
 	WRegion *stack_above;
 	WFloatWS *ws;
@@ -534,7 +535,7 @@ bool add_clientwin_floatws_transient(WClientWin *cwin,
 EXTL_EXPORT_MEMBER
 WRegion *floatws_circulate(WFloatWS *ws)
 {
-	WRegion *r=NEXT_MANAGED_WRAP(ws->managed_list, ws->current_managed);
+	WRegion *r=REGION_NEXT_MANAGED_WRAP(ws->managed_list, ws->current_managed);
 	if(r!=NULL)
 		region_goto(r);
 	return r;
@@ -560,7 +561,7 @@ WRegion *floatws_circulate_and_raise(WFloatWS *ws)
 EXTL_EXPORT_MEMBER
 WRegion *floatws_backcirculate(WFloatWS *ws)
 {
-	WRegion *r=PREV_MANAGED_WRAP(ws->managed_list, ws->current_managed);
+	WRegion *r=REGION_PREV_MANAGED_WRAP(ws->managed_list, ws->current_managed);
 	if(r!=NULL)
 		region_goto(r);
 	return r;
@@ -617,18 +618,20 @@ static bool floatws_save_to_file(WFloatWS *ws, FILE *file, int lvl)
 {
 	WRegion *mgd;
 	
-	begin_saved_region((WRegion*)ws, file, lvl);
-	save_indent_line(file, lvl);
+	region_save_identity((WRegion*)ws, file, lvl);
+	file_indent(file, lvl);
 	fprintf(file, "managed = {\n");
 	FOR_ALL_MANAGED_ON_LIST(ws->managed_list, mgd){
-		save_indent_line(file, lvl+1);
+		file_indent(file, lvl+1);
 		fprintf(file, "{\n");
-		if(region_save_to_file((WRegion*)mgd, file, lvl+2))
-			save_geom(&REGION_GEOM(mgd), file, lvl+2);
-		save_indent_line(file, lvl+1);
+		if(region_save_to_file((WRegion*)mgd, file, lvl+2)){
+            file_indent(file, lvl+2);
+            rectangle_writecode(&REGION_GEOM(mgd), file);
+        }
+		file_indent(file, lvl+1);
 		fprintf(file, "},\n");
 	}
-	save_indent_line(file, lvl);
+	file_indent(file, lvl);
 	fprintf(file, "},\n");
 	
 	return TRUE;
@@ -682,8 +685,8 @@ static DynFunTab floatws_dynfuntab[]={
 	{(DynFun*)region_display_managed, 
 	 (DynFun*)floatws_display_managed},
 
-	{region_set_focus_to, 
-	 floatws_set_focus_to},
+	{region_do_set_focus, 
+	 floatws_do_set_focus},
 	{region_managed_activated, 
 	 floatws_managed_activated},
 	
@@ -697,8 +700,8 @@ static DynFunTab floatws_dynfuntab[]={
 	{(DynFun*)region_save_to_file, 
 	 (DynFun*)floatws_save_to_file},
 
-	{(DynFun*)region_x_window,
-	 (DynFun*)floatws_x_window},
+	{(DynFun*)region_xwindow,
+	 (DynFun*)floatws_xwindow},
 
 	{region_close,
 	 floatws_close},
@@ -713,7 +716,7 @@ static DynFunTab floatws_dynfuntab[]={
 };
 
 
-IMPLOBJ(WFloatWS, WGenWS, floatws_deinit, floatws_dynfuntab);
+IMPLCLASS(WFloatWS, WGenWS, floatws_deinit, floatws_dynfuntab);
 
 
 /*}}}*/

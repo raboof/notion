@@ -22,9 +22,14 @@
 #include <ioncore/stacking.h>
 #include <ioncore/minmax.h>
 #include <ioncore/signal.h>
+#include <ioncore/focus.h>
+#include <ioncore/event.h>
+#include <ioncore/objp.h>
+#include <ioncore/region-iter.h>
 #include "menu.h"
-#include "menup.h"
+#include "main.h"
 
+#define MENU_WIN(MENU) ((MENU)->win.win)
 
 static bool extl_table_getis(ExtlTab tab, int i, const char *s, char c,
 							 void *p)
@@ -188,7 +193,7 @@ static void menu_calc_size(WMenu *menu, int maxw, int maxh,
 	}
 	
 	if(extl_table_gets_s(tab, title, &str)){
-		menu->title=make_label(menu->title_brush, str, maxew);
+		menu->title=grbrush_make_label(menu->title_brush, str, maxew);
 		free(str);
 	}
 #endif
@@ -202,8 +207,8 @@ static void menu_calc_size(WMenu *menu, int maxw, int maxh,
 			continue;
 		
 		if(extl_table_getis(menu->tab, i+1, "name", 's', &str)){
-			menu->entries[i].title=make_label(menu->entry_brush, str, 
-											  maxew);
+			menu->entries[i].title=grbrush_make_label(menu->entry_brush, 
+                                                      str, maxew);
 			free(str);
 		}
 	}
@@ -383,12 +388,13 @@ static bool menu_init_gr(WMenu *menu, WRootWin *rootwin, Window win)
 
 void menu_draw_config_updated(WMenu *menu)
 {
-	if(!menu_init_gr(menu, ROOTWIN_OF(menu), MENU_WIN(menu)))
+	if(!menu_init_gr(menu, region_rootwin_of((WRegion*)menu),
+                     MENU_WIN(menu)))
 		return;
 	
 	menu_refit(menu);
 	
-	region_default_draw_config_updated((WRegion*)menu);
+	region_draw_config_updated_default((WRegion*)menu);
 	
 	window_draw((WWindow*)menu, TRUE);
 }
@@ -481,13 +487,13 @@ bool menu_init(WMenu *menu, WWindow *par, const WRectangle *geom,
 
 	win=menu->win.win;
 	
-	if(!menu_init_gr(menu, ROOTWIN_OF(par), win))
+	if(!menu_init_gr(menu, region_rootwin_of((WRegion*)par), win))
 		goto fail2;
 
 	menu_firstfit(menu, params->submenu_mode, params->ref_x, params->ref_y);
 	
-	XSelectInput(wglobal.dpy, win, MENU_MASK);
-	region_add_bindmap((WRegion*)menu, &menu_bindmap);
+	XSelectInput(ioncore_g.dpy, win, IONCORE_EVENTMASK_INPUT);
+	region_add_bindmap((WRegion*)menu, &menumod_menu_bindmap);
 	
 	return TRUE;
 
@@ -576,7 +582,7 @@ static void menu_remove_managed(WMenu *menu, WRegion *sub)
 	region_unset_manager(sub, (WRegion*)menu, (WRegion**)&(menu->submenu));
 
 	if(mcf)
-		region_set_focus_to((WRegion*)menu, FALSE);
+		region_do_set_focus((WRegion*)menu, FALSE);
 }
 
 
@@ -638,16 +644,16 @@ static void show_sub(WMenu *menu, int n)
 	region_map((WRegion*)submenu);
 	
 	if(!menu->pmenu_mode && region_may_control_focus((WRegion*)menu))
-		region_set_focus_to((WRegion*)submenu, FALSE);
+		region_do_set_focus((WRegion*)submenu, FALSE);
 }
 
 
-static void menu_set_focus_to(WMenu *menu, bool warp)
+static void menu_do_set_focus(WMenu *menu, bool warp)
 {
 	if(menu->submenu!=NULL)
-		region_set_focus_to((WRegion*)menu->submenu, warp);
+		region_do_set_focus((WRegion*)menu->submenu, warp);
 	else
-		window_set_focus_to((WWindow*)menu, warp);
+		window_do_set_focus((WWindow*)menu, warp);
 }
 
 
@@ -773,7 +779,7 @@ void menu_finish(WMenu *menu)
 		return;
 	}
 	
-	defer_action((WObj*)menu, (DeferredAction*)menu_do_finish);
+	ioncore_defer_action((WObj*)menu, (WDeferredAction*)menu_do_finish);
 }
 
 
@@ -784,7 +790,7 @@ void menu_finish(WMenu *menu)
 EXTL_EXPORT_MEMBER
 void menu_cancel(WMenu *menu)
 {
-	defer_destroy((WObj*)menu);
+	ioncore_defer_destroy((WObj*)menu);
 }
 
 
@@ -805,7 +811,7 @@ void menu_close(WMenu *menu)
 
 static int scroll_time=20;
 static int scroll_amount=3;
-static WTimer scroll_timer=INIT_TIMER(NULL);
+static WTimer scroll_timer=TIMER_INIT(NULL);
 
 
 /*EXTL_DOC
@@ -815,7 +821,7 @@ static WTimer scroll_timer=INIT_TIMER(NULL);
  * pixels every 20msec.
  */
 EXTL_EXPORT
-void menu_set_scroll_params(int delay, int amount)
+void menumod_set_scroll_params(int delay, int amount)
 {
 	scroll_amount=maxof(0, amount);
 	scroll_time=maxof(1, delay);
@@ -893,7 +899,7 @@ static void scroll_left(WTimer *timer, WMenu *menu)
 	menu=menu_tail(menu);
 	scroll_left_or_up(menu, right_diff(menu), 0);
 	if(right_diff(menu)>0)
-		set_timer_param(timer, scroll_time, (WObj*)menu);
+		timer_set_param(timer, scroll_time, (WObj*)menu);
 }
 
 
@@ -902,7 +908,7 @@ static void scroll_up(WTimer *timer, WMenu *menu)
 	menu=menu_tail(menu);
 	scroll_left_or_up(menu, 0, bottom_diff(menu));
 	if(bottom_diff(menu)>0)
-		set_timer_param(timer, scroll_time, (WObj*)menu);
+		timer_set_param(timer, scroll_time, (WObj*)menu);
 }
 
 
@@ -925,7 +931,7 @@ static void scroll_right(WTimer *timer, WMenu *menu)
 	menu=menu_head(menu);
 	scroll_right_or_down(menu, left_diff(menu), 0);
 	if(left_diff(menu)>0)
-		set_timer_param(timer, scroll_time, (WObj*)menu);
+		timer_set_param(timer, scroll_time, (WObj*)menu);
 }
 
 
@@ -934,13 +940,13 @@ static void scroll_down(WTimer *timer, WMenu *menu)
 	menu=menu_head(menu);
 	scroll_right_or_down(menu, 0, top_diff(menu));
 	if(top_diff(menu)>0)
-		set_timer_param(timer, scroll_time, (WObj*)menu);
+		timer_set_param(timer, scroll_time, (WObj*)menu);
 }
 
 
 static void end_scroll(WMenu *menu)
 {
-	reset_timer(&(scroll_timer));
+	timer_reset(&(scroll_timer));
 }
 
 
@@ -980,10 +986,10 @@ static void check_scroll(WMenu *menu, int x, int y)
 	menu=menu_head(menu);
 
 	while(menu!=NULL){
-		if(coords_in_rect(&REGION_GEOM(menu), x, y)){
+		if(rectangle_contains(&REGION_GEOM(menu), x, y)){
 			if(scroll_timer.handler!=fn || !timer_is_set(&scroll_timer)){
 				scroll_timer.handler=fn;
-				set_timer_param(&scroll_timer, scroll_time, (WObj*)menu);
+				timer_set_param(&scroll_timer, scroll_time, (WObj*)menu);
 			}
 			return;
 		}
@@ -1078,7 +1084,7 @@ int menu_press(WMenu *menu, XButtonEvent *ev, WRegion **reg_ret)
 {
 	menu_button(menu, ev);
 	menu=menu_head(menu);
-	p_set_drag_handlers((WRegion*)menu,
+	ioncore_set_drag_handlers((WRegion*)menu,
 						NULL,
 						(WMotionHandler*)menu_motion,
 						(WButtonHandler*)menu_release,
@@ -1101,14 +1107,14 @@ static DynFunTab menu_dynfuntab[]={
 	{window_draw, menu_draw},
 	{(DynFun*)window_press, (DynFun*)menu_press},
 	{region_remove_managed, menu_remove_managed},
-	{region_set_focus_to, menu_set_focus_to},
+	{region_do_set_focus, menu_do_set_focus},
 	{region_activated, menu_activated},
 	{region_inactivated, menu_inactivated},
 	END_DYNFUNTAB
 };
 
 
-IMPLOBJ(WMenu, WWindow, menu_deinit, menu_dynfuntab);
+IMPLCLASS(WMenu, WWindow, menu_deinit, menu_dynfuntab);
 
 	
 /*}}}*/

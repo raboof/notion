@@ -80,7 +80,7 @@ static bool parse_keybut(const char *str, uint *mod_ret, uint *ksb_ret,
 				warn_obj(str, "Insane key combination");
 				break;
 			}
-			if(XKeysymToKeycode(wglobal.dpy, keysym)==0){
+			if(XKeysymToKeycode(ioncore_g.dpy, keysym)==0){
 				warn_obj(str, "Could not convert keysym to keycode");
 				break;
 			}
@@ -128,7 +128,7 @@ static bool parse_keybut(const char *str, uint *mod_ret, uint *ksb_ret,
 /*}}}*/
 
 
-/*{{{ process_bindings */
+/*{{{ bindmap_do_table */
 
 
 static bool do_action(WBindmap *bindmap, const char *str,
@@ -146,19 +146,19 @@ static bool do_action(WBindmap *bindmap, const char *str,
 	binding.act=act;
 	binding.state=mod;
 	binding.ksb=ksb;
-	binding.kcb=(act==ACT_KEYPRESS ? XKeysymToKeycode(wglobal.dpy, ksb) : ksb);
+	binding.kcb=(act==BINDING_KEYPRESS ? XKeysymToKeycode(ioncore_g.dpy, ksb) : ksb);
 	binding.area=area;
 	binding.submap=NULL;
 	
 	if(func!=extl_fn_none()){
 		binding.func=extl_ref_fn(func);
-		if(add_binding(bindmap, &binding))
+		if(bindmap_add_binding(bindmap, &binding))
 			return TRUE;
 		extl_unref_fn(binding.func);
 		warn("Unable to add binding %s.", str);
 	}else{
 		binding.func=func;
-		if(remove_binding(bindmap, &binding))
+		if(bindmap_remove_binding(bindmap, &binding))
 			return TRUE;
 		warn("Unable to remove binding %s. Either you are trying to "
 			 "remove a binding that has not been set or you're trying "
@@ -175,17 +175,17 @@ static bool do_submap(WBindmap *bindmap, const char *str,
 	WBinding binding, *bnd;
 	uint kcb;
 
-	if(action!=ACT_KEYPRESS)
+	if(action!=BINDING_KEYPRESS)
 		return FALSE;
 	
-	kcb=XKeysymToKeycode(wglobal.dpy, ksb);
-	bnd=lookup_binding(bindmap, action, mod, kcb);
+	kcb=XKeysymToKeycode(ioncore_g.dpy, ksb);
+	bnd=bindmap_lookup_binding(bindmap, action, mod, kcb);
 	
 	if(bnd!=NULL && bnd->submap!=NULL && bnd->state==mod)
-		return process_bindings(bnd->submap, NULL, subtab);
+		return bindmap_do_table(bnd->submap, NULL, subtab);
 
 	binding.waitrel=FALSE;
-	binding.act=ACT_KEYPRESS;
+	binding.act=BINDING_KEYPRESS;
 	binding.state=mod;
 	binding.ksb=ksb;
 	binding.kcb=kcb;
@@ -196,10 +196,10 @@ static bool do_submap(WBindmap *bindmap, const char *str,
 	if(binding.submap==NULL)
 		return FALSE;
 
-	if(add_binding(bindmap, &binding))
-		return process_bindings(binding.submap, NULL, subtab);
+	if(bindmap_add_binding(bindmap, &binding))
+		return bindmap_do_table(binding.submap, NULL, subtab);
 
-	deinit_binding(&binding);
+	binding_deinit(&binding);
 	
 	warn("Unable to add submap for binding %s.", str);
 	
@@ -208,11 +208,11 @@ static bool do_submap(WBindmap *bindmap, const char *str,
 
 
 static StringIntMap action_map[]={
-	{"kpress", ACT_KEYPRESS},
-	{"mpress", ACT_BUTTONPRESS},
-	{"mclick", ACT_BUTTONCLICK},
-	{"mdblclick", ACT_BUTTONDBLCLICK},
-	{"mdrag", ACT_BUTTONMOTION},
+	{"kpress", BINDING_KEYPRESS},
+	{"mpress", BINDING_BUTTONPRESS},
+	{"mclick", BINDING_BUTTONCLICK},
+	{"mdblclick", BINDING_BUTTONDBLCLICK},
+	{"mdrag", BINDING_BUTTONMOTION},
 	{NULL, 0}
 };
 
@@ -235,7 +235,7 @@ static bool do_entry(WBindmap *bindmap, ExtlTab tab, StringIntMap *areamap)
 	}
 
 	if(strcmp(action_str, "kpress_waitrel")==0){
-		action=ACT_KEYPRESS;
+		action=BINDING_KEYPRESS;
 		wr=TRUE;
 	}else{
 		action=stringintmap_value(action_map, action_str, -1);
@@ -248,7 +248,7 @@ static bool do_entry(WBindmap *bindmap, ExtlTab tab, StringIntMap *areamap)
 	if(!extl_table_gets_s(tab, "kcb", &ksb_str))
 		goto fail;
 
-	if(!parse_keybut(ksb_str, &mod, &ksb, (action!=ACT_KEYPRESS &&
+	if(!parse_keybut(ksb_str, &mod, &ksb, (action!=BINDING_KEYPRESS &&
 										   action!=-1))){
 		goto fail;
 	}
@@ -288,7 +288,7 @@ fail:
 }
 
 
-bool process_bindings(WBindmap *bindmap, StringIntMap *areamap, ExtlTab tab)
+bool bindmap_do_table(WBindmap *bindmap, StringIntMap *areamap, ExtlTab tab)
 {
 	int i, n, nok=0;
 	ExtlTab ent;

@@ -28,7 +28,7 @@
 #include <ioncore/readconfig.h>
 #include <ioncore/exec.h>
 #include <ioncore/errorlog.h>
-#include <ioncore/eventh.h>
+#include <ioncore/event.h>
 #include "../version.h"
 
 
@@ -94,7 +94,7 @@ void check_new_user_help()
 		return;
 	}
 
-	if(!exec(CF_XMESSAGE" "CF_NEW_USER_MESSAGE))
+	if(!ioncore_exec(CF_XMESSAGE" "CF_NEW_USER_MESSAGE))
 		return;
 
 	/* This should actually be done when less or xmessage returns,
@@ -113,7 +113,7 @@ int main(int argc, char*argv[])
 	char *cmd=NULL;
 	int stflags=0;
 	int opt;
-	ErrorLog el;
+	WErrorLog el;
 	FILE *ef=NULL;
 	char *efnam=NULL;
 	bool may_continue=FALSE;
@@ -189,7 +189,7 @@ int main(int argc, char*argv[])
 			efnam=NULL;
 		}
 		fprintf(ef, "Ion startup error log:\n");
-		begin_errorlog_file(&el, ef);
+		errorlog_begin_file(&el, ef);
 	}
 
 	/* Set up locale and detect encoding.
@@ -208,15 +208,15 @@ fail:
 	
 	if(ef!=NULL){
 		pid_t pid=-1;
-		if(end_errorlog(&el)){
+		if(errorlog_end(&el)){
 			fclose(ef);
 			pid=fork();
 			if(pid==0){
-				setup_environ(DefaultScreen(wglobal.dpy));
+				ioncore_setup_environ(DefaultScreen(ioncore_g.dpy));
 				if(!may_continue)
-					XCloseDisplay(wglobal.dpy);
+					XCloseDisplay(ioncore_g.dpy);
 				else
-					close(wglobal.conn);
+					close(ioncore_g.conn);
 				libtu_asprintf(&cmd, CF_XMESSAGE " %s", efnam);
 				if(system(cmd)==-1)
 					warn_err_obj(cmd);

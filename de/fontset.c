@@ -101,7 +101,7 @@ XFontSet de_create_font_set(const char *fontname)
 	
     FNT_D(fprintf(stderr, "FNTRQ: %s\n", fontname));
 	
-	fs = XCreateFontSet(wglobal.dpy, fontname, &missing, &nmissing, &def);
+	fs = XCreateFontSet(ioncore_g.dpy, fontname, &missing, &nmissing, &def);
 	
 	if (fs && (! nmissing))
 		return fs;
@@ -121,7 +121,7 @@ XFontSet de_create_font_set(const char *fontname)
 		
 		setlocale(LC_CTYPE, "C");
 		
-		fs = XCreateFontSet(wglobal.dpy, fontname, &missing, &nmissing, &def);
+		fs = XCreateFontSet(ioncore_g.dpy, fontname, &missing, &nmissing, &def);
 		
 		if(lcc!=NULL){
 			setlocale(LC_CTYPE, lcc);
@@ -175,11 +175,11 @@ XFontSet de_create_font_set(const char *fontname)
 	if (nmissing)
 		XFreeStringList(missing);
 	if (fs)
-		XFreeFontSet(wglobal.dpy, fs);
+		XFreeFontSet(ioncore_g.dpy, fs);
 
 	FNT_D(if(fs) fprintf(stderr, "Trying '%s'.\n", nfontname));
 	
-	fs = XCreateFontSet(wglobal.dpy, nfontname, &missing, &nmissing, &def);
+	fs = XCreateFontSet(ioncore_g.dpy, nfontname, &missing, &nmissing, &def);
 	
 	free(pattern2);
 	

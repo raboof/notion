@@ -13,11 +13,11 @@
 #define ION_IONCORE_GR_H
 
 #include "common.h"
-#include "hooks.h"
+#include "rectangle.h"
 
 
-INTROBJ(GrBrush);
-DECLOBJ(GrBrush){
+INTRCLASS(GrBrush);
+DECLCLASS(GrBrush){
 	WObj obj;
 };
 

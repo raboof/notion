@@ -29,22 +29,25 @@
 
 static bool loading_workspaces=FALSE;
 
-WRegion *load_create_region(WWindow *par, const WRectangle *geom, 
+WRegion *create_region_load(WWindow *par, const WRectangle *geom, 
 							ExtlTab tab)
 {
-	char *objclass, *name;
-	WRegionLoadCreateFn* fn;
-	WRegion *reg;
+	char *objclass=NULL, *name=NULL;
+	WRegionLoadCreateFn* fn=NULL;
+    WRegClassInfo *info=NULL;
+	WRegion *reg=NULL;
 	
 	if(!extl_table_gets_s(tab, "type", &objclass))
 		return NULL;
 
-	fn=lookup_region_load_create_fn(objclass);
+    info=ioncore_lookup_regclass(objclass, FALSE, FALSE, TRUE);
+    if(info!=NULL)
+        fn=info->lc_fn;
 	
 	if(fn==NULL){
 		warn("Unknown class \"%s\", cannot create region.", objclass);
-		if(loading_workspaces && wglobal.ws_save_enabled){
-			wglobal.ws_save_enabled=FALSE;
+		if(loading_workspaces && ioncore_g.ws_save_enabled){
+			ioncore_g.ws_save_enabled=FALSE;
 			warn("Disabling workspace saving on exit to prevent savefile "
 				 "corruption.\n"
 				 "Call enable_workspace_saves(TRUE) to re-enable saves or\n"
@@ -62,7 +65,7 @@ WRegion *load_create_region(WWindow *par, const WRectangle *geom,
 	if(reg==NULL)
 		return NULL;
 	
-	if(!WOBJ_IS(reg, WClientWin)){
+	if(!OBJ_IS(reg, WClientWin)){
 		if(extl_table_gets_s(tab, "name", &name)){
 			region_set_name(reg, name);
 			free(name);
@@ -93,14 +96,14 @@ bool region_save_to_file(WRegion *reg, FILE *file, int lvl)
 }
 
 
-void save_indent_line(FILE *file, int lvl)
+void file_indent(FILE *file, int lvl)
 {
 	while(lvl-->0)
 		fprintf(file, "    ");
 }
 
 
-void write_escaped_string(FILE *file, const char *str)
+void file_write_escaped_string(FILE *file, const char *str)
 {
 	fputc('"', file);
 
@@ -118,38 +121,23 @@ void write_escaped_string(FILE *file, const char *str)
 }
 
 
-void begin_saved_region(WRegion *reg, FILE *file, int lvl)
+void region_save_identity(WRegion *reg, FILE *file, int lvl)
 {
 	const char *name;
 	
-	/*save_indent_line(file, lvl-1);*/
+	/*file_indent(file, lvl-1);*/
 	/*fprintf(file, "{\n");*/
-	save_indent_line(file, lvl);
-	fprintf(file, "type = \"%s\",\n", WOBJ_TYPESTR(reg));
+	file_indent(file, lvl);
+	fprintf(file, "type = \"%s\",\n", OBJ_TYPESTR(reg));
 	
 	name=region_name(reg);
 	
-	if(name!=NULL && !WOBJ_IS(reg, WClientWin)){
-		save_indent_line(file, lvl);
+	if(name!=NULL && !OBJ_IS(reg, WClientWin)){
+		file_indent(file, lvl);
 		fprintf(file, "name = ");
-		write_escaped_string(file, name);
+		file_write_escaped_string(file, name);
 		fprintf(file, ",\n");
 	}
-}
-
-
-/*void end_saved_region(WRegion *reg, FILE *file, int lvl)
-{
-	save_indent_line(file, lvl-1);
-	fprintf(file, "},\n");
-}*/
-
-
-void save_geom(const WRectangle *geom, FILE *file, int lvl)
-{
-	save_indent_line(file, lvl);
-	fprintf(file, "geom = { x = %d, y = %d, w = %d, h = %d},\n",
-			geom->x, geom->y, geom->w, geom->h);
 }
 
 
@@ -159,24 +147,24 @@ void save_geom(const WRectangle *geom, FILE *file, int lvl)
 /*{{{ save_workspaces, load_workspaces */
 
 
-bool load_workspaces()
+bool ioncore_load_workspaces()
 {
 	bool ret;
 	loading_workspaces=TRUE;
-	ret=read_config_args("workspaces", FALSE, NULL, NULL);
+	ret=ioncore_read_config("workspaces", NULL, FALSE);
 	loading_workspaces=FALSE;
 	return ret;
 }
 
 
-bool save_workspaces()
+bool ioncore_save_workspaces()
 {
 	bool successp=TRUE;
 	char *wsconf;
 	FILE *file;
 	WScreen *scr;
 	
-	wsconf=get_savefile("workspaces");
+	wsconf=ioncore_get_savefile("workspaces");
 
 	if(wsconf==NULL)
 		return FALSE;
@@ -192,7 +180,7 @@ bool save_workspaces()
 	fprintf(file, "-- This file was created by and is modified by Ion.\n\n");
 
 	FOR_ALL_SCREENS(scr){
-		fprintf(file, "initialise_screen_id(%d, {\n", scr->id);
+		fprintf(file, "ioncore.initialise_screen_id(%d, {\n", scr->id);
 		if(!region_save_to_file((WRegion*)scr, file, 1))
 			successp=FALSE;
 		fprintf(file, "})\n\n");
@@ -208,19 +196,4 @@ bool save_workspaces()
 
 /*}}}*/
 
-
-/*{{{ Misc. */
-
-
-/*EXTL_EXPROT
- * Enable or disable workspaces saving on exit.
- */
-EXTL_EXPORT
-void enable_workspace_saves(bool enable)
-{
-	wglobal.ws_save_enabled=enable;
-}
-
-
-/*}}}*/
 

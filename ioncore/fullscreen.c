@@ -18,6 +18,8 @@
 #include "manage.h"
 #include "fullscreen.h"
 #include "mwmhints.h"
+#include "focus.h"
+#include "region-iter.h"
 
 
 
@@ -26,15 +28,15 @@ bool clientwin_check_fullscreen_request(WClientWin *cwin, int w, int h,
 {
 	WScreen *scr;
 	WMwmHints *mwm;
+	WRectangle *rwgeom;
 	
-	
-	mwm=get_mwm_hints(cwin->win);
+	mwm=xwindow_get_mwmhints(cwin->win);
 	if(mwm==NULL || !(mwm->flags&MWM_HINTS_DECORATIONS) ||
 	   mwm->decorations!=0)
 		return FALSE;
 	
 	FOR_ALL_SCREENS(scr){
-		if(!same_rootwin((WRegion*)scr, (WRegion*)cwin))
+		if(!region_same_rootwin((WRegion*)scr, (WRegion*)cwin))
 			continue;
 		/* TODO: if there are multiple possible rootwins, use the one with
 		 * requested position, if any.
@@ -44,12 +46,13 @@ bool clientwin_check_fullscreen_request(WClientWin *cwin, int w, int h,
 		}
 	}
 	
+    rwgeom=&REGION_GEOM(region_rootwin_of((WRegion*)cwin));
+                        
 	/* Catch Xinerama-unaware apps here */
-	if(REGION_GEOM(ROOTWIN_OF(cwin)).w==w &&
-	   REGION_GEOM(ROOTWIN_OF(cwin)).h==h){
+	if(rwgeom->w==w && rwgeom->h==h)
 		return clientwin_enter_fullscreen(cwin, sw);
-	}
-	return FALSE;
+
+    return FALSE;
 }
 
 
@@ -58,12 +61,12 @@ static void lastmgr_watchhandler(WWatch *watch, WObj *obj)
 	WClientWinFSInfo *fsinfo=(WClientWinFSInfo*)watch;
 	WRegion *r;
 	
-	assert(WOBJ_IS(obj, WRegion));
+	assert(OBJ_IS(obj, WRegion));
 	
 	r=region_find_rescue_manager((WRegion*)obj);
 	
 	if(r!=NULL)
-		setup_watch(&(fsinfo->last_mgr_watch), (WObj*)r, lastmgr_watchhandler);
+		watch_setup(&(fsinfo->last_mgr_watch), (WObj*)r, lastmgr_watchhandler);
 }
 
 
@@ -76,11 +79,11 @@ bool clientwin_fullscreen_scr(WClientWin *cwin, WScreen *scr, bool switchto)
 		wasfs=FALSE;
 		
 		if(REGION_MANAGER(cwin)!=NULL){
-			setup_watch(&(cwin->fsinfo.last_mgr_watch),
+			watch_setup(&(cwin->fsinfo.last_mgr_watch),
 						(WObj*)REGION_MANAGER(cwin),
 						lastmgr_watchhandler);
 		}else if(scr->mplex.current_sub!=NULL){
-			setup_watch(&(cwin->fsinfo.last_mgr_watch),
+			watch_setup(&(cwin->fsinfo.last_mgr_watch),
 						(WObj*)scr->mplex.current_sub, 
 						lastmgr_watchhandler);
 		}
@@ -94,7 +97,7 @@ bool clientwin_fullscreen_scr(WClientWin *cwin, WScreen *scr, bool switchto)
 	if(!mplex_attach_simple((WMPlex*)scr, (WRegion*)cwin, switchto)){
 		warn("Failed to enter full screen mode");
 		if(!wasfs)
-			reset_watch(&(cwin->fsinfo.last_mgr_watch));
+			watch_reset(&(cwin->fsinfo.last_mgr_watch));
 		return FALSE;
 	}
 
@@ -107,7 +110,7 @@ bool clientwin_enter_fullscreen(WClientWin *cwin, bool switchto)
 	WScreen *scr=region_screen_of((WRegion*)cwin);
 	
 	if(scr==NULL){
-		scr=rootwin_current_scr(ROOTWIN_OF(cwin));
+		scr=rootwin_current_scr(region_rootwin_of((WRegion*)cwin));
 		if(scr==NULL)
 			return FALSE;
 	}
@@ -119,7 +122,7 @@ bool clientwin_enter_fullscreen(WClientWin *cwin, bool switchto)
 bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto)
 {	
 	WRegion *reg;
-	WManageParams param=INIT_WMANAGEPARAMS;
+	WManageParams param=MANAGEPARAMS_INIT;
 	int rootx, rooty;
 	bool cf;
 	
@@ -129,8 +132,8 @@ bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto)
 	cf=region_may_control_focus((WRegion*)cwin);
 
 	reg=(WRegion*)cwin->fsinfo.last_mgr_watch.obj;
-	reset_watch(&(cwin->fsinfo.last_mgr_watch));
-	assert(WOBJ_IS(reg, WRegion));
+	watch_reset(&(cwin->fsinfo.last_mgr_watch));
+	assert(OBJ_IS(reg, WRegion));
 	
 	param.geom=cwin->fsinfo.saved_rootrel_geom;
 	param.tfor=NULL;

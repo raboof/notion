@@ -13,20 +13,18 @@
 #define ION_IONCORE_SCREEN_H
 
 #include "common.h"
-
-INTROBJ(WScreen);
-
 #include "mplex.h"
 #include "extl.h"
-
+#include "rectangle.h"
+#include "rootwin.h"
 
 #define FOR_ALL_SCREENS(SCR)   \
-	for((SCR)=wglobal.screens; \
+	for((SCR)=ioncore_g.screens; \
 		(SCR)!=NULL;           \
 		(SCR)=(SCR)->next_scr)
 
 
-DECLOBJ(WScreen){
+DECLCLASS(WScreen){
 	WMPlex mplex;
 	int id;
 	Atom atom_workspace;
@@ -36,33 +34,25 @@ DECLOBJ(WScreen){
 	WScreen *next_scr, *prev_scr;
 };
 
-#include "rootwin.h"
-
 extern WScreen *create_screen(WRootWin *rootwin, int id, 
 							  const WRectangle *geom,
 							  bool useroot);
 
 extern bool screen_initialize_workspaces(WScreen *scr);
-extern bool initialise_screen_id(int id, ExtlTab tab);
-
-/*extern void screen_switch_nth(WScreen *scr, uint n);
-extern void screen_switch_next(WScreen *scr);
-extern void screen_switch_prev(WScreen *scr);*/
+extern WRegion *screen_current(WScreen *scr);
+extern void screen_set_managed_offset(WScreen *scr, const WRectangle *off);
 
 extern WScreen *region_screen_of(WRegion *reg);
-
-extern WRegion *screen_current(WScreen *scr);
-
-extern void screen_set_managed_offset(WScreen *scr, const WRectangle *off);
 
 /* For viewports corresponding to Xinerama rootwins <id> is initially set
  * to the Xinerama screen number. When Xinerama is not enabled, <id> is
  * the X screen number (which is the same for all Xinerama rootwins).
  * For all other viewports <id> is undefined.
  */
-extern WScreen *find_screen_id(int id);
-extern void goto_screen_id(int id);
-extern void goto_next_screen();
-extern void goto_prev_screen();
+extern bool ioncore_initialise_screen_id(int id, ExtlTab tab);
+extern WScreen *ioncore_find_screen_id(int id);
+extern void ioncore_goto_screen_id(int id);
+extern void ioncore_goto_next_screen();
+extern void ioncore_goto_prev_screen();
 
 #endif /* ION_IONCORE_SCREEN_H */

@@ -17,8 +17,8 @@
 #include "global.h"
 
 
-ulong get_property(Display *dpy, Window win, Atom atom, Atom type,
-				   ulong n32expected, bool more, uchar **p)
+ulong xwindow_get_property(Window win, Atom atom, Atom type, 
+                           ulong n32expected, bool more, uchar **p)
 {
 	Atom real_type;
 	int format;
@@ -26,8 +26,9 @@ ulong get_property(Display *dpy, Window win, Atom atom, Atom type,
 	int status;
 	
 	do{
-		status=XGetWindowProperty(dpy, win, atom, 0L, n32expected, False,
-								  type, &real_type, &format, &n, &extra, p);
+		status=XGetWindowProperty(ioncore_g.dpy, win, atom, 0L, n32expected, 
+                                  False, type, &real_type, &format, &n,
+                                  &extra, p);
 		
 		if(status!=Success || *p==NULL)
 			return -1;
@@ -53,12 +54,12 @@ ulong get_property(Display *dpy, Window win, Atom atom, Atom type,
 /* string
  */
 
-char *get_string_property(Window win, Atom a, int *nret)
+char *xwindow_get_string_property(Window win, Atom a, int *nret)
 {
 	char *p;
 	int n;
 	
-	n=get_property(wglobal.dpy, win, a, XA_STRING, 64L, TRUE, (uchar**)&p);
+	n=xwindow_get_property(win, a, XA_STRING, 64L, TRUE, (uchar**)&p);
 	
 	if(nret!=NULL)
 		*nret=n;
@@ -67,12 +68,12 @@ char *get_string_property(Window win, Atom a, int *nret)
 }
 
 
-void set_string_property(Window win, Atom a, const char *value)
+void xwindow_set_string_property(Window win, Atom a, const char *value)
 {
 	if(value==NULL){
-		XDeleteProperty(wglobal.dpy, win, a);
+		XDeleteProperty(ioncore_g.dpy, win, a);
 	}else{
-		XChangeProperty(wglobal.dpy, win, a, XA_STRING,
+		XChangeProperty(ioncore_g.dpy, win, a, XA_STRING,
 						8, PropModeReplace, (uchar*)value, strlen(value));
 	}
 }
@@ -81,12 +82,12 @@ void set_string_property(Window win, Atom a, const char *value)
 /* integer
  */
 
-bool get_integer_property(Window win, Atom a, int *vret)
+bool xwindow_get_integer_property(Window win, Atom a, int *vret)
 {
 	long *p=NULL;
 	ulong n;
 	
-	n=get_property(wglobal.dpy, win, a, XA_INTEGER, 1L, FALSE, (uchar**)&p);
+	n=xwindow_get_property(win, a, XA_INTEGER, 1L, FALSE, (uchar**)&p);
 	
 	if(n>0 && p!=NULL){
 		*vret=*p;
@@ -98,13 +99,13 @@ bool get_integer_property(Window win, Atom a, int *vret)
 }
 
 
-void set_integer_property(Window win, Atom a, int value)
+void xwindow_set_integer_property(Window win, Atom a, int value)
 {
 	CARD32 data[2];
 	
 	data[0]=value;
 	
-	XChangeProperty(wglobal.dpy, win, a, XA_INTEGER,
+	XChangeProperty(ioncore_g.dpy, win, a, XA_INTEGER,
 					32, PropModeReplace, (uchar*)data, 1);
 }
 
@@ -112,12 +113,13 @@ void set_integer_property(Window win, Atom a, int value)
 /* WM_STATE
  */
 
-bool get_win_state(Window win, int *state)
+bool xwindow_get_state_property(Window win, int *state)
 {
 	CARD32 *p=NULL;
 	
-	if(get_property(wglobal.dpy, win, wglobal.atom_wm_state,
-					wglobal.atom_wm_state, 2L, FALSE, (uchar**)&p)<=0)
+	if(xwindow_get_property(win, ioncore_g.atom_wm_state, 
+                            ioncore_g.atom_wm_state, 
+                            2L, FALSE, (uchar**)&p)<=0)
 		return FALSE;
 	
 	*state=*p;
@@ -128,30 +130,30 @@ bool get_win_state(Window win, int *state)
 }
 
 
-void set_win_state(Window win, int state)
+void xwindow_set_state_property(Window win, int state)
 {
 	CARD32 data[2];
 	
 	data[0]=state;
 	data[1]=None;
 	
-	XChangeProperty(wglobal.dpy, win,
-					wglobal.atom_wm_state, wglobal.atom_wm_state,
+	XChangeProperty(ioncore_g.dpy, win,
+					ioncore_g.atom_wm_state, ioncore_g.atom_wm_state,
 					32, PropModeReplace, (uchar*)data, 2);
 }
 
 
-/* get_text_property
+/* xwindow_get_text_property
  */
 
-char **get_text_property(Window win, Atom a, int *nret)
+char **xwindow_get_text_property(Window win, Atom a, int *nret)
 {
 	XTextProperty prop;
 	char **list=NULL;
 	int n=0;
 	Status st=0;
 	
-	st=XGetTextProperty(wglobal.dpy, win, &prop, a);
+	st=XGetTextProperty(ioncore_g.dpy, win, &prop, a);
 
 	if(nret)
 		*nret=(!st ? 0 : -1);
@@ -168,10 +170,10 @@ char **get_text_property(Window win, Atom a, int *nret)
 	}
 #endif
 
-	if(!wglobal.use_mb){
+	if(!ioncore_g.use_mb){
 		st=XTextPropertyToStringList(&prop, &list, &n);
 	}else{
-		st=XmbTextPropertyToTextList(wglobal.dpy, &prop, &list, &n);
+		st=XmbTextPropertyToTextList(ioncore_g.dpy, &prop, &list, &n);
 		st=!st;
 	}
 
@@ -187,7 +189,7 @@ char **get_text_property(Window win, Atom a, int *nret)
 }
 
 
-void set_text_property(Window win, Atom a, const char *str)
+void xwindow_set_text_property(Window win, Atom a, const char *str)
 {
 	XTextProperty prop;
 	const char *ptr[1]={NULL};
@@ -195,14 +197,14 @@ void set_text_property(Window win, Atom a, const char *str)
 
 	ptr[0]=str;
 	
-	if(!wglobal.use_mb){
+	if(!ioncore_g.use_mb){
 		st=XStringListToTextProperty((char **)&ptr, 1, &prop);
 	}else{
 #ifdef X_HAVE_UTF8_STRING		
-		st=XmbTextListToTextProperty(wglobal.dpy, (char **)&ptr, 1,
+		st=XmbTextListToTextProperty(ioncore_g.dpy, (char **)&ptr, 1,
 									 XUTF8StringStyle, &prop);
 #else		
-		st=XmbTextListToTextProperty(wglobal.dpy, (char **)&ptr, 1,
+		st=XmbTextListToTextProperty(ioncore_g.dpy, (char **)&ptr, 1,
 									 XTextStyle, &prop);
 #endif		
 		st=!st;
@@ -211,6 +213,6 @@ void set_text_property(Window win, Atom a, const char *str)
 	if(!st)
 		return;
 	
-	XSetTextProperty(wglobal.dpy, win, &prop, a);
+	XSetTextProperty(ioncore_g.dpy, win, &prop, a);
 	XFree(prop.value);
 }

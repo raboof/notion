@@ -16,7 +16,7 @@ SOURCES=init.c draw.c font.c colour.c brush.c fontset.c
 
 MODULE=de
 
-MAKE_EXPORTS=de_module
+MAKE_EXPORTS=de
 
 ######################################
 

@@ -23,7 +23,7 @@ INTRSTRUCT(Defer);
 	
 DECLSTRUCT(Defer){
 	WWatch watch;
-	DeferredAction *action;
+	WDeferredAction *action;
 	Defer *next, *prev;
 	void **list;
 };
@@ -67,7 +67,7 @@ static void free_defer(Defer *d)
 }
 
 
-static bool get_next(WObj **obj, DeferredAction **action, Defer **list)
+static bool get_next(WObj **obj, WDeferredAction **action, Defer **list)
 {
 	Defer *d=*list;
 	
@@ -77,7 +77,7 @@ static bool get_next(WObj **obj, DeferredAction **action, Defer **list)
 	UNLINK_ITEM(*list, d, next, prev);
 	*obj=d->watch.obj;
 	*action=d->action;
-	reset_watch(&(d->watch));
+	watch_reset(&(d->watch));
 	free_defer(d);
 	return TRUE;
 }
@@ -94,7 +94,8 @@ static void defer_watch_handler(WWatch *w, WObj *obj)
 }
 
 	
-bool defer_action_on_list(WObj *obj, DeferredAction *action, void **list)
+bool ioncore_defer_action_on_list(WObj *obj, WDeferredAction *action, 
+                                  void **list)
 {
 	Defer *d;
 	
@@ -109,7 +110,7 @@ bool defer_action_on_list(WObj *obj, DeferredAction *action, void **list)
 	d->list=list;
 	
 	if(obj!=NULL)
-		setup_watch(&(d->watch), obj, defer_watch_handler);
+		watch_setup(&(d->watch), obj, defer_watch_handler);
 	
 	LINK_ITEM(*(Defer**)list, d, next, prev);
 	
@@ -117,22 +118,22 @@ bool defer_action_on_list(WObj *obj, DeferredAction *action, void **list)
 }
 
 
-bool defer_action(WObj *obj, DeferredAction *action)
+bool ioncore_defer_action(WObj *obj, WDeferredAction *action)
 {
-	return defer_action_on_list(obj, action, (void**)&deferred);
+	return ioncore_defer_action_on_list(obj, action, (void**)&deferred);
 }
 
 
-bool defer_destroy(WObj *obj)
+bool ioncore_defer_destroy(WObj *obj)
 {
-	if(WOBJ_IS_BEING_DESTROYED(obj))
+	if(OBJ_IS_BEING_DESTROYED(obj))
 		return FALSE;
 	
-	return defer_action(obj, destroy_obj);
+	return ioncore_defer_action(obj, destroy_obj);
 }
 	
 
-void execute_deferred_on_list(void **list)
+void ioncore_execute_deferred_on_list(void **list)
 {
 	WObj *obj;
 	void (*action)(WObj*);
@@ -142,7 +143,8 @@ void execute_deferred_on_list(void **list)
 }
 
 
-void execute_deferred()
+void ioncore_execute_deferred()
 {
-	execute_deferred_on_list((void**)&deferred);
+	ioncore_execute_deferred_on_list((void**)&deferred);
 }
+

@@ -81,11 +81,11 @@ bool region_is_tagged(WRegion *reg)
  * Untag all regions.
  */
 EXTL_EXPORT
-void clear_tags()
+void ioncore_clear_tags()
 {
 	WRegion *reg;
 	
-	ITERATE_OBJLIST(WRegion*, reg, taglist){
+	FOR_ALL_ON_OBJLIST(WRegion*, reg, taglist){
 		region_untag(reg);
 	}
 }
@@ -97,13 +97,13 @@ void clear_tags()
 /*{{{ Iteration */
 
 
-WRegion *tag_first()
+WRegion *ioncore_tags_first()
 {
 	return (WRegion*)objlist_init_iter(taglist);
 }
 
 
-WRegion *tag_take_first()
+WRegion *ioncore_tags_take_first()
 {
 	WRegion *reg=(WRegion*)objlist_init_iter(taglist);
 	
@@ -114,7 +114,7 @@ WRegion *tag_take_first()
 }
 
 
-WRegion *tag_next(WRegion *reg)
+WRegion *ioncore_tags_next(WRegion *reg)
 {
 	return (WRegion*)objlist_iter(taglist);
 }

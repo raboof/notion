@@ -19,10 +19,11 @@
 #include <ioncore/manage.h>
 #include <ioncore/extl.h>
 #include <ioncore/objlist.h>
+#include <ioncore/rectangle.h>
 
-INTROBJ(WFloatWS);
+INTRCLASS(WFloatWS);
 
-DECLOBJ(WFloatWS){
+DECLCLASS(WFloatWS){
 	WGenWS genws;
 	Window dummywin;
 	WRegion *managed_list;
@@ -38,11 +39,11 @@ extern WRegion *floatws_backcirculate(WFloatWS *ws);
 extern WRegion *floatws_load(WWindow *par, const WRectangle *geom, 
 							 ExtlTab tab);
 
-extern bool add_clientwin_floatws_transient(WClientWin *cwin, 
-											const WManageParams *param);
-
 extern WRegion* floatws_current(WFloatWS *floatws);
 
 extern WObjList *floatws_sticky_list;
+
+extern bool floatwsmod_clientwin_do_manage(WClientWin *cwin, 
+                                           const WManageParams *param);
 
 #endif /* ION_FLOATWS_FLOATWS_H */

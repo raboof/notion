@@ -16,7 +16,7 @@
 #include "objp.h"
 
 
-WObjDescr OBJDESCR(WObj)={"WObj", NULL, 0, NULL, NULL};
+WClassDescr CLASSDESCR(WObj)={"WObj", NULL, 0, NULL, NULL};
 
 
 static void do_watches(WObj *obj, bool call);
@@ -27,12 +27,12 @@ static void do_watches(WObj *obj, bool call);
 
 void destroy_obj(WObj *obj)
 {
-	WObjDescr *d;
+	WClassDescr *d;
 	
-	if(WOBJ_IS_BEING_DESTROYED(obj))
+	if(OBJ_IS_BEING_DESTROYED(obj))
 		return;
 	
-	obj->flags|=WOBJ_DEST;
+	obj->flags|=OBJ_DEST;
 	
 	do_watches(obj, TRUE);
 	
@@ -58,9 +58,9 @@ void destroy_obj(WObj *obj)
 /*{{{ is/cast */
 
 
-bool wobj_is(const WObj *obj, const WObjDescr *descr)
+bool obj_is(const WObj *obj, const WClassDescr *descr)
 {
-	WObjDescr *d;
+	WClassDescr *d;
 	
 	if(obj==NULL)
 		return FALSE;
@@ -76,9 +76,9 @@ bool wobj_is(const WObj *obj, const WObjDescr *descr)
 }
 
 
-bool wobj_is_str(const WObj *obj, const char *str)
+bool obj_is_str(const WObj *obj, const char *str)
 {
-	WObjDescr *d;
+	WClassDescr *d;
 	
 	if(obj==NULL || str==NULL)
 		return FALSE;
@@ -93,13 +93,13 @@ bool wobj_is_str(const WObj *obj, const char *str)
 	return FALSE;
 }
 
-#if 0
-const void *wobj_cast(const WObj *obj, const WObjDescr *descr)
+
+const void *obj_cast(const WObj *obj, const WClassDescr *descr)
 {
-	WObjDescr *d;
+	WClassDescr *d;
 	
 	if(obj==NULL)
-		return FALSE;
+		return NULL;
 	
 	d=obj->obj_type;
 	
@@ -110,7 +110,7 @@ const void *wobj_cast(const WObj *obj, const WObjDescr *descr)
 	}
 	return NULL;
 }
-#endif
+
 
 /*}}}*/
 
@@ -137,7 +137,7 @@ static int comp_fun(const void *a, const void *b)
 DynFun *lookup_dynfun(const WObj *obj, DynFun *func,
 					  bool *funnotfound)
 {
-	WObjDescr *descr;
+	WClassDescr *descr;
 	DynFunTab *df;
 	/*DynFunTab dummy={NULL, NULL};*/
 	/*dummy.func=func;*/
@@ -147,7 +147,7 @@ DynFun *lookup_dynfun(const WObj *obj, DynFun *func,
 	
 	descr=obj->obj_type;
 	
-	for(; descr!=&WObj_objdescr; descr=descr->ancestor){
+	for(; descr!=&WObj_classdescr; descr=descr->ancestor){
 		if(descr->funtab==NULL)
 			continue;
 		
@@ -220,12 +220,12 @@ bool has_dynfun(const WObj *obj, DynFun *func)
 /*{{{ Watches */
 
 
-bool setup_watch(WWatch *watch, WObj *obj, WWatchHandler *handler)
+bool watch_setup(WWatch *watch, WObj *obj, WWatchHandler *handler)
 {
-	if(WOBJ_IS_BEING_DESTROYED(obj))
+	if(OBJ_IS_BEING_DESTROYED(obj))
 		return FALSE;
 	
-	reset_watch(watch);
+	watch_reset(watch);
 	
 	watch->handler=handler;
 	LINK_ITEM(obj->obj_watches, watch, next, prev);
@@ -234,7 +234,7 @@ bool setup_watch(WWatch *watch, WObj *obj, WWatchHandler *handler)
 	return TRUE;
 }
 
-void do_reset_watch(WWatch *watch, bool call)
+void do_watch_reset(WWatch *watch, bool call)
 {
 	WWatchHandler *handler=watch->handler;
 	WObj *obj=watch->obj;
@@ -252,9 +252,9 @@ void do_reset_watch(WWatch *watch, bool call)
 }
 
 
-void reset_watch(WWatch *watch)
+void watch_reset(WWatch *watch)
 {
-	do_reset_watch(watch, FALSE);
+	do_watch_reset(watch, FALSE);
 }
 
 
@@ -272,19 +272,19 @@ static void do_watches(WObj *obj, bool call)
 	
 	while(watch!=NULL){
 		next=watch->next;
-		do_reset_watch(watch, call);
+		do_watch_reset(watch, call);
 		watch=next;
 	}
 }
 
 
-void call_watches(WObj *obj)
+void watch_calles(WObj *obj)
 {
 	do_watches(obj, FALSE);
 }
 
 
-void init_watch(WWatch *watch)
+void watch_init(WWatch *watch)
 {
 	watch->obj=NULL;
 	watch->next=NULL;

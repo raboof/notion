@@ -16,9 +16,10 @@
 #include "region.h"
 #include "resize.h"
 #include "sizehint.h"
+#include "region-iter.h"
 
 
-/*{{{ correct_size */
+/*{{{ xsizehints_correct */
 
 
 static void do_correct_aspect(int max_w, int max_h, int ax, int ay,
@@ -65,7 +66,7 @@ static void correct_aspect(int max_w, int max_h, const XSizeHints *hints,
 }
 
 
-void correct_size(int *wp, int *hp, const XSizeHints *hints, bool min)
+void xsizehints_correct(const XSizeHints *hints, int *wp, int *hp, bool min)
 {
 	int w=*wp;
 	int h=*hp;
@@ -108,18 +109,18 @@ void correct_size(int *wp, int *hp, const XSizeHints *hints, bool min)
 /*}}}*/
 
 
-/*{{{ get_sizehints */
+/*{{{ xwindow_get_sizehints */
 
-#define CWIN_MIN_W 0
-#define CWIN_MIN_H 0
+#define CLIENTWIN_MIN_W 0
+#define CLIENTWIN_MIN_H 0
 
-void get_sizehints(Window win, XSizeHints *hints)
+void xwindow_get_sizehints(Window win, XSizeHints *hints)
 {
 	int minh, minw;
 	long supplied=0;
 	
 	memset(hints, 0, sizeof(*hints));
-	XGetWMNormalHints(wglobal.dpy, win, hints, &supplied);
+	XGetWMNormalHints(ioncore_g.dpy, win, hints, &supplied);
 
 	if(!(hints->flags&PMinSize)){
 		if(hints->flags&PBaseSize){
@@ -174,13 +175,13 @@ void get_sizehints(Window win, XSizeHints *hints)
 /*}}}*/
 
 
-/*{{{ adjust_size_hints_for_managed */
+/*{{{ xsizehints_adjust_for */
 
 
 #define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
 
 
-void adjust_size_hints_for_managed(XSizeHints *hints, WRegion *list)
+void xsizehints_adjust_for(XSizeHints *hints, WRegion *list)
 {
 	WRegion *reg;
 	uint wdummy, hdummy;
@@ -220,7 +221,7 @@ void adjust_size_hints_for_managed(XSizeHints *hints, WRegion *list)
 /*{{{ account_gravity */
 
 
-int gravity_deltax(int gravity, int left, int right)
+int xgravity_deltax(int gravity, int left, int right)
 {
 	int woff=left+right;
 
@@ -242,7 +243,7 @@ int gravity_deltax(int gravity, int left, int right)
 }
 
 
-int gravity_deltay(int gravity, int top, int bottom)
+int xgravity_deltay(int gravity, int top, int bottom)
 {
 	int hoff=top+bottom;
 	

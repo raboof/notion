@@ -37,10 +37,6 @@ DECLSTRUCT(Edln){
 	EdlnUpdateHandler *ui_update;
 };
 
-#if 0
-bool edln_insch(Edln *edln, char ch);
-bool edln_ovrch(Edln *edln, char ch);
-#endif
 
 bool edln_insstr(Edln *edln, const char *str);
 bool edln_insstr_n(Edln *edln, const char *str, int len);
@@ -69,8 +65,8 @@ bool edln_init(Edln *edln, const char *dflt);
 void edln_deinit(Edln *edln);
 char* edln_finish(Edln *edln);
 
-void query_history_push(const char *str);
-const char *query_history_get(int n);
-void query_history_clear();
+void querymod_history_push(const char *str);
+const char *querymod_history_get(int n);
+void querymod_history_clear();
 
 #endif /* ION_QUERY_EDLN_H */

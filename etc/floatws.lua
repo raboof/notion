@@ -6,12 +6,12 @@
 -- on any object on the workspace.
 
 defbindings("WFloatWS", {
-    kpress(DEFAULT_MOD.."Tab", "circulate_and_raise"),
-    submap(DEFAULT_MOD.."K", { 
-        kpress("AnyModifier+Tab", "backcirculate_and_raise"),
+    kpress(MOD1.."Tab",		"WFloatWS.circulate_and_raise(_)"),
+    submap(MOD1.."K", { 
+        kpress("AnyModifier+Tab", "WFloatWS.backcirculate_and_raise(_)"),
     }),
-    kpress(DEFAULT_MOD.."P", "@sub", "lower"),
-    kpress(DEFAULT_MOD.."N", "@sub", "raise"),
+    kpress(MOD1.."P", 		"WRegion.lower(_sub)", "_sub:non-nil"),
+    kpress(MOD1.."N", 		"WRegion.raise(_sub)", "_sub:non-nil"),
 })
 
 
@@ -20,23 +20,15 @@ defbindings("WFloatWS", {
 -- ion-bindings.lua.
 
 defbindings("WFloatFrame", {
-    mpress("Button1@tab", "raise"),
-    mpress("Button1@border", "raise"),
-    mclick("Button1@tab", "p_switch_tab"),
-    mdrag("Button1@tab", "p_move"),
-    mdrag("Button1@border", "p_resize"),
-    mdblclick("Button1@tab", "toggle_shade"),
+    mdblclick("Button1@tab", 	"WFloatFrame.toggle_shade(_)"),
+    mpress("Button1@tab", 	"WFloatFrame.raise(_)"),
+    mpress("Button1@border", 	"WFloatFrame.raise(_)"),
+    mclick(MOD1.."Button1", 	"WFloatFrame.raise(_)"),
+    mclick(MOD1.."Button3", 	"WFloatFrame.lower(_)"),
+    mdrag("Button1@tab", 	"WFloatFrame.p_move(_)"),
+    mdrag(MOD1.."Button1", 	"WFloatFrame.p_move(_)"),
     
-    mclick(DEFAULT_MOD.."Button1", "raise"),
-    mdrag(DEFAULT_MOD.."Button1", "p_move"),
-    
-    mclick("Button2@tab", "p_switch_tab"),
-    mdrag("Button2@tab", "p_tabdrag"),
-    
-    mclick(DEFAULT_MOD.."Button3", "lower"),
-    mdrag(DEFAULT_MOD.."Button3", "p_resize"),
-
-    kpress(DEFAULT_MOD.."M", "menu", "ctxmenu-floatframe"),
-    mpress("Button3@tab", "pmenu", "ctxmenu-floatframe"),
+    kpress(MOD1.."M", 		"menulib.menu(_, _sub, 'ctxmenu-floatframe')"),
+    mpress("Button3@tab", 	"menulib.pmenu(_, _sub, 'ctxmenu-floatframe')"),
 })
 

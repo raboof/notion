@@ -14,13 +14,15 @@
 
 #include "common.h"
 #include "rootwin.h"
+#include "extl.h"
 
-extern void do_exec(const char *cmd);
-extern bool exec_on_rootwin(WRootWin *rootwin, const char *cmd);
-extern bool exec(const char *cmd);
-extern void restart_other_wm(const char *cmd);
-extern void restart_wm();
-extern void exit_wm();
-extern void setup_environ(int scr);
+extern void ioncore_do_exec(const char *cmd);
+extern bool ioncore_exec_on_rootwin(WRootWin *rootwin, const char *cmd);
+extern bool ioncore_exec(const char *cmd);
+extern void ioncore_restart_other(const char *cmd);
+extern void ioncore_restart();
+extern void ioncore_exit();
+extern void ioncore_setup_environ(int scr);
+extern bool ioncore_popen_bgread(const char *cmd, ExtlFn handler);
 
 #endif /* ION_IONCORE_EXEC_H */

@@ -27,9 +27,9 @@ extern const char *region_name(WRegion *reg);
 
 extern char *region_make_label(WRegion *reg, int maxw, GrBrush *brush);
 
-extern WRegion *lookup_region(const char *cname, const char *typenam);
-extern ExtlTab complete_region(const char *nam, const char *typenam);
-extern WClientWin *lookup_clientwin(const char *cname);
-extern ExtlTab complete_clientwin(const char *nam);
+extern ExtlTab ioncore_complete_region(const char *nam, const char *typenam);
+extern ExtlTab ioncore_complete_clientwin(const char *nam);
+extern WRegion *ioncore_lookup_region(const char *cname, const char *typenam);
+extern WClientWin *ioncore_lookup_clientwin(const char *cname);
 
 #endif /* ION_IONCORE_NAMES_H */

@@ -17,6 +17,7 @@
 #include "modules.h"
 #include "readconfig.h"
 #include "gr.h"
+#include "objp.h"
 
 
 /*{{{ Lookup and registration */
@@ -105,7 +106,7 @@ static bool gr_do_select_engine(const char *engine)
  * colour scheme etc. configuration files and can not be used to change the
  * look of existing objects; for that use \fnref{reread_draw_config}.
  */
-EXTL_EXPORT
+EXTL_EXPORT_AS(gr, select_engine)
 bool gr_select_engine(const char *engine)
 {
 	if(engine==NULL)
@@ -114,7 +115,7 @@ bool gr_select_engine(const char *engine)
 	if(gr_do_select_engine(engine))
 		return TRUE;
 	
-	if(!load_module(engine))
+	if(!ioncore_load_module(engine))
 		return FALSE;
 	
 	if(!gr_do_select_engine(engine)){
@@ -385,16 +386,16 @@ void grbrush_clear_area(GrBrush *brush, Window win, const WRectangle *geom)
 /*}}}*/
 
 
-/*{{{ read_config/refresh */
+/*{{{ ioncore_read_config/refresh */
 
 
 /*EXTL_DOC
  * Read drawing engine configuration file \file{draw.lua}.
  */
-EXTL_EXPORT
+EXTL_EXPORT_AS(gr, read_config)
 void gr_read_config()
 {
-	read_config("draw");
+	ioncore_read_config("draw", NULL, TRUE);
 	
 	/* If nothing has been loaded, try the default engine with
 	 * default settings.
@@ -409,7 +410,7 @@ void gr_read_config()
 /*EXTL_DOC
  * Refresh objects' brushes to update them to use newly loaded style.
  */
-EXTL_EXPORT
+EXTL_EXPORT_AS(gr, refresh)
 void gr_refresh()
 {
 	WRootWin *rootwin;
@@ -431,7 +432,7 @@ static DynFunTab grbrush_dynfuntab[]={
 };
 									   
 
-IMPLOBJ(GrBrush, WObj, grbrush_deinit, grbrush_dynfuntab);
+IMPLCLASS(GrBrush, WObj, grbrush_deinit, grbrush_dynfuntab);
 
 
 /*}}}*/

@@ -57,7 +57,7 @@ DEFont *de_load_font(const char *fontname)
 		}
 	}
 	
-	if(wglobal.use_mb){
+	if(ioncore_g.use_mb){
 		fontset=de_create_font_set(fontname);
 		if(fontset!=NULL){
 			if(XContextDependentDrawing(fontset)){
@@ -67,7 +67,7 @@ DEFont *de_load_font(const char *fontname)
 			}
 		}
 	}else{
-		fontstruct=XLoadQueryFont(wglobal.dpy, fontname);
+		fontstruct=XLoadQueryFont(ioncore_g.dpy, fontname);
 	}
 	
 	if(fontstruct==NULL && fontset==NULL){
@@ -108,7 +108,7 @@ bool de_set_font_for_style(DEStyle *style, DEFont *font)
     font->refcount++;
     
 	if(style->font->fontstruct!=NULL){
-		XSetFont(wglobal.dpy, style->normal_gc, 
+		XSetFont(ioncore_g.dpy, style->normal_gc, 
 				 style->font->fontstruct->fid);
 	}
 
@@ -127,7 +127,7 @@ bool de_load_font_for_style(DEStyle *style, const char *fontname)
 		return FALSE;
 	
 	if(style->font->fontstruct!=NULL){
-		XSetFont(wglobal.dpy, style->normal_gc, 
+		XSetFont(ioncore_g.dpy, style->normal_gc, 
 				 style->font->fontstruct->fid);
 	}
 	
@@ -141,9 +141,9 @@ void de_free_font(DEFont *font)
 		return;
 	
 	if(font->fontset!=NULL)
-		XFreeFontSet(wglobal.dpy, font->fontset);
+		XFreeFontSet(ioncore_g.dpy, font->fontset);
 	if(font->fontstruct!=NULL)
-		XFreeFont(wglobal.dpy, font->fontstruct);
+		XFreeFont(ioncore_g.dpy, font->fontstruct);
 	if(font->pattern!=NULL)
 		free(font->pattern);
 	
@@ -206,7 +206,7 @@ uint defont_get_text_width(DEFont *font, const char *text, uint len)
 	if(font->fontset!=NULL){
 		XRectangle lext;
 #ifdef CF_DE_USE_XUTF8
-		if(wglobal.enc_utf8)
+		if(ioncore_g.enc_utf8)
 			Xutf8TextExtents(font->fontset, text, len, NULL, &lext);
 		else
 #endif
@@ -235,34 +235,34 @@ void debrush_do_draw_string(DEBrush *brush, Window win, int x, int y,
 	if(brush->d->font==NULL)
 		return;
 	
-	XSetForeground(wglobal.dpy, gc, colours->fg);
+	XSetForeground(ioncore_g.dpy, gc, colours->fg);
 	
 	if(!needfill){
 		if(brush->d->font->fontset!=NULL){
 #ifdef CF_DE_USE_XUTF8
-			if(wglobal.enc_utf8)
-				Xutf8DrawString(wglobal.dpy, win, brush->d->font->fontset,
+			if(ioncore_g.enc_utf8)
+				Xutf8DrawString(ioncore_g.dpy, win, brush->d->font->fontset,
 								gc, x, y, str, len);
 			else
 #endif
-				XmbDrawString(wglobal.dpy, win, brush->d->font->fontset,
+				XmbDrawString(ioncore_g.dpy, win, brush->d->font->fontset,
 							  gc, x, y, str, len);
 		}else if(brush->d->font->fontstruct!=NULL){
-			XDrawString(wglobal.dpy, win, gc, x, y, str, len);
+			XDrawString(ioncore_g.dpy, win, gc, x, y, str, len);
 		}
 	}else{
-		XSetBackground(wglobal.dpy, gc, colours->bg);
+		XSetBackground(ioncore_g.dpy, gc, colours->bg);
 		if(brush->d->font->fontset!=NULL){
 #ifdef CF_DE_USE_XUTF8
-			if(wglobal.enc_utf8)
-				Xutf8DrawImageString(wglobal.dpy, win, brush->d->font->fontset,
+			if(ioncore_g.enc_utf8)
+				Xutf8DrawImageString(ioncore_g.dpy, win, brush->d->font->fontset,
 									 gc, x, y, str, len);
 			else
 #endif
-				XmbDrawImageString(wglobal.dpy, win, brush->d->font->fontset,
+				XmbDrawImageString(ioncore_g.dpy, win, brush->d->font->fontset,
 								   gc, x, y, str, len);
 		}else if(brush->d->font->fontstruct!=NULL){
-			XDrawImageString(wglobal.dpy, win, gc, x, y, str, len);
+			XDrawImageString(ioncore_g.dpy, win, gc, x, y, str, len);
 		}
 	}
 }

@@ -15,12 +15,13 @@
 #include <ioncore/common.h>
 #include <ioncore/obj.h>
 #include <ioncore/window.h>
+#include <ioncore/rectangle.h>
 #include "listing.h"
 #include "input.h"
 
-INTROBJ(WMessage);
+INTRCLASS(WMessage);
 
-DECLOBJ(WMessage){
+DECLCLASS(WMessage){
 	WInput input;
 	WListing listing;
 };

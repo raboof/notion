@@ -81,9 +81,9 @@ SOME OPTIONAL INSTALLATION STEPS
    It may also be useful to run ion-completeman with the suitable
    '-mk*cache' argument once manually to build the initial cache.
    
-   If the MANPATH environment variable is not set on your system does and
-   it does not have the 'manpath' command (or it does not print anything 
-   sensible), you may also with to set the ION_MC_MANPATH environment
+   If the MANPATH environment variable is not set on your system and it
+    does not have the 'manpath' command (or it does not print anything 
+   sensible), you may also want to set the ION_MC_MANPATH environment
    variable to the list of paths where the system stores manual pages.
 
 

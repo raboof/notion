@@ -13,19 +13,19 @@ DEFAULT_WS_TYPE="WFloatWS"
 
 -- Maximum delay between clicks in milliseconds to be considered a
 -- double click.
---set_dblclick_delay(250)
+--ioncore.set_dblclick_delay(250)
 
 -- For keyboard resize, time (in milliseconds) to wait after latest
 -- key press before automatically leaving resize mode (and doing
 -- the resize in case of non-opaque move).
---set_resize_delay(1500)
+--ioncore.set_resize_delay(1500)
 
 -- Opaque resize?
-enable_opaque_resize(false)
+ioncore.set_opaque_resize(false)
 
 -- Movement commands warp the pointer to frames instead of just
 -- changing focus. Enabled by default.
-enable_warp(false)
+ioncore.set_warp(false)
 
 -- Kludges to make apps behave better.
 include("kludges")
@@ -43,16 +43,16 @@ include("pwm-menus")
 -- How to shorten window titles when the full title doesn't fit in
 -- the available space? The first-defined matching rule that succeeds 
 -- in making the title short enough is used.
-add_shortenrule("(.*) - Mozilla(<[0-9]+>)", "$1$2$|$1$<...$2")
-add_shortenrule("(.*) - Mozilla", "$1$|$1$<...")
-add_shortenrule("XMMS - (.*)", "$1$|...$>$1")
-add_shortenrule("[^:]+: (.*)(<[0-9]+>)", "$1$2$|$1$<...$2")
-add_shortenrule("[^:]+: (.*)", "$1$|$1$<...")
-add_shortenrule("(.*)(<[0-9]+>)", "$1$2$|$1$<...$2")
-add_shortenrule("(.*)", "$1$|$1$<...")
+ioncore.add_shortenrule("(.*) - Mozilla(<[0-9]+>)", "$1$2$|$1$<...$2")
+ioncore.add_shortenrule("(.*) - Mozilla", "$1$|$1$<...")
+ioncore.add_shortenrule("XMMS - (.*)", "$1$|...$>$1")
+ioncore.add_shortenrule("[^:]+: (.*)(<[0-9]+>)", "$1$2$|$1$<...$2")
+ioncore.add_shortenrule("[^:]+: (.*)", "$1$|$1$<...")
+ioncore.add_shortenrule("(.*)(<[0-9]+>)", "$1$2$|$1$<...$2")
+ioncore.add_shortenrule("(.*)", "$1$|$1$<...")
 
 -- Modules.
-load_module("floatws")
-load_module("menu")
---load_module("query")
-load_module("dock")
+ioncore.load_module("floatwsmod")
+ioncore.load_module("menumod")
+--ioncore.load_module("querymod")
+ioncore.load_module("dockmod")

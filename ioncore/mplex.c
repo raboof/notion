@@ -31,11 +31,12 @@
 #include "frame-pointer.h"
 #include "bindmaps.h"
 #include "regbind.h"
+#include "region-iter.h"
 
 
-#define WMPLEX_WIN(MPLEX) ((MPLEX)->win.win)
-#define WMPLEX_MGD_UNVIEWABLE(MPLEX) \
-			((MPLEX)->flags&WMPLEX_MANAGED_UNVIEWABLE)
+#define MPLEX_WIN(MPLEX) ((MPLEX)->win.win)
+#define MPLEX_MGD_UNVIEWABLE(MPLEX) \
+			((MPLEX)->flags&MPLEX_MANAGED_UNVIEWABLE)
 
 
 /*{{{ Destroy/create mplex */
@@ -98,7 +99,7 @@ static void link_at(WMPlex *mplex, WRegion *reg, int index)
 	if(index>0){
 		after=mplex_nth_managed(mplex, index-1);
 	}else if(index<0){
-		if(!(mplex->flags&WMPLEX_ADD_TO_END) && wglobal.opmode!=OPMODE_INIT)
+		if(!(mplex->flags&MPLEX_ADD_TO_END) && ioncore_g.opmode!=IONCORE_OPMODE_INIT)
 			after=mplex->current_sub;
 	}
 
@@ -170,12 +171,12 @@ static void reparent_or_fit(WMPlex *mplex, const WRectangle *geom,
 	
 	if(parent!=NULL){
 		region_detach_parent((WRegion*)mplex);
-		XReparentWindow(wglobal.dpy, WMPLEX_WIN(mplex), parent->win,
+		XReparentWindow(ioncore_g.dpy, MPLEX_WIN(mplex), parent->win,
 						geom->x, geom->y);
-		XResizeWindow(wglobal.dpy, WMPLEX_WIN(mplex), geom->w, geom->h);
+		XResizeWindow(ioncore_g.dpy, MPLEX_WIN(mplex), geom->w, geom->h);
 		region_attach_parent((WRegion*)mplex, (WRegion*)parent);
 	}else{
-		XMoveResizeWindow(wglobal.dpy, WMPLEX_WIN(mplex),
+		XMoveResizeWindow(ioncore_g.dpy, MPLEX_WIN(mplex),
 						  geom->x, geom->y, geom->w, geom->h);
 	}
 	
@@ -193,7 +194,7 @@ static void reparent_or_fit(WMPlex *mplex, const WRectangle *geom,
 
 bool mplex_reparent(WMPlex *mplex, WWindow *parent, const WRectangle *geom)
 {
-	if(!same_rootwin((WRegion*)mplex, (WRegion*)parent))
+	if(!region_same_rootwin((WRegion*)mplex, (WRegion*)parent))
 		return FALSE;
 	
 	reparent_or_fit(mplex, geom, parent);
@@ -212,7 +213,7 @@ void mplex_fit_managed(WMPlex *mplex)
 	WRectangle geom;
 	WRegion *sub;
 	
-	if(WMPLEX_MGD_UNVIEWABLE(mplex))
+	if(MPLEX_MGD_UNVIEWABLE(mplex))
 		return;
 	
 	mplex_managed_geom(mplex, &geom);
@@ -254,7 +255,7 @@ void mplex_map(WMPlex *mplex)
 	/* A lame requirement of the ICCCM is that client windows should be
 	 * unmapped if the parent is unmapped.
 	 */
-	if(mplex->current_sub!=NULL && !WMPLEX_MGD_UNVIEWABLE(mplex))
+	if(mplex->current_sub!=NULL && !MPLEX_MGD_UNVIEWABLE(mplex))
 		region_map(mplex->current_sub);
 }
 
@@ -276,24 +277,24 @@ void mplex_unmap(WMPlex *mplex)
 /*{{{ Focus  */
 
 
-static void mplex_set_focus_to(WMPlex *mplex, bool warp)
+void mplex_do_set_focus(WMPlex *mplex, bool warp)
 {
-	if(!WMPLEX_MGD_UNVIEWABLE(mplex) && mplex->current_input!=NULL){
-		region_set_focus_to((WRegion*)mplex->current_input, FALSE);
-	}else if(!WMPLEX_MGD_UNVIEWABLE(mplex) && mplex->current_sub!=NULL){
+	if(!MPLEX_MGD_UNVIEWABLE(mplex) && mplex->current_input!=NULL){
+		region_do_set_focus((WRegion*)mplex->current_input, FALSE);
+	}else if(!MPLEX_MGD_UNVIEWABLE(mplex) && mplex->current_sub!=NULL){
 		/* Allow workspaces to position cursor to their liking. */
-		if(warp && WOBJ_IS(mplex->current_sub, WGenWS)){
-			region_set_focus_to(mplex->current_sub, TRUE);
+		if(warp && OBJ_IS(mplex->current_sub, WGenWS)){
+			region_do_set_focus(mplex->current_sub, TRUE);
 			return;
 		}else{
-			region_set_focus_to(mplex->current_sub, FALSE);
+			region_do_set_focus(mplex->current_sub, FALSE);
 		}
 	}else{
-		SET_FOCUS(WMPLEX_WIN(mplex));
+		xwindow_do_set_focus(MPLEX_WIN(mplex));
 	}
 
 	if(warp)
-		do_warp((WRegion*)mplex);
+		region_do_warp((WRegion*)mplex);
 }
 	
 
@@ -316,7 +317,7 @@ static bool mplex_do_display_managed(WMPlex *mplex, WRegion *sub)
 	if(sub==mplex->current_sub || sub==mplex->current_input)
 		return TRUE;
 
-	if(REGION_IS_MAPPED(mplex) && !WMPLEX_MGD_UNVIEWABLE(mplex))
+	if(REGION_IS_MAPPED(mplex) && !MPLEX_MGD_UNVIEWABLE(mplex))
 		region_map(sub);
 	else
 		region_unmap(sub);
@@ -334,7 +335,7 @@ static bool mplex_do_display_managed(WMPlex *mplex, WRegion *sub)
 	region_lower(sub);
 
 	if(region_may_control_focus((WRegion*)mplex))
-		warp((WRegion*)mplex);
+		region_warp((WRegion*)mplex);
 	
 	return TRUE;
 }
@@ -357,10 +358,10 @@ bool mplex_display_managed(WMPlex *mplex, WRegion *sub)
 EXTL_EXPORT_MEMBER
 WRegion *mplex_nth_managed(WMPlex *mplex, uint n)
 {
-	WRegion *reg=FIRST_MANAGED(mplex->managed_list);
+	WRegion *reg=REGION_FIRST_MANAGED(mplex->managed_list);
 	
 	while(n-->0 && reg!=NULL)
-		reg=NEXT_MANAGED(mplex->managed_list, reg);
+		reg=REGION_NEXT_MANAGED(mplex->managed_list, reg);
 	
 	return reg;
 }
@@ -390,8 +391,8 @@ void mplex_switch_nth(WMPlex *mplex, uint n)
 EXTL_EXPORT_MEMBER
 void mplex_switch_next(WMPlex *mplex)
 {
-	do_switch(mplex, NEXT_MANAGED_WRAP(mplex->managed_list, 
-									   mplex->current_sub));
+	do_switch(mplex, REGION_NEXT_MANAGED_WRAP(mplex->managed_list, 
+                                              mplex->current_sub));
 }
 
 
@@ -402,8 +403,8 @@ void mplex_switch_next(WMPlex *mplex)
 EXTL_EXPORT_MEMBER
 void mplex_switch_prev(WMPlex *mplex)
 {
-	do_switch(mplex, PREV_MANAGED_WRAP(mplex->managed_list, 
-									   mplex->current_sub));
+	do_switch(mplex, REGION_PREV_MANAGED_WRAP(mplex->managed_list, 
+                                              mplex->current_sub));
 }
 
 
@@ -461,9 +462,9 @@ bool mplex_attach_simple(WMPlex *mplex, WRegion *reg, bool switchto)
 	par.index=-1;
 	par.switchto=switchto;
 	
-	return attach_reparent_helper((WRegion*)mplex, reg,
-								  (WRegionDoAttachFn*)mplex_do_attach, 
-								  &par);
+	return region__attach_reparent((WRegion*)mplex, reg,
+                                   (WRegionDoAttachFn*)mplex_do_attach, 
+                                   &par);
 }
 
 
@@ -475,9 +476,9 @@ WRegion *mplex_attach_new_simple(WMPlex *mplex, WRegionSimpleCreateFn *fn,
 	par.index=-1;
 	par.switchto=switchto;
 	
-	return attach_new_helper((WRegion*)mplex, fn,
-							 (WRegionDoAttachFn*)mplex_do_attach, 
-							 &par);
+	return region__attach_new((WRegion*)mplex, fn,
+                              (WRegionDoAttachFn*)mplex_do_attach, 
+                              &par);
 }
 
 
@@ -503,9 +504,9 @@ bool mplex_attach(WMPlex *mplex, WRegion *reg, ExtlTab param)
 	if(reg==(WRegion*)mplex)
 		return FALSE;
 	
-	return attach_reparent_helper((WRegion*)mplex, reg,
-								  (WRegionDoAttachFn*)mplex_do_attach, 
-								  &par);
+	return region__attach_reparent((WRegion*)mplex, reg,
+                                   (WRegionDoAttachFn*)mplex_do_attach, 
+                                   &par);
 }
 
 
@@ -533,9 +534,9 @@ WRegion *mplex_attach_new(WMPlex *mplex, ExtlTab param)
 	MPlexAttachParams par;
 	get_params(param, &par);
 	
-	return attach_load_helper((WRegion*)mplex, param,
-							  (WRegionDoAttachFn*)mplex_do_attach, 
-							  &par);
+	return region__attach_load((WRegion*)mplex, param,
+                               (WRegionDoAttachFn*)mplex_do_attach, 
+                               &par);
 }
 
 
@@ -547,7 +548,7 @@ void mplex_attach_tagged(WMPlex *mplex)
 {
 	WRegion *reg;
 	
-	while((reg=tag_take_first())!=NULL)
+	while((reg=ioncore_tags_take_first())!=NULL)
 		mplex_attach_simple(mplex, reg, FALSE);
 }
 
@@ -559,7 +560,7 @@ static bool mplex_handle_drop(WMPlex *mplex, int x, int y,
 	   HAS_DYN(mplex->current_sub, region_handle_drop)){
 		int rx, ry;
 		region_rootpos(mplex->current_sub, &rx, &ry);
-		if(coords_in_rect(&REGION_GEOM(mplex->current_sub), x-rx, y-ry)){
+		if(rectangle_contains(&REGION_GEOM(mplex->current_sub), x-rx, y-ry)){
 			if(region_handle_drop(mplex->current_sub, x, y, dropped))
 				return TRUE;
 		}
@@ -586,16 +587,16 @@ static void mplex_do_remove(WMPlex *mplex, WRegion *sub)
 	WRegion *next=NULL;
 	
 	if(mplex->current_sub==sub){
-		next=PREV_MANAGED(mplex->managed_list, sub);
+		next=REGION_PREV_MANAGED(mplex->managed_list, sub);
 		if(next==NULL)
-			next=NEXT_MANAGED(mplex->managed_list, sub);
+			next=REGION_NEXT_MANAGED(mplex->managed_list, sub);
 		mplex->current_sub=NULL;
 	}
 	
 	region_unset_manager(sub, (WRegion*)mplex, &(mplex->managed_list));
 	mplex->managed_count--;
 	
-	if(!WOBJ_IS_BEING_DESTROYED(mplex)){
+	if(!OBJ_IS_BEING_DESTROYED(mplex)){
 		bool sw=(next!=NULL || mplex->managed_count==0);
 		if(next!=NULL)
 			mplex_do_display_managed(mplex, next);
@@ -610,7 +611,7 @@ void mplex_remove_managed(WMPlex *mplex, WRegion *reg)
 		region_unset_manager(reg, (WRegion*)mplex, NULL);
 		mplex->current_input=NULL;
 		if(region_may_control_focus((WRegion*)mplex))
-			set_focus((WRegion*)mplex);
+			region_set_focus((WRegion*)mplex);
 	}else{
 		mplex_do_remove(mplex, reg);
 	}
@@ -651,7 +652,7 @@ WRegion *mplex_add_input(WMPlex *mplex, WRegionAttachHandler *fn, void *fnp)
 	WRectangle geom;
 	WRegion *sub;
 	
-	if(mplex->current_input!=NULL || WMPLEX_MGD_UNVIEWABLE(mplex))
+	if(mplex->current_input!=NULL || MPLEX_MGD_UNVIEWABLE(mplex))
 		return NULL;
 	
 	mplex_managed_geom(mplex, &geom);
@@ -666,7 +667,7 @@ WRegion *mplex_add_input(WMPlex *mplex, WRegionAttachHandler *fn, void *fnp)
 	region_map(sub);
 	
 	if(region_may_control_focus((WRegion*)mplex))
-		set_focus(sub);
+		region_set_focus(sub);
 
 	return sub;
 }
@@ -741,7 +742,7 @@ static DynFunTab mplex_dynfuntab[]={
 	{region_fit, mplex_fit},
 	{(DynFun*)region_reparent, (DynFun*)mplex_reparent},
 
-	{region_set_focus_to, mplex_set_focus_to},
+	{region_do_set_focus, mplex_do_set_focus},
 	{(DynFun*)region_control_managed_focus,
 	 (DynFun*)mplex_managed_focus},
 	
@@ -767,7 +768,7 @@ static DynFunTab mplex_dynfuntab[]={
 };
 									   
 
-IMPLOBJ(WMPlex, WWindow, mplex_deinit, mplex_dynfuntab);
+IMPLCLASS(WMPlex, WWindow, mplex_deinit, mplex_dynfuntab);
 
 
 /*}}}*/

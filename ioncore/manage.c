@@ -25,13 +25,14 @@
 /*{{{ Add */
 
 
-WScreen *find_suitable_screen(WClientWin *cwin, const WManageParams *param)
+WScreen *clientwin_find_suitable_screen(WClientWin *cwin, 
+                                        const WManageParams *param)
 {
 	WScreen *scr=NULL, *found=NULL;
 	bool respectpos=(param->tfor!=NULL || param->userpos);
 	
 	FOR_ALL_SCREENS(scr){
-		if(!same_rootwin((WRegion*)scr, (WRegion*)cwin))
+		if(!region_same_rootwin((WRegion*)scr, (WRegion*)cwin))
 			continue;
 		if(REGION_IS_ACTIVE(scr)){
 			found=scr;
@@ -39,7 +40,7 @@ WScreen *find_suitable_screen(WClientWin *cwin, const WManageParams *param)
 				break;
 		}
 		
-		if(coords_in_rect(&REGION_GEOM(scr), param->geom.x, param->geom.y)){
+		if(rectangle_contains(&REGION_GEOM(scr), param->geom.x, param->geom.y)){
 			found=scr;
 			if(respectpos)
 				break;
@@ -66,7 +67,7 @@ static bool try_manage(WRegion *reg, WClientWin *cwin,
 			return TRUE;
 	}
 
-	if(WOBJ_IS(reg, WGenWS))
+	if(OBJ_IS(reg, WGenWS))
 		*triedws=TRUE;
 	
 	if(!*triedws)
@@ -76,7 +77,8 @@ static bool try_manage(WRegion *reg, WClientWin *cwin,
 }
 
 
-bool add_clientwin_default(WClientWin *cwin, const WManageParams *param)
+bool clientwin_do_manage_default(WClientWin *cwin, 
+                                 const WManageParams *param)
 {
 	WRegion *r=NULL, *r2;
 	WScreen *scr=NULL;
@@ -106,7 +108,7 @@ bool add_clientwin_default(WClientWin *cwin, const WManageParams *param)
 		return TRUE;
 
 	/* Find a suitable screen */
-	scr=find_suitable_screen(cwin, param);
+	scr=clientwin_find_suitable_screen(cwin, param);
 	if(scr==NULL){
 		warn("Unable to find a screen for a new client window.");
 		return FALSE;
@@ -117,7 +119,7 @@ bool add_clientwin_default(WClientWin *cwin, const WManageParams *param)
 	
 	if(clientwin_get_transient_mode(cwin)==TRANSIENT_MODE_CURRENT){
 		WRegion *r=mplex_current((WMPlex*)scr);
-		if(r!=NULL && WOBJ_IS(r, WClientWin)){
+		if(r!=NULL && OBJ_IS(r, WClientWin)){
 			if(clientwin_attach_transient((WClientWin*)r, (WRegion*)cwin)){
 				return TRUE;
 			}

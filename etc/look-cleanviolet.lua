@@ -3,15 +3,15 @@
 -- Based on look-clean and look-violetgrey.
 -- 
 
-if not gr_select_engine("de") then
+if not gr.select_engine("de") then
     return
 end
 
 -- Clear existing styles from memory.
-de_reset()
+de.reset()
 
 -- Base style
-de_define_style("*", {
+de.defstyle("*", {
     -- Gray background
     highlight_colour = "#eeeeee",
     shadow_colour = "#eeeeee",
@@ -29,7 +29,7 @@ de_define_style("*", {
 })
 
 
-de_define_style("frame", {
+de.defstyle("frame", {
     based_on = "*",
     padding_colour = "#aaaaaa",
     background_colour = "#000000",
@@ -37,7 +37,7 @@ de_define_style("frame", {
 })
 
 
-de_define_style("frame-ionframe", {
+de.defstyle("frame-ionframe", {
     based_on = "frame",
     shadow_pixels = 0,
     highlight_pixels = 0,
@@ -46,11 +46,11 @@ de_define_style("frame-ionframe", {
 })
 
 
-de_define_style("tab", {
+de.defstyle("tab", {
     based_on = "*",
     font = "-*-helvetica-medium-r-normal-*-12-*-*-*-*-*-*-*",
     
-    de_substyle("active-selected", {
+    de.substyle("active-selected", {
         -- Violet tab
         highlight_colour = "#aaaacc",
         shadow_colour = "#aaaacc",
@@ -58,7 +58,7 @@ de_define_style("tab", {
         foreground_colour = "#eeeeee",
     }),
 
-    de_substyle("inactive-selected", {
+    de.substyle("inactive-selected", {
         -- Greyish violet tab
         highlight_colour = "#eeeeff",
         shadow_colour = "#eeeeff",
@@ -68,10 +68,10 @@ de_define_style("tab", {
 })
 
 
-de_define_style("tab-frame", {
+de.defstyle("tab-frame", {
     based_on = "tab",
 
-    de_substyle("*-*-*-*-activity", {
+    de.substyle("*-*-*-*-activity", {
         -- Red tab
         highlight_colour = "#eeeeff",
         shadow_colour = "#eeeeff",
@@ -81,28 +81,28 @@ de_define_style("tab-frame", {
 })
 
 
-de_define_style("tab-frame-ionframe", {
+de.defstyle("tab-frame-ionframe", {
     based_on = "tab-frame",
     spacing = 1,
     bar_inside_frame = true,
 })
 
 
-de_define_style("tab-menuentry", {
+de.defstyle("tab-menuentry", {
     based_on = "tab",
     text_align = "left",
     spacing = 1,
 })
 
 
-de_define_style("tab-menuentry-big", {
+de.defstyle("tab-menuentry-big", {
     based_on = "tab-menuentry",
     font = "-*-helvetica-medium-r-normal-*-17-*-*-*-*-*-*-*",
     padding_pixels = 7,
 })
 
 
-de_define_style("input", {
+de.defstyle("input", {
     based_on = "*",
     text_align = "left",
     spacing = 1,
@@ -112,12 +112,12 @@ de_define_style("input", {
     background_colour = "#9999aa",
     foreground_colour = "#000000",
     
-    de_substyle("*-selection", {
+    de.substyle("*-selection", {
         background_colour = "#777799",
         foreground_colour = "#000000",
     }),
 
-    de_substyle("*-cursor", {
+    de.substyle("*-cursor", {
         background_colour = "#000000",
         foreground_colour = "#9999aa",
     }),
@@ -125,4 +125,4 @@ de_define_style("input", {
 
     
 -- Refresh objects' brushes.
-gr_refresh()
+gr.refresh()

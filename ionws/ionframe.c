@@ -20,13 +20,15 @@
 #include <ioncore/resize.h>
 #include <ioncore/extl.h>
 #include <ioncore/strings.h>
+#include <ioncore/region-iter.h>
+#include <ioncore/defer.h>
 
 #include "ionframe.h"
+#include "ionws.h"
 #include "bindmaps.h"
-#include "splitframe.h"
 
 
-#define BAR_INSIDE_BORDER(FRAME) (!((FRAME)->frame.flags&WFRAME_BAR_OUTSIDE))
+#define BAR_INSIDE_BORDER(FRAME) (!((FRAME)->frame.flags&FRAME_BAR_OUTSIDE))
 #define BAR_OFF(FRAME) (0)
 
 
@@ -118,9 +120,9 @@ static void ionframe_brushes_updated(WIonFrame *frame)
                       "ionframe_bar_inside_border", 'b', &b);
 	
 	if(b)
-		frame->frame.flags&=~WFRAME_BAR_OUTSIDE;
+		frame->frame.flags&=~FRAME_BAR_OUTSIDE;
 	else
-		frame->frame.flags|=WFRAME_BAR_OUTSIDE;
+		frame->frame.flags|=FRAME_BAR_OUTSIDE;
 }
 
 
@@ -133,6 +135,83 @@ static const char *ionframe_style(WIonFrame *frame)
 static const char *ionframe_tab_style(WIonFrame *frame)
 {
 	return "tab-frame-ionframe";
+}
+
+
+/*}}}*/
+
+
+/*{{{ Close */
+
+
+/*EXTL_DOC
+ * Try to relocate regions managed by \var{frame} somewhere else
+ * and if possible, destroy the frame.
+ */
+EXTL_EXPORT_MEMBER
+void ionframe_relocate_and_close(WIonFrame *frame)
+{
+	if(!region_may_destroy((WRegion*)frame)){
+		warn("Frame may not be destroyed");
+		return;
+	}
+
+	if(!region_rescue_clientwins((WRegion*)frame)){
+		warn("Failed to rescue managed objects.");
+		return;
+	}
+
+	ioncore_defer_destroy((WObj*)frame);
+}
+
+
+void ionframe_close(WIonFrame *frame)
+{
+	if(FRAME_MCOUNT(frame)!=0 || FRAME_CURRENT(frame)!=NULL){
+		warn("Frame not empty.");
+		return;
+	}
+	
+	ionframe_relocate_and_close(frame);
+}
+
+
+/*}}}*/
+
+
+/*{{{ Split */
+
+
+/*EXTL_DOC
+ * Split \var{frame} creating a new WIonFrame to direction \var{dir}
+ * (one of ''left'', ''right'', ''top'' or ''bottom'') of \var{frame}.
+ * The active manages region in \var{frame}, if any, is moved to the
+ * new frame.
+ */
+EXTL_EXPORT_MEMBER
+WIonFrame *ionframe_split(WIonFrame *frame, const char *dirstr)
+{
+	WIonWS *ws=REGION_MANAGER_CHK(frame, WIonWS);
+    
+    if(ws==NULL)
+        return NULL;
+
+	return ionws_newframe_at(ws, frame, dirstr, TRUE);
+}
+
+/*EXTL_DOC
+ * Similar to \fnref{WIonFrame.split} except nothing is moved to the newly
+ * created frame.
+ */
+EXTL_EXPORT_MEMBER
+WIonFrame *ionframe_split_empty(WIonFrame *frame, const char *dirstr)
+{
+	WIonWS *ws=REGION_MANAGER_CHK(frame, WIonWS);
+    
+    if(ws==NULL)
+        return NULL;
+
+	return ionws_newframe_at(ws, frame, dirstr, FALSE);
 }
 
 
@@ -171,7 +250,7 @@ static DynFunTab ionframe_dynfuntab[]={
 };
 									   
 
-IMPLOBJ(WIonFrame, WFrame, ionframe_deinit, ionframe_dynfuntab);
+IMPLCLASS(WIonFrame, WFrame, ionframe_deinit, ionframe_dynfuntab);
 
 	
 /*}}}*/

@@ -47,8 +47,11 @@ end
 
 --DOC
 -- Use this function to define normal menu entries.
-function menulib.menuentry(name, cmd, ...)
-    return {name=name, cmd=cmd, args=arg}
+function menulib.menuentry(name, cmd, guard)
+    local fn, gfn=ioncorelib.compile_cmd(cmd, guard)
+    if fn then
+        return {name=name, func=fn, guard_func=gfn}
+    end
 end
 
 --DOC
@@ -70,35 +73,28 @@ end
 
 local function do_menu(reg, sub, menu_or_name, fn)
     local function wrapper(entry)
-        if entry.cmd then
-            if type(entry.cmd)=="function" then
-                entry.cmd(reg, sub)
-            else
-                ioncorelib.do_cmd(reg, sub, entry.cmd, entry.args)
-            end
+        if entry.func then
+            entry.func(reg, sub)
         end
     end
     return fn(reg, wrapper, menulib.getmenu(menu_or_name))
 end
 
 
-defcmd2("WMPlex", "menu", 
-        function(mplex, sub, menu_or_name) 
-            return do_menu(mplex, sub, menu_or_name, menu_menu)
-        end)
+function menulib.menu(mplex, sub, menu_or_name) 
+    return do_menu(mplex, sub, menu_or_name, menumod.menu)
+end
 
-defcmd2("WMPlex", "bigmenu", 
-        function(mplex, sub, menu_or_name) 
-            local function menu_bigmenu(m, s, menu)
-                return menu_menu(m, s, menu, true)
-            end
-            return do_menu(mplex, sub, menu_or_name, menu_bigmenu)
-        end)
+function menulib.bigmenu(mplex, sub, menu_or_name) 
+    local function menu_bigmenu(m, s, menu)
+        return menumod.menu(m, s, menu, true)
+    end
+    return do_menu(mplex, sub, menu_or_name, menu_bigmenu)
+end
 
-defcmd2("WWindow", "pmenu",
-        function(win, sub, menu_or_name) 
-            return do_menu(win, sub, menu_or_name, menu_pmenu)
-        end)
+function menulib.pmenu(win, sub, menu_or_name) 
+    return do_menu(win, sub, menu_or_name, menumod.pmenu)
+end
 
 -- }}}
 
@@ -107,11 +103,11 @@ defcmd2("WWindow", "pmenu",
 
 
 function menus.windowlist()
-    local cwins=complete_clientwin("")
+    local cwins=ioncore.complete_clientwin("")
     table.sort(cwins)
     local entries={}
     for i, name in cwins do
-        local cwin=lookup_clientwin(name)
+        local cwin=ioncore.lookup_clientwin(name)
         entries[i]=menuentry(name, function() cwin:goto() end)
     end
     
@@ -120,11 +116,11 @@ end
 
 
 function menus.workspacelist()
-    local wss=complete_region("", "WGenWS")
+    local wss=ioncore.complete_region("", "WGenWS")
     table.sort(wss)
     local entries={}
     for i, name in wss do
-        local ws=lookup_region(name, "WGenWS")
+        local ws=ioncore.lookup_region(name, "WGenWS")
         entries[i]=menuentry(name, function() ws:goto() end)
     end
     
@@ -148,7 +144,7 @@ end
 local function selectstyle(look, where)
     include(look)
 
-    local fname=get_savefile('draw')
+    local fname=ioncore.get_savefile('draw')
 
     local function writeit()
         local f, err=io.open(fname, 'w')
@@ -224,9 +220,9 @@ end
 --DOC
 -- Refresh list of known style files.
 function menulib.refresh_styles()
-    local cmd=lookup_script("ion-completefile")
+    local cmd=ioncore.lookup_script("ion-completefile")
     if cmd then
-        local dirs=ioncore_get_scriptdirs()
+        local dirs=ioncore.get_scriptdirs()
         if table.getn(dirs)==0 then
             return
         end
@@ -234,7 +230,7 @@ function menulib.refresh_styles()
             cmd=cmd.." "..string.shell_safe(s.."/look-")
         end
         
-        popen_bgread(cmd, coroutine.wrap(receive_styles))
+        ioncore.popen_bgread(cmd, coroutine.wrap(receive_styles))
     end
 end
 

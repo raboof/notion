@@ -25,9 +25,10 @@
 #include "framep.h"
 #include "infowin.h"
 #include "defer.h"
+#include "region-iter.h"
 
 
-#define XOR_RESIZE (!wglobal.opaque_resize)
+#define XOR_RESIZE (!ioncore_g.opaque_resize)
 
 
 /*{{{ Size/position display and rubberband */
@@ -48,7 +49,7 @@ static void draw_rubberbox(WRootWin *rw, const WRectangle *rect)
 	fpts[4].x=rect->x;
 	fpts[4].y=rect->y;
 	
-	XDrawLines(wglobal.dpy, WROOTWIN_ROOT(rw), rw->xor_gc, fpts, 5, 
+	XDrawLines(ioncore_g.dpy, WROOTWIN_ROOT(rw), rw->xor_gc, fpts, 5, 
 			   CoordModeOrigin);
 }
 
@@ -98,14 +99,14 @@ static WInfoWin *setup_moveres_display(WWindow *parent, int cx, int cy)
 	if(infowin==NULL)
 		return NULL;
     
-	grbrush_get_border_widths(WINFOWIN_BRUSH(infowin), &bdw);
-	grbrush_get_font_extents(WINFOWIN_BRUSH(infowin), &fnte);
+	grbrush_get_border_widths(INFOWIN_BRUSH(infowin), &bdw);
+	grbrush_get_font_extents(INFOWIN_BRUSH(infowin), &fnte);
 	
 	/* Create move/resize position/size display window */
 	g.w=3;
 	g.w+=chars_for_num(REGION_GEOM(parent).w);
 	g.w+=chars_for_num(REGION_GEOM(parent).h);
-	g.w*=max_width(WINFOWIN_BRUSH(infowin), "0123456789x+"); 	
+	g.w*=max_width(INFOWIN_BRUSH(infowin), "0123456789x+"); 	
 	g.w+=bdw.left+bdw.right;
 	g.h=fnte.max_height+bdw.top+bdw.bottom;;
     
@@ -127,7 +128,7 @@ static void moveres_draw_infowin(WMoveresMode *mode)
 	if(mode->infowin==NULL)
 		return;
 	
-	buf=WINFOWIN_BUFFER(mode->infowin);
+	buf=INFOWIN_BUFFER(mode->infowin);
 	
 	if(buf==NULL)
 		return;
@@ -148,9 +149,9 @@ static void moveres_draw_infowin(WMoveresMode *mode)
 			h/=mode->hints.height_inc;
 		}
 		
-		snprintf(buf, WINFOWIN_BUFFER_LEN, "%dx%d", w, h);
+		snprintf(buf, INFOWIN_BUFFER_LEN, "%dx%d", w, h);
 	}else{
-		snprintf(buf, WINFOWIN_BUFFER_LEN, "%+d %+d", 
+		snprintf(buf, INFOWIN_BUFFER_LEN, "%+d %+d", 
                  mode->geom.x, mode->geom.y);
 	}
 	
@@ -162,7 +163,9 @@ static void moveres_draw_rubberband(WMoveresMode *mode)
 {
 	WRectangle rgeom=mode->geom;
 	int rx, ry;
-	WRootWin *rootwin=(mode->reg==NULL ? NULL : ROOTWIN_OF(mode->reg));
+	WRootWin *rootwin=(mode->reg==NULL 
+                       ? NULL 
+                       : region_rootwin_of(mode->reg));
     
     if(rootwin==NULL)
         return;
@@ -186,7 +189,7 @@ static void moveres_draw_rubberband(WMoveresMode *mode)
 WMoveresMode *tmpmode=NULL;
 
 
-IMPLOBJ(WMoveresMode, WObj, NULL, NULL);
+IMPLCLASS(WMoveresMode, WObj, NULL, NULL);
 
 
 WMoveresMode *moveres_mode(WRegion *reg)
@@ -266,7 +269,7 @@ static bool moveresmode_init(WMoveresMode *mode, WRegion *reg,
 	moveres_draw_infowin(mode);
 	
 	if(XOR_RESIZE){
-		XGrabServer(wglobal.dpy);
+		XGrabServer(ioncore_g.dpy);
 		moveres_draw_rubberband(mode);
     }
     
@@ -282,28 +285,28 @@ static WMoveresMode *create_moveresmode(WRegion *reg,
 }
 
 
-WMoveresMode *begin_resize(WRegion *reg, WDrawRubberbandFn *rubfn, 
-                           bool cumulative)
+WMoveresMode *region_begin_resize(WRegion *reg, WDrawRubberbandFn *rubfn, 
+                                  bool cumulative)
 {
 	WMoveresMode *mode=create_moveresmode(reg, rubfn, cumulative);
     
     if(mode!=NULL){
         mode->mode=MOVERES_SIZE;
-        change_grab_cursor(CURSOR_RESIZE);
+        ioncore_change_grab_cursor(IONCORE_CURSOR_RESIZE);
     }
 
     return mode;
 }
 
 
-WMoveresMode *begin_move(WRegion *reg, WDrawRubberbandFn *rubfn, 
-                         bool cumulative)
+WMoveresMode *region_begin_move(WRegion *reg, WDrawRubberbandFn *rubfn, 
+                                bool cumulative)
 {
 	WMoveresMode *mode=create_moveresmode(reg, rubfn, cumulative);
     
     if(mode!=NULL){
         mode->mode=MOVERES_POS;
-        change_grab_cursor(CURSOR_MOVE);
+        ioncore_change_grab_cursor(IONCORE_CURSOR_MOVE);
     }
     
     return mode;
@@ -347,7 +350,7 @@ static void moveresmode_delta(WMoveresMode *mode,
 	if(h<=0)
 		h=mode->hints.min_height;
 	
-	correct_size(&w, &h, &mode->hints, TRUE);
+	xsizehints_correct(&mode->hints, &w, &h, TRUE);
 	
 	/* Do not modify coordinates and sizes that were not requested to be
 	 * changed. 
@@ -428,7 +431,7 @@ static void set_saved(WMoveresMode *mode, WRegion *reg)
 {
 	WFrame *frame;
 	
-	if(!WOBJ_IS(reg, WFrame))
+	if(!OBJ_IS(reg, WFrame))
 		return;
 	
 	frame=(WFrame*)reg;
@@ -462,13 +465,13 @@ bool moveresmode_do_end(WMoveresMode *mode, bool apply)
 			region_request_geom(reg, mode->rqflags&~REGION_RQGEOM_TRYONLY,
 								&g2, &mode->geom);
 		}
-		XUngrabServer(wglobal.dpy);
+		XUngrabServer(ioncore_g.dpy);
 	}
 	if(apply)
 		set_saved(mode, reg);
 	
 	if(mode->infowin!=NULL){
-		defer_destroy((WObj*)mode->infowin);
+		ioncore_defer_destroy((WObj*)mode->infowin);
 		mode->infowin=NULL;
 	}
     destroy_obj((WObj*)mode);
@@ -509,7 +512,7 @@ void region_request_geom(WRegion *reg, int flags, const WRectangle *geom,
  * but may contain missing fields, in which case, \var{reg}'s manager may
  * attempt to leave that attribute unchanged.
  */
-EXTL_EXPORT_MEMBER_AS(WRegion, request_geom)
+EXTL_EXPORT_AS(WRegion, request_geom)
 ExtlTab region_request_geom_extl(WRegion *reg, ExtlTab g)
 {
 	WRectangle geom=REGION_GEOM(reg);
@@ -527,7 +530,7 @@ ExtlTab region_request_geom_extl(WRegion *reg, ExtlTab g)
 	
 	region_request_geom(reg, flags, &geom, &ogeom);
 	
-	return geom_to_extltab(&ogeom);
+	return extl_table_from_rectangle(&ogeom);
 }
 
 
@@ -587,9 +590,6 @@ void region_resize_hints(WRegion *reg, XSizeHints *hints_ret,
 /*}}}*/
 
 
-/*}}}*/
-
-
 /*{{{ Restore size, maximize, shade */
 
 
@@ -600,13 +600,13 @@ void frame_restore_size(WFrame *frame, bool horiz, bool vert)
 
 	geom=REGION_GEOM(frame);
 	
-	if(vert && frame->flags&WFRAME_SAVED_VERT){
+	if(vert && frame->flags&FRAME_SAVED_VERT){
 		geom.y=frame->saved_y;
 		geom.h=frame->saved_h;
 		rqf&=~(REGION_RQGEOM_WEAK_Y|REGION_RQGEOM_WEAK_H);
 	}
 
-	if(horiz && frame->flags&WFRAME_SAVED_HORIZ){
+	if(horiz && frame->flags&FRAME_SAVED_HORIZ){
 		geom.x=frame->saved_x;
 		geom.w=frame->saved_w;
 		rqf&=~(REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_W);
@@ -629,7 +629,7 @@ static void correct_frame_size(WFrame *frame, int *w, int *h)
 	hdiff=REGION_GEOM(frame).h-relh;
 	*w-=wdiff;
 	*h-=hdiff;
-	correct_size(w, h, &hints, TRUE);
+	xsizehints_correct(&hints, w, h, TRUE);
 	*w+=wdiff;
 	*h+=hdiff;
 }
@@ -662,7 +662,7 @@ void frame_maximize_vert(WFrame *frame)
 {
 	WRegion *mgr=REGION_MANAGER(frame);
 	
-	if(frame->flags&WFRAME_SHADED){
+	if(frame->flags&FRAME_SHADED){
 		frame_do_toggle_shade(frame, 0 /* not used */);
 		return;
 	}
@@ -723,12 +723,12 @@ void frame_do_toggle_shade(WFrame *frame, int shaded_h)
 {
 	WRectangle geom=REGION_GEOM(frame);
 
-	if(frame->flags&WFRAME_SHADED){
-		if(!(frame->flags&WFRAME_SAVED_VERT))
+	if(frame->flags&FRAME_SHADED){
+		if(!(frame->flags&FRAME_SAVED_VERT))
 			return;
 		geom.h=frame->saved_h;
 	}else{
-		if(frame->flags&WFRAME_TAB_HIDE)
+		if(frame->flags&FRAME_TAB_HIDE)
 			return;
 		geom.h=shaded_h;
 	}
@@ -744,7 +744,7 @@ void frame_do_toggle_shade(WFrame *frame, int shaded_h)
 EXTL_EXPORT_MEMBER
 bool frame_is_shaded(WFrame *frame)
 {
-	return ((frame->flags&WFRAME_SHADED)!=0);
+	return ((frame->flags&FRAME_SHADED)!=0);
 }
 
 

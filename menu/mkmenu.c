@@ -28,7 +28,7 @@
  * when entry is activated, but this is handled by \var{handler}.)
  */
 EXTL_EXPORT
-WMenu *menu_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab, bool big_mode)
+WMenu *menumod_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab, bool big_mode)
 {
 	WMenuCreateParams fnp;
 
@@ -52,11 +52,11 @@ WMenu *menu_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab, bool big_mode)
  * \fnref{menu_menu}.
  */
 EXTL_EXPORT
-WMenu *menu_pmenu(WWindow *where, ExtlFn handler, ExtlTab tab)
+WMenu *menumod_pmenu(WWindow *where, ExtlFn handler, ExtlTab tab)
 {
 	WScreen *scr;
 	WMenuCreateParams fnp;
-	XEvent *ev=p_current_event();
+	XEvent *ev=ioncore_current_pointer_event();
 	WMenu *menu;
 	WRectangle geom;
 	
@@ -86,7 +86,7 @@ WMenu *menu_pmenu(WWindow *where, ExtlFn handler, ExtlTab tab)
 	if(menu==NULL)
 		return NULL;
 	
-	if(!p_set_drag_handlers((WRegion*)menu,
+	if(!ioncore_set_drag_handlers((WRegion*)menu,
 							NULL,
 							(WMotionHandler*)menu_motion,
 							(WButtonHandler*)menu_release,

@@ -12,40 +12,33 @@
 #include <stdlib.h>
 
 #include <ioncore/common.h>
-#include <ioncore/global.h>
-#include <ioncore/readconfig.h>
 #include <ioncore/binding.h>
 #include <ioncore/conf-bindings.h>
 #include <ioncore/framep.h>
 #include <ioncore/extl.h>
-#include "ionframe.h"
 #include "bindmaps.h"
 
 
 static StringIntMap frame_areas[]={
-	{"border", 		WFRAME_AREA_BORDER},
-	{"tab", 		WFRAME_AREA_TAB},
-	{"empty_tab", 	WFRAME_AREA_TAB},
-	{"client", 		WFRAME_AREA_CLIENT},
+	{"border", 		FRAME_AREA_BORDER},
+	{"tab", 		FRAME_AREA_TAB},
+	{"empty_tab", 	FRAME_AREA_TAB},
+	{"client", 		FRAME_AREA_CLIENT},
 	END_STRINGINTMAP
 };
 
 
-EXTL_EXPORT
-bool __defbindings_WIonWS(ExtlTab tab)
+EXTL_EXPORT_AS(global, __defbindings_WIonWS)
+bool ionwsmod_defbindings_WIonWS(ExtlTab tab)
 {
-	return process_bindings(&ionws_bindmap, NULL, tab);
+	return bindmap_do_table(&ionws_bindmap, NULL, tab);
 }
 
 
-EXTL_EXPORT
-bool __defbindings_WIonFrame(ExtlTab tab)
+EXTL_EXPORT_AS(global, __defbindings_WIonFrame)
+bool ionwsmod_defbindings_WIonFrame(ExtlTab tab)
 {
-	return process_bindings(&ionframe_bindmap, frame_areas, tab);
+	return bindmap_do_table(&ionframe_bindmap, frame_areas, tab);
 }
 
 
-bool ionws_module_read_config()
-{
-	return read_config("ionws");
-}

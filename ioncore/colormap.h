@@ -15,10 +15,11 @@
 #include "common.h"
 #include "clientwin.h"
 
-extern void install_cmap(WRootWin *scr, Colormap cmap);
-extern void install_cwin_cmap(WClientWin *cwin);
-extern void handle_all_cmaps(const XColormapEvent *ev);
-extern void handle_cwin_cmap(WClientWin *cwin, const XColormapEvent *ev);
+extern void ioncore_handle_colormap_notify(const XColormapEvent *ev);
+
+extern void rootwin_install_colormap(WRootWin *scr, Colormap cmap);
+
+extern void clientwin_install_colormap(WClientWin *cwin);
 extern void clientwin_get_colormaps(WClientWin *cwin);
 extern void clientwin_clear_colormaps(WClientWin *cwin);
 

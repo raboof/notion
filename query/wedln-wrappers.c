@@ -203,7 +203,7 @@ void wedln_history_prev(WEdln *wedln)
 /*EXTL_DOC
  * Input \var{str} in wedln at current editing point.
  */
-EXTL_EXPORT_MEMBER_AS(WEdln, insstr)
+EXTL_EXPORT_AS(WEdln, insstr)
 void wedln_insstr_exported(WEdln *wedln, const char *str)
 {
 	edln_insstr(&(wedln->edln), str);

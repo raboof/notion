@@ -17,10 +17,10 @@
 extern void region_tag(WRegion *reg);
 extern void region_untag(WRegion *reg);
 extern void region_toggle_tag(WRegion *reg);
-extern void clear_tags();
 
-extern WRegion *tag_first();
-extern WRegion *tag_take_first();
-extern WRegion *tag_next(WRegion *reg);
+extern void ioncore_clear_tags();
+extern WRegion *ioncore_tags_first();
+extern WRegion *ioncore_tags_take_first();
+extern WRegion *ioncore_tags_next(WRegion *reg);
 
 #endif /* ION_IONCORE_TAGS_H */

@@ -17,28 +17,24 @@
 #include "hooks.h"
 #include "extl.h"
 #include "window.h"
-
-INTROBJ(WClientWin);
-
+#include "rectangle.h"
 #include "attach.h"
 
-#define CWIN_P_WM_DELETE 		0x00001
-#define CWIN_P_WM_TAKE_FOCUS 	0x00002
-#define CWIN_PROP_ACROBATIC		0x00010
-#define CWIN_PROP_MAXSIZE 		0x00020
-#define CWIN_PROP_ASPECT 		0x00040
-#define CWIN_PROP_TRANSPARENT 	0x00080
-#define CWIN_PROP_IGNORE_RSZINC 0x00100
-#define CWIN_PROP_MINSIZE 		0x00200
-#define CWIN_PROP_IGNORE_CFGRQ  0x00400
-#define CWIN_NEED_CFGNTFY 		0x01000
-#define CWIN_USE_NET_WM_NAME 	0x10000
-#define CWIN_TRANSIENTS_AT_TOP	0x20000
-
-#define MANAGE_INITIAL			0x0002
+#define CLIENTWIN_P_WM_DELETE 		 0x00001
+#define CLIENTWIN_P_WM_TAKE_FOCUS 	 0x00002
+#define CLIENTWIN_PROP_ACROBATIC	 0x00010
+#define CLIENTWIN_PROP_MAXSIZE 		 0x00020
+#define CLIENTWIN_PROP_ASPECT 		 0x00040
+#define CLIENTWIN_PROP_TRANSPARENT 	 0x00080
+#define CLIENTWIN_PROP_IGNORE_RSZINC 0x00100
+#define CLIENTWIN_PROP_MINSIZE 		 0x00200
+#define CLIENTWIN_PROP_IGNORE_CFGRQ  0x00400
+#define CLIENTWIN_NEED_CFGNTFY 		 0x01000
+#define CLIENTWIN_USE_NET_WM_NAME 	 0x10000
+#define CLIENTWIN_TRANSIENTS_AT_TOP	 0x20000
 
 #define FOR_ALL_CLIENTWINS(CWIN) \
-    for((CWIN)=wglobal.cwin_list; (CWIN)!=NULL; (CWIN)=(CWIN)->g_cwin_next)
+    for((CWIN)=ioncore_g.cwin_list; (CWIN)!=NULL; (CWIN)=(CWIN)->g_cwin_next)
 
 #define CLIENTWIN_IS_FULLSCREEN(cwin) \
 		(REGION_PARENT_CHK(cwin, WScreen)!=NULL)
@@ -50,7 +46,7 @@ typedef struct{
 } WClientWinFSInfo;
 
 
-DECLOBJ(WClientWin){
+DECLCLASS(WClientWin){
 	WRegion region;
 	
 	int flags;
@@ -89,14 +85,11 @@ extern void clientwin_destroyed(WClientWin *cwin);
 extern void clientwin_kill(WClientWin *cwin);
 extern void clientwin_close(WClientWin *cwin);
 
-extern WClientWin *manage_clientwin(Window win, int mflags);
 extern void clientwin_tfor_changed(WClientWin *cwin);
 
 extern bool clientwin_attach_transient(WClientWin *cwin, WRegion *transient);
 
 extern void clientwin_get_set_name(WClientWin *cwin);
-
-extern WClientWin *find_clientwin(Window win);
 
 extern void clientwin_handle_configure_request(WClientWin *cwin,
 											   XConfigureRequestEvent *ev);
@@ -120,7 +113,10 @@ extern WClientWin *clientwin_get_transient_for(WClientWin *cwin);
 
 /* Hooks */
 
-extern WHooklist *add_clientwin_alt;
+extern WHooklist *clientwin_do_manage_alt;
 
+/* Manage */
+
+extern WClientWin *ioncore_manage_clientwin(Window win, bool maprq);
 
 #endif /* ION_IONCORE_CLIENTWIN_H */

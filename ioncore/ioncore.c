@@ -31,6 +31,7 @@
 #include "readconfig.h"
 #include "global.h"
 #include "modules.h"
+#include "event.h"
 #include "eventh.h"
 #include "saveload.h"
 #include "ioncore.h"
@@ -52,7 +53,7 @@
 /*{{{ Variables */
 
 
-WGlobal wglobal;
+WGlobal ioncore_g;
 
 
 static const char ioncore_about[]=
@@ -81,15 +82,15 @@ extern void ioncore_unregister_exports();
 
 static void init_hooks()
 {
-	ADD_HOOK(add_clientwin_alt, add_clientwin_default);
-	ADD_HOOK(handle_event_alt, handle_event_default);
-	ADD_HOOK(do_warp_alt, do_warp_default);
+	ADD_HOOK(clientwin_do_manage_alt, clientwin_do_manage_default);
+	ADD_HOOK(ioncore_handle_event_alt, ioncore_handle_event);
+	ADD_HOOK(region_do_warp_alt, region_do_warp_default);
 }
 
 
 static bool register_classes()
 {
-	if(!register_region_class(&OBJDESCR(WClientWin), NULL,
+	if(!ioncore_register_regclass(&CLASSDESCR(WClientWin), NULL,
 							  (WRegionLoadCreateFn*) clientwin_load)){
 		return FALSE;
 	}
@@ -102,29 +103,30 @@ static void init_global()
 	WRectangle zero_geom={0, 0, 0, 0};
 	
 	/* argc, argv must be set be the program */
-	wglobal.dpy=NULL;
-	wglobal.display=NULL;
+	ioncore_g.dpy=NULL;
+	ioncore_g.display=NULL;
 
-	wglobal.rootwins=NULL;
-	wglobal.screens=NULL;
-	wglobal.focus_next=NULL;
-	wglobal.warp_next=FALSE;
-	wglobal.cwin_list=NULL;
+	ioncore_g.rootwins=NULL;
+	ioncore_g.screens=NULL;
+	ioncore_g.focus_next=NULL;
+	ioncore_g.warp_next=FALSE;
+	ioncore_g.cwin_list=NULL;
 	
-	wglobal.active_screen=NULL;
+	ioncore_g.active_screen=NULL;
 
-	wglobal.input_mode=INPUT_NORMAL;
-	wglobal.opmode=OPMODE_INIT;
-	wglobal.previous_protect=0;
-	wglobal.dblclick_delay=CF_DBLCLICK_DELAY;
-	wglobal.resize_delay=CF_RESIZE_DELAY;
-	wglobal.opaque_resize=0;
-	wglobal.warp_enabled=TRUE;
-	wglobal.ws_save_enabled=TRUE;
+	ioncore_g.input_mode=IONCORE_INPUTMODE_NORMAL;
+	ioncore_g.opmode=IONCORE_OPMODE_INIT;
+	ioncore_g.previous_protect=0;
+	ioncore_g.dblclick_delay=CF_DBLCLICK_DELAY;
+	ioncore_g.resize_delay=CF_RESIZE_DELAY;
+	ioncore_g.opaque_resize=0;
+	ioncore_g.warp_enabled=TRUE;
+	ioncore_g.ws_save_enabled=TRUE;
+    ioncore_g.switchto_new=TRUE;
 	
-	wglobal.enc_utf8=FALSE;
-	wglobal.enc_sb=TRUE;
-	wglobal.use_mb=FALSE;
+	ioncore_g.enc_utf8=FALSE;
+	ioncore_g.enc_sb=TRUE;
+	ioncore_g.use_mb=FALSE;
 }
 
 
@@ -132,13 +134,13 @@ bool ioncore_init(int argc, char *argv[])
 {
 	init_global();
 	
-	wglobal.argc=argc;
-	wglobal.argv=argv;
+	ioncore_g.argc=argc;
+	ioncore_g.argv=argv;
 
 	register_classes();
 	init_hooks();
 
-	return init_module_support();
+	return ioncore_init_module_support();
 }
 
 
@@ -184,9 +186,9 @@ static bool check_encoding()
 	}
 		
 	if(strcmp(langi, "UTF-8")==0 || strcmp(langi, "UTF8")==0){
-		wglobal.enc_sb=FALSE;
-		wglobal.enc_utf8=TRUE;
-		wglobal.use_mb=TRUE;
+		ioncore_g.enc_sb=FALSE;
+		ioncore_g.enc_utf8=TRUE;
+		ioncore_g.use_mb=TRUE;
 		return TRUE;
 	}
 	
@@ -201,7 +203,7 @@ static bool check_encoding()
 	
 	if(i==256){
 		/* Seems like a single-byte encoding... */
-		wglobal.use_mb=TRUE;
+		ioncore_g.use_mb=TRUE;
 		return TRUE;
 	}
 
@@ -210,8 +212,8 @@ static bool check_encoding()
 		return FALSE;
 	}
 	
-	wglobal.enc_sb=FALSE;
-	wglobal.use_mb=TRUE;
+	ioncore_g.enc_sb=FALSE;
+	ioncore_g.use_mb=TRUE;
 #endif	
 	return TRUE;
 }
@@ -291,7 +293,7 @@ static void set_session(const char *display)
 }
 	
 
-static bool init_x(const char *display, int stflags)
+static bool ioncore_init_x(const char *display, int stflags)
 {
 	Display *dpy;
 	int i, drw, nrw;
@@ -322,8 +324,8 @@ static bool init_x(const char *display, int stflags)
 	
 	/* Initialize */
 	if(display!=NULL){
-		wglobal.display=scopy(display);
-		if(wglobal.display==NULL){
+		ioncore_g.display=scopy(display);
+		if(ioncore_g.display==NULL){
 			warn_err();
 			XCloseDisplay(dpy);
 			return FALSE;
@@ -332,34 +334,33 @@ static bool init_x(const char *display, int stflags)
 	
 	set_session(XDisplayName(display));
 	
-	wglobal.dpy=dpy;
+	ioncore_g.dpy=dpy;
 	
-	init_xim();
+	ioncore_g.conn=ConnectionNumber(dpy);
+	ioncore_g.win_context=XUniqueContext();
 	
-	wglobal.conn=ConnectionNumber(dpy);
-	wglobal.win_context=XUniqueContext();
-	
-	wglobal.atom_wm_state=XInternAtom(dpy, "WM_STATE", False);
-	wglobal.atom_wm_change_state=XInternAtom(dpy, "WM_CHANGE_STATE", False);
-	wglobal.atom_wm_protocols=XInternAtom(dpy, "WM_PROTOCOLS", False);
-	wglobal.atom_wm_delete=XInternAtom(dpy, "WM_DELETE_WINDOW", False);
-	wglobal.atom_wm_take_focus=XInternAtom(dpy, "WM_TAKE_FOCUS", False);
-	wglobal.atom_wm_colormaps=XInternAtom(dpy, "WM_COLORMAP_WINDOWS", False);
-	wglobal.atom_wm_window_role=XInternAtom(dpy, "WM_WINDOW_ROLE", False);
-	wglobal.atom_checkcode=XInternAtom(dpy, "_ION_CWIN_RESTART_CHECKCODE", False);
-	wglobal.atom_selection=XInternAtom(dpy, "_ION_SELECTION_STRING", False);
-	wglobal.atom_kludges=XInternAtom(dpy, "_ION_KLUDGES", False);
-	wglobal.atom_mwm_hints=XInternAtom(dpy, "_MOTIF_WM_HINTS", False);
+	ioncore_g.atom_wm_state=XInternAtom(dpy, "WM_STATE", False);
+	ioncore_g.atom_wm_change_state=XInternAtom(dpy, "WM_CHANGE_STATE", False);
+	ioncore_g.atom_wm_protocols=XInternAtom(dpy, "WM_PROTOCOLS", False);
+	ioncore_g.atom_wm_delete=XInternAtom(dpy, "WM_DELETE_WINDOW", False);
+	ioncore_g.atom_wm_take_focus=XInternAtom(dpy, "WM_TAKE_FOCUS", False);
+	ioncore_g.atom_wm_colormaps=XInternAtom(dpy, "WM_COLORMAP_WINDOWS", False);
+	ioncore_g.atom_wm_window_role=XInternAtom(dpy, "WM_WINDOW_ROLE", False);
+	ioncore_g.atom_checkcode=XInternAtom(dpy, "_ION_CWIN_RESTART_CHECKCODE", False);
+	ioncore_g.atom_selection=XInternAtom(dpy, "_ION_SELECTION_STRING", False);
+	ioncore_g.atom_kludges=XInternAtom(dpy, "_ION_KLUDGES", False);
+	ioncore_g.atom_mwm_hints=XInternAtom(dpy, "_MOTIF_WM_HINTS", False);
+
+	ioncore_init_xim();
+	ioncore_init_bindings();
+    ioncore_init_cursors();
 
 	netwm_init();
 	
-	init_bindings();
-	load_cursors();	
-	
 	for(i=drw; i<nrw; i++)
-		manage_rootwin(i, stflags&IONCORE_STARTUP_NOXINERAMA);
+		ioncore_manage_rootwin(i, stflags&IONCORE_STARTUP_NOXINERAMA);
 
-	if(wglobal.rootwins==NULL){
+	if(ioncore_g.rootwins==NULL){
 		if(nrw-drw>1)
 			warn("Could not find a screen to manage.");
 		return FALSE;
@@ -377,21 +378,19 @@ bool ioncore_startup(const char *display, const char *cfgfile,
 
 	ioncore_register_exports();
 	
-	trap_signals();
+	ioncore_trap_signals();
 
-	if(!read_config("ioncorelib"))
-		return FALSE;
-	
-	if(!init_x(display, stflags))
+	if(!ioncore_init_x(display, stflags))
 		return FALSE;
 
 	gr_read_config();
 
-	if(!ioncore_read_config(cfgfile)){
-		/* Let's not fail, it might be a minor error */
-	}
+	if(!ioncore_read_config("ioncorelib", NULL, TRUE))
+		return FALSE;
+    
+	ioncore_read_main_config(cfgfile);
 	
-	if(!setup_rootwins()){
+	if(!ioncore_setup_rootwins()){
 		warn("Unable to set up any rootwins.");
 		return FALSE;
 	}
@@ -411,31 +410,31 @@ void ioncore_deinit()
 	Display *dpy;
 	WRootWin *rootwin;
 	
-	wglobal.opmode=OPMODE_DEINIT;
+	ioncore_g.opmode=IONCORE_OPMODE_DEINIT;
 	
-	if(wglobal.dpy==NULL)
+	if(ioncore_g.dpy==NULL)
 		return;
 	
 	extl_call_named("call_hook", "s", NULL, "deinit");
 					
-	if(wglobal.ws_save_enabled){
-		save_workspaces();
+	if(ioncore_g.ws_save_enabled){
+		ioncore_save_workspaces();
 	}else{
 		warn("Not saving workspace layout.");
 	}
 	
-	while(wglobal.screens!=NULL)
-		destroy_obj((WObj*)wglobal.screens);
+	while(ioncore_g.screens!=NULL)
+		destroy_obj((WObj*)ioncore_g.screens);
 
-	unload_modules();
+	ioncore_unload_modules();
 
-	while(wglobal.rootwins!=NULL)
-		destroy_obj((WObj*)wglobal.rootwins);
+	while(ioncore_g.rootwins!=NULL)
+		destroy_obj((WObj*)ioncore_g.rootwins);
 
 	ioncore_deinit_bindmaps();
 	
-	dpy=wglobal.dpy;
-	wglobal.dpy=NULL;
+	dpy=ioncore_g.dpy;
+	ioncore_g.dpy=NULL;
 	
 	XSync(dpy, True);
 	XCloseDisplay(dpy);
@@ -454,8 +453,8 @@ void ioncore_deinit()
  * Issue a warning. How the message is displayed depends on the current
  * warning handler.
  */
-EXTL_EXPORT_AS(warn)
-void exported_warn(const char *str)
+EXTL_EXPORT
+void ioncore_warn(const char *str)
 {
 	warn("%s", str);
 }
@@ -467,7 +466,7 @@ void exported_warn(const char *str)
 EXTL_EXPORT
 bool ioncore_is_i18n()
 {
-	return wglobal.use_mb;
+	return ioncore_g.use_mb;
 }
 
 

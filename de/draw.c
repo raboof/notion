@@ -79,7 +79,7 @@ static void do_draw_border(Window win, GC gc, int x, int y, int w, int h,
 	w--;
 	h--;
 
-	XSetForeground(wglobal.dpy, gc, tlc);
+	XSetForeground(ioncore_g.dpy, gc, tlc);
 
 	
 	a=(br!=0);
@@ -95,11 +95,11 @@ static void do_draw_border(Window win, GC gc, int x, int y, int w, int h,
 		if(b<br)
 			b++;
 	
-		XDrawLines(wglobal.dpy, win, gc, points, 3, CoordModeOrigin);
+		XDrawLines(ioncore_g.dpy, win, gc, points, 3, CoordModeOrigin);
 	}
 
 	
-	XSetForeground(wglobal.dpy, gc, brc);
+	XSetForeground(ioncore_g.dpy, gc, brc);
 
 	a=(tl!=0);
 	b=0;
@@ -114,7 +114,7 @@ static void do_draw_border(Window win, GC gc, int x, int y, int w, int h,
 		if(b<tl)
 			b++;
 		
-		XDrawLines(wglobal.dpy, win, gc, points, 3, CoordModeOrigin);
+		XDrawLines(ioncore_g.dpy, win, gc, points, 3, CoordModeOrigin);
 	}
 }
 
@@ -187,9 +187,9 @@ static void copy_masked(DETabBrush *brush, Drawable src, Drawable dst,
 	
 	GC copy_gc=brush->debrush.d->copy_gc;
 	
-	XSetClipMask(wglobal.dpy, copy_gc, src);
-	XSetClipOrigin(wglobal.dpy, copy_gc, dst_x, dst_y);
-	XCopyPlane(wglobal.dpy, src, dst, copy_gc, src_x, src_y, w, h,
+	XSetClipMask(ioncore_g.dpy, copy_gc, src);
+	XSetClipOrigin(ioncore_g.dpy, copy_gc, dst_x, dst_y);
+	XCopyPlane(ioncore_g.dpy, src, dst, copy_gc, src_x, src_y, w, h,
 			   dst_x, dst_y, 1);
 }
 
@@ -216,12 +216,12 @@ static void tabbrush_textbox_extras(DETabBrush *brush, Window win,
 		d->normal_gc=d->stipple_gc;
 		d->stipple_gc=tmp;
 		swapped=TRUE;
-		XClearArea(wglobal.dpy, win, g->x, g->y, g->w, g->h, False);
+		XClearArea(ioncore_g.dpy, win, g->x, g->y, g->w, g->h, False);
 		return;
 	}
 	
 	if(MATCHES2("*-*-tagged", a1, a2)){
-		XSetForeground(wglobal.dpy, d->copy_gc, cg->fg);
+		XSetForeground(ioncore_g.dpy, d->copy_gc, cg->fg);
 			
 		copy_masked(brush, d->tag_pixmap, win, 0, 0,
 					d->tag_pixmap_w, d->tag_pixmap_h,
@@ -236,7 +236,7 @@ static void tabbrush_textbox_extras(DETabBrush *brush, Window win,
 		swapped=FALSE;
 	}
 	/*if(MATCHES2("*-*-*-dragged", a1, a2)){
-		XFillRectangle(wglobal.dpy, win, d->stipple_gc, 
+		XFillRectangle(ioncore_g.dpy, win, d->stipple_gc, 
 					   g->x, g->y, g->w, g->h);
 	}*/
 }
@@ -273,8 +273,8 @@ void debrush_do_draw_box(DEBrush *brush, Window win,
 	GC gc=brush->d->normal_gc;
 	
 	if(TRUE/*needfill*/){
-		XSetForeground(wglobal.dpy, gc, cg->bg);
-		XFillRectangle(wglobal.dpy, win, gc, geom->x, geom->y, 
+		XSetForeground(ioncore_g.dpy, gc, cg->bg);
+		XFillRectangle(ioncore_g.dpy, win, gc, geom->x, geom->y, 
 					   geom->w, geom->h);
 	}
 	
@@ -355,7 +355,7 @@ static void do_draw_textboxes(DEBrush *brush, Window win,
 		
 		g.x+=g.w;
 		if(bdw.spacing>0 && needfill){
-			XClearArea(wglobal.dpy, win, g.x, g.y,
+			XClearArea(ioncore_g.dpy, win, g.x, g.y,
 					   brush->d->spacing, g.h, False);
 		}
 		g.x+=bdw.spacing;
@@ -453,14 +453,14 @@ void debrush_set_clipping_rectangle(DEBrush *brush, Window unused,
 	rect.width=geom->w;
 	rect.height=geom->h;
 	
-	XSetClipRectangles(wglobal.dpy, brush->d->normal_gc,
+	XSetClipRectangles(ioncore_g.dpy, brush->d->normal_gc,
 					   0, 0, &rect, 1, Unsorted);
 }
 
 
 void debrush_clear_clipping_rectangle(DEBrush *brush, Window unused)
 {
-	XSetClipMask(wglobal.dpy, brush->d->normal_gc, None);
+	XSetClipMask(ioncore_g.dpy, brush->d->normal_gc, None);
 }
 
 
@@ -487,7 +487,7 @@ void debrush_set_window_shape(DEBrush *brush, Window win, bool rough,
 		r[i].height=rects[i].h;
 	}
 	
-	XShapeCombineRectangles(wglobal.dpy, win, ShapeBounding, 0, 0, r, n,
+	XShapeCombineRectangles(ioncore_g.dpy, win, ShapeBounding, 0, 0, r, n,
 							ShapeSet, YXBanded);
 }
 
@@ -509,8 +509,8 @@ void debrush_enable_transparency(DEBrush *brush, Window win,
 		attr.background_pixel=brush->d->cgrp.bg;
 	}
 	
-	XChangeWindowAttributes(wglobal.dpy, win, attrflags, &attr);
-	XClearWindow(wglobal.dpy, win);
+	XChangeWindowAttributes(ioncore_g.dpy, win, attrflags, &attr);
+	XClearWindow(ioncore_g.dpy, win);
 }
 
 
@@ -523,14 +523,14 @@ void debrush_fill_area(DEBrush *brush, Window win, const WRectangle *geom,
 	if(cg==NULL)
 		return;
 	
-	XSetForeground(wglobal.dpy, gc, cg->bg);
-	XFillRectangle(wglobal.dpy, win, gc, geom->x, geom->y, geom->w, geom->h);
+	XSetForeground(ioncore_g.dpy, gc, cg->bg);
+	XFillRectangle(ioncore_g.dpy, win, gc, geom->x, geom->y, geom->w, geom->h);
 }
 
 
 void debrush_clear_area(DEBrush *brush, Window win, const WRectangle *geom)
 {
-	XClearArea(wglobal.dpy, win, geom->x, geom->y, geom->w, geom->h, False);
+	XClearArea(ioncore_g.dpy, win, geom->x, geom->y, geom->w, geom->h, False);
 }
 
 

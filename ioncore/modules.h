@@ -14,8 +14,8 @@
 
 #include "common.h"
 
-extern bool load_module(const char *name);
-extern void unload_modules();
-extern bool init_module_support();
+extern bool ioncore_load_module(const char *name);
+extern void ioncore_unload_modules();
+extern bool ioncore_init_module_support();
 
 #endif /* ION_IONCORE_MODULES_H */

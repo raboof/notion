@@ -14,6 +14,7 @@
 #include <ioncore/global.h>
 #include <ioncore/regbind.h>
 #include <ioncore/defer.h>
+#include <ioncore/event.h>
 #include "inputp.h"
 
 
@@ -79,7 +80,8 @@ void input_draw_config_updated(WInput *input)
 {
 	GrBrush *brush;
 	
-	brush=gr_get_brush(ROOTWIN_OF(input), input->win.win,
+	brush=gr_get_brush(region_rootwin_of((WRegion*)input),
+                       input->win.win,
 					   input_style(input));
 	
 	if(brush==NULL)
@@ -90,7 +92,7 @@ void input_draw_config_updated(WInput *input)
 	input->brush=brush;
 	input_refit(input);
 	
-	region_default_draw_config_updated((WRegion*)input);
+	region_draw_config_updated_default((WRegion*)input);
 	
 	window_draw((WWindow*)input, TRUE);
 }
@@ -113,14 +115,15 @@ bool input_init(WInput *input, WWindow *par, const WRectangle *geom)
 	
 	win=input->win.win;
 	
-	input->brush=gr_get_brush(ROOTWIN_OF(par), win, input_style(input));
+	input->brush=gr_get_brush(region_rootwin_of((WRegion*)par),
+                              win, input_style(input));
 	
 	if(input->brush==NULL)
 		goto fail;
 	
 	input_refit(input);
-	XSelectInput(wglobal.dpy, input->win.win, INPUT_MASK);
-	region_add_bindmap((WRegion*)input, &query_bindmap);
+	XSelectInput(ioncore_g.dpy, input->win.win, IONCORE_EVENTMASK_INPUT);
+	region_add_bindmap((WRegion*)input, &querymod_input_bindmap);
 	
 	return TRUE;
 	
@@ -145,7 +148,7 @@ void input_deinit(WInput *input)
 EXTL_EXPORT_MEMBER
 void input_cancel(WInput *input)
 {
-	defer_destroy((WObj*)input);
+	ioncore_defer_destroy((WObj*)input);
 }
 
 
@@ -193,7 +196,7 @@ static DynFunTab input_dynfuntab[]={
 };
 
 
-IMPLOBJ(WInput, WWindow, input_deinit, input_dynfuntab);
+IMPLCLASS(WInput, WWindow, input_deinit, input_dynfuntab);
 
 	
 /*}}}*/

@@ -17,11 +17,12 @@
 #include <ioncore/window.h>
 #include <ioncore/xic.h>
 #include <ioncore/extl.h>
+#include <ioncore/rectangle.h>
 #include "listing.h"
 #include "input.h"
 #include "edln.h"
 
-INTROBJ(WEdln);
+INTRCLASS(WEdln);
 INTRSTRUCT(WEdlnCreateParams);
 
 DECLSTRUCT(WEdlnCreateParams){
@@ -32,7 +33,7 @@ DECLSTRUCT(WEdlnCreateParams){
 };
 
 
-DECLOBJ(WEdln){
+DECLCLASS(WEdln){
 	WInput input;
 
 	WListing complist;

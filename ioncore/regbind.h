@@ -29,7 +29,7 @@ extern void region_remove_bindings(WRegion *reg);
 extern WBinding *region_lookup_keybinding(WRegion *reg, const XKeyEvent *ev,
 										  const WSubmapState *sc,
 										  WRegion **binding_owner_ret);
-extern WBinding *region_lookup_binding_area(WRegion *reg, int act, uint state,
+extern WBinding *region_lookup_binding(WRegion *reg, int act, uint state,
 											uint kcb, int area);
 
 extern void rbind_binding_added(const WRegBindingInfo *rbind, 

@@ -15,14 +15,14 @@
 # include "common.h"
 # include "extl.h"
 
-typedef int TryConfigFn(const char *file, void *param);
+typedef int WTryConfigFn(const char *file, void *param);
 
 enum{
-	TRYCONFIG_MEMERROR=-3,
-	TRYCONFIG_NOTFOUND=-2,
-	TRYCONFIG_LOAD_FAILED=-1,
-	TRYCONFIG_CALL_FAILED=0,
-	TRYCONFIG_OK=1
+	IONCORE_TRYCONFIG_MEMERROR=-3,
+	IONCORE_TRYCONFIG_NOTFOUND=-2,
+	IONCORE_TRYCONFIG_LOAD_FAILED=-1,
+	IONCORE_TRYCONFIG_CALL_FAILED=0,
+	IONCORE_TRYCONFIG_OK=1
 };
 
 
@@ -32,15 +32,14 @@ extern bool ioncore_add_scriptdir(const char *dir);
 extern bool ioncore_add_moduledir(const char *dir);
 extern const char* ioncore_userdir();
 
-extern int try_config(const char *module, TryConfigFn *tryfn, 
-					  void *tryfnparam);
+extern int ioncore_try_config(const char *module, WTryConfigFn *tryfn, 
+                              void *tryfnparam);
 
-extern bool read_config(const char *module);
-extern bool read_config_args(const char *module, bool warn_nx,
-							 const char *spec, const char *rspec, ...);
+extern char *ioncore_lookup_script(const char *file, const char *sp);
 
-extern char *get_savefile(const char *module);
+extern bool ioncore_read_config(const char *file, const char *sp, 
+                                bool warn_nx);
 
-extern bool do_include(const char *file, const char *cfdir);
+extern char *ioncore_get_savefile(const char *module);
 
 #endif /* ION_IONCORE_READCONFIG_H */

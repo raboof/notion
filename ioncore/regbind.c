@@ -20,29 +20,29 @@
 /*{{{ Grab/ungrab */
 
 
-static void do_grab_ungrab_binding(const WRegion *reg, const WBinding *binding,
+static void do_binding_grab_on_ungrab_on(const WRegion *reg, const WBinding *binding,
 								   const WBindmap *bindmap, bool grab)
 {
-	Window win=region_x_window(reg);
+	Window win=region_xwindow(reg);
 	WRegBindingInfo *r;
 	
 	for(r=reg->bindings; r!=NULL; r=r->next){
 		if(r->bindmap==bindmap)
 			continue;
-		if(lookup_binding(r->bindmap, binding->act, binding->state,
+		if(bindmap_lookup_binding(r->bindmap, binding->act, binding->state,
 						  binding->kcb)!=NULL)
 			break;
 	}
 	if(r==NULL && binding->area==0){
 		if(grab)
-			grab_binding(binding, win);
+			binding_grab_on(binding, win);
 		else
-			ungrab_binding(binding, win);
+			binding_ungrab_on(binding, win);
 	}
 }
 
 
-static void do_grab_ungrab_bindings(const WRegion *reg, const WBindmap *bindmap,
+static void do_binding_grab_on_ungrab_ons(const WRegion *reg, const WBindmap *bindmap,
 									bool grab)
 {
 	WBinding *binding=bindmap->bindings;
@@ -52,19 +52,19 @@ static void do_grab_ungrab_bindings(const WRegion *reg, const WBindmap *bindmap,
 		return;
 	
 	for(i=0; i<bindmap->nbindings; i++, binding++)
-		do_grab_ungrab_binding(reg, binding, bindmap, grab);
+		do_binding_grab_on_ungrab_on(reg, binding, bindmap, grab);
 }
 
 
 static void grab_ungrabbed_bindings(const WRegion *reg, const WBindmap *bindmap)
 {
-	do_grab_ungrab_bindings(reg, bindmap, TRUE);
+	do_binding_grab_on_ungrab_ons(reg, bindmap, TRUE);
 }
 
 
 static void ungrab_freed_bindings(const WRegion *reg, const WBindmap *bindmap)
 {
-	do_grab_ungrab_bindings(reg, bindmap, FALSE);
+	do_binding_grab_on_ungrab_ons(reg, bindmap, FALSE);
 }
 
 
@@ -73,7 +73,7 @@ void rbind_binding_added(const WRegBindingInfo *rbind,
 						 const WBindmap *bindmap)
 {
 	if(binding->area==0)
-		do_grab_ungrab_binding(rbind->reg, binding, rbind->bindmap, TRUE);
+		do_binding_grab_on_ungrab_on(rbind->reg, binding, rbind->bindmap, TRUE);
 }
 
 
@@ -82,7 +82,7 @@ void rbind_binding_removed(const WRegBindingInfo *rbind,
 						   const WBindmap *bindmap)
 {
 	if(binding->area==0)
-		do_grab_ungrab_binding(rbind->reg, binding, rbind->bindmap, FALSE);
+		do_binding_grab_on_ungrab_on(rbind->reg, binding, rbind->bindmap, FALSE);
 }
 
 
@@ -115,7 +115,7 @@ bool region_add_bindmap_owned(WRegion *reg, WBindmap *bindmap, WRegion *owner)
 {
 	WRegBindingInfo *rbind;
 	
-	if(region_x_window(reg)==None)
+	if(region_xwindow(reg)==None)
 		return FALSE;
 	
 	if(bindmap==NULL)
@@ -211,7 +211,7 @@ WBinding *region_lookup_keybinding(WRegion *reg, const XKeyEvent *ev,
 		bindmap=rbind->bindmap;
 		
 		for(s=sc; s!=NULL && bindmap!=NULL; s=s->next){
-			binding=lookup_binding(bindmap, ACT_KEYPRESS, s->state, s->key);
+			binding=bindmap_lookup_binding(bindmap, BINDING_KEYPRESS, s->state, s->key);
 
 			if(binding==NULL){
 				bindmap=NULL;
@@ -229,7 +229,7 @@ WBinding *region_lookup_keybinding(WRegion *reg, const XKeyEvent *ev,
 			continue;
 		}
 
-		binding=lookup_binding(bindmap, ACT_KEYPRESS, ev->state, ev->keycode);
+		binding=bindmap_lookup_binding(bindmap, BINDING_KEYPRESS, ev->state, ev->keycode);
 		
 		if(binding!=NULL)
 			break;
@@ -242,7 +242,7 @@ WBinding *region_lookup_keybinding(WRegion *reg, const XKeyEvent *ev,
 }
 
 
-WBinding *region_lookup_binding_area(WRegion *reg, int act, uint state,
+WBinding *region_lookup_binding(WRegion *reg, int act, uint state,
 									 uint kcb, int area)
 {
 	WRegBindingInfo *rbind;
@@ -251,7 +251,7 @@ WBinding *region_lookup_binding_area(WRegion *reg, int act, uint state,
 	for(rbind=(WRegBindingInfo*)reg->bindings; rbind!=NULL; rbind=rbind->next){
 		if(rbind->owner!=NULL)
 			continue;
-		binding=lookup_binding_area(rbind->bindmap, act, state, kcb, area);
+		binding=bindmap_lookup_binding_area(rbind->bindmap, act, state, kcb, area);
 		if(binding!=NULL)
 			break;
 	}
