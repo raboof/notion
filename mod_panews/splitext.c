@@ -498,6 +498,7 @@ WSplitRegion *split_tree_find_region_in_pane_of(WSplit *node)
 /*EXTL_DOC
  * Get marker.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 const char *splitpane_marker(WSplitPane *pane)
 {
@@ -531,6 +532,7 @@ bool splitpane_set_marker(WSplitPane *pane, const char *s)
 /*EXTL_DOC
  * Get root of contained sub-split tree.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WSplit *splitpane_contents(WSplitPane *pane)
 {

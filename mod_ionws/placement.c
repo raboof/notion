@@ -81,6 +81,8 @@ bool ionws_manage_clientwin(WIonWS *ws, WClientWin *cwin,
         mrshpm[1]=ws;
         mrshpm[2]=&param;
         
+#warning "TODO: protect/change parameters?"
+        
         managed=hook_call_alt(ionws_placement_alt, &mrshpm, 
                               (WHookMarshall*)placement_mrsh,
                               (WHookMarshallExtl*)placement_mrsh_extl);

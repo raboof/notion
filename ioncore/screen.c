@@ -351,6 +351,7 @@ static void screen_managed_notify(WScreen *scr, WRegion *sub)
  * not present, \var{id} corresponds to X screen numbers. Otherwise
  * the ids are some arbitrary ordering of Xinerama rootwins.
  */
+EXTL_SAFE
 EXTL_EXPORT
 WScreen *ioncore_find_screen_id(int id)
 {
@@ -430,6 +431,7 @@ WScreen *ioncore_goto_prev_screen()
 /*EXTL_DOC
  * Return the numerical id for screen \var{scr}.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 int screen_id(WScreen *scr)
 {

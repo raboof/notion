@@ -130,6 +130,7 @@ void mod_floatws_set(ExtlTab tab)
  * Get module basic settings. See \fnref{mod_floatws.set} for more 
  * information.
  */
+EXTL_SAFE
 EXTL_EXPORT
 ExtlTab mod_floatws_get()
 {

@@ -612,6 +612,7 @@ int region_orientation(WRegion *reg)
  * fields \code{min_?}, \code{base_?} and sometimes the fields \code{max_?},
  * \code{base_?} and \code{inc_?}, where \code{?}=\code{w}, \code{h}.
  */
+EXTL_SAFE
 EXTL_EXPORT_AS(WRegion, size_hints)
 ExtlTab region_size_hints_extl(WRegion *reg)
 {

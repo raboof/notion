@@ -278,6 +278,7 @@ char *ioncore_x_get_atom_name(const char *name, int atom)
  * deciphered from \var{atom_type} is a field in the returned table.
  * See \code{XGetWindowProperty}(3) manual page for more information.
  */
+EXTL_SAFE
 EXTL_EXPORT
 ExtlTab ioncore_x_get_window_property(int win, int atom, int atom_type,
                                       int n32expected, bool more)
@@ -386,6 +387,7 @@ void ioncore_x_delete_property(int win, int atom)
  * table (starting from 1) are the null-separated parts of the property.
  * See the \code{XGetTextProperty}(3) manual page for more information.
  */
+EXTL_SAFE
 EXTL_EXPORT
 ExtlTab ioncore_x_get_text_property(int win, int atom)
 {

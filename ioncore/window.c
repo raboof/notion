@@ -205,6 +205,7 @@ Window window_xwindow(const WWindow *wwin)
 /*EXTL_DOC
  * Return the X window id for \var{wwin}.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 double window_xid(WWindow *wwin)
 {

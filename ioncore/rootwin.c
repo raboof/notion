@@ -507,6 +507,7 @@ static bool scr_ok(WRegion *r)
 /*EXTL_DOC
  * Returns previously active screen on root window \var{rootwin}.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WScreen *rootwin_current_scr(WRootWin *rootwin)
 {
@@ -532,6 +533,7 @@ WScreen *rootwin_current_scr(WRootWin *rootwin)
 /*EXTL_DOC
  * Returns a table of root windows indexed by the X screen id.
  */
+EXTL_SAFE
 EXTL_EXPORT
 ExtlTab ioncore_root_windows()
 {

@@ -97,11 +97,16 @@ static void clientwin_get_winprops(WClientWin *cwin)
 {
     ExtlTab tab, tab2;
     int i1, i2;
-
+    bool ret;
+    
     if(!get_winprop_fn_set)
         return;
     
-    if(!extl_call(get_winprop_fn, "o", "t", cwin, &tab))
+    extl_protect(NULL);
+    ret=extl_call(get_winprop_fn, "o", "t", cwin, &tab);
+    extl_unprotect(NULL);
+
+    if(!ret)
         return;
     
     cwin->proptab=tab;
@@ -1305,6 +1310,7 @@ static void clientwin_resize_hints(WClientWin *cwin, XSizeHints *hints_ret)
  * properties for \var{cwin}. If a property is not set, the corresponding 
  * field(s) are unset in the  table.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 ExtlTab clientwin_get_ident(WClientWin *cwin)
 {
@@ -1465,6 +1471,7 @@ void clientwin_nudge(WClientWin *cwin)
 /*EXTL_DOC
  * Returns a list of regions managed by the clientwin (transients, mostly).
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 ExtlTab clientwin_managed_list(WClientWin *cwin)
 {
@@ -1506,6 +1513,7 @@ static WRegion *clientwin_current(WClientWin *cwin)
 /*EXTL_DOC
  * Return the X window id for the client window.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 double clientwin_xid(WClientWin *cwin)
 {

@@ -89,7 +89,9 @@ static bool mrsh_layout_extl(ExtlFn fn, WPaneWSPlacementParams *p)
     extl_table_sets_o(t, "reg", (Obj*)p->reg);
     extl_table_sets_o(t, "specifier", (Obj*)p->specifier);
 
+    extl_protect(NULL);
     extl_call(fn, "t", "b", t, &ret);
+    extl_unprotect(NULL);
     
     if(ret){
         ret=FALSE;

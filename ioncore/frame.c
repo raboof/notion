@@ -495,6 +495,7 @@ bool frame_toggle_shade(WFrame *frame)
 /*EXTL_DOC
  * Is \var{frame} shaded?
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 bool frame_is_shaded(WFrame *frame)
 {
@@ -505,6 +506,7 @@ bool frame_is_shaded(WFrame *frame)
 /*EXTL_DOC
  * Is \var{frame}'s tab-bar displayed?
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 bool frame_is_tabbar_hidden(WFrame *frame)
 {

@@ -113,12 +113,14 @@ int frame_press(WFrame *frame, XButtonEvent *ev, WRegion **reg_ret)
 /*{{{ Tab drag */
 
 
-static ExtlSafelist tabdrag_safe_funclist[]={
+static ExtlExportedFn *tabdrag_safe_fns[]={
     (ExtlExportedFn*)&mplex_switch_nth,
     (ExtlExportedFn*)&mplex_switch_next,
     (ExtlExportedFn*)&mplex_switch_prev,
     NULL
 };
+
+static ExtlSafelist tabdrag_safelist=EXTL_SAFELIST_INIT(tabdrag_safe_fns);
 
 
 #define BUTTONS_MASK \
@@ -140,10 +142,9 @@ static bool tabdrag_kbd_handler(WRegion *reg, XEvent *xev)
                                    ev->state&~BUTTONS_MASK, ev->keycode);
     
     if(binding!=NULL && binding->func!=extl_fn_none()){
-        const ExtlSafelist *old_safelist=
-            extl_set_safelist(tabdrag_safe_funclist);
+        extl_protect(&tabdrag_safelist);
         extl_call(binding->func, "o", NULL, region_screen_of(reg));
-        extl_set_safelist(old_safelist);
+        extl_unprotect(&tabdrag_safelist);
     }
     
     return FALSE;

@@ -86,6 +86,7 @@ WHook *ioncore_unregister_hook(const char *name, WHook *hk)
 /*EXTL_DOC
  * Find named hook \var{name}.
  */
+EXTL_SAFE
 EXTL_EXPORT
 WHook *ioncore_get_hook(const char *name)
 {
@@ -184,6 +185,7 @@ WHookItem *hook_find_extl(WHook *hk, ExtlFn efn)
 /*EXTL_DOC
  * Is \var{fn} hooked to hook \var{hk}?
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 bool hook_listed(WHook *hk, ExtlFn efn)
 {

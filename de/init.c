@@ -309,6 +309,7 @@ bool de_defstyle(const char *name, ExtlTab tab)
 /*EXTL_DOC
  * Define a substyle.
  */
+EXTL_SAFE
 EXTL_EXPORT
 ExtlTab de_substyle(const char *pattern, ExtlTab tab)
 {

@@ -102,6 +102,7 @@ void region_clear_activity(WRegion *reg, bool force)
 /*EXTL_DOC
  * Is activity notification set on \var{reg}.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 bool region_is_activity(WRegion *reg)
 {

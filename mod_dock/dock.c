@@ -1052,6 +1052,7 @@ static void dock_do_get(WDock *dock, ExtlTab conftab)
  * Get \var{dock}'s configuration table. See \fnref{WDock.set} for a
  * description of the table.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 ExtlTab dock_get(WDock *dock)
 {

@@ -153,6 +153,7 @@ bool ioncore_do_defbindings(const char *name, ExtlTab tab)
 }
 
 
+EXTL_SAFE
 EXTL_EXPORT
 ExtlTab ioncore_do_getbindings()
 {

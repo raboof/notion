@@ -220,7 +220,9 @@ void region_got_focus(WRegion *reg)
     if(reg->active_sub==NULL && !OBJ_IS(reg, WClientWin))
         rootwin_install_colormap(region_rootwin_of(reg), None); 
     
+    extl_protect(NULL);
     hook_call_o(region_activated_hook, (Obj*)reg);
+    extl_unprotect(NULL);
 }
 
 
@@ -241,7 +243,10 @@ void region_lost_focus(WRegion *reg)
     if(r!=NULL)
         region_managed_inactivated(r, reg);
     
+    extl_protect(NULL);
     hook_call_o(region_inactivated_hook, (Obj*)reg);
+    extl_unprotect(NULL);
+
 }
 
 
@@ -254,6 +259,7 @@ void region_lost_focus(WRegion *reg)
 /*EXTL_DOC
  * Is \var{reg} active/does it or one of it's children of focus?
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 bool region_is_active(WRegion *reg)
 {

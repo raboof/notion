@@ -67,6 +67,7 @@ void mod_ionws_set(ExtlTab tab)
 /*EXTL_DOC
  * Get parameters. For details see \fnref{mod_ionws.set}.
  */
+EXTL_SAFE
 EXTL_EXPORT
 ExtlTab mod_ionws_get()
 {

@@ -100,6 +100,7 @@ bool ioncore_do_exec_rw(WRootWin *rw, const char *cmd, const char *wd)
  * X display the WM is running on. No specific screen is set unlike with
  * \fnref{WRootWin.exec_on}.
  */
+EXTL_SAFE
 EXTL_EXPORT
 bool ioncore_exec(const char *cmd)
 {
@@ -150,6 +151,7 @@ static void process_pipe(int fd, void *p)
  * When data is received through the pipe, \var{handler} is called
  * with that data.
  */
+EXTL_SAFE
 EXTL_EXPORT
 bool ioncore_popen_bgread(const char *cmd, ExtlFn handler)
 {
@@ -273,7 +275,9 @@ bool ioncore_do_snapshot()
     if(!ioncore_save_layout())
         return FALSE;
 
+    extl_protect(NULL);
     hook_call_v(ioncore_snapshot_hook);
+    extl_unprotect(NULL);
     
     return TRUE;
 }

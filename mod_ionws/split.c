@@ -1382,6 +1382,7 @@ static WSplit *splitsplit_current(WSplitSplit *split)
 /*EXTL_DOC
  * Returns the most previously active child node of \var{split}.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WSplit *splitinner_current(WSplitInner *node)
 {
@@ -1636,6 +1637,7 @@ void splitsplit_flip(WSplitSplit *split)
 /*EXTL_DOC
  * Return parent split for \var{split}.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WSplitInner *split_parent(WSplit *split)
 {
@@ -1646,6 +1648,7 @@ WSplitInner *split_parent(WSplit *split)
 /*EXTL_DOC
  * Returns the area of workspace used by the regions under \var{split}.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 ExtlTab split_geom(WSplit *split)
 {
@@ -1657,6 +1660,7 @@ ExtlTab split_geom(WSplit *split)
  * Returns the top or left child node of \var{split} depending
  * on the direction of the split.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WSplit *splitsplit_tl(WSplitSplit *split)
 {
@@ -1668,6 +1672,7 @@ WSplit *splitsplit_tl(WSplitSplit *split)
  * Returns the bottom or right child node of \var{split} depending
  * on the direction of the split.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WSplit *splitsplit_br(WSplitSplit *split)
 {
@@ -1678,6 +1683,7 @@ WSplit *splitsplit_br(WSplitSplit *split)
  * Returns the direction of \var{split}; either ''vertical'' or
  * ''horizontal''.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 const char *splitsplit_dir(WSplitSplit *split)
 {
@@ -1688,6 +1694,7 @@ const char *splitsplit_dir(WSplitSplit *split)
 /*EXTL_DOC
  * Returns the region contained in \var{node}.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WRegion *splitregion_reg(WSplitRegion *node)
 {

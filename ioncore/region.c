@@ -227,6 +227,7 @@ void region_managed_remove(WRegion *mgr, WRegion *reg)
  * Return the object, if any, that is considered ''currently active''
  * within the objects managed by \var{mplex}.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WRegion *region_current(WRegion *mgr)
 {
@@ -547,6 +548,7 @@ void region_unset_parent(WRegion *reg)
 /*EXTL_DOC
  * Returns the region that manages \var{reg}.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WRegion *region_manager(WRegion *reg)
 {
@@ -557,6 +559,7 @@ WRegion *region_manager(WRegion *reg)
 /*EXTL_DOC
  * Returns the parent region of \var{reg}.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WWindow *region_parent(WRegion *reg)
 {
@@ -634,6 +637,7 @@ void region_restack(WRegion *reg, Window other, int mode)
 /*EXTL_DOC
  * Returns the root window \var{reg} is on.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WRootWin *region_rootwin_of(const WRegion *reg)
 {
@@ -648,6 +652,7 @@ WRootWin *region_rootwin_of(const WRegion *reg)
 /*EXTL_DOC
  * Returns the screen \var{reg} is on.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WScreen *region_screen_of(WRegion *reg)
 {
@@ -675,6 +680,7 @@ bool region_same_rootwin(const WRegion *reg1, const WRegion *reg2)
 /*EXTL_DOC
  * Is \var{reg} visible/is it and all it's ancestors mapped?
  */
+EXTL_SAFE
 EXTL_EXPORT_AS(WRegion, is_mapped)
 bool region_is_fully_mapped(WRegion *reg)
 {
@@ -734,6 +740,7 @@ void region_notify_change(WRegion *reg)
  * Returns the geometry of \var{reg} within its parent; a table with fields
  * \var{x}, \var{y}, \var{w} and \var{h}.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 ExtlTab region_geom(WRegion *reg)
 {

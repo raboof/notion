@@ -89,6 +89,7 @@ void ioncore_set(ExtlTab tab)
 /*EXTL_DOC
  * Get ioncore basic settings. For details see \fnref{ioncore.set}.
  */
+EXTL_SAFE
 EXTL_EXPORT
 ExtlTab ioncore_get()
 {
@@ -109,6 +110,7 @@ ExtlTab ioncore_get()
 /*EXTL_DOC
  * Get important directories (userdir, sessiondir, searchpath).
  */
+EXTL_SAFE
 EXTL_EXPORT
 ExtlTab ioncore_get_paths(ExtlTab tab)
 {
@@ -156,6 +158,7 @@ bool ioncore_set_paths(ExtlTab tab)
  * Lookup script \var{file}. If \var{try_in_dir} is set, it is tried
  * before the standard search path.
  */
+EXTL_SAFE
 EXTL_EXPORT_AS(ioncore, lookup_script)
 char *extl_lookup_script(const char *file, const char *sp);
 
@@ -164,6 +167,7 @@ char *extl_lookup_script(const char *file, const char *sp);
  * Get a file name to save (session) data in. The string \var{basename} 
  * should contain no path or extension components.
  */
+EXTL_SAFE
 EXTL_EXPORT_AS(ioncore, get_savefile)
 char *extl_get_savefile(const char *basename);
 
@@ -172,6 +176,7 @@ char *extl_get_savefile(const char *basename);
  * Write \var{tab} in file with basename \var{basename} in the
  * session directory.
  */
+EXTL_SAFE
 EXTL_EXPORT_AS(ioncore, write_savefile)
 bool extl_write_savefile(const char *basename, ExtlTab tab);
 
@@ -179,6 +184,7 @@ bool extl_write_savefile(const char *basename, ExtlTab tab);
 /*EXTL_DOC
  * Read a savefile.
  */
+EXTL_SAFE
 EXTL_EXPORT_AS(ioncore, read_savefile)
 ExtlTab extl_extl_read_savefile(const char *basename);
 

@@ -70,6 +70,7 @@ void mgmtmode_select(WMgmtMode *mode, WRegion *reg)
 /*EXTL_DOC
  * Return management mode target.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WRegion *mgmtmode_selected(WMgmtMode *mode)
 {

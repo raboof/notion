@@ -397,6 +397,7 @@ static bool use_name_parseany(WRegion *reg, WNamespace *ns, const char *name)
 /*EXTL_DOC
  * Returns the name for \var{reg}.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 const char *region_name(WRegion *reg)
 {
@@ -530,6 +531,7 @@ static WRegion *do_lookup_region(WNamespace *ns, const char *cname,
  * Attempt to find a non-client window region with name \var{name} and type
  * inheriting \var{typenam}.
  */
+EXTL_SAFE
 EXTL_EXPORT
 WRegion *ioncore_lookup_region(const char *name, const char *typenam)
 {
@@ -540,6 +542,7 @@ WRegion *ioncore_lookup_region(const char *name, const char *typenam)
 /*EXTL_DOC
  * Attempt to find a client window with name \var{name}.
  */
+EXTL_SAFE
 EXTL_EXPORT
 WClientWin *ioncore_lookup_clientwin(const char *name)
 {
@@ -578,6 +581,7 @@ static ExtlTab do_list(WNamespace *ns, const char *typenam)
 /*EXTL_DOC
  * Find all non-client window regions inheriting \var{typenam}.
  */
+EXTL_SAFE
 EXTL_EXPORT
 ExtlTab ioncore_region_list(const char *typenam)
 {
@@ -588,6 +592,7 @@ ExtlTab ioncore_region_list(const char *typenam)
 /*EXTL_DOC
  * Return a list of all client windows.
  */
+EXTL_SAFE
 EXTL_EXPORT
 ExtlTab ioncore_clientwin_list()
 {

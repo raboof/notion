@@ -661,7 +661,9 @@ static void show_sub(WMenu *menu, int n)
     {
         ExtlFn fn;
         if(extl_table_getis(menu->tab, n+1, "submenu_fn", 'f', &fn)){
+            extl_protect(NULL);
             extl_call(fn, NULL, "t", &(fnp.tab));
+            extl_unprotect(NULL);
             extl_unref_fn(fn);
         }else{
             extl_table_getis(menu->tab, n+1, "submenu", 't', &(fnp.tab));
@@ -679,7 +681,9 @@ static void show_sub(WMenu *menu, int n)
     {
         ExtlFn fn;
         if(extl_table_getis(menu->tab, n+1, "initial", 'f', &fn)){
+            extl_protect(NULL);
             extl_call(fn, NULL, "i", &(fnp.initial));
+            extl_unprotect(NULL);
 	    extl_unref_fn(fn);
         }else{
             extl_table_getis(menu->tab, n+1, "initial", 'i', &(fnp.initial));
@@ -924,6 +928,7 @@ void mod_menu_set(ExtlTab tab)
 /*EXTL_DOC
  * Get module basic settings. For details, see \fnref{mod_menu.set}.
  */
+EXTL_SAFE
 EXTL_EXPORT
 ExtlTab mod_menu_get()
 {

@@ -60,7 +60,9 @@ static bool mrsh_init_layout_extl(ExtlFn fn, WPaneWSInitParams *p)
     
     extl_table_sets_o(t, "ws", (Obj*)p->ws);
 
+    extl_protect(NULL);
     ret=extl_call(fn, "t", "b", t, &ret);
+    extl_unprotect(NULL);
     
     if(ret)
         ret=extl_table_gets_t(t, "layout", &(p->layout));

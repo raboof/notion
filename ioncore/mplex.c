@@ -291,6 +291,7 @@ WRegion *mplex_current(WMPlex *mplex)
  * Returns the layer \var{reg} is on \var{mplex} or $-1$ if \var{reg}
  * is not managed by \var{mplex}.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 int mplex_layer(WMPlex *mplex, WRegion *reg)
 {
@@ -306,6 +307,7 @@ int mplex_layer(WMPlex *mplex, WRegion *reg)
  * Return the managed object currently active within layer \var{l} of
  * \var{mplex}.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WRegion *mplex_lcurrent(WMPlex *mplex, uint l)
 {
@@ -321,6 +323,7 @@ WRegion *mplex_lcurrent(WMPlex *mplex, uint l)
  * Returns the \var{n}:th object managed by \var{mplex} on the the
  * \var{l}:th layer..
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WRegion *mplex_lnth(WMPlex *mplex, uint l, uint n)
 {
@@ -335,6 +338,7 @@ WRegion *mplex_lnth(WMPlex *mplex, uint l, uint n)
 /*EXTL_DOC
  * Returns a list of regions managed by \var{mplex} on layer \var{l}.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 ExtlTab mplex_llist(WMPlex *mplex, uint l)
 {
@@ -349,6 +353,7 @@ ExtlTab mplex_llist(WMPlex *mplex, uint l)
 /*EXTL_DOC
  * Returns the number of regions managed by \var{mplex} on layer \var{l}.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 int mplex_lcount(WMPlex *mplex, uint l)
 {
@@ -391,6 +396,7 @@ void mplex_set_index(WMPlex *mplex, WRegion *reg, int index)
  * by \var{mplex} has index zero. If \var{reg} is not managed by \var{mplex},
  * -1 is returned.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 int mplex_get_index(WMPlex *mplex, WRegion *reg)
 {
@@ -616,6 +622,7 @@ void mplex_managed_activated(WMPlex *mplex, WRegion *reg)
 /*EXTL_DOC
  * Is \var{reg} on the layer2 of \var{mplex}, but hidden?
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 bool mplex_l2_hidden(WMPlex *mplex, WRegion *reg)
 {
@@ -1407,6 +1414,7 @@ static ExtlTab mplex_do_get_stdisp_extl(WMPlex *mplex, bool fullconfig)
  * Get status display information. See \fnref{WMPlex.get_stdisp} for
  * information on the fields.
  */
+EXTL_SAFE
 EXTL_EXPORT_AS(WMPlex, get_stdisp)
 ExtlTab mplex_get_stdisp_extl(WMPlex *mplex)
 {
@@ -1477,7 +1485,9 @@ static bool mrsh_chg(ExtlFn fn, WMPlexChangedParams *p)
     extl_table_sets_b(t, "sw", p->sw);
     extl_table_sets_o(t, "sub", (Obj*)p->sub);
     
+    extl_protect(NULL);
     ret=extl_call(fn, "t", NULL, t);
+    extl_unprotect(NULL);
     
     extl_unref_table(t);
     

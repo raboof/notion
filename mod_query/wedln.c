@@ -462,9 +462,19 @@ void wedln_scrolldown_completions(WEdln *wedln)
 }
 
 
+static ExtlExportedFn *sc_safe_fns[]={
+    (ExtlExportedFn*)&wedln_set_completions,
+    NULL
+};
+
+static ExtlSafelist sc_safelist=EXTL_SAFELIST_INIT(sc_safe_fns);
+
+
 static void wedln_completion_handler(WEdln *wedln, const char *nam)
 {
+    extl_protect(&sc_safelist);
     extl_call(wedln->completor, "os", NULL, wedln, nam);
+    extl_unprotect(&sc_safelist);
 }
 
 

@@ -69,6 +69,7 @@ void region_toggle_tag(WRegion *reg)
 /*EXTL_DOC
  * Is \var{reg} tagged?
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 bool region_is_tagged(WRegion *reg)
 {

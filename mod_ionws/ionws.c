@@ -896,6 +896,7 @@ WRegion *ionws_current(WIonWS *ws)
 /*EXTL_DOC
  * Returns a list of regions managed by the workspace (frames, mostly).
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 ExtlTab ionws_managed_list(WIonWS *ws)
 {
@@ -910,6 +911,7 @@ ExtlTab ionws_managed_list(WIonWS *ws)
 /*EXTL_DOC
  * Returns the root of the split tree.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WSplit *ionws_split_tree(WIonWS *ws)
 {
@@ -944,6 +946,7 @@ WRegion *ionws_do_get_nextto(WIonWS *ws, WRegion *reg,
  * must be managed by \var{ws}. If \var{any} is not set, the status display
  * is not considered.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WRegion *ionws_nextto(WIonWS *ws, WRegion *reg, const char *dirstr,
                       bool any)
@@ -984,6 +987,7 @@ WRegion *ionws_do_get_farthest(WIonWS *ws,
  * (left/right/up/down). If \var{any} is not set, the status 
  * display is not considered.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WRegion *ionws_farthest(WIonWS *ws, const char *dirstr, bool any)
 {
@@ -1075,6 +1079,7 @@ WRegion *ionws_region_at(WIonWS *ws, int x, int y)
  * For region \var{reg} managed by \var{ws} return the \type{WSplit}
  * a leaf of which \var{reg} is.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WSplitRegion *ionws_node_of(WIonWS *ws, WRegion *reg)
 {

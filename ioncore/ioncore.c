@@ -558,6 +558,7 @@ void ioncore_deinit()
 /*EXTL_DOC
  * Is Ion supporting locale-specifically multibyte-encoded strings?
  */
+EXTL_SAFE
 EXTL_EXPORT
 bool ioncore_is_i18n()
 {
@@ -568,6 +569,7 @@ bool ioncore_is_i18n()
 /*EXTL_DOC
  * Returns Ioncore version string.
  */
+EXTL_SAFE
 EXTL_EXPORT
 const char *ioncore_version()
 {
@@ -577,6 +579,7 @@ const char *ioncore_version()
 /*EXTL_DOC
  * Returns the name of program using Ioncore.
  */
+EXTL_SAFE
 EXTL_EXPORT
 const char *ioncore_progname()
 {
@@ -587,6 +590,7 @@ const char *ioncore_progname()
 /*EXTL_DOC
  * Returns an about message (version, author, copyright notice).
  */
+EXTL_SAFE
 EXTL_EXPORT
 const char *ioncore_aboutmsg()
 {

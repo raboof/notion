@@ -89,13 +89,15 @@ bool mod_sp_toggle_on(WMPlex *mplex)
  * Toggle displayed status of \var{sp}.
  */
 EXTL_EXPORT
-void mod_sp_toggle(WScratchpad *sp)
+bool mod_sp_toggle(WScratchpad *sp)
 {
     if(sp!=NULL){
         WMPlex *mplex=OBJ_CAST(REGION_MANAGER(sp), WMPlex);
         if(mplex!=NULL /*&& mplex_layer(mplex, (WRegion*)sp)==2*/)
-            do_toggle(mplex, sp);
+            return do_toggle(mplex, sp);
     }
+    
+    return FALSE;
 }
 
 

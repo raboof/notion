@@ -134,13 +134,15 @@ void moveresmode_accel(WMoveresMode *mode, int *wu, int *hu, int accel_mode)
 /*{{{ Keyboard resize handler */
 
 
-static ExtlSafelist moveres_safe_funclist[]={
+static ExtlExportedFn *moveres_safe_fns[]={
     (ExtlExportedFn*)&moveresmode_resize,
     (ExtlExportedFn*)&moveresmode_move,
     (ExtlExportedFn*)&moveresmode_finish,
     (ExtlExportedFn*)&moveresmode_cancel,
     NULL
 };
+
+static ExtlSafelist moveres_safelist=EXTL_SAFELIST_INIT(moveres_safe_fns);
 
 
 static bool resize_handler(WRegion *reg, XEvent *xev)
@@ -169,10 +171,9 @@ static bool resize_handler(WRegion *reg, XEvent *xev)
         return FALSE;
     
     if(binding!=NULL){
-        const ExtlSafelist *old_safelist=
-            extl_set_safelist(moveres_safe_funclist);
+        extl_protect(&moveres_safelist);
         extl_call(binding->func, "o", NULL, mode);
-        extl_set_safelist(old_safelist);
+        extl_unprotect(&moveres_safelist);
     }
     
     return (moveres_mode(reg)==NULL);

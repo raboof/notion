@@ -217,6 +217,7 @@ void wedln_insstr_exported(WEdln *wedln, const char *str)
 /*EXTL_DOC
  * Get line editor contents.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 const char *wedln_contents(WEdln *wedln)
 {
@@ -227,6 +228,7 @@ const char *wedln_contents(WEdln *wedln)
  * Get current editing point. 
  * Beginning of the edited line is point 0.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 int wedln_point(WEdln *wedln)
 {
@@ -238,6 +240,7 @@ int wedln_point(WEdln *wedln)
  * Return value of -1 indicates that there is no mark, and
  * 0 is the beginning of the line.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 int wedln_mark(WEdln *wedln)
 {
@@ -258,6 +261,7 @@ void wedln_set_context(WEdln *wedln, const char *context)
 /*EXTL_DOC
  * Get history context for \var{wedln}.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 const char *wedln_context(WEdln *wedln)
 {

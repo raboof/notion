@@ -37,6 +37,7 @@ void timer_reset(WTimer *timer);
 /*EXTL_DOC
  * Is timer active?
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 bool timer_is_set(WTimer *timer);
 
@@ -58,6 +59,7 @@ void timer_set_extl(WTimer *timer, uint msecs, ExtlFn fn);
  * Issue a warning. How the message is displayed depends on the current
  * warning handler.
  */
+EXTL_SAFE
 EXTL_EXPORT
 void ioncore_warn(const char *str)
 {
@@ -65,6 +67,7 @@ void ioncore_warn(const char *str)
 }
 
 
+EXTL_SAFE
 EXTL_EXPORT
 const char *ioncore_gettext(const char *s)
 {

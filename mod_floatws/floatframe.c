@@ -436,6 +436,7 @@ void floatframe_toggle_sticky(WFloatFrame *frame)
 /*EXTL_DOC
  * Is \var{frame} sticky?
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 bool floatframe_is_sticky(WFloatFrame *frame)
 {

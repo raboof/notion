@@ -1167,6 +1167,7 @@ void floatws_lower(WFloatWS *ws, WRegion *reg)
 /*EXTL_DOC
  * Returns a list of regions managed by the workspace (frames, mostly).
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 ExtlTab floatws_managed_list(WFloatWS *ws)
 {

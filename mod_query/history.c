@@ -71,6 +71,7 @@ void mod_query_history_push_(char *str)
 /*EXTL_DOC
  * Get entry at index \var{n} in line editor history, 0 being the latest.
  */
+EXTL_SAFE
 EXTL_EXPORT
 const char *mod_query_history_get(int n)
 {
@@ -118,6 +119,7 @@ static bool match(const char *h, const char *b)
 /*EXTL_DOC
  * Try to find matching history entry.
  */
+EXTL_SAFE
 EXTL_EXPORT
 int mod_query_history_search(const char *s, int from, bool bwd)
 {
@@ -138,6 +140,7 @@ int mod_query_history_search(const char *s, int from, bool bwd)
 /*EXTL_DOC
  * Return table of history entries.
  */
+EXTL_SAFE
 EXTL_EXPORT
 ExtlTab mod_query_history_table()
 {
