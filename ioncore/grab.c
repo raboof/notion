@@ -23,7 +23,9 @@
 #include "cursor.h"
 #include "grab.h"
 
-/* {{{ definitions */
+
+/*{{{ Definitions */
+
 
 typedef struct _grab_status{
 	WRegion *holder;
@@ -36,12 +38,15 @@ typedef struct _grab_status{
 	bool remove;	/* TRUE, if entry marked for removal by do_grab_remove() */
 	int cursor;
 	Window confine_to;
+	int sqid;
 }GrabStatus;
 
 #define MAX_GRABS 4
 static GrabStatus grabs[MAX_GRABS];
 static GrabStatus *current_grab;
 static int idx_grab=0;
+static int last_sqid=0;
+
 
 /*}}}*/
 
@@ -81,6 +86,7 @@ void grab_establish(WRegion *reg, GrabHandler *func, GrabKilledHandler *kh,
 		current_grab->remove=FALSE;
 		current_grab->cursor=CURSOR_DEFAULT;
 		current_grab->confine_to=ROOT_OF(reg);
+		current_grab->sqid=last_sqid++;
 		do_grab_install(current_grab);
 	}
 }
@@ -159,6 +165,9 @@ void grab_remove(GrabHandler *func)
 
 bool call_grab_handler(XEvent *ev)
 {
+	GrabStatus *gr;
+	int gr_sqid;
+	
 	while(current_grab && current_grab->remove)
 		do_grab_remove();
 	
@@ -176,8 +185,14 @@ bool call_grab_handler(XEvent *ev)
 	if(ev->type!=KeyRelease && ev->type!=KeyPress)
 		return FALSE;
 	
-	if(current_grab->handler(current_grab->holder, ev))
-		mark_for_removal(current_grab, FALSE);
+	/* We must check that the grab pointed to by current_grab still
+	 * is the same grab and not already released or replaced by
+	 * another grab.
+	 */
+	gr=current_grab;
+	gr_sqid=gr->sqid;
+	if(gr->handler(gr->holder, ev) && gr->sqid==gr_sqid)
+		mark_for_removal(gr, FALSE);
 	
 	return TRUE;
 }
