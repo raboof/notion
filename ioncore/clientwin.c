@@ -78,8 +78,6 @@ static void get_winprops(WClientWin *cwin)
 	if(tab==extl_table_none())
 		return;
 	
-	fprintf(stderr, "got winprop\n");
-	
 	cwin->proptab=tab;
 
 	if(extl_table_gets_b(tab, "transparent", &b)){
