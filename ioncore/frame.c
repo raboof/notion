@@ -78,7 +78,7 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
     frame->bar_brush=NULL;
     frame->style=stringstore_alloc(style);
     
-    if(style==STRINGID_NONE){
+    if(frame->style==STRINGID_NONE){
         warn_err();
         return FALSE;
     }

@@ -213,6 +213,8 @@ static void setup_dragwin(WFrame *frame, uint tab)
     fp.g.w=frame_nth_tab_w(frame, tab);
     fp.g.h=frame->bar_h;
     
+    assert(frame->style!=STRINGID_NONE);
+    
     style=stringstore_get(frame->style);
     
     assert(style!=NULL);
