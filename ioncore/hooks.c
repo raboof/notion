@@ -218,12 +218,22 @@ EXTL_EXPORT_AS(WHook, add)
 bool hook_add_extl(WHook *hk, ExtlFn efn)
 {
     WHookItem *item;
+    
+    if(efn==extl_fn_none()){
+        warn("No function.");
+        return FALSE;
+    }
+
     if(hook_find_extl(hk, efn))
         return FALSE;
+    
     item=create_item(hk);
+    
     if(item==NULL)
         return FALSE;
+    
     item->efn=extl_ref_fn(efn);
+    
     return TRUE;
 }
 
