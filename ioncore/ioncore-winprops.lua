@@ -90,7 +90,7 @@ local function match_name(prop, cwin)
     if not prop.name then
         return true
     elseif nm then
-        local st, en=string.find(nm, name)
+        local st, en=string.find(nm, prop.name)
         return (st and en)
     else
         return false
