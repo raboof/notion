@@ -93,7 +93,13 @@ int genframe_press(WGenFrame *genframe, XButtonEvent *ev, WRegion **reg_ret)
 	/* Check tab */
 	
 	genframe_bar_geom(genframe, &g);
-		
+	
+	/* Borders act like tabs at top of the parent region */
+	if(REGION_GEOM(genframe).y==0){
+		g.h+=g.y;
+		g.y=0;
+	}
+
 	if(coords_in_rect(&g, ev->x, ev->y)){
 		p_tabnum=genframe_tab_at_x(genframe, ev->x);
 
