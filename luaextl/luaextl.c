@@ -176,10 +176,9 @@ static Obj *extl_get_wobj(lua_State *st, int pos)
 
 static void extl_uncache(lua_State *st, Obj *obj)
 {
-    lua_rawgeti(st, LUA_REGISTRYINDEX, obj_cache_ref);
     lua_pushlightuserdata(st, obj);
     lua_pushnil(st);
-    lua_rawset_check(st, -3);
+    lua_rawset_check(st, LUA_REGISTRYINDEX);
     obj->flags&=~OBJ_EXTL_CACHED;
 }
 
@@ -201,19 +200,16 @@ static void extl_push_obj(lua_State *st, Obj *obj)
     }
 
     if(obj->flags&OBJ_EXTL_CACHED){
-        lua_rawgeti(st, LUA_REGISTRYINDEX, obj_cache_ref);
         lua_pushlightuserdata(st, obj);
-        lua_gettable(st, -2);
+        lua_rawget(st, LUA_REGISTRYINDEX);
         if(lua_isuserdata(st, -1)){
             D(fprintf(stderr, "found %p cached\n", obj));
-            lua_remove(st, -2);
             return;
         }
-        lua_pop(st, 2);
     }
 
     D(fprintf(stderr, "Creating %p\n", obj));
-    
+
     watch=(Watch*)lua_newuserdata(st, sizeof(Watch));
     
     /* Lua shouldn't return if the allocation fails */
@@ -224,17 +220,15 @@ static void extl_push_obj(lua_State *st, Obj *obj)
     lua_pushfstring(st, "luaextl_%s_metatable", OBJ_TYPESTR(obj));
     lua_gettable(st, LUA_REGISTRYINDEX);
     if(lua_isnil(st, -1)){
-        lua_pop(st, 2);         
+        lua_pop(st, 2);
         lua_pushnil(st);
     }else{
         lua_setmetatable(st, -2);
-
+        
         /* Store in cache */
-        lua_rawgeti(st, LUA_REGISTRYINDEX, obj_cache_ref);
         lua_pushlightuserdata(st, obj);
-        lua_pushvalue(st, -3);
-        lua_rawset_check(st, -3);
-        lua_pop(st, 1);
+        lua_pushvalue(st, -2);
+        lua_rawset_check(st, LUA_REGISTRYINDEX);
         obj->flags|=OBJ_EXTL_CACHED;
     }
 }
