@@ -15,6 +15,9 @@
 WObjDescr OBJDESCR(WObj)={"WObj", NULL, NULL, NULL};
 
 
+static void do_watches(WObj *obj, bool call);
+
+
 /*{{{ Destroy */
 
 
@@ -22,7 +25,12 @@ void destroy_obj(WObj *obj)
 {
 	WObjDescr *d;
 	
-	call_watches(obj);
+	if(WOBJ_IS_BEING_DESTROYED(obj))
+		return;
+	
+	obj->flags|=WOBJ_DEST;
+	
+	do_watches(obj, TRUE);
 	
 	d=obj->obj_type;
 	
@@ -34,6 +42,8 @@ void destroy_obj(WObj *obj)
 		d=d->ancestor;
 	}
 	
+	do_watches(obj, FALSE);
+
 	free(obj);
 }
 
@@ -164,6 +174,8 @@ bool has_dynfun(const WObj *obj, DynFun *func)
 
 void setup_watch(WWatch *watch, WObj *obj, WWatchHandler *handler)
 {
+	assert(!WOBJ_IS_BEING_DESTROYED(obj));
+	
 	reset_watch(watch);
 	
 	watch->handler=handler;
@@ -201,7 +213,7 @@ bool watch_ok(WWatch *watch)
 }
 
 
-void call_watches(WObj *obj)
+static void do_watches(WObj *obj, bool call)
 {
 	WWatch *watch, *next;
 
@@ -209,9 +221,15 @@ void call_watches(WObj *obj)
 	
 	while(watch!=NULL){
 		next=watch->next;
-		do_reset_watch(watch, TRUE);
+		do_reset_watch(watch, call);
 		watch=next;
 	}
+}
+
+
+void call_watches(WObj *obj)
+{
+	do_watches(obj, FALSE);
 }
 
 

@@ -11,7 +11,6 @@
 #include "common.h"
 #include "region.h"
 #include "hooks.h"
-#include "viewport.h"
 #include "extl.h"
 #include "window.h"
 
@@ -78,26 +77,16 @@ extern void clientwin_close(WClientWin *cwin);
 
 extern WClientWin *manage_clientwin(Window win, int mflags);
 
+extern void clientwin_get_set_name(WClientWin *cwin);
+
 extern WClientWin *find_clientwin(Window win);
 extern WClientWin *lookup_clientwin(const char *name);
 extern ExtlTab complete_clientwin(const char *nam);
 
-extern void clientwin_set_target_id(WClientWin *cwin, int id);
-extern void clientwin_clear_target_id(WClientWin *cwin);
-
 extern void clientwin_handle_configure_request(WClientWin *cwin,
 											   XConfigureRequestEvent *ev);
 
-extern bool clientwin_check_fullscreen_request(WClientWin *cwin, int w, int h);
-extern bool clientwin_fullscreen_vp(WClientWin *cwin, WViewport *vp,
-									bool switchto);
-extern bool clientwin_toggle_fullscreen(WClientWin *cwin);
-extern bool clientwin_enter_fullscreen(WClientWin *cwin, bool switchto);
-extern bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto);
-
 extern void clientwin_broken_app_resize_kludge(WClientWin *cwin);
-
-extern void clientwin_get_set_name(WClientWin *cwin);
 
 extern WRegion *clientwin_load(WWindow *par, WRectangle geom, ExtlTab tab);
 

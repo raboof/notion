@@ -86,10 +86,10 @@ WGenFrame *create_genframe(WWindow *parent, WRectangle geom)
 
 void genframe_deinit(WGenFrame *genframe)
 {
-	while(genframe->managed_list!=NULL)
+	/*while(genframe->managed_list!=NULL)
 		destroy_obj((WObj*)genframe->managed_list);
 	if(genframe->current_input!=NULL)
-		destroy_obj((WObj*)genframe->current_input);
+		destroy_obj((WObj*)genframe->current_input);*/
 	
 	window_deinit((WWindow*)genframe);
 }

@@ -54,12 +54,12 @@ extern bool region_add_managed(WRegion *reg, WRegion *sub,
 
 /* */
 
-DYNFUN WRegion *region_do_find_new_manager(WRegion *reg, WRegion *todst);
-extern WRegion *default_do_find_new_manager(WRegion *reg, WRegion *todst);
-extern WRegion *region_find_new_manager(WRegion *reg);
+DYNFUN WRegion *region_find_rescue_manager_for(WRegion *reg, WRegion *todst);
+extern WRegion *default_find_rescue_manager_for(WRegion *reg, WRegion *todst);
+extern WRegion *region_find_rescue_manager(WRegion *reg);
+extern bool region_can_manage_clientwins(WRegion *reg);
 
-extern bool region_move_managed_on_list(WRegion *dest, WRegion *src,
-										WRegion *list);
-extern bool region_rescue_managed_on_list(WRegion *reg, WRegion *list);
+extern bool rescue_clientwins_on_list(WRegion *reg, WRegion *list);
+extern bool move_clientwins_on_list(WRegion *dest, WRegion *src, WRegion *list);
 
 #endif /* ION_IONCORE_ATTACH_H */

@@ -9,11 +9,10 @@
 #include "common.h"
 #include "region.h"
 #include "attach.h"
-#include "property.h"
 #include "manage.h"
-#include "mwmhints.h"
 #include "objp.h"
 #include "names.h"
+#include "fullscreen.h"
 #include "extl.h"
 
 
@@ -26,6 +25,7 @@
 
 
 /*{{{ Static helper functions */
+
 
 static bool ws_ok(WRegion *r)
 {
@@ -46,29 +46,6 @@ static WGenWS *find_suitable_workspace(WViewport *vp)
 	}
 	
 	return NULL;
-}
-
-
-static void find_prop_target(WClientWin *cwin, WRegion **target,
-							 WGenWS **ws)
-{
-	WRegion *r;
-	char *target_name;
-	
-	if(!extl_table_gets_s(cwin->proptab, "target", &target_name))
-		return;
-	
-	/* Potential problem: numbering */
-	r=lookup_region(target_name);
-	
-	free(target_name);
-	
-	if(r!=NULL && SCREEN_OF(r)==SCREEN_OF(cwin)){
-		if(ws!=NULL && ws_ok(r))
-			*ws=(WGenWS*)r;
-		else if(target!=NULL && HAS_DYN(r, region_add_managed))
-			*target=r;
-	}
 }
 
 
@@ -102,7 +79,6 @@ static WViewport *find_suitable_viewport(WClientWin *cwin,
 
 bool add_clientwin_default(WClientWin *cwin, const WAttachParams *param)
 {
-	WRegion *target=NULL;
 	WGenWS *ws=NULL;
 	WViewport *vp=NULL;
 	int tm;
@@ -110,9 +86,11 @@ bool add_clientwin_default(WClientWin *cwin, const WAttachParams *param)
 	/* check full screen mode */
 	if(param->flags&REGION_ATTACH_POSRQ){ /* flag should always be set */
 		if(clientwin_check_fullscreen_request(cwin, param->geomrq.w,
-											  param->geomrq.h))
+											  param->geomrq.h)){
+			if(clientwin_get_switchto(cwin))
+				region_goto((WRegion*)cwin);
 			return TRUE;
-
+		}
 	}
 
 	/* Transients are managed by their transient_for client window 
@@ -124,32 +102,10 @@ bool add_clientwin_default(WClientWin *cwin, const WAttachParams *param)
 			return TRUE;
 	}
 	
-	find_prop_target(cwin, target==NULL ? &target : NULL, &ws);
-	
-	if(target!=NULL){
-		if(!region_supports_add_managed(target)){
-			warn("Target region of window %#x does not support primitive "
-				 "add_managed method", cwin->win);
-			target=NULL;
-		}else if(SCREEN_OF(target)!=SCREEN_OF(cwin)){
-			warn("The target id property of window %#x is set to "
-				 "a frame on different screen", cwin->win);
-			target=NULL;
-		}
-	}
-	
-	/* Found a specific target frame or such? */
-	if(target!=NULL){
-		if(finish_add_clientwin(target, cwin, param))
-			return TRUE;
-	}
-	
 	/* Need to find a workspace and let it handle this. */
-	if(ws==NULL){
-		vp=find_suitable_viewport(cwin, param);
-		if(vp!=NULL)
-			ws=find_suitable_workspace(vp);
-	}
+	vp=find_suitable_viewport(cwin, param);
+	if(vp!=NULL)
+		ws=find_suitable_workspace(vp);
 	
 	if(ws!=NULL){
 		if(genws_add_clientwin(ws, cwin, param))
@@ -175,6 +131,25 @@ bool genws_add_clientwin(WGenWS *reg, WClientWin *cwin,
 
 
 /*{{{ finish_add_clientwin */
+
+
+bool do_add_clientwin(WRegion *reg, WClientWin *cwin,
+					  const WAttachParams *param)
+{
+	if(HAS_DYN(reg, genws_add_clientwin)){
+		return genws_add_clientwin((WGenWS*)reg, cwin, param);
+	}else{
+		/* Can't use region_x_window(reg)==None because WFloatWS:s have
+		 * a dummy window.
+		 */
+		if(!WOBJ_IS(reg, WWindow) && !WOBJ_IS(reg, WClientWin)){
+			warn("Attaching a WClientWin to a non-WWindow non-WClientWin "
+				 "WRegion with region_add_managed... "
+				 "probably not a good idea.");
+		}
+		return region_add_managed(reg, (WRegion*)cwin, param);
+	}
+}
 
 
 bool finish_add_clientwin(WRegion *reg, WClientWin *cwin,
@@ -204,7 +179,7 @@ bool finish_add_clientwin(WRegion *reg, WClientWin *cwin,
 	   param->init_state==IconicState)
 		param2.flags=0;
 	
-	return region_add_managed(reg, (WRegion*)cwin, &param2);
+	return do_add_clientwin(reg, (WRegion*)cwin, &param2);
 }
 
 

@@ -32,7 +32,7 @@ DECLSTRUCT(WObjDescr){
 								 (void (*)())DFN}
 
 #define WOBJ_INIT(O, TYPE) {((WObj*)(O))->obj_type=&OBJDESCR(TYPE); \
-	((WObj*)(O))->obj_watches=NULL;}
+	((WObj*)(O))->obj_watches=NULL; ((WObj*)(O))->flags=0;}
 
 #define CREATEOBJ_IMPL(OBJ, LOWOBJ, INIT_ARGS)                     \
 	OBJ *p;  p=ALLOC(OBJ); if(p==NULL){ warn_err(); return NULL; } \

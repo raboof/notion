@@ -22,6 +22,7 @@
 #include <ioncore/genframe-pointer.h>
 #include <ioncore/stacking.h>
 #include <ioncore/extlconv.h>
+#include <ioncore/defer.h>
 
 #include "floatws.h"
 #include "floatframe.h"
@@ -197,7 +198,7 @@ WFloatWS *create_floatws(WWindow *parent, WRectangle bounds)
 void floatws_deinit(WFloatWS *ws)
 {
 	while(ws->managed_list!=NULL)
-		floatws_remove_managed(ws, ws->managed_list);
+		destroy_obj((WObj*)(ws->managed_list));
 
 	genws_deinit(&(ws->genws));
 
@@ -216,10 +217,12 @@ bool floatws_destroy(WFloatWS *ws)
 	if(!region_may_destroy((WRegion*)ws))
 		return FALSE;
 	
-	if(!region_rescue_managed_on_list((WRegion*)ws, ws->managed_list))
+	/* TODO: move frames to other workspaces */
+	
+	if(!rescue_clientwins_on_list((WRegion*)ws, ws->managed_list))
 		return FALSE;
 	
-	destroy_obj((WObj*)ws);
+	defer_destroy((WObj*)ws);
 	return TRUE;
 }
 
@@ -566,8 +569,6 @@ static DynFunTab floatws_dynfuntab[]={
 	{region_managed_activated, floatws_managed_activated},
 	{region_remove_managed, floatws_remove_managed},
 	{(DynFun*)region_display_managed, (DynFun*)floatws_display_managed},
-	
-/*	{(DynFun*)region_do_find_new_manager, (DynFun*)floatws_do_find_new_manager},*/
 	
 	{(DynFun*)region_save_to_file, (DynFun*)floatws_save_to_file},
 

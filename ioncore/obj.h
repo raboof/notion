@@ -34,7 +34,11 @@ extern void destroy_obj(WObj *obj);
 DECLOBJ(WObj){
 	WObjDescr *obj_type;
 	WWatch *obj_watches;
+	int flags;
 };
+
+#define WOBJ_DEST 0x0001
+#define WOBJ_IS_BEING_DESTROYED(OBJ) (((WObj*)(OBJ))->flags&WOBJ_DEST)
 
 #define DYNFUN
 

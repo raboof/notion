@@ -9,11 +9,13 @@
 #include <limits.h>
 
 #include "common.h"
+#include "global.h"
 #include "region.h"
 #include "attach.h"
 #include "objp.h"
 #include "clientwin.h"
 #include "saveload.h"
+#include "manage.h"
 #include "extlconv.h"
 
 
@@ -194,93 +196,123 @@ bool region_manage(WRegion *mgr, WRegion *reg, ExtlTab tab)
 /*{{{ find_new_manager */
 
 
-WRegion *default_do_find_new_manager(WRegion *reg, WRegion *todst)
+bool region_can_manage_clientwins(WRegion *reg)
+{
+	return (HAS_DYN(reg, genws_add_clientwin) ||
+			HAS_DYN(reg, region_do_add_managed));
+}
+
+
+WRegion *default_find_rescue_manager_for(WRegion *reg, WRegion *todst)
 {
 	WRegion *p;
 	
-	if(region_supports_add_managed(reg))
-		return reg;
+	if(reg!=todst && !WOBJ_IS_BEING_DESTROYED(reg)){
+		if(region_can_manage_clientwins(reg))
+			return reg;
+	}
 	
 	p=REGION_MANAGER(reg);
-
+	
 	if(p==NULL){
-		p=REGION_PARENT_CHK(reg, WRegion);
+		p=region_parent(reg);
 		if(p==NULL)
 			return NULL;
 	}
 	
-	reg=region_do_find_new_manager(p, todst);
-	if(reg!=NULL)
-		return reg;
-	return default_do_find_new_manager(p, todst);
+	if(!WOBJ_IS_BEING_DESTROYED(p)){
+		WRegion *nm=region_find_rescue_manager_for(p, reg);
+		if(nm!=NULL)
+			return nm;
+	}
+	
+	return default_find_rescue_manager_for(p, reg);
 }
 
 
-WRegion *region_do_find_new_manager(WRegion *r2, WRegion *reg)
+WRegion *region_find_rescue_manager_for(WRegion *r2, WRegion *reg)
 {
 	WRegion *ret=NULL;
-	CALL_DYN_RET(ret, WRegion*, region_do_find_new_manager, r2, (r2, reg));
+	CALL_DYN_RET(ret, WRegion*, region_find_rescue_manager_for, r2, (r2, reg));
 	return ret;
 }
 
 
-
-WRegion *region_find_new_manager(WRegion *reg)
+/* Find new manager for the WClientWins in reg */
+WRegion *region_find_rescue_manager(WRegion *reg)
 {
-	WRegion *p=REGION_MANAGER(reg), *nm;
-
-	if(p==NULL){
-		p=REGION_PARENT_CHK(reg, WRegion);
-		if(p==NULL)
-			return NULL;
-	}
-	
-	nm=region_do_find_new_manager(p, reg);
-	if(nm!=NULL)
-		return nm;
-	return default_do_find_new_manager(p, reg);
+	return default_find_rescue_manager_for(reg, reg);
 }
 
 
-bool region_move_managed_on_list(WRegion *dest, WRegion *src,
-								 WRegion *list)
+bool move_clientwins_on_list(WRegion *dest, WRegion *src, WRegion *list)
 {
 	WRegion *r, *next;
 	bool success=TRUE;
+	WAttachParams param;
+	bool hascw=FALSE;
+	int xroot=0, yroot=0;
+	XSizeHints szhnt;
 	
-	assert(region_supports_add_managed(dest));
+	if(HAS_DYN(dest, genws_add_clientwin)){
+		hascw=TRUE;
+	}else if(!HAS_DYN(dest, region_do_add_managed)){
+		return FALSE;
+	}
+
+	region_rootpos(dest, &xroot, &yroot);
 	
 	FOR_ALL_MANAGED_ON_LIST_W_NEXT(list, r, next){
-		if(!region_add_managed_simple(dest, r, 0))
-			success=FALSE;
+		if(!WOBJ_IS(r, WClientWin))
+			continue;
+		
+		region_rootpos(r, &(param.geomrq.w), &(param.geomrq.h));
+		param.geomrq.x-=xroot;
+		param.geomrq.y-=yroot;
+		param.geomrq.w=REGION_GEOM(r).w;
+		param.geomrq.h=REGION_GEOM(r).h;
+		param.flags=(REGION_ATTACH_POSRQ|REGION_ATTACH_SIZERQ);
+		/* TODO: StaticGravity */
+		
+		if(hascw){
+			if(!genws_add_clientwin((WGenWS*)dest, (WClientWin*)r, &param))
+				success=FALSE;
+		}else{
+			if(!region_add_managed(dest, r, &param))
+				success=FALSE;
+		}
 	}
 	
 	return success;
 }
 
 
-bool region_rescue_managed_on_list(WRegion *reg, WRegion *list)
+bool rescue_clientwins_on_list(WRegion *reg, WRegion *list)
 {
-	WRegion *p;
+	WRegion *p, *r;
 	
-	if(list==NULL)
+	if(list==NULL || wglobal.opmode==OPMODE_DEINIT)
 		return TRUE;
 	
-	p=region_find_new_manager(reg);
+	p=region_find_rescue_manager(reg);
 	
 	if(p!=NULL){
-		if(region_move_managed_on_list(p, reg, list))
+		if(move_clientwins_on_list(p, reg, list))
 			return TRUE;
 	}
 	
 	/* This should not happen unless the region is not
 	 * properly in a tree with a WScreen root.
 	 */
+	FOR_ALL_MANAGED_ON_LIST(list, r){
+		if(WOBJ_IS(r, WClientWin)){
+			warn("Unable to move managed regions of a %s somewhere else.",
+				 WOBJ_TYPESTR(reg));
+			return FALSE;
+		}
+	}
 	
-	warn("Unable to move managed regions of a %s somewhere else.",
-		 WOBJ_TYPESTR(reg));
-	
-	return FALSE;
+	return TRUE;
 }
 
 

@@ -1029,7 +1029,7 @@ void ionws_managed_activated(WIonWS *ws, WRegion *reg)
 /*}}}*/
 
 
-/*{{{ do_find_new_manager */
+/*{{{ iowns_find_rescue_manager_for */
 
 
 static WRegion *do_find_nmgr(WObj *ptr, int primn)
@@ -1039,9 +1039,8 @@ static WRegion *do_find_nmgr(WObj *ptr, int primn)
 	
 	do{
 		if(WOBJ_IS(ptr, WRegion)){
-			return (region_supports_add_managed((WRegion*)ptr)
-					? (WRegion*)ptr
-					: NULL);
+			return (region_can_manage_clientwins((WRegion*)ptr)
+					? (WRegion*)ptr : NULL);
 		}
 		
 		if(!WOBJ_IS(ptr, WWsSplit))
@@ -1065,14 +1064,14 @@ static WRegion *do_find_nmgr(WObj *ptr, int primn)
 }
 					  
 
-WRegion *ionws_do_find_new_manager(WIonWS *ws, WRegion *reg)
+WRegion *ionws_find_rescue_manager_for(WIonWS *ws, WRegion *reg)
 {
 	WWsSplit *split;
 	WRegion *nmgr;
 	WObj *obj;
 	
 	if(REGION_MANAGER(reg)!=(WRegion*)ws)
-		return do_find_nmgr(ws->split_tree, TOP_OR_LEFT);
+		return FALSE;
 
 	split=SPLIT_OF(reg);
 	

@@ -135,7 +135,7 @@ WARN=	-W -Wimplicit -Wreturn-type -Wswitch -Wcomment \
 #C99_SOURCE=-std=c99 -DCF_HAS_VA_COPY
 
 CFLAGS=-g -O2 $(WARN) $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES)
-LDFLAGS=-g $(LIBS) $(EXTRA_LIBS)
+LDFLAGS=-g -O2 $(LIBS) $(EXTRA_LIBS)
 
 
 ##

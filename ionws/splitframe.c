@@ -189,9 +189,9 @@ void ionframe_relocate_and_close(WIonFrame *frame)
 		return;
 	}
 
-	if(!region_rescue_managed_on_list((WRegion*)frame,
-									  frame->genframe.managed_list)){
-		warn("Failed to rescue managed subregions.");
+	if(!rescue_clientwins_on_list((WRegion*)frame,
+								  frame->genframe.managed_list)){
+		warn("Failed to rescue managed client windows.");
 		return;
 	}
 

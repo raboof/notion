@@ -80,26 +80,23 @@ static void destroy_children(WRegion *reg)
 {
 	WRegion *sub, *prev=NULL;
 
-	assert(!(reg->flags&REGION_SUBDEST));
-	
-	reg->flags|=REGION_SUBDEST;
-	
 	/* destroy children */
 	while(1){
 		sub=reg->children;
 		if(sub==NULL)
 			break;
+		assert(!WOBJ_IS_BEING_DESTROYED(sub));
 		assert(sub!=prev);
 		prev=sub;
 		destroy_obj((WObj*)sub);
 	}
-	
-	reg->flags&=~REGION_SUBDEST;
 }
 
 
 void region_deinit(WRegion *reg)
 {
+	rescue_clientwins_on_list(reg, reg->children);
+	
 	destroy_children(reg);
 
 	if(wglobal.focus_next==reg){

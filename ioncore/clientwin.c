@@ -22,14 +22,13 @@
 #include "resize.h"
 #include "attach.h"
 #include "regbind.h"
-#include "mwmhints.h"
-#include "viewport.h"
 #include "names.h"
 #include "stacking.h"
 #include "saveload.h"
 #include "manage.h"
 #include "extl.h"
 #include "extlconv.h"
+#include "fullscreen.h"
 
 
 static void set_clientwin_state(WClientWin *cwin, int state);
@@ -171,12 +170,18 @@ void set_switch_to_new_clients(bool sw)
 	switch_to_new_clients=sw;
 }
 
+
 bool clientwin_get_switchto(WClientWin *cwin)
 {
+	bool b;
+	
 	if(wglobal.opmode==OPMODE_INIT)
 		return FALSE;
 	
-	return extl_table_is_bool_set(cwin->proptab, "switchto");
+	if(extl_table_gets_b(cwin->proptab, "switchto", &b))
+		return b;
+	
+	return switch_to_new_clients;
 }
 
 
@@ -283,6 +288,53 @@ static WClientWin *create_clientwin(WWindow *parent, Window win,
 }
 
 
+static bool handle_target_prop(WClientWin *cwin, const WAttachParams *param)
+{
+	WRegion *r=NULL;
+	char *target_name=NULL;
+	
+	if(!extl_table_gets_s(cwin->proptab, "target", &target_name))
+		return FALSE;
+	
+	r=lookup_region(target_name);
+	
+	free(target_name);
+	
+	if(!region_can_manage_clientwins(r))
+		return FALSE;
+	
+	return do_add_clientwin(r, cwin, param);
+}
+
+
+static void get_transient_for(WClientWin *cwin, WAttachParams *param)
+{
+	Window tfor;
+	
+	if(XGetTransientForHint(wglobal.dpy, cwin->win, &tfor)){
+		param->tfor=find_clientwin(tfor);
+		if(param->tfor==cwin){
+			param->tfor=NULL;
+			warn("The transient_for hint for \"%s\" points to itself.",
+				 region_name((WRegion*)cwin));
+		}else if(param->tfor==NULL){
+			if(find_window(tfor)!=NULL){
+				warn("Client window \"%s\" has broken transient_for hint. "
+					 "(\"Extended WM hints\" multi-parent brain damage?)",
+					 region_name((WRegion*)cwin));
+			}
+		}else if(SCREEN_OF(param->tfor)!=SCREEN_OF(cwin)){
+			warn("The transient_for window for \"%s\" is not on the same "
+				 "screen.", region_name((WRegion*)cwin));
+		}else{
+			cwin->transient_for=tfor;
+			if(clientwin_get_transient_mode(cwin)==TRANSIENT_MODE_NORMAL)
+				param->flags|=REGION_ATTACH_TFOR;
+		}
+	}
+}
+
+
 /* This is called when a window is mapped on the root window.
  * We want to check if we should manage the window and how and
  * act appropriately.
@@ -294,7 +346,6 @@ WClientWin* manage_clientwin(Window win, int mflags)
 	XWindowAttributes attr;
 	XWMHints *hints;
 	int state=NormalState;
-	bool managed=FALSE;
 	WAttachParams param;
 	
 	param.flags=0;
@@ -330,7 +381,7 @@ again:
 		
 		win=hints->icon_window;
 		
-		/* It is a dock, do everything again from the beginning, now
+		/* It is a dockapp, do everything again from the beginning, now
 		 * with the icon window.
 		 */
 		param.flags|=REGION_ATTACH_DOCKAPP;
@@ -389,31 +440,17 @@ again:
 		param.size_hints=&(cwin->size_hints);
 	}
 
-	if(XGetTransientForHint(wglobal.dpy, cwin->win, &(cwin->transient_for))){
-		param.tfor=find_clientwin(cwin->transient_for);
-		if(param.tfor==cwin){
-			param.tfor=NULL;
-			cwin->transient_for=None;
-			warn("The transient_for hint for \"%s\" points to itself.",
-				 region_name((WRegion*)cwin));
-		}else if(param.tfor==NULL){
-			warn("Client window \"%s\" has broken transient_for hint. "
-				 "(\"Extended WM hints\" multi-parent idiocy?)",
-				 region_name((WRegion*)cwin));
-		}else if(SCREEN_OF(param.tfor)!=SCREEN_OF(cwin)){
-			warn("The transient_for window for \"%s\" is not on the same "
-				 "screen.", region_name((WRegion*)cwin));
-		}else{
-			if(clientwin_get_transient_mode(cwin)==TRANSIENT_MODE_NORMAL)
-				param.flags|=REGION_ATTACH_TFOR;
+	get_transient_for(cwin, &param);
+
+	if(!handle_target_prop(cwin, &param)){
+		bool managed=FALSE;
+		
+		CALL_ALT_B(managed, add_clientwin_alt, (cwin, &param));
+
+		if(!managed){
+			warn("Unable to manage client window %d\n", win);
+			goto failure;
 		}
-	}
-
-	CALL_ALT_B(managed, add_clientwin_alt, (cwin, &param));
-
-	if(!managed){
-		warn("Unable to manage client window %d\n", win);
-		goto failure;
 	}
 	
 	/* Check that the window exists. The previous check and selectinput
@@ -571,7 +608,7 @@ void clientwin_deinit(WClientWin *cwin)
 /* Used when the window was unmapped */
 void clientwin_unmapped(WClientWin *cwin)
 {
-	region_rescue_managed_on_list((WRegion*)cwin, cwin->transient_list);
+	rescue_clientwins_on_list((WRegion*)cwin, cwin->transient_list);
 	if(cwin->fsinfo.last_mgr_watch.obj!=NULL)
 		region_goto((WRegion*)(cwin->fsinfo.last_mgr_watch.obj));
 	destroy_obj((WObj*)cwin);
@@ -1109,180 +1146,6 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 /*}}}*/
 
 
-/*{{{ Fullscreen */
-
-
-bool clientwin_check_fullscreen_request(WClientWin *cwin, int w, int h)
-{
-	WRegion *reg;
-	WMwmHints *mwm;
-	
-	mwm=get_mwm_hints(cwin->win);
-	if(mwm==NULL || !(mwm->flags&MWM_HINTS_DECORATIONS) ||
-	   mwm->decorations!=0)
-		return FALSE;
-	
-	FOR_ALL_MANAGED_ON_LIST(SCREEN_OF(cwin)->viewport_list, reg){
-		if(!WOBJ_IS(reg, WViewport))
-			continue;
-		/* TODO: if there are multiple possible screens, use the one with
-		 * requested position, if any.
-		 */
-		if(REGION_GEOM(reg).w==w && REGION_GEOM(reg).h==h){
-			return clientwin_fullscreen_vp(cwin, (WViewport*)reg,
-										   clientwin_get_switchto(cwin));
-		}
-	}
-	
-	/* Catch Xinerama-unaware apps here */
-	if(REGION_GEOM(SCREEN_OF(cwin)).w==w && REGION_GEOM(SCREEN_OF(cwin)).h==h){
-		return clientwin_enter_fullscreen(cwin, 
-										  clientwin_get_switchto(cwin));
-	}
-	return FALSE;
-}
-
-
-static void lastmgr_watchhandler(WWatch *watch, WObj *obj)
-{
-	WClientWinFSInfo *fsinfo=(WClientWinFSInfo*)watch;
-	WRegion *r;
-	
-	assert(WOBJ_IS(obj, WRegion));
-	
-	r=REGION_MANAGER((WRegion*)obj);
-	
-	if(r==NULL)
-		r=region_parent((WRegion*)obj);
-	
-	if(r!=NULL)
-		setup_watch(&(fsinfo->last_mgr_watch), (WObj*)r, lastmgr_watchhandler);
-}
-
-
-bool clientwin_fullscreen_vp(WClientWin *cwin, WViewport *vp, bool switchto)
-{
-	int rootx, rooty;
-	bool wasfs=TRUE;
-	
-	if(cwin->fsinfo.last_mgr_watch.obj==NULL){
-		wasfs=FALSE;
-		
-		if(REGION_MANAGER(cwin)!=NULL){
-			setup_watch(&(cwin->fsinfo.last_mgr_watch),
-						(WObj*)REGION_MANAGER(cwin),
-						lastmgr_watchhandler);
-		}else if(vp->current_ws!=NULL){
-			setup_watch(&(cwin->fsinfo.last_mgr_watch),
-						(WObj*)vp->current_ws, 
-						lastmgr_watchhandler);
-		}
-		region_rootpos((WRegion*)cwin, &rootx, &rooty);
-		cwin->fsinfo.saved_rootrel_geom.x=rootx;
-		cwin->fsinfo.saved_rootrel_geom.y=rooty;
-		cwin->fsinfo.saved_rootrel_geom.w=REGION_GEOM(cwin).w;
-		cwin->fsinfo.saved_rootrel_geom.h=REGION_GEOM(cwin).h;
-	}
-	
-	if(!region_add_managed_simple((WRegion*)vp, (WRegion*)cwin, switchto ? 
-								  REGION_ATTACH_SWITCHTO : 0)){
-		warn("Failed to enter full screen mode");
-		if(!wasfs)
-			reset_watch(&(cwin->fsinfo.last_mgr_watch));
-		return FALSE;
-	}
-
-	return TRUE;
-}
-
-
-bool clientwin_enter_fullscreen(WClientWin *cwin, bool switchto)
-{
-	WViewport *vp=region_viewport_of((WRegion*)cwin);
-	
-	if(vp==NULL){
-		vp=SCREEN_OF(cwin)->current_viewport;
-		if(vp==NULL)
-			return FALSE;
-	}
-	
-	return clientwin_fullscreen_vp(cwin, vp, switchto);
-}
-
-
-static bool do_add_clientwin(WRegion *reg, WClientWin *cwin,
-							  WAttachParams *param)
-{
-	if(HAS_DYN(reg, genws_add_clientwin)){
-		return genws_add_clientwin((WGenWS*)reg, cwin, param);
-	}else{
-		/* Can't use region_x_window(reg)==None because WFloatWS:s have
-		 * a dummy window.
-		 */
-		if(!WOBJ_IS(reg, WWindow) && !WOBJ_IS(reg, WClientWin)){
-			warn("Attaching a WClientWin to a non-WWindow non-WClientWin "
-				 "WRegion with region_add_managed... "
-				 "probably not a good idea.");
-		}
-		return region_add_managed(reg, (WRegion*)cwin, param);
-	}
-}
-
-
-bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto)
-{	
-	WRegion *reg;
-	WAttachParams param;
-	XSizeHints hnt;
-	int rootx, rooty;
-	
-	if(cwin->fsinfo.last_mgr_watch.obj==NULL)
-		return FALSE;
-
-	reg=(WRegion*)cwin->fsinfo.last_mgr_watch.obj;
-	reset_watch(&(cwin->fsinfo.last_mgr_watch));
-	assert(WOBJ_IS(reg, WRegion));
-	
-	/* Set up geometry hints */
-	param.flags|=(REGION_ATTACH_SIZERQ|REGION_ATTACH_POSRQ|
-				  REGION_ATTACH_SWITCHTO|REGION_ATTACH_SIZE_HINTS);
-	
-	region_rootpos(reg, &rootx, &rooty);
-	param.geomrq=cwin->fsinfo.saved_rootrel_geom;
-	param.geomrq.x-=rootx;
-	param.geomrq.y-=rooty;
-	
-	hnt=cwin->size_hints;
-	hnt.flags|=PWinGravity;
-	hnt.win_gravity=StaticGravity;
-	param.size_hints=&hnt;
-	
-	if(!do_add_clientwin(reg, cwin, &param)){
-		warn("WClientWin failed to return from full screen mode; remaining "
-			 "manager or parent from previous location refused to manage us.");
-		return FALSE;
-	}
-	
-	return region_goto((WRegion*)cwin);
-}
-
-
-/*EXTL_DOC
- * Toggle between full screen and normal (framed) mode.
- */
-EXTL_EXPORT
-bool clientwin_toggle_fullscreen(WClientWin *cwin)
-{
-	if(cwin->fsinfo.last_mgr_watch.obj!=NULL)
-		return clientwin_leave_fullscreen(cwin, TRUE);
-	
-	return clientwin_enter_fullscreen(cwin, TRUE);
-}
-
-
-/*}}}*/
-
-
 /*{{{ Kludges */
 
 
@@ -1324,11 +1187,6 @@ static bool clientwin_save_to_file(WClientWin *cwin, FILE *file, int lvl)
 		set_integer_property(cwin->win, wglobal.atom_checkcode, chkc);
 		fprintf(file, "checkcode = %d,\n", chkc);
 	}
-	/*save_indent_line(file, lvl);
-	fprintf(file, "subs = {\n");
-	FOR_ALL_MANAGED_ON_LIST(cwin->transient_list, sub){
-		region_save_to_file((WRegion*)sub, file, lvl+1);
-	}*/
 	
 	return TRUE;
 }
@@ -1341,8 +1199,6 @@ WRegion *clientwin_load(WWindow *par, WRectangle geom, ExtlTab tab)
 	int chkc=0, real_chkc=0;
 	WClientWin *cwin=NULL;
 	XWindowAttributes attr;
-	/*ExtlTab substab, subtab;
-	int n, i;*/
 
 	if(!extl_table_gets_d(tab, "windowid", &wind) ||
 	   !extl_table_gets_i(tab, "checkcode", &chkc)){
@@ -1354,7 +1210,7 @@ WRegion *clientwin_load(WWindow *par, WRectangle geom, ExtlTab tab)
 	if(!get_integer_property(win, wglobal.atom_checkcode, &real_chkc))
 		return NULL;
 
-	if(real_chkc!=chkc || chkc==0){
+	if(real_chkc!=chkc){
 		warn("Client window check code mismatch.");
 		return NULL;
 	}
@@ -1387,19 +1243,6 @@ WRegion *clientwin_load(WWindow *par, WRectangle geom, ExtlTab tab)
 		XResizeWindow(wglobal.dpy, win, geom.w, geom.h);
 	}
 
-	/* TODO: checks that the window still is there */
-	
-	/*if(extl_table_gets_t(tab, "subs", &substab)){
-		n=extl_table_get_n(substab);
-		for(i=1; i<=n; i++){
-			if(extl_table_geti_t(substab, i, &subtab)){
-				region_add_managed_load((WRegion*)frame, subtab);
-				extl_unref_table(subtab);
-			}
-		}
-		extl_unref_table(substab);
-	}*/
-	
 	return (WRegion*)cwin;
 }
 

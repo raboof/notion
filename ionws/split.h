@@ -61,7 +61,7 @@ extern int split_tree_other_size(WObj *obj, int dir);
 
 extern void ionws_add_managed(WIonWS *ws, WRegion *reg);
 extern void ionws_managed_activated(WIonWS *ws, WRegion *reg);
-extern WRegion *ionws_do_find_new_manager(WIonWS *ws, WRegion *todest);
+extern WRegion *ionws_find_rescue_manager_for(WIonWS *ws, WRegion *todest);
 extern void ionws_request_managed_geom(WIonWS *ws, WRegion *reg,
 										 WRectangle geom,
 										 WRectangle *geomret, bool tryonly);

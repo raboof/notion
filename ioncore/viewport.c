@@ -257,6 +257,25 @@ static bool viewport_display_managed(WViewport *vp, WRegion *reg)
 }
 
 
+static WRegion *viewport_find_rescue_manager_for(WViewport *vp, WRegion *reg)
+{
+	WRegion *other;
+	
+	if(REGION_MANAGER(reg)!=(WRegion*)vp)
+		return NULL;
+
+	other=reg;
+	while(1){
+		other=PREV_MANAGED(vp->ws_list, other);
+		if(other==reg)
+			break;
+		if(WOBJ_IS(other, WGenWS) && region_can_manage_clientwins(other))
+			return other;
+	}
+	return NULL;
+}
+
+
 /*}}}*/
 
 
@@ -466,6 +485,9 @@ static DynFunTab viewport_dynfuntab[]={
 	
 	{(DynFun*)region_may_destroy_managed,
 	 (DynFun*)viewport_may_destroy_managed},
+
+	{(DynFun*)region_find_rescue_manager_for,
+	 (DynFun*)viewport_find_rescue_manager_for},
 	
 	END_DYNFUNTAB
 };

@@ -415,7 +415,8 @@ static DynFunTab ionws_dynfuntab[]={
 	{region_remove_managed, ionws_remove_managed},
 	{(DynFun*)region_display_managed, (DynFun*)ionws_display_managed},
 	
-	{(DynFun*)region_do_find_new_manager, (DynFun*)ionws_do_find_new_manager},
+	{(DynFun*)region_find_rescue_manager_for, 
+	 (DynFun*)ionws_find_rescue_manager_for},
 	
 	{(DynFun*)region_save_to_file, (DynFun*)ionws_save_to_file},
 

@@ -12,6 +12,7 @@
 
 #include "common.h"
 #include "obj.h"
+#include "objp.h"
 #include "defer.h"
 
 INTRSTRUCT(Defer);
@@ -120,6 +121,9 @@ bool defer_action(WObj *obj, DeferredAction *action)
 
 bool defer_destroy(WObj *obj)
 {
+	if(WOBJ_IS_BEING_DESTROYED(obj))
+		return FALSE;
+	
 	return defer_action(obj, destroy_obj);
 }
 	
