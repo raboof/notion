@@ -101,7 +101,7 @@ void check_new_user_help()
 	 * but that would mean yet another script...
 	 */
 	mkdir(userdir, 0700);
-	if(open(oldbeard, O_CREAT|O_RDWR)<0)
+	if(open(oldbeard, O_CREAT|O_RDWR, 0600)<0)
 		warn_err_obj(oldbeard);
 }
 
