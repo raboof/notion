@@ -21,6 +21,7 @@
 #include "main.h"
 #include "panews.h"
 #include "placement.h"
+#include "exports.h"
 
 
 /*{{{ Module information */
@@ -46,10 +47,6 @@ WBindmap *mod_panews_unusedwin_bindmap=NULL;
 
 
 /*{{{ Module init & deinit */
-
-
-extern bool mod_panews_register_exports();
-extern void mod_panews_unregister_exports();
 
 
 void mod_panews_deinit()

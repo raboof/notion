@@ -27,6 +27,7 @@
 #include <ioncore/exec.h>
 #include "sm_matchwin.h"
 #include "sm_session.h"
+#include "exports.h"
 
 
 /*{{{ Module information */
@@ -71,10 +72,6 @@ static bool sm_do_manage(WClientWin *cwin, const WManageParams *param)
 
 
 /*{{{ Init/deinit */
-
-
-extern bool mod_sm_register_exports();
-extern void mod_sm_unregister_exports();
 
 
 static void mod_sm_set_sessiondir()

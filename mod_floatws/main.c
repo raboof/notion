@@ -20,6 +20,7 @@
 
 #include "floatws.h"
 #include "floatframe.h"
+#include "exports.h"
 
 
 /*{{{ Module information */
@@ -53,10 +54,6 @@ static StringIntMap frame_areas[]={
 
 
 /*{{{ Init & deinit */
-
-
-extern bool mod_floatws_register_exports();
-extern bool mod_floatws_unregister_exports();
 
 
 void mod_floatws_deinit()

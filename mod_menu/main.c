@@ -14,6 +14,7 @@
 #include <ioncore/bindmaps.h>
 
 #include "menu.h"
+#include "exports.h"
 
 
 /*{{{ Module information */
@@ -37,10 +38,6 @@ WBindmap *mod_menu_menu_bindmap=NULL;
 
 
 /*{{{ Init & deinit */
-
-
-extern bool mod_menu_register_exports();
-extern void mod_menu_unregister_exports();
 
 
 void mod_menu_deinit()

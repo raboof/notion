@@ -13,6 +13,7 @@
 #include <ioncore/saveload.h>
 #include <ioncore/bindmaps.h>
 
+#include "exports.h"
 
 /*{{{ Module information */
 
@@ -35,10 +36,6 @@ WBindmap *mod_mgmtmode_bindmap=NULL;
 
 
 /*{{{ Init & deinit */
-
-
-extern bool mod_mgmtmode_register_exports();
-extern void mod_mgmtmode_unregister_exports();
 
 
 void mod_mgmtmode_deinit()

@@ -51,6 +51,7 @@
 #include "saveload.h"
 #include "infowin.h"
 #include "../version.h"
+#include "exports.h"
 
 
 /*{{{ Variables */
@@ -211,9 +212,6 @@ static bool init_messages(const char *localedir)
 
 /*{{{ ioncore_init */
 
-
-extern bool ioncore_register_exports();
-extern void ioncore_unregister_exports();
 
 #define INIT_HOOK_(NM)                             \
     NM=mainloop_register_hook(#NM, create_hook()); \

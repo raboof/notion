@@ -23,6 +23,7 @@
 
 #include "main.h"
 #include "scratchpad.h"
+#include "exports.h"
 
 
 /*{{{ Module information */
@@ -105,10 +106,6 @@ bool mod_sp_toggle(WScratchpad *sp)
 
 
 /*{{{ Init & deinit */
-
-
-extern bool mod_sp_register_exports();
-extern void mod_sp_unregister_exports();
 
 
 void mod_sp_deinit()

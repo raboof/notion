@@ -27,8 +27,9 @@ endif
 .PHONY: subdirs-install
 .PHONY: _install
 .PHONY: _depend
+.PHONY: _exports
 
-all: subdirs $(TARGETS)
+all: subdirs _exports $(TARGETS)
 
 clean: subdirs-clean _clean
 
@@ -44,16 +45,24 @@ install: subdirs-install _install
 
 ifdef MAKE_EXPORTS
 
-TO_CLEAN := $(TO_CLEAN) exports.c
-
 EXPORTS_C = exports.c
+EXPORTS_H = exports.h
 
-exports.c: $(SOURCES)
-	$(MKEXPORTS) -module $(MAKE_EXPORTS) -o exports.c $(SOURCES)
+DEPEND_DEPENDS += $(EXPORTS_H)
+
+TO_CLEAN := $(TO_CLEAN) $(EXPORTS_C) $(EXPORTS_H)
+
+_exports: $(EXPORTS_C)
+
+$(EXPORTS_H): $(EXPORTS_C)
+
+$(EXPORTS_C):
+	$(MKEXPORTS) -module $(MAKE_EXPORTS) -o $(EXPORTS_C) -h $(EXPORTS_H) $(SOURCES)
 
 else # !MAKE_EXPORTS
 
 EXPORTS_C = 
+EXPORTS_H = 
 
 endif # !MAKE_EXPORTS
 

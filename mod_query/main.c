@@ -24,6 +24,7 @@
 #include "input.h"
 #include "complete.h"
 #include "history.h"
+#include "exports.h"
 
 
 /*{{{ Module information */
@@ -48,10 +49,6 @@ WBindmap *mod_query_wedln_bindmap=NULL;
 
 
 /*{{{ Init & deinit */
-
-
-extern bool mod_query_register_exports();
-extern void mod_query_unregister_exports();
 
 
 static void load_history()

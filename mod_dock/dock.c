@@ -59,6 +59,8 @@
 #include <ioncore/extlconv.h>
 #include <ioncore/event.h>
 
+#include "exports.h"
+
 /*}}}*/
 
 
@@ -1523,10 +1525,6 @@ static bool dock_handle_drop(WDock *dock, int x, int y,
 
 
 /*{{{ Module init/deinit */
-
-
-extern bool mod_dock_register_exports();
-extern void mod_dock_unregister_exports();
 
 
 bool mod_dock_init()

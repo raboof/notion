@@ -21,6 +21,7 @@
 #include "main.h"
 #include "ionws.h"
 #include "placement.h"
+#include "exports.h"
 
 
 /*{{{ Module information */
@@ -85,10 +86,6 @@ ExtlTab mod_ionws_get()
 
 
 /*{{{ Module init & deinit */
-
-
-extern bool mod_ionws_register_exports();
-extern void mod_ionws_unregister_exports();
 
 
 void mod_ionws_deinit()

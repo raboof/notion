@@ -14,6 +14,7 @@
 #include <ioncore/bindmaps.h>
 
 #include "statusbar.h"
+#include "exports.h"
 
 
 /*{{{ Module information */
@@ -37,10 +38,6 @@ WBindmap *mod_statusbar_statusbar_bindmap=NULL;
 
 
 /*{{{ Init & deinit */
-
-
-extern bool mod_statusbar_register_exports();
-extern void mod_statusbar_unregister_exports();
 
 
 void mod_statusbar_deinit()

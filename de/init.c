@@ -25,6 +25,7 @@
 #include "colour.h"
 #include "misc.h"
 #include "init.h"
+#include "exports.h"
 
 
 /*{{{ Borders */
@@ -327,10 +328,6 @@ ExtlTab de_substyle(const char *pattern, ExtlTab tab)
 #include "../version.h"
 
 char de_ion_api_version[]=ION_API_VERSION;
-
-
-extern bool de_register_exports();
-extern void de_unregister_exports();
 
 
 bool de_init()
