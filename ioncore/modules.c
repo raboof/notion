@@ -346,10 +346,7 @@ bool ioncore_init_module_support()
 
 
 /*EXTL_DOC
- * Attempt to load module \var{modname}. Ion will use libltdl to search
- * the library path (the default setting is \file{\~{}/.ion3/libs} and
- * \file{\$PREFIX/lib/ion}) and also try diffent extensions, so only
- * the module name should usually be necessary to give here.
+ * Attempt to load a C-side module. 
  */
 EXTL_EXPORT
 bool ioncore_load_module(const char *modname)

@@ -8,16 +8,17 @@
 
 ifdef MODULE
 ifeq ($(PRELOAD_MODULES),1)
-TARGETS := $(TARGETS) $(MODULE).a
+MODULE_TARGETS := $(ODULE).a $(MODULE).lc
 else
-TARGETS := $(TARGETS) $(MODULE).so
+MODULE_TARGETS := $(MODULE).so $(MODULE).lc
 endif
+TARGETS := $(TARGETS) $(MODULE_TARGETS)
 endif
+
 
 ifdef LUA_SOURCES
 LUA_COMPILED := $(subst .lua,.lc, $(LUA_SOURCES))
 TARGETS := $(TARGETS) $(LUA_COMPILED)
-TO_CLEAN := $(TO_CLEAN) $(LUA_COMPILED)
 endif
 
 
@@ -92,9 +93,15 @@ LD_SHAREDFLAGS=-shared
 $(MODULE).so: $(OBJS) $(EXT_OBJS)
 	$(CC) $(LD_SHAREDFLAGS) $(LDFLAGS) $(OBJS) $(EXT_OBJS) -o $@
 
+$(MODULE).lc: $(MODULE).so
+	echo "ioncore.load_module('$(MODULEDIR)/$(MODULE).so')" \
+	| $(LUAC) -o $@ -
+
 module_install:
 	$(INSTALLDIR) $(MODULEDIR)
 	$(INSTALL) -m $(BIN_MODE) $(MODULE).so $(MODULEDIR)
+	$(INSTALL) -m $(DATA_MODE) $(MODULE).lc $(MODULEDIR)
+
 
 else # PRELOAD_MODULES
 
@@ -108,9 +115,12 @@ $(MODULE).a: $(OBJS) $(EXT_OBJS)
 	$(AR) $(ARFLAGS) $@ $+
 	$(RANLIB) $@
 
+$(MODULE).lc: $(MODULE).a
+	echo "ioncore.load_module('$(MODULE)')" | $(LUAC) -o $@ -
+
 module_install:
-#	$(INSTALLDIR) $(MODULEDIR)
-#	$(INSTALL) -m $(BIN_MODE) $(MODULE).a $(MODULEDIR)
+	$(INSTALLDIR) $(MODULEDIR)
+	$(INSTALL) -m $(DATA_MODE) $(MODULE).lc $(MODULEDIR)
 
 endif # PRELOAD_MODULES
 

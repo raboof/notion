@@ -34,7 +34,7 @@ include("querylib")
 -- Make some bindings.
 include("ion-bindings")
 
--- Define some menus (menu module required to actually use them)
+-- Define some menus (menu module loadd to actually use them)
 include("ion-menus")
 
 -- How to shorten window titles when the full title doesn't fit in
@@ -49,9 +49,9 @@ ioncore.add_shortenrule("(.*)(<[0-9]+>)", "$1$2$|$1$<...$2")
 ioncore.add_shortenrule("(.*)", "$1$|$1$<...")
 
 -- Modules.
-ioncore.load_module("mod_query")
-ioncore.load_module("mod_menu")
-ioncore.load_module("mod_ionws")
-ioncore.load_module("mod_floatws")
-ioncore.load_module("mod_dock")
---ioncore.load_module("mod_sp")
+include("mod_query")
+include("mod_menu")
+include("mod_ionws")
+include("mod_floatws")
+include("mod_dock")
+--include("mod_sp")

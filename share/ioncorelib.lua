@@ -11,7 +11,7 @@
 
 -- This is a slight abuse of the _LOADED variable perhaps, but library-like 
 -- packages should handle checking if they're loaded instead of confusing 
--- the user with require/include differences.
+-- the user with require/includer differences.
 if _LOADED["ioncorelib"] then return end
 
 local ioncorelib={}
