@@ -282,10 +282,10 @@ static WScreen *add_screen(WRootWin *rw, int id, WRectangle geom,
 WRootWin *manage_rootwin(int xscr)
 {
 	WRootWin *rootwin;
-	
+	int nxi=0;
 #ifndef CF_NO_XINERAMA
 	XineramaScreenInfo *xi=NULL;
-	int i, nxi=0;
+	int i;
 	int event_base, error_base;
 	
 	if(XineramaQueryExtension(wglobal.dpy, &event_base, &error_base)){
