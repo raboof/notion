@@ -18,6 +18,9 @@
 
 local settings={
     interval=10*1000,
+    load_hint=1,
+    important_threshold=1.5,
+    critical_threshold=4.0
 }
 
 local function get_load_proc()
@@ -52,8 +55,25 @@ end
 
 local get_load, load_timer
 
+local function get_hint(l)
+    local lds={string.find(l, '^(%d+%.%d+).*(%d+%.%d+).*(%d+%.%d+)')}
+    local v=tonumber(lds[settings.load_hint+2])
+    local i="normal"
+    print(v)
+    if v then
+        if v>settings.critical_threshold then
+            i="critical"
+        elseif v>settings.important_threshold then
+            i="important"
+        end
+    end
+    return i
+end
+
 local function update_load()
-    statusd.inform("load", get_load())
+    local l=get_load()
+    statusd.inform("load", l)
+    statusd.inform("load_hint", get_hint(l))
     load_timer:set(settings.interval, update_load)
 end
 

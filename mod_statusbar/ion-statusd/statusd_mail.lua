@@ -68,6 +68,18 @@ local function update_mail()
     statusd.inform("mail_new", tostring(mail_new))
     statusd.inform("mail_unread", tostring(mail_unread))
     statusd.inform("mail_total", tostring(mail_total))
+    
+    if mail_new>0 then
+        statusd.inform("mail_new_hint", "important")
+    else
+        statusd.inform("mail_new_hint", "normal")
+    end
+
+    if mail_unread>0 then
+        statusd.inform("mail_unread_hint", "important")
+    else
+        statusd.inform("mail_unread_hint", "normal")
+    end
 
     mail_timer:set(settings.interval, update_mail)
 end

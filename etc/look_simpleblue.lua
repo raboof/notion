@@ -130,6 +130,14 @@ de.defstyle("stdisp", {
     text_align = "left",
     background_colour = "black",
     font = "fixed",
+
+    de.substyle("important", {
+        foreground_colour = "green",
+    }),
+
+    de.substyle("critical", {
+        foreground_colour = "red",
+    }),
 })
 
 gr.refresh()

@@ -34,7 +34,6 @@ string.format("[ %%date || %s: %%load || %s: %%mail_new/%%mail_total ]",
 local settings={
     date_format='%a %Y-%m-%d %H:%M',
     template=default_tmpl,
-    load_wtempl="x.xx, x.xx, x.xx",
 }
 
 local statusbars={}
@@ -62,7 +61,9 @@ end
 
 -- Meter list {{{
 
-local meters={}
+local meters={
+    load_wtempl="x.xx, x.xx, x.xx",
+}
 
 --DOC
 -- Inform of a value.
@@ -133,7 +134,10 @@ end
 function mod_statusbar.get_status()
     local res={}
     process_template(function(s)
-                         table.insert(res, {text=meters[s] or "??"})
+                         table.insert(res, {
+                             text=meters[s] or "??",
+                             attr=meters[s.."_hint"]
+                         })
                      end,
                      function(t)
                          table.insert(res, {text=t})
@@ -145,7 +149,7 @@ function mod_statusbar.get_w_template()
     local res=""
     process_template(function(s)
                          local m=meters[s]
-                         local w=settings[s.."_wtempl"]
+                         local w=meters[s.."_wtempl"]
                          res=res..(w or m or "??")
                      end,
                      function(t)

@@ -60,14 +60,17 @@ void statusbar_draw(WStatusBar *sb, bool complete)
 {
     WRectangle g;
     GrBorderWidths bdw;
+    GrFontExtents fnte;
     Window win=sb->wwin.win;
     bool right_align=FALSE;
     WMPlex *mgr;
+    int ty;
     
     if(sb->brush==NULL)
         return;
     
     grbrush_get_border_widths(sb->brush, &bdw);
+    grbrush_get_font_extents(sb->brush, &fnte);
 
     g.x=0;
     g.y=0;
@@ -89,14 +92,14 @@ void statusbar_draw(WStatusBar *sb, bool complete)
             right_align=(corner==MPLEX_STDISP_TR || corner==MPLEX_STDISP_BR);
     }
 
+    ty=(g.y+bdw.top+fnte.baseline+(g.h-bdw.top-bdw.bottom-fnte.max_height)/2);
+
     if(!right_align){
-        draw_strings(sb->brush, win, g.x+bdw.left, g.y+g.h-bdw.bottom, 
-                     sb->strings, sb->nstrings, 
-                     !complete, NULL);
+        draw_strings(sb->brush, win, g.x+bdw.left, ty,
+                     sb->strings, sb->nstrings, !complete, NULL);
     }else{
-        draw_strings_ra(sb->brush, win, g.x+g.w-bdw.right, g.y+g.h-bdw.bottom, 
-                        sb->strings, sb->nstrings, 
-                        !complete, NULL);
+        draw_strings_ra(sb->brush, win, g.x+g.w-bdw.right, ty,
+                        sb->strings, sb->nstrings, !complete, NULL);
     }
 }
 
