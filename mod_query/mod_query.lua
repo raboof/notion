@@ -556,7 +556,7 @@ function mod_query.exec_completor(wedln, str)
     local beg=table.concat(parts)
     local wp=" "
     
-    if string.find(beg, "^%s*:%s*$") then
+    if string.find(beg, "^%s*:?%s*$") then
         wp=" -wp "
     end
 
