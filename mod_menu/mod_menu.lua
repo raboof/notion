@@ -58,7 +58,7 @@ end
 function mod_menu.menuentry(name, cmd, guard)
     local fn, gfn=ioncore.compile_cmd(cmd, guard)
     if fn then
-        return {name=name, func=fn, guard_func=gfn}
+        return {name=ioncore.gettext(name), func=fn, guard_func=gfn}
     end
 end
 
@@ -68,7 +68,7 @@ end
 -- of an already defined menu.
 function mod_menu.submenu(name, sub_or_name)
     return {
-        name=name,
+        name=ioncore.gettext(name),
         submenu_fn=function() 
                        return mod_menu.getmenu(sub_or_name) 
                    end
