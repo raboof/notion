@@ -21,6 +21,7 @@ static void wmsg_calc_size(WMessage *wmsg, WRectangle *geom);
 static void wmsg_draw(WMessage *wmsg, bool complete);
 static void wmsg_scrollup(WMessage *edln);
 static void wmsg_scrolldown(WMessage *edln);
+static void wmsg_draw_config_updated(WMessage *msg);
 
 
 static DynFunTab wmsg_dynfuntab[]={
@@ -28,6 +29,7 @@ static DynFunTab wmsg_dynfuntab[]={
 	{input_calc_size, 	wmsg_calc_size},
 	{input_scrollup, 	wmsg_scrollup},
 	{input_scrolldown,	wmsg_scrolldown},
+	{region_draw_config_updated, wmsg_draw_config_updated},
 	END_DYNFUNTAB
 };
 
@@ -117,7 +119,7 @@ void wmsg_scrolldown(WMessage *wmsg)
 /*}}}*/
 
 
-/*{{{ Init and deinit */
+/*{{{ Init, deinit draw config update */
 
 
 static bool init_wmsg(WMessage *wmsg, WScreen *scr, WWinGeomParams params,
@@ -169,6 +171,13 @@ void deinit_wmsg(WMessage *wmsg)
 		deinit_listing(&(wmsg->listing));
 
 	deinit_input((WInput*)wmsg);
+}
+
+
+static void wmsg_draw_config_updated(WMessage *wmsg)
+{
+	listing_set_font(&(wmsg->listing), INPUT_FONT(GRDATA_OF(wmsg)));
+	input_draw_config_updated((WInput*)wmsg);
 }
 
 

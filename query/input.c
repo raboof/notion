@@ -13,7 +13,8 @@
 
 
 static DynFunTab input_dynfuntab[]={
-	{fit_region,	fit_input},
+	{fit_region, fit_input},
+	{region_draw_config_updated, input_draw_config_updated},
 	END_DYNFUNTAB
 };
 
@@ -67,7 +68,7 @@ void setup_input_dinfo(WInput *input, DrawInfo *dinfo)
 /*}}}*/
 
 
-/*{{{ Resize */
+/*{{{ Resize and draw config update */
 
 
 void input_refit(WInput *input)
@@ -82,6 +83,16 @@ void fit_input(WInput *input, WRectangle geom)
 {
 	input->max_geom=geom;
 	input_refit(input);
+}
+
+
+void input_draw_config_updated(WInput *input)
+{
+	XSetWindowBackground(wglobal.dpy, input->win.win,
+						 GRDATA_OF(input)->input_colors.bg);
+	input_refit(input);
+	default_draw_config_updated((WRegion*)input);
+	draw_window((WWindow*)input, TRUE);
 }
 
 

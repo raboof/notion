@@ -28,6 +28,7 @@ static void wedln_calc_size(WEdln *wedln, WRectangle *geom);
 static void wedln_scrollup_completions(WEdln *edln);
 static void wedln_scrolldown_completions(WEdln *edln);
 static void wedln_insstr(WEdln *edln, const char *buf, size_t n);
+static void wedln_draw_config_updated(WEdln *edln);
 
 static DynFunTab wedln_dynfuntab[]={
 	{draw_window,		wedln_draw},
@@ -35,6 +36,7 @@ static DynFunTab wedln_dynfuntab[]={
 	{input_scrollup, 	wedln_scrollup_completions},
 	{input_scrolldown,	wedln_scrolldown_completions},
 	{window_insstr,		wedln_insstr},
+	{region_draw_config_updated, wedln_draw_config_updated},
 	END_DYNFUNTAB
 };
 
@@ -365,7 +367,7 @@ void wedln_scrolldown_completions(WEdln *wedln)
 /*}}}*/
 
 
-/*{{{ Init and deinit */
+/*{{{ Init, deinit and config update */
 
 
 static bool wedln_init_prompt(WEdln *wedln, WScreen *scr, const char *prompt)
@@ -435,6 +437,15 @@ WEdln *create_wedln(WScreen *scr, WWinGeomParams params,
 {
 	CREATETHING_IMPL(WEdln, wedln, (p, scr, params, fnp->handler,
 									fnp->prompt, fnp->dflt));
+}
+
+
+static void wedln_draw_config_updated(WEdln *wedln)
+{
+	WFont *fnt=INPUT_FONT(GRDATA_OF(wedln));
+	listing_set_font(&(wedln->complist), fnt);
+	wedln->prompt_w=text_width(fnt, wedln->prompt, wedln->prompt_len);
+	input_draw_config_updated((WInput*)wedln);
 }
 
 

@@ -46,6 +46,7 @@ static void frame_resize_hints(WFrame *frame, XSizeHints *hints_ret,
 							   uint *relw_ret, uint *relh_ret);
 	
 static WRegion *frame_selected_sub(WFrame *frame);
+static void frame_draw_config_updated(WFrame *frame);
 
 
 static DynFunTab frame_dynfuntab[]={
@@ -75,6 +76,8 @@ static DynFunTab frame_dynfuntab[]={
 
 	{region_request_close, destroy_frame},
 	
+	{region_draw_config_updated, frame_draw_config_updated},
+
 	END_DYNFUNTAB
 };
 									   
@@ -169,7 +172,7 @@ static bool init_frame(WFrame *frame, WScreen *scr, WWinGeomParams params,
 	XSetWindowAttributes attr;
 	WGRData *grdata=&(scr->grdata);
 	int sp=grdata->spacing;
-	int attrflags=0;
+	ulong attrflags=0;
 	
 	frame->flags=flags;
 	frame->sub_count=0;
@@ -426,6 +429,37 @@ void draw_frame_bar(const WFrame *frame, bool complete)
 		
 		X+=frame->tab_w+grdata->tab_spacing;
 	}
+}
+
+
+static void frame_draw_config_updated(WFrame *frame)
+{
+	WGRData *grdata=GRDATA_OF(frame);
+	XSetWindowAttributes attr;
+	ulong attrflags;
+	WRegion *sub;
+	WRectangle geom;
+	
+	if(grdata->transparent_background){
+		attr.background_pixmap=ParentRelative;
+		attrflags=CWBackPixmap;
+	}else{
+		attr.background_pixel=COLOR_PIXEL(grdata->frame_bgcolor);
+		attrflags=CWBackPixel;
+	}
+	
+	XChangeWindowAttributes(wglobal.dpy, frame->win.win,
+							attrflags, &attr);
+	
+	frame_sub_geom(frame, &geom);
+	
+	FOR_ALL_TYPED(frame, sub, WRegion){
+		region_draw_config_updated(sub);
+		fit_region(sub, geom);
+	}
+	
+	frame_recalc_bar(frame);
+	draw_frame(frame, TRUE);
 }
 
 

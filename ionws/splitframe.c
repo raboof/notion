@@ -5,6 +5,8 @@
  * See the included file LICENSE for details.
  */
 
+#include <string.h>
+
 #include <wmcore/focus.h>
 #include <wmcore/clientwin.h>
 #include <wmcore/resize.h>

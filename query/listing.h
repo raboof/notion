@@ -29,5 +29,6 @@ extern void fit_listing(DrawInfo *dinfo, WListing *l);
 extern void draw_listing(DrawInfo *dinfo, WListing *l, bool complete);
 extern bool scrollup_listing(WListing *l);
 extern bool scrolldown_listing(WListing *l);
+extern void listing_set_font(WListing *l, WFont *font);
 
 #endif /* QUERY_LISTING_H */

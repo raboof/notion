@@ -162,17 +162,20 @@ static bool onedown(WListing *l, int *ip, int *rp)
 void setup_listing(WListing *l, WFont *font,
 				   char **strs, int nstrs)
 {
-	int maxw;
-	
 	if(l->strs!=NULL)
 		deinit_listing(l);
 
 	l->itemrows=ALLOC_N(int, nstrs);
-	
-	maxw=strings_maxw(font, strs, nstrs);
-	
 	l->strs=strs;
 	l->nstrs=nstrs;
+	
+	listing_set_font(l, font);
+}
+
+
+void listing_set_font(WListing *l, WFont *font)
+{
+	int maxw=strings_maxw(font, l->strs, l->nstrs);
 	l->itemw=maxw+COL_SPACING;
 	l->itemh=FONT_HEIGHT(font);
 }
