@@ -590,6 +590,9 @@ void mplex_managed_activated(WMPlex *mplex, WRegion *reg)
 EXTL_EXPORT_MEMBER
 bool mplex_l2_hidden(WMPlex *mplex, WRegion *reg)
 {
+    if(reg==NULL)
+        return FALSE;
+    
     return (REGION_MANAGER(reg)==(WRegion*)mplex
             && l2_is_hidden(reg));
 }
