@@ -152,6 +152,16 @@ function mod_menu.bigmenu(mplex, sub, menu_or_name)
 end
 
 --DOC
+-- This function is similar to \fnref{mod_menu.menu}, but input
+-- is grabbed and \var{key} is used to cycle through the menu.
+function mod_menu.grabmenu(mplex, sub, menu_or_name, key) 
+    local function menu_grabmenu(m, s, menu)
+        return mod_menu.do_grabmenu(m, s, menu, key)
+    end
+    return menu_(mplex, sub, menu_or_name, menu_grabmenu, true)
+end
+
+--DOC
 -- This function displays a drop-down menu and should only
 -- be called from a mouse press handler. The parameters are
 -- similar to thos of \fnref{mod_menu.menu}.

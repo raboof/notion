@@ -57,8 +57,8 @@ static StringIntMap button_map[]={
 };
 
 
-static bool parse_keybut(const char *str, uint *mod_ret, uint *ksb_ret,
-                         bool button, bool init_any)
+bool ioncore_parse_keybut(const char *str, uint *mod_ret, uint *ksb_ret,
+                          bool button, bool init_any)
 {
     char *str2, *p, *p2;
     int keysym=NoSymbol, i;
@@ -275,8 +275,9 @@ static bool do_entry(WBindmap *bindmap, ExtlTab tab,
     if(!extl_table_gets_s(tab, "kcb", &ksb_str))
         goto fail;
 
-    if(!parse_keybut(ksb_str, &mod, &ksb,
-                     (action!=BINDING_KEYPRESS && action!=-1), init_any)){
+    if(!ioncore_parse_keybut(ksb_str, &mod, &ksb,
+                             (action!=BINDING_KEYPRESS && action!=-1), 
+                             init_any)){
         goto fail;
     }
     

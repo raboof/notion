@@ -47,6 +47,8 @@ DECLCLASS(WMenu){
     ExtlFn handler;
     
     char *typeahead;
+    
+    uint gm_ksb, gm_mod;
 };
 
 
@@ -70,6 +72,7 @@ extern void menu_deinit(WMenu *menu);
 
 extern bool menu_fitrep(WMenu *menu, WWindow *par, const WFitParams *fp);
 
+extern void menu_finish(WMenu *menu);
 extern void menu_cancel(WMenu *menu);
 extern bool menu_rqclose(WMenu *menu);
 extern void menu_updategr(WMenu *menu);
@@ -83,5 +86,9 @@ extern int menu_press(WMenu *menu, XButtonEvent *ev, WRegion **reg_ret);
 extern void mod_menu_set_scroll_params(int delay, int amount);
 
 extern void menu_typeahead_clear(WMenu *menu);
+
+extern void menu_select_nth(WMenu *menu, int n);
+extern void menu_select_prev(WMenu *menu);
+extern void menu_select_next(WMenu *menu);
 
 #endif /* ION_MOD_MENU_MENU_H */
