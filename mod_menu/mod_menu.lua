@@ -85,10 +85,13 @@ end
 --DOC
 -- Use this function to define menu entries for submenus. The parameter
 -- \fnref{sub_or_name} is either a table of menu entries or the name
--- of an already defined menu.
-function mod_menu.submenu(name, sub_or_name)
+-- of an already defined menu. The initial menu entry to highlight can be
+-- specified in \var{initial} as either an integer starting from 1, or a
+-- function that returns such a number.
+function mod_menu.submenu(name, sub_or_name, initial)
     return {
         name=ioncore.gettext(name),
+        initial=initial or 0,
         submenu_fn=function()
                        return mod_menu.evalmenu(menus, sub_or_name)
                    end
@@ -136,29 +139,43 @@ end
 -- called from a binding handler, \var{sub} should be set to
 -- the second argument of to the binding handler (\var{_sub})
 -- so that the menu handler will get the same parameters as the
--- binding handler.
-function mod_menu.menu(mplex, sub, menu_or_name) 
-    return menu_(mplex, sub, menu_or_name, mod_menu.do_menu, true)
+-- binding handler. The initial menu entry to highlight can be
+-- specified in \var{initial} as an integer starting from 1.
+function mod_menu.menu(mplex, sub, menu_or_name, initial) 
+   local function menu_stdmenu(m, s, menu)
+      return mod_menu.do_menu(m, s, menu, false, initial or 0)
+   end
+   return menu_(mplex, sub, menu_or_name, menu_stdmenu, true, initial)
 end
 
 --DOC
 -- This function is similar to \fnref{mod_menu.menu}, but
 -- a style with possibly bigger font and menu entries is used.
-function mod_menu.bigmenu(mplex, sub, menu_or_name) 
+function mod_menu.bigmenu(mplex, sub, menu_or_name, initial) 
     local function menu_bigmenu(m, s, menu)
-        return mod_menu.do_menu(m, s, menu, true)
+        return mod_menu.do_menu(m, s, menu, true, initial or 0)
     end
-    return menu_(mplex, sub, menu_or_name, menu_bigmenu, true)
+    return menu_(mplex, sub, menu_or_name, menu_bigmenu, true, initial)
 end
 
 --DOC
 -- This function is similar to \fnref{mod_menu.menu}, but input
 -- is grabbed and \var{key} is used to cycle through the menu.
-function mod_menu.grabmenu(mplex, sub, menu_or_name, key) 
+function mod_menu.grabmenu(mplex, sub, menu_or_name, key, initial) 
     local function menu_grabmenu(m, s, menu)
-        return mod_menu.do_grabmenu(m, s, menu, key)
+        return mod_menu.do_grabmenu(m, s, menu, false, key, initial or 0)
     end
-    return menu_(mplex, sub, menu_or_name, menu_grabmenu, true)
+    return menu_(mplex, sub, menu_or_name, menu_grabmenu, true, initial)
+end
+
+--DOC
+-- This function is similar to \fnref{mod_menu.bigmenu}, but input
+-- is grabbed and \var{key} is used to cycle through the menu.
+function mod_menu.biggrabmenu(mplex, sub, menu_or_name, key, initial) 
+    local function menu_biggrabmenu(m, s, menu)
+        return mod_menu.do_grabmenu(m, s, menu, true, key, initial or 0)
+    end
+    return menu_(mplex, sub, menu_or_name, menu_biggrabmenu, true, initial)
 end
 
 --DOC

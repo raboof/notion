@@ -498,7 +498,17 @@ bool menu_init(WMenu *menu, WWindow *par, const WFitParams *fp,
     menu->big_mode=params->big_mode;
 
     menu->last_fp=*fp;
-    menu->selected_entry=(params->pmenu_mode ? -1 : 0);
+    
+    if(params->pmenu_mode)
+        menu->selected_entry=-1;
+    else{
+        menu->selected_entry=params->initial-1;
+        if(menu->selected_entry<0)
+           menu->selected_entry=0;
+        if(params->initial > menu->n_entries)
+           menu->selected_entry=0;
+    }
+    
     menu->max_entry_w=0;
     menu->entry_h=0;
     menu->brush=NULL;
@@ -664,6 +674,17 @@ static void show_sub(WMenu *menu, int n)
     fnp.big_mode=menu->big_mode;
     fnp.submenu_mode=TRUE;
     
+    fnp.initial=0;
+    {
+        ExtlFn fn;
+        if(extl_table_getis(menu->tab, n+1, "initial", 'f', &fn)){
+            extl_call(fn, NULL, "i", &(fnp.initial));
+	    extl_unref_fn(fn);
+        }else{
+            extl_table_getis(menu->tab, n+1, "initial", 'i', &(fnp.initial));
+	}
+    }
+
     submenu=create_menu(par, &fp, &fnp);
     
     if(submenu==NULL)

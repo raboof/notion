@@ -50,7 +50,7 @@ static bool grabmenu_handler(WRegion *reg, XEvent *xev)
 /*--lowlevel routine not to be called by the user--*/
 EXTL_EXPORT
 WMenu *mod_menu_do_grabmenu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
-                            const char *key)
+                            bool big_mode, const char *key, int initial)
 {
     WMenuCreateParams fnp;
     uint mod=0, ksb=0;
@@ -66,7 +66,8 @@ WMenu *mod_menu_do_grabmenu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
     fnp.tab=tab;
     fnp.pmenu_mode=FALSE;
     fnp.submenu_mode=FALSE;
-    fnp.big_mode=FALSE;
+    fnp.big_mode=big_mode;
+    fnp.initial=initial;
     
     menu=(WMenu*)mplex_attach_hnd(mplex,
                                   (WRegionAttachHandler*)create_menu,
