@@ -37,14 +37,6 @@ extern void workspace_managed_activated(WWorkspace *ws, WRegion *reg);
 
 static bool workspace_save_to_file(WWorkspace *ws, FILE *file, int lvl);
 
-/* split.c */
-
-extern void workspace_request_managed_geom(WWorkspace *ws, WRegion *reg,
-										   WRectangle geom,
-										   WRectangle *geomret, bool tryonly);
-extern void workspace_remove_managed(WWorkspace *ws, WRegion *reg);
-extern WRegion *workspace_do_find_new_manager(WRegion *reg);
-
 
 static DynFunTab workspace_dynfuntab[]={
 	{fit_region, fit_workspace},
@@ -78,8 +70,8 @@ IMPLOBJ(WWorkspace, WRegion, deinit_workspace, workspace_dynfuntab,
 static void fit_workspace(WWorkspace *ws, WRectangle geom)
 {
 	if(ws->splitree!=NULL){
-		tree_do_resize(ws->splitree, HORIZONTAL, geom.x, geom.w);
-		tree_do_resize(ws->splitree, VERTICAL, geom.y, geom.h);
+		split_tree_do_resize(ws->splitree, HORIZONTAL, geom.x, geom.w);
+		split_tree_do_resize(ws->splitree, VERTICAL, geom.y, geom.h);
 	}
 }
 
@@ -332,7 +324,6 @@ int complete_workspace(char *nam, char ***cp_ret, char **beg, void *unused)
 
 /*{{{ Save */
 
-extern int tree_size(WObj *obj, int dir);
 
 static void write_obj(WObj *obj, FILE *file, int lvl)
 {
@@ -353,8 +344,8 @@ static void write_obj(WObj *obj, FILE *file, int lvl)
 	
 	split=(WWsSplit*)obj;
 	
-	tls=tree_size(split->tl, split->dir);
-	brs=tree_size(split->br, split->dir);
+	tls=split_tree_size(split->tl, split->dir);
+	brs=split_tree_size(split->br, split->dir);
 	
 	save_indent_line(file, lvl);
 	if(split->dir==HORIZONTAL)

@@ -64,16 +64,22 @@ static OptParserCommonInfo ion_cinfo={
 /*}}}*/
 
 
+/*{{{ Misc. */
+
+
 extern WRegion *workspace_load(WRegion *par, WRectangle geom, Tokenizer *tokz);
 extern WFrame *frame_load(WFrame *par, WRectangle geom, Tokenizer *tokz);
-	
-void register_loaders()
+
+static void register_loaders()
 {
 	register_region_load_create_fn("WFrame", (WRegionLoadCreateFn*)
 								   frame_load);
 	register_region_load_create_fn("WWorkspace", (WRegionLoadCreateFn*)
 								   workspace_load);
 }
+
+
+/*}}}*/
 
 
 /*{{{ Main */

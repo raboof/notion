@@ -53,7 +53,7 @@ static int reg_pos(WRegion *reg, int dir)
 }
 
 
-static WRectangle tree_geom(WObj *obj)
+static WRectangle split_tree_geom(WObj *obj)
 {
 	if(WOBJ_IS(obj, WRegion))
 		return REGION_GEOM(obj);
@@ -62,7 +62,7 @@ static WRectangle tree_geom(WObj *obj)
 }
 
 
-int tree_size(WObj *obj, int dir)
+int split_tree_size(WObj *obj, int dir)
 {
 	if(WOBJ_IS(obj, WRegion))
 		return reg_size((WRegion*)obj, dir);
@@ -73,7 +73,7 @@ int tree_size(WObj *obj, int dir)
 }
 
 
-static int tree_pos(WObj *obj, int dir)
+int split_tree_pos(WObj *obj, int dir)
 {
 	if(WOBJ_IS(obj, WRegion))
 		return reg_pos((WRegion*)obj, dir);
@@ -84,7 +84,7 @@ static int tree_pos(WObj *obj, int dir)
 }
 
 
-static int tree_other_size(WObj *obj, int dir)
+int split_tree_other_size(WObj *obj, int dir)
 {
 	if(WOBJ_IS(obj, WRegion))
 		return reg_other_size((WRegion*)obj, dir);
@@ -158,7 +158,7 @@ static void set_split_of(WObj *obj, WWsSplit *split)
 /*{{{ Low-level resize code */
 
 
-static int tree_calcresize(WObj *node_, int dir, int primn,
+static int split_tree_calcresize(WObj *node_, int dir, int primn,
 						   int nsize)
 {
 	WWsSplit *node;
@@ -177,21 +177,21 @@ static int tree_calcresize(WObj *node_, int dir, int primn,
 	
 	if(node->dir!=dir){
 		/* Found a split in the other direction than the resize */
-		s1=tree_calcresize(node->tl, dir, primn, nsize);
-		s2=tree_calcresize(node->br, dir, primn, nsize);
+		s1=split_tree_calcresize(node->tl, dir, primn, nsize);
+		s2=split_tree_calcresize(node->br, dir, primn, nsize);
 		
 		if(s1>s2){
-			/*if(nsize>tree_size(node->tl, dir)){
-				tree_calcresize(node->tl, dir, primn, s2);
+			/*if(nsize>split_tree_size(node->tl, dir)){
+				split_tree_calcresize(node->tl, dir, primn, s2);
 				s1=s2;
 			}else*/{
-				tree_calcresize(node->br, dir, primn, s1);
+				split_tree_calcresize(node->br, dir, primn, s1);
 			}
 		}else if(s2>s1){
-			/*if(nsize>tree_size(node->br, dir)){
-				tree_calcresize(node->br, dir, primn, s1);
+			/*if(nsize>split_tree_size(node->br, dir)){
+				split_tree_calcresize(node->br, dir, primn, s1);
 			}else*/{
-				tree_calcresize(node->tl, dir, primn, s2);
+				split_tree_calcresize(node->tl, dir, primn, s2);
 				s1=s2;
 			}
 		}
@@ -210,13 +210,13 @@ static int tree_calcresize(WObj *node_, int dir, int primn,
 			primn=BOTTOM_OR_RIGHT;
 		}
 		
-		s2=tree_size(o2, dir);
+		s2=split_tree_size(o2, dir);
 		ns1=nsize-s2;
-		s1=tree_calcresize(o1, dir, primn, ns1);
+		s1=split_tree_calcresize(o1, dir, primn, ns1);
 		
 		/*if(s1!=ns1){*/
 			ns2=nsize-s1;
-			s2=tree_calcresize(o2, dir, primn, ns2);
+			s2=split_tree_calcresize(o2, dir, primn, ns2);
 			node->res=ANY;
 		/*}else{
 			node->res=primn;
@@ -229,7 +229,7 @@ static int tree_calcresize(WObj *node_, int dir, int primn,
 }
 
 
-int tree_do_resize(WObj *node_, int dir, int npos, int nsize)
+int split_tree_do_resize(WObj *node_, int dir, int npos, int nsize)
 {
 	WWsSplit *node;
 	int tls, brs;
@@ -250,8 +250,8 @@ int tree_do_resize(WObj *node_, int dir, int npos, int nsize)
 	node=(WWsSplit*)node_;
 	
 	if(node->dir!=dir){
-		tree_do_resize(node->tl, dir, npos, nsize);
-		s=tree_do_resize(node->br, dir, npos, nsize);
+		split_tree_do_resize(node->tl, dir, npos, nsize);
+		s=split_tree_do_resize(node->br, dir, npos, nsize);
 	}else{
 		if(node->knowsize==TOP_OR_LEFT){
 			tls=node->tmpsize;
@@ -267,16 +267,16 @@ int tree_do_resize(WObj *node_, int dir, int npos, int nsize)
 		
 		
 		/*if(node->res!=BOTTOM_OR_RIGHT)*/
-			s+=tree_do_resize(node->tl, dir, npos, tls);
+			s+=split_tree_do_resize(node->tl, dir, npos, tls);
 		/*else
-			s+=tree_size(node->tl, dir);*/
+			s+=split_tree_size(node->tl, dir);*/
 		
 		npos+=s;
 		
 		/*if(node->res!=TOP_OR_LEFT)*/
-			s+=tree_do_resize(node->br, dir, npos, brs);
+			s+=split_tree_do_resize(node->br, dir, npos, brs);
 		/*else
-			s+=tree_size(node->br, dir);*/
+			s+=split_tree_size(node->br, dir);*/
 	}
 	
 	if(dir==VERTICAL){
@@ -302,18 +302,18 @@ static void wcalcres(WWsSplit *split, int dir, int primn,
 	WObj *other=(from==TOP_OR_LEFT ? split->br : split->tl);
 	WWsSplit *p;
 	
-	s=tree_size((WObj*)split, dir);
+	s=split_tree_size((WObj*)split, dir);
 	
 	if(dir!=split->dir){
 		/* It might not be possible to shrink the other as much */
-		ds=tree_calcresize(other, dir, primn, nsize);
+		ds=split_tree_calcresize(other, dir, primn, nsize);
 		nsize=ds;
 		s2=0;
 	}else{
 		if(primn!=from)
-			s2=tree_calcresize(other, dir, from, s-nsize);
+			s2=split_tree_calcresize(other, dir, from, s-nsize);
 		else
-			s2=tree_calcresize(other, dir, from, tree_size(other, dir));
+			s2=split_tree_calcresize(other, dir, from, split_tree_size(other, dir));
 	}
 	ds=nsize+s2;
 
@@ -321,7 +321,7 @@ static void wcalcres(WWsSplit *split, int dir, int primn,
 	
 	if(p==NULL || ds==s){
 		rs=s;
-		rp=tree_pos((WObj*)split, dir);
+		rp=split_tree_pos((WObj*)split, dir);
 		ret->postmp=rp;
 		ret->sizetmp=rs;
 		/* Don't have to resize the other branch if the split is not
@@ -339,7 +339,7 @@ static void wcalcres(WWsSplit *split, int dir, int primn,
 		rs=ret->winsizetmp;
 		
 		if(rs!=ds && dir!=split->dir)
-			tree_calcresize(other, dir, primn, rs);
+			split_tree_calcresize(other, dir, primn, rs);
 	}
 	
 	nsize=rs-s2;
@@ -356,18 +356,18 @@ static void wcalcres(WWsSplit *split, int dir, int primn,
 }
 
 
-int calcresize_obj(WObj *obj, int dir, int primn, int nsize,
-				   WResizeTmp *ret)
+static int calcresize_obj(WObj *obj, int dir, int primn, int nsize,
+						  WResizeTmp *ret)
 {
 	WWsSplit *split=split_of(obj);
 	
-	nsize=tree_calcresize(obj, dir, primn, nsize);
+	nsize=split_tree_calcresize(obj, dir, primn, nsize);
 	
 	ret->dir=dir;
 	
 	if(split==NULL){
-		ret->winsizetmp=ret->sizetmp=tree_size(obj, dir);
-		ret->winpostmp=ret->postmp=tree_pos(obj, dir);
+		ret->winsizetmp=ret->sizetmp=split_tree_size(obj, dir);
+		ret->winpostmp=ret->postmp=split_tree_pos(obj, dir);
 		ret->startnode=NULL;
 		ret->dir=dir;
 	}else{
@@ -385,16 +385,16 @@ int calcresize_obj(WObj *obj, int dir, int primn, int nsize,
 /*{{{ Resize interface */
 
 
-int calcresize_reg(WRegion *reg, int dir, int primn, int nsize,
-					  WResizeTmp *ret)
+static int calcresize_reg(WRegion *reg, int dir, int primn, int nsize,
+						  WResizeTmp *ret)
 {
 	return calcresize_obj((WObj*)reg, dir, primn, nsize, ret);
 }
 
 
-void resize_tmp(const WResizeTmp *tmp)
+static void resize_tmp(const WResizeTmp *tmp)
 {
-	tree_do_resize(tmp->startnode, tmp->dir, tmp->postmp, tmp->sizetmp);
+	split_tree_do_resize(tmp->startnode, tmp->dir, tmp->postmp, tmp->sizetmp);
 }
 
 
@@ -493,13 +493,13 @@ static WRegion *do_split_at(WWorkspace *ws, WObj *obj, int dir, int primn,
 	 * them becoming too small.
 	 */
 
-	s=tree_size(obj, dir);
+	s=split_tree_size(obj, dir);
 	sn=s/2;
 	
 	if(sn<minsize)
 		sn=minsize;
 	
-	gs=tree_calcresize(obj, dir, primn, s-sn);
+	gs=split_tree_calcresize(obj, dir, primn, s-sn);
 
 	if(gs+sn>s){
 		s=calcresize_obj(obj, dir, ANY, gs+sn, &rtmp);
@@ -512,7 +512,7 @@ static WRegion *do_split_at(WWorkspace *ws, WObj *obj, int dir, int primn,
 	
 	/* Create split and new window
 	 */
-	geom=tree_geom(obj);
+	geom=split_tree_geom(obj);
 	
 	nsplit=create_split(dir, NULL, NULL, geom);
 	
@@ -544,11 +544,11 @@ static WRegion *do_split_at(WWorkspace *ws, WObj *obj, int dir, int primn,
 	/* Now that everything's ok, resize (and move) the original
 	 * obj.
 	 */
-	pos=tree_pos(obj, dir);
+	pos=split_tree_pos(obj, dir);
 	if(primn!=BOTTOM_OR_RIGHT)
 		pos+=sn;
-	s=tree_calcresize(obj, dir, primn, gs);
-	tree_do_resize(obj, dir, pos, s);
+	s=split_tree_calcresize(obj, dir, primn, gs);
+	split_tree_do_resize(obj, dir, pos, s);
 
 	/* Set up split structure
 	 */
@@ -749,7 +749,8 @@ static void goto_reg(WRegion *reg)
 		goto_region(reg);
 }
 
-/*
+
+#if 0
 static void check_mgr(WRegion *reg)
 {
 	assert(REGION_MANAGER(reg)!=NULL && 
@@ -783,7 +784,7 @@ void goto_right(WRegion *reg)
 	check_mgr(reg);
 	goto_reg(right_or_down(reg, HORIZONTAL));
 }
-*/
+#endif
 
 
 void workspace_goto_above(WWorkspace *ws)
@@ -890,10 +891,10 @@ bool remove_split(WWorkspace *ws, WWsSplit *split)
 		((WWsSplit*)other)->parent=split2;
 	
 	if(wglobal.opmode!=OPMODE_DEINIT){
-		nsize=tree_size((WObj*)split, split->dir);
-		npos=tree_pos((WObj*)split, split->dir);
-		nsize=tree_calcresize(other, split->dir, primn, nsize);
-		tree_do_resize(other, split->dir, npos, nsize);
+		nsize=split_tree_size((WObj*)split, split->dir);
+		npos=split_tree_pos((WObj*)split, split->dir);
+		nsize=split_tree_calcresize(other, split->dir, primn, nsize);
+		split_tree_do_resize(other, split->dir, npos, nsize);
 	}
 
 	free(split);
@@ -905,7 +906,7 @@ bool remove_split(WWorkspace *ws, WWsSplit *split)
 /*}}}*/
 
 
-/*{{{ sub_activated */
+/*{{{ managed_activated */
 
 
 void workspace_managed_activated(WWorkspace *ws, WRegion *reg)
