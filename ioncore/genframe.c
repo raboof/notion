@@ -743,7 +743,7 @@ static const char *genframe_tab_style_default(WGenFrame *genframe)
 
 static DynFunTab genframe_dynfuntab[]={
 	{region_fit, genframe_fit},
-	{(DynFun*)reparent_region, (DynFun*)genframe_reparent},
+	{(DynFun*)region_reparent, (DynFun*)genframe_reparent},
 	{region_resize_hints, genframe_resize_hints},
 
 	{genframe_draw_bar, genframe_draw_bar_default},

@@ -15,6 +15,7 @@
 #include <ioncore/grab.h>
 #include <ioncore/binding.h>
 #include <ioncore/signal.h>
+#include <ioncore/focus.h>
 #include "resize.h"
 #include "floatframe.h"
 #include "main.h"

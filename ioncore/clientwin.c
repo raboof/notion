@@ -993,7 +993,7 @@ static void do_fit_clientwin(WClientWin *cwin, const WRectangle *max_geom,
 		if(np==NULL){
 			region_fit(transient, max_geom);
 		}else{
-			if(!reparent_region(transient, np, max_geom)){
+			if(!region_reparent(transient, np, max_geom)){
 				warn("Problem: can't reparent a %s managed by a WClientWin"
 					 "being reparented. Detaching from this object.",
 					 WOBJ_TYPESTR(transient));
@@ -1065,7 +1065,7 @@ static void clientwin_set_focus_to(WClientWin *cwin, bool warp)
 	Time stmp;
 	
 	if(warp)
-		do_move_pointer_to((WRegion*)cwin);
+		do_warp((WRegion*)cwin);
 	
 	if(reg!=NULL){
 		region_set_focus_to(reg, FALSE);
@@ -1420,7 +1420,7 @@ static DynFunTab clientwin_dynfuntab[]={
 	{region_fit,
 	 clientwin_fit},
 	
-	{(DynFun*)reparent_region,
+	{(DynFun*)region_reparent,
 	 (DynFun*)reparent_clientwin},
 	
 	{region_map,

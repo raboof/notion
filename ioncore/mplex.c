@@ -308,7 +308,7 @@ static void mplex_set_focus_to(WMPlex *mplex, bool warp)
 	}
 
 	if(warp)
-		do_move_pointer_to((WRegion*)mplex);
+		do_warp((WRegion*)mplex);
 }
 	
 
@@ -754,7 +754,7 @@ void mplex_managed_changed(WMPlex *mplex, int mode, bool sw, WRegion *mgd)
 
 static DynFunTab mplex_dynfuntab[]={
 	{region_fit, mplex_fit},
-	{(DynFun*)reparent_region, (DynFun*)mplex_reparent},
+	{(DynFun*)region_reparent, (DynFun*)mplex_reparent},
 
 	{region_set_focus_to, mplex_set_focus_to},
 	{(DynFun*)region_control_managed_focus,

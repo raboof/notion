@@ -47,10 +47,10 @@ void window_release(WWindow *wwin)
 }
 
 
-bool reparent_region(WRegion *reg, WWindow *par, const WRectangle *geom)
+bool region_reparent(WRegion *reg, WWindow *par, const WRectangle *geom)
 {
 	bool ret=FALSE;
-	CALL_DYN_RET(ret, bool, reparent_region, reg, (reg, par, geom));
+	CALL_DYN_RET(ret, bool, region_reparent, reg, (reg, par, geom));
 	return ret;
 }
 
@@ -196,7 +196,7 @@ void window_unmap(WWindow *wwin)
 void window_set_focus_to(WWindow *wwin, bool warp)
 {
 	if(warp)
-		do_move_pointer_to((WRegion*)wwin);
+		do_warp((WRegion*)wwin);
 	SET_FOCUS(wwin->win);
 }
 
@@ -239,7 +239,7 @@ static DynFunTab window_dynfuntab[]={
 	{region_map, window_map},
 	{region_unmap, window_unmap},
 	{region_set_focus_to, window_set_focus_to},
-	{(DynFun*)reparent_region, (DynFun*)reparent_window},
+	{(DynFun*)region_reparent, (DynFun*)reparent_window},
 	{(DynFun*)region_restack, (DynFun*)window_restack},
 	{(DynFun*)region_x_window, (DynFun*)window_x_window},
 	END_DYNFUNTAB

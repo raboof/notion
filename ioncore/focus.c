@@ -14,6 +14,7 @@
 #include "global.h"
 #include "window.h"
 #include "region.h"
+#include "hooks.h"
 
 
 /*{{{ Previous active region */
@@ -91,14 +92,17 @@ void goto_previous()
 /*{{{ set_focus, warp */
 
 
-void do_move_pointer_to(WRegion *reg)
+WHooklist *do_warp_alt=NULL;
+
+
+bool do_warp_default(WRegion *reg)
 {
 	Window root, win=None, realroot=None;
 	int x, y, w, h;
 	int wx=0, wy=0, px=0, py=0;
 	uint mask=0;
 	
-	D(fprintf(stderr, "do_move_pointer_to %p %s\n", reg, WOBJ_TYPESTR(reg)));
+	D(fprintf(stderr, "do_warp %p %s\n", reg, WOBJ_TYPESTR(reg)));
 	
 	root=ROOT_OF(reg);
 	region_rootpos(reg, &x, &y);
@@ -109,11 +113,19 @@ void do_move_pointer_to(WRegion *reg)
 		h=REGION_GEOM(reg).h;
 
 		if(px>=x && py>=y && px<x+w && py<y+h)
-			return;
+			return TRUE;
 	}
 	
 	XWarpPointer(wglobal.dpy, None, root, 0, 0, 0, 0,
 				 x+5, y+5);
+	
+	return TRUE;
+}
+
+
+void do_warp(WRegion *reg)
+{
+	CALL_ALT_B_NORET(do_warp_alt, (reg));
 }
 
 

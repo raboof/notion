@@ -15,11 +15,11 @@
 #include "common.h"
 #include "window.h"
 #include "region.h"
+#include "hooks.h"
 
 #define SET_FOCUS(WIN) \
 	XSetInputFocus(wglobal.dpy, WIN, RevertToParent, CurrentTime);
 
-extern void do_move_pointer_to(WRegion *reg);
 extern void do_set_focus(WRegion *reg, bool warp);
 extern void set_focus(WRegion *reg);
 extern void warp(WRegion *reg);
@@ -29,5 +29,9 @@ extern void goto_previous();
 extern void protect_previous();
 extern void unprotect_previous();
 extern void goto_previous();
+
+extern void do_warp(WRegion *reg);
+extern bool do_warp_default(WRegion *reg);
+extern WHooklist *do_warp_alt;
 
 #endif /* ION_IONCORE_FOCUS_H */

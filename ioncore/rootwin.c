@@ -602,7 +602,7 @@ static DynFunTab rootwin_dynfuntab[]={
 	{region_unmap, rootwin_unmap},
 	{region_set_focus_to, rootwin_set_focus_to},
 	{(DynFun*)region_x_window, (DynFun*)rootwin_x_window},
-	{(DynFun*)reparent_region, (DynFun*)reparent_rootwin},
+	{(DynFun*)region_reparent, (DynFun*)reparent_rootwin},
 	{region_remove_managed, rootwin_remove_managed},
 	END_DYNFUNTAB
 };

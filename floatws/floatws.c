@@ -67,7 +67,7 @@ static bool reparent_floatws(WFloatWS *ws, WWindow *parent,
 		WRectangle g=REGION_GEOM(sub);
 		g.x+=xdiff;
 		g.y+=ydiff;
-		if(!reparent_region(sub, parent, &g)){
+		if(!region_reparent(sub, parent, &g)){
 			warn("Problem: can't reparent a %s managed by a WFloatWS"
 				 "being reparented. Detaching from this object.",
 				 WOBJ_TYPESTR(sub));
@@ -141,7 +141,7 @@ static void floatws_set_focus_to(WFloatWS *ws, bool warp)
 	if(r==NULL){
 		SET_FOCUS(ws->dummywin);
 		if(warp)
-			do_move_pointer_to((WRegion*)ws);
+			do_warp((WRegion*)ws);
 		return;
 	}
 	
@@ -623,7 +623,7 @@ WRegion *floatws_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
 static DynFunTab floatws_dynfuntab[]={
 	{region_fit, 
 	 floatws_fit},
-	{(DynFun*)reparent_region,
+	{(DynFun*)region_reparent,
 	 (DynFun*)reparent_floatws},
 
 	{region_map, 

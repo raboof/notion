@@ -43,6 +43,7 @@
 #include "gr.h"
 #include "xic.h"
 #include "netwm.h"
+#include "focus.h"
 #include "../version.h"
 
 
@@ -80,6 +81,7 @@ static void init_hooks()
 {
 	ADD_HOOK(add_clientwin_alt, add_clientwin_default);
 	ADD_HOOK(handle_event_alt, handle_event_default);
+	ADD_HOOK(do_warp_alt, do_warp_default);
 }
 
 

@@ -67,7 +67,7 @@ WRegion *attach_load_helper(WRegion *mgr, ExtlTab tab,
 static WRegion *add_fn_reparent(WWindow *par, const WRectangle *geom, 
 								WRegion *reg)
 {
-	if(!reparent_region(reg, par, geom)){
+	if(!region_reparent(reg, par, geom)){
 		warn("Unable to reparent");
 		return NULL;
 	}

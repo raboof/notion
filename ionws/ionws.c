@@ -62,7 +62,7 @@ static bool reparent_ionws(WIonWS *ws, WWindow *parent,
 	region_attach_parent((WRegion*)ws, (WRegion*)parent);
 	
 	FOR_ALL_MANAGED_ON_LIST_W_NEXT(ws->managed_list, sub, next){
-		if(!reparent_region(sub, parent, &REGION_GEOM(sub))){
+		if(!region_reparent(sub, parent, &REGION_GEOM(sub))){
 			warn("Problem: can't reparent a %s managed by a WIonWS"
 				 "being reparented. Detaching from this object.",
 				 WOBJ_TYPESTR(sub));
@@ -434,7 +434,7 @@ static DynFunTab ionws_dynfuntab[]={
 	{region_map, ionws_map},
 	{region_unmap, ionws_unmap},
 	{region_set_focus_to, ionws_set_focus_to},
-	{(DynFun*)reparent_region,
+	{(DynFun*)region_reparent,
      (DynFun*)reparent_ionws},
 	
 	{(DynFun*)region_manage_clientwin, 

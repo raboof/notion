@@ -56,7 +56,7 @@ extern bool reparent_window(WWindow *wwin, WWindow *parent,
 extern Window window_restack(WWindow *wwin, Window other, int mode);
 extern void do_restack_window(Window win, Window other, int stack_mode);
 
-DYNFUN bool reparent_region(WRegion *reg, WWindow *target, 
+DYNFUN bool region_reparent(WRegion *reg, WWindow *target, 
 							const WRectangle *geom);
 
 #endif /* ION_IONCORE_WINDOW_H */

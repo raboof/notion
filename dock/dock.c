@@ -1103,7 +1103,7 @@ static bool dock_manage_clientwin(WDock *dock, WClientWin *cwin,
 					   &(dock->managed_list));
 	dock_request_managed_geom(dock, (WRegion *)cwin, REGION_RQGEOM_TRYONLY,
 							  NULL, &geom);
-	reparent_region((WRegion *)cwin, (WWindow *)dock, &geom);
+	region_reparent((WRegion *)cwin, (WWindow *)dock, &geom);
 	dock_resize(dock);
 	region_map((WRegion *)cwin);
 
