@@ -180,8 +180,6 @@ static bool extl_init_obj_info(lua_State *st)
 	lua_pushcfunction(st, extl_obj_eq_handler);
 	lua_settable(st, -3); /* set metatable.__eq=extl_obj_eq_handler */
 	wobj_metaref=lua_ref(st, -1);
-	lua_settable(st, -3); /* set registry.WObj_metatable=metatable */
-	lua_pop(st, 1); /* pop registry */
 
 	lua_pushcfunction(st, extl_obj_typename);
 	lua_setglobal(st, "obj_typename");

@@ -734,10 +734,11 @@ WRegion *genframe_current(WGenFrame *genframe)
  * Returns a list of regions managed by the frame.
  */
 EXTL_EXPORT
-ExtlTab floatws_managed_list(WGenFrame *genframe)
+ExtlTab genframe_managed_list(WGenFrame *genframe)
 {
 	return managed_list_to_table(genframe->managed_list, NULL);
 }
+
 
 static bool genframe_handle_drop(WGenFrame *genframe, int x, int y,
 								 WRegion *dropped)
