@@ -167,7 +167,20 @@ Go to previous client window within frame
 Go to n:th client window within frame (n=1..9, 0)
 .TP
 .B Mod1+A
-Attach client in current frame (query)
+Attach named client window in the frame (query)
+
+.IP "\fITags\fR"
+
+.TP
+.B Mod1+T
+Toggle current client window's tag state (indicated by a right-angle
+in the top-right corner of the window's tab)
+.TP
+.B Mod1+K T
+Clear all objects' tag state
+.TP
+.B Mod1+K A
+Attach all tagged windows to the frame
 
 .IP "\fIResizing and splitting\fR"
 

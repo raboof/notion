@@ -31,6 +31,7 @@ global_bindings{
     
     submap(DEFAULT_MOD.."K") {
         kpress("AnyModifier+K", goto_previous),
+        kpress("AnyModifier+T", clear_tags),
     },
     
     kpress(DEFAULT_MOD.."Shift+1", function() goto_nth_screen(0) end),
@@ -51,7 +52,7 @@ global_bindings{
     kpress(DEFAULT_MOD.."F9", 
            function(scr)
                scr:attach_new({ type=default_ws_type, switchto=true })
-           end)
+           end),
 }
 
 -- }}}
@@ -90,7 +91,8 @@ mplex_bindings{
                make_current_clientwin_fn(WClientWin.kill)),
         kpress("AnyModifier+Q", 
                make_current_clientwin_fn(WClientWin.quote_next)),
-    }
+    },
+    
 }
 
 -- }}}
@@ -103,7 +105,11 @@ mplex_bindings{
 -- configuration files.
 
 genframe_bindings{
+    -- Tag viewed object
+    kpress(DEFAULT_MOD.."T", make_current_fn(WRegion.toggle_tag)),
+
     submap(DEFAULT_MOD.."K") {
+        -- Selected object/tab switching
         kpress("AnyModifier+N", WGenFrame.switch_next),
         kpress("AnyModifier+P", WGenFrame.switch_prev),
         kpress("AnyModifier+1", function(f) f:switch_nth(0) end),
@@ -116,8 +122,11 @@ genframe_bindings{
         kpress("AnyModifier+8", function(f) f:switch_nth(7) end),
         kpress("AnyModifier+9", function(f) f:switch_nth(8) end),
         kpress("AnyModifier+0", function(f) f:switch_nth(9) end),
+        -- Maximize
         kpress("AnyModifier+H", WGenFrame.maximize_horiz),
         kpress("AnyModifier+V", WGenFrame.maximize_vert),
+        -- Attach tagged objects
+        kpress("AnyModifier+A", WGenFrame.attach_tagged),
     },
 }
 
