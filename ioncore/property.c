@@ -159,14 +159,11 @@ char **get_text_property(Window win, Atom a, int *nret)
 		return NULL;
 
 #ifdef CF_XFREE86_TEXTPROP_BUG_WORKAROUND
-	{
-		uint i;
-		for(i=0; i<prop.nitems; i++){
-			if(prop.value[i]=='\0'){
-				prop.nitems=i;
-				break;
-			}
-		}
+	while(prop.nitems>0){
+		if(prop.value[prop.nitems-1]=='\0')
+			prop.nitems--;
+		else
+			break;
 	}
 #endif
 
