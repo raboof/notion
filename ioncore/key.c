@@ -199,18 +199,9 @@ static void submapgrab(WRegion *reg)
 
 void handle_keypress(XKeyEvent *ev)
 {
-	/*
-	bool grabit=FALSE;
-	bool topmap=TRUE;
-	*/
-	
 	WBinding *binding=NULL;
 	WRegion *reg=NULL, *oreg=NULL, *binding_owner=NULL;
 	
-	/* Lookup the object that should receive the event and
-	 * the action.
-	 */
-
 	if(ev->subwindow!=None)
 		reg=(WRegion*)FIND_WINDOW(ev->subwindow);
 	if(reg==NULL)
@@ -218,30 +209,15 @@ void handle_keypress(XKeyEvent *ev)
 	if(reg==NULL)
 		return;
 	oreg=reg;
-	/*evreg=(WRegion*)FIND_WINDOW(ev->window);
-
-	if(evreg==NULL || !WTHING_IS(evreg, WWindow))
-		return;
-
-	if(reg==NULL)
-		reg=evreg*/
-	
-	/*if(reg==NULL || !WTHING_IS(reg, WWindow))
-		return;*/
 
 	do{
 		binding=region_lookup_keybinding(reg, ev, NULL, &binding_owner);
 		if(binding!=NULL)
 			break;
-		/*if(reg==evreg)
-			break;*/
 		if(WTHING_IS(reg, WScreen))
 			break;
 		reg=FIND_PARENT1(reg, WRegion);
 	}while(reg!=NULL);
-
-	/*fprintf(stderr, "key: %s %s %d\n",
-			WOBJ_TYPESTR(reg), WOBJ_TYPESTR(binding_owner), binding);*/
 	
 	if(binding!=NULL){
 		if(binding->submap!=NULL){

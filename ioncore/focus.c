@@ -22,10 +22,10 @@ void set_previous_of(WRegion *reg)
 	
 	if(reg==NULL || wglobal.previous_protect!=0)
 		return;
-	
+
 	if(REGION_IS_ACTIVE(reg))
 		return;
-	
+
 	/* Trace back to the root to remove all previous-references on
 	 * the path to reg. We do this so the node previous to reg can
 	 * be found starting from both reg and the root.
@@ -76,7 +76,7 @@ void goto_previous()
 	
 	while(reg->previous_act!=NULL)
 		reg=reg->previous_act;
-
+	
 	goto_region(reg);
 }
 

@@ -16,6 +16,7 @@
 #include "regbind.h"
 #include "property.h"
 #include "names.h"
+#include "saveload.h"
 
 
 static void fit_viewport(WViewport *vp, WRectangle geom);
@@ -223,13 +224,14 @@ static bool viewport_display_managed(WViewport *vp, WRegion *reg)
 	
 	if(reg==vp->current_ws)
 		return FALSE;
+
+	if(region_is_fully_mapped((WRegion*)vp))
+		map_region(reg);
 	
 	if(vp->current_ws!=NULL)
 		unmap_region(vp->current_ws);
 	
 	vp->current_ws=reg;
-	if(region_is_fully_mapped((WRegion*)vp))
-		map_region(reg);
 	
 	if(vp->atom_workspace!=None && wglobal.opmode!=OPMODE_DEINIT){
 		n=region_full_name(reg);
@@ -243,7 +245,7 @@ static bool viewport_display_managed(WViewport *vp, WRegion *reg)
 	}
 	
 	if(region_manages_active_reg((WRegion*)vp))
-		do_set_focus(reg, wglobal.warp_enabled);
+		warp(reg);
 	
 	return TRUE;
 }

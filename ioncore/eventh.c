@@ -65,56 +65,6 @@ static void keyboard_handler(XEvent *ev);
 /*	fprintf(stderr, "[%#lx] %s\n", ev->xany.window, #X);*/
 
 
-#if 0
-
-#define SKIP_FOCUSENTER_EVENTS(EV) while(XCheckMaskEvent(wglobal.dpy, \
-	EnterWindowMask|FocusChangeMask, EV)) /*nothing */;
-
-#define SKIP_ENTER_EVENTS(EV) while(XCheckMaskEvent(wglobal.dpy, \
-	EnterWindowMask, EV)) /*nothing */;
-
-/* 
- * Workspace switching and focusing with CF_WARP.
- * 
- * - switch_workspace sets focus (immediately) to previous active
- *   winobj on workspace.
- * - skip_focusenter should receive an enter event and focus to the
- *   window that is really wanted to have the focus.
- */
-
-static void skip_focusenter()
-{
-	XEvent ev;
-	return;
-	
-	/*if(wglobal.current_wswindow==NULL ||
-	   !region_is_fully_mapped(wglobal.current_wswindow))
-		return;*/
-
-	XSync(wglobal.dpy, False);
-	
-	while(XCheckMaskEvent(wglobal.dpy,
-						  EnterWindowMask|FocusChangeMask, &ev)){
-	#ifdef CF_WARP
-		if(ev.type==EnterNotify && wglobal.focus_next==NULL){
-			protect_previous();
-			handle_enter_window(&ev);
-			unprotect_previous();
-			XFlush(wglobal.dpy);
-		}else
-	#endif
-		
-		/* Have to handle last focus in or else we may not get
-		 * correct colormap.
-		 */
-		if(wglobal.focus_next==NULL)
-			handle_focus_in(&(ev.xfocus));
-	}
-}
-
-#endif
-
-
 static void skip_focusenter_but(WRegion *reg)
 {
 	XEvent ev;
@@ -127,18 +77,21 @@ static void skip_focusenter_but(WRegion *reg)
 		if(ev.type==FocusOut)
 			handle_focus_out(&(ev.xfocus));
 		
-		if(ev.type!=FocusIn)
-			continue;
+		/*if(ev.type!=FocusIn)
+			continue;*/
 		
-		r=FIND_WINDOW_T(ev.xfocus.window, WRegion);
+		r=FIND_WINDOW_T(ev.xany.window, WRegion);
 		
-		while(r!=NULL){
+		/*while(r!=NULL){*/
 			if(r==reg){
-				handle_focus_in(&(ev.xfocus));
+				if(ev.type==FocusIn)
+					handle_focus_in(&(ev.xfocus));
+				else if(ev.type==EnterNotify)
+					handle_enter_window(&ev);
 				break;
 			}
 			r=FIND_PARENT1(r, WRegion);
-		}
+		/*}*/
 	}
 }
 
@@ -448,29 +401,24 @@ static void handle_enter_window(XEvent *ev)
 {
 	XEnterWindowEvent *eev=&(ev->xcrossing);
 	WRegion *reg=NULL;
-	bool inf=TRUE;
-	
-	if(eev->mode==NotifyUngrab)
-		return;
-	
-	do{
-		if(eev->detail!=NotifyInferior)
-			inf=FALSE;
-	}while(XCheckMaskEvent(wglobal.dpy, EnterWindowMask, ev));
 
-	/*if(inf)
-		return;*/
-
-	if(eev->window==eev->root){
-		/* Ignore root window enter */
-		return;
+	while(XCheckMaskEvent(wglobal.dpy, EnterWindowMask, ev)){
+		/* We're only interested in the latest enter event */
 	}
+	
+	/*
+	if(eev->window==eev->root){
+		return;
+	}*/
 	
 	reg=FIND_WINDOW_T(eev->window, WRegion);
 	
 	if(reg==NULL)
 		return;
 
+	if(REGION_IS_ACTIVE(reg))
+		return;
+	
 	/*fprintf(stderr, "Enter %p\n", reg);*/
 
 	/* Client window enter notifies should only be handled when mapped
@@ -478,6 +426,7 @@ static void handle_enter_window(XEvent *ev)
 	 * if when moving the pointer into a client window in a frame with
 	 * a query box if we always focus on enter window event.
 	 */
+	/*
 	if(WTHING_IS(reg, WClientWin)){
 		WRegion *par=FIND_PARENT1(reg, WRegion);
 		if(par!=NULL && !WTHING_IS(par, WScreen)){
@@ -486,7 +435,7 @@ static void handle_enter_window(XEvent *ev)
 			reg=par;
 		}
 		
-	}
+	}*/
 	
 	set_previous_of(reg);
 	set_focus(reg);

@@ -494,37 +494,39 @@ void region_lost_focus(WRegion *reg)
 
 bool display_region(WRegion *reg)
 {
-	WRegion *mg, *preg;
+	WRegion *mgr, *preg;
 
 	if(region_is_fully_mapped(reg))
 		return TRUE;
 	
-	mg=REGION_MANAGER(reg);
+	mgr=REGION_MANAGER(reg);
+	
+	if(mgr!=NULL){
+		if(!display_region(mgr))
+			return FALSE;
+		return region_display_managed(mgr, reg);
+	}
+	
 	preg=FIND_PARENT1(reg, WRegion);
 
 	if(preg!=NULL && !display_region(preg))
 		return FALSE;
 
-	if(mg==NULL){
-		map_region(reg);
-		return TRUE;
-	}
-
-	return region_display_managed(mg, reg);
+	map_region(reg);
+	return TRUE;
 }
 
 
 bool display_region_sp(WRegion *reg)
 {
+	bool ret;
+	
 	set_previous_of(reg);
 	protect_previous();
-
-	if(!display_region(reg))
-		return FALSE;
-
+	ret=display_region(reg);
 	unprotect_previous();
 
-	return TRUE;
+	return ret;
 }
 
 

@@ -111,12 +111,12 @@ static bool reparent_workspace(WWorkspace *ws, WRegion *parent,
 static void map_workspace(WWorkspace *ws)
 {
 	WRegion *reg;
+
+	MARK_REGION_MAPPED(ws);
 	
 	FOR_ALL_MANAGED_ON_LIST(ws->managed_list, reg){
 		map_region(reg);
 	}
-	
-	MARK_REGION_MAPPED(ws);
 }
 
 
@@ -124,11 +124,11 @@ static void unmap_workspace(WWorkspace *ws)
 {
 	WRegion *reg;
 	
+	MARK_REGION_UNMAPPED(ws);
+	
 	FOR_ALL_MANAGED_ON_LIST(ws->managed_list, reg){
 		unmap_region(reg);
 	}
-	
-	MARK_REGION_UNMAPPED(ws);
 }
 
 
@@ -238,7 +238,6 @@ void deinit_workspace(WWorkspace *ws)
 
 
 /*}}}*/
-
 
 
 /*{{{ Names */
