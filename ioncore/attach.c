@@ -271,7 +271,6 @@ static void init_rescue(RescueState *st, WRegion *reg)
 static bool do_rescue(RescueState *st, WClientWin *cwin)
 {
 	WAttachParams param;
-	XSizeHints szhnt;
 
 	/* We do not descend into other objects, their destroy functions
 	 * can handle the rescue.
