@@ -298,8 +298,10 @@ void debrush_deinit(DEBrush *brush)
 		UNLINK_ITEM(brushes, brush, next, prev);
 	}
 	
-	if(brush->font!=NULL)
+	if(brush->font!=NULL){
 		de_free_font(brush->font);
+		brush->font=NULL;
+	}
 	
 	if(brush->cgrp_alloced)
 		de_free_colour_group(brush->rootwin, &(brush->cgrp));
