@@ -408,7 +408,7 @@ SEE ALSO
 
        DOCDIR/
 
-       X(1x), pwm(1)
+       X(7x), pwm(1)
 
 
 AUTHOR
