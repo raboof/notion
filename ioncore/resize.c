@@ -138,8 +138,8 @@ static void moveres_draw_infowin(WMoveresMode *mode)
     if(mode->mode==MOVERES_SIZE){
         int w, h;
         
-        w=(mode->geom.w-mode->origgeom.w)+mode->relw;
-        h=(mode->geom.h-mode->origgeom.h)+mode->relh;
+        w=mode->geom.w;
+        h=mode->geom.h;
         
         if((mode->hints.flags&PResizeInc) &&
            (mode->hints.width_inc>1 || mode->hints.height_inc>1)){
@@ -225,7 +225,7 @@ static bool moveresmode_init(WMoveresMode *mode, WRegion *reg,
     tmpmode=mode;
     
     mode->snap_enabled=FALSE;
-    region_size_hints(reg, &mode->hints, &mode->relw, &mode->relh);
+    region_size_hints(reg, &mode->hints);
     
     region_rootpos((WRegion*)parent, &mode->parent_rx, &mode->parent_ry);
     
@@ -344,8 +344,8 @@ static void moveresmode_delta(WMoveresMode *mode,
             realdy2=sg->y+sg->h-geom.y-geom.h;
     }
     
-    w=mode->relw-realdx1+realdx2;
-    h=mode->relh-realdy1+realdy2;
+    w=mode->origgeom.w-realdx1+realdx2;
+    h=mode->origgeom.h-realdy1+realdy2;
     
     if(w<=0)
         w=mode->hints.min_width;
@@ -364,7 +364,7 @@ static void moveresmode_delta(WMoveresMode *mode,
         else
             geom.x+=realdx2;
     }else{
-        geom.w=geom.w-mode->relw+w;
+        geom.w=w;
         if(mode->dx1==0 || realdx1!=mode->dx1)
             geom.x+=realdx1;
         else
@@ -378,7 +378,7 @@ static void moveresmode_delta(WMoveresMode *mode,
         else
             geom.y+=realdy2;
     }else{
-        geom.h=geom.h-mode->relh+h;
+        geom.h=h;
         if(mode->dy1==0 || realdy1!=mode->dy1)
             geom.y+=realdy1;
         else
@@ -396,8 +396,6 @@ static void moveresmode_delta(WMoveresMode *mode,
         mode->dx2=0;
         mode->dy1=0;
         mode->dy2=0;
-        mode->relw=(mode->geom.w-mode->origgeom.w)+mode->relw;
-        mode->relh=(mode->geom.h-mode->origgeom.h)+mode->relh;
         mode->origgeom=mode->geom;
     }
     
@@ -576,17 +574,21 @@ void region_managed_rqgeom_unallow(WRegion *mgr, WRegion *reg,
 }
 
 
-void region_size_hints(WRegion *reg, XSizeHints *hints_ret,
-                       uint *relw_ret, uint *relh_ret)
+void region_size_hints(WRegion *reg, XSizeHints *hints_ret)
 {
     hints_ret->flags=0;
-    hints_ret->min_width=1;
-    hints_ret->min_height=1;
-    *relw_ret=REGION_GEOM(reg).w;
-    *relh_ret=REGION_GEOM(reg).h;
     {
-        CALL_DYN(region_size_hints, reg, (reg, hints_ret, relw_ret, relh_ret));
+        CALL_DYN(region_size_hints, reg, (reg, hints_ret));
     }
+    if(!(hints_ret->flags&PMinSize)){
+        hints_ret->min_width=1;
+        hints_ret->min_height=1;
+    }
+    if(!(hints_ret->flags&PBaseSize)){
+        hints_ret->base_width=0;
+        hints_ret->base_height=0;
+    }
+    hints_ret->flags|=(PMinSize|PBaseSize);
 }
 
 
@@ -602,22 +604,22 @@ int region_orientation(WRegion *reg)
 
 /*EXTL_DOC
  * Returns size hints for \var{reg}. The returned table always contains the
- * fields \code{rel_?}, \code{min_?} and sometimes the fields \code{max_?},
+ * fields \code{min_?}, \code{base_?} and sometimes the fields \code{max_?},
  * \code{base_?} and \code{inc_?}, where \code{?}=\code{w}, \code{h}.
  */
 EXTL_EXPORT_AS(WRegion, size_hints)
 ExtlTab region_size_hints_extl(WRegion *reg)
 {
-    uint relw, relh;
     XSizeHints hints;
     ExtlTab tab;
     
-    region_size_hints(reg, &hints, &relw, &relh);
+    region_size_hints(reg, &hints);
     
     tab=extl_create_table();
     
-    extl_table_sets_i(tab, "rel_w", relw);
-    extl_table_sets_i(tab, "rel_h", relh);
+    /* Base size is always guaranteed to be set. */
+    extl_table_sets_i(tab, "base_w", hints.base_width);
+    extl_table_sets_i(tab, "base_h", hints.base_height);
     /* Minimum size is always guaranteed to be set. */
     extl_table_sets_i(tab, "min_w", hints.min_width);
     extl_table_sets_i(tab, "min_h", hints.min_height);
@@ -670,18 +672,10 @@ void frame_restore_size(WFrame *frame, bool horiz, bool vert)
 static void correct_frame_size(WFrame *frame, int *w, int *h)
 {
     XSizeHints hints;
-    uint relw, relh;
     int wdiff, hdiff;
     
-    region_size_hints((WRegion*)frame, &hints, &relw, &relh);
-    
-    wdiff=REGION_GEOM(frame).w-relw;
-    hdiff=REGION_GEOM(frame).h-relh;
-    *w-=wdiff;
-    *h-=hdiff;
+    region_size_hints((WRegion*)frame, &hints);
     xsizehints_correct(&hints, w, h, TRUE);
-    *w+=wdiff;
-    *h+=hdiff;
 }
 
 
@@ -778,20 +772,16 @@ EXTL_EXPORT_MEMBER
 uint region_min_h(WRegion *reg)
 {
     XSizeHints hints;
-    uint relw, relh;
-    region_size_hints(reg, &hints, &relw, &relh);
-    return ((hints.flags&PMinSize ? hints.min_height : 1)
-            +REGION_GEOM(reg).h-relh);
+    region_size_hints(reg, &hints);
+    return hints.min_height;
 }
 
 
 uint region_min_w(WRegion *reg)
 {
     XSizeHints hints;
-    uint relw, relh;
-    region_size_hints(reg, &hints, &relw, &relh);
-    return ((hints.flags&PMinSize ? hints.min_width : 1)
-            +REGION_GEOM(reg).w-relw);
+    region_size_hints(reg, &hints);
+    return hints.min_width;
 }
 
 

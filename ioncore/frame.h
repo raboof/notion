@@ -61,8 +61,7 @@ extern bool frame_rqclose(WFrame *frame);
 
 /* Resize and reparent */
 extern bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp);
-extern void frame_resize_hints(WFrame *frame, XSizeHints *hints_ret,
-                                  uint *relw_ret, uint *relh_ret);
+extern void frame_resize_hints(WFrame *frame, XSizeHints *hints_ret);
 
 /* Focus */
 extern void frame_activated(WFrame *frame);

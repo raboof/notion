@@ -568,12 +568,9 @@ bool floatws_manage_rescue(WFloatWS *ws, WClientWin *cwin, WRegion *from)
 
 static void floatws_place_stdisp(WFloatWS *ws, int corner, WRegion *stdisp)
 {
-    XSizeHints hints;
     WRectangle g;
     WRectangle *wg=&REGION_GEOM(ws);
-    uint relw, relh;
     
-    region_size_hints(stdisp, &hints, &relw, &relh);
     g.w=minof(wg->w, maxof(CF_STDISP_MIN_SZ, region_min_w(stdisp)));
     g.h=minof(wg->h, maxof(CF_STDISP_MIN_SZ, region_min_h(stdisp)));
     

@@ -174,11 +174,10 @@ void xsizehints_sanity_adjust(XSizeHints *hints)
 void xsizehints_adjust_for(XSizeHints *hints, WRegion *list)
 {
     WRegion *reg;
-    uint wdummy, hdummy;
     XSizeHints tmp_hints;
     
     FOR_ALL_MANAGED_ON_LIST(list, reg){
-        region_size_hints(reg, &tmp_hints, &wdummy, &hdummy);
+        region_size_hints(reg, &tmp_hints);
         
         if(tmp_hints.flags&PMinSize){
             if(!(hints->flags&PMinSize)){

@@ -384,30 +384,35 @@ bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp)
 }
 
 
-void frame_resize_hints(WFrame *frame, XSizeHints *hints_ret,
-                        uint *relw_ret, uint *relh_ret)
+void frame_resize_hints(WFrame *frame, XSizeHints *hints_ret)
 {
     WRectangle subgeom;
-    uint wdummy, hdummy;
+    int woff, hoff;
     
     mplex_managed_geom((WMPlex*)frame, &subgeom);
-    if(relw_ret!=NULL)
-        *relw_ret=subgeom.w;
-    if(relh_ret!=NULL)
-        *relh_ret=subgeom.h;
+    
+    woff=maxof(REGION_GEOM(frame).w-subgeom.w, 0);
+    hoff=maxof(REGION_GEOM(frame).h-subgeom.h, 0);
     
     if(FRAME_CURRENT(frame)!=NULL){
-        region_size_hints(FRAME_CURRENT(frame), hints_ret,
-                            &wdummy, &hdummy);
+        region_size_hints(FRAME_CURRENT(frame), hints_ret);
     }else{
         hints_ret->flags=0;
     }
     
     xsizehints_adjust_for(hints_ret, FRAME_MLIST(frame));
     
+    if(!hints_ret->flags&PBaseSize){
+        hints_ret->base_width=0;
+        hints_ret->base_height=0;
+        hints_ret->flags|=PBaseSize;
+    }
+    hints_ret->base_width+=woff;
+    hints_ret->base_height+=hoff;
+        
     hints_ret->flags|=PMinSize;
-    hints_ret->min_width=0;
-    hints_ret->min_height=0;
+    hints_ret->min_width=woff;
+    hints_ret->min_height=hoff;
 }
 
 

@@ -777,10 +777,8 @@ static void dock_managed_rqgeom(WDock *dock, WRegion *reg, int flags,
 
 
 
-void dock_size_hints(WDock *dock, XSizeHints *hints, int *relw, int *relh)
+void dock_size_hints(WDock *dock, XSizeHints *hints)
 {
-    *relw=REGION_GEOM(dock).w;
-    *relh=REGION_GEOM(dock).h;
     hints->flags=PMinSize|PMaxSize;
     hints->min_width=dock->min_w;
     hints->min_height=dock->min_h;

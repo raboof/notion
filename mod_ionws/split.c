@@ -211,15 +211,13 @@ void split_deinit(WSplit *split)
 static void split_update_region_bounds(WSplit *node, WRegion *reg)
 {
     XSizeHints hints;
-    uint relw, relh;
-    region_size_hints(reg, &hints, &relw, &relh);
     
-    node->min_w=maxof(1, ((hints.flags&PMinSize ? hints.min_width : 1)
-                          +REGION_GEOM(reg).w-relw));
+    region_size_hints(reg, &hints);
+    
+    node->min_w=maxof(1, hints.flags&PMinSize ? hints.min_width : 1);
     node->max_w=INT_MAX;
 
-    node->min_h=maxof(1, ((hints.flags&PMinSize ? hints.min_height : 1)
-                          +REGION_GEOM(reg).h-relh));
+    node->min_h=maxof(1, hints.flags&PMinSize ? hints.min_height : 1);
     node->max_h=INT_MAX;
 }
 

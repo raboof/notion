@@ -178,7 +178,6 @@ static void floatframe_rqgeom_clientwin(WFloatFrame *frame, WClientWin *cwin,
 {
     int gravity=NorthWestGravity;
     XSizeHints hints;
-    uint relw=0, relh=0;
     WRectangle off;
     WRegion *par;
     WRectangle geom=*geom_;
@@ -188,7 +187,7 @@ static void floatframe_rqgeom_clientwin(WFloatFrame *frame, WClientWin *cwin,
 
     floatframe_offsets(frame, &off);
 
-    region_size_hints((WRegion*)frame, &hints, &relw, &relh);
+    region_size_hints((WRegion*)frame, &hints);
     xsizehints_correct(&hints, &(geom.w), &(geom.h), TRUE);
     
     geom.w=maxof(geom.w, 0);
@@ -229,30 +228,35 @@ static void floatframe_rqgeom_clientwin(WFloatFrame *frame, WClientWin *cwin,
 }
 
 
-void floatframe_resize_hints(WFloatFrame *frame, XSizeHints *hints_ret,
-                             uint *relw_ret, uint *relh_ret)
+void floatframe_resize_hints(WFloatFrame *frame, XSizeHints *hints_ret)
 {
     WRectangle subgeom;
-    uint wdummy, hdummy;
+    int woff, hoff;
     
     mplex_managed_geom((WMPlex*)frame, &subgeom);
-    if(relw_ret!=NULL)
-        *relw_ret=subgeom.w;
-    if(relh_ret!=NULL)
-        *relh_ret=subgeom.h;
     
+    woff=maxof(REGION_GEOM(frame).w-subgeom.w, 0);
+    hoff=frame->frame.bar_h;
+
     if(FRAME_CURRENT(frame)!=NULL){
-        region_size_hints(FRAME_CURRENT(frame), hints_ret,
-                            &wdummy, &hdummy);
+        region_size_hints(FRAME_CURRENT(frame), hints_ret);
     }else{
         hints_ret->flags=0;
     }
     
     xsizehints_adjust_for(hints_ret, FRAME_MLIST(frame));
     
+    if(!hints_ret->flags&PBaseSize){
+        hints_ret->base_width=0;
+        hints_ret->base_height=0;
+        hints_ret->flags|=PBaseSize;
+    }
+    hints_ret->base_width+=woff;
+    hints_ret->base_height+=hoff;
+
     hints_ret->flags|=PMinSize;
-    hints_ret->min_width=1;
-    hints_ret->min_height=0;
+    hints_ret->min_width=woff;
+    hints_ret->min_height=hoff;
 }
 
 

@@ -48,7 +48,6 @@ typedef void WDrawRubberbandFn(WRootWin *rw, const WRectangle *geom);
 DECLCLASS(WMoveresMode){
     Obj obj;
     XSizeHints hints;
-    uint relw, relh;
     int dx1, dx2, dy1, dy2;
     WRectangle origgeom;
     WRectangle geom;
@@ -116,8 +115,7 @@ extern void region_managed_rqgeom_allow(WRegion *reg, WRegion *sub,
 DYNFUN void region_rqgeom_clientwin(WRegion *reg, WClientWin *cwin,
                                     int flags, const WRectangle *geom);
 
-DYNFUN void region_size_hints(WRegion *reg, XSizeHints *hints_ret,
-                              uint *relw_ret, uint *relh_ret);
+DYNFUN void region_size_hints(WRegion *reg, XSizeHints *hints_ret);
 DYNFUN int region_orientation(WRegion *reg);
 
 extern uint region_min_h(WRegion *reg);

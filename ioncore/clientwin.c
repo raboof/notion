@@ -1170,15 +1170,9 @@ static void clientwin_activated(WClientWin *cwin)
 }
 
 
-static void clientwin_resize_hints(WClientWin *cwin, XSizeHints *hints_ret,
-                                   uint *relw_ret, uint *relh_ret)
+static void clientwin_resize_hints(WClientWin *cwin, XSizeHints *hints_ret)
 {
-    if(relw_ret!=NULL)
-        *relw_ret=REGION_GEOM(cwin).w;
-    if(relh_ret!=NULL)
-        *relh_ret=REGION_GEOM(cwin).h;
     *hints_ret=cwin->size_hints;
-    
     xsizehints_adjust_for(hints_ret, cwin->transient_list);
 }
 
