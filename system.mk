@@ -45,7 +45,7 @@ VARDIR=/var/cache/ion
 #PRELOAD_MODULES=1
 
 # Flags to link with libdl.
-#DL_LIBS=-ldl
+DL_LIBS=-ldl
 
 
 ##
@@ -174,11 +174,7 @@ RANLIB=ranlib
 ## Install & strip
 ##
 
-# Should work almost everywhere
-INSTALL=install
-# On a system with pure BSD install, -c might be preferred
-#INSTALL=install -c
-
+INSTALL=$(TOPDIR)/install-sh
 INSTALLDIR=mkdir -p
 
 BIN_MODE=755
