@@ -95,7 +95,7 @@ static void destroy_children(WRegion *reg)
 
 void region_deinit(WRegion *reg)
 {
-	rescue_clientwins_on_list(reg, reg->children);
+	rescue_child_clientwins(reg);
 	
 	destroy_children(reg);
 

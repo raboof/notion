@@ -193,7 +193,7 @@ bool region_manage(WRegion *mgr, WRegion *reg, ExtlTab tab)
 /*}}}*/
 
 
-/*{{{ find_new_manager */
+/*{{{ Rescue */
 
 
 bool region_can_manage_clientwins(WRegion *reg)
@@ -241,68 +241,94 @@ WRegion *region_find_rescue_manager(WRegion *reg)
 }
 
 
-bool move_clientwins_on_list(WRegion *dest, WRegion *src, WRegion *list)
+typedef struct{
+	WRegion *dest;
+	bool hascw;
+	int xroot, yroot;
+} RescueState;
+
+
+static void init_rescue(RescueState *st, WRegion *reg)
 {
-	WRegion *r, *next;
-	bool success=TRUE;
-	WAttachParams param;
-	bool hascw=FALSE;
-	int xroot=0, yroot=0;
-	XSizeHints szhnt;
+	st->dest=region_find_rescue_manager(reg);
+
+	if(st->dest==NULL)
+		return;
 	
-	if(HAS_DYN(dest, genws_add_clientwin)){
-		hascw=TRUE;
-	}else if(!HAS_DYN(dest, region_do_add_managed)){
-		return FALSE;
+	st->hascw=FALSE;
+	
+	if(HAS_DYN(st->dest, genws_add_clientwin)){
+		st->hascw=TRUE;
+	}else if(!HAS_DYN(st->dest, region_do_add_managed)){
+		return;
 	}
 
-	region_rootpos(dest, &xroot, &yroot);
-	
-	FOR_ALL_MANAGED_ON_LIST_W_NEXT(list, r, next){
-		if(!WOBJ_IS(r, WClientWin))
-			continue;
-		
-		region_rootpos(r, &(param.geomrq.w), &(param.geomrq.h));
-		param.geomrq.x-=xroot;
-		param.geomrq.y-=yroot;
-		param.geomrq.w=REGION_GEOM(r).w;
-		param.geomrq.h=REGION_GEOM(r).h;
-		param.flags=(REGION_ATTACH_POSRQ|REGION_ATTACH_SIZERQ);
-		/* TODO: StaticGravity */
-		
-		if(hascw){
-			if(!genws_add_clientwin((WGenWS*)dest, (WClientWin*)r, &param))
-				success=FALSE;
-		}else{
-			if(!region_add_managed(dest, r, &param))
-				success=FALSE;
-		}
-	}
-	
-	return success;
+	region_rootpos(st->dest, &(st->xroot), &(st->yroot));
 }
 
 
-bool rescue_clientwins_on_list(WRegion *reg, WRegion *list)
+static bool do_rescue(RescueState *st, WClientWin *cwin)
 {
-	WRegion *p, *r;
+	WAttachParams param;
+	XSizeHints szhnt;
+
+	/* We do not descend into other objects, their destroy functions
+	 * can handle the rescue.
+	 */
+	param.geomrq.x-=st->xroot;
+	param.geomrq.y-=st->yroot;
+	param.geomrq.w=REGION_GEOM(cwin).w;
+	param.geomrq.h=REGION_GEOM(cwin).h;
+	param.flags=(REGION_ATTACH_POSRQ|REGION_ATTACH_SIZERQ);
+	/* TODO: StaticGravity */
+		
+	if(st->hascw){
+		return genws_add_clientwin((WGenWS*)(st->dest), cwin, &param);
+	}else{
+		return region_add_managed(st->dest, (WRegion*)cwin, &param);
+	}
+}
+
+
+bool rescue_managed_clientwins(WRegion *reg, WRegion *list)
+{
+	WRegion *r, *next;
+	RescueState st;
 	
 	if(list==NULL || wglobal.opmode==OPMODE_DEINIT)
 		return TRUE;
 	
-	p=region_find_rescue_manager(reg);
-	
-	if(p!=NULL){
-		if(move_clientwins_on_list(p, reg, list))
-			return TRUE;
+	init_rescue(&st, reg);
+		
+	FOR_ALL_MANAGED_ON_LIST_W_NEXT(list, r, next){
+		if(!WOBJ_IS(r, WClientWin))
+			continue;
+
+		if(!do_rescue(&st, (WClientWin*)r)){
+			warn("Unable to rescue a client window managed by a %s.",
+				 WOBJ_TYPESTR(reg));
+			return FALSE;
+		}
 	}
 	
-	/* This should not happen unless the region is not
-	 * properly in a tree with a WRootWin root.
-	 */
-	FOR_ALL_MANAGED_ON_LIST(list, r){
-		if(WOBJ_IS(r, WClientWin)){
-			warn("Unable to move managed regions of a %s somewhere else.",
+	return TRUE;
+}
+
+
+bool rescue_child_clientwins(WRegion *reg)
+{
+	WClientWin *r, *next;
+	RescueState st;
+	
+	if(wglobal.opmode==OPMODE_DEINIT)
+		return TRUE;
+	
+	init_rescue(&st, reg);
+		
+	for(r=FIRST_CHILD(reg, WClientWin); r!=NULL; r=next){
+		next=NEXT_CHILD(r, WClientWin);
+		if(!do_rescue(&st, r)){
+			warn("Unable to rescue a client window contained in a %s.",
 				 WOBJ_TYPESTR(reg));
 			return FALSE;
 		}

@@ -224,7 +224,7 @@ bool floatws_destroy(WFloatWS *ws)
 	
 	/* TODO: move frames to other workspaces */
 	
-	if(!rescue_clientwins_on_list((WRegion*)ws, ws->managed_list))
+	if(!rescue_managed_clientwins((WRegion*)ws, ws->managed_list))
 		return FALSE;
 	
 	defer_destroy((WObj*)ws);

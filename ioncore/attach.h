@@ -58,7 +58,7 @@ extern WRegion *default_find_rescue_manager_for(WRegion *reg, WRegion *todst);
 extern WRegion *region_find_rescue_manager(WRegion *reg);
 extern bool region_can_manage_clientwins(WRegion *reg);
 
-extern bool rescue_clientwins_on_list(WRegion *reg, WRegion *list);
-extern bool move_clientwins_on_list(WRegion *dest, WRegion *src, WRegion *list);
+extern bool rescue_managed_clientwins(WRegion *reg, WRegion *list);
+extern bool rescue_child_clientwins(WRegion *reg);
 
 #endif /* ION_IONCORE_ATTACH_H */
