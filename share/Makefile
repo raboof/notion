@@ -39,8 +39,8 @@ _install:
 	done
 
 %: %.in
-	sed 's#@SHAREDIR@#$(SHAREDIR)#g' $< > $@
-	sed 's#@VARDIR@#$(VARDIR)#g' $< > $@
+	sed 's#@SHAREDIR@#$(SHAREDIR)#g' $< | \
+	sed 's#@VARDIR@#$(VARDIR)#g' > $@
 	chmod $(BIN_MODE) $@
 
 #
