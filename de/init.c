@@ -243,10 +243,11 @@ bool de_do_define_style(WRootWin *rootwin, const char *name, ExtlTab tab)
 	}else{
 		brush->font=de_load_font(CF_FALLBACK_FONT_NAME);
 	}
-/*#ifndef CF_UTF8
-	if(brush->font!=NULL)
-		XSetFont(wglobal.dpy, brush->normal_gc, brush->font->fid);
-#endif*/
+	
+	if(brush->font!=NULL && brush->font->fontstruct!=NULL){
+		XSetFont(wglobal.dpy, brush->normal_gc, 
+				 brush->font->fontstruct->fid);
+	}
 
 	brush->cgrp_alloced=TRUE;
 	get_colour_group(rootwin, &(brush->cgrp), tab);
