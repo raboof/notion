@@ -41,14 +41,12 @@ function T.split3(d, ls, cs, rs, co, sattr)
         split_tls = ls+cs,
         split_brs = rs,
         split_dir = d,
-        static = static_,
         tl = sattr{
             split_tls = ls,
             split_brs = cs,
             split_dir = d,
-            static = static_,
             tl = { },
-            br = co
+            br = co,
         },
         br = { },
     }
@@ -80,10 +78,8 @@ function T.default_layout(ws, reg)
     local gw, gr=ws:geom(), reg:geom()
     return T.center3("horizontal", gw.w, gr.w,
                      T.center3("vertical", gw.h, gr.h, 
-                               { 
-                                   type = obj_typename(reg),
-                                   reference = reg,
-                               }, T.set_lazy), T.set_static)
+                               { reference = reg, }, T.set_lazy), 
+                     T.set_static)
     
 end
 

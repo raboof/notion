@@ -92,8 +92,6 @@ static WRegion *find_suitable_target(WIonWS *ws)
 /*{{{ Code for looking up free space */
 
 
-#define WS_REALLY_FULL(ws) FALSE
-
 enum{
     ACT_NOT_FOUND,
     ACT_SPLIT_VERTICAL,
@@ -113,6 +111,8 @@ typedef struct{
 #define PENALTY_NEVER    INT_MAX
 #define PENALTY_INIT     (INT_MAX-1)
 #define PENALTY_ENDSCALE (-1)
+
+#define REGFIT_FIT_OFFSET 10
 
 /* grow or shrink pixels */
 static int fit_penalty_scale[][2]={
@@ -205,6 +205,17 @@ static int split_penalty(int s, int ss, int slack)
 #define vsplit_penalty(S1, S2, T, I, DS) split_penalty(S1, S2, (T)->t+(T)->b)
 
 
+static int regfit_penalty(int s, int ss)
+{
+    int d=ss-s;
+    int res=interp1(fit_penalty_scale, ss-s);
+    return (res==PENALTY_NEVER ? res : res+REGFIT_FIT_OFFSET);
+}
+
+#define hregfit_penalty(S1, S2) regfit_penalty(S1, S2)
+#define vregfit_penalty(S1, S2) regfit_penalty(S1, S2)
+
+
 static int combine(int h, int v)
 {
     if(h==PENALTY_NEVER || v==PENALTY_NEVER)
@@ -266,9 +277,22 @@ static void scan(WSplit *split, int depth, const WRectangle *geom,
                 }
             }
         }
-    }
+        
+    }else if(split->type==SPLIT_REGNODE){
+        int rqw=geom->w, rqh=geom->h, sw=split->geom.w, sh=split->geom.h;
+        int p_h=hregfit_penalty(rqw, sw);
+        int p_v=vregfit_penalty(rqh, sh);
+        int p=combine(p_h, p_v);
 
-    if(split->type==SPLIT_VERTICAL || split->type==SPLIT_HORIZONTAL){
+        if(p<best->penalty && OBJ_IS(split->u.reg, WFrame)){
+            best->split=split;
+            best->penalty=p;
+            best->dest_w=-1;
+            best->dest_h=-1;
+            best->action=ACT_ATTACH;
+        }
+        
+    }else if(split->type==SPLIT_VERTICAL || split->type==SPLIT_HORIZONTAL){
         WSplit *tl=split->u.s.tl, *br=split->u.s.br;
         WSplitUnused tlunused, brunused;
         WSplitUnused tot, immed;
@@ -432,7 +456,6 @@ static bool do_split(Res *rs, WSplit **tree, WFrame *frame)
     return (node!=NULL);
 }
 
-
 /*}}}*/
 
 
@@ -443,64 +466,63 @@ bool autows_manage_clientwin(WAutoWS *ws, WClientWin *cwin,
                              const WManageParams *param, int redir)
 {
     WRegion *target=NULL;
+    WFrame *frame=create_frame_for(ws, (WRegion*)cwin);
     
-    if(!WS_REALLY_FULL(ws)){
-        WFrame *frame=create_frame_for(ws, (WRegion*)cwin);
-     
-        if(frame!=NULL && ws->ionws.split_tree==NULL){
-            create_initial_configuration(ws, (WRegion*)frame);
-            
-            if(REGION_MANAGER(frame)==NULL){
-                destroy_obj((Obj*)frame);
-                warn("Unable to initialise layout for a new window.");
-            }else{
-                target=(WRegion*)frame;
-            }
-        }else if(frame!=NULL){
-            /*      split action         penalty       primn      w    h */
-            Res rs={NULL, ACT_NOT_FOUND, PENALTY_INIT, PRIMN_ANY, -1, -1};
-            WSplitUnused tot={0, 0, 0, 0}, immed={0, 0, 0, 0};
-            WSplit **tree=&(ws->ionws.split_tree);
-
-            split_update_bounds(*tree, TRUE);
-            scan(*tree, 0, &REGION_GEOM(frame), &tot, &immed, &rs);
-            
-            /* Resize */
-            if(rs.dest_w>0 || rs.dest_h>0){
-                WRectangle grq=rs.split->geom;
-                int gflags=REGION_RQGEOM_WEAK_ALL;
-                
-                if(rs.dest_w>0){
-                    grq.w=rs.dest_w;
-                    gflags&=~REGION_RQGEOM_WEAK_W;
-                }
-                
-                if(rs.dest_h>0){
-                    grq.h=rs.dest_h;
-                    gflags&=~REGION_RQGEOM_WEAK_H;
-                }
-                
-                split_tree_rqgeom(*tree, rs.split, gflags, &grq, NULL);
-            }
-
-            /* Put the frame there */
-            if(rs.action==ACT_SPLIT_HORIZONTAL || 
-               rs.action==ACT_SPLIT_VERTICAL){
-                if(do_split(&rs, tree, frame))
-                    target=(WRegion*)frame;
-            }else if(rs.action==ACT_REPLACE_UNUSED){
-                if(do_replace(&rs, tree, frame))
-                    target=(WRegion*)frame;
-            }else{
-                warn("Placement method unimplemented.");
-            }
-            
-            if(target==NULL)
-                destroy_obj((Obj*)frame);
-            else
-                ionws_managed_add(&(ws->ionws), target);
-
+    if(frame!=NULL && ws->ionws.split_tree==NULL){
+        create_initial_configuration(ws, (WRegion*)frame);
+        
+        if(REGION_MANAGER(frame)==NULL){
+            destroy_obj((Obj*)frame);
+            warn("Unable to initialise layout for a new window.");
+        }else{
+            target=(WRegion*)frame;
         }
+    }else if(frame!=NULL){
+        /*      split action         penalty       primn      w    h */
+        Res rs={NULL, ACT_NOT_FOUND, PENALTY_INIT, PRIMN_ANY, -1, -1};
+        WSplitUnused tot={0, 0, 0, 0}, immed={0, 0, 0, 0};
+        WSplit **tree=&(ws->ionws.split_tree);
+        
+        split_update_bounds(*tree, TRUE);
+        scan(*tree, 0, &REGION_GEOM(frame), &tot, &immed, &rs);
+        
+        /* Resize */
+        if(rs.dest_w>0 || rs.dest_h>0){
+            WRectangle grq=rs.split->geom;
+            int gflags=REGION_RQGEOM_WEAK_ALL;
+            
+            if(rs.dest_w>0){
+                grq.w=rs.dest_w;
+                gflags&=~REGION_RQGEOM_WEAK_W;
+            }
+            
+            if(rs.dest_h>0){
+                grq.h=rs.dest_h;
+                gflags&=~REGION_RQGEOM_WEAK_H;
+            }
+            
+            split_tree_rqgeom(*tree, rs.split, gflags, &grq, NULL);
+        }
+        
+        /* Put the frame there */
+        if(rs.action==ACT_SPLIT_HORIZONTAL || 
+           rs.action==ACT_SPLIT_VERTICAL){
+            if(do_split(&rs, tree, frame))
+                target=(WRegion*)frame;
+        }else if(rs.action==ACT_REPLACE_UNUSED){
+            if(do_replace(&rs, tree, frame))
+                target=(WRegion*)frame;
+        }else if(rs.action==ACT_ATTACH){
+            target=rs.split->u.reg;
+        }else{
+            warn("Placement method unimplemented.");
+        }
+        
+        if(target!=(WRegion*)frame)
+            destroy_obj((Obj*)frame);
+        else
+            ionws_managed_add(&(ws->ionws), (WRegion*)frame);
+        
     }
 
     if(target!=NULL && REGION_MANAGER(target)==(WRegion*)ws){
