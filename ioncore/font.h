@@ -18,25 +18,47 @@
 #define FONT_HEIGHT(X) ((X)->height)
 #define MAX_FONT_WIDTH(X) ((X)->max_advance_width)
 #define MAX_FONT_HEIGHT(X) ((X)->height)
+#define FONT_BASELINE(X) ((X)->ascent)
 
 #define free_font XftFontClose
-extern int text_width(WFont *font, const char *str, int len);
+extern int text_width(WFontPtr font, const char *str, int len);
 
-#else
+#else /* !CF_XFT */
+
+#ifdef CF_UTF8
+
+extern int fontset_height(XFontSet fntset);
+extern int fontset_max_width(XFontSet fntset);
+extern int fontset_text_width(XFontSet fntset, const char *str, int len);
+extern int fontset_baseline(XFontSet fntset);
+
+#define FONT_HEIGHT(X) fontset_height(X)
+#define MAX_FONT_WIDTH(X) fontset_max_width(X)
+#define MAX_FONT_HEIGHT(X) fontset_height(X)
+#define FONT_BASELINE(X) fontset_baseline(X)
+/*((X)->max_bounds.ascent+(X)->max_bounds.descent)*/
+
+#define free_font XFreeFontSet
+#define text_width fontset_text_width
+
+#else /* !CF_UTF8 */
 
 #define FONT_HEIGHT(X) ((X)->ascent+(X)->descent)
 #define MAX_FONT_WIDTH(X) ((X)->max_bounds.width)
 #define MAX_FONT_HEIGHT(X) ((X)->max_bounds.ascent+(X)->max_bounds.descent)
+#define FONT_BASELINE(X) ((X)->ascent)
 
 #define free_font XFreeFont
 #define text_width XTextWidth
 
-#endif
+#endif /* !CF_UTF8 */
+#endif /* !CF_XFT */
 
-#define FONT_BASELINE(X) ((X)->ascent)
-
-extern WFont *load_font(Display *dpy, const char *fontname);
-extern char *make_label(WFont *fnt, const char *str, int maxw);
+extern WFontPtr load_font(Display *dpy, const char *fontname);
+extern char *make_label(WFontPtr fnt, const char *str, int maxw);
 extern bool add_shortenrule(const char *rx, const char *rule);
+
+extern int str_nextoff(const char *p);
+extern int str_prevoff(const char *p, int pos);
 
 #endif /* WMCORE_FONT_H */

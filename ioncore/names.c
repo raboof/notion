@@ -52,7 +52,7 @@ char *region_full_name(WRegion *reg)
 }
 
 
-char *region_make_label(WRegion *reg, int maxw, WFont *font)
+char *region_make_label(WRegion *reg, int maxw, WFontPtr font)
 {
 	char *str=region_full_name(reg);
 	char *ret;

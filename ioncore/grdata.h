@@ -44,7 +44,7 @@ DECLSTRUCT(WGRData){
 	WBorder tab_border;
 	WBorder input_border;
 
-	WFont *font, *tab_font;
+	WFontPtr font, tab_font;
 
 	/* Ion-specific */
 	bool bar_inside_frame;

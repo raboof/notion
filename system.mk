@@ -42,13 +42,16 @@ XINERAMA_LIBS=-lXinerama -lXext
 #DEFINES += -DCF_NO_XINERAMA
 
 # Uncomment to enable Xft (anti-aliased fonts) support
-#EXTRA_LIBS += `xft-config --libs`
-#EXTRA_INCLUDES += `xft-config --cflags`
 #DEFINES += -DCF_XFT
+#X11_INCLUDES += `xft-config --cflags`
+#X11_LIBS += `xft-config --libs`
 
-
-#EXTRA_INCLUDES = -I$(PREFIX)/include
-#EXTRA_LIBS = -L$(PREFIX)/lib
+# Uncomment to enable UTF8 support. You must have XFree86 (4.x?) and the
+# libunicode library (the one from Gnome -- no, the library doesn't depend
+# no other Gnome libraries of even glib at the time of writing this).
+#DEFINES += -DCF_UTF8
+#EXTRA_INCLUDES += `unicode-config --cflags`
+#EXTRA_LIBS += `unicode-config --libs`
 
 
 ##

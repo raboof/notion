@@ -40,9 +40,11 @@ DECLSTRUCT(Edln){
 	EdlnHideComplHandler *ui_hide_completions;
 };
 
-	
+#if 0
 bool edln_insch(Edln *edln, char ch);
 bool edln_ovrch(Edln *edln, char ch);
+#endif
+
 bool edln_insstr(Edln *edln, const char *str);
 bool edln_insstr_n(Edln *edln, const char *str, int len);
 void edln_back(Edln *edln);

@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
+#include <locale.h>
 
 #include <libtu/util.h>
 #include <X11/Xlib.h>
@@ -84,7 +85,10 @@ bool wmcore_init(const char *appname, const char *appetcdir,
 	WScreen *scr;
 	int i, dscr, nscr;
 	static bool called=FALSE;
-	
+    
+	if(setlocale(LC_ALL, "")==NULL)
+		warn("setlocale() call failed");
+
 	/* Sorry, this function can not be re-entered due to laziness
 	 * towards implementing checking of things already initialized.
 	 * Nobody would call this twice anyway.
@@ -202,6 +206,7 @@ void pgeom(const char *n, WRectangle g)
 {
 	fprintf(stderr, "%s %d, %d; %d, %d\n", n, g.x, g.y, g.w, g.h);
 }
+
 
 /*}}}*/
 

@@ -25,15 +25,13 @@ DECLSTRUCT(DrawInfo){
 	WRectangle geom;
 	WColorGroup *colors;
 	WBorder *border;
-	WFont *font;
+	WFontPtr font;
 	WGRData *grdata;
 };
 
 
 #define WIN dinfo->win
-#ifdef CF_XFT
 #define DRAW dinfo->draw
-#endif
 #define XGC dinfo->gc
 #define BORDER dinfo->border
 #define COLORS dinfo->colors

@@ -20,7 +20,7 @@
 #define ITEMROWS(L, R) ((L)->itemrows==NULL ? 1 : (L)->itemrows[R])
 
 
-static int strings_maxw(WFont *font, char **strs, int nstrs)
+static int strings_maxw(WFontPtr font, char **strs, int nstrs)
 {
 	int maxw=0, w, i;
 	
@@ -34,7 +34,7 @@ static int strings_maxw(WFont *font, char **strs, int nstrs)
 }
 
 
-static int getbeg(WFont *font, int maxw, char *str, int l, int *wret)
+static int getbeg(WFontPtr font, int maxw, char *str, int l, int *wret)
 {
 	int n=maxw/MAX_FONT_WIDTH(font);
 	int w;
@@ -51,7 +51,7 @@ static int getbeg(WFont *font, int maxw, char *str, int l, int *wret)
 }
 
 
-static int string_nrows(WFont *font, int maxw, char *str)
+static int string_nrows(WFontPtr font, int maxw, char *str)
 {
 	int wrapw=text_width(font, "\\", 1);
 	int ciw=text_width(font, CONT_INDENT, CONT_INDENT_LEN);
@@ -159,7 +159,7 @@ static bool onedown(WListing *l, int *ip, int *rp)
 }
 
 
-void setup_listing(WListing *l, WFont *font,
+void setup_listing(WListing *l, WFontPtr font,
 				   char **strs, int nstrs)
 {
 	if(l->strs!=NULL)
@@ -173,7 +173,7 @@ void setup_listing(WListing *l, WFont *font,
 }
 
 
-void listing_set_font(WListing *l, WFont *font)
+void listing_set_font(WListing *l, WFontPtr font)
 {
 	int maxw=strings_maxw(font, l->strs, l->nstrs);
 	l->itemw=maxw+COL_SPACING;

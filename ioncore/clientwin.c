@@ -133,6 +133,42 @@ void get_clientwin_size_hints(WClientWin *cwin)
 }
 
 
+char **get_name_list(Window win)
+{
+	XTextProperty prop;
+	char **list=NULL;
+	int n,i;
+	Status st;
+	
+	st=XGetWMName(wglobal.dpy, win, &prop);
+	
+	if(!st)
+		return NULL;
+
+#ifndef CF_UTF8
+	st=XTextPropertyToStringList(&prop, &list, &n);
+#else
+	st=Xutf8TextPropertyToTextList(wglobal.dpy, &prop, &list, &n);
+#endif
+	if(n==0 || list==NULL)
+		return NULL;
+	return list;
+}
+
+	
+void clientwin_get_set_name(WClientWin *cwin)
+{
+	char **list=get_name_list(cwin->win);
+	
+	if(list==NULL){
+		region_unuse_name((WRegion*)cwin);
+	}else{
+		stripws(*list);
+		region_set_name((WRegion*)cwin, *list);
+		XFreeStringList(list);
+	}
+}
+
 /*}}}*/
 
 
@@ -172,13 +208,7 @@ static bool init_clientwin(WClientWin *cwin, WWindow *parent,
 	cwin->win=win;
 	cwin->orig_bw=attr->border_width;
 	
-	name=get_string_property(win, XA_WM_NAME, NULL);
-	
-	if(name!=NULL){
-		stripws(name);
-		region_set_name(&cwin->region, name);
-		free(name);
-	}
+	clientwin_get_set_name(cwin);
 
 	cwin->event_mask=CLIENT_MASK;
 	cwin->transient_for=None;

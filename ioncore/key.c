@@ -32,7 +32,11 @@ static void insstr(WWindow *wwin, XKeyEvent *ev)
 	if(wwin->xic!=NULL){
 		if(XFilterEvent((XEvent*)ev, ev->window))
 		   return;
+#ifdef CF_UTF8
+		n=Xutf8LookupString(wwin->xic, ev, buf, 16, &ksym, &stat);
+#else
 		n=XmbLookupString(wwin->xic, ev, buf, 16, &ksym, &stat);
+#endif
 	}else{
 		n=XLookupString(ev, buf, 16, &ksym, &cs);
 	}

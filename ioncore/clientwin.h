@@ -84,6 +84,8 @@ extern bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto);
 
 extern void clientwin_broken_app_resize_kludge(WClientWin *cwin);
 
+extern void clientwin_get_set_name(WClientWin *cwin);
+
 /* Hooks */
 
 extern WHooklist *add_clientwin_alt;

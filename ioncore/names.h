@@ -19,7 +19,7 @@ extern uint region_name_instance(WRegion *reg);
 /* Returns a newly allocated copy of the name with the instance
  * number appended. */
 extern char *region_full_name(WRegion *reg);
-extern char *region_make_label(WRegion *reg, int maxw, WFont *font);
+extern char *region_make_label(WRegion *reg, int maxw, WFontPtr font);
 
 extern WRegion *do_lookup_region(const char *cname, WObjDescr *descr);
 extern int do_complete_region(char *nam, char ***cp_ret, char **beg,

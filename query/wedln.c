@@ -79,7 +79,7 @@ static int wedln_draw_strsect(DrawInfo *dinfo, int x, const char *str,
 static void wedln_do_draw_str_box(DrawInfo *dinfo, const char *str,
 								  int cursor, int mark, int tx)
 {
-	int len=strlen(str);
+	int len=strlen(str), ll;
 	XRectangle rect;
 	
 	rect.x=I_X; rect.y=I_Y; rect.width=I_W; rect.height=I_H;
@@ -92,14 +92,17 @@ static void wedln_do_draw_str_box(DrawInfo *dinfo, const char *str,
 		}else{
 			DSTRSECT(cursor, 0);
 		}
-		if(len==0)
+		if(len==0){
 			tx+=wedln_draw_strsect(dinfo, tx, " ", 1, 2);
-		else
-			DSTRSECT(1, 2);
+		}else{
+			ll=str_nextoff(str);
+			DSTRSECT(ll, 2);
+		}
 	}else{
 		DSTRSECT(cursor, 0);
-		DSTRSECT(1, 2);
-		DSTRSECT(mark-cursor-1, 1);
+		ll=str_nextoff(str);
+		DSTRSECT(ll, 2);
+		DSTRSECT(mark-cursor-ll, 1);
 	}
 	DSTRSECT(len, 0);
 	
@@ -131,7 +134,7 @@ static void wedln_draw_str_box(DrawInfo *dinfo, int vstart, const char *str,
 }
 
 
-static bool wedln_update_cursor(WEdln *wedln, WFont *font, int iw)
+static bool wedln_update_cursor(WEdln *wedln, WFontPtr font, int iw)
 {
 	int cx, l;
 	int vstart=wedln->vstart;
@@ -442,7 +445,7 @@ WEdln *create_wedln(WRegion *par, WRectangle geom,
 
 static void wedln_draw_config_updated(WEdln *wedln)
 {
-	WFont *fnt=INPUT_FONT(GRDATA_OF(wedln));
+	WFontPtr fnt=INPUT_FONT(GRDATA_OF(wedln));
 	listing_set_font(&(wedln->complist), fnt);
 	wedln->prompt_w=text_width(fnt, wedln->prompt, wedln->prompt_len);
 	input_draw_config_updated((WInput*)wedln);

@@ -24,11 +24,11 @@ DECLSTRUCT(WListing){
 
 extern void init_listing(WListing *l);
 extern void deinit_listing(WListing *l);
-void setup_listing(WListing *l, WFont *font, char **strs, int nstrs);
+void setup_listing(WListing *l, WFontPtr font, char **strs, int nstrs);
 extern void fit_listing(DrawInfo *dinfo, WListing *l);
 extern void draw_listing(DrawInfo *dinfo, WListing *l, bool complete);
 extern bool scrollup_listing(WListing *l);
 extern bool scrolldown_listing(WListing *l);
-extern void listing_set_font(WListing *l, WFont *font);
+extern void listing_set_font(WListing *l, WFontPtr font);
 
 #endif /* QUERY_LISTING_H */

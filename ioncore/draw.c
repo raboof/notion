@@ -106,11 +106,19 @@ void draw_textbox(DrawInfo *dinfo,
 	ty=I_Y+I_H/2-FONT_HEIGHT(FONT)/2+FONT_BASELINE(FONT);
 	
 #ifdef CF_XFT
+#ifdef CF_UTF8
+	XftDrawStringUtf8(DRAW, &COLORS->fg, FONT, tx, ty, (XftChar8 *) str, len);
+#else /* !CF_UTF8 */
 	XftDrawString8(DRAW, &COLORS->fg, FONT, tx, ty, (XftChar8 *) str, len);
-#else
+#endif /* !CF_UTF8 */
+#else /* !CF_XFT */
 	XSetForeground(wglobal.dpy, XGC, COLORS->fg);
+#ifdef CF_UTF8
+	Xutf8DrawString(wglobal.dpy, WIN, FONT, XGC, tx, ty, str, len);
+#else /* !CF_UTF8 */
 	XDrawString(wglobal.dpy, WIN, XGC, tx, ty, str, len);
-#endif
+#endif /* !CF_UTF8 */
+#endif /* !CF_XFT */
 }
 
 
@@ -119,14 +127,24 @@ void draw_image_string(DrawInfo *dinfo, int x, int y, const char *str, int len,
 {
 #ifdef CF_XFT
 	XGlyphInfo extents;
+#ifdef CF_UTF8
+	XftTextExtentsUtf8(wglobal.dpy, FONT, (XftChar8 *) str, len, &extents);
+	XftDrawRect(DRAW, bg, x, y - FONT->ascent, extents.xOff, FONT->height);
+	XftDrawStringUtf8(DRAW, fg, FONT, x, y, (XftChar8 *) str, len);
+#else /* !CF_UTF8 */
 	XftTextExtents8(wglobal.dpy, FONT, (XftChar8 *) str, len, &extents);
 	XftDrawRect(DRAW, bg, x, y - FONT->ascent, extents.xOff, FONT->height);
 	XftDrawString8(DRAW, fg, FONT, x, y, (XftChar8 *) str, len);
-#else
+#endif /* !CF_UTF8 */
+#else /* !CF_XFT */
 	set_foreground(wglobal.dpy, XGC, *fg);
 	set_background(wglobal.dpy, XGC, *bg);
+#ifdef CF_UTF8
+	Xutf8DrawImageString(wglobal.dpy, WIN, FONT, XGC, x, y, str, len);
+#else /* !CF_UTF8 */
 	XDrawImageString(wglobal.dpy, WIN, XGC, x, y, str, len);
-#endif
+#endif /* !CF_UTF8 */
+#endif /* !CF_XFT */
 }
 
 
@@ -272,7 +290,7 @@ void preinit_graphics(WScreen *scr)
 }
 
 
-static int max_width(WFont *font, const char *str)
+static int max_width(WFontPtr font, const char *str)
 {
 	int maxw=0, w;
 	
@@ -389,23 +407,22 @@ void postinit_graphics(WScreen *scr)
 	gcv.join_style=JoinBevel;
 	gcv.cap_style=CapButt;
 	gcv.fill_style=FillSolid;
-#ifndef CF_XFT
-	gcv.font=grdata->font->fid;
-#endif
-
 	gcvmask=(GCLineStyle|GCLineWidth|GCFillStyle|
 			 GCJoinStyle|GCCapStyle);
 #ifndef CF_XFT
+#ifndef CF_UTF8
+	gcv.font=grdata->font->fid;
 	gcvmask|=GCFont;
 #endif
-	
+#endif
 	grdata->gc=XCreateGC(dpy, root, gcvmask, &gcv);
 
 	/* Create tab gc (other font) */
 #ifndef CF_XFT
+#ifndef CF_UTF8
 	gcv.font=grdata->tab_font->fid;
 #endif
-	
+#endif
 	grdata->tab_gc=XCreateGC(dpy, root, gcvmask, &gcv);
 
 	/* Create stipple pattern and stipple GC */
@@ -603,10 +620,12 @@ void reread_draw_config()
 	FOR_ALL_SCREENS(scr){
 		read_draw_config(scr);
 #ifndef CF_XFT
+#ifndef CF_UTF8
 		XSetFont(wglobal.dpy, scr->grdata.gc, 
 				 scr->grdata.font->fid);
 		XSetFont(wglobal.dpy, scr->grdata.tab_gc, 
 				 scr->grdata.tab_font->fid);
+#endif
 #endif		
 		calc_grdata(scr);
 		region_draw_config_updated((WRegion*)scr);

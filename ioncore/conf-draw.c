@@ -28,7 +28,7 @@ static WScreen *tmp_screen;
 
 static bool opt_screen_font(Tokenizer *tokz, int n, Token *toks)
 {
-	WFont *fnt;
+	WFontPtr fnt;
 	
 	fnt=load_font(wglobal.dpy, TOK_STRING_VAL(&(toks[1])));
 	
@@ -44,7 +44,7 @@ static bool opt_screen_font(Tokenizer *tokz, int n, Token *toks)
 
 static bool opt_screen_tab_font(Tokenizer *tokz, int n, Token *toks)
 {
-	WFont *fnt;
+	WFontPtr fnt;
 	
 	fnt=load_font(wglobal.dpy, TOK_STRING_VAL(&(toks[1])));
 	if(fnt!=NULL){
@@ -60,7 +60,7 @@ static bool opt_screen_tab_font(Tokenizer *tokz, int n, Token *toks)
 static bool opt_screen_term_font(Tokenizer *tokz, int n, Token *toks)
 {
 
-	WFont *term_font;
+	WFontPtr term_font;
 	
 	term_font=load_font(wglobal.dpy, TOK_STRING_VAL(&(toks[1])));
 	

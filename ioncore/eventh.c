@@ -314,12 +314,7 @@ static void handle_property(const XPropertyEvent *ev)
 		return;
 	
 	case XA_WM_NAME:
-		{
-			char *str=get_string_property(cwin->win, XA_WM_NAME, NULL);
-			set_clientwin_name(cwin, str);
-			if(str!=NULL)
-				free(str);
-		}
+		clientwin_get_set_name(cwin);
 		break;
 		
 	case XA_WM_ICON_NAME:

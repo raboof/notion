@@ -8,12 +8,16 @@
 #include <string.h>
 #include <ctype.h>
 #include <string.h>
-
 #include <wmcore/common.h>
 #include <wmcore/selection.h>
+#include <wmcore/font.h>
 
 #include "edln.h"
 #include "wedln.h"
+
+#ifdef CF_UTF8
+#include <unicode.h>
+#endif
 
 #define EDLN_ALLOCUNIT 16
 #define EDLN_HISTORY_SIZE 256
@@ -21,6 +25,28 @@
 
 #define UPDATE(X) edln->ui_update(edln->uiptr, X, FALSE)
 #define UPDATE_MOVED(X) edln->ui_update(edln->uiptr, X, TRUE)
+
+
+#ifdef CF_UTF8
+
+#define CHAR unicode_char_t
+#define ISALNUM unicode_isalnum
+#define CHAR_AT(P, N) char_at(P, N)
+static CHAR char_at(const char *p, int n)
+{
+	CHAR ch;
+	if(unicode_get_utf8(p, &ch)==NULL)
+		return (CHAR)0;
+	return ch;
+}
+
+#else /* !CF_UTF8 */
+
+#define CHAR char
+#define ISALNUM isalnum
+#define CHAR_AT(P, N) ((N)==0 ? '\0' : *(P))
+
+#endif /* !CF_UTF8 */
 
 
 /*{{{ Alloc */
@@ -138,7 +164,7 @@ static bool edln_setstr(Edln *edln, const char *p)
 
 /*{{{ Insert */
 
-
+#if 0
 bool edln_insch(Edln *edln, char ch)
 {
 	if(edln_pspc(edln, 1)){
@@ -156,7 +182,7 @@ bool edln_ovrch(Edln *edln, char ch)
 	edln_delete(edln);
 	return edln_insch(edln, ch);
 }
-
+#endif
 
 bool edln_insstr(Edln *edln, const char *str)
 {
@@ -190,21 +216,37 @@ bool edln_insstr_n(Edln *edln, const char *str, int l)
 /*{{{ Movement */
 
 
+static int do_edln_back(Edln *edln)
+{
+	int l=str_prevoff(edln->p, edln->point);
+	edln->point-=l;
+	return l;
+}
+
+
 void edln_back(Edln *edln)
 {
-	if(edln->point>0){
-		edln->point--;
+	int p=edln->point;
+	do_edln_back(edln);
+	/*if(edln->point!=p)*/
 		UPDATE_MOVED(edln->point);
-	}
+}
+
+
+static int do_edln_forward(Edln *edln)
+{
+	int l=str_nextoff(edln->p+edln->point);
+	edln->point+=l;
+	return l;
 }
 
 
 void edln_forward(Edln *edln)
 {
-	if(edln->point<edln->psize){
-		edln->point++;
-		UPDATE_MOVED(edln->point-1);
-	}
+	int p=edln->point;
+	do_edln_forward(edln);
+	/*if(edln->point!=p)*/
+		UPDATE_MOVED(p);
 }
 
 
@@ -230,48 +272,57 @@ void edln_eol(Edln *edln)
 
 void edln_bskip_word(Edln *edln)
 {
-	int p=edln->point-1;
-
-	while(p>0){
-		if(isalnum(edln->p[p]))
+	int p, n;
+	CHAR c;
+	
+	while(edln->point>0){
+		n=do_edln_back(edln);
+		c=CHAR_AT(edln->p+edln->point, n);
+		if(ISALNUM(c))
 			goto fnd;
-		p--;
 	}
+	UPDATE_MOVED(edln->point);
 	return;
 	
 fnd:
-	while(p>0){
-		if(!isalnum(edln->p[p])){
-			p++;
+	while(edln->point>0){
+		p=edln->point;
+		n=do_edln_back(edln);
+		c=CHAR_AT(edln->p+edln->point, n);
+
+		if(!ISALNUM(c)){
+			edln->point=p;
 			break;
 		}
-		p--;
 	}
-	edln->point=p;
 	UPDATE_MOVED(edln->point);
 }
 
 
 void edln_skip_word(Edln *edln)
 {
-	int p=edln->point;
-	int o=p;
+	int oldp=edln->point;
+	CHAR c;
 	
-	while(p<edln->psize){
-		if(!isalnum(edln->p[p]))
+	while(edln->point<edln->psize){
+		c=CHAR_AT(edln->p+edln->point, edln->psize-edln->point);
+		if(ISALNUM(c))
 			goto fnd;
-		p++;
+		if(do_edln_forward(edln)==0)
+			break;
 	}
+	UPDATE_MOVED(oldp);
 	return;
 	
 fnd:
-	while(p<edln->psize){
-		if(isalnum(edln->p[p]))
+	while(edln->point<edln->psize){
+		c=CHAR_AT(edln->p+edln->point, edln->psize-edln->point);
+		if(!ISALNUM(c))
 			break;
-		p++;
+		if(do_edln_forward(edln)==0)
+			break;
 	}
-	edln->point=p;
-	UPDATE_MOVED(o);
+	UPDATE_MOVED(oldp);
 }
 
 
@@ -301,16 +352,32 @@ void edln_set_point(Edln *edln, int point)
 
 void edln_delete(Edln *edln)
 {
+#ifdef CF_UTF8
+	int left=edln->psize-edln->point;
+	size_t l;
+	
+	if(left<=0)
+		return;
+	
+	l=str_nextoff(edln->p+edln->point);
+	
+	if(l>0)
+		edln_rspc(edln, l);
+#else
 	edln_rspc(edln, 1);
+#endif
 	UPDATE(edln->point);
 }
 
 
 void edln_backspace(Edln *edln)
 {
-	if(edln->point!=0){
-		edln_back(edln);
-		edln_delete(edln);
+	int n;
+	if(edln->point==0)
+		return;
+	n=do_edln_back(edln);
+	if(n!=0){
+		edln_rspc(edln, n);
 		UPDATE_MOVED(edln->point);
 	}
 }
@@ -343,57 +410,32 @@ void edln_kill_line(Edln *edln)
 
 void edln_kill_word(Edln *edln)
 {
-	int p=edln->point;
-	int o=p;
+	int oldp=edln->point;
+	int l;
+	edln_skip_word(edln);
 	
-	if(!isalnum(edln->p[p])){
-		while(p<edln->psize){
-			p++;
-			if(isalnum(edln->p[p]))
-				break;
-		}
-	}else{
-		while(p<edln->psize){
-			p++;
-			if(!isalnum(edln->p[p]))
-				break;
-		}
-	}
-	edln_rspc(edln, p-edln->point);
-	UPDATE(o);
+	if(edln->point==oldp)
+		return;
+	
+	l=edln->point-oldp;
+	edln->point=oldp;
+	edln_rspc(edln, l);
+	
+	UPDATE(oldp);
 }
 
 
 void edln_bkill_word(Edln *edln)
 {
-	int p=edln->point, p2;
+	int oldp=edln->point;
 	
-	if(p==0)
+	edln_bskip_word(edln);
+	
+	if(edln->point==oldp)
 		return;
 	
-	p--;
-	if(!isalnum(edln->p[p])){
-		while(p>0){
-			p--;
-			if(isalnum(edln->p[p])){
-				p++;
-				break;
-			}
-		}
-	}else{
-		while(p>0){
-			p--;
-			if(!isalnum(edln->p[p])){
-				p++;
-				break;
-			}
-		}
-	}
-	
-	p2=edln->point;
-	edln->point=p;
-	edln_rspc(edln, p2-p);
-	UPDATE_MOVED(edln->point);
+	edln_rspc(edln, oldp-edln->point);
+	UPDATE(edln->point);
 }
 
 
