@@ -4,7 +4,7 @@
 
 -- The following settings only apply if no dock exists
 
-local dock_type='embedded' -- embedded | floating | none
+local dock_type='none' -- embedded | floating | none
 local dock_screen=0
 local dock_params={
     grow="right", -- growth direction: left|right|up|down
