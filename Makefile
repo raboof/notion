@@ -8,7 +8,7 @@ include system-inc.mk
 ######################################
 
 #DIST: SUBDIRS = libtu $(MODULE_LIST) luaextl ioncore man scripts
-SUBDIRS = $(MODULE_LIST) luaextl ioncore man scripts
+SUBDIRS = $(MODULE_LIST) luaextl ioncore man scripts share
 INSTALL_SUBDIRS = $(MODULE_LIST) ioncore scripts man etc share
 
 DOCS = README LICENSE ChangeLog
