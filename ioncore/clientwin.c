@@ -558,10 +558,9 @@ void clientwin_tfor_changed(WClientWin *cwin)
 typedef struct{
 	WClientWin *cwin;
 	WRegion *transient;
-	bool top;
 } TransRepar;
 
-static TransRepar *transient_reparents;
+static TransRepar *transient_reparents=NULL;
 
 static WRegion *clientwin_do_attach_transient(WClientWin *cwin, 
 											  WRegionAttachHandler *fn,
@@ -578,7 +577,6 @@ static WRegion *clientwin_do_attach_transient(WClientWin *cwin,
 
 	tp.cwin=cwin;
 	tp.transient=thereg;
-	tp.top=(cwin->flags&CWIN_TRANSIENTS_TOP);
 	tpold=transient_reparents;
 	transient_reparents=&tp;
 	
@@ -886,22 +884,22 @@ static void convert_geom(WClientWin *cwin, const WRectangle *max_geom,
 	bool bottom=FALSE;
 	bool top=FALSE;
 	int htry=max_geom->h;
-	WClientWin *mgr=REGION_MANAGER_CHK(cwin, WClientWin);
+	WClientWin *mgr;
 	
 	if(transient_reparents!=NULL && 
 	   transient_reparents->transient==(WRegion*)cwin){
-		if(transient_reparents->top)
-			top=TRUE;
-		else
-			bottom=TRUE;
-	}else if(mgr!=NULL){
+		mgr=transient_reparents->cwin;
+	}else{
+		mgr=REGION_MANAGER_CHK(cwin, WClientWin);
+	}
+	
+	if(mgr!=NULL){
 		if(mgr->flags&CWIN_TRANSIENTS_TOP)
 			top=TRUE;
 		else
 			bottom=TRUE;
+		htry=cwin->last_h_rq;
 	}
-	
-	htry=cwin->last_h_rq;
 	
 	geom->w=max_geom->w;
 	geom->h=htry;
