@@ -683,6 +683,18 @@ bool mplex_l2_show(WMPlex *mplex, WRegion *reg)
 }
 
 
+static bool mplex_l2_passive(WMPlex *mplex)
+{
+    WLListNode *node;
+    FOR_ALL_NODES_ON_LLIST(node, mplex->l2_list){
+        if((node->flags&(LLIST_L2_HIDDEN|LLIST_L2_PASSIVE))==0)
+            return FALSE;
+    }
+     
+    return TRUE;
+}
+
+
 static bool mplex_do_managed_display(WMPlex *mplex, WRegion *sub,
                                      bool call_changed)
 {
@@ -701,7 +713,7 @@ static bool mplex_do_managed_display(WMPlex *mplex, WRegion *sub,
         if(node==NULL)
             return FALSE;
         if(node==mplex->l1_current)
-            return TRUE;
+            return mplex_l2_passive(mplex);
     }
 
     stdisp=(WRegion*)(mplex->stdispinfo.regwatch.obj);
@@ -760,7 +772,7 @@ static bool mplex_do_managed_display(WMPlex *mplex, WRegion *sub,
     
     if(!l2){
         mplex_managed_changed(mplex, MPLEX_CHANGE_SWITCHONLY, TRUE, sub);
-        return mplex->l2_current==NULL;
+        return mplex_l2_passive(mplex);
     }else{
         return mplex->l2_current==node;
     }
