@@ -38,14 +38,32 @@ if mod_menu then
     defctxmenu("WIonWS", {
         menuentry("Destroy frame", 
                   "WIonWS.unsplit_at(_, _sub)"),
-        menuentry("Split vertically", 
-                  "WIonWS.split_at(_, _sub, 'bottom', true)"),
-        menuentry("Split horizontally", 
-                  "WIonWS.split_at(_, _sub, 'right', true)"),
-        menuentry("Flip root", "_:split_tree():flip()"),
-        menuentry("Flip parent", "_:node_of(_sub):parent():flip()"),
-        menuentry("Transpose root", "_:split_tree():transpose()"),
-        menuentry("Transpose parent", "_:node_of(_sub):parent():transpose()"),
+        submenu("Flip&transpose", {          
+            menuentry("Flip", "_:node_of(_sub):parent():flip()"),
+            menuentry("Transpose", "_:node_of(_sub):parent():transpose()"),
+            menuentry("Flip at root", "_:split_tree():flip()"),
+            menuentry("Transpose at root", "_:split_tree():transpose()"),
+        }),
+        submenu("Split", {
+            menuentry("Vertically", 
+                      "WIonWS.split_at(_, _sub, 'bottom', true)"),
+            menuentry("Horizontally", 
+                       "WIonWS.split_at(_, _sub, 'right', true)"),
+            menuentry("Vertically at root", 
+                      "WIonWS.split_top(_, 'bottom')"),
+            menuentry("Horizontally at root", 
+                      "WIonWS.split_top(_, 'right')"),
+        }),
+        submenu("Floating split", {
+            menuentry("Vertically", 
+                      "WIonWS.split_at(_, _sub, 'floating:bottom', true)"),
+            menuentry("Horizontally", 
+                      "WIonWS.split_at(_, _sub, 'floating:right', true)"),
+            menuentry("Vertically at root", 
+                      "WIonWS.split_top(_, 'floating:bottom')"),
+            menuentry("Horizontally at root", 
+                      "WIonWS.split_top(_, 'floating:right')"),
+        }),
     })
 end
 

@@ -320,14 +320,9 @@ local function get_ctxmenu(reg, sub, is_par)
         m3={}
         for k, v in m2 do
             v2=table.copy(v)
-            if v2.submenu then
-                sm=cp(v2.submenu)
-                if is_par then
-                    local ofn=sm.submenu_fn
-                    sm.submenu_fn=function() return cp(ofn()) end
-                end
-                -- TODO: koko zydeemi barffaa jos ei table.
-                v2.submenu=sm
+            if v2.submenu_fn then
+                local ofn=v2.submenu_fn
+                v2.submenu_fn=function() return cp(ofn()) end
             end
             v2._reg=reg
             v2._sub=sub
