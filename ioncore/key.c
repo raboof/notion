@@ -162,8 +162,6 @@ static bool submapgrab_handler(WRegion *reg, XEvent *ev)
 	WBinding *binding=NULL;
 	WRegion *rreg=NULL;
 	
-	fprintf(stderr, "sgh\n");
-	
 	if(ev->type==KeyRelease)
 		return FALSE;
 	
