@@ -2,7 +2,74 @@
 -- Ion-devel dock module configuration
 --
 
---[[
+-- The following settings only apply if no dock exists
+
+local dock_type='embedded' -- embedded | floating | none
+local dock_screen=0
+local dock_params={
+    grow="right", -- growth direction: left|right|up|down
+    pos="bl",     -- position: embedded: tl|tr|bl|br, 
+                  --           floating: also tc|bc|ml|mc|mr
+    is_auto=true, -- whether new dockapps should be added automatically
+}
+
+
+--
+-- Code to set up a dock
+-- 
+
+if dock_type~='none' then
+    local function create_dock_if_missing()
+        local f
+        local d=ioncore.region_list("WDock")
+        if table.getn(d)>0 then
+            return
+        end
+        
+        local scr=ioncore.find_screen_id(dock_screen)
+        
+        if dock_type=='embedded' then
+            scr:set_stdisp(table.join(dock_params, {type="WDock"}))
+        elseif dock_type=='floating' then
+            scr:attach_new(table.join(dock_params, {
+                type="WDock", 
+                layer=2, 
+                passive=true,
+                switchto=true,
+            }))
+        else
+            warn("Invalid dock type")
+        end
+    end
+
+    local hk=ioncore.get_hook("ioncore_post_layout_setup_hook")
+    hk:add(create_dock_if_missing)
+end
+
+if dock_type=='floating' then
+    function toggle_floating_dock(r)
+        local l=r:llist(2)
+        for k, v in l do
+            if obj_is(v, "WDock") then
+                if v:is_mapped() then
+                    r:l2_hide(v)
+                else
+                    r:l2_show(v)
+                end
+            end
+        end
+    end
+    
+    defbindings("WScreen", {
+        kpress(MOD1.."space", "toggle_floating_dock(_)")
+    })
+end
+
+
+--
+-- Dock settings menu
+-- 
+
 include('menulib')
 
 defmenu("dock-settings", {
@@ -19,49 +86,4 @@ defmenu("dock-settings", {
 defbindings("WDock", {
     mpress("Button3", "menulib.pmenu(_, _sub, 'dock-settings')"),
 })
---]]
 
--- create a new dock on screen 0
---[[
-dock = mod_dock.create_dock(0, {
-    name="dock",    -- name for use in target="..." winprops
-    hpos="right",    -- horizontal position left|center|right
-    vpos="bottom",    -- vertical position top|middle|bottom
-    grow="left",    -- growth direction up|down|left|right
-    is_auto=true,    -- whether new dockapps should be added automatically
-})
-
-
-function toggle_dock()
-    WDock.toggle(dock)    -- toggle map/unmapped state
-end
-
-defbindings("WScreen", {
-    kpress(MOD1.."space", "toggle_dock()")
-})
---]]
-
--- dockapp ordering
-
--- Use the dockposition winprop to enforce an ordering on dockapps. The value is
--- arbitrary and relative to other dockapps only. The default is 0.
--- Unfortunately, many dockapps do not set their class/instance/role so they
--- cannot be used with the winprop system.
-
--- dockapp borders
-
--- Use dockappborder=false to disable the drawing of a border around a dockapp.
--- This is only effective if outline_style="each" (see dock-draw.lua).
-
-defwinprop{
-    instance="gkrellm2",
-    dockposition=-100,    -- place first
-    dockborder=false,    -- do not draw border if outline_style="each"
-}
-
--- kludges
-
-defwinprop{
-    instance="wmxmms",
-    target="dock",
-}
