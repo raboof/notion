@@ -24,12 +24,15 @@ enable_opaque_resize(FALSE)
 enable_warp(TRUE)
 
 -- Kludges to make apps behave better.
-include("kludges.lua")
+include("kludges")
 
 -- Global and some common bindings. See modules' configuration files for
 -- other bindings. This must be executed before loading workspace/frame 
 -- modules!
-include("ioncore-bindings.lua")
+include("ioncore-bindings")
+
+-- Define some menus (menu module required to actually use them)
+include("ioncore-menus")
 
 -- How to shorten window titles when the full title doesn't fit in
 -- the available space? The first-defined matching rule that succeeds 
@@ -55,6 +58,6 @@ query_man_path={
 
 -- Modules.
 load_module("query")
+load_module("menu")
 load_module("ionws")
 load_module("floatws")
-

@@ -2,9 +2,6 @@
 -- PWM ioncore main executable configuration file
 --
 
--- Create floatws:s by default.
-default_ws_type="WFloatWS"
-
 -- Set default modifier. Alt should usually be mapped to Mod1 on
 -- XFree86-based systems. The flying window keys are probably Mod3
 -- or Mod4; see the output of 'xmodmap'.
@@ -20,28 +17,34 @@ DEFAULT_MOD = "Mod1+"
 --set_resize_delay(1500)
 
 -- Opaque resize?
-enable_opaque_resize(TRUE)
+enable_opaque_resize(FALSE)
 
 -- Movement commands warp the pointer to frames instead of just
 -- changing focus. Enabled by default.
 enable_warp(TRUE)
 
--- Kludges to make apps behave better
-include("kludges.lua")
+-- Kludges to make apps behave better.
+include("kludges")
 
--- Global bindings. See modules' configuration files for other bindings.
-include("ioncore-bindings.lua")
+-- Global and some common bindings. See modules' configuration files for
+-- other bindings. This must be executed before loading workspace/frame 
+-- modules!
+include("ioncore-bindings")
+
+-- Define some menus (menu module required to actually use them)
+include("ioncore-menus")
 
 -- How to shorten window titles when the full title doesn't fit in
--- the available space?
-add_shortenrule("(.*)(<[0-9]+>)", "$1$2$|$1$<...$2")
-add_shortenrule("(.*)", "$1$|$1$<...")
+-- the available space? The first-defined matching rule that succeeds 
+-- in making the title short enough is used.
 add_shortenrule("(.*) - Mozilla(<[0-9]+>)", "$1$2$|$1$<...$2")
 add_shortenrule("(.*) - Mozilla", "$1$|$1$<...")
 add_shortenrule("XMMS - (.*)", "$1$|...$>$1")
+add_shortenrule("[^:]+: (.*)(<[0-9]+>)", "$1$2$|$1$<...$2")
+add_shortenrule("[^:]+: (.*)", "$1$|$1$<...")
+add_shortenrule("(.*)(<[0-9]+>)", "$1$2$|$1$<...$2")
+add_shortenrule("(.*)", "$1$|$1$<...")
 
--- Modules. The query module must be loaded before the WS modules
--- for the functions to be bound in the WS modules' configuration
--- files to be defined. Alternatively the functions could be bound
--- elsewhere.
+-- Modules.
 load_module("floatws")
+load_module("menu")

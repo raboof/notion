@@ -9,12 +9,14 @@
 -- (at your option) any later version.
 --
 
-if querylib~=nil then
-    return
-end
+
+-- This is a slight abuse of the _LOADED variable perhaps, but library-like 
+-- packages should handle checking if they're loaded instead of confusing 
+-- the user with require/include differences.
+if _LOADED["querylib"] then return end
+
 
 querylib={}
-
 
 -- Functions to generate functions {{{
 
@@ -657,3 +659,7 @@ end
 
 
 -- }}}
+
+
+-- Mark ourselves loaded.
+_LOADED["querylib"]=true

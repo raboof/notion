@@ -1,6 +1,11 @@
 --
--- Query bindings
+-- Query module configuration.
 --
+-- Only bindings that are in effect in queries and message displays are
+-- configured here. Actions to display queries are configured in
+-- ioncore-bindings.lua
+-- 
+
 
 query_wedln_bindings{
     kpress("Control+F", WEdln.forward),
@@ -22,13 +27,13 @@ query_wedln_bindings{
 
     kpress("Control+M", WEdln.finish),
     
-    submap("Control+K") {
+    submap("Control+K", {
         kpress("AnyModifier+B", WEdln.set_mark),
         kpress("AnyModifier+Y", WEdln.cut),
         kpress("AnyModifier+K", WEdln.copy),
         kpress("AnyModifier+C", WEdln.paste),
         kpress("AnyModifier+G", WEdln.clear_mark),
-    },
+    }),
 
     kpress("Return", WEdln.finish),
     kpress("KP_Enter", WEdln.finish),
@@ -54,4 +59,5 @@ query_bindings{
     kpress("Page_Up", WInput.scrollup),
     kpress("Page_Down", WInput.scrolldown),
 }
+
 

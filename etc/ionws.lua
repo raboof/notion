@@ -9,9 +9,9 @@ ionws_bindings{
     kpress(DEFAULT_MOD .. "N", WIonWS.goto_below),
     kpress(DEFAULT_MOD .. "P", WIonWS.goto_above),
     kpress(DEFAULT_MOD .. "Tab", WIonWS.goto_right),
-    submap(DEFAULT_MOD .. "K") {
+    submap(DEFAULT_MOD .. "K", {
         kpress("AnyModifier+Tab", WIonWS.goto_left),
-    },
+    }),
 }
 
 
@@ -24,11 +24,11 @@ ionframe_bindings{
     kpress(DEFAULT_MOD .. "S",
            function(frame) frame:split("bottom") end),
 
-    submap(DEFAULT_MOD .. "K"){
+    submap(DEFAULT_MOD .. "K", {
         kpress("AnyModifier+X", WIonFrame.relocate_and_close),
         kpress("AnyModifier+S",
                function(frame) frame:split("right") end),
-    },
+    }),
     
     mclick("Button1", WGenFrame.p_switch_tab, "tab"),
     mdblclick("Button1", WIonFrame.toggle_shade, "tab"),

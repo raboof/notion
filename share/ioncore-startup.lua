@@ -41,7 +41,7 @@ wrap_bindings("genframe_bindings")
 if arg and arg[1] then
     include(arg[1])
 else
-    include("ioncore.lua")
+    include("ioncore")
 end
 
 

@@ -23,6 +23,15 @@ default_ws_type="WIonWS"
 DEFAULT_MOD="Mod1+"
 SECOND_MOD=""
 
+-- If we're on SunOS, we need to remap some keys.
+KEYF11, KEYF12="F11", "F12"
+
+if os.execute('uname -s|grep "SunOS" > /dev/null')==0 then
+    print("ioncorelib.lua: Uname test reported SunOS; ".. 
+          "mapping F11=Sun36, F12=SunF37.")
+    KEYF11, KEYF12="SunF36", "SunF37"
+end
+
 -- }}}
 
 
@@ -347,4 +356,4 @@ end
 -- }}}
 
 
-include('ioncore-mplexfns.lua')
+include('ioncore-mplexfns')
