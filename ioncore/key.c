@@ -216,6 +216,6 @@ void handle_keypress(XKeyEvent *ev)
 	if(binding!=NULL){
 		dispatch_binding(rreg, binding, ev);
 	}else if(topmap && WTHING_IS(reg, WWindow)){
-		insstr((WWindow*)rreg, ev);
+		insstr((WWindow*)reg, ev);
 	}
 }
