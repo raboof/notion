@@ -35,9 +35,10 @@ OPTIONS
               Set sesion name. This option affects where workspace  and  other
               savefiles are put (~/.ion-devel/session_name if option set).
 
-       -noxinerama
+       -xinerama 0|1
               If  Ion  was  compiled with Xinerama support, this option can be
-              used to disable it.
+              used to enable/disable (1/0) the use of it. The  default  is  to
+              use Xinerama screen information.
 
        -i18n  Enable use of multibyte string routines, actual encoding depend-
               ing on the locale.
@@ -51,45 +52,45 @@ OPTIONS
 
 
 BASIC CONCEPTS
-       This  section  is  an overview of the types objects that appear on an X
-       display managed by Ion and their relationships  in  a  standard  setup.
+       This section is an overview of the types objects that appear  on  an  X
+       display  managed  by  Ion  and their relationships in a standard setup.
        This information is necessary to understand the operations of different
-       key bindings. For a more detailed explanation, needed for writing  cus-
-       tom  bindings  configuration  files,  see  the additional documentation
+       key  bindings. For a more detailed explanation, needed for writing cus-
+       tom bindings configuration  files,  see  the  additional  documentation
        available from the Ion Web page.
 
-       The top-level objects that matter are screens and  they  correspond  to
-       physical  screens. Screens contain workspaces and client windows put in
+       The  top-level  objects  that matter are screens and they correspond to
+       physical screens. Screens contain workspaces and client windows put  in
        full screen mode. Only one of these "multiplexed" objects can be viewed
        at a time.
 
-       Two  types  of  workspaces currently supported; tiled (traditional Ion-
+       Two types of workspaces currently supported;  tiled  (traditional  Ion-
        style) and floating (pwm-style). Workspaces are not visible objects but
-       rather  collections  of frames. Frames are the objects with decorations
+       rather collections of frames. Frames are the objects  with  decorations
        such as tabs and borders and there are two types of these corresponding
        to the diffent types of workspaces.
 
        Frames contain (multiplex) client windows, to each of which corresponds
-       a tab in the frame's decoration.  Only  one  client  window  (or  other
-       object)  can be shown at a time in each frame. (In a traditional window
+       a  tab  in  the  frame's  decoration.  Only one client window (or other
+       object) can be shown at a time in each frame. (In a traditional  window
        manager each frame may contain exactly one client window.)
 
        "Queries" are boxes that appear at the bottoms of frames or screens and
-       are  used  to ask the user for textual input. Most queries support tab-
+       are used to ask the user for textual input. Most queries  support  tab-
        completion.
 
 
 
 KEYS
-       These are the default keybindings.  Mod1 depends  on  your  system.  On
+       These  are  the  default  keybindings.  Mod1 depends on your system. On
        PC:s with XFree86 it is probably bound to the left alt key (Alt_L).  On
-       Suns it is usually bound to the  diamond  keys  (Meta_L,  Meta_R).  Use
+       Suns  it  is  usually  bound  to the diamond keys (Meta_L, Meta_R). Use
        xmodmap(1x) to find out.
 
 
    F-keys
-       F1     Show  manual  page  (query, uses ion-man). Tab-completion can be
-              enabled by specifying a list  of  directories  in  the  variable
+       F1     Show manual page (query, uses ion-man).  Tab-completion  can  be
+              enabled  by  specifying  a  list  of directories in the variable
               query_man_path.
 
        Mod1+F1
@@ -103,20 +104,20 @@ KEYS
        Mod1+F3
               Call a function (query).
 
-       F4     Start new SSH session (query, uses ion-ssh).  Tab-completion  of
-              hosts  can  be  enabled  by specifying them in the configuration
+       F4     Start  new  SSH session (query, uses ion-ssh). Tab-completion of
+              hosts can be enabled by specifying  them  in  the  configuration
               variable query_ssh_hosts.
 
-       F5     Open a file for editing (query). Uses ion-edit which by  default
+       F5     Open  a file for editing (query). Uses ion-edit which by default
               uses run-mailcap.
 
-       F6     Open  a file for viewing (query). Uses ion-view which by default
+       F6     Open a file for viewing (query). Uses ion-view which by  default
               uses run-mailcap.
 
        F9     Go to existing workspace or create new (query).
 
        Mod1+F9
-              Create a new tiled workspace with a name of the form  WIonWS<n>.
+              Create  a new tiled workspace with a name of the form WIonWS<n>.
 
        F12    Main menu
 
@@ -199,7 +200,7 @@ KEYS
 
        Tags
 
-       Mod1+T Toggle  current client window's tag state (indicated by a right-
+       Mod1+T Toggle current client window's tag state (indicated by a  right-
               angle in the top-right corner of the window's tab)
 
        Mod1+K T
@@ -236,13 +237,13 @@ KEYS
               Shrink the frame in the specific direction
 
        Mod1+Left, Right, Up Down or Mod1+F, B, P, N
-              On floating frame worskacpes: move the  frame  in  the  specific
+              On  floating  frame  worskacpes:  move the frame in the specific
               direction.
 
 
    Miscellaneous
        Mod1+L Broken application resize kludge; try to make that broken appli-
-              cation that didn't get it the first time to understand the  real
+              cation  that didn't get it the first time to understand the real
               size of the active window
 
        Mod1+K Q
@@ -251,8 +252,8 @@ KEYS
 
 
 LINE-EDITING KEYS
-       These  keys  can be used in the line editor (queries). They are similar
-       to those of joe(1).  Selection works  differently,  though,  while  the
+       These keys can be used in the line editor (queries). They  are  similar
+       to  those  of  joe(1).   Selection works differently, though, while the
        keys are equivalent.
 
 
@@ -335,7 +336,7 @@ LINE-EDITING KEYS
 
 
 POINTING DEVICE BUTTONS
-       The  bindings  for  the two types of frames are again different because
+       The bindings for the two types of frames are  again  different  because
        not all legacy/floating frame actions are available on tiled frames and
        thus those buttons have been mapped to other actions.
 
@@ -356,8 +357,8 @@ POINTING DEVICE BUTTONS
 
    Floating frames
        Button1 (left)
-              Press:  raise frame, click tab: switch client, double-click tab:
-              toggle shade mode, drag border:  resize,  drag  elsewhere:  move
+              Press: raise frame, click tab: switch client, double-click  tab:
+              toggle  shade  mode,  drag  border: resize, drag elsewhere: move
               frame
 
        Button2 (middle) on tab

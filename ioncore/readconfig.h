@@ -19,16 +19,15 @@ typedef int TryConfigFn(const char *file, void *param);
 
 enum{
 	TRYCONFIG_MEMERROR=-3,
-		TRYCONFIG_NOTFOUND=-2,
-		TRYCONFIG_LOAD_FAILED=-1,
-		TRYCONFIG_CALL_FAILED=0,
-		TRYCONFIG_OK=1
+	TRYCONFIG_NOTFOUND=-2,
+	TRYCONFIG_LOAD_FAILED=-1,
+	TRYCONFIG_CALL_FAILED=0,
+	TRYCONFIG_OK=1
 };
 
 
 extern bool ioncore_set_userdirs(const char *appname);
 extern bool ioncore_set_sessiondir(const char *session);
-extern bool ioncore_add_default_dirs();
 extern bool ioncore_add_scriptdir(const char *dir);
 extern bool ioncore_add_moduledir(const char *dir);
 extern const char* ioncore_userdir();

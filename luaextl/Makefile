@@ -8,8 +8,11 @@ include $(TOPDIR)/system-inc.mk
 
 ######################################
 
-#DIST: INCLUDES += -I../libtu/include $(X11_INCLUDES) -I.. $(LUA_INCLUDES)
-INCLUDES += $(X11_INCLUDES) -I.. $(LUA_INCLUDES)
+INCLUDES += $(X11_INCLUDES)
+INCLUDES += $(LUA_INCLUDES)
+#DIST: INCLUDES += -I../libtu/include -I.. 
+INCLUDES += -I..
+
 CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
 SOURCES=luaextl.c
@@ -26,4 +29,4 @@ luaextl.a: $(OBJS)
 	$(AR) $(ARFLAGS) $@ $+
 	$(RANLIB) $@
 
-_install: module_install
+_install:

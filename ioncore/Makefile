@@ -1,4 +1,4 @@
-
+##
 ## Ioncore Makefile
 ##
 
@@ -6,35 +6,14 @@
 TOPDIR=..
 include $(TOPDIR)/system-inc.mk
 
-# List of modules to possibly preload
-include $(TOPDIR)/modulelist.mk
-
 ######################################
 
-#DIST: LIBS += -L../libtu -ltu -lm $(X11_LIBS) $(XINERAMA_LIBS)
-LIBS += -ltu -lm $(X11_LIBS) $(XINERAMA_LIBS)
-#DIST: INCLUDES += -I../libtu/include $(X11_INCLUDES) -I..
-INCLUDES += $(X11_INCLUDES) -I..
-DEFINES += -DETCDIR=\"$(ETCDIR)\" -DSHAREDIR=\"$(SHAREDIR)\" \
-           -DEXTRABINDIR=\"$(EXTRABINDIR)\" -DMODULEDIR=\"$(MODULEDIR)\"
-CFLAGS += $(XOPEN_SOURCE)
-
-# libtool
+INCLUDES += $(X11_INCLUDES)
 INCLUDES += $(LTDL_INCLUDES)
-LIBS += $(LTDL_LIBS)
-CFLAGS += $(LTDL_CFLAGS)
-ifeq ($(PRELOAD_MODULES),1)
-LDFLAGS += $(foreach mod, $(MODULE_LIST), -dlpreopen ../$(mod)/$(mod).la)
-CFLAGS += -DCF_PRELOAD_MODULES
-LINKOPTS = -R$(MODULEDIR)
-else
-LINKOPTS = -export-dynamic -R$(MODULEDIR)
-endif
+#DIST: INCLUDES += -I../libtu/include -I..
+INCLUDES += -I..
 
-# Lua support setup
-EXT_OBJS := $(EXT_OBJS) ../luaextl/luaextl.a
-ICNLUDES += $(LUA_INCLUDES)
-LIBS += $(LUA_LIBS)
+CFLAGS += $(XOPEN_SOURCE)
 
 SOURCES=binding.c conf-bindings.c cursor.c event.c     \
 	exec.c focus.c strings.c key.c modules.c mwmhints.c obj.c pointer.c  \
@@ -48,7 +27,7 @@ SOURCES=binding.c conf-bindings.c cursor.c event.c     \
 
 MAKE_EXPORTS=ioncore
 
-TARGETS=ioncore
+TARGETS=ioncore.a
 
 ######################################
 
@@ -56,11 +35,9 @@ include $(TOPDIR)/rules.mk
 
 ######################################
 
-ioncore: $(OBJS) $(EXT_OBJS)
-	$(LIBTOOL) --mode=link $(CC) $(LINKOPTS) $(OBJS) $(EXT_OBJS) $(LDFLAGS) -o $@
+ioncore.a: $(OBJS)
+	$(AR) $(ARFLAGS) $@ $+
+	$(RANLIB) $@
 
 _install:
-	$(INSTALLDIR) $(BINDIR)
-	$(INSTALL) -m $(BIN_MODE) ioncore $(BINDIR)
-	# $(STRIP) $(BINDIR)/ioncore
 

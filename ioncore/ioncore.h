@@ -18,11 +18,14 @@
 #define IONCORE_STARTUP_NOXINERAMA 0x0002
 
 /* argc and argv are needed for restart_wm */
-bool ioncore_init(int argc, char *argv[]);
-bool ioncore_init_i18n();
-bool ioncore_startup(const char *display, const char *cfgfile, int flags);
-void ioncore_deinit();
+extern bool ioncore_init(int argc, char *argv[]);
+extern bool ioncore_init_i18n();
+extern bool ioncore_startup(const char *display, const char *cfgfile, 
+							int flags);
+extern void ioncore_deinit();
 
-bool ioncore_is_i18n();
+extern const char *ioncore_aboutmsg();
+extern const char *ioncore_version();
+extern bool ioncore_is_i18n();
 
 #endif /* ION_IONCORE_IONCORE_H */

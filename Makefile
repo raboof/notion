@@ -10,9 +10,9 @@ include modulelist.mk
 
 ######################################
 
-#DIST: SUBDIRS = libtu $(MODULE_LIST) luaextl ioncore man scripts share
-SUBDIRS = $(MODULE_LIST) luaextl ioncore man scripts share
-INSTALL_SUBDIRS = $(MODULE_LIST) ioncore scripts man etc share
+INSTALL_SUBDIRS = $(MODULE_LIST) ion pwm man etc share
+#DIST: SUBDIRS = libtu ioncore luaextl $(INSTALL_SUBDIRS)
+SUBDIRS = ioncore luaextl $(INSTALL_SUBDIRS)
 
 DOCS = README LICENSE ChangeLog
 

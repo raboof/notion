@@ -31,9 +31,10 @@ in the DISPLAY environment variable.
 Set sesion name. This option affects where workspace and other savefiles are
 put (~/.ion-devel/session_name if option set).
 .TP
-.B \-noxinerama
+.B \-xinerama 0|1
 If Ion was compiled with Xinerama support, this option can be used to
-disable it.
+enable/disable (1/0) the use of it. The default is to use Xinerama
+screen information.
 .TP
 .B \-i18n
 Enable use of multibyte string routines, actual encoding depending on the

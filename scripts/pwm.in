@@ -1,9 +1,0 @@
-#!/bin/sh
-
-if test x$HOME != x; then
-  PWMDIRARGS="-confdir $HOME/.pwm-devel \
-    -moduledir $HOME/.pwm-devel/libs \
-    $PWMDIRARGS"
-fi
-
-exec BINDIR/ioncore "$@" $PWMDIRARGS
