@@ -15,15 +15,14 @@
 
 #define REGION_ATTACH_SWITCHTO	0x0001
 
-typedef WRegion *WRegionCreateFn(WWindow *parent, WRectangle geom, void *fnp);
-								 
-DYNFUN void region_add_managed_params(const WRegion *reg, WWindow **par,
-									  WRectangle *geom);
-DYNFUN void region_add_managed_doit(WRegion *reg, WRegion *sub, int flags);
+typedef WRegion *WRegionAddFn(WWindow *parent, WRectangle geom, void *param);
+
+DYNFUN WRegion *region_do_add_managed(WRegion *reg, WRegionAddFn *fn,
+									  void *param, int flags,
+									  WRectangle *geomrq);
 
 extern bool region_supports_add_managed(WRegion *reg);
-extern WRegion *region_add_managed_new(WRegion *reg, WRegionCreateFn *fn,
-									   void *fnp, int flags);
+
 extern WRegion *region_add_managed_new_simple(WRegion *reg,
 											  WRegionSimpleCreateFn *fn,
 											  int flags);

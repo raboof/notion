@@ -18,109 +18,57 @@
 /*{{{ Attach */
 
 
-void region_add_managed_params(const WRegion *reg, WWindow **par,
-							   WRectangle *geom)
+WRegion *region_do_add_managed(WRegion *reg, WRegionAddFn *fn, void *param,
+							   int flags, WRectangle *geomrq)
 {
-	CALL_DYN(region_add_managed_params, reg, (reg, par, geom));
-}
-
-
-void region_add_managed_doit(WRegion *reg, WRegion *sub, int flags)
-{
-	CALL_DYN(region_add_managed_doit, reg, (reg, sub, flags));
+	WRegion *ret=NULL;
+	CALL_DYN_RET(ret, WRegion*, region_do_add_managed, reg,
+				 (reg, fn, param, flags));
+	return ret;
 }
 
 
 bool region_supports_add_managed(WRegion *reg)
 {
-	return HAS_DYN(reg, region_add_managed_doit);
+	return HAS_DYN(reg, region_do_add_managed);
 }
 
 
-WRegion *region_add_managed_new(WRegion *mgr, WRegionCreateFn *fn,
-								void *fnp, int flags)
+static WRegion *add_fn_new(WWindow *par, WRectangle geom,
+						   WRegionSimpleCreateFn *fn)
 {
-	WRectangle geom;
-	WRegion *reg;
-	WWindow *par=NULL;
-
-	geom.x=0;
-	geom.y=0;
-	geom.w=0;
-	geom.h=0;
-	
-	{ /* CALL_DYN defines variables */
-		CALL_DYN(region_add_managed_params, mgr, (mgr, &par, &geom));
-		if(funnotfound)
-			return NULL;
-	}
-	
-	reg=fn(par, geom, fnp);
-	
-	if(reg!=NULL)
-		region_add_managed_doit(mgr, reg, flags);
-	
-	return reg;
+	return fn(par, geom);
 }
 
 
 WRegion *region_add_managed_new_simple(WRegion *mgr, WRegionSimpleCreateFn *fn,
 									   int flags)
 {
-	WRectangle geom;
-	WRegion *reg;
-	WWindow *par=NULL;
+	return region_do_add_managed(mgr, (WRegionAddFn*)add_fn_new,
+								 (void*)fn, flags, NULL);
+}
 
-	geom.x=0;
-	geom.y=0;
-	geom.w=0;
-	geom.h=0;
-	
-	{ /* CALL_DYN defines variables */
-		CALL_DYN(region_add_managed_params, mgr, (mgr, &par, &geom));
-		if(funnotfound)
-			return NULL;
+
+static WRegion *add_fn_reparent(WWindow *par, WRectangle geom, WRegion *reg)
+{
+	if(!reparent_region(reg, par, geom)){
+		warn("Unable to reparent");
+		return NULL;
 	}
-	
-	reg=fn(par, geom);
-	
-	if(reg!=NULL)
-		region_add_managed_doit(mgr, reg, flags);
-	
+	region_detach_manager(reg);
 	return reg;
 }
 
-	
+
 bool region_add_managed(WRegion *mgr, WRegion *reg, int flags)
 {
-	WRectangle geom;
-	WWindow *par=NULL;
+	WRectangle geom=REGION_GEOM(reg);
 	
 	if(REGION_MANAGER(reg)==mgr)
 		return TRUE;
 	
-	/* clientwin_add_managed_params wants the old geometry */
-	geom=REGION_GEOM(reg);
-	
-	{ /* CALL_DYN defines variables */
-		CALL_DYN(region_add_managed_params, mgr, (mgr, &par, &geom));
-		if(funnotfound)
-			return FALSE;
-	}
-	
-	if(FIND_PARENT1(reg, WWindow)!=par){
-		if(!reparent_region(reg, par, geom)){
-			warn("Unable to reparent.");
-			return FALSE;
-		}
-	}else{
-		fit_region(reg, geom);
-	}
-	
-	region_detach_manager(reg);
-	region_add_managed_doit(mgr, reg, flags);
-	
-	return TRUE;
+	return (region_do_add_managed(mgr, (WRegionAddFn*)add_fn_reparent,
+								  (void*)reg, flags, &geom)!=NULL);
 }
 
 

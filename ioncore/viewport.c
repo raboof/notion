@@ -28,9 +28,9 @@ static void deinit_viewport(WViewport *vp);
 
 static bool viewport_display_managed(WViewport *vp, WRegion *reg);
 static void viewport_remove_managed(WViewport *vp, WRegion *reg);
-static void viewport_add_managed_params(const WViewport *vp, WRegion **par,
-										WRectangle *ret);
-/*static void viewport_add_managed_doit(WViewport *vp, WRegion *sub, int flags);*/
+static WRegion *viewport_do_add_managed(WViewport *vp, WRegionAddFn *fn,
+										void *params, int flags,
+										WRectangle *geomrq);
 
 
 static DynFunTab viewport_dynfuntab[]={
@@ -41,8 +41,7 @@ static DynFunTab viewport_dynfuntab[]={
 	
 	{(DynFun*)region_display_managed, (DynFun*)viewport_display_managed},
 	{region_request_managed_geom, region_request_managed_geom_unallow},
-	{region_add_managed_params, viewport_add_managed_params},
-	{region_add_managed_doit, viewport_add_managed_doit},
+	{(DynFun*)region_do_add_managed, (DynFun*)viewport_do_add_managed},
 	{region_remove_managed, viewport_remove_managed},
 	
 	END_DYNFUNTAB
@@ -158,16 +157,21 @@ bool init_workspaces_on_vp(WViewport* vp)
 /*{{{ Attach/detach */
 
 
-static void viewport_add_managed_params(const WViewport *vp, WRegion **par,
-										WRectangle *ret)
+static WRegion *viewport_do_add_managed(WViewport *vp, WRegionAddFn *fn,
+										void *params, int flags,
+										WRectangle *geomrq)
 {
-	*par=FIND_PARENT1(vp, WRegion);
-	*ret=REGION_GEOM(vp);
-}
+	WWindow *par=FIND_PARENT1(vp, WWindow);
+	WRegion *reg;
+	
+	if(par==NULL)
+		return NULL;
+	
+	reg=fn(par, REGION_GEOM(vp), params);
+	
+	if(reg==NULL)
+		return NULL;
 
-
-void viewport_add_managed_doit(WViewport *vp, WRegion *reg, int flags)
-{
 	region_set_manager(reg, (WRegion*)vp, &(vp->ws_list));
 	vp->ws_count++;
 	
@@ -178,6 +182,8 @@ void viewport_add_managed_doit(WViewport *vp, WRegion *reg, int flags)
 		viewport_display_managed(vp, reg);
 	else
 		unmap_region(reg);
+	
+	return reg;
 }
 
 

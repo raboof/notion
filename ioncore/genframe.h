@@ -55,8 +55,8 @@ extern void genframe_resize_hints(WGenFrame *genframe, XSizeHints *hints_ret,
 /* Attach */
 extern void genframe_move_managed(WGenFrame *dest, WGenFrame *src);
 extern void genframe_attach_tagged(WGenFrame *genframe);
-extern WRegion *genframe_attach_input_new(WGenFrame *genframe,
-										  WRegionCreateFn *fn, void *fnp);
+extern WRegion *genframe_add_input(WGenFrame *genframe, WRegionAddFn *fn,
+								   void *fnp);
 extern void genframe_remove_managed(WGenFrame *genframe, WRegion *reg);
 
 /* Switch */

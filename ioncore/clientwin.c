@@ -50,9 +50,9 @@ static void clientwin_resize_hints(WClientWin *cwin, XSizeHints *hints_ret,
 static WRegion *clientwin_managed_enter_to_focus(WClientWin *cwin, WRegion *reg);
 
 static void clientwin_remove_managed(WClientWin *cwin, WRegion *reg);
-static void clientwin_add_managed_params(const WClientWin *cwin, WRegion **par,
-										WRectangle *ret);
-static void clientwin_add_managed_doit(WClientWin *cwin, WRegion *reg, int flags);
+static WRegion *clientwin_do_add_managed(WClientWin *cwin, WRegionAddFn *fn,
+										 void *params, int flags,
+										 WRectangle *geomrq);
 static void clientwin_request_managed_geom(WClientWin *cwin, WRegion *sub,
 										   WRectangle geom, WRectangle *geomret,
 										   bool tryonly);
@@ -72,11 +72,8 @@ static DynFunTab clientwin_dynfuntab[]={
 	{region_resize_hints, clientwin_resize_hints},
 	{(DynFun*)region_managed_enter_to_focus,
 	 (DynFun*)clientwin_managed_enter_to_focus},
-	
 	{region_remove_managed, clientwin_remove_managed},
-	{region_add_managed_params, clientwin_add_managed_params},
-	{region_add_managed_doit, clientwin_add_managed_doit},
-	/* Perhaps resize accordingly instead? */
+	{(DynFun*)region_do_add_managed, (DynFun*)clientwin_do_add_managed},
 	{region_request_managed_geom, clientwin_request_managed_geom},
 	
 	END_DYNFUNTAB
@@ -372,49 +369,49 @@ fail2:
 /*{{{ Add/remove managed */
 
 
-static void clientwin_add_managed_params(const WClientWin *cwin, WRegion **par,
-										 WRectangle *geom)
+static WRegion *clientwin_do_add_managed(WClientWin *cwin, WRegionAddFn *fn,
+										 void *params, int flags,
+										 WRectangle *geomrq)
 {
-	int htmp=geom->h;
+	WRectangle geom=cwin->max_geom;
+	WWindow *par=FIND_PARENT1(cwin, WWindow);
+	WRegion *reg, *t;
 	
-	*par=FIND_PARENT1(cwin, WRegion);
+	if(par==NULL)
+		return NULL;
 	
-	*geom=cwin->max_geom;
-	
-	if(htmp<=0){
-		geom->h/=3;
-	}else{
+	if(geomrq!=NULL && geomrq->h>0){
 		/* Don't increase the height of the transient */
-		int diff=geom->h-htmp;
+		int diff=geom.h-geomrq->h;
 		if(diff>0){
-			geom->y+=diff;
-			geom->h-=diff;
+			geom.y+=diff;
+			geom.h-=diff;
 		}
+	}else{
+		/* Put something less than the full height for the size */
+		geom.h/=3;
 	}
 	
-}
-
-
-static void clientwin_add_managed_doit(WClientWin *cwin, WRegion *transient,
-									   int flags)
-{
-	WRegion *t=NULL;
-	Window win=None;
+	reg=fn(par, geom, params);
 	
-	region_set_manager(transient, (WRegion*)cwin, &(cwin->transient_list));
+	if(reg==NULL)
+		return NULL;
+
+	region_set_manager(reg, (WRegion*)cwin, &(cwin->transient_list));
 	
 	t=TOPMOST_TRANSIENT(cwin);
 	if(t!=NULL)
-		win=region_x_window(transient);
+		region_restack(reg, region_x_window(t), Above);
 	else
-		win=cwin->win;
-	region_restack(transient, win, Above);
+		region_restack(reg, cwin->win, Above);
 
 	if(REGION_IS_MAPPED((WRegion*)cwin))
-	   map_region(transient);
+	   map_region(reg);
 	
 	if(REGION_IS_ACTIVE(cwin))
-		set_focus(transient);
+		set_focus(reg);
+	
+	return reg;
 }
 
 
@@ -1070,9 +1067,9 @@ bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto)
 		return FALSE;
 	if(!region_supports_add_managed(reg))
 		return FALSE;
-	if(region_add_managed(reg, (WRegion*)cwin, REGION_ATTACH_SWITCHTO))
-		return goto_region(reg);
-	return FALSE;
+	if(!region_add_managed(reg, (WRegion*)cwin, REGION_ATTACH_SWITCHTO))
+		return FALSE;
+	return goto_region(reg);
 }
 
 

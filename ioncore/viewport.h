@@ -48,9 +48,6 @@ extern void goto_viewport_id(int id);
 extern void goto_next_viewport();
 extern void goto_prev_viewport();
 
-
-extern void viewport_add_managed_doit(WViewport *vp, WRegion *reg, int flags);
-
 extern bool init_workspaces_on_vp(WViewport* vp);
 
 #endif /* ION_IONCORE_VIEWPORT_H */

@@ -27,5 +27,8 @@ extern void save_indent_line(FILE *file, int lvl);
 extern bool load_workspaces(WViewport *vp);
 extern bool save_workspaces(WViewport *vp);
 
+extern WRegion *region_add_managed_load(WRegion *mgr, Tokenizer *tokz,
+										int n, Token *toks);
+
 #endif /* ION_IONCORE_SAVELOAD_H */
 

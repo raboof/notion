@@ -235,7 +235,6 @@ bool add_clientwin_default(WClientWin *cwin, const XWindowAttributes *attr,
 }
 
 
-
 bool region_ws_add_clientwin(WRegion *reg, WClientWin *cwin,
 							 const XWindowAttributes *attr,
 							 int init_state, WWinProp *props)

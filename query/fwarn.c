@@ -25,12 +25,12 @@ void fwarn(WGenFrame *frame, const char *p)
 	p2=scat("-Error- ", p);
 	
 	if(p2!=NULL){
-		wmsg=(WMessage*)genframe_attach_input_new(frame,
-			(WRegionCreateFn*)create_wmsg, (void*)p2);
+		wmsg=(WMessage*)genframe_add_input(frame, (WRegionAddFn*)create_wmsg,
+										   (void*)p2);
 		free(p2);
 	}else{
-		wmsg=(WMessage*)genframe_attach_input_new(frame,
-			(WRegionCreateFn*)create_wmsg, (void*)p);
+		wmsg=(WMessage*)genframe_add_input(frame, (WRegionAddFn*)create_wmsg,
+										   (void*)p);
 	}
 	
 	map_region((WRegion*)wmsg);

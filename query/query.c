@@ -45,9 +45,8 @@ static WEdln *do_query_edln(WGenFrame *frame, WEdlnHandler *handler,
 	fnp.dflt=dflt;
 	fnp.handler=handler;
 	
-	wedln=(WEdln*)genframe_attach_input_new(frame,
-											(WRegionCreateFn*)create_wedln,
-											(void*)&fnp);
+	wedln=(WEdln*)genframe_add_input(frame, (WRegionAddFn*)create_wedln,
+									 (void*)&fnp);
 	if(wedln!=NULL){
 		map_region((WRegion*)wedln);
 		

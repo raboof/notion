@@ -380,15 +380,7 @@ static bool opt_region(Tokenizer *tokz, int n, Token *toks)
 		}
 	}
 	
-	genframe_managed_geom((WGenFrame*)tmp_frame, &geom);
-	reg=load_create_region((WWindow*)tmp_frame, geom, tokz, n, toks);
-
-	if(reg==NULL)
-		return FALSE;
-
-	region_add_managed_doit((WRegion*)tmp_frame, reg, 0);
-	
-	return TRUE;
+	return (region_add_managed_load((WRegion*)tmp_frame, tokz, n, toks)!=NULL);
 }
 
 

@@ -42,6 +42,7 @@ WRegion *load_create_region(WWindow *par, WRectangle geom,
 	
 	if(fn==NULL){
 		warn("Unknown class \"%s\", cannot create region", objclass);
+		parse_config_tokz_skip_section(tokz);
 		return NULL;
 	}
 	
@@ -54,6 +55,42 @@ WRegion *load_create_region(WWindow *par, WRectangle geom,
 		assert(TOK_IS_STRING(&(toks[2])));
 		region_set_name(reg, TOK_STRING_VAL(&(toks[2])));
 	}
+	
+	return reg;
+}
+
+
+typedef struct{
+	Tokenizer *tokz;
+	int n;
+	Token *toks;
+	bool read;
+} AddParams;
+	
+
+static WRegion *add_fn_load(WWindow *par, WRectangle geom, AddParams *params)
+{
+	params->read=TRUE;
+	return load_create_region(par, geom, params->tokz, params->n, params->toks);
+}
+
+
+WRegion *region_add_managed_load(WRegion *mgr, Tokenizer *tokz,
+								 int n, Token *toks)
+{
+	AddParams params;
+	WRegion *reg;
+	
+	params.tokz=tokz;
+	params.n=n;
+	params.toks=toks;
+	params.read=FALSE;
+	
+	reg=region_do_add_managed(mgr, (WRegionAddFn*)&add_fn_load,
+							  (void*)&params, 0, NULL);
+	
+	if(!params.read)
+		parse_config_tokz_skip_section(tokz);
 	
 	return reg;
 }
@@ -138,19 +175,8 @@ static WViewport *current_vp=NULL;
 
 static bool opt_viewport_region(Tokenizer *tokz, int n, Token *toks)
 {
-	WRegion *reg;
-	WRectangle geom;
-	
-	reg=load_create_region((WWindow*)SCREEN_OF(current_vp),
-						   REGION_GEOM(current_vp),
-						   tokz, n, toks);
-
-	if(reg==NULL)
-		return FALSE;
-	
-	viewport_add_managed_doit(current_vp, reg, 0);
-	
-	return TRUE;
+	return (region_add_managed_load((WRegion*)current_vp,
+									tokz, n, toks)!=NULL);
 }
 
 

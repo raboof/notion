@@ -32,10 +32,9 @@
 static void genframe_notify_managed_change(WGenFrame *genframe, WRegion *sub);
 static WRegion *genframe_selected_sub(WGenFrame *genframe);
 static bool set_genframe_background(WGenFrame *genframe, bool set_always);
-static void genframe_add_managed_params(const WGenFrame *genframe,
-										WWindow **par, WRectangle *geom);
-static void genframe_add_managed_doit(WGenFrame *genframe, WRegion *sub,
-									  int flags);
+static WRegion *genframe_do_add_managed(WGenFrame *genframe, WRegionAddFn *fn,
+										void *params, int flags,
+										WRectangle *geomrq);
 static void genframe_request_managed_geom(WGenFrame *genframe, WRegion *sub,
 									   WRectangle geom, WRectangle *geomret,
 									   bool tryonly);
@@ -66,8 +65,7 @@ static DynFunTab genframe_dynfuntab[]={
 	{(DynFun*)region_managed_enter_to_focus,
 	 (DynFun*)genframe_managed_enter_to_focus},
 	
-	{region_add_managed_params, genframe_add_managed_params},
-	{region_add_managed_doit, genframe_add_managed_doit},
+	{(DynFun*)region_do_add_managed, (DynFun*)genframe_do_add_managed},
 	{region_remove_managed, genframe_remove_managed},
 	{region_notify_managed_change, genframe_notify_managed_change},
 	{region_request_managed_geom, genframe_request_managed_geom},
@@ -438,25 +436,28 @@ void genframe_switch_prev(WGenFrame *genframe)
 /*{{{ Add/remove managed */
 
 
-static void genframe_add_managed_params(const WGenFrame *genframe,
-										WWindow **par, WRectangle *geom)
+static WRegion *genframe_do_add_managed(WGenFrame *genframe, WRegionAddFn *fn,
+										void *params, int flags,
+										WRectangle *geomrq)
 {
-	genframe_managed_geom(genframe, geom);
-	*par=(WWindow*)genframe;
-}
+	WRectangle geom;
+	WRegion *reg;
 
+	genframe_managed_geom(genframe, &geom);
+	
+	reg=fn((WWindow*)genframe, geom, params);
 
-static void genframe_add_managed_doit(WGenFrame *genframe, WRegion *sub,
-									  int flags)
-{
-	set_target_id(sub, genframe->target_id);
+	if(reg==NULL)
+		return NULL;
+	
+	set_target_id(reg, genframe->target_id);
 	
 	if(genframe->current_sub!=NULL && wglobal.opmode!=OPMODE_INIT){
-		region_set_manager(sub, (WRegion*)genframe, NULL);
+		region_set_manager(reg, (WRegion*)genframe, NULL);
 		LINK_ITEM_AFTER(genframe->managed_list, genframe->current_sub,
-						sub, mgr_next, mgr_prev);
+						reg, mgr_next, mgr_prev);
 	}else{
-		region_set_manager(sub, (WRegion*)genframe, &(genframe->managed_list));
+		region_set_manager(reg, (WRegion*)genframe, &(genframe->managed_list));
 	}
 	
 	genframe->managed_count++;
@@ -466,12 +467,13 @@ static void genframe_add_managed_doit(WGenFrame *genframe, WRegion *sub,
 	
 	if(flags&REGION_ATTACH_SWITCHTO){
 		genframe_recalc_bar(genframe, FALSE);
-		genframe_display_managed(genframe, sub);
+		genframe_display_managed(genframe, reg);
 	}else{
-		unmap_region(sub);
+		unmap_region(reg);
 		genframe_recalc_bar(genframe, TRUE);
 	}
 	
+	return reg;
 }
 
 
@@ -578,8 +580,7 @@ WRegion *genframe_current_input(WGenFrame *genframe)
 }
 
 
-WRegion *genframe_attach_input_new(WGenFrame *genframe, WRegionCreateFn *fn,
-								   void *fnp)
+WRegion *genframe_add_input(WGenFrame *genframe, WRegionAddFn *fn, void *fnp)
 {
 	WRectangle geom;
 	WRegion *sub;
