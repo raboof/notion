@@ -10,7 +10,6 @@
 #include "region.h"
 #include "attach.h"
 #include "property.h"
-#include "targetid.h"
 #include "manage.h"
 #include "mwmhints.h"
 #include "objp.h"
@@ -103,7 +102,6 @@ static WViewport *find_suitable_viewport(WClientWin *cwin,
 
 bool add_clientwin_default(WClientWin *cwin, WAttachParams *param)
 {
-	int target_id=0;
 	WRegion *target=NULL;
 	WGenWS *ws=NULL;
 	WViewport *vp=NULL;
@@ -141,10 +139,10 @@ bool add_clientwin_default(WClientWin *cwin, WAttachParams *param)
 	/* Check target id property and target winprop for non-transients */
 	
 	if(!(param->flags&REGION_ATTACH_TFOR)){
-		get_integer_property(cwin->win, wglobal.atom_frame_id, &target_id);
+		/*get_integer_property(cwin->win, wglobal.atom_frame_id, &target_id);
 		
 		if(target_id!=0)
-			target=find_target_by_id(target_id);
+			target=find_target_by_id(target_id);*/
 		
 		find_prop_target(cwin, target==NULL ? &target : NULL, &ws);
 		

@@ -239,6 +239,34 @@ static void floatws_add_managed(WFloatWS *ws, WRegion *reg)
 }
 
 
+static WRegion *floatws_do_add_managed(WFloatWS *ws, WRegionAddFn *fn,
+									   void *fnparams, 
+									   const WAttachParams *param)
+{
+	WRectangle geom;
+	WWindow *par;
+	WRegion *reg;
+
+	if(param->flags&REGION_ATTACH_GEOMRQ){
+		geom=param->geomrq;
+	}else{
+		warn("Attempt to add a region that does not request geometry on a "
+			 "WFloatWS");
+		return NULL;
+	}
+	
+	par=FIND_PARENT1(ws, WWindow);
+	assert(par!=NULL);
+	
+	reg=fn(par, geom, fnparams);
+
+	if(reg!=NULL)
+		floatws_add_managed(ws, reg);
+	
+	return reg;
+}
+
+
 WRegion *find_existing(WFloatWS *ws)
 {
 	WRegion *r=ws->current_managed;
@@ -412,14 +440,51 @@ WRegion *floatws_backcirculate(WFloatWS *ws)
 
 static bool floatws_save_to_file(WFloatWS *ws, FILE *file, int lvl)
 {
+	WRegion *mgd;
+	
 	begin_saved_region((WRegion*)ws, file, lvl);
+	save_indent_line(file, lvl);
+	fprintf(file, "managed = {\n");
+	FOR_ALL_MANAGED_ON_LIST(ws->managed_list, mgd){
+		save_indent_line(file, lvl+1);
+		fprintf(file, "{\n");
+		if(region_save_to_file((WRegion*)mgd, file, lvl+2))
+			save_geom(REGION_GEOM(mgd), file, lvl+2);
+		save_indent_line(file, lvl+1);
+		fprintf(file, "},\n");
+	}
+	save_indent_line(file, lvl);
+	fprintf(file, "},\n");
+	
 	return TRUE;
 }
 
 
 WRegion *floatws_load(WWindow *par, WRectangle geom, ExtlTab tab)
 {
-	return (WRegion*)create_floatws(par, geom);
+	WFloatWS *ws;
+	ExtlTab substab, subtab;
+	int i, n;
+	
+	ws=create_floatws(par, geom);
+	
+	if(ws==NULL)
+		return NULL;
+		
+	if(!extl_table_gets_t(tab, "managed", &substab))
+		return (WRegion*)ws;
+
+	n=extl_table_get_n(substab);
+	for(i=1; i<=n; i++){
+		if(extl_table_geti_t(substab, i, &subtab)){
+			region_add_managed_load((WRegion*)ws, subtab);
+			extl_unref_table(subtab);
+		}
+	}
+	
+	extl_unref_table(substab);
+
+	return (WRegion*)ws;
 }
 
 
@@ -449,6 +514,8 @@ static DynFunTab floatws_dynfuntab[]={
 	{(DynFun*)region_x_window, (DynFun*)floatws_x_window},
 
 	{(DynFun*)region_handle_drop, (DynFun*)floatws_handle_drop},
+
+	{(DynFun*)region_do_add_managed, (DynFun*)floatws_do_add_managed},
 	
 	END_DYNFUNTAB
 };

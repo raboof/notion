@@ -13,7 +13,6 @@
 #include <ioncore/objp.h>
 #include <ioncore/drawp.h>
 #include <ioncore/resize.h>
-#include <ioncore/targetid.h>
 #include <ioncore/extl.h>
 
 #include "ionframe.h"
@@ -28,9 +27,9 @@ static void set_tab_spacing(WIonFrame *frame);
 
 
 static bool ionframe_init(WIonFrame *frame, WWindow *parent, WRectangle geom,
-						  int id, int flags)
+						  int flags)
 {
-	if(!genframe_init((WGenFrame*)frame, parent, geom, id))
+	if(!genframe_init((WGenFrame*)frame, parent, geom))
 		return FALSE;
 	
 	frame->genframe.flags|=flags;
@@ -42,15 +41,15 @@ static bool ionframe_init(WIonFrame *frame, WWindow *parent, WRectangle geom,
 }
 
 
-WIonFrame *create_ionframe(WWindow *parent, WRectangle geom, int id, int flags)
+WIonFrame *create_ionframe(WWindow *parent, WRectangle geom, int flags)
 {
-	CREATEOBJ_IMPL(WIonFrame, ionframe, (p, parent, geom, id, flags));
+	CREATEOBJ_IMPL(WIonFrame, ionframe, (p, parent, geom, flags));
 }
 
 
 WIonFrame* create_ionframe_simple(WWindow *parent, WRectangle geom)
 {
-	return create_ionframe(parent, geom, 0, 0);
+	return create_ionframe(parent, geom, 0);
 }
 
 
@@ -276,19 +275,25 @@ void ionframe_draw_config_updated(WIonFrame *frame)
 /*{{{ Save/load */
 
 
-static bool ionframe_save_to_file(WIonFrame *ionframe, FILE *file, int lvl)
+static bool ionframe_save_to_file(WIonFrame *frame, FILE *file, int lvl)
 {
 	WRegion *sub;
 	
-	begin_saved_region((WRegion*)ionframe, file, lvl);
+	begin_saved_region((WRegion*)frame, file, lvl);
 	save_indent_line(file, lvl);
-	fprintf(file, "target_id = %d,\n", ionframe->genframe.target_id);
-	save_indent_line(file, lvl);
-	fprintf(file, "flags = %d,\n", ionframe->genframe.flags);
+	fprintf(file, "flags = %d,\n", frame->genframe.flags);
 	save_indent_line(file, lvl);
 	fprintf(file, "subs = {\n");
-	FOR_ALL_MANAGED_ON_LIST(ionframe->genframe.managed_list, sub){
-		region_save_to_file((WRegion*)sub, file, lvl+1);
+	FOR_ALL_MANAGED_ON_LIST(frame->genframe.managed_list, sub){
+		save_indent_line(file, lvl+1);
+		fprintf(file, "{\n");
+		region_save_to_file((WRegion*)sub, file, lvl+2);
+		if(sub==frame->genframe.current_sub){
+			save_indent_line(file, lvl+2);
+			fprintf(file, "selected = true,\n");
+		}
+		save_indent_line(file, lvl+1);
+		fprintf(file, "},\n");
 	}
 	save_indent_line(file, lvl);
 	fprintf(file, "},\n");
@@ -299,16 +304,15 @@ static bool ionframe_save_to_file(WIonFrame *ionframe, FILE *file, int lvl)
 
 WRegion *ionframe_load(WWindow *par, WRectangle geom, ExtlTab tab)
 {
-	int target_id=0, flags=0;
+	int flags=0;
 	ExtlTab substab, subtab;
 	WIonFrame *frame;
 	int n, i;
 	
-	extl_table_gets_i(tab, "target_id", &target_id);
 	extl_table_gets_i(tab, "flags", &flags);
 	flags&=WGENFRAME_TAB_HIDE;
 	
-	frame=create_ionframe(par, geom, target_id, flags);
+	frame=create_ionframe(par, geom, flags);
 	
 	if(frame==NULL)
 		return NULL;

@@ -13,6 +13,7 @@
 #include "hooks.h"
 #include "viewport.h"
 #include "extl.h"
+#include "window.h"
 
 INTROBJ(WClientWin);
 
@@ -91,6 +92,8 @@ extern bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto);
 extern void clientwin_broken_app_resize_kludge(WClientWin *cwin);
 
 extern void clientwin_get_set_name(WClientWin *cwin);
+
+extern WRegion *clientwin_load(WWindow *par, WRectangle geom, ExtlTab tab);
 
 /* Some standard winprops */
 

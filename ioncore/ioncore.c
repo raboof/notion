@@ -241,6 +241,16 @@ static void init_hooks()
 }
 
 
+static bool init_classes()
+{
+	if(!register_region_class(&OBJDESCR(WClientWin), NULL,
+							  (WRegionLoadCreateFn*) clientwin_load)){
+		return FALSE;
+	}
+	return TRUE;
+}
+
+
 static void initialize_global()
 {
 	WRectangle zero_geom={0, 0, 0, 0};
@@ -386,12 +396,12 @@ bool ioncore_init(const char *display, bool onescreen)
 	wglobal.atom_wm_take_focus=XInternAtom(dpy, "WM_TAKE_FOCUS", False);
 	wglobal.atom_wm_colormaps=XInternAtom(dpy, "WM_COLORMAP_WINDOWS", False);
 	wglobal.atom_wm_window_role=XInternAtom(dpy, "WM_WINDOW_ROLE", False);
-	wglobal.atom_frame_id=XInternAtom(dpy, "_ION_FRAME_ID", False);
-	/*wglobal.atom_workspace=XInternAtom(dpy, "_ION_WORKSPACE", False);*/
+	wglobal.atom_checkcode=XInternAtom(dpy, "_ION_CWIN_RESTART_CHECKCODE", False);
 	wglobal.atom_selection=XInternAtom(dpy, "_ION_SELECTION_STRING", False);
 	wglobal.atom_mwm_hints=XInternAtom(dpy, "_MOTIF_WM_HINTS", False);
 	
 	init_hooks();
+	init_classes();
 	trap_signals();
 	load_cursors();	
 	init_bindings();

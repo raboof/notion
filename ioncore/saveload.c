@@ -49,9 +49,11 @@ WRegion *load_create_region(WWindow *par, WRectangle geom, ExtlTab tab)
 	if(reg==NULL)
 		return NULL;
 	
-	if(extl_table_gets_s(tab, "name", &name)){
-		region_set_name(reg, name);
-		free(name);
+	if(region_name(reg)==NULL){
+		if(extl_table_gets_s(tab, "name", &name)){
+			region_set_name(reg, name);
+			free(name);
+		}
 	}
 	
 	return reg;
@@ -66,10 +68,23 @@ static WRegion *add_fn_load(WWindow *par, WRectangle geom, ExtlTab *tab)
 
 WRegion *region_add_managed_load(WRegion *mgr, ExtlTab tab)
 {
+	ExtlTab geomtab;
+	bool sel;
 	WAttachParams param;
+	char *typestr;
+	
 	param.flags=0;
 	
-	/* TODO: Maybe fill in some fields from tab to param? */
+	if(extl_table_gets_t(tab, "geom", &geomtab)){
+		if(extltab_to_geom(geomtab, &(param.geomrq)))
+			param.flags|=REGION_ATTACH_GEOMRQ;
+		extl_unref_table(geomtab);
+	}
+
+	if(extl_table_gets_b(tab, "selected", &sel)){
+		if(sel)
+			param.flags|=REGION_ATTACH_SWITCHTO;
+	}
 
 	return region_do_add_managed(mgr, (WRegionAddFn*)&add_fn_load,
 								 (void*)&tab, &param);
@@ -146,6 +161,26 @@ void begin_saved_region(WRegion *reg, FILE *file, int lvl)
 	save_indent_line(file, lvl-1);
 	fprintf(file, "},\n");
 }*/
+
+
+void save_geom(WRectangle geom, FILE *file, int lvl)
+{
+	save_indent_line(file, lvl);
+	fprintf(file, "geom = { x = %d, y = %d, w = %d, h = %d},\n",
+			geom.x, geom.y, geom.w, geom.h);
+}
+
+
+bool extltab_to_geom(ExtlTab tab, WRectangle *geomret)
+{
+	if(!extl_table_gets_i(tab, "x", &(geomret->x)) ||
+	   !extl_table_gets_i(tab, "y", &(geomret->y)) ||
+	   !extl_table_gets_i(tab, "w", &(geomret->w)) ||
+	   !extl_table_gets_i(tab, "h", &(geomret->h)))
+	   return FALSE;
+	
+	return TRUE;
+}
 
 
 /*}}}*/

@@ -25,7 +25,6 @@ INTROBJ(WGenFrame);
 DECLOBJ(WGenFrame){
 	WWindow win;
 	int flags;
-	int target_id;
 	int saved_w, saved_h;
 	int saved_x, saved_y;
 	
@@ -40,9 +39,9 @@ DECLOBJ(WGenFrame){
 
 
 /* Create/destroy */
-extern WGenFrame *create_genframe(WWindow *parent, WRectangle geom, int id);
+extern WGenFrame *create_genframe(WWindow *parent, WRectangle geom);
 extern bool genframe_init(WGenFrame *genframe, WWindow *parent,
-						  WRectangle geom, int id);
+						  WRectangle geom);
 extern void genframe_deinit(WGenFrame *genframe);
 
 /* Resize and reparent */

@@ -29,9 +29,9 @@
 
 
 static bool floatframe_init(WFloatFrame *frame, WWindow *parent,
-							WRectangle geom, int id)
+							WRectangle geom, int unused_flags)
 {
-	if(!genframe_init((WGenFrame*)frame, parent, geom, id))
+	if(!genframe_init((WGenFrame*)frame, parent, geom))
 		return FALSE;
 
 	frame->bar_w=geom.w;
@@ -46,9 +46,9 @@ static bool floatframe_init(WFloatFrame *frame, WWindow *parent,
 }
 
 
-WFloatFrame *create_floatframe(WWindow *parent, WRectangle geom, int id)
+WFloatFrame *create_floatframe(WWindow *parent, WRectangle geom, int flags)
 {
-	CREATEOBJ_IMPL(WFloatFrame, floatframe, (p, parent, geom, id));
+	CREATEOBJ_IMPL(WFloatFrame, floatframe, (p, parent, geom, flags));
 }
 
 
@@ -381,52 +381,75 @@ bool floatframe_is_shaded(WFloatFrame *frame)
 /*}}}*/
 
 
-#if 0
 
 /*{{{ Save/load */
 
 
-static bool floatframe_save_to_file(WFloatFrame *floatframe, FILE *file,
-									int lvl)
+static bool floatframe_save_to_file(WFloatFrame *frame, FILE *file, int lvl)
 {
-	begin_saved_region((WRegion*)floatframe, file, lvl);
+	WRegion *sub;
+	
+	begin_saved_region((WRegion*)frame, file, lvl);
 	save_indent_line(file, lvl);
-	fprintf(file, "target_id %d\n", floatframe->genframe.target_id);
-	end_saved_region((WRegion*)floatframe, file, lvl);
-	return TRUE;
-}
-
-
-static int load_target_id;
-
-
-static bool opt_target_id(Tokenizer *tokz, int n, Token *toks)
-{
-	load_target_id=TOK_LONG_VAL(&(toks[1]));
-	return TRUE;
-}
-
-
-static ConfOpt floatframe_opts[]={
-	{"target_id", "l", opt_target_id, NULL},
-	END_CONFOPTS
-};
-
-
-WRegion *floatframe_load(WRegion *par, WRectangle geom, Tokenizer *tokz)
-{
-	load_target_id=0;
+	fprintf(file, "flags = %d,\n", frame->genframe.flags);
+	save_indent_line(file, lvl);
+	fprintf(file, "subs = {\n");
+	FOR_ALL_MANAGED_ON_LIST(frame->genframe.managed_list, sub){
+		save_indent_line(file, lvl+1);
+		fprintf(file, "{\n");
+		region_save_to_file((WRegion*)sub, file, lvl+2);
+		if(sub==frame->genframe.current_sub){
+			save_indent_line(file, lvl+2);
+			fprintf(file, "selected = true,\n");
+		}
+		save_indent_line(file, lvl+1);
+		fprintf(file, "},\n");
+	}
+	save_indent_line(file, lvl);
+	fprintf(file, "},\n");
 	
-	if(!parse_config_tokz(tokz, floatframe_opts))
+	return TRUE;
+}
+
+
+WRegion *floatframe_load(WWindow *par, WRectangle geom, ExtlTab tab)
+{
+	int flags=0;
+	ExtlTab substab, subtab;
+	WFloatFrame *frame;
+	int n, i;
+	
+	/*extl_table_gets_i(tab, "flags", &flags);
+	flags&=WGENFRAME_TAB_HIDE;*/
+	
+	if(!extl_table_gets_t(tab, "subs", &substab))
 		return NULL;
+
+	frame=create_floatframe(par, geom, flags);
 	
-	return (WRegion*)create_floatframe(par, geom, load_target_id);
+	if(frame!=NULL){
+		n=extl_table_get_n(substab);
+		for(i=1; i<=n; i++){
+			if(extl_table_geti_t(substab, i, &subtab)){
+				region_add_managed_load((WRegion*)frame, subtab);
+				extl_unref_table(subtab);
+			}
+		}
+	}
+	
+	extl_unref_table(substab);
+	
+	if(frame->genframe.managed_count==0){
+		/* Nothing to manage, destroy */
+		destroy_obj((WObj*)frame);
+		frame=NULL;
+	}
+	
+	return (WRegion*)frame;
 }
 
 
 /*}}}*/
-
-#endif
 
 
 /*{{{ Dynfuntab and class implementation */
@@ -444,11 +467,11 @@ static DynFunTab floatframe_dynfuntab[]={
 	
 	{region_request_managed_geom, floatframe_request_managed_geom},
 	
-	/*{(DynFun*)region_save_to_file, (DynFun*)floatframe_save_to_file},*/
+	{(DynFun*)region_save_to_file, (DynFun*)floatframe_save_to_file},
 	
 	END_DYNFUNTAB
 };
-									   
+
 
 IMPLOBJ(WFloatFrame, WGenFrame, deinit_floatframe, floatframe_dynfuntab);
 

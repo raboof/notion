@@ -91,6 +91,7 @@ void floatws_module_deinit()
 	deinit_bindmap(&floatws_bindmap);
 	deinit_bindmap(&floatframe_bindmap);
 	unregister_region_class(&OBJDESCR(WFloatWS));
+	unregister_region_class(&OBJDESCR(WFloatFrame));
 }
 
 
@@ -104,7 +105,9 @@ bool floatws_module_init()
 	
 	if(!register_region_class(&OBJDESCR(WFloatWS),
 							  (WRegionSimpleCreateFn*) create_floatws,
-							  (WRegionLoadCreateFn*) floatws_load)){
+							  (WRegionLoadCreateFn*) floatws_load) ||
+	   !register_region_class(&OBJDESCR(WFloatFrame), NULL,
+							  (WRegionLoadCreateFn*) floatframe_load)){
 		warn_obj("floatws module", "failed to register classes.");
 		goto err;
 	}

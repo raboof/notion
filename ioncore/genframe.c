@@ -13,7 +13,6 @@
 #include "focus.h"
 #include "drawp.h"
 #include "event.h"
-#include "targetid.h"
 #include "attach.h"
 #include "resize.h"
 #include "tags.h"
@@ -33,8 +32,7 @@ static bool set_genframe_background(WGenFrame *genframe, bool set_always);
 /*{{{ Destroy/create genframe */
 
 
-bool genframe_init(WGenFrame *genframe, WWindow *parent, WRectangle geom,
-				   int id)
+bool genframe_init(WGenFrame *genframe, WWindow *parent, WRectangle geom)
 {
 	Window win;
 	XSetWindowAttributes attr;
@@ -73,17 +71,15 @@ bool genframe_init(WGenFrame *genframe, WWindow *parent, WRectangle geom,
 	
 	genframe->win.region.flags|=REGION_BINDINGS_ARE_GRABBED;
 	
-	genframe->target_id=use_target_id((WRegion*)genframe, id);
-	
 	XSelectInput(wglobal.dpy, win, FRAME_MASK);
 	
 	return TRUE;
 }
 
 
-WGenFrame *create_genframe(WWindow *parent, WRectangle geom, int id)
+WGenFrame *create_genframe(WWindow *parent, WRectangle geom)
 {
-	CREATEOBJ_IMPL(WGenFrame, genframe, (p, parent, geom, id));
+	CREATEOBJ_IMPL(WGenFrame, genframe, (p, parent, geom));
 }
 
 
@@ -95,7 +91,6 @@ void genframe_deinit(WGenFrame *genframe)
 		destroy_obj((WObj*)genframe->current_input);
 	
 	window_deinit((WWindow*)genframe);
-	free_target_id(genframe->target_id);
 }
 
 
@@ -347,6 +342,8 @@ bool genframe_display_managed(WGenFrame *genframe, WRegion *sub)
 	
 	if(REGION_IS_MAPPED(genframe))
 		region_map(sub);
+	else
+		region_unmap(sub);
 	
 	if(genframe->current_input==NULL){
 		if(REGION_IS_ACTIVE(genframe))
@@ -438,8 +435,6 @@ static WRegion *genframe_do_add_managed(WGenFrame *genframe, WRegionAddFn *fn,
 
 	if(reg==NULL)
 		return NULL;
-	
-	set_target_id(reg, genframe->target_id);
 	
 	if(genframe->current_sub!=NULL && wglobal.opmode!=OPMODE_INIT){
 		region_set_manager(reg, (WRegion*)genframe, NULL);

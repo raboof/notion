@@ -26,6 +26,7 @@
 #include "viewport.h"
 #include "names.h"
 #include "stacking.h"
+#include "saveload.h"
 
 
 static void set_clientwin_state(WClientWin *cwin, int state);
@@ -298,8 +299,12 @@ WClientWin* manage_clientwin(Window win, int mflags)
 	WAttachParams param;
 	
 	param.flags=0;
-	
+
 again:
+	/* Is the window already being managed? */
+	cwin=find_clientwin(win);
+	if(cwin!=NULL)
+		return cwin;
 	
 	/* Select for UnmapNotify and DestroyNotify as the
 	 * window might get destroyed or unmapped in the meanwhile.
@@ -325,11 +330,6 @@ again:
 		XSelectInput(wglobal.dpy, win, 0);
 		
 		win=hints->icon_window;
-		
-		/* Is the icon window already being managed? */
-		cwin=find_clientwin(win);
-		if(cwin!=NULL)
-			return cwin;
 		
 		/* It is a dock, do everything again from the beginning, now
 		 * with the icon window.
@@ -532,8 +532,6 @@ void clientwin_deinit(WClientWin *cwin)
 		
 		if(wglobal.opmode==OPMODE_DEINIT)
 			XMapWindow(wglobal.dpy, cwin->win);
-		else
-			clientwin_clear_target_id(cwin);
 	}
 	clear_colormaps(cwin);
 	
@@ -841,8 +839,6 @@ static bool reparent_clientwin(WClientWin *cwin, WWindow *par, WRectangle geom)
 	
 	sendconfig_clientwin(cwin);
 	
-	clientwin_clear_target_id(cwin);
-	
 	return TRUE;
 }
 
@@ -941,7 +937,7 @@ static WRegion *clientwin_managed_enter_to_focus(WClientWin *cwin, WRegion *reg)
 /*}}}*/
 
 
-/*{{{ Names */
+/*{{{ Names & lookup */
 
 
 /*EXTL_DOC
@@ -1003,30 +999,9 @@ ExtlTab clientwin_get_ident(WClientWin *cwin)
 }
 
 
-/*}}}*/
-
-
-/*{{{ Misc */
-
-
 WClientWin *find_clientwin(Window win)
 {
 	return FIND_WINDOW_T(win, WClientWin);
-}
-
-
-void clientwin_set_target_id(WClientWin *cwin, int id)
-{
-	if(id<=0)
-		clientwin_clear_target_id(cwin);
-	else
-		set_integer_property(cwin->win, wglobal.atom_frame_id, id);
-}
-
-
-void clientwin_clear_target_id(WClientWin *cwin)
-{
-	XDeleteProperty(wglobal.dpy, cwin->win, wglobal.atom_frame_id);
 }
 
 
@@ -1226,6 +1201,108 @@ void clientwin_broken_app_resize_kludge(WClientWin *cwin)
 /*}}}*/
 
 
+/*{{{ Save/load */
+
+
+static int last_checkcode=1;
+
+static bool clientwin_save_to_file(WClientWin *cwin, FILE *file, int lvl)
+{
+	WRegion *sub;
+	int chkc=0;
+
+	begin_saved_region((WRegion*)cwin, file, lvl);
+	save_indent_line(file, lvl);
+	fprintf(file, "windowid = %.32f,\n", (double)(cwin->win));
+	save_indent_line(file, lvl);
+	
+	if(last_checkcode!=0){
+		chkc=last_checkcode++;
+		set_integer_property(cwin->win, wglobal.atom_checkcode, chkc);
+		fprintf(file, "checkcode = %d,\n", chkc);
+	}
+	/*save_indent_line(file, lvl);
+	fprintf(file, "subs = {\n");
+	FOR_ALL_MANAGED_ON_LIST(cwin->transient_list, sub){
+		region_save_to_file((WRegion*)sub, file, lvl+1);
+	}*/
+	
+	return TRUE;
+}
+
+
+WRegion *clientwin_load(WWindow *par, WRectangle geom, ExtlTab tab)
+{
+	double wind=0;
+	Window win=None;
+	int chkc=0, real_chkc=0;
+	/*ExtlTab substab, subtab;
+	int n, i;*/
+	WClientWin *cwin=NULL;
+	XWindowAttributes attr;
+
+	if(!extl_table_gets_d(tab, "windowid", &wind) ||
+	   !extl_table_gets_i(tab, "checkcode", &chkc)){
+		return NULL;
+	}
+	
+	win=(Window)wind;
+
+	if(!get_integer_property(win, wglobal.atom_checkcode, &real_chkc))
+		return NULL;
+	
+	set_integer_property(win, wglobal.atom_checkcode, 0);
+
+	if(real_chkc!=chkc || chkc==0){
+		warn("Client window check code mismatch.");
+		return NULL;
+	}
+
+	/* Found it! */
+	
+	if(!XGetWindowAttributes(wglobal.dpy, win, &attr)){
+		warn("Window disappeared");
+		return NULL;
+	}
+	
+	if(attr.override_redirect || 
+	   (wglobal.opmode==OPMODE_INIT && attr.map_state!=IsViewable)){
+		warn("Saved client window does not want to be managed");
+		return NULL;
+	}
+
+	XReparentWindow(wglobal.dpy, win, par->win, geom.x, geom.y);
+	XResizeWindow(wglobal.dpy, win, geom.w, geom.h);
+	XSelectInput(wglobal.dpy, win, StructureNotifyMask);
+	
+	attr.x=geom.x;
+	attr.y=geom.y;
+	attr.width=geom.w;
+	attr.height=geom.h;
+
+	cwin=create_clientwin(par, win, &attr);
+	
+	/* TODO: checks that the window still is there */
+	
+	/*if(extl_table_gets_t(tab, "subs", &substab)){
+		n=extl_table_get_n(substab);
+		for(i=1; i<=n; i++){
+			if(extl_table_geti_t(substab, i, &subtab)){
+				region_add_managed_load((WRegion*)frame, subtab);
+				extl_unref_table(subtab);
+			}
+		}
+		extl_unref_table(substab);
+	}*/
+	
+	return (WRegion*)cwin;
+}
+
+
+/*}}}*/
+
+
+
 /*{{{ Dynfuntab and class info */
 
 
@@ -1247,7 +1324,7 @@ static DynFunTab clientwin_dynfuntab[]={
 	{(DynFun*)region_do_add_managed, (DynFun*)clientwin_do_add_managed},
 	{region_request_managed_geom, clientwin_request_managed_geom},
 	{region_close, clientwin_close},
-	
+	{(DynFun*)region_save_to_file, (DynFun*)clientwin_save_to_file},
 	END_DYNFUNTAB
 };
 

@@ -19,7 +19,7 @@ DECLOBJ(WIonFrame){
 };
 
 
-extern WIonFrame *create_ionframe(WWindow *parent, WRectangle geom, int id, int flags);
+extern WIonFrame *create_ionframe(WWindow *parent, WRectangle geom, int flags);
 extern WIonFrame* create_ionframe_simple(WWindow *parent, WRectangle geom);
 extern void ionframe_draw_config_updated(WIonFrame *frame);
 extern void ionframe_draw_bar(const WIonFrame *frame, bool complete);

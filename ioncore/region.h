@@ -136,6 +136,8 @@ extern void region_detach(WRegion *reg);
 extern void region_detach_parent(WRegion *reg);
 extern void region_detach_manager(WRegion *reg);
 
+extern WRegion *region_parent(WRegion *reg);
+extern WRegion *region_manager(WRegion *reg);
 extern void region_set_parent(WRegion *reg, WRegion *par);
 extern void region_set_manager(WRegion *reg, WRegion *mgr, WRegion **listptr);
 extern void region_unset_manager(WRegion *reg, WRegion *mgr, WRegion **listptr);
