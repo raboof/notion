@@ -23,10 +23,12 @@ enable_opaque_resize(FALSE)
 -- changing focus. Enabled by default.
 enable_warp(TRUE)
 
--- Kludges to make apps behave better
+-- Kludges to make apps behave better.
 include("kludges.lua")
 
--- Global bindings. See modules' configuration files for other bindings.
+-- Global and some common bindings. See modules' configuration files for
+-- other bindings. This must be executed before loading workspace/frame 
+-- modules!
 include("ioncore-bindings.lua")
 
 -- How to shorten window titles when the full title doesn't fit in

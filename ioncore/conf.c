@@ -17,8 +17,6 @@
 #include "common.h"
 #include "global.h"
 #include "readconfig.h"
-#include "binding.h"
-#include "conf-bindings.h"
 #include "modules.h"
 #include "font.h"
 #include "rootwin.h"
@@ -61,16 +59,6 @@ EXTL_EXPORT
 void enable_warp(bool warp)
 {
 	wglobal.warp_enabled=warp;
-}
-
-
-/*EXTL_DOC
- * Add a set of binding available everywhere.
- */
-EXTL_EXPORT
-void global_bindings(ExtlTab tab)
-{
-	process_bindings(&ioncore_rootwin_bindmap, NULL, tab);
 }
 
 

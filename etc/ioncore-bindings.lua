@@ -1,8 +1,14 @@
---
--- Ion ioncore bindings configuration file. Global bindings only, see
--- modules' configuration files for other bindings.
+-- 
+-- Ion ioncore bindings configuration file. Global bindings and bindings
+-- common to screens and all types of frames only. See modules'
+-- configuration files for other bindings.
 --
 
+
+-- global_bindings {{{
+
+-- Global_bindings apply to screens. The functions given here should accept
+-- WScreens as parameter.
 
 global_bindings{
     kpress(DEFAULT_MOD .. "1", function(s) screen_switch_nth(s, 0) end),
@@ -18,22 +24,7 @@ global_bindings{
     kpress(DEFAULT_MOD .. "Left", screen_switch_prev),
     kpress(DEFAULT_MOD .. "Right", screen_switch_next),
     
-    -- make_active_leaf_fn(fn) (defined in ioncore-lib.lua) creates a
-    -- function to call fn(region_get_active_leaf(screen)).
-    -- Region_get_active_leaf is a function that will start from it's
-    -- parameter (the screen in this case) and advance active_sub links in
-    -- Ion's tree hierarchy of objects on the screen to find the most
-    -- recently active object until there are no children. Usually this object
-    -- will be a frame, client window or an input widget.
-    kpress_waitrel(DEFAULT_MOD .. "C", make_active_leaf_fn(region_close)),
-    kpress_waitrel(DEFAULT_MOD .. "L",
-                   make_active_leaf_fn(clientwin_broken_app_resize_kludge)),
-    kpress_waitrel(DEFAULT_MOD .. "Return",
-                   make_active_leaf_fn(clientwin_toggle_fullscreen)),
-    
     submap(DEFAULT_MOD .. "K") {
-        kpress("AnyModifier+C", make_active_leaf_fn(clientwin_kill)),
-        kpress("AnyModifier+Q", make_active_leaf_fn(clientwin_quote_next)),
         kpress("AnyModifier+K", goto_previous),
     },
     
@@ -53,4 +44,117 @@ global_bindings{
            end)
 }
 
+-- }}}
 
+
+-- mplex_bindings {{{
+
+-- These bindings work in frames and on screens. The innermost of such
+-- objects always gets to handle the key press. Essentially these bindings
+-- are used to define actions on client windows. (Remember that client
+-- windows can be put in fullscreen mode and therefore may not have a
+-- frame.)
+-- 
+-- The make_*_fn functions are used to call functions on the object currently 
+-- managed by the screen or frame or the frame itself. For details see the
+-- document "Ion: Configuring and extending with Lua".
+
+mplex_bindings{
+    kpress_waitrel(DEFAULT_MOD .. "C", make_current_or_self_fn(region_close)),
+    kpress_waitrel(DEFAULT_MOD .. "L", 
+                   make_current_clientwin_fn(clientwin_broken_app_resize_kludge)),
+    kpress_waitrel(DEFAULT_MOD .. "Return", 
+                   make_current_clientwin_fn(clientwin_toggle_fullscreen)),
+
+    submap(DEFAULT_MOD .. "K") {
+        kpress("AnyModifier+C",
+               make_current_clientwin_fn(clientwin_kill)),
+        kpress("AnyModifier+Q", 
+               make_current_clientwin_fn(clientwin_quote_next)),
+    }
+}
+
+-- }}}
+
+
+-- genframe_bindings {{{
+
+-- These bindings are common to all types of frames. The rest of frame
+-- bindings are defined in the modules' configuration files, which depend 
+-- on this table having been defined.
+
+genframe_bindings{
+    submap(DEFAULT_MOD.."K") {
+            kpress("AnyModifier+N", genframe_switch_next),
+            kpress("AnyModifier+P", genframe_switch_prev),
+            kpress("AnyModifier+1", 
+                   function(f) genframe_switch_nth(f, 0) end),
+            kpress("AnyModifier+2",
+                   function(f) genframe_switch_nth(f, 1) end),
+            kpress("AnyModifier+3",
+                   function(f) genframe_switch_nth(f, 2) end),
+            kpress("AnyModifier+4",
+                   function(f) genframe_switch_nth(f, 3) end),
+            kpress("AnyModifier+5",
+                   function(f) genframe_switch_nth(f, 4) end),
+            kpress("AnyModifier+6",
+                   function(f) genframe_switch_nth(f, 5) end),
+            kpress("AnyModifier+7",
+                   function(f) genframe_switch_nth(f, 6) end),
+            kpress("AnyModifier+8",
+                   function(f) genframe_switch_nth(f, 7) end),
+            kpress("AnyModifier+9",
+                   function(f) genframe_switch_nth(f, 8) end),
+            kpress("AnyModifier+0",
+                   function(f) genframe_switch_nth(f, 9) end),
+            kpress("AnyModifier+H", genframe_maximize_horiz),
+            kpress("AnyModifier+V", genframe_maximize_vert),
+    }
+}
+
+-- }}}
+
+
+-- Queries {{{
+
+-- The bindings that pop up queries are defined here. The bindings to edit
+-- text in queries etc. are defined in the query module's configuration file
+-- query.lua. If you are not going to load the query module, you might as
+-- well comment out the following include statement. This should free up 
+-- some memory and prevent non-working bindings from being defined.
+
+include("querylib.lua")
+
+if QueryLib then
+    local f11key, f12key="F11", "F12"
+    
+    -- If we're on SunOS, we need to remap some keys.
+    if os.execute('uname -s -p|grep "SunOS sparc" > /dev/null')==0 then
+        print("ioncore-bindings.lua: Uname test reported SunOS; ".. 
+              "mapping F11=Sun36, F12=SunF37.")
+        f11key, f12key="SunF36", "SunF37"
+    end
+    
+    -- Frame-level queries
+    genframe_bindings{
+        kpress(DEFAULT_MOD.."A", QueryLib.query_attachclient),
+        kpress(DEFAULT_MOD.."G", QueryLib.query_gotoclient),
+        
+        kpress("F1", QueryLib.query_man),
+        kpress("F3", QueryLib.query_exec),
+        kpress(DEFAULT_MOD .. "F3", QueryLib.query_lua),
+        kpress("F4", QueryLib.query_ssh),
+        kpress("F5", QueryLib.query_editfile),
+        kpress("F6", QueryLib.query_runfile),
+        kpress("F9", QueryLib.query_workspace),
+    }
+    
+    -- Screen-level queries. Queries generally appear in frames to be consistent 
+    -- although do not affect the frame, but these two are special.
+    global_bindings{
+        kpress(f11key, QueryLib.query_restart),
+        kpress(f12key, QueryLib.query_exit),
+    }
+end
+
+-- }}}

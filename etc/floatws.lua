@@ -11,14 +11,13 @@ floatws_bindings{
     submap(DEFAULT_MOD .. "K") {
         kpress("AnyModifier+Tab",
                function(ws) region_raise(floatws_backcirculate(ws)) end),
-    }
+    },
 }
 
--- Frame bindings. These work in (floating/PWM-style) frames.
 
-include("common-frame-bindings.lua")
-floatframe_bindings(common_frame_bindings())
-floatframe_bindings(frame_query_bindings())
+-- Frame bindings. These work in (floating/PWM-style) frames. Some bindings
+-- that are common to all frame types and multiplexes are defined in
+-- ioncore-bindings.lua.
 
 floatframe_bindings{
     kpress(DEFAULT_MOD .. "R", floatframe_begin_resize),
@@ -39,6 +38,7 @@ floatframe_bindings{
     mclick(DEFAULT_MOD .. "Button3", region_lower),
     mdrag(DEFAULT_MOD .. "Button3", genframe_p_resize),
 }
+
 
 -- Frame move/resize mode bindings
 

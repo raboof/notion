@@ -28,6 +28,8 @@
 #include "stacking.h"
 #include "extlconv.h"
 #include "mplex.h"
+#include "bindmaps.h"
+#include "regbind.h"
 
 
 #define genframe_draw(F, C) draw_window((WWindow*)F, C)
@@ -86,6 +88,8 @@ bool genframe_init(WGenFrame *genframe, WWindow *parent, WRectangle geom)
 	/*genframe->win.region.flags|=REGION_BINDINGS_ARE_GRABBED;*/
 	
 	XSelectInput(wglobal.dpy, win, FRAME_MASK);
+
+	region_add_bindmap((WRegion*)genframe, &ioncore_genframe_bindmap);
 	
 	return TRUE;
 }

@@ -16,7 +16,6 @@
 #include "attach.h"
 #include "objp.h"
 #include "focus.h"
-#include "regbind.h"
 #include "property.h"
 #include "names.h"
 #include "reginfo.h"
@@ -24,6 +23,8 @@
 #include "resize.h"
 #include "genws.h"
 #include "event.h"
+#include "bindmaps.h"
+#include "regbind.h"
 
 
 #define SCR_MLIST(SCR) ((SCR)->mplex.managed_list)

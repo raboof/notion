@@ -23,6 +23,7 @@
 #include "genframe-pointer.h"
 #include "genframep.h"
 #include "objp.h"
+#include "bindmaps.h"
 
 
 static int p_tab_x, p_tab_y, p_tabnum=-1;

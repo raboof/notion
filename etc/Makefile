@@ -8,10 +8,10 @@ include $(TOPDIR)/system-inc.mk
 
 ######################################
 
-ETC = common-frame-bindings.lua floatws.lua ioncore-bindings.lua \
-      ionws.lua kludges.lua look-blackwheat.lua look-brownsteel.lua \
-      look-clean.lua look-dusky.lua look-greyviolet.lua look-ios.lua \
-      look-simpleblue.lua look-wheat.lua query.lua ioncore-example.lua
+ETC =	floatws.lua ioncore-bindings.lua ionws.lua kludges.lua \
+	look-blackwheat.lua look-brownsteel.lua look-clean.lua \
+	look-dusky.lua look-greyviolet.lua look-ios.lua \
+	look-simpleblue.lua look-wheat.lua query.lua ioncore-example.lua
 
 ######################################
 

@@ -39,15 +39,7 @@
 #include "screen.h"
 #include "draw.h"
 #include "screen.h"
-
-
-/*{{{ The bindmap */
-
-
-WBindmap ioncore_rootwin_bindmap=BINDMAP_INIT;
-
-
-/*}}}*/
+#include "bindmaps.h"
 
 
 /*{{{ Error handling */

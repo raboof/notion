@@ -24,6 +24,8 @@
 #include "extlconv.h"
 #include "genws.h"
 #include "genframe-pointer.h"
+#include "bindmaps.h"
+#include "regbind.h"
 
 
 #define WMPLEX_WIN(MPLEX) ((MPLEX)->win.win)
@@ -47,7 +49,9 @@ bool mplex_init(WMPlex *mplex, WWindow *parent, Window win,
 		return FALSE;
 	
 	mplex->win.region.flags|=REGION_BINDINGS_ARE_GRABBED;
-	
+
+	region_add_bindmap((WRegion*)mplex, &ioncore_mplex_bindmap);
+
 	return TRUE;
 }
 

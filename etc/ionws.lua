@@ -14,11 +14,10 @@ ionws_bindings{
     },
 }
 
--- Frame bindings. These work in (Ion/tiled-style) frames.
 
-include("common-frame-bindings.lua")
-ionframe_bindings(common_frame_bindings())
-ionframe_bindings(frame_query_bindings())
+-- Frame bindings. These work in (Ion/tiled-style) frames. Some bindings
+-- that are common to all frame types and multiplexes are defined in
+-- ioncore-bindings.lua.
 
 ionframe_bindings{
     kpress(DEFAULT_MOD .. "R", ionframe_begin_resize),

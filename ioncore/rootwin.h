@@ -65,8 +65,5 @@ extern void rootwin_manage_initial_windows(WRootWin *rootwin);
 extern bool setup_rootwins();
 
 
-extern WBindmap ioncore_rootwin_bindmap;
-
-
 #endif /* ION_IONCORE_ROOTWIN_H */
 

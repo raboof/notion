@@ -192,7 +192,7 @@ bool finish_add_clientwin(WRegion *reg, WClientWin *cwin,
 		 * control the focus.
 		 */
 		if(param->flags&REGION_ATTACH_SWITCHTO)
-			region_goto(cwin);
+			region_goto((WRegion*)cwin);
 		return TRUE;
 	}
 	return FALSE;
