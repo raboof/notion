@@ -332,33 +332,13 @@ bool mplex_fitrep(WMPlex *mplex, WWindow *par, const WFitParams *fp)
 {
     bool wchg=(REGION_GEOM(mplex).w!=fp->g.w);
     bool hchg=(REGION_GEOM(mplex).h!=fp->g.h);
-    bool move=(REGION_GEOM(mplex).x!=fp->g.x ||
-               REGION_GEOM(mplex).y!=fp->g.y);
-    int w=maxof(1, fp->g.w);
-    int h=maxof(1, fp->g.h);
     
-    if(par!=NULL){
-        if(!region_same_rootwin((WRegion*)mplex, (WRegion*)par))
-            return FALSE;
-        region_detach_parent((WRegion*)mplex);
-        XReparentWindow(ioncore_g.dpy, MPLEX_WIN(mplex), par->win,
-                        fp->g.x, fp->g.y);
-        XResizeWindow(ioncore_g.dpy, MPLEX_WIN(mplex), w, h);
-        region_attach_parent((WRegion*)mplex, (WRegion*)par);
-    }else{
-        XMoveResizeWindow(ioncore_g.dpy, MPLEX_WIN(mplex),
-                          fp->g.x, fp->g.y, w, h);
-    }
+    window_do_fitrep(&(mplex->win), par, &(fp->g));
     
-    REGION_GEOM(mplex)=fp->g;
-    
-    if(move && !wchg && !hchg)
-        region_notify_subregions_move(&(mplex->win.region));
-    else if(wchg || hchg)
+    if(wchg || hchg){
         mplex_fit_managed(mplex);
-    
-    if(wchg || hchg)
         mplex_size_changed(mplex, wchg, hchg);
+    }
     
     return TRUE;
 }

@@ -335,27 +335,10 @@ bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp)
     WRectangle old_geom, mg;
     bool wchg=(REGION_GEOM(frame).w!=fp->g.w);
     bool hchg=(REGION_GEOM(frame).h!=fp->g.h);
-    bool move=(REGION_GEOM(frame).x!=fp->g.x ||
-               REGION_GEOM(frame).y!=fp->g.y);
-    int w=maxof(1, fp->g.w);
-    int h=maxof(1, fp->g.h);
-    
-    if(par!=NULL){
-        if(!region_same_rootwin((WRegion*)frame, (WRegion*)par))
-            return FALSE;
-
-        region_detach_parent((WRegion*)frame);
-        XReparentWindow(ioncore_g.dpy, FRAME_WIN(frame), par->win,
-                        fp->g.x, fp->g.y);
-        XResizeWindow(ioncore_g.dpy, FRAME_WIN(frame), w, h);
-        region_attach_parent((WRegion*)frame, (WRegion*)par);
-    }else{
-        XMoveResizeWindow(ioncore_g.dpy, FRAME_WIN(frame),
-                          fp->g.x, fp->g.y, w, h);
-    }
     
     old_geom=REGION_GEOM(frame);
-    REGION_GEOM(frame)=fp->g;
+    
+    window_do_fitrep(&(frame->mplex.win), par, &(fp->g));
 
     if(hchg){
         frame->flags|=FRAME_SAVED_VERT;
@@ -370,6 +353,7 @@ bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp)
     }
 
     mplex_managed_geom((WMPlex*)frame, &mg);
+    
     if(hchg && mg.h<=1){
         if(!(frame->flags&(FRAME_SHADED|FRAME_TAB_HIDE))){
             SET_SHADE_FLAG(frame);
@@ -384,20 +368,17 @@ bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp)
         UNSET_SHADE_FLAG(frame);
     }
 
-    if(move && !wchg && !hchg)
-        region_notify_subregions_move((WRegion*)frame);
-    else if(wchg || hchg)
+    if(wchg || hchg){
         mplex_fit_managed((WMPlex*)frame);
-
-    if(wchg || hchg)
         mplex_size_changed((WMPlex*)frame, wchg, hchg);
+    }
     
     return TRUE;
 }
 
 
 void frame_resize_hints(WFrame *frame, XSizeHints *hints_ret,
-                           uint *relw_ret, uint *relh_ret)
+                        uint *relw_ret, uint *relh_ret)
 {
     WRectangle subgeom;
     uint wdummy, hdummy;
