@@ -271,8 +271,8 @@ static bool %s(%s (*fn)(), ExtlL2Param *in, ExtlL2Param *out)
     -- Generate type checking code
     for k, t in info.itypes do
         if t~="" then
-            fprintf(h, "    if(!WOBJ_IS(in[%d].o, %s)){ return fail(%d, in[%d].o, \"%s\"); }\n",
-                    k-1, t, k-1, k-1, t)
+            fprintf(h, "    if(!chko(in, %d, &OBJDESCR(%s))) return FALSE;\n",
+                    k-1, t)
         end
     end
 
@@ -299,16 +299,9 @@ function write_exports(h)
 #include <ioncore/extl.h>
 #include <ioncore/objp.h>
 
-static bool fail(int ndx, WObj *o, const char *s)
-{
-    warn("Type checking failed in level 2 call handler for parameter %d "
-	 "(got %s, expected %s).", ndx, WOBJ_TYPESTR(o), s);
-    return FALSE;
-}
-
 ]])
     -- end blockwrite
-    
+
     -- Write class infos
     for c in classes do
         -- WObj is defined in obj.h which we include.
@@ -317,7 +310,20 @@ static bool fail(int ndx, WObj *o, const char *s)
         end
     end
     
-    fprintf(h, "\n")
+    -- begin blockwrite
+    h:write([[
+              
+static bool chko(ExtlL2Param *in, int ndx, WObjDescr *descr)
+{
+    WObj *o=in[ndx].o;
+    if(wobj_is(o, descr)) return TRUE;
+    warn("Type checking failed in level 2 call handler for parameter %d "
+	 "(got %s, expected %s).", ndx, WOBJ_TYPESTR(o), descr->name);
+    return FALSE;
+}
+
+]])
+    -- end blockwrite
     
     -- Write L2 call handlers
     for name, info in chnds do
