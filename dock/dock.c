@@ -1015,6 +1015,8 @@ static bool dock_init(WDock *dock, int screen, ExtlTab conftab)
 	if(!window_init_new((WWindow *)dock, parent, &geom)){
 		return FALSE;
 	}
+	
+	((WRegion*)dock)->flags|=REGION_SKIP_FOCUS;
 
 	region_keep_on_top((WRegion *)dock);
 

@@ -544,9 +544,15 @@ bool region_display_sp(WRegion *reg)
 EXTL_EXPORT_MEMBER
 bool region_goto(WRegion *reg)
 {
-	if(region_display_sp(reg))
-		return (reg==set_focus_mgrctl(reg, TRUE));
-	return FALSE;
+	bool ret=FALSE;
+
+	set_previous_of(reg);
+	protect_previous();
+	if(region_display(reg))
+		ret=(reg==set_focus_mgrctl(reg, TRUE));
+	unprotect_previous();
+	
+	return ret;
 }
 
 

@@ -41,7 +41,7 @@ static void prev_watch_handler(WWatch *watch, WRegion *prev)
 
 void set_previous_of(WRegion *reg)
 {
-	WRegion *r2;
+	WRegion *r2=NULL, *r3=NULL;
 	
 	if(reg==NULL || wglobal.previous_protect!=0)
 		return;
@@ -49,10 +49,15 @@ void set_previous_of(WRegion *reg)
 	if(REGION_IS_ACTIVE(reg))
 		return;
 	
-	r2=(WRegion*)wglobal.active_screen;
-	while(r2->active_sub!=NULL)
-		r2=r2->active_sub;
+    r3=(WRegion*)wglobal.active_screen;
 	
+	while(r3!=NULL){
+		r2=r3;
+		r3=r2->active_sub;
+		if(r3==NULL)
+			r3=region_current(r2);
+	}
+
 	if(r2!=NULL)
 		setup_watch(&prev_watch, (WObj*)r2, (WWatchHandler*)prev_watch_handler);
 }

@@ -419,14 +419,11 @@ static void handle_enter_window(XEvent *ev)
 
 		reg=FIND_WINDOW_T(eev->window, WRegion);
 		
-		if(reg==NULL)
-			continue;
-		
 		D(fprintf(stderr, "E: %p %s %d %d\n", reg, WOBJ_TYPESTR(reg),
 				  eev->mode, eev->detail));
 		
 		/* If an EnterWindow event was already found that we're going to
-		 * handle, only notify subsequent events if they are into children
+		 * handle, only note subsequent events if they are into children
 		 * of the window of this event.
 		 */
 		if(freg!=NULL){
@@ -453,6 +450,8 @@ static void handle_enter_window(XEvent *ev)
 	mgr=freg;
 	while(1){
 		reg=mgr;
+		if(reg->flags&REGION_SKIP_FOCUS)
+			return;
 		mgr=REGION_MANAGER(reg);
 		if(mgr==NULL)
 			break;
@@ -462,7 +461,7 @@ static void handle_enter_window(XEvent *ev)
 	}
 
 	set_previous_of(freg);
-	set_focus_mgrctl(freg, FALSE);
+	set_focus(freg);
 }
 
 
