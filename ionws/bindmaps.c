@@ -1,14 +1,14 @@
 /*
- * ion/bindmaps.c
+ * ion/ionws/bindmaps.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#include <wmcore/binding.h>
+#include <ioncore/binding.h>
 #include "bindmaps.h"
 
-WBindmap ion_ionws_bindmap=BINDMAP_INIT;
-WBindmap ion_frame_bindmap=BINDMAP_INIT;
-WBindmap ion_moveres_bindmap=BINDMAP_INIT;
+WBindmap ionws_bindmap=BINDMAP_INIT;
+WBindmap ionframe_bindmap=BINDMAP_INIT;
+WBindmap ionframe_moveres_bindmap=BINDMAP_INIT;
 

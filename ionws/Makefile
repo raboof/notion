@@ -1,5 +1,5 @@
 ##
-## Ion Makefile
+## Ion workspace module Makefile
 ##
 
 # System-specific configuration is in system.mk
@@ -8,34 +8,24 @@ include $(TOPDIR)/system-inc.mk
 
 ######################################
 
-#DIST: LIBS += -L../libtu -ltu -lm $(X11_LIBS) -lX11 $(XINERAMA_LIBS)
-LIBS += -ltu -lm $(X11_LIBS) -lX11 $(XINERAMA_LIBS)
-#-lefence
 #DIST: INCLUDES += -I../libtu/include $(X11_INCLUDES) -I..
 INCLUDES += $(X11_INCLUDES) -I..
-DEFINES += -DETCDIR=\"$(ETCDIR)\" -DLIBDIR=\"$(LIBDIR)\"
+MODULEDIR = $(LIBDIR)/ion-devel
+CFLAGS += $(XOPEN_SOURCE)
+DEFINES += -DETCDIR=\"$(ETCDIR)\"
 
-CFLAGS += $(XOPEN_SOURCE) $(MODULE_SUPPORT)
-LDFLAGS += $(MODULE_SUPPORT_LDFLAGS)
+OBJS =	bindmaps.o conf.o ionframe.o funtabs.o main.o placement.o \
+	split.o splitframe.o ionws.o resize.o
 
-OBJS=	bindmaps.o conf.o draw.o frame-pointer.o frame.o		\
-	funtabs.o main.o placement.o resize.o split.o splitframe.o	\
-	winprops.o ionws.o
-
-EXT_OBJS= ../query/query.a ../wmcore/wmcore.a
-
-TARGETS=ion
+MODULE=ionws
 
 ######################################
 
-include ../rules.mk
+include $(TOPDIR)/rules.mk
 
 ######################################
 
-ion: $(OBJS) $(EXT_OBJS)
-	$(CC) $(OBJS) $(EXT_OBJS) $(LDFLAGS) -o $@
+_install: module_install
 
-_install:
-	$(INSTALLDIR) $(BINDIR)
-	$(INSTALL) -m $(BIN_MODE) ion $(BINDIR)
-	$(STRIP) $(BINDIR)/ion
+
+

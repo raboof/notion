@@ -1,20 +1,19 @@
 /*
- * ion/placement.c
+ * ion/ionws/placement.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#include <wmcore/common.h>
-#include <wmcore/global.h>
-#include <wmcore/screen.h>
-#include <wmcore/clientwin.h>
-#include <wmcore/attach.h>
-#include <wmcore/wsreg.h>
+#include <ioncore/common.h>
+#include <ioncore/global.h>
+#include <ioncore/screen.h>
+#include <ioncore/clientwin.h>
+#include <ioncore/attach.h>
+#include <ioncore/wsreg.h>
 #include "placement.h"
-#include "frame.h"
+#include "ionframe.h"
 #include "splitframe.h"
-#include "winprops.h"
 
 
 static WRegion *find_suitable_frame(WIonWS *ws)
@@ -43,10 +42,10 @@ bool ionws_add_clientwin(WIonWS *ws, WClientWin *cwin,
 
 	if(props!=NULL && props->transient_mode==TRANSIENT_MODE_CURRENT){
 		target=find_suitable_frame(ws);
-		if(target!=NULL && WTHING_IS(target, WFrame)){
-			if(((WFrame*)target)->current_sub!=NULL &&
-			   WTHING_IS(((WFrame*)target)->current_sub, WClientWin)){
-				return region_add_managed(((WFrame*)target)->current_sub,
+		if(target!=NULL && WTHING_IS(target, WGenFrame)){
+			if(((WGenFrame*)target)->current_sub!=NULL &&
+			   WTHING_IS(((WGenFrame*)target)->current_sub, WClientWin)){
+				return region_add_managed(((WGenFrame*)target)->current_sub,
 										  (WRegion*)cwin, 0);
 			}
 		}

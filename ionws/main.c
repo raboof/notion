@@ -1,153 +1,93 @@
 /*
- * ion/main.c
+ * ion/ionws/main.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#include <stdlib.h>
-#include <libtu/util.h>
-#include <libtu/optparser.h>
-#include <libtu/tokenizer.h>
-
-#include <wmcore/common.h>
-#include <wmcore/wmcore.h>
-#include <wmcore/global.h>
-#include <wmcore/readconfig.h>
-#include <wmcore/event.h>
-#include <wmcore/eventh.h>
-#include <wmcore/hooks.h>
-#include <wmcore/clientwin.h>
-#include <wmcore/exec.h>
-#include <wmcore/saveload.h>
+#include <ioncore/common.h>
+#include <ioncore/functionp.h>
+#include <ioncore/function.h>
+#include <ioncore/reginfo.h>
 #include <query/main.h>
+
 #include "conf.h"
 #include "funtabs.h"
-#include "../version.h"
-#include "placement.h"
-#include "ionws.h"
 #include "bindmaps.h"
-#include "frame.h"
+#include "ionws.h"
+#include "ionframe.h"
 
 
-/*{{{ Optparser data */
+/*{{{ Module information */
 
 
-/* Options. Getopt is not used because getopt_long is quite gnu-specific
- * and they don't know of '-display foo' -style args anyway.
- * Instead, I've reinvented the wheel in libtu :(.
- */
-static OptParserOpt opts[]={
-	{OPT_ID('d'), 	"display", 	OPT_ARG, "host:dpy.scr", "X display to use"},
-	{'c', 			"cfgfile", 	OPT_ARG, "config_file", "Configuration file"},
-	{OPT_ID('o'), 	"onescreen", 0, NULL, "Manage default screen only"},
-	END_OPTPARSEROPTS
-};
+#include "../version.h"
 
-
-static const char ion_usage_tmpl[]=
-	"Usage: $p [options]\n\n$o\n";
-
-
-static const char ion_about[]=
-	"Ion " ION_VERSION ", copyright (c) Tuomo Valkonen 1999-2003.\n"
-	"This program may be copied and modified under the terms of the "
-	"Clarified Artistic License.\n";
-
-
-static OptParserCommonInfo ion_cinfo={
-	ION_VERSION,
-	ion_usage_tmpl,
-	ion_about
-};
+char ionws_module_ion_version[]=ION_VERSION;
 
 
 /*}}}*/
 
 
-/*{{{ Misc. */
+/*{{{ Module init & deinit */
 
 
-extern WRegion *ionws_load(WRegion *par, WRectangle geom, Tokenizer *tokz);
-extern WFrame *frame_load(WFrame *par, WRectangle geom, Tokenizer *tokz);
-
-static void register_loaders()
+void ionws_module_deinit()
 {
-	register_region_load_create_fn("WFrame", (WRegionLoadCreateFn*)
-								   frame_load);
-	register_region_load_create_fn("WIonWS", (WRegionLoadCreateFn*)
-								   ionws_load);
+	ionws_module_clear_funclists();
+	deinit_bindmap(&ionws_bindmap);
+	deinit_bindmap(&ionframe_bindmap);
+	deinit_bindmap(&ionframe_moveres_bindmap);
+	unregister_region_class(&OBJDESCR(WIonWS));
+	unregister_region_class(&OBJDESCR(WIonFrame));
 }
 
 
-/*}}}*/
-
-
-/*{{{ Main */
-
-
-int main(int argc, char*argv[])
+static bool register_regions()
 {
-	const char *cfgfile=NULL;
-	const char *display=NULL;
-	bool onescreen=FALSE;
-	int opt;
-	
-	libtu_init(argv[0]);
-	
-	optparser_init(argc, argv, OPTP_MIDLONG, opts, &ion_cinfo);
-	
-	while((opt=optparser_get_opt())){
-		switch(opt){
-		case OPT_ID('d'):
-			display=optparser_get_arg();
-			break;
-		case 'c':
-			cfgfile=optparser_get_arg();
-			break;
-		case OPT_ID('o'):
-			onescreen=TRUE;
-			break;
-		default:
-			optparser_print_error();
-			return EXIT_FAILURE;
-		}
+	if(!register_region_class(&OBJDESCR(WIonFrame), NULL,
+							  (WRegionLoadCreateFn*) ionframe_load)){
+		return FALSE;
 	}
+	
+	if(!register_region_class(&OBJDESCR(WIonWS),
+							  (WRegionSimpleCreateFn*) create_ionws_simple,
+							  (WRegionLoadCreateFn*) ionws_load)){
+	   return FALSE;
+	}
+	
+	return TRUE;
+}
 
-	wglobal.argc=argc;
-	wglobal.argv=argv;
+
+bool ionws_module_init()
+{
+	if(!ionws_module_init_funclists())
+		goto err;
 	
-	if(!wmcore_init("ion-devel", ETCDIR, LIBDIR, display, onescreen))
-		return EXIT_FAILURE;
+	if(!register_regions())
+		goto err;
 	
-	init_funclists();
-	register_loaders();
-	query_init();
+	if(!ionws_module_read_config())
+		goto err2;
 	
-	if(!ion_read_config(cfgfile))
-		goto configfail;
+	if(ionframe_bindmap.nbindings==0 ||
+	   ionframe_moveres_bindmap.nbindings==0)
+		goto err2;
+
+	return TRUE;
 	
-	if(ion_frame_bindmap.nbindings==0 ||
-	   ion_moveres_bindmap.nbindings==0)
-		goto configfail;
-	
-	setup_screens();
-	
-	mainloop();
-	
-	/* The code should never return here */
-	return EXIT_SUCCESS;
-	
-configfail:
-#define MSG \
-    "Unable to load configuration or inadequate binding configurations. " \
-	"Refusing to start.\nYou *must* install proper configuration files " \
-	"either in ~/.ion or "ETCDIR"/ion to use Ion."
-	
-	warn(MSG);
-	setup_environ(DefaultScreen(wglobal.dpy));
-	XCloseDisplay(wglobal.dpy);
-	wm_do_exec("xmessage 'ion: " MSG "'");
+err2:
+	warn("Unable to load configuration or inadequate binding "
+		 "configurations. Refusing to load module.\nYou *must* "
+		 "install proper configuration files either in ~/.ion or "
+		 ETCDIR"/ion to use Ion.");
+	ionws_module_deinit();
+	return FALSE;
+
+err:
+	warn_err();
+	ionws_module_deinit();
 	return FALSE;
 }
 

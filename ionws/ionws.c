@@ -1,5 +1,5 @@
 /*
- * ion/ionws.c
+ * ion/ionws/ionws.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
@@ -8,29 +8,28 @@
 #include <string.h>
 
 #include <libtu/parser.h>
-#include <wmcore/common.h>
-#include <wmcore/screen.h>
-#include <wmcore/focus.h>
-#include <wmcore/global.h>
-#include <wmcore/thingp.h>
-#include <wmcore/region.h>
-#include <wmcore/wsreg.h>
-#include <wmcore/funtabs.h>
-#include <wmcore/viewport.h>
-#include <wmcore/names.h>
-#include <wmcore/saveload.h>
-#include <wmcore/attach.h>
+#include <ioncore/common.h>
+#include <ioncore/screen.h>
+#include <ioncore/focus.h>
+#include <ioncore/global.h>
+#include <ioncore/thingp.h>
+#include <ioncore/region.h>
+#include <ioncore/wsreg.h>
+#include <ioncore/funtabs.h>
+#include <ioncore/viewport.h>
+#include <ioncore/names.h>
+#include <ioncore/saveload.h>
+#include <ioncore/attach.h>
 #include "placement.h"
 #include "ionws.h"
 #include "split.h"
-#include "frame.h"
+#include "ionframe.h"
 #include "funtabs.h"
 
 
 static void deinit_ionws(WIonWS *ws);
 static void fit_ionws(WIonWS *ws, WRectangle geom);
-static bool reparent_ionws(WIonWS *ws, WRegion *parent,
-							   WRectangle geom);
+static bool reparent_ionws(WIonWS *ws, WWindow *parent, WRectangle geom);
 static void map_ionws(WIonWS *ws);
 static void unmap_ionws(WIonWS *ws);
 static void focus_ionws(WIonWS *ws, bool warp);
@@ -61,8 +60,8 @@ static DynFunTab ionws_dynfuntab[]={
 };
 
 
-IMPLOBJ(WIonWS, WGenericWS, deinit_ionws, ionws_dynfuntab,
-		&ion_ionws_funclist)
+IMPLOBJ(WIonWS, WGenWS, deinit_ionws, ionws_dynfuntab,
+		&ionws_funclist)
 
 
 /*{{{ region dynfun implementations */
@@ -79,18 +78,17 @@ static void fit_ionws(WIonWS *ws, WRectangle geom)
 }
 
 
-static bool reparent_ionws(WIonWS *ws, WRegion *parent,
-						   WRectangle geom)
+static bool reparent_ionws(WIonWS *ws, WWindow *parent, WRectangle geom)
 {
 	WRegion *sub, *next;
 	bool rs;
 	int xdiff, ydiff;
 	
-	if(!same_screen((WRegion*)ws, parent))
+	if(!same_screen((WRegion*)ws, (WRegion*)parent))
 		return FALSE;
 	
 	region_detach_parent((WRegion*)ws);
-	region_set_parent((WRegion*)ws, parent);
+	region_set_parent((WRegion*)ws, (WRegion*)parent);
 	
 	xdiff=geom.x-REGION_GEOM(ws).x;
 	ydiff=geom.y-REGION_GEOM(ws).y;
@@ -162,16 +160,13 @@ static bool ionws_display_managed(WIonWS *ws, WRegion *reg)
 /*{{{ Create/destroy */
 
 
-static WFrame *create_initial_frame(WIonWS *ws, WRectangle geom)
+static WIonFrame *create_initial_frame(WIonWS *ws, WWindow *parent,
+									   WRectangle geom)
 {
-	WFrame *frame;
-	WRegion *parent=FIND_PARENT1(ws, WRegion);
+	WIonFrame *frame;
 	
-	if(parent==NULL)
-		return NULL;
-	
-	frame=create_frame(parent, geom, 0, 0);
-	
+	frame=create_ionframe(parent, geom, 0);
+
 	if(frame==NULL)
 		return NULL;
 	
@@ -182,10 +177,10 @@ static WFrame *create_initial_frame(WIonWS *ws, WRectangle geom)
 }
 
 
-static bool init_ionws(WIonWS *ws, WRegion *parent, WRectangle bounds,
+static bool init_ionws(WIonWS *ws, WWindow *parent, WRectangle bounds,
 					   const char *name, bool ci)
 {
-	init_genericws(&(ws->genws), parent, bounds);
+	init_genws(&(ws->genws), parent, bounds);
 	ws->split_tree=NULL;
 	
 	if(name!=NULL){
@@ -196,8 +191,8 @@ static bool init_ionws(WIonWS *ws, WRegion *parent, WRectangle bounds,
 	}
 	
 	if(ci){
-		if(create_initial_frame(ws, bounds)==NULL){
-			deinit_genericws(&(ws->genws));
+		if(create_initial_frame(ws, parent, bounds)==NULL){
+			deinit_genws(&(ws->genws));
 			return FALSE;
 		}
 	}
@@ -206,31 +201,15 @@ static bool init_ionws(WIonWS *ws, WRegion *parent, WRectangle bounds,
 }
 
 
-WIonWS *create_ionws(WRegion *parent, WRectangle bounds, const char *name,
-					 bool ci)
+WIonWS *create_ionws(WWindow *parent, WRectangle bounds, bool ci)
 {
-	CREATETHING_IMPL(WIonWS, ionws, (p, parent, bounds, name, ci));
+	CREATETHING_IMPL(WIonWS, ionws, (p, parent, bounds, ci));
 }
 
 
-static WRegion *create_new_ws(WRegion *parent, WRectangle bounds, void *fnp)
+WIonWS *create_ionws_simple(WWindow *parent, WRectangle bounds)
 {
-	return (WRegion*)create_ionws(parent, bounds, (char*)fnp, TRUE);
-}
-
-
-
-WIonWS *create_new_ionws_on_vp(WViewport *vp, const char *name)
-{
-	return (WIonWS*)region_add_managed_new((WRegion*)vp, create_new_ws,
-											   (char *)name, 0);
-}
-
-
-bool create_initial_workspace_on_vp(WViewport *vp)
-{
-	WIonWS *ws=create_new_ionws_on_vp(vp, "main");
-	return (ws!=NULL);
+	return create_ionws(parent, bounds, NULL, TRUE);
 }
 
 
@@ -238,11 +217,10 @@ void deinit_ionws(WIonWS *ws)
 {
 	WRegion *reg;
 	
-	FOR_ALL_MANAGED_ON_LIST(ws->managed_list, reg){
-		ionws_remove_managed(ws, reg);
-	}
+	while(ws->managed_list!=NULL)
+		ionws_remove_managed(ws, ws->managed_list);
 
-	deinit_genericws(&(ws->genws));
+	deinit_genws(&(ws->genws));
 }
 
 
@@ -303,7 +281,7 @@ static bool ionws_save_to_file(WIonWS *ws, FILE *file, int lvl)
 /*{{{ Load */
 
 
-static WRegion *tmp_par=NULL;
+static WWindow *tmp_par=NULL;
 static WRectangle tmp_geom;
 static WIonWS *current_ws=NULL;
 static WWsSplit *current_split=NULL;
@@ -473,15 +451,10 @@ static bool opt_ionws_region(Tokenizer *tokz, int n, Token *toks)
 }
 
 
-static ConfOpt dummy_opts[]={
-	END_CONFOPTS
-};
-
-
 static ConfOpt split_opts[]={
 	{"vsplit", "ll",  opt_ionws_vsplit, split_opts},
 	{"hsplit", "ll",  opt_ionws_hsplit, split_opts},
-	{"region", "s?s", opt_ionws_region, dummy_opts},
+	{"region", "s?s", opt_ionws_region, CONFOPTS_NOT_SET},
 	{"#end", NULL, opt_split_end, NULL},
 	END_CONFOPTS
 };
@@ -490,16 +463,16 @@ static ConfOpt split_opts[]={
 static ConfOpt ionws_opts[]={
 	{"vsplit", "ll",  opt_ionws_vsplit, split_opts},
 	{"hsplit", "ll",  opt_ionws_hsplit, split_opts},
-	{"region", "s?s", opt_ionws_region, dummy_opts},
+	{"region", "s?s", opt_ionws_region, CONFOPTS_NOT_SET},
 	END_CONFOPTS
 };
 
 
-WRegion *ionws_load(WRegion *par, WRectangle geom, Tokenizer *tokz)
+WRegion *ionws_load(WWindow *par, WRectangle geom, Tokenizer *tokz)
 {
 	WIonWS *ws;
 	
-	ws=create_ionws(par, geom, NULL, FALSE);
+	ws=create_ionws(par, geom, FALSE);
 	if(ws==NULL)
 		return NULL;
 

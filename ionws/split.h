@@ -1,15 +1,16 @@
 /*
- * ion/split.h
+ * ion/ionws/split.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef ION_SPLIT_H
-#define ION_SPLIT_H
+#ifndef ION_IONWS_SPLIT_H
+#define ION_IONWS_SPLIT_H
 
-#include <wmcore/common.h>
-#include <wmcore/window.h>
+#include <ioncore/common.h>
+#include <ioncore/window.h>
+#include <ioncore/reginfo.h>
 
 INTROBJ(WWsSplit)
 INTRSTRUCT(WResizeTmp)
@@ -69,5 +70,10 @@ extern void ionws_remove_managed(WIonWS *ws, WRegion *reg);
 extern bool ionws_remove_split(WIonWS *ws, WWsSplit *split);
 extern WRegion *ionws_find_current(WIonWS *ws);
 
-#endif /* ION_SPLIT_H */
+extern WRegion *split_reg(WRegion *reg, int dir, int primn,
+						  int minsize, WRegionSimpleCreateFn *fn);
+extern WRegion *split_toplevel(WIonWS *ws, int dir, int primn,
+							   int minsize, WRegionSimpleCreateFn *fn);
+
+#endif /* ION_IONWS_SPLIT_H */
 

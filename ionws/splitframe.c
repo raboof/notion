@@ -1,5 +1,5 @@
 /*
- * ion/splitframe.c
+ * ion/ionws/splitframe.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
@@ -7,23 +7,15 @@
 
 #include <string.h>
 
-#include <wmcore/common.h>
-#include <wmcore/global.h>
-#include <wmcore/objp.h>
-#include <wmcore/focus.h>
-#include <wmcore/clientwin.h>
-#include <wmcore/resize.h>
-#include <query/fwarn.h>
+#include <ioncore/common.h>
+#include <ioncore/global.h>
+#include <ioncore/objp.h>
+#include <ioncore/focus.h>
+#include <ioncore/clientwin.h>
+#include <ioncore/resize.h>
+#include <ioncore/genframep.h>
 #include "splitframe.h"
 #include "split.h"
-#include "framep.h"
-
-
-typedef WRegion *WSplitCreate(WRegion *parent, WRectangle geom);
-extern WRegion *split_reg(WRegion *reg, int dir, int primn,
-						  int minsize, WSplitCreate *fn);
-extern WRegion *split_toplevel(WIonWS *ws, int dir, int primn,
-							   int minsize, WSplitCreate *fn);
 
 
 /*{{{ Find */
@@ -60,13 +52,13 @@ static WObj *do_find_at(WObj *obj, int x, int y)
 }
 
 
-WFrame *find_frame_at(WIonWS *ws, int x, int y)
+WIonFrame *find_frame_at(WIonWS *ws, int x, int y)
 {
 	WObj *obj=ws->split_tree;
 	
 	obj=do_find_at(obj, x, y);
 	
-	return WTHING_IS(obj, WFrame) ? (WFrame*)obj : NULL;
+	return WTHING_IS(obj, WIonFrame) ? (WIonFrame*)obj : NULL;
 }
 
 
@@ -74,12 +66,6 @@ WFrame *find_frame_at(WIonWS *ws, int x, int y)
 
 
 /*{{{ Split */
-
-
-static WRegion* split_create_frame(WRegion *parent, WRectangle geom)
-{
-	return (WRegion*)create_frame(parent, geom, 0, 0);
-}
 
 
 bool get_splitparams(int *dir, int *primn, const char *str)
@@ -119,12 +105,14 @@ static void do_split(WRegion *oreg, const char *str, bool attach)
 	
 	mins=(dir==VERTICAL ? region_min_h(oreg) : region_min_w(oreg));
 	
-	reg=split_reg(oreg, dir, primn, mins, split_create_frame);
+	reg=split_reg(oreg, dir, primn, mins,
+				  (WRegionSimpleCreateFn*)create_ionframe_simple);
 	
 	if(reg!=NULL){
-		if(attach && WTHING_IS(oreg, WFrame) &&
-		   ((WFrame*)oreg)->current_sub!=NULL){
-			region_add_managed(reg, ((WFrame*)oreg)->current_sub, TRUE);
+		if(attach && WTHING_IS(oreg, WIonFrame) &&
+		   ((WIonFrame*)oreg)->genframe.current_sub!=NULL){
+			region_add_managed(reg, ((WIonFrame*)oreg)->genframe.current_sub,
+							   TRUE);
 		}
 		goto_region(reg);
 	}else{
@@ -154,10 +142,11 @@ void split_top(WIonWS *ws, const char *str)
 		return;
 	
 	mins=(dir==VERTICAL
-		  ? FRAME_MIN_H(SCREEN_OF(ws)) 
-		  : FRAME_MIN_W(SCREEN_OF(ws)));
+		  ? WGENFRAME_MIN_H(SCREEN_OF(ws)) 
+		  : WGENFRAME_MIN_W(SCREEN_OF(ws)));
 	
-	reg=split_toplevel(ws, dir, primn, mins, split_create_frame);
+	reg=split_toplevel(ws, dir, primn, mins,
+					   (WRegionSimpleCreateFn*)create_ionframe_simple);
 	if(reg!=NULL)
 		warp(reg);
 }
@@ -169,7 +158,7 @@ void split_top(WIonWS *ws, const char *str)
 /*{{{ Close */
 
 
-void frame_close(WFrame *frame)
+void ionframe_close(WIonFrame *frame)
 {
 	WIonWS *ws;
 	WViewport *vp;
@@ -179,7 +168,8 @@ void frame_close(WFrame *frame)
 	ws=(WIonWS*)REGION_MANAGER(frame);
 	
 	if(ws==NULL || !WTHING_IS(ws, WIonWS)){
-		region_rescue_managed_on_list((WRegion*)frame, frame->managed_list);
+		region_rescue_managed_on_list((WRegion*)frame,
+									  frame->genframe.managed_list);
 		destroy_thing((WThing*)frame);
 		return;
 	}
@@ -188,22 +178,22 @@ void frame_close(WFrame *frame)
 	
 	if(vp!=NULL && WTHING_IS(vp, WViewport)){
 		if(vp->ws_count<=1 && ws->split_tree==(WObj*)frame){
-			fwarn(frame, "Cannot destroy only frame on only ionws.");
+			warn("Cannot destroy only frame on only ionws.");
 			return;
 		}
 	}
 	
 	other=ionws_find_new_manager((WRegion*)frame);
 	
-	if(frame->managed_count!=0){
+	if(frame->genframe.managed_count!=0){
 		if(other==NULL || WTHING_IS(other, WScreen)){
-			fwarn(frame, "Last frame on workspace and not empty: "
-				  "refusing to destroy.");
+			warn("Last frame on workspace and not empty: refusing to "
+				 "destroy.");
 			return;
 		}
 		region_move_managed_on_list(other, (WRegion*)frame,
-									frame->managed_list);
-		if(frame->managed_count==0)
+									frame->genframe.managed_list);
+		if(frame->genframe.managed_count==0)
 			warn("Could not move all managed objects.");
 	}
 
@@ -214,12 +204,13 @@ void frame_close(WFrame *frame)
 }
 
 
-void frame_close_if_empty(WFrame *frame)
+void ionframe_close_if_empty(WIonFrame *frame)
 {
-	if(frame->managed_count!=0 || frame->current_input!=NULL)
+	if(frame->genframe.managed_count!=0 ||
+	   frame->genframe.current_input!=NULL)
 		return;
 	
-	frame_close(frame);
+	ionframe_close(frame);
 }
 
 

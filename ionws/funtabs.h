@@ -1,20 +1,21 @@
 /*
- * ion/funtab.h
+ * ion/ionws/funtab.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
-#ifndef ION_FUNTAB_H
-#define ION_FUNTAB_H
+#ifndef ION_IONWS_FUNTAB_H
+#define ION_IONWS_FUNTAB_H
 
-#include <wmcore/function.h>
-#include <wmcore/thing.h>
+#include <ioncore/function.h>
+#include <ioncore/thing.h>
 
-extern WFunclist ion_ionws_funclist;
-extern WFunclist ion_frame_funclist;
-extern WFunclist ion_moveres_funclist;
+extern WFunclist ionws_funclist;
+extern WFunclist ionframe_funclist;
+extern WFunclist ionframe_moveres_funclist;
 
-extern void init_funclists();
+extern bool ionws_module_init_funclists();
+extern void ionws_module_clear_funclists();
 
-#endif /* ION_FUNTAB_H */
+#endif /* ION_IONWS_FUNTAB_H */

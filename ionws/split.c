@@ -1,5 +1,5 @@
 /*
- * ion/split.c
+ * ion/ionws/split.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
@@ -7,17 +7,18 @@
 
 #include <X11/Xmd.h>
 
-#include <wmcore/common.h>
-#include <wmcore/screen.h>
-#include <wmcore/focus.h>
-#include <wmcore/global.h>
-#include <wmcore/window.h>
-#include <wmcore/objp.h>
-#include <wmcore/resize.h>
-#include <wmcore/attach.h>
-#include <wmcore/defer.h>
+#include <ioncore/common.h>
+#include <ioncore/screen.h>
+#include <ioncore/focus.h>
+#include <ioncore/global.h>
+#include <ioncore/window.h>
+#include <ioncore/objp.h>
+#include <ioncore/resize.h>
+#include <ioncore/attach.h>
+#include <ioncore/defer.h>
+#include <ioncore/reginfo.h>
 #include "ionws.h"
-#include "frame.h"
+#include "ionframe.h"
 #include "split.h"
 #include "splitframe.h"
 #include "bindmaps.h"
@@ -445,9 +446,6 @@ void ionws_request_managed_geom(WIonWS *ws, WRegion *sub, WRectangle geom,
 /*{{{ Split */
 
 
-typedef WRegion *WSplitCreate(WRegion *parent, WRectangle geom);
-
-
 WWsSplit *create_split(int dir, WObj *tl, WObj *br, WRectangle geom)
 {
 	WWsSplit *split=ALLOC(WWsSplit);
@@ -471,14 +469,14 @@ WWsSplit *create_split(int dir, WObj *tl, WObj *br, WRectangle geom)
 
 
 static WRegion *do_split_at(WIonWS *ws, WObj *obj, int dir, int primn,
-							int minsize, WSplitCreate *fn)
+							int minsize, WRegionSimpleCreateFn *fn)
 {
 	int s, sn, gs, pos;
 	WWsSplit *split, *nsplit;
 	WRectangle geom;
 	WRegion *nreg;
 	WResizeTmp rtmp;
-	WRegion *par;
+	WWindow *par;
 	
 	assert(obj!=NULL);
 	
@@ -528,7 +526,7 @@ static WRegion *do_split_at(WIonWS *ws, WObj *obj, int dir, int primn,
 		geom.w=sn;
 	}
 	
-	par=FIND_PARENT1(ws, WRegion);
+	par=FIND_PARENT1(ws, WWindow);
 	assert(par!=NULL);
 	
 	nreg=fn(par, geom);
@@ -579,7 +577,7 @@ static WRegion *do_split_at(WIonWS *ws, WObj *obj, int dir, int primn,
 
 
 WRegion *split_reg(WRegion *reg, int dir, int primn, int minsize,
-				   WSplitCreate *fn)
+				   WRegionSimpleCreateFn *fn)
 {
 	WRegion *mgr=REGION_MANAGER(reg);
 	assert(mgr!=NULL && WTHING_IS(mgr, WIonWS));
@@ -589,7 +587,7 @@ WRegion *split_reg(WRegion *reg, int dir, int primn, int minsize,
 
 
 WRegion *split_toplevel(WIonWS *ws, int dir, int primn, int minsize,
-						WSplitCreate *fn)
+						WRegionSimpleCreateFn *fn)
 {
 	if(ws->split_tree==NULL)
 		return NULL;
@@ -820,7 +818,7 @@ void ionws_add_managed(WIonWS *ws, WRegion *reg)
 {
 	region_set_manager(reg, (WRegion*)ws, &(ws->managed_list));
 	
-	region_add_bindmap_owned(reg, &ion_ionws_bindmap, TRUE, (WRegion*)ws);
+	region_add_bindmap_owned(reg, &ionws_bindmap, TRUE, (WRegion*)ws);
 	
 	if(REGION_IS_MAPPED(ws))
 		map_region(reg);
@@ -833,7 +831,7 @@ void ionws_remove_managed(WIonWS *ws, WRegion *reg)
 	
 	region_unset_manager(reg, (WRegion*)ws, &(ws->managed_list));
 
-	region_remove_bindmap_owned(reg, &ion_ionws_bindmap, (WRegion*)ws);
+	region_remove_bindmap_owned(reg, &ionws_bindmap, (WRegion*)ws);
 
 	split=SPLIT_OF(reg);
 	
