@@ -13,7 +13,7 @@ INCLUDES += $(LTDL_INCLUDES)
 #DIST: INCLUDES += -I../libtu/include -I..
 INCLUDES += -I..
 
-CFLAGS += $(XOPEN_SOURCE)
+CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
 SOURCES=binding.c conf-bindings.c cursor.c event.c     \
 	exec.c focus.c strings.c key.c modules.c mwmhints.c obj.c pointer.c  \

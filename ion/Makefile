@@ -24,7 +24,7 @@ LIBS += $(LTDL_LIBS)
 DEFINES += -DETCDIR=\"$(ETCDIR)\" -DSHAREDIR=\"$(SHAREDIR)\" \
            -DEXTRABINDIR=\"$(EXTRABINDIR)\" -DMODULEDIR=\"$(MODULEDIR)\"
 
-CFLAGS += $(XOPEN_SOURCE)
+CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
 ifeq ($(PRELOAD_MODULES),1)
 LDFLAGS += $(foreach mod, $(MODULE_LIST), -dlpreopen ../$(mod)/$(mod).la)

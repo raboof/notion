@@ -125,14 +125,10 @@ DEFINES += -DCF_XFREE86_TEXTPROP_BUG_WORKAROUND
 
 CC=gcc
 
-# The POSIX_SOURCE, XOPEN_SOURCE and WARN options should not be necessary,
-# they're mainly for development use. So, if they cause trouble (not
-# the ones that should be used on your system or the system is broken),
-# just comment them out.
+# The POSIX_SOURCE, XOPEN_SOURCE and WARN options are mainly for development
+# use and should not be needed. 
 
-# libtu/ uses POSIX_SOURCE
-
-POSIX_SOURCE=-ansi -D_POSIX_SOURCE
+#POSIX_SOURCE=-ansi -D_POSIX_SOURCE
 
 # and . (ion) XOPEN_SOURCE.
 # There is variation among systems what should be used and how they interpret
@@ -143,15 +139,16 @@ POSIX_SOURCE=-ansi -D_POSIX_SOURCE
 # sunos, (irix)
 #XOPEN_SOURCE=-ansi -D__EXTENSIONS__
 
+# If you have a recent C compiler (e.g. gcc 3.x) then uncommenting the
+# following should optimize function calls to Lua a little. You should
+# also uncomment this if you define XOPEN_SOURCE.
+#C99_SOURCE=-std=c99 -DCF_HAS_VA_COPY
+
 # Same as '-Wall -pedantic' without '-Wunused' as callbacks often
 # have unused variables.
 WARN=	-W -Wimplicit -Wreturn-type -Wswitch -Wcomment \
 	-Wtrigraphs -Wformat -Wchar-subscripts \
 	-Wparentheses -pedantic -Wuninitialized
-
-# If you have a recent C compiler (e.g. gcc 3.x) then uncommenting the
-# following should optimize function calls to Lua a little.
-#C99_SOURCE=-std=c99 -DCF_HAS_VA_COPY
 
 CFLAGS=-g -Os $(WARN) $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES)
 LDFLAGS=-g -Os $(LIBS) $(EXTRA_LIBS)
