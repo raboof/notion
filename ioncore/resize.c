@@ -32,13 +32,16 @@ static uint tmprelw, tmprelh;
 static int tmpdx1, tmpdx2, tmpdy1, tmpdy2;
 static WRectangle tmporiggeom;
 static WRectangle tmpgeom;
-static WRegion *tmpreg=NULL;
+static WRegion *tmpreg;
 static WDrawRubberbandFn *tmprubfn=NULL;
 static int parent_rx, parent_ry;
 static enum {MOVERES_SIZE, MOVERES_POS} moveres_mode=MOVERES_SIZE;
 static bool resize_cumulative=FALSE;
 static int tmprqflags=0;
 
+/*static WWatch tmpregwatch=WWATCH_INIT;
+#define tmpreg ((WRegion*)(tmpregwatch.obj))
+*/
 
 /*{{{ Dynfuns */
 
@@ -102,7 +105,6 @@ static void res_draw_rubberband(WRootWin *rootwin)
 		draw_rubberbox(rootwin, rgeom);
 	else
 		tmprubfn(rootwin, rgeom);
-	
 }
 
 
@@ -122,6 +124,58 @@ bool may_resize(WRegion *reg)
 {
 	return (tmpreg==reg);
 }
+
+
+/* It is ugly to do this here, but it will have to do for now... */
+static void set_saved(WRegion *reg)
+{
+	WGenFrame *frame;
+	
+	if(!WOBJ_IS(reg, WGenFrame))
+		return;
+	
+	frame=(WGenFrame*)reg;
+	
+	/* Restore saved sizes from the beginning of the resize action */
+	if(tmporiggeom.w!=tmpgeom.w){
+		frame->saved_x=tmporiggeom.x;
+		frame->saved_w=tmporiggeom.w;
+	}
+	
+	if(tmporiggeom.h!=tmpgeom.h){
+		frame->saved_y=tmporiggeom.y;
+		frame->saved_h=tmporiggeom.h;
+	}
+}
+
+
+static void do_end_resize(WRegion *reg, bool dors)
+{
+	WRootWin *rootwin;
+	
+	resize_mode=FALSE;
+	rootwin=ROOTWIN_OF(reg);
+	
+	if(XOR_RESIZE){
+		res_draw_rubberband(rootwin);
+		if(dors){
+			region_request_geom(reg, tmprqflags&~REGION_RQGEOM_TRYONLY,
+								tmpgeom, &tmpgeom);
+		}
+		XUngrabServer(wglobal.dpy);
+	}
+	if(dors)
+		set_saved(reg);
+	
+	XUnmapWindow(wglobal.dpy, rootwin->grdata.moveres_win);
+}
+
+
+/*static void tmpreg_watch_handler(WWatch *watch, WRegion *reg)
+{
+	D(warn("Object destroyed while resizing."));
+	do_end_resize(reg, FALSE);
+}*/
 
 
 static bool begin_moveres(WRegion *reg, WDrawRubberbandFn *rubfn,
@@ -149,11 +203,14 @@ static bool begin_moveres(WRegion *reg, WDrawRubberbandFn *rubfn,
 	tmpdx2=0;
 	tmpdy1=0;
 	tmpdy2=0;
-	tmpreg=reg;
 	tmprubfn=rubfn;
 	resize_cumulative=cumulative;
 	resize_mode=TRUE;
 	tmprqflags=(XOR_RESIZE ? REGION_RQGEOM_TRYONLY : 0);
+
+	/*setup_watch(&tmpregwatch, (WObj*)reg,
+				(WWatchHandler*)tmpreg_watch_handler);*/
+	tmpreg=reg;
 	
 	if(!tmphints.flags&PMinSize || tmphints.min_width<1)
 		tmphints.min_width=1;
@@ -201,7 +258,8 @@ static void delta_moveres(WRegion *reg, int dx1, int dx2, int dy1, int dy2,
 	WRectangle geom;
 	int w, h;
 	
-	assert(tmpreg==reg);
+	if(tmpreg!=reg || reg==NULL)
+		return;
 	
 	if(!resize_cumulative){
 		tmpdx1=dx1;
@@ -290,78 +348,29 @@ void delta_move(WRegion *reg, int dx, int dy, WRectangle *rret)
 }
 
 
-/* It is ugly to do this here, but it will have to do for now... */
-static void set_saved(WRegion *reg)
-{
-	WGenFrame *frame;
-	
-	if(!WOBJ_IS(reg, WGenFrame))
-		return;
-	
-	frame=(WGenFrame*)reg;
-	
-	/* Restore saved sizes from the beginning of the resize action */
-	if(tmporiggeom.w!=tmpgeom.w){
-		frame->saved_x=tmporiggeom.x;
-		frame->saved_w=tmporiggeom.w;
-	}
-	
-	if(tmporiggeom.h!=tmpgeom.h){
-		frame->saved_y=tmporiggeom.y;
-		frame->saved_h=tmporiggeom.h;
-	}
-}
-
-
 bool end_resize()
 {
-	WRootWin *rootwin;
 	WRegion *reg=tmpreg;
-
-	if(reg==NULL)
-		return FALSE;
-	
-	tmpreg=NULL;
-	resize_mode=FALSE;
-	rootwin=ROOTWIN_OF(reg);
-	
-	if(XOR_RESIZE){
-		res_draw_rubberband(rootwin);
-		region_request_geom(reg, tmprqflags&~REGION_RQGEOM_TRYONLY,
-							tmpgeom, &tmpgeom);
-		XUngrabServer(wglobal.dpy);
+	if(reg!=NULL){
+		/*reset_watch(&tmpregwatch);*/
+		tmpreg=NULL;
+		do_end_resize(reg, TRUE);
+		return TRUE;
 	}
-	
-	set_saved(reg);
-	
-	XUnmapWindow(wglobal.dpy, rootwin->grdata.moveres_win);
-	
-	return TRUE;
+	return FALSE;
 }
 
 
 bool cancel_resize()
 {
-	WRootWin *rootwin;
 	WRegion *reg=tmpreg;
-
-	if(reg==NULL)
-		return FALSE;
-	
-	resize_mode=FALSE;
-	tmpreg=NULL;
-	rootwin=ROOTWIN_OF(reg);
-	
-	if(XOR_RESIZE){
-		res_draw_rubberband(rootwin);
-		XUngrabServer(wglobal.dpy);
-	}else{
-		set_saved(reg);
+	if(reg!=NULL){
+		/*reset_watch(&tmpregwatch);*/
+		tmpreg=NULL;
+		do_end_resize(reg, FALSE);
+		return TRUE;
 	}
-	
-	XUnmapWindow(wglobal.dpy, rootwin->grdata.moveres_win);
-	
-	return TRUE;
+	return FALSE;
 }
 
 
@@ -459,27 +468,6 @@ void region_request_managed_geom_unallow(WRegion *mgr, WRegion *reg,
 
 
 /*{{{ Restore size, maximize, shade */
-
-#if 0
-void save_vert(WGenFrame *frame, bool override)
-{
-	if(override || !(frame->flags&WGENFRAME_SAVED_VERT)){
-		frame->flags|=WGENFRAME_SAVED_VERT;
-		frame->saved_y=REGION_GEOM(frame).y;
-		frame->saved_h=REGION_GEOM(frame).h;
-	}
-}
-
-
-static void save_horiz(WGenFrame *frame, bool override)
-{
-	if(override || !(frame->flags&WGENFRAME_SAVED_HORIZ)){
-		frame->flags|=WGENFRAME_SAVED_HORIZ;
-		frame->saved_x=REGION_GEOM(frame).x;
-		frame->saved_w=REGION_GEOM(frame).w;
-	}
-}
-#endif
 
 
 void genframe_restore_size(WGenFrame *frame, bool horiz, bool vert)

@@ -108,7 +108,8 @@ void floatframe_do_resize(WFloatFrame *frame, int left, int right,
 	
 	delta_resize((WRegion*)frame, -left*wu, right*wu, -top*hu, bottom*hu,
 				 NULL);
-	set_resize_timer((WRegion*)frame, wglobal.resize_delay);
+	
+	set_timer(&resize_timer, wglobal.resize_delay);
 }
 
 
@@ -179,8 +180,8 @@ void floatframe_begin_resize(WFloatFrame *frame)
 		return;
 	
 	grab_establish((WRegion*)frame, resize_handler,
-				   /*floatframe_cancel_resize,*/
-				   FocusChangeMask|KeyReleaseMask);
+				   (GrabKilledHandler*)floatframe_cancel_resize, 0);
+	
 	set_timer(&resize_timer, wglobal.resize_delay);
 }
 

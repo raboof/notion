@@ -1,7 +1,8 @@
 /*
  * ion/ioncore/grab.h
  *
- * Based on the contributed code "(c) Lukas Schroeder 2002".
+ * Copyright (c) Lukas Schroeder 2002,
+ *				 Tuomo Valkonen 2003.
  *
  * Ion is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by
@@ -24,10 +25,12 @@
    kept active and you get more grabbed events passed to your handler.
  */
 typedef bool GrabHandler(WRegion *reg, XEvent *ev);
+typedef void GrabKilledHandler(WRegion *reg);
 
 extern bool call_grab_handler(XEvent *ev);
 
-extern void grab_establish(WRegion *reg, GrabHandler *func, long eventmask);
+extern void grab_establish(WRegion *reg, GrabHandler *func,
+						   GrabKilledHandler *kh,long eventmask);
 extern void grab_remove(GrabHandler *func);
 extern void grab_holder_remove(WRegion *holder);
 extern WRegion *grab_get_holder();

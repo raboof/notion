@@ -295,23 +295,32 @@ static WRegion *fnd(Window root, int x, int y)
 }
 
 
+static void tabdrag_deinit(WGenFrame *genframe)
+{
+	wglobal.draw_dragwin=NULL;
+	XUnmapWindow(wglobal.dpy, GRDATA_OF(genframe)->drag_win);
+	genframe->tab_pressed_sub=NULL;
+	genframe->flags&=~WGENFRAME_TAB_DRAGGED;
+}
+
+
+static void tabdrag_killed(WGenFrame *genframe)
+{
+	tabdrag_deinit(genframe);
+	if(!WOBJ_IS_BEING_DESTROYED(genframe))
+		genframe_draw_bar(genframe, TRUE);
+}
+
+
 static void p_tabdrag_end(WGenFrame *genframe, XButtonEvent *ev)
 {
-	WGRData *grdata=GRDATA_OF(genframe);
 	WRegion *sub=NULL;
 	WRegion *dropped_on;
 	Window win=None;
-	
-	grab_remove(tabdrag_kbd_handler);
-
-	wglobal.draw_dragwin=NULL;
 
 	sub=genframe->tab_pressed_sub;
-	genframe->tab_pressed_sub=NULL;
-	genframe->flags&=~WGENFRAME_TAB_DRAGGED;
 	
-	XUnmapWindow(wglobal.dpy, grdata->drag_win);	
-	/*XSelectInput(wglobal.dpy, grdata->drag_win, 0);*/
+	tabdrag_deinit(genframe);
 	
 	/* Must be same screen */
 	
@@ -341,13 +350,12 @@ void genframe_p_tabdrag(WGenFrame *genframe)
 	if(genframe->tab_pressed_sub==NULL)
 		return;
 
-	if(!set_drag_handlers((WRegion*)genframe,
-						  (WMotionHandler*)p_tabdrag_begin,
-						  (WMotionHandler*)p_tabdrag_motion,
-						  (WButtonHandler*)p_tabdrag_end))
-		return;
-	
-	grab_establish((WRegion*)genframe, tabdrag_kbd_handler, FocusChangeMask);
+	p_set_drag_handlers((WRegion*)genframe,
+						(WMotionHandler*)p_tabdrag_begin,
+						(WMotionHandler*)p_tabdrag_motion,
+						(WButtonHandler*)p_tabdrag_end,
+						tabdrag_kbd_handler,
+						(GrabKilledHandler*)tabdrag_killed);
 }
 
 
@@ -365,6 +373,26 @@ bool region_handle_drop(WRegion *reg, int x, int y, WRegion *dropped)
 /*{{{ Resize */
 
 
+static void p_moveres_end(WGenFrame *genframe, XButtonEvent *ev)
+{
+	end_resize();
+}
+
+
+static void p_moveres_cancel(WGenFrame *genframe)
+{
+	cancel_resize();
+}
+
+
+static void confine_to_parent(WGenFrame *genframe)
+{
+	WRegion *par=region_parent((WRegion*)genframe);
+	if(par!=NULL)
+		grab_confine_to(region_x_window(par));
+}
+
+
 static void p_resize_motion(WGenFrame *genframe, XMotionEvent *ev, int dx, int dy)
 {
 	delta_resize((WRegion*)genframe, p_dx1mul*dx, p_dx2mul*dx,
@@ -379,20 +407,6 @@ static void p_resize_begin(WGenFrame *genframe, XMotionEvent *ev, int dx, int dy
 }
 
 
-static void p_resize_end(WGenFrame *genframe, XButtonEvent *ev)
-{
-	end_resize();
-}
-
-
-static void confine_to_parent(WGenFrame *genframe)
-{
-	WRegion *par=region_parent((WRegion*)genframe);
-	if(par!=NULL)
-		grab_confine_to(region_x_window(par));
-}
-
-
 /*EXTL_DOC
  * Start resizing \var{genframe} with the mouse or other pointing device.
  * This function should only be used by binding it to \emph{mpress} or
@@ -401,10 +415,12 @@ static void confine_to_parent(WGenFrame *genframe)
 EXTL_EXPORT
 void genframe_p_resize(WGenFrame *genframe)
 {
-	if(!set_drag_handlers((WRegion*)genframe,
-						  (WMotionHandler*)p_resize_begin,
-						  (WMotionHandler*)p_resize_motion,
-						  (WButtonHandler*)p_resize_end))
+	if(!p_set_drag_handlers((WRegion*)genframe,
+							(WMotionHandler*)p_resize_begin,
+							(WMotionHandler*)p_resize_motion,
+							(WButtonHandler*)p_moveres_end,
+							NULL, 
+							(GrabKilledHandler*)p_moveres_cancel))
 		return;
 	
 	confine_to_parent(genframe);
@@ -430,18 +446,14 @@ static void p_move_begin(WGenFrame *genframe, XMotionEvent *ev, int dx, int dy)
 }
 
 
-static void p_move_end(WGenFrame *genframe, XButtonEvent *ev)
-{
-	end_resize();
-}
-
-
 void genframe_p_move(WGenFrame *genframe)
 {
-	if(!set_drag_handlers((WRegion*)genframe,
-						  (WMotionHandler*)p_move_begin,
-						  (WMotionHandler*)p_move_motion,
-						  (WButtonHandler*)p_move_end))
+	if(!p_set_drag_handlers((WRegion*)genframe,
+							(WMotionHandler*)p_move_begin,
+							(WMotionHandler*)p_move_motion,
+							(WButtonHandler*)p_moveres_end,
+							NULL, 
+							(GrabKilledHandler*)p_moveres_cancel))
 		return;
 	
 	confine_to_parent(genframe);
@@ -452,6 +464,7 @@ void genframe_p_move(WGenFrame *genframe)
 
 
 /*{{{ switch_tab */
+
 
 /*EXTL_DOC
  * Display the region corresponding to the tab that the user pressed on.

@@ -1,7 +1,8 @@
 /*
  * ion/ioncore/grab.c
  * 
- * Based on the contributed code "(c) Lukas Schroeder 2002".
+ * Copyright (c) Lukas Schroeder 2002,
+ *				 Tuomo Valkonen 2003.
  *
  * Ion is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by
@@ -12,6 +13,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/time.h>
+
+#define XK_MISCELLANY
+#include <X11/keysymdef.h>
 
 #include "common.h"
 #include "global.h"
@@ -24,8 +28,9 @@
 typedef struct _grab_status{
 	WRegion *holder;
 	GrabHandler *handler;
+	GrabKilledHandler *killedhandler;
 	WWatch watch;
-	long events;
+	long eventmask;
 	long flags;
 
 	bool remove;	/* TRUE, if entry marked for removal by do_grab_remove() */
@@ -33,7 +38,7 @@ typedef struct _grab_status{
 	Window confine_to;
 }GrabStatus;
 
-#define MAX_GRABS 10
+#define MAX_GRABS 4
 static GrabStatus grabs[MAX_GRABS];
 static GrabStatus *current_grab;
 static int idx_grab=0;
@@ -41,19 +46,51 @@ static int idx_grab=0;
 /*}}}*/
 
 
+/*{{{ Functions for installing grabs */
+
+
+static void do_holder_remove(WRegion *holder, bool killed);
+
+	
 static void grab_watch_handler(WWatch *w, WObj *obj)
 {
-	grab_holder_remove((WRegion*)obj);
-	/*warn("Object destroyed while it's a grab->holder!");*/
+	do_holder_remove((WRegion*)obj, TRUE);
 }
+
 
 static void do_grab_install(GrabStatus *grab)
 {
 	setup_watch(&grab->watch, (WObj*)grab->holder, grab_watch_handler);
 	do_grab_kb_ptr(ROOT_OF(grab->holder), grab->confine_to, grab->cursor,
-				   ~grab->events);
+				   grab->eventmask);
 	current_grab=grab;
 }
+
+
+void grab_establish(WRegion *reg, GrabHandler *func, GrabKilledHandler *kh,
+					long eventmask)
+{
+	assert((~eventmask)&(KeyPressMask|KeyReleaseMask));
+	
+	if(idx_grab<MAX_GRABS){
+		current_grab=&grabs[idx_grab++];
+		current_grab->holder=reg;
+		current_grab->handler=func;
+		current_grab->killedhandler=kh;
+		current_grab->eventmask=eventmask;
+		current_grab->remove=FALSE;
+		current_grab->cursor=CURSOR_DEFAULT;
+		current_grab->confine_to=ROOT_OF(reg);
+		do_grab_install(current_grab);
+	}
+}
+
+
+/*}}}*/
+
+
+/*{{{ Grab removal functions */
+
 
 static void do_grab_remove()
 {
@@ -73,43 +110,91 @@ static void do_grab_remove()
 	}
 }
 
+
+static void mark_for_removal(GrabStatus *grab, bool killed)
+{
+	grab->remove=TRUE;
+	if(killed && grab->killedhandler!=NULL && grab->holder!=NULL)
+		grab->killedhandler(grab->holder);
+	
+	if(grabs[idx_grab-1].remove)
+		do_grab_remove();
+}
+
+
+static void do_holder_remove(WRegion *holder, bool killed)
+{
+	int i;
+	
+	for(i=idx_grab-1; i>=0; i--){
+		if(grabs[i].holder==holder)
+			mark_for_removal(grabs+i, killed);
+	}
+}
+
+
+void grab_holder_remove(WRegion *holder)
+{
+	do_holder_remove(holder, FALSE);
+}
+
+
+void grab_remove(GrabHandler *func)
+{
+	int i;
+	for(i=idx_grab-1; i>=0; i--){
+		if(grabs[i].handler==func){
+			mark_for_removal(grabs+i, FALSE);
+			break;
+		}
+	}
+}
+
+
+/*}}}*/
+
+
+/*{{{ Grab handler calling */
+
+
 bool call_grab_handler(XEvent *ev)
 {
-	if(current_grab && current_grab->remove){
+	while(current_grab && current_grab->remove)
 		do_grab_remove();
+	
+	if(current_grab==NULL || current_grab->holder==NULL ||
+	   current_grab->handler==NULL){
 		return FALSE;
 	}
-
-	if(current_grab!=NULL
-		&& current_grab->holder!=NULL 
-		&& current_grab->handler!=NULL){
-
-		bool allow;
-		bool remove=FALSE;
-		GrabStatus *tmp_grab=current_grab;
-
-		/* here we also catch luser's that tried to grab without
-           KeyPressMask|KeyReleaseMask */
-        allow=!(current_grab->events&(KeyPressMask|KeyReleaseMask));
-        if(!allow && ev->type==KeyRelease && current_grab->events&KeyReleaseMask)
-            allow=TRUE;
-        else if(!allow && ev->type==KeyPress && current_grab->events&KeyPressMask)
-            allow=TRUE;
-
-		if(allow){
-			remove=current_grab->handler(current_grab->holder, ev);
-			if(remove)
-				grab_remove(tmp_grab->handler);
-		}
+	
+	/* Escape key is harcoded to always kill active grab. */
+	if(XLookupKeysym(&(ev->xkey), 0)==XK_Escape){
+		mark_for_removal(current_grab, TRUE);
 		return TRUE;
 	}
-	return FALSE;
+	
+	if(ev->type!=KeyRelease && ev->type!=KeyPress)
+		return FALSE;
+	
+	if(current_grab->handler(current_grab->holder, ev))
+		mark_for_removal(current_grab, FALSE);
+	
+	return TRUE;
 }
+
+
+/*}}}*/
+
+
+
+/*{{{ Misc. */
+
 
 bool grab_held()
 {
 	return idx_grab>0;
 }
+
 
 void change_grab_cursor(int cursor)
 {
@@ -119,6 +204,7 @@ void change_grab_cursor(int cursor)
 								 x_cursor(cursor), CurrentTime);
 	}
 }
+
 
 void grab_confine_to(Window confine_to)
 {
@@ -130,46 +216,6 @@ void grab_confine_to(Window confine_to)
 	}
 }
 
-void grab_establish(WRegion *reg, GrabHandler *func, long eventmask)
-{
-	if(idx_grab<MAX_GRABS){
-		current_grab=&grabs[idx_grab++];
-		current_grab->holder=reg;
-		current_grab->handler=func;
-		current_grab->events=~eventmask;
-		current_grab->remove=FALSE;
-		current_grab->cursor=CURSOR_DEFAULT;
-		current_grab->confine_to=ROOT_OF(reg);
-		do_grab_install(current_grab);
-	}
-}
-
-void grab_remove(GrabHandler *func)
-{
-	int i;
-	for(i=idx_grab-1; i>=0; i--){
-		if(grabs[i].handler==func){
-			grabs[i].remove=TRUE;
-			break;
-		}
-	}
-
-	if(grabs[idx_grab-1].remove){
-		do_grab_remove();
-	}
-}
-
-void grab_holder_remove(WRegion *holder)
-{
-	int i;
-	for(i=idx_grab-1; i>=0; i--){
-		if(grabs[i].holder==holder)
-			grabs[i].remove=TRUE;
-	}
-
-	if(grabs[idx_grab-1].remove)
-		do_grab_remove();
-}
 
 WRegion *grab_get_holder()
 {
@@ -177,6 +223,7 @@ WRegion *grab_get_holder()
 		return grabs[idx_grab-1].holder;
 	return NULL;
 }
+
 
 WRegion *grab_get_my_holder(GrabHandler *func)
 {
@@ -186,3 +233,7 @@ WRegion *grab_get_my_holder(GrabHandler *func)
 			return grabs[i].holder;
 	return NULL;
 }
+
+
+/*}}}*/
+

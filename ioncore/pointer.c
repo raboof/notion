@@ -35,6 +35,8 @@ static int p_area=0;
 static WButtonHandler *p_button_handler=NULL;
 static WMotionHandler *p_motion_handler=NULL;
 static WMotionHandler *p_motion_begin_handler=NULL;
+static GrabHandler *p_key_handler=NULL;
+static GrabKilledHandler *p_killed_handler=NULL;
 
 static WWatch p_regwatch=WWATCH_INIT, p_subregwatch=WWATCH_INIT;
 
@@ -48,8 +50,8 @@ static WWatch p_regwatch=WWATCH_INIT, p_subregwatch=WWATCH_INIT;
 /*{{{ Handler setup */
 
 
-bool set_button_handler(WRegion *reg,
-						WButtonHandler *handler)
+bool p_set_button_handler(WRegion *reg,
+						  WButtonHandler *handler)
 {
 	if(reg!=p_reg)
 		return FALSE;
@@ -59,10 +61,12 @@ bool set_button_handler(WRegion *reg,
 }
 
 
-bool set_drag_handlers(WRegion *reg,
-					   WMotionHandler *begin,
-					   WMotionHandler *motion,
-					   WButtonHandler *end)
+bool p_set_drag_handlers(WRegion *reg,
+						 WMotionHandler *begin,
+						 WMotionHandler *motion,
+						 WButtonHandler *end,
+						 GrabHandler *keypress,
+						 GrabKilledHandler *killed)
 {
 	if(reg!=p_reg || p_motion==FALSE)
 		return FALSE;
@@ -70,6 +74,8 @@ bool set_drag_handlers(WRegion *reg,
 	p_motion_begin_handler=begin;
 	p_motion_handler=motion;
 	p_button_handler=end;
+	p_key_handler=keypress;
+	p_killed_handler=killed;
 	
 	return TRUE;
 }
@@ -160,11 +166,28 @@ static void call_motion_begin(WBinding *binding, XMotionEvent *ev,
 /*{{{ handle_button_press/release/motion */
 
 
-bool handle_key_dummy(WRegion *reg, XEvent *ev)
+static bool handle_key(WRegion *reg, XEvent *ev)
 {
+	if(p_key_handler!=NULL)
+		return p_key_handler(reg, ev);
 	return FALSE;
 }
-	
+
+static void finish_pointer()
+{
+	if(p_reg!=NULL)
+		window_release((WWindow*)p_reg);
+	reset_watch(&p_subregwatch);
+}
+
+static void pointer_grab_killed(WRegion *unused)
+{
+	if(p_reg!=NULL && p_killed_handler!=NULL)
+		p_killed_handler(p_reg);
+	reset_watch(&p_regwatch);
+	finish_pointer();
+}
+
 
 bool handle_button_press(XButtonEvent *ev)
 {
@@ -211,8 +234,7 @@ bool handle_button_press(XButtonEvent *ev)
 	setup_watch(&p_regwatch, (WObj*)reg, NULL);
 	setup_watch(&p_subregwatch, (WObj*)subreg, NULL);
 
-	/*do_grab_kb_ptr(ev->root, reg, FocusChangeMask);*/
-	grab_establish(reg, handle_key_dummy, 0);
+	grab_establish(reg, handle_key, pointer_grab_killed, 0);
 	
 end:
 	/*p_reg=reg;*/
@@ -228,6 +250,8 @@ end:
 	p_button_handler=NULL;
 	p_motion_handler=NULL;
 	p_motion_begin_handler=NULL;
+	p_key_handler=NULL;
+	p_killed_handler=NULL;
 	
 	call_button(pressbind, ev);
 	
@@ -253,14 +277,11 @@ bool handle_button_release(XButtonEvent *ev)
 				p_button_handler(p_reg, ev);
 		}
 		
-		/* Allow any temporary settings to be cleared */
-		grab_remove(handle_key_dummy);
-		window_release((WWindow*)p_reg);
 	}
 	
-	/*reset_watch(&p_regwatch);*/
-	reset_watch(&p_subregwatch);
-
+	grab_remove(handle_key);
+	finish_pointer();
+	
 	return TRUE;
 }
 

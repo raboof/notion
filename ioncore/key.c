@@ -105,7 +105,7 @@ static bool quote_next_handler(WRegion *reg, XEvent *xev)
 EXTL_EXPORT
 void clientwin_quote_next(WClientWin *cwin)
 {
-    grab_establish((WRegion*)cwin, quote_next_handler, FocusChangeMask);
+    grab_establish((WRegion*)cwin, quote_next_handler, NULL, 0);
 	change_grab_cursor(CURSOR_WAITKEY);
 }
 
@@ -126,7 +126,7 @@ static void waitrelease(WRegion *reg)
 	 * be removed before the modifiers are released.
 	 */
 	grab_establish((WRegion*)region_rootwin_of(reg), waitrelease_handler, 
-				   FocusChangeMask|KeyPressMask);
+				   NULL, 0);
 	change_grab_cursor(CURSOR_WAITKEY);
 }
 
@@ -220,7 +220,7 @@ static bool submapgrab_handler(WRegion *reg, XEvent *ev)
 
 static void submapgrab(WRegion *reg)
 {
-	grab_establish(reg, submapgrab_handler, FocusChangeMask|KeyReleaseMask);
+	grab_establish(reg, submapgrab_handler, clear_subs, 0);
 	change_grab_cursor(CURSOR_WAITKEY);
 }
 

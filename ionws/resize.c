@@ -78,7 +78,6 @@ static WTimer resize_timer=INIT_TIMER(tmr_end_resize);
 /*}}}*/
 
 
-
 /*{{{ Keyboard resize interface */
 
 
@@ -144,9 +143,10 @@ void ionframe_begin_resize(WIonFrame *frame)
 {
 	if(!begin_resize((WRegion*)frame, NULL, FALSE))
 		return;
+	
 	grab_establish((WRegion*)frame, resize_handler,
-				   /*ionframe_cancel_resize,*/
-				   FocusChangeMask|KeyReleaseMask);
+				   (GrabKilledHandler*)ionframe_cancel_resize, 0);
+
 	set_timer(&resize_timer, wglobal.resize_delay);
 }
 

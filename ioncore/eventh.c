@@ -564,7 +564,7 @@ static void pointer_handler(XEvent *ev)
 {
 	XEvent tmp;
 	Window win_pressed;
-	bool mouse_grab_held=FALSE;
+	bool finished=FALSE;
 
 	if(grab_held())
 		return;
@@ -574,9 +574,7 @@ static void pointer_handler(XEvent *ev)
 	if(!handle_button_press(&(ev->xbutton)))
 		return;
 
-	mouse_grab_held=TRUE;
-
-	while(mouse_grab_held){
+	while(!finished && grab_held()){
 		XFlush(wglobal.dpy);
 		get_event_mask(ev, GRAB_EV_MASK);
 		
@@ -592,14 +590,8 @@ static void pointer_handler(XEvent *ev)
 		
 		switch(ev->type){
 		CASE_EVENT(ButtonRelease)
-			if(handle_button_release(&ev->xbutton)){
-				/*ungrab_kb_ptr();*/
-				/* Don't ignore following UngrabNotify EnterWindow events in
-				 * case of pointer action originated grabs.
-				 */
-				/*wglobal.grab_released=FALSE;*/
-				mouse_grab_held=FALSE;
-			}
+			if(handle_button_release(&ev->xbutton))
+				finished=TRUE;
 			break;
 		CASE_EVENT(MotionNotify)
 			handle_pointer_motion(&ev->xmotion);
