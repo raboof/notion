@@ -174,7 +174,7 @@ end
 local function selectstyle(look, where)
     dopath(look)
 
-    local fname=ioncore.get_savefile('draw')
+    local fname=ioncore.get_savefile('look')
 
     local function writeit()
         local f, err=io.open(fname, 'w')
