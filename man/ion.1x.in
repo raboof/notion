@@ -132,6 +132,12 @@ Split vertically
 .TP
 .B Mod1+K S
 Split horizontally
+.TP
+.B Mod1+L
+Broken application resize kludge; try to make that broken application
+that didn't get it the first time to understand the real size of the
+active window
+
 
 .SS Close and all
 
