@@ -1,5 +1,5 @@
 /*
- * wmcore/winpropsgen.c
+ * wmcore/winprops.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2002. 
  * See the included file LICENSE for details.
@@ -9,13 +9,20 @@
 
 #include "common.h"
 #include "property.h"
-#include "winpropsgen.h"
+#include "winprops.h"
+#include "attach.h"
 
 
-WWinPropGen *find_winpropgen(WWinPropGen *list,
-							 const char *wclass, const char *winstance)
+static WWinProp *winprop_list=NULL;
+
+
+/*{{{ Static functions */
+
+
+static WWinProp *do_find_winprop(WWinProp *list, const char *wclass,
+								 const char *winstance)
 {
-	WWinPropGen *prop=list, *loosematch=NULL;
+	WWinProp *prop=list, *loosematch=NULL;
 	int match, bestmatch=0;
 	
 	/* I assume there will not be that many winprops, so a naive algorithm
@@ -59,7 +66,7 @@ WWinPropGen *find_winpropgen(WWinPropGen *list,
 }
 
 
-WWinPropGen *find_winpropgen_win(WWinPropGen *list, Window win)
+static WWinProp *do_find_winprop_win(WWinProp *list, Window win)
 {
 	char *winstance, *wclass=NULL;
 	int n, tmp;
@@ -73,11 +80,11 @@ WWinPropGen *find_winpropgen_win(WWinPropGen *list, Window win)
 	if(tmp+1<n)
 		wclass=winstance+tmp+1;
 
-	return find_winpropgen(list, wclass, winstance);
+	return do_find_winprop(list, wclass, winstance);
 }
 
 
-void free_winpropgen(WWinPropGen **list, WWinPropGen *winprop)
+static void do_free_winprop(WWinProp **list, WWinProp *winprop)
 {	
 	if(winprop->prev!=NULL){
 		UNLINK_ITEM(*list, winprop, next, prev);
@@ -85,16 +92,21 @@ void free_winpropgen(WWinPropGen **list, WWinPropGen *winprop)
 	
 	if(winprop->data!=NULL)
 		free(winprop->data);
+	
+	if(winprop->target_name!=NULL)
+		free(winprop->target_name);
+	
+	free(winprop);
 }
 
 
-void add_winpropgen(WWinPropGen **list, WWinPropGen *winprop)
+static void do_add_winprop(WWinProp **list, WWinProp *winprop)
 {
 	LINK_ITEM(*list, winprop, next, prev);
 }
 
 
-bool init_winpropgen(WWinPropGen *winprop, const char *name)
+static bool init_winprop(WWinProp *winprop, const char *name)
 {
 	char *wclass, *winstance;
 
@@ -122,5 +134,67 @@ bool init_winpropgen(WWinPropGen *winprop, const char *name)
 	winprop->wclass=wclass;
 	winprop->winstance=winstance;
 	
+	winprop->flags=0;
+	winprop->manage_flags=REGION_ATTACH_SWITCHTO;
+	winprop->stubborn=FALSE;
+	winprop->max_w=winprop->max_h=0;
+	winprop->aspect_w=winprop->aspect_h=0;
+	winprop->target_name=NULL;
+	
 	return TRUE;
 }
+
+
+/*}}}*/
+
+
+/*{{{ Interface */
+
+
+WWinProp *alloc_winprop(const char *winname)
+{
+	char *wclass, *winstance;
+	WWinProp *winprop;
+	
+	winprop=ALLOC(WWinProp);
+	
+	if(winprop==NULL){
+		warn_err();
+		return NULL;
+	}
+		
+	if(!init_winprop(winprop, winname)){
+		free(winprop);
+		return NULL;
+	}
+
+	return winprop;
+}
+
+
+void add_winprop(WWinProp *winprop)
+{
+	do_add_winprop(&winprop_list, winprop);
+}
+
+
+WWinProp *find_winprop_win(Window win)
+{
+	return do_find_winprop_win(winprop_list, win);
+}
+
+
+void free_winprop(WWinProp *winprop)
+{
+	do_free_winprop(&winprop_list, winprop);
+}
+
+
+void free_winprops()
+{
+	while(winprop_list!=NULL)
+		free_winprop(winprop_list);
+}
+
+
+/*}}}*/

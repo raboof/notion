@@ -76,7 +76,7 @@ extern bool clientwin_attach_sub(WClientWin *cwin, WRegion *sub, int flags);
 
 /* Hooks */
 
-
 extern WHooklist *add_clientwin_alt;
+
 
 #endif /* WMCORE_CLIENTWIN_H */

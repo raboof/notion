@@ -10,63 +10,12 @@
 
 #include <wmcore/common.h>
 #include <wmcore/clientwin.h>
-#include <wmcore/winpropsgen.h>
+#include <wmcore/winprops.h>
+#include <wmcore/attach.h>
 #include "winprops.h"
 
 
-static WWinProp *winprop_list=NULL;
 static WWinProp *tmp_winprop=NULL;
-
-
-/*{{{ Create/free/find */
-
-
-WWinProp *alloc_winprop(const char *winname)
-{
-	char *wclass, *winstance;
-	WWinProp *winprop;
-	
-	winprop=ALLOC(WWinProp);
-	
-	if(winprop==NULL){
-		warn_err();
-		return NULL;
-	}
-		
-	if(!init_winpropgen(&winprop->genprop, winname)){
-		free(winprop);
-		return NULL;
-	}
-		
-	winprop->flags=0;
-	winprop->switchto=-1;
-	winprop->stubborn=0;
-
-	return winprop;
-}
-
-
-WWinProp *find_winprop_win(Window win)
-{
-	return (WWinProp*)find_winpropgen_win((WWinPropGen*)winprop_list,
-										  win);
-}
-
-
-void free_winprop(WWinProp *winprop)
-{
-	free_winpropgen((WWinPropGen**)&winprop_list, (WWinPropGen*)winprop);
-}
-
-
-void free_winprops()
-{
-	while(winprop_list!=NULL)
-		free_winprop(winprop_list);
-}
-
-
-/*}}}*/
 
 
 /*{{{ Configuration */
@@ -92,7 +41,11 @@ static bool opt_winprop_aspect(Tokenizer *tokz, int n, Token *toks)
 
 static bool opt_winprop_switchto(Tokenizer *tokz, int n, Token *toks)
 {
-	tmp_winprop->switchto=TOK_BOOL_VAL(&(toks[1]));
+	if(TOK_BOOL_VAL(&(toks[1])))
+		tmp_winprop->manage_flags|=REGION_ATTACH_SWITCHTO;
+	else
+		tmp_winprop->manage_flags&=~REGION_ATTACH_SWITCHTO;
+	
 	return TRUE;
 }
 
@@ -107,6 +60,16 @@ static bool opt_winprop_stubborn(Tokenizer *tokz, int n, Token *toks)
 static bool opt_winprop_acrobatic(Tokenizer *tokz, int n, Token *toks)
 {
 	tmp_winprop->flags|=CWIN_PROP_ACROBATIC;
+	return TRUE;
+}
+
+
+static bool opt_winprop_target(Tokenizer *tokz, int n, Token *toks)
+{
+	if(tmp_winprop->target_name!=NULL)
+		free(tmp_winprop->target_name);
+	
+	tmp_winprop->target_name=TOK_TAKE_STRING_VAL(&(toks[1]));
 	return TRUE;
 }
 
@@ -129,7 +92,7 @@ bool ion_begin_winprop(Tokenizer *tokz, int n, Token *toks)
 
 static bool end_winprop(Tokenizer *tokz, int n, Token *toks)
 {
-	add_winpropgen((WWinPropGen**)&winprop_list, (WWinPropGen*)tmp_winprop);
+	add_winprop(tmp_winprop);
 	tmp_winprop=NULL;
 	
 	return TRUE;
@@ -145,7 +108,8 @@ ConfOpt ion_winprop_opts[]={
 	{"acrobatic", NULL, opt_winprop_acrobatic, NULL},
 	{"switchto", "b", opt_winprop_switchto, NULL},
 	{"stubborn", "b", opt_winprop_stubborn, NULL},
-	
+	{"target", "s", opt_winprop_target, NULL},
+		
 	{"#end", NULL, end_winprop, NULL},
 	{"#cancel", NULL, cancel_winprop, NULL},
 	

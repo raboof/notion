@@ -188,7 +188,7 @@ void unload_modules()
 
 bool load_module(const char *name)
 {
-	warn_obj(name, "Unabled to load: module support not enabled.");
+	warn_obj(name, "Unable to load: module support not enabled.");
 	return FALSE;
 }
 

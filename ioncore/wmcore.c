@@ -25,6 +25,7 @@
 #include "draw.h"
 #include "modules.h"
 #include "imports.h"
+#include "wsreg.h"
 
 
 /*{{{ Global variables */
@@ -37,6 +38,11 @@ WGlobal wglobal;
 
 	
 /*{{{ Init */
+
+static void init_hooks()
+{
+	ADD_HOOK(add_clientwin_alt, add_clientwin_default);
+}
 
 
 static void initialize_global()
@@ -70,6 +76,14 @@ bool wmcore_init(const char *appname, const char *appetcdir,
 {
 	Display *dpy;
 	int i, dscr, nscr;
+	static bool called=FALSE;
+	
+	/* Sorry, this function can not be re-entered due to laziness
+	 * towards implementing checking of things already initialized.
+	 * Nobody would call this twice anyway.
+	 */
+	assert(!called);
+	called=TRUE;
 	
 	initialize_global();
 	
@@ -117,6 +131,7 @@ bool wmcore_init(const char *appname, const char *appetcdir,
 	wglobal.atom_workspace=XInternAtom(dpy, "_ION_WORKSPACE", False);
 	wglobal.atom_selection=XInternAtom(dpy, "_ION_SELECTION_STRING", False);
 	
+	init_hooks();
 	trap_signals();
 	load_cursors();	
 	init_bindings();

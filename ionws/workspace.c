@@ -14,6 +14,8 @@
 #include <wmcore/global.h>
 #include <wmcore/thingp.h>
 #include <wmcore/region.h>
+#include <wmcore/wsreg.h>
+#include "placement.h"
 #include "workspace.h"
 #include "split.h"
 #include "frame.h"
@@ -47,6 +49,10 @@ static DynFunTab workspace_dynfuntab[]={
 	{region_sub_activated, workspace_sub_activated},
 	{region_remove_sub, workspace_remove_sub},
 	{(DynFun*)region_do_find_new_home, (DynFun*)workspace_do_find_new_home},
+	
+	{(DynFun*)region_ws_add_clientwin, (DynFun*)workspace_add_clientwin},
+	{(DynFun*)region_ws_add_transient, (DynFun*)workspace_add_transient},
+	
 	END_DYNFUNTAB
 };
 

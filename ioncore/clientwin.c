@@ -19,9 +19,7 @@
 #include "event.h"
 #include "clientwin.h"
 #include "colormap.h"
-#include "targetid.h"
 #include "resize.h"
-#include "attach.h"
 #include "close.h"
 
 
@@ -292,10 +290,7 @@ again:
 	if(cwin==NULL)
 		goto fail2;
 	
-	/*managed=add_to_target(cwin);
-
-	if(!managed)*/
-		CALL_ALT_B(managed, add_clientwin_alt, (cwin, &attr, state, dock));
+	CALL_ALT_B(managed, add_clientwin_alt, (cwin, &attr, state, dock));
 
 	if(!managed)
 		goto failure;
@@ -321,6 +316,12 @@ fail2:
 	XSelectInput(wglobal.dpy, win, 0);
 	return NULL;
 }
+
+
+/*}}}*/
+
+
+/*{{{ Attach sub */
 
 
 bool clientwin_attach_sub(WClientWin *cwin, WRegion *sub, int flags)

@@ -77,8 +77,10 @@ DynFun *lookup_dynfun(const WObj *obj, DynFun *func,
 	return dummy_dyn;
 }
 
+
 bool has_dynfun(const WObj *obj, DynFun *func)
 {
 	bool funnotfound;
-	return (bool)lookup_dynfun(obj, func, &funnotfound);
+	lookup_dynfun(obj, func, &funnotfound);
+	return !funnotfound;
 }

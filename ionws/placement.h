@@ -11,12 +11,18 @@
 #include <wmcore/common.h>
 #include <wmcore/clientwin.h>
 #include "winprops.h"
-#include "frame.h"
+#include "workspace.h"
 
-extern bool add_clientwin(WClientWin *cwin, const XWindowAttributes *attr,
-						  int init_state, bool dock);
-extern bool finish_add_clientwin(WRegion *reg, WClientWin *cwin,
-								 bool init_state, const WWinProp *props);
-extern WWinProp *setup_get_winprops(WClientWin *cwin);
+
+/* These implement dynfuns introduced in wmcore/wsreg.h */
+
+extern bool workspace_add_clientwin(WWorkspace *ws, WClientWin *cwin,
+									const XWindowAttributes *attr,
+									int init_state, WWinProp *props);
+
+extern bool workspace_add_transient(WRegion *reg, WClientWin *tfor,
+									WClientWin *cwin,
+									const XWindowAttributes *attr,
+									int init_state, WWinProp *props);
 
 #endif /* ION_PLACEMENT_H */

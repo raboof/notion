@@ -65,12 +65,6 @@ static OptParserCommonInfo ion_cinfo={
 /*{{{ Main */
 
 
-static void init_hooks()
-{
-	ADD_HOOK(add_clientwin_alt, add_clientwin);
-}
-
-
 int main(int argc, char*argv[])
 {
 	const char *cfgfile=NULL;
@@ -106,7 +100,6 @@ int main(int argc, char*argv[])
 		return EXIT_FAILURE;
 	
 	init_funclists();
-	init_hooks();
 	query_init();
 	
 	if(!ion_read_config(cfgfile))

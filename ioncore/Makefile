@@ -22,8 +22,8 @@ OBJS=	binding.o conf-bindings.o conf-draw.o cursor.o draw.o event.o	\
 	obj.o pointer.o property.o readconfig.o screen.o signal.o	\
 	sizehint.o thing.o window.o wmcore.o xic.o selection.o		\
 	completehelp.o symlist.o clientwin.o colormap.o region.o	\
-	eventh.o winpropsgen.o targetid.o attach.o resize.o close.o	\
-	defer.o grab.o
+	eventh.o winprops.o targetid.o attach.o resize.o close.o	\
+	defer.o grab.o wsreg.o
 
 
 TARGETS=wmcore.a
