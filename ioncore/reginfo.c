@@ -25,8 +25,7 @@ static WRegClassInfo *reg_class_infos;
 /*{{{ Registration */
 
 
-bool ioncore_register_regclass(ClassDescr *descr, WRegionSimpleCreateFn *sc_fn,
-                               WRegionLoadCreateFn *lc_fn)
+bool ioncore_register_regclass(ClassDescr *descr, WRegionLoadCreateFn *lc_fn)
 {
     WRegClassInfo *info;
     
@@ -40,7 +39,6 @@ bool ioncore_register_regclass(ClassDescr *descr, WRegionSimpleCreateFn *sc_fn,
     }
     
     info->descr=descr;
-    info->sc_fn=sc_fn;
     info->lc_fn=lc_fn;
     LINK_ITEM(reg_class_infos, info, next, prev);
     
@@ -68,10 +66,7 @@ void ioncore_unregister_regclass(ClassDescr *descr)
 /*{{{ Lookup */
 
 
-WRegClassInfo *ioncore_lookup_regclass(const char *name, 
-                                       bool inheriting_ok,
-                                       bool need_simplefn,
-                                       bool need_loadfn)
+WRegClassInfo *ioncore_lookup_regclass(const char *name, bool inheriting_ok)
 {
     WRegClassInfo *info;
     ClassDescr *descr;
@@ -85,11 +80,8 @@ WRegClassInfo *ioncore_lookup_regclass(const char *name,
             descr=(inheriting_ok ? descr->ancestor : NULL)){
             
             if(strcmp(descr->name, name)==0){
-                if(need_simplefn && !info->sc_fn)
-                    break;
-                if(need_loadfn && !info->lc_fn)
-                    break;
-                return info;
+                if(info->lc_fn!=NULL)
+                    return info;
             }
         }
     }

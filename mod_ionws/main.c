@@ -76,7 +76,6 @@ void mod_ionws_deinit()
 static bool register_regions()
 {
     if(!ioncore_register_regclass(&CLASSDESCR(WIonWS),
-                                  (WRegionSimpleCreateFn*)create_ionws_simple,
                                   (WRegionLoadCreateFn*)ionws_load)){
         return FALSE;
     }

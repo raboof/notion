@@ -113,11 +113,11 @@ static bool register_classes()
 {
     int fail=0;
     
-    fail|=!ioncore_register_regclass(&CLASSDESCR(WClientWin), NULL,
+    fail|=!ioncore_register_regclass(&CLASSDESCR(WClientWin), 
                                      (WRegionLoadCreateFn*)clientwin_load);
-    fail|=!ioncore_register_regclass(&CLASSDESCR(WMPlex), NULL,
+    fail|=!ioncore_register_regclass(&CLASSDESCR(WMPlex), 
                                      (WRegionLoadCreateFn*)mplex_load);
-    fail|=!ioncore_register_regclass(&CLASSDESCR(WFrame), NULL,
+    fail|=!ioncore_register_regclass(&CLASSDESCR(WFrame), 
                                      (WRegionLoadCreateFn*)frame_load);
     
     return !fail;

@@ -77,7 +77,6 @@ void mod_autows_deinit()
 static bool register_regions()
 {
     if(!ioncore_register_regclass(&CLASSDESCR(WAutoWS),
-                                  (WRegionSimpleCreateFn*)create_autows_simple,
                                   (WRegionLoadCreateFn*)autows_load)){
         return FALSE;
     }

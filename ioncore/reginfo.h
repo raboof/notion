@@ -27,21 +27,17 @@ INTRSTRUCT(WRegClassInfo);
     
 DECLSTRUCT(WRegClassInfo){
     ClassDescr *descr;
-    WRegionSimpleCreateFn *sc_fn;
     WRegionLoadCreateFn *lc_fn;
     WRegClassInfo *next, *prev;
 };
 
 
 extern bool ioncore_register_regclass(ClassDescr *descr,
-                                      WRegionSimpleCreateFn *sc_fn,
                                       WRegionLoadCreateFn *lc_fn);
 extern void ioncore_unregister_regclass(ClassDescr *descr);
 
 extern WRegClassInfo *ioncore_lookup_regclass(const char *name, 
-                                              bool inheriting_ok,
-                                              bool need_simplefn,
-                                              bool need_loadfn);
+                                              bool inheriting_ok);
 
 #endif /* ION_IONCORE_REGINFO_H */
 

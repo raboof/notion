@@ -47,7 +47,7 @@ WRegion *create_region_load(WWindow *par, const WFitParams *fp,
     if(!extl_table_gets_s(tab, "type", &objclass))
         return NULL;
 
-    info=ioncore_lookup_regclass(objclass, FALSE, FALSE, TRUE);
+    info=ioncore_lookup_regclass(objclass, FALSE);
     if(info!=NULL)
         fn=info->lc_fn;
     

@@ -521,29 +521,34 @@ ExtlTab screen_get_configuration(WScreen *scr)
 }
 
 
+static WRegion *do_create_initial(WWindow *parent, const WFitParams *fp, 
+                                  WRegionLoadCreateFn *fn)
+{
+    return fn(parent, fp, extl_table_none());
+}
+
+
 static bool create_initial_ws(WScreen *scr)
 {
-    WRegionSimpleCreateFn *fn=NULL;
+    WRegionLoadCreateFn *fn=NULL;
     WRegion *reg=NULL;
     
     /* Check default_ws_type */{
         ExtlTab tab=extl_globals();
         char *wsclass=NULL;
         if(extl_table_gets_s(tab, "DEFAULT_WS_TYPE", &wsclass)){
-            WRegClassInfo *info=ioncore_lookup_regclass(wsclass,
-                                                        FALSE, TRUE, FALSE);
+            WRegClassInfo *info=ioncore_lookup_regclass(wsclass, FALSE);
             if(info!=NULL)
-                fn=info->sc_fn;
+                fn=info->lc_fn;
             free(wsclass);
         }
         extl_unref_table(tab);
     }
         
     if(fn==NULL){
-        WRegClassInfo *info=ioncore_lookup_regclass("WGenWS",
-                                                    TRUE, TRUE, FALSE);
+        WRegClassInfo *info=ioncore_lookup_regclass("WGenWS", TRUE);
         if(info!=NULL)
-            fn=info->sc_fn;
+            fn=info->lc_fn;
     }
     
     if(fn==NULL){
@@ -552,7 +557,9 @@ static bool create_initial_ws(WScreen *scr)
         return FALSE;
     }
     
-    reg=mplex_attach_hnd(&scr->mplex, (WRegionAttachHandler*)fn, NULL, 0);
+    reg=mplex_attach_hnd(&scr->mplex,
+                         (WRegionAttachHandler*)do_create_initial, 
+                         (void*)fn, 0);
     
     if(reg==NULL){
         warn("Unable to create a workspace on screen %d\n", scr->id);

@@ -101,9 +101,8 @@ bool mod_floatws_init()
     }
     
     if(!ioncore_register_regclass(&CLASSDESCR(WFloatWS),
-                                  (WRegionSimpleCreateFn*) create_floatws,
                                   (WRegionLoadCreateFn*) floatws_load) ||
-       !ioncore_register_regclass(&CLASSDESCR(WFloatFrame), NULL,
+       !ioncore_register_regclass(&CLASSDESCR(WFloatFrame), 
                                   (WRegionLoadCreateFn*) floatframe_load)){
         WARN_FUNC("Failed to register classes.");
         goto err;

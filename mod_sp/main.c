@@ -154,7 +154,6 @@ bool mod_sp_init()
     }
     
     if(!ioncore_register_regclass(&CLASSDESCR(WScratchpad),
-                                  (WRegionSimpleCreateFn*)create_scratchpad,
                                   (WRegionLoadCreateFn*)scratchpad_load)){
         mod_sp_deinit();
         return FALSE;
