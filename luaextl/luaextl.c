@@ -290,13 +290,13 @@ static int extl_include(lua_State *st)
 	toincl=luaL_checkstring(st, 1);
 	
 	if(extl_current_file_or_dir(st, TRUE)!=1){
-		lua_pushboolean(st, FALSE);
+		res=do_include(toincl, NULL);
 	}else{
 		cfdir=lua_tostring(st, -1);
 		res=do_include(toincl, cfdir);
 		lua_pop(st, 1);
-		lua_pushboolean(st, res);
 	}
+	lua_pushboolean(st, res);
 	return 1;
 }
 
