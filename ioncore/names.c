@@ -206,6 +206,8 @@ void region_do_unuse_name(WRegion *reg, bool insert_unnamed)
     node=rb_find_gkey_n(ns->rb, &(reg->ni), COMPARE_FN, &found);
 
     if(found){
+        /*fprintf(stderr, "%s<-%p|%p->%s\n", reg->ni.name, reg,
+                rb_val(node), ((WRegion*)rb_val(node))->ni.name);*/
         assert((rb_val(node)==(void*)reg));
         rb_delete_node(node);
     }

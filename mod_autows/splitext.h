@@ -26,6 +26,7 @@ DECLCLASS(WSplitPane){
     WSplitInner isplit;
     WSplit *contents;
     char *marker;
+    int contents_h, contents_w;
 };
 
 extern bool splitunused_init(WSplitUnused *split, const WRectangle *geom);
