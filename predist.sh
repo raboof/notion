@@ -1,5 +1,21 @@
 #!/bin/sh
 
+do_darcs_export() {
+	url="$1"
+	project="$2"
+
+	set -e
+	
+	! test -f "${project}" || { echo "${project} exists"; exit 1; }
+	! test -f "${project}.tmp" || { echo "${project}.tmp exists"; exit 1; }
+
+	darcs get --partial "${url}" "${project}.tmp"
+	darcs changes --context --repo="${project}.tmp" > "${project}.context"
+	mv "${project}.tmp/_darcs/current" "${project}"
+	mv "${project}.context" "${project}/exact-version"
+	rm -r "${project}.tmp"
+}
+
 ##
 ## Versioning
 ##
@@ -26,18 +42,18 @@ fi
 ##
 
 getlib() {
-    svn export -q http://tao.uab.es/ion/svn/$1/trunk $1
-    rm $1/rules.mk $1/system.mk
-    ln -s ../rules.mk $1/rules.mk
-    cat > $1/system-inc.mk << EOF
+    do_darcs_export $1 $2
+    rm $2/rules.mk $2/system.mk
+    ln -s ../rules.mk $2/rules.mk
+    cat > $2/system-inc.mk << EOF
 TOPDIR := \$(TOPDIR)/..
 include \$(TOPDIR)/system-inc.mk
 EOF
 
 }
 
-getlib libtu
-getlib libextl
+getlib http://iki.fi/tuomov/repos/libtu-3 libtu
+getlib http://iki.fi/tuomov/repos/libextl-3 libextl
 
 ##
 ## Makefiles
@@ -56,3 +72,10 @@ mv libs.mk.dist libs.mk
 
 autoconf
 rm -rf autom4te.cache
+
+##
+## Scripts
+##
+
+rm predist.sh
+chmod a+x install-sh
