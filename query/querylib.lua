@@ -286,10 +286,8 @@ defcmd("WMPlex", "query_attachclient",
 -- This query asks for the name of a workspace. If a workspace
 -- (an object inheriting \type{WGenWS}) with such a name exists,
 -- it will be switched to. Otherwise a new workspace with the
--- entered name will be created. The default class for such a workspace
--- has been \emph{temporarily} hardcoded to \type{WIonWS}. By prefixing
--- the input string with ''classname:'' it is possible to create other 
--- kinds of workspaces.
+-- entered name will be created and the user will be queried for
+-- the type of the workspace.
 defcmd("WMPlex", "query_workspace",
        function(mplex)
            local function complete_workspace(nm)

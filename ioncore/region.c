@@ -392,7 +392,6 @@ void region_detach(WRegion *reg)
 /*}}}*/
 
 
-	
 /*{{{ Goto */
 
 

@@ -105,8 +105,15 @@ static int my_error_handler(Display *dpy, XErrorEvent *ev)
 
 Window create_simple_window(WRootWin *rw, Window par, const WRectangle *geom)
 {
-	return XCreateSimpleWindow(wglobal.dpy, par,
-							   geom->x, geom->y, geom->w, geom->h,
+    int w=geom->w;
+    int h=geom->h;
+    
+    if(w<=0)
+        w=1;
+    if(h<=0)
+        h=1;
+    
+	return XCreateSimpleWindow(wglobal.dpy, par, geom->x, geom->y, w, h,
 							   0, 0, BlackPixel(wglobal.dpy, rw->xscr));
 }
 

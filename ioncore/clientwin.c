@@ -1078,7 +1078,7 @@ static void clientwin_set_focus_to(WClientWin *cwin, bool warp)
 		send_clientmsg(cwin->win, wglobal.atom_wm_take_focus, stmp);
 	}
 
-	XSetInputFocus(wglobal.dpy, cwin->win, RevertToParent, CurrentTime);
+    SET_FOCUS(cwin->win);
 	
 	XSync(wglobal.dpy, 0);
 }

@@ -258,6 +258,9 @@ KEYS
        Mod1+K Q
               Send next key press to active client window.
 
+       Mod1+Enter
+              Toggle client window full screen mode.
+
 
 
 LINE-EDITING KEYS

@@ -334,7 +334,7 @@ static bool mplex_do_display_managed(WMPlex *mplex, WRegion *sub)
 	region_lower(sub);
 
 	if(region_may_control_focus((WRegion*)mplex))
-		set_focus((WRegion*)mplex);
+		warp((WRegion*)mplex);
 	
 	return TRUE;
 }
