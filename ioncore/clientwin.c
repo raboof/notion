@@ -135,34 +135,16 @@ void clientwin_get_size_hints(WClientWin *cwin)
 }
 
 
-char **get_name_list(Window win)
-{
-	XTextProperty prop;
-	char **list=NULL;
-	int n;
-	Status st;
-	
-	st=XGetWMName(wglobal.dpy, win, &prop);
-	
-	if(!st)
-		return NULL;
-
-#ifndef CF_UTF8
-	st=XTextPropertyToStringList(&prop, &list, &n);
-#else
-	st=Xutf8TextPropertyToTextList(wglobal.dpy, &prop, &list, &n);
-#endif
-	XFree(prop.value);
-	if(st || n==0 || list==NULL)
-		return NULL;
-	return list;
-}
-
-	
 void clientwin_get_set_name(WClientWin *cwin)
 {
-	char **list=get_name_list(cwin->win);
+	char **list;
 	
+	list=get_text_property(cwin->win, wglobal.atom_net_wm_name);
+	if(list==NULL)
+		list=get_text_property(cwin->win, XA_WM_NAME);
+	else
+		cwin->flags|=CWIN_USE_NET_WM_NAME;
+
 	if(list==NULL){
 		region_unuse_name((WRegion*)cwin);
 	}else{

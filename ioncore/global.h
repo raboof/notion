@@ -54,9 +54,9 @@ DECLSTRUCT(WGlobal){
 	Atom atom_frame_id;
 	/*Atom atom_workspace;*/
 	Atom atom_selection;
-#ifndef CF_NO_MWM_HINTS	
 	Atom atom_mwm_hints;
-#endif
+	
+	Atom atom_net_wm_name;
 
 	WClientWin *cwin_list;
 	WScreen *screens;

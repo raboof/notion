@@ -269,7 +269,7 @@ static void initialize_global()
 }
 
 
-#ifdef CF_UTF8
+/*#ifdef CF_UTF8*/
 static bool test_fallback_font(Display *dpy)
 {
 	WFontPtr fnt=load_font(dpy, CF_FALLBACK_FONT_NAME);
@@ -316,7 +316,7 @@ static bool set_up_locales(Display *dpy)
 		tryno++;
 	}
 }
-#endif
+/*#endif*/
 
 
 bool ioncore_init(const char *display, bool onescreen)
@@ -378,6 +378,7 @@ bool ioncore_init(const char *display, bool onescreen)
 	wglobal.conn=ConnectionNumber(dpy);
 	wglobal.win_context=XUniqueContext();
 	
+	wglobal.atom_net_wm_name=XInternAtom(dpy, "_NET_WM_NAME", False);
 	wglobal.atom_wm_state=XInternAtom(dpy, "WM_STATE", False);
 	wglobal.atom_wm_change_state=XInternAtom(dpy, "WM_CHANGE_STATE", False);
 	wglobal.atom_wm_protocols=XInternAtom(dpy, "WM_PROTOCOLS", False);
