@@ -357,7 +357,6 @@ static bool mrsh_init_extl(ExtlFn fn, WAutoWSInitLayoutParam *p)
 static void create_initial_configuration(WAutoWS *ws, WRegion *reg)
 {
     WAutoWSInitLayoutParam p;
-    WWindow *par;
 
     p.ws=ws;
     p.reg=reg;
@@ -366,23 +365,18 @@ static void create_initial_configuration(WAutoWS *ws, WRegion *reg)
     hook_call_alt_p(autows_init_layout_alt, &p, 
                     (WHookMarshallExtl*)mrsh_init_extl);
     
-    par=REGION_PARENT_CHK(ws, WWindow);
-    if(par==NULL)
-        goto ret;
-    
     if(ws->ionws.split_tree!=NULL){
-        WARN_FUNC("Malfunctioning hook.");
+        WARN_FUNC("Malfunctioning hook/#1.");
         goto ret;
     }
 
     if(p.config!=extl_table_none()){
-        ws->ionws.split_tree=ionws_load_node(&(ws->ionws), par,
-                                             &REGION_GEOM(ws), 
+        ws->ionws.split_tree=ionws_load_node(&(ws->ionws), &REGION_GEOM(ws), 
                                              p.config);
         
         if(ws->ionws.split_tree!=NULL){
             if(REGION_MANAGER(reg)!=(WRegion*)ws)
-                WARN_FUNC("Malfunctioning hook.");
+                WARN_FUNC("Malfunctioning hook/#2.");
             goto ret;
         }
     }

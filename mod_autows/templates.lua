@@ -56,7 +56,8 @@ function T.center3(d, ts, cs, co, sattr)
     local sc=math.min(ts, cs)
     local sl=math.floor((ts-sc)/2)
     local sr=ts-sc-sl
-    return T.split3(d, sl, sc, sr, co, sattr)
+    local r=T.split3(d, sl, sc, sr, co, sattr)
+    return r
 end
 
 -- }}}
@@ -78,9 +79,11 @@ function T.default_layout(ws, reg)
     local gw, gr=ws:geom(), reg:geom()
     return T.center3("horizontal", gw.w, gr.w,
                      T.center3("vertical", gw.h, gr.h, 
-                               { reference = reg, }, T.set_lazy), 
+                               { 
+                                   type = "?",
+                                   reference = reg, 
+                               }, T.set_lazy), 
                      T.set_static)
-    
 end
 
 -- Extended default. Has additional zero-width/height extendable unused 

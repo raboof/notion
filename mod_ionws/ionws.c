@@ -135,7 +135,7 @@ void ionws_managed_add_default(WIonWS *ws, WRegion *reg)
     
     if(region_may_control_focus((WRegion*)ws)){
         WRegion *curr=ionws_current(ws);
-        if(curr==NULL)
+        if(curr==NULL || !REGION_IS_ACTIVE(curr))
             region_warp(reg);
     }
 }
@@ -830,8 +830,7 @@ extern void set_split_of(Obj *obj, WSplit *split);
 
 #define MINS 8
 
-static WSplit *load_split(WIonWS *ws, WWindow *par, const WRectangle *geom,
-                          ExtlTab tab)
+static WSplit *load_split(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
 {
     WSplit *split;
     char *dir_str;
@@ -880,7 +879,7 @@ static WSplit *load_split(WIonWS *ws, WWindow *par, const WRectangle *geom,
     }
     
     if(extl_table_gets_t(tab, "tl", &subtab)){
-        tl=ionws_load_node(ws, par, &geom2, subtab);
+        tl=ionws_load_node(ws, &geom2, subtab);
         extl_unref_table(subtab);
     }
 
@@ -896,7 +895,7 @@ static WSplit *load_split(WIonWS *ws, WWindow *par, const WRectangle *geom,
     }
             
     if(extl_table_gets_t(tab, "br", &subtab)){
-        br=ionws_load_node(ws, par, &geom2, subtab);
+        br=ionws_load_node(ws, &geom2, subtab);
         extl_unref_table(subtab);
     }
     
@@ -919,35 +918,49 @@ static WSplit *load_split(WIonWS *ws, WWindow *par, const WRectangle *geom,
 }
 
 
-WSplit *ionws_load_node(WIonWS *ws, WWindow *par, const WRectangle *geom,
-                        ExtlTab tab)
+static WRegion *do_attach(WIonWS *ws, WRegionAttachHandler *handler,
+                          void *handlerparams, const WRectangle *geom)
 {
-    char *typestr;
+    WWindow *par=REGION_PARENT_CHK(ws, WWindow);
+    WFitParams fp;
+    assert(par!=NULL);
+    fp.g=*geom;
+    fp.mode=REGION_FIT_EXACT;
     
-    if(extl_table_gets_s(tab, "type", &typestr)){
+    return handler(par, &fp, handlerparams);
+}
+
+WSplit *ionws_load_node(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
+{
+    char *typestr=NULL;
+    char *reference=NULL;
+    
+    if(extl_table_gets_s(tab, "type", &typestr) ||
+       extl_table_gets_s(tab, "reference", &reference)){
+        WSplit *node=NULL;
         WRegion *reg;
-        WFitParams fp;
-        WSplit *node;
         
-        free(typestr);
+        if(typestr!=NULL)
+            free(typestr);
+        if(reference!=NULL)
+            free(reference);
         
-        fp.g=*geom;
-        fp.mode=REGION_FIT_EXACT;
-        reg=create_region_load(par, &fp, tab);
-        if(reg==NULL)
-            return NULL;
+        reg=region__attach_load((WRegion*)ws,
+                                tab, (WRegionDoAttachFn*)do_attach, 
+                                (void*)geom);
         
-        node=create_split_regnode(geom, reg);
-        if(node==NULL){
-            destroy_obj((Obj*)reg);
-            return NULL;
+        if(reg!=NULL){
+            node=create_split_regnode(geom, reg);
+            if(node==NULL)
+                destroy_obj((Obj*)reg);
+            else
+                ionws_managed_add(ws, reg);
         }
         
-        ionws_managed_add(ws, reg);
         return node;
     }
     
-    return load_split(ws, par, geom, tab);
+    return load_split(ws, geom, tab);
 }
 
 
@@ -969,7 +982,7 @@ WRegion *ionws_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
     }
 
     if(!ci){
-        ws->split_tree=ionws_load_node(ws, par, &REGION_GEOM(ws), treetab);
+        ws->split_tree=ionws_load_node(ws, &REGION_GEOM(ws), treetab);
         extl_unref_table(treetab);
     }
     

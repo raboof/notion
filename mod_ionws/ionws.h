@@ -53,8 +53,7 @@ extern void ionws_unsplit_at(WIonWS *ws, WFrame *frame);
 extern WSplit *ionws_split_of(WIonWS *ws, WRegion *reg);
 
 extern WRegion *ionws_load(WWindow *par, const WFitParams *fp, ExtlTab tab);
-extern WSplit *ionws_load_node(WIonWS *ws, WWindow *par, 
-                               const WRectangle *geom, ExtlTab tab);
+extern WSplit *ionws_load_node(WIonWS *ws, const WRectangle *geom, ExtlTab tab);
 
 extern WRegion *ionws_do_managed_remove(WIonWS *ws, WRegion *reg,
                                         bool reclaim_space);
