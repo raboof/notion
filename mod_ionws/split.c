@@ -1175,7 +1175,7 @@ Obj *split_hoist(WSplit *split)
 
 /*EXTL_DOC
  * Return the object (region or split) corresponding to top or left
- * sibling of \var{split} depending on the split's direction.
+ * child of \var{split} depending on the split's direction.
  */
 EXTL_EXPORT_MEMBER
 Obj *split_tl(WSplit *split)
@@ -1190,7 +1190,7 @@ Obj *split_tl(WSplit *split)
 
 /*EXTL_DOC
  * Return the object (region or split) corresponding to bottom or right
- * sibling of \var{split} depending on the split's direction.
+ * child of \var{split} depending on the split's direction.
  */
 EXTL_EXPORT_MEMBER
 Obj *split_br(WSplit *split)
