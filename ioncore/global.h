@@ -74,11 +74,11 @@ DECLSTRUCT(WGlobal){
     int opmode;
     int previous_protect;
     
-    Time resize_delay;
     Time dblclick_delay;
     int opaque_resize;
     bool warp_enabled;
     bool switchto_new;
+    bool screen_notify;
     
     /*bool save_enabled;*/
     

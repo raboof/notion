@@ -23,8 +23,8 @@
 
 #include "gr.h"
 
-extern bool ioncore_add_shortenrule(const char *rx, const char *rule,
-                                    bool always);
+extern bool ioncore_defshortening(const char *rx, const char *rule,
+                                  bool always);
 
 extern char *grbrush_make_label(GrBrush *brush, const char *str, uint maxw);
                                        

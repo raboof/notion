@@ -14,6 +14,7 @@
 #include <time.h>
 #include <limits.h>
 
+#include <libtu/minmax.h>
 #include "global.h"
 #include "resize.h"
 #include "kbresize.h"
@@ -33,6 +34,8 @@ static struct timeval last_update_tv={-1, 0};
 static int last_accel_mode=0;
 static double accel=1, accelinc=30, accelmax=100*100;
 static long actmax=200, uptmin=50;
+static int resize_delay=CF_RESIZE_DELAY;
+
 
 static void accel_reset()
 {
@@ -43,30 +46,31 @@ static void accel_reset()
 }
 
 
-/*EXTL_DOC
- * Set keyboard resize acceleration parameters. When a keyboard resize
- * function is called, and at most \var{t_max} milliseconds has passed
- * from a previous call, acceleration factor is reset to 1.0. Otherwise,
- * if at least \var{t_min} milliseconds have passed from the from previous
- * acceleration update or reset the squere root of the acceleration factor
- * is incremented by \var{step}. The maximum acceleration factor (pixels/call 
- * modulo size hints) is given by \var{maxacc}. The default values are 
- * (200, 50, 30, 100). 
- * 
- * Notice the interplay with X keyboard acceleration parameters.
- * (Maybe insteed of \var{t_min} we should use a minimum number of
- * calls to the function/key presses between updated? Or maybe the
- * resize should be completely time-based with key presses triggering
- * the changes?)
- */
-EXTL_EXPORT
-void ioncore_set_moveres_accel(int t_max, int t_min, 
-                               double step, double maxacc)
+void ioncore_set_moveres_accel(ExtlTab tab)
 {
-    actmax=(t_max>0 ? t_max : INT_MAX);
-    uptmin=(t_min>0 ? t_min : INT_MAX);
-    accelinc=(step>0 ? step : 1);
-    accelmax=(maxacc>0 ? maxacc*maxacc : 1);
+    int t_max, t_min, rd;
+    double step, maxacc;
+    
+    if(extl_table_gets_i(tab, "kbresize_t_max", &t_max))
+       actmax=(t_max>0 ? t_max : INT_MAX);
+    if(extl_table_gets_i(tab, "kbresize_t_min", &t_min))
+       uptmin=(t_min>0 ? t_min : INT_MAX);
+    if(extl_table_gets_d(tab, "kbresize_step", &step))
+       accelinc=(step>0 ? step : 1);
+    if(extl_table_gets_d(tab, "kbresize_maxacc", &maxacc))
+       accelmax=(maxacc>0 ? maxacc*maxacc : 1);
+    if(extl_table_gets_i(tab, "kbresize_delay", &rd))
+        resize_delay=maxof(0, rd);
+}
+
+
+void ioncore_get_moveres_accel(ExtlTab tab)
+{
+    extl_table_sets_i(tab, "kbresize_t_max", actmax),
+    extl_table_sets_i(tab, "kbresize_t_min", uptmin);
+    extl_table_sets_d(tab, "kbresize_step", accelinc);
+    extl_table_sets_d(tab, "kbresize_maxacc", accelmax);
+    extl_table_sets_d(tab, "kbresize_delay", resize_delay);
 }
 
 
@@ -201,7 +205,7 @@ static bool setup_resize_timer()
         }
     }
     
-    timer_set(resize_timer, ioncore_g.resize_delay, tmr_end_resize);
+    timer_set(resize_timer, resize_delay, tmr_end_resize);
     
     return TRUE;
 }

@@ -98,30 +98,51 @@ enum{
 
 
 /*EXTL_DOC
- * Set placement method for WFloatWS:s. \var{Method} can be one  of ''udlr'',
- * ''lrud'' (default) and ''random''. The method ''udlr'' looks for free space
- * starting from top the top left corner of the workspace moving first down
- * keeping the x coordinate fixed. If it find no free space, it start looking
- * similarly at next x coordinate unoccupied by other objects and so on.
- * ''lrud' is the same but with the role of coordinates changed and both
- * fall back to ''random'' placement if no free area was found.
+ * Set module basic settings. Currently only the \code{placement_method} 
+ * parameter is supported.
+ *
+ * The method can be one  of ''udlr'', ''lrud'' (default) and ''random''. 
+ * The ''udlr'' method looks for free space starting from top the top left
+ * corner of the workspace moving first down keeping the x coordinate fixed.
+ * If it find no free space, it start looking similarly at next x coordinate
+ * unoccupied by other objects and so on. ''lrud' is the same but with the 
+ * role of coordinates changed and both fall back to ''random'' placement 
+ * if no free area was found.
  */
 EXTL_EXPORT
-void mod_floatws_set_placement_method(const char *method)
+void mod_floatws_set(ExtlTab tab)
 {
-    if(method==NULL)
-        return;
+    char *method=NULL;
     
-    if(strcmp(method, "udlr")==0)
-        placement_method=PLACEMENT_UDLR;
-    else if(strcmp(method, "lrud")==0)
-        placement_method=PLACEMENT_LRUD;
-    else if(strcmp(method, "random")==0)
-        placement_method=PLACEMENT_RANDOM;
-    else
-        warn("Unknown placement method \"%s\".", method);
+    if(extl_table_gets_s(tab, "placement_method", &method)){
+        if(strcmp(method, "udlr")==0)
+            placement_method=PLACEMENT_UDLR;
+        else if(strcmp(method, "lrud")==0)
+            placement_method=PLACEMENT_LRUD;
+        else if(strcmp(method, "random")==0)
+            placement_method=PLACEMENT_RANDOM;
+        else
+            warn("Unknown placement method \"%s\".", method);
+        free(method);
+    }
 }
 
+/*EXTL_DOC
+ * Get module basic settings. See \fnref{mod_floatws.set} for more 
+ * information.
+ */
+EXTL_EXPORT
+ExtlTab mod_floatws_get()
+{
+    ExtlTab t=extl_create_table();
+    extl_table_sets_s(t, "placement_method", 
+                      (placement_method==PLACEMENT_UDLR
+                       ? "udlr" 
+                       : (placement_method==PLACEMENT_LRUD
+                          ? "lrud" 
+                          : "random")));
+    return t;
+}
 
 static bool tiling_placement(WFloatWS *ws, WRectangle *g)
 {

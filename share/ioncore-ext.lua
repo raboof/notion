@@ -14,16 +14,11 @@
 -- the user with require/includer differences.
 if _LOADED["ioncore"] then return end
 
-local ioncore=_G.ioncore
-
 -- Default modifiers
 MOD1="Mod1+"
 MOD2=""
 
--- Default workspace type
-DEFAULT_WS_TYPE="WIonWS"
-
--- How many characters of result data to completions do we allow?
+-- Maximum number of bytes to read from pipes
 ioncore.RESULT_DATA_LIMIT=1024^2
 
 -- Bindings, winprops, hooks and extra commands
@@ -42,13 +37,9 @@ export(ioncore,
        "mdblclick",
        "mdrag",
        "defbindings",
-       "defwinprop")
-
---[[
-export(ioncore,
+       "defwinprop",
        "warn",
        "exec")
---]]
 
 -- Mark ourselves loaded.
 _LOADED["ioncore"]=true

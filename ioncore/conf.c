@@ -13,6 +13,7 @@
 #include <string.h>
 
 #include <libtu/map.h>
+#include <libtu/minmax.h>
 
 #include "common.h"
 #include "global.h"
@@ -20,58 +21,93 @@
 #include "modules.h"
 #include "rootwin.h"
 #include "bindmaps.h"
+#include "kbresize.h"
+#include "readconfig.h"
+
+
+char *ioncore_default_ws_type=NULL;
 
 
 /*EXTL_DOC
- * Enable/disable opaque move/resize mode.
+ * Set ioncore basic settings. The table \var{tab} may contain the
+ * following fields.
+ * 
+ * \begin{tabularx}{\linewidth}{lX}
+ *  \hline
+ *  Field & Description \\
+ *  \hline
+ *  \var{opaque_resize} & (boolean) Controls whether interactive move and
+ *                        resize operations simply draw a rubberband during
+ *                        the operation (false) or immediately affect the 
+ *                        object in question at every step (true). \\
+ *  \var{warp} &          (boolean) Should focusing operations move the 
+ *                        pointer to the object to be focused? \\
+ *  \var{switchto} &      (boolean) Should a managing \type{WMPlex} switch
+ *                        to a newly mapped client window? \\
+ *  \var{screen_notify} & (boolean) Should notification tooltips be displayed
+ *                        for hidden workspaces with activity? \\
+ *  \var{dblclick_delay} & (integer) Delay between clicks of a double click.\\
+ *  \var{default_ws_type} & (string) Default workspace type for operations
+ *                         that create a workspace.\\
+ *  \var{kbresize_delay} & (integer) Delay in milliseconds for ending keyboard
+ *                         resize mode after inactivity. \\
+ *  \var{kbresize_t_max} & (integer) Controls keyboard resize acceleration. 
+ *                         See description below for details. \\
+ *  \var{kbresize_t_min} & (integer) See below. \\
+ *  \var{kbresize_step} & (floating point) See below. \\
+ *  \var{kbresize_maxacc} & (floating point) See below. \\
+ * \end{tabularx}
+ * 
+ * When a keyboard resize function is called, and at most \var{kbresize_t_max} 
+ * milliseconds has passed from a previous call, acceleration factor is reset 
+ * to 1.0. Otherwise, if at least \var{kbresize_t_min} milliseconds have 
+ * passed from the from previous acceleration update or reset the squere root
+ * of the acceleration factor is incremented by \var{kbresize_step}. The 
+ * maximum acceleration factor (pixels/call modulo size hints) is given by 
+ * \var{kbresize_maxacc}. The default values are (200, 50, 30, 100). 
  */
 EXTL_EXPORT
-void ioncore_set_opaque_resize(bool opaque)
+void ioncore_set(ExtlTab tab)
 {
-    ioncore_g.opaque_resize=opaque;
+    int dd, rd;
+    char *wst;
+    
+    extl_table_gets_b(tab, "opaque_resize", &(ioncore_g.opaque_resize));
+    extl_table_gets_b(tab, "warp", &(ioncore_g.warp_enabled));
+    extl_table_gets_b(tab, "switchto", &(ioncore_g.switchto_new));
+    extl_table_gets_b(tab, "screen_notify", &(ioncore_g.screen_notify));
+    
+    if(extl_table_gets_i(tab, "dblclick_delay", &dd))
+        ioncore_g.dblclick_delay=maxof(0, dd);
+    if(extl_table_gets_s(tab, "default_ws_type", &wst)){
+        if(ioncore_default_ws_type!=NULL)
+            free(ioncore_default_ws_type);
+        ioncore_default_ws_type=wst;
+    }
+    ioncore_set_moveres_accel(tab);
 }
 
 
 /*EXTL_DOC
- * Set double click delay in milliseconds.
+ * Get ioncore basic settings. For details see \fnref{ioncore.set}.
  */
 EXTL_EXPORT
-void ioncore_set_dblclick_delay(int dd)
+ExtlTab ioncore_get()
 {
-    ioncore_g.dblclick_delay=(dd<0 ? 0 : dd);
+    ExtlTab tab=extl_create_table();
+    
+    extl_table_sets_b(tab, "opaque_resize", ioncore_g.opaque_resize);
+    extl_table_sets_b(tab, "warp", ioncore_g.warp_enabled);
+    extl_table_sets_b(tab, "switchto", ioncore_g.switchto_new);
+    extl_table_sets_i(tab, "dblclick_delay", ioncore_g.dblclick_delay);
+    extl_table_sets_b(tab, "screen_notify", ioncore_g.screen_notify);
+    extl_table_sets_s(tab, "default_ws_type", ioncore_default_ws_type);
+    ioncore_get_moveres_accel(tab);
+    
+    return tab;
 }
-
-
-/*EXTL_DOC
- * Set keyboard resize mode auto-finish delay in milliseconds.
- */
-EXTL_EXPORT
-void ioncore_set_resize_delay(int rd)
-{
-    ioncore_g.resize_delay=(rd<0 ? 0 : rd);
-}
-
-
-/*EXTL_DOC
- * Enable/disable warping pointer to be contained in activated region.
- */
-EXTL_EXPORT
-void ioncore_set_warp(bool warp)
-{
-    ioncore_g.warp_enabled=warp;
-}
-
-
-/*EXTL_DOC
- * Should newly created client window be switched to immediately or
- * should the active window retain focus by default?
- */
-EXTL_EXPORT
-void ioncore_set_switchto(bool sw)
-{
-    ioncore_g.switchto_new=sw;
-}
-
+        
+    
 
 bool ioncore_read_main_config(const char *cfgfile)
 {

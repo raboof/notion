@@ -146,7 +146,6 @@ static void init_global()
     ioncore_g.opmode=IONCORE_OPMODE_INIT;
     ioncore_g.previous_protect=0;
     ioncore_g.dblclick_delay=CF_DBLCLICK_DELAY;
-    ioncore_g.resize_delay=CF_RESIZE_DELAY;
     ioncore_g.opaque_resize=0;
     ioncore_g.warp_enabled=TRUE;
     ioncore_g.switchto_new=TRUE;

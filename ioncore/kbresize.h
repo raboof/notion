@@ -15,12 +15,12 @@
 #include "common.h"
 #include "frame.h"
 #include "resize.h"
-
+#include "extl.h"
 
 extern void frame_moveres_begin(WFrame *frame);
 
-extern void ioncore_set_moveres_accel(int t_max, int t_min, 
-                                      double step, double maxacc);
+extern void ioncore_set_moveres_accel(ExtlTab tab);
+extern void ioncore_get_moveres_accel(ExtlTab tab);
 
 extern void moveresmode_finish(WMoveresMode *mode);
 extern void moveresmode_cancel(WMoveresMode *mode);

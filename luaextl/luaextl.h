@@ -78,7 +78,6 @@ extern ExtlFn extl_ref_fn(ExtlFn ref);
 extern ExtlTab extl_ref_table(ExtlTab ref);
 
 extern ExtlTab extl_create_table();
-extern ExtlTab extl_globals();
 
 /* Table/get */
 extern bool extl_table_get_vararg(ExtlTab ref, char itype, char type, 

@@ -251,13 +251,15 @@ end
 function mod_menu.refresh_styles()
     local cmd=ioncore.lookup_script("ion-completefile")
     if cmd then
-        local dirs=ioncore.get_scriptdirs()
-        if table.getn(dirs)==0 then
-            return
-        end
-        for _, s in dirs do
-            cmd=cmd.." "..string.shell_safe(s.."/look-")
-        end
+        local path=ioncore.get_paths().searchpath
+        cmd=cmd..string.gsub(path..":", "([^:]*):",
+                             function(s)
+                                 if s=="" then
+                                     return ""
+                                 else
+                                     return " "..string.shell_safe(s)
+                                 end
+                             end)
         
         ioncore.popen_bgread(cmd, coroutine.wrap(receive_styles))
     end

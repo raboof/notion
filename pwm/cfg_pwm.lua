@@ -13,35 +13,27 @@
 MOD1="Mod1+"
 MOD2=""
 
--- Set default workspace type to floating
-DEFAULT_WS_TYPE="WFloatWS"
 
--- Maximum delay between clicks in milliseconds to be considered a
--- double click.
---ioncore.set_dblclick_delay(250)
+ioncore.set{
+    -- Maximum delay between clicks in milliseconds to be considered a
+    -- double click.
+    dblclick_delay=250,
 
--- For keyboard resize, time (in milliseconds) to wait after latest
--- key press before automatically leaving resize mode (and doing
--- the resize in case of non-opaque move).
---ioncore.set_resize_delay(1500)
+    -- For keyboard resize, time (in milliseconds) to wait after latest
+    -- key press before automatically leaving resize mode (and doing
+    -- the resize in case of non-opaque move).
+    resize_delay=1500,
 
--- Opaque resize?
-ioncore.set_opaque_resize(false)
+    -- Opaque resize?
+    opaque_resize=false,
 
--- Movement commands warp the pointer to frames instead of just
--- changing focus. Enabled by default.
-ioncore.set_warp(false)
-
--- How to shorten window titles when the full title doesn't fit in
--- the available space? The first-defined matching rule that succeeds 
--- in making the title short enough is used.
-ioncore.add_shortenrule("(.*) - Mozilla(<[0-9]+>)", "$1$2$|$1$<...$2")
-ioncore.add_shortenrule("(.*) - Mozilla", "$1$|$1$<...")
-ioncore.add_shortenrule("XMMS - (.*)", "$1$|...$>$1")
-ioncore.add_shortenrule("[^:]+: (.*)(<[0-9]+>)", "$1$2$|$1$<...$2")
-ioncore.add_shortenrule("[^:]+: (.*)", "$1$|$1$<...")
-ioncore.add_shortenrule("(.*)(<[0-9]+>)", "$1$2$|$1$<...$2")
-ioncore.add_shortenrule("(.*)", "$1$|$1$<...")
+    -- Movement commands warp the pointer to frames instead of just
+    -- changing focus. Enabled by default.
+    warp=false,
+    
+    -- Default workspace type.
+    default_ws_type="WFloatWS",
+}
 
 
 --

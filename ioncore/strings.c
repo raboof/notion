@@ -213,7 +213,7 @@ static SR *shortenrules=NULL;
  * \end{tabularx}
  */
 EXTL_EXPORT
-bool ioncore_add_shortenrule(const char *rx, const char *rule, bool always)
+bool ioncore_defshortening(const char *rx, const char *rule, bool always)
 {
     SR *si;
     int ret;

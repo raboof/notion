@@ -854,27 +854,7 @@ ExtlTab extl_create_table()
 }
 
 
-/* globals */
-
-static bool extl_do_globals(lua_State *st, int *refp)
-{
-    lua_pushvalue(st, LUA_GLOBALSINDEX);
-    *refp=lua_ref(st, 1);
-    return TRUE;
-}
-
-
-ExtlTab extl_globals()
-{
-    ExtlTab ref;
-    if(extl_cpcall(l_st, (ExtlCPCallFn*)extl_do_globals, &ref))
-        return ref;
-    return LUA_NOREF;
-}
-
-
 /* eq */
-
 
 typedef struct{
     int o1, o2;

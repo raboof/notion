@@ -856,18 +856,44 @@ static void reset_scroll_timer()
 
 
 /*EXTL_DOC
- * Set ''pmenu'' off-screen scrolling parameters: the number of pixels 
- * to scroll at each timer event, \var{amount}, and the time between
- * those events, \var{delay} (in milliseconds). The default values are 3
- * pixels every 20msec.
+ * Set module basic settings. The parameter table may contain the
+ * following fields:
+ * 
+ * \begin{tabularx}{\linewidth}{lX}
+ *  \hline
+ *  Field & Description \\
+ *  \hline
+ *  \var{scroll_amount} & Number of pixels to scroll at a time 
+ *                        pointer-controlled menus when one extends
+ *                        beyond a border of the screen and the pointer
+ *                        touches that border. \\
+ *  \var{scroll_delay}  & Time between such scrolling events in 
+ *                        milliseconds.
+ * \end{tabularx}
  */
 EXTL_EXPORT
-void mod_menu_set_scroll_params(int delay, int amount)
+void mod_menu_set(ExtlTab tab)
 {
-    scroll_amount=maxof(0, amount);
-    scroll_time=maxof(1, delay);
+    int a, t;
+    
+    if(extl_table_gets_i(tab, "scroll_amount", &a))
+        scroll_amount=maxof(0, a);
+    if(extl_table_gets_i(tab, "scroll_delay", &t))
+        scroll_time=maxof(0, t);
 }
 
+
+/*EXTL_DOC
+ * Get module basic settings. For details, see \fnref{mod_menu.set}.
+ */
+EXTL_EXPORT
+ExtlTab mod_menu_get()
+{
+    ExtlTab tab=extl_create_table();
+    extl_table_sets_i(tab, "scroll_amount", scroll_amount);
+    extl_table_sets_i(tab, "scroll_delay", scroll_time);
+    return tab;
+}
 
 static int scrolld(int d)
 {

@@ -21,13 +21,6 @@
 #include "extl.h"
 
 
-static char *userdir;
-static char* dummy_paths=NULL;
-static char **scriptpaths=&dummy_paths;
-static int n_scriptpaths=0;
-static char *sessiondir=NULL;
-
-
 typedef struct{
     ExtlFn fn;
     ExtlTab tab;
@@ -35,52 +28,53 @@ typedef struct{
 } TryCallParam;
 
 
-/*{{{ Init */
+/*{{{ Path setup */
 
 
-static bool add_dir(char ***pathsptr, int *n_pathsptr, const char *dir)
+static char *userdir=NULL;
+static char *sessiondir=NULL;
+static char *scriptpath=NULL;
+
+
+bool ioncore_add_searchdir(const char *dir)
 {
-    char **paths;
-    char *dircp;
-    int i;
-    
-    if(dir==NULL)
-        return FALSE;
-    
-    dircp=scopy(dir);
-    
-    if(dircp==NULL){
-        warn_err();
-        return FALSE;
+    if(scriptpath==NULL){
+        scriptpath=scopy(dir);
+        if(scriptpath==NULL){
+            warn_err();
+            return FALSE;
+        }
+    }else{
+        char *p=scat3(scriptpath, ":", dir);
+        if(p==NULL){
+            warn_err();
+            return FALSE;
+        }
+        free(scriptpath);
+        scriptpath=p;
     }
-    
-    if(*n_pathsptr==0)
-        paths=ALLOC_N(char*, 2);
-    else
-        paths=REALLOC_N(*pathsptr, char*, (*n_pathsptr)+1, (*n_pathsptr)+2);
-    
-    if(paths==NULL){
-        warn_err();
-        free(dircp);
-        return FALSE;
-    }
-    
-    paths[*n_pathsptr]=dircp;
-    paths[(*n_pathsptr)+1]=NULL;
-    (*n_pathsptr)++;
-    *pathsptr=paths;
     
     return TRUE;
 }
 
 
-/*EXTL_DOC
- * Add a directory to search path.
- */
-EXTL_EXPORT
-bool ioncore_add_searchdir(const char *dir)
+bool ioncore_set_searchpath(const char *path)
 {
-    return add_dir(&scriptpaths, &n_scriptpaths, dir);
+    char *s=NULL;
+    
+    if(path!=NULL){
+        s=scopy(path);
+        if(s==NULL){
+            warn_err();
+            return FALSE;
+        }
+    }
+    
+    if(scriptpath!=NULL)
+        free(scriptpath);
+    
+    scriptpath=s;
+    return TRUE;
 }
 
 
@@ -117,25 +111,6 @@ bool ioncore_set_userdirs(const char *appname)
     return (fails==0);
 }
 
-/*EXTL_DOC
- * Get user configuration file directory.
- */
-EXTL_EXPORT
-const char* ioncore_userdir()
-{
-    return userdir;
-}
-
-
-/*EXTL_DOC
- * Get session directory.
- */
-EXTL_EXPORT
-const char* ioncore_sessiondir()
-{
-    return sessiondir;
-}
-
 
 bool ioncore_set_sessiondir(const char *session)
 {
@@ -165,19 +140,65 @@ bool ioncore_set_sessiondir(const char *session)
 }
 
 
+const char *ioncore_userdir()
+{
+    return userdir;
+}
+
+
+const char *ioncore_sessiondir()
+{
+    return sessiondir;
+}
+
+
+const char *ioncore_searchpath()
+{
+    return scriptpath;
+}
+
+
 /*EXTL_DOC
- * Get all directories on search path.
+ * Get important directories (userdir, sessiondir, searchpath).
  */
 EXTL_EXPORT
-ExtlTab ioncore_get_scriptdirs()
+ExtlTab ioncore_get_paths(ExtlTab tab)
 {
-    int i;
-    ExtlTab tab=extl_create_table();
-    
-    for(i=0; i<n_scriptpaths; i++)
-        extl_table_seti_s(tab, i+1, scriptpaths[i]);
-    
+    tab=extl_create_table();
+    extl_table_sets_s(tab, "userdir", userdir);
+    extl_table_sets_s(tab, "sessiondir", sessiondir);
+    extl_table_sets_s(tab, "searchpath", scriptpath);
     return tab;
+}
+
+
+/*EXTL_DOC
+ * Set important directories (sessiondir, searchpath).
+ */
+EXTL_EXPORT
+bool ioncore_set_paths(ExtlTab tab)
+{
+    char *s;
+
+    if(extl_table_gets_s(tab, "userdir", &s)){
+        WARN_FUNC("User directory can not be set.");
+        free(s);
+        return FALSE;
+    }
+    
+    if(extl_table_gets_s(tab, "sessiondir", &s)){
+        ioncore_set_sessiondir(s);
+        free(s);
+        return FALSE;
+    }
+
+    if(extl_table_gets_s(tab, "searchpath", &s)){
+        ioncore_set_searchpath(s);
+        free(s);
+        return FALSE;
+    }
+    
+    return TRUE;
 }
 
 
@@ -227,6 +248,7 @@ static int try_etcpath(const char *const *files,
 {
     const char *const *file=NULL;
     int i, ret;
+    char *path, *colon, *dir;
 
     if(sessiondir!=NULL){
         for(file=files; *file!=NULL; file++){
@@ -236,11 +258,31 @@ static int try_etcpath(const char *const *files,
         }
     }
     
-    for(i=n_scriptpaths-1; i>=0; i--){
-        for(file=files; *file!=NULL; file++){
-            ret=do_try(scriptpaths[i], *file, tryfn, tryfnparam);
-            if(ret>=0)
-                return ret;
+    
+    path=scriptpath;
+    while(path!=NULL){
+        colon=strchr(path, ':');
+        if(colon!=NULL){
+            dir=scopyn(path, colon-path);
+            path=colon+1;
+        }else{
+            dir=scopy(path);
+            path=NULL;
+        }
+        
+        if(dir==NULL){
+            warn_err();
+        }else{
+            if(*dir!='\0'){
+                for(file=files; *file!=NULL; file++){
+                    ret=do_try(dir, *file, tryfn, tryfnparam);
+                    if(ret>=0){
+                        free(dir);
+                        return ret;
+                    }
+                }
+            }
+            free(dir);
         }
     }
     

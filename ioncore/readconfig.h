@@ -28,10 +28,15 @@ enum{
 
 extern bool ioncore_set_userdirs(const char *appname);
 extern bool ioncore_set_sessiondir(const char *session);
+extern bool ioncore_set_searchpath(const char *path);
 extern bool ioncore_add_searchdir(const char *dir);
 
 extern const char *ioncore_userdir();
 extern const char *ioncore_sessiondir();
+extern const char *ioncore_searchpath();
+
+extern ExtlTab ioncore_get_paths();
+extern bool ioncore_set_paths(ExtlTab tab);
 
 extern int ioncore_try_config(const char *fname, const char *cfdir,
                               WTryConfigFn *tryfn, void *tryfnparam,

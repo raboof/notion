@@ -253,9 +253,6 @@ static void screen_activated(WScreen *scr)
 /*{{{ Notifications */
 
 
-static bool notifies_enabled=TRUE;
-
-
 void screen_notify(WScreen *scr, const char *str)
 {
     WInfoWin *iw=(WInfoWin*)(scr->notifywin_watch.obj);
@@ -339,7 +336,7 @@ static void screen_managed_notify(WScreen *scr, WRegion *sub)
     if(ioncore_g.opmode!=IONCORE_OPMODE_NORMAL)
         return;
     
-    if(notifies_enabled){
+    if(ioncore_g.screen_notify){
         notstr=screen_managed_activity(scr);
         if(notstr!=NULL){
             screen_notify(scr, notstr);
@@ -349,17 +346,6 @@ static void screen_managed_notify(WScreen *scr, WRegion *sub)
     }
 
     screen_unnotify(scr);
-}
-
-
-/*EXTL_DOC
- * Set to true to enable small notification windows at corners of screens 
- * when there is activity on a hidden workspace (or other object).
- */
-EXTL_EXPORT
-void ioncore_set_screen_notify(bool enabled)
-{
-    notifies_enabled=enabled;
 }
 
 
@@ -528,21 +514,19 @@ static WRegion *do_create_initial(WWindow *parent, const WFitParams *fp,
 }
 
 
+extern char *ioncore_default_ws_type;
+
+
 static bool create_initial_ws(WScreen *scr)
 {
     WRegionLoadCreateFn *fn=NULL;
     WRegion *reg=NULL;
     
-    /* Check default_ws_type */{
-        ExtlTab tab=extl_globals();
-        char *wsclass=NULL;
-        if(extl_table_gets_s(tab, "DEFAULT_WS_TYPE", &wsclass)){
-            WRegClassInfo *info=ioncore_lookup_regclass(wsclass, FALSE);
-            if(info!=NULL)
-                fn=info->lc_fn;
-            free(wsclass);
-        }
-        extl_unref_table(tab);
+    if(ioncore_default_ws_type!=NULL){
+        WRegClassInfo *info;
+        info=ioncore_lookup_regclass(ioncore_default_ws_type, FALSE);
+        if(info!=NULL)
+            fn=info->lc_fn;
     }
         
     if(fn==NULL){
