@@ -191,8 +191,8 @@ bool add_clientwin_default(WClientWin *cwin, const XWindowAttributes *attr,
 			/* Is it a transient to some other window? */
 			if(XGetTransientForHint(wglobal.dpy, win, &(cwin->transient_for))){
 				tfor=find_clientwin(cwin->transient_for);
-				if(tfor!=NULL && add_transient(tfor, cwin, attr,
-											   init_state, props))
+				if(tfor!=NULL && tfor!=cwin &&
+				   add_transient(tfor, cwin, attr, init_state, props))
 					return TRUE;
 				cwin->transient_for=None;
 			}
