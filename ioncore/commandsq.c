@@ -27,7 +27,7 @@ static void sq_watch_handler(WWatch *watch, WThing *t)
 }
 
 
-void commands_at_top()
+void commands_at_leaf()
 {
 	WRegion *reg;
 	

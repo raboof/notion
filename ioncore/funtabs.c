@@ -44,7 +44,7 @@ static WFunction wmcore_screen_funtab[]={
 	FN_GLOBAL_VOID("switch_ws_next",		switch_ws_next),
 	FN_GLOBAL_VOID("switch_ws_prev",		switch_ws_prev),
 
-	FN_GLOBAL_VOID("commands_at_top",		commands_at_top),
+	FN_GLOBAL_VOID("commands_at_leaf",		commands_at_leaf),
 	END_FUNTAB
 };
 
