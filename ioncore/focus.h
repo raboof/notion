@@ -23,6 +23,7 @@ extern void do_move_pointer_to(WRegion *reg);
 extern void do_set_focus(WRegion *reg, bool warp);
 extern void set_focus(WRegion *reg);
 extern void warp(WRegion *reg);
+extern WRegion *set_focus_mgrctl(WRegion *freg, bool dowarp);
 extern void set_previous_of(WRegion *reg);
 extern void goto_previous();
 extern void protect_previous();

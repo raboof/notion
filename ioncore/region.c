@@ -248,10 +248,10 @@ void region_remove_managed(WRegion *mgr, WRegion *reg)
 }
 
 
-WRegion *region_managed_enter_to_focus(WRegion *mgr, WRegion *reg)
+WRegion *region_control_managed_focus(WRegion *mgr, WRegion *reg)
 {
 	WRegion *ret=NULL;
-	CALL_DYN_RET(ret, WRegion*, region_managed_enter_to_focus, mgr, (mgr, reg));
+	CALL_DYN_RET(ret, WRegion*, region_control_managed_focus, mgr, (mgr, reg));
 	return ret;
 }
 
@@ -398,7 +398,7 @@ void region_detach(WRegion *reg)
 /*{{{ Focus */
 
 
-bool _region_may_control_focus(WRegion *reg)
+bool region_may_control_focus(WRegion *reg)
 {
 	WRegion *par, *r2;
 	
@@ -420,13 +420,6 @@ bool _region_may_control_focus(WRegion *reg)
 	return FALSE;
 }
 
-
-bool region_may_control_focus(WRegion *reg)
-{
-	bool mcf=_region_may_control_focus(reg);
-	D2(fprintf(stderr, "mcf: %s %d\n", WOBJ_TYPESTR(reg), mcf));
-	return mcf;
-}
 
 void region_got_focus(WRegion *reg)
 {
@@ -550,10 +543,8 @@ bool region_display_sp(WRegion *reg)
 EXTL_EXPORT_MEMBER
 bool region_goto(WRegion *reg)
 {
-	if(region_display_sp(reg)){
-		warp(reg);
-		return TRUE;
-	}
+	if(region_display_sp(reg))
+		return (reg==set_focus_mgrctl(reg, TRUE));
 	return FALSE;
 }
 

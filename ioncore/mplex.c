@@ -312,7 +312,7 @@ static void mplex_set_focus_to(WMPlex *mplex, bool warp)
 }
 	
 
-static WRegion *mplex_managed_enter_to_focus(WMPlex *mplex, WRegion *reg)
+static WRegion *mplex_managed_focus(WMPlex *mplex, WRegion *reg)
 {
 	return mplex->current_input;
 }
@@ -624,7 +624,7 @@ void mplex_remove_managed(WMPlex *mplex, WRegion *reg)
 	if(mplex->current_input==reg){
 		region_unset_manager(reg, (WRegion*)mplex, NULL);
 		mplex->current_input=NULL;
-		if(REGION_IS_ACTIVE(mplex))
+		if(region_may_control_focus((WRegion*)mplex))
 			set_focus((WRegion*)mplex);
 	}else{
 		mplex_do_remove(mplex, reg);
@@ -757,8 +757,8 @@ static DynFunTab mplex_dynfuntab[]={
 	{(DynFun*)reparent_region, (DynFun*)mplex_reparent},
 
 	{region_set_focus_to, mplex_set_focus_to},
-	{(DynFun*)region_managed_enter_to_focus,
-	 (DynFun*)mplex_managed_enter_to_focus},
+	{(DynFun*)region_control_managed_focus,
+	 (DynFun*)mplex_managed_focus},
 	
 	{region_remove_managed, mplex_remove_managed},
 	{region_request_managed_geom, mplex_request_managed_geom},

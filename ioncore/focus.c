@@ -142,5 +142,31 @@ void warp(WRegion *reg)
 }
 
 
+WRegion *set_focus_mgrctl(WRegion *freg, bool dowarp)
+{
+	WRegion *mgr=freg;
+	WRegion *reg;
+	
+	while(1){
+		reg=mgr;
+		mgr=REGION_MANAGER(reg);
+		if(mgr==NULL)
+			break;
+		reg=region_control_managed_focus(mgr, reg);
+		if(reg!=NULL)
+			freg=reg;
+	}
+	
+	if(!REGION_IS_ACTIVE(freg)){
+		if(dowarp)
+			warp(freg);
+		else
+			set_focus(freg);
+	}
+
+	return freg;
+}
+
+
 /*}}}*/
 

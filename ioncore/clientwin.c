@@ -568,7 +568,7 @@ static WRegion *clientwin_do_attach_transient(WClientWin *cwin,
 	else
 		region_unmap(reg);
 	
-	if(REGION_IS_ACTIVE(cwin))
+	if(region_may_control_focus((WRegion*)cwin))
 		set_focus(reg);
 	
 	return reg;
@@ -588,13 +588,13 @@ bool clientwin_attach_transient(WClientWin *cwin, WRegion *transient)
 
 static void clientwin_remove_managed(WClientWin *cwin, WRegion *transient)
 {
-	WRegion *reg;
+	bool mcf=region_may_control_focus((WRegion*)cwin);
 	
 	region_unset_manager(transient, (WRegion*)cwin, &(cwin->transient_list));
 	region_reset_stacking(transient);
 	
-	if(REGION_IS_ACTIVE(transient)){
-		reg=region_topmost_stacked_above((WRegion*)cwin);
+	if(mcf){
+		WRegion *reg=region_topmost_stacked_above((WRegion*)cwin);
 		if(reg==NULL)
 			reg=&cwin->region;
 		set_focus(reg);
@@ -1086,7 +1086,7 @@ static void clientwin_resize_hints(WClientWin *cwin, XSizeHints *hints_ret,
 }
 
 
-static WRegion *clientwin_managed_enter_to_focus(WClientWin *cwin, WRegion *reg)
+static WRegion *clientwin_managed_focus(WClientWin *cwin, WRegion *reg)
 {
 	return region_topmost_stacked_above((WRegion*)cwin);
 }
@@ -1396,8 +1396,8 @@ static DynFunTab clientwin_dynfuntab[]={
 	{region_resize_hints, 
 	 clientwin_resize_hints},
 	
-	{(DynFun*)region_managed_enter_to_focus,
-	 (DynFun*)clientwin_managed_enter_to_focus},
+	{(DynFun*)region_control_managed_focus,
+	 (DynFun*)clientwin_managed_focus},
 	
 	{region_remove_managed, 
 	 clientwin_remove_managed},

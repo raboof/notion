@@ -155,7 +155,7 @@ extern void region_set_manager(WRegion *reg, WRegion *mgr, WRegion **listptr);
 extern void region_unset_manager(WRegion *reg, WRegion *mgr, WRegion **listptr);
 extern WRegion *region_get_manager_chk(WRegion *p, const WObjDescr *descr);
 
-DYNFUN WRegion *region_managed_enter_to_focus(WRegion *mgr, WRegion *reg);
+DYNFUN WRegion *region_control_managed_focus(WRegion *mgr, WRegion *reg);
 DYNFUN void region_remove_managed(WRegion *reg, WRegion *sub);
 DYNFUN bool region_display_managed(WRegion *reg, WRegion *sub);
 DYNFUN void region_managed_activated(WRegion *reg, WRegion *sub);

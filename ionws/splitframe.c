@@ -100,7 +100,9 @@ static WIonFrame *do_split(WIonFrame *oframe, const char *str, bool attach)
 	if(attach && WGENFRAME_CURRENT(oframe)!=NULL)
 		mplex_attach_simple((WMPlex*)reg, WGENFRAME_CURRENT(oframe), TRUE);
 	
-	region_goto(reg);
+	if(region_may_control_focus((WRegion*)oframe))
+		region_goto(reg);
+
 	return (WIonFrame*)reg;
 }
 

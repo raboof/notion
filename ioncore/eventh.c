@@ -464,13 +464,13 @@ static void handle_enter_window(XEvent *ev)
 		mgr=REGION_MANAGER(reg);
 		if(mgr==NULL)
 			break;
-		reg=region_managed_enter_to_focus(mgr, reg);
+		reg=region_control_managed_focus(mgr, reg);
 		if(reg!=NULL)
 			freg=reg;
 	}
 
 	set_previous_of(freg);
-	set_focus(freg);
+	set_focus_mgrctl(freg, FALSE);
 }
 
 
