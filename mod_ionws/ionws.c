@@ -36,6 +36,18 @@
 #include "main.h"
 
 
+EXTL_EXPORT_MEMBER
+bool ionws_mark_as_docknode(WIonWS *ws, WSplit *split)
+{
+    #warning "Temporary function: remove"
+    if(split->type==SPLIT_REGNODE){
+        split->type=SPLIT_DOCKNODE;
+        return TRUE;
+    }
+    return FALSE;
+}
+    
+       
 /*{{{ region dynfun implementations */
 
 
@@ -719,7 +731,7 @@ WRegion *ionws_region_at(WIonWS *ws, int x, int y)
  * a leaf of which \var{reg} is.
  */
 EXTL_EXPORT_MEMBER
-WSplit *ionws_split_of(WIonWS *ws, WRegion *reg)
+WSplit *ionws_node_of(WIonWS *ws, WRegion *reg)
 {
     if(reg==NULL){
         WARN_FUNC("nil parameter");
@@ -731,7 +743,7 @@ WSplit *ionws_split_of(WIonWS *ws, WRegion *reg)
         return NULL;
     }
     
-    return split_tree_split_of(reg);
+    return split_tree_node_of(reg);
 }
 
 
@@ -761,6 +773,13 @@ static ExtlTab get_node_config(WSplit *node)
     ExtlTab tab, stab;
     
     assert(node!=NULL);
+    
+    if(node->type==SPLIT_DOCKNODE){
+#warning "TODO: proper docknode saving"
+        if(region_supports_save(node->u.reg))
+            return region_get_configuration(node->u.reg);
+        return extl_table_none();
+    }
     
     if(node->type==SPLIT_REGNODE){
         if(region_supports_save(node->u.reg))
@@ -937,6 +956,8 @@ WSplit *ionws_load_node(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
     char *typestr=NULL;
     Obj *reference=NULL;
     
+#warning "TODO: docknode loading"
+
     if(extl_table_gets_s(tab, "type", &typestr) ||
        extl_table_gets_o(tab, "reference", &reference)){
         WSplit *node=NULL;

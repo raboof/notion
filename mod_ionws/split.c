@@ -29,6 +29,7 @@
 #include <ioncore/rectangle.h>
 #include "ionws.h"
 #include "split.h"
+#include "split-dock.h"
 
 
 IMPLCLASS(WSplit, Obj, split_deinit, NULL);
@@ -58,7 +59,6 @@ int split_other_pos(WSplit *split, int dir)
 {
     return (dir==SPLIT_VERTICAL ? split->geom.x : split->geom.y);
 }
-
 
 
 static int reg_calcresize(WRegion *reg, int dir, int nsize)
@@ -148,15 +148,6 @@ WSplit *split_tree_node_of(WRegion *reg)
 }
 
 
-WSplit *split_tree_split_of(WRegion *reg)
-{
-    WSplit *node=node_of_reg(reg);
-    if(node!=NULL)
-        return node->parent;
-    return NULL;
-}
-
-
 #define set_node_of_reg split_tree_set_node_of
 
 
@@ -195,7 +186,7 @@ void split_deinit(WSplit *split)
 {
     assert(split->parent==NULL);
 
-    if(split->type==SPLIT_REGNODE){
+    if(split->type==SPLIT_REGNODE || split->type==SPLIT_DOCKNODE){
         if(split->u.reg!=NULL)
             set_node_of_reg(split->u.reg, NULL);
     }else if(split->type==SPLIT_VERTICAL || split->type==SPLIT_HORIZONTAL){
@@ -237,7 +228,7 @@ void split_get_unused(WSplit *node, WSplitUnused *unused)
 {
     CHKNODE(node);
     
-    if(node->type==SPLIT_REGNODE){
+    if(node->type==SPLIT_REGNODE || node->type==SPLIT_DOCKNODE){
         unused->t=0;
         unused->b=0;
         unused->l=0;
@@ -265,6 +256,15 @@ void split_update_bounds(WSplit *node, bool recursive)
     
     CHKNODE(node);
     
+    if(node->type==SPLIT_DOCKNODE){
+        /* Temporary */
+        node->min_w=1;
+        node->min_h=32;
+        node->max_w=INT_MAX;
+        node->max_h=32;
+        return;
+    }
+
     if(node->type==SPLIT_REGNODE){
         split_update_region_bounds(node, node->u.reg);
         return;
@@ -312,6 +312,87 @@ void split_update_bounds(WSplit *node, bool recursive)
         node->u.s.unused.tot_v=tlunused.tot_v+brunused.tot_v;
         node->u.s.unused.tot_h=minof(tlunused.tot_h, brunused.tot_h);
     }
+}
+
+
+void split_update_geom_from_children(WSplit *node)
+{
+    if(node->type==SPLIT_VERTICAL)
+        node->geom.h=node->u.s.tl->geom.h+node->u.s.br->geom.h;
+    else if(node->type==SPLIT_HORIZONTAL)
+        node->geom.w=node->u.s.tl->geom.w+node->u.s.br->geom.w;
+}
+
+
+/*}}}*/
+
+
+/*{{{ Dock handling helper functions. */
+
+
+static WSplit *saw_dock=NULL;
+
+
+static void begin_resize_segment()
+{
+    saw_dock=NULL;
+}
+
+
+static void end_resize_segment()
+{
+    if(saw_dock!=NULL){
+        split_regularise_dock(saw_dock);
+        saw_dock=NULL;
+    }
+}
+
+
+static void split_lookup_dock_rootward(WSplit *node)
+{
+    while(1){
+        WSplit *p=node->parent;
+        
+        if(p==NULL){
+            return;
+        }else if(p->u.s.tl->type==SPLIT_DOCKNODE){
+            saw_dock=p->u.s.tl;
+            return;
+        }else if(p->u.s.br->type==SPLIT_DOCKNODE){
+            saw_dock=p->u.s.br;
+            return;
+        }
+        node=p;
+    }
+}
+
+
+static WSplit *split_lookup_dock_parent(WSplit *node)
+{
+    WSplit *r;
+    
+    if(node->type!=SPLIT_VERTICAL && node->type!=SPLIT_HORIZONTAL){
+        return NULL;
+    }else if(node->u.s.tl->type==SPLIT_DOCKNODE){
+        return node;
+    }else if(node->u.s.br->type==SPLIT_DOCKNODE){
+        return node;
+    }
+        
+    r=split_lookup_dock_parent(node->u.s.tl);
+    if(r==NULL)
+        r=split_lookup_dock_parent(node->u.s.br);
+    return r;
+}
+
+
+static bool dock_immediate_child(WSplit *split)
+{
+    if(split->type!=SPLIT_VERTICAL && split->type!=SPLIT_HORIZONTAL)
+        return FALSE;
+    
+    return (split->u.s.br->type==SPLIT_DOCKNODE ||
+            split->u.s.tl->type==SPLIT_DOCKNODE);
 }
 
 
@@ -363,31 +444,44 @@ static void adjust_sizes(int *tls_, int *brs_, int nsize, int sz,
 
 
 bool split_do_resize(WSplit *node, const WRectangle *ng, 
-                     int hprimn, int vprimn, bool transpose)
+                     int hprimn, int vprimn, bool transpose, 
+                     void (*justcheck)(WSplit *node, const WRectangle *g))
 {
     bool ret=TRUE;
+    bool dock_moved=FALSE;
     
     CHKNODE(node);
-
+    
     assert(!transpose || (hprimn==PRIMN_ANY && vprimn==PRIMN_ANY));
     
-    if(node->type==SPLIT_REGNODE){
-        region_fit(node->u.reg, ng, REGION_FIT_EXACT);
+    if(node->type==SPLIT_REGNODE || node->type==SPLIT_DOCKNODE){
+        if(node->type==SPLIT_DOCKNODE)
+            saw_dock=node;
+        if(!justcheck){
+            region_fit(node->u.reg, ng, REGION_FIT_EXACT);
+            node->geom=*ng;
+        }
     }else if(node->type!=SPLIT_UNUSED){
+        /* !!! Gotta do some DOCKNODE checking somewhere here perhaps? 
+         * Or perhaps where this is called from?
+         */
         WSplit *tl=node->u.s.tl, *br=node->u.s.br;
         int sz=split_size(node, node->type);
         int tls=split_size(tl, node->type);
         int brs=split_size(br, node->type);
-        int dir=(transpose ? other_dir(node->type) : node->type);
+        /* Dock can not be transposed. */
+        int dir=((transpose && !dock_immediate_child(node))
+                 ? other_dir(node->type)
+                 : node->type);
         int nsize=(dir==SPLIT_VERTICAL ? ng->h : ng->w);
         int primn=(dir==SPLIT_VERTICAL ? vprimn : hprimn);
         int tlmin, tlmax, tlused, brmin, brmax, brused;
         WRectangle tlg=*ng, brg=*ng;
-
+        
         get_minmaxused(tl, dir, &tlmin, &tlmax, &tlused);
         get_minmaxused(br, dir, &brmin, &brmax, &brused);
         /* tlmin,  brmin >= 1 => (tls>=tlmin, brs>=brmin => sz>0) */
-
+        
         if(sz>2){
             if(nsize>=tlused+brused){
                 /* Just remove slack if shrinking */
@@ -401,7 +495,7 @@ bool split_do_resize(WSplit *node, const WRectangle *ng,
                              primn);
             }
         }
-
+        
         if(tls+brs!=nsize){
             /* Bad fit; just size proportionally. */
             if(sz<=2){
@@ -422,15 +516,31 @@ bool split_do_resize(WSplit *node, const WRectangle *ng,
             brg.x+=tls;
             brg.w=brs;
         }
-
-        split_do_resize(tl, &tlg, hprimn, vprimn, transpose);
-        split_do_resize(br, &brg, hprimn, vprimn, transpose);
         
-        node->type=dir;
+        split_do_resize(tl, &tlg, hprimn, vprimn, transpose, justcheck);
+        split_do_resize(br, &brg, hprimn, vprimn, transpose, justcheck);
+        
+        if(!justcheck){
+            node->type=dir;
+            node->geom=*ng;
+            
+            /*
+            dock_moved=split_try_sink_dock(node, TRUE, FALSE);
+            if(!dock_moved){
+                if(dock_immediate_child(tl))
+                    dock_moved=split_try_unsink_dock(tl, FALSE, FALSE);
+                else if(dock_immediate_child(br))
+                    dock_moved=split_try_unsink_dock(br, FALSE, FALSE);
+            }*/
+        }
+    }else{
+        node->geom=*ng;
     }
-    
-    node->geom=*ng;
-    split_update_bounds(node, FALSE);
+
+    if(!justcheck)
+        split_update_bounds(node, dock_moved);
+    else
+        justcheck(node, ng);
     
     return ret;
 }
@@ -439,7 +549,9 @@ bool split_do_resize(WSplit *node, const WRectangle *ng,
 void split_resize(WSplit *node, const WRectangle *ng, int hprimn, int vprimn)
 {
     split_update_bounds(node, TRUE);
-    split_do_resize(node, ng, hprimn, vprimn, FALSE);
+    begin_resize_segment();
+    split_do_resize(node, ng, hprimn, vprimn, FALSE, NULL);
+    end_resize_segment();
 }
 
 
@@ -556,8 +668,17 @@ static void split_do_resize_rootward(WSplit *node, RootwardAmount *ha,
     }
     
     if(!tryonly){
-        split_do_resize(other, &og, hprimn, vprimn, FALSE);
+        /* Entä jos 'other' on dock? */
+        split_do_resize(other, &og, hprimn, vprimn, FALSE, NULL);
+        
         p->geom=pg;
+
+        /* Ei näin. 'node'n kokoa ei saisi muuttaa vielä.
+        if(dock_immediate_child(other)){
+            if(split_try_unsink_dock(other, FALSE, FALSE)){
+            }
+        }
+         */
     }
     
     *rg=ng;
@@ -616,10 +737,18 @@ void split_resize_rootward(WSplit *node, const WRectangle *ng,
     if(rg==NULL)
         rg=&rg_;
 
+    begin_resize_segment();
+    
     split_resize_rootward_(node, ng, hany, vany, tryonly, rg);
     
-    if(!tryonly)
-        split_do_resize(node, rg, PRIMN_ANY, PRIMN_ANY, FALSE);
+    if(!tryonly){
+        split_do_resize(node, rg, PRIMN_ANY, PRIMN_ANY, FALSE, NULL);
+        end_resize_segment();
+        if(rg!=NULL){
+            /* end_resize_segment may have changed geometry. */
+            *rg=node->geom;
+        }
+    }
 }
 
 
@@ -708,7 +837,7 @@ WSplit *create_split(const WRectangle *geom, int dir, WSplit *tl, WSplit *br)
         split->type=dir;
         split->u.s.tl=tl;
         split->u.s.br=br;
-        split->u.s.current=0;
+        split->u.s.current=SPLIT_CURRENT_TL;
         split->u.s.unused.t=0;
         split->u.s.unused.l=0;
         split->u.s.unused.b=0;
@@ -759,6 +888,11 @@ WSplit *split_tree_split(WSplit **root, WSplit *node, int dir, int primn,
     
     assert(root!=NULL && *root!=NULL && node!=NULL && parent!=NULL);
     
+    if(node->type==SPLIT_DOCKNODE){
+        WARN_FUNC("Splitting dock not allowed.");
+        return NULL;
+    }
+
     if(primn!=PRIMN_TL && primn!=PRIMN_BR)
         primn=PRIMN_BR;
     if(dir!=SPLIT_HORIZONTAL && dir!=SPLIT_VERTICAL)
@@ -771,6 +905,7 @@ WSplit *split_tree_split(WSplit **root, WSplit *node, int dir, int primn,
     sn=maxof(minsize, s/2);
     so=maxof(objmin, s-sn);
 
+    begin_resize_segment();
     
     if(sn+so!=s){
         int rs;
@@ -782,7 +917,7 @@ WSplit *split_tree_split(WSplit **root, WSplit *node, int dir, int primn,
         split_resize_rootward_(node, &ng, TRUE, TRUE, TRUE, &rg);
         rs=(dir==SPLIT_VERTICAL ? rg.h : rg.w);
         if(rs<minsize+objmin){
-            warn("Unable to split: not enough free space.");
+            WARN_FUNC("Unable to split: not enough free space.");
             return NULL;
         }
         split_resize_rootward_(node, &ng, TRUE, TRUE, FALSE, &rg);
@@ -796,6 +931,7 @@ WSplit *split_tree_split(WSplit **root, WSplit *node, int dir, int primn,
         }
     }else{
         rg=node->geom;
+        split_lookup_dock_rootward(node);
     }
 
     /* Create split and new window
@@ -849,7 +985,7 @@ WSplit *split_tree_split(WSplit **root, WSplit *node, int dir, int primn,
     split_do_resize(node, &ng, 
                     (dir==SPLIT_HORIZONTAL ? primn : PRIMN_ANY),
                     (dir==SPLIT_VERTICAL ? primn : PRIMN_ANY),
-                    FALSE);
+                    FALSE, NULL);
 
     /* Set up split structure
      */
@@ -874,6 +1010,8 @@ WSplit *split_tree_split(WSplit **root, WSplit *node, int dir, int primn,
     }else{
         *root=nsplit;
     }
+    
+    end_resize_segment();
     
     return nnode;
 }
@@ -1063,10 +1201,7 @@ static void move_down_(WSplit **root, WSplit *node, WSplit *unused)
         other->parent=node;
         unused->parent=p;
         
-        if(dir==SPLIT_VERTICAL)
-            node->geom.h=other->geom.h+uother->geom.h;
-        else
-            node->geom.w=other->geom.w+uother->geom.w;
+        split_update_geom_from_children(node);
         
         move_down(root, p, unused);
     }
@@ -1081,6 +1216,15 @@ WSplit *split_tree_remove(WSplit **root, WSplit *node,
     WSplit **thisptr=NULL;
     bool replace_ok=FALSE, tl=FALSE;
 
+    if(split!=NULL){
+        if((split->u.s.tl!=node && split->u.s.tl->type==SPLIT_DOCKNODE) ||
+           (split->u.s.br!=node && split->u.s.br->type==SPLIT_DOCKNODE)){
+            /* Try to move dock out of the way. */
+            split_try_unsink_dock(split, FALSE, TRUE);
+            split=node->parent;
+        }
+    }
+    
     nextfocus=split_find_closest_regnode(node);
     
     if(split!=NULL){
@@ -1090,7 +1234,7 @@ WSplit *split_tree_remove(WSplit **root, WSplit *node,
         
         assert(other!=NULL);
         
-        if(lazy){
+        if(lazy || other->type==SPLIT_DOCKNODE){
             WSplit *un=create_split_unused(&(node->geom));
             if(un!=NULL){
                 *thisptr=un;
@@ -1142,10 +1286,10 @@ WSplit *split_current_tl(WSplit *node, int dir)
         
     if(node->type==SPLIT_UNUSED){
         /* nothing */
-    }else if(node->type==SPLIT_REGNODE){
+    }else if(node->type==SPLIT_REGNODE || node->type==SPLIT_DOCKNODE){
         if(regfilter==NULL || regfilter(node->u.reg))
             nnode=node;
-    }else if(node->type==dir || node->u.s.current==0){
+    }else if(node->type==dir || node->u.s.current==SPLIT_CURRENT_TL){
         nnode=split_current_tl(node->u.s.tl, dir);
         if(nnode==NULL)
             nnode=split_current_tl(node->u.s.br, dir);
@@ -1170,9 +1314,9 @@ WSplit *split_current_br(WSplit *node, int dir)
 
     if(node->type==SPLIT_UNUSED){
         /* nothing */
-    }else if(node->type==SPLIT_REGNODE){
+    }else if(node->type==SPLIT_REGNODE || node->type==SPLIT_DOCKNODE){
         nnode=node;
-    }else if(node->type==dir || node->u.s.current!=0){
+    }else if(node->type==dir || node->u.s.current!=SPLIT_CURRENT_TL){
         nnode=split_current_br(node->u.s.br, dir);
         if(nnode==NULL)
             nnode=split_current_br(node->u.s.tl, dir);
@@ -1192,8 +1336,6 @@ static WSplit *find_split(WSplit *node, int dir, int *from)
     WSplit *split=node->parent;
     
     while(split!=NULL){
-        CHKSPLIT(split);
-        
         if(split->type==dir){
             if(node==split->u.s.tl)
                 *from=PRIMN_TL;
@@ -1369,14 +1511,14 @@ WSplit *split_br(WSplit *split)
 
 
 /*EXTL_DOC
- * For split nodes of type \code{SPLIT_REGNODE} this function returns the
- * region contained in the node. For other types of nodes \code{nil} is
- * returned.
+ * For split nodes of type \code{SPLIT_REGNODE} or \code{SPLIT_DOCKNODE}
+ * this function returns the region contained in the node. For other types
+ * of nodes \code{nil} is returned.
  */
 EXTL_EXPORT_MEMBER
 WRegion *split_reg(WSplit *node)
 {
-    if(node->type!=SPLIT_REGNODE)
+    if(node->type!=SPLIT_REGNODE && node->type!=SPLIT_DOCKNODE)
         return NULL;
     return node->u.reg;
 }
@@ -1385,7 +1527,7 @@ WRegion *split_reg(WSplit *node)
 /*EXTL_DOC
  * Returns the split type of \var{node}, one of
  * \code{SPLIT_VERTICAL}, \code{SPLIT_HORIZONTAL},
- * \code{SPLIT_UNUSED} and \code{SPLIT_REGNODE}
+ * \code{SPLIT_UNUSED}, \code{SPLIT_REGNODE} and \code{SPLIT_DOCKNODE}.
  */
 EXTL_EXPORT_MEMBER
 const char *split_type(WSplit *split)
@@ -1395,6 +1537,7 @@ const char *split_type(WSplit *split)
     CT(SPLIT_HORIZONTAL);
     CT(SPLIT_UNUSED);
     CT(SPLIT_REGNODE);
+    CT(SPLIT_DOCKNODE);
     return NULL;
 #undef CT
 }
@@ -1435,7 +1578,7 @@ WRegion *split_region_at(WSplit *node, int x, int y)
     if(node->type==SPLIT_UNUSED)
         return NULL;
 
-    if(node->type==SPLIT_REGNODE){
+    if(node->type==SPLIT_REGNODE || node->type==SPLIT_DOCKNODE){
         if(!rectangle_contains(&REGION_GEOM(node->u.reg), x, y))
             return NULL;
         return node->u.reg;
@@ -1456,7 +1599,9 @@ void split_mark_current(WSplit *node)
     WSplit *split=node->parent;
     
     while(split!=NULL){
-        split->u.s.current=(split->u.s.tl==node ? 0 : 1);
+        split->u.s.current=(split->u.s.tl==node 
+                            ? SPLIT_CURRENT_TL 
+                            : SPLIT_CURRENT_BR);
         node=split;
         split=split->parent;
     }
@@ -1471,8 +1616,37 @@ void split_mark_current(WSplit *node)
 
 void split_transpose_to(WSplit *node, const WRectangle *geom)
 {
+    WSplit *dockp=NULL;
+
+    if(node->type==SPLIT_DOCKNODE){
+        WARN_FUNC("Docks can not be transposed.");
+        return;
+    }
+    
+    dockp=split_lookup_dock_parent(node);
+    
+    /* split_do_resize can do things right if 'node' has dock as child, but
+     * otherwise transpose will put the dock the dock in a bad split 
+     * configuration if it is contained within 'node', so we must first move
+     * it out of the way.
+     */
+    if(dockp!=NULL && dockp!=node){
+        split_try_unsink_dock(dockp, TRUE, TRUE);
+        dockp=split_lookup_dock_parent(node);
+        if(dockp!=NULL && dockp!=node){
+            WARN_FUNC("Unable to move dock out of way of transpose.");
+            return;
+        }
+    }
+    
     split_update_bounds(node, TRUE);
-    split_do_resize(node, geom,  PRIMN_ANY, PRIMN_ANY, TRUE);
+    
+    begin_resize_segment();
+    
+    split_do_resize(node, geom, PRIMN_ANY, PRIMN_ANY, TRUE, NULL);
+    split_lookup_dock_rootward(node);
+    
+    end_resize_segment();
 }
 
 
@@ -1486,3 +1660,5 @@ void split_transpose(WSplit *node)
 
 
 /*}}}*/
+
+

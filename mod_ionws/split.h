@@ -24,7 +24,8 @@ enum WSplitType{
     SPLIT_REGNODE,
     SPLIT_HORIZONTAL,
     SPLIT_VERTICAL,
-    SPLIT_UNUSED
+    SPLIT_UNUSED,
+    SPLIT_DOCKNODE
 };
 
 
@@ -35,10 +36,17 @@ enum WPrimaryNode{
 };
 
 
+enum WSplitCurrent{
+    SPLIT_CURRENT_TL,
+    SPLIT_CURRENT_BR
+};
+
+
 typedef struct{
     int t, l, b, r;
     int tot_v, tot_h;
 } WSplitUnused;
+
 
 INTRCLASS(WSplit);
 DECLCLASS(WSplit){
@@ -91,7 +99,9 @@ extern void split_get_unused(WSplit *node, WSplitUnused *unused);
 extern void split_resize(WSplit *node, const WRectangle *ng, 
                          int hprimn, int vprimn);
 extern bool split_do_resize(WSplit *node, const WRectangle *ng, 
-                            int hprimn, int vprimn, bool transpose);
+                            int hprimn, int vprimn, bool transpose,
+                            void (*justcheck)(WSplit *node, 
+                                              const WRectangle *g));
 
 extern WSplit *split_tree_split(WSplit **root, WSplit *node, int dir, 
                                 int primn, int minsize, 
@@ -114,16 +124,15 @@ extern bool split_tree_set_node_of(WRegion *reg, WSplit *split);
 extern void split_transpose(WSplit *split);
 extern void split_transpose_to(WSplit *split, const WRectangle *geom);
 
+extern void split_update_geom_from_children(WSplit *node);
+
 #define CHKNODE(NODE)                                              \
     assert(((NODE)->type==SPLIT_REGNODE && (NODE)->u.reg!=NULL) || \
+           ((NODE)->type==SPLIT_DOCKNODE && (NODE)->u.reg!=NULL) ||\
            ((NODE)->type==SPLIT_UNUSED) ||                         \
            (((NODE)->type==SPLIT_VERTICAL ||                       \
              (NODE)->type==SPLIT_HORIZONTAL)                       \
             && ((NODE)->u.s.tl!=NULL && (NODE)->u.s.br!=NULL)))
-
-#define CHKSPLIT(NODE)                                          \
-    assert((NODE)->type!=SPLIT_REGNODE &&                       \
-           ((NODE)->u.s.tl!=NULL && (NODE)->u.s.br!=NULL));
 
 #define UNUSED_TOT(U1, U2, S) ((U1)+(U2)>=(S) ? (U1)+(U2) : (U1))
 #define UNUSED_L_TOT(U, R) UNUSED_TOT((U).l, (U).r, (R)->geom.w)
