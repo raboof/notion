@@ -37,8 +37,11 @@ EXTRABINDIR=$(LIBDIR)/ion-devel
 
 LIBTOOL=libtool
 
-# Set PRELOAD_MODULES=1 if your system does not support dynamically
-# loaded modules. 
+# Set PRELOAD_MODULES=1 if your system does not support dynamically loaded
+# modules. Cygwin users need to set this option and also LIBTOOL point to 
+# a real libtool script (e.g. /usr/autotool/stable/bin/libtool) instead of
+# some lame autoconf-expecting wrapper script. This should allow compiling
+# Ion on at least the version of Cygwin I installed on 2003-06-17.
 #PRELOAD_MODULES=1
 
 # List of modules to build (and possibly preload)
