@@ -397,9 +397,11 @@ void postinit_graphics(WScreen *scr)
 	/* font */
 	if(grdata->font==NULL)
 		grdata->font=load_font(dpy, CF_FALLBACK_FONT_NAME);
+	assert(grdata->font!=NULL);
 	
 	if(grdata->tab_font==NULL)
 		grdata->tab_font=load_font(dpy, CF_FALLBACK_FONT_NAME);
+	assert(grdata->tab_font!=NULL);
 
 	/* Create normal gc */
 	gcv.line_style=LineSolid;
