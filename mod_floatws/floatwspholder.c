@@ -75,12 +75,6 @@ void floatwspholder_deinit(WFloatWSPHolder *ph)
 /*{{{ Dynfuns */
 
 
-bool floatwspholder_stale(WFloatWSPHolder *ph)
-{
-    return (ph->floatws_watch.obj==NULL);
-}
-
-
 bool floatwspholder_do_attach(WFloatWSPHolder *ph, WRegionAttachHandler *hnd,
                               void *hnd_param)
 {
@@ -146,9 +140,6 @@ static DynFunTab floatwspholder_dynfuntab[]={
 
     {(DynFun*)pholder_do_goto, 
      (DynFun*)floatwspholder_do_goto},
-    
-    {(DynFun*)pholder_stale, 
-     (DynFun*)floatwspholder_stale},
     
     END_DYNFUNTAB
 };

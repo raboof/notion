@@ -69,7 +69,7 @@ bool clientwin_fullscreen_scr(WClientWin *cwin, WScreen *scr, bool switchto)
     int swf=(switchto ? MPLEX_ATTACH_SWITCHTO : 0);
     WRegion *mgr=REGION_MANAGER(cwin);
     
-    if(cwin->fs_pholder!=NULL && pholder_stale(cwin->fs_pholder))
+    if(cwin->fs_pholder!=NULL)
         destroy_pholder(cwin);
         
     if(cwin->fs_pholder==NULL && mgr!=NULL)

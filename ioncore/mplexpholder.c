@@ -182,12 +182,6 @@ int mplexpholder_layer(WMPlexPHolder *ph)
 }
 
 
-bool mplexpholder_stale(WMPlexPHolder *ph)
-{
-    return (ph->mplex_watch.obj==NULL);
-}
-
-
 bool mplexpholder_do_attach(WMPlexPHolder *ph, WRegionAttachHandler *hnd,
                             void *hnd_param)
 {
@@ -373,9 +367,6 @@ static DynFunTab mplexpholder_dynfuntab[]={
     {(DynFun*)pholder_do_goto, 
      (DynFun*)mplexpholder_do_goto},
 
-    {(DynFun*)pholder_stale, 
-     (DynFun*)mplexpholder_stale},
-    
     END_DYNFUNTAB
 };
 

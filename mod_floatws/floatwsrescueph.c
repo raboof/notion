@@ -92,12 +92,6 @@ void floatwsrescueph_deinit(WFloatWSRescuePH *ph)
 /*{{{ Dynfuns */
 
 
-bool floatwsrescueph_stale(WFloatWSRescuePH *ph)
-{
-    return (ph->floatws_watch.obj==NULL);
-}
-
-
 bool floatwsrescueph_do_attach(WFloatWSRescuePH *ph, WRegionAttachHandler *hnd,
                                void *hnd_param)
 {
@@ -160,9 +154,6 @@ static DynFunTab floatwsrescueph_dynfuntab[]={
 
     {(DynFun*)pholder_do_goto, 
      (DynFun*)floatwsrescueph_do_goto},
-    
-    {(DynFun*)pholder_stale, 
-     (DynFun*)floatwsrescueph_stale},
     
     END_DYNFUNTAB
 };

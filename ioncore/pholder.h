@@ -26,8 +26,6 @@ DECLCLASS(WPHolder){
 extern bool pholder_init(WPHolder *ph);
 extern void pholder_deinit(WPHolder *ph);
 
-DYNFUN bool pholder_stale(WPHolder *ph);
-
 DYNFUN bool pholder_do_attach(WPHolder *ph, 
                               WRegionAttachHandler *hnd, void *hnd_param);
 
