@@ -77,7 +77,7 @@ void rbind_binding_added(const WRegBindingInfo *rbind,
                          const WBinding *binding,
                          const WBindmap *bindmap)
 {
-    if(binding->area==0)
+    if(binding->area==0 && rbind->reg->flags&REGION_BINDINGS_ARE_GRABBED)
         do_binding_grab_on_ungrab_on(rbind->reg, binding, rbind->bindmap, TRUE);
 }
 
@@ -86,7 +86,7 @@ void rbind_binding_removed(const WRegBindingInfo *rbind,
                            const WBinding *binding,
                            const WBindmap *bindmap)
 {
-    if(binding->area==0)
+    if(binding->area==0 && rbind->reg->flags&REGION_BINDINGS_ARE_GRABBED)
         do_binding_grab_on_ungrab_on(rbind->reg, binding, rbind->bindmap, FALSE);
 }
 

@@ -34,7 +34,7 @@
 #include "xwindow.h"
 
 
-/*{{{ ioncore_handle_event  */
+/*{{{ ioncore_handle_event */
 
 
 #define CASE_EVENT(EV) case EV:  /*\
@@ -88,8 +88,7 @@ bool ioncore_handle_event(XEvent *ev)
         ioncore_handle_colormap_notify(&(ev->xcolormap));
         break;
     CASE_EVENT(MappingNotify)
-        XRefreshKeyboardMapping(&(ev->xmapping));
-        ioncore_refresh_bindmaps();
+        ioncore_handle_mapping_notify(ev);
         break;
     CASE_EVENT(SelectionClear)
         ioncore_clear_selection();
@@ -240,6 +239,22 @@ void ioncore_handle_property(const XPropertyEvent *ev)
     }else if(ev->atom==ioncore_g.atom_net_wm_name){
         clientwin_get_set_name(cwin);
     }
+}
+
+
+/*}}}*/
+
+
+/*{{{ Misc. notifies */
+
+
+void ioncore_handle_mapping_notify(XEvent *ev)
+{
+    do{
+        XRefreshKeyboardMapping(&(ev->xmapping));
+    }while(XCheckTypedEvent(ioncore_g.dpy, MappingNotify, ev));
+    
+    ioncore_refresh_bindmaps();
 }
 
 

@@ -183,36 +183,59 @@ void bindmap_destroy(WBindmap *bindmap)
 }
 
 
+static void free_map(Rb_node map)
+{
+    Rb_node node;
+    WBinding *b;
+    
+    FOR_ALL_BINDINGS(b, node, map)
+        free(b);
+    
+    rb_free_tree(map);
+}
+
+
 void bindmap_refresh(WBindmap *bindmap)
 {
     WRegBindingInfo *rbind;
-    WBinding *b;
-    Rb_node node;
-    int i;
-    Rb_node newtree;
+    Rb_node newtree, node;
+    WBinding *b, *b2;
     
     if(bindmap->bindings==NULL)
         return;
     
     newtree=make_rb();
     
-    if(rb_nil(newtree))
+    if(newtree==NULL){
+        warn_err();
         return;
+    }
     
     FOR_ALL_BINDINGS(b, node, bindmap->bindings){
-        if(b->act!=BINDING_KEYPRESS)
-            continue;
-        for(rbind=bindmap->rbind_list; rbind!=NULL; rbind=rbind->bm_next)
-            rbind_binding_removed(rbind, b, bindmap);
-        b->kcb=XKeysymToKeycode(ioncore_g.dpy, b->ksb);
-        if(!rb_insertg(newtree, b, b, (Rb_compfn*)compare_bindings)){
+        b2=ALLOC(WBinding);
+        if(b2==NULL){
             warn_err();
-            rb_free_tree(newtree);
+            free_map(newtree);
+            return;
+        }
+        
+        *b2=*b;
+
+        if(b->act==BINDING_KEYPRESS){
+            for(rbind=bindmap->rbind_list; rbind!=NULL; rbind=rbind->bm_next)
+                rbind_binding_removed(rbind, b, bindmap);
+            b2->kcb=XKeysymToKeycode(ioncore_g.dpy, b->ksb);
+        }
+        
+        if(!rb_insertg(newtree, b2, b2, (Rb_compfn*)compare_bindings)){
+            warn_err();
+            free(b2);
+            free_map(newtree);
             return;
         }
     }
 
-    rb_free_tree(bindmap->bindings);
+    free_map(bindmap->bindings);
     bindmap->bindings=newtree;
 
     FOR_ALL_BINDINGS(b, node, bindmap->bindings){

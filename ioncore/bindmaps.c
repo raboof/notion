@@ -84,7 +84,7 @@ void ioncore_refresh_bindmaps()
     
     ioncore_update_modmap();
     
-    rb_traverse(node, known_bindmaps){
+    rb_traverse(node,known_bindmaps){
         bindmap_refresh((WBindmap*)rb_val(node));
     }
 }

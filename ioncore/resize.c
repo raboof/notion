@@ -11,6 +11,8 @@
 
 #include <stdio.h>
 
+#include <libtu/objp.h>
+#include <libtu/minmax.h>
 #include "common.h"
 #include "global.h"
 #include "resize.h"
@@ -18,7 +20,6 @@
 #include "sizehint.h"
 #include "event.h"
 #include "cursor.h"
-#include <libtu/objp.h>
 #include "extl.h"
 #include "extlconv.h"
 #include "grab.h"
@@ -26,7 +27,6 @@
 #include "infowin.h"
 #include "defer.h"
 #include "region-iter.h"
-#include <libtu/minmax.h>
 
 
 #define XOR_RESIZE (!ioncore_g.opaque_resize)

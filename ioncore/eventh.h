@@ -27,5 +27,6 @@ extern void ioncore_handle_focus_out(const XFocusChangeEvent *ev);
 extern void ioncore_handle_property(const XPropertyEvent *ev);
 extern void ioncore_handle_buttonpress(XEvent *ev);
 extern void ioncore_handle_keyboard(XEvent *ev);
+extern void ioncore_handle_mapping_notify(XEvent *ev);
 
 #endif /* ION_IONCORE_EVENTH_H */
