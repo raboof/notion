@@ -90,7 +90,7 @@ void menu_draw_entry(WMenu *menu, int i, const WRectangle *igeom,
 	
 	geom=*igeom;
 	geom.h=menu->entry_h;
-	geom.y+=i*(menu->entry_h+menu->entry_spacing);
+	geom.y+=(i-menu->first_entry)*(menu->entry_h+menu->entry_spacing);
 	
 	a=((REGION_IS_ACTIVE(menu) ? 0 : 4)
 	   |(menu->selected_entry==i ? 0 : 2)
@@ -104,11 +104,14 @@ void menu_draw_entry(WMenu *menu, int i, const WRectangle *igeom,
 void menu_draw_entries(WMenu *menu, bool complete)
 {
 	WRectangle igeom;
-	int i;
+	int i, mx;
 	
 	get_inner_geom(menu, &igeom);
 	
-	for(i=0; i<menu->n_entries; i++)
+	mx=menu->first_entry+menu->vis_entries;
+	mx=(mx < menu->n_entries ? mx : menu->n_entries);
+	
+	for(i=menu->first_entry; i<mx; i++)
 		menu_draw_entry(menu, i, &igeom, complete);
 }
 
@@ -141,7 +144,7 @@ static void menu_calc_size(WMenu *menu, int maxw, int maxh,
 	GrBorderWidths bdw, e_bdw;
 	char *str;
 	int i;
-	int nath, maxew=menu->max_entry_w;
+	int nath, bdh, maxew=menu->max_entry_w;
 	
 	grbrush_get_border_widths(menu->brush, &bdw);
 	grbrush_get_border_widths(menu->entry_brush, &e_bdw);
@@ -153,15 +156,27 @@ static void menu_calc_size(WMenu *menu, int maxw, int maxh,
 		*w_ret=maxew+bdw.left+bdw.right;
 	}
 	
-	nath=bdw.top+bdw.bottom+(menu->n_entries*menu->entry_h);
-	if(menu->n_entries>0)
-		nath+=(menu->n_entries-1)*e_bdw.spacing;
+	bdh=bdw.top+bdw.bottom;
 	
-	if(nath>maxh)
-		*h_ret=maxh;
-	else
-		*h_ret=nath;
-	
+	if(menu->n_entries==0){
+		*h_ret=bdh;
+		menu->first_entry=0;
+		menu->vis_entries=0;
+	}else{
+		int vis=(maxh-bdh+e_bdw.spacing)/(e_bdw.spacing+menu->entry_h);
+		if(vis>menu->n_entries){
+			vis=menu->n_entries;
+			menu->first_entry=0;
+		}else if(menu->selected_entry>=0){
+			if(menu->selected_entry<menu->first_entry)
+				menu->first_entry=menu->selected_entry;
+			else if(menu->selected_entry>=menu->first_entry+vis)
+				menu->first_entry=menu->selected_entry-vis+1;
+		}
+		menu->vis_entries=vis;
+		*h_ret=vis*(menu->entry_h+e_bdw.spacing)+bdh;
+	}
+
 	/* Calculate new shortened entry names */
 	maxew-=e_bdw.left+e_bdw.right;
 #if 0
@@ -451,6 +466,8 @@ bool menu_init(WMenu *menu, WWindow *par, const WRectangle *geom,
 	menu->brush=NULL;
 	menu->entry_brush=NULL;
 	menu->entry_spacing=0;
+	menu->vis_entries=menu->n_entries;
+	menu->first_entry=0;
 	menu->submenu=NULL;
 	
 	if(!window_init_new((WWindow*)menu, par, geom))
@@ -558,7 +575,7 @@ static void menu_remove_managed(WMenu *menu, WRegion *sub)
 int get_sub_y_off(WMenu *menu, int n)
 {
 	/* top + sum of above entries and spacings - top_of_sub */
-	return (menu->entry_h+menu->entry_spacing)*n;
+	return (menu->entry_h+menu->entry_spacing)*(n-menu->first_entry);
 }
 
 
@@ -624,6 +641,7 @@ static void menu_set_focus_to(WMenu *menu, bool warp)
 static void menu_do_select_nth(WMenu *menu, int n)
 {
 	int oldn=menu->selected_entry;
+	bool drawfull=FALSE;
 	
 	if(oldn==n)
 		return;
@@ -635,12 +653,25 @@ static void menu_do_select_nth(WMenu *menu, int n)
 
 	menu->selected_entry=n;
 
-	if(n>=0 && menu->entries[n].flags&WMENUENTRY_SUBMENU &&
-	   menu->pmenu_mode){
-		show_sub(menu, n);
+	if(n>=0){
+		if(n<menu->first_entry){
+			menu->first_entry=n;
+			drawfull=TRUE;
+		}else if(n>=menu->first_entry+menu->vis_entries){
+			menu->first_entry=n-menu->vis_entries+1;
+			drawfull=TRUE;
+		}
+		
+		if(menu->entries[n].flags&WMENUENTRY_SUBMENU &&
+		   menu->pmenu_mode){
+			show_sub(menu, n);
+		}
 	}
 	
-	/* redraw new and old selected entry */ {
+	if(drawfull){
+		menu_draw_entries(menu, TRUE);
+	}else{
+		/* redraw new and old selected entry */ 
 		WRectangle igeom;
 		get_inner_geom(menu, &igeom);
 
@@ -963,8 +994,9 @@ int menu_entry_at_root(WMenu *menu, int root_x, int root_y)
 		return -1;
 	
 	entry=y/(menu->entry_h+menu->entry_spacing);
-	
-	return (entry<menu->n_entries ? entry : -1);
+	if(entry<0 || entry>=menu->vis_entries)
+		return -1;
+	return entry+menu->first_entry;
 }
 
 

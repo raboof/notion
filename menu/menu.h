@@ -36,6 +36,7 @@ DECLOBJ(WMenu){
 	bool pmenu_mode;
 	bool big_mode;
 	int n_entries, selected_entry;
+	int first_entry, vis_entries;
 	int max_entry_w, entry_h, entry_spacing;
 	WMenuEntry *entries;
 	
