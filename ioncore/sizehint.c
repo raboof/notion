@@ -237,11 +237,11 @@ void account_gravity(WRectangle *geom, int gravity,
 			/* */
 		}else if(gravity==NorthEastGravity || gravity==EastGravity ||
 				 gravity==SouthEastGravity){
-			/* geom->y=geom->y+geom->h-(geom->h+hoff) */
+			/* geom->x=geom->w+geom->x-(geom->w+woff) */
 			geom->x-=woff;
 		}else if(gravity==CenterGravity || gravity==NorthGravity ||
 				 gravity==SouthGravity){
-			/* geom->y=geom->y+geom->h/2-(geom->h+hoff)/2 */
+			/* geom->x=geom->x+geom->w/2-(geom->w+woff)/2 */
 			geom->x-=woff/2;
 		}
 		

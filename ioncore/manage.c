@@ -58,15 +58,24 @@ static WScreen *find_suitable_screen(WClientWin *cwin,
 									 const WAttachParams *param)
 {
 	WScreen *scr=NULL, *found=NULL;
-	
+	bool respectpos=(cwin->transient_for!=None ||
+					 cwin->size_hints.flags&USPosition);
+
 	FOR_ALL_SCREENS(scr){
 		if(!same_rootwin((WRegion*)scr, (WRegion*)cwin))
 		   continue;
-		if(found==NULL || REGION_IS_ACTIVE(scr))
+		if(REGION_IS_ACTIVE(scr)){
 			found=scr;
+			if(!respectpos)
+				break;
+		}
+		
 		if(coords_in_rect(&REGION_GEOM(scr), 
-						  param->geomrq.x, param->geomrq.y))
-			return scr;
+						  param->geomrq.x, param->geomrq.y)){
+			found=scr;
+			if(respectpos)
+				break;
+		}
 	}
 	
 	return found;

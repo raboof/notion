@@ -1104,6 +1104,8 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 	/* Do I need to insert another disparaging comment on the person who
 	 * invented geometry-affecting window borders?
 	 */
+	fprintf(stderr,"ORIGH: %d\n", REGION_GEOM(cwin).h);
+
 	geom.w=REGION_GEOM(cwin).w+2*cwin->orig_bw;
 	geom.h=REGION_GEOM(cwin).h+2*cwin->orig_bw;
 	
@@ -1111,24 +1113,38 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 	 * expressed is that of the root (irrespective of any reparenting that
 	 * may have occurred)." This is quite vague. In my opinion apps should
 	 * send the absolute position measured from the root window top left
-	 * corner (fsck gravity). Some apps, however, request root-relative
-	 * coordinates for the outermost wm frame as if that was specified
-	 * by the client. Other apps (e.g. XMMS) request coordinates for the
-	 * innermost WM frame relative to the root. There's no way the latter
-	 * could be an interpretation of the ICCCM statement (more like an
-	 * assumption that there is only one level of WM windows) so we do
-	 * the former. Some apps' totally useless resize and move features
-	 * will go nuts in nested frames/workspaces/on additional Xinerama
-	 * screens while others' will work.
+	 * corner (fsck gravity). Now, however, most apps request position
+	 * as if the innermost WM window was the frame that will be moved and
+	 * others as if the outermost WM window was the frame. While the latter
+	 * might be slightly more correct, I do the former as
+	 *  1) The implementation is more consistent with how frame position
+	 *     is calculated when the window is initially mapped.
+	 *  2) In the second interpretation, moving the window to (0, 0) would
+	 *     have no effect on it when virtual roots are enabled as all
+	 *     offset is considered border.
+	 * be broken by it.
+	 * coordinates for the outermost wm frame as if that was the client.
+	 * Other apps (e.g. XMMS) request coordinates for the innermost WM 
+	 * frame relative to the root. There's no way the latter could be an
+	 * interpretation of the ICCCM statement (more like an assumption that
+	 * there is only one level of WM windows) so we do the former. Some 
+	 * apps' totally useless resize and move features will go nuts while
+	 * others' will work.
 	 */
+#if 0	
 	par=(WRegion*)cwin;
 	do{
 		geom.x=REGION_GEOM(par).x;
 		geom.y=REGION_GEOM(par).y;
 		par=region_parent((WRegion*)par);
 	}while(par!=NULL && ROOT_OF(par)!=region_x_window(par));
-
+#else
+	par=region_parent((WRegion*)cwin);
+	if(par!=NULL)
+		region_rootpos(par, &(geom.x), &(geom.y));
+#endif
 	if(ev->value_mask&CWX){
+	fprintf(stderr,"XX: %d\n", ev->x);
 		dx=ev->x-geom.x;
 		rqflags&=~REGION_RQGEOM_WEAK_X;
 	}
@@ -1146,6 +1162,7 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 	}
 	
 	if(ev->value_mask&CWHeight){
+		fprintf(stderr, "HH: %d\n", ev->height);
 		geom.h=ev->height+2*cwin->orig_bw;
 		if(geom.h<1)
 			geom.h=1;
@@ -1163,7 +1180,7 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 
 	cwin->flags|=CWIN_NEED_CFGNTFY;
 	
-	if(ev->value_mask&(CWX|CWY|CWWidth|CWHeight)){
+	if(ev->value_mask&(CWX|CWY|CWWidth|CWHeight))
 		WRegion *mgr=REGION_MANAGER(cwin);
 		if(mgr!=NULL && HAS_DYN(mgr, region_request_clientwin_geom)){
 			geom.x+=dx;
