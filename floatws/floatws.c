@@ -131,12 +131,38 @@ static void floatws_unmap(WFloatWS *ws)
 }
 
 
+static WRegion *floatws_get_focus_to(WFloatWS *ws)
+{
+	WRegion *next=NULL;
+	WWindow *par=REGION_PARENT_CHK(ws, WWindow);
+	
+	if(par!=NULL){
+		Window root=None, parent=None, *children=NULL;
+		uint nchildren=0;
+		WRegion *r;
+		XQueryTree(wglobal.dpy, region_x_window((WRegion*)par),
+				   &root, &parent, &children, &nchildren);
+		while(nchildren>0){
+			nchildren--;
+			r=find_window(children[nchildren]);
+			if(r!=NULL && REGION_MANAGER(r)==(WRegion*)ws){
+				next=r;
+				break;
+			}
+		}
+		XFree(children);
+	}
+	
+	return (next ? next : ws->managed_list);
+}
+
+
 static void floatws_set_focus_to(WFloatWS *ws, bool warp)
 {
 	WRegion *r=ws->current_managed;
 		
 	if(r==NULL)
-		r=ws->managed_list;
+		r=floatws_get_focus_to(ws);
 
 	if(r==NULL){
 		SET_FOCUS(ws->dummywin);
@@ -171,35 +197,14 @@ static void floatws_remove_managed(WFloatWS *ws, WRegion *reg)
 	
 	ws->current_managed=NULL;
 	
-	if(reg->stacking.above!=NULL){
-		next=reg->stacking.above;
-	}else{
-		WWindow *par=REGION_PARENT_CHK(ws, WWindow);
-		if(par!=NULL){
-			Window root=None, parent=None, *children=NULL;
-			uint nchildren=0;
-			WRegion *r;
-			XQueryTree(wglobal.dpy, region_x_window((WRegion*)par),
-					   &root, &parent, &children, &nchildren);
-			while(nchildren>0){
-				nchildren--;
-				r=find_window(children[nchildren]);
-				if(r!=NULL && REGION_MANAGER(r)==(WRegion*)ws){
-					next=r;
-					break;
-				}
-			}
-			XFree(children);
-		}
+	if(mcf){
+		if(reg->stacking.above!=NULL)
+			next=reg->stacking.above;
+		else
+			next=floatws_get_focus_to(ws);
 		
-		if(next==NULL)
-			next=NEXT_MANAGED_WRAP(ws->managed_list, reg);
-	}
-	
-	if(mcf)
 		do_set_focus(next!=NULL ? next : (WRegion*)ws, FALSE);
-	else
-		ws->current_managed=next;
+	}
 }
 
 
