@@ -1,5 +1,65 @@
 
 
+=== ion-3ds-20040730 ===
+
+
+The first thing you'll notice when you start up this release of Ion is
+that isn't reading your old configuration that. The next thing you 
+should notice is a neat layout-adapting statusbar at the bottom of the
+screen. That's right, Ion now includes an ext_statusbar Lua script that
+is enabled by default and displays date/time/load/mail count in a
+configurable format.
+
+So why is it not reading your configuration and save files? Firstly,
+all of the .lua files were renamed to be indicative of their purpose.
+Secondly, there have been so many changes that your old files would be
+incompatible anyway.
+
+The .lua files are now named as follows:
+
+    cfg_*.lua    Configuration file that the user may wish to edit
+    look_*.lua   Drawing engine style file
+    saved_*.lua  Save file
+    mod_*.lua    Module stub loader
+    ext_*.lua    A bigger Lua extension without a C counterpart
+                 so that it is not a module
+                 
+The configuration file for mod_foobar or ext_foobar, if it has one, is,
+of course, cfg_foobar.lua. In the topic of file names, also note that 
+the default installation paths and binary names have changed to include
+the component '3' to reflect the situation with many binary packages
+of Ion.
+
+You perhaps noticed above that modules have stub loaders now, so the 
+user has no need to use the ioncore.load_module routine. All extensions
+and additional configuration files can now be loaded  with 'dopath'
+(used to be 'include'). Also, the menulib, querylib, and ioncorelib Lua
+libraries are gone and instead their contents can be found in the same 
+mod_whatever namespace with the corresponding module (the "stub" loader
+for these modules is a bit more than just a stub...). Some may also
+want to know that for mod_* and ext_* only the compiled .lc files are
+now installed, and not the source .lua files, thus removing redundant
+files and making the installation slightly smaller.
+
+There are few other changes to the contents of the configuration files
+as well, so you're probably best off simply rewriting your modified
+configuration files based on the new defaults. There quite likely won't
+be any more _big_ changes to the configuration files before the release
+of final Ion3, wherever that will be. (Most likely we won't see 3rc:s
+yet this year.) However, some functions and variables are still likely
+to be renamed or changed.
+
+In addition to being renamed, the layout savefile of this Ion release
+is incompatible with older releases. This is due to the changes made
+to the WIonWS (and WAutoWS) split tree code to make it more modularly
+extensible with the new kinds of nodes that WAutoWS requires.
+
+The mod_autows module has infact been through many changes since the 
+last release, and I think I have the final form of it finally figured
+out. However, it is still far from finished and unlikely to be ready 
+for use yet.
+
+
 === ion-3ds-20040703 ===
 
 
