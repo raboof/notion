@@ -78,6 +78,8 @@ static void skip_focusenter()
 			handle_focus_out(&(ev.xfocus));
 		else if(ev.type==FocusIn)
 			handle_focus_in(&(ev.xfocus));
+		/*else if(ev.type==EnterNotify)
+			handle_enter_window(&ev);*/
 	}
 }
 
@@ -382,31 +384,48 @@ static void handle_expose(const XExposeEvent *ev)
 static void handle_enter_window(XEvent *ev)
 {
 	XEnterWindowEvent *eev=&(ev->xcrossing);
-	WRegion *reg=NULL, *mgr;
-#if 0
-	while(XCheckMaskEvent(wglobal.dpy, EnterWindowMask, ev)){
-		/* We're only interested in the latest enter event */
-	}
-#endif
+	WRegion *reg=NULL, *freg=NULL, *mgr=NULL;
+	bool more=TRUE;
+	
 	if(wglobal.input_mode!=INPUT_NORMAL)
 		return;
-	
-/*
-	if(eev->mode!=NotifyNormal && !wglobal.warp_enabled)
-		return;
-*/
-/*	if(eev->window==eev->root){
-		return;
-	}*/
-	
-	reg=FIND_WINDOW_T(eev->window, WRegion);
-	
-	if(reg==NULL)
-		return;
 
-	if(REGION_IS_ACTIVE(reg))
-		return;
+	do{
+		/*if(eev->mode!=NotifyNormal && !wglobal.warp_enabled)
+            return;*/
+		/*if(eev->detail==NotifyNonlinearVirtual)
+		    return;*/
+
+		reg=FIND_WINDOW_T(eev->window, WRegion);
+		
+		if(reg==NULL)
+			continue;
+		
+		D(fprintf(stderr, "E: %p %s %d %d\n", reg, WOBJ_TYPESTR(reg),
+				  eev->mode, eev->detail));
+		
+		/* If an EnterWindow event was already found that we're going to
+		 * handle, only notify subsequent events if they are into children
+		 * of the window of this event.
+		 */
+		if(freg!=NULL){
+			WRegion *r2=reg;
+			while(r2!=NULL){
+				if(r2==freg)
+					break;
+				r2=FIND_PARENT1(r2, WRegion);
+			}
+			if(r2==NULL)
+				continue;
+		}
+		
+		
+		if(!REGION_IS_ACTIVE(reg))
+			freg=reg;
+	}while(freg!=NULL && XCheckMaskEvent(wglobal.dpy, EnterWindowMask, ev));
 	
+	/* Does the manager of the region want to handle focusing?
+	 */
 	mgr=reg;
 	while(1){
 		mgr=REGION_MANAGER(mgr);
@@ -415,7 +434,7 @@ static void handle_enter_window(XEvent *ev)
 		if(mgr->flags&REGION_HANDLES_MANAGED_ENTER_FOCUS)
 			reg=mgr;
 	}
-	
+
 	set_previous_of(reg);
 	set_focus(reg);
 }

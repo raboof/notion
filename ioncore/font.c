@@ -35,9 +35,10 @@ wchar_t str_wchar_at(char *p, int max)
 	if(!iconv_tried){
 		iconv_tried=TRUE;
 		ic=iconv_open(CF_ICONV_TARGET, CF_ICONV_SOURCE);
-		if(ic==(iconv_t)(-1))
+		if(ic==(iconv_t)(-1)){
 			warn_err_obj("iconv_open(\"" CF_ICONV_TARGET "\", \""
 						 CF_ICONV_SOURCE "\")");
+		}
 	}
 	
 	if(ic==(iconv_t)(-1))
@@ -152,8 +153,6 @@ WFontPtr load_font(Display *dpy, const char *fontname)
 	char **dummy_missing;
 	int dummy_missing_n;
 	char *dummy_def;
-	/*if(!XSupportsLocale())
-		warn("Locale unsupported\n");*/
 	
 	xfnt=XCreateFontSet(dpy, fontname, &dummy_missing,
 						&dummy_missing_n, &dummy_def);
