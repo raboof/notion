@@ -1168,7 +1168,7 @@ static void menu_insstr(WMenu *menu, const char *buf, size_t n)
     
     if(newta_orig!=newta){
         if(*newta=='\0'){
-            free(newta);
+            free(newta_orig);
             newta=NULL;
         }else{
             char *p=scopy(newta);
