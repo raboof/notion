@@ -258,6 +258,9 @@ static void do_draw_listing(DrawInfo *dinfo, WListing *l)
 {
 	int r, c, i, x, y;
 	
+	if(l->nitemcol==0 || l->visrow==0)
+		return;
+	
 	set_clipping_rectangle(dinfo, I_X, I_Y, I_W, I_H);
 
 	x=I_X;
