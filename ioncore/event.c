@@ -130,7 +130,7 @@ static void skip_focusenter()
     XEvent ev;
     WRegion *r;
     
-    XFlush(ioncore_g.dpy);
+    XSync(ioncore_g.dpy, False);
     
     while(XCheckMaskEvent(ioncore_g.dpy,
                           EnterWindowMask|FocusChangeMask, &ev)){

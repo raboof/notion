@@ -305,22 +305,22 @@ void ioncore_handle_enter_window(XEvent *ev)
         
         if(reg==NULL)
             continue;
-        
+
         D(fprintf(stderr, "E: %p %s %d %d\n", reg, OBJ_TYPESTR(reg),
                   eev->mode, eev->detail));
         
         /* If an EnterWindow event was already found that we're going to
-         * handle, only note subsequent events if they are into children
-         * of the window of this event.
+         * handle, do not note subsequent events if they are into an 
+         * ancestor of the window of freg.
          */
         if(freg!=NULL){
-            WRegion *r2=reg;
+            WRegion *r2=freg;
             while(r2!=NULL){
-                if(r2==freg)
+                if(r2==reg)
                     break;
                 r2=REGION_PARENT_CHK(r2, WRegion);
             }
-            if(r2==NULL)
+            if(r2!=NULL)
                 continue;
         }
         

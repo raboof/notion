@@ -524,7 +524,7 @@ bool mplex_l2_hide(WMPlex *mplex, WRegion *reg)
             if(mcf)
                 mplex_managed_display(mplex, toact);
         }else if(mcf){
-            region_set_focus((WRegion*)mplex);
+            region_warp((WRegion*)mplex);
         }
     }
     
@@ -562,7 +562,7 @@ bool mplex_l2_show(WMPlex *mplex, WRegion *reg)
     if(fixcurrent && toact!=NULL){
         mplex->l2_current=toact;
         if(mcf)
-            region_set_focus(toact);
+            region_warp(toact);
     }
     
     return changes;
