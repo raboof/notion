@@ -31,6 +31,9 @@
 
 #define MENU_WIN(MENU) ((MENU)->win.win)
 
+/*{{{ Helpers */
+
+
 static bool extl_table_getis(ExtlTab tab, int i, const char *s, char c,
                              void *p)
 {
@@ -43,6 +46,9 @@ static bool extl_table_getis(ExtlTab tab, int i, const char *s, char c,
     extl_unref_table(sub);
     return ret;
 }
+
+
+/*}}}*/
 
 
 /*{{{ Drawing routines */
@@ -483,6 +489,7 @@ bool menu_init(WMenu *menu, WWindow *par, const WRectangle *geom,
     menu->vis_entries=menu->n_entries;
     menu->first_entry=0;
     menu->submenu=NULL;
+    menu->typeahead=NULL;
     
     if(!window_init_new((WWindow*)menu, par, geom))
         goto fail;
@@ -520,7 +527,8 @@ WMenu *create_menu(WWindow *par, const WRectangle *geom,
 void menu_deinit(WMenu *menu)
 {
     int i;
-    WMenu *m;
+    
+    menu_typeahead_clear(menu);
     
     if(menu->submenu!=NULL)
         destroy_obj((Obj*)menu->submenu);
@@ -720,7 +728,8 @@ void menu_select_nth(WMenu *menu, int n)
         n=0;
     if(n>=menu->n_entries)
         n=menu->n_entries-1;
-    
+
+    menu_typeahead_clear(menu);
     menu_do_select_nth(menu, n);
 }
 
@@ -770,11 +779,14 @@ static void menu_do_finish(WMenu *menu)
 
 
 /*EXTL_DOC
- * Destroy the menu and call handler for selected entry.
+ * If selected entry is a submenu, display that.
+ * Otherwise destroy the menu and call handler for selected entry.
  */
 EXTL_EXPORT_MEMBER
 void menu_finish(WMenu *menu)
 {
+    menu_typeahead_clear(menu);
+
     if(!menu->pmenu_mode && menu->selected_entry>=0 &&
        menu->entries[menu->selected_entry].flags&WMENUENTRY_SUBMENU){
         show_sub(menu, menu->selected_entry);
@@ -1099,6 +1111,78 @@ int menu_press(WMenu *menu, XButtonEvent *ev, WRegion **reg_ret)
 /*}}}*/
 
 
+/*{{{ Typeahead find */
+
+
+static void menu_insstr(WMenu *menu, const char *buf, size_t n)
+{
+    size_t oldlen=(menu->typeahead==NULL ? 0 : strlen(menu->typeahead));
+    char *newta=(char*)malloc(oldlen+n+1);
+    char *newta_orig;
+    int entry;
+    
+    if(newta==NULL)
+        return;
+    
+    if(oldlen!=0)
+        memcpy(newta, menu->typeahead, oldlen);
+    if(n!=0)
+        memcpy(newta+oldlen, buf, n);
+    newta[oldlen+n]='\0';
+    newta_orig=newta;
+    
+    while(*newta!='\0'){
+        bool found=FALSE;
+        entry=menu->selected_entry;
+        do{
+            if(menu->entries[entry].title!=NULL){
+                size_t l=strlen(menu->entries[entry].title);
+                if(libtu_strcasestr(menu->entries[entry].title, newta)){
+                    found=TRUE;
+                    break;
+                }
+            }
+            entry=(entry+1)%menu->n_entries;
+        }while(entry!=menu->selected_entry);
+        if(found){
+            menu_do_select_nth(menu, entry);
+            break;
+        }
+        newta++;
+    }
+    
+    if(newta_orig!=newta){
+        if(*newta=='\0'){
+            free(newta);
+            newta=NULL;
+        }else{
+            char *p=scopy(newta);
+            free(newta_orig);
+            newta=p;
+        }
+    }
+    if(menu->typeahead!=NULL)
+        free(menu->typeahead);
+    menu->typeahead=newta;
+}
+
+
+/*EXTL_DOC
+ * Clear typeahead buffer.
+ */
+EXTL_EXPORT_MEMBER
+void menu_typeahead_clear(WMenu *menu)
+{
+    if(menu->typeahead!=NULL){
+        free(menu->typeahead);
+        menu->typeahead=NULL;
+    }
+}
+
+
+/*}}}*/
+
+
 /*{{{ Dynamic function table and class implementation */
 
 
@@ -1112,6 +1196,7 @@ static DynFunTab menu_dynfuntab[]={
     {region_do_set_focus, menu_do_set_focus},
     {region_activated, menu_activated},
     {region_inactivated, menu_inactivated},
+    {window_insstr, menu_insstr},
     END_DYNFUNTAB
 };
 
