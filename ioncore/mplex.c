@@ -594,11 +594,11 @@ static WRegion *mplex_managed_control_focus(WMPlex *mplex, WRegion *reg)
 
 void mplex_managed_activated(WMPlex *mplex, WRegion *reg)
 {
-    if(mplex->l2_current!=NULL && mplex->l2_current!=reg &&
-       mgd_flags(mplex->l2_current)&MGD_L2_PASSIVE){
-        mplex->l2_current=NULL;
-    }else if(on_l2_list(mplex, reg)){
+    if(on_l2_list(mplex, reg)){
         mplex->l2_current=reg;
+    }else if(mplex->l2_current!=NULL && 
+             mgd_flags(mplex->l2_current)&MGD_L2_PASSIVE){
+        mplex->l2_current=NULL;
     }
 }
 
@@ -747,12 +747,14 @@ static bool mplex_do_managed_display(WMPlex *mplex, WRegion *sub,
         /* This call should be unnecessary... */
         mplex_managed_activated(mplex, sub);
     }else{
+        int flags=mgd_flags(sub);
         UNLINK_ITEM(mplex->l2_list, sub, mgr_next, mgr_prev);
         region_raise(sub);
         LINK_ITEM(mplex->l2_list, sub, mgr_next, mgr_prev);
-        if(l2_is_hidden(sub))
+        if(flags&MGD_L2_HIDDEN)
             l2_unmark_hidden(sub);
-        mplex->l2_current=sub;
+        if(!(flags&MGD_L2_PASSIVE))
+            mplex->l2_current=sub;
     }
     
     if(region_may_control_focus((WRegion*)mplex))
