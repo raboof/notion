@@ -588,14 +588,16 @@ static void ionws_request_managed_geom_dir(WIonWS *ws, WRegion *sub,
 		}
 	}
 	
-#if 0
+#if 1
 	if(flags&(horiz ? REGION_RQGEOM_WEAK_X : REGION_RQGEOM_WEAK_Y)){
 		int wd=-x1d+x2d;
 		int x2d2;
 		/* Adjust width/height change to what is possible */
-		adjust_d(&wd, tlshrink+brshrink, tlfree+brfree);
+		adjust_d(&wd, infadd(tlshrink, brshrink), tlfree+brfree);
+		
 		/* Adjust x initially */
 		adjust_d(&x1d, tlfree, tlshrink);
+
 		/* Adjust x2 to grow or shrink the frame */
 		x2d2=wd+x1d;
 		x2d=x2d2;
@@ -604,16 +606,14 @@ static void ionws_request_managed_geom_dir(WIonWS *ws, WRegion *sub,
 		 * keeping it fixed */
 		x1d+=x2d-x2d2;
 		adjust_d(&x1d, tlfree, tlshrink);
-	}else{
+	}else
+#endif	
+	{
 		/* Just adjust both x:s independently */
 		adjust_d(&x1d, tlfree, tlshrink);
 		adjust_d(&x2d, brshrink, brfree);
 		
 	}
-#else
-	adjust_d(&x1d, tlfree, tlshrink);
-	adjust_d(&x2d, brshrink, brfree);
-#endif
 
 	if(geomret!=NULL){
 		if(horiz){
@@ -717,7 +717,7 @@ static WRegion *do_split_at(WIonWS *ws, WObj *obj, int dir, int primn,
 			warn("Unable to split: not enough free space.");
 			return NULL;
 		}
-		do_resize_node(obj, dir, primn, (sn+so)-s);
+		do_resize_node(obj, dir, ANY, (sn+so)-s);
 	}
 
 	/* Create split and new window

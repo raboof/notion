@@ -177,7 +177,7 @@ void ionframe_toggle_shade(WIonFrame *frame)
 	GrBorderWidths bdw;
 	int h=frame->genframe.bar_h;
 
-	if(!BAR_INSIDE_BORDER(frame) && frame->genframe.brush!=NULL){
+	if(BAR_INSIDE_BORDER(frame) && frame->genframe.brush!=NULL){
 		grbrush_get_border_widths(frame->genframe.brush, &bdw);
 		h+=bdw.top+bdw.bottom+2*bdw.spacing;
 	}else{
