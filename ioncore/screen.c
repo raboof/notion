@@ -212,10 +212,10 @@ static void screen_fit(WScreen *scr, const WRectangle *geom)
 
 
 static void screen_managed_changed(WScreen *scr, int mode, bool sw, 
-								   WRegion *reg)
+								   WRegion *reg_)
 {
-	WRegion *reg;
 	const char *n=NULL;
+	WRegion *reg;
 	
 	if(!sw)
 		return;
