@@ -90,7 +90,7 @@ static WRegion *find_suitable_target(WIonWS *ws)
 
 /*{{{ Placement scan */
 
-#define PENALTY_NEVER    -1
+#define PENALTY_NEVER    INT_MAX
 #define PENALTY_INIT     (INT_MAX-1)
 #define PENALTY_MAX      (INT_MAX-2)
 
@@ -141,6 +141,7 @@ static bool mrsh_layout_extl(ExtlFn fn, PenaltyParams *p)
     extl_call(fn, "t", "b", t, &ret);
     
     if(ret){
+        double d;
         Res *r=&(p->res);
         r->split=p->node;
         r->penalty=PENALTY_NEVER;
@@ -150,7 +151,8 @@ static bool mrsh_layout_extl(ExtlFn fn, PenaltyParams *p)
 
         extl_table_gets_i(t, "dest_w", &(r->dest_w));
         extl_table_gets_i(t, "dest_h", &(r->dest_h));
-        extl_table_gets_i(t, "penalty", &(r->penalty));
+        if(extl_table_gets_d(t, "penalty", &d) && d>=0)
+            r->penalty=(d>=PENALTY_NEVER ? PENALTY_NEVER : d);
         ret=(extl_table_gets_t(t, "config", &(r->config))
              || r->split->type==SPLIT_REGNODE);
     }
@@ -213,12 +215,10 @@ static void scan(WSplit *split, PenaltyFn *pfn, WAutoWS *ws, WFrame *frame,
         p.unused=uspc;
 
         if(pfn(&p)){
-            if(p.res.penalty!=PENALTY_NEVER && 
-               p.res.penalty<best->penalty){
+            if(p.res.penalty<best->penalty)
                 *best=p.res;
-            }else{
+            else
                 extl_unref_table(p.res.config);
-            }
         }
         
     }else if(split->type==SPLIT_VERTICAL || split->type==SPLIT_HORIZONTAL){

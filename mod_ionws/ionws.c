@@ -254,7 +254,8 @@ static WSplit *get_node_check(WIonWS *ws, WRegion *reg)
 }
 
 
-WRegion *ionws_do_managed_remove(WIonWS *ws, WRegion *reg, bool reclaim_space)
+WRegion *ionws_do_managed_remove(WIonWS *ws, WRegion *reg, 
+                                 bool reclaim_space, bool lazy)
 {
     WSplit *other=NULL, *node=get_node_check(ws, reg);
     
@@ -268,7 +269,8 @@ WRegion *ionws_do_managed_remove(WIonWS *ws, WRegion *reg, bool reclaim_space)
     region_remove_bindmap(reg, mod_ionws_frame_bindmap);
 
     if(ws->split_tree!=NULL)
-        other=split_tree_remove(&(ws->split_tree), node, reclaim_space);
+        other=split_tree_remove(&(ws->split_tree), node, 
+                                reclaim_space, lazy);
 
     /* Other is guaranteed to be SPLIT_REGNODE if not NULL */
     return (other!=NULL ? other->u.reg : NULL);
@@ -279,7 +281,7 @@ void ionws_managed_remove(WIonWS *ws, WRegion *reg)
 {
     bool ds=OBJ_IS_BEING_DESTROYED(ws);
     
-    WRegion *other=ionws_do_managed_remove(ws, reg, !ds);
+    WRegion *other=ionws_do_managed_remove(ws, reg, !ds, FALSE);
     
     if(!ds){
         if(other!=NULL){
@@ -797,11 +799,6 @@ static ExtlTab get_node_config(WSplit *node)
         }
     }
 
-    if(node->is_static)
-        extl_table_sets_b(tab, "static", TRUE);
-    if(node->is_lazy)
-        extl_table_sets_b(tab, "lazy", TRUE);
-
     return tab;
 }
 
@@ -911,9 +908,6 @@ static WSplit *load_split(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
         free(split);
         return (tl==NULL ? br : tl);
     }
-    
-    extl_table_gets_b(tab, "static", &(split->is_static));
-    extl_table_gets_b(tab, "lazy", &(split->is_lazy));
     
     tl->parent=split;
     br->parent=split;

@@ -21,21 +21,38 @@ _G.templates=T
 
 -- Penalty calculation {{{
 
-local PENALTY_NEVER=-1
+local PENALTY_NEVER=2^32-1
 local S={}
 
+local gr=(1+math.sqrt(5))/2
+S.l_ratio=gr
+S.r_ratio=1
+S.t_ratio=gr
+S.b_ratio=1
+
 S.fit_fit_offset=0
-S.fit_activereg_offset=100
-S.fit_inactivereg_offset=500
+S.fit_activereg_offset=400
+S.fit_inactivereg_offset=800
 
 -- grow or shrink percentage 
-S.fit_penalty_scale={
+S.vert_fit_penalty_scale={
     {  10, 9000},
-    {  33, 1000},
+    {  50, 1000},
     {  80,  100},
     { 100,    0},
     { 120,  100},
-    { 200,  200},
+    { 200, 1000},
+    { 500, 9000},
+}
+
+-- grow or shrink percentage 
+S.horiz_fit_penalty_scale={
+    {  10, 9000},
+    {  50, 3000},
+    {  80, 1000},
+    { 100,    0},
+    { 120, 1000},
+    { 200, 3000},
     { 500, 9000},
 }
 
@@ -48,11 +65,11 @@ S.slack_penalty_scale={
 }
 
 
--- pixels remaining in other side of split
-S.split_penalty_scale={
+-- percentage remaining in other side of split
+S.waste_penalty_scale={
     {  10, PENALTY_NEVER},
-    {  10, 1000},
-    { 100,    0},
+    {  10, 9000},
+    { 100,  100},
 }
 
 
@@ -96,24 +113,29 @@ function T.add_p(p1, p2)
     end
 end
 
-function T.fit_penalty(ms, s, ss)
+function T.vert_fit_penalty(ms, s, ss)
     local d=T.frac(ss, s)
    
     if ss<ms then
         return PENALTY_NEVER -- Should just penalise more
     end
     
-    return T.add_p(T.interp1(S.fit_penalty_scale, d),
+    return T.add_p(T.interp1(S.vert_fit_penalty_scale, d),
                    S.fit_fit_offset)
 end
 
---#define hfit_penalty(S, CWIN, FRAME_SZH, SZ, U, DS) \
---    fit_penalty(FRAME_SZH->min_width, SZ, (S)->geom.w)
---#define vfit_penalty(S, CWIN, FRAME_SZH, SZ, U, DS) \
---    fit_penalty(FRAME_SZH->min_height, SZ, (S)->geom.h)
+function T.horiz_fit_penalty(ms, s, ss)
+    local d=T.frac(ss, s)
+   
+    if ss<ms then
+        return PENALTY_NEVER -- Should just penalise more
+    end
+    
+    return T.add_p(T.interp1(S.horiz_fit_penalty_scale, d),
+                   S.fit_fit_offset)
+end
 
-
-function T.slack_penalty(ms, s, ss, slack, islack)
+function T.slack_penalty(ms, s, ss, islack)
     local ds=ss-s;
 
     if ss<ms then
@@ -127,53 +149,42 @@ function T.slack_penalty(ms, s, ss, slack, islack)
     -- If there's enough "immediate" slack, don't penalise more
     -- than normal fit would penalise stretching ss to s.
     if -ds<=islack then
-        return T.interp1(S.fit_penalty_scale, T.frac(ss, s))
+        return T.interp1(S.vert_fit_penalty_scale, T.frac(ss, s))
     end
     
     return T.interp1(S.slack_penalty_scale, -ds);
 end
 
---#define hslack_penalty(S, CWIN, FRAME_SZH, SZ, U, DS) \
---    slack_penalty(FRAME_SZH->min_width, SZ, (S)->geom.w, (U)->tot_h, (U)->l+(U)->r)
---#define vslack_penalty(S, CWIN, FRAME_SZH, SZ, U, DS) \
---    slack_penalty(FRAME_SZH->min_height, SZ, (S)->geom.h, (U)->tot_v, (U)->t+(U)->b)
 
-
-function T.split_penalty(ms, s, ss, slack)
-    if s>=ss then
+function T.waste_penalty(ms, s, ss)
+    if s>=ss then        
         return PENALTY_NEVER
     end
     
-    if ss<ms then
-        return PENALTY_NEVER -- Should just penalise more.
-    end
-
-    return T.interp1(S.split_penalty_scale, T.frac(ss-s, s))
+    return T.interp1(S.waste_penalty_scale, T.frac(ss-s, s))
 end
 
---#define hsplit_penalty(S, CWIN, FRAME_SZH, SZ, U, DS) \
---    split_penalty(FRAME_SZH->min_width, SZ, (S)->geom.w, (U)->tot_h)
---#define vsplit_penalty(S, CWIN, FRAME_SZH, SZ, U, DS) \
---    split_penalty(FRAME_SZH->min_height, SZ, (S)->geom.h, (U)->tot_v)
 
-
-function T.regfit_penalty(s, ss, cwin, reg)
-    local res=T.interp1(S.fit_penalty_scale, T.frac(ss, s))
+function T.vert_regfit_penalty(s, ss, cwin, reg)
+    local res=T.interp1(S.vert_fit_penalty_scale, T.frac(ss, s))
     return T.add_p(res, T.valif(reg:is_active(),
                                 S.fit_activereg_offset,
                                 S.fit_inactivereg_offset))
 end
 
---#define hregfit_penalty(S, CWIN, SZ) \
---    regfit_penalty(SZ, (S)->geom.w, CWIN, (S)->u.reg)
---#define vregfit_penalty(S, CWIN, SZ) \
---    regfit_penalty(SZ, (S)->geom.h, CWIN, (S)->u.reg)
+function T.horiz_regfit_penalty(s, ss, cwin, reg)
+    local res=T.interp1(S.horiz_fit_penalty_scale, T.frac(ss, s))
+    return T.add_p(res, T.valif(reg:is_active(),
+                                S.fit_activereg_offset,
+                                S.fit_inactivereg_offset))
+end
 
 
 function T.combine(h, v)
     return T.valif(h==PENALTY_NEVER or v==PENALTY_NEVER,
                    PENALTY_NEVER,
-                   math.max(h, v))
+                   math.sqrt(h^2+v^2))
+                   --math.max(h, v))
 end
 
 -- }}}
@@ -181,27 +192,12 @@ end
 
 -- Helper code {{{
 
-function T.set_static(t)
-    t.static=true
-    return t
-end
-
-function T.set_lazy(t)
-    t.lazy=true
-    return t
-end
-
-function T.id(t)
-    return t
-end
-
-function T.split3(d, ls, cs, rs, lo, co, ro, sattr)
-    if not sattr then sattr=T.id end
-    return sattr{
+function T.split3(d, ls, cs, rs, lo, co, ro)
+    return {
         split_tls = ls+cs,
         split_brs = rs,
         split_dir = d,
-        tl = sattr{
+        tl = {
             split_tls = ls,
             split_brs = cs,
             split_dir = d,
@@ -212,12 +208,29 @@ function T.split3(d, ls, cs, rs, lo, co, ro, sattr)
     }
 end
 
-function T.center3(d, ts, cs, lo, co, ro, sattr)
+function T.center3(d, ts, cs, lo, co, ro)
     local sc=math.min(ts, cs)
     local sl=math.floor((ts-sc)/2)
     local sr=ts-sc-sl
-    local r=T.split3(d, sl, sc, sr, lo, co, ro, sattr)
+    local r=T.split3(d, sl, sc, sr, lo, co, ro)
     return r
+end
+
+function T.split2(d, ts, ls, rs, lo, ro)
+    assert((not ls) or (not rs))
+    if not ls then
+        ls=ts-rs
+    else
+        rs=ts-ls
+    end
+    assert(rs>0 and ls>0)
+    return {
+        split_dir=d,
+        split_tls=ls,
+        split_brs=rs,
+        tl=lo,
+        br=ro,
+    }
 end
 
 -- }}}
@@ -225,45 +238,113 @@ end
 
 -- Layout templates {{{
 
--- Default layout template. This will return a configuration as follows,
--- with 'U' denoting unused space (a SPLIT_UNUSED split) and 'R'
--- the initial frame.
--- 
--- UU|UUU|UU
--- UU|---|UU
--- UU|RRR|UU
--- UU|---|UU
--- UU|UUU|UU
--- 
-function T.default_layout(ws, reg)
-    local gw, gr=ws:geom(), reg:geom()
-    return T.center3("horizontal", gw.w, gr.w, 
-                     nil,
-                     T.center3("vertical", gw.h, gr.h, 
-                               nil,
-                               { 
-                                   type = "?",
-                                   reference = reg, 
-                               }, 
-                               nil,
-                               T.set_lazy), 
-                     nil,
-                     T.set_lazy)
-end
-
 -- Extended default. Has additional zero-width/height extendable unused 
 -- spaces blocks around the default layout.
-function T.default_layout_ext(ws, reg)
+function T.layout_ext(ws, reg, lo)
     return T.center3("horizontal", 1, 1,
-                     nil,
-                     T.center3("vertical", 1, 1,
-                               nil,
-                               T.default_layout(ws, reg),
-                               nil,
-                               T.set_static),
-                     nil,
-                     T.set_lazy)
+                     nil, 
+                     T.center3("vertical", 1, 1, nil, lo, nil),
+                     nil)
 end
+
+
+function T.div_length(w, r1, r2)
+    return w*r1/(r1+r2), w*r2/(r1+r2)
+end
+
+
+function T.ratio_layout_1d(d, ss, fs, min_fs, max_fs, islack,
+                           l_ratio, r_ratio, allowed, horiz, contents)
+    local fp
+    
+    if horiz then
+        fp=T.horiz_fit_penalty
+    else
+        fp=T.vert_fit_penalty
+    end
+    
+    if fs>ss then
+        local ps=T.slack_penalty(min_fs, fs, ss, islack)
+        local pt=fp(min_fs, fs, ss)
+        
+        if pt<ps then
+            return pt, contents, nil
+        else
+            return ps, contents, math.min(fs, ss+islack)
+        end
+    else
+        local pw=T.waste_penalty(0, fs, ss)
+        local pt=fp(min_fs, fs, ss)
+        
+        if pw<pt then
+            -- Maybe other penalty scale?
+            local sl, sr=T.div_length(ss, l_ratio, r_ratio)
+            local pl=fp(min_fs, fs, sl)
+            local pr=fp(min_fs, fs, sr)
+            local la, ra=string.find(allowed, 'l'), string.find(allowed, 'r')
+            
+            if (pr<pl or not la) and ra then
+                -- Put on right or bottom side of split
+                return pw, T.split2(d, ss, nil, fs, { }, contents), nil
+            elseif la then
+                -- Put on left or top side of split
+                return pw, T.split2(d, ss, fs, nil, contents, { }), nil
+            end
+        end
+        
+        -- Use all space
+        return pt, contents, nil
+    end
+end
+
+
+function T.find_parent(node, t)
+    while true do
+        local p=node:parent()
+        if not p then
+            return
+        end
+        
+        if p:type()==t then
+            return p, ((p:tl()==node and "l") or "r")
+        end
+        node=p
+    end
+end
+        
+        
+function T.ratio_layout(p)
+    local fnode={reference=p.frame}
+    local fg=p.frame:geom()
+    local sg=p.node:geom()
+    local vp, vsplit, dest_h
+    local hp, layout, dest_w
+    local tr, br, lr, rr=S.t_ratio, S.b_ratio, S.l_ratio, S.r_ratio
+    local hmay, vmay="lr", "lr"
+    
+    local par, parfrom=T.find_parent(p.node, "SPLIT_VERTICAL")
+    if par then
+        hmay=""
+        vmay=((parfrom=="l" and "r") or "l")
+    elseif p.node:parent() then
+        lr, rr=rr, lr
+        vmay="l" -- Top only.
+    end
+    
+    -- TODO: 1, nil, 0 (min_fs, max_fs, islack)
+    vp, vsplit, dest_h=T.ratio_layout_1d("vertical", sg.h, fg.h, 1, nil, 0,
+                                         tr, br, vmay, false, fnode)
+    hp, layout, dest_w=T.ratio_layout_1d("horizontal", sg.w, fg.w, 1, nil, 0,
+                                         lr, rr, hmay, true, vsplit)
+    
+    p.penalty=T.combine(vp, hp)
+    p.config=layout
+    p.dest_h=dest_h
+    p.dest_w=dest_w
+    
+    return true
+end
+
 
 -- }}}
 
@@ -271,29 +352,15 @@ end
 -- Callbacks {{{
 
 function T.handle_unused(p)
-    -- Dummy implementation. To be rewritten.
-    local fg=p.frame:geom()
-    local sg=p.node:geom()
-    if p.depth==0 then
-        p.penalty=0
-        p.config=T.default_layout(p.ws, p.frame)
-    else
-        p.penalty=T.combine(T.fit_penalty(0, fg.w, sg.w),
-                            T.fit_penalty(0, fg.h, sg.h))
-        p.config={
-            reference=p.frame
-        }
-    end
-    return true
+    return T.ratio_layout(p)
 end
 
 function T.handle_regfit(p)
-    local cwg=p.cwin:geom()
+    local cwg=p.frame:geom() -- Should use p.cwin:geom()
     local sg=p.node:geom() -- Should use WMPlex.managed_geom instead
     local r=p.node:reg()
-    p.penalty=T.combine(T.regfit_penalty(cwg.w, sg.w, p.cwin, r),
-                        T.regfit_penalty(cwg.h, sg.h, p.cwin, r))
-    
+    p.penalty=T.combine(T.horiz_regfit_penalty(cwg.w, sg.w, p.cwin, r),
+                        T.vert_regfit_penalty(cwg.h, sg.h, p.cwin, r))
     return true
 end
 

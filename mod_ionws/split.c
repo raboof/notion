@@ -695,8 +695,6 @@ static WSplit *do_create_split(const WRectangle *geom)
         split->min_h=0;
         split->max_w=INT_MAX;
         split->max_h=INT_MAX;
-        split->is_static=FALSE;
-        split->is_lazy=FALSE;
     }
     return split;
 }
@@ -979,10 +977,6 @@ static void move_down_(WSplit **root, WSplit *node, WSplit *unused)
                  *   /   \    =>
                  * node other
                  */
-                if(p->is_static){
-                    D(fprintf(stderr, "st\n"));
-                    return;
-                }
                 p->type=SPLIT_UNUSED;
                 other->parent=NULL;
                 node->parent=NULL;
@@ -1009,7 +1003,7 @@ static void move_down_(WSplit **root, WSplit *node, WSplit *unused)
                 destroy_obj((Obj*)unused);
                 move_down(root, p, other);
             }
-        }else if(other->type==p->type && !other->is_static){
+        }else if(other->type==p->type){
             D(fprintf(stderr, "3\n"));
             if((tl && other->u.s.tl->type==SPLIT_UNUSED) ||
                (!tl && other->u.s.br->type==SPLIT_UNUSED)){
@@ -1079,7 +1073,8 @@ static void move_down_(WSplit **root, WSplit *node, WSplit *unused)
 }
     
 
-WSplit *split_tree_remove(WSplit **root, WSplit *node, bool reclaim_space)
+WSplit *split_tree_remove(WSplit **root, WSplit *node, 
+                          bool reclaim_space, bool lazy)
 {
     WSplit *split=node->parent;
     WSplit *other=NULL, *nextfocus=NULL;
@@ -1095,17 +1090,15 @@ WSplit *split_tree_remove(WSplit **root, WSplit *node, bool reclaim_space)
         
         assert(other!=NULL);
         
-        if(split->is_static || split->is_lazy){
+        if(lazy){
             WSplit *un=create_split_unused(&(node->geom));
             if(un!=NULL){
                 *thisptr=un;
                 un->parent=split;
                 replace_ok=TRUE;
-                if(split->is_lazy){
-                    D(fprintf(stderr, ">>>>\n"));
-                    move_down(root, un, un);
-                    D(fprintf(stderr, "<<<<\n"));
-                }
+                D(fprintf(stderr, ">>>>\n"));
+                move_down(root, un, un);
+                D(fprintf(stderr, "<<<<\n"));
             }else{
                 warn_err();
             }

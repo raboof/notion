@@ -98,7 +98,7 @@ extern WSplit *split_tree_split(WSplit **root, WSplit *node, int dir,
                                 WRegionSimpleCreateFn *fn,
                                 WWindow *parent);
 extern WSplit *split_tree_remove(WSplit **root, WSplit *node,
-                                 bool reclaim_space);
+                                 bool reclaim_space, bool lazy);
 extern void split_tree_rqgeom(WSplit *root, WSplit *node, int flags, 
                               const WRectangle *geom, WRectangle *geomret);
 

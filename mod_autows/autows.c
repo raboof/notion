@@ -96,7 +96,7 @@ void autows_managed_remove(WAutoWS *ws, WRegion *reg)
 {
     bool ds=OBJ_IS_BEING_DESTROYED(ws);
     bool mcf=region_may_control_focus((WRegion*)ws);
-    WRegion *other=ionws_do_managed_remove(&(ws->ionws), reg, !ds);
+    WRegion *other=ionws_do_managed_remove(&(ws->ionws), reg, !ds, TRUE);
     
     region_remove_bindmap_owned(reg, mod_autows_autows_bindmap, (WRegion*)ws);
     region_remove_bindmap(reg, mod_autows_frame_bindmap);

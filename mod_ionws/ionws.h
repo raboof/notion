@@ -57,7 +57,7 @@ extern WRegion *ionws_load(WWindow *par, const WFitParams *fp, ExtlTab tab);
 extern WSplit *ionws_load_node(WIonWS *ws, const WRectangle *geom, ExtlTab tab);
 
 extern WRegion *ionws_do_managed_remove(WIonWS *ws, WRegion *reg,
-                                        bool reclaim_space);
+                                        bool reclaim_space, bool lazy);
 
 DYNFUN void ionws_managed_add(WIonWS *ws, WRegion *reg);
 extern void ionws_managed_add_default(WIonWS *ws, WRegion *reg);
