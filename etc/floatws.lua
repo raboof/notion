@@ -25,8 +25,9 @@ defbindings("WFloatFrame", {
     mpress("Button1@border",    "WFloatFrame.raise(_)"),
     mclick(MOD1.."Button1",     "WFloatFrame.raise(_)"),
     mclick(MOD1.."Button3",     "WFloatFrame.lower(_)"),
-    mdrag("Button1@tab",        "WFloatFrame.p_move(_)"),
-    mdrag(MOD1.."Button1",      "WFloatFrame.p_move(_)"),
+    mdrag("Button1@tab",        "WFrame.p_move(_)"),
+     -- in ion-bindings.lua now:
+    --mdrag(MOD1.."Button1",      "WFrame.p_move(_)"),
     
     kpress(MOD1.."M",           "menulib.menu(_, _sub, 'ctxmenu-floatframe')"),
     mpress("Button3@tab",       "menulib.pmenu(_, _sub, 'ctxmenu-floatframe')"),

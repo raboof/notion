@@ -138,6 +138,7 @@ defbindings("WFrame", {
     mclick("Button2@tab",       "WFrame.p_switch_tab(_)"),
     mdrag("Button1@border",     "WFrame.p_resize(_)"),
     mdrag(MOD1.."Button3",      "WFrame.p_resize(_)"),
+    mdrag(MOD1.."Button1",      "WFrame.p_move(_)"),
     mdrag("Button1@tab",        "WFrame.p_tabdrag(_)"),
     mdrag("Button2@tab",        "WFrame.p_tabdrag(_)"),
            

@@ -445,18 +445,6 @@ void floatframe_managed_remove(WFloatFrame *frame, WRegion *reg)
 
 
 /*EXTL_DOC
- * Start moving \var{frame} with the mouse (or other pointing device).
- * this should only be used by binding to the \emph{mpress} or
- * \emph{mdrag} actions.
- */
-EXTL_EXPORT_MEMBER
-void floatframe_p_move(WFloatFrame *frame)
-{
-    frame_p_move((WFrame*)frame);
-}
-
-
-/*EXTL_DOC
  * Toggle \var{frame} stickyness. Only works across frames on 
  * \type{WFloatWS} that have the same \type{WMPlex} parent.
  */

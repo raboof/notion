@@ -481,6 +481,12 @@ static void p_move_begin(WFrame *frame, XMotionEvent *ev, int dx, int dy)
 }
 
 
+/*EXTL_DOC
+ * Start moving \var{frame} with the mouse or other pointing device.
+ * This function should only be used by binding it to \emph{mpress} or
+ * \emph{mdrag} action.
+ */
+EXTL_EXPORT_MEMBER
 void frame_p_move(WFrame *frame)
 {
     if(!ioncore_set_drag_handlers((WRegion*)frame,

@@ -38,7 +38,6 @@ extern void floatframe_managed_remove(WFloatFrame *frame, WRegion *reg);
 extern WRegion *floatframe_load(WWindow *par, const WFitParams *fp, 
                                 ExtlTab tab);
 
-extern void floatframe_p_move(WFloatFrame *frame);
 extern void floatframe_toggle_shade(WFloatFrame *frame);
 
 /* Geometry */
