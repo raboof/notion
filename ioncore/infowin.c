@@ -52,6 +52,8 @@ bool infowin_init(WInfoWin *p, WWindow *parent, const WFitParams *fp,
     if(p->brush==NULL)
         goto fail3;
     
+    p->wwin.region.flags|=REGION_SKIP_FOCUS;
+    
     /* Enable save unders */
     attr.save_under=True;
     XChangeWindowAttributes(ioncore_g.dpy, p->wwin.win, CWSaveUnder, &attr);
@@ -174,6 +176,29 @@ static void infowin_do_set_text(WInfoWin *p, const char *str)
 }
 
 
+static void infowin_resize(WInfoWin *p)
+{
+    int rqflags=REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y;
+    const char *str=INFOWIN_BUFFER(p);
+    WRectangle g;
+    GrBorderWidths bdw;
+    GrFontExtents fnte;
+    
+    g.x=REGION_GEOM(p).x;
+    g.y=REGION_GEOM(p).y;
+    
+    grbrush_get_border_widths(p->brush, &bdw);
+    grbrush_get_font_extents(p->brush, &fnte);
+        
+    g.w=bdw.left+bdw.right;
+    g.w+=grbrush_get_text_width(p->brush, str, strlen(str));
+    g.h=fnte.max_height+bdw.top+bdw.bottom;
+
+    if(g.w!=REGION_GEOM(p).w || g.h!=REGION_GEOM(p).h)
+        region_rqgeom((WRegion*)p, rqflags, &g, NULL);
+}
+
+
 /*EXTL_DOC
  * Set contents of the info window.
  */
@@ -182,6 +207,9 @@ void infowin_set_text(WInfoWin *p, const char *str)
 {
     infowin_do_set_text(p, str);
 
+    infowin_resize(p);
+    
+    /* sometimes unnecessary */
     window_draw((WWindow*)p, TRUE);
 }
 
