@@ -127,7 +127,7 @@ end
 
 
 --DOC    
--- This function will generate another function, that depending on its
+-- This function will generate another function that, depending on its
 -- parameter, will call either \fnref{exec_in_frame} or 
 -- \fnref{exec_on_rootwin} to execute \var{cmd}. You should use this
 -- function to bind execution commands to keys.
