@@ -774,14 +774,14 @@ static bool extl_table_dodo_get2(lua_State *st, TableParams2 *params)
 }
 
 
-bool extl_table_get_vararg(ExtlTab ref, char itype, char type, va_list args)
+bool extl_table_get_vararg(ExtlTab ref, char itype, char type, va_list *args)
 {
 	TableParams2 params;
 	
 	params.ref=ref;
 	params.itype=itype;
 	params.type=type;
-	params.argsp=&args;
+	params.argsp=args;
 	
 	return extl_cpcall(l_st, (ExtlCPCallFn*)extl_table_dodo_get2, &params);
 }
@@ -793,7 +793,7 @@ bool extl_table_get(ExtlTab ref, char itype, char type, ...)
 	bool retval;
 	
 	va_start(args, type);
-	retval=extl_table_get_vararg(ref, itype, type, args);
+	retval=extl_table_get_vararg(ref, itype, type, &args);
 	va_end(args);
 	
 	return retval;
@@ -927,14 +927,14 @@ static bool extl_table_dodo_set2(lua_State *st, TableParams2 *params)
 }
 
 
-bool extl_table_set_vararg(ExtlTab ref, char itype, char type, va_list args)
+bool extl_table_set_vararg(ExtlTab ref, char itype, char type, va_list *args)
 {
 	TableParams2 params;
 	
 	params.ref=ref;
 	params.itype=itype;
 	params.type=type;
-	params.argsp=&args;
+	params.argsp=args;
 	
 	return extl_cpcall(l_st, (ExtlCPCallFn*)extl_table_dodo_set2, &params);
 }
@@ -946,7 +946,7 @@ bool extl_table_set(ExtlTab ref, char itype, char type, ...)
 	bool retval;
 	
 	va_start(args, type);
-	retval=extl_table_set_vararg(ref, itype, type, args);
+	retval=extl_table_set_vararg(ref, itype, type, &args);
 	va_end(args);
 	
 	return retval;
@@ -1040,14 +1040,14 @@ static bool extl_table_dodo_clear2(lua_State *st, TableParams2 *params)
 	return TRUE;
 }
 
-bool extl_table_clear_vararg(ExtlTab ref, char itype, va_list args)
+bool extl_table_clear_vararg(ExtlTab ref, char itype, va_list *args)
 {
 	TableParams2 params;
 	
 	params.ref=ref;
 	params.itype=itype;
 	/*params.type='?';*/
-	params.argsp=&args;
+	params.argsp=args;
 	
 	return extl_cpcall(l_st, (ExtlCPCallFn*)extl_table_dodo_clear2, &params);
 }
@@ -1058,7 +1058,7 @@ bool extl_table_clear(ExtlTab ref, char itype, ...)
 	bool retval;
 	
 	va_start(args, itype);
-	retval=extl_table_clear_vararg(ref, itype, args);
+	retval=extl_table_clear_vararg(ref, itype, &args);
 	va_end(args);
 	
 	return retval;
@@ -1238,7 +1238,7 @@ static bool extl_do_call_vararg(lua_State *st, ExtlDoCallParam *param)
 
 
 bool extl_call_vararg(ExtlFn fnref, const char *spec,
-					  const char *rspec, va_list args)
+					  const char *rspec, va_list *args)
 {
 	ExtlDoCallParam param;
 	
@@ -1247,7 +1247,7 @@ bool extl_call_vararg(ExtlFn fnref, const char *spec,
 
 	param.spec=spec;
 	param.rspec=rspec;
-	param.args=&args;
+	param.args=args;
 	param.misc=(void*)&fnref;
 
 	return extl_cpcall_call(l_st, (ExtlCPCallFn*)extl_do_call_vararg, &param);
@@ -1260,7 +1260,7 @@ bool extl_call(ExtlFn fnref, const char *spec, const char *rspec, ...)
 	va_list args;
 	
 	va_start(args, rspec);
-	retval=extl_call_vararg(fnref, spec, rspec, args);
+	retval=extl_call_vararg(fnref, spec, rspec, &args);
 	va_end(args);
 	
 	return retval;
@@ -1281,12 +1281,12 @@ static bool extl_do_call_named_vararg(lua_State *st, ExtlDoCallParam *param)
 
 
 bool extl_call_named_vararg(const char *name, const char *spec,
-							const char *rspec, va_list args)
+							const char *rspec, va_list *args)
 {
 	ExtlDoCallParam param;
 	param.spec=spec;
 	param.rspec=rspec;
-	param.args=&args;
+	param.args=args;
 	param.misc=(void*)name;
 
 	return extl_cpcall_call(l_st, (ExtlCPCallFn*)extl_do_call_named_vararg,
@@ -1300,7 +1300,7 @@ bool extl_call_named(const char *name, const char *spec, const char *rspec, ...)
 	va_list args;
 	
 	va_start(args, rspec);
-	retval=extl_call_named_vararg(name, spec, rspec, args);
+	retval=extl_call_named_vararg(name, spec, rspec, &args);
 	va_end(args);
 	
 	return retval;

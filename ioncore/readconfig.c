@@ -224,7 +224,7 @@ static int try_call(const char *file, TryCallParam *param)
 	if(ret!=TRYCONFIG_OK)
 		return ret;
 	
-	ret=extl_call_vararg(param->fn, param->spec, param->rspec,  param->args);
+	ret=extl_call_vararg(param->fn, param->spec, param->rspec, &(param->args));
 	
 	extl_unref_fn(param->fn);
 	

@@ -75,7 +75,7 @@ extern ExtlTab extl_globals();
 
 /* Table/get */
 extern bool extl_table_get_vararg(ExtlTab ref, char itype, char type, 
-								  va_list args);
+								  va_list *args);
 extern bool extl_table_get(ExtlTab ref, char itype, char type, ...);
 
 extern bool extl_table_gets_o(ExtlTab ref, const char *entry, WObj **ret);
@@ -97,7 +97,7 @@ extern bool extl_table_geti_t(ExtlTab ref, int entry, ExtlTab *ret);
 
 /* Table/set */
 extern bool extl_table_set_vararg(ExtlTab ref, char itype, char type, 
-								  va_list args);
+								  va_list *args);
 extern bool extl_table_set(ExtlTab ref, char itype, char type, ...);
 
 extern bool extl_table_sets_o(ExtlTab ref, const char *entry, WObj *val);
@@ -118,7 +118,7 @@ extern bool extl_table_seti_t(ExtlTab ref, int entry, ExtlTab val);
 
 /* Table/clear */
 
-extern bool extl_table_clear_vararg(ExtlTab ref, char itype, va_list args);
+extern bool extl_table_clear_vararg(ExtlTab ref, char itype, va_list *args);
 extern bool extl_table_clear(ExtlTab ref, char itype, ...);
 
 extern bool extl_table_clears(ExtlTab ref, const char *entry);
@@ -129,12 +129,12 @@ extern bool extl_table_cleari(ExtlTab ref, int entry);
 extern const ExtlSafelist *extl_set_safelist(const ExtlSafelist *sl);
 
 extern bool extl_call_vararg(ExtlFn fnref, const char *spec,
-							 const char *rspec, va_list args);
+							 const char *rspec, va_list *args);
 extern bool extl_call(ExtlFn fnref, const char *spec,
 					  const char *rspec, ...);
 
 extern bool extl_call_named_vararg(const char *name, const char *spec,
-								   const char *rspec, va_list args);
+								   const char *rspec, va_list *args);
 extern bool extl_call_named(const char *name, const char *spec,
 							const char *rspec, ...);
 
