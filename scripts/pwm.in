@@ -1,9 +1,9 @@
 #!/bin/sh
 
-DIRARGS="-confdir PREFIX/etc/ion-devel \
-  -libdir PREFIX/lib/ion-devel"
-PWMDIRARGS="-confdir PREFIX/etc/pwm-devel \
-  -libdir PREFIX/lib/pwm-devel"
+DIRARGS="-confdir ETCDIR/ion-devel \
+  -libdir LIBDIR/ion-devel"
+PWMDIRARGS="-confdir ETCDIR/pwm-devel \
+  -libdir LIBDIR/pwm-devel"
 
 if test x$HOME != x; then
   DIRARGS="-confdir $HOME/.ion-devel \

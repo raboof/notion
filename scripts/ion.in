@@ -1,7 +1,7 @@
 #!/bin/sh
 
-DIRARGS="-confdir PREFIX/etc/ion-devel \
-  -libdir PREFIX/lib/ion-devel"
+DIRARGS="-confdir ETCDIR/ion-devel \
+  -libdir LIBDIR/ion-devel"
 
 if test x$HOME != x; then
   DIRARGS="-confdir $HOME/.ion-devel \

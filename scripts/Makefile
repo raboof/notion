@@ -25,9 +25,13 @@ _install:
 	done
 
 ion: ion.in
-	sed 's#PREFIX#$(PREFIX)#g' $< > $@
+	sed 's#ETCDIR#$(ETCDIR)#g; \
+	     s#LIBDIR#$(LIBDIR)#g; \
+	     s#PREFIX#$(PREFIX)#g;' $< > $@
 	chmod $(BIN_MODE) $@
 	
 pwm: pwm.in
-	sed 's#PREFIX#$(PREFIX)#g' $< > $@
+	sed 's#ETCDIR#$(ETCDIR)#g; \
+	     s#LIBDIR#$(LIBDIR)#g; \
+	     s#PREFIX#$(PREFIX)#g;' $< > $@
 	chmod $(BIN_MODE) $@
