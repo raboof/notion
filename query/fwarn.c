@@ -14,7 +14,8 @@
 #include <ioncore/objp.h>
 
 
-void fwarn(WGenFrame *frame, const char *p)
+EXTL_EXPORT
+void query_fwarn(WGenFrame *frame, const char *p)
 {
 	WMessage *wmsg;
 	char *p2;
@@ -41,10 +42,10 @@ void fwarn(WGenFrame *frame, const char *p)
 }
 
 
-void fwarn_free(WGenFrame *frame, char *p)
+void query_fwarn_free(WGenFrame *frame, char *p)
 {
 	if(p!=NULL){
-		fwarn(frame, p);
+		query_fwarn(frame, p);
 		free(p);
 	}
 }

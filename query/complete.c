@@ -111,8 +111,7 @@ void edln_complete(Edln *edln)
 	memcpy(p, edln->p, len);
 	p[len]='\0';
 	
-	ncomp=edln->completion_handler(p, &completions, &beg,
-								   edln->completion_handler_data);
+	ncomp=edln->completion_handler(edln->uiptr, p, &completions, &beg);
 	
 	free(p);
 	

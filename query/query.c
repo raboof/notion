@@ -25,24 +25,25 @@
 #include "wmessage.h"
 #include "fwarn.h"
 
-#define FWARN(ARGS) fwarn_free((WGenFrame*)obj, errmsg ARGS)
-
 
 /*{{{ Generic */
 
 
-static WEdln *do_query_edln(WGenFrame *frame, WEdlnHandler *handler,
-							const char *prompt, const char *dflt,
-							EdlnCompletionHandler *chandler,
-							void *chandler_data)
+EXTL_EXPORT
+void query_query(WGenFrame *frame, const char *prompt, const char *dflt,
+				 ExtlFn handler, ExtlFn completor)
 {
 	WRectangle geom;
 	WEdln *wedln;
 	WEdlnCreateParams fnp;
 	
+	/*fprintf(stderr, "query_query called %s %s %d %d\n", prompt, dflt,
+			handler, completor);*/
+	
 	fnp.prompt=prompt;
 	fnp.dflt=dflt;
 	fnp.handler=handler;
+	fnp.completor=completor;
 	
 	wedln=(WEdln*)genframe_add_input(frame, (WRegionAddFn*)create_wedln,
 									 (void*)&fnp);
@@ -51,111 +52,7 @@ static WEdln *do_query_edln(WGenFrame *frame, WEdlnHandler *handler,
 		
 		if(REGION_IS_ACTIVE(frame))
 			set_focus((WRegion*)wedln);
-		
-		if(chandler!=NULL)
-			wedln_set_completion_handler(wedln, chandler, chandler_data);
 	}
-	
-	return wedln;
-}
-
-
-/*}}}*/
-
-
-/*{{{ Files */
-
-
-static char wdbuf[PATH_MAX+10]="/";
-static int wdstatus=0;
-
-static const char *my_getwd()
-{
-	
-	if(wdstatus==0){
-		if(getcwd(wdbuf, PATH_MAX)==NULL){
-			wdstatus=-1;
-			strcpy(wdbuf, "/");
-		}else{
-			wdstatus=1;
-			strcat(wdbuf, "/");
-		}
-	}
-	
-	return wdbuf;
-}
-
-
-static void handler_runfile(WObj *obj, char *str, char *userdata)
-{
-	char *p;
-	
-	if(*str=='\0')
-		return;
-	
-	if(userdata!=NULL)
-		do_open_with(SCREEN_OF(obj), userdata, str);
-	
-	p=strrchr(str, '/');
-	if(p==NULL){
-		wdstatus=0;
-	}else{
-		*(p+1)='\0';
-		strncpy(wdbuf, str, PATH_MAX);
-	}
-}
-
-
-static void handler_runwith(WObj *obj, char *str, char *userdata)
-{
-	WScreen *scr=SCREEN_OF(obj);
-	
-	if(userdata==NULL)
-		return;
-	
-	if(*str!='\0')
-		do_open_with(scr, userdata, str);
-	else
-		exec_on_screen(scr, userdata);
-}
-
-
-static void handler_exec(WObj *obj, char *str, char *userdata)
-{
-	WScreen *scr=SCREEN_OF(obj);
-	
-	if(*str==':')
-		do_open_with(scr, "ion-runinxterm", str+1);
-	else
-		exec_on_screen(scr, str);
-}
-
-
-EXTL_EXPORT
-void query_exec(WGenFrame *frame)
-{
-	do_query_edln(frame, handler_exec, "Run:", NULL,
-				  complete_file_with_path, NULL);
-}
-
-
-EXTL_EXPORT
-void query_runfile(WGenFrame *frame, char *prompt, char *cmd)
-{
-	WEdln *wedln=do_query_edln(frame, handler_runfile,
-							   prompt, my_getwd(), complete_file, NULL);
-	if(wedln!=NULL)
-		wedln->userdata=scopy(cmd);
-}
-
-
-EXTL_EXPORT
-void query_runwith(WGenFrame *frame, char *prompt, char *cmd)
-{
-	WEdln *wedln=do_query_edln(frame, handler_runwith,
-							   prompt, NULL, NULL, NULL);
-	if(wedln!=NULL)
-		wedln->userdata=scopy(cmd);
 }
 
 
@@ -165,57 +62,23 @@ void query_runwith(WGenFrame *frame, char *prompt, char *cmd)
 /*{{{ Navigation */
 
 
-static bool attach_test(WGenFrame *dst, WRegion *sub, WGenFrame *obj)
+EXTL_EXPORT
+void query_handler_attachclient(WGenFrame *frame, const char *str)
 {
-	if(!same_screen(&dst->win.region, sub)){
+	WClientWin *cwin=lookup_clientwin(str);
+	
+	if(cwin==NULL){
+		query_fwarn_free(frame, errmsg("No client named '%s'", str));
+		return;
+	}
+
+	if(!same_screen((WRegion*)cwin, (WRegion*)frame)){
 		/* complaint should go in 'obj' -frame */
-		FWARN(("Cannot attach: not on same screen."));
-		return FALSE;
-	}
-	region_add_managed((WRegion*)dst, sub, TRUE);
-	return TRUE;
-}
-
-
-static void handler_attachclient(WObj *obj, char *str, char *userdata)
-{
-	WClientWin *cwin=lookup_clientwin(str);
-	
-	if(cwin==NULL){
-		FWARN(("No client named '%s'", str));
+		query_fwarn(frame, "Cannot attach: not on same screen.");
 		return;
 	}
 	
-	attach_test((WGenFrame*)obj, (WRegion*)cwin, (WGenFrame*)obj);
-}
-
-
-static void handler_gotoclient(WObj *obj, char *str, char *userdata)
-{
-	WClientWin *cwin=lookup_clientwin(str);
-	
-	if(cwin==NULL){
-		FWARN(("No client named '%s'", str));
-		return;
-	}
-	
-	region_goto(&cwin->region);
-}
-
-
-EXTL_EXPORT
-void query_attachclient(WGenFrame *frame)
-{
-	do_query_edln(frame, handler_attachclient,
-				  "Attach client:", "", complete_clientwin, NULL);
-}
-
-
-EXTL_EXPORT
-void query_gotoclient(WGenFrame *frame)
-{
-	do_query_edln(frame, handler_gotoclient,
-				  "Goto client:", "", complete_clientwin, NULL);
+	region_add_managed((WRegion*)frame, (WRegion*)cwin, TRUE);
 }
 
 
@@ -225,7 +88,7 @@ bool empty_name(const char *p)
 }
 
 
-static WRegion *create_ws_on_vp(WViewport *vp, char *name)
+static WRegion *create_ws_on_vp(WViewport *vp, const char *name)
 {
 	WRegionSimpleCreateFn *fn=NULL;
 	char *p=strchr(name, ':');
@@ -257,9 +120,10 @@ static WRegion *create_ws_on_vp(WViewport *vp, char *name)
 }
 
 
-static void handler_workspace(WObj *obj, char *name, char *userdata)
+EXTL_EXPORT
+void query_handler_workspace(WGenFrame *frame, const char *name)
 {
-	WScreen *scr=SCREEN_OF(obj);
+	WScreen *scr=SCREEN_OF(frame);
 	WRegion *ws=NULL;
 	WViewport *vp=NULL;
 	
@@ -269,11 +133,11 @@ static void handler_workspace(WObj *obj, char *name, char *userdata)
 	ws=(WRegion*)lookup_workspace(name);
 	
 	if(ws==NULL){
-		vp=viewport_of((WRegion*)obj);
+		vp=viewport_of((WRegion*)frame);
 		if(vp!=NULL)
 			ws=create_ws_on_vp(vp, name);
 		if(ws==NULL){
-			FWARN(("Unable to create workspace."));
+			query_fwarn(frame, "Unable to create workspace.");
 			return;
 		}
 	}
@@ -282,17 +146,9 @@ static void handler_workspace(WObj *obj, char *name, char *userdata)
 }
 
 
-EXTL_EXPORT
-void query_workspace(WGenFrame *frame)
-{
-	do_query_edln(frame, handler_workspace,
-				  "Goto/create workspace:", "", complete_workspace, NULL);
-}
-
-
+#if 0
 static void handler_workspace_with(WObj *obj, char *name, char *userdata)
 {
-#if 0
 	WScreen *scr=SCREEN_OF(obj);
 	WGenWS *ws;
 	WClientWin *cwin;
@@ -333,175 +189,68 @@ static void handler_workspace_with(WObj *obj, char *name, char *userdata)
 	
 	if(attach_test((WGenFrame*)frame, (WRegion*)cwin, (WGenFrame*)obj))
 		region_goto((WRegion*)cwin);
+}
 #endif
-}
-
-
-EXTL_EXPORT
-void query_workspace_with(WGenFrame *frame)
-{
-#if 0
-	WEdln *wedln;
-	WRegion *sub=frame->current_sub;
-	char *p;
-	
-	if(sub==NULL){
-		query_workspace(frame);
-		return;
-	}
-	
-	p=region_full_name(sub);
-	
-	wedln=do_query_edln(frame, handler_workspace_with,
-						"Create workspace/attach:", p,
-						complete_workspace, NULL);
-	if(wedln==NULL)
-		free(p);
-	else
-		wedln->userdata=p;
-#endif
-	fwarn(frame, "This feature is not available at the moment");
-}
-
-
-void handler_renameworkspace(WObj *obj, char *name, char *userdata)
-{
-	WGenWS *ws=FIND_PARENT((WRegion*)obj, WGenWS);
-	
-	if(ws==NULL || empty_name(name))
-		return;
-	
-	region_set_name((WRegion*)ws, name);
-}
-
-
-EXTL_EXPORT
-void query_renameworkspace(WGenFrame *frame)
-{
-	WGenWS *ws=FIND_PARENT(frame, WGenWS);
-	
-	if(ws==NULL)
-		return;
-	
-	do_query_edln(frame, handler_renameworkspace,
-				  "Rename workspace to:", region_name((WRegion*)ws),
-				  NULL, NULL);
-}
-
-
-void handler_renameframe(WObj *obj, char *name, char *userdata)
-{
-	region_set_name((WRegion*)obj, name);
-}
-
-
-EXTL_EXPORT
-void query_renameframe(WGenFrame *frame)
-{
-	do_query_edln(frame, handler_renameframe,
-				  "Name of this frame:", region_name((WRegion*)frame),
-				  NULL, NULL);
-}
 
 
 /*}}}*/
 
 
-/*{{{ Misc. */
+/*{{{ Files */
 
 
-static char *error_message=NULL;
+int do_complete_file(char *pathname, char ***avp, char **beg, void *unused);
+int do_complete_file_with_path(char *pathname, char ***avp, char **beg,
+							   void *unused);
 
 
-static void function_warn_handler(const char *message)
+/* TODO: Put the values directly in the Lua table instead of this
+ * memory-wasting bandwidth-abusing conversion.
+ */
+
+static ExtlTab complete(char *pathname, int (*cfn)(char *pathname,
+												   char ***avp,
+												   char **beg, 
+												   void *unused))
 {
-	char *tmp;
+	int i, n;
+	char **avp=NULL;
+	char *beg=NULL;
+	ExtlTab tab;
 	
-	if(error_message==NULL){
-		error_message=scopy(message);
-	}else{
-		tmp=scat3(error_message, "\n", message);
-		if(tmp!=NULL)
-			error_message=tmp;
+	n=cfn(pathname, &avp, &beg, NULL);
+	
+	if(n==0)
+		return extl_table_none();
+	
+	tab=extl_create_table();
+	
+	for(i=0;i<n;i++){
+		extl_table_seti_s(tab, i+1, avp[i]);
+		free(avp[i]);
 	}
-}
-
-
-void handler_commands(WObj *obj, char *cmds, char *userdata)
-{
-	WarnHandler *old_warn_handler;
-	WWatch watch=WWATCH_INIT;
-	bool error=FALSE;
+	free(avp);
 	
-	assert(WOBJ_IS(obj, WGenFrame));
-	
-	setup_watch(&watch, obj, NULL);
-	
-	if(((WGenFrame*)obj)->current_sub!=NULL)
-		obj=(WObj*)(((WGenFrame*)obj)->current_sub);
-	
-	old_warn_handler=set_warn_handler(function_warn_handler);
-	error=!extl_dostring(cmds, "o", NULL, obj);
-	set_warn_handler(old_warn_handler);
-	
-	if(watch.obj!=NULL){
-		obj=watch.obj;
-		if(error_message!=NULL){
-			FWARN(("%s", error_message));
-		}else if(error){
-			FWARN(("An unknown error occurred while trying to "
-				   "parse your request"));
-		}
+	if(beg!=NULL){
+		extl_table_sets_s(tab, "common_part", beg);
+		free(beg);
 	}
-	
-	reset_watch(&watch);
-	
-	if(error_message!=NULL){
-		free(error_message);
-		error_message=NULL;
-	}
+
+	return tab;
 }
-
-
-static void handler_yesno(WObj *obj, char *yesno, char *fnc)
-{
-	ExtlFn fn;
-	
-	if(strcasecmp(yesno, "y") && strcasecmp(yesno, "yes"))
-		return;
-	
-	if(fnc==NULL)
-		return;
-	
-	fn=*(ExtlFn*)fnc;
-	free(fnc);
-	
-	extl_call(fn, "o", NULL, obj);
-}
-
 
 EXTL_EXPORT
-void query_yesno(WGenFrame *frame, const char *prompt, ExtlFn fn)
+ExtlTab complete_file(char *pathname)
 {
-	WEdln *wedln=do_query_edln(frame, handler_yesno,
-							   prompt, NULL, NULL, NULL);
-	if(wedln!=NULL){
-		ExtlFn *fnc=ALLOC(ExtlFn);
-		if(fnc==NULL)
-			return;
-		*fnc=extl_ref_fn(fn);
-		wedln->userdata=(char*)fnc;
-	}
+	complete(pathname, do_complete_file);
 }
 
-
+	
 EXTL_EXPORT
-void query_commands(WGenFrame *frame)
+ExtlTab complete_file_with_path(char *pathname)
 {
-	do_query_edln(frame, handler_commands,
-				  "Commands:", NULL, extl_complete_fn, frame);
+	return complete(pathname, do_complete_file_with_path);
 }
 
 
 /*}}}*/
-

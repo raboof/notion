@@ -136,6 +136,4 @@ extern const char* extl_extension();
 
 extern bool extl_init();
 
-extern ExtlTab extl_complete_fn(const char *nam);
-
 #endif /* ION_LUA_LUAEXTL_H */

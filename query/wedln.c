@@ -15,6 +15,7 @@
 #include <ioncore/selection.h>
 #include <ioncore/event.h>
 #include <ioncore/regbind.h>
+#include <ioncore/extl.h>
 #include "edln.h"
 #include "wedln.h"
 #include "inputp.h"
@@ -347,6 +348,49 @@ void wedln_scrolldown_completions(WEdln *wedln)
 		wedln_draw_completions(wedln, TRUE);
 }
 
+
+static int wedln_completion_handler(WEdln *wedln, const char *nam, char ***ret,
+									char **beg)
+{
+	ExtlTab tab=extl_table_none();
+	int i, n;
+	char **ptr, *p;
+	
+	if(!extl_call(wedln->completor, "s", "t", nam, &tab))
+		return 0;
+	
+	n=extl_table_get_n(tab);
+	if(n>0){
+		ptr=ALLOC_N(char*, n);
+		if(ptr==NULL){
+			warn_err();
+			goto fail;
+		}
+		for(i=0; i<n; i++){
+			if(!extl_table_geti_s(tab, i+1, &p))
+				goto allocfail;
+			ptr[i]=p;
+		}
+		*ret=ptr;
+	}
+	
+	if(extl_table_gets_s(tab, "common_part", &p))
+		*beg=p;
+	
+	extl_unref_table(tab);
+	return n;
+	
+allocfail:
+	while(i>0){
+		i--;
+		free(ptr[i]);
+	}
+	free(ptr);
+fail:
+	extl_unref_table(tab);
+	return 0;
+}
+
 	
 /*}}}*/
 
@@ -379,17 +423,15 @@ static bool wedln_init_prompt(WEdln *wedln, WScreen *scr, const char *prompt)
 }
 
 
-bool wedln_init(WEdln *wedln, WWindow *par, WRectangle geom,
-				WEdlnHandler *handler, const char *prompt, const char *dflt)
+static bool wedln_init(WEdln *wedln, WWindow *par, WRectangle geom, 
+					   WEdlnCreateParams *params)
 {
 	wedln->vstart=0;
-	wedln->handler=handler;
-	wedln->userdata=NULL;
 
-	if(!wedln_init_prompt(wedln, SCREEN_OF(par), prompt))
+	if(!wedln_init_prompt(wedln, SCREEN_OF(par), params->prompt))
 		return FALSE;
 	
-	if(!edln_init(&(wedln->edln), dflt)){
+	if(!edln_init(&(wedln->edln), params->dflt)){
 		free(wedln->prompt);
 		return FALSE;
 	}
@@ -398,6 +440,7 @@ bool wedln_init(WEdln *wedln, WWindow *par, WRectangle geom,
 	wedln->edln.ui_update=(EdlnUpdateHandler*)wedln_update_handler;
 	wedln->edln.ui_show_completions=(EdlnShowComplHandler*)wedln_show_completions;
 	wedln->edln.ui_hide_completions=(EdlnHideComplHandler*)wedln_hide_completions;
+	wedln->edln.completion_handler=(EdlnCompletionHandler*)wedln_completion_handler;
 
 	init_listing(&(wedln->complist));
 	
@@ -408,6 +451,9 @@ bool wedln_init(WEdln *wedln, WWindow *par, WRectangle geom,
 	}
 
 	wedln->input.win.xic=create_xic(wedln->input.win.win);
+	
+	wedln->handler=extl_ref_fn(params->handler);
+	wedln->completor=extl_ref_fn(params->completor);
 
 	region_add_bindmap((WRegion*)wedln, &query_wedln_bindmap);
 	
@@ -415,10 +461,9 @@ bool wedln_init(WEdln *wedln, WWindow *par, WRectangle geom,
 }
 
 
-WEdln *create_wedln(WWindow *par, WRectangle geom, WEdlnCreateParams *fnp)
+WEdln *create_wedln(WWindow *par, WRectangle geom, WEdlnCreateParams *params)
 {
-	CREATEOBJ_IMPL(WEdln, wedln, (p, par, geom, fnp->handler,
-								  fnp->prompt, fnp->dflt));
+	CREATEOBJ_IMPL(WEdln, wedln, (p, par, geom, params));
 }
 
 
@@ -436,12 +481,12 @@ static void wedln_deinit(WEdln *wedln)
 	if(wedln->prompt!=NULL)
 		free(wedln->prompt);
 
-	if(wedln->userdata!=NULL)
-		free(wedln->userdata);
-	
 	if(wedln->complist.strs!=NULL)
 		deinit_listing(&(wedln->complist));
 
+	extl_unref_fn(wedln->completor);
+	extl_unref_fn(wedln->handler);
+	
 	edln_deinit(&(wedln->edln));
 	input_deinit((WInput*)wedln);
 }
@@ -451,23 +496,20 @@ EXTL_EXPORT
 void wedln_finish(WEdln *wedln)
 {
 	WRegion *parent;
-	WEdlnHandler *handler;
+	ExtlFn handler;
 	char *p;
-	char *userdata;
 	
-	handler=wedln->handler;
-	parent=((WRegion*)wedln)->parent;
+	handler=extl_ref_fn(wedln->handler);
+	/*parent=((WRegion*)wedln)->parent;*/
 	p=edln_finish(&(wedln->edln));
-	userdata=wedln->userdata;
-	wedln->userdata=NULL;
 	
 	destroy_obj((WObj*)wedln);
 	
-	if(handler!=NULL)
-		handler((WObj*)parent, p, userdata);
+	if(p!=NULL)
+		extl_call(handler, "s", NULL, p);
 	
-	if(userdata!=NULL)
-		free(userdata);
+	free(p);
+	extl_unref_fn(handler);
 }
 
 
@@ -487,15 +529,6 @@ void wedln_paste(WEdln *wedln)
 void wedln_insstr(WEdln *wedln, const char *buf, size_t n)
 {
 	edln_insstr_n(&(wedln->edln), buf, n);
-	/*wedln_draw(wedln, FALSE);*/
-}
-
-
-void wedln_set_completion_handler(WEdln *wedln, EdlnCompletionHandler *h,
-								  void *d)
-{
-	wedln->edln.completion_handler=h;
-	wedln->edln.completion_handler_data=d;
 }
 
 

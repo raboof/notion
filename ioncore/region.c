@@ -685,14 +685,14 @@ bool region_manages_active_reg(WRegion *reg)
 
 
 EXTL_EXPORT
-WRegion *region_get_manager(WRegion *reg)
+WRegion *region_manager(WRegion *reg)
 {
 	return REGION_MANAGER(reg);
 }
 
 
 EXTL_EXPORT
-WRegion *region_get_parent(WRegion *reg)
+WRegion *region_parent(WRegion *reg)
 {
 	return reg->parent;
 }

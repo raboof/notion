@@ -13,8 +13,8 @@
 
 INTRSTRUCT(Edln);
 
-typedef int EdlnCompletionHandler(char *p, char ***ret, char **beg,
-								  void *data);
+typedef int EdlnCompletionHandler(void*, const char *p, char ***ret,
+								  char **beg);
 typedef void EdlnUpdateHandler(void*, int, bool moved);
 typedef void EdlnShowComplHandler(void*, char **, int);
 typedef void EdlnHideComplHandler(void*);
@@ -33,8 +33,6 @@ DECLSTRUCT(Edln){
 	void *uiptr;
 
 	EdlnCompletionHandler *completion_handler;
-	void *completion_handler_data;
-	
 	EdlnUpdateHandler *ui_update;
 	EdlnShowComplHandler *ui_show_completions;
 	EdlnHideComplHandler *ui_hide_completions;

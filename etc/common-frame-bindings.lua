@@ -38,9 +38,11 @@ function common_frame_bindings()
 end    
 
 function frame_query_bindings()
-    if query_attachclient==nil then
+    if query_query==nil then
         return {}
     end
+
+    include("querylib.lua")
     
     local f11key, f12key="F11", "F12"
     
@@ -51,30 +53,18 @@ function frame_query_bindings()
     end
     
     return {
-        kpress(DEFAULT_MOD.."A", query_attachclient),
-        kpress(DEFAULT_MOD.."G", query_gotoclient),
+        kpress(DEFAULT_MOD.."A", QueryLib.query_attachclient),
+        kpress(DEFAULT_MOD.."G", QueryLib.query_gotoclient),
         
-        kpress("F1",
-               function(f) query_runwith(f, "Manual page:", "ion-man") end),
-        kpress("F3", query_exec),
-        kpress("Mod1+F3", query_commands),
-        kpress("F4",
-               function(f) query_runwith(f, "SSH to:", "ion-ssh") end),
-        kpress("F5",
-               function(f) query_runfile(f, "Edit file:", "ion-edit") end),
-        kpress("F6",
-               function(f) query_runfile(f, "View file:", "ion-view") end),
-        kpress("F9", query_workspace),
-        kpress("Mod1+F9", query_workspace_with),
-        kpress(f11key,
-               function(f)
-                   query_yesno(f, "Restart Ion (y/n)?", restart_wm)
-               end
-              ),
-        kpress(f12key,
-               function(f)
-                   query_yesno(f, "Exit Ion (y/n)?", exit_wm)
-               end
-              ),
+        kpress("F1", QueryLib.query_man),
+        kpress("F3", QueryLib.query_exec),
+        kpress("Mod1+F3", QueryLib.query_lua),
+        kpress("F4", QueryLib.query_ssh),
+        kpress("F5", QueryLib.query_editfile),
+        kpress("F6", QueryLib.query_runfile),
+        kpress("F9", QueryLib.query_workspace),
+        --kpress("Mod1+F9", query_workspace_with),
+        kpress(f11key, QueryLib.query_restart),
+        kpress(f12key, QueryLib.query_exit),
     }
 end

@@ -10,7 +10,7 @@
 
 #include <ioncore/genframe.h>
 
-extern void fwarn(WGenFrame *frame, const char *p);
-extern void fwarn_free(WGenFrame *frame, char *p);
+extern void query_fwarn(WGenFrame *frame, const char *p);
+extern void query_fwarn_free(WGenFrame *frame, char *p);
 
 #endif /* ION_QUERY_FWARN_H */

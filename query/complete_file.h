@@ -8,8 +8,8 @@
 #ifndef ION_QUERY_COMPLETE_FILE_H
 #define ION_QUERY_COMPLETE_FILE_H
 
-int complete_file(char *pathname, char ***avp, char **beg, void *unused);
-int complete_file_with_path(char *pathname, char ***avp, char **beg,
-							void *unused);
+int do_complete_file(char *pathname, char ***avp, char **beg, void *unused);
+int do_complete_file_with_path(char *pathname, char ***avp, char **beg,
+							   void *unused);
 
 #endif /* ION_QUERY_COMPLETE_FILE_H */

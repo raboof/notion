@@ -12,6 +12,7 @@
 #include <ioncore/obj.h>
 #include <ioncore/window.h>
 #include <ioncore/xic.h>
+#include <ioncore/extl.h>
 #include "listing.h"
 #include "input.h"
 #include "edln.h"
@@ -23,9 +24,10 @@ typedef void WEdlnHandler(WObj *p, char *str, char *userdata);
 
 
 DECLSTRUCT(WEdlnCreateParams){
-	WEdlnHandler *handler;
 	const char *prompt;
 	const char *dflt;
+	ExtlFn handler;
+	ExtlFn completor;
 };
 
 
@@ -40,15 +42,12 @@ DECLOBJ(WEdln){
 	int prompt_w;
 	int vstart;
 	
-	WEdlnHandler *handler;
-	char *userdata;
+	ExtlFn handler;
+	ExtlFn completor;
 };
 
 extern WEdln *create_wedln(WWindow *par, WRectangle geom,
 						   WEdlnCreateParams *p);
-extern void wedln_set_completion_handler(WEdln *wedln,
-										 EdlnCompletionHandler *h,
-										 void *d);
 extern void wedln_finish(WEdln *wedln);
 extern void wedln_paste(WEdln *wedln);
 extern void wedln_draw(WEdln *wedln, bool complete);

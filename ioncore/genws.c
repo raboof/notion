@@ -33,18 +33,21 @@ void genws_deinit(WGenWS *ws)
 /*{{{ Names */
 
 
+EXTL_EXPORT
 WGenWS *lookup_workspace(const char *name)
 {
 	return (WGenWS*)do_lookup_region(name, &OBJDESCR(WGenWS));
 }
 
 
-int complete_workspace(char *nam, char ***cp_ret, char **beg, void *unused)
+EXTL_EXPORT
+ExtlTab complete_workspace(const char *nam)
 {
-	return do_complete_region(nam, cp_ret, beg, &OBJDESCR(WGenWS));
+	return do_complete_region(nam, &OBJDESCR(WGenWS));
 }
 
 
+EXTL_EXPORT
 bool goto_workspace_name(const char *str)
 {
 	WGenWS *ws=lookup_workspace(str);

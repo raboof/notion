@@ -947,9 +947,10 @@ WClientWin *lookup_clientwin(const char *name)
 }
 
 
-int complete_clientwin(char *nam, char ***cp_ret, char **beg, void *unused)
+EXTL_EXPORT
+ExtlTab complete_clientwin(const char *nam)
 {
-	return do_complete_region(nam, cp_ret, beg, &OBJDESCR(WClientWin));
+	return do_complete_region(nam, &OBJDESCR(WClientWin));
 }
 
 

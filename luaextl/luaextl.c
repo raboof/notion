@@ -26,6 +26,8 @@ static lua_State *l_st=NULL;
 static bool extl_stack_get(lua_State *st, int pos, char type, bool copystring,
 						   void *valret);
 
+static int complete_function(lua_State *st);
+
 /*{{{ WObj userdata handling */
 
 
@@ -115,7 +117,7 @@ static int extl_obj_typename(lua_State *st)
 {
 	WObj *obj;
 
-	if(!extl_stack_get(st, -1, 'o', FALSE, &obj)){
+	if(!extl_stack_get(st, 1, 'o', FALSE, &obj)){
 		lua_pushnil(st);
 	}else{
 		lua_pushstring(st, WOBJ_TYPESTR(obj));
@@ -130,10 +132,10 @@ static int extl_obj_is(lua_State *st)
 	WObj *obj;
 	const char *tn;
 	
-	if(!extl_stack_get(st, -2, 'o', FALSE, &obj)){
+	if(!extl_stack_get(st, 1, 'o', FALSE, &obj)){
 		lua_pushboolean(st, 0);
 	}else{
-		tn=lua_tostring(st, -1);
+		tn=lua_tostring(st, 2);
 		lua_pushboolean(st, wobj_is_str(obj, tn));
 	}
 	
@@ -186,6 +188,9 @@ bool extl_init()
 		warn("Failed to initialize WObj metatable\n");
 		goto fail;
 	}
+
+	lua_pushcfunction(l_st, complete_function);
+	lua_setglobal(l_st, "complete_function");
 	
 	return TRUE;
 fail:
@@ -560,7 +565,7 @@ static bool extl_table_do_sets(ExtlTab ref, const char *entry, char type,
 	lua_pushstring(l_st, entry);
 	
 	if(extl_stack_push(l_st, type, val)){
-		lua_settable(l_st, -2);
+		lua_settable(l_st, -3);
 		ret=TRUE;
 	}
 	
@@ -1230,37 +1235,40 @@ void extl_unregister_function(ExtlExportedFnSpec *spec)
 /*{{{ Misc */
 
 
-EXTL_EXPORT
-ExtlTab extl_complete_fn(const char *nam)
+int complete_function(lua_State *st)
 {
-	int oldtop=lua_gettop(l_st);
-	int l=strlen(nam);
-	const char *fnam;
-	ExtlTab tab;
+	const char *fnam, *str;
+	int l, n=1;
+
+	str=lua_tostring(st, 1);
 	
-	lua_newtable(l_st);
-	lua_pushnil(l_st);
-	
-	while(lua_next(l_st, LUA_GLOBALSINDEX)!=0){
-		if(lua_isfunction(l_st, -1)){
-			fnam=lua_tostring(l_st, -2);
+	if(str==NULL){
+		fprintf(stderr, "doh!");
+		return 0;
+	}
 		
+	l=strlen(str);
+	
+	lua_newtable(st);
+	lua_pushnil(st);
+	
+	while(lua_next(st, LUA_GLOBALSINDEX)!=0){
+		if(lua_isfunction(st, -1)){
+			fnam=lua_tostring(st, -2);
+
 			if(fnam!=NULL){
-				if(strncmp(nam, fnam, l)==0){
-					lua_settable(l_st, -3);
-					continue;
+				if(strncmp(str, fnam, l)==0){
+					lua_pushvalue(st, -2);
+					lua_rawseti(st, -4, n);
+					n++;
 				}
 			}
 		}
-		lua_pop(l_st, 1);
+		lua_pop(st, 1);
 	}
 	
-	lua_pop(l_st, 1);
-	tab=lua_ref(l_st, 1);
-	
-	lua_settop(l_st, oldtop);
-	
-	return tab;
+	/*lua_pop(st, 1);*/
+	return 1;
 }
 	
 	

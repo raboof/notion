@@ -10,6 +10,7 @@
 
 #include "region.h"
 #include "font.h"
+#include "extl.h"
 
 
 extern bool region_set_name(WRegion *reg, const char *name);
@@ -22,11 +23,9 @@ extern char *region_full_name(WRegion *reg);
 extern char *region_make_label(WRegion *reg, int maxw, WFontPtr font);
 
 extern WRegion *do_lookup_region(const char *cname, WObjDescr *descr);
-extern int do_complete_region(char *nam, char ***cp_ret, char **beg,
-							  WObjDescr *descr);
+extern ExtlTab do_complete_region(const char *nam, WObjDescr *descr);
 extern WRegion *lookup_region(const char *cname);
-extern int complete_region(char *nam, char ***cp_ret, char **beg,
-						   void *unused);
+extern ExtlTab complete_region(const char *nam);
 
 extern void goto_named_region(char *name);
 extern void	region_unuse_name(WRegion *reg);

@@ -201,13 +201,13 @@ WRegion *do_lookup_region(const char *cname, WObjDescr *descr)
 }
 
 
-int do_complete_region(char *nam, char ***cp_ret, char **beg, WObjDescr *descr)
+ExtlTab do_complete_region(const char *nam, WObjDescr *descr)
 {
 	WRegion *reg;
 	char *name;
-	char **cp;
-	int n=0, l=strlen(nam);
-	int lnum=0;
+	int lnum=0, l=strlen(nam);
+	int n=1;
+	ExtlTab tab=extl_create_table();
 	
 again:
 	
@@ -221,14 +221,14 @@ again:
 		if(name==NULL)
 			continue;
 		
-		if((lnum==0 && l && strncmp(name, nam, l)) ||
-		   (strstr(name, nam)==NULL)){
-			   free(name);
-			   continue;
+		if(l==0 ||
+		   (lnum==0 && strncmp(name, nam, l)==0) ||
+		   (lnum==1 && strstr(name, nam)!=NULL)){
+			if(extl_table_seti_s(tab, n, name))
+				n++;
 		}
 		
-		if(!add_to_complist(cp_ret, &n, name))
-			free(name);
+		free(name);
 	}
 	
 	if(n==0 && lnum==0 && l>1){
@@ -236,7 +236,7 @@ again:
 		goto again;
 	}
 	
-	return n;
+	return tab;
 }
 
 
@@ -247,9 +247,10 @@ WRegion *lookup_region(const char *name)
 }
 
 
-int complete_region(char *nam, char ***cp_ret, char **beg, void *unused)
+EXTL_EXPORT
+ExtlTab complete_region(const char *nam)
 {
-	return do_complete_region(nam, cp_ret, beg, &OBJDESCR(WObj));
+	return do_complete_region(nam, &OBJDESCR(WObj));
 }
 
 

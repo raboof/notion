@@ -73,8 +73,7 @@ extern WClientWin *manage_clientwin(Window win, int mflags);
 
 extern WClientWin *find_clientwin(Window win);
 extern WClientWin *lookup_clientwin(const char *name);
-extern int complete_clientwin(char *nam, char ***cp_ret, char **beg,
-							  void *unused);
+extern ExtlTab complete_clientwin(const char *nam);
 
 extern void clientwin_set_target_id(WClientWin *cwin, int id);
 extern void clientwin_clear_target_id(WClientWin *cwin);
