@@ -58,6 +58,45 @@ extern bool mod_sm_register_exports();
 extern void mod_sm_unregister_exports();
 
 
+static void set_sdir()
+{
+    const char *smdir=NULL, *id=NULL;
+    char *tmp;
+    
+    smdir=getenv("SM_SAVE_DIR");
+    id=getenv("GNOME_DESKTOP_SESSION_ID");
+
+    /* Running under SM, try to use a directory specific
+     * to the session.
+     */
+    if(smdir!=NULL){
+        tmp=scat(smdir, "/ion3"); /* TODO: pwm<=>ion! */
+    }else if(id!=NULL){
+        tmp=scat("gnome-session-", id);
+        if(tmp!=NULL){
+            char *p=tmp;
+            while(1){
+                p=strpbrk(p, "/ :?*");
+                if(p==NULL)
+                    break;
+                *p='-';
+                p++;
+            }
+        }
+    }else{
+        tmp=scopy("default-session-sm");
+    }
+        
+    if(tmp==NULL){
+        warn_err();
+    }else{
+        ioncore_set_sessiondir(tmp);
+        free(tmp);
+    }
+}
+
+
+
 void mod_sm_deinit()
 {
     hook_remove(clientwin_do_manage_alt, (WHookDummy*)sm_do_manage);
@@ -78,6 +117,9 @@ int mod_sm_init()
     if(!mod_sm_init_session())
         goto err;
 
+    if(ioncore_sessiondir()==NULL)
+        set_sdir();
+    
     if(!mod_sm_register_exports())
         goto err;
 

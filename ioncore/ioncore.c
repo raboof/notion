@@ -297,67 +297,40 @@ bool ioncore_init_i18n()
 /*{{{ ioncore_startup */
 
 
-static void set_session(const char *display)
+static void ioncore_init_session(const char *display)
 {
     const char *dpyend=NULL;
     char *tmp=NULL, *colon=NULL;
-    const char *sm=NULL, *smdir=NULL, *id=NULL;
+    const char *sm=getenv("SESSION_MANAGER");
     
-    sm=getenv("SESSION_MANAGER");
-    smdir=getenv("SM_SAVE_DIR");
-    id=getenv("GNOME_DESKTOP_SESSION_ID");
-    /* kde sm? */
+    if(sm!=NULL)
+        ioncore_load_module("mod_sm");
+
+    if(ioncore_sessiondir()!=NULL)
+        return;
     
-    if(sm!=NULL){
-        /* Running under SM, try to use a directory specific
-         * to the session.
-         */
-        if(smdir!=NULL){
-            tmp=scat(smdir, "/ion3"); /* TODO: pwm<=>ion! */
-        }else if(id!=NULL){
-            tmp=scat("gnome-session-", id);
-            if(tmp!=NULL){
-                char *p=tmp;
-                while(1){
-                    p=strpbrk(p, "/ :?*");
-                    if(p==NULL)
-                        break;
-                    *p='-';
-                    p++;
-                }
-            }
-        }else{
-            tmp=scopy("default-session-sm");
-        }
-        
-        if(tmp==NULL){
-            warn_err();
-            return;
-        }
+    /* Not running under SM; use display-specific directory */
+    dpyend=strchr(display, ':');
+    if(dpyend!=NULL)
+        dpyend=strchr(dpyend, '.');
+    if(dpyend==NULL){    
+        libtu_asprintf(&tmp, "default-session-%s", display);
     }else{
-        /* Not running under SM; use display-specific directory */
-        dpyend=strchr(display, ':');
-        if(dpyend!=NULL)
-            dpyend=strchr(dpyend, '.');
-        if(dpyend==NULL){    
-            libtu_asprintf(&tmp, "default-session-%s", display);
-        }else{
-            libtu_asprintf(&tmp, "default-session-%.*s",
-                           (int)(dpyend-display), display);
-        }
-        
-        if(tmp==NULL){
-            warn_err();
-            return;
-        }
-        
-        colon=tmp;
-        while(1){
-            colon=strchr(colon, ':');
-            if(colon==NULL)
-                break;
-            *colon='-';
-        }
+        libtu_asprintf(&tmp, "default-session-%.*s",
+                       (int)(dpyend-display), display);
+    }
+    
+    if(tmp==NULL){
+        warn_err();
+        return;
+    }
+    
+    colon=tmp;
+    while(1){
+        colon=strchr(colon, ':');
+        if(colon==NULL)
+            break;
+        *colon='-';
     }
     
     ioncore_set_sessiondir(tmp);
@@ -404,9 +377,6 @@ static bool ioncore_init_x(const char *display, int stflags)
         }
     }
     
-    if(ioncore_sessiondir()==NULL)
-        set_session(XDisplayName(display));
-    
     ioncore_g.dpy=dpy;
     
     ioncore_g.conn=ConnectionNumber(dpy);
@@ -430,6 +400,8 @@ static bool ioncore_init_x(const char *display, int stflags)
 
     netwm_init();
     
+    ioncore_init_session(XDisplayName(display));
+
     for(i=drw; i<nrw; i++)
         ioncore_manage_rootwin(i, stflags&IONCORE_STARTUP_NOXINERAMA);
 
