@@ -72,7 +72,28 @@ bool ioncore_add_scriptdir(const char *dir)
 
 bool ioncore_add_moduledir(const char *dir)
 {
+#ifndef CF_LTDL_ANCIENT
 	return (lt_dlinsertsearchdir(lt_dlgetsearchpath(), dir)==0);
+#else
+	const char *oldpath;
+	char *newpath;
+	bool ret;
+	
+	oldpath=lt_dlgetsearchpath();
+	if(oldpath==NULL){
+		return (lt_dlsetsearchpath(dir)==0);
+	}else{
+		libtu_asprintf(&newpath, "%s:%s", dir, oldpath);
+		if(newpath==NULL){
+			warn_err();
+			return FALSE;
+		}else{
+			ret=(lt_dlsetsearchpath(newpath)==0);
+			free(newpath);
+			return ret;
+		}
+	}
+#endif
 }
 
 

@@ -47,6 +47,9 @@ MODULE_LIST=ionws floatws query
 # Settings for compiling and linking to ltdl
 LTDL_INCLUDES=
 LTDL_LIBS=-lltdl
+# Libtool 1.4.3 or newer is highly recommended, but some older versions
+# might work with the following flag.
+#LTDL_CFLAGS=-DCF_LTDL_ANCIENT
 
 
 ##

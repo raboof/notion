@@ -19,6 +19,7 @@ CFLAGS += $(XOPEN_SOURCE)
 # libtool
 INCLUDES += $(LTDL_INCLUDES)
 LIBS += $(LTDL_LIBS)
+CFLAGS += $(LTDL_CFLAGS)
 ifeq ($(PRELOAD_MODULES),1)
 LDFLAGS += $(foreach mod, $(MODULE_LIST), -dlpreopen ../$(mod)/$(mod).la)
 CFLAGS += -DCF_PRELOAD_MODULES
