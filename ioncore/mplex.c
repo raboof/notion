@@ -60,7 +60,7 @@ bool mplex_do_init(WMPlex *mplex, WWindow *parent, Window win,
     mplex->l2_current=NULL;
     watch_init(&(mplex->stdispinfo.regwatch));
     mplex->stdispinfo.orientation=REGION_ORIENTATION_HORIZONTAL;
-    mplex->stdispinfo.corner=MPLEX_STDISP_BL;
+    mplex->stdispinfo.pos=MPLEX_STDISP_BL;
     
     if(create){
         if(!window_init((WWindow*)mplex, parent, fp))
@@ -539,19 +539,29 @@ static void mplex_managed_rqgeom(WMPlex *mplex, WRegion *sub,
 
 void mplex_do_set_focus(WMPlex *mplex, bool warp)
 {
-    if(!MPLEX_MGD_UNVIEWABLE(mplex) && mplex->l2_current!=NULL){
-        region_do_set_focus((WRegion*)mplex->l2_current, FALSE);
-    }else if(!MPLEX_MGD_UNVIEWABLE(mplex) && mplex->l1_current!=NULL){
-        /* Allow workspaces to position cursor to their liking. */
-        if(warp && OBJ_IS(mplex->l1_current, WGenWS)){
-            region_do_set_focus(mplex->l1_current, TRUE);
-            return;
-        }else{
-            region_do_set_focus(mplex->l1_current, FALSE);
+    bool focset=FALSE;
+    
+    if(!MPLEX_MGD_UNVIEWABLE(mplex)){
+        if(mplex->l2_current!=NULL && 
+           (mplex->l1_current==NULL ||
+            (mgd_flags(mplex->l2_current)&MGD_L2_PASSIVE)==0)){
+            
+            region_do_set_focus((WRegion*)mplex->l2_current, FALSE);
+            focset=TRUE;
+        }else if(mplex->l1_current!=NULL){
+            /* Allow workspaces to position cursor to their liking. */
+            if(warp && OBJ_IS(mplex->l1_current, WGenWS)){
+                region_do_set_focus(mplex->l1_current, TRUE);
+                return;
+            }else{
+                region_do_set_focus(mplex->l1_current, FALSE);
+                focset=TRUE;
+            }
         }
-    }else{
-        xwindow_do_set_focus(MPLEX_WIN(mplex));
     }
+    
+    if(!focset)
+        xwindow_do_set_focus(MPLEX_WIN(mplex));
     
     if(warp)
         region_do_warp((WRegion*)mplex);
@@ -560,7 +570,11 @@ void mplex_do_set_focus(WMPlex *mplex, bool warp)
 
 static WRegion *mplex_managed_control_focus(WMPlex *mplex, WRegion *reg)
 {
-    return mplex->l2_current;
+    if(mplex->l2_current!=NULL && 
+       (mgd_flags(mplex->l2_current)&MGD_L2_PASSIVE)==0){
+        return mplex->l2_current;
+    }
+    return NULL;
 }
 
 
@@ -590,7 +604,8 @@ bool mplex_l2_hide(WMPlex *mplex, WRegion *reg)
         region_unmap(reg);
     
     FOR_ALL_MANAGED_ON_LIST(mplex->l2_list, reg2){
-        if(!l2_is_hidden(reg2))
+        /*if(!l2_is_hidden(reg2))*/
+        if((mgd_flags(reg2)&(MGD_L2_HIDDEN|MGD_L2_PASSIVE))==0)
             toact=reg2;
     }
     
@@ -614,9 +629,8 @@ bool mplex_l2_hide(WMPlex *mplex, WRegion *reg)
 EXTL_EXPORT_MEMBER
 bool mplex_l2_show(WMPlex *mplex, WRegion *reg)
 {
-    /*WRegion *reg2, *toact=NULL;
-     bool mcf=region_may_control_focus((WRegion*)mplex);
-     */
+    WRegion *reg2, *toact=NULL;
+    bool mcf=region_may_control_focus((WRegion*)mplex);
     
     if(!l2_is_hidden(reg))
         return FALSE;
@@ -625,11 +639,12 @@ bool mplex_l2_show(WMPlex *mplex, WRegion *reg)
     if(REGION_IS_MAPPED(mplex) && !MPLEX_MGD_UNVIEWABLE(mplex))
         region_map(reg);
     
-#if 1
+#if 0
     return mplex_managed_display(mplex, reg);
 #else    
     FOR_ALL_MANAGED_ON_LIST(mplex->l2_list, reg2){
-        if(!l2_is_hidden(reg2))
+        /*if(!l2_is_hidden(reg2))*/
+        if((mgd_flags(reg2)&(MGD_L2_HIDDEN|MGD_L2_PASSIVE))==0)
             toact=reg2;
     }
     
@@ -641,6 +656,10 @@ bool mplex_l2_show(WMPlex *mplex, WRegion *reg)
         else
             region_warp((WRegion*)mplex);
     }
+    
+    mplex_managed_changed(mplex, MPLEX_CHANGE_SWITCHONLY, TRUE, 
+                          toact ? toact : mplex->l1_current);
+
     return TRUE;
 #endif    
 }
@@ -670,7 +689,7 @@ static bool mplex_do_managed_display(WMPlex *mplex, WRegion *sub)
             }
             
             genws_manage_stdisp((WGenWS*)sub, stdisp, 
-                                mplex->stdispinfo.corner,
+                                mplex->stdispinfo.pos,
                                 mplex->stdispinfo.orientation);
         }
     }
@@ -803,6 +822,8 @@ static WRegion *mplex_do_attach(WMPlex *mplex, WRegionAttachHandler *hnd,
         region_keep_on_top(reg);
         if(!sw)
             sw=!l2_mark_hidden(reg);
+        if(param->flags&MPLEX_ATTACH_L2_PASSIVE)
+            mgd_set_flags(reg, MGD_L2_PASSIVE);
     }
     
     if(sw || (!l2 && mplex->l1_count==1)){
@@ -858,6 +879,10 @@ static void get_params(ExtlTab tab, MPlexAttachParams *par)
     
     if(extl_table_is_bool_set(tab, "switchto"))
         par->flags|=MPLEX_ATTACH_SWITCHTO;
+
+    
+    if(extl_table_is_bool_set(tab, "passive"))
+        par->flags|=MPLEX_ATTACH_L2_PASSIVE;
     
     extl_table_gets_i(tab, "index", &(par->index));
 }
@@ -897,7 +922,9 @@ WRegion *mplex_attach(WMPlex *mplex, WRegion *reg, ExtlTab param)
  *  \var{switchto} & Should the region be switched to (boolean)? Optional. \\
  *  \var{index} & Index of the new region in \var{mplex}'s list of
  *   managed objects (integer, 0 = first). Optional. \\
- *  \var{layer} & Layer to attach on; 1 (default) or 2.
+ *  \var{layer} & Layer to attach on; 1 (default) or 2. \\
+ *  \var{passive} & Is a layer 2 object passive/skipped when deciding
+ *      object to gives focus to (boolean)? Optional.
  * \end{tabularx}
  * 
  * In addition parameters to the region to be created are passed in this 
@@ -1077,8 +1104,7 @@ static void stdisp_watch_handler(Watch *watch, Obj *obj)
 }
 
 
-bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg, 
-                      int corner, int orientation)
+bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg, int pos, int orientation)
 {
     WMPlexSTDispInfo *di=&(mplex->stdispinfo);
     WRegion *oldstdisp=(WRegion*)(di->regwatch.obj);
@@ -1096,7 +1122,7 @@ bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg,
         }
     }
     
-    di->corner=corner;
+    di->pos=pos;
     di->orientation=orientation;
     
     if(reg==NULL){
@@ -1116,7 +1142,7 @@ bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg,
             mgr=(WGenWS*)(mplex->l1_current);
         }
         if(mgr!=NULL)
-            genws_manage_stdisp(mgr, reg, di->corner, di->orientation);
+            genws_manage_stdisp(mgr, reg, di->pos, di->orientation);
         else
             region_unmap(reg);
     }
@@ -1127,61 +1153,39 @@ bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg,
 }
 
 
-void mplex_get_stdisp(WMPlex *mplex, WRegion **reg, 
-                      int *corner, int *orientation)
+void mplex_get_stdisp(WMPlex *mplex, WRegion **reg, int *pos, int *orientation)
 {
     WMPlexSTDispInfo *di=&(mplex->stdispinfo);
     
     *reg=(WRegion*)di->regwatch.obj;
-    *corner=di->corner;
+    *pos=di->pos;
     *orientation=di->orientation;
 }
 
 
-#define CHK(O, V, S) if(O==V) return S;
-
-static const char *corner_to_str(int c)
-{
-    CHK(c, MPLEX_STDISP_TL, "tl");
-    CHK(c, MPLEX_STDISP_TR, "tr");
-    CHK(c, MPLEX_STDISP_BL, "bl");
-    CHK(c, MPLEX_STDISP_BR, "br");
-    return NULL;
-}
-
-static const char *orientation_to_str(int o)
-{
-    CHK(o, REGION_ORIENTATION_VERTICAL, "vertical");
-    CHK(o, REGION_ORIENTATION_HORIZONTAL, "horizontal");
-    return NULL;
-}
+static StringIntMap pos_map[]={
+    {"tl", MPLEX_STDISP_TL},
+    {"tr", MPLEX_STDISP_TR},
+    {"bl", MPLEX_STDISP_BL},
+    {"br", MPLEX_STDISP_BR},
+    {NULL, 0}
+};
 
 
-#undef CHK
-#define CHK(O, V, S) if(strcmp(O, S)==0) return V;
+static StringIntMap orientation_map[]={
+    {"horizontal", REGION_ORIENTATION_HORIZONTAL},
+    {"vertical", REGION_ORIENTATION_VERTICAL},
+    {"h", REGION_ORIENTATION_HORIZONTAL},
+    {"v", REGION_ORIENTATION_VERTICAL},
+    {NULL, 0}
+};
 
-static int str_to_corner(const char *c)
-{
-    CHK(c, MPLEX_STDISP_TL, "tl");
-    CHK(c, MPLEX_STDISP_TR, "tr");
-    CHK(c, MPLEX_STDISP_BL, "bl");
-    CHK(c, MPLEX_STDISP_BR, "br");
-    return -1;
-}
-
-static int str_to_orientation(const char *o)
-{
-    CHK(o, REGION_ORIENTATION_VERTICAL, "vertical");
-    CHK(o, REGION_ORIENTATION_HORIZONTAL, "horizontal");
-    return -1;
-}
 
 
 static WRegion *do_attach_stdisp(WMPlex *mplex, WRegionAttachHandler *handler,
                                  void *handlerparams, const WFitParams *fp)
 {
     return handler((WWindow*)mplex, fp, handlerparams);
-    
     /* We do not manage the stdisp, so manager is not set in this
      * function unlike a true "attach" function.
      */
@@ -1194,11 +1198,11 @@ static WRegion *do_attach_stdisp(WMPlex *mplex, WRegionAttachHandler *handler,
  * \fnref{WMPlex.attach_new}). In addition, the following fields are
  * recognised:
  * \begin{tabularx}{\linewidth}{lX}
- *   \var{corner} & The corner of the screen to place the status display
- *                  in. One of \code{tl}, \code{tr}, \var{bl} or \var{br}. \\
+ *   \var{pos} & The corner of the screen to place the status display
+ *               in. One of \code{tl}, \code{tr}, \var{bl} or \var{br}. \\
  *   \var{orientation} & Orientation of the status display, if it does
- *                  not specify one. Either \code{vertical} or 
- *                  \var{horizontal}. \\
+ *                  not specify one. Either \code{v(ertical)} or 
+ *                  \var{h(orizontal)}. \\
  *   \var{action} & If this field is set to \code{keep}, \var{corner}
  *                  and \var{orientation} are changed for the existing
  *                  status display. If this field is set to \var{remove},
@@ -1212,19 +1216,19 @@ EXTL_EXPORT_AS(WMPlex, set_stdisp)
 bool mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t)
 {
     WRegion *stdisp=NULL;
-    int c=mplex->stdispinfo.corner, o=mplex->stdispinfo.orientation;
+    int p=mplex->stdispinfo.pos, o=mplex->stdispinfo.orientation;
     char *s;
     
-    if(extl_table_gets_s(t, "corner", &s)){
-        c=str_to_corner(s);
-        if(c<0){
-            warn("Invalid corner setting");
+    if(extl_table_gets_s(t, "pos", &s)){
+        p=stringintmap_value(pos_map, s, -1);
+        if(p<0){
+            warn("Invalid pos setting");
             return FALSE;
         }
     }
     
     if(extl_table_gets_s(t, "orientation", &s)){
-        o=str_to_orientation(s);
+        o=stringintmap_value(orientation_map, s, -1);
         if(o<0){
             warn("Invalid orientation setting");
             return FALSE;
@@ -1268,7 +1272,7 @@ bool mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t)
         return FALSE;
     }
     
-    if(!mplex_set_stdisp(mplex, stdisp, c, o)){
+    if(!mplex_set_stdisp(mplex, stdisp, p, o)){
         destroy_obj((Obj*)stdisp);
         return FALSE;
     }
@@ -1294,9 +1298,10 @@ static ExtlTab mplex_do_get_stdisp_extl(WMPlex *mplex, bool fullconfig)
     }
     
     if(t!=extl_table_none()){
-        extl_table_sets_s(t, "corner", corner_to_str(di->corner));
-        extl_table_sets_s(t, "orientation", 
-                          orientation_to_str(di->orientation));
+        extl_table_sets_s(t, "pos", stringintmap_key(pos_map, di->pos, NULL));
+        extl_table_sets_s(t, "orientation", stringintmap_key(orientation_map, 
+                                                             di->orientation, 
+                                                             NULL));
     }
     
     return t;
@@ -1377,9 +1382,10 @@ ExtlTab mplex_get_configuration(WMPlex *mplex)
     FOR_ALL_MANAGED_ON_LIST(mplex->l2_list, sub){
         ExtlTab st=region_get_configuration(sub);
         if(st!=extl_table_none()){
+            int flags=mgd_flags(sub);
             extl_table_sets_i(st, "layer", 2);
-            if(REGION_IS_MAPPED(sub))
-                extl_table_sets_b(st, "switchto", TRUE);
+            extl_table_sets_b(st, "switchto", !(flags&MGD_L2_HIDDEN));
+            extl_table_sets_b(st, "passive", flags&MGD_L2_PASSIVE);
             extl_table_seti_t(subs, ++n, st);
             extl_unref_table(st);
         }

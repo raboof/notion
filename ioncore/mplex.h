@@ -21,6 +21,7 @@
 
 #define MPLEX_ATTACH_SWITCHTO 0x01
 #define MPLEX_ATTACH_L2 0x02
+#define MPLEX_ATTACH_L2_PASSIVE 0x04
 
 enum{
     MPLEX_CHANGE_SWITCHONLY=0,
@@ -32,15 +33,15 @@ enum{
 
 enum{
     MPLEX_STDISP_TL,
-        MPLEX_STDISP_TR,
-        MPLEX_STDISP_BL,
-        MPLEX_STDISP_BR
+    MPLEX_STDISP_TR,
+    MPLEX_STDISP_BL,
+    MPLEX_STDISP_BR
 };
 
 
 typedef struct{
     Watch regwatch;
-    int corner;
+    int pos;
     int orientation;
 } WMPlexSTDispInfo;
 
@@ -132,9 +133,9 @@ extern void mplex_load_contents(WMPlex *frame, ExtlTab tab);
 /* Sticky status display support */
 
 extern bool mplex_set_stdisp(WMPlex *mplex, WRegion *stdisp,
-                             int corner, int orientation);
+                             int pos, int orientation);
 extern void mplex_get_stdisp(WMPlex *mplex, WRegion **stdisp, 
-                             int *corner, int *orientation);
+                             int *pos, int *orientation);
 
 extern bool mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t);
 extern ExtlTab mplex_get_stdisp_extl(WMPlex *mplex);

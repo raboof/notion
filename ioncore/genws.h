@@ -32,7 +32,7 @@ extern void genws_do_map(WGenWS *ws);
 extern void genws_do_unmap(WGenWS *ws);
 
 DYNFUN void genws_manage_stdisp(WGenWS *ws, WRegion *stdisp, 
-                                int corner, int orientation);
+                                int pos, int orientation);
 DYNFUN void genws_unmanage_stdisp(WGenWS *ws, bool permanent, bool nofocus);
 
 #endif /* ION_IONCORE_GENWS_H */

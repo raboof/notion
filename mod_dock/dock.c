@@ -38,6 +38,7 @@
 
 #include <libtu/objp.h>
 #include <libtu/map.h>
+#include <libtu/minmax.h>
 #include <ioncore/common.h>
 #include <ioncore/clientwin.h>
 #include <ioncore/eventh.h>
@@ -109,8 +110,7 @@ DECLCLASS(WDock){
     WWindow win;
     WDock *dock_next, *dock_prev;
     WRegion *managed_list;
-    int vpos, hpos;
-    int grow;
+    int pos, grow;
     bool is_auto;
     GrBrush *brush;
     WDockApp *dockapps;
@@ -199,46 +199,34 @@ static const WDockParam dock_param_name={
 };
 
 
-enum WDockHPos{
-    DOCK_HPOS_LEFT,
-    DOCK_HPOS_CENTER,
-    DOCK_HPOS_RIGHT,
-    DOCK_HPOS_LAST
-};
+#define DOCK_HPOS_MASK   0x000f
+#define DOCK_HPOS_LEFT   0x0000
+#define DOCK_HPOS_CENTER 0x0001
+#define DOCK_HPOS_RIGHT  0x0002
+#define DOCK_VPOS_MASK   0x00f0
+#define DOCK_VPOS_TOP    0x0000
+#define DOCK_VPOS_MIDDLE 0x0010
+#define DOCK_VPOS_BOTTOM 0x0020
 
-static StringIntMap dock_hpos_map[]={
-    {"left", DOCK_HPOS_LEFT},
-    {"center", DOCK_HPOS_CENTER},
-    {"right", DOCK_HPOS_RIGHT},
+
+static StringIntMap dock_pos_map[]={
+    {"tl", DOCK_VPOS_TOP|DOCK_HPOS_LEFT},
+    {"tc", DOCK_VPOS_TOP|DOCK_HPOS_CENTER},
+    {"tr", DOCK_VPOS_TOP|DOCK_HPOS_RIGHT},
+    {"ml", DOCK_VPOS_MIDDLE|DOCK_HPOS_LEFT},
+    {"mc", DOCK_VPOS_MIDDLE|DOCK_HPOS_CENTER},
+    {"mr", DOCK_VPOS_MIDDLE|DOCK_HPOS_RIGHT},
+    {"bl", DOCK_VPOS_BOTTOM|DOCK_HPOS_LEFT},
+    {"bc", DOCK_VPOS_BOTTOM|DOCK_HPOS_CENTER},
+    {"br", DOCK_VPOS_BOTTOM|DOCK_HPOS_RIGHT},
     END_STRINGINTMAP
 };
 
-static WDockParam dock_param_hpos={
-    "hpos",
-    "horizontal position",
-    dock_hpos_map,
-    DOCK_HPOS_RIGHT
-};
-
-
-enum WDockVPos{
-    DOCK_VPOS_TOP,
-    DOCK_VPOS_MIDDLE,
-    DOCK_VPOS_BOTTOM
-};
-
-static StringIntMap dock_vpos_map[]={
-    {"top", DOCK_VPOS_TOP},
-    {"middle", DOCK_VPOS_MIDDLE},
-    {"bottom", DOCK_VPOS_BOTTOM},
-    END_STRINGINTMAP
-};
-
-static WDockParam dock_param_vpos={
-    "vpos",
-    "vertical position",
-    dock_vpos_map,
-    DOCK_VPOS_MIDDLE
+static WDockParam dock_param_pos={
+    "pos",
+    "dock position",
+    dock_pos_map,
+    DOCK_HPOS_RIGHT|DOCK_VPOS_MIDDLE
 };
 
 
@@ -366,8 +354,7 @@ static void dock_get_tile_size(WDock *dock, WRectangle *ret)
 }
 
 
-static void dock_get_hpos_vpos_grow(WDock *dock, int *hpos, int *vpos,
-                                    int *grow)
+static void dock_get_pos_grow(WDock *dock, int *pos, int *grow)
 {
     WMPlex *mplex=OBJ_CAST(REGION_PARENT(dock), WMPlex);
     WRegion *mplex_stdisp;
@@ -381,10 +368,10 @@ static void dock_get_hpos_vpos_grow(WDock *dock, int *hpos, int *vpos,
             /* Ok, we're assigned as a status display for mplex, so
              * get parameters from there.
              */
-            *hpos=((corner==MPLEX_STDISP_TL || corner==MPLEX_STDISP_BL)
-                   ? DOCK_HPOS_LEFT
-                   : DOCK_HPOS_RIGHT);
-            *vpos=((corner==MPLEX_STDISP_TL || corner==MPLEX_STDISP_TR)
+            *pos=((corner==MPLEX_STDISP_TL || corner==MPLEX_STDISP_BL)
+                  ? DOCK_HPOS_LEFT
+                  : DOCK_HPOS_RIGHT) 
+                | ((corner==MPLEX_STDISP_TL || corner==MPLEX_STDISP_TR)
                    ? DOCK_VPOS_TOP
                    : DOCK_VPOS_BOTTOM);
             *grow=(orientation==REGION_ORIENTATION_HORIZONTAL
@@ -395,8 +382,7 @@ static void dock_get_hpos_vpos_grow(WDock *dock, int *hpos, int *vpos,
     }
     
     *grow=dock->grow;
-    *hpos=dock->hpos;
-    *vpos=dock->vpos;
+    *pos=dock->pos;
 }
 
 
@@ -482,12 +468,12 @@ static void dock_arrange_dockapps(WDock *dock, const WRectangle *bd_dockg,
 {
     GrBorderWidths dock_bdw, dockapp_bdw;
     WDockApp dummy_copy, *dockapp;
-    int hpos, vpos, grow, cur_coord=0;
+    int pos, grow, cur_coord=0;
     WRectangle dock_geom;
 
     dock->arrange_called=TRUE;
     
-    dock_get_hpos_vpos_grow(dock, &hpos, &vpos, &grow);
+    dock_get_pos_grow(dock, &pos, &grow);
 
     /* Determine dock and dockapp border widths */
     memset(&dock_bdw, 0, sizeof(GrBorderWidths));
@@ -546,7 +532,7 @@ static void dock_arrange_dockapps(WDock *dock, const WRectangle *bd_dockg,
         switch(grow){
         case DOCK_GROW_UP:
         case DOCK_GROW_DOWN:
-            switch(hpos){
+            switch(pos&DOCK_HPOS_MASK){
             case DOCK_HPOS_LEFT:
                 da->border_geom.x=0;
                 break;
@@ -561,7 +547,7 @@ static void dock_arrange_dockapps(WDock *dock, const WRectangle *bd_dockg,
             break;
         case DOCK_GROW_LEFT:
         case DOCK_GROW_RIGHT:
-            switch(vpos){
+            switch(pos&DOCK_VPOS_MASK){
             case DOCK_VPOS_TOP:
                 da->border_geom.y=0;
                 break;
@@ -617,6 +603,34 @@ static void dock_arrange_dockapps(WDock *dock, const WRectangle *bd_dockg,
 }
 
 
+static void calc_dock_pos(WRectangle *dg, const WRectangle *pg, int pos)
+{
+    switch(pos&DOCK_HPOS_MASK){
+    case DOCK_HPOS_LEFT:
+        dg->x=pg->x;
+        break;
+    case DOCK_HPOS_CENTER:
+        dg->x=pg->x+(pg->w-dg->w)/2;
+        break;
+    case DOCK_HPOS_RIGHT:
+        dg->x=pg->x+(pg->w-dg->w);
+        break;
+    }
+    
+    switch(pos&DOCK_VPOS_MASK){
+    case DOCK_VPOS_TOP:
+        dg->y=pg->y;
+        break;
+    case DOCK_VPOS_MIDDLE:
+        dg->y=pg->y+(pg->h-dg->h)/2;
+        break;
+    case DOCK_VPOS_BOTTOM:
+        dg->y=pg->y+(pg->h-dg->h);
+        break;
+    }
+}
+
+
 static void dock_managed_rqgeom(WDock *dock, WRegion *reg, int flags,
                                 const WRectangle *geom, WRectangle *geomret)
 {
@@ -624,13 +638,13 @@ static void dock_managed_rqgeom(WDock *dock, WRegion *reg, int flags,
     WRectangle parent_geom, dock_geom, border_dock_geom;
     GrBorderWidths dock_bdw, dockapp_bdw;
     int n_dockapps=0, max_w=1, max_h=1, total_w=0, total_h=0;
-    int hpos, vpos, grow;
+    int pos, grow;
     WRectangle tile_size;
     
     /* dock_resize calls with NULL parameters. */
     assert(reg!=NULL || (geomret==NULL && !(flags&REGION_RQGEOM_TRYONLY)));
     
-    dock_get_hpos_vpos_grow(dock, &hpos, &vpos, &grow);
+    dock_get_pos_grow(dock, &pos, &grow);
 
     /* Determine parent and tile geoms */
     parent_geom=((WRegion*)dock)->parent->geom;
@@ -731,30 +745,7 @@ static void dock_managed_rqgeom(WDock *dock, WRegion *reg, int flags,
     border_dock_geom.w=dock_bdw.left+dock_geom.w+dock_bdw.right;
     border_dock_geom.h=dock_bdw.top+dock_geom.h+dock_bdw.bottom;
     
-    switch(hpos){
-    case DOCK_HPOS_LEFT:
-        border_dock_geom.x=0;
-        break;
-    case DOCK_HPOS_CENTER:
-        border_dock_geom.x=(parent_geom.w-border_dock_geom.w)/2;
-        break;
-    case DOCK_HPOS_RIGHT:
-        border_dock_geom.x=parent_geom.w-border_dock_geom.w;
-        break;
-    }
-    
-    switch(vpos){
-    case DOCK_VPOS_TOP:
-        border_dock_geom.y=0;
-        break;
-    case DOCK_VPOS_MIDDLE:
-        border_dock_geom.y=(parent_geom.h-border_dock_geom.h)/2;
-        break;
-    case DOCK_VPOS_BOTTOM:
-        border_dock_geom.y=parent_geom.h-border_dock_geom.h;
-        break;
-    }
-    
+    calc_dock_pos(&border_dock_geom, &parent_geom, pos);
     
     /* Fit dock to new geom if required */
     if(!(flags&REGION_RQGEOM_TRYONLY)){
@@ -800,9 +791,21 @@ void dock_size_hints(WDock *dock, XSizeHints *hints, int *relw, int *relh)
 
 static bool dock_fitrep(WDock *dock, WWindow *parent, const WFitParams *fp)
 {
+    WFitParams fp2;
+    
+    if(fp->mode==REGION_FIT_BOUNDS){
+        int pos, grow;
+        dock_get_pos_grow(dock, &pos, &grow);
+        fp2.mode=REGION_FIT_EXACT;
+        fp2.g.w=minof(dock->min_w, fp->g.w);
+        fp2.g.w=minof(dock->min_h, fp->g.h);
+        calc_dock_pos(&(fp2.g), &(fp->g), pos);
+        fp=&fp2;
+    }
+
     if(!window_fitrep(&(dock->win), parent, fp))
         return FALSE;
-    
+
     dock_arrange_dockapps(dock, &(fp->g), NULL, NULL);
     
     if(shape_extension)
@@ -810,6 +813,7 @@ static bool dock_fitrep(WDock *dock, WWindow *parent, const WFitParams *fp)
     
     return TRUE;
 }
+
 
 /*}}}*/
 
@@ -902,8 +906,8 @@ static void dock_updategr(WDock *dock)
  *  Key & Values & Description \\
  *  \hline
  *  \var{name} & string & Name of dock \\
- *  %\var{hpos} & left/center/right & Horizontal position \\
- *  %\var{vpos} & top/middle/bottom & Vertical position \\
+ *  \var{pos} & string in $\{t,m,b\}\times\{t,c,b\}$ & Dock position. 
+ *              Can only be used in floating mode. \\
  *  \var{grow} & up/down/left/right & 
  *       Growth direction where new dockapps are added) \\
  *  \var{is_auto} & bool & 
@@ -926,10 +930,7 @@ void dock_set(WDock *dock, ExtlTab conftab)
         free(s);
     }
 
-    if(dock_param_extl_table_set(&dock_param_hpos, conftab, &dock->hpos)){
-        resize=TRUE;
-    }
-    if(dock_param_extl_table_set(&dock_param_vpos, conftab, &dock->vpos)){
+    if(dock_param_extl_table_set(&dock_param_pos, conftab, &dock->pos)){
         resize=TRUE;
     }
     if(dock_param_extl_table_set(&dock_param_grow, conftab, &dock->grow)){
@@ -949,8 +950,7 @@ static void dock_do_get(WDock *dock, ExtlTab conftab)
 {
     extl_table_sets_s(conftab, dock_param_name.key,
                       region_name((WRegion*)dock));
-    dock_param_extl_table_get(&dock_param_hpos, conftab, dock->hpos);
-    dock_param_extl_table_get(&dock_param_vpos, conftab, dock->vpos);
+    dock_param_extl_table_get(&dock_param_pos, conftab, dock->pos);
     dock_param_extl_table_get(&dock_param_grow, conftab, dock->grow);
     extl_table_sets_b(conftab, dock_param_is_auto.key, dock->is_auto);
 }
@@ -978,8 +978,7 @@ ExtlTab dock_get(WDock *dock)
 
 static bool dock_init(WDock *dock, WWindow *parent, const WFitParams *fp)
 {
-    dock->vpos=dock_param_vpos.dflt;
-    dock->hpos=dock_param_hpos.dflt;
+    dock->pos=dock_param_pos.dflt;
     dock->grow=dock_param_grow.dflt;
     dock->is_auto=dock_param_is_auto.dflt;
     dock->brush=NULL;
@@ -1026,38 +1025,6 @@ static WDock *create_dock(WWindow *parent, const WFitParams *fp)
 }
 
 
-/* EXTL_DOC
- * Create an unmanaged dock. \var{screen} is the screen number on which the 
- * dock should appear. \var{conftab} is the initial configuration table passed
- * to \fnref{WDock.set}.
- */
-/*EXTL_EXPORT_AS(mod_dock, create_dock)
-static WDock *create_dock_unmanaged(int screen, ExtlTab conftab)
-{
-    WScreen *scr=ioncore_find_screen_id(scr);
-    WFitParams fp={{-1, -1, 1, 1}, REGION_FIT_EXACT};
-    WDock *dock;
-    
-    if(!scr){
-        warn_obj(modname, "Unknown screen %d", screen);
-        return NULL;
-    } 
-    
-    dock=create_dock((WWindow*)scr, &fp);
-
-    if(dock==NULL){
-        warn("Unable to create dock.");
-        return NULL;
-    }
-    
-    dock_set(dock, conftab);
-    
-    region_keep_on_top((WRegion*)dock);
-    
-    return dock;
-}*/
-
-
 /*EXTL_DOC
  * Destroys \var{dock} if it is empty.
  */
@@ -1088,6 +1055,8 @@ ExtlTab dock_get_configuration(WDock *dock)
     
     tab=region_get_base_configuration((WRegion*)dock);
     dock_do_get(dock, tab);
+
+#warning "TODO: save&load dockapp configuration"
     
     return tab;
 }
@@ -1096,9 +1065,11 @@ ExtlTab dock_get_configuration(WDock *dock)
 WRegion *dock_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 {
     WDock *dock=create_dock(par, fp);
-    if(dock!=NULL)
+    if(dock!=NULL){
         dock_set(dock, tab);
-    
+        dock_fitrep(dock, NULL, fp);
+    }
+
     return (WRegion*)dock;
 }
 

@@ -3,6 +3,7 @@
 --
 
 -- create a new dock on screen 0
+--[[
 dock = mod_dock.create_dock(0, {
     name="dock",    -- name for use in target="..." winprops
     hpos="right",    -- horizontal position left|center|right
@@ -19,6 +20,7 @@ end
 defbindings("WScreen", {
     kpress(MOD1.."space", "toggle_dock()")
 })
+--]]
 
 -- dockapp ordering
 
