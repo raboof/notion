@@ -1456,7 +1456,6 @@ static int extl_l1_call_handler2(lua_State *st)
 	param->ni=(spec->ispec==NULL ? 0 : strlen(spec->ispec));
 	
 	for(i=0; i<param->ni; i++){
-		param->ii=i;
 		if(!extl_stack_get(st, i+1, spec->ispec[i], FALSE,
 						   (void*)&(param->ip[i]))){
 			warn("Argument %d to %s is of invalid type. "
@@ -1465,6 +1464,7 @@ static int extl_l1_call_handler2(lua_State *st)
 				 lua_typename(st, lua_type(st, i+1)));
 			return 0;
 		}
+		param->ii=i;
 	}
 	
 	if(!spec->l2handler(spec->fn, param->ip, param->op))
