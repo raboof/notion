@@ -40,6 +40,13 @@ This will allow the script to find the Lua headers, binaries and
 libraries as renamed and located on Debian.
 
 
+CYGWIN NOTES
+
+Under Cygwin you must use statically linked modules:
+
+    ./configure --disabled-shared
+
+
 AUTHORS
 
 Tom Payne <ion@tompayne.org>

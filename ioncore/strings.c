@@ -13,7 +13,6 @@
 #include <libtu/misc.h>
 #include <string.h>
 #include <regex.h>
-#include <wctype.h>
 #include "common.h"
 #include "global.h"
 #include "strings.h"

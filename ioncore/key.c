@@ -10,8 +10,6 @@
  */
 
 #include <ctype.h>
-#include <wctype.h>
-
 #include "common.h"
 #include "key.h"
 #include "binding.h"

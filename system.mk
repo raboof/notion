@@ -49,6 +49,12 @@ LTDL_LIBS=-lltdl
 
 # The following should do it if you have manually installed libtool 1.5 in
 # $(LIBTOOLDIR).
+#
+# Note to Cygwin users: you must set LIBTOOLDIR point to a real libtool 
+# script (e.g. /usr/autotool/stable/bin/libtool) instead of some useless
+# autoconf-expecting wrapper. If you also set PRELOAD_MODULES=1 and disable
+# Xinerama support below, Ion should compile on Cygwin.
+#
 #LIBTOOLDIR=/usr/local/stow/libtool-1.5
 #LIBTOOL=$(LIBTOOLDIR)/bin/libtool
 #LTDL_INCLUDES=-I$(LIBTOOLDIR)/include
@@ -58,10 +64,6 @@ LTDL_LIBS=-lltdl
 # modules. 
 #PRELOAD_MODULES=1
 
-# Note to Cygwin users: you must set the above option and also LIBTOOL point 
-# to a real libtool script (e.g. /usr/autotool/stable/bin/libtool) instead 
-# of some useless autoconf-expecting wrapper. With these settings Ion should
-# compile on at least the version of Cygwin I installed on 2003-06-17 on WinXP.
 
 ##
 ## Lua
@@ -117,6 +119,12 @@ DEFINES += -DCF_XFREE86_TEXTPROP_BUG_WORKAROUND
 # If HAS_SYSTEM_ASPRINTF is not defined, an implementation
 # in sprintf_2.2/ is used.
 #HAS_SYSTEM_ASPRINTF=1
+
+
+# If you're on an archaic system (such as relatively recent *BSD releases)
+# without even dummy multibyte/widechar support, you may have to uncomment
+# the following line:
+#DEFINES += -DCF_NO_MB_SUPPORT
 
 
 ##

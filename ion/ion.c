@@ -194,10 +194,8 @@ int main(int argc, char*argv[])
 
 	/* Set up locale and detect encoding.
 	 */
-	if(i18n){
-		if(!ioncore_init_i18n())
-			warn("Please fix your locale settings.");
-	}
+	if(i18n)
+		ioncore_init_i18n();
 	
 	if(ioncore_startup(display, cfgfile, stflags))
 		may_continue=TRUE;

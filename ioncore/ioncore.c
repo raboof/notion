@@ -14,9 +14,11 @@
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
+#include <sys/types.h>
+#ifndef CF_NO_MB_SUPPORT
 #include <locale.h>
 #include <langinfo.h>
-#include <sys/types.h>
+#endif
 
 #include <libtu/util.h>
 #include <libtu/optparser.h>
@@ -148,6 +150,9 @@ bool ioncore_init(int argc, char *argv[])
 
 static bool check_encoding()
 {
+#ifdef CF_NO_MB_SUPPORT
+	return TRUE;
+#else
 	int i;
 	char chs[8]=" ";
 	wchar_t wc;
@@ -207,13 +212,17 @@ static bool check_encoding()
 	
 	wglobal.enc_sb=FALSE;
 	wglobal.use_mb=TRUE;
-	
+#endif	
 	return TRUE;
 }
 
 
 bool ioncore_init_i18n()
 {
+#ifdef CF_NO_MB_SUPPORT
+	warn("Can't enable i18n support: compiled with CF_NO_MB_SUPPORT.");
+	return FALSE;
+#else
 	const char *p;
 	
 	p=setlocale(LC_ALL, "");
@@ -239,6 +248,7 @@ bool ioncore_init_i18n()
 		warn("setlocale() call failed.");
 		
 	return FALSE;
+#endif
 }
 
 

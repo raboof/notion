@@ -10,9 +10,6 @@
  */
 
 #include <string.h>
-#include <ctype.h>
-#include <wchar.h>
-#include <wctype.h>
 #include <ioncore/common.h>
 #include <ioncore/selection.h>
 #include <ioncore/strings.h>

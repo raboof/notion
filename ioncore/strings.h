@@ -12,9 +12,17 @@
 #ifndef ION_IONCORE_STRINGS_H
 #define ION_IONCORE_STRINGS_H
 
-#include <wchar.h>
 #include "common.h"
+
+#ifdef CF_NO_MB_SUPPORT
+#include "dummywc.h"
+#else
+#include <wchar.h>
+#include <wctype.h>
+#endif
+
 #include "gr.h"
+
 
 extern char *make_label(GrBrush *brush, const char *str, uint maxw);
 extern bool add_shortenrule(const char *rx, const char *rule, bool always);
