@@ -20,7 +20,7 @@
 
 
 /*EXTL_DOC
- * Display an error message box in the frame \var{frame}.
+ * Display an error message box in the multiplexer \var{mplex}.
  */
 EXTL_EXPORT
 WMessage *query_fwarn(WMPlex *mplex, const char *p)
@@ -46,7 +46,7 @@ WMessage *query_fwarn(WMPlex *mplex, const char *p)
 }
 
 /*EXTL_DOC
- * Display a mesage in the frame \var{frame}.
+ * Display a message in the \var{mplex}.
  */
 EXTL_EXPORT
 WMessage *query_message(WMPlex *mplex, const char *p)
