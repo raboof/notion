@@ -226,39 +226,6 @@ void ionws_restack(WIonWS *ws, Window other, int mode)
 }
 
 
-static void ionws_do_stacking(WIonWS *ws, Window *bottomret, Window *topret,
-                              bool incl_stdisp)
-{
-    WRegion *reg;
-
-    *bottomret=ws->genws.dummywin;
-    *topret=ws->genws.dummywin;
-
-    if(incl_stdisp){
-        reg=STDISP_OF(ws);
-        if(reg!=NULL){
-            Window bottom=None, top=None;
-            region_stacking(reg, &bottom, &top);
-            if(top!=None){
-                *topret=top;
-                return;
-            }
-        }
-    }
-    
-    for(reg=REGION_LAST_MANAGED(ws->managed_list);
-        reg!=NULL;
-        reg=REGION_PREV_MANAGED(ws->managed_list, reg)){
-        Window bottom=None, top=None;
-        region_stacking(reg, &bottom, &top);
-        if(top!=None){
-            *topret=top;
-            break;
-        }
-    }
-}
-
-
 void ionws_stacking(WIonWS *ws, Window *bottomret, Window *topret)
 {
     Window sbottom=None, stop=None;
@@ -469,8 +436,8 @@ void ionws_managed_add_default(WIonWS *ws, WRegion *reg)
 {
     Window bottom=None, top=None;
     
-    ionws_do_stacking(ws, &bottom, &top, FALSE);
-    region_restack(reg, top, Above);
+    /*region_stacking((WRegion*)ws, &bottom, &top);
+    region_restack(reg, top, Above);*/
     
     if(STDISP_OF(ws)==reg)
         region_set_manager(reg, (WRegion*)ws, NULL);
@@ -767,6 +734,10 @@ static WFrame *ionws_do_split(WIonWS *ws, WSplit *node,
     assert(newframe!=NULL);
 
     ionws_managed_add(ws, nnode->reg);
+
+    /* Restack */
+    if(ws->split_tree!=NULL)
+        split_restack(ws->split_tree, ws->genws.dummywin, Above);
     
     return newframe;
 }
