@@ -53,9 +53,32 @@ static WScreen *find_suitable_screen(WClientWin *cwin,
 }
 
 
+/* Try the deepest WGenWS first and then anything before it on the path
+ * given by region_current() calls starting from chosen screen.
+ */
+static bool try_manage(WRegion *reg, WClientWin *cwin,
+					   const WManageParams *param, bool *triedws)
+{
+	WRegion *r2=region_current(reg);
+	
+	if(r2!=NULL){
+		if(try_manage(r2, cwin, param, triedws))
+			return TRUE;
+	}
+
+	if(WOBJ_IS(reg, WGenWS))
+		*triedws=TRUE;
+	
+	if(!*triedws)
+		return FALSE;
+	
+	return region_manage_clientwin(reg, cwin, param);
+}
+
+
 bool add_clientwin_default(WClientWin *cwin, const WManageParams *param)
 {
-	WRegion *r=NULL;
+	WRegion *r=NULL, *r2;
 	WScreen *scr=NULL;
 	bool triedws=FALSE;
 	
@@ -80,30 +103,12 @@ bool add_clientwin_default(WClientWin *cwin, const WManageParams *param)
 		warn("Unable to find a screen for a new client window.");
 		return FALSE;
 	}
-	
-	/* Starting from the innermost active object, find first proper
-	 * workspace and see if it can manage cwin. If not, try all regions
-	 * between the ws and the screen that can manage client windows
-	 * falling back on the screen if all else fails.
-	 */
 
-	 r=(WRegion*)scr;
-	
-	while(r->active_sub!=NULL)
-		r=r->active_sub;
-	
-	while(r!=(WRegion*)scr && r!=NULL){
-		if(region_has_manage_clientwin(r) && (triedws || WOBJ_IS(r, WGenWS))){
-			if(region_manage_clientwin(r, cwin, param))
-				return TRUE;
-		}
-		
-		r=region_manager_or_parent(r);
-	}
+	if(try_manage((WRegion*)scr, cwin, param, &triedws))
+		return TRUE;
 	
 	return region_manage_clientwin((WRegion*)scr, cwin, param);
 }
-
 
 
 /*}}}*/

@@ -159,6 +159,7 @@ DYNFUN void region_managed_activated(WRegion *reg, WRegion *sub);
 DYNFUN void region_managed_inactivated(WRegion *reg, WRegion *sub);
 DYNFUN void region_notify_managed_change(WRegion *reg, WRegion *sub);
 DYNFUN bool region_may_destroy_managed(WRegion *mgr, WRegion *reg);
+DYNFUN WRegion *region_current(WRegion *mgr);
 
 
 /* Old WThing stuff */

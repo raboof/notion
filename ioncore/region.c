@@ -245,6 +245,14 @@ WRegion *region_managed_enter_to_focus(WRegion *mgr, WRegion *reg)
 }
 
 
+WRegion *region_current(WRegion *mgr)
+{
+	WRegion *ret=NULL;
+	CALL_DYN_RET(ret, WRegion*, region_current, mgr, (mgr));
+	return ret;
+}
+
+
 /*}}}*/
 
 
@@ -284,12 +292,6 @@ static Window default_restack(WRegion *reg, Window other, int mode)
 	return other;
 }
 #endif
-
-
-static WRegion *default_selected_sub(WRegion *reg)
-{
-	return reg->active_sub;
-}
 
 
 void region_default_draw_config_updated(WRegion *reg)

@@ -163,6 +163,17 @@ static Window floatws_x_window(const WFloatWS *ws)
 }
 
 
+/*EXTL_DOC
+ * Returns the object that currently has or previously had focus on \var{ws}
+ * (if no other object on the workspace currently has focus).
+ */
+EXTL_EXPORT
+WRegion* floatws_current(WFloatWS *ws)
+{
+	return ws->current_managed;
+}
+
+
 /*}}}*/
 
 
@@ -599,6 +610,9 @@ static DynFunTab floatws_dynfuntab[]={
 
 	{region_close,
 	 floatws_close},
+
+	{(DynFun*)region_current,
+	 (DynFun*)floatws_current},
 	
 	END_DYNFUNTAB
 };

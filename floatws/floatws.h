@@ -39,4 +39,6 @@ extern WRegion *floatws_load(WWindow *par, WRectangle geom, ExtlTab tab);
 extern bool add_clientwin_floatws_transient(WClientWin *cwin, 
 											const WManageParams *param);
 
+extern WRegion* floatws_current(WFloatWS *floatws);
+
 #endif /* ION_FLOATWS_FLOATWS_H */

@@ -723,6 +723,9 @@ static DynFunTab mplex_dynfuntab[]={
 	{(DynFun*)region_manage_clientwin,
 	 (DynFun*)mplex_manage_clientwin},
 	
+	{(DynFun*)region_current,
+	 (DynFun*)mplex_current},
+			
 	END_DYNFUNTAB
 };
 									   

@@ -428,6 +428,9 @@ static DynFunTab ionws_dynfuntab[]={
 	{(DynFun*)region_may_destroy_managed,
 	 (DynFun*)ionws_may_destroy_managed},
 
+	{(DynFun*)region_current,
+	 (DynFun*)ionws_current},
+
 	END_DYNFUNTAB
 };
 
