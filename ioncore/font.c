@@ -160,8 +160,7 @@ WFontPtr load_font(Display *dpy, const char *fontname)
 	xfnt=XLoadQueryFont(dpy, fontname);
 #endif
 #endif
-	
-	if(xfnt==NULL){
+	if(xfnt==NULL && strcmp(fontname, CF_FALLBACK_FONT_NAME)!=0){
 		warn("Could not load font \"%s\", trying \"%s\"",
 			 fontname, CF_FALLBACK_FONT_NAME);
 #ifdef CF_XFT

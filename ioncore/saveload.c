@@ -103,10 +103,12 @@ void write_escaped_string(FILE *file, const char *str)
 	fputc('"', file);
 
 	while(*str){
-		if(((*str)&0x7f)<32)
-			fprintf(file, "\\%o", (int)(uchar)(*str));
-		else
+		if(((*str)&0x7f)<32){
+			/* Lua uses decimal in escapes */
+			fprintf(file, "\\%3d", (int)(uchar)(*str));
+		}else{
 			fputc(*str, file);
+		}
 		str++;
 	}
 	
