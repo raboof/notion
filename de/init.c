@@ -22,6 +22,7 @@
 #include "brush.h"
 #include "font.h"
 #include "colour.h"
+#include "misc.h"
 
 
 /*{{{ Borders */
@@ -203,6 +204,13 @@ static void get_transparent_background(uint *mode, ExtlTab tab)
 /*{{{ de_define_style */
 
 
+static void dementbrush_postinit(DEMEntBrush *brush)
+{
+	brush->sub_ind_w=grbrush_get_text_width((GrBrush*)brush, 
+											DE_SUB_IND, DE_SUB_IND_LEN);
+}
+
+
 /*EXTL_DOC
  * Define a style for the root window \var{rootwin}. Use
  * \fnref{de_define_style} instead to define for all root windows.
@@ -245,6 +253,9 @@ bool de_do_define_style(WRootWin *rootwin, const char *name, ExtlTab tab)
 	get_extra_cgrps(rootwin, brush, tab);
 	
 	brush->data_table=extl_ref_table(tab);
+	
+	if(WOBJ_IS(brush, DEMEntBrush))
+		dementbrush_postinit((DEMEntBrush*)brush);
 	
 	return TRUE;
 }

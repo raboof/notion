@@ -16,6 +16,7 @@
 #include <ioncore/gr.h>
 #include "brush.h"
 #include "font.h"
+#include "misc.h"
 
 #include <X11/extensions/shape.h>
 
@@ -177,6 +178,14 @@ void debrush_get_border_widths(DEBrush *brush, GrBorderWidths *bdw)
 }
 
 
+void dementbrush_get_border_widths(DEMEntBrush *brush, GrBorderWidths *bdw)
+{
+	debrush_get_border_widths(&(brush->debrush), bdw);
+	bdw->right+=brush->sub_ind_w;
+	bdw->tb_iright+=brush->sub_ind_w;
+}
+
+
 /*}}}*/
 
 
@@ -185,6 +194,7 @@ void debrush_get_border_widths(DEBrush *brush, GrBorderWidths *bdw)
 
 typedef void TextBoxExtraFn(DEBrush *brush_, Window win, const WRectangle *g,
 							DEColourGroup *cg, GrBorderWidths *bdw,
+							GrFontExtents *fnte,
 							const char *a1, const char *a2);
 
 
@@ -205,6 +215,7 @@ static void copy_masked(DETabBrush *brush, Drawable src, Drawable dst,
 static void tabbrush_textbox_extras(DETabBrush *brush, Window win,
 									const WRectangle *g, DEColourGroup *cg,
 									GrBorderWidths *bdw,
+									GrFontExtents *fnte,
 									const char *a1, const char *a2)
 {
 	if(MATCHES2("*-*-tagged", a1, a2)){
@@ -220,6 +231,26 @@ static void tabbrush_textbox_extras(DETabBrush *brush, Window win,
 		XFillRectangle(wglobal.dpy, win, brush->stipple_gc, 
 					   g->x, g->y, g->w, g->h);
 	}
+}
+
+
+static void mentbrush_textbox_extras(DEMEntBrush *brush, Window win,
+									 const WRectangle *g, DEColourGroup *cg,
+									 GrBorderWidths *bdw,
+									 GrFontExtents *fnte,
+									 const char *a1, const char *a2)
+{
+	int tx, ty;
+
+	if(!MATCHES2("*-submenu", a1, a2))
+		return;
+		
+	ty=(g->y+bdw->top+fnte->baseline
+		+(g->h-bdw->top-bdw->bottom-fnte->max_height)/2);
+	tx=g->x+g->w-bdw->right;
+
+	debrush_do_draw_string((DEBrush*)brush, win, tx, ty, DE_SUB_IND,
+						   DE_SUB_IND_LEN, FALSE, cg);
 }
 
 
@@ -261,8 +292,8 @@ static void debrush_do_draw_textbox(DEBrush *brush, Window win,
 		if(len==0)
 			break;
 	
-		debrush_get_border_widths(brush, &bdw);
-		debrush_get_font_extents(brush, &fnte);
+		grbrush_get_border_widths(&(brush->grbrush), &bdw);
+		grbrush_get_font_extents(&(brush->grbrush), &fnte);
 		
 		if(brush->textalign!=DEALIGN_LEFT){
 			tw=debrush_get_text_width(brush, text, len);
@@ -282,7 +313,7 @@ static void debrush_do_draw_textbox(DEBrush *brush, Window win,
 	}while(0);
 	
 	if(extrafn!=NULL)
-		extrafn(brush, win, geom, cg, &bdw, a1, a2);
+		extrafn(brush, win, geom, cg, &bdw, &fnte, a1, a2);
 }
 
 
@@ -298,7 +329,7 @@ static void do_draw_textboxes(DEBrush *brush, Window win,
 	GrBorderWidths bdw;
 	int i;
 	
-	debrush_get_border_widths(brush, &bdw);
+	grbrush_get_border_widths(&(brush->grbrush), &bdw);
 	
 	for(i=0; i<n; i++){
 		g.w=bdw.left+elem[i].iw+bdw.right;
@@ -342,6 +373,19 @@ void detabbrush_draw_textbox(DETabBrush *brush, Window win,
 }
 
 
+void dementbrush_draw_textbox(DEMEntBrush *brush, Window win, 
+							  const WRectangle *geom, const char *text, 
+							  const char *attr, bool needfill)
+{
+	DEColourGroup *cg=debrush_get_colour_group(&(brush->debrush), attr);
+	if(cg!=NULL){
+		debrush_do_draw_textbox(&(brush->debrush), win, geom, text, cg, 
+								needfill, attr, NULL,
+								(TextBoxExtraFn*)mentbrush_textbox_extras);
+	}
+}
+
+
 void debrush_draw_textboxes(DEBrush *brush, Window win, 
 							const WRectangle *geom,
 							int n, const GrTextElem *elem, 
@@ -358,8 +402,20 @@ void detabbrush_draw_textboxes(DETabBrush *brush, Window win,
 							   int n, const GrTextElem *elem, 
 							   bool needfill, const char *common_attrib)
 {
-	do_draw_textboxes(&(brush->debrush), win, geom, n, elem, needfill, 
-					  common_attrib, (TextBoxExtraFn*)tabbrush_textbox_extras);
+	do_draw_textboxes(&(brush->debrush), win, geom, n, elem, 
+					  needfill, common_attrib,
+					  (TextBoxExtraFn*)tabbrush_textbox_extras);
+}
+
+
+void dementbrush_draw_textboxes(DEMEntBrush *brush, Window win, 
+								const WRectangle *geom,
+								int n, const GrTextElem *elem, 
+								bool needfill, const char *common_attrib)
+{
+	do_draw_textboxes(&(brush->debrush), win, geom, n, elem, 
+					  needfill, common_attrib,
+					  (TextBoxExtraFn*)mentbrush_textbox_extras);
 }
 
 

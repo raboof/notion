@@ -27,6 +27,8 @@
 INTROBJ(DEBorder);
 INTROBJ(DEBrush);
 INTROBJ(DETabBrush);
+INTROBJ(DEMEntBrush);
+
 
 #include "font.h"
 #include "colour.h"
@@ -91,6 +93,12 @@ DECLOBJ(DETabBrush){
 };
 
 
+DECLOBJ(DEMEntBrush){
+	DEBrush debrush;
+	int sub_ind_w;
+};
+
+
 /*}}}*/
 
 
@@ -99,6 +107,8 @@ DECLOBJ(DETabBrush){
 
 extern DEBrush *create_debrush(WRootWin *rootwin, const char *name);
 extern DETabBrush *create_detabbrush(WRootWin *rootwin, const char *name);
+extern DEMEntBrush *create_dementbrush(WRootWin *rootwin, 
+									   const char *name);
 extern DEBrush *de_find_or_create_brush(WRootWin *rootwin, const char *name);
 
 extern DEBrush *de_get_brush(WRootWin *rootwin, Window win, 
@@ -114,6 +124,7 @@ extern void debrush_release(DEBrush *brush, Window win);
 
 extern void debrush_deinit(DEBrush *brush);
 extern void detabbrush_deinit(DETabBrush *brush);
+extern void dementbrush_deinit(DEMEntBrush *brush);
 
 extern void de_reset();
 extern void de_deinit_brushes();
@@ -132,6 +143,8 @@ extern void debrush_draw_border(DEBrush *brush, Window win,
 								const char *attrib);
 
 extern void debrush_get_border_widths(DEBrush *brush, GrBorderWidths *bdw);
+extern void dementbrush_get_border_widths(DEMEntBrush *brush, 
+										  GrBorderWidths *bdw);
 
 
 /* Textboxes */
@@ -148,16 +161,27 @@ extern void detabbrush_draw_textbox(DETabBrush *brush, Window win,
 									const char *attr,
 									bool needfill);
 
+extern void dementbrush_draw_textbox(DEMEntBrush *brush, Window win, 
+									 const WRectangle *geom,
+									 const char *text, 
+									 const char *attr,
+									 bool needfill);
+
+
 extern void debrush_draw_textboxes(DEBrush *brush, Window win, 
     	    	    	    	   const WRectangle *geom, int n,
 								   const GrTextElem *elem, bool needfill,
 								   const char *common_attrib);
 
-
 extern void detabbrush_draw_textboxes(DETabBrush *brush, Window win, 
 									  const WRectangle *geom, int n,
 									  const GrTextElem *elem, bool needfill, 
 									  const char *common_attrib);
+
+extern void dementbrush_draw_textboxes(DEMEntBrush *brush, Window win, 
+									   const WRectangle *geom, int n,
+									   const GrTextElem *elem, bool needfill, 
+									   const char *common_attrib);
 
 /* Misc */
 

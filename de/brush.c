@@ -218,6 +218,16 @@ static bool detabbrush_init(DETabBrush *brush, WRootWin *rootwin,
 }
 
 
+static bool dementbrush_init(DEMEntBrush *brush, WRootWin *rootwin, 
+							 const char *name)
+{
+	if(!debrush_init(&(brush->debrush), rootwin, name))
+		return FALSE;
+	brush->sub_ind_w=20;
+	return TRUE;
+}
+
+
 DEBrush *create_debrush(WRootWin *rootwin, const char *name)
 {
 	CREATEOBJ_IMPL(DEBrush, debrush, (p, rootwin, name));
@@ -227,6 +237,12 @@ DEBrush *create_debrush(WRootWin *rootwin, const char *name)
 DETabBrush *create_detabbrush(WRootWin *rootwin, const char *name)
 {
 	CREATEOBJ_IMPL(DETabBrush, detabbrush, (p, rootwin, name));
+}
+
+
+DEMEntBrush *create_dementbrush(WRootWin *rootwin, const char *name)
+{
+	CREATEOBJ_IMPL(DEMEntBrush, dementbrush, (p, rootwin, name));
 }
 
 
@@ -252,6 +268,8 @@ DEBrush *de_find_or_create_brush(WRootWin *rootwin, const char *name)
 
 	if(MATCHES("frame-tab", name))
 		brush=(DEBrush*)create_detabbrush(rootwin, name);
+	else if(MATCHES("input-menu-entry", name))
+		brush=(DEBrush*)create_dementbrush(rootwin, name);
 	else
 		brush=create_debrush(rootwin, name);
 	
@@ -307,6 +325,12 @@ void detabbrush_deinit(DETabBrush *brush)
 	XFreeGC(wglobal.dpy, brush->copy_gc);
 	XFreeGC(wglobal.dpy, brush->stipple_gc);
 	XFreePixmap(wglobal.dpy, brush->tag_pixmap);
+}
+
+
+void dementbrush_deinit(DEMEntBrush *brush)
+{
+	debrush_deinit(&(brush->debrush));
 }
 
 
@@ -371,11 +395,11 @@ bool de_get_brush_values(WRootWin *rootwin, const char *style,
 		return FALSE;
 	
 	if(bdw!=NULL)
-		debrush_get_border_widths(brush, bdw);
+		grbrush_get_border_widths(&(brush->grbrush), bdw);
 	if(fnte!=NULL)
-		debrush_get_font_extents(brush, fnte);
+		grbrush_get_font_extents(&(brush->grbrush), fnte);
 	if(tab!=NULL)
-		debrush_get_extra_values(brush, tab);
+		grbrush_get_extra_values(&(brush->grbrush), tab);
 	
 	return TRUE;
 }
@@ -415,8 +439,17 @@ static DynFunTab detabbrush_dynfuntab[]={
 };
 									   
 
+static DynFunTab dementbrush_dynfuntab[]={
+	{grbrush_draw_textbox, dementbrush_draw_textbox},
+	{grbrush_draw_textboxes, dementbrush_draw_textboxes},
+	{grbrush_get_border_widths, dementbrush_get_border_widths},
+	END_DYNFUNTAB
+};
+									   
+
 IMPLOBJ(DEBrush, GrBrush, debrush_deinit, debrush_dynfuntab);
 IMPLOBJ(DETabBrush, DEBrush, detabbrush_deinit, detabbrush_dynfuntab);
+IMPLOBJ(DEMEntBrush, DEBrush, dementbrush_deinit, dementbrush_dynfuntab);
 
 
 /*}}}*/
