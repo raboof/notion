@@ -171,9 +171,9 @@ static void floatframe_request_clientwin_geom(WFloatFrame *frame,
 											  int rqflags, WRectangle geom)
 {
 	int gravity=NorthWestGravity;
-	WRegion *par;
 	XSizeHints hints;
 	WRectangle off;
+	WRegion *par;
 	
 	if(cwin->size_hints.flags&PWinGravity)
 		gravity=cwin->size_hints.win_gravity;
@@ -202,7 +202,19 @@ static void floatframe_request_clientwin_geom(WFloatFrame *frame,
 	else
 		geom.y+=gravity_deltay(gravity, -off.y, off.y+off.h);
 
-	region_convert_root_geom(region_parent((WRegion*)frame), &geom);
+	par=region_parent((WRegion*)frame);
+	region_convert_root_geom(par, &geom);
+	if(par!=NULL){
+		if(geom.x+geom.w<4)
+			geom.x=-geom.w+4;
+		if(geom.x>REGION_GEOM(par).w-4)
+			geom.x=REGION_GEOM(par).w-4;
+		if(geom.y+geom.h<4)
+			geom.y=-geom.h+4;
+		if(geom.y>REGION_GEOM(par).h-4)
+			geom.y=REGION_GEOM(par).h-4;
+	}
+
 	region_request_geom((WRegion*)frame, REGION_RQGEOM_NORMAL, geom, NULL);
 }
 

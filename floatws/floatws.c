@@ -383,7 +383,7 @@ static bool floatws_add_clientwin(WFloatWS *ws,
 	floatws_add_managed(ws, target);
 	
 	if(newreg && params->flags&REGION_ATTACH_SWITCHTO)
-		region_goto((WRegion*)cwin);
+		region_goto((WRegion*)target);
 	
 	return TRUE;
 }
