@@ -399,8 +399,8 @@ end
 -- This function asks for a name new for the workspace on which the
 -- query resides.
 function querylib.query_renameworkspace(mplex)
-    local ws=ioncorelib.find_manager(ws, "WGenWS")
-    querylib.do_query(frame, "Workspace name:", ws:name(),
+    local ws=ioncorelib.find_manager(mplex, "WGenWS")
+    querylib.do_query(mplex, "Workspace name:", ws:name(),
                       function(mplex, str) ws:set_name(str) end,
                       nil)
 end
