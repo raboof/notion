@@ -28,6 +28,7 @@
 #include <ioncore/resize.h>
 #include <ioncore/defer.h>
 #include <mod_ionws/split.h>
+#include <mod_ionws/split-stdisp.h>
 #include "placement.h"
 #include "autows.h"
 #include "splitext.h"
@@ -222,6 +223,9 @@ static bool do_replace(WAutoWS *ws, WFrame *frame, WClientWin *cwin,
     u->parent=NULL;
     ioncore_defer_destroy((Obj*)u);
     
+    if(ws->ionws.stdispnode!=NULL)
+        split_regularise_stdisp(ws->ionws.stdispnode);
+
     return TRUE;
 }
 

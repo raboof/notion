@@ -14,11 +14,10 @@ CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
 SOURCES=main.c autows.c placement.c splitext.c
 
-LUA_SOURCES=templates.lua
-
 MAKE_EXPORTS=mod_autows
 
 MODULE=mod_autows
+MODULE_STUB=mod_autows.lua
 
 ######################################
 
@@ -27,7 +26,3 @@ include $(TOPDIR)/rules.mk
 ######################################
 
 _install: module_install
-	$(INSTALLDIR) $(SHAREDIR)
-	$(INSTALL) -m $(DATA_MODE) templates.lua $(SHAREDIR)
-	$(INSTALLDIR) $(LCDIR)
-	$(INSTALL) -m $(DATA_MODE) templates.lc $(LCDIR)

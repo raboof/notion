@@ -1,5 +1,5 @@
 --
--- ion/mod_autows/templates.lua -- Templates for WAutoWS
+-- ion/mod_autows/mod_autows.lua
 -- 
 -- Copyright (c) Tuomo Valkonen 2004.
 -- 
@@ -15,8 +15,14 @@
 -- the user with require/include differences.
 if _LOADED["templates"] then return end
 
+if not ioncore.load_module("mod_autows") then
+    return
+end
+
+local mod_autows=_G["mod_autows"]
+
 local T={}
-_G.templates=T
+--_G.templates=T
 
 -- Settings {{{
 
