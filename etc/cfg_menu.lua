@@ -13,7 +13,7 @@ defbindings("WMenu", {
     kpress("Control+G", "WMenu.cancel(_)"),
     kpress("Control+C", "WMenu.cancel(_)"),
     
-    bdoc("Active current menu entry."),
+    bdoc("Activate current menu entry."),
     kpress("Return",  "WMenu.finish(_)"),
     kpress("KP_Enter", "WMenu.finish(_)"),
     kpress("Control+M", "WMenu.finish(_)"),
