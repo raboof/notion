@@ -58,8 +58,6 @@ bool panewin_init(WPaneWin *pwin, WWindow *parent, const WFitParams *fp)
         memcpy(&(pwin->bdw), &bdw, sizeof(bdw));
     }
 
-    region_add_bindmap((WRegion*)pwin, mod_autows_panewin_bindmap);
-
     XSelectInput(ioncore_g.dpy, pwin->wwin.win, IONCORE_EVENTMASK_FRAME);
     
     return TRUE;

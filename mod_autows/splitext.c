@@ -20,6 +20,8 @@
 #include <ioncore/region-iter.h>
 #include <mod_ionws/split.h>
 #include "splitext.h"
+#include "unusedwin.h"
+#include "panewin.h"
 
 
 #define GEOM(X) (((WSplit*)(X))->geom)
@@ -28,15 +30,37 @@
 /*{{{ Init/deinit */
 
 
-bool splitunused_init(WSplitUnused *split, const WRectangle *geom)
+bool splitunused_init(WSplitUnused *split, const WRectangle *geom,
+                      WAutoWS *ws)
 {
-    return split_init(&(split->split), geom);
+    WWindow *par=REGION_PARENT_CHK(ws, WWindow);
+    WUnusedWin *uwin;
+    WFitParams fp;
+
+    assert(par!=NULL);
+    
+    fp.g=*geom;
+    fp.mode=REGION_FIT_EXACT;
+    
+    uwin=create_unusedwin(par, &fp);
+    
+    if(uwin==NULL)
+        return FALSE;
+    
+    if(!splitregion_init(&(split->regnode), geom, (WRegion*)uwin)){
+        destroy_obj((Obj*)uwin);
+        return FALSE;
+    }
+    
+    ionws_managed_add(&ws->ionws, (WRegion*)uwin);
+    
+    return TRUE;
 }
 
 
-WSplitUnused *create_splitunused(const WRectangle *geom)
+WSplitUnused *create_splitunused(const WRectangle *geom, WAutoWS *ws)
 {
-    CREATEOBJ_IMPL(WSplitUnused, splitunused, (p, geom));
+    CREATEOBJ_IMPL(WSplitUnused, splitunused, (p, geom, ws));
 }
 
 
@@ -116,7 +140,12 @@ WSplitFloat *create_splitfloat(const WRectangle *geom, WAutoWS *ws, int dir)
 
 void splitunused_deinit(WSplitUnused *split)
 {
-    split_deinit(&(split->split));
+    if(split->regnode.reg!=NULL){
+        destroy_obj((Obj*)split->regnode.reg);
+        split->regnode.reg=NULL;
+    }
+    
+    splitregion_deinit(&(split->regnode));
 }
 
 
@@ -786,7 +815,7 @@ static void splitpane_replace(WSplitPane *pane, WSplit *child, WSplit *what)
 }
 
 
-#define RECREATE_UNUSED TRUE
+/*#define RECREATE_UNUSED TRUE*/
 
 static void splitpane_remove(WSplitPane *pane, WSplit *child, 
                              bool reclaim_space)
@@ -799,6 +828,7 @@ static void splitpane_remove(WSplitPane *pane, WSplit *child,
     pane->contents=NULL;
     child->parent=NULL;
 
+    /*
     if(RECREATE_UNUSED){
         pane->contents=(WSplit*)create_splitunused(&GEOM(pane));
         if(pane->contents!=NULL){
@@ -806,6 +836,7 @@ static void splitpane_remove(WSplitPane *pane, WSplit *child,
             return;
         }
     }
+    */
     
     if(parent!=NULL)
         splitinner_remove(parent, (WSplit*)pane, reclaim_space);
@@ -971,7 +1002,7 @@ static DynFunTab splitfloat_dynfuntab[]={
 };
 
 
-IMPLCLASS(WSplitUnused, WSplit, splitunused_deinit, splitunused_dynfuntab);
+IMPLCLASS(WSplitUnused, WSplitRegion, splitunused_deinit, splitunused_dynfuntab);
 IMPLCLASS(WSplitPane, WSplitInner, splitpane_deinit, splitpane_dynfuntab);
 IMPLCLASS(WSplitFloat, WSplitSplit, splitfloat_deinit, splitfloat_dynfuntab);
 

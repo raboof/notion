@@ -95,7 +95,7 @@ static bool autows_init_layout(WAutoWS *ws)
     }
          
     if(ws->ionws.split_tree==NULL)
-        ws->ionws.split_tree=(WSplit*)create_splitunused(&REGION_GEOM(ws));
+        ws->ionws.split_tree=(WSplit*)create_splitunused(&REGION_GEOM(ws), ws);
         
     return (ws->ionws.split_tree!=NULL);
 }
@@ -259,10 +259,10 @@ ExtlTab autows_get_configuration(WAutoWS *ws)
 /*{{{ Load */
 
 
-static WSplit *load_splitunused(WIonWS *ws, const WRectangle *geom, 
+static WSplit *load_splitunused(WAutoWS *ws, const WRectangle *geom, 
                                 ExtlTab tab)
 {
-    return (WSplit*)create_splitunused(geom);
+    return (WSplit*)create_splitunused(geom, (WAutoWS*)ws);
 }
 
 
@@ -280,7 +280,7 @@ static WSplit *load_splitpane(WAutoWS *ws, const WRectangle *geom, ExtlTab tab)
         cnt=ionws_load_node(&(ws->ionws), geom, t);
         extl_unref_table(t);
     }else{
-        cnt=load_splitunused(&(ws->ionws), geom, extl_table_none());
+        cnt=load_splitunused(ws, geom, extl_table_none());
     }
     
     if(cnt==NULL){
@@ -408,13 +408,13 @@ static WSplit *autows_load_node(WAutoWS *ws, const WRectangle *geom,
             if(OBJ_IS(reg, WRegion))
                 return load_splitregion_doit(&(ws->ionws), geom, tab);
         }else{
-            return load_splitunused(&(ws->ionws), geom, tab);
+            return load_splitunused(ws, geom, tab);
         }
     }else{
         if(strcmp(s, "WSplitPane")==0)
             return load_splitpane(ws, geom, tab);
         else if(strcmp(s, "WSplitUnused")==0)
-            return load_splitunused(&(ws->ionws), geom, tab);
+            return load_splitunused(ws, geom, tab);
         else if(strcmp(s, "WSplitFloat")==0)
             return load_splitfloat(ws, geom, tab);
     }

@@ -23,7 +23,7 @@ INTRCLASS(WSplitPane);
 INTRCLASS(WSplitFloat);
 
 DECLCLASS(WSplitUnused){
-    WSplit split;
+    WSplitRegion regnode;
 };
 
 DECLCLASS(WSplitPane){
@@ -37,13 +37,15 @@ DECLCLASS(WSplitFloat){
     WPaneWin *tlpwin, *brpwin;
 };
 
-extern bool splitunused_init(WSplitUnused *split, const WRectangle *geom);
+extern bool splitunused_init(WSplitUnused *split, const WRectangle *geom,
+                             WAutoWS *ws);
 extern bool splitpane_init(WSplitPane *split, const WRectangle *geom,
                            WSplit *cnt);
 extern bool splitfloat_init(WSplitFloat *split, const WRectangle *geom,
                             WAutoWS *ws, int dir);
 
-extern WSplitUnused *create_splitunused(const WRectangle *geom);
+extern WSplitUnused *create_splitunused(const WRectangle *geom,
+                                        WAutoWS *ws);
 extern WSplitPane *create_splitpane(const WRectangle *geom, WSplit *cnt);
 extern WSplitFloat *create_splitfloat(const WRectangle *geom, 
                                       WAutoWS *ws, int dir);

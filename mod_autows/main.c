@@ -39,7 +39,7 @@ char mod_autows_ion_api_version[]=ION_API_VERSION;
 
 WBindmap *mod_autows_autows_bindmap=NULL;
 WBindmap *mod_autows_frame_bindmap=NULL;
-WBindmap *mod_autows_panewin_bindmap=NULL;
+WBindmap *mod_autows_unusedwin_bindmap=NULL;
 
 
 /*}}}*/
@@ -62,9 +62,9 @@ void mod_autows_deinit()
         mod_autows_autows_bindmap=NULL;
     }
 
-    if(mod_autows_panewin_bindmap!=NULL){
-        ioncore_free_bindmap("WPaneWin", mod_autows_panewin_bindmap);
-        mod_autows_panewin_bindmap=NULL;
+    if(mod_autows_unusedwin_bindmap!=NULL){
+        ioncore_free_bindmap("WUnusedWin", mod_autows_unusedwin_bindmap);
+        mod_autows_unusedwin_bindmap=NULL;
     }
     
     if(mod_autows_frame_bindmap!=NULL){
@@ -116,11 +116,11 @@ bool mod_autows_init()
         goto err;
 
     mod_autows_autows_bindmap=ioncore_alloc_bindmap("WAutoWS", NULL);
-    mod_autows_panewin_bindmap=ioncore_alloc_bindmap_frame("WPaneWin");
+    mod_autows_unusedwin_bindmap=ioncore_alloc_bindmap_frame("WUnusedWin");
     mod_autows_frame_bindmap=ioncore_alloc_bindmap_frame("WFrame@WAutoWS");
 
     if(mod_autows_autows_bindmap==NULL ||
-       mod_autows_panewin_bindmap==NULL ||
+       mod_autows_unusedwin_bindmap==NULL ||
        mod_autows_frame_bindmap==NULL){
         goto err;
     }
