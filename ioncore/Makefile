@@ -40,7 +40,7 @@ SOURCES=binding.c conf-bindings.c conf-draw.c cursor.c draw.c event.c	\
 	eventh.c winprops.c targetid.c attach.c resize.c defer.c grab.c \
 	wsreg.c readfds.c regbind.c viewport.c 				\
 	tags.c names.c saveload.c genws.c genframe.c genframe-pointer.c	\
-	conf.c reginfo.c
+	conf.c reginfo.c errorlog.c
 
 MAKE_EXPORTS=ioncore
 

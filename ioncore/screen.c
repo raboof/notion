@@ -366,6 +366,8 @@ void screen_deinit(WScreen *scr)
 		wglobal.screens=(WScreen*)tmp;
 	}
 	
+	XSelectInput(wglobal.dpy, scr->root.win, 0);
+
 	region_deinit((WRegion*)scr);
 }
 
