@@ -35,7 +35,7 @@ function T.id(t)
     return t
 end
 
-function T.split3(d, ls, cs, rs, co, sattr)
+function T.split3(d, ls, cs, rs, lo, co, ro, sattr)
     if not sattr then sattr=T.id end
     return sattr{
         split_tls = ls+cs,
@@ -45,18 +45,18 @@ function T.split3(d, ls, cs, rs, co, sattr)
             split_tls = ls,
             split_brs = cs,
             split_dir = d,
-            tl = { },
-            br = co,
+            tl = (lo or {}),
+            br = (co or {}),
         },
-        br = { },
+        br = (ro or {}),
     }
 end
 
-function T.center3(d, ts, cs, co, sattr)
+function T.center3(d, ts, cs, lo, co, ro, sattr)
     local sc=math.min(ts, cs)
     local sl=math.floor((ts-sc)/2)
     local sr=ts-sc-sl
-    local r=T.split3(d, sl, sc, sr, co, sattr)
+    local r=T.split3(d, sl, sc, sr, lo, co, ro, sattr)
     return r
 end
 
@@ -77,12 +77,17 @@ end
 -- 
 function T.default_layout(ws, reg)
     local gw, gr=ws:geom(), reg:geom()
-    return T.center3("horizontal", gw.w, gr.w,
+    return T.center3("horizontal", gw.w, gr.w, 
+                     nil,
                      T.center3("vertical", gw.h, gr.h, 
+                               nil,
                                { 
                                    type = "?",
                                    reference = reg, 
-                               }, T.set_lazy), 
+                               }, 
+                               nil,
+                               T.set_lazy), 
+                     nil,          
                      T.set_static)
 end
 
@@ -90,9 +95,13 @@ end
 -- spaces blocks around the default layout.
 function T.default_layout_ext(ws, reg)
     return T.center3("horizontal", 1, 1,
+                     nil,
                      T.center3("vertical", 1, 1,
+                               nil,
                                T.default_layout(ws, reg),
+                               nil,
                                T.set_static),
+                     nil,          
                      T.set_static)
 end
 

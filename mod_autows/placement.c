@@ -49,8 +49,8 @@ static WFrame *create_frame_for(WAutoWS *ws, WRegion *reg)
     
     if(frame==NULL)
         return NULL;
-    
-    /*frame->autocreated=TRUE;*/
+
+    frame->flags|=FRAME_DEST_EMPTY;
     
     mplex_managed_geom((WMPlex*)frame, &mg);
     
@@ -95,15 +95,17 @@ static WRegion *find_suitable_target(WIonWS *ws)
 
 #define FIT_FIT_OFFSET 0
 #define FIT_ACTIVEREG_OFFSET 100
-#define FIT_INACTIVEREG_OFFSET 300
+#define FIT_INACTIVEREG_OFFSET 500
 
-/* grow or shrink pixels */
+/* grow or shrink percentage */
 static int fit_penalty_scale[][2]={
-    {-500, 1000},
-    { -50,  100},
-    {   0,    0},
-    {  50,  100},
-    { 500, 1000},
+    {  10, 9000},
+    {  33, 1000},
+    {  80,  100},
+    { 100,    0},
+    { 120,  100},
+    { 200,  200},
+    { 500, 9000},
     {   0, PENALTY_ENDSCALE}
 };
 
@@ -119,9 +121,9 @@ static int slack_penalty_scale[][2]={
 
 /* pixels remaining in other side of split */
 static int split_penalty_scale[][2]={
-    {  32, PENALTY_NEVER},
-    {  32, 1000},
-    { 500,  100},
+    {  10, PENALTY_NEVER},
+    {  10, 1000},
+    { 100,    0},
     {   0, PENALTY_ENDSCALE}
 };
 
@@ -145,20 +147,29 @@ static int interp1(int scale[][2], int v)
 }
 
 
-static int fit_penalty(int s, int ss)
+static int fit_penalty(int ms, int s, int ss)
 {
-    int d=ss-s;
-    int res=interp1(fit_penalty_scale, ss-s);
+    int res, d=100*ss/maxof(1, s);
+   
+    if(ss<ms)
+        return PENALTY_NEVER; /* Should just penalise more. */
+    
+    res=interp1(fit_penalty_scale, d);
     return (res==PENALTY_NEVER ? res : res+FIT_FIT_OFFSET);
 }
 
-#define hfit_penalty(S, CWIN, SZ, U, DS) fit_penalty(SZ, (S)->geom.w)
-#define vfit_penalty(S, CWIN, SZ, U, DS) fit_penalty(SZ, (S)->geom.h)
+#define hfit_penalty(S, CWIN, FRAME_SZH, SZ, U, DS) \
+    fit_penalty(FRAME_SZH->min_width, SZ, (S)->geom.w)
+#define vfit_penalty(S, CWIN, FRAME_SZH, SZ, U, DS) \
+    fit_penalty(FRAME_SZH->min_height, SZ, (S)->geom.h)
 
 
-static int slack_penalty(int s, int ss, int slack, int islack)
+static int slack_penalty(int ms, int s, int ss, int slack, int islack)
 {
     int ds=ss-s;
+
+    if(ss<ms)
+        return PENALTY_NEVER; /* Should just penalise more. */
     
     if(ds>=0)
         return PENALTY_NEVER; /* fit will do */
@@ -167,33 +178,38 @@ static int slack_penalty(int s, int ss, int slack, int islack)
      * than normal fit would penalise stretching ss to s.
      */
     if(-ds<=islack)
-        return interp1(fit_penalty_scale, -ds);
+        return interp1(fit_penalty_scale, 100*ss/maxof(1, s));
     
     return interp1(slack_penalty_scale, -ds);
 
 }
 
-#define hslack_penalty(S, CWIN, SZ, U, DS) \
-    slack_penalty(SZ, (S)->geom.w, (U)->tot_h, (U)->l+(U)->r)
-#define vslack_penalty(S, CWIN, SZ, U, DS) \
-    slack_penalty(SZ, (S)->geom.h, (U)->tot_v, (U)->t+(U)->b)
+#define hslack_penalty(S, CWIN, FRAME_SZH, SZ, U, DS) \
+    slack_penalty(FRAME_SZH->min_width, SZ, (S)->geom.w, (U)->tot_h, (U)->l+(U)->r)
+#define vslack_penalty(S, CWIN, FRAME_SZH, SZ, U, DS) \
+    slack_penalty(FRAME_SZH->min_height, SZ, (S)->geom.h, (U)->tot_v, (U)->t+(U)->b)
 
 
-static int split_penalty(int s, int ss, int slack)
-{
-    return interp1(split_penalty_scale, ss-s);
+static int split_penalty(int ms, int s, int ss, int slack)
+{    
+    if(s>=ss)
+        return PENALTY_NEVER;
+    
+    if(ss<ms)
+        return PENALTY_NEVER; /* Should just penalise more. */
+
+    return interp1(split_penalty_scale, 100*(ss-s)/maxof(1, s));
 }
 
-#define hsplit_penalty(S, CWIN, SZ, U, DS) \
-    split_penalty(SZ, (S)->geom.w, (U)->tot_h)
-#define vsplit_penalty(S, CWIN, SZ, U, DS) \
-    split_penalty(SZ, (S)->geom.h, (U)->tot_v)
+#define hsplit_penalty(S, CWIN, FRAME_SZH, SZ, U, DS) \
+    split_penalty(FRAME_SZH->min_width, SZ, (S)->geom.w, (U)->tot_h)
+#define vsplit_penalty(S, CWIN, FRAME_SZH, SZ, U, DS) \
+    split_penalty(FRAME_SZH->min_height, SZ, (S)->geom.h, (U)->tot_v)
 
 
-static int regfit_penalty(int s, int ss, WRegion *reg)
+static int regfit_penalty(int s, int ss, WClientWin *cwin, WRegion *reg)
 {
-    int d=ss-s;
-    int res=interp1(fit_penalty_scale, ss-s);
+    int res=interp1(fit_penalty_scale, 100*ss/maxof(1, s));
     return (res==PENALTY_NEVER
             ? res
             : res+(REGION_IS_ACTIVE(reg)
@@ -202,9 +218,9 @@ static int regfit_penalty(int s, int ss, WRegion *reg)
 }
 
 #define hregfit_penalty(S, CWIN, SZ) \
-    regfit_penalty(SZ, (S)->geom.w, (S)->u.reg)
+    regfit_penalty(SZ, (S)->geom.w, CWIN, (S)->u.reg)
 #define vregfit_penalty(S, CWIN, SZ) \
-    regfit_penalty(SZ, (S)->geom.h, (S)->u.reg)
+    regfit_penalty(SZ, (S)->geom.h, CWIN, (S)->u.reg)
 
 
 static int combine(int h, int v)
@@ -212,7 +228,7 @@ static int combine(int h, int v)
     if(h==PENALTY_NEVER || v==PENALTY_NEVER)
         return PENALTY_NEVER;
     
-    return h+v;
+    return maxof(h, v);
 }
 
 
@@ -245,8 +261,9 @@ enum{
 };
 
 static void scan(WSplit *split, WClientWin *cwin, int depth, 
-                 const WRectangle *geom, const WSplitUnused *uspc, 
-                 int last_static_dir, Res *best)
+                 const WRectangle *geom, XSizeHints *szh,
+                 const WSplitUnused *uspc, int last_static_dir, 
+                 Res *best)
 {
     if(split->type==SPLIT_UNUSED){
         int d_w[P_N]={-1, -1, -1};
@@ -254,12 +271,12 @@ static void scan(WSplit *split, WClientWin *cwin, int depth,
         int p, p_h[P_N], p_v[P_N];
         int i, j;
         
-        p_h[P_FIT]=hfit_penalty(split, cwin, geom->w, uspc, &d_w[P_FIT]);
-        p_v[P_FIT]=vfit_penalty(split, cwin, geom->h, uspc, &d_h[P_FIT]);
-        p_h[P_SLACK]=hslack_penalty(split, cwin, geom->w, uspc, d_w[P_SLACK]);
-        p_v[P_SLACK]=vslack_penalty(split, cwin, geom->h, uspc, d_h[P_SLACK]);
-        p_h[P_SPLIT]=hsplit_penalty(split, cwin, geom->w, uspc, d_w[P_SPLIT]);
-        p_v[P_SPLIT]=vsplit_penalty(split, cwin, geom->h, uspc, d_h[P_SPLIT]);
+        p_h[P_FIT]=hfit_penalty(split, cwin, szh, geom->w, uspc, &d_w[P_FIT]);
+        p_v[P_FIT]=vfit_penalty(split, cwin, szh, geom->h, uspc, &d_h[P_FIT]);
+        p_h[P_SLACK]=hslack_penalty(split, cwin, szh, geom->w, uspc, d_w[P_SLACK]);
+        p_v[P_SLACK]=vslack_penalty(split, cwin, szh, geom->h, uspc, d_h[P_SLACK]);
+        p_h[P_SPLIT]=hsplit_penalty(split, cwin, szh, geom->w, uspc, d_w[P_SPLIT]);
+        p_v[P_SPLIT]=vsplit_penalty(split, cwin, szh, geom->h, uspc, d_h[P_SPLIT]);
         
         for(i=0; i<P_N; i++){ /* horizontal loop */
             for(j=0; j<P_N; j++){ /* vertical loop */
@@ -323,20 +340,20 @@ static void scan(WSplit *split, WClientWin *cwin, int depth,
             un=*uspc;
             UNUSED_B_ADD(un, brunused, br);
             un.tot_v=brunused.tot_v;
-            scan(tl, cwin, depth+1, geom, &un, last_static_dir, best);
+            scan(tl, cwin, depth+1, geom, szh, &un, last_static_dir, best);
             un=*uspc;
             UNUSED_T_ADD(un, tlunused, tl);
             un.tot_v=tlunused.tot_v;
-            scan(br, cwin, depth+1, geom, &un, last_static_dir, best);
+            scan(br, cwin, depth+1, geom, szh, &un, last_static_dir, best);
         }else if(split->type==SPLIT_HORIZONTAL){
             un=*uspc;
             UNUSED_R_ADD(un, brunused, br);
             un.tot_h=brunused.tot_h;
-            scan(tl, cwin, depth+1, geom, &un, last_static_dir, best);
+            scan(tl, cwin, depth+1, geom, szh, &un, last_static_dir, best);
             un=*uspc;
             UNUSED_L_ADD(un, tlunused, tl);
             un.tot_h=tlunused.tot_h;
-            scan(br, cwin, depth+1, geom, &un, last_static_dir, best);
+            scan(br, cwin, depth+1, geom, szh, &un, last_static_dir, best);
         }
     }
 }
@@ -488,9 +505,13 @@ bool autows_manage_clientwin(WAutoWS *ws, WClientWin *cwin,
         Res rs={NULL, ACT_NOT_FOUND, PENALTY_INIT, PRIMN_ANY, -1, -1};
         WSplitUnused unused={0, 0, 0, 0, 0, 0};
         WSplit **tree=&(ws->ionws.split_tree);
-        
+        XSizeHints szh;
+        uint dummyw, dummyh;
+
         split_update_bounds(*tree, TRUE);
-        scan(*tree, cwin, 0, &REGION_GEOM(frame), &unused, SPLIT_UNUSED, &rs);
+        region_resize_hints((WRegion*)frame, &szh, &dummyw, &dummyh);
+        scan(*tree, cwin, 0, &REGION_GEOM(frame), &szh, &unused, SPLIT_UNUSED,
+             &rs);
         
         /* Resize */
         if(rs.dest_w>0 || rs.dest_h>0){
