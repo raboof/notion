@@ -41,6 +41,10 @@
 ObjList *floatws_sticky_list=NULL;
 
 
+static void floatws_place_stdisp(WFloatWS *ws, WWindow *parent,
+                                 int corner, WRegion *stdisp);
+
+
 /*{{{ region dynfun implementations */
 
 
@@ -81,6 +85,9 @@ bool floatws_fitrep(WFloatWS *ws, WWindow *par, const WFitParams *fp)
         }
     }
     
+    if(ws->managed_stdisp!=NULL)
+        floatws_place_stdisp(ws, par, ws->stdisp_corner, ws->managed_stdisp);
+    
     return TRUE;
 }
 
@@ -120,6 +127,9 @@ static void floatws_map(WFloatWS *ws)
     FOR_ALL_MANAGED_ON_LIST(ws->managed_list, reg){
         region_map(reg);
     }
+    
+    if(ws->managed_stdisp!=NULL)
+        region_map(ws->managed_stdisp);
 }
 
 
@@ -132,6 +142,9 @@ static void floatws_unmap(WFloatWS *ws)
     FOR_ALL_MANAGED_ON_LIST(ws->managed_list, reg){
         region_unmap(reg);
     }
+
+    if(ws->managed_stdisp!=NULL)
+        region_unmap(ws->managed_stdisp);
 }
 
 
@@ -144,12 +157,14 @@ static WRegion *floatws_get_focus_to(WFloatWS *ws)
         Window root=None, parent=None, *children=NULL;
         uint nchildren=0;
         WRegion *r;
+        /* Use XQueryTree to get things in stacking order. */
         XQueryTree(ioncore_g.dpy, region_xwindow((WRegion*)par),
                    &root, &parent, &children, &nchildren);
         while(nchildren>0){
             nchildren--;
             r=xwindow_region_of(children[nchildren]);
-            if(r!=NULL && REGION_MANAGER(r)==(WRegion*)ws){
+            if(r!=NULL && r!=ws->managed_stdisp &&
+               REGION_MANAGER(r)==(WRegion*)ws){
                 next=r;
                 break;
             }
@@ -188,10 +203,17 @@ static bool floatws_managed_display(WFloatWS *ws, WRegion *reg)
 
 static void floatws_managed_remove(WFloatWS *ws, WRegion *reg)
 {
-    WRegion *next=NULL;
     bool mcf=region_may_control_focus((WRegion*)ws);
+    bool ds=OBJ_IS_BEING_DESTROYED(ws);
+    WRegion *next=NULL;
     
-    region_unset_manager(reg, (WRegion*)ws, &(ws->managed_list));
+    if(reg==ws->managed_stdisp){
+        region_unset_manager(reg, (WRegion*)ws, NULL);
+        ws->managed_stdisp=NULL;
+    }else{
+        region_unset_manager(reg, (WRegion*)ws, &(ws->managed_list));
+    }
+    
     region_remove_bindmap_owned(reg, mod_floatws_floatws_bindmap,
                                 (WRegion*)ws);
     
@@ -200,7 +222,7 @@ static void floatws_managed_remove(WFloatWS *ws, WRegion *reg)
     
     ws->current_managed=NULL;
     
-    if(mcf){
+    if(mcf && !ds){
         if(reg->stacking.above!=NULL)
             next=reg->stacking.above;
         else
@@ -227,6 +249,8 @@ static bool floatws_init(WFloatWS *ws, WWindow *parent, const WFitParams *fp)
 {
     ws->managed_list=NULL;
     ws->current_managed=NULL;
+    ws->managed_stdisp=NULL;
+    ws->stdisp_corner=MPLEX_STDISP_BL;
 
     if(!genws_init(&(ws->genws), parent, fp))
         return FALSE;
@@ -246,8 +270,11 @@ WFloatWS *create_floatws(WWindow *parent, const WFitParams *fp)
 void floatws_deinit(WFloatWS *ws)
 {
     while(ws->managed_list!=NULL)
-        destroy_obj((Obj*)(ws->managed_list));
+        floatws_managed_remove(ws, ws->managed_list);
 
+    if(ws->managed_stdisp!=NULL)
+        floatws_managed_remove(ws, ws->managed_stdisp);
+        
     genws_deinit(&(ws->genws));
 }
 
@@ -300,9 +327,13 @@ bool floatws_rqclose(WFloatWS *ws)
 /*{{{ manage_clientwin/transient */
 
 
-static void floatws_add_managed(WFloatWS *ws, WRegion *reg)
+static void floatws_add_managed(WFloatWS *ws, WRegion *reg, bool skip_list)
 {
-    region_set_manager(reg, (WRegion*)ws, &(ws->managed_list));
+    if(skip_list)
+        region_set_manager(reg, (WRegion*)ws, NULL);
+    else
+        region_set_manager(reg, (WRegion*)ws, &(ws->managed_list));
+    
     region_add_bindmap_owned(reg, mod_floatws_floatws_bindmap, (WRegion*)ws);
 
     if(region_is_fully_mapped((WRegion*)ws))
@@ -398,7 +429,7 @@ static bool floatws_do_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
         return FALSE;
     }
 
-    floatws_add_managed(ws, (WRegion*)frame);
+    floatws_add_managed(ws, (WRegion*)frame, FALSE);
     
     /* Don't warp, it is annoying in this case */
     if(param->switchto && region_may_control_focus((WRegion*)ws)){
@@ -454,7 +485,7 @@ static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
         return FALSE;
     }
     
-    floatws_add_managed(ws, (WRegion*)frame);
+    floatws_add_managed(ws, (WRegion*)frame, FALSE);
 
     return TRUE;
 }
@@ -566,25 +597,28 @@ bool floatws_manage_rescue(WFloatWS *ws, WClientWin *cwin, WRegion *from)
 /*{{{ Sticky status display support */
 
 
-static void floatws_place_stdisp(WFloatWS *ws, int corner, WRegion *stdisp)
+static void floatws_place_stdisp(WFloatWS *ws, WWindow *par,
+                                 int corner, WRegion *stdisp)
 {
-    WRectangle g;
+    WFitParams fp;
     WRectangle *wg=&REGION_GEOM(ws);
     
-    g.w=minof(wg->w, maxof(CF_STDISP_MIN_SZ, region_min_w(stdisp)));
-    g.h=minof(wg->h, maxof(CF_STDISP_MIN_SZ, region_min_h(stdisp)));
+    fp.g.w=minof(wg->w, maxof(CF_STDISP_MIN_SZ, region_min_w(stdisp)));
+    fp.g.h=minof(wg->h, maxof(CF_STDISP_MIN_SZ, region_min_h(stdisp)));
     
     if(corner==MPLEX_STDISP_TL || corner==MPLEX_STDISP_BL)
-        g.x=wg->x;
+        fp.g.x=wg->x;
     else
-        g.x=wg->x+wg->w-g.w;
+        fp.g.x=wg->x+wg->w-fp.g.w;
 
     if(corner==MPLEX_STDISP_TL || corner==MPLEX_STDISP_TR)
-        g.y=wg->y;
+        fp.g.y=wg->y;
     else
-        g.y=wg->y+wg->h-g.h;
+        fp.g.y=wg->y+wg->h-fp.g.h;
         
-    region_fit(stdisp, &g, REGION_FIT_EXACT);
+    fp.mode=REGION_FIT_EXACT;
+    
+    region_fitrep(stdisp, par, &fp);
 }
 
 
@@ -595,9 +629,12 @@ void floatws_manage_stdisp(WFloatWS *ws, WRegion *stdisp, int corner)
     
     region_detach_manager(stdisp);
     
-    floatws_add_managed(ws, stdisp);
+    floatws_add_managed(ws, stdisp, TRUE);
+
+    ws->stdisp_corner=corner;
+    ws->managed_stdisp=stdisp;
     
-    floatws_place_stdisp(ws, corner, stdisp);
+    floatws_place_stdisp(ws, NULL, corner, stdisp);
 }
 
 
@@ -701,15 +738,9 @@ WRegion* floatws_current(WFloatWS *ws)
 static ExtlTab floatws_get_configuration(WFloatWS *ws)
 {
     ExtlTab tab, mgds, st, g;
-    WRegion *mgd, *stdisp=NULL;
+    WRegion *mgd;
     WMPlex *par;
     int n=0;
-    
-    par=OBJ_CAST(region_parent((WRegion*)ws), WMPlex);
-    if(par!=NULL){
-        int dummyp;
-        mplex_get_stdisp(par, &stdisp, &dummyp);
-    }
     
     tab=region_get_base_configuration((WRegion*)ws);
     
@@ -718,9 +749,6 @@ static ExtlTab floatws_get_configuration(WFloatWS *ws)
     extl_table_sets_t(tab, "managed", mgds);
     
     FOR_ALL_MANAGED_ON_LIST(ws->managed_list, mgd){
-        if(mgd==stdisp)
-            continue;
-        
         st=region_get_configuration(mgd);
         if(st==extl_table_none())
             continue;
@@ -751,7 +779,7 @@ static WRegion *floatws_do_attach(WFloatWS *ws, WRegionAttachHandler *fn,
     reg=fn(par, fp, fnparams);
 
     if(reg!=NULL)
-        floatws_add_managed(ws, reg);
+        floatws_add_managed(ws, reg, FALSE);
     
     return reg;
 }

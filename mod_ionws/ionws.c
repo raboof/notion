@@ -37,7 +37,24 @@
 #include "main.h"
 
 
+#define STDISP_OF(WS) \
+     ((WS)->stdispnode!=NULL ? (WS)->stdispnode->u.reg : NULL)
+
 /*{{{ Dynfun implementations */
+
+
+static void reparent_mgd(WRegion *sub, WWindow *par)
+{
+    WFitParams subfp;
+    subfp.g=REGION_GEOM(sub);
+    subfp.mode=REGION_FIT_EXACT;
+    if(!region_fitrep(sub, par, &subfp)){
+        warn("Problem: can't reparent a %s managed by a WIonWS"
+             "being reparented. Detaching from this object.",
+             OBJ_TYPESTR(sub));
+        region_detach_manager(sub);
+    }
+}
 
 
 bool ionws_fitrep(WIonWS *ws, WWindow *par, const WFitParams *fp)
@@ -51,17 +68,10 @@ bool ionws_fitrep(WIonWS *ws, WWindow *par, const WFitParams *fp)
     
         genws_do_reparent(&(ws->genws), par, fp);
     
-        FOR_ALL_MANAGED_ON_LIST_W_NEXT(ws->managed_list, sub, next){
-            WFitParams subfp;
-            subfp.g=REGION_GEOM(sub);
-            subfp.mode=REGION_FIT_EXACT;
-            if(!region_fitrep(sub, par, &subfp)){
-                warn("Problem: can't reparent a %s managed by a WIonWS"
-                     "being reparented. Detaching from this object.",
-                     OBJ_TYPESTR(sub));
-                region_detach_manager(sub);
-            }
-        }
+        FOR_ALL_MANAGED_ON_LIST_W_NEXT(ws->managed_list, sub, next)
+            reparent_mgd(sub, par);
+        if(STDISP_OF(ws)!=NULL)
+            reparent_mgd(STDISP_OF(ws), par);
     }
     
     REGION_GEOM(ws)=fp->g;
@@ -84,6 +94,9 @@ void ionws_map(WIonWS *ws)
     FOR_ALL_MANAGED_ON_LIST(ws->managed_list, reg){
         region_map(reg);
     }
+    
+    if(STDISP_OF(ws)!=NULL)
+        region_map(STDISP_OF(ws));
 }
 
 
@@ -96,6 +109,9 @@ void ionws_unmap(WIonWS *ws)
     FOR_ALL_MANAGED_ON_LIST(ws->managed_list, reg){
         region_unmap(reg);
     }
+    
+    if(STDISP_OF(ws)!=NULL)
+        region_unmap(STDISP_OF(ws));
 }
 
 
@@ -286,7 +302,10 @@ void ionws_manage_stdisp(WIonWS *ws, WRegion *stdisp, int corner)
 
 void ionws_managed_add_default(WIonWS *ws, WRegion *reg)
 {
-    region_set_manager(reg, (WRegion*)ws, &(ws->managed_list));
+    if(STDISP_OF(ws)==reg)
+        region_set_manager(reg, (WRegion*)ws, NULL);
+    else
+        region_set_manager(reg, (WRegion*)ws, &(ws->managed_list));
     
     region_add_bindmap_owned(reg, mod_ionws_ionws_bindmap, (WRegion*)ws);
     if(OBJ_IS(reg, WFrame))
@@ -377,6 +396,11 @@ void ionws_deinit(WIonWS *ws)
     
     while(ws->managed_list!=NULL)
         ionws_managed_remove(ws, ws->managed_list);
+    
+    ionws_unmanage_stdisp(ws, TRUE, TRUE);
+
+    if(ws->split_tree!=NULL)
+        destroy_obj((Obj*)(ws->split_tree));
 
     genws_deinit(&(ws->genws));
 }
@@ -418,7 +442,13 @@ static WSplit *get_node_check(WIonWS *ws, WRegion *reg)
 
 void ionws_do_managed_remove(WIonWS *ws, WRegion *reg)
 {
-    region_unset_manager(reg, (WRegion*)ws, &(ws->managed_list));
+    if(STDISP_OF(ws)==reg){
+        region_unset_manager(reg, (WRegion*)ws, NULL);
+        ws->stdispnode->u.reg=NULL;
+    }else{
+        region_unset_manager(reg, (WRegion*)ws, &(ws->managed_list));
+    }
+    
     region_remove_bindmap_owned(reg, mod_ionws_ionws_bindmap, (WRegion*)ws);
     if(OBJ_IS(reg, WFrame))
         region_remove_bindmap(reg, mod_ionws_frame_bindmap);

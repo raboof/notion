@@ -144,7 +144,7 @@ extern bool split_set_marker(WSplit *node, const char *s);
            (NODE)->type==SPLIT_VERTICAL ||                          \
            (NODE)->type==SPLIT_HORIZONTAL);                         \
     assert((NODE)->type!=SPLIT_REGNODE || (NODE)->u.reg!=NULL);     \
-    assert((NODE)->type!=SPLIT_STDISPNODE || (NODE)->u.reg!=NULL);  \
+    /*assert((NODE)->type!=SPLIT_STDISPNODE || (NODE)->u.reg!=NULL);*/  \
     assert((NODE)->type!=SPLIT_VERTICAL || (NODE)->u.s.tl!=NULL);   \
     assert((NODE)->type!=SPLIT_VERTICAL || (NODE)->u.s.br!=NULL);   \
     assert((NODE)->type!=SPLIT_HORIZONTAL || (NODE)->u.s.tl!=NULL); \

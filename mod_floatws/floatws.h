@@ -26,6 +26,8 @@ INTRCLASS(WFloatWS);
 DECLCLASS(WFloatWS){
     WGenWS genws;
     WRegion *managed_list;
+    WRegion *managed_stdisp;
+    int stdisp_corner;
     WRegion *current_managed;
 };
 
