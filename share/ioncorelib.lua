@@ -244,6 +244,13 @@ function obj_exists(obj)
     return (obj_typename(obj)~=nil)
 end
 
+--DOC
+-- Make \var{str} shell-safe.
+function string.shell_safe(str)
+    local str="'"..string.gsub(str, "'", "'\\''").."'"
+    print(str)
+    return str
+end
 
 -- }}}
 
