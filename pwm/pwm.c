@@ -92,7 +92,7 @@ int main(int argc, char*argv[])
 #endif
 	ioncore_add_scriptdir(SHAREDIR);
 	ioncore_add_moduledir(MODULEDIR);
-	ioncore_set_userdirs("pwm2");
+	ioncore_set_userdirs("pwm3");
 
 	optparser_init(argc, argv, OPTP_MIDLONG, pwm_opts, &pwm_cinfo);
 	

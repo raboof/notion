@@ -92,7 +92,7 @@ bool init_module_support()
 
 /*EXTL_DOC
  * Attempt to load module \var{modname}. Ion will use libltdl to search
- * the library path (the default setting is \file{\~{}/.ion2/libs} and
+ * the library path (the default setting is \file{\~{}/.ion3/libs} and
  * \file{\$PREFIX/lib/ion}) and also try diffent extensions, so only
  * the module name should usually be necessary to give here.
  */

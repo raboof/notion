@@ -130,7 +130,7 @@ int main(int argc, char*argv[])
 	ioncore_add_scriptdir(ETCDIR);
 	ioncore_add_scriptdir(SHAREDIR);
 	ioncore_add_moduledir(MODULEDIR);
-	ioncore_set_userdirs("ion2");
+	ioncore_set_userdirs("ion3");
 
 	optparser_init(argc, argv, OPTP_MIDLONG, ion_opts, &ion_cinfo);
 	

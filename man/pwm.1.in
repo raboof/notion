@@ -32,7 +32,7 @@ in the DISPLAY environment variable.
 .TP
 .B \-sessionname session_name
 Set session name. This option affects where workspace and other save files are
-put (~/.pwm2/session_name if option set).
+put (~/.pwm3/session_name if option set).
 .TP
 .B \-xinerama 0|1
 If Ioncore was compiled with Xinerama support, this option can be used to
@@ -66,10 +66,10 @@ System default configuration files
 .B ETCDIR/pwm.lua
 System default main configuration file
 .TP
-.B ~/.pwm2/
+.B ~/.pwm3/
 User configuration files
 .TP
-.B ~/.pwm2/pwm.lua
+.B ~/.pwm3/pwm.lua
 User default configuration file (overrides system default)
 
 .SH SEE ALSO
