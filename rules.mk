@@ -90,8 +90,7 @@ $(MODULE).la: $(OBJS) $(EXT_OBJS)
 
 module_install:
 	$(INSTALLDIR) $(MODULEDIR)
-	$(LIBTOOL) --mode=install $(INSTALL) -m $(BIN_MODE) $(MODULE).la $(MODULEDIR)
-	# $(STRIP) $(MODULEDIR)/$(MODULE).so
+	$(LIBTOOL) --mode=install $(INSTALL) -s -m $(BIN_MODE) $(MODULE).la $(MODULEDIR)
 
 clean_objs:
 	$(RM) -f $(OBJS)

@@ -57,7 +57,7 @@ pwm: $(OBJS) $(EXT_OBJS)
 
 _install:
 	$(INSTALLDIR) $(BINDIR)
-	$(INSTALL) -m $(BIN_MODE) pwm $(BINDIR)
+	$(INSTALL) -s -m $(BIN_MODE) pwm $(BINDIR)
 	# $(STRIP) $(BINDIR)/pwm
 	$(INSTALLDIR) $(PWM_ETCDIR)
 	for i in $(ETC); do \
