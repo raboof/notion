@@ -109,8 +109,7 @@ function make_active_leaf_fn(fn)
 	error("fn==nil", 2)
     end
     local function call_active_leaf(reg)
-	lf=region_get_active_leaf(reg)
-	fn(lf)
+	fn(region_get_active_leaf(reg))
     end
     return call_active_leaf
 end
