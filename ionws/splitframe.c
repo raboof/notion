@@ -158,7 +158,7 @@ void ionws_split_top(WIonWS *ws, const char *dirstr)
 	WRegion *reg;
 	int dir, primn, mins;
 	
-	if(!get_splitparams(&dir, &primn, str))
+	if(!get_splitparams(&dir, &primn, dirstr))
 		return;
 	
 	mins=(dir==VERTICAL
