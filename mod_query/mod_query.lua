@@ -74,7 +74,7 @@ function mod_query.query_execfile(mplex, prompt, prog)
     local function handle_execwith(mplex, str)
         ioncore.exec_on(mplex, prog.." "..string.shell_safe(str))
     end
-    return mod_query.query(mplex, prompt, mod_query.get_initdir(),
+    return mod_query.query(mplex, prompt, mod_query.get_initdir(mplex),
                            handle_execwith, mod_query.file_completor,
                            "filename")
 end
@@ -102,11 +102,11 @@ function mod_query.lookup_script_warn(mplex, script)
 end
 
 
-function mod_query.get_initdir()
-    if mod_query.last_dir then
-        return mod_query.last_dir
-    end
-    local wd=os.getenv("PWD")
+function mod_query.get_initdir(mplex)
+    --if mod_query.last_dir then
+    --    return mod_query.last_dir
+    --end
+    local wd=(ioncore.get_dir_for(mplex) or os.getenv("PWD"))
     if wd==nil then
         wd="/"
     elseif string.sub(wd, -1)~="/" then
