@@ -94,7 +94,7 @@ end
 local function get_script_warn(frame, script)
     local s, err=QueryLib.make_script_lookup_fn(script)()
     if not s then
-        query_fwarn(frame, s)
+        query_fwarn(frame, err)
     end
     return s
 end
@@ -250,7 +250,7 @@ function QueryLib.handler_lua(frame, code)
     setfenv(f, env)
     err=collect_errors(f)
     if err then
-        query_fwarn(frame, err)
+        query_fwarn(frame, string.gsub(err, "\n*$", ""))
     end
 end
 
