@@ -80,20 +80,22 @@ static void get_border(DEBorder *border, ExtlTab tab)
 
 
 static bool get_colour(WRootWin *rootwin, DEColour *ret, 
-					   ExtlTab tab, const char *what)
+					   ExtlTab tab, const char *what, DEColour substitute)
 {
 	char *name=NULL;
 	bool ok=FALSE;
 	
-	if(!extl_table_gets_s(tab, what, &name))
-		return FALSE;
+	if(extl_table_gets_s(tab, what, &name)){
+		ok=de_alloc_colour(rootwin, ret, name);
 	
-	ok=de_alloc_colour(rootwin, ret, name);
+		if(!ok)
+			warn("Unable to allocate colour \"%s\".", name);
+
+		free(name);
+	}
 	
 	if(!ok)
-		warn("Unable to allocate colour \"%s\".", name);
-
-	free(name);
+		return de_duplicate_colour(rootwin, substitute, ret);
 	
 	return ok;
 }
@@ -102,12 +104,15 @@ static bool get_colour(WRootWin *rootwin, DEColour *ret,
 static void get_colour_group(WRootWin *rootwin, DEColourGroup *cg, 
 							 ExtlTab tab)
 {
-	get_colour(rootwin, &(cg->hl), tab, "highlight_colour");
-	get_colour(rootwin, &(cg->sh), tab, "shadow_colour");
-	get_colour(rootwin, &(cg->bg), tab, "background_colour");
-	get_colour(rootwin, &(cg->fg), tab, "foreground_colour");
-	if(!get_colour(rootwin, &(cg->pad), tab, "padding_colour"))
-		de_duplicate_colour(rootwin, cg->bg, &(cg->pad));
+	get_colour(rootwin, &(cg->hl), tab, "highlight_colour",
+			   DE_WHITE(rootwin));
+	get_colour(rootwin, &(cg->sh), tab, "shadow_colour",
+			   DE_WHITE(rootwin));
+	get_colour(rootwin, &(cg->bg), tab, "background_colour",
+			   DE_BLACK(rootwin));
+	get_colour(rootwin, &(cg->fg), tab, "foreground_colour",
+			   DE_WHITE(rootwin));
+	get_colour(rootwin, &(cg->pad), tab, "padding_colour", cg->bg);
 }
 
 
@@ -136,7 +141,7 @@ static void get_extra_cgrps(WRootWin *rootwin, DEBrush *brush, ExtlTab tab)
 			goto err;
 		}
 		
-		de_init_colour_group(rootwin, brush->extra_cgrps+i-nfailed);
+		/*de_init_colour_group(rootwin, brush->extra_cgrps+i-nfailed);*/
 		brush->extra_cgrps[i-nfailed].spec=name;
 		get_colour_group(rootwin, brush->extra_cgrps+i-nfailed, sub);
 		
@@ -231,6 +236,7 @@ bool de_do_define_style(WRootWin *rootwin, const char *name, ExtlTab tab)
 		XSetFont(wglobal.dpy, brush->normal_gc, brush->font->fid);
 #endif
 
+	brush->cgrp_alloced=TRUE;
 	get_colour_group(rootwin, &(brush->cgrp), tab);
 	get_extra_cgrps(rootwin, brush, tab);
 	

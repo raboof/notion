@@ -183,10 +183,15 @@ static bool debrush_init(DEBrush *brush, WRootWin *rootwin, const char *name)
 
 	brush->spacing=0;
 	
-	brush->textalign=DEALIGN_LEFT;
+	brush->textalign=DEALIGN_CENTER;
 
-	if(!de_init_colour_group(rootwin, &(brush->cgrp)))
-		return FALSE;
+	brush->cgrp_alloced=FALSE;
+	brush->cgrp.spec=NULL;
+	brush->cgrp.bg=DE_BLACK(rootwin);
+	brush->cgrp.pad=DE_BLACK(rootwin);
+	brush->cgrp.fg=DE_WHITE(rootwin);
+	brush->cgrp.hl=DE_WHITE(rootwin);
+	brush->cgrp.sh=DE_WHITE(rootwin);
 	
 	brush->font=NULL;
 	
@@ -278,8 +283,8 @@ void debrush_deinit(DEBrush *brush)
 	if(brush->font!=NULL)
 		de_free_font(brush->font);
 	
-	de_free_colour_group(brush->rootwin, &(brush->cgrp));
-	
+	if(brush->cgrp_alloced)
+		de_free_colour_group(brush->rootwin, &(brush->cgrp));
 	
 	for(i=0; i<brush->n_extra_cgrps; i++)
 		de_free_colour_group(brush->rootwin, brush->extra_cgrps+i);

@@ -64,6 +64,7 @@ DECLOBJ(DEBrush){
 	GC normal_gc;	
 	
 	DEBorder border;
+	bool cgrp_alloced;
 	DEColourGroup cgrp;
 	int n_extra_cgrps;
 	DEColourGroup *extra_cgrps;

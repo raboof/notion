@@ -13,18 +13,6 @@
 #include "colour.h"
 
 
-bool de_init_colour_group(WRootWin *rootwin, DEColourGroup *cg)
-{
-	cg->spec=NULL;
-	
-	return (de_duplicate_colour(rootwin, DE_BLACK(rootwin), &(cg->bg)) &&
-			de_duplicate_colour(rootwin, DE_BLACK(rootwin), &(cg->pad)) &&
-			de_duplicate_colour(rootwin, DE_WHITE(rootwin), &(cg->fg)) &&
-			de_duplicate_colour(rootwin, DE_WHITE(rootwin), &(cg->hl)) &&
-			de_duplicate_colour(rootwin, DE_WHITE(rootwin), &(cg->sh)));
-}
-
-
 bool de_alloc_colour(WRootWin *rootwin, DEColour *ret, const char *name)
 {
 	XColor c;
