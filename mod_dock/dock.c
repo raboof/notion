@@ -1203,14 +1203,16 @@ static bool dock_clientwin_is_dockapp(WClientWin *cwin,
                                                      "_NET_WM_WINDOW_TYPE_DOCK",
                                                       False);
         }
-        XGetWindowProperty(ioncore_g.dpy, cwin->win, atom__net_wm_window_type, 0,
-                           sizeof(Atom), False, XA_ATOM, &actual_type,
-                           &actual_format, &nitems, &bytes_after, &prop);
-        if(actual_type==XA_ATOM && nitems>=1
-           && *(Atom *)prop==atom__net_wm_window_type_dock){
-            is_dockapp=TRUE;
+        if(XGetWindowProperty(ioncore_g.dpy, cwin->win, atom__net_wm_window_type,
+                              0, sizeof(Atom), False, XA_ATOM, &actual_type,
+                              &actual_format, &nitems, &bytes_after, &prop)
+           ==Success){
+            if(actual_type==XA_ATOM && nitems>=1
+               && *(Atom *)prop==atom__net_wm_window_type_dock){
+                is_dockapp=TRUE;
+            }
+            XFree(prop);
         }
-        XFree(prop);
     }
     /* }}} */
 
@@ -1225,6 +1227,33 @@ static bool dock_clientwin_is_dockapp(WClientWin *cwin,
                 is_dockapp=TRUE;
             }
             XFreeStringList(p);
+        }
+    }
+    /* }}} */
+
+    /* Fourth, inspect the _KDE_NET_WM_SYSTEM_TRAY_WINDOW_FOR property {{{ */
+    if(!is_dockapp){
+        static Atom atom__kde_net_wm_system_tray_window_for=None;
+        Atom actual_type=None;
+        int actual_format;
+        unsigned long nitems;
+        unsigned long bytes_after;
+        unsigned char *prop;
+
+        if(atom__kde_net_wm_system_tray_window_for==None){
+            atom__kde_net_wm_system_tray_window_for=XInternAtom(ioncore_g.dpy,
+        							"_KDE_NET_WM_SYSTEM_TRAY_WINDOW_FOR",
+        							False);
+        }
+        if(XGetWindowProperty(ioncore_g.dpy, cwin->win,
+                              atom__kde_net_wm_system_tray_window_for, 0,
+                              sizeof(Atom), False, AnyPropertyType, 
+                              &actual_type, &actual_format, &nitems,
+                              &bytes_after, &prop)==Success){
+            if(actual_type!=None){
+                is_dockapp=TRUE;
+            }
+            XFree(prop);
         }
     }
     /* }}} */
