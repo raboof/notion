@@ -73,10 +73,7 @@ tab in the frame's decoration. Only one client window (or other object)
 can be shown at a time in each frame. (In a traditional window manager
 each frame may contain exactly one client window.)
 
-"Messages" are boxes that appear at the bottoms of frames or screens.
-These are used to display important information, such as error messages.
-
-"Queries" are also boxes that appear at the bottoms of frames or screens 
+"Queries" are boxes that appear at the bottoms of frames or screens 
 and are used to ask the user for textual input. Most queries support 
 tab-completion.
 
