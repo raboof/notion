@@ -32,7 +32,13 @@ INTROBJ(WClientWin);
 #define FOR_ALL_CLIENTWINS(CWIN) \
     for((CWIN)=wglobal.cwin_list; (CWIN)!=NULL; (CWIN)=(CWIN)->g_cwin_next)
 	
-	
+
+typedef struct{
+	WWatch last_mgr_watch;
+	WRectangle saved_rootrel_geom;
+} WClientWinFSInfo;
+
+
 DECLOBJ(WClientWin){
 	WRegion region;
 	
@@ -57,7 +63,7 @@ DECLOBJ(WClientWin){
 
 	XSizeHints size_hints;
 	
-	WWatch last_mgr_watch;
+	WClientWinFSInfo fsinfo;
 	
 	ExtlTab proptab;
 };

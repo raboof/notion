@@ -20,6 +20,7 @@
 #include <ioncore/regbind.h>
 #include <ioncore/defer.h>
 #include <ioncore/resize.h>
+#include <ioncore/sizehint.h>
 #include "floatframe.h"
 #include "main.h"
 
@@ -129,48 +130,16 @@ static void floatframe_border_inner_geom(const WFloatFrame *frame,
 WRectangle initial_to_floatframe_geom(WGRData *grdata, WRectangle geom,
 									  int gravity)
 {
-	int woff=2*(BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad);
-	int hoff=2*(BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad)
-		+grdata->bar_h;
+	int top, bottom, left, right;
 	
-	if(gravity==StaticGravity || gravity==ForgetGravity){
-		geom.x-=BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad;
-		geom.y-=BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad
-			+grdata->bar_h;
-		geom.w+=woff;
-		geom.h+=hoff;
-	}else{
-		if(gravity==NorthWestGravity || gravity==WestGravity ||
-		   gravity==SouthWestGravity){
-			/* */
-		}else if(gravity==NorthEastGravity || gravity==EastGravity ||
-				 gravity==SouthEastGravity){
-			/* geom.y=geom.y+geom.h-(geom.h+hoff) */
-			geom.x-=woff;
-		}else if(gravity==CenterGravity || gravity==NorthGravity ||
-				 gravity==SouthGravity){
-			/* geom.y=geom.y+geom.h/2-(geom.h+hoff)/2 */
-			geom.x-=woff/2;
-		}
-		
-		geom.w+=woff;
-		
-		if(gravity==NorthWestGravity || gravity==NorthGravity ||
-		   gravity==NorthEastGravity){
-			/* */
-		}else if(gravity==SouthWestGravity || gravity==SouthGravity ||
-				 gravity==SouthEastGravity){
-			/* geom.y=geom.y+geom.h-(geom.h+hoff) */
-			geom.y-=hoff;
-		}else if(gravity==CenterGravity || gravity==WestGravity ||
-				 gravity==EastGravity){
-			/* geom.y=geom.y+geom.h/2-(geom.h+hoff)/2 */
-			geom.y-=hoff/2;
-		}
-		
-		geom.h+=hoff;
-	}
-		
+	top=BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad
+		+grdata->bar_h;
+	bottom=BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad;
+	left=bottom;
+	right=bottom;
+	
+	account_gravity(&geom, gravity, top, bottom, left, right);
+	
 	return geom;
 }
 
@@ -379,7 +348,6 @@ bool floatframe_is_shaded(WFloatFrame *frame)
 
 
 /*}}}*/
-
 
 
 /*{{{ Save/load */

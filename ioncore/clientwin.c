@@ -27,6 +27,7 @@
 #include "names.h"
 #include "stacking.h"
 #include "saveload.h"
+#include "manage.h"
 
 
 static void set_clientwin_state(WClientWin *cwin, int state);
@@ -120,7 +121,7 @@ void clientwin_get_size_hints(WClientWin *cwin)
 {
 	XSizeHints tmp=cwin->size_hints;
 	
-	get_sizehints(SCREEN_OF(cwin), cwin->win, &(cwin->size_hints));
+	get_sizehints(cwin->win, &(cwin->size_hints));
 	
 	if(cwin->flags&CWIN_PROP_MAXSIZE){
 		cwin->size_hints.max_width=tmp.max_width;
@@ -221,63 +222,71 @@ static void configure_cwin_bw(Window win, int bw)
 
 
 static bool clientwin_init(WClientWin *cwin, WWindow *parent,
-						   Window win, const XWindowAttributes *attr)
+						   Window win, XWindowAttributes *attr)
 {
 	WRectangle geom;
 	char *name;
-	
-	geom.x=attr->x;
-	geom.y=attr->y;
-	geom.h=attr->height;
-	geom.w=attr->width;
-	
-	region_init(&(cwin->region), &(parent->region), geom);
-	
-	cwin->max_geom=geom;
+
 	cwin->flags=0;
 	cwin->win=win;
-	cwin->orig_bw=attr->border_width;
+	cwin->state=WithdrawnState;
 	
-	clientwin_get_set_name(cwin);
+	get_winprops(cwin);
+	clientwin_get_size_hints(cwin);
 
-	cwin->event_mask=CLIENT_MASK;
+	geom.x=attr->x;
+	geom.y=attr->y;
+	geom.w=attr->width;
+	geom.h=attr->height;
+	
+	/* The idiot who invented special server-supported window borders should
+	 * be "taken behind a sauna".
+	 */
+	cwin->orig_bw=attr->border_width;
+	if(cwin->orig_bw!=0){
+		configure_cwin_bw(win, 0);
+		account_gravity(&geom, (cwin->size_hints.flags&PWinGravity 
+								? cwin->size_hints.win_gravity 
+								: NorthWestGravity),
+						-cwin->orig_bw, -cwin->orig_bw, 
+						-cwin->orig_bw, -cwin->orig_bw);
+		geom.w=attr->width;
+		geom.h=attr->height;
+	}
+
+	region_init(&(cwin->region), &(parent->region), geom);
+						
+	cwin->max_geom=geom;
+
 	cwin->transient_for=None;
 	cwin->transient_list=NULL;
-	cwin->state=WithdrawnState;
 	
 	cwin->n_cmapwins=0;
 	cwin->cmap=attr->colormap;
 	cwin->cmaps=NULL;
 	cwin->cmapwins=NULL;
 	cwin->n_cmapwins=0;
-
-	get_winprops(cwin);
-
-	init_watch(&(cwin->last_mgr_watch));
-	
 	get_colormaps(cwin);
-	
-	clientwin_get_size_hints(cwin);
-	clientwin_get_protocols(cwin);
 
+	clientwin_get_protocols(cwin);
+	clientwin_get_set_name(cwin);
+	
+	init_watch(&(cwin->fsinfo.last_mgr_watch));
+
+	cwin->event_mask=CLIENT_MASK;
 	XSelectInput(wglobal.dpy, win, cwin->event_mask);
 
 	XSaveContext(wglobal.dpy, win, wglobal.win_context, (XPointer)cwin);
 	XAddToSaveSet(wglobal.dpy, win);
 
-	if(cwin->orig_bw!=0)
-		configure_cwin_bw(win, 0);
-	
 	LINK_ITEM(wglobal.cwin_list, cwin, g_cwin_next, g_cwin_prev);
-	
-	/*region_add_bindmap((WRegion*)cwin, &ioncore_clientwin_bindmap, TRUE);*/
 	
 	return TRUE;
 }
 
 
 static WClientWin *create_clientwin(WWindow *parent, Window win,
-									const XWindowAttributes *attr)
+									XWindowAttributes *attr)
 {
 	CREATEOBJ_IMPL(WClientWin, clientwin, (p, parent, win, attr));
 }
@@ -384,6 +393,10 @@ again:
 
 	param.flags|=(REGION_ATTACH_SIZERQ|REGION_ATTACH_POSRQ|REGION_ATTACH_MAPRQ);
 	param.geomrq=REGION_GEOM(cwin);
+	if(cwin->size_hints.flags&PWinGravity){
+		param.flags|=REGION_ATTACH_SIZE_HINTS;
+		param.size_hints=&(cwin->size_hints);
+	}
 
 	CALL_ALT_B(managed, add_clientwin_alt, (cwin, &param));
 
@@ -539,7 +552,7 @@ void clientwin_deinit(WClientWin *cwin)
 	}
 	clear_colormaps(cwin);
 	
-	reset_watch(&(cwin->last_mgr_watch));
+	reset_watch(&(cwin->fsinfo.last_mgr_watch));
 	region_deinit((WRegion*)cwin);
 }
 
@@ -548,8 +561,8 @@ void clientwin_deinit(WClientWin *cwin)
 void clientwin_unmapped(WClientWin *cwin)
 {
 	region_rescue_managed_on_list((WRegion*)cwin, cwin->transient_list);
-	if(cwin->last_mgr_watch.obj!=NULL)
-		region_goto((WRegion*)(cwin->last_mgr_watch.obj));
+	if(cwin->fsinfo.last_mgr_watch.obj!=NULL)
+		region_goto((WRegion*)(cwin->fsinfo.last_mgr_watch.obj));
 	destroy_obj((WObj*)cwin);
 }
 
@@ -678,8 +691,8 @@ void clientwin_notify_rootpos(WClientWin *cwin, int rootx, int rooty)
 	ce.xconfigure.type=ConfigureNotify;
 	ce.xconfigure.event=win;
 	ce.xconfigure.window=win;
-	ce.xconfigure.x=rootx;
-	ce.xconfigure.y=rooty;
+	ce.xconfigure.x=rootx-cwin->orig_bw;
+	ce.xconfigure.y=rooty-cwin->orig_bw;
 	ce.xconfigure.width=REGION_GEOM(cwin).w;
 	ce.xconfigure.height=REGION_GEOM(cwin).h;
 	ce.xconfigure.border_width=cwin->orig_bw;
@@ -1101,6 +1114,9 @@ bool clientwin_check_fullscreen_request(WClientWin *cwin, int w, int h)
 	FOR_ALL_MANAGED_ON_LIST(SCREEN_OF(cwin)->viewport_list, reg){
 		if(!WOBJ_IS(reg, WViewport))
 			continue;
+		/* TODO: if there are multiple possible screens, use the one with
+		 * requested position, if any.
+		 */
 		if(REGION_GEOM(reg).w==w && REGION_GEOM(reg).h==h){
 			return clientwin_fullscreen_vp(cwin, (WViewport*)reg,
 										   clientwin_get_switchto(cwin));
@@ -1116,20 +1132,55 @@ bool clientwin_check_fullscreen_request(WClientWin *cwin, int w, int h)
 }
 
 
+static void lastmgr_watchhandler(WWatch *watch, WObj *obj)
+{
+	WClientWinFSInfo *fsinfo=(WClientWinFSInfo*)watch;
+	WRegion *r;
+	
+	assert(WOBJ_IS(obj, WRegion));
+	
+	r=REGION_MANAGER((WRegion*)obj);
+	
+	if(r==NULL)
+		r=region_parent((WRegion*)obj);
+	
+	if(r!=NULL)
+		setup_watch(&(fsinfo->last_mgr_watch), (WObj*)r, lastmgr_watchhandler);
+}
+
+
 bool clientwin_fullscreen_vp(WClientWin *cwin, WViewport *vp, bool switchto)
 {
-	if(REGION_MANAGER(cwin)!=NULL){
-		setup_watch(&(cwin->last_mgr_watch), (WObj*)REGION_MANAGER(cwin), NULL);
-	}else if(vp->current_ws!=NULL){
-		setup_watch(&(cwin->last_mgr_watch), (WObj*)vp->current_ws, NULL);
+	int rootx, rooty;
+	bool wasfs=TRUE;
+	
+	if(cwin->fsinfo.last_mgr_watch.obj==NULL){
+		wasfs=FALSE;
+		
+		if(REGION_MANAGER(cwin)!=NULL){
+			setup_watch(&(cwin->fsinfo.last_mgr_watch),
+						(WObj*)REGION_MANAGER(cwin),
+						lastmgr_watchhandler);
+		}else if(vp->current_ws!=NULL){
+			setup_watch(&(cwin->fsinfo.last_mgr_watch),
+						(WObj*)vp->current_ws, 
+						lastmgr_watchhandler);
+		}
+		region_rootpos((WRegion*)cwin, &rootx, &rooty);
+		cwin->fsinfo.saved_rootrel_geom.x=rootx;
+		cwin->fsinfo.saved_rootrel_geom.y=rooty;
+		cwin->fsinfo.saved_rootrel_geom.w=REGION_GEOM(cwin).w;
+		cwin->fsinfo.saved_rootrel_geom.h=REGION_GEOM(cwin).h;
 	}
 	
 	if(!region_add_managed_simple((WRegion*)vp, (WRegion*)cwin, switchto ? 
 								  REGION_ATTACH_SWITCHTO : 0)){
 		warn("Failed to enter full screen mode");
+		if(!wasfs)
+			reset_watch(&(cwin->fsinfo.last_mgr_watch));
 		return FALSE;
 	}
-	
+
 	return TRUE;
 }
 
@@ -1148,23 +1199,60 @@ bool clientwin_enter_fullscreen(WClientWin *cwin, bool switchto)
 }
 
 
+static bool do_add_clientwin(WRegion *reg, WClientWin *cwin,
+							  WAttachParams *param)
+{
+	if(HAS_DYN(reg, genws_add_clientwin)){
+		return genws_add_clientwin((WGenWS*)reg, cwin, param);
+	}else{
+		/* Can't use region_x_window(reg)==None because WFloatWS:s have
+		 * a dummy window.
+		 */
+		if(!WOBJ_IS(reg, WWindow) && !WOBJ_IS(reg, WClientWin)){
+			warn("Attaching a WClientWin to a non-WWindow non-WClientWin "
+				 "WRegion with region_add_managed... "
+				 "probably not a good idea.");
+		}
+		return region_add_managed(reg, (WRegion*)cwin, param);
+	}
+}
+
+
 bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto)
 {	
 	WRegion *reg;
+	WAttachParams param;
+	XSizeHints hnt;
+	int rootx, rooty;
 	
-	if(cwin->last_mgr_watch.obj==NULL)
+	if(cwin->fsinfo.last_mgr_watch.obj==NULL)
 		return FALSE;
 
-	reg=(WRegion*)cwin->last_mgr_watch.obj;
-	reset_watch(&(cwin->last_mgr_watch));
-	if(!WOBJ_IS(reg, WRegion))
+	reg=(WRegion*)cwin->fsinfo.last_mgr_watch.obj;
+	reset_watch(&(cwin->fsinfo.last_mgr_watch));
+	assert(WOBJ_IS(reg, WRegion));
+	
+	/* Set up geometry hints */
+	param.flags|=(REGION_ATTACH_SIZERQ|REGION_ATTACH_POSRQ|
+				  REGION_ATTACH_SWITCHTO|REGION_ATTACH_SIZE_HINTS);
+	
+	region_rootpos(reg, &rootx, &rooty);
+	param.geomrq=cwin->fsinfo.saved_rootrel_geom;
+	param.geomrq.x-=rootx;
+	param.geomrq.y-=rooty;
+	
+	hnt=cwin->size_hints;
+	hnt.flags|=PWinGravity;
+	hnt.win_gravity=StaticGravity;
+	param.size_hints=&hnt;
+	
+	if(!do_add_clientwin(reg, cwin, &param)){
+		warn("WClientWin failed to return from full screen mode; remaining "
+			 "manager or parent from previous location refused to manage us.");
 		return FALSE;
-	if(!region_supports_add_managed(reg))
-		return FALSE;
-	/* TODO: geomrq for correct placement on floatws:s */
-	if(!region_add_managed_simple(reg, (WRegion*)cwin, REGION_ATTACH_SWITCHTO))
-		return FALSE;
-	return region_goto(reg);
+	}
+	
+	return region_goto((WRegion*)cwin);
 }
 
 
@@ -1174,7 +1262,7 @@ bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto)
 EXTL_EXPORT
 bool clientwin_toggle_fullscreen(WClientWin *cwin)
 {
-	if(cwin->last_mgr_watch.obj!=NULL)
+	if(cwin->fsinfo.last_mgr_watch.obj!=NULL)
 		return clientwin_leave_fullscreen(cwin, TRUE);
 	
 	return clientwin_enter_fullscreen(cwin, TRUE);

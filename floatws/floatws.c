@@ -308,6 +308,7 @@ static bool floatws_add_clientwin(WFloatWS *ws,
 	
 	if(target==NULL){
 		WRectangle fgeom;
+		int gravity=NorthWestGravity;
 		
 		if(params->flags&REGION_ATTACH_SIZERQ){
 			fgeom.w=params->geomrq.w;
@@ -316,9 +317,6 @@ static bool floatws_add_clientwin(WFloatWS *ws,
 			fgeom.w=REGION_GEOM(cwin).w;
 			fgeom.h=REGION_GEOM(cwin).h;
 		}
-		
-		fgeom.w+=2*cwin->orig_bw;
-		fgeom.h+=2*cwin->orig_bw;
 
 		if(params->flags&REGION_ATTACH_POSRQ){
 			fgeom.x=params->geomrq.x;
@@ -329,10 +327,12 @@ static bool floatws_add_clientwin(WFloatWS *ws,
 			fgeom.y=0;
 		}
 		
-		fgeom=initial_to_floatframe_geom(GRDATA_OF(ws), fgeom,
-										 (cwin->size_hints.flags&PWinGravity
-										  ? cwin->size_hints.win_gravity
-										  : NorthWestGravity));
+		if(params->flags&REGION_ATTACH_SIZE_HINTS &&
+		   params->size_hints->flags&PWinGravity){
+			gravity=params->size_hints->win_gravity;
+		}
+		
+		fgeom=initial_to_floatframe_geom(GRDATA_OF(ws), fgeom, gravity);
 
 		if(params->flags&REGION_ATTACH_MAPRQ && wglobal.opmode!=OPMODE_INIT){
 			/* When the window is mapped by application request, position

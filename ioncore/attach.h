@@ -21,7 +21,8 @@
 #define REGION_ATTACH_DOCKAPP	0x0020 /* only set by add_clientwin */
 #define REGION_ATTACH_TFOR		0x0040 /* only set by add_clientwin */
 #define REGION_ATTACH_MAPRQ 	0x0080 /* only setd by add_clientwin;
-										  implies GEOMRQ */
+										  implies POSRQ|SIZERQ */
+#define REGION_ATTACH_SIZE_HINTS 0x0100
 
 #define REGION_ATTACH_IS_GEOMRQ(FLAGS) \
  (((FLAGS)&(REGION_ATTACH_POSRQ|REGION_ATTACH_SIZERQ)) \
@@ -32,6 +33,7 @@ typedef struct{
 	int init_state;
 	WRectangle geomrq;
 	WClientWin *tfor;
+	XSizeHints *size_hints;
 } WAttachParams;
 
 

@@ -206,6 +206,12 @@ bool genws_add_clientwin(WGenWS *reg, WClientWin *cwin,
 }
 
 
+/*}}}*/
+
+
+/*{{{ finish_add_clientwin */
+
+
 bool finish_add_clientwin(WRegion *reg, WClientWin *cwin,
 						  const WAttachParams *param)
 {
@@ -228,7 +234,7 @@ bool finish_add_clientwin(WRegion *reg, WClientWin *cwin,
 	   param->init_state==IconicState)
 		param2.flags=0;
 	
-	return region_add_managed(reg, (WRegion*)cwin, &param2);
+	return region_add_managed(reg, (WRegion*)cwin, &param2));
 }
 
 

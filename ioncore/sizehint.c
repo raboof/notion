@@ -109,7 +109,7 @@ void correct_size(int *wp, int *hp, const XSizeHints *hints, bool min)
 #define CWIN_MIN_W 1
 #define CWIN_MIN_H 1
 
-void get_sizehints(WScreen *scr, Window win, XSizeHints *hints)
+void get_sizehints(Window win, XSizeHints *hints)
 {
 	int minh, minw;
 	long supplied=0;
@@ -203,3 +203,54 @@ void adjust_size_hints_for_managed(XSizeHints *hints, WRegion *list)
 
 /*}}}*/
 
+
+
+/*{{{ account_gravity */
+
+
+void account_gravity(WRectangle *geom, int gravity, 
+					 int top, int bottom, int left, int right)
+{
+	int woff=left+right;
+	int hoff=top+bottom;
+	
+	if(gravity==StaticGravity || gravity==ForgetGravity){
+		geom->x-=left;
+		geom->y-=top;
+		geom->w+=woff;
+		geom->h+=hoff;
+	}else{
+		if(gravity==NorthWestGravity || gravity==WestGravity ||
+		   gravity==SouthWestGravity){
+			/* */
+		}else if(gravity==NorthEastGravity || gravity==EastGravity ||
+				 gravity==SouthEastGravity){
+			/* geom->y=geom->y+geom->h-(geom->h+hoff) */
+			geom->x-=woff;
+		}else if(gravity==CenterGravity || gravity==NorthGravity ||
+				 gravity==SouthGravity){
+			/* geom->y=geom->y+geom->h/2-(geom->h+hoff)/2 */
+			geom->x-=woff/2;
+		}
+		
+		geom->w+=woff;
+		
+		if(gravity==NorthWestGravity || gravity==NorthGravity ||
+		   gravity==NorthEastGravity){
+			/* */
+		}else if(gravity==SouthWestGravity || gravity==SouthGravity ||
+				 gravity==SouthEastGravity){
+			/* geom->y=geom->y+geom->h-(geom->h+hoff) */
+			geom->y-=hoff;
+		}else if(gravity==CenterGravity || gravity==WestGravity ||
+				 gravity==EastGravity){
+			/* geom->y=geom->y+geom->h/2-(geom->h+hoff)/2 */
+			geom->y-=hoff/2;
+		}
+		
+		geom->h+=hoff;
+	}
+}
+
+
+/*}}}*/
