@@ -216,10 +216,12 @@ void ioncore_handle_property(const XPropertyEvent *ev)
         hints=XGetWMHints(ioncore_g.dpy, ev->window);
         /* region_notify/clear_activity take care of checking current state */
         if(hints!=NULL){
-            if(hints->flags&XUrgencyHint)
-                region_notify_activity((WRegion*)cwin);
-            else
+            if(hints->flags&XUrgencyHint){
+                if(!region_skip_focus((WRegion*)cwin))
+                   region_notify_activity((WRegion*)cwin);
+            }else{
                 region_clear_activity((WRegion*)cwin, TRUE);
+            }
         }
         XFree(hints);
     }else if(ev->atom==XA_WM_NORMAL_HINTS){
@@ -326,16 +328,11 @@ void ioncore_handle_enter_window(XEvent *ev)
     if(freg==NULL)
         return;
     
-    reg=freg;
-    while(reg!=NULL){
-        if(reg->flags&REGION_SKIP_FOCUS)
-            return;
-        reg=REGION_PARENT_REG(reg);
+    if(!region_skip_focus(freg)){
+        region_goto_flags(freg, (REGION_GOTO_FOCUS|
+                                 REGION_GOTO_NOWARP|
+                                 REGION_GOTO_ENTERWINDOW));
     }
-
-    region_goto_flags(freg, (REGION_GOTO_FOCUS|
-                             REGION_GOTO_NOWARP|
-                             REGION_GOTO_ENTERWINDOW));
 }
 
 

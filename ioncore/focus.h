@@ -52,4 +52,7 @@ extern WHook *region_do_warp_alt;
 extern WHook *region_activated_hook;
 extern WHook *region_inactivated_hook;
 
+/* Misc. */
+extern bool region_skip_focus(WRegion *reg);
+
 #endif /* ION_IONCORE_FOCUS_H */

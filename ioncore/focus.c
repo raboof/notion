@@ -367,3 +367,19 @@ void region_warp(WRegion *reg)
 
 /*}}}*/
 
+
+/*{{{ Misc. */
+
+
+bool region_skip_focus(WRegion *reg)
+{
+    while(reg!=NULL){
+        if(reg->flags&REGION_SKIP_FOCUS)
+            return TRUE;
+        reg=REGION_PARENT_REG(reg);
+    }
+    return FALSE;
+}
+
+
+/*}}}*/

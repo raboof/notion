@@ -81,17 +81,17 @@ void region_clear_activity(WRegion *reg, bool force)
     if(!(reg->flags&REGION_ACTIVITY))
         return;
     
-	if(!force && OBJ_IS(reg, WClientWin)){
-		XWMHints *hints=XGetWMHints(ioncore_g.dpy, ((WClientWin*)reg)->win);
+    if(!force && OBJ_IS(reg, WClientWin)){
+        XWMHints *hints=XGetWMHints(ioncore_g.dpy, ((WClientWin*)reg)->win);
         if(hints!=NULL){
-			if(hints->flags&XUrgencyHint){
-				XFree(hints);
-				return;
-			}
-			XFree(hints);
-		}
-	}
-
+            if(hints->flags&XUrgencyHint){
+                XFree(hints);
+                return;
+            }
+            XFree(hints);
+        }
+    }
+    
     reg->flags&=~REGION_ACTIVITY;
     
     if(reg->mgd_activity==0)

@@ -549,8 +549,9 @@ again:
         }
     }
     
-    if(!region_is_fully_mapped((WRegion*)cwin) && 
-       ioncore_g.opmode==IONCORE_OPMODE_NORMAL){
+    if(ioncore_g.opmode==IONCORE_OPMODE_NORMAL &&
+       !region_is_fully_mapped((WRegion*)cwin) && 
+       !region_skip_focus((WRegion*)cwin)){
         region_notify_activity((WRegion*)cwin);
     }
     
