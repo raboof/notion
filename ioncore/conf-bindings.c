@@ -138,22 +138,29 @@ static bool do_action(WBindmap *bindmap, const char *str,
 		warn("Cannot waitrel when no modifiers set in \"%s\". Sorry.", str);
 		wr=FALSE;
 	}
-
+	
 	binding.waitrel=wr;
 	binding.act=act;
 	binding.state=mod;
 	binding.kcb=kcb;
 	binding.area=area;
-	binding.func=extl_ref_fn(func);
 	binding.submap=NULL;
 	
-	if(add_binding(bindmap, &binding))
-		return TRUE;
+	if(func!=extl_fn_none()){
+		binding.func=extl_ref_fn(func);
+		if(add_binding(bindmap, &binding))
+			return TRUE;
+		extl_unref_fn(binding.func);
+		warn("Unable to add binding %s.", str);
+	}else{
+		binding.func=func;
+		if(remove_binding(bindmap, &binding))
+			return TRUE;
+		warn("Unable to remove binding %s. Either you are trying to "
+			 "remove a binding that has not been set or you're trying "
+			 "to bind to a nil function", str);
+	}
 
-	deinit_binding(&binding);
-	
-	warn("Unable to add binding %s.", str);
-	
 	return FALSE;
 }
 
@@ -253,8 +260,9 @@ static bool do_entry(WBindmap *bindmap, ExtlTab tab, StringIntMap *areamap)
 		}
 		
 		if(!extl_table_gets_f(tab, "func", &func)){
-			warn("Function for binding %s not set/nil/undefined.", kcb_str);
-			goto fail;
+			/*warn("Function for binding %s not set/nil/undefined.", kcb_str);
+			goto fail;*/
+			func=extl_fn_none();
 		}
 		ret=do_action(bindmap, kcb_str, func, action, mod, kcb, area, wr);
 		if(!ret)

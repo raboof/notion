@@ -32,8 +32,12 @@ extern WBinding *region_lookup_keybinding(WRegion *reg, const XKeyEvent *ev,
 extern WBinding *region_lookup_binding_area(WRegion *reg, int act, uint state,
 											uint kcb, int area);
 
-extern void rbind_binding_added(const WRegBindingInfo *rbind, const WBinding *binding,
+extern void rbind_binding_added(const WRegBindingInfo *rbind, 
+								const WBinding *binding,
 								const WBindmap *bindmap);
+extern void rbind_binding_removed(const WRegBindingInfo *rbind, 
+								  const WBinding *binding,
+								  const WBindmap *bindmap);
 
 #endif /* ION_IONCORE_REGBIND_H */
 

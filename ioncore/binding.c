@@ -210,6 +210,58 @@ subst:
 }
 
 
+bool remove_binding(WBindmap *bindmap, const WBinding *b)
+{
+	WBinding *binding;
+	int i, j;
+	
+	if(bindmap==NULL)
+		return FALSE;
+
+	binding=bindmap->bindings;
+	
+	for(i=0; i<bindmap->nbindings; i++){
+		switch(compare_bindings((void*)b, (void*)(binding+i))){
+		case 1:
+			continue;
+		case 0:
+			goto rmove;
+		}
+		break;
+	}
+	
+	return FALSE;
+
+rmove:
+	deinit_binding(binding+i);
+
+	{
+		WRegBindingInfo *rbind;
+		for(rbind=bindmap->rbind_list; rbind!=NULL; rbind=rbind->bm_next){
+			rbind_binding_removed(rbind, b, bindmap);
+		}
+	}
+
+	memmove(&(binding[i]), &(binding[i+1]),
+			sizeof(WBinding)*(bindmap->nbindings-i));
+
+	bindmap->nbindings--;
+	
+	if(bindmap->nbindings==0){
+		free(binding);
+		bindmap->bindings=NULL;
+	}else{
+		binding=REALLOC_N(binding, WBinding, bindmap->nbindings,
+						  bindmap->nbindings);
+		if(binding==NULL)
+			warn_err();
+		else
+			bindmap->bindings=binding;
+	}
+	
+	return TRUE;
+}
+
 
 void init_bindings()
 {

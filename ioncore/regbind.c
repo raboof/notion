@@ -68,11 +68,21 @@ static void ungrab_freed_bindings(const WRegion *reg, const WBindmap *bindmap)
 }
 
 
-void rbind_binding_added(const WRegBindingInfo *rbind, const WBinding *binding,
+void rbind_binding_added(const WRegBindingInfo *rbind, 
+						 const WBinding *binding,
 						 const WBindmap *bindmap)
 {
 	if(binding->area==0)
 		do_grab_ungrab_binding(rbind->reg, binding, rbind->bindmap, TRUE);
+}
+
+
+void rbind_binding_removed(const WRegBindingInfo *rbind, 
+						   const WBinding *binding,
+						   const WBindmap *bindmap)
+{
+	if(binding->area==0)
+		do_grab_ungrab_binding(rbind->reg, binding, rbind->bindmap, FALSE);
 }
 
 
