@@ -200,6 +200,18 @@ void screen_managed_geom(WScreen *scr, WRectangle *geom)
 
 static bool screen_handle_drop(WScreen *screen, int x, int y, WRegion *dropped)
 {
+	WMPlex *mplex=(WMPlex*)screen;
+	
+	if(mplex->current_sub!=NULL &&
+	   HAS_DYN(mplex->current_sub, region_handle_drop)){
+		int rx, ry;
+		region_rootpos(mplex->current_sub, &rx, &ry);
+		if(coords_in_rect(&REGION_GEOM(mplex->current_sub), x-rx, y-ry)){
+			if(region_handle_drop(mplex->current_sub, x, y, dropped))
+				return TRUE;
+		}
+	}
+	/* Do not attach to ourselves unlike generic WMPlex. */
 	return FALSE;
 }
 
