@@ -702,8 +702,15 @@ WRegion* floatws_current(WFloatWS *ws)
 static ExtlTab floatws_get_configuration(WFloatWS *ws)
 {
     ExtlTab tab, mgds, st, g;
-    WRegion *mgd;
+    WRegion *mgd, *stdisp=NULL;
+    WMPlex *par;
     int n=0;
+    
+    par=OBJ_CAST(region_parent((WRegion*)ws), WMPlex);
+    if(par!=NULL){
+        int dummyp, dummyo;
+        mplex_get_stdisp(par, &stdisp, &dummyp, &dummyo);
+    }
     
     tab=region_get_base_configuration((WRegion*)ws);
     
@@ -712,6 +719,9 @@ static ExtlTab floatws_get_configuration(WFloatWS *ws)
     extl_table_sets_t(tab, "managed", mgds);
     
     FOR_ALL_MANAGED_ON_LIST(ws->managed_list, mgd){
+        if(mgd==stdisp)
+            continue;
+        
         st=region_get_configuration(mgd);
         if(st==extl_table_none())
             continue;
