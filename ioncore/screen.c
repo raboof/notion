@@ -269,9 +269,6 @@ static WScreen *preinit_screen(int xscr)
 static void postinit_screen(WScreen *scr)
 {
 	set_cursor(scr->root.win, CURSOR_DEFAULT);
-	
-	/* TODO: Need to reorder initilisation code */
-	/*init_workspaces(scr);*/
 }
 
 

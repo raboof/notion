@@ -381,7 +381,6 @@ static void handle_expose(const XExposeEvent *ev)
 	}
 	
 	/* TODO: drawlist */
-	
 	FOR_ALL_SCREENS(scr){
 		if(scr->grdata.drag_win==ev->window && wglobal.draw_dragwin!=NULL){
 			wglobal.draw_dragwin(wglobal.draw_dragwin_arg);
