@@ -23,7 +23,7 @@ bool add_to_symlist(WSymlist **symlist, void *symbol)
 		
 	node->symbol=symbol;
 	
-	LINK_ITEM(*symlist, node, next, prev);
+	LINK_ITEM_FIRST(*symlist, node, next, prev);
 	
 	return TRUE;
 }
