@@ -900,20 +900,22 @@ static void convert_geom(WClientWin *cwin, const WRectangle *max_geom,
 			top=TRUE;
 		else
 			bottom=TRUE;
-		htry=cwin->last_h_rq;
+		if(cwin->last_h_rq<htry)
+			htry=cwin->last_h_rq;
 	}
 	
 	geom->w=max_geom->w;
 	geom->h=htry;
 	
 	/* Don't ignore minimum size at first try. */
-	if(bottom || top)
+	/*if(bottom || top)
 		correct_size(&(geom->w), &(geom->h), &(cwin->size_hints), TRUE);
 	if(!(bottom || top) || geom->w>max_geom->w || geom->h>max_geom->h){
 		geom->w=max_geom->w;
-		geom->h=htry;
+		geom->h=max_geom->h;
 		correct_size(&(geom->w), &(geom->h), &(cwin->size_hints), FALSE);
-	}
+	}*/
+	correct_size(&(geom->w), &(geom->h), &(cwin->size_hints), FALSE);
 
 	geom->x=max_geom->x+max_geom->w/2-geom->w/2;
 	

@@ -330,12 +330,12 @@ static bool mplex_do_display_managed(WMPlex *mplex, WRegion *sub)
 	
 	if(sub==mplex->current_sub || sub==mplex->current_input)
 		return TRUE;
-	
+
 	if(REGION_IS_MAPPED(mplex) && !WMPLEX_MGD_UNVIEWABLE(mplex))
 		region_map(sub);
 	else
 		region_unmap(sub);
-
+	
 	if(mplex->current_sub!=NULL && REGION_IS_MAPPED(mplex))
 		region_unmap(mplex->current_sub);
 
@@ -349,7 +349,7 @@ static bool mplex_do_display_managed(WMPlex *mplex, WRegion *sub)
 	region_lower(sub);
 
 	if(region_may_control_focus((WRegion*)mplex))
-		warp((WRegion*)mplex);
+		set_focus((WRegion*)mplex);
 	
 	return TRUE;
 }

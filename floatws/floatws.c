@@ -391,65 +391,54 @@ static bool floatws_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
 {
 	WMPlex *target=NULL;
 	WWindow *par;
-	bool newreg=FALSE;
 	bool respectpos=TRUE;
+	WRectangle fgeom=param->geom;
 
 	par=REGION_PARENT_CHK(ws, WWindow);
 	assert(par!=NULL);
 	
-#ifdef CF_FLOATWS_ATTACH_TO_CURRENT
-	target=find_existing(ws);
-#endif
+	initial_to_floatframe_geom(ws, &fgeom, param->gravity);
+
+	if(param->maprq && wglobal.opmode!=OPMODE_INIT){
+		/* When the window is mapped by application request, position
+		 * request is only honoured if the position was given by the user
+		 * and in case of a transient (the app may know better where to 
+		 * place them) or if we're initialising.
+		 */
+		respectpos=(param->tfor!=NULL || param->userpos);
+	}
+	
+	/* However, if the requested geometry does not overlap the
+	 * workspaces's geometry, position request is never honoured.
+	 */
+	if((fgeom.x+fgeom.w<=REGION_GEOM(ws).x) ||
+	   (fgeom.y+fgeom.h<=REGION_GEOM(ws).y) ||
+	   (fgeom.x>=REGION_GEOM(ws).x+REGION_GEOM(ws).w) ||
+	   (fgeom.y>=REGION_GEOM(ws).y+REGION_GEOM(ws).h)){
+		respectpos=FALSE;
+	}
+	
+	if(!respectpos)
+		floatws_calc_placement(ws, &fgeom);
+	
+	target=(WMPlex*)create_floatframe(par, &fgeom);
 	
 	if(target==NULL){
-		WRectangle fgeom=param->geom;
-		
-		initial_to_floatframe_geom(ws, &fgeom, param->gravity);
-
-		if(param->maprq && wglobal.opmode!=OPMODE_INIT){
-			/* When the window is mapped by application request, position
-			 * request is only honoured if the position was given by the user
-			 * and in case of a transient (the app may know better where to 
-			 * place them) or if we're initialising.
-			 */
-			respectpos=(param->tfor!=NULL || param->userpos);
-		}
-
-		/* However, if the requested geometry does not overlap the
-		 * workspaces's geometry, position request is never honoured.
-		 */
-		if((fgeom.x+fgeom.w<=REGION_GEOM(ws).x) ||
-		   (fgeom.y+fgeom.h<=REGION_GEOM(ws).y) ||
-		   (fgeom.x>=REGION_GEOM(ws).x+REGION_GEOM(ws).w) ||
-		   (fgeom.y>=REGION_GEOM(ws).y+REGION_GEOM(ws).h)){
-			respectpos=FALSE;
-		}
-
-		if(!respectpos)
-			floatws_calc_placement(ws, &fgeom);
-		
-		target=(WMPlex*)create_floatframe(par, &fgeom);
-	
-		if(target==NULL){
-			warn("Failed to create a new WFloatFrame for client window");
-			return FALSE;
-		}
-
-		newreg=TRUE;
+		warn("Failed to create a new WFloatFrame for client window");
+		return FALSE;
 	}
 
 	assert(same_rootwin((WRegion*)target, (WRegion*)cwin));
 	
 	if(!mplex_attach_simple(target, (WRegion*)cwin, param->switchto)){
-		if(newreg)
-			destroy_obj((WObj*)target);
+		destroy_obj((WObj*)target);
 		return FALSE;
 	}
 
 	floatws_add_managed(ws, (WRegion*)target);
 	
 	/* Don't warp, it is annoying in this case */
-	if(newreg && param->switchto && region_may_control_focus((WRegion*)ws)){
+	if(param->switchto && region_may_control_focus((WRegion*)ws)){
 		set_previous_of((WRegion*)target);
 		set_focus((WRegion*)target);
 	}
@@ -519,6 +508,7 @@ bool add_clientwin_floatws_transient(WClientWin *cwin,
 	if(!floatws_manage_clientwin(ws, cwin, param))
 		return FALSE;
 
+	region_raise(stack_above);
 	region_stack_above(REGION_MANAGER(cwin), stack_above);
 
 	return TRUE;
