@@ -263,9 +263,9 @@ static int extl_obj_gc_handler(lua_State *st)
 
 static int extl_obj_typename(lua_State *st)
 {
-    Obj *obj;
+    Obj *obj=NULL;
 
-    if(!extl_stack_get(st, 1, 'o', FALSE, &obj))
+    if(!extl_stack_get(st, 1, 'o', FALSE, &obj) || obj==NULL)
         return 0;
     
     lua_pushstring(st, OBJ_TYPESTR(obj));
@@ -283,8 +283,9 @@ const char *__obj_typename(Obj *obj);
 
 static int extl_obj_exists(lua_State *st)
 {
-    Obj *obj;
-    lua_pushboolean(st, extl_stack_get(st, 1, 'o', FALSE, &obj));
+    Obj *obj=NULL;
+    extl_stack_get(st, 1, 'o', FALSE, &obj);
+    lua_pushboolean(st, obj!=NULL);
     return 1;
 }
 
@@ -299,10 +300,12 @@ bool __obj_exists(Obj *obj);
 
 static int extl_obj_is(lua_State *st)
 {
-    Obj *obj;
+    Obj *obj=NULL;
     const char *tn;
     
-    if(!extl_stack_get(st, 1, 'o', FALSE, &obj)){
+    extl_stack_get(st, 1, 'o', FALSE, &obj);
+    
+    if(obj==NULL){
         lua_pushboolean(st, 0);
     }else{
         tn=lua_tostring(st, 2);
@@ -593,6 +596,9 @@ static bool extl_stack_get(lua_State *st, int pos, char type, bool copystring,
         }else if(type=='s' || type=='S'){
             if(valret)
                 *((char**)valret)=NULL;
+        }else if(type=='o'){
+            if(valret)
+                *((Obj**)valret)=NULL;
         }else{
             return FALSE;
         }
@@ -1233,9 +1239,9 @@ static bool extl_get_retvals(lua_State *st, int m, ExtlDoCallParam *param)
 #endif
         if(!extl_stack_get(st, -m, *spec, TRUE, ptr)){
             /* This is the only place where we allow nil-objects */
-            if(*spec=='o' && lua_isnil(st, -m)){
+            /*if(*spec=='o' && lua_isnil(st, -m)){
                 *(Obj**)ptr=NULL;
-            }else{
+            }else*/{
                 warn("Invalid return value (expected '%c', got lua type \"%s\").",
                      *spec, lua_typename(st, lua_type(st, -m)));
                 return FALSE;

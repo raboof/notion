@@ -384,8 +384,13 @@ static bool %s(%s (*fn)(), ExtlL2Param *in, ExtlL2Param *out)
     -- Generate type checking code
     for k, t in info.itypes do
         if t~="" then
-            fprintf(h, "    if(!chko(in, %d, &CLASSDESCR(%s))) return FALSE;\n",
-                    k-1, t)
+            if k==1 then
+                fprintf(h, "    if(!chko1(in, %d, &CLASSDESCR(%s))) return FALSE;\n",
+                        k-1, t)
+            else
+                fprintf(h, "    if(!chko(in, %d, &CLASSDESCR(%s))) return FALSE;\n",
+                        k-1, t)
+            end
         end
     end
 
@@ -452,13 +457,28 @@ function write_exports(h)
     
     -- begin blockwrite
     h:write([[
+
+static const char chkfailstr[]=
+    "Type checking failed in level 2 call handler for parameter %d "
+    "(got %s, expected %s).";
+
+static bool chko1(ExtlL2Param *in, int ndx, ClassDescr *descr)
+{
+    Obj *o=in[ndx].o;
+    if(o==NULL){
+        warn("Got nil object as first parameter.");
+        return FALSE;
+    }
+    if(obj_is(o, descr)) return TRUE;
+    warn(chkfailstr, ndx, OBJ_TYPESTR(o), descr->name);
+    return FALSE;
+}
               
 static bool chko(ExtlL2Param *in, int ndx, ClassDescr *descr)
 {
     Obj *o=in[ndx].o;
-    if(obj_is(o, descr)) return TRUE;
-    warn("Type checking failed in level 2 call handler for parameter %d "
-	 "(got %s, expected %s).", ndx, OBJ_TYPESTR(o), descr->name);
+    if(o==NULL || obj_is(o, descr)) return TRUE;
+    warn(chkfailstr, ndx, OBJ_TYPESTR(o), descr->name);
     return FALSE;
 }
 

@@ -504,6 +504,9 @@ bool floatws_attach(WFloatWS *ws, WClientWin *cwin, ExtlTab p)
     WManageParams param=MANAGEPARAMS_INIT;
     ExtlTab g;
     
+    if(cwin==NULL)
+        return FALSE;
+    
     param.gravity=ForgetGravity;
     param.geom.w=REGION_GEOM(cwin).w;
     param.geom.h=REGION_GEOM(cwin).h;

@@ -263,7 +263,7 @@ static void link_at(WMPlex *mplex, WRegion *reg, int index)
 EXTL_EXPORT_MEMBER
 void mplex_set_index(WMPlex *mplex, WRegion *reg, int index)
 {
-    if(index<0)
+    if(index<0 || reg==NULL)
         return;
 
     if(!on_l1_list(mplex, reg))
@@ -692,7 +692,8 @@ WRegion *mplex_attach(WMPlex *mplex, WRegion *reg, ExtlTab param)
     MPlexAttachParams par;
     get_params(param, &par);
 
-    if(reg==(WRegion*)mplex)
+    /* region__attach_reparent should do better checks. */
+    if(reg==NULL || reg==(WRegion*)mplex)
         return FALSE;
     
     return region__attach_reparent((WRegion*)mplex, reg,

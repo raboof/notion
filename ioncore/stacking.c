@@ -155,9 +155,12 @@ bool region_stack_above(WRegion *reg, WRegion *above)
     WWindow *par=REGION_PARENT_CHK(reg, WWindow);
     Window abovewin=region_xwindow(above);
 
-    if(reg==above || par==NULL || (WRegion*)par!=REGION_PARENT(above))
+    if(above==NULL || reg==above || par==NULL)
         return FALSE;
 
+    if((WRegion*)par!=REGION_PARENT(above))
+        return FALSE;
+    
     if(region_xwindow(reg)==None || abovewin==None)
         return FALSE;
     
