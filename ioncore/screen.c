@@ -238,10 +238,10 @@ static void screen_managed_changed(WScreen *scr, int mode, bool sw,
 		
 		set_string_property(ROOT_OF(scr), scr->atom_workspace, 
 							n==NULL ? "" : n);
-	}
 	
-	extl_call_named("call_hook", "soo", NULL,
-					"screen_workspace_switched", scr, reg);
+		extl_call_named("call_hook", "soo", NULL,
+						"screen_workspace_switched", scr, reg);
+	}
 }
 
 

@@ -610,7 +610,7 @@ static void mplex_do_remove(WMPlex *mplex, WRegion *sub)
 	region_unset_manager(sub, (WRegion*)mplex, &(mplex->managed_list));
 	mplex->managed_count--;
 	
-	if(wglobal.opmode!=OPMODE_DEINIT){
+	if(!WOBJ_IS_BEING_DESTROYED(mplex)){
 		bool sw=(next!=NULL || mplex->managed_count==0);
 		if(next!=NULL)
 			mplex_do_display_managed(mplex, next);

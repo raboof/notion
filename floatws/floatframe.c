@@ -414,7 +414,7 @@ static const char *floatframe_tab_style_default(WFloatFrame *frame)
 void floatframe_remove_managed(WFloatFrame *frame, WRegion *reg)
 {
 	mplex_remove_managed((WMPlex*)frame, reg);
-	if(WGENFRAME_MCOUNT(frame)==0)
+	if(WGENFRAME_MCOUNT(frame)==0 && !WOBJ_IS_BEING_DESTROYED(frame))
 		defer_destroy((WObj*)frame);
 }
 

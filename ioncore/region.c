@@ -400,6 +400,9 @@ bool region_may_control_focus(WRegion *reg)
 {
 	WRegion *par, *r2;
 	
+	if(WOBJ_IS_BEING_DESTROYED(reg))
+		return FALSE;
+
 	if(REGION_IS_ACTIVE(reg))
 		return TRUE;
 	

@@ -1256,7 +1256,7 @@ static bool ionws_remove_split(WIonWS *ws, WWsSplit *split)
 	
 	set_split_of(other, split2);
 	
-	if(wglobal.opmode!=OPMODE_DEINIT){
+	if(!WOBJ_IS_BEING_DESTROYED(ws)){
 		nsize=split_tree_size((WObj*)split, split->dir);
 		npos=split_tree_pos((WObj*)split, split->dir);
 		split_tree_resize(other, split->dir, ANY, npos, nsize);
@@ -1297,7 +1297,7 @@ void ionws_remove_managed(WIonWS *ws, WRegion *reg)
 	region_unset_manager(reg, (WRegion*)ws, &(ws->managed_list));
 	region_remove_bindmap_owned(reg, &ionws_bindmap, (WRegion*)ws);
 	
-	if(ws->split_tree==NULL)
+	if(!WOBJ_IS_BEING_DESTROYED(ws) && ws->split_tree==NULL)
 		defer_destroy((WObj*)ws);
 }
 
