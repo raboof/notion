@@ -47,7 +47,7 @@ de_define_style("frame-floatframe", {
     border_style = "ridge"
 })
 
-de_define_style("frame-tab", {
+de_define_style("tab", {
     based_on = "*",
     font = "-*-helvetica-medium-r-normal-*-12-*-*-*-*-*-*-*",
     de_substyle("active-selected", {
@@ -74,18 +74,33 @@ de_define_style("frame-tab", {
         background_colour = "#aaaaaa",
         foreground_colour = "#000000",
     }),
+    text_align = "center",
+})
+
+de_define_style("tab-frame", {
+    based_on = "tab",
     de_substyle("*-*-*-*-activity", {
         shadow_colour = "#777777",
         highlight_colour = "#eeeeee",
         background_colour = "#990000",
         foreground_colour = "#eeeeee",
     }),
-    text_align = "center",
 })
 
-de_define_style("frame-tab-ionframe", {
-    based_on = "frame-tab",
+de_define_style("tab-frame-ionframe", {
+    based_on = "tab-frame",
     spacing = 1,
+})
+
+de_define_style("tab-menuentry", {
+    based_on = "tab",
+    text_align = "left",
+})
+
+de_define_style("tab-menuentry-big", {
+    based_on = "tab-menuentry",
+    font = "-*-helvetica-medium-r-normal-*-18-*-*-*-*-*-*-*",
+    padding_pixels = 10,
 })
 
 de_define_style("input", {

@@ -46,7 +46,7 @@ de_define_style("frame-ionframe", {
 })
 
 
-de_define_style("frame-tab", {
+de_define_style("tab", {
     based_on = "*",
     
     de_substyle("active-selected", {
@@ -64,6 +64,11 @@ de_define_style("frame-tab", {
         background_colour = "#9999aa",
         foreground_colour = "#000000",
     }),
+})
+
+
+de_define_style("tab-frame", {
+    based_on = "tab",
 
     de_substyle("*-*-*-*-activity", {
         -- Red tab
@@ -75,10 +80,24 @@ de_define_style("frame-tab", {
 })
 
 
-de_define_style("frame-tab-ionframe", {
-    based_on = "frame-tab",
+de_define_style("tab-frame-ionframe", {
+    based_on = "tab-frame",
     spacing = 1,
     bar_inside_frame = true,
+})
+
+
+de_define_style("tab-menuentry", {
+    based_on = "tab",
+    text_align = "left",
+    spacing = 1,
+})
+
+
+de_define_style("tab-menuentry-big", {
+    based_on = "tab-menuentry",
+    font = "-*-helvetica-medium-r-normal-*-18-*-*-*-*-*-*-*",
+    padding_pixels = 10,
 })
 
 
@@ -87,7 +106,7 @@ de_define_style("input", {
     
     -- Bigger font for readability
     font = "-*-helvetica-medium-r-normal-*-14-*-*-*-*-*-*-*",
-
+    text_align = "left",
     spacing = 1,
     
     -- Greyish violet background
@@ -107,5 +126,6 @@ de_define_style("input", {
     }),
 })
 
+    
 -- Refresh objects' brushes.
 gr_refresh()
