@@ -147,16 +147,10 @@ void ionws_managed_add(WIonWS *ws, WRegion *reg)
 }
 
 
-static WRegion *create_frame_ionws(WWindow *parent, const WFitParams *fp)
-{
-    return (WRegion*)create_frame(parent, fp, "frame-ionframe");
-}
-
-
 static WRegion *create_initial_frame(WIonWS *ws, WWindow *parent,
                                      const WFitParams *fp)
 {
-    WRegion *reg=create_frame_ionws(parent, fp);
+    WRegion *reg=ws->create_frame_fn(parent, fp);
 
     if(reg==NULL)
         return NULL;
@@ -174,9 +168,19 @@ static WRegion *create_initial_frame(WIonWS *ws, WWindow *parent,
 }
 
 
-bool ionws_init(WIonWS *ws, WWindow *parent, const WFitParams *fp, bool ci)
+static WRegion *create_frame_ionws(WWindow *parent, const WFitParams *fp)
+{
+    return (WRegion*)create_frame(parent, fp, "frame-ionframe");
+}
+
+
+bool ionws_init(WIonWS *ws, WWindow *parent, const WFitParams *fp, 
+                WRegionSimpleCreateFn *create_frame_fn, bool ci)
 {
     ws->split_tree=NULL;
+    ws->create_frame_fn=(create_frame_fn 
+                         ? create_frame_fn
+                         : create_frame_ionws);
 
     if(!genws_init(&(ws->genws), parent, fp))
         return FALSE;
@@ -192,15 +196,16 @@ bool ionws_init(WIonWS *ws, WWindow *parent, const WFitParams *fp, bool ci)
 }
 
 
-WIonWS *create_ionws(WWindow *parent, const WFitParams *fp, bool ci)
+WIonWS *create_ionws(WWindow *parent, const WFitParams *fp, 
+                     WRegionSimpleCreateFn *create_frame_fn, bool ci)
 {
-    CREATEOBJ_IMPL(WIonWS, ionws, (p, parent, fp, ci));
+    CREATEOBJ_IMPL(WIonWS, ionws, (p, parent, fp, create_frame_fn, ci));
 }
 
 
 WIonWS *create_ionws_simple(WWindow *parent, const WFitParams *fp)
 {
-    return create_ionws(parent, fp, TRUE);
+    return create_ionws(parent, fp, NULL, TRUE);
 }
 
 
@@ -427,7 +432,7 @@ WFrame *ionws_split_top(WIonWS *ws, const char *dirstr)
         return NULL;
     
     nnode=split_tree_split(&(ws->split_tree), ws->split_tree, 
-                           dir, primn, mins, create_frame_ionws,
+                           dir, primn, mins, ws->create_frame_fn,
                            REGION_PARENT_CHK(ws, WWindow));
     
     if(nnode==NULL)
@@ -472,7 +477,8 @@ WFrame *ionws_split_at(WIonWS *ws, WFrame *frame, const char *dirstr,
           : region_min_w((WRegion*)frame));
     
     nnode=split_tree_split(&(ws->split_tree), node, dir, primn, mins,
-                           create_frame_ionws, REGION_PARENT_CHK(ws, WWindow));
+                           ws->create_frame_fn, 
+                           REGION_PARENT_CHK(ws, WWindow));
     
     if(nnode==NULL){
         WARN_FUNC("Unable to split");
@@ -972,7 +978,7 @@ WRegion *ionws_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
     if(extl_table_gets_t(tab, "split_tree", &treetab))
         ci=FALSE;
     
-    ws=create_ionws(par, fp, ci);
+    ws=create_ionws(par, fp, NULL, ci);
     
     if(ws==NULL){
         if(!ci)

@@ -23,6 +23,7 @@
 #include <ioncore/regbind.h>
 #include <ioncore/extlconv.h>
 #include <ioncore/defer.h>
+#include <ioncore/frame.h>
 #include <mod_ionws/ionws.h>
 #include <mod_ionws/split.h>
 #include "autows.h"
@@ -41,9 +42,16 @@ void autows_managed_add(WAutoWS *ws, WRegion *reg)
 }
 
 
+static WRegion *create_frame_autows(WWindow *parent, const WFitParams *fp)
+{
+    return (WRegion*)create_frame(parent, fp, "frame-autoframe");
+}
+
+
 bool autows_init(WAutoWS *ws, WWindow *parent, const WFitParams *fp)
 {
-    return ionws_init(&(ws->ionws), parent, fp, FALSE);
+    return ionws_init(&(ws->ionws), parent, fp, 
+                      create_frame_autows, FALSE);
 }
 
 

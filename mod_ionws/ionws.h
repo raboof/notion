@@ -26,12 +26,14 @@ DECLCLASS(WIonWS){
     WGenWS genws;
     WSplit *split_tree;
     WRegion *managed_list;
+    WRegionSimpleCreateFn *create_frame_fn;
 };
 
 
 extern bool ionws_init(WIonWS *ws, WWindow *parent, const WFitParams *fp,
-                       bool ci);
-extern WIonWS *create_ionws(WWindow *parent, const WFitParams *fp, bool ci);
+                       WRegionSimpleCreateFn *create_frame_fn, bool ci);
+extern WIonWS *create_ionws(WWindow *parent, const WFitParams *fp, 
+                            WRegionSimpleCreateFn *create_frame_fn, bool ci);
 extern WIonWS *create_ionws_simple(WWindow *parent, const WFitParams *fp);
 extern void ionws_deinit(WIonWS *ws);
 

@@ -32,12 +32,6 @@
 /*{{{ create_frame_for */
 
 
-static WFrame *create_frame_autows(WWindow *parent, const WFitParams *fp)
-{
-    return create_frame(parent, fp, "frame-autoframe");
-}
-
-
 static WFrame *create_frame_for(WAutoWS *ws, WRegion *reg)
 {
     WWindow *par=REGION_PARENT_CHK(ws, WWindow);
@@ -51,7 +45,7 @@ static WFrame *create_frame_for(WAutoWS *ws, WRegion *reg)
     fp.g=REGION_GEOM(ws);
     fp.mode=REGION_FIT_BOUNDS;
     
-    frame=create_frame_autows(par, &fp);
+    frame=(WFrame*)ws->ionws.create_frame_fn(par, &fp);
     
     if(frame==NULL)
         return NULL;
