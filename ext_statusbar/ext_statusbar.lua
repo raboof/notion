@@ -28,7 +28,6 @@ string.format("[ %%date || %s: %%load || %s: %%mail_new/%%mail_total ]",
 local settings={
     date_format='%a %Y-%m-%d %H:%M',
     template=default_tmpl,
-    statusd_params="-m mail -m load",
     load_wtempl="x.xx, x.xx, x.xx",
 }
 
@@ -108,27 +107,30 @@ end
 
 -- Status update {{{
 
+local function process_template(fn)
+    return string.gsub(settings.template, '%%([a-zA-Z0-9_]*)', fn)
+end
+
 function ext_statusbar.get_status()
-    return string.gsub(settings.template, '%%([a-zA-Z0-9_]*)', 
-                       function(s)
-                           if s=="" then
-                               return ""
-                           end
-                           return (meters[s] or "??")
-                       end)
+    return process_template(function(s)
+                                if s=="" then
+                                    return ""
+                                end
+                                return (meters[s] or "??")
+                            end)
 end
 
 function ext_statusbar.get_w_template()
-    return string.gsub(settings.template, '%%([a-zA-Z0-9_]*)', 
-                       function(s)
-                           if s=="" then
-                               return ""
-                           end
-                           local m=meters[s]
-                           local w=settings[s.."_wtempl"]
-                           return (w or m or "??")
-                       end)
+    return process_template(function(s)
+                                if s=="" then
+                                    return ""
+                                end
+                                local m=meters[s]
+                                local w=settings[s.."_wtempl"]
+                                return (w or m or "??")
+                            end)
 end
+
 
 --DOC
 -- Update statusbar contents. To be called after series
@@ -183,6 +185,23 @@ end
 
 
 function ext_statusbar.launch_statusd()
+    local function get_statusd_params()
+        if settings.statusd_params then
+            return settings.statusd_params
+        else
+            local mods={}
+            process_template(function(s)
+                                 local _, _, m = string.find(s, "^([^_]+)")
+                                 if m then
+                                     mods[m]=true
+                                 end
+                             end)
+            local params=""
+            table.foreach(mods, function(k) params=params.." -M "..k end)
+            return params
+        end
+    end
+    
     if statusd_running then
         return
     end
@@ -192,9 +211,9 @@ function ext_statusbar.launch_statusd()
         ioncore.warn(TR("Could not find %s", script))
     end
     
-    local cmd=statusd.." "..settings.statusd_params
+    local cmd=statusd.." "..get_statusd_params()
     local cr=coroutine.wrap(ext_statusbar.rcv_statusd)
-    
+
     statusd_running=ioncore.popen_bgread(cmd, cr)
 end
 

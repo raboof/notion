@@ -5,13 +5,6 @@
 
 -- Configure format and updating
 ext_statusbar.set{
-    -- ion-statusd params. Load mail checker and load modules.
-    -- (The load meter should really be on the Ion side for up-to-datedness, 
-    -- but until ext_statusbar is turned into a proper C module that can use 
-    -- getloadavg, the code uses potentially blocking files and external 
-    -- programs and thus belongs to ion-statusd.)
-    --statusd_params="-m mail -m load"
-
     -- ISO-8601 date format with additional abbreviated day name
     --date_format='%a %Y-%m-%d %H:%M',
     -- Finnish date format

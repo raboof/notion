@@ -48,6 +48,9 @@ static OptParserOpt ion_opts[]={
 
     {'m', "meter", OPT_ARG, "meter_module",
      DUMMY_TR("Load a meter module")},
+
+    {'M', "try-meter", OPT_ARG, "meter_module",
+     DUMMY_TR("Try to load a meter module without complaining")},
         
     END_OPTPARSEROPTS
 };
@@ -171,6 +174,7 @@ int main(int argc, char*argv[])
             printf("%s\n\n%s", statusd_copy, TR(statusd_license));
             return EXIT_SUCCESS;
         case 'm':
+        case 'M':
             mod=optparser_get_arg();
             if(strchr(mod, '/')==NULL && strchr(mod, '.')==NULL){
                 mod2=scat("statusd_", mod);
@@ -178,7 +182,7 @@ int main(int argc, char*argv[])
                     return EXIT_FAILURE;
                 mod=mod2;
             }
-            if(extl_read_config(mod, NULL, TRUE))
+            if(extl_read_config(mod, NULL, opt=='m'))
                 loaded++;
             if(mod2!=NULL)
                 free(mod2);
