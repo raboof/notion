@@ -17,6 +17,9 @@
 #include <ioncore/gr.h>
 
 
+#define STATUSBAR_NX_STR "??"
+
+
 typedef enum{
     WSBELEM_ALIGN_LEFT=0,
     WSBELEM_ALIGN_CENTER=1,

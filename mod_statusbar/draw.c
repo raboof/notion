@@ -24,9 +24,11 @@ static void draw_elems(GrBrush *brush, Window win, int x, int y,
     while(nelems>0){
         if(elems->type==WSBELEM_STRETCH){
             x+=elems->text_w+elems->stretch;
-        }else if(elems->text!=NULL){
-            int sl=strlen(elems->text);
-            grbrush_draw_string(brush, win, x, y, elems->text, sl, needfill, 
+        }else{
+            const char *s=(elems->text!=NULL
+                           ? elems->text 
+                           : STATUSBAR_NX_STR);
+            grbrush_draw_string(brush, win, x, y, s, strlen(s), needfill, 
                                 elems->attr ? elems->attr : dfltattr);
             x+=elems->text_w;
         }
@@ -47,10 +49,12 @@ static void draw_elems_ra(GrBrush *brush, Window win, int x, int y,
         elems--;
         if(elems->type==WSBELEM_STRETCH){
             x-=elems->text_w+elems->stretch;
-        }else if(elems->text!=NULL){
-            int sl=strlen(elems->text);
+        }else{
+            const char *s=(elems->text!=NULL
+                           ? elems->text 
+                           : STATUSBAR_NX_STR);
             x-=elems->text_w;
-            grbrush_draw_string(brush, win, x, y, elems->text, sl, needfill,
+            grbrush_draw_string(brush, win, x, y, s, strlen(s), needfill,
                                 elems->attr ? elems->attr : dfltattr);
         }
     }

@@ -202,9 +202,7 @@ static void calc_elem_w(WSBElem *el, GrBrush *brush)
     const char *str;
 
     if(el->type==WSBELEM_METER){
-        str=el->tmpl;
-        if(str==NULL)
-            str="??";
+        str=(el->tmpl!=NULL ? el->tmpl : STATUSBAR_NX_STR);
         el->tmpl_w=grbrush_get_text_width(brush, str, strlen(str));
     }else{
         str=el->text;
@@ -292,6 +290,7 @@ static void spread_stretch(WStatusBar *sb)
     int i, j, k;
     int diff;
     WSBElem *el, *lel, *rel;
+    const char *str;
     
     for(i=0; i<sb->nelems; i++){
         el=&(sb->elems[i]);
@@ -299,10 +298,8 @@ static void spread_stretch(WStatusBar *sb)
         if(el->type!=WSBELEM_METER)
             continue;
         
-        if(el->text!=NULL)
-            el->text_w=grbrush_get_text_width(sb->brush, el->text, strlen(el->text));
-        else
-            el->text_w=grbrush_get_text_width(sb->brush, "??", 2);
+        str=(el->text!=NULL ? el->text : STATUSBAR_NX_STR);
+        el->text_w=grbrush_get_text_width(sb->brush, str, strlen(str));
         
         diff=el->tmpl_w-el->text_w;
         
