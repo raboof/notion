@@ -163,6 +163,7 @@ local function update_mail()
     if mail_last_check and t<(mail_last_check+settings.mail_interval) then
         return
     end
+    mail_last_check=t
 
     local mbox=os.getenv('MAIL')
     if not mbox then
