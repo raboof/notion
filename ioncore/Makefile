@@ -36,7 +36,7 @@ SOURCES=binding.c conf-bindings.c conf-draw.c cursor.c draw.c event.c	\
 	exec.c focus.c font.c key.c modules.c mwmhints.c	\
 	obj.c pointer.c property.c readconfig.c screen.c signal.c	\
 	sizehint.c window.c ioncore.c xic.c selection.c			\
-	completehelp.c symlist.c clientwin.c colormap.c region.c	\
+	symlist.c clientwin.c colormap.c region.c	\
 	eventh.c winprops.c targetid.c attach.c resize.c defer.c grab.c \
 	wsreg.c readfds.c regbind.c viewport.c 				\
 	tags.c names.c saveload.c genws.c genframe.c genframe-pointer.c	\

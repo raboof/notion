@@ -96,7 +96,7 @@ function QueryLib.complete_ssh(str)
 end
 
 function QueryLib.make_execwith_fn(prompt, init, prog, completor)
-    function handle_execwith(frame, str)
+    local function handle_execwith(frame, str)
         exec_on_screen(region_screen_of(frame), prog .. " " .. str)
     end
     return QueryLib.make_frame_fn(prompt, init, handle_execwith, completor)
@@ -132,6 +132,16 @@ function QueryLib.get_initdir()
         wd=wd .. "/"
     end
     return wd
+end
+
+function QueryLib.complete_function(str)
+    res={}
+    for k, v in pairs(_G) do
+        if type(v)=="function" then
+            table.insert(res, k)
+        end
+    end
+    return res
 end
 
 
@@ -189,5 +199,5 @@ QueryLib.query_runfile=QueryLib.make_execwith_fn("View file:",
 QueryLib.query_lua=QueryLib.make_frame_fn("Lua code to run:",
                                           nil,
                                           QueryLib.handler_lua,
-                                          complete_function);
+                                          QueryLib.complete_function);
 

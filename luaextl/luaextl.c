@@ -16,7 +16,6 @@
 #include <ioncore/common.h>
 #include <ioncore/obj.h>
 #include <ioncore/objp.h>
-#include <ioncore/completehelp.h>
 
 #include "luaextl.h"
 
@@ -25,8 +24,6 @@ static lua_State *l_st=NULL;
 
 static bool extl_stack_get(lua_State *st, int pos, char type, bool copystring,
 						   void *valret);
-
-static int complete_function(lua_State *st);
 
 /*{{{ WObj userdata handling */
 
@@ -189,9 +186,6 @@ bool extl_init()
 		goto fail;
 	}
 
-	lua_pushcfunction(l_st, complete_function);
-	lua_setglobal(l_st, "complete_function");
-	
 	return TRUE;
 fail:
 	lua_close(l_st);
@@ -1230,48 +1224,4 @@ void extl_unregister_function(ExtlExportedFnSpec *spec)
 
 
 /*}}}*/
-
-
-/*{{{ Misc */
-
-
-int complete_function(lua_State *st)
-{
-	const char *fnam, *str;
-	int l, n=1;
-
-	str=lua_tostring(st, 1);
-	
-	if(str==NULL){
-		fprintf(stderr, "doh!");
-		return 0;
-	}
-		
-	l=strlen(str);
-	
-	lua_newtable(st);
-	lua_pushnil(st);
-	
-	while(lua_next(st, LUA_GLOBALSINDEX)!=0){
-		if(lua_isfunction(st, -1)){
-			fnam=lua_tostring(st, -2);
-
-			if(fnam!=NULL){
-				if(strncmp(str, fnam, l)==0){
-					lua_pushvalue(st, -2);
-					lua_rawseti(st, -4, n);
-					n++;
-				}
-			}
-		}
-		lua_pop(st, 1);
-	}
-	
-	/*lua_pop(st, 1);*/
-	return 1;
-}
-	
-	
-/*}}}*/
-
 

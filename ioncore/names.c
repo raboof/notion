@@ -14,7 +14,6 @@
 #include "names.h"
 #include "font.h"
 #include "grdata.h"
-#include "completehelp.h"
 
 
 /*{{{ Name setup */
