@@ -22,9 +22,10 @@ Directory to search for module
 .B \-confdir dir
 Directory to search for configuration files and other scripts
 .TP
-.B \-onescreen
+.B \-oneroot
 On X servers with multiple (traditional non-Xinerama) screens, manage only
-default screen, not all.
+default screen (root window), not all, as given by the -display option or
+in the DISPLAY environment variable.
 .TP
 .B \-sessionname seession_name
 Set sesion name. This option affects where workspace and other savefiles are
