@@ -392,15 +392,13 @@ static void delta_moveres(WRegion *reg, int dx1, int dx2, int dy1, int dy2,
 	 * if the respective delta is zero
 	 */
 	
-	/* TODO: Set weak attrs. */
-	
 	if(tmpdx1!=0){
 		if(tmpdx2==0)
 			geom.x+=tmporiggeom.w-geom.w;
 		else
 			geom.x+=tmpdx1;
 	}
-
+		
 	if(tmpdy1!=0){
 		if(tmpdy2==0)
 			geom.y+=tmporiggeom.h-geom.h;
