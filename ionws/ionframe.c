@@ -251,8 +251,7 @@ void ionframe_draw(const WIonFrame *frame, bool complete)
 	
 	draw_border_inverted(dinfo, TRUE);
 
-	genframe_draw_bar((WGenFrame*)frame,
-					  !complete || !grdata->bar_inside_frame);
+	genframe_draw_bar((WGenFrame*)frame, complete);
 }
 
 

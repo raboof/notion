@@ -363,7 +363,8 @@ void genframe_unmap(WGenFrame *genframe)
 /*{{{ Managed region switching */
 
 
-bool genframe_display_managed(WGenFrame *genframe, WRegion *sub)
+static bool genframe_do_display_managed(WGenFrame *genframe, WRegion *sub,
+										bool draw_complete)
 {
 	bool mapped;
 	
@@ -393,12 +394,18 @@ bool genframe_display_managed(WGenFrame *genframe, WRegion *sub)
 	region_lower(sub);
 	
 	if(!set_genframe_background(genframe, FALSE))
-		genframe_draw_bar(genframe, FALSE);
+		genframe_draw_bar(genframe, draw_complete);
 	
 	extl_call_named("call_hook", "soo", NULL,
 					"genframe_managed_switched", genframe, sub);
 
 	return TRUE;
+}
+
+
+bool genframe_display_managed(WGenFrame *genframe, WRegion *sub)
+{
+	return genframe_do_display_managed(genframe, sub, FALSE);
 }
 
 
@@ -483,7 +490,7 @@ static WRegion *genframe_do_add_managed(WGenFrame *genframe, WRegionAddFn *fn,
 	
 	if(genframe->managed_count==1 || param->flags&REGION_ATTACH_SWITCHTO){
 		genframe_recalc_bar(genframe, FALSE);
-		genframe_display_managed(genframe, reg);
+		genframe_do_display_managed(genframe, reg, TRUE);
 	}else{
 		region_unmap(reg);
 		genframe_recalc_bar(genframe, TRUE);
@@ -513,7 +520,7 @@ static void genframe_do_remove(WGenFrame *genframe, WRegion *sub)
 	if(wglobal.opmode!=OPMODE_DEINIT){
 		genframe_recalc_bar(genframe, (next==NULL));
 		if(next!=NULL)
-			genframe_display_managed(genframe, next);
+			genframe_do_display_managed(genframe, next, TRUE);
 		else
 			set_genframe_background(genframe, FALSE);
 	}
