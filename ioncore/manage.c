@@ -201,7 +201,7 @@ bool region_rescue_managed_clientwins(WRegion *reg, WRegion *list)
             res=FALSE;
     }
     
-    reg->flags&=REGION_CWINS_BEING_RESCUED;
+    reg->flags&=~REGION_CWINS_BEING_RESCUED;
 
     return res;
 }
