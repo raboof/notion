@@ -1476,8 +1476,6 @@ bool extl_loadfile(const char *file, ExtlFn *ret)
 	param.isfile=TRUE;
 	param.resptr=ret;
 
-	printf("extl_loadfile(%s)\n", file);
-
 	return extl_cpcall(l_st, (ExtlCPCallFn*)extl_do_load, &param);
 }
 
