@@ -432,7 +432,7 @@ again:
     /* Select for UnmapNotify and DestroyNotify as the
      * window might get destroyed or unmapped in the meanwhile.
      */
-    XSelectInput(ioncore_g.dpy, win, StructureNotifyMask);
+    xwindow_unmanaged_selectinput(win, StructureNotifyMask);
 
     
     /* Is it a dockapp?
@@ -450,7 +450,7 @@ again:
         if(!maprq)
             XUnmapWindow(ioncore_g.dpy, win);
         
-        XSelectInput(ioncore_g.dpy, win, 0);
+        xwindow_unmanaged_selectinput(win, 0);
         
         win=hints->icon_window;
         
@@ -538,7 +538,7 @@ failure:
     return NULL;
 
 fail2:
-    XSelectInput(ioncore_g.dpy, win, 0);
+    xwindow_unmanaged_selectinput(win, 0);
     return NULL;
 }
 
@@ -728,7 +728,7 @@ void clientwin_deinit(WClientWin *cwin)
         destroy_obj((Obj*)(cwin->transient_list));
     
     if(cwin->win!=None){
-        XSelectInput(ioncore_g.dpy, cwin->win, 0);
+        xwindow_unmanaged_selectinput(cwin->win, 0);
         XUnmapWindow(ioncore_g.dpy, cwin->win);
         
         if(cwin->orig_bw!=0)
@@ -775,7 +775,7 @@ void clientwin_destroyed(WClientWin *cwin)
 {
     XRemoveFromSaveSet(ioncore_g.dpy, cwin->win);
     XDeleteContext(ioncore_g.dpy, cwin->win, ioncore_g.win_context);
-    XSelectInput(ioncore_g.dpy, cwin->win, 0);
+    xwindow_unmanaged_selectinput(cwin->win, 0);
     cwin->win=None;
     clientwin_unmapped(cwin);
 }

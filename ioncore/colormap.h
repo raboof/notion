@@ -23,4 +23,6 @@ extern void clientwin_install_colormap(WClientWin *cwin);
 extern void clientwin_get_colormaps(WClientWin *cwin);
 extern void clientwin_clear_colormaps(WClientWin *cwin);
 
+extern void xwindow_unmanaged_selectinput(Window win, long mask);
+
 #endif /* ION_IONCORE_COLORMAP_H */
