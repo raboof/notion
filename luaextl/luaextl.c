@@ -211,15 +211,7 @@ static bool extl_stack_get(lua_State *st, int pos, char type, bool copystring,
 {
 	double d=0;
 	const char *str;
-			  
-	if(lua_isnil(st, pos)){
-		if(type!='t' && type!='f')
-			return FALSE;
-		if(valret)
-			*((int*)valret)=LUA_NOREF;
-		return TRUE;
-	}
-		
+		  
 	if(type=='i' || type=='d'){
 		if(lua_type(st, pos)!=LUA_TNUMBER)
 			return FALSE;
@@ -248,6 +240,14 @@ static bool extl_stack_get(lua_State *st, int pos, char type, bool copystring,
 				*((bool*)valret)=(lua_tonumber(st, pos)==0 ? FALSE : TRUE);
 			return TRUE;
 		}
+		return TRUE;
+	}
+
+	if(lua_type(st, pos)==LUA_TNIL){
+		if(type!='t' && type!='f')
+			return FALSE;
+		if(valret)
+			*((int*)valret)=LUA_NOREF;
 		return TRUE;
 	}
 	
@@ -371,17 +371,17 @@ ExtlTab extl_table_none()
 
 ExtlTab extl_ref_table(ExtlTab ref)
 {
-	if(extl_getref(l_st, ref)==0)
+	if(!extl_getref(l_st, ref))
 		return LUA_NOREF;
-	ref=lua_ref(l_st, 1);
-	lua_pop(l_st, 1);
-	return ref;
+	return lua_ref(l_st, 1);
 }
 
 
 ExtlFn extl_ref_fn(ExtlFn ref)
 {
-	return extl_ref_table(ref);
+	if(!extl_getref(l_st, ref))
+		return LUA_NOREF;
+	return lua_ref(l_st, 1);
 }
 
 
@@ -412,7 +412,8 @@ static bool extl_table_do_gets(ExtlTab ref, const char *entry, char type,
 	
 	lua_pushstring(l_st, entry);
 	lua_gettable(l_st, -2);
-	ret=extl_stack_get(l_st, -1, type, TRUE, valret);
+	if(!lua_isnil(l_st, -1))
+		ret=extl_stack_get(l_st, -1, type, TRUE, valret);
 	
 	lua_settop(l_st, oldtop);
 	
@@ -492,7 +493,8 @@ static bool extl_table_do_geti(ExtlTab ref, int entry, char type, void *valret)
 		return FALSE;
 	
 	lua_rawgeti(l_st, -1, entry);
-	ret=extl_stack_get(l_st, -1, type, TRUE, valret);
+	if(!lua_isnil(l_st, -1))
+		ret=extl_stack_get(l_st, -1, type, TRUE, valret);
 	
 	lua_settop(l_st, oldtop);
 	
