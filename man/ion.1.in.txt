@@ -31,7 +31,7 @@ OPTIONS
               manage  only  default screen (root window), not all, as given by
               the -display option or in the DISPLAY environment variable.
 
-       -sessionname seession_name
+       -sessionname session_name
               Set sesion name. This option affects where workspace  and  other
               savefiles are put (~/.ion2/session_name if option set).
 
@@ -371,7 +371,7 @@ POINTING DEVICE BUTTONS
               Click: raise, drag: move
 
        Mod1+Button3 (right)
-              Click: lower: drag: resize
+              Click: lower, drag: resize
 
        Button3 (right) on tab
               Context menu
@@ -402,7 +402,7 @@ SEE ALSO
 
        DOCDIR/
 
-       X(1x) pwm(1)
+       X(1x), pwm(1)
 
 
 AUTHOR

@@ -27,7 +27,7 @@ On X servers with multiple (traditional non-Xinerama) screens, manage only
 default screen (root window), not all, as given by the -display option or
 in the DISPLAY environment variable.
 .TP
-.B \-sessionname seession_name
+.B \-sessionname session_name
 Set sesion name. This option affects where workspace and other savefiles are
 put (~/.ion2/session_name if option set).
 .TP
@@ -391,7 +391,7 @@ Click: switch client, drag: drag&drop clients between frames
 Click: raise, drag: move
 .TP
 .B Mod1+Button3 (right)
-Click: lower: drag: resize
+Click: lower, drag: resize
 .TP
 .B Button3 (right) on tab
 Context menu
@@ -421,8 +421,7 @@ Ion home page.
 .PP
 .I DOCDIR/
 .PP
-.I X(1x)
-.I pwm(1)
+\fIX(1x)\fP, \fIpwm(1)\fP
 
 .SH AUTHOR
 Ion was written by Tuomo Valkonen <tuomov at iki.fi>.

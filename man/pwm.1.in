@@ -1,4 +1,4 @@
-.TH ION 1
+.TH PWM 1
 .SH NAME
 PWM - An X11 window manager
 .SH SYNOPSIS
@@ -30,7 +30,7 @@ On X servers with multiple (traditional non-Xinerama) screens, manage only
 default screen (root window), not all, as given by the -display option or
 in the DISPLAY environment variable.
 .TP
-.B \-sessionname seession_name
+.B \-sessionname session_name
 Set sesion name. This option affects where workspace and other savefiles are
 put (~/.pwm2/session_name if option set).
 .TP
@@ -75,5 +75,5 @@ User default configuration file (overrides system default)
 .SH SEE ALSO
 
 For more information, see
-.I ion(1).
+\fIion(1)\fP.
 
