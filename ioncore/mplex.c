@@ -155,6 +155,36 @@ int mplex_get_managed_index(WMPlex *mplex, WRegion *reg)
 }
 
 
+/*EXTL_DOC
+ * Move \var{r} ''right'' within objects managed by \var{mplex}.
+ */
+EXTL_EXPORT_MEMBER
+void mplex_inc_managed_index(WMPlex *mplex, WRegion *r)
+{
+    if(r==NULL)
+        r=mplex_current(mplex);
+    if(r!=NULL){
+        mplex_set_managed_index(mplex, r,
+                                mplex_get_managed_index(mplex, r)+1);
+    }
+}
+
+
+/*EXTL_DOC
+ * Move \var{r} ''right'' within objects managed by \var{mplex}.
+ */
+EXTL_EXPORT_MEMBER
+void mplex_dec_managed_index(WMPlex *mplex, WRegion *r)
+{
+    if(r==NULL)
+        r=mplex_current(mplex);
+    if(r!=NULL){
+        mplex_set_managed_index(mplex, r,
+                                mplex_get_managed_index(mplex, r)-1);
+    }
+}
+
+
 /*}}}*/
 
 

@@ -11,7 +11,8 @@
 
 local ioncorelib=_G.ioncorelib
 
-
+--DOC
+-- Try to choose region to close wisely.
 function ioncorelib.propagate_close(reg, sub)
     if sub then reg=sub end
 
@@ -20,38 +21,19 @@ function ioncorelib.propagate_close(reg, sub)
         if l then
             local r2=l[table.getn(l)]
             if r2 then
-                return propagate_close(r2)
+                return ioncorelib.propagate_close(r2)
             end
         end
     end
     reg:close()
 end                               
 
---DOC
--- Move currently viewed object left within the multiplexer.
-function WMPlex.inc_managed_index(mplex, r)
-    if not r then
-        r=mplex:current()
-    end
-    if r then
-        mplex:set_mgd_index(r, mplex:get_mgd_index(r)+1) 
-    end
-end
 
 --DOC
--- Move currently viewed object right within the multiplexer.
-function WMPlex.dec_managed_index(mplex, r)
-    if not r then
-        r=mplex:current()
-    end
-    if r then
-        mplex:set_mgd_index(r, mplex:get_mgd_index(r)-1) 
-    end
-end
-
-
---DOC
--- Create new workspace on screen.
+-- Create new workspace on screen \var{scr}. If \var{ws_type} is
+-- set, then a workspace of that type is created. Otherwise
+-- a workspace of type indicated by the \code{DEFAULT_WS_TYPE}
+-- variable is created.
 function ioncorelib.create_new_ws(scr, ws_type)
     scr:attach_new({
         type=(ws_type or DEFAULT_WS_TYPE),
@@ -60,7 +42,7 @@ function ioncorelib.create_new_ws(scr, ws_type)
 end
 
 --DOC
--- Close current workspace.
+-- Close current workspace on screen \var{scr}.
 function ioncorelib.close_current_ws(scr)
     local c=scr:current()
     if obj_is(c, "WGenWS") then 
