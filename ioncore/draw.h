@@ -26,4 +26,6 @@ extern void setup_color_group(WScreen *scr, WColorGroup *cg,
 extern void preinit_graphics(WScreen *scr);
 extern void postinit_graphics(WScreen *scr);
 
+extern void reread_draw_config();
+
 #endif /* WMCORE_DRAW_H */

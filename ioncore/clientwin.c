@@ -1033,7 +1033,8 @@ bool clientwin_enter_fullscreen(WClientWin *cwin, bool switchto)
 
 void clientwin_broken_app_resize_kludge(WClientWin *cwin)
 {
-	XResizeWindow(wglobal.dpy, cwin->win, cwin->win_geom.w+1, cwin->win_geom.h+1);
+	XResizeWindow(wglobal.dpy, cwin->win, 2*cwin->win_geom.w, 2*cwin->win_geom.h);
+	XFlush(wglobal.dpy);
 	XResizeWindow(wglobal.dpy, cwin->win, cwin->win_geom.w, cwin->win_geom.h);
 }
 

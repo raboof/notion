@@ -13,6 +13,7 @@
 #include "font.h"
 #include "drawp.h"
 #include "imports.h"
+#include "conf-draw.h"
 
 
 /*{{{ Primitives */
@@ -594,6 +595,30 @@ void clear_clipping(DrawInfo *dinfo)
 #ifdef CF_XFT
 	XftDrawSetClip(DRAW, 0);
 #endif
+}
+
+
+/*}}}*/
+
+
+/*{{{ reread_draw_config */
+
+
+void reread_draw_config()
+{
+	WScreen *scr;
+	
+	FOR_ALL_SCREENS(scr){
+		read_draw_config(scr);
+#ifndef CF_XFT
+		XSetFont(wglobal.dpy, scr->grdata.gc, 
+				 scr->grdata.font->fid);
+		XSetFont(wglobal.dpy, scr->grdata.tab_gc, 
+				 scr->grdata.tab_font->fid);
+#endif		
+		calc_grdata(scr);
+		region_draw_config_updated((WRegion*)scr);
+	}
 }
 
 

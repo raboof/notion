@@ -48,6 +48,7 @@ static void default_request_sub_geom(WRegion *reg, WRegion *sub,
 									WRectangle geom, WRectangle *geomret,
 									bool tryonly);
 static WRegion *default_selected_sub(WRegion *reg);
+void default_draw_config_updated(WRegion *reg);
 
 
 static DynFunTab region_dynfuntab[]={
@@ -57,6 +58,7 @@ static DynFunTab region_dynfuntab[]={
 	{(DynFun*)region_restack, (DynFun*)default_restack},
 	{region_request_sub_geom, default_request_sub_geom},
 	{(DynFun*)region_selected_sub, (DynFun*)default_selected_sub},
+	{region_draw_config_updated, default_draw_config_updated},
 	END_DYNFUNTAB
 };
 
@@ -110,6 +112,12 @@ void deinit_region(WRegion *reg)
 void fit_region(WRegion *reg, WRectangle geom)
 {
 	CALL_DYN(fit_region, reg, (reg, geom));
+}
+
+
+void region_draw_config_updated(WRegion *reg)
+{
+	CALL_DYN(region_draw_config_updated, reg, (reg));
 }
 
 
@@ -349,6 +357,16 @@ void region_request_sub_geom_constrain(WRegion *reg, WRegion *sub,
 static WRegion *default_selected_sub(WRegion *reg)
 {
 	return reg->active_sub;
+}
+
+
+void default_draw_config_updated(WRegion *reg)
+{
+	WRegion *sub;
+	
+	FOR_ALL_TYPED(reg, sub, WRegion){
+		region_draw_config_updated(sub);
+	}
 }
 
 

@@ -16,6 +16,8 @@
 #include "viewport.h"
 #include "tags.h"
 #include "key.h"
+#include "draw.h"
+
 
 WBindmap wmcore_screen_bindmap=BINDMAP_INIT;
 WBindmap wmcore_viewport_bindmap=BINDMAP_INIT;
@@ -35,6 +37,7 @@ static WFunction wmcore_screen_funtab[]={
 	FN_GLOBAL_VOID(				"goto_prev_viewport",	goto_prev_viewport),
 	FN_GLOBAL_VOID(				"clear_tags",			clear_tags),
 	FN_GLOBAL(s,				"goto_named_region",	goto_named_region),
+	FN_GLOBAL_VOID(				"reread_draw_config",	reread_draw_config),
 	END_FUNTAB
 };
 
