@@ -182,14 +182,21 @@ function get_winprop(cwin)
     for c, r, i in alternative_winprop_idents(id) do
         names={}
         pcall(function() names=winprops[c][r][i] or {} end)
+        local match, matchl=names[0], 0
         for name, prop in names do
-            if type(name)=="string" and string.find(nm, name) then
-                return prop
+            if type(name)=="string" then
+                local st, en=string.find(nm, name)
+                if st and en then
+                    if en-st>matchl then
+                        match=prop
+                        matchl=en-st
+                    end
+                end
             end
         end
         -- no regexp match, use default winprop
-        if names[0] then
-            return names[0]
+        if match then
+            return match
         end
     end
 end
