@@ -444,6 +444,9 @@ int extl_table_get_n(ExtlTab ref)
 	int oldtop=lua_gettop(l_st);
 	int n=0;
 	
+	if(!lua_checkstack(l_st, 8 /*something that should be enough*/))
+		return 0;
+	
 	if(extl_getref(l_st, ref)==0){
 		fprintf(stderr, "nilref\n");
 		return 0;
@@ -524,14 +527,8 @@ bool extl_table_geti_t(ExtlTab ref, int entry, ExtlTab *ret)
 /*{{{ Function calls to Lua */
 
 
-static bool extl_push_args(lua_State *st, const char *spec, int *n_ret,
-						   va_list args)
+static bool extl_push_args(lua_State *st, const char *spec, va_list args)
 {
-	*n_ret=0;
-	
-	if(spec==NULL)
-		return TRUE;
-	
 	while(*spec!='\0'){
 		/*fprintf(stderr, "push: %c\n", *spec);*/
 		switch(*spec){
@@ -560,7 +557,6 @@ static bool extl_push_args(lua_State *st, const char *spec, int *n_ret,
 		default:
 			return FALSE;
 		}
-		(*n_ret)++;
 		spec++;
 	}
 	
@@ -634,7 +630,7 @@ static bool extl_do_call_vararg(lua_State *st, int oldtop,
 	bool ret=TRUE;
 	const char **old_safelist=NULL;
 	int n=0, m=0;
-
+#if 0
 	/* First phase of safelist checking: Make sure the called function is our
 	 * l1 call handler. The call handler then checks that the name of the
 	 * called function matches as otherwise we'd  have to do some extra
@@ -643,16 +639,26 @@ static bool extl_do_call_vararg(lua_State *st, int oldtop,
 	if(safelist!=NULL){
 		if(lua_tocfunction(st, -1)!=extl_l1_call_handler){
 			lua_settop(st, oldtop);
-			warn("Attempt to call an unsafe function on restricted mode.");
+			warn("Attempt to call an unsafe function in restricted mode.");
 			return FALSE;
 		}
+	}
+#endif
+	if(spec!=NULL){
+		n=strlen(spec);
+	
+		/* +1 for extl_push_obj */
+		if(!lua_checkstack(l_st, n+1)){
+			warn("Stack full");
+			return FALSE;
+		}
+		
+		ret=extl_push_args(st, spec, args);
 	}
 
 	old_safelist=extl_safelist;
 	extl_safelist=safelist;
-	
-	ret=extl_push_args(st, spec, &n, args);
-	
+
 	if(ret){
 		if(rspec!=NULL)
 			m=strlen(rspec);
@@ -767,6 +773,8 @@ static int extl_l1_call_handler(lua_State *st)
 		return 0;
 	}
 	
+	/*fprintf(stderr, "%s called\n", spec->name);*/
+	
 	/* Second phase of safelist checking */
 	if(extl_safelist!=NULL){
 		for(i=0; extl_safelist[i]!=NULL; i++){
@@ -774,13 +782,19 @@ static int extl_l1_call_handler(lua_State *st)
 				break;
 		}
 		if(extl_safelist[i]==NULL){
-			warn("Attempt to call an unsafe function on restricted mode.");
+			warn("Attempt to call an unsafe function in restricted mode.");
 			return 0;
 		}
 	}
 	
 	ni=(spec->ispec==NULL ? 0 : strlen(spec->ispec));
 	no=(spec->ospec==NULL ? 0 : strlen(spec->ospec));
+	
+	/* +1 for extl_push_obj */
+	if(!lua_checkstack(st, no+1)){
+		warn("Stack full");
+		return 0;
+	}
 	
 	for(i=0; i<ni; i++){
 		if(!extl_stack_get(st, i+1, spec->ispec[i], FALSE, (void*)&(ip[i]))){
@@ -895,7 +909,7 @@ static int extl_is_a(lua_State *st)
 	WObj *obj;
 	
 	s=lua_tostring(st, -1);
-p	
+
 	if(s==NULL)
 		return 0;
 	
