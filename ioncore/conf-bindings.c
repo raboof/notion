@@ -214,8 +214,10 @@ static bool do_entry(WBindmap *bindmap, ExtlTab tab, StringIntMap *areamap)
 	bool wr=FALSE;
 	int area=0;
 	
-	if(!extl_table_gets_s(tab, "action", &action_str))
+	if(!extl_table_gets_s(tab, "action", &action_str)){
+		warn("Invalid action set for binding.");
 		goto fail;
+	}
 
 	if(strcmp(action_str, "kpress_waitrel")==0){
 		action=ACT_KEYPRESS;
