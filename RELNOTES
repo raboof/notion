@@ -1,4 +1,34 @@
 
+=== ion-3ds-20041104 ===
+
+This monthly snapshot adds a few new and improved features.
+
+ * 'Grabbed menus' that have a single cycling key and activate selected
+   entry when all modifiers have been released. See
+
+	http://iki.fi/tuomov/repos/ion-scripts-3/scripts/wcirculate.lua
+   
+   for an application.
+
+ * Potentially blocking status meters are now in a separate ion-statusd
+   program. Please write your additional status meters that do not monitor
+   the state of Ion itself for ion-statusd (and contribute them in the
+   Ion3 scripts repository at http://iki.fi/tuomov/repos/ion-scripts-3/).
+   For help on writing such status meters, see e.g. source for statusd_load
+   in ext_statusbar/ion-statusd.
+
+ * Floating splits are now supported on plain tiled workspaces as well as
+   on pane workspaces. To create such a split, use the workspace context
+   menu (Mod1+M by default) or write your own bindings.
+
+ * Line editor now supports history search; Control+Up/Down only scrolls
+   through history entries with matching initial part.
+
+ * Arbitrary winprop matching criteria is supported. Lua scripts have
+   access to X properties.
+ 
+Of course there are some other minor fixes and improvements as well.
+
 
 === ion-3ds-20040906 ===
 
