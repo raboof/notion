@@ -140,21 +140,45 @@ static void kgrab_binding_and_reg(WBinding **binding_ret,
 }
 
 
+static void free_subs(WSubmapState *p)
+{
+	WSubmapState *next;
+	
+	while(p!=NULL){
+		next=p->next;
+		free(p);
+		p=next;
+	}
+}
+
+
 static void clear_subs(WRegion *reg)
 {
 	reg->submapstat.key=None;
+	free_subs(reg->submapstat.next);
+	reg->submapstat.next=NULL;
 }
 
 
 static bool add_sub(WRegion *reg, uint key, uint state)
 {
-	if(reg->submapstat.key!=None)
-		return FALSE;
-	   
-	reg->submapstat.key=key;
-	reg->submapstat.state=state;
+	WSubmapState *p=&(reg->submapstat);
+	
+	if(p->key!=None){
+		if(p->next!=NULL)
+			p=p->next;
+	    p->next=ALLOC(WSubmapState);
+		if(p->next==NULL)
+			return FALSE;
+		p=p->next;
+		p->next=NULL;
+	}
+	
+	p->key=key;
+	p->state=state;
 	
 	return TRUE;
+
 }
 
 
