@@ -40,6 +40,9 @@ static bool send_clientmsg(Window win, Atom a, Time stmp);
 WHooklist *add_clientwin_alt=NULL;
 
 
+#define TRANSIENT_LAST_H_RQ(TR) ((WRegion*)(TR))->mgr_data.i
+
+
 /*{{{ Get properties */
 
 
@@ -523,6 +526,8 @@ static WRegion *clientwin_do_add_managed(WClientWin *cwin,
 	
 	if(reg==NULL)
 		return NULL;
+
+	TRANSIENT_LAST_H_RQ(reg)=geom.h;
 	
 	region_set_manager(reg, (WRegion*)cwin, &(cwin->transient_list));
 	region_stack_above(reg, (WRegion*)cwin);
@@ -790,6 +795,9 @@ static void convert_geom(WClientWin *cwin, WRectangle max_geom,
 	WRectangle r;
 	bool bottom=FALSE;
 	
+	/* It's quite ugly to do this alignment here, but a nice generic
+	 * solution would as usual add so much bloat...
+	 */
 	if(REGION_MANAGER(cwin)!=NULL &&
 	   WOBJ_IS(REGION_MANAGER(cwin), WClientWin)){
 		bottom=TRUE;
@@ -799,10 +807,7 @@ static void convert_geom(WClientWin *cwin, WRectangle max_geom,
 	geom->h=max_geom.h;
 	
 	correct_size(&(geom->w), &(geom->h), &(cwin->size_hints), FALSE);
-	/*
-	 if(!rq && bottom && geom->h>REGION_GEOM(cwin).h)
-	 geom->h=REGION_GEOM(cwin).h;
-	 */
+
 	geom->x=max_geom.x+max_geom.w/2-geom->w/2;
 	
 	if(bottom)
@@ -828,6 +833,8 @@ static void clientwin_request_managed_geom(WClientWin *cwin, WRegion *sub,
 										   WRectangle *geomret)
 {
 	WRectangle rgeom=cwin->max_geom;
+	
+	TRANSIENT_LAST_H_RQ(sub)=geom.h;
 	
 	if(rgeom.h>geom.h){
 		rgeom.h=geom.h;
@@ -882,7 +889,7 @@ static void do_fit_clientwin(WClientWin *cwin, WRectangle max_geom, WWindow *np)
 	FOR_ALL_MANAGED_ON_LIST_W_NEXT(cwin->transient_list, transient, next){
 		geom2.y=max_geom.y;
 		geom2.h=max_geom.h;
-		diff=geom.h-REGION_GEOM(transient).h;
+		diff=geom.h-TRANSIENT_LAST_H_RQ(transient);
 		if(diff>0){
 			geom2.y+=diff;
 			geom2.h-=diff;
@@ -891,6 +898,7 @@ static void do_fit_clientwin(WClientWin *cwin, WRectangle max_geom, WWindow *np)
 		if(np==NULL){
 			region_fit(transient, geom2);
 		}else{
+			/* TODO: stacking should not be reset */
 			if(!reparent_region(transient, np, geom2)){
 				warn("Problem: can't reparent a %s managed by a WClientWin"
 					 "being reparented. Detaching from this object.",

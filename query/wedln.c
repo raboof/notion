@@ -514,7 +514,6 @@ static void wedln_deinit(WEdln *wedln)
 EXTL_EXPORT
 void wedln_finish(WEdln *wedln)
 {
-	WRegion *parent;
 	ExtlFn handler;
 	char *p;
 	
