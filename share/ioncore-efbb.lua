@@ -31,7 +31,7 @@ if string.find(arg[1], "m") then
 end
 
 if string.find(arg[1], "f") then
-    table.insert(mappings, "\nMod1+K P/N -> WGenFrame.switch_next/prev")
+    table.insert(mappings, "Mod1+K P/N -> WGenFrame.switch_next/prev")
     table.insert(groups, "genframe_bindings")
     genframe_bindings{
         submap("Mod1+K") {
@@ -43,8 +43,8 @@ end
 
 if table.getn(groups)>0 then
     warn("The binding group(s) " .. table.concat(groups, ", ") .. 
-         " were empty so the\nfollowing emergency mappings have " ..
-         "been made:\n  " .. table.concat(mappings, "\n  ") .. 
+         "\nwere empty so the following emergency mappings have " ..
+         "been made:\n" .. table.concat(mappings, "\n") .. 
          "\nPlease fix your configuration files!")
 end
 
