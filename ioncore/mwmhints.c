@@ -37,6 +37,8 @@ void xwindow_check_mwmhints_nodecor(Window win, bool *nodecor)
 {
     WMwmHints *hints;
     int n;
+
+    *nodecor=FALSE;
     
     n=xwindow_get_property(win, ioncore_g.atom_mwm_hints, 
                            ioncore_g.atom_mwm_hints, 
