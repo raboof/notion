@@ -67,6 +67,9 @@ void region_init(WRegion *reg, WRegion *parent, WRectangle geom)
 	reg->ni.ns_next=NULL;
 	reg->ni.ns_prev=NULL;
 	
+	if(!WOBJ_IS(reg, WClientWin))
+		region_set_name(reg, WOBJ_TYPESTR(reg));
+
 	reg->manager=NULL;
 	reg->mgr_next=NULL;
 	reg->mgr_prev=NULL;
