@@ -61,7 +61,7 @@ end
 function querylib.do_query_execfile(mplex, prompt, prog)
     assert(prog~=nil)
     local function handle_execwith(mplex, str)
-        exec(prog.." "..string.shell_safe(str))
+        ioncore.exec(prog.." "..string.shell_safe(str))
     end
     return querylib.do_query(mplex, prompt, querylib.get_initdir(),
                              handle_execwith, querylib.file_completor)
@@ -73,7 +73,7 @@ function querylib.do_query_execwith(mplex, prompt, dflt, prog, completor)
         if not str or str=="" then
             str=dflt
         end
-        exec(prog.." "..string.shell_safe(str))
+        ioncore.exec(prog.." "..string.shell_safe(str))
     end
     return querylib.do_query(mplex, prompt, nil, 
                              handle_execwith, completor)
