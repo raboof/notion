@@ -29,6 +29,7 @@
 #include "defer.h"
 #include "rectangle.h"
 #include "xwindow.h"
+#include "names.h"
 #include "region-iter.h"
 
 
@@ -339,6 +340,7 @@ static bool drop_ok(WRegion *mgr, WRegion *reg)
 err:
     warn(TR("Attempt to make region %s manage its ancestor %s."),
          region_name(mgr), region_name(reg));
+    return FALSE;
 }
 
 

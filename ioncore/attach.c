@@ -111,6 +111,7 @@ WRegion *region__attach_reparent(WRegion *mgr, WRegion *reg,
 err:
     warn(TR("Attempt to make region %s manage its ancestor %s."),
          region_name(mgr), region_name(reg));
+    return FALSE;
 }
 
 

@@ -161,7 +161,7 @@ bool ioncore_init_layout()
         char tm[]="saved_layout.backup-YYYYMMDDHHMMSS\0\0\0\0";
         char *backup;
         
-        strftime(tm+14, 15, "%Y%m%d%H%M%S", localtime(&t));
+        strftime(tm+20, 15, "%Y%m%d%H%M%S", localtime(&t));
         backup=ioncore_get_savefile(tm);
         if(backup==NULL){
             warn(TR("Unable to get file for layout backup."));
