@@ -24,7 +24,7 @@ test "${X_DISPLAY_MISSING+set}" = set && exit 1
 AC_CHECK_LIB([Xext],
              [XMissingExtension],
              [X_LIBS="$X_LIBS -lXext"],
-             [exit 1],
+             [AC_MSG_ERROR([*** Missing symbol XMissingExtension in Xext])],
              [$X_PRE_LIBS -lX11 $X_LIBS $X_EXTRA_LIBS])
 dnl }}}
 
@@ -41,9 +41,13 @@ if test "x$enable_xinerama" != xno; then
     AC_CHECK_LIB([Xinerama],
                  [XineramaQueryExtension],
                  [XINERAMA_LIBS="-lXinerama"],
-                 [exit 1],
+                 [AC_MSG_WARN([*** Xinerama disabled (not available)])
+                  enable_xinerama="no"],
                  [$X_PRE_LIBS -lX11 $X_LIBS $X_EXTRA_LIBS])
-else
+
+fi
+
+if test "x$enable_xinerama" = xno; then
     _DCF_NO_XINERAMA="-DCF_NO_XINERAMA"
 fi
 
@@ -116,8 +120,9 @@ dnl DL_LIBS {{{
 
 AC_SUBST([DL_LIBS])
 
-AC_CHECK_HEADER([dlfcn.h], [], [exit 1])
-AC_CHECK_LIB([dl], [dlopen], [DL_LIBS="-ldl"], [exit 1])
+AC_CHECK_HEADER([dlfcn.h], [], [AC_MSG_ERROR([*** missing header dlfcn.h])])
+AC_CHECK_LIB([dl], [dlopen], [DL_LIBS="-ldl"],
+             [AC_MSG_ERROR([*** missing library dl])])
 
 dnl }}}
 
@@ -167,7 +172,7 @@ else
 fi
 if test "x$LUA" = x; then
     AC_PATH_PROG([LUA], [lua$with_lua_suffix], [], [$lua_search_path])
-    test "x$LUA" = x && exit 1
+    test "x$LUA" = x && AC_MSG_ERROR([*** Can't build ion without lua])
 fi
 dnl }}}
 
@@ -178,7 +183,7 @@ dnl lua_version=$($LUA -v 2>&1 >/dev/null | head -n 1 | $EGREP -o '[0-9]+(\.[0-9
 case $lua_version in
 0.* | 1.* | 2.* | 3.* | 4.*)
     AC_MSG_RESULT([no (found $lua_version)])
-    exit 1
+    AC_MSG_ERROR([*** can't build ion with this version of lua])
     ;;
 *)
     AC_MSG_RESULT([yes (found $lua_version)])
@@ -212,7 +217,9 @@ elif test "x$with_lua_prefix" != x; then
 fi
 save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS $LUA_INCLUDES"
-AC_CHECK_HEADERS([lua.h lualib.h], [], [exit 1], [])
+AC_CHECK_HEADERS([lua.h lualib.h], [],
+                 [AC_MSG_ERROR([*** missing headers lua.h or lualib.h.
+                  *** install the lua's -dev package or check --with-lua-includes option.])], [])
 CFLAGS="$save_CFLAGS"
 dnl }}}
 
@@ -225,7 +232,8 @@ fi
 AC_CHECK_LIB([lua$with_lua_suffix],
              [lua_open],
              [LUA_LIBS="$LUA_LIBS -llua$with_lua_suffix"],
-             [exit 1],
+             [AC_MSG_ERROR([*** Can't find lua_open in lua$with_lua_suffix.
+                  *** Check for liblua installation or --with-lua-libraries or --with-lua-suffix options])],
              [$LUA_LIBS])
 AC_CHECK_LIB([dl], [dlopen], [lua_extra_libs="$lua_extra_libs -ldl"], [])
 AC_CHECK_LIB([m], [exp], [lua_extra_libs="$lua_extra_libs -lm"], [])
