@@ -1,0 +1,59 @@
+.TH ION 1
+.SH NAME
+PWM - An X11 window manager
+.SH SYNOPSIS
+.B pwm
+.I "[options]"
+.SH "DESCRIPTION"
+
+The original PWM was the first tabbing window manager. This version of
+PWM is based on the code of Ion and is actually exactly the same window
+manager with only differences in default configuration files, configuration
+file lookup paths and some options.
+
+.SH "OPTIONS"
+.TP
+.B \-display host:display.screen
+X display to manage
+.TP
+.B \-cfgfile configfile
+Config file to use instead of default
+.TP
+.B \-moduledir dir
+Directory to search for module
+.TP
+.B \-confdir dir
+Directory to search for configuration files and other scripts
+.TP
+.B \-oneroot
+On X servers with multiple (traditional non-Xinerama) screens, manage only
+default screen (root window), not all, as given by the -display option or
+in the DISPLAY environment variable.
+.TP
+.B \-sessionname seession_name
+Set sesion name. This option affects where workspace and other savefiles are
+put (~/.ion-devel/session_name if option set).
+.TP
+.B \-xinerama 0|1
+If Ioncore was compiled with Xinerama support, this option can be used to
+enable/disable (1/0) the use of it. The default is _not_ to use Xinerama
+screen information.
+.TP
+.B \-i18n
+Enable use of multibyte string routines, actual encoding depending on the
+locale.
+.TP
+.B \-help
+Show help on command line options
+.TP
+.B \-version
+Show version
+.TP
+.B \-about
+Show about text (version, copyright)
+
+.SH SEE ALSO
+
+For more information, see
+.I Ion(1).
+
