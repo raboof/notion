@@ -49,8 +49,7 @@ TO_CLEAN := $(TO_CLEAN) exports.c
 EXPORTS_C = exports.c
 
 exports.c: $(SOURCES)
-	$(LUA) $(TOPDIR)/build/mkexports.lua -module $(MAKE_EXPORTS) \
-		-o exports.c $(SOURCES)
+	$(MKEXPORTS) -module $(MAKE_EXPORTS) -o exports.c $(SOURCES)
 
 else # !MAKE_EXPORTS
 

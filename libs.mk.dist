@@ -6,4 +6,4 @@ LIBTU_LIBS = -L$(TOPDIR)/libtu -ltu
 
 LIBEXTL_INCLUDES = -I$(TOPDIR)/libextl/include
 LIBEXTL_LIBS = -L$(TOPDIR)/libextl -lextl
-
+MKEXPORTS = $(LUA) $(TOPDIR)/libextl/libextl-mkexports

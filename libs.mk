@@ -6,4 +6,4 @@ LIBTU_LIBS = -ltu
 
 LIBEXTL_INCLUDES =
 LIBEXTL_LIBS = -lextl
-
+MKEXPORTS = libextl-mkexports
