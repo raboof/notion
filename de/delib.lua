@@ -10,6 +10,12 @@
 -- (at your option) any later version.
 --
 
+-- This is a slight abuse of the _LOADED variable perhaps, but library-like 
+-- packages should handle checking if they're loaded instead of confusing 
+-- the user with require/include differences.
+if _LOADED["delib"] then return end
+
+
 local stylecache={}
 
 local function lookup_substyle(list, pattern)
@@ -109,3 +115,7 @@ function de_substyle(pattern, list)
     list.substyle_pattern=pattern
     return list
 end
+
+
+-- Mark ourselves loaded.
+_LOADED["delib"]=true

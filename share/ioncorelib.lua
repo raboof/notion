@@ -9,6 +9,11 @@
 -- (at your option) any later version.
 --
 
+-- This is a slight abuse of the _LOADED variable perhaps, but library-like 
+-- packages should handle checking if they're loaded instead of confusing 
+-- the user with require/include differences.
+if _LOADED["ioncorelib"] then return end
+
 -- Constants {{{
 
 TRUE = true
@@ -357,3 +362,7 @@ end
 
 
 include('ioncore-mplexfns')
+
+-- Mark ourselves loaded.
+_LOADED["ioncorelib"]=true
+
