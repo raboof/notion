@@ -95,6 +95,11 @@ int main(int argc, char*argv[])
 	
 	libtu_init(argv[0]);
 	
+	if(argc<2){
+		warn("Do not run ioncore directly.");
+		return EXIT_FAILURE;
+	}
+	
 	optparser_init(argc, argv, OPTP_MIDLONG, ioncore_opts, &ioncore_cinfo);
 	
 	while((opt=optparser_get_opt())){
