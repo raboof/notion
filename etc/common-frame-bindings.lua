@@ -68,12 +68,12 @@ function frame_query_bindings()
         kpress("Mod1+F9", query_workspace_with),
         kpress(f11key,
                function(f)
-                   query_yesno(f, "Restart Ion (y/n)?", ioncore_restart)
+                   query_yesno(f, "Restart Ion (y/n)?", restart_wm)
                end
               ),
         kpress(f12key,
                function(f)
-                   query_yesno(f, "Exit Ion (y/n)?", ioncore_exit)
+                   query_yesno(f, "Exit Ion (y/n)?", exit_wm)
                end
               ),
     }

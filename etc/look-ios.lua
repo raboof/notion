@@ -14,7 +14,6 @@ set_ion_spacing(0)
 
 set_background_color("#000000")
 
---			highlight, shadow, background, foreground 
 set_act_tab_colors("#ffffff", "#606060", "#d8d8d8", "#000000")
 set_act_tab_sel_colors("#f0f066", "#f09000", "#f0c000", "#000000")
 set_act_frame_colors("#ffffff", "#606060", "#d8d8d8", "#000000")

@@ -12,7 +12,6 @@ set_input_border(1, 1, 1)
 enable_ion_bar_inside_frame(TRUE)
 set_ion_spacing(1)
 
--- 			highlight, shadow, background, foreground
 set_act_tab_sel_colors("white", "white", "#8a999e", "white")
 set_act_tab_colors("grey", "grey", "#545d75", "grey")
 set_act_frame_colors("#545d75", "grey", "black", "grey")

@@ -59,6 +59,11 @@ function mpress(kcb_, func_, area_)
     return mact("mpress", kcb_, func_, area_)
 end
 
+
+--
+-- Callback creation functions
+-- 
+
 function make_active_leaf_fn(fn)
     if not fn then
 	error("fn==nil", 2)
@@ -70,9 +75,16 @@ function make_active_leaf_fn(fn)
     return call_active_leaf
 end
 
+function make_screen_switch_nth_fn(n)
+    local function call_nth(scr)
+        screen_switch_nth_on_cvp(scr, %n)
+    end
+    return call_nth
+end
+    
 function make_exec_fn(cmd)
     local function do_exec(scr)
-	return ioncore_exec(scr, %cmd)
+	return exec_on_screen(scr, %cmd)
     end
     return do_exec
 end
@@ -90,7 +102,8 @@ function include(file)
             current_dir = cdir
         end
     end
-    ioncore_include(file, current_dir)
+    -- do_include is implemented in ioncore.
+    do_include(file, current_dir)
 end
 
 

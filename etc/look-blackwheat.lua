@@ -1,25 +1,25 @@
-#
-# look-blackwheat.conf for Ion
-#
+--
+-- look-blackwheat.lua for Ion
+--
 
-font "-*-helvetica-medium-r-normal-*-14-*-*-*-*-*-*-*"
-tab_font "-*-helvetica-medium-r-normal-*-12-*-*-*-*-*-*-*"
+set_font("-*-helvetica-medium-r-normal-*-14-*-*-*-*-*-*-*")
+set_tab_font("-*-helvetica-medium-r-normal-*-12-*-*-*-*-*-*-*")
 
-tab_border 1, 1, 1
-frame_border 1, 2, 2
-input_border 1, 2, 2
-ion_bar_inside_frame FALSE
-ion_spacing 1
+set_tab_border(1, 1, 1)
+set_frame_border(1, 2, 2)
+set_input_border(1, 2, 2)
+enable_ion_bar_inside_frame(FALSE)
+set_ion_spacing(1)
 
-background_color	"black"
+set_background_color("black")
 
-act_tab_sel_colors	"black", "black", "#aaaa9e", "white"
-act_tab_colors		"black", "black", "#7f7f75", "white"
-act_frame_colors	"gray10", "gray10", "#7f7f75", "white"
+set_act_tab_sel_colors("black", "black", "#aaaa9e", "white")
+set_act_tab_colors("black", "black", "#7f7f75", "white")
+set_act_frame_colors("gray10", "gray10", "#7f7f75", "white")
 
-tab_sel_colors		"black", "black", "#7f7f75", "white"
-tab_colors		"black", "black", "#7f7f75", "white"
-frame_colors		"gray10", "gray10", "#7f7f75", "white"
+set_tab_sel_colors("black", "black", "#7f7f75", "white")
+set_tab_colors("black", "black", "#7f7f75", "white")
+set_frame_colors("gray10", "gray10", "#7f7f75", "white")
 
-input_colors		"black", "black", "#454545", "white"
-selection_colors	"black", "white"
+set_input_colors("black", "black", "#454545", "white")
+set_selection_colors("black", "white")
