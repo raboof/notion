@@ -47,7 +47,7 @@ static WEdln *do_query_edln(WGenFrame *frame, WEdlnHandler *handler,
 	wedln=(WEdln*)genframe_add_input(frame, (WRegionAddFn*)create_wedln,
 									 (void*)&fnp);
 	if(wedln!=NULL){
-		map_region((WRegion*)wedln);
+		region_map((WRegion*)wedln);
 		
 		if(REGION_IS_ACTIVE(frame))
 			set_focus((WRegion*)wedln);
@@ -116,7 +116,7 @@ static void handler_runwith(WObj *obj, char *str, char *userdata)
 	if(*str!='\0')
 		do_open_with(scr, userdata, str);
 	else
-		ioncore_exec(scr, userdata);
+		exec_on_screen(scr, userdata);
 }
 
 
@@ -127,7 +127,7 @@ static void handler_exec(WObj *obj, char *str, char *userdata)
 	if(*str==':')
 		do_open_with(scr, "ion-runinxterm", str+1);
 	else
-		ioncore_exec(scr, str);
+		exec_on_screen(scr, str);
 }
 
 
@@ -199,7 +199,7 @@ static void handler_gotoclient(WObj *obj, char *str, char *userdata)
 		return;
 	}
 	
-	goto_region(&cwin->region);
+	region_goto(&cwin->region);
 }
 
 
@@ -278,7 +278,7 @@ static void handler_workspace(WObj *obj, char *name, char *userdata)
 		}
 	}
 	
-	goto_region(ws);
+	region_goto(ws);
 }
 
 
@@ -332,7 +332,7 @@ static void handler_workspace_with(WObj *obj, char *name, char *userdata)
 	}
 	
 	if(attach_test((WGenFrame*)frame, (WRegion*)cwin, (WGenFrame*)obj))
-		goto_region((WRegion*)cwin);
+		region_goto((WRegion*)cwin);
 #endif
 }
 

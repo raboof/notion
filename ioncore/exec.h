@@ -11,13 +11,13 @@
 #include "common.h"
 #include "screen.h"
 
-extern void ioncore_do_exec(const char *cmd);
-extern void ioncore_exec(WScreen *scr, const char *cmd);
+extern void do_exec(const char *cmd);
+extern void exec_on_screen(WScreen *scr, const char *cmd);
 extern void do_open_with(WScreen *scr, const char *cmd,
 						 const char *filename);
-extern void ioncore_restart_other(const char *cmd);
-extern void ioncore_restart();
-extern void ioncore_exit();
+extern void restart_other_wm(const char *cmd);
+extern void restart_wm();
+extern void exit_wm();
 extern void setup_environ(int scr);
 
 #endif /* ION_IONCORE_EXEC_H */

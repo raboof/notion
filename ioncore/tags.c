@@ -16,24 +16,8 @@ static WRegion *taglist;
 /*{{{ Adding/removing tags */
 
 
-/*
-void clear_sub_tags(WRegion *reg)
-{
-	WRegion *sub;
-	
-	if(taglist==NULL)
-		return;
-	
-	untag_region(reg);
-	
-	FOR_ALL_TYPED_CHILDREN(reg, sub, WRegion){
-		clear_sub_tags(sub);
-	}
-}
-*/
-
 EXTL_EXPORT
-void tag_region(WRegion *reg)
+void region_tag(WRegion *reg)
 {
 	if(reg->flags&REGION_TAGGED)
 		return;
@@ -48,7 +32,7 @@ void tag_region(WRegion *reg)
 
 
 EXTL_EXPORT
-void untag_region(WRegion *reg)
+void region_untag(WRegion *reg)
 {
 	if(!(reg->flags&REGION_TAGGED))
 		return;
@@ -61,20 +45,20 @@ void untag_region(WRegion *reg)
 
 
 EXTL_EXPORT
-void toggle_region_tag(WRegion *reg)
+void region_toggle_tag(WRegion *reg)
 {
 	if(reg->flags&REGION_TAGGED)
-		untag_region(reg);
+		region_untag(reg);
 	else
-		tag_region(reg);
+		region_tag(reg);
 }
 
 
 EXTL_EXPORT
-void clear_tags(WRegion *reg)
+void clear_tags()
 {
 	while(taglist!=NULL)
-		untag_region(taglist);
+		region_untag(taglist);
 }
 
 
@@ -96,7 +80,7 @@ WRegion *tag_take_first()
 	WRegion *reg=taglist;
 	
 	if(reg!=NULL)
-		untag_region(reg);
+		region_untag(reg);
 	
 	return reg;
 }

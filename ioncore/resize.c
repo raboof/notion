@@ -357,7 +357,7 @@ void region_request_geom(WRegion *reg,
 		if(geomret!=NULL)
 			*geomret=REGION_GEOM(reg);
 		if(!tryonly)
-			fit_region(reg, geom);
+			region_fit(reg, geom);
 	}
 
 	if(!tryonly && geomret!=NULL)

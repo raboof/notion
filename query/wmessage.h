@@ -23,6 +23,5 @@ DECLOBJ(WMessage){
 
 extern WMessage *create_wmsg(WWindow *par, WRectangle geom,
 							 const char *msg);
-extern void deinit_wmsg(WMessage *msg);
 
 #endif /* ION_QUERY_WMESSAGE_H */

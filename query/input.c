@@ -67,11 +67,11 @@ void input_refit(WInput *input)
 {
 	WRectangle geom=input->max_geom;
 	input_calc_size(input, &geom);
-	fit_window(&input->win, geom);
+	window_fit(&input->win, geom);
 }
 
 
-void fit_input(WInput *input, WRectangle geom)
+void input_fit(WInput *input, WRectangle geom)
 {
 	input->max_geom=geom;
 	input_refit(input);
@@ -84,7 +84,7 @@ void input_draw_config_updated(WInput *input)
 						 COLOR_PIXEL(GRDATA_OF(input)->input_colors.bg));
 
 	input_refit(input);
-	default_draw_config_updated((WRegion*)input);
+	region_default_draw_config_updated((WRegion*)input);
 	draw_window((WWindow*)input, TRUE);
 }
 
@@ -95,7 +95,7 @@ void input_draw_config_updated(WInput *input)
 /*{{{ Init/deinit */
 
 
-bool init_input(WInput *input, WWindow *par, WRectangle geom)
+bool input_init(WInput *input, WWindow *par, WRectangle geom)
 {
 	WScreen *scr;
 	Window win;
@@ -105,7 +105,7 @@ bool init_input(WInput *input, WWindow *par, WRectangle geom)
 	win=create_simple_window_bg(scr, par->win, geom,
 								scr->grdata.input_colors.bg);
 	
-	if(!init_window((WWindow*)input, par, win, geom))
+	if(!window_init((WWindow*)input, par, win, geom))
 		return FALSE;
 
 	input_refit(input);
@@ -117,9 +117,9 @@ bool init_input(WInput *input, WWindow *par, WRectangle geom)
 }
 
 
-void deinit_input(WInput *input)
+void input_deinit(WInput *input)
 {
-	deinit_window((WWindow*)input);
+	window_deinit((WWindow*)input);
 }
 
 
@@ -144,14 +144,14 @@ void input_close(WInput *input)
 
 
 static DynFunTab input_dynfuntab[]={
-	{fit_region, fit_input},
+	{region_fit, input_fit},
 	{region_draw_config_updated, input_draw_config_updated},
 	{region_close, input_close},
 	END_DYNFUNTAB
 };
 
 
-IMPLOBJ(WInput, WWindow, deinit_input, input_dynfuntab);
+IMPLOBJ(WInput, WWindow, input_deinit, input_dynfuntab);
 
 	
 /*}}}*/

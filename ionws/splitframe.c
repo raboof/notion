@@ -114,7 +114,7 @@ static void do_split(WRegion *oreg, const char *str, bool attach)
 			region_add_managed(reg, ((WIonFrame*)oreg)->genframe.current_sub,
 							   TRUE);
 		}
-		goto_region(reg);
+		region_goto(reg);
 	}else{
 		warn("Unable to split");
 	}
@@ -215,7 +215,7 @@ void ionframe_close(WIonFrame *frame)
 	   frame->genframe.current_input!=NULL)
 		return;
 	
-	ionframe_close(frame);
+	ionframe_relocate_and_close(frame);
 }
 
 

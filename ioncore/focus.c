@@ -77,7 +77,7 @@ void goto_previous()
 	while(reg->previous_act!=NULL)
 		reg=reg->previous_act;
 	
-	goto_region(reg);
+	region_goto(reg);
 }
 
 
@@ -122,7 +122,7 @@ void do_set_focus(WRegion *reg, bool warp)
 	if(reg==NULL || !region_is_fully_mapped(reg))
 		return;
 
-	focus_region(reg, warp);
+	region_set_focus_to(reg, warp);
 }
 
 

@@ -28,10 +28,10 @@
 /*{{{ Destroy/create frame */
 
 
-static bool init_floatframe(WFloatFrame *frame, WWindow *parent,
+static bool floatframe_init(WFloatFrame *frame, WWindow *parent,
 							WRectangle geom, int id)
 {
-	if(!init_genframe((WGenFrame*)frame, parent, geom, id))
+	if(!genframe_init((WGenFrame*)frame, parent, geom, id))
 		return FALSE;
 
 	frame->bar_w=geom.w;
@@ -53,7 +53,7 @@ WFloatFrame *create_floatframe(WWindow *parent, WRectangle geom, int id)
 
 static void deinit_floatframe(WFloatFrame *frame)
 {
-	deinit_genframe((WGenFrame*)frame);
+	genframe_deinit((WGenFrame*)frame);
 }
 
 

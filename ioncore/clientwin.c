@@ -45,7 +45,7 @@ WHooklist *add_clientwin_alt=NULL;
 /*{{{ Get properties */
 
 
-void get_protocols(WClientWin *cwin)
+void clientwin_get_protocols(WClientWin *cwin)
 {
 	Atom *protocols=NULL, *p;
 	int n;
@@ -115,7 +115,7 @@ static void get_winprops(WClientWin *cwin)
 }
 
 
-void get_clientwin_size_hints(WClientWin *cwin)
+void clientwin_get_size_hints(WClientWin *cwin)
 {
 	XSizeHints tmp=cwin->size_hints;
 	
@@ -224,7 +224,7 @@ static void configure_cwin_bw(Window win, int bw)
 }
 
 
-static bool init_clientwin(WClientWin *cwin, WWindow *parent,
+static bool clientwin_init(WClientWin *cwin, WWindow *parent,
 						   Window win, const XWindowAttributes *attr)
 {
 	WRectangle geom;
@@ -235,7 +235,7 @@ static bool init_clientwin(WClientWin *cwin, WWindow *parent,
 	geom.h=attr->height;
 	geom.w=attr->width;
 	
-	init_region(&(cwin->region), &(parent->region), geom);
+	region_init(&(cwin->region), &(parent->region), geom);
 	
 	cwin->max_geom=geom;
 	cwin->flags=0;
@@ -261,8 +261,8 @@ static bool init_clientwin(WClientWin *cwin, WWindow *parent,
 	
 	get_colormaps(cwin);
 	
-	get_clientwin_size_hints(cwin);
-	get_protocols(cwin);
+	clientwin_get_size_hints(cwin);
+	clientwin_get_protocols(cwin);
 
 	XSelectInput(wglobal.dpy, win, cwin->event_mask);
 
@@ -444,7 +444,7 @@ static WRegion *clientwin_do_add_managed(WClientWin *cwin, WRegionAddFn *fn,
 		region_restack(reg, cwin->win, Above);
 
 	if(REGION_IS_MAPPED((WRegion*)cwin))
-	   map_region(reg);
+	   region_map(reg);
 	
 	if(REGION_IS_ACTIVE(cwin))
 		set_focus(reg);
@@ -499,7 +499,7 @@ static void reparent_root(WClientWin *cwin)
 }
 
 
-void deinit_clientwin(WClientWin *cwin)
+void clientwin_deinit(WClientWin *cwin)
 {
 	UNLINK_ITEM(wglobal.cwin_list, cwin, g_cwin_next, g_cwin_prev);
 	
@@ -522,7 +522,7 @@ void deinit_clientwin(WClientWin *cwin)
 	clear_colormaps(cwin);
 	
 	reset_watch(&(cwin->last_mgr_watch));
-	deinit_region((WRegion*)cwin);
+	region_deinit((WRegion*)cwin);
 }
 
 
@@ -730,7 +730,7 @@ static void clientwin_request_managed_geom(WClientWin *cwin, WRegion *sub,
 		*geomret=rgeom;
 	
 	if(!tryonly)
-		fit_region(sub, rgeom);
+		region_fit(sub, rgeom);
 }
 
 
@@ -781,7 +781,7 @@ static void do_fit_clientwin(WClientWin *cwin, WRectangle max_geom, WWindow *np)
 		}
 		
 		if(np==NULL){
-		   fit_region(transient, geom2);
+		   region_fit(transient, geom2);
 		}else{
 			if(!reparent_region(transient, np, geom2)){
 				warn("Problem: can't reparent a %s managed by a WClientWin"
@@ -794,7 +794,7 @@ static void do_fit_clientwin(WClientWin *cwin, WRectangle max_geom, WWindow *np)
 }
 
 
-static void fit_clientwin(WClientWin *cwin, WRectangle geom)
+static void clientwin_fit(WClientWin *cwin, WRectangle geom)
 {
 	do_fit_clientwin(cwin, geom, NULL);
 }
@@ -820,7 +820,7 @@ static bool reparent_clientwin(WClientWin *cwin, WWindow *par, WRectangle geom)
 }
 
 
-static void map_clientwin(WClientWin *cwin)
+static void clientwin_map(WClientWin *cwin)
 {
 	WRegion *sub;
 	
@@ -828,12 +828,12 @@ static void map_clientwin(WClientWin *cwin)
 	MARK_REGION_MAPPED(cwin);
 	
 	FOR_ALL_TRANSIENTS(cwin, sub){
-		map_region(sub);
+		region_map(sub);
 	}
 }
 
 
-static void unmap_clientwin(WClientWin *cwin)
+static void clientwin_unmap(WClientWin *cwin)
 {
 	WRegion *sub;
 	
@@ -841,12 +841,12 @@ static void unmap_clientwin(WClientWin *cwin)
 	MARK_REGION_UNMAPPED(cwin);
 	
 	FOR_ALL_TRANSIENTS(cwin, sub){
-		unmap_region(sub);
+		region_unmap(sub);
 	}
 }
 
 
-static void focus_clientwin(WClientWin *cwin, bool warp)
+static void clientwin_set_focus_to(WClientWin *cwin, bool warp)
 {
 	WRegion *reg=TOPMOST_TRANSIENT(cwin);
 	
@@ -854,7 +854,7 @@ static void focus_clientwin(WClientWin *cwin, bool warp)
 		do_move_pointer_to((WRegion*)cwin);
 	
 	if(reg!=NULL){
-		focus_region(reg, FALSE);
+		region_set_focus_to(reg, FALSE);
 		return;
 	}
 	
@@ -869,7 +869,7 @@ static bool clientwin_display_managed(WClientWin *cwin, WRegion *sub)
 {
 	if(REGION_IS_MAPPED(cwin))
 		return FALSE;
-	map_region(sub);
+	region_map(sub);
 	return TRUE;
 	
 #if 0
@@ -940,12 +940,7 @@ static WRegion *clientwin_managed_enter_to_focus(WClientWin *cwin, WRegion *reg)
 /*{{{ Names */
 
 
-void set_clientwin_name(WClientWin *cwin, char *p)
-{
-	region_set_name(&cwin->region, p);
-}
-
-
+EXTL_EXPORT
 WClientWin *lookup_clientwin(const char *name)
 {
 	return (WClientWin*)do_lookup_region(name, &OBJDESCR(WClientWin));
@@ -1109,7 +1104,7 @@ bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto)
 		return FALSE;
 	if(!region_add_managed(reg, (WRegion*)cwin, REGION_ATTACH_SWITCHTO))
 		return FALSE;
-	return goto_region(reg);
+	return region_goto(reg);
 }
 
 
@@ -1147,11 +1142,11 @@ void clientwin_broken_app_resize_kludge(WClientWin *cwin)
 
 
 static DynFunTab clientwin_dynfuntab[]={
-	{fit_region, fit_clientwin},
+	{region_fit, clientwin_fit},
 	{(DynFun*)reparent_region, (DynFun*)reparent_clientwin},
-	{map_region, map_clientwin},
-	{unmap_region, unmap_clientwin},
-	{focus_region, focus_clientwin},
+	{region_map, clientwin_map},
+	{region_unmap, clientwin_unmap},
+	{region_set_focus_to, clientwin_set_focus_to},
 	{(DynFun*)region_display_managed, (DynFun*)clientwin_display_managed},
 	{region_notify_rootpos, clientwin_notify_rootpos},
 	{(DynFun*)region_restack, (DynFun*)clientwin_restack},
@@ -1169,7 +1164,7 @@ static DynFunTab clientwin_dynfuntab[]={
 };
 
 
-IMPLOBJ(WClientWin, WRegion, deinit_clientwin, clientwin_dynfuntab);
+IMPLOBJ(WClientWin, WRegion, clientwin_deinit, clientwin_dynfuntab);
 
 
 /*}}}*/

@@ -412,7 +412,7 @@ EXTL_EXPORT
 void genframe_p_switch_tab(WGenFrame *genframe)
 {
 	if(genframe->tab_pressed_sub!=NULL)
-		display_region_sp(genframe->tab_pressed_sub);
+		region_display_sp(genframe->tab_pressed_sub);
 }
 
 

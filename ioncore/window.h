@@ -30,10 +30,10 @@ DECLOBJ(WWindow){
 #include "screen.h"
 
 
-extern bool init_window(WWindow *p, WWindow *parent,
+extern bool window_init(WWindow *p, WWindow *parent,
 						Window win, WRectangle geom);
-extern bool init_window_new(WWindow *p, WWindow *parent, WRectangle geom);
-extern void deinit_window(WWindow *win);
+extern bool window_init_new(WWindow *p, WWindow *parent, WRectangle geom);
+extern void window_deinit(WWindow *win);
 
 extern WRegion *find_window(Window win);
 extern WRegion *find_window_t(Window win, const WObjDescr *descr);
@@ -44,10 +44,10 @@ DYNFUN int window_press(WWindow *wwin, XButtonEvent *ev, WRegion **reg_ret);
 DYNFUN void window_release(WWindow *wwin);
 
 /* Only to be used by regions that inherit this */
-extern void map_window(WWindow *wwin);
-extern void unmap_window(WWindow *wwin);
-extern void focus_window(WWindow *wwin, bool warp);
-extern void fit_window(WWindow *wwin, WRectangle geom);
+extern void window_map(WWindow *wwin);
+extern void window_unmap(WWindow *wwin);
+extern void window_set_focus_to(WWindow *wwin, bool warp);
+extern void window_fit(WWindow *wwin, WRectangle geom);
 extern bool reparent_window(WWindow *wwin, WWindow *parent, WRectangle geom);
 
 extern Window window_restack(WWindow *wwin, Window other, int mode);

@@ -293,7 +293,7 @@ static void handle_property(const XPropertyEvent *ev)
 	
 	switch(ev->atom){
 	case XA_WM_NORMAL_HINTS:
-		get_clientwin_size_hints(cwin);
+		clientwin_get_size_hints(cwin);
 		return;
 	
 	case XA_WM_NAME:
@@ -306,13 +306,13 @@ static void handle_property(const XPropertyEvent *ev)
 
 	case XA_WM_TRANSIENT_FOR:
 		warn("Changes in WM_TRANSIENT_FOR property are unsupported.");
-		/*unmap_clientwin(cwin);
+		/*clientwin_unmap(cwin);
 		manage_clientwin(ev->window, 0);*/
 		break;
 		
 	default:
 		if(ev->atom==wglobal.atom_wm_protocols){
-			get_protocols(cwin);
+			clientwin_get_protocols(cwin);
 			return;
 		}
 		return;

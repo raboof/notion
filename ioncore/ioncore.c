@@ -165,7 +165,7 @@ fail:
 	XCloseDisplay(wglobal.dpy);
 	libtu_asprintf(&cmd, "xmessage '%s'", msg);
 	if(cmd!=NULL)
-		ioncore_do_exec(cmd);
+		do_exec(cmd);
 	return EXIT_FAILURE;
 }
 

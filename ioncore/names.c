@@ -259,7 +259,7 @@ void goto_named_region(char *name)
 	WRegion *reg=lookup_region(name);
 	
 	if(reg!=NULL)
-		goto_region(reg);
+		region_goto(reg);
 }
 
 

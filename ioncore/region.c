@@ -29,7 +29,7 @@
 /*{{{ Init & deinit */
 
 
-void init_region(WRegion *reg, WRegion *parent, WRectangle geom)
+void region_init(WRegion *reg, WRegion *parent, WRectangle geom)
 {
 	reg->geom=geom;
 	reg->flags=0;
@@ -87,7 +87,7 @@ static void destroy_children(WRegion *reg)
 }
 
 
-void deinit_region(WRegion *reg)
+void region_deinit(WRegion *reg)
 {
 	destroy_children(reg);
 
@@ -98,7 +98,7 @@ void deinit_region(WRegion *reg)
 
 	region_detach(reg);
 	region_unuse_name(reg);
-	untag_region(reg);
+	region_untag(reg);
 	region_remove_bindings(reg);
 }
 
@@ -109,9 +109,9 @@ void deinit_region(WRegion *reg)
 /*{{{ Dynfuns */
 
 
-void fit_region(WRegion *reg, WRectangle geom)
+void region_fit(WRegion *reg, WRectangle geom)
 {
-	CALL_DYN(fit_region, reg, (reg, geom));
+	CALL_DYN(region_fit, reg, (reg, geom));
 }
 
 
@@ -121,15 +121,15 @@ void region_draw_config_updated(WRegion *reg)
 }
 
 
-void map_region(WRegion *reg)
+void region_map(WRegion *reg)
 {
-	CALL_DYN(map_region, reg, (reg));
+	CALL_DYN(region_map, reg, (reg));
 }
 
 
-void unmap_region(WRegion *reg)
+void region_unmap(WRegion *reg)
 {
-	CALL_DYN(unmap_region, reg, (reg));
+	CALL_DYN(region_unmap, reg, (reg));
 }
 
 
@@ -167,9 +167,9 @@ void region_inactivated(WRegion *reg)
 }
 
 
-void focus_region(WRegion *reg, bool warp)
+void region_set_focus_to(WRegion *reg, bool warp)
 {
-	CALL_DYN(focus_region, reg, (reg, warp));
+	CALL_DYN(region_set_focus_to, reg, (reg, warp));
 }
 
 
@@ -243,7 +243,7 @@ WRegion *region_managed_enter_to_focus(WRegion *mgr, WRegion *reg)
 
 static void default_notify_rootpos(WRegion *reg, int x, int y)
 {
-	notify_subregions_rootpos(reg, x, y);
+	region_notify_subregions_rootpos(reg, x, y);
 }
 
 
@@ -290,7 +290,7 @@ void region_request_managed_geom_allow(WRegion *mgr, WRegion *reg,
 		*geomret=geom;
 	
 	if(!tryonly)
-		fit_region(reg, geom);
+		region_fit(reg, geom);
 }
 
 
@@ -350,14 +350,14 @@ doit:
 		*geomret=geom;
 	
 	if(!tryonly)
-		fit_region(reg, geom);
+		region_fit(reg, geom);
 }
 
 
 /*}}}*/
 
 
-void default_draw_config_updated(WRegion *reg)
+void region_default_draw_config_updated(WRegion *reg)
 {
 	WRegion *sub;
 	
@@ -492,7 +492,7 @@ void region_lost_focus(WRegion *reg)
 
 
 EXTL_EXPORT
-bool display_region(WRegion *reg)
+bool region_display(WRegion *reg)
 {
 	WRegion *mgr, *preg;
 
@@ -502,29 +502,29 @@ bool display_region(WRegion *reg)
 	mgr=REGION_MANAGER(reg);
 	
 	if(mgr!=NULL){
-		if(!display_region(mgr))
+		if(!region_display(mgr))
 			return FALSE;
 		return region_display_managed(mgr, reg);
 	}
 	
 	preg=FIND_PARENT1(reg, WRegion);
 
-	if(preg!=NULL && !display_region(preg))
+	if(preg!=NULL && !region_display(preg))
 		return FALSE;
 
-	map_region(reg);
+	region_map(reg);
 	return TRUE;
 }
 
 
 EXTL_EXPORT
-bool display_region_sp(WRegion *reg)
+bool region_display_sp(WRegion *reg)
 {
 	bool ret;
 	
 	set_previous_of(reg);
 	protect_previous();
-	ret=display_region(reg);
+	ret=region_display(reg);
 	unprotect_previous();
 
 	return ret;
@@ -532,9 +532,9 @@ bool display_region_sp(WRegion *reg)
 
 
 EXTL_EXPORT
-bool goto_region(WRegion *reg)
+bool region_goto(WRegion *reg)
 {
-	if(display_region_sp(reg)){
+	if(region_display_sp(reg)){
 		warp(reg);
 		return TRUE;
 	}
@@ -574,16 +574,16 @@ void region_rootgeom(WRegion *reg, int *xret, int *yret)
 }
 
 
-void notify_subregions_move(WRegion *reg)
+void region_notify_subregions_move(WRegion *reg)
 {
 	int x, y;
 	
 	region_rootgeom(reg, &x, &y);
-	notify_subregions_rootpos(reg, x, y);
+	region_notify_subregions_rootpos(reg, x, y);
 }
 
 
-void notify_subregions_rootpos(WRegion *reg, int x, int y)
+void region_notify_subregions_rootpos(WRegion *reg, int x, int y)
 {
 	WRegion *sub;
 	
@@ -681,6 +681,20 @@ bool region_manages_active_reg(WRegion *reg)
 	}
 	
 	return FALSE;
+}
+
+
+EXTL_EXPORT
+WRegion *region_get_manager(WRegion *reg)
+{
+	return REGION_MANAGER(reg);
+}
+
+
+EXTL_EXPORT
+WRegion *region_get_parent(WRegion *reg)
+{
+	return reg->parent;
 }
 
 
@@ -907,12 +921,12 @@ static DynFunTab region_dynfuntab[]={
 	{region_notify_rootpos, default_notify_rootpos},
 	/*{(DynFun*)region_restack, (DynFun*)default_restack},*/
 	{region_request_managed_geom, region_request_managed_geom_allow},
-	{region_draw_config_updated, default_draw_config_updated},
+	{region_draw_config_updated, region_default_draw_config_updated},
 	END_DYNFUNTAB
 };
 
 
-IMPLOBJ(WRegion, WObj, deinit_region, region_dynfuntab);
+IMPLOBJ(WRegion, WObj, region_deinit, region_dynfuntab);
 
 	
 /*}}}*/

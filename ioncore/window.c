@@ -57,9 +57,9 @@ bool reparent_region(WRegion *reg, WWindow *par, WRectangle geom)
 /*{{{ Init, create */
 
 
-bool init_window(WWindow *wwin, WWindow *parent, Window win, WRectangle geom)
+bool window_init(WWindow *wwin, WWindow *parent, Window win, WRectangle geom)
 {
-	init_region(&(wwin->region), (WRegion*)parent, geom);
+	region_init(&(wwin->region), (WRegion*)parent, geom);
 	
 	wwin->win=win;
 #ifdef CF_XFT
@@ -78,7 +78,7 @@ bool init_window(WWindow *wwin, WWindow *parent, Window win, WRectangle geom)
 }
 
 
-bool init_window_new(WWindow *p, WWindow *parent, WRectangle geom)
+bool window_init_new(WWindow *p, WWindow *parent, WRectangle geom)
 {
 	Window win;
 	
@@ -87,14 +87,14 @@ bool init_window_new(WWindow *p, WWindow *parent, WRectangle geom)
 	if(win==None)
 		return FALSE;
 	
-	/* init_window above will always succeed */
-	return init_window(p, parent, win, geom);
+	/* window_init above will always succeed */
+	return window_init(p, parent, win, geom);
 }
 
 
-void deinit_window(WWindow *wwin)
+void window_deinit(WWindow *wwin)
 {
-	deinit_region((WRegion*)wwin);
+	region_deinit((WRegion*)wwin);
 	
 	if(wwin->xic!=NULL)
 		XDestroyIC(wwin->xic);
@@ -172,7 +172,7 @@ static void reparent_or_fit_window(WWindow *wwin, Window parwin,
 	REGION_GEOM(wwin)=geom;
 
 	if(move)
-		notify_subregions_move(&(wwin->region));
+		region_notify_subregions_move(&(wwin->region));
 }
 
 
@@ -188,27 +188,27 @@ bool reparent_window(WWindow *wwin, WWindow *parent, WRectangle geom)
 }
 
 
-void fit_window(WWindow *wwin, WRectangle geom)
+void window_fit(WWindow *wwin, WRectangle geom)
 {
 	reparent_or_fit_window(wwin, None, geom);
 }
 
 
-void map_window(WWindow *wwin)
+void window_map(WWindow *wwin)
 {
 	XMapWindow(wglobal.dpy, wwin->win);
 	MARK_REGION_MAPPED(wwin);
 }
 
 
-void unmap_window(WWindow *wwin)
+void window_unmap(WWindow *wwin)
 {
 	XUnmapWindow(wglobal.dpy, wwin->win);
 	MARK_REGION_UNMAPPED(wwin);
 }
 
 
-void focus_window(WWindow *wwin, bool warp)
+void window_set_focus_to(WWindow *wwin, bool warp)
 {
 	if(warp)
 		do_move_pointer_to((WRegion*)wwin);
@@ -250,10 +250,10 @@ Window window_x_window(const WWindow *wwin)
 
 
 static DynFunTab window_dynfuntab[]={
-	{fit_region, fit_window},
-	{map_region, map_window},
-	{unmap_region, unmap_window},
-	{focus_region, focus_window},
+	{region_fit, window_fit},
+	{region_map, window_map},
+	{region_unmap, window_unmap},
+	{region_set_focus_to, window_set_focus_to},
 	{(DynFun*)reparent_region, (DynFun*)reparent_window},
 	{(DynFun*)region_restack, (DynFun*)window_restack},
 	{(DynFun*)region_x_window, (DynFun*)window_x_window},
@@ -261,7 +261,7 @@ static DynFunTab window_dynfuntab[]={
 };
 
 
-IMPLOBJ(WWindow, WRegion, deinit_window, window_dynfuntab);
+IMPLOBJ(WWindow, WRegion, window_deinit, window_dynfuntab);
 
 	
 /*}}}*/

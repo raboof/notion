@@ -29,7 +29,7 @@
 /*{{{ region dynfun implementations */
 
 
-static void fit_floatws(WFloatWS *ws, WRectangle geom)
+static void floatws_fit(WFloatWS *ws, WRectangle geom)
 {
 	REGION_GEOM(ws)=geom;
 }
@@ -68,7 +68,7 @@ static bool reparent_floatws(WFloatWS *ws, WWindow *parent, WRectangle geom)
 }
 
 
-static void map_floatws(WFloatWS *ws)
+static void floatws_map(WFloatWS *ws)
 {
 	WRegion *reg;
 
@@ -76,12 +76,12 @@ static void map_floatws(WFloatWS *ws)
 	XMapWindow(wglobal.dpy, ws->dummywin);
 	
 	FOR_ALL_MANAGED_ON_LIST(ws->managed_list, reg){
-		map_region(reg);
+		region_map(reg);
 	}
 }
 
 
-static void unmap_floatws(WFloatWS *ws)
+static void floatws_unmap(WFloatWS *ws)
 {
 	WRegion *reg;
 	
@@ -89,12 +89,12 @@ static void unmap_floatws(WFloatWS *ws)
 	XUnmapWindow(wglobal.dpy, ws->dummywin);
 	
 	FOR_ALL_MANAGED_ON_LIST(ws->managed_list, reg){
-		unmap_region(reg);
+		region_unmap(reg);
 	}
 }
 
 
-static void focus_floatws(WFloatWS *ws, bool warp)
+static void floatws_set_focus_to(WFloatWS *ws, bool warp)
 {
 	if(ws->current_managed==NULL){
 		SET_FOCUS(ws->dummywin);
@@ -103,7 +103,7 @@ static void focus_floatws(WFloatWS *ws, bool warp)
 		return;
 	}
 
-	focus_region(ws->current_managed, warp);
+	region_set_focus_to(ws->current_managed, warp);
 }
 
 
@@ -111,7 +111,7 @@ static bool floatws_display_managed(WFloatWS *ws, WRegion *reg)
 {
 	if(!region_is_fully_mapped((WRegion*)ws))
 	   return FALSE;
-	map_region(reg);
+	region_map(reg);
 	return TRUE;
 }
 
@@ -156,7 +156,7 @@ static Window floatws_x_window(const WFloatWS *ws)
 /*{{{ Create/destroy */
 
 
-static bool init_floatws(WFloatWS *ws, WWindow *parent, WRectangle bounds)
+static bool floatws_init(WFloatWS *ws, WWindow *parent, WRectangle bounds)
 {
 	if(!WOBJ_IS(parent, WWindow))
 		return FALSE;
@@ -174,7 +174,7 @@ static bool init_floatws(WFloatWS *ws, WWindow *parent, WRectangle bounds)
 	XSaveContext(wglobal.dpy, ws->dummywin, wglobal.win_context,
 				 (XPointer)ws);
 	
-	init_genws(&(ws->genws), parent, bounds);
+	genws_init(&(ws->genws), parent, bounds);
 
 	ws->managed_list=NULL;
 	ws->current_managed=NULL;
@@ -191,12 +191,12 @@ WFloatWS *create_floatws(WWindow *parent, WRectangle bounds)
 }
 
 
-void deinit_floatws(WFloatWS *ws)
+void floatws_deinit(WFloatWS *ws)
 {
 	while(ws->managed_list!=NULL)
 		floatws_remove_managed(ws, ws->managed_list);
 
-	deinit_genws(&(ws->genws));
+	genws_deinit(&(ws->genws));
 
 	XDeleteContext(wglobal.dpy, ws->dummywin, wglobal.win_context);
 	XDestroyWindow(wglobal.dpy, ws->dummywin);
@@ -215,7 +215,7 @@ static void floatws_add_managed(WFloatWS *ws, WRegion *reg)
 	region_add_bindmap_owned(reg, &floatws_bindmap, (WRegion*)ws);
 
 	if(region_is_fully_mapped((WRegion*)ws))
-		map_region(reg);
+		region_map(reg);
 }
 
 
@@ -277,7 +277,7 @@ static bool floatws_add_clientwin(WFloatWS *ws, WClientWin *cwin,
 #ifdef CF_SWITCH_NEW_CLIENTS
 	/* TODO: dummy InputOnly window */
 	if(region_manages_active_reg((WRegion*)ws)){
-		display_region_sp((WRegion*)cwin);
+		region_display_sp((WRegion*)cwin);
 		set_focus((WRegion*)cwin);
 	}
 #endif
@@ -346,7 +346,7 @@ WRegion *floatws_circulate(WFloatWS *ws)
 {
 	WRegion *r=NEXT_MANAGED_WRAP(ws->managed_list, ws->current_managed);
 	if(r!=NULL)
-		goto_region(r);
+		region_goto(r);
 	return r;
 }
 
@@ -356,7 +356,7 @@ WRegion *floatws_backcirculate(WFloatWS *ws)
 {
 	WRegion *r=PREV_MANAGED_WRAP(ws->managed_list, ws->current_managed);
 	if(r!=NULL)
-		goto_region(r);
+		region_goto(r);
 	return r;
 }
 
@@ -387,10 +387,10 @@ WRegion *floatws_load(WWindow *par, WRectangle geom, ExtlTab tab)
 
 
 static DynFunTab floatws_dynfuntab[]={
-	{fit_region, fit_floatws},
-	{map_region, map_floatws},
-	{unmap_region, unmap_floatws},
-	{focus_region, focus_floatws},
+	{region_fit, floatws_fit},
+	{region_map, floatws_map},
+	{region_unmap, floatws_unmap},
+	{region_set_focus_to, floatws_set_focus_to},
 	{(DynFun*)reparent_region, (DynFun*)reparent_floatws},
 	
 	{(DynFun*)region_ws_add_clientwin, (DynFun*)floatws_add_clientwin},
@@ -412,7 +412,7 @@ static DynFunTab floatws_dynfuntab[]={
 };
 
 
-IMPLOBJ(WFloatWS, WGenWS, deinit_floatws, floatws_dynfuntab);
+IMPLOBJ(WFloatWS, WGenWS, floatws_deinit, floatws_dynfuntab);
 
 
 /*}}}*/

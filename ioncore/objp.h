@@ -34,10 +34,10 @@ DECLSTRUCT(WObjDescr){
 #define WOBJ_INIT(O, TYPE) {((WObj*)(O))->obj_type=&OBJDESCR(TYPE); \
 	((WObj*)(O))->obj_watches=NULL;}
 
-#define CREATEOBJ_IMPL(OBJ, LOWOBJ, INIT_ARGS)                          \
-	OBJ *p;  p=ALLOC(OBJ); if(p==NULL){ warn_err(); return NULL; }      \
-	WOBJ_INIT(p, OBJ);                                                  \
-	if(!init_##LOWOBJ INIT_ARGS){ free((void*)p); return NULL; } return p
+#define CREATEOBJ_IMPL(OBJ, LOWOBJ, INIT_ARGS)                     \
+	OBJ *p;  p=ALLOC(OBJ); if(p==NULL){ warn_err(); return NULL; } \
+	WOBJ_INIT(p, OBJ);                                             \
+	if(!LOWOBJ ## _init INIT_ARGS) { free((void*)p); return NULL; } return p
 
 #define SIMPLECREATEOBJ_IMPL(OBJ, LOWOBJ, INIT_ARGS)                    \
 	OBJ *p;  p=ALLOC(OBJ); if(p==NULL){ warn_err(); return NULL; }      \

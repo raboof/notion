@@ -15,15 +15,15 @@
 /*{{{ Create/destroy */
 
 
-void init_genws(WGenWS *ws, WWindow *parent, WRectangle geom)
+void genws_init(WGenWS *ws, WWindow *parent, WRectangle geom)
 {
-	init_region(&(ws->reg), (WRegion*)parent, geom);
+	region_init(&(ws->reg), (WRegion*)parent, geom);
 }
 
 
-void deinit_genws(WGenWS *ws)
+void genws_deinit(WGenWS *ws)
 {
-	deinit_region(&(ws->reg));
+	region_deinit(&(ws->reg));
 }
 
 
@@ -52,7 +52,7 @@ bool goto_workspace_name(const char *str)
 	if(ws==NULL)
 		return FALSE;
 
-	goto_region((WRegion*)ws);
+	region_goto((WRegion*)ws);
 	
 	return TRUE;
 }
@@ -64,7 +64,7 @@ bool goto_workspace_name(const char *str)
 /*{{{ Class implementation */
 
 
-IMPLOBJ(WGenWS, WRegion, deinit_genws, NULL);
+IMPLOBJ(WGenWS, WRegion, genws_deinit, NULL);
 
 
 /*}}}*/

@@ -41,7 +41,7 @@
 /*  awb Dec 30 1998                                                         */
 /*                                                                          */
 /****************************************************************************/
-/*  $Revision: 1.3 $
+/*  $Revision: 1.4 $
  **
  **  History and file completion functions for editline library.
  */
@@ -52,6 +52,7 @@
  * Tuomo Valkonen <tuomov@cc.tut.fi>, 2000-08-23.
  */
 
+#include <sys/types.h>
 #include <dirent.h>
 #include <string.h>
 #include <unistd.h>

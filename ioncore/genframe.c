@@ -32,7 +32,7 @@ static bool set_genframe_background(WGenFrame *genframe, bool set_always);
 /*{{{ Destroy/create genframe */
 
 
-bool init_genframe(WGenFrame *genframe, WWindow *parent, WRectangle geom,
+bool genframe_init(WGenFrame *genframe, WWindow *parent, WRectangle geom,
 				   int id)
 {
 	Window win;
@@ -65,7 +65,7 @@ bool init_genframe(WGenFrame *genframe, WWindow *parent, WRectangle geom,
 					  geom.w, geom.h, 0, CopyFromParent, InputOutput,
 					  CopyFromParent, attrflags, &attr);
 	
-	if(!init_window((WWindow*)genframe, parent, win, geom)){
+	if(!window_init((WWindow*)genframe, parent, win, geom)){
 		XDestroyWindow(wglobal.dpy, win);
 		return FALSE;
 	}
@@ -86,14 +86,14 @@ WGenFrame *create_genframe(WWindow *parent, WRectangle geom, int id)
 }
 
 
-void deinit_genframe(WGenFrame *genframe)
+void genframe_deinit(WGenFrame *genframe)
 {
 	while(genframe->managed_list!=NULL)
 		destroy_obj((WObj*)genframe->managed_list);
 	if(genframe->current_input!=NULL)
 		destroy_obj((WObj*)genframe->current_input);
 	
-	deinit_window((WWindow*)genframe);
+	window_deinit((WWindow*)genframe);
 	free_target_id(genframe->target_id);
 }
 
@@ -206,7 +206,7 @@ static void reparent_or_fit(WGenFrame *genframe, WRectangle geom,
 	REGION_GEOM(genframe)=geom;
 
 	if(move && !wchg && !hchg)
-		notify_subregions_move(&(genframe->win.region));
+		region_notify_subregions_move(&(genframe->win.region));
 	else if(wchg || hchg)
 		genframe_fit_managed(genframe);
 
@@ -247,11 +247,11 @@ void genframe_fit_managed(WGenFrame *genframe)
 	genframe_managed_geom(genframe, &geom);
 	
 	FOR_ALL_MANAGED_ON_LIST(genframe->managed_list, sub){
-		fit_region(sub, geom);
+		region_fit(sub, geom);
 	}
 	
 	if(genframe->current_input!=NULL)
-		fit_region(genframe->current_input, geom);
+		region_fit(genframe->current_input, geom);
 }
 
 
@@ -266,7 +266,7 @@ static void genframe_request_managed_geom(WGenFrame *genframe, WRegion *sub,
 		*geomret=geom;
 	
 	if(!tryonly)
-		fit_region(sub, geom);
+		region_fit(sub, geom);
 }
 
 
@@ -304,10 +304,10 @@ bool genframe_display_managed(WGenFrame *genframe, WRegion *sub)
 		return FALSE;
 	
 	if(genframe->current_sub!=NULL)
-		unmap_region(genframe->current_sub);
+		region_unmap(genframe->current_sub);
 	
 	genframe->current_sub=sub;
-	map_region(sub);
+	region_map(sub);
 	
 	if(genframe->current_input==NULL){
 		if(REGION_IS_ACTIVE(genframe))
@@ -354,7 +354,7 @@ void genframe_switch_nth(WGenFrame *genframe, uint n)
 {
 	WRegion *sub=genframe_nth_managed(genframe, n);
 	if(sub!=NULL)
-		display_region_sp(sub);
+		region_display_sp(sub);
 }
 
 
@@ -363,7 +363,7 @@ void genframe_switch_next(WGenFrame *genframe)
 {
 	WRegion *sub=NEXT_MANAGED_WRAP(genframe->managed_list, genframe->current_sub);
 	if(sub!=NULL)
-		display_region_sp(sub);
+		region_display_sp(sub);
 }
 
 
@@ -372,7 +372,7 @@ void genframe_switch_prev(WGenFrame *genframe)
 {
 	WRegion *sub=PREV_MANAGED_WRAP(genframe->managed_list, genframe->current_sub);
 	if(sub!=NULL)
-		display_region_sp(sub);
+		region_display_sp(sub);
 }
 
 
@@ -415,7 +415,7 @@ static WRegion *genframe_do_add_managed(WGenFrame *genframe, WRegionAddFn *fn,
 		genframe_recalc_bar(genframe, FALSE);
 		genframe_display_managed(genframe, reg);
 	}else{
-		unmap_region(reg);
+		region_unmap(reg);
 		genframe_recalc_bar(genframe, TRUE);
 	}
 	
@@ -495,9 +495,9 @@ void genframe_focus(WGenFrame *genframe, bool warp)
 		do_move_pointer_to((WRegion*)genframe);
 	
 	if(genframe->current_input!=NULL)
-		focus_region((WRegion*)genframe->current_input, FALSE);
+		region_set_focus_to((WRegion*)genframe->current_input, FALSE);
 	else if(genframe->current_sub!=NULL)
-		focus_region(genframe->current_sub, FALSE);
+		region_set_focus_to(genframe->current_sub, FALSE);
 	else
 		SET_FOCUS(WGENFRAME_WIN(genframe));
 }
@@ -615,7 +615,7 @@ void genframe_draw_config_updated(WGenFrame *genframe)
 	FOR_ALL_TYPED_CHILDREN(genframe, sub, WRegion){
 		region_draw_config_updated(sub);
 		if(REGION_MANAGER(sub)==(WRegion*)genframe)
-			fit_region(sub, geom);
+			region_fit(sub, geom);
 	}
 	
 	genframe_recalc_bar(genframe, FALSE);
@@ -639,10 +639,9 @@ static void genframe_size_changed_default(WGenFrame *genframe,
 
 
 EXTL_EXPORT
-void genframe_toggle_sub_tag(WGenFrame *genframe)
+WRegion *genframe_current(WGenFrame *genframe)
 {
-	if(genframe->current_sub!=NULL)
-		toggle_region_tag(genframe->current_sub);
+	return genframe->current_sub;
 }
 
 
@@ -797,7 +796,7 @@ void genframe_draw_bar_default(const WGenFrame *genframe, bool complete)
 
 
 static DynFunTab genframe_dynfuntab[]={
-	{fit_region, genframe_fit},
+	{region_fit, genframe_fit},
 	{genframe_size_changed, genframe_size_changed_default},
 	{(DynFun*)reparent_region, (DynFun*)genframe_reparent},
 	{region_resize_hints, genframe_resize_hints},
@@ -807,7 +806,7 @@ static DynFunTab genframe_dynfuntab[]={
 	{(DynFun*)window_press, (DynFun*)genframe_press},
 	{(DynFun*)window_release, (DynFun*)genframe_release},
 	
-	{focus_region, genframe_focus},
+	{region_set_focus_to, genframe_focus},
 	{region_activated, genframe_activated},
 	{region_inactivated, genframe_inactivated},
 	{(DynFun*)region_managed_enter_to_focus,
@@ -827,7 +826,7 @@ static DynFunTab genframe_dynfuntab[]={
 };
 									   
 
-IMPLOBJ(WGenFrame, WWindow, deinit_genframe, genframe_dynfuntab);
+IMPLOBJ(WGenFrame, WWindow, genframe_deinit, genframe_dynfuntab);
 
 
 /*}}}*/

@@ -69,7 +69,7 @@ static void wmsg_calc_size(WMessage *wmsg, WRectangle *geom)
 /*{{{ Draw */
 
 
-void wmsg_draw(WMessage *wmsg, bool complete)
+static void wmsg_draw(WMessage *wmsg, bool complete)
 {
 	DrawInfo dinfo_;
 	setup_wmsg_dinfo(wmsg, &dinfo_, FALSE);
@@ -83,14 +83,14 @@ void wmsg_draw(WMessage *wmsg, bool complete)
 /*{{{ Scroll */
 
 
-void wmsg_scrollup(WMessage *wmsg)
+static void wmsg_scrollup(WMessage *wmsg)
 {
 	if(scrollup_listing(&(wmsg->listing)))
 		wmsg_draw(wmsg, TRUE);
 }
 
 
-void wmsg_scrolldown(WMessage *wmsg)
+static void wmsg_scrolldown(WMessage *wmsg)
 {
 	if(scrolldown_listing(&(wmsg->listing)))
 		wmsg_draw(wmsg, TRUE);
@@ -103,7 +103,7 @@ void wmsg_scrolldown(WMessage *wmsg)
 /*{{{ Init, deinit draw config update */
 
 
-static bool init_wmsg(WMessage *wmsg, WWindow *par, WRectangle geom,
+static bool wmsg_init(WMessage *wmsg, WWindow *par, WRectangle geom,
 					  const char *msg)
 {
 	char **ptr;
@@ -129,7 +129,7 @@ static bool init_wmsg(WMessage *wmsg, WWindow *par, WRectangle geom,
 	init_listing(&(wmsg->listing));
 	setup_listing(&(wmsg->listing), INPUT_FONT(GRDATA_OF(par)), ptr, 1);
 	
-	if(!init_input((WInput*)wmsg, par, geom)){
+	if(!input_init((WInput*)wmsg, par, geom)){
 		free(cmsg);
 		free(ptr);
 		deinit_listing(&(wmsg->listing));
@@ -146,12 +146,12 @@ WMessage *create_wmsg(WWindow *par, WRectangle geom, const char *msg)
 }
 
 
-void deinit_wmsg(WMessage *wmsg)
+static void wmsg_deinit(WMessage *wmsg)
 {
 	if(wmsg->listing.strs!=NULL)
 		deinit_listing(&(wmsg->listing));
 
-	deinit_input((WInput*)wmsg);
+	input_deinit((WInput*)wmsg);
 }
 
 
@@ -178,7 +178,7 @@ static DynFunTab wmsg_dynfuntab[]={
 };
 
 
-IMPLOBJ(WMessage, WInput, deinit_wmsg, wmsg_dynfuntab);
+IMPLOBJ(WMessage, WInput, wmsg_deinit, wmsg_dynfuntab);
 
 	
 /*}}}*/

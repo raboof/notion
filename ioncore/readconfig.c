@@ -145,7 +145,7 @@ char *search_etcpath2(const char *const *files, bool noaccesstest)
 
 
 EXTL_EXPORT
-void ioncore_include(const char *file, const char *current_dir)
+void do_include(const char *file, const char *current_dir)
 {
 	const char *files[]={NULL, NULL};
 	char* tmp=NULL;

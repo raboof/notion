@@ -27,10 +27,10 @@ static void set_tab_spacing(WIonFrame *frame);
 /*{{{ Destroy/create frame */
 
 
-static bool init_ionframe(WIonFrame *frame, WWindow *parent, WRectangle geom,
+static bool ionframe_init(WIonFrame *frame, WWindow *parent, WRectangle geom,
 						  int id, int flags)
 {
-	if(!init_genframe((WGenFrame*)frame, parent, geom, id))
+	if(!genframe_init((WGenFrame*)frame, parent, geom, id))
 		return FALSE;
 	
 	frame->genframe.flags|=flags;
@@ -54,9 +54,9 @@ WIonFrame* create_ionframe_simple(WWindow *parent, WRectangle geom)
 }
 
 
-static void deinit_ionframe(WIonFrame *frame)
+static void ionframe_deinit(WIonFrame *frame)
 {
-	deinit_genframe((WGenFrame*)frame);
+	genframe_deinit((WGenFrame*)frame);
 }
 
 
@@ -355,7 +355,7 @@ static DynFunTab ionframe_dynfuntab[]={
 };
 									   
 
-IMPLOBJ(WIonFrame, WGenFrame, deinit_ionframe, ionframe_dynfuntab);
+IMPLOBJ(WIonFrame, WGenFrame, ionframe_deinit, ionframe_dynfuntab);
 
 	
 /*}}}*/

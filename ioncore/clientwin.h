@@ -62,15 +62,16 @@ DECLOBJ(WClientWin){
 };
 
 
-extern void get_protocols(WClientWin *cwin);
-extern void get_clientwin_size_hints(WClientWin *cwin);
-extern WClientWin* manage_clientwin(Window win, int mflags);
+extern void clientwin_get_protocols(WClientWin *cwin);
+extern void clientwin_get_size_hints(WClientWin *cwin);
 extern void clientwin_unmapped(WClientWin *cwin);
 extern void clientwin_destroyed(WClientWin *cwin);
 extern void clientwin_kill(WClientWin *cwin);
 extern void clientwin_close(WClientWin *cwin);
+
+extern WClientWin *manage_clientwin(Window win, int mflags);
+
 extern WClientWin *find_clientwin(Window win);
-extern void set_clientwin_name(WClientWin *cwin, char *p);
 extern WClientWin *lookup_clientwin(const char *name);
 extern int complete_clientwin(char *nam, char ***cp_ret, char **beg,
 							  void *unused);

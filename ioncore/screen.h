@@ -59,7 +59,7 @@ extern Window create_simple_window(const WScreen *scr, Window par,
 								   WRectangle geom);
 
 extern WScreen *manage_screen(int xscr);
-extern void deinit_screen(WScreen *scr);
+extern void screen_deinit(WScreen *scr);
 
 extern WScreen *region_screen_of(const WRegion *reg);
 extern WGRData *region_grdata_of(const WRegion *reg);
@@ -68,7 +68,7 @@ extern bool same_screen(const WRegion *reg1, const WRegion *reg2);
 
 extern void screen_switch_nth2(int scrnum, int n);
 
-extern void manage_initial_windows(WScreen *scr);
+extern void screen_manage_initial_windows(WScreen *scr);
 extern bool setup_screens();
 
 

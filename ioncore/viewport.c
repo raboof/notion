@@ -25,7 +25,7 @@ static bool viewport_display_managed(WViewport *vp, WRegion *reg);
 /*{{{ Init/deinit */
 
 
-static bool init_viewport(WViewport *vp, WScreen *scr,
+static bool viewport_init(WViewport *vp, WScreen *scr,
 						  int id, WRectangle geom)
 {
 	vp->ws_count=0;
@@ -34,7 +34,7 @@ static bool init_viewport(WViewport *vp, WScreen *scr,
 	vp->id=id;
 	vp->atom_workspace=None;
 	
-	init_region((WRegion*)vp, (WRegion*)scr, geom);
+	region_init((WRegion*)vp, (WRegion*)scr, geom);
 	
 	if(id==0){
 		vp->atom_workspace=XInternAtom(wglobal.dpy, "_ION_WORKSPACE", False);
@@ -59,12 +59,12 @@ WViewport *create_viewport(WScreen *scr, int id, WRectangle geom)
 }
 
 
-void deinit_viewport(WViewport *vp)
+void viewport_deinit(WViewport *vp)
 {
 	while(vp->ws_list!=NULL)
 		region_unset_manager(vp->ws_list, (WRegion*)vp, &(vp->ws_list));
 		
-	deinit_region((WRegion*)vp);
+	region_deinit((WRegion*)vp);
 }
 
 
@@ -93,7 +93,7 @@ static bool create_initial_workspace_on_vp(WViewport *vp)
 }
 
 
-bool init_workspaces_on_vp(WViewport* vp)
+bool viewport_initialize_workspaces(WViewport* vp)
 {
 	WRegion *ws=NULL;
 	char *wsname=NULL;
@@ -152,7 +152,7 @@ static WRegion *viewport_do_add_managed(WViewport *vp, WRegionAddFn *fn,
 	if(flags&REGION_ATTACH_SWITCHTO)
 		viewport_display_managed(vp, reg);
 	else
-		unmap_region(reg);
+		region_unmap(reg);
 	
 	return reg;
 }
@@ -185,7 +185,7 @@ static void viewport_remove_managed(WViewport *vp, WRegion *reg)
 /*{{{ region dynfun implementations */
 
 
-static void fit_viewport(WViewport *vp, WRectangle geom)
+static void viewport_fit(WViewport *vp, WRectangle geom)
 {
 	WRegion *sub;
 	
@@ -195,31 +195,31 @@ static void fit_viewport(WViewport *vp, WRectangle geom)
 	geom.y=0;
 	
 	FOR_ALL_MANAGED_ON_LIST(vp->ws_list, sub){
-		fit_region(sub, geom);
+		region_fit(sub, geom);
 	}
 }
 
 
-static void map_viewport(WViewport *vp)
+static void viewport_map(WViewport *vp)
 {
 	MARK_REGION_MAPPED(vp);
 	if(vp->current_ws!=NULL)
-		map_region(vp->current_ws);
+		region_map(vp->current_ws);
 }
 
 
-static void unmap_viewport(WViewport *vp)
+static void viewport_unmap(WViewport *vp)
 {
 	MARK_REGION_UNMAPPED(vp);
 	if(vp->current_ws!=NULL)
-		unmap_region(vp->current_ws);
+		region_unmap(vp->current_ws);
 }
 
 
-static void focus_viewport(WViewport *vp, bool warp)
+static void viewport_set_focus_to(WViewport *vp, bool warp)
 {
 	if(vp->current_ws!=NULL)
-		focus_region(vp->current_ws, warp);
+		region_set_focus_to(vp->current_ws, warp);
 }
 
 
@@ -231,10 +231,10 @@ static bool viewport_display_managed(WViewport *vp, WRegion *reg)
 		return FALSE;
 
 	if(region_is_fully_mapped((WRegion*)vp))
-		map_region(reg);
+		region_map(reg);
 	
 	if(vp->current_ws!=NULL)
-		unmap_region(vp->current_ws);
+		region_unmap(vp->current_ws);
 	
 	vp->current_ws=reg;
 	
@@ -279,27 +279,27 @@ static WRegion *nth_ws(WViewport *vp, uint n)
 }
 
 
-void viewport_display_nth(WViewport *vp, uint n)
+void viewport_switch_nth(WViewport *vp, uint n)
 {
 	WRegion *sub=nth_ws(vp, n);
 	if(sub!=NULL)
-		display_region_sp(sub);
+		region_display_sp(sub);
 }
 
 
-void viewport_display_next(WViewport *vp)
+void viewport_switch_next(WViewport *vp)
 {
 	WRegion *reg=NEXT_MANAGED_WRAP(vp->ws_list, vp->current_ws);
 	if(reg!=NULL)
-		display_region_sp(reg);
+		region_display_sp(reg);
 }
 
 
-void viewport_display_prev(WViewport *vp)
+void viewport_switch_prev(WViewport *vp)
 {
 	WRegion *reg=PREV_MANAGED_WRAP(vp->ws_list, vp->current_ws);
 	if(reg!=NULL)
-		display_region_sp(reg);
+		region_display_sp(reg);
 }
 
 
@@ -359,7 +359,7 @@ void goto_viewport_id(int id)
 {
 	WViewport *vp=find_viewport_id(id);
 	if(vp!=NULL)
-		goto_region((WRegion*)vp);
+		region_goto((WRegion*)vp);
 }
 
 
@@ -373,7 +373,7 @@ void goto_next_viewport()
 	if(vp==NULL)
 		vp=find_viewport_id(0);
 	if(vp!=NULL)
-		goto_region((WRegion*)vp);
+		region_goto((WRegion*)vp);
 }
 
 
@@ -389,34 +389,34 @@ void goto_prev_viewport()
 	else
 		vp=find_viewport_id(vp->id-1);
 	if(vp!=NULL)
-		goto_region((WRegion*)vp);
+		region_goto((WRegion*)vp);
 }
 
 
 EXTL_EXPORT
-void switch_ws_nth(WScreen *scr, uint n)
+void screen_switch_nth_on_cvp(WScreen *scr, uint n)
 {
 	WViewport *vp=current_vp(scr);
 	if(vp!=NULL)
-		viewport_display_nth(vp, n);
+		viewport_switch_nth(vp, n);
 }
 
 
 EXTL_EXPORT
-void switch_ws_next(WScreen *scr)
+void screen_switch_next_on_cvp(WScreen *scr)
 {
 	WViewport *vp=current_vp(scr);
 	if(vp!=NULL)
-		viewport_display_next(vp);
+		viewport_switch_next(vp);
 }
 
 
 EXTL_EXPORT
-void switch_ws_prev(WScreen *scr)
+void screen_switch_prev_on_cvp(WScreen *scr)
 {
 	WViewport *vp=current_vp(scr);
 	if(vp!=NULL)
-		viewport_display_prev(vp);
+		viewport_switch_prev(vp);
 }
 
 
@@ -427,10 +427,10 @@ void switch_ws_prev(WScreen *scr)
 
 
 static DynFunTab viewport_dynfuntab[]={
-	{fit_region, fit_viewport},
-	{map_region, map_viewport},
-	{unmap_region, unmap_viewport},
-	{focus_region, focus_viewport},
+	{region_fit, viewport_fit},
+	{region_map, viewport_map},
+	{region_unmap, viewport_unmap},
+	{region_set_focus_to, viewport_set_focus_to},
 	
 	{(DynFun*)region_display_managed, (DynFun*)viewport_display_managed},
 	{region_request_managed_geom, region_request_managed_geom_unallow},
@@ -441,7 +441,7 @@ static DynFunTab viewport_dynfuntab[]={
 };
 
 
-IMPLOBJ(WViewport, WRegion, deinit_viewport, viewport_dynfuntab);
+IMPLOBJ(WViewport, WRegion, viewport_deinit, viewport_dynfuntab);
 
 
 /*}}}*/

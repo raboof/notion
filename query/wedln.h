@@ -49,8 +49,6 @@ extern WEdln *create_wedln(WWindow *par, WRectangle geom,
 extern void wedln_set_completion_handler(WEdln *wedln,
 										 EdlnCompletionHandler *h,
 										 void *d);
-extern void deinit_wedln(WEdln *edln);
-
 extern void wedln_finish(WEdln *wedln);
 extern void wedln_paste(WEdln *wedln);
 extern void wedln_draw(WEdln *wedln, bool complete);

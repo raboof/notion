@@ -33,7 +33,7 @@ void fwarn(WGenFrame *frame, const char *p)
 										   (void*)p);
 	}
 	
-	map_region((WRegion*)wmsg);
+	region_map((WRegion*)wmsg);
 
 	if(REGION_IS_ACTIVE(frame)){
 		set_focus((WRegion*)wmsg);

@@ -29,7 +29,7 @@
 /*{{{ Exec */
 
 
-void ioncore_do_exec(const char *cmd)
+void do_exec(const char *cmd)
 {
 	char *argv[4];
 	
@@ -53,7 +53,7 @@ void ioncore_do_exec(const char *cmd)
 
 
 EXTL_EXPORT
-void ioncore_exec(WScreen *scr, const char *cmd)
+void exec_on_screen(WScreen *scr, const char *cmd)
 {
 	int pid;
 	char *tmp;
@@ -77,7 +77,7 @@ void ioncore_exec(WScreen *scr, const char *cmd)
 	
 	sprintf(tmp, "exec %s", cmd);
 	
-	ioncore_do_exec(tmp);
+	do_exec(tmp);
 }
 
 
@@ -104,7 +104,7 @@ void do_open_with(WScreen *scr, const char *cmd, const char *file)
 		die_err();
 	
 	sprintf(tmp, "exec %s '%s'", cmd, file);
-	ioncore_do_exec(tmp);
+	do_exec(tmp);
 }
 
 
@@ -146,7 +146,7 @@ void setup_environ(int scr)
 /*{{{ Exit and restart */
 
 
-static void ioncore_exitret(int retval)
+static void exitret(int retval)
 {	
 	ioncore_deinit();
 	exit(retval);
@@ -154,18 +154,18 @@ static void ioncore_exitret(int retval)
 
 
 EXTL_EXPORT
-void ioncore_exit()
+void exit_wm()
 {
-	ioncore_exitret(EXIT_SUCCESS);
+	exitret(EXIT_SUCCESS);
 }
 
 
 EXTL_EXPORT
-void ioncore_restart_other(const char *cmd)
+void restart_other_wm(const char *cmd)
 {
 	ioncore_deinit();
 	if(cmd!=NULL){
-		ioncore_do_exec(cmd);
+		do_exec(cmd);
 	}
 	execvp(wglobal.argv[0], wglobal.argv);
 	die_err_obj(wglobal.argv[0]);
@@ -173,9 +173,9 @@ void ioncore_restart_other(const char *cmd)
 
 
 EXTL_EXPORT
-void ioncore_restart()
+void restart_wm()
 {
-	ioncore_restart_other(NULL);
+	restart_other_wm(NULL);
 }
 
 

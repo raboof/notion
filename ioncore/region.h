@@ -90,13 +90,13 @@ DECLOBJ(WRegion){
 								 : PREV_MANAGED_WRAP(LIST, LIST))
 
 
-DYNFUN void fit_region(WRegion *reg, WRectangle geom);
-DYNFUN void map_region(WRegion *reg);
-DYNFUN void unmap_region(WRegion *reg);
-/* Use set_focus instead except in focus_region handler itself 
- * when focusing subregions.
+DYNFUN void region_fit(WRegion *reg, WRectangle geom);
+DYNFUN void region_map(WRegion *reg);
+DYNFUN void region_unmap(WRegion *reg);
+/* Use set_focus instead of region_set_focus_to handler itself when
+ * focusing subregions.
  */
-DYNFUN void focus_region(WRegion *reg, bool warp);
+DYNFUN void region_set_focus_to(WRegion *reg, bool warp);
 DYNFUN void region_notify_rootpos(WRegion *reg, int x, int y);
 /* mode==Above, return topmost; mode==Below, return bottomost */
 DYNFUN Window region_restack(WRegion *reg, Window other, int mode);
@@ -105,18 +105,18 @@ DYNFUN void region_activated(WRegion *reg);
 DYNFUN void region_inactivated(WRegion *reg);
 DYNFUN void region_draw_config_updated(WRegion *reg);
 DYNFUN void region_close(WRegion *reg);
-extern void default_draw_config_updated(WRegion *reg);
+extern void region_default_draw_config_updated(WRegion *reg);
 
 extern void region_rootpos(WRegion *reg, int *xret, int *yret);
-extern void notify_subregions_rootpos(WRegion *reg, int x, int y);
-extern void notify_subregions_move(WRegion *reg);
+extern void region_notify_subregions_rootpos(WRegion *reg, int x, int y);
+extern void region_notify_subregions_move(WRegion *reg);
 
-extern bool display_region(WRegion *reg);
-extern bool display_region_sp(WRegion *reg);
-extern bool goto_region(WRegion *reg);
+extern bool region_display(WRegion *reg);
+extern bool region_display_sp(WRegion *reg);
+extern bool region_goto(WRegion *reg);
 
-extern void init_region(WRegion *reg, WRegion *parent, WRectangle geom);
-extern void deinit_region(WRegion *reg);
+extern void region_init(WRegion *reg, WRegion *parent, WRectangle geom);
+extern void region_deinit(WRegion *reg);
 
 /* --> window? */
 extern void region_got_focus(WRegion *reg);

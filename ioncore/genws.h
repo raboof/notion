@@ -17,8 +17,8 @@ DECLOBJ(WGenWS){
 	WRegion reg;
 };
 
-extern void init_genws(WGenWS *ws, WWindow *parent, WRectangle geom);
-extern void deinit_genws(WGenWS *ws);
+extern void genws_init(WGenWS *ws, WWindow *parent, WRectangle geom);
+extern void genws_deinit(WGenWS *ws);
 
 extern WGenWS *lookup_workspace(const char *name);
 extern int complete_workspace(char *nam, char ***cp_ret, char **beg,

@@ -40,10 +40,10 @@ DECLOBJ(WGenFrame){
 
 
 /* Create/destroy */
-extern bool init_genframe(WGenFrame *genframe, WWindow *parent,
-						  WRectangle geom, int id);
 extern WGenFrame *create_genframe(WWindow *parent, WRectangle geom, int id);
-extern void deinit_genframe(WGenFrame *genframe);
+extern bool genframe_init(WGenFrame *genframe, WWindow *parent,
+						  WRectangle geom, int id);
+extern void genframe_deinit(WGenFrame *genframe);
 
 /* Resize and reparent */
 extern bool genframe_reparent(WGenFrame *genframe, WWindow *parent,

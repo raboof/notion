@@ -159,7 +159,7 @@ static void scan_initial_windows(WScreen *scr)
 }
 
 
-void manage_initial_windows(WScreen *scr)
+void screen_manage_initial_windows(WScreen *scr)
 {
 	Window *wins=scr->tmpwins;
 	Window tfor=None;
@@ -224,7 +224,7 @@ static WScreen *preinit_screen(int xscr)
 	geom.w=DisplayWidth(dpy, xscr);
 	geom.h=DisplayHeight(dpy, xscr);
 	
-	init_window((WWindow*)scr, NULL, rootwin, geom);
+	window_init((WWindow*)scr, NULL, rootwin, geom);
 	
 	scr->root.region.flags|=REGION_BINDINGS_ARE_GRABBED;
 	scr->root.region.screen=scr;
@@ -268,7 +268,7 @@ WViewport *add_viewport(WScreen *scr, int id, WRectangle geom)
 	
 	region_set_manager((WRegion*)vp, (WRegion*)scr, &(scr->viewport_list));
 	
-	map_region((WRegion*)vp);
+	region_map((WRegion*)vp);
 	
 	if(scr->default_viewport==NULL)
 		scr->default_viewport=vp;
@@ -349,7 +349,7 @@ WScreen *manage_screen(int xscr)
 }
 
 
-void deinit_screen(WScreen *scr)
+void screen_deinit(WScreen *scr)
 {
 	WRegion *reg, *next;
 
@@ -366,7 +366,7 @@ void deinit_screen(WScreen *scr)
 		wglobal.screens=(WScreen*)tmp;
 	}
 	
-	deinit_region((WRegion*)scr);
+	region_deinit((WRegion*)scr);
 }
 
 
@@ -376,25 +376,25 @@ void deinit_screen(WScreen *scr)
 /*{{{ region dynfun implementations */
 
 
-static void fit_screen(WScreen *scr, WRectangle geom)
+static void screen_fit(WScreen *scr, WRectangle geom)
 {
-	warn("Don't know how to fit_screen");
+	warn("Don't know how to screen_fit");
 }
 
 
-static void map_screen(WScreen *scr)
+static void screen_map(WScreen *scr)
 {
 	warn("Attempt to map a screen.");
 }
 
 
-static void unmap_screen(WScreen *scr)
+static void screen_unmap(WScreen *scr)
 {
 	warn("Attempt to unmap a screen -- impossible");
 }
 
 
-static void focus_screen(WScreen *scr, bool warp)
+static void screen_set_focus_to(WScreen *scr, bool warp)
 {
 	WRegion *sub;
 	
@@ -408,9 +408,9 @@ static void focus_screen(WScreen *scr, bool warp)
 	}
 		
 	if(sub!=NULL)
-		focus_region(sub, warp);
+		region_set_focus_to(sub, warp);
 	else
-		focus_window(&(scr->root), warp);
+		window_set_focus_to(&(scr->root), warp);
 }
 
 
@@ -488,10 +488,10 @@ bool setup_screens()
 	FOR_ALL_SCREENS(scr){
 		FOR_ALL_MANAGED_ON_LIST(scr->viewport_list, reg){
 			if(WOBJ_IS(reg, WViewport) &&
-			   init_workspaces_on_vp((WViewport*)reg))
+			   viewport_initialize_workspaces((WViewport*)reg))
 				n++;
 		}
-		manage_initial_windows(scr);
+		screen_manage_initial_windows(scr);
 	}
 	
 	return (n!=0);
@@ -505,10 +505,10 @@ bool setup_screens()
 
 
 static DynFunTab screen_dynfuntab[]={
-	{fit_region, fit_screen},
-	{map_region, map_screen},
-	{unmap_region, unmap_screen},
-	{focus_region, focus_screen},
+	{region_fit, screen_fit},
+	{region_map, screen_map},
+	{region_unmap, screen_unmap},
+	{region_set_focus_to, screen_set_focus_to},
 	{(DynFun*)reparent_region, (DynFun*)reparent_screen},
 	/*{region_request_managed_geom, region_request_managed_geom_unallow},*/
 	{region_activated, screen_activated},
@@ -517,7 +517,7 @@ static DynFunTab screen_dynfuntab[]={
 };
 
 
-IMPLOBJ(WScreen, WWindow, deinit_screen, screen_dynfuntab);
+IMPLOBJ(WScreen, WWindow, screen_deinit, screen_dynfuntab);
 
 	
 /*}}}*/

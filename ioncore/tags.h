@@ -10,11 +10,10 @@
 
 #include "region.h"
 
-extern void tag_region(WRegion *reg);
-extern void untag_region(WRegion *reg);
-extern void toggle_region_tag(WRegion *reg);
-extern void clear_tags(WRegion *reg);
-extern void clear_sub_tags(WRegion *reg);
+extern void region_tag(WRegion *reg);
+extern void region_untag(WRegion *reg);
+extern void region_toggle_tag(WRegion *reg);
+extern void clear_tags();
 
 extern WRegion *tag_first();
 extern WRegion *tag_take_first();

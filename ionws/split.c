@@ -123,7 +123,7 @@ static int reg_resize(WRegion *reg, int dir, int npos, int nsize)
 		/*wwin->flags&=~WWINDOW_WFORCED;*/
 	}
 	
-	fit_region(reg, geom);
+	region_fit(reg, geom);
 	
 	return nsize;
 }
@@ -743,7 +743,7 @@ static WRegion *up_or_left(WRegion *reg, int dir)
 static void goto_reg(WRegion *reg)
 {
 	if(reg!=NULL)
-		goto_region(reg);
+		region_goto(reg);
 }
 
 
@@ -825,7 +825,7 @@ void ionws_add_managed(WIonWS *ws, WRegion *reg)
 	region_add_bindmap_owned(reg, &ionws_bindmap, (WRegion*)ws);
 	
 	if(REGION_IS_MAPPED(ws))
-		map_region(reg);
+		region_map(reg);
 }
 
 

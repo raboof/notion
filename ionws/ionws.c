@@ -28,7 +28,7 @@
 /*{{{ region dynfun implementations */
 
 
-static void fit_ionws(WIonWS *ws, WRectangle geom)
+static void ionws_fit(WIonWS *ws, WRectangle geom)
 {
 	REGION_GEOM(ws)=geom;
 	
@@ -66,37 +66,37 @@ static bool reparent_ionws(WIonWS *ws, WWindow *parent, WRectangle geom)
 		}
 	}
 	
-	fit_ionws(ws, geom);
+	ionws_fit(ws, geom);
 	
 	return TRUE;
 }
 
 
-static void map_ionws(WIonWS *ws)
+static void ionws_map(WIonWS *ws)
 {
 	WRegion *reg;
 
 	MARK_REGION_MAPPED(ws);
 	
 	FOR_ALL_MANAGED_ON_LIST(ws->managed_list, reg){
-		map_region(reg);
+		region_map(reg);
 	}
 }
 
 
-static void unmap_ionws(WIonWS *ws)
+static void ionws_unmap(WIonWS *ws)
 {
 	WRegion *reg;
 	
 	MARK_REGION_UNMAPPED(ws);
 	
 	FOR_ALL_MANAGED_ON_LIST(ws->managed_list, reg){
-		unmap_region(reg);
+		region_unmap(reg);
 	}
 }
 
 
-static void focus_ionws(WIonWS *ws, bool warp)
+static void ionws_set_focus_to(WIonWS *ws, bool warp)
 {
 	WRegion *sub=ionws_find_current(ws);
 	
@@ -105,7 +105,7 @@ static void focus_ionws(WIonWS *ws, bool warp)
 		return;
 	}
 
-	focus_region(sub, warp);
+	region_set_focus_to(sub, warp);
 }
 
 
@@ -138,14 +138,14 @@ static WIonFrame *create_initial_frame(WIonWS *ws, WWindow *parent,
 }
 
 
-static bool init_ionws(WIonWS *ws, WWindow *parent, WRectangle bounds, bool ci)
+static bool ionws_init(WIonWS *ws, WWindow *parent, WRectangle bounds, bool ci)
 {
-	init_genws(&(ws->genws), parent, bounds);
+	genws_init(&(ws->genws), parent, bounds);
 	ws->split_tree=NULL;
 	
 	if(ci){
 		if(create_initial_frame(ws, parent, bounds)==NULL){
-			deinit_genws(&(ws->genws));
+			genws_deinit(&(ws->genws));
 			return FALSE;
 		}
 	}
@@ -166,14 +166,14 @@ WIonWS *create_ionws_simple(WWindow *parent, WRectangle bounds)
 }
 
 
-void deinit_ionws(WIonWS *ws)
+void ionws_deinit(WIonWS *ws)
 {
 	WRegion *reg;
 	
 	while(ws->managed_list!=NULL)
 		ionws_remove_managed(ws, ws->managed_list);
 
-	deinit_genws(&(ws->genws));
+	genws_deinit(&(ws->genws));
 }
 
 
@@ -389,10 +389,10 @@ WRegion *ionws_load(WWindow *par, WRectangle geom, ExtlTab tab)
 
 
 static DynFunTab ionws_dynfuntab[]={
-	{fit_region, fit_ionws},
-	{map_region, map_ionws},
-	{unmap_region, unmap_ionws},
-	{focus_region, focus_ionws},
+	{region_fit, ionws_fit},
+	{region_map, ionws_map},
+	{region_unmap, ionws_unmap},
+	{region_set_focus_to, ionws_set_focus_to},
 	{(DynFun*)reparent_region, (DynFun*)reparent_ionws},
 	
 	{(DynFun*)region_ws_add_clientwin, (DynFun*)ionws_add_clientwin},
@@ -411,7 +411,7 @@ static DynFunTab ionws_dynfuntab[]={
 };
 
 
-IMPLOBJ(WIonWS, WGenWS, deinit_ionws, ionws_dynfuntab);
+IMPLOBJ(WIonWS, WGenWS, ionws_deinit, ionws_dynfuntab);
 
 	
 /*}}}*/

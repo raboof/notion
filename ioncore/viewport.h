@@ -28,13 +28,15 @@ DECLOBJ(WViewport){
 
 extern WViewport *create_viewport(WScreen *scr, int id, WRectangle geom);
 
-extern void viewport_display_nth(WViewport *vp, uint n);
-extern void viewport_display_next(WViewport *vp);
-extern void viewport_display_prev(WViewport *vp);
+extern bool viewport_initialize_workspaces(WViewport* vp);
 
-extern void switch_ws_nth(WScreen *scr, uint n);
-extern void switch_ws_next(WScreen *scr);
-extern void switch_ws_prev(WScreen *scr);
+extern void viewport_switch_nth(WViewport *vp, uint n);
+extern void viewport_switch_next(WViewport *vp);
+extern void viewport_switch_prev(WViewport *vp);
+
+extern void screen_switch_nth_on_cvp(WScreen *scr, uint n);
+extern void screen_switch_next_on_cvp(WScreen *scr);
+extern void screen_switch_prev_on_cvp(WScreen *scr);
 
 extern WViewport *viewport_of(WRegion *reg);
 
@@ -47,7 +49,5 @@ extern WViewport *find_viewport_id(int id);
 extern void goto_viewport_id(int id);
 extern void goto_next_viewport();
 extern void goto_prev_viewport();
-
-extern bool init_workspaces_on_vp(WViewport* vp);
 
 #endif /* ION_IONCORE_VIEWPORT_H */

@@ -379,7 +379,7 @@ static bool wedln_init_prompt(WEdln *wedln, WScreen *scr, const char *prompt)
 }
 
 
-bool init_wedln(WEdln *wedln, WWindow *par, WRectangle geom,
+bool wedln_init(WEdln *wedln, WWindow *par, WRectangle geom,
 				WEdlnHandler *handler, const char *prompt, const char *dflt)
 {
 	wedln->vstart=0;
@@ -401,7 +401,7 @@ bool init_wedln(WEdln *wedln, WWindow *par, WRectangle geom,
 
 	init_listing(&(wedln->complist));
 	
-	if(!init_input((WInput*)wedln, par, geom)){
+	if(!input_init((WInput*)wedln, par, geom)){
 		edln_deinit(&(wedln->edln));
 		free(wedln->prompt);
 		return FALSE;
@@ -431,7 +431,7 @@ static void wedln_draw_config_updated(WEdln *wedln)
 }
 
 
-void deinit_wedln(WEdln *wedln)
+static void wedln_deinit(WEdln *wedln)
 {
 	if(wedln->prompt!=NULL)
 		free(wedln->prompt);
@@ -443,7 +443,7 @@ void deinit_wedln(WEdln *wedln)
 		deinit_listing(&(wedln->complist));
 
 	edln_deinit(&(wedln->edln));
-	deinit_input((WInput*)wedln);
+	input_deinit((WInput*)wedln);
 }
 
 
@@ -516,7 +516,7 @@ static DynFunTab wedln_dynfuntab[]={
 };
 
 
-IMPLOBJ(WEdln, WInput, deinit_wedln, wedln_dynfuntab);
+IMPLOBJ(WEdln, WInput, wedln_deinit, wedln_dynfuntab);
 
 	
 /*}}}*/

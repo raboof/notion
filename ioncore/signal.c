@@ -76,11 +76,11 @@ void check_signals()
 	
 	if(kill_sig!=0){
 		if(kill_sig==SIGUSR1){
-			ioncore_restart_other(tmp);
+			restart_other_wm(tmp);
 			assert(0);
 		} 
 		if(kill_sig==SIGTERM)
-			ioncore_exit();
+			exit_wm();
 
 		ioncore_deinit();
 		kill(getpid(), kill_sig);
