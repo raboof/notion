@@ -113,7 +113,7 @@ static void do_split(WIonFrame *oframe, const char *str, bool attach)
 		  : region_min_w((WRegion*)oframe));
 	
 	reg=split_reg((WRegion*)oframe, dir, primn, mins,
-				  (WRegionSimpleCreateFn*)create_ionframe_simple);
+				  (WRegionSimpleCreateFn*)create_ionframe);
 	
 	if(reg==NULL){
 		warn("Unable to split");
@@ -168,7 +168,7 @@ void ionws_newframe(WIonWS *ws, const char *dirstr)
 	mins=(dir==VERTICAL ? GRDATA_OF(ws)->h_unit : GRDATA_OF(ws)->w_unit);
 	
 	reg=split_toplevel(ws, dir, primn, mins,
-					   (WRegionSimpleCreateFn*)create_ionframe_simple);
+					   (WRegionSimpleCreateFn*)create_ionframe);
 	if(reg!=NULL)
 		warp(reg);
 }

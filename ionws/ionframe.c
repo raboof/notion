@@ -30,14 +30,11 @@ static void set_tab_spacing(WIonFrame *frame);
 /*{{{ Destroy/create frame */
 
 
-static bool ionframe_init(WIonFrame *frame, WWindow *parent, WRectangle geom,
-						  int flags)
+static bool ionframe_init(WIonFrame *frame, WWindow *parent, WRectangle geom)
 {
 	if(!genframe_init((WGenFrame*)frame, parent, geom))
 		return FALSE;
 	
-	flags&=~WGENFRAME_TAB_HIDE;
-	frame->genframe.flags|=flags;
 	set_tab_spacing(frame);
 	
 	region_add_bindmap((WRegion*)frame, &(ionframe_bindmap));
@@ -46,15 +43,9 @@ static bool ionframe_init(WIonFrame *frame, WWindow *parent, WRectangle geom,
 }
 
 
-WIonFrame *create_ionframe(WWindow *parent, WRectangle geom, int flags)
+WIonFrame *create_ionframe(WWindow *parent, WRectangle geom)
 {
-	CREATEOBJ_IMPL(WIonFrame, ionframe, (p, parent, geom, flags));
-}
-
-
-WIonFrame* create_ionframe_simple(WWindow *parent, WRectangle geom)
-{
-	return create_ionframe(parent, geom, 0);
+	CREATEOBJ_IMPL(WIonFrame, ionframe, (p, parent, geom));
 }
 
 
@@ -247,12 +238,12 @@ void ionframe_draw(const WIonFrame *frame, bool complete)
 	else
 		dinfo->colors=&(grdata->frame_colors);
 	
-	/*if(complete)
-		XClearWindow(wglobal.dpy, WGENFRAME_WIN(frame));*/
+	if(complete)
+		XClearWindow(wglobal.dpy, WGENFRAME_WIN(frame));
 	
 	draw_border_inverted(dinfo, TRUE);
 
-	genframe_draw_bar((WGenFrame*)frame, complete);
+	genframe_draw_bar((WGenFrame*)frame, FALSE);
 }
 
 
@@ -337,12 +328,15 @@ WRegion *ionframe_load(WWindow *par, WRectangle geom, ExtlTab tab)
 	WIonFrame *frame;
 	int n, i;
 	
-	extl_table_gets_i(tab, "flags", &flags);
-	
-	frame=create_ionframe(par, geom, flags);
+	frame=create_ionframe(par, geom);
 	
 	if(frame==NULL)
 		return NULL;
+	
+	extl_table_gets_i(tab, "flags", &flags);
+	
+	if(flags&WGENFRAME_TAB_HIDE)
+		genframe_toggle_tab((WGenFrame*)frame);
 
 	if(!extl_table_gets_t(tab, "subs", &substab))
 		return (WRegion*)frame;

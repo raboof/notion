@@ -55,7 +55,6 @@ bool genframe_init(WGenFrame *genframe, WWindow *parent, WRectangle geom)
 	ulong attrflags=0;
 	WRootWin *rootwin=ROOTWIN_OF(parent);
 	
-	genframe->flags=0;
 	genframe->saved_w=0;
 	genframe->saved_h=0;
 	genframe->saved_x=0;
@@ -338,12 +337,9 @@ void genframe_toggle_tab(WGenFrame *genframe)
 	if(genframe->flags&WGENFRAME_SHADED)
 		return;
 	
-	if(genframe->flags&WGENFRAME_TAB_HIDE)
-		genframe->flags&=~WGENFRAME_TAB_HIDE;
-	else
-		genframe->flags|=WGENFRAME_TAB_HIDE;
+	genframe->flags^=WGENFRAME_TAB_HIDE;
 	mplex_fit_managed(&(genframe->mplex));
-	genframe_draw(genframe,TRUE);
+	genframe_draw(genframe, TRUE);
 }
 
 
@@ -480,6 +476,9 @@ void genframe_draw_bar_default(const WGenFrame *genframe, bool complete)
 	WGRData *grdata=GRDATA_OF(genframe);
 	WRectangle bg;
 	int n;
+
+	if(genframe->flags&WGENFRAME_TAB_HIDE)
+		return;
 	
 	genframe_bar_geom(genframe, &bg);
 	
