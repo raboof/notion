@@ -173,8 +173,10 @@ static void menu_calc_size(WMenu *menu, int maxw, int maxh,
 			else if(menu->selected_entry>=menu->first_entry+vis)
 				menu->first_entry=menu->selected_entry-vis+1;
 		}
+		if(vis<=0)
+			vis=1;
 		menu->vis_entries=vis;
-		*h_ret=vis*(menu->entry_h+e_bdw.spacing)+bdh;
+		*h_ret=vis*menu->entry_h+(vis-1)*e_bdw.spacing+bdh;
 	}
 
 	/* Calculate new shortened entry names */
