@@ -6,7 +6,11 @@ usercache=""
 syscache=""
 
 translate_grepsafe() { 
-    sed 's:[[[.].].*$^\\]:\\&:g'
+    # The regexp below is supposed to be [\[\].*$^\\], but sed sucks
+    # and doesn't support simple and intuitive escaping and we have to
+    # do it the hard way with the collations [.[.] and [.].] standing 
+    # for [ and ], respectively.
+    sed 's:[[.[.][.].].*$^\\]:\\&:g'
 }
 
 case "$1" in
