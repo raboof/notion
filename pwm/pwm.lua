@@ -28,17 +28,17 @@ ioncore.set_opaque_resize(false)
 ioncore.set_warp(false)
 
 -- Kludges to make apps behave better.
-include("kludges")
+dopath("kludges")
 
 -- Some usefull routines (needed by pwm-bindings and pwm-menus)
-include("menulib")
-include("querylib")
+dopath("menulib")
+dopath("querylib")
 
 -- Make some bindings.
-include("pwm-bindings")
+dopath("pwm-bindings")
 
 -- Define some menus (menu module required to actually use them)
-include("pwm-menus")
+dopath("pwm-menus")
 
 -- How to shorten window titles when the full title doesn't fit in
 -- the available space? The first-defined matching rule that succeeds 
@@ -52,7 +52,7 @@ ioncore.add_shortenrule("(.*)(<[0-9]+>)", "$1$2$|$1$<...$2")
 ioncore.add_shortenrule("(.*)", "$1$|$1$<...")
 
 -- Modules.
-include("mod_floatws")
-include("mod_menu")
---include("mod_query")
-include("mod_dock")
+dopath("mod_floatws")
+dopath("mod_menu")
+--dopath("mod_query")
+dopath("mod_dock")

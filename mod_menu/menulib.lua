@@ -167,7 +167,7 @@ local function mplex_of(reg)
 end
 
 local function selectstyle(look, where)
-    include(look)
+    dopath(look)
 
     local fname=ioncore.get_savefile('draw')
 
@@ -176,7 +176,7 @@ local function selectstyle(look, where)
         if not f then
             mod_query.message(where, err)
         else
-            f:write(string.format('include("%s")\n', look))
+            f:write(string.format('dopath("%s")\n', look))
             f:close()
         end
     end

@@ -379,7 +379,7 @@ err:
 }
 
 
-static int extl_include(lua_State *st)
+static int extl_dopath(lua_State *st)
 {
     bool res;
     const char *toincl, *cfdir;
@@ -400,9 +400,9 @@ static int extl_include(lua_State *st)
 /* Dummy code for documentation generation. */
 
 /*EXTL_DOC
- * Execute another file with Lua code.
+ * Look up and execute another file with Lua code.
  */
-EXTL_EXPORT_AS(global, include)
+EXTL_EXPORT_AS(global, dopath)
 bool include(const char *what);
 
 
@@ -432,8 +432,8 @@ static bool extl_init_obj_info(lua_State *st)
     lua_setglobal(st, "obj_is");
     lua_pushcfunction(st, extl_obj_exists);
     lua_setglobal(st, "obj_exists");
-    lua_pushcfunction(st, extl_include);
-    lua_setglobal(st, "include");
+    lua_pushcfunction(st, extl_dopath);
+    lua_setglobal(st, "dopath");
 
     return TRUE;
 }

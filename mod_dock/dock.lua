@@ -70,7 +70,7 @@ end
 -- Dock settings menu
 -- 
 
-include('menulib')
+dopath('menulib')
 
 defmenu("dock-settings", {
     menuentry("Pos-TL", "_:set{pos='tl'}"),

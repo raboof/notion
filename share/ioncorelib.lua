@@ -28,10 +28,10 @@ DEFAULT_WS_TYPE="WIonWS"
 ioncorelib.RESULT_DATA_LIMIT=1024^2
 
 -- Bindings, winprops, hooks and extra commands
-include('ioncorelib-luaext')
-include('ioncorelib-bindings')
-include('ioncorelib-winprops')
-include('ioncorelib-extras')
+dopath('ioncorelib-luaext')
+dopath('ioncorelib-bindings')
+dopath('ioncorelib-winprops')
+dopath('ioncorelib-extras')
 
 -- Export some important functions into global namespace.
 ioncorelib.export(ioncorelib, 
