@@ -100,14 +100,19 @@ static void floatws_unmap(WFloatWS *ws)
 
 static void floatws_set_focus_to(WFloatWS *ws, bool warp)
 {
-	if(ws->current_managed==NULL){
+	WRegion *r=ws->current_managed;
+	
+	if(r==NULL)
+		r=ws->managed_list;
+	
+	if(r==NULL){
 		SET_FOCUS(ws->dummywin);
 		if(warp)
 			do_move_pointer_to((WRegion*)ws);
 		return;
 	}
-
-	region_set_focus_to(ws->current_managed, warp);
+	
+	region_set_focus_to(r, warp);
 }
 
 
