@@ -1,5 +1,18 @@
-#ifndef ION_MOD_SM_WINMATCH_H
-#define ION_MOD_SM_WINMATCH_H
+/*
+ * ion/mod_sm/sm_mathcwin.c
+ *
+ * Copyright (c) Tuomo Valkonen 2004. 
+ * 
+ * Based on the code of the 'sm' module for Ion1 by an unknown contributor.
+ *
+ * Ion is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ */
+
+#ifndef ION_MOD_SM_MATCHWIN_H
+#define ION_MOD_SM_MATCHWIN_H
 
 #include <ioncore/common.h>
 #include <libtu/obj.h>
@@ -29,4 +42,4 @@ extern void mod_sm_start_purge_timer();
 extern bool mod_sm_add_match(WWindow *par, ExtlTab tab);
 extern void mod_sm_get_configuration(WClientWin *cwin, ExtlTab tab);
 
-#endif /* ION_MOD_SM_WINMATCH_H */
+#endif /* ION_MOD_SM_MATCHWIN_H */
