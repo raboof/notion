@@ -31,6 +31,9 @@ LIBDIR=@libdir@
 MODULEDIR=@libdir@/@PACKAGE_TARNAME@
 # ion-completefile (does not belong in SHAREDIR being a binary file)
 EXTRABINDIR=@libexecdir@/@PACKAGE_TARNAME@
+# For ion-completeman system-wide cache
+#VARDIR=@localstatedir@/cache/@PACKAGE_TARNAME@
+VARDIR=/var/cache/@PACKAGE_TARNAME@
 
 ##
 ## Modules

@@ -51,14 +51,6 @@ add_shortenrule("[^:]+: (.*)", "$1$|$1$<...")
 add_shortenrule("(.*)(<[0-9]+>)", "$1$2$|$1$<...$2")
 add_shortenrule("(.*)", "$1$|$1$<...")
 
--- List of directories to look for manuals in the F1 man page query.
-query_man_path={
-    "/usr/man",
-    "/usr/share/man",
-    "/usr/X11R6/man",
-    "/usr/local/man"
-}
-
 -- Modules.
 load_module("floatws")
 load_module("menu")

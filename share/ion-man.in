@@ -1,4 +1,4 @@
 #!/bin/sh
 topic=ion
 test $# -ge 1 && topic=$*
-exec SHAREDIR/ion-runinxterm -T "$topic manual" man $topic
+exec @SHAREDIR@/ion-runinxterm -T "$topic manual" man $topic

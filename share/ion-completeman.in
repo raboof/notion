@@ -1,0 +1,88 @@
+#!/bin/sh
+
+tocompl=""
+action=""
+usercache=""
+syscache=""
+
+translate_grepsafe() { 
+    sed 's:[[[.].].*$^\\]:\\&:g'
+}
+
+case "$1" in
+    -complete)
+        tocompl=`echo "$2" | translate_grepsafe`
+        action="complete"
+        ;;
+    -mkusercache)
+        action="mkusercache"
+        ;;
+    -mksyscache)
+        action="mksyscache"
+        ;;
+esac
+   
+if test "x$action" == x; then
+    echo "Usage: $0 (-complete what|-mkusercache|-mksyscache)"
+    exit 1
+fi
+        
+scan() {
+    if test "x$ION_MC_MANPATH" != "x"; then
+        mpath="$ION_MANPATH"
+    elif test "x$MANPATH" != "x"; then
+        mpath="$MANPATH"
+    else
+        mpprog=`which manpath`
+        if test "x$mpprog" == x; then
+            echo "Please set MANPATH, ION_MANPATH or put 'manpath' on PATH" > /dev/stderr
+            exit 1
+        fi
+        mpath=`$mpprog`
+    fi
+    
+    for p in `echo "$mpath"|tr : '\n'`; do
+        find  "$p" -type f -o -type l|sed 's:^.*/\([^/]\+\)\.[0-9].*$:\1:p; d'
+    done 
+}
+
+
+cachefile=""
+
+if test "x$HOME" != x; then
+    usercache="$HOME/.ion3/mancache"
+fi
+
+syscache="@VARDIR@/mancache"
+
+case "$action" in
+    complete)
+        if test "x$usercache" != x -a -f "$usercache"; then
+            cachefile="$usercache"
+        fi
+        
+        if test -f "$syscache"; then
+            cachefile="$syscache"
+        fi
+        
+        # Empty "common part" of completions.
+        echo ""
+        
+        if test "x$cachefile" != x; then
+            grep "^$tocompl" "$cachefile"
+        else
+            scan | grep "^$tocompl" 
+        fi
+        ;;
+    mkusercache)
+        if test "x$usercache" != x; then
+            scan > "$usercache"
+        else
+            echo >&2 "\$HOME not set."
+        fi
+        ;;
+    mksyscache)
+        mkdir -p "@VARDIR@"
+        scan > "$syscache"
+        ;;
+esac

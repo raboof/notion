@@ -30,6 +30,9 @@ LIBDIR=$(PREFIX)/lib
 MODULEDIR=$(LIBDIR)/ion
 # ion-completefile (does not belong in SHAREDIR being a binary file)
 EXTRABINDIR=$(LIBDIR)/ion
+# For ion-completeman system-wide cache
+VARDIR=/var/cache/ion
+
 
 ##
 ## Modules

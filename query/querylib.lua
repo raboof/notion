@@ -127,6 +127,61 @@ function querylib.complete_from_list(list, str)
 end    
 
 
+local pipes={}
+
+function querylib.popen_completions(wedln, cmd)
+    
+    local pst={wedln=wedln, maybe_stalled=false}
+    
+    local function rcv(str)
+        local data=""
+        
+        while str do
+            if pst.maybe_stalled then
+                pipes[rcv]=nil
+                return
+            end
+            data=data .. str
+            if string.len(data)>ioncorelib.RESULT_DATA_LIMIT then
+                error("Too much result data")
+            end
+            str=coroutine.yield()
+        end
+        
+        local results={}
+        
+        -- ion-completefile will return possible common part of path on
+        -- the first line and the entries in that directory on the
+        -- following lines.
+        for a in string.gfind(data, "([^\n]*)\n") do
+            table.insert(results, a)
+        end
+        
+        results.common_part=results[1]
+        table.remove(results, 1)
+        
+        wedln:set_completions(results)
+        
+        pipes[rcv]=nil
+        return
+    end
+    
+    local found_clean=false
+    for k, v in pipes do
+        if v.wedln==wedln then
+            if v.maybe_stalled then
+                v.maybe_stalled=true
+                found_clean=true
+            end
+        end
+    end
+    
+    if not found_clean then
+        pst[rcv]=pst
+        popen_bgread(cmd, coroutine.wrap(rcv))
+    end
+end
+
 -- }}}
 
 
@@ -291,37 +346,10 @@ defcmd("WMPlex", "query_renameworkspace",
 
 
 function querylib.file_completor(wedln, str, wp)
-    local function receive_data(str)
-        local data=""
-        
-        while str do
-            data=data .. str
-            if string.len(data)>ioncorelib.RESULT_DATA_LIMIT then
-                error("Too much result data")
-            end
-            str=coroutine.yield()
-        end
-        
-        
-        local results={}
-        
-        -- ion-completefile will return possible common part of path on
-        -- the first line and the entries in that directory on the
-        -- following lines.
-        for a in string.gfind(data, "([^\n]*)\n") do
-            table.insert(results, a)
-        end
-        
-        results.common_part=results[1]
-        table.remove(results, 1)
-        
-        wedln:set_completions(results)
-    end
-    
     local ic=lookup_script("ion-completefile")
     if ic then
-        popen_bgread(ic..(wp or " ")..string.shell_safe(str),
-                     coroutine.wrap(receive_data))
+        querylib.popen_completions(wedln,
+                                   ic..(wp or " ")..string.shell_safe(str))
     end
 end
 
@@ -438,65 +466,19 @@ defcmd("WMPlex", "query_ssh",
 -- Man pages {{{{
 
 
--- Use weak references to cache found manuals.
-querylib.mancache={}
-setmetatable(querylib.mancache, {__mode="v"})
-
 function querylib.man_completor(wedln, str)
-    local function set_completions(manuals)
-        local results=querylib.complete_from_list(manuals, str)
-        wedln:set_completions(results)
+    local mc=lookup_script("ion-completeman")
+    if mc then
+        querylib.popen_completions(wedln, mc.." "..string.shell_safe(str))
     end
-
-    if querylib.mancache.manuals then
-        set_completions(querylib.mancache.manuals)
-        return
-    end    
-    
-    local function receive_data(str)
-        local data = "\n"
-        
-        while str do
-            data=data .. str
-            if string.len(data)>ioncorelib.RESULT_DATA_LIMIT then
-                error("Too much result data")
-            end
-            str=coroutine.yield()
-        end
-        
-        local manuals={}
-        
-        for a in string.gfind(data, "[^\n]*/([^/.\n]+)%.%d[^\n]*\n") do
-            table.insert(manuals, a)
-        end
-
-        querylib.mancache.manuals=manuals
-        
-        set_completions(manuals)
-    end
-    
-    local dirs=table.concat(query_man_path, " ")
-    if dirs==nil then
-        return
-    end
-    
-    popen_bgread("find "..dirs.." -type f -o -type l", 
-                 coroutine.wrap(receive_data))
 end
 
 
 --DOC
 -- This query asks for a manual page to display. It uses the command
 -- \file{ion-man} to run \file{man} in a terminal emulator. By customizing
--- this script it is possible use some other man page viewer. To enable
--- tab-completion you must list paths with manuals in the table
--- \var{query_man_path}. For example,
---\begin{verbatim}
---query_man_path = {
---    "/usr/local/man","/usr/man",
---    "/usr/share/man", "/usr/X11R6/man",
---}
---\end{verbatim}
+-- this script it is possible use some other man page viewer. The script
+-- \file{ion-completeman} is used to complete manual pages.
 defcmd("WMPlex", "query_man", 
        function(mplex)
            local script=querylib.lookup_script_warn(mplex, "ion-man")

@@ -16,11 +16,12 @@ LUA_SOURCES = ioncorelib.lua ioncorelib-luaext.lua \
               ioncorelib-hooks.lua ioncorelib-extras.lua \
               ioncore-efbb.lua
 
-SHELLSCRIPTS = ion-edit ion-man ion-runinxterm ion-ssh ion-view
+SHELLSCRIPTS = ion-edit ion-man ion-runinxterm ion-ssh ion-view \
+	       ion-completeman
 
 MISC_SHARE = welcome_message.txt
 
-TARGETS=ion-ssh ion-man welcome_message.txt
+TARGETS=ion-ssh ion-man ion-completeman welcome_message.txt
 
 ######################################
 
@@ -38,7 +39,8 @@ _install:
 	done
 
 %: %.in
-	sed 's#SHAREDIR#$(SHAREDIR)#g' $< > $@
+	sed 's#@SHAREDIR@#$(SHAREDIR)#g' $< > $@
+	sed 's#@VARDIR@#$(VARDIR)#g' $< > $@
 	chmod $(BIN_MODE) $@
 
 #
