@@ -47,7 +47,7 @@ mkdist() {
     perl -n -i -e 'if(s/^#DIST: (.*)/$1/){ print; <>; } else { print; }' "$@"
 }
 
-mkdist Makefile
+mkdist Makefile system.mk
 mv libs.mk.dist libs.mk
 
 ##
