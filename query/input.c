@@ -88,8 +88,13 @@ void fit_input(WInput *input, WRectangle geom)
 
 void input_draw_config_updated(WInput *input)
 {
+#ifdef CF_XFT
+	XSetWindowBackground(wglobal.dpy, input->win.win,
+						 GRDATA_OF(input)->input_colors.bg.pixel);
+#else
 	XSetWindowBackground(wglobal.dpy, input->win.win,
 						 GRDATA_OF(input)->input_colors.bg);
+#endif
 	input_refit(input);
 	default_draw_config_updated((WRegion*)input);
 	draw_window((WWindow*)input, TRUE);

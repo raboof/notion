@@ -71,8 +71,8 @@ bool init_window(WWindow *wwin, WWindow *parent, Window win, WRectangle geom)
 	wwin->win=win;
 #ifdef CF_XFT
 	wwin->draw=XftDrawCreate(wglobal.dpy, win, 
-							 DefaultVisual(wglobal.dpy, scr->xscr),
-							 scr->default_cmap);
+							 DefaultVisual(wglobal.dpy, SCREEN_OF(wwin)->xscr),
+							 SCREEN_OF(wwin)->default_cmap);
 #else
 	wwin->draw=NULL;
 #endif
