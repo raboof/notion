@@ -139,7 +139,7 @@ static bool extl_cpcall(lua_State *st, ExtlCPCallFn *fn, void *ptr)
 /*}}}*/
 
 
-/*{{{ WObj userdata handling -- unsafe */
+/*{{{ Obj userdata handling -- unsafe */
 
 
 static int obj_cache_ref=LUA_NOREF;
@@ -174,19 +174,19 @@ static Obj *extl_get_wobj(lua_State *st, int pos)
 }
 
 
-static void extl_uncache(lua_State *st, WObj *obj)
+static void extl_uncache(lua_State *st, Obj *obj)
 {
     lua_rawgeti(st, LUA_REGISTRYINDEX, obj_cache_ref);
     lua_pushlightuserdata(st, obj);
     lua_pushnil(st);
     lua_rawset_check(st, -3);
-    obj->flags&=~WOBJ_EXTL_CACHED;
+    obj->flags&=~OBJ_EXTL_CACHED;
 }
 
 
-static void extl_obj_dest_handler(WWatch *watch, WObj *obj)
+static void extl_obj_dest_handler(Watch *watch, Obj *obj)
 {
-    if(obj->flags&WOBJ_EXTL_CACHED)
+    if(obj->flags&OBJ_EXTL_CACHED)
         extl_cpcall(l_st, (ExtlCPCallFn*)extl_uncache, obj);
 }
 
@@ -255,7 +255,7 @@ static int extl_obj_gc_handler(lua_State *st)
      * they are destroyed.
      */
     
-    watch=(WWatch*)lua_touserdata(st, 1);
+    watch=(Watch*)lua_touserdata(st, 1);
     
     if(watch!=NULL){
         if(watch->obj!=NULL)
