@@ -17,6 +17,9 @@
 #include <ioncore/common.h>
 #include <ioncore/objp.h>
 
+#define EXTL_EXTENSION	"lua"
+#define EXTL_COMPILED_EXTENSION	"lc"
+
 /* o: userdata/WObj
  * i: integer
  * d: double
@@ -155,8 +158,6 @@ bool extl_register_class(const char *cls, ExtlExportedFnSpec *fns,
 void extl_unregister_class(const char *cls, ExtlExportedFnSpec *fns);
 
 /* Misc. */
-
-extern const char* extl_extension();
 
 extern bool extl_init();
 extern void extl_deinit();

@@ -519,12 +519,6 @@ fail:
 }
 
 
-const char *extl_extension()
-{
-	return "lua";
-}
-
-
 void extl_deinit()
 {
 	lua_close(l_st);
