@@ -17,11 +17,18 @@
 #include <ioncore/rectangle.h>
 
 INTRSTRUCT(WListing);
+INTRSTRUCT(WListingItemInfo);
+
+DECLSTRUCT(WListingItemInfo){
+    int len;
+    int n_parts;
+    int *part_lens;
+};
 
 DECLSTRUCT(WListing){
     char **strs;
+    WListingItemInfo *iteminfos;
     int nstrs;
-    int *itemrows;
     int ncol, nrow, nitemcol, visrow;
     int firstitem, firstoff;
     int itemw, itemh, toth;

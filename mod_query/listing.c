@@ -22,7 +22,7 @@
 #define COL_SPACING 16
 #define CONT_INDENT "xx"
 #define CONT_INDENT_LEN 2
-#define ITEMROWS(L, R) ((L)->itemrows==NULL ? 1 : (L)->itemrows[R])
+#define ITEMROWS(L, R) ((L)->iteminfos==NULL ? 1 : (L)->iteminfos[R].n_parts)
 
 
 static int strings_maxw(GrBrush *brush, char **strs, int nstrs)
@@ -79,67 +79,97 @@ static int getbeg(GrBrush *brush, int maxw, char *str, int l, int *wret)
 }
 
 
-static int string_nrows(GrBrush *brush, int maxw, char *str)
+static void reset_iteminfo(WListingItemInfo *iinf)
 {
-    int wrapw=grbrush_get_text_width(brush, "\\", 1);
-    int ciw=grbrush_get_text_width(brush, CONT_INDENT, CONT_INDENT_LEN);
-    int l2, l=strlen(str);
-    int w;
-    int nr=1;
-    
-    if(maxw<=0)
-        return 1;
-    
-    while(1){
-        w=grbrush_get_text_width(brush, str, l);
-        if(w<maxw)
-            break;
-        l2=getbeg(brush, maxw-wrapw, str, l, &w);
-        if(l2==0)
-            break;
-        if(nr==1)
-            maxw-=ciw;
-        nr++;
-        l-=l2;
-        str+=l2;
+    iinf->n_parts=1;
+    if(iinf->part_lens!=NULL){
+        free(iinf->part_lens);
+        iinf->part_lens=NULL;
     }
-    
-    return nr;
 }
 
 
-static void draw_multirow(GrBrush *brush, Window win, int x, int y,
-                          int maxw, int h, char *str, const char *style)
+static void string_do_calc_parts(GrBrush *brush, int maxw, char *str, int l,
+                                 WListingItemInfo *iinf,
+                                 int wrapw, int ciw)
+{
+    int i=iinf->n_parts, l2=l, w;
+    
+    iinf->n_parts++;
+    
+    w=grbrush_get_text_width(brush, str, l);
+    
+    if(w>maxw){
+        l2=getbeg(brush, maxw-wrapw-(i==0 ? 0 : ciw), str, l, &w);
+        if(l2<=0)
+            l2=1;
+    }
+        
+    if(l2<l){
+        string_do_calc_parts(brush, maxw, str+l2, l-l2, iinf, wrapw, ciw);
+    }else{
+        int *p=(int*)realloc(iinf->part_lens, iinf->n_parts*sizeof(int));
+        if(p==NULL){
+            reset_iteminfo(iinf);
+        }else{
+            iinf->part_lens=p;
+        }
+    }
+
+    if(iinf->part_lens!=NULL)
+        iinf->part_lens[i]=l2;
+}
+
+
+static void string_calc_parts(GrBrush *brush, int maxw, char *str,
+                              WListingItemInfo *iinf)
 {
     int wrapw=grbrush_get_text_width(brush, "\\", 1);
     int ciw=grbrush_get_text_width(brush, CONT_INDENT, CONT_INDENT_LEN);
-    int l2, l=strlen(str);
-    int w;
-    int nr=1;
-    
-    if(maxw<=0)
-        return;
+    int i, s;
 
-    while(1){
-        w=grbrush_get_text_width(brush, str, l);
-        if(w<maxw)
-            break;
-        l2=getbeg(brush, maxw-wrapw, str, l, &w);
-        if(l2==0)
-            break;
-        grbrush_draw_string(brush, win, x, y, str, l2, TRUE, style);
-        grbrush_draw_string(brush, win, x+w, y, "\\", 1, TRUE, style);
-        if(nr==1){
-            maxw-=ciw;
-            x+=ciw;
-        }
-        nr++;
-        y+=h;
-        l-=l2;
-        str+=l2;
-    }
+    iinf->n_parts=0;
+    iinf->len=strlen(str);
+
+    if(maxw<=0)
+        reset_iteminfo(iinf);
+    else
+        string_do_calc_parts(brush, maxw, str, iinf->len, iinf, wrapw, ciw);
+}
+
+
+static void draw_multirow(GrBrush *brush, Window win, int x, int y, int h, 
+                          char *str, WListingItemInfo *iinf,
+                          int maxw, int ciw, int wrapw, const char *style)
+{
+    int i, l;
     
+    if(iinf==NULL){
+        grbrush_draw_string(brush, win, x, y, str, strlen(str), TRUE, style);
+        return;
+    }
+
+    assert(iinf->n_parts>=1);
+    if(iinf->part_lens==NULL){
+        assert(iinf->n_parts==1);
+        l=iinf->len;
+    }else{
+        l=iinf->part_lens[0];
+    }
+
     grbrush_draw_string(brush, win, x, y, str, l, TRUE, style);
+    
+    for(i=1; i<iinf->n_parts; i++){
+        grbrush_draw_string(brush, win, x+maxw-wrapw, y, "\\", 1, TRUE, style);
+        
+        y+=h;
+        str+=l;
+        x+=ciw;
+        maxw-=ciw;
+        l=iinf->part_lens[i];
+            
+        grbrush_draw_string(brush, win, x, y, str, l, TRUE, style);
+    }
 }
 
                           
@@ -198,7 +228,7 @@ void setup_listing(WListing *l, char **strs, int nstrs, bool onecol)
     if(l->strs!=NULL)
         deinit_listing(l);
 
-    l->itemrows=ALLOC_N(int, nstrs);
+    l->iteminfos=ALLOC_N(WListingItemInfo, nstrs);
     l->strs=strs;
     l->nstrs=nstrs;
     l->onecol=onecol;
@@ -227,15 +257,18 @@ void fit_listing(GrBrush *brush, const WRectangle *geom, WListing *l)
     else
         ncol=col_fit(w, l->itemw-COL_SPACING, COL_SPACING);
 
-    if(l->itemrows!=NULL){
+    if(l->iteminfos!=NULL){
         for(i=0; i<l->nstrs; i++){
             if(ncol!=1){
-                l->itemrows[i]=1;
+                reset_iteminfo(&(l->iteminfos[i]));
+                l->iteminfos[i].len=strlen(l->strs[i]);
             }else{
-                l->itemrows[i]=string_nrows(brush, w, l->strs[i]);
-                nrow+=l->itemrows[i];
+                string_calc_parts(brush, w, l->strs[i], &(l->iteminfos[i]));
             }
+            nrow+=l->iteminfos[i].n_parts;
         }
+    }else{
+        nrow=l->nstrs;
     }
     
     if(ncol>1){
@@ -271,13 +304,18 @@ void deinit_listing(WListing *l)
     if(l->strs==NULL)
         return;
     
-    while(l->nstrs--)
+    while(l->nstrs--){
         free(l->strs[l->nstrs]);
+        if(l->iteminfos!=NULL)
+            reset_iteminfo(&(l->iteminfos[l->nstrs]));
+    }
+
     free(l->strs);
     l->strs=NULL;
-    if(l->itemrows){
-        free(l->itemrows);
-        l->itemrows=NULL;
+    
+    if(l->iteminfos!=NULL){
+        free(l->iteminfos);
+        l->iteminfos=NULL;
     }
 }
 
@@ -286,8 +324,7 @@ void init_listing(WListing *l)
 {
     l->nstrs=0;
     l->strs=NULL;
-    l->itemrows=NULL;
-    l->strs=NULL;
+    l->iteminfos=NULL;
     l->nstrs=0;
     l->onecol=TRUE;
     l->itemw=0;
@@ -304,6 +341,8 @@ static void do_draw_listing(GrBrush *brush, Window win,
                             const WRectangle *geom, WListing *l,
                             const char *style)
 {
+    int wrapw=grbrush_get_text_width(brush, "\\", 1);
+    int ciw=grbrush_get_text_width(brush, CONT_INDENT, CONT_INDENT_LEN);
     int r, c, i, x, y;
     GrFontExtents fnte;
     
@@ -325,9 +364,9 @@ static void do_draw_listing(GrBrush *brush, Window win,
             if(i>=l->nstrs)
                 goto finished;
             
-            draw_multirow(brush, win, geom->x+x, y,
-                          geom->w-x, l->itemh, l->strs[i], 
-                          style);
+            draw_multirow(brush, win, geom->x+x, y, l->itemh, l->strs[i],
+                          (l->iteminfos!=NULL ? &(l->iteminfos[i]) : NULL),
+                          geom->w-x, ciw, wrapw, style);
 
             y+=l->itemh*ITEMROWS(l, i);
             r+=ITEMROWS(l, i);
@@ -348,7 +387,8 @@ void draw_listing(GrBrush *brush, Window win, const WRectangle *geom,
     WRectangle geom2;
     GrBorderWidths bdw;
     
-    grbrush_clear_area(brush, win, geom);
+    if(complete)
+        grbrush_clear_area(brush, win, geom);
     
     grbrush_draw_border(brush, win, geom, style);
 
