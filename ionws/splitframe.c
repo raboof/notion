@@ -98,7 +98,7 @@ bool get_splitparams(int *dir, int *primn, const char *str)
 }
 
 
-static void do_split(WIonFrame *oframe, const char *str, bool attach)
+static WIonFrame *do_split(WIonFrame *oframe, const char *str, bool attach)
 {
 	WRegion *reg;
 	int dir, primn, mins;
@@ -125,6 +125,7 @@ static void do_split(WIonFrame *oframe, const char *str, bool attach)
 								  REGION_ATTACH_SWITCHTO);
 	}
 	region_goto(reg);
+	return (WIonFrame*)reg;
 }
 
 
@@ -135,9 +136,9 @@ static void do_split(WIonFrame *oframe, const char *str, bool attach)
  * new frame.
  */
 EXTL_EXPORT
-void ionframe_split(WIonFrame *frame, const char *dirstr)
+WIonFrame *ionframe_split(WIonFrame *frame, const char *dirstr)
 {
-	do_split(frame, dirstr, TRUE);
+	return do_split(frame, dirstr, TRUE);
 }
 
 /*EXTL_DOC
@@ -145,9 +146,9 @@ void ionframe_split(WIonFrame *frame, const char *dirstr)
  * created frame.
  */
 EXTL_EXPORT
-void ionframe_split_empty(WIonFrame *frame, const char *dirstr)
+WIonFrame *ionframe_split_empty(WIonFrame *frame, const char *dirstr)
 {
-	do_split(frame, dirstr, FALSE);
+	return do_split(frame, dirstr, FALSE);
 }
 
 
@@ -157,13 +158,13 @@ void ionframe_split_empty(WIonFrame *frame, const char *dirstr)
  * (one of ''left'', ''right'', ''top'' or ''bottom'').
  */
 EXTL_EXPORT
-void ionws_newframe(WIonWS *ws, const char *dirstr)
+WIonFrame *ionws_newframe(WIonWS *ws, const char *dirstr)
 {
 	WRegion *reg;
 	int dir, primn, mins;
 	
 	if(!get_splitparams(&dir, &primn, dirstr))
-		return;
+		return NULL;
 	
 	mins=(dir==VERTICAL ? GRDATA_OF(ws)->h_unit : GRDATA_OF(ws)->w_unit);
 	
@@ -171,6 +172,8 @@ void ionws_newframe(WIonWS *ws, const char *dirstr)
 					   (WRegionSimpleCreateFn*)create_ionframe);
 	if(reg!=NULL)
 		warp(reg);
+	
+	return (WIonFrame*)reg;
 }
 
 
