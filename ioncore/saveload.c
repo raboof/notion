@@ -10,6 +10,9 @@
  */
 
 #include <string.h>
+#include <time.h>
+#include <unistd.h>
+
 #include <libtu/objp.h>
 
 #include "common.h"
@@ -25,9 +28,13 @@
 #include "extlconv.h"
 
 
+static bool loading_layout=FALSE;
+static bool layout_load_error=FALSE;
+
+
 /*{{{ Load support functions */
 
-static bool loading_layout=FALSE;
+
 
 WRegion *create_region_load(WWindow *par, const WFitParams *fp, 
                             ExtlTab tab)
@@ -46,15 +53,7 @@ WRegion *create_region_load(WWindow *par, const WFitParams *fp,
     
     if(fn==NULL){
         warn("Unknown class \"%s\", cannot create region.", objclass);
-        if(loading_layout && ioncore_g.save_enabled){
-            ioncore_g.save_enabled=FALSE;
-            warn("Disabling workspace saving on exit to prevent savefile "
-                 "corruption.\n"
-                 "Call enable_workspace_saves(TRUE) to re-enable saves or\n"
-                 "fix your configuration files and restart.");
-        }
-        
-        free(objclass);
+        layout_load_error=loading_layout;
         return NULL;
     }
 
@@ -120,6 +119,16 @@ ExtlTab region_get_configuration(WRegion *reg)
 /*{{{ save_workspaces, load_workspaces */
 
 
+#define BACKUP_MSG                                                            \
+"There were errors loading layout. Backing up current layout savefile as\n"   \
+"%s.\n"                                                                       \
+"If you are _not_ running under a session manager and wish to restore your\n" \
+"old layout, copy this backup file over the layout savefile found in the\n"   \
+"same directory while Ion is not running and after having fixed your other\n" \
+"configuration files that are causing this problem. (Maybe a missing\n"       \
+"ioncore.load_module call?)."
+
+
 bool ioncore_init_layout()
 {
     ExtlTab tab;
@@ -130,6 +139,7 @@ bool ioncore_init_layout()
     ok=ioncore_read_savefile("layout", &tab);
     
     loading_layout=TRUE;
+    layout_load_error=FALSE;
     
     FOR_ALL_SCREENS(scr){
         ExtlTab scrtab=extl_table_none();
@@ -145,6 +155,28 @@ bool ioncore_init_layout()
 
     loading_layout=FALSE;
 
+    if(layout_load_error){
+        time_t t=time(NULL);
+        char tm[]="layout.backup-YYYYMMDDHHMMSS\0\0\0\0";
+        char *backup;
+        
+        strftime(tm+14, 15, "%Y%m%d%H%M%S", localtime(&t));
+        backup=ioncore_get_savefile(tm);
+        if(backup==NULL){
+            warn("Unable to get file for layout backup.");
+            return FALSE;
+        }
+        if(access(backup, F_OK)==0){
+            warn("Backup file %s already exists.", backup);
+            free(backup);
+            return FALSE;
+        }
+        warn(BACKUP_MSG, backup);
+        if(!extl_serialise(backup, tab))
+            warn("Failed backup.");
+        free(backup);
+    }
+        
     return (n!=0);
 }
 

@@ -145,7 +145,6 @@ static void init_global()
     ioncore_g.resize_delay=CF_RESIZE_DELAY;
     ioncore_g.opaque_resize=0;
     ioncore_g.warp_enabled=TRUE;
-    ioncore_g.save_enabled=TRUE;
     ioncore_g.switchto_new=TRUE;
     
     ioncore_g.enc_utf8=FALSE;

@@ -63,16 +63,6 @@ void ioncore_set_warp(bool warp)
 
 
 /*EXTL_DOC
- * Enable or disable layout saving on exit.
- */
-EXTL_EXPORT
-void ioncore_set_save(bool enable)
-{
-    ioncore_g.save_enabled=enable;
-}
-
-
-/*EXTL_DOC
  * Should newly created client window be switched to immediately or
  * should the active window retain focus by default?
  */

@@ -323,7 +323,8 @@ void ioncore_do_restart()
 
 
 /*EXTL_DOC
- * Causes the window manager to simply exit.
+ * Causes the window manager to simply exit without saving
+ * state/session.
  */
 EXTL_EXPORT
 void ioncore_resign()
@@ -331,15 +332,13 @@ void ioncore_resign()
     if(smhook!=NULL){
         smhook(IONCORE_SM_RESIGN);
     }else{
-        if(ioncore_g.save_enabled)
-            ioncore_do_snapshot();
         ioncore_do_exit();
     }
 }
 
 
 /*EXTL_DOC
- * End session.
+ * End session saving it first.
  */
 EXTL_EXPORT
 void ioncore_shutdown()
@@ -347,15 +346,14 @@ void ioncore_shutdown()
     if(smhook!=NULL){
         smhook(IONCORE_SM_SHUTDOWN);
     }else{
-        if(ioncore_g.save_enabled)
-            ioncore_do_snapshot();
+        ioncore_do_snapshot();
         ioncore_do_exit();
     }
 }
 
 
 /*EXTL_DOC
- * Restart Ioncore.
+ * Restart, saving session first.
  */
 EXTL_EXPORT
 void ioncore_restart()
@@ -365,8 +363,7 @@ void ioncore_restart()
     if(smhook!=NULL){
         smhook(IONCORE_SM_RESTART);
     }else{
-        if(ioncore_g.save_enabled)
-            ioncore_do_snapshot();
+        ioncore_do_snapshot();
         ioncore_do_restart();
     }
 }
@@ -383,8 +380,7 @@ void ioncore_restart_other(const char *cmd)
     if(smhook!=NULL){
         smhook(IONCORE_SM_RESTART_OTHER);
     }else{
-        if(ioncore_g.save_enabled)
-            ioncore_do_snapshot();
+        ioncore_do_snapshot();
         ioncore_do_restart();
     }
 }

@@ -277,8 +277,6 @@ static void sm_save_complete(SmcConn conn, SmPointer client_data)
 static void sm_die(SmcConn conn, SmPointer client_data)
 {
     assert(conn==sm_conn);
-    ioncore_set_smhook(NULL);
-    mod_sm_close();
     ioncore_do_exit();
 }
 
@@ -379,9 +377,11 @@ void mod_sm_smhook(int what)
     switch(what){
     case IONCORE_SM_RESIGN:
         restart_hint=SmRestartIfRunning;
-        SmcRequestSaveYourself(sm_conn, SmSaveBoth, False,
+        sm_set_properties();
+        /*SmcRequestSaveYourself(sm_conn, SmSaveBoth, False,
                                SmInteractStyleAny, False, False);
-        save_complete_fn=&sm_exit;
+        save_complete_fn=&sm_exit;*/
+        ioncore_do_exit();
         break;
     case IONCORE_SM_SHUTDOWN:
         restart_hint=SmRestartIfRunning;
