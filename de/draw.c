@@ -253,7 +253,7 @@ static void mentbrush_textbox_extras(DEMEntBrush *brush, Window win,
 {
 	int tx, ty;
 
-	if(!MATCHES2("*-submenu", a1, a2))
+	if(!MATCHES2("*-*-submenu", a1, a2))
 		return;
 		
 	ty=(g->y+bdw->top+fnte->baseline
