@@ -266,9 +266,9 @@ static bool floatws_add_clientwin(WFloatWS *ws, WClientWin *cwin,
 				respectpos=FALSE;
 		}
 
-		if(cwin->size_hints.flags&USPosition)
+		if(cwin->size_hints.flags&USPosition || wglobal.opmode==OPMODE_INIT)
 			respectpos=TRUE;
-			   
+
 		if(!respectpos)
 			floatws_calc_placement(ws, &fgeom);
 		
