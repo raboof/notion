@@ -613,11 +613,13 @@ void mplex_managed_activated(WMPlex *mplex, WRegion *reg)
 {
     WLListNode *node=llist_find_on(mplex->l2_list, reg);
 
-    if(node!=NULL){
+    if(node==NULL){
+        if(mplex->l2_current!=NULL && 
+           mplex->l2_current->flags&LLIST_L2_PASSIVE){
+            mplex->l2_current=NULL;
+        }
+    }else if(!(node->flags&LLIST_L2_HIDDEN)){
         mplex->l2_current=node;
-    }else if(mplex->l2_current!=NULL && 
-             mplex->l2_current->flags&LLIST_L2_PASSIVE){
-        mplex->l2_current=NULL;
     }
 }
 
@@ -644,7 +646,7 @@ bool mplex_l2_hide(WMPlex *mplex, WRegion *reg)
 {
     bool mcf=region_may_control_focus((WRegion*)mplex);
     WLListNode *node=llist_find_on(mplex->l2_list, reg);
-    
+
     if(node==NULL || node->flags&LLIST_L2_HIDDEN)
         return FALSE;
     
@@ -760,6 +762,9 @@ static bool mplex_do_managed_display(WMPlex *mplex, WRegion *sub,
         
         /* This call should be unnecessary... */
         mplex_managed_activated(mplex, sub);
+
+        mplex_managed_changed(mplex, MPLEX_CHANGE_SWITCHONLY, TRUE, sub);
+        return mplex_l2_passive(mplex);
     }else{
         mplex_move_phs_before(mplex, node, 2);
         llist_unlink(&(mplex->l2_list), node);
@@ -769,15 +774,9 @@ static bool mplex_do_managed_display(WMPlex *mplex, WRegion *sub,
         llist_link_last(&(mplex->l2_list), node);
         
         node->flags&=~LLIST_L2_HIDDEN;
-        if(!(node->flags&LLIST_L2_PASSIVE))
-            mplex->l2_current=node;
-    }
-    
-    if(!l2){
-        mplex_managed_changed(mplex, MPLEX_CHANGE_SWITCHONLY, TRUE, sub);
-        return mplex_l2_passive(mplex);
-    }else{
-        return mplex->l2_current==node;
+        /*if(!(node->flags&LLIST_L2_PASSIVE))
+            mplex->l2_current=node;*/
+        return TRUE;
     }
 }
 
@@ -788,8 +787,10 @@ static bool mplex_do_managed_goto(WMPlex *mplex, WRegion *sub,
     if(!mplex_do_managed_display(mplex, sub, call_changed))
         return FALSE;
     
-    if(flags&REGION_GOTO_FOCUS)
-        region_maybewarp((WRegion*)mplex, !(flags&REGION_GOTO_NOWARP));
+    if(flags&REGION_GOTO_FOCUS){
+        region_maybewarp((WRegion*)sub, !(flags&REGION_GOTO_NOWARP));
+        /*region_maybewarp((WRegion*)mplex, !(flags&REGION_GOTO_NOWARP));*/
+    }
     
     return TRUE;
 }
