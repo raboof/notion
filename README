@@ -26,7 +26,7 @@ BUILDING AND INSTALLING
    make as default.
    
 4. Run 'make install', as root if you set $PREFIX in system.mk to a directory
-   taht requires those privileges.
+   that requires those privileges.
    
 5. If you did not install Ion so that $PREFIX/bin is on $PATH, you should add
    it there. Otherwise Ion can not find the various ion-* helper scripts.
