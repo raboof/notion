@@ -355,7 +355,7 @@ WViewport *find_viewport_id(int id)
 
 
 EXTL_EXPORT
-void goto_viewport_id(int id)
+void goto_nth_viewport(int id)
 {
 	WViewport *vp=find_viewport_id(id);
 	if(vp!=NULL)
