@@ -505,6 +505,11 @@ void split_resize_rootward(WSplit *node, const WRectangle *ng,
                            bool hany, bool vany, bool tryonly,
                            WRectangle *rg)
 {
+    WRectangle rg_;
+    
+    if(rg==NULL)
+        rg=&rg_;
+    
     split_do_resize_rootward(node, ng, hany, vany, tryonly, rg);
     if(!tryonly)
         split_do_resize(node, rg, PRIMN_ANY, PRIMN_ANY, FALSE);

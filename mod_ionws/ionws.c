@@ -525,7 +525,7 @@ WRegion *ionws_current(WIonWS *ws)
 {
     WSplit *node=NULL;
     if(ws->split_tree!=NULL)
-        split_current_tl(ws->split_tree, -1);
+        node=split_current_tl(ws->split_tree, -1);
     return (node ? node->u.reg : NULL);
 }
 
