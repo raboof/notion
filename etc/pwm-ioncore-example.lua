@@ -2,6 +2,9 @@
 -- PWM ioncore main executable configuration file
 --
 
+-- Create floatws:s by default.
+default_ws_type="WFloatWS"
+
 -- Set default modifier. Alt should usually be mapped to Mod1 on
 -- XFree86-based systems. The flying window keys are probably Mod3
 -- or Mod4; see the output of 'xmodmap'.
