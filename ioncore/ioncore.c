@@ -47,6 +47,7 @@
 #include "focus.h"
 #include "frame.h"
 #include "saveload.h"
+#include "infowin.h"
 #include "../version.h"
 
 
@@ -120,6 +121,8 @@ static bool register_classes()
                                      (WRegionLoadCreateFn*)mplex_load);
     fail|=!ioncore_register_regclass(&CLASSDESCR(WFrame), 
                                      (WRegionLoadCreateFn*)frame_load);
+    fail|=!ioncore_register_regclass(&CLASSDESCR(WInfoWin), 
+                                     (WRegionLoadCreateFn*)infowin_load);
     
     return !fail;
 }

@@ -233,9 +233,9 @@ static void setup_dragwin(WFrame *frame, uint tab)
     if(tabdrag_infowin==NULL)
         return;
     
-    infowin_setattr2(tabdrag_infowin, (REGION_IS_ACTIVE(frame) 
-                                       ? "active" : "inactive"),
-                     frame->titles[tab].attr);
+    infowin_set_attr2(tabdrag_infowin, (REGION_IS_ACTIVE(frame) 
+                                        ? "active" : "inactive"),
+                      frame->titles[tab].attr);
     
     if(frame->titles[tab].text!=NULL){
         char *buf=INFOWIN_BUFFER(tabdrag_infowin);

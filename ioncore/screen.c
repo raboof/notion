@@ -262,7 +262,7 @@ void screen_notify(WScreen *scr, const char *str)
     WFitParams fp;
     
     if(iw!=NULL){
-        infowin_settext(iw, str);
+        infowin_set_text(iw, str);
         return;
     }
 
@@ -279,7 +279,7 @@ void screen_notify(WScreen *scr, const char *str)
     
     watch_setup(&(scr->notifywin_watch), (Obj*)iw, NULL);
 
-    infowin_settext(iw, str);
+    infowin_set_text(iw, str);
     region_keep_on_top((WRegion*)iw);
     region_map((WRegion*)iw);
 }
