@@ -54,7 +54,7 @@ end
 -- (\code{mplex [, sub]}) that calls \var{fn} with parameter chosen
 -- as \var{sub} if it is not nil and otherwise \code{mplex:current()}.
 -- 
--- Calling this functino is equivalent to
+-- Calling this function is equivalent to
 -- \fnref{make_mplex_sub_or_self_fn}\code{(fn, true, true, false)}.
 function make_mplex_sub_fn(fn)
     return make_mplex_sub_or_self_fn(fn, true, true, false)
@@ -67,7 +67,7 @@ end
 -- as \var{sub} if it is not nil and otherwise \code{mplex:current()},
 -- and calls \var{fn} if the object chosen is of type \fnref{WClientWin}.
 -- 
--- Calling this functino is equivalent to
+-- Calling this function is equivalent to
 -- \fnref{make_mplex_sub_or_self_fn}\code{(fn, true, true, true)}.
 function make_mplex_clientwin_fn(fn)
     return make_mplex_sub_or_self_fn(fn, true, true, true)
