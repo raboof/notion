@@ -701,9 +701,6 @@ static void do_fit_clientwin(WClientWin *cwin, WRectangle geom,
 	
 	convert_geom(cwin, geom, &wingeom, rq);
 	
-	cwin->win_geom=wingeom;
-	REGION_GEOM(cwin)=geom;
-	
 	/* XMoveResizeWindow won't send a ConfigureNotify event if the
 	 * geometry has not changed and some programs expect that.
 	 */
@@ -718,6 +715,9 @@ static void do_fit_clientwin(WClientWin *cwin, WRectangle geom,
 			return;
 		}
 	}
+
+	cwin->win_geom=wingeom;
+	REGION_GEOM(cwin)=geom;
 	
 	if(np!=NULL){
 		do_reparent_clientwin(cwin, np->win,
