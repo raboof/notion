@@ -73,6 +73,9 @@ extern bool frame_is_shaded(WFrame *frame);
 extern bool frame_has_tabbar(WFrame *frame);
 
 /* Misc */
+extern void frame_managed_notify(WFrame *frame, WRegion *sub);
+
+/* Save/load */
 extern ExtlTab frame_get_configuration(WFrame *frame);
 extern WRegion *frame_load(WWindow *par, const WFitParams *fp, ExtlTab tab);
 extern void frame_do_load(WFrame *frame, ExtlTab tab);
