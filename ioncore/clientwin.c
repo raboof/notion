@@ -1236,10 +1236,10 @@ WRegion *clientwin_load(WWindow *par, WRectangle geom, ExtlTab tab)
 	double wind=0;
 	Window win=None;
 	int chkc=0, real_chkc=0;
-	/*ExtlTab substab, subtab;
-	int n, i;*/
 	WClientWin *cwin=NULL;
 	XWindowAttributes attr;
+	/*ExtlTab substab, subtab;
+	int n, i;*/
 
 	if(!extl_table_gets_d(tab, "windowid", &wind) ||
 	   !extl_table_gets_i(tab, "checkcode", &chkc)){
@@ -1271,10 +1271,6 @@ WRegion *clientwin_load(WWindow *par, WRectangle geom, ExtlTab tab)
 		return NULL;
 	}
 
-	XReparentWindow(wglobal.dpy, win, par->win, geom.x, geom.y);
-	XResizeWindow(wglobal.dpy, win, geom.w, geom.h);
-	XSelectInput(wglobal.dpy, win, StructureNotifyMask);
-	
 	attr.x=geom.x;
 	attr.y=geom.y;
 	attr.width=geom.w;
@@ -1282,6 +1278,14 @@ WRegion *clientwin_load(WWindow *par, WRectangle geom, ExtlTab tab)
 
 	cwin=create_clientwin(par, win, &attr);
 	
+	if(cwin!=NULL){
+		/* Reparent and resize taking limits set by size hints into account */
+		convert_geom(cwin, geom, &geom);
+		REGION_GEOM(cwin)=geom;
+		do_reparent_clientwin(cwin, par->win, geom.x, geom.y);
+		XResizeWindow(wglobal.dpy, win, geom.w, geom.h);
+	}
+
 	/* TODO: checks that the window still is there */
 	
 	/*if(extl_table_gets_t(tab, "subs", &substab)){
@@ -1300,7 +1304,6 @@ WRegion *clientwin_load(WWindow *par, WRectangle geom, ExtlTab tab)
 
 
 /*}}}*/
-
 
 
 /*{{{ Dynfuntab and class info */
