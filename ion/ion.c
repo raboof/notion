@@ -142,7 +142,7 @@ int main(int argc, char*argv[])
     
     libtu_init(argv[0]);
 
-    if(!ioncore_init(argc, argv))
+    if(!ioncore_init("ion3", argc, argv))
         return EXIT_FAILURE;
 
     ion_cinfo.about=ioncore_aboutmsg();

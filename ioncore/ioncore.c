@@ -56,6 +56,7 @@
 
 WGlobal ioncore_g;
 
+static const char *progname="ion";
 
 static const char ioncore_about[]=
     "Ion " ION_VERSION ", copyright (c) Tuomo Valkonen 1999-2004.\n"
@@ -156,10 +157,11 @@ static void init_global()
 }
 
 
-bool ioncore_init(int argc, char *argv[])
+bool ioncore_init(const char *prog, int argc, char *argv[])
 {
     init_global();
     
+    progname=prog;
     ioncore_g.argc=argc;
     ioncore_g.argv=argv;
 
@@ -562,6 +564,16 @@ EXTL_EXPORT
 const char *ioncore_version()
 {
     return ION_VERSION;
+}
+
+
+/*EXTL_DOC
+ * Returns the name of program using Ioncore.
+ */
+EXTL_EXPORT
+const char *ioncore_progname()
+{
+    return progname;
 }
 
 

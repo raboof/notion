@@ -48,7 +48,7 @@ LINKOPTS = -export-dynamic
 endif
 
 ETC = cfg_pwm.lua cfg_pwm_menus.lua cfg_pwm_bindings.lua
-TARGETS = pwm
+TARGETS = pwm3
 
 ######################################
 
@@ -56,7 +56,7 @@ include $(TOPDIR)/rules.mk
 
 ######################################
 
-pwm: $(OBJS) $(EXT_OBJS)
+pwm3: $(OBJS) $(EXT_OBJS)
 	$(CC) $(LINKOPTS) $(OBJS) $(EXT_OBJS) $(LDFLAGS) -o $@
 
 preload.c:
@@ -64,8 +64,7 @@ preload.c:
 
 _install:
 	$(INSTALLDIR) $(BINDIR)
-	$(INSTALL) -m $(BIN_MODE) pwm $(BINDIR)
-	# $(STRIP) $(BINDIR)/pwm
+	$(INSTALL) -m $(BIN_MODE) pwm3 $(BINDIR)
 	$(INSTALLDIR) $(PWM_ETCDIR)
 	for i in $(ETC); do \
 		$(INSTALL) -m $(DATA_MODE) $$i $(PWM_ETCDIR); \

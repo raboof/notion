@@ -50,7 +50,7 @@ _install:
 # Therefore these commands should be executed before packaging Ion.
 #
 
-welcome_message.txt: ../man/ion.1.in.txt welcome_message.head
+welcome_message.txt: ../man/ion3.1.in.txt welcome_message.head
 	(cat welcome_message.head; \
          sed 's#ETCDIR#$(ETCDIR)#g; s#DOCDIR#$(DOCDIR)#g;' \
-	 ../man/ion.1.in.txt) > welcome_message.txt
+	 ../man/ion3.1.in.txt) > welcome_message.txt

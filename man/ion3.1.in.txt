@@ -6,7 +6,7 @@ NAME
        Ion - an X11 window manager
 
 SYNOPSIS
-       ion [options]
+       ion3 [options]
 
 DESCRIPTION
        Ion  is  a tiling tabbed window manager designed with keyboard users in
@@ -31,9 +31,9 @@ OPTIONS
               manage  only  default screen (root window), not all, as given by
               the -display option or in the DISPLAY environment variable.
 
-       -session session_dir
-              Set session save file directory. If there are no slashes in  the
-              name, ~/.ion3/ prefix is added.
+       -sessionname session_name
+              Set session name. This option affects where workspace and  other
+              save files are put (~/.ion3/session_name if option set).
 
        -xinerama 0|1
               If  Ion  was  compiled with Xinerama support, this option can be
@@ -387,14 +387,11 @@ POINTING DEVICE BUTTONS
 
 
 FILES AND DIRECTORIES
-       ETCDIR/
-              System default configuration files
-
        ETCDIR/cfg_ion.lua
               System default main configuration files
 
        ETCDIR/cfg_*.lua
-              Other configuration files
+              Other configuration files.
 
        ETCDIR/look_*.lua
               Colour scheme configuration files
@@ -414,7 +411,7 @@ SEE ALSO
 
        DOCDIR/
 
-       X(7x), pwm(1), joe(1)
+       X(7x), pwm3(1), joe(1)
 
 
 AUTHOR

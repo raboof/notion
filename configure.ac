@@ -5,7 +5,7 @@ dnl $Header: /home/twp/cvsroot/twp/ion/ion-devel-autoconf/configure.ac,v 1.16 20
 AC_INIT([Ion Window Manager],
         [ION_VERSION],
         [tuomov@iki.fi],
-        [ion])
+        [ion3])
 AC_PREREQ([2.58])
 AC_REVISION([$Revision: 1.16 $])
 

@@ -7,6 +7,7 @@
 ## Installation paths
 ##
 
+#DIST: /usr/local
 PREFIX=/usr/local/ion-3
 
 # Unless you are creating a package conforming to some OS's standards, you
@@ -15,25 +16,25 @@ PREFIX=/usr/local/ion-3
 # Main binaries
 BINDIR=$(PREFIX)/bin
 # Configuration .lua files
-ETCDIR=$(PREFIX)/etc/ion
+ETCDIR=$(PREFIX)/etc/ion3
 # Some .lua files and ion-* shell scripts
-SHAREDIR=$(PREFIX)/share/ion
+SHAREDIR=$(PREFIX)/share/ion3
 # Manual pages
 MANDIR=$(PREFIX)/share/man
 # Some documents
-DOCDIR=$(PREFIX)/share/doc/ion
+DOCDIR=$(PREFIX)/share/doc/ion3
 # Nothing at the moment
-INCDIR=$(PREFIX)/include/ion
+INCDIR=$(PREFIX)/include/ion3
 # Nothing at the moment
 LIBDIR=$(PREFIX)/lib
 # Modules
-MODULEDIR=$(LIBDIR)/ion/mod
+MODULEDIR=$(LIBDIR)/ion3/mod
 # Compiled Lua source code
-LCDIR=$(LIBDIR)/ion/lc
+LCDIR=$(LIBDIR)/ion3/lc
 # ion-completefile (does not belong in SHAREDIR being a binary file)
-EXTRABINDIR=$(LIBDIR)/ion/bin
+EXTRABINDIR=$(LIBDIR)/ion3/bin
 # For ion-completeman system-wide cache
-VARDIR=/var/cache/ion
+VARDIR=/var/cache/ion3
 
 
 ##
@@ -42,7 +43,7 @@ VARDIR=/var/cache/ion
 
 # Set PRELOAD_MODULES=1 if your system does not support dynamically loaded
 # modules through 'libdl' or has non-standard naming conventions.
-PRELOAD_MODULES=1
+#PRELOAD_MODULES=1
 
 # Flags to link with libdl.
 DL_LIBS=-ldl

@@ -2,7 +2,7 @@
 .SH NAME
 PWM - An X11 window manager
 .SH SYNOPSIS
-.B pwm
+.B pwm3
 .I "[options]"
 .SH "DESCRIPTION"
 
@@ -30,9 +30,9 @@ On X servers with multiple (traditional non-Xinerama) screens, manage only
 default screen (root window), not all, as given by the -display option or
 in the DISPLAY environment variable.
 .TP
-.B \-session session_dir
-Set session save file directory. If there are no slashes in the name,
-~/.pwm3/ prefix is added.
+.B \-sessionname session_name
+Set session name. This option affects where workspace and other save files are
+put (~/.pwm3/session_name if option set).
 .TP
 .B \-xinerama 0|1
 If Ioncore was compiled with Xinerama support, this option can be used to
@@ -60,14 +60,14 @@ queries won't work.
 
 .SH FILES AND DIRECTORIES
 .TP
-.B ETCDIR/
-System default configuration files
-.TP
 .B ETCDIR/cfg_pwm.lua
 System default main configuration file
 .TP
 .B ETCDIR/cfg_*.lua
 Other configuration files
+.TP
+.B ETCDIR/look_*.lua
+Colour scheme configuration files
 .TP
 .B ~/.pwm3/
 User configuration files
@@ -78,5 +78,5 @@ User default main configuration file (overrides system default)
 .SH SEE ALSO
 
 For more information, see
-\fIion(1)\fP.
+\fIion3(1)\fP.
 

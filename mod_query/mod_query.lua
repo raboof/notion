@@ -583,8 +583,10 @@ end
 -- \file{ion-completeman} is used to complete manual pages.
 function mod_query.query_man(mplex)
     local script=mod_query.lookup_script_warn(mplex, "ion-man")
-    mod_query.query_execwith(mplex, "Manual page (ion):", "ion",
-                             script, mod_query.man_completor)
+    local prgm=ioncore.progname()
+    local prompt="Manual page ("..prgm.."):"
+    mod_query.query_execwith(mplex, prompt, prgm, script, 
+                             mod_query.man_completor)
 end
 
 

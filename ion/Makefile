@@ -41,7 +41,7 @@ else
 LINKOPTS = -export-dynamic
 endif
 
-TARGETS=ion
+TARGETS=ion3
 
 ######################################
 
@@ -49,7 +49,7 @@ include $(TOPDIR)/rules.mk
 
 ######################################
 
-ion: $(OBJS) $(EXT_OBJS)
+ion3: $(OBJS) $(EXT_OBJS)
 	$(CC) $(LINKOPTS) $(OBJS) $(EXT_OBJS) $(LDFLAGS) -o $@
 
 preload.c:
@@ -57,4 +57,4 @@ preload.c:
 
 _install:
 	$(INSTALLDIR) $(BINDIR)
-	$(INSTALL) -m $(BIN_MODE) ion $(BINDIR)
+	$(INSTALL) -m $(BIN_MODE) ion3 $(BINDIR)

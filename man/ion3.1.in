@@ -2,7 +2,7 @@
 .SH NAME
 Ion - an X11 window manager
 .SH SYNOPSIS
-.B ion
+.B ion3
 .I "[options]"
 .SH "DESCRIPTION"
 
@@ -27,9 +27,9 @@ On X servers with multiple (traditional non-Xinerama) screens, manage only
 default screen (root window), not all, as given by the -display option or
 in the DISPLAY environment variable.
 .TP
-.B \-session session_dir
-Set session save file directory. If there are no slashes in the name,
-~/.ion3/ prefix is added.
+.B \-sessionname session_name
+Set session name. This option affects where workspace and other save files are
+put (~/.ion3/session_name if option set).
 .TP
 .B \-xinerama 0|1
 If Ion was compiled with Xinerama support, this option can be used to
@@ -409,14 +409,11 @@ Context menu
 
 .SH FILES AND DIRECTORIES
 .TP
-.B ETCDIR/
-System default configuration files
-.TP
 .B ETCDIR/cfg_ion.lua
 System default main configuration files
 .TP
 .B ETCDIR/cfg_*.lua
-Other configuration files
+Other configuration files.
 .TP
 .B ETCDIR/look_*.lua
 Colour scheme configuration files
@@ -435,7 +432,7 @@ Ion home page.
 .PP
 .I DOCDIR/
 .PP
-\fIX(7x)\fP, \fIpwm(1)\fP, \fIjoe(1)\fP
+\fIX(7x)\fP, \fIpwm3(1)\fP, \fIjoe(1)\fP
 
 .SH AUTHOR
 Ion was written by Tuomo Valkonen <tuomov at iki.fi>.

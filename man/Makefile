@@ -8,7 +8,7 @@ include $(TOPDIR)/system-inc.mk
 
 ######################################
 
-TARGETS=ion.1 pwm.1
+TARGETS=ion3.1 pwm3.1
 
 ######################################
 
@@ -21,14 +21,14 @@ include $(TOPDIR)/rules.mk
 
 _install:
 	$(INSTALLDIR) $(MANDIR)/man1
-	$(INSTALL) -m $(DATA_MODE) ion.1 $(MANDIR)/man1
-	$(INSTALL) -m $(DATA_MODE) pwm.1 $(MANDIR)/man1
+	$(INSTALL) -m $(DATA_MODE) ion3.1 $(MANDIR)/man1
+	$(INSTALL) -m $(DATA_MODE) pwm3.1 $(MANDIR)/man1
 
 #
 # Awful hack that may not work on the user's system. This is rule is
 # supposed to be executed before packaging Ion.
 #
 
-ion.1.in.txt: ion.1.in
-	man ./ion.1.in|perl -p -i -e 's/.\10//g' > ion.1.in.txt
+ion3.1.in.txt: ion3.1.in
+	man ./$< | perl -p -i -e 's/.\10//g' > $@
 
