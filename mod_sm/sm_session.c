@@ -29,10 +29,8 @@ static char restart_hint=SmRestartIfRunning;
 
 static Bool sent_save_done=FALSE;
 
-#ifndef XSM
 /* Function to be called when sm tells client save is complete */
 static void (*save_complete_fn)();
-#endif
 
 void mod_sm_set_ion_id(const char *client_id)
 {
@@ -135,13 +133,8 @@ static void sm_set_other_properties()
     int nvals=0, i;
     const char *sdir=NULL, *cid=NULL;
     
-#ifdef XSM   
-    SmPropValue discard_val;
-    SmProp discard_prop={ SmDiscardCommand, SmARRAY8, 1, NULL};
-#else
     SmPropValue discard_val[3];
     SmProp discard_prop={ SmDiscardCommand, SmLISTofARRAY8, 3, NULL };
-#endif
     SmPropValue restart_hint_val, *restart_val=NULL;
     SmProp restart_hint_prop={ SmRestartStyleHint, SmCARD8, 1, NULL};
     SmProp restart_prop={ SmRestartCommand, SmLISTofARRAY8, 0, NULL};
@@ -184,26 +177,18 @@ static void sm_set_other_properties()
     restart_val[nvals++].length=strlen(cid);
     restart_prop.num_vals=nvals;
     restart_prop.vals=restart_val;
-#ifdef XSM
-    discard_val.length=strlen(rmprog)+strlen(rmarg)+strlen(sdir)+2;
-    discard_val.value=(char *)malloc(sizeof(char)*(discard_val.length+1));
-    sprintf(discard_val.value, "%s %s %s", rmprog, rmarg, sdir);
-#else
     discard_val[0].length=strlen(rmprog);
     discard_val[0].value=rmprog;
     discard_val[1].length=strlen(rmarg);
     discard_val[1].value=rmarg;
     discard_val[2].length=strlen(sdir);
     discard_val[2].value=(char*)sdir;
-#endif	
+
     SmcSetProperties(sm_conn,
                      sizeof(props)/sizeof(props[0]),
                      (SmProp **)&props);
     
     free(restart_val);
-#ifdef XSM
-    free(discard_val.value);
-#endif
 }
 
 static void sm_set_properties()
@@ -248,6 +233,7 @@ static void sm_save_yourself(SmcConn conn,
                              Bool fast)
 {
     if(!SmcRequestSaveYourselfPhase2(sm_conn, sm_save_yourself_phase2, NULL)){
+        warn("Failed to request save-yourself-phase2 from session manager.");
         SmcSaveYourselfDone(sm_conn, False);
         sent_save_done=TRUE;
     }else{
@@ -259,9 +245,7 @@ static void sm_save_yourself(SmcConn conn,
 
 static void sm_shutdown_cancelled(SmcConn conn, SmPointer client_data)
 {
-#ifndef XSM
     save_complete_fn=NULL;
-#endif		
     if(!sent_save_done){
         SmcSaveYourselfDone(conn, False);
         sent_save_done=True;
@@ -272,12 +256,10 @@ static void sm_shutdown_cancelled(SmcConn conn, SmPointer client_data)
 
 static void sm_save_complete(SmcConn conn, SmPointer client_data)
 {
-#ifndef XSM
     if(save_complete_fn){
         save_complete_fn();
         save_complete_fn=NULL;
     }
-#endif
 }
 
 /* Callback */
@@ -370,10 +352,6 @@ static void sm_exit()
     sm_die(sm_conn, NULL);
 }
 
-#ifndef XSM
-/* Clients can request
- a save yourself message from the sm.
- xsm does not support this. */
 
 static void sm_resign(char hint)
 {
@@ -382,6 +360,7 @@ static void sm_resign(char hint)
                            SmInteractStyleAny, False, False);
     save_complete_fn=&sm_exit;
 }
+
 
 /*EXTL_DOC
  * Request shutdown.
@@ -392,20 +371,17 @@ void mod_sm_request_shutdown()
     SmcRequestSaveYourself(sm_conn, SmSaveBoth, True,
                            SmInteractStyleAny, False, True);
 }
-#else
-static void sm_resign(char hint)
+
+
+/*EXTL_DOC
+ * Request save.
+ */
+EXTL_EXPORT
+void mod_sm_request_save()
 {
-    bool success;
-    
-    if(!(success=ioncore_write_session())){
-        warn("Failed to save session state\n");
-    }else{
-        restart_hint=hint;
-        sm_set_properties();
-        sm_exit();
-    }
+    SmcRequestSaveYourself(sm_conn, SmSaveBoth, False,
+                           SmInteractStyleAny, False, True);
 }
-#endif
 
 
 /*EXTL_DOC
@@ -429,7 +405,7 @@ void mod_sm_resign()
 
 
 /*EXTL_DOC
- * Restart hint to restart anyway and exit Ion will be restarted next
+ * Restart hint to restart anyway and exit. Ion will be restarted next
  * session launch even if it wasn't running at shutdown.
  */
 EXTL_EXPORT
