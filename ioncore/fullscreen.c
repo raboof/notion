@@ -90,8 +90,7 @@ bool clientwin_fullscreen_scr(WClientWin *cwin, WScreen *scr, bool switchto)
 		cwin->fsinfo.saved_rootrel_geom.h=REGION_GEOM(cwin).h;
 	}
 	
-	if(!region_add_managed_simple((WRegion*)scr, (WRegion*)cwin, switchto ? 
-								  REGION_ATTACH_SWITCHTO : 0)){
+	if(!mplex_attach_simple((WMPlex*)scr, (WRegion*)cwin, switchto)){
 		warn("Failed to enter full screen mode");
 		if(!wasfs)
 			reset_watch(&(cwin->fsinfo.last_mgr_watch));
@@ -119,8 +118,7 @@ bool clientwin_enter_fullscreen(WClientWin *cwin, bool switchto)
 bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto)
 {	
 	WRegion *reg;
-	WAttachParams param;
-	XSizeHints hnt;
+	WManageParams param=INIT_WMANAGEPARAMS;
 	int rootx, rooty;
 	bool cf;
 	
@@ -133,21 +131,15 @@ bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto)
 	reset_watch(&(cwin->fsinfo.last_mgr_watch));
 	assert(WOBJ_IS(reg, WRegion));
 	
-	/* Set up geometry hints */
-	param.flags=(REGION_ATTACH_SIZERQ|REGION_ATTACH_POSRQ|
-				 REGION_ATTACH_SWITCHTO|REGION_ATTACH_SIZE_HINTS);
+	param.geom=cwin->fsinfo.saved_rootrel_geom;
+	param.tfor=NULL;
+	param.userpos=FALSE;
+	param.maprq=FALSE;
+	param.switchto=switchto;
+	param.dockapp=FALSE;
+	param.gravity=StaticGravity;
 	
-	param.geomrq=cwin->fsinfo.saved_rootrel_geom;
-	/*region_rootpos(reg, &rootx, &rooty);
-	param.geomrq.x-=rootx;
-	param.geomrq.y-=rooty;*/
-	
-	hnt=cwin->size_hints;
-	hnt.flags|=PWinGravity;
-	hnt.win_gravity=StaticGravity;
-	param.size_hints=&hnt;
-	
-	if(!do_add_clientwin(reg, cwin, &param)){
+	if(!region_manage_clientwin(reg, cwin, &param)){
 		warn("WClientWin failed to return from full screen mode; remaining "
 			 "manager or parent from previous location refused to manage us.");
 		return FALSE;

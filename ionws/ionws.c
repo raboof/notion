@@ -413,7 +413,7 @@ static DynFunTab ionws_dynfuntab[]={
 	{region_set_focus_to, ionws_set_focus_to},
 	{(DynFun*)reparent_region, (DynFun*)reparent_ionws},
 	
-	{(DynFun*)genws_add_clientwin, (DynFun*)ionws_add_clientwin},
+	{(DynFun*)region_manage_clientwin, (DynFun*)ionws_manage_clientwin},
 
 	{region_request_managed_geom, ionws_request_managed_geom},
 	{region_managed_activated, ionws_managed_activated},

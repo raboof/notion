@@ -54,7 +54,8 @@ WMessage *query_message(WMPlex *mplex, const char *p)
 	if(p==NULL || mplex_current_input(mplex)!=NULL)
 		return NULL;
 
-	return (WMessage*)mplex_add_input(mplex, (WRegionAddFn*)create_wmsg,
+	return (WMessage*)mplex_add_input(mplex,
+									  (WRegionAttachHandler*)create_wmsg,
 									  (void*)p);
 }
 

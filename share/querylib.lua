@@ -197,7 +197,7 @@ function QueryLib.attachclient_handler(frame, str)
         return
     end
     
-    region_manage(frame, cwin, { selected = true })
+    mplex_attach(frame, cwin, { switchto = true })
 end
 
 function QueryLib.workspace_handler(frame, name)
@@ -224,7 +224,7 @@ function QueryLib.workspace_handler(frame, name)
         name=nam
     end
     
-    ws=region_manage_new(scr, { type=cls, name=name, selected=true })
+    ws=mplex_attach_new(scr, { type=cls, name=name, switchto=true })
     if not ws then
         query_fwarn(frame, "Failed to create workspace")
     end

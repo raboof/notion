@@ -423,7 +423,7 @@ static bool floatframe_save_to_file(WFloatFrame *frame, FILE *file, int lvl)
 		region_save_to_file((WRegion*)sub, file, lvl+2);
 		if(sub==WGENFRAME_CURRENT(frame)){
 			save_indent_line(file, lvl+2);
-			fprintf(file, "selected = true,\n");
+			fprintf(file, "switchto = true,\n");
 		}
 		save_indent_line(file, lvl+1);
 		fprintf(file, "},\n");
@@ -451,7 +451,7 @@ WRegion *floatframe_load(WWindow *par, WRectangle geom, ExtlTab tab)
 		n=extl_table_get_n(substab);
 		for(i=1; i<=n; i++){
 			if(extl_table_geti_t(substab, i, &subtab)){
-				region_add_managed_load((WRegion*)frame, subtab);
+				mplex_attach_new((WMPlex*)frame, subtab);
 				extl_unref_table(subtab);
 			}
 		}

@@ -251,7 +251,7 @@ void floatws_close(WFloatWS *ws)
 /*}}}*/
 
 
-/*{{{ add_clientwin/transient */
+/*{{{ manage_clientwin/transient */
 
 
 static void floatws_add_managed(WFloatWS *ws, WRegion *reg)
@@ -264,26 +264,16 @@ static void floatws_add_managed(WFloatWS *ws, WRegion *reg)
 }
 
 
-static WRegion *floatws_do_add_managed(WFloatWS *ws, WRegionAddFn *fn,
-									   void *fnparams, 
-									   const WAttachParams *param)
+static WRegion *floatws_do_attach(WFloatWS *ws, WRegionAttachHandler *fn,
+								  void *fnparams, const WRectangle *geom)
 {
-	WRectangle geom;
 	WWindow *par;
 	WRegion *reg;
 
-	if(REGION_ATTACH_IS_GEOMRQ(param->flags)){
-		geom=param->geomrq;
-	}else{
-		warn("Attempt to add region that does not request geometry on a "
-			 "WFloatWS");
-		return NULL;
-	}
-	
 	par=REGION_PARENT_CHK(ws, WWindow);
 	assert(par!=NULL);
 	
-	reg=fn(par, geom, fnparams);
+	reg=fn(par, *geom, fnparams);
 
 	if(reg!=NULL)
 		floatws_add_managed(ws, reg);
@@ -292,73 +282,68 @@ static WRegion *floatws_do_add_managed(WFloatWS *ws, WRegionAddFn *fn,
 }
 
 
-WRegion *find_existing(WFloatWS *ws)
+
+static WRegion *floatws_attach_load(WFloatWS *ws, ExtlTab param)
+{
+	WRectangle geom;
+	
+	if(!extl_table_gets_geom(param, "geom", &geom)){
+		warn("No geometry specified");
+		return NULL;
+	}
+	
+	return attach_load_helper((WRegion*)ws, param, 
+							  (WRegionDoAttachFn*)floatws_do_attach,
+							  &geom);
+}
+
+
+#define REG_OK(R) region_has_manage_clientwin(R)
+
+
+static WMPlex *find_existing(WFloatWS *ws)
 {
 	WRegion *r=ws->current_managed;
-	if(r!=NULL && region_supports_add_managed(r))
-		return r;
-			
+	
+	if(r!=NULL && REG_OK(r))
+		return (WMPlex*)r;
+	
 	FOR_ALL_MANAGED_ON_LIST(ws->managed_list, r){
-		if(region_supports_add_managed(r))
-			return r;
+		if(REG_OK(r))
+			return (WMPlex*)r;
 	}
+	
 	return NULL;
 }
 
 
-static bool floatws_add_clientwin(WFloatWS *ws,
-								  WClientWin *cwin,
-								  const WAttachParams *params)
+static bool floatws_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
+									 const WManageParams *param)
 {
-	WRegion *target=NULL;
+	WMPlex *target=NULL;
 	WWindow *par;
 	bool newreg=FALSE;
-	bool respectpos=FALSE;
+	bool respectpos=TRUE;
 
 	par=REGION_PARENT_CHK(ws, WWindow);
 	assert(par!=NULL);
 	
 #ifdef CF_FLOATWS_ATTACH_TO_CURRENT
-	if(target==NULL)
-		target=find_existing(ws);
+	target=find_existing(ws);
 #endif
 	
 	if(target==NULL){
-		WRectangle fgeom;
-		int gravity=NorthWestGravity;
+		WRectangle fgeom=param->geom;
 		
-		if(params->flags&REGION_ATTACH_SIZERQ){
-			fgeom.w=params->geomrq.w;
-			fgeom.h=params->geomrq.h;
-		}else{
-			fgeom.w=REGION_GEOM(cwin).w;
-			fgeom.h=REGION_GEOM(cwin).h;
-		}
+		initial_to_floatframe_geom(ws, &fgeom, param->gravity);
 
-		if(params->flags&REGION_ATTACH_POSRQ){
-			fgeom.x=params->geomrq.x;
-			fgeom.y=params->geomrq.y;
-			respectpos=TRUE;
-		}else{
-			fgeom.x=0;
-			fgeom.y=0;
-		}
-		
-		if(params->flags&REGION_ATTACH_SIZE_HINTS &&
-		   params->size_hints->flags&PWinGravity){
-			gravity=params->size_hints->win_gravity;
-		}
-		
-		initial_to_floatframe_geom(ws, &fgeom, gravity);
-
-		if(params->flags&REGION_ATTACH_MAPRQ && wglobal.opmode!=OPMODE_INIT){
+		if(param->maprq && wglobal.opmode!=OPMODE_INIT){
 			/* When the window is mapped by application request, position
 			 * request is only honoured if the position was given by the user
 			 * and in case of a transient (the app may know better where to 
-			 * place them).
+			 * place them) or of we're initialising.
 			 */
-			respectpos=(cwin->transient_for!=None ||
-						cwin->size_hints.flags&USPosition);
+			respectpos=(param->tfor!=NULL || param->userpos);
 		}
 
 		/* However, if the requested geometry does not overlap the
@@ -374,7 +359,7 @@ static bool floatws_add_clientwin(WFloatWS *ws,
 		if(!respectpos)
 			floatws_calc_placement(ws, &fgeom);
 		
-		target=(WRegion*)create_floatframe(par, fgeom);
+		target=(WMPlex*)create_floatframe(par, fgeom);
 	
 		if(target==NULL){
 			warn("Failed to create a new WFloatFrame for client window");
@@ -384,19 +369,18 @@ static bool floatws_add_clientwin(WFloatWS *ws,
 		newreg=TRUE;
 	}
 
-	assert(same_rootwin(target, (WRegion*)cwin));
+	assert(same_rootwin((WRegion*)target, (WRegion*)cwin));
 	
-	if(!finish_add_clientwin(target, cwin, params)){
+	if(!mplex_attach_simple(target, (WRegion*)cwin, param->switchto)){
 		if(newreg)
 			destroy_obj((WObj*)target);
 		return FALSE;
 	}
 
-	floatws_add_managed(ws, target);
+	floatws_add_managed(ws, (WRegion*)target);
 	
 	/* Don't warp, it is annoying in this case */
-	if(newreg && params->flags&REGION_ATTACH_SWITCHTO &&
-	   region_may_control_focus((WRegion*)ws)){
+	if(newreg && param->switchto && region_may_control_focus((WRegion*)ws)){
 		set_previous_of((WRegion*)target);
 		set_focus((WRegion*)target);
 	}
@@ -409,7 +393,7 @@ static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
 								WRegion *dropped)
 {
 	WRectangle fgeom;
-	WRegion *target;
+	WFloatFrame *target;
 	WWindow *par;
 	
 	par=REGION_PARENT_CHK(ws, WWindow);
@@ -424,20 +408,20 @@ static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
 	fgeom.x=x-fgeom.x;
 	fgeom.y=y-fgeom.y;
 
-	target=(WRegion*)create_floatframe(par, fgeom);
+	target=create_floatframe(par, fgeom);
 	
 	if(target==NULL){
 		warn("Failed to create a new WFloatFrame.");
 		return FALSE;
 	}
 	
-	if(!region_add_managed_simple(target, dropped, REGION_ATTACH_SWITCHTO)){
+	if(!mplex_attach_simple((WMPlex*)target, dropped, TRUE)){
 		destroy_obj((WObj*)target);
 		warn("Failed to attach dropped region to created WFloatFrame");
 		return FALSE;
 	}
 	
-	floatws_add_managed(ws, target);
+	floatws_add_managed(ws, (WRegion*)target);
 
 	return TRUE;
 }
@@ -446,12 +430,13 @@ static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
 /* A handler for add_clientwin_alt hook to handle transients for windows
  * on WFloatWS:s differently from the normal behaviour.
  */
-bool add_clientwin_floatws_transient(WClientWin *cwin, WAttachParams *param)
+bool add_clientwin_floatws_transient(WClientWin *cwin, 
+									 const WManageParams *param)
 {
 	WRegion *stack_above;
 	WFloatWS *ws;
 	
-	if(!(param->flags&REGION_ATTACH_TFOR))
+	if(param->tfor==NULL)
 		return FALSE;
 
 	stack_above=(WRegion*)REGION_PARENT_CHK(param->tfor, WFloatFrame);
@@ -462,7 +447,7 @@ bool add_clientwin_floatws_transient(WClientWin *cwin, WAttachParams *param)
 	if(ws==NULL)
 		return FALSE;
 	
-	if(!floatws_add_clientwin(ws, cwin, param))
+	if(!floatws_manage_clientwin(ws, cwin, param))
 		return FALSE;
 
 	region_stack_above(REGION_MANAGER(cwin), stack_above);
@@ -564,7 +549,7 @@ WRegion *floatws_load(WWindow *par, WRectangle geom, ExtlTab tab)
 	n=extl_table_get_n(substab);
 	for(i=1; i<=n; i++){
 		if(extl_table_geti_t(substab, i, &subtab)){
-			region_add_managed_load((WRegion*)ws, subtab);
+			floatws_attach_load(ws, subtab);
 			extl_unref_table(subtab);
 		}
 	}
@@ -582,27 +567,38 @@ WRegion *floatws_load(WWindow *par, WRectangle geom, ExtlTab tab)
 
 
 static DynFunTab floatws_dynfuntab[]={
-	{region_fit, floatws_fit},
-	{region_map, floatws_map},
-	{region_unmap, floatws_unmap},
-	{region_set_focus_to, floatws_set_focus_to},
-	{(DynFun*)reparent_region, (DynFun*)reparent_floatws},
+	{region_fit, 
+	 floatws_fit},
+	{(DynFun*)reparent_region,
+	 (DynFun*)reparent_floatws},
+
+	{region_map, 
+	 floatws_map},
+	{region_unmap, 
+	 floatws_unmap},
+	{(DynFun*)region_display_managed, 
+	 (DynFun*)floatws_display_managed},
+
+	{region_set_focus_to, 
+	 floatws_set_focus_to},
+	{region_managed_activated, 
+	 floatws_managed_activated},
 	
-	{(DynFun*)genws_add_clientwin, (DynFun*)floatws_add_clientwin},
-
-	{region_managed_activated, floatws_managed_activated},
-	{region_remove_managed, floatws_remove_managed},
-	{(DynFun*)region_display_managed, (DynFun*)floatws_display_managed},
+	{(DynFun*)region_manage_clientwin, 
+	 (DynFun*)floatws_manage_clientwin},
+	{(DynFun*)region_handle_drop,
+	 (DynFun*)floatws_handle_drop},
+	{region_remove_managed,
+	 floatws_remove_managed},
 	
-	{(DynFun*)region_save_to_file, (DynFun*)floatws_save_to_file},
+	{(DynFun*)region_save_to_file, 
+	 (DynFun*)floatws_save_to_file},
 
-	{(DynFun*)region_x_window, (DynFun*)floatws_x_window},
+	{(DynFun*)region_x_window,
+	 (DynFun*)floatws_x_window},
 
-	{(DynFun*)region_handle_drop, (DynFun*)floatws_handle_drop},
-
-	{(DynFun*)region_do_add_managed, (DynFun*)floatws_do_add_managed},
-
-	{region_close, floatws_close},
+	{region_close,
+	 floatws_close},
 	
 	END_DYNFUNTAB
 };

@@ -17,10 +17,15 @@
 #include "extl.h"
 
 extern bool extltab_to_geom(ExtlTab tab, WRectangle *geomret);
-extern ExtlTab geom_to_extltab(WRectangle geom);
+extern ExtlTab geom_to_extltab(const WRectangle *geom);
 
 extern ExtlTab managed_list_to_table(WRegion *list, 
 									bool (*filter)(WRegion *r));
+
+extern bool extl_table_gets_geom(ExtlTab tab, const char *nam,
+								 WRectangle *geom);
+extern void extl_table_sets_geom(ExtlTab tab, const char *nam,
+								 const WRectangle *geom);
 
 extern bool extl_table_is_bool_set(ExtlTab tab, const char *entry);
 

@@ -420,7 +420,7 @@ ExtlTab region_request_geom_extl(WRegion *reg, ExtlTab g)
 	
 	region_request_geom(reg, flags, geom, &geom);
 	
-	return geom_to_extltab(geom);
+	return geom_to_extltab(&geom);
 }
 
 

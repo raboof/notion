@@ -9,6 +9,9 @@
  * (at your option) any later version.
  */
 
+#include <limits.h>
+#include <string.h>
+
 #include "common.h"
 #include "objp.h"
 #include "window.h"
@@ -17,10 +20,12 @@
 #include "focus.h"
 #include "event.h"
 #include "attach.h"
+#include "manage.h"
 #include "resize.h"
 #include "tags.h"
 #include "sizehint.h"
 #include "stacking.h"
+#include "extl.h"
 #include "extlconv.h"
 #include "genws.h"
 #include "genframe-pointer.h"
@@ -362,15 +367,22 @@ void mplex_switch_prev(WMPlex *mplex)
 /*}}}*/
 
 
-/*{{{ Add/remove managed */
+/*{{{ Attach */
 
 
-static WRegion *mplex_do_add_managed(WMPlex *mplex, WRegionAddFn *fn,
-									 void *fnparams, 
-									 const WAttachParams *param)
+typedef struct{
+	bool switchto;
+	int index;
+} MPlexAttachParams;
+
+
+static WRegion *mplex_do_attach(WMPlex *mplex, WRegionAttachHandler *fn,
+								void *fnparams, MPlexAttachParams *param)
 {
+	bool switchto;
 	WRectangle geom;
 	WRegion *reg;
+	WRegion *after=NULL;
 	
 	mplex_managed_geom(mplex, &geom);
 	
@@ -379,21 +391,25 @@ static WRegion *mplex_do_add_managed(WMPlex *mplex, WRegionAddFn *fn,
 	if(reg==NULL)
 		return NULL;
 	
-	if(mplex->current_sub!=NULL && wglobal.opmode!=OPMODE_INIT){
-		region_set_manager(reg, (WRegion*)mplex, NULL);
-		if(mplex->flags&WMPLEX_ADD_TO_END){
-			LINK_ITEM(mplex->managed_list, reg, mgr_next, mgr_prev);
-		}else{
-			LINK_ITEM_AFTER(mplex->managed_list, mplex->current_sub,
-							reg, mgr_next, mgr_prev);
-		}
-	}else{
-		region_set_manager(reg, (WRegion*)mplex, &(mplex->managed_list));
+	if(param->index>0){
+		after=mplex_nth_managed(mplex, param->index-1);
+	}else if(param->index<0){
+		if(!(mplex->flags&WMPLEX_ADD_TO_END) && wglobal.opmode!=OPMODE_INIT)
+			after=mplex->current_sub;
 	}
 	
+	if(after!=NULL){
+		LINK_ITEM_AFTER(mplex->managed_list, after, reg, mgr_next, mgr_prev);
+	}else if(param->index==0){
+		LINK_ITEM_FIRST(mplex->managed_list, reg, mgr_next, mgr_prev);
+	}else{
+		LINK_ITEM(mplex->managed_list, reg, mgr_next, mgr_prev);
+	}
+
+	region_set_manager(reg, (WRegion*)mplex, NULL);
 	mplex->managed_count++;
 	
-	if(mplex->managed_count==1 || param->flags&REGION_ATTACH_SWITCHTO){
+	if(mplex->managed_count==1 || param->switchto){
 		mplex_do_display_managed(mplex, reg);
 		mplex_managed_added(mplex, reg, TRUE);
 	}else{
@@ -403,6 +419,121 @@ static WRegion *mplex_do_add_managed(WMPlex *mplex, WRegionAddFn *fn,
 	
 	return reg;
 }
+
+
+bool mplex_attach_simple(WMPlex *mplex, WRegion *reg, bool switchto)
+{
+	MPlexAttachParams par;
+	
+	par.index=-1;
+	par.switchto=switchto;
+	
+	return attach_reparent_helper((WRegion*)mplex, reg,
+								  (WRegionDoAttachFn*)mplex_do_attach, 
+								  &par);
+}
+
+
+WRegion *mplex_attach_new_simple(WMPlex *mplex, WRegionSimpleCreateFn *fn,
+								 bool switchto)
+{
+	MPlexAttachParams par;
+	
+	par.index=-1;
+	par.switchto=switchto;
+	
+	return attach_new_helper((WRegion*)mplex, fn,
+							 (WRegionDoAttachFn*)mplex_do_attach, 
+							 &par);
+}
+
+
+static void get_params(ExtlTab tab, MPlexAttachParams *par)
+{
+	par->switchto=extl_table_is_bool_set(tab, "switchto");
+	par->index=-1;
+	extl_table_gets_i(tab, "index", &(par->index));
+}
+
+
+/*EXTL_DOC
+ * Attach and reparent existing region \var{reg} to \var{mplex}.
+ * The table \var{param} may contain the fields \var{index} and
+ * \var{switchto} that are interpreted as for \fnref{mplex_attach_new}.
+ */
+EXTL_EXPORT
+bool mplex_attach(WMPlex *mplex, WRegion *reg, ExtlTab param)
+{
+	MPlexAttachParams par;
+	get_params(param, &par);
+	
+	return attach_reparent_helper((WRegion*)mplex, reg,
+								  (WRegionDoAttachFn*)mplex_do_attach, 
+								  &par);
+}
+
+
+/*EXTL_DOC
+ * Create a new region to be managed by \var{mplex}. At least the following
+ * fields in \var{param} are understood:
+ * 
+ * \begin{tabularx}{\linewidth}{lX}
+ *  \hline
+ *  Field & Description \\
+ *  \hline
+ *  \var{type} & Class name of the object to be created. Mandatory. \\
+ *  \var{name} & Name of the object to be created. Optional. \\
+ *  \var{switchto} & Should the region be switched to? Optional. \\
+ *  \var{index} & Index of the new region in \var{mplex}'s list of
+ *   managed objects (0 = first). Optional. \\
+ * \end{tabularx}
+ * 
+ * In addition parameters to the region to be created are passed in this 
+ * same table.
+ */
+EXTL_EXPORT
+WRegion *mplex_attach_new(WMPlex *mplex, ExtlTab param)
+{
+	MPlexAttachParams par;
+	get_params(param, &par);
+	
+	return attach_load_helper((WRegion*)mplex, param,
+							  (WRegionDoAttachFn*)mplex_do_attach, 
+							  &par);
+}
+
+
+/*EXTL_DOC
+ * Attach all tagged regions to \var{mplex}.
+ */
+EXTL_EXPORT
+void mplex_attach_tagged(WMPlex *mplex)
+{
+	WRegion *reg;
+	
+	while((reg=tag_take_first())!=NULL)
+		mplex_attach_simple(mplex, reg, FALSE);
+}
+
+
+static bool mplex_handle_drop(WMPlex *mplex, int x, int y,
+							  WRegion *dropped)
+{
+	return mplex_attach_simple(mplex, dropped, TRUE);
+}
+
+
+static bool mplex_manage_clientwin(WMPlex *mplex, WRegion *dropped,
+								   const WManageParams *param)
+{
+	return mplex_attach_simple(mplex, dropped, param->switchto);
+}
+
+
+/*}}}*/
+
+
+/*{{{ Remove */
 
 
 static void mplex_do_remove(WMPlex *mplex, WRegion *sub)
@@ -439,25 +570,6 @@ void mplex_remove_managed(WMPlex *mplex, WRegion *reg)
 	}
 }
 
-
-/*EXTL_DOC
- * Attach all tagged regions to \var{mplex}.
- */
-EXTL_EXPORT
-void mplex_attach_tagged(WMPlex *mplex)
-{
-	WRegion *reg;
-	
-	while((reg=tag_take_first())!=NULL){
-		if(region_is_ancestor((WRegion*)mplex, reg)){
-			warn("Cannot attach tagged region: ancestor");
-			continue;
-		}
-		region_add_managed_simple((WRegion*)mplex, reg, 0);
-	}
-}
-
-
 /*}}}*/
 
 
@@ -475,7 +587,7 @@ WRegion *mplex_current_input(WMPlex *mplex)
 }
 
 
-WRegion *mplex_add_input(WMPlex *mplex, WRegionAddFn *fn, void *fnp)
+WRegion *mplex_add_input(WMPlex *mplex, WRegionAttachHandler *fn, void *fnp)
 {
 	WRectangle geom;
 	WRegion *sub;
@@ -533,14 +645,6 @@ EXTL_EXPORT
 int mplex_managed_count(WMPlex *mplex)
 {
 	return mplex->managed_count;
-}
-
-
-static bool mplex_handle_drop(WMPlex *mplex, int x, int y,
-								 WRegion *dropped)
-{
-	return region_add_managed_simple((WRegion*)mplex, dropped,
-									 REGION_ATTACH_SWITCHTO);
 }
 
 
@@ -603,7 +707,6 @@ static DynFunTab mplex_dynfuntab[]={
 	{(DynFun*)region_managed_enter_to_focus,
 	 (DynFun*)mplex_managed_enter_to_focus},
 	
-	{(DynFun*)region_do_add_managed, (DynFun*)mplex_do_add_managed},
 	{region_remove_managed, mplex_remove_managed},
 	{region_request_managed_geom, mplex_request_managed_geom},
 	{(DynFun*)region_display_managed, (DynFun*)mplex_display_managed},
@@ -615,6 +718,9 @@ static DynFunTab mplex_dynfuntab[]={
 	
 	{mplex_managed_added, mplex_managed_added_default},
 	{mplex_managed_removed, mplex_managed_removed_default},
+	
+	{(DynFun*)region_manage_clientwin,
+	 (DynFun*)mplex_manage_clientwin},
 	
 	END_DYNFUNTAB
 };

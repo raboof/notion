@@ -16,7 +16,7 @@
 #include <ioncore/region.h>
 #include <ioncore/screen.h>
 #include <ioncore/genws.h>
-#include <ioncore/attach.h>
+#include <ioncore/manage.h>
 #include <ioncore/extl.h>
 
 INTROBJ(WFloatWS);
@@ -37,6 +37,6 @@ extern WRegion *floatws_backcirculate(WFloatWS *ws);
 extern WRegion *floatws_load(WWindow *par, WRectangle geom, ExtlTab tab);
 
 extern bool add_clientwin_floatws_transient(WClientWin *cwin, 
-											WAttachParams *param);
+											const WManageParams *param);
 
 #endif /* ION_FLOATWS_FLOATWS_H */

@@ -29,16 +29,42 @@ bool extltab_to_geom(ExtlTab tab, WRectangle *geomret)
 }
 
 
-ExtlTab geom_to_extltab(WRectangle geom)
+ExtlTab geom_to_extltab(const WRectangle *geom)
 {
 	ExtlTab tab=extl_create_table();
 	
-	extl_table_sets_i(tab, "x", geom.x);
-	extl_table_sets_i(tab, "y", geom.y);
-	extl_table_sets_i(tab, "w", geom.w);
-	extl_table_sets_i(tab, "h", geom.h);
+	extl_table_sets_i(tab, "x", geom->x);
+	extl_table_sets_i(tab, "y", geom->y);
+	extl_table_sets_i(tab, "w", geom->w);
+	extl_table_sets_i(tab, "h", geom->h);
 	
 	return tab;
+}
+
+
+void extl_table_sets_geom(ExtlTab tab, const char *nam, 
+						  const WRectangle *geom)
+{
+	ExtlTab g=geom_to_extltab(geom);
+	extl_table_sets_t(tab, nam, g);
+	extl_unref_table(g);
+}
+
+
+bool extl_table_gets_geom(ExtlTab tab, const char *nam, 
+						  WRectangle *geom)
+{
+	ExtlTab g;
+	bool ok;
+	
+	if(!extl_table_gets_t(tab, nam, &g))
+		return FALSE;
+	
+	ok=extltab_to_geom(g, geom);
+	
+	extl_unref_table(g);
+	
+	return ok;
 }
 
 

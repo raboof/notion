@@ -37,17 +37,23 @@ extern void mplex_deinit(WMPlex *mplex);
 extern bool mplex_reparent(WMPlex *mplex, WWindow *parent,
 						   WRectangle geom);
 extern void mplex_fit(WMPlex *mplex, WRectangle geom);
+extern void mplex_fit_managed(WMPlex *mplex);
 
 /* Mapping */
 extern void mplex_map(WMPlex *mplex);
 extern void mplex_unmap(WMPlex *mplex);
 
 /* Attach */
-extern WRegion *mplex_add_input(WMPlex *mplex, WRegionAddFn *fn,
-								void *fnp);
-extern void mplex_remove_managed(WMPlex *mplex, WRegion *reg);
-extern void mplex_fit_managed(WMPlex *mplex);
+extern bool mplex_attach_simple(WMPlex *mplex, WRegion *reg, bool switchto);
+extern WRegion *mplex_attach_new_simple(WMPlex *mplex, WRegionSimpleCreateFn *fn,
+										bool switchto);
+extern bool mplex_attach(WMPlex *mplex, WRegion *reg, ExtlTab param);
+extern WRegion *mplex_attach_new(WMPlex *mplex, ExtlTab param);
 extern void mplex_attach_tagged(WMPlex *mplex);
+extern WRegion *mplex_add_input(WMPlex *mplex, WRegionAttachHandler *fn,
+								void *fnp);
+
+extern void mplex_remove_managed(WMPlex *mplex, WRegion *reg);
 
 /* Switch */
 extern bool mplex_display_managed(WMPlex *mplex, WRegion *sub);

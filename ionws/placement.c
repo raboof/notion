@@ -16,64 +16,81 @@
 #include <ioncore/manage.h>
 #include <ioncore/extl.h>
 #include <ioncore/genframep.h>
+#include <ioncore/names.h>
 #include "placement.h"
 #include "ionframe.h"
 #include "splitframe.h"
 #include "ionws.h"
 
 
-static WRegion *find_suitable_frame(WIonWS *ws)
+#define REG_OK(R) region_has_manage_clientwin(R)
+
+
+static WRegion *find_suitable_target(WIonWS *ws)
 {
 	WRegion *r=ionws_current(ws);
 	
-	if(r!=NULL && region_supports_add_managed(r))
+	if(r!=NULL && REG_OK(r))
 		return r;
 	
 	FOR_ALL_MANAGED_ON_LIST(ws->managed_list, r){
-		if(region_supports_add_managed(r))
+		if(REG_OK(r))
 			return r;
-		
 	}
 	
 	return NULL;
 }
 
 
-bool ionws_add_clientwin(WIonWS *ws, WClientWin *cwin,
-						 const WAttachParams *param)
+static bool try_current(WIonWS *ws, WClientWin *cwin)
+{
+	WRegion *target;
+
+	target=find_suitable_target(ws);
+	
+	if(target==NULL || !WOBJ_IS(target, WGenFrame))
+		return FALSE;
+		
+	target=WGENFRAME_CURRENT(target);
+	
+	if(target==NULL || !WOBJ_IS(target, WClientWin))
+		return FALSE;
+	
+	
+	return clientwin_attach_transient((WClientWin*)target, (WRegion*)cwin);
+}
+
+
+bool ionws_manage_clientwin(WIonWS *ws, WClientWin *cwin,
+							const WManageParams *param)
 {
 	WRegion *target=NULL;
-	bool uspos;
 	
 	if(clientwin_get_transient_mode(cwin)==TRANSIENT_MODE_CURRENT){
-		target=find_suitable_frame(ws);
-		if(target!=NULL && WOBJ_IS(target, WGenFrame)){
-			WRegion *curr=WGENFRAME_CURRENT(target);
-			if(curr!=NULL && WOBJ_IS(curr, WClientWin)){
-				if(finish_add_clientwin(curr, cwin, param))
-					return TRUE;
-			}
-		}
-	}else{
-		bool uspos=(param->flags&REGION_ATTACH_MAPRQ &&
-					cwin->size_hints.flags&USPosition);
-
-		if(target==NULL){
-			extl_call_named("ionws_placement_method", 
-							"oob", "o", ws, cwin, uspos, &target);
-			if(target!=NULL && !WOBJ_IS(target, WRegion))
-				target=NULL;
-		}
-		
-		if(target==NULL)
-			target=find_suitable_frame(ws);
+		if(try_current(ws, cwin))
+			return TRUE;
 	}
+		
+	extl_call_named("ionws_placement_method", "oob", "o", 
+					ws, cwin, param->userpos, &target);
+	
+	if(target!=NULL){
+		/* Only allow regions managed by us so the scripts shouldn't be able
+		 * to cause loops and so on.
+		 */
+		if(!REG_OK(target) || REGION_MANAGER(target)!=(WRegion*)ws)
+			target=NULL;
+	}
+
+	if(target==NULL)
+		target=find_suitable_target(ws);
 	
 	if(target==NULL){
-		warn("Ooops... could not find a frame to add client to.");
+		warn("Ooops... could not find a region to attach client window to "
+			 "on workspace %s.", region_name((WRegion*)ws));
 		return FALSE;
 	}
 	
-	return finish_add_clientwin(target, cwin, param);
+	return region_manage_clientwin(target, cwin, param);
 }
 

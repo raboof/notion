@@ -117,3 +117,7 @@ obsolete("exec_in_frame", exec_in)
 
 -- Added 2003-06-27
 obsolete("floatws_destroy", floatws_relocate_and_close)
+
+-- Added 2003-07-08
+obsolete("region_manage", mplex_attach)
+obsolete("region_manage_new", mplex_attach_new)

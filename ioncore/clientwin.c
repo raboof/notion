@@ -309,7 +309,7 @@ static WClientWin *create_clientwin(WRegion *parent, Window win,
 }
 
 
-static bool handle_target_props(WClientWin *cwin, const WAttachParams *param)
+static bool handle_target_props(WClientWin *cwin, const WManageParams *param)
 {
 	WRegion *r=NULL;
 	char *target_name=NULL;
@@ -325,39 +325,46 @@ static bool handle_target_props(WClientWin *cwin, const WAttachParams *param)
 	
 	free(target_name);
 	
-	if(!region_can_manage_clientwins(r))
+	if(!region_has_manage_clientwin(r))
 		return FALSE;
 	
-	return do_add_clientwin(r, cwin, param);
+	return region_manage_clientwin(r, cwin, param);
 }
 
 
-static void get_transient_for(WClientWin *cwin, WAttachParams *param)
+static void get_transient_for(WClientWin *cwin, WManageParams *param)
 {
 	Window tfor;
+
+	param->tfor=NULL;
 	
-	if(XGetTransientForHint(wglobal.dpy, cwin->win, &tfor)){
-		if(tfor==None)
-			return;
-		param->tfor=find_clientwin(tfor);
-		if(param->tfor==cwin){
-			param->tfor=NULL;
-			warn("The transient_for hint for \"%s\" points to itself.",
+	if(clientwin_get_transient_mode(cwin)!=TRANSIENT_MODE_NORMAL)
+		return;
+
+	if(!XGetTransientForHint(wglobal.dpy, cwin->win, &tfor))
+		return;
+	
+	if(tfor==None)
+		return;
+	
+	param->tfor=find_clientwin(tfor);
+	
+	if(param->tfor==cwin){
+		param->tfor=NULL;
+		warn("The transient_for hint for \"%s\" points to itself.",
+			 region_name((WRegion*)cwin));
+	}else if(param->tfor==NULL){
+		if(find_window(tfor)!=NULL){
+			warn("Client window \"%s\" has broken transient_for hint. "
+				 "(\"Extended WM hints\" multi-parent brain damage?)",
 				 region_name((WRegion*)cwin));
-		}else if(param->tfor==NULL){
-			if(find_window(tfor)!=NULL){
-				warn("Client window \"%s\" has broken transient_for hint. "
-					 "(\"Extended WM hints\" multi-parent brain damage?)",
-					 region_name((WRegion*)cwin));
-			}
-		}else if(!same_rootwin((WRegion*)cwin, (WRegion*)param->tfor)){
-			warn("The transient_for window for \"%s\" is not on the same "
-				 "screen.", region_name((WRegion*)cwin));
-		}else{
-			cwin->transient_for=tfor;
-			if(clientwin_get_transient_mode(cwin)==TRANSIENT_MODE_NORMAL)
-				param->flags|=REGION_ATTACH_TFOR;
 		}
+	}else if(!same_rootwin((WRegion*)cwin, (WRegion*)param->tfor)){
+		param->tfor=NULL;
+		warn("The transient_for window for \"%s\" is not on the same "
+			 "screen.", region_name((WRegion*)cwin));
+	}else{
+		cwin->transient_for=tfor;
 	}
 }
 
@@ -390,11 +397,11 @@ WClientWin* manage_clientwin(Window win, int mflags)
 	WClientWin *cwin=NULL;
 	XWindowAttributes attr;
 	XWMHints *hints;
-	int state=NormalState;
-	WAttachParams param;
-	
-	param.flags=0;
+	int init_state=NormalState;
+	WManageParams param=INIT_WMANAGEPARAMS;
 
+	param.dockapp=FALSE;
+	
 again:
 	/* Is the window already being managed? */
 	cwin=find_clientwin(win);
@@ -412,9 +419,9 @@ again:
 	hints=XGetWMHints(wglobal.dpy, win);
 
 	if(hints!=NULL && hints->flags&StateHint)
-		state=hints->initial_state;
+		init_state=hints->initial_state;
 	
-	if(!(param.flags&REGION_ATTACH_DOCKAPP) && state==WithdrawnState &&
+	if(!param.dockapp && init_state==WithdrawnState && 
 	   hints->flags&IconWindowHint && hints->icon_window!=None){
 		/* The dockapp might be displaying its "main" window if no
 		 * wm that understands dockapps has been managing it.
@@ -429,18 +436,12 @@ again:
 		/* It is a dockapp, do everything again from the beginning, now
 		 * with the icon window.
 		 */
-		param.flags|=REGION_ATTACH_DOCKAPP;
+		param.dockapp=TRUE;
 		goto again;
 	}
 	
-	if(hints!=NULL){
-		if(hints->flags&StateHint){
-			param.init_state=hints->initial_state;
-			param.flags|=REGION_ATTACH_INITSTATE;
-		}
-		
+	if(hints!=NULL)
 		XFree((void*)hints);
-	}
 
 	if(!XGetWindowAttributes(wglobal.dpy, win, &attr)){
 		if(!(mflags&MANAGE_INITIAL))
@@ -448,11 +449,8 @@ again:
 		goto fail2;
 	}
 	
-	/* Get the actual state if any */
-	/*get_win_state(win, &state);*/
-	
 	/* Do we really want to manage it? */
-	if(!(param.flags&REGION_ATTACH_DOCKAPP) && (attr.override_redirect || 
+	if(!param.dockapp && (attr.override_redirect || 
 		(mflags&MANAGE_INITIAL && attr.map_state!=IsViewable))){
 		goto fail2;
 	}
@@ -473,15 +471,14 @@ again:
 	if(cwin==NULL)
 		goto fail2;
 
-	param.flags|=(REGION_ATTACH_SIZERQ|REGION_ATTACH_POSRQ|REGION_ATTACH_MAPRQ);
-	if(clientwin_get_switchto(cwin))
-		param.flags|=REGION_ATTACH_SWITCHTO;
-	param.geomrq=REGION_GEOM(cwin);
-	if(cwin->size_hints.flags&PWinGravity){
-		param.flags|=REGION_ATTACH_SIZE_HINTS;
-		param.size_hints=&(cwin->size_hints);
-	}
-
+	param.geom=REGION_GEOM(cwin);
+	param.maprq=TRUE;
+	param.userpos=(cwin->size_hints.flags&USPosition);
+	param.switchto=(init_state!=IconicState && clientwin_get_switchto(cwin));
+	param.gravity=(cwin->size_hints.flags&PWinGravity
+				   ? cwin->size_hints.win_gravity
+				   : ForgetGravity);
+	
 	get_transient_for(cwin, &param);
 
 	if(!handle_target_props(cwin, &param)){
@@ -512,9 +509,10 @@ fail2:
 /*{{{ Add/remove managed */
 
 
-static WRegion *clientwin_do_add_managed(WClientWin *cwin, 
-										 WRegionAddFn *fn, void *fnparams, 
-										 const WAttachParams *param)
+static WRegion *clientwin_do_attach_transient(WClientWin *cwin, 
+											  WRegionAttachHandler *fn,
+											  void *fnparams, 
+											  int *h)
 {
 	WRectangle geom=cwin->max_geom;
 	WWindow *par=REGION_PARENT_CHK(cwin, WWindow);
@@ -523,9 +521,9 @@ static WRegion *clientwin_do_add_managed(WClientWin *cwin,
 	if(par==NULL)
 		return NULL;
 	
-	if(param->flags&REGION_ATTACH_SIZERQ && param->geomrq.h>0){
+	if(*h>0){
 		/* Don't increase the height of the transient */
-		int diff=geom.h-param->geomrq.h;
+		int diff=geom.h-*h;
 		if(diff>0){
 			geom.y+=diff;
 			geom.h-=diff;
@@ -553,6 +551,17 @@ static WRegion *clientwin_do_add_managed(WClientWin *cwin,
 		set_focus(reg);
 	
 	return reg;
+}
+
+
+bool clientwin_attach_transient(WClientWin *cwin, WRegion *transient)
+{
+	int h=REGION_GEOM(transient).h;
+	
+	return attach_reparent_helper((WRegion*)cwin, transient,
+								  ((WRegionDoAttachFn*)
+								   clientwin_do_attach_transient), 
+								  &h);
 }
 
 
@@ -1299,7 +1308,6 @@ static DynFunTab clientwin_dynfuntab[]={
 	{(DynFun*)region_managed_enter_to_focus,
 	 (DynFun*)clientwin_managed_enter_to_focus},
 	{region_remove_managed, clientwin_remove_managed},
-	{(DynFun*)region_do_add_managed, (DynFun*)clientwin_do_add_managed},
 	{region_request_managed_geom, clientwin_request_managed_geom},
 	{region_close, clientwin_close},
 	{(DynFun*)region_save_to_file, (DynFun*)clientwin_save_to_file},

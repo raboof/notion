@@ -20,6 +20,8 @@
 
 INTROBJ(WClientWin);
 
+#include "attach.h"
+
 #define CWIN_P_WM_DELETE 		0x00001
 #define CWIN_P_WM_TAKE_FOCUS 	0x00002
 #define CWIN_PROP_ACROBATIC		0x00010
@@ -83,6 +85,8 @@ extern void clientwin_kill(WClientWin *cwin);
 extern void clientwin_close(WClientWin *cwin);
 
 extern WClientWin *manage_clientwin(Window win, int mflags);
+
+extern bool clientwin_attach_transient(WClientWin *cwin, WRegion *transient);
 
 extern void clientwin_get_set_name(WClientWin *cwin);
 

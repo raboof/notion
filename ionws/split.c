@@ -21,6 +21,7 @@
 #include <ioncore/defer.h>
 #include <ioncore/reginfo.h>
 #include <ioncore/extlconv.h>
+#include <ioncore/manage.h>
 #include "ionws.h"
 #include "ionframe.h"
 #include "split.h"
@@ -1062,7 +1063,7 @@ static WRegion *do_find_nmgr(WObj *ptr, int primn)
 	
 	do{
 		if(WOBJ_IS(ptr, WRegion)){
-			return (region_can_manage_clientwins((WRegion*)ptr)
+			return (region_has_manage_clientwin((WRegion*)ptr)
 					? (WRegion*)ptr : NULL);
 		}
 		
@@ -1196,7 +1197,7 @@ bool split_is_horizontal(WWsSplit *split)
 EXTL_EXPORT
 ExtlTab split_geom(WWsSplit *split)
 {
-	return geom_to_extltab(split->geom);
+	return geom_to_extltab(&(split->geom));
 }
 
 

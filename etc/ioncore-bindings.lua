@@ -50,8 +50,8 @@ global_bindings{
     -- Create a new workspace with a default name.
     kpress(DEFAULT_MOD.."F9", 
            function(scr)
-               local r=region_manage_new(scr, {type=default_ws_type})
-               if r then region_goto(r) end
+               mplex_attach_new(scr, { type=default_ws_type, 
+                                       switchto=true})
            end)
 }
 

@@ -15,6 +15,7 @@
 #include <ioncore/common.h>
 #include <ioncore/window.h>
 #include <ioncore/reginfo.h>
+#include <ioncore/attach.h>
 
 INTROBJ(WWsSplit);
 INTRSTRUCT(WResizeTmp);
@@ -67,7 +68,7 @@ extern int split_tree_other_size(WObj *obj, int dir);
 
 extern void ionws_add_managed(WIonWS *ws, WRegion *reg);
 extern void ionws_managed_activated(WIonWS *ws, WRegion *reg);
-extern WRegion *ionws_find_rescue_manager_for(WIonWS *ws, WRegion *todest);
+extern WRegion *ionws_find_rescue_manager_for(WIonWS *ws, WRegion *reg);
 extern void ionws_request_managed_geom(WIonWS *ws, WRegion *reg,
 									   int flags, WRectangle geom,
 									   WRectangle *geomret);

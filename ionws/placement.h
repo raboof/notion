@@ -14,11 +14,11 @@
 
 #include <ioncore/common.h>
 #include <ioncore/clientwin.h>
-#include <ioncore/attach.h>
+#include <ioncore/manage.h>
 #include "ionws.h"
 
 
-extern bool ionws_add_clientwin(WIonWS *ws, WClientWin *cwin,
-								const WAttachParams *param);
+extern bool ionws_manage_clientwin(WIonWS *ws, WClientWin *cwin,
+								   const WManageParams *param);
 
 #endif /* ION_IONWS_PLACEMENT_H */

@@ -679,7 +679,7 @@ WRegion *region_manager_or_parent(WRegion *reg)
 EXTL_EXPORT
 ExtlTab region_geom(WRegion *reg)
 {
-	return geom_to_extltab(REGION_GEOM(reg));
+	return geom_to_extltab(&REGION_GEOM(reg));
 }
 
 

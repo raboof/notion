@@ -120,10 +120,11 @@ static WIonFrame *do_split(WIonFrame *oframe, const char *str, bool attach)
 		return NULL;
 	}
 
-	if(attach && WGENFRAME_CURRENT(oframe)!=NULL){
-		region_add_managed_simple(reg, WGENFRAME_CURRENT(oframe),
-								  REGION_ATTACH_SWITCHTO);
-	}
+	assert(WOBJ_IS(reg, WIonFrame));
+	
+	if(attach && WGENFRAME_CURRENT(oframe)!=NULL)
+		mplex_attach_simple((WMPlex*)reg, WGENFRAME_CURRENT(oframe), TRUE);
+	
 	region_goto(reg);
 	return (WIonFrame*)reg;
 }

@@ -16,46 +16,33 @@
 #include "reginfo.h"
 #include "window.h"
 #include "clientwin.h"
-
-#define REGION_ATTACH_SWITCHTO	0x0001
-#define REGION_ATTACH_POSRQ		0x0002
-#define REGION_ATTACH_SIZERQ	0x0004
-#define REGION_ATTACH_INITSTATE	0x0010 /* only set by add_clientwin */
-#define REGION_ATTACH_DOCKAPP	0x0020 /* only set by add_clientwin */
-#define REGION_ATTACH_TFOR		0x0040 /* only set by add_clientwin */
-#define REGION_ATTACH_MAPRQ 	0x0080 /* only setd by add_clientwin;
-										  implies POSRQ|SIZERQ */
-#define REGION_ATTACH_SIZE_HINTS 0x0100
-
-#define REGION_ATTACH_IS_GEOMRQ(FLAGS) \
- (((FLAGS)&(REGION_ATTACH_POSRQ|REGION_ATTACH_SIZERQ)) \
-	  ==(REGION_ATTACH_POSRQ|REGION_ATTACH_SIZERQ))
-
-typedef struct{
-	int flags;
-	int init_state;
-	WRectangle geomrq;
-	WClientWin *tfor;
-	XSizeHints *size_hints;
-} WAttachParams;
+#include "genws.h"
 
 
-typedef WRegion *WRegionAddFn(WWindow *parent, WRectangle geom, void *param);
+/* Attach helpers */
 
 
-DYNFUN WRegion *region_do_add_managed(WRegion *reg, WRegionAddFn *fn,
-									  void *fnpar, const WAttachParams *par);
+typedef WRegion *WRegionAttachHandler(WWindow *parent, WRectangle geom, 
+									  void *param);
+	
+typedef WRegion *WRegionDoAttachFn(WRegion *reg, 
+								   WRegionAttachHandler *handler,
+								   void *handlerparams,
+								   void *param);
 
-extern bool region_supports_add_managed(WRegion *reg);
 
-extern WRegion *region_add_managed_new_simple(WRegion *reg,
-											  WRegionSimpleCreateFn *fn,
-											  int flags);
-extern bool region_add_managed_simple(WRegion *reg, WRegion *sub, int flags);
-extern bool region_add_managed(WRegion *reg, WRegion *sub,
-							   const WAttachParams *par);
+extern bool attach_reparent_helper(WRegion *mgr, WRegion *reg, 
+								   WRegionDoAttachFn *fn, void *param);
 
-/* */
+extern WRegion *attach_new_helper(WRegion *mgr, WRegionSimpleCreateFn *cfn,
+								  WRegionDoAttachFn *fn, void *param);
+
+extern WRegion *attach_load_helper(WRegion *mgr, ExtlTab tab,
+								   WRegionDoAttachFn *fn, void *param);
+
+
+/* Rescue */
+
 
 DYNFUN WRegion *region_find_rescue_manager_for(WRegion *reg, WRegion *todst);
 extern WRegion *default_find_rescue_manager_for(WRegion *reg, WRegion *todst);
@@ -64,5 +51,6 @@ extern bool region_can_manage_clientwins(WRegion *reg);
 
 extern bool rescue_managed_clientwins(WRegion *reg, WRegion *list);
 extern bool rescue_child_clientwins(WRegion *reg);
+
 
 #endif /* ION_IONCORE_ATTACH_H */

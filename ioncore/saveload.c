@@ -161,22 +161,6 @@ void save_geom(WRectangle geom, FILE *file, int lvl)
 /*{{{ save_workspaces, load_workspaces */
 
 
-static WScreen *current_scr=NULL;
-
-
-/* 2003-05-10, TODO: keep for savefile backwards compatibility 
- * for now, but remove eventually.
- */
-EXTL_EXPORT
-bool add_to_viewport(ExtlTab tab)
-{
-	if(current_scr==NULL)
-		return FALSE;
-	
-	return (region_add_managed_load((WRegion*)current_scr, tab)!=NULL);
-}
-
-
 bool load_workspaces(WScreen *vp)
 {
 	bool ret;
@@ -246,7 +230,7 @@ static bool do_save_workspaces(WScreen *scr, char *wsconf)
 	
 	FOR_ALL_MANAGED_ON_LIST(scr->mplex.managed_list, reg){
 		if(region_supports_save(reg)){
-			fprintf(file, "region_manage_new(arg[1], {\n");
+			fprintf(file, "mplex_attach_new(arg[1], {\n");
 			region_save_to_file(reg, file, 1);
 			fprintf(file, "})\n");
 		}

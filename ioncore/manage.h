@@ -12,21 +12,35 @@
 #ifndef ION_IONCORE_MANAGE_H
 #define ION_IONCORE_MANAGE_H
 
+#include "common.h"
 #include "clientwin.h"
 #include "genws.h"
 #include "attach.h"
 
 
-extern bool finish_add_clientwin(WRegion *reg, WClientWin *cwin,
-								 const WAttachParams *par);
+#define INIT_WMANAGEPARAMS \
+  {FALSE, FALSE, FALSE, FALSE, ForgetGravity, {0, 0, 0, 0}, NULL}
 
-extern bool do_add_clientwin(WRegion *reg, WClientWin *cwin,
-							 const WAttachParams *param);
+
+typedef struct{
+	bool switchto;
+	bool userpos;
+	bool dockapp;
+	bool maprq;
+	int gravity;
+	WRectangle geom;
+	WClientWin *tfor;
+} WManageParams;
+
+
 
 extern bool add_clientwin_default(WClientWin *cwin,
-								  const WAttachParams *param);
+								  const WManageParams *param);
 
-DYNFUN bool genws_add_clientwin(WGenWS *genws, WClientWin *cwin,
-								const WAttachParams *par);
+DYNFUN bool region_manage_clientwin(WRegion *reg, WClientWin *cwin,
+									const WManageParams *par);
+
+extern bool region_has_manage_clientwin(WRegion *reg);
+
 
 #endif /* ION_IONCORE_MANAGE_H */

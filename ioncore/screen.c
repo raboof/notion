@@ -14,6 +14,7 @@
 #include "screen.h"
 #include "region.h"
 #include "attach.h"
+#include "manage.h"
 #include "objp.h"
 #include "focus.h"
 #include "property.h"
@@ -147,7 +148,7 @@ static bool create_initial_workspace_on_scr(WScreen *scr)
 		return FALSE;
 	}
 	
-	reg=region_add_managed_new_simple((WRegion*)scr, fn, 0);
+	reg=mplex_attach_new_simple((WMPlex*)scr, fn, TRUE);
 	
 	if(reg==NULL){
 		warn("Unable to create a workspace on screen %d\n", scr->id);
@@ -248,33 +249,38 @@ static void screen_managed_changed(WScreen *scr, bool sw)
 }
 
 
-static WRegion *screen_find_rescue_manager_for(WScreen *scr, WRegion *reg)
+static WRegion *screen_find_rescue_manager_for(WScreen *scr, WRegion *todst)
 {
 	WRegion *other;
 	
-	/* TODO: checking that reg is on the managed list should be done
+	/* TODO: checking that todst is on the managed list should be done
 	 * more cleanly.
 	 */
-	if(REGION_MANAGER(reg)!=(WRegion*)scr || reg==scr->mplex.current_input)
-		return NULL;
+	if(REGION_MANAGER(todst)!=(WRegion*)scr || todst==scr->mplex.current_input)
+		return FALSE;
 
-	other=reg;
+	other=todst;
 	while(1){
 		other=PREV_MANAGED(SCR_MLIST(scr), other);
 		if(other==NULL)
 			break;
-		if(WOBJ_IS(other, WGenWS) && region_can_manage_clientwins(other))
+		if(region_has_manage_clientwin(other) && 
+		   !WOBJ_IS_BEING_DESTROYED(other)){
 			return other;
+		}
 	}
 
-	other=reg;
+	other=todst;
 	while(1){
 		other=NEXT_MANAGED(SCR_MLIST(scr), other);
 		if(other==NULL)
 			break;
-		if(WOBJ_IS(other, WGenWS) && region_can_manage_clientwins(other))
+		if(region_has_manage_clientwin(other) && 
+		   !WOBJ_IS_BEING_DESTROYED(other)){
 			return other;
+		}
 	}
+	
 	return NULL;
 }
 
