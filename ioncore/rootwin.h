@@ -51,7 +51,7 @@ extern Window create_simple_window_bg(const WGRData *grdata, Window par,
 extern Window create_simple_window(const WGRData *grdata, Window par,
 								   WRectangle geom);
 
-extern WRootWin *manage_rootwin(int xscr);
+extern WRootWin *manage_rootwin(int xscr, bool noxinerama);
 extern void rootwin_deinit(WRootWin *rootwin);
 
 extern WRootWin *region_rootwin_of(const WRegion *reg);

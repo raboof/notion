@@ -14,10 +14,12 @@
 
 #include "common.h"
 
+#define IONCORE_STARTUP_ONEROOT    0x0001
+#define IONCORE_STARTUP_NOXINERAMA 0x0002
+
 /* argc and argv are needed for restart_wm */
 bool ioncore_init(int argc, char *argv[]);
-bool ioncore_startup(const char *display, bool oneroot, 
-					 const char *cfgfile);
+bool ioncore_startup(const char *display, const char *cfgfile, int flags);
 void ioncore_deinit();
 
 #endif /* ION_IONCORE_WMCORE_H */

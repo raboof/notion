@@ -64,6 +64,11 @@ static OptParserOpt ioncore_opts[]={
 	{OPT_ID('o'), 	"oneroot",  0, NULL, "Manage default root window/non-Xinerama screen only"},
 	{OPT_ID('c'), 	"confdir", 	OPT_ARG, "dir", "Search directory for configuration files"},
 	{OPT_ID('l'), 	"moduledir", OPT_ARG, "dir", "Search directory for modules"},
+#ifndef CF_NOXINERAMA	
+	{OPT_ID('x'), 	"noxinerama", 0, NULL, "Ignore Xinerama screen information"},
+#else
+	{OPT_ID('x'), 	"noxinerama", 0, NULL, "Ignored: not compiled with Xinerama support"},
+#endif
 	END_OPTPARSEROPTS
 };
 
@@ -106,7 +111,7 @@ int main(int argc, char*argv[])
 	const char *display=NULL;
 	const char *msg=NULL;
 	char *cmd=NULL;
-	bool oneroot=FALSE;
+	int stflags=0;
 	int opt;
 	ErrorLog el;
 	FILE *ef=NULL;
@@ -135,7 +140,10 @@ int main(int argc, char*argv[])
 			ioncore_add_moduledir(optparser_get_arg());
 			break;
 		case OPT_ID('o'):
-			oneroot=TRUE;
+			stflags|=IONCORE_STARTUP_ONEROOT;
+			break;
+		case OPT_ID('x'):
+			stflags|=IONCORE_STARTUP_NOXINERAMA;
 			break;
 		default:
 			optparser_print_error();
@@ -161,7 +169,7 @@ int main(int argc, char*argv[])
 		begin_errorlog_file(&el, ef);
 	}
 	
-	if(ioncore_startup(display, oneroot, cfgfile))
+	if(ioncore_startup(display, cfgfile, stflags))
 		may_continue=TRUE;
 
 fail:
@@ -308,7 +316,7 @@ static bool set_up_locales(Display *dpy)
 #endif
 
 
-static bool init_x(const char *display, bool oneroot)
+static bool init_x(const char *display, int stflags)
 {
 	Display *dpy;
 	int i, drw, nrw;
@@ -341,7 +349,7 @@ static bool init_x(const char *display, bool oneroot)
 	}
 #endif
 
-	if(oneroot){
+	if(stflags&IONCORE_STARTUP_ONEROOT){
 		drw=DefaultScreen(dpy);
 		nrw=drw+1;
 	}else{
@@ -380,8 +388,8 @@ static bool init_x(const char *display, bool oneroot)
 	load_cursors();	
 	
 	for(i=drw; i<nrw; i++)
-		manage_rootwin(i);
-	
+		manage_rootwin(i, stflags&IONCORE_STARTUP_NOXINERAMA);
+
 	if(wglobal.rootwins==NULL){
 		if(nrw-drw>1)
 			warn("Could not find a screen to manage.");
@@ -411,8 +419,8 @@ bool ioncore_init(int argc, char *argv[])
 }
 
 
-bool ioncore_startup(const char *display,
-					 bool oneroot, const char *cfgfile)
+bool ioncore_startup(const char *display, const char *cfgfile,
+					 int stflags)
 {
 	if(!extl_init())
 		return FALSE;
@@ -422,7 +430,7 @@ bool ioncore_startup(const char *display,
 	if(!read_config_for("ioncorelib"))
 		return FALSE;
 	
-	if(!init_x(display, oneroot))
+	if(!init_x(display, stflags))
 		return FALSE;
 
 	if(!ioncore_read_config(cfgfile)){

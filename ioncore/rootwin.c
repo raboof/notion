@@ -279,7 +279,7 @@ static WScreen *add_screen(WRootWin *rw, int id, WRectangle geom,
 }
 
 
-WRootWin *manage_rootwin(int xscr)
+WRootWin *manage_rootwin(int xscr, bool noxinerama)
 {
 	WRootWin *rootwin;
 	int nxi=0;
@@ -288,14 +288,16 @@ WRootWin *manage_rootwin(int xscr)
 	int i;
 	int event_base, error_base;
 	
-	if(XineramaQueryExtension(wglobal.dpy, &event_base, &error_base)){
-		xi=XineramaQueryScreens(wglobal.dpy, &nxi);
-	
-		if(xi!=NULL && wglobal.rootwins!=NULL){
-			warn("Don't know how to get Xinerama information for "
-				 "multiple X root windows.");
-			XFree(xi);
-			return NULL;
+	if(!noxinerama){
+		if(XineramaQueryExtension(wglobal.dpy, &event_base, &error_base)){
+			xi=XineramaQueryScreens(wglobal.dpy, &nxi);
+			
+			if(xi!=NULL && wglobal.rootwins!=NULL){
+				warn("Don't know how to get Xinerama information for "
+					 "multiple X root windows.");
+				XFree(xi);
+				return NULL;
+			}
 		}
 	}
 #endif
