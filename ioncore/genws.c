@@ -39,6 +39,8 @@ bool genws_init(WGenWS *ws, WWindow *par, const WFitParams *fp)
     XSaveContext(ioncore_g.dpy, ws->dummywin, ioncore_g.win_context,
                  (XPointer)ws);
     
+    ((WRegion*)ws)->flags|=REGION_PLEASE_WARP;
+
     return TRUE;
 }
 
@@ -69,9 +71,9 @@ void genws_do_reparent(WGenWS *ws, WWindow *par, const WFitParams *fp)
 
 void genws_fallback_focus(WGenWS *ws, bool warp)
 {
-    xwindow_do_set_focus(ws->dummywin);
     if(warp)
         region_do_warp((WRegion*)ws);
+    xwindow_do_set_focus(ws->dummywin);
 }
 
 

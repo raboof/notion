@@ -250,7 +250,7 @@ static WRootWin *preinit_rootwin(int xscr)
         return NULL;
     }
 
-    ((WRegion*)rootwin)->flags|=REGION_BINDINGS_ARE_GRABBED;
+    ((WRegion*)rootwin)->flags|=REGION_BINDINGS_ARE_GRABBED|REGION_PLEASE_WARP;
     ((WRegion*)rootwin)->rootwin=rootwin;
     
     REGION_MARK_MAPPED(rootwin);

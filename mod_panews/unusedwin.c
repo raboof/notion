@@ -61,6 +61,8 @@ bool unusedwin_init(WUnusedWin *uwin, WWindow *parent, const WFitParams *fp)
 
     XSelectInput(ioncore_g.dpy, uwin->wwin.win, IONCORE_EVENTMASK_NORMAL);
     
+    ((WRegion*)uwin)->flags|=REGION_PLEASE_WARP;
+    
     return TRUE;
 }
 

@@ -297,12 +297,27 @@ bool region_may_control_focus(WRegion *reg)
 /*{{{ set_focus, warp */
 
 
+static WRegion *find_warp_to_reg(WRegion *reg)
+{
+    if(reg==NULL)
+        return NULL;
+    if(reg->flags&REGION_PLEASE_WARP)
+        return reg;
+    return find_warp_to_reg(region_manager_or_parent(reg));
+}
+
+
 bool region_do_warp_default(WRegion *reg)
 {
     Window root, win=None, realroot=None;
     int x, y, w, h;
     int wx=0, wy=0, px=0, py=0;
     uint mask=0;
+    
+    reg=find_warp_to_reg(reg);
+    
+    if(reg==NULL)
+        return FALSE;
     
     D(fprintf(stderr, "region_do_warp %p %s\n", reg, OBJ_TYPESTR(reg)));
     

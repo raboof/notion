@@ -95,6 +95,8 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
     if(mg.h<=1)
         frame->flags|=FRAME_SHADED;
     
+    ((WRegion*)frame)->flags|=REGION_PLEASE_WARP;
+    
     return TRUE;
 }
 

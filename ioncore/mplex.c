@@ -551,28 +551,19 @@ static void mplex_managed_rqgeom(WMPlex *mplex, WRegion *sub,
 void mplex_do_set_focus(WMPlex *mplex, bool warp)
 {
     bool focset=FALSE;
+    bool warped=FALSE;
     
     if(!MPLEX_MGD_UNVIEWABLE(mplex)){
         if(mplex->l2_current!=NULL){
-            region_do_set_focus((WRegion*)mplex->l2_current, warp);
+            region_do_set_focus(mplex->l2_current, warp);
             return;
         }else if(mplex->l1_current!=NULL){
-            /* Allow workspaces to position cursor to their liking. */
-            if(warp && OBJ_IS(mplex->l1_current, WGenWS)){
-                region_do_set_focus(mplex->l1_current, TRUE);
-                return;
-            }else{
-                region_do_set_focus(mplex->l1_current, FALSE);
-                focset=TRUE;
-            }
+            region_do_set_focus(mplex->l1_current, warp);
+            return;
         }
     }
     
-    if(!focset)
-        xwindow_do_set_focus(MPLEX_WIN(mplex));
-    
-    if(warp)
-        region_do_warp((WRegion*)mplex);
+    window_do_set_focus((WWindow*)mplex, warp);
 }
 
 

@@ -1138,15 +1138,15 @@ static void clientwin_unmap(WClientWin *cwin)
 
 static void clientwin_do_set_focus(WClientWin *cwin, bool warp)
 {
-    WRegion *reg=LATEST_TRANSIENT(cwin);
+    WRegion *trs=LATEST_TRANSIENT(cwin);
     
-    if(warp)
-        region_do_warp((WRegion*)cwin);
-    
-    if(reg!=NULL){
-        region_do_set_focus(reg, FALSE);
+    if(trs!=NULL){
+        region_do_set_focus(trs, warp);
         return;
     }
+
+    if(warp)
+        region_do_warp((WRegion*)cwin);
 
     if(cwin->flags&CLIENTWIN_P_WM_TAKE_FOCUS){
         Time stmp=ioncore_get_timestamp();
@@ -1154,7 +1154,7 @@ static void clientwin_do_set_focus(WClientWin *cwin, bool warp)
     }
 
     xwindow_do_set_focus(cwin->win);
-    
+
     XSync(ioncore_g.dpy, 0);
 }
 
