@@ -187,11 +187,11 @@ static int do_try(const char *dir, const char *file, TryConfigFn *tryfn,
 }
 
 
-static int try_etcpath2(const char *const *files, const char *cfdir,
-						TryConfigFn *tryfn, void *tryfnparam)
+static int try_dir(const char *const *files, const char *cfdir,
+				   TryConfigFn *tryfn, void *tryfnparam)
 {
 	const char *const *file;
-	int i, ret;
+	int ret;
 	
 	if(cfdir!=NULL){
 		for(file=files; *file!=NULL; file++){
@@ -200,6 +200,16 @@ static int try_etcpath2(const char *const *files, const char *cfdir,
 				return ret;
 		}
 	}
+	
+	return TRYCONFIG_NOTFOUND;
+}
+
+
+static int try_etcpath(const char *const *files, 
+						TryConfigFn *tryfn, void *tryfnparam)
+{
+	const char *const *file;
+	int i, ret;
 	
 	for(i=n_scriptpaths-1; i>=0; i--){
 		for(file=files; *file!=NULL; file++){
@@ -271,28 +281,43 @@ static int try_call_nargs(const char *file, TryCallParam *param)
 }
 
 
-static int do_try_config(const char *module, const char *cfdir,
+static int do_try_config(const char *fname, const char *cfdir,
 						 TryConfigFn *tryfn, void *tryfnparam)
 {
 	char *files[]={NULL, NULL, NULL};
-	int n=0;
-	int ret;
+	int n=0, ret;
+	bool search=FALSE;
 	
-#ifdef EXTL_COMPILED_EXTENSION	
-	libtu_asprintf(files+n, "%s." EXTL_COMPILED_EXTENSION, module);
-	if(files[n]==NULL)
-		warn_err();
-	else
-		n++;
+	if(cfdir==NULL || fname[0]!='.' || fname[1]!='/'){
+		search=(fname[0]!='/');
+		cfdir="";
+	}
+
+	if(strrchr(fname, '.')>strrchr(fname, '/')){
+		files[n]=scopy(fname);
+		if(files[n]==NULL)
+			warn_err();
+		else
+			n++;
+	}else{
+#ifdef EXTL_COMPILED_EXTENSION
+		files[n]=scat(fname, "." EXTL_COMPILED_EXTENSION);
+		if(files[n]==NULL)
+			warn_err();
+		else
+			n++;
 #endif
+		files[n]=scat(fname, "." EXTL_EXTENSION);
+		if(files[n]==NULL)
+			warn_err();
+		else
+			n++;
+	}
 	
-	libtu_asprintf(files+n, "%s." EXTL_EXTENSION, module);
-	if(files[n]==NULL)
-		warn_err();
+	if(!search)
+		ret=try_dir((const char**)&files, cfdir, tryfn, tryfnparam);
 	else
-		n++;
-	
-	ret=try_etcpath2((const char**)&files, cfdir, tryfn, tryfnparam);
+		ret=try_etcpath((const char**)&files, tryfn, tryfnparam);
 	
 	while(n>0)
 		free(files[--n]);
@@ -307,35 +332,21 @@ int try_config(const char *module, TryConfigFn *tryfn, void *tryfnparam)
 }
 
 
-int do_lookup_script(const char *file, const char *try_in_dir,
-					 TryConfigFn *tryfn, void *tryfnparam)
-{
-	const char *files[]={NULL, NULL};
-	char* tmp=NULL;
-	int retval;
-	
-	if(file==NULL)
-		return TRYCONFIG_NOTFOUND;
-	
-	if(file[0]=='/')
-		return tryfn(file, tryfnparam);
-	
-	files[0]=file;
-	return try_etcpath2(files, try_in_dir, tryfn, tryfnparam);
-}
-
-
-/*EXTL_DOC
- * This function will return the path to the first file with name
- * \var{file} on the script and configuration file search path. The
- * directory \var{try_in_dir} if checked before the search path if
- * specified.
- */
 EXTL_EXPORT
 char *lookup_script(const char *file, const char *try_in_dir)
 {
-	char *tmp=NULL;
-	do_lookup_script(file, try_in_dir, (TryConfigFn*)try_lookup, &tmp);
+	const char *files[]={NULL, NULL};
+	char* tmp=NULL;
+	
+	if(file!=NULL){
+		files[0]=file;
+
+		if(try_in_dir!=NULL)
+			try_dir(files, try_in_dir, (TryConfigFn*)try_lookup, &tmp);
+		if(tmp==NULL)
+			try_etcpath(files, (TryConfigFn*)try_lookup, &tmp);
+	}
+	
 	return tmp;
 }
 
@@ -352,16 +363,11 @@ bool do_include(const char *file, const char *current_file_dir)
 	
 	param.status=0;
 	
-	if(strpbrk(file, "./")==NULL){
-		retval=do_try_config(file, current_file_dir,
-							 (TryConfigFn*)try_call_nargs, &param);
-	}else{
-		retval=do_lookup_script(file, current_file_dir,
-								(TryConfigFn*)try_call_nargs, &param);
-	}
+	retval=do_try_config(file, current_file_dir,
+						 (TryConfigFn*)try_call_nargs, &param);
 	
 	if(retval==TRYCONFIG_NOTFOUND)
-		warn("Unable to find '%s' on search path", file);
+		warn("Unable to find '%s'.", file);
 	
 	return (retval==TRYCONFIG_OK);
 }
@@ -371,19 +377,6 @@ bool do_include(const char *file, const char *current_file_dir)
 
 
 /*{{{ read_config */
-
-
-/*bool read_config(const char *cfgfile)
- {
- int retval;
- TryCallParam param;
- * 
- param.status=0;
- retval=try_call_nargs(cfgfile, &param);
- if(retval==-2)
- warn_err_obj(cfgfile);
- return (retval==1);
- }*/
 
 
 bool read_config(const char *module)
