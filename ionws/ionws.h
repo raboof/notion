@@ -27,8 +27,7 @@ DECLOBJ(WIonWS){
 };
 
 
-extern WIonWS *create_ionws(WWindow *parent, WRectangle bounds,
-							const char *name, bool ci);
+extern WIonWS *create_ionws(WWindow *parent, WRectangle bounds, bool ci);
 extern WIonWS *create_ionws_simple(WWindow *parent, WRectangle bounds);
 
 extern void ionws_goto_above(WIonWS *ws);

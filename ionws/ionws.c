@@ -177,18 +177,10 @@ static WIonFrame *create_initial_frame(WIonWS *ws, WWindow *parent,
 }
 
 
-static bool init_ionws(WIonWS *ws, WWindow *parent, WRectangle bounds,
-					   const char *name, bool ci)
+static bool init_ionws(WIonWS *ws, WWindow *parent, WRectangle bounds, bool ci)
 {
 	init_genws(&(ws->genws), parent, bounds);
 	ws->split_tree=NULL;
-	
-	if(name!=NULL){
-		if(!region_set_name((WRegion*)ws, name)){
-			deinit_region((WRegion*)ws);
-			return FALSE;
-		}
-	}
 	
 	if(ci){
 		if(create_initial_frame(ws, parent, bounds)==NULL){
@@ -209,7 +201,7 @@ WIonWS *create_ionws(WWindow *parent, WRectangle bounds, bool ci)
 
 WIonWS *create_ionws_simple(WWindow *parent, WRectangle bounds)
 {
-	return create_ionws(parent, bounds, NULL, TRUE);
+	return create_ionws(parent, bounds, TRUE);
 }
 
 
