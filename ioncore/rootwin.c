@@ -447,7 +447,7 @@ static void rootwin_do_set_focus(WRootWin *rootwin, bool warp)
     if(sub!=NULL)
         region_do_set_focus(sub, warp);
     else
-        xwindow_do_set_focus(WROOTWIN_ROOT(rootwin));
+        window_do_set_focus((WWindow*)rootwin, warp);
 }
 
 

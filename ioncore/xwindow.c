@@ -14,7 +14,6 @@
 #include <libtu/minmax.h>
 #include "common.h"
 #include "global.h"
-#include "focus.h"
 #include "xwindow.h"
 #include "cursor.h"
 #include "sizehint.h"
@@ -93,7 +92,6 @@ void xwindow_restack(Window win, Window other, int stack_mode)
 
 void xwindow_do_set_focus(Window win)
 {
-    region_set_await_focus(xwindow_region_of(win));
     XSetInputFocus(ioncore_g.dpy, win, RevertToParent, CurrentTime);
 }
 

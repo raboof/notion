@@ -174,6 +174,8 @@ void window_do_set_focus(WWindow *wwin, bool warp)
 {
     if(warp)
         region_do_warp((WRegion*)wwin);
+    
+    region_set_await_focus((WRegion*)wwin);
     xwindow_do_set_focus(wwin->win);
 }
 

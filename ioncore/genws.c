@@ -73,6 +73,8 @@ void genws_fallback_focus(WGenWS *ws, bool warp)
 {
     if(warp)
         region_do_warp((WRegion*)ws);
+    
+    region_set_await_focus((WRegion*)ws);
     xwindow_do_set_focus(ws->dummywin);
 }
 

@@ -1153,6 +1153,7 @@ static void clientwin_do_set_focus(WClientWin *cwin, bool warp)
         send_clientmsg(cwin->win, ioncore_g.atom_wm_take_focus, stmp);
     }
 
+    region_set_await_focus((WRegion*)cwin);
     xwindow_do_set_focus(cwin->win);
 
     XSync(ioncore_g.dpy, 0);
