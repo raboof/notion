@@ -568,12 +568,14 @@ static WMenu *menu_tail(WMenu *menu)
 
 static void menu_remove_managed(WMenu *menu, WRegion *sub)
 {
+	bool mcf=region_may_control_focus((WRegion*)menu);
+	
 	if(sub!=(WRegion*)menu->submenu)
 		return;
 
 	region_unset_manager(sub, (WRegion*)menu, (WRegion**)&(menu->submenu));
-	
-	if(region_may_control_focus((WRegion*)menu))
+
+	if(mcf)
 		region_set_focus_to((WRegion*)menu, FALSE);
 }
 
