@@ -27,12 +27,6 @@ de.defstyle("frame", {
     padding_pixels = 2,
     highlight_pixels = 1,
     shadow_pixels = 1,
-    de.substyle("active", {
-        shadow_colour = "#777777",
-        highlight_colour = "#eeeeee",
-        background_colour = "#aaaaaa",
-        foreground_colour = "#ffffff",
-    }),
 })
 
 de.defstyle("frame-ionframe", {
@@ -123,6 +117,13 @@ de.defstyle("input", {
         background_colour = "#aaaaaa",
         foreground_colour = "black",
     }),
+})
+
+de.defstyle("stdisp", {
+    based_on = "*",
+    shadow_pixels = 0,
+    highlight_pixels = 0,
+    text_align = "left",
 })
 
 gr.refresh()

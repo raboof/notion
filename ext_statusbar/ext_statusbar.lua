@@ -297,7 +297,7 @@ function ext_statusbar.create(param)
         type="WInfoWin", 
         corner=(param.corner or "bl"),
         name="*statusbar*",
-        style="infowin-statusbar"
+        style="stdisp-statusbar"
     })
     
     if not iw then

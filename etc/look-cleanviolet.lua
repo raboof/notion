@@ -123,6 +123,15 @@ de.defstyle("input", {
     }),
 })
 
+de.defstyle("stdisp", {
+    based_on = "*",
+    shadow_pixels = 0,
+    highlight_pixels = 0,
+    text_align = "left",
+    background_colour = "#000000",
+    foreground_colour = "grey",
+    font="fixed",
+})
     
 -- Refresh objects' brushes.
 gr.refresh()

@@ -72,7 +72,7 @@ de.defstyle("tab", {
         shadow_colour = "gray10",
         highlight_colour = "gray10",
         background_colour = "#7f7f75",
-        foreground_colour = "#aaaa9e",
+        foreground_colour = "gray",
     }),
     text_align = "center",
 })
@@ -121,6 +121,13 @@ de.defstyle("input", {
         background_colour = "black",
         foreground_colour = "white",
     }),
+})
+
+de.defstyle("stdisp", {
+    based_on = "*",
+    shadow_pixels = 0,
+    highlight_pixels = 0,
+    text_align = "left",
 })
 
 gr.refresh()

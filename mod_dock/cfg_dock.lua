@@ -18,6 +18,8 @@ mod_dock.create{
     is_auto=true, 
     -- Show floating dock initially?
     floating_hidden=false,
+    -- Name of the dock
+    name="*dock*",
 }
 
 

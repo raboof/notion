@@ -905,7 +905,7 @@ static void dock_brush_get(WDock *dock)
 
     dock_brush_release(dock);
     dock->brush=gr_get_brush(region_rootwin_of((WRegion*)dock), 
-                             ((WWindow*)dock)->win, "dock");
+                             ((WWindow*)dock)->win, "stdisp-dock");
 }
 
 
