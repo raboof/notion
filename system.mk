@@ -86,7 +86,7 @@ POSIX_SOURCE=-ansi -D_POSIX_SOURCE
 # sunos, (irix)
 #XOPEN_SOURCE=-ansi -D__EXTENSIONS__
 
-# Same as '-Wall -pedantic-errors' without '-Wunused' as callbacks often
+# Same as '-Wall -pedantic' without '-Wunused' as callbacks often
 # have unused variables.
 WARN=	-W -Wimplicit -Wreturn-type -Wswitch -Wcomment \
 	-Wtrigraphs -Wformat -Wchar-subscripts \

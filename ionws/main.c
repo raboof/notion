@@ -1,7 +1,7 @@
 /*
  * ion/main.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2002. 
+ * Copyright (c) Tuomo Valkonen 1999-2003. 
  * See the included file LICENSE for details.
  */
 
@@ -47,7 +47,7 @@ static const char ion_usage_tmpl[]=
 
 
 static const char ion_about[]=
-	"Ion " ION_VERSION ", copyright (c) Tuomo Valkonen 1999-2002.\n"
+	"Ion " ION_VERSION ", copyright (c) Tuomo Valkonen 1999-2003.\n"
 	"This program may be copied and modified under the terms of the "
 	"Clarified Artistic License.\n";
 
