@@ -591,13 +591,13 @@ bool ionws_may_destroy(WIonWS *ws, WRegion *reg)
 }
 
 
-bool ionws_rescue_clientwins(WIonWS *ws)
+bool ionws_rescue_clientwins(WIonWS *ws, WPHolder *ph)
 {
     WIonWSIterTmp tmp;
     
     ptrlist_iter_init(&tmp, ws->managed_list);
     
-    return region_rescue_some_clientwins((WRegion*)ws, 
+    return region_rescue_some_clientwins((WRegion*)ws, ph,
                                          (WRegionIterator*)ptrlist_iter, 
                                          &tmp);
 }
@@ -860,29 +860,19 @@ WFrame *ionws_split_at(WIonWS *ws, WFrame *frame, const char *dirstr,
  * and, if possible, destroy the frame.
  */
 EXTL_EXPORT_MEMBER
-void ionws_unsplit_at(WIonWS *ws, WFrame *frame)
+bool ionws_unsplit_at(WIonWS *ws, WFrame *frame)
 {
     if(frame==NULL){
         warn(TR("Nil frame."));
-        return;
+        return FALSE;
     }
     
     if(REGION_MANAGER(frame)!=(WRegion*)ws){
         warn(TR("The frame is not managed by the workspace."));
-        return;
+        return FALSE;
     }
     
-    if(!region_managed_may_destroy((WRegion*)ws, (WRegion*)frame)){
-        warn(TR("Frame may not be destroyed."));
-        return;
-    }
-
-    if(!region_rescue_clientwins((WRegion*)frame)){
-        warn(TR("Failed to rescue managed objects."));
-        return;
-    }
-
-    mainloop_defer_destroy((Obj*)frame);
+    return region_rqclose((WRegion*)frame, TRUE);
 }
 
 

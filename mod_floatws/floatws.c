@@ -376,13 +376,13 @@ void floatws_deinit(WFloatWS *ws)
 
 
     
-bool floatws_rescue_clientwins(WFloatWS *ws)
+bool floatws_rescue_clientwins(WFloatWS *ws, WPHolder *ph)
 {
     WFloatWSIterTmp tmp;
     
     floatws_iter_init(&tmp, ws);
     
-    return region_rescue_some_clientwins((WRegion*)ws, 
+    return region_rescue_some_clientwins((WRegion*)ws, ph,
                                          (WRegionIterator*)floatws_iter,
                                          &tmp);
 }

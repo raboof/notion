@@ -93,8 +93,6 @@ static void destroy_children(WRegion *reg)
 
 void region_deinit(WRegion *reg)
 {
-    /*rescue_child_clientwins(reg);*/
-    
     destroy_children(reg);
 
     if(ioncore_g.focus_next==reg){
@@ -360,18 +358,26 @@ bool region_reparent(WRegion *reg, WWindow *par,
 
 static bool region_rqclose_default(WRegion *reg, bool relocate)
 {
-    WRegion *mgr;
+    WPHolder *ph;
+    bool refuse=TRUE;
     
     if((!relocate && !region_may_destroy(reg)) ||
        !region_manager_allows_destroying(reg)){
         return FALSE;
     }
     
-    if(!region_rescue_clientwins(reg)){
+    ph=region_get_rescue_pholder(reg);
+    
+    if(ph!=NULL){
+        refuse=!region_rescue_clientwins(reg, ph);
+        destroy_obj((Obj*)ph);
+    }
+
+    if(refuse){
         warn(TR("Failed to rescue some client windows - not closing."));
         return FALSE;
     }
-    
+
     mainloop_defer_destroy((Obj*)reg);
     
     return TRUE;

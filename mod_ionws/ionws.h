@@ -56,7 +56,7 @@ DYNFUN WRegion *ionws_do_get_farthest(WIonWS *ws,
 extern WFrame *ionws_split_top(WIonWS *ws, const char *dirstr);
 extern WFrame *ionws_split_at(WIonWS *ws, WFrame *frame, 
                               const char *dirstr, bool attach_current);
-extern void ionws_unsplit_at(WIonWS *ws, WFrame *frame);
+extern bool ionws_unsplit_at(WIonWS *ws, WFrame *frame);
 
 extern WSplit *ionws_split_tree(WIonWS *ws);
 extern WSplit *ionws_split_of(WIonWS *ws, WRegion *reg);
@@ -77,7 +77,7 @@ extern void ionws_managed_rqgeom(WIonWS *ws, WRegion *reg,
                                  WRectangle *geomret);
 extern void ionws_managed_remove(WIonWS *ws, WRegion *reg);
 extern void ionws_managed_activated(WIonWS *ws, WRegion *reg);
-extern bool ionws_rescue_clientwins(WIonWS *ws);
+extern bool ionws_rescue_clientwins(WIonWS *ws, WPHolder *ph);
 extern WPHolder *ionws_get_rescue_pholder_for(WIonWS *ws, WRegion *mgd);
 extern void ionws_do_set_focus(WIonWS *ws, bool warp);
 extern bool ionws_managed_goto(WIonWS *ws, WRegion *reg, bool cfocus);

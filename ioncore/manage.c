@@ -144,17 +144,16 @@ static WRegion *iter_children(void *st)
 }
 
 
-bool region_rescue_child_clientwins(WRegion *reg)
+bool region_rescue_child_clientwins(WRegion *reg, WPHolder *ph)
 {
     WRegion *next=reg->children;
-    return region_rescue_some_clientwins(reg, iter_children, &next);
+    return region_rescue_some_clientwins(reg, ph, iter_children, &next);
 }
 
 
-bool region_rescue_some_clientwins(WRegion *reg, 
+bool region_rescue_some_clientwins(WRegion *reg, WPHolder *ph,
                                    WRegionIterator *iter, void *st)
 {
-    WPHolder *ph=NULL;
     bool res=FALSE;
     int fails=0;
 
@@ -167,13 +166,10 @@ bool region_rescue_some_clientwins(WRegion *reg,
             break;
         
         if(!OBJ_IS(tosave, WClientWin)){
-            if(!region_rescue_clientwins(tosave))
+            if(!region_rescue_clientwins(tosave, ph))
                 fails++;
         }else{
-            if(ph==NULL)
-                ph=region_get_rescue_pholder(reg);
-            
-            if(ph==NULL || !pholder_attach(ph, tosave))
+            if(!pholder_attach(ph, tosave))
                 fails++;
         }
     }
@@ -184,10 +180,10 @@ bool region_rescue_some_clientwins(WRegion *reg,
 }
 
 
-bool region_rescue_clientwins(WRegion *reg)
+bool region_rescue_clientwins(WRegion *reg, WPHolder *ph)
 {
     bool ret=FALSE;
-    CALL_DYN_RET(ret, bool, region_rescue_clientwins, reg, (reg));
+    CALL_DYN_RET(ret, bool, region_rescue_clientwins, reg, (reg, ph));
     return ret;
 }
 

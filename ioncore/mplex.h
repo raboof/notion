@@ -19,6 +19,7 @@
 #include "manage.h"
 #include "rectangle.h"
 #include "hooks.h"
+#include "pholder.h"
 
 #define MPLEX_ADD_TO_END 0x0001
 #define MPLEX_MANAGED_UNVIEWABLE 0x0002
@@ -127,7 +128,7 @@ extern void mplex_attach_tagged(WMPlex *mplex);
 extern void mplex_managed_remove(WMPlex *mplex, WRegion *reg);
 extern void mplex_child_removed(WMPlex *mplex, WRegion *sub);
 
-extern bool mplex_rescue_clientwins(WMPlex *mplex);
+extern bool mplex_rescue_clientwins(WMPlex *mplex, WPHolder *ph);
 
 extern bool mplex_manage_clientwin(WMPlex *mplex, WClientWin *cwin,
                                    const WManageParams *param, int redir);

@@ -690,18 +690,18 @@ static void clientwin_managed_remove(WClientWin *cwin, WRegion *transient)
 }
 
 
-bool clientwin_rescue_clientwins(WClientWin *cwin)
+bool clientwin_rescue_clientwins(WClientWin *cwin, WPHolder *ph)
 {
     PtrListIterTmp tmp;
     bool ret1, ret2;
     
     ptrlist_iter_init(&tmp, cwin->transient_list);
     
-    ret1=region_rescue_some_clientwins((WRegion*)cwin, 
+    ret1=region_rescue_some_clientwins((WRegion*)cwin, ph,
                                        (WRegionIterator*)ptrlist_iter, 
                                        &tmp);
 
-    ret2=region_rescue_child_clientwins((WRegion*)cwin);
+    ret2=region_rescue_child_clientwins((WRegion*)cwin, ph);
     
     return (ret1 && ret2);
 }
@@ -827,8 +827,15 @@ static bool mrsh_u_extl(ExtlFn fn, void *param)
 static void clientwin_do_unmapped(WClientWin *cwin, Window win)
 {
     bool cf=region_may_control_focus((WRegion*)cwin);
+    WPHolder *ph=region_get_rescue_pholder((WRegion*)cwin);
     
-    region_rescue_clientwins((WRegion*)cwin);
+    if(ph==NULL){
+        warn(TR("Failed to rescue some client windows."));
+    }else{
+        if(!region_rescue_clientwins((WRegion*)cwin, ph))
+            warn(TR("Failed to rescue some client windows."));
+        destroy_obj((Obj*)ph);
+    }
     
     if(cf && cwin->fs_pholder!=NULL)
         pholder_goto(cwin->fs_pholder);

@@ -19,6 +19,7 @@
 #include <ioncore/genws.h>
 #include <ioncore/manage.h>
 #include <ioncore/rectangle.h>
+#include <ioncore/pholder.h>
 
 #include "classes.h"
 
@@ -59,7 +60,7 @@ extern bool floatws_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
 
 extern bool floatws_add_managed(WFloatWS *ws, WRegion *reg);
 
-extern bool floatws_rescue_clientwins(WFloatWS *ws);
+extern bool floatws_rescue_clientwins(WFloatWS *ws, WPHolder *ph);
 
 extern bool floatws_rqclose(WFloatWS *ws);
 extern bool floatws_rqclose_relocate(WFloatWS *ws);

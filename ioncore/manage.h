@@ -69,9 +69,9 @@ extern bool region_manage_clientwin_default(WRegion *reg, WClientWin *cwin,
 
 /* Rescue */
 
-extern bool region_rescue_clientwins(WRegion *reg);
-extern bool region_rescue_child_clientwins(WRegion *reg);
-extern bool region_rescue_some_clientwins(WRegion *reg, 
+extern bool region_rescue_clientwins(WRegion *reg, WPHolder *ph);
+extern bool region_rescue_child_clientwins(WRegion *reg, WPHolder *ph);
+extern bool region_rescue_some_clientwins(WRegion *reg, WPHolder *ph,
                                           WRegionIterator *iter, void *st);
 
 

@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ion3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-02-28 21:28+0200\n"
+"POT-Creation-Date: 2005-02-28 23:03+0200\n"
 "PO-Revision-Date: 2004-07-31 23:50+0300\n"
 "Last-Translator: Tuomo Valkonen <tuomov at iki.fi>\n"
 "Language-Team: none\n"
@@ -150,8 +150,8 @@ msgstr "Moduulin alustus epäonnistui."
 msgid "No module to load given."
 msgstr "Ladattava moduulia ei ole annettu."
 
-#: ../ioncore/property.c:354 ../ioncore/property.c:363
 #
+#: ../ioncore/property.c:354 ../ioncore/property.c:363
 msgid "Invalid arguments."
 msgstr "Virheelliset parametrit."
 
@@ -159,13 +159,13 @@ msgstr "Virheelliset parametrit."
 msgid "act: "
 msgstr "act: "
 
-#: ../ioncore/screen.c:464
 #
+#: ../ioncore/screen.c:464
 msgid "Only workspace may not be destroyed."
 msgstr "Ainoata työpöytää ei voi tuhota."
 
-#: ../ioncore/screen.c:472
 #
+#: ../ioncore/screen.c:472
 msgid "Screens may not be destroyed."
 msgstr "Näyttöjä ei voi tuhota."
 
@@ -258,7 +258,7 @@ msgid "The transient_for window for \"%s\" is not on the same screen."
 msgstr "Ikkunan \"%s\" transient_for neuvo osoittaa eri näytölle."
 
 #: ../ioncore/clientwin.c:405 ../ioncore/clientwin.c:492
-#: ../ioncore/clientwin.c:1578
+#: ../ioncore/clientwin.c:1585
 #, c-format
 msgid "Window %#x disappeared."
 msgstr "Ikkuna %#x katosi."
@@ -277,17 +277,23 @@ msgid "Changes is WM_TRANSIENT_FOR property are unsupported."
 msgstr "Muutoksia WM_TRANSIENT_FOR ominaisuudessa ei tueta."
 
 #
-#: ../ioncore/clientwin.c:904
+#: ../ioncore/clientwin.c:833 ../ioncore/clientwin.c:836
+#
+msgid "Failed to rescue some client windows."
+msgstr "Joidenkin asiakasikkunoiden pelastaminen epäonnistui."
+
+#
+#: ../ioncore/clientwin.c:911
 msgid "Client does not support the WM_DELETE protocol."
 msgstr "Asiakasikkuna ei tue WM_DELETE-protokollaa."
 
-#: ../ioncore/clientwin.c:1139 ../mod_ionws/ionws.c:82
+#: ../ioncore/clientwin.c:1146 ../mod_ionws/ionws.c:82
 #: ../mod_floatws/floatws.c:137
 #, c-format
 msgid "Error reparenting %s."
 msgstr "Virhe alueen %s vanhemman vaihdossa."
 
-#: ../ioncore/clientwin.c:1584
+#: ../ioncore/clientwin.c:1591
 msgid "Saved client window does not want to be managed."
 msgstr "Talletettu asiakasikkuna ei halua sitä hallittavan."
 
@@ -305,8 +311,8 @@ msgstr "Yritys luoda korkeudeltaan tai leveydeltään negatiivinen alue."
 msgid "Destroying object \"%s\" with client windows as children."
 msgstr "Olio \"%s\", jolla on vielä asiakasikkunoita lapsena, tuhotaan."
 
-#: ../ioncore/region.c:371
 #
+#: ../ioncore/region.c:377
 msgid "Failed to rescue some client windows - not closing."
 msgstr "Joidenkin asiakasikkunoiden pelastaminen epäonnistui - ei suljeta."
 
@@ -422,8 +428,8 @@ msgstr ""
 "Asiakasikkunan paluu kokoruudun tilasta epäonnistui; edellinen hallitsija "
 "tai vanhempi kieltäytyi hallitsemasta ikkunaa."
 
-#: ../ioncore/mplex.c:256
 #
+#: ../ioncore/mplex.c:256
 msgid "Refusing to destroy - not empty."
 msgstr "Tuhoamisesta kieltäydytään - ei tyhjä."
 
@@ -464,8 +470,8 @@ msgstr "Solmun luonti tilanäytölle epäonnistui."
 msgid "Unable to create new split for status display."
 msgstr "Uuden jaon tekeminen tilanäytölle epäonnistui."
 
-#: ../mod_ionws/ionws.c:585 ../mod_floatws/floatws.c:398
 #
+#: ../mod_ionws/ionws.c:585 ../mod_floatws/floatws.c:398
 msgid "Workspace not empty - refusing to destroy."
 msgstr "Työpöytää ei voida tuhota, koska se ei ole tyhjä."
 
@@ -475,8 +481,8 @@ msgid "Invalid node."
 msgstr "Epäkelpo solmu."
 
 #
-#: ../mod_ionws/ionws.c:752
 #
+#: ../mod_ionws/ionws.c:752
 msgid "Invalid split type parameter."
 msgstr "Tuntematon jaon tapa."
 
@@ -493,52 +499,44 @@ msgstr "Kehys on asettamatta."
 msgid "The frame is not managed by the workspace."
 msgstr "Kehys ei ole tämän työpöydän hallinnoima."
 
-#: ../mod_ionws/ionws.c:876
-msgid "Frame may not be destroyed."
-msgstr "Kehystä ei saa tuhota."
-
-#: ../mod_ionws/ionws.c:881
-msgid "Failed to rescue managed objects."
-msgstr "Hallittujen olioiden pelastaminen epäonnistui."
-
-#: ../mod_ionws/ionws.c:1096
+#: ../mod_ionws/ionws.c:1086
 msgid "Nil parameter."
 msgstr "Parametri on asettamatta."
 
-#: ../mod_ionws/ionws.c:1101
+#: ../mod_ionws/ionws.c:1091
 msgid "Manager doesn't match."
 msgstr "Hallitsija on väärä."
 
 #
-#: ../mod_ionws/ionws.c:1123
+#: ../mod_ionws/ionws.c:1113
 msgid "Could not get split tree."
 msgstr "Halkaisupuu puuttuu."
 
-#: ../mod_ionws/ionws.c:1144
+#: ../mod_ionws/ionws.c:1134
 msgid "Workspace already has a status display node."
 msgstr "Työpöydällä on jo solmu tilanäytölle."
 
 #
-#: ../mod_ionws/ionws.c:1194
+#: ../mod_ionws/ionws.c:1184
 msgid "Missing region parameters."
 msgstr "Alueen parameterit puuttuu."
 
-#: ../mod_ionws/ionws.c:1230 ../mod_ionws/splitfloat.c:782
+#: ../mod_ionws/ionws.c:1220 ../mod_ionws/splitfloat.c:782
 msgid "Invalid direction."
 msgstr "Virheellinen suunta."
 
 #
-#: ../mod_ionws/ionws.c:1304
+#: ../mod_ionws/ionws.c:1294
 msgid "No split type given."
 msgstr "Halkaisun tyyppiä ei ole asetettu."
 
-#: ../mod_ionws/ionws.c:1317
+#: ../mod_ionws/ionws.c:1307
 msgid "Unknown split type."
 msgstr "Tuntematon halkaisutyyppi."
 
 #
 #
-#: ../mod_ionws/ionws.c:1357
+#: ../mod_ionws/ionws.c:1347
 msgid "The workspace is empty."
 msgstr "Työpöytä on tyhjä."
 
@@ -1650,6 +1648,12 @@ msgstr "Istunto"
 #: ../pwm/cfg_pwm_menus.lua:27
 msgid "List"
 msgstr "Lista"
+
+#~ msgid "Frame may not be destroyed."
+#~ msgstr "Kehystä ei saa tuhota."
+
+#~ msgid "Failed to rescue managed objects."
+#~ msgstr "Hallittujen olioiden pelastaminen epäonnistui."
 
 #
 #~ msgid "Could not find a root window."
