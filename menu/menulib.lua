@@ -88,7 +88,7 @@ end
 -- function should only be called from a mouse press binding.
 -- 
 -- See also: \fnref{menu_pmenu}, \fnref{make_menu_fn}.
-function make_pmenu_fn(menuname)
+function make_pmenu_fn(menu_or_name)
     return function(mplex, ...)
                local params=arg
                local function wrapper(entry)
