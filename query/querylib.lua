@@ -38,15 +38,12 @@ end
 
 
 function querylib.do_query_yesno(mplex, prompt, handler)
-    local function handle_yesno(...)
-        local n=table.getn(arg)
-        if n==0 then return end
-        if arg[n]=="y" or arg[n]=="Y" or arg[n]=="yes" then
-            table.remove(arg, n)
-            handler(unpack(arg))
+    local function handle_yesno(str)
+        if str=="y" or str=="Y" or str=="yes" then
+            handler(mplex)
         end
     end
-    return querylib.do_query(mplex, prompt, nil, handle_yesno, nil)
+    return querymod.query(mplex, prompt, nil, handle_yesno, nil)
 end
 
 

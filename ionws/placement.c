@@ -20,7 +20,6 @@
 #include <ioncore/region-iter.h>
 #include "placement.h"
 #include "ionframe.h"
-#include "splitframe.h"
 #include "ionws.h"
 
 

@@ -149,14 +149,14 @@ local function selectstyle(look, where)
     local function writeit()
         local f, err=io.open(fname, 'w')
         if not f then
-            query_message(where, err)
+            querymod.message(where, err)
         else
             f:write(string.format('include("%s")\n', look))
             f:close()
         end
     end
 
-    if not querylib or not query_message then
+    if not querylib or not querymod then
         if fname then
             writeit()
         end
@@ -173,9 +173,9 @@ local function selectstyle(look, where)
         return
     end
     
-    local q=querylib.make_yesno_fn("Save look selection in "..fname.."?", 
-                                   writeit)
-    q(where)
+    querylib.do_query_yesno(where, 
+                            "Save look selection in "..fname.."?",
+                            writeit)
 end
 
 local function receive_styles(str)

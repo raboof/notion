@@ -13,6 +13,11 @@ local ioncorelib=_G.ioncorelib
 
 local warn=ioncore.warn
 
+--DOC
+-- Compile string \var{cmd} into a bindable function. The string \var{guard} 
+-- maybe set to pose limits on the second argument (\code{_sub}) passed to 
+-- the function. Currently supported guards are \code{_sub:non-nil}  and 
+-- \code{_sub:WFoobar}, where \type{WFoobar} is a class.
 function ioncorelib.compile_cmd(cmd, guard)
     local guardcode=""
     if guard then
@@ -22,7 +27,7 @@ function ioncorelib.compile_cmd(cmd, guard)
         elseif condition=="non-nil" then
             guardcode='if not _sub then return end; '
         else
-            guarcode='if not obj_is(_sub, "'..condition..'") then return end; '
+            guardcode='if not obj_is(_sub, "'..condition..'") then return end; '
         end
     end
 
@@ -140,6 +145,10 @@ function ioncorelib.mdrag(buttonspec, cmd, guard)
     return mact("mdrag", buttonspec, cmd, guard)
 end
 
+--DOC
+-- Define bindings for context \var{context}. Here \var{binding} is
+-- a table composed of entries created with \fnref{ioncorelib.kpress}, 
+-- etc.; see section \ref{sec:bindings} for details.
 function ioncorelib.defbindings(context, bindings)
     local do_bind=_G['__defbindings_'..context]
     if not do_bind then
