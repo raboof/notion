@@ -41,6 +41,7 @@
 #include "errorlog.h"
 #include "gr.h"
 #include "xic.h"
+#include "netwm.h"
 #include "../version.h"
 
 
@@ -396,7 +397,6 @@ static bool init_x(const char *display, int stflags)
 	wglobal.conn=ConnectionNumber(dpy);
 	wglobal.win_context=XUniqueContext();
 	
-	wglobal.atom_net_wm_name=XInternAtom(dpy, "_NET_WM_NAME", False);
 	wglobal.atom_wm_state=XInternAtom(dpy, "WM_STATE", False);
 	wglobal.atom_wm_change_state=XInternAtom(dpy, "WM_CHANGE_STATE", False);
 	wglobal.atom_wm_protocols=XInternAtom(dpy, "WM_PROTOCOLS", False);
@@ -407,6 +407,8 @@ static bool init_x(const char *display, int stflags)
 	wglobal.atom_checkcode=XInternAtom(dpy, "_ION_CWIN_RESTART_CHECKCODE", False);
 	wglobal.atom_selection=XInternAtom(dpy, "_ION_SELECTION_STRING", False);
 	wglobal.atom_mwm_hints=XInternAtom(dpy, "_MOTIF_WM_HINTS", False);
+
+	netwm_init();
 	
 	init_bindings();
 	load_cursors();	

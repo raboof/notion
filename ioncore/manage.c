@@ -19,6 +19,7 @@
 #include "fullscreen.h"
 #include "pointer.h"
 #include "extl.h"
+#include "netwm.h"
 
 
 /*{{{ Add */
@@ -80,6 +81,7 @@ bool add_clientwin_default(WClientWin *cwin, const WManageParams *param)
 	WRegion *r=NULL, *r2;
 	WScreen *scr=NULL;
 	bool triedws=FALSE;
+	int fs;
 	
 	/* Transients are managed by their transient_for client window unless the
 	 * behaviour is overridden before this function.
@@ -89,8 +91,16 @@ bool add_clientwin_default(WClientWin *cwin, const WManageParams *param)
 			return TRUE;
 	}
 	
-	/* check full screen mode */
-	if(clientwin_check_fullscreen_request(cwin, param->geom.w, param->geom.h)){
+	/* Check fullscreen mode */
+	
+	fs=netwm_check_initial_fullscreen(cwin);
+	
+	if(fs<0 && clientwin_check_fullscreen_request(cwin, param->geom.w,
+												  param->geom.h)){
+		fs=1;
+	}
+
+	if(fs>0){
 		if(param->switchto)
 			region_goto((WRegion*)cwin);
 		return TRUE;

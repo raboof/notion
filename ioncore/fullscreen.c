@@ -20,10 +20,12 @@
 #include "mwmhints.h"
 
 
+
 bool clientwin_check_fullscreen_request(WClientWin *cwin, int w, int h)
 {
 	WScreen *scr;
 	WMwmHints *mwm;
+	
 	
 	mwm=get_mwm_hints(cwin->win);
 	if(mwm==NULL || !(mwm->flags&MWM_HINTS_DECORATIONS) ||

@@ -35,6 +35,7 @@
 #include "event.h"
 #include "rootwin.h"
 #include "activity.h"
+#include "netwm.h"
 
 
 static void set_clientwin_state(WClientWin *cwin, int state);
@@ -165,7 +166,7 @@ void clientwin_get_set_name(WClientWin *cwin)
 	char **list=NULL;
 	
 #ifdef CF_UTF8
-	if(wglobal.utf8_mode)
+	if(wglobal.utf8_mode && wglobal.atom_net_wm_name!=0)
 		list=get_text_property(cwin->win, wglobal.atom_net_wm_name, NULL);
 #endif
 	
@@ -616,6 +617,7 @@ static void reparent_root(WClientWin *cwin)
 	}
 	
 	XReparentWindow(wglobal.dpy, cwin->win, attr.root, x, y);
+	
 }
 
 
@@ -645,6 +647,10 @@ void clientwin_deinit(WClientWin *cwin)
 			 * matter which one has as long as some has.
 			 */
 			SET_FOCUS(cwin->win);
+		}else{
+			set_clientwin_state(cwin, WithdrawnState);
+			XDeleteProperty(wglobal.dpy, cwin->win, 
+							wglobal.atom_net_wm_state);
 		}
 	}
 	clear_colormaps(cwin);
@@ -953,7 +959,14 @@ static bool reparent_clientwin(WClientWin *cwin, WWindow *par,
 	
 	do_fit_clientwin(cwin, geom, par);
 	sendconfig_clientwin(cwin);
+
+	if(!CLIENTWIN_IS_FULLSCREEN(cwin) && 
+	   cwin->fsinfo.last_mgr_watch.obj!=NULL){
+		reset_watch(&(cwin->fsinfo.last_mgr_watch));
+	}
 	
+	netwm_update_state(cwin);
+
 	return TRUE;
 }
 

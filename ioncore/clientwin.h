@@ -38,7 +38,10 @@ INTROBJ(WClientWin);
 
 #define FOR_ALL_CLIENTWINS(CWIN) \
     for((CWIN)=wglobal.cwin_list; (CWIN)!=NULL; (CWIN)=(CWIN)->g_cwin_next)
-	
+
+#define CLIENTWIN_IS_FULLSCREEN(cwin) \
+		(REGION_PARENT_CHK(cwin, WScreen)!=NULL)
+
 
 typedef struct{
 	WWatch last_mgr_watch;

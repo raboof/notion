@@ -32,6 +32,7 @@
 #include "grab.h"
 #include "regbind.h"
 #include "activity.h"
+#include "netwm.h"
 
 
 /*{{{ Hooks */
@@ -288,6 +289,13 @@ static void handle_configure_request(XConfigureRequestEvent *ev)
 
 static void handle_client_message(const XClientMessageEvent *ev)
 {
+	/* Check _NET_WM_STATE fullscreen request */
+	if(ev->message_type==wglobal.atom_net_wm_state && ev->format==32){
+		WClientWin *cwin=find_clientwin(ev->window);
+		if(cwin!=NULL)
+			netwm_state_change_rq(cwin, ev);
+	}
+
 #if 0
 	WClientWin *cwin;
 

@@ -82,7 +82,7 @@ void set_string_property(Window win, Atom a, const char *value)
 
 bool get_integer_property(Window win, Atom a, int *vret)
 {
-	CARD32 *p=NULL;
+	long *p=NULL;
 	ulong n;
 	
 	n=get_property(wglobal.dpy, win, a, XA_INTEGER, 1L, FALSE, (uchar**)&p);
@@ -113,13 +113,13 @@ void set_integer_property(Window win, Atom a, int value)
 
 bool get_win_state(Window win, int *state)
 {
-	CARD32 *p=NULL;
+	long *p=NULL;
 	
 	if(get_property(wglobal.dpy, win, wglobal.atom_wm_state,
 					wglobal.atom_wm_state, 2L, FALSE, (uchar**)&p)<=0)
 		return FALSE;
 	
-	*state=(CARD32)*p;
+	*state=*p;
 	
 	XFree((void*)p);
 	

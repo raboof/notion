@@ -44,7 +44,7 @@ SOURCES=binding.c conf-bindings.c cursor.c event.c     \
 	manage.c readfds.c regbind.c rootwin.c tags.c names.c saveload.c  \
 	genws.c genframe.c genframe-pointer.c conf.c reginfo.c errorlog.c \
 	stacking.c extlconv.c fullscreen.c mplex.c bindmaps.c gr.c \
-	infowin.c activity.c
+	infowin.c activity.c netwm.c
 
 MAKE_EXPORTS=ioncore
 
