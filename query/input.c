@@ -15,7 +15,7 @@
 /*{{{ Dynfuns */
 
 
-/*EXTL_EXPORT
+/*EXTL_DOC
  * Scroll input \var{input} text contents up.
  */
 EXTL_EXPORT
@@ -25,7 +25,7 @@ void input_scrollup(WInput *input)
 }
 
 
-/*EXTL_EXPORT
+/*EXTL_DOC
  * Scroll input \var{input} text contents down.
  */
 EXTL_EXPORT
@@ -130,7 +130,7 @@ void input_deinit(WInput *input)
 }
 
 
-/*EXTL_EXPORT
+/*EXTL_DOC
  * Close input not calling any possible finish handlers.
  */
 EXTL_EXPORT
@@ -140,7 +140,7 @@ void input_cancel(WInput *input)
 }
 
 
-/*EXTL_EXPORT
+/*EXTL_DOC
  * Same as \fnref{input_cancel}.
  */
 EXTL_EXPORT
