@@ -24,8 +24,7 @@
 /*{{{ Add */
 
 
-static WScreen *find_suitable_screen(WClientWin *cwin, 
-									 const WManageParams *param)
+WScreen *find_suitable_screen(WClientWin *cwin, const WManageParams *param)
 {
 	WScreen *scr=NULL, *found=NULL;
 	bool respectpos=(param->tfor!=NULL || param->userpos);

@@ -42,5 +42,7 @@ DYNFUN bool region_manage_clientwin(WRegion *reg, WClientWin *cwin,
 
 extern bool region_has_manage_clientwin(WRegion *reg);
 
+extern WScreen *find_suitable_screen(WClientWin *cwin,
+									 const WManageParams *param);
 
 #endif /* ION_IONCORE_MANAGE_H */
