@@ -212,7 +212,7 @@ static bool opt_mdblclick(Tokenizer *tokz, int n, Token *toks)
 
 static bool opt_submap(Tokenizer *tokz, int n, Token *toks)
 {
-	WBinding binding=BINDING_INIT;
+	WBinding binding=BINDING_INIT, *bnd;
 	uint kcb=NoSymbol, mod=tmp_bindmap->confdefmod;
 	
 	if(!parse_keybut(tokz, &(toks[1]), &mod, &kcb, 0))
@@ -222,10 +222,16 @@ static bool opt_submap(Tokenizer *tokz, int n, Token *toks)
 	if(kcb==0)
 		return FALSE;
 
+	bnd=lookup_binding(tmp_bindmap, ACT_KEYPRESS, mod, kcb);
+	
+	if(bnd!=NULL && bnd->submap!=NULL && bnd->state==mod){
+		tmp_bindmap=bnd->submap;
+		return TRUE;
+	}
+
 	binding.act=ACT_KEYPRESS;
 	binding.state=mod;
 	binding.kcb=kcb;
-	
 	binding.submap=create_bindmap();
 	
 	if(binding.submap==NULL)
