@@ -43,7 +43,7 @@ endif
 EXT_OBJS += ../ioncore/ioncore.a ../luaextl/luaextl.a
 
 SOURCES = pwm.c
-ETC = pwm.lua pwm-menus.lua
+ETC = pwm.lua pwm-menus.lua pwm-bindings.lua
 TARGETS = pwm
 
 ######################################

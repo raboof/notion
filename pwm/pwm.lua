@@ -30,7 +30,7 @@ enable_warp(false)
 include("kludges")
 
 -- Make some bindings.
-include("ion-bindings")
+include("pwm-bindings")
 
 -- Define some menus (menu module required to actually use them)
 include("pwm-menus")

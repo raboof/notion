@@ -171,16 +171,21 @@ function selectstyle(look, where)
             f:close()
         end
     end
+
+    local fname=get_savefile('draw')
     
     if not querylib or not query_message then
-        writeit()
+        if fname then
+            writeit()
+        end
         return
     end
     
     where=mplex_of(where)
-    if not where then return end
+    if not where then 
+        return 
+    end
     
-    local fname=get_savefile('draw')
     if not fname then
         query_message(where, "Cannot save selection.")
         return

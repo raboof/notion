@@ -5,8 +5,6 @@
 
 -- Load a library with some convenience functions.
 include("menulib")
--- Load query support code
-include("querylib")
 
 
 -- Main menu
@@ -30,11 +28,9 @@ defmenu("appmenu", {
 
 -- Menu with restart/exit alternatives
 defmenu("exitmenu", {
-    --menuentry("Restart", querylib.query_restart),
     menuentry("Restart", restart_wm),
     menuentry("Restart Ion", function() restart_other_wm("ion") end),
     menuentry("Restart TWM", function() restart_other_wm("twm") end),
-    --menuentry("Exit", querylib.query_exit),
     menuentry("Exit", exit_wm),
 })
 
