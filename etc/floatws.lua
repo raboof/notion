@@ -6,14 +6,14 @@ floatws_bindings{
     kpress(DEFAULT_MOD .. "Tab",
            function(ws)
                f=floatws_circulate(ws)
-               floatframe_raise(f)
+               region_raise(f)
            end
           ),
     submap "Mod1+K" {
         kpress("AnyModifier+Tab",
                function(ws)
                    f=floatws_backcirculate(ws)
-                   floatframe_raise(f)
+                   region_raise(f)
                end
               ),
     }
@@ -24,19 +24,19 @@ floatframe_bindings(common_frame_bindings())
 floatframe_bindings(frame_query_bindings())
 
 floatframe_bindings{
-    mpress("Button1", floatframe_raise, "tab"),
-    mpress("Button1", floatframe_raise, "border"),
+    mpress("Button1", region_raise, "tab"),
+    mpress("Button1", region_raise, "border"),
     mclick("Button1", genframe_p_switch_tab, "tab"),
     mdrag("Button1", floatframe_p_move, "tab"),
     mdrag("Button1", genframe_p_resize, "border"),
     mdblclick("Button1", floatframe_toggle_shade, "tab"),
     
-    mclick(DEFAULT_MOD .. "Button1", floatframe_raise),
+    mclick(DEFAULT_MOD .. "Button1", region_raise),
     mdrag(DEFAULT_MOD .. "Button1", floatframe_p_move),
     
     mclick("Button2", genframe_p_switch_tab, "tab"),
     mdrag("Button2", genframe_p_tabdrag, "tab"),
     
-    mclick(DEFAULT_MOD .. "Button3", floatframe_lower),
+    mclick(DEFAULT_MOD .. "Button3", region_lower),
     mdrag(DEFAULT_MOD .. "Button3", genframe_p_resize),
 }
