@@ -312,64 +312,123 @@ end
 
 -- Internal operations
 
+--DOC
+-- This query asks for the name of a client window and attaches
+-- it to the frame the query was opened in. It uses the completion
+-- function \fnref{complete_clientwin}.
 QueryLib.query_gotoclient=QueryLib.make_frame_fn(
     "Go to window:", nil,
     QueryLib.gotoclient_handler,
     QueryLib.make_completor(complete_clientwin)
 )
 
+--DOC
+-- This query asks for the name of a client window and switches
+-- focus to the one entered. It uses the completion function
+-- \fnref{complete_clientwin}.
 QueryLib.query_attachclient=QueryLib.make_frame_fn(
     "Attach window:", nil,
     query_handler_attachclient, 
     QueryLib.make_completor(complete_clientwin)
 )
 
+--DOC
+-- This query asks for the name of a workspace. If a workspace
+-- (an object inheriting \type{WGenWS}) with such a name exists,
+-- it will be switched to. Otherwise a new workspace with the
+-- entered name will be created.
 QueryLib.query_workspace=QueryLib.make_frame_fn(
     "Go to or create workspace:", nil, 
     query_handler_workspace, 
     QueryLib.make_completor(complete_workspace)
 )
 
+--DOC
+-- This query asks whether the user wants to have Ioncore exit.
+-- If the answer is 'y', 'Y' or 'yes', so will happen.
 QueryLib.query_exit=QueryLib.make_yesno_fn(
     "Exit Ion (y/n)?", exit_wm
 )
 
+--DOC
+-- This query asks whether the user wants restart Ioncore.
+-- If the answer is 'y', 'Y' or 'yes', so will happen.
 QueryLib.query_restart=QueryLib.make_yesno_fn(
     "Restart Ion (y/n)?", restart_wm
 )
 
+--DOC
+-- This function asks for a name new for the frame where the query
+-- was created.
 QueryLib.query_renameframe=QueryLib.make_rename_fn(
     "Frame name: ", function(frame) return frame end
 )
 
+--DOC
+-- This function asks for a name new for the workspace on which the
+-- query resides.
 QueryLib.query_renameworkspace=QueryLib.make_rename_fn(
     "Workspace name: ", QueryLib.getws
 )
 
 -- Queries for starting external programs
 
+--DOC
+-- This function asks for a command to execute with \file{/bin/sh}.
+-- If the command is prefixed with a colon (':'), the command will
+-- be run in an XTerm (or other terminal emulator) using the script
+-- \file{ion-runinxterm}.
 QueryLib.query_exec=QueryLib.make_frame_fn(
     "Run:", nil, QueryLib.exec_handler, QueryLib.exec_completor
 )
 
+--DOC
+-- This query asks for a host to connect to with SSH. It starts
+-- up ssh in a terminal using \file{ion-ssh}. To enable tab completion,
+-- put the names of often-used hosts in the table \var{query_ssh_hosts}.
 QueryLib.query_ssh=QueryLib.make_execwith_fn(
     "SSH to:", nil, "ion-ssh", QueryLib.make_completor(QueryLib.complete_ssh)
 )
 
+--DOC
+-- This query asks for a manual page to display. It uses the command
+-- \file{ion-man} to run \file{man} in a terminal emulator. By customizing
+-- this script it is possible use some other man page viewer. To enable
+-- tab-completion you must list paths with manuals in the stable
+-- \var{query_man_path}. For example,
+--\begin{verbatim}
+--query_man_path = {
+--    "/usr/local/man","/usr/man",
+--    "/usr/share/man", "/usr/X11R6/man",
+--}
+--\end{verbatim}
 QueryLib.query_man=QueryLib.make_execwith_fn(
     "Manual page (ion):", nil, "ion-man", QueryLib.man_completor
 )
 
+--DOC
+-- Asks for a file to be edited. It uses the script \file{ion-edit} to
+-- start a program to edit the file. This script uses \file{run-mailcap}
+-- by default, but if you don't have it, you may customise the script.
 QueryLib.query_editfile=QueryLib.make_execwith_fn(
     "Edit file:", QueryLib.get_initdir, "ion-edit", QueryLib.file_completor
 )
 
+--DOC
+-- Asks for a file to be viewed. It uses the script \file{ion-view} to
+-- start a program to view the file. This script uses \file{run-mailcap}
+-- by default, but if you don't have it, you may customise the script.
 QueryLib.query_runfile=QueryLib.make_execwith_fn(
     "View file:", QueryLib.get_initdir, "ion-view", QueryLib.file_completor
 )
 
 -- Lua code execution
 
+--DOC
+-- This query asks for Lua code to execute. It sets the variable '\var{\_}'
+-- in the local environment of the string to point to the frame where the
+-- query was created. It also sets the table \var{arg} in the local
+-- environment to \code{\{_, genframe_current(_)\}}.
 QueryLib.query_lua=QueryLib.make_frame_fn(
     "Lua code to run:", nil,
     QueryLib.handler_lua,
