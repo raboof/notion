@@ -2,6 +2,9 @@
 -- Ion ionws module configuration file
 --
 
+-- Workspace bindings for the tiled workspaces.
+-- These should work on any object on the workspace.
+
 ionws_bindings{
     kpress(DEFAULT_MOD .. "S",
            function(ws, sub) ionws_split(sub, "bottom") end
@@ -16,6 +19,8 @@ ionws_bindings{
         kpress("AnyModifier+Tab", ionws_goto_left),
     },
 }
+
+-- Frame bindings. These work in (Ion/tiled-style) frames.
 
 include("common-frame-bindings.lua")
 ionframe_bindings(common_frame_bindings())
@@ -39,6 +44,8 @@ ionframe_bindings{
 }
 
 
+-- Some wrapper functions for resize mode bindings
+
 local function ionframe_grow_vert(frame)
     ionframe_do_resize(frame, 0, 1)
 end
@@ -55,6 +62,7 @@ local function ionframe_shrink_horiz(frame)
     ionframe_do_resize(frame, -1, 0)
 end
 
+-- Frame resize mode bindings
 
 ionframe_moveres_bindings{
     kpress("AnyModifier+Escape", ionframe_cancel_resize),

@@ -2,6 +2,9 @@
 -- Ion floatws module configuration file
 --
 
+-- Workspace bindings for (PWM-style) floating frame workspaces.
+-- These should work on any object on the workspace.
+
 floatws_bindings{
     kpress(DEFAULT_MOD .. "Tab",
            function(ws)
@@ -18,6 +21,8 @@ floatws_bindings{
               ),
     }
 }
+
+-- Frame bindings. These work in (floating/PWM-style) frames.
 
 include("common-frame-bindings.lua")
 floatframe_bindings(common_frame_bindings())
@@ -42,6 +47,8 @@ floatframe_bindings{
     mclick(DEFAULT_MOD .. "Button3", region_lower),
     mdrag(DEFAULT_MOD .. "Button3", genframe_p_resize),
 }
+
+-- Some wrapper functions for move/resize mode bindings
 
 local function floatframe_grow_vert(frame)
     floatframe_do_resize(frame, 0, 1)
@@ -74,6 +81,8 @@ end
 local function floatframe_move_left(frame)
     floatframe_do_move(frame, -1, 0)
 end
+
+-- Frame move/resize mode bindings
 
 floatframe_moveres_bindings{
     kpress("AnyModifier+Escape", floatframe_cancel_resize),
