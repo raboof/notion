@@ -3,7 +3,7 @@
 -- 
 
 
--- {{{ Constants
+-- Constants {{{
 
 TRUE = true
 FALSE = false
@@ -11,7 +11,7 @@ FALSE = false
 -- }}}
 
 
--- {{{ Functions to help construct bindmaps
+-- Functions to help construct bindmaps {{{
 
 function submap2(kcb_, list)
     return {action = "kpress", kcb = kcb_, submap = list}
@@ -98,7 +98,7 @@ end
 -- }}}
 
 
--- {{{ Callback creation functions
+-- Callback creation functions {{{
 
 --DOC
 -- Create a function that will call \var{fn} with argument
@@ -153,7 +153,7 @@ function exec_in_frame(frame, cmd)
 end
 
 
--- {{{ Includes
+-- Includes {{{
 
 --DOC
 -- Execute another file with Lua code.
@@ -172,7 +172,7 @@ end
 -- }}}
 
 
--- {{{ Winprops
+-- Winprops {{{
 
 local winprops={}
 
@@ -240,7 +240,7 @@ end
 -- }}}
 
 
--- {{{ Misc
+-- Misc {{{
 
 --DOC
 -- Check that the \type{WObj} \var{obj} still exists in Ioncore.
@@ -251,7 +251,7 @@ end
 -- }}}
 
 
--- {{{ Hooks
+-- Hooks {{{
 
 local hooks={}
 
@@ -284,3 +284,24 @@ function remove_from_hook(hookname, fn)
 end
 
 -- }}}
+
+-- Names {{{
+
+function lookup_clientwin(nam)
+    return lookup_region(nam, "WClientWin")
+end
+
+function complete_clientwin(nam)
+    return complete_region(nam, "WClientWin")
+end
+
+function lookup_workspace(nam)
+    return lookup_region(nam, "WGenWS")
+end
+
+function complete_workspace(nam)
+    return complete_region(nam, "WGenWS")
+end
+
+-- }}}
+

@@ -230,7 +230,12 @@ bool region_set_name_instrq(WRegion *reg, const char *p, int instrq)
 /*{{{ Lookup */
 
 
-WRegion *do_lookup_region(const char *cname, WObjDescr *descr)
+/*EXTL_DOC
+ * Attempt to find a region with full name \var{name} and type inheriting
+ * \var{typenam}.
+ */
+EXTL_EXPORT
+WRegion *lookup_region(const char *cname, const char *typenam)
 {
 	WRegion *reg;
 	char *name;
@@ -239,7 +244,7 @@ WRegion *do_lookup_region(const char *cname, WObjDescr *descr)
 		return NULL;
 
 	for(reg=region_list; reg!=NULL; reg=reg->ni.g_next){
-		if(!wobj_is((WObj*)reg, descr))
+		if(typenam!=NULL && !wobj_is_str((WObj*)reg, typenam))
 			continue;
 		
 		name=(char*)region_full_name(reg);
@@ -260,8 +265,13 @@ WRegion *do_lookup_region(const char *cname, WObjDescr *descr)
 	return NULL;
 }
 
-
-ExtlTab do_complete_region(const char *nam, WObjDescr *descr)
+/*EXTL_DOC
+ * Find all regions inheriting \var{typename} and whose name begins with
+ * \var{nam} or, if none are found and the length of \var{name} is at 
+ * least two, all regions whose name contains \var{name}.
+ */
+EXTL_EXPORT
+ExtlTab complete_region(const char *nam, const char *typenam)
 {
 	WRegion *reg;
 	char *name;
@@ -276,7 +286,7 @@ again:
 	
 	for(reg=region_list; reg!=NULL; reg=reg->ni.g_next){
 		
-		if(!wobj_is((WObj*)reg, descr))
+		if(typenam!=NULL && !wobj_is_str((WObj*)reg, typenam))
 			continue;
 
 		name=(char*)region_full_name(reg);
@@ -302,25 +312,4 @@ again:
 	return tab;
 }
 
-
-/*EXTL_DOC
- * Attempt to find a region with full name \var{name}.
- */
-EXTL_EXPORT
-WRegion *lookup_region(const char *name)
-{
-	return do_lookup_region(name, &OBJDESCR(WObj));
-}
-
-
-/*EXTL_DOC
- * Find all regions whose name begins with \var{nam} or, if none
- * are found and the length of \var{name} is at least two, all
- * regions whose name contains \var{name}.
- */
-EXTL_EXPORT
-ExtlTab complete_region(const char *nam)
-{
-	return do_complete_region(nam, &OBJDESCR(WObj));
-}
 

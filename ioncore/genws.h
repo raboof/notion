@@ -21,7 +21,4 @@ DECLOBJ(WGenWS){
 extern void genws_init(WGenWS *ws, WWindow *parent, WRectangle geom);
 extern void genws_deinit(WGenWS *ws);
 
-extern WGenWS *lookup_workspace(const char *name);
-extern ExtlTab complete_workspace(const char *nam);
-
 #endif /* ION_IONCORE_GENWS_H */

@@ -29,7 +29,7 @@
 #include "extl.h"
 #include "extlconv.h"
 #include "fullscreen.h"
-
+#include "event.h"
 
 
 static void set_clientwin_state(WClientWin *cwin, int state);
@@ -297,7 +297,7 @@ static bool handle_target_prop(WClientWin *cwin, const WAttachParams *param)
 	if(!extl_table_gets_s(cwin->proptab, "target", &target_name))
 		return FALSE;
 	
-	r=lookup_region(target_name);
+	r=lookup_region(target_name, NULL);
 	
 	free(target_name);
 	
@@ -640,7 +640,7 @@ static void send_clientmsg(Window win, Atom a)
 	ev.message_type=wglobal.atom_wm_protocols;
 	ev.format=32;
 	ev.data.l[0]=a;
-	ev.data.l[1]=CurrentTime;
+	ev.data.l[1]=get_timestamp();/*CurrentTime;*/
 	
 	XSendEvent(wglobal.dpy, win, False, 0L, (XEvent*)&ev);
 }
@@ -946,7 +946,7 @@ static void clientwin_set_focus_to(WClientWin *cwin, bool warp)
 		region_set_focus_to(reg, FALSE);
 		return;
 	}
-	
+
 	SET_FOCUS(cwin->win);
 	
 	if(cwin->flags&CWIN_P_WM_TAKE_FOCUS)
@@ -1004,28 +1004,6 @@ static WRegion *clientwin_managed_enter_to_focus(WClientWin *cwin, WRegion *reg)
 
 
 /*{{{ Names & lookup */
-
-
-/*EXTL_DOC
- * Similar to \fnref{lookup_region} but only looks for objects of type
- * \type{WClientWin}.
- */
-EXTL_EXPORT
-WClientWin *lookup_clientwin(const char *name)
-{
-	return (WClientWin*)do_lookup_region(name, &OBJDESCR(WClientWin));
-}
-
-
-/*EXTL_DOC
- * Similar to \fnref{complete_region} but only includes objects of type
- * \type{WClientWin}.
- */
-EXTL_EXPORT
-ExtlTab complete_clientwin(const char *nam)
-{
-	return do_complete_region(nam, &OBJDESCR(WClientWin));
-}
 
 
 /*EXTL_DOC
@@ -1134,10 +1112,13 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 	
 	cwin->flags|=CWIN_NEED_CFGNTFY;
 	
-	if(sz || pos)
+	if(sz || pos){
+		fprintf(stderr, "rq %d\n", cwin->win);
 		region_request_geom((WRegion*)cwin, geom, NULL, FALSE);
+	}
 	
 	if(cwin->flags&CWIN_NEED_CFGNTFY){
+		fprintf(stderr, "sc %d\n", cwin->win);
 		sendconfig_clientwin(cwin);
 		cwin->flags&=~CWIN_NEED_CFGNTFY;
 	}

@@ -24,10 +24,8 @@ extern const char *region_name(WRegion *reg);
 extern char *region_full_name(WRegion *reg);
 extern char *region_make_label(WRegion *reg, int maxw, WFontPtr font);
 
-extern WRegion *do_lookup_region(const char *cname, WObjDescr *descr);
-extern ExtlTab do_complete_region(const char *nam, WObjDescr *descr);
-extern WRegion *lookup_region(const char *cname);
-extern ExtlTab complete_region(const char *nam);
+extern WRegion *lookup_region(const char *cname, const char *typenam);
+extern ExtlTab complete_region(const char *nam, const char *typenam);
 
 extern void	region_unuse_name(WRegion *reg);
 

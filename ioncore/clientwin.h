@@ -80,8 +80,6 @@ extern WClientWin *manage_clientwin(Window win, int mflags);
 extern void clientwin_get_set_name(WClientWin *cwin);
 
 extern WClientWin *find_clientwin(Window win);
-extern WClientWin *lookup_clientwin(const char *name);
-extern ExtlTab complete_clientwin(const char *nam);
 
 extern void clientwin_handle_configure_request(WClientWin *cwin,
 											   XConfigureRequestEvent *ev);
