@@ -295,7 +295,7 @@ function ext_statusbar.create(param)
     
     local iw=scr:set_stdisp({
         type="WInfoWin", 
-        corner=(param.corner or "bl"),
+        pos=(param.pos or "bl"),
         name="*statusbar*",
         style="stdisp-statusbar"
     })
