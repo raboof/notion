@@ -19,6 +19,7 @@
 #include "readconfig.h"
 #include "modules.h"
 #include "rootwin.h"
+#include "bindmaps.h"
 
 
 /*EXTL_DOC
@@ -63,5 +64,26 @@ void enable_warp(bool warp)
 
 bool ioncore_read_config(const char *cfgfile)
 {
-	return read_config_for_args("ioncore-startup", TRUE, "S", NULL, cfgfile);
+	bool ret;
+	char unset[]="???";
+	int n=0;
+
+	if(cfgfile==NULL)
+		cfgfile="ioncore";
+	
+	ret=do_include(cfgfile, ".");
+	
+	if(ioncore_rootwin_bindmap.nbindings==0)
+		unset[n++]='g';
+	if(ioncore_mplex_bindmap.nbindings==0)
+		unset[n++]='m';
+	if(ioncore_genframe_bindmap.nbindings==0)
+		unset[n++]='f';
+	
+	if(n>0){
+		warn("Some bindmaps were empty, loading ioncore-efbb");
+		read_config_for_args("ioncore-efbb", TRUE, "S", NULL, unset);
+	}
+	
+	return ret;	
 }

@@ -364,7 +364,6 @@ bool do_include(const char *file, const char *current_file_dir)
 /*}}}*/
 
 
-
 /*{{{ read_config */
 
 
