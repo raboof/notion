@@ -13,7 +13,8 @@ ext_statusbar.set{
     -- updating rather often and can be distracting)
     --S.date_format='%c'
 
-    -- Update interval in seconds
+    -- Update interval in seconds. This should divide 60, or it will
+    -- get adjusted.
     update_interval=10,
     
     -- Mail checking interval

@@ -20,10 +20,12 @@ _G["ext_statusbar"]=ext_statusbar
 
 -- Settings etc. {{{
 
+local default_update_interval=10
+
 -- Default settings
 local settings={
     date_format='%Y-%m-%d %H:%M',
-    update_interval=10,
+    update_interval=default_update_interval,
     mail_interval=60,
     template="%date || load: %load || mail: %mail_new/%mail_total"
 }
@@ -36,6 +38,10 @@ local timer=nil
 -- Set format and update variables.
 function ext_statusbar.set(s)
     settings=table.join(s, settings)
+    if settings.update_interval<=0 then
+        settings.update_interval=default_update_interval
+    end
+    
     local wt=ext_statusbar.get_w_template()
     for iw, _ in infowins do
         iw:set_natural_w(wt)
@@ -231,12 +237,14 @@ end
 
 function ext_statusbar.set_timer()
     local t=os.date('*t')
-    local sec1=os.time(t)
-    t.sec=t.sec+10
-    --t.min=t.min+1
-    local sec2=os.time(t)
+    local s=((math.floor(t.sec/settings.update_interval)+1)
+             *settings.update_interval)
+    local d=(s-t.sec)
+    if d<=0 then
+        d=settings.update_interval
+    end
     
-    timer:set((sec2-sec1)*1000, ext_statusbar.timer_handler)
+    timer:set(d*1000, ext_statusbar.timer_handler)
 end
 
 function ext_statusbar.timer_handler(tmr)
