@@ -72,6 +72,8 @@ CREDITS
 
 Ion was written by Tuomo Valkonen.
 
+The dock module was written by Tom Payne and Per Olofsson.
+
 share/ion-completefile/ion-completefile.c is based on editline, (c)
 1992 Simmule Turner and Rich Salz. See the file for details.
 
