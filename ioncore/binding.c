@@ -31,6 +31,7 @@
 
 /* */
 
+
 #define N_MODS 8
 
 static const uint modmasks[N_MODS]={
@@ -81,9 +82,8 @@ static void evil_ungrab_button(Display *display, uint button, uint modifiers,
 
 #define CVAL(A, B, V) ( A->V < B->V ? -1 : (A->V > B->V ? 1 : 0))
 
-static int compare_bindings(const void *a_, const void *b_)
+static int compare_bindings(const WBinding *a, const WBinding *b)
 {
-    const WBinding *a=(WBinding*)a_, *b=(WBinding*)b_;
     int r=CVAL(a, b, act);
     if(r==0){
         r=CVAL(a, b, kcb);
@@ -143,10 +143,18 @@ void binding_deinit(WBinding *binding)
 }
 
 
+void do_destroy_binding(WBinding *binding)
+{
+    assert(binding!=NULL);
+    binding_deinit(binding);
+    free(binding);
+}
+
+
 void bindmap_deinit(WBindmap *bindmap)
 {
-    int i;
-    WBinding *binding;
+    WBinding *b=NULL;
+    Rb_node node=NULL;
 
     UNLINK_ITEM(known_bindmaps, bindmap, next_known, prev_known);
 
@@ -155,14 +163,18 @@ void bindmap_deinit(WBindmap *bindmap)
                               bindmap);
     }
         
-    binding=bindmap->bindings;
+    if(bindmap->bindings==NULL)
+        return;
     
-    for(i=0; i<bindmap->nbindings; i++, binding++)
-        binding_deinit(binding);
+    FOR_ALL_BINDINGS(b, node, bindmap->bindings){
+        do_destroy_binding((WBinding*)rb_val(node));
+        bindmap->nbindings--;
+    }
+
+    assert(bindmap->nbindings==0);
     
-    free(bindmap->bindings);
+    rb_free_tree(bindmap->bindings);
     bindmap->bindings=NULL;
-    bindmap->nbindings=0;
 }
 
 
@@ -170,25 +182,35 @@ static void refresh_bindmap(WBindmap *bindmap)
 {
     WRegBindingInfo *rbind;
     WBinding *b;
+    Rb_node node;
     int i;
+    Rb_node newtree;
     
-    for(i=0, b=bindmap->bindings; i<bindmap->nbindings; i++, b++){
+    if(bindmap->bindings==NULL)
+        return;
+    
+    newtree=make_rb();
+    
+    if(rb_nil(newtree))
+        return;
+    
+    FOR_ALL_BINDINGS(b, node, bindmap->bindings){
         if(b->act!=BINDING_KEYPRESS)
             continue;
         for(rbind=bindmap->rbind_list; rbind!=NULL; rbind=rbind->bm_next)
             rbind_binding_removed(rbind, b, bindmap);
+        b->kcb=XKeysymToKeycode(ioncore_g.dpy, b->ksb);
+        if(!rb_insertg(newtree, b, b, (Rb_compfn*)compare_bindings)){
+            warn_err();
+            rb_free_tree(newtree);
+            return;
+        }
     }
 
-    for(i=0, b=bindmap->bindings; i<bindmap->nbindings; i++, b++){
-        if(b->act!=BINDING_KEYPRESS)
-            continue;
-        b->kcb=XKeysymToKeycode(ioncore_g.dpy, b->ksb);
-    }
-    
-    qsort((void*)(bindmap->bindings), bindmap->nbindings, sizeof(WBinding), 
-          compare_bindings);
-    
-    for(i=0, b=bindmap->bindings; i<bindmap->nbindings; i++, b++){
+    rb_free_tree(bindmap->bindings);
+    bindmap->bindings=newtree;
+
+    FOR_ALL_BINDINGS(b, node, bindmap->bindings){
         if(b->act!=BINDING_KEYPRESS)
             continue;
         for(rbind=bindmap->rbind_list; rbind!=NULL; rbind=rbind->bm_next)
@@ -210,105 +232,90 @@ void ioncore_refresh_bindings()
 
 bool bindmap_add_binding(WBindmap *bindmap, const WBinding *b)
 {
-    WBinding *binding;
-    int i, j;
+    WRegBindingInfo *rbind=NULL;
+    WBinding *binding=NULL;
+    Rb_node node=NULL;
+    int found=0;
     
-    if(bindmap==NULL)
-        return FALSE;
-
+    /* Do some lazy initialisation */
+    if(bindmap->bindings==NULL){
+        bindmap->bindings=make_rb();
+        if(bindmap->bindings==NULL){
+            warn_err();
+            return FALSE;
+        }
+    }
+    
     if(bindmap->prev_known==NULL){
         LINK_ITEM(known_bindmaps, bindmap, next_known, prev_known);
     }
-
-    binding=bindmap->bindings;
     
-    for(i=0; i<bindmap->nbindings; i++){
-        switch(compare_bindings((void*)b, (void*)(binding+i))){
-        case 1:
-            continue;
-        case 0:
-            binding_deinit(binding+i);
-            goto subst;
-        }
-        break;
-    }
-
-    binding=REALLOC_N(binding, WBinding, bindmap->nbindings,
-                      bindmap->nbindings+1);
+    
+    /* Handle adding the binding */
+    binding=ALLOC(WBinding);
     
     if(binding==NULL){
         warn_err();
         return FALSE;
     }
     
-    memmove(&(binding[i+1]), &(binding[i]),
-            sizeof(WBinding)*(bindmap->nbindings-i));
+    memcpy(binding, b, sizeof(*b));
     
-    bindmap->bindings=binding;
+    node=rb_find_gkey_n(bindmap->bindings, binding,
+                        (Rb_compfn*)compare_bindings, &found);
+    
+    if(found){
+        if(!rb_insert_a(node, binding, binding)){
+            warn("Binding insert error.");
+            free(binding);
+            return FALSE;
+        }
+        do_destroy_binding((WBinding*)rb_val(node));
+        rb_delete_node(node);
+    }else{
+        if(!rb_insertg(bindmap->bindings, binding, binding, 
+                       (Rb_compfn*)compare_bindings)){
+            warn("Binding insert error.");
+            free(binding);
+            return FALSE;
+        }
+    }
+
     bindmap->nbindings++;
     
-    {
-        WRegBindingInfo *rbind;
-        for(rbind=bindmap->rbind_list; rbind!=NULL; rbind=rbind->bm_next)
-            rbind_binding_added(rbind, b, bindmap);
-    }
-    
-subst:
-    memcpy(binding+i, b, sizeof(WBinding));
-    
+    for(rbind=bindmap->rbind_list; rbind!=NULL; rbind=rbind->bm_next)
+        rbind_binding_added(rbind, binding, bindmap);
+
     return TRUE;
 }
 
 
 bool bindmap_remove_binding(WBindmap *bindmap, const WBinding *b)
 {
-    WBinding *binding;
-    int i, j;
+    WRegBindingInfo *rbind=NULL;
+    WBinding *binding=NULL;
+    Rb_node node=NULL;
+    int found=0;
     
-    if(bindmap==NULL)
+    if(bindmap->bindings==NULL)
         return FALSE;
-
-    binding=bindmap->bindings;
     
-    for(i=0; i<bindmap->nbindings; i++){
-        switch(compare_bindings((void*)b, (void*)(binding+i))){
-        case 1:
-            continue;
-        case 0:
-            goto rmove;
-        }
-        break;
-    }
+    node=rb_find_gkey_n(bindmap->bindings, b, (Rb_compfn*)compare_bindings,
+                        &found);
     
-    return FALSE;
+    if(!found)
+        return FALSE;
+    
+    binding=(WBinding*)rb_val(node);
+    
+    for(rbind=bindmap->rbind_list; rbind!=NULL; rbind=rbind->bm_next)
+        rbind_binding_removed(rbind, binding, bindmap);
 
-rmove:
-    binding_deinit(binding+i);
-
-    {
-        WRegBindingInfo *rbind;
-        for(rbind=bindmap->rbind_list; rbind!=NULL; rbind=rbind->bm_next){
-            rbind_binding_removed(rbind, b, bindmap);
-        }
-    }
-
-    memmove(&(binding[i]), &(binding[i+1]),
-            sizeof(WBinding)*(bindmap->nbindings-i));
-
+    do_destroy_binding(binding);
+    rb_delete_node(node);
+    
     bindmap->nbindings--;
-    
-    if(bindmap->nbindings==0){
-        free(binding);
-        bindmap->bindings=NULL;
-    }else{
-        binding=REALLOC_N(binding, WBinding, bindmap->nbindings,
-                          bindmap->nbindings);
-        if(binding==NULL)
-            warn_err();
-        else
-            bindmap->bindings=binding;
-    }
-    
+
     return TRUE;
 }
 
@@ -399,27 +406,24 @@ void binding_ungrab_on(const WBinding *binding, Window win)
 }
 
 
-#if 0
-void binding_grab_ons(WBindmap *bindmap, Window win)
-{
-    WBinding *binding;
-    int i;
-    
-    binding=bindmap->bindings;
-    for(i=0; i<bindmap->nbindings; i++, binding++)
-        binding_grab_on(binding, win);
-}
-#endif
-
-
 /* */
 
 
 static WBinding *search_binding(WBindmap *bindmap, WBinding *binding)
 {
-    return (WBinding*)bsearch((void*)binding, (void*)(bindmap->bindings),
-                              bindmap->nbindings, sizeof(WBinding),
-                              compare_bindings);
+    Rb_node node;
+    int found=0;
+
+    if(bindmap->bindings==NULL)
+        return NULL;
+    
+    node=rb_find_gkey_n(bindmap->bindings, binding,
+                        (Rb_compfn*)compare_bindings, &found);
+    
+    if(found==0)
+        return NULL;
+    
+    return (WBinding*)rb_val(node);
 }
 
 

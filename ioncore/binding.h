@@ -12,20 +12,23 @@
 #ifndef ION_IONCORE_BINDING_H
 #define ION_IONCORE_BINDING_H
 
-#include "common.h"
 #include <libtu/obj.h>
+#include <libtu/rb.h>
+#include "common.h"
 #include "region.h"
 #include "extl.h"
 
 
-#define BINDING_KEYPRESS         0
-#define BINDING_BUTTONPRESS        1
+#define BINDING_KEYPRESS        0
+#define BINDING_BUTTONPRESS     1
 #define BINDING_BUTTONMOTION    2
-#define BINDING_BUTTONCLICK        3
-#define BINDING_BUTTONDBLCLICK    4
+#define BINDING_BUTTONCLICK     3
+#define BINDING_BUTTONDBLCLICK  4
 
 #define BINDMAP_INIT        {0, NULL, NULL, NULL, NULL}
 
+#define FOR_ALL_BINDINGS(B, NODE, MAP) \
+        rb_traverse(NODE, MAP) if(((B)=(WBinding*)rb_val(NODE))!=NULL)
 
 INTRSTRUCT(WBinding);
 INTRSTRUCT(WBindmap);
@@ -57,7 +60,7 @@ DECLSTRUCT(WRegBindingInfo){
 
 DECLSTRUCT(WBindmap){
     int nbindings;
-    WBinding *bindings;
+    Rb_node bindings;
     WRegBindingInfo *rbind_list;
     WBindmap *next_known, *prev_known;
 };
