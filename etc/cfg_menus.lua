@@ -37,7 +37,7 @@ defctxmenu("WFrame", {
     menuentry("Close",          "WRegion.rqclose_propagate(_, _sub)"),
     menuentry("Kill",           "WClientWin.kill(_sub)",
                                 "_sub:WClientWin"),
-    menuentry("(Un)tag",        "WRegion.toggle_tag(_sub)",
+    menuentry("(Un)tag",        "WRegion.set_tagged(_sub, 'toggle')",
                                 "_sub:non-nil"),
     menuentry("Attach tagged",  "WFrame.attach_tagged(_)"),
     menuentry("Clear tags",     "ioncore.clear_tags()"),
