@@ -1,0 +1,12 @@
+--- common-frame-bindings.conf	2003-03-08 15:11:37.000000000 +0200
++++ common-frame-bindings-sun.conf	2003-03-08 15:12:21.000000000 +0200
+@@ -45,6 +45,7 @@
+ 
+ kpress "F9", "query_workspace"
+ kpress "Mod1+F9", "query_workspace_with"
+-kpress "F11", "query_yesno \"Restart Ion (y/n)?\", \"restart\""
+-kpress "F12", "query_yesno \"Exit Ion (y/n)?\", \"exit\""
++kpress "SunF36", "query_yesno \"Restart Ion (y/n)?\", \"restart\""
++kpress "SunF37", "query_yesno \"Exit Ion (y/n)?\", \"exit\""
++ 
+ 
