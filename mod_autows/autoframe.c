@@ -79,19 +79,15 @@ bool autoframe_fitrep(WAutoFrame *frame, WWindow *parent, const WFitParams *fp)
     if(fp->mode==REGION_FIT_EXACT){
         lazyfp=*fp;
     }else{
+        WRectangle rg=REGION_GEOM(frame);
         lazyfp.mode=REGION_FIT_EXACT;
         
-        if(parent!=NULL){
-            lazyfp.g.w=minof(fp->g.w, REGION_GEOM(frame).w);
-            lazyfp.g.h=minof(fp->g.h, REGION_GEOM(frame).h);
-            lazyfp.g.x=fp->g.x+(fp->g.w-lazyfp.g.w)/2;
-            lazyfp.g.y=fp->g.y+(fp->g.h-lazyfp.g.h)/2;
-        }else{
-            lazyfp.g=REGION_GEOM(frame);
-            rectangle_constrain(&(lazyfp.g), &(fp->g));
-        }
+        lazyfp.g.w=minof(fp->g.w, rg.w);
+        lazyfp.g.h=minof(fp->g.h, rg.h);
+        lazyfp.g.x=minof(maxof(fp->g.x, rg.x), fp->g.x+fp->g.w-lazyfp.g.w);
+        lazyfp.g.y=minof(maxof(fp->g.y, rg.y), fp->g.y+fp->g.h-lazyfp.g.h);
     }
-    
+
     return frame_fitrep(&frame->frame, parent, &lazyfp);
 }
 
