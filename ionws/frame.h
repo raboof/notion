@@ -71,4 +71,7 @@ extern void deactivate_frame(WFrame *frame);
 extern WFrame *find_frame_of(Window win);
 extern void frame_attach_tagged(WFrame *frame);
 
+extern void frame_move_current_tab_right(WFrame *frame);
+extern void frame_move_current_tab_left(WFrame *frame);
+
 #endif /* ION_FRAME_H */

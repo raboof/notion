@@ -847,3 +847,37 @@ WRegion *frame_selected_sub(WFrame *frame)
 /*}}}*/
 
 
+/*{{{ Tab reordering */
+
+
+void frame_move_current_tab_right(WFrame *frame)
+{
+	WRegion *reg, *next;
+	
+	if((reg=frame->current_sub)==NULL)
+		return;
+	if((next=nextreg_ni(frame, reg))==NULL)
+		return;
+	
+	unlink_thing((WThing*)reg);
+	link_thing_after((WThing*)next, (WThing*)reg);
+	draw_frame_bar(frame, TRUE);
+}
+
+
+void frame_move_current_tab_left(WFrame *frame)
+{
+	WRegion *reg, *prev;
+	
+	if((reg=frame->current_sub)==NULL)
+		return;
+	if((prev=prevreg_ni(frame, reg))==NULL)
+		return;
+	
+	unlink_thing((WThing*)reg);
+	link_thing_before((WThing*)prev, (WThing*)reg);
+	draw_frame_bar(frame, TRUE);
+}
+
+/*}}}*/
+

@@ -139,8 +139,11 @@ static WFunction ion_frame_funtab[]={
 	FN(d,	generic, WRegion,	"set_heightq",		set_heightq),
 
 	/* mouse move/resize and tab drag */
-	FN_VOID(generic, WFrame,		"p_resize",		p_resize_setup),
-	FN_VOID(generic, WRegion,		"p_tabdrag", 	p_tabdrag_setup),
+	FN_VOID(generic, WFrame,	"p_resize",		p_resize_setup),
+	FN_VOID(generic, WRegion,	"p_tabdrag", 	p_tabdrag_setup),
+
+	FN_VOID(generic, WFrame,	"frame_move_current_tab_left", frame_move_current_tab_left),
+	FN_VOID(generic, WFrame,	"frame_move_current_tab_right", frame_move_current_tab_right),
 
 	END_FUNTAB
 };

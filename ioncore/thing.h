@@ -39,7 +39,7 @@ INTRSTRUCT(WWatch)
 
 extern void init_thing(WThing *thing);
 extern void link_thing(WThing *parent, WThing *child);
-/*extern void link_thing_before(WThing *before, WThing *child);*/
+extern void link_thing_before(WThing *before, WThing *child);
 extern void link_thing_after(WThing *after, WThing *thing);
 extern void unlink_thing(WThing *thing);
 extern void destroy_subthings(WThing *thing);

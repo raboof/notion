@@ -80,12 +80,12 @@ void link_thing(WThing *parent, WThing *thing)
 }
 
 
-/*void link_thing_before(WThing *before, WThing *thing)
+void link_thing_before(WThing *before, WThing *thing)
 {
 	WThing *parent=before->t_parent;
 	LINK_ITEM_BEFORE(parent->t_children, before, thing, t_next, t_prev);
 	thing->t_parent=parent;
-}*/
+}
 
 
 void link_thing_after(WThing *after, WThing *thing)
