@@ -1,4 +1,4 @@
-/*
+ /*
  * ion/ioncore/mplex.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
@@ -482,11 +482,11 @@ bool mplex_attach(WMPlex *mplex, WRegion *reg, ExtlTab param)
  *  \hline
  *  Field & Description \\
  *  \hline
- *  \var{type} & Class name of the object to be created. Mandatory. \\
- *  \var{name} & Name of the object to be created. Optional. \\
- *  \var{switchto} & Should the region be switched to? Optional. \\
+ *  \var{type} & Class name (a string) of the object to be created. Mandatory. \\
+ *  \var{name} & Name of the object to be created (a string). Optional. \\
+ *  \var{switchto} & Should the region be switched to (boolean)? Optional. \\
  *  \var{index} & Index of the new region in \var{mplex}'s list of
- *   managed objects (0 = first). Optional. \\
+ *   managed objects (integer, 0 = first). Optional. \\
  * \end{tabularx}
  * 
  * In addition parameters to the region to be created are passed in this 
