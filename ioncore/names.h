@@ -9,24 +9,22 @@
 #define ION_IONCORE_NAMES_H
 
 #include "region.h"
+#include "clientwin.h"
 #include "font.h"
 #include "extl.h"
 
-
 extern bool region_set_name(WRegion *reg, const char *name);
-extern bool region_set_name_instrq(WRegion *reg, const char *p, int instrq);
+extern bool region_set_name_exact(WRegion *reg, const char *name);
+extern bool clientwin_set_name(WClientWin *cwin, const char *name);
+extern void	region_unuse_name(WRegion *reg);
 
-extern int region_name_instance(WRegion *reg);
 extern const char *region_name(WRegion *reg);
 
-/* Returns a newly allocated copy of the name with the instance
- * number appended. */
-extern char *region_full_name(WRegion *reg);
 extern char *region_make_label(WRegion *reg, int maxw, WFontPtr font);
 
 extern WRegion *lookup_region(const char *cname, const char *typenam);
 extern ExtlTab complete_region(const char *nam, const char *typenam);
-
-extern void	region_unuse_name(WRegion *reg);
+extern WClientWin *lookup_clientwin(const char *cname);
+extern ExtlTab complete_clientwin(const char *nam);
 
 #endif /* ION_IONCORE_NAMES_H */

@@ -59,11 +59,9 @@ void region_init(WRegion *reg, WRegion *parent, WRectangle geom)
 	reg->active_sub=NULL;
 	
 	reg->ni.name=NULL;
-	reg->ni.instance=0;
-	reg->ni.n_next=reg;
-	reg->ni.n_prev=reg;
-	reg->ni.g_next=NULL;
-	reg->ni.g_prev=NULL;
+	reg->ni.namespaceinfo=NULL;
+	reg->ni.ns_next=NULL;
+	reg->ni.ns_prev=NULL;
 	
 	reg->manager=NULL;
 	reg->mgr_next=NULL;

@@ -276,7 +276,7 @@ static void screen_set_focus_to(WScreen *scr, bool warp)
 
 static bool screen_display_managed(WScreen *scr, WRegion *reg)
 {
-	char *n;
+	const char *n;
 	
 	if(reg==scr->current_ws)
 		return FALSE;
@@ -290,14 +290,10 @@ static bool screen_display_managed(WScreen *scr, WRegion *reg)
 	scr->current_ws=reg;
 	
 	if(scr->atom_workspace!=None && wglobal.opmode!=OPMODE_DEINIT){
-		n=region_full_name(reg);
+		n=region_name(reg);
 		
-		if(n==NULL){
-			set_string_property(ROOT_OF(scr), scr->atom_workspace, "");
-		}else{
-			set_string_property(ROOT_OF(scr), scr->atom_workspace, n);
-			free(n);
-		}
+		set_string_property(ROOT_OF(scr), scr->atom_workspace, 
+							n==NULL ? "" : n);
 	}
 	
 	if(wglobal.opmode!=OPMODE_DEINIT && region_may_control_focus((WRegion*)scr))

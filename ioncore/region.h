@@ -38,9 +38,8 @@ DECLOBJ(WRegion){
 	
 	struct{
 		char *name;
-		int instance;
-		WRegion *n_next, *n_prev;
-		WRegion *g_next, *g_prev;
+		void *namespaceinfo;
+		WRegion *ns_next, *ns_prev;
 	} ni;
 	
 	WRegion *tag_next, *tag_prev;
