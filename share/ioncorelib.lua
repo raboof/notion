@@ -255,7 +255,9 @@ function get_winprop(cwin)
             end
         end
         -- no regexp match, use default winprop
-        return names[0]
+        if names[0] then
+            return names[0]
+        end
     end
 end
 
