@@ -12,11 +12,14 @@
 #include <ioncore/window.h>
 #include <ioncore/resize.h>
 #include <ioncore/genframe.h>
-#include "split.h"
+#include "ionframe.h"
 
-extern void resize_vert(WRegion *reg);
-extern void resize_horiz(WRegion *reg);
-extern void grow(WRegion *reg);
-extern void shrink(WRegion *reg);
+extern void ionframe_begin_resize(WIonFrame *frame);
+extern void ionframe_grow_vert(WIonFrame *frame);
+extern void ionframe_shrink_vert(WIonFrame *frame);
+extern void ionframe_grow_horiz(WIonFrame *frame);
+extern void ionframe_shrink_horiz(WIonFrame *frame);
+extern void ionframe_end_resize(WIonFrame *frame);
+extern void ionframe_cancel_resize(WIonFrame *frame);
 
 #endif /* ION_IONWS_RESIZE_H */

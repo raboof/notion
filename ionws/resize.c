@@ -20,10 +20,7 @@
 
 
 static const char* moveres_safe_funclist[]={
-	"ionframe_grow_vert",
-	"ionframe_shrink_vert",
-	"ionframe_grow_horiz",
-	"ionframe_shrink_horiz",
+	"ionframe_do_resize",
 	"ionframe_end_resize",
 	"ionframe_cancel_resize",
 	NULL
@@ -70,15 +67,16 @@ static void end_keyresize()
 
 
 EXTL_EXPORT
-void ionframe_begin_resize(WRegion *reg)
+void ionframe_begin_resize(WIonFrame *frame)
 {
-	grab_establish((WRegion*)reg, resize_handler,
+	grab_establish((WRegion*)frame, resize_handler,
 				   FocusChangeMask|KeyReleaseMask);
-	begin_resize_atexit(reg, NULL, end_keyresize);
+	begin_resize_atexit((WRegion*)frame, NULL, end_keyresize);
 }
 
 
-static void ionframe_grow(WIonFrame *frame, int dir)
+EXTL_EXPORT
+void ionframe_do_resize(WIonFrame *frame, int horizmul, int vertmul)
 {
 	int wu=0, hu=0;
 
@@ -87,60 +85,11 @@ static void ionframe_grow(WIonFrame *frame, int dir)
 	
 	genframe_resize_units((WGenFrame*)frame, &wu, &hu);
 	
-	if(dir==VERTICAL)
-		wu=0;
-	else
-		hu=0;
+	wu=wu*horizmul;
+	hu=hu*vertmul;
 		
 	delta_resize((WRegion*)frame, -(wu-wu/2), wu/2, -(hu-hu/2), hu/2, NULL);
 	set_resize_timer((WRegion*)frame, wglobal.resize_delay);
-}
-
-
-static void ionframe_shrink(WIonFrame *frame, int dir)
-{
-	int wu, hu;
-	
-	if(!may_resize((WRegion*)frame))
-		return;
-
-	genframe_resize_units((WGenFrame*)frame, &wu, &hu);
-	
-	if(dir==VERTICAL)
-		wu=0;
-	else
-		hu=0;
-	
-	delta_resize((WRegion*)frame, (wu-wu/2), -wu/2, (hu-hu/2), -hu/2, NULL);
-	set_resize_timer((WRegion*)frame, wglobal.resize_delay);
-}
-
-
-EXTL_EXPORT
-void ionframe_grow_vert(WIonFrame *frame)
-{
-	ionframe_grow(frame, VERTICAL);
-}
-
-
-EXTL_EXPORT
-void ionframe_shrink_vert(WIonFrame *frame)
-{
-	ionframe_shrink(frame, VERTICAL);
-}
-
-
-EXTL_EXPORT
-void ionframe_grow_horiz(WIonFrame *frame)
-{
-	ionframe_grow(frame, HORIZONTAL);
-}
-
-
-EXTL_EXPORT
-void ionframe_shrink_horiz(WIonFrame *frame)
-{
-	ionframe_shrink(frame, HORIZONTAL);
 }
 
 
