@@ -582,6 +582,8 @@ static bool mplex_do_display_managed(WMPlex *mplex, WRegion *sub)
     
     if(REGION_IS_MAPPED(mplex) && !MPLEX_MGD_UNVIEWABLE(mplex))
         region_map(sub);
+    else
+        region_unmap(sub);
     
     if(!l2){
         if(mplex->l1_current!=NULL && REGION_IS_MAPPED(mplex))
