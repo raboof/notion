@@ -208,7 +208,7 @@ void floatws_deinit(WFloatWS *ws)
 EXTL_EXPORT
 bool floatws_destroy(WFloatWS *ws)
 {
-	if(!region_may_destroy((WGenWS*)ws))
+	if(!region_may_destroy((WRegion*)ws))
 		return FALSE;
 	
 	if(!region_rescue_managed_on_list((WRegion*)ws, ws->managed_list))
