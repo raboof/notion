@@ -197,12 +197,12 @@ static bool opt_workspace_frame(Tokenizer *tokz, int n, Token *toks)
 	
 	get_params(&params);
 	frame=create_frame(SCREEN_OF(current_vp), params, id, 0);
-
-	if(n>=3)
-		set_region_name((WRegion*)frame, TOK_STRING_VAL(&(toks[2])));
 	
 	if(frame==NULL)
 		return FALSE;
+	
+	if(n>=3)
+		set_region_name((WRegion*)frame, TOK_STRING_VAL(&(toks[2])));
 	
 	if(current_split==NULL)
 		current_ws->splitree=(WObj*)frame;
@@ -325,6 +325,8 @@ static void dodo_write_workspaces(FILE *file)
 			continue;
 		}
 		
+		fprintf(stderr, "--S %s\n", region_name((WRegion*)ws));
+
 		if(ws->splitree==NULL){
 			warn("Empty workspace -- this cannot happen");
 			continue;
@@ -358,7 +360,7 @@ static ConfOpt split_opts[]={
 static ConfOpt workspace_opts[]={
 	{"vsplit", "ll",  opt_workspace_vsplit, split_opts},
 	{"hsplit", "ll",  opt_workspace_hsplit, split_opts},
-	{"frame", "l",  opt_workspace_frame, NULL},
+	{"frame", "l?s",  opt_workspace_frame, NULL},
 	
 	{"#end", NULL, opt_workspace_end, NULL},
 	/*{"#cancel", NULL, opt_workspace_cancel, NULL},*/
@@ -428,6 +430,7 @@ static bool do_write_workspaces(char *wsconf)
 	
 	fprintf(file, "# This file was created by and is modified by Ion.\n");
 	
+	fprintf(stderr, "[%s]\n", wsconf);
 	dodo_write_workspaces(file);
 	
 	fclose(file);
@@ -441,6 +444,7 @@ bool write_workspaces(WViewport *vp)
 	bool successp;
 	char *wsconf;
 	
+	fprintf(stderr, "<%d>\n", vp->id);
 	wsconf=get_savefile_for_scr("workspaces", vp->id);
 	
 	if(wsconf==NULL)
