@@ -799,7 +799,8 @@ static bool mrsh_u_c(WHookDummy *fn, void *param)
 
 static bool mrsh_u_extl(ExtlFn fn, void *param)
 {
-    extl_call(fn, "d", NULL, *(Window*)param);
+    double d=*(Window*)param;
+    extl_call(fn, "d", NULL, &d);
     return TRUE;
 }
 
