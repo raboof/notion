@@ -1,5 +1,5 @@
 /*
- * ion/ioncore/statusbar.c
+ * ion/mod_statusbar/statusbar.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2005. 
  *

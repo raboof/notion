@@ -1,5 +1,5 @@
 /*
- * ion/ioncore/draw.c
+ * ion/mod_statusbar/draw.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2005. 
  *
