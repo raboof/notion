@@ -212,11 +212,11 @@ static bool extl_stack_get(lua_State *st, int pos, char type, bool copystring,
 	double d=0;
 	const char *str;
 			  
-	if(type=='0'){
-		if(!lua_isnil(st, pos))
+	if(lua_isnil(st, pos)){
+		if(type!='t' && type!='f')
 			return FALSE;
 		if(valret)
-			*((int*)valret)=lua_ref(st, pos);
+			*((int*)valret)=LUA_NOREF;
 		return TRUE;
 	}
 		
@@ -373,22 +373,32 @@ ExtlTab extl_ref_table(ExtlTab ref)
 {
 	if(extl_getref(l_st, ref)==0)
 		return LUA_NOREF;
-	return lua_ref(l_st, ref);
+	ref=lua_ref(l_st, 1);
+	lua_pop(l_st, 1);
+	return ref;
 }
 
 
 ExtlFn extl_ref_fn(ExtlFn ref)
 {
-	if(extl_getref(l_st, ref)==0)
-		return LUA_NOREF;
-	return lua_ref(l_st, ref);
+	return extl_ref_table(ref);
+}
+
+
+ExtlTab extl_create_table()
+{
+	ExtlTab ref;
+	lua_newtable(l_st);
+	ref=lua_ref(l_st, 1);
+	lua_pop(l_st, 1);
+	return ref;
 }
 
 
 /*}}}*/
 
 
-/*{{{ Tables */
+/*{{{ Table/get */
 
 
 static bool extl_table_do_gets(ExtlTab ref, const char *entry, char type,
@@ -454,10 +464,8 @@ int extl_table_get_n(ExtlTab ref)
 	if(!lua_checkstack(l_st, 8 /*something that should be enough*/))
 		return 0;
 	
-	if(extl_getref(l_st, ref)==0){
-		fprintf(stderr, "nilref\n");
+	if(extl_getref(l_st, ref)==0)
 		return 0;
-	}
 	
 	lua_getglobal(l_st, "table");
 	lua_pushstring(l_st, "getn");
@@ -525,6 +533,149 @@ bool extl_table_geti_f(ExtlTab ref, int entry, ExtlFn *ret)
 bool extl_table_geti_t(ExtlTab ref, int entry, ExtlTab *ret)
 {
 	return extl_table_do_geti(ref, entry, 't', (void*)ret);
+}
+
+
+/*}}}*/
+
+
+/*{{{ Table/set */
+
+
+static bool extl_table_do_sets(ExtlTab ref, const char *entry, char type,
+							   void *val)
+{
+	bool ret=FALSE;
+	int oldtop=lua_gettop(l_st);
+	
+	if(extl_getref(l_st, ref)==0)
+		return FALSE;
+	
+	lua_pushstring(l_st, entry);
+	
+	if(extl_stack_push(l_st, type, val)){
+		lua_settable(l_st, -2);
+		ret=TRUE;
+	}
+	
+	lua_settop(l_st, oldtop);
+	
+	return ret;
+}
+
+
+bool extl_table_sets_o(ExtlTab ref, const char *entry, WObj *val)
+{
+	return extl_table_do_sets(ref, entry, 'o', (void*)&val);
+}
+
+bool extl_table_sets_i(ExtlTab ref, const char *entry, int val)
+{
+	return extl_table_do_sets(ref, entry, 'i', (void*)&val);
+}
+
+bool extl_table_sets_d(ExtlTab ref, const char *entry, double val)
+{
+	return extl_table_do_sets(ref, entry, 'd', (void*)&val);
+}
+
+bool extl_table_sets_b(ExtlTab ref, const char *entry, bool val)
+{
+	return extl_table_do_sets(ref, entry, 'b', (void*)&val);
+}
+
+bool extl_table_sets_s(ExtlTab ref, const char *entry, const char *val)
+{
+	return extl_table_do_sets(ref, entry, 'S', (void*)&val);
+}
+
+bool extl_table_sets_f(ExtlTab ref, const char *entry, ExtlFn val)
+{
+	return extl_table_do_sets(ref, entry, 'f', (void*)&val);
+}
+
+bool extl_table_sets_t(ExtlTab ref, const char *entry, ExtlTab val)
+{
+	return extl_table_do_sets(ref, entry, 't', (void*)&val);
+}
+
+
+static bool extl_table_do_seti(ExtlTab ref, bool insertlast, int entry,
+							   char type, void *val)
+{
+	bool ret=FALSE;
+	int oldtop=lua_gettop(l_st);
+	int n;
+	
+	if(!lua_checkstack(l_st, 8 /*something that should be enough*/))
+		return FALSE;
+
+	n=extl_table_get_n(ref);
+	
+	if(extl_getref(l_st, ref)==0)
+		return FALSE;
+	
+	if(insertlast)
+		entry=n+1;
+	
+	if(extl_stack_push(l_st, type, val)){ /* stack: ref, val */
+		lua_rawseti(l_st, -2, entry);
+		
+		if(entry>n){
+			lua_getglobal(l_st, "table");
+			lua_pushstring(l_st, "setn"); /* stack: ref, table, "setn" */
+			lua_gettable(l_st, -2); 	  /* stack: ref, table, setn */
+			lua_pushvalue(l_st, -3); 	  /* stack: ref, table, setn, ref */
+			lua_pushnumber(l_st, entry);  /* stack: ref, table, setn, ref, entry */
+			if(lua_pcall(l_st, 2, 0, 0)!=0){
+				warn("%s", lua_tostring(l_st, -1));
+			}else{
+				ret=TRUE;
+			}
+		}else{
+			ret=TRUE;
+		}
+	}
+	
+	lua_settop(l_st, oldtop);
+	
+	return ret;
+}
+
+
+bool extl_table_seti_o(ExtlTab ref, int entry, WObj *val)
+{
+	return extl_table_do_seti(ref, FALSE, entry, 'o', (void*)&val);
+}
+
+bool extl_table_seti_i(ExtlTab ref, int entry, int val)
+{
+	return extl_table_do_seti(ref, FALSE, entry, 'i', (void*)&val);
+}
+
+bool extl_table_seti_d(ExtlTab ref, int entry, double val)
+{
+	return extl_table_do_seti(ref, FALSE, entry, 'd', (void*)&val);
+}
+
+bool extl_table_seti_b(ExtlTab ref, int entry, bool val)
+{
+	return extl_table_do_seti(ref, FALSE, entry, 'b', (void*)&val);
+}
+
+bool extl_table_seti_s(ExtlTab ref, int entry, const char *val)
+{
+	return extl_table_do_seti(ref, FALSE, entry, 'S', (void*)&val);
+}
+
+bool extl_table_seti_f(ExtlTab ref, int entry, ExtlFn val)
+{
+	return extl_table_do_seti(ref, FALSE, entry, 'f', (void*)&val);
+}
+
+bool extl_table_seti_t(ExtlTab ref, int entry, ExtlTab val)
+{
+	return extl_table_do_seti(ref, FALSE, entry, 't', (void*)&val);
 }
 
 
@@ -1052,35 +1203,39 @@ void extl_unregister_function(ExtlExportedFnSpec *spec)
 /*}}}*/
 
 
-
 /*{{{ Misc */
 
 
-int extl_complete_fn(char *nam, char ***cp_ret, char **beg, void *unused)
+EXTL_EXPORT
+ExtlTab extl_complete_fn(const char *nam)
 {
 	int oldtop=lua_gettop(l_st);
-	int n=0;
 	int l=strlen(nam);
 	const char *fnam;
+	ExtlTab tab;
 	
+	lua_newtable(l_st);
 	lua_pushnil(l_st);
 	
-	for(; lua_next(l_st, LUA_GLOBALSINDEX)!=0; lua_pop(l_st, 1)){
-		if(!lua_isfunction(l_st, -1))
-			continue;
+	while(lua_next(l_st, LUA_GLOBALSINDEX)!=0){
+		if(lua_isfunction(l_st, -1)){
+			fnam=lua_tostring(l_st, -2);
 		
-		fnam=lua_tostring(l_st, -2);
-		
-		if(fnam==NULL)
-			continue;
-			
-		if(strncmp(nam, fnam, l)==0)
-			add_to_complist_copy(cp_ret, &n, fnam);
+			if(fnam!=NULL){
+				if(strncmp(nam, fnam, l)==0){
+					lua_settable(l_st, -3);
+					continue;
+				}
+			}
+		}
+		lua_pop(l_st, 1);
 	}
+	
+	tab=lua_ref(l_st, -2);
 	
 	lua_settop(l_st, oldtop);
 	
-	return n;
+	return tab;
 }
 	
 	

@@ -62,6 +62,10 @@ extern ExtlTab extl_table_none();
 extern ExtlFn extl_ref_fn(ExtlFn ref);
 extern ExtlTab extl_ref_table(ExtlTab ref);
 
+extern ExtlTab extl_create_table();
+
+/* Table/get */
+
 extern bool extl_table_gets_o(ExtlTab ref, const char *entry, WObj **ret);
 extern bool extl_table_gets_i(ExtlTab ref, const char *entry, int *ret);
 extern bool extl_table_gets_d(ExtlTab ref, const char *entry, double *ret);
@@ -78,6 +82,26 @@ extern bool extl_table_geti_b(ExtlTab ref, int entry, bool *ret);
 extern bool extl_table_geti_s(ExtlTab ref, int entry, char **ret);
 extern bool extl_table_geti_f(ExtlTab ref, int entry, ExtlFn *ret);
 extern bool extl_table_geti_t(ExtlTab ref, int entry, ExtlTab *ret);
+
+/* Table/set */
+
+extern bool extl_table_sets_o(ExtlTab ref, const char *entry, WObj *val);
+extern bool extl_table_sets_i(ExtlTab ref, const char *entry, int val);
+extern bool extl_table_sets_d(ExtlTab ref, const char *entry, double val);
+extern bool extl_table_sets_b(ExtlTab ref, const char *entry, bool val);
+extern bool extl_table_sets_s(ExtlTab ref, const char *entry, const char *val);
+extern bool extl_table_sets_f(ExtlTab ref, const char *entry, ExtlFn val);
+extern bool extl_table_sets_t(ExtlTab ref, const char *entry, ExtlTab val);
+
+extern bool extl_table_seti_o(ExtlTab ref, int entry, WObj *val);
+extern bool extl_table_seti_i(ExtlTab ref, int entry, int val);
+extern bool extl_table_seti_d(ExtlTab ref, int entry, double val);
+extern bool extl_table_seti_b(ExtlTab ref, int entry, bool val);
+extern bool extl_table_seti_s(ExtlTab ref, int entry, const char *val);
+extern bool extl_table_seti_f(ExtlTab ref, int entry, ExtlFn val);
+extern bool extl_table_seti_t(ExtlTab ref, int entry, ExtlTab val);
+
+/* Call */
 
 extern const char **extl_set_safelist(const char **list);
 
@@ -101,14 +125,17 @@ extern bool extl_dostring_vararg(const char *string, const char *spec,
 extern bool extl_dostring(const char *string, const char *spec,
 						  const char *rspec, ...);
 
+/* Register */
+
 extern bool extl_register_function(ExtlExportedFnSpec *spec);
 extern void extl_unregister_function(ExtlExportedFnSpec *spec);
+
+/* Misc. */
 
 extern const char* extl_extension();
 
 extern bool extl_init();
 
-extern int extl_complete_fn(char *nam, char ***cp_ret, char **beg,
-							void *unused);
+extern ExtlTab extl_complete_fn(const char *nam);
 
 #endif /* ION_LUA_LUAEXTL_H */
