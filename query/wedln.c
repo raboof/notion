@@ -428,7 +428,7 @@ bool init_wedln(WEdln *wedln, WWindow *par, WRectangle geom,
 
 	wedln->input.win.xic=create_xic(wedln->input.win.win);
 
-	region_add_bindmap((WRegion*)wedln, &query_edln_bindmap, FALSE);
+	region_add_bindmap((WRegion*)wedln, &query_edln_bindmap);
 	
 	return TRUE;
 }

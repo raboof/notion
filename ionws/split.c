@@ -818,7 +818,7 @@ void ionws_add_managed(WIonWS *ws, WRegion *reg)
 {
 	region_set_manager(reg, (WRegion*)ws, &(ws->managed_list));
 	
-	region_add_bindmap_owned(reg, &ionws_bindmap, TRUE, (WRegion*)ws);
+	region_add_bindmap_owned(reg, &ionws_bindmap, (WRegion*)ws);
 	
 	if(REGION_IS_MAPPED(ws))
 		map_region(reg);

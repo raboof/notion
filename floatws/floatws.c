@@ -245,7 +245,7 @@ static bool init_floatws(WFloatWS *ws, WWindow *parent, WRectangle bounds)
 	ws->managed_list=NULL;
 	ws->current_managed=NULL;
 	
-	region_add_bindmap((WRegion*)ws, &floatws_bindmap, TRUE);
+	region_add_bindmap((WRegion*)ws, &floatws_bindmap);
 	
 	return TRUE;
 }
@@ -278,7 +278,7 @@ void deinit_floatws(WFloatWS *ws)
 static void floatws_add_managed(WFloatWS *ws, WRegion *reg)
 {
 	region_set_manager(reg, (WRegion*)ws, &(ws->managed_list));
-	region_add_bindmap_owned(reg, &floatws_bindmap, TRUE, (WRegion*)ws);
+	region_add_bindmap_owned(reg, &floatws_bindmap, (WRegion*)ws);
 
 	if(region_is_fully_mapped((WRegion*)ws))
 		map_region(reg);

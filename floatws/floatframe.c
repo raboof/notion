@@ -80,7 +80,7 @@ static bool init_floatframe(WFloatFrame *frame, WWindow *parent,
 	
 	genframe_recalc_bar((WGenFrame*)frame, FALSE);
 	
-	region_add_bindmap((WRegion*)frame, &(floatframe_bindmap), TRUE);
+	region_add_bindmap((WRegion*)frame, &(floatframe_bindmap));
 	
 	return TRUE;
 }

@@ -74,7 +74,7 @@ static bool init_ionframe(WIonFrame *frame, WWindow *parent, WRectangle geom,
 	
 	set_tab_spacing(frame);
 	
-	region_add_bindmap((WRegion*)frame, &(ionframe_bindmap), TRUE);
+	region_add_bindmap((WRegion*)frame, &(ionframe_bindmap));
 	
 	return TRUE;
 }

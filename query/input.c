@@ -119,7 +119,7 @@ bool init_input(WInput *input, WWindow *par, WRectangle geom)
 	input_refit(input);
 	
 	XSelectInput(wglobal.dpy, input->win.win, INPUT_MASK);
-	region_add_bindmap((WRegion*)input, &query_bindmap, FALSE);
+	region_add_bindmap((WRegion*)input, &query_bindmap);
 	
 	return TRUE;
 }
