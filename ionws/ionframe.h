@@ -27,4 +27,6 @@ extern void ionframe_draw(const WIonFrame *frame, bool complete);
 
 extern WRegion *ionframe_load(WWindow *par, WRectangle geom, ExtlTab tab);
 
+extern void ionframe_toggle_shade(WIonFrame *frame);
+
 #endif /* ION_IONWS_IONFRAME_H */

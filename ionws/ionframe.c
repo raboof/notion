@@ -32,6 +32,7 @@ static bool ionframe_init(WIonFrame *frame, WWindow *parent, WRectangle geom,
 	if(!genframe_init((WGenFrame*)frame, parent, geom))
 		return FALSE;
 	
+	flags&=~WGENFRAME_TAB_HIDE;
 	frame->genframe.flags|=flags;
 	set_tab_spacing(frame);
 	
@@ -168,7 +169,27 @@ static void ionframe_resize_hints(WIonFrame *frame, XSizeHints *hints_ret,
 	
 	hints_ret->flags|=PMinSize;
 	hints_ret->min_width=1;
-	hints_ret->min_height=1;
+	hints_ret->min_height=0;
+}
+
+
+/*EXTL_DOC
+ * Toggle shade (only titlebar visible) mode.
+ */
+EXTL_EXPORT
+void ionframe_toggle_shade(WIonFrame *frame)
+{
+	WGRData *grdata=GRDATA_OF(frame);
+	WBorder bd=frame_border(grdata);
+	int h;
+		
+	if(!grdata->bar_inside_frame){
+		h=2*bd.ipad+grdata->bar_h;
+	}else{
+		h=2*grdata->spacing+BORDER_TOTAL(&bd)+grdata->bar_h;
+	}
+		
+	genframe_do_toggle_shade((WGenFrame*)frame, h);
 }
 
 
@@ -310,7 +331,6 @@ WRegion *ionframe_load(WWindow *par, WRectangle geom, ExtlTab tab)
 	int n, i;
 	
 	extl_table_gets_i(tab, "flags", &flags);
-	flags&=WGENFRAME_TAB_HIDE;
 	
 	frame=create_ionframe(par, geom, flags);
 	

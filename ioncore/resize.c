@@ -317,6 +317,29 @@ void delta_move(WRegion *reg, int dx, int dy, WRectangle *rret)
 }
 
 
+/* It is ugly to do this here, but it will have to do for now... */
+static void set_saved(WRegion *reg)
+{
+	WGenFrame *frame;
+	
+	if(!WOBJ_IS(reg, WGenFrame))
+		return;
+	
+	frame=(WGenFrame*)reg;
+	
+	/* Restore saved sizes from the beginning of the resize action */
+	if(tmporiggeom.w!=tmpgeom.w){
+		frame->saved_x=tmporiggeom.x;
+		frame->saved_w=tmporiggeom.w;
+	}
+	
+	if(tmporiggeom.h!=tmpgeom.h){
+		frame->saved_y=tmporiggeom.y;
+		frame->saved_h=tmporiggeom.h;
+	}
+}
+
+
 void end_resize(WRegion *reg)
 {
 	WRootWin *rootwin=ROOTWIN_OF(reg);
@@ -333,6 +356,8 @@ void end_resize(WRegion *reg)
 		region_request_geom(reg, tmpgeom, &tmpgeom, FALSE);
 		XUngrabServer(wglobal.dpy);
 	}
+	
+	set_saved(reg);
 	
 	XUnmapWindow(wglobal.dpy, rootwin->grdata.moveres_win);
 
@@ -357,6 +382,8 @@ void cancel_resize(WRegion *reg)
 	if(XOR_RESIZE){
 		res_draw_rubberband(rootwin);
 		XUngrabServer(wglobal.dpy);
+	}else{
+		set_saved(reg);
 	}
 	
 	XUnmapWindow(wglobal.dpy, rootwin->grdata.moveres_win);
@@ -379,7 +406,8 @@ void region_request_geom(WRegion *reg,
 						 bool tryonly)
 {
 	if(REGION_MANAGER(reg)!=NULL){
-		region_request_managed_geom(REGION_MANAGER(reg), reg, geom, geomret, tryonly);
+		region_request_managed_geom(REGION_MANAGER(reg), reg, geom, geomret, 
+									tryonly);
 	}else{
 		if(geomret!=NULL)
 			*geomret=REGION_GEOM(reg);
@@ -429,31 +457,67 @@ void region_set_h(WRegion *reg, int h)
 /*}}}*/
 
 
-/*{{{ Maximize */
+/*{{{ Restore size, maximize, shade */
 
-
-#define DO_MAXIMIZE(FRAME, WH, POS)                              \
-	WRegion *par=REGION_PARENT_CHK(FRAME, WRegion);                   \
-	WRectangle geom=REGION_GEOM(FRAME);                          \
-	int tmp, tmp2;                                               \
-                                                                 \
-	if(par==NULL)                                                \
-		return;                                                  \
-                                                                 \
-	if((FRAME)->saved_##WH!=WGENFRAME_NO_SAVED_WH){              \
-		geom.WH=(FRAME)->saved_##WH;                             \
-		geom.POS=(FRAME)->saved_##POS;                           \
-		region_request_geom((WRegion*)FRAME, geom, NULL, FALSE); \
-		(FRAME)->saved_##WH=WGENFRAME_NO_SAVED_WH;               \
-	}else{                                                       \
-		tmp=geom.WH;                                             \
-		tmp2=geom.POS;                                           \
-		geom.WH=REGION_GEOM(par).WH;                             \
-		geom.POS=0; /* Needed to resize both up and down */		 \
-		region_request_geom((WRegion*)FRAME, geom, NULL, FALSE); \
-		(FRAME)->saved_##WH=tmp;                                 \
-		(FRAME)->saved_##POS=tmp2;                               \
+#if 0
+void save_vert(WGenFrame *frame, bool override)
+{
+	if(override || !(frame->flags&WGENFRAME_SAVED_VERT)){
+		frame->flags|=WGENFRAME_SAVED_VERT;
+		frame->saved_y=REGION_GEOM(frame).y;
+		frame->saved_h=REGION_GEOM(frame).h;
 	}
+}
+
+
+static void save_horiz(WGenFrame *frame, bool override)
+{
+	if(override || !(frame->flags&WGENFRAME_SAVED_HORIZ)){
+		frame->flags|=WGENFRAME_SAVED_HORIZ;
+		frame->saved_x=REGION_GEOM(frame).x;
+		frame->saved_w=REGION_GEOM(frame).w;
+	}
+}
+#endif
+
+
+void genframe_restore_size(WGenFrame *frame, bool horiz, bool vert)
+{
+	WRectangle geom;
+	
+	if(!(frame->flags&WGENFRAME_SAVED_VERT))
+		vert=FALSE;
+	if(!(frame->flags&WGENFRAME_SAVED_HORIZ))
+		horiz=FALSE;
+	
+	if(!vert && !horiz)
+		return;
+	
+	geom=REGION_GEOM(frame);
+	
+	if(vert){
+		geom.h=frame->saved_h;
+		geom.y=frame->saved_y;
+	}
+	
+	if(horiz){
+		geom.w=frame->saved_w;
+		geom.x=frame->saved_x;
+	}
+	
+	region_request_geom((WRegion*)frame, geom, NULL, FALSE);
+}
+
+
+static bool trymaxv(WGenFrame *frame, WRegion *mgr, bool tryonly)
+{
+	WRectangle geom=REGION_GEOM(frame);
+	geom.y=0;
+	geom.h=REGION_GEOM(mgr).h;
+	region_request_geom((WRegion*)frame, geom, &geom, tryonly);
+	return (abs(geom.y-REGION_GEOM(frame).y)>1 ||
+			abs(geom.h-REGION_GEOM(frame).h)>1);
+}
 
 
 /*EXTL_DOC
@@ -462,17 +526,85 @@ void region_set_h(WRegion *reg, int h)
 EXTL_EXPORT
 void genframe_maximize_vert(WGenFrame *frame)
 {
-	DO_MAXIMIZE(frame, h, y);
+	WRegion *mgr=REGION_MANAGER(frame);
+	
+	if(frame->flags&WGENFRAME_SHADED){
+		genframe_do_toggle_shade(frame, 0 /* not used */);
+		return;
+	}
+		
+	if(mgr==NULL)
+		return;
+
+	if(!trymaxv(frame, mgr, TRUE)){
+		/* Could not maximize further, restore */
+		genframe_restore_size(frame, FALSE, TRUE);
+		return;
+	}
+
+	trymaxv(frame, mgr, FALSE);
 }
 
 
+static bool trymaxh(WGenFrame *frame, WRegion *mgr, bool tryonly)
+{
+	WRectangle geom=REGION_GEOM(frame);
+	geom.x=0;
+	geom.w=REGION_GEOM(mgr).w;
+	region_request_geom((WRegion*)frame, geom, &geom, tryonly);
+	return (abs(geom.x-REGION_GEOM(frame).x)>1 ||
+			abs(geom.w-REGION_GEOM(frame).w)>1);
+}
+				   
 /*EXTL_DOC
  * Attempt to maximize \var{frame} horizontally.
  */
 EXTL_EXPORT
 void genframe_maximize_horiz(WGenFrame *frame)
 {
-	DO_MAXIMIZE(frame, w, x);
+	WRegion *mgr=REGION_MANAGER(frame);
+	
+	if(mgr==NULL)
+		return;
+
+	if(!trymaxh(frame, mgr, TRUE)){
+		/* Could not maximize further, restore */
+		genframe_restore_size(frame, TRUE, FALSE);
+		return;
+	}
+	
+	trymaxh(frame, mgr, FALSE);
+}
+
+
+void genframe_do_toggle_shade(WGenFrame *frame, int shaded_h)
+{
+	WRectangle geom=REGION_GEOM(frame);
+
+	if(frame->flags&WGENFRAME_SHADED){
+		if(!(frame->flags&WGENFRAME_SAVED_VERT))
+			return;
+		geom.h=frame->saved_h;
+	}else{
+		if(frame->flags&WGENFRAME_TAB_HIDE)
+			return;
+		geom.h=shaded_h;
+	}
+	/* TODO: region_request_geom should support specifying only size 
+	 * so this gets handled correctly on WIonWS:s.
+	 */
+	
+	region_request_geom((WRegion*)frame, geom, NULL, FALSE);
+}
+
+
+/*EXTL_DOC
+ * Is \var{frame} shaded?
+ */
+EXTL_EXPORT
+bool genframe_is_shaded(WGenFrame *frame)
+{
+	return ((frame->flags&WGENFRAME_SHADED)!=0);
 }
 
 

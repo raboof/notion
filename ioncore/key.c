@@ -237,10 +237,14 @@ void handle_keypress(XKeyEvent *ev)
 		reg=REGION_PARENT_CHK(reg, WRegion);
 	}while(reg!=NULL);
 
+	if(reg==NULL)
+		return;
+	
 #ifndef CF_WINDOWED_SCREENS
 	if(WOBJ_IS(reg, WRootWin)){
-		reg=(WRegion*)((WRootWin*)reg)->current_screen;
-		binding_owner=reg;
+		binding_owner=(WRegion*)((WRootWin*)reg)->current_screen;
+		if(binding_owner==NULL)
+			binding_owner=(WRegion*)((WRootWin*)reg)->screen_list;
 	}
 #endif
 

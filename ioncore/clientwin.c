@@ -773,7 +773,7 @@ static void do_reparent_clientwin(WClientWin *cwin, Window win, int x, int y)
 
 
 static void convert_geom(WClientWin *cwin, WRectangle max_geom,
-						 WRectangle *geom/*, bool rq*/)
+						 WRectangle *geom)
 {
 	WRectangle r;
 	bool bottom=FALSE;
@@ -797,6 +797,11 @@ static void convert_geom(WClientWin *cwin, WRectangle max_geom,
 		geom->y=max_geom.y+max_geom.h-geom->h;
 	else
 		geom->y=max_geom.y+max_geom.h/2-geom->h/2;
+	
+	if(geom->h<=1)
+		geom->h=1;
+	if(geom->w<=1)
+		geom->w=1;
 }
 
 

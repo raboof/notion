@@ -17,7 +17,6 @@ INTROBJ(WFloatFrame);
 
 DECLOBJ(WFloatFrame){
 	WGenFrame genframe;
-	bool shaded;
 	int bar_w;
 };
 
@@ -34,6 +33,5 @@ extern WRegion *floatframe_load(WWindow *par, WRectangle geom, ExtlTab tab);
 
 extern void floatframe_p_move(WFloatFrame *frame);
 extern void floatframe_toggle_shade(WFloatFrame *frame);
-extern bool floatframe_is_shaded(WFloatFrame *frame);
 
 #endif /* ION_FLOATWS_FLOATFRAME_H */

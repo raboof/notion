@@ -29,6 +29,8 @@ static int p_dx1mul=0, p_dx2mul=0, p_dy1mul=0, p_dy2mul=0;
 
 /*{{{ Frame press */
 
+#define MINCORNER 16
+
 
 int genframe_press(WGenFrame *genframe, XButtonEvent *ev, WRegion **reg_ret)
 {
@@ -48,7 +50,7 @@ int genframe_press(WGenFrame *genframe, XButtonEvent *ev, WRegion **reg_ret)
 		int hh=REGION_GEOM(genframe).h/2;
 		int xdiv, ydiv;
 		int tmpx, tmpy, atmpx, atmpy;
-
+		
 		tmpx=ev->x-ww;
 		tmpy=hh-ev->y;
 		xdiv=ww/2;
@@ -56,6 +58,18 @@ int genframe_press(WGenFrame *genframe, XButtonEvent *ev, WRegion **reg_ret)
 		atmpx=abs(tmpx);
 		atmpy=abs(tmpy);
 		
+		if(xdiv<MINCORNER && xdiv>1){
+			xdiv=ww-MINCORNER;
+			if(xdiv<1)
+				xdiv=1;
+		}
+
+		if(ydiv<MINCORNER && ydiv>1){
+			ydiv=hh-MINCORNER;
+			if(ydiv<1)
+				ydiv=1;
+		}
+
 		if(xdiv==0){
 			p_dx2mul=1;
 		}else if(hh*atmpx/xdiv>=tmpy && -hh*atmpx/xdiv<=tmpy){

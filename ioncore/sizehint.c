@@ -106,8 +106,8 @@ void correct_size(int *wp, int *hp, const XSizeHints *hints, bool min)
 
 /*{{{ get_sizehints */
 
-#define CWIN_MIN_W 1
-#define CWIN_MIN_H 1
+#define CWIN_MIN_W 0
+#define CWIN_MIN_H 0
 
 void get_sizehints(Window win, XSizeHints *hints)
 {
@@ -117,18 +117,27 @@ void get_sizehints(Window win, XSizeHints *hints)
 	memset(hints, 0, sizeof(*hints));
 	XGetWMNormalHints(wglobal.dpy, win, hints, &supplied);
 
-	if(!(hints->flags&PMinSize) || hints->min_width<CWIN_MIN_W)
-		hints->min_width=CWIN_MIN_W;
-	if(!(hints->flags&PMinSize) || hints->min_height<CWIN_MIN_H)
-		hints->min_height=CWIN_MIN_H;
-	hints->flags|=PMinSize;
-	
-	if(!(hints->flags&PBaseSize)){
-		hints->flags|=PBaseSize;
-		hints->base_width=hints->min_width;
-		hints->base_height=hints->min_height;
+	if(!(hints->flags&PMinSize)){
+		if(hints->flags&PBaseSize){
+			hints->min_width=hints->base_width;
+			hints->min_height=hints->base_height;
+		}else{
+			hints->min_width=0;
+			hints->min_height=0;
+		}
 	}
 
+	if(hints->min_width<0)
+		hints->min_width=0;
+	if(hints->min_height<0)
+		hints->min_height=0;
+
+	if(!(hints->flags&PBaseSize) || hints->base_width<0)
+		hints->base_width=hints->min_width;
+	if(!(hints->flags&PBaseSize) || hints->base_height<0)
+		hints->base_height=hints->min_height;
+
+	
 	if(hints->flags&PMaxSize){
 		if(hints->max_width<hints->min_width)
 			hints->max_width=hints->min_width;
@@ -136,7 +145,7 @@ void get_sizehints(Window win, XSizeHints *hints)
 			hints->max_height=hints->min_height;
 	}
 	
-	/*hints->flags|=PBaseSize;|PMinSize;*/
+	hints->flags|=(PBaseSize|PMinSize);
 
 	if(hints->flags&PResizeInc){
 		if(hints->width_inc<=0 || hints->height_inc<=0){

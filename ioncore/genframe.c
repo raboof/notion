@@ -46,10 +46,10 @@ bool genframe_init(WGenFrame *genframe, WWindow *parent, WRectangle geom)
 	genframe->managed_list=NULL;
 	genframe->current_sub=NULL;
 	genframe->current_input=NULL;
-	genframe->saved_w=WGENFRAME_NO_SAVED_WH;
-	genframe->saved_h=WGENFRAME_NO_SAVED_WH;
-	genframe->saved_x=WGENFRAME_NO_SAVED_WH;
-	genframe->saved_y=WGENFRAME_NO_SAVED_WH;
+	genframe->saved_w=0;
+	genframe->saved_h=0;
+	genframe->saved_x=0;
+	genframe->saved_y=0;
 	genframe->tab_pressed_sub=NULL;
 	genframe->tab_spacing=0;
 	
@@ -196,6 +196,7 @@ void genframe_move_current_tab_left(WGenFrame *genframe)
 static void reparent_or_fit(WGenFrame *genframe, const WRectangle *geom,
 							WWindow *parent)
 {
+	WRectangle old_geom, mg;
 	bool wchg=(REGION_GEOM(genframe).w!=geom->w);
 	bool hchg=(REGION_GEOM(genframe).h!=geom->h);
 	bool move=(REGION_GEOM(genframe).x!=geom->x ||
@@ -210,18 +211,41 @@ static void reparent_or_fit(WGenFrame *genframe, const WRectangle *geom,
 						  geom->x, geom->y, geom->w, geom->h);
 	}
 	
+	old_geom=REGION_GEOM(genframe);
 	REGION_GEOM(genframe)=*geom;
 
-	if(move && !wchg && !hchg){
+	if(hchg){
+		genframe->flags|=WGENFRAME_SAVED_VERT;
+		genframe->saved_y=old_geom.y;
+		genframe->saved_h=old_geom.h;
+	}
+
+	if(wchg){
+		genframe->flags|=WGENFRAME_SAVED_HORIZ;
+		genframe->saved_x=old_geom.x;
+		genframe->saved_w=old_geom.w;
+	}
+
+	genframe_managed_geom(genframe, &mg);
+	if(hchg && mg.h<=1){
+		if(!(genframe->flags&(WGENFRAME_SHADED|WGENFRAME_TAB_HIDE))){
+			genframe->flags|=WGENFRAME_SHADED;
+			if(genframe->current_sub!=NULL)
+				region_unmap(genframe->current_sub);
+		}
+	}else if(hchg){
+		if(genframe->flags&WGENFRAME_SHADED && REGION_IS_MAPPED(genframe)){
+			if(genframe->current_sub!=NULL)
+				region_map(genframe->current_sub);
+		}
+		genframe->flags&=~WGENFRAME_SHADED;
+	}
+
+	if(move && !wchg && !hchg)
 		region_notify_subregions_move(&(genframe->win.region));
-	}else if(wchg || hchg)
+	else if(wchg || hchg)
 		genframe_fit_managed(genframe);
 
-	if(wchg)
-		genframe->saved_w=WGENFRAME_NO_SAVED_WH;
-	if(hchg)
-		genframe->saved_h=WGENFRAME_NO_SAVED_WH;
-	
 	if(wchg || hchg)
 		genframe_size_changed(genframe, wchg, hchg);
 }
@@ -250,6 +274,9 @@ void genframe_fit_managed(WGenFrame *genframe)
 {
 	WRectangle geom;
 	WRegion *sub;
+
+	if(genframe->flags&WGENFRAME_SHADED)
+		return;
 	
 	genframe_managed_geom(genframe, &geom);
 	
@@ -311,7 +338,7 @@ void genframe_map(WGenFrame *genframe)
 	/* A lame requirement of the ICCCM is that client windows should be
 	 * unmapped if the parent is unmapped.
 	 */
-	if(genframe->current_sub!=NULL)
+	if(genframe->current_sub!=NULL && !(genframe->flags&WGENFRAME_SHADED))
 		region_map(genframe->current_sub);
 }
 
@@ -345,7 +372,7 @@ bool genframe_display_managed(WGenFrame *genframe, WRegion *sub)
 	
 	genframe->current_sub=sub;
 	
-	if(REGION_IS_MAPPED(genframe))
+	if(REGION_IS_MAPPED(genframe) && !(genframe->flags&WGENFRAME_SHADED))
 		region_map(sub);
 	else
 		region_unmap(sub);
@@ -537,12 +564,17 @@ void genframe_focus(WGenFrame *genframe, bool warp)
 	if(warp)
 		do_move_pointer_to((WRegion*)genframe);
 	
-	if(genframe->current_input!=NULL)
-		region_set_focus_to((WRegion*)genframe->current_input, FALSE);
-	else if(genframe->current_sub!=NULL)
-		region_set_focus_to(genframe->current_sub, FALSE);
-	else
-		SET_FOCUS(WGENFRAME_WIN(genframe));
+	if(!(genframe->flags&WGENFRAME_SHADED)){
+		if(genframe->current_input!=NULL){
+			region_set_focus_to((WRegion*)genframe->current_input, FALSE);
+			return;
+		}else if(genframe->current_sub!=NULL){
+			region_set_focus_to(genframe->current_sub, FALSE);
+			return;
+		}
+	}
+	
+	SET_FOCUS(WGENFRAME_WIN(genframe));
 }
 
 
@@ -575,7 +607,7 @@ WRegion *genframe_add_input(WGenFrame *genframe, WRegionAddFn *fn, void *fnp)
 	WRectangle geom;
 	WRegion *sub;
 	
-	if(genframe->current_input!=NULL)
+	if(genframe->current_input!=NULL || genframe->flags&WGENFRAME_SHADED)
 		return NULL;
 	
 	genframe_managed_geom(genframe, &geom);
@@ -641,6 +673,9 @@ static bool set_genframe_background(WGenFrame *genframe, bool set_always)
 EXTL_EXPORT
 void genframe_toggle_tab(WGenFrame *genframe)
 {
+	if(genframe->flags&WGENFRAME_SHADED)
+		return;
+	
 	if(genframe->flags&WGENFRAME_TAB_HIDE)
 		genframe->flags&=~WGENFRAME_TAB_HIDE;
 	else

@@ -37,7 +37,6 @@ static bool floatframe_init(WFloatFrame *frame, WWindow *parent,
 
 	frame->bar_w=geom.w;
 	frame->genframe.tab_spacing=0;
-	frame->shaded=FALSE;
 	
 	genframe_recalc_bar((WGenFrame*)frame, FALSE);
 	
@@ -150,10 +149,16 @@ static void floatframe_request_managed_geom(WFloatFrame *frame, WRegion *sub,
 											bool tryonly)
 {
 	WRectangle fgeom;
+	
+	if(geom.w<1)
+		geom.w=1;
+	if(geom.h<1)
+		geom.h=1;
+	
 	fgeom=managed_to_floatframe_geom(GRDATA_OF(frame), geom);
 	fgeom.x+=REGION_GEOM(frame).x;
 	fgeom.y+=REGION_GEOM(frame).y;
-	
+
 	region_request_geom((WRegion*)frame, fgeom, &fgeom, tryonly);
 	
 	if(geomret!=NULL)
@@ -169,17 +174,27 @@ static void floatframe_request_managed_geom(WFloatFrame *frame, WRegion *sub,
 
 static void floatframe_set_shape(WFloatFrame *frame)
 {
-	WRectangle g;
+	WRectangle g={0, 0, 0, 0};
 	XRectangle r[2];
+	int n=0;
 	
-	floatframe_bar_geom(frame, &g);
-	r[0].x=g.x; r[0].y=g.y; r[0].width=g.w; r[0].height=g.h;
-	r[1].width=REGION_GEOM(frame).w;
-	r[1].height=REGION_GEOM(frame).h-g.h;
-	r[1].x=0;
-	r[1].y=g.h;
+	if(!(frame->genframe.flags&WGENFRAME_TAB_HIDE)){
+		floatframe_bar_geom(frame, &g);
+		r[n].x=g.x;
+		r[n].y=g.y;
+		r[n].width=g.w;
+		r[n].height=g.h;
+		n++;
+	}
+	if(!(frame->genframe.flags&WGENFRAME_SHADED)){
+		r[n].width=REGION_GEOM(frame).w;
+		r[n].height=REGION_GEOM(frame).h-g.h;
+		r[n].x=0;
+		r[n].y=g.h;
+		n++;
+	}
 	XShapeCombineRectangles(wglobal.dpy, WGENFRAME_WIN(frame), ShapeBounding,
-							0, 0, r, 2-frame->shaded, ShapeSet, YXBanded);
+							0, 0, r, n, ShapeSet, YXBanded);
 }
 
 
@@ -332,18 +347,9 @@ void floatframe_p_move(WFloatFrame *frame)
 EXTL_EXPORT
 void floatframe_toggle_shade(WFloatFrame *frame)
 {
-	frame->shaded=!frame->shaded;
-	floatframe_set_shape(frame);
-}
-
-
-/*EXTL_DOC
- * Is \var{frame} shaded?
- */
-EXTL_EXPORT
-bool floatframe_is_shaded(WFloatFrame *frame)
-{
-	return frame->shaded;
+	WRectangle geom;
+	floatframe_bar_geom(frame, &geom);
+	genframe_do_toggle_shade((WGenFrame*)frame, geom.h);
 }
 
 
