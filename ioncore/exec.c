@@ -62,24 +62,24 @@ void ioncore_do_exec(const char *cmd)
 
 
 EXTL_EXPORT
-bool ioncore_do_exec_rw(WRootWin *rw, const char *cmd, const char *wd)
+int ioncore_do_exec_rw(WRootWin *rw, const char *cmd, const char *wd)
 {
     int pid;
     
     if(cmd==NULL)
-        return FALSE;
+        return -1;
 
     XSync(ioncore_g.dpy, False);
     
     pid=fork();
     
-    if(pid<0){
-        warn_err();
-        return FALSE;
+    if(pid!=0){
+        if(pid<0)
+            warn_err();
+        return pid;
     }
     
-    if(pid!=0)
-        return TRUE;
+    /* The new process */
     
     ioncore_setup_environ(rw==NULL ? -1 : rw->xscr);
     
@@ -98,11 +98,12 @@ bool ioncore_do_exec_rw(WRootWin *rw, const char *cmd, const char *wd)
 /*EXTL_DOC
  * Run \var{cmd} with the environment variable DISPLAY set to point to the
  * X display the WM is running on. No specific screen is set unlike with
- * \fnref{WRootWin.exec_on}.
+ * \fnref{WRootWin.exec_on}. The PID of the (shell executing the) new 
+ * process is returned.
  */
 EXTL_SAFE
 EXTL_EXPORT
-bool ioncore_exec(const char *cmd)
+int ioncore_exec(const char *cmd)
 {
     return ioncore_do_exec_rw(NULL, cmd, NULL);
 }
