@@ -252,6 +252,7 @@ end
 -- Find winprop table for \var{cwin}.
 function get_winprop(cwin)
     local id=clientwin_get_ident(cwin)
+    local prop
     
     for c, r, i in alternative_winprop_idents(id) do
         if pcall(function() prop=winprops[c][r][i] end) then
