@@ -123,10 +123,23 @@ _realclean: clean_target
 	$(RM) -f $(TO_REALCLEAN)
 
 
+# Dependencies
+######################################
+
 ifdef SOURCES
 
+ifdef MODULE
+
 _depend:
-	$(MAKE_DEPEND) $(SOURCES)
+	$(MAKE_DEPEND_MOD)
+	
+else
+
+_depend:
+	$(MAKE_DEPEND)
+
+endif
+
 else #!SOURCES
 
 _depend:

@@ -24,9 +24,9 @@ BUILDING AND INSTALLING
    you might want to save the file somewhere for future use. (Most GNU/Linux
    users should need very little of any modifications.)
    
-3. Run 'make depend && make'. Note that 'make' here refers to GNU make which
-   is usually named 'gmake' on systems with some other implementation of
-   make as default.
+3. Run 'make'. Note that 'make' here refers to GNU make which is usually
+   named 'gmake' on systems with some other implementation of make as 
+   default.
    
 4. Run 'make install', as root if you set $PREFIX in system.mk to a directory
    that requires those privileges.
