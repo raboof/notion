@@ -19,18 +19,14 @@ include $(TOPDIR)/rules.mk
 
 all: $(EXPORT_TEXES)
 
-ioncore-exports.tex:
-	$(LUA) $(TOPDIR)/mkexports.lua -module ioncore -mkdoc \
-	-o ioncore-exports.tex ../ioncore/*.c
+ioncore-exports.tex: ../ioncore/*.c
+	$(LUA) $(TOPDIR)/mkexports.lua -module ioncore -mkdoc -o $@ $+
 
-ionws-exports.tex:
-	$(LUA) $(TOPDIR)/mkexports.lua -module ionws -mkdoc \
-	-o ionws-exports.tex ../ionws/*.c
+ionws-exports.tex: ../ionws/*.c
+	$(LUA) $(TOPDIR)/mkexports.lua -module ionws -mkdoc -o $@ $+
 
-floatws-exports.tex:
-	$(LUA) $(TOPDIR)/mkexports.lua -module floatws -mkdoc \
-	-o floatws-exports.tex ../floatws/*.c
+floatws-exports.tex: ../floatws/*.c
+	$(LUA) $(TOPDIR)/mkexports.lua -module floatws -mkdoc -o $@ $+
 
-query-exports.tex:
-	$(LUA) $(TOPDIR)/mkexports.lua -module query -mkdoc \
-	-o query-exports.tex ../query/*.c
+query-exports.tex: ../query/*.c
+	$(LUA) $(TOPDIR)/mkexports.lua -module query -mkdoc -o $@ $+
