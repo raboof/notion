@@ -213,8 +213,8 @@ static bool do_load_module(const char *modname)
 {
     int retval;
     
-    retval=extl_try_config(modname, NULL, (WTryConfigFn*)try_load, NULL,
-                           "so", NULL);
+    retval=extl_try_config(modname, NULL, (ExtlTryConfigFn*)try_load, 
+                           NULL, "so", NULL);
     
     if(retval==EXTL_TRYCONFIG_NOTFOUND)
         warn(TR("Unable to find '%s' on search path."), modname);
