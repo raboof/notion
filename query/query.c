@@ -330,7 +330,21 @@ void query_renameworkspace(WFrame *frame)
 	
 	do_query_edln(frame, handler_renameworkspace,
 				  "Rename workspace to:", region_name((WRegion*)ws),
-				  complete_workspace);
+				  NULL);
+}
+
+
+void handler_renameframe(WThing *thing, char *name, char *userdata)
+{
+	set_region_name((WRegion*)thing, name);
+}
+
+
+void query_renameframe(WFrame *frame)
+{
+	do_query_edln(frame, handler_renameframe,
+				  "Name of this frame:", region_name((WRegion*)frame),
+				  NULL);
 }
 
 

@@ -195,6 +195,9 @@ static bool opt_workspace_frame(Tokenizer *tokz, int n, Token *toks)
 	get_params(&params);
 	frame=create_frame(current_screen, params, id, 0);
 
+	if(n>=3)
+		set_region_name((WRegion*)frame, TOK_STRING_VAL(&(toks[2])));
+	
 	if(frame==NULL)
 		return FALSE;
 	
@@ -272,10 +275,16 @@ static void write_obj(FILE *file, WObj *obj, int lvl)
 {
 	WWsSplit *split;
 	int tls, brs;
+	const char *name;
 	
 	if(WOBJ_IS(obj, WFrame)){
 		indent(file, lvl);
-		fprintf(file, "frame %d\n", ((WFrame*)obj)->target_id);
+		fprintf(file, "frame %d", ((WFrame*)obj)->target_id);
+		name=region_name((WRegion*)obj);
+		/* TODO: escape reserved characters */
+		if(name!=NULL)
+			fprintf(file, ", \"%s\"", name);
+		fprintf(file, "\n");
 		return;
 	}
 	
@@ -318,6 +327,7 @@ static void dodo_write_workspaces(FILE *file)
 			continue;
 		}
 		
+		/* TODO: escape reserved characters */
 		fprintf(file, "workspace \"%s\" {\n", region_name((WRegion*)ws));
 		write_obj(file, ws->splitree, 1);
 		fprintf(file, "}\n");
@@ -334,7 +344,7 @@ static void dodo_write_workspaces(FILE *file)
 static ConfOpt split_opts[]={
 	{"vsplit", "ll",  opt_workspace_vsplit, split_opts},
 	{"hsplit", "ll",  opt_workspace_hsplit, split_opts},
-	{"frame", "l",  opt_workspace_frame, NULL},
+	{"frame", "l?s",  opt_workspace_frame, NULL},
 	
 	{"#end", NULL, opt_split_end, NULL},
 	/*{"#cancel", NULL, opt_split_cancel, NULL},*/

@@ -85,6 +85,7 @@ static WFunction query_main_funtab[]={
 	FN_VOID(generic, WFrame,	"query_workspace",	query_workspace),
 	FN_VOID(generic, WFrame,	"query_workspace_with",	query_workspace_with),
 	FN_VOID(generic, WFrame,	"query_renameworkspace", query_renameworkspace),
+	FN_VOID(generic, WFrame,	"query_renameframe", query_renameframe),
 	END_FUNTAB
 };
 

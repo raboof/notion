@@ -49,7 +49,7 @@ static const char ion_usage_tmpl[]=
 static const char ion_about[]=
 	"Ion " ION_VERSION ", copyright (c) Tuomo Valkonen 1999-2002.\n"
 	"This program may be copied and modified under the terms of the "
-	"Artistic License.\n";
+	"Clarified Artistic License.\n";
 
 
 static OptParserCommonInfo ion_cinfo={

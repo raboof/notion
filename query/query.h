@@ -21,5 +21,6 @@ extern void query_workspace_with(WFrame *frame);
 extern void query_yesno(WFrame *frame, char *fn, char *prompt);
 extern void query_function(WFrame *frame);
 extern void query_renameworkspace(WFrame *frame);
+extern void query_renameframe(WFrame *frame);
 
 #endif /* QUERY_QUERY_H */
