@@ -609,7 +609,7 @@ bool mplex_l2_hide(WMPlex *mplex, WRegion *reg)
     }
     
     if(reg==mplex->l2_current)
-        mplex->l2_current=toact;
+        mplex->l2_current=NULL;
     
     if(mcf)
         region_warp((WRegion*)mplex);
@@ -647,7 +647,7 @@ bool mplex_l2_show(WMPlex *mplex, WRegion *reg)
             toact=reg2;
     }
     
-    mplex->l2_current=toact;
+    /*mplex->l2_current=toact;*/
     
     if(mcf){
         if(toact!=NULL)
