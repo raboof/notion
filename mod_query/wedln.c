@@ -337,7 +337,7 @@ static void wedln_calc_size(WEdln *wedln, WRectangle *geom)
 /*{{{ Draw */
 
 
-static void wedln_update_handler(WEdln *wedln, int from, bool moved)
+static void wedln_update_handler(WEdln *wedln, int from, int mode)
 {
     WRectangle geom;
     
@@ -346,15 +346,15 @@ static void wedln_update_handler(WEdln *wedln, int from, bool moved)
     
     get_textarea_geom(wedln, G_CURRENT, &geom);
     
-    from-=wedln->vstart;
+    if(mode==EDLN_UPDATE_NEW)
+        wedln->vstart=0;
     
-    if(moved){
+    if(mode==EDLN_UPDATE_MOVED || mode==EDLN_UPDATE_NEW){
         if(wedln_update_cursor(wedln, geom.w))
-            from=0;
+            from=wedln->vstart;
     }
     
-    if(from<0)
-        from=0;
+    from=maxof(0, from-wedln->vstart);
 
     wedln_draw_str_box(wedln, &geom, wedln->vstart, wedln->edln.p, from,
                        wedln->edln.point, wedln->edln.mark);

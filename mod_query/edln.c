@@ -20,8 +20,9 @@
 
 #define EDLN_ALLOCUNIT 16
 
-#define UPDATE(X) edln->ui_update(edln->uiptr, X, FALSE)
-#define UPDATE_MOVED(X) edln->ui_update(edln->uiptr, X, TRUE)
+#define UPDATE(X) edln->ui_update(edln->uiptr, X, EDLN_UPDATE_STAT)
+#define UPDATE_MOVED(X) edln->ui_update(edln->uiptr, X, EDLN_UPDATE_MOVED)
+#define UPDATE_NEW() edln->ui_update(edln->uiptr, 0, EDLN_UPDATE_NEW)
 
 #define CHAR wchar_t
 #define ISALNUM iswalnum
@@ -532,7 +533,7 @@ static void edln_do_set_hist(Edln *edln, int e)
         edln->point=edln->psize;
         edln->mark=-1;
         edln->modified=FALSE;
-        UPDATE_MOVED(0);
+        UPDATE_NEW();
     }
 }
 
@@ -567,7 +568,7 @@ void edln_history_next(Edln *edln)
         edln->point=edln->psize;
         edln->mark=-1;
         edln->modified=TRUE;
-        UPDATE_MOVED(0);
+        UPDATE_NEW();
     }
 }
 

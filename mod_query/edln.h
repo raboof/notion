@@ -18,9 +18,14 @@
 INTRSTRUCT(Edln);
 
 typedef int EdlnCompletionHandler(void*, const char *p);
-typedef void EdlnUpdateHandler(void*, int, bool moved);
+typedef void EdlnUpdateHandler(void*, int from, int mode);
 
-
+enum{
+    EDLN_UPDATE_STAT,
+    EDLN_UPDATE_MOVED,
+    EDLN_UPDATE_NEW
+};
+        
 DECLSTRUCT(Edln){
     char *p;
     char *tmp_p;
