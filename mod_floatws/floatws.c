@@ -360,6 +360,9 @@ void floatws_deinit(WFloatWS *ws)
     WFloatWSIterTmp tmp;
     WRegion *reg;
 
+    if(ws->managed_stdisp!=NULL)
+        floatws_managed_remove(ws, ws->managed_stdisp);
+
     FOR_ALL_MANAGED_BY_FLOATWS(ws, reg, tmp){
         destroy_obj((Obj*)reg);
     }
@@ -368,9 +371,6 @@ void floatws_deinit(WFloatWS *ws)
         assert(FALSE);
     }
 
-    if(ws->managed_stdisp!=NULL)
-        floatws_managed_remove(ws, ws->managed_stdisp);
-        
     genws_deinit(&(ws->genws));
 }
 
