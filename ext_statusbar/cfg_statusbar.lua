@@ -6,12 +6,12 @@
 -- Configure format and updating
 ext_statusbar.set{
     -- ISO-8601 date format
-    date_format='%Y-%m-%d %H:%M',
+    --date_format='%Y-%m-%d %H:%M',
     -- Finnish date format
-    --S.date_format='%d.%m.%Y %H:%M'
-    -- Locale date format (usually shows seconds, which would requires 
+    --date_format='%d.%m.%Y %H:%M'
+    -- Locale date format (usually shows seconds, which would require
     -- updating rather often and can be distracting)
-    --S.date_format='%c'
+    --date_format='%c',
 
     -- Update interval in seconds. This should divide 60, or it will
     -- get adjusted.
