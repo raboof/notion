@@ -153,7 +153,8 @@ function QueryLib.complete_function(str)
 end
 
 -- Use weak references to cache found manuals.
-QueryLib.mancache={__mode="v"}
+QueryLib.mancache={}
+setmetatable(QueryLib.mancache, {__mode="v"})
 
 function QueryLib.complete_man(str)
     local function find_manuals()
@@ -175,7 +176,7 @@ function QueryLib.complete_man(str)
         return manuals
     end
     
-    manuals=QueryLib.mancache.manuals
+    local manuals=QueryLib.mancache.manuals
     if not manuals then
         -- Manuals were not cached, find them
         manuals=find_manuals()
