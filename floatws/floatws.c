@@ -256,7 +256,6 @@ static bool floatws_do_add_clientwin(WFloatWS *ws,
 #endif
 		
 	if(target==NULL){
-		/* Should use size_hints.win_gravity instead? */
 		WRectangle fgeom=REGION_GEOM(cwin);
 		fgeom.w+=2*cwin->orig_bw;
 		fgeom.h+=2*cwin->orig_bw;
