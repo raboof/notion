@@ -638,6 +638,21 @@ WRootWin *region_rootwin_of(const WRegion *reg)
 }
 
 
+/*EXTL_DOC
+ * Returns the screen \var{reg} is on.
+ */
+EXTL_EXPORT_MEMBER
+WScreen *region_screen_of(WRegion *reg)
+{
+    while(reg!=NULL){
+        if(OBJ_IS(reg, WScreen))
+            return (WScreen*)reg;
+        reg=region_parent(reg);
+    }
+    return NULL;
+}
+
+
 Window region_root_of(const WRegion *reg)
 {
     return WROOTWIN_ROOT(region_rootwin_of(reg));

@@ -13,6 +13,7 @@
 #include <unistd.h>
 #include <sys/time.h>
 
+#include <libtu/objp.h>
 #include "common.h"
 #include "global.h"
 #include "rootwin.h"
@@ -25,12 +26,12 @@
 #include "eventh.h"
 #include "clientwin.h"
 #include "colormap.h"
-#include <libtu/objp.h>
 #include "grab.h"
 #include "regbind.h"
 #include "activity.h"
 #include "netwm.h"
 #include "region-iter.h"
+#include "xwindow.h"
 
 
 /*{{{ ioncore_handle_event  */

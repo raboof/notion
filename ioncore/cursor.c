@@ -36,7 +36,3 @@ Cursor ioncore_xcursor(int cursor)
 }
 
 
-void xwindow_set_cursor(Window win, int cursor)
-{
-    XDefineCursor(ioncore_g.dpy, win, ioncore_xcursor(cursor));
-}

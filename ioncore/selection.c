@@ -15,6 +15,7 @@
 #include "common.h"
 #include "global.h"
 #include "property.h"
+#include "xwindow.h"
 
 
 static char *selection_data=NULL;

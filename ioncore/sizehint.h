@@ -15,10 +15,10 @@
 #include "common.h"
 #include "region.h"
 
-extern void xwindow_get_sizehints(Window win, XSizeHints *hints);
-
-extern void xsizehints_correct(const XSizeHints *hints, int *wp, int *hp,  bool min);
+extern void xsizehints_sanity_adjust(XSizeHints *hints);
 extern void xsizehints_adjust_for(XSizeHints *hints, WRegion *list);
+extern void xsizehints_correct(const XSizeHints *hints, int *wp, int *hp, 
+                               bool min);
 
 extern int xgravity_deltax(int gravity, int left, int right);
 extern int xgravity_deltay(int gravity, int top, int bottom);

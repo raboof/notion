@@ -349,12 +349,5 @@ WRegion *region_set_focus_mgrctl(WRegion *freg, bool dowarp)
 }
 
 
-void xwindow_do_set_focus(Window win)
-{
-    region_set_await_focus(xwindow_region_of(win));
-    XSetInputFocus(ioncore_g.dpy, win, RevertToParent, CurrentTime);
-}
-
-
 /*}}}*/
 

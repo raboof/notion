@@ -25,8 +25,8 @@
 #include <X11/extensions/Xinerama.h>
 #endif
 
-#include "common.h"
 #include <libtu/objp.h>
+#include "common.h"
 #include "rootwin.h"
 #include "cursor.h"
 #include "global.h"
@@ -44,6 +44,7 @@
 #include "saveload.h"
 #include "netwm.h"
 #include "region-iter.h"
+#include "xwindow.h"
 
 
 /*{{{ Error handling */
@@ -95,27 +96,6 @@ static int my_error_handler(Display *dpy, XErrorEvent *ev)
     kill(getpid(), SIGTRAP);
     
     return 0;
-}
-
-
-/*}}}*/
-
-
-/*{{{ Utility functions */
-
-
-Window create_xwindow(WRootWin *rw, Window par, const WRectangle *geom)
-{
-    int w=geom->w;
-    int h=geom->h;
-    
-    if(w<=0)
-        w=1;
-    if(h<=0)
-        h=1;
-    
-    return XCreateSimpleWindow(ioncore_g.dpy, par, geom->x, geom->y, w, h,
-                               0, 0, BlackPixel(ioncore_g.dpy, rw->xscr));
 }
 
 

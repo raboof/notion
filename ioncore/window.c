@@ -9,15 +9,16 @@
  * (at your option) any later version.
  */
 
-#include "common.h"
 #include <libtu/objp.h>
+#include <libtu/minmax.h>
+#include "common.h"
 #include "global.h"
 #include "window.h"
 #include "focus.h"
 #include "rootwin.h"
 #include "region.h"
 #include "stacking.h"
-#include <libtu/minmax.h>
+#include "xwindow.h"
 
 
 /*{{{ Dynfuns */
@@ -83,7 +84,8 @@ bool window_init_new(WWindow *wwin, WWindow *parent, const WRectangle *geom)
 {
     Window win;
     
-    win=create_xwindow(region_rootwin_of((WRegion*)parent), parent->win, geom);
+    win=create_xwindow(region_rootwin_of((WRegion*)parent),
+                       parent->win, geom);
     if(win==None)
         return FALSE;
     /* window_init does not fail */
@@ -102,38 +104,6 @@ void window_deinit(WWindow *wwin)
         XDeleteContext(ioncore_g.dpy, wwin->win, ioncore_g.win_context);
         XDestroyWindow(ioncore_g.dpy, wwin->win);
     }
-}
-
-
-/*}}}*/
-
-
-/*{{{ Find, X Window -> WRegion */
-
-
-WRegion *xwindow_region_of(Window win)
-{
-    WRegion *reg;
-    
-    if(XFindContext(ioncore_g.dpy, win, ioncore_g.win_context,
-                    (XPointer*)&reg)!=0)
-        return NULL;
-    
-    return reg;
-}
-
-
-WRegion *xwindow_region_of_t(Window win, const ClassDescr *descr)
-{
-    WRegion *reg=xwindow_region_of(win);
-    
-    if(reg==NULL)
-        return NULL;
-    
-    if(!obj_is((Obj*)reg, descr))
-        return NULL;
-    
-    return reg;
 }
 
 
@@ -201,20 +171,6 @@ void window_do_set_focus(WWindow *wwin, bool warp)
     if(warp)
         region_do_warp((WRegion*)wwin);
     xwindow_do_set_focus(wwin->win);
-}
-
-
-void xwindow_restack(Window win, Window other, int stack_mode)
-{
-    XWindowChanges wc;
-    int wcmask;
-    
-    wcmask=CWStackMode;
-    wc.stack_mode=stack_mode;
-    if((wc.sibling=other)!=None)
-        wcmask|=CWSibling;
-
-    XConfigureWindow(ioncore_g.dpy, win, wcmask, &wc);
 }
 
 

@@ -50,13 +50,4 @@ extern Window window_restack(WWindow *wwin, Window other, int mode);
 DYNFUN bool region_reparent(WRegion *reg, WWindow *target, 
                             const WRectangle *geom);
 
-
-#define XWINDOW_REGION_OF_T(WIN, TYPE) (TYPE*)xwindow_region_of_t(WIN, &CLASSDESCR(TYPE))
-#define XWINDOW_REGION_OF(WIN) xwindow_region_of(WIN)
-
-extern WRegion *xwindow_region_of(Window win);
-extern WRegion *xwindow_region_of_t(Window win, const ClassDescr *descr);
-
-extern void xwindow_restack(Window win, Window other, int stack_mode);
-
 #endif /* ION_IONCORE_WINDOW_H */

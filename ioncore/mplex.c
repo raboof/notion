@@ -35,6 +35,7 @@
 #include "regbind.h"
 #include "region-iter.h"
 #include "saveload.h"
+#include "xwindow.h"
 
 
 #define MPLEX_WIN(MPLEX) ((MPLEX)->win.win)

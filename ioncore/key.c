@@ -10,18 +10,19 @@
  */
 
 #include <ctype.h>
+#include <libtu/objp.h>
 #include "common.h"
 #include "key.h"
 #include "binding.h"
 #include "global.h"
 #include "event.h"
 #include "cursor.h"
-#include <libtu/objp.h>
 #include "grab.h"
 #include "regbind.h"
 #include "extl.h"
 #include "region-iter.h"
 #include "strings.h"
+#include "xwindow.h"
 
 
 static void waitrelease(WRegion *reg);

@@ -16,6 +16,7 @@
 #include "stacking.h"
 #include "global.h"
 #include "region-iter.h"
+#include "xwindow.h"
 
 
 /*

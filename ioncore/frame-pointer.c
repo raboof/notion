@@ -11,6 +11,7 @@
 
 #include <string.h>
 
+#include <libtu/objp.h>
 #include "common.h"
 #include "global.h"
 #include "pointer.h"
@@ -23,11 +24,11 @@
 #include "framep.h"
 #include "frame-pointer.h"
 #include "frame-draw.h"
-#include <libtu/objp.h>
 #include "bindmaps.h"
 #include "infowin.h"
 #include "defer.h"
 #include "rectangle.h"
+#include "xwindow.h"
 
 
 static int p_tab_x=0, p_tab_y=0, p_tabnum=-1;

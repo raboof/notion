@@ -247,21 +247,6 @@ static void screen_activated(WScreen *scr)
 
 
 /*EXTL_DOC
- * Returns the screen \var{reg} is on.
- */
-EXTL_EXPORT_MEMBER
-WScreen *region_screen_of(WRegion *reg)
-{
-    while(reg!=NULL){
-        if(OBJ_IS(reg, WScreen))
-            return (WScreen*)reg;
-        reg=region_parent(reg);
-    }
-    return NULL;
-}
-
-
-/*EXTL_DOC
  * Find the screen with numerical id \var{id}. If Xinerama is
  * not present, \var{id} corresponds to X screen numbers. Otherwise
  * the ids are some arbitrary ordering of Xinerama rootwins.

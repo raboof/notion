@@ -48,8 +48,5 @@ extern WScreen *rootwin_current_scr(WRootWin *rootwin);
 extern void rootwin_manage_initial_windows(WRootWin *rootwin);
 extern WRootWin *ioncore_manage_rootwin(int xscr, bool noxinerama);
 
-extern Window create_xwindow(WRootWin *rootwin, Window par,
-                             const WRectangle *geom);
-
 #endif /* ION_IONCORE_ROOTWIN_H */
 

@@ -126,6 +126,7 @@ extern void region_unset_manager(WRegion *reg, WRegion *mgr, WRegion **listptr);
 
 extern WRootWin *region_rootwin_of(const WRegion *reg);
 extern Window region_root_of(const WRegion *reg);
+extern WScreen *region_screen_of(WRegion *reg);
 extern bool region_same_rootwin(const WRegion *reg1, const WRegion *reg2);
 
 #endif /* ION_IONCORE_REGION_H */

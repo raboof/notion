@@ -37,12 +37,9 @@ extern WScreen *create_screen(WRootWin *rootwin, int id,
                               const WRectangle *geom,
                               bool useroot);
 
-extern WRegion *screen_current(WScreen *scr);
 extern int screen_id(WScreen *scr);
 
 extern void screen_set_managed_offset(WScreen *scr, const WRectangle *off);
-
-extern WScreen *region_screen_of(WRegion *reg);
 
 extern bool screen_init_layout(WScreen *scr, ExtlTab tab);
 

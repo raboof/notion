@@ -112,17 +112,9 @@ void xsizehints_correct(const XSizeHints *hints, int *wp, int *hp, bool min)
 
 /*{{{ xwindow_get_sizehints */
 
-#define CLIENTWIN_MIN_W 0
-#define CLIENTWIN_MIN_H 0
 
-void xwindow_get_sizehints(Window win, XSizeHints *hints)
+void xsizehints_sanity_adjust(XSizeHints *hints)
 {
-    int minh, minw;
-    long supplied=0;
-    
-    memset(hints, 0, sizeof(*hints));
-    XGetWMNormalHints(ioncore_g.dpy, win, hints, &supplied);
-
     if(!(hints->flags&PMinSize)){
         if(hints->flags&PBaseSize){
             hints->min_width=hints->base_width;

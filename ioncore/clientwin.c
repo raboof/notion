@@ -12,8 +12,9 @@
 #include <string.h>
 #include <limits.h>
 
-#include "common.h"
 #include <libtu/objp.h>
+#include <libtu/minmax.h>
+#include "common.h"
 #include "global.h"
 #include "property.h"
 #include "focus.h"
@@ -37,7 +38,7 @@
 #include "activity.h"
 #include "netwm.h"
 #include "region-iter.h"
-#include <libtu/minmax.h>
+#include "xwindow.h"
 
 
 static void set_clientwin_state(WClientWin *cwin, int state);

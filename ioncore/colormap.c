@@ -17,6 +17,7 @@
 #include "colormap.h"
 #include "region.h"
 #include "names.h"
+#include "xwindow.h"
 
 
 /*{{{ Installing colormaps */

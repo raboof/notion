@@ -28,7 +28,6 @@ extern WRegion *region_set_focus_mgrctl(WRegion *freg, bool dowarp);
 extern void region_do_warp(WRegion *reg);
 extern bool region_do_warp_default(WRegion *reg);
 extern WHooklist *region_do_warp_alt;
-extern void xwindow_do_set_focus(Window win);
 
 /* Awaiting focus state */
 extern void region_set_await_focus(WRegion *reg);

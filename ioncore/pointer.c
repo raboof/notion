@@ -17,6 +17,7 @@
 #include "focus.h"
 #include "regbind.h"
 #include "grab.h"
+#include "xwindow.h"
 
 
 /*{{{ Variables */

@@ -11,11 +11,12 @@
 
 #include <string.h>
 
+#include <libtu/minmax.h>
+#include <libtu/objp.h>
 #include <ioncore/common.h>
 #include <ioncore/rootwin.h>
 #include <ioncore/focus.h>
 #include <ioncore/global.h>
-#include <libtu/objp.h>
 #include <ioncore/region.h>
 #include <ioncore/manage.h>
 #include <ioncore/screen.h>
@@ -28,7 +29,7 @@
 #include <ioncore/extlconv.h>
 #include <ioncore/defer.h>
 #include <ioncore/region-iter.h>
-#include <libtu/minmax.h>
+#include <ioncore/xwindow.h>
 
 #include "floatws.h"
 #include "floatframe.h"
