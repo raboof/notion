@@ -17,6 +17,7 @@
 #include <ioncore/attach.h>
 #include <ioncore/defer.h>
 #include <ioncore/reginfo.h>
+#include <ioncore/geom.h>
 #include "ionws.h"
 #include "ionframe.h"
 #include "split.h"
@@ -1085,4 +1086,87 @@ WRegion *ionws_do_find_new_manager(WIonWS *ws, WRegion *reg)
 
 /*}}}*/
 
+
+/*{{{ Exports */
+
+
+/*EXTL_DOC
+ * For region \var{reg} managed by \var{ws} return the \type{WWsSplit}
+ * a leaf of which \var{reg} is.
+ */
+EXTL_EXPORT
+WWsSplit *ionws_split_of(WIonWS *ws, WObj *reg)
+{
+	if(REGION_MANAGER(reg)!=(WRegion*)ws){
+		warn_obj("ionws_split_of", "Manager doesn't match");
+		return NULL;
+	}
+	
+	return split_of((WObj*)reg);
+}
+
+
+/*EXTL_DOC
+ * Return parent split for \var{split}.
+ */
+EXTL_EXPORT
+WWsSplit *split_parent(WWsSplit *split)
+{
+	return split->parent;
+}
+
+
+/*EXTL_DOC
+ * Return the object (region or split) corresponding to top or left
+ * sibling of \var{split} depending on the split's direction.
+ */
+EXTL_EXPORT
+WObj *split_tl(WWsSplit *split)
+{
+	return split->tl;
+}
+
+
+/*EXTL_DOC
+ * Return the object (region or split) corresponding to bottom or right
+ * sibling of \var{split} depending on the split's direction.
+ */
+EXTL_EXPORT
+WObj *split_br(WWsSplit *split)
+{
+	return split->br;
+}
+
+
+/*EXTL_DOC
+ * Is \var{split} a vertical split?
+ */
+EXTL_EXPORT
+bool split_is_vertical(WWsSplit *split)
+{
+	return (split->dir==VERTICAL);
+}
+
+
+/*EXTL_DOC
+ * Is \var{split} a horizontal split?
+ */
+EXTL_EXPORT
+bool split_is_horizontal(WWsSplit *split)
+{
+	return (split->dir==VERTICAL);
+}
+
+
+/*EXTL_DOC
+ * Returns the area of workspace used by the regions under \var{split}.
+ */
+EXTL_EXPORT
+ExtlTab split_geom(WWsSplit *split)
+{
+	return geom_to_extltab(split->geom);
+}
+
+
+/*}}}*/
 
