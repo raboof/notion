@@ -5,15 +5,10 @@
  * See the included file LICENSE for details.
  */
 
-#ifndef INCLUDED_CONFIG_H
-#define INCLUDED_CONFIG_H
-
+#ifndef ION_CONFIG_H
+#define ION_CONFIG_H
 
 /* #define CF_NO_LOCK_HACK */
-
-
-/* Configurable
- */
 
 #define CF_FALLBACK_FONT_NAME "fixed"
 #define CF_DRAG_TRESHOLD 2
@@ -28,6 +23,12 @@
 
 #define CF_XMESSAGE "xmessage -file "
 
+#define CF_MIN_WIDTH 20
+#define CF_MIN_HEIGHT 3
+#define CF_STUBBORN_TRESH 1
+
+/*#define CF_EDGE_RESISTANCE 16*/
+
 /* Cursors
  */
 
@@ -37,21 +38,4 @@
 #define CF_CURSOR_DRAG XC_cross
 #define CF_CURSOR_WAITKEY XC_icon
 
-
-#define CF_MAX_COMMAND_SQ_NEST 32
-
-/* PWM
- */
-#define CF_EDGE_RESISTANCE 16
-#define CF_STEP_SIZE 16
-#define CF_CORNER_SIZE (16+8)
-
-
-/* Ion
- */
-#define CF_MIN_WIDTH 20
-#define CF_MIN_HEIGHT 3
-#define CF_STUBBORN_TRESH 1
-
-
-#endif /* INCLUDED_CONFIG_H */
+#endif /* ION_CONFIG_H */
