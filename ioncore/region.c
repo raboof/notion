@@ -597,7 +597,7 @@ void region_rootpos(WRegion *reg, int *xret, int *yret)
 	}
 	
 	region_rootpos(par, xret, yret);
-		
+	
 	*xret+=REGION_GEOM(reg).x;
 	*yret+=REGION_GEOM(reg).y;
 }

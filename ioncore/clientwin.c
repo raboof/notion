@@ -1147,7 +1147,7 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 			geom.y=ev->y+gdy;
 			rqflags&=~REGION_RQGEOM_WEAK_Y;
 		}
-
+		
 		mgr=region_manager((WRegion*)cwin);
 		if(mgr!=NULL && HAS_DYN(mgr, region_request_clientwin_geom)){
 			/* Manager gets to decide how to handle position request. */
