@@ -18,20 +18,12 @@ static int selection_length;
 
 void send_selection(XSelectionRequestEvent *ev)
 {
-/*	XTextProperty tp;*/
 	XSelectionEvent sev;
 	
 	if(selection_data==NULL)
 		return;
 	
-/*	XmbTextListToTextProperty(wglobal.dpy, &selection_data, 1,
-							  XCompoundTextStyle, &tp);
-	
-	XChangeProperty(wglobal.dpy, ev->requestor, ev->property, ev->target,
-					tp.format, PropModeReplace, tp.value, tp.nitems);*/
-	XChangeProperty(wglobal.dpy, ev->requestor, ev->property, XA_STRING,
-					8, PropModeReplace, (uchar*)selection_data,
-					selection_length);
+	set_text_property(ev->requestor, ev->property, selection_data);
 	
 	sev.type=SelectionNotify;
 	sev.requestor=ev->requestor;
@@ -45,42 +37,10 @@ void send_selection(XSelectionRequestEvent *ev)
 
 static void insert_selection(WWindow *wwin, Window win, Atom prop)
 {
-	Atom real_type;
-	int format;
-	ulong n, left;
-	int status;
-	int total;
-	char *p;
-
-	status=XGetWindowProperty(wglobal.dpy, win, prop, 0L, 0L, False,
-							  AnyPropertyType, &real_type, &format,
-							  &n, &left, (uchar**)&p);
-	
-	if(status!=Success)
-		return;
-	
-	if(p!=NULL)
-		XFree(p);
-	
-	if(real_type==None)
-		return;
-	
-	total=0;
-	
-	while(left>0){
-		status=XGetWindowProperty(wglobal.dpy, win, prop, total/4,
-								  1+left/4, False, AnyPropertyType,
-								  &real_type, &format,
-								  &n, &left, (uchar**)&p);
-		if(status!=Success)
-			break;
-		
-		n*=(format/8);
-		
-		window_insstr(wwin, p, n);
-
-		XFree(p);
-		total+=n;
+	char **p=get_text_property(win, prop);
+	if(p!=NULL){
+		window_insstr(wwin, p[0], strlen(p[0]));
+		XFreeStringList(p);
 	}
 }
 
@@ -152,10 +112,29 @@ void set_selection(const char *p, int n)
 }
 
 
+#ifdef CF_UTF8
+static Atom utf8_atom=XA_STRING;
+#endif
+
 void request_selection(Window win)
 {
-/*	Atom cta=XInternAtom(wglobal.display, "COMPOUND_TEXT", False);*/
-	XConvertSelection(wglobal.dpy, XA_PRIMARY, XA_STRING,
+	Atom a;
+#ifndef CF_UTF8
+	a=XA_STRING;
+#else
+	if(utf8_atom==XA_STRING){
+		XTextProperty prop;
+		const char *ptr[1]={""};
+		Status st;
+
+		st=Xutf8TextListToTextProperty(wglobal.dpy, (char **)&ptr, 1,
+									   XUTF8StringStyle, &prop);
+		if(!st)
+			utf8_atom=prop.encoding;
+	}
+	a=utf8_atom;
+#endif
+	XConvertSelection(wglobal.dpy, XA_PRIMARY, a,
 					  wglobal.atom_selection, win, CurrentTime);
 }
 

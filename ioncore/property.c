@@ -124,3 +124,49 @@ void set_win_state(Window win, int state)
 					32, PropModeReplace, (uchar*)data, 2);
 }
 
+
+/* get_text_property
+ */
+
+char **get_text_property(Window win, Atom a)
+{
+	XTextProperty prop;
+	char **list=NULL;
+	int n=0;
+	Status st=0;
+	
+	st=XGetTextProperty(wglobal.dpy, win, &prop, a);
+	
+	if(!st)
+		return NULL;
+
+#ifndef CF_UTF8
+	st=XTextPropertyToStringList(&prop, &list, &n);
+#else
+	st=Xutf8TextPropertyToTextList(wglobal.dpy, &prop, &list, &n);
+#endif
+	if(st || n==0 || list==NULL)
+		return NULL;
+	return list;
+}
+
+
+void set_text_property(Window win, Atom a, const char *str)
+{
+	XTextProperty prop;
+	const char *ptr[1]={NULL};
+	Status st;
+
+	ptr[0]=str;
+	
+#ifndef CF_UTF8
+	st=XStringListToTextProperty((const char **)&ptr, 1, &prop);
+#else
+	st=Xutf8TextListToTextProperty(wglobal.dpy, (char **)&ptr, 1,
+								   XUTF8StringStyle, &prop);
+#endif
+	if(st)
+		return;
+	
+	XSetTextProperty(wglobal.dpy, win, &prop, a);
+}
