@@ -319,57 +319,6 @@ void region_request_managed_geom_unallow(WRegion *mgr, WRegion *reg,
 }
 
 
-void region_request_managed_geom_constrain(WRegion *mgr, WRegion *reg,
-										   WRectangle geom, WRectangle *geomret,
-										   bool tryonly)
-{
-	WRectangle g;
-	int diff;
-	WRegion *par;
-	
-	par=REGION_PARENT_CHK(reg, WRegion);
-	
-	if(par==mgr){
-		/* mgr is also the parent of reg */
-		g.x=0;
-		g.y=0;
-		g.w=REGION_GEOM(mgr).w;
-		g.h=REGION_GEOM(mgr).h;
-	}else if(REGION_PARENT_CHK(mgr, WRegion)==par){
-		/* mgr and reg have the same parent */
-		g=REGION_GEOM(mgr);
-	}else{
-		/* Don't know how to constrain */
-		goto doit;
-	}
-	
-	diff=g.x-geom.x;
-	if(diff>0){
-		geom.x+=diff;
-		geom.w-=diff;
-	}
-	diff=(geom.w+geom.x)-(g.w+g.x);
-	if(diff>0)
-		geom.w-=diff;
-		
-	diff=g.y-geom.y;
-	if(diff>0){
-		geom.y+=diff;
-		geom.h-=diff;
-	}
-	diff=(geom.h+geom.y)-(g.h+g.y);
-	if(diff>0)
-		geom.h-=diff;
-	
-doit:
-	if(geomret!=NULL)
-		*geomret=geom;
-	
-	if(!tryonly)
-		region_fit(reg, geom);
-}
-
-
 /*}}}*/
 
 

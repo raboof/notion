@@ -163,9 +163,6 @@ DYNFUN void region_request_managed_geom(WRegion *reg, WRegion *sub,
 extern void region_request_managed_geom_unallow(WRegion *reg, WRegion *sub,
 												WRectangle geom, WRectangle *geomret,
 												bool tryonly);
-extern void region_request_managed_geom_constrain(WRegion *reg, WRegion *sub,
-												  WRectangle geom, WRectangle *geomret,
-												  bool tryonly);
 /* default */
 extern void region_request_managed_geom_allow(WRegion *reg, WRegion *sub,
 											  WRectangle geom, WRectangle *geomret,
