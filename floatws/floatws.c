@@ -20,6 +20,7 @@
 #include <ioncore/attach.h>
 #include <ioncore/regbind.h>
 #include <ioncore/genframe-pointer.h>
+#include <ioncore/stacking.h>
 
 #include "floatws.h"
 #include "floatframe.h"
@@ -234,8 +235,11 @@ WRegion *find_existing(WFloatWS *ws)
 }
 
 
-static bool floatws_add_clientwin(WFloatWS *ws, WClientWin *cwin,
-								  const XWindowAttributes *attr, int init_state)
+static bool floatws_do_add_clientwin(WFloatWS *ws,
+									 WRegion *stack_above,
+									 WClientWin *cwin,
+									 const XWindowAttributes *attr,
+									 int init_state)
 {
 	WRegion *target=NULL;
 	WWindow *par;
@@ -278,6 +282,9 @@ static bool floatws_add_clientwin(WFloatWS *ws, WClientWin *cwin,
 			warn("Failed to create a new WFloatFrame for client window");
 			return FALSE;
 		}
+		
+		if(stack_above!=NULL)
+			region_stack_above(target, stack_above);
 
 		floatws_add_managed(ws, target);
 		newreg=TRUE;
@@ -303,16 +310,23 @@ static bool floatws_add_clientwin(WFloatWS *ws, WClientWin *cwin,
 }
 
 
+static bool floatws_add_clientwin(WFloatWS *ws, WClientWin *cwin,
+								  const XWindowAttributes *attr, int init_state)
+{
+	return floatws_do_add_clientwin(ws, NULL, cwin, attr, init_state);
+}
+
+
 static bool floatws_add_transient(WFloatWS *ws, WClientWin *tfor,
 								  WClientWin *cwin,
 								  const XWindowAttributes *attr, int init_state)
 {
-	if(floatws_add_clientwin(ws, cwin, attr, init_state)){
-		/* TODO: set up stacking */
-		return TRUE;
-	}
+	WRegion *r=(WRegion*)FIND_PARENT1(tfor, WFloatFrame);
 	
-	return FALSE;
+	if(r!=NULL && REGION_MANAGER(r)!=(WRegion*)ws)
+		r=NULL;
+	
+	return floatws_do_add_clientwin(ws, r, cwin, attr, init_state);
 }
 
 

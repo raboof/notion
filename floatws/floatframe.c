@@ -312,20 +312,6 @@ void floatframe_remove_managed(WFloatFrame *frame, WRegion *reg)
 
 
 EXTL_EXPORT
-void floatframe_raise(WFloatFrame *frame)
-{
-	region_restack((WRegion*)frame, None, Above);
-}
-
-
-EXTL_EXPORT
-void floatframe_lower(WFloatFrame *frame)
-{
-	region_restack((WRegion*)frame, None, Below);
-}
-
-
-EXTL_EXPORT
 void floatframe_p_move(WFloatFrame *frame)
 {
 	genframe_p_move((WGenFrame*)frame);
