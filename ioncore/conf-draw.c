@@ -19,9 +19,9 @@
 static WRootWin *tmp_rootwin;
 
 #define DO_CHK_SCR(RET) \
-	if(tmp_rootwin==NULL){warn("Screen not set.\n"); return RET;}
-#define CHK_SCR_V DO_CHK_SCR( )
-#define CHK_SCR DO_CHK_SCR(FALSE)
+	if(tmp_rootwin==NULL){warn("Screen not set.\n"); RET;}
+#define CHK_SCR_V DO_CHK_SCR(return)
+#define CHK_SCR DO_CHK_SCR(return FALSE)
 
 
 /*{{{ Font */
