@@ -13,6 +13,7 @@
 #include <sys/time.h>
 #include <time.h>
 #include <limits.h>
+#include <stdio.h>
 
 #include "common.h"
 #include "global.h"
