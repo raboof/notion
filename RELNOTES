@@ -25,7 +25,7 @@ winprops (setting: panews_classification) should eventually added.
 In addition to the new module, this release adds support for translations
 of program messages and the manual page, regardless of whether such is
 of any use in a program like Ion or not. (Currently Finnish and Czech
-translatiosn are available.) Of course there are some bug fixes and
+translations are available.) Of course there are some bug fixes and
 other minor additions as well, and the ./configure script is also back,
 the abandonment of libtool being final now. 
 
