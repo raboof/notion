@@ -648,5 +648,15 @@ void genframe_resize_units(WGenFrame *genframe, int *wret, int *hret)
 }
 
 
+void region_convert_root_geom(WRegion *reg, WRectangle *geom)
+{
+	int rx, ry;
+	if(reg!=NULL){
+		region_rootpos(reg, &rx, &ry);
+		geom->x-=rx;
+		geom->y-=ry;
+	}
+}
+
 /*}}}*/
 

@@ -315,7 +315,7 @@ static bool floatws_add_clientwin(WFloatWS *ws,
 		WRectangle fgeom;
 		int gravity=NorthWestGravity;
 		
-		if(params->flags&REGION_ATTACH_SIZERQ){
+		if(!(params->flags&REGION_ATTACH_SIZERQ)){
 			fgeom.w=params->geomrq.w;
 			fgeom.h=params->geomrq.h;
 		}else{
@@ -324,8 +324,8 @@ static bool floatws_add_clientwin(WFloatWS *ws,
 		}
 
 		if(params->flags&REGION_ATTACH_POSRQ){
-			fgeom.x=params->geomrq.x-REGION_GEOM(ws).x;
-			fgeom.y=params->geomrq.y-REGION_GEOM(ws).x;
+			fgeom.x=params->geomrq.x;
+			fgeom.y=params->geomrq.y;
 			respectpos=TRUE;
 		}else{
 			fgeom.x=0;
@@ -337,7 +337,7 @@ static bool floatws_add_clientwin(WFloatWS *ws,
 			gravity=params->size_hints->win_gravity;
 		}
 		
-		fgeom=initial_to_floatframe_geom(GRDATA_OF(ws), fgeom, gravity);
+		initial_to_floatframe_geom(ws, &fgeom, gravity);
 
 		if(params->flags&REGION_ATTACH_MAPRQ && wglobal.opmode!=OPMODE_INIT){
 			/* When the window is mapped by application request, position
@@ -405,9 +405,8 @@ static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
 	if(par==NULL)
 		return FALSE;
 	
-	fgeom=initial_to_floatframe_geom(GRDATA_OF(ws), REGION_GEOM(dropped),
-									 ForgetGravity);
-	
+	fgeom=REGION_GEOM(dropped);
+	managed_to_floatframe_geom(GRDATA_OF(ws), &fgeom);
 	/* The x and y arguments are in root coordinate space */
 	region_rootpos((WRegion*)par, &fgeom.x, &fgeom.y);
 	fgeom.x=x-fgeom.x;

@@ -26,6 +26,7 @@
 #include <ioncore/resize.h>
 #include <ioncore/sizehint.h>
 #include "floatframe.h"
+#include "floatws.h"
 #include "main.h"
 
 
@@ -67,31 +68,35 @@ static void deinit_floatframe(WFloatFrame *frame)
 
 /*{{{ Geometry */
 
-
-static WRectangle floatframe_to_managed_geom(WGRData *grdata, WRectangle geom)
+static void floatframe_offsets(WGRData *grdata, WRectangle *off)
 {
-	geom.x=BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad;
-	geom.w-=2*(BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad);
-	geom.y=BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad
-		+grdata->bar_h;
-	geom.h-=2*(BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad)
-		+grdata->bar_h;
-	
-	return geom;
+	int bd=BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad;
+	off->x=-bd;
+	off->w=2*bd;
+	off->y=-bd-grdata->bar_h;
+	off->h=2*bd+grdata->bar_h;	
 }
 
 
-WRectangle managed_to_floatframe_geom(WGRData *grdata, WRectangle geom)
+void managed_to_floatframe_geom(WGRData *grdata, WRectangle *geom)
 {
-	return initial_to_floatframe_geom(grdata, geom, StaticGravity);
-	/*
-	geom.x-=BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad;
-	geom.y-=BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad
-		+grdata->bar_h;
-	geom.w+=2*(BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad);
-	geom.h+=2*(BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad)
-		+grdata->bar_h;
-	return geom;*/
+	WRectangle off;
+	floatframe_offsets(grdata, &off);
+	geom->x+=off.x;
+	geom->y+=off.y;
+	geom->w+=off.w;
+	geom->h+=off.h;
+}
+
+
+static void floatframe_to_managed_geom(WGRData *grdata, WRectangle *geom)
+{
+	WRectangle off;
+	floatframe_offsets(grdata, &off);
+	geom->x=-off.x;
+	geom->y=-off.y;
+	geom->w-=off.w;
+	geom->h-=off.h;
 }
 
 
@@ -119,70 +124,85 @@ static void floatframe_bar_geom(const WFloatFrame *frame, WRectangle *geom)
 
 static void floatframe_managed_geom(const WFloatFrame *frame, WRectangle *geom)
 {
-	*geom=floatframe_to_managed_geom(GRDATA_OF(frame), REGION_GEOM(frame));
+	*geom=REGION_GEOM(frame);
+	floatframe_to_managed_geom(GRDATA_OF(frame), geom);
 }
 
 
-static void floatframe_border_inner_geom(const WFloatFrame *frame,
-										 WRectangle *geom)
+#define floatframe_border_inner_geom floatframe_managed_geom
+
+
+void initial_to_floatframe_geom(WFloatWS *ws, WRectangle *geom, int gravity)
 {
-	*geom=floatframe_to_managed_geom(GRDATA_OF(frame), REGION_GEOM(frame));
+	WRectangle off;
+#ifndef CF_NO_WSREL_INIT_GEOM
+	/* 'app -geometry -0-0' should place the app at the lower right corner
+	 * of ws even if ws is nested etc.
+	 */
+	int top=0, left=0, bottom=0, right=0;
+	WRootWin *root;
+	
+	root=region_rootwin_of((WRegion*)ws);
+	region_rootpos((WRegion*)ws, &left, &top);
+	right=REGION_GEOM(root).w-left-REGION_GEOM(ws).w;
+	bottom=REGION_GEOM(root).h-top-REGION_GEOM(ws).h;
+#endif
+
+	floatframe_offsets(GRDATA_OF(ws), &off);
+
+	geom->w+=off.w;
+	geom->h+=off.h;
+#ifndef CF_NO_WSREL_INIT_GEOM
+	geom->x+=gravity_deltax(gravity, -off.x+left, off.x+off.w+right);
+	geom->y+=gravity_deltay(gravity, -off.y+top, off.y+off.h+bottom);
+	geom->x+=REGION_GEOM(ws).x;
+	geom->y+=REGION_GEOM(ws).y;
+#else
+	geom->x+=gravity_deltax(gravity, -off.x, off.x+off.w);
+	geom->y+=gravity_deltay(gravity, -off.y, off.y+off.h);
+	region_convert_root_geom(region_parent((WRegion*)ws), geom);
+#endif
 }
 
-
-WRectangle initial_to_floatframe_geom(WGRData *grdata, WRectangle geom,
-									  int gravity)
-{
-	int top, bottom, left, right;
-
-	if(geom.w<1)
-		geom.w=1;
-	if(geom.h<1)
-		geom.h=1;
 	
-	top=BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad
-		+grdata->bar_h;
-	bottom=BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad;
-	left=bottom;
-	right=bottom;
-	
-	account_gravity(&geom, gravity, top, bottom, left, right);
-	
-	return geom;
-}
-
-
+/* geom parameter==client requested geometry minus border crap */
 static void floatframe_request_clientwin_geom(WFloatFrame *frame, 
 											  WClientWin *cwin,
-											  int flags, WRectangle geom)
+											  int rqflags, WRectangle geom)
 {
 	int gravity=NorthWestGravity;
-	WRegion *parent;
+	WRegion *par;
 	XSizeHints hints;
+	WRectangle off;
 	
 	if(cwin->size_hints.flags&PWinGravity)
 		gravity=cwin->size_hints.win_gravity;
-	
+
+	floatframe_offsets(GRDATA_OF(frame), &off);
+
 	genframe_resize_hints((WGenFrame*)frame, &hints, NULL, NULL);
 	correct_size(&(geom.w), &(geom.h), &hints, TRUE);
-	geom=initial_to_floatframe_geom(GRDATA_OF(frame), geom, gravity);
-	{
-		int rx, ry;
-		WRegion *par=(WRegion*)frame;
-		
-		do{
-			rx=REGION_GEOM(par).x;
-			ry=REGION_GEOM(par).y;
-			par=region_parent((WRegion*)par);
-		}while(par!=NULL && ROOT_OF(par)!=region_x_window(par));
-		
-		/* Add the difference between client requested coordinates and 
-		 * the coordinates of the outermost WM window to frame coordinates.
-		 */
-		geom.x+=REGION_GEOM(frame).x-rx;
-		geom.y+=REGION_GEOM(frame).y-ry;
-	}
 	
+	geom.w+=off.w;
+	geom.h+=off.h;
+	
+	/* If WEAK_? is set, then geom.(x|y) is root-relative as it was not 
+	 * requested by the client and clientwin_handle_configure_request has
+	 * no better guess. Otherwise the coordinates are those requested by 
+	 * the client (modulo borders/gravity) and we interpret them to be 
+	 * root-relative coordinates for this frame modulo gravity.
+	 */
+	if(rqflags&REGION_RQGEOM_WEAK_X)
+		geom.x+=off.x;
+	else
+		geom.x+=gravity_deltax(gravity, -off.x, off.x+off.w);
+
+	if(rqflags&REGION_RQGEOM_WEAK_Y)
+		geom.y+=off.y;  /* geom.y was clientwin root relative y */
+	else
+		geom.y+=gravity_deltay(gravity, -off.y, off.y+off.h);
+
+	region_convert_root_geom(region_parent((WRegion*)frame), &geom);
 	region_request_geom((WRegion*)frame, REGION_RQGEOM_NORMAL, geom, NULL);
 }
 
@@ -310,8 +330,8 @@ static void floatframe_draw(const WFloatFrame *frame, bool complete)
 	else
 		dinfo->colors=&(grdata->frame_colors);
 	
-	/*if(complete)
-		XClearWindow(wglobal.dpy, WGENFRAME_WIN(frame));*/
+	if(complete)
+		XClearWindow(wglobal.dpy, WGENFRAME_WIN(frame));
 	
 	draw_border(dinfo);
 	
@@ -409,9 +429,6 @@ WRegion *floatframe_load(WWindow *par, WRectangle geom, ExtlTab tab)
 	ExtlTab substab, subtab;
 	WFloatFrame *frame;
 	int n, i;
-	
-	/*extl_table_gets_i(tab, "flags", &flags);
-	flags&=WGENFRAME_TAB_HIDE;*/
 	
 	if(!extl_table_gets_t(tab, "subs", &substab))
 		return NULL;

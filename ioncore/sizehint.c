@@ -220,48 +220,47 @@ void adjust_size_hints_for_managed(XSizeHints *hints, WRegion *list)
 /*{{{ account_gravity */
 
 
-void account_gravity(WRectangle *geom, int gravity, 
-					 int top, int bottom, int left, int right)
+int gravity_deltax(int gravity, int left, int right)
 {
 	int woff=left+right;
+
+	if(gravity==StaticGravity || gravity==ForgetGravity){
+		return -left;
+	}else if(gravity==NorthWestGravity || gravity==WestGravity ||
+			 gravity==SouthWestGravity){
+		/* */
+	}else if(gravity==NorthEastGravity || gravity==EastGravity ||
+			 gravity==SouthEastGravity){
+		/* geom->x=geom->w+geom->x-(geom->w+woff) */
+		return -woff;
+	}else if(gravity==CenterGravity || gravity==NorthGravity ||
+			 gravity==SouthGravity){
+		/* geom->x=geom->x+geom->w/2-(geom->w+woff)/2 */
+		return -woff/2;
+	}
+	return 0;
+}
+
+
+int gravity_deltay(int gravity, int top, int bottom)
+{
 	int hoff=top+bottom;
 	
 	if(gravity==StaticGravity || gravity==ForgetGravity){
-		geom->x-=left;
-		geom->y-=top;
-		geom->w+=woff;
-		geom->h+=hoff;
-	}else{
-		if(gravity==NorthWestGravity || gravity==WestGravity ||
-		   gravity==SouthWestGravity){
-			/* */
-		}else if(gravity==NorthEastGravity || gravity==EastGravity ||
-				 gravity==SouthEastGravity){
-			/* geom->x=geom->w+geom->x-(geom->w+woff) */
-			geom->x-=woff;
-		}else if(gravity==CenterGravity || gravity==NorthGravity ||
-				 gravity==SouthGravity){
-			/* geom->x=geom->x+geom->w/2-(geom->w+woff)/2 */
-			geom->x-=woff/2;
-		}
-		
-		geom->w+=woff;
-		
-		if(gravity==NorthWestGravity || gravity==NorthGravity ||
-		   gravity==NorthEastGravity){
-			/* */
-		}else if(gravity==SouthWestGravity || gravity==SouthGravity ||
-				 gravity==SouthEastGravity){
-			/* geom->y=geom->y+geom->h-(geom->h+hoff) */
-			geom->y-=hoff;
-		}else if(gravity==CenterGravity || gravity==WestGravity ||
-				 gravity==EastGravity){
-			/* geom->y=geom->y+geom->h/2-(geom->h+hoff)/2 */
-			geom->y-=hoff/2;
-		}
-		
-		geom->h+=hoff;
+		return -top;
+	}else if(gravity==NorthWestGravity || gravity==NorthGravity ||
+			 gravity==NorthEastGravity){
+		/* */
+	}else if(gravity==SouthWestGravity || gravity==SouthGravity ||
+			 gravity==SouthEastGravity){
+		/* geom->y=geom->y+geom->h-(geom->h+hoff) */
+		return -hoff;
+	}else if(gravity==CenterGravity || gravity==WestGravity ||
+			 gravity==EastGravity){
+		/* geom->y=geom->y+geom->h/2-(geom->h+hoff)/2 */
+		return -hoff/2;
 	}
+	return 0;
 }
 
 

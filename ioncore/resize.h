@@ -94,4 +94,6 @@ extern void genframe_maximize_horiz(WGenFrame *frame);
 extern void genframe_do_toggle_shade(WGenFrame *frame, int shaded_h);
 extern bool genframe_is_shaded(WGenFrame *frame);
 
+extern void region_convert_root_geom(WRegion *reg, WRectangle *geom);
+
 #endif /* ION_IONCORE_RESIZE_H */

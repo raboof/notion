@@ -16,6 +16,7 @@
 #include <ioncore/genframe.h>
 #include <ioncore/window.h>
 #include <ioncore/extl.h>
+#include "floatws.h"
 
 INTROBJ(WFloatFrame);
 
@@ -29,8 +30,9 @@ extern WFloatFrame *create_floatframe(WWindow *parent, WRectangle geom);
 
 extern void floatframe_remove_managed(WFloatFrame *frame, WRegion *reg);
 
-extern WRectangle initial_to_floatframe_geom(WGRData *grdata, WRectangle geom,
-											 int gravity);
+extern void initial_to_floatframe_geom(WFloatWS *ws, WRectangle *geom, 
+									   int gravity);
+extern void managed_to_floatframe_geom(WGRData *grdata, WRectangle *geom);
 
 extern WRegion *floatframe_load(WWindow *par, WRectangle geom, ExtlTab tab);
 
