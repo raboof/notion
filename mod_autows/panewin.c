@@ -17,7 +17,9 @@
 #include <ioncore/global.h>
 #include <ioncore/event.h>
 #include <ioncore/gr.h>
+#include <ioncore/regbind.h>
 #include "panewin.h"
+#include "main.h"
 
 
 /*{{{ Init/deinit */
@@ -55,6 +57,8 @@ bool panewin_init(WPaneWin *pwin, WWindow *parent, const WFitParams *fp)
         GrBorderWidths bdw=GR_BORDER_WIDTHS_INIT;
         memcpy(&(pwin->bdw), &bdw, sizeof(bdw));
     }
+
+    region_add_bindmap((WRegion*)pwin, mod_autows_panewin_bindmap);
 
     XSelectInput(ioncore_g.dpy, pwin->wwin.win, IONCORE_EVENTMASK_FRAME);
     
