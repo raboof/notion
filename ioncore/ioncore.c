@@ -304,7 +304,7 @@ bool ioncore_init(const char *display, bool onescreen)
 void ioncore_deinit()
 {
 	Display *dpy;
-	WScreen *scr;
+	WScreen *scr, *next;
 	WViewport *vp;
 	
 	wglobal.opmode=OPMODE_DEINIT;
@@ -312,7 +312,9 @@ void ioncore_deinit()
 	if(wglobal.dpy==NULL)
 		return;
 	
-	FOR_ALL_SCREENS(scr){
+	for(scr=wglobal.screens; scr!=NULL; scr=next){
+		next=NEXT_THING(scr, WScreen);
+		
 		FOR_ALL_TYPED(scr, vp, WViewport){
 			save_workspaces(vp);
 		}

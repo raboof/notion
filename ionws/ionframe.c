@@ -241,7 +241,7 @@ static void ionframe_recalc_bar(WIonFrame *frame, bool draw)
 		}
 	}
 	
-	if(draw && !(frame->genframe.flags&WGENFRAME_TAB_HIDE))
+	if(draw)
 		genframe_draw_bar((WGenFrame*)frame, TRUE);
 }
 
@@ -271,9 +271,8 @@ void ionframe_draw(const WIonFrame *frame, bool complete)
 	
 	draw_border_inverted(dinfo, TRUE);
 
-	if(!(frame->genframe.flags&WGENFRAME_TAB_HIDE))
-		genframe_draw_bar((WGenFrame*)frame,
-					  	!complete || !grdata->bar_inside_frame);
+	genframe_draw_bar((WGenFrame*)frame,
+					  !complete || !grdata->bar_inside_frame);
 }
 
 
@@ -341,6 +340,7 @@ static WIonFrame *tmp_frame;
 static int tmp_flags=0;
 static int tmp_target_id=0;
 static WWindow *tmp_par=NULL;
+static WRectangle tmp_geom;
 
 
 static bool opt_target_id(Tokenizer *tokz, int n, Token *toks)
@@ -373,15 +373,17 @@ static bool opt_region(Tokenizer *tokz, int n, Token *toks)
 	WRectangle geom;
 	
 	if(tmp_frame==NULL){
-		tmp_frame=create_ionframe(tmp_par, geom, tmp_target_id, tmp_flags);
+		tmp_frame=create_ionframe(tmp_par, tmp_geom, tmp_target_id, tmp_flags);
 		if(tmp_frame==NULL){
 			warn_err();
 			return FALSE;
 		}
 	}
 	
+	pgeom("bar: ", REGION_GEOM(tmp_frame));
+	pgeom("quk: ", tmp_geom);
 	genframe_managed_geom((WGenFrame*)tmp_frame, &geom);
-	
+	pgeom("foo: ", geom);
 	reg=load_create_region((WWindow*)tmp_frame, geom, tokz, n, toks);
 
 	if(reg==NULL)
@@ -407,6 +409,7 @@ WRegion *ionframe_load(WWindow *par, WRectangle geom, Tokenizer *tokz)
 	tmp_flags=0;
 	tmp_par=par;
 	tmp_frame=NULL;
+	tmp_geom=geom;
 	
 	if(!parse_config_tokz(tokz, ionframe_opts)){
 		destroy_thing((WThing*)tmp_frame);

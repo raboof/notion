@@ -250,6 +250,7 @@ static WScreen *preinit_screen(int xscr)
 	scr->default_cmap=DefaultColormap(dpy, xscr);
 	scr->default_viewport=NULL;
 	scr->current_viewport=NULL;
+	scr->viewport_list=NULL;
 	
 	scr->w_unit=7;
 	scr->h_unit=13;
@@ -283,7 +284,7 @@ WViewport *add_viewport(WScreen *scr, int id, WRectangle geom)
 	if(vp==NULL)
 		return NULL;
 	
-	region_set_manager((WRegion*)vp, (WRegion*)scr, NULL);
+	region_set_manager((WRegion*)vp, (WRegion*)scr, &(scr->viewport_list));
 	
 	map_region((WRegion*)vp);
 	
@@ -297,7 +298,6 @@ WViewport *add_viewport(WScreen *scr, int id, WRectangle geom)
 WScreen *manage_screen(int xscr)
 {
 	WScreen *scr;
-	WThing *tmp;
 	
 #ifndef CF_NO_XINERAMA
 	XineramaScreenInfo *xi=NULL;
@@ -353,13 +353,14 @@ WScreen *manage_screen(int xscr)
 		return NULL;
 	}
 	
-	/* TODO: typed LINK_ITEM */
-	tmp=(WThing*)wglobal.screens;
-	LINK_ITEM(tmp, (WThing*)scr, t_next, t_prev);
-	wglobal.screens=(WScreen*)tmp;
+	/* */ {
+		/* TODO: typed LINK_ITEM */
+		WThing *tmp=(WThing*)wglobal.screens;
+		LINK_ITEM(tmp, (WThing*)scr, t_next, t_prev);
+		wglobal.screens=(WScreen*)tmp;
+	}
 	
 	postinit_graphics(scr);
-	
 	postinit_screen(scr);
 	
 	return scr;
@@ -368,15 +369,21 @@ WScreen *manage_screen(int xscr)
 
 void deinit_screen(WScreen *scr)
 {
-	WViewport *vp;
-	
+	WRegion *reg, *next;
+
 	if(wglobal.active_screen==scr)
 		wglobal.active_screen=NULL;
 	
-	FOR_ALL_TYPED(scr, vp, WViewport){
-		region_unset_manager((WRegion*)vp, (WRegion*)scr, NULL);
+	FOR_ALL_MANAGED_ON_LIST_W_NEXT(scr->viewport_list, reg, next){
+		region_unset_manager(reg, (WRegion*)scr, &(scr->viewport_list));
 	}
-		
+	
+	/* */ {
+		WThing *tmp=(WThing*)wglobal.screens;
+		UNLINK_ITEM(tmp, (WThing*)scr, t_next, t_prev);
+		wglobal.screens=(WScreen*)tmp;
+	}
+	
 	deinit_region((WRegion*)scr);
 }
 

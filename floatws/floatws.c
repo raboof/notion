@@ -163,7 +163,6 @@ static void focus_floatws(WFloatWS *ws, bool warp)
 {
 	if(ws->current_managed==NULL){
 		SET_FOCUS(ws->dummywin);
-		/*SET_FOCUS(SCREEN_OF(ws)->root.win);*/
 		if(warp)
 			do_move_pointer_to((WRegion*)ws);
 		return;

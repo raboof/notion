@@ -136,13 +136,10 @@ static WViewport *find_suitable_viewport(WClientWin *cwin, int x, int y)
 	}
 #endif
 	
-	if(REGION_ACTIVE_SUB(scr)!=NULL){
-		vp=viewport_of(REGION_ACTIVE_SUB(scr));
-		if(vp!=NULL)
-			return vp;
-	}
+	if(scr->current_viewport!=NULL)
+		return scr->current_viewport;
 	
-	return (WViewport*)scr->default_viewport;
+	return scr->default_viewport;
 }
 
 

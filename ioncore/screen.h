@@ -23,7 +23,7 @@ INTROBJ(WScreen)
 #define FOR_ALL_SCREENS(SCR)                     \
 	for(SCR=wglobal.screens;                     \
 		SCR!=NULL;                               \
-		SCR=(WScreen*)(((WThing*)(SCR))->t_next))
+		SCR=NEXT_THING(SCR, WScreen))
 
 #define SCREEN_MAX_STACK 3
 
@@ -33,6 +33,7 @@ INTROBJ(WScreen)
 DECLOBJ(WScreen){
 	WWindow root;
 	int xscr;
+	WRegion *viewport_list;
 	WViewport *default_viewport;
 	WViewport *current_viewport;
 	
