@@ -29,7 +29,7 @@
                                  PropertyChangeMask|KeyPressMask|   \
                                  FocusChangeMask|EnterWindowMask)
 
-#define IONCORE_EVENTMASK_FRAME    (FocusChangeMask|          \
+#define IONCORE_EVENTMASK_FRAME (FocusChangeMask|          \
                                  ButtonPressMask|          \
                                  ButtonReleaseMask|        \
                                  KeyPressMask|             \

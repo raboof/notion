@@ -18,12 +18,7 @@
 #include "infowin.h"
 #include "resize.h"
 #include "gr.h"
-
-
-/* We must select for keyboard events so that workspaces managing a
- * WInfoWin get their input when the info window has the focus.
- */
-#define INFOWIN_MASK (ExposureMask|KeyPressMask|KeyReleaseMask)
+#include "event.h"
 
 
 /*{{{ Init/deinit */
@@ -65,7 +60,7 @@ bool infowin_init(WInfoWin *p, WWindow *parent, const WFitParams *fp,
     attr.save_under=True;
     XChangeWindowAttributes(ioncore_g.dpy, p->wwin.win, CWSaveUnder, &attr);
     
-    XSelectInput(ioncore_g.dpy, p->wwin.win, INFOWIN_MASK);
+    XSelectInput(ioncore_g.dpy, p->wwin.win, IONCORE_EVENTMASK_INPUT);
     
     return TRUE;
 

@@ -139,7 +139,7 @@ extern void mplex_load_contents(WMPlex *frame, ExtlTab tab);
 extern bool mplex_set_stdisp(WMPlex *mplex, WRegion *stdisp, int pos);
 extern void mplex_get_stdisp(WMPlex *mplex, WRegion **stdisp, int *pos);
 
-extern bool mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t);
+extern WRegion *mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t);
 extern ExtlTab mplex_get_stdisp_extl(WMPlex *mplex);
 
 

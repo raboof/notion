@@ -1206,7 +1206,7 @@ static WRegion *do_attach_stdisp(WMPlex *mplex, WRegionAttachHandler *handler,
  * \end{tabularx}
  */
 EXTL_EXPORT_AS(WMPlex, set_stdisp)
-bool mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t)
+WRegion *mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t)
 {
     WRegion *stdisp=NULL;
     int p=mplex->stdispinfo.pos;
@@ -1216,7 +1216,7 @@ bool mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t)
         p=stringintmap_value(pos_map, s, -1);
         if(p<0){
             warn("Invalid pos setting");
-            return FALSE;
+            return NULL;
         }
     }
     
@@ -1243,7 +1243,7 @@ bool mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t)
                                    (void*)&fp);
         
         if(stdisp==NULL)
-            return FALSE;
+            return NULL;
         
     }else if(strcmp(s, "keep")==0){
         stdisp=(WRegion*)(mplex->stdispinfo.regwatch.obj);
@@ -1254,10 +1254,10 @@ bool mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t)
     
     if(!mplex_set_stdisp(mplex, stdisp, p)){
         destroy_obj((Obj*)stdisp);
-        return FALSE;
+        return NULL;
     }
     
-    return TRUE;
+    return stdisp;
 }
 
 

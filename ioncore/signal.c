@@ -129,7 +129,7 @@ bool ioncore_check_signals()
                 }else if(q->extl_handler!=extl_fn_none()){
                     ExtlFn fn=q->extl_handler;
                     q->extl_handler=extl_fn_none();
-                    extl_call(fn, NULL, NULL);
+                    extl_call(fn, "o", NULL, q);
                     extl_unref_fn(fn);
                 }
             }else{
