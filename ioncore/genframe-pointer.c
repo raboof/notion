@@ -309,7 +309,7 @@ static void p_tabdrag_end(WGenFrame *genframe, XButtonEvent *ev)
 	
 	dropped_on=fnd((WWindow*)SCREEN_OF(sub), ev->x_root, ev->y_root);
 
-	if(dropped_on==NULL || dropped_on==(WRegion*)genframe){
+	if(dropped_on==NULL || dropped_on==(WRegion*)genframe || dropped_on==sub){
 		genframe_draw_bar(genframe, TRUE);
 		return;
 	}
