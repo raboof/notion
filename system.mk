@@ -40,7 +40,7 @@ X11_LIBS=-L$(X11_PREFIX)/lib
 X11_INCLUDES=-I$(X11_PREFIX)/include
 
 #EXTRA_INCLUDES = -I$(PREFIX)/include
-EXTRA_LIBS = -L$(PREFIX)/lib -lefence
+#EXTRA_LIBS = -L$(PREFIX)/lib
 
 XINERAMA_LIBS=-lXinerama -lXext
 #DEFINES += -DCF_NO_XINERAMA

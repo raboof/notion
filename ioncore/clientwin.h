@@ -79,6 +79,8 @@ extern bool clientwin_fullscreen_vp(WClientWin *cwin, WViewport *vp,
 									bool switchto);
 extern bool clientwin_enter_fullscreen(WClientWin *cwin, bool switchto);
 
+extern void clientwin_broken_app_resize_kludge(WClientWin *cwin);
+
 /* Hooks */
 
 extern WHooklist *add_clientwin_alt;

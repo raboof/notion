@@ -56,7 +56,7 @@ static WFunction wmcore_clientwin_funtab[]={
 	FN_VOID(generic, WClientWin,	"close",		close_clientwin),
 	FN_VOID(generic, WClientWin,	"kill",			kill_clientwin),
 	FN(b,	generic, WClientWin,	"enter_fullscreen",	clientwin_enter_fullscreen),
-	
+	FN_VOID(generic, WClientWin,	"broken_app_resize_kludge", clientwin_broken_app_resize_kludge),
 	END_FUNTAB
 };
 
