@@ -344,7 +344,7 @@ void region_detach_manager(WRegion *reg)
         }
     }
 
-    region_clear_activity(reg);
+    region_clear_activity(reg, TRUE);
 
     region_managed_remove(mgr, reg);
     

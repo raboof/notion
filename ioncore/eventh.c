@@ -224,7 +224,7 @@ void ioncore_handle_property(const XPropertyEvent *ev)
             if(hints->flags&XUrgencyHint)
                 region_notify_activity((WRegion*)cwin);
             else
-                region_clear_activity((WRegion*)cwin);
+                region_clear_activity((WRegion*)cwin, TRUE);
         }
         XFree(hints);
     }else if(ev->atom==XA_WM_NORMAL_HINTS){

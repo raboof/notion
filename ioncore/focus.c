@@ -174,7 +174,7 @@ void region_got_focus(WRegion *reg)
     
     check_clear_await(reg);
     
-    region_clear_activity(reg);
+    region_clear_activity(reg, FALSE);
     
     if(!REGION_IS_ACTIVE(reg)){
         D(fprintf(stderr, "got focus (inact) %s [%p]\n", OBJ_TYPESTR(reg), reg);)

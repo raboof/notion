@@ -15,7 +15,7 @@
 #include "region.h"
 
 extern void region_notify_activity(WRegion *reg);
-extern void region_clear_activity(WRegion *reg);
+extern void region_clear_activity(WRegion *reg, bool force);
 extern bool region_activity(WRegion *reg);
 
 #endif /* ION_IONCORE_ACTIVITY_H */

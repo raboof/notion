@@ -10,6 +10,8 @@
  */
 
 
+#include "common.h"
+#include "global.h"
 #include "region.h"
 #include "activity.h"
 
@@ -37,6 +39,10 @@ static void propagate_activity(WRegion *reg)
 }
 
 
+/*EXTL_DOC
+ * Notify of activity in \var{reg}.
+ */
+EXTL_EXPORT_MEMBER
 void region_notify_activity(WRegion *reg)
 {
     if(reg->flags&REGION_ACTIVITY || REGION_IS_ACTIVE(reg))
@@ -65,11 +71,27 @@ static void propagate_clear(WRegion *reg)
 }
 
     
-void region_clear_activity(WRegion *reg)
+/*EXTL_DOC
+ * Clear notification of activity in \var{reg}. If \var{reg} is a client window
+ * and its urgency hint is set, \var{force} must be set to clear the state.
+ */
+EXTL_EXPORT_MEMBER
+void region_clear_activity(WRegion *reg, bool force)
 {
     if(!(reg->flags&REGION_ACTIVITY))
         return;
     
+	if(!force && OBJ_IS(reg, WClientWin)){
+		XWMHints *hints=XGetWMHints(ioncore_g.dpy, ((WClientWin*)reg)->win);
+        if(hints!=NULL){
+			if(hints->flags&XUrgencyHint){
+				XFree(hints);
+				return;
+			}
+			XFree(hints);
+		}
+	}
+
     reg->flags&=~REGION_ACTIVITY;
     
     if(reg->mgd_activity==0)
