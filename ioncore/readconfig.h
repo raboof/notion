@@ -28,8 +28,7 @@ enum{
 
 extern bool ioncore_set_userdirs(const char *appname);
 extern bool ioncore_set_sessiondir(const char *session);
-extern bool ioncore_add_scriptdir(const char *dir);
-extern bool ioncore_add_moduledir(const char *dir);
+extern bool ioncore_add_searchdir(const char *dir);
 
 extern const char *ioncore_userdir();
 extern const char *ioncore_sessiondir();

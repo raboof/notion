@@ -39,9 +39,8 @@
 static OptParserOpt pwm_opts[]={
     {OPT_ID('d'), "display",  OPT_ARG, "host:dpy.scr", "X display to use"},
     {'c',         "conffile", OPT_ARG, "config_file", "Configuration file"},
+    {'s',         "searchdir",OPT_ARG, "dir", "Add directory to search path"},
     {OPT_ID('o'), "oneroot",  0, NULL, "Manage default root window/non-Xinerama screen only"},
-    {OPT_ID('c'), "confdir",  OPT_ARG, "dir", "Search directory for configuration files"},
-    {OPT_ID('l'), "moduledir", OPT_ARG,"dir", "Search directory for modules"},
 #ifndef CF_NOXINERAMA    
     {OPT_ID('x'), "xinerama", OPT_ARG, "1|0", "Use Xinerama screen information (default: 0/no)"},
 #else
@@ -86,14 +85,14 @@ int main(int argc, char*argv[])
 
     pwm_cinfo.about=ioncore_aboutmsg();
     
-    ioncore_add_scriptdir(EXTRABINDIR); /* ion-completefile */
-    ioncore_add_scriptdir(ETCDIR);
+    ioncore_add_searchdir(EXTRABINDIR); /* ion-completefile */
+    ioncore_add_searchdir(MODULEDIR);
+    ioncore_add_searchdir(ETCDIR);
 #ifdef PWM_ETCDIR    
-    ioncore_add_scriptdir(PWM_ETCDIR);
+    ioncore_add_searchdir(PWM_ETCDIR);
 #endif
-    ioncore_add_scriptdir(SHAREDIR);
-    ioncore_add_scriptdir(LCDIR);
-    ioncore_add_moduledir(MODULEDIR);
+    ioncore_add_searchdir(SHAREDIR);
+    ioncore_add_searchdir(LCDIR);
     ioncore_set_userdirs("pwm3");
 
     optparser_init(argc, argv, OPTP_MIDLONG, pwm_opts, &pwm_cinfo);
@@ -106,14 +105,11 @@ int main(int argc, char*argv[])
         case 'c':
             cfgfile=optparser_get_arg();
             break;
+        case 's':
+            ioncore_add_searchdir(optparser_get_arg());
+            break;
         case OPT_ID('S'):
             ioncore_g.sm_client_id=optparser_get_arg();
-            break;
-        case OPT_ID('c'):
-            ioncore_add_scriptdir(optparser_get_arg());
-            break;
-        case OPT_ID('l'):
-            ioncore_add_moduledir(optparser_get_arg());
             break;
         case OPT_ID('o'):
             stflags|=IONCORE_STARTUP_ONEROOT;

@@ -75,23 +75,12 @@ static bool add_dir(char ***pathsptr, int *n_pathsptr, const char *dir)
 
 
 /*EXTL_DOC
- * Add a script search path.
+ * Add a directory to search path.
  */
 EXTL_EXPORT
-bool ioncore_add_scriptdir(const char *dir)
+bool ioncore_add_searchdir(const char *dir)
 {
     return add_dir(&scriptpaths, &n_scriptpaths, dir);
-}
-
-
-/*EXTL_DOC
- * Add a module search path.
- */
-EXTL_EXPORT
-bool ioncore_add_moduledir(const char *dir)
-{
-    return ioncore_add_scriptdir(dir);
-    /*(lt_dlinsertsearchdir(lt_dlgetsearchpath(), dir)==0);*/
 }
 
 
@@ -113,14 +102,14 @@ bool ioncore_set_userdirs(const char *appname)
         if(userdir==NULL){
             warn_err();
         }else{
-            fails-=ioncore_add_scriptdir(userdir);
+            fails-=ioncore_add_searchdir(userdir);
         }
         
         libtu_asprintf(&tmp, "%s/.%s/lib", home, appname);
         if(tmp==NULL){
             warn_err();
         }else{
-            fails-=ioncore_add_moduledir(tmp);
+            fails-=ioncore_add_searchdir(tmp);
             free(tmp);
         }
     }
