@@ -183,6 +183,12 @@ int mplexpholder_layer(WMPlexPHolder *ph)
 }
 
 
+bool mplexpholder_stale(WMPlexPHolder *ph)
+{
+    return (ph->mplex_watch.obj!=NULL);
+}
+
+
 bool mplexpholder_attach(WMPlexPHolder *ph, WRegionAttachHandler *hnd,
                          void *hnd_param)
 {
@@ -319,6 +325,9 @@ WMPlexPHolder *mplex_managed_get_pholder(WMPlex *mplex, WRegion *mgd)
 static DynFunTab mplexpholder_dynfuntab[]={
     {(DynFun*)pholder_attach, 
      (DynFun*)mplexpholder_attach},
+    
+    {(DynFun*)pholder_stale, 
+     (DynFun*)mplexpholder_stale},
 };
 
 IMPLCLASS(WMPlexPHolder, WPHolder, mplexpholder_deinit, 

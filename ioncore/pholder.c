@@ -34,6 +34,14 @@ bool pholder_attach(WPHolder *ph,
 }
 
 
+bool pholder_stale(WPHolder *ph)
+{
+    bool ret=FALSE;
+    CALL_DYN_RET(ret, bool, pholder_stale, ph, (ph));
+    return ret;
+}
+
+
 WPHolder *region_managed_get_pholder(WRegion *reg, WRegion *mgd)
 {
     WPHolder *ret=NULL;

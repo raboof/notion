@@ -15,12 +15,16 @@
 #include "common.h"
 #include "attach.h"
 
+/* Note: PHolders should be destroyed by their acquirer. */
+
 DECLCLASS(WPHolder){
     Obj obj;
 };
 
 extern bool pholder_init(WPHolder *ph);
 extern void pholder_deinit(WPHolder *ph);
+
+DYNFUN bool pholder_stale(WPHolder *ph);
 
 DYNFUN bool pholder_attach(WPHolder *ph, 
                            WRegionAttachHandler *hnd, void *hnd_param);
