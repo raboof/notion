@@ -9,10 +9,6 @@
  * (at your option) any later version.
  */
 
-#include <math.h>
-#include <sys/time.h>
-#include <time.h>
-#include <limits.h>
 #include <stdio.h>
 
 #include "common.h"
@@ -221,124 +217,14 @@ static void res_draw_rubberband(WRootWin *rootwin)
 /*}}}*/
 
 
-/*{{{ Keyboard resize accelerator */
-
-
-static struct timeval last_action_tv={-1, 0};
-static struct timeval last_update_tv={-1, 0};
-static int last_mode=0;
-static double accel=1, accelinc=30, accelmax=100*100;
-static long actmax=200, uptmin=50;
-
-static void accel_reset()
-{
-	last_mode=0;
-	accel=1.0;
-	last_action_tv.tv_sec=-1;
-	last_action_tv.tv_usec=-1;
-}
-
-
-/*EXTL_DOC
- * Set keyboard resize acceleration parameters. When a keyboard resize
- * function is called, and at most \var{t_max} milliseconds has passed
- * from a previous call, acceleration factor is reset to 1.0. Otherwise,
- * if at least \var{t_min} milliseconds have passed from the from previous
- * acceleration update or reset the squere root of the acceleration factor
- * is incremented by \var{step}. The maximum acceleration factor (pixels/call 
- * modulo size hints) is given by \var{maxacc}. The default values are 
- * (200, 50, 30, 100). 
- * 
- * Notice the interplay with X keyboard acceleration parameters.
- * (Maybe insteed of \var{t_min} we should use a minimum number of
- * calls to the function/key presses between updated? Or maybe the
- * resize should be completely time-based with key presses triggering
- * the changes?)
- */
-EXTL_EXPORT
-void set_resize_accel_params(int t_max, int t_min, double step, double maxacc)
-{
-	actmax=(t_max>0 ? t_max : INT_MAX);
-	uptmin=(t_min>0 ? t_min : INT_MAX);
-	accelinc=(step>0 ? step : 1);
-	accelmax=(maxacc>0 ? maxacc*maxacc : 1);
-}
-
-
-static int sign(int x)
-{
-	return (x>0 ? 1 : (x<0 ? -1 : 0));
-}
-
-
-static long tvdiffmsec(struct timeval *tv1, struct timeval *tv2)
-{
-	double t1=1000*(double)tv1->tv_sec+(double)tv1->tv_usec/1000;
-	double t2=1000*(double)tv2->tv_sec+(double)tv2->tv_usec/1000;
-	
-	return (int)(t1-t2);
-}
-
-#define SIGN_NZ(X) ((X) < 0 ? -1 : 1)
-
-static double max(double a, double b)
-{
-	return (a<b ? b : a);
-}
-
-void resize_accel(int *wu, int *hu, int mode)
-{
-	struct timeval tv;
-	long adiff, udiff;
-	
-	gettimeofday(&tv, NULL);
-	
-	adiff=tvdiffmsec(&tv, &last_action_tv);
-	udiff=tvdiffmsec(&tv, &last_update_tv);
-	
-	if(last_mode==mode && adiff<actmax){
-		if(udiff>uptmin){
-			accel+=accelinc;
-			if(accel>accelmax)
-				accel=accelmax;
-			last_update_tv=tv;
-		}
-	}else{
-		accel=1.0;
-		last_update_tv=tv;
-	}
-	
-	last_mode=mode;
-	last_action_tv=tv;
-	
-	/*
-	if(*wu!=0)
-		*wu=SIGN_NZ(*wu)*ceil(max(sqrt(accel), abs(*wu)));
-	if(*hu!=0)
-		*hu=SIGN_NZ(*hu)*ceil(max(sqrt(accel), abs(*hu)));
-	 */
-	if(*wu!=0)
-		*wu=(*wu)*ceil(sqrt(accel)/abs(*wu));
-	if(*hu!=0)
-		*hu=(*hu)*ceil(sqrt(accel)/abs(*hu));
-}
-
-
-/*}}}*/
-
-
 /*{{{ Resize */
 
 
-bool is_resizing()
+WRegion *resize_target()
 {
-	return resize_mode;
-}
-
-
-bool may_resize(WRegion *reg)
-{
-	return (tmpreg==reg);
+    if(!resize_mode)
+        return NULL;
+    return tmpreg;
 }
 
 
@@ -416,8 +302,6 @@ static bool begin_moveres(WRegion *reg, WDrawRubberbandFn *rubfn,
 	
 	if(parent==NULL)
 		return FALSE;
-	
-	accel_reset();
 	
 	region_rootpos((WRegion*)parent, &parent_rx, &parent_ry);
 	
@@ -911,28 +795,6 @@ uint region_min_w(WRegion *reg)
 	region_resize_hints(reg, &hints, &relw, &relh);
 	return (hints.flags&PMinSize ? hints.min_width : 1)
 		+REGION_GEOM(reg).w-relw;
-}
-
-
-void frame_resize_units(WFrame *frame, int *wret, int *hret)
-{
-	/*WGRData *grdata=GRDATA_OF(frame);
-	*wret=grdata->w_unit;
-	*hret=grdata->h_unit;*/
-	*wret=1;
-	*hret=1;
-	
-	if(WFRAME_CURRENT(frame)!=NULL){
-		XSizeHints hints;
-		
-		region_resize_hints(WFRAME_CURRENT(frame), &hints, NULL, NULL);
-		
-		if(hints.flags&PResizeInc &&
-		   (hints.width_inc>1 || hints.height_inc>1)){
-			*wret=hints.width_inc;
-			*hret=hints.height_inc;
-		}
-	}
 }
 
 

@@ -720,8 +720,6 @@ static WRegion *do_split_at(WIonWS *ws, WObj *obj, int dir, int primn,
 	sn=s/2;
 	so=s-sn;
 	
-    fprintf(stderr, "%d[%d:%d %d:%d]\n", s, sn, minsize, so, objmin);
-    
 	if(sn<minsize)
 		sn=minsize;
 	if(so<objmin)

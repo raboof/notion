@@ -157,3 +157,38 @@ frame_bindings{
     mpress("Button3", make_pmenu_fn("ctxmenu"), "tab"),
 }
 
+
+-- Keyboard move/resize mode bindings
+
+kbresize_bindings{
+    kpress("AnyModifier+Escape", kbresize_cancel),
+    kpress("AnyModifier+Return", kbresize_end),
+    
+    kpress("Left", function() kbresize_resize(1, 0, 0, 0) end),
+    kpress("Right",function() kbresize_resize(0, 1, 0, 0) end),
+    kpress("Up",   function() kbresize_resize(0, 0, 1, 0) end),
+    kpress("Down", function() kbresize_resize(0, 0, 0, 1) end),
+    kpress("F",    function() kbresize_resize(1, 0, 0, 0) end),
+    kpress("B",	   function() kbresize_resize(0, 1, 0, 0) end),
+    kpress("P",    function() kbresize_resize(0, 0, 1, 0) end),
+    kpress("N",    function() kbresize_resize(0, 0, 0, 1) end),
+
+    kpress("Shift+Left", function() kbresize_resize(-1, 0, 0, 0) end),
+    kpress("Shift+Right",function() kbresize_resize( 0,-1, 0, 0) end),
+    kpress("Shift+Up",   function() kbresize_resize( 0, 0,-1, 0) end),
+    kpress("Shift+Down", function() kbresize_resize( 0, 0, 0,-1) end),
+    kpress("Shift+F",    function() kbresize_resize(-1, 0, 0, 0) end),
+    kpress("Shift+B",    function() kbresize_resize( 0,-1, 0, 0) end),
+    kpress("Shift+P",    function() kbresize_resize( 0, 0,-1, 0) end),
+    kpress("Shift+N",    function() kbresize_resize( 0, 0, 0,-1) end),
+
+    kpress(DEFAULT_MOD.."Left", function() kbresize_move(-1, 0) end),
+    kpress(DEFAULT_MOD.."Right",function() kbresize_move( 1, 0) end),
+    kpress(DEFAULT_MOD.."Up", 	function() kbresize_move( 0,-1) end),
+    kpress(DEFAULT_MOD.."Down", function() kbresize_move( 0, 1) end),
+    kpress(DEFAULT_MOD.."F",    function() kbresize_move(-1, 0) end),
+    kpress(DEFAULT_MOD.."B",    function() kbresize_move( 1, 0) end),
+    kpress(DEFAULT_MOD.."P", 	function() kbresize_move( 0,-1) end),
+    kpress(DEFAULT_MOD.."N",    function() kbresize_move( 0, 1) end),
+}
+

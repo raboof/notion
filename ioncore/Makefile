@@ -23,7 +23,7 @@ SOURCES=binding.c conf-bindings.c cursor.c event.c     \
 	manage.c readfds.c regbind.c rootwin.c tags.c names.c saveload.c  \
 	genws.c frame.c frame-pointer.c conf.c reginfo.c errorlog.c \
 	stacking.c extlconv.c fullscreen.c mplex.c bindmaps.c gr.c \
-	infowin.c activity.c netwm.c objlist.c frame-draw.c
+	infowin.c activity.c netwm.c objlist.c frame-draw.c kbresize.c
 
 ifeq ($(PRELOAD_MODULES),1)
 CFLAGS += -DCF_PRELOAD_MODULES

@@ -12,7 +12,7 @@ include $(TOPDIR)/system-inc.mk
 INCLUDES += $(X11_INCLUDES) -I..
 CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
-SOURCES=main.c floatws.c floatframe.c placement.c resize.c
+SOURCES=main.c floatws.c floatframe.c placement.c
 
 MAKE_EXPORTS=floatws_module
 

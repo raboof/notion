@@ -19,6 +19,8 @@
 WBindmap ioncore_rootwin_bindmap=BINDMAP_INIT;
 WBindmap ioncore_mplex_bindmap=BINDMAP_INIT;
 WBindmap ioncore_frame_bindmap=BINDMAP_INIT;
+WBindmap ioncore_kbresize_bindmap=BINDMAP_INIT;
+
 
 /*EXTL_DOC
  * Add a set of bindings available everywhere. The bound functions
@@ -61,11 +63,21 @@ bool frame_bindings(ExtlTab tab)
 }
 
 
+/*EXTL_DOC
+ * Sets up bindings for move/resize mode.
+ */
+EXTL_EXPORT
+bool kbresize_bindings(ExtlTab tab)
+{
+	return process_bindings(&ioncore_kbresize_bindmap, NULL, tab);
+}
+
 
 void ioncore_deinit_bindmaps()
 {
 	deinit_bindmap(&ioncore_rootwin_bindmap);
 	deinit_bindmap(&ioncore_mplex_bindmap);
 	deinit_bindmap(&ioncore_frame_bindmap);
+	deinit_bindmap(&ioncore_kbresize_bindmap);
 }
 

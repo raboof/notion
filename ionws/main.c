@@ -42,7 +42,6 @@ void ionws_module_deinit()
 	ionws_module_unregister_exports();
 	deinit_bindmap(&ionws_bindmap);
 	deinit_bindmap(&ionframe_bindmap);
-	deinit_bindmap(&ionframe_moveres_bindmap);
 	unregister_region_class(&OBJDESCR(WIonWS));
 	unregister_region_class(&OBJDESCR(WIonFrame));
 }

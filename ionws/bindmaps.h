@@ -17,6 +17,5 @@
 
 extern WBindmap ionws_bindmap;
 extern WBindmap ionframe_bindmap;
-extern WBindmap ionframe_moveres_bindmap;
 
 #endif /* ION_IONWS_BINDMAPS_H */

@@ -52,16 +52,6 @@ bool ionframe_bindings(ExtlTab tab)
 }
 
 
-/*EXTL_DOC
- * Describe WIonFrame resize mode bindings.
- */
-EXTL_EXPORT
-bool ionframe_moveres_bindings(ExtlTab tab)
-{
-	return process_bindings(&ionframe_moveres_bindmap, NULL, tab);
-}
-
-
 bool ionws_module_read_config()
 {
 	return read_config("ionws");

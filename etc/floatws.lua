@@ -22,7 +22,7 @@ floatws_bindings{
 -- ion-bindings.lua.
 
 floatframe_bindings{
-    kpress(DEFAULT_MOD.."R", WFloatFrame.begin_resize),
+    kpress(DEFAULT_MOD.."R", WFloatFrame.begin_kbresize),
     
     mpress("Button1", WRegion.raise, "tab"),
     mpress("Button1", WRegion.raise, "border"),
@@ -44,38 +44,4 @@ floatframe_bindings{
     mpress("Button3", make_pmenu_fn("ctxmenu-floatframe"), "tab"),
 }
 
-
--- Frame move/resize mode bindings
-
-floatframe_moveres_bindings{
-    kpress("AnyModifier+Escape", WFloatFrame.cancel_resize),
-    kpress("AnyModifier+Return", WFloatFrame.end_resize),
-    
-    kpress("Left", function(f) f:do_resize(1, 0, 0, 0) end),
-    kpress("Right",function(f) f:do_resize(0, 1, 0, 0) end),
-    kpress("Up",   function(f) f:do_resize(0, 0, 1, 0) end),
-    kpress("Down", function(f) f:do_resize(0, 0, 0, 1) end),
-    kpress("F",    function(f) f:do_resize(1, 0, 0, 0) end),
-    kpress("B",	   function(f) f:do_resize(0, 1, 0, 0) end),
-    kpress("P",    function(f) f:do_resize(0, 0, 1, 0) end),
-    kpress("N",    function(f) f:do_resize(0, 0, 0, 1) end),
-
-    kpress("Shift+Left", function(f) f:do_resize(-1, 0, 0, 0) end),
-    kpress("Shift+Right",function(f) f:do_resize( 0,-1, 0, 0) end),
-    kpress("Shift+Up",   function(f) f:do_resize( 0, 0,-1, 0) end),
-    kpress("Shift+Down", function(f) f:do_resize( 0, 0, 0,-1) end),
-    kpress("Shift+F",    function(f) f:do_resize(-1, 0, 0, 0) end),
-    kpress("Shift+B",    function(f) f:do_resize( 0,-1, 0, 0) end),
-    kpress("Shift+P",    function(f) f:do_resize( 0, 0,-1, 0) end),
-    kpress("Shift+N",    function(f) f:do_resize( 0, 0, 0,-1) end),
-
-    kpress(DEFAULT_MOD.."Left", function(f) f:do_move(-1, 0) end),
-    kpress(DEFAULT_MOD.."Right",function(f) f:do_move( 1, 0) end),
-    kpress(DEFAULT_MOD.."Up", 	function(f) f:do_move( 0,-1) end),
-    kpress(DEFAULT_MOD.."Down", function(f) f:do_move( 0, 1) end),
-    kpress(DEFAULT_MOD.."F",    function(f) f:do_move(-1, 0) end),
-    kpress(DEFAULT_MOD.."B",    function(f) f:do_move( 1, 0) end),
-    kpress(DEFAULT_MOD.."P", 	function(f) f:do_move( 0,-1) end),
-    kpress(DEFAULT_MOD.."N",    function(f) f:do_move( 0, 1) end),
-}
 

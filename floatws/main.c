@@ -39,7 +39,6 @@ char floatws_module_ion_api_version[]=ION_API_VERSION;
 
 WBindmap floatws_bindmap=BINDMAP_INIT;
 WBindmap floatframe_bindmap=BINDMAP_INIT;
-WBindmap floatframe_moveres_bindmap=BINDMAP_INIT;
 
 
 static StringIntMap frame_areas[]={
@@ -58,16 +57,6 @@ EXTL_EXPORT
 bool floatframe_bindings(ExtlTab tab)
 {
 	return process_bindings(&floatframe_bindmap, frame_areas, tab);
-}
-
-
-/*EXTL_DOC
- * Sets up bindings for move/resize mode of WFloatFrames.
- */
-EXTL_EXPORT
-bool floatframe_moveres_bindings(ExtlTab tab)
-{
-	return process_bindings(&floatframe_moveres_bindmap, NULL, tab);
 }
 
 
@@ -98,7 +87,6 @@ void floatws_module_deinit()
 	floatws_module_unregister_exports();
 	deinit_bindmap(&floatws_bindmap);
 	deinit_bindmap(&floatframe_bindmap);
-	deinit_bindmap(&floatframe_moveres_bindmap);
 	unregister_region_class(&OBJDESCR(WFloatWS));
 	unregister_region_class(&OBJDESCR(WFloatFrame));
 }

@@ -50,8 +50,7 @@ extern void delta_resize(WRegion *reg, int dx1, int dx2, int dy1, int dy2,
 extern void delta_move(WRegion *reg, int dx, int dy, WRectangle *rret);
 extern bool end_resize();
 extern bool cancel_resize();
-extern bool is_resizing();
-extern bool may_resize(WRegion *reg);
+extern WRegion *resize_target();
 
 /* Note: even if REGION_RQGEOM_(X|Y|W|H) are not all specified, the
  * geom parameter should contain a proper geometry!
@@ -89,8 +88,6 @@ DYNFUN void region_resize_hints(WRegion *reg, XSizeHints *hints_ret,
 extern uint region_min_h(WRegion *reg);
 extern uint region_min_w(WRegion *reg);
 
-extern void frame_resize_units(WFrame *frame, int *wret, int *hret);
-
 extern void frame_maximize_vert(WFrame *frame);
 extern void frame_maximize_horiz(WFrame *frame);
 
@@ -98,7 +95,5 @@ extern void frame_do_toggle_shade(WFrame *frame, int shaded_h);
 extern bool frame_is_shaded(WFrame *frame);
 
 extern void region_convert_root_geom(WRegion *reg, WRectangle *geom);
-
-extern void resize_accel(int *wu, int *hu, int mode);
 
 #endif /* ION_IONCORE_RESIZE_H */

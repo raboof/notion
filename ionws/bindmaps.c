@@ -14,5 +14,4 @@
 
 WBindmap ionws_bindmap=BINDMAP_INIT;
 WBindmap ionframe_bindmap=BINDMAP_INIT;
-WBindmap ionframe_moveres_bindmap=BINDMAP_INIT;
 

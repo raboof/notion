@@ -20,7 +20,7 @@ ionws_bindings{
 -- ion-bindings.lua.
 
 ionframe_bindings{
-    kpress(DEFAULT_MOD.."R", WIonFrame.begin_resize),
+    kpress(DEFAULT_MOD.."R", WIonFrame.begin_kbresize),
     kpress(DEFAULT_MOD.."S",
            function(frame) frame:split("bottom") end),
 
@@ -41,30 +41,4 @@ ionframe_bindings{
     mdrag("Button2", WFrame.p_tabdrag, "tab"),
     
     mdrag(DEFAULT_MOD.."Button3", WFrame.p_resize),
-}
-
-
--- Frame resize mode bindings
-
-ionframe_moveres_bindings{
-    kpress("AnyModifier+Escape", WIonFrame.cancel_resize),
-    kpress("AnyModifier+Return", WIonFrame.end_resize),
-    
-    kpress("Left", function(f) f:do_resize( 1, 0, 0, 0) end),
-    kpress("Right",function(f) f:do_resize( 0, 1, 0, 0) end),
-    kpress("Up",   function(f) f:do_resize( 0, 0, 1, 0) end),
-    kpress("Down", function(f) f:do_resize( 0, 0, 0, 1) end),
-    kpress("F",    function(f) f:do_resize( 1, 0, 0, 0) end),
-    kpress("B",	   function(f) f:do_resize( 0, 1, 0, 0) end),
-    kpress("P",    function(f) f:do_resize( 0, 0, 1, 0) end),
-    kpress("N",    function(f) f:do_resize( 0, 0, 0, 1) end),
-
-    kpress("Shift+Left", function(f) f:do_resize(-1, 0, 0, 0) end),
-    kpress("Shift+Right",function(f) f:do_resize( 0,-1, 0, 0) end),
-    kpress("Shift+Up",   function(f) f:do_resize( 0, 0,-1, 0) end),
-    kpress("Shift+Down", function(f) f:do_resize( 0, 0, 0,-1) end),
-    kpress("Shift+F",    function(f) f:do_resize(-1, 0, 0, 0) end),
-    kpress("Shift+B",    function(f) f:do_resize( 0,-1, 0, 0) end),
-    kpress("Shift+P",    function(f) f:do_resize( 0, 0,-1, 0) end),
-    kpress("Shift+N",    function(f) f:do_resize( 0, 0, 0,-1) end),
 }
