@@ -43,7 +43,7 @@ local statusbars={}
 -- Meter list {{{
 
 local meters={
-    load_wtempl="x.xx, x.xx, x.xx",
+    load_template="0.00, 0.00, 0.00",
 }
 
 --DOC
@@ -142,7 +142,7 @@ function mod_statusbar.get_w_template(stng)
     process_template(stng.template,
                      function(s)
                          local m=meterget(stng, s)
-                         local w=meterget(stng, s.."_wtempl")
+                         local w=meterget(stng, s.."_template")
                          res=res..(w or m or "??")
                      end,
                      function(t)
@@ -162,13 +162,21 @@ function mod_statusbar.update()
         if not obj_exists(sb) then
             statusbars[sb]=nil
         else
-            local st=mod_statusbar.get_status(stng)
-            sb:set_contents(st)
+            sb:set_contents(mod_statusbar.get_status(stng))
             found=true
         end
     end
     
     return found
+end
+
+
+function mod_statusbar.update_natural_w()
+    for sb, stng in statusbars do
+        if obj_exists(sb) then
+            sb:set_natural_w(mod_statusbar.get_w_template(stng))
+        end
+    end
 end
 
 -- }}}
@@ -182,14 +190,20 @@ local statusd_modules={}
 
 function mod_statusbar.rcv_statusd(str)
     local data=""
+    local updatenw=false
 
     local function doline(i)
         if i=="." then
+            if updatenw then
+                mod_statusbar.update_natural_w()
+                updatenw=false
+            end
             mod_statusbar.update()
         else
             local _, _, m, v=string.find(i, "^([^:]+):%s*(.*)")
             if m and v then
                 mod_statusbar.inform(m, v)
+                updatenw=updatenw or string.find(m, "_template")
             end
         end
     end
@@ -206,6 +220,25 @@ function mod_statusbar.rcv_statusd(str)
 end
 
 
+local function get_statusd_params()
+    local mods={}
+    for sb, stng in statusbars do
+        process_template(stng.template,
+                         function(s)
+                             local _, _, m = string.find(s, "^([^_]+)")
+                             if m then
+                                 mods[m]=true
+                             end
+                         end,
+                         function() 
+                         end)
+    end
+    local params=statusd_cfg
+    table.foreach(mods, function(k) params=params.." -M "..k end)
+    return params
+end
+
+
 function mod_statusbar.cfg_statusd(cfg)
     --TODO: don't construct file name twice.
     ioncore.write_savefile("cfg_statusd", cfg)
@@ -216,24 +249,6 @@ end
 --DOC
 -- Launch ion-statusd with configuration table \var{cfg}.
 function mod_statusbar.launch_statusd(cfg)
-    local function get_statusd_params()
-        local mods={}
-        for sb, stng in statusbars do
-            process_template(stng.template,
-                             function(s)
-                                 local _, _, m = string.find(s, "^([^_]+)")
-                                 if m then
-                                     mods[m]=true
-                                 end
-                             end,
-                             function() 
-                             end)
-        end
-        local params=statusd_cfg
-        table.foreach(mods, function(k) params=params.." -M "..k end)
-        return params
-    end
-    
     if statusd_running then
         return
     end
@@ -241,6 +256,7 @@ function mod_statusbar.launch_statusd(cfg)
     local statusd=ioncore.lookup_script("ion-statusd")
     if not statusd then
         ioncore.warn(TR("Could not find %s", script))
+        return
     end
 
     local cfg=mod_statusbar.cfg_statusd(cfg or {})
@@ -250,7 +266,6 @@ function mod_statusbar.launch_statusd(cfg)
 
     statusd_running=ioncore.popen_bgread(cmd, cr)
 end
-
 
 --}}}
 
@@ -300,8 +315,6 @@ function mod_statusbar.create(param_)
     end
 
     mod_statusbar.init_timer()
-    
-    --mod_statusbar.launch_statusd()
     
     statusbars[sb]=param
     sb:set_natural_w(mod_statusbar.get_w_template(param))

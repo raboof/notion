@@ -51,7 +51,7 @@ static OptParserOpt ion_opts[]={
 
     {'M', "try-meter", OPT_ARG, "meter_module",
      DUMMY_TR("Try to load a meter module without complaining")},
-        
+
     END_OPTPARSEROPTS
 };
 
@@ -214,7 +214,6 @@ int main(int argc, char*argv[])
     
     mainloop();
     
-    /* The code should never return here */
     return EXIT_SUCCESS;
 }
 
@@ -246,3 +245,4 @@ ExtlTab statusd_get_config(const char *name)
             return extl_create_table();
     }
 }
+

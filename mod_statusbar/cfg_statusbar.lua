@@ -46,6 +46,6 @@ mod_statusbar.launch_statusd{
         update_interval=60*1000,
         mbox=os.getenv("MAIL")
     },
-    --]]    
+    --]]
 }
 

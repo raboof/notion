@@ -87,5 +87,10 @@ local function update_mail()
 end
 
 -- Init
+statusd.inform("mail_new_template", "00")
+statusd.inform("mail_unread_template", "00")
+statusd.inform("mail_total_template", "00")
+
 mail_timer=statusd.create_timer()
 update_mail()
+
