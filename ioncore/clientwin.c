@@ -677,8 +677,24 @@ static void do_fit_clientwin(WClientWin *cwin, WRectangle geom, bool rq)
 	cwin->x_off_cache=params.win_x;
 	cwin->y_off_cache=params.win_y;
 	cwin->win_geom=wingeom;
-	REGION_GEOM(cwin)=geom;
 	
+	/* XMoveResizeWindow won't send a ConfigureNotify event if the
+	 * geometry has not changed and some programs expect that.
+	 */
+	{
+		bool changes=(REGION_GEOM(cwin).x!=geom.x ||
+					  REGION_GEOM(cwin).y!=geom.y ||
+					  REGION_GEOM(cwin).w!=geom.w ||
+					  REGION_GEOM(cwin).h!=geom.h);
+		if(!changes){
+			if(rq)
+				sendconfig_clientwin(cwin);
+			return;
+		}
+	}
+	
+	REGION_GEOM(cwin)=geom;
+			
 	if(cwin->flags&CWIN_PROP_ACROBATIC && !REGION_IS_MAPPED(cwin)){
 		XMoveResizeWindow(wglobal.dpy, cwin->win,
 						  -2*wingeom.w, -2*wingeom.h,
@@ -965,8 +981,7 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 		cwin->orig_bw=ev->border_width;
 	
 	if(!sz && !pos){
-		if(ev->value_mask&CWBorderWidth)
-			sendconfig_clientwin(cwin);
+		sendconfig_clientwin(cwin);
 		return;
 	}
 	
