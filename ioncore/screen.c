@@ -40,7 +40,7 @@
 #define SCR_WIN(SCR) ((SCR)->mplex.win.win)
 
 
-WHook *frame_managed_changed_hook=NULL;
+WHook *screen_managed_changed_hook=NULL;
 
 
 /*{{{ Init/deinit */
