@@ -90,10 +90,10 @@ function parse_type(t)
     t=string.gsub(t, "%*", "* ")
     
     -- Check for const
-    local is_const=false
+    local is_const=""
     local s, e=string.find(t, "^const +")
     if s then
-        is_const=true
+        is_const="const "
         t=string.sub(t, e+1)
     end
     
@@ -107,11 +107,9 @@ function parse_type(t)
     end
     
     -- Try to check for supported types
-    if ct2desc[tn] then
-        desc=ct2desc[tn]
-    end
+    desc = ct2desc[is_const .. tn]
     
-    if desc=="o" or desc=="?" then
+    if not desc or desc=="o" then
         s, e=string.find(tn, "^W[%w_]*%*$")
         if s then
             desc="o"
