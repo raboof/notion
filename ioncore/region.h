@@ -143,6 +143,7 @@ extern void region_detach(WRegion *reg);
 extern void region_detach_parent(WRegion *reg);
 extern void region_detach_manager(WRegion *reg);
 
+extern WRegion *region_active_sub(WRegion *reg);
 extern WRegion *region_parent(WRegion *reg);
 extern WRegion *region_manager(WRegion *reg);
 extern WRegion *region_manager_or_parent(WRegion *reg);

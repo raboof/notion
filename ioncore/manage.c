@@ -21,14 +21,6 @@
 #include "extl.h"
 
 
-/* This file contains the add_clientwin_default handler for managing
- * clientwins. It should be called whenever no other handler knows
- * a special way to handle the window. This will then check if there
- * are any properties set indicating where to place the window and if
- * not, pass on the trouble to a suitable workspace (the current).
- */
-
-
 /*{{{ Static helper functions */
 
 
@@ -40,17 +32,35 @@ static bool ws_ok(WRegion *r)
 	
 static WGenWS *find_suitable_workspace(WScreen *scr)
 {
-	WRegion *r=scr->mplex.current_sub;
+	WRegion *r=(WRegion*)scr;
+	WGenWS *ws=NULL;
 	
-	if(ws_ok(r))
-		return (WGenWS*)r;
-
-	FOR_ALL_MANAGED_ON_LIST(scr->mplex.managed_list, r){
-		if(ws_ok(r))
-			return (WGenWS*)r;
+	while(r!=NULL){
+		if(ws_ok(r)){
+			ws=(WGenWS*)r;
+			break; /* Can't continue */
+		}else if(WOBJ_IS(r, WMPlex)){
+			if(ws_ok(((WMPlex*)r)->current_sub))
+				ws=(WGenWS*)((WMPlex*)r)->current_sub;
+		}
+		r=region_active_sub(r);
 	}
+
+	return ws;
 	
+	/*
+	if(ws!=NULL)
+		return ws;
+
+	if(ws==NULL){
+		FOR_ALL_MANAGED_ON_LIST(scr->mplex.managed_list, r){
+			if(ws_ok(r))
+				return (WGenWS*)r;
+		}
+	}
+
 	return NULL;
+	*/
 }
 
 
