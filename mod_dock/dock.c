@@ -1141,6 +1141,7 @@ WDock *mod_dock_create(ExtlTab tab)
             floating=TRUE;
         }else if(strcmp(mode, "embedded")!=0){
             warn("Invalid dock mode.");
+            free(mode);
             return NULL;
         }
         free(mode);
