@@ -161,6 +161,9 @@ bool extltab_to_geom(ExtlTab tab, WRectangle *geomret)
 static WViewport *current_vp=NULL;
 
 
+/* 2003-10-05, TODO: keep for savefile backwards compatibility 
+ * for now, but remove eventually.
+ */
 EXTL_EXPORT
 bool add_to_viewport(ExtlTab tab)
 {
@@ -182,7 +185,7 @@ bool load_workspaces(WViewport *vp)
 		return FALSE;
 	
 	current_vp=vp;
-	successp=read_config(filename);
+	successp=extl_dofile(filename, "o", NULL, vp);
 	current_vp=NULL;
 	
 	free(filename);
@@ -227,6 +230,7 @@ static bool do_save_workspaces(WViewport *vp, char *wsconf)
 {
 	FILE *file;
 	WRegion *reg;
+	const char *name;
 	
 	if(!ensuredir(wsconf))
 		return FALSE;
@@ -239,11 +243,19 @@ static bool do_save_workspaces(WViewport *vp, char *wsconf)
 	}
 	
 	fprintf(file, "-- This file was created by and is modified by Ion.\n");
+	
+	name=region_name((WRegion*)vp);
+	if(name!=NULL){
+		fprintf(file, "region_set_name(arg[1], ");
+		write_escaped_string(file, name);
+		fprintf(file, ")\n");
+	}
+	
 	FOR_ALL_MANAGED_ON_LIST(vp->ws_list, reg){
 		if(region_supports_save(reg)){
-			fprintf(file, "add_to_viewport {\n");
+			fprintf(file, "region_manage_new(arg[1], {\n");
 			region_save_to_file(reg, file, 1);
-			fprintf(file, "}\n");
+			fprintf(file, "})\n");
 		}
 	}
 	
