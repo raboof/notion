@@ -1,4 +1,4 @@
-
+##
 ## Ion-completefile Makefile
 ##
 
@@ -8,10 +8,8 @@ include $(TOPDIR)/system-inc.mk
 
 ######################################
 
-#DIST: LIBS += -L../../libtu -ltu
-LIBS += -ltu
-#DIST: INCLUDES += -I../../libtu/include -I../..
-INCLUDES += -I../..
+LIBS += $(LIBTU_LIBS)
+INCLUDES += $(LIBTU_INCLUDES)
 CFLAGS += $(XOPEN_SOURCE)
 
 SOURCES=ion-completefile.c
