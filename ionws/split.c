@@ -611,7 +611,7 @@ static void adjust_d(int *d, int negmax, int posmax)
 }
 
 
-static void ionws_do_request_geom_dir(WIonWS *ws, Obj *sub, 
+static void ionws_do_rqgeom_dir(WIonWS *ws, Obj *sub, 
                                       int flags, const WRectangle *geom,
                                       WRectangle *geomret, int dir)
 {
@@ -705,20 +705,20 @@ static void ionws_do_request_geom_dir(WIonWS *ws, Obj *sub,
 }
 
 
-static void ionws_do_request_geom(WIonWS *ws, Obj *obj,
+static void ionws_do_rqgeom(WIonWS *ws, Obj *obj,
                                   int flags, const WRectangle *geom,
                                   WRectangle *geomret)
 {
-    ionws_do_request_geom_dir(ws, obj, flags, geom, geomret, HORIZONTAL);
-    ionws_do_request_geom_dir(ws, obj, flags, geom, geomret, VERTICAL);
+    ionws_do_rqgeom_dir(ws, obj, flags, geom, geomret, HORIZONTAL);
+    ionws_do_rqgeom_dir(ws, obj, flags, geom, geomret, VERTICAL);
 }
 
 
-void ionws_request_managed_geom(WIonWS *ws, WRegion *mgd, 
+void ionws_managed_rqgeom(WIonWS *ws, WRegion *mgd, 
                                 int flags, const WRectangle *geom,
                                 WRectangle *geomret)
 {
-    ionws_do_request_geom(ws, (Obj*)mgd, flags, geom, geomret);
+    ionws_do_rqgeom(ws, (Obj*)mgd, flags, geom, geomret);
 }
 
 
@@ -1275,7 +1275,7 @@ static bool ionws_remove_split(WIonWS *ws, WWsSplit *split)
 }
 
 
-void ionws_remove_managed(WIonWS *ws, WRegion *reg)
+void ionws_managed_remove(WIonWS *ws, WRegion *reg)
 {
     WWsSplit *split;
     
@@ -1485,7 +1485,7 @@ ExtlTab split_geom(WWsSplit *split)
 /*EXTL_DOC
  * Attempt to resize and/or move the split tree starting at \var{node}
  * (\type{WWsSplit} or \type{WRegion}). Behaviour and the \var{g} 
- * parameter are as for \fnref{WRegion.request_geom} operating on
+ * parameter are as for \fnref{WRegion.rqgeom} operating on
  * \var{node} (if it were a \type{WRegion}).
  */
 EXTL_EXPORT_MEMBER
@@ -1517,7 +1517,7 @@ ExtlTab ionws_resize_tree(WIonWS *ws, Obj *node, ExtlTab g)
     geom.w=maxof(1, geom.w);
     geom.h=maxof(1, geom.h);
 
-    ionws_do_request_geom(ws, node, flags, &geom, &ogeom);
+    ionws_do_rqgeom(ws, node, flags, &geom, &ogeom);
     
     return extl_table_from_rectangle(&ogeom);
 }

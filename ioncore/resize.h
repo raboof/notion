@@ -18,7 +18,7 @@
 #include "rectangle.h"
 
 
-/* To make it easier for region_request_managed_geom handlers, the geom
+/* To make it easier for region_managed_rqgeom handlers, the geom
  * parameter contain a complete requested geometry for the region that
  * wants its geometry changed. The REGION_WEAK_* flags are used to
  * indicate that the respective geometry value has not been changed or
@@ -29,11 +29,11 @@
 #define REGION_RQGEOM_WEAK_Y    0x0002
 #define REGION_RQGEOM_WEAK_W    0x0004
 #define REGION_RQGEOM_WEAK_H    0x0008
-#define REGION_RQGEOM_WEAK_ALL    0x000f
-#define REGION_RQGEOM_TRYONLY    0x0010
+#define REGION_RQGEOM_WEAK_ALL  0x000f
+#define REGION_RQGEOM_TRYONLY   0x0010
 
 #define REGION_RQGEOM_NORMAL    0
-#define REGION_RQGEOM_VERT_ONLY    (REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_W)
+#define REGION_RQGEOM_VERT_ONLY (REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_W)
 #define REGION_RQGEOM_HORIZ_ONLY (REGION_RQGEOM_WEAK_Y|REGION_RQGEOM_WEAK_H)
 #define REGION_RQGEOM_H_ONLY    (REGION_RQGEOM_VERT_ONLY|REGION_RQGEOM_WEAK_Y)
 #define REGION_RQGEOM_W_ONLY    (REGION_RQGEOM_HORIZ_ONLY|REGION_RQGEOM_WEAK_X)
@@ -85,32 +85,32 @@ extern WMoveresMode *moveres_mode(WRegion *reg);
 /* Note: even if REGION_RQGEOM_(X|Y|W|H) are not all specified, the
  * geom parameter should contain a proper geometry!
  */
-DYNFUN void region_request_managed_geom(WRegion *reg, WRegion *sub,int flags, 
-                                        const WRectangle *geom,
-                                        WRectangle *geomret);
+DYNFUN void region_managed_rqgeom(WRegion *reg, WRegion *sub, int flags, 
+                                  const WRectangle *geom,
+                                  WRectangle *geomret);
 
-extern void region_request_geom(WRegion *reg, int flags, 
-                                const WRectangle *geom,
-                                WRectangle *geomret);
+extern void region_rqgeom(WRegion *reg, int flags, 
+                          const WRectangle *geom,
+                          WRectangle *geomret);
 
 /* Implementation for regions that do not allow subregions to resize
  * themselves; default is to give the size the region wants.
  */
-extern void region_request_managed_geom_unallow(WRegion *reg, WRegion *sub,
-                                                int flags, 
-                                                const WRectangle *geom,
-                                                WRectangle *geomret);
+extern void region_managed_rqgeom_unallow(WRegion *reg, WRegion *sub,
+                                          int flags, 
+                                          const WRectangle *geom,
+                                          WRectangle *geomret);
 /* default */
-extern void region_request_managed_geom_allow(WRegion *reg, WRegion *sub,
-                                              int flags, 
-                                              const WRectangle *geom, 
-                                              WRectangle *geomret);
+extern void region_managed_rqgeom_allow(WRegion *reg, WRegion *sub,
+                                        int flags, 
+                                        const WRectangle *geom, 
+                                        WRectangle *geomret);
 
 /* This function expects a root-relative geometry and the client expects
  * the gravity size hint be taken into account.
  */
-DYNFUN void region_request_clientwin_geom(WRegion *reg, WClientWin *cwin,
-                                          int flags, const WRectangle *geom);
+DYNFUN void region_rqgeom_clientwin(WRegion *reg, WClientWin *cwin,
+                                    int flags, const WRectangle *geom);
 
 DYNFUN void region_resize_hints(WRegion *reg, XSizeHints *hints_ret,
                                 uint *relw_ret, uint *relh_ret);

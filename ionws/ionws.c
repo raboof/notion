@@ -109,7 +109,7 @@ static void ionws_do_set_focus(WIonWS *ws, bool warp)
 }
 
 
-static bool ionws_display_managed(WIonWS *ws, WRegion *reg)
+static bool ionws_managed_display(WIonWS *ws, WRegion *reg)
 {
     return TRUE;
 }
@@ -179,7 +179,7 @@ void ionws_deinit(WIonWS *ws)
     WRegion *reg;
     
     while(ws->managed_list!=NULL)
-        ionws_remove_managed(ws, ws->managed_list);
+        ionws_managed_remove(ws, ws->managed_list);
 
     genws_deinit(&(ws->genws));
     
@@ -187,7 +187,7 @@ void ionws_deinit(WIonWS *ws)
 }
 
 
-static bool ionws_may_destroy_managed(WIonWS *ws, WRegion *reg)
+static bool ionws_managed_may_destroy(WIonWS *ws, WRegion *reg)
 {
     if(ws->split_tree==(Obj*)reg)
         return region_may_destroy((WRegion*)ws);
@@ -439,12 +439,12 @@ static DynFunTab ionws_dynfuntab[]={
     {(DynFun*)region_fitrep,
      (DynFun*)ionws_fitrep},
     
-    {region_request_managed_geom, ionws_request_managed_geom},
+    {region_managed_rqgeom, ionws_managed_rqgeom},
     {region_managed_activated, ionws_managed_activated},
-    {region_remove_managed, ionws_remove_managed},
+    {region_managed_remove, ionws_managed_remove},
     
-    {(DynFun*)region_display_managed,
-     (DynFun*)ionws_display_managed},
+    {(DynFun*)region_managed_display,
+     (DynFun*)ionws_managed_display},
     
     {(DynFun*)region_manage_clientwin, 
      (DynFun*)ionws_manage_clientwin},
@@ -457,8 +457,8 @@ static DynFunTab ionws_dynfuntab[]={
     {(DynFun*)region_get_configuration,
      (DynFun*)ionws_get_configuration},
 
-    {(DynFun*)region_may_destroy_managed,
-     (DynFun*)ionws_may_destroy_managed},
+    {(DynFun*)region_managed_may_destroy,
+     (DynFun*)ionws_managed_may_destroy},
 
     {(DynFun*)region_current,
      (DynFun*)ionws_current},

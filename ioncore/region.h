@@ -94,24 +94,25 @@ DYNFUN void region_unmap(WRegion *reg);
 DYNFUN Window region_xwindow(const WRegion *reg);
 DYNFUN void region_activated(WRegion *reg);
 DYNFUN void region_inactivated(WRegion *reg);
-DYNFUN void region_draw_config_updated(WRegion *reg);
+DYNFUN void region_updategr(WRegion *reg);
 DYNFUN bool region_rqclose(WRegion *reg);
-DYNFUN WRegion *region_control_managed_focus(WRegion *mgr, WRegion *reg);
-DYNFUN void region_remove_managed(WRegion *reg, WRegion *sub);
-DYNFUN bool region_display_managed(WRegion *reg, WRegion *sub);
-DYNFUN void region_managed_activated(WRegion *reg, WRegion *sub);
-DYNFUN void region_managed_inactivated(WRegion *reg, WRegion *sub);
-DYNFUN void region_notify_managed_change(WRegion *reg, WRegion *sub);
-DYNFUN bool region_may_destroy_managed(WRegion *mgr, WRegion *reg);
 DYNFUN WRegion *region_current(WRegion *mgr);
 DYNFUN void region_notify_rootpos(WRegion *reg, int x, int y);
+
+DYNFUN WRegion *region_managed_control_focus(WRegion *mgr, WRegion *reg);
+DYNFUN void region_managed_remove(WRegion *reg, WRegion *sub);
+DYNFUN bool region_managed_display(WRegion *reg, WRegion *sub);
+DYNFUN void region_managed_activated(WRegion *reg, WRegion *sub);
+DYNFUN void region_managed_inactivated(WRegion *reg, WRegion *sub);
+DYNFUN void region_managed_notify(WRegion *reg, WRegion *sub);
+DYNFUN bool region_managed_may_destroy(WRegion *mgr, WRegion *reg);
 
 extern void region_fit(WRegion *reg, const WRectangle *geom, 
                        WRegionFitMode mode);
 extern bool region_reparent(WRegion *reg, WWindow *target, 
                             const WRectangle *geom, WRegionFitMode mode);
 
-extern void region_draw_config_updated_default(WRegion *reg);
+extern void region_updategr_default(WRegion *reg);
 
 extern bool region_may_destroy(WRegion *reg);
 

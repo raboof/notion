@@ -30,7 +30,7 @@ static void propagate_activity(WRegion *reg)
     
     mgr_marked=region_activity(mgr);
     mgr->mgd_activity++;
-    region_notify_managed_change(mgr, reg);
+    region_managed_notify(mgr, reg);
     
     if(!mgr_marked)
         propagate_activity(mgr);
@@ -58,7 +58,7 @@ static void propagate_clear(WRegion *reg)
         return;
     
     mgr->mgd_activity--;
-    region_notify_managed_change(mgr, reg);
+    region_managed_notify(mgr, reg);
     
     if(!region_activity(mgr))
         propagate_clear(mgr);

@@ -484,8 +484,8 @@ static void dock_reshape(WDock *dock)
 }
 /* }}} */
 
-/* dock_request_managed_geom {{{ */
-static void dock_request_managed_geom(WDock *dock, WRegion *reg, int flags,
+/* dock_managed_rqgeom {{{ */
+static void dock_managed_rqgeom(WDock *dock, WRegion *reg, int flags,
                                       const WRectangle *geom,
                                       WRectangle *geomret)
 {
@@ -855,7 +855,7 @@ EXTL_EXPORT_MEMBER
 void dock_resize(WDock *dock)
 {
 
-    dock_request_managed_geom(dock, NULL, 0, NULL, NULL);
+    dock_managed_rqgeom(dock, NULL, 0, NULL, NULL);
     dock_draw(dock, TRUE);
 
 }
@@ -883,8 +883,8 @@ static void dock_brush_get(WDock *dock)
 }
 /* }}} */
 
-/* dock_draw_config_updated {{{ */
-static void dock_draw_config_updated(WDock *dock)
+/* dock_updategr {{{ */
+static void dock_updategr(WDock *dock)
 {
 
     dock_brush_get(dock);
@@ -1125,7 +1125,7 @@ static bool dock_manage_clientwin(WDock *dock, WClientWin *cwin,
 
     region_set_manager((WRegion *)cwin, (WRegion *)dock,
                        &(dock->managed_list));
-    dock_request_managed_geom(dock, (WRegion *)cwin, REGION_RQGEOM_TRYONLY,
+    dock_managed_rqgeom(dock, (WRegion *)cwin, REGION_RQGEOM_TRYONLY,
                               NULL, &geom);
     region_reparent((WRegion *)cwin, (WWindow *)dock, &geom, 
                     REGION_FIT_BOUNDS);
@@ -1137,8 +1137,8 @@ static bool dock_manage_clientwin(WDock *dock, WClientWin *cwin,
 }
 /* }}} */
 
-/* dock_remove_managed {{{ */
-static void dock_remove_managed(WDock *dock, WRegion *reg)
+/* dock_managed_remove {{{ */
+static void dock_managed_remove(WDock *dock, WRegion *reg)
 {
 
     WDockApp *dockapp=dock_find_dockapp(dock, reg);
@@ -1156,10 +1156,10 @@ static void dock_remove_managed(WDock *dock, WRegion *reg)
 
 static DynFunTab dock_dynfuntab[]={ /* {{{ */
     {window_draw, dock_draw},
-    {region_draw_config_updated, dock_draw_config_updated},
-    {region_request_managed_geom, dock_request_managed_geom},
+    {region_updategr, dock_updategr},
+    {region_managed_rqgeom, dock_managed_rqgeom},
     {(DynFun *)region_manage_clientwin, (DynFun *)dock_manage_clientwin},
-    {region_remove_managed, dock_remove_managed},
+    {region_managed_remove, dock_managed_remove},
     END_DYNFUNTAB
 };
 /* }}} */

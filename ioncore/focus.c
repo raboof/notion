@@ -335,7 +335,7 @@ WRegion *region_set_focus_mgrctl(WRegion *freg, bool dowarp)
         mgr=REGION_MANAGER(reg);
         if(mgr==NULL)
             break;
-        reg=region_control_managed_focus(mgr, reg);
+        reg=region_managed_control_focus(mgr, reg);
         if(reg!=NULL)
             freg=reg;
     }

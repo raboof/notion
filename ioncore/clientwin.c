@@ -633,7 +633,7 @@ bool clientwin_attach_transient(WClientWin *cwin, WRegion *transient)
 }
 
 
-static void clientwin_remove_managed(WClientWin *cwin, WRegion *transient)
+static void clientwin_managed_remove(WClientWin *cwin, WRegion *transient)
 {
     bool mcf=region_may_control_focus((WRegion*)cwin);
     
@@ -970,7 +970,7 @@ static void convert_geom(WClientWin *cwin, const WRectangle *max_geom,
 /*{{{ Region dynfuns */
 
 
-static void clientwin_request_managed_geom(WClientWin *cwin, WRegion *sub,
+static void clientwin_managed_rqgeom(WClientWin *cwin, WRegion *sub,
                                            int flags, const WRectangle *geom, 
                                            WRectangle *geomret)
 {
@@ -1103,7 +1103,7 @@ static void clientwin_do_set_focus(WClientWin *cwin, bool warp)
 }
 
 
-static bool clientwin_display_managed(WClientWin *cwin, WRegion *sub)
+static bool clientwin_managed_display(WClientWin *cwin, WRegion *sub)
 {
     if(!REGION_IS_MAPPED(cwin))
         return FALSE;
@@ -1244,7 +1244,7 @@ void clientwin_handle_configure_request(WClientWin *cwin,
         }
         
         /* Rootpos is usually wrong here, but managers (frames) that respect
-         * position at all, should define region_request_clientwin_geom to
+         * position at all, should define region_rqgeom_clientwin to
          * handle this how they see fit.
          */
         region_rootpos((WRegion*)cwin, &(geom.x), &(geom.y));
@@ -1280,13 +1280,13 @@ void clientwin_handle_configure_request(WClientWin *cwin,
         }
         
         mgr=region_manager((WRegion*)cwin);
-        if(mgr!=NULL && HAS_DYN(mgr, region_request_clientwin_geom)){
+        if(mgr!=NULL && HAS_DYN(mgr, region_rqgeom_clientwin)){
             /* Manager gets to decide how to handle position request. */
-            region_request_clientwin_geom(mgr, cwin, rqflags, &geom);
+            region_rqgeom_clientwin(mgr, cwin, rqflags, &geom);
         }else{
             region_convert_root_geom(region_parent((WRegion*)cwin),
                                      &geom);
-            region_request_geom((WRegion*)cwin, rqflags, &geom, NULL);
+            region_rqgeom((WRegion*)cwin, rqflags, &geom, NULL);
         }
     }
 
@@ -1472,8 +1472,8 @@ static DynFunTab clientwin_dynfuntab[]={
     {region_do_set_focus, 
      clientwin_do_set_focus},
     
-    {(DynFun*)region_display_managed,
-     (DynFun*)clientwin_display_managed},
+    {(DynFun*)region_managed_display,
+     (DynFun*)clientwin_managed_display},
     
     {region_notify_rootpos, 
      clientwin_notify_rootpos},
@@ -1490,14 +1490,14 @@ static DynFunTab clientwin_dynfuntab[]={
     {region_resize_hints, 
      clientwin_resize_hints},
     
-    {(DynFun*)region_control_managed_focus,
+    {(DynFun*)region_managed_control_focus,
      (DynFun*)clientwin_managed_focus},
     
-    {region_remove_managed, 
-     clientwin_remove_managed},
+    {region_managed_remove, 
+     clientwin_managed_remove},
     
-    {region_request_managed_geom, 
-     clientwin_request_managed_geom},
+    {region_managed_rqgeom, 
+     clientwin_managed_rqgeom},
     
     {(DynFun*)region_rqclose, 
      (DynFun*)clientwin_rqclose},

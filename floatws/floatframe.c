@@ -173,10 +173,8 @@ void floatframe_geom_from_initial_geom(WFloatFrame *frame,
 
     
 /* geom parameter==client requested geometry minus border crap */
-static void floatframe_request_clientwin_geom(WFloatFrame *frame, 
-                                              WClientWin *cwin,
-                                              int rqflags, 
-                                              const WRectangle *geom_)
+static void floatframe_rqgeom_clientwin(WFloatFrame *frame, WClientWin *cwin,
+                                        int rqflags, const WRectangle *geom_)
 {
     int gravity=NorthWestGravity;
     XSizeHints hints;
@@ -226,7 +224,7 @@ static void floatframe_request_clientwin_geom(WFloatFrame *frame,
             geom.y=REGION_GEOM(par).h-4;
     }
 
-    region_request_geom((WRegion*)frame, REGION_RQGEOM_NORMAL, &geom, NULL);
+    region_rqgeom((WRegion*)frame, REGION_RQGEOM_NORMAL, &geom, NULL);
 }
 
 
@@ -420,9 +418,9 @@ static const char *floatframe_tab_style_default(WFloatFrame *frame)
 }
 
 
-/*static void floatframe_draw_config_updated(WFloatFrame *floatframe)
+/*static void floatframe_updategr(WFloatFrame *floatframe)
 {
-    frame_draw_config_updated((WFrame*)floatframe);
+    frame_updategr((WFrame*)floatframe);
 }*/
 
 
@@ -432,9 +430,9 @@ static const char *floatframe_tab_style_default(WFloatFrame *frame)
 /*{{{ Add/remove */
 
 
-void floatframe_remove_managed(WFloatFrame *frame, WRegion *reg)
+void floatframe_managed_remove(WFloatFrame *frame, WRegion *reg)
 {
-    mplex_remove_managed((WMPlex*)frame, reg);
+    mplex_managed_remove((WMPlex*)frame, reg);
     if(FRAME_MCOUNT(frame)==0 && !OBJ_IS_BEING_DESTROYED(frame))
         ioncore_defer_destroy((Obj*)frame);
 }
@@ -535,9 +533,9 @@ static DynFunTab floatframe_dynfuntab[]={
     {frame_bar_geom, floatframe_bar_geom},
     {frame_border_inner_geom, floatframe_border_inner_geom},
     {frame_border_geom, floatframe_border_geom},
-    {region_remove_managed, floatframe_remove_managed},
+    {region_managed_remove, floatframe_managed_remove},
     
-    {region_request_clientwin_geom, floatframe_request_clientwin_geom},
+    {region_rqgeom_clientwin, floatframe_rqgeom_clientwin},
     
     {(DynFun*)region_get_configuration,
      (DynFun*)floatframe_get_configuration},

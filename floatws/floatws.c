@@ -182,7 +182,7 @@ static void floatws_do_set_focus(WFloatWS *ws, bool warp)
 }
 
 
-static bool floatws_display_managed(WFloatWS *ws, WRegion *reg)
+static bool floatws_managed_display(WFloatWS *ws, WRegion *reg)
 {
     if(!region_is_fully_mapped((WRegion*)ws))
        return FALSE;
@@ -191,7 +191,7 @@ static bool floatws_display_managed(WFloatWS *ws, WRegion *reg)
 }
 
 
-static void floatws_remove_managed(WFloatWS *ws, WRegion *reg)
+static void floatws_managed_remove(WFloatWS *ws, WRegion *reg)
 {
     WRegion *next=NULL;
     bool mcf=region_may_control_focus((WRegion*)ws);
@@ -786,8 +786,8 @@ static DynFunTab floatws_dynfuntab[]={
      floatws_map},
     {region_unmap, 
      floatws_unmap},
-    {(DynFun*)region_display_managed, 
-     (DynFun*)floatws_display_managed},
+    {(DynFun*)region_managed_display, 
+     (DynFun*)floatws_managed_display},
 
     {region_do_set_focus, 
      floatws_do_set_focus},
@@ -798,8 +798,8 @@ static DynFunTab floatws_dynfuntab[]={
      (DynFun*)floatws_manage_clientwin},
     {(DynFun*)region_handle_drop,
      (DynFun*)floatws_handle_drop},
-    {region_remove_managed,
-     floatws_remove_managed},
+    {region_managed_remove,
+     floatws_managed_remove},
     
     {(DynFun*)region_get_configuration, 
      (DynFun*)floatws_get_configuration},

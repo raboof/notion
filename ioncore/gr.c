@@ -416,7 +416,7 @@ void gr_refresh()
     WRootWin *rootwin;
     
     FOR_ALL_ROOTWINS(rootwin){
-        region_draw_config_updated((WRegion*)rootwin);
+        region_updategr((WRegion*)rootwin);
     }
 }
 

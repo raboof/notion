@@ -389,7 +389,7 @@ static void moveresmode_delta(WMoveresMode *mode,
         moveres_draw_rubberband(mode);
     
     if(mode->reg!=NULL)
-        region_request_geom(mode->reg, mode->rqflags, &geom, &mode->geom);
+        region_rqgeom(mode->reg, mode->rqflags, &geom, &mode->geom);
     
     if(!mode->resize_cumulative){
         mode->dx1=0;
@@ -464,7 +464,7 @@ bool moveresmode_do_end(WMoveresMode *mode, bool apply)
         moveres_draw_rubberband(mode);
         if(apply){
             WRectangle g2=mode->geom;
-            region_request_geom(reg, mode->rqflags&~REGION_RQGEOM_TRYONLY,
+            region_rqgeom(reg, mode->rqflags&~REGION_RQGEOM_TRYONLY,
                                 &g2, &mode->geom);
         }
         XUngrabServer(ioncore_g.dpy);
@@ -488,13 +488,13 @@ bool moveresmode_do_end(WMoveresMode *mode, bool apply)
 /*{{{ Request and other dynfuns */
 
 
-void region_request_geom(WRegion *reg, int flags, const WRectangle *geom,
+void region_rqgeom(WRegion *reg, int flags, const WRectangle *geom,
                          WRectangle *geomret)
 {
     bool tryonly=(flags&REGION_RQGEOM_TRYONLY);
     
     if(REGION_MANAGER(reg)!=NULL){
-        region_request_managed_geom(REGION_MANAGER(reg), reg, flags, geom,
+        region_managed_rqgeom(REGION_MANAGER(reg), reg, flags, geom,
                                     geomret);
     }else{
         if(geomret!=NULL)
@@ -514,8 +514,8 @@ void region_request_geom(WRegion *reg, int flags, const WRectangle *geom,
  * but may contain missing fields, in which case, \var{reg}'s manager may
  * attempt to leave that attribute unchanged.
  */
-EXTL_EXPORT_AS(WRegion, request_geom)
-ExtlTab region_request_geom_extl(WRegion *reg, ExtlTab g)
+EXTL_EXPORT_AS(WRegion, rqgeom)
+ExtlTab region_rqgeom_extl(WRegion *reg, ExtlTab g)
 {
     WRectangle geom=REGION_GEOM(reg);
     WRectangle ogeom=REGION_GEOM(reg);
@@ -533,29 +533,29 @@ ExtlTab region_request_geom_extl(WRegion *reg, ExtlTab g)
     geom.w=maxof(1, geom.w);
     geom.h=maxof(1, geom.h);
     
-    region_request_geom(reg, flags, &geom, &ogeom);
+    region_rqgeom(reg, flags, &geom, &ogeom);
     
     return extl_table_from_rectangle(&ogeom);
 }
 
 
-void region_request_managed_geom(WRegion *mgr, WRegion *reg,
+void region_managed_rqgeom(WRegion *mgr, WRegion *reg,
                                  int flags, const WRectangle *geom,
                                  WRectangle *geomret)
 {
-    CALL_DYN(region_request_managed_geom, mgr,
+    CALL_DYN(region_managed_rqgeom, mgr,
              (mgr, reg, flags, geom, geomret));
 }
 
 
-void region_request_clientwin_geom(WRegion *mgr, WClientWin *cwin,
-                                   int flags, const WRectangle *geom)
+void region_rqgeom_clientwin(WRegion *mgr, WClientWin *cwin,
+                             int flags, const WRectangle *geom)
 {
-    CALL_DYN(region_request_clientwin_geom, mgr, (mgr, cwin, flags, geom));
+    CALL_DYN(region_rqgeom_clientwin, mgr, (mgr, cwin, flags, geom));
 }
 
 
-void region_request_managed_geom_allow(WRegion *mgr, WRegion *reg,
+void region_managed_rqgeom_allow(WRegion *mgr, WRegion *reg,
                                        int flags, const WRectangle *geom,
                                        WRectangle *geomret)
 {
@@ -567,7 +567,7 @@ void region_request_managed_geom_allow(WRegion *mgr, WRegion *reg,
 }
 
 
-void region_request_managed_geom_unallow(WRegion *mgr, WRegion *reg,
+void region_managed_rqgeom_unallow(WRegion *mgr, WRegion *reg,
                                          int flags, const WRectangle *geom,
                                          WRectangle *geomret)
 {
@@ -618,7 +618,7 @@ void frame_restore_size(WFrame *frame, bool horiz, bool vert)
     }
     
     if((rqf&REGION_RQGEOM_WEAK_ALL)!=REGION_RQGEOM_WEAK_ALL)
-        region_request_geom((WRegion*)frame, rqf, &geom, NULL);
+        region_rqgeom((WRegion*)frame, rqf, &geom, NULL);
 }
 
 
@@ -651,7 +651,7 @@ static bool trymaxv(WFrame *frame, WRegion *mgr, int tryonlyflag)
         correct_frame_size(frame, &dummy_w, &(geom.h));
     }
     
-    region_request_geom((WRegion*)frame, 
+    region_rqgeom((WRegion*)frame, 
                         tryonlyflag|REGION_RQGEOM_VERT_ONLY, 
                         &geom, &rgeom);
     return (abs(rgeom.y-REGION_GEOM(frame).y)>1 ||
@@ -696,7 +696,7 @@ static bool trymaxh(WFrame *frame, WRegion *mgr, int tryonlyflag)
         correct_frame_size(frame, &(geom.w), &dummy_h);
     }
     
-    region_request_geom((WRegion*)frame, 
+    region_rqgeom((WRegion*)frame, 
                         tryonlyflag|REGION_RQGEOM_HORIZ_ONLY, 
                         &geom, &rgeom);
     return (abs(rgeom.x-REGION_GEOM(frame).x)>1 ||

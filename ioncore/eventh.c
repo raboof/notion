@@ -326,7 +326,7 @@ void ioncore_handle_enter_window(XEvent *ev)
         mgr=REGION_MANAGER(reg);
         if(mgr==NULL)
             break;
-        reg=region_control_managed_focus(mgr, reg);
+        reg=region_managed_control_focus(mgr, reg);
         if(reg!=NULL)
             freg=reg;
     }

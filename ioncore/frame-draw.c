@@ -300,7 +300,7 @@ const char *frame_tab_style_default(WFrame *frame)
 /*{{{ Misc. */
 
 
-void frame_draw_config_updated(WFrame *frame)
+void frame_updategr(WFrame *frame)
 {
     Window win=FRAME_WIN(frame);
     WRectangle geom;
@@ -313,7 +313,7 @@ void frame_draw_config_updated(WFrame *frame)
     mplex_managed_geom(&frame->mplex, &geom);
     
     FOR_ALL_CHILDREN(frame, sub){
-        region_draw_config_updated(sub);
+        region_updategr(sub);
     }
     
     mplex_fit_managed(&frame->mplex);

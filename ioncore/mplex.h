@@ -69,7 +69,7 @@ extern WRegion *mplex_attach_new(WMPlex *mplex, ExtlTab param);
 
 extern void mplex_attach_tagged(WMPlex *mplex);
 
-extern void mplex_remove_managed(WMPlex *mplex, WRegion *reg);
+extern void mplex_managed_remove(WMPlex *mplex, WRegion *reg);
 
 extern bool mplex_rescue_clientwins(WMPlex *mplex);
 
@@ -79,7 +79,7 @@ extern bool mplex_manage_rescue(WMPlex *mplex, WClientWin *cwin,
                                 WRegion *from);
 
 /* Switch */
-extern bool mplex_display_managed(WMPlex *mplex, WRegion *sub);
+extern bool mplex_managed_display(WMPlex *mplex, WRegion *sub);
 extern void mplex_switch_nth(WMPlex *mplex, uint n);
 extern void mplex_switch_next(WMPlex *mplex);
 extern void mplex_switch_prev(WMPlex *mplex);

@@ -336,7 +336,7 @@ int screen_id(WScreen *scr)
 
 
 
-static bool screen_may_destroy_managed(WScreen *scr, WRegion *reg)
+static bool screen_managed_may_destroy(WScreen *scr, WRegion *reg)
 {
     WRegion *r2;
     
@@ -437,8 +437,8 @@ static DynFunTab screen_dynfuntab[]={
     {region_unmap, screen_unmap},
     {region_activated, screen_activated},
     
-    {(DynFun*)region_may_destroy_managed,
-     (DynFun*)screen_may_destroy_managed},
+    {(DynFun*)region_managed_may_destroy,
+     (DynFun*)screen_managed_may_destroy},
 
     {mplex_managed_changed, screen_managed_changed},
     

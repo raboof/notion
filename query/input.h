@@ -32,7 +32,7 @@ extern void input_fitrep(WInput *input, WWindow *par, const WFitParams *fp);
 extern void input_refit(WInput *input);
 extern void input_cancel(WInput *input);
 extern bool input_rqclose(WInput *input);
-extern void input_draw_config_updated(WInput *input);
+extern void input_updategr(WInput *input);
 
 DYNFUN void input_scrollup(WInput *input);
 DYNFUN void input_scrolldown(WInput *input);

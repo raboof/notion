@@ -132,9 +132,9 @@ bool region_fitrep(WRegion *reg, WWindow *par, const WFitParams *fp)
 }
 
 
-void region_draw_config_updated(WRegion *reg)
+void region_updategr(WRegion *reg)
 {
-    CALL_DYN(region_draw_config_updated, reg, (reg));
+    CALL_DYN(region_updategr, reg, (reg));
 }
 
 
@@ -200,10 +200,10 @@ bool region_rqclose(WRegion *reg)
 }
 
 
-bool region_may_destroy_managed(WRegion *mgr, WRegion *reg)
+bool region_managed_may_destroy(WRegion *mgr, WRegion *reg)
 {
     bool ret=TRUE;
-    CALL_DYN_RET(ret, bool, region_may_destroy_managed, mgr, (mgr, reg));
+    CALL_DYN_RET(ret, bool, region_managed_may_destroy, mgr, (mgr, reg));
     return ret;
 }
 
@@ -223,30 +223,30 @@ void region_managed_inactivated(WRegion *mgr, WRegion *reg)
 }
 
 
-bool region_display_managed(WRegion *mgr, WRegion *reg)
+bool region_managed_display(WRegion *mgr, WRegion *reg)
 {
     bool ret=TRUE;
-    CALL_DYN_RET(ret, bool, region_display_managed, mgr, (mgr, reg));
+    CALL_DYN_RET(ret, bool, region_managed_display, mgr, (mgr, reg));
     return ret;
 }
 
 
-void region_notify_managed_change(WRegion *mgr, WRegion *reg)
+void region_managed_notify(WRegion *mgr, WRegion *reg)
 {
-    CALL_DYN(region_notify_managed_change, mgr, (mgr, reg));
+    CALL_DYN(region_managed_notify, mgr, (mgr, reg));
 }
 
 
-void region_remove_managed(WRegion *mgr, WRegion *reg)
+void region_managed_remove(WRegion *mgr, WRegion *reg)
 {
-    CALL_DYN(region_remove_managed, mgr, (mgr, reg));
+    CALL_DYN(region_managed_remove, mgr, (mgr, reg));
 }
 
 
-WRegion *region_control_managed_focus(WRegion *mgr, WRegion *reg)
+WRegion *region_managed_control_focus(WRegion *mgr, WRegion *reg)
 {
     WRegion *ret=NULL;
-    CALL_DYN_RET(ret, WRegion*, region_control_managed_focus, mgr, (mgr, reg));
+    CALL_DYN_RET(ret, WRegion*, region_managed_control_focus, mgr, (mgr, reg));
     return ret;
 }
 
@@ -279,12 +279,12 @@ static void region_notify_rootpos_default(WRegion *reg, int x, int y)
 }
 
 
-void region_draw_config_updated_default(WRegion *reg)
+void region_updategr_default(WRegion *reg)
 {
     WRegion *sub=NULL;
     
     FOR_ALL_CHILDREN(reg, sub){
-        region_draw_config_updated(sub);
+        region_updategr(sub);
     }
 }
 
@@ -352,7 +352,7 @@ void region_detach_manager(WRegion *reg)
 
     region_clear_activity(reg);
 
-    region_remove_managed(mgr, reg);
+    region_managed_remove(mgr, reg);
     
     assert(REGION_MANAGER(reg)==NULL);
 }
@@ -387,7 +387,7 @@ bool region_display(WRegion *reg)
     if(mgr!=NULL){
         if(!region_display(mgr))
             return FALSE;
-        return region_display_managed(mgr, reg);
+        return region_managed_display(mgr, reg);
     }
     
     preg=region_parent(reg);
@@ -558,7 +558,7 @@ void region_notify_change(WRegion *reg)
     WRegion *mgr=REGION_MANAGER(reg);
     
     if(mgr!=NULL)
-        region_notify_managed_change(mgr, reg);
+        region_managed_notify(mgr, reg);
 }
 
 
@@ -645,7 +645,7 @@ bool region_may_destroy(WRegion *reg)
     if(mgr==NULL)
         return TRUE;
     else
-        return region_may_destroy_managed(mgr, reg);
+        return region_managed_may_destroy(mgr, reg);
 }
 
 
@@ -728,11 +728,11 @@ static DynFunTab region_dynfuntab[]={
     {region_notify_rootpos, 
      region_notify_rootpos_default},
     
-    {region_request_managed_geom,
-     region_request_managed_geom_allow},
+    {region_managed_rqgeom,
+     region_managed_rqgeom_allow},
     
-    {region_draw_config_updated, 
-     region_draw_config_updated_default},
+    {region_updategr, 
+     region_updategr_default},
     
     {(DynFun*)region_rescue_clientwins,
      (DynFun*)region_rescue_child_clientwins},

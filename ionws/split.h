@@ -66,10 +66,10 @@ extern int split_tree_other_size(Obj *obj, int dir);
 extern void ionws_add_managed(WIonWS *ws, WRegion *reg);
 extern void ionws_managed_activated(WIonWS *ws, WRegion *reg);
 extern bool ionws_manage_rescue(WIonWS *ws, WClientWin *cwin, WRegion *from);
-extern void ionws_request_managed_geom(WIonWS *ws, WRegion *reg,
+extern void ionws_managed_rqgeom(WIonWS *ws, WRegion *reg,
                                        int flags, const WRectangle *geom,
                                        WRectangle *geomret);
-extern void ionws_remove_managed(WIonWS *ws, WRegion *reg);
+extern void ionws_managed_remove(WIonWS *ws, WRegion *reg);
 
 extern WRegion *ionws_current(WIonWS *ws);
 extern WRegion *ionws_next_to(WIonWS *ws, WRegion *reg, const char *str);

@@ -485,7 +485,7 @@ static void frame_do_toggle_shade(WFrame *frame, int shaded_h)
         geom.h=shaded_h;
     }
     
-    region_request_geom((WRegion*)frame, REGION_RQGEOM_H_ONLY,
+    region_rqgeom((WRegion*)frame, REGION_RQGEOM_H_ONLY,
                         &geom, NULL);
 }
 
@@ -532,7 +532,7 @@ bool frame_is_tabbar_hidden(WFrame *frame)
 }
 
 
-void frame_notify_managed_change(WFrame *frame, WRegion *sub)
+void frame_managed_notify(WFrame *frame, WRegion *sub)
 {
     /* TODO: Should only draw/update the affected tab.*/
     update_attrs(frame);
@@ -542,7 +542,7 @@ void frame_notify_managed_change(WFrame *frame, WRegion *sub)
 
 
 static void frame_size_changed_default(WFrame *frame,
-                                          bool wchg, bool hchg)
+                                       bool wchg, bool hchg)
 {
     if(wchg)
         frame_recalc_bar(frame);
@@ -552,7 +552,7 @@ static void frame_size_changed_default(WFrame *frame,
 
 
 static void frame_managed_changed(WFrame *frame, int mode, bool sw,
-                                     WRegion *reg)
+                                  WRegion *reg)
 {
     if(mode!=MPLEX_CHANGE_SWITCHONLY)
         frame_initialise_titles(frame);
@@ -645,7 +645,7 @@ static DynFunTab frame_dynfuntab[]={
 
     {mplex_managed_changed, frame_managed_changed},
     {mplex_size_changed, frame_size_changed_default},
-    {region_notify_managed_change, frame_notify_managed_change},
+    {region_managed_notify, frame_managed_notify},
     
     {region_activated, frame_activated},
     {region_inactivated, frame_inactivated},
@@ -674,8 +674,8 @@ static DynFunTab frame_dynfuntab[]={
     {mplex_managed_geom, 
      frame_managed_geom_default},
 
-    {region_draw_config_updated, 
-     frame_draw_config_updated},
+    {region_updategr, 
+     frame_updategr},
 
     {(DynFun*)region_fitrep,
      (DynFun*)frame_fitrep},

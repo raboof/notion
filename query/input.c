@@ -85,7 +85,7 @@ void input_fitrep(WInput *input, WWindow *par, const WFitParams *fp)
 }
 
 
-void input_draw_config_updated(WInput *input)
+void input_updategr(WInput *input)
 {
     GrBrush *brush;
     
@@ -101,7 +101,7 @@ void input_draw_config_updated(WInput *input)
     input->brush=brush;
     input_refit(input);
     
-    region_draw_config_updated_default((WRegion*)input);
+    region_updategr_default((WRegion*)input);
     
     window_draw((WWindow*)input, TRUE);
 }
@@ -194,7 +194,7 @@ static void input_activated(WInput *input)
 
 static DynFunTab input_dynfuntab[]={
     {(DynFun*)region_fitrep, (DynFun*)input_fitrep},
-    {region_draw_config_updated, input_draw_config_updated},
+    {region_updategr, input_updategr},
     {(DynFun*)region_rqclose, (DynFun*)input_rqclose},
     {region_activated, input_activated},
     {region_inactivated, input_inactivated},

@@ -387,7 +387,7 @@ void mplex_fit_managed(WMPlex *mplex)
 }
 
 
-static void mplex_request_managed_geom(WMPlex *mplex, WRegion *sub,
+static void mplex_managed_rqgeom(WMPlex *mplex, WRegion *sub,
                                        int flags, const WRectangle *geom, 
                                        WRectangle *geomret)
 {
@@ -476,7 +476,7 @@ void mplex_do_set_focus(WMPlex *mplex, bool warp)
 }
     
 
-static WRegion *mplex_control_managed_focus(WMPlex *mplex, WRegion *reg)
+static WRegion *mplex_managed_control_focus(WMPlex *mplex, WRegion *reg)
 {
     return mplex->l2_current;
 }
@@ -520,7 +520,7 @@ bool mplex_l2_hide(WMPlex *mplex, WRegion *reg)
         if(toact!=NULL){
             mplex->l2_current=toact;
             if(mcf)
-                mplex_display_managed(mplex, toact);
+                mplex_managed_display(mplex, toact);
         }else if(mcf){
             region_set_focus((WRegion*)mplex);
         }
@@ -567,7 +567,7 @@ bool mplex_l2_show(WMPlex *mplex, WRegion *reg)
 }
 
 
-static bool mplex_do_display_managed(WMPlex *mplex, WRegion *sub)
+static bool mplex_do_managed_display(WMPlex *mplex, WRegion *sub)
 {
     bool mapped;
     bool l2=FALSE;
@@ -612,9 +612,9 @@ static bool mplex_do_display_managed(WMPlex *mplex, WRegion *sub)
 }
 
 
-bool mplex_display_managed(WMPlex *mplex, WRegion *sub)
+bool mplex_managed_display(WMPlex *mplex, WRegion *sub)
 {
-    if(mplex_do_display_managed(mplex, sub)){
+    if(mplex_do_managed_display(mplex, sub)){
         mplex_managed_changed(mplex, MPLEX_CHANGE_SWITCHONLY, TRUE, sub);
         return TRUE;
     }
@@ -706,7 +706,7 @@ static WRegion *mplex_do_attach(WMPlex *mplex, WRegionAttachHandler *hnd,
         region_keep_on_top(reg);
 
     if(sw || (!l2 && mplex->l1_count==1)){
-        mplex_do_display_managed(mplex, reg);
+        mplex_do_managed_display(mplex, reg);
         mplex_managed_changed(mplex, MPLEX_CHANGE_ADD, TRUE, reg);
     }else{
         region_unmap(reg);
@@ -884,7 +884,7 @@ bool mplex_manage_rescue(WMPlex *mplex, WClientWin *cwin, WRegion *from)
 /*{{{ Remove */
 
 
-void mplex_remove_managed(WMPlex *mplex, WRegion *sub)
+void mplex_managed_remove(WMPlex *mplex, WRegion *sub)
 {
     WRegion *next=NULL;
     bool l2=FALSE;
@@ -923,7 +923,7 @@ void mplex_remove_managed(WMPlex *mplex, WRegion *sub)
         return;
     
     if(next!=NULL && sw)
-        mplex_do_display_managed(mplex, next);
+        mplex_do_managed_display(mplex, next);
     else if(l2 && region_may_control_focus((WRegion*)mplex))
         region_set_focus((WRegion*)mplex);
     
@@ -1038,12 +1038,12 @@ void mplex_load_contents(WMPlex *mplex, ExtlTab tab)
 
 static DynFunTab mplex_dynfuntab[]={
     {region_do_set_focus, mplex_do_set_focus},
-    {(DynFun*)region_control_managed_focus,
-     (DynFun*)mplex_control_managed_focus},
+    {(DynFun*)region_managed_control_focus,
+     (DynFun*)mplex_managed_control_focus},
     
-    {region_remove_managed, mplex_remove_managed},
-    {region_request_managed_geom, mplex_request_managed_geom},
-    {(DynFun*)region_display_managed, (DynFun*)mplex_display_managed},
+    {region_managed_remove, mplex_managed_remove},
+    {region_managed_rqgeom, mplex_managed_rqgeom},
+    {(DynFun*)region_managed_display, (DynFun*)mplex_managed_display},
 
     {(DynFun*)region_handle_drop, (DynFun*)mplex_handle_drop},
     

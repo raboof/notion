@@ -38,6 +38,6 @@ extern void frame_brushes_updated_default(WFrame *frame);
 extern void frame_initialise_gr(WFrame *frame);
 extern void frame_release_brushes(WFrame *frame);
 extern bool frame_set_background(WFrame *frame, bool set_always);
-extern void frame_draw_config_updated(WFrame *frame);
+extern void frame_updategr(WFrame *frame);
 
 #endif /* ION_IONCORE_FRAME_DRAW_H */

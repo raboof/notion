@@ -449,7 +449,7 @@ static void rootwin_unmap(WRootWin *rootwin)
 }
 
 
-static void rootwin_remove_managed(WRootWin *rootwin, WRegion *reg)
+static void rootwin_managed_remove(WRootWin *rootwin, WRegion *reg)
 {
     region_unset_manager(reg, (WRegion*)rootwin, &(rootwin->screen_list));
 }
@@ -524,7 +524,7 @@ static DynFunTab rootwin_dynfuntab[]={
     {region_do_set_focus, rootwin_do_set_focus},
     {(DynFun*)region_xwindow, (DynFun*)rootwin_x_window},
     {(DynFun*)region_fitrep, (DynFun*)rootwin_fitrep},
-    {region_remove_managed, rootwin_remove_managed},
+    {region_managed_remove, rootwin_managed_remove},
     END_DYNFUNTAB
 };
 

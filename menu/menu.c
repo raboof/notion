@@ -412,7 +412,7 @@ static bool menu_init_gr(WMenu *menu, WRootWin *rootwin, Window win)
 }
 
 
-void menu_draw_config_updated(WMenu *menu)
+void menu_updategr(WMenu *menu)
 {
     if(!menu_init_gr(menu, region_rootwin_of((WRegion*)menu),
                      MENU_WIN(menu)))
@@ -420,7 +420,7 @@ void menu_draw_config_updated(WMenu *menu)
     
     menu_do_refit(menu, NULL, &(menu->last_fp));
     
-    region_draw_config_updated_default((WRegion*)menu);
+    region_updategr_default((WRegion*)menu);
     
     window_draw((WWindow*)menu, TRUE);
 }
@@ -600,7 +600,7 @@ static WMenu *menu_tail(WMenu *menu)
 }
 
 
-static void menu_remove_managed(WMenu *menu, WRegion *sub)
+static void menu_managed_remove(WMenu *menu, WRegion *sub)
 {
     bool mcf=region_may_control_focus((WRegion*)menu);
     
@@ -1203,11 +1203,11 @@ void menu_typeahead_clear(WMenu *menu)
 
 static DynFunTab menu_dynfuntab[]={
     {(DynFun*)region_fitrep, (DynFun*)menu_fitrep},
-    {region_draw_config_updated, menu_draw_config_updated},
+    {region_updategr, menu_updategr},
     {(DynFun*)region_rqclose, (DynFun*)menu_rqclose},
     {window_draw, menu_draw},
     {(DynFun*)window_press, (DynFun*)menu_press},
-    {region_remove_managed, menu_remove_managed},
+    {region_managed_remove, menu_managed_remove},
     {region_do_set_focus, menu_do_set_focus},
     {region_activated, menu_activated},
     {region_inactivated, menu_inactivated},

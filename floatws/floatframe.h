@@ -33,7 +33,7 @@ DECLCLASS(WFloatFrame){
 
 extern WFloatFrame *create_floatframe(WWindow *parent, const WFitParams *fp);
 
-extern void floatframe_remove_managed(WFloatFrame *frame, WRegion *reg);
+extern void floatframe_managed_remove(WFloatFrame *frame, WRegion *reg);
 
 extern WRegion *floatframe_load(WWindow *par, const WFitParams *fp, 
                                 ExtlTab tab);
