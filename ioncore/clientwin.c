@@ -602,6 +602,18 @@ static void clientwin_remove_managed(WClientWin *cwin, WRegion *transient)
 }
 
 
+static bool clientwin_do_rescue_clientwins(WClientWin *cwin, WRegion *dst)
+{
+	bool ret1, ret2;
+	
+	ret1=region_do_rescue_managed_clientwins((WRegion*)cwin, dst,
+											 cwin->transient_list);
+	ret2=region_do_rescue_child_clientwins((WRegion*)cwin, dst);
+	
+	return (ret1 && ret2);
+}
+
+
 /*}}}*/
 
 
@@ -677,7 +689,7 @@ void clientwin_deinit(WClientWin *cwin)
 void clientwin_unmapped(WClientWin *cwin)
 {
 	bool cf=region_may_control_focus((WRegion*)cwin);
-	rescue_managed_clientwins((WRegion*)cwin, cwin->transient_list);
+	region_rescue_clientwins((WRegion*)cwin);
 	if(cf && cwin->fsinfo.last_mgr_watch.obj!=NULL)
 		region_goto((WRegion*)(cwin->fsinfo.last_mgr_watch.obj));
 	destroy_obj((WObj*)cwin);
@@ -1335,23 +1347,57 @@ WRegion *clientwin_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
 
 
 static DynFunTab clientwin_dynfuntab[]={
-	{region_fit, clientwin_fit},
-	{(DynFun*)reparent_region, (DynFun*)reparent_clientwin},
-	{region_map, clientwin_map},
-	{region_unmap, clientwin_unmap},
-	{region_set_focus_to, clientwin_set_focus_to},
-	{(DynFun*)region_display_managed, (DynFun*)clientwin_display_managed},
-	{region_notify_rootpos, clientwin_notify_rootpos},
-	{(DynFun*)region_restack, (DynFun*)clientwin_restack},
-	{(DynFun*)region_x_window, (DynFun*)clientwin_x_window},
-	{region_activated, clientwin_activated},
-	{region_resize_hints, clientwin_resize_hints},
+	{region_fit,
+	 clientwin_fit},
+	
+	{(DynFun*)reparent_region,
+	 (DynFun*)reparent_clientwin},
+	
+	{region_map,
+	 clientwin_map},
+	
+	{region_unmap,
+	 clientwin_unmap},
+	
+	{region_set_focus_to, 
+	 clientwin_set_focus_to},
+	
+	{(DynFun*)region_display_managed,
+	 (DynFun*)clientwin_display_managed},
+	
+	{region_notify_rootpos, 
+	 clientwin_notify_rootpos},
+	
+	{(DynFun*)region_restack, 
+	 (DynFun*)clientwin_restack},
+	
+	{(DynFun*)region_x_window, 
+	 (DynFun*)clientwin_x_window},
+	
+	{region_activated, 
+	 clientwin_activated},
+	
+	{region_resize_hints, 
+	 clientwin_resize_hints},
+	
 	{(DynFun*)region_managed_enter_to_focus,
 	 (DynFun*)clientwin_managed_enter_to_focus},
-	{region_remove_managed, clientwin_remove_managed},
-	{region_request_managed_geom, clientwin_request_managed_geom},
-	{region_close, clientwin_close},
-	{(DynFun*)region_save_to_file, (DynFun*)clientwin_save_to_file},
+	
+	{region_remove_managed, 
+	 clientwin_remove_managed},
+	
+	{region_request_managed_geom, 
+	 clientwin_request_managed_geom},
+	
+	{region_close, 
+	 clientwin_close},
+	
+	{(DynFun*)region_save_to_file, 
+	 (DynFun*)clientwin_save_to_file},
+	
+	{(DynFun*)region_do_rescue_clientwins,
+	 (DynFun*)clientwin_do_rescue_clientwins},
+	
 	END_DYNFUNTAB
 };
 

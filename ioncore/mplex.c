@@ -626,6 +626,18 @@ void mplex_remove_managed(WMPlex *mplex, WRegion *reg)
 }
 
 
+static bool mplex_do_rescue_clientwins(WMPlex *mplex, WRegion *dst)
+{
+	bool ret1, ret2;
+	
+	ret1=region_do_rescue_managed_clientwins((WRegion*)mplex, dst,
+											 mplex->managed_list);
+	ret2=region_do_rescue_child_clientwins((WRegion*)mplex, dst);
+	
+	return (ret1 && ret2);
+}
+
+
 /*}}}*/
 
 
@@ -756,6 +768,9 @@ static DynFunTab mplex_dynfuntab[]={
 	
 	{(DynFun*)region_current,
 	 (DynFun*)mplex_current},
+
+	{(DynFun*)region_do_rescue_clientwins,
+	 (DynFun*)mplex_do_rescue_clientwins},
 			
 	END_DYNFUNTAB
 };

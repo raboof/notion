@@ -200,6 +200,13 @@ static bool ionws_may_destroy_managed(WIonWS *ws, WRegion *reg)
 }
 
 
+static bool ionws_do_rescue_clientwins(WIonWS *ws, WRegion *dst)
+{
+	return region_do_rescue_managed_clientwins((WRegion*)ws, dst,
+											   ws->managed_list);
+}
+
+
 /*}}}*/
 
 
@@ -427,19 +434,27 @@ static DynFunTab ionws_dynfuntab[]={
 	{region_map, ionws_map},
 	{region_unmap, ionws_unmap},
 	{region_set_focus_to, ionws_set_focus_to},
-	{(DynFun*)reparent_region, (DynFun*)reparent_ionws},
+	{(DynFun*)reparent_region,
+     (DynFun*)reparent_ionws},
 	
-	{(DynFun*)region_manage_clientwin, (DynFun*)ionws_manage_clientwin},
+	{(DynFun*)region_manage_clientwin, 
+     (DynFun*)ionws_manage_clientwin},
 
 	{region_request_managed_geom, ionws_request_managed_geom},
 	{region_managed_activated, ionws_managed_activated},
 	{region_remove_managed, ionws_remove_managed},
-	{(DynFun*)region_display_managed, (DynFun*)ionws_display_managed},
+	
+	{(DynFun*)region_display_managed,
+     (DynFun*)ionws_display_managed},
 	
 	{(DynFun*)region_find_rescue_manager_for, 
 	 (DynFun*)ionws_find_rescue_manager_for},
 	
-	{(DynFun*)region_save_to_file, (DynFun*)ionws_save_to_file},
+	{(DynFun*)region_do_rescue_clientwins,
+	 (DynFun*)ionws_do_rescue_clientwins},
+	
+	{(DynFun*)region_save_to_file,
+     (DynFun*)ionws_save_to_file},
 
 	{(DynFun*)region_may_destroy_managed,
 	 (DynFun*)ionws_may_destroy_managed},

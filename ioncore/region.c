@@ -86,7 +86,8 @@ void region_init(WRegion *reg, WRegion *parent, const WRectangle *geom)
 static void destroy_children(WRegion *reg)
 {
 	WRegion *sub, *prev=NULL;
-
+	bool complained=FALSE;
+	
 	/* destroy children */
 	while(1){
 		sub=reg->children;
@@ -94,6 +95,11 @@ static void destroy_children(WRegion *reg)
 			break;
 		assert(!WOBJ_IS_BEING_DESTROYED(sub));
 		assert(sub!=prev);
+		if(wglobal.opmode!=OPMODE_DEINIT && !complained && WOBJ_IS(reg, WClientWin)){
+			warn("Destroying object \"%s\" with client windows as children.", 
+				 region_name(reg));
+			complained=TRUE;
+		}
 		prev=sub;
 		destroy_obj((WObj*)sub);
 	}
@@ -102,7 +108,7 @@ static void destroy_children(WRegion *reg)
 
 void region_deinit(WRegion *reg)
 {
-	rescue_child_clientwins(reg);
+	/*rescue_child_clientwins(reg);*/
 	
 	destroy_children(reg);
 
@@ -904,11 +910,21 @@ WRegion *region_active_sub(WRegion *reg)
 
 
 static DynFunTab region_dynfuntab[]={
-	{region_notify_rootpos, default_notify_rootpos},
-	{region_request_managed_geom, region_request_managed_geom_allow},
-	{region_draw_config_updated, region_default_draw_config_updated},
+	{region_notify_rootpos, 
+	 default_notify_rootpos},
+	
+	{region_request_managed_geom,
+	 region_request_managed_geom_allow},
+	
+	{region_draw_config_updated, 
+	 region_default_draw_config_updated},
+	
 	{(DynFun*)region_find_rescue_manager_for, 
 	 (DynFun*)default_find_rescue_manager_for},
+	
+	{(DynFun*)region_do_rescue_clientwins,
+	 (DynFun*)region_do_rescue_child_clientwins},
+	
 	END_DYNFUNTAB
 };
 

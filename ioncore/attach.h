@@ -44,14 +44,16 @@ extern WRegion *attach_load_helper(WRegion *mgr, ExtlTab tab,
 
 /* Rescue */
 
-
+extern WRegion *region_find_rescue_manager(WRegion *reg);
 DYNFUN WRegion *region_find_rescue_manager_for(WRegion *reg, WRegion *todst);
 extern WRegion *default_find_rescue_manager_for(WRegion *reg, WRegion *todst);
-extern WRegion *region_find_rescue_manager(WRegion *reg);
+
+extern bool region_rescue_clientwins(WRegion *reg);
+extern bool region_do_rescue_managed_clientwins(WRegion *reg, WRegion *dest, WRegion *list);
+extern bool region_do_rescue_child_clientwins(WRegion *reg, WRegion *dest);
+/* dest may be NULL */
+DYNFUN bool region_do_rescue_clientwins(WRegion *reg, WRegion *dest);
+
 extern bool region_can_manage_clientwins(WRegion *reg);
-
-extern bool rescue_managed_clientwins(WRegion *reg, WRegion *list);
-extern bool rescue_child_clientwins(WRegion *reg);
-
 
 #endif /* ION_IONCORE_ATTACH_H */

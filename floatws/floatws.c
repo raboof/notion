@@ -228,6 +228,13 @@ void floatws_deinit(WFloatWS *ws)
 }
 
 
+static bool floatws_do_rescue_clientwins(WFloatWS *ws, WRegion *dst)
+{
+	return region_do_rescue_managed_clientwins((WRegion*)ws, dst,
+											   ws->managed_list);
+}
+
+
 /*EXTL_DOC
  * Destroys \var{ws} unless this would put the WM in a possibly unusable
  * state.
@@ -235,13 +242,17 @@ void floatws_deinit(WFloatWS *ws)
 EXTL_EXPORT_MEMBER
 bool floatws_relocate_and_close(WFloatWS *ws)
 {
-	if(!region_may_destroy((WRegion*)ws))
+	if(!region_may_destroy((WRegion*)ws)){
+		warn("Workspace may not be destroyed.");
 		return FALSE;
+	}
 	
 	/* TODO: move frames to other workspaces */
 	
-	if(!rescue_managed_clientwins((WRegion*)ws, ws->managed_list))
+	if(!region_rescue_clientwins((WRegion*)ws)){
+		warn("Failed to rescue some client windows!");
 		return FALSE;
+	}
 	
 	defer_destroy((WObj*)ws);
 	return TRUE;
@@ -614,6 +625,9 @@ static DynFunTab floatws_dynfuntab[]={
 
 	{(DynFun*)region_current,
 	 (DynFun*)floatws_current},
+	
+	{(DynFun*)region_do_rescue_clientwins,
+	 (DynFun*)floatws_do_rescue_clientwins},
 	
 	END_DYNFUNTAB
 };

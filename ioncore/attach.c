@@ -21,6 +21,7 @@
 #include "saveload.h"
 #include "manage.h"
 #include "extlconv.h"
+#include "names.h"
 
 
 /*{{{ Attach */
@@ -151,66 +152,70 @@ WRegion *region_find_rescue_manager(WRegion *reg)
 }
 
 
-static bool do_rescue(WRegion *dest, WClientWin *cwin)
+static bool do_rescue(WRegion *dest, WRegion *r)
 {
 	WManageParams param=INIT_WMANAGEPARAMS;
-
-	if(dest==NULL)
-		return FALSE;
+	bool res=FALSE;
 	
-	region_rootpos(dest, &(param.geom.x), &(param.geom.y));
-	param.geom.w=REGION_GEOM(cwin).w;
-	param.geom.h=REGION_GEOM(cwin).h;
-
-	return region_manage_clientwin(dest, cwin, &param);
+	if(!WOBJ_IS(r, WClientWin)){
+		res=region_do_rescue_clientwins(r, dest);
+	}else if(dest!=NULL){
+		region_rootpos(dest, &(param.geom.x), &(param.geom.y));
+		param.geom.w=REGION_GEOM(r).w;
+		param.geom.h=REGION_GEOM(r).h;
+		res=region_manage_clientwin(dest, (WClientWin*)r, &param);
+	}
+	
+	if(!res)
+		warn("Unable to rescue \"%s\".", region_name(r));
+	
+	return res;
 }
 
 
-bool rescue_managed_clientwins(WRegion *reg, WRegion *list)
+bool region_do_rescue_managed_clientwins(WRegion *reg, WRegion *dest, 
+										 WRegion *list)
 {
 	WRegion *r, *next;
-	WRegion *dest;
-	
-	if(list==NULL || wglobal.opmode==OPMODE_DEINIT)
-		return TRUE;
-	
-	dest=region_find_rescue_manager(reg);
+	bool res=TRUE;
 	
 	FOR_ALL_MANAGED_ON_LIST_W_NEXT(list, r, next){
-		if(!WOBJ_IS(r, WClientWin))
-			continue;
-
-		if(!do_rescue(dest, (WClientWin*)r)){
-			warn("Unable to rescue a client window managed by a %s.",
-				 WOBJ_TYPESTR(reg));
-			return FALSE;
-		}
+		if(!do_rescue(dest, r))
+			res=FALSE;
 	}
 	
-	return TRUE;
+	return res;
 }
 
 
-bool rescue_child_clientwins(WRegion *reg)
+bool region_do_rescue_child_clientwins(WRegion *reg, WRegion *dest)
 {
-	WClientWin *r, *next;
-	WRegion *dest;
+	WRegion *r, *next;
+	bool res=TRUE;
 	
-	if(wglobal.opmode==OPMODE_DEINIT)
-		return TRUE;
-	
-	dest=region_find_rescue_manager(reg);
+	for(r=reg->children; r!=NULL; r=next){
+		next=r->p_next;
 		
-	for(r=FIRST_CHILD(reg, WClientWin); r!=NULL; r=next){
-		next=NEXT_CHILD(r, WClientWin);
-		if(!do_rescue(dest, r)){
-			warn("Unable to rescue a client window contained in a %s.",
-				 WOBJ_TYPESTR(reg));
-			return FALSE;
-		}
+		if(!do_rescue(dest, r))
+			res=FALSE;
 	}
 	
-	return TRUE;
+	return res;
+}
+
+
+bool region_do_rescue_clientwins(WRegion *reg, WRegion *dest)
+{
+	bool ret=FALSE;
+	CALL_DYN_RET(ret, bool, region_do_rescue_clientwins, reg, (reg, dest));
+	return ret;
+}
+
+
+bool region_rescue_clientwins(WRegion *reg)
+{
+	WRegion *dest=region_find_rescue_manager(reg);
+	return region_do_rescue_clientwins(reg, dest);
 }
 
 

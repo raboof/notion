@@ -172,8 +172,8 @@ void ionframe_relocate_and_close(WIonFrame *frame)
 		return;
 	}
 
-	if(!rescue_managed_clientwins((WRegion*)frame, WGENFRAME_MLIST(frame))){
-		warn("Failed to rescue managed client windows.");
+	if(!region_rescue_clientwins((WRegion*)frame)){
+		warn("Failed to rescue managed objects.");
 		return;
 	}
 
