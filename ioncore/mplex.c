@@ -211,7 +211,7 @@ WRegion *mplex_current(WMPlex *mplex)
  * \var{mplex}.
  */
 EXTL_EXPORT_MEMBER
-    WRegion *mplex_lcurrent(WMPlex *mplex, uint l)
+WRegion *mplex_lcurrent(WMPlex *mplex, uint l)
 {
     return (l==1 
             ? mplex->l1_current
@@ -226,7 +226,7 @@ EXTL_EXPORT_MEMBER
  * \var{l}:th layer..
  */
 EXTL_EXPORT_MEMBER
-    WRegion *mplex_lnth(WMPlex *mplex, uint l, uint n)
+WRegion *mplex_lnth(WMPlex *mplex, uint l, uint n)
 {
     return (l==1 
             ? nth_on_list(mplex->l1_list, n)
@@ -240,7 +240,7 @@ EXTL_EXPORT_MEMBER
  * Returns a list of regions managed by \var{mplex} on layer \var{l}.
  */
 EXTL_EXPORT_MEMBER
-    ExtlTab mplex_llist(WMPlex *mplex, uint l)
+ExtlTab mplex_llist(WMPlex *mplex, uint l)
 {
     return (l==1 
             ? managed_list_to_table(mplex->l1_list, NULL)
@@ -254,7 +254,7 @@ EXTL_EXPORT_MEMBER
  * Returns the number of regions managed by \var{mplex} on layer \var{l}.
  */
 EXTL_EXPORT_MEMBER
-    int mplex_lcount(WMPlex *mplex, uint l)
+int mplex_lcount(WMPlex *mplex, uint l)
 {
     return (l==1 
             ? mplex->l1_count
@@ -294,7 +294,7 @@ static void link_at(WMPlex *mplex, WRegion *reg, int index)
  * Set index of \var{reg} within the multiplexer to \var{index}.
  */
 EXTL_EXPORT_MEMBER
-    void mplex_set_index(WMPlex *mplex, WRegion *reg, int index)
+void mplex_set_index(WMPlex *mplex, WRegion *reg, int index)
 {
     if(index<0 || reg==NULL)
         return;
@@ -314,7 +314,7 @@ EXTL_EXPORT_MEMBER
  * -1 is returned.
  */
 EXTL_EXPORT_MEMBER
-    int mplex_get_index(WMPlex *mplex, WRegion *reg)
+int mplex_get_index(WMPlex *mplex, WRegion *reg)
 {
     WRegion *other;
     int index=0;
@@ -333,7 +333,7 @@ EXTL_EXPORT_MEMBER
  * Move \var{r} ''right'' within objects managed by \var{mplex}.
  */
 EXTL_EXPORT_MEMBER
-    void mplex_inc_index(WMPlex *mplex, WRegion *r)
+void mplex_inc_index(WMPlex *mplex, WRegion *r)
 {
     if(r==NULL)
         r=mplex_lcurrent(mplex, 1);
@@ -346,7 +346,7 @@ EXTL_EXPORT_MEMBER
  * Move \var{r} ''right'' within objects managed by \var{mplex}.
  */
 EXTL_EXPORT_MEMBER
-    void mplex_dec_index(WMPlex *mplex, WRegion *r)
+void mplex_dec_index(WMPlex *mplex, WRegion *r)
 {
     if(r==NULL)
         r=mplex_lcurrent(mplex, 1);
@@ -533,7 +533,7 @@ static WRegion *mplex_managed_control_focus(WMPlex *mplex, WRegion *reg)
  * hide it. if \var{reg} is nil, hide all objects on the l2 list.
  */
 EXTL_EXPORT_MEMBER
-    bool mplex_l2_hide(WMPlex *mplex, WRegion *reg)
+bool mplex_l2_hide(WMPlex *mplex, WRegion *reg)
 {
     WRegion *reg2, *toact=NULL;
     bool mcf=region_may_control_focus((WRegion*)mplex);
@@ -570,7 +570,7 @@ EXTL_EXPORT_MEMBER
  * display it. if \var{reg} is nil, display all objects on the l2 list.
  */
 EXTL_EXPORT_MEMBER
-    bool mplex_l2_show(WMPlex *mplex, WRegion *reg)
+bool mplex_l2_show(WMPlex *mplex, WRegion *reg)
 {
     /*WRegion *reg2, *toact=NULL;
      bool mcf=region_may_control_focus((WRegion*)mplex);
@@ -689,7 +689,7 @@ static void do_switch(WMPlex *mplex, WRegion *sub)
  * Have \var{mplex} display the \var{n}:th object managed by it.
  */
 EXTL_EXPORT_MEMBER
-    void mplex_switch_nth(WMPlex *mplex, uint n)
+void mplex_switch_nth(WMPlex *mplex, uint n)
 {
     do_switch(mplex, mplex_lnth(mplex, 1, n));
 }
@@ -700,7 +700,7 @@ EXTL_EXPORT_MEMBER
  * by it.
  */
 EXTL_EXPORT_MEMBER
-    void mplex_switch_next(WMPlex *mplex)
+void mplex_switch_next(WMPlex *mplex)
 {
     do_switch(mplex, REGION_NEXT_MANAGED_WRAP(mplex->l1_list, 
                                               mplex->l1_current));
@@ -712,7 +712,7 @@ EXTL_EXPORT_MEMBER
  * managed by it.
  */
 EXTL_EXPORT_MEMBER
-    void mplex_switch_prev(WMPlex *mplex)
+void mplex_switch_prev(WMPlex *mplex)
 {
     do_switch(mplex, REGION_PREV_MANAGED_WRAP(mplex->l1_list, 
                                               mplex->l1_current));
@@ -827,7 +827,7 @@ static void get_params(ExtlTab tab, MPlexAttachParams *par)
  * \var{switchto} that are interpreted as for \fnref{WMPlex.attach_new}.
  */
 EXTL_EXPORT_MEMBER
-    WRegion *mplex_attach(WMPlex *mplex, WRegion *reg, ExtlTab param)
+WRegion *mplex_attach(WMPlex *mplex, WRegion *reg, ExtlTab param)
 {
     MPlexAttachParams par;
     get_params(param, &par);
@@ -862,7 +862,7 @@ EXTL_EXPORT_MEMBER
  * same table.
  */
 EXTL_EXPORT_MEMBER
-    WRegion *mplex_attach_new(WMPlex *mplex, ExtlTab param)
+WRegion *mplex_attach_new(WMPlex *mplex, ExtlTab param)
 {
     MPlexAttachParams par;
     get_params(param, &par);
@@ -877,7 +877,7 @@ EXTL_EXPORT_MEMBER
  * Attach all tagged regions to \var{mplex}.
  */
 EXTL_EXPORT_MEMBER
-    void mplex_attach_tagged(WMPlex *mplex)
+void mplex_attach_tagged(WMPlex *mplex)
 {
     WRegion *reg;
     
@@ -1146,6 +1146,26 @@ static WRegion *do_attach_stdisp(WMPlex *mplex, WRegionAttachHandler *handler,
 }
 
 
+/*EXTL_DOC
+ * Set/create status display for \var{mplex}. Table is a standard
+ * description of the object to be created (as passed to e.g. 
+ * \fnref{WMPlex.attach_new}). In addition, the following fields are
+ * recognised:
+ * \begin{tabularx}{\linewidth}{lX}
+ *   \var{corner} & The corner of the screen to place the status display
+ *                  in. One of \code{tl}, \code{tr}, \var{bl} or \var{br}. \\
+ *   \var{orientation} & Orientation of the status display, if it does
+ *                  not specify one. Either \code{vertical} or 
+ *                  \var{horizontal}. \\
+ *   \var{action} & If this field is set to \code{keep}, \var{corner}
+ *                  and \var{orientation} are changed for the existing
+ *                  status display. If this field is set to \var{remove},
+ *                  the existing status display is removed. If this
+ *                  field is not set or is set to \code{replace}, a 
+ *                  new status display is created and the old, if any,
+ *                  removed. \\
+ * \end{tabularx}
+ */
 EXTL_EXPORT_AS(WMPlex, set_stdisp)
 bool mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t)
 {
@@ -1241,6 +1261,10 @@ static ExtlTab mplex_do_get_stdisp_extl(WMPlex *mplex, bool fullconfig)
 }
 
 
+/*EXTL_DOC
+ * Get status display information. See \fnref{WMPlex.get_stdisp} for
+ * information on the fields.
+ */
 EXTL_EXPORT_AS(WMPlex, get_stdisp)
 ExtlTab mplex_get_stdisp_extl(WMPlex *mplex)
 {
