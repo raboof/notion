@@ -42,8 +42,6 @@ ioncorelib.export(ioncorelib,
                   "mclick",
                   "mdblclick",
                   "mdrag",
-                  "defcmd",
-                  "defcmd2",
                   "defbindings",
                   "defwinprop")
 
