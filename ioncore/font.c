@@ -326,10 +326,10 @@ bool add_shortenrule(const char *rx, const char *rule)
 	
 	return TRUE;
 	
-	fail:
+fail:
 	warn_err();
 	regfree(&(si->re));
-	fail2:
+fail2:
 	free(si);
 	return FALSE;
 }
@@ -362,6 +362,8 @@ static char *shorten(WFontPtr fnt, const char *str, int maxw,
 		return NULL;
 	}
 	
+	assert(rule!=NULL);
+	
 	do{
 		more=FALSE;
 		j=0;
@@ -376,6 +378,7 @@ static char *shorten(WFontPtr fnt, const char *str, int maxw,
 			
 			if(rule[i]=='|'){
 				rule=rule+i+1;
+				rl=rl-i-1;
 				more=TRUE;
 				break;
 			}
