@@ -147,7 +147,7 @@ if querylib then
     local f11key, f12key="F11", "F12"
     
     -- If we're on SunOS, we need to remap some keys.
-    if os.execute('uname -s -p|grep "SunOS sparc" > /dev/null')==0 then
+    if os.execute('uname -s|grep "SunOS" > /dev/null')==0 then
         print("ioncore-bindings.lua: Uname test reported SunOS; ".. 
               "mapping F11=Sun36, F12=SunF37.")
         f11key, f12key="SunF36", "SunF37"
