@@ -17,9 +17,9 @@
 #include "draw.h"
 
 
-static void draw_elems(GrBrush *brush, int x, int y,
-                       WSBElem *elems, int nelems, bool needfill, 
-                       const char *dfltattr)
+static int draw_elems(GrBrush *brush, int x, int y,
+                      WSBElem *elems, int nelems, bool needfill, 
+                      const char *dfltattr)
 {
     while(nelems>0){
         if(elems->type==WSBELEM_STRETCH){
@@ -35,12 +35,14 @@ static void draw_elems(GrBrush *brush, int x, int y,
         nelems--;
         elems++;
     }
+    
+    return x;
 }
 
 
-static void draw_elems_ra(GrBrush *brush, int x, int y,
-                          WSBElem *elems, int nelems, bool needfill, 
-                          const char *dfltattr)
+static int draw_elems_ra(GrBrush *brush, int x, int y,
+                         WSBElem *elems, int nelems, bool needfill, 
+                         const char *dfltattr)
 {
     elems+=nelems;
     
@@ -58,6 +60,8 @@ static void draw_elems_ra(GrBrush *brush, int x, int y,
                                 elems->attr ? elems->attr : dfltattr);
         }
     }
+    
+    return x;
 }
 
 
@@ -69,7 +73,7 @@ void statusbar_draw(WStatusBar *sb, bool complete)
     Window win=sb->wwin.win;
     bool right_align=FALSE;
     WMPlex *mgr;
-    int ty;
+    int ty, minx, maxx;
     
     if(sb->brush==NULL)
         return;
@@ -99,13 +103,23 @@ void statusbar_draw(WStatusBar *sb, bool complete)
     }
     
     ty=(g.y+bdw.top+fnte.baseline+(g.h-bdw.top-bdw.bottom-fnte.max_height)/2);
+    minx=g.x+bdw.left;
+    maxx=g.x+g.w-bdw.right;
     
     if(!right_align){
-        draw_elems(sb->brush, g.x+bdw.left, ty,
-                   sb->elems, sb->nelems, TRUE, NULL);
+        g.x=draw_elems(sb->brush, minx, ty,
+                       sb->elems, sb->nelems, TRUE, NULL);
+        if(!complete && g.x<maxx){
+            g.w=maxx-g.x;
+            grbrush_clear_area(sb->brush, &g);
+        }
     }else{
-        draw_elems_ra(sb->brush, g.x+g.w-bdw.right, ty,
-                      sb->elems, sb->nelems, TRUE, NULL);
+        g.x=draw_elems_ra(sb->brush, maxx, ty,
+                          sb->elems, sb->nelems, TRUE, NULL);
+        if(!complete && g.x>minx){
+            g.w=g.x-minx;
+            grbrush_clear_area(sb->brush, &g);
+        }
     }
     
     grbrush_end(sb->brush);

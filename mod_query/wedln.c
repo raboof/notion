@@ -87,12 +87,12 @@ static void wedln_do_draw_str_box(WEdln *wedln, const WRectangle *geom,
     const char *cursorstyle=(REGION_IS_ACTIVE(wedln)
                              ? "active-cursor" : "inactive-cursor");
     
-    if(tx<geom->w){
+    /*if(tx<geom->w){
         WRectangle g=*geom;
         g.x+=tx;
         g.w-=tx;
         grbrush_clear_area(WEDLN_BRUSH(wedln), &g);
-    }
+    }*/
     
     ty=calc_text_y(wedln, geom);
 
@@ -118,12 +118,12 @@ static void wedln_do_draw_str_box(WEdln *wedln, const WRectangle *geom,
     }
     DSTRSECT(len, normalstyle);
 
-    /*if(tx<geom->w){
+    if(tx<geom->w){
         WRectangle g=*geom;
         g.x+=tx;
         g.w-=tx;
-        grbrush_clear_area(WEDLN_BRUSH(wedln), WEDLN_WIN(wedln), &g);
-    }*/
+        grbrush_clear_area(WEDLN_BRUSH(wedln), &g);
+    }
 }
 
 

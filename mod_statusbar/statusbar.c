@@ -381,7 +381,7 @@ void statusbar_update(WStatusBar *sb, ExtlTab t)
     spread_stretch(sb);
     positive_stretch(sb);
     
-    window_draw((WWindow*)sb, TRUE);
+    window_draw((WWindow*)sb, FALSE);
 }
 
 
