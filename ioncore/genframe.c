@@ -444,12 +444,18 @@ void genframe_resize_hints(WGenFrame *genframe, XSizeHints *hints_ret,
 void genframe_inactivated(WGenFrame *genframe)
 {
 	genframe_draw(genframe, FALSE);
+	extl_call_named("call_hook", "soo", NULL,
+					"genframe_inactivated",
+					genframe, WGENFRAME_CURRENT(genframe));
 }
 
 
 void genframe_activated(WGenFrame *genframe)
 {
 	genframe_draw(genframe, FALSE);
+	extl_call_named("call_hook", "soo", NULL,
+					"genframe_activated",
+					genframe, WGENFRAME_CURRENT(genframe));
 }
 
 
