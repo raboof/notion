@@ -207,7 +207,7 @@ end
 
 -- ion-statusd support {{{
 
-local statusd_running=false
+local statusd_pid=0
 local statusd_cfg=""
 local statusd_modules={}
 
@@ -237,7 +237,7 @@ function mod_statusbar.rcv_statusd(str)
     end
     
     ioncore.warn(TR("ion-statusd quit."))
-    statusd_running=false
+    statusd_pid=0
     meters={}
     mod_statusbar.update()
 end
@@ -277,7 +277,7 @@ end
 --DOC
 -- Launch ion-statusd with configuration table \var{cfg}.
 function mod_statusbar.launch_statusd(cfg)
-    if statusd_running then
+    if statusd_pid>0 then
         return
     end
     
@@ -292,7 +292,7 @@ function mod_statusbar.launch_statusd(cfg)
     local cmd=statusd.." -c "..cfg..get_statusd_params()
     local cr=coroutine.wrap(mod_statusbar.rcv_statusd)
 
-    statusd_running=ioncore.popen_bgread(cmd, cr)
+    statusd_pid=ioncore.popen_bgread(cmd, cr)
 end
 
 --}}}
@@ -362,6 +362,6 @@ _LOADED["mod_statusbar"]=true
 dopath('cfg_statusbar', true)
 
 -- Launch statusd if the user didn't launch it.
-if not statusd_running then
+if statusd_pid<=0 then
     mod_statusbar.launch_statusd()
 end

@@ -154,14 +154,14 @@ static void process_pipe(int fd, void *p)
  */
 EXTL_SAFE
 EXTL_EXPORT
-bool ioncore_popen_bgread(const char *cmd, ExtlFn handler)
+int ioncore_popen_bgread(const char *cmd, ExtlFn handler)
 {
     int pid;
     int fds[2];
     
     if(pipe(fds)!=0){
         warn_err_obj("pipe()");
-        return FALSE;
+        return -1;
     }
 
     fcntl(fds[0], F_SETFD, FD_CLOEXEC);
@@ -173,6 +173,7 @@ bool ioncore_popen_bgread(const char *cmd, ExtlFn handler)
         close(fds[0]);
         close(fds[1]);
         warn_err();
+        return -1;
     }
     
     if(pid!=0){
@@ -185,7 +186,7 @@ bool ioncore_popen_bgread(const char *cmd, ExtlFn handler)
             if(fl==-1){
                 warn_err();
                 close(fds[0]);
-                return FALSE;
+                return -1;
             }
         }
             
@@ -198,7 +199,7 @@ bool ioncore_popen_bgread(const char *cmd, ExtlFn handler)
             free(p);
         }
         close(fds[0]);
-        return FALSE;
+        return -1;
     }
     
     /* Redirect stdout */
@@ -211,7 +212,7 @@ bool ioncore_popen_bgread(const char *cmd, ExtlFn handler)
     ioncore_do_exec(cmd);
     
     /* We should not get here */
-    return FALSE;
+    return pid;
 }
 
 
