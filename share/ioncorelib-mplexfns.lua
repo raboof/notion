@@ -14,7 +14,7 @@ if mplex_managed_index then
     return
 end
 
---EXTL_EXPORT
+--DOC
 -- Returns the index of \var{mgd} in \var{mplex}'s managed list or
 -- -1 if not on list.
 function mplex_managed_index(mplex, mgd)
@@ -28,7 +28,7 @@ function mplex_managed_index(mplex, mgd)
 end
 
 
---EXTL_EXPORT
+--DOC
 -- Returns the index of \fnref{mplex_current}\code{(mplex)} in \var{mplex}'s
 -- managed list or -1 if there is no current managed object.
 function mplex_current_index(mplex)
