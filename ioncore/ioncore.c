@@ -126,8 +126,6 @@ static bool register_classes()
 
 static void init_global()
 {
-    WRectangle zero_geom={0, 0, 0, 0};
-    
     /* argc, argv must be set be the program */
     ioncore_g.dpy=NULL;
     ioncore_g.display=NULL;
@@ -179,6 +177,7 @@ bool ioncore_init(int argc, char *argv[])
         warn("Unable to initialise module support.");
         return FALSE;
     }
+	return TRUE;
 }
 
 
