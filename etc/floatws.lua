@@ -7,18 +7,10 @@
 
 floatws_bindings{
     kpress(DEFAULT_MOD .. "Tab",
-           function(ws)
-               f=floatws_circulate(ws)
-               region_raise(f)
-           end
-          ),
+           function(ws) region_raise(floatws_circulate(ws)) end),
     submap(DEFAULT_MOD .. "K") {
         kpress("AnyModifier+Tab",
-               function(ws)
-                   f=floatws_backcirculate(ws)
-                   region_raise(f)
-               end
-              ),
+               function(ws) region_raise(floatws_backcirculate(ws)) end),
     }
 }
 
