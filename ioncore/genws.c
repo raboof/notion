@@ -99,6 +99,12 @@ void genws_do_unmap(WGenWS *ws)
 }
 
 
+WRegion *genws_rqclose_propagate(WGenWS *ws, WRegion *maybe_sub)
+{
+    return (region_rqclose((WRegion*)ws) ? (WRegion*)ws : NULL);
+}
+
+
 /*}}}*/
 
 
@@ -126,7 +132,8 @@ void genws_unmanage_stdisp(WGenWS *ws, bool permanent, bool nofocus)
 static DynFunTab genws_dynfuntab[]={
     {(DynFun*)region_xwindow,
      (DynFun*)genws_xwindow},
-    
+    {(DynFun*)region_rqclose_propagate,
+     (DynFun*)genws_rqclose_propagate},
     END_DYNFUNTAB
 };
 

@@ -266,6 +266,7 @@ static bool panews_rqclose(WPaneWS *ws)
 }
 
 
+/*
 static WRegion *panews_rqclose_propagate(WPaneWS *ws, WRegion *sub)
 {
     WSplitRegion *node=NULL;
@@ -293,6 +294,7 @@ static WRegion *panews_rqclose_propagate(WPaneWS *ws, WRegion *sub)
     
     return (region_rqclose(sub) ? sub : NULL);
 }
+*/
 
 
 /*}}}*/
@@ -556,9 +558,9 @@ static DynFunTab panews_dynfuntab[]={
 
     {(DynFun*)region_rqclose,
      (DynFun*)panews_rqclose},
-    
+    /*
     {(DynFun*)region_rqclose_propagate,
-     (DynFun*)panews_rqclose_propagate},
+     (DynFun*)panews_rqclose_propagate},*/
     
     END_DYNFUNTAB
 };
