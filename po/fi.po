@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ion3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-10-11 18:33+0300\n"
+"POT-Creation-Date: 2005-02-28 21:28+0200\n"
 "PO-Revision-Date: 2004-07-31 23:50+0300\n"
 "Last-Translator: Tuomo Valkonen <tuomov at iki.fi>\n"
 "Language-Team: none\n"
@@ -71,40 +71,35 @@ msgstr "Sidonnan tyyppiä ei ole asetettu."
 msgid "Unknown binding type \"%s\"."
 msgstr "Sidonnalle annettu tyyppi \"%s\" on tuntematon."
 
-#: ../ioncore/conf-bindings.c:291
+#: ../ioncore/conf-bindings.c:292
 #, c-format
 msgid "Unknown area \"%s\" for binding %s."
 msgstr "Sidonnalle %s asetettu tuntematon alue \"%s.\""
 
-#: ../ioncore/conf-bindings.c:332
+#: ../ioncore/conf-bindings.c:333
 #, c-format
 msgid "Unable to get bindmap entry %d."
 msgstr "Sidontakartan alkion %d haussa epäonnistuttiin."
 
-#: ../ioncore/conf-bindings.c:374
+#: ../ioncore/conf-bindings.c:375
 msgid "Unable to convert keysym to string."
 msgstr "Näppäinsymbolia muunto merkkijonoksi epäonnistui."
 
-#: ../ioncore/conf-bindings.c:388
+#: ../ioncore/conf-bindings.c:389
 msgid "Unable to convert button to string."
 msgstr "Napin tunnistetteen muunto merkkijonoksi epäonnistui."
 
 #
-#: ../ioncore/event.c:78
+#: ../ioncore/event.c:111
 msgid "Time request from X server failed."
 msgstr "Ajan pyyntö X-palvelimelta epäonnistui."
 
-#
-#: ../ioncore/exec.c:101
-msgid "Could not find a root window."
-msgstr "Juuri-ikkunaa ei löytynyt."
-
-#: ../ioncore/exec.c:134
+#: ../ioncore/exec.c:123
 msgid "reading a pipe"
 msgstr "putken luku"
 
 #
-#: ../ioncore/exec.c:296
+#: ../ioncore/exec.c:285
 msgid "Not saving state: running under session manager."
 msgstr "Tilaa ei talleteta, koska olemme istunnonhallinnan alaisia."
 
@@ -112,7 +107,7 @@ msgstr "Tilaa ei talleteta, koska olemme istunnonhallinnan alaisia."
 msgid "Invalid multibyte string."
 msgstr "Virheellinen multibyte-merkkijono."
 
-#: ../ioncore/strings.c:234
+#: ../ioncore/strings.c:232
 #, c-format
 msgid "Error compiling regular expression: %s"
 msgstr "Virhe säännölisen lausekkeen käännöksessä: %s"
@@ -138,7 +133,7 @@ msgstr ""
 msgid "Unable to initialise module %s."
 msgstr "Virhe moduulin %s alustuksessa."
 
-#: ../ioncore/modules.c:220 ../../libextl/readconfig.c:368
+#: ../ioncore/modules.c:220 ../../libextl/readconfig.c:374
 #, c-format
 msgid "Unable to find '%s' on search path."
 msgstr "Hakupolulta ei löytynyt '%s':ää."
@@ -155,41 +150,45 @@ msgstr "Moduulin alustus epäonnistui."
 msgid "No module to load given."
 msgstr "Ladattava moduulia ei ole annettu."
 
-#: ../ioncore/screen.c:301
+#: ../ioncore/property.c:354 ../ioncore/property.c:363
+#
+msgid "Invalid arguments."
+msgstr "Virheelliset parametrit."
+
+#: ../ioncore/screen.c:300
 msgid "act: "
 msgstr "act: "
 
-#: ../ioncore/screen.c:490
+#: ../ioncore/screen.c:464
+#
+msgid "Only workspace may not be destroyed."
+msgstr "Ainoata työpöytää ei voi tuhota."
+
+#: ../ioncore/screen.c:472
+#
+msgid "Screens may not be destroyed."
+msgstr "Näyttöjä ei voi tuhota."
+
+#: ../ioncore/screen.c:508
 msgid "Invalid offset."
 msgstr "Virheellinen poikkeama."
 
-#: ../ioncore/screen.c:535
+#: ../ioncore/screen.c:553
 msgid "Could not find a complete workspace class. Please load some modules."
 msgstr ""
 "Yhtäkään täydellistä työpöytäluokkaa ei löydy. Ole hyvä ja lataa joitakin "
 "moduuleita."
 
-#: ../ioncore/screen.c:545
+#: ../ioncore/screen.c:563
 #, c-format
 msgid "Unable to create a workspace on screen %d."
 msgstr "Työpöydän luonti ruudulle %d epäonnistui."
 
-#: ../ioncore/signal.c:291
-#, c-format
-msgid "Caught fatal signal %d. Dying without deinit."
-msgstr ""
-"Ohjelma lopettaa ilman jälkien putsausta tuhoisan signaalin %d vastaanottoon."
-
-#: ../ioncore/signal.c:300
-#, c-format
-msgid "Caught signal %d. Dying."
-msgstr "Ohjelma lopettaa signaalin %d vastaanottoon."
-
-#: ../ioncore/sizehint.c:150
+#: ../ioncore/sizehint.c:149
 msgid "Invalid client-supplied width/height increment."
 msgstr "Asiakkaan ilmoittama pysty/vaakalisäys koolle on virheellinen."
 
-#: ../ioncore/sizehint.c:158
+#: ../ioncore/sizehint.c:157
 msgid "Invalid client-supplied aspect-ratio."
 msgstr "Asiakkaan ilmoittama sivusuhde on virheellinen."
 
@@ -221,7 +220,7 @@ msgstr ""
 msgid "Could not connect to X display '%s'"
 msgstr "Yhteydenotto X-palvelimeen '%s' epäonnistui."
 
-#: ../ioncore/ioncore.c:438
+#: ../ioncore/ioncore.c:437
 msgid "Could not find a screen to manage."
 msgstr "Yhtään hallittavissa olevaa juuri-ikkunaa ei löytynyt."
 
@@ -259,7 +258,7 @@ msgid "The transient_for window for \"%s\" is not on the same screen."
 msgstr "Ikkunan \"%s\" transient_for neuvo osoittaa eri näytölle."
 
 #: ../ioncore/clientwin.c:405 ../ioncore/clientwin.c:492
-#: ../ioncore/clientwin.c:1554
+#: ../ioncore/clientwin.c:1578
 #, c-format
 msgid "Window %#x disappeared."
 msgstr "Ikkuna %#x katosi."
@@ -273,22 +272,22 @@ msgstr "Vastaavaa juuri-ikkunaa ei löytynyt."
 msgid "Unable to manage client window %#x."
 msgstr "Asiakasikkunan %x hallittavaksi saattaminen epäonnistui."
 
-#: ../ioncore/clientwin.c:597
+#: ../ioncore/clientwin.c:598
 msgid "Changes is WM_TRANSIENT_FOR property are unsupported."
 msgstr "Muutoksia WM_TRANSIENT_FOR ominaisuudessa ei tueta."
 
 #
-#: ../ioncore/clientwin.c:874
+#: ../ioncore/clientwin.c:904
 msgid "Client does not support the WM_DELETE protocol."
 msgstr "Asiakasikkuna ei tue WM_DELETE-protokollaa."
 
-#: ../ioncore/clientwin.c:1103 ../mod_ionws/ionws.c:76
-#: ../mod_floatws/floatws.c:103
+#: ../ioncore/clientwin.c:1139 ../mod_ionws/ionws.c:82
+#: ../mod_floatws/floatws.c:137
 #, c-format
 msgid "Error reparenting %s."
 msgstr "Virhe alueen %s vanhemman vaihdossa."
 
-#: ../ioncore/clientwin.c:1560
+#: ../ioncore/clientwin.c:1584
 msgid "Saved client window does not want to be managed."
 msgstr "Talletettu asiakasikkuna ei halua sitä hallittavan."
 
@@ -297,7 +296,7 @@ msgstr "Talletettu asiakasikkuna ei halua sitä hallittavan."
 msgid "Unable to store colourmap watch info."
 msgstr "Värikartan valvonnan alustaminen epäonnistui."
 
-#: ../ioncore/region.c:36
+#: ../ioncore/region.c:38
 msgid "Creating region with negative width or height!"
 msgstr "Yritys luoda korkeudeltaan tai leveydeltään negatiivinen alue."
 
@@ -306,48 +305,43 @@ msgstr "Yritys luoda korkeudeltaan tai leveydeltään negatiivinen alue."
 msgid "Destroying object \"%s\" with client windows as children."
 msgstr "Olio \"%s\", jolla on vielä asiakasikkunoita lapsena, tuhotaan."
 
-#: ../ioncore/attach.c:80
+#: ../ioncore/region.c:371
+#
+msgid "Failed to rescue some client windows - not closing."
+msgstr "Joidenkin asiakasikkunoiden pelastaminen epäonnistui - ei suljeta."
+
+#: ../ioncore/attach.c:79 ../ioncore/pholder.c:44
 msgid "Unable to reparent."
 msgstr "Vanhemman vaihto epäonnistui."
 
-#: ../ioncore/attach.c:112 ../ioncore/frame-pointer.c:295
+#: ../ioncore/attach.c:111 ../ioncore/frame-pointer.c:295
 #, c-format
 msgid "Attempt to make region %s manage its ancestor %s."
 msgstr "Yritys saattaa alue %s hallitsemaan sen esivanhempaa %s."
 
-#
-#: ../ioncore/defer.c:93
-msgid "Object destroyed while deferred actions are still pending."
-msgstr "Viivästettyä toimintoja jonossa vielä oliota tuhottaessa."
-
-#: ../ioncore/manage.c:90
+#: ../ioncore/manage.c:89
 msgid "Unable to find a screen for a new client window."
 msgstr "Uudelle asiakasikkunalle ei löytynyt näyttöä."
 
-#: ../ioncore/manage.c:187
-#, c-format
-msgid "Unable to rescue \"%s\"."
-msgstr "Alueen \"%s\" pelastaminen epäonnistui."
-
-#: ../ioncore/rootwin.c:222
+#: ../ioncore/rootwin.c:221
 #, c-format
 msgid "Unable to redirect root window events for screen %d."
 msgstr "Juuri-ikkunan %d viestien uudelleenohjaus epäonnistui."
 
-#: ../ioncore/rootwin.c:316
+#: ../ioncore/rootwin.c:317
 msgid "Xinerama sanity check failed; overlapping screens detected."
 msgstr "Xinerama-tiedon järkevyystarkastus havaitsi päällekkäisiä ruutuja."
 
-#: ../ioncore/rootwin.c:342
+#: ../ioncore/rootwin.c:343
 msgid "Don't know how to get Xinerama information for multiple X root windows."
 msgstr "Xinerama-tietoa ei osata käyttää usealle juuri-ikkunalle."
 
-#: ../ioncore/rootwin.c:378
+#: ../ioncore/rootwin.c:379
 #, c-format
 msgid "Unable to setup Xinerama screen %d."
 msgstr "Xinerama-ruudun %d hallittavaksi saattaminen epäonnistui."
 
-#: ../ioncore/rootwin.c:389
+#: ../ioncore/rootwin.c:393
 #, c-format
 msgid "Unable to setup X screen %d."
 msgstr "X-ruudun %d hallittavaksi saattaminen epäonnistui."
@@ -357,12 +351,12 @@ msgstr "X-ruudun %d hallittavaksi saattaminen epäonnistui."
 msgid "Corrupt instance number %s."
 msgstr "Rikkinäinen instanssinumero %s."
 
-#: ../ioncore/saveload.c:55
+#: ../ioncore/saveload.c:92
 #, c-format
 msgid "Unknown class \"%s\", cannot create region."
 msgstr "Luokka \"%s\" on tuntematon. Aluetta ei voida luoda."
 
-#: ../ioncore/saveload.c:124
+#: ../ioncore/saveload.c:172
 #, c-format
 msgid ""
 "There were errors loading layout. Backing up current layout savefile as\n"
@@ -381,50 +375,46 @@ msgstr ""
 "tilanteen aiheuttavat virheet (mahdollisesti puuttuva moduuli?) muissa\n"
 "asetustiedostoissasi."
 
-#: ../ioncore/saveload.c:167
+#: ../ioncore/saveload.c:215
 msgid "Unable to get file for layout backup."
 msgstr "Sijoittelun varmuuskopiolle ei voitu muodostaa tiedostonimeä."
 
-#: ../ioncore/saveload.c:171
+#: ../ioncore/saveload.c:219
 #, c-format
 msgid "Backup file %s already exists."
 msgstr "Varmuuskopio %s on jo olemassa."
 
-#: ../ioncore/saveload.c:177
+#: ../ioncore/saveload.c:225
 msgid "Failed backup."
 msgstr "Varmuuskopionti epäonnistui."
 
 #
-#: ../ioncore/saveload.c:182
+#: ../ioncore/saveload.c:230
 msgid "Unable to initialise layout on any screen."
 msgstr "Sijoittelun alustus epäonnistui kaikilla näytöillä."
 
-#: ../ioncore/saveload.c:202
+#: ../ioncore/saveload.c:250
 #, c-format
 msgid "Unable to get configuration for screen %d."
 msgstr "Ruudun %d asetukset puuttuvat."
 
-#: ../ioncore/saveload.c:215
+#: ../ioncore/saveload.c:263
 msgid "Unable to save layout."
 msgstr "Sijoittelun talletus epäonnistui."
 
-#: ../ioncore/frame.c:122
-msgid "Frame is not empty."
-msgstr "Kehys ei ole tyhjä."
-
-#: ../ioncore/conf.c:134
+#: ../ioncore/conf.c:132
 msgid "User directory can not be set."
 msgstr "Käyttäjän hakemistoa ei pystytä asettamaan."
 
-#: ../ioncore/conf.c:197
+#: ../ioncore/conf.c:202
 msgid "Some bindmaps were empty, loading ioncore-efbb."
 msgstr "Jotkut sidontakartat olivat tyhjiä. Ladataan ioncore-efbb."
 
-#: ../ioncore/fullscreen.c:100
+#: ../ioncore/fullscreen.c:79
 msgid "Failed to enter full screen mode."
 msgstr "Vaihto kokoruudun tilaan epäonnistui."
 
-#: ../ioncore/fullscreen.c:158
+#: ../ioncore/fullscreen.c:113
 msgid ""
 "WClientWin failed to return from full screen mode; remaining manager or "
 "parent from previous location refused to manage us."
@@ -432,13 +422,18 @@ msgstr ""
 "Asiakasikkunan paluu kokoruudun tilasta epäonnistui; edellinen hallitsija "
 "tai vanhempi kieltäytyi hallitsemasta ikkunaa."
 
+#: ../ioncore/mplex.c:256
 #
-#: ../ioncore/mplex.c:1247
+msgid "Refusing to destroy - not empty."
+msgstr "Tuhoamisesta kieltäydytään - ei tyhjä."
+
+#
+#: ../ioncore/mplex.c:1337
 msgid "Invalid position setting."
 msgstr "Virheellinen paikka-asetus."
 
 #
-#: ../ioncore/mplex.c:1280
+#: ../ioncore/mplex.c:1370
 msgid "Invalid action setting."
 msgstr "Virheellinen toiminto-asetus."
 
@@ -461,116 +456,117 @@ msgstr "Yhtään piirtomoottoria ei ole ladattu. Yritetään oletusta \"de\"."
 msgid "No function given."
 msgstr "Funktiota ei ole annettu."
 
-#: ../mod_ionws/ionws.c:311
+#: ../mod_ionws/ionws.c:331
 msgid "Unable to create a node for status display."
 msgstr "Solmun luonti tilanäytölle epäonnistui."
 
-#: ../mod_ionws/ionws.c:323
+#: ../mod_ionws/ionws.c:343
 msgid "Unable to create new split for status display."
 msgstr "Uuden jaon tekeminen tilanäytölle epäonnistui."
 
+#: ../mod_ionws/ionws.c:585 ../mod_floatws/floatws.c:398
 #
-#: ../mod_ionws/ionws.c:742
-msgid "Frame not managed by the workspace."
-msgstr "Kehys ei ole tämän työpöydän hallitsema."
+msgid "Workspace not empty - refusing to destroy."
+msgstr "Työpöytää ei voida tuhota, koska se ei ole tyhjä."
 
 #
-#: ../mod_ionws/ionws.c:747
-msgid "Invalid direction parameter."
-msgstr "Tuntematon suuntaparametri."
+#: ../mod_ionws/ionws.c:747 ../mod_ionws/split.c:977
+msgid "Invalid node."
+msgstr "Epäkelpo solmu."
 
 #
-#: ../mod_ionws/ionws.c:765
+#: ../mod_ionws/ionws.c:752
+#
+msgid "Invalid split type parameter."
+msgstr "Tuntematon jaon tapa."
+
+#
+#: ../mod_ionws/ionws.c:768
 msgid "Unable to split."
 msgstr "Halkaisu ei ole mahdollista."
 
-#: ../mod_ionws/ionws.c:803
+#: ../mod_ionws/ionws.c:866
 msgid "Nil frame."
 msgstr "Kehys on asettamatta."
 
-#: ../mod_ionws/ionws.c:807
+#: ../mod_ionws/ionws.c:871
 msgid "The frame is not managed by the workspace."
 msgstr "Kehys ei ole tämän työpöydän hallinnoima."
 
-#: ../mod_ionws/ionws.c:812
+#: ../mod_ionws/ionws.c:876
 msgid "Frame may not be destroyed."
 msgstr "Kehystä ei saa tuhota."
 
-#: ../mod_ionws/ionws.c:817
+#: ../mod_ionws/ionws.c:881
 msgid "Failed to rescue managed objects."
 msgstr "Hallittujen olioiden pelastaminen epäonnistui."
 
-#: ../mod_ionws/ionws.c:1028
+#: ../mod_ionws/ionws.c:1096
 msgid "Nil parameter."
 msgstr "Parametri on asettamatta."
 
-#: ../mod_ionws/ionws.c:1033
+#: ../mod_ionws/ionws.c:1101
 msgid "Manager doesn't match."
 msgstr "Hallitsija on väärä."
 
 #
-#: ../mod_ionws/ionws.c:1055
+#: ../mod_ionws/ionws.c:1123
 msgid "Could not get split tree."
 msgstr "Halkaisupuu puuttuu."
 
-#: ../mod_ionws/ionws.c:1076
+#: ../mod_ionws/ionws.c:1144
 msgid "Workspace already has a status display node."
 msgstr "Työpöydällä on jo solmu tilanäytölle."
 
 #
-#: ../mod_ionws/ionws.c:1126
+#: ../mod_ionws/ionws.c:1194
 msgid "Missing region parameters."
 msgstr "Alueen parameterit puuttuu."
 
-#: ../mod_ionws/ionws.c:1162 ../mod_ionws/splitfloat.c:783
+#: ../mod_ionws/ionws.c:1230 ../mod_ionws/splitfloat.c:782
 msgid "Invalid direction."
 msgstr "Virheellinen suunta."
 
 #
-#: ../mod_ionws/ionws.c:1236
+#: ../mod_ionws/ionws.c:1304
 msgid "No split type given."
 msgstr "Halkaisun tyyppiä ei ole asetettu."
 
-#: ../mod_ionws/ionws.c:1249
+#: ../mod_ionws/ionws.c:1317
 msgid "Unknown split type."
 msgstr "Tuntematon halkaisutyyppi."
 
 #
 #
-#: ../mod_ionws/ionws.c:1289
+#: ../mod_ionws/ionws.c:1357
 msgid "The workspace is empty."
 msgstr "Työpöytä on tyhjä."
 
-#: ../mod_ionws/placement.c:97 ../mod_panews/placement.c:299
+#: ../mod_ionws/placement.c:95 ../mod_panews/placement.c:298
 #, c-format
 msgid ""
 "Ooops... could not find a region to attach client window to on workspace %s."
 msgstr "Työpöydältä %s ei löytynyt aluetta johon liittää asiakasikkuna."
 
-#: ../mod_ionws/split.c:906
+#: ../mod_ionws/split.c:904
 msgid "REGION_RQGEOM_TRYONLY unsupported for status display."
 msgstr "REGION_RQGEOM_TRYONLY:ä ei tueta tilanäytölle."
 
 #
-#: ../mod_ionws/split.c:979
-msgid "Invalid node."
-msgstr "Epäkelpo solmu."
-
-#
-#: ../mod_ionws/split.c:1044
+#: ../mod_ionws/split.c:1042
 msgid "Splitting the status display is not allowed."
 msgstr "Tilanäytön halkaisu ei ole sallittu."
 
-#: ../mod_ionws/split.c:1072 ../mod_ionws/splitfloat.c:896
+#: ../mod_ionws/split.c:1070 ../mod_ionws/splitfloat.c:895
 msgid "Unable to split: not enough free space."
 msgstr "Ei voida halkaista: liian vähän tilaa."
 
 #
-#: ../mod_ionws/split.c:1558
+#: ../mod_ionws/split.c:1556
 msgid "Unable to move the status display out of way of transpose."
 msgstr "Tilanäyttöä ei voida siirtää pois transpoosin tieltä."
 
-#: ../mod_ionws/split.c:1722
+#: ../mod_ionws/split.c:1720
 #, c-format
 msgid "Unable to get configuration for %s."
 msgstr "Alueelle \"%s\" ei saatu asetuksia."
@@ -579,37 +575,25 @@ msgstr "Alueelle \"%s\" ei saatu asetuksia."
 msgid "Status display in bad split configuration."
 msgstr "Tilanäyttö huonossa halkaisuasetelmassa."
 
-#: ../mod_ionws/split-stdisp.c:657
+#: ../mod_ionws/split-stdisp.c:656
 msgid "Status display badly located in split tree."
 msgstr "Tilanäyttö on huonosti sijoittuneena halkaisupuuhun."
 
-#: ../mod_floatws/floatws.c:351 ../mod_panews/panews.c:259
-msgid "Workspace may not be destroyed."
-msgstr "Työpöytää ei saa tuhota."
-
-#: ../mod_floatws/floatws.c:358
-msgid "Failed to rescue some client windows!"
-msgstr "Joidenkin asiakasikkunoiden pelastaminen epäonnistui."
-
-#: ../mod_floatws/floatws.c:370 ../mod_panews/panews.c:254
-msgid "Refusing to close non-empty workspace."
-msgstr "Työpöydän tuhoamisesta kieltäydytään, koska se ei ole tyhjä."
-
 #
-#: ../mod_floatws/floatws.c:462
+#: ../mod_floatws/floatws.c:482
 msgid "Failure to create a new frame."
 msgstr "Uuden kehyksen luonti epäonnistui."
 
 #
-#: ../mod_floatws/floatws.c:1037 ../mod_floatws/floatws.c:1115
+#: ../mod_floatws/floatws.c:1055 ../mod_floatws/floatws.c:1133
 msgid "Region not managed by the workspace."
 msgstr "Alue ei ole työpöydän hallinnassa."
 
-#: ../mod_floatws/floatws.c:1236
+#: ../mod_floatws/floatws.c:1258
 msgid "No geometry specified."
 msgstr "Geometria on asettamatta."
 
-#: ../mod_floatws/placement.c:125
+#: ../mod_floatws/placement.c:124
 #, c-format
 msgid "Unknown placement method \"%s\"."
 msgstr "Tuntematon sijoittelumenetelmä \"%s\"."
@@ -618,8 +602,12 @@ msgstr "Tuntematon sijoittelumenetelmä \"%s\"."
 msgid "Unable to re-initialise workspace. Destroying."
 msgstr "Työpöydän uudelleenalustus epäonnistui, joten se tuhotaan."
 
-#: ../mod_panews/placement.c:104 ../mod_panews/placement.c:108
-#: ../mod_panews/placement.c:175 ../mod_panews/placement.c:180
+#: ../mod_panews/panews.c:254
+msgid "Refusing to close non-empty workspace."
+msgstr "Työpöydän tuhoamisesta kieltäydytään, koska se ei ole tyhjä."
+
+#: ../mod_panews/placement.c:103 ../mod_panews/placement.c:107
+#: ../mod_panews/placement.c:174 ../mod_panews/placement.c:179
 #, c-format
 msgid "Malfunctioning placement hook; condition #%d."
 msgstr "Rikkinäinen koukku; tapaus #%d."
@@ -634,7 +622,7 @@ msgid "Empty menu."
 msgstr "Tyhjä valikko."
 
 #
-#: ../mod_sm/sm.c:110
+#: ../mod_sm/sm.c:116
 msgid "Failed to set session directory."
 msgstr "Istuntohakemiston asetus epäonnistui."
 
@@ -664,7 +652,7 @@ msgstr "Virhe istunnonhallinan kutsussa IceAddConnectionWatch."
 msgid "Unable to connect to the session manager."
 msgstr "Yhteydenotto istunnonhallintaohjelmaan epäonnistui."
 
-#: ../mod_sp/main.c:137
+#: ../mod_sp/main.c:154
 #, c-format
 msgid "Unable to create scratchpad for screen %d."
 msgstr "Suttupöydän luonti ruudulle %d epäonnistui."
@@ -826,12 +814,12 @@ msgstr ""
 "Käyttäjän hakemistoa ei ole asetettu, joten istuntohakemistoa ei voida "
 "asettaa."
 
-#: ../../libextl/readconfig.c:247
+#: ../../libextl/readconfig.c:253
 #, c-format
 msgid "Falling back to %s."
 msgstr "Yritetään tiedostoa %s."
 
-#: ../../libextl/readconfig.c:441
+#: ../../libextl/readconfig.c:460
 #, c-format
 msgid "Unable to create session directory \"%s\"."
 msgstr "Istuntohakemiston \"%s\" luonti epäonnistui."
@@ -845,11 +833,11 @@ msgstr "Luan pino on täysi."
 msgid "Unknown Lua error."
 msgstr "Tuntematon Lua:n virhe."
 
-#: ../../libextl/luaextl.c:456
+#: ../../libextl/luaextl.c:465
 msgid "Stack trace:"
 msgstr "Pinojälki:"
 
-#: ../../libextl/luaextl.c:463
+#: ../../libextl/luaextl.c:472
 #, c-format
 msgid ""
 "\n"
@@ -858,7 +846,7 @@ msgstr ""
 "\n"
 "(Debuggaustiedot eivät ole saatavilla tasolle %d)"
 
-#: ../../libextl/luaextl.c:481
+#: ../../libextl/luaextl.c:490
 msgid ""
 "\n"
 "  [Skipping unnamed C functions.]"
@@ -866,46 +854,46 @@ msgstr ""
 "\n"
 "  [Ohitetaan nimettömiä C-funktioita.]"
 
-#: ../../libextl/luaextl.c:532
+#: ../../libextl/luaextl.c:541
 msgid "Internal error."
 msgstr "Sisäinen virhe."
 
-#: ../../libextl/luaextl.c:551
+#: ../../libextl/luaextl.c:560
 msgid "Unable to initialize Lua."
 msgstr "Lua:n alustus epäonnistui."
 
-#: ../../libextl/luaextl.c:1277
+#: ../../libextl/luaextl.c:1286
 msgid ""
 "Too many return values. Use a C compiler that has va_copy to support more."
 msgstr ""
 "Liian monta paluuarvoa. Useamman tukemiseksi käytä C-kääntäjää, joka tukee "
 "va_copy:ä."
 
-#: ../../libextl/luaextl.c:1295
+#: ../../libextl/luaextl.c:1304
 #, c-format
 msgid "Invalid return value (expected '%c', got lua type \"%s\")."
 msgstr ""
 "Virheellinen paluuarvo (odotettiin tyyppiä '%c', mutta saatiin Lua:n tyyppi "
 "\"%s\")."
 
-#: ../../libextl/luaextl.c:1330 ../../libextl/luaextl.c:1594
+#: ../../libextl/luaextl.c:1339 ../../libextl/luaextl.c:1603
 msgid "Stack full."
 msgstr "Pino täysi."
 
-#: ../../libextl/luaextl.c:1570
+#: ../../libextl/luaextl.c:1579
 msgid "L1 call handler upvalues corrupt."
 msgstr "Tason 1 kutsunkäsittelijän \"upvalue\":t rikki."
 
-#: ../../libextl/luaextl.c:1575
+#: ../../libextl/luaextl.c:1584
 msgid "Called function has been unregistered."
 msgstr "Kutsuttu funktio on poistettu."
 
-#: ../../libextl/luaextl.c:1587
+#: ../../libextl/luaextl.c:1596
 #, c-format
 msgid "Attempt to call an unsafe function \"%s\" in restricted mode."
 msgstr "Yritys kutsua turvatonta funktiota \"%s\" rajoitetussa tilassa."
 
-#: ../../libextl/luaextl.c:1603
+#: ../../libextl/luaextl.c:1612
 #, c-format
 msgid ""
 "Argument %d to %s is of invalid type. (Argument template is '%s', got lua "
@@ -914,7 +902,7 @@ msgstr ""
 "Parameteri %d funktiolle %s on väärää tyyppiä. (Parametripohja on '%s', "
 "saatiin Lua:n tyyppi '%s'.)"
 
-#: ../../libextl/luaextl.c:1782
+#: ../../libextl/luaextl.c:1791
 #, c-format
 msgid ""
 "Function '%s' has more parameters than the level 1 call handler can handle"
@@ -923,16 +911,16 @@ msgstr ""
 "kykenee."
 
 #
-#: ../../libextl/luaextl.c:2199
+#: ../../libextl/luaextl.c:2208
 msgid "Maximal serialisation depth reached."
 msgstr "Suurin mahdollinen talletuksen rekursiosyvyys saavutettu."
 
-#: ../../libextl/luaextl.c:2220
+#: ../../libextl/luaextl.c:2229
 #, c-format
 msgid "Unable to serialise type %s."
 msgstr "Tyyppiä %s ei voida tallettaa."
 
-#: ../../libextl/luaextl.c:2251
+#: ../../libextl/luaextl.c:2260
 msgid "-- This file has been generated by Ion. Do not edit.\n"
 msgstr "-- Tämä tiedosto on Ionin luoma. Älä editoi sitä.\n"
 
@@ -949,7 +937,7 @@ msgstr ""
 msgid "Lower the frame."
 msgstr "Alenna kehystä."
 
-#: ../etc/cfg_bindings.lua:171
+#: ../etc/cfg_bindings.lua:170
 msgid "Display frame context menu."
 msgstr "Näytä kehyksen kontekstivalikko."
 
@@ -963,7 +951,7 @@ msgstr "Peilaa juuri"
 msgid "Go to n:th screen on multihead setup."
 msgstr "Siirry näytölle n usean näytön järjestelmässä."
 
-#: ../ext_statusbar/ext_statusbar.lua:308
+#: ../mod_statusbar/mod_statusbar.lua:314
 msgid "Failed to create statusbar."
 msgstr "Epäonnistuttiin tilarivin luonnissa"
 
@@ -971,7 +959,7 @@ msgstr "Epäonnistuttiin tilarivin luonnissa"
 msgid "Help"
 msgstr "Ohjeet"
 
-#: ../mod_query/mod_query.lua:566
+#: ../mod_query/mod_query.lua:584
 msgid "SSH to:"
 msgstr "Avaa SSH-yhteys:"
 
@@ -979,11 +967,11 @@ msgstr "Avaa SSH-yhteys:"
 msgid "Restart"
 msgstr "Uudelleenkäynnistä"
 
-#: ../mod_menu/mod_menu.lua:231
+#: ../mod_menu/mod_menu.lua:252
 msgid "Cannot save selection."
 msgstr "Ei voida tallettaa valintaa."
 
-#: ../etc/cfg_bindings.lua:206
+#: ../etc/cfg_bindings.lua:205
 msgid "End the resize mode."
 msgstr "Siirry tilasta pois."
 
@@ -993,11 +981,11 @@ msgstr "Siirry tilasta pois."
 msgid "Vertically"
 msgstr "Pystysuunnassa"
 
-#: ../ioncore/ioncore-bindings.lua:34
+#: ../ioncore/ioncore_bindings.lua:34
 msgid "Invalid guard %s."
 msgstr "Virheellinen vahti %s."
 
-#: ../etc/cfg_bindings.lua:109
+#: ../etc/cfg_bindings.lua:108
 msgid "Query for Lua code to execute."
 msgstr "Kysy Lua-koodia ajettavaksi."
 
@@ -1010,15 +998,15 @@ msgstr "Mene seuraavalle/edelliselle näytölle usean näytön järjestelmässä."
 msgid "none"
 msgstr "ei mikään"
 
-#: ../etc/cfg_bindings.lua:219
-msgid "Shrink in specified direction."
-msgstr "Kutista vastaavaan suuntaan."
+#: ../etc/cfg_menus.lua:31
+msgid "Exit"
+msgstr "Poistu"
 
-#: ../etc/cfg_bindings.lua:160
+#: ../etc/cfg_bindings.lua:159
 msgid "Maximize the frame horizontally/vertically."
 msgstr "Maksimoi kehys vaaka/pystysuunnassa."
 
-#: ../etc/cfg_bindings.lua:156
+#: ../etc/cfg_bindings.lua:155
 msgid "Move current object within the frame left/right."
 msgstr ""
 "Siirrä kehyksessä tällä hetkellä näytettävää oliota vasemmalle/oikealle."
@@ -1029,41 +1017,41 @@ msgstr ""
 "Siirry tämänhetkisen kehyksen yllä/alla/vasemmalle/oikealla olevaan "
 "kehykseen."
 
-#: ../ext_statusbar/ext_statusbar.lua:289
+#: ../mod_statusbar/mod_statusbar.lua:296
 msgid "Screen not found."
 msgstr "Ruutua ei löytynyt."
 
-#: ../etc/cfg_bindings.lua:182
+#: ../etc/cfg_bindings.lua:181
 msgid "Resize the frame."
 msgstr "Muuta kehyksen kokoa."
 
-#: ../etc/cfg_bindings.lua:189
+#: ../etc/cfg_bindings.lua:188
 msgid "Move objects between frames by dragging and dropping the tab."
 msgstr "Siirrä olioita kehysten välillä raahaamalla ja pudottamalla välilehti."
 
-#: ../mod_query/mod_query.lua:99
+#: ../mod_query/mod_query.lua:99 ../mod_statusbar/mod_statusbar.lua:258
 msgid "Could not find %s"
 msgstr "Ei löydettyä %s:ää."
 
-#: ../ext_statusbar/ext_statusbar.lua:295
+#: ../mod_statusbar/mod_statusbar.lua:302
 msgid "Screen already has an stdisp. Refusing to create a statusbar."
 msgstr "Ruudulla on jo tilanäyttö. Kieltäydytään luomasta tilariviä."
 
-#: ../etc/cfg_bindings.lua:112
+#: ../etc/cfg_bindings.lua:111
 msgid "Query for host to connect to with SSH."
 msgstr "Ota SSH-yhteys kyseltävään koneeseen."
 
 #
-#: ../etc/cfg_bindings.lua:229
+#: ../etc/cfg_bindings.lua:228
 msgid "Move in specified direction."
 msgstr "Liiku vastaavaan suuntaan."
 
 #
-#: ../ext_statusbar/ext_statusbar.lua:27
+#: ../mod_statusbar/mod_statusbar.lua:34
 msgid "mail"
 msgstr "posti"
 
-#: ../mod_query/mod_query.lua:807
+#: ../mod_query/mod_query.lua:825
 msgid ""
 "\n"
 "Transients:\n"
@@ -1075,20 +1063,20 @@ msgstr ""
 msgid "Select next/previous menu entry."
 msgstr "Siirry seuraavaan/edelliseen valintaan."
 
-#: ../ioncore/ioncore-luaext.lua:30
+#: ../ioncore/ioncore_luaext.lua:30
 msgid "Recursive table - unable to deepcopy"
 msgstr "Rekursiivinen taulu - ei voida syväkopioida."
 
 #
-#: ../etc/cfg_bindings.lua:209
+#: ../etc/cfg_bindings.lua:208
 msgid "Grow in specified direction."
 msgstr "Kasvata vastaavaan suuntaan."
 
-#: ../ioncore/ioncore-bindings.lua:68
+#: ../ioncore/ioncore_bindings.lua:68
 msgid "Invalid command"
 msgstr "Virheellinen komento"
 
-#: ../mod_query/mod_query.lua:189 ../mod_menu/mod_menu.lua:245
+#: ../mod_query/mod_query.lua:189 ../mod_menu/mod_menu.lua:266
 msgid "Too much result data"
 msgstr "Liian suuri vastaus"
 
@@ -1105,17 +1093,17 @@ msgstr "Mene edelliseen aktiiviseen olioon."
 msgid "Clear mark/cancel selection."
 msgstr "Lopeta tekstin valinta."
 
-#: ../mod_query/mod_query.lua:772
+#: ../mod_query/mod_query.lua:790
 msgid "No entry '%s'"
 msgstr "Kirjausta '%s' ei löydy."
 
 #
 #
-#: ../etc/cfg_bindings.lua:90
+#: ../etc/cfg_bindings.lua:86
 msgid "Toggle fullscreen mode of current client window."
 msgstr "Kytke aktiivisen asiakasikkunan kokoruudun tila päälle/pois."
 
-#: ../etc/cfg_bindings.lua:103
+#: ../etc/cfg_bindings.lua:99
 msgid "Query for manual page to be displayed."
 msgstr "Kysy ohjesivua näytettäväksi."
 
@@ -1123,16 +1111,16 @@ msgstr "Kysy ohjesivua näytettäväksi."
 msgid "Show the Ion manual page."
 msgstr "Näytä Ionin ohjesivu."
 
-#: ../etc/cfg_bindings.lua:60
+#: ../etc/cfg_bindings.lua:57
 msgid "Display the main menu."
 msgstr "Näytä päävalikko."
 
 #
-#: ../etc/cfg_bindings.lua:54
+#: ../etc/cfg_bindings.lua:102
 msgid "Run a terminal emulator."
 msgstr "Käynnistä pääte-emulaattori."
 
-#: ../etc/cfg_bindings.lua:121
+#: ../etc/cfg_bindings.lua:120
 msgid "Query for workspace to go to or create a new one."
 msgstr "Kysy työpöytää jolle siirtyä, tai luo uusi."
 
@@ -1144,9 +1132,19 @@ msgstr "Tapa"
 msgid "Close"
 msgstr "Sulje"
 
-#: ../mod_query/mod_query.lua:381
-msgid "Go to or create workspace:"
-msgstr "Mene tai luo työpöytä:"
+#: ../mod_query/mod_query.lua:822
+msgid ""
+"Title: %s\n"
+"Class: %s\n"
+"Role: %s\n"
+"Instance: %s\n"
+"XID: 0x%x"
+msgstr ""
+"Otsikko: %s\n"
+"Luokka(class): %s\n"
+"Rooli(role): %s\n"
+"Instanssi(instance): %s\n"
+"XID: 0x%x"
 
 #: ../etc/cfg_query.lua:35
 msgid "Delete one word forward/backward."
@@ -1161,7 +1159,7 @@ msgstr "Mene rivin alkuun/loppuun."
 msgid "Transpose"
 msgstr "Käännä"
 
-#: ../etc/cfg_bindings.lua:152
+#: ../etc/cfg_bindings.lua:151
 msgid "Switch to next/previous object within the frame."
 msgstr "Siirry seuraavaan/edelliseen kehyksen jakavaan olioon."
 
@@ -1169,7 +1167,7 @@ msgstr "Siirry seuraavaan/edelliseen kehyksen jakavaan olioon."
 msgid "Restart Ion (y/n)?"
 msgstr "Uudelleenkäynnistä Ion (kyllä: y, ei: n)?"
 
-#: ../mod_query/mod_query.lua:724
+#: ../mod_query/mod_query.lua:742
 msgid "Lua code: "
 msgstr "Lua-koodia:"
 
@@ -1177,7 +1175,7 @@ msgstr "Lua-koodia:"
 msgid "Attach window:"
 msgstr "Liitä ikkuna:"
 
-#: ../etc/cfg_bindings.lua:186 ../etc/cfg_floatws.lua:37
+#: ../etc/cfg_bindings.lua:185 ../etc/cfg_floatws.lua:37
 msgid "Move the frame."
 msgstr "Siirrä kehystä."
 
@@ -1189,7 +1187,7 @@ msgstr "Ohjelmat"
 msgid "Skip one word forward/backward."
 msgstr "Ohita yksi sana eteen/taaksepäin"
 
-#: ../mod_query/mod_query.lua:738
+#: ../mod_query/mod_query.lua:756
 msgid "Unknown menu %s."
 msgstr "Tuntematon valikko %s."
 
@@ -1216,7 +1214,7 @@ msgstr "Halkaise tämänhetkinen kehys pystysuunnassa."
 
 #
 #
-#: ../etc/cfg_bindings.lua:57
+#: ../etc/cfg_bindings.lua:54
 msgid "Create a new workspace of chosen default type."
 msgstr "Luo uusi työpöytä ennalta asetettua tyyppiä."
 
@@ -1238,11 +1236,11 @@ msgid "Close the query/message box, not executing bound actions."
 msgstr "Sulje kysely/viesti suorittamatta sidottuja toimintoja."
 
 #
-#: ../etc/cfg_bindings.lua:168
+#: ../etc/cfg_bindings.lua:167
 msgid "Query for a client window to attach to active frame."
 msgstr "Kysy asiakasikkunaa liitettäväksi kehykseen."
 
-#: ../mod_query/mod_query.lua:488
+#: ../mod_query/mod_query.lua:506
 msgid "Run:"
 msgstr "Suorita:"
 
@@ -1252,59 +1250,58 @@ msgid "Resize the area."
 msgstr "Muuta kehyksen kokoa."
 
 #
-#: ../etc/cfg_bindings.lua:95
+#: ../etc/cfg_bindings.lua:91
 msgid "Kill client owning current client window."
 msgstr "Tapa aktiivisen asiakasikkunan omistava ohjelma."
 
-#: ../mod_query/mod_query.lua:595
+#: ../mod_query/mod_query.lua:613
 msgid "Manual page (%s):"
 msgstr "Ohjesivu (%s):"
 
 #
-#: ../etc/cfg_bindings.lua:124
+#: ../etc/cfg_bindings.lua:123
 msgid "Query for a client window to go to."
 msgstr "Kysy asiakasikkunaa, johon siirtyä."
 
-#
-#: ../etc/cfg_ionws.lua:39
-msgid "Destroy frame"
-msgstr "Tuhoa kehys"
-
-#: ../mod_query/mod_query.lua:339
-msgid "Unknown error"
-msgstr "Tuntematon virhe"
-
-#: ../etc/cfg_bindings.lua:175 ../etc/cfg_panews.lua:8
-msgid "Begin move/resize mode."
-msgstr "Aloita siirto ja koonmuutostila."
-
-#: ../etc/cfg_bindings.lua:136
-msgid "Tag current object within the frame."
-msgstr "Merkitse kehyksen tällä hetkellä näyttämä olio."
-
-#: ../etc/cfg_bindings.lua:140
-msgid "Switch to n:th object within the frame."
-msgstr "Siirry n:teen kehyksen jakavaan olioon."
-
-#: ../etc/cfg_bindings.lua:203
-msgid "Cancel the resize mode."
-msgstr "Peruuta tilasta."
+#: ../pwm/cfg_pwm_menus.lua:12 ../etc/cfg_menus.lua:9
+msgid "Lock screen"
+msgstr "Lukitse näyttö"
 
 #: ../build/mkman.lua:196
 msgid "%s %s"
 msgstr ""
 
-#: ../etc/cfg_query.lua:27
-msgid "Delete next character."
-msgstr "Poista seuraava merkki."
+#: ../mod_query/mod_query.lua:339
+msgid "Unknown error"
+msgstr "Tuntematon virhe"
 
-#: ../mod_query/mod_query.lua:356
-msgid "Go to window:"
-msgstr "Mene ikkunaan:"
+#: ../etc/cfg_bindings.lua:174 ../etc/cfg_panews.lua:8
+msgid "Begin move/resize mode."
+msgstr "Aloita siirto ja koonmuutostila."
+
+#: ../etc/cfg_bindings.lua:135
+msgid "Tag current object within the frame."
+msgstr "Merkitse kehyksen tällä hetkellä näyttämä olio."
+
+#: ../etc/cfg_bindings.lua:139
+msgid "Switch to n:th object within the frame."
+msgstr "Siirry n:teen kehyksen jakavaan olioon."
+
+#: ../etc/cfg_bindings.lua:202
+msgid "Cancel the resize mode."
+msgstr "Peruuta tilasta."
+
+#: ../etc/cfg_query.lua:11
+msgid "Move one character forward/backward."
+msgstr "Siirry yksi merkki eteen/taakse."
 
 #: ../build/mkman.lua:182
 msgid "drag"
 msgstr "raahaus"
+
+#: ../mod_query/mod_query.lua:356
+msgid "Go to window:"
+msgstr "Mene ikkunaan:"
 
 #: ../build/mkman.lua:181
 msgid "click"
@@ -1318,22 +1315,22 @@ msgstr "painallus"
 msgid "Clear the menu's typeahead find buffer."
 msgstr "Tyhjää valikon hakupuskuri."
 
-#: ../etc/cfg_ionws.lua:47
-msgid "Split"
-msgstr "Halkaise"
+#: ../mod_statusbar/mod_statusbar.lua:216
+msgid "ion-statusd quit."
+msgstr "ion-statusd päätti suorituksen."
+
+#: ../etc/cfg_menu.lua:11
+msgid "Close the menu."
+msgstr "Sulje valikko."
 
 #
-#: ../etc/cfg_bindings.lua:98
+#: ../etc/cfg_bindings.lua:94
 msgid ""
 "Send next key press to current client window. Some programs may not allow "
 "this by default."
 msgstr ""
 "Lähetä seuraava näppäinpainallus aktiiviselle asiakasikkunalle. Kaikki "
 "ohjelmat eivät välttämättä salli tätä oletuksena."
-
-#: ../etc/cfg_menu.lua:11
-msgid "Close the menu."
-msgstr "Sulje valikko."
 
 #: ../etc/cfg_query.lua:87
 msgid "Scroll the message or completions up/down."
@@ -1343,32 +1340,22 @@ msgstr "Vieritä viestiä tai täydennyksiä ylös/alas."
 msgid "Close the query and execute bound action."
 msgstr "Sulje kysely ja suorita sidottu toiminta."
 
+#: ../etc/cfg_query.lua:31
+msgid "Delete previous character."
+msgstr "Tuhoa edellinen merkki."
+
 #
 #: ../etc/cfg_bindings.lua:31
 msgid "Switch to next/previous object within current screen."
 msgstr "Siirry seuraavaan/edelliseen tämänhetkisen näytön lomittamaan olioon."
 
-#: ../etc/cfg_query.lua:39
-msgid "Delete to end of line."
-msgstr "Tuhoa merkit rivin loppuun saakka."
+#: ../mod_statusbar/mod_statusbar.lua:83
+msgid "Failed to create a timer for statusbar."
+msgstr "Epäonnistuttiin ajastimen luonnissa tilariville."
 
 #: ../pwm/cfg_pwm_menus.lua:14 ../etc/cfg_menus.lua:11
 msgid "About Ion"
 msgstr "Tietoja Ionista"
-
-#: ../mod_query/mod_query.lua:804
-msgid ""
-"Title: %s\n"
-"Class: %s\n"
-"Role: %s\n"
-"Instance: %s\n"
-"XID: 0x%x"
-msgstr ""
-"Otsikko: %s\n"
-"Luokka(class): %s\n"
-"Rooli(role): %s\n"
-"Instanssi(instance): %s\n"
-"XID: 0x%x"
 
 #
 #: ../etc/cfg_query.lua:61
@@ -1384,21 +1371,25 @@ msgstr "Liimaa teksti leikelaudalta."
 msgid "Select next/previous (matching) history entry."
 msgstr "Näytä seuraava/edellinen vastaus muistista."
 
+#: ../etc/cfg_query.lua:42
+msgid "Delete the whole line."
+msgstr "Tuhoa koko rivi."
+
 #: ../etc/cfg_menus.lua:43
 msgid "Clear tags"
 msgstr "Poista merkinnät"
 
-#: ../etc/cfg_query.lua:42
-msgid "Delete the whole line."
-msgstr "Tuhoa koko rivi."
+#: ../etc/cfg_query.lua:39
+msgid "Delete to end of line."
+msgstr "Tuhoa merkit rivin loppuun saakka."
 
 #: ../etc/cfg_query.lua:71
 msgid "Try to complete the entered text."
 msgstr "Yritä täydentää syötetty teksti."
 
-#: ../etc/cfg_query.lua:31
-msgid "Delete previous character."
-msgstr "Tuhoa edellinen merkki."
+#: ../etc/cfg_query.lua:27
+msgid "Delete next character."
+msgstr "Poista seuraava merkki."
 
 #: ../mod_query/mod_query.lua:299
 msgid "Cannot attach: different root windows."
@@ -1408,15 +1399,15 @@ msgstr "Ei voida liittää: eri juuri-ikkunat."
 msgid "double click"
 msgstr "kaksoisnapsautus"
 
-#: ../etc/cfg_query.lua:11
-msgid "Move one character forward/backward."
-msgstr "Siirry yksi merkki eteen/taakse."
+#: ../etc/cfg_floatws.lua:26
+msgid "Toggle shade mode"
+msgstr "Kytke litistys päälle/pois."
 
 #: ../etc/cfg_menus.lua:29
 msgid "Restart PWM"
 msgstr "Käynnistä PWM"
 
-#: ../etc/cfg_bindings.lua:115
+#: ../etc/cfg_bindings.lua:114
 msgid "Query for file to edit."
 msgstr "Kysy tiedostoa muokattavaksi."
 
@@ -1425,23 +1416,9 @@ msgstr "Kysy tiedostoa muokattavaksi."
 msgid "Clear all tags."
 msgstr "Poista kaikki merkinnät."
 
-#: ../etc/cfg_bindings.lua:178
+#: ../etc/cfg_bindings.lua:177
 msgid "Switch the frame to display the object indicated by the tab."
 msgstr "Vaihda kehys näyttämään välilehden ilmoittama olio."
-
-#
-#
-#: ../etc/cfg_ionws.lua:50 ../etc/cfg_ionws.lua:60
-msgid "Horizontally"
-msgstr "Vaakasuunnassa"
-
-#: ../pwm/cfg_pwm_menus.lua:16 ../pwm/cfg_pwm_menus.lua:24
-msgid "New"
-msgstr "Uusi"
-
-#: ../mod_query/mod_query.lua:410
-msgid "Frame name:"
-msgstr "Kehyksen nimi:"
 
 #
 #: ../etc/cfg_bindings.lua:18
@@ -1452,27 +1429,39 @@ msgstr ""
 "Siirry n:teen tämänhetkisen näytön lomittamaan olioon (työpöytä, kokoruudun "
 "asiakasikkuna)."
 
-#: ../etc/cfg_bindings.lua:64
-msgid "Display the window list menu."
-msgstr "Näytä ikkunavalikko."
+#: ../pwm/cfg_pwm_menus.lua:16 ../pwm/cfg_pwm_menus.lua:24
+msgid "New"
+msgstr "Uusi"
 
-#: ../etc/cfg_floatws.lua:26
-msgid "Toggle shade mode"
-msgstr "Kytke litistys päälle/pois."
-
-#: ../mod_query/mod_query.lua:393
-msgid "Exit Ion/Shutdown session (y/n)?"
-msgstr "Poistu Ionista/Lopeta istunto (kyllä: y, ei: n)?"
+#: ../mod_query/mod_query.lua:410
+msgid "Frame name:"
+msgstr "Kehyksen nimi:"
 
 #: ../etc/cfg_floatws.lua:15
 msgid "Raise/lower active frame."
 msgstr "Nosta/alenna aktiivinen kehys."
 
-#: ../mod_menu/mod_menu.lua:235
+#: ../etc/cfg_bindings.lua:61
+msgid "Display the window list menu."
+msgstr "Näytä ikkunavalikko."
+
+#: ../mod_query/mod_query.lua:393
+msgid "Exit Ion/Shutdown session (y/n)?"
+msgstr "Poistu Ionista/Lopeta istunto (kyllä: y, ei: n)?"
+
+#: ../mod_query/mod_query.lua:381
+msgid "Go to or create workspace:"
+msgstr "Mene tai luo työpöytä:"
+
+#: ../mod_menu/mod_menu.lua:256
 msgid "Save look selection in %s?"
 msgstr "Talletaanko ulkonäköasetus tiedostoon %s?"
 
-#: ../etc/cfg_bindings.lua:82
+#: ../etc/cfg_ionws.lua:57
+msgid "Floating split"
+msgstr "Kelluva halkaisu"
+
+#: ../etc/cfg_bindings.lua:78
 msgid "Close current object."
 msgstr "Sulje aktiivinen olio."
 
@@ -1481,25 +1470,27 @@ msgstr "Sulje aktiivinen olio."
 msgid "Copy selection."
 msgstr "Kopioi valittu teksti."
 
-#: ../etc/cfg_bindings.lua:164
+#: ../etc/cfg_bindings.lua:163
 msgid "Attach tagged objects to this frame."
 msgstr "Liitä merkityt oliot tähän kehykseen."
-
-#: ../etc/cfg_ionws.lua:57
-msgid "Floating split"
-msgstr "Kelluva halkaisu"
-
-#: ../mod_query/mod_query.lua:768
-msgid "%s menu:"
-msgstr "Valikko %s"
-
-#: ../ext_statusbar/ext_statusbar.lua:318
-msgid "Failed to create a timer for statusbar."
-msgstr "Epäonnistuttiin ajastimen luonnissa tilariville."
 
 #: ../etc/cfg_ionws.lua:52 ../etc/cfg_ionws.lua:62
 msgid "Vertically at root"
 msgstr "Pystysuunnassa juuressa"
+
+#: ../mod_query/mod_query.lua:786
+msgid "%s menu:"
+msgstr "Valikko %s"
+
+#
+#
+#: ../etc/cfg_ionws.lua:50 ../etc/cfg_ionws.lua:60
+msgid "Horizontally"
+msgstr "Vaakasuunnassa"
+
+#: ../etc/cfg_ionws.lua:47
+msgid "Split"
+msgstr "Halkaise"
 
 #
 #
@@ -1507,7 +1498,7 @@ msgstr "Pystysuunnassa juuressa"
 msgid "Activate current menu entry."
 msgstr "Suorita valinta."
 
-#: ../ioncore/ioncore-efbb.lua:12
+#: ../ioncore/ioncore_efbb.lua:12
 msgid ""
 "Making the following minimal emergency mappings:\n"
 "  F2 -> xterm\n"
@@ -1531,7 +1522,7 @@ msgstr "Käännä juuri"
 msgid "Styles"
 msgstr "Tyylit"
 
-#: ../etc/cfg_bindings.lua:106
+#: ../etc/cfg_bindings.lua:105
 msgid "Query for command line to execute."
 msgstr "Kysy komentoriviä suoritettavaksi."
 
@@ -1539,7 +1530,7 @@ msgstr "Kysy komentoriviä suoritettavaksi."
 msgid "Unable to create workspace: no screen."
 msgstr "Ei voida luoda työpöytää: ei ruutua."
 
-#: ../ext_statusbar/ext_statusbar.lua:27
+#: ../mod_statusbar/mod_statusbar.lua:34
 msgid "load"
 msgstr "kuorma"
 
@@ -1552,9 +1543,10 @@ msgstr "Peilaa"
 msgid "Flip&transpose"
 msgstr "Peilaa&käännä"
 
-#: ../pwm/cfg_pwm_menus.lua:12 ../etc/cfg_menus.lua:9
-msgid "Lock screen"
-msgstr "Lukitse näyttö"
+#
+#: ../etc/cfg_ionws.lua:39
+msgid "Destroy frame"
+msgstr "Tuhoa kehys"
 
 #: ../mod_query/mod_query.lua:449
 msgid "Edit file:"
@@ -1569,7 +1561,7 @@ msgid "%s %s at %s"
 msgstr "%s %s osassa %s"
 
 #
-#: ../etc/cfg_bindings.lua:85
+#: ../etc/cfg_bindings.lua:81
 msgid ""
 "Nudge current client window. This might help with some programs' resizing "
 "problems."
@@ -1581,7 +1573,7 @@ msgstr ""
 msgid "Destroy current frame."
 msgstr "Tuhoa tämänhetkinen kehys."
 
-#: ../ioncore/ioncore-bindings.lua:53
+#: ../ioncore/ioncore_bindings.lua:53
 msgid "Error in command string: "
 msgstr "Virhe komentojonossa:"
 
@@ -1589,9 +1581,9 @@ msgstr "Virhe komentojonossa:"
 msgid "Split current frame horizontally."
 msgstr "Halkaise tämänhetkinen kehys vaakasuunnassa."
 
-#: ../etc/cfg_menus.lua:42
-msgid "Attach tagged"
-msgstr "Liitä merkityt"
+#: ../etc/cfg_bindings.lua:218
+msgid "Shrink in specified direction."
+msgstr "Kutista vastaavaan suuntaan."
 
 #: ../etc/cfg_ionws.lua:54 ../etc/cfg_ionws.lua:64
 msgid "Horizontally at root"
@@ -1605,13 +1597,21 @@ msgstr "Vaihda merkintä"
 msgid "View file:"
 msgstr "Näytä tiedosto:"
 
+#: ../etc/cfg_menus.lua:42
+msgid "Attach tagged"
+msgstr "Liitä merkityt"
+
+#: ../etc/cfg_bindings.lua:117
+msgid "Query for file to view."
+msgstr "Kysy tiedostoa näytettäväksi."
+
 #: ../mod_query/mod_query.lua:421
 msgid "Workspace name:"
 msgstr "Työpöydän nimi:"
 
-#: ../etc/cfg_menus.lua:31
-msgid "Exit"
-msgstr "Poistu"
+#: ../ioncore/ioncore_bindings.lua:45
+msgid "Error compiling guard: %s"
+msgstr "Virhe vahdin käännössä. %s"
 
 #: ../etc/cfg_menus.lua:27
 msgid "Save"
@@ -1626,14 +1626,6 @@ msgstr "Työpöydät"
 msgid "Mozilla Firefox"
 msgstr ""
 
-#: ../ioncore/ioncore-bindings.lua:45
-msgid "Error compiling guard: %s"
-msgstr "Virhe vahdin käännössä. %s"
-
-#: ../mod_menu/mod_menu.lua:271
-msgid "Refresh list"
-msgstr "Virkistä lista"
-
 #: ../etc/cfg_floatws.lua:9
 msgid "Circulate focus and raise the newly focused frame."
 msgstr "Kierrätä fokusta ja nosta uudelleen fokusoitu kehys."
@@ -1643,11 +1635,11 @@ msgstr "Kierrätä fokusta ja nosta uudelleen fokusoitu kehys."
 msgid "Run..."
 msgstr "Suorita..."
 
-#: ../etc/cfg_bindings.lua:118
-msgid "Query for file to view."
-msgstr "Kysy tiedostoa näytettäväksi."
+#: ../mod_menu/mod_menu.lua:292
+msgid "Refresh list"
+msgstr "Virkistä lista"
 
-#: ../mod_query/mod_query.lua:511
+#: ../mod_query/mod_query.lua:529
 msgid "Failed to open ~/.ssh/known_hosts"
 msgstr "Tiedostoa ~/.ssh/known_hosts avaaminen epäonnistui."
 
@@ -1658,6 +1650,32 @@ msgstr "Istunto"
 #: ../pwm/cfg_pwm_menus.lua:27
 msgid "List"
 msgstr "Lista"
+
+#
+#~ msgid "Could not find a root window."
+#~ msgstr "Juuri-ikkunaa ei löytynyt."
+
+#~ msgid "Caught fatal signal %d. Dying without deinit."
+#~ msgstr ""
+#~ "Ohjelma lopettaa ilman jälkien putsausta tuhoisan signaalin %d "
+#~ "vastaanottoon."
+
+#~ msgid "Caught signal %d. Dying."
+#~ msgstr "Ohjelma lopettaa signaalin %d vastaanottoon."
+
+#
+#~ msgid "Object destroyed while deferred actions are still pending."
+#~ msgstr "Viivästettyä toimintoja jonossa vielä oliota tuhottaessa."
+
+#~ msgid "Unable to rescue \"%s\"."
+#~ msgstr "Alueen \"%s\" pelastaminen epäonnistui."
+
+#~ msgid "Frame is not empty."
+#~ msgstr "Kehys ei ole tyhjä."
+
+#
+#~ msgid "Frame not managed by the workspace."
+#~ msgstr "Kehys ei ole tämän työpöydän hallitsema."
 
 #~ msgid "Vertically/root"
 #~ msgstr "Pystysuunnassa juuressa"

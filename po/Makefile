@@ -13,6 +13,7 @@ LXGETTEXT = $(LUA) $(TOPDIR)/build/lxgettext.lua
 
 TRANSLATIONS := fi cs de
 MO_FILES := $(patsubst %,%.mo, $(TRANSLATIONS))
+PO_FILES := $(patsubst %,%.po, $(TRANSLATIONS))
 
 POTDIRS=../ioncore \
 	../mod_ionws \
@@ -22,8 +23,9 @@ POTDIRS=../ioncore \
 	../mod_menu \
 	../mod_sm \
 	../mod_sp \
+	../mod_statusbar \
+	../mod_mgmtmode \
 	../de \
-	../ext_statusbar \
 	../ion \
 	../pwm \
 	../etc \
@@ -71,6 +73,6 @@ _install:
 	done
 
 update_translations: pot
-	for i in $(TRANSLATIONS); do \
-		$(MSGMERGE) -U $$i.po $(POTFILE); \
+	for i in $(PO_FILES); do \
+		$(MSGMERGE) -U $$i $(POTFILE); \
 	done
