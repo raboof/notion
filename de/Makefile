@@ -25,3 +25,5 @@ include $(TOPDIR)/rules.mk
 ######################################
 
 _install: module_install
+	$(INSTALLDIR) $(SHAREDIR)
+	$(INSTALL) -m $(DATA_MODE) delib.lua $(SHAREDIR)
