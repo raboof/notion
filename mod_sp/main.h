@@ -17,7 +17,7 @@
 extern bool mod_sp_init();
 extern void mod_sp_deinit();
 
-extern WBindmap mod_sp_scratchpad_bindmap;
+extern WBindmap *mod_sp_scratchpad_bindmap;
 
 #define CF_SCRATCHPAD_DEFAULT_W 640
 #define CF_SCRATCHPAD_DEFAULT_H 480

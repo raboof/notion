@@ -67,7 +67,7 @@ static bool mplex_do_init(WMPlex *mplex, WWindow *parent, Window win,
     
     mplex->win.region.flags|=REGION_BINDINGS_ARE_GRABBED;
 
-    region_add_bindmap((WRegion*)mplex, &ioncore_mplex_bindmap);
+    region_add_bindmap((WRegion*)mplex, ioncore_mplex_bindmap);
 
     return TRUE;
 }

@@ -46,7 +46,7 @@ static bool scratchpad_init(WScratchpad *sp, WWindow *parent,
     if(!frame_init((WFrame*)sp, parent, &lazyfp))
         return FALSE;
     
-    region_add_bindmap((WRegion*)sp, &(mod_sp_scratchpad_bindmap));
+    region_add_bindmap((WRegion*)sp, mod_sp_scratchpad_bindmap);
     
     return TRUE;
 }

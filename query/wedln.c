@@ -582,7 +582,7 @@ static bool wedln_init(WEdln *wedln, WWindow *par, const WFitParams *fp,
     wedln->handler=extl_ref_fn(params->handler);
     wedln->completor=extl_ref_fn(params->completor);
 
-    region_add_bindmap((WRegion*)wedln, &mod_query_wedln_bindmap);
+    region_add_bindmap((WRegion*)wedln, mod_query_wedln_bindmap);
     
     return TRUE;
 }

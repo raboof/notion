@@ -17,7 +17,7 @@
 extern bool mod_menu_init();
 extern void mod_menu_deinit();
 
-extern WBindmap mod_menu_menu_bindmap;
+extern WBindmap *mod_menu_menu_bindmap;
 
 
 #endif /* ION_MENU_MAIN_H */

@@ -22,7 +22,7 @@ typedef void WInputCalcSizeFn(WInput*, WRectangle*);
 typedef void WInputScrollFn(WInput*);
 typedef void WInputDrawFn(WInput*, bool complete);
 
-extern WBindmap mod_query_input_bindmap;
-extern WBindmap mod_query_wedln_bindmap;
+extern WBindmap *mod_query_input_bindmap;
+extern WBindmap *mod_query_wedln_bindmap;
 
 #endif /* ION_QUERY_INPUTP_H */

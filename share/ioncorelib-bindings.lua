@@ -13,6 +13,8 @@ local ioncorelib=_G.ioncorelib
 
 local warn=ioncore.warn
 
+local compiled2str=setmetatable({}, {__mode="k"})
+
 --DOC
 -- Compile string \var{cmd} into a bindable function. Within \var{cmd}, the
 -- variable ''\var{_}'' (underscore) can be used to refer to the object 
@@ -51,7 +53,9 @@ function ioncorelib.compile_cmd(cmd, guard)
             warn("Error in command string: "..err)
             return
         end
-        return fn(), gfn
+        fn=fn()
+        compiled2str[fn]=cmd
+        return fn, gfn
     elseif type(cmd)=="function" then
         if gfn then
             return function(_, _sub) 
@@ -156,12 +160,33 @@ end
 -- a table composed of entries created with \fnref{ioncorelib.kpress}, 
 -- etc.; see section \ref{sec:bindings} for details.
 function ioncorelib.defbindings(context, bindings)
-    local do_bind=_G['__defbindings_'..context]
-    if not do_bind then
-        warn("Context "..context.." not known")
-        return
+    return ioncore.defbindings(context, bindings)
+end
+
+local function bindings_get_cmds(map)
+    for k, v in map do
+        if v.func then
+            v.cmd=compiled2str[v.func]
+        end
+        if v.submap then
+            bindings_get_cmds(v.submap)
+        end
     end
-    return do_bind(bindings)
+end
+
+--DOC
+-- Get a table of all bindings.
+function ioncorelib.getbindings(maybe_context)
+    local bindings=ioncore.getbindings()
+    if maybe_context then
+        bindings_get_cmds(bindings[maybe_context])
+        return bindings[maybe_context]
+    else
+        for k, v in bindings do
+            bindings_get_cmds(v)
+        end
+        return bindings
+    end
 end
 
 

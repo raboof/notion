@@ -9,17 +9,28 @@
  * (at your option) any later version.
  */
 
+#include <libtu/map.h>
 #include "binding.h"
 
 #ifndef ION_IONCORE_BINDMAP_H
 #define ION_IONCORE_BINDMAP_H
 
-extern WBindmap ioncore_rootwin_bindmap;
-extern WBindmap ioncore_mplex_bindmap;
-extern WBindmap ioncore_frame_bindmap;
-extern WBindmap ioncore_moveres_bindmap;
+extern WBindmap *ioncore_rootwin_bindmap;
+extern WBindmap *ioncore_mplex_bindmap;
+extern WBindmap *ioncore_frame_bindmap;
+extern WBindmap *ioncore_moveres_bindmap;
 
 extern void ioncore_deinit_bindmaps();
+extern bool ioncore_init_bindmaps();
+extern void ioncore_refresh_bindmaps();
+
+extern WBindmap *ioncore_alloc_bindmap(const char *name, 
+                                       const StringIntMap *areas);
+extern void ioncore_free_bindmap(const char *name, WBindmap *bm);
+extern WBindmap *ioncore_lookup_bindmap(const char *name);
+
+extern bool ioncore_defbindings(const char *name, ExtlTab tab);
+extern ExtlTab ioncore_getbindings();
 
 #endif /* ION_IONCORE_BINDMAP_H */
 

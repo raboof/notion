@@ -166,8 +166,8 @@ static bool tabdrag_kbd_handler(WRegion *reg, XEvent *xev)
     
     assert(reg!=NULL);
 
-    binding=bindmap_lookup_binding(&ioncore_rootwin_bindmap, BINDING_KEYPRESS,
-                           ev->state&~BUTTONS_MASK, ev->keycode);
+    binding=bindmap_lookup_binding(ioncore_rootwin_bindmap, BINDING_KEYPRESS,
+                                   ev->state&~BUTTONS_MASK, ev->keycode);
     
     if(binding!=NULL && binding->func!=extl_fn_none()){
         const ExtlSafelist *old_safelist=

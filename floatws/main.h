@@ -17,7 +17,7 @@
 extern bool mod_floatws_init();
 extern void mod_floatws_deinit();
 
-extern WBindmap floatws_bindmap;
-extern WBindmap floatframe_bindmap;
+extern WBindmap *mod_floatws_floatws_bindmap;
+extern WBindmap *mod_floatws_floatframe_bindmap;
 
 #endif /* ION_FLOATWS_MAIN_H */

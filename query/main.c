@@ -15,6 +15,7 @@
 #include <ioncore/frame.h>
 #include <ioncore/saveload.h>
 #include <ioncore/extl.h>
+#include <ioncore/bindmaps.h>
 
 #include "query.h"
 #include "edln.h"
@@ -34,25 +35,12 @@ char mod_query_ion_api_version[]=ION_API_VERSION;
 /*}}}*/
 
 
-/*{{{ Bindmaps w/ config */
+/*{{{ Bindmaps */
 
 
-WBindmap mod_query_input_bindmap=BINDMAP_INIT;
-WBindmap mod_query_wedln_bindmap=BINDMAP_INIT;
+WBindmap *mod_query_input_bindmap=NULL;
+WBindmap *mod_query_wedln_bindmap=NULL;
 
-
-EXTL_EXPORT_AS(global, __defbindings_WInput)
-bool mod_query_defbindings_WInput(ExtlTab tab)
-{
-    return bindmap_do_table(&mod_query_input_bindmap, NULL, tab);
-}
-
-
-EXTL_EXPORT_AS(global, __defbindings_WEdln)
-bool mod_query_defbindings_WEdln(ExtlTab tab)
-{
-    return bindmap_do_table(&mod_query_wedln_bindmap, NULL, tab);
-}
 
 /*}}}*/
 
@@ -111,8 +99,16 @@ static bool loaded_ok=FALSE;
 void mod_query_deinit()
 {
     mod_query_unregister_exports();
-    bindmap_deinit(&mod_query_input_bindmap);
-    bindmap_deinit(&mod_query_wedln_bindmap);
+
+    if(mod_query_input_bindmap!=NULL){
+        ioncore_free_bindmap("WInput", mod_query_input_bindmap);
+        mod_query_input_bindmap=NULL;
+    }
+    
+    if(mod_query_wedln_bindmap!=NULL){
+        ioncore_free_bindmap("WEdln", mod_query_wedln_bindmap);
+        mod_query_wedln_bindmap=NULL;
+    }
     
     if(loaded_ok)
         save_history();
@@ -123,6 +119,14 @@ bool mod_query_init()
 {
     if(!mod_query_register_exports())
         goto err;
+    
+    mod_query_input_bindmap=ioncore_alloc_bindmap("WInput", NULL);
+    mod_query_wedln_bindmap=ioncore_alloc_bindmap("WEdln", NULL);
+    
+    if(mod_query_wedln_bindmap==NULL ||
+       mod_query_input_bindmap==NULL){
+        goto err;
+    }
     
     ioncore_read_config("query", NULL, TRUE);
 

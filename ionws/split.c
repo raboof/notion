@@ -29,7 +29,7 @@
 #include <ioncore/region-iter.h>
 #include "ionws.h"
 #include "split.h"
-#include "bindmaps.h"
+#include "main.h"
 
     
 IMPLCLASS(WWsSplit, Obj, NULL, NULL);
@@ -1225,7 +1225,7 @@ void ionws_add_managed(WIonWS *ws, WRegion *reg)
 {
     region_set_manager(reg, (WRegion*)ws, &(ws->managed_list));
     
-    region_add_bindmap_owned(reg, &ionws_bindmap, (WRegion*)ws);
+    region_add_bindmap_owned(reg, mod_ionws_ionws_bindmap, (WRegion*)ws);
     
     if(REGION_IS_MAPPED(ws))
         region_map(reg);
@@ -1302,7 +1302,7 @@ void ionws_remove_managed(WIonWS *ws, WRegion *reg)
     }
 
     region_unset_manager(reg, (WRegion*)ws, &(ws->managed_list));
-    region_remove_bindmap_owned(reg, &ionws_bindmap, (WRegion*)ws);
+    region_remove_bindmap_owned(reg, mod_ionws_ionws_bindmap, (WRegion*)ws);
     
     if(!OBJ_IS_BEING_DESTROYED(ws) && ws->split_tree==NULL)
         ioncore_defer_destroy((Obj*)ws);

@@ -22,12 +22,14 @@
 #include "global.h"
 #include "extl.h"
 #include "conf-bindings.h"
+#include "bindmaps.h"
 
 
 /*{{{ parse_keybut */
 
 
 #define BUTTON1_NDX 9
+#define MOD5_NDX 7
 
 static StringIntMap state_map[]={
     {"Shift",       ShiftMask},
@@ -138,7 +140,7 @@ static bool parse_keybut(const char *str, uint *mod_ret, uint *ksb_ret,
 /*}}}*/
 
 
-/*{{{ bindmap_do_table */
+/*{{{ ioncore_do_defbindings */
 
 
 static bool do_action(WBindmap *bindmap, const char *str,
@@ -192,7 +194,7 @@ static bool do_submap(WBindmap *bindmap, const char *str,
     bnd=bindmap_lookup_binding(bindmap, action, mod, kcb);
     
     if(bnd!=NULL && bnd->submap!=NULL && bnd->state==mod)
-        return bindmap_do_table(bnd->submap, NULL, subtab);
+        return ioncore_do_defbindings(bnd->submap, subtab);
 
     binding.waitrel=FALSE;
     binding.act=BINDING_KEYPRESS;
@@ -207,7 +209,7 @@ static bool do_submap(WBindmap *bindmap, const char *str,
         return FALSE;
 
     if(bindmap_add_binding(bindmap, &binding))
-        return bindmap_do_table(binding.submap, NULL, subtab);
+        return ioncore_do_defbindings(binding.submap, subtab);
 
     binding_deinit(&binding);
     
@@ -227,7 +229,8 @@ static StringIntMap action_map[]={
 };
 
 
-static bool do_entry(WBindmap *bindmap, ExtlTab tab, StringIntMap *areamap)
+static bool do_entry(WBindmap *bindmap, ExtlTab tab, 
+                     const StringIntMap *areamap)
 {
     bool ret=FALSE;
     char *action_str=NULL, *ksb_str=NULL, *area_str=NULL;
@@ -298,7 +301,7 @@ fail:
 }
 
 
-bool bindmap_do_table(WBindmap *bindmap, StringIntMap *areamap, ExtlTab tab)
+bool ioncore_do_defbindings(WBindmap *bindmap, ExtlTab tab)
 {
     int i, n, nok=0;
     ExtlTab ent;
@@ -307,13 +310,203 @@ bool bindmap_do_table(WBindmap *bindmap, StringIntMap *areamap, ExtlTab tab)
     
     for(i=1; i<=n; i++){
         if(extl_table_geti_t(tab, i, &ent)){
-            nok+=do_entry(bindmap, ent, areamap);
+            nok+=do_entry(bindmap, ent, bindmap->areamap);
             extl_unref_table(ent);
             continue;
         }
         warn("Unable to get bindmap entry %d.", i);
     }
     return (nok!=0);
+}
+
+
+/*}}}*/
+
+
+/*{{{ ioncore_getbindings */
+
+
+static const char *value2str(const StringIntMap *map, int value)
+{
+    int i;
+    
+    for(i=0; map[i].string!=NULL; i++){
+        if(map[i].value==value)
+            return map[i].string;
+    }
+    
+    return NULL;
+}
+
+
+static char *get_mods(uint state)
+{
+    char *ret=NULL;
+    int i;
+    
+    if(state==AnyModifier){
+        ret=scopy("AnyModifier+");
+    }else{
+        ret=scopy("");
+        for(i=0; i<=MOD5_NDX; i++){
+            if(ret==NULL)
+                break;
+            if(state&state_map[i].value){
+                char *ret2=ret;
+                ret=scat3(ret, state_map[i].string, "+");
+                free(ret2);
+            }
+        }
+    }
+    
+    if(ret==NULL)
+        warn_err();
+    
+    return ret;
+}
+
+
+static char *get_key(char *mods, uint kcb)
+{
+    const char *s=XKeysymToString(kcb);
+    char *ret=NULL;
+    
+    if(s==NULL){
+        warn("Unable to convert keysym to string.");
+        return NULL;
+    }
+    
+    ret=scat(mods, s);
+    
+    if(ret==NULL)
+        warn_err();
+    
+    return ret;
+}
+
+
+static char *get_button(char *mods, uint kcb)
+{
+    const char *s=value2str(state_map, kcb);
+    char *ret=NULL;
+    
+    if(s==NULL){
+        warn("Unable to convert button to string.");
+        return NULL;
+    }
+    
+    ret=scat(mods, s);
+    
+    if(ret==NULL)
+        warn_err();
+    
+    return ret;
+}
+
+
+static bool get_kpress(WBindmap *bindmap, WBinding *b, ExtlTab t)
+{
+    char *mods;
+    char *key;
+    
+    if(b->waitrel)
+        extl_table_sets_s(t, "action", "kpress_wairel");
+    else
+        extl_table_sets_s(t, "action", "kpress");
+    
+    mods=get_mods(b->state);
+    
+    if(mods==NULL)
+        return FALSE;
+    
+    key=get_key(mods, b->ksb);
+
+    free(mods);
+    
+    if(key==NULL)
+        return FALSE;
+    
+    extl_table_sets_s(t, "kcb", key);
+    
+    free(key);
+    
+    if(b->submap!=NULL){
+        ExtlTab stab=ioncore_do_getbindings(b->submap);
+        extl_table_sets_t(t, "submap", stab);
+    }else{
+        extl_table_sets_f(t, "func", b->func);
+    }
+    
+    return TRUE;
+}
+
+
+static bool get_mact(WBindmap *bindmap, WBinding *b, ExtlTab t)
+{
+    char *mods;
+    char *button;
+    
+    extl_table_sets_s(t, "action", value2str(action_map, b->act));
+    
+    mods=get_mods(b->state);
+    
+    if(mods==NULL)
+        return FALSE;
+    
+    button=get_button(mods, b->ksb);
+
+    free(mods);
+    
+    if(button==NULL)
+        return FALSE;
+    
+    extl_table_sets_s(t, "kcb", button);
+    
+    free(button);
+    
+    if(b->area!=0 && bindmap->areamap!=NULL)
+        extl_table_sets_s(t, "area", value2str(bindmap->areamap, b->area));
+
+    extl_table_sets_f(t, "func", b->func);
+    
+    return TRUE;
+}
+
+
+static ExtlTab getbinding(WBindmap *bindmap, WBinding *b)
+{
+    ExtlTab t=extl_create_table();
+    
+    if(b->act==BINDING_KEYPRESS){
+        if(get_kpress(bindmap, b, t))
+            return t;
+    }else{
+        if(get_mact(bindmap, b, t))
+            return t;
+    }
+    
+    return extl_unref_table(t);
+}
+
+
+ExtlTab ioncore_do_getbindings(WBindmap *bindmap)
+{
+    Rb_node node;
+    WBinding *b;
+    ExtlTab tab;
+    ExtlTab btab;
+    int n=0;
+    
+    tab=extl_create_table();
+    
+    FOR_ALL_BINDINGS(b, node, bindmap->bindings){
+        btab=getbinding(bindmap, b);
+        extl_table_seti_t(tab, n+1, btab);
+        extl_unref_table(btab);
+        n++;
+    }
+    
+    return tab;
 }
 
 

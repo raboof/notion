@@ -9,61 +9,159 @@
  * (at your option) any later version.
  */
 
+#include <libtu/rb.h>
 #include "common.h"
 #include "conf-bindings.h"
 #include "binding.h"
 #include "extl.h"
 #include "framep.h"
+#include "bindmaps.h"
 
 
-WBindmap ioncore_rootwin_bindmap=BINDMAP_INIT;
-WBindmap ioncore_mplex_bindmap=BINDMAP_INIT;
-WBindmap ioncore_frame_bindmap=BINDMAP_INIT;
-WBindmap ioncore_moveres_bindmap=BINDMAP_INIT;
+/* 
+ * This file contains higher-level bindmap management code
+ */
 
 
-EXTL_EXPORT_AS(global, __defbindings_WScreen)
-bool ioncore_defbindings_WScreen(ExtlTab tab)
-{
-    return bindmap_do_table(&ioncore_rootwin_bindmap, NULL, tab);
-}
+WBindmap *ioncore_rootwin_bindmap=NULL;
+WBindmap *ioncore_mplex_bindmap=NULL;
+WBindmap *ioncore_frame_bindmap=NULL;
+WBindmap *ioncore_moveres_bindmap=NULL;
 
-
-EXTL_EXPORT_AS(global, __defbindings_WMPlex)
-bool ioncore_defbindings_WMPlex(ExtlTab tab)
-{
-    return bindmap_do_table(&ioncore_mplex_bindmap, NULL, tab);
-}
-
+static Rb_node known_bindmaps=NULL;
 
 static StringIntMap frame_areas[]={
-    {"border",         FRAME_AREA_BORDER},
+    {"border",      FRAME_AREA_BORDER},
     {"tab",         FRAME_AREA_TAB},
-    {"empty_tab",     FRAME_AREA_TAB},
-    {"client",         FRAME_AREA_CLIENT},
+    {"empty_tab",   FRAME_AREA_TAB},
+    {"client",      FRAME_AREA_CLIENT},
     END_STRINGINTMAP
 };
 
 
-EXTL_EXPORT_AS(global, __defbindings_WFrame)
-bool ioncore_defbindings_WFrame(ExtlTab tab)
-{
-    return bindmap_do_table(&ioncore_frame_bindmap, frame_areas, tab);
-}
-
-
-EXTL_EXPORT_AS(global, __defbindings_WMoveresMode)
-bool ioncore_defbindings_WMoveresMode(ExtlTab tab)
-{
-    return bindmap_do_table(&ioncore_moveres_bindmap, NULL, tab);
-}
-
+#define DO_FREE(X, Y)                                       \
+    if(ioncore_ ## X ## _bindmap!=NULL){                    \
+        ioncore_free_bindmap(Y, ioncore_ ## X ## _bindmap); \
+        ioncore_ ## X ## _bindmap=NULL;                     \
+    }
 
 void ioncore_deinit_bindmaps()
 {
-    bindmap_deinit(&ioncore_rootwin_bindmap);
-    bindmap_deinit(&ioncore_mplex_bindmap);
-    bindmap_deinit(&ioncore_frame_bindmap);
-    bindmap_deinit(&ioncore_moveres_bindmap);
+    DO_FREE(rootwin, "WScreen");
+    DO_FREE(mplex, "WMPlex");
+    DO_FREE(frame, "WFrame");
+    DO_FREE(moveres, "WMoveresMode");
+    rb_free_tree(known_bindmaps);
+    known_bindmaps=NULL;
+}
+
+
+#define DO_ALLOC(X, Y, Z)                                  \
+    ioncore_ ## X ## _bindmap=ioncore_alloc_bindmap(Y, Z); \
+    if(ioncore_ ## X ## _bindmap==NULL)                    \
+        return FALSE;
+
+bool ioncore_init_bindmaps()
+{
+    known_bindmaps=make_rb();
+    
+    if(known_bindmaps==NULL)
+        return FALSE;
+    
+    DO_ALLOC(rootwin, "WScreen", NULL);
+    DO_ALLOC(mplex, "WMPlex", NULL);
+    DO_ALLOC(frame, "WFrame", frame_areas);
+    DO_ALLOC(moveres, "WMoveresMode", NULL);
+    
+    return TRUE;
+}
+
+
+
+void ioncore_refresh_bindmaps()
+{
+    Rb_node node;
+    
+    ioncore_update_modmap();
+    
+    rb_traverse(node, known_bindmaps){
+        bindmap_refresh((WBindmap*)rb_val(node));
+    }
+}
+
+
+WBindmap *ioncore_alloc_bindmap(const char *name, const StringIntMap *areas)
+{
+    WBindmap *bm=create_bindmap();
+
+    if(bm==NULL)
+        return NULL;
+    
+    bm->areamap=areas;
+    
+    if(!rb_insert(known_bindmaps, name, bm)){
+        warn_err();
+        bindmap_destroy(bm);
+        return NULL;
+    }
+    
+    return bm;
+}
+
+
+void ioncore_free_bindmap(const char *name, WBindmap *bm)
+{
+    int found=0;
+    Rb_node node;
+    
+    node=rb_find_key_n(known_bindmaps, name, &found);
+    assert(found!=0 && rb_val(node)==(void*)bm);
+    
+    rb_delete_node(node);
+    bindmap_destroy(bm);
+}
+
+
+WBindmap *ioncore_lookup_bindmap(const char *name)
+{
+    int found=0;
+    Rb_node node;
+    
+    node=rb_find_key_n(known_bindmaps, name, &found);
+    
+    if(found==0)
+        return NULL;
+    
+    return (WBindmap*)rb_val(node);
+}
+
+
+EXTL_EXPORT
+bool ioncore_defbindings(const char *name, ExtlTab tab)
+{
+    WBindmap *bm=ioncore_lookup_bindmap(name);
+    if(bm==NULL){
+        warn("Unknown bindmap %s.", name);
+        return FALSE;
+    }
+    return ioncore_do_defbindings(bm, tab);
+}
+
+
+EXTL_EXPORT
+ExtlTab ioncore_getbindings()
+{
+    Rb_node node;
+    ExtlTab tab;
+    
+    tab=extl_create_table();
+    
+    rb_traverse(node, known_bindmaps){
+        ExtlTab bmtab=ioncore_do_getbindings((WBindmap*)rb_val(node));
+        extl_table_sets_t(tab, (const char*)node->k.key, bmtab);
+        extl_unref_table(bmtab);
+    }
+    
+    return tab;
 }
 

@@ -9,7 +9,7 @@
  * (at your option) any later version.
  */
 
-#include <ioncore/binding.h>
+#include <libtu/map.h>
 #include <ioncore/conf-bindings.h>
 #include <ioncore/readconfig.h>
 #include <ioncore/saveload.h>
@@ -18,6 +18,8 @@
 #include <ioncore/mplex.h>
 #include <ioncore/ioncore.h>
 #include <ioncore/global.h>
+#include <ioncore/framep.h>
+#include <ioncore/bindmaps.h>
 
 #include "main.h"
 #include "scratchpad.h"
@@ -37,14 +39,16 @@ char mod_sp_ion_api_version[]=ION_API_VERSION;
 /*{{{ Bindmaps w/ config */
 
 
-WBindmap mod_sp_scratchpad_bindmap=BINDMAP_INIT;
+WBindmap *mod_sp_scratchpad_bindmap=NULL;
 
 
-EXTL_EXPORT_AS(global, __defbindings_WScratchpad)
-bool mod_sp_defbindings_WScratchpad(ExtlTab tab)
-{
-    return bindmap_do_table(&mod_sp_scratchpad_bindmap, NULL, tab);
-}
+static StringIntMap frame_areas[]={
+    {"border",     FRAME_AREA_BORDER},
+    {"tab",        FRAME_AREA_TAB},
+    {"empty_tab",  FRAME_AREA_TAB},
+    {"client",     FRAME_AREA_CLIENT},
+    END_STRINGINTMAP
+};
 
 
 /*}}}*/
@@ -90,8 +94,11 @@ extern void mod_sp_unregister_exports();
 
 void mod_sp_deinit()
 {
+    if(mod_sp_scratchpad_bindmap!=NULL){
+        ioncore_free_bindmap("WScratchpad", mod_sp_scratchpad_bindmap);
+        mod_sp_scratchpad_bindmap=NULL;
+    }
     mod_sp_unregister_exports();
-    bindmap_deinit(&mod_sp_scratchpad_bindmap);
     ioncore_unregister_regclass(&CLASSDESCR(WScratchpad));
 }
 
@@ -136,7 +143,12 @@ static void check_and_create()
 
 bool mod_sp_init()
 {
-    if(!mod_sp_register_exports()){
+    if(!mod_sp_register_exports())
+        return FALSE;
+
+    mod_sp_scratchpad_bindmap=ioncore_alloc_bindmap("WScratchpad", NULL);
+    
+    if(mod_sp_scratchpad_bindmap==NULL){
         mod_sp_deinit();
         return FALSE;
     }

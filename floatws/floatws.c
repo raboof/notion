@@ -197,7 +197,8 @@ static void floatws_remove_managed(WFloatWS *ws, WRegion *reg)
     bool mcf=region_may_control_focus((WRegion*)ws);
     
     region_unset_manager(reg, (WRegion*)ws, &(ws->managed_list));
-    region_remove_bindmap_owned(reg, &floatws_bindmap, (WRegion*)ws);
+    region_remove_bindmap_owned(reg, mod_floatws_floatws_bindmap,
+                                (WRegion*)ws);
     
     if(ws->current_managed!=reg)
         return;
@@ -256,7 +257,7 @@ static bool floatws_init(WFloatWS *ws, WWindow *parent, const WFitParams *fp)
 
     genws_init(&(ws->genws), parent, fp);
 
-    region_add_bindmap((WRegion*)ws, &floatws_bindmap);
+    region_add_bindmap((WRegion*)ws, mod_floatws_floatws_bindmap);
     
     return TRUE;
 }
@@ -331,7 +332,7 @@ bool floatws_rqclose(WFloatWS *ws)
 static void floatws_add_managed(WFloatWS *ws, WRegion *reg)
 {
     region_set_manager(reg, (WRegion*)ws, &(ws->managed_list));
-    region_add_bindmap_owned(reg, &floatws_bindmap, (WRegion*)ws);
+    region_add_bindmap_owned(reg, mod_floatws_floatws_bindmap, (WRegion*)ws);
 
     if(region_is_fully_mapped((WRegion*)ws))
         region_map(reg);

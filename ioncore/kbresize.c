@@ -156,8 +156,9 @@ static bool resize_handler(WRegion *reg, XEvent *xev)
     if(mode==NULL)
         return FALSE;
     
-    binding=bindmap_lookup_binding(&ioncore_moveres_bindmap, BINDING_KEYPRESS,
-                           ev->state, ev->keycode);
+    binding=bindmap_lookup_binding(ioncore_moveres_bindmap, 
+                                   BINDING_KEYPRESS,
+                                   ev->state, ev->keycode);
     
     if(!binding)
         return FALSE;

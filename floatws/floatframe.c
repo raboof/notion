@@ -46,7 +46,7 @@ static bool floatframe_init(WFloatFrame *frame, WWindow *parent,
     
     frame->frame.flags|=FRAME_BAR_OUTSIDE;
 
-    region_add_bindmap((WRegion*)frame, &(floatframe_bindmap));
+    region_add_bindmap((WRegion*)frame, mod_floatws_floatframe_bindmap);
     
     return TRUE;
 }

@@ -27,7 +27,7 @@
 #include "clientwin.h"
 #include "colormap.h"
 #include "grab.h"
-#include "regbind.h"
+#include "bindmaps.h"
 #include "activity.h"
 #include "netwm.h"
 #include "region-iter.h"
@@ -89,7 +89,7 @@ bool ioncore_handle_event(XEvent *ev)
         break;
     CASE_EVENT(MappingNotify)
         XRefreshKeyboardMapping(&(ev->xmapping));
-        ioncore_refresh_bindings();
+        ioncore_refresh_bindmaps();
         break;
     CASE_EVENT(SelectionClear)
         ioncore_clear_selection();

@@ -142,7 +142,10 @@ bool ioncore_init(int argc, char *argv[])
     ioncore_g.argc=argc;
     ioncore_g.argv=argv;
 
-    register_classes();
+    if(!ioncore_init_bindmaps())
+        return FALSE;
+    if(!register_classes())
+        return FALSE;
     init_hooks();
 
     return ioncore_init_module_support();

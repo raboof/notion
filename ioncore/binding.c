@@ -100,16 +100,16 @@ static int compare_bindings(const WBinding *a, const WBinding *b)
 #undef CVAL
 
 
-static WBindmap *known_bindmaps=NULL;
-
-
 bool init_bindmap(WBindmap *bindmap)
 {
-    bindmap->nbindings=0;
-    bindmap->bindings=NULL;
     bindmap->rbind_list=NULL;
-    bindmap->next_known=NULL;
-    bindmap->prev_known=NULL;
+    bindmap->areamap=NULL;
+    bindmap->nbindings=0;
+    bindmap->bindings=make_rb();
+    if(bindmap->bindings==NULL){
+        warn_err();
+        return FALSE;
+    }
     return TRUE;
 }
 
@@ -123,7 +123,10 @@ WBindmap *create_bindmap()
         return NULL;
     }
     
-    init_bindmap(bindmap);
+    if(!init_bindmap(bindmap)){
+        free(bindmap);
+        return NULL;
+    }
     
     return bindmap;
 }
@@ -131,11 +134,8 @@ WBindmap *create_bindmap()
 
 void binding_deinit(WBinding *binding)
 {
-    int i;
-    
     if(binding->submap!=NULL){
-        bindmap_deinit(binding->submap);
-        free(binding->submap);
+        bindmap_destroy(binding->submap);
         binding->submap=NULL;
     }
 
@@ -143,7 +143,7 @@ void binding_deinit(WBinding *binding)
 }
 
 
-void do_destroy_binding(WBinding *binding)
+static void do_destroy_binding(WBinding *binding)
 {
     assert(binding!=NULL);
     binding_deinit(binding);
@@ -151,12 +151,10 @@ void do_destroy_binding(WBinding *binding)
 }
 
 
-void bindmap_deinit(WBindmap *bindmap)
+static void bindmap_deinit(WBindmap *bindmap)
 {
     WBinding *b=NULL;
     Rb_node node=NULL;
-
-    UNLINK_ITEM(known_bindmaps, bindmap, next_known, prev_known);
 
     while(bindmap->rbind_list!=NULL){
         region_remove_bindmap(bindmap->rbind_list->reg,
@@ -178,7 +176,14 @@ void bindmap_deinit(WBindmap *bindmap)
 }
 
 
-static void refresh_bindmap(WBindmap *bindmap)
+void bindmap_destroy(WBindmap *bindmap)
+{
+    bindmap_deinit(bindmap);
+    free(bindmap);
+}
+
+
+void bindmap_refresh(WBindmap *bindmap)
 {
     WRegBindingInfo *rbind;
     WBinding *b;
@@ -215,18 +220,9 @@ static void refresh_bindmap(WBindmap *bindmap)
             continue;
         for(rbind=bindmap->rbind_list; rbind!=NULL; rbind=rbind->bm_next)
             rbind_binding_added(rbind, b, bindmap);
+        if(b->submap!=NULL)
+            bindmap_refresh(b->submap);
     }
-}
-
-
-void ioncore_refresh_bindings()
-{
-    WBindmap *bindmap;
-    
-    ioncore_update_modmap();
-    
-    for(bindmap=known_bindmaps; bindmap!=NULL; bindmap=bindmap->next_known)
-        refresh_bindmap(bindmap);
 }
 
 
@@ -236,20 +232,6 @@ bool bindmap_add_binding(WBindmap *bindmap, const WBinding *b)
     WBinding *binding=NULL;
     Rb_node node=NULL;
     int found=0;
-    
-    /* Do some lazy initialisation */
-    if(bindmap->bindings==NULL){
-        bindmap->bindings=make_rb();
-        if(bindmap->bindings==NULL){
-            warn_err();
-            return FALSE;
-        }
-    }
-    
-    if(bindmap->prev_known==NULL){
-        LINK_ITEM(known_bindmaps, bindmap, next_known, prev_known);
-    }
-    
     
     /* Handle adding the binding */
     binding=ALLOC(WBinding);

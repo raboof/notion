@@ -262,7 +262,7 @@ static WRootWin *preinit_rootwin(int xscr)
     preinit_gr(rootwin);
     netwm_init_rootwin(rootwin);
     
-    region_add_bindmap((WRegion*)rootwin, &ioncore_rootwin_bindmap);
+    region_add_bindmap((WRegion*)rootwin, ioncore_rootwin_bindmap);
     
     return rootwin;
 }

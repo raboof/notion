@@ -81,7 +81,7 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp)
     
     XSelectInput(ioncore_g.dpy, FRAME_WIN(frame), IONCORE_EVENTMASK_FRAME);
 
-    region_add_bindmap((WRegion*)frame, &ioncore_frame_bindmap);
+    region_add_bindmap((WRegion*)frame, ioncore_frame_bindmap);
 
     mplex_managed_geom((WMPlex*)frame, &mg);
     

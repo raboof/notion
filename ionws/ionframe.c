@@ -19,7 +19,7 @@
 
 #include "ionframe.h"
 #include "ionws.h"
-#include "bindmaps.h"
+#include "main.h"
 
 
 /*{{{ Destroy/create frame */
@@ -31,7 +31,7 @@ static bool ionframe_init(WIonFrame *frame, WWindow *par,
     if(!frame_init((WFrame*)frame, par, fp))
         return FALSE;
     
-    region_add_bindmap((WRegion*)frame, &(ionframe_bindmap));
+    region_add_bindmap((WRegion*)frame, mod_ionws_ionframe_bindmap);
     
     return TRUE;
 }

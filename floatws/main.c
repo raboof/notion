@@ -9,8 +9,7 @@
  * (at your option) any later version.
  */
 
-#include <ioncore/binding.h>
-#include <ioncore/conf-bindings.h>
+#include <ioncore/bindmaps.h>
 #include <ioncore/readconfig.h>
 #include <ioncore/framep.h>
 #include <ioncore/frame-pointer.h>
@@ -34,34 +33,20 @@ char mod_floatws_ion_api_version[]=ION_API_VERSION;
 /*}}}*/
 
 
-/*{{{ Bindmaps w/ config */
+/*{{{ Bindmaps */
 
 
-WBindmap floatws_bindmap=BINDMAP_INIT;
-WBindmap floatframe_bindmap=BINDMAP_INIT;
+WBindmap *mod_floatws_floatws_bindmap=NULL;
+WBindmap *mod_floatws_floatframe_bindmap=NULL;
 
 
 static StringIntMap frame_areas[]={
-    {"border",         FRAME_AREA_BORDER},
-    {"tab",         FRAME_AREA_TAB},
-    {"empty_tab",     FRAME_AREA_TAB},
-    {"client",         FRAME_AREA_CLIENT},
+    {"border",     FRAME_AREA_BORDER},
+    {"tab",        FRAME_AREA_TAB},
+    {"empty_tab",  FRAME_AREA_TAB},
+    {"client",     FRAME_AREA_CLIENT},
     END_STRINGINTMAP
 };
-
-
-EXTL_EXPORT_AS(global, __defbindings_WFloatFrame)
-bool mod_floatws_defbindings_WFloatFrame(ExtlTab tab)
-{
-    return bindmap_do_table(&floatframe_bindmap, frame_areas, tab);
-}
-
-
-EXTL_EXPORT_AS(global, __defbindings_WFloatWS)
-void mod_floatws_defbindings_WFloatWS(ExtlTab tab)
-{
-    bindmap_do_table(&floatws_bindmap, NULL, tab);
-}
 
 
 /*}}}*/
@@ -76,31 +61,50 @@ extern bool mod_floatws_unregister_exports();
 
 void mod_floatws_deinit()
 {
-    REMOVE_HOOK(clientwin_do_manage_alt, 
-                mod_floatws_clientwin_do_manage);
+    REMOVE_HOOK(clientwin_do_manage_alt, mod_floatws_clientwin_do_manage);
 
-    mod_floatws_unregister_exports();
-    bindmap_deinit(&floatws_bindmap);
-    bindmap_deinit(&floatframe_bindmap);
+    if(mod_floatws_floatws_bindmap!=NULL){
+        ioncore_free_bindmap("WFloatWS", mod_floatws_floatws_bindmap);
+        mod_floatws_floatws_bindmap=NULL;
+    }
+    
+    if(mod_floatws_floatframe_bindmap!=NULL){
+        ioncore_free_bindmap("WFloatFrame", mod_floatws_floatframe_bindmap);
+        mod_floatws_floatframe_bindmap=NULL;
+    }
+    
     ioncore_unregister_regclass(&CLASSDESCR(WFloatWS));
     ioncore_unregister_regclass(&CLASSDESCR(WFloatFrame));
+    
+    mod_floatws_unregister_exports();
 }
 
 
 
 bool mod_floatws_init()
 {
+    mod_floatws_floatws_bindmap=ioncore_alloc_bindmap("WFloatWS", NULL);
+       
+    mod_floatws_floatframe_bindmap=ioncore_alloc_bindmap("WFloatFrame", 
+                                                         frame_areas);
+
+    if(mod_floatws_floatws_bindmap==NULL ||
+       mod_floatws_floatframe_bindmap==NULL){
+        warn_obj("mod_floatws", "failed to allocate bindmaps.");
+        goto err;
+    }
+
     if(!mod_floatws_register_exports()){
-        warn_obj("floatws module", "failed to register functions.");
+        warn_obj("mod_floatws", "failed to register functions.");
         goto err;
     }
     
     if(!ioncore_register_regclass(&CLASSDESCR(WFloatWS),
-                              (WRegionSimpleCreateFn*) create_floatws,
-                              (WRegionLoadCreateFn*) floatws_load) ||
+                                  (WRegionSimpleCreateFn*) create_floatws,
+                                  (WRegionLoadCreateFn*) floatws_load) ||
        !ioncore_register_regclass(&CLASSDESCR(WFloatFrame), NULL,
-                              (WRegionLoadCreateFn*) floatframe_load)){
-        warn_obj("floatws module", "failed to register classes.");
+                                  (WRegionLoadCreateFn*) floatframe_load)){
+        warn_obj("mod_floatws", "failed to register classes.");
         goto err;
     }
 

@@ -9,10 +9,9 @@
  * (at your option) any later version.
  */
 
-#include <ioncore/binding.h>
-#include <ioncore/conf-bindings.h>
 #include <ioncore/readconfig.h>
 #include <ioncore/saveload.h>
+#include <ioncore/bindmaps.h>
 
 #include "menu.h"
 
@@ -28,17 +27,10 @@ char mod_menu_ion_api_version[]=ION_API_VERSION;
 /*}}}*/
 
 
-/*{{{ Bindmaps w/ config */
+/*{{{ Bindmaps */
 
 
-WBindmap mod_menu_menu_bindmap=BINDMAP_INIT;
-
-
-EXTL_EXPORT_AS(global, __defbindings_WMenu)
-bool mod_menu_defbindings_WMenu(ExtlTab tab)
-{
-    return bindmap_do_table(&mod_menu_menu_bindmap, NULL, tab);
-}
+WBindmap *mod_menu_menu_bindmap=NULL;
 
 
 /*}}}*/
@@ -53,13 +45,22 @@ extern void mod_menu_unregister_exports();
 
 void mod_menu_deinit()
 {
+    if(mod_menu_menu_bindmap!=NULL){
+        ioncore_free_bindmap("WMenu", mod_menu_menu_bindmap);
+        mod_menu_menu_bindmap=NULL;
+    }
+
     mod_menu_unregister_exports();
-    bindmap_deinit(&mod_menu_menu_bindmap);
 }
 
 
 bool mod_menu_init()
 {
+    mod_menu_menu_bindmap=ioncore_alloc_bindmap("WMenu", NULL);
+    
+    if(mod_menu_menu_bindmap==NULL)
+        return FALSE;
+
     if(!mod_menu_register_exports()){
         mod_menu_deinit();
         return FALSE;

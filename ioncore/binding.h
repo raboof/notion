@@ -14,6 +14,7 @@
 
 #include <libtu/obj.h>
 #include <libtu/rb.h>
+#include <libtu/map.h>
 #include "common.h"
 #include "region.h"
 #include "extl.h"
@@ -62,20 +63,19 @@ DECLSTRUCT(WBindmap){
     int nbindings;
     Rb_node bindings;
     WRegBindingInfo *rbind_list;
-    WBindmap *next_known, *prev_known;
+    const StringIntMap *areamap;
 };
 
 
 extern void ioncore_init_bindings();
-extern void ioncore_refresh_bindings();
 extern void ioncore_update_modmap();
 extern int ioncore_unmod(int state, int keycode);
 extern bool ioncore_ismod(int keycode);
 
-
 extern WBindmap *create_bindmap();
 
-extern void bindmap_deinit(WBindmap *bindmap);
+extern void bindmap_destroy(WBindmap *bindmap);
+extern void bindmap_refresh(WBindmap *bindmap);
 extern bool bindmap_add_binding(WBindmap *bindmap, const WBinding *binding);
 extern bool bindmap_remove_binding(WBindmap *bindmap, const WBinding *binding);
 extern WBinding *bindmap_lookup_binding(WBindmap *bindmap, int act,
