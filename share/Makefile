@@ -8,7 +8,7 @@ include $(TOPDIR)/system-inc.mk
 
 ######################################
 
-LUA_SOURCES = ioncorelib.lua ioncore-mplexfns.lua compat.lua \
+LUA_SOURCES = ioncorelib.lua ioncorelib-mplexfns.lua compat.lua \
 	      ioncore-efbb.lua
 
 SHELLSCRIPTS = ion-edit ion-man ion-runinxterm ion-ssh ion-view
