@@ -55,19 +55,11 @@ bool clientwin_check_fullscreen_request(WClientWin *cwin, int w, int h,
     return FALSE;
 }
 
-
-static void lastmgr_watchhandler(Watch *watch, Obj *obj)
+static void destroy_pholder(WClientWin *cwin)
 {
-    WClientWinFSInfo *fsinfo=(WClientWinFSInfo*)watch;
-    WRegion *r;
-    
-    assert(OBJ_IS(obj, WRegion));
-    
-    /* TODO: It'd be nicer if we didn't access obj. */
-    r=region_manager_or_parent((WRegion*)obj);
-    
-    if(r!=NULL)
-        watch_setup(&(fsinfo->last_mgr_watch), (Obj*)r, lastmgr_watchhandler);
+    WPHolder *ph=cwin->fs_pholder;
+    cwin->fs_pholder=NULL;
+    destroy_obj((Obj*)ph);
 }
 
 
@@ -76,30 +68,18 @@ bool clientwin_fullscreen_scr(WClientWin *cwin, WScreen *scr, bool switchto)
     int rootx, rooty;
     bool wasfs=TRUE;
     int swf=(switchto ? MPLEX_ATTACH_SWITCHTO : 0);
+    WRegion *mgr=REGION_MANAGER(cwin);
     
-    if(cwin->fsinfo.last_mgr_watch.obj==NULL){
-        wasfs=FALSE;
+    if(cwin->fs_pholder!=NULL && pholder_stale(cwin->fs_pholder))
+        destroy_pholder(cwin);
         
-        if(REGION_MANAGER(cwin)!=NULL){
-            watch_setup(&(cwin->fsinfo.last_mgr_watch),
-                        (Obj*)REGION_MANAGER(cwin),
-                        lastmgr_watchhandler);
-        }else if(scr->mplex.l1_current!=NULL){
-            watch_setup(&(cwin->fsinfo.last_mgr_watch),
-                        (Obj*)scr->mplex.l1_current->reg, 
-                        lastmgr_watchhandler);
-        }
-        region_rootpos((WRegion*)cwin, &rootx, &rooty);
-        cwin->fsinfo.saved_rootrel_geom.x=rootx;
-        cwin->fsinfo.saved_rootrel_geom.y=rooty;
-        cwin->fsinfo.saved_rootrel_geom.w=REGION_GEOM(cwin).w;
-        cwin->fsinfo.saved_rootrel_geom.h=REGION_GEOM(cwin).h;
-    }
+    if(cwin->fs_pholder==NULL && mgr!=NULL)
+        cwin->fs_pholder=region_managed_get_pholder(mgr, (WRegion*)cwin);
     
     if(!mplex_attach_simple((WMPlex*)scr, (WRegion*)cwin, swf)){
         warn(TR("Failed to enter full screen mode."));
-        if(!wasfs)
-            watch_reset(&(cwin->fsinfo.last_mgr_watch));
+        if(cwin->fs_pholder!=NULL)
+            destroy_pholder(cwin);
         return FALSE;
     }
 
@@ -120,44 +100,45 @@ bool clientwin_enter_fullscreen(WClientWin *cwin, bool switchto)
     return clientwin_fullscreen_scr(cwin, scr, switchto);
 }
 
+#warning "TODO: some changes in wrappers stuff."
+
+static WRegion *add_fn_reparent(WWindow *par, const WFitParams *fp, 
+                                WRegion *reg)
+{
+    if(!region_fitrep(reg, par, fp)){
+        warn(TR("Unable to reparent."));
+        return NULL;
+    }
+    region_detach_manager(reg);
+    return reg;
+}
+
 
 bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto)
 {    
-    WRegion *reg;
-    WManageParams param=MANAGEPARAMS_INIT;
-    int rootx, rooty;
     bool cf;
     
-    if(cwin->fsinfo.last_mgr_watch.obj==NULL)
+    if(cwin->fs_pholder==NULL)
         return FALSE;
     
     cf=region_may_control_focus((WRegion*)cwin);
-
-    reg=(WRegion*)cwin->fsinfo.last_mgr_watch.obj;
-    watch_reset(&(cwin->fsinfo.last_mgr_watch));
-    assert(OBJ_IS(reg, WRegion));
     
-    param.geom=cwin->fsinfo.saved_rootrel_geom;
-    param.tfor=NULL;
-    param.userpos=FALSE;
-    param.maprq=FALSE;
-    param.switchto=switchto;
-    param.dockapp=FALSE;
-    param.gravity=StaticGravity;
-    
-    while(reg!=NULL){
-        if(region_manage_clientwin(reg, cwin, &param, 
-                                   MANAGE_REDIR_PREFER_NO)){
-            if(!cf)
-                return TRUE;
-            return region_goto((WRegion*)cwin);
-        }
-        reg=region_manager_or_parent(reg);
+    if(!pholder_attach(cwin->fs_pholder, add_fn_reparent, cwin)){
+        warn(TR("WClientWin failed to return from full screen mode; "
+                "remaining manager or parent from previous location "
+                "refused to manage us."));
+        return FALSE;
     }
-
-    warn(TR("WClientWin failed to return from full screen mode; remaining "
-            "manager or parent from previous location refused to manage us."));
-    return FALSE;
+    
+    if(cwin->fs_pholder!=NULL){
+        /* Should be destroyed already in clientwin_fitrep. */
+        destroy_pholder(cwin);
+    }
+        
+    if(cf)
+        region_goto((WRegion*)cwin);
+    
+    return TRUE;
 }
 
 
@@ -167,7 +148,7 @@ bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto)
 EXTL_EXPORT_MEMBER
 bool clientwin_toggle_fullscreen(WClientWin *cwin)
 {
-    if(cwin->fsinfo.last_mgr_watch.obj!=NULL)
+    if(cwin->fs_pholder!=NULL)
         return clientwin_leave_fullscreen(cwin, TRUE);
     
     return clientwin_enter_fullscreen(cwin, TRUE);

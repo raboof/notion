@@ -306,7 +306,7 @@ static bool clientwin_init(WClientWin *cwin, WWindow *par, Window win,
     cwin->n_cmapwins=0;
     cwin->event_mask=IONCORE_EVENTMASK_CLIENTWIN;
 
-    watch_init(&(cwin->fsinfo.last_mgr_watch));
+    cwin->fs_pholder=NULL;
     
     region_init(&(cwin->region), par, &(cwin->last_fp));
     
@@ -798,7 +798,12 @@ void clientwin_deinit(WClientWin *cwin)
     
     clientwin_clear_colormaps(cwin);
     
-    watch_reset(&(cwin->fsinfo.last_mgr_watch));
+    if(cwin->fs_pholder!=NULL){
+        WPHolder *ph=cwin->fs_pholder;
+        cwin->fs_pholder=NULL;
+        destroy_obj((Obj*)ph);
+    }
+    
     region_deinit((WRegion*)cwin);
 }
 
@@ -821,8 +826,9 @@ static void clientwin_do_unmapped(WClientWin *cwin, Window win)
 {
     bool cf=region_may_control_focus((WRegion*)cwin);
     region_rescue_clientwins((WRegion*)cwin);
-    if(cf && cwin->fsinfo.last_mgr_watch.obj!=NULL)
-        region_goto((WRegion*)(cwin->fsinfo.last_mgr_watch.obj));
+#warning "TODO: pholder_goto?"    
+/*    if(cf && cwin->fsinfo.last_mgr_watch.obj!=NULL)
+        region_goto((WRegion*)(cwin->fsinfo.last_mgr_watch.obj));*/
     destroy_obj((Obj*)cwin);
     
     hook_call(clientwin_unmapped_hook, &win, mrsh_u_c, mrsh_u_extl);
@@ -1091,10 +1097,12 @@ static bool clientwin_fitrep(WClientWin *cwin, WWindow *np, WFitParams *fp)
         region_set_parent((WRegion*)cwin, np);
         sendconfig_clientwin(cwin);
 
-        if(!CLIENTWIN_IS_FULLSCREEN(cwin) && 
-           cwin->fsinfo.last_mgr_watch.obj!=NULL){
-            watch_reset(&(cwin->fsinfo.last_mgr_watch));
+        if(!CLIENTWIN_IS_FULLSCREEN(cwin) && cwin->fs_pholder!=NULL){
+            WPHolder *ph=cwin->fs_pholder;
+            cwin->fs_pholder=NULL;
+            destroy_obj((Obj*)ph);
         }
+        
         netwm_update_state(cwin);
     }
     

@@ -22,6 +22,7 @@
 #include "rectangle.h"
 #include "attach.h"
 #include "manage.h"
+#include "pholder.h"
 
 #define CLIENTWIN_P_WM_DELETE        0x00001
 #define CLIENTWIN_P_WM_TAKE_FOCUS    0x00002
@@ -37,12 +38,6 @@
 #define CLIENTWIN_TRANSIENTS_AT_TOP  0x20000
 
 #define CLIENTWIN_IS_FULLSCREEN(cwin) OBJ_IS(REGION_PARENT(cwin), WScreen)
-
-
-typedef struct{
-    Watch last_mgr_watch;
-    WRectangle saved_rootrel_geom;
-} WClientWinFSInfo;
 
 
 DECLCLASS(WClientWin){
@@ -70,7 +65,7 @@ DECLCLASS(WClientWin){
 
     XSizeHints size_hints;
     
-    WClientWinFSInfo fsinfo;
+    WPHolder *fs_pholder;
     
     int last_h_rq;
     
