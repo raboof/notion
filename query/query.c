@@ -18,7 +18,6 @@
 #include <src/frame.h>
 #include <src/workspace.h>
 #include <src/funtab.h>
-#include <src/commandsq.h>
 #include "query.h"
 #include "wedln.h"
 #include "complete_file.h"

@@ -1,25 +1,20 @@
 /*
- * ion/commandsq.c
+ * wmcore/commandsq.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2002. 
  * See the included file LICENSE for details.
  */
 
-/* This code should eventually go to wmcore. (It currently
- * depends on ion_main_funclist.)
- */
-
-#include <wmcore/common.h>
-#include <wmcore/global.h>
-
-#include <src/funtab.h>
-
 #include <libtu/parser.h>
 #include <libtu/tokenizer.h>
 #include <libtu/output.h>
 
+#include "common.h"
+#include "global.h"
+
 
 static WWatch sq_watch=WWATCH_INIT;
+static WFunclist *tmp_funclist=NULL;
 
 /* We don't want to refer to destroyed things. */
 static void sq_watch_handler(WWatch *watch, WThing *t)
@@ -40,7 +35,7 @@ static bool opt_default(Tokenizer *tokz, int n, Token *toks)
 	if(thing==NULL)
 		return FALSE;
 	
-	func=lookup_func_ex(name, &ion_main_funclist);
+	func=lookup_func_ex(name, tmp_funclist);
 	
 	if(func==NULL){
 		warn("Unknown function '%s' or not in ion_main_funclist.", name);
@@ -69,19 +64,22 @@ static ConfOpt command_opts[]={
 };
 
 
-bool command_sequence(WThing *thing, char *fn)
+bool execute_command_sequence(WThing *thing, char *fn, WFunclist *funclist)
 {
 	static bool command_sq=FALSE;
 	bool retval;
-	
 	Tokenizer *tokz;
 
+	if(funclist==NULL)
+		return FALSE;
+	
 	if(command_sq){
 		warn("Nested command sequence.");
 		return FALSE;
 	}
 	
 	command_sq=TRUE;
+	tmp_funclist=funclist;
 
 	setup_watch(&sq_watch, thing, sq_watch_handler);
 	
@@ -92,6 +90,7 @@ bool command_sequence(WThing *thing, char *fn)
 
 	reset_watch(&sq_watch);
 	
+	tmp_funclist=NULL;
 	command_sq=FALSE;
 
 	return retval;

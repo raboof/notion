@@ -137,3 +137,9 @@ void init_funclists()
 	assert(add_to_funclist(&ion_main_funclist, ion_main_funtab));
 	assert(add_to_funclist(&ion_moveres_funclist, ion_moveres_funtab));
 }
+
+
+bool command_sequence(WThing *thing, char *fn)
+{
+	execute_command_sequence(thing, fn, &ion_main_funclist);
+}
