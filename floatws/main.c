@@ -33,6 +33,7 @@ char floatws_module_ion_version[]=ION_VERSION;
 
 WBindmap floatws_bindmap=BINDMAP_INIT;
 WBindmap floatframe_bindmap=BINDMAP_INIT;
+WBindmap floatframe_moveres_bindmap=BINDMAP_INIT;
 
 
 static StringIntMap frame_areas[]={
@@ -48,6 +49,13 @@ EXTL_EXPORT
 void floatframe_bindings(ExtlTab tab)
 {
 	process_bindings(&floatframe_bindmap, frame_areas, tab);
+}
+
+
+EXTL_EXPORT
+void floatframe_moveres_bindings(ExtlTab tab)
+{
+	process_bindings(&floatframe_moveres_bindmap, NULL, tab);
 }
 
 

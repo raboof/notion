@@ -15,5 +15,6 @@ extern void floatws_module_deinit();
 
 extern WBindmap floatws_bindmap;
 extern WBindmap floatframe_bindmap;
+extern WBindmap floatframe_moveres_bindmap;
 
 #endif /* ION_FLOATWS_MAIN_H */

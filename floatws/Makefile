@@ -13,7 +13,7 @@ INCLUDES += $(X11_INCLUDES) -I..
 MODULEDIR = $(LIBDIR)/ion-devel
 CFLAGS += $(XOPEN_SOURCE)
 
-SOURCES=main.c floatws.c floatframe.c placement.c
+SOURCES=main.c floatws.c floatframe.c placement.c resize.c
 
 MAKE_EXPORTS=floatws_module
 
