@@ -23,10 +23,10 @@ query_wedln_bindings{
     kpress("Control+M", wedln_finish),
     
     submap("Control+K") {
-        kpress("Control+B", wedln_set_mark),
-        kpress("Control+Y", wedln_cut),
-        kpress("Control+K", wedln_copy),
-        kpress("Control+C", wedln_paste),
+        kpress("AnyModifier+B", wedln_set_mark),
+        kpress("AnyModifier+Y", wedln_cut),
+        kpress("AnyModifier+K", wedln_copy),
+        kpress("AnyModifier+C", wedln_paste),
     },
 
     kpress("Return", wedln_finish),
