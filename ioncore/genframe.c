@@ -295,19 +295,51 @@ void genframe_resize_hints(WGenFrame *genframe, XSizeHints *hints_ret,
 /*}}}*/
 
 
+/*{{{ Mapping */
+
+
+void genframe_map(WGenFrame *genframe)
+{
+	window_map((WWindow*)genframe);
+	/* A lame requirement of the ICCCM is that client windows should be
+	 * unmapped if the parent is unmapped.
+	 */
+	if(genframe->current_sub!=NULL)
+		region_map(genframe->current_sub);
+}
+
+
+void genframe_unmap(WGenFrame *genframe)
+{
+	window_unmap((WWindow*)genframe);
+	/* A lame requirement of the ICCCM is that client windows should be
+	 * unmapped if the parent is unmapped.
+	 */
+	if(genframe->current_sub!=NULL)
+		region_unmap(genframe->current_sub);
+}
+
+
+/*}}}*/
+
+
 /*{{{ Managed region switching */
 
 
 bool genframe_display_managed(WGenFrame *genframe, WRegion *sub)
 {
+	bool mapped;
+	
 	if(sub==genframe->current_sub || sub==genframe->current_input)
 		return FALSE;
 	
-	if(genframe->current_sub!=NULL)
+	if(genframe->current_sub!=NULL && REGION_IS_MAPPED(genframe))
 		region_unmap(genframe->current_sub);
 	
 	genframe->current_sub=sub;
-	region_map(sub);
+	
+	if(REGION_IS_MAPPED(genframe))
+		region_map(sub);
 	
 	if(genframe->current_input==NULL){
 		if(REGION_IS_ACTIVE(genframe))
@@ -821,6 +853,9 @@ static DynFunTab genframe_dynfuntab[]={
 	{(DynFun*)region_handle_drop, (DynFun*)genframe_handle_drop},
 	
 	{region_draw_config_updated, genframe_draw_config_updated},
+	
+	{region_map, genframe_map},
+	{region_unmap, genframe_unmap},
 	
 	END_DYNFUNTAB
 };
