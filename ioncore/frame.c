@@ -604,8 +604,10 @@ void frame_do_load(WFrame *frame, ExtlTab tab)
     
     extl_table_gets_i(tab, "flags", &flags);
     
-    if(flags&FRAME_TAB_HIDE)
-        frame_toggle_tabbar((WFrame*)frame);
+    if(flags&FRAME_TAB_HIDE){
+        frame->flags&=~FRAME_SHADED;
+        frame->flags|=FRAME_TAB_HIDE;
+    }
 
     frame->flags|=(flags&FRAME_DEST_EMPTY);
     
