@@ -277,6 +277,7 @@ bool bindmap_add_binding(WBindmap *bindmap, const WBinding *b)
         }
         do_destroy_binding((WBinding*)rb_val(node));
         rb_delete_node(node);
+        bindmap->nbindings--;
     }else{
         if(!rb_insertg(bindmap->bindings, binding, binding, 
                        (Rb_compfn*)compare_bindings)){
