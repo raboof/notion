@@ -734,6 +734,9 @@ static void do_fit_clientwin(WClientWin *cwin, WRectangle geom,
 	/* XMoveResizeWindow won't send a ConfigureNotify event if the
 	 * geometry has not changed and some programs expect that.
 	 */
+	cwin->win_geom=wingeom;
+	REGION_GEOM(cwin)=geom;
+
 	if(np==NULL){
 		bool changes=(REGION_GEOM(cwin).x!=wingeom.x ||
 					  REGION_GEOM(cwin).y!=wingeom.y ||
@@ -746,9 +749,6 @@ static void do_fit_clientwin(WClientWin *cwin, WRectangle geom,
 		}
 	}
 
-	cwin->win_geom=wingeom;
-	REGION_GEOM(cwin)=geom;
-	
 	if(np!=NULL){
 		do_reparent_clientwin(cwin, np->win,
 							  geom.x+wingeom.x, geom.y+wingeom.y);
