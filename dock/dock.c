@@ -39,6 +39,7 @@
 #include <string.h>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
+#include <X11/Xutil.h>
 #include <X11/extensions/shape.h>
 #include <X11/extensions/Xext.h>
 #include <ioncore/clientwin.h>
