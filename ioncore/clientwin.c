@@ -991,3 +991,4 @@ bool clientwin_enter_fullscreen(WClientWin *cwin, bool switchto)
 
 
 /*}}}*/
+

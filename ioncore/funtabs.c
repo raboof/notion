@@ -34,7 +34,7 @@ static WFunction wmcore_screen_funtab[]={
 	FN_GLOBAL_VOID(				"goto_next_viewport",	goto_next_viewport),
 	FN_GLOBAL_VOID(				"goto_prev_viewport",	goto_prev_viewport),
 	FN_GLOBAL_VOID(				"clear_tags",			clear_tags),
-
+	FN_GLOBAL(s,				"goto_named_region",	goto_named_region),
 	END_FUNTAB
 };
 

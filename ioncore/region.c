@@ -900,3 +900,17 @@ int complete_region(char *nam, char ***cp_ret, char **beg, void *unused)
 /*}}}*/
 
 
+/*{{{ Misc. */
+
+
+void goto_named_region(char *name)
+{
+	WRegion *reg=lookup_region(name);
+	
+	if(reg!=NULL)
+		goto_region(reg);
+}
+
+
+/*}}}*/
+

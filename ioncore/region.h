@@ -151,4 +151,6 @@ extern WRegion *lookup_region(const char *cname);
 extern int complete_region(char *nam, char ***cp_ret, char **beg,
 						   void *unused);
 
+extern void goto_named_region(char *name);
+
 #endif /* WMCORE_REGION_H */
