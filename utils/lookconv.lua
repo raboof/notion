@@ -144,7 +144,7 @@ local function output(nm)
     print('})\n')
     
     -- Tabs
-    print('de_define_style("frame-tab", {')
+    print('de_define_style("tab", {')
     print('    based_on = "*",')
     print_font("tab_font")
     print_extra_cg("active-selected", "act_tab_sel_colours")
@@ -154,19 +154,36 @@ local function output(nm)
     if _G["tab_colours"] then
         _G["tab_colours"].foreground_colour="#eeeeee";
         _G["tab_colours"].background_colour="#990000";
-        print_extra_cg("*-*-*-*-activity", "tab_colours")
     end
         
     print('    text_align = "center",')
     print('})\n')
     
+    -- Frame tabs
+    print('de_define_style("tab-frame", {')
+    print('    based_on = "tab",')
+    print_extra_cg("*-*-*-*-activity", "tab_colours")
+    print('})\n')
+    
     -- Ionframe tabs
     if spacing then
-        print('de_define_style("frame-tab-ionframe", {')
-        print('    based_on = "frame-tab",')
+        print('de_define_style("tab-frame-ionframe", {')
+        print('    based_on = "tab-frame",')
         print(string.format('    spacing = %d,', spacing))
         print('})\n')
     end
+    
+    -- Menu tabs
+    print('de_define_style("tab-menuentry", {')
+    print('    based_on = "tab",')
+    print('    text_align = "left",')
+    print('})\n')
+    
+    print('de_define_style("tab-menuentry-big", {')
+    print('    based_on = "tab-menuentry",')
+    print('    font = "-*-helvetica-medium-r-normal-*-18-*-*-*-*-*-*-*",')
+    print('    padding_pixels = 10,')
+    print('})\n')
     
     -- Input
     print('de_define_style("input", {')
