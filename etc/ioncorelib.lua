@@ -287,14 +287,6 @@ end
 
 -- Names {{{
 
-function lookup_clientwin(nam)
-    return lookup_region(nam, "WClientWin")
-end
-
-function complete_clientwin(nam)
-    return complete_region(nam, "WClientWin")
-end
-
 function lookup_workspace(nam)
     return lookup_region(nam, "WGenWS")
 end
