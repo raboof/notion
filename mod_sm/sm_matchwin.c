@@ -97,8 +97,8 @@ char *sm_get_window_cmd(Window window)
             strcat(command, " ");
             strcat(command, cmd_argv[i]);
         }
+        XFreeStringList(cmd_argv);
     }
-    XFreeStringList(cmd_argv);
     
     return command;
 }
