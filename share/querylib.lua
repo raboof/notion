@@ -19,6 +19,10 @@ querylib={}
 -- Functions to generate functions {{{
 
 
+--DOC
+-- Generate a ''completor'' passable to many of the \code{querylib.make_*_fn}
+-- functions from a simple function \var{completefn} that completes an input 
+-- string to a table of completion strings.
 function querylib.make_completor(completefn)
     local function completor(wedln, str)
         wedln:set_completions(completefn(str))
@@ -27,6 +31,20 @@ function querylib.make_completor(completefn)
 end
 
     
+--DOC
+-- Generate a function that can be directly passed in mplex/frame/screen 
+-- binding definitions to display a query to call a function with 
+-- tab-completed parameter. The parameters to this function are
+-- \begin{tabularx}{\linewidth}{lX}
+-- \hline
+-- Parameter & Description \\
+-- \hline
+-- \var{prompt} & The prompt. \\
+-- \var{initfn} & A function that returns initial input when called. \\
+-- \var{handler} & The function to be called with the user input as parameter 
+-- 		   when the query is finished. \\
+-- \var{completor} & A completor function. \\
+-- \end{tabularx}
 function querylib.make_simple_fn(prompt, initfn, handler, completor)
     local function query_it(frame)
         local initvalue;
@@ -38,6 +56,20 @@ function querylib.make_simple_fn(prompt, initfn, handler, completor)
     return query_it
 end
 
+--DOC
+-- Generate a function that can be directly passed in mplex/frame/screen 
+-- binding definitions to display a query to call a function with 
+-- tab-completed parameter. The parameters to this function are
+-- \begin{tabularx}{\linewidth}{lX}
+-- \hline
+-- Parameter & Description \\
+-- \hline
+-- \var{prompt} & The prompt. \\
+-- \var{initfn} & A function that returns initial input when called. \\
+-- \var{handler} & The function to be called with the mplex/frame/screen and
+--                 user input as parameters when the query is finished. \\
+-- \var{completor} & A completor function. \\
+-- \end{tabularx}
 function querylib.make_frame_fn(prompt, initfn, handler, completor)
     local function query_it(frame)
         local initvalue;
@@ -63,22 +95,21 @@ function querylib.make_rename_fn(prompt, getobj)
     return query_it
 end
 
-function querylib.make_yesno_handler(fn)
+--DOC
+-- Generate a function that can be directly passed in mplex/frame/screen 
+-- binding definitions to display a query to conditionally depending 
+-- on user's input call another function \var{handler} that will get the
+-- mplex/frame/screen where the query was displayed as argument.
+function querylib.make_yesno_fn(prompt, handler)
     local function handle_yesno(...)
         local n=table.getn(arg)
         if n==0 then return end
         if arg[n]=="y" or arg[n]=="Y" or arg[n]=="yes" then
             table.remove(arg, n)
-            fn(unpack(arg))
+            handler(unpack(arg))
         end
     end
-    return handle_yesno
-end
-
-function querylib.make_yesno_fn(prompt, handler)
-    return querylib.make_frame_fn(prompt, nil,
-                                  querylib.make_yesno_handler(handler),
-                                  nil)
+    return querylib.make_frame_fn(prompt, nil, handle_yesno, nil)
 end
 
 function querylib.make_script_lookup_fn(script)
@@ -110,6 +141,19 @@ local function getprog(prog)
     end
 end
 
+--DOC
+-- Generate a function that can be directly passed in mplex/frame/screen 
+-- binding definitions to display a query to start a program with a 
+-- tab-completed parameter. The parameters to this function are
+-- \begin{tabularx}{\linewidth}{lX}
+-- \hline
+-- Parameter & Description \\
+-- \hline
+-- \var{prompt} & The prompt \\
+-- \var{init} & A function that returns initial input when called. \\
+-- \var{prog} & Program name or a function that returns it when called. \\
+-- \var{completor} & A completor function. \\
+-- \end{tabularx}
 function querylib.make_execwith_fn(prompt, init, prog, completor)
     local function handle_execwith(frame, str)
         local p, err=getprog(prog)
@@ -122,17 +166,31 @@ function querylib.make_execwith_fn(prompt, init, prog, completor)
     return querylib.make_frame_fn(prompt, init, handle_execwith, completor)
 end
 
-function querylib.make_execfile_fn(prompt, init, prog, completor)
+--DOC
+-- Generate a function that can be directly passed in mplex/frame/screen 
+-- binding definitions to display a query to start a program with a 
+-- tab-completed file as parameter. The previously inputted file's directory is 
+-- used as the initial input. The parameters to this function are
+-- \begin{tabularx}{\linewidth}{lX}
+-- \hline
+-- Parameter & Description \\
+-- \hline
+-- \var{prompt} & The prompt \\
+-- \var{prog} & Program name or a function that returns it when called. \\
+-- \end{tabularx}
+function querylib.make_execfile_fn(prompt, prog)
     local function handle_execwith(frame, str)
         local p, err=getprog(prog)
         if p then
             querylib.last_dir=string.gsub(str, "^(.*/)[^/]-$", "%1")
-            exec_in(frame, getprog(prog) .. " " .. str)
+            exec_in(frame, p.." ".. str)
         else
             query_fwarn(frame, err)
         end
     end
-    return querylib.make_frame_fn(prompt, init, handle_execwith, completor)
+    
+    return querylib.make_frame_fn(prompt, querylib.get_initdir, handle_execwith, 
+                                  querylib.file_completor)
 end
 
 
@@ -337,9 +395,7 @@ end
 -- start a program to edit the file. This script uses \file{run-mailcap}
 -- by default, but if you don't have it, you may customise the script.
 querylib.query_editfile=querylib.make_execfile_fn(
-    "Edit file:", querylib.get_initdir, 
-    querylib.make_script_lookup_fn("ion-edit"),
-    querylib.file_completor
+    "Edit file:", querylib.make_script_lookup_fn("ion-edit")
 )
 
 --DOC
@@ -347,9 +403,7 @@ querylib.query_editfile=querylib.make_execfile_fn(
 -- start a program to view the file. This script uses \file{run-mailcap}
 -- by default, but if you don't have it, you may customise the script.
 querylib.query_runfile=querylib.make_execfile_fn(
-    "View file:", querylib.get_initdir, 
-    querylib.make_script_lookup_fn("ion-view"),
-    querylib.file_completor
+    "View file:", querylib.make_script_lookup_fn("ion-view")
 )
 
 
