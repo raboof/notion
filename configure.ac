@@ -226,7 +226,7 @@ dnl }}}
 dnl LUA_LIBS {{{
 if test "x$with_lua_libraries" != x; then
     LUA_LIBS="-L$with_lua_libraries"
-elif test "x$with_lua" != x; then
+elif test "x$with_lua_prefix" != x; then
     LUA_LIBS="-L$with_lua_prefix/lib"
 fi
 AC_CHECK_LIB([lua$with_lua_suffix],
