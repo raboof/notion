@@ -69,6 +69,11 @@ int frame_press(WFrame *frame, XButtonEvent *ev, WThing **thing_ret)
 		
 	if(inrect(g, ev->x, ev->y)){
 		p_dy1mul=1;
+
+		if(ev->x<g.x+RESB)
+			p_dx1mul=1;
+		else if(ev->x>g.x+g.w-RESB)
+			p_dx2mul=1;
 		
 		x=ev->x-g.x;
 		tw=frame->tab_w+scr->grdata.spacing;
@@ -245,7 +250,8 @@ static void p_tabdrag_end(WRegion *sub, XButtonEvent *ev)
 
 void p_tabdrag_setup(WFrame *frame)
 {
-	set_drag_handlers((WMotionHandler*)p_tabdrag_begin,
+	set_drag_handlers(NULL,
+					  (WMotionHandler*)p_tabdrag_begin,
 					  (WMotionHandler*)p_tabdrag_motion,
 					  (WButtonHandler*)p_tabdrag_end);
 }
@@ -276,10 +282,12 @@ static void p_resize_end(WFrame *frame, XButtonEvent *ev)
 	end_resize((WRegion*)frame);
 }
 
+#include <wmcore/objp.h>
 
 void p_resize_setup(WFrame *frame)
 {
-	set_drag_handlers((WMotionHandler*)p_resize_begin,
+	set_drag_handlers((WThing*)frame,
+					  (WMotionHandler*)p_resize_begin,
 					  (WMotionHandler*)p_resize_motion,
 					  (WButtonHandler*)p_resize_end);
 }

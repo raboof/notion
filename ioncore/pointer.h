@@ -30,9 +30,8 @@ extern void handle_pointer_motion(XMotionEvent *ev);
 
 extern bool find_window_at(Window rootwin, int x, int y, Window *childret);
 
-extern bool set_button_handler(WButtonHandler *handler);
-extern bool set_drag_handlers(WMotionHandler *begin,
-							  WMotionHandler *motion,
-							  WButtonHandler *end);
+extern bool set_button_handler(WThing *thing, WButtonHandler *handler);
+extern bool set_drag_handlers(WThing *thing, WMotionHandler *begin,
+							  WMotionHandler *motion, WButtonHandler *end);
 
 #endif /* WMCORE_POINTER_H */

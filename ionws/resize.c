@@ -9,9 +9,11 @@
 #include <wmcore/global.h>
 #include <wmcore/resize.h>
 #include <wmcore/grab.h>
+#include <wmcore/binding.h>
 #include "resize.h"
 #include "split.h"
 #include "bindmaps.h"
+#include "funtabs.h"
 
 
 /*{{{ keyboard handling */
@@ -28,18 +30,20 @@ static bool resize_handler(WRegion *thing, XEvent *xev)
 		return FALSE;
 	
 	assert(thing && WTHING_IS(thing, WWindow));
+	
 	binding=lookup_binding(&ion_moveres_bindmap, ACT_KEYPRESS,
 						   ev->state, ev->keycode);
 	
 	if(!binding)
 		return FALSE;
 	
-	if(binding){
+	if(binding!=NULL){
 		/* Get the screen now for waitrel grab - the thing might
 		 * have been destroyed when call_binding returns.
 		 */
 		scr=SCREEN_OF(thing);
-		call_binding(binding, (WThing *)thing);
+		call_binding_restricted(binding, (WThing*)thing,
+								&ion_moveres_funclist);
 	}
 	
 	return !is_resizing();

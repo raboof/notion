@@ -82,16 +82,16 @@ static WFunction ion_workspace_funtab[]={
 	FN(s,	wscurrent, WWorkspace,	"split",			split),
 	FN(s,	wscurrent, WWorkspace,	"split_empty", 		split_empty),
 	
+	/*
 	FN_VOID(wscurrent, WWorkspace,	"resize_vert",		resize_vert),
 	FN_VOID(wscurrent, WWorkspace,	"resize_horiz",		resize_horiz),
-	/* TODO
 	FN_VOID(wscurrent, WWorkspace,	"maximize_vert", 	maximize_vert),
 	FN_VOID(wscurrent, WWorkspace,	"maximize_horiz", 	maximize_horiz),
-	 */
 	FN(l,	wscurrent, WWorkspace,	"set_width",		set_width),
 	FN(l,	wscurrent, WWorkspace,	"set_height",		set_height),
 	FN(d,	wscurrent, WWorkspace,	"set_widthq",		set_widthq),
 	FN(d,	wscurrent, WWorkspace,	"set_heightq",		set_heightq),
+	 */
 	END_FUNTAB
 };
 
@@ -107,6 +107,15 @@ static WFunction ion_frame_funtab[]={
 /*	FN_VOID(generic, WFrame,	"closedestroy",		close_propagate),*/
 	FN_VOID(generic, WFrame,	"close_main",		close_sub),
 	FN_VOID(generic, WRegion,	"switch_tab",		switch_region),
+
+	FN_VOID(generic, WRegion,	"resize_vert",		resize_vert),
+	FN_VOID(generic, WRegion,	"resize_horiz",		resize_horiz),
+	FN_VOID(generic, WFrame,	"maximize_vert", 	maximize_vert),
+	FN_VOID(generic, WFrame,	"maximize_horiz", 	maximize_horiz),
+	FN(l,	generic, WRegion,	"set_width",		set_width),
+	FN(l,	generic, WRegion,	"set_height",		set_height),
+	FN(d,	generic, WRegion,	"set_widthq",		set_widthq),
+	FN(d,	generic, WRegion,	"set_heightq",		set_heightq),
 
 	/* mouse move/resize and tab drag */
 	FN_VOID(generic, WFrame,		"p_resize",		p_resize_setup),

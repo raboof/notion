@@ -16,7 +16,7 @@
 
 extern ConfOpt wmcore_binding_opts[];
 
-extern bool wmcore_begin_bindings(WBindmap *bindmap, WFunclist *funclist,
+extern bool wmcore_begin_bindings(WBindmap *bindmap,
 								  const StringIntMap *areas);
 
 #endif /* WMCORE_CONF_BINDINGS_H */

@@ -80,22 +80,19 @@ static StringIntMap frame_areas[]={
 	
 static bool opt_workspace_bindings(Tokenizer *tokz, int n, Token *toks)
 {
-	return wmcore_begin_bindings(&ion_workspace_bindmap,
-								 &ion_workspace_funclist, NULL);
+	return wmcore_begin_bindings(&ion_workspace_bindmap, NULL);
 }
 
 
 static bool opt_frame_bindings(Tokenizer *tokz, int n, Token *toks)
 {
-	return wmcore_begin_bindings(&ion_frame_bindmap,
-								 &ion_frame_funclist, frame_areas);
+	return wmcore_begin_bindings(&ion_frame_bindmap, frame_areas);
 }
 
 
 static bool opt_moveres_bindings(Tokenizer *tokz, int n, Token *toks)
 {
-	return wmcore_begin_bindings(&ion_moveres_bindmap,
-								 &ion_moveres_funclist, NULL);
+	return wmcore_begin_bindings(&ion_moveres_bindmap, NULL);
 }
 
 
@@ -103,15 +100,13 @@ static bool opt_moveres_bindings(Tokenizer *tokz, int n, Token *toks)
 
 static bool opt_clientwin_bindings(Tokenizer *tokz, int n, Token *toks)
 {
-	return wmcore_begin_bindings(&wmcore_clientwin_bindmap,
-								 &wmcore_clientwin_funclist, NULL);
+	return wmcore_begin_bindings(&wmcore_clientwin_bindmap, NULL);
 }
 
 
 static bool opt_global_bindings(Tokenizer *tokz, int n, Token *toks)
 {
-	return wmcore_begin_bindings(&wmcore_screen_bindmap,
-								 &wmcore_screen_funclist, NULL);
+	return wmcore_begin_bindings(&wmcore_screen_bindmap, NULL);
 }
 
 

@@ -103,14 +103,13 @@ static WFunction query_frame_funtab[]={
 
 static bool query_begin_bindings(Tokenizer *tokz, int n, Token *toks)
 {
-	return wmcore_begin_bindings(query_bindmap, &query_input_funclist, NULL);
+	return wmcore_begin_bindings(query_bindmap, NULL);
 }
 
 
 static bool query_begin_edln_bindings(Tokenizer *tokz, int n, Token *toks)
 {
-	return wmcore_begin_bindings(query_edln_bindmap, &query_edln_funclist,
-								 NULL);
+	return wmcore_begin_bindings(query_edln_bindmap, NULL);
 }
 
 

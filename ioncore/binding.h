@@ -75,6 +75,8 @@ extern void grab_binding(const WBinding *binding, Window win);
 extern void ungrab_binding(const WBinding *binding, Window win);
 /*extern void grab_bindings(WBindmap *bindmap, Window win);*/
 extern void call_binding(const WBinding *binding, WThing *thing);
+extern void call_binding_restricted(const WBinding *binding, WThing *thing,
+									WFunclist *funclist);
 extern int unmod(int state, int keycode);
 extern bool ismod(int keycode);
 extern void update_modmap();

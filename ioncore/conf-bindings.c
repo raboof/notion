@@ -17,38 +17,14 @@
 
 
 static WBindmap *tmp_bindmap=NULL;
-static WFunclist *tmp_funclist=NULL;
 static const StringIntMap *tmp_areamap=NULL;
 
 
 /*{{{ Helpers */
 
 
-static bool get_func(Tokenizer *tokz, Token *toks, int n,
-					 WBinding *binding, WFunclist *funclist)
+static bool get_func(Tokenizer *tokz, Token *toks, int n, WBinding *binding)
 {
-/*
-	const char *name=TOK_STRING_VAL(&(toks[0]));
-	WFunction *func;
-	int i;
-	
-	func=lookup_func_ex(name, funclist);
-	
-	if(func==NULL){
-		tokz_warn(tokz, toks[0].line, "\"%s\" undefined", name);
-		return FALSE;
-	}
-	
-	if(!check_args(tokz, toks, n, func->argtypes))
-		return FALSE;
-	
-	binding->func=func;
-	
-	for(i=1; i<n; i++){
-		binding->args[i-1]=toks[i];
-		toks[i].type=TOK_INVALID;
-	}
-*/
 	binding->cmd=TOK_TAKE_STRING_VAL(&(toks[0]));
 	
 	return TRUE;
@@ -164,7 +140,7 @@ static bool do_bind(Tokenizer *tokz, int n, Token *toks, int act, bool wr,
 	binding.kcb=kcb;
 	binding.area=area;
 	
-	if(!get_func(tokz, &(toks[1]), n-1, &binding, tmp_funclist))
+	if(!get_func(tokz, &(toks[1]), n-1, &binding))
 		return TRUE; /* just ignore the error */ 
 	
 	if(add_binding(tmp_bindmap, &binding))
@@ -286,9 +262,6 @@ static bool opt_set_mod(Tokenizer *tokz, int n, Token *toks)
 static bool end_bindings(Tokenizer *tokz, int n, Token *toks)
 {
 	tmp_bindmap=tmp_bindmap->parent;
-	if(tmp_bindmap==NULL)
-		tmp_funclist=NULL;
-	
 	return TRUE;
 }
 
@@ -299,11 +272,9 @@ static bool end_bindings(Tokenizer *tokz, int n, Token *toks)
 /*{{{ Exports */
 
 
-bool wmcore_begin_bindings(WBindmap *bindmap, WFunclist *funclist,
-						   const StringIntMap *areas)
+bool wmcore_begin_bindings(WBindmap *bindmap, const StringIntMap *areas)
 {
 	tmp_bindmap=bindmap;
-	tmp_funclist=funclist;
 	tmp_areamap=areas;
 	return (tmp_bindmap!=NULL);
 }

@@ -14,6 +14,7 @@
 
 
 static WWatch sq_watch=WWATCH_INIT;
+static WFunclist *tmp_funclist=NULL;
 
 /* We don't want to refer to destroyed things. */
 static void sq_watch_handler(WWatch *watch, WThing *t)
@@ -33,9 +34,14 @@ static bool opt_default(Tokenizer *tokz, int n, Token *toks)
 	
 	while(thing!=NULL){
 	
-		func=lookup_func_thing(thing, name);
-	
+		if(tmp_funclist!=NULL)
+			func=lookup_func_ex(name, tmp_funclist);
+		else
+			func=lookup_func_thing(thing, name);
+		
 		if(func==NULL){
+			if(tmp_funclist==NULL)
+				break;
 			thing=thing->t_parent;
 			continue;
 		}
@@ -94,3 +100,15 @@ bool execute_command_sequence(WThing *thing, char *fn)
 	return retval;
 }
 
+
+bool execute_command_sequence_restricted(WThing *thing, char *fn,
+										 WFunclist *funclist)
+{
+	bool ret;
+	
+	tmp_funclist=funclist;
+	ret=execute_command_sequence(thing, fn);
+	tmp_funclist=NULL;
+	
+	return ret;
+}

@@ -355,18 +355,16 @@ WBinding *lookup_binding_area(WBindmap *bindmap,
 	
 void call_binding(const WBinding *binding, WThing *thing)
 {
-/*
-	if(binding->func==NULL)
-		return;
-	
-	if(binding->func->callhnd==NULL)
-		return;
-	
-	binding->func->callhnd(thing, binding->func,
-						   binding->nargs, binding->args);
-*/
 	if(binding->cmd!=NULL)
 		execute_command_sequence(thing, binding->cmd);
+}
+
+
+void call_binding_restricted(const WBinding *binding, WThing *thing,
+							 WFunclist *funclist)
+{
+	if(binding->cmd!=NULL)
+		execute_command_sequence_restricted(thing, binding->cmd, funclist);
 }
 
 
