@@ -93,7 +93,7 @@ static void xwindow_selcmap(Window win)
         
         *p=1;
         if(XSaveContext(ioncore_g.dpy, win, ctx, (XPointer)p)!=0){
-            warn(TR("Unable to save colourmap watch info."));
+            warn(TR("Unable to store colourmap watch info."));
             return;
         }
 

@@ -80,6 +80,17 @@ static OptParserOpt pwm_opts[]={
 };
 
 
+static void help()
+{
+    int i;
+    printf(TR("Usage: %s [options]\n\n"), prog_execname());
+    for(i=0; pwm_opts[i].descr!=NULL; i++)
+        pwm_opts[i].descr=TR(pwm_opts[i].descr);
+    optparser_printhelp(OPTP_MIDLONG, pwm_opts);
+    printf("\n");
+}
+
+
 int main(int argc, char*argv[])
 {
     const char *cfgfile="cfg_pwm";
@@ -145,14 +156,7 @@ int main(int argc, char*argv[])
             noerrorlog=TRUE;
             break;
         case OPT_ID('h'):
-            printf(TR("Usage: %s [options]\n\n"), prog_execname());
-            {
-                int i;
-                for(i=0; pwm_opts[i].descr!=NULL; i++)
-                    pwm_opts[i].descr=TR(pwm_opts[i].descr);
-            }
-            optparser_printhelp(OPTP_MIDLONG, pwm_opts);
-            printf("\n");
+            help();
             return EXIT_SUCCESS;
         case OPT_ID('v'):
             printf("%s\n", ION_VERSION);
@@ -161,7 +165,8 @@ int main(int argc, char*argv[])
             printf("%s\n", ioncore_aboutmsg());
             return EXIT_SUCCESS;
         default:
-            optparser_print_error();
+            warn(TR("Invalid command line."));
+            help();
             return EXIT_FAILURE;
         }
     }

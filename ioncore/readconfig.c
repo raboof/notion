@@ -483,8 +483,7 @@ char *ioncore_get_savefile(const char *basename)
         return NULL;
     
     if(!ensuredir(sessiondir)){
-        warn(TR("Unable to create session directory \"%s\"\n"), 
-             sessiondir);
+        warn(TR("Unable to create session directory \"%s\"."), sessiondir);
         return NULL;
     }
     

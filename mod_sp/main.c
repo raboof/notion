@@ -134,7 +134,7 @@ static void check_and_create()
         if(sp==NULL){
             sp=create(scr);
             if(sp==NULL){
-                warn(TR("Unable to create scratchpad for screen %d\n"),
+                warn(TR("Unable to create scratchpad for screen %d."),
                      screen_id(scr));
             }
         }

@@ -342,7 +342,8 @@ WRootWin *ioncore_manage_rootwin(int xscr, bool noxinerama)
                 warn(TR("Don't know how to get Xinerama information for "
                         "multiple X root windows."));
                 XFree(xi);
-                return NULL;
+                xi=NULL;
+                nxi=0;
             }
         }
     }
@@ -374,7 +375,7 @@ WRootWin *ioncore_manage_rootwin(int xscr, bool noxinerama)
             /*if(nxi==1)
                 useroot=(geom.x==0 && geom.y==0);*/
             if(!add_screen(rootwin, i, &geom, useroot))
-                warn(TR("Unable to add viewport for Xinerama screen %d"), i);
+                warn(TR("Unable to setup Xinerama screen %d."), i);
         }
         XFree(xi);
     }else
@@ -385,7 +386,7 @@ WRootWin *ioncore_manage_rootwin(int xscr, bool noxinerama)
     }
     
     if(rootwin->screen_list==NULL){
-        warn(TR("Unable to add a viewport to X screen %d."), xscr);
+        warn(TR("Unable to setup X screen %d."), xscr);
         destroy_obj((Obj*)rootwin);
         return NULL;
     }
@@ -453,20 +454,20 @@ static void rootwin_do_set_focus(WRootWin *rootwin, bool warp)
 static bool rootwin_fitrep(WRootWin *rootwin, WWindow *par, 
                            const WFitParams *fp)
 {
-    warn(TR("Don't know how to reparent or fit root windows"));
+    D(warn("Don't know how to reparent or fit root windows."));
     return FALSE;
 }
 
 
 static void rootwin_map(WRootWin *rootwin)
 {
-    warn(TR("Attempt to map a root window."));
+    D(warn("Attempt to map a root window."));
 }
 
 
 static void rootwin_unmap(WRootWin *rootwin)
 {
-    warn(TR("Attempt to unmap a root window -- impossible"));
+    D(warn("Attempt to unmap a root window -- impossible."));
 }
 
 

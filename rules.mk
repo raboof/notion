@@ -219,4 +219,4 @@ TO_CLEAN += potfiles_c potfiles_lua
 
 _potfiles:
 	echo "$(SOURCES)"|tr ' ' '\n' > potfiles_c
-	echo "$(LUA_SOURCES)"|tr ' ' '\n' > potfiles_lua
+	echo "$(LUA_SOURCES) $(ETC)"|tr ' ' '\n' > potfiles_lua

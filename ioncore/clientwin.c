@@ -516,7 +516,7 @@ again:
     cwin=create_clientwin((WWindow*)rootwin, win, &attr);
     
     if(cwin==NULL){
-        warn(TR("Unable to create a client window structure!"));
+        warn_err();
         goto fail2;
     }
 
@@ -543,7 +543,7 @@ again:
                               (WHookMarshallExtl*)do_manage_mrsh_extl);
 
         if(!managed){
-            warn(TR("Unable to manage client window %x."), win);
+            warn(TR("Unable to manage client window %#x."), win);
             goto failure;
         }
     }
@@ -590,7 +590,7 @@ void clientwin_tfor_changed(WClientWin *cwin)
     param.gravity=ForgetGravity;
     
     CALL_ALT_B(succeeded, clientwin_do_manage_alt, (cwin, &param));
-    warn(TR("WM_TRANSIENT_FOR changed for \"%s\"."),
+    warn("WM_TRANSIENT_FOR changed for \"%s\".",
          region_name((WRegion*)cwin));
 #else
     warn(TR("Changes is WM_TRANSIENT_FOR property are unsupported."));
@@ -850,7 +850,7 @@ bool clientwin_rqclose(WClientWin *cwin)
                        ioncore_get_timestamp());
         return TRUE;
     }else{
-        warn(TR("Client does not support WM_DELETE."));
+        warn(TR("Client does not support the WM_DELETE protocol."));
         return FALSE;
     }
 }
@@ -1079,10 +1079,8 @@ static bool clientwin_fitrep(WClientWin *cwin, WWindow *np, WFitParams *fp)
         fp2.mode=REGION_FIT_BOUNDS;
         
         if(!region_fitrep(transient, np, &fp2) && np!=NULL){
-           warn(TR("Problem: can't reparent a %s managed by a WClientWin"
-                   "beeing reparented. Detaching from this object."),
-                OBJ_TYPESTR(transient));
-                region_detach_manager(transient);
+            warn(TR("Error reparenting %s."), region_name(transient));
+            region_detach_manager(transient);
         }
     }
     

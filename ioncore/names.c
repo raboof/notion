@@ -339,7 +339,6 @@ static bool do_use_name(WRegion *reg, WNamespace *ns, const char *name,
     reg->ni.namespaceinfo=ns;
     
     if(!rb_insertg(ns->rb, &(reg->ni), reg, COMPARE_FN)){
-        warn(TR("Unable to insert newly allocated name to allocation tree."));
         free(reg->ni.name);
         reg->ni.name=NULL;
         reg->ni.inst_off=0;

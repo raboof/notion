@@ -71,11 +71,11 @@ Time ioncore_get_timestamp()
         XEvent ev;
         Atom dummy;
         
-        D(fprintf(stderr, TR("Attempting to get time from X server.")));
+        D(fprintf(stderr, "Attempting to get time from X server."));
         
         dummy=XInternAtom(ioncore_g.dpy, "_ION_TIMEREQUEST", False);
         if(dummy==None){
-            warn(TR("Time request failed."));
+            warn(TR("Time request from X server failed."));
             return 0;
         }
         /* TODO: use some other window that should also function as a

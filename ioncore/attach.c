@@ -96,23 +96,21 @@ WRegion *region__attach_reparent(WRegion *mgr, WRegion *reg,
     /* Check that reg is not a parent or manager of mgr */
     reg2=mgr;
     for(reg2=mgr; reg2!=NULL; reg2=REGION_MANAGER(reg2)){
-        if(reg2==reg){
-            warn(TR("Trying to make a %s manage a %s above it in management "
-                    "hierarchy."), OBJ_TYPESTR(mgr), OBJ_TYPESTR(reg));
-            return NULL;
-        }
+        if(reg2==reg)
+            goto err;
     }
     
     for(reg2=region_parent(mgr); reg2!=NULL; reg2=region_parent(reg2)){
-        if(reg2==reg){
-            warn(TR("Trying to make a %s manage its ancestor (a %s)."),
-                 OBJ_TYPESTR(mgr), OBJ_TYPESTR(reg));
-            return NULL;
-        }
+        if(reg2==reg)
+            goto err;
     }
     
     return fn(mgr, (WRegionAttachHandler*)add_fn_reparent,
               (void*)reg, param);
+
+err:
+    warn(TR("Attempt to make region %s manage its ancestor %s."),
+         region_name(mgr), region_name(reg));
 }
 
 

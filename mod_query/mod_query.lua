@@ -786,10 +786,10 @@ function mod_query.show_clientwin(mplex, cwin)
     
     local function get_info(cwin)
         local function n(s) return (s or "") end
-        local f=TR("Title: %s\nClass: %s\nRole: %s\nInstance: %s\nXID: 0x%x")
         local i=cwin:get_ident()
-        local s=string.format(f, n(cwin:name()), n(i.class), n(i.role), 
-                              n(i.instance), cwin:xid())
+        local s=TR("Title: %s\nClass: %s\nRole: %s\nInstance: %s\nXID: 0x%x",
+                   n(cwin:name()), n(i.class), n(i.role), n(i.instance), 
+                   cwin:xid())
         local t=TR("\nTransients:\n")
         for k, v in cwin:managed_list() do
             if obj_is(v, "WClientWin") then

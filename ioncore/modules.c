@@ -167,7 +167,7 @@ static int try_load(const char *file, void *param)
     name[dot-slash]='\0';
     
     if(get_handle(name)){
-        warn_obj(file, TR("Module with this name already loaded."));
+        warn_obj(file, TR("The module is already loaded."));
         goto err2;
     }
         

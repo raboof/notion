@@ -127,7 +127,7 @@ static const char backup_msg[]=DUMMY_TR(
 "old layout, copy this backup file over the layout savefile found in the\n"
 "same directory while Ion is not running and after having fixed your other\n"
 "configuration files that are causing this problem. (Maybe a missing\n"
-"ioncore.load_module call?).");
+"module?)");
 
 
 bool ioncore_init_layout()

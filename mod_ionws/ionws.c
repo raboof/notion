@@ -72,9 +72,7 @@ static void reparent_mgd(WRegion *sub, WWindow *par)
     subfp.g=REGION_GEOM(sub);
     subfp.mode=REGION_FIT_EXACT;
     if(!region_fitrep(sub, par, &subfp)){
-        warn(TR("Problem: can't reparent a %s managed by a WIonWS"
-                "being reparented. Detaching from this object."),
-             OBJ_TYPESTR(sub));
+        warn(TR("Error reparenting %s."), region_name(sub));
         region_detach_manager(sub);
     }
 }
@@ -690,12 +688,12 @@ WFrame *ionws_split_at(WIonWS *ws, WFrame *frame, const char *dirstr,
     node=get_node_check(ws, (WRegion*)frame);
     
     if(node==NULL || ws->split_tree==NULL){
-        warn(TR("Invalid frame or frame not managed by the workspace."));
+        warn(TR("Frame not managed by the workspace."));
         return NULL;
     }
     
     if(!get_split_dir_primn(dirstr, &dir, &primn)){
-        warn(TR("Unknown direction parameter to split_at"));
+        warn(TR("Invalid direction parameter."));
         return NULL;
     }
     
@@ -708,7 +706,7 @@ WFrame *ionws_split_at(WIonWS *ws, WFrame *frame, const char *dirstr,
                           REGION_PARENT_CHK(ws, WWindow));
     
     if(nnode==NULL){
-        warn(TR("Unable to split"));
+        warn(TR("Unable to split."));
         return NULL;
     }
 
@@ -740,7 +738,7 @@ EXTL_EXPORT_MEMBER
 void ionws_unsplit_at(WIonWS *ws, WFrame *frame)
 {
     if(frame==NULL){
-        warn(TR("Nil frame"));
+        warn(TR("Nil frame."));
         return;
     }
     if(REGION_MANAGER(frame)!=(WRegion*)ws){
@@ -749,7 +747,7 @@ void ionws_unsplit_at(WIonWS *ws, WFrame *frame)
     }
     
     if(!region_may_destroy((WRegion*)frame)){
-        warn(TR("Frame may not be destroyed"));
+        warn(TR("Frame may not be destroyed."));
         return;
     }
 
@@ -944,12 +942,12 @@ EXTL_EXPORT_MEMBER
 WSplitRegion *ionws_node_of(WIonWS *ws, WRegion *reg)
 {
     if(reg==NULL){
-        warn(TR("Nil parameter"));
+        warn(TR("Nil parameter."));
         return NULL;
     }
     
     if(REGION_MANAGER(reg)!=(WRegion*)ws){
-        warn(TR("Manager doesn't match"));
+        warn(TR("Manager doesn't match."));
         return NULL;
     }
     
@@ -985,7 +983,7 @@ ExtlTab ionws_get_configuration(WIonWS *ws)
     
     if(ws->split_tree!=NULL){
         if(!split_get_config(ws->split_tree, &split_tree))
-            warn(TR("Could not get split tree for a WIonWS."));
+            warn(TR("Could not get split tree."));
     }
     
     extl_table_sets_t(tab, "split_tree", split_tree);
@@ -1006,7 +1004,7 @@ WSplit *load_splitst(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
     WSplitST *st;
 
     if(ws->stdispnode!=NULL){
-        warn(TR("Workspace already has a stdisp node."));
+        warn(TR("Workspace already has a status display node."));
         return NULL;
     }
 
@@ -1044,8 +1042,6 @@ WSplit *load_splitregion_doit(WIonWS *ws, const WRectangle *geom, ExtlTab rt)
             destroy_obj((Obj*)reg);
         else
             ionws_managed_add(ws, reg);
-    }else{
-        warn(TR("Failed to load region."));
     }
     
     return (WSplit*)node;
@@ -1058,7 +1054,7 @@ WSplit *load_splitregion(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
     ExtlTab rt;
     
     if(!extl_table_gets_t(tab, "regparams", &rt)){
-        warn(TR("Entry regparams not found in table."));
+        warn(TR("Missing region parameters."));
         return NULL;
     }
     
@@ -1101,10 +1097,8 @@ WSplit *load_splitsplit(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
     free(dir_str);
 
     split=create_splitsplit(geom, dir);
-    if(split==NULL){
-        warn(TR("Unable to create a split.\n"));
+    if(split==NULL)
         return NULL;
-    }
 
     tls=maxof(tls, MINS);
     brs=maxof(brs, MINS);
@@ -1164,7 +1158,7 @@ WSplit *ionws_load_node_default(WIonWS *ws, const WRectangle *geom,
     extl_table_gets_s(tab, "type", &typestr);
     
     if(typestr==NULL){
-        warn(TR("No split type."));
+        warn(TR("No split type given."));
         return NULL;
     }
     
@@ -1215,7 +1209,7 @@ WRegion *ionws_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
     }
     
     if(ws->split_tree==NULL){
-        warn(TR("Workspace empty."));
+        warn(TR("The workspace is empty."));
         destroy_obj((Obj*)ws);
         return NULL;
     }

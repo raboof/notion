@@ -28,6 +28,7 @@
 #include <ioncore/region-iter.h>
 #include <ioncore/rectangle.h>
 #include <ioncore/saveload.h>
+#include <ioncore/names.h>
 #include "ionws.h"
 #include "split.h"
 #include "split-stdisp.h"
@@ -1017,7 +1018,7 @@ WSplitRegion *splittree_split(WSplit **root, WSplit *node, int dir, int primn,
     assert(root!=NULL && *root!=NULL && node!=NULL && parent!=NULL);
     
     if(OBJ_IS(node, WSplitST)){
-        warn(TR("Splitting stdisp not allowed."));
+        warn(TR("Splitting the status display is not allowed."));
         return NULL;
     }
 
@@ -1437,7 +1438,7 @@ void split_transpose_to(WSplit *node, const WRectangle *geom)
             split_try_unsink_stdisp(stdispp, TRUE, TRUE);
             stdispp=split_lookup_stdisp_parent(node);
             if(stdispp!=NULL && stdispp!=(WSplitSplit*)node){
-                warn(TR("Unable to move status display out of way of "
+                warn(TR("Unable to move the status display out of way of "
                         "transpose."));
                 return;
             }
@@ -1553,9 +1554,12 @@ static bool splitregion_get_config(WSplitRegion *node, ExtlTab *ret)
 {
     ExtlTab rt, t;
     
+    if(node->reg==NULL)
+        return FALSE;
+    
     if(!region_supports_save(node->reg)){
-        warn(TR("Unable to get configuration for a %s."),
-             OBJ_TYPESTR(node->reg));
+        warn(TR("Unable to get configuration for %s."), 
+             region_name(node->reg));
         return FALSE;
     }
     

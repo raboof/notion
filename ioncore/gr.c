@@ -135,7 +135,7 @@ GrBrush *gr_get_brush(WRootWin *rootwin, Window win, const char *style)
     ret=(eng->fn)(rootwin, win, style);
     
     if(ret==NULL)
-        warn(TR("Unable to find brush for '%s'."), style);
+        warn(TR("Unable to find brush for style '%s'."), style);
         
     return ret;
 }

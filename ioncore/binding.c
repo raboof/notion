@@ -271,7 +271,6 @@ bool bindmap_add_binding(WBindmap *bindmap, const WBinding *b)
     
     if(found){
         if(!rb_insert_a(node, binding, binding)){
-            warn(TR("Binding insert error."));
             free(binding);
             return FALSE;
         }
@@ -281,7 +280,6 @@ bool bindmap_add_binding(WBindmap *bindmap, const WBinding *b)
     }else{
         if(!rb_insertg(bindmap->bindings, binding, binding, 
                        (Rb_compfn*)compare_bindings)){
-            warn(TR("Binding insert error."));
             free(binding);
             return FALSE;
         }

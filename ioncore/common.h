@@ -36,8 +36,10 @@
 
 #if __STDC_VERSION__ >= 199901L
 #define WARN_FUNC(...) warn_obj(__func__, __VA_ARGS__)
+#define WARN_ERR_FUNC() warn_err_obj(__func__)
 #else
 #define WARN_FUNC warn
+#define WARN_ERR_FUNC() warn_err()
 #endif
 
 #ifdef CF_NO_LOCALE

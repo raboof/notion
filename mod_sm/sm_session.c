@@ -82,7 +82,7 @@ static void sm_ice_watch_fd(IceConn conn,
 {
     if(opening){
         if(sm_fd!=-1){ /* shouldn't happen */
-            warn(TR("Too many ICE connections -- not supported"));
+            warn(TR("Too many ICE connections."));
         }
         else{
             sm_fd=IceConnectionNumber(conn);
@@ -292,7 +292,7 @@ bool mod_sm_init_session()
     SmcCallbacks smcall;
     
     if(getenv("SESSION_MANAGER")==0){
-        warn(TR("SESSION_MANAGER environment variable unset."));
+        warn(TR("SESSION_MANAGER environment variable not set."));
         return FALSE;
     }
     
@@ -322,7 +322,7 @@ bool mod_sm_init_session()
                                   sm_client_id, &new_client_id,
                                   sizeof(error_str), error_str)) == NULL)
     {
-        warn(TR("Session Manager: Init error"));
+        warn(TR("Unable to connect to the session manager."));
         return FALSE;
     }
     

@@ -155,7 +155,7 @@ static bool do_action(WBindmap *bindmap, const char *str,
     WBinding binding;
     
     if(wr && mod==0){
-        warn(TR("Cannot waitrel when no modifiers set in \"%s\". Sorry."),
+        warn(TR("Can not wait on modifiers when no modifiers set in \"%s\"."),
              str);
         wr=FALSE;
     }
@@ -247,7 +247,7 @@ static bool do_entry(WBindmap *bindmap, ExtlTab tab,
     int area=0;
     
     if(!extl_table_gets_s(tab, "action", &action_str)){
-        warn(TR("No action set for binding."));
+        warn(TR("Binding type not set."));
         goto fail;
     }
 
@@ -257,7 +257,7 @@ static bool do_entry(WBindmap *bindmap, ExtlTab tab,
     }else{
         action=stringintmap_value(action_map, action_str, -1);
         if(action<0){
-            warn(TR("Unknown binding action %s."), action_str);
+            warn(TR("Unknown binding type \"%s\"."), action_str);
             goto fail;
         }
     }
@@ -278,7 +278,7 @@ static bool do_entry(WBindmap *bindmap, ExtlTab tab,
             if(extl_table_gets_s(tab, "area", &area_str)){
                 area=stringintmap_value(areamap, area_str, -1);
                 if(area<0){
-                    warn(TR("Unknown area %s for binding %s."),
+                    warn(TR("Unknown area \"%s\" for binding %s."),
                          area_str, ksb_str);
                     area=0;
                 }

@@ -216,7 +216,7 @@ bool hook_add_extl(WHook *hk, ExtlFn efn)
     WHookItem *item;
     
     if(efn==extl_fn_none()){
-        warn(TR("No function."));
+        warn(TR("No function given."));
         return FALSE;
     }
 

@@ -453,7 +453,6 @@ static bool screen_managed_may_destroy(WScreen *scr, WRegion *reg)
             return TRUE;
     }
     
-    warn(TR("Cannot destroy only workspace."));
     return FALSE;
 }
 

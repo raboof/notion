@@ -26,9 +26,10 @@ POTDIRS=../ioncore \
 	../ext_statusbar \
 	../ion \
 	../pwm \
-	../share
+	../share \
+	../etc
 
-POTFILE=ion.pot
+POTFILE=ion3.pot
 
 TARGETS = $(MO_FILES)
 

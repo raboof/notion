@@ -127,19 +127,13 @@ static bool mrsh_layout_extl(ExtlFn fn, PlacementParams *p)
         extl_table_gets_i(t, "res_h", &(p->res_h));
         
         if(extl_table_gets_o(t, "res_node", (Obj**)&(p->res_node))){
-            if(!OBJ_IS(p->res_node, WSplit)){
-                warn(TR("Malfunctioning hook; not split."));
-                goto err;
-            }
-            
             if(OBJ_IS(p->res_node, WSplitUnused)){
                 if(!extl_table_gets_t(t, "res_config", &(p->res_config))){
-                    warn(TR("Malfunctioning hook; config missing."));
+                    warn(TR("Malfunctioning placement hook; condition #%d."), 1);
                     goto err;
                 }
             }else if(!OBJ_IS(p->res_node, WSplitRegion)){
-                warn(TR("Malfunctioning hook; not SPLIT_UNUSED or "
-                        "SPLIT_REGNODE"));
+                warn(TR("Malfunctioning placement hook; condition #%d."), 2);
                 goto err;
             }
         }
@@ -203,12 +197,12 @@ static bool do_replace(WAutoWS *ws, WFrame *frame, WClientWin *cwin,
     assert(OBJ_IS(u, WSplitUnused));
     
     if(node==NULL){
-        warn(TR("Malfunctioning hook #1."));
+        warn(TR("Malfunctioning placement hook; condition #%d."), 3);
         return FALSE;
     }
 
     if(REGION_MANAGER(frame)!=(WRegion*)ws){
-        warn(TR("Malfunctioning hook #2."));
+        warn(TR("Malfunctioning placement hook; condition #%d."), 4);
         destroy_obj((Obj*)node);
         return FALSE;
     }
@@ -287,10 +281,9 @@ bool autows_manage_clientwin(WAutoWS *ws, WClientWin *cwin,
             if(OBJ_IS(rs.res_node, WSplitUnused)){
                 if(do_replace(ws, frame, cwin, &rs))
                     target=(WRegion*)frame;
-            }else if(OBJ_IS(rs.res_node, WSplitRegion)){
-                target=((WSplitRegion*)rs.res_node)->reg;
             }else{
-                warn(TR("Bug in placement code."));
+                assert(OBJ_IS(rs.res_node, WSplitRegion));
+                target=((WSplitRegion*)rs.res_node)->reg;
             }
             
             extl_unref_table(rs.res_config);
@@ -309,7 +302,7 @@ bool autows_manage_clientwin(WAutoWS *ws, WClientWin *cwin,
             return TRUE;
         }
     }
-    
+
 err:
     warn(TR("Ooops... could not find a region to attach client window to "
             "on workspace %s."), region_name((WRegion*)ws));

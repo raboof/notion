@@ -98,7 +98,7 @@ bool ioncore_exec_on(WRegion *reg, const char *cmd)
 {
     WRootWin *rw=region_rootwin_of(reg);
     if(rw==NULL){
-        warn(TR("No root window."));
+        warn(TR("Could not find a root window."));
         return FALSE;
     }
     
@@ -131,7 +131,7 @@ static void process_pipe(int fd, void *p)
             if(errno==EAGAIN || errno==EINTR)
                 return;
             n=0;
-            warn_err_obj(TR("pipe read"));
+            warn_err_obj(TR("reading a pipe"));
         }
         if(n>0){
             buf[n]='\0';
@@ -293,7 +293,7 @@ bool ioncore_do_snapshot()
 void ioncore_emergency_snapshot()
 {
     if(smhook!=NULL)
-        warn(TR("State not saved: running under session manager."));
+        warn(TR("Not saving state: running under session manager."));
     else
         ioncore_do_snapshot();
 }

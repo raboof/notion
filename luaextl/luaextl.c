@@ -10,6 +10,7 @@
  */
 
 #include <time.h>
+#include <errno.h>
 
 #include <stdlib.h>
 #include <stdarg.h>
@@ -120,14 +121,20 @@ static bool extl_cpcall(lua_State *st, ExtlCPCallFn *fn, void *ptr)
 {
     ExtlCPCallParam param;
     int oldtop=lua_gettop(st);
+    int err;
     
     param.fn=fn;
     param.udata=ptr;
     param.retval=FALSE;
     
     
-    if(lua_cpcall(st, extl_docpcall, &param)!=0){
-        D(fprintf(stderr, "-->%s\n", lua_tostring(st, -1)));
+    err=lua_cpcall(st, extl_docpcall, &param);
+    if(err==LUA_ERRRUN){
+        warn("%s", lua_tostring(st, -1));
+    }else if(err==LUA_ERRMEM){
+        warn("%s", strerror(ENOMEM));
+    }else if(err!=0){
+        warn(TR("Unknown Lua error."));
     }
     
     lua_settop(st, oldtop);
@@ -452,13 +459,14 @@ static int extl_stack_trace(lua_State *st)
     int lvl=0;
     int n_skip=0;
     
-    lua_pushstring(st, "Stack trace:");
+    lua_pushstring(st, TR("Stack trace:"));
 
     for( ; lua_getstack(st, lvl, &ar); lvl++){
         bool is_c=FALSE;
         
         if(lua_getinfo(st, "Sln", &ar)==0){
-            lua_pushfstring(st, "\n(Unable to get debug info for level %d)",
+            lua_pushfstring(st, 
+                            TR("\n(Unable to get debug info for level %d)"),
                             lvl);
             lua_concat(st, 2);
             continue;
@@ -554,17 +562,14 @@ bool extl_init()
     luaopen_loadlib(l_st);
     
     if(!extl_init_obj_info(l_st)){
-        warn(TR("Failed to initialize Obj metatable."));
-        goto fail;
+        lua_close(l_st);
+        return FALSE;
     }
 
     lua_pushcfunction(l_st, extl_collect_errors);
     lua_setglobal(l_st, "collect_errors");
 
     return TRUE;
-fail:
-    lua_close(l_st);
-    return FALSE;
 }
 
 
@@ -909,6 +914,9 @@ typedef struct{
 
 static bool extl_table_dodo_get2(lua_State *st, TableParams2 *params)
 {
+    if(params->ref<0)
+        return FALSE;
+
     lua_rawgeti(st, LUA_REGISTRYINDEX, params->ref);
     extl_stack_push_vararg(st, params->itype, params->argsp);
     lua_gettable(st, -2);
@@ -1996,10 +2004,8 @@ bool extl_register_class(const char *cls, ExtlExportedFnSpec *fns,
     
     D(assert(strcmp(cls, "Obj")==0 || parent!=NULL));
            
-    if(!extl_cpcall(l_st, (ExtlCPCallFn*)extl_do_register_class, &clsdata)){
-        warn(TR("Unable to register class %s."), cls);
+    if(!extl_cpcall(l_st, (ExtlCPCallFn*)extl_do_register_class, &clsdata))
         return FALSE;
-    }
 
     if(fns==NULL)
         return TRUE;
@@ -2082,10 +2088,8 @@ bool extl_register_module(const char *mdl, ExtlExportedFnSpec *fns)
     clsdata.refret=LUA_NOREF;
     clsdata.hide=FALSE; /* unused, but initialise */
     
-    if(!extl_cpcall(l_st, (ExtlCPCallFn*)extl_do_register_module, &clsdata)){
-        warn(TR("Unable to register module %s."), mdl);
+    if(!extl_cpcall(l_st, (ExtlCPCallFn*)extl_do_register_module, &clsdata))
         return FALSE;
-    }
 
     if(fns==NULL)
         return TRUE;
@@ -2180,7 +2184,7 @@ static bool ser(lua_State *st, FILE *f, int lvl)
         break;
     case LUA_TTABLE:
         if(lvl+1>=EXTL_MAX_SERIALISE_DEPTH){
-            warn(TR("Maximize serialisation depth reached."));
+            warn(TR("Maximal serialisation depth reached."));
             fprintf(f, "nil");
             lua_pop(st, 1);
             return FALSE;
