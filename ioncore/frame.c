@@ -12,6 +12,7 @@
 #include <libtu/obj.h>
 #include <libtu/objp.h>
 #include <libtu/minmax.h>
+#include <libtu/stringstore.h>
 
 #include "common.h"
 #include "window.h"
@@ -60,6 +61,9 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
 {
     WRectangle mg;
     
+    if(style==NULL)
+        style="frame";
+    
     frame->flags=0;
     frame->saved_w=0;
     frame->saved_h=0;
@@ -72,11 +76,17 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
     frame->tr_mode=GR_TRANSPARENCY_DEFAULT;
     frame->brush=NULL;
     frame->bar_brush=NULL;
-#warning "TODO: do not make multiple copies"
-    frame->style=(style ? scopy(style) : NULL);
-
-    if(!mplex_init((WMPlex*)frame, parent, fp))
+    frame->style=stringstore_alloc(style);
+    
+    if(style==STRINGID_NONE){
+        warn_err();
         return FALSE;
+    }
+
+    if(!mplex_init((WMPlex*)frame, parent, fp)){
+        stringstore_free(frame->style);
+        return FALSE;
+    }
     
     frame_initialise_gr(frame);
     frame_initialise_titles(frame);
@@ -105,10 +115,7 @@ void frame_deinit(WFrame *frame)
 {
     frame_free_titles(frame);
     frame_release_brushes(frame);
-    if(frame->style!=NULL){
-        free(frame->style);
-        frame->style=NULL;
-    }
+    stringstore_free(frame->style);
     mplex_deinit((WMPlex*)frame);
 }
 
@@ -576,8 +583,7 @@ ExtlTab frame_get_configuration(WFrame *frame)
         extl_table_sets_i(tab, "saved_w", frame->saved_w);
     }
     
-    if(frame->style!=NULL)
-        extl_table_sets_s(tab, "frame_style", frame->style);
+    extl_table_sets_s(tab, "frame_style", stringstore_get(frame->style));
     
     return tab;
 }

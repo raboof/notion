@@ -300,8 +300,10 @@ void frame_initialise_gr(WFrame *frame)
     GrBorderWidths bdw;
     GrFontExtents fnte;
     WRootWin *rw=region_rootwin_of((WRegion*)frame);
-    const char *style=(frame->style ? frame->style : "frame");
+    const char *style=stringstore_get(frame->style);
     char *tab_style;
+    
+    assert(style!=NULL);
     
     frame->bar_h=0;
     

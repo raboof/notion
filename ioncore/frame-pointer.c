@@ -185,6 +185,7 @@ static void setup_dragwin(WFrame *frame, uint tab)
     WRectangle g;
     WRootWin *rw;
     WFitParams fp;
+    const char *style;
     char *tab_style;
     
     assert(tabdrag_infowin==NULL);
@@ -197,7 +198,11 @@ static void setup_dragwin(WFrame *frame, uint tab)
     fp.g.w=frame_nth_tab_w(frame, tab);
     fp.g.h=frame->bar_h;
     
-    tab_style=scat("tab-", (frame->style ? frame->style : "frame"));
+    style=stringstore_get(frame->style);
+    
+    assert(style!=NULL);
+    
+    tab_style=scat("tab-", style);
     
     if(tab_style==NULL){
         warn_err();

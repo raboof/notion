@@ -12,6 +12,8 @@
 #ifndef ION_IONCORE_FRAME_H
 #define ION_IONCORE_FRAME_H
 
+#include <libtu/stringstore.h>
+
 #include "common.h"
 #include "window.h"
 #include "attach.h"
@@ -39,7 +41,7 @@ DECLCLASS(WFrame){
     
     int tab_dragged_idx;
     
-    char *style;
+    StringId style;
     GrBrush *brush;
     GrBrush *bar_brush;
     GrTransparency tr_mode;
