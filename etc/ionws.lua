@@ -22,8 +22,9 @@ ionframe_bindings(common_frame_bindings())
 ionframe_bindings(frame_query_bindings())
 
 ionframe_bindings{
-    kpress(DEFAULT_MOD .. "H", ionframe_resize_horiz),
-    kpress(DEFAULT_MOD .. "V", ionframe_resize_vert),
+    --kpress(DEFAULT_MOD .. "H", ionframe_resize_horiz),
+    --kpress(DEFAULT_MOD .. "V", ionframe_resize_vert),
+    kpress(DEFAULT_MOD .. "M", ionframe_begin_resize),
     
     submap(DEFAULT_MOD .. "K"){
         kpress("X", ionframe_close),
@@ -41,10 +42,22 @@ ionframe_bindings{
 
 
 ionframe_moveres_bindings{
+    --[[
     kpress("AnyModifier+Escape", ionframe_cancel_resize),
     kpress("AnyModifier+Return", ionframe_end_resize),
     kpress("AnyModifier+V", ionframe_grow),
     kpress("AnyModifier+H", ionframe_grow),
     kpress("AnyModifier+S", ionframe_shrink),
+    ]]
+    kpress("AnyModifier+Escape", ionframe_cancel_resize),
+    kpress("AnyModifier+Return", ionframe_end_resize),
+    kpress("AnyModifier+Up", ionframe_grow_vert),
+    kpress("AnyModifier+Down", ionframe_shrink_vert),
+    kpress("AnyModifier+Right", ionframe_grow_horiz),
+    kpress("AnyModifier+Left", ionframe_shrink_horiz),
+    kpress("AnyModifier+P", ionframe_grow_vert),
+    kpress("AnyModifier+N", ionframe_shrink_vert),
+    kpress("AnyModifier+F", ionframe_grow_horiz),
+    kpress("AnyModifier+B", ionframe_shrink_horiz),
 }
 

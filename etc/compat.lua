@@ -5,7 +5,47 @@
 -- of configuration files.
 -- 
 
+function obsolete(name, fn)
+    function obswrap(...)
+        io.stderr:write("Warning: function " .. name .. " is obsolete.\n")
+        fn(unpack(arg))
+    end
+    _G[name]=obswrap
+end
+    
 -- Added 2003-04-22
-floatframe_raise=region_raise
-floatframe_lower=region_lower
+obsolete("floatframe_raise", region_raise)
+obsolete("floatframe_lower", region_lower)
 
+-- Added 2003-05-02
+local vertical_resize=true
+
+obsolete("ionframe_resize_vert", function(frame)
+                                     vertical_resize=true
+                                     ionframe_begin_resize(frame)
+                                 end
+        )
+
+obsolete("ionframe_resize_horiz", function(frame)
+                                      vertical_resize=false
+                                      ionframe_begin_resize(frame)
+                                  end
+        )
+
+obsolete("ionframe_grow", function(frame)
+                              if vertical_resize then
+                                  ionframe_grow_vert(frame)
+                              else
+                                  ionframe_grow_horiz(frame)
+                              end
+                          end
+        )
+
+obsolete("ionframe_shrink", function(frame)
+                                if vertical_resize then
+                                    ionframe_shrink_vert(frame)
+                                else
+                                    ionframe_shrink_horiz(frame)
+                                end
+                            end
+        )
