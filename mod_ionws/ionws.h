@@ -26,7 +26,6 @@ DECLCLASS(WIonWS){
     WGenWS genws;
     WSplit *split_tree;
     WRegion *managed_list;
-    ExtlTab managed_splits;
     WRegionSimpleCreateFn *create_frame_fn;
 };
 

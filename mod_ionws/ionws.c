@@ -49,8 +49,7 @@ bool ionws_fitrep(WIonWS *ws, WWindow *par, const WFitParams *fp)
         if(!region_same_rootwin((WRegion*)ws, (WRegion*)par))
             return FALSE;
     
-        region_detach_parent((WRegion*)ws);
-        region_attach_parent((WRegion*)ws, (WRegion*)par);
+        genws_do_reparent(&(ws->genws), par, fp);
     
         FOR_ALL_MANAGED_ON_LIST_W_NEXT(ws->managed_list, sub, next){
             WFitParams subfp;
@@ -80,7 +79,7 @@ void ionws_map(WIonWS *ws)
 {
     WRegion *reg;
 
-    REGION_MARK_MAPPED(ws);
+    genws_do_map(&(ws->genws));
     
     FOR_ALL_MANAGED_ON_LIST(ws->managed_list, reg){
         region_map(reg);
@@ -92,7 +91,7 @@ void ionws_unmap(WIonWS *ws)
 {
     WRegion *reg;
     
-    REGION_MARK_UNMAPPED(ws);
+    genws_do_unmap(&(ws->genws));
     
     FOR_ALL_MANAGED_ON_LIST(ws->managed_list, reg){
         region_unmap(reg);
@@ -105,10 +104,7 @@ void ionws_do_set_focus(WIonWS *ws, bool warp)
     WRegion *sub=ionws_current(ws);
     
     if(sub==NULL){
-        WRegion *r=REGION_PARENT(ws);
-        warn("Trying to focus an empty ionws.");
-        if(r!=NULL)
-            xwindow_do_set_focus(region_xwindow(r));
+        genws_fallback_focus(&(ws->genws), warp);
         return;
     }
 
@@ -139,8 +135,8 @@ void ionws_managed_add_default(WIonWS *ws, WRegion *reg)
     
     if(region_may_control_focus((WRegion*)ws)){
         WRegion *curr=ionws_current(ws);
-        if(!REGION_IS_ACTIVE(curr))
-            region_warp(curr);
+        if(curr==NULL)
+            region_warp(reg);
     }
 }
 
@@ -180,19 +176,14 @@ bool ionws_init(WIonWS *ws, WWindow *parent, const WFitParams *fp,
         create_frame_fn=(WRegionSimpleCreateFn*)create_ionframe;
     
     ws->create_frame_fn=create_frame_fn;
-    ws->managed_splits=extl_create_table();
-    
-    if(ws->managed_splits==extl_table_none())
-        return FALSE;
-    
     ws->split_tree=NULL;
 
-    genws_init(&(ws->genws), parent, fp);
+    if(!genws_init(&(ws->genws), parent, fp))
+        return FALSE;
     
     if(ci){
         if(create_initial_frame(ws, parent, fp)==NULL){
             genws_deinit(&(ws->genws));
-            extl_unref_table(ws->managed_splits);
             return FALSE;
         }
     }
@@ -222,8 +213,6 @@ void ionws_deinit(WIonWS *ws)
         ionws_managed_remove(ws, ws->managed_list);
 
     genws_deinit(&(ws->genws));
-    
-    extl_unref_table(ws->managed_splits);
 }
 
 

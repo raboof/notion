@@ -62,10 +62,8 @@ bool floatws_fitrep(WFloatWS *ws, WWindow *par, const WFitParams *fp)
 
     if(!region_same_rootwin((WRegion*)ws, (WRegion*)par))
         return FALSE;
-    
-    region_detach_parent((WRegion*)ws);
-    XReparentWindow(ioncore_g.dpy, ws->dummywin, par->win, fp->g.x, fp->g.h);
-    region_attach_parent((WRegion*)ws, (WRegion*)par);
+
+    genws_do_reparent(&(ws->genws), par, fp);
     
     xdiff=fp->g.x-REGION_GEOM(ws).x;
     ydiff=fp->g.y-REGION_GEOM(ws).y;
@@ -114,10 +112,9 @@ static void floatws_map(WFloatWS *ws)
 {
     WRegion *reg;
 
+    genws_do_map(&(ws->genws));
+    
     move_sticky(ws);
-
-    REGION_MARK_MAPPED(ws);
-    XMapWindow(ioncore_g.dpy, ws->dummywin);
 
     FOR_ALL_MANAGED_ON_LIST(ws->managed_list, reg){
         region_map(reg);
@@ -128,10 +125,9 @@ static void floatws_map(WFloatWS *ws)
 static void floatws_unmap(WFloatWS *ws)
 {
     WRegion *reg;
-    
-    REGION_MARK_UNMAPPED(ws);
-    XUnmapWindow(ioncore_g.dpy, ws->dummywin);
-    
+
+    genws_do_unmap(&(ws->genws));
+
     FOR_ALL_MANAGED_ON_LIST(ws->managed_list, reg){
         region_unmap(reg);
     }
@@ -172,9 +168,7 @@ static void floatws_do_set_focus(WFloatWS *ws, bool warp)
         r=floatws_get_focus_to(ws);
 
     if(r==NULL){
-        xwindow_do_set_focus(ws->dummywin);
-        if(warp)
-            region_do_warp((WRegion*)ws);
+        genws_fallback_focus(&(ws->genws), warp);
         return;
     }
     
@@ -222,12 +216,6 @@ static void floatws_managed_activated(WFloatWS *ws, WRegion *reg)
 }
 
 
-static Window floatws_xwindow(const WFloatWS *ws)
-{
-    return ws->dummywin;
-}
-
-
 /*}}}*/
 
 
@@ -236,26 +224,11 @@ static Window floatws_xwindow(const WFloatWS *ws)
 
 static bool floatws_init(WFloatWS *ws, WWindow *parent, const WFitParams *fp)
 {
-    if(!OBJ_IS(parent, WWindow))
-        return FALSE;
-
-    ws->dummywin=XCreateWindow(ioncore_g.dpy, parent->win,
-                                fp->g.x, fp->g.y, 1, 1, 0,
-                                CopyFromParent, InputOnly,
-                                CopyFromParent, 0, NULL);
-    if(ws->dummywin==None)
-        return FALSE;
-
-    XSelectInput(ioncore_g.dpy, ws->dummywin,
-                 FocusChangeMask|KeyPressMask|KeyReleaseMask|
-                 ButtonPressMask|ButtonReleaseMask);
-    XSaveContext(ioncore_g.dpy, ws->dummywin, ioncore_g.win_context,
-                 (XPointer)ws);
-    
     ws->managed_list=NULL;
     ws->current_managed=NULL;
 
-    genws_init(&(ws->genws), parent, fp);
+    if(!genws_init(&(ws->genws), parent, fp))
+        return FALSE;
 
     region_add_bindmap((WRegion*)ws, mod_floatws_floatws_bindmap);
     
@@ -275,9 +248,6 @@ void floatws_deinit(WFloatWS *ws)
         destroy_obj((Obj*)(ws->managed_list));
 
     genws_deinit(&(ws->genws));
-
-    XDeleteContext(ioncore_g.dpy, ws->dummywin, ioncore_g.win_context);
-    XDestroyWindow(ioncore_g.dpy, ws->dummywin);
 }
 
 
@@ -803,9 +773,6 @@ static DynFunTab floatws_dynfuntab[]={
     
     {(DynFun*)region_get_configuration, 
      (DynFun*)floatws_get_configuration},
-
-    {(DynFun*)region_xwindow,
-     (DynFun*)floatws_xwindow},
 
     {(DynFun*)region_rqclose,
      (DynFun*)floatws_rqclose},

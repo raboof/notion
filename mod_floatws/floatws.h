@@ -25,7 +25,6 @@ INTRCLASS(WFloatWS);
 
 DECLCLASS(WFloatWS){
     WGenWS genws;
-    Window dummywin;
     WRegion *managed_list;
     WRegion *current_managed;
 };

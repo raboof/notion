@@ -19,9 +19,16 @@
 
 DECLCLASS(WGenWS){
     WRegion reg;
+    Window dummywin;
 };
 
-extern void genws_init(WGenWS *ws, WWindow *par, const WFitParams *fp);
+extern bool genws_init(WGenWS *ws, WWindow *par, const WFitParams *fp);
 extern void genws_deinit(WGenWS *ws);
+
+extern void genws_do_reparent(WGenWS *ws, WWindow *par, const WFitParams *fp);
+extern void genws_fallback_focus(WGenWS *ws, bool warp);
+extern Window genws_xwindow(const WGenWS *ws);
+extern void genws_do_map(WGenWS *ws);
+extern void genws_do_unmap(WGenWS *ws);
 
 #endif /* ION_IONCORE_GENWS_H */
