@@ -49,6 +49,7 @@ void region_init(WRegion *reg, WWindow *par, const WFitParams *fp)
     reg->active_sub=NULL;
     
     reg->ni.name=NULL;
+    reg->ni.inst_off=0;
     reg->ni.namespaceinfo=NULL;
     
     reg->manager=NULL;

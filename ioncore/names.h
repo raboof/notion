@@ -20,7 +20,6 @@
 
 typedef struct{
     struct rb_node *rb;
-    struct rb_node *rb_unnamed;
     WRegion *list;
     bool initialised;
 } WNamespace;

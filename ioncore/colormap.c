@@ -226,12 +226,6 @@ static void handle_all_cmaps(const XColormapEvent *ev)
         if(cwin!=NULL)
             handle_cwin_cmap(cwin, ev);
     }
-
-    rb_traverse(node, ioncore_clientwin_ns.rb_unnamed){
-        WClientWin *cwin=(WClientWin*)rb_val(node);
-        if(cwin!=NULL)
-            handle_cwin_cmap(cwin, ev);
-    }
 }
 
 

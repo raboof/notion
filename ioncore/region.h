@@ -53,6 +53,13 @@ DECLSTRUCT(WSubmapState){
     WSubmapState *next;
 };
 
+INTRSTRUCT(WRegionNameInfo);
+DECLSTRUCT(WRegionNameInfo){
+    char *name;
+    int inst_off;
+    void *namespaceinfo;
+};
+
 DECLCLASS(WRegion){
     Obj obj;
     
@@ -68,10 +75,7 @@ DECLCLASS(WRegion){
     
     WRegion *active_sub;
     
-    struct{
-        char *name;
-        void *namespaceinfo;
-    } ni;
+    WRegionNameInfo ni;
     
     WRegion *manager;
     WRegion *mgr_next, *mgr_prev;
