@@ -10,8 +10,7 @@ dopath("cfg_menus")
 defmenu("mainmenu", {
     submenu("Programs",      "appmenu"),
     menuentry("Lock screen", "ioncore.exec_on(_, 'xlock')"),
-    menuentry("Help",        "mod_query.query_man(_)"),
-    menuentry("About Ion",   "mod_query.show_about_ion(_)"),
+    menuentry("Help",        "ioncore.exec_on(_, ':man pwm3')"),
     submenu("Workspaces",    "wsmenu"),
     menuentry("New",         "ioncore.create_ws(_)"),
     submenu("Styles",        "stylemenu"),

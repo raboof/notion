@@ -11,6 +11,7 @@ dopath("cfg_bindings")
 
 defbindings("WMPlex", {
     kpress(MOD2.."F1", nil),
+    kpress(MOD1.."F1", "ioncore.exec_on(_, ':man pwm3')"),
     kpress(MOD2.."F3", nil),
     kpress(MOD1.."F3", nil),
     kpress(MOD2.."F4", nil),
