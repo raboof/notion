@@ -546,7 +546,6 @@ static bool create_initial_ws(WScreen *scr)
         return FALSE;
     }
     
-    region_set_name(reg, TR("main"));
     return TRUE;
 }
 

@@ -56,6 +56,16 @@ end
 
 
 --DOC
+-- Insert all positive integer entries from t2 into t1.
+function table.icat(t1, t2)
+    for _, v in ipairs(t2) do
+        table.insert(t1, v)
+    end
+    return t1
+end
+
+
+--DOC
 -- Export a list of functions from \var{lib} into global namespace.
 function export(lib, ...)
     for k, v in arg do

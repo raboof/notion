@@ -36,11 +36,14 @@ defbindings("WFloatFrame", {
     
     bdoc("Move the frame."),
     mdrag("Button1@tab", "WFrame.p_move(_)"),
-    -- in ion-bindings.lua now:
-    --mdrag(MOD1.."Button1", "WFrame.p_move(_)"),
-    
-    bdoc("Show frame context menu."),
-    kpress(MOD1.."M", "mod_menu.menu(_, _sub, 'ctxmenu-floatframe')"),
-    mpress("Button3@tab", "mod_menu.pmenu(_, _sub, 'ctxmenu-floatframe')"),
 })
+
+
+-- WFloatFrame context menu extras
+
+if mod_menu then
+    defctxmenu("WFloatFrame", {
+        menuentry("(Un)stick",      "WFloatFrame.toggle_sticky(_)"),
+    })
+end
 

@@ -36,19 +36,39 @@ function mod_menu.defmenu(name, tab)
 end
 
 --DOC
--- If \var{menu_or_name} is a string, returns a menu defined
--- with \fnref{defmenu}, else return \var{menu_or_name}.
-function mod_menu.getmenu(menu_or_name)
-    if type(menu_or_name)=="string" then
-        if type(menus[menu_or_name])=="table" then
-            return menus[menu_or_name]
-        elseif type(menus[menu_or_name])=="function" then
-            return menus[menu_or_name]()
+-- Returns a menu defined with \fnref{mod_menu.defmenu}.
+function mod_menu.getmenu(name)
+    return menus[menu]
+end
+
+--DOC
+-- Define context menu for context \var{ctx}, \var{tab} being a table 
+-- of menu entries.
+function mod_menu.defctxmenu(name, tab)
+    menus["ctxmenu-"..name]=tab
+end
+
+--DOC
+-- Returns a context menu defined with \fnref{mod_menu.defctxmenu}.
+function mod_menu.getctxmenu(name)
+    return menus["ctxmenu-"..name]
+end
+
+
+function mod_menu.evalmenu(ms, menu, args)
+    if type(menu)=="string" then
+        return mod_menu.evalmenu({}, ms[menu], args)
+    elseif type(menu)=="function" then
+        if args then
+            return menu(unpack(args))
+        else
+            return menu()
         end
-    else
-        return menu_or_name
+    elseif type(menu)=="table" then
+        return menu
     end
 end
+
 
 --DOC
 -- Use this function to define normal menu entries. The string \var{name} 
@@ -69,8 +89,8 @@ end
 function mod_menu.submenu(name, sub_or_name)
     return {
         name=ioncore.gettext(name),
-        submenu_fn=function() 
-                       return mod_menu.getmenu(sub_or_name) 
+        submenu_fn=function()
+                       return mod_menu.evalmenu(menus, sub_or_name)
                    end
     }
 end
@@ -81,7 +101,7 @@ end
 
 -- Menu commands {{{
 
-local function do_menu(reg, sub, menu_or_name, fn, check)
+local function menu_(reg, sub, menu_or_name, fn, check)
     if check then
         -- Check that no other menus are open in reg.
         local l=reg:llist(2)
@@ -94,11 +114,17 @@ local function do_menu(reg, sub, menu_or_name, fn, check)
 
     local function wrapper(entry)
         if entry.func then
-            entry.func(reg, sub)
+            if entry._reg then
+                entry.func(entry._reg, entry._sub)
+            else
+                entry.func(reg, sub)
+            end
         end
     end
     
-    return fn(reg, wrapper, mod_menu.getmenu(menu_or_name))
+    menu=mod_menu.evalmenu(menus, menu_or_name, {reg, sub})
+    
+    return fn(reg, wrapper, menu)
 end
 
 
@@ -112,7 +138,7 @@ end
 -- so that the menu handler will get the same parameters as the
 -- binding handler.
 function mod_menu.menu(mplex, sub, menu_or_name) 
-    return do_menu(mplex, sub, menu_or_name, mod_menu.do_menu, true)
+    return menu_(mplex, sub, menu_or_name, mod_menu.do_menu, true)
 end
 
 --DOC
@@ -122,7 +148,7 @@ function mod_menu.bigmenu(mplex, sub, menu_or_name)
     local function menu_bigmenu(m, s, menu)
         return mod_menu.do_menu(m, s, menu, true)
     end
-    return do_menu(mplex, sub, menu_or_name, menu_bigmenu, true)
+    return menu_(mplex, sub, menu_or_name, menu_bigmenu, true)
 end
 
 --DOC
@@ -130,7 +156,7 @@ end
 -- be called from a mouse press handler. The parameters are
 -- similar to thos of \fnref{mod_menu.menu}.
 function mod_menu.pmenu(win, sub, menu_or_name) 
-    return do_menu(win, sub, menu_or_name, mod_menu.do_pmenu)
+    return menu_(win, sub, menu_or_name, mod_menu.do_pmenu)
 end
 
 -- }}}
@@ -157,6 +183,9 @@ function menus.workspacelist()
     return makelist(ioncore.region_list("WGenWS"))
 end
 
+function menus.ctxmenu()
+    
+end
 
 -- }}}
 
@@ -269,8 +298,79 @@ end
 
 -- }}}
 
+
+-- Context menu {{{
+
+
+local function classes(reg)
+    local function classes_(t)
+        if t.__parentclass then
+            classes_(t.__parentclass)
+        end
+        coroutine.yield(t.__typename)
+    end
+    return coroutine.wrap(function() classes_(reg) end)
+end
+
+
+local function get_ctxmenu(reg, sub, is_par)    
+    local m={}
+    
+    local function cp(m2)
+        m3={}
+        for k, v in m2 do
+            v2=table.copy(v)
+            if v2.submenu then
+                sm=cp(v2.submenu)
+                if is_par then
+                    local ofn=sm.submenu_fn
+                    sm.submenu_fn=function() return cp(ofn()) end
+                end
+                -- TODO: koko zydeemi barffaa jos ei table.
+                v2.submenu=sm
+            end
+            v2._reg=reg
+            v2._sub=sub
+            m3[k]=v2
+        end
+        return m3
+    end
+    
+    for s in classes(reg) do
+        local m2=mod_menu.evalmenu(menus, "ctxmenu-"..s)
+        if m2 then
+            if is_par then
+                m=table.icat(m, cp(m2))
+            else
+                m=table.icat(m, m2)
+            end
+        end
+    end
+    return m
+end
+
+function menus.ctxmenu(reg, sub)
+    local m=get_ctxmenu(reg, sub, false);
+    
+    sub=reg
+    reg=reg:manager()
+    
+    while reg do
+        local mm = get_ctxmenu(reg, sub, true)
+        if table.getn(mm)>0 then
+            table.insert(m, mod_menu.submenu(reg:name(), mm))
+        end
+        sub=reg
+        reg=reg:manager()
+    end
+    
+    return m
+end
+
+-- }}}
 export(mod_menu,
        "defmenu",
+       "defctxmenu",
        "menuentry",
        "submenu")
 

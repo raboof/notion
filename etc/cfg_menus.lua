@@ -33,7 +33,7 @@ defmenu("sessionmenu", {
 
 
 -- Context menu (frame/client window actions)
-defmenu("ctxmenu", {
+defctxmenu("WFrame", {
     menuentry("Close",          "WRegion.rqclose_propagate(_, _sub)"),
     menuentry("Kill",           "WClientWin.kill(_sub)",
                                 "_sub:WClientWin"),
@@ -44,17 +44,3 @@ defmenu("ctxmenu", {
     menuentry("Window info",    "mod_query.show_clientwin(_, _sub)",
                                 "_sub:WClientWin"),
 })
-
-
--- Context menu for floating frames -- add sticky toggle.
-defmenu("ctxmenu-floatframe", {
-    menuentry("Close",          "WRegion.rqclose_propagate(_, _sub)"),
-    menuentry("Kill",           "WClientWin.kill(_sub)",
-                                "_sub:WClientWin"),
-    menuentry("(Un)tag",        "WRegion.toggle_tag(_sub)",
-                                "_sub:non-nil"),
-    menuentry("Attach tagged",  "WFrame.attach_tagged(_)"),
-    menuentry("Clear tags",     "ioncore.clear_tags()"),
-    menuentry("(Un)stick",      "WFloatFrame.toggle_sticky(_)"),
-})
-

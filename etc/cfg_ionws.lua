@@ -31,3 +31,17 @@ defbindings("WIonWS", {
 
 --defbindings("WIonFrame", {
 --})
+
+-- WFloatFrame context menu extras
+
+if mod_menu then
+    defctxmenu("WIonWS", {
+        menuentry("Destroy frame", 
+                  "WIonWS.unsplit_at(_, _sub)"),
+        menuentry("Split vertically", 
+                  "WIonWS.split_at(_, _sub, 'bottom', true)"),
+        menuentry("Split horizontally", 
+                  "WIonWS.split_at(_, _sub, 'right', true)"),
+    })
+end
+
