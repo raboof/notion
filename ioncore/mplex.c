@@ -608,7 +608,7 @@ bool mplex_l2_hide(WMPlex *mplex, WRegion *reg)
     WRegion *reg2, *toact=NULL;
     bool mcf=region_may_control_focus((WRegion*)mplex);
     
-    if(REGION_MANAGER(reg)!=(WRegion*)mplex)
+    if(reg==NULL || REGION_MANAGER(reg)!=(WRegion*)mplex)
         return FALSE;
     
     if(l2_is_hidden(reg))
@@ -646,7 +646,7 @@ bool mplex_l2_show(WMPlex *mplex, WRegion *reg)
     WRegion *reg2, *toact=NULL;
     bool mcf=region_may_control_focus((WRegion*)mplex);
 
-    if(REGION_MANAGER(reg)!=(WRegion*)mplex)
+    if(reg==NULL || REGION_MANAGER(reg)!=(WRegion*)mplex)
         return FALSE;
     
     if(!l2_is_hidden(reg))
