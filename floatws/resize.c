@@ -85,31 +85,26 @@ void floatframe_begin_resize(WFloatFrame *frame)
 
 
 /*EXTL_DOC
- * Shrink or grow \var{frame} one step horizontally and/or vertically
- * (must be in move/resize mode):
- *
- * \begin{tabular}{rl}
- * \hline
- * \var{horizmul}/\var{vertmul} & effect \\\hline
- * -1 & Shrink horizontally/vertically \\
- * 0 & No effect \\
- * 1 & Grow horizontally/vertically \\
- * \end{tabular}
+ * Shrink or grow \var{frame} one or more steps in each direction.
+ * Negative values for the parameters \var{left}, \var{right}, \var{top}
+ * and \var{bottom} attempt to shrink the frame by altering the corresponding
+ * border and positive values grow.
  */
 EXTL_EXPORT
-void floatframe_do_resize(WFloatFrame *frame, int horizmul, int vertmul)
+void floatframe_do_resize(WFloatFrame *frame, int left, int right,
+						  int top, int bottom)
 {
 	int wu=0, hu=0;
 
+	/* TODO: should use WEAK_ stuff? */
+	
 	if(!may_resize((WRegion*)frame))
 		return;
 	
 	genframe_resize_units((WGenFrame*)frame, &wu, &hu);
 	
-	wu=wu*horizmul;
-	hu=hu*vertmul;
-
-	delta_resize((WRegion*)frame, 0, wu, 0, hu, NULL);
+	delta_resize((WRegion*)frame, -left*wu, right*wu, -top*hu, bottom*hu,
+				 NULL);
 	set_resize_timer((WRegion*)frame, wglobal.resize_delay);
 }
 
