@@ -23,6 +23,7 @@
 
 #include "floatws.h"
 #include "floatframe.h"
+#include "placement.h"
 #include "main.h"
 
 
@@ -238,8 +239,8 @@ static bool floatws_add_clientwin(WFloatWS *ws, WClientWin *cwin,
 {
 	WRegion *target=NULL;
 	WWindow *par;
-	bool geomset=FALSE;
 	bool newreg=FALSE;
+	bool respectpos=FALSE;
 	bool b;
 
 	par=FIND_PARENT1(ws, WWindow);
@@ -254,6 +255,22 @@ static bool floatws_add_clientwin(WFloatWS *ws, WClientWin *cwin,
 		WRectangle fgeom=initial_to_floatframe_geom(GRDATA_OF(ws),
 													REGION_GEOM(cwin),
 													attr->win_gravity);
+		if(cwin->transient_for!=None)
+			respectpos=TRUE;
+		
+		if(respectpos){
+			if((attr->x+attr->width<=REGION_GEOM(ws).x) ||
+			   (attr->y+attr->height<=REGION_GEOM(ws).y) ||
+			   (attr->x<=REGION_GEOM(ws).x+REGION_GEOM(ws).w) ||
+			   (attr->y<=REGION_GEOM(ws).y+REGION_GEOM(ws).h))
+				respectpos=FALSE;
+		}
+
+		if(cwin->size_hints.flags&USPosition)
+			respectpos=TRUE;
+			   
+		if(!respectpos)
+			floatws_calc_placement(ws, &fgeom);
 		
 		target=(WRegion*)create_floatframe(par, fgeom, 0);
 	

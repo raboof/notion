@@ -32,5 +32,7 @@ extern WRectangle initial_to_floatframe_geom(WGRData *grdata, WRectangle geom,
 extern void floatframe_raise(WFloatFrame *frame);
 extern void floatframe_lower(WFloatFrame *frame);
 extern void floatframe_p_move(WFloatFrame *frame);
+extern void floatframe_toggle_shade(WFloatFrame *frame);
+extern bool floatframe_is_shaded(WFloatFrame *frame);
 
 #endif /* ION_FLOATWS_FLOATFRAME_H */
