@@ -45,7 +45,7 @@ WBindmap floatframe_moveres_bindmap=BINDMAP_INIT;
 static StringIntMap frame_areas[]={
 	{"border", 		WGENFRAME_AREA_BORDER},
 	{"tab", 		WGENFRAME_AREA_TAB},
-	{"empty_tab", 	WGENFRAME_AREA_EMPTY_TAB},
+	{"empty_tab", 	WGENFRAME_AREA_TAB},
 	{"client", 		WGENFRAME_AREA_CLIENT},
 	END_STRINGINTMAP
 };
