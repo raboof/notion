@@ -8,7 +8,8 @@
 ##
 
 #DIST: PREFIX=/usr/local
-PREFIX=/usr/local/ion-devel
+PREFIX=/usr/local
+#/ion-devel
 
 # Unless you are creating a package conforming to some OS's standards, you
 # probably do not want to modify the following directories:
@@ -20,9 +21,9 @@ ETCDIR=$(PREFIX)/etc/ion
 # Some .lua files and ion-* shell scripts
 SHAREDIR=$(PREFIX)/share/ion
 # Manual pages
-MANDIR=$(PREFIX)/man
+MANDIR=$(PREFIX)/share/man
 # Some documents
-DOCDIR=$(PREFIX)/doc/ion
+DOCDIR=$(PREFIX)/share/doc/ion
 # Nothing at the moment
 INCDIR=$(PREFIX)/include/ion
 # Nothing at the moment

@@ -20,9 +20,9 @@ ETCDIR=@sysconfdir@/@PACKAGE_TARNAME@
 # Some .lua files and ion-* shell scripts
 SHAREDIR=@datadir@/@PACKAGE_TARNAME@
 # Manual pages
-MANDIR=@mandir@
+MANDIR=@datadir@/man
 # Some documents
-DOCDIR=${prefix}/doc/@PACKAGE_TARNAME@
+DOCDIR=@datadir@/doc/@PACKAGE_TARNAME@
 # Nothing at the moment
 INCDIR=@includedir@
 # Nothing at the moment
