@@ -12,6 +12,16 @@
 
 local stylecache={}
 
+local function lookup_substyle(list, pattern)
+    for k, v in ipairs(list) do
+        if type(v)=="table" then
+            if v.substyle_pattern and v.substyle_pattern==pattern then
+                return v
+            end
+        end
+    end
+end
+
 local function base_on(name, list)
     if not stylecache[list.based_on] then
         warn("Attempt to base style "..name.." on style "..list.based_on
@@ -21,7 +31,13 @@ local function base_on(name, list)
 
     for k, v in stylecache[list.based_on] do
         if type(k)=="number" then
-            table.insert(list, v)
+            if type(v)=="table" then
+                if v.substyle_pattern then
+                    if not lookup_substyle(list, v.substyle_pattern) then
+                        table.insert(list, v)
+                    end
+                end
+            end
         elseif not list[k] then
             list[k]=v
         end
