@@ -42,36 +42,27 @@ ionframe_bindings{
 }
 
 
--- Some wrapper functions for resize mode bindings
-
-local function ionframe_grow_vert(frame)
-    ionframe_do_resize(frame, 0, 1)
-end
-
-local function ionframe_grow_horiz(frame)
-    ionframe_do_resize(frame, 1, 0)
-end
-
-local function ionframe_shrink_vert(frame)
-    ionframe_do_resize(frame, 0, -1)
-end
-
-local function ionframe_shrink_horiz(frame)
-    ionframe_do_resize(frame, -1, 0)
-end
-
 -- Frame resize mode bindings
 
 ionframe_moveres_bindings{
     kpress("AnyModifier+Escape", ionframe_cancel_resize),
     kpress("AnyModifier+Return", ionframe_end_resize),
-    kpress("AnyModifier+Down", ionframe_grow_vert),
-    kpress("AnyModifier+Up", ionframe_shrink_vert),
-    kpress("AnyModifier+Right", ionframe_grow_horiz),
-    kpress("AnyModifier+Left", ionframe_shrink_horiz),
-    kpress("AnyModifier+N", ionframe_grow_vert),
-    kpress("AnyModifier+P", ionframe_shrink_vert),
-    kpress("AnyModifier+F", ionframe_grow_horiz),
-    kpress("AnyModifier+B", ionframe_shrink_horiz),
-}
+    
+    kpress("Left", function(f) ionframe_do_resize(f, 1, 0, 0, 0) end),
+    kpress("Right",function(f) ionframe_do_resize(f, 0, 1, 0, 0) end),
+    kpress("Up",   function(f) ionframe_do_resize(f, 0, 0, 1, 0) end),
+    kpress("Down", function(f) ionframe_do_resize(f, 0, 0, 0, 1) end),
+    kpress("F",    function(f) ionframe_do_resize(f, 1, 0, 0, 0) end),
+    kpress("B",	   function(f) ionframe_do_resize(f, 0, 1, 0, 0) end),
+    kpress("P",    function(f) ionframe_do_resize(f, 0, 0, 1, 0) end),
+    kpress("N",    function(f) ionframe_do_resize(f, 0, 0, 0, 1) end),
 
+    kpress("Shift+Left", function(f) ionframe_do_resize(f,-1, 0, 0, 0) end),
+    kpress("Shift+Right",function(f) ionframe_do_resize(f, 0,-1, 0, 0) end),
+    kpress("Shift+Up",   function(f) ionframe_do_resize(f, 0, 0,-1, 0) end),
+    kpress("Shift+Down", function(f) ionframe_do_resize(f, 0, 0, 0,-1) end),
+    kpress("Shift+F",    function(f) ionframe_do_resize(f,-1, 0, 0, 0) end),
+    kpress("Shift+B",    function(f) ionframe_do_resize(f, 0,-1, 0, 0) end),
+    kpress("Shift+P",    function(f) ionframe_do_resize(f, 0, 0,-1, 0) end),
+    kpress("Shift+N",    function(f) ionframe_do_resize(f, 0, 0, 0,-1) end),
+}

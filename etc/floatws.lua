@@ -40,60 +40,37 @@ floatframe_bindings{
     mdrag(DEFAULT_MOD .. "Button3", genframe_p_resize),
 }
 
--- Some wrapper functions for move/resize mode bindings
-
-local function floatframe_grow_vert(frame)
-    floatframe_do_resize(frame, 0, 1)
-end
-
-local function floatframe_grow_horiz(frame)
-    floatframe_do_resize(frame, 1, 0)
-end
-
-local function floatframe_shrink_vert(frame)
-    floatframe_do_resize(frame, 0, -1)
-end
-
-local function floatframe_shrink_horiz(frame)
-    floatframe_do_resize(frame, -1, 0)
-end
-
-local function floatframe_move_down(frame)
-    floatframe_do_move(frame, 0, 1)
-end
-
-local function floatframe_move_right(frame)
-    floatframe_do_move(frame, 1, 0)
-end
-
-local function floatframe_move_up(frame)
-    floatframe_do_move(frame, 0, -1)
-end
-
-local function floatframe_move_left(frame)
-    floatframe_do_move(frame, -1, 0)
-end
-
 -- Frame move/resize mode bindings
 
 floatframe_moveres_bindings{
     kpress("AnyModifier+Escape", floatframe_cancel_resize),
     kpress("AnyModifier+Return", floatframe_end_resize),
-    kpress(DEFAULT_MOD .. "Down", floatframe_grow_vert),
-    kpress(DEFAULT_MOD .. "Up", floatframe_shrink_vert),
-    kpress(DEFAULT_MOD .. "Right", floatframe_grow_horiz),
-    kpress(DEFAULT_MOD .. "Left", floatframe_shrink_horiz),
-    kpress(DEFAULT_MOD .. "N", floatframe_grow_vert),
-    kpress(DEFAULT_MOD .. "P", floatframe_shrink_vert),
-    kpress(DEFAULT_MOD .. "F", floatframe_grow_horiz),
-    kpress(DEFAULT_MOD .. "B", floatframe_shrink_horiz),
-    kpress("Up", floatframe_move_up),
-    kpress("Down", floatframe_move_down),
-    kpress("Right", floatframe_move_right),
-    kpress("Left", floatframe_move_left),
-    kpress("P", floatframe_move_up),
-    kpress("N", floatframe_move_down),
-    kpress("F", floatframe_move_right),
-    kpress("B", floatframe_move_left),
+    
+    kpress("Left", function(f) floatframe_do_resize(f, 1, 0, 0, 0) end),
+    kpress("Right",function(f) floatframe_do_resize(f, 0, 1, 0, 0) end),
+    kpress("Up",   function(f) floatframe_do_resize(f, 0, 0, 1, 0) end),
+    kpress("Down", function(f) floatframe_do_resize(f, 0, 0, 0, 1) end),
+    kpress("F",    function(f) floatframe_do_resize(f, 1, 0, 0, 0) end),
+    kpress("B",	   function(f) floatframe_do_resize(f, 0, 1, 0, 0) end),
+    kpress("P",    function(f) floatframe_do_resize(f, 0, 0, 1, 0) end),
+    kpress("N",    function(f) floatframe_do_resize(f, 0, 0, 0, 1) end),
+
+    kpress("Shift+Left", function(f) floatframe_do_resize(f,-1, 0, 0, 0) end),
+    kpress("Shift+Right",function(f) floatframe_do_resize(f, 0,-1, 0, 0) end),
+    kpress("Shift+Up",   function(f) floatframe_do_resize(f, 0, 0,-1, 0) end),
+    kpress("Shift+Down", function(f) floatframe_do_resize(f, 0, 0, 0,-1) end),
+    kpress("Shift+F",    function(f) floatframe_do_resize(f,-1, 0, 0, 0) end),
+    kpress("Shift+B",    function(f) floatframe_do_resize(f, 0,-1, 0, 0) end),
+    kpress("Shift+P",    function(f) floatframe_do_resize(f, 0, 0,-1, 0) end),
+    kpress("Shift+N",    function(f) floatframe_do_resize(f, 0, 0, 0,-1) end),
+
+    kpress(DEFAULT_MOD.."Left", function(f) floatframe_do_move(f,-1, 0) end),
+    kpress(DEFAULT_MOD.."Right",function(f) floatframe_do_move(f, 1, 0) end),
+    kpress(DEFAULT_MOD.."Up", 	function(f) floatframe_do_move(f, 0,-1) end),
+    kpress(DEFAULT_MOD.."Down", function(f) floatframe_do_move(f, 0, 1) end),
+    kpress(DEFAULT_MOD.."F",    function(f) floatframe_do_move(f,-1, 0) end),
+    kpress(DEFAULT_MOD.."B",    function(f) floatframe_do_move(f, 1, 0) end),
+    kpress(DEFAULT_MOD.."P", 	function(f) floatframe_do_move(f, 0,-1) end),
+    kpress(DEFAULT_MOD.."N",    function(f) floatframe_do_move(f, 0, 1) end),
 }
 
