@@ -479,7 +479,7 @@ static void handle_enter_window(XEvent *ev)
 	 */
 	if(WTHING_IS(reg, WClientWin)){
 		WRegion *par=FIND_PARENT1(reg, WRegion);
-		if(!WTHING_IS(par, WScreen)){
+		if(par!=NULL && !WTHING_IS(par, WScreen)){
 			if(REGION_IS_ACTIVE(par))
 				return;
 			reg=par;
