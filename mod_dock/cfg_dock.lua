@@ -5,7 +5,7 @@
 -- Create a dock
 mod_dock.create{
     -- Dock mode: embedded|floating
-    mode="embedded",
+    mode="floating",
     -- The screen to create the dock on
     screen=0,
     -- Corner or side of the screen to place the dock on.
