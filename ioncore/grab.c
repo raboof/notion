@@ -211,7 +211,7 @@ bool ioncore_handle_grabs(XEvent *ev)
     }
     
     /* Escape key is harcoded to always kill active grab. */
-    if(XLookupKeysym(&(ev->xkey), 0)==XK_Escape){
+    if(ev->type==KeyPress && XLookupKeysym(&(ev->xkey), 0)==XK_Escape){
         mark_for_removal(current_grab, TRUE);
         return TRUE;
     }
