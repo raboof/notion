@@ -718,7 +718,7 @@ static void dock_request_managed_geom(WDock *dock, WRegion *reg, int flags,
 /* dock_is_mapped {{{ */
 /*EXTL_DOC
  * Is \var{dock} mapped? This is much faster than calling
- * \fnref{WDock.get}\code{(\var{dock}).is_mapped}.
+ * \fnref{WDock.get}\code{(dock).is_mapped}.
  */
 EXTL_EXPORT_MEMBER
 bool dock_is_mapped(WDock *dock)
@@ -732,7 +732,7 @@ bool dock_is_mapped(WDock *dock)
 /* dock_map {{{ */
 /*EXTL_DOC
  * Map (show) \var{dock}. This is much faster than calling
- * \fnref{WDock.set}\code{(\var{dock}, \{is_mapped=true\})}.
+ * \fnref{WDock.set}\code{(dock, \{is_mapped=true\})}.
  */
 EXTL_EXPORT_MEMBER
 void dock_map(WDock *dock)
@@ -746,7 +746,7 @@ void dock_map(WDock *dock)
 /* dock_unmap {{{ */
 /*EXTL_DOC
  * Unmap (hide) \var{dock}. This is much faster than calling
- * \fnref{WDock.set}\code{(\var{dock}, \{is_mapped=false\})}.
+ * \fnref{WDock.set}\code{(dock, \{is_mapped=false\})}.
  */
 EXTL_EXPORT_MEMBER
 void dock_unmap(WDock *dock)
@@ -893,20 +893,20 @@ void dock_destroy(WDock *dock)
 
 /* dock_set {{{ */
 /*EXTL_DOC
- * Configure \var{dock}. \{conftab} is a table of key/value pairs:
+ * Configure \var{dock}. \var{conftab} is a table of key/value pairs:
  *
- * \begin{tabularx}{llX}
+ * \begin{tabularx}{\linewidth}{llX}
  *  \hline
  *  Key & Values & Description \\
  *  \hline
- *  name & string & Name of dock \\
- *  hpos & left|center|right & Horizontal position \\
- *  vpos & top|middle|bottom & Vertical position \\
- *  grow & up|down|left|right & Growth direction (where new dockapps are added)
- *                              \\
- *  is_auto & bool & Should \var{dock} automatically manage new dockapps? \\
- *  is_mapped & bool & Is \var{dock} mapped? \\
- *  \hline
+ *  \var{name} & string & Name of dock \\
+ *  \var{hpos} & left/center/right & Horizontal position \\
+ *  \var{vpos} & top/middle/bottom & Vertical position \\
+ *  \var{grow} & up/down/left/right & 
+ *   	Growth direction where new dockapps are added) \\
+ *  \var{is_auto} & bool & 
+ *		Should \var{dock} automatically manage new dockapps? \\
+ *  \var{is_mapped} & bool & Is \var{dock} mapped? \\
  * \end{tabularx}
  *
  * Any parameters not explicitly set in \var{conftab} will be left unchanged.
