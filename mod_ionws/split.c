@@ -1078,13 +1078,13 @@ WSplit *split_current_br(WSplit *node, int dir)
     }else if(node->type==SPLIT_REGNODE){
         nnode=node;
     }else if(node->type==dir || node->u.s.current!=0){
-        nnode=split_current_tl(node->u.s.br, dir);
+        nnode=split_current_br(node->u.s.br, dir);
         if(nnode==NULL)
-            nnode=split_current_tl(node->u.s.tl, dir);
+            nnode=split_current_br(node->u.s.tl, dir);
     }else{
-        nnode=split_current_tl(node->u.s.tl, dir);
+        nnode=split_current_br(node->u.s.tl, dir);
         if(nnode==NULL)
-            nnode=split_current_tl(node->u.s.br, dir);
+            nnode=split_current_br(node->u.s.br, dir);
     }
     
     return nnode;
@@ -1129,8 +1129,11 @@ WSplit *split_to_br(WSplit *node, int dir)
         if(split==NULL)
             break;
         
-        if(from==PRIMN_TL)
-            return split_current_tl(split->u.s.br, dir);
+        if(from==PRIMN_TL){
+            WSplit *s=split_current_tl(split->u.s.br, dir);
+            if(s!=NULL)
+                return s;
+        }
         
         node=split;
     }
@@ -1153,9 +1156,12 @@ WSplit *split_to_tl(WSplit *node, int dir)
         if(split==NULL)
             break;
         
-        if(from==PRIMN_BR)
-            return split_current_br(split->u.s.tl, dir);
-        
+        if(from==PRIMN_BR){
+            WSplit *s=split_current_br(split->u.s.tl, dir);
+            if(s!=NULL)
+                return s;
+        }
+
         node=split;
     }
     
