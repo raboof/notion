@@ -9,6 +9,7 @@ include $(TOPDIR)/system-inc.mk
 XGETTEXT = xgettext
 MSGFMT = msgfmt -c
 MSGMERGE = msgmerge
+LXGETTEXT = $(LUA) $(TOPDIR)/build/lxgettext.lua
 
 TRANSLATIONS := fi
 MO_FILES := $(patsubst %,%.mo, $(TRANSLATIONS))
@@ -54,7 +55,8 @@ pot: $(POTFILE)
 
 $(POTFILE): potfiles
 	$(XGETTEXT) -kTR -kDUMMY_TR -o $(POTFILE).tmp -f potfiles_c
-	$(LUA) $(TOPDIR)/build/lxgettext.lua -k TR -k bdoc -o $(POTFILE) -a $(POTFILE).tmp -f potfiles_lua
+	$(LXGETTEXT) -k TR -k bdoc -k submenu -k menuentry \
+		-o $(POTFILE) -a $(POTFILE).tmp -f potfiles_lua
 	$(RM) $(POTFILE).tmp
 
 %.mo: %.po
