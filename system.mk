@@ -9,14 +9,27 @@
 
 PREFIX=/usr/local/ion-devel
 
-# No need to modify these usually
-BINDIR=$(PREFIX)/bin
-ETCDIR=$(PREFIX)/etc
-MANDIR=$(PREFIX)/man
-DOCDIR=$(PREFIX)/doc
-LIBDIR=$(PREFIX)/lib
-INCDIR=$(PREFIX)/include
+# Unless you are creating a package conforming to some OS's standards, you
+# probably do not want to modify the following directories:
 
+# 'ioncore' binary and 'ion' script
+BINDIR=$(PREFIX)/bin
+# Configuration .lua files
+ETCDIR=$(PREFIX)/etc/ion-devel
+# Some .lua files and ion-* shell scripts
+SHAREDIR=$(PREFIX)/share/ion-devel
+# Manual pages
+MANDIR=$(PREFIX)/man
+# Some documents
+DOCDIR=$(PREFIX)/doc/ion-devel
+# Nothing at the moment
+INCDIR=$(PREFIX)/include/ion-devel
+# Nothing at the moment
+LIBDIR=$(PREFIX)/lib
+# Modules
+MODULEDIR=$(LIBDIR)/ion-devel
+# ion-completefile (does not belong in SHAREDIR being a binary file)
+EXTRABINDIR=$(LIBDIR)/ion-devel
 
 ##
 ## Modules
