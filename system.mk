@@ -130,8 +130,9 @@ WARN=	-W -Wimplicit -Wreturn-type -Wswitch -Wcomment \
 	-Wtrigraphs -Wformat -Wchar-subscripts \
 	-Wparentheses -pedantic -Wuninitialized
 
-
-C99_SOURCE=-std=c99
+# If you have a recent C compiler (e.g. gcc 3.x) then uncommenting the
+# following should optimize function calls to Lua a little.
+#C99_SOURCE=-std=c99 -DCF_HAS_VA_COPY
 
 CFLAGS=-g -O2 $(WARN) $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES)
 LDFLAGS=-g $(LIBS) $(EXTRA_LIBS)
