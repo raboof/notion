@@ -49,6 +49,10 @@ of course. If you want to use run-mailcap, it can be found at
 
 CONFIGURATION
 
+NOTE: The configuration file documentation is out-of-date for ion-devel.
+Have a look at the Ion home page, mailing list archives and the WikiWiki
+instead.
+
 Have a look at doc/  and the default configuration files.
 If you do nothing else, you may at least want to change term_font
 from the default 7x13 to whatever font you use in xterm and such.
