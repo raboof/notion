@@ -74,6 +74,8 @@ static WFunction query_input_funtab[]={
 	FN_VOID(generic, WInput,	"cancel",			input_cancel),	
 	FN_VOID(generic, WInput,	"scrollup",			input_scrollup),
 	FN_VOID(generic, WInput,	"scrolldown",		input_scrolldown),
+	
+	FN_VOID(generic, WInput,	"close",			input_cancel),	
 	END_FUNTAB
 };
 
