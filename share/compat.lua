@@ -11,7 +11,7 @@ local function obsolete(name, fn)
         if type(fn)=="string" then
             fnx=_G[fn]
         end
-        io.stderr:write("Warning: function " .. name .. " is obsolete.\n")
+        warn("Warning: function " .. name .. " is obsolete.\n")
         return fnx(unpack(arg))
     end
     _G[name]=obswrap
@@ -90,4 +90,13 @@ obsolete("floatframe_do_resize", function(f, x, y)
                                      new_floatframe_do_resize(f, x, x, y, y)
                                  end)
 
-                               
+-- Added 2003-06-09
+obsolete("make_active_leaf_fn", 
+         function(fn)
+             if not fn then
+                 error("fn==nil", 2)
+             end
+             return function call_active_leaf(reg)
+                        fn(region_get_active_leaf(reg))
+                    end
+         end)

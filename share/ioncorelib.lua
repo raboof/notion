@@ -114,18 +114,58 @@ end
 
 -- Callback creation functions {{{
 
---DOC
--- Create a function that will call \var{fn} with argument
--- \fnref{region_get_active_leaf}\code{(param)} where \var{param} is
--- the parameter to the created function.
-function make_active_leaf_fn(fn)
+--DOC 
+-- Creates a function that accepts a \type{WMPlex} \var{mplex} as argument 
+-- and that will call \var{fn} with argument as follows:
+-- \begin{enumerate}
+-- \item If \fnref{mplex_current_input}\code{(mplex)} is not nil, then
+--   this object is the parameter
+-- \item If \fnref{mplex_current}\code{(mplex)} is not nil, then
+--   this object is the parameter
+-- \item Otherwise if \var{self_if_not_current} is set, the \var{mplex} 
+--   itself will be the parameter.
+-- \end{enumerate}
+function make_current_fn(fn, self_if_no_current)
     if not fn then
-	error("fn==nil", 2)
+        warn("nil parameter to make_current_managed_fn")
+        return
     end
-    local function call_active_leaf(reg)
-	fn(region_get_active_leaf(reg))
+    return function(mplex)
+               local reg=mplex_current_input(mplex)
+               if not reg then
+                   reg=mplex_current(mplex)
+               end
+               if not reg then
+                   if not self_if_no_current then
+                       return 
+                   end
+                   reg=mplex
+               end
+               fn(reg)
+           end
+end
+
+--DOC
+-- Equivalent to \fnref{make_current_fn}\code{(fn, true)}.
+function make_current_or_self_fn(fn)
+    return make_current_fn(fn, true)
+end
+
+--DOC
+-- Creates a function that accepts a \type{WMPlex} \var{mplex} as argument 
+-- and that will call \var{fn} with argument:
+-- \fnref{mplex_current}\code{(mplex)} if this is of type \type{WClientWin}.
+function make_current_clientwin_fn(fn)
+    if not fn then
+        warn("nil parameter to make_current_clientwin_fn")
+        return
     end
-    return call_active_leaf
+    return function(mplex)
+               local reg=mplex_current(mplex)
+               if reg and obj_is(reg, "WClientWin") then
+                   fn(reg)
+               end
+           end
 end
 
 
@@ -165,12 +205,18 @@ function exec_in_frame(frame, cmd)
     execrootw(frame, cmd)
 end
 
+-- }}}
+
 
 -- Includes {{{
 
 --DOC
 -- Execute another file with Lua code.
 function include(file)
+    local obsolete_files={["common-frame-bindings.lua"]=true}
+    if obsolete_files[file] then
+        warn("Warning: "..file.." is obsolete")
+    end
     local current_dir = "."
     if CURRENT_FILE ~= nil then
         local s, e, cdir, cfile=string.find(CURRENT_FILE, "(.*)([^/])");
@@ -298,12 +344,17 @@ end
 
 -- }}}
 
+
 -- Names {{{
 
+--DOC
+-- Equivalent to \fnref{lookup_region}\code{(nam, "WGenWS")}.
 function lookup_workspace(nam)
     return lookup_region(nam, "WGenWS")
 end
 
+--DOC
+-- Equivalent to \fnref{complete_region}\code{(nam, "WGenWS")}.
 function complete_workspace(nam)
     return complete_region(nam, "WGenWS")
 end
