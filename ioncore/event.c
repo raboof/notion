@@ -130,7 +130,7 @@ static void skip_focusenter()
     XEvent ev;
     WRegion *r;
     
-    XSync(ioncore_g.dpy, False);
+    XFlush(ioncore_g.dpy);
     
     while(XCheckMaskEvent(ioncore_g.dpy,
                           EnterWindowMask|FocusChangeMask, &ev)){
@@ -169,19 +169,11 @@ void ioncore_flush()
 void ioncore_x_connection_handler(int conn, void *unused)
 {
     XEvent ev;
-    bool more=TRUE;
 
-    while(more){
-        XNextEvent(ioncore_g.dpy, &ev);
-        /*if(!XCheckMaskEvent(ioncore_g.dpy, ~0, &ev))
-            break;*/
-        
-        ioncore_update_timestamp(&ev);
-        
-        CALL_ALT_B_NORET(ioncore_handle_event_alt, (&ev));
+    XNextEvent(ioncore_g.dpy, &ev);
+    ioncore_update_timestamp(&ev);
 
-        more=(QLength(ioncore_g.dpy)>0);
-    }
+    CALL_ALT_B_NORET(ioncore_handle_event_alt, (&ev));
 }
 
 

@@ -513,43 +513,42 @@ static void frame_managed_changed(WFrame *frame, int mode, bool sw,
 /*{{{ Save/load */
 
 
-bool frame_save_to_file(WFrame *frame, FILE *file, int lvl)
+ExtlTab frame_get_configuration(WFrame *frame)
 {
-    WRegion *sub;
+    WRegion *sub=NULL;
+    int n=0;
+    ExtlTab tab, subs;
     
-    region_save_identity((WRegion*)frame, file, lvl);
-    file_indent(file, lvl);
-    fprintf(file, "flags = %d,\n", frame->flags);
+    tab=region_get_base_configuration((WRegion*)frame);
     
+    extl_table_sets_i(tab, "flags", frame->flags);
     if(frame->flags&FRAME_SAVED_VERT){
-        file_indent(file, lvl);
-        fprintf(file, "saved_y = %d, saved_h = %d,\n", 
-                frame->saved_y, frame->saved_h);
+        extl_table_sets_i(tab, "saved_y", frame->saved_y);
+        extl_table_sets_i(tab, "saved_h", frame->saved_h);
     }
     if(frame->flags&FRAME_SAVED_HORIZ){
-        file_indent(file, lvl);
-        fprintf(file, "saved_x = %d, saved_w = %d,\n", 
-                frame->saved_x, frame->saved_w);
+        extl_table_sets_i(tab, "saved_x", frame->saved_x);
+        extl_table_sets_i(tab, "saved_w", frame->saved_w);
     }
+        
+    subs=extl_create_table();
+    extl_table_sets_t(tab, "subs", subs);
     
-    file_indent(file, lvl);
-    fprintf(file, "subs = {\n");
     FOR_ALL_MANAGED_ON_LIST(FRAME_MLIST(frame), sub){
-        file_indent(file, lvl+1);
-        fprintf(file, "{\n");
-        region_save_to_file((WRegion*)sub, file, lvl+2);
-        if(sub==FRAME_CURRENT(frame)){
-            file_indent(file, lvl+2);
-            fprintf(file, "switchto = true,\n");
+        ExtlTab st=region_get_configuration(sub);
+        if(st!=extl_table_none()){
+            if(sub==FRAME_CURRENT(frame))
+                extl_table_sets_b(st, "switchto", TRUE);
+            extl_table_seti_t(subs, ++n, st);
+            extl_unref_table(st);
         }
-        file_indent(file, lvl+1);
-        fprintf(file, "},\n");
     }
-    file_indent(file, lvl);
-    fprintf(file, "},\n");
     
-    return TRUE;
+    extl_unref_table(subs);
+    
+    return tab;
 }
+
 
 
 void frame_load_saved_geom(WFrame* frame, ExtlTab tab)
@@ -618,8 +617,8 @@ static DynFunTab frame_dynfuntab[]={
 
     {(DynFun*)window_press, (DynFun*)frame_press},
     
-    {(DynFun*)region_save_to_file,
-     (DynFun*)frame_save_to_file},
+    {(DynFun*)region_get_configuration,
+     (DynFun*)frame_get_configuration},
 
     {(DynFun*)frame_style, 
      (DynFun*)frame_style_default},

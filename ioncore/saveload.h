@@ -22,14 +22,11 @@ extern WRegion *create_region_load(WWindow *par, const WRectangle *geom,
                                    ExtlTab tab);
 
 extern bool region_supports_save(WRegion *reg);
-DYNFUN bool region_save_to_file(WRegion *reg, FILE *file, int lvl);
-extern void region_save_identity(WRegion *reg, FILE *file, int lvl);
+DYNFUN ExtlTab region_get_configuration(WRegion *reg);
+extern ExtlTab region_get_base_configuration(WRegion *reg);
 
-extern void file_write_escaped_string(FILE *file, const char *str);
-extern void file_indent(FILE *file, int lvl);
-
-extern bool ioncore_load_workspaces();
-extern bool ioncore_save_workspaces();
+extern bool ioncore_init_layout();
+extern bool ioncore_save_layout();
 
 #endif /* ION_IONCORE_SAVELOAD_H */
 

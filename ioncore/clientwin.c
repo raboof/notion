@@ -1322,9 +1322,6 @@ ExtlTab clientwin_managed_list(WClientWin *cwin)
 }
 
 
-/*}}}*/
-
-
 /*EXTL_DOC
  * Toggle transients managed by \var{cwin} between top/bottom
  * of the window.
@@ -1342,28 +1339,32 @@ void clientwin_toggle_transients_pos(WClientWin *cwin)
 }
 
 
+/*}}}*/
+
+
 /*{{{ Save/load */
 
 
 static int last_checkcode=1;
 
-static bool clientwin_save_to_file(WClientWin *cwin, FILE *file, int lvl)
-{
-    WRegion *sub;
-    int chkc=0;
 
-    region_save_identity((WRegion*)cwin, file, lvl);
-    file_indent(file, lvl);
-    fprintf(file, "windowid = %lu,\n", (unsigned long)(cwin->win));
-    file_indent(file, lvl);
+static ExtlTab clientwin_get_configuration(WClientWin *cwin)
+{
+    int chkc=0;
+    ExtlTab tab;
+    
+    tab=region_get_base_configuration((WRegion*)cwin);
+
+    extl_table_sets_d(tab, "windowid", (double)(cwin->win));
     
     if(last_checkcode!=0){
         chkc=last_checkcode++;
-        xwindow_set_integer_property(cwin->win, ioncore_g.atom_checkcode, chkc);
-        fprintf(file, "checkcode = %d,\n", chkc);
+        xwindow_set_integer_property(cwin->win, ioncore_g.atom_checkcode, 
+                                     chkc);
+        extl_table_sets_i(tab, "checkcode", chkc);
     }
     
-    return TRUE;
+    return tab;
 }
 
 
@@ -1481,8 +1482,8 @@ static DynFunTab clientwin_dynfuntab[]={
     {region_close, 
      clientwin_close},
     
-    {(DynFun*)region_save_to_file, 
-     (DynFun*)clientwin_save_to_file},
+    {(DynFun*)region_get_configuration,
+     (DynFun*)clientwin_get_configuration},
     
     {(DynFun*)region_do_rescue_clientwins,
      (DynFun*)clientwin_do_rescue_clientwins},

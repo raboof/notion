@@ -10,10 +10,10 @@
  */
 
 #ifndef ION_IONCORE_READCONFIG_H
-# define ION_IONCORE_READCONFIG_H
+#define ION_IONCORE_READCONFIG_H
 
-# include "common.h"
-# include "extl.h"
+#include "common.h"
+#include "extl.h"
 
 typedef int WTryConfigFn(const char *file, void *param);
 
@@ -41,5 +41,7 @@ extern bool ioncore_read_config(const char *file, const char *sp,
                                 bool warn_nx);
 
 extern char *ioncore_get_savefile(const char *module);
+extern bool ioncore_read_savefile(const char *module, ExtlTab *tabret);
+extern bool ioncore_write_savefile(const char *module, ExtlTab tab);
 
 #endif /* ION_IONCORE_READCONFIG_H */

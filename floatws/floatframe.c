@@ -471,48 +471,13 @@ bool floatframe_is_sticky(WFloatFrame *frame)
 /*{{{ Save/load */
 
 
-static bool floatframe_save_to_file(WFloatFrame *frame, FILE *file, int lvl)
+static ExtlTab floatframe_get_configuration(WFloatFrame *frame)
 {
-    WRegion *sub;
+    ExtlTab tab=frame_get_configuration(&(frame->frame));
+
+    extl_table_sets_b(tab, "sticky", frame->sticky);
     
-    region_save_identity((WRegion*)frame, file, lvl);
-    file_indent(file, lvl);
-    fprintf(file, "flags = %d,\n", frame->frame.flags);
-    if(frame->sticky){
-        file_indent(file, lvl);
-        fprintf(file, "sticky = true,\n");
-    }
-    
-    if(frame->frame.flags&FRAME_SAVED_VERT){
-        file_indent(file, lvl);
-        fprintf(file, "saved_y = %d, saved_h = %d,\n", 
-                frame->frame.saved_y,
-                frame->frame.saved_h);
-    }
-    if(frame->frame.flags&FRAME_SAVED_HORIZ){
-        file_indent(file, lvl);
-        fprintf(file, "saved_x = %d, saved_w = %d,\n", 
-                frame->frame.saved_x,
-                frame->frame.saved_w);
-    }
-        
-    file_indent(file, lvl);
-    fprintf(file, "subs = {\n");
-    FOR_ALL_MANAGED_ON_LIST(FRAME_MLIST(frame), sub){
-        file_indent(file, lvl+1);
-        fprintf(file, "{\n");
-        region_save_to_file((WRegion*)sub, file, lvl+2);
-        if(sub==FRAME_CURRENT(frame)){
-            file_indent(file, lvl+2);
-            fprintf(file, "switchto = true,\n");
-        }
-        file_indent(file, lvl+1);
-        fprintf(file, "},\n");
-    }
-    file_indent(file, lvl);
-    fprintf(file, "},\n");
-    
-    return TRUE;
+    return tab;
 }
 
 
@@ -555,7 +520,8 @@ static DynFunTab floatframe_dynfuntab[]={
     
     {region_request_clientwin_geom, floatframe_request_clientwin_geom},
     
-    {(DynFun*)region_save_to_file, (DynFun*)floatframe_save_to_file},
+    {(DynFun*)region_get_configuration,
+     (DynFun*)floatframe_get_configuration},
 
     {(DynFun*)frame_style, (DynFun*)floatframe_style_default},
     {(DynFun*)frame_tab_style, (DynFun*)floatframe_tab_style_default},

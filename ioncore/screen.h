@@ -29,7 +29,6 @@ DECLCLASS(WScreen){
     int id;
     Atom atom_workspace;
     bool uses_root;
-    bool configured;
     WRectangle managed_off;
     WScreen *next_scr, *prev_scr;
 };
@@ -38,18 +37,20 @@ extern WScreen *create_screen(WRootWin *rootwin, int id,
                               const WRectangle *geom,
                               bool useroot);
 
-extern bool screen_initialize_workspaces(WScreen *scr);
 extern WRegion *screen_current(WScreen *scr);
+extern int screen_id(WScreen *scr);
+
 extern void screen_set_managed_offset(WScreen *scr, const WRectangle *off);
 
 extern WScreen *region_screen_of(WRegion *reg);
+
+extern bool screen_init_layout(WScreen *scr, ExtlTab tab);
 
 /* For viewports corresponding to Xinerama rootwins <id> is initially set
  * to the Xinerama screen number. When Xinerama is not enabled, <id> is
  * the X screen number (which is the same for all Xinerama rootwins).
  * For all other viewports <id> is undefined.
  */
-extern bool ioncore_initialise_screen_id(int id, ExtlTab tab);
 extern WScreen *ioncore_find_screen_id(int id);
 extern void ioncore_goto_screen_id(int id);
 extern void ioncore_goto_next_screen();

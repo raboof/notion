@@ -16,8 +16,9 @@
 
 #include <libtu/obj.h>
 
-#define EXTL_EXTENSION    "lua"
-#define EXTL_COMPILED_EXTENSION    "lc"
+#define EXTL_EXTENSION "lua"
+#define EXTL_COMPILED_EXTENSION "lc"
+#define EXTL_MAX_SERIALISE_DEPTH 128
 
 /* o: userdata/Obj
  * i: integer
@@ -140,10 +141,10 @@ extern bool extl_call_named_vararg(const char *name, const char *spec,
 extern bool extl_call_named(const char *name, const char *spec,
                             const char *rspec, ...);
 
-/* Load file/string */
+/* Files */
 
 extern bool extl_loadfile(const char *file, ExtlFn *ret);
-extern bool extl_loadstring(const char *file, ExtlFn *ret);
+extern bool extl_serialise(const char *file, ExtlTab tab);
 
 /* Register */
 

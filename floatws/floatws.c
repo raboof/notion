@@ -614,27 +614,34 @@ WRegion* floatws_current(WFloatWS *ws)
 /*{{{ Save/load */
 
 
-static bool floatws_save_to_file(WFloatWS *ws, FILE *file, int lvl)
+static ExtlTab floatws_get_configuration(WFloatWS *ws)
 {
+    ExtlTab tab, mgds, st, g;
     WRegion *mgd;
+    int n=0;
     
-    region_save_identity((WRegion*)ws, file, lvl);
-    file_indent(file, lvl);
-    fprintf(file, "managed = {\n");
+    tab=region_get_base_configuration((WRegion*)ws);
+    
+    mgds=extl_create_table();
+    
+    extl_table_sets_t(tab, "managed", mgds);
+    
     FOR_ALL_MANAGED_ON_LIST(ws->managed_list, mgd){
-        file_indent(file, lvl+1);
-        fprintf(file, "{\n");
-        if(region_save_to_file((WRegion*)mgd, file, lvl+2)){
-            file_indent(file, lvl+2);
-            rectangle_writecode(&REGION_GEOM(mgd), file);
-        }
-        file_indent(file, lvl+1);
-        fprintf(file, "},\n");
+        st=region_get_configuration(mgd);
+        if(st==extl_table_none())
+            continue;
+
+        g=extl_table_from_rectangle(&REGION_GEOM(mgd));
+        extl_table_sets_t(st, "geom", g);
+        extl_unref_table(g);
+        
+        extl_table_seti_t(mgds, ++n, st);
+        extl_unref_table(st);
     }
-    file_indent(file, lvl);
-    fprintf(file, "},\n");
     
-    return TRUE;
+    extl_unref_table(mgds);
+    
+    return tab;
 }
 
 
@@ -697,8 +704,8 @@ static DynFunTab floatws_dynfuntab[]={
     {region_remove_managed,
      floatws_remove_managed},
     
-    {(DynFun*)region_save_to_file, 
-     (DynFun*)floatws_save_to_file},
+    {(DynFun*)region_get_configuration, 
+     (DynFun*)floatws_get_configuration},
 
     {(DynFun*)region_xwindow,
      (DynFun*)floatws_xwindow},

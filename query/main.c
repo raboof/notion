@@ -14,6 +14,7 @@
 #include <ioncore/readconfig.h>
 #include <ioncore/frame.h>
 #include <ioncore/saveload.h>
+#include <ioncore/extl.h>
 
 #include "query.h"
 #include "edln.h"
@@ -65,52 +66,43 @@ extern void querymod_unregister_exports();
 
 static void load_history()
 {
-    ioncore_read_config("query_history", NULL, FALSE);
+    ExtlTab tab;
+    int i, n;
+        
+    if(!ioncore_read_savefile("query_history", &tab))
+        return;
+    
+    n=extl_table_get_n(tab);
+    
+    for(i=n; i>=1; i--){
+        char *s=NULL;
+        if(extl_table_geti_s(tab, i, &s)){
+            querymod_history_push(s);
+            free(s);
+        }
+    }
+    
+    extl_unref_table(tab);
 }
 
 
 static void save_history()
 {
-    char *fname;
-    const char *histent;
-    FILE *file;
-    int i=0;
+    ExtlTab tab;
+    int i;
     
-    fname=ioncore_get_savefile("query_history");
-    
-    if(fname==NULL){
-        warn("Unable to save query history");
-        return;
-    }
-    
-    file=fopen(fname, "w");
-    
-    if(file==NULL){
-        warn_err_obj(fname);
-        return;
-    }
-    
-    free(fname);
-    
-    fprintf(file, "local saves={\n");
-    
-    while(1){
-        histent=querymod_history_get(i);
-        if(histent==NULL)
+    tab=extl_create_table();
+
+    for(i=0; ; i++){
+        const char *histent=querymod_history_get(i);
+        if(!histent)
             break;
-        fprintf(file, "    ");
-        file_write_escaped_string(file, histent);
-        fprintf(file, ",\n");
-        i++;
+        extl_table_seti_s(tab, i+1, histent);
     }
     
-    fprintf(file, "}\n");
-    fprintf(file, "for k=table.getn(saves),1,-1 do "
-            "querymod.history_push(saves[k]) end\n");
+    ioncore_write_savefile("query_history", tab);
     
-    querymod_history_clear();
-    
-    fclose(file);
+    extl_unref_table(tab);
 }
 
 

@@ -50,7 +50,6 @@ static bool screen_init(WScreen *scr, WRootWin *rootwin,
     scr->id=id;
     scr->atom_workspace=None;
     scr->uses_root=useroot;
-    scr->configured=FALSE;
     scr->managed_off.x=0;
     scr->managed_off.y=0;
     scr->managed_off.w=0;
@@ -135,60 +134,6 @@ void screen_deinit(WScreen *scr)
         SCR_WIN(scr)=None;
     
     mplex_deinit((WMPlex*)scr);
-}
-
-
-static bool create_initial_workspace_on_scr(WScreen *scr)
-{
-    WRegionSimpleCreateFn *fn=NULL;
-    WRegion *reg=NULL;
-    
-    /* Check default_ws_type */{
-        ExtlTab tab=extl_globals();
-        char *wsclass=NULL;
-        if(extl_table_gets_s(tab, "DEFAULT_WS_TYPE", &wsclass)){
-            WRegClassInfo *info=ioncore_lookup_regclass(wsclass,
-                                                        FALSE, TRUE, FALSE);
-            if(info!=NULL)
-                fn=info->sc_fn;
-            free(wsclass);
-        }
-        extl_unref_table(tab);
-    }
-        
-    if(fn==NULL){
-        WRegClassInfo *info=ioncore_lookup_regclass("WGenWS",
-                                                    TRUE, TRUE, FALSE);
-        if(info!=NULL)
-            fn=info->sc_fn;
-    }
-    
-    if(fn==NULL){
-        warn("Could not find a complete workspace class. "
-             "Please load some modules.");
-        return FALSE;
-    }
-    
-    reg=mplex_attach_new_simple((WMPlex*)scr, fn, TRUE);
-    
-    if(reg==NULL){
-        warn("Unable to create a workspace on screen %d\n", scr->id);
-        return FALSE;
-    }
-    
-    region_set_name(reg, "main");
-    return TRUE;
-}
-
-
-bool screen_initialize_workspaces(WScreen* scr)
-{
-    WRegion *ws=NULL;
-
-    if(scr->configured || SCR_MCOUNT(scr)>0)
-        return TRUE;
-    
-    return create_initial_workspace_on_scr(scr);
 }
 
 
@@ -460,49 +405,84 @@ void screen_set_managed_offset(WScreen *scr, const WRectangle *off)
 /*{{{ Save/load */
 
 
-static bool screen_save_to_file(WScreen *scr, FILE *file, int lvl)
+ExtlTab screen_get_configuration(WScreen *scr)
 {
-    WRegion *sub;
+    WRegion *sub=NULL;
+    int n=0;
+    ExtlTab tab, subs;
     
-    region_save_identity((WRegion*)scr, file, lvl);
-    file_indent(file, lvl);
-    fprintf(file, "subs = {\n");
+    tab=region_get_base_configuration((WRegion*)scr);
+        
+    subs=extl_create_table();
+    extl_table_sets_t(tab, "subs", subs);
+    
     FOR_ALL_MANAGED_ON_LIST(SCR_MLIST(scr), sub){
-        file_indent(file, lvl+1);
-        fprintf(file, "{\n");
-        region_save_to_file((WRegion*)sub, file, lvl+2);
-        if(sub==SCR_CURRENT(scr)){
-            file_indent(file, lvl+2);
-            fprintf(file, "switchto = true,\n");
+        ExtlTab st=region_get_configuration(sub);
+        if(st!=extl_table_none()){
+            if(sub==SCR_CURRENT(scr))
+                extl_table_sets_b(st, "switchto", TRUE);
+            extl_table_seti_t(subs, ++n, st);
+            extl_unref_table(st);
         }
-        file_indent(file, lvl+1);
-        fprintf(file, "},\n");
     }
-    file_indent(file, lvl);
-    fprintf(file, "},\n");
     
+    extl_unref_table(subs);
+    
+    return tab;
+}
+
+
+static bool create_initial_ws(WScreen *scr)
+{
+    WRegionSimpleCreateFn *fn=NULL;
+    WRegion *reg=NULL;
+    
+    /* Check default_ws_type */{
+        ExtlTab tab=extl_globals();
+        char *wsclass=NULL;
+        if(extl_table_gets_s(tab, "DEFAULT_WS_TYPE", &wsclass)){
+            WRegClassInfo *info=ioncore_lookup_regclass(wsclass,
+                                                        FALSE, TRUE, FALSE);
+            if(info!=NULL)
+                fn=info->sc_fn;
+            free(wsclass);
+        }
+        extl_unref_table(tab);
+    }
+        
+    if(fn==NULL){
+        WRegClassInfo *info=ioncore_lookup_regclass("WGenWS",
+                                                    TRUE, TRUE, FALSE);
+        if(info!=NULL)
+            fn=info->sc_fn;
+    }
+    
+    if(fn==NULL){
+        warn("Could not find a complete workspace class. "
+             "Please load some modules.");
+        return FALSE;
+    }
+    
+    reg=mplex_attach_new_simple((WMPlex*)scr, fn, TRUE);
+    
+    if(reg==NULL){
+        warn("Unable to create a workspace on screen %d\n", scr->id);
+        return FALSE;
+    }
+    
+    region_set_name(reg, "main");
     return TRUE;
 }
 
 
-/*EXTL_DOC
- * (Intended to be called from workspace savefiles.)
- * Set screen name and initial workspaces etc.
- */
-EXTL_EXPORT
-bool ioncore_initialise_screen_id(int id, ExtlTab tab)
+bool screen_init_layout(WScreen *scr, ExtlTab tab)
 {
     char *name;
-    WScreen *scr=ioncore_find_screen_id(id);
     ExtlTab substab, subtab;
     int n, i;
 
-    if(scr==NULL){
-        warn("No screen #%d\n", id);
-        return FALSE;
-    }
-    
-    scr->configured=TRUE;
+    if(tab==extl_table_none())
+        return create_initial_ws(scr);
     
     if(extl_table_gets_s(tab, "name", &name)){
         region_set_name((WRegion*)scr, name);
@@ -546,8 +526,8 @@ static DynFunTab screen_dynfuntab[]={
     
     {mplex_managed_geom, screen_managed_geom},
 
-    {(DynFun*)region_save_to_file,
-     (DynFun*)screen_save_to_file},
+    {(DynFun*)region_get_configuration,
+     (DynFun*)screen_get_configuration},
 
     {(DynFun*)region_handle_drop, 
      (DynFun*)screen_handle_drop},

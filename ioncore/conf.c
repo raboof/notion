@@ -63,12 +63,12 @@ void ioncore_set_warp(bool warp)
 
 
 /*EXTL_DOC
- * Enable or disable workspaces saving on exit.
+ * Enable or disable layout saving on exit.
  */
 EXTL_EXPORT
-void ioncore_set_workspace_saves(bool enable)
+void ioncore_set_save_layout(bool enable)
 {
-    ioncore_g.ws_save_enabled=enable;
+    ioncore_g.layout_save_enabled=enable;
 }
 
 

@@ -121,7 +121,7 @@ static void init_global()
     ioncore_g.resize_delay=CF_RESIZE_DELAY;
     ioncore_g.opaque_resize=0;
     ioncore_g.warp_enabled=TRUE;
-    ioncore_g.ws_save_enabled=TRUE;
+    ioncore_g.layout_save_enabled=TRUE;
     ioncore_g.switchto_new=TRUE;
     
     ioncore_g.enc_utf8=FALSE;
@@ -405,6 +405,8 @@ static void set_initial_focus()
 bool ioncore_startup(const char *display, const char *cfgfile,
                      int stflags)
 {
+    WRootWin *rootwin;
+
     if(!extl_init())
         return FALSE;
 
@@ -422,10 +424,13 @@ bool ioncore_startup(const char *display, const char *cfgfile,
     
     ioncore_read_main_config(cfgfile);
     
-    if(!ioncore_setup_rootwins()){
-        warn("Unable to set up any rootwins.");
+    if(!ioncore_init_layout()){
+        warn("Unable to set up layout on any screen.");
         return FALSE;
     }
+    
+    FOR_ALL_ROOTWINS(rootwin)
+        rootwin_manage_initial_windows(rootwin);
     
     set_initial_focus();
     
@@ -451,8 +456,8 @@ void ioncore_deinit()
     
     extl_call_named("call_hook", "s", NULL, "deinit");
                     
-    if(ioncore_g.ws_save_enabled){
-        ioncore_save_workspaces();
+    if(ioncore_g.layout_save_enabled){
+        ioncore_save_layout();
     }else{
         warn("Not saving workspace layout.");
     }

@@ -31,6 +31,7 @@ static char *sessiondir=NULL;
 
 typedef struct{
     ExtlFn fn;
+    ExtlTab tab;
     int status;
 } TryCallParam;
 
@@ -279,6 +280,21 @@ static int try_call(const char *file, TryCallParam *param)
 }
 
 
+static int try_read_savefile(const char *file, TryCallParam *param)
+{
+    int ret=try_load(file, param);
+    
+    if(ret!=IONCORE_TRYCONFIG_OK)
+        return ret;
+    
+    ret=extl_call(param->fn, NULL, "t", &(param->tab));
+    
+    extl_unref_fn(param->fn);
+    
+    return (ret ? IONCORE_TRYCONFIG_OK : IONCORE_TRYCONFIG_CALL_FAILED);
+}
+
+
 static int do_try_config(const char *fname, const char *cfdir,
                          WTryConfigFn *tryfn, void *tryfnparam)
 {
@@ -375,6 +391,23 @@ bool ioncore_read_config(const char *file, const char *sp, bool warn_nx)
 }
 
 
+bool ioncore_read_savefile(const char *basename, ExtlTab *tabret)
+{
+    TryCallParam param;
+    int retval;
+    
+    param.status=0;
+    param.tab=extl_table_none();
+    
+    retval=do_try_config(basename, NULL, (WTryConfigFn*)try_read_savefile,
+                         &param);
+
+    *tabret=param.tab;
+    
+    return (retval==IONCORE_TRYCONFIG_OK);
+}
+
+
 /*}}}*/
 
 
@@ -435,4 +468,20 @@ char *ioncore_get_savefile(const char *basename)
 }
 
 
+EXTL_EXPORT
+bool ioncore_write_savefile(const char *basename, ExtlTab tab)
+{
+    bool ret=FALSE;
+    char *fname=ioncore_get_savefile(basename);
+    
+    if(fname!=NULL){
+        ret=extl_serialise(fname, tab);
+        free(fname);
+    }
+    
+    return ret;
+}
+
+
 /*}}}*/
+

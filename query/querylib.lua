@@ -324,7 +324,7 @@ function querylib.query_workspace(mplex)
     end
     querylib.do_query(mplex, "Go to or create workspace:", nil, 
                       querylib.workspace_handler,
-                      querylib.make_completor(ioncore.complete_workspace))
+                      querylib.make_completor(complete_workspace))
 end
 
 
@@ -491,7 +491,8 @@ end
 function querylib.man_completor(wedln, str)
     local mc=ioncore.lookup_script("ion-completeman")
     if mc then
-        querylib.popen_completions(wedln, mc.." -complete "..string.shell_safe(str))
+        querylib.popen_completions(wedln, mc.." -complete "..
+                                   string.shell_safe(str))
     end
 end
 

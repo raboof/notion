@@ -214,68 +214,74 @@ static bool ionws_do_rescue_clientwins(WIonWS *ws, WRegion *dst)
 /*{{{ Save */
 
 
-static void write_obj(Obj *obj, FILE *file, int lvl)
+static ExtlTab get_obj_config(Obj *obj)
 {
     WWsSplit *split;
     int tls, brs;
-    const char *name;
+    ExtlTab tab, stab;
     
     if(obj==NULL)
-        goto fail2;
+        return extl_table_none();
     
     if(OBJ_IS(obj, WRegion)){
-        if(region_supports_save((WRegion*)obj)){
-            if(region_save_to_file((WRegion*)obj, file, lvl))
-                return;
-        }
-        goto fail;
+        if(region_supports_save((WRegion*)obj))
+            return region_get_configuration((WRegion*)obj);
+        return extl_table_none();
     }
     
     if(!OBJ_IS(obj, WWsSplit))
-        goto fail;
+        return extl_table_none();
     
     split=(WWsSplit*)obj;
+    
+    tab=extl_create_table();
     
     tls=split_tree_size(split->tl, split->dir);
     brs=split_tree_size(split->br, split->dir);
     
-    file_indent(file, lvl);
-    fprintf(file, "split_dir = \"%s\",\n", (split->dir==VERTICAL
-                                           ? "vertical" : "horizontal"));
+    extl_table_sets_s(tab, "split_dir",(split->dir==VERTICAL
+                                        ? "vertical" : "horizontal"));
     
-    file_indent(file, lvl);
-    fprintf(file, "split_tls = %d, split_brs = %d,\n", tls, brs);
+    extl_table_sets_i(tab, "split_tls", tls);
+    extl_table_sets_i(tab, "split_brs", brs);
     
-    file_indent(file, lvl);
-    fprintf(file, "tl = {\n");
-    write_obj(split->tl, file, lvl+1);
-    file_indent(file, lvl);
-    fprintf(file, "},\n");
-            
-    file_indent(file, lvl);
-    fprintf(file, "br = {\n");
-    write_obj(split->br, file, lvl+1);
-    file_indent(file, lvl);
-    fprintf(file, "},\n");
+    stab=get_obj_config(split->tl);
+    if(stab==extl_table_none()){
+        warn("Could not get configuration for split TL (a %s).", 
+             OBJ_TYPESTR(obj));
+    }else{
+        extl_table_sets_t(tab, "tl", stab);
+        extl_unref_table(stab);
+    }
+    
+    stab=get_obj_config(split->br);
+    if(stab==extl_table_none()){
+        warn("Could not get configuration for split BR (a %s).", 
+             OBJ_TYPESTR(obj));
+    }else{
+        extl_table_sets_t(tab, "br", stab);
+        extl_unref_table(stab);
+    }
 
-    return;
-    
-fail:        
-    warn("Unable to save a %s\n", OBJ_TYPESTR(obj));
-fail2:
-    fprintf(file, "{},\n");
+    return tab;
 }
 
 
-static bool ionws_save_to_file(WIonWS *ws, FILE *file, int lvl)
+static ExtlTab ionws_get_configuration(WIonWS *ws)
 {
-    region_save_identity((WRegion*)ws, file, lvl);
-    file_indent(file, lvl);
-    fprintf(file, "split_tree = {\n");
-    write_obj(ws->split_tree, file, lvl+1);
-    file_indent(file, lvl);
-    fprintf(file, "},\n");
-    return TRUE;
+    ExtlTab tab, split_tree;
+    
+    tab=region_get_base_configuration((WRegion*)ws);
+    split_tree=get_obj_config(ws->split_tree);
+    
+    if(split_tree==extl_table_none()){
+        warn("Could not get split tree for a WIonWS.");
+    }else{
+        extl_table_sets_t(tab, "split_tree", split_tree);
+        extl_unref_table(split_tree);
+    }
+    
+    return tab;
 }
 
 
@@ -454,8 +460,8 @@ static DynFunTab ionws_dynfuntab[]={
     {(DynFun*)region_do_rescue_clientwins,
      (DynFun*)ionws_do_rescue_clientwins},
     
-    {(DynFun*)region_save_to_file,
-     (DynFun*)ionws_save_to_file},
+    {(DynFun*)region_get_configuration,
+     (DynFun*)ionws_get_configuration},
 
     {(DynFun*)region_may_destroy_managed,
      (DynFun*)ionws_may_destroy_managed},

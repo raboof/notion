@@ -71,7 +71,7 @@ extern void frame_toggle_tab(WFrame *frame);
 extern void frame_update_attr_nth(WFrame *frame, int i);
 
 /* Misc */
-extern bool frame_save_to_file(WFrame *frame, FILE *file, int lvl);
+extern ExtlTab frame_get_configuration(WFrame *frame);
 extern void frame_load_saved_geom(WFrame* frame, ExtlTab tab);
 extern void frame_do_load(WFrame *frame, ExtlTab tab);
 

@@ -27,7 +27,7 @@
 
 /*{{{ Load support functions */
 
-static bool loading_workspaces=FALSE;
+static bool loading_layout=FALSE;
 
 WRegion *create_region_load(WWindow *par, const WRectangle *geom, 
                             ExtlTab tab)
@@ -46,8 +46,8 @@ WRegion *create_region_load(WWindow *par, const WRectangle *geom,
     
     if(fn==NULL){
         warn("Unknown class \"%s\", cannot create region.", objclass);
-        if(loading_workspaces && ioncore_g.ws_save_enabled){
-            ioncore_g.ws_save_enabled=FALSE;
+        if(loading_layout && ioncore_g.layout_save_enabled){
+            ioncore_g.layout_save_enabled=FALSE;
             warn("Disabling workspace saving on exit to prevent savefile "
                  "corruption.\n"
                  "Call enable_workspace_saves(TRUE) to re-enable saves or\n"
@@ -84,60 +84,33 @@ WRegion *create_region_load(WWindow *par, const WRectangle *geom,
 
 bool region_supports_save(WRegion *reg)
 {
-    return HAS_DYN(reg, region_save_to_file);
+    return HAS_DYN(reg, region_get_configuration);
 }
 
 
-bool region_save_to_file(WRegion *reg, FILE *file, int lvl)
-{
-    bool ret=FALSE;
-    CALL_DYN_RET(ret, bool, region_save_to_file, reg, (reg, file, lvl));
-    return ret;
-}
-
-
-void file_indent(FILE *file, int lvl)
-{
-    while(lvl-->0)
-        fprintf(file, "    ");
-}
-
-
-void file_write_escaped_string(FILE *file, const char *str)
-{
-    fputc('"', file);
-
-    while(str && *str){
-        if(((*str)&0x7f)<32 || *str=='"' || *str=='\\'){
-            /* Lua uses decimal in escapes */
-            fprintf(file, "\\%03d", (int)(uchar)(*str));
-        }else{
-            fputc(*str, file);
-        }
-        str++;
-    }
-    
-    fputc('"', file);
-}
-
-
-void region_save_identity(WRegion *reg, FILE *file, int lvl)
+ExtlTab region_get_base_configuration(WRegion *reg)
 {
     const char *name;
+    ExtlTab tab;
     
-    /*file_indent(file, lvl-1);*/
-    /*fprintf(file, "{\n");*/
-    file_indent(file, lvl);
-    fprintf(file, "type = \"%s\",\n", OBJ_TYPESTR(reg));
+    tab=extl_create_table();
+    
+    extl_table_sets_s(tab, "type", OBJ_TYPESTR(reg));
     
     name=region_name(reg);
     
-    if(name!=NULL && !OBJ_IS(reg, WClientWin)){
-        file_indent(file, lvl);
-        fprintf(file, "name = ");
-        file_write_escaped_string(file, name);
-        fprintf(file, ",\n");
-    }
+    if(name!=NULL && !OBJ_IS(reg, WClientWin))
+        extl_table_sets_s(tab, "name", name);
+    
+    return tab;
+}
+
+
+ExtlTab region_get_configuration(WRegion *reg)
+{
+    ExtlTab tab=extl_table_none();
+    CALL_DYN_RET(tab, ExtlTab, region_get_configuration, reg, (reg));
+    return tab;
 }
 
 
@@ -147,50 +120,59 @@ void region_save_identity(WRegion *reg, FILE *file, int lvl)
 /*{{{ save_workspaces, load_workspaces */
 
 
-bool ioncore_load_workspaces()
+bool ioncore_init_layout()
 {
-    bool ret;
-    loading_workspaces=TRUE;
-    ret=ioncore_read_config("workspaces", NULL, FALSE);
-    loading_workspaces=FALSE;
-    return ret;
+    ExtlTab tab;
+    WScreen *scr;
+    bool ok;
+    bool n=0;
+    
+    ok=ioncore_read_savefile("layout", &tab);
+    
+    FOR_ALL_SCREENS(scr){
+        ExtlTab scrtab=extl_table_none();
+        bool scrok=FALSE;
+        if(ok)
+            scrok=extl_table_geti_t(tab, screen_id(scr), &scrtab);
+        
+        n+=(TRUE==screen_init_layout(scr, scrtab));
+        
+        if(scrok)
+            extl_unref_table(scrtab);
+    }
+
+    return (n!=0);
 }
 
 
-bool ioncore_save_workspaces()
+bool ioncore_save_layout()
 {
-    bool successp=TRUE;
-    char *wsconf;
-    FILE *file;
-    WScreen *scr;
+    WScreen *scr=NULL;
+    ExtlTab tab=extl_create_table();
+    bool ret;
     
-    wsconf=ioncore_get_savefile("workspaces");
-
-    if(wsconf==NULL)
+    if(tab==extl_table_none())
         return FALSE;
-
-    file=fopen(wsconf, "w");
-
-    if(file==NULL){
-        warn_err_obj(wsconf);
-        free(wsconf);
-        return FALSE;
-    }
-
-    fprintf(file, "-- This file was created by and is modified by Ion.\n\n");
-
+    
     FOR_ALL_SCREENS(scr){
-        fprintf(file, "ioncore.initialise_screen_id(%d, {\n", scr->id);
-        if(!region_save_to_file((WRegion*)scr, file, 1))
-            successp=FALSE;
-        fprintf(file, "})\n\n");
+        ExtlTab scrtab=region_get_configuration((WRegion*)scr);
+        if(scrtab==extl_table_none()){
+            warn("Unable to get configuration for screen %d.",
+                 screen_id(scr));
+        }else{
+            extl_table_seti_t(tab, screen_id(scr), scrtab);
+            extl_unref_table(scrtab);
+        }
     }
     
-    fclose(file);
+    ret=ioncore_write_savefile("layout", tab);
     
-    free(wsconf);
+    extl_unref_table(tab);
     
-    return successp;
+    if(!ret)
+        warn("Unable to save layout.");
+        
+    return ret;
 }
 
 

@@ -75,11 +75,12 @@ static void do_timer_set()
 }
 
 
-void ioncore_check_signals()
+bool ioncore_check_signals()
 {
     char *tmp=NULL;
     struct timeval current_time;
     WTimer *q;
+    bool ret=FALSE;
 
 #if 1    
     if(wait_sig!=0){
@@ -106,6 +107,7 @@ void ioncore_check_signals()
     /* Check for timer events in the queue */
     while(had_tmr && queue.next!=NULL){
         had_tmr=FALSE;
+        ret=TRUE;
         gettimeofday(&current_time, NULL);
         while(queue.next!=NULL){
             if((TIMEVAL_LATER(current_time, queue.next->when))){
@@ -122,6 +124,8 @@ void ioncore_check_signals()
         }
         do_timer_set();
     }
+    
+    return ret;
 }
 
 

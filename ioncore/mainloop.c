@@ -16,6 +16,9 @@
 #include "event.h"
 
 
+/*{{{ File descriptor management */
+
+
 static WInputFd *input_fds=NULL;
 
 static WInputFd *find_input_fd(int fd)
@@ -89,6 +92,13 @@ static void check_input_fds(fd_set *rfds)
     }
 }
 
+
+/*}}}*/
+
+
+/*{{{ Mainloop */
+
+
 void ioncore_mainloop()
 {
     fd_set rfds;
@@ -101,13 +111,21 @@ void ioncore_mainloop()
         ioncore_execute_deferred();
         ioncore_flush();
 
-        FD_ZERO(&rfds);
-        FD_SET(ioncore_g.conn, &rfds);
-        
-        set_input_fds(&rfds, &nfds);
-        
-        if(select(nfds+1, &rfds, NULL, NULL, NULL)>0)
-            check_input_fds(&rfds);
+        if(QLength(ioncore_g.dpy)>0){
+           ioncore_x_connection_handler(ioncore_g.conn, NULL);
+           ioncore_check_signals();
+        }else{
+            FD_ZERO(&rfds);
+            FD_SET(ioncore_g.conn, &rfds);
+            
+            set_input_fds(&rfds, &nfds);
+            
+            if(select(nfds+1, &rfds, NULL, NULL, NULL)>0)
+                check_input_fds(&rfds);
+        }
     }
 }
+
+
+/*}}}*/
 

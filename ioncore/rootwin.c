@@ -536,33 +536,6 @@ ExtlTab ioncore_root_windows()
 /*}}}*/
 
 
-/*{{{ Workspace and client window management setup */
-
-
-bool ioncore_setup_rootwins()
-{
-    WRootWin *rootwin;
-    WRegion *reg;
-    int n=0;
-    
-    ioncore_load_workspaces();
-    
-    FOR_ALL_ROOTWINS(rootwin){
-        FOR_ALL_MANAGED_ON_LIST(rootwin->screen_list, reg){
-            if(OBJ_IS(reg, WScreen) &&
-               screen_initialize_workspaces((WScreen*)reg))
-                n++;
-        }
-        rootwin_manage_initial_windows(rootwin);
-    }
-    
-    return (n!=0);
-}
-
-
-/*}}}*/
-
-
 /*{{{ Dynamic function table and class implementation */
 
 

@@ -28,7 +28,7 @@ DECLSTRUCT(WTimer){
 
 #define TIMER_INIT(FUN) {{0, 0}, FUN, NULL, WWATCH_INIT}
 
-extern void ioncore_check_signals();
+extern bool ioncore_check_signals();
 extern void ioncore_trap_signals();
 
 extern void timer_set(WTimer *timer, uint msecs);
