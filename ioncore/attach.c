@@ -114,26 +114,11 @@ bool attach_reparent_helper(WRegion *mgr, WRegion *reg,
 /*{{{ Rescue */
 
 
-WRegion *default_find_rescue_manager_for(WRegion *reg, WRegion *todst)
+WRegion *default_find_rescue_manager_for(WRegion *reg, WRegion *chld)
 {
-	WRegion *p;
-	
-	if(reg!=todst && !WOBJ_IS_BEING_DESTROYED(reg)){
-		if(region_has_manage_clientwin(reg))
-			return reg;
-	}
-	
-	p=region_manager_or_parent(reg);
-	if(p==NULL)
-		return NULL;
-	
-	if(!WOBJ_IS_BEING_DESTROYED(p)){
-		WRegion *nm=region_find_rescue_manager_for(p, reg);
-		if(nm!=NULL)
-			return nm;
-	}
-	
-	return default_find_rescue_manager_for(p, reg);
+	if(region_has_manage_clientwin(reg))
+		return reg;
+	return NULL;
 }
 
 
@@ -148,7 +133,21 @@ WRegion *region_find_rescue_manager_for(WRegion *r2, WRegion *reg)
 /* Find new manager for the WClientWins in reg */
 WRegion *region_find_rescue_manager(WRegion *reg)
 {
-	return default_find_rescue_manager_for(reg, reg);
+	WRegion *p;
+	
+	while(1){
+		p=region_manager_or_parent(reg);
+		if(p==NULL)
+			break;
+		if(!WOBJ_IS_BEING_DESTROYED(p)){
+			WRegion *nm=region_find_rescue_manager_for(p, reg);
+			if(nm!=NULL)
+				return nm;
+		}
+		reg=p;
+	}
+	
+	return NULL;
 }
 
 
@@ -176,7 +175,7 @@ bool rescue_managed_clientwins(WRegion *reg, WRegion *list)
 		return TRUE;
 	
 	dest=region_find_rescue_manager(reg);
-		
+	
 	FOR_ALL_MANAGED_ON_LIST_W_NEXT(list, r, next){
 		if(!WOBJ_IS(r, WClientWin))
 			continue;
