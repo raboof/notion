@@ -731,7 +731,7 @@ static const char *genframe_style_default(WGenFrame *genframe)
 
 static const char *genframe_tab_style_default(WGenFrame *genframe)
 {
-	return "frame-tab";
+	return "tab-frame";
 }
 
 

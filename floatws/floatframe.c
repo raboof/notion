@@ -87,7 +87,7 @@ static void floatframe_offsets(WRootWin *rootwin, const WFloatFrame *frame,
 	}else if(rootwin!=NULL){
 		GrBorderWidths bdwt=GR_BORDER_WIDTHS_INIT;
 		GrFontExtents fntet=GR_FONT_EXTENTS_INIT;
-		gr_get_brush_values(rootwin, "frame-tab-floatframe", &bdwt, &fntet, 
+		gr_get_brush_values(rootwin, "tab-frame-floatframe", &bdwt, &fntet, 
 							NULL);
 		bar_h=bdwt.top+bdwt.bottom+fntet.max_height;
 	}
