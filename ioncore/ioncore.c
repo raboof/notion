@@ -90,8 +90,7 @@ static const char ioncore_about[]=
     "This program is distributed in the hope that it will be useful,\n"
     "but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
     "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU\n"
-    "Lesser General Public License for more details.\n"
-    "\n";
+    "Lesser General Public License for more details.\n";
 
 
 static OptParserCommonInfo ioncore_cinfo={
@@ -579,6 +578,15 @@ const char *ioncore_version()
 	return ION_VERSION;
 }
 
+
+/*EXTL_DOC
+ * Returns an about message (version, author, copyright notice).
+ */
+EXTL_EXPORT
+const char *ioncore_aboutmsg()
+{
+	return ioncore_about;
+}
 
 /*}}}*/
 
