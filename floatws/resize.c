@@ -89,6 +89,7 @@ void floatframe_begin_resize(WFloatFrame *frame)
  * (must be in move/resize mode):
  *
  * \begin{tabular}{rl}
+ * \hline
  * \var{horizmul}/\var{vertmul} & effect \\\hline
  * -1 & Shrink horizontally/vertically \\
  * 0 & No effect \\
@@ -118,6 +119,7 @@ void floatframe_do_resize(WFloatFrame *frame, int horizmul, int vertmul)
  * (must be in move/resize mode):
  *
  * \begin{tabular}{rl}
+ * \hline
  * \var{horizmul}/\var{vertmul} & effect \\\hline
  * -1 & Move left/up \\
  * 0 & No effect \\

@@ -83,6 +83,7 @@ void ionframe_begin_resize(WIonFrame *frame)
  * (must be in move/resize mode):
  *
  * \begin{tabular}{rl}
+ * \hline
  * \var{horizmul}/\var{vertmul} & effect \\\hline
  * -1 & Shrink horizontally/vertically \\
  * 0 & No effect \\
