@@ -179,45 +179,32 @@ void panews_managed_remove(WPaneWS *ws, WRegion *reg)
     bool ds=OBJ_IS_BEING_DESTROYED(ws);
     bool act=REGION_IS_ACTIVE(reg);
     bool mcf=region_may_control_focus((WRegion*)ws);
-    WSplitRegion *other=NULL, *node=get_node_check(ws, reg);
+    WSplitRegion *node=get_node_check(ws, reg);
+    WRegion *other=NULL;
+
+    other=ionws_do_get_nextto(&(ws->ionws), reg, SPLIT_ANY, PRIMN_ANY, FALSE);
     
     panews_do_managed_remove(ws, reg);
 
-    if(node==NULL)
-        return;
-
-    other=(WSplitRegion*)split_closest_leaf((WSplit*)node, 
-                                            plainregionfilter);
-
     if(node==(WSplitRegion*)(ws->ionws.stdispnode))
         ws->ionws.stdispnode=NULL;
-    splittree_remove((WSplit*)node, !ds);
+    
+    if(node!=NULL)
+        splittree_remove((WSplit*)node, !ds);
     
     if(!ds){
         if(other==NULL){
-#warning "Dock reinitissä"            
-#if 0
-            if(ws->ionws.split_tree!=NULL){
-                ioncore_defer_destroy((Obj*)(ws->ionws.split_tree));
-                ws->ionws.split_tree=NULL;
-            }
-
-            panews_create_initial_unused(ws);
-            
             if(ws->ionws.split_tree==NULL){
                 warn(TR("Unable to re-initialise workspace. Destroying."));
                 ioncore_defer_destroy((Obj*)ws);
-            }
-#endif
-
-            if(act && mcf){
+            }else if(act && mcf){
                 /* We don't want to give the stdisp focus, even if one exists. 
                  * Or do we?
                  */
                 genws_fallback_focus((WGenWS*)ws, FALSE);
             }
         }else if(act && mcf){
-            region_set_focus(other->reg);
+            region_warp(other);
         }
     }
 }
@@ -231,6 +218,7 @@ void panews_managed_remove(WPaneWS *ws, WRegion *reg)
 
 bool panews_managed_may_destroy(WPaneWS *ws, WRegion *reg)
 {
+#warning "TODO - don't let panes be destroyed if the ws can not be destroyed."
     return TRUE;
 }
 

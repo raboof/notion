@@ -1137,29 +1137,11 @@ static void clientwin_do_set_focus(WClientWin *cwin, bool warp)
 }
 
 
-static bool clientwin_managed_goto(WClientWin *cwin, WRegion *sub, int flags)
+static void restack_transients(WClientWin *cwin)
 {
-    if(!REGION_IS_MAPPED(cwin))
-        return FALSE;
-    
-    if(!REGION_IS_MAPPED(sub))
-        region_map(sub);
-#warning "TODO: raise to top"    
-    
-    if(flags&REGION_GOTO_FOCUS)
-        region_maybewarp(sub, !(flags&REGION_GOTO_NOWARP));
-    
-    return TRUE;
-}
-
-
-void clientwin_restack(WClientWin *cwin, Window other, int mode)
-{
+    Window other=cwin->win;
+    int mode=Above;
     WRegion *reg;
-    
-    xwindow_restack(cwin->win, other, mode);
-    other=cwin->win;
-    mode=Above;
     
     FOR_ALL_MANAGED_ON_LIST(cwin->transient_list, reg){
         Window bottom=None, top=None;
@@ -1170,6 +1152,35 @@ void clientwin_restack(WClientWin *cwin, Window other, int mode)
     }
 }
 
+
+
+static bool clientwin_managed_goto(WClientWin *cwin, WRegion *sub, int flags)
+{
+    if(REGION_LAST_MANAGED(cwin->transient_list)!=sub){
+        UNLINK_ITEM(cwin->transient_list, sub, mgr_next, mgr_prev);
+        LINK_ITEM(cwin->transient_list, sub, mgr_next, mgr_prev);
+        restack_transients(cwin);
+    }
+        
+    if(!REGION_IS_MAPPED(cwin))
+        return FALSE;
+    
+    if(!REGION_IS_MAPPED(sub))
+        region_map(sub);
+    
+    if(flags&REGION_GOTO_FOCUS)
+        region_maybewarp(sub, !(flags&REGION_GOTO_NOWARP));
+    
+    return TRUE;
+}
+
+
+void clientwin_restack(WClientWin *cwin, Window other, int mode)
+{
+    xwindow_restack(cwin->win, other, mode);
+    restack_transients(cwin);
+}
+       
 
 void clientwin_stacking(WClientWin *cwin, Window *bottomret, Window *topret)
 {

@@ -184,7 +184,6 @@ static void ionws_do_stacking(WIonWS *ws, Window *bottomret, Window *topret,
 {
     WRegion *reg;
 
-#warning "Eroon tästä?"    
     *bottomret=ws->genws.dummywin;
     *topret=ws->genws.dummywin;
 
@@ -231,10 +230,16 @@ void ionws_stacking(WIonWS *ws, Window *bottomret, Window *topret)
 /*{{{ Status display support code */
 
 
+static bool regnodefilter(WSplit *split)
+{
+    return OBJ_IS(split, WSplitRegion);
+}
+
+
 void ionws_unmanage_stdisp(WIonWS *ws, bool permanent, bool nofocus)
 {
-    bool setfocus=FALSE;
     WSplitRegion *tofocus=NULL;
+    bool setfocus=FALSE;
     WRegion *od;
     
     if(ws->stdispnode==NULL)
@@ -246,8 +251,9 @@ void ionws_unmanage_stdisp(WIonWS *ws, bool permanent, bool nofocus)
         if(!nofocus && REGION_IS_ACTIVE(od) && 
            region_may_control_focus((WRegion*)ws)){
             setfocus=TRUE;
-            tofocus=(WSplitRegion*)split_closest_leaf((WSplit*)(ws->stdispnode), 
-                                                      NULL);
+            tofocus=(WSplitRegion*)split_nextto((WSplit*)(ws->stdispnode), 
+                                                SPLIT_ANY, PRIMN_ANY,
+                                                regnodefilter);
         }
         /* Reset node_of info here so ionws_managed_remove will not
          * remove the node.
@@ -567,41 +573,51 @@ void ionws_managed_remove(WIonWS *ws, WRegion *reg)
     bool ds=OBJ_IS_BEING_DESTROYED(ws);
     bool act=REGION_IS_ACTIVE(reg);
     bool mcf=region_may_control_focus((WRegion*)ws);
-    WSplitRegion *other=NULL, *node=get_node_check(ws, reg);
+    WSplitRegion *node=get_node_check(ws, reg);
+    WRegion *other;
+
+    other=ionws_do_get_nextto(ws, reg, SPLIT_ANY, PRIMN_ANY, FALSE);
     
     ionws_do_managed_remove(ws, reg);
 
-    if(node==NULL)
-        return;
-    
-    other=(WSplitRegion*)split_closest_leaf((WSplit*)node, nostdispfilter);
-    
     if(node==(WSplitRegion*)(ws->stdispnode))
         ws->stdispnode=NULL;
-    splittree_remove((WSplit*)node, !ds);
+    
+    if(node!=NULL)
+        splittree_remove((WSplit*)node, !ds);
     
     if(!ds){
         if(other==NULL)
             ioncore_defer_destroy((Obj*)ws);
         else if(act && mcf)
-            region_set_focus(other->reg);
+            region_warp(other);
     }
+}
+
+
+static bool mplexfilter(WSplit *node)
+{
+    WSplitRegion *regnode=OBJ_CAST(node, WSplitRegion);
+    
+    return (regnode!=NULL && regnode->reg!=NULL &&
+            OBJ_IS(regnode->reg, WMPlex));
 }
 
 
 bool ionws_manage_rescue(WIonWS *ws, WClientWin *cwin, WRegion *from)
 {
-    WMPlex *nmgr;
+    WSplitRegion *node=get_node_check(ws, from), *other;
     
-    if(REGION_MANAGER(from)!=(WRegion*)ws)
+    if(REGION_MANAGER(from)!=(WRegion*)ws || node==NULL)
         return FALSE;
 
-    nmgr=splittree_find_mplex(from);
+    other=(WSplitRegion*)split_nextto((WSplit*)node, SPLIT_ANY, PRIMN_ANY,
+                                      mplexfilter);
 
-    if(nmgr!=NULL)
-        return (NULL!=mplex_attach_simple(nmgr, (WRegion*)cwin, 0));
+    if(other==NULL || other->reg==NULL)
+        return FALSE;
     
-    return FALSE;
+    return (NULL!=mplex_attach_simple((WMPlex*)other->reg, (WRegion*)cwin, 0));
 }
 
 

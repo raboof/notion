@@ -17,7 +17,6 @@
 #include <ioncore/reginfo.h>
 #include <ioncore/attach.h>
 #include <ioncore/rectangle.h>
-#include <ioncore/mplex.h>
 #include <ioncore/extl.h>
 
 
@@ -175,8 +174,6 @@ DYNFUN void splitinner_mark_current(WSplitInner *split, WSplit *child);
 DYNFUN void splitinner_forall(WSplitInner *node, WSplitFn *fn);
 extern WSplit *split_nextto(WSplit *node, int dir, int primn, 
                             WSplitFilter *filter);
-extern WSplit *split_closest_leaf(WSplit *node, WSplitFilter *filter);
-extern WMPlex *splittree_find_mplex(WRegion *from);
 
 /* X window handling */
 

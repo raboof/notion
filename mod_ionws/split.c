@@ -1339,21 +1339,6 @@ WSplit *split_nextto(WSplit *node, int dir, int primn, WSplitFilter *filter)
 }
 
 
-WSplit *split_closest_leaf(WSplit *node, WSplitFilter *filter)
-{
-    return split_nextto(node, SPLIT_ANY, PRIMN_ANY, filter);
-}
-
-
-static bool mplexfilter(WSplit *node)
-{
-    WSplitRegion *regnode=OBJ_CAST(node, WSplitRegion);
-    
-    return (regnode!=NULL && regnode->reg!=NULL &&
-            OBJ_IS(regnode->reg, WMPlex));
-}
-
-
 void splitinner_mark_current_default(WSplitInner *split, WSplit *child)
 {
     if(((WSplit*)split)->parent!=NULL)
@@ -1374,21 +1359,6 @@ void splitsplit_mark_current(WSplitSplit *split, WSplit *child)
 void splitinner_mark_current(WSplitInner *split, WSplit *child)
 {
     CALL_DYN(splitinner_mark_current, split, (split, child));
-}
-
-
-WMPlex *splittree_find_mplex(WRegion *from)
-{
-    WSplitRegion *node=NULL, *node2=NULL;
-    
-    node=node_of_reg(from);
-    if(node!=NULL){
-        node2=(WSplitRegion*)split_closest_leaf((WSplit*)node, mplexfilter);
-        if(node2!=NULL)
-            return (WMPlex*)(node2->reg);
-    }
-    
-    return NULL;
 }
 
 
@@ -1438,6 +1408,7 @@ static void splitregion_stacking(WSplitRegion *split,
         region_stacking(split->reg, bottomret, topret);
 }
 
+
 void splitsplit_stacking(WSplitSplit *split, 
                          Window *bottomret, Window *topret)
 {
@@ -1447,7 +1418,9 @@ void splitsplit_stacking(WSplitSplit *split,
     split_stacking(split->tl, &tlb, &tlt);
     split_stacking(split->br, &brb, &brt);
     
-#warning "Nothing is done to ensure that this would hold."    
+    /* To make sure that this condition holds is left to the workspace
+     * code to do after a split tree has been loaded or modified.
+     */
     if(split->current==SPLIT_CURRENT_TL){
         *topret=(tlt!=None ? tlt : brt);
         *bottomret=(brb!=None ? brb : tlb);
