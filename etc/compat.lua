@@ -12,7 +12,7 @@ local function obsolete(name, fn)
             fnx=_G[fn]
         end
         io.stderr:write("Warning: function " .. name .. " is obsolete.\n")
-        fnx(unpack(arg))
+        return fnx(unpack(arg))
     end
     _G[name]=obswrap
 end
