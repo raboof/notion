@@ -16,10 +16,13 @@
 #include "global.h"
 #include "property.h"
 #include "xwindow.h"
+#include "extl.h"
 
 
 static char *selection_data=NULL;
 static int selection_length;
+static bool continuation_set=FALSE;
+static ExtlFn continuation;
 
 void ioncore_handle_selection_request(XSelectionRequestEvent *ev)
 {
@@ -40,17 +43,33 @@ void ioncore_handle_selection_request(XSelectionRequestEvent *ev)
 }
 
 
-static void insert_selection(WWindow *wwin, Window win, Atom prop)
+static void ins(Window win, const char *str, int n)
+{
+    if(!continuation_set){
+        WWindow *wwin=XWINDOW_REGION_OF_T(win, WWindow);
+        if(wwin)
+            window_insstr(wwin, str, n);
+    }else{
+        char *tmp=scopyn(str, n);
+        if(tmp!=NULL){
+            extl_call(continuation, "s", NULL, tmp);
+            free(tmp);
+        }
+    }
+}
+
+    
+static void insert_selection(Window win, Atom prop)
 {
     char **p=xwindow_get_text_property(win, prop, NULL);
     if(p!=NULL){
-        window_insstr(wwin, p[0], strlen(p[0]));
+        ins(win, p[0], strlen(p[0]));
         XFreeStringList(p);
     }
 }
 
 
-static void insert_cutbuffer(WWindow *wwin)
+static void insert_cutbuffer(Window win)
 {
     char *p;
     int n;
@@ -60,7 +79,7 @@ static void insert_cutbuffer(WWindow *wwin)
     if(n<=0 || p==NULL)
         return;
     
-    window_insstr(wwin, p, n);
+    ins(win, p, n);
 }
 
 
@@ -70,18 +89,17 @@ void ioncore_handle_selection(XSelectionEvent *ev)
     Window win=ev->requestor;
     WWindow *wwin;
     
-    wwin=XWINDOW_REGION_OF_T(win, WWindow);
-    
-    if(wwin==NULL)
-        return;
-    
     if(prop==None){
-        insert_cutbuffer(wwin);
-        return;
+        insert_cutbuffer(win);
+    }else{
+        insert_selection(win, prop);
+        XDeleteProperty(ioncore_g.dpy, win, prop);
     }
-
-    insert_selection(wwin, win, prop);
-    XDeleteProperty(ioncore_g.dpy, win, prop);
+    
+    if(continuation_set){
+        extl_unref_fn(continuation);
+        continuation_set=FALSE;
+    }
 }
 
 
@@ -94,7 +112,7 @@ void ioncore_clear_selection()
 }
 
 
-void ioncore_set_selection(const char *p, int n)
+void ioncore_set_selection_n(const char *p, int n)
 {
     if(selection_data!=NULL)
         free(selection_data);
@@ -116,9 +134,27 @@ void ioncore_set_selection(const char *p, int n)
 }
 
 
+/*EXTL_DOC
+ * Set primary selection and cutbuffer0 to \var{p}.
+ */
+EXTL_EXPORT
+void ioncore_set_selection(const char *p)
+{
+    if(p==NULL)
+        ioncore_clear_selection();
+    else
+        ioncore_set_selection_n(p, strlen(p));
+}
+
+
 void ioncore_request_selection_for(Window win)
 {
     Atom a=XA_STRING;
+    
+    if(continuation_set){
+        extl_unref_fn(continuation);
+        continuation_set=FALSE;
+    }
     
     if(ioncore_g.use_mb){
 #ifdef X_HAVE_UTF8_STRING
@@ -130,5 +166,19 @@ void ioncore_request_selection_for(Window win)
     
     XConvertSelection(ioncore_g.dpy, XA_PRIMARY, a,
                       ioncore_g.atom_selection, win, CurrentTime);
+}
+
+
+/*EXTL_DOC
+ * Request (string) selection. The function \var{fn} will be called 
+ * with the selection when and if it is received.
+ */
+EXTL_EXPORT
+void ioncore_request_selection(ExtlFn fn)
+{
+    assert(ioncore_g.rootwins!=NULL);
+    ioncore_request_selection_for(ioncore_g.rootwins->dummy_win);
+    continuation=extl_ref_fn(fn);
+    continuation_set=TRUE;
 }
 

@@ -461,7 +461,7 @@ static void edln_do_copy(Edln *edln, bool del)
         end=edln->point;
     }
     
-    ioncore_set_selection(edln->p+beg, end-beg);
+    ioncore_set_selection_n(edln->p+beg, end-beg);
     
     if(del){
         edln->point=beg;
