@@ -11,11 +11,12 @@
 
 #include <string.h>
 
+#include <libtu/objp.h>
+#include <libtu/minmax.h>
 #include <ioncore/common.h>
 #include <ioncore/rootwin.h>
 #include <ioncore/focus.h>
 #include <ioncore/global.h>
-#include <libtu/objp.h>
 #include <ioncore/region.h>
 #include <ioncore/manage.h>
 #include <ioncore/screen.h>
@@ -25,11 +26,14 @@
 #include <ioncore/resize.h>
 #include <ioncore/extl.h>
 #include <ioncore/region-iter.h>
-#include <libtu/minmax.h>
+#include <ioncore/regbind.h>
+#include <ioncore/extlconv.h>
+#include <ioncore/defer.h>
 #include "placement.h"
 #include "ionws.h"
 #include "ionframe.h"
 #include "split.h"
+#include "main.h"
 
 
 /*{{{ region dynfun implementations */
@@ -121,6 +125,17 @@ static bool ionws_managed_display(WIonWS *ws, WRegion *reg)
 /*{{{ Create/destroy */
 
 
+static void ionws_managed_add(WIonWS *ws, WRegion *reg)
+{
+    region_set_manager(reg, (WRegion*)ws, &(ws->managed_list));
+    
+    region_add_bindmap_owned(reg, mod_ionws_ionws_bindmap, (WRegion*)ws);
+    
+    if(REGION_IS_MAPPED(ws))
+        region_map(reg);
+}
+
+
 static WIonFrame *create_initial_frame(WIonWS *ws, WWindow *parent,
                                        const WFitParams *fp)
 {
@@ -132,7 +147,7 @@ static WIonFrame *create_initial_frame(WIonWS *ws, WWindow *parent,
         return NULL;
     
     ws->split_tree=(Obj*)frame;
-    ionws_add_managed(ws, (WRegion*)frame);
+    ionws_managed_add(ws, (WRegion*)frame);
 
     return frame;
 }
@@ -199,6 +214,444 @@ static bool ionws_managed_may_destroy(WIonWS *ws, WRegion *reg)
 bool ionws_rescue_clientwins(WIonWS *ws)
 {
     return region_rescue_managed_clientwins((WRegion*)ws, ws->managed_list);
+}
+
+
+void ionws_managed_remove(WIonWS *ws, WRegion *reg)
+{
+    bool ds=OBJ_IS_BEING_DESTROYED(ws);
+    WRegion *other;
+    
+    region_unset_manager(reg, (WRegion*)ws, &(ws->managed_list));
+    region_remove_bindmap_owned(reg, mod_ionws_ionws_bindmap, (WRegion*)ws);
+
+    other=split_tree_remove(&(ws->split_tree), reg, !ds);
+    
+    if(!ds){
+        if(other){
+            if(region_may_control_focus((WRegion*)ws))
+                region_set_focus(other);
+        }else{
+            ioncore_defer_destroy((Obj*)ws);
+        }
+    }
+}
+
+
+bool ionws_manage_rescue(WIonWS *ws, WClientWin *cwin, WRegion *from)
+{
+    WWsSplit *split;
+    WMPlex *nmgr;
+    
+    if(REGION_MANAGER(from)!=(WRegion*)ws)
+        return FALSE;
+
+    nmgr=split_tree_find_mplex(from);
+
+    if(nmgr!=NULL)
+        return (NULL!=mplex_attach_simple(nmgr, (WRegion*)cwin, 0));
+    
+    return FALSE;
+}
+
+
+/*}}}*/
+
+
+/*{{{ Resize */
+
+
+void ionws_managed_rqgeom(WIonWS *ws, WRegion *mgd, 
+                          int flags, const WRectangle *geom,
+                          WRectangle *geomret)
+{
+    if(REGION_MANAGER(mgd)!=(WRegion*)ws)
+        return;
+    
+    split_tree_rqgeom(ws->split_tree, (Obj*)mgd, flags, geom, geomret);
+}
+
+
+/*EXTL_DOC
+ * Attempt to resize and/or move the split tree starting at \var{node}
+ * (\type{WWsSplit} or \type{WRegion}). Behaviour and the \var{g} 
+ * parameter are as for \fnref{WRegion.rqgeom} operating on
+ * \var{node} (if it were a \type{WRegion}).
+ */
+EXTL_EXPORT_MEMBER
+ExtlTab ionws_resize_tree(WIonWS *ws, Obj *node, ExtlTab g)
+{
+    WRectangle geom, ogeom;
+    int flags=REGION_RQGEOM_WEAK_ALL;
+    
+    if(node!=NULL && OBJ_IS(node, WRegion)){
+        geom=REGION_GEOM((WRegion*)node);
+    }else if(node!=NULL && OBJ_IS(node, WWsSplit)){
+        geom=((WWsSplit*)node)->geom;
+    }else{
+        warn("Invalid node.");
+        return extl_table_none();
+    }
+    
+    ogeom=geom;
+
+    if(extl_table_gets_i(g, "x", &(geom.x)))
+        flags&=~REGION_RQGEOM_WEAK_X;
+    if(extl_table_gets_i(g, "y", &(geom.y)))
+        flags&=~REGION_RQGEOM_WEAK_Y;
+    if(extl_table_gets_i(g, "w", &(geom.w)))
+        flags&=~REGION_RQGEOM_WEAK_W;
+    if(extl_table_gets_i(g, "h", &(geom.h)))
+        flags&=~REGION_RQGEOM_WEAK_H;
+    
+    geom.w=maxof(1, geom.w);
+    geom.h=maxof(1, geom.h);
+
+    split_tree_rqgeom(ws->split_tree, node, flags, &geom, &ogeom);
+    
+    return extl_table_from_rectangle(&ogeom);
+}
+
+
+/*}}}*/
+
+
+/*{{{ Split/unsplit */
+
+
+static bool get_split_dir_primn(const char *str, int *dir, int *primn)
+{
+    if(str==NULL)
+        return FALSE;
+    
+    if(!strcmp(str, "left")){
+        *primn=TOP_OR_LEFT;
+        *dir=HORIZONTAL;
+    }else if(!strcmp(str, "right")){
+        *primn=BOTTOM_OR_RIGHT;
+        *dir=HORIZONTAL;
+    }else if(!strcmp(str, "top") || 
+             !strcmp(str, "above") || 
+             !strcmp(str, "up")){
+        *primn=TOP_OR_LEFT;
+        *dir=VERTICAL;
+    }else if(!strcmp(str, "bottom") || 
+             !strcmp(str, "below") ||
+             !strcmp(str, "down")){
+        *primn=BOTTOM_OR_RIGHT;
+        *dir=VERTICAL;
+    }else{
+        return FALSE;
+    }
+    
+    return TRUE;
+}
+
+
+/*EXTL_DOC
+ * Create new WIonFrame on \var{ws} above/below/left of/right of
+ * all other objects depending on \var{dirstr}
+ * (one of ''left'', ''right'', ''top'' or ''bottom'').
+ */
+EXTL_EXPORT_MEMBER
+WIonFrame *ionws_split_top(WIonWS *ws, const char *dirstr)
+{
+    WRegion *reg=NULL;
+    int dir, primn, mins;
+    
+    if(!get_split_dir_primn(dirstr, &dir, &primn))
+        return NULL;
+    
+    mins=16; /* totally arbitrary */
+    
+    if(ws->split_tree!=NULL){
+        reg=split_tree_split(&(ws->split_tree), ws->split_tree, 
+                             dir, primn, mins, ANY,
+                             (WRegionSimpleCreateFn*)create_ionframe,
+                             REGION_PARENT_CHK(ws, WWindow));
+    }
+    
+    if(reg!=NULL){
+        ionws_managed_add(ws, reg);
+        region_warp(reg);
+    }
+    
+    return (WIonFrame*)reg;
+}
+
+
+/*EXTL_DOC
+ * Split \var{frame} creating a new WIonFrame to direction \var{dir}
+ * (one of ''left'', ''right'', ''top'' or ''bottom'') of \var{frame}.
+ * If \var{attach_current} is set, the region currently displayed in
+ * \var{frame}, if any, is moved to thenew frame.
+ */
+EXTL_EXPORT_MEMBER
+WIonFrame *ionws_split_at(WIonWS *ws, WIonFrame *frame, const char *dirstr, 
+                          bool attach_current)
+{
+    WRegion *reg, *curr;
+    int dir, primn, mins;
+    
+    if(frame==NULL){
+        warn_obj("ionws_split_at", "nil frame");
+        return NULL;
+    }
+    
+    if(REGION_MANAGER(frame)!=(WRegion*)ws){
+        warn_obj("ionws_split_at", "Frame not managed by the workspace.");
+        return NULL;
+    }
+    
+    if(!get_split_dir_primn(dirstr, &dir, &primn)){
+        warn_obj("ionws_split_at", "Unknown direction parameter to split_at");
+        return NULL;
+    }
+    
+    mins=(dir==VERTICAL
+          ? region_min_h((WRegion*)frame)
+          : region_min_w((WRegion*)frame));
+    
+    reg=split_tree_split(&(ws->split_tree), (Obj*)frame, 
+                         dir, primn, mins, primn,
+                         (WRegionSimpleCreateFn*)create_ionframe,
+                         REGION_PARENT_CHK(ws, WWindow));
+    
+    if(reg==NULL){
+        warn_obj("ionws_split_at", "Unable to split");
+        return NULL;
+    }
+
+    assert(OBJ_IS(reg, WIonFrame));
+
+    ionws_managed_add(ws, reg);
+    
+    curr=mplex_l1_current(&(frame->frame.mplex));
+    
+    if(attach_current && curr!=NULL)
+        mplex_attach_simple((WMPlex*)reg, curr, MPLEX_ATTACH_SWITCHTO);
+    
+    if(region_may_control_focus((WRegion*)frame))
+        region_goto(reg);
+
+    return (WIonFrame*)reg;
+}
+
+
+/*EXTL_DOC
+ * Try to relocate regions managed by \var{frame} to another frame
+ * and, if possible, destroy the frame.
+ */
+EXTL_EXPORT_MEMBER
+void ionws_unsplit_at(WIonWS *ws, WIonFrame *frame)
+{
+    if(frame==NULL){
+        warn_obj("ionws_unsplit_at", "nil frame");
+        return;
+    }
+    if(REGION_MANAGER(frame)!=(WRegion*)ws){
+        warn_obj("ionws_unsplit_at", "The frame is not managed by the workspace.");
+        return;
+    }
+    
+    if(!region_may_destroy((WRegion*)frame)){
+        warn_obj("ionws_unsplit_at", "Frame may not be destroyed");
+        return;
+    }
+
+    if(!region_rescue_clientwins((WRegion*)frame)){
+        warn_obj("ionws_unsplit_at", "Failed to rescue managed objects.");
+        return;
+    }
+
+    ioncore_defer_destroy((Obj*)frame);
+}
+
+
+/*}}}*/
+
+
+/*{{{ Navigation etc. exports */
+
+
+/*EXTL_DOC
+ * Returns most recently active region on \var{ws}.
+ */
+EXTL_EXPORT_MEMBER
+WRegion *ionws_current(WIonWS *ws)
+{
+    return split_tree_current_tl(ws->split_tree, -1);
+}
+
+
+/*EXTL_DOC
+ * Returns a list of regions managed by the workspace (frames, mostly).
+ */
+EXTL_EXPORT_MEMBER
+ExtlTab ionws_managed_list(WIonWS *ws)
+{
+    return managed_list_to_table(ws->managed_list, NULL);
+}
+
+
+static WRegion *do_get_next_to(WIonWS *ws, WRegion *reg, int dir, int primn)
+{
+    if(reg==NULL || REGION_MANAGER(reg)!=(WRegion*)ws)
+        return NULL;
+    
+    if(primn==TOP_OR_LEFT)
+        return split_tree_to_tl(reg, dir);
+    else
+        return split_tree_to_br(reg, dir);
+}
+
+
+/*EXTL_DOC
+ * Return the most previously active region next to \var{reg} in
+ * direction \var{dirstr} (left/right/up/down). The region \var{reg}
+ * must be managed by \var{ws}.
+ */
+EXTL_EXPORT_MEMBER
+WRegion *ionws_next_to(WIonWS *ws, WRegion *reg, const char *dirstr)
+{
+    int dir=0, primn=0;
+    
+    if(!get_split_dir_primn(dirstr, &dir, &primn))
+        return NULL;
+    
+    return do_get_next_to(ws, reg, dir, primn);
+}
+
+
+static WRegion *do_get_farthest(WIonWS *ws, int dir, int primn)
+{
+    if(primn==TOP_OR_LEFT)
+        return split_tree_current_tl(ws->split_tree, dir);
+    else
+        return split_tree_current_br(ws->split_tree, dir);
+}
+
+
+/*EXTL_DOC
+ * Return the most previously active region on \var{ws} with no
+ * other regions next to it in  direction \var{dirstr} 
+ * (left/right/up/down). 
+ */
+EXTL_EXPORT_MEMBER
+WRegion *ionws_farthest(WIonWS *ws, const char *dirstr)
+{
+    int dir=0, primn=0;
+
+    if(!get_split_dir_primn(dirstr, &dir, &primn))
+        return NULL;
+    
+    return do_get_farthest(ws, dir, primn);
+}
+
+
+static WRegion *do_goto_dir(WIonWS *ws, int dir, int primn)
+{
+    int primn2=(primn==TOP_OR_LEFT ? BOTTOM_OR_RIGHT : TOP_OR_LEFT);
+    WRegion *reg=NULL, *curr=ionws_current(ws);
+    if(curr!=NULL)
+        reg=do_get_next_to(ws, curr, dir, primn);
+    if(reg==NULL)
+        reg=do_get_farthest(ws, dir, primn2);
+    if(reg!=NULL)
+        region_goto(reg);
+    return reg;
+}
+
+
+/*EXTL_DOC
+ * Go to the most previously active region on \var{ws} next to \var{reg} in
+ * direction \var{dirstr} (up/down/left/right), wrapping around to a most 
+ * recently active farthest region in the opposite direction if \var{reg} 
+ * is already the further region in the given direction.
+ * 
+ * Note that this function is asynchronous; the region will not
+ * actually have received the focus when this function returns.
+ */
+EXTL_EXPORT_MEMBER
+WRegion *ionws_goto_dir(WIonWS *ws, const char *dirstr)
+{
+    int dir=0, primn=0;
+
+    if(!get_split_dir_primn(dirstr, &dir, &primn))
+        return NULL;
+    
+    return do_goto_dir(ws, dir, primn);
+}
+
+
+static WRegion *do_goto_dir_nowrap(WIonWS *ws, int dir, int primn)
+{
+    int primn2=(primn==TOP_OR_LEFT ? BOTTOM_OR_RIGHT : TOP_OR_LEFT);
+    WRegion *reg=NULL, *curr=ionws_current(ws);
+    if(curr!=NULL)
+        reg=do_get_next_to(ws, curr, dir, primn);
+    if(reg!=NULL)
+        region_goto(reg);
+    return reg;
+}
+
+
+/*EXTL_DOC
+ * Go to the most previously active region on \var{ws} next to \var{reg} in
+ * direction \var{dirstr} (up/down/left/right) without wrapping around.
+ */
+EXTL_EXPORT_MEMBER
+WRegion *ionws_goto_dir_nowrap(WIonWS *ws, const char *dirstr)
+{
+    int dir=0, primn=0;
+
+    if(!get_split_dir_primn(dirstr, &dir, &primn))
+        return NULL;
+    
+    return do_goto_dir_nowrap(ws, dir, primn);
+}
+
+
+/*EXTL_DOC
+ * Find region on \var{ws} overlapping coordinates $(x, y)$.
+ */
+EXTL_EXPORT_MEMBER
+WRegion *ionws_region_at(WIonWS *ws, int x, int y)
+{
+    return split_tree_region_at(ws->split_tree, x, y);
+}
+
+
+/*EXTL_DOC
+ * For region \var{reg} managed by \var{ws} return the \type{WWsSplit}
+ * a leaf of which \var{reg} is.
+ */
+EXTL_EXPORT_MEMBER
+WWsSplit *ionws_split_of(WIonWS *ws, WRegion *reg)
+{
+    if(reg==NULL){
+        warn_obj("ionws_split_of", "nil parameter");
+        return NULL;
+    }
+    
+    if(REGION_MANAGER(reg)!=(WRegion*)ws){
+        warn_obj("ionws_split_of", "Manager doesn't match");
+        return NULL;
+    }
+    
+    return split_tree_split_of((Obj*)reg);
+}
+
+
+/*}}}*/
+
+
+/*{{{ Misc. */
+
+
+void ionws_managed_activated(WIonWS *ws, WRegion *reg)
+{
+    split_tree_mark_current(reg);
 }
 
 
@@ -385,7 +838,7 @@ static Obj *load_obj(WIonWS *ws, WWindow *par, const WRectangle *geom,
         fp.mode=REGION_FIT_EXACT;
         reg=create_region_load(par, &fp, tab);
         if(reg!=NULL)
-            ionws_add_managed(ws, reg);
+            ionws_managed_add(ws, reg);
         return (Obj*)reg;
     }
     

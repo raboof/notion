@@ -23,22 +23,20 @@
 #include <ioncore/resize.h>
 #include <ioncore/attach.h>
 #include <ioncore/defer.h>
-#include <ioncore/reginfo.h>
-#include <ioncore/extlconv.h>
 #include <ioncore/manage.h>
+#include <ioncore/extlconv.h>
 #include <ioncore/region-iter.h>
 #include "ionws.h"
 #include "split.h"
-#include "main.h"
 
-    
+
 IMPLCLASS(WWsSplit, Obj, NULL, NULL);
 
 
 static Rb_node split_of_map=NULL;
 
 
-/*{{{ Misc helper functions */
+/*{{{ Geometry helper functions */
 
 
 static int reg_size(WRegion *reg, int dir)
@@ -140,70 +138,6 @@ static int reg_resize(WRegion *reg, int dir, int npos, int nsize)
 }
 
 
-static WWsSplit *split_of_reg(WRegion *reg)
-{
-    Rb_node node=NULL;
-    int found=0;
-    
-    assert(REGION_MANAGER_CHK(reg, WIonWS)!=NULL);
-    
-    if(split_of_map!=NULL){
-        node=rb_find_pkey_n(split_of_map, reg, &found);
-        if(found)
-            return (WWsSplit*)(node->v.val);
-    }
-    
-    return NULL;
-}
-
-    
-WWsSplit *split_of(Obj *obj)
-{
-    if(OBJ_IS(obj, WWsSplit)){
-        return ((WWsSplit*)obj)->parent;
-    }else{
-        assert(OBJ_IS(obj, WRegion));
-        return split_of_reg((WRegion*)obj);
-    }
-}
-
-
-bool set_split_of_reg(WRegion *reg, WWsSplit *split)
-{
-    Rb_node node=NULL;
-    int found;
-    
-    assert(REGION_MANAGER_CHK(reg, WIonWS)!=NULL);
-
-    if(split_of_map==NULL){
-        if(split==NULL)
-            return TRUE;
-        split_of_map=make_rb();
-        if(split_of_map==NULL){
-            warn_err();
-            return FALSE;
-        }
-    }
-    
-    node=rb_find_pkey_n(split_of_map, reg, &found);
-    if(found)
-        rb_delete_node(node);
-
-    return (rb_insertp(split_of_map, reg, split)!=NULL);
-}
-
-
-void set_split_of(Obj *obj, WWsSplit *split)
-{
-    if(OBJ_IS(obj, WWsSplit)){
-        ((WWsSplit*)obj)->parent=split;
-    }else{
-        assert(OBJ_IS(obj, WRegion));
-        set_split_of_reg((WRegion*)obj, split);
-    }
-}
-
-
 /* No, these are not even supposed to be proper/consistent 
  * Z \cup {\infty, -\infty} calculation rules. 
  */
@@ -236,32 +170,76 @@ static void bound(int *what, int min, int max)
 }
 
 
-static bool get_split_dir_primn(const char *str, int *dir, int *primn)
+/*}}}*/
+
+
+/*{{{ Functions to find the parent split */
+
+
+static WWsSplit *split_of_reg(WRegion *reg)
 {
-    if(str==NULL)
-        return FALSE;
+    Rb_node node=NULL;
+    int found=0;
     
-    if(!strcmp(str, "left")){
-        *primn=TOP_OR_LEFT;
-        *dir=HORIZONTAL;
-    }else if(!strcmp(str, "right")){
-        *primn=BOTTOM_OR_RIGHT;
-        *dir=HORIZONTAL;
-    }else if(!strcmp(str, "top") || 
-             !strcmp(str, "above") || 
-             !strcmp(str, "up")){
-        *primn=TOP_OR_LEFT;
-        *dir=VERTICAL;
-    }else if(!strcmp(str, "bottom") || 
-             !strcmp(str, "below") ||
-             !strcmp(str, "down")){
-        *primn=BOTTOM_OR_RIGHT;
-        *dir=VERTICAL;
-    }else{
-        return FALSE;
+    /*assert(REGION_MANAGER_CHK(reg, WIonWS)!=NULL);*/
+    
+    if(split_of_map!=NULL){
+        node=rb_find_pkey_n(split_of_map, reg, &found);
+        if(found)
+            return (WWsSplit*)(node->v.val);
     }
     
-    return TRUE;
+    return NULL;
+}
+
+
+#define split_of split_tree_split_of
+
+
+WWsSplit *split_tree_split_of(Obj *obj)
+{
+    if(OBJ_IS(obj, WWsSplit)){
+        return ((WWsSplit*)obj)->parent;
+    }else{
+        assert(OBJ_IS(obj, WRegion));
+        return split_of_reg((WRegion*)obj);
+    }
+}
+
+
+bool set_split_of_reg(WRegion *reg, WWsSplit *split)
+{
+    Rb_node node=NULL;
+    int found;
+    
+    /*assert(REGION_MANAGER_CHK(reg, WIonWS)!=NULL);*/
+
+    if(split_of_map==NULL){
+        if(split==NULL)
+            return TRUE;
+        split_of_map=make_rb();
+        if(split_of_map==NULL){
+            warn_err();
+            return FALSE;
+        }
+    }
+    
+    node=rb_find_pkey_n(split_of_map, reg, &found);
+    if(found)
+        rb_delete_node(node);
+
+    return (rb_insertp(split_of_map, reg, split)!=NULL);
+}
+
+
+void set_split_of(Obj *obj, WWsSplit *split)
+{
+    if(OBJ_IS(obj, WWsSplit)){
+        ((WWsSplit*)obj)->parent=split;
+    }else{
+        assert(OBJ_IS(obj, WRegion));
+        set_split_of_reg((WRegion*)obj, split);
+    }
 }
 
 
@@ -611,9 +589,9 @@ static void adjust_d(int *d, int negmax, int posmax)
 }
 
 
-static void ionws_do_rqgeom_dir(WIonWS *ws, Obj *sub, 
-                                      int flags, const WRectangle *geom,
-                                      WRectangle *geomret, int dir)
+static void split_tree_do_rqgeom_dir(Obj *root, Obj *sub, 
+                                     int flags, const WRectangle *geom,
+                                     WRectangle *geomret, int dir)
 {
     bool horiz=(dir==HORIZONTAL);
     int x1d, x2d;
@@ -705,20 +683,12 @@ static void ionws_do_rqgeom_dir(WIonWS *ws, Obj *sub,
 }
 
 
-static void ionws_do_rqgeom(WIonWS *ws, Obj *obj,
-                                  int flags, const WRectangle *geom,
-                                  WRectangle *geomret)
+void split_tree_rqgeom(Obj *root, Obj *obj, int flags, 
+                       const WRectangle *geom,
+                       WRectangle *geomret)
 {
-    ionws_do_rqgeom_dir(ws, obj, flags, geom, geomret, HORIZONTAL);
-    ionws_do_rqgeom_dir(ws, obj, flags, geom, geomret, VERTICAL);
-}
-
-
-void ionws_managed_rqgeom(WIonWS *ws, WRegion *mgd, 
-                                int flags, const WRectangle *geom,
-                                WRectangle *geomret)
-{
-    ionws_do_rqgeom(ws, (Obj*)mgd, flags, geom, geomret);
+    split_tree_do_rqgeom_dir(root, obj, flags, geom, geomret, HORIZONTAL);
+    split_tree_do_rqgeom_dir(root, obj, flags, geom, geomret, VERTICAL);
 }
 
 
@@ -750,19 +720,18 @@ WWsSplit *create_split(int dir, Obj *tl, Obj *br, const WRectangle *geom)
 }
 
 
-WRegion *ionws_do_split_at(WIonWS *ws, Obj *obj, int dir, int primn,
-                           int minsize, int oprimn,
-                           WRegionSimpleCreateFn *fn)
+WRegion *split_tree_split(Obj **root, Obj *obj, int dir, int primn, 
+                          int minsize, int oprimn, 
+                          WRegionSimpleCreateFn *fn, WWindow *parent)
 {
     int tlfree, brfree, tlshrink, brshrink, minsizebytree, maxsizebytree;
     int objmin, objmax;
     int s, sn, so, pos;
     WWsSplit *split, *nsplit;
     WRegion *nreg;
-    WWindow *par;
     WFitParams fp;
     
-    assert(obj!=NULL);
+    assert(root!=NULL && *root!=NULL && obj!=NULL && parent!=NULL);
     
     if(primn!=TOP_OR_LEFT && primn!=BOTTOM_OR_RIGHT)
         primn=BOTTOM_OR_RIGHT;
@@ -810,17 +779,12 @@ WRegion *ionws_do_split_at(WIonWS *ws, Obj *obj, int dir, int primn,
         fp.g.w=sn;
     }
     
-    par=REGION_PARENT_CHK(ws, WWindow);
-    assert(par!=NULL);
-    
-    nreg=fn(par, &fp);
+    nreg=fn(parent, &fp);
     
     if(nreg==NULL){
         free(nsplit);
         return NULL;
     }
-    
-    ionws_add_managed(ws, nreg);
     
     /* Now that everything's ok, resize and move everything.
      */
@@ -852,102 +816,155 @@ WRegion *ionws_do_split_at(WIonWS *ws, Obj *obj, int dir, int primn,
             split->br=(Obj*)nsplit;
         nsplit->parent=split;
     }else{
-        ws->split_tree=(Obj*)nsplit;
+        *root=(Obj*)nsplit;
     }
     
     return nreg;
 }
 
 
-/*EXTL_DOC
- * Create new WIonFrame on \var{ws} above/below/left of/right of
- * all other objects depending on \var{dirstr}
- * (one of ''left'', ''right'', ''top'' or ''bottom'').
- */
-EXTL_EXPORT_MEMBER
-WIonFrame *ionws_split_top(WIonWS *ws, const char *dirstr)
+/*}}}*/
+
+
+/*{{{ Remove */
+
+
+static bool split_tree_remove_split(Obj **root, WWsSplit *split, 
+                                    bool reclaim_space)
 {
-    WRegion *reg=NULL;
-    int dir, primn, mins;
+    WWsSplit *split2;
+    Obj *other;
+    int osize, nsize, npos;
+    int primn;
     
-    if(!get_split_dir_primn(dirstr, &dir, &primn))
-        return NULL;
-    
-    mins=16; /* totally arbitrary */
-    
-    if(ws->split_tree!=NULL){
-        reg=ionws_do_split_at(ws, ws->split_tree, dir, primn, mins, ANY,
-                              (WRegionSimpleCreateFn*)create_ionframe);
+    if(split->tl==NULL){
+        other=split->br;
+        primn=TOP_OR_LEFT;
+    }else{
+        other=split->tl;
+        primn=BOTTOM_OR_RIGHT;
     }
     
-    if(reg!=NULL)
-        region_warp(reg);
+    split2=split->parent;
     
-    return (WIonFrame*)reg;
+    if(split2!=NULL){
+        if((Obj*)split==split2->tl)
+            split2->tl=other;
+        else
+            split2->br=other;
+    }else{
+        *root=other;
+    }
+    
+    if(other==NULL)
+        return FALSE;
+    
+    set_split_of(other, split2);
+    
+    if(reclaim_space){
+        nsize=split_tree_size((Obj*)split, split->dir);
+        npos=split_tree_pos((Obj*)split, split->dir);
+        split_tree_resize(other, split->dir, ANY, npos, nsize);
+    }
+
+    destroy_obj((Obj*)split);
+    
+    return TRUE;
 }
 
-
-/*EXTL_DOC
- * Split \var{frame} creating a new WIonFrame to direction \var{dir}
- * (one of ''left'', ''right'', ''top'' or ''bottom'') of \var{frame}.
- * If \var{attach_current} is set, the region currently displayed in
- * \var{frame}, if any, is moved to thenew frame.
- */
-EXTL_EXPORT_MEMBER
-WIonFrame *ionws_split_at(WIonWS *ws, WIonFrame *frame, const char *dirstr, 
-                          bool attach_current)
+    
+WRegion *split_tree_remove(Obj **root, WRegion *reg, bool reclaim_space)
 {
-    WRegion *reg, *curr;
-    int dir, primn, mins;
+    WWsSplit *split;
     
-    if(frame==NULL){
-        warn_obj("ionws_split_at", "nil frame");
-        return NULL;
-    }
-    
-    if(REGION_MANAGER(frame)!=(WRegion*)ws){
-        warn_obj("ionws_split_at", "Frame not managed by the workspace.");
-        return NULL;
-    }
-    
-    if(!get_split_dir_primn(dirstr, &dir, &primn)){
-        warn_obj("ionws_split_at", "Unknown direction parameter to split_at");
-        return NULL;
-    }
-    
-    mins=(dir==VERTICAL
-          ? region_min_h((WRegion*)frame)
-          : region_min_w((WRegion*)frame));
-    
-    reg=ionws_do_split_at(ws, (Obj*)frame, dir, primn, mins, primn,
-                          (WRegionSimpleCreateFn*)create_ionframe);
-    
-    if(reg==NULL){
-        warn_obj("ionws_split_at", "Unable to split");
-        return NULL;
-    }
+    split=split_of_reg(reg);
 
-    assert(OBJ_IS(reg, WIonFrame));
-    
-    curr=mplex_l1_current(&(frame->frame.mplex));
-    
-    if(attach_current && curr!=NULL)
-        mplex_attach_simple((WMPlex*)reg, curr, MPLEX_ATTACH_SWITCHTO);
-    
-    if(region_may_control_focus((WRegion*)frame))
-        region_goto(reg);
-
-    return (WIonFrame*)reg;
+    if(split!=NULL){
+        WRegion *other;
+        if(split->tl==(Obj*)reg){
+            split->tl=NULL;
+            other=split_tree_current_tl(split->br, split->dir);
+        }else{
+            split->br=NULL;
+            other=split_tree_current_br(split->tl, split->dir);
+        }
+        
+        set_split_of_reg(reg, NULL);
+        
+        split_tree_remove_split(root, split, reclaim_space);
+        
+        return other;
+    }else{
+        *root=NULL;
+        return NULL;
+    }
 }
 
 
 /*}}}*/
 
 
-/*{{{ Navigation */
+/*{{{ iowns_manage_rescue */
 
 
-static WRegion *left_or_topmost_current(Obj *obj, int dir)
+static WMPlex *find_mplex_descend(Obj *ptr, int primn)
+{
+    WMPlex *reg;
+    WWsSplit *split;
+    
+    do{
+        if(OBJ_IS(ptr, WMPlex))
+            return (WMPlex*)ptr;
+        
+        if(!OBJ_IS(ptr, WWsSplit))
+            return NULL;
+        
+        split=(WWsSplit*)ptr;
+        
+        if(primn==TOP_OR_LEFT)
+            reg=find_mplex_descend(split->tl, primn);
+        else
+            reg=find_mplex_descend(split->br, primn);
+        
+        if(reg!=NULL)
+            return reg;
+        
+        if(primn==TOP_OR_LEFT)
+            ptr=split->br;
+        else
+            ptr=split->tl;
+    }while(1);
+}
+
+
+WMPlex *split_tree_find_mplex(WRegion *from)
+{
+    WMPlex *nmgr=NULL;
+    Obj *obj=(Obj*)from;
+    WWsSplit *split=split_of_reg(from);
+    
+    while(split!=NULL){
+        if(split->tl==obj)
+            nmgr=find_mplex_descend(split->br, TOP_OR_LEFT);
+        else
+            nmgr=find_mplex_descend(split->tl, BOTTOM_OR_RIGHT);
+        if(nmgr!=NULL)
+            break;
+        obj=(Obj*)split;
+        split=split->parent;
+    }
+    
+    return nmgr;
+}
+
+
+/*}}}*/
+
+
+/*{{{ Tree traversal */
+
+
+WRegion *split_tree_current_tl(Obj *obj, int dir)
 {
     WWsSplit *split;
     
@@ -974,7 +991,7 @@ static WRegion *left_or_topmost_current(Obj *obj, int dir)
 }
 
 
-static WRegion *right_or_lowest_current(Obj *obj, int dir)
+WRegion *split_tree_current_br(Obj *obj, int dir)
 {
     WWsSplit *split;
     
@@ -1001,26 +1018,6 @@ static WRegion *right_or_lowest_current(Obj *obj, int dir)
 }
 
 
-/*EXTL_DOC
- * Returns most recently active region on \var{ws}.
- */
-EXTL_EXPORT_MEMBER
-WRegion *ionws_current(WIonWS *ws)
-{
-    return left_or_topmost_current(ws->split_tree, -1);
-}
-
-
-/*EXTL_DOC
- * Returns a list of regions managed by the workspace (frames, mostly).
- */
-EXTL_EXPORT_MEMBER
-ExtlTab ionws_managed_list(WIonWS *ws)
-{
-    return managed_list_to_table(ws->managed_list, NULL);
-}
-
-
 static WWsSplit *find_split(Obj *obj, int dir, int *from)
 {
     WWsSplit *split;
@@ -1044,10 +1041,9 @@ static WWsSplit *find_split(Obj *obj, int dir, int *from)
 }
 
 
-static WRegion *down_or_right(WRegion *reg, int dir)
+WRegion *split_tree_to_br(WRegion *reg, int dir)
 {
     Obj *prev=(Obj*)reg;
-    WIonWS *ws;
     WWsSplit *split;
     int from;
     
@@ -1061,7 +1057,7 @@ static WRegion *down_or_right(WRegion *reg, int dir)
             break;
         
         if(from==TOP_OR_LEFT)
-            return left_or_topmost_current(split->br, dir);
+            return split_tree_current_tl(split->br, dir);
         
         prev=(Obj*)split;
     }
@@ -1071,10 +1067,9 @@ static WRegion *down_or_right(WRegion *reg, int dir)
 }
 
 
-static WRegion *up_or_left(WRegion *reg, int dir)
+WRegion *split_tree_to_tl(WRegion *reg, int dir)
 {
     Obj *prev=(Obj*)reg;
-    WIonWS *ws;
     WWsSplit *split;
     int from;
     
@@ -1088,7 +1083,7 @@ static WRegion *up_or_left(WRegion *reg, int dir)
             break;
         
         if(from==BOTTOM_OR_RIGHT)
-            return right_or_lowest_current(split->tl, dir);
+            return split_tree_current_br(split->tl, dir);
         
         prev=(Obj*)split;
     }
@@ -1097,327 +1092,10 @@ static WRegion *up_or_left(WRegion *reg, int dir)
 }
 
 
-static WRegion *do_get_next_to(WIonWS *ws, WRegion *reg, int dir, int primn)
-{
-    if(reg==NULL || REGION_MANAGER(reg)!=(WRegion*)ws)
-        return NULL;
-    
-    if(primn==TOP_OR_LEFT)
-        return up_or_left(reg, dir);
-    else
-        return down_or_right(reg, dir);
-}
-
-
-/*EXTL_DOC
- * Return the most previously active region next to \var{reg} in
- * direction \var{dirstr} (left/right/up/down). The region \var{reg}
- * must be managed by \var{ws}.
- */
-EXTL_EXPORT_MEMBER
-WRegion *ionws_next_to(WIonWS *ws, WRegion *reg, const char *dirstr)
-{
-    int dir=0, primn=0;
-    
-    if(!get_split_dir_primn(dirstr, &dir, &primn))
-        return NULL;
-    
-    return do_get_next_to(ws, reg, dir, primn);
-}
-
-
-static WRegion *do_get_farthest(WIonWS *ws, int dir, int primn)
-{
-    if(primn==TOP_OR_LEFT)
-        return left_or_topmost_current(ws->split_tree, dir);
-    else
-        return right_or_lowest_current(ws->split_tree, dir);
-}
-
-
-/*EXTL_DOC
- * Return the most previously active region on \var{ws} with no
- * other regions next to it in  direction \var{dirstr} 
- * (left/right/up/down). 
- */
-EXTL_EXPORT_MEMBER
-WRegion *ionws_farthest(WIonWS *ws, const char *dirstr)
-{
-    int dir=0, primn=0;
-
-    if(!get_split_dir_primn(dirstr, &dir, &primn))
-        return NULL;
-    
-    return do_get_farthest(ws, dir, primn);
-}
-
-
-static WRegion *do_goto_dir(WIonWS *ws, int dir, int primn)
-{
-    int primn2=(primn==TOP_OR_LEFT ? BOTTOM_OR_RIGHT : TOP_OR_LEFT);
-    WRegion *reg=NULL, *curr=ionws_current(ws);
-    if(curr!=NULL)
-        reg=do_get_next_to(ws, curr, dir, primn);
-    if(reg==NULL)
-        reg=do_get_farthest(ws, dir, primn2);
-    if(reg!=NULL)
-        region_goto(reg);
-    return reg;
-}
-
-
-/*EXTL_DOC
- * Go to the most previously active region on \var{ws} next to \var{reg} in
- * direction \var{dirstr} (up/down/left/right), wrapping around to a most 
- * recently active farthest region in the opposite direction if \var{reg} 
- * is already the further region in the given direction.
- * 
- * Note that this function is asynchronous; the region will not
- * actually have received the focus when this function returns.
- */
-EXTL_EXPORT_MEMBER
-WRegion *ionws_goto_dir(WIonWS *ws, const char *dirstr)
-{
-    int dir=0, primn=0;
-
-    if(!get_split_dir_primn(dirstr, &dir, &primn))
-        return NULL;
-    
-    return do_goto_dir(ws, dir, primn);
-}
-
-
-static WRegion *do_goto_dir_nowrap(WIonWS *ws, int dir, int primn)
-{
-    int primn2=(primn==TOP_OR_LEFT ? BOTTOM_OR_RIGHT : TOP_OR_LEFT);
-    WRegion *reg=NULL, *curr=ionws_current(ws);
-    if(curr!=NULL)
-        reg=do_get_next_to(ws, curr, dir, primn);
-    if(reg!=NULL)
-        region_goto(reg);
-    return reg;
-}
-
-
-/*EXTL_DOC
- * Go to the most previously active region on \var{ws} next to \var{reg} in
- * direction \var{dirstr} (up/down/left/right) without wrapping around.
- */
-EXTL_EXPORT_MEMBER
-WRegion *ionws_goto_dir_nowrap(WIonWS *ws, const char *dirstr)
-{
-    int dir=0, primn=0;
-
-    if(!get_split_dir_primn(dirstr, &dir, &primn))
-        return NULL;
-    
-    return do_goto_dir_nowrap(ws, dir, primn);
-}
-
-
-/*}}}*/
-
-
-/*{{{ Remove/add */
-
-
-void ionws_add_managed(WIonWS *ws, WRegion *reg)
-{
-    region_set_manager(reg, (WRegion*)ws, &(ws->managed_list));
-    
-    region_add_bindmap_owned(reg, mod_ionws_ionws_bindmap, (WRegion*)ws);
-    
-    if(REGION_IS_MAPPED(ws))
-        region_map(reg);
-}
-
-
-static bool ionws_remove_split(WIonWS *ws, WWsSplit *split)
-{
-    WWsSplit *split2;
-    Obj *other;
-    int osize, nsize, npos;
-    int primn;
-    
-    if(split->tl==NULL){
-        other=split->br;
-        primn=TOP_OR_LEFT;
-    }else{
-        other=split->tl;
-        primn=BOTTOM_OR_RIGHT;
-    }
-    
-    split2=split->parent;
-    
-    if(split2!=NULL){
-        if((Obj*)split==split2->tl)
-            split2->tl=other;
-        else
-            split2->br=other;
-    }else{
-        ws->split_tree=other;
-    }
-    
-    if(other==NULL)
-        return FALSE;
-    
-    set_split_of(other, split2);
-    
-    if(!OBJ_IS_BEING_DESTROYED(ws)){
-        nsize=split_tree_size((Obj*)split, split->dir);
-        npos=split_tree_pos((Obj*)split, split->dir);
-        split_tree_resize(other, split->dir, ANY, npos, nsize);
-    }
-
-    destroy_obj((Obj*)split);
-    
-    return TRUE;
-}
-
-
-void ionws_managed_remove(WIonWS *ws, WRegion *reg)
-{
-    WWsSplit *split;
-    
-    split=split_of_reg(reg);
-
-    if(split!=NULL){
-        WRegion *other;
-        if(split->tl==(Obj*)reg){
-            split->tl=NULL;
-            other=left_or_topmost_current(split->br, split->dir);
-        }else{
-            split->br=NULL;
-            other=right_or_lowest_current(split->tl, split->dir);
-        }
-        
-        set_split_of_reg(reg, NULL);
-        
-        ionws_remove_split(ws, split);
-        
-        if(region_may_control_focus((WRegion*)ws))
-            region_set_focus(other!=NULL ? other : (WRegion*)ws);
-    }else{
-        ws->split_tree=NULL;
-    }
-
-    region_unset_manager(reg, (WRegion*)ws, &(ws->managed_list));
-    region_remove_bindmap_owned(reg, mod_ionws_ionws_bindmap, (WRegion*)ws);
-    
-    if(!OBJ_IS_BEING_DESTROYED(ws) && ws->split_tree==NULL)
-        ioncore_defer_destroy((Obj*)ws);
-}
-
-
-/*}}}*/
-
-
-/*{{{ managed_activated */
-
-
-void ionws_managed_activated(WIonWS *ws, WRegion *reg)
-{
-    WWsSplit *split=split_of_reg(reg);
-    Obj *prev=(Obj*)reg;
-    
-    while(split!=NULL){
-        split->current=(split->tl==prev ? 0 : 1);
-        prev=(Obj*)split;
-        split=split->parent;
-    }
-}
-
-
-/*}}}*/
-
-
-/*{{{ iowns_manage_rescue */
-
-
-static WMPlex *do_find_nmgr(Obj *ptr, int primn)
-{
-    WMPlex *reg;
-    WWsSplit *split;
-    
-    do{
-        if(OBJ_IS(ptr, WMPlex))
-            return (WMPlex*)ptr;
-        
-        if(!OBJ_IS(ptr, WWsSplit))
-            return NULL;
-        
-        split=(WWsSplit*)ptr;
-        
-        if(primn==TOP_OR_LEFT)
-            reg=do_find_nmgr(split->tl, primn);
-        else
-            reg=do_find_nmgr(split->br, primn);
-        
-        if(reg!=NULL)
-            return reg;
-        
-        if(primn==TOP_OR_LEFT)
-            ptr=split->br;
-        else
-            ptr=split->tl;
-    }while(1);
-}
-                      
-
-bool ionws_manage_rescue(WIonWS *ws, WClientWin *cwin, WRegion *from)
-{
-    WWsSplit *split;
-    WMPlex *nmgr;
-    Obj *obj;
-    
-    if(REGION_MANAGER(from)!=(WRegion*)ws)
-        return FALSE;
-
-    split=split_of_reg(from);
-    
-    obj=(Obj*)from;
-    while(split!=NULL){
-        if(split->tl==obj)
-            nmgr=do_find_nmgr(split->br, TOP_OR_LEFT);
-        else
-            nmgr=do_find_nmgr(split->tl, BOTTOM_OR_RIGHT);
-        
-        if(nmgr!=NULL)
-            return (NULL!=mplex_attach_simple(nmgr, (WRegion*)cwin, 0));
-        
-        obj=(Obj*)split;
-        split=split->parent;
-    }
-    
-    return FALSE;
-}
-
-
 /*}}}*/
 
 
 /*{{{ Misc. exports */
-
-
-/*EXTL_DOC
- * For region \var{reg} managed by \var{ws} return the \type{WWsSplit}
- * a leaf of which \var{reg} is.
- */
-EXTL_EXPORT_MEMBER
-WWsSplit *ionws_split_of(WIonWS *ws, WRegion *reg)
-{
-    if(reg==NULL){
-        warn_obj("ionws_split_of", "nil parameter");
-        return NULL;
-    }
-    
-    if(REGION_MANAGER(reg)!=(WRegion*)ws){
-        warn_obj("ionws_split_of", "Manager doesn't match");
-        return NULL;
-    }
-    
-    return split_of_reg(reg);
-}
 
 
 /*EXTL_DOC
@@ -1482,48 +1160,13 @@ ExtlTab split_geom(WWsSplit *split)
 }
 
 
-/*EXTL_DOC
- * Attempt to resize and/or move the split tree starting at \var{node}
- * (\type{WWsSplit} or \type{WRegion}). Behaviour and the \var{g} 
- * parameter are as for \fnref{WRegion.rqgeom} operating on
- * \var{node} (if it were a \type{WRegion}).
- */
-EXTL_EXPORT_MEMBER
-ExtlTab ionws_resize_tree(WIonWS *ws, Obj *node, ExtlTab g)
-{
-    WRectangle geom, ogeom;
-    int flags=REGION_RQGEOM_WEAK_ALL;
-    
-    if(node!=NULL && OBJ_IS(node, WRegion)){
-        geom=REGION_GEOM((WRegion*)node);
-    }else if(node!=NULL && OBJ_IS(node, WWsSplit)){
-        geom=((WWsSplit*)node)->geom;
-    }else{
-        warn("Invalid node.");
-        return extl_table_none();
-    }
-    
-    ogeom=geom;
-
-    if(extl_table_gets_i(g, "x", &(geom.x)))
-        flags&=~REGION_RQGEOM_WEAK_X;
-    if(extl_table_gets_i(g, "y", &(geom.y)))
-        flags&=~REGION_RQGEOM_WEAK_Y;
-    if(extl_table_gets_i(g, "w", &(geom.w)))
-        flags&=~REGION_RQGEOM_WEAK_W;
-    if(extl_table_gets_i(g, "h", &(geom.h)))
-        flags&=~REGION_RQGEOM_WEAK_H;
-    
-    geom.w=maxof(1, geom.w);
-    geom.h=maxof(1, geom.h);
-
-    ionws_do_rqgeom(ws, node, flags, &geom, &ogeom);
-    
-    return extl_table_from_rectangle(&ogeom);
-}
+/*}}}*/
 
 
-static WRegion *do_find_at(Obj *obj, int x, int y)
+/*{{{ Misc. */
+
+
+WRegion *split_tree_region_at(Obj *obj, int x, int y)
 {
     WWsSplit *split;
     WRegion *ret;
@@ -1541,56 +1184,23 @@ static WRegion *do_find_at(Obj *obj, int x, int y)
     if(!rectangle_contains(&(split->geom), x, y))
         return NULL;
     
-    ret=do_find_at(split->tl, x, y);
+    ret=split_tree_region_at(split->tl, x, y);
     if(ret==NULL)
-        ret=do_find_at(split->br, x, y);
+        ret=split_tree_region_at(split->br, x, y);
     return ret;
 }
 
 
-/*EXTL_DOC
- * Find region on \var{ws} overlapping coordinates $(x, y)$.
- */
-EXTL_EXPORT_MEMBER
-WRegion *ionws_region_at(WIonWS *ws, int x, int y)
+void split_tree_mark_current(WRegion *reg)
 {
-    return do_find_at(ws->split_tree, x, y);
-}
-
-
-/*}}}*/
-
-
-/*{{{ Unsplit */
-
-
-/*EXTL_DOC
- * Try to relocate regions managed by \var{frame} to another frame
- * and, if possible, destroy the frame.
- */
-EXTL_EXPORT_MEMBER
-void ionws_unsplit_at(WIonWS *ws, WIonFrame *frame)
-{
-    if(frame==NULL){
-        warn_obj("ionws_unsplit_at", "nil frame");
-        return;
-    }
-    if(REGION_MANAGER(frame)!=(WRegion*)ws){
-        warn_obj("ionws_unsplit_at", "The frame is not managed by the workspace.");
-        return;
-    }
+    WWsSplit *split=split_of_reg(reg);
+    Obj *prev=(Obj*)reg;
     
-    if(!region_may_destroy((WRegion*)frame)){
-        warn_obj("ionws_unsplit_at", "Frame may not be destroyed");
-        return;
+    while(split!=NULL){
+        split->current=(split->tl==prev ? 0 : 1);
+        prev=(Obj*)split;
+        split=split->parent;
     }
-
-    if(!region_rescue_clientwins((WRegion*)frame)){
-        warn_obj("ionws_unsplit_at", "Failed to rescue managed objects.");
-        return;
-    }
-
-    ioncore_defer_destroy((Obj*)frame);
 }
 
 
