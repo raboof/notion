@@ -194,6 +194,7 @@ function QueryLib.handler_lua(frame, code)
     local f, err=loadstring(code)
     if not f then
         query_fwarn(frame, err)
+        return
     end
     -- Create a new environment with parameters
     local origenv=getfenv(f)
