@@ -16,7 +16,7 @@ end
 
 --DOC
 -- Returns the index of \var{mgd} in \var{mplex}'s managed list or
--- -1 if not on list.
+-- $-1$ if not on list.
 function mplex_managed_index(mplex, mgd)
     local list=mplex_managed_list(mplex)
     for idx, mgd2 in list do
@@ -30,7 +30,7 @@ end
 
 --DOC
 -- Returns the index of \fnref{mplex_current}\code{(mplex)} in \var{mplex}'s
--- managed list or -1 if there is no current managed object.
+-- managed list or $-1$ if there is no current managed object.
 function mplex_current_index(mplex)
     return mplex_managed_index(mplex, mplex_current(mplex))
 end
