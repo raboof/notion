@@ -395,11 +395,11 @@ WBinding *region_lookup_keybinding(const WRegion *reg, const XKeyEvent *ev,
 		for(s=sc; s!=NULL && bindmap!=NULL; s=s->next){
 			binding=lookup_binding(bindmap, ACT_KEYPRESS,
 								   s->state, s->key);
-			/* The case binding->submap==NULL shouldn't happen unless
-			 * maps were changed. We'll just ignore that situation.
-			 */
-			if(binding==NULL)
+
+			if(binding==NULL){
+				bindmap=NULL;
 				break;
+			}
 			
 			bindmap=binding->submap;
 		}
