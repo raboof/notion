@@ -614,7 +614,7 @@ bool region_display_sp(WRegion *reg)
 }
 
 
-/* EXTL_DOC
+/*EXTL_DOC
  * Attempt to display \var{reg}, save region activity status and then
  * warp to (or simply set focus to if warping is disabled) \var{reg}.
  */
