@@ -122,10 +122,16 @@ extern void split_transpose_to(WSplit *split, const WRectangle *geom);
     assert((NODE)->type!=SPLIT_REGNODE &&                       \
            ((NODE)->u.s.tl!=NULL && (NODE)->u.s.br!=NULL));
 
-#define UNUSED_TOT(u1, u2, s) ((u1)+(u2)>=(s) ? (u1)+(u2) : (u1))
+#define UNUSED_TOT(U1, U2, S) ((U1)+(U2)>=(S) ? (U1)+(U2) : (U1))
 #define UNUSED_L_TOT(U, R) UNUSED_TOT((U).l, (U).r, (R)->geom.w)
 #define UNUSED_R_TOT(U, R) UNUSED_TOT((U).r, (U).l, (R)->geom.w)
 #define UNUSED_T_TOT(U, R) UNUSED_TOT((U).t, (U).b, (R)->geom.h)
 #define UNUSED_B_TOT(U, R) UNUSED_TOT((U).b, (U).t, (R)->geom.h)
+
+#define UNUSED_ADD(T, U1, U2, S) (T)=((U1)+(U2)>=(S) ? (T)+(U1)+(U2) : (U1))
+#define UNUSED_L_ADD(T, U, R) UNUSED_ADD((T).l, (U).l, (U).r, (R)->geom.w)
+#define UNUSED_R_ADD(T, U, R) UNUSED_ADD((T).r, (U).r, (U).l, (R)->geom.w)
+#define UNUSED_T_ADD(T, U, R) UNUSED_ADD((T).t, (U).t, (U).b, (R)->geom.h)
+#define UNUSED_B_ADD(T, U, R) UNUSED_ADD((T).b, (U).b, (U).t, (R)->geom.h)
 
 #endif /* ION_MOD_IONWS_SPLIT_H */

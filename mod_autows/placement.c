@@ -164,8 +164,8 @@ static int fit_penalty(int s, int ss, int slack)
     return interp1(fit_penalty_scale, ss-s);
 }
 
-#define hfit_penalty fit_penalty
-#define vfit_penalty fit_penalty
+#define hfit_penalty(S1, S2, T, I) fit_penalty(S1, S2, (T)->l+(T)->r)
+#define vfit_penalty(S1, S2, T, I) fit_penalty(S1, S2, (T)->t+(T)->b)
 
 
 static int slack_penalty(int s, int ss, int slack)
@@ -179,8 +179,8 @@ static int slack_penalty(int s, int ss, int slack)
 
 }
 
-#define hslack_penalty slack_penalty
-#define vslack_penalty slack_penalty
+#define hslack_penalty(S1, S2, T, I) slack_penalty(S1, S2, (T)->l+(T)->r)
+#define vslack_penalty(S1, S2, T, I) slack_penalty(S1, S2, (T)->t+(T)->b)
 
 
 static int split_penalty(int s, int ss, int slack)
@@ -188,8 +188,8 @@ static int split_penalty(int s, int ss, int slack)
     return interp1(split_penalty_scale, ss-s);
 }
 
-#define hsplit_penalty split_penalty
-#define vsplit_penalty split_penalty
+#define hsplit_penalty(S1, S2, T, I) split_penalty(S1, S2, (T)->l+(T)->r)
+#define vsplit_penalty(S1, S2, T, I) split_penalty(S1, S2, (T)->t+(T)->b)
 
 
 static int combine(int h, int v)
@@ -201,23 +201,10 @@ static int combine(int h, int v)
 }
 
 
-static int getvslack(WSplit *split)
+static void scan(WSplit *split, int depth, const WRectangle *geom,
+                 const WSplitUnused *un_tot, const WSplitUnused *un_immed, 
+                 Res *best)
 {
-    return maxof(0, split->geom.h-split->used_h);
-}
-
-
-static int gethslack(WSplit *split)
-{
-    return maxof(0, split->geom.w-split->used_w);
-}
-
-
-static void scan(WSplit *split, int depth, int vslack, int hslack, 
-                 const WRectangle *geom, Res *best)
-{
-    int thisvslack=getvslack(split);
-    int thishslack=gethslack(split);
     int h_gof, v_gof, h_gol, v_gol;
     
     /*
@@ -230,12 +217,12 @@ static void scan(WSplit *split, int depth, int vslack, int hslack,
     /* Only split orthogonally to deepest previous 'static' split? */
     
     if(split->type==SPLIT_UNUSED){
-        int phfit=hfit_penalty(geom->w, split->geom.w, hslack);
-        int pvfit=vfit_penalty(geom->h, split->geom.h, vslack);
-        int phslack=hslack_penalty(geom->w, split->geom.w, hslack);
-        int pvslack=vslack_penalty(geom->h, split->geom.h, vslack);
-        int phsplit=hsplit_penalty(geom->w, split->geom.w, hslack);
-        int pvsplit=vsplit_penalty(geom->h, split->geom.h, vslack);
+        int phfit=hfit_penalty(geom->w, split->geom.w, un_tot, un_immed);
+        int pvfit=vfit_penalty(geom->h, split->geom.h, un_tot, un_immed);
+        int phslack=hslack_penalty(geom->w, split->geom.w, un_tot, un_immed);
+        int pvslack=vslack_penalty(geom->h, split->geom.h, un_tot, un_immed);
+        int phsplit=hsplit_penalty(geom->w, split->geom.w, un_tot, un_immed);
+        int pvsplit=vsplit_penalty(geom->h, split->geom.h, un_tot, un_immed);
         int p;
         
         p=combine(phfit, pvfit);
@@ -278,17 +265,37 @@ static void scan(WSplit *split, int depth, int vslack, int hslack,
             best->grow=FALSE;
         }
     }
-    
-    if(split->type==SPLIT_VERTICAL){
-        int tlslack=getvslack(split->u.s.tl);
-        int brslack=getvslack(split->u.s.br);
-        scan(split->u.s.tl, depth+1, vslack+brslack, hslack, geom, best);
-        scan(split->u.s.br, depth+1, vslack+tlslack, hslack, geom, best);
-    }else if(split->type==SPLIT_HORIZONTAL){
-        int tlslack=gethslack(split->u.s.tl);
-        int brslack=gethslack(split->u.s.br);
-        scan(split->u.s.tl, depth+1, vslack, hslack+brslack, geom, best);
-        scan(split->u.s.br, depth+1, vslack, hslack+tlslack, geom, best);
+
+    if(split->type==SPLIT_VERTICAL || split->type==SPLIT_HORIZONTAL){
+        WSplit *tl=split->u.s.tl, *br=split->u.s.br;
+        WSplitUnused tlunused, brunused;
+        WSplitUnused tot, immed;
+
+        split_get_unused(tl, &tlunused);
+        split_get_unused(br, &brunused);
+        if(split->type==SPLIT_VERTICAL){
+            tot=*un_tot;
+            immed=*un_immed;
+            UNUSED_B_ADD(immed, brunused, br);
+            tot.b+=brunused.t+brunused.b;
+            scan(tl, depth+1, geom, &tot, &immed, best);
+            tot=*un_tot;
+            immed=*un_immed;
+            UNUSED_T_ADD(immed, tlunused, tl);
+            tot.t+=tlunused.t+tlunused.b;
+            scan(br, depth+1, geom, &tot, &immed, best);
+        }else if(split->type==SPLIT_HORIZONTAL){
+            tot=*un_tot;
+            immed=*un_immed;
+            UNUSED_R_ADD(immed, brunused, br);
+            tot.r+=brunused.l+brunused.r;
+            scan(tl, depth+1, geom, &tot, &immed, best);
+            tot=*un_tot;
+            immed=*un_immed;
+            UNUSED_L_ADD(immed, tlunused, tl);
+            tot.l+=tlunused.l+tlunused.r;
+            scan(br, depth+1, geom, &tot, &immed, best);
+        }
     }
 }
 
@@ -406,10 +413,12 @@ bool autows_manage_clientwin(WAutoWS *ws, WClientWin *cwin,
                 target=(WRegion*)frame;
             }
         }else if(frame!=NULL){
+            WSplitUnused tot={0, 0, 0, 0}, immed={0, 0, 0, 0};
             Res rs={NULL, PENALTY_INIT, SPLIT_VERTICAL, PRIMN_ANY, FALSE};
             
             split_update_bounds(ws->ionws.split_tree, TRUE);
-            scan(ws->ionws.split_tree, 0, 0, 0, &REGION_GEOM(frame), &rs);
+            scan(ws->ionws.split_tree, 0, &REGION_GEOM(frame), &tot, &immed, 
+                 &rs);
             
             if(rs.split!=NULL && rs.dir==SPLIT_UNUSED){
                 fprintf(stderr, "use unused!\n");
@@ -420,12 +429,11 @@ bool autows_manage_clientwin(WAutoWS *ws, WClientWin *cwin,
                     region_fit(target, &(rs.split->geom), REGION_FIT_EXACT);
                 }
             }else if(rs.split!=NULL){
-                fprintf(stderr, "split %d\n", rs.dir==SPLIT_VERTICAL);
-                
                 WSplit *node;
                 int mins=(rs.dir==SPLIT_VERTICAL 
                           ? REGION_GEOM(frame).h
                           : REGION_GEOM(frame).w);
+                fprintf(stderr, "split %d\n", rs.dir==SPLIT_VERTICAL);
                 /* Should resize first! */
                 assert(mke_frame==NULL);
                 mke_frame=frame;
