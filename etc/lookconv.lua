@@ -133,10 +133,7 @@ local function output(nm)
         print(string.format('    spacing = %d,', spacing))
     end
     if bar_inside_frame==false then
-        print('    bar_inside_frame = false,')
-    else
-        print('    bar_inside_frame = true,')
-        
+        print('    ionframe_bar_inside_border = false,')
     end
     print('})\n')
     
