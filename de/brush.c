@@ -291,12 +291,10 @@ void debrush_deinit(DEBrush *brush)
 
 	grbrush_deinit(&(brush->grbrush));
 
+	UNLINK_ITEM(brushes, brush, next, prev);
+
 	if(brush->style!=NULL)
 		free(brush->style);
-	
-	if(brush->prev!=NULL){
-		UNLINK_ITEM(brushes, brush, next, prev);
-	}
 	
 	if(brush->font!=NULL){
 		de_free_font(brush->font);
