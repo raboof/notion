@@ -734,12 +734,8 @@ typedef struct{
 
 static bool extl_table_do_get_n(lua_State *st, GetNParams *params)
 {
-	lua_getglobal(st, "table");
-	lua_pushstring(st, "getn");
-	lua_gettable(st, -2);
 	lua_rawgeti(st, LUA_REGISTRYINDEX, params->ref);
-	lua_call(st, 1, 1);
-	params->n=lua_tonumber(st, -1);
+	params->n=luaL_getn(st, -1);
 	return TRUE;
 }
 
@@ -910,15 +906,15 @@ bool extl_table_clears(ExtlTab ref, const char *entry)
 
 static bool extl_table_dodo_seti(lua_State *st, TableParams *params)
 {
-	lua_getglobal(st, "table");
-	lua_pushstring(st, "insert");
-	lua_gettable(st, -2);
+	int n, i;
 	lua_rawgeti(st, LUA_REGISTRYINDEX, params->ref);
-	if(!params->insertlast)
-		lua_pushnumber(st, params->ientry);
 	extl_stack_push(st, params->type, params->val);
-	lua_call(st, 2+!params->insertlast, 0);
-	
+	n=luaL_getn(st, -2);
+	i=(params->insertlast ? n+1 : params->ientry);
+	lua_rawseti(st, -2, i);
+	if(i>n)
+		luaL_setn(st, -1, i);
+	   
 	return TRUE;
 }
 
