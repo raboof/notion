@@ -23,7 +23,8 @@
 enum WSplitType{
     SPLIT_REGNODE,
     SPLIT_HORIZONTAL,
-    SPLIT_VERTICAL
+    SPLIT_VERTICAL,
+    SPLIT_UNUSED
 };
 
 
@@ -55,9 +56,11 @@ DECLCLASS(WSplit){
 };
 
 
-extern WSplit *create_split(int dir, WSplit *tl, WSplit *br, 
-                            const WRectangle *geom);
-extern WSplit *create_split_regnode(WRegion *reg, const WRectangle *geom);
+extern WSplit *create_split(const WRectangle *geom,
+                            int dir, WSplit *tl, WSplit *br);
+extern WSplit *create_split_regnode(const WRectangle *geom, WRegion *reg);
+extern WSplit *create_split_unused(const WRectangle *geom);
+
 extern void split_deinit(WSplit *split);
 
 extern int split_size(WSplit *split, int dir);
@@ -76,10 +79,9 @@ extern WSplit *split_to_tl(WSplit *node, int dir);
 extern WSplit *split_to_br(WSplit *node, int dir);
 
 extern void split_resize(WSplit *node, const WRectangle *ng, 
-                         int hprimn, int vprimn, int fit_mode);
+                         int hprimn, int vprimn);
 extern bool split_do_resize(WSplit *node, const WRectangle *ng, 
-                            int hprimn, int vprimn, 
-                            bool transpose, int fit_mode);
+                            int hprimn, int vprimn, bool transpose);
 
 extern WSplit *split_tree_split(WSplit **root, WSplit *node, int dir, 
                                 int primn, int minsize, int oprimn, 

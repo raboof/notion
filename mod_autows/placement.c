@@ -45,7 +45,7 @@ static WRegion *create_initial_frame(WIonWS *ws, WWindow *parent,
     if(reg==NULL)
         return NULL;
     
-    ws->split_tree=create_split_regnode(reg, &(fp->g));
+    ws->split_tree=create_split_regnode(&(fp->g), reg);
     if(ws->split_tree==NULL){
         warn_err();
         destroy_obj((Obj*)reg);

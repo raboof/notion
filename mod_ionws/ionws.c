@@ -70,8 +70,7 @@ bool ionws_fitrep(WIonWS *ws, WWindow *par, const WFitParams *fp)
     if(ws->split_tree==NULL)
         return TRUE;
     
-    split_resize(ws->split_tree, &(fp->g), PRIMN_ANY, PRIMN_ANY,
-                 REGION_FIT_BOUNDS);
+    split_resize(ws->split_tree, &(fp->g), PRIMN_ANY, PRIMN_ANY);
     
     return TRUE;
 }
@@ -155,7 +154,7 @@ static WRegion *create_initial_frame(WIonWS *ws, WWindow *parent,
     if(reg==NULL)
         return NULL;
     
-    ws->split_tree=create_split_regnode(reg, &(fp->g));
+    ws->split_tree=create_split_regnode(&(fp->g), reg);
     if(ws->split_tree==NULL){
         warn_err();
         destroy_obj((Obj*)reg);
@@ -243,7 +242,7 @@ bool ionws_rescue_clientwins(WIonWS *ws)
 static WSplit *get_node_check(WIonWS *ws, WRegion *reg)
 {
     WSplit *node;
-    
+
     if(reg==NULL)
         return NULL;
     
@@ -759,6 +758,9 @@ static ExtlTab get_node_config(WSplit *node)
     
     assert(node!=NULL);
     
+    if(node->type==SPLIT_UNUSED)
+        return extl_table_none();
+
     if(node->type==SPLIT_REGNODE){
         if(region_supports_save(node->u.reg))
             return region_get_configuration(node->u.reg);
@@ -839,13 +841,18 @@ static WSplit *load_split(WIonWS *ws, WWindow *par, const WRectangle *geom,
     ExtlTab subtab;
     WSplit *tl=NULL, *br=NULL;
     WRectangle geom2;
+    int set=0;
 
-    if(!extl_table_gets_i(tab, "split_tls", &tls))
-        return FALSE;
-    if(!extl_table_gets_i(tab, "split_brs", &brs))
-        return FALSE;
-    if(!extl_table_gets_s(tab, "split_dir", &dir_str))
-        return FALSE;
+    set+=(extl_table_gets_i(tab, "split_tls", &tls)==TRUE);
+    set+=(extl_table_gets_i(tab, "split_brs", &brs)==TRUE);
+    set+=(extl_table_gets_s(tab, "split_dir", &dir_str)==TRUE);
+    
+    if(set==0)
+        return create_split_unused(geom);
+    
+    if(set!=3)
+        return NULL;
+    
     if(strcmp(dir_str, "vertical")==0){
         dir=SPLIT_VERTICAL;
     }else if(strcmp(dir_str, "horizontal")==0){
@@ -856,7 +863,7 @@ static WSplit *load_split(WIonWS *ws, WWindow *par, const WRectangle *geom,
     }
     free(dir_str);
 
-    split=create_split(dir, NULL, NULL, geom);
+    split=create_split(geom, dir, NULL, NULL);
     if(split==NULL){
         warn("Unable to create a split.\n");
         return NULL;
@@ -929,7 +936,7 @@ WSplit *ionws_load_node(WIonWS *ws, WWindow *par, const WRectangle *geom,
         if(reg==NULL)
             return NULL;
         
-        node=create_split_regnode(reg, geom);
+        node=create_split_regnode(geom, reg);
         if(node==NULL){
             destroy_obj((Obj*)reg);
             return NULL;
