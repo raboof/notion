@@ -26,7 +26,7 @@
 
 #define CF_XMESSAGE "xmessage -file "
 
-/*#define CF_EDGE_RESISTANCE 16*/
+#define CF_EDGE_RESISTANCE 16
 
 /* Cursors
  */
