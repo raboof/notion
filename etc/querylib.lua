@@ -137,28 +137,70 @@ function QueryLib.get_initdir()
 end
 
 function QueryLib.handler_lua(frame, code)
-    local errors
-    local oldarg=arg
-    arg={frame, genframe_current(frame)}
-    errors=collect_errors(function()
-                              f=loadstring(code)
-                              f()
-			  end)
-    arg=oldarg;
+    local f, err=loadstring(code)
+    if not f then
+        query_fwarn(frame, err)
+    end
+    local env=getfenv(f)
+    env._=frame
+    env.arg={frame, genframe_current(frame)}
+    setfenv(f, env)
+    err=collect_errors(f)
     if errors then
         query_fwarn(frame, errors)
     end
 end
 
-function QueryLib.complete_function(str)
-    local res={}
-    local len=string.len(str)
-    for k, v in pairs(_G) do
-        if type(v)=="function" and string.sub(k, 1, len)==str then
-            table.insert(res, k)
+function QueryLib.complete_lua(str)
+    local comptab=_G;
+    
+    -- Get the variable to complete, including containing tables.
+    -- This will also match string concatenations and such because
+    -- Lua's regexps don't support optional subexpressions, but we
+    -- handle them in the next step.
+    local _, _, tocomp=string.find(str, "([%w_.:]*)$")
+    
+    -- Descend into tables
+    if tocomp and string.len(tocomp)>=1 then
+        for t in string.gfind(tocomp, "([^.:]*)[.:]") do
+            if string.len(t)==0 then
+                comptab=_G;
+            elseif comptab then
+                if type(comptab[t])=="table" then
+                    comptab=comptab[t]
+                else
+                    comptab=nil
+                end
+            end
         end
     end
-    return res
+    
+    if not comptab then return {} end
+
+    local compl={}
+    
+    -- Get the actual variable to complete without containing tables
+    _, _, compl.common_part, tocomp=string.find(str, "(.-)([%w_]*)$")
+
+    local l=string.len(tocomp)
+    
+    for k in comptab do
+        if string.sub(k, 1, l)==tocomp then
+            table.insert(compl, k)
+        end
+    end
+    
+    -- If there was only one completion and it is a string or function,
+    -- concatenate it with "." or "(", respectively.
+    if table.getn(compl)==1 then
+        if type(comptab[compl[1]])=="table" then
+            compl[1]=compl[1] .. "."
+        elseif type(comptab[compl[1]])=="function" then
+            compl[1]=compl[1] .. "("
+        end
+    end
+    
+    return compl
 end
 
 
@@ -331,5 +373,5 @@ QueryLib.query_runfile=QueryLib.make_execwith_fn(
 QueryLib.query_lua=QueryLib.make_frame_fn(
     "Lua code to run:", nil,
     QueryLib.handler_lua,
-    QueryLib.make_completor(QueryLib.complete_function)
+    QueryLib.make_completor(QueryLib.complete_lua)
 )
