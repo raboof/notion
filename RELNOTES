@@ -1,5 +1,35 @@
 
 
+=== ion-3ds-20040906 ===
+
+
+This release finally includes a usable (yet still incomplete) version
+of the mod_panews workspace module (that has also bored the name 'autows'
+and 'rubberws' previously). The final outcome is not exactly what I
+initially planned, as those plans turned out not to be that workable.
+Instead, what mod_panews does is add to the basic tiled ionws approach
+overlappable splits and automatically filled panes that are initially
+empty. Each window is classified and assigned to the pane matching that
+classification. (The default classifications are T(erminal), V(iewer)
+and M(iscellaneous).)
+
+For a better feel for it, try it out yourself and please give feedback.
+The overlapping panes may be a bit confusing (this is one place where
+true translucency might actually be useful and not just eyecandy) at
+first, but you'll get used to them if you use the feature, and e.g.
+the Gimp works quite splendidly with the toolboxes in the 'M' pane and
+image windows in the 'V' pane --  although the simple initial size-based
+classification heuristics don't always get it right and overriding
+winprops (setting: panews_classification) should eventually added. 
+
+In addition to the new module, this release adds support for translations
+of program messages and the manual page, regardless of whether such is
+of any use in a program like Ion or not. (Currently Finnish and Czech
+translatiosn are available.) Of course there are some bug fixes and
+other minor additions as well, and the ./configure script is also back,
+the abandonment of libtool being final now. 
+
+
 === ion-3ds-20040730 ===
 
 
