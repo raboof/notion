@@ -436,10 +436,10 @@ void frame_activated(WFrame *frame)
 
 bool frame_set_tabbar(WFrame *frame, int sp)
 {
-    bool set=(frame->flags&FRAME_TAB_HIDE);
+    bool set=!(frame->flags&FRAME_TAB_HIDE);
     bool nset=libtu_do_setparam(sp, set);
     
-    if(nset && frame->flags&FRAME_SHADED)
+    if(!nset && frame->flags&FRAME_SHADED)
         return set;
     
     if(XOR(nset, set)){
@@ -450,7 +450,7 @@ bool frame_set_tabbar(WFrame *frame, int sp)
         window_draw((WWindow*)frame, TRUE);
     }
     
-    return (frame->flags&FRAME_TAB_HIDE);
+    return !(frame->flags&FRAME_TAB_HIDE);
 }
 
 
