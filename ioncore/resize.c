@@ -243,13 +243,15 @@ static void delta_moveres(WRegion *reg, int dx1, int dx2, int dy1, int dy2,
 		tmpdy2+=dy2;
 		geom=tmporiggeom;
 	}
+	
 	w=tmprelw-tmpdx1+tmpdx2;
 	h=tmprelh-tmpdy1+tmpdy2;
+	
 	if(w<=0)
 		w=tmphints.min_width;
 	if(h<=0)
 		h=tmphints.min_height;
-	/* If the region has only been moved, don't try to correct the size */
+	
 	correct_size(&w, &h, &tmphints, TRUE);
 	/* Do not alter sizes that were not changed */
 	if(tmpdx1==tmpdx2)
