@@ -35,7 +35,6 @@ DECLCLASS(WScreen){
     int id;
     Atom atom_workspace;
     bool uses_root;
-    WRectangle managed_off;
     WScreen *next_scr, *prev_scr;
     Watch notifywin_watch;
 };
@@ -45,8 +44,6 @@ extern WScreen *create_screen(WRootWin *rootwin, int id,
                               bool useroot);
 
 extern int screen_id(WScreen *scr);
-
-extern void screen_set_managed_offset(WScreen *scr, const WRectangle *off);
 
 extern bool screen_init_layout(WScreen *scr, ExtlTab tab);
 

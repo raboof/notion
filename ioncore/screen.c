@@ -52,10 +52,6 @@ static bool screen_init(WScreen *scr, WRootWin *rootwin,
     scr->id=id;
     scr->atom_workspace=None;
     scr->uses_root=useroot;
-    scr->managed_off.x=0;
-    scr->managed_off.y=0;
-    scr->managed_off.w=0;
-    scr->managed_off.h=0;
     scr->next_scr=NULL;
     scr->prev_scr=NULL;
     
@@ -145,12 +141,10 @@ void screen_deinit(WScreen *scr)
 
 void screen_managed_geom(WScreen *scr, WRectangle *geom)
 {
-    geom->x=scr->managed_off.x;
-    geom->y=scr->managed_off.y;
-    geom->w=REGION_GEOM(scr).w+scr->managed_off.w;
-    geom->h=REGION_GEOM(scr).h+scr->managed_off.h;
-    geom->w=maxof(geom->w, 0);
-    geom->h=maxof(geom->h, 0);
+    geom->x=0,
+    geom->y=0;
+    geom->w=maxof(REGION_GEOM(scr).w, 0);
+    geom->h=maxof(REGION_GEOM(scr).h, 0);
 }
 
 
@@ -473,41 +467,6 @@ static bool screen_may_destroy(WScreen *scr)
     return FALSE;
 }
 
-
-
-void screen_set_managed_offset(WScreen *scr, const WRectangle *off)
-{
-    scr->managed_off=*off;
-    mplex_fit_managed((WMPlex*)scr);
-}
-
-
-/*EXTL_DOC
- * Set offset of objects managed by the screen from actual screen geometry.
- * The table \var{offset} should contain the entries \code{x}, \code{y}, 
- * \code{w} and \code{h} indicating offsets of that component of screen 
- * geometry.
- */
-EXTL_EXPORT_AS(WScreen, set_managed_offset)
-bool screen_set_managed_offset_extl(WScreen *scr, ExtlTab offset)
-{
-    WRectangle g;
-    
-    if(!extl_table_to_rectangle(offset, &g))
-        goto err;
-    
-    if(-g.w>=REGION_GEOM(scr).w)
-        goto err;
-    if(-g.h>=REGION_GEOM(scr).h)
-        goto err;
-    
-    screen_set_managed_offset(scr, &g);
-    
-    return TRUE;
-err:
-    warn(TR("Invalid offset."));
-    return FALSE;
-}
 
 /*}}}*/
 
