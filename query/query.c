@@ -226,6 +226,7 @@ static WRegion *create_ws_on_vp(WViewport *vp, char *name)
 {
 	WRegionSimpleCreateFn *fn=NULL;
 	char *p=strchr(name, ':');
+	WRegion *ws;
 	
 	if(p!=NULL){
 		char *s=ALLOC_N(char, p-name+1);
@@ -244,8 +245,12 @@ static WRegion *create_ws_on_vp(WViewport *vp, char *name)
 	if(fn==NULL)
 		return NULL;
 	
-	return region_add_managed_new_simple((WRegion*)vp, fn,
-										 REGION_ATTACH_SWITCHTO);
+	ws=region_add_managed_new_simple((WRegion*)vp, fn,
+									 REGION_ATTACH_SWITCHTO);
+	if(ws!=NULL)
+		region_set_name(ws, name);
+	
+	return ws;
 }
 
 
