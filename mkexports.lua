@@ -12,6 +12,10 @@ function errorf(fmt, ...)
     error(string.format(fmt, unpack(arg)), 2)
 end
 
+function matcherr(s)
+    error(string.format("Parse error in \"%s...\"", string.sub(s, 1, 50)), 2)
+end
+
 function fprintf(h, fmt, ...)
     h:write(string.format(fmt, unpack(arg)))
 end
@@ -140,14 +144,7 @@ function parse(d)
         doc=s
     end
     
-    -- Handle EXTL_EXPORT otype fn(args)
-    local function do_export(s)
-        local pat="^[%s\n]+EXTL_EXPORT[%s\n]+([%w%s_*]+[%s\n*])([%w_]+)[%s\n]*(%b())"
-        local st, en, ot, fn, param=string.find(s, pat)
-        if not st then
-            errorf("Regex matching error in \"%s...\"", string.sub(s, 1, 50))
-        end
-        
+    local function do_do_export(efn, ot, fn, param)
         local odesc, otype=parse_type(ot)
         local idesc, itypes, ivars="", {}, {}
         
@@ -177,16 +174,35 @@ function parse(d)
             idesc=idesc,
             itypes=itypes,
             ivars=ivars,
+            exported_name=efn,
         }
         add_chnd(fns[fn])
         
         -- Reset
         doc=nil
     end
+
+    -- Handle EXTL_EXPORT otype fn(args)
+    local function do_export(s)
+        local pat="^[%s\n]+EXTL_EXPORT[%s\n]+([%w%s_*]+[%s\n*])([%w_]+)[%s\n]*(%b())"
+        local st, en, ot, fn, param=string.find(s, pat)
+        if not st then matcherr(s) end
+        do_do_export(fn, ot, fn, param)
+    end
+
+    -- Handle EXTL_EXPORT_AS(exported_fn) otype fn(args)
+    local function do_export_as(s)
+        local pat="^[%s\n]+EXTL_EXPORT_AS(%b())[%s\n]+([%w%s_*]+[%s\n*])([%w_]+)[%s\n]*(%b())"
+        local st, en, efn, ot, fn, param=string.find(s, pat)
+        if not st then matcherr(s) end
+        efn=string.gsub(efn, "%([%s\n]*(.*)[%s\n]*%)", "%1");
+        do_do_export(efn, ot, fn, param)
+    end
     
     local lookfor={
         ["/%*EXTL_DOC"] = do_doc,
-        ["[%s\n]EXTL_EXPORT"] = do_export,
+        ["[%s\n]EXTL_EXPORT[%s\n]"] = do_export,
+        ["[%s\n]EXTL_EXPORT_AS"] = do_export_as,
     }
     
     do_parse(d, lookfor)
@@ -349,7 +365,7 @@ static bool chko(ExtlL2Param *in, int ndx, WObjDescr *descr)
         end
         
         fprintf(h, "    {\"%s\", %s, %s, %s, (ExtlL2CallHandler*)%s},\n",
-                fn, fn, ids, ods, info.chnd)
+                info.exported_name, fn, ids, ods, info.chnd)
     end
     
     fprintf(h, "    {NULL, NULL, NULL, NULL, NULL}\n};\n\n")
