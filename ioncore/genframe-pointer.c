@@ -31,24 +31,6 @@ static int p_dx1mul=0, p_dx2mul=0, p_dy1mul=0, p_dy2mul=0;
 
 /*{{{ Frame press */
 
-/* ~55 degrees */
-#define PROD_LIM  0.28404
-
-/* Calculates the $l_2$ norm $\R^2$. */
-static float l2norm(float x, float y)
-{
-	return sqrt(x*x+y*y);
-}
-
-/* Normalises the vectors $(x1, y1)$ and $(x2, y2)$ and calculates the
- * $\R^2$ inner product for the normalised vectors yielding the cosine 
- * of the angle between the vectors.
- */
-static float normiprod(float x1, float y1, float x2, float y2)
-{
-	return (x1*x2+y1*y2)/(l2norm(x1, y1)*l2norm(x2,  y2));
-}
-
 
 int genframe_press(WGenFrame *genframe, XButtonEvent *ev, WRegion **reg_ret)
 {
@@ -61,28 +43,34 @@ int genframe_press(WGenFrame *genframe, XButtonEvent *ev, WRegion **reg_ret)
 	p_dy2mul=0;
 	p_tabnum=-1;
 
-	/* for each unit vector perpendicular to a side of the frame, calculate 
-	 * the cosine of the angle between that vector and the vector pointing 
-	 * from the centre of the frame to the point where the pointer press 
-	 * occured. If the cosine is less than PROD_LIM (currently cos(55 deg)), 
-	 * we allow resizing along that border.
-	 */
-	
+
+	/* Check resize directions */
 	{
-		int tmpx, tmpy;
+		int ww=REGION_GEOM(genframe).w/2;
+		int hh=REGION_GEOM(genframe).h/2;
+		int xdiv, ydiv;
+		int tmpx, tmpy, atmpx, atmpy;
 
-		tmpx=REGION_GEOM(genframe).w/2-ev->x;
-		tmpy=REGION_GEOM(genframe).h/2-ev->y;
+		tmpx=ev->x-ww;
+		tmpy=hh-ev->y;
+		xdiv=ww/2;
+		ydiv=hh/2;
+		atmpx=abs(tmpx);
+		atmpy=abs(tmpy);
 		
-		if(normiprod(tmpx, tmpy, 1, 0)>PROD_LIM)
-			p_dx1mul=1;
-		else if(normiprod(tmpx, tmpy, -1, 0)>PROD_LIM)
+		if(xdiv==0){
 			p_dx2mul=1;
+		}else if(hh*atmpx/xdiv>=tmpy && -hh*atmpx/xdiv<=tmpy){
+			p_dx1mul=(tmpx<0);
+			p_dx2mul=(tmpx>=0);
+		}
 
-		if(normiprod(tmpx, tmpy, 0, 1)>PROD_LIM)
-			p_dy1mul=1;
-		else if(normiprod(tmpx, tmpy, 0, -1)>PROD_LIM)
+		if(ydiv==0){
 			p_dy2mul=1;
+		}else if(ww*atmpy/ydiv>=tmpx && -ww*atmpy/ydiv<=tmpx){
+			p_dy1mul=(tmpy>0);
+			p_dy2mul=(tmpy<=0);
+		}
 	}
 	
 	/* Check tab */

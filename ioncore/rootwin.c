@@ -294,8 +294,6 @@ WRootWin *manage_rootwin(int xscr)
 	
 	rootwin=preinit_rootwin(xscr);
 
-	preinit_graphics(rootwin);
-	
 	if(rootwin==NULL){
 #ifndef CF_NO_XINERAMA
 		if(xi!=NULL)
@@ -303,6 +301,8 @@ WRootWin *manage_rootwin(int xscr)
 #endif
 		return NULL;
 	}
+
+	preinit_graphics(rootwin);
 	
 #ifdef CF_WINDOWED_SCREENS
 	net_virtual_roots=XInternAtom(wglobal.dpy, "_NET_VIRTUAL_ROOTS", False);
