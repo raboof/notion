@@ -386,11 +386,11 @@ void ioncore_handle_focus_in(const XFocusChangeEvent *ev)
         if(wwin->xic!=NULL)
             XSetICFocus(wwin->xic);
     }
-    
-    region_got_focus(reg);
-    
+
     if(ev->detail!=NotifyInferior)
         netwm_set_active(reg);
+    
+    region_got_focus(reg);
 }
 
 

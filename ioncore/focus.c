@@ -246,7 +246,6 @@ void region_lost_focus(WRegion *reg)
     extl_protect(NULL);
     hook_call_o(region_inactivated_hook, (Obj*)reg);
     extl_unprotect(NULL);
-
 }
 
 
@@ -347,7 +346,9 @@ bool region_do_warp_default(WRegion *reg)
 
 void region_do_warp(WRegion *reg)
 {
+    extl_protect(NULL);
     hook_call_alt_o(region_do_warp_alt, (Obj*)reg);
+    extl_unprotect(NULL);
 }
 
 
