@@ -23,10 +23,6 @@
 
 #define CF_XMESSAGE "xmessage -file "
 
-#define CF_MIN_WIDTH 20
-#define CF_MIN_HEIGHT 3
-#define CF_STUBBORN_TRESH 1
-
 /*#define CF_EDGE_RESISTANCE 16*/
 
 /* Cursors
