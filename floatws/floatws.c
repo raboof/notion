@@ -163,20 +163,22 @@ static void floatws_remove_managed(WFloatWS *ws, WRegion *reg)
 	WRegion *next=NULL;
 	
 	region_unset_manager(reg, (WRegion*)ws, &(ws->managed_list));
-	if(ws->current_managed==reg){
-		next=NEXT_MANAGED_WRAP(ws->managed_list, reg);
-		ws->current_managed=NULL;
-	}else{
-		/* REGION_IS_ACTIVE(reg) and ws->current_managed!=reg should
-		 * not happen.
-		 */
-		next=ws->current_managed;
-	}
-	
 	region_remove_bindmap_owned(reg, &floatws_bindmap, (WRegion*)ws);
+	
+	if(ws->current_managed!=reg)
+		return;
+	
+	ws->current_managed=NULL;
+	
+	if(reg->stacking.above!=NULL)
+		next=reg->stacking.above;
+	else
+		next=NEXT_MANAGED_WRAP(ws->managed_list, reg);
 	
 	if(region_may_control_focus((WRegion*)ws))
 		do_set_focus(next!=NULL ? next : (WRegion*)ws, FALSE);
+	else
+		ws->current_managed=next;
 }
 
 
