@@ -5,6 +5,8 @@
  * See the included file LICENSE for details.
  */
 
+#include <math.h>
+
 #include "common.h"
 #include "global.h"
 #include "pointer.h"
@@ -31,6 +33,24 @@ static int p_dx1mul=0, p_dx2mul=0, p_dy1mul=0, p_dy2mul=0;
 
 
 #define RESB 32
+
+/* ~55 degrees */
+#define PROD_LIM  0.28404
+
+/* Calculates the $l_2$ norm $\R^2$. */
+static float l2norm(float x, float y)
+{
+	return sqrt(x*x+y*y);
+}
+
+/* Normalises the vectors $(x1, y1)$ and $(x2, y2)$ and calculates the
+ * $\R^2$ inner product for the normalised vectors yielding the cosine 
+ * of the angle between the vectors.
+ */
+static float normiprod(float x1, float y1, float x2, float y2)
+{
+	return (x1*x2+y1*y2)/(l2norm(x1, y1)*l2norm(x2,  y2));
+}
 
 
 int genframe_press(WGenFrame *genframe, XButtonEvent *ev, WRegion **reg_ret)
@@ -92,18 +112,30 @@ int genframe_press(WGenFrame *genframe, XButtonEvent *ev, WRegion **reg_ret)
 	if(p_dx1mul+p_dx2mul+p_dy1mul+p_dy2mul!=0)
 		return WGENFRAME_AREA_BORDER;
 	
-	/* Neither of those */
+	/* Neither of those. For resize, for each unit vector perpendicular to
+	 * a side of the frame, calculate the cosine of the angle between that 
+	 * vector and the vector pointing from the centre of the frame to the 
+	 * point where the pointer press occured. If the cosine is less than
+	 * PROD_LIM (currently cos(55 degrees)), we allow resizing along that
+	 * border.
+	 */
 	
 	{
-		int tmpx=REGION_GEOM(genframe).w/2-ev->x;
-		int tmpy=REGION_GEOM(genframe).h/2-ev->y;
-		if(abs(tmpy)>abs(tmpx)){
-			p_dy1mul=(tmpy>=0);
-			p_dy2mul=(tmpy<0);
-		}else{
-			p_dx1mul=(tmpx>=0);
-			p_dx2mul=(tmpx<0);
-		}
+		float p;
+		int tmpx, tmpy;
+
+		tmpx=REGION_GEOM(genframe).w/2-ev->x;
+		tmpy=REGION_GEOM(genframe).h/2-ev->y;
+		
+		if(normiprod(tmpx, tmpy, 1, 0)>PROD_LIM)
+			p_dx1mul=1;
+		else if(normiprod(tmpx, tmpy, -1, 0)>PROD_LIM)
+			p_dx2mul=1;
+
+		if(normiprod(tmpx, tmpy, 0, 1)>PROD_LIM)
+			p_dy1mul=1;
+		else if(normiprod(tmpx, tmpy, 0, -1)>PROD_LIM)
+			p_dy2mul=1;
 	}
 
 	return 0;
