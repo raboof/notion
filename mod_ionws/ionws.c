@@ -882,10 +882,6 @@ bool ionws_unsplit_at(WIonWS *ws, WFrame *frame)
 /*{{{ Navigation etc. exports */
 
 
-/*EXTL_DOC
- * Returns most recently active region on \var{ws}.
- */
-EXTL_EXPORT_MEMBER
 WRegion *ionws_current(WIonWS *ws)
 {
     WSplitRegion *node=NULL;
