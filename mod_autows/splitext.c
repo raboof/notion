@@ -815,36 +815,47 @@ static void splitpane_replace(WSplitPane *pane, WSplit *child, WSplit *what)
 {
     assert(child==pane->contents && what!=NULL);
     
+    child->parent=NULL;
     pane->contents=what;
     what->parent=(WSplitInner*)pane;
 #warning "Needed?"    
-    what->selfptrptr=NULL;
-    child->parent=NULL;
+    what->ws_if_root=NULL;
 }
 
 
-/*#define RECREATE_UNUSED TRUE*/
+static WAutoWS *find_ws(WSplit *split)
+{
+    if(split->parent!=NULL)
+        return find_ws((WSplit*)split->parent);
+    
+    if(split->ws_if_root!=NULL)
+        return OBJ_CAST(split->ws_if_root, WAutoWS);
+    
+    return NULL;
+}
+
 
 static void splitpane_remove(WSplitPane *pane, WSplit *child, 
                              bool reclaim_space)
 {
     WSplitInner *parent=((WSplit*)pane)->parent;
     WSplitUnused *un;
+    WAutoWS *ws=find_ws((WSplit*)pane);
     
     assert(child==pane->contents);
     
     pane->contents=NULL;
     child->parent=NULL;
 
-    /*
-    if(RECREATE_UNUSED){
-        pane->contents=(WSplit*)create_splitunused(&GEOM(pane));
+    if(ws!=NULL
+       && !OBJ_IS_BEING_DESTROYED(ws)
+       && !OBJ_IS_BEING_DESTROYED(pane)){
+        pane->contents=(WSplit*)create_splitunused(&GEOM(pane), ws);
         if(pane->contents!=NULL){
             pane->contents->parent=(WSplitInner*)pane;
             return;
         }
     }
-    */
     
     if(parent!=NULL)
         splitinner_remove(parent, (WSplit*)pane, reclaim_space);

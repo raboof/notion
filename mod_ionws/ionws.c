@@ -304,7 +304,7 @@ static void ionws_create_stdispnode(WIonWS *ws, WRegion *stdisp,
     /* Set up new split tree */
     ((WSplit*)stdispnode)->parent=(WSplitInner*)split;
     ws->split_tree->parent=(WSplitInner*)split;
-    ws->split_tree->selfptrptr=NULL;
+    ws->split_tree->ws_if_root=NULL;
     
     if((orientation==REGION_ORIENTATION_HORIZONTAL && 
         (corner==MPLEX_STDISP_BL || corner==MPLEX_STDISP_BR)) ||
@@ -318,7 +318,7 @@ static void ionws_create_stdispnode(WIonWS *ws, WRegion *stdisp,
     }
 
     ws->split_tree=(WSplit*)split;
-    ((WSplit*)split)->selfptrptr=&(ws->split_tree);
+    ((WSplit*)split)->ws_if_root=ws;
     ws->stdispnode=stdispnode;
 }
 
@@ -1235,7 +1235,7 @@ WRegion *ionws_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
         destroy_obj((Obj*)ws);
         return NULL;
     }else{
-        ws->split_tree->selfptrptr=&(ws->split_tree);
+        ws->split_tree->ws_if_root=ws;
         split_restack(ws->split_tree, ws->genws.dummywin, Above);
     }
     

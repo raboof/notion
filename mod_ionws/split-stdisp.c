@@ -112,16 +112,10 @@ static bool stdisp_dir_ok(WSplitSplit *p, WSplitST *stdisp)
 
 static void replace(WSplitSplit *a, WSplitSplit *p)
 {
-    if(((WSplit*)a)->parent==NULL){
-        WSplit **r=((WSplit*)a)->selfptrptr;
-        assert(r!=NULL && *r==(WSplit*)a);
-        *r=(WSplit*)p;
-        ((WSplit*)p)->selfptrptr=r;
-        ((WSplit*)p)->parent=NULL;
-        ((WSplit*)a)->selfptrptr=NULL;
-    }else{
+    if(((WSplit*)a)->parent!=NULL)
         splitinner_replace(((WSplit*)a)->parent, (WSplit*)a, (WSplit*)p);
-    }
+    else
+        splittree_changeroot((WSplit*)a, (WSplit*)p);
 }
 
 

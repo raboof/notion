@@ -179,7 +179,7 @@ bool splittree_set_node_of(WRegion *reg, WSplitRegion *split)
 bool split_init(WSplit *split, const WRectangle *geom)
 {
     split->parent=NULL;
-    split->selfptrptr=NULL;
+    split->ws_if_root=NULL;
     split->geom=*geom;
     split->min_w=0;
     split->min_h=0;
@@ -989,12 +989,12 @@ err:
 
 void splittree_changeroot(WSplit *root, WSplit *node)
 {
-    WSplit **rptr=root->selfptrptr;
-    assert(rptr!=NULL && *rptr==root);
-    root->selfptrptr=NULL;
-    *rptr=node;
+    WIonWS *ws=(WIonWS*)(root->ws_if_root);
+    assert(ws!=NULL && ws->split_tree==root);
+    root->ws_if_root=NULL;
+    ws->split_tree=node;
     if(node!=NULL){
-        node->selfptrptr=rptr;
+        node->ws_if_root=ws;
         node->parent=NULL;
     }
 }
@@ -1009,11 +1009,12 @@ static void splitsplit_replace(WSplitSplit *split, WSplit *child,
         split->tl=what;
     else
         split->br=what;
+
+    child->parent=NULL;
     
     what->parent=(WSplitInner*)split;
 #warning "Needed?"    
-    what->selfptrptr=NULL;
-    child->parent=NULL;
+    what->ws_if_root=NULL;
 }
 
 
@@ -1223,7 +1224,7 @@ void splittree_remove(WSplit *node, bool reclaim_space)
 {
     if(node->parent!=NULL)
         splitinner_remove(node->parent, node, reclaim_space);
-    else if(node->selfptrptr!=NULL)
+    else if(node->ws_if_root!=NULL)
         splittree_changeroot(node, NULL);
     
     destroy_obj((Obj*)node);

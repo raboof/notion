@@ -52,7 +52,7 @@ DECLCLASS(WSplit){
     Obj obj;
     WRectangle geom;
     WSplitInner *parent;
-    WSplit **selfptrptr;
+    void *ws_if_root;
     
     int min_w, min_h;
     int max_w, max_h;
