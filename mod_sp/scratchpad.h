@@ -22,14 +22,10 @@ INTRCLASS(WScratchpad);
 DECLCLASS(WScratchpad){
     WFrame frame;
     WFitParams last_fp;
-    Watch notifywin_watch;
 };
 
 extern WScratchpad* create_scratchpad(WWindow *parent, const WFitParams *fp);
 extern WRegion *scratchpad_load(WWindow *par, const WFitParams *fp,
                                 ExtlTab tab);
-
-extern void scratchpad_notify(WScratchpad *sp);
-extern void scratchpad_unnotify(WScratchpad *sp);
 
 #endif /* ION_MOD_SP_SCRATCHPAD_H */

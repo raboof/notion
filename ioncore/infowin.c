@@ -9,12 +9,14 @@
  * (at your option) any later version.
  */
 
+#include <string.h>
+
+#include <libtu/objp.h>
 #include "common.h"
 #include "global.h"
 #include "window.h"
 #include "infowin.h"
 #include "gr.h"
-#include <libtu/objp.h>
 
 
 /*{{{ Init/deinit */
@@ -81,7 +83,7 @@ void infowin_deinit(WInfoWin *p)
 /*{{{ Content-setting */
 
 
-bool infowin_set_attr2(WInfoWin *p, const char *attr1, const char *attr2)
+bool infowin_setattr2(WInfoWin *p, const char *attr1, const char *attr2)
 {
     char *p2=NULL;
     
@@ -100,6 +102,33 @@ bool infowin_set_attr2(WInfoWin *p, const char *attr1, const char *attr2)
     p->attr=p2;
     
     return TRUE;
+}
+
+
+void infowin_settext(WInfoWin *p, const char *str)
+{
+    WFitParams fp;
+    GrBorderWidths bdw;
+    GrFontExtents fnte;
+
+    strncpy(INFOWIN_BUFFER(p), str, INFOWIN_BUFFER_LEN);
+    INFOWIN_BUFFER(p)[INFOWIN_BUFFER_LEN-1]='\0';
+    
+    grbrush_get_border_widths(INFOWIN_BRUSH(p), &bdw);
+    grbrush_get_font_extents(INFOWIN_BRUSH(p), &fnte);
+    
+    fp.g.w=bdw.left+bdw.right;
+    fp.g.w+=grbrush_get_text_width(INFOWIN_BRUSH(p), INFOWIN_BUFFER(p),
+                                   strlen(INFOWIN_BUFFER(p)));
+    fp.g.h=fnte.max_height+bdw.top+bdw.bottom;;
+    fp.g.x=REGION_GEOM(p).x;
+    fp.g.y=REGION_GEOM(p).y;
+    
+    if(fp.g.w==REGION_GEOM(p).w && fp.g.h==REGION_GEOM(p).h){
+        window_draw((WWindow*)p, TRUE);
+    }else{
+        region_fitrep((WRegion*)p, NULL, &fp);
+    }
 }
 
 

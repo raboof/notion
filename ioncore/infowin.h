@@ -33,7 +33,7 @@ extern bool infowin_init(WInfoWin *p, WWindow *parent, const WFitParams *fp,
                          const char *style);
 extern WInfoWin *create_infowin(WWindow *parent, const WFitParams *fp,
                                 const char *style);
-extern bool infowin_set_attr2(WInfoWin *p, const char *attr1,
-                              const char *attr2);
+extern void infowin_settext(WInfoWin *p, const char *s);
+extern bool infowin_setattr2(WInfoWin *p, const char *a1, const char *a2);
 
 #endif /* ION_IONCORE_INFOWIN_H */

@@ -10,6 +10,7 @@
  */
 
 #include <libtu/objp.h>
+#include <libtu/minmax.h>
 #include "common.h"
 #include "global.h"
 #include "screen.h"
@@ -29,7 +30,10 @@
 #include "frame-pointer.h"
 #include "rectangle.h"
 #include "region-iter.h"
-#include <libtu/minmax.h>
+#include "infowin.h"
+#include "stacking.h"
+#include "defer.h"
+#include "activity.h"
 
 #define SCR_MLIST(SCR) ((SCR)->mplex.l1_list)
 #define SCR_MCOUNT(SCR) ((SCR)->mplex.l1_count)
@@ -55,6 +59,8 @@ static bool screen_init(WScreen *scr, WRootWin *rootwin,
     scr->managed_off.h=0;
     scr->next_scr=NULL;
     scr->prev_scr=NULL;
+    
+    watch_init(&(scr->notifywin_watch));
 
     if(useroot){
         win=WROOTWIN_ROOT(rootwin);
@@ -235,6 +241,122 @@ static void screen_unmap(WScreen *scr)
 static void screen_activated(WScreen *scr)
 {
     ioncore_g.active_screen=scr;
+}
+
+
+/*}}}*/
+
+
+/*{{{ Notifications */
+
+
+static bool notifies_enabled=TRUE;
+
+
+void screen_notify(WScreen *scr, const char *str)
+{
+    WInfoWin *iw=(WInfoWin*)(scr->notifywin_watch.obj);
+    WFitParams fp;
+    
+    if(iw!=NULL){
+        infowin_settext(iw, str);
+        return;
+    }
+
+    fp.mode=REGION_FIT_EXACT;
+    fp.g.x=0;
+    fp.g.y=0;
+    fp.g.w=1;
+    fp.g.h=1;
+    
+    iw=create_infowin((WWindow*)scr, &fp, "actnotify");
+    
+    if(iw==NULL)
+        return;
+    
+    watch_setup(&(scr->notifywin_watch), (Obj*)iw, NULL);
+
+    infowin_settext(iw, str);
+    region_keep_on_top((WRegion*)iw);
+    region_map((WRegion*)iw);
+}
+
+
+void screen_unnotify(WScreen *scr)
+{
+    Obj *iw=scr->notifywin_watch.obj;
+    if(iw!=NULL){
+        ioncore_defer_destroy(iw);
+        watch_reset(&(scr->notifywin_watch));
+    }
+}
+
+
+static char *addnot(char *str, WRegion *reg)
+{
+    const char *nm=region_name(reg);
+    char *nstr=NULL;
+    
+    if(nm==NULL)
+        return str;
+    
+    if(str==NULL)
+        return scat("act: ", nm);
+
+    nstr=scat3(str, ", ", nm);
+    if(nstr!=NULL)
+        free(str);
+    return nstr;
+}
+
+
+static char *screen_managed_activity(WScreen *scr)
+{
+    WRegion *reg;
+    char *notstr=NULL;
+    
+    FOR_ALL_MANAGED_ON_LIST(scr->mplex.l1_list, reg){
+        if(region_activity(reg) && !REGION_IS_MAPPED(reg))
+            notstr=addnot(notstr, reg);
+    }
+    
+    FOR_ALL_MANAGED_ON_LIST(scr->mplex.l2_list, reg){
+        if(region_activity(reg) && !REGION_IS_MAPPED(reg))
+            notstr=addnot(notstr, reg);
+    }
+    
+    return notstr;
+}
+
+
+static void screen_managed_notify(WScreen *scr, WRegion *sub)
+{
+    char *notstr;
+    
+    if(ioncore_g.opmode!=IONCORE_OPMODE_NORMAL)
+        return;
+    
+    if(notifies_enabled){
+        notstr=screen_managed_activity(scr);
+        if(notstr!=NULL){
+            screen_notify(scr, notstr);
+            free(notstr);
+            return;
+        }
+    }
+
+    screen_unnotify(scr);
+}
+
+
+/*EXTL_DOC
+ * Set to true to enable small notification windows at corners of screens 
+ * when there is activity on a hidden workspace (or other object).
+ */
+EXTL_EXPORT
+void ioncore_set_screen_notify(bool enabled)
+{
+    notifies_enabled=enabled;
 }
 
 
@@ -443,6 +565,8 @@ static DynFunTab screen_dynfuntab[]={
     {mplex_managed_changed, screen_managed_changed},
     
     {mplex_managed_geom, screen_managed_geom},
+
+    {region_managed_notify, screen_managed_notify},
 
     {(DynFun*)region_get_configuration,
      (DynFun*)screen_get_configuration},
