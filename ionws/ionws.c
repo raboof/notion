@@ -18,6 +18,7 @@
 #include <ioncore/names.h>
 #include <ioncore/saveload.h>
 #include <ioncore/attach.h>
+#include <ioncore/resize.h>
 #include <ioncore/extl.h>
 #include "placement.h"
 #include "ionws.h"

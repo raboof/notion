@@ -234,11 +234,11 @@ static bool clientwin_init(WClientWin *cwin, WRegion *parent,
 
 	geom.x=attr->x;
 	geom.y=attr->y;
-	geom.w=attr->width;
-	geom.h=attr->height;
+	geom.w=attr->width+2*attr->border_width;
+	geom.h=attr->height+2*attr->border_width;
 	
-	/* The idiot who invented special server-supported window borders should
-	 * be "taken behind a sauna".
+	/* The idiot who invented special server-supported window borders (that
+	 * affect window geometry) should be "taken behind a sauna".
 	 */
 	cwin->orig_bw=attr->border_width;
 	if(cwin->orig_bw!=0){
@@ -248,8 +248,8 @@ static bool clientwin_init(WClientWin *cwin, WRegion *parent,
 								: NorthWestGravity),
 						-cwin->orig_bw, -cwin->orig_bw, 
 						-cwin->orig_bw, -cwin->orig_bw);
-		geom.w=attr->width;
-		geom.h=attr->height;
+		/*geom.w=attr->width;
+		geom.h=attr->height;*/
 	}
 
 	region_init(&(cwin->region), parent, geom);
@@ -822,8 +822,8 @@ static void convert_geom(WClientWin *cwin, WRectangle max_geom,
 
 
 static void clientwin_request_managed_geom(WClientWin *cwin, WRegion *sub,
-										   WRectangle geom, WRectangle *geomret,
-										   bool tryonly)
+										   int flags, WRectangle geom, 
+										   WRectangle *geomret)
 {
 	WRectangle rgeom=cwin->max_geom;
 	
@@ -835,7 +835,7 @@ static void clientwin_request_managed_geom(WClientWin *cwin, WRegion *sub,
 	if(geomret!=NULL)
 		*geomret=rgeom;
 	
-	if(!tryonly)
+	if(!(flags&REGION_RQGEOM_TRYONLY))
 		region_fit(sub, rgeom);
 }
 
@@ -1004,8 +1004,10 @@ static void clientwin_activated(WClientWin *cwin)
 static void clientwin_resize_hints(WClientWin *cwin, XSizeHints *hints_ret,
 								   uint *relw_ret, uint *relh_ret)
 {
-	*relw_ret=REGION_GEOM(cwin).w;
-	*relh_ret=REGION_GEOM(cwin).h;
+	if(relw_ret!=NULL)
+		*relw_ret=REGION_GEOM(cwin).w;
+	if(relh_ret!=NULL)
+		*relh_ret=REGION_GEOM(cwin).h;
 	*hints_ret=cwin->size_hints;
 	
 	adjust_size_hints_for_managed(hints_ret, cwin->transient_list);
@@ -1068,58 +1070,93 @@ WClientWin *find_clientwin(Window win)
 void clientwin_handle_configure_request(WClientWin *cwin,
 										XConfigureRequestEvent *ev)
 {
+	WRegion *par;
 	WRectangle geom;
+	int rqflags=REGION_RQGEOM_WEAK_ALL;
 	int dx=0, dy=0;
-	int rx, ry;
-	bool sz=FALSE, pos=FALSE;
-	WWindow *par;
 	
 	/* check full screen request */
 	if((ev->value_mask&(CWWidth|CWHeight))==(CWWidth|CWHeight)){
 		if(clientwin_check_fullscreen_request(cwin, ev->width, ev->height))
 			return;
 	}
-	
-	geom=REGION_GEOM(cwin);
-	
-	/* ConfigureRequest coordinates are coordinates of the window manager
-	 * frame if such exists.
+
+	if(ev->value_mask&CWBorderWidth)
+		cwin->orig_bw=ev->border_width;
+
+	/* Do I need to insert another disparaging comment on the person who
+	 * invented geometry-affecting window borders?
 	 */
-	region_rootpos((WRegion*)cwin, &rx, &ry);
+	geom.w=REGION_GEOM(cwin).w+2*cwin->orig_bw;
+	geom.h=REGION_GEOM(cwin).h+2*cwin->orig_bw;
 	
+	/* The ICCCM says: "The coordinate system in which the location is
+	 * expressed is that of the root (irrespective of any reparenting that
+	 * may have occurred)." This is quite vague. In my opinion apps should
+	 * send the absolute position measured from the root window top left
+	 * corner (fsck gravity). Some apps, however, request root-relative
+	 * coordinates for the outermost wm frame as if that was specified
+	 * by the client. Other apps (e.g. XMMS) request coordinates for the
+	 * innermost WM frame relative to the root. There's no way the latter
+	 * could be an interpretation of the ICCCM statement (more like an
+	 * assumption that there is only one level of WM windows) so we do
+	 * the former. Some apps' totally useless resize and move features
+	 * will go nuts in nested frames/workspaces/on additional Xinerama
+	 * screens while others' will work.
+	 */
+	par=(WRegion*)cwin;
+	do{
+		geom.x=REGION_GEOM(par).x;
+		geom.y=REGION_GEOM(par).y;
+		par=region_parent((WRegion*)par);
+	}while(par!=NULL && ROOT_OF(par)!=region_x_window(par));
+
 	if(ev->value_mask&CWX){
-		dx=ev->x-rx;
-		geom.x+=dx;
-		pos=TRUE;
+		dx=ev->x-geom.x;
+		rqflags&=~REGION_RQGEOM_WEAK_X;
 	}
 	
 	if(ev->value_mask&CWY){
-		dy=ev->y-ry;
-		geom.y+=dy;
-		pos=TRUE;
+		dy=ev->y-geom.y;
+		rqflags&=~REGION_RQGEOM_WEAK_Y;
 	}
 	
 	if(ev->value_mask&CWWidth){
-		geom.w=ev->width;
+		geom.w=ev->width+2*cwin->orig_bw;
 		if(geom.w<1)
 			geom.w=1;
-		sz=TRUE;
+		rqflags&=~REGION_RQGEOM_WEAK_W;
 	}
 	
 	if(ev->value_mask&CWHeight){
-		geom.h=ev->height;
+		geom.h=ev->height+2*cwin->orig_bw;
 		if(geom.h<1)
 			geom.h=1;
-		sz=TRUE;
+		rqflags&=~REGION_RQGEOM_WEAK_H;
 	}
 	
-	if(ev->value_mask&CWBorderWidth)
-		cwin->orig_bw=ev->border_width;
-	
+	if(cwin->orig_bw!=0){
+		account_gravity(&geom, (cwin->size_hints.flags&PWinGravity 
+								? cwin->size_hints.win_gravity 
+								: NorthWestGravity),
+						-cwin->orig_bw, -cwin->orig_bw, 
+						-cwin->orig_bw, -cwin->orig_bw);
+	}
+
 	cwin->flags|=CWIN_NEED_CFGNTFY;
 	
-	if(sz || pos)
-		region_request_geom((WRegion*)cwin, geom, NULL, FALSE);
+	if(ev->value_mask&(CWX|CWY|CWWidth|CWHeight)){
+		WRegion *mgr=REGION_MANAGER(cwin);
+		if(mgr!=NULL && HAS_DYN(mgr, region_request_clientwin_geom)){
+			geom.x+=dx;
+			geom.y+=dy;
+			region_request_clientwin_geom(mgr, cwin, rqflags, geom);
+		}else{
+			geom.x=REGION_GEOM(cwin).x+dx;
+			geom.y=REGION_GEOM(cwin).y+dy;
+			region_request_geom((WRegion*)cwin, rqflags, geom, NULL);
+		}
+	}
 	
 	if(cwin->flags&CWIN_NEED_CFGNTFY){
 		sendconfig_clientwin(cwin);

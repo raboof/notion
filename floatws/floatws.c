@@ -320,8 +320,8 @@ static bool floatws_add_clientwin(WFloatWS *ws,
 		}
 
 		if(params->flags&REGION_ATTACH_POSRQ){
-			fgeom.x=params->geomrq.x;
-			fgeom.y=params->geomrq.y;
+			fgeom.x=params->geomrq.x-REGION_GEOM(ws).x;
+			fgeom.y=params->geomrq.y-REGION_GEOM(ws).x;
 			respectpos=TRUE;
 		}else{
 			fgeom.x=0;
@@ -338,8 +338,8 @@ static bool floatws_add_clientwin(WFloatWS *ws,
 		if(params->flags&REGION_ATTACH_MAPRQ && wglobal.opmode!=OPMODE_INIT){
 			/* When the window is mapped by application request, position
 			 * request is only honoured if the position was given by the user
-			 * and in case of a transient (the may know better where to place
-			 * them).
+			 * and in case of a transient (the app may know better where to 
+			 * place them).
 			 */
 			respectpos=(cwin->transient_for!=None ||
 						cwin->size_hints.flags&USPosition);

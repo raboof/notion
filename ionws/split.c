@@ -399,20 +399,24 @@ static void resize_tmp(const WResizeTmp *tmp)
 }
 
 
-void ionws_request_managed_geom(WIonWS *ws, WRegion *sub, WRectangle geom,
-								WRectangle *geomret, bool tryonly)
+void ionws_request_managed_geom(WIonWS *ws, WRegion *sub, 
+								int flags, WRectangle geom,
+								WRectangle *geomret)
 {
 	int hprimn=ANY, vprimn=ANY;
+	bool tryonly=(flags&REGION_RQGEOM_TRYONLY);
 	WResizeTmp tmp;
-
+	
 	if(geomret!=NULL)
 		*geomret=REGION_GEOM(sub);
 	
-	if(REGION_GEOM(sub).w!=geom.w){
-		if(REGION_GEOM(sub).x==geom.x)
-			hprimn=BOTTOM_OR_RIGHT;
-		else if(REGION_GEOM(sub).x+REGION_GEOM(sub).w==geom.x+geom.w)
-			hprimn=TOP_OR_LEFT;
+	if(!(flags&REGION_RQGEOM_WEAK_W) && REGION_GEOM(sub).w!=geom.w){
+		if(!(flags&REGION_RQGEOM_WEAK_X)){
+			if(REGION_GEOM(sub).x==geom.x)
+				hprimn=BOTTOM_OR_RIGHT;
+			else if(REGION_GEOM(sub).x+REGION_GEOM(sub).w==geom.x+geom.w)
+				hprimn=TOP_OR_LEFT;
+		}
 		
 		calcresize_reg(sub, HORIZONTAL, hprimn, geom.w, &tmp);
 		if(geomret!=NULL){
@@ -423,11 +427,13 @@ void ionws_request_managed_geom(WIonWS *ws, WRegion *sub, WRectangle geom,
 			resize_tmp(&tmp);
 	}
 	
-	if(REGION_GEOM(sub).h!=geom.h){
-		if(REGION_GEOM(sub).y==geom.y)
-			vprimn=BOTTOM_OR_RIGHT;
-		else if(REGION_GEOM(sub).y+REGION_GEOM(sub).h==geom.y+geom.h)
-			vprimn=TOP_OR_LEFT;
+	if(!(flags&REGION_RQGEOM_WEAK_H) && REGION_GEOM(sub).h!=geom.h){
+		if(!(flags&REGION_RQGEOM_WEAK_Y)){
+			if(REGION_GEOM(sub).y==geom.y)
+				vprimn=BOTTOM_OR_RIGHT;
+			else if(REGION_GEOM(sub).y+REGION_GEOM(sub).h==geom.y+geom.h)
+				vprimn=TOP_OR_LEFT;
+		}
 
 		calcresize_reg(sub, VERTICAL, vprimn, geom.h, &tmp);
 		if(geomret!=NULL){

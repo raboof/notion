@@ -17,6 +17,7 @@
 #include "names.h"
 #include "reginfo.h"
 #include "saveload.h"
+#include "resize.h"
 #include "genws.h"
 #include "event.h"
 

@@ -24,22 +24,9 @@ static void random_placement(WRectangle box, WRectangle *g)
 }
 
 
-static bool shaded_frame(WRegion *reg)
-{
-	return (WOBJ_IS(reg, WFloatFrame) &&
-		   genframe_is_shaded((WFloatFrame*)reg));
-}
-
-
 static void ggeom(WRegion *reg, WRectangle *geom)
 {
-	if(shaded_frame(reg)){
-		genframe_bar_geom((WGenFrame*)reg, geom);
-		geom->x+=REGION_GEOM(reg).x;
-		geom->y+=REGION_GEOM(reg).y;
-	}else{
-		*geom=REGION_GEOM(reg);
-	}
+	*geom=REGION_GEOM(reg);
 }
 
 

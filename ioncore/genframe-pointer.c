@@ -255,13 +255,17 @@ static WRegion *fnd(Window root, int x, int y)
 	Window win=root;
 	int dstx, dsty;
 	WRegion *reg=NULL, *reg2;
-	WWindow *w=NULL;
+	WRegion *w=NULL;
+	
+	w=FIND_WINDOW_T(root, WRegion);
+	if(w==NULL)
+		return NULL;
 	
 	do{
 		if(!XTranslateCoordinates(wglobal.dpy, root, win,
 								  x, y, &dstx, &dsty, &win))
 			return NULL;
-	
+		
 		if(win==None){
 			x-=REGION_GEOM(w).x;
 			y-=REGION_GEOM(w).y;
@@ -274,7 +278,7 @@ static WRegion *fnd(Window root, int x, int y)
 			}
 			break;
 		}
-		w=FIND_WINDOW_T(win, WWindow);
+		w=(WRegion*)FIND_WINDOW_T(win, WWindow);
 		if(w==NULL)
 			break;
 		if(HAS_DYN(w, region_handle_drop))

@@ -107,7 +107,6 @@ DYNFUN void region_unmap(WRegion *reg);
  * focusing subregions.
  */
 DYNFUN void region_set_focus_to(WRegion *reg, bool warp);
-DYNFUN void region_notify_rootpos(WRegion *reg, int x, int y);
 /* mode==Above, return topmost; mode==Below, return bottomost */
 DYNFUN Window region_x_window(const WRegion *reg);
 DYNFUN void region_activated(WRegion *reg);
@@ -117,6 +116,7 @@ DYNFUN void region_close(WRegion *reg);
 extern void region_default_draw_config_updated(WRegion *reg);
 extern bool region_may_destroy(WRegion *reg);
 
+DYNFUN void region_notify_rootpos(WRegion *reg, int x, int y);
 extern void region_rootpos(WRegion *reg, int *xret, int *yret);
 extern void region_notify_subregions_rootpos(WRegion *reg, int x, int y);
 extern void region_notify_subregions_move(WRegion *reg);
@@ -155,20 +155,6 @@ DYNFUN void region_managed_activated(WRegion *reg, WRegion *sub);
 DYNFUN void region_managed_inactivated(WRegion *reg, WRegion *sub);
 DYNFUN void region_notify_managed_change(WRegion *reg, WRegion *sub);
 DYNFUN bool region_may_destroy_managed(WRegion *mgr, WRegion *reg);
-DYNFUN void region_request_managed_geom(WRegion *reg, WRegion *sub,
-										WRectangle geom, WRectangle *geomret,
-										bool tryonly);
-
-/* Implementation for regions that do not allow subregions to resize
- * themselves; default is to give the size the region wants.
- */
-extern void region_request_managed_geom_unallow(WRegion *reg, WRegion *sub,
-												WRectangle geom, WRectangle *geomret,
-												bool tryonly);
-/* default */
-extern void region_request_managed_geom_allow(WRegion *reg, WRegion *sub,
-											  WRectangle geom, WRectangle *geomret,
-											  bool tryonly);
 
 
 /* Old WThing stuff */

@@ -290,8 +290,8 @@ void genframe_fit_managed(WGenFrame *genframe)
 
 
 static void genframe_request_managed_geom(WGenFrame *genframe, WRegion *sub,
-										  WRectangle geom, WRectangle *geomret,
-										  bool tryonly)
+										  int flags, WRectangle geom, 
+										  WRectangle *geomret)
 {
 	/* Just try to give it the maximum size */
 	genframe_managed_geom(genframe, &geom);
@@ -299,7 +299,7 @@ static void genframe_request_managed_geom(WGenFrame *genframe, WRegion *sub,
 	if(geomret!=NULL)
 		*geomret=geom;
 	
-	if(!tryonly)
+	if(!(flags&REGION_RQGEOM_TRYONLY))
 		region_fit(sub, geom);
 }
 
@@ -310,10 +310,18 @@ void genframe_resize_hints(WGenFrame *genframe, XSizeHints *hints_ret,
 	WRectangle subgeom;
 	uint wdummy, hdummy;
 	
-	genframe_managed_geom(genframe, &subgeom);
-	
-	*relw_ret=subgeom.w;
-	*relh_ret=subgeom.h;
+	/*if(genframe->current_sub==NULL){*/
+		genframe_managed_geom(genframe, &subgeom);
+		if(relw_ret!=NULL)
+			*relw_ret=subgeom.w;
+		if(relh_ret!=NULL)
+			*relh_ret=subgeom.h;
+	/*}else{
+		if(relw_ret!=NULL)
+			*relw_ret=REGION_GEOM(genframe->current_sub).w;
+		if(relh_ret!=NULL)
+			*relh_ret=REGION_GEOM(genframe->current_sub).h;
+	}*/
 	
 	if(genframe->current_sub!=NULL){
 		region_resize_hints(genframe->current_sub, hints_ret,

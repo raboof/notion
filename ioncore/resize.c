@@ -14,6 +14,8 @@
 #include "event.h"
 #include "cursor.h"
 #include "objp.h"
+#include "extl.h"
+#include "extlconv.h"
 #include "grab.h"
 
 
@@ -32,6 +34,7 @@ static void (*resize_atexit)();
 static int parent_rx, parent_ry;
 static enum {MOVERES_SIZE, MOVERES_POS} moveres_mode=MOVERES_SIZE;
 static bool resize_cumulative=FALSE;
+static int tmprqflags=0;
 
 
 /*{{{ Dynfuns */
@@ -43,8 +46,10 @@ void region_resize_hints(WRegion *reg, XSizeHints *hints_ret,
 	hints_ret->flags=0;
 	hints_ret->min_width=1;
 	hints_ret->min_height=1;
-	*relw_ret=REGION_GEOM(reg).w;
-	*relh_ret=REGION_GEOM(reg).h;
+	if(relw_ret!=NULL)
+		*relw_ret=REGION_GEOM(reg).w;
+	if(relh_ret!=NULL)
+		*relh_ret=REGION_GEOM(reg).h;
 	{
 		CALL_DYN(region_resize_hints, reg, (reg, hints_ret, relw_ret, relh_ret));
 	}
@@ -171,8 +176,8 @@ static bool begin_moveres(WRegion *reg, WDrawRubberbandFn *rubfn,
 	tmpreg=reg;
 	tmprubfn=rubfn;
 	resize_cumulative=cumulative;
-	
 	resize_mode=TRUE;
+	tmprqflags=(XOR_RESIZE ? REGION_RQGEOM_TRYONLY : 0);
 	
 	if(!tmphints.flags&PMinSize || tmphints.min_width<1)
 		tmphints.min_width=1;
@@ -287,14 +292,14 @@ static void delta_moveres(WRegion *reg, int dx1, int dx2, int dy1, int dy2,
 			geom.y+=tmpdy1;
 	}
 	
-	region_request_geom(reg, geom, &geom, XOR_RESIZE);
+	region_request_geom(reg, tmprqflags, geom, &geom);
 
 	if(XOR_RESIZE)
 		res_draw_rubberband(rootwin);
+
+	tmpgeom=geom;
 	
 	res_draw_moveres(rootwin);
-	
-	tmpgeom=geom;
 	
 	if(XOR_RESIZE)
 		res_draw_rubberband(rootwin);
@@ -355,7 +360,8 @@ void end_resize(WRegion *reg)
 	
 	if(XOR_RESIZE){
 		res_draw_rubberband(rootwin);
-		region_request_geom(reg, tmpgeom, &tmpgeom, FALSE);
+		region_request_geom(reg, tmprqflags&~REGION_RQGEOM_TRYONLY,
+							tmpgeom, &tmpgeom);
 		XUngrabServer(wglobal.dpy);
 	}
 	
@@ -403,13 +409,14 @@ void cancel_resize(WRegion *reg)
 /*{{{ Request */
 
 
-void region_request_geom(WRegion *reg,
-						 WRectangle geom, WRectangle *geomret,
-						 bool tryonly)
+void region_request_geom(WRegion *reg, int flags, WRectangle geom,
+						 WRectangle *geomret)
 {
+	bool tryonly=(flags&REGION_RQGEOM_TRYONLY);
+	
 	if(REGION_MANAGER(reg)!=NULL){
-		region_request_managed_geom(REGION_MANAGER(reg), reg, geom, geomret, 
-									tryonly);
+		region_request_managed_geom(REGION_MANAGER(reg), reg, flags, geom,
+									geomret);
 	}else{
 		if(geomret!=NULL)
 			*geomret=REGION_GEOM(reg);
@@ -417,42 +424,72 @@ void region_request_geom(WRegion *reg,
 			region_fit(reg, geom);
 	}
 
-	if(!tryonly && geomret!=NULL)
+	/*if(!tryonly && geomret!=NULL)
+		*geomret=REGION_GEOM(reg);*/
+}
+
+
+/*EXTL_DOC
+ * Attempt to resize and/or move \var{reg}. The table \var{g} is a usual
+ * geometry specification (fields \var{x}, \var{y}, \var{w} and \var{h}),
+ * but may contain missing fields, in which case, \var{reg}'s manager may
+ * attempt to leave that attribute unchanged.
+ */
+EXTL_EXPORT_AS(region_request_geom)
+ExtlTab region_request_geom_extl(WRegion *reg, ExtlTab g)
+{
+	WRectangle geom=REGION_GEOM(reg);
+	int flags=REGION_RQGEOM_WEAK_ALL;
+	
+	if(extl_table_gets_i(g, "x", &(geom.x)))
+	   flags&=~REGION_RQGEOM_WEAK_X;
+	if(extl_table_gets_i(g, "y", &(geom.y)))
+	   flags&=~REGION_RQGEOM_WEAK_Y;
+	if(extl_table_gets_i(g, "w", &(geom.w)))
+	   flags&=~REGION_RQGEOM_WEAK_W;
+	if(extl_table_gets_i(g, "h", &(geom.h)))
+	   flags&=~REGION_RQGEOM_WEAK_H;
+	
+	region_request_geom(reg, flags, geom, &geom);
+	
+	return geom_to_extltab(geom);
+}
+
+
+void region_request_managed_geom(WRegion *mgr, WRegion *reg,
+								 int flags, WRectangle geom,
+								 WRectangle *geomret)
+{
+	CALL_DYN(region_request_managed_geom, mgr,
+			 (mgr, reg, flags, geom, geomret));
+}
+
+
+void region_request_clientwin_geom(WRegion *mgr, WClientWin *cwin,
+								   int flags, WRectangle geom)
+{
+	CALL_DYN(region_request_clientwin_geom, mgr, (mgr, cwin, flags, geom));
+}
+
+
+void region_request_managed_geom_allow(WRegion *mgr, WRegion *reg,
+									   int flags, WRectangle geom,
+									   WRectangle *geomret)
+{
+	if(geomret!=NULL)
+		*geomret=geom;
+	
+	if(!(flags&REGION_RQGEOM_TRYONLY))
+		region_fit(reg, geom);
+}
+
+
+void region_request_managed_geom_unallow(WRegion *mgr, WRegion *reg,
+										 int flags, WRectangle geom,
+										 WRectangle *geomret)
+{
+	if(geomret!=NULL)
 		*geomret=REGION_GEOM(reg);
-}
-
-
-/*}}}*/
-
-
-/*{{{ set_width etc. */
-
-
-/*EXTL_DOC
- * Attempt to set the width of \var{reg} to \var{w} pixels.
- */
-EXTL_EXPORT
-void region_set_w(WRegion *reg, int w)
-{
-	WRectangle geom=REGION_GEOM(reg);
-	if(w>0){
-		geom.w=w;
-		region_request_geom(reg, geom, &geom, FALSE);
-	}
-}
-
-
-/*EXTL_DOC
- * Attempt to set the height of \var{reg} to \var{h} pixels.
- */
-EXTL_EXPORT
-void region_set_h(WRegion *reg, int h)
-{
-	WRectangle geom=REGION_GEOM(reg);
-	if(h>0){
-		geom.h=h;
-		region_request_geom(reg, geom, &geom, FALSE);
-	}
 }
 
 
@@ -486,37 +523,35 @@ static void save_horiz(WGenFrame *frame, bool override)
 void genframe_restore_size(WGenFrame *frame, bool horiz, bool vert)
 {
 	WRectangle geom;
-	
-	if(!(frame->flags&WGENFRAME_SAVED_VERT))
-		vert=FALSE;
-	if(!(frame->flags&WGENFRAME_SAVED_HORIZ))
-		horiz=FALSE;
-	
-	if(!vert && !horiz)
-		return;
-	
+	int rqf=REGION_RQGEOM_WEAK_ALL;
+
 	geom=REGION_GEOM(frame);
 	
-	if(vert){
-		geom.h=frame->saved_h;
+	if(vert && frame->flags&WGENFRAME_SAVED_VERT){
 		geom.y=frame->saved_y;
+		geom.h=frame->saved_h;
+		rqf&=~(REGION_RQGEOM_WEAK_Y|REGION_RQGEOM_WEAK_H);
 	}
-	
-	if(horiz){
-		geom.w=frame->saved_w;
+
+	if(horiz && frame->flags&WGENFRAME_SAVED_HORIZ){
 		geom.x=frame->saved_x;
+		geom.w=frame->saved_w;
+		rqf&=~(REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_W);
 	}
 	
-	region_request_geom((WRegion*)frame, geom, NULL, FALSE);
+	if((rqf&REGION_RQGEOM_WEAK_ALL)!=REGION_RQGEOM_WEAK_ALL)
+		region_request_geom((WRegion*)frame, rqf, geom, NULL);
 }
 
 
-static bool trymaxv(WGenFrame *frame, WRegion *mgr, bool tryonly)
+static bool trymaxv(WGenFrame *frame, WRegion *mgr, int tryonlyflag)
 {
 	WRectangle geom=REGION_GEOM(frame);
 	geom.y=0;
 	geom.h=REGION_GEOM(mgr).h;
-	region_request_geom((WRegion*)frame, geom, &geom, tryonly);
+	region_request_geom((WRegion*)frame, 
+						tryonlyflag|REGION_RQGEOM_VERT_ONLY, 
+						geom, &geom);
 	return (abs(geom.y-REGION_GEOM(frame).y)>1 ||
 			abs(geom.h-REGION_GEOM(frame).h)>1);
 }
@@ -538,22 +573,24 @@ void genframe_maximize_vert(WGenFrame *frame)
 	if(mgr==NULL)
 		return;
 
-	if(!trymaxv(frame, mgr, TRUE)){
+	if(!trymaxv(frame, mgr, REGION_RQGEOM_TRYONLY)){
 		/* Could not maximize further, restore */
 		genframe_restore_size(frame, FALSE, TRUE);
 		return;
 	}
 
-	trymaxv(frame, mgr, FALSE);
+	trymaxv(frame, mgr, 0);
 }
 
 
-static bool trymaxh(WGenFrame *frame, WRegion *mgr, bool tryonly)
+static bool trymaxh(WGenFrame *frame, WRegion *mgr, int tryonlyflag)
 {
 	WRectangle geom=REGION_GEOM(frame);
 	geom.x=0;
 	geom.w=REGION_GEOM(mgr).w;
-	region_request_geom((WRegion*)frame, geom, &geom, tryonly);
+	region_request_geom((WRegion*)frame, 
+						tryonlyflag|REGION_RQGEOM_HORIZ_ONLY, 
+						geom, &geom);
 	return (abs(geom.x-REGION_GEOM(frame).x)>1 ||
 			abs(geom.w-REGION_GEOM(frame).w)>1);
 }
@@ -569,13 +606,13 @@ void genframe_maximize_horiz(WGenFrame *frame)
 	if(mgr==NULL)
 		return;
 
-	if(!trymaxh(frame, mgr, TRUE)){
+	if(!trymaxh(frame, mgr, REGION_RQGEOM_TRYONLY)){
 		/* Could not maximize further, restore */
 		genframe_restore_size(frame, TRUE, FALSE);
 		return;
 	}
 	
-	trymaxh(frame, mgr, FALSE);
+	trymaxh(frame, mgr, 0);
 }
 
 
@@ -592,11 +629,9 @@ void genframe_do_toggle_shade(WGenFrame *frame, int shaded_h)
 			return;
 		geom.h=shaded_h;
 	}
-	/* TODO: region_request_geom should support specifying only size 
-	 * so this gets handled correctly on WIonWS:s.
-	 */
 	
-	region_request_geom((WRegion*)frame, geom, NULL, FALSE);
+	region_request_geom((WRegion*)frame, REGION_RQGEOM_H_ONLY,
+						geom, NULL);
 }
 
 
@@ -650,11 +685,9 @@ void genframe_resize_units(WGenFrame *genframe, int *wret, int *hret)
 	*hret=grdata->h_unit;
 	
 	if(genframe->current_sub!=NULL){
-		uint dummyrelw,  dummyrelh;
 		XSizeHints hints;
 		
-		region_resize_hints(genframe->current_sub, &hints,
-							&dummyrelw, &dummyrelh);
+		region_resize_hints(genframe->current_sub, &hints, NULL, NULL);
 		
 		if(hints.flags&PResizeInc &&
 		   (hints.width_inc>1 || hints.height_inc>1)){

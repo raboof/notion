@@ -63,8 +63,8 @@ extern void ionws_add_managed(WIonWS *ws, WRegion *reg);
 extern void ionws_managed_activated(WIonWS *ws, WRegion *reg);
 extern WRegion *ionws_find_rescue_manager_for(WIonWS *ws, WRegion *todest);
 extern void ionws_request_managed_geom(WIonWS *ws, WRegion *reg,
-										 WRectangle geom,
-										 WRectangle *geomret, bool tryonly);
+									   int flags, WRectangle geom,
+									   WRectangle *geomret);
 extern void ionws_remove_managed(WIonWS *ws, WRegion *reg);
 
 extern WRegion *ionws_current(WIonWS *ws);

@@ -213,7 +213,6 @@ void adjust_size_hints_for_managed(XSizeHints *hints, WRegion *list)
 /*}}}*/
 
 
-
 /*{{{ account_gravity */
 
 

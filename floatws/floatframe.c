@@ -130,6 +130,11 @@ WRectangle initial_to_floatframe_geom(WGRData *grdata, WRectangle geom,
 									  int gravity)
 {
 	int top, bottom, left, right;
+
+	if(geom.w<1)
+		geom.w=1;
+	if(geom.h<1)
+		geom.h=1;
 	
 	top=BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad
 		+grdata->bar_h;
@@ -143,23 +148,55 @@ WRectangle initial_to_floatframe_geom(WGRData *grdata, WRectangle geom,
 }
 
 
+static void floatframe_request_clientwin_geom(WFloatFrame *frame, 
+											  WClientWin *cwin,
+											  int flags, WRectangle geom)
+{
+	int gravity=NorthWestGravity;
+	WRegion *parent;
+	XSizeHints hints;
+	
+	if(cwin->size_hints.flags&PWinGravity)
+		gravity=cwin->size_hints.win_gravity;
+	
+	genframe_resize_hints((WGenFrame*)frame, &hints, NULL, NULL);
+	correct_size(&(geom.w), &(geom.h), &hints, TRUE);
+	geom=initial_to_floatframe_geom(GRDATA_OF(frame), geom, gravity);
+	{
+		int rx, ry;
+		WRegion *par=(WRegion*)frame;
+		
+		do{
+			rx=REGION_GEOM(par).x;
+			ry=REGION_GEOM(par).y;
+			par=region_parent((WRegion*)par);
+		}while(par!=NULL && ROOT_OF(par)!=region_x_window(par));
+		
+		/* Add the difference between client requested coordinates and 
+		 * the coordinates of the outermost WM window to frame coordinates.
+		 */
+		geom.x+=REGION_GEOM(frame).x-rx;
+		geom.y+=REGION_GEOM(frame).y-ry;
+	}
+	
+	region_request_geom((WRegion*)frame, REGION_RQGEOM_NORMAL, geom, NULL);
+}
+
+
 static void floatframe_request_managed_geom(WFloatFrame *frame, WRegion *sub,
-											WRectangle geom,
-											WRectangle *geomret,
-											bool tryonly)
+											int flags, WRectangle geom,
+											WRectangle *geomret)
 {
 	WRectangle fgeom;
-	
-	if(geom.w<1)
-		geom.w=1;
-	if(geom.h<1)
-		geom.h=1;
+	XSizeHints hints;
 	
 	fgeom=managed_to_floatframe_geom(GRDATA_OF(frame), geom);
 	fgeom.x+=REGION_GEOM(frame).x;
 	fgeom.y+=REGION_GEOM(frame).y;
 
-	region_request_geom((WRegion*)frame, fgeom, &fgeom, tryonly);
+	genframe_resize_hints((WGenFrame*)frame, &hints, NULL, NULL);
+	correct_size(&(geom.w), &(geom.h), &hints, TRUE);
+	region_request_geom((WRegion*)frame, flags, fgeom, &fgeom);
 	
 	if(geomret!=NULL)
 		*geomret=floatframe_to_managed_geom(GRDATA_OF(frame), fgeom);
@@ -440,6 +477,8 @@ static DynFunTab floatframe_dynfuntab[]={
 	{region_remove_managed, floatframe_remove_managed},
 	
 	{region_request_managed_geom, floatframe_request_managed_geom},
+
+	{region_request_clientwin_geom, floatframe_request_clientwin_geom},
 	
 	{(DynFun*)region_save_to_file, (DynFun*)floatframe_save_to_file},
 	

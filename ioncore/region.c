@@ -16,6 +16,7 @@
 #include "tags.h"
 #include "names.h"
 #include "stacking.h"
+#include "resize.h"
 #include "extl.h"
 #include "extlconv.h"
 
@@ -225,15 +226,6 @@ void region_notify_managed_change(WRegion *mgr, WRegion *reg)
 }
 
 
-void region_request_managed_geom(WRegion *mgr, WRegion *reg,
-								 WRectangle geom, WRectangle *geomret,
-								 bool tryonly)
-{
-	CALL_DYN(region_request_managed_geom, mgr,
-			 (mgr, reg, geom, geomret, tryonly));
-}
-
-
 void region_remove_managed(WRegion *mgr, WRegion *reg)
 {
 	CALL_DYN(region_remove_managed, mgr, (mgr, reg));
@@ -293,33 +285,6 @@ static WRegion *default_selected_sub(WRegion *reg)
 {
 	return reg->active_sub;
 }
-
-
-/*{{{ Manager region default dynfuns */
-
-
-void region_request_managed_geom_allow(WRegion *mgr, WRegion *reg,
-									   WRectangle geom, WRectangle *geomret,
-									   bool tryonly)
-{
-	if(geomret!=NULL)
-		*geomret=geom;
-	
-	if(!tryonly)
-		region_fit(reg, geom);
-}
-
-
-void region_request_managed_geom_unallow(WRegion *mgr, WRegion *reg,
-										 WRectangle geom, WRectangle *geomret,
-										 bool tryonly)
-{
-	if(geomret!=NULL)
-		*geomret=REGION_GEOM(reg);
-}
-
-
-/*}}}*/
 
 
 void region_default_draw_config_updated(WRegion *reg)
@@ -910,7 +875,6 @@ WRegion *region_get_active_leaf(WRegion *reg)
 
 static DynFunTab region_dynfuntab[]={
 	{region_notify_rootpos, default_notify_rootpos},
-	/*{(DynFun*)region_restack, (DynFun*)default_restack},*/
 	{region_request_managed_geom, region_request_managed_geom_allow},
 	{region_draw_config_updated, region_default_draw_config_updated},
 	END_DYNFUNTAB
