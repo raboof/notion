@@ -81,9 +81,9 @@ static bool dispatch_binding(WRegion *binding_owner,
             subctx=region_current(binding_owner);
         else
             subctx=grab_reg;
-        
+
         extl_call(binding->func, "oo", NULL, binding_owner, subctx);
-        
+		
         if(ev->state!=0 && binding->waitrel)
             waitrelease(grab_reg);
     }
@@ -134,6 +134,9 @@ static bool waitrelease_handler(WRegion *reg, XEvent *ev)
 
 static void waitrelease(WRegion *reg)
 {
+	if(ioncore_modstate()==0)
+		return;
+	
     /* We need to grab on the root window as <reg> might have been
      * ioncore_defer_destroy:ed by the binding handler (the most common case
      * for using this kpress_waitrel!). In such a case the grab may

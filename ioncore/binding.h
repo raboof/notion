@@ -71,6 +71,7 @@ extern void ioncore_init_bindings();
 extern void ioncore_update_modmap();
 extern int ioncore_unmod(int state, int keycode);
 extern bool ioncore_ismod(int keycode);
+extern int ioncore_modstate();
 
 extern WBindmap *create_bindmap();
 

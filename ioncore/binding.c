@@ -514,6 +514,30 @@ int ioncore_unmod(int state, int keycode)
 }
 
 
+int ioncore_modstate()
+{
+	char keys[32];
+	int state=0;
+	int j;
+	
+	XQueryKeymap(ioncore_g.dpy, keys);
+    
+	for(j=0; j<N_MODS*modmap->max_keypermod; j++){
+        int a=(modmap->modifiermap[j]&7);
+		int b=(modmap->modifiermap[j]>>3);
+		if(b<32){
+			if(keys[b]&(1<<a))
+				state|=modmasks[j/modmap->max_keypermod];
+		}
+    }
+
+#ifdef CF_HACK_IGNORE_EVIL_LOCKS
+    state&=~evilignoremask;
+#endif
+    return state;
+}
+
+
 bool ioncore_ismod(int keycode)
 {
     int j;
