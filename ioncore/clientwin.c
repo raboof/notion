@@ -195,8 +195,8 @@ void clientwin_get_set_name(WClientWin *cwin)
     char **list=NULL;
     int n=0;
     
-    if(ioncore_g.use_mb && ioncore_g.atom_net_wm_name!=0)
-        list=xwindow_get_text_property(cwin->win, ioncore_g.atom_net_wm_name, NULL);
+    if(ioncore_g.use_mb)
+        list=netwm_get_name(cwin);
 
     if(list==NULL){
         list=xwindow_get_text_property(cwin->win, XA_WM_NAME, &n);
@@ -774,8 +774,7 @@ void clientwin_deinit(WClientWin *cwin)
                 xwindow_do_set_focus(cwin->win);
             }else{
                 set_clientwin_state(cwin, WithdrawnState);
-                XDeleteProperty(ioncore_g.dpy, cwin->win, 
-                                ioncore_g.atom_net_wm_state);
+                netwm_delete_state(cwin);
             }
         }
         

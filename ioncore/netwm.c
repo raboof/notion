@@ -21,24 +21,38 @@
 #include "property.h"
 #include "focus.h"
 #include "region-iter.h"
+#include "xwindow.h"
+#include "extlconv.h"
 
 
+/*{{{ Atoms */
+
+static Atom atom_net_wm_name=0;
+static Atom atom_net_wm_state=0;
 static Atom atom_net_wm_state_fullscreen=0;
-static Atom atom_net_supported=0;
 static Atom atom_net_supporting_wm_check=0;
 static Atom atom_net_virtual_roots=0;
+static Atom atom_net_active_window=0;
 
-#define N_NETWM 5
+#define N_NETWM 6
+
+static Atom atom_net_supported=0;
+
+/*}}}*/
+
+
+/*{{{ Initialisation */
 
 
 void netwm_init()
 {
-    ioncore_g.atom_net_wm_name=XInternAtom(ioncore_g.dpy, "_NET_WM_NAME", False);
-    ioncore_g.atom_net_wm_state=XInternAtom(ioncore_g.dpy, "_NET_WM_STATE", False);
+    atom_net_wm_name=XInternAtom(ioncore_g.dpy, "_NET_WM_NAME", False);
+    atom_net_wm_state=XInternAtom(ioncore_g.dpy, "_NET_WM_STATE", False);
+    atom_net_wm_state_fullscreen=XInternAtom(ioncore_g.dpy, "_NET_WM_STATE_FULLSCREEN", False);
     atom_net_supported=XInternAtom(ioncore_g.dpy, "_NET_SUPPORTED", False);
     atom_net_supporting_wm_check=XInternAtom(ioncore_g.dpy, "_NET_SUPPORTING_WM_CHECK", False);
-    atom_net_wm_state_fullscreen=XInternAtom(ioncore_g.dpy, "_NET_WM_STATE_FULLSCREEN", False);
     atom_net_virtual_roots=XInternAtom(ioncore_g.dpy, "_NET_VIRTUAL_ROOTS", False);
+    atom_net_active_window=XInternAtom(ioncore_g.dpy, "_NET_ACTIVE_WINDOW", False);
 }
 
 
@@ -46,11 +60,12 @@ void netwm_init_rootwin(WRootWin *rw)
 {
     Atom atoms[N_NETWM];
 
-    atoms[0]=ioncore_g.atom_net_wm_name;
-    atoms[1]=ioncore_g.atom_net_wm_state;
+    atoms[0]=atom_net_wm_name;
+    atoms[1]=atom_net_wm_state;
     atoms[2]=atom_net_wm_state_fullscreen;
     atoms[3]=atom_net_supporting_wm_check;
     atoms[4]=atom_net_virtual_roots;
+    atoms[5]=atom_net_active_window;
     
     FOR_ALL_ROOTWINS(rw){
         XChangeProperty(ioncore_g.dpy, WROOTWIN_ROOT(rw),
@@ -60,36 +75,16 @@ void netwm_init_rootwin(WRootWin *rw)
                         atom_net_supported, XA_ATOM,
                         32, PropModeReplace, (uchar*)atoms, N_NETWM);
         /* Something else should probably be used as WM name here. */
-        xwindow_set_text_property(rw->dummy_win, ioncore_g.atom_net_wm_name,
+        xwindow_set_text_property(rw->dummy_win, atom_net_wm_name,
                           prog_execname());
     }
 }
 
-    
-void netwm_state_change_rq(WClientWin *cwin, const XClientMessageEvent *ev)
-{
-    if((ev->data.l[1]==0 ||
-        ev->data.l[1]!=(long)atom_net_wm_state_fullscreen) &&
-       (ev->data.l[2]==0 ||
-        ev->data.l[2]!=(long)atom_net_wm_state_fullscreen)){
-        return;
-    }
-    
-    /* Ok, full screen add/remove/toggle */
-    if(!CLIENTWIN_IS_FULLSCREEN(cwin)){
-        if(ev->data.l[0]==_NET_WM_STATE_ADD || 
-           ev->data.l[0]==_NET_WM_STATE_TOGGLE){
-            bool sw=region_may_control_focus((WRegion*)cwin);
-            clientwin_enter_fullscreen(cwin, sw);
-        }
-    }else{
-        if(ev->data.l[0]==_NET_WM_STATE_REMOVE || 
-           ev->data.l[0]==_NET_WM_STATE_TOGGLE){
-            bool sw=region_may_control_focus((WRegion*)cwin);
-            clientwin_leave_fullscreen(cwin, sw);
-        }
-    }
-}
+
+/*}}}*/
+
+
+/*{{{ _NET_WM_STATE */
 
 
 int netwm_check_initial_fullscreen(WClientWin *cwin, bool sw)
@@ -99,7 +94,7 @@ int netwm_check_initial_fullscreen(WClientWin *cwin, bool sw)
     int ret=0;
     long *data;
     
-    n=xwindow_get_property(cwin->win, ioncore_g.atom_net_wm_state, XA_ATOM,
+    n=xwindow_get_property(cwin->win, atom_net_wm_state, XA_ATOM,
                    1, TRUE, (uchar**)&data);
     
     if(n<0)
@@ -126,8 +121,121 @@ void netwm_update_state(WClientWin *cwin)
     if(CLIENTWIN_IS_FULLSCREEN(cwin))
         data[n++]=atom_net_wm_state_fullscreen;
 
-    XChangeProperty(ioncore_g.dpy, cwin->win, ioncore_g.atom_net_wm_state, 
+    XChangeProperty(ioncore_g.dpy, cwin->win, atom_net_wm_state, 
                     XA_ATOM, 32, PropModeReplace, (uchar*)data, n);
 }
 
 
+void netwm_delete_state(WClientWin *cwin)
+{
+    XDeleteProperty(ioncore_g.dpy, cwin->win, atom_net_wm_state);
+}
+
+
+
+static void netwm_state_change_rq(WClientWin *cwin, 
+                                  const XClientMessageEvent *ev)
+{
+    if((ev->data.l[1]==0 ||
+        ev->data.l[1]!=(long)atom_net_wm_state_fullscreen) &&
+       (ev->data.l[2]==0 ||
+        ev->data.l[2]!=(long)atom_net_wm_state_fullscreen)){
+        return;
+    }
+    
+    /* Ok, full screen add/remove/toggle */
+    if(!CLIENTWIN_IS_FULLSCREEN(cwin)){
+        if(ev->data.l[0]==_NET_WM_STATE_ADD || 
+           ev->data.l[0]==_NET_WM_STATE_TOGGLE){
+            bool sw=region_may_control_focus((WRegion*)cwin);
+            clientwin_enter_fullscreen(cwin, sw);
+        }
+    }else{
+        if(ev->data.l[0]==_NET_WM_STATE_REMOVE || 
+           ev->data.l[0]==_NET_WM_STATE_TOGGLE){
+            bool sw=region_may_control_focus((WRegion*)cwin);
+            clientwin_leave_fullscreen(cwin, sw);
+        }
+    }
+}
+
+
+/*}}}*/
+
+
+/*{{{ _NET_ACTIVE_WINDOW */
+
+
+void netwm_set_active(WRegion *reg)
+{
+    CARD32 data[1]={None};
+    
+    if(OBJ_IS(reg, WClientWin))
+        data[0]=region_xwindow(reg);
+
+    /* The spec doesn't say how multihead should be handled, so
+     * we just update the root window the window is on.
+     */
+    XChangeProperty(ioncore_g.dpy, region_root_of(reg), 
+                    atom_net_active_window, XA_WINDOW, 
+                    32, PropModeReplace, (uchar*)data, 1);
+}
+
+
+static void netwm_active_window_rq(WClientWin *cwin, 
+                                   const XClientMessageEvent *ev)
+{
+    if(!extl_table_is_bool_set(cwin->proptab, "ignore_net_active_window"))
+        region_goto((WRegion*)cwin);
+}
+
+
+/*}}}*/
+
+
+/*{{{ _NET_WM_NAME */
+
+
+char **netwm_get_name(WClientWin *cwin)
+{
+    return xwindow_get_text_property(cwin->win, atom_net_wm_name, NULL);
+}
+
+
+/*}}}*/
+
+
+/*{{{ netwm_handle_client_message */
+
+
+void netwm_handle_client_message(const XClientMessageEvent *ev)
+{
+    /* Check _NET_WM_STATE fullscreen request */
+    if(ev->message_type==atom_net_wm_state && ev->format==32){
+        WClientWin *cwin=XWINDOW_REGION_OF_T(ev->window, WClientWin);
+        if(cwin!=NULL)
+            netwm_state_change_rq(cwin, ev);
+    }
+    /* Check _NET_ACTIVE_WINDOW request */
+    else if(ev->message_type==atom_net_active_window && ev->format==32){
+        WClientWin *cwin=XWINDOW_REGION_OF_T(ev->window, WClientWin);
+        if(cwin!=NULL)
+            netwm_active_window_rq(cwin, ev);
+    }
+}
+
+
+/*}}}*/
+
+
+/*{{{ netwm_handle_property */
+
+
+void netwm_handle_property(WClientWin *cwin, const XPropertyEvent *ev)
+{
+    if(ev->atom==atom_net_wm_name)
+        clientwin_get_set_name(cwin);
+}
+
+
+/*}}}*/

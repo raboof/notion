@@ -24,7 +24,11 @@ extern void netwm_init_rootwin(WRootWin *rw);
 
 extern int netwm_check_initial_fullscreen(WClientWin *cwin, bool switchto);
 extern void netwm_update_state(WClientWin *cwin);
-extern void netwm_state_change_rq(WClientWin *cwin, 
-                                  const XClientMessageEvent *ev);
+extern void netwm_delete_state(WClientWin *cwin);
+extern void netwm_set_active(WRegion *reg);
+extern char **netwm_get_name(WClientWin *cwin);
+
+extern void netwm_handle_client_message(const XClientMessageEvent *ev);
+extern void netwm_handle_property(WClientWin *cwin, const XPropertyEvent *ev);
 
 #endif /* ION_IONCORE_NETWM_H */

@@ -181,12 +181,7 @@ void ioncore_handle_configure_request(XConfigureRequestEvent *ev)
 
 void ioncore_handle_client_message(const XClientMessageEvent *ev)
 {
-    /* Check _NET_WM_STATE fullscreen request */
-    if(ev->message_type==ioncore_g.atom_net_wm_state && ev->format==32){
-        WClientWin *cwin=XWINDOW_REGION_OF_T(ev->window, WClientWin);
-        if(cwin!=NULL)
-            netwm_state_change_rq(cwin, ev);
-    }
+    netwm_handle_client_message(ev);
 
 #if 0
     WClientWin *cwin;
@@ -236,8 +231,8 @@ void ioncore_handle_property(const XPropertyEvent *ev)
         clientwin_tfor_changed(cwin);
     }else if(ev->atom==ioncore_g.atom_wm_protocols){
         clientwin_get_protocols(cwin);
-    }else if(ev->atom==ioncore_g.atom_net_wm_name){
-        clientwin_get_set_name(cwin);
+    }else{
+        netwm_handle_property(cwin, ev);
     }
 }
 
@@ -396,9 +391,10 @@ void ioncore_handle_focus_in(const XFocusChangeEvent *ev)
             XSetICFocus(wwin->xic);
     }
     
-    /*if(ev->detail!=NotifyInferior)*/{
-        region_got_focus(reg);
-    }
+    region_got_focus(reg);
+    
+    if(ev->detail!=NotifyInferior)
+        netwm_set_active(reg);
 }
 
 
