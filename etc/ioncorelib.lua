@@ -131,7 +131,7 @@ end
 function get_winprop(cwin)
     local id=clientwin_get_ident(cwin)
     
-    for c, r, i in alternative_winprops_idents(id) do
+    for c, r, i in alternative_winprop_idents(id) do
         if pcall(function() prop=winprops[c][r][i] end) then
             if prop then
                 return prop
@@ -151,7 +151,6 @@ end
 
 function do_add_winprop(class, role, instance, props)
     ensure_winproptab(class, role, instance)
-    print("add winprop ", class, role, instance)
     winprops[class][role][instance]=props
 end
 
