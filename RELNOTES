@@ -1,21 +1,37 @@
 
 === ion-3ds-20050??? ===
 
-This with custom configuration files should note that many exported toggle
-functions were changed and renamed, and now accept a string parameter
-incidating whether to toggle, set or unset the property.
-  
-  - WClientwin.set_fullsreen (replaces WClientWin.toggle_fullscreen)
-  - WRegion.set_tagged (replaces WRegion.tag/untag/toggle_tag)
-  - WFrame.set_tabbar (replaces WFrame.toggle_tabbar)
-  - WFrame.set_shaded (replaces WFrame.toggle_shade)
-  - WFloatFrame.set_sticky (replaces WFloatFrame.toggle_sticky)
-  - WMPlex.l2_set_hidden (replaces WMPlex.l2_hide/show)
-  - mod_sp.set_shown(_on) (replaces mod_sp.toggle(_on))
-  - mod_dock.set_floating_shown_on (replaces mod_dock.toggle_floating_on)
+The most visible changes to the in this release are:
 
-For example, WRegion.set_tagged(_, 'toggle') should be used in place of
-WRegion.toggle_tagged(_) now.
+ * Mod1+space now toggles the scratchpad by default and Mod1+D the dock.
+
+ * The ion-(ssh|man|view|edit) wrapper scripts were removed and instead
+   the programs used can be configured in Ion's configuration files.
+
+ * ioncore.exec(_on) also support the ':cmd' notation for "run cmd in 
+   xterm" familiar from the run query. The '::cmd' notation can be used 
+   to ask for enter to be pressed even when the program quit succesfully.
+
+ * Those with custom configuration files should note that many exported toggle
+   functions were changed and renamed, and now accept a string parameter
+   incidating whether to toggle, set or unset the property.
+  
+    - WClientwin.set_fullsreen (replaces WClientWin.toggle_fullscreen)
+    - WRegion.set_tagged (replaces WRegion.tag/untag/toggle_tag)
+    - WFrame.set_tabbar (replaces WFrame.toggle_tabbar)
+    - WFrame.set_shaded (replaces WFrame.toggle_shade)
+    - WFloatFrame.set_sticky (replaces WFloatFrame.toggle_sticky)
+    - WMPlex.l2_set_hidden (replaces WMPlex.l2_hide/show)
+    - mod_sp.set_shown(_on) (replaces mod_sp.toggle(_on))
+    - mod_dock.set_floating_shown_on (replaces mod_dock.toggle_floating_on)
+    - WRegion.set_activity (replaces WRegion.clear_activity and 
+      WRegion.notify_activity)
+      
+   For example, WRegion.set_tagged(_, 'toggle') should be used in place of
+   WRegion.toggle_tagged(_) now.
+
+Obviously there are some other changes and fixes too. See the changelog
+for details as usual.
 
 
 === ion-3ds-20050304 ===
