@@ -133,11 +133,27 @@ static char *do_get_cfgfile_for_scr(bool core, const char *module,
 				   						display, xscr);
 	}
 	
+	/* It seems Xlib doesn't want this freed */
+	/*XFree(display);*/
+	
 	if(tmp==NULL){
 		warn_err();
 		goto fallback;
 	}
 
+	/* Some second-rate OSes/filesystems don't like the colon */
+#ifdef CF_SECOND_RATE_OS_FS
+	{
+		char *colon=tmp;
+		while(1){
+			colon=strchr(colon, ':');
+			if(colon==NULL)
+				break;
+			*colon='_';
+		}
+	}
+#endif
+	
 	ret=do_get_cfgfile_for(core, module, tmp, noaccesstest);
 	
 	free(tmp);

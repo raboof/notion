@@ -115,12 +115,14 @@ bool init_workspaces_on_vp(WViewport* vp)
 			ws=lookup_region(wsname);
 		if(ws==NULL || REGION_MANAGER(ws)!=(WRegion*)vp)
 			ws=FIRST_MANAGED(vp->ws_list);
+		if(ws!=NULL)
+			viewport_display_managed(vp, ws);
 	}
 	
 	if(wsname!=NULL)
 		free(wsname);
 	
-	return (ws!=NULL);
+	return (vp->ws_count!=0);
 }
 
 
