@@ -143,7 +143,7 @@ bool region_add_bindmap_owned(WRegion *reg, WBindmap *bindmap, WRegion *owner)
     
     /* Link to reg's rbind list*/ {
         WRegBindingInfo *b=reg->bindings;
-        LINK_ITEM(b, rbind, next, prev);
+        LINK_ITEM_FIRST(b, rbind, next, prev);
         reg->bindings=b;
     }
     
