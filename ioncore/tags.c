@@ -30,7 +30,7 @@ void region_tag(WRegion *reg)
     
     /*clear_sub_tags(reg);*/
     
-    objlist_insert(&taglist, (Obj*)reg);
+    objlist_insert_last(&taglist, (Obj*)reg);
     
     reg->flags|=REGION_TAGGED;
     region_notify_change(reg);
@@ -83,8 +83,9 @@ EXTL_EXPORT
 void ioncore_clear_tags()
 {
     WRegion *reg;
+    ObjListIterTmp tmp;
     
-    FOR_ALL_ON_OBJLIST(WRegion*, reg, taglist){
+    FOR_ALL_ON_OBJLIST(WRegion*, reg, taglist, tmp){
         region_untag(reg);
     }
 }
@@ -98,24 +99,18 @@ void ioncore_clear_tags()
 
 WRegion *ioncore_tags_first()
 {
-    return (WRegion*)objlist_init_iter(taglist);
+    return (WRegion*)OBJLIST_FIRST(WRegion*, taglist);
 }
 
 
 WRegion *ioncore_tags_take_first()
 {
-    WRegion *reg=(WRegion*)objlist_init_iter(taglist);
+    WRegion *reg=(WRegion*)objlist_take_first(&taglist);
     
     if(reg!=NULL)
-        region_untag(reg);
+        reg->flags&=~REGION_TAGGED;
     
     return reg;
-}
-
-
-WRegion *ioncore_tags_next(WRegion *reg)
-{
-    return (WRegion*)objlist_iter(taglist);
 }
 
 

@@ -12,7 +12,6 @@
 #ifndef ION_MOD_FLOATWS_FLOATWS_H
 #define ION_MOD_FLOATWS_FLOATWS_H
 
-#include <libtu/objlist.h>
 #include <libextl/extl.h>
 #include <ioncore/common.h>
 #include <ioncore/region.h>

@@ -10,7 +10,6 @@
  */
 
 #include <string.h>
-#include <libtu/objlist.h>
 #include <libtu/objp.h>
 
 #include <ioncore/common.h>

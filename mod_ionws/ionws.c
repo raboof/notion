@@ -13,7 +13,7 @@
 
 #include <libtu/objp.h>
 #include <libtu/minmax.h>
-#include <libtu/symlist.h>
+#include <libtu/ptrlist.h>
 #include <libmainloop/defer.h>
 #include <libmainloop/signal.h>
 
@@ -449,7 +449,7 @@ void ionws_managed_add_default(WIonWS *ws, WRegion *reg)
 
     if(STDISP_OF(ws)!=reg){
         #warning "TODO: FIX"
-        assert(symlist_insert_last(&(ws->managed_list), reg));
+        assert(ptrlist_insert_last(&(ws->managed_list), reg));
     }
     
     region_set_manager(reg, (WRegion*)ws);
@@ -578,7 +578,7 @@ static WRegion *iter_just_cwins(WIonWSIterTmp *tmp)
     WRegion *r;
     
     while(TRUE){
-        r=(WRegion*)symlist_iter(tmp);
+        r=(WRegion*)ptrlist_iter(tmp);
         if(r==NULL || OBJ_IS(r, WClientWin))
             break;
     }
@@ -591,7 +591,7 @@ bool ionws_rescue_clientwins(WIonWS *ws)
 {
     WIonWSIterTmp tmp;
     
-    symlist_iter_init(&tmp, ws->managed_list);
+    ptrlist_iter_init(&tmp, ws->managed_list);
     
     return region_rescue_some_clientwins((WRegion*)ws, 
                                          (WRegionIterator*)iter_just_cwins, 
@@ -606,7 +606,7 @@ void ionws_do_managed_remove(WIonWS *ws, WRegion *reg)
     if(STDISP_OF(ws)==reg){
         ws->stdispnode->regnode.reg=NULL;
     }else{
-        symlist_remove(&(ws->managed_list), reg);
+        ptrlist_remove(&(ws->managed_list), reg);
     }
     
     region_remove_bindmap_owned(reg, mod_ionws_ionws_bindmap, (WRegion*)ws);
@@ -908,11 +908,11 @@ WRegion *ionws_current(WIonWS *ws)
 EXTL_EXPORT_MEMBER
 ExtlTab ionws_managed_list(WIonWS *ws)
 {
-    SymlistIterTmp tmp;
+    PtrListIterTmp tmp;
     
-    symlist_iter_init(&tmp, ws->managed_list);
+    ptrlist_iter_init(&tmp, ws->managed_list);
     
-    return extl_list_to_obj_table((ObjIterator*)symlist_iter, &tmp);
+    return extl_list_to_obj_table((ObjIterator*)ptrlist_iter, &tmp);
 }
 
 

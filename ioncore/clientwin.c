@@ -49,7 +49,7 @@ WHook *clientwin_mapped_hook=NULL;
 WHook *clientwin_unmapped_hook=NULL;
 
 
-#define LATEST_TRANSIENT(CWIN) SYMLIST_LAST(WRegion*, (CWIN)->transient_list)
+#define LATEST_TRANSIENT(CWIN) PTRLIST_LAST(WRegion*, (CWIN)->transient_list)
 
 
 /*{{{ Get properties */
@@ -643,7 +643,7 @@ static WRegion *clientwin_do_attach_transient(WClientWin *cwin,
     if(reg==NULL)
         return NULL;
     
-    if(!symlist_insert_last(&(cwin->transient_list), reg)){
+    if(!ptrlist_insert_last(&(cwin->transient_list), reg)){
         destroy_obj((Obj*)reg);
         return NULL;
     }
@@ -677,7 +677,7 @@ static void clientwin_managed_remove(WClientWin *cwin, WRegion *transient)
 {
     bool mcf=region_may_control_focus((WRegion*)cwin);
     
-    symlist_remove(&(cwin->transient_list), transient);
+    ptrlist_remove(&(cwin->transient_list), transient);
     region_unset_manager(transient, (WRegion*)cwin);
     
     if(mcf){
@@ -690,12 +690,12 @@ static void clientwin_managed_remove(WClientWin *cwin, WRegion *transient)
 }
 
 
-static WRegion *iter_just_cwins(SymlistIterTmp *tmp)
+static WRegion *iter_just_cwins(PtrListIterTmp *tmp)
 {
     WRegion *r;
     
     while(TRUE){
-        r=(WRegion*)symlist_iter(tmp);
+        r=(WRegion*)ptrlist_iter(tmp);
         if(r==NULL || OBJ_IS(r, WClientWin))
             break;
     }
@@ -706,10 +706,10 @@ static WRegion *iter_just_cwins(SymlistIterTmp *tmp)
 
 bool clientwin_rescue_clientwins(WClientWin *cwin)
 {
-    SymlistIterTmp tmp;
+    PtrListIterTmp tmp;
     bool ret1, ret2;
     
-    symlist_iter_init(&tmp, cwin->transient_list);
+    ptrlist_iter_init(&tmp, cwin->transient_list);
     
     ret1=region_rescue_some_clientwins((WRegion*)cwin, 
                                        (WRegionIterator*)iter_just_cwins, 
@@ -780,13 +780,13 @@ static bool reparent_root(WClientWin *cwin)
 void clientwin_deinit(WClientWin *cwin)
 {
     Obj *obj;
-    SymlistIterTmp tmp;
+    PtrListIterTmp tmp;
     
-    FOR_ALL_ON_SYMLIST(Obj*, obj, cwin->transient_list, tmp){
+    FOR_ALL_ON_PTRLIST(Obj*, obj, cwin->transient_list, tmp){
         destroy_obj(obj);
     }
     
-    assert(SYMLIST_EMPTY(cwin->transient_list));
+    assert(PTRLIST_EMPTY(cwin->transient_list));
     
     if(cwin->win!=None){
         xwindow_unmanaged_selectinput(cwin->win, 0);
@@ -1086,7 +1086,7 @@ static bool clientwin_fitrep(WClientWin *cwin, WWindow *np, WFitParams *fp)
 {
     WRegion *transient, *next;
     WRectangle geom;
-    SymlistIterTmp tmp;
+    PtrListIterTmp tmp;
     int diff;
     bool changes;
     int w, h;
@@ -1134,7 +1134,7 @@ static bool clientwin_fitrep(WClientWin *cwin, WWindow *np, WFitParams *fp)
     
     cwin->flags&=~CLIENTWIN_NEED_CFGNTFY;
     
-    FOR_ALL_ON_SYMLIST(WRegion*, transient, cwin->transient_list, tmp){
+    FOR_ALL_ON_PTRLIST(WRegion*, transient, cwin->transient_list, tmp){
         WFitParams fp2;
         fp2.g=fp->g;
         fp2.mode=REGION_FIT_BOUNDS;
@@ -1152,12 +1152,12 @@ static bool clientwin_fitrep(WClientWin *cwin, WWindow *np, WFitParams *fp)
 static void clientwin_map(WClientWin *cwin)
 {
     WRegion *sub;
-    SymlistIterTmp tmp;
+    PtrListIterTmp tmp;
     
     show_clientwin(cwin);
     REGION_MARK_MAPPED(cwin);
     
-    FOR_ALL_ON_SYMLIST(WRegion*, sub, cwin->transient_list, tmp){
+    FOR_ALL_ON_PTRLIST(WRegion*, sub, cwin->transient_list, tmp){
         region_map(sub);
     }
 }
@@ -1166,12 +1166,12 @@ static void clientwin_map(WClientWin *cwin)
 static void clientwin_unmap(WClientWin *cwin)
 {
     WRegion *sub;
-    SymlistIterTmp tmp;
+    PtrListIterTmp tmp;
     
     hide_clientwin(cwin);
     REGION_MARK_UNMAPPED(cwin);
     
-    FOR_ALL_ON_SYMLIST(WRegion*, sub, cwin->transient_list, tmp){
+    FOR_ALL_ON_PTRLIST(WRegion*, sub, cwin->transient_list, tmp){
         region_unmap(sub);
     }
 }
@@ -1204,11 +1204,11 @@ static void clientwin_do_set_focus(WClientWin *cwin, bool warp)
 static void restack_transients(WClientWin *cwin)
 {
     Window other=cwin->win;
-    SymlistIterTmp tmp;
+    PtrListIterTmp tmp;
     int mode=Above;
     WRegion *reg;
 
-    FOR_ALL_ON_SYMLIST(WRegion*, reg, cwin->transient_list, tmp){
+    FOR_ALL_ON_PTRLIST(WRegion*, reg, cwin->transient_list, tmp){
         Window bottom=None, top=None;
         region_restack(reg, other, Above);
         region_stacking(reg, &bottom, &top);
@@ -1222,7 +1222,7 @@ static void restack_transients(WClientWin *cwin)
 static bool clientwin_managed_goto(WClientWin *cwin, WRegion *sub, int flags)
 {
     if(LATEST_TRANSIENT(cwin)!=sub){
-        symlist_reinsert_last(&(cwin->transient_list), sub);
+        ptrlist_reinsert_last(&(cwin->transient_list), sub);
         restack_transients(cwin);
     }
         
@@ -1249,12 +1249,12 @@ void clientwin_restack(WClientWin *cwin, Window other, int mode)
 void clientwin_stacking(WClientWin *cwin, Window *bottomret, Window *topret)
 {
     WRegion *reg;
-    SymlistIterTmp tmp;
+    PtrListIterTmp tmp;
     
     *bottomret=cwin->win;
     *topret=cwin->win;
     
-    FOR_ALL_ON_SYMLIST_REV(WRegion*, reg, cwin->transient_list, tmp){
+    FOR_ALL_ON_PTRLIST_REV(WRegion*, reg, cwin->transient_list, tmp){
         Window bottom=None, top=None;
         region_stacking(reg, &bottom, &top);
         if(top!=None){
@@ -1280,11 +1280,11 @@ static void clientwin_activated(WClientWin *cwin)
 static void clientwin_resize_hints(WClientWin *cwin, XSizeHints *hints_ret)
 {
     WRegion *trs;
-    SymlistIterTmp tmp;
+    PtrListIterTmp tmp;
     
     *hints_ret=cwin->size_hints;
     
-    FOR_ALL_ON_SYMLIST(WRegion*, trs, cwin->transient_list, tmp){
+    FOR_ALL_ON_PTRLIST(WRegion*, trs, cwin->transient_list, tmp){
         xsizehints_adjust_for(hints_ret, trs);
     }
 }
@@ -1465,10 +1465,10 @@ void clientwin_nudge(WClientWin *cwin)
 EXTL_EXPORT_MEMBER
 ExtlTab clientwin_managed_list(WClientWin *cwin)
 {
-    SymlistIterTmp tmp;
-    symlist_iter_init(&tmp, cwin->transient_list);
+    PtrListIterTmp tmp;
+    ptrlist_iter_init(&tmp, cwin->transient_list);
     
-    return extl_list_to_obj_table((ObjIterator*)symlist_iter, &tmp);
+    return extl_list_to_obj_table((ObjIterator*)ptrlist_iter, &tmp);
 }
 
 
@@ -1481,14 +1481,14 @@ void clientwin_toggle_transients_pos(WClientWin *cwin)
 {
     WRegion *transient;
     WFitParams fp;
-    SymlistIterTmp tmp;
+    PtrListIterTmp tmp;
     
     cwin->flags^=CLIENTWIN_TRANSIENTS_AT_TOP;
 
     fp.mode=REGION_FIT_BOUNDS;
     fp.g=cwin->last_fp.g;
     
-    FOR_ALL_ON_SYMLIST(WRegion*, transient, cwin->transient_list, tmp){
+    FOR_ALL_ON_PTRLIST(WRegion*, transient, cwin->transient_list, tmp){
         region_fitrep(transient, NULL, &fp);
     }
 }
