@@ -1,7 +1,7 @@
 /*
  * ion/ext_statusbar/ion-statusd/ion-statusd.c
  *
- * Copyright (c) Tuomo Valkonen 2004. 
+ * Copyright (c) Tuomo Valkonen 2004-2005.
  *
  * Ion is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by
@@ -57,7 +57,7 @@ static OptParserOpt ion_opts[]={
 
 
 static const char statusd_copy[]=
-    "Ion-statusd " ION_VERSION ", copyright (c) Tuomo Valkonen 2004.";
+    "Ion-statusd " ION_VERSION ", copyright (c) Tuomo Valkonen 2004-2005.";
 
 
 static const char statusd_license[]=DUMMY_TR(

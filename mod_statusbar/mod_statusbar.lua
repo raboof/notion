@@ -1,7 +1,7 @@
 --
 -- ion/mod_statusbar/mod_statusbar.lua
 -- 
--- Copyright (c) Tuomo Valkonen 2004.
+-- Copyright (c) Tuomo Valkonen 2004-2005.
 --
 -- Ion is free software; you can redistribute it and/or modify it under
 -- the terms of the GNU Lesser General Public License as published by
