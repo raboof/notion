@@ -11,6 +11,7 @@
 
 #include <string.h>
 #include <limits.h>
+#include <ctype.h>
 
 #include <libtu/objp.h>
 #include <libtu/minmax.h>
@@ -93,6 +94,47 @@ void ioncore_set_get_winprop_fn(ExtlFn fn)
 }
 
 
+struct gravity_spec {
+    const char *spec;    /* name of the gravity value       */
+    int         gravity; /* X gravity value                 */
+};
+
+/* translation table for gravity specifications */
+static struct gravity_spec gravity_specs[] = {
+    {"center"        , CenterGravity    },
+    {"west"          , WestGravity      },
+    {"east"          , EastGravity      },
+    {"north"         , NorthGravity     },
+    {"northwest"     , NorthWestGravity },
+    {"northeast"     , NorthEastGravity },
+    {"south"         , SouthGravity     },
+    {"southwest"     , SouthWestGravity },
+    {"southeast"     , SouthEastGravity },
+    { NULL           , 0                }   /* end marker */
+};
+
+static int get_gravity_winprop(WClientWin *cwin,const char *propname)
+{
+    char *gravity;
+    char *s;
+    const struct gravity_spec *sp;
+    int value = ForgetGravity;
+
+    if (extl_table_gets_s(cwin->proptab,propname,&gravity)) {
+	for (s=gravity; *s; ++s)
+	    *s = tolower(*s);
+
+	for (sp=gravity_specs; sp->spec; ++sp) {
+	    if (strcmp(gravity,sp->spec) == 0) {
+		value = sp->gravity;
+		break;
+	    }
+	}
+	free(gravity);
+    }
+    return value;
+}
+
 static void clientwin_get_winprops(WClientWin *cwin)
 {
     ExtlTab tab, tab2;
@@ -162,7 +204,10 @@ static void clientwin_get_winprops(WClientWin *cwin)
         cwin->flags|=CLIENTWIN_PROP_IGNORE_CFGRQ;
 
     if(extl_table_is_bool_set(tab, "transients_at_top"))
-        cwin->flags|=CLIENTWIN_TRANSIENTS_AT_TOP;
+        cwin->transient_gravity = NorthGravity;
+
+    cwin->gravity = get_gravity_winprop(cwin,"gravity");
+    cwin->transient_gravity = get_gravity_winprop(cwin,"transient_gravity");
 }
 
 
@@ -312,6 +357,9 @@ static bool clientwin_init(WClientWin *cwin, WWindow *par, Window win,
     cwin->event_mask=IONCORE_EVENTMASK_CLIENTWIN;
 
     cwin->fs_pholder=NULL;
+
+    cwin->gravity=ForgetGravity;
+    cwin->transient_gravity=SouthGravity;
     
     region_init(&(cwin->region), par, &(cwin->last_fp));
 
@@ -1018,13 +1066,11 @@ static void do_reparent_clientwin(WClientWin *cwin, Window win, int x, int y)
     XSelectInput(ioncore_g.dpy, cwin->win, cwin->event_mask);
 }
 
-
 static void convert_geom(WClientWin *cwin, const WFitParams *fp,
                          WRectangle *geom)
 {
     const WRectangle *max_geom=&(fp->g);
-    bool bottom=FALSE;
-    bool top=FALSE;
+    int gravity = cwin->gravity;
     int htry=max_geom->h;
     WClientWin *mgr;
     
@@ -1036,10 +1082,8 @@ static void convert_geom(WClientWin *cwin, const WFitParams *fp,
     }
     
     if(mgr!=NULL && fp->mode==REGION_FIT_BOUNDS){
-        if(mgr->flags&CLIENTWIN_TRANSIENTS_AT_TOP)
-            top=TRUE;
-        else
-            bottom=TRUE;
+	if (gravity == ForgetGravity)
+	    gravity = mgr->transient_gravity;
         if(cwin->last_h_rq<htry)
             htry=cwin->last_h_rq;
     }
@@ -1049,14 +1093,39 @@ static void convert_geom(WClientWin *cwin, const WFitParams *fp,
     
     xsizehints_correct(&(cwin->size_hints), &(geom->w), &(geom->h), FALSE);
 
-    geom->x=max_geom->x+max_geom->w/2-geom->w/2;
-    
-    if(top)
-        geom->y=max_geom->y;
-    else if(bottom)
-        geom->y=max_geom->y+max_geom->h-geom->h;
-    else
-        geom->y=max_geom->y+max_geom->h/2-geom->h/2;
+    switch (gravity) {
+	case WestGravity:
+	case NorthWestGravity:
+	case SouthWestGravity:
+	    geom->x=max_geom->x;
+	    break;
+
+	case EastGravity:
+	case NorthEastGravity:
+	case SouthEastGravity:
+	    geom->x=max_geom->x+max_geom->w-geom->w;
+	    break;
+
+	default:
+	    geom->x=max_geom->x+max_geom->w/2-geom->w/2;
+    }
+
+    switch (gravity) {
+	case NorthGravity:
+	case NorthWestGravity:
+	case NorthEastGravity:
+	    geom->y=max_geom->y;
+	    break;
+
+	case SouthGravity:
+	case SouthWestGravity:
+	case SouthEastGravity:
+	    geom->y=max_geom->y+max_geom->h-geom->h;
+	    break;
+
+	default:
+	    geom->y=max_geom->y+max_geom->h/2-geom->h/2;
+    }
     
     if(geom->h<=1)
         geom->h=1;
@@ -1494,7 +1563,10 @@ void clientwin_toggle_transients_pos(WClientWin *cwin)
     WFitParams fp;
     PtrListIterTmp tmp;
     
-    cwin->flags^=CLIENTWIN_TRANSIENTS_AT_TOP;
+    if (cwin->transient_gravity == NorthGravity)
+	cwin->transient_gravity = SouthGravity;
+    else
+	cwin->transient_gravity = NorthGravity;
 
     fp.mode=REGION_FIT_BOUNDS;
     fp.g=cwin->last_fp.g;
