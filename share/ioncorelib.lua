@@ -197,29 +197,6 @@ end
 -- }}}
 
 
--- Includes {{{
-
---DOC
--- Execute another file with Lua code.
-function include(file)
-    local obsolete_files={["common-frame-bindings.lua"]=true}
-    if obsolete_files[file] then
-        warn("Warning: "..file.." is obsolete")
-    end
-    local current_dir = "."
-    if CURRENT_FILE ~= nil then
-        local s, e, cdir, cfile=string.find(CURRENT_FILE, "(.*)([^/])");
-        if cdir ~= nil then
-            current_dir = cdir
-        end
-    end
-    -- do_include is implemented in ioncore.
-    do_include(file, current_dir)
-end
-
--- }}}
-
-
 -- Winprops {{{
 
 local winprops={}

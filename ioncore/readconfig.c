@@ -295,7 +295,6 @@ char *lookup_script(const char *file, const char *try_in_dir)
 }
 
 
-EXTL_EXPORT
 bool do_include(const char *file, const char *current_file_dir)
 {
 	TryCallParam param;

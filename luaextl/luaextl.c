@@ -26,6 +26,7 @@
 #include <ioncore/obj.h>
 #include <ioncore/objp.h>
 #include <ioncore/errorlog.h>
+#include <ioncore/readconfig.h>
 
 #include "luaextl.h"
 
@@ -214,6 +215,14 @@ static int extl_obj_typename(lua_State *st)
 	return 1;
 }
 
+/* Dummy code for documentation generation. */
+
+/*EXTL_DOC
+ * Return type name of \var{obj}.
+ */
+EXTL_EXPORT_AS(obj_typename)
+const char *obj_typename(WObj *obj);
+
 
 static int extl_obj_is(lua_State *st)
 {
@@ -229,6 +238,75 @@ static int extl_obj_is(lua_State *st)
 	
 	return 1;
 }
+
+/* Dummy code for documentation generation. */
+
+/*EXTL_DOC
+ * Is \var{obj} of type \var{typename}.
+ */
+EXTL_EXPORT_AS(obj_is)
+bool obj_is(WObj *obj, const char *typename);
+
+
+static int extl_current_file_or_dir(lua_State *st, bool dir)
+{
+	int r;
+	lua_Debug ar;
+	const char *s, *p;
+	
+	if(lua_getstack(st, 1, &ar)!=1)
+		goto err;
+	if(lua_getinfo(st, "S", &ar)==0)
+		goto err;
+	
+	if(ar.source==NULL || ar.source[0]!='@')
+		return 0; /* not a file */
+	
+	s=ar.source+1;
+	
+	if(!dir){
+		lua_pushstring(st, s);
+	}else{
+		p=strrchr(s, '/');
+		if(p==NULL){
+			lua_pushstring(st, ".");
+		}else{
+			lua_pushlstring(st, s, p-s);
+		}
+	}
+	return 1;
+	
+err:
+	warn("Unable to get caller file from stack.");
+	return 0;
+}
+
+
+static int extl_include(lua_State *st)
+{
+	bool res;
+	const char *toincl, *cfdir;
+	
+	toincl=luaL_checkstring(st, 1);
+	
+	if(extl_current_file_or_dir(st, TRUE)!=1){
+		lua_pushboolean(st, FALSE);
+	}else{
+		cfdir=lua_tostring(st, -1);
+		res=do_include(toincl, cfdir);
+		lua_pop(st, 1);
+		lua_pushboolean(st, res);
+	}
+	return 1;
+}
+
+/* Dummy code for documentation generation. */
+
+/*EXTL_DOC
+ * Execute another file with Lua code.
+ */
+EXTL_EXPORT_AS(include)
+bool include(const char *what);
 
 
 /*}}}*/
@@ -255,6 +333,8 @@ static bool extl_init_obj_info(lua_State *st)
 	lua_setglobal(st, "obj_typename");
 	lua_pushcfunction(st, extl_obj_is);
 	lua_setglobal(st, "obj_is");
+	lua_pushcfunction(st, extl_include);
+	lua_setglobal(st, "include");
 
 	return TRUE;
 }
@@ -1367,11 +1447,11 @@ static bool extl_do_load(lua_State *st, ExtlLoadParam *param)
 	}
 	
 	lua_newtable(st); /* Create new environment */
-	if(param->isfile){
+	/*if(param->isfile){
 		lua_pushstring(st, "CURRENT_FILE");
 		lua_pushstring(st, param->src);
 		lua_rawset_check(st, -3);
-	}
+	}*/
 	/* Now there's fn, newenv in stack */
 	lua_newtable(st); /* Create metatable */
 	lua_pushstring(st, "__index");

@@ -42,4 +42,6 @@ extern bool read_config_for_args(const char *module, bool warn_nx,
 
 extern char *get_savefile_for(const char *module);
 
+extern bool do_include(const char *file, const char *cfdir);
+
 #endif /* ION_IONCORE_READCONFIG_H */
