@@ -23,7 +23,12 @@ Directory to search for module
 Directory to search for configuration files and other scripts
 .TP
 .B \-onescreen
-On X servers with multiple screens, manage only default screen, not all.
+On X servers with multiple (traditional non-Xinerama) screens, manage only
+default screen, not all.
+.TP
+.B \-noxinerama
+If Ion was compiled with Xinerama support, this option can be used to
+disable it.
 .TP
 .B \-help
 Show help on command line options
@@ -32,7 +37,7 @@ Show help on command line options
 Show version
 .TP
 .B \-about
-Show about text
+Show about text (version, copyright)
 
 .SH KEYS
 
