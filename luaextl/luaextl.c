@@ -411,7 +411,7 @@ static int extl_dopath(lua_State *st)
  * Look up and execute another file with Lua code.
  */
 EXTL_EXPORT_AS(global, dopath)
-bool include(const char *what);
+bool dopath(const char *what);
 
 
 /*}}}*/

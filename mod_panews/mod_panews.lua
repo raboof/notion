@@ -19,48 +19,49 @@ if not ioncore.load_module("mod_panews") then
     return
 end
 
-local mod_panews=_G["mod_panews"]
+assert(not _G["mod_panews"]);
+local mod_panews={}
+_G["mod_panews"]=mod_panews
 
-local T={}
---_G.templates=T
+local private={}
+local settings={}
 
 -- Settings {{{
 
-local S={}
 -- Classes:
 --  (T)erminal
 --  (V)iewer
 --  (M)isc
-S.valid_classifications={["V"]=true, ["T"]=true, ["M"]=true,}
+settings.valid_classifications={["V"]=true, ["T"]=true, ["M"]=true,}
 
 -- Xterm, rxvt, aterm, etc. all have "XTerm" as class part of WM_CLASS
-S.terminal_emulators={["XTerm"]=true,} 
+settings.terminal_emulators={["XTerm"]=true,} 
 
 -- Pixel scale factor from 1280x1024/75dpi
-S.scalef=1.0
+settings.scalef=1.0
 
---S.b_ratio=(1+math.sqrt(5))/2
---S.s_ratio=1
-S.b_ratio=3
-S.s_ratio=2
+--settings.b_ratio=(1+math.sqrt(5))/2
+--settings.s_ratio=1
+settings.b_ratio=3
+settings.s_ratio=2
 
-S.b_ratio2=7
-S.s_ratio2=1
+settings.b_ratio2=7
+settings.s_ratio2=1
 
-S.templates={}
+settings.templates={}
 
-S.templates["default"]={
+settings.templates["default"]={
     type="WSplitFloat",
     dir="horizontal",
-    tls=S.b_ratio,
-    brs=S.s_ratio,
+    tls=settings.b_ratio,
+    brs=settings.s_ratio,
     tl={
         type="WSplitPane",
         contents={
             type="WSplitFloat",
             dir="vertical",
-            tls=S.b_ratio2,
-            brs=S.s_ratio2,
+            tls=settings.b_ratio2,
+            brs=settings.s_ratio2,
             tl={
                 type="WSplitPane",
                 marker="V:single",
@@ -78,49 +79,116 @@ S.templates["default"]={
 }
 
 
---[[
-S.templates["alternative1"]={
-    type="WSplitSplit",
+settings.templates["alternative1"]={
+    type="WSplitFloat",
     dir="horizontal",
-    tls=S.s_ratio2,
-    brs=S.b_ratio2,
-    marker="M:down;:",
-    tl={},
-    br={
-        type="WSplitSplit",
-        dir="vertical",
-        tls=S.b_ratio,
-        brs=S.s_ratio,
-        marker="V:single;T:right",
-        tl={},
-        br={},
-    },
-}
-
-
-S.templates["alternative2"]={
-    type="WSplitSplit",
-    dir="vertical",
-    tls=S.b_ratio,
-    brs=S.s_ratio,
-    marker=":;T:right",
+    tls=settings.s_ratio2,
+    brs=settings.b_ratio2,
     tl={
-        type="WSplitSplit",
-        dir="horizontal",
-        tls=S.s_ratio2,
-        brs=S.b_ratio2,
-        marker="M:down;V:single",
-        tl={},
-        br={},
+        type="WSplitPane",
+        marker="M:down",
     },
-    br={},
+    br={
+        type="WSplitFloat",
+        dir="vertical",
+        tls=settings.b_ratio,
+        brs=settings.s_ratio,
+        tl={
+            type="WSplitPane",
+            marker="V:single",
+        },
+        br={
+            type="WSplitPane",
+            marker="T:right",
+        },
+    },
 }
-]]
 
-S.template=S.templates["default"]
 
-S.shrink_minimum=32
+settings.templates["alternative2"]={
+    type="WSplitFloat",
+    dir="vertical",
+    tls=settings.b_ratio,
+    brs=settings.s_ratio,
+    tl={
+        type="WSplitFloat",
+        dir="horizontal",
+        tls=settings.s_ratio2,
+        brs=settings.b_ratio2,
+        tl={
+            type="WSplitPane",
+            marker="M:down",
+        },
+        br={
+            type="WSplitPane",
+            marker="V:single",
+        },
+    },
+    br={
+        type="WSplitPane",
+        marker="T:right",
+    },
+}
 
+
+settings.template=settings.templates["default"]
+
+settings.shrink_minimum=32
+
+--DOC
+-- Set some module parameters. Currently \var{s} may contain the following
+-- fields:
+-- \begin{tabularx}{\linewidth}{lX}
+--  \hline
+--  Field & Description \\
+--  \hline
+--  \var{template} & layout template for newly created \type{WPaneWS} 
+--                   workspaces. This can be either a table or one of the 
+--                   predefined layouts 'default', 'alternative1', and
+--                   'alternative2'. \\
+--  \var{scalef}   & Scale factor for classification heuristics to work 
+--                   with different screen resolutions. The default is 1.0 
+--                   and is designed for 1280x1024 at 75dpi. \\
+--  \var{valid_classifications} & A table with valid window classifications
+--                                as valid keys. \\
+-- \end{tabularx}
+function mod_panews.set(s)
+    if s.template then
+        local ok=false
+        if type(s.template)=="string" then
+            if settings.templates[s.template] then
+                settings.template=settings.templates[s.template]
+                ok=true
+            end
+        elseif type(s.template)=="table" then
+            settings.template=s.template
+        end
+        if not ok then
+            warn("Invalid template.")
+        end
+    end
+    if s.scalef then
+        if type(s.scalef)~="number" or s.scalef<=0 then
+            warn('Invalid scale factor')
+        else
+            settings.scalef=s.scalef
+        end
+    end
+    
+    if type(s.valid_classifications)=="table" then
+        settings.valid_classifications=s.valid_classifications
+    end
+end
+
+
+--DOC
+-- Get some module settings. See \fnref{mod_panews.set} for documentation
+-- on the contents of the returned table.
+function mod_panews.get()
+    return table.copy(settings, true)
+end
+
+                        
 -- }}}
 
 
@@ -134,12 +202,12 @@ local function sfind(s, p)
 end
 
 
-function T.div_length(w, r1, r2)
+function private.div_length(w, r1, r2)
     local a=math.ceil(w*r1/(r1+r2))
     return a, w-a
 end
 
-function T.split3(d, ls, cs, rs, lo, co, ro)
+function private.split3(d, ls, cs, rs, lo, co, ro)
     return {
         tls = ls+cs,
         brs = rs,
@@ -155,15 +223,15 @@ function T.split3(d, ls, cs, rs, lo, co, ro)
     }
 end
 
-function T.center3(d, ts, cs, lo, co, ro)
+function private.center3(d, ts, cs, lo, co, ro)
     local sc=math.min(ts, cs)
     local sl=math.floor((ts-sc)/2)
     local sr=ts-sc-sl
-    local r=T.split3(d, sl, sc, sr, lo, co, ro)
+    local r=private.split3(d, sl, sc, sr, lo, co, ro)
     return r
 end
 
-function T.split2(d, ts, ls, rs, lo, ro)
+function private.split2(d, ts, ls, rs, lo, ro)
     if ls and rs then
         assert(ls+rs==ts)
     elseif not ls then
@@ -187,19 +255,19 @@ end
 
 -- Classification {{{
 
-function T.classify(ws, reg)
+function private.classify(ws, reg)
     if obj_is(reg, "WClientWin") then
         -- Check if there's a winprop override
         local wp=ioncore.getwinprop(reg)
         if wp and wp.panews_classification then
-            if S.valid_classifications[wp.panews_classification] then
+            if settings.valid_classifications[wp.panews_classification] then
                 return wp.panews_classification
             end
         end
         
         -- Handle known terminal emulators.
         local id=reg:get_ident()
-        if S.terminal_emulators[id.class] then
+        if settings.terminal_emulators[id.class] then
             return "T"
         end
     end
@@ -207,11 +275,11 @@ function T.classify(ws, reg)
     -- Try size heuristics.
     local cg=reg:geom()
 
-    if cg.w<3/8*(1280*S.scalef) then
+    if cg.w<3/8*(1280*settings.scalef) then
         return "M"
     end
     
-    if cg.h>4/8*(960*S.scalef) then
+    if cg.h>4/8*(960*settings.scalef) then
         return "V"
     else
         return "T"
@@ -223,7 +291,7 @@ end
 
 -- Placement code {{{
 
-function T.use_unused(p, n, d, forcefit)
+function private.use_unused(p, n, d, forcefit)
     if d=="single" then
         p.res_node=n
         p.res_config={reg=p.frame}
@@ -242,10 +310,10 @@ function T.use_unused(p, n, d, forcefit)
         end
         local fh=math.min(fg.h, sg.h)
         if d=="up" then
-            p.res_config=T.split2("vertical", sg.h, nil, fh,
+            p.res_config=private.split2("vertical", sg.h, nil, fh,
                                   {}, {reg=p.frame})
         else
-            p.res_config=T.split2("vertical", sg.h, fh, nil,
+            p.res_config=private.split2("vertical", sg.h, fh, nil,
                                   {reg=p.frame}, {})
         end
         return true
@@ -256,10 +324,10 @@ function T.use_unused(p, n, d, forcefit)
         end
         local fw=math.min(fg.w, sg.w)
         if d=="left" then
-            p.res_config=T.split2("horizontal", sg.w, nil, fw,
+            p.res_config=private.split2("horizontal", sg.w, nil, fw,
                                   {}, {reg=p.frame})
         else
-            p.res_config=T.split2("horizontal", sg.w, fw, nil,
+            p.res_config=private.split2("horizontal", sg.w, fw, nil,
                                   {reg=p.frame}, {})
         end
         return true
@@ -267,7 +335,7 @@ function T.use_unused(p, n, d, forcefit)
 end
 
 
-function T.scan_pane(p, node, pdir)
+function private.scan_pane(p, node, pdir)
     local function do_scan_active(n)
         local t=obj_typename(n)
         if t=="WSplitRegion" then
@@ -301,7 +369,7 @@ function T.scan_pane(p, node, pdir)
             end
         elseif t=="WSplitUnused" then
             -- Found it
-            return T.use_unused(p, n, d, forcefit)
+            return private.use_unused(p, n, d, forcefit)
         end
     end
     
@@ -317,7 +385,7 @@ function T.scan_pane(p, node, pdir)
 end
     
 
-function T.make_placement(p)
+function private.make_placement(p)
     if p.specifier then
         local n=p.specifier
         local pcls, pdir
@@ -330,10 +398,10 @@ function T.make_placement(p)
             pcls, pdir=sfind((n:marker() or ""), "(.*):(.*)")
         end
             
-        return T.use_unused(p, p.specifier, (pdir or "single"), false)
+        return private.use_unused(p, p.specifier, (pdir or "single"), false)
     end
     
-    local cls=T.classify(p.ws, p.reg)
+    local cls=private.classify(p.ws, p.reg)
     
     local function do_scan_cls(n)
         local t=obj_typename(n)
@@ -342,7 +410,7 @@ function T.make_placement(p)
             if m then
                 local pcls, pdir=sfind(m, "(.*):(.*)")
                 if pcls and pcls==cls then
-                    return T.scan_pane(p, n:contents(), pdir)
+                    return private.scan_pane(p, n:contents(), pdir)
                 end
             else
                 return do_scan_cls(n:contents())
@@ -378,7 +446,7 @@ end
 -- Layout initialisation {{{
 
 
-function T.calc_sizes(tmpl, sw, sh)
+function private.calc_sizes(tmpl, sw, sh)
     tmpl._w, tmpl._h=sw, sh
 
     if tmpl.type=="WSplitSplit" or tmpl.type=="WSplitFloat" then
@@ -390,7 +458,7 @@ function T.calc_sizes(tmpl, sw, sh)
             tmps=sw
         end
         
-        tmpl.tls, tmpl.brs=T.div_length(tmps, tmpl.tls, tmpl.brs)
+        tmpl.tls, tmpl.brs=private.div_length(tmps, tmpl.tls, tmpl.brs)
     
         if tmpl.dir=="vertical" then
             tlw, brw=sw, sw
@@ -400,16 +468,16 @@ function T.calc_sizes(tmpl, sw, sh)
             tlh, brh=sh, sh
         end
     
-        T.calc_sizes(tmpl.tl, tlw, tlh)
-        T.calc_sizes(tmpl.br, brw, brh)
+        private.calc_sizes(tmpl.tl, tlw, tlh)
+        private.calc_sizes(tmpl.br, brw, brh)
     end
 end
 
 
-function T.init_layout(p)
-    p.layout=table.copy(S.template, true) -- deep copy template
+function private.init_layout(p)
+    p.layout=table.copy(settings.template, true) -- deep copy template
     local wg=p.ws:geom()
-    T.calc_sizes(p.layout, wg.w, wg.h)
+    private.calc_sizes(p.layout, wg.w, wg.h)
     return true
 end
 
@@ -418,7 +486,7 @@ end
 
 -- Initialisation {{{
 
-function T.setup_hooks()
+function private.setup_hooks()
     local function hookto(hkname, fn)
         local hk=ioncore.get_hook(hkname)
         if not hk then
@@ -429,15 +497,20 @@ function T.setup_hooks()
         end
     end
 
-    hookto("panews_init_layout_alt", T.init_layout)
-    hookto("panews_make_placement_alt", T.make_placement)
+    hookto("panews_init_layout_alt", private.init_layout)
+    hookto("panews_make_placement_alt", private.make_placement)
 end
 
 
-T.setup_hooks()
+private.setup_hooks()
 
 -- }}}
 
 
 -- Mark ourselves loaded.
 _LOADED["templates"]=true
+
+
+-- Load configuration file
+dopath('cfg_panews', false)
+

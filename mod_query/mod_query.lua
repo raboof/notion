@@ -808,3 +808,7 @@ end
 
 -- Mark ourselves loaded.
 _LOADED["mod_query"]=true
+
+
+-- Load configuration file
+dopath('cfg_query', true)

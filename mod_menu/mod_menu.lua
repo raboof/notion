@@ -278,3 +278,7 @@ mod_menu.refresh_styles()
 
 -- Mark ourselves loaded.
 _LOADED["mod_menu"]=true
+
+
+-- Load configuration file
+dopath('cfg_menu', true)

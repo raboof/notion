@@ -133,7 +133,7 @@ bool mod_panews_init()
     if(!register_regions())
         goto err;
     
-    ioncore_read_config("cfg_panews", NULL, FALSE);
+    /*ioncore_read_config("cfg_panews", NULL, FALSE);*/
 
     return TRUE;
     
