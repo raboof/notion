@@ -29,8 +29,8 @@
 /*{{{ Implementation */
 
 
-WNamespace ioncore_internal_ns={NULL, NULL, FALSE};
-WNamespace ioncore_clientwin_ns={NULL, NULL, FALSE};
+WNamespace ioncore_internal_ns={NULL, FALSE};
+WNamespace ioncore_clientwin_ns={NULL, FALSE};
 
 
 static bool initialise_ns(WNamespace *ns)
@@ -219,7 +219,7 @@ void region_do_unuse_name(WRegion *reg, bool insert_unnamed)
     }
     
     if(insert_unnamed){
-        if(rb_insertp(ns->rb, &(reg->ni), reg))
+        if(rb_insertg(ns->rb, &(reg->ni), reg, COMPARE_FN))
             return;
         warn_err();
     }
@@ -343,7 +343,7 @@ static bool do_use_name(WRegion *reg, WNamespace *ns, const char *name,
         free(reg->ni.name);
         reg->ni.name=NULL;
         reg->ni.inst_off=0;
-        rb_insertp(ns->rb, &(reg->ni), reg);
+        rb_insertg(ns->rb, &(reg->ni), reg, COMPARE_FN);
         return FALSE;
     }
 
@@ -454,7 +454,9 @@ bool region_init_name(WRegion *reg)
             return FALSE;
         assert(reg->ni.name==NULL);
         reg->ni.namespaceinfo=&ioncore_clientwin_ns;
-        return (rb_insertp(ioncore_clientwin_ns.rb, &(reg->ni), reg)!=NULL);
+        return (rb_insertg(ioncore_clientwin_ns.rb, &(reg->ni), reg, 
+                           COMPARE_FN)
+                !=NULL);
     }
 
     if(!initialise_ns(&ioncore_internal_ns))
@@ -565,7 +567,7 @@ static ExtlTab do_list(WNamespace *ns, const char *typenam)
         WRegion *reg=(WRegion*)node->v.val;
         
         assert(reg!=NULL);
-        
+
         if(typenam!=NULL && !obj_is_str((Obj*)reg, typenam))
             continue;
 
