@@ -46,12 +46,19 @@ XINERAMA_LIBS=-lXinerama -lXext
 #X11_INCLUDES += `xft-config --cflags`
 #X11_LIBS += `xft-config --libs`
 
-# Uncomment to enable UTF8 support. You must have XFree86 (4.x?) and the
-# libunicode library (the one from Gnome -- no, the library doesn't depend
-# no other Gnome libraries of even glib at the time of writing this).
-DEFINES += -DCF_UTF8
-#EXTRA_LIBS += -liconv
+# Uncomment to enable UTF8 support. You must have XFree86 (4.x?) and C99
+# wide char support available (either libc directly or maybe libutf8+libiconv).
+# Although iconv (that is needed to test character properties) is a
+# standardised function, encoding names unfortunately aren't and thus these
+# also have to specified here.
 
+# GNU/Linux and other glibc-2.2 based systems.
+DEFINES += -DCF_UTF8 -DCF_ICONV_TARGET=\"WCHAR_T\" -DCF_ICONV_SOURCE=\"UTF-8\"
+
+# Systems that depend on libutf8 and separate libiconv might want these.
+#DEFINES += -DCF_UTF8 -DCF_LIBUTF8 -DCF_ICONV_TARGET=\"C99\" -DCF_ICONV_SOURCE=\"UTF-8\"
+#EXTRA_LIBS += -liconv -L/usr/local/lib
+#EXTRA_INCLUDES -I/usr/local/include
 
 ##
 ## libc

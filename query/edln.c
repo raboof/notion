@@ -25,6 +25,13 @@
 
 #ifdef CF_UTF8
 
+#ifdef CF_LIBUTF8
+#include <libutf8.h>
+#else
+#include <wchar.h>
+#include <wctype.h>
+#endif
+
 #define CHAR wchar_t
 #define ISALNUM iswalnum
 #define CHAR_AT(P, N) str_wchar_at(P, N)

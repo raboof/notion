@@ -26,7 +26,7 @@ static void insstr(WWindow *wwin, XKeyEvent *ev)
 	static XComposeStatus cs={NULL, 0};
 	char buf[16]={0,};
 	Status stat;
-	int n;
+	int n, i;
 	KeySym ksym;
 	
 	if(wwin->xic!=NULL){
@@ -37,13 +37,16 @@ static void insstr(WWindow *wwin, XKeyEvent *ev)
 #else
 		n=XmbLookupString(wwin->xic, ev, buf, 16, &ksym, &stat);
 #endif
+		if(stat!=XLookupChars && stat!=XLookupBoth)
+			return;
 	}else{
 		n=XLookupString(ev, buf, 16, &ksym, &cs);
 	}
 	
+	
 	if(n<=0 || *(uchar*)buf<32)
 		return;
-
+	
 	window_insstr(wwin, buf, n);
 }
 

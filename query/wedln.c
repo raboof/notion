@@ -84,7 +84,7 @@ static void wedln_do_draw_str_box(DrawInfo *dinfo, const char *str,
 	
 	rect.x=I_X; rect.y=I_Y; rect.width=I_W; rect.height=I_H;
 	XSetClipRectangles(wglobal.dpy, XGC, 0, 0, &rect, 1, Unsorted);
-	
+
 	if(mark<=cursor){
 		if(mark>=0){
 			DSTRSECT(mark, 0);
@@ -105,7 +105,7 @@ static void wedln_do_draw_str_box(DrawInfo *dinfo, const char *str,
 		DSTRSECT(mark-cursor-ll, 1);
 	}
 	DSTRSECT(len, 0);
-	
+
 	if(tx<I_W){
 		set_foreground(wglobal.dpy, XGC, COLORS->bg);
 		XFillRectangle(wglobal.dpy, WIN, XGC, I_X+tx, I_Y, I_W-tx, I_H);
@@ -118,7 +118,7 @@ static void wedln_draw_str_box(DrawInfo *dinfo, int vstart, const char *str,
 							   int dstart, int point, int mark)
 {
 	int tx=0;
-	
+
 	if(mark>=0){
 		mark-=vstart+dstart;
 		if(mark<0)
@@ -506,7 +506,7 @@ void wedln_paste(WEdln *wedln)
 void wedln_insstr(WEdln *wedln, const char *buf, size_t n)
 {
 	edln_insstr_n(&(wedln->edln), buf, n);
-	wedln_draw(wedln, FALSE);
+	/*wedln_draw(wedln, FALSE);*/
 }
 
 
