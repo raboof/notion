@@ -149,8 +149,7 @@ function QueryLib.workspace_handler(frame, name)
     name=string.gsub(name, "^%s*(.-)%s*$", "%1")
     local ws=lookup_workspace(name)
     if ws then
-        --region_goto(ws)
-        query_fwarn(frame, "ok")
+        region_goto(ws)
         return
     end
     
