@@ -23,6 +23,9 @@
 
 
 static int kill_sig=0;
+#if 1
+static int wait_sig=0;
+#endif
 static bool had_tmr=FALSE;
 static WTimer queue=INIT_TIMER(NULL);
 
@@ -73,6 +76,16 @@ void check_signals()
 	char *tmp=NULL;
 	struct timeval current_time;
 	WTimer *q;
+
+#if 1	
+	if(wait_sig!=0){
+		pid_t pid;
+		wait_sig=0;
+		while((pid=waitpid(-1, NULL, WNOHANG|WUNTRACED))>0){
+			/* nothing */
+		}
+	}
+#endif
 	
 	if(kill_sig!=0){
 		if(kill_sig==SIGUSR1){
@@ -196,12 +209,15 @@ static void deadly_signal_handler(int signal_num)
 
 static void chld_handler(int signal_num)
 {
+#if 0
 	pid_t pid;
-	int i;
-	
+
 	while((pid=waitpid(-1, NULL, WNOHANG|WUNTRACED))>0){
 		/* nothing */
 	}
+#else
+	wait_sig=1;
+#endif
 }
 
 
