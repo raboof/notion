@@ -1077,6 +1077,17 @@ bool mplex_rescue_clientwins(WMPlex *mplex)
 }
 
 
+void mplex_child_removed(WMPlex *mplex, WRegion *sub)
+{
+    WMPlexSTDispInfo *di=&(mplex->stdispinfo);
+    
+    if(sub==(WRegion*)(di->regwatch.obj)){
+        watch_reset(&(di->regwatch));
+        mplex_set_stdisp(mplex, NULL, di->pos);
+    }
+}
+
+
 /*}}}*/
 
 
@@ -1441,6 +1452,9 @@ static DynFunTab mplex_dynfuntab[]={
     
     {(DynFun*)region_fitrep,
      (DynFun*)mplex_fitrep},
+    
+    {region_child_removed,
+     mplex_child_removed},
     
     END_DYNFUNTAB
 };

@@ -93,6 +93,7 @@ extern WRegion *mplex_attach_new(WMPlex *mplex, ExtlTab param);
 extern void mplex_attach_tagged(WMPlex *mplex);
 
 extern void mplex_managed_remove(WMPlex *mplex, WRegion *reg);
+extern void mplex_child_removed(WMPlex *mplex, WRegion *sub);
 
 extern bool mplex_rescue_clientwins(WMPlex *mplex);
 

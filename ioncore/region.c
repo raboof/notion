@@ -264,6 +264,18 @@ WRegion *region_current(WRegion *mgr)
 }
 
 
+void region_child_removed(WRegion *reg, WRegion *sub)
+{
+    CALL_DYN(region_child_removed, reg, (reg, sub));
+}
+
+
+void region_manager_changed(WRegion *reg, WRegion *mgr_or_null)
+{
+    CALL_DYN(region_child_removed, reg, (reg, mgr_or_null));
+}
+
+
 /*}}}*/
 
 
@@ -293,10 +305,10 @@ void region_detach_parent(WRegion *reg)
 {
     WRegion *p=reg->parent;
 
-    region_reset_stacking(reg);
-
     if(p==NULL || p==reg)
         return;
+
+    region_reset_stacking(reg);
     
     UNLINK_ITEM(p->children, reg, p_next, p_prev);
     reg->parent=NULL;
@@ -310,6 +322,8 @@ void region_detach_parent(WRegion *reg)
         /*if(REGION_IS_ACTIVE(reg) && ioncore_g.focus_next==NULL)
             set_focus(p);*/
     }
+    
+    region_child_removed(p, reg);
 }
 
 
@@ -347,7 +361,7 @@ void region_detach_manager(WRegion *reg)
     region_clear_activity(reg, TRUE);
 
     region_managed_remove(mgr, reg);
-    
+
     assert(REGION_MANAGER(reg)==NULL);
 }
 
@@ -543,6 +557,8 @@ void region_set_manager(WRegion *reg, WRegion *mgr, WRegion **listptr)
     if(listptr!=NULL){
         LINK_ITEM(*listptr, reg, mgr_next, mgr_prev);
     }
+    
+    region_manager_changed(reg, mgr);
 }
 
 
@@ -554,6 +570,9 @@ void region_unset_manager(WRegion *reg, WRegion *mgr, WRegion **listptr)
     if(listptr!=NULL){
         UNLINK_ITEM(*listptr, reg, mgr_next, mgr_prev);
     }
+    
+    if(!OBJ_IS_BEING_DESTROYED(reg))
+        region_manager_changed(reg, NULL);
 }
 
 

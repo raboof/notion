@@ -107,6 +107,10 @@ DYNFUN void region_managed_inactivated(WRegion *reg, WRegion *sub);
 DYNFUN void region_managed_notify(WRegion *reg, WRegion *sub);
 DYNFUN bool region_managed_may_destroy(WRegion *mgr, WRegion *reg);
 
+DYNFUN void region_child_removed(WRegion *reg, WRegion *sub);
+
+DYNFUN void region_manager_changed(WRegion *reg, WRegion *mgr_or_null);
+
 extern void region_fit(WRegion *reg, const WRectangle *geom, 
                        WRegionFitMode mode);
 extern bool region_reparent(WRegion *reg, WWindow *target, 
