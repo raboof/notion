@@ -978,7 +978,8 @@ bool mplex_manage_clientwin(WMPlex *mplex, WClientWin *cwin,
     int swf=(param->switchto ? MPLEX_ATTACH_SWITCHTO : 0);
     
     if(redir==MANAGE_REDIR_STRICT_YES || redir==MANAGE_REDIR_PREFER_YES){
-        if(mplex->l2_current!=NULL){
+        if(mplex->l2_current!=NULL &&
+           !(mgd_flags(mplex->l2_current)&MGD_L2_PASSIVE)){
             if(region_manage_clientwin(mplex->l2_current, cwin, param,
                                        MANAGE_REDIR_PREFER_YES))
                 return TRUE;
