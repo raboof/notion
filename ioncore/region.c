@@ -13,7 +13,6 @@
 #include "global.h"
 #include "objp.h"
 #include "region.h"
-#include "colormap.h"
 #include "focus.h"
 #include "attach.h"
 #include "regbind.h"
@@ -392,99 +391,6 @@ void region_detach(WRegion *reg)
 
 /*}}}*/
 
-
-/*{{{ Focus */
-
-
-bool region_may_control_focus(WRegion *reg)
-{
-	WRegion *par, *r2;
-	
-	if(WOBJ_IS_BEING_DESTROYED(reg))
-		return FALSE;
-
-	if(REGION_IS_ACTIVE(reg))
-		return TRUE;
-	
-	par=region_parent(reg);
-	
-	if(par==NULL || !REGION_IS_ACTIVE(par))
-		return FALSE;
-	
-	r2=par->active_sub;
-	while(r2!=NULL && r2!=par){
-		if(r2==reg)
-			return TRUE;
-		r2=REGION_MANAGER(r2);
-	}
-
-	return FALSE;
-}
-
-
-void region_got_focus(WRegion *reg)
-{
-	WRegion *r;
-	
-	region_clear_activity(reg);
-	
-	if(!REGION_IS_ACTIVE(reg)){
-		D(fprintf(stderr, "got focus (inact) %s [%p]\n", WOBJ_TYPESTR(reg), reg);)
-		reg->flags|=REGION_ACTIVE;
-		
-		r=region_parent(reg);
-		if(r!=NULL)
-			r->active_sub=reg;
-		
-		region_activated(reg);
-		
-		r=REGION_MANAGER(reg);
-		if(r!=NULL)
-			region_managed_activated(r, reg);
-	}else{
-		D(fprintf(stderr, "got focus (act) %s [%p]\n", WOBJ_TYPESTR(reg), reg);)
-    }
-
-	/* Install default colour map only if there is no active subregion;
-	 * their maps should come first. WClientWins will install their maps
-	 * in region_activated. Other regions are supposed to use the same
-	 * default map.
-	 */
-	if(reg->active_sub==NULL && !WOBJ_IS(reg, WClientWin))
-		install_cmap(ROOTWIN_OF(reg), None); 
-}
-
-
-void region_lost_focus(WRegion *reg)
-{
-	WRegion *r;
-	
-	if(!REGION_IS_ACTIVE(reg)){
-		D(fprintf(stderr, "lost focus (inact) %s [%p:]\n", WOBJ_TYPESTR(reg), reg);)
-		return;
-	}
-	
-	D(fprintf(stderr, "lost focus (act) %s [%p:]\n", WOBJ_TYPESTR(reg), reg);)
-	
-	reg->flags&=~REGION_ACTIVE;
-	region_inactivated(reg);
-	r=REGION_MANAGER(reg);
-	if(r!=NULL)
-		region_managed_inactivated(r, reg);
-}
-
-
-/*EXTL_DOC
- * Is \var{reg} active/does it or one of it's children of focus?
- */
-EXTL_EXPORT_MEMBER
-bool region_is_active(WRegion *reg)
-{
-	return REGION_IS_ACTIVE(reg);
-}
-
-
-/*}}}*/
 
 	
 /*{{{ Goto */

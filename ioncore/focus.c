@@ -15,6 +15,8 @@
 #include "window.h"
 #include "region.h"
 #include "hooks.h"
+#include "colormap.h"
+#include "activity.h"
 
 
 /*{{{ Previous active region */
@@ -88,6 +90,165 @@ void goto_previous()
 		reset_watch(&prev_watch);
 		region_goto(r);
 	}
+}
+
+
+/*}}}*/
+
+
+/*{{{ Await focus */
+
+
+static WWatch await_watch=WWATCH_INIT;
+
+
+static void await_watch_handler(WWatch *watch, WRegion *prev)
+{
+	WRegion *r;
+	while(1){
+		r=region_parent(prev);
+		if(r==NULL)
+			break;
+		
+		if(setup_watch(&await_watch, (WObj*)r, 
+					   (WWatchHandler*)await_watch_handler))
+			break;
+		prev=r;
+	}
+}
+
+
+void set_await_focus(WRegion *reg)
+{
+    if(reg!=NULL){
+        setup_watch(&await_watch, (WObj*)reg,
+                    (WWatchHandler*)await_watch_handler);
+    }
+}
+
+
+static bool is_await(WRegion *reg)
+{
+    WRegion *aw=(WRegion*)await_watch.obj;
+    
+    while(aw!=NULL){
+        if(aw==reg)
+            return TRUE;
+        aw=region_parent(aw);
+    }
+    
+    return FALSE;
+}
+
+
+/* Only keep await status if focus event is to an ancestor of the await 
+ * region.
+ */
+static void check_clear_await(WRegion *reg)
+{
+    if(is_await(reg) && reg!=(WRegion*)await_watch.obj)
+        return;
+    
+    reset_watch(&await_watch);
+}
+
+
+/*}}}*/
+
+
+/*{{{ Region stuff */
+
+
+bool region_may_control_focus(WRegion *reg)
+{
+	WRegion *par, *r2;
+	
+	if(WOBJ_IS_BEING_DESTROYED(reg))
+		return FALSE;
+
+	if(REGION_IS_ACTIVE(reg))
+		return TRUE;
+	
+    if(is_await(reg))
+        return TRUE;
+    
+	par=region_parent(reg);
+	
+	if(par==NULL || !REGION_IS_ACTIVE(par))
+		return FALSE;
+	
+	r2=par->active_sub;
+	while(r2!=NULL && r2!=par){
+		if(r2==reg)
+			return TRUE;
+		r2=REGION_MANAGER(r2);
+	}
+
+	return FALSE;
+}
+
+
+void region_got_focus(WRegion *reg)
+{
+	WRegion *r;
+	
+    check_clear_await(reg);
+    
+	region_clear_activity(reg);
+	
+	if(!REGION_IS_ACTIVE(reg)){
+		D(fprintf(stderr, "got focus (inact) %s [%p]\n", WOBJ_TYPESTR(reg), reg);)
+		reg->flags|=REGION_ACTIVE;
+		
+		r=region_parent(reg);
+		if(r!=NULL)
+			r->active_sub=reg;
+		
+		region_activated(reg);
+		
+		r=REGION_MANAGER(reg);
+		if(r!=NULL)
+			region_managed_activated(r, reg);
+	}else{
+		D(fprintf(stderr, "got focus (act) %s [%p]\n", WOBJ_TYPESTR(reg), reg);)
+    }
+
+	/* Install default colour map only if there is no active subregion;
+	 * their maps should come first. WClientWins will install their maps
+	 * in region_activated. Other regions are supposed to use the same
+	 * default map.
+	 */
+	if(reg->active_sub==NULL && !WOBJ_IS(reg, WClientWin))
+		install_cmap(ROOTWIN_OF(reg), None); 
+}
+
+
+void region_lost_focus(WRegion *reg)
+{
+	WRegion *r;
+	
+	if(!REGION_IS_ACTIVE(reg)){
+		D(fprintf(stderr, "lost focus (inact) %s [%p:]\n", WOBJ_TYPESTR(reg), reg);)
+		return;
+	}
+	
+	D(fprintf(stderr, "lost focus (act) %s [%p:]\n", WOBJ_TYPESTR(reg), reg);)
+	
+	reg->flags&=~REGION_ACTIVE;
+	region_inactivated(reg);
+	r=REGION_MANAGER(reg);
+	if(r!=NULL)
+		region_managed_inactivated(r, reg);
+}
+
+
+/*EXTL_DOC
+ * Is \var{reg} active/does it or one of it's children of focus?
+ */
+EXTL_EXPORT_MEMBER
+bool region_is_active(WRegion *reg)
+{
+	return REGION_IS_ACTIVE(reg);
 }
 
 

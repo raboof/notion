@@ -18,7 +18,8 @@
 #include "hooks.h"
 
 #define SET_FOCUS(WIN) \
-	XSetInputFocus(wglobal.dpy, WIN, RevertToParent, CurrentTime);
+    {set_await_focus(find_window(WIN)); \
+	XSetInputFocus(wglobal.dpy, WIN, RevertToParent, CurrentTime);}
 
 extern void do_set_focus(WRegion *reg, bool warp);
 extern void set_focus(WRegion *reg);
@@ -33,5 +34,7 @@ extern void goto_previous();
 extern void do_warp(WRegion *reg);
 extern bool do_warp_default(WRegion *reg);
 extern WHooklist *do_warp_alt;
+
+extern void set_await_focus(WRegion *reg);
 
 #endif /* ION_IONCORE_FOCUS_H */
