@@ -81,11 +81,11 @@ static int my_error_handler(Display *dpy, XErrorEvent *ev)
 	XmuPrintDefaultErrorMessage(dpy, ev, stderr);
 #else
 	XGetErrorText(dpy, ev->error_code, msg, 128);
-	sprintf(num, "%d", ev->request_code);
+	snprintf(num, 32, "%d", ev->request_code);
 	XGetErrorDatabaseText(dpy, "XRequest", num, "", request, 64);
 
 	if(request[0]=='\0')
-		sprintf(request, "<unknown request>");
+		snprintf(request, 64, "<unknown request>");
 
 	if(ev->minor_code!=0){
 		warn("[%d] %s (%d.%d) %#lx: %s", ev->serial, request,

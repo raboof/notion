@@ -211,7 +211,7 @@ void setup_environ(int xscr)
 	/* %ui, UINT_MAX is used to ensure there is enough space for the screen
 	 * number
 	 */
-	libtu_asprintf(&tmp, "DISPLAY=%s.%u", display, UINT_MAX);
+	libtu_asprintf(&tmp, "DISPLAY=%s.0123456789a", display);
 
 	if(tmp==NULL){
 		warn_err();
@@ -226,7 +226,7 @@ void setup_environ(int xscr)
 	}
 
 	if(xscr>=0)
-		sprintf(tmp+strlen(tmp), ".%u", (unsigned)xscr);
+		snprintf(tmp+strlen(tmp), 11, ".%u", (unsigned)xscr);
 	
 	putenv(tmp);
 	

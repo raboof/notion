@@ -581,14 +581,14 @@ static void do_draw_moveres(WRootWin *rootwin, const char *str)
 
 void set_moveres_pos(WRootWin *rootwin, int x, int y)
 {
-	sprintf(moveres_tmpstr, "%+d %+d", x, y);
+	snprintf(moveres_tmpstr, CF_MAX_MOVERES_STR_SIZE, "%+d %+d", x, y);
 	do_draw_moveres(rootwin, moveres_tmpstr);
 }
 
 
 void set_moveres_size(WRootWin *rootwin, int w, int h)
 {
-	sprintf(moveres_tmpstr, "%dx%d", w, h);
+	snprintf(moveres_tmpstr, CF_MAX_MOVERES_STR_SIZE, "%dx%d", w, h);
 	do_draw_moveres(rootwin, moveres_tmpstr);
 }
 
