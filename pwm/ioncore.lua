@@ -51,3 +51,4 @@ add_shortenrule("(.*)", "$1$|$1$<...")
 -- Modules.
 load_module("floatws")
 load_module("menu")
+load_module("query")
