@@ -608,7 +608,6 @@ static bool extl_do_create_table(lua_State *st, int *refp)
 {
 	lua_newtable(st);
 	*refp=lua_ref(st, 1);
-	lua_pop(st, 1);
 	return TRUE;
 }
 
@@ -617,6 +616,24 @@ ExtlTab extl_create_table()
 {
 	ExtlTab ref;
 	if(extl_cpcall(l_st, (ExtlCPCallFn*)extl_do_create_table, &ref))
+		return ref;
+	return LUA_NOREF;
+}
+
+
+/* globals */
+
+static bool extl_do_globals(lua_State *st, int *refp)
+{
+	*refp=lua_ref(st, LUA_GLOBALSINDEX);
+	return TRUE;
+}
+
+
+ExtlTab extl_globals()
+{
+	ExtlTab ref;
+	if(extl_cpcall(l_st, (ExtlCPCallFn*)extl_do_globals, &ref))
 		return ref;
 	return LUA_NOREF;
 }
