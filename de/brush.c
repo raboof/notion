@@ -294,7 +294,7 @@ DEStyle *de_create_style(WRootWin *rootwin, const char *name)
  * Clear all styles from drawing engine memory.
  */
 EXTL_EXPORT
-	void de_reset()
+void de_reset()
 {
 	DEStyle *style, *next;
 	for(style=styles; style!=NULL; style=next){
