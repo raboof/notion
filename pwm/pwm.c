@@ -86,7 +86,7 @@ int main(int argc, char*argv[])
 	
 	ioncore_add_scriptdir(EXTRABINDIR); /* ion-completefile */
 	ioncore_add_scriptdir(ETCDIR);
-	ioncore_add_scriptdir(ETCDIR"/pwm");
+	ioncore_add_scriptdir(PWM_ETCDIR);
 	ioncore_add_scriptdir(SHAREDIR);
 	ioncore_add_moduledir(MODULEDIR);
 	ioncore_set_userdirs("pwm");
