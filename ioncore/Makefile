@@ -68,5 +68,5 @@ endif
 
 _install:
 	$(INSTALLDIR) $(BINDIR)
-	$(INSTALL) -m $(BIN_MODE) ioncore $(BINDIR)
-	$(STRIP) $(BINDIR)/ioncore
+	$(INSTALL) -m $(BIN_MODE) ion $(BINDIR)
+	$(STRIP) $(BINDIR)/ion
