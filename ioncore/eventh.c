@@ -322,9 +322,10 @@ static void handle_property(const XPropertyEvent *ev)
 		break;
 
 	case XA_WM_TRANSIENT_FOR:
-		/*warn("Changes in WM_TRANSIENT_FOR property are unsupported.");*/
+		warn("Changes in WM_TRANSIENT_FOR property are unsupported.");
 		/*unmap_clientwin(cwin);
 		manage_clientwin(ev->window, 0);*/
+		break;
 		
 	default:
 		if(ev->atom==wglobal.atom_wm_protocols){
@@ -409,6 +410,7 @@ static void handle_enter_window(XEvent *ev)
 #endif
 	if(wglobal.input_mode!=INPUT_NORMAL)
 		return;
+	
 /*
 	if(eev->mode!=NotifyNormal && !wglobal.warp_enabled)
 		return;
@@ -453,8 +455,7 @@ static void handle_focus_in(const XFocusChangeEvent *ev)
 
 	D(fprintf(stderr, "FI: %s %p %d %d\n", WOBJ_TYPESTR(reg), reg, ev->mode, ev->detail);)
 
-    if(ev->mode==NotifyGrab)/* || ev->mode==NotifyWhileGrabbed)*/
-	/*if(ev->mode!=NotifyNormal && ev->mode!=NotifyWhileGrabbed)*/
+    if(ev->mode==NotifyGrab)
 		return;
 	
 	if(wglobal.focus_next!=NULL){
@@ -494,14 +495,6 @@ static void handle_focus_out(const XFocusChangeEvent *ev)
 	WRegion *reg;
 	WWindow *wwin;
 	
-	/*if(ev->window==SCREEN->root.win){
-		SCREEN->active=FALSE;
-		wwin=wglobal.current_wswindow;
-		if(wwin!=NULL)
-			redraw_wwin(wwin);
-		return;
-	}*/
-
 	reg=FIND_WINDOW_T(ev->window, WRegion);
 	
 	if(reg==NULL)
@@ -509,8 +502,7 @@ static void handle_focus_out(const XFocusChangeEvent *ev)
 
 	D(fprintf(stderr, "FO: %s %p %d %d\n", WOBJ_TYPESTR(reg), reg, ev->mode, ev->detail);)
 
-	if(ev->mode==NotifyGrab)/* || ev->mode==NotifyWhileGrabbed)*/
-	/*if(ev->mode!=NotifyNormal && ev->mode!=NotifyWhileGrabbed)*/
+	if(ev->mode==NotifyGrab)
 		return;
 
 	if(WTHING_IS(reg, WWindow)){
