@@ -50,6 +50,17 @@ static bool opt_winprop_switchto(Tokenizer *tokz, int n, Token *toks)
 }
 
 
+static bool opt_winprop_transparent(Tokenizer *tokz, int n, Token *toks)
+{
+	if(TOK_BOOL_VAL(&(toks[1])))
+		tmp_winprop->flags|=CWIN_PROP_TRANSPARENT;
+	else
+		tmp_winprop->flags&=~CWIN_PROP_TRANSPARENT;
+	
+	return TRUE;
+}
+
+
 static bool opt_winprop_stubborn(Tokenizer *tokz, int n, Token *toks)
 {
 	tmp_winprop->stubborn=TOK_BOOL_VAL(&(toks[1]));
@@ -135,6 +146,7 @@ ConfOpt ion_winprop_opts[]={
 	{"stubborn", "b", opt_winprop_stubborn, NULL},
 	{"target", "s", opt_winprop_target, NULL},
 	{"transient_mode", "i", opt_winprop_transient_mode, NULL},
+	{"transparent", "b", opt_winprop_transparent, NULL},
 	
 	{"#end", NULL, end_winprop, NULL},
 	{"#cancel", NULL, cancel_winprop, NULL},

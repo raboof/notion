@@ -113,7 +113,7 @@ IMPLOBJ(WFrame, WWindow, deinit_frame, frame_dynfuntab, &ion_frame_funclist)
 
 
 static bool init_frame(WFrame *frame, WRegion *parent, WRectangle geom,
-					   int id, int flags)
+					   int id, int unused_flags)
 {
 	Window win;
 	XSetWindowAttributes attr;
@@ -124,7 +124,7 @@ static bool init_frame(WFrame *frame, WRegion *parent, WRectangle geom,
 	if(!WTHING_IS(parent, WWindow))
 		return FALSE;
 	
-	frame->flags=flags;
+	frame->flags=0;
 	frame->managed_count=0;
 	frame->managed_list=NULL;
 	frame->current_sub=NULL;
@@ -138,6 +138,7 @@ static bool init_frame(WFrame *frame, WRegion *parent, WRectangle geom,
 	if(grdata->transparent_background){
 		attr.background_pixmap=ParentRelative;
 		attrflags=CWBackPixmap;
+		frame->flags|=FRAME_TRANSPARENT;
 	}else{
 		attr.background_pixel=COLOR_PIXEL(grdata->frame_bgcolor);
 		attrflags=CWBackPixel;
@@ -254,7 +255,40 @@ int frame_nth_tab_w(const WFrame *frame, int n)
 }
 
 
-void frame_recalc_bar(WFrame *frame)
+bool set_frame_background(WFrame *frame)
+{
+	XSetWindowAttributes attr;
+	ulong attrflags=0;
+	bool tr=FALSE, chg=FALSE;
+	WGRData *grdata=GRDATA_OF(frame);
+	
+	if(frame->managed_count==0){
+		tr=grdata->transparent_background;
+	}else if(frame->current_sub!=NULL &&
+			 WTHING_IS(frame->current_sub, WClientWin)){
+		tr=((WClientWin*)frame->current_sub)->flags&CWIN_PROP_TRANSPARENT;
+	}
+	
+	if(tr && !(frame->flags&FRAME_TRANSPARENT)){
+		attr.background_pixmap=ParentRelative;
+		attrflags=CWBackPixmap;
+		frame->flags|=FRAME_TRANSPARENT;
+		chg=TRUE;
+	}else if(!tr && frame->flags&FRAME_TRANSPARENT){
+		attr.background_pixel=COLOR_PIXEL(grdata->frame_bgcolor);
+		attrflags=CWBackPixel;
+		frame->flags&=~FRAME_TRANSPARENT;
+		chg=TRUE;
+	}
+	
+	XChangeWindowAttributes(wglobal.dpy, frame->win.win, attrflags, &attr);
+	draw_frame(frame, TRUE);
+
+	return chg;
+}
+
+
+void frame_recalc_bar(WFrame *frame, bool draw)
 {
 	WScreen *scr=SCREEN_OF(frame);
 	int bar_w=BAR_W(frame, &(scr->grdata));
@@ -272,13 +306,15 @@ void frame_recalc_bar(WFrame *frame)
 												scr->grdata.tab_font);
 		}
 	}
+	
+	if(draw)
+		draw_frame_bar(frame, TRUE);
 }
 
 
 static void frame_notify_managed_change(WFrame *frame, WRegion *sub)
 {
-	frame_recalc_bar(frame);
-	draw_frame_bar(frame, FALSE);
+	frame_recalc_bar(frame, TRUE);
 }
 
 
@@ -439,8 +475,7 @@ static void frame_draw_config_updated(WFrame *frame)
 			fit_region(sub, geom);
 	}
 	
-	frame_recalc_bar(frame);
-	draw_frame(frame, TRUE);
+	frame_recalc_bar(frame, TRUE);
 }
 
 
@@ -475,7 +510,7 @@ static void reparent_or_fit(WFrame *frame, WRectangle geom, WWindow *parent)
 
 	if(wchg){
 		frame->saved_w=FRAME_NO_SAVED_WH;
-		frame_recalc_bar(frame);
+		frame_recalc_bar(frame, FALSE);
 		/* We should get an exposure event so this should not be needed. */
 		/* draw_frame(frame, TRUE); */
 	}
@@ -623,13 +658,12 @@ static void frame_add_managed_doit(WFrame *frame, WRegion *sub, int flags)
 	if(frame->managed_count==1)
 		flags|=REGION_ATTACH_SWITCHTO;
 
-	frame_recalc_bar(frame);
-
 	if(flags&REGION_ATTACH_SWITCHTO){
+		frame_recalc_bar(frame, FALSE);
 		frame_display_managed(frame, sub);
 	}else{
 		unmap_region(sub);
-		draw_frame_bar(frame, TRUE);
+		frame_recalc_bar(frame, TRUE);
 	}
 
 }
@@ -684,11 +718,11 @@ static void frame_do_remove(WFrame *frame, WRegion *sub)
 	frame->managed_count--;
 	
 	if(wglobal.opmode!=OPMODE_DEINIT){
-		frame_recalc_bar(frame);
+		frame_recalc_bar(frame, (next==NULL));
 		if(next!=NULL)
 			frame_display_managed(frame, next);
 		else
-			draw_frame_bar(frame, TRUE);
+			set_frame_background(frame);
 	}
 
 	if(REGION_LABEL(sub)!=NULL){
@@ -764,7 +798,8 @@ static bool frame_display_managed(WFrame *frame, WRegion *sub)
 	 */
 	region_restack(sub, None, Below);
 	
-	draw_frame_bar(frame, TRUE);
+	if(!set_frame_background(frame))
+		draw_frame_bar(frame, FALSE);
 	
 	return TRUE;
 }

@@ -28,6 +28,8 @@ INTROBJ(WFrame)
 #define FRAME_NO_SAVED_WH -1
 
 #define FRAME_TAB_DRAGGED 0x0001
+#define FRAME_TRANSPARENT 0x0002
+
 
 DECLOBJ(WFrame){
 	WWindow win;
@@ -51,7 +53,7 @@ extern WFrame *create_frame(WRegion *parent, WRectangle geom,
 extern void frame_bar_geom(const WFrame *frame, WRectangle *geom);
 extern void frame_sub_geom(const WFrame *frame, WRectangle *geom);
 
-extern void frame_recalc_bar(WFrame *frame);
+extern void frame_recalc_bar(WFrame *frame, bool draw);
 extern void draw_frame(const WFrame *frame, bool complete);
 extern void draw_frame_bar(const WFrame *frame, bool complete);
 
