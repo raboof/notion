@@ -1465,7 +1465,7 @@ ExtlTab mplex_get_configuration(WMPlex *mplex)
         }
     }
     
-    FOR_ALL_NODES(mplex->l1_list, node){
+    FOR_ALL_NODES(mplex->l2_list, node){
         ExtlTab st=region_get_configuration(node->reg);
         if(st!=extl_table_none()){
             extl_table_sets_i(st, "layer", 2);
