@@ -296,13 +296,13 @@ function querylib.workspace_handler(frame, name)
             cls=default_ws_type
         end
     
-        err=collect_errors(function()
-                               ws=scr:attach_new({ 
-                                   type=cls, 
-                                   name=name, 
-                                   switchto=true 
-                               })
-                           end)
+        local err=collect_errors(function()
+                                     ws=scr:attach_new({ 
+                                         type=cls, 
+                                         name=name, 
+                                         switchto=true 
+                                     })
+                                 end)
         if not ws then
             query_fwarn(frame, err or "Unknown error")
         end
