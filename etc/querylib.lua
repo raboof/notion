@@ -117,17 +117,6 @@ function QueryLib.gotoclient_handler(frame, str)
     end
 end
 
-function QueryLib.handler_lua(frame, code)
-    local f=loadstring(code)
-    if f then
-        local oldarg=arg
-        arg={frame, genframe_current(frame)}
-        pcall(f)
-        oldarg=arg
-    end
-end
-
-
 function QueryLib.get_initdir()
     local wd=os.getenv("PWD")
     if wd==nil then
@@ -136,6 +125,20 @@ function QueryLib.get_initdir()
         wd=wd .. "/"
     end
     return wd
+end
+
+function QueryLib.handler_lua(frame, code)
+    local errors
+    local oldarg=arg
+    arg={frame, genframe_current(frame)}
+    errors=collect_errors(function()
+                              f=loadstring(code)
+                              f()
+			  end)
+    arg=oldarg;
+    if errors then
+        query_fwarn(frame, errors)
+    end
 end
 
 function QueryLib.complete_function(str)
@@ -205,4 +208,3 @@ QueryLib.query_lua=QueryLib.make_frame_fn("Lua code to run:",
                                           nil,
                                           QueryLib.handler_lua,
                                           QueryLib.complete_function);
-
