@@ -15,14 +15,61 @@
 #include "global.h"
 #endif
 
+#ifdef CF_XFT
+
+static WFont *xft_load_pattern(Display *dpy, XftPattern *pattern)
+{
+	WFont *xfnt;
+	XftPattern *match;
+	XftResult result;
+
+	match=XftFontMatch(dpy, DefaultScreen(dpy), pattern, &result);
+
+	xfnt=XftFontOpenPattern(dpy, match);
+
+	if(!xfnt)
+		XftPatternDestroy(match);
+	
+	return xfnt;
+}
+
+static WFont *xft_load_font(Display *dpy, const char *fontname)
+{
+	WFont *xfnt=NULL;
+	XftPattern *pattern;
+	bool use_xft=FALSE;
+
+	if(strlen(fontname)>4 && !strncmp("xft:", fontname, 4)){
+		use_xft=TRUE;
+		fontname+=4;
+	}
+
+	if((pattern=XftXlfdParse(fontname, False, False))){
+		if(!use_xft)
+			XftPatternAddBool(pattern, XFT_CORE, True);
+		xfnt=xft_load_pattern(dpy, pattern);
+		XftPatternDestroy(pattern);
+	}
+
+	if(!xfnt){
+		if((pattern=XftNameParse(fontname))){
+			if(!use_xft)
+				XftPatternAddBool(pattern, XFT_CORE, True);
+			xfnt=xft_load_pattern(dpy, pattern);
+			XftPatternDestroy(pattern);
+		}
+	}
+
+	return xfnt;
+}
+
+#endif
+
 WFont *load_font(Display *dpy, const char *fontname)
 {
 	WFont *xfnt;
-	
 #ifdef CF_XFT
-	xfnt=XftFontOpenXlfd(dpy, DefaultScreen(dpy), fontname);
-	if(xfnt==NULL)
-		xfnt=XftFontOpenName(dpy, DefaultScreen(dpy), fontname);
+	xfnt=xft_load_font(dpy, fontname);
 #else
 	xfnt=XLoadQueryFont(dpy, fontname);
 #endif
@@ -31,9 +78,7 @@ WFont *load_font(Display *dpy, const char *fontname)
 		warn("Could not load font \"%s\", trying \"%s\"",
 			 fontname, CF_FALLBACK_FONT_NAME);
 #ifdef CF_XFT
-		xfnt=XftFontOpenXlfd(dpy, DefaultScreen(dpy), CF_FALLBACK_FONT_NAME);
-		if(xfnt==NULL)
-			xfnt=XftFontOpenName(dpy, DefaultScreen(dpy), fontname);
+		xfnt=xft_load_font(dpy, CF_FALLBACK_FONT_NAME);
 #else
 		xfnt=XLoadQueryFont(dpy, CF_FALLBACK_FONT_NAME);
 #endif
