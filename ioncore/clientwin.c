@@ -515,7 +515,7 @@ again:
         CALL_ALT_B(managed, clientwin_do_manage_alt, (cwin, &param));
 
         if(!managed){
-            warn("Unable to manage client window %d\n", win);
+            warn("Unable to manage client window %x\n", win);
             goto failure;
         }
     }
@@ -684,14 +684,15 @@ bool clientwin_manage_clientwin(WClientWin *cwin, WClientWin *cwin2,
 /*{{{ Unmanage/destroy */
 
 
-static void reparent_root(WClientWin *cwin)
+static bool reparent_root(WClientWin *cwin)
 {
     XWindowAttributes attr;
     WWindow *par;
     Window dummy;
     int x=0, y=0;
     
-    XGetWindowAttributes(ioncore_g.dpy, cwin->win, &attr);
+    if(!XGetWindowAttributes(ioncore_g.dpy, cwin->win, &attr))
+        return FALSE;
     
     par=REGION_PARENT_CHK(cwin, WWindow);
     
@@ -714,6 +715,8 @@ static void reparent_root(WClientWin *cwin)
     }
     
     XReparentWindow(ioncore_g.dpy, cwin->win, attr.root, x, y);
+    
+    return TRUE;
 }
 
 
@@ -726,27 +729,29 @@ void clientwin_deinit(WClientWin *cwin)
     
     if(cwin->win!=None){
         XSelectInput(ioncore_g.dpy, cwin->win, 0);
-        
-        reparent_root(cwin);
+        XUnmapWindow(ioncore_g.dpy, cwin->win);
         
         if(cwin->orig_bw!=0)
             configure_cwin_bw(cwin->win, cwin->orig_bw);
         
+        if(reparent_root(cwin)){
+            if(ioncore_g.opmode==IONCORE_OPMODE_DEINIT){
+                XMapWindow(ioncore_g.dpy, cwin->win);
+                /* Make sure the topmost window has focus; it doesn't really
+                 * matter which one has as long as some has.
+                 */
+                xwindow_do_set_focus(cwin->win);
+            }else{
+                set_clientwin_state(cwin, WithdrawnState);
+                XDeleteProperty(ioncore_g.dpy, cwin->win, 
+                                ioncore_g.atom_net_wm_state);
+            }
+        }
+        
         XRemoveFromSaveSet(ioncore_g.dpy, cwin->win);
         XDeleteContext(ioncore_g.dpy, cwin->win, ioncore_g.win_context);
-        
-        if(ioncore_g.opmode==IONCORE_OPMODE_DEINIT){
-            XMapWindow(ioncore_g.dpy, cwin->win);
-            /* Make sure the topmost window has focus; it doesn't really
-             * matter which one has as long as some has.
-             */
-            xwindow_do_set_focus(cwin->win);
-        }else{
-            set_clientwin_state(cwin, WithdrawnState);
-            XDeleteProperty(ioncore_g.dpy, cwin->win, 
-                            ioncore_g.atom_net_wm_state);
-        }
     }
+    
     clientwin_clear_colormaps(cwin);
     
     watch_reset(&(cwin->fsinfo.last_mgr_watch));
@@ -768,7 +773,9 @@ void clientwin_unmapped(WClientWin *cwin)
 /* Used when the window was deastroyed */
 void clientwin_destroyed(WClientWin *cwin)
 {
+    XRemoveFromSaveSet(ioncore_g.dpy, cwin->win);
     XDeleteContext(ioncore_g.dpy, cwin->win, ioncore_g.win_context);
+    XSelectInput(ioncore_g.dpy, cwin->win, 0);
     cwin->win=None;
     clientwin_unmapped(cwin);
 }
