@@ -13,6 +13,7 @@
 #include "global.h"
 #include "signal.h"
 #include "defer.h"
+#include "event.h"
 
 
 static WInputFd *input_fds=NULL;
@@ -98,7 +99,8 @@ void ioncore_mainloop()
     while(1){
         ioncore_check_signals();
         ioncore_execute_deferred();
-        
+        ioncore_flush();
+
         FD_ZERO(&rfds);
         FD_SET(ioncore_g.conn, &rfds);
         

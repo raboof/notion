@@ -18,8 +18,8 @@
 #include "global.h"
 #include "event.h"
 #include "eventh.h"
-#include "focus.h"
 #include "signal.h"
+#include "focus.h"
 
 
 
@@ -122,7 +122,7 @@ void ioncore_get_event(XEvent *ev, long mask)
 /*}}}*/
 
 
-/*{{{ X connection FD handler */
+/*{{{ Flush */
 
 
 static void skip_focusenter()
@@ -145,6 +145,26 @@ static void skip_focusenter()
 }
 
 
+void ioncore_flush()
+{
+    if(ioncore_g.focus_next!=NULL && 
+       ioncore_g.input_mode==IONCORE_INPUTMODE_NORMAL){
+        bool warp=ioncore_g.warp_next;
+        WRegion *next=ioncore_g.focus_next;
+        ioncore_g.focus_next=NULL;
+        skip_focusenter();
+        region_do_set_focus(next, warp);
+    }
+    
+    XFlush(ioncore_g.dpy);
+}
+
+
+/*}}}*/
+
+
+/*{{{ X connection FD handler */
+
 
 void ioncore_x_connection_handler(int conn, void *unused)
 {
@@ -153,23 +173,13 @@ void ioncore_x_connection_handler(int conn, void *unused)
 
     while(more){
         XNextEvent(ioncore_g.dpy, &ev);
+        /*if(!XCheckMaskEvent(ioncore_g.dpy, ~0, &ev))
+            break;*/
+        
         ioncore_update_timestamp(&ev);
         
         CALL_ALT_B_NORET(ioncore_handle_event_alt, (&ev));
 
-        XSync(ioncore_g.dpy, False);
-        if(ioncore_g.focus_next!=NULL && 
-           ioncore_g.input_mode==IONCORE_INPUTMODE_NORMAL){
-            bool warp=ioncore_g.warp_next;
-            WRegion *next=ioncore_g.focus_next;
-            ioncore_g.focus_next=NULL;
-            skip_focusenter();
-            region_do_set_focus(next, warp);
-        }
-
-        /*ioncore_check_signals();
-        ioncore_execute_deferred();*/
-        
         more=(QLength(ioncore_g.dpy)>0);
     }
 }

@@ -46,7 +46,7 @@
                                  FocusChangeMask)
 
 extern void ioncore_x_connection_handler(int conn, void *unused);
-    
+extern void ioncore_flush();
 extern void ioncore_get_event(XEvent *ev, long mask);
 
 extern void ioncore_update_timestamp(XEvent *ev);
