@@ -258,8 +258,9 @@ void ionws_unmanage_stdisp(WIonWS *ws, bool permanent, bool nofocus)
     }
     
     if(permanent){
-        splittree_remove((WSplit*)(ws->stdispnode), TRUE);
+        WSplit *node=(WSplit*)ws->stdispnode;
         ws->stdispnode=NULL;
+        splittree_remove(node, TRUE);
     }
     
     if(setfocus){
@@ -1136,14 +1137,12 @@ WSplit *load_splitsplit(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
     }
 
     geom2=*geom;
-    if(tl!=NULL){
-        if(dir==SPLIT_HORIZONTAL){
-            geom2.w-=tls;
-            geom2.x+=tls;
-        }else{
-            geom2.h-=tls;
-            geom2.y+=tls;
-        }
+    if(dir==SPLIT_HORIZONTAL){
+        geom2.w-=tls;
+        geom2.x+=tls;
+    }else{
+        geom2.h-=tls;
+        geom2.y+=tls;
     }
             
     if(extl_table_gets_t(tab, "br", &subtab)){
@@ -1153,7 +1152,15 @@ WSplit *load_splitsplit(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
     
     if(tl==NULL || br==NULL){
         destroy_obj((Obj*)split);
-        return (tl==NULL ? br : tl);
+        if(tl!=NULL){
+            split_do_resize(tl, geom, PRIMN_ANY, PRIMN_ANY, FALSE);
+            return tl;
+        }
+        if(br!=NULL){
+            split_do_resize(br, geom, PRIMN_ANY, PRIMN_ANY, FALSE);
+            return br;
+        }
+        return NULL;
     }
     
     tl->parent=(WSplitInner*)split;

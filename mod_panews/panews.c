@@ -458,7 +458,15 @@ static WSplit *load_splitfloat(WPaneWS *ws, const WRectangle *geom,
     
     if(tl==NULL || br==NULL){
         destroy_obj((Obj*)split);
-        return (tl==NULL ? br : tl);
+        if(tl!=NULL){
+            split_do_resize(tl, geom, PRIMN_ANY, PRIMN_ANY, FALSE);
+            return tl;
+        }
+        if(br!=NULL){
+            split_do_resize(br, geom, PRIMN_ANY, PRIMN_ANY, FALSE);
+            return br;
+        }
+        return NULL;
     }
     
     tl->parent=(WSplitInner*)split;
