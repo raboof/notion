@@ -37,13 +37,13 @@ function common_frame_bindings()
     }
 end    
 
+include("querylib.lua")
+
 function frame_query_bindings()
-    if query_query==nil then
+    if not QueryLib then
         return {}
     end
 
-    include("querylib.lua")
-    
     local f11key, f12key="F11", "F12"
     
     if os.execute('uname -s -p|grep "SunOS sparc" > /dev/null')==0 then
