@@ -643,6 +643,17 @@ static bool set_genframe_background(WGenFrame *genframe, bool set_always)
 }
 
 
+void genframe_toggle_tab(WGenFrame *genframe)
+{
+	if(genframe->flags&WGENFRAME_TAB_HIDE)
+		genframe->flags&=!WGENFRAME_TAB_HIDE;
+	else
+		genframe->flags|=WGENFRAME_TAB_HIDE;
+	genframe_fit_managed(genframe);
+	genframe_draw(genframe,TRUE);
+}
+
+
 void genframe_draw_config_updated(WGenFrame *genframe)
 {
 	WGRData *grdata=GRDATA_OF(genframe);

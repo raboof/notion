@@ -15,6 +15,7 @@
 #include <ioncore/thingp.h>
 #include <ioncore/drawp.h>
 #include <ioncore/resize.h>
+#include <ioncore/targetid.h>
 #include "ionframe.h"
 
 #include "bindmaps.h"
@@ -67,11 +68,12 @@ IMPLOBJ(WIonFrame, WGenFrame, deinit_ionframe, ionframe_dynfuntab,
 
 
 static bool init_ionframe(WIonFrame *frame, WWindow *parent, WRectangle geom,
-						  int id)
+						  int id, int flags)
 {
 	if(!init_genframe((WGenFrame*)frame, parent, geom, id))
 		return FALSE;
 	
+	frame->genframe.flags|=flags;
 	set_tab_spacing(frame);
 	
 	region_add_bindmap((WRegion*)frame, &(ionframe_bindmap));
@@ -80,15 +82,15 @@ static bool init_ionframe(WIonFrame *frame, WWindow *parent, WRectangle geom,
 }
 
 
-WIonFrame *create_ionframe(WWindow *parent, WRectangle geom, int id)
+WIonFrame *create_ionframe(WWindow *parent, WRectangle geom, int id, int flags)
 {
-	CREATETHING_IMPL(WIonFrame, ionframe, (p, parent, geom, id));
+	CREATETHING_IMPL(WIonFrame, ionframe, (p, parent, geom, id, flags));
 }
 
 
 WIonFrame* create_ionframe_simple(WWindow *parent, WRectangle geom)
 {
-	return create_ionframe(parent, geom, 0);
+	return create_ionframe(parent, geom, 0, 0);
 }
 
 
@@ -121,7 +123,7 @@ static void ionframe_border_geom(const WIonFrame *frame, WRectangle *geom)
 	geom->w=REGION_GEOM(frame).w;
 	geom->h=REGION_GEOM(frame).h;
 	
-	if(!grdata->bar_inside_frame){
+	if(!grdata->bar_inside_frame && !(frame->genframe.flags&WGENFRAME_TAB_HIDE)){
 		WBorder bd=frame_border(grdata);
 		geom->y+=grdata->bar_h+bd.ipad;
 		geom->h-=grdata->bar_h+bd.ipad;
@@ -145,7 +147,7 @@ static void ionframe_bar_geom(const WIonFrame *frame, WRectangle *geom)
 		geom->w=REGION_GEOM(frame).w-2*bd.ipad;
 	}
 
-	geom->h=grdata->bar_h;
+	geom->h=(frame->genframe.flags&WGENFRAME_TAB_HIDE ? 0 : grdata->bar_h);
 }
 
 
@@ -159,7 +161,7 @@ static void ionframe_managed_geom(const WIonFrame *frame, WRectangle *geom)
 	geom->w-=2*grdata->spacing;
 	geom->h-=2*grdata->spacing;
 	
-	if(grdata->bar_inside_frame){
+	if(grdata->bar_inside_frame && !(frame->genframe.flags&WGENFRAME_TAB_HIDE)){
 		geom->y+=grdata->bar_h+grdata->spacing;
 		geom->h-=grdata->bar_h+grdata->spacing;
 	}
@@ -222,7 +224,7 @@ static void ionframe_recalc_bar(WIonFrame *frame, bool draw)
 	WScreen *scr=SCREEN_OF(frame);
 	int bar_w, tab_w, textw, n;
 	WRegion *sub;
-	
+
 	{
 		WRectangle geom;
 		genframe_bar_geom((WGenFrame*)frame, &geom);
@@ -239,7 +241,7 @@ static void ionframe_recalc_bar(WIonFrame *frame, bool draw)
 		}
 	}
 	
-	if(draw)
+	if(draw && !(frame->genframe.flags&WGENFRAME_TAB_HIDE))
 		genframe_draw_bar((WGenFrame*)frame, TRUE);
 }
 
@@ -268,15 +270,19 @@ void ionframe_draw(const WIonFrame *frame, bool complete)
 		XClearWindow(wglobal.dpy, WGENFRAME_WIN(frame));
 	
 	draw_border_inverted(dinfo, TRUE);
-	
-	genframe_draw_bar((WGenFrame*)frame,
-					  !complete || !grdata->bar_inside_frame);
+
+	if(!(frame->genframe.flags&WGENFRAME_TAB_HIDE))
+		genframe_draw_bar((WGenFrame*)frame,
+					  	!complete || !grdata->bar_inside_frame);
 }
 
 
 void ionframe_draw_bar(const WIonFrame *frame, bool complete)
 {
 	WGRData *grdata=GRDATA_OF(frame);
+
+	if(frame->genframe.flags&WGENFRAME_TAB_HIDE)
+		return;
 	
 	if(complete && !grdata->bar_inside_frame){
 		WBorder bd=frame_border(grdata);
@@ -318,6 +324,8 @@ static bool ionframe_save_to_file(WIonFrame *ionframe, FILE *file, int lvl)
 	begin_saved_region((WRegion*)ionframe, file, lvl);
 	save_indent_line(file, lvl);
 	fprintf(file, "target_id %d\n", ionframe->genframe.target_id);
+	save_indent_line(file, lvl);
+	fprintf(file, "flags %x\n", ionframe->genframe.flags);
 	
 	FOR_ALL_MANAGED_ON_LIST(ionframe->genframe.managed_list, sub){
 		region_save_to_file((WRegion*)sub, file, lvl+1);
@@ -329,13 +337,32 @@ static bool ionframe_save_to_file(WIonFrame *ionframe, FILE *file, int lvl)
 }
 
 
-static int load_target_id;
 static WIonFrame *tmp_frame;
+static int tmp_flags=0;
+static int tmp_target_id=0;
+static WWindow *tmp_par=NULL;
 
 
 static bool opt_target_id(Tokenizer *tokz, int n, Token *toks)
 {
-	load_target_id=TOK_LONG_VAL(&(toks[1]));
+	if(tmp_frame!=NULL){
+		warn("Will not set target id after frame has been created.");
+		return FALSE;
+	}
+			
+	tmp_target_id=TOK_LONG_VAL(&(toks[1]));
+	return TRUE;
+}
+
+
+static bool opt_frame_flags(Tokenizer *tokz, int n, Token *toks)
+{
+	if(tmp_frame!=NULL){
+		warn("Will not set flags after frame has been created.");
+		return FALSE;
+	}
+	tmp_flags=TOK_LONG_VAL(&(toks[1]));
+	tmp_flags&=WGENFRAME_TAB_HIDE;
 	return TRUE;
 }
 
@@ -345,8 +372,13 @@ static bool opt_region(Tokenizer *tokz, int n, Token *toks)
 	WRegion *reg;
 	WRectangle geom;
 	
-	if(tmp_frame==NULL)
-		return FALSE;
+	if(tmp_frame==NULL){
+		tmp_frame=create_ionframe(tmp_par, geom, tmp_target_id, tmp_flags);
+		if(tmp_frame==NULL){
+			warn_err();
+			return FALSE;
+		}
+	}
 	
 	genframe_managed_geom((WGenFrame*)tmp_frame, &geom);
 	
@@ -360,23 +392,29 @@ static bool opt_region(Tokenizer *tokz, int n, Token *toks)
 	return TRUE;
 }
 
+
 static ConfOpt ionframe_opts[]={
-	{"target_id", "l", opt_target_id, NULL},
-	{"region", "s?s", opt_region, CONFOPTS_NOT_SET},
+	{"target_id",	"l", opt_target_id, 	NULL},
+	{"flags",		"l", opt_frame_flags,	NULL},
+	{"region", 		"s?s", opt_region, CONFOPTS_NOT_SET},
 	END_CONFOPTS
 };
 
 
 WRegion *ionframe_load(WWindow *par, WRectangle geom, Tokenizer *tokz)
 {
-	load_target_id=0;
-
-	tmp_frame=create_ionframe(par, geom, load_target_id);
+	tmp_target_id=TARGET_ID_ALLOCANY;
+	tmp_flags=0;
+	tmp_par=par;
+	tmp_frame=NULL;
 	
 	if(!parse_config_tokz(tokz, ionframe_opts)){
 		destroy_thing((WThing*)tmp_frame);
 		return NULL;
 	}
+
+	if(tmp_frame==NULL)
+		tmp_frame=create_ionframe(par, geom, tmp_target_id, tmp_flags);
 	
 	return (WRegion*)tmp_frame;
 }

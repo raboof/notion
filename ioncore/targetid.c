@@ -113,7 +113,10 @@ int use_target_id(WRegion *reg, int id)
 {
 	int tab, ndx;
 	
-	if(id<=0 || id>MAX_ID)
+	if(id<0)
+		return 0;
+	
+	if(id==0 || id>MAX_ID)
 		return alloc_target_id(reg);
 	
 	tab=id/TAB_SIZE;

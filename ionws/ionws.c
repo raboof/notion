@@ -165,7 +165,7 @@ static WIonFrame *create_initial_frame(WIonWS *ws, WWindow *parent,
 {
 	WIonFrame *frame;
 	
-	frame=create_ionframe(parent, geom, 0);
+	frame=create_ionframe(parent, geom, 0,0);
 
 	if(frame==NULL)
 		return NULL;

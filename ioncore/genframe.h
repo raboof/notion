@@ -15,13 +15,11 @@
 
 INTROBJ(WGenFrame)
 
-/*#define WGENFRAME_CLIENT_WOFF(SCR) ((SCR)->grdata.client_off.w)
-#define WGENFRAME_CLIENT_HOFF(SCR) ((SCR)->grdata.client_off.h)
-*/
 #define WGENFRAME_NO_SAVED_WH -1
-
+	
 #define WGENFRAME_TAB_DRAGGED 0x0001
 #define WGENFRAME_TRANSPARENT 0x0002
+#define WGENFRAME_TAB_HIDE    0x0004
 
 
 DECLOBJ(WGenFrame){
@@ -78,6 +76,7 @@ extern int genframe_nth_tab_x(const WGenFrame *genframe, int n);
 extern int genframe_tab_at_x(const WGenFrame *genframe, int x);
 extern void genframe_move_current_tab_right(WGenFrame *genframe);
 extern void genframe_move_current_tab_left(WGenFrame *genframe);
+extern void genframe_toggle_tab(WGenFrame *genframe);
 
 /* Misc */
 extern WRegion *genframe_nth_managed(WGenFrame *genframe, uint n);

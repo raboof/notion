@@ -86,6 +86,7 @@ static WFunction ioncore_genframe_funtab[]={
 	FN_VOID(generic, WGenFrame,	"genframe_p_resize",		genframe_p_resize_setup),
 	FN_VOID(generic, WGenFrame,	"genframe_p_tabdrag", 		genframe_p_tabdrag_setup),
 	FN_VOID(generic, WGenFrame,	"genframe_p_switch_tab",	genframe_switch_tab),
+	FN_VOID(generic, WGenFrame, "genframe_toggle_tab",		genframe_toggle_tab),
 
 	FN_VOID(generic, WGenFrame,	"genframe_move_current_tab_left", genframe_move_current_tab_left),
 	FN_VOID(generic, WGenFrame,	"genframe_move_current_tab_right", genframe_move_current_tab_right),
