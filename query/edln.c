@@ -529,6 +529,7 @@ void edln_history_prev(Edln *edln)
 		if(hist_count==0)
 			return;
 		edln->tmp_p=edln->p;
+		edln->tmp_palloced=edln->palloced;
 		edln->p=NULL;
 		e=hist_head;
 	}else{
@@ -554,8 +555,10 @@ void edln_history_next(Edln *edln)
 		if(edln->p!=NULL)
 			free(edln->p);
 		edln->p=edln->tmp_p;
+		edln->palloced=edln->tmp_palloced;
 		edln->tmp_p=NULL;
-		edln->point=strlen(edln->p);
+		edln->psize=strlen(edln->p);
+		edln->point=edln->psize;
 		edln->mark=-1;
 		edln->modified=TRUE;
 		UPDATE_MOVED(0);

@@ -27,6 +27,7 @@ DECLSTRUCT(Edln){
 	int mark;
 	int psize;
 	int palloced;
+	int tmp_palloced;
 	int modified;
 	int histent;
 	void *uiptr;
