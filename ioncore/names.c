@@ -97,9 +97,9 @@ static int parseinst_simple(const char *inststr)
 static int compare_nameinfos(const WRegionNameInfo *ni1, 
                              const WRegionNameInfo *ni2)
 {
-    int l1, l2;
-    int i1, i2;
-    int mc;
+    int l1=0, l2=0;
+    int i1=0, i2=0;
+    int mc=0;
     
     /* Handle unnamed regions. */
 
@@ -140,12 +140,12 @@ static int compare_nameinfos(const WRegionNameInfo *ni1,
     if(ni1->inst_off>=0)
         i1=parseinst_simple(ni1->name+ni1->inst_off);
     else
-        i1=-ni1->inst_off-1;
+        i1=-ni1->inst_off-1; /*???*/
 
     if(ni2->inst_off>=0)
         i2=parseinst_simple(ni2->name+ni2->inst_off);
     else
-        i2=-ni2->inst_off-1;
+        i2=-ni2->inst_off-1; /*???*/
 
     if(i1!=i2)
         return (i1<i2 ? -1 : 1);
@@ -155,6 +155,12 @@ static int compare_nameinfos(const WRegionNameInfo *ni1,
     return 0;
 }
 
+static bool insert_reg(Rb_node tree, WRegion *reg)
+{
+    assert(reg->ni.node==NULL);
+    reg->ni.node=(void*)rb_insertg(tree, &(reg->ni), reg, COMPARE_FN);
+    return (reg->ni.node!=NULL);
+}
 
 static bool separated(const WRegionNameInfo *ni1, 
                       const WRegionNameInfo *ni2, int *i1ret)
@@ -196,29 +202,16 @@ static bool separated(const WRegionNameInfo *ni1,
 
 void region_unregister(WRegion *reg)
 {
-    WNamespace *ns=reg->ni.namespaceinfo;
-    Rb_node node;
-    int found=0;
-    
-    if(ns==NULL || !ns->initialised)
-        return;
-    
-    node=rb_find_gkey_n(ns->rb, &(reg->ni), COMPARE_FN, &found);
-
-    if(found){
-        /*fprintf(stderr, "%s<-%p|%p->%s\n", reg->ni.name, reg,
-                rb_val(node), ((WRegion*)rb_val(node))->ni.name);*/
-        assert((rb_val(node)==(void*)reg));
-        rb_delete_node(node);
+    if(reg->ni.node!=NULL){
+        rb_delete_node((Rb_node)reg->ni.node);
+        reg->ni.node=NULL;
     }
-
+    
     if(reg->ni.name!=NULL){
         free(reg->ni.name);
         reg->ni.name=NULL;
         reg->ni.inst_off=0;
     }
-    
-    reg->ni.namespaceinfo=NULL;
 }
 
 
@@ -320,17 +313,21 @@ static bool do_use_name(WRegion *reg, WNamespace *ns, const char *name,
     if(!make_full_name(&ni, name, inst, parsed_inst>=0))
         return FALSE;
 
+    /*
+    rb_find_gkey_n(ns->rb, &ni, COMPARE_FN, &found);
+    
+    assert(!found);
+     */
+
     region_unregister(reg);
     
     reg->ni.name=ni.name;
     reg->ni.inst_off=ni.inst_off;
-    reg->ni.namespaceinfo=ns;
     
-    if(!rb_insertg(ns->rb, &(reg->ni), reg, COMPARE_FN)){
+    if(!insert_reg(ns->rb, reg)){
         free(reg->ni.name);
         reg->ni.name=NULL;
         reg->ni.inst_off=0;
-        rb_insertg(ns->rb, &(reg->ni), reg, COMPARE_FN);
         return FALSE;
     }
 
@@ -359,16 +356,16 @@ static bool use_name_parseany(WRegion *reg, WNamespace *ns, const char *name)
     
     inst=parseinst(name, &startinst);
     if(inst>=0){
+        bool retval=FALSE;
         int realnamelen=startinst-name;
         char *realname=ALLOC_N(char, realnamelen+1);
         if(realname!=NULL){
-            bool retval;
             memcpy(realname, name, realnamelen);
             realname[realnamelen]='\0';
             retval=do_use_name(reg, ns, realname, inst, FALSE);
             free(realname);
-            return retval;
         }
+        return retval;
     }
     
     return do_use_name(reg, ns, name, 0, FALSE);
@@ -420,7 +417,7 @@ static bool do_set_name(bool (*fn)(WRegion *reg, WNamespace *ns, const char *p),
 
     if(nm==NULL || *nm=='\0'){
         region_unregister(reg);
-        ret=(rb_insertg(ns->rb, &(reg->ni), reg, COMPARE_FN)!=NULL);
+        ret=insert_reg(ns->rb, reg);
     }else{
         ret=fn(reg, ns, nm);
     }
@@ -454,10 +451,7 @@ bool clientwin_register(WClientWin *cwin)
     if(!initialise_ns(&ioncore_clientwin_ns))
         return FALSE;
     
-    reg->ni.namespaceinfo=&ioncore_clientwin_ns;
-    return (rb_insertg(ioncore_clientwin_ns.rb, &(reg->ni), reg, 
-                       COMPARE_FN)
-            !=NULL);
+    return insert_reg(ioncore_clientwin_ns.rb, (WRegion*)cwin);
 }
 
 

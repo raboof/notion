@@ -67,7 +67,7 @@ INTRSTRUCT(WRegionNameInfo);
 DECLSTRUCT(WRegionNameInfo){
     char *name;
     int inst_off;
-    void *namespaceinfo;
+    void *node;
 };
 
 DECLCLASS(WRegion){
