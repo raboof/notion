@@ -41,6 +41,8 @@ static StringIntMap state_map[]={
 	{"Button3",		Button3},
 	{"Button4",		Button4},
 	{"Button5",		Button5},
+	{"Button6",		6},
+	{"Button7",		7},
 	{"AnyButton",	AnyButton},
 	{NULL,  		0},
 };
