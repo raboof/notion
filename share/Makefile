@@ -9,7 +9,7 @@ include $(TOPDIR)/system-inc.mk
 ######################################
 
 LUACODE = ioncorelib.lua ioncore-mplexfns.lua querylib.lua compat.lua \
-	  ioncore-startup.lua
+	  ioncore-startup.lua delib.lua
 
 SHELLSCRIPTS = ion-edit ion-man ion-runinxterm ion-ssh ion-view
 
