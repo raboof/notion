@@ -105,7 +105,7 @@ static WIonFrame *do_split(WIonFrame *oframe, const char *str, bool attach)
 	
 	if(!get_splitparams(&dir, &primn, str)){
 		warn("Unknown parameter to do_split");
-		return;
+		return NULL;
 	}
 	
 	mins=(dir==VERTICAL
@@ -117,7 +117,7 @@ static WIonFrame *do_split(WIonFrame *oframe, const char *str, bool attach)
 	
 	if(reg==NULL){
 		warn("Unable to split");
-		return;
+		return NULL;
 	}
 
 	if(attach && WGENFRAME_CURRENT(oframe)!=NULL){
