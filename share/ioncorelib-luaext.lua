@@ -40,6 +40,19 @@ function table.copy(t, deep)
     return docopy(t, deep, deep and {})
 end
 
+--DOC
+-- Create a table containing all entries from \var{t1} and those from
+-- \var{t2} that are missing from \var{t1}.
+function table.join(t1, t2)
+    local t=table.copy(t1, false)
+    for k, v in t2 do
+        if not t[k] then
+            t[k]=v
+        end
+    end
+    return t
+end
+
 
 --function os.execute()
 --    warn("Do not use os.execute. Use ioncore.exec.")
