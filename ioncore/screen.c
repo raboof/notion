@@ -516,6 +516,42 @@ err:
     return FALSE;
 }
 
+
+WPHolder *screen_get_rescue_pholder_for(WScreen *scr, WRegion *mgd)
+{
+    WPHolder *ph;
+    WLListNode *node, *node2;
+
+    node=mplex_find_node(&(scr->mplex), mgd);
+
+    if(node==NULL){
+        node=scr->mplex.l1_current;
+        if(node==NULL)
+            node=scr->mplex.l1_list;
+        if(node!=NULL){
+            ph=region_get_rescue_pholder_for(node->reg, mgd);
+            if(ph!=NULL)
+                return ph;
+        }
+    }
+            
+    if(node!=NULL){
+        node2=node->prev;
+        for(node2=node->prev; node2->next!=NULL; node2=node2->prev){
+            ph=region_get_rescue_pholder_for(node2->reg, mgd);
+            if(ph!=NULL)
+                return ph;
+        }
+        for(node2=node->next; node2!=NULL; node2=node->next){
+            ph=region_get_rescue_pholder_for(node2->reg, mgd);
+            if(ph!=NULL)
+                return ph;
+        }
+    }
+    
+    return (WPHolder*)mplex_get_rescue_pholder_for(&(scr->mplex), mgd);
+}
+
 /*}}}*/
 
 
@@ -628,6 +664,9 @@ static DynFunTab screen_dynfuntab[]={
 
     {(DynFun*)region_fitrep,
      (DynFun*)screen_fitrep},
+
+    {(DynFun*)region_get_rescue_pholder_for,
+     (DynFun*)screen_get_rescue_pholder_for},
     
     END_DYNFUNTAB
 };

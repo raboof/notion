@@ -94,6 +94,7 @@ DECLCLASS(WMPlex){
 
 
 /* Create/destroy */
+
 extern WMPlex *create_mplex(WWindow *parent, const WFitParams *fp);
 extern bool mplex_init(WMPlex *mplex, WWindow *parent,
                        const WFitParams *fp);
@@ -102,14 +103,17 @@ extern bool mplex_do_init(WMPlex *mplex, WWindow *parent, Window win,
 extern void mplex_deinit(WMPlex *mplex);
 
 /* Resize and reparent */
+
 extern bool mplex_fitrep(WMPlex *mplex, WWindow *par, const WFitParams *fp);
 extern void mplex_fit_managed(WMPlex *mplex);
 
 /* Mapping */
+
 extern void mplex_map(WMPlex *mplex);
 extern void mplex_unmap(WMPlex *mplex);
 
 /* Attach */
+
 extern WRegion *mplex_attach_simple(WMPlex *mplex, WRegion *reg, 
                                     int flags);
 extern WRegion *mplex_attach_hnd(WMPlex *mplex, WRegionAttachHandler *hnd,
@@ -137,6 +141,7 @@ extern bool mplex_manage_clientwin(WMPlex *mplex, WClientWin *cwin,
                                    const WManageParams *param, int redir);
 
 /* Switch */
+
 extern bool mplex_managed_goto(WMPlex *mplex, WRegion *sub, bool cfocus);
 extern void mplex_switch_nth(WMPlex *mplex, uint n);
 extern void mplex_switch_next(WMPlex *mplex);
@@ -146,10 +151,12 @@ extern bool mplex_l2_show(WMPlex *mplex, WRegion *reg);
 extern bool mplex_l2_hidden(WMPlex *mplex, WRegion *reg);
 
 /* Focus */
+
 extern void mplex_do_set_focus(WMPlex *mplex, bool warp);
 extern void mplex_managed_activated(WMPlex *mplex, WRegion *reg);
 
 /* Misc */
+
 extern WRegion *mplex_current(WMPlex *mplex);
 extern bool mplex_may_destroy(WMPlex *mplex);
 
@@ -162,7 +169,10 @@ extern WRegion *mplex_lcurrent(WMPlex *mplex, uint l);
 extern void mplex_call_changed_hook(WMPlex *mplex, WHook *hook, 
                                     int mode, bool sw, WRegion *reg);
 
+extern WLListNode *mplex_find_node(WMPlex *mplex, WRegion *reg);
+
 /* Dynfuns */
+
 DYNFUN void mplex_managed_geom(const WMPlex *mplex, WRectangle *geom);
 DYNFUN void mplex_size_changed(WMPlex *mplex, bool wchg, bool hchg);
 DYNFUN void mplex_managed_changed(WMPlex *mplex, int what, bool sw,

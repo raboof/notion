@@ -134,10 +134,18 @@ bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto)
 EXTL_EXPORT_MEMBER
 bool clientwin_toggle_fullscreen(WClientWin *cwin)
 {
-    if(cwin->fs_pholder!=NULL)
+    if(!CLIENTWIN_IS_FULLSCREEN(cwin)){
+        return clientwin_enter_fullscreen(cwin, TRUE);
+    }else{
+        if(cwin->fs_pholder==NULL){
+            WPHolder *ph=region_get_rescue_pholder((WRegion*)cwin);
+            
+            if(ph!=NULL && pholder_target(ph)==REGION_MANAGER(cwin))
+                destroy_obj((Obj*)ph);
+            else
+                cwin->fs_pholder=ph;
+        }
+        
         return clientwin_leave_fullscreen(cwin, TRUE);
-    
-    return clientwin_enter_fullscreen(cwin, TRUE);
+    }
 }
-
-

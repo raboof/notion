@@ -666,22 +666,50 @@ static bool mplexfilter(WSplit *node)
 }
 
 
+static WPHolder *find_ph_result=NULL;
+static WRegion *find_ph_param=NULL;
+
+
+static bool find_ph(WSplit *split)
+{
+    WSplitRegion *sr=OBJ_CAST(split, WSplitRegion);
+
+    assert(find_ph_result==NULL);
+    
+    if(sr==NULL || sr->reg==NULL)
+        return FALSE;
+    
+    find_ph_result=region_get_rescue_pholder_for(sr->reg, find_ph_param);
+
+    return (find_ph_result!=NULL);
+}
+
+
 WPHolder *ionws_get_rescue_pholder_for(WIonWS *ws, WRegion *mgd)
 {
     WSplit *node=(WSplit*)get_node_check(ws, mgd);
-    WSplitRegion *other;
-    WPHolder *ph=NULL;
+    WPHolder *ph;
     
-    while(node!=NULL){
-        other=(WSplitRegion*)split_nextto(node,  SPLIT_ANY, PRIMN_ANY,
-                                          mplexfilter);
-        if(other!=NULL && other->reg!=NULL){
-            ph=region_get_rescue_pholder_for(other->reg, mgd);
-            if(ph!=NULL)
-                break;
+    find_ph_result=NULL;
+    find_ph_param=mgd;
+    
+    if(node==NULL){
+        if(ws->split_tree!=NULL){
+            split_current_todir(ws->split_tree, SPLIT_ANY, PRIMN_ANY, 
+                                find_ph);
         }
-        node=(WSplit*)node->parent;
+    }else{
+        while(node!=NULL){
+            split_nextto(node, SPLIT_ANY, PRIMN_ANY, find_ph);
+            if(find_ph_result!=NULL)
+                break;
+            node=(WSplit*)node->parent;
+        }
     }
+    
+    ph=find_ph_result;
+    find_ph_result=NULL;
+    find_ph_param=NULL;
      
     return ph;
 }

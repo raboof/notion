@@ -18,6 +18,7 @@
 #include "mplex.h"
 #include "rectangle.h"
 #include "rootwin.h"
+#include "pholder.h"
 
 #define FOR_ALL_SCREENS(SCR)   \
     for((SCR)=ioncore_g.screens; \
@@ -52,6 +53,8 @@ extern bool screen_init_layout(WScreen *scr, ExtlTab tab);
 
 extern void screen_notify(WScreen *scr, const char *notstr);
 extern void screen_unnotify(WScreen *scr);
+
+extern WPHolder *screen_get_rescue_pholder_for(WScreen *scr, WRegion *mgd);
 
 /* For viewports corresponding to Xinerama rootwins <id> is initially set
  * to the Xinerama screen number. When Xinerama is not enabled, <id> is

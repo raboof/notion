@@ -35,8 +35,6 @@
 #define CLIENTWIN_NEED_CFGNTFY       0x01000
 #define CLIENTWIN_USE_NET_WM_NAME    0x10000
 
-#define CLIENTWIN_IS_FULLSCREEN(cwin) OBJ_IS(REGION_PARENT(cwin), WScreen)
-
 
 DECLCLASS(WClientWin){
     WRegion region;
