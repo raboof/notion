@@ -116,6 +116,10 @@ DEFINES += -DCF_XFREE86_TEXTPROP_BUG_WORKAROUND
 # have to uncomment the following line:
 #DEFINES += -DCF_NO_LOCALE
 
+# On some other systems you may something like this:
+#EXTRA_LIBS += -lintl
+#EXTRA_INCLUDES +=
+
 
 ##
 ## C compiler
