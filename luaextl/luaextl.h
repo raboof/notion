@@ -143,6 +143,7 @@ extern bool extl_call(ExtlFn fnref, const char *spec,
 /* Files */
 
 extern bool extl_loadfile(const char *file, ExtlFn *ret);
+extern bool extl_loadstring(const char *str, ExtlFn *ret);
 extern bool extl_serialise(const char *file, ExtlTab tab);
 
 /* Register */

@@ -1468,7 +1468,7 @@ static int call_loaded(lua_State *st)
 
 typedef struct{
     const char *src;
-    /*bool isfile;*/
+    bool isfile;
     ExtlFn *resptr;
 } ExtlLoadParam;
 
@@ -1477,11 +1477,11 @@ static bool extl_do_load(lua_State *st, ExtlLoadParam *param)
 {
     int res=0;
     
-    /*if(param->isfile){*/
+    if(param->isfile){
         res=luaL_loadfile(st, param->src);
-    /*}else{
+    }else{
         res=luaL_loadbuffer(st, param->src, strlen(param->src), param->src);
-    }*/
+    }
     
     if(res!=0){
         warn("%s", lua_tostring(st, -1));
@@ -1516,14 +1516,13 @@ bool extl_loadfile(const char *file, ExtlFn *ret)
 {
     ExtlLoadParam param;
     param.src=file;
-    /*param.isfile=TRUE;*/
+    param.isfile=TRUE;
     param.resptr=ret;
 
     return extl_cpcall(l_st, (ExtlCPCallFn*)extl_do_load, &param);
 }
 
 
-#if 0
 bool extl_loadstring(const char *str, ExtlFn *ret)
 {
     ExtlLoadParam param;
@@ -1533,7 +1532,7 @@ bool extl_loadstring(const char *str, ExtlFn *ret)
 
     return extl_cpcall(l_st, (ExtlCPCallFn*)extl_do_load, &param);
 }
-#endif
+
 
 /*}}}*/
 
