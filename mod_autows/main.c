@@ -21,6 +21,7 @@
 #include "main.h"
 #include "autows.h"
 #include "autoframe.h"
+#include "placement.h"
 
 
 /*{{{ Module information */
@@ -75,6 +76,12 @@ void mod_autows_deinit()
         ioncore_free_bindmap("WAutoFrame", mod_autows_autoframe_bindmap);
         mod_autows_autoframe_bindmap=NULL;
     }
+    
+    if(autows_init_layout_alt!=NULL){
+        destroy_obj((Obj*)autows_init_layout_alt);
+        autows_init_layout_alt=NULL;
+    }
+
 }
 
 
@@ -95,8 +102,26 @@ static bool register_regions()
 }
 
 
+#define INIT_HOOK_(NM)                            \
+    NM=ioncore_register_hook(#NM, create_hook()); \
+    if(NM==NULL) return FALSE;
+
+
+static bool init_hooks()
+{
+    INIT_HOOK_(autows_init_layout_alt);
+    return TRUE;
+}
+
+
+
 bool mod_autows_init()
 {
+    if(!init_hooks()){
+        WARN_FUNC("failed to initialise hooks");
+        goto err;
+    }
+
     mod_autows_autows_bindmap=ioncore_alloc_bindmap("WAutoWS", NULL);
     
     mod_autows_autoframe_bindmap=ioncore_alloc_bindmap("WAutoFrame", 
@@ -123,6 +148,7 @@ bool mod_autows_init()
         goto err;
     }
     
+    ioncore_read_config("templates", NULL, TRUE);
     ioncore_read_config("autows", NULL, FALSE);
 
     return TRUE;

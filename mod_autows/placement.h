@@ -15,7 +15,18 @@
 #include <ioncore/common.h>
 #include <ioncore/clientwin.h>
 #include <ioncore/manage.h>
+#include <ioncore/hooks.h>
 #include "autows.h"
+
+
+typedef struct{
+    WAutoWS *ws;
+    WRegion *reg;
+    ExtlTab config;
+} WAutoWSInitLayoutParam;
+
+
+extern WHook *autows_init_layout_alt;
 
 
 extern bool autows_manage_clientwin(WAutoWS *ws, WClientWin *cwin,

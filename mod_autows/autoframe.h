@@ -22,10 +22,13 @@ INTRCLASS(WAutoFrame);
 DECLCLASS(WAutoFrame){
     WFrame frame;
     WFitParams last_fp;
+    bool autocreated;
 };
 
 extern WAutoFrame *create_autoframe(WWindow *parent, const WFitParams *fp);
 extern WRegion *autoframe_load(WWindow *par, const WFitParams *fp,
                                ExtlTab tab);
+
+extern void autoframe_managed_remove(WAutoFrame *frame, WRegion *reg);
 
 #endif /* ION_MOD_AUTOWS_AUTOFRAME_H */
