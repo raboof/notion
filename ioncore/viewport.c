@@ -281,7 +281,7 @@ void viewport_display_nth(WViewport *vp, uint n)
 
 
 void viewport_display_next(WViewport *vp)
-{
+{nn
 	WRegion *reg=NEXT_MANAGED_WRAP(vp->ws_list, vp->current_ws);
 	if(reg!=NULL)
 		display_region_sp(reg);
