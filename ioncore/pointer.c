@@ -27,14 +27,19 @@ static int p_clickcnt=0;
 static Time p_time=0;
 static bool p_motiontmp_dirty;
 static WBinding *p_motiontmp=NULL;
-static WThing *p_thing=NULL;
-static WRegion *p_reg=NULL;
+/*static WThing *p_thing=NULL;
+static WRegion *p_reg=NULL;*/
 static WScreen *p_screen=NULL;
 static int p_area=0;
 
 static WButtonHandler *p_button_handler=NULL;
 static WMotionHandler *p_motion_handler=NULL;
 static WMotionHandler *p_motion_begin_handler=NULL;
+
+static WWatch p_regwatch=WWATCH_INIT, p_thingwatch=WWATCH_INIT;
+
+#define p_reg ((WRegion*)p_regwatch.thing)
+#define p_thing (p_thingwatch.thing)
 
 
 /*}}}*/
@@ -126,7 +131,7 @@ static void call_button(WBinding *binding, XButtonEvent *ev)
 
 	call_binding(binding, p_thing);
 	
-	if(p_button_handler!=NULL)
+	if(p_button_handler!=NULL && p_reg!=NULL)
 		p_button_handler(p_reg, ev);
 	
 	p_button_handler=NULL;
@@ -136,7 +141,7 @@ static void call_button(WBinding *binding, XButtonEvent *ev)
 static void call_motion(WBinding *binding, XMotionEvent *ev,
 						int dx, int dy)
 {
-	if(p_motion_handler!=NULL)
+	if(p_motion_handler!=NULL && p_reg!=NULL)
 		p_motion_handler(p_reg, ev, dx, dy);
 }
 
@@ -151,11 +156,17 @@ static void call_motion_begin(WBinding *binding, XMotionEvent *ev,
 
 	call_binding(binding, p_thing);
 	
-	if(p_motion_begin_handler!=NULL)
+	if(p_motion_begin_handler!=NULL && p_reg!=NULL)
 		p_motion_begin_handler(p_reg, ev, dx, dy);
 	
 	p_motion_begin_handler=NULL;
 }
+
+
+/*}}}*/
+
+
+/*{{{ Watch handler */
 
 
 /*}}}*/
@@ -168,6 +179,7 @@ bool handle_button_press(XButtonEvent *ev)
 {
 	WBinding *pressbind=NULL;
 	WRegion *reg=NULL;
+	WThing *thing=NULL;
 	uint button, state;
 	int area=0;
 	
@@ -184,9 +196,9 @@ bool handle_button_press(XButtonEvent *ev)
 
 	do_grab_kb_ptr(ev->root, reg, FocusChangeMask);
 	
-	p_thing=(WThing*)reg;
+	thing=(WThing*)reg;
 	
-	area=window_press((WWindow*)reg, ev, &p_thing);
+	area=window_press((WWindow*)reg, ev, &thing);
 	
 	if(p_clickcnt==1 && time_in_threshold(ev->time) && p_button==button &&
 	   p_state==state && reg==p_reg){
@@ -199,8 +211,11 @@ bool handle_button_press(XButtonEvent *ev)
 											 button, area);
 	}
 	
+	setup_watch(&p_regwatch, (WThing*)reg, NULL);
+	setup_watch(&p_thingwatch, thing, NULL);
+	
 end:
-	p_reg=reg;
+	/*p_reg=reg;*/
 	p_button=button;
 	p_state=state;
 	p_orig_x=p_x=ev->x_root;
@@ -228,18 +243,23 @@ bool handle_button_release(XButtonEvent *ev)
 	if(p_button!=ev->button)
 	   	return FALSE;
 
-	if(p_motion==FALSE){
-		p_clickcnt=1;
-		binding=region_lookup_binding_area(p_reg, ACT_BUTTONCLICK,
-										   p_state, p_button, p_area);
-		call_button(binding,  ev);
-	}else{
-		if(p_button_handler!=NULL)
-			p_button_handler(p_reg, ev);
+	if(p_reg!=NULL){
+		if(p_motion==FALSE){
+			p_clickcnt=1;
+			binding=region_lookup_binding_area(p_reg, ACT_BUTTONCLICK,
+											   p_state, p_button, p_area);
+			call_button(binding,  ev);
+		}else{
+			if(p_button_handler!=NULL)
+				p_button_handler(p_reg, ev);
+		}
+		
+		/* Allow any temporary settings to be cleared */
+		window_release((WWindow*)p_reg);
 	}
 	
-	/* Allow any temporary settings to be cleared */
-	window_release((WWindow*)p_reg);
+	/*reset_watch(&p_regwatch);*/
+	reset_watch(&p_thingwatch);
 
 	return TRUE;
 }
@@ -249,6 +269,9 @@ void handle_pointer_motion(XMotionEvent *ev)
 {
 	WThing *tmp;
 	int dx, dy;
+	
+	if(p_reg==NULL)
+		return;
 	
 	if(p_motion==FALSE && motion_in_threshold(ev->x_root, ev->y_root))
 		return;
