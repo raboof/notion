@@ -2,7 +2,11 @@
  * ion/ioncore/init.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2003. 
- * See the included file LICENSE for details.
+ *
+ * Ion is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
  */
 
 #include <stdlib.h>
@@ -69,9 +73,18 @@ static const char ioncore_usage_tmpl[]=
 
 
 static const char ioncore_about[]=
-	"Ioncore " ION_VERSION ", copyright (c) Tuomo Valkonen 1999-2003.\n"
-	"This program may be copied and modified under the terms of the "
-	"Clarified Artistic License.\n";
+    "Ion " ION_VERSION ", copyright (c) Tuomo Valkonen 1999-2003.\n"
+    "\n"
+    "This program is free software; you can redistribute it and/or\n"
+    "modify it under the terms of the GNU Lesser General Public\n"
+    "License as published by the Free Software Foundation; either\n"
+    "version 2.1 of the License, or (at your option) any later version.\n"
+    "\n"
+    "This program is distributed in the hope that it will be useful,\n"
+    "but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
+    "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU\n"
+    "Lesser General Public License for more details.\n"
+    "\n";
 
 
 static OptParserCommonInfo ioncore_cinfo={
