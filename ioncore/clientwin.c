@@ -101,6 +101,17 @@ static void get_winprops(WClientWin *cwin)
 		extl_unref_table(tab2);
 	}
 
+	if(extl_table_gets_t(tab, "min_size", &tab2)){
+		if(extl_table_gets_i(tab2, "w", &i1) &&
+		   extl_table_gets_i(tab2, "h", &i2)){
+			cwin->size_hints.min_width=i1;
+			cwin->size_hints.min_height=i2;
+			cwin->size_hints.flags|=PMinSize;
+			cwin->flags|=CWIN_PROP_MINSIZE;
+		}
+		extl_unref_table(tab2);
+	}
+
 	if(extl_table_gets_t(tab, "aspect", &tab2)){
 		if(extl_table_gets_i(tab2, "w", &i1) &&
 		   extl_table_gets_i(tab2, "h", &i2)){
@@ -596,6 +607,9 @@ void clientwin_deinit(WClientWin *cwin)
 {
 	WRegion *reg;
 	
+	while(cwin->transient_list!=NULL)
+		destroy_obj((WObj*)(cwin->transient_list));
+	
 	UNLINK_ITEM(wglobal.cwin_list, cwin, g_cwin_next, g_cwin_prev);
 	
 	if(cwin->win!=None){
@@ -838,11 +852,12 @@ static void clientwin_request_managed_geom(WClientWin *cwin, WRegion *sub,
 	
 	TRANSIENT_LAST_H_RQ(sub)=geom.h;
 	
+
 	if(rgeom.h>geom.h){
 		rgeom.h=geom.h;
 		rgeom.y+=cwin->max_geom.h-geom.h;
 	}
-	
+
 	if(geomret!=NULL)
 		*geomret=rgeom;
 	
@@ -860,7 +875,7 @@ static void do_fit_clientwin(WClientWin *cwin, WRectangle max_geom, WWindow *np)
 	bool changes;
 	
 	convert_geom(cwin, max_geom, &geom);
-	
+
 	changes=(REGION_GEOM(cwin).x!=geom.x ||
 			 REGION_GEOM(cwin).y!=geom.y ||
 			 REGION_GEOM(cwin).w!=geom.w ||
