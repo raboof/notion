@@ -582,10 +582,8 @@ void region_size_hints(WRegion *reg, XSizeHints *hints_ret,
     hints_ret->flags=0;
     hints_ret->min_width=1;
     hints_ret->min_height=1;
-    if(relw_ret!=NULL)
-        *relw_ret=REGION_GEOM(reg).w;
-    if(relh_ret!=NULL)
-        *relh_ret=REGION_GEOM(reg).h;
+    *relw_ret=REGION_GEOM(reg).w;
+    *relh_ret=REGION_GEOM(reg).h;
     {
         CALL_DYN(region_size_hints, reg, (reg, hints_ret, relw_ret, relh_ret));
     }
@@ -777,20 +775,13 @@ EXTL_EXPORT_MEMBER
 /*{{{ Misc. */
 
 
-#define REG_MIN_WH(REG, WHL)                                 \
-    XSizeHints hints;                                        \
-    uint relwidth, relheight;                                \
-    region_size_hints(reg, &hints, &relwidth, &relheight);   \
-    return (hints.flags&PMinSize ? hints.min_##WHL : 1);
-
-
 uint region_min_h(WRegion *reg)
 {
     XSizeHints hints;
     uint relw, relh;
     region_size_hints(reg, &hints, &relw, &relh);
-    return (hints.flags&PMinSize ? hints.min_height : 1)
-        +REGION_GEOM(reg).h-relh;
+    return ((hints.flags&PMinSize ? hints.min_height : 1)
+            +REGION_GEOM(reg).h-relh);
 }
 
 
@@ -799,8 +790,8 @@ uint region_min_w(WRegion *reg)
     XSizeHints hints;
     uint relw, relh;
     region_size_hints(reg, &hints, &relw, &relh);
-    return (hints.flags&PMinSize ? hints.min_width : 1)
-        +REGION_GEOM(reg).w-relw;
+    return ((hints.flags&PMinSize ? hints.min_width : 1)
+            +REGION_GEOM(reg).w-relw);
 }
 
 

@@ -793,7 +793,27 @@ void split_tree_rqgeom(WSplit *root, WSplit *sub, int flags,
     WRectangle geom=*geom_;
 
     split_update_bounds(root, TRUE);
-    /*split_update_bounds(sub, TRUE);*/
+    
+    if(sub->type==SPLIT_STDISPNODE){
+        if(flags&REGION_RQGEOM_TRYONLY){
+            WARN_FUNC("REGION_RQGEOM_TRYONLY unsupported for status display.");
+            if(geomret!=NULL)
+                *geomret=sub->geom;
+            return;
+        }
+        split_regularise_stdisp(sub);
+        geom=sub->geom;
+        if(sub->u.d.orientation==REGION_ORIENTATION_HORIZONTAL){
+            if(geom_->h==geom.h)
+                return;
+            geom.h=geom_->h;
+        }else{
+            if(geom_->w==geom.w)
+                return;
+            geom.w=geom_->w;
+        }
+        split_update_bounds(root, TRUE);
+    }
 
     /* Handle internal size bounds */
     bnd(&(geom.x), &(geom.w), sub->geom.x, sub->geom.w, 

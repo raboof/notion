@@ -1048,7 +1048,6 @@ bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg,
         mgr=OBJ_CAST(REGION_MANAGER(oldstdisp), WGenWS);
         
         if(oldstdisp!=reg){
-            warn("D-old");
             ioncore_defer_destroy(di->regwatch.obj);
             watch_reset(&(di->regwatch));
         }
