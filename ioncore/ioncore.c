@@ -487,7 +487,7 @@ bool ioncore_startup(const char *display, const char *cfgfile,
 
     gr_read_config();
 
-    if(!extl_read_config("ioncore-ext", NULL, TRUE))
+    if(!extl_read_config("ioncore_ext", NULL, TRUE))
         return FALSE;
     
     ioncore_read_main_config(cfgfile);
