@@ -5,10 +5,9 @@ Ion - an X11 window manager
 .B ion
 .I "[options]"
 .SH "DESCRIPTION"
-Ion is an X11 window manager with text-editorish and keyboard friendly feel.
 
-This manual page may be out of date for Ion-devel.
-
+Ion is a tiling tabbed window manager designed with keyboard users in mind.
+ 
 .SH "OPTIONS"
 .TP
 .B \-display host:display.screen
@@ -16,6 +15,12 @@ X display to manage
 .TP
 .B \-cfgfile configfile
 Config file to use instead of default
+.TP
+.B \-moduledir dir
+Directory to search for module
+.TP
+.B \-confdir dir
+Directory to search for configuration files and other scripts
 .TP
 .B \-onescreen
 On X servers with multiple screens, manage only default screen, not all.
@@ -42,7 +47,8 @@ On Suns it is usually bound to the diamond keys (\fBMeta_L\fP, \fBMeta_R\fP). Us
 
 .TP
 .B F1
-Show manual page (query, uses ion-man).
+Show manual page (query, uses ion-man). Tab-completion can be enabled by
+specifying a list of directories in the variable query_man_path.
 .TP
 .B Mod1+F1
 Show Ion manual page.
@@ -57,7 +63,8 @@ Run a program (query). Precede the program name with a colon (:) to run in xterm
 Call a function (query).
 .TP
 .B F4
-Start new SSH session (query, uses ion-ssh).
+Start new SSH session (query, uses ion-ssh). Tab-completion of hosts can be
+enabled by specifying them in the configuration variable query_ssh_hosts.
 .TP
 .B F5
 Open a file for editing (query). Uses ion-edit which by default uses run-mailcap.
@@ -66,10 +73,7 @@ Open a file for editing (query). Uses ion-edit which by default uses run-mailcap
 Open a file for viewing (query). Uses ion-view which by default uses run-mailcap.
 .TP
 .B F9
-Goto existing workspace or create new (query).
-.TP
-.B Mod1+F9
-Create new workspace with active client.
+Go to existing workspace or create new (query).
 .TP
 .B F11
 Restart Ion (query)
@@ -80,49 +84,85 @@ Exit Ion (query)
 .SS Navigation
 
 .TP
-.B Mod1+N
-Goto below frame
-.TP
-.B Mod1+P
-Goto above frame
-.TP
-.B Mod1+Tab
-Goto right frame
-.TP
-.B Mod1+K Tab
-Goto left frame
-.TP
 .B Mod1+n
-Goto n:th workspace (n=1..9, 0)
+Go to n:th workspace (n=1..9, 0)
 .TP
-.B Mod1+K N
-Goto next client within frame
+.B Mod1+Right
+Go to next workspace
 .TP
-.B Mod1+K P
-Goto previous client within frame
+.B Mod1+Left
+Go to previous workspace
 .TP
-.B Mod1+K n
-Goto n:th client within frame (n=1..9, 0)
+.B Mod1+Shift+n
+Go to n:th screen (n=1,2)
+.TP
+.B Mod1+Shift+Right
+Go to next screen
+.TP
+.B Mod1+Shift+Left
+Go to previous screen
+.TP
+.B Mod1+G
+Go to client (query; only works in a frame)
 .TP
 .B Mod1+K K
-Goto previously active client
+Go to previously active object
+
+
+
+.IP "\fINavigation on tiled workspaces\fR"
+
+.TP
+.B Mod1+N
+Go to below frame
+.TP
+.B Mod1+P
+Go to above frame
+.TP
+.B Mod1+Tab
+Go to right frame
+.TP
+.B Mod1+K Tab
+Go to left frame
+
+.IP "\fINavigation on floating workspaces\fR"
+
+.TP
+.B Mod1+Tab
+Circulate
+.TP
+.B Mod1+K Tab
+Backcirculate
+
+.SS Closing and destroying objects.
+
+.TP
+.B Mod1+C
+Close active object if possible
+.TP
+.B Mod1+K C
+Kill client window
+.TP
+.B Mod1+K X
+Destroy frame
+
+.SS Frame operations
+
+.TP
+.B Mod1+K N
+Go to next client window within frame
+.TP
+.B Mod1+K P
+Go to previous client window within frame
+.TP
+.B Mod1+K n
+Go to n:th client window within frame (n=1..9, 0)
 .TP
 .B Mod1+A
 Attach client in current frame (query)
-.TP
-.B Mod1+G
-Goto client (query)
 
+.IP "\fIResizing and splitting\fR"
 
-.SS Resize and split
-
-.TP
-.B Mod1+V
-Resize vertically. In resize-mode, use \fBS\fP to shrink, \fBV\fP to grow and \fBEnter\fP to
-finish before timeout (1.5s by default).
-.TP
-.B Mod1+H
-Resize horizontally
 .TP
 .B Mod1+K V
 Maximize vertically
@@ -131,28 +171,36 @@ Maximize vertically
 Maximize horizontally
 .TP
 .B Mod1+S
-Split vertically
+Split vertically (tiled workspaces only)
 .TP
 .B Mod1+K S
-Split horizontally
+Split horizontally (tiled workspaces only)
+.TP
+.B Mod1+R
+Enter resize mode
+
+.IP "\fIResize mode bindings\fR"
+
+.TP
+.B Left, Right, Up Down or F, B, P, N
+Grow the frame in the specific direction
+.TP
+.B Shift+Left, Right, Up Down or Shift+F, B, P, N
+Shrink the frame in the specific direction
+.TP
+.B Mod1+Left, Right, Up Down or Mod1+F, B, P, N
+On floating frame worskacpes: move the frame in the specific direction.
+
+.SS Miscellaneous
 .TP
 .B Mod1+L
 Broken application resize kludge; try to make that broken application
 that didn't get it the first time to understand the real size of the
 active window
-
-
-.SS Close and all
-
 .TP
-.B Mod1+C
-Close client or destroy empty frame
-.TP
-.B Mod1+K C
-Kill client
-.TP
-.B Mod1+K X
-Destroy frame
+.B Mod1+Q
+Send next key press to active client window.
+
 
 .SH LINE-EDITING KEYS
 
@@ -246,32 +294,63 @@ Accept
 
 .SH BUTTONS
 
+The bindings for the two types of frames are again different because not
+all legacy/floating frame actions are available on tiled frames and thus
+those buttons have been mapped to other actions.
+
+.SS Tiled frames
+
+.TP
+.B Button1 (left) or Button2 (middle) on tab
+Click: switch client, drag: drag&drop clients between frames
+.TP
+.B Button1 (left) on border
+Drag: resize
+.TP
+.B Mod1+Button1 (left) or Mod1+Button3 (right)
+Resize.
+
+.SS Floating frames
+
 .TP
 .B Button1 (left)
-Click on tab: switch client. Drag tab: move clients between frames.
+Press: raise frame, click tab: switch client, double-click tab: toggle
+shade mode, drag border: resize, drag elsewhere: move frame
 .TP
-.B Button3 (right)
-Drag border: resize.
+.B Button2 (middle) ontab
+Click: switch client, drag: drag&drop clients between frames
+.TP
+.B Mod1+Button1 (left)
+Click: raise, drag: move
+.TP
+.B Mod1+Button3 (right)
+Click: lower: drag: resize
 
-.SH FILES
+.SH FILES AND DIRECTORIES
 .TP
-.B PREFIX/etc/ion/ion.conf
-System default configuration file
+.B ETCDIR/
+System default configuration files
 .TP
-.B PREFIX/etc/ion/look-*.conf
+.B ETCDIR/ioncore.lua
+System default main configuratio files
+.TP
+.B ETCDIR/look-*.lua
 Color scheme configuration files
 .TP
-.B PREFIX/etc/ion/bindings-*.conf
-Keyboard and pointer binding configuration files
+.B ~/.ion-devel/
+User configuration files
 .TP
-.B ~/.ion/ion.conf
+.B ~/.ion-devel/ioncore.lua
 User default configuration file (overrides system default)
 
 .SH SEE ALSO
 The Ion home page, \fIhttp://iki.fi/tuomov/ion/\fP
 .PP
-.I PREFIX/doc/ion/
+The document "Ion: Configuring and extending with Lua" found on the
+Ion home page.
+.PP
+.I DOCDIR/
 .PP
 .I X(1x)
 .SH AUTHOR
-Ion was written by Tuomo Valkonen <tuomov@iki.fi>.
+Ion was written by Tuomo Valkonen <tuomov at iki.fi>.

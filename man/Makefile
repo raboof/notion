@@ -17,7 +17,8 @@ include $(TOPDIR)/rules.mk
 ######################################
 
 ion.1x: ion.1x.in
-	sed 's#PREFIX#$(PREFIX)#g' ion.1x.in > ion.1x
+	sed 's#ETCDIR#$(ETCDIR)#g; \
+	     s#DOCDIR#$(DOCDIR)#g;' $< > $@
 
 _install:
 	$(INSTALLDIR) $(MANDIR)/man1
