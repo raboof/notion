@@ -134,6 +134,7 @@ bool wmcore_init(const char *appname, const char *appetcdir,
 	wglobal.atom_wm_delete=XInternAtom(dpy, "WM_DELETE_WINDOW", False);
 	wglobal.atom_wm_take_focus=XInternAtom(dpy, "WM_TAKE_FOCUS", False);
 	wglobal.atom_wm_colormaps=XInternAtom(dpy, "WM_COLORMAP_WINDOWS", False);
+	wglobal.atom_wm_window_role=XInternAtom(dpy, "WM_WINDOW_ROLE", False);
 	wglobal.atom_frame_id=XInternAtom(dpy, "_ION_FRAME_ID", False);
 	/*wglobal.atom_workspace=XInternAtom(dpy, "_ION_WORKSPACE", False);*/
 	wglobal.atom_selection=XInternAtom(dpy, "_ION_SELECTION_STRING", False);

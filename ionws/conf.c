@@ -139,7 +139,7 @@ static ConfOpt opts[]={
 	{"warp_enabled", "b", opt_warp_enabled, NULL},
 	
 	/* window props */
-	{"winprop" , "s", ion_begin_winprop, ion_winprop_opts},
+	{"winprop" , "sss", ion_begin_winprop, ion_winprop_opts},
 
 	/* bindings */
 	{"workspace_bindings", NULL, opt_workspace_bindings, wmcore_binding_opts},

@@ -101,9 +101,10 @@ static bool opt_winprop_transient_mode(Tokenizer *tokz, int n, Token *toks)
 bool ion_begin_winprop(Tokenizer *tokz, int n, Token *toks)
 {
 	WWinProp *wrop;
-	char *wclass, *winstance;
 	
-	tmp_winprop=alloc_winprop(TOK_STRING_VAL(&(toks[1])));
+	tmp_winprop=alloc_winprop(TOK_STRING_VAL(&(toks[1])),
+							  TOK_STRING_VAL(&(toks[2])),
+							  TOK_STRING_VAL(&(toks[3])));
 	
 	if(tmp_winprop==NULL){
 		warn_err();

@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include "common.h"
+#include "global.h"
 #include "property.h"
 #include "winprops.h"
 #include "attach.h"
@@ -20,58 +21,42 @@ static WWinProp *winprop_list=NULL;
 
 
 static WWinProp *do_find_winprop(WWinProp *list, const char *wclass,
+								 const char *wrole,
 								 const char *winstance)
 {
-	WWinProp *prop=list, *loosematch=NULL;
-	int match, bestmatch=0;
-	
-	/* I assume there will not be that many winprops, so a naive algorithm
-	 * and data structure should do. (linear search, linked list)
-	 */
-	
+	WWinProp *prop=list;
+
 	for(; prop!=NULL; prop=prop->next){
-		match=0;
-		
-		/* *.* -> 2
-		 * *.bar -> 3
-		 * foo.* -> 4
-		 * foo.bar -> 5
-		 */
-		
-		if(prop->wclass==NULL)
-			match+=1;
-		else if(wclass!=NULL && strcmp(prop->wclass, wclass)==0)
-			match+=3;
-		else
-			continue;
-
-		if(prop->winstance==NULL)
-			match+=1;
-		else if(winstance!=NULL && strcmp(prop->winstance, winstance)==0)
-			match+=2;
-		else
-			continue;
-
-		/* exact match? */
-		if(match==5)
-			return prop;
-		
-		if(match>bestmatch){
-			bestmatch=match;
-			loosematch=prop;
+		if(prop->wclass!=NULL){
+			if(wclass==NULL || strcmp(prop->wclass, wclass)!=0)
+				continue;
 		}
+
+		if(prop->wrole!=NULL){
+			if(wrole==NULL || strcmp(prop->wrole, wrole)!=0)
+				continue;
+		}
+
+		if(prop->winstance!=NULL){
+			if(winstance==NULL || strcmp(prop->winstance, winstance)!=0)
+				continue;
+		}
+		
+		return prop;
 	}
 	
-	return loosematch;
+	return NULL;
 }
 
 
 static WWinProp *do_find_winprop_win(WWinProp *list, Window win)
 {
-	char *winstance, *wclass=NULL;
-	int n, tmp;
+	char *winstance=NULL, *wclass=NULL, *wrole=NULL;
+	int n=0, n2=0, tmp=0;
+	WWinProp *prop;
 	
 	winstance=get_string_property(win, XA_WM_CLASS, &n);
+	wrole=get_string_property(win, wglobal.atom_wm_window_role, &n2);
 	
 	if(winstance==NULL)
 		return NULL;
@@ -80,7 +65,14 @@ static WWinProp *do_find_winprop_win(WWinProp *list, Window win)
 	if(tmp+1<n)
 		wclass=winstance+tmp+1;
 
-	return do_find_winprop(list, wclass, winstance);
+	prop=do_find_winprop(list, wclass, wrole, winstance);
+	
+	if(winstance!=NULL)
+		free(winstance);
+	if(wrole!=NULL)
+		free(wrole);
+	
+	return prop;
 }
 
 
@@ -90,8 +82,12 @@ static void do_free_winprop(WWinProp **list, WWinProp *winprop)
 		UNLINK_ITEM(*list, winprop, next, prev);
 	}
 	
-	if(winprop->data!=NULL)
-		free(winprop->data);
+	if(winprop->wclass!=NULL)
+		free(winprop->wclass);
+	if(winprop->wrole!=NULL)
+		free(winprop->wrole);
+	if(winprop->winstance!=NULL)
+		free(winprop->winstance);
 	
 	if(winprop->target_name!=NULL)
 		free(winprop->target_name);
@@ -106,34 +102,34 @@ static void do_add_winprop(WWinProp **list, WWinProp *winprop)
 }
 
 
-static bool init_winprop(WWinProp *winprop, const char *name)
+static bool init_winprop(WWinProp *winprop, const char *cls,
+						 const char *role, const char *inst)
 {
-	char *wclass, *winstance;
-
-	winprop->data=NULL;
 	winprop->next=NULL;
 	winprop->prev=NULL;
+	winprop->wclass=NULL;
+	winprop->wrole=NULL;
+	winprop->winstance=NULL;
 	
-	wclass=scopy(name);
+	if(strcmp(cls, "*")){
+		winprop->wclass=scopy(cls);
+		if(winprop->wclass==NULL)
+			goto fail;
+	}
 
-	if(wclass==NULL)
-		return FALSE;
+	if(strcmp(role, "*")){
+		winprop->wrole=scopy(role);
+		if(winprop->wrole==NULL)
+			goto fail;
+	}
 
-	winstance=strchr(wclass, '.');
-
-	if(winstance!=NULL){
-		*winstance++='\0';
-		if(strcmp(winstance, "*")==0)
-			winstance=NULL;
+	if(strcmp(inst, "*")){
+		winprop->winstance=scopy(inst);
+		if(winprop->winstance==NULL)
+			goto fail;
 	}
 	
-	if(strcmp(wclass, "*")==0)
-		wclass=NULL;
-	
-	winprop->data=wclass;
-	winprop->wclass=wclass;
-	winprop->winstance=winstance;
-	
+		
 	winprop->flags=0;
 	winprop->manage_flags=REGION_ATTACH_SWITCHTO;
 	winprop->stubborn=FALSE;
@@ -142,6 +138,21 @@ static bool init_winprop(WWinProp *winprop, const char *name)
 	winprop->target_name=NULL;
 	
 	return TRUE;
+	
+fail:
+	warn_err();
+	
+	if(winprop->wclass!=NULL){
+		free(winprop->wclass);
+		winprop->wclass=NULL;
+	}
+
+	if(winprop->wrole!=NULL){
+		free(winprop->wrole);
+		winprop->wrole=NULL;
+	}
+	
+	return FALSE;
 }
 
 
@@ -151,9 +162,9 @@ static bool init_winprop(WWinProp *winprop, const char *name)
 /*{{{ Interface */
 
 
-WWinProp *alloc_winprop(const char *winname)
+WWinProp *alloc_winprop(const char *cls, const char *role,
+						const char *instance)
 {
-	char *wclass, *winstance;
 	WWinProp *winprop;
 	
 	winprop=ALLOC(WWinProp);
@@ -163,7 +174,7 @@ WWinProp *alloc_winprop(const char *winname)
 		return NULL;
 	}
 		
-	if(!init_winprop(winprop, winname)){
+	if(!init_winprop(winprop, cls, role, instance)){
 		free(winprop);
 		return NULL;
 	}

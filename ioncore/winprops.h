@@ -17,8 +17,8 @@ enum TransientMode{
 INTRSTRUCT(WWinProp)
 
 DECLSTRUCT(WWinProp){
-	char *data;
 	char *wclass;
+	char *wrole;
 	char *winstance;
 	WWinProp *next, *prev;
 	
@@ -31,7 +31,8 @@ DECLSTRUCT(WWinProp){
 	int transient_mode;
 };
 
-extern WWinProp *alloc_winprop(const char *winname);
+extern WWinProp *alloc_winprop(const char *cls, const char *role,
+							   const char *instance);
 extern void add_winprop(WWinProp *winprop);
 extern WWinProp *find_winprop_win(Window win);
 extern void free_winprop(WWinProp *winprop);
