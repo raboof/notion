@@ -24,7 +24,7 @@ if test "$1" = "-T"; then
 	title="$2"
 	shift 2
 else
-	title="$1"
+	title="$*"
 fi
 
 exec $XTERMCMD -T "$title" -e $0 -- "$@"
