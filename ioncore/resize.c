@@ -310,10 +310,16 @@ void resize_accel(int *wu, int *hu, int mode)
 	last_mode=mode;
 	last_action_tv=tv;
 	
+	/*
 	if(*wu!=0)
-		*wu=SIGN_NZ(*wu)*ceil(max(sqrt(accel), 1));
+		*wu=SIGN_NZ(*wu)*ceil(max(sqrt(accel), abs(*wu)));
 	if(*hu!=0)
-		*hu=SIGN_NZ(*hu)*ceil(max(sqrt(accel), 1));
+		*hu=SIGN_NZ(*hu)*ceil(max(sqrt(accel), abs(*hu)));
+	 */
+	if(*wu!=0)
+		*wu=(*wu)*ceil(sqrt(accel)/abs(*wu));
+	if(*hu!=0)
+		*hu=(*hu)*ceil(sqrt(accel)/abs(*hu));
 }
 
 
