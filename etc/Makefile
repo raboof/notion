@@ -25,8 +25,5 @@ _install:
 	for i in $(ETC); do \
 		$(INSTALL) -m $(DATA_MODE) $$i $(ETCDIR); \
 	done
-
-	if test -L $(ETCDIR)/draw.lua ; then \
-		rm -f $(ETCDIR)/draw.lua; \
-		ln -s look-cleanviolet.lua $(ETCDIR)/draw.lua; \
-	fi
+	rm -f $(ETCDIR)/draw.lua
+	ln -s look-cleanviolet.lua $(ETCDIR)/draw.lua
