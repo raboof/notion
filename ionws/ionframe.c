@@ -263,23 +263,30 @@ void ionframe_draw_bar(const WIonFrame *frame, bool complete)
 	if(frame->genframe.flags&WGENFRAME_TAB_HIDE)
 		return;
 	
-	if(complete && !grdata->bar_inside_frame){
-		WBorder bd=frame_border(grdata);
-
-		if(REGION_IS_ACTIVE(frame)){
-			set_foreground(wglobal.dpy, grdata->tab_gc,
-						   grdata->act_frame_colors.bg);
+	if(complete){
+		if(!grdata->bar_inside_frame){
+			WBorder bd=frame_border(grdata);
+			
+			if(REGION_IS_ACTIVE(frame)){
+				set_foreground(wglobal.dpy, grdata->tab_gc,
+							   grdata->act_frame_colors.bg);
+			}else{
+				set_foreground(wglobal.dpy, grdata->tab_gc,
+							   grdata->frame_colors.bg);
+			}
+			
+			XFillRectangle(wglobal.dpy, WGENFRAME_WIN(frame), grdata->tab_gc,
+						   0, 0, REGION_GEOM(frame).w, grdata->bar_h+bd.ipad);
 		}else{
-			set_foreground(wglobal.dpy, grdata->tab_gc,
-						   grdata->frame_colors.bg);
-		}
+			WRectangle geom;
+			genframe_bar_geom((WGenFrame*)frame, &geom);
 		
-		XFillRectangle(wglobal.dpy, WGENFRAME_WIN(frame), grdata->tab_gc,
-					   0, 0, REGION_GEOM(frame).w, grdata->bar_h+bd.ipad);
-		complete=FALSE;
+			XClearArea(wglobal.dpy, WGENFRAME_WIN(frame), 
+					   geom.x, geom.y, geom.w, geom.h, False);
+		}
 	}
 	
-	genframe_draw_bar_default((WGenFrame*)frame, complete);
+	genframe_draw_bar_default((WGenFrame*)frame, FALSE);
 }
 
 
