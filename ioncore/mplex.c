@@ -815,12 +815,6 @@ void mplex_switch_prev(WMPlex *mplex)
 /*{{{ Attach */
 
 
-typedef struct{
-    int flags;
-    int index;
-} MPlexAttachParams;
-
-
 static WRegion *mplex_do_attach(WMPlex *mplex, WRegionAttachHandler *hnd,
                                 void *hnd_param, MPlexAttachParams *param)
 {
@@ -830,7 +824,16 @@ static WRegion *mplex_do_attach(WMPlex *mplex, WRegionAttachHandler *hnd,
     bool l2=param->flags&MPLEX_ATTACH_L2;
     
     mplex_managed_geom(mplex, &(fp.g));
-    fp.mode=(l2 ? REGION_FIT_BOUNDS : REGION_FIT_EXACT);
+    if(l2 && param->flags&MPLEX_ATTACH_L2_GEOM){
+        WRectangle tmp=param->l2geom;
+        rectangle_constrain(&tmp, &(fp.g));
+        fp.g=tmp;
+        fp.mode=REGION_FIT_EXACT;
+    }else if(l2){
+        fp.mode=REGION_FIT_BOUNDS;
+    }else{
+        fp.mode=REGION_FIT_EXACT;
+    }
     
     reg=hnd((WWindow*)mplex, &fp, hnd_param);
     
@@ -905,13 +908,16 @@ static void get_params(ExtlTab tab, MPlexAttachParams *par)
     par->index=-1;
     
     extl_table_gets_i(tab, "layer", &layer);
-    if(layer==2)
+    if(layer==2){
         par->flags|=MPLEX_ATTACH_L2;
+        
+        if(extl_table_gets_rectangle(tab, "geom", &(par->l2geom)))
+            par->flags|=MPLEX_ATTACH_L2_GEOM;
+    }
     
     if(extl_table_is_bool_set(tab, "switchto"))
         par->flags|=MPLEX_ATTACH_SWITCHTO;
 
-    
     if(extl_table_is_bool_set(tab, "passive"))
         par->flags|=MPLEX_ATTACH_L2_PASSIVE;
     
@@ -1422,7 +1428,7 @@ ExtlTab mplex_get_configuration(WMPlex *mplex)
 {
     WRegion *sub=NULL;
     int n=0;
-    ExtlTab tab, subs, stdisptab;
+    ExtlTab tab, subs, stdisptab, g;
     
     tab=region_get_base_configuration((WRegion*)mplex);
     
@@ -1446,6 +1452,9 @@ ExtlTab mplex_get_configuration(WMPlex *mplex)
             extl_table_sets_i(st, "layer", 2);
             extl_table_sets_b(st, "switchto", !(flags&MGD_L2_HIDDEN));
             extl_table_sets_b(st, "passive", flags&MGD_L2_PASSIVE);
+            g=extl_table_from_rectangle(&REGION_GEOM(sub));
+            extl_table_sets_t(st, "geom", g);
+            extl_unref_table(g);
             extl_table_seti_t(subs, ++n, st);
             extl_unref_table(st);
         }

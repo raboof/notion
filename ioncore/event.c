@@ -219,7 +219,7 @@ void ioncore_x_connection_handler(int conn, void *unused)
 void ioncore_mainloop()
 {
     mainloop_trap_signals();
-    mainloop_trap_timer();
+    /*mainloop_trap_timer();*/ /* This has to be done earlier. */
     
     ioncore_g.opmode=IONCORE_OPMODE_NORMAL;
 

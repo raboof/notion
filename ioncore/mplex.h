@@ -26,6 +26,7 @@
 #define MPLEX_ATTACH_SWITCHTO 0x01
 #define MPLEX_ATTACH_L2 0x02
 #define MPLEX_ATTACH_L2_PASSIVE 0x04
+#define MPLEX_ATTACH_L2_GEOM 0x08
 
 enum{
     MPLEX_CHANGE_SWITCHONLY=0,
@@ -55,6 +56,13 @@ typedef struct{
     bool sw;
     WRegion *sub;
 } WMPlexChangedParams;
+
+
+typedef struct{
+    int flags;
+    int index;
+    WRectangle l2geom;
+} MPlexAttachParams;
 
 
 DECLCLASS(WMPlex){
