@@ -92,9 +92,11 @@ bool mod_sp_toggle_on(WMPlex *mplex)
 EXTL_EXPORT
 void mod_sp_toggle(WScratchpad *sp)
 {
-    WMPlex *mplex=OBJ_CAST(REGION_MANAGER(sp), WMPlex);
-    if(mplex!=NULL /*&& mplex_layer(mplex, (WRegion*)sp)==2*/)
-        do_toggle(mplex, sp);
+    if(sp!=NULL){
+        WMPlex *mplex=OBJ_CAST(REGION_MANAGER(sp), WMPlex);
+        if(mplex!=NULL /*&& mplex_layer(mplex, (WRegion*)sp)==2*/)
+            do_toggle(mplex, sp);
+    }
 }
 
 
