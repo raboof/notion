@@ -1137,12 +1137,18 @@ static void clientwin_do_set_focus(WClientWin *cwin, bool warp)
 }
 
 
-static bool clientwin_managed_display(WClientWin *cwin, WRegion *sub)
+static bool clientwin_managed_goto(WClientWin *cwin, WRegion *sub, int flags)
 {
     if(!REGION_IS_MAPPED(cwin))
         return FALSE;
-    region_map(sub);
+    
+    if(!REGION_IS_MAPPED(sub))
+        region_map(sub);
 #warning "TODO: raise to top"    
+    
+    if(flags&REGION_GOTO_FOCUS)
+        region_maybewarp(sub, !(flags&REGION_GOTO_NOWARP));
+    
     return TRUE;
 }
 
@@ -1201,12 +1207,6 @@ static void clientwin_resize_hints(WClientWin *cwin, XSizeHints *hints_ret)
 {
     *hints_ret=cwin->size_hints;
     xsizehints_adjust_for(hints_ret, cwin->transient_list);
-}
-
-
-static WRegion *clientwin_managed_focus(WClientWin *cwin, WRegion *reg)
-{
-    return LATEST_TRANSIENT(cwin);
 }
 
 
@@ -1575,8 +1575,8 @@ static DynFunTab clientwin_dynfuntab[]={
     {region_do_set_focus, 
      clientwin_do_set_focus},
     
-    {(DynFun*)region_managed_display,
-     (DynFun*)clientwin_managed_display},
+    {(DynFun*)region_managed_goto,
+     (DynFun*)clientwin_managed_goto},
     
     {region_notify_rootpos, 
      clientwin_notify_rootpos},
@@ -1595,9 +1595,6 @@ static DynFunTab clientwin_dynfuntab[]={
     
     {region_size_hints, 
      clientwin_resize_hints},
-    
-    {(DynFun*)region_managed_control_focus,
-     (DynFun*)clientwin_managed_focus},
     
     {region_managed_remove, 
      clientwin_managed_remove},

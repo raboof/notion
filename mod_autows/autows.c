@@ -235,24 +235,24 @@ bool autows_managed_may_destroy(WAutoWS *ws, WRegion *reg)
 }
 
 
-WRegion *autows_managed_control_focus(WAutoWS *ws, WRegion *reg)
+bool autows_managed_goto(WAutoWS *ws, WRegion *reg, int flags)
 {
-    WSplitRegion *node=get_node_check(ws, reg);
-    WSplitRegion *other;
+    if(flags&REGION_GOTO_ENTERWINDOW){
+        WSplitRegion *other, *node=get_node_check(ws, reg);
+        if(node!=NULL && OBJ_IS(node, WSplitUnused)){
+            /* An unused region - do not focus unless there are no
+             * normal regions in its pane. 
+             */
+            other=split_tree_find_region_in_pane_of((WSplit*)node);
+            if(other!=NULL){
+                ionws_managed_goto(&(ws->ionws), other->reg, 
+                                   flags&~REGION_GOTO_ENTERWINDOW);
+                return FALSE;
+            }
+        }
+    }
         
-    if(node==NULL || !OBJ_IS(node, WSplitUnused))
-        return NULL;
-    
-    /* An unused region - do not focus unless there are no
-     * normal regions in its pane. 
-     */
-    
-    other=split_tree_find_region_in_pane_of((WSplit*)node);
-    
-    if(other!=NULL)
-        return other->reg;
-    
-    return NULL;
+    return ionws_managed_goto(&(ws->ionws), reg, flags);
 }
 
 
@@ -499,8 +499,8 @@ static DynFunTab autows_dynfuntab[]={
     {(DynFun*)ionws_do_get_farthest,
      (DynFun*)autows_do_get_farthest},
 
-    {(DynFun*)region_managed_control_focus,
-     (DynFun*)autows_managed_control_focus},
+    {(DynFun*)region_managed_goto,
+     (DynFun*)autows_managed_goto},
 
     END_DYNFUNTAB
 };

@@ -25,6 +25,10 @@
 #define REGION_SKIP_FOCUS    0x0200
 #define REGION_CWINS_BEING_RESCUED 0x0400
 
+#define REGION_GOTO_FOCUS    0x0001
+#define REGION_GOTO_NOWARP   0x0002
+#define REGION_GOTO_ENTERWINDOW 0x0004
+
 /* Use region_is_fully_mapped instead for most cases. */
 #define REGION_IS_MAPPED(R)     (((WRegion*)(R))->flags&REGION_MAPPED)
 #define REGION_MARK_MAPPED(R)   (((WRegion*)(R))->flags|=REGION_MAPPED)
@@ -98,7 +102,7 @@ DYNFUN void region_notify_rootpos(WRegion *reg, int x, int y);
 
 DYNFUN WRegion *region_managed_control_focus(WRegion *mgr, WRegion *reg);
 DYNFUN void region_managed_remove(WRegion *reg, WRegion *sub);
-DYNFUN bool region_managed_display(WRegion *reg, WRegion *sub);
+DYNFUN bool region_managed_goto(WRegion *reg, WRegion *sub, int flags);
 DYNFUN void region_managed_activated(WRegion *reg, WRegion *sub);
 DYNFUN void region_managed_inactivated(WRegion *reg, WRegion *sub);
 DYNFUN void region_managed_notify(WRegion *reg, WRegion *sub);
@@ -128,9 +132,8 @@ extern WRegion *region_rqclose_propagate(WRegion *reg, WRegion *maybe_sub);
 extern void region_rootpos(WRegion *reg, int *xret, int *yret);
 extern void region_notify_change(WRegion *reg);
 
-extern bool region_display(WRegion *reg);
-extern bool region_display_sp(WRegion *reg);
 extern bool region_goto(WRegion *reg);
+extern bool region_goto_flags(WRegion *reg, int flags);
 
 extern bool region_is_fully_mapped(WRegion *reg);
 

@@ -396,8 +396,10 @@ void frame_p_switch_tab(WFrame *frame)
     
     sub=sub_at_tab(frame);
     
-    if(sub!=NULL)
-        region_display_sp(sub);
+    if(sub!=NULL){
+        region_managed_goto((WRegion*)frame, sub, 
+                            REGION_GOTO_FOCUS|REGION_GOTO_NOWARP);
+    }
 }
 
 

@@ -319,43 +319,22 @@ void region_do_warp(WRegion *reg)
 }
 
 
+void region_maybewarp(WRegion *reg, bool warp)
+{
+    ioncore_g.focus_next=reg;
+    ioncore_g.warp_next=warp;
+}
+
+
 void region_set_focus(WRegion *reg)
 {
-    D(fprintf(stderr, "set_focus %p %s\n", reg, OBJ_TYPESTR(reg)));
-    ioncore_g.focus_next=reg;
-    ioncore_g.warp_next=FALSE;
+    region_maybewarp(reg, FALSE);
 }
 
 
 void region_warp(WRegion *reg)
 {
-    D(fprintf(stderr, "warp %p %s\n", reg, OBJ_TYPESTR(reg)));
-    ioncore_g.focus_next=reg;
-    ioncore_g.warp_next=ioncore_g.warp_enabled;
-}
-
-
-WRegion *region_set_focus_mgrctl(WRegion *freg, bool dowarp)
-{
-    WRegion *mgr=freg;
-    WRegion *reg;
-    
-    while(1){
-        reg=mgr;
-        mgr=REGION_MANAGER(reg);
-        if(mgr==NULL)
-            break;
-        reg=region_managed_control_focus(mgr, reg);
-        if(reg!=NULL)
-            freg=reg;
-    }
-    
-    if(!REGION_IS_ACTIVE(freg)){
-        ioncore_g.focus_next=freg;
-        ioncore_g.warp_next=(ioncore_g.warp_enabled && dowarp);
-    }
-
-    return freg;
+    region_maybewarp(reg, TRUE);
 }
 
 

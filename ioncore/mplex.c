@@ -576,16 +576,6 @@ void mplex_do_set_focus(WMPlex *mplex, bool warp)
 }
 
 
-static WRegion *mplex_managed_control_focus(WMPlex *mplex, WRegion *reg)
-{
-    if(mplex->l2_current!=NULL && 
-       (mgd_flags(mplex->l2_current)&MGD_L2_PASSIVE)==0){
-        return mplex->l2_current;
-    }
-    return NULL;
-}
-
-
 /*}}}*/
 
 
@@ -668,26 +658,7 @@ bool mplex_l2_show(WMPlex *mplex, WRegion *reg)
     if(!l2_is_hidden(reg))
         return FALSE;
     
-#if 1
-    return mplex_managed_display(mplex, reg);
-#else    
-    l2_unmark_hidden(reg);
-    if(REGION_IS_MAPPED(mplex) && !MPLEX_MGD_UNVIEWABLE(mplex))
-        region_map(reg);
-    
-    FOR_ALL_MANAGED_ON_LIST(mplex->l2_list, reg2){
-        /*if(!l2_is_hidden(reg2))*/
-        if((mgd_flags(reg2)&(MGD_L2_HIDDEN|MGD_L2_PASSIVE))==0)
-            toact=reg2;
-    }
-    
-    mplex->l2_current=toact;
-    
-    if(mcf)
-        region_warp((WRegion*)mplex);
-
-    return TRUE;
-#endif    
+    return mplex_managed_goto(mplex, reg, (mcf ? REGION_GOTO_FOCUS : 0));
 }
 
 
@@ -697,7 +668,10 @@ static bool mplex_do_managed_display(WMPlex *mplex, WRegion *sub,
     bool l2=FALSE;
     WRegion *stdisp;
     
-    if(sub==mplex->l1_current || sub==mplex->l2_current)
+    if(sub==mplex->l1_current)
+        return mplex->l2_current==NULL;
+        
+    if(sub==mplex->l2_current)
         return TRUE;
     
     if(on_l2_list(mplex, sub))
@@ -757,26 +731,51 @@ static bool mplex_do_managed_display(WMPlex *mplex, WRegion *sub,
             mplex->l2_current=sub;
     }
     
-    if(region_may_control_focus((WRegion*)mplex))
-        region_warp((WRegion*)mplex);
-
-    if(!l2)
+    if(!l2){
         mplex_managed_changed(mplex, MPLEX_CHANGE_SWITCHONLY, TRUE, sub);
+        return mplex->l2_current==NULL;
+    }else{
+        return mplex->l2_current==sub;
+    }
+}
+
+
+static bool mplex_do_managed_goto(WMPlex *mplex, WRegion *sub,
+                                  bool call_changed, int flags)
+{
+    if(!mplex_do_managed_display(mplex, sub, call_changed))
+        return FALSE;
+    
+    if(flags&REGION_GOTO_FOCUS)
+        region_maybewarp((WRegion*)mplex, !(flags&REGION_GOTO_NOWARP));
     
     return TRUE;
 }
 
 
-bool mplex_managed_display(WMPlex *mplex, WRegion *sub)
+static bool mplex_do_managed_goto_sw(WMPlex *mplex, WRegion *sub,
+                                     bool call_changed)
 {
-    return mplex_do_managed_display(mplex, sub, TRUE);
+    bool mcf=region_may_control_focus((WRegion*)mplex);
+    return mplex_do_managed_goto(mplex, sub, FALSE, 
+                                 (mcf ? REGION_GOTO_FOCUS : 0)
+                                 |REGION_GOTO_NOWARP);
+}
+
+
+bool mplex_managed_goto(WMPlex *mplex, WRegion *sub, int flags)
+{
+    return mplex_do_managed_goto(mplex, sub, TRUE, flags);
 }
 
 
 static void do_switch(WMPlex *mplex, WRegion *sub)
 {
-    if(sub!=NULL)
-        region_display_sp(sub);
+    if(sub!=NULL){
+        bool mcf=region_may_control_focus((WRegion*)mplex);
+        region_managed_goto((WRegion*)mplex, sub,
+                            (mcf ? REGION_GOTO_FOCUS : 0));
+    }
 }
 
 
@@ -863,7 +862,7 @@ static WRegion *mplex_do_attach(WMPlex *mplex, WRegionAttachHandler *hnd,
         sw=TRUE;
     
     if(sw)
-        mplex_do_managed_display(mplex, reg, FALSE);
+        mplex_do_managed_goto_sw(mplex, reg, FALSE);
     else
         region_unmap(reg);
 
@@ -1093,7 +1092,7 @@ void mplex_managed_remove(WMPlex *mplex, WRegion *sub)
         return;
     
     if(next!=NULL && sw)
-        mplex_do_managed_display(mplex, next, FALSE);
+        mplex_do_managed_goto_sw(mplex, next, FALSE);
     else if(l2 && region_may_control_focus((WRegion*)mplex))
         region_warp((WRegion*)mplex);
     
@@ -1457,17 +1456,14 @@ static DynFunTab mplex_dynfuntab[]={
     {region_do_set_focus, 
      mplex_do_set_focus},
     
-    {(DynFun*)region_managed_control_focus,
-     (DynFun*)mplex_managed_control_focus},
-    
     {region_managed_remove, 
      mplex_managed_remove},
     
     {region_managed_rqgeom,
      mplex_managed_rqgeom},
     
-    {(DynFun*)region_managed_display,
-     (DynFun*)mplex_managed_display},
+    {(DynFun*)region_managed_goto,
+     (DynFun*)mplex_managed_goto},
     
     {(DynFun*)region_handle_drop, 
      (DynFun*)mplex_handle_drop},

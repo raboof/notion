@@ -78,7 +78,7 @@ extern void ionws_managed_activated(WIonWS *ws, WRegion *reg);
 extern bool ionws_managed_rescue(WIonWS *ws, WClientWin *cwin, WRegion *from);
 extern bool ionws_rescue_clientwins(WIonWS *ws);
 extern void ionws_do_set_focus(WIonWS *ws, bool warp);
-extern bool ionws_managed_display(WIonWS *ws, WRegion *reg);
+extern bool ionws_managed_goto(WIonWS *ws, WRegion *reg, bool cfocus);
 extern bool ionws_managed_may_destroy(WIonWS *ws, WRegion *reg);
 extern void ionws_manage_stdisp(WIonWS *ws, WRegion *stdisp, int corner);
 extern void ionws_unmanage_stdisp(WIonWS *ws, bool permanent, bool nofocus);

@@ -147,8 +147,25 @@ void ionws_do_set_focus(WIonWS *ws, bool warp)
 }
 
 
-bool ionws_managed_display(WIonWS *ws, WRegion *reg)
+bool ionws_managed_goto(WIonWS *ws, WRegion *reg, int flags)
 {
+    WSplitRegion *node=get_node_check(ws, reg);
+    
+    if(!REGION_IS_MAPPED(ws))
+        return FALSE;
+
+    if(node!=NULL && node->split.parent!=NULL)
+        splitinner_mark_current(node->split.parent, &(node->split));
+        
+    /* WSplitSplit uses activity based stacking as required on WAutoWS,
+     * so we must restack here.
+     */
+    if(ws->split_tree!=NULL)
+        split_restack(ws->split_tree, ws->genws.dummywin, Above);
+    
+    if(flags&REGION_GOTO_FOCUS)
+        region_maybewarp(reg, !(flags&REGION_GOTO_NOWARP));
+
     return TRUE;
 }
 
@@ -973,28 +990,6 @@ WSplitRegion *ionws_node_of(WIonWS *ws, WRegion *reg)
 /*}}}*/
 
 
-/*{{{ Misc. */
-
-
-void ionws_managed_activated(WIonWS *ws, WRegion *reg)
-{
-    WSplitRegion *node=get_node_check(ws, reg);
-    
-    if(node!=NULL && node->split.parent!=NULL)
-        splitinner_mark_current(node->split.parent, &(node->split));
-    
-    /* WSplitSplit uses activity based stacking as required on WAutoWS,
-     * so we must restack here.
-     */
-    if(ws->split_tree!=NULL)
-        split_restack(ws->split_tree, ws->genws.dummywin, Above);
-
-}
-
-
-/*}}}*/
-
-
 /*{{{ Save */
 
 
@@ -1266,14 +1261,11 @@ static DynFunTab ionws_dynfuntab[]={
     {region_managed_rqgeom, 
      ionws_managed_rqgeom},
     
-    {region_managed_activated,
-     ionws_managed_activated},
-    
     {region_managed_remove, 
      ionws_managed_remove},
     
-    {(DynFun*)region_managed_display,
-     (DynFun*)ionws_managed_display},
+    {(DynFun*)region_managed_goto,
+     (DynFun*)ionws_managed_goto},
     
     {(DynFun*)region_manage_clientwin, 
      (DynFun*)ionws_manage_clientwin},

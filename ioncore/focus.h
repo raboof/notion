@@ -22,7 +22,7 @@ DYNFUN void region_do_set_focus(WRegion *reg, bool warp);
 /* Delayed (until return to main loop) warp/focus */
 extern void region_warp(WRegion *reg);
 extern void region_set_focus(WRegion *reg);
-extern WRegion *region_set_focus_mgrctl(WRegion *freg, bool dowarp);
+extern void region_maybewarp(WRegion *reg, bool warp);
 
 /* Immediate warp/focus */
 extern void region_do_warp(WRegion *reg);

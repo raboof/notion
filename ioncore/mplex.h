@@ -103,7 +103,7 @@ extern bool mplex_manage_rescue(WMPlex *mplex, WClientWin *cwin,
                                 WRegion *from);
 
 /* Switch */
-extern bool mplex_managed_display(WMPlex *mplex, WRegion *sub);
+extern bool mplex_managed_goto(WMPlex *mplex, WRegion *sub, bool cfocus);
 extern void mplex_switch_nth(WMPlex *mplex, uint n);
 extern void mplex_switch_next(WMPlex *mplex);
 extern void mplex_switch_prev(WMPlex *mplex);

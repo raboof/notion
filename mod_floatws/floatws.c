@@ -225,11 +225,16 @@ static void floatws_do_set_focus(WFloatWS *ws, bool warp)
 }
 
 
-static bool floatws_managed_display(WFloatWS *ws, WRegion *reg)
+static bool floatws_managed_goto(WFloatWS *ws, WRegion *reg, int flags)
 {
     if(!region_is_fully_mapped((WRegion*)ws))
        return FALSE;
+    
     region_map(reg);
+    
+    if(flags&REGION_GOTO_FOCUS)
+        region_maybewarp(reg, !(flags&REGION_GOTO_NOWARP));
+    
     return TRUE;
 }
 
@@ -1286,8 +1291,8 @@ static DynFunTab floatws_dynfuntab[]={
      floatws_map},
     {region_unmap, 
      floatws_unmap},
-    {(DynFun*)region_managed_display, 
-     (DynFun*)floatws_managed_display},
+    {(DynFun*)region_managed_goto, 
+     (DynFun*)floatws_managed_goto},
 
     {region_do_set_focus, 
      floatws_do_set_focus},

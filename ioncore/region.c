@@ -218,10 +218,22 @@ void region_managed_inactivated(WRegion *mgr, WRegion *reg)
 }
 
 
-bool region_managed_display(WRegion *mgr, WRegion *reg)
+static bool region_managed_goto_default(WRegion *mgr, WRegion *reg, int flags)
+{
+    if(!region_is_fully_mapped(mgr))
+        return FALSE;
+    if(!REGION_IS_MAPPED(reg))
+        region_map(reg);
+    if(flags&REGION_GOTO_FOCUS)
+        region_maybewarp(reg, !(flags&REGION_GOTO_NOWARP));
+    return TRUE;
+}
+
+    
+bool region_managed_goto(WRegion *mgr, WRegion *reg, int flags)
 {
     bool ret=TRUE;
-    CALL_DYN_RET(ret, bool, region_managed_display, mgr, (mgr, reg));
+    CALL_DYN_RET(ret, bool, region_managed_goto, mgr, (mgr, reg, flags));
     return ret;
 }
 
@@ -235,14 +247,6 @@ void region_managed_notify(WRegion *mgr, WRegion *reg)
 void region_managed_remove(WRegion *mgr, WRegion *reg)
 {
     CALL_DYN(region_managed_remove, mgr, (mgr, reg));
-}
-
-
-WRegion *region_managed_control_focus(WRegion *mgr, WRegion *reg)
-{
-    WRegion *ret=NULL;
-    CALL_DYN_RET(ret, WRegion*, region_managed_control_focus, mgr, (mgr, reg));
-    return ret;
 }
 
 
@@ -372,49 +376,39 @@ void region_detach(WRegion *reg)
 /*{{{ Goto */
 
 
-/*EXTL_DOC
- * Attempt to display \var{reg}.
- */
-EXTL_EXPORT_MEMBER
-bool region_display(WRegion *reg)
+static bool region_do_goto(WRegion *reg, int flags)
 {
-    WRegion *mgr, *preg;
-
-    if(region_is_fully_mapped(reg))
-        return TRUE;
-    
-    mgr=REGION_MANAGER(reg);
+    WRegion *mgr=REGION_MANAGER(reg);
     
     if(mgr!=NULL){
-        if(!region_display(mgr))
+        if(!region_do_goto(mgr, flags))
             return FALSE;
-        return region_managed_display(mgr, reg);
+        return region_managed_goto(mgr, reg, flags);
+    }else{
+        WRegion *par=region_parent(reg);
+        if(par!=NULL){
+            if(!region_do_goto(par, flags))
+                return FALSE;
+        }
+
+        region_map(reg);
+        if(flags&REGION_GOTO_FOCUS)
+            region_maybewarp(reg, !(flags&REGION_GOTO_NOWARP));
+        
+        return TRUE;
     }
-    
-    preg=region_parent(reg);
-
-    if(preg!=NULL && !region_display(preg))
-        return FALSE;
-
-    region_map(reg);
-    return TRUE;
 }
 
 
-/*EXTL_DOC
- * Attempt to display \var{reg} and save the current region
- * activity status for use by \fnref{goto_previous}.
- */
-EXTL_EXPORT_MEMBER
-bool region_display_sp(WRegion *reg)
+bool region_goto_flags(WRegion *reg, int flags)
 {
-    bool ret;
-    
+    bool ret=FALSE;
+
     ioncore_set_previous_of(reg);
     ioncore_protect_previous();
-    ret=region_display(reg);
+    region_do_goto(reg, flags);
     ioncore_unprotect_previous();
-
+    
     return ret;
 }
 
@@ -429,15 +423,7 @@ bool region_display_sp(WRegion *reg)
 EXTL_EXPORT_MEMBER
 bool region_goto(WRegion *reg)
 {
-    bool ret=FALSE;
-
-    ioncore_set_previous_of(reg);
-    ioncore_protect_previous();
-    if(region_display(reg))
-        ret=(reg==region_set_focus_mgrctl(reg, TRUE));
-    ioncore_unprotect_previous();
-    
-    return ret;
+    return region_goto_flags(reg, REGION_GOTO_FOCUS);
 }
 
 
@@ -766,6 +752,9 @@ static DynFunTab region_dynfuntab[]={
 
     {(DynFun*)region_manage_rescue,
      (DynFun*)region_manage_rescue_default},
+
+    {(DynFun*)region_managed_goto,
+     (DynFun*)region_managed_goto_default},
     
     {region_stacking, region_stacking_default},
     

@@ -331,23 +331,16 @@ void ioncore_handle_enter_window(XEvent *ev)
     if(freg==NULL)
         return;
     
-    /* Does the manager of the region want to handle focusing?
-     */
-    mgr=freg;
-    while(1){
-        reg=mgr;
+    reg=freg;
+    while(reg!=NULL){
         if(reg->flags&REGION_SKIP_FOCUS)
             return;
-        mgr=REGION_MANAGER(reg);
-        if(mgr==NULL)
-            break;
-        reg=region_managed_control_focus(mgr, reg);
-        if(reg!=NULL)
-            freg=reg;
+        reg=region_parent(reg);
     }
 
-    ioncore_set_previous_of(freg);
-    region_set_focus(freg);
+    region_goto_flags(freg, (REGION_GOTO_FOCUS|
+                             REGION_GOTO_NOWARP|
+                             REGION_GOTO_ENTERWINDOW));
 }
 
 
