@@ -168,6 +168,7 @@ function querylib.popen_completions(wedln, cmd)
             
             if lines>querylib.COLLECT_THRESHOLD then
                 collectgarbage()
+                lines=0
             end
             
             str=coroutine.yield()
