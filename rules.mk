@@ -4,6 +4,12 @@
 
 ######################################
 
+ifdef MODULE
+
+TARGETS := $(TARGETS) $(MODULE).so
+
+endif
+
 ifdef SUBDIRS
 
 all: subdirs $(TARGETS)
@@ -38,8 +44,29 @@ endif
 
 ######################################
 
+ifdef MODULE
+
+$(MODULE).so: $(OBJS) $(EXT_OBJS)
+	$(CC) $(CFLAGS) $(LDFLAGS) $(MODULE_LDFLAGS) $(OBJS) $(EXT_OBJS) -o $@
+
+$(MODULE).a: $(OBJS)
+	$(AR) $(ARFLAGS) $@ $+
+	$(RANLIB) $@
+
+.c.o:
+	$(CC) $(CFLAGS) $(MODULE_CFLAGS) -c $< -o $@
+
+module_install:
+	$(INSTALLDIR) $(MODULEDIR)
+	$(INSTALL) -m $(BIN_MODE) $(MODULE).so $(MODULEDIR)
+	$(STRIP) $(MODULEDIR)/$(MODULE).so
+
+else
+
 .c.o:
 	$(CC) $(CFLAGS) -c $< -o $@
+
+endif
 
 ifdef OBJS
 

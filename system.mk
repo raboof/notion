@@ -22,8 +22,10 @@ INCDIR=$(PREFIX)/include
 ## Modules
 ##
 
-#MODULE_SUPPORT=-DCF_NO_MODULE_SUPPORT
+#MODULE_SUPPORT_CFLAGS=-DCF_NO_MODULE_SUPPORT
 MODULE_SUPPORT_LDFLAGS=-export-dynamic -ldl
+MODULE_LDFLAGS=-shared
+MODULE_CFLAGS=-shared
 
 
 ##
@@ -54,7 +56,7 @@ XINERAMA_LIBS=-lXinerama -lXext
 # specified here.
 
 # GNU/Linux and other glibc-2.2 based systems.
-DEFINES += -DCF_UTF8 -DCF_ICONV_TARGET=\"WCHAR_T\" -DCF_ICONV_SOURCE=\"UTF-8\"
+#DEFINES += -DCF_UTF8 -DCF_ICONV_TARGET=\"WCHAR_T\" -DCF_ICONV_SOURCE=\"UTF-8\"
 
 # Systems that depend on libutf8 and libiconv might want these.
 #DEFINES += -DCF_UTF8 -DCF_LIBUTF8 -DCF_ICONV_TARGET=\"C99\" -DCF_ICONV_SOURCE=\"UTF-8\"
