@@ -228,8 +228,7 @@ static int extl_docpcall(lua_State *st)
 }
 
 							
-static bool extl_cpcallx(lua_State *st, ExtlCPCallFn *fn, void *ptr, 
-						 bool errors)
+static bool extl_cpcall(lua_State *st, ExtlCPCallFn *fn, void *ptr)
 {
 	ExtlCPCallParam param;
 	int oldtop=lua_gettop(st);
@@ -238,24 +237,11 @@ static bool extl_cpcallx(lua_State *st, ExtlCPCallFn *fn, void *ptr,
 	param.udata=ptr;
 	param.retval=FALSE;
 	
-	if(lua_cpcall(st, extl_docpcall, &param)!=0 && errors){
-		if(lua_isstring(st, -1)){
-			/* Should be safe... */
-			warn("%s", lua_tostring(st, -1));
-		}else{
-			warn("Unknown Lua error.");
-		}
-	}
+	lua_cpcall(st, extl_docpcall, &param);
 	
 	lua_settop(st, oldtop);
 	
 	return param.retval;
-}
-
-
-static bool extl_cpcall(lua_State *st, ExtlCPCallFn *fn, void *ptr)
-{
-	return extl_cpcallx(st, fn, ptr, FALSE);
 }
 
 
@@ -1110,12 +1096,10 @@ static bool extl_dodo_call_vararg(lua_State *st, ExtlDoCallParam *param)
 	if(param->rspec!=NULL)
 		m=strlen(param->rspec);
 	
-	/*if(lua_pcall(st, n, m, 0)!=0){
+	if(lua_pcall(st, n, m, 0)!=0){
 		warn("%s", lua_tostring(st, -1));
 		return FALSE;
-	}*/
-	
-	lua_call(st, n, m);
+	}
 
 	if(m>0)
 		return extl_get_retvals(st, m, param);
@@ -1132,7 +1116,7 @@ static bool extl_cpcall_call(lua_State *st, ExtlCPCallFn *fn,
 	
 	param->nret=0;
 	
-	if(extl_cpcallx(st, fn, param, TRUE))
+	if(extl_cpcall(st, fn, param))
 		return TRUE;
 	
 	/* If param.nret>0, there was an error getting some return value and
@@ -1594,8 +1578,7 @@ static bool extl_do_register_function(lua_State *st, ExtlExportedFnSpec *spec)
 
 bool extl_register_function(ExtlExportedFnSpec *spec)
 {
-	return extl_cpcallx(l_st, (ExtlCPCallFn*)extl_do_register_function, spec,
-						TRUE);
+	return extl_cpcall(l_st, (ExtlCPCallFn*)extl_do_register_function, spec);
 }
 
 
@@ -1630,8 +1613,7 @@ static bool extl_do_unregister_function(lua_State *st, ExtlExportedFnSpec *spec)
 
 void extl_unregister_function(ExtlExportedFnSpec *spec)
 {
-	extl_cpcallx(l_st, (ExtlCPCallFn*)extl_do_unregister_function, spec,
-				 TRUE);
+	extl_cpcall(l_st, (ExtlCPCallFn*)extl_do_unregister_function, spec);
 }
 
 
