@@ -65,4 +65,7 @@ bool edln_init(Edln *edln, const char *dflt);
 void edln_deinit(Edln *edln);
 char* edln_finish(Edln *edln);
 
+void edlnhist_push(const char *str);
+const char *edlnhist_get(uint n);
+
 #endif /* ION_QUERY_EDLN_H */

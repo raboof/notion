@@ -536,6 +536,19 @@ void edlnhist_push(const char *str)
 }
 
 
+const char *edlnhist_get(uint n)
+{
+	int i=0;
+	int e=hist_head;
+	
+	if(n>=(uint)hist_count)
+		return NULL;
+	
+	n=(hist_head+n)%EDLN_HISTORY_SIZE;
+	return hist[n];
+}
+
+
 void edlnhist_clear()
 {
 	while(hist_count!=0){

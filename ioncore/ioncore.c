@@ -445,7 +445,7 @@ void ioncore_deinit()
 		destroy_obj((WObj*)scr);
 	}
 
-	/*unload_modules();*/
+	unload_modules();
 	
 	dpy=wglobal.dpy;
 	wglobal.dpy=NULL;

@@ -9,6 +9,7 @@
 #include <ioncore/conf-bindings.h>
 #include <ioncore/readconfig.h>
 #include <ioncore/genframe.h>
+#include <ioncore/saveload.h>
 
 #include "query.h"
 #include "edln.h"
@@ -64,11 +65,74 @@ extern bool query_module_register_exports();
 extern void query_module_unregister_exports();
 
 
+/*EXTL_DOC
+ * Push entries into \type{Wedln} history.
+ */
+EXTL_EXPORT 
+void wedln_history_push(const char *str)
+{
+	edlnhist_push(str);
+}
+	
+
+static void load_history()
+{
+	char *filename=get_cfgfile_for("saves/wedln_history");
+	if(filename!=NULL){
+		read_config(filename);
+		free(filename);
+	}
+}
+
+
+static void save_history()
+{
+	char *fname;
+	const char *histent;
+	FILE *file;
+	int i=0;
+	
+	fname=get_savefile_for("saves/wedln_history");
+	
+	if(fname==NULL){
+		warn("Unable to save wedln history");
+		return;
+	}
+	
+	file=fopen(fname, "w");
+	
+	if(file==NULL){
+		warn_err_obj(fname);
+		return;
+	}
+	
+	fprintf(file, "local saves={\n");
+	
+	while(1){
+		histent=edlnhist_get(i);
+		if(histent==NULL)
+			break;
+		fprintf(file, "    ");
+		write_escaped_string(file, histent);
+		fprintf(file, ",\n");
+		i++;
+	}
+	
+	fprintf(file, "}\n");
+	fprintf(file, "for k=table.getn(saves),1,-1 do "
+			"wedln_history_push(saves[k]) end\n");
+	
+	fclose(file);
+}
+
+
 void query_module_deinit()
 {
 	query_module_unregister_exports();
 	deinit_bindmap(&query_bindmap);
 	deinit_bindmap(&query_wedln_bindmap);
+	
+	save_history();
 }
 
 
@@ -84,6 +148,8 @@ bool query_module_init()
 				 "Refusing to load module. Please fix your configuration.");
 		goto err;
 	}
+
+	load_history();
 	
 	return TRUE;
 	
