@@ -24,6 +24,11 @@
         (SCR)!=NULL;           \
         (SCR)=(SCR)->next_scr)
 
+#define FOR_ALL_SCREENS_W_NEXT(SCR, NXT)                               \
+    for((SCR)=ioncore_g.screens, NXT=((SCR) ? (SCR)->next_scr : NULL); \
+        (SCR)!=NULL;                                                   \
+        (SCR)=(NXT), NXT=((SCR) ? (SCR)->next_scr : NULL))
+
 
 DECLCLASS(WScreen){
     WMPlex mplex;

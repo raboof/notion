@@ -29,8 +29,6 @@ DECLCLASS(WRootWin){
     WWindow wwin;
     int xscr;
     
-    WRegion *screen_list;
-    
     Colormap default_cmap;
     
     Window *tmpwins;
