@@ -31,9 +31,6 @@ static int p_dx1mul=0, p_dx2mul=0, p_dy1mul=0, p_dy2mul=0;
 
 /*{{{ Frame press */
 
-
-#define RESB 32
-
 /* ~55 degrees */
 #define PROD_LIM  0.28404
 
@@ -63,19 +60,36 @@ int genframe_press(WGenFrame *genframe, XButtonEvent *ev, WRegion **reg_ret)
 	p_dy1mul=0;
 	p_dy2mul=0;
 	p_tabnum=-1;
+
+	/* for each unit vector perpendicular to a side of the frame, calculate 
+	 * the cosine of the angle between that vector and the vector pointing 
+	 * from the centre of the frame to the point where the pointer press 
+	 * occured. If the cosine is less than PROD_LIM (currently cos(55 deg)), 
+	 * we allow resizing along that border.
+	 */
+	
+	{
+		int tmpx, tmpy;
+
+		tmpx=REGION_GEOM(genframe).w/2-ev->x;
+		tmpy=REGION_GEOM(genframe).h/2-ev->y;
+		
+		if(normiprod(tmpx, tmpy, 1, 0)>PROD_LIM)
+			p_dx1mul=1;
+		else if(normiprod(tmpx, tmpy, -1, 0)>PROD_LIM)
+			p_dx2mul=1;
+
+		if(normiprod(tmpx, tmpy, 0, 1)>PROD_LIM)
+			p_dy1mul=1;
+		else if(normiprod(tmpx, tmpy, 0, -1)>PROD_LIM)
+			p_dy2mul=1;
+	}
 	
 	/* Check tab */
 	
 	genframe_bar_geom(genframe, &g);
 		
 	if(coords_in_rect(g, ev->x, ev->y)){
-		p_dy1mul=1;
-
-		if(ev->x<g.x+RESB)
-			p_dx1mul=1;
-		else if(ev->x>g.x+g.w-RESB)
-			p_dx2mul=1;
-		
 		p_tabnum=genframe_tab_at_x(genframe, ev->x);
 
 		region_rootpos((WRegion*)genframe, &p_tab_x, &p_tab_y);
@@ -95,48 +109,13 @@ int genframe_press(WGenFrame *genframe, XButtonEvent *ev, WRegion **reg_ret)
 		return WGENFRAME_AREA_TAB;
 	}
 	
-	/* Check borders */
 
+	/* Check border */
+	
 	genframe_border_inner_geom(genframe, &g);
 	
-	if(ev->x<g.x+RESB)
-		p_dx1mul=1;
-	else if(ev->x>g.x+g.w-RESB)
-		p_dx2mul=1;
-	if(ev->y<g.y+RESB)
-		p_dy1mul=1;
-	else if(ev->y>g.y+g.h-RESB)
-		p_dy2mul=1;
-	
-	
-	if(p_dx1mul+p_dx2mul+p_dy1mul+p_dy2mul!=0)
+	if(coords_in_rect(g, ev->x, ev->y))
 		return WGENFRAME_AREA_BORDER;
-	
-	/* Neither of those. For resize, for each unit vector perpendicular to
-	 * a side of the frame, calculate the cosine of the angle between that 
-	 * vector and the vector pointing from the centre of the frame to the 
-	 * point where the pointer press occured. If the cosine is less than
-	 * PROD_LIM (currently cos(55 degrees)), we allow resizing along that
-	 * border.
-	 */
-	
-	{
-		float p;
-		int tmpx, tmpy;
-
-		tmpx=REGION_GEOM(genframe).w/2-ev->x;
-		tmpy=REGION_GEOM(genframe).h/2-ev->y;
-		
-		if(normiprod(tmpx, tmpy, 1, 0)>PROD_LIM)
-			p_dx1mul=1;
-		else if(normiprod(tmpx, tmpy, -1, 0)>PROD_LIM)
-			p_dx2mul=1;
-
-		if(normiprod(tmpx, tmpy, 0, 1)>PROD_LIM)
-			p_dy1mul=1;
-		else if(normiprod(tmpx, tmpy, 0, -1)>PROD_LIM)
-			p_dy2mul=1;
-	}
 
 	return 0;
 }
