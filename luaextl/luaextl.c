@@ -908,47 +908,40 @@ static bool extl_do_call_vararg(lua_State *st, int oldtop, bool intab,
 		n=strlen(spec);
 
 	/* +2 for stack tracer and extl_push_obj */
-	if(!lua_checkstack(l_st, n+2)){
-		lua_settop(l_st, oldtop);
+	if(!lua_checkstack(st, n+2)){
+		lua_settop(st, oldtop);
 		warn("Stack full");
 		return FALSE;
 	}
-#if 0
-	lua_pushcfunction(st, extl_stack_trace);
-	lua_insert(st, -2);
-#endif
 	
-	/* For dostring and dofile arguments are passed in the global table 'arg'.
+	/* For dostring and dofile arguments are passed in the local table 'arg'.
 	 */
-	if(intab)
-		lua_newtable(l_st);
+	if(intab){
+		lua_newtable(st); /* Create "arg" */
+		lua_getfenv(st, -2); /* Get environment */
+		lua_pushstring(st, "arg");
+		lua_pushvalue(st, -3); /* Get the table created above */
+		lua_settable(st, -3); /* Set arg in the environment */
+		lua_pop(st, 1); /* Pop the environment */
+	}
 
 	if(n>0)
 		ret=extl_push_args(st, intab, spec, args, &args);
 
 	if(ret){
 		if(intab){
-			lua_setglobal(l_st, "arg");
+			lua_pop(st, 1); /* Pop "arg"; it now only resides in the env. */
 			n=0;
 		}
 		
 		if(rspec!=NULL)
 			m=strlen(rspec);
-#if 0
-		if(lua_pcall(st, n, m, -n-2)!=0){
-#else
 		if(lua_pcall(st, n, m, 0)!=0){
-#endif
 			warn("%s", lua_tostring(st, -1));
 			ret=FALSE;
 		}else{
 			if(m>0)
 				ret=extl_get_retvals(st, rspec, m, args);
-		}
-		
-		if(intab){
-			lua_pushnil(l_st);
-			lua_setglobal(l_st, "arg");
 		}
 	}
 	
