@@ -68,6 +68,35 @@ static bool dispatch_binding(WRegion *reg, WBinding *binding, XKeyEvent *ev)
 	return TRUE;
 }
 
+
+static void send_key(XEvent *ev, WClientWin *cwin)
+{
+	Window win=cwin->win;
+	ev->xkey.window=win;
+	ev->xkey.subwindow=None;
+	XSendEvent(wglobal.dpy, win, False, KeyPressMask, ev);
+}
+
+
+static bool quote_next_handler(WRegion *reg, XEvent *xev)
+{
+	XKeyEvent *ev=&xev->xkey;
+ 	if(ev->type==KeyRelease)
+		return FALSE;
+	if(ismod(ev->keycode))
+		return FALSE;
+	assert(WTHING_IS(reg, WClientWin));
+	send_key(xev, (WClientWin*)reg);
+	return TRUE; /* remove the grab */
+}
+
+
+void quote_next(WClientWin *cwin)
+{
+    grab_establish((WRegion*)cwin, quote_next_handler, FocusChangeMask);
+}
+
+
 static bool waitrelease_handler(WRegion *thing, XEvent *ev)
 {
 	if(!unmod(ev->xkey.state, ev->xkey.keycode))

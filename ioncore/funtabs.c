@@ -15,7 +15,7 @@
 #include "funtabs.h"
 #include "viewport.h"
 #include "tags.h"
-
+#include "key.h"
 
 WBindmap wmcore_screen_bindmap=BINDMAP_INIT;
 WBindmap wmcore_viewport_bindmap=BINDMAP_INIT;
@@ -57,6 +57,7 @@ static WFunction wmcore_clientwin_funtab[]={
 	FN_VOID(generic, WClientWin,	"kill",			kill_clientwin),
 	FN(b,	generic, WClientWin,	"enter_fullscreen",	clientwin_enter_fullscreen),
 	FN_VOID(generic, WClientWin,	"broken_app_resize_kludge", clientwin_broken_app_resize_kludge),
+    FN_VOID(generic, WClientWin,    "quote_next",   quote_next),
 	END_FUNTAB
 };
 
