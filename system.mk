@@ -25,10 +25,13 @@ INCDIR=$(PREFIX)/include
 MODULE_LIST=ionws floatws query
 
 # For dynamically loaded modules
-MODULE_SUPPORT_CFLAGS=
 MODULE_SUPPORT_LDFLAGS=-export-dynamic -ldl
 MODULE_LDFLAGS=-shared
 MODULE_CFLAGS=-shared
+
+# Some strangely behaving OSes (NetBSD, OpenBSD, ...) might need this.
+#MODULE_SUPPORT_CFLAGS=-DCF_UNDERSCORED_MODULE_SYMBOLS
+MODULE_SUPPORT_CFLAGS=
 
 # Statically loaded modules
 #STATIC_MODULES=1

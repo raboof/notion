@@ -28,12 +28,26 @@ DECLSTRUCT(Module){
 static Module *modules=NULL;
 
 
+/*{{{ Symbols */
+
+static char *module_symbol_cat(const char *s1, const char *s2)
+{
+#ifdef CF_UNDERSCORED_MODULE_SYMBOLS
+	return scat3("_", s1, s2);
+#else
+	return scat(s1, s2);
+#endif
+}
+
+/*}}}*/
+
+
 /*{{{ Loading and initialization code */
 
 
 static bool check_version(void *handle, char *name)
 {
-	char *p=scat(name, "_module_ion_version");
+	char *p=module_symbol_cat(name, "_module_ion_version");
 	char *versionstr;
 
 	if(p==NULL){
@@ -54,7 +68,7 @@ static bool check_version(void *handle, char *name)
 
 static bool call_init(void *handle, char *name)
 {
-	char *p=scat(name, "_module_init");
+	char *p=module_symbol_cat(name, "_module_init");
 	bool (*initfn)(void);
 
 	if(p==NULL){
@@ -190,7 +204,7 @@ bool load_module(const char *name)
 
 static void call_deinit(void *handle, char *name)
 {
-	char *p=scat(name, "_module_deinit");
+	char *p=module_symbol_cat(name, "_module_deinit");
 	void (*deinitfn)(void);
 
 	if(p==NULL){
