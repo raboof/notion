@@ -2,7 +2,8 @@
 ## List of modules to build
 ##
 
-MODULE_LIST = ionws floatws query de menu dock mod_sp
+MODULE_LIST = mod_ionws mod_floatws mod_query mod_menu \
+	      mod_dock mod_sp de
 
 # Modules to -dlpreload into pwm if statically linking.
 
