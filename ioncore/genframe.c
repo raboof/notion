@@ -22,6 +22,7 @@
 #include "genframep.h"
 #include "genframe-pointer.h"
 #include "sizehint.h"
+#include "stacking.h"
 
 
 #define genframe_draw(F, C) draw_window((WWindow*)F, C)
@@ -205,9 +206,9 @@ static void reparent_or_fit(WGenFrame *genframe, WRectangle geom,
 	
 	REGION_GEOM(genframe)=geom;
 
-	if(move && !wchg && !hchg)
+	if(move && !wchg && !hchg){
 		region_notify_subregions_move(&(genframe->win.region));
-	else if(wchg || hchg)
+	}else if(wchg || hchg)
 		genframe_fit_managed(genframe);
 
 	if(wchg)
@@ -344,16 +345,6 @@ bool genframe_display_managed(WGenFrame *genframe, WRegion *sub)
 	if(genframe->current_input==NULL){
 		if(REGION_IS_ACTIVE(genframe))
 			set_focus(sub);
-	}else{
-		region_restack(genframe->current_input, None, Above);
-#if 0
-		if(REGION_IS_ACTIVE(genframe)){
-			/* For some reason se switch-to subregion seems to be
-			 * getting the focus.
-			 */
-			set_focus(genframe->current_input);
-		}
-#endif
 	}
 	
 	/* Many programs will get upset if the visible, although only such,
@@ -361,7 +352,7 @@ bool genframe_display_managed(WGenFrame *genframe, WRegion *sub)
 	 * will return the information for the lowest window. 'netscape -remote'
 	 * will not work at all if there are no visible netscape windows.
 	 */
-	region_restack(sub, None, Below);
+	region_lower(sub);
 	
 	if(!set_genframe_background(genframe, FALSE))
 		genframe_draw_bar(genframe, FALSE);
@@ -575,6 +566,7 @@ WRegion *genframe_add_input(WGenFrame *genframe, WRegionAddFn *fn, void *fnp)
 	
 	genframe->current_input=sub;
 	region_set_manager(sub, (WRegion*)genframe, NULL);
+	region_keep_on_top(sub);
 	
 	return sub;
 }

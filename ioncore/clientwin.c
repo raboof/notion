@@ -25,6 +25,7 @@
 #include "mwmhints.h"
 #include "viewport.h"
 #include "names.h"
+#include "stacking.h"
 
 
 #define TOPMOST_TRANSIENT(CWIN) LAST_MANAGED((CWIN)->transient_list)
@@ -426,11 +427,7 @@ static WRegion *clientwin_do_add_managed(WClientWin *cwin, WRegionAddFn *fn,
 	t=TOPMOST_TRANSIENT(cwin);
 
 	region_set_manager(reg, (WRegion*)cwin, &(cwin->transient_list));
-	
-	if(t!=NULL)
-		region_restack(reg, region_x_window(t), Above);
-	else
-		region_restack(reg, cwin->win, Above);
+	region_stack_above(reg, (WRegion*)cwin);
 
 	if(REGION_IS_MAPPED((WRegion*)cwin))
 		region_map(reg);

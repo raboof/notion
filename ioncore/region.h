@@ -48,6 +48,12 @@ DECLOBJ(WRegion){
 	WRegion *manager;
 	WRegion *mgr_next, *mgr_prev;
 	void *mgr_data;
+	
+	struct{
+		WRegion *below_list;
+		WRegion *above;
+		WRegion *next, *prev;
+	} stacking;
 };
 
 
@@ -56,7 +62,8 @@ DECLOBJ(WRegion){
 #define REGION_HAS_GRABS 	0x0004
 #define REGION_TAGGED		0x0008
 #define REGION_BINDINGS_ARE_GRABBED 0x0020
-#define REGION_SUBDEST 0x0040
+#define REGION_SUBDEST 		0x0040
+#define REGION_KEEPONTOP 	0x0080
 
 #define MARK_REGION_MAPPED(R)	(((WRegion*)(R))->flags|=REGION_MAPPED)
 #define MARK_REGION_UNMAPPED(R)	(((WRegion*)(R))->flags&=~REGION_MAPPED)
@@ -99,7 +106,6 @@ DYNFUN void region_unmap(WRegion *reg);
 DYNFUN void region_set_focus_to(WRegion *reg, bool warp);
 DYNFUN void region_notify_rootpos(WRegion *reg, int x, int y);
 /* mode==Above, return topmost; mode==Below, return bottomost */
-DYNFUN Window region_restack(WRegion *reg, Window other, int mode);
 DYNFUN Window region_x_window(const WRegion *reg);
 DYNFUN void region_activated(WRegion *reg);
 DYNFUN void region_inactivated(WRegion *reg);

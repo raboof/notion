@@ -15,6 +15,7 @@
 #include "regbind.h"
 #include "tags.h"
 #include "names.h"
+#include "stacking.h"
 
 
 #define FOR_ALL_SUBREGIONS(REG, SUB) \
@@ -62,6 +63,11 @@ void region_init(WRegion *reg, WRegion *parent, WRectangle geom)
 	reg->mgr_next=NULL;
 	reg->mgr_prev=NULL;
 	reg->mgr_data=NULL;
+	
+	reg->stacking.below_list=NULL;
+	reg->stacking.next=NULL;
+	reg->stacking.prev=NULL;
+	reg->stacking.above=NULL;
 }
 
 
@@ -136,14 +142,6 @@ void region_unmap(WRegion *reg)
 void region_notify_rootpos(WRegion *reg, int x, int y)
 {
 	CALL_DYN(region_notify_rootpos, reg, (reg, x, y));
-}
-
-
-Window region_restack(WRegion *reg, Window other, int mode)
-{
-	Window ret=None;
-	CALL_DYN_RET(ret, Window, region_restack, reg, (reg, other, mode));
-	return ret;
 }
 
 
@@ -377,6 +375,8 @@ void region_detach_parent(WRegion *reg)
 {
 	WRegion *p=reg->parent;
 
+	region_reset_stacking(reg);
+
 	if(p==NULL)
 		return;
 	
@@ -564,7 +564,7 @@ bool region_is_fully_mapped(WRegion *reg)
 void region_rootgeom(WRegion *reg, int *xret, int *yret)
 {
 	*xret=REGION_GEOM(reg).x;
-	*yret=REGION_GEOM(reg).x;
+	*yret=REGION_GEOM(reg).y;
 	
 	while(1){
 		reg=FIND_PARENT1(reg, WRegion);

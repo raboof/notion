@@ -25,8 +25,6 @@ INTROBJ(WScreen);
 		SCR!=NULL;                               \
 		SCR=NEXT_CHILD(SCR, WScreen))
 
-#define SCREEN_MAX_STACK 3
-
 
 DECLOBJ(WScreen){
 	WWindow root;
@@ -38,10 +36,6 @@ DECLOBJ(WScreen){
 	Colormap default_cmap;
 	
 	int w_unit, h_unit;
-	
-	union{
-		WWindow *stack_lists[SCREEN_MAX_STACK];
-	} u;
 	
 	Window *tmpwins;
 	int tmpnwins;

@@ -242,9 +242,6 @@ static WScreen *preinit_screen(int xscr)
 	
 	MARK_REGION_MAPPED(scr);
 	
-	for(i=0; i<SCREEN_MAX_STACK; i++)
-		scr->u.stack_lists[i]=NULL;
-	
 	scan_initial_windows(scr);
 
 	region_add_bindmap((WRegion*)scr, &ioncore_screen_bindmap);

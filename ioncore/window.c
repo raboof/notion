@@ -11,7 +11,7 @@
 #include "window.h"
 #include "focus.h"
 #include "screen.h"
-
+#include "stacking.h"
 
 
 /*{{{ Dynfuns */
@@ -70,7 +70,7 @@ bool window_init(WWindow *wwin, WWindow *parent, Window win, WRectangle geom)
 	wwin->draw=NULL;
 #endif
 	wwin->xic=NULL;
-	/*wwin->bindmap=NULL;*/
+	wwin->keep_on_top_list=NULL;
 	
 	XSaveContext(wglobal.dpy, win, wglobal.win_context, (XPointer)wwin);
 	

@@ -24,6 +24,7 @@ DECLOBJ(WWindow){
 	Window win;
 	WExtraDrawInfo *draw;
 	XIC xic;
+	WRegion *keep_on_top_list;
 };
 
 
