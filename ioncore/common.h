@@ -34,4 +34,10 @@
 #define EXTL_EXPORT_AS(T, F)
 #define EXTL_EXPORT_MEMBER
 
+#if __STDC_VERSION__ >= 199901L
+#define WARN_FUNC(...) warn_obj(__func__, __VA_ARGS__)
+#else
+#define WARN_FUNC warn
+#endif
+
 #endif /* ION_IONCORE_COMMON_H */

@@ -244,7 +244,7 @@ static WSplit *get_node_check(WIonWS *ws, WRegion *reg)
 void ionws_managed_remove(WIonWS *ws, WRegion *reg)
 {
     bool ds=OBJ_IS_BEING_DESTROYED(ws);
-    WSplit *other, *node=get_node_check(ws, reg);
+    WSplit *other=NULL, *node=get_node_check(ws, reg);
     
     /* This function should only be called by a code that gets us 
      * through reg 
@@ -254,7 +254,8 @@ void ionws_managed_remove(WIonWS *ws, WRegion *reg)
     region_unset_manager(reg, (WRegion*)ws, &(ws->managed_list));
     region_remove_bindmap_owned(reg, mod_ionws_ionws_bindmap, (WRegion*)ws);
 
-    other=split_tree_remove(&(ws->split_tree), node, !ds);
+    if(ws->split_tree!=NULL)
+        other=split_tree_remove(&(ws->split_tree), node, !ds);
     
     if(!ds){
         if(other){
@@ -297,7 +298,7 @@ void ionws_managed_rqgeom(WIonWS *ws, WRegion *mgd,
                           WRectangle *geomret)
 {
     WSplit *node=get_node_check(ws, mgd);
-    if(node!=NULL)
+    if(node!=NULL && ws->split_tree!=NULL)
         split_tree_rqgeom(ws->split_tree, node, flags, geom, geomret);
 }
 
@@ -314,6 +315,9 @@ ExtlTab ionws_resize_tree(WIonWS *ws, Obj *node, ExtlTab g)
     WRectangle geom, ogeom;
     int flags=REGION_RQGEOM_WEAK_ALL;
     WSplit *snode;
+    
+    if(ws->split_tree==NULL)
+        goto err;
     
     if(node!=NULL && OBJ_IS(node, WRegion)){
         geom=REGION_GEOM((WRegion*)node);
@@ -436,14 +440,13 @@ WIonFrame *ionws_split_at(WIonWS *ws, WIonFrame *frame, const char *dirstr,
     
     node=get_node_check(ws, (WRegion*)frame);
     
-    if(node==NULL){
-        warn_obj("ionws_split_at", "Invalid frame or frame not managed by "
-                 "the workspace.");
+    if(node==NULL || ws->split_tree==NULL){
+        WARN_FUNC("Invalid frame or frame not managed by the workspace.");
         return NULL;
     }
     
     if(!get_split_dir_primn(dirstr, &dir, &primn)){
-        warn_obj("ionws_split_at", "Unknown direction parameter to split_at");
+        WARN_FUNC("Unknown direction parameter to split_at");
         return NULL;
     }
     
@@ -456,7 +459,7 @@ WIonFrame *ionws_split_at(WIonWS *ws, WIonFrame *frame, const char *dirstr,
                            REGION_PARENT_CHK(ws, WWindow));
     
     if(nnode==NULL){
-        warn_obj("ionws_split_at", "Unable to split");
+        WARN_FUNC("Unable to split");
         return NULL;
     }
 
@@ -486,21 +489,21 @@ EXTL_EXPORT_MEMBER
 void ionws_unsplit_at(WIonWS *ws, WIonFrame *frame)
 {
     if(frame==NULL){
-        warn_obj("ionws_unsplit_at", "nil frame");
+        WARN_FUNC("nil frame");
         return;
     }
     if(REGION_MANAGER(frame)!=(WRegion*)ws){
-        warn_obj("ionws_unsplit_at", "The frame is not managed by the workspace.");
+        WARN_FUNC("The frame is not managed by the workspace.");
         return;
     }
     
     if(!region_may_destroy((WRegion*)frame)){
-        warn_obj("ionws_unsplit_at", "Frame may not be destroyed");
+        WARN_FUNC("Frame may not be destroyed");
         return;
     }
 
     if(!region_rescue_clientwins((WRegion*)frame)){
-        warn_obj("ionws_unsplit_at", "Failed to rescue managed objects.");
+        WARN_FUNC("Failed to rescue managed objects.");
         return;
     }
 
@@ -520,7 +523,9 @@ void ionws_unsplit_at(WIonWS *ws, WIonFrame *frame)
 EXTL_EXPORT_MEMBER
 WRegion *ionws_current(WIonWS *ws)
 {
-    WSplit *node=split_current_tl(ws->split_tree, -1);
+    WSplit *node=NULL;
+    if(ws->split_tree!=NULL)
+        split_current_tl(ws->split_tree, -1);
     return (node ? node->u.reg : NULL);
 }
 
@@ -578,12 +583,14 @@ WRegion *ionws_next_to(WIonWS *ws, WRegion *reg, const char *dirstr)
 
 static WRegion *do_get_farthest(WIonWS *ws, int dir, int primn)
 {
-    WSplit *node;
+    WSplit *node=NULL;
     
-    if(primn==PRIMN_TL)
-        node=split_current_tl(ws->split_tree, dir);
-    else
-        node=split_current_br(ws->split_tree, dir);
+    if(ws->split_tree!=NULL){
+        if(primn==PRIMN_TL)
+            node=split_current_tl(ws->split_tree, dir);
+        else
+            node=split_current_br(ws->split_tree, dir);
+    }
     
     return (node ? node->u.reg : NULL);
 }
@@ -675,6 +682,8 @@ WRegion *ionws_goto_dir_nowrap(WIonWS *ws, const char *dirstr)
 EXTL_EXPORT_MEMBER
 WRegion *ionws_region_at(WIonWS *ws, int x, int y)
 {
+    if(ws->split_tree==NULL)
+        return NULL;
     return split_region_at(ws->split_tree, x, y);
 }
 
@@ -687,12 +696,12 @@ EXTL_EXPORT_MEMBER
 WSplit *ionws_split_of(WIonWS *ws, WRegion *reg)
 {
     if(reg==NULL){
-        warn_obj("ionws_split_of", "nil parameter");
+        WARN_FUNC("nil parameter");
         return NULL;
     }
     
     if(REGION_MANAGER(reg)!=(WRegion*)ws){
-        warn_obj("ionws_split_of", "Manager doesn't match");
+        WARN_FUNC("Manager doesn't match");
         return NULL;
     }
     
@@ -771,7 +780,11 @@ static ExtlTab ionws_get_configuration(WIonWS *ws)
     ExtlTab tab, split_tree;
     
     tab=region_get_base_configuration((WRegion*)ws);
-    split_tree=get_node_config(ws->split_tree);
+    if(ws->split_tree==NULL){
+        split_tree=extl_table_none();
+    }else{
+        split_tree=get_node_config(ws->split_tree);
+    }
     
     if(split_tree==extl_table_none()){
         warn("Could not get split tree for a WIonWS.");

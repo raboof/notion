@@ -341,7 +341,7 @@ bool de_init()
         return FALSE;
     
     if(!gr_register_engine("de", (GrGetBrushFn*)&de_get_brush)){
-        warn("DE module", "Failed to register the drawing engine");
+        WARN_FUNC("Failed to register the drawing engine");
         goto fail;
     }
     
@@ -349,8 +349,8 @@ bool de_init()
     FOR_ALL_ROOTWINS(rootwin){
         style=de_create_style(rootwin, "*");
         if(style==NULL){
-            warn_obj("DE module", "Could not initialise fallback style for "
-                     "root window %d.\n", rootwin->xscr);
+            WARN_FUNC("Could not initialise fallback style for "
+                      "root window %d.\n", rootwin->xscr);
         }else{
             style->is_fallback=TRUE;
             de_load_font_for_style(style, CF_FALLBACK_FONT_NAME);

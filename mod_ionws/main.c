@@ -104,22 +104,22 @@ bool mod_ionws_init()
 
     if(mod_ionws_ionws_bindmap==NULL ||
        mod_ionws_ionframe_bindmap==NULL){
-        warn_obj("mod_ionws", "failed to allocate bindmaps.");
+        WARN_FUNC("failed to allocate bindmaps.");
         goto err;
     }
 
     if(!mod_ionws_register_exports()){
-        warn_obj("mod_ionws", "failed to register functions.");
+        WARN_FUNC("failed to register functions.");
         goto err;
     }
 
     if(!mod_ionws_register_exports()){
-        warn_obj("mod_ionws", "Unable to register exports");
+        WARN_FUNC("Unable to register exports");
         goto err;
     }
     
     if(!register_regions()){
-        warn_obj("mod_ionws", "Unable to register classes");
+        WARN_FUNC("Unable to register classes");
         goto err;
     }
     

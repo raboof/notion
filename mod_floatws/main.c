@@ -90,12 +90,12 @@ bool mod_floatws_init()
 
     if(mod_floatws_floatws_bindmap==NULL ||
        mod_floatws_floatframe_bindmap==NULL){
-        warn_obj("mod_floatws", "failed to allocate bindmaps.");
+        WARN_FUNC("Failed to allocate bindmaps.");
         goto err;
     }
 
     if(!mod_floatws_register_exports()){
-        warn_obj("mod_floatws", "failed to register functions.");
+        WARN_FUNC("Failed to register functions.");
         goto err;
     }
     
@@ -104,7 +104,7 @@ bool mod_floatws_init()
                                   (WRegionLoadCreateFn*) floatws_load) ||
        !ioncore_register_regclass(&CLASSDESCR(WFloatFrame), NULL,
                                   (WRegionLoadCreateFn*) floatframe_load)){
-        warn_obj("mod_floatws", "failed to register classes.");
+        WARN_FUNC("Failed to register classes.");
         goto err;
     }
 
