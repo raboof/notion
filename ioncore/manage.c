@@ -86,6 +86,9 @@ static WScreen *find_suitable_screen(WClientWin *cwin,
 			if(respectpos)
 				break;
 		}
+		
+		if(found==NULL)
+			found=scr;
 	}
 	
 	return found;
