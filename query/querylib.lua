@@ -133,7 +133,7 @@ querylib.COLLECT_THRESHOLD=2000
 
 function querylib.popen_completions(wedln, cmd)
     
-    local pst={wedln=wedln, maybe_stalled=false}
+    local pst={wedln=wedln, maybe_stalled=0}
     
     local function rcv(str)
         local data=""
@@ -142,10 +142,11 @@ function querylib.popen_completions(wedln, cmd)
         local lines=0
         
         while str do
-            if pst.maybe_stalled then
+            if pst.maybe_stalled>=2 then
                 pipes[rcv]=nil
                 return
             end
+            pst.maybe_stalled=0
             
             totallen=totallen+string.len(str)
             if totallen>ioncorelib.RESULT_DATA_LIMIT then
@@ -176,23 +177,25 @@ function querylib.popen_completions(wedln, cmd)
         
         wedln:set_completions(results)
         
-        collectgarbage()
-        
         pipes[rcv]=nil
+        results={}
+        
+        collectgarbage()
     end
     
     local found_clean=false
+    
     for k, v in pipes do
         if v.wedln==wedln then
-            if v.maybe_stalled then
-                v.maybe_stalled=true
+            if v.maybe_stalled<2 then
+                v.maybe_stalled=v.maybe_stalled+1
                 found_clean=true
             end
         end
     end
     
     if not found_clean then
-        pst[rcv]=pst
+        pipes[rcv]=pst
         popen_bgread(cmd, coroutine.wrap(rcv))
     end
 end
