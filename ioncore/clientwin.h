@@ -69,6 +69,8 @@ DECLOBJ(WClientWin){
 	
 	WClientWinFSInfo fsinfo;
 	
+	int last_h_rq;
+	
 	ExtlTab proptab;
 };
 

@@ -43,9 +43,6 @@ static bool send_clientmsg(Window win, Atom a, Time stmp);
 WHooklist *add_clientwin_alt=NULL;
 
 
-#define TRANSIENT_LAST_H_RQ(TR) ((WRegion*)(TR))->mgr_data.i
-
-
 /*{{{ Get properties */
 
 
@@ -140,6 +137,12 @@ void clientwin_get_size_hints(WClientWin *cwin)
 		cwin->size_hints.max_width=tmp.max_width;
 		cwin->size_hints.max_height=tmp.max_height;
 		cwin->size_hints.flags|=PMaxSize;
+	}
+
+	if(cwin->flags&CWIN_PROP_MINSIZE){
+		cwin->size_hints.min_width=tmp.min_width;
+		cwin->size_hints.min_height=tmp.min_height;
+		cwin->size_hints.flags|=PMinSize;
 	}
 	
 	if(cwin->flags&CWIN_PROP_ASPECT){
@@ -272,6 +275,7 @@ static bool clientwin_init(WClientWin *cwin, WRegion *parent,
 	region_init(&(cwin->region), parent, geom);
 
 	cwin->max_geom=geom;
+	cwin->last_h_rq=geom.h;
 
 	cwin->transient_for=None;
 	cwin->transient_list=NULL;
@@ -538,8 +542,6 @@ static WRegion *clientwin_do_add_managed(WClientWin *cwin,
 	
 	if(reg==NULL)
 		return NULL;
-
-	TRANSIENT_LAST_H_RQ(reg)=geom.h;
 	
 	region_set_manager(reg, (WRegion*)cwin, &(cwin->transient_list));
 	region_stack_above(reg, (WRegion*)cwin);
@@ -811,18 +813,25 @@ static void convert_geom(WClientWin *cwin, WRectangle max_geom,
 	WRectangle r;
 	bool bottom=FALSE;
 	
-	/* It's quite ugly to do this alignment here, but a nice generic
-	 * solution would as usual add so much bloat...
-	 */
+	/* Align transients managed by another client window at bottom. */
+	/*if(cwin->transient_for!=None){*/
 	if(REGION_MANAGER(cwin)!=NULL &&
 	   WOBJ_IS(REGION_MANAGER(cwin), WClientWin)){
 		bottom=TRUE;
+		if(max_geom.h>cwin->last_h_rq){
+			max_geom.y+=max_geom.h-cwin->last_h_rq;
+			max_geom.h=cwin->last_h_rq;
+		}
 	}
 	
 	geom->w=max_geom.w;
 	geom->h=max_geom.h;
 	
-	correct_size(&(geom->w), &(geom->h), &(cwin->size_hints), FALSE);
+	/* Don't ignore minimum size at first try. */
+	if(bottom)
+		correct_size(&(geom->w), &(geom->h), &(cwin->size_hints), TRUE);
+	if(!bottom || geom->w>max_geom.w || geom->h>max_geom.h)
+		correct_size(&(geom->w), &(geom->h), &(cwin->size_hints), FALSE);
 
 	geom->x=max_geom.x+max_geom.w/2-geom->w/2;
 	
@@ -849,14 +858,6 @@ static void clientwin_request_managed_geom(WClientWin *cwin, WRegion *sub,
 										   WRectangle *geomret)
 {
 	WRectangle rgeom=cwin->max_geom;
-	
-	TRANSIENT_LAST_H_RQ(sub)=geom.h;
-	
-
-	if(rgeom.h>geom.h){
-		rgeom.h=geom.h;
-		rgeom.y+=cwin->max_geom.h-geom.h;
-	}
 
 	if(geomret!=NULL)
 		*geomret=rgeom;
@@ -870,7 +871,7 @@ static void clientwin_request_managed_geom(WClientWin *cwin, WRegion *sub,
 static void do_fit_clientwin(WClientWin *cwin, WRectangle max_geom, WWindow *np)
 {
 	WRegion *transient, *next;
-	WRectangle geom, geom2;
+	WRectangle geom;
 	int diff;
 	bool changes;
 	
@@ -900,22 +901,11 @@ static void do_fit_clientwin(WClientWin *cwin, WRectangle max_geom, WWindow *np)
 	
 	cwin->flags&=~CWIN_NEED_CFGNTFY;
 	
-	geom2.x=max_geom.x;
-	geom2.w=max_geom.w;
-	
 	FOR_ALL_MANAGED_ON_LIST_W_NEXT(cwin->transient_list, transient, next){
-		geom2.y=max_geom.y;
-		geom2.h=max_geom.h;
-		diff=geom.h-TRANSIENT_LAST_H_RQ(transient);
-		if(diff>0){
-			geom2.y+=diff;
-			geom2.h-=diff;
-		}
-		
 		if(np==NULL){
-			region_fit(transient, geom2);
+			region_fit(transient, max_geom);
 		}else{
-			if(!reparent_region(transient, np, geom2)){
+			if(!reparent_region(transient, np, max_geom)){
 				warn("Problem: can't reparent a %s managed by a WClientWin"
 					 "being reparented. Detaching from this object.",
 					 WOBJ_TYPESTR(transient));
@@ -1160,6 +1150,7 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 		if(geom.h<1)
 			geom.h=1;
 		rqflags&=~REGION_RQGEOM_WEAK_H;
+		cwin->last_h_rq=ev->height;
 	}
 	
 	if(cwin->orig_bw!=0){
