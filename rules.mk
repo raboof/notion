@@ -5,7 +5,11 @@
 ######################################
 
 ifdef MODULE
-TARGETS := $(TARGETS) module_link
+ifneq ($(STATIC_MODULES),1)
+TARGETS := $(TARGETS) $(MODULE).so
+else
+TARGETS := $(TARGETS) $(MODULE).a
+endif
 endif
 
 ifdef SUBDIRS
@@ -46,8 +50,6 @@ ifdef MODULE
 
 ifneq ($(STATIC_MODULES),1)
 
-module_link: $(MODULE).so
-
 $(MODULE).so: $(OBJS) $(EXT_OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(MODULE_LDFLAGS) $(OBJS) $(EXT_OBJS) -o $@
 
@@ -57,8 +59,6 @@ module_install:
 	# $(STRIP) $(MODULEDIR)/$(MODULE).so
 
 else
-
-module_link: $(MODULE).a
 
 $(MODULE).a: $(OBJS)
 	$(AR) $(ARFLAGS) $@ $+
