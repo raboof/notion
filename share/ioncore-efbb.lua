@@ -23,10 +23,10 @@ if string.find(arg[1], "g") then
 end
 
 if string.find(arg[1], "m") then
-    table.insert(mappings, "Mod1+C -> WRegion.close")
+    table.insert(mappings, "Mod1+C -> WRegion.close_sub_or_self")
     table.insert(groups, "mplex_bindings")
     mplex_bindings{
-        kpress_waitrel("Mod1+C", make_current_or_self_fn(WRegion.close)),
+        kpress_waitrel("Mod1+C", WRegion.close_sub_or_self),
     }
 end
 

@@ -100,28 +100,5 @@ function make_pmenu_fn(menuname)
            end
 end
 
-
---DOC
--- This function can be used to wrap the function \var{fn} so that
--- in frame context menus \var{fn} is correctly called either with
--- the frame, current managed object (e.g. client window) or in case
--- of drop-down menus the object corresponding to the tab that was 
--- clicked on. For example
--- \begin{verbatim}
---    menuentry("Close", make_menu_ctx_fn(WRegion.close)),
--- \end{verbatim}
--- will either close the frame or some client window correctly.
-function make_menu_ctx_fn(fn)
-    return function(frame, cwin)
-               if not cwin or frame==cwin then
-                   cwin=frame:current()
-               end
-               if cwin then 
-                   fn(cwin) 
-               end
-           end
-end
-
-
 -- Mark ourselves loaded.
 _LOADED["menulib"]=true

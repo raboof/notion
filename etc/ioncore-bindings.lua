@@ -81,7 +81,7 @@ global_bindings{
 -- 
 -- The make_*_fn functions are used to call functions on the object currently 
 -- managed by the screen or frame or the frame itself. Essentially e.g.
--- make_current_clientwin_fn(fn) expands to
+-- make_mplex_clientwin_fn(fn) expands to
 -- 
 -- function(mplex)
 --     local reg=mplex:current()
@@ -95,15 +95,15 @@ global_bindings{
 mplex_bindings{
     kpress_waitrel(DEFAULT_MOD.."C", WRegion.close_sub_or_self),
     kpress_waitrel(DEFAULT_MOD.."L", 
-                   make_current_clientwin_fn(WClientWin.broken_app_resize_kludge)),
+                   make_mplex_clientwin_fn(WClientWin.broken_app_resize_kludge)),
     kpress_waitrel(DEFAULT_MOD.."Return", 
-                   make_current_clientwin_fn(WClientWin.toggle_fullscreen)),
+                   make_mplex_clientwin_fn(WClientWin.toggle_fullscreen)),
 
     submap(DEFAULT_MOD.."K", {
         kpress("AnyModifier+C",
-               make_current_clientwin_fn(WClientWin.kill)),
+               make_mplex_clientwin_fn(WClientWin.kill)),
         kpress("AnyModifier+Q", 
-               make_current_clientwin_fn(WClientWin.quote_next)),
+               make_mplex_clientwin_fn(WClientWin.quote_next)),
     }),
 }
 
@@ -116,7 +116,7 @@ mplex_bindings{
 
 genframe_bindings{
     -- Tag viewed object
-    kpress(DEFAULT_MOD.."T", make_current_fn(WRegion.toggle_tag)),
+    kpress(DEFAULT_MOD.."T", make_mplex_sub_fn(WRegion.toggle_tag)),
 
     submap(DEFAULT_MOD.."K", {
         -- Selected object/tab switching

@@ -42,8 +42,8 @@ defmenu("mainmenu", {
 
 -- Context menu (frame/client window actions)
 defmenu("ctxmenu", {
-    menuentry("Close", make_menu_ctx_fn(WRegion.close)),
-    menuentry("Kill", make_menu_ctx_fn(WClientWin.kill)),
-    menuentry("(Un)tag", make_menu_ctx_fn(WRegion.toggle_tag)),
+    menuentry("Close", make_mplex_sub_fn(WRegion.close)),
+    menuentry("Kill", make_mplex_clientwin_fn(WClientWin.kill)),
+    menuentry("(Un)tag", make_mplex_sub_fn(WRegion.toggle_tag)),
     menuentry("Attach tagged", WGenFrame.attach_tagged),
 })

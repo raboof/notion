@@ -124,59 +124,58 @@ end
 
 -- Callback creation functions {{{
 
---DOC 
--- Creates a function that accepts a \type{WMPlex} \var{mplex} as argument 
--- and that will call \var{fn} with argument as follows:
--- \begin{enumerate}
--- \item If \fnref{WMPlex.current_input}\code{(mplex)} is not nil, then
---   this object is the parameter
--- \item If \fnref{WMPlex.current}\code{(mplex)} is not nil, then
---   this object is the parameter
--- \item Otherwise if \var{self_if_not_current} is set, the \var{mplex} 
---   itself will be the parameter.
--- \end{enumerate}
-function make_current_fn(fn, self_if_no_current)
+--DOC
+-- Create a \type{WMPlex}-bindable function that calls \var{fn} with
+-- parameter either the \type{WMPlex}, the current input in it or 
+-- currently shown or some other object multiplexed in it dependent 
+-- on the passed settings and parameters to the wrapper receives.
+-- \var{noself}: Never call with the mplex itself as parameter.
+-- \var{noinput}: Never call with current input as parameter.
+-- \var{cwincheck}: Only call \var{fn} if the object selected is
+-- a \type{WClientWin}.
+function make_mplex_sub_or_self_fn(fn, noself, noinput, cwincheck)
     if not fn then
-        warn("nil parameter to make_current_managed_fn")
-        return
+        warn("nil parameter to make_mplex_sub_fn")
     end
-    return function(mplex)
-               local reg=mplex:current_input()
-               if not reg then
-                   reg=mplex:current()
+    return function(mplex, current)
+               if not noinput then
+                   local ci=mplex:current_input()
+                   if ci then
+                       current=ci
+                   end
                end
-               if not reg then
-                   if not self_if_no_current then
+               if not current then 
+                   current=mplex:current()
+               end
+               if not current then
+                   if noself then
                        return 
                    end
-                   reg=mplex
+                   current=mplex
                end
-               fn(reg)
+               if not cwincheck or obj_is(current, "WClientWin") then
+                   fn(current)
+               end
+               
            end
 end
 
 --DOC
--- Equivalent to \fnref{make_current_fn}\code{(fn, true)}.
-function make_current_or_self_fn(fn)
-    return make_current_fn(fn, true)
+-- Equivalent to \fnref{make_mplex_sub_or_self_fn}\code{(fn, true, true, false)}.
+function make_mplex_sub_fn(fn)
+    return make_mplex_sub_or_self_fn(fn, true, true, false)
 end
 
+
 --DOC
--- Creates a function that accepts a \type{WMPlex} \var{mplex} as argument 
--- and that will call \var{fn} with argument:
--- \fnref{WMPlex.current}\code{(mplex)} if this is of type \type{WClientWin}.
-function make_current_clientwin_fn(fn)
-    if not fn then
-        warn("nil parameter to make_current_clientwin_fn")
-        return
-    end
-    return function(mplex)
-               local reg=mplex:current()
-               if reg and obj_is(reg, "WClientWin") then
-                   fn(reg)
-               end
-           end
+-- Equivalent to \fnref{make_mplex_sub_or_self_fn}\code{(fn, true, true, true)}.
+function make_mplex_clientwin_fn(fn)
+    return make_mplex_sub_or_self_fn(fn, true, true, true)
 end
+
+-- Backwards compatibility.
+make_current_fn=make_mplex_sub_fn
+make_current_clientwin_fn=make_mplex_clientwin_fn
 
 
 local function execrootw(reg, cmd)
