@@ -16,12 +16,14 @@
 -- this meter must be in ion-statusd.
 --
 
-local settings={
+local defaults={
     interval=10*1000,
     load_hint=1,
     important_threshold=1.5,
     critical_threshold=4.0
 }
+
+local settings=table.join(statusd.get_config("load"), defaults)
 
 local function get_load_proc()
     local f=io.open('/proc/loadavg', 'r')

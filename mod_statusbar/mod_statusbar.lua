@@ -26,35 +26,16 @@ _G["mod_statusbar"]=mod_statusbar
 
 -- Settings etc. {{{
 
-local default_tmpl=
-string.format("[ %%date || %s: %%load || %s: %%mail_new/%%mail_total ]",
-              TR("load"), TR("mail"))
-
 -- Default settings
-local settings={
+local defaults={
     date_format='%a %Y-%m-%d %H:%M',
-    template=default_tmpl,
+    template=string.format(
+        "[ %%date || %s: %%load || %s: %%mail_new/%%mail_total ]",
+        TR("load"), TR("mail")
+    ),
 }
 
 local statusbars={}
-
-
---DOC
--- Set format and update variables.
-function mod_statusbar.set(s)
-    settings=table.join(s, settings)
-    local wt=mod_statusbar.get_w_template()
-    for sb, _ in statusbars do
-        sb:set_natural_w(wt)
-    end
-end
-
-
---DOC
--- Set format and update variables.
-function mod_statusbar.get()
-    return table.copy(settings)
-end
 
 -- }}}
 
@@ -78,9 +59,9 @@ end
 
 local timer
 
-local function get_date()
-    return os.date(settings.date_format)
-end
+--local function get_date()
+--    return os.date(defaults.date_format)
+--end
 
 function mod_statusbar.set_timer()
     local t=os.date('*t')
@@ -90,7 +71,7 @@ function mod_statusbar.set_timer()
 end
 
 function mod_statusbar.timer_handler(tmr)
-    mod_statusbar.inform("date", get_date())
+    --mod_statusbar.inform("date", get_date())
     mod_statusbar.update()
     mod_statusbar.set_timer()
 end
@@ -114,8 +95,8 @@ end
 
 -- Status update {{{
 
-local function process_template(fn, gn)
-    local l=string.gsub(settings.template, '(.-)%%(%%?[a-zA-Z0-9_]*)', 
+local function process_template(template, fn, gn)
+    local l=string.gsub(template, '(.-)%%(%%?[a-zA-Z0-9_]*)', 
                         function(t, s)
                             if string.len(t)>0 then
                                 gn(t)
@@ -131,12 +112,23 @@ local function process_template(fn, gn)
     end
 end
 
-function mod_statusbar.get_status()
+
+local function meterget(stng, s)
+    if s=="date" then
+        return os.date(stng.date_format)
+    else
+        return meters[s]
+    end
+end
+
+
+function mod_statusbar.get_status(stng)
     local res={}
-    process_template(function(s)
+    process_template(stng.template,
+                     function(s)
                          table.insert(res, {
-                             text=meters[s] or "??",
-                             attr=meters[s.."_hint"]
+                             text=meterget(stng, s) or "??",
+                             attr=meterget(stng, s.."_hint")
                          })
                      end,
                      function(t)
@@ -145,11 +137,12 @@ function mod_statusbar.get_status()
     return res
 end
 
-function mod_statusbar.get_w_template()
+function mod_statusbar.get_w_template(stng)
     local res=""
-    process_template(function(s)
-                         local m=meters[s]
-                         local w=meters[s.."_wtempl"]
+    process_template(stng.template,
+                     function(s)
+                         local m=meterget(stng, s)
+                         local w=meterget(stng, s.."_wtempl")
                          res=res..(w or m or "??")
                      end,
                      function(t)
@@ -163,13 +156,13 @@ end
 -- Update statusbar contents. To be called after series
 -- of \fnref{mod_statusbar.inform} calls.
 function mod_statusbar.update()
-    local st=mod_statusbar.get_status()
     local found=false
     
-    for sb, _ in statusbars do
+    for sb, stng in statusbars do
         if not obj_exists(sb) then
             statusbars[sb]=nil
         else
+            local st=mod_statusbar.get_status(stng)
             sb:set_contents(st)
             found=true
         end
@@ -184,6 +177,8 @@ end
 -- ion-statusd support {{{
 
 local statusd_running=false
+local statusd_cfg=""
+local statusd_modules={}
 
 function mod_statusbar.rcv_statusd(str)
     local data=""
@@ -211,13 +206,21 @@ function mod_statusbar.rcv_statusd(str)
 end
 
 
-function mod_statusbar.launch_statusd()
+function mod_statusbar.cfg_statusd(cfg)
+    --TODO: don't construct file name twice.
+    ioncore.write_savefile("cfg_statusd", cfg)
+    return ioncore.get_savefile("cfg_statusd")
+end
+
+
+--DOC
+-- Launch ion-statusd with configuration table \var{cfg}.
+function mod_statusbar.launch_statusd(cfg)
     local function get_statusd_params()
-        if settings.statusd_params then
-            return settings.statusd_params
-        else
-            local mods={}
-            process_template(function(s)
+        local mods={}
+        for sb, stng in statusbars do
+            process_template(stng.template,
+                             function(s)
                                  local _, _, m = string.find(s, "^([^_]+)")
                                  if m then
                                      mods[m]=true
@@ -225,10 +228,10 @@ function mod_statusbar.launch_statusd()
                              end,
                              function() 
                              end)
-            local params=""
-            table.foreach(mods, function(k) params=params.." -M "..k end)
-            return params
         end
+        local params=statusd_cfg
+        table.foreach(mods, function(k) params=params.." -M "..k end)
+        return params
     end
     
     if statusd_running then
@@ -239,22 +242,40 @@ function mod_statusbar.launch_statusd()
     if not statusd then
         ioncore.warn(TR("Could not find %s", script))
     end
+
+    local cfg=mod_statusbar.cfg_statusd(cfg or {})
     
-    local cmd=statusd.." "..get_statusd_params()
+    local cmd=statusd.." -c "..cfg..get_statusd_params()
     local cr=coroutine.wrap(mod_statusbar.rcv_statusd)
 
     statusd_running=ioncore.popen_bgread(cmd, cr)
 end
 
+
 --}}}
 
 
--- Initialisation {{{
+-- Initialisation and default settings {{{
+
+--DOC 
+-- Set defaults. For Backwards compatibility.
+function mod_statusbar.set(t)
+    defaults=table.join(t, defaults)
+end
+
+
+--DOC 
+-- Get defaults. For Backwards compatibility.
+function mod_statusbar.get(t)
+    return defaults
+end
 
     
 --DOC
 -- Create a statusbar.
-function mod_statusbar.create(param)
+function mod_statusbar.create(param_)
+    local param=table.join(param_, defaults)
+    
     local scr=ioncore.find_screen_id(param.screen or 0)
     if not scr then
         error(TR("Screen not found."))
@@ -280,11 +301,11 @@ function mod_statusbar.create(param)
 
     mod_statusbar.init_timer()
     
-    mod_statusbar.launch_statusd()
+    --mod_statusbar.launch_statusd()
     
-    statusbars[sb]=true
-    sb:set_natural_w(mod_statusbar.get_w_template())
-    sb:set_contents(mod_statusbar.get_status())
+    statusbars[sb]=param
+    sb:set_natural_w(mod_statusbar.get_w_template(param))
+    sb:set_contents(mod_statusbar.get_status(param))
     
     return sb
 end
@@ -299,3 +320,7 @@ _LOADED["mod_statusbar"]=true
 -- Load user configuration file
 dopath('cfg_statusbar', true)
 
+-- Launch statusd if the user didn't launch it.
+if not statusd_running then
+    launch_statusd()
+end

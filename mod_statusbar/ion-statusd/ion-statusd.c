@@ -26,10 +26,10 @@
 
 static OptParserOpt ion_opts[]={
     /*{OPT_ID('d'), "display",  OPT_ARG, "host:dpy.scr", 
-     DUMMY_TR("X display to use")},
+     DUMMY_TR("X display to use")},*/
     
     {'c', "conffile", OPT_ARG, "config_file", 
-     DUMMY_TR("Configuration file")},*/
+     DUMMY_TR("Configuration file")},
     
     {'s', "searchdir", OPT_ARG, "dir", 
      DUMMY_TR("Add directory to search path")},
@@ -72,6 +72,9 @@ static const char statusd_license[]=DUMMY_TR(
     "Lesser General Public License for more details.\n");
 
 
+static bool new_informs=FALSE;
+static ExtlTab configtab;
+
 static void help()
 {
     int i;
@@ -81,9 +84,6 @@ static void help()
     optparser_printhelp(OPTP_MIDLONG, ion_opts);
     printf("\n");
 }
-
-
-static bool new_informs=FALSE;
 
 
 static void flush_informs()
@@ -135,6 +135,8 @@ int main(int argc, char*argv[])
     int loaded=0;
     int opt;
 
+    configtab=extl_table_none();
+    
     libtu_init(argv[0]);
     extl_init();
 
@@ -150,13 +152,12 @@ int main(int argc, char*argv[])
 
     optparser_init(argc, argv, OPTP_MIDLONG, ion_opts);
     
+    extl_read_config("ioncore_luaext", NULL, TRUE);
+    
     while((opt=optparser_get_opt())){
         switch(opt){
         /*case OPT_ID('d'):
             display=optparser_get_arg();
-            break;
-        case 'c':
-            cfgfile=optparser_get_arg();
             break;*/
         case 's':
             extl_add_searchdir(optparser_get_arg());
@@ -173,6 +174,18 @@ int main(int argc, char*argv[])
         case OPT_ID('a'):
             printf("%s\n\n%s", statusd_copy, TR(statusd_license));
             return EXIT_SUCCESS;
+        case 'c':
+            {
+                ExtlTab t;
+                const char *f=optparser_get_arg();
+                if(extl_read_savefile(f, &t)){
+                    extl_unref_table(configtab);
+                    configtab=t;
+                }else{
+                    warn(TR("Unable to load configuration file %s"), f);
+                }
+            }
+            break;
         case 'm':
         case 'M':
             mod=optparser_get_arg();
@@ -206,9 +219,30 @@ int main(int argc, char*argv[])
 }
 
 
+/*EXTL_DOC
+ * Inform that meter \var{name} has value \var{value}.
+ */
 EXTL_EXPORT
 void statusd_inform(const char *name, const char *value)
 {
     printf("%s: %s\n", name, value);
     new_informs=TRUE;
+}
+
+
+/*EXTL_DOC
+ * Get configuration table for module \var{name}
+ */
+EXTL_EXPORT
+ExtlTab statusd_get_config(const char *name)
+{
+    if(name==NULL){
+        return extl_ref_table(configtab);
+    }else{
+        ExtlTab t;
+        if(extl_table_gets_t(configtab, name, &t))
+            return t;
+        else
+            return extl_create_table();
+    }
 }

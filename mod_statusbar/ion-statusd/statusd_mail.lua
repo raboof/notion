@@ -9,10 +9,12 @@
 -- (at your option) any later version.
 --
 
-local settings={
-    interval=60*1000,
+local defaults={
+    update_interval=60*1000,
     mbox=os.getenv("MAIL")
 }
+
+local settings=table.join(statusd.get_config("mail"), defaults)
 
 local function calcmail(fname)
     local f=io.open(fname, 'r')
@@ -81,7 +83,7 @@ local function update_mail()
         statusd.inform("mail_unread_hint", "normal")
     end
 
-    mail_timer:set(settings.interval, update_mail)
+    mail_timer:set(settings.update_interval, update_mail)
 end
 
 -- Init

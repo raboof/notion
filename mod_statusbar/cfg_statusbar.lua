@@ -3,11 +3,15 @@
 -- 
 
 
--- Configure format and updating
-mod_statusbar.set{
+-- Create a statusbar
+mod_statusbar.create{
+    -- First screen, bottom left corner
+    screen=0,
+    pos='bl',
+
     -- ISO-8601 date format with additional abbreviated day name
-    --date_format='%a %Y-%m-%d %H:%M',
-    -- Finnish date format
+    date_format='%a %Y-%m-%d %H:%M',
+    -- Finnish etc. date format
     --date_format='%a %d.%m.%Y %H:%M'
     -- Locale date format (usually shows seconds, which would require
     -- updating rather often and can be distracting)
@@ -15,19 +19,33 @@ mod_statusbar.set{
 
     -- Template. Tokens %string are replaced with the value of the 
     -- corresponding meter. Currently supported meters are:
-    --   %date     date
-    --   %load     load average
-    --   %mail_new    new mail count
+    --   %date        date
+    --   %load        load average
+    --   %mail_new    new mail count (mbox format file $MAIL)
     --   %mail_unread unread mail count
     --   %mail_total  total mail count
-    --template="[ %date || load: %load || mail: %mail_new/%mail_total ]",
+    template="[ %date || load: %load || mail: %mail_new/%mail_total ]",
 }
 
 
--- Create a statusbar
-mod_statusbar.create{
-    -- First screen, bottom left corner
-    screen=0,
-    pos='bl',
+-- Launch ion-statusd. This must be done after creating any statusbars
+-- for necessary modules to be parsed from the templates.
+mod_statusbar.launch_statusd{
+    -- Load meter
+    --[[
+    load={
+        update_interval=10*1000,
+        important_threshold=1.5,
+        critical_threshold=4.0
+    },
+    --]]
+
+    -- Mail meter
+    --[[
+    mail={
+        update_interval=60*1000,
+        mbox=os.getenv("MAIL")
+    },
+    --]]    
 }
 
