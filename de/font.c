@@ -18,21 +18,6 @@
 #include "brush.h"
 
 
-/*{{{ The DEFont structure */
-
-
-DECLSTRUCT(DEFont){
-    char *pattern;
-    int refcount;
-    XFontSet fontset;
-    XFontStruct *fontstruct;
-    DEFont *next, *prev;
-};
-
-
-/*}}}*/
-
-
 /*{{{ Load/free */
 
 
