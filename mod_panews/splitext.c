@@ -9,6 +9,7 @@
  * (at your option) any later version.
  */
 
+#include <string.h>
 #include <limits.h>
 #include <libtu/objp.h>
 #include <libtu/minmax.h>
@@ -535,6 +536,36 @@ static void splitfloat_update_bounds(WSplitFloat *split, bool recursive)
 static void splitpane_do_resize(WSplitPane *pane, const WRectangle *ng, 
                                 int hprimn, int vprimn, bool transpose)
 {
+    if(transpose && pane->marker!=NULL){
+        char *growdir=strchr(pane->marker, ':');
+        if(growdir!=NULL){
+            const char *newdir=NULL;
+            growdir++;
+            
+            if(strcmp(growdir, "right")==0)
+                newdir="down";
+            else if(strcmp(growdir, "left")==0)
+                newdir="up";
+            if(strcmp(growdir, "down")==0)
+                newdir="right";
+            else if(strcmp(growdir, "up")==0)
+                newdir="left";
+            
+            if(newdir!=NULL){
+                char *newmarker=NULL;
+                *growdir='\0';
+                libtu_asprintf(&newmarker, "%s:%s", pane->marker, newdir);
+                if(newmarker==NULL){
+                    *growdir=':';
+                }else{
+                    free(pane->marker);
+                    pane->marker=newmarker;
+                }
+            }
+        }
+        
+    }
+    
     ((WSplit*)pane)->geom=*ng;
     
     if(pane->contents!=NULL)
@@ -1116,7 +1147,6 @@ static DynFunTab splitpane_dynfuntab[]={
     {splitinner_remove, splitpane_remove},
     {(DynFun*)split_current_todir, (DynFun*)splitpane_current_todir},
     {(DynFun*)splitinner_current, (DynFun*)splitpane_current},
-    /*{splitinner_mark_current, splitpane_mark_current},*/
     {(DynFun*)split_get_config, (DynFun*)splitpane_get_config},
     {splitinner_forall, splitpane_forall},
     {split_stacking, splitpane_stacking},
