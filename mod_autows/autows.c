@@ -26,7 +26,6 @@
 #include <mod_ionws/ionws.h>
 #include <mod_ionws/split.h>
 #include "autows.h"
-#include "autoframe.h"
 #include "placement.h"
 #include "main.h"
 
@@ -37,14 +36,14 @@
 void autows_managed_add(WAutoWS *ws, WRegion *reg)
 {
     region_add_bindmap_owned(reg, mod_autows_autows_bindmap, (WRegion*)ws);
+    region_add_bindmap(reg, mod_autows_frame_bindmap);
     ionws_managed_add_default(&(ws->ionws), reg);
 }
 
 
 bool autows_init(WAutoWS *ws, WWindow *parent, const WFitParams *fp)
 {
-    return ionws_init(&(ws->ionws), parent, fp, FALSE,
-                      (WRegionSimpleCreateFn*)create_autoframe);
+    return ionws_init(&(ws->ionws), parent, fp, FALSE);
 }
 
 
@@ -66,6 +65,7 @@ void autows_managed_remove(WAutoWS *ws, WRegion *reg)
     WRegion *other=ionws_do_managed_remove(&(ws->ionws), reg, !ds);
     
     region_remove_bindmap_owned(reg, mod_autows_autows_bindmap, (WRegion*)ws);
+    region_remove_bindmap(reg, mod_autows_frame_bindmap);
     
     if(other==NULL){
         if(region_may_control_focus((WRegion*)ws))

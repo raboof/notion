@@ -20,7 +20,6 @@
 
 #include "main.h"
 #include "autows.h"
-#include "autoframe.h"
 #include "placement.h"
 
 
@@ -39,16 +38,7 @@ char mod_autows_ion_api_version[]=ION_API_VERSION;
 
 
 WBindmap *mod_autows_autows_bindmap=NULL;
-WBindmap *mod_autows_autoframe_bindmap=NULL;
-
-
-static StringIntMap frame_areas[]={
-    {"border",      FRAME_AREA_BORDER},
-    {"tab",         FRAME_AREA_TAB},
-    {"empty_tab",   FRAME_AREA_TAB},
-    {"client",      FRAME_AREA_CLIENT},
-    END_STRINGINTMAP
-};
+WBindmap *mod_autows_frame_bindmap=NULL;
 
 
 /*}}}*/
@@ -65,16 +55,15 @@ void mod_autows_deinit()
 {
     mod_autows_unregister_exports();
     ioncore_unregister_regclass(&CLASSDESCR(WAutoWS));
-    ioncore_unregister_regclass(&CLASSDESCR(WAutoFrame));
     
     if(mod_autows_autows_bindmap!=NULL){
         ioncore_free_bindmap("WAutoWS", mod_autows_autows_bindmap);
         mod_autows_autows_bindmap=NULL;
     }
     
-    if(mod_autows_autoframe_bindmap!=NULL){
-        ioncore_free_bindmap("WAutoFrame", mod_autows_autoframe_bindmap);
-        mod_autows_autoframe_bindmap=NULL;
+    if(mod_autows_frame_bindmap!=NULL){
+        ioncore_free_bindmap("WFrame@WAutoWS", mod_autows_frame_bindmap);
+        mod_autows_frame_bindmap=NULL;
     }
     
     if(autows_init_layout_alt!=NULL){
@@ -90,11 +79,6 @@ static bool register_regions()
     if(!ioncore_register_regclass(&CLASSDESCR(WAutoWS),
                                   (WRegionSimpleCreateFn*)create_autows,
                                   (WRegionLoadCreateFn*)autows_load)){
-        return FALSE;
-    }
-    if(!ioncore_register_regclass(&CLASSDESCR(WAutoFrame),
-                                  (WRegionSimpleCreateFn*)create_autoframe,
-                                  (WRegionLoadCreateFn*)autoframe_load)){
         return FALSE;
     }
     
@@ -123,12 +107,10 @@ bool mod_autows_init()
     }
 
     mod_autows_autows_bindmap=ioncore_alloc_bindmap("WAutoWS", NULL);
-    
-    mod_autows_autoframe_bindmap=ioncore_alloc_bindmap("WAutoFrame", 
-                                                       frame_areas);
+    mod_autows_frame_bindmap=ioncore_alloc_bindmap_frame("WFrame-on-WAutoWS");
 
     if(mod_autows_autows_bindmap==NULL ||
-       mod_autows_autoframe_bindmap==NULL){
+       mod_autows_frame_bindmap==NULL){
         warn_obj("mod_autows", "failed to allocate bindmaps.");
         goto err;
     }

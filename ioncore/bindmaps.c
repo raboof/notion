@@ -109,6 +109,12 @@ WBindmap *ioncore_alloc_bindmap(const char *name, const StringIntMap *areas)
 }
 
 
+WBindmap *ioncore_alloc_bindmap_frame(const char *name)
+{
+    return ioncore_alloc_bindmap(name, frame_areas);
+}
+
+
 void ioncore_free_bindmap(const char *name, WBindmap *bm)
 {
     int found=0;

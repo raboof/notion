@@ -20,7 +20,6 @@
 
 #include "main.h"
 #include "ionws.h"
-#include "ionframe.h"
 #include "placement.h"
 
 
@@ -39,16 +38,7 @@ char mod_ionws_ion_api_version[]=ION_API_VERSION;
 
 
 WBindmap *mod_ionws_ionws_bindmap=NULL;
-WBindmap *mod_ionws_ionframe_bindmap=NULL;
-
-
-static StringIntMap frame_areas[]={
-    {"border",      FRAME_AREA_BORDER},
-    {"tab",         FRAME_AREA_TAB},
-    {"empty_tab",   FRAME_AREA_TAB},
-    {"client",      FRAME_AREA_CLIENT},
-    END_STRINGINTMAP
-};
+WBindmap *mod_ionws_frame_bindmap=NULL;
 
 
 /*}}}*/
@@ -65,16 +55,15 @@ void mod_ionws_deinit()
 {
     mod_ionws_unregister_exports();
     ioncore_unregister_regclass(&CLASSDESCR(WIonWS));
-    ioncore_unregister_regclass(&CLASSDESCR(WIonFrame));
     
     if(mod_ionws_ionws_bindmap!=NULL){
         ioncore_free_bindmap("WIonWS", mod_ionws_ionws_bindmap);
         mod_ionws_ionws_bindmap=NULL;
     }
     
-    if(mod_ionws_ionframe_bindmap!=NULL){
-        ioncore_free_bindmap("WIonFrame", mod_ionws_ionframe_bindmap);
-        mod_ionws_ionframe_bindmap=NULL;
+    if(mod_ionws_frame_bindmap!=NULL){
+        ioncore_free_bindmap("WFrame@WIonWS", mod_ionws_frame_bindmap);
+        mod_ionws_frame_bindmap=NULL;
     }
     
     if(ionws_placement_alt!=NULL){
@@ -89,11 +78,6 @@ static bool register_regions()
     if(!ioncore_register_regclass(&CLASSDESCR(WIonWS),
                                   (WRegionSimpleCreateFn*)create_ionws_simple,
                                   (WRegionLoadCreateFn*)ionws_load)){
-        return FALSE;
-    }
-    if(!ioncore_register_regclass(&CLASSDESCR(WIonFrame),
-                                  (WRegionSimpleCreateFn*)create_ionframe,
-                                  (WRegionLoadCreateFn*)ionframe_load)){
         return FALSE;
     }
     
@@ -122,11 +106,10 @@ bool mod_ionws_init()
             
     mod_ionws_ionws_bindmap=ioncore_alloc_bindmap("WIonWS", NULL);
     
-    mod_ionws_ionframe_bindmap=ioncore_alloc_bindmap("WIonFrame", 
-                                                     frame_areas);
+    mod_ionws_frame_bindmap=ioncore_alloc_bindmap_frame("WFrame-on-WIonWS");
 
     if(mod_ionws_ionws_bindmap==NULL ||
-       mod_ionws_ionframe_bindmap==NULL){
+       mod_ionws_frame_bindmap==NULL){
         WARN_FUNC("failed to allocate bindmaps.");
         goto err;
     }

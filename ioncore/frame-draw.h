@@ -16,8 +16,6 @@
 #include "rectangle.h"
 
 DYNFUN void frame_draw_bar(const WFrame *frame, bool complete);
-DYNFUN const char *frame_style(WFrame *frame);
-DYNFUN const char *frame_tab_style(WFrame *frame);
 DYNFUN void frame_recalc_bar(WFrame *frame);
 DYNFUN void frame_bar_geom(const WFrame *frame, WRectangle *geom);
 DYNFUN void frame_border_geom(const WFrame *frame, WRectangle *geom);
@@ -26,8 +24,6 @@ DYNFUN void frame_brushes_updated(WFrame *frame);
 
 extern void frame_draw_default(const WFrame *frame, bool complete);
 extern void frame_draw_bar_default(const WFrame *frame, bool complete);
-extern const char *frame_style_default(WFrame *frame);
-extern const char *frame_tab_style_default(WFrame *frame);
 extern void frame_recalc_bar_default(WFrame *frame);
 extern void frame_border_geom_default(const WFrame *frame, WRectangle *geom);
 extern void frame_border_inner_geom_default(const WFrame *frame, WRectangle *geom);
@@ -39,5 +35,7 @@ extern void frame_initialise_gr(WFrame *frame);
 extern void frame_release_brushes(WFrame *frame);
 extern bool frame_set_background(WFrame *frame, bool set_always);
 extern void frame_updategr(WFrame *frame);
+
+extern void ioncore_frame_stylefn(const char **frame, const char **tab);
 
 #endif /* ION_IONCORE_FRAME_DRAW_H */

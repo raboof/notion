@@ -19,6 +19,6 @@ extern bool mod_ionws_init();
 extern void mod_ionws_deinit();
 
 extern WBindmap *mod_ionws_ionws_bindmap;
-extern WBindmap *mod_ionws_ionframe_bindmap;
+extern WBindmap *mod_ionws_frame_bindmap;
 
 #endif /* ION_MOD_IONWS_MAIN_H */

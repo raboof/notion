@@ -29,22 +29,6 @@
 /*{{{ Dynfuns */
 
 
-const char *frame_style(WFrame *frame)
-{
-    const char *ret=NULL;
-    CALL_DYN_RET(ret, const char *, frame_style, frame, (frame));
-    return ret;
-}
-
-
-const char *frame_tab_style(WFrame *frame)
-{
-    const char *ret=NULL;
-    CALL_DYN_RET(ret, const char *, frame_tab_style, frame, (frame));
-    return ret;
-}
-
-
 void frame_recalc_bar(WFrame *frame)
 {
     CALL_DYN(frame_recalc_bar, frame, (frame));
@@ -282,18 +266,6 @@ void frame_brushes_updated_default(WFrame *frame)
 }
 
 
-const char *frame_style_default(WFrame *frame)
-{
-    return "frame";
-}
-
-
-const char *frame_tab_style_default(WFrame *frame)
-{
-    return "tab-frame";
-}
-
-
 /*}}}*/
 
 
@@ -328,15 +300,22 @@ void frame_initialise_gr(WFrame *frame)
     GrBorderWidths bdw;
     GrFontExtents fnte;
     WRootWin *rw=region_rootwin_of((WRegion*)frame);
+    const char *style=(frame->style ? frame->style : "frame");
+    char *tab_style;
     
     frame->bar_h=0;
     
-    frame->brush=gr_get_brush(rw, win, frame_style(frame));
+    frame->brush=gr_get_brush(rw, win, style);
     if(frame->brush==NULL)
         return;
     
-    frame->bar_brush=grbrush_get_slave(frame->brush, rw, win,
-                                       frame_tab_style(frame));
+    tab_style=scat("tab-", style);
+    if(tab_style==NULL){
+        warn_err();
+        return;
+    }
+    frame->bar_brush=grbrush_get_slave(frame->brush, rw, win, tab_style);
+    free(tab_style);
     
     if(frame->bar_brush==NULL)
         return;

@@ -26,11 +26,16 @@
 #include <ioncore/resize.h>
 #include <mod_ionws/split.h>
 #include "placement.h"
-#include "autoframe.h"
 #include "autows.h"
 
 
 /*{{{ create_frame_for */
+
+
+static WFrame *create_frame_autows(WWindow *parent, const WFitParams *fp)
+{
+    return create_frame(parent, fp, "frame-autoframe");
+}
 
 
 static WFrame *create_frame_for(WAutoWS *ws, WRegion *reg)
@@ -38,7 +43,7 @@ static WFrame *create_frame_for(WAutoWS *ws, WRegion *reg)
     WWindow *par=REGION_PARENT_CHK(ws, WWindow);
     WFitParams fp;
     WRectangle mg;
-    WAutoFrame *frame;
+    WFrame *frame;
     
     if(par==NULL)
         return NULL;
@@ -46,13 +51,12 @@ static WFrame *create_frame_for(WAutoWS *ws, WRegion *reg)
     fp.g=REGION_GEOM(ws);
     fp.mode=REGION_FIT_BOUNDS;
     
-    /*frame=(WFrame*)(ws->ionws.create_frame_fn(par, &fp));*/
-    frame=create_autoframe(par, &fp);
+    frame=create_frame_autows(par, &fp);
     
     if(frame==NULL)
         return NULL;
     
-    frame->autocreated=TRUE;
+    /*frame->autocreated=TRUE;*/
     
     mplex_managed_geom((WMPlex*)frame, &mg);
     

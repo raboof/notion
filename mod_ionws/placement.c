@@ -19,7 +19,6 @@
 #include <ioncore/names.h>
 #include <ioncore/region-iter.h>
 #include "placement.h"
-#include "ionframe.h"
 #include "ionws.h"
 
 

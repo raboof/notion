@@ -55,7 +55,8 @@ WHook *frame_content_switched_hook=NULL;
 /*{{{ Destroy/create frame */
 
 
-bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp)
+bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
+                const char *style)
 {
     WRectangle mg;
     
@@ -71,6 +72,8 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp)
     frame->tr_mode=GR_TRANSPARENCY_DEFAULT;
     frame->brush=NULL;
     frame->bar_brush=NULL;
+#warning "TODO: do not make multiple copies"
+    frame->style=(style ? scopy(style) : NULL);
 
     if(!mplex_init((WMPlex*)frame, parent, fp))
         return FALSE;
@@ -92,9 +95,9 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp)
 }
 
 
-WFrame *create_frame(WWindow *parent, const WFitParams *fp)
+WFrame *create_frame(WWindow *parent, const WFitParams *fp, const char *style)
 {
-    CREATEOBJ_IMPL(WFrame, frame, (p, parent, fp));
+    CREATEOBJ_IMPL(WFrame, frame, (p, parent, fp, style));
 }
 
 
@@ -102,6 +105,10 @@ void frame_deinit(WFrame *frame)
 {
     frame_free_titles(frame);
     frame_release_brushes(frame);
+    if(frame->style!=NULL){
+        free(frame->style);
+        frame->style=NULL;
+    }
     mplex_deinit((WMPlex*)frame);
 }
 
@@ -538,6 +545,16 @@ static void frame_managed_changed(WFrame *frame, int mode, bool sw,
 }
 
 
+void frame_managed_remove(WFrame *frame, WRegion *reg)
+{
+    mplex_managed_remove((WMPlex*)frame, reg);
+    if(frame->flags&FRAME_DEST_EMPTY && FRAME_MCOUNT(frame)==0 &&
+       !OBJ_IS_BEING_DESTROYED(frame)){
+        ioncore_defer_destroy((Obj*)frame);
+    }
+}
+
+
 /*}}}*/
 
 
@@ -549,6 +566,7 @@ ExtlTab frame_get_configuration(WFrame *frame)
     ExtlTab tab=mplex_get_configuration(&frame->mplex);
     
     extl_table_sets_i(tab, "flags", frame->flags);
+    
     if(frame->flags&FRAME_SAVED_VERT){
         extl_table_sets_i(tab, "saved_y", frame->saved_y);
         extl_table_sets_i(tab, "saved_h", frame->saved_h);
@@ -557,6 +575,9 @@ ExtlTab frame_get_configuration(WFrame *frame)
         extl_table_sets_i(tab, "saved_x", frame->saved_x);
         extl_table_sets_i(tab, "saved_w", frame->saved_w);
     }
+    
+    if(frame->style!=NULL)
+        extl_table_sets_s(tab, "frame_style", frame->style);
     
     return tab;
 }
@@ -593,9 +614,19 @@ void frame_do_load(WFrame *frame, ExtlTab tab)
 
 WRegion *frame_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 {
-    WFrame *frame=create_frame(par, fp);
+    char *style=NULL;
+    WFrame *frame;
+    
+    extl_table_gets_s(tab, "frame_style", &style);
+    
+    frame=create_frame(par, fp, style);
+    
     if(frame!=NULL)
         frame_do_load(frame, tab);
+    
+    if(style!=NULL)
+        free(style);
+    
     return (WRegion*)frame;
 }
 
@@ -622,10 +653,6 @@ static DynFunTab frame_dynfuntab[]={
     {(DynFun*)region_get_configuration,
      (DynFun*)frame_get_configuration},
 
-    {(DynFun*)frame_style, 
-     (DynFun*)frame_style_default},
-    {(DynFun*)frame_tab_style,
-     (DynFun*)frame_tab_style_default},
     {window_draw, 
      frame_draw_default},
     {frame_draw_bar, 
@@ -646,6 +673,8 @@ static DynFunTab frame_dynfuntab[]={
 
     {(DynFun*)region_fitrep,
      (DynFun*)frame_fitrep},
+
+    {region_managed_remove, frame_managed_remove},
     
     END_DYNFUNTAB
 };

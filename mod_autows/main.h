@@ -19,6 +19,6 @@ extern bool mod_autows_init();
 extern void mod_autows_deinit();
 
 extern WBindmap *mod_autows_autows_bindmap;
-extern WBindmap *mod_autows_autoframe_bindmap;
+extern WBindmap *mod_autows_frame_bindmap;
 
 #endif /* ION_AUTOWS_MAIN_H */

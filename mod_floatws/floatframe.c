@@ -41,10 +41,10 @@ static bool floatframe_init(WFloatFrame *frame, WWindow *parent,
     frame->bar_w=fp->g.w;
     frame->sticky=FALSE;
     
-    if(!frame_init((WFrame*)frame, parent, fp))
+    if(!frame_init((WFrame*)frame, parent, fp, "frame-floatframe"))
         return FALSE;
     
-    frame->frame.flags|=FRAME_BAR_OUTSIDE;
+    frame->frame.flags|=(FRAME_BAR_OUTSIDE|FRAME_DEST_EMPTY);
 
     region_add_bindmap((WRegion*)frame, mod_floatws_floatframe_bindmap);
     
@@ -406,38 +406,6 @@ static void floatframe_size_changed(WFloatFrame *frame, bool wchg, bool hchg)
 }
 
 
-static const char *floatframe_style_default(WFloatFrame *frame)
-{
-    return "frame-floatframe";
-}
-
-
-static const char *floatframe_tab_style_default(WFloatFrame *frame)
-{
-    return "tab-frame-floatframe";
-}
-
-
-/*static void floatframe_updategr(WFloatFrame *floatframe)
-{
-    frame_updategr((WFrame*)floatframe);
-}*/
-
-
-/*}}}*/
-
-
-/*{{{ Add/remove */
-
-
-void floatframe_managed_remove(WFloatFrame *frame, WRegion *reg)
-{
-    mplex_managed_remove((WMPlex*)frame, reg);
-    if(FRAME_MCOUNT(frame)==0 && !OBJ_IS_BEING_DESTROYED(frame))
-        ioncore_defer_destroy((Obj*)frame);
-}
-
-
 /*}}}*/
 
 
@@ -521,16 +489,12 @@ static DynFunTab floatframe_dynfuntab[]={
     {frame_bar_geom, floatframe_bar_geom},
     {frame_border_inner_geom, floatframe_border_inner_geom},
     {frame_border_geom, floatframe_border_geom},
-    {region_managed_remove, floatframe_managed_remove},
     
     {region_rqgeom_clientwin, floatframe_rqgeom_clientwin},
     
     {(DynFun*)region_get_configuration,
      (DynFun*)floatframe_get_configuration},
 
-    {(DynFun*)frame_style, (DynFun*)floatframe_style_default},
-    {(DynFun*)frame_tab_style, (DynFun*)floatframe_tab_style_default},
-    
     {frame_brushes_updated, floatframe_brushes_updated},
     
     {region_resize_hints, floatframe_resize_hints},

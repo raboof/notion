@@ -21,8 +21,6 @@
 
 #include <mod_ionws/ionws.h>
 
-#include "autoframe.h"
-
 
 INTRCLASS(WAutoWS);
 DECLCLASS(WAutoWS){

@@ -24,8 +24,11 @@
 #define FRAME_SAVED_VERT  0x0008
 #define FRAME_SAVED_HORIZ 0x0010
 #define FRAME_SHADED      0x0020
-#define FRAME_SETSHADED      0x0040
+#define FRAME_SETSHADED   0x0040
 #define FRAME_BAR_OUTSIDE 0x0080
+#define FRAME_DEST_EMPTY  0x0100
+
+typedef void WFrameStyleFn(const char **, const char **);
 
 DECLCLASS(WFrame){
     WMPlex mplex;
@@ -36,6 +39,7 @@ DECLCLASS(WFrame){
     
     int tab_dragged_idx;
     
+    char *style;
     GrBrush *brush;
     GrBrush *bar_brush;
     GrTransparency tr_mode;
@@ -46,8 +50,10 @@ DECLCLASS(WFrame){
 
 
 /* Create/destroy */
-extern WFrame *create_frame(WWindow *parent, const WFitParams *fp);
-extern bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp);
+extern WFrame *create_frame(WWindow *parent, const WFitParams *fp,
+                            const char *style);
+extern bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
+                       const char *style);
 extern void frame_deinit(WFrame *frame);
 extern bool frame_rqclose(WFrame *frame);
 
@@ -74,6 +80,7 @@ extern bool frame_has_tabbar(WFrame *frame);
 
 /* Misc */
 extern void frame_managed_notify(WFrame *frame, WRegion *sub);
+extern void frame_managed_remove(WFrame *frame, WRegion *reg);
 
 /* Save/load */
 extern ExtlTab frame_get_configuration(WFrame *frame);

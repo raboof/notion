@@ -185,19 +185,28 @@ static void setup_dragwin(WFrame *frame, uint tab)
     WRectangle g;
     WRootWin *rw;
     WFitParams fp;
+    char *tab_style;
     
     assert(tabdrag_infowin==NULL);
+    
+    rw=region_rootwin_of((WRegion*)frame);
     
     fp.mode=REGION_FIT_EXACT;
     fp.g.x=p_tab_x;
     fp.g.y=p_tab_y;
     fp.g.w=frame_nth_tab_w(frame, tab);
     fp.g.h=frame->bar_h;
-
-    /* region_rootwin_of cannot fail */
-    rw=region_rootwin_of((WRegion*)frame);
-    tabdrag_infowin=create_infowin((WWindow*)rw, &fp,
-                                   frame_tab_style(frame));
+    
+    tab_style=scat("tab-", (frame->style ? frame->style : "frame"));
+    
+    if(tab_style==NULL){
+        warn_err();
+        return;
+    }
+    
+    tabdrag_infowin=create_infowin((WWindow*)rw, &fp, tab_style);
+    
+    free(tab_style);
     
     if(tabdrag_infowin==NULL)
         return;

@@ -45,7 +45,7 @@ static bool scratchpad_init(WScratchpad *sp, WWindow *parent,
         lazyfp.g.y=fp->g.y+(fp->g.h-lazyfp.g.h)/2;
     }
     
-    if(!frame_init((WFrame*)sp, parent, &lazyfp))
+    if(!frame_init((WFrame*)sp, parent, &lazyfp, "frame-scratchpad"))
         return FALSE;
     
     region_add_bindmap((WRegion*)sp, mod_sp_scratchpad_bindmap);
@@ -99,24 +99,6 @@ bool scratchpad_fitrep(WScratchpad *sp, WWindow *parent, const WFitParams *fp)
 /*}}}*/
 
 
-/*{{{ Style */
-
-
-static const char *scratchpad_style(WScratchpad *frame)
-{
-    return "frame-scratchpad";
-}
-
-
-static const char *scratchpad_tab_style(WScratchpad *frame)
-{
-    return "tab-frame-scratchpad";
-}
-
-
-/*}}}*/
-
-
 /*{{{ Load */
 
 
@@ -136,11 +118,6 @@ WRegion *scratchpad_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 
 
 static DynFunTab scratchpad_dynfuntab[]={
-    {(DynFun*)frame_style, 
-     (DynFun*)scratchpad_style},
-    {(DynFun*)frame_tab_style, 
-     (DynFun*)scratchpad_tab_style},
-
     {(DynFun*)region_fitrep,
      (DynFun*)scratchpad_fitrep},
     
