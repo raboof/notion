@@ -247,9 +247,7 @@ end
 --DOC
 -- Make \var{str} shell-safe.
 function string.shell_safe(str)
-    local str="'"..string.gsub(str, "'", "'\\''").."'"
-    print(str)
-    return str
+    return "'"..string.gsub(str, "'", "'\\''").."'"
 end
 
 -- }}}
