@@ -630,8 +630,8 @@ ExtlTab region_size_hints_extl(WRegion *reg)
     extl_table_sets_i(tab, "min_w", hints.min_width);
     extl_table_sets_i(tab, "min_h", hints.min_height);
     if(hints.flags&PMaxSize){
-        extl_table_sets_i(tab, "min_w", hints.max_width);
-        extl_table_sets_i(tab, "min_h", hints.max_height);
+        extl_table_sets_i(tab, "max_w", hints.max_width);
+        extl_table_sets_i(tab, "max_h", hints.max_height);
     }
     if(hints.flags&PBaseSize){
         extl_table_sets_i(tab, "base_w", hints.base_width);
