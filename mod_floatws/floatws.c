@@ -875,7 +875,7 @@ static WFloatStacking *link_lists(WFloatStacking *l1, WFloatStacking *l2)
      */
     WFloatStacking *tmp=l2->prev;
     l1->prev->next=l2;
-    l2->prev=l2->prev;
+    l2->prev=l1->prev;
     l1->prev=tmp;
     return l1;
 }
