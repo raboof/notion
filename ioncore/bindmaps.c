@@ -23,9 +23,9 @@ WBindmap ioncore_genframe_bindmap=BINDMAP_INIT;
  * should accept \type{WScreen} as argument.
  */
 EXTL_EXPORT
-void global_bindings(ExtlTab tab)
+bool global_bindings(ExtlTab tab)
 {
-	process_bindings(&ioncore_rootwin_bindmap, NULL, tab);
+	return process_bindings(&ioncore_rootwin_bindmap, NULL, tab);
 }
 
 
@@ -34,9 +34,9 @@ void global_bindings(ExtlTab tab)
  * types of frames).
  */
 EXTL_EXPORT
-void mplex_bindings(ExtlTab tab)
+bool mplex_bindings(ExtlTab tab)
 {
-	process_bindings(&ioncore_mplex_bindmap, NULL, tab);
+	return process_bindings(&ioncore_mplex_bindmap, NULL, tab);
 }
 
 
@@ -44,8 +44,8 @@ void mplex_bindings(ExtlTab tab)
  * Add a set of bindings available in \type{WGenFrame}s (all types of frames).
  */
 EXTL_EXPORT
-void genframe_bindings(ExtlTab tab)
+bool genframe_bindings(ExtlTab tab)
 {
-	process_bindings(&ioncore_genframe_bindmap, NULL, tab);
+	return process_bindings(&ioncore_genframe_bindmap, NULL, tab);
 }
 

@@ -267,20 +267,20 @@ fail:
 
 bool process_bindings(WBindmap *bindmap, StringIntMap *areamap, ExtlTab tab)
 {
-	int i, n;
+	int i, n, nok=0;
 	ExtlTab ent;
 	
 	n=extl_table_get_n(tab);
 	
 	for(i=1; i<=n; i++){
 		if(extl_table_geti_t(tab, i, &ent)){
-			do_entry(bindmap, ent, areamap);
+			nok+=do_entry(bindmap, ent, areamap);
 			extl_unref_table(ent);
 			continue;
 		}
-		warn("Unable to get bindmap entry %d\n", i);
+		warn("Unable to get bindmap entry %d.", i);
 	}
-	return TRUE;
+	return (nok!=0);
 }
 
 

@@ -55,9 +55,9 @@ static StringIntMap frame_areas[]={
  * Sets up bindings for WFloatFrames.
  */
 EXTL_EXPORT
-void floatframe_bindings(ExtlTab tab)
+bool floatframe_bindings(ExtlTab tab)
 {
-	process_bindings(&floatframe_bindmap, frame_areas, tab);
+	return process_bindings(&floatframe_bindmap, frame_areas, tab);
 }
 
 
@@ -65,9 +65,9 @@ void floatframe_bindings(ExtlTab tab)
  * Sets up bindings for move/resize mode of WFloatFrames.
  */
 EXTL_EXPORT
-void floatframe_moveres_bindings(ExtlTab tab)
+bool floatframe_moveres_bindings(ExtlTab tab)
 {
-	process_bindings(&floatframe_moveres_bindmap, NULL, tab);
+	return process_bindings(&floatframe_moveres_bindmap, NULL, tab);
 }
 
 
@@ -121,12 +121,6 @@ bool floatws_module_init()
 	}
 
 	read_config_for("floatws");
-
-	if(floatframe_bindmap.nbindings==0){
-		warn_obj("floatws module", "Inadequate binding configurations. "
-				 "Refusing to load module. Please fix your configuration.");
-		goto err;
-	}
 	
 	ADD_HOOK(add_clientwin_alt, add_clientwin_floatws_transient);
 

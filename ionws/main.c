@@ -79,18 +79,8 @@ bool ionws_module_init()
 	
 	ionws_module_read_config();
 	
-	if(ionframe_bindmap.nbindings==0 ||
-	   ionframe_moveres_bindmap.nbindings==0)
-		goto err2;
-
 	return TRUE;
 	
-err2:
-	warn_obj("ionws module", "Inadequate binding configurations. "
-			 "Refusing to load module. Please fix your configuration.");
-	ionws_module_deinit();
-	return FALSE;
-
 err:
 	ionws_module_deinit();
 	return FALSE;
