@@ -125,8 +125,8 @@ workspace was entered, the type of the workspace to be created will
 be queried as well.
 .TP
 .B Mod1+F9
-Create a new tiled workspace with name matching the type of
-workspace to be created (the default_ws_type variable).
+Create a new workspace (of type controlled with the default_ws_type variable)
+with a default name formed from the type of the workspace.
 .TP
 .B F12
 Main menu
@@ -163,25 +163,25 @@ Go to previously active object
 
 .TP
 .B Mod1+N
-Go to below frame
+Go to frame below current frame
 .TP
 .B Mod1+P
-Go to above frame
+Go to frame above current frame
 .TP
 .B Mod1+Tab
-Go to right frame
+Go to frame right of current frame
 .TP
 .B Mod1+K Tab
-Go to left frame
+Go to frame left of current frame
 
 .IP "\fINavigation on floating workspaces\fR"
 
 .TP
 .B Mod1+N
-Raise
+Raise frame
 .TP
 .B Mod1+P
-Lower
+Lower frame
 .TP
 .B Mod1+Tab
 Circulate focus and raise
@@ -196,7 +196,7 @@ Back-circulate focus and raise
 Close active object if possible
 .TP
 .B Mod1+K C
-Kill client window
+Kill client owning current client window (if any)
 .TP
 .B Mod1+K X
 Destroy frame
@@ -277,7 +277,7 @@ Send next key press to active client window.
 .SH LINE-EDITING KEYS
 
 These keys can be used in the line editor (queries). They are similar to
-those of \fIjoe(1)\fP.
+those of the \fIjoe(1)\fP editor.
 Selection works differently, though, while the keys are equivalent.
 
 .SS Movement

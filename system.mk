@@ -70,7 +70,7 @@ LTDL_LIBS=-lltdl
 ##
 
 # If you have installed Lua 5.0 from the official tarball without changing
-# paths, this so do it.
+# paths, this should do it.
 LUA_DIR=/usr/local
 LUA_LIBS = -L$(LUA_DIR)/lib -R$(LUA_DIR)/lib -llua -llualib
 LUA_INCLUDES = -I$(LUA_DIR)/include
