@@ -31,10 +31,10 @@
 /*EXTL_DOC
  * Show a query window in \var{frame} with prompt \var{prompt}, initial
  * contents \var{dflt}. The function \var{handler} is called with
- * the entered string as the sole argument when \code{wedln_finish}
+ * the entered string as the sole argument when \fnref{wedln_finish}
  * is called. The function \var{completor} is called with the created
  * \type{WEdln} is first argument and the string to complete is the
- * second argument when \code{wedln_complete} is called.
+ * second argument when \fnref{wedln_complete} is called.
  */
 EXTL_EXPORT
 void query_query(WGenFrame *frame, const char *prompt, const char *dflt,

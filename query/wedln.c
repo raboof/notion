@@ -360,7 +360,7 @@ static void wedln_completion_handler(WEdln *wedln, const char *nam)
  * This function should be called in completors (such given as
  * parameters to \code{query_query}) to return the set of completions
  * found. The numerical indexes of \var{completions} list the found
- * completions. If the entry \code{common_part} exists, it gives an
+ * completions. If the entry \var{common_part} exists, it gives an
  * extra common prefix of all found completions.
  */
 EXTL_EXPORT

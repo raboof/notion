@@ -15,7 +15,7 @@ function fprintf(h, fmt, ...)
 end
 
 function trim(str)
-    return string.gsub(str, "^[%s\n]*(.*)[%s\n]*$", "%1")
+    return string.gsub(str, "^[%s\n]*(.-)[%s\n]*$", "%1")
 end
 
 -- }}}
@@ -342,6 +342,7 @@ end
 function write_fndoc(h, fn, info)
     fprintf(h, "\\begin{function}\n")
     fprintf(h, "\\index{%s@\\code{%s}}\n", texfriendly(fn), fn)
+    fprintf(h, "\\hyperlabel{fn:%s}", fn)
     fprintf(h, "\\synopsis{%s %s(", tohuman(info.odesc, info.otype), fn)
     local comma=""
     for i, varname in info.ivars do
@@ -353,7 +354,7 @@ function write_fndoc(h, fn, info)
         comma=", "
     end
     fprintf(h, ")}\n")
-    h:write("\\begin{funcdesc}" .. trim(info.doc).. "\\end{funcdesc}\n")
+    h:write("\\begin{funcdesc}\n" .. trim(info.doc).. "\n\\end{funcdesc}\n")
     fprintf(h, "\\end{function}\n\n")
 end
 

@@ -865,7 +865,7 @@ void ionws_goto_above(WIonWS *ws)
 
 
 /*EXTL_DOC
- * Similar to \code{ionws_goto_above}.
+ * Similar to \fnref{ionws_goto_above}.
  */
 EXTL_EXPORT
 void ionws_goto_below(WIonWS *ws)
@@ -876,7 +876,7 @@ void ionws_goto_below(WIonWS *ws)
 
 
 /*EXTL_DOC
- * Similar to \code{ionws_goto_above}.
+ * Similar to \fnref{ionws_goto_above}.
  */
 EXTL_EXPORT
 void ionws_goto_left(WIonWS *ws)
@@ -887,7 +887,7 @@ void ionws_goto_left(WIonWS *ws)
 
 
 /*EXTL_DOC
- * Similar to \code{ionws_goto_above}.
+ * Similar to \fnref{ionws_goto_above}.
  */
 EXTL_EXPORT
 void ionws_goto_right(WIonWS *ws)

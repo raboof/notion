@@ -598,7 +598,7 @@ bool region_display(WRegion *reg)
 
 /*EXTL_DOC
  * Attempt to display \var{reg} and save the current region
- * activity status for use by \code{goto_previous()}.
+ * activity status for use by \fnref{goto_previous}.
  */
 EXTL_EXPORT
 bool region_display_sp(WRegion *reg)

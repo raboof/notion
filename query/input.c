@@ -140,7 +140,7 @@ void input_cancel(WInput *input)
 
 
 /*EXTL_EXPORT
- * Same as \code{input_cancel}.
+ * Same as \fnref{input_cancel}.
  */
 EXTL_EXPORT
 void input_close(WInput *input)

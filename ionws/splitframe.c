@@ -136,7 +136,7 @@ void ionws_split(WRegion *reg, const char *dirstr)
 }
 
 /*EXTL_DOC
- * Same as \code{ionws_split} except nothing is moved to the newly
+ * Same as \fnref{ionws_split} except nothing is moved to the newly
  * created frame.
  * \note{NOTE: This function will be changed into something else.}
  */

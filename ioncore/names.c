@@ -161,7 +161,8 @@ void region_unuse_name(WRegion *reg)
 
 
 /*EXTL_DOC
- * Set the name of \var{reg} to \var{p}.
+ * Set the name of \var{reg} to \var{p}. If \var{p} is nil, \var{reg}
+ * is set to have no name.
  */
 EXTL_EXPORT
 bool region_set_name(WRegion *reg, const char *p)
