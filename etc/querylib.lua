@@ -56,13 +56,12 @@ function QueryLib.make_rename_fn(prompt, getobj)
 end
 
 function QueryLib.make_yesno_handler(fn)
-    local function handle_yesno(_, yesno)
-        if yesno=="y" or yesno=="Y" or yesno=="yes" then
-            if arg then
-                fn(unpack(arg))
-            else
-                fn()
-            end
+    local function handle_yesno(...)
+        local n=table.getn(arg)
+        if n==0 then return end
+        if arg[n]=="y" or arg[n]=="Y" or arg[n]=="yes" then
+            table.remove(arg, n)
+            fn(unpack(arg))
         end
     end
     return handle_yesno
@@ -196,9 +195,12 @@ function QueryLib.handler_lua(frame, code)
     if not f then
         query_fwarn(frame, err)
     end
-    local env=getfenv(f)
-    env._=frame
-    env.arg={frame, genframe_current(frame)}
+    -- Create a new environment with parameters
+    local origenv=getfenv(f)
+    local meta={__index=origenv, __newindex=origenv}
+    local env={_=frame, arg={frame, genframe_current(frame)}}
+    setmetatable(env, meta)
+    setfenv(f, env)
     err=collect_errors(f)
     if err then
         query_fwarn(frame, err)

@@ -944,8 +944,6 @@ static bool extl_push_args(lua_State *st, bool intab, const char *spec,
 	int i=1;
 	
 	while(*spec!='\0'){
-		if(intab)
-			lua_pushnumber(l_st, i);
 		switch(*spec){
 		case 'i':
 			lua_pushnumber(l_st, (double)va_arg(*argsp, int));
@@ -973,7 +971,7 @@ static bool extl_push_args(lua_State *st, bool intab, const char *spec,
 			return FALSE;
 		}
 		if(intab)
-			lua_rawset(l_st, -3);
+			lua_rawseti(l_st, -2, i);
 		i++;
 		spec++;
 	}
@@ -1020,7 +1018,7 @@ static bool extl_get_retvals(lua_State *st, int m, ExtlDoCallParam *param)
 #endif
 		if(!extl_stack_get(st, -m, *spec, TRUE, ptr)){
 			/* This is the only place where we allow nil-objects */
-			if(*spec!='o' && lua_isnil(st, -m)){
+			if(*spec=='o' && lua_isnil(st, -m)){
 				*(WObj**)ptr=NULL;
 			}else{
 				warn("Invalid return value (expected '%c', got lua type \"%s\").",
@@ -1058,15 +1056,31 @@ static bool extl_dodo_call_vararg(lua_State *st, ExtlDoCallParam *param)
 		return FALSE;
 	}
 	
-	/* For dostring and dofile arguments are passed in the local table 'arg'.
+	/* For dostring and dofile arguments are passed in the table 'arg'.
+	 * The make 'arg' appear local without messing up with any such variable
+	 * actually defined in the function, we need to make a new environment 
+	 * containg the parameter and __index and __newindex of the metatable set
+	 * to point to the global environment. We don't need to reset this 
+	 * environment as we created the function.
 	 */
 	if(param->intab){
-		lua_newtable(st); /* Create "arg" */
-		lua_getfenv(st, -2); /* Get environment */
+		lua_newtable(st); /* Create arg */
+		lua_newtable(st); /* Create new environment */
 		lua_pushstring(st, "arg");
-		lua_pushvalue(st, -3); /* Get the table created above */
-		lua_settable(st, -3); /* Set arg in the environment */
-		lua_pop(st, 1); /* Pop the environment */
+		lua_pushvalue(st, -3);
+		lua_settable(st, -3); /* Set arg in the new environment */
+		/* Now there's fn, arg, newenv in stack */
+		lua_newtable(st); /* Create metatable */
+		lua_pushstring(st, "__index");
+		lua_getfenv(st, -5); /* Get old environment */
+		lua_settable(st, -3); /* Set metatable.__index */
+		lua_pushstring(st, "__newindex");
+		lua_getfenv(st, -5); /* Get old environment */
+		lua_settable(st, -3); /* Set metatable.__newindex */
+		/* Now there's fn, arg, newenv, meta in stack */
+		lua_setmetatable(st, -2); /* Set metatable for new environment */
+		lua_setfenv(st, -3);
+		/* Now there should be just fn, arg in stack */
 	}
 
 	if(n>0){
