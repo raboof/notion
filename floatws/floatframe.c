@@ -23,6 +23,7 @@ n *
 #include <ioncore/defer.h>
 #include <ioncore/resize.h>
 #include <ioncore/sizehint.h>
+#include <ioncore/extlconv.h>
 #include "floatframe.h"
 #include "floatws.h"
 #include "main.h"
@@ -487,6 +488,10 @@ static bool floatframe_save_to_file(WFloatFrame *frame, FILE *file, int lvl)
 	begin_saved_region((WRegion*)frame, file, lvl);
 	save_indent_line(file, lvl);
 	fprintf(file, "flags = %d,\n", frame->genframe.flags);
+	if(frame->sticky){
+		save_indent_line(file, lvl);
+		fprintf(file, "sticky = true,\n");
+	}
 	save_indent_line(file, lvl);
 	fprintf(file, "subs = {\n");
 	FOR_ALL_MANAGED_ON_LIST(WGENFRAME_MLIST(frame), sub){
@@ -530,6 +535,9 @@ WRegion *floatframe_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
 	}
 	
 	extl_unref_table(substab);
+	
+	if(extl_table_is_bool_set(tab, "sticky"))
+		floatframe_toggle_sticky(frame);
 	
 	if(WGENFRAME_MCOUNT(frame)==0){
 		/* Nothing to manage, destroy */
