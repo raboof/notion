@@ -133,30 +133,23 @@ end
 
 -- Workspace and window lists {{{
 
-
-function menus.windowlist()
-    local cwins=ioncore.complete_clientwin("")
-    table.sort(cwins)
+local function makelist(list)
     local entries={}
-    for i, name in cwins do
-        local cwin=ioncore.lookup_clientwin(name)
-        entries[i]=menuentry(name, function() cwin:goto() end)
+    for i, tgt_ in list do
+        -- Loop variable scope doesn't work as it should
+        local tgt=tgt_
+        entries[i]=menuentry(tgt:name(), function() tgt:goto() end)
     end
-    
+    table.sort(entries, function(a, b) return a.name < b.name end)
     return entries
 end
 
+function menus.windowlist()
+    return makelist(ioncore.clientwin_list())
+end
 
 function menus.workspacelist()
-    local wss=ioncore.complete_region("", "WGenWS")
-    table.sort(wss)
-    local entries={}
-    for i, name in wss do
-        local ws=ioncore.lookup_region(name, "WGenWS")
-        entries[i]=menuentry(name, function() ws:goto() end)
-    end
-    
-    return entries
+    return makelist(ioncore.region_list("WGenWS"))
 end
 
 

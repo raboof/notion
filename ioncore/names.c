@@ -349,7 +349,7 @@ bool clientwin_set_name(WClientWin *cwin, const char *p)
 /*}}}*/
 
 
-/*{{{ Lookup and complete */
+/*{{{ Lookup and list */
 
 
 static WRegion *do_lookup_region(Namespace *ns, const char *cname,
@@ -400,45 +400,19 @@ WClientWin *ioncore_lookup_clientwin(const char *name)
 }
 
 
-ExtlTab do_complete_region(Namespace *ns, const char *nam, 
-                           const char *typenam)
+static ExtlTab do_list(Namespace *ns, const char *typenam)
 {
-    WRegion *reg;
-    const char *name;
-    int lnum=0, l=0;
-    int n=0;
+    WRegion *reg=NULL;
     ExtlTab tab=extl_create_table();
-    
-    if(nam==NULL)
-        nam="";
-    
-    l=strlen(nam);
-    
-again:
+    int n=0;
     
     for(reg=ns->list; reg!=NULL; reg=reg->ni.ns_next){
-        name=region_name(reg);
-        
-        if(name==NULL)
-            continue;
-        
-        if(l!=0){
-           if(lnum==0 && strncmp(name, nam, l))
-                continue;
-           if(lnum==1 && strstr(name, nam)==NULL)
-                continue;
-        }
 
         if(typenam!=NULL && !obj_is_str((Obj*)reg, typenam))
             continue;
-            
-        if(extl_table_seti_s(tab, n+1, name))
+
+        if(extl_table_seti_o(tab, n+1, (Obj*)reg))
             n++;
-    }
-    
-    if(n==0 && lnum==0 && l>=1){
-        lnum=1;
-        goto again;
     }
     
     return tab;
@@ -446,25 +420,22 @@ again:
 
 
 /*EXTL_DOC
- * Find all non-client window regions inheriting \var{typename} and whose
- * name begins with \var{nam} or, if none are found all whose name contains
- * \var{name}.
+ * Find all non-client window regions inheriting \var{typenam}.
  */
 EXTL_EXPORT
-ExtlTab ioncore_complete_region(const char *nam, const char *typenam)
+ExtlTab ioncore_region_list(const char *typenam)
 {
-    return do_complete_region(&internal_ns, nam, typenam);
+    return do_list(&internal_ns, typenam);
 }
 
 
 /*EXTL_DOC
- * Find all client windows whose name begins with \var{nam} or, if none are
- * found, all whose name contains \var{name}.
+ * Return a list of all client windows.
  */
 EXTL_EXPORT
-ExtlTab ioncore_complete_clientwin(const char *nam)
+ExtlTab ioncore_clientwin_list()
 {
-    return do_complete_region(&clientwin_ns, nam, NULL);
+    return do_list(&clientwin_ns, NULL);
 }
 
 

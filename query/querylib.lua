@@ -230,6 +230,39 @@ end
 -- Simple queries for internal actions {{{
 
 
+local function complete_name(str, list)
+    local entries={}
+    local l=string.len(str)
+    for i, reg in list do
+        local nm=reg:name()
+        if nm and string.sub(nm, 1, l)==str then
+            table.insert(entries, nm)
+        end
+    end
+    if table.getn(entries)==0 then
+        for i, reg in list do
+            local nm=reg:name()
+            if nm and string.find(nm, str, 1, true) then
+                table.insert(entries, nm)
+            end
+        end
+    end
+    return entries
+end
+
+function querylib.complete_clientwin(str)
+    return complete_name(str, ioncore.clientwin_list())
+end
+
+function querylib.complete_workspace(str)
+    return complete_name(str, ioncore.region_list("WGenWS"))
+end
+
+function querylib.complete_region(str)
+    return complete_name(str, ioncore.region_list())
+end
+
+
 function querylib.gotoclient_handler(frame, str)
     local cwin=ioncore.lookup_clientwin(str)
     
@@ -305,7 +338,7 @@ end
 function querylib.query_gotoclient(mplex)
     querylib.do_query(mplex, "Go to window:", nil,
                       querylib.gotoclient_handler,
-                      querylib.make_completor(ioncore.complete_clientwin))
+                      querylib.make_completor(querylib.complete_clientwin))
 end
 
 --DOC
@@ -315,7 +348,7 @@ end
 function querylib.query_attachclient(mplex)
     querylib.do_query(mplex, "Attach window:", nil,
                       querylib.attachclient_handler, 
-                      querylib.make_completor(ioncore.complete_clientwin))
+                      querylib.make_completor(querylib.complete_clientwin))
 end
 
 
@@ -326,12 +359,9 @@ end
 -- entered name will be created and the user will be queried for
 -- the type of the workspace.
 function querylib.query_workspace(mplex)
-    local function complete_workspace(nm)
-        return ioncore.complete_region(nm, "WGenWS")
-    end
     querylib.do_query(mplex, "Go to or create workspace:", nil, 
                       querylib.workspace_handler,
-                      querylib.make_completor(complete_workspace))
+                      querylib.make_completor(querylib.complete_workspace))
 end
 
 
