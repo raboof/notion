@@ -19,7 +19,6 @@
 #include "strings.h"
 #include "names.h"
 #include "gr.h"
-#include "region-iter.h"
 
 
 #define BAR_INSIDE_BORDER(FRAME) (!((FRAME)->flags&FRAME_BAR_OUTSIDE))
@@ -285,9 +284,8 @@ void frame_updategr(WFrame *frame)
 
     mplex_managed_geom(&frame->mplex, &geom);
     
-    FOR_ALL_CHILDREN(frame, sub){
-        region_updategr(sub);
-    }
+    /* Update children */
+    region_updategr_default((WRegion*)frame);
     
     mplex_fit_managed(&frame->mplex);
     frame_recalc_bar(frame);

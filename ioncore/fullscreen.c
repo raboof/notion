@@ -19,7 +19,6 @@
 #include "fullscreen.h"
 #include "mwmhints.h"
 #include "focus.h"
-#include "region-iter.h"
 
 
 

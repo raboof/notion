@@ -17,7 +17,6 @@
 #include <libextl/extl.h>
 #include <ioncore/framep.h>
 #include <ioncore/names.h>
-#include <ioncore/region-iter.h>
 #include "placement.h"
 #include "ionws.h"
 

@@ -52,7 +52,6 @@
 #include <ioncore/property.h>
 #include <ioncore/resize.h>
 #include <ioncore/window.h>
-#include <ioncore/region-iter.h>
 #include <ioncore/mplex.h>
 #include <ioncore/saveload.h>
 #include <ioncore/bindmaps.h>

@@ -14,7 +14,6 @@
 #include <libtu/pointer.h>
 
 #include <ioncore/common.h>
-#include <ioncore/region-iter.h>
 #include "floatws.h"
 #include "floatwspholder.h"
 

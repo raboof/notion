@@ -28,7 +28,6 @@
 #include "grab.h"
 #include "framep.h"
 #include "infowin.h"
-#include "region-iter.h"
 
 
 #define XOR_RESIZE (!ioncore_g.opaque_resize)

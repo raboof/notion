@@ -20,7 +20,6 @@
 #include <ioncore/global.h>
 #include <ioncore/framep.h>
 #include <ioncore/bindmaps.h>
-#include <ioncore/region-iter.h>
 
 #include "main.h"
 #include "scratchpad.h"

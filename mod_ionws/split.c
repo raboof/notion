@@ -24,7 +24,6 @@
 #include <ioncore/attach.h>
 #include <ioncore/manage.h>
 #include <ioncore/extlconv.h>
-#include <ioncore/region-iter.h>
 #include <ioncore/rectangle.h>
 #include <ioncore/saveload.h>
 #include <ioncore/names.h>

@@ -30,7 +30,6 @@
 #include "bindmaps.h"
 #include "activity.h"
 #include "netwm.h"
-#include "region-iter.h"
 #include "xwindow.h"
 
 

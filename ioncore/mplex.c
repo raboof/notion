@@ -34,7 +34,6 @@
 #include "frame-pointer.h"
 #include "bindmaps.h"
 #include "regbind.h"
-#include "region-iter.h"
 #include "saveload.h"
 #include "xwindow.h"
 #include "mplexpholder.h"

@@ -28,7 +28,6 @@
 #include <ioncore/regbind.h>
 #include <ioncore/frame-pointer.h>
 #include <ioncore/extlconv.h>
-#include <ioncore/region-iter.h>
 #include <ioncore/xwindow.h>
 #include <ioncore/resize.h>
 

@@ -18,7 +18,6 @@
 #include <ioncore/rootwin.h>
 #include <ioncore/xwindow.h>
 #include <ioncore/window.h>
-#include <ioncore/region-iter.h>
 #include <mod_ionws/split.h>
 #include "splitext.h"
 #include "unusedwin.h"

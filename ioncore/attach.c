@@ -22,7 +22,6 @@
 #include "manage.h"
 #include "extlconv.h"
 #include "names.h"
-#include "region-iter.h"
 
 
 /*{{{ New */

@@ -20,7 +20,6 @@
 #include <ioncore/regbind.h>
 #include <ioncore/framep.h>
 #include <ioncore/presize.h>
-#include <ioncore/region-iter.h>
 #include <ioncore/frame-pointer.h>
 #include "unusedwin.h"
 #include "splitext.h"

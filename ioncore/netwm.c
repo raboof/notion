@@ -20,7 +20,6 @@
 #include "netwm.h"
 #include "property.h"
 #include "focus.h"
-#include "region-iter.h"
 #include "xwindow.h"
 #include "extlconv.h"
 

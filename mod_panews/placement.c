@@ -25,7 +25,6 @@
 #include <ioncore/manage.h>
 #include <ioncore/framep.h>
 #include <ioncore/names.h>
-#include <ioncore/region-iter.h>
 #include <ioncore/resize.h>
 #include <mod_ionws/split.h>
 #include <mod_ionws/split-stdisp.h>

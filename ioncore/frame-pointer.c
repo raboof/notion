@@ -29,7 +29,6 @@
 #include "infowin.h"
 #include "rectangle.h"
 #include "xwindow.h"
-#include "region-iter.h"
 #include "names.h"
 #include "presize.h"
 #include "mplexp.h"

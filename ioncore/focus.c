@@ -17,7 +17,6 @@
 #include "hooks.h"
 #include "colormap.h"
 #include "activity.h"
-#include "region-iter.h"
 
 
 /*{{{ Hooks. */

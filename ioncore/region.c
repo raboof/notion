@@ -9,16 +9,17 @@
  * (at your option) any later version.
  */
 
+#include <libtu/objp.h>
+#include <libextl/extl.h>
+
 #include "common.h"
 #include "global.h"
-#include <libtu/objp.h>
 #include "region.h"
 #include "focus.h"
 #include "regbind.h"
 #include "names.h"
 #include "resize.h"
 #include "manage.h"
-#include <libextl/extl.h>
 #include "extlconv.h"
 #include "activity.h"
 #include "region-iter.h"

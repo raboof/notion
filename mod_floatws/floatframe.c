@@ -23,7 +23,6 @@
 #include <ioncore/resize.h>
 #include <ioncore/sizehint.h>
 #include <ioncore/extlconv.h>
-#include <ioncore/region-iter.h>
 #include <libtu/minmax.h>
 #include "floatframe.h"
 #include "floatws.h"

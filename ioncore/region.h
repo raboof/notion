@@ -40,6 +40,12 @@
 #define REGION_GEOM(R)          (((WRegion*)(R))->geom)
 #define REGION_ACTIVE_SUB(R)    (((WRegion*)(R))->active_sub)
 
+#define REGION_MANAGER(R)       (((WRegion*)(R))->manager)
+#define REGION_MANAGER_CHK(R, TYPE) OBJ_CAST(REGION_MANAGER(R), TYPE)
+
+#define REGION_PARENT(REG)      (((WRegion*)(REG))->parent)
+#define REGION_PARENT_REG(REG)  ((WRegion*)REGION_PARENT(REG))
+
 typedef enum{
     REGION_FIT_EXACT,
     REGION_FIT_BOUNDS

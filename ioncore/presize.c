@@ -14,7 +14,6 @@
 #include "window.h"
 #include "pointer.h"
 #include "grab.h"
-#include "region-iter.h"
 
 
 /*{{{ Resize */

@@ -12,7 +12,6 @@
 #include <string.h>
 
 #include <ioncore/common.h>
-#include <ioncore/region-iter.h>
 #include <ioncore/mplex.h>
 #include "statusbar.h"
 #include "draw.h"

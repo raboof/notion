@@ -13,7 +13,6 @@
 
 #include <ioncore/common.h>
 #include <ioncore/region.h>
-#include <ioncore/region-iter.h>
 
 #include "placement.h"
 #include "floatws.h"

@@ -27,7 +27,6 @@
 #include <ioncore/focus.h>
 #include <ioncore/event.h>
 #include <ioncore/xwindow.h>
-#include <ioncore/region-iter.h>
 #include "menu.h"
 #include "main.h"
 

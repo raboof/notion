@@ -17,7 +17,6 @@
 #include "region.h"
 #include "resize.h"
 #include "sizehint.h"
-#include "region-iter.h"
 
 
 /*{{{ xsizehints_correct */

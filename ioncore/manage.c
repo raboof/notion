@@ -20,7 +20,6 @@
 #include <libextl/extl.h>
 #include "netwm.h"
 #include "extlconv.h"
-#include "region-iter.h"
 
 
 /*{{{ Add */

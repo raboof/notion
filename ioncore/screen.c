@@ -30,7 +30,6 @@
 #include "regbind.h"
 #include "frame-pointer.h"
 #include "rectangle.h"
-#include "region-iter.h"
 #include "infowin.h"
 #include "activity.h"
 #include "extlconv.h"

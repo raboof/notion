@@ -11,6 +11,7 @@
 
 #include <libtu/objp.h>
 #include <libtu/minmax.h>
+
 #include "common.h"
 #include "global.h"
 #include "window.h"

@@ -26,7 +26,6 @@
 #include <ioncore/regbind.h>
 #include <ioncore/extlconv.h>
 #include <ioncore/frame.h>
-#include <ioncore/region-iter.h>
 #include <mod_ionws/ionws.h>
 #include <mod_ionws/split.h>
 #include "panews.h"

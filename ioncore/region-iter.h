@@ -12,16 +12,6 @@
 #ifndef ION_IONCORE_REGION_ITER_H
 #define ION_IONCORE_REGION_ITER_H
 
-/* Manager -- managed */
-
-#define REGION_MANAGER(R)          (((WRegion*)(R))->manager)
-#define REGION_MANAGER_CHK(R, TYPE) OBJ_CAST(REGION_MANAGER(R), TYPE)
-
-/* Parent -- child */
-
-#define REGION_PARENT(REG) (((WRegion*)(REG))->parent)
-#define REGION_PARENT_REG(REG) ((WRegion*)REGION_PARENT(REG))
-
 #define REGION_FIRST_CHILD(PAR) (((WRegion*)(PAR))->children)
 #define REGION_LAST_CHILD(PAR)                                               \
  (REGION_FIRST_CHILD(PAR)==NULL ? NULL                                       \

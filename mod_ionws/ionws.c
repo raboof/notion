@@ -29,7 +29,6 @@
 #include <ioncore/attach.h>
 #include <ioncore/resize.h>
 #include <libextl/extl.h>
-#include <ioncore/region-iter.h>
 #include <ioncore/regbind.h>
 #include <ioncore/extlconv.h>
 #include <ioncore/xwindow.h>

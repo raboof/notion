@@ -43,7 +43,6 @@
 #include "resize.h"
 #include "saveload.h"
 #include "netwm.h"
-#include "region-iter.h"
 #include "xwindow.h"
 
 
