@@ -29,8 +29,8 @@ INTROBJ(WRootWin);
 DECLOBJ(WRootWin){
 	WWindow root;
 	int xscr;
+	
 	WRegion *screen_list;
-	WScreen *default_screen;
 	WScreen *current_screen;
 	
 	Colormap default_cmap;

@@ -77,9 +77,9 @@ bool set_drag_handlers(WRegion *reg,
 /*{{{ Misc. */
 
 
-bool coords_in_rect(WRectangle g, int x, int y)
+bool coords_in_rect(const WRectangle *g, int x, int y)
 {
-	return (x>=g.x && x<g.x+g.w && y>=g.y && y<g.y+g.h);
+	return (x>=g->x && x<g->x+g->w && y>=g->y && y<g->y+g->h);
 }
 
 
@@ -100,21 +100,6 @@ static bool motion_in_threshold(int x, int y)
 {
 	return (x>p_x-CF_DRAG_TRESHOLD && x<p_x+CF_DRAG_TRESHOLD &&
 			y>p_y-CF_DRAG_TRESHOLD && y<p_y+CF_DRAG_TRESHOLD);
-}
-
-
-bool find_window_at(Window rootwin, int x, int y, Window *childret)
-{
-	int dstx, dsty;
-	
-	if(!XTranslateCoordinates(wglobal.dpy, rootwin, rootwin,
-							  x, y, &dstx, &dsty, childret))
-		return FALSE;
-	
-	if(*childret==None)
-		return FALSE;
-	
-	return TRUE;
 }
 
 
@@ -212,7 +197,7 @@ bool handle_button_press(XButtonEvent *ev)
 	if(WOBJ_IS(reg, WRootWin)){
 		WScreen *scr;
 		FOR_ALL_TYPED_CHILDREN(reg, scr, WScreen){
-			if(coords_in_rect(REGION_GEOM(scr), ev->x, ev->y))
+			if(coords_in_rect(&REGION_GEOM(scr), ev->x, ev->y))
 				break;
 		}
 		if(scr==NULL)

@@ -49,7 +49,6 @@ extern void window_fit(WWindow *wwin, WRectangle geom);
 extern bool reparent_window(WWindow *wwin, WWindow *parent, WRectangle geom);
 
 extern Window window_restack(WWindow *wwin, Window other, int mode);
-extern Window window_lowest_win(WWindow *wwin);
 extern void do_restack_window(Window win, Window other, int stack_mode);
 
 DYNFUN bool reparent_region(WRegion *reg, WWindow *target, WRectangle geom);

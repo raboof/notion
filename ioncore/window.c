@@ -145,16 +145,6 @@ WRegion *find_window_t(Window win, const WObjDescr *descr)
 /*{{{ Region dynfuns */
 
 
-/*void window_rect_params(WWindow *wwin, WRectangle geom,
-						WWinGeomParams *ret)
-{
-	ret->geom=geom;
-	ret->win=wwin->win;
-	ret->win_x=geom.x;
-	ret->win_y=geom.y;
-}*/
-
-
 static void reparent_or_fit_window(WWindow *wwin, Window parwin,
 								   WRectangle geom)
 {

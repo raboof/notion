@@ -193,24 +193,24 @@ void genframe_move_current_tab_left(WGenFrame *genframe)
 /*{{{ Resize and reparent */
 
 
-static void reparent_or_fit(WGenFrame *genframe, WRectangle geom,
+static void reparent_or_fit(WGenFrame *genframe, const WRectangle *geom,
 							WWindow *parent)
 {
-	bool wchg=(REGION_GEOM(genframe).w!=geom.w);
-	bool hchg=(REGION_GEOM(genframe).h!=geom.h);
-	bool move=(REGION_GEOM(genframe).x!=geom.x ||
-			   REGION_GEOM(genframe).y!=geom.y);
+	bool wchg=(REGION_GEOM(genframe).w!=geom->w);
+	bool hchg=(REGION_GEOM(genframe).h!=geom->h);
+	bool move=(REGION_GEOM(genframe).x!=geom->x ||
+			   REGION_GEOM(genframe).y!=geom->y);
 	
 	if(parent!=NULL){
 		XReparentWindow(wglobal.dpy, WGENFRAME_WIN(genframe), parent->win,
-						geom.x, geom.y);
-		XResizeWindow(wglobal.dpy, WGENFRAME_WIN(genframe), geom.w, geom.h);
+						geom->x, geom->y);
+		XResizeWindow(wglobal.dpy, WGENFRAME_WIN(genframe), geom->w, geom->h);
 	}else{
 		XMoveResizeWindow(wglobal.dpy, WGENFRAME_WIN(genframe),
-						  geom.x, geom.y, geom.w, geom.h);
+						  geom->x, geom->y, geom->w, geom->h);
 	}
 	
-	REGION_GEOM(genframe)=geom;
+	REGION_GEOM(genframe)=*geom;
 
 	if(move && !wchg && !hchg){
 		region_notify_subregions_move(&(genframe->win.region));
@@ -234,7 +234,7 @@ bool genframe_reparent(WGenFrame *genframe, WWindow *parent, WRectangle geom)
 	
 	region_detach_parent((WRegion*)genframe);
 	region_set_parent((WRegion*)genframe, (WRegion*)parent);
-	reparent_or_fit(genframe, geom, parent);
+	reparent_or_fit(genframe, &geom, parent);
 	
 	return TRUE;
 }
@@ -242,7 +242,7 @@ bool genframe_reparent(WGenFrame *genframe, WWindow *parent, WRectangle geom)
 
 void genframe_fit(WGenFrame *genframe, WRectangle geom)
 {
-	reparent_or_fit(genframe, geom, NULL);
+	reparent_or_fit(genframe, &geom, NULL);
 }
 
 

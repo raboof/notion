@@ -85,27 +85,24 @@ static void extl_obj_dest_handler(WWatch *watch, WObj *obj)
 
 
 /* how to call this? */
-static bool extl_push_obj(lua_State *st, WObj *obj)
+static void extl_push_obj(lua_State *st, WObj *obj)
 {
 	WWatch *watch;
 	
 	if(obj==NULL){
 		lua_pushnil(st);
-		return TRUE;
+		return;
 	}
 
 	watch=(WWatch*)lua_newuserdata(st, sizeof(WWatch));
 	
-	if(watch==NULL)
-		return FALSE;
+	/* Lua shouldn't return if the allocation fails */
 	
 	init_watch(watch);
 	setup_watch(watch, obj, extl_obj_dest_handler);
 	
 	extl_get_wobj_metatable(st);
 	lua_setmetatable(st, -2);
-	
-	return TRUE;
 }
 	
 	
@@ -146,12 +143,10 @@ static int extl_obj_typename(lua_State *st)
 {
 	WObj *obj;
 
-	if(!extl_stack_get(st, 1, 'o', FALSE, &obj)){
-		lua_pushnil(st);
-	}else{
-		lua_pushstring(st, WOBJ_TYPESTR(obj));
-	}
+	if(!extl_stack_get(st, 1, 'o', FALSE, &obj))
+		return 0;
 	
+	lua_pushstring(st, WOBJ_TYPESTR(obj));
 	return 1;
 }
 
@@ -392,16 +387,8 @@ static bool extl_stack_get(lua_State *st, int pos, char type, bool copystring,
 	}
 	
 	if(type=='b'){
-		if(lua_isboolean(st, pos)){
-			if(valret)
-				*((bool*)valret)=lua_toboolean(st, pos);
-			return TRUE;
-		}
-		if(lua_isnumber(st, pos)){
-			if(valret)
-				*((bool*)valret)=(lua_tonumber(st, pos)==0 ? FALSE : TRUE);
-			return TRUE;
-		}
+		if(valret)
+			*((bool*)valret)=lua_toboolean(st, pos);
 		return TRUE;
 	}
 
@@ -471,7 +458,7 @@ static bool extl_stack_get(lua_State *st, int pos, char type, bool copystring,
 }
 
 
-static bool extl_stack_push(lua_State *st, char spec, void *ptr)
+static void extl_stack_push(lua_State *st, char spec, void *ptr)
 {
 	if(spec=='i'){
 		lua_pushnumber(st, *(int*)ptr);
@@ -480,21 +467,14 @@ static bool extl_stack_push(lua_State *st, char spec, void *ptr)
 	}else if(spec=='b'){
 		lua_pushboolean(st, *(bool*)ptr);
 	}else if(spec=='o'){
-		if(!extl_push_obj(st, *(WObj**)ptr)){
-			lua_pushnil(st);
-			return FALSE;
-		}
+		extl_push_obj(st, *(WObj**)ptr);
 	}else if(spec=='s' || spec=='S'){
 		lua_pushstring(st, *(char**)ptr);
 	}else if(spec=='t' || spec=='f'){
 		lua_rawgeti(st, LUA_REGISTRYINDEX, *(int*)ptr);
-		return !lua_isnil(st, -1);
 	}else{
 		lua_pushnil(st);
-		return FALSE;
 	}
-	
-	return TRUE;
 }
 
 
@@ -822,12 +802,9 @@ static bool extl_table_dodo_sets(lua_State *st, TableParams *params)
 {
 	lua_rawgeti(st, LUA_REGISTRYINDEX, params->ref);
 	lua_pushstring(st, params->sentry);
-	if(extl_stack_push(st, params->type, params->val)){
-		lua_settable(st, -3);
-		return TRUE;
-	}
-	
-	return FALSE;
+	extl_stack_push(st, params->type, params->val);
+	lua_settable(st, -3);
+	return TRUE;
 }
 
 
@@ -890,10 +867,8 @@ static bool extl_table_dodo_seti(lua_State *st, TableParams *params)
 	lua_rawgeti(st, LUA_REGISTRYINDEX, params->ref);
 	if(!params->insertlast)
 		lua_pushnumber(st, params->ientry);
-	if(extl_stack_push(st, params->type, params->val)){
-		lua_call(st, 2+!params->insertlast, 0);
-		return TRUE;
-	}
+	extl_stack_push(st, params->type, params->val);
+	lua_call(st, 2+!params->insertlast, 0);
 	
 	return FALSE;
 }
@@ -973,8 +948,7 @@ static bool extl_push_args(lua_State *st, bool intab, const char *spec,
 			lua_pushboolean(st, va_arg(*argsp, bool));
 			break;
 		case 'o':
-			if(!extl_push_obj(st, va_arg(*argsp, WObj*)))
-				return FALSE;
+			extl_push_obj(st, va_arg(*argsp, WObj*));
 			break;
 		case 'S':
 		case 's':

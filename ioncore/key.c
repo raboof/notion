@@ -67,12 +67,8 @@ static bool dispatch_binding(WRegion *mgr, WRegion *reg, WBinding *binding,
 		 */
 		rootwin=ROOTWIN_OF(reg);
 		extl_call(binding->func, "oo", NULL, mgr, reg);
-		if(ev->state!=0 && binding->waitrel){
+		if(ev->state!=0 && binding->waitrel)
 			waitrelease(rootwin);
-			/* return FALSE here to prevent uninstalling the waitrelease
-			 * handler immediately after establishing it */
-			return FALSE;
-		}
 	}
 	return TRUE;
 }

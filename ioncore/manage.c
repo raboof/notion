@@ -13,6 +13,7 @@
 #include "objp.h"
 #include "names.h"
 #include "fullscreen.h"
+#include "pointer.h"
 #include "extl.h"
 
 
@@ -55,13 +56,12 @@ static WScreen *find_suitable_screen(WClientWin *cwin,
 	WRootWin *rootwin=ROOTWIN_OF(cwin);
 	WScreen *vp;
 
-	if(param->flags&REGION_ATTACH_MAPRQ && 
-	   param->flags&REGION_ATTACH_SIZE_HINTS &&
+	if(((param->flags&(REGION_ATTACH_MAPRQ|REGION_ATTACH_SIZE_HINTS))
+		==(REGION_ATTACH_MAPRQ|REGION_ATTACH_SIZE_HINTS)) &&
 	   param->size_hints->flags&USPosition){
 		FOR_ALL_TYPED_CHILDREN(rootwin, vp, WScreen){
-			WRectangle geom=REGION_GEOM(vp);
-			if(param->geomrq.x>=geom.x && param->geomrq.x<geom.x+geom.w &&
-			   param->geomrq.y>=geom.y && param->geomrq.y<geom.y+geom.h)
+			if(coords_in_rect(&REGION_GEOM(vp), 
+							 param->geomrq.x, param->geomrq.y))
 				return vp;
 		}
 	}
@@ -69,7 +69,7 @@ static WScreen *find_suitable_screen(WClientWin *cwin,
 	if(rootwin->current_screen!=NULL)
 		return rootwin->current_screen;
 	
-	return rootwin->default_screen;
+	return FIRST_CHILD(rootwin, WScreen);
 }
 
 

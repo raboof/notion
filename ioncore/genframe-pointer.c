@@ -89,7 +89,7 @@ int genframe_press(WGenFrame *genframe, XButtonEvent *ev, WRegion **reg_ret)
 	
 	genframe_bar_geom(genframe, &g);
 		
-	if(coords_in_rect(g, ev->x, ev->y)){
+	if(coords_in_rect(&g, ev->x, ev->y)){
 		p_tabnum=genframe_tab_at_x(genframe, ev->x);
 
 		region_rootpos((WRegion*)genframe, &p_tab_x, &p_tab_y);
@@ -114,7 +114,7 @@ int genframe_press(WGenFrame *genframe, XButtonEvent *ev, WRegion **reg_ret)
 	
 	genframe_border_inner_geom(genframe, &g);
 	
-	if(coords_in_rect(g, ev->x, ev->y))
+	if(coords_in_rect(&g, ev->x, ev->y))
 		return WGENFRAME_AREA_BORDER;
 
 	return 0;
@@ -266,7 +266,7 @@ static WRegion *fnd(WWindow *w, int x, int y)
 			y-=REGION_GEOM(w).y;
 			FOR_ALL_TYPED_CHILDREN(w, reg2, WRegion){
 				if(region_is_fully_mapped(reg2) &&
-				   coords_in_rect(REGION_GEOM(reg2), x, y) &&
+				   coords_in_rect(&REGION_GEOM(reg2), x, y) &&
 				   HAS_DYN(reg2, region_handle_drop)){
 					return reg2;
 				}

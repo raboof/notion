@@ -138,10 +138,6 @@ static void scan_initial_windows(WRootWin *rootwin)
 	for(i=0; i<nwins; i++){
 		if(wins[i]==None)
 			continue;
-		if(FIND_WINDOW(wins[i])!=NULL){
-			wins[i]=None;
-			continue;
-		}
 		hints=XGetWMHints(wglobal.dpy, wins[i]);
 		if(hints!=NULL && hints->flags&IconWindowHint){
 			for(j=0; j<nwins; j++){
@@ -170,6 +166,8 @@ void rootwin_manage_initial_windows(WRootWin *rootwin)
 	rootwin->tmpnwins=0;
 	
 	for(i=0; i<nwins; i++){
+		if(FIND_WINDOW(wins[i])!=NULL)
+			wins[i]=None;
 		if(wins[i]==None)
 			continue;
 		if(XGetTransientForHint(wglobal.dpy, wins[i], &tfor))
@@ -231,7 +229,6 @@ static WRootWin *preinit_rootwin(int xscr)
 	rootwin->root.region.rootwin=rootwin;
 	rootwin->xscr=xscr;
 	rootwin->default_cmap=DefaultColormap(dpy, xscr);
-	rootwin->default_screen=NULL;
 	rootwin->current_screen=NULL;
 	rootwin->screen_list=NULL;
 	
@@ -264,9 +261,6 @@ WScreen *add_screen(WRootWin *scr, int id, WRectangle geom)
 	region_set_manager((WRegion*)vp, (WRegion*)scr, &(scr->screen_list));
 	
 	region_map((WRegion*)vp);
-	
-	if(scr->default_screen==NULL)
-		scr->default_screen=vp;
 
 #ifdef CF_WINDOWED_SCREENS
 	p[1]=region_x_window((WRegion*)vp);
@@ -336,7 +330,7 @@ WRootWin *manage_rootwin(int xscr)
 		add_screen(rootwin, xscr, REGION_GEOM(rootwin));
 	}
 	
-	if(rootwin->default_screen==NULL){
+	if(rootwin->screen_list==NULL){
 		warn("Unable to add a viewport to X screen %d.", xscr);
 		destroy_obj((WObj*)rootwin);
 		return NULL;
