@@ -39,6 +39,7 @@ DECLCLASS(DEBrush){
     DEBrushExtrasFn *extras_fn;
     int indicator_w;
     Window win;
+    bool clip_set;
 };
 
 extern DEBrush *de_get_brush(Window win, WRootWin *rootwin,
@@ -62,6 +63,12 @@ extern DEColourGroup *debrush_get_colour_group2(DEBrush *brush,
 
 extern DEColourGroup *debrush_get_colour_group(DEBrush *brush, 
                                                const char *attr);
+
+
+/* Begin/end */
+
+extern void debrush_begin(DEBrush *brush, const WRectangle *geom, int flags);
+extern void debrush_end(DEBrush *brush);
 
 /* Information */
 
@@ -89,10 +96,6 @@ extern DEBrushExtrasFn debrush_tab_extras;
 extern DEBrushExtrasFn debrush_menuentry_extras;
 
 /* Misc */
-
-extern void debrush_set_clipping_rectangle(DEBrush *brush, 
-                                           const WRectangle *geom);
-extern void debrush_clear_clipping_rectangle(DEBrush *brush);
 
 extern void debrush_set_window_shape(DEBrush *brush, bool rough,
                                      int n, const WRectangle *rects);

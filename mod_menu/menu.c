@@ -85,8 +85,8 @@ static void get_inner_geom(WMenu *menu, WRectangle *geom)
 }
 
 
-void menu_draw_entry(WMenu *menu, int i, const WRectangle *igeom,
-                     bool complete)
+static void menu_draw_entry(WMenu *menu, int i, const WRectangle *igeom,
+                            bool complete)
 {
     WRectangle geom;
     int a;
@@ -113,8 +113,12 @@ void menu_draw_entry(WMenu *menu, int i, const WRectangle *igeom,
        |(menu->selected_entry==i ? 0 : 2)
        |(menu->entries[i].flags&WMENUENTRY_SUBMENU ? 1 : 0));
 
+    grbrush_begin(menu->entry_brush, &geom, GRBRUSH_AMEND);
+
     grbrush_draw_textbox(menu->entry_brush, &geom, menu->entries[i].title, 
                          attrs[a], complete);
+    
+    grbrush_end(menu->entry_brush);
 }
 
     
@@ -122,6 +126,9 @@ void menu_draw_entries(WMenu *menu, bool complete)
 {
     WRectangle igeom;
     int i, mx;
+
+    if(menu->entry_brush==NULL)
+        return;
     
     get_inner_geom(menu, &igeom);
     
@@ -143,9 +150,14 @@ void menu_draw(WMenu *menu, bool complete)
     
     get_outer_geom(menu, &geom);
     
+    grbrush_begin(menu->brush, &geom, 
+                  (complete ? 0 : GRBRUSH_NO_CLEAR_OK));
+    
     grbrush_draw_border(menu->brush, &geom, substyle);
     
     menu_draw_entries(menu, FALSE);
+    
+    grbrush_end(menu->brush);
 }
 
 
@@ -794,6 +806,7 @@ static void menu_do_select_nth(WMenu *menu, int n)
         WRectangle igeom;
         get_inner_geom(menu, &igeom);
 
+        /* !!!BEGIN!!! */
         if(oldn!=-1)
             menu_draw_entry(menu, oldn, &igeom, TRUE);
         if(n!=-1)

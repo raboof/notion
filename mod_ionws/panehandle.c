@@ -111,7 +111,11 @@ static void panehandle_draw(WPaneHandle *pwin, bool complete)
     g.w=REGION_GEOM(pwin).w;
     g.h=REGION_GEOM(pwin).h;
     
+    grbrush_begin(pwin->brush, &g, (complete ? 0 : GRBRUSH_NO_CLEAR_OK));
+    
     grbrush_draw_borderline(pwin->brush, &g, NULL, pwin->bline);
+    
+    grbrush_end(pwin->brush);
 }
 
 

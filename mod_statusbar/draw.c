@@ -82,9 +82,10 @@ void statusbar_draw(WStatusBar *sb, bool complete)
     g.w=REGION_GEOM(sb).w;
     g.h=REGION_GEOM(sb).h;
     
-    /*grbrush_draw_border(sb->brush, &g, NULL);*/
-    grbrush_draw_textbox(sb->brush, &g, NULL, NULL, complete);
-
+    grbrush_begin(sb->brush, &g, (complete ? 0 : GRBRUSH_NO_CLEAR_OK));
+    
+    grbrush_draw_border(sb->brush, &g, NULL);
+    
     if(sb->elems==NULL)
         return;
     
@@ -96,9 +97,9 @@ void statusbar_draw(WStatusBar *sb, bool complete)
         if(std==(WRegion*)sb)
             right_align=(corner==MPLEX_STDISP_TR || corner==MPLEX_STDISP_BR);
     }
-
+    
     ty=(g.y+bdw.top+fnte.baseline+(g.h-bdw.top-bdw.bottom-fnte.max_height)/2);
-
+    
     if(!right_align){
         draw_elems(sb->brush, g.x+bdw.left, ty,
                    sb->elems, sb->nelems, TRUE, NULL);
@@ -106,5 +107,7 @@ void statusbar_draw(WStatusBar *sb, bool complete)
         draw_elems_ra(sb->brush, g.x+g.w-bdw.right, ty,
                       sb->elems, sb->nelems, TRUE, NULL);
     }
+    
+    grbrush_end(sb->brush);
 }
 

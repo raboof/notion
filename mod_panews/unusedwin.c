@@ -181,7 +181,11 @@ static void unusedwin_draw(WUnusedWin *uwin, bool complete)
     g.w=REGION_GEOM(uwin).w;
     g.h=REGION_GEOM(uwin).h;
     
+    grbrush_begin(uwin->brush, &g, (complete ? 0 : GRBRUSH_NO_CLEAR_OK));
+    
     grbrush_draw_border(uwin->brush, &g, substyle);
+    
+    grbrush_end(uwin->brush);
 }
 
 

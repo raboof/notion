@@ -122,8 +122,10 @@ void infowin_draw(WInfoWin *p, bool complete)
     g.y=0;
     g.w=REGION_GEOM(p).w;
     g.h=REGION_GEOM(p).h;
-    
-    grbrush_draw_textbox(p->brush, &g, p->buffer, p->attr, complete);
+
+    grbrush_begin(p->brush, &g, GRBRUSH_NO_CLEAR_OK);
+    grbrush_draw_textbox(p->brush, &g, p->buffer, p->attr, TRUE);
+    grbrush_end(p->brush);
 }
 
 

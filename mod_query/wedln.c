@@ -30,7 +30,6 @@
 
 
 #define WEDLN_BRUSH(X) ((X)->input.brush)
-#define WEDLN_WIN(X)  ((X)->input.win.win)
 
 
 /*{{{ Drawing primitives */
@@ -88,8 +87,6 @@ static void wedln_do_draw_str_box(WEdln *wedln, const WRectangle *geom,
     const char *cursorstyle=(REGION_IS_ACTIVE(wedln)
                              ? "active-cursor" : "inactive-cursor");
     
-    grbrush_set_clipping_rectangle(WEDLN_BRUSH(wedln), geom);
-    
     if(tx<geom->w){
         WRectangle g=*geom;
         g.x+=tx;
@@ -127,8 +124,6 @@ static void wedln_do_draw_str_box(WEdln *wedln, const WRectangle *geom,
         g.w-=tx;
         grbrush_clear_area(WEDLN_BRUSH(wedln), WEDLN_WIN(wedln), &g);
     }*/
-    
-    grbrush_clear_clipping_rectangle(WEDLN_BRUSH(wedln));
 }
 
 
@@ -151,8 +146,12 @@ static void wedln_draw_str_box(WEdln *wedln, const WRectangle *geom,
     
     if(dstart!=0)
         tx=grbrush_get_text_width(WEDLN_BRUSH(wedln), str+vstart, dstart);
+
+    grbrush_begin(WEDLN_BRUSH(wedln), geom, GRBRUSH_AMEND|GRBRUSH_NEED_CLIP);
     
     wedln_do_draw_str_box(wedln, geom, str+vstart+dstart, point, mark, tx);
+
+    grbrush_end(WEDLN_BRUSH(wedln));
 }
 
 
@@ -368,14 +367,16 @@ void wedln_draw_completions(WEdln *wedln, bool complete)
     
     if(wedln->complist.strs!=NULL && WEDLN_BRUSH(wedln)!=NULL){
         const char *style=(REGION_IS_ACTIVE(wedln) ? "active" : "inactive");
+        
         get_completions_geom(wedln, G_CURRENT, &geom);
+        
         draw_listing(WEDLN_BRUSH(wedln), &geom, &(wedln->complist), 
                      complete, style);
     }
 }
 
     
-void wedln_draw_textarea(WEdln *wedln, bool complete)
+void wedln_draw_textarea(WEdln *wedln)
 {
     WRectangle geom;
     const char *style=(REGION_IS_ACTIVE(wedln) ? "active" : "inactive");
@@ -384,6 +385,9 @@ void wedln_draw_textarea(WEdln *wedln, bool complete)
         return;
     
     get_outer_geom(wedln, G_CURRENT, &geom);
+    
+    /*grbrush_begin(WEDLN_BRUSH(wedln), &geom, GRBRUSH_AMEND);*/
+    
     grbrush_draw_border(WEDLN_BRUSH(wedln), &geom, style);
 
     if(wedln->prompt!=NULL){
@@ -403,13 +407,27 @@ void wedln_draw_textarea(WEdln *wedln, bool complete)
     
     wedln_draw_str_box(wedln, &geom, wedln->vstart, wedln->edln.p, 0,
                        wedln->edln.point, wedln->edln.mark);
+
+    /*grbrush_end(WEDLN_BRUSH(wedln));*/
 }
 
 
 void wedln_draw(WEdln *wedln, bool complete)
 {
-    wedln_draw_completions(wedln, complete);
-    wedln_draw_textarea(wedln, complete);
+    WRectangle g;
+    int f=(complete ? 0 : GRBRUSH_NO_CLEAR_OK);
+    
+    if(WEDLN_BRUSH(wedln)==NULL)
+        return;
+    
+    get_geom(wedln, G_CURRENT, &g);
+    
+    grbrush_begin(WEDLN_BRUSH(wedln), &g, f);
+    
+    wedln_draw_completions(wedln, FALSE);
+    wedln_draw_textarea(wedln);
+    
+    grbrush_end(WEDLN_BRUSH(wedln));
 }
 
 

@@ -350,8 +350,6 @@ static void do_draw_listing(GrBrush *brush, const WRectangle *geom,
     
     grbrush_get_font_extents(brush, &fnte);
     
-    grbrush_set_clipping_rectangle(brush, geom);
-    
     x=0;
     c=0;
     while(1){
@@ -361,7 +359,7 @@ static void do_draw_listing(GrBrush *brush, const WRectangle *geom,
         y+=r*l->itemh;
         while(r<l->visrow){
             if(i>=l->nstrs)
-                goto finished;
+                return;
             
             draw_multirow(brush, geom->x+x, y, l->itemh, l->strs[i],
                           (l->iteminfos!=NULL ? &(l->iteminfos[i]) : NULL),
@@ -374,9 +372,6 @@ static void do_draw_listing(GrBrush *brush, const WRectangle *geom,
         x+=l->itemw;
         c++;
     }
-    
-finished:
-    grbrush_clear_clipping_rectangle(brush);
 }
 
 
@@ -385,7 +380,9 @@ void draw_listing(GrBrush *brush, const WRectangle *geom,
 {
     WRectangle geom2;
     GrBorderWidths bdw;
-    
+                         
+    grbrush_begin(brush, geom, GRBRUSH_AMEND|GRBRUSH_NEED_CLIP);
+
     if(complete)
         grbrush_clear_area(brush, geom);
     
@@ -399,6 +396,8 @@ void draw_listing(GrBrush *brush, const WRectangle *geom,
     geom2.h=geom->h-bdw.top-bdw.bottom;
     
     do_draw_listing(brush, &geom2, l, style);
+    
+    grbrush_end(brush);
 }
 
 

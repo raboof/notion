@@ -429,35 +429,6 @@ void debrush_draw_textboxes(DEBrush *brush, const WRectangle *geom,
 /*}}}*/
 
 
-/*{{{ Clipping rectangles */
-
-/* Should actually set the clipping rectangle for all GC:s and use 
- * window-specific GC:s to do this correctly...
- */
-
-void debrush_set_clipping_rectangle(DEBrush *brush, const WRectangle *geom)
-{
-    XRectangle rect;
-    
-    rect.x=geom->x;
-    rect.y=geom->y;
-    rect.width=geom->w;
-    rect.height=geom->h;
-    
-    XSetClipRectangles(ioncore_g.dpy, brush->d->normal_gc,
-                       0, 0, &rect, 1, Unsorted);
-}
-
-
-void debrush_clear_clipping_rectangle(DEBrush *brush)
-{
-    XSetClipMask(ioncore_g.dpy, brush->d->normal_gc, None);
-}
-
-
-/*}}}*/
-
-
 /*{{{ Misc. */
 
 #define MAXSHAPE 16
@@ -528,4 +499,64 @@ void debrush_clear_area(DEBrush *brush, const WRectangle *geom)
 
 /*}}}*/
 
+
+/*{{{ Clipping rectangles */
+
+/* Should actually set the clipping rectangle for all GC:s and use 
+ * window-specific GC:s to do this correctly...
+ */
+
+static void debrush_set_clipping_rectangle(DEBrush *brush, 
+                                           const WRectangle *geom)
+{
+    XRectangle rect;
+    
+    assert(!brush->clip_set);
+    
+    rect.x=geom->x;
+    rect.y=geom->y;
+    rect.width=geom->w;
+    rect.height=geom->h;
+    
+    XSetClipRectangles(ioncore_g.dpy, brush->d->normal_gc,
+                       0, 0, &rect, 1, Unsorted);
+    brush->clip_set=TRUE;
+}
+
+
+static void debrush_clear_clipping_rectangle(DEBrush *brush)
+{
+    if(brush->clip_set){
+        XSetClipMask(ioncore_g.dpy, brush->d->normal_gc, None);
+        brush->clip_set=FALSE;
+    }
+}
+
+
+/*}}}*/
+
+
+/*{{{ debrush_begin/end */
+
+
+void debrush_begin(DEBrush *brush, const WRectangle *geom, int flags)
+{
+    if(flags&GRBRUSH_AMEND)
+        flags|=GRBRUSH_NO_CLEAR_OK;
+    
+    if(!(flags&GRBRUSH_NO_CLEAR_OK))
+        debrush_clear_area(brush, geom);
+    
+    if(flags&GRBRUSH_NEED_CLIP)
+        debrush_set_clipping_rectangle(brush, geom);
+}
+
+
+void debrush_end(DEBrush *brush)
+{
+    debrush_clear_clipping_rectangle(brush);
+}
+
+
+/*}}}*/
 

@@ -36,6 +36,7 @@ bool debrush_init(DEBrush *brush, Window win,
     brush->extras_fn=NULL;
     brush->indicator_w=0;
     brush->win=win;
+    brush->clip_set=FALSE;
     
     style->usecount++;
 
@@ -181,14 +182,14 @@ static DynFunTab debrush_dynfuntab[]={
     {(DynFun*)grbrush_get_text_width, (DynFun*)debrush_get_text_width},
     {grbrush_draw_textbox, debrush_draw_textbox},
     {grbrush_draw_textboxes, debrush_draw_textboxes},
-    {grbrush_set_clipping_rectangle, debrush_set_clipping_rectangle},
-    {grbrush_clear_clipping_rectangle, debrush_clear_clipping_rectangle},
     {grbrush_set_window_shape, debrush_set_window_shape},
     {grbrush_enable_transparency, debrush_enable_transparency},
     {grbrush_clear_area, debrush_clear_area},
     {grbrush_fill_area, debrush_fill_area},
     {(DynFun*)grbrush_get_extra, (DynFun*)debrush_get_extra},
     {(DynFun*)grbrush_get_slave, (DynFun*)debrush_get_slave},
+    {grbrush_begin, debrush_begin},
+    {grbrush_end, debrush_end},
     END_DYNFUNTAB
 };
 

@@ -245,6 +245,24 @@ GrBrush *grbrush_get_slave(GrBrush *brush, WRootWin *rootwin,
 /*}}}*/
 
 
+/*{{{ Dynfuns/begin/end/replay */
+
+
+void grbrush_begin(GrBrush *brush, const WRectangle *geom, int flags)
+{
+    CALL_DYN(grbrush_begin, brush, (brush, geom, flags));
+}
+
+
+void grbrush_end(GrBrush *brush)
+{
+    CALL_DYN(grbrush_end, brush, (brush));
+}
+
+
+/*}}}*/
+
+
 /*{{{ Dynfuns/values */
 
 
@@ -341,18 +359,6 @@ void grbrush_draw_textboxes(GrBrush *brush, const WRectangle *geom,
 
 
 /*{{{ Dynfuns/Misc */
-
-
-void grbrush_set_clipping_rectangle(GrBrush *brush, const WRectangle *geom)
-{
-    CALL_DYN(grbrush_set_clipping_rectangle, brush, (brush, geom));
-}
-
-
-void grbrush_clear_clipping_rectangle(GrBrush *brush)
-{
-    CALL_DYN(grbrush_clear_clipping_rectangle, brush, (brush));
-}
 
 
 void grbrush_set_window_shape(GrBrush *brush, bool rough,

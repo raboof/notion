@@ -79,13 +79,21 @@ static void wmsg_calc_size(WMessage *wmsg, WRectangle *geom)
 
 static void wmsg_draw(WMessage *wmsg, bool complete)
 {
+    const char *style=(REGION_IS_ACTIVE(wmsg) ? "active" : "inactive");
     WRectangle geom;
-    if(WMSG_BRUSH(wmsg)!=NULL){
-        const char *style=(REGION_IS_ACTIVE(wmsg) ? "active" : "inactive");
-        get_geom(wmsg, FALSE, &geom);
-        draw_listing(WMSG_BRUSH(wmsg), &geom, &(wmsg->listing), 
-                     complete, style);
-    }
+    
+    if(WMSG_BRUSH(wmsg)==NULL)
+        return;
+    
+    get_geom(wmsg, FALSE, &geom);
+    
+    grbrush_begin(WMSG_BRUSH(wmsg), &geom, 
+                  (complete ? 0 : GRBRUSH_NO_CLEAR_OK));
+    
+    draw_listing(WMSG_BRUSH(wmsg), &geom, &(wmsg->listing), 
+                 FALSE, style);
+    
+    grbrush_end(WMSG_BRUSH(wmsg));
 }
 
 

@@ -224,9 +224,13 @@ void frame_draw_bar_default(const WFrame *frame, bool complete)
     }
     
     frame_bar_geom(frame, &geom);
+
+    grbrush_begin(frame->bar_brush, &geom, GRBRUSH_AMEND);
     
     grbrush_draw_textboxes(frame->bar_brush, &geom, frame->titles_n, 
                            frame->titles, complete, cattr);
+    
+    grbrush_end(frame->bar_brush);
 }
 
 
@@ -241,9 +245,12 @@ void frame_draw_default(const WFrame *frame, bool complete)
     
     frame_border_geom(frame, &geom);
     
+    grbrush_begin(frame->brush, &geom, (complete ? 0 : GRBRUSH_NO_CLEAR_OK));
+    
     grbrush_draw_border(frame->brush, &geom, attr);
-
-    frame_draw_bar(frame, FALSE);
+    frame_draw_bar(frame, TRUE);
+    
+    grbrush_end(frame->brush);
 }
 
 

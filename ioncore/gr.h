@@ -62,7 +62,12 @@ typedef enum{
     GR_BORDERLINE_BOTTOM
 } GrBorderLine;
 
-/* Init/deinit */
+/* Flags to grbrush_begin */
+#define GRBRUSH_AMEND       0x0001
+#define GRBRUSH_NEED_CLIP   0x0004
+#define GRBRUSH_NO_CLEAR_OK 0x0008 /* implied by GRBRUSH_AMEND */
+
+/* Engines etc. */
 
 typedef GrBrush *GrGetBrushFn(Window win, WRootWin *rootwin,
                               const char *style);
@@ -72,17 +77,6 @@ extern void gr_unregister_engine(const char *engine);
 extern bool gr_select_engine(const char *engine);
 extern void gr_refresh();
 extern void gr_read_config();
-
-extern GrBrush *gr_get_brush(Window win, WRootWin *rootwin,
-                             const char *style);
-
-extern GrBrush *grbrush_get_slave(GrBrush *brush, WRootWin *rootwin, 
-                                  const char *style);
-
-extern void grbrush_release(GrBrush *brush);
-
-extern bool grbrush_init(GrBrush *brush);
-extern void grbrush_deinit(GrBrush *brush);
 
 /* Stylespecs are of the from attr1-attr2-etc. We require that each attr in
  * 'spec' matches the one at same index in 'attrib' when '*' matches anything.
@@ -103,6 +97,22 @@ extern uint gr_stylespec_score(const char *spec, const char *attrib);
 extern uint gr_stylespec_score2(const char *spec, const char *attrib, 
                                 const char *attrib_p2);
 
+/* GrBrush */
+
+extern GrBrush *gr_get_brush(Window win, WRootWin *rootwin,
+                             const char *style);
+
+extern GrBrush *grbrush_get_slave(GrBrush *brush, WRootWin *rootwin, 
+                                  const char *style);
+
+extern void grbrush_release(GrBrush *brush);
+
+extern bool grbrush_init(GrBrush *brush);
+extern void grbrush_deinit(GrBrush *brush);
+
+extern void grbrush_begin(GrBrush *brush, const WRectangle *geom,
+                          int flags);
+extern void grbrush_end(GrBrush *brush);
 
 /* Border drawing */
 
@@ -117,11 +127,11 @@ DYNFUN void grbrush_draw_borderline(GrBrush *brush, const WRectangle *geom,
 
 DYNFUN void grbrush_get_font_extents(GrBrush *brush, GrFontExtents *fnti);
 
+DYNFUN uint grbrush_get_text_width(GrBrush *brush, const char *text, uint len);
+
 DYNFUN void grbrush_draw_string(GrBrush *brush, int x, int y,
                                 const char *str, int len, bool needfill,
                                 const char *attrib);
-
-DYNFUN uint grbrush_get_text_width(GrBrush *brush, const char *text, uint len);
 
 /* Textbox drawing */
 
@@ -134,10 +144,6 @@ DYNFUN void grbrush_draw_textboxes(GrBrush *brush, const WRectangle *geom,
                                    bool needfill, const char *common_attrib);
 
 /* Misc */
-
-DYNFUN void grbrush_set_clipping_rectangle(GrBrush *brush, 
-                                           const WRectangle *geom);
-DYNFUN void grbrush_clear_clipping_rectangle(GrBrush *brush);
 
 /* Behaviour of the following two functions for "slave brushes" is undefined. 
  * If the parameter rough to grbrush_set_window_shape is set, the actual 
