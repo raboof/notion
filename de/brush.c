@@ -170,6 +170,7 @@ bool debrush_get_extra(DEBrush *brush, const char *key, char type, void *data)
 static DynFunTab debrush_dynfuntab[]={
     {grbrush_release, debrush_release},
     {grbrush_draw_border, debrush_draw_border},
+    {grbrush_draw_borderline, debrush_draw_borderline},
     {grbrush_get_border_widths, debrush_get_border_widths},
     {grbrush_draw_string, debrush_draw_string},
     {debrush_do_draw_string, debrush_do_draw_string_default},

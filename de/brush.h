@@ -70,6 +70,9 @@ extern bool debrush_get_extra(DEBrush *brush, const char *key, char type, void *
 extern void debrush_draw_border(DEBrush *brush, Window win, 
                                 const WRectangle *geom,
                                 const char *attrib);
+extern void debrush_draw_borderline(DEBrush *brush, Window win,
+                                    const WRectangle *geom,
+                                    const char *attrib, GrBorderLine line);
 
 extern void debrush_draw_textbox(DEBrush *brush, Window win, 
                                  const WRectangle *geom,

@@ -54,6 +54,12 @@ typedef enum{
     GR_TRANSPARENCY_DEFAULT
 } GrTransparency;
 
+typedef enum{
+    GR_BORDERLINE_LEFT,
+    GR_BORDERLINE_RIGHT,
+    GR_BORDERLINE_TOP,
+    GR_BORDERLINE_BOTTOM
+} GrBorderLine;
 
 /* Init/deinit */
 
@@ -104,6 +110,9 @@ DYNFUN void grbrush_get_border_widths(GrBrush *brush, GrBorderWidths *bdi);
 DYNFUN void grbrush_draw_border(GrBrush *brush, Window win, 
                                 const WRectangle *geom,
                                 const char *attrib);
+DYNFUN void grbrush_draw_borderline(GrBrush *brush, Window win, 
+                                    const WRectangle *geom,
+                                    const char *attrib, GrBorderLine line);
 
 /* String drawing */
 

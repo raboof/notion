@@ -284,6 +284,14 @@ void grbrush_draw_border(GrBrush *brush, Window win,
 }
 
 
+void grbrush_draw_borderline(GrBrush *brush, Window win, 
+                             const WRectangle *geom,
+                             const char *attrib, GrBorderLine line)
+{
+    CALL_DYN(grbrush_draw_borderline, brush, (brush, win, geom, attrib, line));
+}
+
+
 /*}}}*/
 
 

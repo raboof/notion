@@ -168,6 +168,68 @@ void debrush_draw_border(DEBrush *brush, Window win,
 }
 
 
+static void draw_borderline(Window win, GC gc, WRectangle *geom,
+                            uint tl, uint br, DEColour tlc, DEColour brc, 
+                            GrBorderLine line)
+{
+    if(line==GR_BORDERLINE_LEFT && geom->h>0){
+        XSetForeground(ioncore_g.dpy, gc, tlc);
+        XDrawRectangle(ioncore_g.dpy, win, gc, geom->x, geom->y, tl, geom->h);
+    }else if(line==GR_BORDERLINE_TOP && geom->w>0){
+        XSetForeground(ioncore_g.dpy, gc, tlc);
+        XDrawRectangle(ioncore_g.dpy, win, gc, geom->x, geom->y, geom->w, tl);
+    }else if(line==GR_BORDERLINE_RIGHT && geom->h>0){
+        XSetForeground(ioncore_g.dpy, gc, brc);
+        XDrawRectangle(ioncore_g.dpy, win, gc, geom->x+geom->w-br, geom->y, br, geom->h);
+    }else if(line==GR_BORDERLINE_TOP && geom->w>0){
+        XSetForeground(ioncore_g.dpy, gc, brc);
+        XDrawRectangle(ioncore_g.dpy, win, gc, geom->x, geom->y+geom->h-br, geom->w, br);
+    }
+
+    geom->x+=tl;
+    geom->y+=tl;
+    geom->w-=tl+br;
+    geom->h-=tl+br;
+}
+
+
+void debrush_do_draw_borderline(DEBrush *brush, Window win, WRectangle geom,
+                                DEColourGroup *cg, GrBorderLine line)
+{
+    DEBorder *bd=&(brush->d->border);
+    GC gc=brush->d->normal_gc;
+    
+    switch(bd->style){
+    case DEBORDER_RIDGE:
+        draw_borderline(win, gc, &geom, bd->hl, bd->sh, cg->hl, cg->sh, line);
+    case DEBORDER_INLAID:
+        draw_borderline(win, gc, &geom, bd->pad, bd->pad, cg->pad, cg->pad, line);
+        draw_borderline(win, gc, &geom, bd->sh, bd->hl, cg->sh, cg->hl, line);
+        break;
+    case DEBORDER_GROOVE:
+        draw_borderline(win, gc, &geom, bd->sh, bd->hl, cg->sh, cg->hl, line);
+        draw_borderline(win, gc, &geom, bd->pad, bd->pad, cg->pad, cg->pad, line);
+        draw_borderline(win, gc, &geom, bd->hl, bd->sh, cg->hl, cg->sh, line);
+        break;
+    case DEBORDER_ELEVATED:
+    default:
+        draw_borderline(win, gc, &geom, bd->hl, bd->sh, cg->hl, cg->sh, line);
+        draw_borderline(win, gc, &geom, bd->pad, bd->pad, cg->pad, cg->pad, line);
+        break;
+    }
+}
+
+
+void debrush_draw_borderline(DEBrush *brush, Window win,
+                             const WRectangle *geom,
+                             const char *attrib, GrBorderLine line)
+{
+    DEColourGroup *cg=debrush_get_colour_group(brush, attrib);
+    if(cg!=NULL)
+        debrush_do_draw_borderline(brush, win, *geom, cg, line);
+}
+
+
 /*}}}*/
 
 
@@ -286,6 +348,9 @@ static void debrush_do_draw_textbox(DEBrush *brush, Window win,
     GrFontExtents fnte;
     uint tx, ty, tw;
 
+    grbrush_get_border_widths(&(brush->grbrush), &bdw);
+    grbrush_get_font_extents(&(brush->grbrush), &fnte);
+    
     if(brush->extras_fn!=NULL)
         brush->extras_fn(brush, win, geom, cg, &bdw, &fnte, a1, a2, TRUE);
     
@@ -300,9 +365,6 @@ static void debrush_do_draw_textbox(DEBrush *brush, Window win,
         if(len==0)
             break;
     
-        grbrush_get_border_widths(&(brush->grbrush), &bdw);
-        grbrush_get_font_extents(&(brush->grbrush), &fnte);
-        
         if(brush->d->textalign!=DEALIGN_LEFT){
             tw=grbrush_get_text_width((GrBrush*)brush, text, len);
             
