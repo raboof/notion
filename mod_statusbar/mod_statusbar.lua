@@ -95,58 +95,81 @@ end
 
 -- Status update {{{
 
-local function process_template(template, fn, gn)
-    local l=string.gsub(template, '(.-)%%(%%?[a-zA-Z0-9_]*)', 
-                        function(t, s)
-                            if string.len(t)>0 then
-                                gn(t)
-                            end
-                            if string.sub(s, 1, 1)=='%' then
-                                gn('%')
-                            elseif s~="" then
-                                fn(s)
-                            end
-                        end)
-    if l then
-        gn(l)
+local function process_template(template, meter_f, text_f, stretch_f)
+    local st, en, b, c, r
+    
+    while template~="" do
+        st, en, b, r=string.find(template, '^(.-)%%(.*)')
+    
+        if not b then
+            text_f(template)
+            break
+        else
+            if b~="" then
+                text_f(b)
+            end
+            template=r
+
+            st, en, c, r=string.find(template, '^([ %%])(.*)')
+
+            if c then
+                if c==' ' then
+                    stretch_f(c)
+                else
+                    text_f(c)
+                end
+                template=r
+            else 
+                st, en, c, b, r=string.find(template,
+                                            '^([<|>]?)([a-zA-Z0-9_]+)(.*)')
+                if b then
+                    meter_f(b, c)
+                    template=r
+                end
+            end
+        end
     end
 end
 
 
-local function meterget(stng, s)
-    if s=="date" then
-        return os.date(stng.date_format)
-    else
-        return meters[s]
+local function set_date(stng, meters)
+    local d=os.date(stng.date_format)
+    meters["date"]=d
+    if not meters["date_template"] then
+        meters["date_template"]=d
     end
+    return meters
 end
 
 
-function mod_statusbar.get_status(stng)
+function mod_statusbar.get_template_table(stng)
     local res={}
+    local m=set_date(stng, meters)
+    local aligns={["<"]=0, ["|"]=1, [">"]=2}
+    
     process_template(stng.template,
-                     function(s)
+                     -- meter
+                     function(s, c)
                          table.insert(res, {
-                             text=meterget(stng, s) or "??",
-                             attr=meterget(stng, s.."_hint")
+                             type=2,
+                             meter=s,
+                             align=aligns[c],
+                             tmpl=m[s.."_template"]
                          })
                      end,
+                     -- text
                      function(t)
-                         table.insert(res, {text=t})
-                     end)
-    return res
-end
-
-function mod_statusbar.get_w_template(stng)
-    local res=""
-    process_template(stng.template,
-                     function(s)
-                         local m=meterget(stng, s)
-                         local w=meterget(stng, s.."_template")
-                         res=res..(w or m or "??")
+                         table.insert(res, {
+                             type=1,
+                             text=t
+                         })
                      end,
+                     -- stretch
                      function(t)
-                         res=res..t
+                         table.insert(res, {
+                             type=3,
+                             text=t
+                         })
                      end)
     return res
 end
@@ -162,7 +185,7 @@ function mod_statusbar.update()
         if not obj_exists(sb) then
             statusbars[sb]=nil
         else
-            sb:set_contents(mod_statusbar.get_status(stng))
+            sb:update(set_date(stng, meters))
             found=true
         end
     end
@@ -171,10 +194,10 @@ function mod_statusbar.update()
 end
 
 
-function mod_statusbar.update_natural_w()
+function mod_statusbar.update_template()
     for sb, stng in statusbars do
         if obj_exists(sb) then
-            sb:set_natural_w(mod_statusbar.get_w_template(stng))
+            sb:set_template(mod_statusbar.get_template_table(stng))
         end
     end
 end
@@ -195,7 +218,7 @@ function mod_statusbar.rcv_statusd(str)
     local function doline(i)
         if i=="." then
             if updatenw then
-                mod_statusbar.update_natural_w()
+                mod_statusbar.update_template()
                 updatenw=false
             end
             mod_statusbar.update()
@@ -224,13 +247,18 @@ local function get_statusd_params()
     local mods={}
     for sb, stng in statusbars do
         process_template(stng.template,
+                         -- meter
                          function(s)
                              local _, _, m = string.find(s, "^([^_]+)")
                              if m then
                                  mods[m]=true
                              end
                          end,
+                         -- text
                          function() 
+                         end,
+                         -- stretch
+                         function()
                          end)
     end
     local params=statusd_cfg
@@ -317,8 +345,8 @@ function mod_statusbar.create(param_)
     mod_statusbar.init_timer()
     
     statusbars[sb]=param
-    sb:set_natural_w(mod_statusbar.get_w_template(param))
-    sb:set_contents(mod_statusbar.get_status(param))
+    sb:set_template(mod_statusbar.get_template_table(param))
+    sb:update(meters)
     
     return sb
 end

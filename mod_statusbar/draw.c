@@ -17,39 +17,41 @@
 #include "draw.h"
 
 
-static void draw_strings(GrBrush *brush, Window win, int x, int y,
-                         GrTextElem *texts, int ntexts, bool needfill, 
-                         const char *dfltattr)
+static void draw_elems(GrBrush *brush, Window win, int x, int y,
+                       WSBElem *elems, int nelems, bool needfill, 
+                       const char *dfltattr)
 {
-    while(ntexts>0){
-        if(texts->text!=NULL){
-            int sl=strlen(texts->text);
-            int w=grbrush_get_text_width(brush, texts->text, sl);
-            grbrush_draw_string(brush, win, x, y, texts->text, sl, needfill, 
-                                texts->attr ? texts->attr : dfltattr);
-            x+=w;
+    while(nelems>0){
+        if(elems->type==WSBELEM_STRETCH){
+            x+=elems->text_w+elems->stretch;
+        }else if(elems->text!=NULL){
+            int sl=strlen(elems->text);
+            grbrush_draw_string(brush, win, x, y, elems->text, sl, needfill, 
+                                elems->attr ? elems->attr : dfltattr);
+            x+=elems->text_w;
         }
-        ntexts--;
-        texts++;
+        nelems--;
+        elems++;
     }
 }
 
 
-static void draw_strings_ra(GrBrush *brush, Window win, int x, int y,
-                            GrTextElem *texts, int ntexts, bool needfill, 
-                            const char *dfltattr)
+static void draw_elems_ra(GrBrush *brush, Window win, int x, int y,
+                          WSBElem *elems, int nelems, bool needfill, 
+                          const char *dfltattr)
 {
-    texts+=ntexts;
+    elems+=nelems;
     
-    while(ntexts>0){
-        ntexts--;
-        texts--;
-        if(texts->text!=NULL){
-            int sl=strlen(texts->text);
-            int w=grbrush_get_text_width(brush, texts->text, sl);
-            x-=w;
-            grbrush_draw_string(brush, win, x, y, texts->text, sl, needfill,
-                                texts->attr ? texts->attr : dfltattr);
+    while(nelems>0){
+        nelems--;
+        elems--;
+        if(elems->type==WSBELEM_STRETCH){
+            x-=elems->text_w+elems->stretch;
+        }else if(elems->text!=NULL){
+            int sl=strlen(elems->text);
+            x-=elems->text_w;
+            grbrush_draw_string(brush, win, x, y, elems->text, sl, needfill,
+                                elems->attr ? elems->attr : dfltattr);
         }
     }
 }
@@ -79,7 +81,7 @@ void statusbar_draw(WStatusBar *sb, bool complete)
     /*grbrush_draw_border(sb->brush, win, &g, NULL);*/
     grbrush_draw_textbox(sb->brush, win, &g, NULL, NULL, complete);
 
-    if(sb->strings==NULL)
+    if(sb->elems==NULL)
         return;
     
     mgr=OBJ_CAST(REGION_PARENT(sb), WMPlex);
@@ -94,11 +96,11 @@ void statusbar_draw(WStatusBar *sb, bool complete)
     ty=(g.y+bdw.top+fnte.baseline+(g.h-bdw.top-bdw.bottom-fnte.max_height)/2);
 
     if(!right_align){
-        draw_strings(sb->brush, win, g.x+bdw.left, ty,
-                     sb->strings, sb->nstrings, !complete, NULL);
+        draw_elems(sb->brush, win, g.x+bdw.left, ty,
+                   sb->elems, sb->nelems, !complete, NULL);
     }else{
-        draw_strings_ra(sb->brush, win, g.x+g.w-bdw.right, ty,
-                        sb->strings, sb->nstrings, !complete, NULL);
+        draw_elems_ra(sb->brush, win, g.x+g.w-bdw.right, ty,
+                      sb->elems, sb->nelems, !complete, NULL);
     }
 }
 

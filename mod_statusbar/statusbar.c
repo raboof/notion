@@ -12,6 +12,7 @@
 #include <string.h>
 
 #include <libtu/objp.h>
+#include <libtu/minmax.h>
 #include <ioncore/common.h>
 #include <ioncore/global.h>
 #include <ioncore/window.h>
@@ -26,8 +27,8 @@
 #include "draw.h"
 
 
-static void statusbar_set_strings(WStatusBar *sb, ExtlTab t);
-static void statusbar_free_strings(WStatusBar *sb);
+static void statusbar_set_elems(WStatusBar *sb, ExtlTab t);
+static void statusbar_free_elems(WStatusBar *sb);
 static void statusbar_update_natural_size(WStatusBar *p);
 
 
@@ -40,11 +41,10 @@ bool statusbar_init(WStatusBar *p, WWindow *parent, const WFitParams *fp)
         return FALSE;
 
     p->brush=NULL;
-    p->strings=NULL;
-    p->nstrings=0;
+    p->elems=NULL;
+    p->nelems=0;
     p->natural_w=1;
     p->natural_h=1;
-    p->natural_w_tmpl=NULL;
     
     statusbar_updategr(p);
 
@@ -72,14 +72,11 @@ WStatusBar *create_statusbar(WWindow *parent, const WFitParams *fp)
 
 void statusbar_deinit(WStatusBar *p)
 {
-    statusbar_free_strings(p);
+    statusbar_free_elems(p);
     
     if(p->brush!=NULL)
         grbrush_release(p->brush, p->wwin.win);
     
-    if(p->natural_w_tmpl!=NULL)
-        free(p->natural_w_tmpl);
-
     window_deinit(&(p->wwin));
 }
 
@@ -90,17 +87,17 @@ void statusbar_deinit(WStatusBar *p)
 /*{{{ Content stuff */
 
 
-static GrTextElem *get_textelems(ExtlTab t, int *nret)
+static WSBElem *get_sbelems(ExtlTab t, int *nret)
 {
     int i, n=extl_table_get_n(t);
-    GrTextElem *el;
+    WSBElem *el;
     
     *nret=0;
     
     if(n<=0)
         return NULL;
     
-    el=ALLOC_N(GrTextElem, n);
+    el=ALLOC_N(WSBElem, n);
     
     if(el==NULL)
         return NULL;
@@ -108,13 +105,26 @@ static GrTextElem *get_textelems(ExtlTab t, int *nret)
     for(i=0; i<n; i++){
         ExtlTab tt;
         
+        el[i].type=WSBELEM_NONE;
+        el[i].meter=NULL;
+        el[i].text_w=0;
         el[i].text=NULL;
+        el[i].tmpl_w=0;
+        el[i].tmpl=NULL;
         el[i].attr=NULL;
-        el[i].iw=0;
-        
+        el[i].stretch=0;
+        el[i].align=WSBELEM_ALIGN_CENTER;
+
         if(extl_table_geti_t(t, i+1, &tt)){
-            extl_table_gets_s(tt, "text", &(el[i].text));
-            extl_table_gets_s(tt, "attr", &(el[i].attr));
+            if(extl_table_gets_i(tt, "type", &(el[i].type))){
+                if(el[i].type==WSBELEM_TEXT || el[i].type==WSBELEM_STRETCH){
+                    extl_table_gets_s(tt, "text", &(el[i].text));
+                }else if(el[i].type==WSBELEM_METER){
+                    extl_table_gets_s(tt, "meter", &(el[i].meter));
+                    extl_table_gets_s(tt, "tmpl", &(el[i].tmpl));
+                    extl_table_gets_i(tt, "align", &(el[i].align));
+                }
+            }
             extl_unref_table(tt);
         }
     }
@@ -125,13 +135,17 @@ static GrTextElem *get_textelems(ExtlTab t, int *nret)
 }
     
 
-static void free_textelems(GrTextElem *el, int n)
+static void free_sbelems(WSBElem *el, int n)
 {
     int i;
     
     for(i=0; i<n; i++){
         if(el[i].text!=NULL)
             free(el[i].text);
+        if(el[i].meter!=NULL)
+            free(el[i].meter);
+        if(el[i].tmpl!=NULL)
+            free(el[i].tmpl);
         if(el[i].attr!=NULL)
             free(el[i].attr);
     }
@@ -140,35 +154,21 @@ static void free_textelems(GrTextElem *el, int n)
 }
 
 
-static void statusbar_set_strings(WStatusBar *sb, ExtlTab t)
+static void statusbar_set_elems(WStatusBar *sb, ExtlTab t)
 {
-    statusbar_free_strings(sb);
+    statusbar_free_elems(sb);
     
-    sb->strings=get_textelems(t, &(sb->nstrings));
+    sb->elems=get_sbelems(t, &(sb->nelems));
 }
 
 
-static void statusbar_free_strings(WStatusBar *sb)
+static void statusbar_free_elems(WStatusBar *sb)
 {
-    if(sb->strings!=NULL){
-        free_textelems(sb->strings, sb->nstrings);
-        sb->strings=NULL;
-        sb->nstrings=0;
+    if(sb->elems!=NULL){
+        free_sbelems(sb->elems, sb->nelems);
+        sb->elems=NULL;
+        sb->nelems=0;
     }
-}
-
-
-/*EXTL_DOC
- * Set statusbar contents.
- */
-EXTL_EXPORT_MEMBER
-void statusbar_set_contents(WStatusBar *sb, ExtlTab t)
-{
-    statusbar_set_strings(sb, t);
-    
-    statusbar_update_natural_size(sb);
-    
-    window_draw(&sb->wwin, TRUE);
 }
 
 
@@ -194,43 +194,45 @@ static void statusbar_resize(WStatusBar *p)
 }
 
 
+static void calc_elem_w(WSBElem *el, GrBrush *brush)
+{
+    const char *str;
+
+    if(el->type==WSBELEM_METER){
+        str=el->tmpl;
+        if(str==NULL)
+            str="??";
+        el->tmpl_w=grbrush_get_text_width(brush, str, strlen(str));
+    }else{
+        str=el->text;
+        if(str!=NULL)
+            el->text_w=grbrush_get_text_width(brush, str, strlen(str));
+        else
+            el->text_w=0;
+    }
+}
+
+
 static void statusbar_update_natural_size(WStatusBar *p)
 {
     GrBorderWidths bdw;
     GrFontExtents fnte;
-    const char *str=(p->natural_w_tmpl!=NULL ? p->natural_w_tmpl : "");
-    
+    int totw=0;
+    int i;
+
     grbrush_get_border_widths(p->brush, &bdw);
     grbrush_get_font_extents(p->brush, &fnte);
     
-    p->natural_w=bdw.left+bdw.right;
-    p->natural_w+=grbrush_get_text_width(p->brush, str, strlen(str));
-    p->natural_h=fnte.max_height+bdw.top+bdw.bottom;
-}
-
-
-/*EXTL_DOC
- * Set natural width template string.
- */
-EXTL_EXPORT_MEMBER
-void statusbar_set_natural_w(WStatusBar *p, const char *str)
-{
-    GrBorderWidths bdw;
-    char *s=NULL;
-    
-    if(str!=NULL){
-        s=scopy(str);
-        if(s==NULL)
-            return;
+    for(i=0; i<p->nelems; i++){
+        calc_elem_w(&(p->elems[i]), p->brush);
+        if(p->elems[i].type==WSBELEM_METER)
+            totw+=p->elems[i].tmpl_w;
+        else
+            totw+=p->elems[i].text_w;
     }
-
-    if(p->natural_w_tmpl!=NULL)
-        free(p->natural_w_tmpl);
     
-    p->natural_w_tmpl=s;
-    
-    statusbar_update_natural_size(p);
-    statusbar_resize(p);
+    p->natural_w=bdw.left+totw+bdw.right;
+    p->natural_h=fnte.max_height+bdw.top+bdw.bottom;
 }
 
 
@@ -241,6 +243,145 @@ void statusbar_size_hints(WStatusBar *p, XSizeHints *h)
     h->min_height=p->natural_h;
     h->max_width=p->natural_w;
     h->max_height=p->natural_h;
+}
+
+
+/*}}}*/
+
+
+/*{{{ Exports */
+
+
+/*EXTL_DOC
+ * Set statusbar template.
+ */
+EXTL_EXPORT_MEMBER
+void statusbar_set_template(WStatusBar *sb, ExtlTab t)
+{
+    statusbar_set_elems(sb, t);
+    
+    statusbar_update_natural_size(sb);
+    
+    statusbar_resize(sb);
+}
+
+
+static void reset_stretch(WStatusBar *sb)
+{
+    int i;
+    
+    for(i=0; i<sb->nelems; i++)
+        sb->elems[i].stretch=0;
+}
+
+
+static void positive_stretch(WStatusBar *sb)
+{
+    int i;
+    
+    for(i=0; i<sb->nelems; i++)
+        sb->elems[i].stretch=maxof(0, sb->elems[i].stretch);
+}
+
+
+static void spread_stretch(WStatusBar *sb)
+{
+    int i, j, k;
+    int diff;
+    WSBElem *el, *lel, *rel;
+    
+    for(i=0; i<sb->nelems; i++){
+        el=&(sb->elems[i]);
+
+        if(el->type!=WSBELEM_METER)
+            continue;
+        
+        if(el->text!=NULL)
+            el->text_w=grbrush_get_text_width(sb->brush, el->text, strlen(el->text));
+        else
+            el->text_w=grbrush_get_text_width(sb->brush, "??", 2);
+        
+        diff=el->tmpl_w-el->text_w;
+        
+        lel=NULL;
+        rel=NULL;
+        
+        if(el->align!=WSBELEM_ALIGN_RIGHT){
+            for(j=i+1; j<sb->nelems; j++){
+                if(sb->elems[j].type==WSBELEM_STRETCH){
+                    rel=&(sb->elems[j]);
+                    break;
+                }
+            }
+        }
+        
+        if(el->align!=WSBELEM_ALIGN_LEFT){
+            for(k=i-1; k>=0; k--){
+                if(sb->elems[k].type==WSBELEM_STRETCH){
+                    lel=&(sb->elems[k]);
+                    break;
+                }
+            }
+        }
+        
+        if(rel!=NULL && lel!=NULL){
+            int l=diff/2;
+            int r=diff-l;
+            lel->stretch+=l;
+            rel->stretch+=r;
+        }else if(lel!=NULL){
+            lel->stretch+=diff;
+        }else if(rel!=NULL){
+            rel->stretch+=diff;
+        }
+    }
+}
+
+
+
+/*EXTL_DOC
+ * Set statusbar template.
+ */
+EXTL_EXPORT_MEMBER
+void statusbar_update(WStatusBar *sb, ExtlTab t)
+{
+    int i;
+    WSBElem *el;
+    
+    if(sb->brush==NULL)
+        return;
+    
+    for(i=0; i<sb->nelems; i++){
+        el=&(sb->elems[i]);
+        
+        if(el->type!=WSBELEM_METER)
+            continue;
+        
+        if(el->text!=NULL){
+            free(el->text);
+            el->text=NULL;
+        }
+
+        if(el->attr!=NULL){
+            free(el->attr);
+            el->attr=NULL;
+        }
+        
+        if(el->meter!=NULL){
+            char *attrnm=scat(el->meter, "_hint");
+            extl_table_gets_s(t, el->meter, &(el->text));
+            if(attrnm!=NULL){
+                extl_table_gets_s(t, attrnm, &(el->attr));
+                free(attrnm);
+            }
+        }
+    }
+    
+    reset_stretch(sb);
+    spread_stretch(sb);
+    positive_stretch(sb);
+    
+    window_draw((WWindow*)sb, TRUE);
 }
 
 
@@ -265,6 +406,10 @@ void statusbar_updategr(WStatusBar *p)
     p->brush=nbrush;
     
     statusbar_update_natural_size(p);
+    
+    reset_stretch(p);
+    spread_stretch(p);
+    positive_stretch(p);
     
     window_draw(&(p->wwin), TRUE);
 }

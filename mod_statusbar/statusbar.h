@@ -16,14 +16,43 @@
 #include <ioncore/common.h>
 #include <ioncore/gr.h>
 
+
+typedef enum{
+    WSBELEM_ALIGN_LEFT=0,
+    WSBELEM_ALIGN_CENTER=1,
+    WSBELEM_ALIGN_RIGHT=2
+} WSBElemAlign;
+
+
+typedef enum{
+    WSBELEM_NONE=0,
+    WSBELEM_TEXT=1,
+    WSBELEM_METER=2,
+    WSBELEM_STRETCH=3
+} WSBElemType;
+  
+
+INTRSTRUCT(WSBElem);
+
+DECLSTRUCT(WSBElem){
+    int type;
+    int align;
+    int stretch;
+    int text_w;
+    char *text;
+    char *meter;
+    int tmpl_w;
+    char *tmpl;
+    char *attr;
+};
+
 INTRCLASS(WStatusBar);
 
 DECLCLASS(WStatusBar){
     WWindow wwin;
     GrBrush *brush;
-    GrTextElem *strings;
-    int nstrings;
-    char *natural_w_tmpl;
+    WSBElem *elems;
+    int nelems;
     int natural_w, natural_h;
 };
 
