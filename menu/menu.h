@@ -32,7 +32,7 @@ DECLCLASS(WMenu){
     GrBrush *brush;
     GrBrush *entry_brush;
 
-    WRectangle max_geom;
+    WFitParams last_fp;
     
     bool pmenu_mode;
     bool big_mode;
@@ -62,13 +62,14 @@ DECLSTRUCT(WMenuCreateParams){
 };
 
 
-extern WMenu *create_menu(WWindow *par, const WRectangle *geom,
+extern WMenu *create_menu(WWindow *par, const WFitParams *fp,
                           const WMenuCreateParams *params);
-extern bool menu_init(WMenu *menu, WWindow *par, const WRectangle *geom,
+extern bool menu_init(WMenu *menu, WWindow *par, const WFitParams *fp,
                       const WMenuCreateParams *params);
 extern void menu_deinit(WMenu *menu);
 
-extern void menu_fit(WMenu *menu, const WRectangle *geom);
+extern bool menu_fitrep(WMenu *menu, WWindow *par, const WFitParams *fp);
+
 extern void menu_cancel(WMenu *menu);
 extern bool menu_rqclose(WMenu *menu);
 extern void menu_draw_config_updated(WMenu *menu);

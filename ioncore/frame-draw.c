@@ -310,14 +310,13 @@ void frame_draw_config_updated(WFrame *frame)
     
     frame_initialise_gr(frame);
 
-    mplex_managed_geom((WMPlex*)frame, &geom);
+    mplex_managed_geom(&frame->mplex, &geom);
     
     FOR_ALL_CHILDREN(frame, sub){
         region_draw_config_updated(sub);
-        if(REGION_MANAGER(sub)==(WRegion*)frame)
-            region_fit(sub, &geom);
     }
     
+    mplex_fit_managed(&frame->mplex);
     frame_recalc_bar(frame);
     frame_set_background(frame, TRUE);
 }

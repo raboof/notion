@@ -51,7 +51,8 @@ DECLCLASS(WClientWin){
     int state;
     int event_mask;
     Window win;
-    WRectangle max_geom;
+    
+    WFitParams last_fp;
     
     int orig_bw;
 

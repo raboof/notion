@@ -25,10 +25,10 @@
 /*{{{ Destroy/create frame */
 
 
-static bool ionframe_init(WIonFrame *frame, WWindow *parent, 
-                          const WRectangle *geom)
+static bool ionframe_init(WIonFrame *frame, WWindow *par,
+                          const WFitParams *fp)
 {
-    if(!frame_init((WFrame*)frame, parent, geom))
+    if(!frame_init((WFrame*)frame, par, fp))
         return FALSE;
     
     region_add_bindmap((WRegion*)frame, &(ionframe_bindmap));
@@ -37,9 +37,9 @@ static bool ionframe_init(WIonFrame *frame, WWindow *parent,
 }
 
 
-WIonFrame *create_ionframe(WWindow *parent, const WRectangle *geom)
+WIonFrame *create_ionframe(WWindow *par, const WFitParams *fp)
 {
-    CREATEOBJ_IMPL(WIonFrame, ionframe, (p, parent, geom));
+    CREATEOBJ_IMPL(WIonFrame, ionframe, (p, par, fp));
 }
 
 
@@ -73,9 +73,9 @@ static const char *ionframe_tab_style(WIonFrame *frame)
 /*{{{ Load */
 
 
-WRegion *ionframe_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
+WRegion *ionframe_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 {
-    WIonFrame *frame=create_ionframe(par, geom);
+    WIonFrame *frame=create_ionframe(par, fp);
     if(frame!=NULL)
         frame_do_load((WFrame*)frame, tab);
     return (WRegion*)frame;

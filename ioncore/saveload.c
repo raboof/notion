@@ -29,7 +29,7 @@
 
 static bool loading_layout=FALSE;
 
-WRegion *create_region_load(WWindow *par, const WRectangle *geom, 
+WRegion *create_region_load(WWindow *par, const WFitParams *fp, 
                             ExtlTab tab)
 {
     char *objclass=NULL, *name=NULL;
@@ -60,7 +60,7 @@ WRegion *create_region_load(WWindow *par, const WRectangle *geom,
 
     free(objclass);
     
-    reg=fn(par, geom, tab);
+    reg=fn(par, fp, tab);
     
     if(reg==NULL)
         return NULL;

@@ -87,15 +87,16 @@ static WInfoWin *setup_moveres_display(WWindow *parent, int cx, int cy)
 {
     GrBorderWidths bdw;
     GrFontExtents fnte;
-    WRectangle g;
     WInfoWin *infowin;
+    WFitParams fp;
     
-    g.x=0;
-    g.y=0;
-    g.w=1;
-    g.h=1;
+    fp.mode=REGION_FIT_EXACT;
+    fp.g.x=0;
+    fp.g.y=0;
+    fp.g.w=1;
+    fp.g.h=1;
     
-    infowin=create_infowin(parent, &g, "moveres_display");
+    infowin=create_infowin(parent, &fp, "moveres_display");
     
     if(infowin==NULL)
         return NULL;
@@ -104,17 +105,17 @@ static WInfoWin *setup_moveres_display(WWindow *parent, int cx, int cy)
     grbrush_get_font_extents(INFOWIN_BRUSH(infowin), &fnte);
     
     /* Create move/resize position/size display window */
-    g.w=3;
-    g.w+=chars_for_num(REGION_GEOM(parent).w);
-    g.w+=chars_for_num(REGION_GEOM(parent).h);
-    g.w*=max_width(INFOWIN_BRUSH(infowin), "0123456789x+");     
-    g.w+=bdw.left+bdw.right;
-    g.h=fnte.max_height+bdw.top+bdw.bottom;;
+    fp.g.w=3;
+    fp.g.w+=chars_for_num(REGION_GEOM(parent).w);
+    fp.g.w+=chars_for_num(REGION_GEOM(parent).h);
+    fp.g.w*=max_width(INFOWIN_BRUSH(infowin), "0123456789x+");     
+    fp.g.w+=bdw.left+bdw.right;
+    fp.g.h=fnte.max_height+bdw.top+bdw.bottom;;
     
-    g.x=cx-g.w/2;
-    g.y=cy-g.h/2;
+    fp.g.x=cx-fp.g.w/2;
+    fp.g.y=cy-fp.g.h/2;
     
-    region_fit((WRegion*)infowin, &g);
+    region_fitrep((WRegion*)infowin, NULL, &fp);
     region_map((WRegion*)infowin);
     
     return infowin;
@@ -499,7 +500,7 @@ void region_request_geom(WRegion *reg, int flags, const WRectangle *geom,
         if(geomret!=NULL)
             *geomret=REGION_GEOM(reg);
         if(!tryonly)
-            region_fit(reg, geom);
+            region_fit(reg, geom, REGION_FIT_EXACT);
     }
 
     /*if(!tryonly && geomret!=NULL)
@@ -562,7 +563,7 @@ void region_request_managed_geom_allow(WRegion *mgr, WRegion *reg,
         *geomret=*geom;
     
     if(!(flags&REGION_RQGEOM_TRYONLY))
-        region_fit(reg, geom);
+        region_fit(reg, geom, REGION_FIT_EXACT);
 }
 
 

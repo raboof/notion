@@ -29,10 +29,10 @@
 /*{{{ New */
 
 
-static WRegion *add_fn_new(WWindow *par, const WRectangle *geom,
+static WRegion *add_fn_new(WWindow *par, const WFitParams *fp,
                            WRegionSimpleCreateFn *fn)
 {
-    return fn(par, geom);
+    return fn(par, fp);
 }
 
 
@@ -49,10 +49,10 @@ WRegion *region__attach_new(WRegion *mgr, WRegionSimpleCreateFn *cfn,
 /*{{{ Load */
 
 
-static WRegion *add_fn_load(WWindow *par, const WRectangle *geom, 
+static WRegion *add_fn_load(WWindow *par, const WFitParams *fp, 
                             ExtlTab *tab)
 {
-    return create_region_load(par, geom, *tab);
+    return create_region_load(par, fp, *tab);
 }
 
 
@@ -69,10 +69,10 @@ WRegion *region__attach_load(WRegion *mgr, ExtlTab tab,
 /*{{{ Reparent */
 
 
-static WRegion *add_fn_reparent(WWindow *par, const WRectangle *geom, 
+static WRegion *add_fn_reparent(WWindow *par, const WFitParams *fp, 
                                 WRegion *reg)
 {
-    if(!region_reparent(reg, par, geom)){
+    if(!region_fitrep(reg, par, fp)){
         warn("Unable to reparent");
         return NULL;
     }

@@ -621,7 +621,7 @@ static void dock_request_managed_geom(WDock *dock, WRegion *reg, int flags,
 
     /* Fit dock to new geom if required {{{ */
     if(!(flags&REGION_RQGEOM_TRYONLY)){
-        region_fit((WRegion *)dock, &border_dock_geom);
+        region_fit((WRegion *)dock, &border_dock_geom, REGION_FIT_EXACT);
     }
     /* }}} */
 
@@ -726,7 +726,8 @@ static void dock_request_managed_geom(WDock *dock, WRegion *reg, int flags,
 
         /* Fit dockapp to new geom if required {{{ */
         if(!(flags&REGION_RQGEOM_TRYONLY)){
-            region_fit((WRegion *)dockapp->cwin, &dockapp->geom);
+            region_fit((WRegion *)dockapp->cwin, &dockapp->geom, 
+                       REGION_FIT_BOUNDS);
         }
         /* }}} */
 
@@ -1007,7 +1008,7 @@ ExtlTab dock_get(WDock *dock)
 /* dock_init {{{ */
 static bool dock_init(WDock *dock, int screen, ExtlTab conftab)
 {
-    WRectangle geom={-1, -1, 1, 1};
+    WFitParams fp={{-1, -1, 1, 1}, REGION_FIT_EXACT};
     WScreen *scr;
     WWindow *parent;
 
@@ -1029,7 +1030,7 @@ static bool dock_init(WDock *dock, int screen, ExtlTab conftab)
     dock->dockapps=NULL;
     /* }}} */
 
-    if(!window_init_new((WWindow *)dock, parent, &geom)){
+    if(!window_init_new((WWindow *)dock, parent, &fp)){
         return FALSE;
     }
     
@@ -1126,7 +1127,8 @@ static bool dock_manage_clientwin(WDock *dock, WClientWin *cwin,
                        &(dock->managed_list));
     dock_request_managed_geom(dock, (WRegion *)cwin, REGION_RQGEOM_TRYONLY,
                               NULL, &geom);
-    region_reparent((WRegion *)cwin, (WWindow *)dock, &geom);
+    region_reparent((WRegion *)cwin, (WWindow *)dock, &geom, 
+                    REGION_FIT_BOUNDS);
     dock_resize(dock);
     region_map((WRegion *)cwin);
 

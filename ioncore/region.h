@@ -36,6 +36,17 @@
 #define REGION_GEOM(R)          (((WRegion*)(R))->geom)
 #define REGION_ACTIVE_SUB(R)      (((WRegion*)(R))->active_sub)
 
+typedef enum{
+    REGION_FIT_EXACT,
+    REGION_FIT_BOUNDS
+} WRegionFitMode;
+
+INTRSTRUCT(WFitParams);
+DECLSTRUCT(WFitParams){
+    WRectangle g;
+    WRegionFitMode mode;
+};
+
 INTRSTRUCT(WSubmapState);
 DECLSTRUCT(WSubmapState){
     uint key, state;
@@ -74,11 +85,10 @@ DECLCLASS(WRegion){
     int mgd_activity;
 };
 
-extern void region_init(WRegion *reg, WRegion *parent, 
-                        const WRectangle *geom);
+extern void region_init(WRegion *reg, WWindow *par, const WFitParams *fp);
 extern void region_deinit(WRegion *reg);
 
-DYNFUN void region_fit(WRegion *reg, const WRectangle *geom);
+DYNFUN bool region_fitrep(WRegion *reg, WWindow *par, const WFitParams *fp);
 DYNFUN void region_map(WRegion *reg);
 DYNFUN void region_unmap(WRegion *reg);
 DYNFUN Window region_xwindow(const WRegion *reg);
@@ -95,6 +105,11 @@ DYNFUN void region_notify_managed_change(WRegion *reg, WRegion *sub);
 DYNFUN bool region_may_destroy_managed(WRegion *mgr, WRegion *reg);
 DYNFUN WRegion *region_current(WRegion *mgr);
 DYNFUN void region_notify_rootpos(WRegion *reg, int x, int y);
+
+extern void region_fit(WRegion *reg, const WRectangle *geom, 
+                       WRegionFitMode mode);
+extern bool region_reparent(WRegion *reg, WWindow *target, 
+                            const WRectangle *geom, WRegionFitMode mode);
 
 extern void region_draw_config_updated_default(WRegion *reg);
 

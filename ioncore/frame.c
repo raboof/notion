@@ -56,8 +56,7 @@ static void frame_free_titles(WFrame *frame);
 /*{{{ Destroy/create frame */
 
 
-bool frame_init(WFrame *frame, WWindow *parent, 
-                   const WRectangle *geom)
+bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp)
 {
     WRectangle mg;
     
@@ -74,7 +73,7 @@ bool frame_init(WFrame *frame, WWindow *parent,
     frame->brush=NULL;
     frame->bar_brush=NULL;
 
-    if(!mplex_init_new((WMPlex*)frame, parent, geom))
+    if(!mplex_init_new((WMPlex*)frame, parent, fp))
         return FALSE;
     
     frame_initialise_gr(frame);
@@ -93,9 +92,9 @@ bool frame_init(WFrame *frame, WWindow *parent,
 }
 
 
-WFrame *create_frame(WWindow *parent, const WRectangle *geom)
+WFrame *create_frame(WWindow *parent, const WFitParams *fp)
 {
-    CREATEOBJ_IMPL(WFrame, frame, (p, parent, geom));
+    CREATEOBJ_IMPL(WFrame, frame, (p, parent, fp));
 }
 
 
@@ -331,30 +330,32 @@ static bool frame_initialise_titles(WFrame *frame)
 /*{{{ Resize and reparent */
 
 
-static void reparent_or_fit(WFrame *frame, const WRectangle *geom,
-                            WWindow *parent)
+bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp)
 {
     WRectangle old_geom, mg;
-    bool wchg=(REGION_GEOM(frame).w!=geom->w);
-    bool hchg=(REGION_GEOM(frame).h!=geom->h);
-    bool move=(REGION_GEOM(frame).x!=geom->x ||
-               REGION_GEOM(frame).y!=geom->y);
-    int w=maxof(1, geom->w);
-    int h=maxof(1, geom->h);
+    bool wchg=(REGION_GEOM(frame).w!=fp->g.w);
+    bool hchg=(REGION_GEOM(frame).h!=fp->g.h);
+    bool move=(REGION_GEOM(frame).x!=fp->g.x ||
+               REGION_GEOM(frame).y!=fp->g.y);
+    int w=maxof(1, fp->g.w);
+    int h=maxof(1, fp->g.h);
     
-    if(parent!=NULL){
+    if(par!=NULL){
+        if(!region_same_rootwin((WRegion*)frame, (WRegion*)par))
+            return FALSE;
+
         region_detach_parent((WRegion*)frame);
-        XReparentWindow(ioncore_g.dpy, FRAME_WIN(frame), parent->win,
-                        geom->x, geom->y);
+        XReparentWindow(ioncore_g.dpy, FRAME_WIN(frame), par->win,
+                        fp->g.x, fp->g.y);
         XResizeWindow(ioncore_g.dpy, FRAME_WIN(frame), w, h);
-        region_attach_parent((WRegion*)frame, (WRegion*)parent);
+        region_attach_parent((WRegion*)frame, (WRegion*)par);
     }else{
         XMoveResizeWindow(ioncore_g.dpy, FRAME_WIN(frame),
-                          geom->x, geom->y, w, h);
+                          fp->g.x, fp->g.y, w, h);
     }
     
     old_geom=REGION_GEOM(frame);
-    REGION_GEOM(frame)=*geom;
+    REGION_GEOM(frame)=fp->g;
 
     if(hchg){
         frame->flags|=FRAME_SAVED_VERT;
@@ -390,23 +391,8 @@ static void reparent_or_fit(WFrame *frame, const WRectangle *geom,
 
     if(wchg || hchg)
         mplex_size_changed((WMPlex*)frame, wchg, hchg);
-}
-
-
-bool frame_reparent(WFrame *frame, WWindow *parent, 
-                       const WRectangle *geom)
-{
-    if(!region_same_rootwin((WRegion*)frame, (WRegion*)parent))
-        return FALSE;
     
-    reparent_or_fit(frame, geom, parent);
     return TRUE;
-}
-
-
-void frame_fit(WFrame *frame, const WRectangle *geom)
-{
-    reparent_or_fit(frame, geom, NULL);
 }
 
 
@@ -638,9 +624,9 @@ void frame_do_load(WFrame *frame, ExtlTab tab)
 }
 
 
-WRegion *frame_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
+WRegion *frame_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 {
-    WFrame *frame=create_frame(par, geom);
+    WFrame *frame=create_frame(par, fp);
     if(frame!=NULL)
         frame_do_load(frame, tab);
     return (WRegion*)frame;
@@ -655,8 +641,6 @@ WRegion *frame_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
 
 static DynFunTab frame_dynfuntab[]={
     {(DynFun*)region_rqclose, (DynFun*)frame_rqclose},
-    {region_fit, frame_fit},
-    {(DynFun*)region_reparent, (DynFun*)frame_reparent},
     {region_resize_hints, frame_resize_hints},
 
     {mplex_managed_changed, frame_managed_changed},
@@ -692,6 +676,9 @@ static DynFunTab frame_dynfuntab[]={
 
     {region_draw_config_updated, 
      frame_draw_config_updated},
+
+    {(DynFun*)region_fitrep,
+     (DynFun*)frame_fitrep},
     
     END_DYNFUNTAB
 };

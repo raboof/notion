@@ -50,46 +50,39 @@ void window_release(WWindow *wwin)
 }
 
 
-bool region_reparent(WRegion *reg, WWindow *par, const WRectangle *geom)
-{
-    bool ret=FALSE;
-    CALL_DYN_RET(ret, bool, region_reparent, reg, (reg, par, geom));
-    return ret;
-}
-
-
 /*}}}*/
     
 
 /*{{{ Init, create */
 
 
-bool window_init(WWindow *wwin, WWindow *parent, Window win,
-                 const WRectangle *geom)
+bool window_init(WWindow *wwin, WWindow *par, Window win, 
+                 const WFitParams *fp)
 {
     wwin->win=win;
     wwin->xic=NULL;
     wwin->keep_on_top_list=NULL;
-    region_init(&(wwin->region), (WRegion*)parent, geom);
+    region_init(&(wwin->region), par, fp);
     if(win!=None){
-        XSaveContext(ioncore_g.dpy, win, ioncore_g.win_context, (XPointer)wwin);
-        if(parent!=NULL)
-            window_init_sibling_stacking(parent, win);
+        XSaveContext(ioncore_g.dpy, win, ioncore_g.win_context, 
+                     (XPointer)wwin);
+        if(par!=NULL)
+            window_init_sibling_stacking(par, win);
     }
     return TRUE;
 }
 
 
-bool window_init_new(WWindow *wwin, WWindow *parent, const WRectangle *geom)
+bool window_init_new(WWindow *wwin, WWindow *par, const WFitParams *fp)
 {
     Window win;
     
-    win=create_xwindow(region_rootwin_of((WRegion*)parent),
-                       parent->win, geom);
+    win=create_xwindow(region_rootwin_of((WRegion*)par),
+                       par->win, &(fp->g));
     if(win==None)
         return FALSE;
     /* window_init does not fail */
-    return window_init(wwin, parent, win, geom);
+    return window_init(wwin, par, win, fp);
 }
 
 
@@ -113,19 +106,18 @@ void window_deinit(WWindow *wwin)
 /*{{{ Region dynfuns */
 
 
-static void reparent_or_fit_window(WWindow *wwin, WWindow *parent,
-                                   const WRectangle *geom)
+void window_do_fitrep(WWindow *wwin, WWindow *par, const WRectangle *geom)
 {
     bool move=(REGION_GEOM(wwin).x!=geom->x ||
                REGION_GEOM(wwin).y!=geom->y);
     int w=maxof(1, geom->w);
     int h=maxof(1, geom->h);
 
-    if(parent!=NULL){
+    if(par!=NULL){
         region_detach_parent((WRegion*)wwin);
-        XReparentWindow(ioncore_g.dpy, wwin->win, parent->win, geom->x, geom->y);
+        XReparentWindow(ioncore_g.dpy, wwin->win, par->win, geom->x, geom->y);
         XResizeWindow(ioncore_g.dpy, wwin->win, w, h);
-        region_attach_parent((WRegion*)wwin, (WRegion*)parent);
+        region_attach_parent((WRegion*)wwin, (WRegion*)par);
     }else{
         XMoveResizeWindow(ioncore_g.dpy, wwin->win, geom->x, geom->y, w, h);
     }
@@ -137,18 +129,12 @@ static void reparent_or_fit_window(WWindow *wwin, WWindow *parent,
 }
 
 
-bool window_reparent(WWindow *wwin, WWindow *parent, const WRectangle *geom)
+bool window_fitrep(WWindow *wwin, WWindow *par, const WFitParams *fp)
 {
-    if(!region_same_rootwin((WRegion*)wwin, (WRegion*)parent))
+    if(par!=NULL && !region_same_rootwin((WRegion*)wwin, (WRegion*)par))
         return FALSE;
-    reparent_or_fit_window(wwin, parent, geom);
+    window_do_fitrep(wwin, par, &(fp->g));
     return TRUE;
-}
-
-
-void window_fit(WWindow *wwin, const WRectangle *geom)
-{
-    reparent_or_fit_window(wwin, NULL, geom);
 }
 
 
@@ -194,11 +180,10 @@ Window window_xwindow(const WWindow *wwin)
 
 
 static DynFunTab window_dynfuntab[]={
-    {region_fit, window_fit},
     {region_map, window_map},
     {region_unmap, window_unmap},
     {region_do_set_focus, window_do_set_focus},
-    {(DynFun*)region_reparent, (DynFun*)window_reparent},
+    {(DynFun*)region_fitrep, (DynFun*)window_fitrep},
     {(DynFun*)region_restack, (DynFun*)window_restack},
     {(DynFun*)region_xwindow, (DynFun*)window_xwindow},
     END_DYNFUNTAB

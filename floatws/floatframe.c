@@ -36,12 +36,12 @@
 
 
 static bool floatframe_init(WFloatFrame *frame, WWindow *parent,
-                            const WRectangle *geom)
+                            const WFitParams *fp)
 {
-    frame->bar_w=geom->w;
+    frame->bar_w=fp->g.w;
     frame->sticky=FALSE;
     
-    if(!frame_init((WFrame*)frame, parent, geom))
+    if(!frame_init((WFrame*)frame, parent, fp))
         return FALSE;
     
     frame->frame.flags|=FRAME_BAR_OUTSIDE;
@@ -52,9 +52,9 @@ static bool floatframe_init(WFloatFrame *frame, WWindow *parent,
 }
 
 
-WFloatFrame *create_floatframe(WWindow *parent, const WRectangle *geom)
+WFloatFrame *create_floatframe(WWindow *parent, const WFitParams *fp)
 {
-    CREATEOBJ_IMPL(WFloatFrame, floatframe, (p, parent, geom));
+    CREATEOBJ_IMPL(WFloatFrame, floatframe, (p, parent, fp));
 }
 
 
@@ -500,9 +500,9 @@ static ExtlTab floatframe_get_configuration(WFloatFrame *frame)
 }
 
 
-WRegion *floatframe_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
+WRegion *floatframe_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 {
-    WFloatFrame *frame=create_floatframe(par, geom);
+    WFloatFrame *frame=create_floatframe(par, fp);
     
     if(frame==NULL)
         return NULL;

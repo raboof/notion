@@ -46,16 +46,13 @@ DECLCLASS(WFrame){
 
 
 /* Create/destroy */
-extern WFrame *create_frame(WWindow *parent, const WRectangle *geom);
-extern bool frame_init(WFrame *frame, WWindow *parent,
-                          const WRectangle *geom);
+extern WFrame *create_frame(WWindow *parent, const WFitParams *fp);
+extern bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp);
 extern void frame_deinit(WFrame *frame);
 extern bool frame_rqclose(WFrame *frame);
 
 /* Resize and reparent */
-extern bool frame_reparent(WFrame *frame, WWindow *parent,
-                              const WRectangle *geom);
-extern void frame_fit(WFrame *frame, const WRectangle *geom);
+extern bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp);
 extern void frame_resize_hints(WFrame *frame, XSizeHints *hints_ret,
                                   uint *relw_ret, uint *relh_ret);
 
@@ -77,7 +74,7 @@ extern bool frame_has_tabbar(WFrame *frame);
 
 /* Misc */
 extern ExtlTab frame_get_configuration(WFrame *frame);
-extern WRegion *frame_load(WWindow *par, const WRectangle *geom, ExtlTab tab);
+extern WRegion *frame_load(WWindow *par, const WFitParams *fp, ExtlTab tab);
 extern void frame_do_load(WFrame *frame, ExtlTab tab);
 
 #endif /* ION_IONCORE_FRAME_H */

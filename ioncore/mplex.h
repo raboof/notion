@@ -45,15 +45,13 @@ DECLCLASS(WMPlex){
 
 /* Create/destroy */
 extern bool mplex_init(WMPlex *mplex, WWindow *parent, Window win,
-                       const WRectangle *geom);
+                       const WFitParams *fp);
 extern bool mplex_init_new(WMPlex *mplex, WWindow *parent, 
-                           const WRectangle *geom);
+                           const WFitParams *fp);
 extern void mplex_deinit(WMPlex *mplex);
 
 /* Resize and reparent */
-extern bool mplex_reparent(WMPlex *mplex, WWindow *parent,
-                           const WRectangle *geom);
-extern void mplex_fit(WMPlex *mplex, const WRectangle *geom);
+extern bool mplex_fitrep(WMPlex *mplex, WWindow *par, const WFitParams *fp);
 extern void mplex_fit_managed(WMPlex *mplex);
 
 /* Mapping */

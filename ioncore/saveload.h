@@ -18,7 +18,7 @@
 #include "extl.h"
 #include "rectangle.h"
 
-extern WRegion *create_region_load(WWindow *par, const WRectangle *geom, 
+extern WRegion *create_region_load(WWindow *par, const WFitParams *fp, 
                                    ExtlTab tab);
 
 extern bool region_supports_save(WRegion *reg);

@@ -31,12 +31,9 @@ DECLCLASS(WIonWS){
 };
 
 
-extern WIonWS *create_ionws(WWindow *parent, const WRectangle *bounds, 
-                            bool ci);
-extern WIonWS *create_ionws_simple(WWindow *parent, 
-                                   const WRectangle *bounds);
-extern WRegion *ionws_load(WWindow *par, const WRectangle *geom, 
-                           ExtlTab tab);
+extern WIonWS *create_ionws(WWindow *parent, const WFitParams *fp, bool ci);
+extern WIonWS *create_ionws_simple(WWindow *parent, const WFitParams *fp);
+extern WRegion *ionws_load(WWindow *par, const WFitParams *fp, ExtlTab tab);
 
 extern bool ionws_rescue_clientwins(WIonWS *ws);
 

@@ -40,7 +40,7 @@
 
 
 static bool screen_init(WScreen *scr, WRootWin *rootwin,
-                        int id, const WRectangle *geom, bool useroot)
+                        int id, const WFitParams *fp, bool useroot)
 {
     Window win;
     XSetWindowAttributes attr;
@@ -63,7 +63,7 @@ static bool screen_init(WScreen *scr, WRootWin *rootwin,
         attrflags=CWBackPixmap;
         
         win=XCreateWindow(ioncore_g.dpy, WROOTWIN_ROOT(rootwin),
-                          geom->x, geom->y, geom->w, geom->h, 0, 
+                          fp->g.x, fp->g.y, fp->g.w, fp->g.h, 0, 
                           DefaultDepth(ioncore_g.dpy, rootwin->xscr),
                           InputOutput,
                           DefaultVisual(ioncore_g.dpy, rootwin->xscr),
@@ -72,7 +72,7 @@ static bool screen_init(WScreen *scr, WRootWin *rootwin,
             return FALSE;
     }
 
-    if(!mplex_init((WMPlex*)scr, (WWindow*)rootwin, win, geom))
+    if(!mplex_init((WMPlex*)scr, (WWindow*)rootwin, win, fp))
         return FALSE;
 
     /*scr->mplex.win.region.rootwin=rootwin;
@@ -115,10 +115,10 @@ static bool screen_init(WScreen *scr, WRootWin *rootwin,
 }
 
 
-WScreen *create_screen(WRootWin *rootwin, int id, const WRectangle *geom,
+WScreen *create_screen(WRootWin *rootwin, int id, const WFitParams *fp,
                        bool useroot)
 {
-    CREATEOBJ_IMPL(WScreen, screen, (p, rootwin, id, geom, useroot));
+    CREATEOBJ_IMPL(WScreen, screen, (p, rootwin, id, fp, useroot));
 }
 
 
@@ -175,21 +175,19 @@ static bool screen_handle_drop(WScreen *scr, int x, int y, WRegion *dropped)
 /*{{{ Region dynfun implementations */
 
 
-static void screen_fit(WScreen *scr, const WRectangle *geom)
+static bool screen_fitrep(WScreen *scr, WWindow *par, const WFitParams *fp)
 {
     WRegion *sub;
     
-    if(scr->uses_root){
-        WRectangle mg;
-        
-        screen_managed_geom(scr, &mg);
-    
-        FOR_ALL_MANAGED_ON_LIST(SCR_MLIST(scr), sub){
-            region_fit(sub, &mg);
-        }
-    }else{
-        mplex_fit((WMPlex*)scr, geom);
+    if(par==NULL){
+        warn("Unable to reparent screens.");
+        return FALSE;
     }
+    
+    if(scr->uses_root)
+        return FALSE;
+
+    return mplex_fitrep((WMPlex*)scr, NULL, fp);
 }
 
 
@@ -435,7 +433,6 @@ bool screen_init_layout(WScreen *scr, ExtlTab tab)
 
 
 static DynFunTab screen_dynfuntab[]={
-    {region_fit, screen_fit},
     {region_map, screen_map},
     {region_unmap, screen_unmap},
     {region_activated, screen_activated},
@@ -452,6 +449,9 @@ static DynFunTab screen_dynfuntab[]={
 
     {(DynFun*)region_handle_drop, 
      (DynFun*)screen_handle_drop},
+
+    {(DynFun*)region_fitrep,
+     (DynFun*)screen_fitrep},
     
     END_DYNFUNTAB
 };

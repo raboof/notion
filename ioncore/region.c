@@ -31,12 +31,12 @@
 /*{{{ Init & deinit */
 
 
-void region_init(WRegion *reg, WRegion *parent, const WRectangle *geom)
+void region_init(WRegion *reg, WWindow *par, const WFitParams *fp)
 {
-    if(geom->w<0 || geom->h<0)
-        warn("Creating region with negative width or height!");
+    if(fp->g.w<0 || fp->g.h<0)
+        warn("Creating reg ion with negative width or height!");
     
-    reg->geom=*geom;
+    reg->geom=fp->g;
     reg->flags=0;
     reg->bindings=NULL;
     reg->rootwin=NULL;
@@ -64,9 +64,9 @@ void region_init(WRegion *reg, WRegion *parent, const WRectangle *geom)
 
     region_init_name(reg);
     
-    if(parent!=NULL){
-        reg->rootwin=parent->rootwin;
-        region_set_parent(reg, parent);
+    if(par!=NULL){
+        reg->rootwin=((WRegion*)par)->rootwin;
+        region_set_parent(reg, (WRegion*)par);
     }else{
         assert(OBJ_IS(reg, WRootWin));/* || OBJ_IS(reg, WScreen));*/
     }
@@ -124,9 +124,11 @@ void region_deinit(WRegion *reg)
 /*{{{ Dynfuns */
 
 
-void region_fit(WRegion *reg, const WRectangle *geom)
+bool region_fitrep(WRegion *reg, WWindow *par, const WFitParams *fp)
 {
-    CALL_DYN(region_fit, reg, (reg, geom));
+    bool ret=FALSE;
+    CALL_DYN_RET(ret, bool, region_fitrep, reg, (reg, par, fp));
+    return ret;
 }
 
 
@@ -442,6 +444,25 @@ bool region_goto(WRegion *reg)
 
 
 /*{{{ Helpers/misc */
+
+
+void region_fit(WRegion *reg, const WRectangle *geom, WRegionFitMode mode)
+{
+    WFitParams fp;
+    fp.g=*geom;
+    fp.mode=mode;
+    region_fitrep(reg, NULL, &fp);
+}
+
+
+bool region_reparent(WRegion *reg, WWindow *par,
+                     const WRectangle *geom, WRegionFitMode mode)
+{
+    WFitParams fp;
+    fp.g=*geom;
+    fp.mode=mode;
+    return region_fitrep(reg, par, &fp);
+}
 
 
 /*EXTL_DOC

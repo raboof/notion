@@ -64,7 +64,7 @@ WMenu *mod_menu_pmenu(WWindow *where, ExtlFn handler, ExtlTab tab)
     WMenuCreateParams fnp;
     XEvent *ev=ioncore_current_pointer_event();
     WMenu *menu;
-    WRectangle geom;
+    WFitParams fp;
     
     if(ev==NULL || ev->type!=ButtonPress)
         return NULL;
@@ -82,12 +82,13 @@ WMenu *mod_menu_pmenu(WWindow *where, ExtlFn handler, ExtlTab tab)
     fnp.ref_x=ev->xbutton.x_root-REGION_GEOM(scr).x;
     fnp.ref_y=ev->xbutton.y_root-REGION_GEOM(scr).y;
     
-    geom.x=0;
-    geom.y=0;
-    geom.w=REGION_GEOM(where).w;
-    geom.h=REGION_GEOM(where).h;
+    fp.mode=REGION_FIT_BOUNDS;
+    fp.g.x=0;
+    fp.g.y=0;
+    fp.g.w=REGION_GEOM(where).w;
+    fp.g.h=REGION_GEOM(where).h;
     
-    menu=create_menu((WWindow*)scr, &geom, &fnp);
+    menu=create_menu((WWindow*)scr, &fp, &fnp);
     
     if(menu==NULL)
         return NULL;

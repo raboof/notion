@@ -31,12 +31,11 @@ DECLCLASS(WFloatFrame){
 };
 
 
-extern WFloatFrame *create_floatframe(WWindow *parent, 
-                                      const WRectangle *geom);
+extern WFloatFrame *create_floatframe(WWindow *parent, const WFitParams *fp);
 
 extern void floatframe_remove_managed(WFloatFrame *frame, WRegion *reg);
 
-extern WRegion *floatframe_load(WWindow *par, const WRectangle *geom, 
+extern WRegion *floatframe_load(WWindow *par, const WFitParams *fp, 
                                 ExtlTab tab);
 
 extern void floatframe_p_move(WFloatFrame *frame);

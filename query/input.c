@@ -43,7 +43,10 @@ void input_scrolldown(WInput *input)
 
 void input_calc_size(WInput *input, WRectangle *geom)
 {
-    CALL_DYN(input_calc_size, input, (input, geom));
+    *geom=input->last_fp.g;
+    {
+        CALL_DYN(input_calc_size, input, (input, geom));
+    }
 }
 
 
@@ -61,18 +64,24 @@ const char *input_style(WInput *input)
 /*{{{ Resize and draw config update */
 
 
-void input_refit(WInput *input)
+static void input_do_refit(WInput *input, WWindow *par)
 {
-    WRectangle geom=input->max_geom;
-    input_calc_size(input, &geom);
-    window_fit(&input->win, &geom);
+    WRectangle g;
+    input_calc_size(input, &g);
+    window_do_fitrep(&input->win, par, &g);
 }
 
 
-void input_fit(WInput *input, const WRectangle *geom)
+void input_refit(WInput *input)
 {
-    input->max_geom=*geom;
-    input_refit(input);
+    input_do_refit(input, NULL);
+}
+
+
+void input_fitrep(WInput *input, WWindow *par, const WFitParams *fp)
+{
+    input->last_fp=*fp;
+    input_do_refit(input, par);
 }
 
 
@@ -104,13 +113,13 @@ void input_draw_config_updated(WInput *input)
 /*{{{ Init/deinit */
 
 
-bool input_init(WInput *input, WWindow *par, const WRectangle *geom)
+bool input_init(WInput *input, WWindow *par, const WFitParams *fp)
 {
     Window win;
 
-    input->max_geom=*geom;
+    input->last_fp=*fp;
 
-    if(!window_init_new((WWindow*)input, par, geom))
+    if(!window_init_new((WWindow*)input, par, fp))
         return FALSE;
     
     win=input->win.win;
@@ -184,7 +193,7 @@ static void input_activated(WInput *input)
 
 
 static DynFunTab input_dynfuntab[]={
-    {region_fit, input_fit},
+    {(DynFun*)region_fitrep, (DynFun*)input_fitrep},
     {region_draw_config_updated, input_draw_config_updated},
     {(DynFun*)region_rqclose, (DynFun*)input_rqclose},
     {region_activated, input_activated},

@@ -49,28 +49,32 @@ static void floatws_fit(WFloatWS *ws, const WRectangle *geom)
 }
 
 
-static bool reparent_floatws(WFloatWS *ws, WWindow *parent, 
-                             const WRectangle *geom)
+bool floatws_fitrep(WFloatWS *ws, WWindow *par, const WFitParams *fp)
 {
     WRegion *sub, *next;
     bool rs;
     int xdiff, ydiff;
     
-    if(!region_same_rootwin((WRegion*)ws, (WRegion*)parent))
+    if(par==NULL){
+        REGION_GEOM(ws)=fp->g;
+        return TRUE;
+    }
+
+    if(!region_same_rootwin((WRegion*)ws, (WRegion*)par))
         return FALSE;
     
     region_detach_parent((WRegion*)ws);
-    XReparentWindow(ioncore_g.dpy, ws->dummywin, parent->win, geom->x, geom->h);
-    region_attach_parent((WRegion*)ws, (WRegion*)parent);
+    XReparentWindow(ioncore_g.dpy, ws->dummywin, par->win, fp->g.x, fp->g.h);
+    region_attach_parent((WRegion*)ws, (WRegion*)par);
     
-    xdiff=geom->x-REGION_GEOM(ws).x;
-    ydiff=geom->y-REGION_GEOM(ws).y;
+    xdiff=fp->g.x-REGION_GEOM(ws).x;
+    ydiff=fp->g.y-REGION_GEOM(ws).y;
     
     FOR_ALL_MANAGED_ON_LIST_W_NEXT(ws->managed_list, sub, next){
         WRectangle g=REGION_GEOM(sub);
         g.x+=xdiff;
         g.y+=ydiff;
-        if(!region_reparent(sub, parent, &g)){
+        if(!region_reparent(sub, par, &g, REGION_FIT_EXACT)){
             warn("Problem: can't reparent a %s managed by a WFloatWS"
                  "being reparented. Detaching from this object.",
                  OBJ_TYPESTR(sub));
@@ -229,14 +233,13 @@ static Window floatws_xwindow(const WFloatWS *ws)
 /*{{{ Create/destroy */
 
 
-static bool floatws_init(WFloatWS *ws, WWindow *parent, 
-                         const WRectangle *bounds)
+static bool floatws_init(WFloatWS *ws, WWindow *parent, const WFitParams *fp)
 {
     if(!OBJ_IS(parent, WWindow))
         return FALSE;
 
     ws->dummywin=XCreateWindow(ioncore_g.dpy, parent->win,
-                                bounds->x, bounds->y, 1, 1, 0,
+                                fp->g.x, fp->g.y, 1, 1, 0,
                                 CopyFromParent, InputOnly,
                                 CopyFromParent, 0, NULL);
     if(ws->dummywin==None)
@@ -251,7 +254,7 @@ static bool floatws_init(WFloatWS *ws, WWindow *parent,
     ws->managed_list=NULL;
     ws->current_managed=NULL;
 
-    genws_init(&(ws->genws), parent, bounds);
+    genws_init(&(ws->genws), parent, fp);
 
     region_add_bindmap((WRegion*)ws, &floatws_bindmap);
     
@@ -259,9 +262,9 @@ static bool floatws_init(WFloatWS *ws, WWindow *parent,
 }
 
 
-WFloatWS *create_floatws(WWindow *parent, const WRectangle *bounds)
+WFloatWS *create_floatws(WWindow *parent, const WFitParams *fp)
 {
-    CREATEOBJ_IMPL(WFloatWS, floatws, (p, parent, bounds));
+    CREATEOBJ_IMPL(WFloatWS, floatws, (p, parent, fp));
 }
 
 
@@ -360,7 +363,7 @@ static bool floatws_do_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
 {
     WFloatFrame *frame=NULL;
     WWindow *par;
-    WRectangle fgeom=param->geom;
+    WFitParams fp;
     int swf;
     
     if(redir==MANAGE_REDIR_PREFER_YES){
@@ -379,8 +382,9 @@ static bool floatws_do_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
     assert(par!=NULL);
     
     /* Create frame with dummy geometry */
-    fgeom=REGION_GEOM(cwin);
-    frame=create_floatframe(par, &fgeom);
+    fp.mode=REGION_FIT_EXACT;
+    fp.g=REGION_GEOM(cwin);
+    frame=create_floatframe(par, &fp);
 
     if(frame==NULL){
         warn("Failed to create a new WFloatFrame for client window");
@@ -389,7 +393,7 @@ static bool floatws_do_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
 
     assert(region_same_rootwin((WRegion*)frame, (WRegion*)cwin));
     
-    floatframe_geom_from_initial_geom(frame, ws, &fgeom, param->gravity);
+    floatframe_geom_from_initial_geom(frame, ws, &fp.g, param->gravity);
 
     if(param->maprq && ioncore_g.opmode!=IONCORE_OPMODE_INIT){
         /* When the window is mapped by application request, position
@@ -403,18 +407,18 @@ static bool floatws_do_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
     /* However, if the requested geometry does not overlap the
      * workspaces's geometry, position request is never honoured.
      */
-    if((fgeom.x+fgeom.w<=REGION_GEOM(ws).x) ||
-       (fgeom.y+fgeom.h<=REGION_GEOM(ws).y) ||
-       (fgeom.x>=REGION_GEOM(ws).x+REGION_GEOM(ws).w) ||
-       (fgeom.y>=REGION_GEOM(ws).y+REGION_GEOM(ws).h)){
+    if((fp.g.x+fp.g.w<=REGION_GEOM(ws).x) ||
+       (fp.g.y+fp.g.h<=REGION_GEOM(ws).y) ||
+       (fp.g.x>=REGION_GEOM(ws).x+REGION_GEOM(ws).w) ||
+       (fp.g.y>=REGION_GEOM(ws).y+REGION_GEOM(ws).h)){
         respectpos=FALSE;
     }
     
     if(!respectpos)
-        floatws_calc_placement(ws, &fgeom);
+        floatws_calc_placement(ws, &fp.g);
     
     /* Set proper geometry */
-    region_fit((WRegion*)frame, &fgeom);
+    region_fit((WRegion*)frame, &fp.g, REGION_FIT_EXACT);
     
     swf=(param->switchto ? MPLEX_ATTACH_SWITCHTO : 0);
     if(!mplex_attach_simple((WMPlex*)frame, (WRegion*)cwin, swf)){
@@ -445,7 +449,7 @@ bool floatws_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
 static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
                                 WRegion *dropped)
 {
-    WRectangle fgeom;
+    WFitParams fp;
     WFloatFrame *frame;
     WWindow *par;
     
@@ -454,8 +458,9 @@ static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
     if(par==NULL)
         return FALSE;
     
-    fgeom=REGION_GEOM(dropped);
-    frame=create_floatframe(par, &fgeom);
+    fp.mode=REGION_FIT_EXACT;
+    fp.g=REGION_GEOM(dropped);
+    frame=create_floatframe(par, &fp);
     
     if(frame==NULL){
         warn("Failed to create a new WFloatFrame.");
@@ -464,12 +469,12 @@ static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
 
     /* Resize */
     
-    floatframe_geom_from_managed_geom(frame, &fgeom);
+    floatframe_geom_from_managed_geom(frame, &fp.g);
     /* The x and y arguments are in root coordinate space */
-    region_rootpos((WRegion*)par, &fgeom.x, &fgeom.y);
-    fgeom.x=x-fgeom.x;
-    fgeom.y=y-fgeom.y;
-    region_fit((WRegion*)frame, &fgeom);
+    region_rootpos((WRegion*)par, &fp.g.x, &fp.g.y);
+    fp.g.x=x-fp.g.x;
+    fp.g.y=y-fp.g.y;
+    region_fitrep((WRegion*)frame, NULL, &fp);
     
     if(!mplex_attach_simple((WMPlex*)frame, dropped, MPLEX_ATTACH_SWITCHTO)){
         destroy_obj((Obj*)frame);
@@ -702,7 +707,7 @@ static ExtlTab floatws_get_configuration(WFloatWS *ws)
 
 
 static WRegion *floatws_do_attach(WFloatWS *ws, WRegionAttachHandler *fn,
-                                  void *fnparams, const WRectangle *geom)
+                                  void *fnparams, const WFitParams *fp)
 {
     WWindow *par;
     WRegion *reg;
@@ -710,7 +715,7 @@ static WRegion *floatws_do_attach(WFloatWS *ws, WRegionAttachHandler *fn,
     par=REGION_PARENT_CHK(ws, WWindow);
     assert(par!=NULL);
     
-    reg=fn(par, geom, fnparams);
+    reg=fn(par, fp, fnparams);
 
     if(reg!=NULL)
         floatws_add_managed(ws, reg);
@@ -738,13 +743,13 @@ static WRegion *floatws_attach_load(WFloatWS *ws, ExtlTab param)
 }
 
 
-WRegion *floatws_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
+WRegion *floatws_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 {
     WFloatWS *ws;
     ExtlTab substab, subtab;
     int i, n;
     
-    ws=create_floatws(par, geom);
+    ws=create_floatws(par, fp);
     
     if(ws==NULL)
         return NULL;
@@ -773,10 +778,8 @@ WRegion *floatws_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
 
 
 static DynFunTab floatws_dynfuntab[]={
-    {region_fit, 
-     floatws_fit},
-    {(DynFun*)region_reparent,
-     (DynFun*)reparent_floatws},
+    {(DynFun*)region_fitrep,
+     (DynFun*)floatws_fitrep},
 
     {region_map, 
      floatws_map},

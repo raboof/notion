@@ -31,7 +31,7 @@
  */
 EXTL_EXPORT
 WEdln *mod_query_query(WMPlex *mplex, const char *prompt, const char *dflt,
-                      ExtlFn handler, ExtlFn completor)
+                       ExtlFn handler, ExtlFn completor)
 {
     WRectangle geom;
     WEdlnCreateParams fnp;

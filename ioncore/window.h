@@ -26,10 +26,10 @@ DECLCLASS(WWindow){
 };
 
 
-extern bool window_init_new(WWindow *p, WWindow *parent, 
-                            const WRectangle *geom);
+extern bool window_init_new(WWindow *p, WWindow *parent,
+                            const WFitParams *fp);
 extern bool window_init(WWindow *p, WWindow *parent, Window win, 
-                        const WRectangle *geom);
+                        const WFitParams *fp);
 extern void window_deinit(WWindow *win);
 
 DYNFUN void window_draw(WWindow *wwin, bool complete);
@@ -40,14 +40,14 @@ DYNFUN void window_release(WWindow *wwin);
 /* Only to be used by regions that inherit this */
 extern void window_map(WWindow *wwin);
 extern void window_unmap(WWindow *wwin);
+
 extern void window_do_set_focus(WWindow *wwin, bool warp);
-extern void window_fit(WWindow *wwin, const WRectangle *geom);
-extern bool window_reparent(WWindow *wwin, WWindow *parent, 
-                            const WRectangle *geom);
+
+extern void window_do_fitrep(WWindow *wwin, WWindow *parent,
+                             const WRectangle *geom);
+extern bool window_fitrep(WWindow *wwin, WWindow *parent, 
+                          const WFitParams *fp);
 
 extern Window window_restack(WWindow *wwin, Window other, int mode);
-
-DYNFUN bool region_reparent(WRegion *reg, WWindow *target, 
-                            const WRectangle *geom);
 
 #endif /* ION_IONCORE_WINDOW_H */

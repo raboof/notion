@@ -264,8 +264,8 @@ static void configure_cwin_bw(Window win, int bw)
 }
 
 
-static bool clientwin_init(WClientWin *cwin, WRegion *parent,
-                           Window win, XWindowAttributes *attr)
+static bool clientwin_init(WClientWin *cwin, WWindow *par, Window win,
+                           XWindowAttributes *attr)
 {
     WRectangle geom;
     char *name;
@@ -292,7 +292,8 @@ static bool clientwin_init(WClientWin *cwin, WRegion *parent,
                                -cwin->orig_bw, -cwin->orig_bw);
     }
 
-    cwin->max_geom=geom;
+    cwin->last_fp.g=geom;
+    cwin->last_fp.mode=REGION_FIT_EXACT;
     cwin->last_h_rq=geom.h;
 
     cwin->transient_for=None;
@@ -307,7 +308,7 @@ static bool clientwin_init(WClientWin *cwin, WRegion *parent,
 
     watch_init(&(cwin->fsinfo.last_mgr_watch));
     
-    region_init(&(cwin->region), parent, &geom);
+    region_init(&(cwin->region), par, &(cwin->last_fp));
     
     clientwin_get_colormaps(cwin);
     clientwin_get_protocols(cwin);
@@ -324,10 +325,10 @@ static bool clientwin_init(WClientWin *cwin, WRegion *parent,
 }
 
 
-static WClientWin *create_clientwin(WRegion *parent, Window win,
+static WClientWin *create_clientwin(WWindow *par, Window win,
                                     XWindowAttributes *attr)
 {
-    CREATEOBJ_IMPL(WClientWin, clientwin, (p, parent, win, attr));
+    CREATEOBJ_IMPL(WClientWin, clientwin, (p, par, win, attr));
 }
 
 
@@ -490,7 +491,7 @@ again:
     }
 
     /* Allocate and initialize */
-    cwin=create_clientwin((WRegion*)rootwin, win, &attr);
+    cwin=create_clientwin((WWindow*)rootwin, win, &attr);
     
     if(cwin==NULL){
         warn("Unable to create a client window structure!");
@@ -585,10 +586,10 @@ static WRegion *clientwin_do_attach_transient(WClientWin *cwin,
                                               void *fnparams,
                                               WRegion *thereg)
 {
-    WRectangle geom=cwin->max_geom;
     WWindow *par=REGION_PARENT_CHK(cwin, WWindow);
     WRegion *reg;
     TransRepar tp, *tpold;
+    WFitParams fp;
 
     if(par==NULL)
         return NULL;
@@ -598,7 +599,10 @@ static WRegion *clientwin_do_attach_transient(WClientWin *cwin,
     tpold=transient_reparents;
     transient_reparents=&tp;
     
-    reg=fn(par, &geom, fnparams);
+    fp.mode=REGION_FIT_BOUNDS;
+    fp.g=cwin->last_fp.g;
+    
+    reg=fn(par, &fp, fnparams);
     
     transient_reparents=tpold;
     
@@ -834,7 +838,7 @@ static void hide_clientwin(WClientWin *cwin)
 {
     if(cwin->flags&CLIENTWIN_PROP_ACROBATIC){
         XMoveWindow(ioncore_g.dpy, cwin->win,
-                    -2*cwin->max_geom.w, -2*cwin->max_geom.h);
+                    -2*cwin->last_fp.g.w, -2*cwin->last_fp.g.h);
         return;
     }
     
@@ -970,43 +974,52 @@ static void clientwin_request_managed_geom(WClientWin *cwin, WRegion *sub,
                                            int flags, const WRectangle *geom, 
                                            WRectangle *geomret)
 {
-    WRectangle rgeom=cwin->max_geom;
+    WRectangle rgeom=cwin->last_fp.g;
 
     if(geomret!=NULL)
         *geomret=rgeom;
     
     if(!(flags&REGION_RQGEOM_TRYONLY))
-        region_fit(sub, &rgeom);
+        region_fit(sub, &rgeom, REGION_FIT_EXACT);
 }
 
 
 
-static void do_fit_clientwin(WClientWin *cwin, const WRectangle *max_geom, 
-                             WWindow *np)
+static bool clientwin_fitrep(WClientWin *cwin, WWindow *np, WFitParams *fp)
 {
     WRegion *transient, *next;
     WRectangle geom;
     int diff;
     bool changes;
     int w, h;
-    
-    convert_geom(cwin, max_geom, &geom);
+
+    if(np!=NULL && !region_same_rootwin((WRegion*)cwin, (WRegion*)np))
+        return FALSE;
+
+    convert_geom(cwin, &(fp->g), &geom);
 
     changes=(REGION_GEOM(cwin).x!=geom.x ||
              REGION_GEOM(cwin).y!=geom.y ||
              REGION_GEOM(cwin).w!=geom.w ||
              REGION_GEOM(cwin).h!=geom.h);
     
-    cwin->max_geom=*max_geom;
+    cwin->last_fp=*fp;
     REGION_GEOM(cwin)=geom;
     
     if(np==NULL && !changes)
-        return;
+        return TRUE;
     
     if(np!=NULL){
         region_detach_parent((WRegion*)cwin);
         do_reparent_clientwin(cwin, np->win, geom.x, geom.y);
         region_attach_parent((WRegion*)cwin, (WRegion*)np);
+        sendconfig_clientwin(cwin);
+
+        if(!CLIENTWIN_IS_FULLSCREEN(cwin) && 
+           cwin->fsinfo.last_mgr_watch.obj!=NULL){
+            watch_reset(&(cwin->fsinfo.last_mgr_watch));
+        }
+        netwm_update_state(cwin);
     }
     
     w=maxof(1, geom.w);
@@ -1014,53 +1027,29 @@ static void do_fit_clientwin(WClientWin *cwin, const WRectangle *max_geom,
     
     if(cwin->flags&CLIENTWIN_PROP_ACROBATIC && !REGION_IS_MAPPED(cwin)){
         XMoveResizeWindow(ioncore_g.dpy, cwin->win,
-                          -2*max_geom->w, -2*max_geom->h, w, h);
+                          -2*cwin->last_fp.g.w, -2*cwin->last_fp.g.h, w, h);
     }else{
         XMoveResizeWindow(ioncore_g.dpy, cwin->win, geom.x, geom.y, w, h);
     }
     
     cwin->flags&=~CLIENTWIN_NEED_CFGNTFY;
     
+    
     FOR_ALL_MANAGED_ON_LIST_W_NEXT(cwin->transient_list, transient, next){
-        if(np==NULL){
-            region_fit(transient, max_geom);
-        }else{
-            if(!region_reparent(transient, np, max_geom)){
-                warn("Problem: can't reparent a %s managed by a WClientWin"
-                     "being reparented. Detaching from this object.",
-                     OBJ_TYPESTR(transient));
+        WFitParams fp2;
+        fp2.g=fp->g;
+        fp2.mode=REGION_FIT_BOUNDS;
+        
+        if(!region_fitrep(transient, np, &fp2) && np!=NULL){
+           warn("Problem: can't reparent a %s managed by a WClientWin"
+                "being reparented. Detaching from this object.",
+                OBJ_TYPESTR(transient));
                 region_detach_manager(transient);
-            }
-            region_stack_above(transient, (WRegion*)cwin);
         }
-    }
-}
-
-
-static void clientwin_fit(WClientWin *cwin, const WRectangle *geom)
-{
-    do_fit_clientwin(cwin, geom, NULL);
-}
-
-
-static bool reparent_clientwin(WClientWin *cwin, WWindow *par, 
-                               const WRectangle *geom)
-{
-    int rootx, rooty;
-    
-    if(!region_same_rootwin((WRegion*)cwin, (WRegion*)par))
-        return FALSE;
-    
-    do_fit_clientwin(cwin, geom, par);
-    sendconfig_clientwin(cwin);
-
-    if(!CLIENTWIN_IS_FULLSCREEN(cwin) && 
-       cwin->fsinfo.last_mgr_watch.obj!=NULL){
-        watch_reset(&(cwin->fsinfo.last_mgr_watch));
+        if(np!=NULL)
+            region_stack_above(transient, (WRegion*)cwin);
     }
     
-    netwm_update_state(cwin);
-
     return TRUE;
 }
 
@@ -1321,8 +1310,8 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 EXTL_EXPORT_MEMBER
 void clientwin_nudge(WClientWin *cwin)
 {
-    XResizeWindow(ioncore_g.dpy, cwin->win, 2*cwin->max_geom.w,
-                  2*cwin->max_geom.h);
+    XResizeWindow(ioncore_g.dpy, cwin->win, 2*cwin->last_fp.g.w,
+                  2*cwin->last_fp.g.h);
     XFlush(ioncore_g.dpy);
     XResizeWindow(ioncore_g.dpy, cwin->win, REGION_GEOM(cwin).w,
                   REGION_GEOM(cwin).h);
@@ -1353,11 +1342,14 @@ EXTL_EXPORT_MEMBER
 void clientwin_toggle_transients_pos(WClientWin *cwin)
 {
     WRegion *transient;
+    WFitParams fp;
     
     cwin->flags^=CLIENTWIN_TRANSIENTS_AT_TOP;
 
+    fp.mode=REGION_FIT_BOUNDS;
+    fp.g=cwin->last_fp.g;
     FOR_ALL_MANAGED_ON_LIST(cwin->transient_list, transient){
-        region_fit(transient, &(cwin->max_geom));
+        region_fitrep(transient, NULL, &fp);
     }
 }
 
@@ -1438,7 +1430,7 @@ WRegion *clientwin_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
     attr.width=geom->w;
     attr.height=geom->h;
 
-    cwin=create_clientwin((WRegion*)par, win, &attr);
+    cwin=create_clientwin(par, win, &attr);
     
     if(cwin==NULL)
         return FALSE;
@@ -1465,14 +1457,11 @@ WRegion *clientwin_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
 
 
 static DynFunTab clientwin_dynfuntab[]={
+    {(DynFun*)region_fitrep,
+     (DynFun*)clientwin_fitrep},
+
     {(DynFun*)region_current,
      (DynFun*)clientwin_current},
-    
-    {region_fit,
-     clientwin_fit},
-    
-    {(DynFun*)region_reparent,
-     (DynFun*)reparent_clientwin},
     
     {region_map,
      clientwin_map},

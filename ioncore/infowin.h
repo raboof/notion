@@ -29,10 +29,9 @@ DECLCLASS(WInfoWin){
 #define INFOWIN_BRUSH(INFOWIN) ((INFOWIN)->brush)
 #define INFOWIN_BUFFER(INFOWIN) ((INFOWIN)->buffer)
 
-extern bool infowin_init(WInfoWin *p, WWindow *parent, 
-                         const WRectangle *geom,
+extern bool infowin_init(WInfoWin *p, WWindow *parent, const WFitParams *fp,
                          const char *style);
-extern WInfoWin *create_infowin(WWindow *parent, const WRectangle *geom,
+extern WInfoWin *create_infowin(WWindow *parent, const WFitParams *fp,
                                 const char *style);
 extern bool infowin_set_attr2(WInfoWin *p, const char *attr1,
                               const char *attr2);

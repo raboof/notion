@@ -134,7 +134,7 @@ static int reg_resize(WRegion *reg, int dir, int npos, int nsize)
         /*wwin->flags&=~WWINDOW_WFORCED;*/
     }
     
-    region_fit(reg, &geom);
+    region_fit(reg, &geom, REGION_FIT_EXACT);
     
     return nsize;
 }
@@ -758,9 +758,9 @@ WRegion *ionws_do_split_at(WIonWS *ws, Obj *obj, int dir, int primn,
     int objmin, objmax;
     int s, sn, so, pos;
     WWsSplit *split, *nsplit;
-    WRectangle geom;
     WRegion *nreg;
     WWindow *par;
+    WFitParams fp;
     
     assert(obj!=NULL);
     
@@ -792,27 +792,28 @@ WRegion *ionws_do_split_at(WIonWS *ws, Obj *obj, int dir, int primn,
 
     /* Create split and new window
      */
-    geom=split_tree_geom(obj);
+    fp.mode=REGION_FIT_EXACT;
+    fp.g=split_tree_geom(obj);
     
-    nsplit=create_split(dir, NULL, NULL, &geom);
+    nsplit=create_split(dir, NULL, NULL, &(fp.g));
     
     if(nsplit==NULL)
         return NULL;
     
     if(dir==VERTICAL){
         if(primn==BOTTOM_OR_RIGHT)
-            geom.y+=so;
-        geom.h=sn;
+            fp.g.y+=so;
+        fp.g.h=sn;
     }else{
         if(primn==BOTTOM_OR_RIGHT)
-            geom.x+=so;
-        geom.w=sn;
+            fp.g.x+=so;
+        fp.g.w=sn;
     }
     
     par=REGION_PARENT_CHK(ws, WWindow);
     assert(par!=NULL);
     
-    nreg=fn(par, &geom);
+    nreg=fn(par, &fp);
     
     if(nreg==NULL){
         free(nsplit);

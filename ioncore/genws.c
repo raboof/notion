@@ -19,9 +19,9 @@
 /*{{{ Create/destroy */
 
 
-void genws_init(WGenWS *ws, WWindow *parent, const WRectangle *geom)
+void genws_init(WGenWS *ws, WWindow *par, const WFitParams *fp)
 {
-    region_init(&(ws->reg), (WRegion*)parent, geom);
+    region_init(&(ws->reg), par, fp);
 }
 
 

@@ -18,9 +18,9 @@
 
 
 typedef WRegion *WRegionAttachHandler(WWindow *parent, 
-                                      const WRectangle *geom, 
+                                      const WFitParams *fp, 
                                       void *param);
-    
+
 typedef WRegion *WRegionDoAttachFn(WRegion *reg, 
                                    WRegionAttachHandler *handler,
                                    void *handlerparams,

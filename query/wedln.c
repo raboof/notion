@@ -223,7 +223,7 @@ enum{G_NORESET, G_MAX, G_CURRENT};
 static void get_geom(WEdln *wedln, int mode, WRectangle *geom)
 {
     if(mode==G_MAX)
-        *geom=wedln->input.max_geom;
+        *geom=wedln->input.last_fp.g;
     else if(mode==G_CURRENT)
         *geom=REGION_GEOM(wedln);
 }
@@ -300,7 +300,7 @@ static void wedln_calc_size(WEdln *wedln, WRectangle *geom)
     th=get_textarea_height(wedln, wedln->complist.strs!=NULL);
     
     if(wedln->complist.strs==NULL){
-        if(max_geom.h<th)
+        if(max_geom.h<th || wedln->input.last_fp.mode==REGION_FIT_EXACT)
             geom->h=max_geom.h;
         else
             geom->h=th;
@@ -316,7 +316,7 @@ static void wedln_calc_size(WEdln *wedln, WRectangle *geom)
         h=wedln->complist.toth;
         th+=bdw.top+bdw.bottom;
         
-        if(h+th>max_geom.h)
+        if(h+th>max_geom.h || wedln->input.last_fp.mode==REGION_FIT_EXACT)
             h=max_geom.h-th;
         geom->h=h+th;
     }
@@ -549,7 +549,7 @@ static bool wedln_init_prompt(WEdln *wedln, const char *prompt)
 }
 
 
-static bool wedln_init(WEdln *wedln, WWindow *par, const WRectangle *geom, 
+static bool wedln_init(WEdln *wedln, WWindow *par, const WFitParams *fp, 
                        WEdlnCreateParams *params)
 {
     wedln->vstart=0;
@@ -571,7 +571,7 @@ static bool wedln_init(WEdln *wedln, WWindow *par, const WRectangle *geom,
 
     init_listing(&(wedln->complist));
     
-    if(!input_init((WInput*)wedln, par, geom)){
+    if(!input_init((WInput*)wedln, par, fp)){
         edln_deinit(&(wedln->edln));
         free(wedln->prompt);
         return FALSE;
@@ -588,10 +588,10 @@ static bool wedln_init(WEdln *wedln, WWindow *par, const WRectangle *geom,
 }
 
 
-WEdln *create_wedln(WWindow *par, const WRectangle *geom, 
+WEdln *create_wedln(WWindow *par, const WFitParams *fp,
                     WEdlnCreateParams *params)
 {
-    CREATEOBJ_IMPL(WEdln, wedln, (p, par, geom, params));
+    CREATEOBJ_IMPL(WEdln, wedln, (p, par, fp, params));
 }
 
 

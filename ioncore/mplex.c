@@ -47,7 +47,7 @@
 
 
 static bool mplex_do_init(WMPlex *mplex, WWindow *parent, Window win,
-                          const WRectangle *geom, bool create)
+                          const WFitParams *fp, bool create)
 {
     mplex->flags=0;
     mplex->l1_count=0;
@@ -58,10 +58,10 @@ static bool mplex_do_init(WMPlex *mplex, WWindow *parent, Window win,
     mplex->l2_current=NULL;
     
     if(create){
-        if(!window_init_new((WWindow*)mplex, parent, geom))
+        if(!window_init_new((WWindow*)mplex, parent, fp))
             return FALSE;
     }else{
-        if(!window_init((WWindow*)mplex, parent, win, geom))
+        if(!window_init((WWindow*)mplex, parent, win, fp))
             return FALSE;
     }
     
@@ -74,15 +74,15 @@ static bool mplex_do_init(WMPlex *mplex, WWindow *parent, Window win,
 
 
 bool mplex_init(WMPlex *mplex, WWindow *parent, Window win,
-                const WRectangle *geom)
+                const WFitParams *fp)
 {
-    return mplex_do_init(mplex, parent, win, geom, FALSE);
+    return mplex_do_init(mplex, parent, win, fp, FALSE);
 }
 
 
-bool mplex_init_new(WMPlex *mplex, WWindow *parent, const WRectangle *geom)
+bool mplex_init_new(WMPlex *mplex, WWindow *parent, const WFitParams *fp)
 {
-    return mplex_do_init(mplex, parent, None, geom, TRUE);
+    return mplex_do_init(mplex, parent, None, fp, TRUE);
 }
     
 
@@ -328,28 +328,29 @@ void mplex_dec_index(WMPlex *mplex, WRegion *r)
 /*{{{ Resize and reparent */
 
 
-static void reparent_or_fit(WMPlex *mplex, const WRectangle *geom,
-                            WWindow *parent)
+bool mplex_fitrep(WMPlex *mplex, WWindow *par, const WFitParams *fp)
 {
-    bool wchg=(REGION_GEOM(mplex).w!=geom->w);
-    bool hchg=(REGION_GEOM(mplex).h!=geom->h);
-    bool move=(REGION_GEOM(mplex).x!=geom->x ||
-               REGION_GEOM(mplex).y!=geom->y);
-    int w=maxof(1, geom->w);
-    int h=maxof(1, geom->h);
+    bool wchg=(REGION_GEOM(mplex).w!=fp->g.w);
+    bool hchg=(REGION_GEOM(mplex).h!=fp->g.h);
+    bool move=(REGION_GEOM(mplex).x!=fp->g.x ||
+               REGION_GEOM(mplex).y!=fp->g.y);
+    int w=maxof(1, fp->g.w);
+    int h=maxof(1, fp->g.h);
     
-    if(parent!=NULL){
+    if(par!=NULL){
+        if(!region_same_rootwin((WRegion*)mplex, (WRegion*)par))
+            return FALSE;
         region_detach_parent((WRegion*)mplex);
-        XReparentWindow(ioncore_g.dpy, MPLEX_WIN(mplex), parent->win,
-                        geom->x, geom->y);
+        XReparentWindow(ioncore_g.dpy, MPLEX_WIN(mplex), par->win,
+                        fp->g.x, fp->g.y);
         XResizeWindow(ioncore_g.dpy, MPLEX_WIN(mplex), w, h);
-        region_attach_parent((WRegion*)mplex, (WRegion*)parent);
+        region_attach_parent((WRegion*)mplex, (WRegion*)par);
     }else{
         XMoveResizeWindow(ioncore_g.dpy, MPLEX_WIN(mplex),
-                          geom->x, geom->y, w, h);
+                          fp->g.x, fp->g.y, w, h);
     }
     
-    REGION_GEOM(mplex)=*geom;
+    REGION_GEOM(mplex)=fp->g;
     
     if(move && !wchg && !hchg)
         region_notify_subregions_move(&(mplex->win.region));
@@ -358,22 +359,8 @@ static void reparent_or_fit(WMPlex *mplex, const WRectangle *geom,
     
     if(wchg || hchg)
         mplex_size_changed(mplex, wchg, hchg);
-}
-
-
-bool mplex_reparent(WMPlex *mplex, WWindow *parent, const WRectangle *geom)
-{
-    if(!region_same_rootwin((WRegion*)mplex, (WRegion*)parent))
-        return FALSE;
     
-    reparent_or_fit(mplex, geom, parent);
     return TRUE;
-}
-
-
-void mplex_fit(WMPlex *mplex, const WRectangle *geom)
-{
-    reparent_or_fit(mplex, geom, NULL);
 }
 
 
@@ -381,18 +368,21 @@ void mplex_fit_managed(WMPlex *mplex)
 {
     WRectangle geom;
     WRegion *sub;
+    WFitParams fp;
     
     if(MPLEX_MGD_UNVIEWABLE(mplex))
         return;
     
-    mplex_managed_geom(mplex, &geom);
+    mplex_managed_geom(mplex, &(fp.g));
     
+    fp.mode=REGION_FIT_EXACT;
     FOR_ALL_MANAGED_ON_LIST(mplex->l1_list, sub){
-        region_fit(sub, &geom);
+        region_fitrep(sub, NULL, &fp);
     }
 
+    fp.mode=REGION_FIT_BOUNDS;
     FOR_ALL_MANAGED_ON_LIST(mplex->l2_list, sub){
-        region_fit(sub, &geom);
+        region_fitrep(sub, NULL, &fp);
     }
 }
 
@@ -401,15 +391,25 @@ static void mplex_request_managed_geom(WMPlex *mplex, WRegion *sub,
                                        int flags, const WRectangle *geom, 
                                        WRectangle *geomret)
 {
-    WRectangle mg;
-    /* Just try to give it the maximum size */
+    WRectangle mg, rg;
+    
     mplex_managed_geom(mplex, &mg);
     
+    if(on_l2_list(mplex, sub)){
+        /* allow changes but constrain with managed area */
+        rg.x=minof(maxof(mg.x, geom->x), mg.x+mg.w-1);
+        rg.y=minof(maxof(mg.y, geom->y), mg.y+mg.h-1);
+        rg.w=maxof(1, minof(geom->x+geom->w, mg.x+mg.w)-rg.x);
+        rg.h=maxof(1, minof(geom->y+geom->h, mg.y+mg.h)-rg.y);
+    }else{
+        rg=mg;
+    }
+    
     if(geomret!=NULL)
-        *geomret=mg;
+        *geomret=rg;
     
     if(!(flags&REGION_RQGEOM_TRYONLY))
-        region_fit(sub, &mg);
+        region_fit(sub, &rg, REGION_FIT_EXACT);
 }
 
 
@@ -677,14 +677,15 @@ typedef struct{
 static WRegion *mplex_do_attach(WMPlex *mplex, WRegionAttachHandler *hnd,
                                 void *hnd_param, MPlexAttachParams *param)
 {
-    WRectangle geom;
     WRegion *reg;
+    WFitParams fp;
     bool sw=param->flags&MPLEX_ATTACH_SWITCHTO;
     bool l2=param->flags&MPLEX_ATTACH_L2;
     
-    mplex_managed_geom(mplex, &geom);
+    mplex_managed_geom(mplex, &(fp.g));
+    fp.mode=(l2 ? REGION_FIT_BOUNDS : REGION_FIT_EXACT);
     
-    reg=hnd((WWindow*)mplex, &geom, hnd_param);
+    reg=hnd((WWindow*)mplex, &fp, hnd_param);
     
     if(reg==NULL)
         return NULL;
@@ -1023,9 +1024,6 @@ void mplex_load_contents(WMPlex *mplex, ExtlTab tab)
 
 
 static DynFunTab mplex_dynfuntab[]={
-    {region_fit, mplex_fit},
-    {(DynFun*)region_reparent, (DynFun*)mplex_reparent},
-
     {region_do_set_focus, mplex_do_set_focus},
     {(DynFun*)region_control_managed_focus,
      (DynFun*)mplex_control_managed_focus},
@@ -1050,6 +1048,9 @@ static DynFunTab mplex_dynfuntab[]={
     
     {(DynFun*)region_manage_rescue,
      (DynFun*)mplex_manage_rescue},
+
+    {(DynFun*)region_fitrep,
+     (DynFun*)mplex_fitrep},
             
     END_DYNFUNTAB
 };

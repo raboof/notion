@@ -30,8 +30,8 @@
 static void get_geom(WMessage *wmsg, bool max, WRectangle *geom)
 {
     if(max){
-        geom->w=wmsg->input.max_geom.w;
-        geom->h=wmsg->input.max_geom.h;
+        geom->w=wmsg->input.last_fp.g.w;
+        geom->h=wmsg->input.last_fp.g.h;
     }else{
         geom->w=REGION_GEOM(wmsg).w;
         geom->h=REGION_GEOM(wmsg).h;
@@ -61,7 +61,7 @@ static void wmsg_calc_size(WMessage *wmsg, WRectangle *geom)
         h=bdw.top+bdw.bottom+wmsg->listing.toth;
     }
     
-    if(h>max_geom.h)
+    if(h>max_geom.h || wmsg->input.last_fp.mode==REGION_FIT_EXACT)
         h=max_geom.h;
     
     geom->h=h;
@@ -115,7 +115,7 @@ static void wmsg_scrolldown(WMessage *wmsg)
 /*{{{ Init, deinit draw config update */
 
 
-static bool wmsg_init(WMessage *wmsg, WWindow *par, const WRectangle *geom,
+static bool wmsg_init(WMessage *wmsg, WWindow *par, const WFitParams *fp,
                       const char *msg)
 {
     char **ptr;
@@ -189,7 +189,7 @@ static bool wmsg_init(WMessage *wmsg, WWindow *par, const WRectangle *geom,
     init_listing(&(wmsg->listing));
     setup_listing(&(wmsg->listing), ptr, k, TRUE);
     
-    if(!input_init((WInput*)wmsg, par, geom)){
+    if(!input_init((WInput*)wmsg, par, fp)){
         deinit_listing(&(wmsg->listing));
         return FALSE;
     }
@@ -198,9 +198,9 @@ static bool wmsg_init(WMessage *wmsg, WWindow *par, const WRectangle *geom,
 }
 
 
-WMessage *create_wmsg(WWindow *par, const WRectangle *geom, const char *msg)
+WMessage *create_wmsg(WWindow *par, const WFitParams *fp, const char *msg)
 {
-    CREATEOBJ_IMPL(WMessage, wmsg, (p, par, geom, msg));
+    CREATEOBJ_IMPL(WMessage, wmsg, (p, par, fp, msg));
 }
 
 

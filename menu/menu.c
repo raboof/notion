@@ -29,7 +29,9 @@
 #include "menu.h"
 #include "main.h"
 
+
 #define MENU_WIN(MENU) ((MENU)->win.win)
+
 
 /*{{{ Helpers */
 
@@ -151,7 +153,8 @@ void menu_draw(WMenu *menu, bool complete)
 /*{{{ Resize */
 
 
-static void menu_calc_size(WMenu *menu, int maxw, int maxh, 
+static void menu_calc_size(WMenu *menu, bool maxexact, 
+                           int maxw, int maxh, 
                            int *w_ret, int *h_ret)
 {
     GrBorderWidths bdw, e_bdw;
@@ -162,7 +165,7 @@ static void menu_calc_size(WMenu *menu, int maxw, int maxh,
     grbrush_get_border_widths(menu->brush, &bdw);
     grbrush_get_border_widths(menu->entry_brush, &e_bdw);
     
-    if(maxew>maxw-(int)bdw.left-(int)bdw.right){
+    if(maxexact || maxew>maxw-(int)bdw.left-(int)bdw.right){
         maxew=maxw-bdw.left-bdw.right;
         *w_ret=maxw;
     }else{
@@ -172,7 +175,7 @@ static void menu_calc_size(WMenu *menu, int maxw, int maxh,
     bdh=bdw.top+bdw.bottom;
     
     if(menu->n_entries==0){
-        *h_ret=bdh;
+        *h_ret=(maxexact ? maxh : bdh);
         menu->first_entry=0;
         menu->vis_entries=0;
     }else{
@@ -189,22 +192,14 @@ static void menu_calc_size(WMenu *menu, int maxw, int maxh,
         if(vis<=0)
             vis=1;
         menu->vis_entries=vis;
-        *h_ret=vis*menu->entry_h+(vis-1)*e_bdw.spacing+bdh;
+        if(maxexact)
+            *h_ret=maxh;
+        else
+            *h_ret=vis*menu->entry_h+(vis-1)*e_bdw.spacing+bdh;
     }
 
     /* Calculate new shortened entry names */
     maxew-=e_bdw.left+e_bdw.right;
-#if 0
-    if(menu->title!=NULL){
-        free(menu->title);
-        menu->title=NULL;
-    }
-    
-    if(extl_table_gets_s(tab, title, &str)){
-        menu->title=grbrush_make_label(menu->title_brush, str, maxew);
-        free(str);
-    }
-#endif
     
     for(i=0; i<menu->n_entries; i++){
         if(menu->entries[i].title){
@@ -225,10 +220,12 @@ static void menu_calc_size(WMenu *menu, int maxw, int maxh,
 
 void calc_size(WMenu *menu, int *w, int *h)
 {
-    if(menu->pmenu_mode)
-        menu_calc_size(menu, INT_MAX, INT_MAX, w, h);
-    else
-        menu_calc_size(menu, menu->max_geom.w, menu->max_geom.h, w, h);
+    if(menu->pmenu_mode){
+        menu_calc_size(menu, FALSE, INT_MAX, INT_MAX, w, h);
+    }else{
+        menu_calc_size(menu, menu->last_fp.mode==REGION_FIT_EXACT,
+                       menu->last_fp.g.w, menu->last_fp.g.h, w, h);
+    }
 }
     
 
@@ -262,7 +259,10 @@ static void menu_firstfit(WMenu *menu, bool submenu, int ref_x, int ref_y)
     
     calc_size(menu, &(geom.w), &(geom.h));
     
-    if(menu->pmenu_mode){
+    if(menu->last_fp.mode==REGION_FIT_EXACT){
+        geom.x=menu->last_fp.g.x;
+        geom.y=menu->last_fp.g.y;
+    }else if(menu->pmenu_mode){
         geom.x=ref_x;
         geom.y=ref_y;
         if(!submenu){
@@ -270,51 +270,69 @@ static void menu_firstfit(WMenu *menu, bool submenu, int ref_x, int ref_y)
             geom.y+=5;
         }
     }else{
+        WRectangle maxg=menu->last_fp.g;
         if(submenu){
             int xoff, yoff, x2, y2;
             get_placement_offs(menu, &xoff, &yoff);
-            x2=minof(ref_x+xoff, menu->max_geom.x+menu->max_geom.w);
-            y2=maxof(ref_y-yoff, menu->max_geom.y);
-            geom.x=menu->max_geom.x+xoff;
+            x2=minof(ref_x+xoff, maxg.x+maxg.w);
+            y2=maxof(ref_y-yoff, maxg.y);
+            geom.x=maxg.x+xoff;
             if(geom.x+geom.w<x2)
                 geom.x=x2-geom.w;
-            geom.y=menu->max_geom.y+menu->max_geom.h-yoff-geom.h;
+            geom.y=maxg.y+maxg.h-yoff-geom.h;
             if(geom.y>y2)
                 geom.y=y2;
             
         }else{
-            geom.x=menu->max_geom.x;
-            geom.y=menu->max_geom.y+menu->max_geom.h-geom.h;
+            geom.x=maxg.x;
+            geom.y=maxg.y+maxg.h-geom.h;
         }
     }
     
-    window_fit(&menu->win, &geom);
+    window_do_fitrep(&menu->win, NULL, &geom);
 }
 
 
-static void menu_refit(WMenu *menu)
+static void menu_do_refit(WMenu *menu, WWindow *par, const WFitParams *oldfp)
 {
     WRectangle geom;
     
     calc_size(menu, &(geom.w), &(geom.h));
     
-    geom.x=REGION_GEOM(menu).x;
-    geom.y=REGION_GEOM(menu).y;
-    
-    if(!menu->pmenu_mode){
-        geom.x=maxof(geom.x, menu->max_geom.x);
-        geom.x=minof(geom.x, menu->max_geom.x+menu->max_geom.w-geom.w);
-        geom.y=maxof(geom.y, menu->max_geom.y);
-        geom.y=minof(geom.y, menu->max_geom.y+menu->max_geom.h-geom.h);
+    if(menu->last_fp.mode==REGION_FIT_EXACT){
+        geom.x=menu->last_fp.g.x;
+        geom.y=menu->last_fp.g.y;
+    }else if(menu->pmenu_mode){
+        geom.x=REGION_GEOM(menu).x;
+        geom.y=REGION_GEOM(menu).y;
+    }else{
+        WRectangle maxg=menu->last_fp.g;
+        int xdiff=REGION_GEOM(menu).x-oldfp->g.x;
+        int ydiff=(REGION_GEOM(menu).y+REGION_GEOM(menu).h
+                   -(oldfp->g.y+oldfp->g.h));
+        geom.x=maxof(0, minof(maxg.x+xdiff, maxg.x+maxg.w-geom.w));
+        geom.y=maxof(0, minof(maxg.y+maxg.h+ydiff, maxg.y+maxg.h)-geom.h);
     }
-    window_fit(&menu->win, &geom);
+    
+    window_do_fitrep(&menu->win, par, &geom);
 }
 
 
-void menu_fit(WMenu *menu, const WRectangle *geom)
+bool menu_fitrep(WMenu *menu, WWindow *par, const WFitParams *fp)
 {
-    menu->max_geom=*geom;
-    menu_refit(menu);
+    WFitParams oldfp;
+    
+    if(par!=NULL && !region_same_rootwin((WRegion*)par, (WRegion*)menu))
+        return FALSE;
+    
+    oldfp=menu->last_fp;
+    menu->last_fp=*fp;
+    menu_do_refit(menu, par, &oldfp);
+    
+    if(menu->submenu!=NULL && !menu->pmenu_mode)
+        region_fitrep((WRegion*)(menu->submenu), par, fp);
+    
+    return TRUE;
 }
 
 
@@ -400,7 +418,7 @@ void menu_draw_config_updated(WMenu *menu)
                      MENU_WIN(menu)))
         return;
     
-    menu_refit(menu);
+    menu_do_refit(menu, NULL, &(menu->last_fp));
     
     region_draw_config_updated_default((WRegion*)menu);
     
@@ -461,12 +479,12 @@ static WMenuEntry *preprocess_menu(ExtlTab tab, int *n_entries)
 
 
 
-bool menu_init(WMenu *menu, WWindow *par, const WRectangle *geom,
+bool menu_init(WMenu *menu, WWindow *par, const WFitParams *fp,
                const WMenuCreateParams *params)
 {
     Window win;
     int i;
-
+    
     menu->entries=preprocess_menu(params->tab, &(menu->n_entries));
     
     if(menu->entries==NULL){
@@ -479,7 +497,7 @@ bool menu_init(WMenu *menu, WWindow *par, const WRectangle *geom,
     menu->pmenu_mode=params->pmenu_mode;
     menu->big_mode=params->big_mode;
 
-    menu->max_geom=*geom;
+    menu->last_fp=*fp;
     menu->selected_entry=(params->pmenu_mode ? -1 : 0);
     menu->max_entry_w=0;
     menu->entry_h=0;
@@ -491,7 +509,7 @@ bool menu_init(WMenu *menu, WWindow *par, const WRectangle *geom,
     menu->submenu=NULL;
     menu->typeahead=NULL;
     
-    if(!window_init_new((WWindow*)menu, par, geom))
+    if(!window_init_new((WWindow*)menu, par, fp))
         goto fail;
 
     win=menu->win.win;
@@ -516,10 +534,10 @@ fail:
 }
 
 
-WMenu *create_menu(WWindow *par, const WRectangle *geom, 
+WMenu *create_menu(WWindow *par, const WFitParams *fp, 
                    const WMenuCreateParams *params)
 {
-    CREATEOBJ_IMPL(WMenu, menu, (p, par, geom, params));
+    CREATEOBJ_IMPL(WMenu, menu, (p, par, fp, params));
 }
 
 
@@ -605,7 +623,7 @@ int get_sub_y_off(WMenu *menu, int n)
 
 static void show_sub(WMenu *menu, int n)
 {
-    WRectangle g;
+    WFitParams fp;
     WMenuCreateParams fnp;
     WMenu *submenu;
     WWindow *par;
@@ -615,7 +633,7 @@ static void show_sub(WMenu *menu, int n)
     if(par==NULL)
         return;
     
-    g=menu->max_geom;
+    fp=menu->last_fp;
     
     if(menu->pmenu_mode){
         fnp.ref_x=REGION_GEOM(menu).x+REGION_GEOM(menu).w;
@@ -643,7 +661,7 @@ static void show_sub(WMenu *menu, int n)
     fnp.big_mode=menu->big_mode;
     fnp.submenu_mode=TRUE;
     
-    submenu=create_menu(par, &g, &fnp);
+    submenu=create_menu(par, &fp, &fnp);
     
     if(submenu==NULL)
         return;
@@ -899,7 +917,7 @@ static void scroll_left_or_up(WMenu *menu, int xd, int yd)
         g=REGION_GEOM(menu);
         g.x-=xd;
         g.y-=yd;
-        window_fit((WWindow*)menu, &g);
+        window_do_fitrep((WWindow*)menu, NULL, &g);
         menu=REGION_MANAGER_CHK(menu, WMenu);
     }
 }
@@ -931,7 +949,7 @@ static void scroll_right_or_down(WMenu *menu, int xd, int yd)
         g=REGION_GEOM(menu);
         g.x+=xd;
         g.y+=yd;
-        window_fit((WWindow*)menu, &g);
+        window_do_fitrep((WWindow*)menu, NULL, &g);
         menu=menu->submenu;
     }
 }
@@ -1184,7 +1202,7 @@ void menu_typeahead_clear(WMenu *menu)
 
 
 static DynFunTab menu_dynfuntab[]={
-    {region_fit, menu_fit},
+    {(DynFun*)region_fitrep, (DynFun*)menu_fitrep},
     {region_draw_config_updated, menu_draw_config_updated},
     {(DynFun*)region_rqclose, (DynFun*)menu_rqclose},
     {window_draw, menu_draw},

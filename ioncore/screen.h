@@ -34,7 +34,7 @@ DECLCLASS(WScreen){
 };
 
 extern WScreen *create_screen(WRootWin *rootwin, int id, 
-                              const WRectangle *geom,
+                              const WFitParams *fp,
                               bool useroot);
 
 extern int screen_id(WScreen *scr);

@@ -31,12 +31,12 @@ DECLCLASS(WFloatWS){
 };
 
 
-extern WFloatWS *create_floatws(WWindow *parent, const WRectangle *bounds);
+extern WFloatWS *create_floatws(WWindow *parent, const WFitParams *fp);
 
 extern WRegion *floatws_circulate(WFloatWS *ws);
 extern WRegion *floatws_backcirculate(WFloatWS *ws);
 
-extern WRegion *floatws_load(WWindow *par, const WRectangle *geom, 
+extern WRegion *floatws_load(WWindow *par, const WFitParams *fp, 
                              ExtlTab tab);
 
 extern WRegion* floatws_current(WFloatWS *floatws);
@@ -55,7 +55,7 @@ extern bool floatws_rqclose_relocate(WFloatWS *ws);
 /* */
 
 extern bool mod_floatws_clientwin_do_manage(WClientWin *cwin, 
-                                           const WManageParams *param);
+                                            const WManageParams *param);
 
 /* */
 

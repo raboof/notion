@@ -204,7 +204,7 @@ static WRootWin *preinit_rootwin(int xscr)
 {
     Display *dpy=ioncore_g.dpy;
     WRootWin *rootwin;
-    WRectangle geom;
+    WFitParams fp;
     Window root;
     int i;
     
@@ -241,11 +241,12 @@ static WRootWin *preinit_rootwin(int xscr)
     rootwin->dummy_win=None;
     rootwin->xor_gc=None;
     
-    geom.x=0; geom.y=0;
-    geom.w=DisplayWidth(dpy, xscr);
-    geom.h=DisplayHeight(dpy, xscr);
+    fp.mode=REGION_FIT_EXACT;
+    fp.g.x=0; fp.g.y=0;
+    fp.g.w=DisplayWidth(dpy, xscr);
+    fp.g.h=DisplayHeight(dpy, xscr);
     
-    if(!window_init((WWindow*)rootwin, NULL, root, &geom)){
+    if(!window_init((WWindow*)rootwin, NULL, root, &fp)){
         free(rootwin);
         return NULL;
     }
@@ -275,12 +276,16 @@ static WScreen *add_screen(WRootWin *rw, int id, const WRectangle *geom,
 {
     WScreen *scr;
     CARD32 p[1];
+    WFitParams fp;
+    
+    fp.g=*geom;
+    fp.mode=REGION_FIT_EXACT;
     
 #ifdef CF_ALWAYS_VIRTUAL_ROOT
     useroot=FALSE;
 #endif
 
-    scr=create_screen(rw, id, geom, useroot);
+    scr=create_screen(rw, id, &fp, useroot);
     
     if(scr==NULL)
         return NULL;
@@ -424,9 +429,11 @@ static void rootwin_do_set_focus(WRootWin *rootwin, bool warp)
 }
 
 
-static void rootwin_fit(WRootWin *rootwin, const WRectangle *geom)
+static bool rootwin_fitrep(WRootWin *rootwin, WWindow *par, 
+                           const WFitParams *fp)
 {
-    warn("Don't know how to rootwin_fit");
+    warn("Don't know how to reparent or fit root windows");
+    return FALSE;
 }
 
 
@@ -439,14 +446,6 @@ static void rootwin_map(WRootWin *rootwin)
 static void rootwin_unmap(WRootWin *rootwin)
 {
     warn("Attempt to unmap a root window -- impossible");
-}
-
-
-static bool reparent_rootwin(WRootWin *rootwin, WWindow *par, 
-                             const WRectangle *geom)
-{
-    warn("Attempt to reparent a root window -- impossible");
-    return FALSE;
 }
 
 
@@ -520,12 +519,11 @@ ExtlTab ioncore_root_windows()
 
 
 static DynFunTab rootwin_dynfuntab[]={
-    {region_fit, rootwin_fit},
     {region_map, rootwin_map},
     {region_unmap, rootwin_unmap},
     {region_do_set_focus, rootwin_do_set_focus},
     {(DynFun*)region_xwindow, (DynFun*)rootwin_x_window},
-    {(DynFun*)region_reparent, (DynFun*)reparent_rootwin},
+    {(DynFun*)region_fitrep, (DynFun*)rootwin_fitrep},
     {region_remove_managed, rootwin_remove_managed},
     END_DYNFUNTAB
 };

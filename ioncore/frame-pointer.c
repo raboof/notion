@@ -184,17 +184,20 @@ static void setup_dragwin(WFrame *frame, uint tab)
 {
     WRectangle g;
     WRootWin *rw;
+    WFitParams fp;
     
     assert(tabdrag_infowin==NULL);
     
-    g.x=p_tab_x;
-    g.y=p_tab_y;
-    g.w=frame_nth_tab_w(frame, tab);
-    g.h=frame->bar_h;
+    fp.mode=REGION_FIT_EXACT;
+    fp.g.x=p_tab_x;
+    fp.g.y=p_tab_y;
+    fp.g.w=frame_nth_tab_w(frame, tab);
+    fp.g.h=frame->bar_h;
 
     /* region_rootwin_of cannot fail */
     rw=region_rootwin_of((WRegion*)frame);
-    tabdrag_infowin=create_infowin((WWindow*)rw, &g, frame_tab_style(frame));
+    tabdrag_infowin=create_infowin((WWindow*)rw, &fp,
+                                   frame_tab_style(frame));
     
     if(tabdrag_infowin==NULL)
         return;
@@ -225,7 +228,7 @@ static void p_tabdrag_motion(WFrame *frame, XMotionEvent *ev,
         g.y=p_tab_y;
         g.w=REGION_GEOM(tabdrag_infowin).w;
         g.h=REGION_GEOM(tabdrag_infowin).h;
-        region_fit((WRegion*)tabdrag_infowin, &g);
+        region_fit((WRegion*)tabdrag_infowin, &g, REGION_FIT_EXACT);
     }
 }
 

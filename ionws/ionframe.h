@@ -23,8 +23,8 @@ DECLCLASS(WIonFrame){
     WFrame frame;
 };
 
-extern WIonFrame* create_ionframe(WWindow *parent, const WRectangle *geom);
-extern WRegion *ionframe_load(WWindow *par, const WRectangle *geom, 
+extern WIonFrame* create_ionframe(WWindow *parent, const WFitParams *fp);
+extern WRegion *ionframe_load(WWindow *par, const WFitParams *fp,
                               ExtlTab tab);
 
 #endif /* ION_IONWS_IONFRAME_H */

@@ -20,12 +20,12 @@
 /*{{{ Init/deinit */
 
 
-bool infowin_init(WInfoWin* p, WWindow *parent, const WRectangle *geom,
+bool infowin_init(WInfoWin* p, WWindow *parent, const WFitParams *fp,
                   const char *style)
 {
     XSetWindowAttributes attr;
     
-    if(!window_init_new(&(p->wwin), parent, geom))
+    if(!window_init_new(&(p->wwin), parent, fp))
         return FALSE;
     
     p->buffer=ALLOC_N(char, INFOWIN_BUFFER_LEN);
@@ -55,10 +55,10 @@ fail:
 }
 
 
-WInfoWin *create_infowin(WWindow *parent, const WRectangle *geom,
+WInfoWin *create_infowin(WWindow *parent, const WFitParams *fp,
                          const char *style)
 {
-    CREATEOBJ_IMPL(WInfoWin, infowin, (p, parent, geom, style));
+    CREATEOBJ_IMPL(WInfoWin, infowin, (p, parent, fp, style));
 }
 
 

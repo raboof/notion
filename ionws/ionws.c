@@ -35,44 +35,38 @@
 /*{{{ region dynfun implementations */
 
 
-static void ionws_fit(WIonWS *ws, const WRectangle *geom)
-{
-    int tmp;
-    
-    REGION_GEOM(ws)=*geom;
-    
-    if(ws->split_tree==NULL)
-        return;
-    
-    split_tree_resize((Obj*)ws->split_tree, HORIZONTAL, ANY, 
-                      geom->x, geom->w);
-    split_tree_resize((Obj*)ws->split_tree, VERTICAL, ANY, 
-                      geom->y,  geom->h);
-}
-
-
-static bool reparent_ionws(WIonWS *ws, WWindow *parent, 
-                           const WRectangle *geom)
+static bool ionws_fitrep(WIonWS *ws, WWindow *par, const WFitParams *fp)
 {
     WRegion *sub, *next;
     bool rs;
     
-    if(!region_same_rootwin((WRegion*)ws, (WRegion*)parent))
-        return FALSE;
+    if(par!=NULL){
+        if(!region_same_rootwin((WRegion*)ws, (WRegion*)par))
+            return FALSE;
     
-    region_detach_parent((WRegion*)ws);
-    region_attach_parent((WRegion*)ws, (WRegion*)parent);
+        region_detach_parent((WRegion*)ws);
+        region_attach_parent((WRegion*)ws, (WRegion*)par);
     
-    FOR_ALL_MANAGED_ON_LIST_W_NEXT(ws->managed_list, sub, next){
-        if(!region_reparent(sub, parent, &REGION_GEOM(sub))){
-            warn("Problem: can't reparent a %s managed by a WIonWS"
-                 "being reparented. Detaching from this object.",
-                 OBJ_TYPESTR(sub));
-            region_detach_manager(sub);
+        FOR_ALL_MANAGED_ON_LIST_W_NEXT(ws->managed_list, sub, next){
+            WFitParams subfp;
+            subfp.g=REGION_GEOM(sub);
+            subfp.mode=REGION_FIT_EXACT;
+            if(!region_fitrep(sub, par, &subfp)){
+                warn("Problem: can't reparent a %s managed by a WIonWS"
+                     "being reparented. Detaching from this object.",
+                     OBJ_TYPESTR(sub));
+                region_detach_manager(sub);
+            }
         }
     }
     
-    ionws_fit(ws, geom);
+    REGION_GEOM(ws)=fp->g;
+    
+    if(ws->split_tree==NULL)
+        return TRUE;
+    
+    split_tree_resize((Obj*)ws->split_tree, HORIZONTAL, ANY, fp->g.x, fp->g.w);
+    split_tree_resize((Obj*)ws->split_tree, VERTICAL, ANY, fp->g.y,  fp->g.h);
     
     return TRUE;
 }
@@ -128,11 +122,11 @@ static bool ionws_display_managed(WIonWS *ws, WRegion *reg)
 
 
 static WIonFrame *create_initial_frame(WIonWS *ws, WWindow *parent,
-                                       const WRectangle *geom)
+                                       const WFitParams *fp)
 {
     WIonFrame *frame;
     
-    frame=create_ionframe(parent, geom);
+    frame=create_ionframe(parent, fp);
 
     if(frame==NULL)
         return NULL;
@@ -144,7 +138,7 @@ static WIonFrame *create_initial_frame(WIonWS *ws, WWindow *parent,
 }
 
 
-static bool ionws_init(WIonWS *ws, WWindow *parent, const WRectangle *bounds, 
+static bool ionws_init(WIonWS *ws, WWindow *parent, const WFitParams *fp,
                        bool ci)
 {
     ws->managed_splits=extl_create_table();
@@ -154,10 +148,10 @@ static bool ionws_init(WIonWS *ws, WWindow *parent, const WRectangle *bounds,
     
     ws->split_tree=NULL;
 
-    genws_init(&(ws->genws), parent, bounds);
+    genws_init(&(ws->genws), parent, fp);
     
     if(ci){
-        if(create_initial_frame(ws, parent, bounds)==NULL){
+        if(create_initial_frame(ws, parent, fp)==NULL){
             genws_deinit(&(ws->genws));
             extl_unref_table(ws->managed_splits);
             return FALSE;
@@ -168,15 +162,15 @@ static bool ionws_init(WIonWS *ws, WWindow *parent, const WRectangle *bounds,
 }
 
 
-WIonWS *create_ionws(WWindow *parent, const WRectangle *bounds, bool ci)
+WIonWS *create_ionws(WWindow *parent, const WFitParams *fp, bool ci)
 {
-    CREATEOBJ_IMPL(WIonWS, ionws, (p, parent, bounds, ci));
+    CREATEOBJ_IMPL(WIonWS, ionws, (p, parent, fp, ci));
 }
 
 
-WIonWS *create_ionws_simple(WWindow *parent, const WRectangle *bounds)
+WIonWS *create_ionws_simple(WWindow *parent, const WFitParams *fp)
 {
-    return create_ionws(parent, bounds, TRUE);
+    return create_ionws(parent, fp, TRUE);
 }
 
 
@@ -383,10 +377,13 @@ static Obj *load_obj(WIonWS *ws, WWindow *par, const WRectangle *geom,
 {
     char *typestr;
     WRegion *reg;
+    WFitParams fp;
     
     if(extl_table_gets_s(tab, "type", &typestr)){
         free(typestr);
-        reg=create_region_load(par, geom, tab);
+        fp.g=*geom;
+        fp.mode=REGION_FIT_EXACT;
+        reg=create_region_load(par, &fp, tab);
         if(reg!=NULL)
             ionws_add_managed(ws, reg);
         return (Obj*)reg;
@@ -396,7 +393,7 @@ static Obj *load_obj(WIonWS *ws, WWindow *par, const WRectangle *geom,
 }
 
 
-WRegion *ionws_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
+WRegion *ionws_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 {
     WIonWS *ws;
     ExtlTab treetab;
@@ -405,7 +402,7 @@ WRegion *ionws_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
     if(extl_table_gets_t(tab, "split_tree", &treetab))
         ci=FALSE;
     
-    ws=create_ionws(par, geom, ci);
+    ws=create_ionws(par, fp, ci);
     
     if(ws==NULL){
         if(!ci)
@@ -435,12 +432,12 @@ WRegion *ionws_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
 
 
 static DynFunTab ionws_dynfuntab[]={
-    {region_fit, ionws_fit},
     {region_map, ionws_map},
     {region_unmap, ionws_unmap},
     {region_do_set_focus, ionws_do_set_focus},
-    {(DynFun*)region_reparent,
-     (DynFun*)reparent_ionws},
+    
+    {(DynFun*)region_fitrep,
+     (DynFun*)ionws_fitrep},
     
     {region_request_managed_geom, ionws_request_managed_geom},
     {region_managed_activated, ionws_managed_activated},

@@ -19,9 +19,9 @@
 #include "extl.h"
 #include "rectangle.h"
 
-typedef WRegion *WRegionLoadCreateFn(WWindow *par, const WRectangle *geom,
+typedef WRegion *WRegionLoadCreateFn(WWindow *par, const WFitParams *fp,
                                      ExtlTab tab);
-typedef WRegion *WRegionSimpleCreateFn(WWindow *par, const WRectangle *geom);
+typedef WRegion *WRegionSimpleCreateFn(WWindow *par, const WFitParams *fp);
 
 INTRSTRUCT(WRegClassInfo);
     

@@ -21,15 +21,14 @@ INTRCLASS(WInput);
 
 DECLCLASS(WInput){
     WWindow win;
-    WRectangle max_geom;
+    WFitParams last_fp;
     GrBrush *brush;
 };
 
-
-extern bool input_init(WInput *input, WWindow *par, const WRectangle *geom);
+extern bool input_init(WInput *input, WWindow *par, const WFitParams *fp);
 extern void input_deinit(WInput *input);
 
-extern void input_fit(WInput *input, const WRectangle *geom);
+extern void input_fitrep(WInput *input, WWindow *par, const WFitParams *fp);
 extern void input_refit(WInput *input);
 extern void input_cancel(WInput *input);
 extern bool input_rqclose(WInput *input);
