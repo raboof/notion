@@ -245,7 +245,7 @@ end
 --DOC
 -- Check that the \type{WObj} \var{obj} still exists in Ioncore.
 function obj_exists(obj)
-    return (obj_typename(obj)==nil)
+    return (obj_typename(obj)~=nil)
 end
 
 -- }}}
