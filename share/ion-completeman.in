@@ -23,7 +23,7 @@ case "$1" in
 esac
    
 if test "x$action" == x; then
-    echo "Usage: $0 (-complete what|-mkusercache|-mksyscache)"
+    echo 2>&1 "Usage: $0 (-complete what|-mkusercache|-mksyscache)"
     exit 1
 fi
         

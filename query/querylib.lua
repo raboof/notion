@@ -469,7 +469,7 @@ defcmd("WMPlex", "query_ssh",
 function querylib.man_completor(wedln, str)
     local mc=lookup_script("ion-completeman")
     if mc then
-        querylib.popen_completions(wedln, mc.." "..string.shell_safe(str))
+        querylib.popen_completions(wedln, mc.." -complete "..string.shell_safe(str))
     end
 end
 
