@@ -26,4 +26,6 @@ DYNFUN bool pholder_attach(WPHolder *ph,
                            WRegionAttachHandler *hnd, void *hnd_param);
 
 
+DYNFUN WPHolder *region_managed_get_pholder(WRegion *reg, WRegion *mgd);
+
 #endif /* ION_IONCORE_PHOLDER_H */

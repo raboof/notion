@@ -1625,6 +1625,9 @@ static DynFunTab mplex_dynfuntab[]={
     
     {region_managed_activated,
      mplex_managed_activated},
+
+    {(DynFun*)region_managed_get_pholder,
+     (DynFun*)mplex_managed_get_pholder},
     
     END_DYNFUNTAB
 };

@@ -279,6 +279,37 @@ void mplex_move_phs_before(WMPlex *mplex, WMPlexManaged *node, int layer)
 }
 
 
+#warning "TODO: some list routine unification"
+
+static WMPlexManaged *find_on_list(WMPlexManaged *list, WRegion *reg)
+{
+    WMPlexManaged *node;
+    
+    LIST_FOR_ALL(list, node, next, prev){
+        if(node->reg==reg)
+            return node;
+    }
+    
+    return NULL;
+}
+
+
+WMPlexPHolder *mplex_managed_get_pholder(WMPlex *mplex, WRegion *mgd)
+{
+    WMPlexManaged *node;
+    
+    node=find_on_list(mplex->l2_list, mgd);
+    if(node!=NULL)
+        return mplexpholder_create(mplex, NULL, node, 2);
+
+    node=find_on_list(mplex->l1_list, mgd);
+    if(node!=NULL)
+        return mplexpholder_create(mplex, NULL, node, 1);
+        
+    return NULL;
+}
+
+
 /*}}}*/
 
 

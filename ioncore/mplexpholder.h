@@ -57,4 +57,6 @@ extern void mplex_move_phs(WMPlex *mplex, WMPlexManaged *node,
 extern void mplex_move_phs_before(WMPlex *mplex, WMPlexManaged *node, 
                                   int layer);
 
+extern WMPlexPHolder *mplex_managed_get_pholder(WMPlex *mplex, WRegion *mgd);
+
 #endif /* ION_IONCORE_MPLEXPHOLDER_H */

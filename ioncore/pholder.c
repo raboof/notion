@@ -25,11 +25,20 @@ void pholder_deinit(WPHolder *ph)
 }
 
 
-DYNFUN bool pholder_attach(WPHolder *ph, 
-                           WRegionAttachHandler *hnd, void *hnd_param)
+bool pholder_attach(WPHolder *ph, 
+                    WRegionAttachHandler *hnd, void *hnd_param)
 {
     bool ret=FALSE;
     CALL_DYN_RET(ret, bool, pholder_attach, ph, (ph, hnd, hnd_param));
+    return ret;
+}
+
+
+WPHolder *region_managed_get_pholder(WRegion *reg, WRegion *mgd)
+{
+    WPHolder *ret=NULL;
+    CALL_DYN_RET(ret, WPHolder*, region_managed_get_pholder, 
+                 reg, (reg, mgd));
     return ret;
 }
 
