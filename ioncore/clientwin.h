@@ -34,9 +34,6 @@
 #define CLIENTWIN_USE_NET_WM_NAME      0x10000
 #define CLIENTWIN_TRANSIENTS_AT_TOP     0x20000
 
-#define FOR_ALL_CLIENTWINS(CWIN) \
-    for((CWIN)=ioncore_g.cwin_list; (CWIN)!=NULL; (CWIN)=(CWIN)->g_cwin_next)
-
 #define CLIENTWIN_IS_FULLSCREEN(cwin) \
         (REGION_PARENT_CHK(cwin, WScreen)!=NULL)
 

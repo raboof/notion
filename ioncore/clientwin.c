@@ -320,8 +320,6 @@ static bool clientwin_init(WClientWin *cwin, WRegion *parent,
     XSaveContext(ioncore_g.dpy, win, ioncore_g.win_context, (XPointer)cwin);
     XAddToSaveSet(ioncore_g.dpy, win);
 
-    LINK_ITEM(ioncore_g.cwin_list, cwin, g_cwin_next, g_cwin_prev);
-    
     return TRUE;
 }
 
@@ -718,8 +716,6 @@ void clientwin_deinit(WClientWin *cwin)
     
     while(cwin->transient_list!=NULL)
         destroy_obj((Obj*)(cwin->transient_list));
-    
-    UNLINK_ITEM(ioncore_g.cwin_list, cwin, g_cwin_next, g_cwin_prev);
     
     if(cwin->win!=None){
         XSelectInput(ioncore_g.dpy, cwin->win, 0);

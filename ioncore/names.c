@@ -422,8 +422,8 @@ static ExtlTab do_list(Namespace *ns, const char *typenam)
 /*EXTL_DOC
  * Find all non-client window regions inheriting \var{typenam}.
  */
-EXTL_EXPORT
-ExtlTab ioncore_region_list(const char *typenam)
+EXTL_EXPORT_AS(ioncore, region_list)
+ExtlTab ioncore_region_list_extl(const char *typenam)
 {
     return do_list(&internal_ns, typenam);
 }
@@ -432,10 +432,22 @@ ExtlTab ioncore_region_list(const char *typenam)
 /*EXTL_DOC
  * Return a list of all client windows.
  */
-EXTL_EXPORT
-ExtlTab ioncore_clientwin_list()
+EXTL_EXPORT_AS(ioncore, clientwin_list)
+ExtlTab ioncore_clientwin_list_extl()
 {
     return do_list(&clientwin_ns, NULL);
+}
+
+
+WClientWin *ioncore_clientwin_list()
+{
+    return (WClientWin*)internal_ns.list;
+}
+
+
+WRegion *ioncore_region_list()
+{
+    return clientwin_ns.list;
 }
 
 

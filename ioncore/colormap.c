@@ -146,7 +146,9 @@ static void handle_all_cmaps(const XColormapEvent *ev)
 {
     WClientWin *cwin;
 
-    FOR_ALL_CLIENTWINS(cwin){
+    for(cwin=ioncore_clientwin_list(); 
+        cwin!=NULL; 
+        cwin=(WClientWin*)((WRegion*)cwin)->ni.ns_next){
         handle_cwin_cmap(cwin, ev);
     }
 }

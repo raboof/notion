@@ -62,7 +62,6 @@ DECLSTRUCT(WGlobal){
 
     WRootWin *rootwins;
     WScreen *screens;
-    WClientWin *cwin_list;
     WRegion *focus_next;
     bool warp_next;
     

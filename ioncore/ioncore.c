@@ -116,7 +116,6 @@ static void init_global()
     ioncore_g.screens=NULL;
     ioncore_g.focus_next=NULL;
     ioncore_g.warp_next=FALSE;
-    ioncore_g.cwin_list=NULL;
     
     ioncore_g.active_screen=NULL;
 
