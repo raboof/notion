@@ -140,11 +140,14 @@ static bool wmsg_init(WMessage *wmsg, WWindow *par, const WRectangle *geom,
 	}
 	ptr[0]=cmsg;
 	n=1;
-#else	
+#else
 	p=msg;
-	while(p!=NULL){
+	while(1){
 		n=n+1;
-		p=strchr(p+1, '\n');
+		p=strchr(p, '\n');
+		if(p==NULL || *(p+1)=='\0')
+			break;
+		p=p+1;
 	}
 	
 	if(n==0)
@@ -162,8 +165,7 @@ static bool wmsg_init(WMessage *wmsg, WWindow *par, const WRectangle *geom,
 	
 	p=msg;
 	k=0;
-	while(1){
-		assert(k<n);
+	while(k<n){
 		l=strcspn(p, "\n");
 		cmsg=ALLOC_N(char, l+1);
 		if(cmsg==NULL){
@@ -185,7 +187,7 @@ static bool wmsg_init(WMessage *wmsg, WWindow *par, const WRectangle *geom,
 #endif
 	
 	init_listing(&(wmsg->listing));
-	setup_listing(&(wmsg->listing), ptr, n, TRUE);
+	setup_listing(&(wmsg->listing), ptr, k, TRUE);
 	
 	if(!input_init((WInput*)wmsg, par, geom)){
 		deinit_listing(&(wmsg->listing));
