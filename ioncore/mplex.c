@@ -1222,7 +1222,11 @@ static WRegion *do_attach_stdisp(WMPlex *mplex, WRegionAttachHandler *handler,
  * description of the object to be created (as passed to e.g. 
  * \fnref{WMPlex.attach_new}). In addition, the following fields are
  * recognised:
+ * 
  * \begin{tabularx}{\linewidth}{lX}
+ *   \hline
+ *   Field & Description \\
+ *   \hline
  *   \var{pos} & The corner of the screen to place the status display
  *               in. One of \code{tl}, \code{tr}, \var{bl} or \var{br}. \\
  *   \var{action} & If this field is set to \code{keep}, \var{corner}
