@@ -584,7 +584,7 @@ WRegion *split_reg(WRegion *reg, int dir, int primn, int minsize,
 	
 	assert(ws!=NULL);
 	
-	return do_split_at(ws, (WObj*)reg, dir, BOTTOM_OR_RIGHT, minsize, fn);
+	return do_split_at(ws, (WObj*)reg, dir, primn, minsize, fn);
 }
 
 
