@@ -293,8 +293,8 @@ static void floatframe_draw(const WFloatFrame *frame, bool complete)
 	else
 		dinfo->colors=&(grdata->frame_colors);
 	
-	if(complete)
-		XClearWindow(wglobal.dpy, WGENFRAME_WIN(frame));
+	/*if(complete)
+		XClearWindow(wglobal.dpy, WGENFRAME_WIN(frame));*/
 	
 	draw_border(dinfo);
 	

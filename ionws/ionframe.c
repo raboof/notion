@@ -246,8 +246,8 @@ void ionframe_draw(const WIonFrame *frame, bool complete)
 	else
 		dinfo->colors=&(grdata->frame_colors);
 	
-	if(complete)
-		XClearWindow(wglobal.dpy, WGENFRAME_WIN(frame));
+	/*if(complete)
+		XClearWindow(wglobal.dpy, WGENFRAME_WIN(frame));*/
 	
 	draw_border_inverted(dinfo, TRUE);
 
