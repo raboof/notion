@@ -1,5 +1,5 @@
 /*
- * ion/ioncore/mplexp.h
+ * ion/ioncore/llist.h
  *
  * Copyright (c) Tuomo Valkonen 2005. 
  * 
@@ -9,10 +9,13 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_IONCORE_MPLEXP_H
-#define ION_IONCORE_MPLEXP_H
+#ifndef ION_IONCORE_LLIST_H
+#define ION_IONCORE_LLIST_H
+
+#include <limits.h>
 
 #include "mplex.h"
+#include "mplexpholder.h"
 #include "extlconv.h"
 
 
@@ -51,12 +54,16 @@ extern bool llist_is_node_on(WLListNode *list, WLListNode *node);
 extern WLListNode *llist_nth_node(WLListNode *list, uint n);
 extern WRegion *llist_nth_region(WLListNode *list, uint n);
 extern ExtlTab llist_to_table(WLListNode *list);
+extern void llist_link_after(WLListNode **list, 
+                             WLListNode *after, WLListNode *node);
+extern void llist_link_last(WLListNode **list, WLListNode *node);
+extern WLListNode *llist_index_to_after(WLListNode *list, 
+                                        WLListNode *current,
+                                        int index);
+extern void llist_unlink(WLListNode **list, WLListNode *node);
 
 #define INDEX_AFTER_CURRENT (INT_MIN)
 #define DEFAULT_INDEX(MPLEX) \
     ((MPLEX)->flags&MPLEX_ADD_TO_END ? -1 : INDEX_AFTER_CURRENT)
 
-#define MPLEX_MGD_UNVIEWABLE(MPLEX) \
-    ((MPLEX)->flags&MPLEX_MANAGED_UNVIEWABLE)
-
-#endif /* ION_IONCORE_MPLEXP_H */
+#endif /* ION_IONCORE_LLIST_H */

@@ -31,7 +31,7 @@
 #include "xwindow.h"
 #include "names.h"
 #include "presize.h"
-#include "mplexp.h"
+#include "llist.h"
 
 
 static int p_tab_x=0, p_tab_y=0, p_tabnum=-1;
