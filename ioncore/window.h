@@ -26,7 +26,6 @@ INTROBJ(WWindow);
 DECLOBJ(WWindow){
 	WRegion region;
 	Window win;
-	WExtraDrawInfo *draw;
 	XIC xic;
 	WRegion *keep_on_top_list;
 };
@@ -40,7 +39,7 @@ extern void window_deinit(WWindow *win);
 extern WRegion *find_window(Window win);
 extern WRegion *find_window_t(Window win, const WObjDescr *descr);
 
-DYNFUN void draw_window(WWindow *wwin, bool complete);
+DYNFUN void window_draw(WWindow *wwin, bool complete);
 DYNFUN void window_insstr(WWindow *wwin, const char *buf, size_t n);
 DYNFUN int window_press(WWindow *wwin, XButtonEvent *ev, WRegion **reg_ret);
 DYNFUN void window_release(WWindow *wwin);

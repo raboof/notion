@@ -39,8 +39,6 @@ bool gr_register_engine(const char *engine, GrGetBrushFn *fn,
 {
 	GrEngine *eng;
 	
-	fprintf(stderr, "registering engine %s\n", engine);
-	
 	if(engine==NULL || fn==NULL || vfn==NULL)
 		return FALSE;
 	
@@ -64,8 +62,6 @@ bool gr_register_engine(const char *engine, GrGetBrushFn *fn,
 	
 	LINK_ITEM(engines, eng, next, prev);
 
-	fprintf(stderr, "ok\n");
-	
 	return TRUE;
 }
 
@@ -118,21 +114,18 @@ bool gr_select_engine(const char *engine)
 	if(engine==NULL)
 		return FALSE;
 	
-	fprintf(stderr, "selecting engine %s\n", engine);
-
 	if(gr_do_select_engine(engine))
 		return TRUE;
 	
-	fprintf(stderr, "attempting to load module\n");
-	
 	if(!load_module(engine))
 		return FALSE;
-
-	fprintf(stderr, "success\n");
 	
-	{bool ret=gr_do_select_engine(engine); fprintf(stderr, "-->%d\n", ret);
-		return ret;
+	if(!gr_do_select_engine(engine)){
+		warn("Drawing engine %s not registered!", engine);
+		return FALSE;
 	}
+	
+	return TRUE;
 }
 
 
@@ -141,16 +134,10 @@ GrBrush *gr_get_brush(WRootWin *rootwin, Window win, const char *style)
 	GrEngine *eng=(current_engine!=NULL ? current_engine : engines);
 	GrBrush *ret;
 	
-	fprintf(stderr, "looking up brush for %s\n", style);
-	
-	if(eng==NULL || eng->fn==NULL){
-		fprintf(stderr, "no engine\n");
+	if(eng==NULL || eng->fn==NULL)
 		return NULL;
-	}
 	
 	ret=(eng->fn)(rootwin, win, style);
-	
-	fprintf(stderr, "got: %p\n", ret);
 	
 	return ret;
 }
@@ -263,14 +250,10 @@ void grbrush_release(GrBrush *brush, Window win)
 GrBrush *grbrush_get_slave(GrBrush *brush, WRootWin *rootwin, 
 						   Window win, const char *style)
 {
-	fprintf(stderr, "Looking up slave %s\n",style);
-	{
 	GrBrush *slave=NULL;
 	CALL_DYN_RET(slave, GrBrush*, grbrush_get_slave, brush,
 				 (brush, rootwin, win, style));
-		fprintf(stderr, "got: %p\n", slave);
 	return slave;
-	}
 }
 
 

@@ -10,7 +10,6 @@
  */
 
 #include <ioncore/common.h>
-#include <X11/extensions/shape.h>
 #include <string.h>
 
 #include <ioncore/genframe.h>
@@ -20,7 +19,6 @@
 #include <ioncore/names.h>
 #include <ioncore/objp.h>
 #include <ioncore/objp.h>
-#include <ioncore/drawp.h>
 #include <ioncore/regbind.h>
 #include <ioncore/defer.h>
 #include <ioncore/resize.h>
@@ -41,7 +39,8 @@ static bool floatframe_init(WFloatFrame *frame, WWindow *parent,
 		return FALSE;
 
 	frame->bar_w=geom.w;
-	frame->genframe.tab_spacing=0;
+	frame->tab_min_w=100;
+	frame->bar_max_width_q=0.95;
 	
 	genframe_recalc_bar((WGenFrame*)frame);
 	
@@ -68,20 +67,43 @@ static void deinit_floatframe(WFloatFrame *frame)
 
 /*{{{ Geometry */
 
-static void floatframe_offsets(WGRData *grdata, WRectangle *off)
+static void floatframe_offsets(WRootWin *rootwin, const WFloatFrame *frame,
+							   WRectangle *off)
 {
-	int bd=BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad;
-	off->x=-bd;
-	off->w=2*bd;
-	off->y=-bd-grdata->bar_h;
-	off->h=2*bd+grdata->bar_h;	
+	GrBorderWidths bdw=GR_BORDER_WIDTHS_INIT;
+	uint bar_h=0;
+	
+	if(frame!=NULL){
+		if(frame->genframe.brush!=NULL)
+			grbrush_get_border_widths(frame->genframe.brush, &bdw);
+	}else if(rootwin!=NULL){
+		gr_get_brush_values(rootwin, "frame-floatframe", &bdw, NULL, NULL);
+	}
+	
+	off->x=-bdw.left;
+	off->y=-bdw.top;
+	off->w=bdw.left+bdw.right;
+	off->h=bdw.top+bdw.bottom;
+
+	if(frame!=NULL){
+		bar_h=frame->genframe.bar_h;
+	}else if(rootwin!=NULL){
+		GrBorderWidths bdwt=GR_BORDER_WIDTHS_INIT;
+		GrFontExtents fntet=GR_FONT_EXTENTS_INIT;
+		gr_get_brush_values(rootwin, "frame-tab-floatframe", &bdwt, &fntet, 
+							NULL);
+		bar_h=bdwt.top+bdwt.bottom+fntet.max_height;
+	}
+
+	off->y-=bar_h;
+	off->h+=bar_h;
 }
 
 
-void managed_to_floatframe_geom(WGRData *grdata, WRectangle *geom)
+void managed_to_floatframe_geom(WRootWin *rootwin, WRectangle *geom)
 {
 	WRectangle off;
-	floatframe_offsets(grdata, &off);
+	floatframe_offsets(rootwin, NULL, &off);
 	geom->x+=off.x;
 	geom->y+=off.y;
 	geom->w+=off.w;
@@ -89,10 +111,12 @@ void managed_to_floatframe_geom(WGRData *grdata, WRectangle *geom)
 }
 
 
-static void floatframe_to_managed_geom(WGRData *grdata, WRectangle *geom)
+static void floatframe_to_managed_geom(WRootWin *rootwin,
+									   const WFloatFrame *frame,
+									   WRectangle *geom)
 {
 	WRectangle off;
-	floatframe_offsets(grdata, &off);
+	floatframe_offsets(rootwin, frame, &off);
 	geom->x=-off.x;
 	geom->y=-off.y;
 	geom->w-=off.w;
@@ -102,30 +126,26 @@ static void floatframe_to_managed_geom(WGRData *grdata, WRectangle *geom)
 
 static void floatframe_border_geom(const WFloatFrame *frame, WRectangle *geom)
 {
-	WGRData *grdata=GRDATA_OF(frame);
-
 	geom->x=0;
-	geom->y=grdata->bar_h;
+	geom->y=frame->genframe.bar_h;
 	geom->w=REGION_GEOM(frame).w;
-	geom->h=REGION_GEOM(frame).h-grdata->bar_h;
+	geom->h=REGION_GEOM(frame).h-frame->genframe.bar_h;
 }
 
 
 static void floatframe_bar_geom(const WFloatFrame *frame, WRectangle *geom)
 {
-	WGRData *grdata=GRDATA_OF(frame);
-	
 	geom->x=0;
 	geom->y=0;
 	geom->w=frame->bar_w;
-	geom->h=grdata->bar_h;
+	geom->h=frame->genframe.bar_h;
 }
 
 
 static void floatframe_managed_geom(const WFloatFrame *frame, WRectangle *geom)
 {
 	*geom=REGION_GEOM(frame);
-	floatframe_to_managed_geom(GRDATA_OF(frame), geom);
+	floatframe_to_managed_geom(NULL, frame, geom);
 }
 
 
@@ -148,7 +168,7 @@ void initial_to_floatframe_geom(WFloatWS *ws, WRectangle *geom, int gravity)
 	bottom=REGION_GEOM(root).h-top-REGION_GEOM(ws).h;
 #endif
 
-	floatframe_offsets(GRDATA_OF(ws), &off);
+	floatframe_offsets(ROOTWIN_OF(ws), NULL, &off);
 
 	geom->w+=off.w;
 	geom->h+=off.h;
@@ -178,7 +198,7 @@ static void floatframe_request_clientwin_geom(WFloatFrame *frame,
 	if(cwin->size_hints.flags&PWinGravity)
 		gravity=cwin->size_hints.win_gravity;
 
-	floatframe_offsets(GRDATA_OF(frame), &off);
+	floatframe_offsets(NULL, frame, &off);
 
 	genframe_resize_hints((WGenFrame*)frame, &hints, NULL, NULL);
 	correct_size(&(geom.w), &(geom.h), &hints, TRUE);
@@ -227,73 +247,85 @@ static void floatframe_request_clientwin_geom(WFloatFrame *frame,
 
 static void floatframe_set_shape(WFloatFrame *frame)
 {
-	WRectangle g={0, 0, 0, 0};
-	XRectangle r[2];
-	int n=0;
+	WRectangle gs[2];
 	
-	if(!(frame->genframe.flags&WGENFRAME_TAB_HIDE)){
-		floatframe_bar_geom(frame, &g);
-		r[n].x=g.x;
-		r[n].y=g.y;
-		r[n].width=g.w;
-		r[n].height=g.h;
-		n++;
+	if(frame->genframe.brush!=NULL){
+		floatframe_bar_geom(frame, gs+0);
+		floatframe_border_geom(frame, gs+1);
+	
+		grbrush_set_window_shape(frame->genframe.brush, WGENFRAME_WIN(frame),
+								 TRUE, 2, gs);
 	}
-	if(!(frame->genframe.flags&WGENFRAME_SHADED)){
-		r[n].width=REGION_GEOM(frame).w;
-		r[n].height=REGION_GEOM(frame).h-g.h;
-		r[n].x=0;
-		r[n].y=g.h;
-		n++;
-	}
-	XShapeCombineRectangles(wglobal.dpy, WGENFRAME_WIN(frame), ShapeBounding,
-							0, 0, r, n, ShapeSet, YXBanded);
 }
 
 
 #define CF_TAB_MAX_TEXT_X_OFF 10
 
+
+static int init_title(WFloatFrame *frame, int i)
+{
+	int textw;
+	
+	if(frame->genframe.titles[i].text!=NULL){
+		free(frame->genframe.titles[i].text);
+		frame->genframe.titles[i].text=NULL;
+	}
+	
+	textw=genframe_nth_tab_iw((WGenFrame*)frame, i);
+	frame->genframe.titles[i].iw=textw;
+	return textw;
+}
+
+
 static void floatframe_recalc_bar(WFloatFrame *frame)
 {
-	WGRData *grdata=GRDATA_OF(frame);
-	int bar_w=0, maxw=0, tmaxw=0;
-	int tab_w, textw, tmp;
+	int bar_w=0, textw=0, tmaxw=0, tmp=0;
 	WRegion *sub;
 	const char *p;
+	GrBorderWidths bdw;
+	char *title;
+	uint bdtotal;
+	int i;
 	
-	if(WGENFRAME_MCOUNT(frame)!=0){
+	if(frame->genframe.bar_brush==NULL)
+		return;
+	
+	if(WGENFRAME_MCOUNT(frame)>0){
+		grbrush_get_border_widths(frame->genframe.bar_brush, &bdw);
+		bdtotal=((WGENFRAME_MCOUNT(frame)-1)*(bdw.tb_ileft+bdw.tb_iright)
+				 +bdw.right+bdw.left);
+
 		FOR_ALL_MANAGED_ON_LIST(WGENFRAME_MLIST(frame), sub){
 			p=region_name(sub);
-			if(p!=NULL){
-				tab_w=(text_width(grdata->tab_font, p, strlen(p))
-					   +BORDER_TL_TOTAL(&(grdata->tab_border))
-					   +BORDER_BR_TOTAL(&(grdata->tab_border)));
-				if(tab_w>tmaxw)
-					tmaxw=tab_w;
-			}
+			if(p==NULL)
+				continue;
+			
+			textw=grbrush_get_text_width(frame->genframe.bar_brush,
+										 p, strlen(p));
+			if(textw>tmaxw)
+				tmaxw=textw;
 		}
+
+		bar_w=frame->bar_max_width_q*REGION_GEOM(frame).w;
+		if(bar_w<frame->tab_min_w && 
+		   REGION_GEOM(frame).w>frame->tab_min_w)
+			bar_w=frame->tab_min_w;
 		
-		maxw=grdata->pwm_bar_max_width_q*REGION_GEOM(frame).w;
-		if(maxw<grdata->pwm_tab_min_width &&
-		   REGION_GEOM(frame).w>grdata->pwm_tab_min_width)
-			maxw=grdata->pwm_tab_min_width;
+		tmp=bar_w-bdtotal-WGENFRAME_MCOUNT(frame)*tmaxw;
 		
-		tmp=maxw-tmaxw*WGENFRAME_MCOUNT(frame);
 		if(tmp>0){
-			/* No label truncation needed. good. See how much can be padded */
+			/* No label truncation needed, good. See how much can be padded. */
 			tmp/=WGENFRAME_MCOUNT(frame)*2;
 			if(tmp>CF_TAB_MAX_TEXT_X_OFF)
 				tmp=CF_TAB_MAX_TEXT_X_OFF;
-			tab_w=tmaxw+tmp*2;
-			bar_w=tab_w*WGENFRAME_MCOUNT(frame);
+			bar_w=(tmaxw+tmp*2)*WGENFRAME_MCOUNT(frame)+bdtotal;
 		}else{
 			/* Some labels must be truncated */
-			bar_w=maxw;
 		}
 	}else{
-		bar_w=grdata->pwm_tab_min_width;
-		if(bar_w>grdata->pwm_bar_max_width_q*REGION_GEOM(frame).w)
-			bar_w=grdata->pwm_bar_max_width_q*REGION_GEOM(frame).w;
+		bar_w=frame->tab_min_w;
+		if(bar_w>frame->bar_max_width_q*REGION_GEOM(frame).w)
+			bar_w=frame->bar_max_width_q*REGION_GEOM(frame).w;
 	}
 
 	if(frame->bar_w!=bar_w){
@@ -301,13 +333,17 @@ static void floatframe_recalc_bar(WFloatFrame *frame)
 		floatframe_set_shape(frame);
 	}
 
-	if(WGENFRAME_MCOUNT(frame)!=0){
-		int n=0;
-		FOR_ALL_MANAGED_ON_LIST(WGENFRAME_MLIST(frame), sub){
-			tab_w=genframe_nth_tab_w((WGenFrame*)frame, n++);
-			textw=BORDER_IW(&(grdata->tab_border), tab_w);
-			REGION_LABEL(sub)=region_make_label(sub, textw, grdata->tab_font);
+	if(WGENFRAME_MCOUNT(frame)==0 || frame->genframe.titles==NULL)
+		return;
+	
+	i=0;
+	FOR_ALL_MANAGED_ON_LIST(WGENFRAME_MLIST(frame), sub){
+		textw=init_title(frame, i);
+		if(textw>0){
+			title=region_make_label(sub, textw, frame->genframe.bar_brush);
+			frame->genframe.titles[i].text=title;
 		}
+		i++;
 	}
 }
 
@@ -317,44 +353,29 @@ static void floatframe_size_changed(WFloatFrame *frame, bool wchg, bool hchg)
 	int bar_w=frame->bar_w;
 	
 	if(wchg)
-		floatframe_recalc_bar(frame);
+		genframe_recalc_bar((WGenFrame*)frame);
 	if(hchg || (wchg && bar_w==frame->bar_w))
 		floatframe_set_shape(frame);
 }
 
 
-static void floatframe_draw(const WFloatFrame *frame, bool complete)
+static const char *floatframe_style_default(WFloatFrame *frame)
 {
-	DrawInfo _dinfo, *dinfo=&_dinfo;
-	WGRData *grdata=GRDATA_OF(frame);
-	int a;
+	return "frame-floatframe";
+}
 
-	dinfo->win=WGENFRAME_WIN(frame);
-	dinfo->draw=WGENFRAME_DRAW(frame);
 
-	dinfo->grdata=grdata;
-	dinfo->gc=grdata->gc;
-	dinfo->border=&(grdata->frame_border);
-	floatframe_border_geom(frame, &(dinfo->geom));
-	
-	if(REGION_IS_ACTIVE(frame))
-		dinfo->colors=&(grdata->act_frame_colors);
-	else
-		dinfo->colors=&(grdata->frame_colors);
-	
-	if(complete)
-		XClearWindow(wglobal.dpy, WGENFRAME_WIN(frame));
-	
-	draw_border(dinfo);
-	
-	dinfo->geom.x+=BORDER->tl;
-	dinfo->geom.y+=BORDER->tl;
-	dinfo->geom.w-=BORDER->tl+BORDER->br;
-	dinfo->geom.h-=BORDER->tl+BORDER->br;
-	
-	draw_border_inverted(dinfo, TRUE);
+static const char *floatframe_tab_style_default(WFloatFrame *frame)
+{
+	return "frame-tab-floatframe";
+}
 
-	genframe_draw_bar((WGenFrame*)frame, FALSE);
+
+static void floatframe_draw_config_updated(WFloatFrame *floatframe)
+{
+	genframe_draw_config_updated((WGenFrame*)floatframe);
+	/* vai missä?*/
+	/*get_bar_widths(floatframe);*/
 }
 
 
@@ -476,13 +497,13 @@ WRegion *floatframe_load(WWindow *par, WRectangle geom, ExtlTab tab)
 
 
 static DynFunTab floatframe_dynfuntab[]={
-	{draw_window, floatframe_draw},
 	{mplex_size_changed, floatframe_size_changed},
 	{genframe_recalc_bar, floatframe_recalc_bar},
 
 	{mplex_managed_geom, floatframe_managed_geom},
 	{genframe_bar_geom, floatframe_bar_geom},
 	{genframe_border_inner_geom, floatframe_border_inner_geom},
+	{genframe_border_geom, floatframe_border_geom},
 	{region_remove_managed, floatframe_remove_managed},
 	
 	/*{region_request_managed_geom, floatframe_request_managed_geom},*/
@@ -490,6 +511,11 @@ static DynFunTab floatframe_dynfuntab[]={
 	{region_request_clientwin_geom, floatframe_request_clientwin_geom},
 	
 	{(DynFun*)region_save_to_file, (DynFun*)floatframe_save_to_file},
+
+	{(DynFun*)genframe_style, (DynFun*)floatframe_style_default},
+	{(DynFun*)genframe_tab_style, (DynFun*)floatframe_tab_style_default},
+	
+	{region_draw_config_updated, floatframe_draw_config_updated},
 	
 	END_DYNFUNTAB
 };

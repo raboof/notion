@@ -56,7 +56,7 @@ LIBTOOL=libtool
 # 2003-06-17 on WinXP.
 
 # List of modules to build (and possibly preload)
-MODULE_LIST=ionws floatws query
+MODULE_LIST=ionws floatws query de
 
 # Settings for compiling and linking to ltdl
 LTDL_INCLUDES=

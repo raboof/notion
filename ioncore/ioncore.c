@@ -36,9 +36,10 @@
 #include "exec.h"
 #include "conf.h"
 #include "binding.h"
-#include "font.h"
+#include "strings.h"
 #include "extl.h"
 #include "errorlog.h"
+#include "gr.h"
 #include "../version.h"
 
 
@@ -270,14 +271,14 @@ static void init_global()
 #ifdef CF_UTF8
 static bool test_fallback_font(Display *dpy)
 {
-	WFontPtr fnt=load_font(dpy, CF_FALLBACK_FONT_NAME);
+	XFontStruct *fnt=XLoadQueryFont(dpy, CF_FALLBACK_FONT_NAME);
 	
 	if(fnt==NULL){
 		warn("Failed to load fallback font \"%s\"", CF_FALLBACK_FONT_NAME);
 		return FALSE;
 	}
 	
-	free_font(dpy, fnt);
+	XFreeFont(dpy, fnt);
 	return TRUE;
 }
 
@@ -434,6 +435,8 @@ bool ioncore_startup(const char *display, const char *cfgfile,
 	if(!init_x(display, stflags))
 		return FALSE;
 
+	reread_draw_config();
+
 	if(!ioncore_read_config(cfgfile)){
 		/* Let's not fail, it might be a minor error */
 	}
@@ -474,10 +477,13 @@ void ioncore_deinit()
 		warn("Not saving workspace layout.");
 	}
 	
-	while(wglobal.rootwins!=NULL)
-		destroy_obj((WObj*)wglobal.rootwins);
+	while(wglobal.screens!=NULL)
+		destroy_obj((WObj*)wglobal.screens);
 
 	unload_modules();
+
+	while(wglobal.rootwins!=NULL)
+		destroy_obj((WObj*)wglobal.rootwins);
 	
 	dpy=wglobal.dpy;
 	wglobal.dpy=NULL;
@@ -502,6 +508,20 @@ EXTL_EXPORT_AS(warn)
 void exported_warn(const char *str)
 {
 	warn("%s", str);
+}
+
+
+/*EXTL_DOC
+ * Was Ioncore compiled to use UTF8 strings internally?
+ */
+EXTL_EXPORT
+bool ioncore_is_utf8()
+{
+#ifdef CF_UTF8
+	return TRUE;
+#else
+	return FALSE;
+#endif
 }
 
 

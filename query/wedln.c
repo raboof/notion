@@ -12,9 +12,8 @@
 #include <string.h>
 #include <ioncore/common.h>
 #include <ioncore/global.h>
-#include <ioncore/drawp.h>
 #include <ioncore/objp.h>
-#include <ioncore/font.h>
+#include <ioncore/strings.h>
 #include <ioncore/xic.h>
 #include <ioncore/selection.h>
 #include <ioncore/event.h>
@@ -27,82 +26,84 @@
 #include "complete.h"
 
 
-#define TEXT_AREA_HEIGHT(GRDATA) \
-	(MAX_FONT_HEIGHT(INPUT_FONT(GRDATA))+INPUT_BORDER_SIZE(GRDATA))
+#define WEDLN_BRUSH(X) ((X)->input.brush)
+#define WEDLN_WIN(X)  ((X)->input.win.win)
 
 
-	
 /*{{{ Drawing primitives */
 
 
-static int wedln_draw_strsect(DrawInfo *dinfo, int x, const char *str,
-							  int len, int col)
+static int calc_text_y(WEdln *wedln, const WRectangle *geom)
 {
-	int ty=I_Y+I_H/2-MAX_FONT_HEIGHT(FONT)/2+FONT_BASELINE(FONT);
-	WColor *fg, *bg;
+	GrFontExtents fnte;
+		
+	grbrush_get_font_extents(WEDLN_BRUSH(wedln), &fnte);
+		
+	return geom->y+geom->h/2-fnte.max_height/2+fnte.baseline;
+}
+
+
+static int wedln_draw_strsect(WEdln *wedln, const WRectangle *geom, int x,
+							  const char *str, int len, const char *attr)
+{
+	int ty=calc_text_y(wedln, geom);
 
 	if(len==0)
 		return 0;
 	
-	if(col==2){
-		fg = &COLORS->bg;
-		bg = &COLORS->fg;
-	}else if(col==1){
-		fg = &GRDATA->selection_fgcolor;
-		bg = &GRDATA->selection_bgcolor;
-	}else{
-		fg = &COLORS->fg;
-		bg = &COLORS->bg;
-	}
+	grbrush_draw_string(WEDLN_BRUSH(wedln), WEDLN_WIN(wedln), geom->x+x, ty,
+						str, len, TRUE, attr);
 	
-	draw_image_string(dinfo, I_X+x, ty, str, len, fg, bg);
-	
-	return text_width(FONT, str, len);
+	return grbrush_get_text_width(WEDLN_BRUSH(wedln), str, len);
 }
 
 #define DSTRSECT(LEN, INV) \
-	{tx+=wedln_draw_strsect(dinfo, tx, str, LEN, INV); str+=LEN; len-=LEN;}
+	{tx+=wedln_draw_strsect(wedln, geom, tx, str, LEN, INV); \
+	 str+=LEN; len-=LEN;}
 
 
-static void wedln_do_draw_str_box(DrawInfo *dinfo, const char *str,
-								  int cursor, int mark, int tx)
+static void wedln_do_draw_str_box(WEdln *wedln, const WRectangle *geom,
+								  const char *str, int cursor, 
+								  int mark, int tx)
 {
 	int len=strlen(str), ll;
-	XRectangle rect;
 	
-	rect.x=I_X; rect.y=I_Y; rect.width=I_W; rect.height=I_H;
-	XSetClipRectangles(wglobal.dpy, XGC, 0, 0, &rect, 1, Unsorted);
+	grbrush_set_clipping_rectangle(WEDLN_BRUSH(wedln), WEDLN_WIN(wedln), geom);
 
 	if(mark<=cursor){
 		if(mark>=0){
-			DSTRSECT(mark, 0);
-			DSTRSECT(cursor-mark, 1);
+			DSTRSECT(mark, "normal");
+			DSTRSECT(cursor-mark, "selection");
 		}else{
-			DSTRSECT(cursor, 0);
+			DSTRSECT(cursor, "normal");
 		}
 		if(len==0){
-			tx+=wedln_draw_strsect(dinfo, tx, " ", 1, 2);
+			tx+=wedln_draw_strsect(wedln, geom, tx, " ", 1, "cursor");
 		}else{
 			ll=str_nextoff(str);
-			DSTRSECT(ll, 2);
+			DSTRSECT(ll, "cursor");
 		}
 	}else{
-		DSTRSECT(cursor, 0);
+		DSTRSECT(cursor, "normal");
 		ll=str_nextoff(str);
-		DSTRSECT(ll, 2);
-		DSTRSECT(mark-cursor-ll, 1);
+		DSTRSECT(ll, "cursor");
+		DSTRSECT(mark-cursor-ll, "selection");
 	}
 	DSTRSECT(len, 0);
 
-	if(tx<I_W){
-		set_foreground(wglobal.dpy, XGC, COLORS->bg);
-		XFillRectangle(wglobal.dpy, WIN, XGC, I_X+tx, I_Y, I_W-tx, I_H);
+	if(tx<geom->w){
+		WRectangle g=*geom;
+		g.x+=tx;
+		g.w-=tx;
+		grbrush_clear_area(WEDLN_BRUSH(wedln), WEDLN_WIN(wedln), &g);
 	}
-	XSetClipMask(wglobal.dpy, XGC, None);
+	
+	grbrush_clear_clipping_rectangle(WEDLN_BRUSH(wedln), WEDLN_WIN(wedln));
 }
 
 
-static void wedln_draw_str_box(DrawInfo *dinfo, int vstart, const char *str,
+static void wedln_draw_str_box(WEdln *wedln, const WRectangle *geom,
+							   int vstart, const char *str,
 							   int dstart, int point, int mark)
 {
 	int tx=0;
@@ -116,13 +117,13 @@ static void wedln_draw_str_box(DrawInfo *dinfo, int vstart, const char *str,
 	point-=vstart+dstart;
 	
 	if(dstart!=0)
-		tx=text_width(FONT, str+vstart, dstart);
+		tx=grbrush_get_text_width(WEDLN_BRUSH(wedln), str+vstart, dstart);
 	
-	wedln_do_draw_str_box(dinfo, str+vstart+dstart, point, mark, tx);
+	wedln_do_draw_str_box(wedln, geom, str+vstart+dstart, point, mark, tx);
 }
 
 
-static bool wedln_update_cursor(WEdln *wedln, WFontPtr font, int iw)
+static bool wedln_update_cursor(WEdln *wedln, int iw)
 {
 	int cx, l;
 	int vstart=wedln->vstart;
@@ -140,10 +141,12 @@ static bool wedln_update_cursor(WEdln *wedln, WFontPtr font, int iw)
 	
 	while(vstart<point){
 		if(point==len){
-			cx=text_width(font, str+vstart, point-vstart);
-			cx+=text_width(font, " ", 1);
+			cx=grbrush_get_text_width(WEDLN_BRUSH(wedln), str+vstart, 
+									  point-vstart);
+			cx+=grbrush_get_text_width(WEDLN_BRUSH(wedln), " ", 1);
 		}else{
-			cx=text_width(font, str+vstart, point-vstart+1);
+			cx=grbrush_get_text_width(WEDLN_BRUSH(wedln), str+vstart, 
+									  point-vstart+1);
 		}
 		l=cx;
 		
@@ -166,60 +169,97 @@ static bool wedln_update_cursor(WEdln *wedln, WFontPtr font, int iw)
 /*{{{ Size/location calc */
 
 
-static void get_textarea_geom(WEdln *wedln, DrawInfo *dinfo)
+static int get_textarea_height(WEdln *wedln, bool with_spacing)
 {
-	int th=TEXT_AREA_HEIGHT(GRDATA);
-	WRectangle geom=REGION_GEOM(wedln);
+	GrBorderWidths bdw;
+	GrFontExtents fnte;
 	
-	if(geom.h<th)
-		th=geom.h;
+	grbrush_get_border_widths(WEDLN_BRUSH(wedln), &bdw);
+	grbrush_get_font_extents(WEDLN_BRUSH(wedln), &fnte);
 	
-	dinfo->geom.x=wedln->prompt_w;
-	dinfo->geom.y=geom.h-th;
-	dinfo->geom.w=geom.w-wedln->prompt_w;
-	dinfo->geom.h=th;
+	return (fnte.max_height+bdw.top+bdw.bottom+
+			(with_spacing ? bdw.spacing : 0));
 }
 
 
-static void get_geom(WEdln *wedln, DrawInfo *dinfo,
-					 bool complist, bool max)
-{
-	WRectangle geom=(max ? wedln->input.max_geom : REGION_GEOM(wedln));
-	int th=TEXT_AREA_HEIGHT(GRDATA);
+enum{G_NORESET, G_MAX, G_CURRENT};
 
-	if(geom.h<th)
-		th=geom.h;
-	
-	geom.x=0;
-	geom.y=0;
-	
-	if(!complist){
-		geom.y=geom.h-th;
-		geom.h=th;
-	}else{
-		geom.h-=th+GRDATA->spacing;
-	}
-	
-	dinfo->geom=geom;
+
+static void get_geom(WEdln *wedln, int mode, WRectangle *geom)
+{
+	if(mode==G_MAX)
+		*geom=wedln->input.max_geom;
+	else if(mode==G_CURRENT)
+		*geom=REGION_GEOM(wedln);
 }
 
 
-static void setup_wedln_dinfo(WEdln *wedln, DrawInfo *dinfo,
-							  bool complist, bool max)
+static void get_completions_geom(WEdln *wedln, int mode, WRectangle *geom)
 {
-	setup_input_dinfo((WInput*)wedln, dinfo);
-	get_geom(wedln, dinfo, complist, max);
+	get_geom(wedln, mode, geom);
+	geom->x=0;
+	geom->y=0;
+	
+	geom->h-=get_textarea_height(wedln, TRUE);
+	if(geom->h<0)
+		geom->h=0;
+}
+
+
+static void get_outer_geom(WEdln *wedln, int mode, WRectangle *geom)
+{
+	int th;
+	
+	get_geom(wedln, mode, geom);
+	geom->x=0;
+	geom->y=0;
+	
+	th=get_textarea_height(wedln, FALSE);
+	
+	geom->y+=geom->h-th;
+	geom->h=th;
+}
+
+
+static void get_inner_geom(WEdln *wedln, int mode, WRectangle *geom)
+{
+	GrBorderWidths bdw;
+	
+	grbrush_get_border_widths(WEDLN_BRUSH(wedln), &bdw);
+	
+	get_outer_geom(wedln, mode, geom);
+	
+	geom->x+=bdw.left;
+	geom->w-=bdw.left+bdw.right;
+	geom->y+=bdw.top;
+	geom->h-=bdw.top+bdw.bottom;
+}
+
+
+static void get_textarea_geom(WEdln *wedln, int mode, WRectangle *geom)
+{
+	get_inner_geom(wedln, mode, geom);
+	geom->x+=wedln->prompt_w;
+	geom->w-=wedln->prompt_w;
 }
 
 
 static void wedln_calc_size(WEdln *wedln, WRectangle *geom)
 {
-	WGRData *grdata=GRDATA_OF(wedln);
 	int h, th;
-	WRectangle max_geom=*geom;
-	DrawInfo dinfo_;
+	GrBorderWidths bdw;
+	WRectangle max_geom=*geom, tageom;
 	
-	th=TEXT_AREA_HEIGHT(grdata);
+	if(WEDLN_BRUSH(wedln)==NULL)
+		return;
+	
+	if(wedln->prompt!=NULL){
+		wedln->prompt_w=grbrush_get_text_width(WEDLN_BRUSH(wedln),
+											   wedln->prompt, 
+											   wedln->prompt_len);
+	}
+
+	th=get_textarea_height(wedln, wedln->complist.strs!=NULL);
 	
 	if(wedln->complist.strs==NULL){
 		if(max_geom.h<th)
@@ -227,11 +267,16 @@ static void wedln_calc_size(WEdln *wedln, WRectangle *geom)
 		else
 			geom->h=th;
 	}else{
-		setup_wedln_dinfo(wedln, &dinfo_, TRUE, TRUE);
-		fit_listing(&dinfo_, &(wedln->complist));
-
+		WRectangle g;
+		
+		get_completions_geom(wedln, G_MAX, &g);
+		
+		fit_listing(WEDLN_BRUSH(wedln), &g, &(wedln->complist));
+		
+		grbrush_get_border_widths(WEDLN_BRUSH(wedln), &bdw);
+		
 		h=wedln->complist.toth;
-		th+=grdata->spacing+INPUT_BORDER_SIZE(grdata);
+		th+=bdw.top+bdw.bottom;
 		
 		if(h+th>max_geom.h)
 			h=max_geom.h-th;
@@ -242,8 +287,9 @@ static void wedln_calc_size(WEdln *wedln, WRectangle *geom)
 	geom->y=max_geom.y+max_geom.h-geom->h;
 	geom->x=max_geom.x;
 
-	wedln_update_cursor(wedln, INPUT_FONT(grdata),
-						geom->w-wedln->prompt_w-INPUT_BORDER_SIZE(grdata));
+	tageom=*geom;
+	get_textarea_geom(wedln, G_NORESET, &tageom);
+	wedln_update_cursor(wedln, tageom.w);
 }
 
 
@@ -255,52 +301,65 @@ static void wedln_calc_size(WEdln *wedln, WRectangle *geom)
 
 static void wedln_update_handler(WEdln *wedln, int from, bool moved)
 {
-	DrawInfo dinfo_, *dinfo=&dinfo_;
+	WRectangle geom;
 	
-	setup_wedln_dinfo(wedln, &dinfo_, FALSE, FALSE);
-	get_textarea_geom(wedln, &dinfo_);
+	if(WEDLN_BRUSH(wedln)==NULL)
+		return;
+	
+	get_textarea_geom(wedln, G_CURRENT, &geom);
 	
 	from-=wedln->vstart;
 	
 	if(moved){
-		if(wedln_update_cursor(wedln, FONT, I_W))
+		if(wedln_update_cursor(wedln, geom.w))
 			from=0;
 	}
 	
 	if(from<0)
 		from=0;
 
-	wedln_draw_str_box(dinfo, wedln->vstart, wedln->edln.p, from,
+	wedln_draw_str_box(wedln, &geom, wedln->vstart, wedln->edln.p, from,
 					   wedln->edln.point, wedln->edln.mark);
 }
 
 
 void wedln_draw_completions(WEdln *wedln, bool complete)
 {
-	DrawInfo dinfo_;
-	if(wedln->complist.strs!=NULL){
-		setup_wedln_dinfo(wedln, &dinfo_, TRUE, FALSE);
-		draw_listing(&dinfo_, &(wedln->complist), complete);
+	WRectangle geom;
+	
+	if(wedln->complist.strs!=NULL && WEDLN_BRUSH(wedln)!=NULL){
+		get_completions_geom(wedln, G_CURRENT, &geom);
+		
+		draw_listing(WEDLN_BRUSH(wedln), WEDLN_WIN(wedln), &geom,
+					 &(wedln->complist), complete);
 	}
 }
 
 	
 void wedln_draw_textarea(WEdln *wedln, bool complete)
 {
-	DrawInfo dinfo_, *dinfo=&dinfo_;
-	int ty;
+	WRectangle geom;
 
-	setup_wedln_dinfo(wedln, dinfo, FALSE, FALSE);
-	draw_box(dinfo, FALSE);
+	if(WEDLN_BRUSH(wedln)==NULL)
+		return;
 	
+	get_outer_geom(wedln, G_CURRENT, &geom);
+	grbrush_draw_border(WEDLN_BRUSH(wedln), WEDLN_WIN(wedln), &geom, NULL);
+
 	if(wedln->prompt!=NULL){
-		ty=I_Y+I_H/2-MAX_FONT_HEIGHT(FONT)/2+FONT_BASELINE(FONT);
-		draw_image_string(dinfo, I_X, ty, wedln->prompt, wedln->prompt_len,
-				          &COLORS->fg, &COLORS->bg);
+		int ty;
+		
+		get_inner_geom(wedln, G_CURRENT, &geom);
+		ty=calc_text_y(wedln, &geom);
+		
+		grbrush_draw_string(WEDLN_BRUSH(wedln), WEDLN_WIN(wedln), geom.x, ty,
+							wedln->prompt, wedln->prompt_len, TRUE, 
+							"prompt");
 	}
 
-	get_textarea_geom(wedln, dinfo);
-	wedln_draw_str_box(dinfo, wedln->vstart, wedln->edln.p, 0,
+	get_textarea_geom(wedln, G_CURRENT, &geom);
+	
+	wedln_draw_str_box(wedln, &geom, wedln->vstart, wedln->edln.p, 0,
 					   wedln->edln.point, wedln->edln.mark);
 }
 
@@ -320,8 +379,10 @@ void wedln_draw(WEdln *wedln, bool complete)
 
 static void wedln_show_completions(WEdln *wedln, char **strs, int nstrs)
 {
-	setup_listing(&(wedln->complist), INPUT_FONT(GRDATA_OF(wedln)),
-				  strs, nstrs, FALSE);
+	if(WEDLN_BRUSH(wedln)==NULL)
+		return;
+	
+	setup_listing(&(wedln->complist), strs, nstrs, FALSE);
 	input_refit((WInput*)wedln);
 	/*?*/ wedln_draw_completions(wedln, TRUE);
 }
@@ -421,7 +482,7 @@ allocfail:
 /*{{{ Init, deinit and config update */
 
 
-static bool wedln_init_prompt(WEdln *wedln, WGRData *grdata, const char *prompt)
+static bool wedln_init_prompt(WEdln *wedln, const char *prompt)
 {
 	char *p;
 	
@@ -434,13 +495,11 @@ static bool wedln_init_prompt(WEdln *wedln, WGRData *grdata, const char *prompt)
 		}
 		wedln->prompt=p;
 		wedln->prompt_len=strlen(p);
-		wedln->prompt_w=text_width(INPUT_FONT(grdata),
-								   p, wedln->prompt_len);
 	}else{
 		wedln->prompt=NULL;
 		wedln->prompt_len=0;
-		wedln->prompt_w=0;
 	}
+	wedln->prompt_w=0;
 	
 	return TRUE;
 }
@@ -451,7 +510,7 @@ static bool wedln_init(WEdln *wedln, WWindow *par, WRectangle geom,
 {
 	wedln->vstart=0;
 
-	if(!wedln_init_prompt(wedln, GRDATA_OF(par), params->prompt))
+	if(!wedln_init_prompt(wedln, params->prompt))
 		return FALSE;
 	
 	if(!edln_init(&(wedln->edln), params->dflt)){
@@ -485,15 +544,6 @@ static bool wedln_init(WEdln *wedln, WWindow *par, WRectangle geom,
 WEdln *create_wedln(WWindow *par, WRectangle geom, WEdlnCreateParams *params)
 {
 	CREATEOBJ_IMPL(WEdln, wedln, (p, par, geom, params));
-}
-
-
-static void wedln_draw_config_updated(WEdln *wedln)
-{
-	WFontPtr fnt=INPUT_FONT(GRDATA_OF(wedln));
-	listing_set_font(&(wedln->complist), fnt);
-	wedln->prompt_w=text_width(fnt, wedln->prompt, wedln->prompt_len);
-	input_draw_config_updated((WInput*)wedln);
 }
 
 
@@ -564,6 +614,12 @@ void wedln_insstr(WEdln *wedln, const char *buf, size_t n)
 }
 
 
+static const char *wedln_style(WEdln *wmsg)
+{
+	return "input-edln";
+}
+
+
 /*}}}*/
 
 
@@ -571,12 +627,13 @@ void wedln_insstr(WEdln *wedln, const char *buf, size_t n)
 
 
 static DynFunTab wedln_dynfuntab[]={
-	{draw_window,		wedln_draw},
+	{window_draw,		wedln_draw},
 	{input_calc_size, 	wedln_calc_size},
 	{input_scrollup, 	wedln_scrollup_completions},
 	{input_scrolldown,	wedln_scrolldown_completions},
 	{window_insstr,		wedln_insstr},
-	{region_draw_config_updated, wedln_draw_config_updated},
+	{(DynFun*)input_style,
+	 (DynFun*)wedln_style},
 	END_DYNFUNTAB
 };
 

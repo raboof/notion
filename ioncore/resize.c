@@ -12,7 +12,7 @@
 #include "common.h"
 #include "global.h"
 #include "resize.h"
-#include "draw.h"
+#include "gr.h"
 #include "sizehint.h"
 #include "event.h"
 #include "cursor.h"
@@ -21,6 +21,8 @@
 #include "extlconv.h"
 #include "grab.h"
 #include "genframep.h"
+#include "infowin.h"
+#include "defer.h"
 
 
 #define XOR_RESIZE (!wglobal.opaque_resize)
@@ -38,6 +40,8 @@ static int parent_rx, parent_ry;
 static enum {MOVERES_SIZE, MOVERES_POS} moveres_mode=MOVERES_SIZE;
 static bool resize_cumulative=FALSE;
 static int tmprqflags=0;
+static WInfoWin *moveres_infowin=NULL;
+
 
 /*static WWatch tmpregwatch=WWATCH_INIT;
 #define tmpreg ((WRegion*)(tmpregwatch.obj))
@@ -65,11 +69,107 @@ void region_resize_hints(WRegion *reg, XSizeHints *hints_ret,
 /*}}}*/
 
 
-/*{{{ Size display and rubberband */
+/*{{{ Size/position display and rubberband */
 
 
-static void res_draw_moveres(WRootWin *rootwin)
+static void draw_rubberbox(WRootWin *rw, WRectangle rect)
 {
+	XPoint fpts[5];
+	
+	fpts[0].x=rect.x;
+	fpts[0].y=rect.y;
+	fpts[1].x=rect.x+rect.w;
+	fpts[1].y=rect.y;
+	fpts[2].x=rect.x+rect.w;
+	fpts[2].y=rect.y+rect.h;
+	fpts[3].x=rect.x;
+	fpts[3].y=rect.y+rect.h;
+	fpts[4].x=rect.x;
+	fpts[4].y=rect.y;
+	
+	XDrawLines(wglobal.dpy, WROOTWIN_ROOT(rw), rw->xor_gc, fpts, 5, 
+			   CoordModeOrigin);
+}
+
+
+static int max_width(GrBrush *brush, const char *str)
+{
+	int maxw=0, w;
+	
+	while(str && *str!='\0'){
+		w=grbrush_get_text_width(brush, str, 1);
+		if(w>maxw)
+			maxw=w;
+		str++;
+	}
+	
+	return maxw;
+}
+
+
+static int chars_for_num(int d)
+{
+	int n=0;
+	
+	do{
+		n++;
+		d/=10;
+	}while(d);
+	
+	return n;
+}
+
+
+static void setup_moveres_display(WWindow *parent, int cx, int cy)
+{
+	GrBorderWidths bdw;
+	GrFontExtents fnte;
+	WRectangle g;
+	
+	g.x=0;
+	g.y=0;
+	g.w=1;
+	g.h=1;
+	
+	assert(moveres_infowin==NULL);
+	
+	moveres_infowin=create_infowin(parent, &g, "moveres_display");
+	
+	if(moveres_infowin==NULL)
+		return;
+
+	grbrush_get_border_widths(WINFOWIN_BRUSH(moveres_infowin), &bdw);
+	grbrush_get_font_extents(WINFOWIN_BRUSH(moveres_infowin), &fnte);
+	
+	/* Create move/resize position/size display window */
+	g.w=3;
+	g.w+=chars_for_num(REGION_GEOM(parent).w);
+	g.w+=chars_for_num(REGION_GEOM(parent).h);
+	g.w*=max_width(WINFOWIN_BRUSH(moveres_infowin), "0123456789x+"); 	
+	g.w+=bdw.left+bdw.right;
+	g.h=fnte.max_height+bdw.top+bdw.bottom;;
+
+	g.x=cx-g.w/2;
+	g.y=cy-g.h/2;
+	
+	region_fit((WRegion*)moveres_infowin, g);
+	region_map((WRegion*)moveres_infowin);
+}
+
+
+static void res_draw_moveres()
+{
+	WRectangle geom;
+	char *buf;
+		
+	if(moveres_infowin==NULL)
+		return;
+	
+	buf=WINFOWIN_BUFFER(moveres_infowin);
+	
+	if(buf==NULL)
+		return;
+	
 	if(moveres_mode==MOVERES_SIZE){
 		int w, h;
 		
@@ -85,11 +185,13 @@ static void res_draw_moveres(WRootWin *rootwin)
 			w/=tmphints.width_inc;
 			h/=tmphints.height_inc;
 		}
-	
-		set_moveres_size(rootwin, w, h);
+		
+		snprintf(buf, WINFOWIN_BUFFER_LEN, "%dx%d", w, h);
 	}else{
-		set_moveres_pos(rootwin, tmpgeom.x, tmpgeom.y);
+		snprintf(buf, WINFOWIN_BUFFER_LEN, "%+d %+d", tmpgeom.x, tmpgeom.y);
 	}
+	
+	window_draw((WWindow*)moveres_infowin, TRUE);
 }
 
 
@@ -167,7 +269,10 @@ static void do_end_resize(WRegion *reg, bool dors)
 	if(dors)
 		set_saved(reg);
 	
-	XUnmapWindow(wglobal.dpy, rootwin->grdata.moveres_win);
+	if(moveres_infowin!=NULL){
+		defer_destroy((WObj*)moveres_infowin);
+		moveres_infowin=NULL;
+	}
 }
 
 
@@ -182,20 +287,19 @@ static bool begin_moveres(WRegion *reg, WDrawRubberbandFn *rubfn,
 						  bool cumulative, int cursor)
 {
 	WRootWin *rootwin=ROOTWIN_OF(reg);
-	WRegion *parent;
+	WWindow *parent;
 	
 	if(tmpreg!=NULL)
 		return FALSE;
 	
 	region_resize_hints(reg, &tmphints, &tmprelw, &tmprelh);
 
-	parent=REGION_PARENT_CHK(reg, WRegion);
-	if(parent==NULL){
-		parent_rx=0;
-		parent_ry=0;
-	}else{
-		region_rootpos(parent, &parent_rx, &parent_ry);
-	}
+	parent=REGION_PARENT_CHK(reg, WWindow);
+	
+	if(parent==NULL)
+		return FALSE;
+	
+	region_rootpos((WRegion*)parent, &parent_rx, &parent_ry);
 	
 	tmpgeom=REGION_GEOM(reg);
 	tmporiggeom=REGION_GEOM(reg);
@@ -220,12 +324,11 @@ static bool begin_moveres(WRegion *reg, WDrawRubberbandFn *rubfn,
 	if(XOR_RESIZE)
 		XGrabServer(wglobal.dpy);
 	
-	XMoveWindow(wglobal.dpy, rootwin->grdata.moveres_win,
-				parent_rx+tmpgeom.x+(tmpgeom.w-rootwin->grdata.moveres_geom.w)/2,
-				parent_ry+tmpgeom.y+(tmpgeom.h-rootwin->grdata.moveres_geom.h)/2);
-	XMapRaised(wglobal.dpy, rootwin->grdata.moveres_win);
+	setup_moveres_display(parent, 
+						  parent_rx+tmpgeom.x+tmpgeom.w/2,
+						  parent_ry+tmpgeom.y+tmpgeom.h/2);
 	
-	res_draw_moveres(rootwin);
+	res_draw_moveres();
 	
 	if(XOR_RESIZE)
 		res_draw_rubberband(rootwin);
@@ -320,7 +423,7 @@ static void delta_moveres(WRegion *reg, int dx1, int dx2, int dy1, int dy2,
 		tmporiggeom=tmpgeom;
 	}
 	
-	res_draw_moveres(rootwin);
+	res_draw_moveres();
 	
 	if(XOR_RESIZE)
 		res_draw_rubberband(rootwin);
@@ -627,9 +730,11 @@ uint region_min_w(WRegion *reg)
 
 void genframe_resize_units(WGenFrame *genframe, int *wret, int *hret)
 {
-	WGRData *grdata=GRDATA_OF(genframe);
+	/*WGRData *grdata=GRDATA_OF(genframe);
 	*wret=grdata->w_unit;
-	*hret=grdata->h_unit;
+	*hret=grdata->h_unit;*/
+	*wret=1;
+	*hret=1;
 	
 	if(WGENFRAME_CURRENT(genframe)!=NULL){
 		XSizeHints hints;

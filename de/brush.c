@@ -267,7 +267,7 @@ void debrush_deinit(DEBrush *brush)
 	int i;
 
 	grbrush_deinit(&(brush->grbrush));
-	
+
 	if(brush->style!=NULL)
 		free(brush->style);
 	
@@ -280,8 +280,11 @@ void debrush_deinit(DEBrush *brush)
 	
 	de_free_colour_group(brush->rootwin, &(brush->cgrp));
 	
+	
 	for(i=0; i<brush->n_extra_cgrps; i++)
 		de_free_colour_group(brush->rootwin, brush->extra_cgrps+i);
+
+	XSync(wglobal.dpy, False);
 	
 	if(brush->extra_cgrps!=NULL)
 		free(brush->extra_cgrps);
@@ -332,8 +335,8 @@ void de_deinit_brushes()
 		next=brush->next;
 		brush->usecount--;
 		if(brush->usecount>0){
-			warn_obj("DE module", "Brush still in use but the module "
-					 "is being unloaded!");
+			warn_obj("DE module", "Brush %s still in use [%d] but the module "
+					 "is being unloaded!", brush->style, brush->usecount);
 		}else{
 			destroy_obj((WObj*)brush);
 		}

@@ -134,8 +134,10 @@ void floatframe_do_move(WFloatFrame *frame, int horizmul, int vertmul)
 	if(!may_resize((WRegion*)frame))
 		return;
 	
-	wu=GRDATA_OF(frame)->w_unit*horizmul;
-	hu=GRDATA_OF(frame)->h_unit*vertmul;
+	/*wu=GRDATA_OF(frame)->w_unit*horizmul;
+	hu=GRDATA_OF(frame)->h_unit*vertmul;*/
+	wu=1;
+	hu=1;
 
 	delta_resize((WRegion*)frame, wu, wu, hu, hu, NULL);
 	

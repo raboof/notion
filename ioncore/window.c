@@ -21,9 +21,9 @@
 /*{{{ Dynfuns */
 
 
-void draw_window(WWindow *wwin, bool complete)
+void window_draw(WWindow *wwin, bool complete)
 {
-	CALL_DYN(draw_window, wwin, (wwin, complete));
+	CALL_DYN(window_draw, wwin, (wwin, complete));
 }
 
 
@@ -66,15 +66,6 @@ bool window_init(WWindow *wwin, WWindow *parent, Window win, WRectangle geom)
 	region_init(&(wwin->region), (WRegion*)parent, geom);
 	
 	wwin->win=win;
-#ifdef CF_XFT
-	if(parent!=NULL){
-		wwin->draw=XftDrawCreate(wglobal.dpy, win, 
-								 DefaultVisual(wglobal.dpy, ROOTWIN_OF(parent)->xscr),
-								 ROOTWIN_OF(parent)->default_cmap);
-	}else
-#endif
-	wwin->draw=NULL;
-	
 	wwin->xic=NULL;
 	wwin->keep_on_top_list=NULL;
 	
@@ -88,7 +79,7 @@ bool window_init_new(WWindow *p, WWindow *parent, WRectangle geom)
 {
 	Window win;
 	
-	win=create_simple_window(GRDATA_OF(parent), parent->win, geom);
+	win=create_simple_window(ROOTWIN_OF(parent), parent->win, geom);
 	
 	if(win==None)
 		return FALSE;
@@ -106,10 +97,6 @@ void window_deinit(WWindow *wwin)
 		XDestroyIC(wwin->xic);
 
 	XDeleteContext(wglobal.dpy, wwin->win, wglobal.win_context);
-#ifdef CF_XFT
-	if(wwin->draw!=NULL)
-		XftDrawDestroy(wwin->draw);
-#endif
 	XDestroyWindow(wglobal.dpy, wwin->win);
 }
 

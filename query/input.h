@@ -14,12 +14,14 @@
 
 #include <ioncore/common.h>
 #include <ioncore/window.h>
+#include <ioncore/gr.h>
 
 INTROBJ(WInput);
 
 DECLOBJ(WInput){
 	WWindow win;
 	WRectangle max_geom;
+	GrBrush *brush;
 };
 
 
@@ -34,5 +36,6 @@ extern void input_draw_config_updated(WInput *input);
 DYNFUN void input_scrollup(WInput *input);
 DYNFUN void input_scrolldown(WInput *input);
 DYNFUN void input_calc_size(WInput *input, WRectangle *geom);
+DYNFUN const char *input_style(WInput *input);
 
 #endif /* ION_QUERY_INPUT_H */

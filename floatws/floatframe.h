@@ -23,6 +23,9 @@ INTROBJ(WFloatFrame);
 DECLOBJ(WFloatFrame){
 	WGenFrame genframe;
 	int bar_w;
+	
+	double bar_max_width_q;
+	int tab_min_w;
 };
 
 
@@ -32,7 +35,7 @@ extern void floatframe_remove_managed(WFloatFrame *frame, WRegion *reg);
 
 extern void initial_to_floatframe_geom(WFloatWS *ws, WRectangle *geom, 
 									   int gravity);
-extern void managed_to_floatframe_geom(WGRData *grdata, WRectangle *geom);
+extern void managed_to_floatframe_geom(WRootWin *rootwin, WRectangle *geom);
 
 extern WRegion *floatframe_load(WWindow *par, WRectangle geom, ExtlTab tab);
 

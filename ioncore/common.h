@@ -22,36 +22,6 @@
 
 #include "../config.h"
 
-#ifdef CF_XFT
-
-#include <X11/Xft/Xft.h>
-typedef XftFont* WFontPtr;
-typedef XftColor WColor;
-typedef XftDraw WExtraDrawInfo;
-#define set_foreground(dpy, gc, fg) XSetForeground((dpy), (gc), (fg).pixel)
-#define set_background(dpy, gc, bg) XSetBackground((dpy), (gc), (bg).pixel)
-#define COLOR_PIXEL(p) ((p).pixel)
-
-#else /* !CF_XFT */
-
-#ifdef CF_UTF8
-
-typedef XFontSet WFontPtr;
-
-#else /* !CF_UTF8 */
-
-typedef XFontStruct* WFontPtr;
-
-#endif /* !CF_UTF8 */
-
-typedef unsigned long WColor;
-typedef void *WExtraDrawInfo;
-#define set_foreground XSetForeground
-#define set_background XSetBackground
-#define COLOR_PIXEL(p) (p)
-
-#endif /* !CF_XFT */
-
 typedef struct WRectangle_struct{
 	int x, y;
 	int w, h;

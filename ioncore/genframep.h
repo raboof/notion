@@ -20,8 +20,6 @@
 #define WGENFRAME_MLIST(FRAME) (((WGenFrame*)(FRAME))->mplex.managed_list)
 #define WGENFRAME_CURRENT(FRAME) (((WGenFrame*)(FRAME))->mplex.current_sub)
 
-#define REGION_LABEL(REG) ((REG)->mgr_data.p)
-
 enum{
 	WGENFRAME_AREA_NONE=0,
 	WGENFRAME_AREA_BORDER=1,

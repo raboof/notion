@@ -455,10 +455,7 @@ again:
 		goto fail2;
 	}
 
-	FOR_ALL_ROOTWINS(rootwin){
-		if(WROOTWIN_ROOT(rootwin)==attr.root)
-			break;
-	}
+	rootwin=find_rootwin_for_root(attr.root);
 
 	if(rootwin==NULL){
 		warn("Unable to find a matching root window!");

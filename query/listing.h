@@ -13,7 +13,7 @@
 #define ION_QUERY_LISTING_H
 
 #include <ioncore/common.h>
-#include <ioncore/drawp.h>
+#include <ioncore/gr.h>
 
 INTRSTRUCT(WListing);
 
@@ -28,13 +28,12 @@ DECLSTRUCT(WListing){
 };
 
 extern void init_listing(WListing *l);
+extern void setup_listing(WListing *l, char **strs, int nstrs, bool onecol);
 extern void deinit_listing(WListing *l);
-void setup_listing(WListing *l, WFontPtr font, char **strs, int nstrs,
-				   bool onecol);
-extern void fit_listing(DrawInfo *dinfo, WListing *l);
-extern void draw_listing(DrawInfo *dinfo, WListing *l, bool complete);
+extern void fit_listing(GrBrush *brush, const WRectangle *geom, WListing *l);
+extern void draw_listing(GrBrush *brush, Window win, const WRectangle *geom,
+						 WListing *l, bool complete);
 extern bool scrollup_listing(WListing *l);
 extern bool scrolldown_listing(WListing *l);
-extern void listing_set_font(WListing *l, WFontPtr font);
 
 #endif /* ION_QUERY_LISTING_H */

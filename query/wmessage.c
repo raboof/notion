@@ -12,50 +12,54 @@
 #include <string.h>
 
 #include <ioncore/common.h>
-#include <ioncore/drawp.h>
 #include <ioncore/objp.h>
-#include <ioncore/font.h>
+#include <ioncore/strings.h>
 #include <ioncore/global.h>
 #include <ioncore/event.h>
 #include "wmessage.h"
 #include "inputp.h"
 
 
+#define WMSG_BRUSH(WMSG) ((WMSG)->input.brush)
+#define WMSG_WIN(WMSG) ((WMSG)->input.win.win)
+
 
 /*{{{ Sizecalc */
 
 
-static void get_geom(WMessage *wmsg, DrawInfo *dinfo, bool max)
+static void get_geom(WMessage *wmsg, bool max, WRectangle *geom)
 {
 	if(max){
-		dinfo->geom.w=wmsg->input.max_geom.w;
-		dinfo->geom.h=wmsg->input.max_geom.h;
+		geom->w=wmsg->input.max_geom.w;
+		geom->h=wmsg->input.max_geom.h;
 	}else{
-		dinfo->geom.w=REGION_GEOM(wmsg).w;
-		dinfo->geom.h=REGION_GEOM(wmsg).h;
+		geom->w=REGION_GEOM(wmsg).w;
+		geom->h=REGION_GEOM(wmsg).h;
 	}
-	dinfo->geom.x=0;
-	dinfo->geom.y=0;
-}
-
-
-static void setup_wmsg_dinfo(WMessage *wmsg, DrawInfo *dinfo, bool max)
-{
-	setup_input_dinfo((WInput*)wmsg, dinfo);
-	get_geom(wmsg, dinfo, max);
+	geom->x=0;
+	geom->y=0;
 }
 
 
 static void wmsg_calc_size(WMessage *wmsg, WRectangle *geom)
 {
 	WRectangle max_geom=*geom;
-	DrawInfo dinfo_;
-	int h;
-	
-	setup_wmsg_dinfo(wmsg, &dinfo_, TRUE);
-	fit_listing(&dinfo_, &(wmsg->listing));
-	
-	h=INPUT_BORDER_SIZE(dinfo_.grdata)+wmsg->listing.toth;
+	GrBorderWidths bdw;
+	int h=16;
+
+	if(WMSG_BRUSH(wmsg)!=NULL){
+		WRectangle g;
+		g.w=max_geom.w;
+		g.h=max_geom.h;
+		g.x=0;
+		g.y=0;
+		
+		fit_listing(WMSG_BRUSH(wmsg), &g, &(wmsg->listing));
+
+		grbrush_get_border_widths(WMSG_BRUSH(wmsg), &bdw);
+		
+		h=bdw.top+bdw.bottom+wmsg->listing.toth;
+	}
 	
 	if(h>max_geom.h)
 		h=max_geom.h;
@@ -75,9 +79,12 @@ static void wmsg_calc_size(WMessage *wmsg, WRectangle *geom)
 
 static void wmsg_draw(WMessage *wmsg, bool complete)
 {
-	DrawInfo dinfo_;
-	setup_wmsg_dinfo(wmsg, &dinfo_, FALSE);
-	draw_listing(&dinfo_, &(wmsg->listing), complete);
+	WRectangle geom;
+	if(WMSG_BRUSH(wmsg)!=NULL){
+		get_geom(wmsg, FALSE, &geom);
+		draw_listing(WMSG_BRUSH(wmsg), WMSG_WIN(wmsg), &geom,
+					 &(wmsg->listing), complete);
+	}
 }
 
 
@@ -177,7 +184,7 @@ static bool wmsg_init(WMessage *wmsg, WWindow *par, WRectangle geom,
 #endif
 	
 	init_listing(&(wmsg->listing));
-	setup_listing(&(wmsg->listing), INPUT_FONT(GRDATA_OF(par)), ptr, n, TRUE);
+	setup_listing(&(wmsg->listing), ptr, n, TRUE);
 	
 	if(!input_init((WInput*)wmsg, par, geom)){
 		deinit_listing(&(wmsg->listing));
@@ -203,10 +210,9 @@ static void wmsg_deinit(WMessage *wmsg)
 }
 
 
-static void wmsg_draw_config_updated(WMessage *wmsg)
+static const char *wmsg_style(WMessage *wmsg)
 {
-	listing_set_font(&(wmsg->listing), INPUT_FONT(GRDATA_OF(wmsg)));
-	input_draw_config_updated((WInput*)wmsg);
+	return "input-message";
 }
 
 
@@ -217,11 +223,12 @@ static void wmsg_draw_config_updated(WMessage *wmsg)
 
 
 static DynFunTab wmsg_dynfuntab[]={
-	{draw_window,		wmsg_draw},
+	{window_draw,		wmsg_draw},
 	{input_calc_size, 	wmsg_calc_size},
 	{input_scrollup, 	wmsg_scrollup},
 	{input_scrolldown,	wmsg_scrolldown},
-	{region_draw_config_updated, wmsg_draw_config_updated},
+	{(DynFun*)input_style,
+	 (DynFun*)wmsg_style},
 	END_DYNFUNTAB
 };
 

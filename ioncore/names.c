@@ -17,8 +17,8 @@
 #include "region.h"
 #include "clientwin.h"
 #include "names.h"
-#include "font.h"
-#include "grdata.h"
+#include "strings.h"
+#include "gr.h"
 #include "extl.h"
 
 
@@ -264,12 +264,12 @@ const char *region_name(WRegion *reg)
 }
 
 
-char *region_make_label(WRegion *reg, int maxw, WFontPtr font)
+char *region_make_label(WRegion *reg, int maxw, GrBrush *brush)
 {
 	if(reg->ni.name==NULL)
 		return NULL;
 	
-	return make_label(font, reg->ni.name, maxw);
+	return make_label(brush, reg->ni.name, maxw);
 }
 
 

@@ -9,13 +9,13 @@
  * (at your option) any later version.
  */
 
+#include <string.h>
+
 #include "common.h"
 #include "global.h"
 #include "pointer.h"
-#include "grdata.h"
 #include "cursor.h"
 #include "focus.h"
-#include "drawp.h"
 #include "attach.h"
 #include "resize.h"
 #include "grab.h"
@@ -24,17 +24,24 @@
 #include "genframep.h"
 #include "objp.h"
 #include "bindmaps.h"
+#include "infowin.h"
+#include "defer.h"
 
 
-static int p_tab_x, p_tab_y, p_tabnum=-1;
-static bool p_tabdrag_active=FALSE;
-static bool p_tabdrag_selected=FALSE;
+static int p_tab_x=0, p_tab_y=0, p_tabnum=-1;
 static int p_dx1mul=0, p_dx2mul=0, p_dy1mul=0, p_dy2mul=0;
+static WInfoWin *tabdrag_infowin=NULL;
 
 
 /*{{{ Frame press */
 
 #define MINCORNER 16
+
+
+static WRegion *sub_at_tab(WGenFrame *genframe)
+{
+	return mplex_nth_managed((WMPlex*)genframe, p_tabnum);
+}
 
 
 int genframe_press(WGenFrame *genframe, XButtonEvent *ev, WRegion **reg_ret)
@@ -112,8 +119,6 @@ int genframe_press(WGenFrame *genframe, XButtonEvent *ev, WRegion **reg_ret)
 		if(sub==NULL)
 			return WGENFRAME_AREA_EMPTY_TAB;
 
-		genframe->tab_pressed_sub=sub;
-
 		if(reg_ret!=NULL)
 			*reg_ret=sub;
 		
@@ -130,12 +135,6 @@ int genframe_press(WGenFrame *genframe, XButtonEvent *ev, WRegion **reg_ret)
 	}
 	
 	return WGENFRAME_AREA_BORDER;
-}
-
-
-void genframe_release(WGenFrame *genframe)
-{
-	genframe->tab_pressed_sub=NULL;
 }
 
 
@@ -182,84 +181,74 @@ static bool tabdrag_kbd_handler(WRegion *reg, XEvent *xev)
 }
 
 
-static void draw_tabdrag(const WRegion *reg)
+static void setup_dragwin(WGenFrame *genframe, uint tab)
 {
-	DrawInfo _dinfo, *dinfo=&_dinfo;
-	WGRData *grdata=GRDATA_OF(reg);
-	const char *label=NULL;
+	WRectangle g;
+	char *buf;
 	
-	dinfo->win=grdata->drag_win;
-	dinfo->draw=grdata->drag_draw;
-	dinfo->grdata=grdata;
-	dinfo->gc=grdata->tab_gc;
-	dinfo->geom.x=0;
-	dinfo->geom.y=0;
-	dinfo->geom.w=grdata->drag_geom.w;
-	dinfo->geom.h=grdata->drag_geom.h;
-	dinfo->border=&(grdata->tab_border);
-	dinfo->font=grdata->tab_font;
-
-	if(p_tabdrag_active){
-		if(p_tabdrag_selected)
-			dinfo->colors=&(grdata->act_tab_sel_colors);
-		else
-			dinfo->colors=&(grdata->act_tab_colors);
-	}else{
-		if(p_tabdrag_selected)
-			dinfo->colors=&(grdata->tab_sel_colors);
-		else
-			dinfo->colors=&(grdata->tab_colors);
-	}
+	assert(tabdrag_infowin==NULL);
 	
+	g.x=p_tab_x;
+	g.y=p_tab_y;
+	g.w=genframe_nth_tab_w(genframe, tab);
+	g.h=genframe->bar_h;
 	
-	if(((WGenFrame*)reg)->tab_pressed_sub!=NULL)
-		label=REGION_LABEL(((WGenFrame*)reg)->tab_pressed_sub);
-	if(label==NULL)
-		label="";
+	tabdrag_infowin=create_infowin((WWindow*)ROOTWIN_OF(genframe), &g, 
+								   genframe_tab_style(genframe));
 	
-	draw_textbox(dinfo, label, ALIGN_CENTER, TRUE);
+	if(tabdrag_infowin==NULL)
+		return;
+	
+	infowin_set_attr2(tabdrag_infowin, (REGION_IS_ACTIVE(genframe) 
+										? "active" : "inactive"),
+					  genframe->titles[tab].attr);
+	
+	buf=WINFOWIN_BUFFER(tabdrag_infowin);
+	strncpy(buf, genframe->titles[tab].text, WINFOWIN_BUFFER_LEN-1);
+	buf[WINFOWIN_BUFFER_LEN-1]='\0';
 }
 
 
 static void p_tabdrag_motion(WGenFrame *genframe, XMotionEvent *ev,
 							 int dx, int dy)
 {
-	WGRData *grdata=GRDATA_OF(genframe);
+	WRootWin *rootwin=ROOTWIN_OF(genframe);
 
 	p_tab_x+=dx;
 	p_tab_y+=dy;
 	
-	XMoveWindow(wglobal.dpy, grdata->drag_win, p_tab_x, p_tab_y);
-}	
+	if(tabdrag_infowin!=NULL){
+		WRectangle g;
+		g.x=p_tab_x;
+		g.y=p_tab_y;
+		g.w=REGION_GEOM(tabdrag_infowin).w;
+		g.h=REGION_GEOM(tabdrag_infowin).h;
+		region_fit((WRegion*)tabdrag_infowin, g);
+	}
+}
 
 
 static void p_tabdrag_begin(WGenFrame *genframe, XMotionEvent *ev,
 							int dx, int dy)
 {
-	WGRData *grdata=GRDATA_OF(genframe);
+	WRootWin *rootwin=ROOTWIN_OF(genframe);
 
+	if(p_tabnum<0)
+		return;
+	
 	change_grab_cursor(CURSOR_DRAG);
 		
-	grdata->drag_geom.w=genframe_nth_tab_w(genframe, p_tabnum);
-	grdata->drag_geom.h=grdata->bar_h;
-	XResizeWindow(wglobal.dpy, grdata->drag_win,
-				  grdata->drag_geom.w, grdata->drag_geom.h);
-	/*XSelectInput(wglobal.dpy, grdata->drag_win, ExposureMask);*/
+	setup_dragwin(genframe, p_tabnum);
 	
-	wglobal.draw_dragwin=(WDrawDragwinFn*)draw_tabdrag;
-	wglobal.draw_dragwin_arg=(WRegion*)genframe;
-	
-	p_tabdrag_active=REGION_IS_ACTIVE(genframe);
-	p_tabdrag_selected=(WGENFRAME_CURRENT(genframe)
-						==genframe->tab_pressed_sub);
-	
-	genframe->flags|=WGENFRAME_TAB_DRAGGED;
-		
+	genframe->tab_dragged_idx=p_tabnum;
+	genframe_update_attr_nth(genframe, p_tabnum);
+
 	genframe_draw_bar(genframe, FALSE);
 	
 	p_tabdrag_motion(genframe, ev, dx, dy);
 	
-	XMapRaised(wglobal.dpy, grdata->drag_win);
+	if(tabdrag_infowin!=NULL)
+		window_map((WWindow*)tabdrag_infowin);
 }
 
 
@@ -270,14 +259,19 @@ static WRegion *fnd(Window root, int x, int y)
 	WRegion *reg=NULL, *reg2;
 	WRegion *w=NULL;
 	
-	w=FIND_WINDOW_T(root, WRegion);
+	/* Can't use FIND_WINDOW_T because the XSaveContext association might
+	 * be to a WScreen.
+	 */
+	w=(WRegion*)find_rootwin_for_root(root);
+
 	if(w==NULL)
 		return NULL;
 	
 	do{
 		if(!XTranslateCoordinates(wglobal.dpy, root, win,
-								  x, y, &dstx, &dsty, &win))
+								  x, y, &dstx, &dsty, &win)){
 			return NULL;
+		}
 		
 		if(win==None){
 			x-=REGION_GEOM(w).x;
@@ -297,17 +291,21 @@ static WRegion *fnd(Window root, int x, int y)
 		if(HAS_DYN(w, region_handle_drop))
 			reg=(WRegion*)w;
 	}while(1);
-	
+
 	return reg;
 }
 
 
 static void tabdrag_deinit(WGenFrame *genframe)
 {
-	wglobal.draw_dragwin=NULL;
-	XUnmapWindow(wglobal.dpy, GRDATA_OF(genframe)->drag_win);
-	genframe->tab_pressed_sub=NULL;
-	genframe->flags&=~WGENFRAME_TAB_DRAGGED;
+	int idx=genframe->tab_dragged_idx;
+	genframe->tab_dragged_idx=-1;
+	genframe_update_attr_nth(genframe, idx);
+	
+	if(tabdrag_infowin!=NULL){
+		destroy_obj((WObj*)tabdrag_infowin);
+		tabdrag_infowin=NULL;
+	}
 }
 
 
@@ -325,12 +323,11 @@ static void p_tabdrag_end(WGenFrame *genframe, XButtonEvent *ev)
 	WRegion *dropped_on;
 	Window win=None;
 
-	sub=genframe->tab_pressed_sub;
+	sub=sub_at_tab(genframe);
 	
 	tabdrag_deinit(genframe);
 	
-	/* Must be same screen */
-	
+	/* Must be same root window */
 	if(ev->root!=ROOT_OF(sub))
 		return;
 	
@@ -354,9 +351,6 @@ static void p_tabdrag_end(WGenFrame *genframe, XButtonEvent *ev)
 EXTL_EXPORT_MEMBER
 void genframe_p_tabdrag(WGenFrame *genframe)
 {
-	if(genframe->tab_pressed_sub==NULL)
-		return;
-
 	p_set_drag_handlers((WRegion*)genframe,
 						(WMotionHandler*)p_tabdrag_begin,
 						(WMotionHandler*)p_tabdrag_motion,
@@ -480,8 +474,15 @@ void genframe_p_move(WGenFrame *genframe)
 EXTL_EXPORT_MEMBER
 void genframe_p_switch_tab(WGenFrame *genframe)
 {
-	if(genframe->tab_pressed_sub!=NULL)
-		region_display_sp(genframe->tab_pressed_sub);
+	WRegion *sub;
+	
+	if(pointer_grab_region()!=(WRegion*)genframe)
+		return;
+	
+	sub=sub_at_tab(genframe);
+	
+	if(sub!=NULL)
+		region_display_sp(sub);
 }
 
 

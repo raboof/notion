@@ -31,6 +31,7 @@ static Time p_time=0;
 static bool p_motiontmp_dirty;
 static WBinding *p_motiontmp=NULL;
 static int p_area=0;
+static bool p_held=FALSE;
 
 static WButtonHandler *p_button_handler=NULL;
 static WMotionHandler *p_motion_handler=NULL;
@@ -68,7 +69,7 @@ bool p_set_drag_handlers(WRegion *reg,
 						 GrabHandler *keypress,
 						 GrabKilledHandler *killed)
 {
-	if(reg!=p_reg || p_motion==FALSE)
+	if(pointer_grab_region()!=reg)
 		return FALSE;
 	
 	p_motion_begin_handler=begin;
@@ -110,6 +111,14 @@ static bool motion_in_threshold(int x, int y)
 {
 	return (x>p_x-CF_DRAG_TRESHOLD && x<p_x+CF_DRAG_TRESHOLD &&
 			y>p_y-CF_DRAG_TRESHOLD && y<p_y+CF_DRAG_TRESHOLD);
+}
+
+
+WRegion *pointer_grab_region()
+{
+	if(!p_held)
+		return NULL;
+	return p_reg;
 }
 
 
@@ -166,19 +175,26 @@ static void call_motion_begin(WBinding *binding, XMotionEvent *ev,
 /*{{{ handle_button_press/release/motion */
 
 
-static bool handle_key(WRegion *reg, XEvent *ev)
-{
-	if(p_key_handler!=NULL)
-		return p_key_handler(reg, ev);
-	return FALSE;
-}
-
 static void finish_pointer()
 {
 	if(p_reg!=NULL)
 		window_release((WWindow*)p_reg);
+	p_held=FALSE;
 	reset_watch(&p_subregwatch);
 }
+
+
+static bool handle_key(WRegion *reg, XEvent *ev)
+{
+	if(p_key_handler!=NULL){
+		if(p_key_handler(reg, ev)){
+			finish_pointer();
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
 
 static void pointer_grab_killed(WRegion *unused)
 {
@@ -252,6 +268,7 @@ end:
 	p_motion_begin_handler=NULL;
 	p_key_handler=NULL;
 	p_killed_handler=NULL;
+	p_held=TRUE;
 	
 	call_button(pressbind, ev);
 	

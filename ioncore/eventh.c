@@ -22,7 +22,6 @@
 #include "focus.h"
 #include "cursor.h"
 #include "signal.h"
-#include "draw.h"
 #include "selection.h"
 #include "event.h"
 #include "eventh.h"
@@ -372,19 +371,8 @@ static void handle_expose(const XExposeEvent *ev)
 
 	wwin=FIND_WINDOW_T(ev->window, WWindow);
 
-	if(wwin!=NULL){
-		draw_window(wwin, FALSE);
-		return;
-	}
-	
-	/* TODO: drawlist */
-	FOR_ALL_ROOTWINS(rootwin){
-		if(rootwin->grdata.drag_win==ev->window && 
-		   wglobal.draw_dragwin!=NULL){
-			wglobal.draw_dragwin(wglobal.draw_dragwin_arg);
-			break;
-		}
-	}
+	if(wwin!=NULL)
+		window_draw(wwin, FALSE);
 }
 
 

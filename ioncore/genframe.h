@@ -16,11 +16,10 @@
 #include "window.h"
 #include "attach.h"
 #include "mplex.h"
+#include "gr.h"
 
 INTROBJ(WGenFrame);
 
-#define WGENFRAME_TAB_DRAGGED 0x0001
-#define WGENFRAME_TRANSPARENT 0x0002
 #define WGENFRAME_TAB_HIDE    0x0004
 #define WGENFRAME_SAVED_VERT  0x0008
 #define WGENFRAME_SAVED_HORIZ 0x0010
@@ -34,8 +33,14 @@ DECLOBJ(WGenFrame){
 	int saved_w, saved_h;
 	int saved_x, saved_y;
 	
-	int tab_spacing;
-	WRegion *tab_pressed_sub;
+	int tab_dragged_idx;
+	
+	GrBrush *brush;
+	GrBrush *bar_brush;
+	GrTransparency tr_mode;
+	int bar_h;
+	GrTextElem *titles;
+	int titles_n;
 };
 
 
@@ -58,16 +63,23 @@ extern void genframe_inactivated(WGenFrame *genframe);
 
 /* Tabs */
 extern int genframe_nth_tab_w(const WGenFrame *genframe, int n);
+extern int genframe_nth_tab_iw(const WGenFrame *genframe, int n);
 extern int genframe_nth_tab_x(const WGenFrame *genframe, int n);
 extern int genframe_tab_at_x(const WGenFrame *genframe, int x);
 extern void genframe_toggle_tab(WGenFrame *genframe);
+extern void genframe_update_attr_nth(WGenFrame *genframe, int i);
 
 /* Misc */
 extern void genframe_draw_config_updated(WGenFrame *genframe);
-extern void genframe_managed_geom(const WGenFrame *genframe, 
-								  WRectangle *geom);
+extern void genframe_toggle_sub_tag(WGenFrame *genframe);
+extern void genframe_border_geom(const WGenFrame *genframe, 
+								 WRectangle *geom);
+extern void genframe_border_inner_geom(const WGenFrame *genframe, 
+									   WRectangle *geom);
 
 /* Dynfuns */
+DYNFUN const char *genframe_style(WGenFrame *genframe);
+DYNFUN const char *genframe_tab_style(WGenFrame *genframe);
 DYNFUN void genframe_recalc_bar(WGenFrame *genframe);
 DYNFUN void genframe_draw_bar(const WGenFrame *genframe, bool complete);
 DYNFUN void genframe_bar_geom(const WGenFrame *genframe, WRectangle *geom);
@@ -75,6 +87,7 @@ DYNFUN void genframe_border_inner_geom(const WGenFrame *genframe,
 									   WRectangle *geom);
 extern void genframe_draw_bar_default(const WGenFrame *genframe, 
 									  bool complete);
+extern void genframe_draw_default(const WGenFrame *genframe, bool complete);
 
 
 #endif /* ION_IONCORE_GENFRAME_H */

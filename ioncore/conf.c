@@ -18,7 +18,6 @@
 #include "global.h"
 #include "readconfig.h"
 #include "modules.h"
-#include "font.h"
 #include "rootwin.h"
 
 

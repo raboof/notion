@@ -34,4 +34,6 @@ extern bool p_set_drag_handlers(WRegion *reg,
 extern bool find_window_at(Window rootwin, int x, int y, Window *childret);
 extern bool coords_in_rect(const WRectangle *g, int x, int y);
 
+extern WRegion *pointer_grab_region();
+
 #endif /* ION_IONCORE_POINTER_H */

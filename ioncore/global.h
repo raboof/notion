@@ -68,9 +68,6 @@ DECLSTRUCT(WGlobal){
 	WRegion *focus_next;
 	bool warp_next;
 	
-	WDrawDragwinFn *draw_dragwin;
-	WRegion *draw_dragwin_arg;
-	
 	/* We could have a display WRegion but the screen-link could impose
 	 * some problems so these are handled as a special case.
 	 */

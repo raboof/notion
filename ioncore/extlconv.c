@@ -88,8 +88,8 @@ ExtlTab managed_list_to_table(WRegion *list, bool (*filter)(WRegion *r))
 	
 	FOR_ALL_MANAGED_ON_LIST(list, r){
 		if(filter==NULL || filter(r)){
-			if(extl_table_seti_o(tab, i, (WObj*)r))
-				i++;
+			extl_table_seti_o(tab, i, (WObj*)r);
+			i++;
 		}
 	}
 	

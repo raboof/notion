@@ -14,7 +14,7 @@
 
 #include "region.h"
 #include "clientwin.h"
-#include "font.h"
+#include "gr.h"
 #include "extl.h"
 
 extern bool region_set_name(WRegion *reg, const char *name);
@@ -24,7 +24,7 @@ extern void	region_unuse_name(WRegion *reg);
 
 extern const char *region_name(WRegion *reg);
 
-extern char *region_make_label(WRegion *reg, int maxw, WFontPtr font);
+extern char *region_make_label(WRegion *reg, int maxw, GrBrush *brush);
 
 extern WRegion *lookup_region(const char *cname, const char *typenam);
 extern ExtlTab complete_region(const char *nam, const char *typenam);

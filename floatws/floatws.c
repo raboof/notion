@@ -413,7 +413,7 @@ static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
 		return FALSE;
 	
 	fgeom=REGION_GEOM(dropped);
-	managed_to_floatframe_geom(GRDATA_OF(ws), &fgeom);
+	managed_to_floatframe_geom(ROOTWIN_OF(ws), &fgeom);
 	/* The x and y arguments are in root coordinate space */
 	region_rootpos((WRegion*)par, &fgeom.x, &fgeom.y);
 	fgeom.x=x-fgeom.x;

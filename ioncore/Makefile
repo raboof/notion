@@ -33,14 +33,15 @@ EXT_OBJS := $(EXT_OBJS) ../luaextl/luaextl.a
 ICNLUDES += $(LUA_INCLUDES)
 LIBS += $(LUA_LIBS)
 
-SOURCES=binding.c conf-bindings.c conf-draw.c cursor.c draw.c event.c     \
-	exec.c focus.c font.c key.c modules.c mwmhints.c obj.c pointer.c  \
+SOURCES=binding.c conf-bindings.c cursor.c event.c     \
+	exec.c focus.c strings.c key.c modules.c mwmhints.c obj.c pointer.c  \
 	property.c readconfig.c screen.c signal.c sizehint.c window.c     \
 	ioncore.c xic.c selection.c symlist.c clientwin.c colormap.c      \
 	region.c eventh.c  attach.c resize.c defer.c grab.c     	  \
 	manage.c readfds.c regbind.c rootwin.c tags.c names.c saveload.c  \
 	genws.c genframe.c genframe-pointer.c conf.c reginfo.c errorlog.c \
-	stacking.c extlconv.c fullscreen.c mplex.c bindmaps.c
+	stacking.c extlconv.c fullscreen.c mplex.c bindmaps.c gr.c \
+	infowin.o
 
 MAKE_EXPORTS=ioncore
 

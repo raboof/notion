@@ -22,4 +22,6 @@ bool ioncore_init(int argc, char *argv[]);
 bool ioncore_startup(const char *display, const char *cfgfile, int flags);
 void ioncore_deinit();
 
+bool ioncore_is_utf8();
+
 #endif /* ION_IONCORE_WMCORE_H */

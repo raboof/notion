@@ -46,24 +46,11 @@ void input_calc_size(WInput *input, WRectangle *geom)
 }
 
 
-/*}}}*/
-
-
-/*{{{ Draw */
-
-
-void setup_input_dinfo(WInput *input, DrawInfo *dinfo)
+const char *input_style(WInput *input)
 {
-	WGRData *grdata=GRDATA_OF(input);
-	
-	dinfo->win=input->win.win;
-	dinfo->draw=input->win.draw;
-
-	dinfo->gc=grdata->gc;
-	dinfo->grdata=grdata;
-	dinfo->colors=&(grdata->input_colors);
-	dinfo->border=&(grdata->input_border);
-	dinfo->font=INPUT_FONT(grdata);
+	const char *ret="input";
+	CALL_DYN_RET(ret, const char*, input_style, input, (input));
+	return ret;
 }
 
 
@@ -90,12 +77,22 @@ void input_fit(WInput *input, WRectangle geom)
 
 void input_draw_config_updated(WInput *input)
 {
-	XSetWindowBackground(wglobal.dpy, input->win.win,
-						 COLOR_PIXEL(GRDATA_OF(input)->input_colors.bg));
-
+	GrBrush *brush;
+	
+	brush=gr_get_brush(ROOTWIN_OF(input), input->win.win,
+					   input_style(input));
+	
+	if(brush==NULL)
+		return;
+	
+	if(input->brush!=NULL)
+		grbrush_release(input->brush, input->win.win);
+	input->brush=brush;
 	input_refit(input);
+	
 	region_default_draw_config_updated((WRegion*)input);
-	draw_window((WWindow*)input, TRUE);
+	
+	window_draw((WWindow*)input, TRUE);
 }
 
 
@@ -107,18 +104,24 @@ void input_draw_config_updated(WInput *input)
 
 bool input_init(WInput *input, WWindow *par, WRectangle geom)
 {
-	WGRData *grdata;
 	Window win;
 
 	input->max_geom=geom;
 	
-	grdata=GRDATA_OF(par);
+	win=create_simple_window(ROOTWIN_OF(par), par->win, geom);
 	
-	win=create_simple_window_bg(grdata, par->win, geom,
-								grdata->input_colors.bg);
-	
-	if(!window_init((WWindow*)input, par, win, geom))
+	input->brush=gr_get_brush(ROOTWIN_OF(par), win, input_style(input));
+	if(input->brush==NULL){
+		warn("Could not get a brush for WInput.");
+		XDestroyWindow(wglobal.dpy, win);
 		return FALSE;
+	}
+
+	if(!window_init((WWindow*)input, par, win, geom)){
+		grbrush_release(input->brush, win);
+		XDestroyWindow(wglobal.dpy, win);
+		return FALSE;
+	}
 
 	input_refit(input);
 	
@@ -131,6 +134,9 @@ bool input_init(WInput *input, WWindow *par, WRectangle geom)
 
 void input_deinit(WInput *input)
 {
+	if(input->brush!=NULL)
+		grbrush_release(input->brush, input->win.win);
+	
 	window_deinit((WWindow*)input);
 }
 

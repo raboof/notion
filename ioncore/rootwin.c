@@ -30,16 +30,16 @@
 #include "cursor.h"
 #include "global.h"
 #include "event.h"
-#include "grdata.h"
-#include "conf-draw.h"
+#include "gr.h"
 #include "clientwin.h"
 #include "property.h"
 #include "focus.h"
 #include "regbind.h"
 #include "screen.h"
-#include "draw.h"
 #include "screen.h"
 #include "bindmaps.h"
+#include "readconfig.h"
+#include "resize.h"
 
 
 
@@ -101,20 +101,11 @@ static int my_error_handler(Display *dpy, XErrorEvent *ev)
 /*{{{ Utility functions */
 
 
-Window create_simple_window_bg(const WGRData *grdata, Window par,
-							   WRectangle geom, WColor background)
+Window create_simple_window(WRootWin *rw, Window par, WRectangle geom)
 {
 	return XCreateSimpleWindow(wglobal.dpy, par,
-							   geom.x, geom.y, geom.w, geom.h, 0, 0,
-							   COLOR_PIXEL(background));
-}
-
-
-Window create_simple_window(const WGRData *grdata, Window par, 
-							WRectangle geom)
-{
-	return create_simple_window_bg(grdata, par, geom, 
-								   grdata->frame_colors.bg);
+							   geom.x, geom.y, geom.w, geom.h,
+							   0, 0, BlackPixel(wglobal.dpy, rw->xscr));
 }
 
 
@@ -184,6 +175,41 @@ void rootwin_manage_initial_windows(WRootWin *rootwin)
 }
 
 
+static void create_wm_windows(WRootWin *rootwin)
+{
+	rootwin->dummy_win=XCreateWindow(wglobal.dpy, WROOTWIN_ROOT(rootwin),
+									 0, 0, 1, 1, 0,
+									 CopyFromParent, InputOnly,
+									 CopyFromParent, 0, NULL);
+
+	XSelectInput(wglobal.dpy, rootwin->dummy_win, PropertyChangeMask);
+}
+
+
+static void preinit_gr(WRootWin *rootwin)
+{
+	XGCValues gcv;
+	ulong gcvmask;
+
+	/* Create XOR gc (for resize) */
+	gcv.line_style=LineSolid;
+	gcv.join_style=JoinBevel;
+	gcv.cap_style=CapButt;
+	gcv.fill_style=FillSolid;
+	gcv.line_width=2;
+	gcv.subwindow_mode=IncludeInferiors;
+	gcv.function=GXxor;
+	gcv.foreground=~0L;
+	
+	gcvmask=(GCLineStyle|GCLineWidth|GCFillStyle|
+			 GCJoinStyle|GCCapStyle|GCFunction|
+			 GCSubwindowMode|GCForeground);
+
+	rootwin->xor_gc=XCreateGC(wglobal.dpy, WROOTWIN_ROOT(rootwin), 
+							  gcvmask, &gcv);
+}
+
+
 static WRootWin *preinit_rootwin(int xscr)
 {
 	Display *dpy=wglobal.dpy;
@@ -232,6 +258,9 @@ static WRootWin *preinit_rootwin(int xscr)
 	MARK_REGION_MAPPED(rootwin);
 	
 	scan_initial_windows(rootwin);
+
+	create_wm_windows(rootwin);
+	preinit_gr(rootwin);
 
 	region_add_bindmap((WRegion*)rootwin, &ioncore_rootwin_bindmap);
 	
@@ -304,8 +333,6 @@ WRootWin *manage_rootwin(int xscr, bool noxinerama)
 		return NULL;
 	}
 
-	preinit_graphics(rootwin);
-	
 	net_virtual_roots=XInternAtom(wglobal.dpy, "_NET_VIRTUAL_ROOTS", False);
 	XDeleteProperty(wglobal.dpy, WROOTWIN_ROOT(rootwin), net_virtual_roots);
 	
@@ -344,9 +371,7 @@ WRootWin *manage_rootwin(int xscr, bool noxinerama)
 		LINK_ITEM(tmp, (WRegion*)rootwin, p_next, p_prev);
 		wglobal.rootwins=(WRootWin*)tmp;
 	}
-	
-	read_draw_config(rootwin);
-	postinit_graphics(rootwin);
+
 	set_cursor(WROOTWIN_ROOT(rootwin), CURSOR_DEFAULT);
 	
 	return rootwin;
@@ -461,12 +486,6 @@ Window region_root_of(const WRegion *reg)
 }
 
 
-WGRData *region_grdata_of(const WRegion *reg)
-{
-	return &(region_rootwin_of(reg)->grdata);
-}
-
-
 bool same_rootwin(const WRegion *reg1, const WRegion *reg2)
 {
 	return (reg1->rootwin==reg2->rootwin);
@@ -498,6 +517,36 @@ WScreen *rootwin_current_scr(WRootWin *rootwin)
 	}
 	
 	return (WScreen*)r;
+}
+
+
+/*EXTL_DOC
+ * Returns a table of root windows indexed by the X screen id.
+ */
+EXTL_EXPORT
+ExtlTab root_windows()
+{
+	WRootWin *rootwin;
+	ExtlTab tab=extl_create_table();
+	
+	FOR_ALL_ROOTWINS(rootwin){
+		extl_table_seti_o(tab, rootwin->xscr, (WObj*)rootwin);
+	}
+
+	return tab;
+}
+
+
+WRootWin *find_rootwin_for_root(Window root)
+{
+	WRootWin *rootwin;
+	
+	FOR_ALL_ROOTWINS(rootwin){
+		if(WROOTWIN_ROOT(rootwin)==root)
+			break;
+	}
+	
+	return rootwin;
 }
 
 

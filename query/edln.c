@@ -14,7 +14,7 @@
 #include <string.h>
 #include <ioncore/common.h>
 #include <ioncore/selection.h>
-#include <ioncore/font.h>
+#include <ioncore/strings.h>
 
 #include "edln.h"
 #include "wedln.h"

@@ -16,9 +16,9 @@
 
 INTROBJ(WRootWin);
 
-#include "grdata.h"
 #include "window.h"
 #include "screen.h"
+#include "gr.h"
 
 #define WROOTWIN_ROOT(X) ((X)->wwin.win)
 
@@ -42,20 +42,16 @@ DECLOBJ(WRootWin){
 	Window *tmpwins;
 	int tmpnwins;
 	
-	WGRData grdata;
+	Window dummy_win;
+	
+	GC xor_gc;
 };
 
-
-extern Window create_simple_window_bg(const WGRData *grdata, Window par,
-									  WRectangle geom, WColor background);
-extern Window create_simple_window(const WGRData *grdata, Window par,
-								   WRectangle geom);
 
 extern WRootWin *manage_rootwin(int xscr, bool noxinerama);
 extern void rootwin_deinit(WRootWin *rootwin);
 
 extern WRootWin *region_rootwin_of(const WRegion *reg);
-extern WGRData *region_grdata_of(const WRegion *reg);
 extern Window region_root_of(const WRegion *reg);
 extern bool same_rootwin(const WRegion *reg1, const WRegion *reg2);
 
@@ -64,6 +60,10 @@ extern WScreen *rootwin_current_scr(WRootWin *rootwin);
 extern void rootwin_manage_initial_windows(WRootWin *rootwin);
 extern bool setup_rootwins();
 
+extern Window create_simple_window(WRootWin *rootwin, Window par,
+								   WRectangle geom);
+
+extern WRootWin *find_rootwin_for_root(Window root);
 
 #endif /* ION_IONCORE_ROOTWIN_H */
 

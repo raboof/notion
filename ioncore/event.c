@@ -74,7 +74,7 @@ Time get_timestamp()
 		/* TODO: use some other window that should also function as a
 		 * NET_WM support check window.
 		 */
-		XChangeProperty(wglobal.dpy, wglobal.rootwins->grdata.drag_win,
+		XChangeProperty(wglobal.dpy, wglobal.rootwins->dummy_win,
 						dummy, dummy, 8, PropModeAppend,
 						(unsigned char*)"", 0);
 		get_event_mask(&ev, PropertyChangeMask);
@@ -162,14 +162,7 @@ void do_grab_kb_ptr(Window win, Window confine_to, int cursor, long eventmask)
 				  GrabModeAsync, CurrentTime);
 	XSync(wglobal.dpy, False);
 	XSelectInput(wglobal.dpy, win, ROOT_MASK);
-	/*wglobal.grab_released=FALSE;*/
 }
-
-
-/*void grab_kb_ptr(WRegion *reg)
-{
-	do_grab_kb_ptr(ROOT_OF(reg), reg, FocusChangeMask);
-}*/
 
 
 void ungrab_kb_ptr()
@@ -178,8 +171,6 @@ void ungrab_kb_ptr()
 	XUngrabPointer(wglobal.dpy, CurrentTime);
 	
 	wglobal.input_mode=INPUT_NORMAL;
-	wglobal.draw_dragwin=NULL;
-	/*wglobal.grab_released=TRUE;*/
 }
 
 
