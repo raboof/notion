@@ -29,8 +29,8 @@
 /*{{{ Implementation */
 
 
-WNamespace ioncore_internal_ns={0, NULL, NULL, FALSE};
-WNamespace ioncore_clientwin_ns={0, NULL, NULL, FALSE};
+WNamespace ioncore_internal_ns={NULL, NULL, NULL, FALSE};
+WNamespace ioncore_clientwin_ns={NULL, NULL, NULL, FALSE};
 
 
 static bool initialise_ns(WNamespace *ns)
