@@ -33,6 +33,7 @@
 #include "placement.h"
 #include "ionws.h"
 #include "split.h"
+#include "splitfloat.h"
 #include "split-stdisp.h"
 #include "main.h"
 
@@ -660,18 +661,35 @@ static bool get_split_dir_primn(const char *str, int *dir, int *primn)
 }
 
 
+static bool get_split_dir_primn_float(const char *str, int *dir, int *primn,
+                                      bool *floating)
+{
+    if(strncmp(str, "floating:", 9)==0){
+        *floating=TRUE;
+        return get_split_dir_primn(str+9, dir, primn);
+    }else{
+        *floating=FALSE;
+        return get_split_dir_primn(str, dir, primn);
+    }
+}
+
+
+
 /*EXTL_DOC
  * Create a new frame on \var{ws} above/below/left of/right of
  * all other objects depending on \var{dirstr}
  * (one of ''left'', ''right'', ''top'' or ''bottom'').
+ * If \var{dirstr} is prefixed with ''floating:'' a floating split is
+ * created.
  */
 EXTL_EXPORT_MEMBER
 WFrame *ionws_split_top(WIonWS *ws, const char *dirstr)
 {
     int dir, primn, mins;
     WSplitRegion *nnode=NULL;
+    bool floating=FALSE;
     
-    if(!get_split_dir_primn(dirstr, &dir, &primn))
+    if(!get_split_dir_primn_float(dirstr, &dir, &primn, &floating))
         return NULL;
     
     mins=16; /* totally arbitrary */
@@ -679,8 +697,13 @@ WFrame *ionws_split_top(WIonWS *ws, const char *dirstr)
     if(ws->split_tree==NULL)
         return NULL;
     
-    nnode=splittree_split(ws->split_tree, dir, primn, mins, 
-                          ws->create_frame_fn, REGION_PARENT(ws));
+    if(!floating){
+        nnode=splittree_split(ws->split_tree, dir, primn, mins, 
+                              ws->create_frame_fn, REGION_PARENT(ws));
+    }else{
+        nnode=splittree_split_floating(ws->split_tree, dir, primn, mins, 
+                                       ws->create_frame_fn, ws);
+    }
     
     if(nnode==NULL)
         return NULL;
@@ -696,10 +719,12 @@ WFrame *ionws_split_top(WIonWS *ws, const char *dirstr)
 
 
 /*EXTL_DOC
- * Split \var{frame} creating a new frame to direction \var{dir}
+ * Split \var{frame} creating a new frame to direction \var{dirstr}
  * (one of ''left'', ''right'', ''top'' or ''bottom'') of \var{frame}.
  * If \var{attach_current} is set, the region currently displayed in
  * \var{frame}, if any, is moved to thenew frame.
+ * If \var{dirstr} is prefixed with ''floating:'' a floating split is
+ * created.
  */
 EXTL_EXPORT_MEMBER
 WFrame *ionws_split_at(WIonWS *ws, WFrame *frame, const char *dirstr, 
@@ -709,6 +734,7 @@ WFrame *ionws_split_at(WIonWS *ws, WFrame *frame, const char *dirstr,
     int dir, primn, mins;
     WSplitRegion *node, *nnode;
     WFrame *newframe;
+    bool floating=FALSE;
     
     node=get_node_check(ws, (WRegion*)frame);
     
@@ -717,7 +743,7 @@ WFrame *ionws_split_at(WIonWS *ws, WFrame *frame, const char *dirstr,
         return NULL;
     }
     
-    if(!get_split_dir_primn(dirstr, &dir, &primn)){
+    if(!get_split_dir_primn_float(dirstr, &dir, &primn, &floating)){
         warn(TR("Invalid direction parameter."));
         return NULL;
     }
@@ -726,9 +752,14 @@ WFrame *ionws_split_at(WIonWS *ws, WFrame *frame, const char *dirstr,
           ? region_min_h((WRegion*)frame)
           : region_min_w((WRegion*)frame));
     
-    nnode=splittree_split((WSplit*)node, dir, primn, mins, 
-                          ws->create_frame_fn, 
-                          REGION_PARENT(ws));
+    if(!floating){
+        nnode=splittree_split((WSplit*)node, dir, primn, mins, 
+                              ws->create_frame_fn, 
+                              REGION_PARENT(ws));
+    }else{
+        nnode=splittree_split_floating((WSplit*)node, dir, primn, mins, 
+                                       ws->create_frame_fn, ws);
+    }
     
     if(nnode==NULL){
         warn(TR("Unable to split."));
@@ -1210,6 +1241,8 @@ WSplit *ionws_load_node_default(WIonWS *ws, const WRectangle *geom,
         node=load_splitregion(ws, geom, tab);
     else if(strcmp(typestr, "WSplitSplit")==0)
         node=load_splitsplit(ws, geom, tab);
+    else if(strcmp(typestr, "WSplitFloat")==0)
+        node=load_splitfloat(ws, geom, tab);
     else if(strcmp(typestr, "WSplitST")==0)
         node=NULL;/*load_splitst(ws, geom, tab);*/
     else

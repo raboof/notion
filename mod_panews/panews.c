@@ -32,7 +32,6 @@
 #include "placement.h"
 #include "main.h"
 #include "splitext.h"
-#include "splitfloat.h"
 
 
 /*{{{ Create/destroy */
@@ -354,117 +353,6 @@ static WSplit *load_splitpane(WPaneWS *ws, const WRectangle *geom, ExtlTab tab)
     return (WSplit*)pane;
 }
 
-#define MINS 8
-
-static void adjust_tls_brs(int *tls, int *brs, int total)
-{
-    if(*tls<=0)
-        *tls=MINS;
-    if(*brs<=0)
-        *brs=MINS;
-    
-    if(*tls+*brs<total){
-        *tls=total*(*tls)/(*tls+*brs);
-        *brs=total-(*tls);
-    }
-        
-    *tls=minof(maxof(MINS, *tls), total);
-    *brs=minof(maxof(MINS, *brs), total);
-}
-
-
-static WSplit *load_splitfloat(WPaneWS *ws, const WRectangle *geom, 
-                               ExtlTab tab)
-{
-    WSplit *tl=NULL, *br=NULL;
-    WSplitFloat *split;
-    char *dir_str;
-    int dir, brs, tls;
-    ExtlTab subtab;
-    WRectangle tlg, brg;
-    int set=0;
-
-    set+=(extl_table_gets_i(tab, "tls", &tls)==TRUE);
-    set+=(extl_table_gets_i(tab, "brs", &brs)==TRUE);
-    set+=(extl_table_gets_s(tab, "dir", &dir_str)==TRUE);
-    
-    if(set!=3)
-        return NULL;
-    
-    if(strcmp(dir_str, "vertical")==0){
-        dir=SPLIT_VERTICAL;
-    }else if(strcmp(dir_str, "horizontal")==0){
-        dir=SPLIT_HORIZONTAL;
-    }else{
-        warn(TR("Invalid direction."));
-        free(dir_str);
-        return NULL;
-    }
-    free(dir_str);
-
-    split=create_splitfloat(geom, ws, dir);
-    if(split==NULL)
-        return NULL;
-
-    tlg=*geom;
-    brg=*geom;
-    
-    if(dir==SPLIT_HORIZONTAL){
-        adjust_tls_brs(&tls, &brs, geom->w);
-        tlg.w=tls;
-        brg.w=brs;
-        brg.x=geom->x+geom->w-brs;
-    }else{
-        adjust_tls_brs(&tls, &brs, geom->h);
-        tlg.h=tls;
-        brg.h=brs;
-        brg.y=geom->y+geom->h-brs;
-    }
-
-    splitfloat_update_handles(split, &tlg, &brg);
-    
-    if(extl_table_gets_t(tab, "tl", &subtab)){
-        WRectangle g=tlg;
-        splitfloat_tl_pwin_to_cnt(split, &g);
-        tl=ionws_load_node((WIonWS*)ws, &g, subtab);
-        extl_unref_table(subtab);
-    }
-    
-    if(extl_table_gets_t(tab, "br", &subtab)){
-        WRectangle g;
-        if(tl==NULL){
-            g=*geom;
-        }else{
-            g=brg;
-            splitfloat_br_pwin_to_cnt(split, &g);
-        }
-        br=ionws_load_node((WIonWS*)ws, &g, subtab);
-        extl_unref_table(subtab);
-    }
-    
-    if(tl==NULL || br==NULL){
-        destroy_obj((Obj*)split);
-        if(tl!=NULL){
-            split_do_resize(tl, geom, PRIMN_ANY, PRIMN_ANY, FALSE);
-            return tl;
-        }
-        if(br!=NULL){
-            split_do_resize(br, geom, PRIMN_ANY, PRIMN_ANY, FALSE);
-            return br;
-        }
-        return NULL;
-    }
-    
-    tl->parent=(WSplitInner*)split;
-    br->parent=(WSplitInner*)split;
-
-    /*split->tmpsize=tls;*/
-    split->ssplit.tl=tl;
-    split->ssplit.br=br;
-    
-    return (WSplit*)split;
-}
-
 
 static WSplit *panews_load_node(WPaneWS *ws, const WRectangle *geom, 
                                 ExtlTab tab)
@@ -485,8 +373,6 @@ static WSplit *panews_load_node(WPaneWS *ws, const WRectangle *geom,
             return load_splitpane(ws, geom, tab);
         else if(strcmp(s, "WSplitUnused")==0)
             return load_splitunused(ws, geom, tab);
-        else if(strcmp(s, "WSplitFloat")==0)
-            return load_splitfloat(ws, geom, tab);
     }
 
     return ionws_load_node_default(&(ws->ionws), geom, tab);

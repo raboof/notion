@@ -413,13 +413,13 @@ void splitsplit_update_geom_from_children(WSplitSplit *node)
 static WSplitST *saw_stdisp=NULL;
 
 
-static void begin_resize_segment()
+void splittree_begin_resize()
 {
     saw_stdisp=NULL;
 }
 
 
-static void end_resize_segment()
+void splittree_end_resize()
 {
     if(saw_stdisp!=NULL){
         split_regularise_stdisp(saw_stdisp);
@@ -428,7 +428,7 @@ static void end_resize_segment()
 }
 
 
-static void split_lookup_stdisp_rootward_(WSplitInner *node_)
+static void splittree_scan_stdisp_rootward_(WSplitInner *node_)
 {
     WSplitSplit *node=OBJ_CAST(node_, WSplitSplit);
     
@@ -443,18 +443,18 @@ static void split_lookup_stdisp_rootward_(WSplitInner *node_)
     }
     
     if(node_->split.parent!=NULL)
-        split_lookup_stdisp_rootward_(node_->split.parent);
+        splittree_scan_stdisp_rootward_(node_->split.parent);
 }
 
 
-static void split_lookup_stdisp_rootward(WSplit *node)
+void splittree_scan_stdisp_rootward(WSplit *node)
 {
     if(node->parent!=NULL)
-        split_lookup_stdisp_rootward_(node->parent);
+        splittree_scan_stdisp_rootward_(node->parent);
 }
 
 
-static WSplitSplit *split_lookup_stdisp_parent(WSplit *node_)
+static WSplitSplit *splittree_scan_stdisp_parent(WSplit *node_)
 {
     WSplitSplit *r, *node=OBJ_CAST(node_, WSplitSplit);
     
@@ -466,9 +466,9 @@ static WSplitSplit *split_lookup_stdisp_parent(WSplit *node_)
         return node;
     }
 
-    r=split_lookup_stdisp_parent(node->tl);
+    r=splittree_scan_stdisp_parent(node->tl);
     if(r==NULL)
-        r=split_lookup_stdisp_parent(node->br);
+        r=splittree_scan_stdisp_parent(node->br);
     return r;
 }
 
@@ -666,9 +666,9 @@ void split_do_resize(WSplit *node, const WRectangle *ng,
 void split_resize(WSplit *node, const WRectangle *ng, int hprimn, int vprimn)
 {
     split_update_bounds(node, TRUE);
-    begin_resize_segment();
+    splittree_begin_resize();
     split_do_resize(node, ng, hprimn, vprimn, FALSE);
-    end_resize_segment();
+    splittree_end_resize();
 }
 
 
@@ -820,9 +820,9 @@ static void initra(RootwardAmount *ra, int p, int s, int op, int os,
 }
 
 
-static void split_do_rqgeom_(WSplit *node, const WRectangle *ng, 
-                             bool hany, bool vany, WRectangle *rg, 
-                             bool tryonly)
+void split_do_rqgeom_(WSplit *node, const WRectangle *ng, 
+                      bool hany, bool vany, WRectangle *rg, 
+                      bool tryonly)
 {
     RootwardAmount ha, va;
 
@@ -838,24 +838,24 @@ static void split_do_rqgeom_(WSplit *node, const WRectangle *ng,
 }
 
 
-static void split_do_rqgeom(WSplit *node, const WRectangle *ng, 
-                            bool hany, bool vany, WRectangle *rg,
-                            bool tryonly)
+void split_do_rqgeom(WSplit *node, const WRectangle *ng, 
+                     bool hany, bool vany, WRectangle *rg,
+                     bool tryonly)
 {
     WRectangle rg_;
     
     if(rg==NULL)
         rg=&rg_;
 
-    begin_resize_segment();
+    splittree_begin_resize();
     
     split_do_rqgeom_(node, ng, hany, vany, rg, tryonly);
     
     if(!tryonly){
         split_do_resize(node, rg, PRIMN_ANY, PRIMN_ANY, FALSE);
-        end_resize_segment();
+        splittree_end_resize();
         if(rg!=NULL){
-            /* end_resize_segment may have changed geometry. */
+            /* splittree_end_resize may have changed geometry. */
             *rg=node->geom;
         }
     }
@@ -881,11 +881,11 @@ static void bnd(int *pos, int *sz, int opos, int osz, int minsz, int maxsz)
 }
 
 
-static WSplit *find_root(WSplit *split)
+WSplit *split_find_root(WSplit *split)
 {
     if(split->parent==NULL)
         return split;
-    return find_root((WSplit*)split->parent);
+    return split_find_root((WSplit*)split->parent);
 }
 
 
@@ -895,7 +895,7 @@ void splittree_rqgeom(WSplit *sub, int flags, const WRectangle *geom_,
     bool hany=flags&REGION_RQGEOM_WEAK_X;
     bool vany=flags&REGION_RQGEOM_WEAK_Y;
     WRectangle geom=*geom_;
-    WSplit *root=find_root(sub);
+    WSplit *root=split_find_root(sub);
 
     split_update_bounds(root, TRUE);
     
@@ -1050,14 +1050,14 @@ WSplitRegion *splittree_split(WSplit *node, int dir, int primn,
     if(dir!=SPLIT_HORIZONTAL && dir!=SPLIT_VERTICAL)
         dir=SPLIT_VERTICAL;
 
-    split_update_bounds(find_root(node), TRUE);
+    split_update_bounds(split_find_root(node), TRUE);
     objmin=(dir==SPLIT_VERTICAL ? node->min_h : node->min_w);
 
     s=split_size(node, dir);
     sn=maxof(minsize, s/2);
     so=maxof(objmin, s-sn);
 
-    begin_resize_segment();
+    splittree_begin_resize();
     
     if(sn+so!=s){
         int rs;
@@ -1083,7 +1083,7 @@ WSplitRegion *splittree_split(WSplit *node, int dir, int primn,
         }
     }else{
         rg=node->geom;
-        split_lookup_stdisp_rootward(node);
+        splittree_scan_stdisp_rootward(node);
     }
 
     /* Create split and new window
@@ -1158,7 +1158,7 @@ WSplitRegion *splittree_split(WSplit *node, int dir, int primn,
         nsplit->br=node;
     }
     
-    end_resize_segment();
+    splittree_end_resize();
     
     return nnode;
 }
@@ -1544,7 +1544,7 @@ void split_reparent(WSplit *split, WWindow *wwin)
 void split_transpose_to(WSplit *node, const WRectangle *geom)
 {
     if(OBJ_IS(node, WSplitSplit)){
-        WSplitSplit *stdispp=split_lookup_stdisp_parent(node);
+        WSplitSplit *stdispp=splittree_scan_stdisp_parent(node);
         
         /* split_do_resize can do things right if 'node' has stdisp as child, 
          * but otherwise transpose will put the stdisp the stdisp in a bad 
@@ -1553,7 +1553,7 @@ void split_transpose_to(WSplit *node, const WRectangle *geom)
          */
         if(stdispp!=NULL && stdispp!=(WSplitSplit*)node){
             split_try_unsink_stdisp(stdispp, TRUE, TRUE);
-            stdispp=split_lookup_stdisp_parent(node);
+            stdispp=splittree_scan_stdisp_parent(node);
             if(stdispp!=NULL && stdispp!=(WSplitSplit*)node){
                 warn(TR("Unable to move the status display out of way of "
                         "transpose."));
@@ -1564,12 +1564,12 @@ void split_transpose_to(WSplit *node, const WRectangle *geom)
     
     split_update_bounds(node, TRUE);
     
-    begin_resize_segment();
+    splittree_begin_resize();
     
     split_do_resize(node, geom, PRIMN_ANY, PRIMN_ANY, TRUE);
-    split_lookup_stdisp_rootward(node);
+    splittree_scan_stdisp_rootward(node);
     
-    end_resize_segment();
+    splittree_end_resize();
 }
 
 

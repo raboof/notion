@@ -165,6 +165,7 @@ extern void splittree_remove(WSplit *node, bool reclaim_space);
 
 /* Tree traversal */
 
+extern WSplit *split_find_root(WSplit *split);
 DYNFUN WSplit *split_current_todir(WSplit *node, int dir, int primn,
                                    WSplitFilter *filter);
 DYNFUN WSplit *splitinner_nextto(WSplitInner *node, WSplit *child,
@@ -195,5 +196,19 @@ DYNFUN void splitsplit_flip(WSplitSplit *split);
 
 extern bool split_get_config(WSplit *node, ExtlTab *ret);
 extern ExtlTab split_base_config(WSplit *node);
+
+/* Internal. */
+
+extern void splittree_begin_resize();
+extern void splittree_end_resize();
+extern void splittree_scan_stdisp_rootward(WSplit *node);
+
+extern void split_do_rqgeom(WSplit *node, const WRectangle *ng, 
+                            bool hany, bool vany, WRectangle *rg,
+                            bool tryonly);
+extern void split_do_rqgeom_(WSplit *node, const WRectangle *ng, 
+                             bool hany, bool vany, WRectangle *rg, 
+                             bool tryonly);
+
 
 #endif /* ION_MOD_IONWS_SPLIT_H */
