@@ -19,7 +19,7 @@ floatws_bindings{
 
 -- Frame bindings. These work in (floating/PWM-style) frames. Some bindings
 -- that are common to all frame types and multiplexes are defined in
--- ioncore-bindings.lua.
+-- ion-bindings.lua.
 
 floatframe_bindings{
     kpress(DEFAULT_MOD.."R", WFloatFrame.begin_resize),

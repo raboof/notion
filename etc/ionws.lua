@@ -17,7 +17,7 @@ ionws_bindings{
 
 -- Frame bindings. These work in (Ion/tiled-style) frames. Some bindings
 -- that are common to all frame types and multiplexes are defined in
--- ioncore-bindings.lua.
+-- ion-bindings.lua.
 
 ionframe_bindings{
     kpress(DEFAULT_MOD.."R", WIonFrame.begin_resize),

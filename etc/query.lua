@@ -3,7 +3,7 @@
 --
 -- Only bindings that are in effect in queries and message displays are
 -- configured here. Actions to display queries are configured in
--- ioncore-bindings.lua
+-- ion-bindings.lua
 -- 
 
 
