@@ -11,7 +11,6 @@ BUILDING AND INSTALLING
 
 1. Make sure you have the following tools and libraries installed:
 
-    * A C99-compliant C compiler (old versions of GCC will not work)
     * GNU make
     * Properly preconfigured GNU libtool (It is not known if versions
       earlier than 1.4.3 work.)
