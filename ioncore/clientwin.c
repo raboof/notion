@@ -803,7 +803,7 @@ static void do_fit_clientwin(WClientWin *cwin, WRectangle max_geom, WWindow *np)
 	FOR_ALL_MANAGED_ON_LIST_W_NEXT(cwin->transient_list, transient, next){
 		geom2.y=max_geom.y;
 		geom2.h=max_geom.h;
-		diff=geom.h-region_min_h(transient);/*REGION_GEOM(transient).h;*/
+		diff=geom.h-REGION_GEOM(transient).h;
 		if(diff>0){
 			geom2.y+=diff;
 			geom2.h-=diff;
