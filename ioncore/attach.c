@@ -59,6 +59,11 @@ static WRegion *add_fn_load(WWindow *par, const WFitParams *fp,
 WRegion *region__attach_load(WRegion *mgr, ExtlTab tab,
                              WRegionDoAttachFn *fn, void *param)
 {
+    WRegion *reg=NULL;
+    
+    if(extl_table_gets_o(tab, "reference", (Obj**)&reg))
+        return region__attach_reparent(mgr, reg, fn, param);
+
     return fn(mgr, (WRegionAttachHandler*)add_fn_load, (void*)&tab, param);
 }
 
