@@ -20,8 +20,6 @@ BUILDING AND INSTALLING
 2. a) Run ./configure; see README.autoconf for details, especially if
       you are using the Debian Lua packages.
 
-      (This method does not work for the moment.)
-
    b) Alternatively, edit system.mk to suit your system. If the autoconf
       script failed for some reason and you are falling back to this choice
       because of that, remove system-ac.mk. Most GNU/Linux users should
