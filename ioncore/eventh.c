@@ -245,7 +245,7 @@ static void handle_configure_request(XConfigureRequestEvent *ev)
 	
 	if(cwin==NULL){
 		wc.border_width=ev->border_width;
-		wc.sibling=None;
+		wc.sibling=ev->above;
 		wc.stack_mode=ev->detail;
 		wc.x=ev->x;
 		wc.y=ev->y;
