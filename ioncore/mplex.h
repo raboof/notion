@@ -44,33 +44,30 @@ enum{
 };
 
 
-typedef struct{
+INTRSTRUCT(WMPlexSTDispInfo);
+INTRSTRUCT(WMPlexChangedParams);
+INTRSTRUCT(WMPlexAttachParams);
+INTRSTRUCT(WLListNode); /* in mplexp.h */
+
+
+DECLSTRUCT(WMPlexSTDispInfo){
     Watch regwatch;
     int pos;
-} WMPlexSTDispInfo;
+};
 
 
-typedef struct{
+DECLSTRUCT(WMPlexChangedParams){
     WMPlex *reg;
     int mode;
     bool sw;
     WRegion *sub;
-} WMPlexChangedParams;
+};
 
 
-typedef struct{
+DECLSTRUCT(WMPlexAttachParams){
     int flags;
     int index;
     WRectangle l2geom;
-} WMPlexAttachParams;
-
-
-INTRSTRUCT(WMPlexManaged);
-DECLSTRUCT(WMPlexManaged){
-    WMPlexManaged *next, *prev;
-    int flags;
-    WRegion *reg;
-    WMPlexPHolder *phs;
 };
 
 
@@ -79,13 +76,13 @@ DECLCLASS(WMPlex){
     int flags;
     
     int l1_count;
-    WMPlexManaged *l1_list;
-    WMPlexManaged *l1_current;
+    WLListNode *l1_list;
+    WLListNode *l1_current;
     WMPlexPHolder *l1_phs;
     
     int l2_count;
-    WMPlexManaged *l2_list;
-    WMPlexManaged *l2_current;
+    WLListNode *l2_list;
+    WLListNode *l2_current;
     WMPlexPHolder *l2_phs;
     
     WMPlexSTDispInfo stdispinfo;
@@ -119,8 +116,8 @@ extern WRegion *mplex_attach_new(WMPlex *mplex, ExtlTab param);
 
 extern WRegion *mplex_do_attach(WMPlex *mplex, WRegionAttachHandler *hnd,
                                 void *hnd_param, WMPlexAttachParams *param);
-extern WMPlexManaged *mplex_do_attach_after(WMPlex *mplex, 
-                                            WMPlexManaged *after, 
+extern WLListNode *mplex_do_attach_after(WMPlex *mplex, 
+                                            WLListNode *after, 
                                             WMPlexAttachParams *param,
                                             WRegionAttachHandler *hnd,
                                             void *hnd_param);

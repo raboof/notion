@@ -20,7 +20,7 @@
 DECLCLASS(WMPlexPHolder){
     WPHolder ph;
     Watch mplex_watch;
-    WMPlexManaged *after;
+    WLListNode *after;
     WMPlexPHolder *next, *prev;
 };
 
@@ -31,11 +31,11 @@ DECLCLASS(WMPlexPHolder){
 
 extern WMPlexPHolder *create_mplexpholder(WMPlex *mplex, 
                                           WMPlexPHolder *after,
-                                          WMPlexManaged *or_after, 
+                                          WLListNode *or_after, 
                                           int or_layer);
 extern bool mplexpholder_init(WMPlexPHolder *ph, WMPlex *mplex, 
                               WMPlexPHolder *after,
-                              WMPlexManaged *or_after, 
+                              WLListNode *or_after, 
                               int or_layer);
 extern void mplexpholder_deinit(WMPlexPHolder *ph);
 
@@ -49,14 +49,14 @@ extern bool mplexpholder_do_attach(WMPlexPHolder *ph,
 
 extern bool mplexpholder_move(WMPlexPHolder *ph, WMPlex *mplex, 
                               WMPlexPHolder *after,
-                              WMPlexManaged *or_after, 
+                              WLListNode *or_after, 
                               int or_layer);
 
-extern void mplex_move_phs(WMPlex *mplex, WMPlexManaged *node,
+extern void mplex_move_phs(WMPlex *mplex, WLListNode *node,
                            WMPlexPHolder *after,
-                           WMPlexManaged *or_after, 
+                           WLListNode *or_after, 
                            int or_layer);
-extern void mplex_move_phs_before(WMPlex *mplex, WMPlexManaged *node, 
+extern void mplex_move_phs_before(WMPlex *mplex, WLListNode *node, 
                                   int layer);
 
 extern WMPlexPHolder *mplex_managed_get_pholder(WMPlex *mplex, 

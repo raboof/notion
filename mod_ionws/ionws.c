@@ -912,7 +912,7 @@ ExtlTab ionws_managed_list(WIonWS *ws)
     
     ptrlist_iter_init(&tmp, ws->managed_list);
     
-    return extl_list_to_obj_table((ObjIterator*)ptrlist_iter, &tmp);
+    return extl_obj_iterable_to_table((ObjIterator*)ptrlist_iter, &tmp);
 }
 
 

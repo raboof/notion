@@ -16,25 +16,13 @@
 #include "common.h"
 #include "mplex.h"
 #include "mplexpholder.h"
+#include "mplexp.h"
 
 
 static void mplex_watch_handler(Watch *watch, Obj *mplex);
 
 
 /*{{{ Primitives */
-
-
-static bool on_layer_list(WMPlexManaged *ll, WMPlexManaged *after)
-{
-    WMPlexManaged *node;
-    
-    LIST_FOR_ALL(ll, node, next, prev){
-        if(node==after)
-            return TRUE;
-    }
-    
-    return FALSE;
-}
 
 
 static bool on_ph_list(WMPlexPHolder *ll, WMPlexPHolder *ph)
@@ -53,7 +41,7 @@ static bool on_ph_list(WMPlexPHolder *ll, WMPlexPHolder *ph)
 static void do_link_ph(WMPlexPHolder *ph, 
                        WMPlex *mplex,
                        WMPlexPHolder *after,
-                       WMPlexManaged *or_after, 
+                       WLListNode *or_after, 
                        int or_layer)
 {
     assert(mplex==(WMPlex*)ph->mplex_watch.obj && mplex!=NULL);
@@ -121,7 +109,7 @@ static void mplex_watch_handler(Watch *watch, Obj *mplex)
 
 bool mplexpholder_init(WMPlexPHolder *ph, WMPlex *mplex, 
                        WMPlexPHolder *after,
-                       WMPlexManaged *or_after, 
+                       WLListNode *or_after, 
                        int or_layer)
 {
     pholder_init(&(ph->ph));
@@ -147,7 +135,7 @@ bool mplexpholder_init(WMPlexPHolder *ph, WMPlex *mplex,
 
 WMPlexPHolder *create_mplexpholder(WMPlex *mplex, 
                                    WMPlexPHolder *after,
-                                   WMPlexManaged *or_after, 
+                                   WLListNode *or_after, 
                                    int or_layer)
 {
     CREATEOBJ_IMPL(WMPlexPHolder, mplexpholder, 
@@ -177,10 +165,10 @@ int mplexpholder_layer(WMPlexPHolder *ph)
         return -1;
     
     if(ph->after!=NULL){
-        if(on_layer_list(mplex->l2_list, ph->after))
+        if(llist_is_node_on(mplex->l2_list, ph->after))
             return 2;
         
-        assert(on_layer_list(mplex->l1_list, ph->after));
+        assert(llist_is_node_on(mplex->l1_list, ph->after));
         
         return 1;
     }else{
@@ -204,7 +192,7 @@ bool mplexpholder_do_attach(WMPlexPHolder *ph, WRegionAttachHandler *hnd,
                             void *hnd_param)
 {
     WMPlex *mplex=(WMPlex*)ph->mplex_watch.obj;
-    WMPlexManaged *nnode;
+    WLListNode *nnode;
     WMPlexAttachParams param;
     WMPlexPHolder *ph2, *ph3=NULL;
     int layer;
@@ -238,7 +226,7 @@ bool mplexpholder_do_attach(WMPlexPHolder *ph, WRegionAttachHandler *hnd,
 
 bool mplexpholder_move(WMPlexPHolder *ph, WMPlex *mplex, 
                        WMPlexPHolder *after,
-                       WMPlexManaged *or_after, 
+                       WLListNode *or_after, 
                        int or_layer)
 
 {
@@ -264,9 +252,9 @@ bool mplexpholder_move(WMPlexPHolder *ph, WMPlex *mplex,
 /*{{{ WMPlex routines */
 
 
-void mplex_move_phs(WMPlex *mplex, WMPlexManaged *node,
+void mplex_move_phs(WMPlex *mplex, WLListNode *node,
                     WMPlexPHolder *after,
-                    WMPlexManaged *or_after, 
+                    WLListNode *or_after, 
                     int or_layer)
 {
     WMPlexPHolder *ph;
@@ -284,9 +272,9 @@ void mplex_move_phs(WMPlex *mplex, WMPlexManaged *node,
 }
 
 
-void mplex_move_phs_before(WMPlex *mplex, WMPlexManaged *node, int layer)
+void mplex_move_phs_before(WMPlex *mplex, WLListNode *node, int layer)
 {
-    WMPlexManaged *before;
+    WLListNode *before;
     
     before=(layer==2 
             ? LIST_PREV(mplex->l2_list, node, next, prev)
@@ -296,30 +284,15 @@ void mplex_move_phs_before(WMPlex *mplex, WMPlexManaged *node, int layer)
 }
 
 
-#warning "TODO: some list routine unification"
-
-static WMPlexManaged *find_on_list(WMPlexManaged *list, WRegion *reg)
-{
-    WMPlexManaged *node;
-    
-    LIST_FOR_ALL(list, node, next, prev){
-        if(node->reg==reg)
-            return node;
-    }
-    
-    return NULL;
-}
-
-
 WMPlexPHolder *mplex_managed_get_pholder(WMPlex *mplex, WRegion *mgd)
 {
-    WMPlexManaged *node;
+    WLListNode *node;
     
-    node=find_on_list(mplex->l2_list, mgd);
+    node=llist_find_on(mplex->l2_list, mgd);
     if(node!=NULL)
         return create_mplexpholder(mplex, NULL, node, 2);
 
-    node=find_on_list(mplex->l1_list, mgd);
+    node=llist_find_on(mplex->l1_list, mgd);
     if(node!=NULL)
         return create_mplexpholder(mplex, NULL, node, 1);
         

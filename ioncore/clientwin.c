@@ -1468,7 +1468,7 @@ ExtlTab clientwin_managed_list(WClientWin *cwin)
     PtrListIterTmp tmp;
     ptrlist_iter_init(&tmp, cwin->transient_list);
     
-    return extl_list_to_obj_table((ObjIterator*)ptrlist_iter, &tmp);
+    return extl_obj_iterable_to_table((ObjIterator*)ptrlist_iter, &tmp);
 }
 
 

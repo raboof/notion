@@ -18,7 +18,7 @@
 /*{{{ Object list */
 
 
-ExtlTab extl_list_to_obj_table(ObjIterator *iter, void *st)
+ExtlTab extl_obj_iterable_to_table(ObjIterator *iter, void *st)
 {
     ExtlTab tab=extl_create_table();
     int i=1;

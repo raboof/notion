@@ -46,6 +46,9 @@ DECLSTRUCT(WManageParams){
 };
 
 
+typedef WRegion *WRegionIterator(void *st);
+
+
 extern ExtlTab manageparams_to_table(WManageParams *mp);
 
 

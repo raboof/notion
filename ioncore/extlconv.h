@@ -12,14 +12,12 @@
 #ifndef ION_IONCORE_EXTLCONV_H
 #define ION_IONCORE_EXTLCONV_H
 
+#include <libextl/extl.h>
+#include <libtu/iterable.h>
 #include "common.h"
 #include "region.h"
-#include <libextl/extl.h>
 
-typedef Obj *ObjIterator(void *st);
-typedef WRegion *WRegionIterator(void *st);
-
-extern ExtlTab extl_list_to_obj_table(ObjIterator *iter, void *st);
+extern ExtlTab extl_obj_iterable_to_table(ObjIterator *iter, void *st);
 
 extern bool extl_table_is_bool_set(ExtlTab tab, const char *entry);
 

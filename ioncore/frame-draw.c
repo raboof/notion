@@ -183,7 +183,7 @@ static int init_title(WFrame *frame, int i)
 void frame_recalc_bar_default(WFrame *frame)
 {
     int textw, i;
-    WMPlexManaged *node;
+    WLListIterTmp tmp;
     WRegion *sub;
     char *title;
 
@@ -201,7 +201,7 @@ void frame_recalc_bar_default(WFrame *frame)
         return;
     }
     
-    FRAME_L1_FOR_ALL(frame, node, sub){
+    FRAME_L1_FOR_ALL(sub, frame, tmp){
         textw=init_title(frame, i);
         if(textw>0){
             title=region_make_label(sub, textw, frame->bar_brush);

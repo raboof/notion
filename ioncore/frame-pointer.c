@@ -32,6 +32,7 @@
 #include "region-iter.h"
 #include "names.h"
 #include "presize.h"
+#include "mplexp.h"
 
 
 static int p_tab_x=0, p_tab_y=0, p_tabnum=-1;
@@ -80,8 +81,8 @@ int frame_press(WFrame *frame, XButtonEvent *ev, WRegion **reg_ret)
         
         return FRAME_AREA_TAB;
     }else{
-        WMPlexManaged *node;
-        FRAME_L1_FOR_ALL(frame, node, sub){
+        WLListIterTmp tmp;
+        FRAME_L1_FOR_ALL(sub, frame, tmp){
             p_tabnum++;
             if(sub==FRAME_CURRENT(frame))
                 break;

@@ -1205,7 +1205,7 @@ ExtlTab floatws_managed_list(WFloatWS *ws)
     WFloatWSIterTmp tmp;
     floatws_iter_init(&tmp, ws);
     
-    return extl_list_to_obj_table((ObjIterator*)floatws_iter, &tmp);
+    return extl_obj_iterable_to_table((ObjIterator*)floatws_iter, &tmp);
 }
 
 

@@ -40,6 +40,7 @@
 #include "genws.h"
 #include "activity.h"
 #include "region-iter.h"
+#include "mplexp.h"
 
 
 extern bool frame_set_background(WFrame *frame, bool set_always);
@@ -271,9 +272,9 @@ static void update_attrs(WFrame *frame)
 {
     int i=0;
     WRegion *sub;
-    WMPlexManaged *node;
+    WLListIterTmp tmp;
     
-    FRAME_L1_FOR_ALL(frame, node, sub){
+    FRAME_L1_FOR_ALL(sub, frame, tmp){
         update_attr(frame, i, sub);
         i++;
     }
@@ -321,10 +322,10 @@ static bool frame_initialise_titles(WFrame *frame)
     if(FRAME_MCOUNT(frame)==0){
         do_init_title(frame, 0, NULL);
     }else{
-        WMPlexManaged *node;
+        WLListIterTmp tmp;
         WRegion *sub;
         i=0;
-        FRAME_L1_FOR_ALL(frame, node, sub){
+        FRAME_L1_FOR_ALL(sub, frame, tmp){
             do_init_title(frame, i, sub);
             i++;
         }
@@ -385,7 +386,7 @@ bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp)
 void frame_resize_hints(WFrame *frame, XSizeHints *hints_ret)
 {
     WRectangle subgeom;
-    WMPlexManaged *node;
+    WLListIterTmp tmp;
     WRegion *sub;
     int woff, hoff;
     
@@ -403,7 +404,7 @@ void frame_resize_hints(WFrame *frame, XSizeHints *hints_ret)
         hints_ret->flags=0;
     }
     
-    FRAME_L1_FOR_ALL(frame, node, sub){
+    FRAME_L1_FOR_ALL(sub, frame, tmp){
         xsizehints_adjust_for(hints_ret, sub);
     }
     

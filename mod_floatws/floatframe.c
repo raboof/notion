@@ -230,7 +230,7 @@ static void floatframe_rqgeom_clientwin(WFloatFrame *frame, WClientWin *cwin,
 void floatframe_resize_hints(WFloatFrame *frame, XSizeHints *hints_ret)
 {
     WRectangle subgeom;
-    WMPlexManaged *node;
+    WLListNode *node;
     WRegion *sub;
     int woff, hoff;
     
@@ -334,7 +334,7 @@ static int init_title(WFloatFrame *frame, int i)
 static void floatframe_recalc_bar(WFloatFrame *frame)
 {
     int bar_w=0, textw=0, tmaxw=frame->tab_min_w, tmp=0;
-    WMPlexManaged *node;
+    WLListNode *node;
     WRegion *sub;
     const char *p;
     GrBorderWidths bdw;

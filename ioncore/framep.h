@@ -13,20 +13,14 @@
 #define ION_IONCORE_FRAMEP_H
 
 #include "frame.h"
+#include "mplexp.h"
 
 #define FRAME_MCOUNT(FRAME) (((WFrame*)(FRAME))->mplex.l1_count)
 #define FRAME_CURRENT(FRAME) ((FRAME)->mplex.l1_current!=NULL \
                               ? (FRAME)->mplex.l1_current->reg : NULL)
 
-#define FOR_ALL_REGIONS__(LL, NODE, REG)        \
-   for(REG=(LL==NULL ? NULL : (LL)->reg),       \
-       NODE=(LL==NULL ? NULL : (LL)->next);     \
-       REG!=NULL;                               \
-       REG=(NODE==NULL ? NULL : (NODE)->reg),   \
-       NODE=(NODE==NULL ? NULL : (NODE)->next))
-
-#define FRAME_L1_FOR_ALL(FRAME, NODE, REG) \
-    FOR_ALL_REGIONS__((FRAME)->mplex.l1_list, NODE, REG)
+#define FRAME_L1_FOR_ALL(REG, FRAME, TMP) \
+    FOR_ALL_REGIONS_ON_LLIST(REG, (FRAME)->mplex.l1_list, TMP)
 
 enum{
     FRAME_AREA_NONE=0,
