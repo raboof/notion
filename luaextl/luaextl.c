@@ -237,7 +237,16 @@ static bool extl_cpcall(lua_State *st, ExtlCPCallFn *fn, void *ptr)
 	param.udata=ptr;
 	param.retval=FALSE;
 	
-	lua_cpcall(st, extl_docpcall, &param);
+	if(lua_cpcall(st, extl_docpcall, &param)!=0){
+		if(lua_isstring(st, -1)){
+			/* Should be safe... */
+			warn("%s", lua_tostring(st, -1));
+		}else{
+			warn("Unknown Lua error.");
+		}
+			*((char*)0)=1;
+	}
+	
 	lua_settop(st, oldtop);
 	
 	return param.retval;
@@ -1096,10 +1105,12 @@ static bool extl_dodo_call_vararg(lua_State *st, ExtlDoCallParam *param)
 	if(param->rspec!=NULL)
 		m=strlen(param->rspec);
 	
-	if(lua_pcall(st, n, m, 0)!=0){
+	/*if(lua_pcall(st, n, m, 0)!=0){
 		warn("%s", lua_tostring(st, -1));
 		return FALSE;
-	}
+	}*/
+	
+	lua_call(st, n, m);
 
 	if(m>0)
 		return extl_get_retvals(st, m, param);
@@ -1563,7 +1574,7 @@ static bool extl_do_register_function(lua_State *st, ExtlExportedFnSpec *spec)
 		return FALSE;
 	}
 	memcpy(spec2, spec, sizeof(ExtlExportedFnSpec));
-
+	
 	lua_getregistry(st);
 	lua_pushvalue(st, -2); /* Get spec2 */
 	lua_pushfstring(st, "ioncore_luaextl_%s_upvalue", spec->name);
@@ -1588,20 +1599,22 @@ static bool extl_do_unregister_function(lua_State *st, ExtlExportedFnSpec *spec)
 
 	lua_getregistry(st);
 	lua_pushfstring(st, "ioncore_luaextl_%s_upvalue", spec->name);
-	lua_insert(st, -1);
+	lua_pushvalue(st, -1);
 	lua_gettable(st, -3); /* Get registry.ioncore_luaextl_fn_upvalue */
 	spec2=lua_touserdata(st, -1);
-	if(spec2!=NULL){
-		spec2->ispec=NULL;
-		spec2->ospec=NULL;
-		spec2->fn=NULL;
-		spec2->name=NULL;
-		spec2->l2handler=NULL;
-	}
 
-	lua_pushnil(st);
-	lua_settable(st, -2); /* Clear registry.ioncore_luaextl_fn_upvalue */
+	if(spec2==NULL)
+		return FALSE;
 	
+	spec2->ispec=NULL;
+	spec2->ospec=NULL;
+	spec2->fn=NULL;
+	spec2->name=NULL;
+	spec2->l2handler=NULL;
+
+	lua_pop(st, 1); /* Pop the upvalue */
+	lua_pushnil(st);
+	lua_settable(st, -3); /* Clear registry.ioncore_luaextl_fn_upvalue */
 	lua_pushnil(st); /* Clear _G.fn */
 	lua_setglobal(st, spec->name);
 	
