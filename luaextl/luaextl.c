@@ -29,7 +29,7 @@ static bool extl_stack_get(lua_State *st, int pos, char type, bool copystring,
 						   void *valret);
 
 
-/*{{{ WObj userdata handling */
+/*{{{ WObj userdata handling -- unsafe */
 
 
 static int wobj_metaref=LUA_NOREF;
@@ -41,9 +41,6 @@ static void extl_get_wobj_metatable(lua_State *st)
 }
 
 
-/* Make sure there is one free stack entry before calling this if a longjmp
- * could be hazardous.
- */
 static WObj *extl_get_wobj(lua_State *st, int pos)
 {
 	WWatch *watch;
@@ -319,7 +316,7 @@ int extl_collect_errors(lua_State *st)
 /*}}}*/
 
 
-/*{{{ Init */
+/*{{{ Init -- unsafe, but it doesn't matter at this point */
 
 
 bool extl_init()
@@ -1295,7 +1292,7 @@ bool extl_dostring(const char *string, const char *spec, const char *rspec, ...)
 /*}}}*/
 
 
-/*{{{ L1  call handler */
+/*{{{ L1 call handler */
 
 
 /* List of safe functions */
