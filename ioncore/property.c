@@ -22,7 +22,7 @@ ulong get_property(Display *dpy, Window win, Atom atom, Atom type,
 {
 	Atom real_type;
 	int format;
-	ulong n, extra;
+	ulong n=-1, extra=0;
 	int status;
 	
 	do{
@@ -42,6 +42,7 @@ ulong get_property(Display *dpy, Window win, Atom atom, Atom type,
 
 	if(n==0){
 		XFree((void*)*p);
+		*p=NULL;
 		return -1;
 	}
 	
@@ -113,7 +114,7 @@ void set_integer_property(Window win, Atom a, int value)
 
 bool get_win_state(Window win, int *state)
 {
-	long *p=NULL;
+	CARD32 *p=NULL;
 	
 	if(get_property(wglobal.dpy, win, wglobal.atom_wm_state,
 					wglobal.atom_wm_state, 2L, FALSE, (uchar**)&p)<=0)
