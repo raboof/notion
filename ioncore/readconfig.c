@@ -114,9 +114,8 @@ bool ioncore_add_default_dirs()
 	fails-=ioncore_add_scriptdir(EXTRABINDIR); /* ion-completefile */
 	fails-=ioncore_add_scriptdir(SHAREDIR);
 	fails-=ioncore_add_scriptdir(ETCDIR);
-	fails-=ioncore_add_userdirs("ion-devel");
-	
 	fails-=ioncore_add_moduledir(MODULEDIR);
+	fails-=ioncore_add_userdirs("ion-devel");
 	
 	return (fails==0);
 }

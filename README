@@ -13,7 +13,7 @@ BUILDING AND INSTALLING
 
     * GNU make
     * Properly preconfigured GNU libtool (It is not known if versions
-      earlier than 1.4.3 work.)
+      earlier than 1.4.3 work.) and libltdl 3
     * Lua 5.0 (see <http://www.lua.org/>)
 
 2. Edit system.mk to suit your system. If heavy modifications are required,

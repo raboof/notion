@@ -10,7 +10,6 @@ include $(TOPDIR)/system-inc.mk
 
 #DIST: INCLUDES += -I../libtu/include $(X11_INCLUDES) -I.. $(LUA_INCLUDES)
 INCLUDES += $(X11_INCLUDES) -I.. $(LUA_INCLUDES)
-MODULEDIR = $(LIBDIR)/ion-devel
 CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
 SOURCES=luaextl.c

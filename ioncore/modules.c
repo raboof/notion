@@ -110,7 +110,7 @@ bool load_module(const char *modname)
 	handle=lt_dlopenext(modname);
 	
 	if(handle==NULL){
-		warn("%s", lt_dlerror());
+		warn("Failed to load module %s: %s", modname, lt_dlerror());
 		return FALSE;
 	}
 	
