@@ -33,10 +33,13 @@ static bool shaded_frame(WRegion *reg)
 
 static void ggeom(WRegion *reg, WRectangle *geom)
 {
-	if(shaded_frame(reg))
+	if(shaded_frame(reg)){
 		genframe_bar_geom((WGenFrame*)reg, geom);
-	else
+		geom->x+=REGION_GEOM(reg).x;
+		geom->y+=REGION_GEOM(reg).y;
+	}else{
 		*geom=REGION_GEOM(reg);
+	}
 }
 
 
