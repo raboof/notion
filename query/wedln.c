@@ -416,12 +416,16 @@ void wedln_draw(WEdln *wedln, bool complete)
 
 static void wedln_show_completions(WEdln *wedln, char **strs, int nstrs)
 {
+    int w=REGION_GEOM(wedln).w;
+    int h=REGION_GEOM(wedln).h;
+    
 	if(WEDLN_BRUSH(wedln)==NULL)
 		return;
 	
 	setup_listing(&(wedln->complist), strs, nstrs, FALSE);
 	input_refit((WInput*)wedln);
-	/*wedln_draw_completions(wedln, TRUE);*/
+    if(w==REGION_GEOM(wedln).w && h==REGION_GEOM(wedln).h)
+        wedln_draw_completions(wedln, TRUE);
 }
 
 
