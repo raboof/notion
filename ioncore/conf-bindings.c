@@ -97,6 +97,11 @@ static bool parse_keybut(const char *str, uint *mod_ret, uint *kcb_ret,
 				}
 				*kcb_ret=state_map[i].value;
 			}else{
+				if(*mod_ret==AnyModifier || 
+				   (*mod_ret!=0 && state_map[i].value==AnyModifier)){
+					warn_obj(str, "Insane modifier combination");
+					break;
+				}
 				*mod_ret|=state_map[i].value;
 			}
 		}

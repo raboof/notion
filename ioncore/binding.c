@@ -447,6 +447,9 @@ static void evil_grab_key(Display *display, uint keycode, uint modifiers,
 	
 	XGrabKey(display, keycode, modifiers, grab_window, owner_events,
 			 pointer_mode, keyboard_mode);
+
+	if(modifiers==AnyModifier)
+		return;
 	
 	for(i=0; i<N_EVILLOCKS; i++){
 		if(evillockmasks[i]==0)
@@ -476,10 +479,13 @@ static void evil_grab_button(Display *display, uint button, uint modifiers,
 {
 	uint mods;
 	int i, j;
-	
+
 	XGrabButton(display, button, modifiers,
 				grab_window, owner_events, event_mask, pointer_mode,
 				keyboard_mode, confine_to, cursor);
+
+	if(modifiers==AnyModifier)
+		return;
 	
 	for(i=0; i<N_EVILLOCKS; i++){
 		if(evillockmasks[i]==0)
@@ -510,6 +516,9 @@ static void evil_ungrab_key(Display *display, uint keycode, uint modifiers,
 	int i, j;
 	
 	XUngrabKey(display, keycode, modifiers, grab_window);
+
+	if(modifiers==AnyModifier)
+		return;
 	
 	for(i=0; i<N_EVILLOCKS; i++){
 		if(evillockmasks[i]==0)
@@ -537,6 +546,9 @@ static void evil_ungrab_button(Display *display, uint button, uint modifiers,
 	int i, j;
 	
 	XUngrabButton(display, button, modifiers, grab_window);
+
+	if(modifiers==AnyModifier)
+		return;
 	
 	for(i=0; i<N_EVILLOCKS; i++){
 		if(evillockmasks[i]==0)
