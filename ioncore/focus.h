@@ -12,10 +12,10 @@
 #ifndef ION_IONCORE_FOCUS_H
 #define ION_IONCORE_FOCUS_H
 
+#include <libmainloop/hooks.h>
 #include "common.h"
 #include "window.h"
 #include "region.h"
-#include "hooks.h"
 
 DYNFUN void region_do_set_focus(WRegion *reg, bool warp);
 

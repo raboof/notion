@@ -12,9 +12,9 @@
 #ifndef ION_IONCORE_EVENT_H
 #define ION_IONCORE_EVENT_H
 
+#include <libmainloop/hooks.h>
 #include "common.h"
 #include "region.h"
-#include "hooks.h"
 
 #define IONCORE_EVENTMASK_PTRGRAB (ButtonPressMask|ButtonReleaseMask| \
                                    ButtonMotionMask)

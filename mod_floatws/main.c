@@ -9,14 +9,14 @@
  * (at your option) any later version.
  */
 
-#include <ioncore/bindmaps.h>
 #include <libextl/readconfig.h>
+#include <libextl/extl.h>
+#include <libmainloop/hooks.h>
+#include <ioncore/bindmaps.h>
 #include <ioncore/framep.h>
 #include <ioncore/frame-pointer.h>
 #include <ioncore/reginfo.h>
-#include <ioncore/hooks.h>
 #include <ioncore/clientwin.h>
-#include <libextl/extl.h>
 
 #include "floatws.h"
 #include "floatframe.h"

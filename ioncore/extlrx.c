@@ -12,11 +12,18 @@
 
 #include <libmainloop/signal.h>
 #include <libmainloop/defer.h>
+#include <libmainloop/hooks.h>
 
 #include "common.h"
 
 
+
+/* TODO: Get rid of this kludge */
+
+
+
 /*{{{ libmainloop/WTimer */
+
 
 EXTL_CLASS(WTimer, Obj)
 
@@ -48,6 +55,47 @@ bool timer_is_set(WTimer *timer);
  */
 EXTL_EXPORT_AS(WTimer, set)
 void timer_set_extl(WTimer *timer, uint msecs, ExtlFn fn);
+
+
+/*}}}*/
+
+
+/*{{{ libmainloop/hooks */
+
+
+EXTL_CLASS(WHook, Obj)
+
+    
+/*EXTL_DOC
+ * Find named hook \var{name}.
+ */
+EXTL_SAFE
+EXTL_EXPORT_AS(ioncore, get_hook)
+WHook *mainloop_get_hook(const char *name);
+
+
+/*EXTL_DOC
+ * Is \var{fn} hooked to hook \var{hk}?
+ */
+EXTL_SAFE
+EXTL_EXPORT_MEMBER
+bool hook_listed(WHook *hk, ExtlFn efn);
+
+
+/*EXTL_DOC
+ * Add \var{efn} to the list of functions to be called when the
+ * hook \var{hk} is triggered.
+ */
+EXTL_EXPORT_AS(WHook, add)
+bool hook_add_extl(WHook *hk, ExtlFn efn);
+
+
+/*EXTL_DOC
+ * Remove \var{efn} from the list of functions to be called when the 
+ * hook \var{hk} is triggered.
+ */
+EXTL_EXPORT_AS(WHook, remove)
+bool hook_remove_extl(WHook *hk, ExtlFn efn);
 
 
 /*}}}*/

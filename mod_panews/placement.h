@@ -12,11 +12,11 @@
 #ifndef ION_MOD_PANEWS_PLACEMENT_H
 #define ION_MOD_PANEWS_PLACEMENT_H
 
+#include <libextl/extl.h>
+#include <libmainloop/hooks.h>
 #include <ioncore/common.h>
 #include <ioncore/clientwin.h>
 #include <ioncore/manage.h>
-#include <ioncore/hooks.h>
-#include <libextl/extl.h>
 #include <mod_ionws/split.h>
 #include "panews.h"
 #include "splitext.h"

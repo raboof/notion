@@ -11,13 +11,13 @@
 
 #include <string.h>
 
+#include <libtu/objp.h>
+#include <libextl/readconfig.h>
+#include <libmainloop/hooks.h>
 #include "common.h"
 #include "global.h"
-#include "hooks.h"
 #include "modules.h"
-#include <libextl/readconfig.h>
 #include "gr.h"
-#include <libtu/objp.h>
 
 
 /*{{{ Lookup and registration */

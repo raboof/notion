@@ -9,12 +9,12 @@
  * (at your option) any later version.
  */
 
+#include <libmainloop/hooks.h>
 #include "common.h"
 #include "focus.h"
 #include "global.h"
 #include "window.h"
 #include "region.h"
-#include "hooks.h"
 #include "colormap.h"
 #include "activity.h"
 

@@ -14,10 +14,9 @@
 
 #include <libextl/extl.h>
 #include <libtu/ptrlist.h>
-
+#include <libmainloop/hooks.h>
 #include "common.h"
 #include "region.h"
-#include "hooks.h"
 #include "window.h"
 #include "rectangle.h"
 #include "attach.h"

@@ -17,12 +17,12 @@
 #include <libtu/minmax.h>
 #include <libextl/extl.h>
 #include <libmainloop/defer.h>
+#include <libmainloop/hooks.h>
 #include "common.h"
 #include "global.h"
 #include "property.h"
 #include "focus.h"
 #include "sizehint.h"
-#include "hooks.h"
 #include "event.h"
 #include "clientwin.h"
 #include "colormap.h"

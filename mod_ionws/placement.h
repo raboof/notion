@@ -12,10 +12,10 @@
 #ifndef ION_MOD_IONWS_PLACEMENT_H
 #define ION_MOD_IONWS_PLACEMENT_H
 
+#include <libmainloop/hooks.h>
 #include <ioncore/common.h>
 #include <ioncore/clientwin.h>
 #include <ioncore/manage.h>
-#include <ioncore/hooks.h>
 #include "ionws.h"
 
 

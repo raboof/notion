@@ -12,7 +12,7 @@ INCLUDES += $(LIBTU_INCLUDES) $(LIBEXTL_INCLUDES) -I..
 
 CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
-SOURCES = select.c defer.c signal.c
+SOURCES = select.c defer.c signal.c hooks.c
 
 MAKE_EXPORTS=mainloop
 

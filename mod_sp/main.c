@@ -10,11 +10,11 @@
  */
 
 #include <libtu/map.h>
-#include <ioncore/conf-bindings.h>
 #include <libextl/readconfig.h>
+#include <libmainloop/hooks.h>
+#include <ioncore/conf-bindings.h>
 #include <ioncore/saveload.h>
 #include <ioncore/screen.h>
-#include <ioncore/hooks.h>
 #include <ioncore/mplex.h>
 #include <ioncore/ioncore.h>
 #include <ioncore/global.h>

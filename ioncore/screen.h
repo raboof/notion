@@ -12,12 +12,12 @@
 #ifndef ION_IONCORE_SCREEN_H
 #define ION_IONCORE_SCREEN_H
 
+#include <libextl/extl.h>
+#include <libmainloop/hooks.h>
 #include "common.h"
 #include "mplex.h"
-#include <libextl/extl.h>
 #include "rectangle.h"
 #include "rootwin.h"
-#include "hooks.h"
 
 #define FOR_ALL_SCREENS(SCR)   \
     for((SCR)=ioncore_g.screens; \

@@ -12,8 +12,8 @@
 #ifndef ION_IONCORE_IONCORE_H
 #define ION_IONCORE_IONCORE_H
 
+#include <libmainloop/hooks.h>
 #include "common.h"
-#include "hooks.h"
 
 #define IONCORE_STARTUP_ONEROOT    0x0001
 #define IONCORE_STARTUP_NOXINERAMA 0x0002

@@ -13,12 +13,12 @@
 #define ION_IONCORE_MPLEX_H
 
 #include <libextl/extl.h>
+#include <libmainloop/hooks.h>
 #include "common.h"
 #include "window.h"
 #include "attach.h"
 #include "manage.h"
 #include "rectangle.h"
-#include "hooks.h"
 #include "pholder.h"
 
 #define MPLEX_ADD_TO_END 0x0001

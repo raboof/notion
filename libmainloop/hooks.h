@@ -1,5 +1,5 @@
 /*
- * ion/ioncore/hooks.h
+ * ion/mainloop/hooks.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2005. 
  *
@@ -9,10 +9,10 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_IONCORE_HOOKS_H
-#define ION_IONCORE_HOOKS_H
+#ifndef ION_LIBMAINLOOP_HOOKS_H
+#define ION_LIBMAINLOOP_HOOKS_H
 
-#include "common.h"
+#include <libtu/types.h>
 #include <libextl/extl.h>
 
 INTRSTRUCT(WHookItem);
@@ -35,9 +35,9 @@ DECLCLASS(WHook){
 
 
 /* If hk==NULL to register, new is attempted to be created. */
-extern WHook *ioncore_register_hook(const char *name, WHook *hk);
-extern WHook *ioncore_unregister_hook(const char *name, WHook *hk);
-extern WHook *ioncore_get_hook(const char *name);
+extern WHook *mainloop_register_hook(const char *name, WHook *hk);
+extern WHook *mainloop_unregister_hook(const char *name, WHook *hk);
+extern WHook *mainloop_get_hook(const char *name);
 
 extern WHook *create_hook();
 extern bool hook_init(WHook *hk);
@@ -64,4 +64,4 @@ extern bool hook_call_alt_o(const WHook *hk, Obj *o);
 extern bool hook_call_alt_p(const WHook *hk, void *p, WHookMarshallExtl *em);
 
 
-#endif /* ION_IONCORE_HOOKS_H */
+#endif /* ION_LIBMAINLOOP_HOOKS_H */

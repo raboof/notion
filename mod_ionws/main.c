@@ -124,8 +124,8 @@ static bool register_regions()
 }
 
 
-#define INIT_HOOK_(NM)                            \
-    NM=ioncore_register_hook(#NM, create_hook()); \
+#define INIT_HOOK_(NM)                             \
+    NM=mainloop_register_hook(#NM, create_hook()); \
     if(NM==NULL) return FALSE;
 
 

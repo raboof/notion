@@ -1,5 +1,5 @@
 /*
- * ion/ioncore/hooks.c
+ * ion/mainloop/hooks.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2005. 
  *
@@ -9,9 +9,13 @@
  * (at your option) any later version.
  */
 
+#include <libtu/types.h>
+#include <libtu/misc.h>
+#include <libtu/dlist.h>
+#include <libtu/output.h>
 #include <libtu/rb.h>
 #include <libtu/objp.h>
-#include "common.h"
+#include <libtu/locale.h>
 #include <libextl/extl.h>
 #include "hooks.h"
 
@@ -26,7 +30,7 @@ static Rb_node named_hooks=NULL;
 
 
 /* If hk==NULL to register, new is attempted to be created. */
-WHook *ioncore_register_hook(const char *name, WHook *hk)
+WHook *mainloop_register_hook(const char *name, WHook *hk)
 {
     bool created=FALSE;
     char *nnm;
@@ -54,7 +58,7 @@ WHook *ioncore_register_hook(const char *name, WHook *hk)
 }
 
 
-WHook *ioncore_unregister_hook(const char *name, WHook *hk)
+WHook *mainloop_unregister_hook(const char *name, WHook *hk)
 {
     bool found=FALSE;
     Rb_node node;
@@ -89,7 +93,7 @@ WHook *ioncore_unregister_hook(const char *name, WHook *hk)
  */
 EXTL_SAFE
 EXTL_EXPORT
-WHook *ioncore_get_hook(const char *name)
+WHook *mainloop_get_hook(const char *name)
 {
     if(named_hooks!=NULL){
         bool found=FALSE;
@@ -145,7 +149,7 @@ WHook *create_hook()
 
 void hook_deinit(WHook *hk)
 {
-    ioncore_unregister_hook(NULL, hk);
+    mainloop_unregister_hook(NULL, hk);
     while(hk->items!=NULL)
         destroy_item(hk, hk->items);
 }

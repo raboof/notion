@@ -28,6 +28,7 @@
 #include <libextl/extl.h>
 #include <libmainloop/select.h>
 #include <libmainloop/signal.h>
+#include <libmainloop/hooks.h>
 
 #include "common.h"
 #include "rootwin.h"
@@ -214,8 +215,8 @@ static bool init_messages(const char *localedir)
 extern bool ioncore_register_exports();
 extern void ioncore_unregister_exports();
 
-#define INIT_HOOK_(NM)                            \
-    NM=ioncore_register_hook(#NM, create_hook()); \
+#define INIT_HOOK_(NM)                             \
+    NM=mainloop_register_hook(#NM, create_hook()); \
     if(NM==NULL) return FALSE;
 
 #define INIT_HOOK(NM, DFLT)                           \
