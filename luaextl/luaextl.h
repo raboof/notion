@@ -67,6 +67,10 @@ extern ExtlFn extl_unref_fn(ExtlFn ref);
 extern ExtlTab extl_unref_table(ExtlTab ref);
 extern ExtlFn extl_fn_none();
 extern ExtlTab extl_table_none();
+
+extern bool extl_fn_eq(ExtlFn fn1, ExtlFn fn2);
+extern bool extl_table_eq(ExtlTab fn1, ExtlTab fn2);
+
 /* These should be called to store function and table references gotten
  * as arguments to functions.
  */

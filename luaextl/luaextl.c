@@ -851,6 +851,48 @@ ExtlTab extl_globals()
 }
 
 
+/* eq */
+
+
+typedef struct{
+    int o1, o2;
+    bool ret;
+} EqParams;
+
+
+static bool extl_do_eq(lua_State *st, EqParams *ep)
+{
+    if(!extl_getref(st, ep->o1))
+        return FALSE;
+    if(!extl_getref(st, ep->o2))
+        return FALSE;
+    ep->ret=lua_equal(st, -1, -2);
+    return TRUE;
+}
+
+
+bool extl_eq_fn(ExtlFn fn1, ExtlFn fn2)
+{
+    EqParams ep;
+    ep.o1=fn1;
+    ep.o2=fn2;
+    ep.ret=FALSE;
+    extl_cpcall(l_st, (ExtlCPCallFn*)extl_do_eq, &ep);
+    return ep.ret;
+}
+
+
+bool extl_eq_table(ExtlTab t1, ExtlTab t2)
+{
+    EqParams ep;
+    ep.o1=t1;
+    ep.o2=t2;
+    ep.ret=FALSE;
+    extl_cpcall(l_st, (ExtlCPCallFn*)extl_do_eq, &ep);
+    return ep.ret;
+}
+
+
 /*}}}*/
 
 
