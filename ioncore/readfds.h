@@ -2,8 +2,8 @@
  * wmcore/readfds.h
  */
 
-#ifndef READFDS_READFDS_H
-#define READFDS_READFDS_H
+#ifndef WMCORE_READFDS_H
+#define WMCORE_READFDS_H
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -23,4 +23,4 @@ extern void unregister_input_fd(int fd);
 extern void set_input_fds(fd_set *rfds, int *nfds);
 extern void check_input_fds(fd_set *rfds);
 
-#endif /* READFDS_READFDS_H */
+#endif /* WMCORE_READFDS_H */
