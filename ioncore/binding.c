@@ -6,6 +6,12 @@
  */
 
 #include <string.h>
+#include "common.h"
+#include "event.h"
+#include "binding.h"
+#include "global.h"
+#include "objp.h"
+#include "commandsq.h"
 
 #ifndef CF_NO_LOCK_HACK
 #define CF_HACK_IGNORE_EVIL_LOCKS
@@ -15,13 +21,6 @@
 #define XK_MISCELLANY
 #include <X11/keysymdef.h>
 #endif
-
-#include "common.h"
-#include "event.h"
-#include "binding.h"
-#include "global.h"
-#include "objp.h"
-#include "commandsq.h"
 
 
 /* */
