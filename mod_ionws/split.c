@@ -535,6 +535,7 @@ void split_resize_rootward(WSplit *node, const WRectangle *ng,
         rg=&rg_;
     
     split_do_resize_rootward(node, ng, hany, vany, tryonly, rg);
+
     if(!tryonly)
         split_do_resize(node, rg, PRIMN_ANY, PRIMN_ANY, FALSE);
 }
@@ -582,7 +583,7 @@ void split_tree_rqgeom(WSplit *root, WSplit *sub, int flags,
     }
 
     if(vany){
-        geom.h+=sub->geom.y-geom.h;
+        geom.h+=sub->geom.y-geom.y;
         geom.y=sub->geom.y;
     }
     
