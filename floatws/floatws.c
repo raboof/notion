@@ -256,9 +256,14 @@ static bool floatws_do_add_clientwin(WFloatWS *ws,
 #endif
 		
 	if(target==NULL){
-		WRectangle fgeom=initial_to_floatframe_geom(GRDATA_OF(ws),
-													REGION_GEOM(cwin),
-													attr->win_gravity);
+		/* Should use size_hints.win_gravity instead? */
+		WRectangle fgeom=REGION_GEOM(cwin);
+		fgeom.w+=2*cwin->orig_bw;
+		fgeom.h+=2*cwin->orig_bw;
+		fgeom=initial_to_floatframe_geom(GRDATA_OF(ws), fgeom,
+										 (cwin->size_hints.flags&PWinGravity
+										  ? cwin->size_hints.win_gravity
+										  : NorthWestGravity));
 		if(cwin->transient_for!=None)
 			respectpos=TRUE;
 		

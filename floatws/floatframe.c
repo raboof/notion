@@ -79,14 +79,15 @@ static WRectangle floatframe_to_managed_geom(WGRData *grdata, WRectangle geom)
 
 WRectangle managed_to_floatframe_geom(WGRData *grdata, WRectangle geom)
 {
+	return initial_to_floatframe_geom(grdata, geom, StaticGravity);
+	/*
 	geom.x-=BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad;
-	geom.w+=2*(BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad);
 	geom.y-=BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad
 		+grdata->bar_h;
+	geom.w+=2*(BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad);
 	geom.h+=2*(BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad)
 		+grdata->bar_h;
-	
-	return geom;
+	return geom;*/
 }
 
 
@@ -128,15 +129,48 @@ static void floatframe_border_inner_geom(const WFloatFrame *frame,
 WRectangle initial_to_floatframe_geom(WGRData *grdata, WRectangle geom,
 									  int gravity)
 {
-	/* TODO: gravity */
-	
-	/*geom.x-=BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad;*/
-	geom.w+=2*(BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad);
-	/*geom.y-=BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad
-		+grdata->bar_h;*/
-	geom.h+=2*(BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad)
+	int woff=2*(BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad);
+	int hoff=2*(BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad)
 		+grdata->bar_h;
 	
+	if(gravity==StaticGravity || gravity==ForgetGravity){
+		geom.x-=BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad;
+		geom.y-=BORDER_TOTAL(&grdata->frame_border)-grdata->frame_border.ipad
+			+grdata->bar_h;
+		geom.w+=woff;
+		geom.h+=hoff;
+	}else{
+		if(gravity==NorthWestGravity || gravity==WestGravity ||
+		   gravity==SouthWestGravity){
+			/* */
+		}else if(gravity==NorthEastGravity || gravity==EastGravity ||
+				 gravity==SouthEastGravity){
+			/* geom.y=geom.y+geom.h-(geom.h+hoff) */
+			geom.x-=woff;
+		}else if(gravity==CenterGravity || gravity==NorthGravity ||
+				 gravity==SouthGravity){
+			/* geom.y=geom.y+geom.h/2-(geom.h+hoff)/2 */
+			geom.x-=woff/2;
+		}
+		
+		geom.w+=woff;
+		
+		if(gravity==NorthWestGravity || gravity==NorthGravity ||
+		   gravity==NorthEastGravity){
+			/* */
+		}else if(gravity==SouthWestGravity || gravity==SouthGravity ||
+				 gravity==SouthEastGravity){
+			/* geom.y=geom.y+geom.h-(geom.h+hoff) */
+			geom.y-=hoff;
+		}else if(gravity==CenterGravity || gravity==WestGravity ||
+				 gravity==EastGravity){
+			/* geom.y=geom.y+geom.h/2-(geom.h+hoff)/2 */
+			geom.y-=hoff/2;
+		}
+		
+		geom.h+=hoff;
+	}
+		
 	return geom;
 }
 
