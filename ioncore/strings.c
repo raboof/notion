@@ -354,8 +354,8 @@ char *make_label(GrBrush *brush, const char *str, uint maxw)
 	int ret;
 	char *retstr;
 	
-	if(grbrush_get_text_width(brush, str, strlen(str))<=maxw)
-		return scopy(str);
+	/*if(grbrush_get_text_width(brush, str, strlen(str))<=maxw)
+		return scopy(str);*/
 	
 	for(rule=shortenrules; rule!=NULL; rule=rule->next){
 		ret=regexec(&(rule->re), str, nmatch, pmatch, 0);
