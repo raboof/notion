@@ -135,7 +135,7 @@ bool ioncore_init_layout()
     ExtlTab tab;
     WScreen *scr;
     bool ok;
-    bool n=0;
+    int n=0;
     
     ok=ioncore_read_savefile("saved_layout", &tab);
     

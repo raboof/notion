@@ -56,7 +56,7 @@ static void floatws_fit(WFloatWS *ws, const WRectangle *geom)
 
 bool floatws_fitrep(WFloatWS *ws, WWindow *par, const WFitParams *fp)
 {
-    WFloatStacking *st, *stnext;
+    WFloatStacking *st, *stnext, *end;
     int xdiff, ydiff;
     WRectangle g;
     bool rs;
@@ -79,7 +79,9 @@ bool floatws_fitrep(WFloatWS *ws, WWindow *par, const WFitParams *fp)
     xdiff=fp->g.x-REGION_GEOM(ws).x;
     ydiff=fp->g.y-REGION_GEOM(ws).y;
     
-    for(st=stacking; st!=NULL; st=stnext){
+    end=NULL;
+
+    for(st=stacking; st!=end; st=stnext){
         stnext=st->next;
         
         if(REGION_MANAGER(st->reg)==(WRegion*)ws){
@@ -89,6 +91,9 @@ bool floatws_fitrep(WFloatWS *ws, WWindow *par, const WFitParams *fp)
              */
             UNLINK_ITEM(stacking, st, next, prev);
             LINK_ITEM(stacking, st, next, prev);
+            
+            if(end==NULL)
+                end=st;
             
             g=REGION_GEOM(st->reg);
             g.x+=xdiff;
@@ -622,7 +627,7 @@ bool mod_floatws_clientwin_do_manage(WClientWin *cwin,
     if(param->tfor==NULL)
         return FALSE;
 
-    stack_above=OBJ_CAST(REGION_PARENT(param->tfor), WFloatFrame);
+    stack_above=OBJ_CAST(REGION_PARENT(param->tfor), WRegion);
     if(stack_above==NULL)
         return FALSE;
     
