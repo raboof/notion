@@ -107,7 +107,7 @@ AC_ARG_ENABLE([sun-f1x-remap],
 							  [Remap F11 key to SunF36 and F12 to SunF37])])
 
 if test "x$enable_sun_f1x_remap" == xyes; then
-	_DCF_SUN_F1X_REMAP="1"
+	_DCF_SUN_F1X_REMAP="-DCF_SUN_F1X_REMAP"
 fi
 
 dnl }}}
