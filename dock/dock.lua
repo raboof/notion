@@ -11,13 +11,13 @@ dock = dockmod.create_dock(0, {
     is_auto=true,    -- whether new dockapps should be added automatically
 })
 
-defcmd("global", "toggle_dock",
-        function()
-            WDock.toggle(dock)    -- toggle map/unmapped state
-        end)
+
+function toggle_dock()
+    WDock.toggle(dock)    -- toggle map/unmapped state
+end
 
 defbindings("WScreen", {
-    kpress(DEFAULT_MOD.."space", "toggle_dock")
+    kpress(MOD1.."space", "toggle_dock()")
 })
 
 -- dockapp ordering
