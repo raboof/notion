@@ -331,15 +331,15 @@ static bool mplex_do_display_managed(WMPlex *mplex, WRegion *sub)
 	if(sub==mplex->current_sub || sub==mplex->current_input)
 		return TRUE;
 	
-	if(mplex->current_sub!=NULL && REGION_IS_MAPPED(mplex))
-		region_unmap(mplex->current_sub);
-	
-	mplex->current_sub=sub;
-	
 	if(REGION_IS_MAPPED(mplex) && !WMPLEX_MGD_UNVIEWABLE(mplex))
 		region_map(sub);
 	else
 		region_unmap(sub);
+
+	if(mplex->current_sub!=NULL && REGION_IS_MAPPED(mplex))
+		region_unmap(mplex->current_sub);
+
+	mplex->current_sub=sub;
 	
 	/* Many programs will get upset if the visible, although only such,
 	 * client window is not the lowest window in the mplex. xprop/xwininfo
