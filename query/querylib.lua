@@ -266,9 +266,15 @@ function querylib.workspace_handler(frame, name)
         name=nam
     end
     
-    ws=scr:attach_new({ type=cls, name=name, switchto=true })
+    err=collect_errors(function()
+                           ws=scr:attach_new({ 
+                               type=cls, 
+                               name=name, 
+                               switchto=true 
+                           })
+                       end)
     if not ws then
-        query_fwarn(frame, "Failed to create workspace")
+        query_fwarn(frame, err or "Unknown error")
     end
     
 end
