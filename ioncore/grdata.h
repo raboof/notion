@@ -67,7 +67,8 @@ DECLSTRUCT(WGRData){
 	Pixmap stick_pixmap;
 	int stick_pixmap_w;
 	int stick_pixmap_h;
-
+	WColor black, white;
+	
 	Window moveres_win;
 	WExtraDrawInfo *moveres_draw;
 	WRectangle moveres_geom;

@@ -32,8 +32,11 @@ static bool opt_screen_font(Tokenizer *tokz, int n, Token *toks)
 	
 	fnt=load_font(wglobal.dpy, TOK_STRING_VAL(&(toks[1])));
 	
-	if(fnt!=NULL)
+	if(fnt!=NULL){
+		if(tmp_screen->grdata.font!=NULL)
+			free_font(wglobal.dpy, tmp_screen->grdata.font);
 		tmp_screen->grdata.font=fnt;
+	}
 	
 	return (fnt!=NULL);
 }
@@ -44,8 +47,11 @@ static bool opt_screen_tab_font(Tokenizer *tokz, int n, Token *toks)
 	WFont *fnt;
 	
 	fnt=load_font(wglobal.dpy, TOK_STRING_VAL(&(toks[1])));
-	if(fnt!=NULL)
+	if(fnt!=NULL){
+		if(tmp_screen->grdata.tab_font!=NULL)
+			free_font(wglobal.dpy, tmp_screen->grdata.tab_font);
 		tmp_screen->grdata.tab_font=fnt;
+	}
 	
 	return (fnt!=NULL);
 }
@@ -120,8 +126,7 @@ static bool do_colorgroup(Tokenizer *tokz, Token *toks,
 {
 	int cnt=0;
 
-	/* TODO: Free colors */
-	
+	/* alloc_color wil free cg->xx */
 	cnt+=alloc_color(scr, TOK_STRING_VAL(&(toks[1])), &(cg->hl));
 	cnt+=alloc_color(scr, TOK_STRING_VAL(&(toks[2])), &(cg->sh));
 	cnt+=alloc_color(scr, TOK_STRING_VAL(&(toks[3])), &(cg->bg));
@@ -154,7 +159,6 @@ CGHAND(input_colors)
 
 static bool opt_screen_frame_bgcolor(Tokenizer *tokz, int n, Token *toks)
 {
-	/* TODO: free */
 	if(!alloc_color(tmp_screen, TOK_STRING_VAL(&(toks[1])),
 					&(tmp_screen->grdata.frame_bgcolor))){
 		tokz_warn(tokz, toks[1].line, "Unable to allocate one or more colors");
@@ -166,7 +170,6 @@ static bool opt_screen_frame_bgcolor(Tokenizer *tokz, int n, Token *toks)
 
 static bool opt_screen_selection_colors(Tokenizer *tokz, int n, Token *toks)
 {
-	/* TODO: free */
 	if(!alloc_color(tmp_screen, TOK_STRING_VAL(&(toks[1])),
 					&(tmp_screen->grdata.selection_bgcolor)) ||
 	   !alloc_color(tmp_screen, TOK_STRING_VAL(&(toks[2])),
@@ -283,10 +286,6 @@ static ConfOpt screen_opts[]={
 	
 	{"pwm_bar_widths", "ldl", opt_screen_bar_widths, NULL},
 
-	
-	/*{"#end", NULL, end_screen, NULL},
-	{"#cancel", NULL, end_screen, NULL},*/
-	
 	{NULL, NULL, NULL, NULL}
 };
 

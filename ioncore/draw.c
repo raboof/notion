@@ -159,6 +159,9 @@ bool alloc_color(WScreen *scr, const char *name, WColor *cret)
 	XColor c;
 	bool ret=FALSE;
 
+	if(*cret!=scr->grdata.black && *cret!=scr->grdata.white)
+		XFreeColors(wglobal.dpy, scr->default_cmap, cret, 1, 0);
+	
 	if(XParseColor(wglobal.dpy, scr->default_cmap, name, &c)){
 		ret=XAllocColor(wglobal.dpy, scr->default_cmap, &c);
 		*cret=c.pixel;
@@ -231,6 +234,8 @@ void preinit_graphics(WScreen *scr)
 	black=BlackPixel(wglobal.dpy, scr->xscr);
 	white=WhitePixel(wglobal.dpy, scr->xscr);
 #endif
+	grdata->black=black;
+	grdata->white=black;
 
 #define INIT_CG(CG, HL, SH, BG, FG) CG.bg=BG; CG.hl=HL; CG.sh=SH; CG.fg=FG;
 										/* hl, sh,    bg,    fg */
@@ -361,28 +366,14 @@ void postinit_graphics(WScreen *scr)
 	Display *dpy=wglobal.dpy;
 	WGRData *grdata=&(scr->grdata);
 	Window root=scr->root.win;
-
 	WColor black, white;
 	XGCValues gcv;
 	ulong gcvmask;
 	Pixmap stipple_pixmap;
 	GC tmp_gc;
 
-#ifdef CF_XFT
-	black.pixel=BlackPixel(wglobal.dpy, scr->xscr);
-	black.color.red=0;
-	black.color.green=0;
-	black.color.blue=0;
-	black.color.alpha=0xffff;
-	white.pixel=WhitePixel(wglobal.dpy, scr->xscr);
-	white.color.red=0xffff;
-	white.color.green=0xffff;
-	white.color.blue=0xffff;
-	white.color.alpha=0xffff;
-#else
-	black=BlackPixel(wglobal.dpy, scr->xscr);
-	white=WhitePixel(wglobal.dpy, scr->xscr);
-#endif
+	black=grdata->black;
+	white=grdata->white;
 
 	/* font */
 	if(grdata->font==NULL)
