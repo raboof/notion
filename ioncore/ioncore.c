@@ -563,5 +563,15 @@ bool ioncore_is_utf8()
 }
 
 
+/*EXTL_DOC
+ * Returns Ioncore version string.
+ */
+EXTL_EXPORT
+const char *ioncore_version()
+{
+	return ION_VERSION;
+}
+
+
 /*}}}*/
 
