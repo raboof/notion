@@ -53,10 +53,7 @@ query_man_path={
     "/usr/local/man"
 }
 
--- Modules. The query module must be loaded before the WS modules
--- for the functions to be bound in the WS modules' configuration
--- files to be defined. Alternatively the functions could be bound
--- elsewhere.
+-- Modules.
 load_module("query")
 load_module("ionws")
 load_module("floatws")
