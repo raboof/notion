@@ -998,7 +998,7 @@ ExtlTab ionws_get_configuration(WIonWS *ws)
 
 extern void set_split_of(Obj *obj, WSplit *split);
 
-#define MINS 8
+#define MINS 1
 
 static WSplit *load_split(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
 {

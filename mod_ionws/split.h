@@ -42,12 +42,6 @@ enum WSplitCurrent{
 };
 
 
-typedef struct{
-    int t, l, b, r;
-    int tot_v, tot_h;
-} WSplitUnused;
-
-
 INTRCLASS(WSplit);
 DECLCLASS(WSplit){
     Obj obj;
@@ -57,6 +51,7 @@ DECLCLASS(WSplit){
     
     int min_w, min_h;
     int max_w, max_h;
+    int unused_w, unused_h;
 
     char *marker;
     
@@ -64,7 +59,6 @@ DECLCLASS(WSplit){
         struct{
             int current;
             WSplit *tl, *br;
-            WSplitUnused unused;
         } s;
         struct{
             WRegion *reg;
@@ -101,7 +95,6 @@ extern WSplit *split_to_br(WSplit *node, int dir, WSplitFilter *filter);
 extern WSplit *split_closest_leaf(WSplit *node, WSplitFilter *filter);
 
 extern void split_update_bounds(WSplit *node, bool recursive);
-extern void split_get_unused(WSplit *node, WSplitUnused *unused);
 extern void split_resize(WSplit *node, const WRectangle *ng, 
                          int hprimn, int vprimn);
 extern bool split_do_resize(WSplit *node, const WRectangle *ng, 
@@ -135,9 +128,9 @@ extern void split_update_geom_from_children(WSplit *node);
 extern const char *split_get_marker(WSplit *node);
 extern bool split_set_marker(WSplit *node, const char *s);
 
-#define CHKNODE_(NODE)                                              \
+#define CHKNODE_(NODE)                                             \
     assert(((NODE)->type==SPLIT_REGNODE && (NODE)->u.reg!=NULL) || \
-           ((NODE)->type==SPLIT_STDISPNODE) ||                       \
+           ((NODE)->type==SPLIT_STDISPNODE) ||                     \
            ((NODE)->type==SPLIT_UNUSED) ||                         \
            (((NODE)->type==SPLIT_VERTICAL ||                       \
              (NODE)->type==SPLIT_HORIZONTAL)                       \
@@ -157,17 +150,5 @@ extern bool split_set_marker(WSplit *node, const char *s);
     assert((NODE)->type!=SPLIT_HORIZONTAL || (NODE)->u.s.tl!=NULL); \
     assert((NODE)->type!=SPLIT_HORIZONTAL || (NODE)->u.s.br!=NULL);
             
-
-#define UNUSED_TOT(U1, U2, S) ((U1)+(U2)>=(S) ? (U1)+(U2) : (U1))
-#define UNUSED_L_TOT(U, R) UNUSED_TOT((U).l, (U).r, (R)->geom.w)
-#define UNUSED_R_TOT(U, R) UNUSED_TOT((U).r, (U).l, (R)->geom.w)
-#define UNUSED_T_TOT(U, R) UNUSED_TOT((U).t, (U).b, (R)->geom.h)
-#define UNUSED_B_TOT(U, R) UNUSED_TOT((U).b, (U).t, (R)->geom.h)
-
-#define UNUSED_ADD(T, U1, U2, S) (T)=((U1)+(U2)>=(S) ? (T)+(U1)+(U2) : (U1))
-#define UNUSED_L_ADD(T, U, R) UNUSED_ADD((T).l, (U).l, (U).r, (R)->geom.w)
-#define UNUSED_R_ADD(T, U, R) UNUSED_ADD((T).r, (U).r, (U).l, (R)->geom.w)
-#define UNUSED_T_ADD(T, U, R) UNUSED_ADD((T).t, (U).t, (U).b, (R)->geom.h)
-#define UNUSED_B_ADD(T, U, R) UNUSED_ADD((T).b, (U).b, (U).t, (R)->geom.h)
 
 #endif /* ION_MOD_IONWS_SPLIT_H */
