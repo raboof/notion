@@ -15,6 +15,7 @@
 #include <ioncore/common.h>
 #include <ioncore/global.h>
 #include <ioncore/gr.h>
+#include <ioncore/strings.h>
 #include "listing.h"
 
 
@@ -40,29 +41,36 @@ static int strings_maxw(GrBrush *brush, char **strs, int nstrs)
 
 static int getbeg(GrBrush *brush, int maxw, char *str, int l, int *wret)
 {
-	int n=INT_MAX, w;
+	int n=0, nprev=0, w;
 	GrFontExtents fnte;
-	
-	*wret=0;
 	
 	grbrush_get_font_extents(brush, &fnte);
 	
-	if(fnte.max_width!=0)
-		n=maxw/fnte.max_width;
+	if(fnte.max_width!=0){
+		/* Do an initial skip. */
+		int n2=maxw/fnte.max_width;
 	
-	if(n>l)
-		n=l;
-	
-	while(1){
-		w=grbrush_get_text_width(brush, str, n);
-		/* w>maxw should not happen on first round */
-		if(w>maxw)
-			return n-1;
-		*wret=w;
-		if(n==l)
-			return l;
-		n++;
+		n=0;
+		while(n2>0){
+			n+=str_nextoff(str, n);
+			n2--;
+		}
 	}
+	
+	w=grbrush_get_text_width(brush, str, n);
+	nprev=n;
+	*wret=w;
+
+	while(w<=maxw){
+		*wret=w;
+		nprev=n;
+		n+=str_nextoff(str, n);
+		if(n==nprev)
+			break;
+		w=grbrush_get_text_width(brush, str, n);
+	}
+	
+	return nprev;
 }
 
 
