@@ -46,6 +46,11 @@
 #include "../version.h"
 
 
+#ifndef CF_APPNAME
+#define CF_APPNAME "ion-devel"
+#endif
+
+
 /*{{{ Global variables */
 
 
@@ -129,6 +134,9 @@ int main(int argc, char*argv[])
 
 	if(!ioncore_init(argc, argv))
 		return EXIT_FAILURE;
+	
+	ioncore_add_default_dirs();
+	ioncore_add_userdirs(CF_APPNAME);
 
 	optparser_init(argc, argv, OPTP_MIDLONG, ioncore_opts, &ioncore_cinfo);
 	
@@ -153,7 +161,7 @@ int main(int argc, char*argv[])
 			stflags|=IONCORE_STARTUP_NOXINERAMA;
 			break;
 		case OPT_ID('s'):
-			ioncore_set_sessiondir("ion-devel", optparser_get_arg());
+			ioncore_set_sessiondir(CF_APPNAME, optparser_get_arg());
 			break;
 		case OPT_ID('i'):
 			i18n=TRUE;
@@ -236,7 +244,7 @@ fail:
 /*}}}*/
 
 	
-/*{{{ Init */
+/*{{{ ioncore_init */
 
 
 extern bool ioncore_register_exports();
@@ -289,6 +297,26 @@ static void init_global()
 	wglobal.enc_sb=TRUE;
 	wglobal.use_mb=FALSE;
 }
+
+
+bool ioncore_init(int argc, char *argv[])
+{
+	init_global();
+	
+	wglobal.argc=argc;
+	wglobal.argv=argv;
+
+	register_classes();
+	init_hooks();
+
+	return init_module_support();
+}
+
+
+/*}}}*/
+
+
+/*{{{ ioncore_init_i18n */
 
 
 static bool check_encoding()
@@ -385,6 +413,12 @@ bool ioncore_init_i18n()
 		
 	return FALSE;
 }
+
+
+/*}}}*/
+
+
+/*{{{ ioncore_startup */
 
 
 static void set_session(const char *display)
@@ -497,25 +531,6 @@ static bool init_x(const char *display, int stflags)
 }
 
 
-bool ioncore_init(int argc, char *argv[])
-{
-	init_global();
-	
-	wglobal.argc=argc;
-	wglobal.argv=argv;
-
-	register_classes();
-	init_hooks();
-
-	if(!init_module_support())
-		return FALSE;
-
-	ioncore_add_default_dirs();
-	
-	return TRUE;
-}
-
-
 bool ioncore_startup(const char *display, const char *cfgfile,
 					 int stflags)
 {
@@ -550,7 +565,7 @@ bool ioncore_startup(const char *display, const char *cfgfile,
 /*}}}*/
 
 
-/*{{{ Deinit */
+/*{{{ ioncore_deinit */
 
 
 void ioncore_deinit()

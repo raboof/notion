@@ -145,14 +145,12 @@ bool ioncore_set_sessiondir(const char *appname, const char *session)
 
 bool ioncore_add_default_dirs()
 {
-	int fails=6;
+	int fails=4;
 	
 	fails-=ioncore_add_scriptdir(EXTRABINDIR); /* ion-completefile */
 	fails-=ioncore_add_scriptdir(ETCDIR);
 	fails-=ioncore_add_scriptdir(SHAREDIR);
 	fails-=ioncore_add_moduledir(MODULEDIR);
-	fails-=ioncore_add_userdirs("ion-devel");
-	/*fails-=ioncore_set_sessiondir("ion-devel", "default-session");*/
 	
 	return (fails==0);
 }
