@@ -160,6 +160,12 @@ void do_include(const char *file, const char *current_dir)
 	if(file==NULL)
 		return;
 	
+	if(file[0]=='/'){
+		if(access(file, F_OK)!=0)
+			goto fail;
+		extl_dofile(file, NULL, NULL);
+		return;
+	}
 	if(current_dir==NULL)
 		current_dir=".";
 	
@@ -176,13 +182,15 @@ void do_include(const char *file, const char *current_dir)
 		tmp=search_etcpath2(files, FALSE);
 	}
 	
-	if(tmp==NULL){
-		warn("Could not find file %s in search path", file);
-		return;
-	}
+	if(tmp==NULL)
+		goto fail;
 	
 	extl_dofile(tmp, NULL, NULL);
 	free(tmp);
+	return;
+	
+fail:
+	warn("Could not find file %s in search path", file);
 }
 
 
