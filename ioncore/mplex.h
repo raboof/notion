@@ -83,6 +83,8 @@ extern bool mplex_display_managed(WMPlex *mplex, WRegion *sub);
 extern void mplex_switch_nth(WMPlex *mplex, uint n);
 extern void mplex_switch_next(WMPlex *mplex);
 extern void mplex_switch_prev(WMPlex *mplex);
+extern bool mplex_l2_hide(WMPlex *mplex, WRegion *reg);
+extern bool mplex_l2_show(WMPlex *mplex, WRegion *reg);
 
 /* Focus */
 extern void mplex_do_set_focus(WMPlex *mplex, bool warp);
@@ -98,7 +100,6 @@ extern ExtlTab mplex_l1_list(WMPlex *mplex);
 extern ExtlTab mplex_l2_list(WMPlex *mplex);
 extern WRegion *mplex_l1_current(WMPlex *mplex);
 extern WRegion *mplex_l2_current(WMPlex *mplex);
-
 
 /* Dynfuns */
 DYNFUN void mplex_managed_geom(const WMPlex *mplex, WRectangle *geom);
