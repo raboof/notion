@@ -129,6 +129,9 @@ static void clientwin_get_winprops(WClientWin *cwin)
 
 	if(extl_table_is_bool_set(tab, "ignore_cfgrq"))
 		cwin->flags|=CWIN_PROP_IGNORE_CFGRQ;
+
+	if(extl_table_is_bool_set(tab, "transients_at_top"))
+		cwin->flags|=CWIN_TRANSIENTS_AT_TOP;
 }
 
 
@@ -894,7 +897,7 @@ static void convert_geom(WClientWin *cwin, const WRectangle *max_geom,
 	}
 	
 	if(mgr!=NULL){
-		if(mgr->flags&CWIN_TRANSIENTS_TOP)
+		if(mgr->flags&CWIN_TRANSIENTS_AT_TOP)
 			top=TRUE;
 		else
 			bottom=TRUE;
@@ -1307,6 +1310,23 @@ ExtlTab clientwin_managed_list(WClientWin *cwin)
 
 
 /*}}}*/
+
+
+/*EXTL_DOC
+ * Toggle transients managed by \var{cwin} between top/bottom
+ * of the window.
+ */
+EXTL_EXPORT_MEMBER
+void clientwin_toggle_transients_pos(WClientWin *cwin)
+{
+	WRegion *transient;
+	
+	cwin->flags^=CWIN_TRANSIENTS_AT_TOP;
+
+	FOR_ALL_MANAGED_ON_LIST(cwin->transient_list, transient){
+		region_fit(transient, &(cwin->max_geom));
+	}
+}
 
 
 /*{{{ Save/load */
