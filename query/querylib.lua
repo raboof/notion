@@ -477,8 +477,8 @@ querylib.do_query_ssh=querylib.make_execwith_fn(
 
 --DOC
 -- This query asks for a host to connect to with SSH. It starts
--- up ssh in a terminal using \file{ion-ssh}. To enable tab completion,
--- put the names of often-used hosts in the table \var{query_ssh_hosts}.
+-- up ssh in a terminal using \file{ion-ssh}. Hosts to tab-complete
+-- are read from \file{~/.ssh/known_hosts}.
 function querylib.query_ssh(mplex)
     querylib.get_known_hosts(mplex)
     return querylib.do_query_ssh(mplex)
