@@ -115,14 +115,17 @@ static void bound(int *what, int min, int max)
 }
 
 
-static void get_minmax(WSplit *node, int dir, int *min, int *max)
+static void get_minmaxused(WSplit *node, int dir, 
+                           int *min, int *max, int *used)
 {
     if(dir==SPLIT_VERTICAL){
-        *min=node->min_h;
-        *max=node->max_h;
+        *min=maxof(1, node->min_h);
+        *max=maxof(*min, node->max_h);
+        *used=node->used_h;
     }else{
-        *min=node->min_w;
-        *max=node->max_w;
+        *min=maxof(1, node->min_w);
+        *max=maxof(*min, node->max_w);
+        *used=node->used_w;
     }
 }
 
@@ -286,9 +289,11 @@ static int other_dir(int dir)
 }
 
 
-void split_do_resize(WSplit *node, const WRectangle *ng, 
+bool split_do_resize(WSplit *node, const WRectangle *ng, 
                      int hprimn, int vprimn, bool transpose)
 {
+    bool ret=TRUE;
+    
     CHKNODE(node);
 
     assert(!transpose || (hprimn==PRIMN_ANY && vprimn==PRIMN_ANY));
@@ -303,32 +308,49 @@ void split_do_resize(WSplit *node, const WRectangle *ng,
         int dir=(transpose ? other_dir(node->type) : node->type);
         int nsize=(dir==SPLIT_VERTICAL ? ng->h : ng->w);
         int primn=(dir==SPLIT_VERTICAL ? vprimn : hprimn);
-        int tlmin, tlmax, brmin, brmax;
+        int tlmin, tlmax, tlused, brmin, brmax, brused;
         WRectangle tlg=*ng, brg=*ng;
 
-        get_minmax(tl, dir, &tlmin, &tlmax);
-        get_minmax(br, dir, &brmin, &brmax);
+        get_minmaxused(tl, dir, &tlmin, &tlmax, &tlused);
+        get_minmaxused(br, dir, &brmin, &brmax, &brused);
+        /* tlmin,  brmin >= 1 => (tls>=tlmin, brs>=brmin => sz>0) */
 
-        if(primn==PRIMN_TL){
-            tls=tls+nsize-sz;
-            bound(&tls, tlmin, tlmax);
-            brs=nsize-tls;
-            /* TODO: brs may be <=0 */
-        }else if(primn==PRIMN_BR){
-            brs=brs+nsize-sz;
-            bound(&brs, brmin, brmax);
-            tls=nsize-brs;
-            /* TODO: tls may be <=0 */
-        }else{
-            if(sz==0)
-                tls=nsize/2;
-            else
+        if(sz>2){
+            if(primn==PRIMN_TL){
+                tls=tls+nsize-sz;
+                bound(&tls, tlmin, tlmax);
+                brs=nsize-tls;
+                bound(&brs, brmin, brmax);
+                tls=nsize-brs;
+                bound(&tls, tlmin, tlmax);
+            }else if(primn==PRIMN_BR){
+                brs=brs+nsize-sz;
+                bound(&brs, brmin, brmax);
+                tls=nsize-brs;
+                bound(&tls, tlmin, tlmax);
+                brs=nsize-tls;
+                bound(&brs, brmin, brmax);
+            }else{ /* && PRIMN_ANY */
                 tls=tls*nsize/sz;
-            bound(&tls, tlmin, tlmax);
-            brs=nsize-tls;
-            /* TODO: brs may be <=0 */
+                bound(&tls, tlmin, tlmax);
+                brs=nsize-tls;
+                bound(&brs, brmin, brmax);
+                tls=nsize-brs;
+                bound(&tls, tlmin, tlmax);
+            }
         }
 
+        if(tls+brs!=nsize){
+            /* Bad fit; just size proportionally. */
+            if(sz<=2){
+                tls=nsize/2;
+                brs=nsize-tls;
+            }else{
+                tls=split_size(tl, node->type)*nsize/sz;
+                brs=nsize-tls;
+            }
+        }
+        
         if(dir==SPLIT_VERTICAL){
             tlg.h=tls;
             brg.y+=tls;
@@ -347,6 +369,8 @@ void split_do_resize(WSplit *node, const WRectangle *ng,
     
     node->geom=*ng;
     split_update_bounds(node, FALSE);
+    
+    return ret;
 }
 
 
