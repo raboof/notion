@@ -87,7 +87,6 @@ static void reparent_mgd(WRegion *sub, WWindow *par)
 
 bool ionws_fitrep(WIonWS *ws, WWindow *par, const WFitParams *fp)
 {
-    WRegion *sub;
     WIonWSIterTmp tmp;
     bool rs;
     
@@ -97,20 +96,14 @@ bool ionws_fitrep(WIonWS *ws, WWindow *par, const WFitParams *fp)
     
         genws_do_reparent(&(ws->genws), par, fp);
     
-        FOR_ALL_MANAGED_BY_IONWS(sub, ws, tmp){
-            reparent_mgd(sub, par);
-        }
-        
-        if(STDISP_OF(ws)!=NULL)
-            reparent_mgd(STDISP_OF(ws), par);
+        if(ws->split_tree!=NULL)
+            split_reparent(ws->split_tree, par);
     }
     
     REGION_GEOM(ws)=fp->g;
     
-    if(ws->split_tree==NULL)
-        return TRUE;
-    
-    split_resize(ws->split_tree, &(fp->g), PRIMN_ANY, PRIMN_ANY);
+    if(ws->split_tree!=NULL)
+        split_resize(ws->split_tree, &(fp->g), PRIMN_ANY, PRIMN_ANY);
     
     return TRUE;
 }
