@@ -180,12 +180,14 @@ static bool wedln_update_cursor(WEdln *wedln, int iw)
 			cx=grbrush_get_text_width(WEDLN_BRUSH(wedln), str+vstart, 
 									  point-vstart+nxt);
 		}
-		l=cx;
 		
-		if(l<iw)
+		if(cx<iw)
 			break;
 		
-		vstart+=str_nextoff(str, vstart);
+		l=str_nextoff(str, vstart);
+		if(l==0)
+			break;
+		vstart+=l;
 	}
 	
 	ret=(wedln->vstart!=vstart);
