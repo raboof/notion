@@ -90,7 +90,7 @@ static void defer_watch_handler(Watch *w, Obj *obj)
     UNLINK_ITEM(*(Defer**)(d->list), d, next, prev);
     free_defer(d);
     
-    warn("Object destroyed while deferred actions pending.");
+    warn(TR("Object destroyed while deferred actions pending."));
 }
 
     
@@ -102,7 +102,7 @@ bool ioncore_defer_action_on_list(Obj *obj, WDeferredAction *action,
     d=alloc_defer();
     
     if(d==NULL){
-        warn("Unable to allocate a Defer structure for deferred action.");
+        warn(TR("Unable to allocate a Defer structure for deferred action."));
         return FALSE;
     }
     

@@ -488,7 +488,7 @@ bool menu_init(WMenu *menu, WWindow *par, const WFitParams *fp,
     menu->entries=preprocess_menu(params->tab, &(menu->n_entries));
     
     if(menu->entries==NULL){
-        warn("Empty menu");
+        warn(TR("Empty menu"));
         return FALSE;
     }
 

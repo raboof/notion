@@ -82,7 +82,7 @@ static void sm_ice_watch_fd(IceConn conn,
 {
     if(opening){
         if(sm_fd!=-1){ /* shouldn't happen */
-            warn("TOO MANY ICE CONNECTIONS -- not supported");
+            warn(TR("Too many ICE connections -- not supported"));
         }
         else{
             sm_fd=IceConnectionNumber(conn);
@@ -224,7 +224,7 @@ static void sm_save_yourself_phase2(SmcConn conn, SmPointer client_data)
     Bool success;
 
     if(!(success=ioncore_do_snapshot()))
-        warn("Failed to save session state\n");
+        warn(TR("Failed to save session state"));
     else
         sm_set_properties();
     
@@ -243,7 +243,8 @@ static void sm_save_yourself(SmcConn conn,
                              Bool fast)
 {
     if(!SmcRequestSaveYourselfPhase2(sm_conn, sm_save_yourself_phase2, NULL)){
-        warn("Failed to request save-yourself-phase2 from session manager.");
+        warn(TR("Failed to request save-yourself-phase2 from "
+                "session manager."));
         SmcSaveYourselfDone(sm_conn, False);
         sent_save_done=TRUE;
     }else{
@@ -291,12 +292,12 @@ bool mod_sm_init_session()
     SmcCallbacks smcall;
     
     if(getenv("SESSION_MANAGER")==0){
-        warn("SESSION_MANAGER environment variable unset.");
+        warn(TR("SESSION_MANAGER environment variable unset."));
         return FALSE;
     }
     
     if(IceAddConnectionWatch(&sm_ice_watch_fd, NULL) == 0){
-        warn("Session Manager: IceAddConnectionWatch failed.");
+        warn(TR("Session Manager: IceAddConnectionWatch failed."));
         return FALSE;
     }
     
@@ -321,7 +322,7 @@ bool mod_sm_init_session()
                                   sm_client_id, &new_client_id,
                                   sizeof(error_str), error_str)) == NULL)
     {
-        warn("Session Manager: Init error");
+        warn(TR("Session Manager: Init error"));
         return FALSE;
     }
     

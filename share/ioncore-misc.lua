@@ -46,3 +46,8 @@ function ioncore.show_manual(for_what)
     end
 end
 
+--DOC
+-- gettext+string.format
+function ioncore.TR(s, ...)
+    return string.format(ioncore.gettext(s), unpack(arg))
+end

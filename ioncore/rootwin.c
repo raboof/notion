@@ -219,7 +219,8 @@ static WRootWin *preinit_rootwin(int xscr)
     XSetErrorHandler(my_error_handler);
 
     if(redirect_error){
-        warn("Unable to redirect root window events for screen %d.", xscr);
+        warn(TR("Unable to redirect root window events for screen %d."),
+             xscr);
         return NULL;
     }
     
@@ -314,7 +315,8 @@ static bool xinerama_sanity_check(XineramaScreenInfo *xi, int nxi)
             if(i!=j &&
                (xi[j].x_org>=xi[i].x_org && xi[j].x_org<xi[i].x_org+xi[i].width) &&
                (xi[j].y_org>=xi[i].y_org  && xi[j].y_org<xi[i].y_org+xi[i].height)){
-                warn("Xinerama sanity check failed; overlapping screens detected.");
+                warn(TR("Xinerama sanity check failed; overlapping "
+                        "screens detected."));
                 return FALSE;
             }
         }
@@ -339,8 +341,8 @@ WRootWin *ioncore_manage_rootwin(int xscr, bool noxinerama)
             xi=XineramaQueryScreens(ioncore_g.dpy, &nxi);
             
             if(xi!=NULL && ioncore_g.rootwins!=NULL){
-                warn("Don't know how to get Xinerama information for "
-                     "multiple X root windows.");
+                warn(TR("Don't know how to get Xinerama information for "
+                        "multiple X root windows."));
                 XFree(xi);
                 return NULL;
             }
@@ -374,7 +376,7 @@ WRootWin *ioncore_manage_rootwin(int xscr, bool noxinerama)
             /*if(nxi==1)
                 useroot=(geom.x==0 && geom.y==0);*/
             if(!add_screen(rootwin, i, &geom, useroot))
-                warn("Unable to add viewport for Xinerama screen %d", i);
+                warn(TR("Unable to add viewport for Xinerama screen %d"), i);
         }
         XFree(xi);
     }else
@@ -385,7 +387,7 @@ WRootWin *ioncore_manage_rootwin(int xscr, bool noxinerama)
     }
     
     if(rootwin->screen_list==NULL){
-        warn("Unable to add a viewport to X screen %d.", xscr);
+        warn(TR("Unable to add a viewport to X screen %d."), xscr);
         destroy_obj((Obj*)rootwin);
         return NULL;
     }
@@ -453,20 +455,20 @@ static void rootwin_do_set_focus(WRootWin *rootwin, bool warp)
 static bool rootwin_fitrep(WRootWin *rootwin, WWindow *par, 
                            const WFitParams *fp)
 {
-    warn("Don't know how to reparent or fit root windows");
+    warn(TR("Don't know how to reparent or fit root windows"));
     return FALSE;
 }
 
 
 static void rootwin_map(WRootWin *rootwin)
 {
-    warn("Attempt to map a root window.");
+    warn(TR("Attempt to map a root window."));
 }
 
 
 static void rootwin_unmap(WRootWin *rootwin)
 {
-    warn("Attempt to unmap a root window -- impossible");
+    warn(TR("Attempt to unmap a root window -- impossible"));
 }
 
 

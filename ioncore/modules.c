@@ -25,10 +25,10 @@
 #ifndef CF_PRELOAD_MODULES
 
 
-typedef void *dlhandle;
-
-
 /*{{{ Module list */
+
+
+typedef void *dlhandle;
 
 
 static Rb_node modules=NULL;
@@ -162,7 +162,7 @@ static int try_load(const char *file, void *param)
         slash++;
     
     if(dot<=slash){
-        warn("Invalid module name.");
+        warn(TR("Invalid module name."));
         goto err1;
     }
     
@@ -176,7 +176,7 @@ static int try_load(const char *file, void *param)
     name[dot-slash]='\0';
     
     if(get_handle(name)){
-        warn_obj(file, "Module with this name already loaded.");
+        warn_obj(file, TR("Module with this name already loaded."));
         goto err2;
     }
         
@@ -191,8 +191,8 @@ static int try_load(const char *file, void *param)
         return IONCORE_TRYCONFIG_OK;
     
     if(!check_version(handle, name)){
-        warn_obj(file, "Module version information not found or version "
-                 "mismatch. Refusing to use.");
+        warn_obj(file, TR("Module version information not found or "
+                          "version mismatch. Refusing to use."));
         goto err3;
     }
     
@@ -204,7 +204,7 @@ static int try_load(const char *file, void *param)
     }
     
     if(!call_init(handle, name)){
-        warn_obj(file, "Unable to initialise module.");
+        warn_obj(file, TR("Unable to initialise module."));
         rb_delete_node(mod);
         goto err3;
     }
@@ -228,7 +228,7 @@ static bool do_load_module(const char *modname)
                               "so", NULL);
     
     if(retval==IONCORE_TRYCONFIG_NOTFOUND)
-        warn("Unable to find '%s' on search path.", modname);
+        warn(TR("Unable to find '%s' on search path."), modname);
     
     return (retval==IONCORE_TRYCONFIG_OK);
 }
@@ -299,7 +299,7 @@ static bool do_load_module(const char *name)
     }
     
     if(mod->name==NULL){
-        warn_obj(name, "Unknown module.");
+        warn_obj(name, TR("Unknown module."));
         return FALSE;
     }
     
@@ -307,7 +307,7 @@ static bool do_load_module(const char *name)
         return TRUE;
 
     if(!call_init(mod)){
-        warn_obj(name, "Unable to initialise module.");
+        warn_obj(name, TR("Unable to initialise module."));
         return FALSE;
     }
     
@@ -352,7 +352,7 @@ EXTL_EXPORT
 bool ioncore_load_module(const char *modname)
 {
     if(modname==NULL){
-        warn("No module to load given.");
+        warn(TR("No module to load given."));
         return FALSE;
     }
     return do_load_module(modname);

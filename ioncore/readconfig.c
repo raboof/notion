@@ -90,7 +90,7 @@ bool ioncore_set_userdirs(const char *appname)
     home=getenv("HOME");
     
     if(home==NULL){
-        warn("$HOME not set");
+        warn(TR("$HOME not set"));
     }else{
         libtu_asprintf(&userdir, "%s/.%s", home, appname);
         if(userdir==NULL){
@@ -122,7 +122,8 @@ bool ioncore_set_sessiondir(const char *session)
     }else if(userdir!=NULL){
         libtu_asprintf(&tmp, "%s/%s", userdir, session);
     }else{
-        warn("User directory not set. Unable to set session directory.");
+        warn(TR("User directory not set. "
+                "Unable to set session directory."));
         return FALSE;
     }
     
@@ -181,7 +182,7 @@ bool ioncore_set_paths(ExtlTab tab)
     char *s;
 
     if(extl_table_gets_s(tab, "userdir", &s)){
-        WARN_FUNC("User directory can not be set.");
+        WARN_FUNC(TR("User directory can not be set."));
         free(s);
         return FALSE;
     }
@@ -306,7 +307,7 @@ static int try_load(const char *file, TryCallParam *param)
         return IONCORE_TRYCONFIG_NOTFOUND;
     
     if(param->status==1)
-        warn("Falling back to %s", file);
+        warn(TR("Falling back to %s."), file);
     
     if(!extl_loadfile(file, &(param->fn))){
         param->status=1;
@@ -424,10 +425,8 @@ bool ioncore_read_config(const char *file, const char *sp, bool warn_nx)
     TryCallParam param;
     int retval;
     
-    if(file==NULL){
-        warn("No file to include given.");
+    if(file==NULL)
         return FALSE;
-    }
     
     param.status=0;
     
@@ -435,8 +434,8 @@ bool ioncore_read_config(const char *file, const char *sp, bool warn_nx)
                               EXTL_COMPILED_EXTENSION, EXTL_EXTENSION);
     
     if(retval==IONCORE_TRYCONFIG_NOTFOUND && warn_nx)
-        warn("Unable to find '%s' on configuration file search path.", file);
-    
+        warn(TR("Unable to find '%s' on search path."), file);
+
     return (retval==IONCORE_TRYCONFIG_OK);
 }
 
@@ -508,7 +507,8 @@ char *ioncore_get_savefile(const char *basename)
         return NULL;
     
     if(!ensuredir(sessiondir)){
-        warn("Unable to create session directory \"%s\"\n", sessiondir);
+        warn(TR("Unable to create session directory \"%s\"\n"), 
+             sessiondir);
         return NULL;
     }
     

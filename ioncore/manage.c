@@ -87,7 +87,7 @@ bool clientwin_do_manage_default(WClientWin *cwin,
     /* Find a suitable screen */
     scr=clientwin_find_suitable_screen(cwin, param);
     if(scr==NULL){
-        warn("Unable to find a screen for a new client window.");
+        warn(TR("Unable to find a screen for a new client window."));
         return FALSE;
     }
 
@@ -184,7 +184,7 @@ static bool do_rescue(WRegion *reg, WRegion *r)
         reg=mgr;
     }
     
-    warn("Unable to rescue \"%s\".", region_name(r));
+    warn(TR("Unable to rescue \"%s\"."), region_name(r));
     
     return FALSE;
 }

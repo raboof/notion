@@ -122,7 +122,7 @@ void mod_floatws_set(ExtlTab tab)
         else if(strcmp(method, "random")==0)
             placement_method=PLACEMENT_RANDOM;
         else
-            warn("Unknown placement method \"%s\".", method);
+            warn(TR("Unknown placement method \"%s\"."), method);
         free(method);
     }
 }

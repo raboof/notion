@@ -98,7 +98,8 @@ static bool screen_init(WScreen *scr, WRootWin *rootwin,
                  (useroot ? IONCORE_EVENTMASK_ROOT : 0));
 
     if(id==0){
-        scr->atom_workspace=XInternAtom(ioncore_g.dpy, "_ION_WORKSPACE", False);
+        scr->atom_workspace=XInternAtom(ioncore_g.dpy, 
+                                        "_ION_WORKSPACE", False);
     }else if(id>=0){
         char *str;
         libtu_asprintf(&str, "_ION_WORKSPACE%d", id);
@@ -188,10 +189,8 @@ static bool screen_fitrep(WScreen *scr, WWindow *par, const WFitParams *fp)
 {
     WRegion *sub;
     
-    if(par==NULL){
-        warn("Unable to reparent screens.");
+    if(par==NULL)
         return FALSE;
-    }
     
     if(scr->uses_root)
         return FALSE;
@@ -301,7 +300,7 @@ static char *addnot(char *str, WRegion *reg)
         return str;
     
     if(str==NULL)
-        return scat("act: ", nm);
+        return scat(TR("act: "), nm);
 
     nstr=scat3(str, ", ", nm);
     if(nstr!=NULL)
@@ -456,7 +455,7 @@ static bool screen_managed_may_destroy(WScreen *scr, WRegion *reg)
             return TRUE;
     }
     
-    warn("Cannot destroy only workspace.");
+    warn(TR("Cannot destroy only workspace."));
     return FALSE;
 }
 
@@ -491,7 +490,7 @@ bool screen_set_managed_offset_extl(WScreen *scr, ExtlTab offset)
     
     return TRUE;
 err:
-    warn("Invalid offset.");
+    warn(TR("Invalid offset."));
     return FALSE;
 }
 
@@ -536,8 +535,8 @@ static bool create_initial_ws(WScreen *scr)
     }
     
     if(fn==NULL){
-        warn("Could not find a complete workspace class. "
-             "Please load some modules.");
+        warn(TR("Could not find a complete workspace class. "
+                "Please load some modules."));
         return FALSE;
     }
     
@@ -546,11 +545,11 @@ static bool create_initial_ws(WScreen *scr)
                          (void*)fn, 0);
     
     if(reg==NULL){
-        warn("Unable to create a workspace on screen %d\n", scr->id);
+        warn(TR("Unable to create a workspace on screen %d."), scr->id);
         return FALSE;
     }
     
-    region_set_name(reg, "main");
+    region_set_name(reg, TR("main"));
     return TRUE;
 }
 

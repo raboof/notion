@@ -299,8 +299,8 @@ static void splitpane_remove(WSplitPane *pane, WSplit *child, WSplit **root,
         ((WSplit*)un)->parent=(WSplitInner*)pane;
     }else{
         WSplitInner *parent=((WSplit*)pane)->parent;
-        WARN_FUNC("Could not create a WSplitUnused for empty WSplitPane. "
-                  "Destroying.");
+        WARN_FUNC(TR("Could not create a WSplitUnused for empty WSplitPane. "
+                     "Destroying."));
         if(parent!=NULL){
             splitinner_remove(parent, (WSplit*)pane, root, reclaim_space);
         }else{

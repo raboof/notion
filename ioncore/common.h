@@ -40,4 +40,18 @@
 #define WARN_FUNC warn
 #endif
 
+#ifdef CF_NO_LOCALE
+
+#define TR(X) X
+#define DUMMY_TR(X) X
+
+#else
+
+#include <libintl.h>
+
+#define TR(X) gettext(X)
+#define DUMMY_TR(X) X
+
+#endif
+
 #endif /* ION_IONCORE_COMMON_H */

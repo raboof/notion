@@ -97,7 +97,7 @@ bool clientwin_fullscreen_scr(WClientWin *cwin, WScreen *scr, bool switchto)
     }
     
     if(!mplex_attach_simple((WMPlex*)scr, (WRegion*)cwin, swf)){
-        warn("Failed to enter full screen mode");
+        warn(TR("Failed to enter full screen mode."));
         if(!wasfs)
             watch_reset(&(cwin->fsinfo.last_mgr_watch));
         return FALSE;
@@ -155,8 +155,8 @@ bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto)
         reg=region_manager_or_parent(reg);
     }
 
-    warn("WClientWin failed to return from full screen mode; remaining "
-         "manager or parent from previous location refused to manage us.");
+    warn(TR("WClientWin failed to return from full screen mode; remaining "
+            "manager or parent from previous location refused to manage us."));
     return FALSE;
 }
 

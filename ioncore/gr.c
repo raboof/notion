@@ -119,7 +119,7 @@ bool gr_select_engine(const char *engine)
         return FALSE;
     
     if(!gr_do_select_engine(engine)){
-        warn("Drawing engine %s not registered!", engine);
+        warn(TR("Drawing engine %s not registered!"), engine);
         return FALSE;
     }
     
@@ -138,7 +138,7 @@ GrBrush *gr_get_brush(WRootWin *rootwin, Window win, const char *style)
     ret=(eng->fn)(rootwin, win, style);
     
     if(ret==NULL)
-        warn("Unable to find brush for '%s'\n", style);
+        warn(TR("Unable to find brush for '%s'."), style);
         
     return ret;
 }
@@ -401,7 +401,7 @@ void gr_read_config()
      * default settings.
      */
     if(engines==NULL){
-        warn("No drawing engines loaded, trying \"de\".");
+        warn(TR("No drawing engines loaded, trying \"de\"."));
         gr_select_engine("de");
     }
 }

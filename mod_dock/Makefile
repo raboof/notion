@@ -36,16 +36,6 @@ _install: module_install
 
 ######################################
 
-.PHONY: tarball
-tarball: $(SOURCES) $(ETC) $(DOCS) Makefile
-	sh -c 'BASENAME=ion-devel-$(MODULE)-`date -r \`ls -t $+ | head -n 1\` +%Y%m%d`; \
-		mkdir $$BASENAME; \
-		cp $+ $$BASENAME; \
-		tar -cvjf $$BASENAME.tar.bz2 $$BASENAME/*; \
-		rm -Rf $$BASENAME'
-
-######################################
-
 .PHONY: tags
 tags:
 	exuberant-ctags -R . $(TOPDIR)

@@ -87,7 +87,7 @@ static int parseinst_simple(const char *inststr)
             return inst;
     }
 
-    WARN_FUNC("Corrupt instance number %s\n", inststr);
+    WARN_FUNC(TR("Corrupt instance number %s."), inststr);
     return -1;
 }
 
@@ -340,7 +340,8 @@ static bool do_use_name(WRegion *reg, WNamespace *ns, const char *name,
     reg->ni.namespaceinfo=ns;
     
     if(!rb_insertg(ns->rb, &(reg->ni), reg, COMPARE_FN)){
-        WARN_FUNC("Unable to insert newly allocated name to allocation tree.");
+        WARN_FUNC(TR("Unable to insert newly allocated name to "
+                     "allocation tree."));
         free(reg->ni.name);
         reg->ni.name=NULL;
         reg->ni.inst_off=0;

@@ -1251,7 +1251,7 @@ WRegion *mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t)
     if(extl_table_gets_s(t, "pos", &s)){
         p=stringintmap_value(pos_map, s, -1);
         if(p<0){
-            warn("Invalid pos setting");
+            warn(TR("Invalid pos setting"));
             return NULL;
         }
     }
@@ -1284,7 +1284,7 @@ WRegion *mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t)
     }else if(strcmp(s, "keep")==0){
         stdisp=(WRegion*)(mplex->stdispinfo.regwatch.obj);
     }else if(strcmp(s, "remove")!=0){
-        warn("Invalid action.");
+        warn(TR("Invalid action."));
         return FALSE;
     }
     

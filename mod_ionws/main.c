@@ -99,7 +99,7 @@ static bool init_hooks()
 bool mod_ionws_init()
 {
     if(!init_hooks()){
-        WARN_FUNC("failed to initialise hooks");
+        WARN_FUNC(TR("Failed to initialise hooks"));
         goto err;
     }
             
@@ -109,22 +109,22 @@ bool mod_ionws_init()
 
     if(mod_ionws_ionws_bindmap==NULL ||
        mod_ionws_frame_bindmap==NULL){
-        WARN_FUNC("failed to allocate bindmaps.");
+        WARN_FUNC(TR("Failed to allocate bindmaps."));
         goto err;
     }
 
     if(!mod_ionws_register_exports()){
-        WARN_FUNC("failed to register functions.");
+        WARN_FUNC(TR("Failed to register functions."));
         goto err;
     }
 
     if(!mod_ionws_register_exports()){
-        WARN_FUNC("Unable to register exports");
+        WARN_FUNC(TR("Unable to register exports"));
         goto err;
     }
     
     if(!register_regions()){
-        WARN_FUNC("Unable to register classes");
+        WARN_FUNC(TR("Unable to register classes"));
         goto err;
     }
     

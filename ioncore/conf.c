@@ -124,7 +124,7 @@ bool ioncore_read_main_config(const char *cfgfile)
     unset+=(ioncore_frame_bindmap->nbindings==0);
     
     if(unset>0){
-        warn("Some bindmaps were empty, loading ioncore-efbb");
+        warn(TR("Some bindmaps were empty, loading ioncore-efbb"));
         ioncore_read_config("ioncore-efbb", NULL, TRUE);
     }
     

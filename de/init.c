@@ -37,7 +37,7 @@ void de_get_border_val(uint *val, ExtlTab tab, const char *what)
     
     if(extl_table_gets_i(tab, what, &g)){
         if(g>CF_BORDER_VAL_SANITY_CHECK || g<0)
-            warn("Border attribute %s sanity check failed.", what);
+            warn(TR("Border attribute %s sanity check failed."), what);
         else
             *val=g;
     }
@@ -60,7 +60,7 @@ void de_get_border_style(uint *ret, ExtlTab tab)
     else if(strcmp(style, "ridge")==0)
         *ret=DEBORDER_RIDGE;
     else
-        warn("Unknown border style \"%s\".", style);
+        warn(TR("Unknown border style \"%s\"."), style);
     
     free(style);
 }
@@ -92,7 +92,7 @@ bool de_get_colour(WRootWin *rootwin, DEColour *ret,
         ok=de_alloc_colour(rootwin, ret, name);
     
         if(!ok)
-            warn("Unable to allocate colour \"%s\".", name);
+            warn(TR("Unable to allocate colour \"%s\"."), name);
 
         free(name);
     }
@@ -158,7 +158,7 @@ void de_get_extra_cgrps(WRootWin *rootwin, DEStyle *style, ExtlTab tab)
         continue;
         
     err:
-        warn("Corrupt substyle table %d.", i);
+        warn(TR("Corrupt substyle table %d."), i);
         nfailed++;
     }
     
@@ -191,7 +191,7 @@ void de_get_text_align(int *alignret, ExtlTab tab)
     else if(strcmp(align, "center")==0)
         *alignret=DEALIGN_CENTER;
     else
-        warn("Unknown text alignment \"%s\".", align);
+        warn(TR("Unknown text alignment \"%s\"."), align);
     
     free(align);
 }
@@ -261,9 +261,10 @@ bool de_defstyle_rootwin(WRootWin *rootwin, const char *name, ExtlTab tab)
     if(extl_table_gets_s(tab, "based_on", &based_on_name)){
         based_on=de_get_style(rootwin, based_on_name);
         if(based_on==style){
-            warn("'based_on' for %s points back to the style itself.", name);
+            warn(TR("'based_on' for %s points back to the style itself."),
+                 name);
         }else if(based_on==NULL){
-            warn("Unknown base style \"%s\".", based_on);
+            warn(TR("Unknown base style \"%s\"."), based_on);
         }else{
             style->based_on=based_on;
             based_on->usecount++;
@@ -341,7 +342,7 @@ bool de_init()
         return FALSE;
     
     if(!gr_register_engine("de", (GrGetBrushFn*)&de_get_brush)){
-        WARN_FUNC("Failed to register the drawing engine");
+        WARN_FUNC(TR("Failed to register the drawing engine."));
         goto fail;
     }
     
@@ -349,8 +350,8 @@ bool de_init()
     FOR_ALL_ROOTWINS(rootwin){
         style=de_create_style(rootwin, "*");
         if(style==NULL){
-            WARN_FUNC("Could not initialise fallback style for "
-                      "root window %d.\n", rootwin->xscr);
+            WARN_FUNC(TR("Could not initialise fallback style for "
+                         "root window %d."), rootwin->xscr);
         }else{
             style->is_fallback=TRUE;
             de_load_font_for_style(style, CF_FALLBACK_FONT_NAME);

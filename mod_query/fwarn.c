@@ -31,7 +31,7 @@ WMessage *mod_query_warn(WMPlex *mplex, const char *p)
     if(p==NULL)
         return NULL;
     
-    p2=scat("Error:\n", p);
+    p2=scat(TR("Error:\n"), p);
     
     if(p2==NULL){
         warn_err();

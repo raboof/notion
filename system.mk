@@ -35,6 +35,8 @@ LCDIR=$(LIBDIR)/ion3/lc
 EXTRABINDIR=$(LIBDIR)/ion3/bin
 # For ion-completeman system-wide cache
 VARDIR=/var/cache/ion3
+# Message catalogs
+LOCALEDIR=$(PREFIX)/share/locale
 
 
 ##
@@ -110,9 +112,9 @@ DEFINES += -DCF_XFREE86_TEXTPROP_BUG_WORKAROUND
 
 
 # If you're on an archaic system (such as relatively recent *BSD releases)
-# without even dummy multibyte/widechar support, you may have to uncomment
-# the following line:
-#DEFINES += -DCF_NO_MB_SUPPORT
+# without even dummy multibyte/widechar and localisation support, you may 
+# have to uncomment the following line:
+#DEFINES += -DCF_NO_LOCALE
 
 
 ##

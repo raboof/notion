@@ -104,7 +104,7 @@ int str_prevoff(const char *p, int pos)
         while(1){
             l=mbrlen(p+prev, pos-prev, &ps);
             if(l<0){
-                warn("Invalid multibyte string.");
+                warn(TR("Invalid multibyte string."));
                 return 0;
             }
             if(prev+l>=pos)
@@ -140,7 +140,7 @@ int str_nextoff(const char *p, int opos)
         
         l=mbrlen(p+opos, strlen(p+opos), &ps);
         if(l<0){
-            warn("Invalid multibyte string.");
+            warn(TR("Invalid multibyte string."));
             return 0;
         }
         return l;
@@ -229,7 +229,7 @@ bool ioncore_defshortening(const char *rx, const char *rule, bool always)
     ret=regcomp(&(si->re), rx, REG_EXTENDED);
     
     if(ret!=0){
-        warn("Error compiling regular_expression");
+        warn(TR("Error compiling regular expression."));
         goto fail2;
     }
     

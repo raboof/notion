@@ -282,14 +282,14 @@ end
 function ext_statusbar.create(param)
     local scr=ioncore.find_screen_id(param.screen or 0)
     if not scr then
-        error("Screen not found")
+        error(TR("Screen not found."))
     end
     
     if not param.force then
         local stdisp=scr:get_stdisp()
         if stdisp and stdisp.reg then
-            error("Screen already has an stdisp. Refusing to create a "..
-                  "statusbar.")
+            error(TR("Screen already has an stdisp. Refusing to create a "..
+                     "statusbar."))
         end
     end
     
@@ -301,7 +301,7 @@ function ext_statusbar.create(param)
     })
     
     if not iw then
-        error("Failed to create statusbar.")
+        error(TR("Failed to create statusbar."))
     end
     
     infowins[iw]=true
@@ -311,7 +311,7 @@ function ext_statusbar.create(param)
     if not timer then
         timer=ioncore.create_timer()
         if not timer then
-            error('Failed to create a timer for statusbar.')
+            error(TR("Failed to create a timer for statusbar."))
         end
     end
     

@@ -33,7 +33,7 @@
 void region_init(WRegion *reg, WWindow *par, const WFitParams *fp)
 {
     if(fp->g.w<0 || fp->g.h<0)
-        warn("Creating region with negative width or height!");
+        warn(TR("Creating region with negative width or height!"));
     
     reg->geom=fp->g;
     reg->flags=0;
@@ -81,8 +81,8 @@ static void destroy_children(WRegion *reg)
         assert(!OBJ_IS_BEING_DESTROYED(sub));
         assert(sub!=prev);
         if(ioncore_g.opmode!=IONCORE_OPMODE_DEINIT && !complained && OBJ_IS(reg, WClientWin)){
-            warn("Destroying object \"%s\" with client windows as children.", 
-                 region_name(reg));
+            warn(TR("Destroying object \"%s\" with client windows as "
+                    "children."), region_name(reg));
             complained=TRUE;
         }
         prev=sub;

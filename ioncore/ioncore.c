@@ -1,5 +1,5 @@
 /*
- * ion/ioncore/init.c
+ * ion/ioncore/ioncore.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -16,9 +16,10 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/types.h>
-#ifndef CF_NO_MB_SUPPORT
+#ifndef CF_NO_LOCALE
 #include <locale.h>
 #include <langinfo.h>
+#include <libintl.h>
 #endif
 
 #include <libtu/util.h>
@@ -58,9 +59,10 @@ WGlobal ioncore_g;
 
 static const char *progname="ion";
 
-static const char ioncore_about[]=
-    "Ion " ION_VERSION ", copyright (c) Tuomo Valkonen 1999-2004.\n"
-    "\n"
+static const char ioncore_copy[]=
+    "Ion " ION_VERSION ", copyright (c) Tuomo Valkonen 1999-2004.";
+
+static const char ioncore_license[]=DUMMY_TR(
     "This program is free software; you can redistribute it and/or\n"
     "modify it under the terms of the GNU Lesser General Public\n"
     "License as published by the Free Software Foundation; either\n"
@@ -69,12 +71,135 @@ static const char ioncore_about[]=
     "This program is distributed in the hope that it will be useful,\n"
     "but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
     "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU\n"
-    "Lesser General Public License for more details.\n";
+    "Lesser General Public License for more details.\n");
 
+static const char *ioncore_about=NULL;
 
 WHook *ioncore_post_layout_setup_hook=NULL;
 WHook *ioncore_snapshot_hook=NULL;
 WHook *ioncore_deinit_hook=NULL;
+
+
+/*}}}*/
+
+
+/*{{{ init_locale */
+
+
+#ifndef CF_NO_LOCALE
+
+
+static bool check_encoding()
+{
+    int i;
+    char chs[8]=" ";
+    wchar_t wc;
+    const char *langi, *ctype, *a, *b;
+
+    langi=nl_langinfo(CODESET);
+    ctype=setlocale(LC_CTYPE, NULL);
+    
+    if(langi==NULL || ctype==NULL){
+        warn("Cannot verify locale encoding setting integrity "
+             "(LC_CTYPE=%s, nl_langinfo(CODESET)=%s).", ctype, langi);
+        return FALSE;
+    }
+
+    a=langi; 
+    b=strchr(ctype, '.');
+    if(b!=NULL){
+        b=b+1;
+        while(*a==*b && *a!='\0'){
+            a++;
+            b++;
+        }
+    }
+    
+    if(b==NULL || (*a!='\0' || (*a=='\0' && *b!='\0' && *b!='@'))){
+        warn("Encoding in LC_CTYPE (%s) and encoding reported by "
+             "nl_langinfo(CODESET) (%s) do not match. ", ctype, langi);
+        return FALSE;
+    }
+        
+    if(strcmp(langi, "UTF-8")==0 || strcmp(langi, "UTF8")==0){
+        ioncore_g.enc_sb=FALSE;
+        ioncore_g.enc_utf8=TRUE;
+        ioncore_g.use_mb=TRUE;
+        return TRUE;
+    }
+    
+    for(i=0; i<256; i++){
+        chs[0]=i;
+        if(mbtowc(&wc, chs, 8)==-1){
+            /* Doesn't look like a single-byte encoding. */
+            break;
+        }
+        
+    }
+    
+    if(i==256){
+        /* Seems like a single-byte encoding... */
+        ioncore_g.use_mb=TRUE;
+        return TRUE;
+    }
+
+    if(mbtowc(NULL, NULL, 0)!=0){
+        warn("Statefull encodings are unsupported.");
+        return FALSE;
+    }
+    
+    ioncore_g.enc_sb=FALSE;
+    ioncore_g.use_mb=TRUE;
+
+    return TRUE;
+}
+
+
+static bool init_locale()
+{
+    const char *p;
+    
+    p=setlocale(LC_ALL, "");
+    
+    if(p==NULL){
+        warn("setlocale() call failed.");
+        return FALSE;
+    }
+
+    /*if(strcmp(p, "C")==0 || strcmp(p, "POSIX")==0)
+        return TRUE;*/
+
+    if(!XSupportsLocale()){
+        warn("XSupportsLocale() failed.");
+    }else{
+        if(check_encoding())
+            return TRUE;
+    }
+    
+    warn("Reverting locale settings to \"C\".");
+    
+    if(setlocale(LC_ALL, "C")==NULL)
+        warn("setlocale() call failed.");
+        
+    return FALSE;
+}
+
+#define TEXTDOMAIN "ion3"
+
+static bool init_messages(const char *localedir)
+{
+    if(bindtextdomain(TEXTDOMAIN, localedir)==NULL){
+        warn_err_obj("bindtextdomain");
+        return FALSE;
+    }else if(textdomain(TEXTDOMAIN)==NULL){
+        warn_err_obj("textdomain");
+        return FALSE;
+    }
+    return TRUE;
+}
+
+
+#endif
 
 
 /*}}}*/
@@ -157,7 +282,8 @@ static void init_global()
 }
 
 
-bool ioncore_init(const char *prog, int argc, char *argv[])
+bool ioncore_init(const char *prog, int argc, char *argv[],
+                  const char *localedir)
 {
     init_global();
     
@@ -165,133 +291,30 @@ bool ioncore_init(const char *prog, int argc, char *argv[])
     ioncore_g.argc=argc;
     ioncore_g.argv=argv;
 
+#ifndef CF_NO_LOCALE    
+    init_locale();
+    init_messages(localedir);
+#endif
+
+    ioncore_about=scat3(ioncore_copy, "\n\n", TR(ioncore_license));
+    
     if(!ioncore_init_bindmaps()){
-        warn("Unable to initialise bindmaps.");
+        warn(TR("Unable to initialise bindmaps."));
         return FALSE;
     }
     if(!register_classes()){
-        warn("Unable to register classes.");
+        warn(TR("Unable to register classes."));
         return FALSE;
     }
     if(!init_hooks()){
-        warn("Unable to initialise hooks.");
+        warn(TR("Unable to initialise hooks."));
         return FALSE;
     }
     if(!ioncore_init_module_support()){
-        warn("Unable to initialise module support.");
+        warn(TR("Unable to initialise module support."));
         return FALSE;
     }
 	return TRUE;
-}
-
-
-/*}}}*/
-
-
-/*{{{ ioncore_init_i18n */
-
-
-static bool check_encoding()
-{
-#ifdef CF_NO_MB_SUPPORT
-    return TRUE;
-#else
-    int i;
-    char chs[8]=" ";
-    wchar_t wc;
-    const char *langi, *ctype, *a, *b;
-
-    langi=nl_langinfo(CODESET);
-    ctype=setlocale(LC_CTYPE, NULL);
-    
-    if(langi==NULL || ctype==NULL){
-        warn("Cannot verify locale encoding setting integrity "
-             "(LC_CTYPE=%s, nl_langinfo(CODESET)=%s).", ctype, langi);
-        return FALSE;
-    }
-
-    a=langi; 
-    b=strchr(ctype, '.');
-    if(b!=NULL){
-        b=b+1;
-        while(*a==*b && *a!='\0'){
-            a++;
-            b++;
-        }
-    }
-    
-    if(b==NULL || (*a!='\0' || (*a=='\0' && *b!='\0' && *b!='@'))){
-        warn("Encoding in LC_CTYPE (%s) and encoding reported by "
-             "nl_langinfo(CODESET) (%s) do not match. ", ctype, langi);
-        return FALSE;
-    }
-        
-    if(strcmp(langi, "UTF-8")==0 || strcmp(langi, "UTF8")==0){
-        ioncore_g.enc_sb=FALSE;
-        ioncore_g.enc_utf8=TRUE;
-        ioncore_g.use_mb=TRUE;
-        return TRUE;
-    }
-    
-    for(i=0; i<256; i++){
-        chs[0]=i;
-        if(mbtowc(&wc, chs, 8)==-1){
-            /* Doesn't look like a single-byte encoding. */
-            break;
-        }
-        
-    }
-    
-    if(i==256){
-        /* Seems like a single-byte encoding... */
-        ioncore_g.use_mb=TRUE;
-        return TRUE;
-    }
-
-    if(mbtowc(NULL, NULL, 0)!=0){
-        warn("Statefull encodings are unsupported.");
-        return FALSE;
-    }
-    
-    ioncore_g.enc_sb=FALSE;
-    ioncore_g.use_mb=TRUE;
-#endif    
-    return TRUE;
-}
-
-
-bool ioncore_init_i18n()
-{
-#ifdef CF_NO_MB_SUPPORT
-    warn("Can't enable i18n support: compiled with CF_NO_MB_SUPPORT.");
-    return FALSE;
-#else
-    const char *p;
-    
-    p=setlocale(LC_ALL, "");
-    
-    if(p==NULL){
-        warn("setlocale() call failed.");
-        return FALSE;
-    }
-
-    if(strcmp(p, "C")==0 || strcmp(p, "POSIX")==0)
-        return TRUE;
-    
-    if(!XSupportsLocale()){
-        warn("XSupportsLocale() failed.");
-    }else{
-        if(check_encoding())
-            return TRUE;
-    }
-    
-    warn("Reverting locale settings to \"C\".");
-    
-    if(setlocale(LC_ALL, "C")==NULL)
-        warn("setlocale() call failed.");
-        
-    return FALSE;
-#endif
 }
 
 
@@ -359,7 +382,8 @@ static bool ioncore_init_x(const char *display, int stflags)
     dpy=XOpenDisplay(display);
     
     if(dpy==NULL){
-        warn("Could not connect to X display '%s'", XDisplayName(display));
+        warn(TR("Could not connect to X display '%s'"), 
+             XDisplayName(display));
         return FALSE;
     }
 
@@ -412,13 +436,13 @@ static bool ioncore_init_x(const char *display, int stflags)
 
     if(ioncore_g.rootwins==NULL){
         if(nrw-drw>1)
-            warn("Could not find a screen to manage.");
+            warn(TR("Could not find a screen to manage."));
         return FALSE;
     }
 
     if(!ioncore_register_input_fd(ioncore_g.conn, NULL,
                                   ioncore_x_connection_handler)){
-        warn("Unable to register X connection FD");
+        warn(TR("Unable to register X connection FD."));
         return FALSE;
     }
     
@@ -475,7 +499,7 @@ bool ioncore_startup(const char *display, const char *cfgfile,
     ioncore_read_main_config(cfgfile);
     
     if(!ioncore_init_layout()){
-        warn("Unable to set up layout on any screen.");
+        warn(TR("Unable to set up layout on any screen."));
         return FALSE;
     }
     
@@ -533,7 +557,7 @@ void ioncore_deinit()
 /*}}}*/
 
 
-/*{{{ Misc. */
+/*{{{ miscellaneous */
 
 
 /*EXTL_DOC
@@ -585,6 +609,17 @@ const char *ioncore_aboutmsg()
 {
     return ioncore_about;
 }
+
+
+EXTL_EXPORT
+const char *ioncore_gettext(const char *s)
+{
+    if(s==NULL)
+        return NULL;
+    else
+        return TR(s);
+}
+
 
 /*}}}*/
 

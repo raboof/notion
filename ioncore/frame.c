@@ -122,7 +122,7 @@ void frame_deinit(WFrame *frame)
 bool frame_rqclose(WFrame *frame)
 {
     if(FRAME_MCOUNT(frame)!=0 || FRAME_CURRENT(frame)!=NULL){
-        warn("Frame not empty.");
+        warn(TR("Frame not empty."));
     }else if(region_may_destroy((WRegion*)frame)){
         ioncore_defer_destroy((Obj*)frame);
         return TRUE;

@@ -1019,7 +1019,7 @@ WSplitRegion *splittree_split(WSplit **root, WSplit *node, int dir, int primn,
     assert(root!=NULL && *root!=NULL && node!=NULL && parent!=NULL);
     
     if(OBJ_IS(node, WSplitST)){
-        WARN_FUNC("Splitting stdisp not allowed.");
+        WARN_FUNC(TR("Splitting stdisp not allowed."));
         return NULL;
     }
 
@@ -1047,7 +1047,7 @@ WSplitRegion *splittree_split(WSplit **root, WSplit *node, int dir, int primn,
         split_do_rqgeom_(node, &ng, TRUE, TRUE, &rg, TRUE);
         rs=(dir==SPLIT_VERTICAL ? rg.h : rg.w);
         if(rs<minsize+objmin){
-            WARN_FUNC("Unable to split: not enough free space.");
+            WARN_FUNC(TR("Unable to split: not enough free space."));
             return NULL;
         }
         split_do_rqgeom_(node, &ng, TRUE, TRUE, &rg, FALSE);
@@ -1440,8 +1440,8 @@ void split_transpose_to(WSplit *node, const WRectangle *geom)
             split_try_unsink_stdisp(stdispp, TRUE, TRUE);
             stdispp=split_lookup_stdisp_parent(node);
             if(stdispp!=NULL && stdispp!=(WSplitSplit*)node){
-                WARN_FUNC("Unable to move status display out of way of "
-                          "transpose.");
+                WARN_FUNC(TR("Unable to move status display out of way of "
+                             "transpose."));
                 return;
             }
         }
@@ -1557,7 +1557,8 @@ static bool splitregion_get_config(WSplitRegion *node, ExtlTab *ret)
     ExtlTab rt, t;
     
     if(!region_supports_save(node->reg)){
-        warn("Unable to get configuration for a %s.", OBJ_TYPESTR(node->reg));
+        warn(TR("Unable to get configuration for a %s."),
+             OBJ_TYPESTR(node->reg));
         return FALSE;
     }
     

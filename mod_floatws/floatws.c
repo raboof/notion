@@ -95,9 +95,9 @@ bool floatws_fitrep(WFloatWS *ws, WWindow *par, const WFitParams *fp)
             g.y+=ydiff;
         
             if(!region_reparent(st->reg, par, &g, REGION_FIT_EXACT)){
-                warn("Problem: can't reparent a %s managed by a WFloatWS"
-                     "being reparented. Detaching from this object.",
-                 OBJ_TYPESTR(st->reg));
+                warn(TR("Problem: can't reparent a %s managed by a WFloatWS"
+                        "being reparented. Detaching from this object."),
+                     OBJ_TYPESTR(st->reg));
                 region_detach_manager(st->reg);
             }
         }
@@ -340,14 +340,14 @@ EXTL_EXPORT_MEMBER
 bool floatws_rqclose_relocate(WFloatWS *ws)
 {
     if(!region_may_destroy((WRegion*)ws)){
-        warn("Workspace may not be destroyed.");
+        warn(TR("Workspace may not be destroyed."));
         return FALSE;
     }
     
     /* TODO: move frames to other workspaces */
     
     if(!region_rescue_clientwins((WRegion*)ws)){
-        warn("Failed to rescue some client windows!");
+        warn(TR("Failed to rescue some client windows!"));
         return FALSE;
     }
     
@@ -359,8 +359,8 @@ bool floatws_rqclose_relocate(WFloatWS *ws)
 bool floatws_rqclose(WFloatWS *ws)
 {
     if(ws->managed_list!=NULL){
-        warn("Workspace %s is still managing other objects "
-             " -- refusing to close.", region_name((WRegion*)ws));
+        warn(TR("Workspace %s is still managing other objects "
+                " -- refusing to close."), region_name((WRegion*)ws));
         return FALSE;
     }
     
@@ -452,7 +452,7 @@ static bool floatws_do_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
     frame=create_floatframe(par, &fp);
 
     if(frame==NULL){
-        warn("Failed to create a new WFloatFrame for client window");
+        warn(TR("Failed to create a new WFloatFrame for client window"));
         return FALSE;
     }
 
@@ -528,7 +528,7 @@ static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
     frame=create_floatframe(par, &fp);
     
     if(frame==NULL){
-        warn("Failed to create a new WFloatFrame.");
+        warn(TR("Failed to create a new WFloatFrame."));
         return FALSE;
     }
 
@@ -543,7 +543,7 @@ static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
     
     if(!mplex_attach_simple((WMPlex*)frame, dropped, MPLEX_ATTACH_SWITCHTO)){
         destroy_obj((Obj*)frame);
-        warn("Failed to attach dropped region to created WFloatFrame");
+        warn(TR("Failed to attach dropped region to created WFloatFrame"));
         return FALSE;
     }
     
@@ -1030,7 +1030,7 @@ static void floatws_do_raise(WFloatWS *ws, WRegion *reg, bool initial)
         return;
 
     if(REGION_MANAGER(reg)!=(WRegion*)ws){
-        WARN_FUNC("reg not managed by ws");
+        WARN_FUNC(TR("reg not managed by ws"));
         return;
     }
     
@@ -1108,7 +1108,7 @@ void floatws_lower(WFloatWS *ws, WRegion *reg)
         return;
 
     if(REGION_MANAGER(reg)!=(WRegion*)ws){
-        WARN_FUNC("reg not managed by ws");
+        WARN_FUNC(TR("reg not managed by ws"));
         return;
     }
     
@@ -1229,7 +1229,7 @@ static WRegion *floatws_attach_load(WFloatWS *ws, ExtlTab param)
     WRegion *reg;
     
     if(!extl_table_gets_rectangle(param, "geom", &geom)){
-        warn("No geometry specified");
+        warn(TR("No geometry specified"));
         return NULL;
     }
 

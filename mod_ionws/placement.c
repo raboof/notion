@@ -94,8 +94,8 @@ bool ionws_manage_clientwin(WIonWS *ws, WClientWin *cwin,
     target=find_suitable_target(ws);
     
     if(target==NULL){
-        warn("Ooops... could not find a region to attach client window to "
-             "on workspace %s.", region_name((WRegion*)ws));
+        warn(TR("Ooops... could not find a region to attach client window "
+                "to on workspace %s."), region_name((WRegion*)ws));
         return FALSE;
     }
     

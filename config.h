@@ -42,4 +42,6 @@
 
 #define CF_STDISP_MIN_SZ 8
 
+#define CF_L10N TRUE
+
 #endif /* ION_CONFIG_H */

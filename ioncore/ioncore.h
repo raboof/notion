@@ -18,16 +18,14 @@
 #define IONCORE_STARTUP_ONEROOT    0x0001
 #define IONCORE_STARTUP_NOXINERAMA 0x0002
 
-/* argc and argv are needed for restart_wm */
-extern bool ioncore_init(const char *prog, int argc, char *argv[]);
-extern bool ioncore_init_i18n();
+extern bool ioncore_init(const char *prog, int argc, char *argv[],
+                         const char *localedir);
 extern bool ioncore_startup(const char *display, const char *cfgfile, 
                             int flags);
 extern void ioncore_deinit();
 
 extern const char *ioncore_aboutmsg();
 extern const char *ioncore_version();
-extern bool ioncore_is_i18n();
 
 extern WHook *ioncore_post_layout_setup_hook;
 extern WHook *ioncore_snapshot_hook;

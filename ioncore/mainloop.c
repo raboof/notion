@@ -39,7 +39,7 @@ bool ioncore_register_input_fd(int fd, void *data,
     WInputFd *tmp;
     
     if(find_input_fd(fd)!=NULL){
-        warn("File descriptor already registered\n");
+        warn(TR("File descriptor already registered."));
         return FALSE;
     }
     

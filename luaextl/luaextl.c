@@ -107,7 +107,7 @@ static int extl_docpcall(lua_State *st)
     
     /* Should be enough for most things */
     if(!lua_checkstack(st, 8)){
-        warn("Lua stack full");
+        warn(TR("Lua stack full."));
         return 0;
     }
 
@@ -476,7 +476,7 @@ static int extl_stack_trace(lua_State *st)
             n_skip=0;
         }else{
             if(n_skip==0){
-                lua_pushstring(st, "\n  [Skipping unnamed C functions.]");
+                lua_pushstring(st, TR("\n  [Skipping unnamed C functions.]"));
                 /*lua_pushstring(st, "\n...skipping...");*/
                 lua_concat(st, 2);
             }
@@ -525,7 +525,7 @@ int extl_collect_errors(lua_State *st)
     errorlog_deinit(&el);
     
     if(err!=0)
-        warn("collect_errors internal error");
+        WARN_FUNC(TR("Internal error."));
     
     return 1;
 }
@@ -542,7 +542,7 @@ bool extl_init()
     l_st=lua_open();
     
     if(l_st==NULL){
-        warn("Unable to initialize Lua.\n");
+        warn(TR("Unable to initialize Lua."));
         return FALSE;
     }
 
@@ -554,7 +554,7 @@ bool extl_init()
     luaopen_loadlib(l_st);
     
     if(!extl_init_obj_info(l_st)){
-        warn("Failed to initialize Obj metatable\n");
+        warn(TR("Failed to initialize Obj metatable."));
         goto fail;
     }
 
@@ -1268,8 +1268,8 @@ static bool extl_get_retvals(lua_State *st, int m, ExtlDoCallParam *param)
     va_copy(args, *(param->args));
 #else
     if(m>MAX_PARAMS){
-        warn("Too many return values. Use a C compiler that has va_copy "
-             "to support more");
+        warn(TR("Too many return values. Use a C compiler that has va_copy "
+                "to support more."));
         return FALSE;
     }
 #endif
@@ -1286,7 +1286,8 @@ static bool extl_get_retvals(lua_State *st, int m, ExtlDoCallParam *param)
             /*if(*spec=='o' && lua_isnil(st, -m)){
                 *(Obj**)ptr=NULL;
             }else*/{
-                warn("Invalid return value (expected '%c', got lua type \"%s\").",
+                warn(TR("Invalid return value (expected '%c', "
+                        "got lua type \"%s\")."),
                      *spec, lua_typename(st, lua_type(st, -m)));
                 return FALSE;
             }
@@ -1320,7 +1321,7 @@ static bool extl_dodo_call_vararg(lua_State *st, ExtlDoCallParam *param)
         n=strlen(param->spec);
 
     if(!lua_checkstack(st, n+8)){
-        warn("Stack full");
+        warn(TR("Stack full."));
         return FALSE;
     }
     
@@ -1560,12 +1561,12 @@ static int extl_l1_call_handler2(lua_State *st)
     int i;
 
     if(spec==NULL){
-        warn("L1 call handler upvalues corrupt.");
+        warn(TR("L1 call handler upvalues corrupt."));
         return 0;
     }
     
     if(spec->fn==NULL){
-        warn("Called function has been unregistered");
+        warn(TR("Called function has been unregistered."));
         return 0;
     }
     
@@ -1577,14 +1578,14 @@ static int extl_l1_call_handler2(lua_State *st)
                 break;
         }
         if(extl_safelist[i]==NULL){
-            warn("Attempt to call an unsafe function \"%s\" in restricted mode.",
-                 spec->name);
+            warn(TR("Attempt to call an unsafe function \"%s\" in "
+                    "restricted mode."), spec->name);
             return 0;
         }
     }
     
     if(!lua_checkstack(st, MAX_PARAMS+1)){
-        warn("Stack full");
+        warn(TR("Stack full."));
         return 0;
     }
     
@@ -1593,8 +1594,8 @@ static int extl_l1_call_handler2(lua_State *st)
     for(i=0; i<param->ni; i++){
         if(!extl_stack_get(st, i+1, spec->ispec[i], FALSE,
                            (void*)&(param->ip[i]))){
-            warn("Argument %d to %s is of invalid type. "
-                 "(Argument template is '%s', got lua type %s).",
+            warn(TR("Argument %d to %s is of invalid type. "
+                    "(Argument template is '%s', got lua type %s)."),
                  i+1, spec->name, spec->ispec,
                  lua_typename(st, lua_type(st, i+1)));
             return 0;
@@ -1760,8 +1761,8 @@ static bool extl_do_register_function(lua_State *st, RegData *data)
     
     if((spec->ispec!=NULL && strlen(spec->ispec)>MAX_PARAMS) ||
        (spec->ospec!=NULL && strlen(spec->ospec)>MAX_PARAMS)){
-        warn("Function '%s' has more parameters than the level 1 "
-             "call handler can handle\n", spec->name);
+        warn(TR("Function '%s' has more parameters than the level 1 "
+                "call handler can handle"), spec->name);
         return FALSE;
     }
 
@@ -1998,7 +1999,7 @@ bool extl_register_class(const char *cls, ExtlExportedFnSpec *fns,
     D(assert(strcmp(cls, "Obj")==0 || parent!=NULL));
            
     if(!extl_cpcall(l_st, (ExtlCPCallFn*)extl_do_register_class, &clsdata)){
-        warn("Unable to register class %s.\n", cls);
+        warn(TR("Unable to register class %s."), cls);
         return FALSE;
     }
 
@@ -2084,7 +2085,7 @@ bool extl_register_module(const char *mdl, ExtlExportedFnSpec *fns)
     clsdata.hide=FALSE; /* unused, but initialise */
     
     if(!extl_cpcall(l_st, (ExtlCPCallFn*)extl_do_register_module, &clsdata)){
-        warn("Unable to register module %s.\n", mdl);
+        warn(TR("Unable to register module %s."), mdl);
         return FALSE;
     }
 
@@ -2181,7 +2182,7 @@ static bool ser(lua_State *st, FILE *f, int lvl)
         break;
     case LUA_TTABLE:
         if(lvl+1>=EXTL_MAX_SERIALISE_DEPTH){
-            warn("Maximize serialisation depth reached.");
+            warn(TR("Maximize serialisation depth reached."));
             fprintf(f, "nil");
             lua_pop(st, 1);
             return FALSE;
@@ -2202,7 +2203,7 @@ static bool ser(lua_State *st, FILE *f, int lvl)
         fprintf(f, "}");
         break;
     default:
-        warn("Unable to serialise type %s.", 
+        warn(TR("Unable to serialise type %s."), 
              lua_typename(st, lua_type(st, -1)));
     }
     lua_pop(st, 1);
@@ -2233,7 +2234,7 @@ extern bool extl_serialise(const char *file, ExtlTab tab)
         return FALSE;
     }
     
-    fprintf(d.f, "-- This file has been generated by Ion. Do no edit.\n");
+    fprintf(d.f, TR("-- This file has been generated by Ion. Do no edit.\n"));
     fprintf(d.f, "return ");
     
     ret=extl_cpcall(l_st, (ExtlCPCallFn*)extl_do_serialise, &d);

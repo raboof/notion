@@ -14,7 +14,7 @@
 
 #include "common.h"
 
-#ifdef CF_NO_MB_SUPPORT
+#ifdef CF_NO_LOCALE
 #include "dummywc.h"
 #else
 #include <wchar.h>

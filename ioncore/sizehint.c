@@ -147,7 +147,7 @@ void xsizehints_sanity_adjust(XSizeHints *hints)
 
     if(hints->flags&PResizeInc){
         if(hints->width_inc<=0 || hints->height_inc<=0){
-            warn("Invalid client-supplied width/height increment");
+            warn(TR("Invalid client-supplied width/height increment."));
             hints->flags&=~PResizeInc;
         }
     }
@@ -155,7 +155,7 @@ void xsizehints_sanity_adjust(XSizeHints *hints)
     if(hints->flags&PAspect){
         if(hints->min_aspect.x<=0 || hints->min_aspect.y<=0 ||
            hints->min_aspect.x<=0 || hints->min_aspect.y<=0){
-            warn("Invalid client-supplied aspect-ratio");
+            warn(TR("Invalid client-supplied aspect-ratio."));
             hints->flags&=~PAspect;
         }
     }

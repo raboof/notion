@@ -25,7 +25,6 @@
 #include "region-iter.h"
 
 
-
 /*{{{ New */
 
 
@@ -78,7 +77,7 @@ static WRegion *add_fn_reparent(WWindow *par, const WFitParams *fp,
                                 WRegion *reg)
 {
     if(!region_fitrep(reg, par, fp)){
-        warn("Unable to reparent");
+        warn(TR("Unable to reparent."));
         return NULL;
     }
     region_detach_manager(reg);
@@ -98,15 +97,15 @@ WRegion *region__attach_reparent(WRegion *mgr, WRegion *reg,
     reg2=mgr;
     for(reg2=mgr; reg2!=NULL; reg2=REGION_MANAGER(reg2)){
         if(reg2==reg){
-            warn("Trying to make a %s manage a %s above it in management "
-                 "hierarchy", OBJ_TYPESTR(mgr), OBJ_TYPESTR(reg));
+            warn(TR("Trying to make a %s manage a %s above it in management "
+                    "hierarchy."), OBJ_TYPESTR(mgr), OBJ_TYPESTR(reg));
             return NULL;
         }
     }
     
     for(reg2=region_parent(mgr); reg2!=NULL; reg2=region_parent(reg2)){
         if(reg2==reg){
-            warn("Trying to make a %s manage its ancestor (a %s)",
+            warn(TR("Trying to make a %s manage its ancestor (a %s)."),
                  OBJ_TYPESTR(mgr), OBJ_TYPESTR(reg));
             return NULL;
         }

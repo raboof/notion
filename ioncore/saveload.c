@@ -52,7 +52,8 @@ WRegion *create_region_load(WWindow *par, const WFitParams *fp,
         fn=info->lc_fn;
     
     if(fn==NULL){
-        warn("Unknown class \"%s\", cannot create region.", objclass);
+        warn(TR("Unknown class \"%s\", cannot create region."),
+             objclass);
         layout_load_error=loading_layout;
         return NULL;
     }
@@ -119,14 +120,14 @@ ExtlTab region_get_configuration(WRegion *reg)
 /*{{{ save_workspaces, load_workspaces */
 
 
-#define BACKUP_MSG                                                            \
-"There were errors loading layout. Backing up current layout savefile as\n"   \
-"%s.\n"                                                                       \
-"If you are _not_ running under a session manager and wish to restore your\n" \
-"old layout, copy this backup file over the layout savefile found in the\n"   \
-"same directory while Ion is not running and after having fixed your other\n" \
-"configuration files that are causing this problem. (Maybe a missing\n"       \
-"ioncore.load_module call?)."
+static const char backup_msg[]=DUMMY_TR(
+"There were errors loading layout. Backing up current layout savefile as\n"
+"%s.\n"
+"If you are _not_ running under a session manager and wish to restore your\n"
+"old layout, copy this backup file over the layout savefile found in the\n"
+"same directory while Ion is not running and after having fixed your other\n"
+"configuration files that are causing this problem. (Maybe a missing\n"
+"ioncore.load_module call?).");
 
 
 bool ioncore_init_layout()
@@ -163,17 +164,17 @@ bool ioncore_init_layout()
         strftime(tm+14, 15, "%Y%m%d%H%M%S", localtime(&t));
         backup=ioncore_get_savefile(tm);
         if(backup==NULL){
-            warn("Unable to get file for layout backup.");
+            warn(TR("Unable to get file for layout backup."));
             return FALSE;
         }
         if(access(backup, F_OK)==0){
-            warn("Backup file %s already exists.", backup);
+            warn(TR("Backup file %s already exists."), backup);
             free(backup);
             return FALSE;
         }
-        warn(BACKUP_MSG, backup);
+        warn(TR(backup_msg), backup);
         if(!extl_serialise(backup, tab))
-            warn("Failed backup.");
+            warn(TR("Failed backup."));
         free(backup);
     }
         
@@ -193,7 +194,7 @@ bool ioncore_save_layout()
     FOR_ALL_SCREENS(scr){
         ExtlTab scrtab=region_get_configuration((WRegion*)scr);
         if(scrtab==extl_table_none()){
-            warn("Unable to get configuration for screen %d.",
+            warn(TR("Unable to get configuration for screen %d."),
                  screen_id(scr));
         }else{
             extl_table_seti_t(tab, screen_id(scr), scrtab);
@@ -206,7 +207,7 @@ bool ioncore_save_layout()
     extl_unref_table(tab);
     
     if(!ret)
-        warn("Unable to save layout.");
+        warn(TR("Unable to save layout."));
         
     return ret;
 }

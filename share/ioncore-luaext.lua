@@ -27,7 +27,7 @@ function table.copy(t, deep)
             local v2=v
             if deep and type(v)=="table" then
                 if seen[v] then
-                    error("Recursive table - unable to deepcopy")
+                    error(TR("Recursive table - unable to deepcopy"))
                 end
                 seen[v]=true
                 v2=docopy(v, deep, seen)

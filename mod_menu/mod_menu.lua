@@ -199,11 +199,11 @@ local function selectstyle(look, where)
     end
     
     if not fname then
-        query_message(where, "Cannot save selection.")
+        query_message(where, TR("Cannot save selection."))
         return
     end
     
-    mod_query.query_yesno(where, "Save look selection in "..fname.."?",
+    mod_query.query_yesno(where, TR("Save look selection in %s?", fname),
                           writeit)
 end
 
@@ -213,7 +213,7 @@ local function receive_styles(str)
     while str do
         data=data .. str
         if string.len(data)>ioncore.RESULT_DATA_LIMIT then
-            error("Too much result data")
+            error(TR("Too much result data"))
         end
         str=coroutine.yield()
     end
@@ -239,7 +239,7 @@ local function receive_styles(str)
                                           end))
     end
     
-    table.insert(stylemenu, menuentry("Refresh list",
+    table.insert(stylemenu, menuentry(TR("Refresh list"),
                                       mod_menu.refresh_styles))
     
     menus.stylemenu=stylemenu

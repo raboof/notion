@@ -161,7 +161,7 @@ void autows_managed_remove(WAutoWS *ws, WRegion *reg)
             autows_create_initial_unused(ws);
             
             if(ws->ionws.split_tree==NULL){
-                warn("Unable to re-initialise workspace. Destroying.");
+                warn(TR("Unable to re-initialise workspace. Destroying."));
                 ioncore_defer_destroy((Obj*)ws);
             }
 #endif

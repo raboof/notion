@@ -101,7 +101,7 @@ static bool init_hooks()
 bool mod_autows_init()
 {
     if(!init_hooks()){
-        WARN_FUNC("failed to initialise hooks");
+        WARN_FUNC(TR("Failed to initialise hooks"));
         goto err;
     }
 
@@ -110,22 +110,22 @@ bool mod_autows_init()
 
     if(mod_autows_autows_bindmap==NULL ||
        mod_autows_frame_bindmap==NULL){
-        warn_obj("mod_autows", "failed to allocate bindmaps.");
+        WARN_FUNC(TR("failed to allocate bindmaps."));
         goto err;
     }
 
     if(!mod_autows_register_exports()){
-        warn_obj("mod_autows", "failed to register functions.");
+        WARN_FUNC(TR("Failed to register functions."));
         goto err;
     }
 
     if(!mod_autows_register_exports()){
-        warn_obj("mod_autows", "Unable to register exports");
+        WARN_FUNC(TR("Unable to register exports"));
         goto err;
     }
     
     if(!register_regions()){
-        warn_obj("mod_autows", "Unable to register classes");
+        WARN_FUNC(TR("Unable to register classes"));
         goto err;
     }
     

@@ -25,7 +25,7 @@ LIBS += -ltu
 
 DEFINES += -DETCDIR=\"$(ETCDIR)\" -DSHAREDIR=\"$(SHAREDIR)\" \
            -DEXTRABINDIR=\"$(EXTRABINDIR)\" -DMODULEDIR=\"$(MODULEDIR)\" \
-	   -DLCDIR=\"$(LCDIR)\"
+	   -DLCDIR=\"$(LCDIR)\" -DLOCALEDIR=\"$(LOCALEDIR)\"
 
 CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
@@ -53,7 +53,7 @@ ion3: $(OBJS) $(EXT_OBJS)
 	$(CC) $(LINKOPTS) $(OBJS) $(EXT_OBJS) $(LDFLAGS) -o $@
 
 preload.c:
-	$(LUA) ../mkpreload.lua $(MODULE_LIST) > preload.c
+	$(LUA) ../build/mkpreload.lua $(MODULE_LIST) > preload.c
 
 _install:
 	$(INSTALLDIR) $(BINDIR)

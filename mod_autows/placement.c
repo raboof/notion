@@ -128,18 +128,18 @@ static bool mrsh_layout_extl(ExtlFn fn, PlacementParams *p)
         
         if(extl_table_gets_o(t, "res_node", (Obj**)&(p->res_node))){
             if(!OBJ_IS(p->res_node, WSplit)){
-                WARN_FUNC("Malfunctioning hook; not split.");
+                WARN_FUNC(TR("Malfunctioning hook; not split."));
                 goto err;
             }
             
             if(OBJ_IS(p->res_node, WSplitUnused)){
                 if(!extl_table_gets_t(t, "res_config", &(p->res_config))){
-                    WARN_FUNC("Malfunctioning hook; config missing.");
+                    WARN_FUNC(TR("Malfunctioning hook; config missing."));
                     goto err;
                 }
             }else if(!OBJ_IS(p->res_node, WSplitRegion)){
-                WARN_FUNC("Malfunctioning hook; not SPLIT_UNUSED or "
-                          "SPLIT_REGNODE");
+                WARN_FUNC(TR("Malfunctioning hook; not SPLIT_UNUSED or "
+                             "SPLIT_REGNODE"));
                 goto err;
             }
         }
@@ -203,12 +203,12 @@ static bool do_replace(WAutoWS *ws, WFrame *frame, WClientWin *cwin,
     assert(OBJ_IS(u, WSplitUnused));
     
     if(node==NULL){
-        WARN_FUNC("Malfunctioning hook #1.");
+        WARN_FUNC(TR("Malfunctioning hook #1."));
         return FALSE;
     }
 
     if(REGION_MANAGER(frame)!=(WRegion*)ws){
-        WARN_FUNC("Malfunctioning hook #2.");
+        WARN_FUNC(TR("Malfunctioning hook #2."));
         destroy_obj((Obj*)node);
         return FALSE;
     }
@@ -290,7 +290,7 @@ bool autows_manage_clientwin(WAutoWS *ws, WClientWin *cwin,
             }else if(OBJ_IS(rs.res_node, WSplitRegion)){
                 target=((WSplitRegion*)rs.res_node)->reg;
             }else{
-                WARN_FUNC("Bug in placement code.");
+                WARN_FUNC(TR("Bug in placement code."));
             }
             
             extl_unref_table(rs.res_config);
@@ -311,8 +311,8 @@ bool autows_manage_clientwin(WAutoWS *ws, WClientWin *cwin,
     }
     
 err:
-    warn("Ooops... could not find a region to attach client window to "
-         "on workspace %s.", region_name((WRegion*)ws));
+    warn(TR("Ooops... could not find a region to attach client window to "
+            "on workspace %s."), region_name((WRegion*)ws));
     return FALSE;
 }
 

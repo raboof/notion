@@ -12,13 +12,15 @@ include modulelist.mk
 
 EXT_LIST=ext_statusbar
 
-INSTALL_SUBDIRS = $(MODULE_LIST) $(EXT_LIST) ion pwm man etc share
+INSTALL_SUBDIRS = $(MODULE_LIST) $(EXT_LIST) ion pwm man etc share po
 #DIST: SUBDIRS = libtu ioncore luaextl $(INSTALL_SUBDIRS)
 SUBDIRS = ioncore luaextl $(INSTALL_SUBDIRS)
 
 DOCS = README LICENSE ChangeLog RELNOTES
 
 TO_REALCLEAN = system-ac.mk
+
+POTFILE=po/ion.pot
 
 ######################################
 

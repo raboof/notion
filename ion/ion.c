@@ -43,52 +43,46 @@
  */
 static OptParserOpt ion_opts[]={
     {OPT_ID('d'), "display",  OPT_ARG, "host:dpy.scr", 
-     "X display to use"},
+     DUMMY_TR("X display to use")},
     
     {'c', "conffile", OPT_ARG, "config_file", 
-     "Configuration file"},
+     DUMMY_TR("Configuration file")},
     
     {'s', "searchdir", OPT_ARG, "dir", 
-     "Add directory to search path"},
+     DUMMY_TR("Add directory to search path")},
 
     {OPT_ID('o'), "oneroot",  0, NULL,
-     "Manage default root window/non-Xinerama screen only"},
+     DUMMY_TR("Manage default root window/non-Xinerama screen only")},
 
 #ifndef CF_NOXINERAMA    
     {OPT_ID('x'), "xinerama", OPT_ARG, "1|0", 
-     "Use Xinerama screen information (default: 1/yes)"},
+     DUMMY_TR("Use Xinerama screen information (default: 1/yes)")},
 #else
     {OPT_ID('x'), "xinerama", OPT_ARG, "?", 
-     "Ignored: not compiled with Xinerama support"},
+     DUMMY_TR("Ignored: not compiled with Xinerama support")},
 #endif
     
     {OPT_ID('s'), "session",  OPT_ARG, "session_name", 
-     "Name of session (affects savefiles)"},
+     DUMMY_TR("Name of session (affects savefiles)")},
     
     {OPT_ID('S'), "smclientid", OPT_ARG, "client_id", 
-     "Session manager client ID"},
+     DUMMY_TR("Session manager client ID")},
 
-    {OPT_ID('i'), "i18n", 0, NULL, 
-     "Enable use of multibyte string routines, actual "
-     "encoding depending on the locale."},
-    
     {OPT_ID('N'), "noerrorlog", 0, NULL, 
-     "Do not create startup error log and display it with xmessage."},
+     DUMMY_TR("Do not create startup error log and display it "
+              "with xmessage.")},
+    
+    {OPT_ID('h'), "help", 0, NULL, 
+     DUMMY_TR("Show this help")},
+    
+    {OPT_ID('v'), "version", 0, NULL,
+     DUMMY_TR("Show program version")},
+    
+    {OPT_ID('a'), "about", 0, NULL,
+     DUMMY_TR("Show about text")},
     
     END_OPTPARSEROPTS
 };
-
-
-static const char ion_usage_tmpl[]=
-    "Usage: $p [options]\n\n$o\n";
-
-
-static OptParserCommonInfo ion_cinfo={
-    ION_VERSION,
-    ion_usage_tmpl,
-    NULL,
-};
-
 
 
 void check_new_user_help()
@@ -98,7 +92,7 @@ void check_new_user_help()
     pid_t pid;
 
     if(userdir==NULL){
-        warn("Could not get user configuration file directory.");
+        warn(TR("Could not get user configuration file directory."));
         return;
     }
     
@@ -137,16 +131,13 @@ int main(int argc, char*argv[])
     FILE *ef=NULL;
     char *efnam=NULL;
     bool may_continue=FALSE;
-    bool i18n=FALSE;
     bool noerrorlog=FALSE;
-    
+
     libtu_init(argv[0]);
 
-    if(!ioncore_init("ion3", argc, argv))
+    if(!ioncore_init("ion3", argc, argv, LOCALEDIR))
         return EXIT_FAILURE;
 
-    ion_cinfo.about=ioncore_aboutmsg();
-    
     ioncore_add_searchdir(EXTRABINDIR); /* ion-completefile */
     ioncore_add_searchdir(MODULEDIR);
     ioncore_add_searchdir(ETCDIR);
@@ -154,7 +145,7 @@ int main(int argc, char*argv[])
     ioncore_add_searchdir(LCDIR);
     ioncore_set_userdirs("ion3");
 
-    optparser_init(argc, argv, OPTP_MIDLONG, ion_opts, &ion_cinfo);
+    optparser_init(argc, argv, OPTP_MIDLONG, ion_opts);
     
     while((opt=optparser_get_opt())){
         switch(opt){
@@ -181,18 +172,31 @@ int main(int argc, char*argv[])
                 else if(strcmp(p, "0")==0)
                     stflags|=IONCORE_STARTUP_NOXINERAMA;
                 else
-                    warn("Invalid parameter to -xinerama.");
+                    warn(TR("Invalid parameter to -xinerama."));
             }
             break;
         case OPT_ID('s'):
             ioncore_set_sessiondir(optparser_get_arg());
             break;
-        case OPT_ID('i'):
-            i18n=TRUE;
-            break;
         case OPT_ID('N'):
             noerrorlog=TRUE;
             break;
+        case OPT_ID('h'):
+            printf(TR("Usage: %s [options]\n\n"), prog_execname());
+            {
+                int i;
+                for(i=0; ion_opts[i].descr!=NULL; i++)
+                    ion_opts[i].descr=TR(ion_opts[i].descr);
+            }
+            optparser_printhelp(OPTP_MIDLONG, ion_opts);
+            printf("\n");
+            return EXIT_SUCCESS;
+        case OPT_ID('v'):
+            printf("%s\n", ION_VERSION);
+            return EXIT_SUCCESS;
+        case OPT_ID('a'):
+            printf("%s\n", ioncore_aboutmsg());
+            return EXIT_SUCCESS;
         default:
             optparser_print_error();
             return EXIT_FAILURE;
@@ -206,7 +210,7 @@ int main(int argc, char*argv[])
         libtu_asprintf(&efnam, "%s/ion-%d-startup-errorlog", P_tmpdir,
                        getpid());
         if(efnam==NULL){
-            warn_err("Failed to create error log file");
+            warn_err(TR("Failed to create error log file."));
         }else{
             ef=fopen(efnam, "wt");
             if(ef==NULL){
@@ -214,22 +218,17 @@ int main(int argc, char*argv[])
                 free(efnam);
                 efnam=NULL;
             }
-            fprintf(ef, "Ion startup error log:\n");
+            fprintf(ef, TR("Ion startup error log:\n"));
             errorlog_begin_file(&el, ef);
         }
     }
 
-    /* Set up locale and detect encoding.
-     */
-    if(i18n)
-        ioncore_init_i18n();
-    
     if(ioncore_startup(display, cfgfile, stflags))
         may_continue=TRUE;
 
 fail:
     if(!may_continue)
-        warn("Refusing to start due to encountered errors.");
+        warn(TR("Refusing to start due to encountered errors."));
     else
         check_new_user_help();
     

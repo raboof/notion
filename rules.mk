@@ -65,7 +65,8 @@ TO_CLEAN := $(TO_CLEAN) exports.c
 EXPORTS_C = exports.c
 
 exports.c: $(SOURCES)
-	$(LUA) $(TOPDIR)/mkexports.lua -module $(MAKE_EXPORTS) -o exports.c $(SOURCES)
+	$(LUA) $(TOPDIR)/build/mkexports.lua -module $(MAKE_EXPORTS) \
+		-o exports.c $(SOURCES)
 
 else # !MAKE_EXPORTS
 
@@ -124,9 +125,8 @@ $(MODULE).lc:
 	echo "ioncore.load_module('$(MODULE)')" \
 	| $(LUAC) -o $@ -
 else
-	
-$(MODULE).lc: $(MODULE_STUB)
-	$(LUAC) -o $@ $(MODULE_STUB)
+
+LUA_SOURCES += $(MODULE_STUB)
 
 endif #MODULE_STUB
 
@@ -210,3 +210,13 @@ subdirs-install:
 ifeq ($(DEPEND_FILE),$(wildcard $(DEPEND_FILE)))
 include $(DEPEND_FILE)
 endif
+
+
+# Localisation
+######################################
+
+TO_CLEAN += potfiles_c potfiles_lua
+
+_potfiles:
+	echo "$(SOURCES)"|tr ' ' '\n' > potfiles_c
+	echo "$(LUA_SOURCES)"|tr ' ' '\n' > potfiles_lua

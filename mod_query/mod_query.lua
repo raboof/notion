@@ -88,7 +88,7 @@ end
 function mod_query.lookup_script_warn(mplex, script)
     local script=ioncore.lookup_script(script)
     if not script then
-        mod_query.warn(mplex, "Could not find "..script)
+        mod_query.warn(mplex, TR("Could not find %s", script))
     end
     return script
 end
@@ -178,7 +178,7 @@ function mod_query.popen_completions(wedln, cmd, beg)
             
             totallen=totallen+string.len(str)
             if totallen>ioncore.RESULT_DATA_LIMIT then
-                error("Too much result data")
+                error(TR("Too much result data"))
             end
 
             data=string.gsub(data..str, "([^\n]*)\n",
@@ -276,8 +276,7 @@ function mod_query.gotoclient_handler(frame, str)
     local cwin=ioncore.lookup_clientwin(str)
     
     if cwin==nil then
-        mod_query.warn(frame, string.format('Could not find client window '..
-                                           'named "%s".', str))
+        mod_query.warn(frame, TR("Could not find client window %s.", str))
     else
         cwin:goto()
     end
@@ -287,10 +286,9 @@ function mod_query.attachclient_handler(frame, str)
     local cwin=ioncore.lookup_clientwin(str)
     
     if not cwin then
-        mod_query.warn(frame, string.format('Could not find client window '..
-                                            'named "%s".', str))
+        mod_query.warn(frame, TR("Could not find client window %s.", str))
     elseif frame:rootwin_of()~=cwin:rootwin_of() then
-        mod_query.warn(frame, "Cannot attach: not on same root window.")
+        mod_query.warn(frame, TR("Cannot attach: different root windows."))
     else
         frame:attach(cwin, { switchto = true })
     end
@@ -314,7 +312,7 @@ function mod_query.workspace_handler(mplex, name)
     local function handler(mplex, cls)
         local scr=mplex:screen_of()
         if not scr then
-            mod_query.warn(mplex, "Unable to create workspace: no screen.")
+            mod_query.warn(mplex, TR("Unable to create workspace: no screen."))
             return
         end
         
@@ -330,16 +328,12 @@ function mod_query.workspace_handler(mplex, name)
                                      })
                                  end)
         if not ws then
-            mod_query.warn(mplex, err or "Unknown error")
+            mod_query.warn(mplex, err or TR("Unknown error"))
         end
     end
     
     local defcls=ioncore.get().default_ws_type
-    local prompt="Workspace type"
-    if defcls then
-        prompt=prompt.."("..defcls..")"
-    end
-    prompt=prompt..":"
+    local prompt=TR("Workspace type (%s):", defcls or TR("none"))
     
     mod_query.query(mplex, prompt, "", handler, completor)
 end
@@ -350,7 +344,7 @@ end
 -- it to the frame the query was opened in. It uses the completion
 -- function \fnref{ioncore.complete_clientwin}.
 function mod_query.query_gotoclient(mplex)
-    mod_query.query(mplex, "Go to window:", nil,
+    mod_query.query(mplex, TR("Go to window:"), nil,
                     mod_query.gotoclient_handler,
                     mod_query.make_completor(mod_query.complete_clientwin))
 end
@@ -360,7 +354,7 @@ end
 -- focus to the one entered. It uses the completion function
 -- \fnref{ioncore.complete_clientwin}.
 function mod_query.query_attachclient(mplex)
-    mod_query.query(mplex, "Attach window:", nil,
+    mod_query.query(mplex, TR("Attach window:"), nil,
                     mod_query.attachclient_handler, 
                     mod_query.make_completor(mod_query.complete_clientwin))
 end
@@ -373,7 +367,7 @@ end
 -- entered name will be created and the user will be queried for
 -- the type of the workspace.
 function mod_query.query_workspace(mplex)
-    mod_query.query(mplex, "Go to or create workspace:", nil, 
+    mod_query.query(mplex, TR("Go to or create workspace:"), nil, 
                     mod_query.workspace_handler,
                     mod_query.make_completor(mod_query.complete_workspace))
 end
@@ -384,7 +378,7 @@ end
 -- or close the session (running under a session manager that supports such
 -- requests). If the answer is 'y', 'Y' or 'yes', so will happen.
 function mod_query.query_shutdown(mplex)
-    mod_query.query_yesno(mplex, "Exit Ion/Shutdown session (y/n)?", 
+    mod_query.query_yesno(mplex, TR("Exit Ion/Shutdown session (y/n)?"),
                          ioncore.shutdown)
 end
 
@@ -393,7 +387,7 @@ end
 -- This query asks whether the user wants restart Ioncore.
 -- If the answer is 'y', 'Y' or 'yes', so will happen.
 function mod_query.query_restart(mplex)
-    mod_query.query_yesno(mplex, "Restart Ion (y/n)?", ioncore.restart)
+    mod_query.query_yesno(mplex, TR("Restart Ion (y/n)?"), ioncore.restart)
 end
 
 
@@ -401,7 +395,7 @@ end
 -- This function asks for a name new for the frame where the query
 -- was created.
 function mod_query.query_renameframe(frame)
-    mod_query.query(frame, "Frame name:", frame:name(),
+    mod_query.query(frame, TR("Frame name:"), frame:name(),
                     function(frame, str) frame:set_name(str) end,
                     nil)
 end
@@ -412,7 +406,7 @@ end
 -- query resides.
 function mod_query.query_renameworkspace(mplex)
     local ws=ioncore.find_manager(mplex, "WGenWS")
-    mod_query.query(mplex, "Workspace name:", ws:name(),
+    mod_query.query(mplex, TR("Workspace name:"), ws:name(),
                     function(mplex, str) ws:set_name(str) end,
                     nil)
 end
@@ -440,7 +434,7 @@ end
 -- by default, but if you don't have it, you may customise the script.
 function mod_query.query_editfile(mplex)
     local script=mod_query.lookup_script_warn(mplex, "ion-edit")
-    mod_query.query_execfile(mplex, "Edit file:", script)
+    mod_query.query_execfile(mplex, TR("Edit file:"), script)
 end
 
 
@@ -450,7 +444,7 @@ end
 -- by default, but if you don't have it, you may customise the script.
 function mod_query.query_runfile(mplex)
     local script=mod_query.lookup_script_warn(mplex, "ion-view")
-    mod_query.query_execfile(mplex, "View file:", script)
+    mod_query.query_execfile(mplex, TR("View file:"), script)
 end
 
 
@@ -479,7 +473,7 @@ end
 -- be run in an XTerm (or other terminal emulator) using the script
 -- \file{ion-runinxterm}.
 function mod_query.query_exec(mplex)
-    mod_query.query(mplex, "Run:", nil, mod_query.exec_handler, 
+    mod_query.query(mplex, TR("Run:"), nil, mod_query.exec_handler, 
                     mod_query.exec_completor)
 end
 
@@ -501,7 +495,7 @@ function mod_query.get_known_hosts(mplex)
         f=io.open(h.."/.ssh/known_hosts")
     end
     if not f then 
-        warn("Failed to open ~/.ssh/known_hosts") 
+        warn(TR("Failed to open ~/.ssh/known_hosts"))
         return
     end
     for l in f:lines() do
@@ -556,7 +550,7 @@ end
 function mod_query.query_ssh(mplex)
     mod_query.get_known_hosts(mplex)
     local script=mod_query.lookup_script_warn(mplex, "ion-ssh")
-    mod_query.query_execwith(mplex, "SSH to:", nil, script,
+    mod_query.query_execwith(mplex, TR("SSH to:"), nil, script,
                              mod_query.make_completor(mod_query.complete_ssh))
 end
 
@@ -584,7 +578,7 @@ end
 function mod_query.query_man(mplex)
     local script=mod_query.lookup_script_warn(mplex, "ion-man")
     local prgm=ioncore.progname()
-    local prompt="Manual page ("..prgm.."):"
+    local prompt=TR("Manual page (%s):", prgm)
     mod_query.query_execwith(mplex, prompt, prgm, script, 
                              mod_query.man_completor)
 end
@@ -713,7 +707,7 @@ function mod_query.query_lua(mplex)
         return mod_query.do_handle_lua(mplex, env, code)
     end
     
-    mod_query.query(mplex, "Lua code to run: ", nil, handler, complete)
+    mod_query.query(mplex, TR("Lua code: "), nil, handler, complete)
 end
 
 -- }}}
@@ -724,15 +718,10 @@ end
 --DOC
 -- This query can be used to create a query of a defined menu.
 function mod_query.query_menu(mplex, prompt, menuname)
-    if not mod_menu then
-        mod_query.warn(mplex, "mod_menu not loaded.")
-        return
-    end
-    
     local menu=mod_menu.getmenu(menuname)
     
     if not menu then
-        mod_query.warn(mplex, "Unknown menu "..tostring(menuname))
+        mod_query.warn(mplex, TR("Unknown menu %s.", tostring(menuname)))
         return
     end
     function complete(str)
@@ -762,10 +751,11 @@ function mod_query.query_menu(mplex, prompt, menuname)
                     mod_query.warn(mplex, err)
                 end
             elseif e.submenu_fn then
-                mod_query.query_menu(mplex, e.name.." menu:", e.submenu_fn())
+                mod_query.query_menu(mplex, TR("%s menu:", e.name), 
+                                     e.submenu_fn())
             end
         else
-            mod_query.warn(mplex, "No entry '"..str.."'.")
+            mod_query.warn(mplex, TR("No entry '%s'", str))
         end
     end
     
@@ -796,11 +786,11 @@ function mod_query.show_clientwin(mplex, cwin)
     
     local function get_info(cwin)
         local function n(s) return (s or "") end
-        local f="Title: %s\nClass: %s\nRole: %s\nInstance: %s\nXID: 0x%x"
+        local f=TR("Title: %s\nClass: %s\nRole: %s\nInstance: %s\nXID: 0x%x")
         local i=cwin:get_ident()
         local s=string.format(f, n(cwin:name()), n(i.class), n(i.role), 
                               n(i.instance), cwin:xid())
-        local t="\nTransients:\n"
+        local t=TR("\nTransients:\n")
         for k, v in cwin:managed_list() do
             if obj_is(v, "WClientWin") then
                 s=s..t..indent(get_info(v))

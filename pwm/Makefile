@@ -25,7 +25,7 @@ LIBS += -ltu
 
 DEFINES += -DETCDIR=\"$(ETCDIR)\" -DSHAREDIR=\"$(SHAREDIR)\" \
 	   -DEXTRABINDIR=\"$(EXTRABINDIR)\" -DMODULEDIR=\"$(MODULEDIR)\" \
-	   -DLCDIR=\"$(LCDIR)\"
+	   -DLCDIR=\"$(LCDIR)\" -DLOCALEDIR=\"$(LOCALEDIR)\"
 
 ifndef PWM_ETCDIR
 PWM_ETCDIR = $(ETCDIR)
@@ -60,7 +60,7 @@ pwm3: $(OBJS) $(EXT_OBJS)
 	$(CC) $(LINKOPTS) $(OBJS) $(EXT_OBJS) $(LDFLAGS) -o $@
 
 preload.c:
-	$(LUA) ../mkpreload.lua $(PWM_MODULE_LIST) > preload.c
+	$(LUA) ../build/mkpreload.lua $(PWM_MODULE_LIST) > preload.c
 
 _install:
 	$(INSTALLDIR) $(BINDIR)

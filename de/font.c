@@ -30,10 +30,7 @@ DEFont *de_load_font(const char *fontname)
     XFontSet fontset=NULL;
     XFontStruct *fontstruct=NULL;
     
-    if(fontname==NULL){
-        warn("Attempt to load NULL as font");
-        return NULL;
-    }
+    assert(fontname!=NULL);
     
     /* There shouldn't be that many fonts... */
     for(fnt=fonts; fnt!=NULL; fnt=fnt->next){
@@ -47,9 +44,9 @@ DEFont *de_load_font(const char *fontname)
         fontset=de_create_font_set(fontname);
         if(fontset!=NULL){
             if(XContextDependentDrawing(fontset)){
-                warn("Fontset for font pattern '%s' implements context "
-                     "dependent drawing, which is unsupported. Expect "
-                     "clutter.", fontname);
+                warn(TR("Fontset for font pattern '%s' implements context "
+                        "dependent drawing, which is unsupported. Expect "
+                        "clutter."), fontname);
             }
         }
     }else{
@@ -58,7 +55,7 @@ DEFont *de_load_font(const char *fontname)
     
     if(fontstruct==NULL && fontset==NULL){
         if(strcmp(fontname, CF_FALLBACK_FONT_NAME)!=0){
-            warn("Could not load font \"%s\", trying \"%s\"",
+            warn(TR("Could not load font \"%s\", trying \"%s\""),
                  fontname, CF_FALLBACK_FONT_NAME);
             return de_load_font(CF_FALLBACK_FONT_NAME);
         }

@@ -328,15 +328,15 @@ static bool drop_ok(WRegion *mgr, WRegion *reg)
     WRegion *reg2=mgr;
     for(reg2=mgr; reg2!=NULL; reg2=region_manager(reg2)){
         if(reg2==reg){
-            warn("Trying to make a %s manage a %s above it in management "
-                 "hierarchy", OBJ_TYPESTR(mgr), OBJ_TYPESTR(reg));
+            warn(TR("Trying to make a %s manage a %s above it in management "
+                    "hierarchy"), OBJ_TYPESTR(mgr), OBJ_TYPESTR(reg));
             return FALSE;
         }
     }
     
     for(reg2=region_parent(mgr); reg2!=NULL; reg2=region_parent(reg2)){
         if(reg2==reg){
-            warn("Trying to make a %s manage its ancestor (a %s)",
+            warn(TR("Trying to make a %s manage its ancestor (a %s)"),
                  OBJ_TYPESTR(mgr), OBJ_TYPESTR(reg));
             return FALSE;
         }

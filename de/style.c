@@ -313,8 +313,8 @@ void de_deinit_styles()
     for(style=styles; style!=NULL; style=next){
         next=style->next;
         if(style->usecount>1){
-            WARN_FUNC("Style %s still in use [%d] but the module "
-                      "is being unloaded!", style->style, style->usecount);
+            WARN_FUNC(TR("Style %s still in use [%d] but the module "
+                         "is being unloaded!"), style->style, style->usecount);
         }
         dump_style(style);
     }

@@ -288,7 +288,7 @@ IMPLCLASS(WTimer, Obj, timer_deinit, NULL);
 static void fatal_signal_handler(int signal_num)
 {
     set_warn_handler(NULL);
-    warn("Caught fatal signal %d. Dying without deinit.", signal_num); 
+    warn(TR("Caught fatal signal %d. Dying without deinit."), signal_num); 
     signal(signal_num, SIG_DFL);
     kill(getpid(), signal_num);
 }
@@ -297,7 +297,7 @@ static void fatal_signal_handler(int signal_num)
 static void deadly_signal_handler(int signal_num)
 {
     set_warn_handler(NULL);
-    warn("Caught signal %d. Dying.", signal_num);
+    warn(TR("Caught signal %d. Dying."), signal_num);
     signal(signal_num, SIG_DFL);
     if(ioncore_g.opmode==IONCORE_OPMODE_INIT)
         kill(getpid(), signal_num);
