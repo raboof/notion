@@ -415,14 +415,6 @@ static bool do_manage_mrsh(bool (*fn)(WClientWin *cwin, WManageParams *pm),
     return fn((WClientWin*)p[0], (WManageParams*)p[1]);
 }
 
-    bool switchto;
-    bool jumpto;
-    bool userpos;
-    bool dockapp;
-    bool maprq;
-    int gravity;
-    WRectangle geom;
-    WClientWin *tfor;
 
 static bool do_manage_mrsh_extl(ExtlFn fn, void **p)
 {
