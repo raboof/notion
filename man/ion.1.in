@@ -29,7 +29,7 @@ in the DISPLAY environment variable.
 .TP
 .B \-sessionname seession_name
 Set sesion name. This option affects where workspace and other savefiles are
-put (~/.ion-devel/session_name if option set).
+put (~/.ion/session_name if option set).
 .TP
 .B \-xinerama 0|1
 If Ion was compiled with Xinerama support, this option can be used to
@@ -405,10 +405,10 @@ System default main configuratio files
 .B ETCDIR/look-*.lua
 Colour scheme configuration files
 .TP
-.B ~/.ion-devel/
+.B ~/.ion/
 User configuration files
 .TP
-.B ~/.ion-devel/ioncore.lua
+.B ~/.ion/ioncore.lua
 User default configuration file (overrides system default)
 
 .SH SEE ALSO

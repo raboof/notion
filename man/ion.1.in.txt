@@ -33,7 +33,7 @@ OPTIONS
 
        -sessionname seession_name
               Set sesion name. This option affects where workspace  and  other
-              savefiles are put (~/.ion-devel/session_name if option set).
+              savefiles are put (~/.ion/session_name if option set).
 
        -xinerama 0|1
               If  Ion  was  compiled with Xinerama support, this option can be
@@ -384,10 +384,10 @@ FILES AND DIRECTORIES
        ETCDIR/look-*.lua
               Colour scheme configuration files
 
-       ~/.ion-devel/
+       ~/.ion/
               User configuration files
 
-       ~/.ion-devel/ioncore.lua
+       ~/.ion/ioncore.lua
               User default configuration file (overrides system default)
 
 

@@ -7,6 +7,7 @@
 ## Installation paths
 ##
 
+#DIST: PREFIX=/usr/local
 PREFIX=/usr/local/ion-devel
 
 # Unless you are creating a package conforming to some OS's standards, you
@@ -15,21 +16,21 @@ PREFIX=/usr/local/ion-devel
 # 'ioncore' binary and 'ion' script
 BINDIR=$(PREFIX)/bin
 # Configuration .lua files
-ETCDIR=$(PREFIX)/etc/ion-devel
+ETCDIR=$(PREFIX)/etc/ion
 # Some .lua files and ion-* shell scripts
-SHAREDIR=$(PREFIX)/share/ion-devel
+SHAREDIR=$(PREFIX)/share/ion
 # Manual pages
 MANDIR=$(PREFIX)/man
 # Some documents
-DOCDIR=$(PREFIX)/doc/ion-devel
+DOCDIR=$(PREFIX)/doc/ion
 # Nothing at the moment
-INCDIR=$(PREFIX)/include/ion-devel
+INCDIR=$(PREFIX)/include/ion
 # Nothing at the moment
 LIBDIR=$(PREFIX)/lib
 # Modules
-MODULEDIR=$(LIBDIR)/ion-devel
+MODULEDIR=$(LIBDIR)/ion
 # ion-completefile (does not belong in SHAREDIR being a binary file)
-EXTRABINDIR=$(LIBDIR)/ion-devel
+EXTRABINDIR=$(LIBDIR)/ion
 
 ##
 ## Modules

@@ -35,7 +35,7 @@ BUILDING AND INSTALLING
    
    YOU SHOULD NOT SKIP THIS STEP unless you know what you are doing. Ion
    will refuse to start if it can not find all the necessary uncorrupt
-   configuration files either in $PREFIX/etc/ion-devel/ or in ~/.ion-devel/.
+   configuration files either in $PREFIX/etc/ion/ or in ~/.ion/.
 
 5. How to best set up 'startx' or whatever to start Ion instead of your
    current window manager depends on your system's setup. A good guess
