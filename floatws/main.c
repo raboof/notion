@@ -28,7 +28,7 @@
 
 #include "../version.h"
 
-char floatws_module_ion_version[]=ION_VERSION;
+char floatws_module_ion_api_version[]=ION_API_VERSION;
 
 
 /*}}}*/

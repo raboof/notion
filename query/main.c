@@ -27,7 +27,7 @@
 
 #include "../version.h"
 
-char query_module_ion_version[]=ION_VERSION;
+char query_module_ion_api_version[]=ION_API_VERSION;
 
 
 /*}}}*/

@@ -24,7 +24,7 @@
 
 #include "../version.h"
 
-char ionws_module_ion_version[]=ION_VERSION;
+char ionws_module_ion_api_version[]=ION_API_VERSION;
 
 
 /*}}}*/

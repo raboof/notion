@@ -255,7 +255,7 @@ bool de_do_define_style(WRootWin *rootwin, const char *name, ExtlTab tab)
 
 #include "../version.h"
 
-char de_module_ion_version[]=ION_VERSION;
+char de_module_ion_api_version[]=ION_API_VERSION;
 
 
 extern bool de_module_register_exports();

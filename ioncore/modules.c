@@ -54,10 +54,10 @@ static void *get_module_symbol(lt_dlhandle handle, char *name)
 
 static bool check_version(lt_dlhandle handle)
 {
-	char *versionstr=(char*)get_module_symbol(handle, "_module_ion_version");
+	char *versionstr=(char*)get_module_symbol(handle, "_module_ion_api_version");
 	if(versionstr==NULL)
 		return FALSE;
-	return (strcmp(versionstr, ION_VERSION)==0);
+	return (strcmp(versionstr, ION_API_VERSION)==0);
 }
 
 

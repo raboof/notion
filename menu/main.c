@@ -22,7 +22,7 @@
 
 #include "../version.h"
 
-char menu_module_ion_version[]=ION_VERSION;
+char menu_module_ion_api_version[]=ION_API_VERSION;
 
 
 /*}}}*/
