@@ -454,7 +454,7 @@ static void split_do_resize_rootward(WSplit *node, const WRectangle *ng,
     
     /* Now check if we can get from or give space to 'other' */
     
-    split_update_bounds(other, TRUE);
+    /*split_update_bounds(other, TRUE);*/
     amount=amountneeded(node, thisnode, ng, p->type, hany, vany);
     if(amount>0){
         ofree=amountfree(other, p->type);
@@ -567,14 +567,15 @@ void split_tree_rqgeom(WSplit *root, WSplit *sub, int flags,
     bool vany=flags&REGION_RQGEOM_WEAK_Y;
     WRectangle geom=*geom_;
 
-    split_update_bounds(sub, TRUE);
+    split_update_bounds(root, TRUE);
+    /*split_update_bounds(sub, TRUE);*/
 
     /* Handle internal size bounds */
     bnd(&(geom.x), &(geom.w), sub->geom.x, sub->geom.w, 
         sub->min_w, sub->max_w);
     bnd(&(geom.y), &(geom.h), sub->geom.y, sub->geom.h, 
         sub->min_h, sub->max_h);
-          
+
     /* Check if we should resize to both tl and br */
     
     if(hany){

@@ -43,6 +43,7 @@
             ((MPLEX)->flags&MPLEX_MANAGED_UNVIEWABLE)
 
 
+
 /*{{{ Destroy/create mplex */
 
 
@@ -326,6 +327,55 @@ void mplex_dec_index(WMPlex *mplex, WRegion *r)
 /*}}}*/
 
 
+/*{{{ Mapping */
+
+
+static void mplex_map_mgd(WMPlex *mplex)
+{
+    /* TODO: L2 */
+    if(mplex->l1_current!=NULL)
+        region_map(mplex->l1_current);
+    /*if(mplex->l2_current!=NULL)
+     region_map(mplex->l2_current);*/
+}
+
+
+static void mplex_unmap_mgd(WMPlex *mplex)
+{
+    /* TODO: L2 */
+    if(mplex->l1_current!=NULL)
+        region_unmap(mplex->l1_current);
+    /*if(mplex->l2_current!=NULL)
+     region_unmap(mplex->l2_current);*/
+}
+
+
+
+void mplex_map(WMPlex *mplex)
+{
+    window_map((WWindow*)mplex);
+    /* A lame requirement of the ICCCM is that client windows should be
+     * unmapped if the parent is unmapped.
+     */
+    if(!MPLEX_MGD_UNVIEWABLE(mplex))
+        mplex_map_mgd(mplex);
+}
+
+
+void mplex_unmap(WMPlex *mplex)
+{
+    window_unmap((WWindow*)mplex);
+    /* A lame requirement of the ICCCM is that client windows should be
+     * unmapped if the parent is unmapped.
+     */
+    if(!MPLEX_MGD_UNVIEWABLE(mplex))
+        mplex_unmap_mgd(mplex);
+}
+
+
+/*}}}*/
+
+
 /*{{{ Resize and reparent */
 
 
@@ -351,19 +401,28 @@ void mplex_fit_managed(WMPlex *mplex)
     WRegion *sub;
     WFitParams fp;
     
-    if(MPLEX_MGD_UNVIEWABLE(mplex))
-        return;
-    
     mplex_managed_geom(mplex, &(fp.g));
     
-    fp.mode=REGION_FIT_EXACT;
-    FOR_ALL_MANAGED_ON_LIST(mplex->l1_list, sub){
-        region_fitrep(sub, NULL, &fp);
+    if(!MPLEX_MGD_UNVIEWABLE(mplex) && (fp.g.w<=1 || fp.g.h<=1)){
+        mplex->flags|=MPLEX_MANAGED_UNVIEWABLE;
+        if(REGION_IS_MAPPED(mplex))
+            mplex_unmap_mgd(mplex);
+    }else if(MPLEX_MGD_UNVIEWABLE(mplex) && !(fp.g.w<=1 || fp.g.h<=1)){
+        mplex->flags&=~MPLEX_MANAGED_UNVIEWABLE;
+        if(REGION_IS_MAPPED(mplex))
+            mplex_map_mgd(mplex);
     }
 
-    fp.mode=REGION_FIT_BOUNDS;
-    FOR_ALL_MANAGED_ON_LIST(mplex->l2_list, sub){
-        region_fitrep(sub, NULL, &fp);
+    if(!MPLEX_MGD_UNVIEWABLE(mplex)){
+        fp.mode=REGION_FIT_EXACT;
+        FOR_ALL_MANAGED_ON_LIST(mplex->l1_list, sub){
+            region_fitrep(sub, NULL, &fp);
+        }
+        
+        fp.mode=REGION_FIT_BOUNDS;
+        FOR_ALL_MANAGED_ON_LIST(mplex->l2_list, sub){
+            region_fitrep(sub, NULL, &fp);
+        }
     }
 }
 
@@ -389,42 +448,6 @@ static void mplex_managed_rqgeom(WMPlex *mplex, WRegion *sub,
     
     if(!(flags&REGION_RQGEOM_TRYONLY))
         region_fit(sub, &rg, REGION_FIT_EXACT);
-}
-
-
-/*}}}*/
-
-
-/*{{{ Mapping */
-
-
-void mplex_map(WMPlex *mplex)
-{
-    window_map((WWindow*)mplex);
-    /* A lame requirement of the ICCCM is that client windows should be
-     * unmapped if the parent is unmapped.
-     */
-    if(!MPLEX_MGD_UNVIEWABLE(mplex)){
-        if(mplex->l1_current!=NULL)
-            region_map(mplex->l1_current);
-        /*if(mplex->l2_current!=NULL)
-            region_map(mplex->l2_current);*/
-    }
-}
-
-
-void mplex_unmap(WMPlex *mplex)
-{
-    window_unmap((WWindow*)mplex);
-    /* A lame requirement of the ICCCM is that client windows should be
-     * unmapped if the parent is unmapped.
-     */
-    if(!MPLEX_MGD_UNVIEWABLE(mplex)){
-        if(mplex->l1_current!=NULL)
-            region_unmap(mplex->l1_current);
-        /*if(mplex->l2_current!=NULL)
-         region_unmap(mplex->l2_current);*/
-    }
 }
 
 

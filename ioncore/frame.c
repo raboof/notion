@@ -40,12 +40,6 @@
 #include "region-iter.h"
 
 
-#define SET_SHADE_FLAG(F) ((F)->flags|=FRAME_SHADED, \
-                           (F)->mplex.flags|=MPLEX_MANAGED_UNVIEWABLE)
-#define UNSET_SHADE_FLAG(F) ((F)->flags&=~FRAME_SHADED, \
-                             (F)->mplex.flags&=~MPLEX_MANAGED_UNVIEWABLE)
-
-
 extern bool frame_set_background(WFrame *frame, bool set_always);
 extern void frame_initialise_gr(WFrame *frame);
 
@@ -92,7 +86,7 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp)
     mplex_managed_geom((WMPlex*)frame, &mg);
     
     if(mg.h<=1)
-        SET_SHADE_FLAG(frame);
+        frame->flags|=FRAME_SHADED;
     
     return TRUE;
 }
@@ -361,17 +355,10 @@ bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp)
     mplex_managed_geom((WMPlex*)frame, &mg);
     
     if(hchg && mg.h<=1){
-        if(!(frame->flags&(FRAME_SHADED|FRAME_TAB_HIDE))){
-            SET_SHADE_FLAG(frame);
-            if(FRAME_CURRENT(frame)!=NULL)
-                region_unmap(FRAME_CURRENT(frame));
-        }
+        if(!(frame->flags&(FRAME_SHADED|FRAME_TAB_HIDE)))
+            frame->flags|=FRAME_SHADED;
     }else if(hchg){
-        if(frame->flags&FRAME_SHADED && REGION_IS_MAPPED(frame)){
-            if(FRAME_CURRENT(frame)!=NULL)
-                region_map(FRAME_CURRENT(frame));
-        }
-        UNSET_SHADE_FLAG(frame);
+        frame->flags&=~FRAME_SHADED;
     }
 
     if(wchg || hchg){
@@ -468,8 +455,7 @@ static void frame_do_toggle_shade(WFrame *frame, int shaded_h)
         geom.h=shaded_h;
     }
     
-    region_rqgeom((WRegion*)frame, REGION_RQGEOM_H_ONLY,
-                        &geom, NULL);
+    region_rqgeom((WRegion*)frame, REGION_RQGEOM_H_ONLY, &geom, NULL);
 }
 
 
