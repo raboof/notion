@@ -219,7 +219,7 @@ function QueryLib.workspace_handler(frame, name)
         -- TODO: This hardcoding should be removed when the C->Lua interfac
         -- is more object-oriented and we can scan the available classes. 
         -- I can't be bothered to create such a function at the moment.
-        cls="WIonWS"
+        cls=default_ws_type
     else
         name=nam
     end

@@ -63,7 +63,6 @@ function frame_query_bindings()
         kpress("F5", QueryLib.query_editfile),
         kpress("F6", QueryLib.query_runfile),
         kpress("F9", QueryLib.query_workspace),
-        --kpress("Mod1+F9", query_workspace_with),
         kpress(f11key, QueryLib.query_restart),
         kpress(f12key, QueryLib.query_exit),
     }

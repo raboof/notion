@@ -75,6 +75,9 @@ Open a file for viewing (query). Uses ion-view which by default uses run-mailcap
 .B F9
 Go to existing workspace or create new (query).
 .TP
+.B Mod1+F9
+Create a new tiled workspace with a name of the form WIonWS<n>.
+.TP
 .B F11
 Restart Ion (query)
 .TP

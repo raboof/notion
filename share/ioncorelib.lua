@@ -17,6 +17,14 @@ FALSE = false
 -- }}}
 
 
+-- Some settings {{{
+
+default_ws_type="WIonWS"
+DEFAULT_MOD="Mod1+"
+
+-- }}}
+
+
 -- Functions to help construct bindmaps {{{
 
 function submap2(kcb_, list)
@@ -304,3 +312,4 @@ end
 
 
 include('ioncore-aliases.lua')
+

@@ -44,6 +44,13 @@ global_bindings{
     
     kpress(DEFAULT_MOD .. "F1", make_exec_fn("ion-man ion")),
     kpress("F2", make_exec_fn("xterm")),
+    
+    -- Create a new workspace with a default name.
+    kpress(DEFAULT_MOD .. "F9", 
+           function(scr)
+               local r=region_manage_new(scr, {type=default_ws_type})
+               if r then region_goto(r) end
+           end)
 }
 
 
