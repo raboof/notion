@@ -244,6 +244,7 @@ static WScreen *preinit_screen(int xscr)
 	
 	init_window((WWindow*)scr, NULL, rootwin, geom);
 	
+	scr->root.region.flags|=REGION_BINDINGS_ARE_GRABBED;
 	scr->root.region.screen=scr;
 	scr->xscr=xscr;
 	scr->default_cmap=DefaultColormap(dpy, xscr);
@@ -263,7 +264,7 @@ static WScreen *preinit_screen(int xscr)
 	
 	scan_initial_windows(scr);
 
-	region_add_bindmap((WRegion*)scr, &ioncore_screen_bindmap, TRUE);
+	region_add_bindmap((WRegion*)scr, &ioncore_screen_bindmap);
 	
 	return scr;
 }

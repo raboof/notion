@@ -30,7 +30,6 @@ DECLOBJ(WWindow){
 #include "screen.h"
 
 
-/* !!! parent<==WRegion? */
 extern bool init_window(WWindow *p, WWindow *parent,
 						Window win, WRectangle geom);
 extern bool init_window_new(WWindow *p, WWindow *parent, WRectangle geom);

@@ -49,7 +49,6 @@ DECLSTRUCT(WBinding){
 
 DECLSTRUCT(WRegBindingInfo){
 	WBindmap *bindmap;
-	bool grab;
 	WRegBindingInfo *next, *prev;
 	WRegBindingInfo *bm_next, *bm_prev;
 	WRegion *reg;

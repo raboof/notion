@@ -125,7 +125,8 @@ bool init_genframe(WGenFrame *genframe, WWindow *parent, WRectangle geom,
 		return FALSE;
 	}
 	
-	genframe->win.region.flags|=REGION_HANDLES_MANAGED_ENTER_FOCUS;
+	genframe->win.region.flags|=(REGION_BINDINGS_ARE_GRABBED|
+								 REGION_HANDLES_MANAGED_ENTER_FOCUS);
 	
 	genframe->target_id=use_target_id((WRegion*)genframe, id);
 	

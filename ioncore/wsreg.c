@@ -123,7 +123,8 @@ static WViewport *find_suitable_viewport(WClientWin *cwin, int x, int y)
 {
 	WScreen *scr=SCREEN_OF(cwin);
 	WViewport *vp;
-	
+
+#ifdef CF_PLACEMENT_GEOM
 	if(x>CF_STUBBORN_TRESH || y>CF_STUBBORN_TRESH ||
 	   cwin->size_hints.win_gravity!=ForgetGravity){
 		FOR_ALL_TYPED(scr, vp, WViewport){
@@ -133,6 +134,7 @@ static WViewport *find_suitable_viewport(WClientWin *cwin, int x, int y)
 				return vp;
 		}
 	}
+#endif
 	
 	if(REGION_ACTIVE_SUB(scr)!=NULL){
 		vp=viewport_of(REGION_ACTIVE_SUB(scr));

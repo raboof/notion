@@ -14,9 +14,9 @@
 #include "binding.h"
 
 
-extern bool region_add_bindmap(WRegion *reg, WBindmap *bindmap, bool grab);
+extern bool region_add_bindmap(WRegion *reg, WBindmap *bindmap);
 extern bool region_add_bindmap_owned(WRegion *reg, WBindmap *bindmap,
-									 bool grab, WRegion *owner);
+									 WRegion *owner);
 extern void region_remove_bindmap(WRegion *reg, WBindmap *bindmap);
 extern void region_remove_bindmap_owned(WRegion *reg, WBindmap *bindmap,
 										WRegion *owner);

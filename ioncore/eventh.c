@@ -61,6 +61,9 @@ static void keyboard_handler(XEvent *ev);
 /*}}}*/
 
 
+/*{{{ Main loop  */
+
+
 #define CASE_EVENT(X) case X:
 /*	fprintf(stderr, "[%#lx] %s\n", ev->xany.window, #X);*/
 
@@ -182,6 +185,9 @@ void mainloop()
 		wglobal.grab_released=FALSE;
 	}
 }
+
+
+/*}}}*/
 
 
 /*}}}*/
