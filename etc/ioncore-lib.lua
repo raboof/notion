@@ -129,3 +129,10 @@ function winprop(list)
     add_winprop(class, role, instance, list2)
 end
 
+--
+-- Misc
+-- 
+
+function obj_exists(obj)
+    return (obj_typename(obj)==nil)
+end
