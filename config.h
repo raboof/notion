@@ -15,6 +15,7 @@
 /* #define CF_NO_LOCK_HACK */
 
 #define CF_FALLBACK_FONT_NAME "fixed"
+/*#define CF_FALLBACK_FONT_NAME "-*-helvetica-medium-r-normal-*-12-*-*-*-*-*-*-*"*/
 #define CF_DRAG_TRESHOLD 2
 #define CF_DBLCLICK_DELAY 250
 
