@@ -12,11 +12,12 @@
 #ifndef ION_MOD_IONWS_IONWS_H
 #define ION_MOD_IONWS_IONWS_H
 
+#include <libtu/symlist.h>
+#include <libextl/extl.h>
 #include <ioncore/common.h>
 #include <ioncore/region.h>
 #include <ioncore/screen.h>
 #include <ioncore/genws.h>
-#include <libextl/extl.h>
 #include <ioncore/rectangle.h>
 #include "split.h"
 
@@ -26,7 +27,7 @@ DECLCLASS(WIonWS){
     WGenWS genws;
     WSplit *split_tree;
     WSplitST *stdispnode;
-    WRegion *managed_list;
+    Symlist *managed_list;
     WRegionSimpleCreateFn *create_frame_fn;
 };
 
@@ -99,5 +100,16 @@ extern WSplit *load_splitregion(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
 extern WSplit *load_splitregion_doit(WIonWS *ws, const WRectangle *geom, ExtlTab rt);
 extern WSplit *load_splitsplit(WIonWS *ws, const WRectangle *geom, ExtlTab tab);
 extern WSplit *load_splitst(WIonWS *ws, const WRectangle *geom, ExtlTab tab);
+
+/* Iteration */
+
+typedef SymlistIterTmp WIonWSIterTmp;
+
+#define FOR_ALL_MANAGED_BY_IONWS(WS, VAR, TMP) \
+    FOR_ALL_ON_SYMLIST(WRegion*, VAR, (WS)->managed_list, TMP)
+    
+#define FOR_ALL_MANAGED_BY_IONWS_UNSAFE(WS, VAR) \
+    FOR_ALL_ON_SYMLIST_UNSAFE(WRegion*, VAR, (WS)->managed_list)
+
 
 #endif /* ION_MOD_IONWS_IONWS_H */

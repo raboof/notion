@@ -29,13 +29,12 @@ static WRegion *find_suitable_target(WIonWS *ws)
 {
     WRegion *r=ionws_current(ws);
     
-    if(r!=NULL)
-        return r;
+    if(r==NULL){
+        FOR_ALL_MANAGED_BY_IONWS_UNSAFE(ws, r)
+            break;
+    }
     
-    FOR_ALL_MANAGED_ON_LIST(ws->managed_list, r)
-        return r;
-    
-    return NULL;
+    return r;
 }
 
 

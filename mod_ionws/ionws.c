@@ -13,6 +13,7 @@
 
 #include <libtu/objp.h>
 #include <libtu/minmax.h>
+#include <libtu/symlist.h>
 #include <libmainloop/defer.h>
 #include <libmainloop/signal.h>
 
@@ -38,6 +39,10 @@
 #include "splitfloat.h"
 #include "split-stdisp.h"
 #include "main.h"
+
+
+
+static WIonWSIterTmp ionws_iter_default_tmp;
 
 
 /*{{{ Some helper routines */
@@ -83,7 +88,8 @@ static void reparent_mgd(WRegion *sub, WWindow *par)
 
 bool ionws_fitrep(WIonWS *ws, WWindow *par, const WFitParams *fp)
 {
-    WRegion *sub, *next;
+    WRegion *sub;
+    WIonWSIterTmp tmp;
     bool rs;
     
     if(par!=NULL){
@@ -92,8 +98,10 @@ bool ionws_fitrep(WIonWS *ws, WWindow *par, const WFitParams *fp)
     
         genws_do_reparent(&(ws->genws), par, fp);
     
-        FOR_ALL_MANAGED_ON_LIST_W_NEXT(ws->managed_list, sub, next)
+        FOR_ALL_MANAGED_BY_IONWS(ws, sub, tmp){
             reparent_mgd(sub, par);
+        }
+        
         if(STDISP_OF(ws)!=NULL)
             reparent_mgd(STDISP_OF(ws), par);
     }
@@ -438,11 +446,13 @@ void ionws_managed_add_default(WIonWS *ws, WRegion *reg)
     
     /*region_stacking((WRegion*)ws, &bottom, &top);
     region_restack(reg, top, Above);*/
+
+    if(STDISP_OF(ws)!=reg){
+        #warning "TODO: FIX"
+        assert(symlist_insert_last(&(ws->managed_list), reg));
+    }
     
-    if(STDISP_OF(ws)==reg)
-        region_set_manager(reg, (WRegion*)ws, NULL);
-    else
-        region_set_manager(reg, (WRegion*)ws, &(ws->managed_list));
+    region_set_manager(reg, (WRegion*)ws, NULL);
     
     region_add_bindmap_owned(reg, mod_ionws_ionws_bindmap, (WRegion*)ws);
     if(OBJ_IS(reg, WFrame))
@@ -532,9 +542,15 @@ WIonWS *create_ionws_simple(WWindow *parent, const WFitParams *fp)
 void ionws_deinit(WIonWS *ws)
 {
     WRegion *reg;
+    WIonWSIterTmp tmp;
     
-    while(ws->managed_list!=NULL)
-        ionws_managed_remove(ws, ws->managed_list);
+    FOR_ALL_MANAGED_BY_IONWS(ws, reg, tmp){
+        ionws_managed_remove(ws, reg);
+    }
+
+    FOR_ALL_MANAGED_BY_IONWS(ws, reg, tmp){
+        assert(FALSE);
+    }
     
     ionws_unmanage_stdisp(ws, TRUE, TRUE);
 
@@ -559,17 +575,20 @@ bool ionws_managed_may_destroy(WIonWS *ws, WRegion *reg)
 
 bool ionws_rescue_clientwins(WIonWS *ws)
 {
-    return region_rescue_managed_clientwins((WRegion*)ws, ws->managed_list);
+#warning "TODO: FIX"
+    /*return region_rescue_managed_clientwins((WRegion*)ws, ws->managed_list);*/
+    return FALSE;
 }
 
 
 void ionws_do_managed_remove(WIonWS *ws, WRegion *reg)
 {
+    region_unset_manager(reg, (WRegion*)ws, NULL);
+    
     if(STDISP_OF(ws)==reg){
-        region_unset_manager(reg, (WRegion*)ws, NULL);
         ws->stdispnode->regnode.reg=NULL;
     }else{
-        region_unset_manager(reg, (WRegion*)ws, &(ws->managed_list));
+        symlist_remove(&(ws->managed_list), reg);
     }
     
     region_remove_bindmap_owned(reg, mod_ionws_ionws_bindmap, (WRegion*)ws);
@@ -867,7 +886,11 @@ WRegion *ionws_current(WIonWS *ws)
 EXTL_EXPORT_MEMBER
 ExtlTab ionws_managed_list(WIonWS *ws)
 {
-    return managed_list_to_table(ws->managed_list, NULL);
+    SymlistIterTmp tmp;
+    
+    symlist_iter_init(&tmp, ws->managed_list);
+    
+    return extl_list_to_obj_table((ObjIterator*)symlist_iter, &tmp);
 }
 
 
