@@ -40,6 +40,7 @@ MODULE_SUPPORT_CFLAGS=
 #MODULE_LDFLAGS=
 #MODULE_CFLAGS=
 
+
 ##
 ## X libraries, includes and options
 ##
