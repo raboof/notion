@@ -131,6 +131,10 @@ bool add_clientwin_default(WClientWin *cwin, WAttachParams *param)
 					cwin->transient_for=None;
 				}else if(param->tfor!=NULL){
 					param->flags|=REGION_ATTACH_TFOR;
+				}else{
+					warn("Client window \"%s\" has broken transient_for hint. "
+						 "(\"Extended WM hints\" multi-parent idiocy?)",
+						 region_name((WRegion*)cwin));
 				}
 			}
 		}
