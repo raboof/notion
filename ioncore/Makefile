@@ -6,6 +6,9 @@
 TOPDIR=..
 include $(TOPDIR)/system-inc.mk
 
+# List of modules to possibly preload
+include $(TOPDIR)/modulelist.mk
+
 ######################################
 
 #DIST: LIBS += -L../libtu -ltu -lm $(X11_LIBS) $(XINERAMA_LIBS)

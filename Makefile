@@ -5,6 +5,9 @@
 # System-specific configuration is in system.mk
 include system-inc.mk
 
+# List of modules
+include modulelist.mk
+
 ######################################
 
 #DIST: SUBDIRS = libtu $(MODULE_LIST) luaextl ioncore man scripts share

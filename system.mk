@@ -62,10 +62,6 @@ LTDL_LIBS=-lltdl
 # of some useless autoconf-expecting wrapper. With these settings Ion should
 # compile on at least the version of Cygwin I installed on 2003-06-17 on WinXP.
 
-# List of modules to build (and possibly preload)
-MODULE_LIST=ionws floatws query de menu
-
-
 ##
 ## Lua
 ##
