@@ -223,7 +223,7 @@ bool hook_add_extl(WHook *hk, ExtlFn efn)
     item=create_item(hk);
     if(item==NULL)
         return FALSE;
-    item->efn=efn;
+    item->efn=extl_ref_fn(efn);
     return TRUE;
 }
 
