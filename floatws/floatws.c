@@ -21,6 +21,7 @@
 #include <ioncore/regbind.h>
 #include <ioncore/genframe-pointer.h>
 #include <ioncore/stacking.h>
+#include <ioncore/extlconv.h>
 
 #include "floatws.h"
 #include "floatframe.h"
@@ -455,6 +456,22 @@ WRegion *floatws_backcirculate(WFloatWS *ws)
 	if(r!=NULL)
 		region_goto(r);
 	return r;
+}
+
+
+/*}}}*/
+
+
+/*{{{ Misc. */
+
+
+/*EXTL_DOC
+ * Returns a list of regions managed by the workspace (frames, mostly).
+ */
+EXTL_EXPORT
+ExtlTab floatws_managed_list(WFloatWS *ws)
+{
+	return region_list_to_table(ws->managed_list, NULL);
 }
 
 

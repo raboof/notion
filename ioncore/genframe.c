@@ -22,6 +22,7 @@
 #include "genframe-pointer.h"
 #include "sizehint.h"
 #include "stacking.h"
+#include "extlconv.h"
 
 
 #define genframe_draw(F, C) draw_window((WWindow*)F, C)
@@ -690,6 +691,14 @@ WRegion *genframe_current(WGenFrame *genframe)
 	return genframe->current_sub;
 }
 
+/*EXTL_DOC
+ * Returns a list of regions managed by the frame.
+ */
+EXTL_EXPORT
+ExtlTab floatws_managed_list(WGenFrame *genframe)
+{
+	return region_list_to_table(genframe->managed_list, NULL);
+}
 
 static bool genframe_handle_drop(WGenFrame *genframe, int x, int y,
 								 WRegion *dropped)

@@ -126,13 +126,16 @@ static void save_history()
 }
 
 
+static bool loaded_ok=FALSE;
+
 void query_module_deinit()
 {
 	query_module_unregister_exports();
 	deinit_bindmap(&query_bindmap);
 	deinit_bindmap(&query_wedln_bindmap);
 	
-	save_history();
+	if(loaded_ok)
+		save_history();
 }
 
 
@@ -150,6 +153,8 @@ bool query_module_init()
 	}
 
 	load_history();
+	
+	loaded_ok=TRUE;
 	
 	return TRUE;
 	

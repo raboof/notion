@@ -11,6 +11,7 @@
 #include <ioncore/clientwin.h>
 #include <ioncore/attach.h>
 #include <ioncore/manage.h>
+#include <ioncore/extl.h>
 #include "placement.h"
 #include "ionframe.h"
 #include "splitframe.h"
@@ -45,6 +46,7 @@ bool ionws_add_clientwin(WIonWS *ws, WClientWin *cwin,
 						 const WAttachParams *param)
 {
 	WRegion *target=NULL;
+	bool uspos;
 	int tm;
 	
 	if(param->flags&REGION_ATTACH_TFOR){
@@ -65,9 +67,18 @@ bool ionws_add_clientwin(WIonWS *ws, WClientWin *cwin,
 			}
 		}
 	}else{
+		bool uspos=(param->flags&REGION_ATTACH_MAPRQ &&
+					cwin->size_hints.flags&USPosition);
+
+		if(target==NULL){
+			extl_call_named("ionws_placement_method", 
+							"oob", "o", ws, cwin, uspos, &target);
+			if(target!=NULL && !WOBJ_IS(target, WRegion))
+				target=NULL;
+		}
+		
 #ifndef CF_IONWS_IGNORE_USER_POSITION
-		if(param->flags&REGION_ATTACH_MAPRQ &&
-		   cwin->size_hints.flags&USPosition){
+		if(target==NULL && uspos){
 			/* MAPRQ implies POSRQ and SIZERQ */
 			
 			/* Maybe gravity should be taken into account so that user
@@ -78,8 +89,8 @@ bool ionws_add_clientwin(WIonWS *ws, WClientWin *cwin,
 			target=(WRegion*)find_frame_at(ws, param->geomrq.x,
 										   param->geomrq.y);
 		}
-		if(target==NULL)
 #endif
+		if(target==NULL)
 			target=find_suitable_frame(ws);
 	}
 	

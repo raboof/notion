@@ -17,7 +17,7 @@
 #include <ioncore/attach.h>
 #include <ioncore/defer.h>
 #include <ioncore/reginfo.h>
-#include <ioncore/geom.h>
+#include <ioncore/extlconv.h>
 #include "ionws.h"
 #include "ionframe.h"
 #include "split.h"
@@ -664,6 +664,16 @@ EXTL_EXPORT
 WRegion *ionws_current(WIonWS *ws)
 {
 	return left_or_topmost_current(ws->split_tree, -1);
+}
+
+
+/*EXTL_DOC
+ * Returns a list of regions managed by the workspace (frames, mostly).
+ */
+EXTL_EXPORT
+ExtlTab ionws_managed_list(WIonWS *ws)
+{
+	return region_list_to_table(ws->managed_list, NULL);
 }
 
 
