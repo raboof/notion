@@ -35,7 +35,11 @@ EXTRABINDIR=$(LIBDIR)/ion-devel
 ## Modules
 ##
 
-# The path to the libtool script
+# The path to the libtool script. Version 1.4.3 or newer is required.
+# Users of many of the *BSD:s will have to manually install a a recent
+# libtool because even more-recent-than-libtool-1.4.3 releases of those
+# OSes only have an _ancient_ 1.3.x libtool that _will_ _not_ _work even
+# though a lot of libltdl-using apps require 1.4.3. 
 LIBTOOL=libtool
 
 # Set PRELOAD_MODULES=1 if your system does not support dynamically loaded
