@@ -818,6 +818,9 @@ WFrame *ionws_split_at(WIonWS *ws, WFrame *frame, const char *dirstr,
                             region_min_w((WRegion*)frame),
                             region_min_h((WRegion*)frame));
 
+    if(newframe==NULL)
+        return NULL;
+
     curr=mplex_lcurrent(&(frame->mplex), 1);
     
     if(attach_current && curr!=NULL){
