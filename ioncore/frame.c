@@ -9,8 +9,11 @@
  * (at your option) any later version.
  */
 
-#include "common.h"
+#include <libtu/obj.h>
 #include <libtu/objp.h>
+#include <libtu/minmax.h>
+
+#include "common.h"
 #include "window.h"
 #include "global.h"
 #include "rootwin.h"
@@ -322,16 +325,18 @@ static void reparent_or_fit(WFrame *frame, const WRectangle *geom,
     bool hchg=(REGION_GEOM(frame).h!=geom->h);
     bool move=(REGION_GEOM(frame).x!=geom->x ||
                REGION_GEOM(frame).y!=geom->y);
+    int w=maxof(1, geom->w);
+    int h=maxof(1, geom->h);
     
     if(parent!=NULL){
         region_detach_parent((WRegion*)frame);
         XReparentWindow(ioncore_g.dpy, FRAME_WIN(frame), parent->win,
                         geom->x, geom->y);
-        XResizeWindow(ioncore_g.dpy, FRAME_WIN(frame), geom->w, geom->h);
+        XResizeWindow(ioncore_g.dpy, FRAME_WIN(frame), w, h);
         region_attach_parent((WRegion*)frame, (WRegion*)parent);
     }else{
         XMoveResizeWindow(ioncore_g.dpy, FRAME_WIN(frame),
-                          geom->x, geom->y, geom->w, geom->h);
+                          geom->x, geom->y, w, h);
     }
     
     old_geom=REGION_GEOM(frame);

@@ -33,6 +33,9 @@
 
 void region_init(WRegion *reg, WRegion *parent, const WRectangle *geom)
 {
+    if(geom->w<0 || geom->h<0)
+        warn("Creating region with negative width or height!");
+    
     reg->geom=*geom;
     reg->flags=0;
     reg->bindings=NULL;

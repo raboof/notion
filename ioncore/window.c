@@ -17,6 +17,7 @@
 #include "rootwin.h"
 #include "region.h"
 #include "stacking.h"
+#include <libtu/minmax.h>
 
 
 /*{{{ Dynfuns */
@@ -147,15 +148,16 @@ static void reparent_or_fit_window(WWindow *wwin, WWindow *parent,
 {
     bool move=(REGION_GEOM(wwin).x!=geom->x ||
                REGION_GEOM(wwin).y!=geom->y);
+    int w=maxof(1, geom->w);
+    int h=maxof(1, geom->h);
 
     if(parent!=NULL){
         region_detach_parent((WRegion*)wwin);
         XReparentWindow(ioncore_g.dpy, wwin->win, parent->win, geom->x, geom->y);
-        XResizeWindow(ioncore_g.dpy, wwin->win, geom->w, geom->h);
+        XResizeWindow(ioncore_g.dpy, wwin->win, w, h);
         region_attach_parent((WRegion*)wwin, (WRegion*)parent);
     }else{
-        XMoveResizeWindow(ioncore_g.dpy, wwin->win, geom->x, geom->y,
-                          geom->w, geom->h);
+        XMoveResizeWindow(ioncore_g.dpy, wwin->win, geom->x, geom->y, w, h);
     }
     
     REGION_GEOM(wwin)=*geom;

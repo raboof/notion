@@ -32,6 +32,7 @@
 #include "bindmaps.h"
 #include "regbind.h"
 #include "region-iter.h"
+#include <libtu/minmax.h>
 
 
 #define MPLEX_WIN(MPLEX) ((MPLEX)->win.win)
@@ -198,16 +199,18 @@ static void reparent_or_fit(WMPlex *mplex, const WRectangle *geom,
     bool hchg=(REGION_GEOM(mplex).h!=geom->h);
     bool move=(REGION_GEOM(mplex).x!=geom->x ||
                REGION_GEOM(mplex).y!=geom->y);
+    int w=maxof(1, geom->w);
+    int h=maxof(1, geom->h);
     
     if(parent!=NULL){
         region_detach_parent((WRegion*)mplex);
         XReparentWindow(ioncore_g.dpy, MPLEX_WIN(mplex), parent->win,
                         geom->x, geom->y);
-        XResizeWindow(ioncore_g.dpy, MPLEX_WIN(mplex), geom->w, geom->h);
+        XResizeWindow(ioncore_g.dpy, MPLEX_WIN(mplex), w, h);
         region_attach_parent((WRegion*)mplex, (WRegion*)parent);
     }else{
         XMoveResizeWindow(ioncore_g.dpy, MPLEX_WIN(mplex),
-                          geom->x, geom->y, geom->w, geom->h);
+                          geom->x, geom->y, w, h);
     }
     
     REGION_GEOM(mplex)=*geom;
@@ -586,6 +589,8 @@ void mplex_attach_tagged(WMPlex *mplex)
 static bool mplex_handle_drop(WMPlex *mplex, int x, int y,
                               WRegion *dropped)
 {
+    WRegion *r;
+
     if(mplex->current_sub!=NULL &&
        HAS_DYN(mplex->current_sub, region_handle_drop)){
         int rx, ry;

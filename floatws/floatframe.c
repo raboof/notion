@@ -26,6 +26,7 @@
 #include <ioncore/sizehint.h>
 #include <ioncore/extlconv.h>
 #include <ioncore/region-iter.h>
+#include <libtu/minmax.h>
 #include "floatframe.h"
 #include "floatws.h"
 #include "main.h"
@@ -107,6 +108,9 @@ void floatframe_border_geom(const WFloatFrame *frame, WRectangle *geom)
     geom->y=BAR_H(frame);
     geom->w=REGION_GEOM(frame).w;
     geom->h=REGION_GEOM(frame).h-BAR_H(frame);
+    geom->w=maxof(geom->w, 0);
+    geom->h=maxof(geom->h, 0);
+
 }
 
 
@@ -155,6 +159,9 @@ void floatframe_geom_from_initial_geom(WFloatFrame *frame,
 
     floatframe_offsets(frame, &off);
 
+    geom->w=maxof(geom->w, 0);
+    geom->h=maxof(geom->h, 0);
+
     geom->w+=off.w;
     geom->h+=off.h;
 #ifndef CF_NO_WSREL_INIT_GEOM
@@ -192,6 +199,8 @@ static void floatframe_request_clientwin_geom(WFloatFrame *frame,
     
     geom.w+=off.w;
     geom.h+=off.h;
+    geom.w=maxof(geom.w, 0);
+    geom.h=maxof(geom.h, 0);
     
     /* If WEAK_? is set, then geom.(x|y) is root-relative as it was not 
      * requested by the client and clientwin_handle_configure_request has

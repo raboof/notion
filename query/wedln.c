@@ -20,6 +20,7 @@
 #include <ioncore/regbind.h>
 #include <ioncore/extl.h>
 #include <ioncore/defer.h>
+#include <libtu/minmax.h>
 #include "edln.h"
 #include "wedln.h"
 #include "inputp.h"
@@ -267,6 +268,8 @@ static void get_inner_geom(WEdln *wedln, int mode, WRectangle *geom)
     geom->w-=bdw.left+bdw.right;
     geom->y+=bdw.top;
     geom->h-=bdw.top+bdw.bottom;
+    geom->w=maxof(0, geom->w);
+    geom->h=maxof(0, geom->h);
 }
 
 
@@ -275,6 +278,7 @@ static void get_textarea_geom(WEdln *wedln, int mode, WRectangle *geom)
     get_inner_geom(wedln, mode, geom);
     geom->x+=wedln->prompt_w;
     geom->w-=wedln->prompt_w;
+    geom->w=maxof(0, geom->w);
 }
 
 

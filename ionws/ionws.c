@@ -25,6 +25,7 @@
 #include <ioncore/resize.h>
 #include <ioncore/extl.h>
 #include <ioncore/region-iter.h>
+#include <libtu/minmax.h>
 #include "placement.h"
 #include "ionws.h"
 #include "split.h"
@@ -295,6 +296,7 @@ extern void set_split_of(Obj *obj, WWsSplit *split);
 static Obj *load_obj(WIonWS *ws, WWindow *par, const WRectangle *geom, 
                       ExtlTab tab);
 
+#define MINS 8
 
 static Obj *load_split(WIonWS *ws, WWindow *par, const WRectangle *geom,
                         ExtlTab tab)
@@ -327,19 +329,16 @@ static Obj *load_split(WIonWS *ws, WWindow *par, const WRectangle *geom,
         warn("Unable to create a split.\n");
         return NULL;
     }
+
+    tls=maxof(tls, MINS);
+    brs=maxof(brs, MINS);
         
     geom2=*geom;
     if(dir==HORIZONTAL){
-        if(tls+brs==0)
-            tls=geom->w/2;
-        else
-            tls=geom->w*tls/(tls+brs);
+        tls=maxof(0, geom->w)*tls/(tls+brs);
         geom2.w=tls;
     }else{
-        if(tls+brs==0)
-            tls=geom->h/2;
-        else
-        tls=geom->h*tls/(tls+brs);
+        tls=maxof(0, geom->h)*tls/(tls+brs);
         geom2.h=tls;
     }
     
@@ -416,7 +415,7 @@ WRegion *ionws_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
     }
 
     if(!ci){
-        ws->split_tree=load_obj(ws, par, geom, treetab);
+        ws->split_tree=load_obj(ws, par, &REGION_GEOM(ws), treetab);
         extl_unref_table(treetab);
     }
     

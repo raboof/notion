@@ -69,6 +69,8 @@ static void get_inner_geom(WMenu *menu, WRectangle *geom)
         geom->y+=bdw.top;
         geom->w-=bdw.left+bdw.right;
         geom->h-=bdw.top+bdw.bottom;
+        geom->w=maxof(0, geom->w);
+        geom->h=maxof(0, geom->h);
     }
 }
 

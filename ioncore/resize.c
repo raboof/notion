@@ -26,6 +26,7 @@
 #include "infowin.h"
 #include "defer.h"
 #include "region-iter.h"
+#include <libtu/minmax.h>
 
 
 #define XOR_RESIZE (!ioncore_g.opaque_resize)
@@ -527,6 +528,9 @@ ExtlTab region_request_geom_extl(WRegion *reg, ExtlTab g)
        flags&=~REGION_RQGEOM_WEAK_W;
     if(extl_table_gets_i(g, "h", &(geom.h)))
        flags&=~REGION_RQGEOM_WEAK_H;
+
+    geom.w=maxof(1, geom.w);
+    geom.h=maxof(1, geom.h);
     
     region_request_geom(reg, flags, &geom, &ogeom);
     

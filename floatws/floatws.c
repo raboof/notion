@@ -28,6 +28,7 @@
 #include <ioncore/extlconv.h>
 #include <ioncore/defer.h>
 #include <ioncore/region-iter.h>
+#include <libtu/minmax.h>
 
 #include "floatws.h"
 #include "floatframe.h"
@@ -361,6 +362,9 @@ static WRegion *floatws_attach_load(WFloatWS *ws, ExtlTab param)
         warn("No geometry specified");
         return NULL;
     }
+
+    geom.w=maxof(geom.w, 0);
+    geom.h=maxof(geom.h, 0);
     
     return region__attach_load((WRegion*)ws, param, 
                                (WRegionDoAttachFn*)floatws_do_attach,

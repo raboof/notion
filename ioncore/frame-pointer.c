@@ -276,15 +276,38 @@ static WRegion *fnd(Window root, int x, int y)
         
         if(!XTranslateCoordinates(ioncore_g.dpy, root, w->win,
                                   x, y, &dstx, &dsty, &win)){
-            return NULL;
+            break;
         }
         
         w=XWINDOW_REGION_OF_T(win, WWindow);
-        x=dstx;
-        y=dsty;
+        /*x=dstx;
+        y=dsty;*/
     }
 
     return reg;
+}
+
+
+static bool drop_ok(WRegion *mgr, WRegion *reg)
+{
+    WRegion *reg2=mgr;
+    for(reg2=mgr; reg2!=NULL; reg2=region_manager(reg2)){
+        if(reg2==reg){
+            warn("Trying to make a %s manage a %s above it in management "
+                 "hierarchy", OBJ_TYPESTR(mgr), OBJ_TYPESTR(reg));
+            return FALSE;
+        }
+    }
+    
+    for(reg2=region_parent(mgr); reg2!=NULL; reg2=region_parent(reg2)){
+        if(reg2==reg){
+            warn("Trying to make a %s manage its ancestor (a %s)",
+                 OBJ_TYPESTR(mgr), OBJ_TYPESTR(reg));
+            return FALSE;
+        }
+    }
+    
+    return TRUE;
 }
 
 
@@ -325,7 +348,8 @@ static void p_tabdrag_end(WFrame *frame, XButtonEvent *ev)
     
     dropped_on=fnd(ev->root, ev->x_root, ev->y_root);
 
-    if(dropped_on==NULL || dropped_on==(WRegion*)frame || dropped_on==sub){
+    if(dropped_on==NULL || dropped_on==(WRegion*)frame || 
+       dropped_on==sub || !drop_ok(dropped_on, sub)){
         frame_draw_bar(frame, TRUE);
         return;
     }

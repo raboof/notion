@@ -42,15 +42,15 @@
  * Instead, I've reinvented the wheel in libtu :(.
  */
 static OptParserOpt ion_opts[]={
-    {OPT_ID('d'),     "display",     OPT_ARG, "host:dpy.scr", "X display to use"},
-    {'c',             "conffile", OPT_ARG, "config_file", "Configuration file"},
-    {OPT_ID('o'),     "oneroot",  0, NULL, "Manage default root window/non-Xinerama screen only"},
-    {OPT_ID('c'),     "confdir",     OPT_ARG, "dir", "Search directory for configuration files"},
-    {OPT_ID('l'),     "moduledir", OPT_ARG, "dir", "Search directory for modules"},
+    {OPT_ID('d'),   "display",  OPT_ARG, "host:dpy.scr", "X display to use"},
+    {'c',           "conffile", OPT_ARG, "config_file", "Configuration file"},
+    {OPT_ID('o'),   "oneroot",  0, NULL, "Manage default root window/non-Xinerama screen only"},
+    {OPT_ID('c'),   "confdir",  OPT_ARG, "dir", "Search directory for configuration files"},
+    {OPT_ID('l'),   "moduledir",OPT_ARG, "dir", "Search directory for modules"},
 #ifndef CF_NOXINERAMA    
-    {OPT_ID('x'),     "xinerama", OPT_ARG, "1|0", "Use Xinerama screen information (default: 1/yes)"},
+    {OPT_ID('x'),   "xinerama", OPT_ARG, "1|0", "Use Xinerama screen information (default: 1/yes)"},
 #else
-    {OPT_ID('x'),     "xinerama", OPT_ARG, "?", "Ignored: not compiled with Xinerama support"},
+    {OPT_ID('x'),   "xinerama", OPT_ARG, "?", "Ignored: not compiled with Xinerama support"},
 #endif
     {OPT_ID('s'),   "sessionname", OPT_ARG, "session_name", "Name of session (affects savefiles)"},
     {OPT_ID('i'),   "i18n", 0, NULL, "Enable use of multibyte string routines, actual "
@@ -208,7 +208,7 @@ fail:
     
     if(ef!=NULL){
         pid_t pid=-1;
-        if(errorlog_end(&el)){
+        if(errorlog_end(&el) && ioncore_g.dpy!=NULL){
             fclose(ef);
             pid=fork();
             if(pid==0){

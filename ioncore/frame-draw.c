@@ -9,6 +9,9 @@
  * (at your option) any later version.
  */
 
+#include <libtu/objp.h>
+#include <libtu/minmax.h>
+
 #include "common.h"
 #include "frame.h"
 #include "framep.h"
@@ -16,7 +19,6 @@
 #include "strings.h"
 #include "names.h"
 #include "gr.h"
-#include <libtu/objp.h>
 #include "region-iter.h"
 
 
@@ -130,6 +132,9 @@ void frame_border_inner_geom_default(const WFrame *frame,
         geom->w-=bdw.left+bdw.right;
         geom->h-=bdw.top+bdw.bottom;
     }
+    
+    geom->w=maxof(geom->w, 0);
+    geom->h=maxof(geom->h, 0);
 }
 
 
@@ -148,7 +153,7 @@ void frame_bar_geom_default(const WFrame *frame, WRectangle *geom)
     }
     geom->x+=off;
     geom->y+=off;
-    geom->w-=2*off;
+    geom->w=maxof(0, geom->w-2*off);
 
     geom->h=(frame->flags&FRAME_TAB_HIDE 
              ? 0 : frame->bar_h);
@@ -170,6 +175,9 @@ void frame_managed_geom_default(const WFrame *frame, WRectangle *geom)
         geom->y+=frame->bar_h+spacing;
         geom->h-=frame->bar_h+spacing;
     }
+    
+    geom->w=maxof(geom->w, 0);
+    geom->h=maxof(geom->h, 0);
 }
 
 
@@ -194,10 +202,8 @@ void frame_recalc_bar_default(WFrame *frame)
     WRegion *sub;
     char *title;
 
-    if(frame->bar_brush==NULL ||
-       frame->titles==NULL){
+    if(frame->bar_brush==NULL || frame->titles==NULL)
         return;
-    }
     
     i=0;
     
@@ -306,8 +312,6 @@ void frame_initialise_gr(WFrame *frame)
     GrBorderWidths bdw;
     GrFontExtents fnte;
     WRootWin *rw=region_rootwin_of((WRegion*)frame);
-
-    
     
     frame->bar_h=0;
     

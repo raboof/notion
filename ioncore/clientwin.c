@@ -37,6 +37,7 @@
 #include "activity.h"
 #include "netwm.h"
 #include "region-iter.h"
+#include <libtu/minmax.h>
 
 
 static void set_clientwin_state(WClientWin *cwin, int state);
@@ -470,6 +471,9 @@ again:
         goto fail2;
     }
     
+    attr.width=maxof(attr.width, 1);
+    attr.height=maxof(attr.height, 1);
+
     /* Do we really want to manage it? */
     if(!param.dockapp && (attr.override_redirect || 
         (!maprq && attr.map_state!=IsViewable))){
@@ -968,6 +972,7 @@ static void do_fit_clientwin(WClientWin *cwin, const WRectangle *max_geom,
     WRectangle geom;
     int diff;
     bool changes;
+    int w, h;
     
     convert_geom(cwin, max_geom, &geom);
 
@@ -988,12 +993,14 @@ static void do_fit_clientwin(WClientWin *cwin, const WRectangle *max_geom,
         region_attach_parent((WRegion*)cwin, (WRegion*)np);
     }
     
+    w=maxof(1, geom.w);
+    h=maxof(1, geom.h);
+    
     if(cwin->flags&CLIENTWIN_PROP_ACROBATIC && !REGION_IS_MAPPED(cwin)){
         XMoveResizeWindow(ioncore_g.dpy, cwin->win,
-                          -2*max_geom->w, -2*max_geom->h, geom.w, geom.h);
+                          -2*max_geom->w, -2*max_geom->h, w, h);
     }else{
-        XMoveResizeWindow(ioncore_g.dpy, cwin->win,
-                          geom.x, geom.y, geom.w, geom.h);
+        XMoveResizeWindow(ioncore_g.dpy, cwin->win, geom.x, geom.y, w, h);
     }
     
     cwin->flags&=~CLIENTWIN_NEED_CFGNTFY;
@@ -1419,7 +1426,7 @@ WRegion *clientwin_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
     convert_geom(cwin, geom, &rg);
     REGION_GEOM(cwin)=rg;
     do_reparent_clientwin(cwin, par->win, rg.x, rg.y);
-    XResizeWindow(ioncore_g.dpy, win, rg.w, rg.h);
+    XResizeWindow(ioncore_g.dpy, win, maxof(1, rg.w), maxof(1, rg.h));
     
     if(!postmanage_check(cwin, &attr)){
         clientwin_destroyed(cwin);

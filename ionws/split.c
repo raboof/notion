@@ -1464,6 +1464,9 @@ ExtlTab ionws_resize_tree(WIonWS *ws, Obj *node, ExtlTab g)
     if(extl_table_gets_i(g, "h", &(geom.h)))
         flags&=~REGION_RQGEOM_WEAK_H;
     
+    geom.w=maxof(1, geom.w);
+    geom.h=maxof(1, geom.h);
+
     ionws_do_request_geom(ws, node, flags, &geom, &ogeom);
     
     return extl_table_from_rectangle(&ogeom);
