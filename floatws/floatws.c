@@ -381,12 +381,13 @@ static bool floatws_add_clientwin(WFloatWS *ws,
 		return FALSE;
 	}
 	
-	if(clientwin_get_switchto(cwin)){
+	/*if(clientwin_get_switchto(cwin)){
+	if(params->flags&REGION_ATTACH_SWITCHTO){
 		if(region_may_control_focus((WRegion*)ws)){
 			region_display_sp((WRegion*)cwin);
 			set_focus((WRegion*)cwin);
 		}
-	}
+	}*/
 	
 	return TRUE;
 }

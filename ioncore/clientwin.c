@@ -454,17 +454,6 @@ again:
 		goto fail2;
 	}
 
-	/*if(state!=NormalState && state!=IconicState)
-		state=NormalState;*/
-
-	/* Set up some additional parameters */
-
-	/*if(clientwin_get_switchto(cwin))
-		param.flags|=REGION_ATTACH_SWITCHTO;
-	
-	if(param.flags&REGION_ATTACH_INITSTATE && param.init_state==IconicState)
-		param.flags&=~REGION_ATTACH_SWITCHTO;*/
-
 	/* Allocate and initialize */
 	cwin=create_clientwin((WRegion*)rootwin, win, &attr);
 	
@@ -472,6 +461,8 @@ again:
 		goto fail2;
 
 	param.flags|=(REGION_ATTACH_SIZERQ|REGION_ATTACH_POSRQ|REGION_ATTACH_MAPRQ);
+	if(clientwin_get_switchto(cwin))
+		param.flags|=REGION_ATTACH_SWITCHTO;
 	param.geomrq=REGION_GEOM(cwin);
 	if(cwin->size_hints.flags&PWinGravity){
 		param.flags|=REGION_ATTACH_SIZE_HINTS;

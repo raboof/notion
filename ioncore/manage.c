@@ -98,7 +98,8 @@ bool add_clientwin_default(WClientWin *cwin, const WAttachParams *param)
 	if(param->flags&REGION_ATTACH_POSRQ){ /* flag should always be set */
 		if(clientwin_check_fullscreen_request(cwin, param->geomrq.w,
 											  param->geomrq.h)){
-			if(clientwin_get_switchto(cwin))
+			/*if(clientwin_get_switchto(cwin))*/
+			if(param->flags&REGION_ATTACH_SWITCHTO)
 				region_goto((WRegion*)cwin);
 			return TRUE;
 		}
@@ -172,7 +173,8 @@ bool finish_add_clientwin(WRegion *reg, WClientWin *cwin,
 		return FALSE;
 	}
 		
-	if(clientwin_get_switchto(cwin))
+	/*if(clientwin_get_switchto(cwin))*/
+	if(param->flags&REGION_ATTACH_SWITCHTO)
 		param2.flags|=REGION_ATTACH_SWITCHTO;
 	
 	if(param->flags&REGION_ATTACH_SIZERQ){
@@ -185,7 +187,15 @@ bool finish_add_clientwin(WRegion *reg, WClientWin *cwin,
 	   param->init_state==IconicState)
 		param2.flags=0;
 	
-	return do_add_clientwin(reg, cwin, &param2);
+	if(do_add_clientwin(reg, cwin, &param2)){
+		/* region_add_managed should only change focus if the region may
+		 * control the focus.
+		 */
+		if(param->flags&REGION_ATTACH_SWITCHTO)
+			region_goto(cwin);
+		return TRUE;
+	}
+	return FALSE;
 }
 
 
