@@ -145,10 +145,9 @@ static void do_lower_tree(WWindow *par, WRegion *reg, Window sibling, int mode)
 /*{{{ Stack above */
 
 
-/*EXTL_DOC
+/*
  * Inform that \var{reg} should be stacked above the region \var{above}.
  */
-EXTL_EXPORT_MEMBER
 bool region_stack_above(WRegion *reg, WRegion *above)
 {
     WRegion *r2;
@@ -181,7 +180,7 @@ bool region_stack_above(WRegion *reg, WRegion *above)
 /*{{{ Keep on top */
 
 
-/*EXTL_DOC
+/*
  * Inform that \var{reg} should be kept above normally stacked regions
  * within its parent.
  */
@@ -230,10 +229,9 @@ static void do_reset_stacking(WRegion *reg)
 }
 
 
-/*EXTL_DOC
+/*
  * Inform that \var{reg} should be stacked normally.
  */
-EXTL_EXPORT_MEMBER
 void region_reset_stacking(WRegion *reg)
 {
     WRegion *r2, *next;
@@ -253,12 +251,11 @@ void region_reset_stacking(WRegion *reg)
 /*{{{ Raise/lower/init */
 
 
-/*EXTL_DOC
+/*
  * Raise \var{reg} in the stack. The regions marked to be stacked above
  * \var{reg} will also be raised and normally stacked regions will not
  * be raised above region marked to be kept on top.
  */
-EXTL_EXPORT_MEMBER
 void region_raise(WRegion *reg)
 {
     WRegion *r2=NULL;
@@ -293,12 +290,11 @@ void window_init_sibling_stacking(WWindow *par, Window win)
 }
 
 
-/*EXTL_DOC
+/*
  * Lower \var{reg} in the stack. The regions marked to be stacked above
  * \var{reg} will also be lowerd and regions marked to be kept on top
  * will not be lowered below normally stacked regions.
  */
-EXTL_EXPORT_MEMBER
 void region_lower(WRegion *reg)
 {
     WRegion *r2=NULL;

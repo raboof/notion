@@ -622,19 +622,6 @@ WRegion *floatws_circulate(WFloatWS *ws)
 
 
 /*EXTL_DOC
- * Activate and raise next object on \var{ws}.
- */
-EXTL_EXPORT_MEMBER
-WRegion *floatws_circulate_and_raise(WFloatWS *ws)
-{
-    WRegion *r=floatws_circulate(ws);
-    if(r!=NULL)
-        region_raise(r);
-    return r;
-}
-
-
-/*EXTL_DOC
  * Activate previous object on \var{ws}.
  */
 EXTL_EXPORT_MEMBER
@@ -648,15 +635,34 @@ WRegion *floatws_backcirculate(WFloatWS *ws)
 
 
 /*EXTL_DOC
- * Activate and raise previous object on \var{ws}.
+ * Raise \var{reg} that must be managed by \var{ws}.
+ * If \var{reg} is \code{nil}, this function silently fails.
  */
 EXTL_EXPORT_MEMBER
-WRegion *floatws_backcirculate_and_raise(WFloatWS *ws)
+void floatws_raise(WFloatWS *ws, WRegion *reg)
 {
-    WRegion *r=floatws_backcirculate(ws);
-    if(r!=NULL)
-        region_raise(r);
-    return r;
+    if(reg!=NULL){
+        if(REGION_MANAGER(reg)!=(WRegion*)ws)
+            WARN_FUNC("reg not managed by ws");
+        else
+            region_raise(reg);
+    }
+}
+
+
+/*EXTL_DOC
+ * Lower \var{reg} that must be managed by \var{ws}.
+ * If \var{reg} is \code{nil}, this function silently fails.
+ */
+EXTL_EXPORT_MEMBER
+void floatws_lower(WFloatWS *ws, WRegion *reg)
+{
+    if(reg!=NULL){
+        if(REGION_MANAGER(reg)!=(WRegion*)ws)
+            WARN_FUNC("reg not managed by ws");
+        else
+            region_lower(reg);
+    }
 }
 
 

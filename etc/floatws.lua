@@ -6,12 +6,12 @@
 -- on any object on the workspace.
 
 defbindings("WFloatWS", {
-    kpress(MOD1.."Tab",         "WFloatWS.circulate_and_raise(_)"),
+    kpress(MOD1.."Tab",         "WFloatWS.raise(_, WFloatWS.circulate(_))"),
     submap(MOD1.."K", { 
-        kpress("AnyModifier+Tab", "WFloatWS.backcirculate_and_raise(_)"),
+        kpress("AnyModifier+Tab", "WFloatWS.raise(_, WFloatWS.backcirculate(_))"),
     }),
-    kpress(MOD1.."P",           "WRegion.lower(_sub)", "_sub:non-nil"),
-    kpress(MOD1.."N",           "WRegion.raise(_sub)", "_sub:non-nil"),
+    kpress(MOD1.."P",           "WFloatWS.lower(_, _sub)", "_sub:non-nil"),
+    kpress(MOD1.."N",           "WFloatWS.raise(_, _sub)", "_sub:non-nil"),
 })
 
 
@@ -21,10 +21,10 @@ defbindings("WFloatWS", {
 
 defbindings("WFloatFrame", {
     mdblclick("Button1@tab",    "WFloatFrame.toggle_shade(_)"),
-    mpress("Button1@tab",       "WFloatFrame.raise(_)"),
-    mpress("Button1@border",    "WFloatFrame.raise(_)"),
-    mclick(MOD1.."Button1",     "WFloatFrame.raise(_)"),
-    mclick(MOD1.."Button3",     "WFloatFrame.lower(_)"),
+    mpress("Button1@tab",       "WFloatWS.raise(WRegion.manager(_), _)"),
+    mpress("Button1@border",    "WFloatWS.raise(WRegion.manager(_), _)"),
+    mclick(MOD1.."Button1",     "WFloatWS.raise(WRegion.manager(_), _)"),
+    mclick(MOD1.."Button3",     "WFloatWS.lower(WRegion.manager(_), _)"),
     mdrag("Button1@tab",        "WFrame.p_move(_)"),
      -- in ion-bindings.lua now:
     --mdrag(MOD1.."Button1",      "WFrame.p_move(_)"),

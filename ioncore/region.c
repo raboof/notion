@@ -680,17 +680,6 @@ bool region_same_rootwin(const WRegion *reg1, const WRegion *reg2)
 }
 
 
-/*EXTL_DOC
- * Returns most recently active region that has \var{reg} as its
- * parent.
- */
-EXTL_EXPORT_MEMBER
-WRegion *region_active_sub(WRegion *reg)
-{
-    return reg->active_sub;
-}
-
-
 /*}}}*/
 
 
