@@ -50,8 +50,6 @@ void region_init(WRegion *reg, WRegion *parent, const WRectangle *geom)
     
     reg->ni.name=NULL;
     reg->ni.namespaceinfo=NULL;
-    reg->ni.ns_next=NULL;
-    reg->ni.ns_prev=NULL;
     
     reg->manager=NULL;
     reg->mgr_next=NULL;

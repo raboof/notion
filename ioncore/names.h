@@ -17,6 +17,18 @@
 #include "gr.h"
 #include "extl.h"
 
+
+typedef struct{
+    struct rb_node *rb;
+    WRegion *list;
+    bool initialised;
+} WNamespace;
+
+
+extern WNamespace ioncore_internal_ns;
+extern WNamespace ioncore_clientwin_ns;
+
+
 extern bool region_init_name(WRegion *reg, const char *name);
 extern bool region_set_name(WRegion *reg, const char *name);
 extern bool region_set_name_exact(WRegion *reg, const char *name);
@@ -27,10 +39,8 @@ extern const char *region_name(WRegion *reg);
 
 extern char *region_make_label(WRegion *reg, int maxw, GrBrush *brush);
 
-extern WClientWin *ioncore_clientwin_list();
-extern WRegion *ioncore_region_list();
-extern ExtlTab ioncore_region_list_extl(const char *typenam);
-extern ExtlTab ioncore_clientwin_list_extl();
+extern ExtlTab ioncore_region_list(const char *typenam);
+extern ExtlTab ioncore_clientwin_list();
 extern WRegion *ioncore_lookup_region(const char *cname, const char *typenam);
 extern WClientWin *ioncore_lookup_clientwin(const char *cname);
 

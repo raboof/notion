@@ -60,7 +60,6 @@ DECLCLASS(WRegion){
     struct{
         char *name;
         void *namespaceinfo;
-        WRegion *ns_next, *ns_prev;
     } ni;
     
     WRegion *manager;

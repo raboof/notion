@@ -9,6 +9,7 @@
  * (at your option) any later version.
  */
 
+#include <libtu/rb.h>
 #include "common.h"
 #include "global.h"
 #include "property.h"
@@ -145,12 +146,15 @@ static void handle_cwin_cmap(WClientWin *cwin, const XColormapEvent *ev)
 
 static void handle_all_cmaps(const XColormapEvent *ev)
 {
-    WClientWin *cwin;
-
-    for(cwin=ioncore_clientwin_list(); 
-        cwin!=NULL; 
-        cwin=(WClientWin*)((WRegion*)cwin)->ni.ns_next){
-        handle_cwin_cmap(cwin, ev);
+    Rb_node node;
+    
+    if(!ioncore_internal_ns.initialised)
+        return;
+    
+    rb_traverse(node, ioncore_internal_ns.rb){
+        WClientWin *cwin=(WClientWin*)rb_val(node);
+        if(cwin!=NULL)
+            handle_cwin_cmap(cwin, ev);
     }
 }
 

@@ -112,10 +112,6 @@ The dock module was written by Tom Payne and Per Olofsson.
 share/ion-completefile/ion-completefile.c is based on editline, (c)
 1992 Simmule Turner and Rich Salz. See the file for details.
 
-libtu/snprintf_2.2/ was written by Mark Martinec, see the README there
-or <http://www.ijs.si/software/snprintf/> for more. I made some minor
-modifications. 
-
 The code that de/fontset.c is based on was apparently originally written 
 by Tomohiro Kubota; see
 <http://www.debian.org/doc/manuals/intro-i18n/ch-examples.en.html#s13.4.5>.
@@ -123,3 +119,4 @@ by Tomohiro Kubota; see
 Various patches have been contributed by other individuals unlisted here.
 (See the mailing list archives.)
 
+See libtu/README for code by others integrated into libtu.
