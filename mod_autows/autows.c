@@ -112,8 +112,8 @@ WRegion *autows_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
         return NULL;
 
     if(extl_table_gets_t(tab, "split_tree", &treetab)){
-        ws->ionws.split_tree=ionws_load_node(&(ws->ionws), par, 
-                                             &REGION_GEOM(ws), treetab);
+        ws->ionws.split_tree=ionws_load_node(&(ws->ionws), &REGION_GEOM(ws), 
+											 treetab);
         extl_unref_table(treetab);
     }
     
