@@ -151,12 +151,6 @@ bool wmcore_init(const char *appname, const char *appetcdir,
 		return FALSE;
 	}
 	
-	/* Need to force REGION_ACTIVE on some screen -- temporary kludge */
-	XSetInputFocus(wglobal.dpy, wglobal.screens->root.win, PointerRoot,
-				   CurrentTime);
-	((WRegion*)wglobal.screens)->flags|=REGION_ACTIVE;
-	wglobal.active_screen=wglobal.screens;
-
 	return TRUE;
 }
 

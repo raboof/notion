@@ -258,6 +258,8 @@ static WScreen *preinit_screen(int xscr)
 	
 	scan_initial_windows(scr);
 	
+	region_add_bindmap((WRegion*)scr, &wmcore_screen_bindmap, TRUE);
+
 	return scr;
 }
 

@@ -28,6 +28,7 @@
 #include "objp.h"
 #include "defer.h"
 #include "grab.h"
+#include "regbind.h"
 
 
 /*{{{ Prototypes */
@@ -200,6 +201,14 @@ void mainloop()
 	XEvent ev;
 
 	wglobal.opmode=OPMODE_NORMAL;
+
+	/* Need to force REGION_ACTIVE on some screen -- temporary kludge */
+	XSetInputFocus(wglobal.dpy, wglobal.screens->root.win, PointerRoot,
+				   CurrentTime);
+	((WRegion*)wglobal.screens)->flags|=REGION_ACTIVE;
+	wglobal.active_screen=wglobal.screens;
+	activate_ggrabs((WRegion*)wglobal.screens);
+	
 	
 	for(;;){
 		get_event(&ev);

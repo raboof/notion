@@ -253,8 +253,6 @@ void setup_screens()
 	WViewport *vp;
 	
 	FOR_ALL_SCREENS(scr){
-		/* TODO: Should be moved somewhere else */
-		region_add_bindmap((WRegion*)scr, &wmcore_screen_bindmap, TRUE);
 		FOR_ALL_TYPED(scr, vp, WViewport){
 			init_workspaces(vp);
 		}
