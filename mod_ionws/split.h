@@ -49,7 +49,6 @@ enum WSplitCurrent{
 
 DECLCLASS(WSplit){
     Obj obj;
-    int dir;
     WRectangle geom;
     WSplitInner *parent;
     
@@ -86,8 +85,7 @@ DECLCLASS(WSplitST){
 
 
 typedef struct{
-    int tltot, brtot;
-    int tlforce, brforce;
+    int tl, br;
     bool any;
 } RootwardAmount;
 

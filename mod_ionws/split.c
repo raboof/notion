@@ -366,7 +366,7 @@ static void splitsplit_update_bounds(WSplitSplit *split, bool recursive)
         split_update_bounds(br, TRUE);
     }
     
-    if(node->dir==SPLIT_HORIZONTAL){
+    if(split->dir==SPLIT_HORIZONTAL){
         node->max_w=infadd(tl->max_w, br->max_w);
         node->min_w=infadd(tl->min_w, br->min_w);
         node->unused_w=unusedadd(tl->unused_w, br->unused_w);
@@ -486,6 +486,37 @@ static bool stdisp_immediate_child(WSplitSplit *node)
 /*{{{ Low-level resize code; from root to leaf */
 
 
+static void split_do_resize_default(WSplit *node, const WRectangle *ng, 
+                                    int hprimn, int vprimn, bool transpose)
+{
+    node->geom=*ng;
+}
+
+
+static void splitregion_do_resize(WSplitRegion *node, const WRectangle *ng, 
+                                  int hprimn, int vprimn, bool transpose)
+{
+    assert(node->reg!=NULL);
+    region_fit(node->reg, ng, REGION_FIT_EXACT);
+    split_update_bounds(&(node->split), FALSE);
+    node->split.geom=*ng;
+}
+
+
+static void splitst_do_resize(WSplitST *node, const WRectangle *ng, 
+                              int hprimn, int vprimn, bool transpose)
+{
+    saw_stdisp=node;
+    
+    if(node->regnode.reg==NULL){
+        ((WSplit*)node)->geom=*ng;
+    }else{
+        splitregion_do_resize(&(node->regnode), ng, hprimn, vprimn, 
+                               transpose);
+    }
+}
+
+
 static int other_dir(int dir)
 {
     return (dir==SPLIT_VERTICAL ? SPLIT_HORIZONTAL : SPLIT_VERTICAL);
@@ -538,37 +569,6 @@ static void get_minmaxunused(WSplit *node, int dir,
         *min=node->min_w;
         *max=maxof(*min, node->max_w);
         *unused=minof(node->unused_w, node->geom.w);
-    }
-}
-
-
-static void split_do_resize_default(WSplit *node, const WRectangle *ng, 
-                                    int hprimn, int vprimn, bool transpose)
-{
-    node->geom=*ng;
-}
-
-
-static void splitregion_do_resize(WSplitRegion *node, const WRectangle *ng, 
-                                  int hprimn, int vprimn, bool transpose)
-{
-    assert(node->reg!=NULL);
-    region_fit(node->reg, ng, REGION_FIT_EXACT);
-    split_update_bounds(&(node->split), FALSE);
-    node->split.geom=*ng;
-}
-
-
-static void splitst_do_resize(WSplitST *node, const WRectangle *ng, 
-                              int hprimn, int vprimn, bool transpose)
-{
-    saw_stdisp=node;
-    
-    if(node->regnode.reg==NULL){
-        ((WSplit*)node)->geom=*ng;
-    }else{
-        splitregion_do_resize(&(node->regnode), ng, hprimn, vprimn, 
-                               transpose);
     }
 }
 
@@ -676,40 +676,36 @@ void split_resize(WSplit *node, const WRectangle *ng, int hprimn, int vprimn)
 /*{{{ Low-level resize code; request towards root */
 
 
-static void flexibility(WSplit *node, int dir, int *unused, int *force,
-                        int *stretch)
+static void flexibility(WSplit *node, int dir, int *shrink, int *stretch)
 {
     if(dir==SPLIT_VERTICAL){
-        *force=maxof(0, node->geom.h-node->min_h);
-        *unused=maxof(0, node->unused_h);
-        *stretch=INT_MAX;
+        *shrink=maxof(0, node->geom.h-node->min_h);
+        if(OBJ_IS(node, WSplitST))
+            *stretch=maxof(0, node->max_h-node->geom.h);
+        else
+            *stretch=INT_MAX;
     }else{
-        *force=maxof(0, node->geom.w-node->min_w);
-        *unused=maxof(0, node->unused_w);
-        *stretch=INT_MAX;
+        *shrink=maxof(0, node->geom.w-node->min_w);
+        if(OBJ_IS(node, WSplitST))
+            *stretch=maxof(0, node->max_w-node->geom.w);
+        else
+            *stretch=INT_MAX;
     }
 }
 
 
-static void calc_amount(int *amountunused, int *amountforce,
-                        int tot, int force, WSplit *other, int dir)
+static void calc_amount(int *amount, int rs, WSplit *other, int dir)
 {
-    int unusedfree, forcefree, stretch;
+    int shrink, stretch;
     
-    flexibility(other, dir, &unusedfree, &forcefree, &stretch);
+    flexibility(other, dir, &shrink, &stretch);
 
-    *amountforce=0;
-    *amountunused=0;
+    *amount=0;
     
-    if(tot>0){
-        *amountunused=minof(unusedfree, tot);
-        if(*amountunused<tot && force>0){
-            *amountforce=minof(minof(force, tot-*amountunused),
-                               forcefree-unusedfree);
-        }
-    }else if(tot<0){
-        *amountunused=-minof(-tot, stretch);
-    }
+    if(rs>0)
+        *amount=minof(rs, shrink);
+    else if(rs<0)
+        *amount=-minof(-rs, stretch);
 }
 
 
@@ -718,15 +714,15 @@ static void splitsplit_do_rqsize(WSplitSplit *p, WSplit *node,
                                  RootwardAmount *ha, RootwardAmount *va, 
                                  WRectangle *rg, bool tryonly)
 {
-    int amountunused, amountforce, amount;
     int hprimn=PRIMN_ANY, vprimn=PRIMN_ANY;
     WRectangle og, pg, ng;
     RootwardAmount *ca;
     WSplit *other;
     int thisnode;
+    int amount;
     
-    assert(!ha->any || ha->tltot==0);
-    assert(!va->any || va->tltot==0);
+    assert(!ha->any || ha->tl==0);
+    assert(!va->any || va->tl==0);
     assert(p->tl==node || p->br==node);
     
     if(p->tl==node){
@@ -740,19 +736,13 @@ static void splitsplit_do_rqsize(WSplitSplit *p, WSplit *node,
     ca=(p->dir==SPLIT_VERTICAL ? va : ha);
 
     if(thisnode==PRIMN_TL || ca->any){
-        calc_amount(&amountunused, &amountforce,
-                    ca->brtot, ca->brforce, other, p->dir);
-        ca->brtot-=amountunused;
-        ca->brforce-=amountforce;
+        calc_amount(&amount, ca->br, other, p->dir);
+        ca->br-=amount;
     }else/*if(thisnode==PRIMN_BR)*/{
-        calc_amount(&amountunused, &amountforce,
-                    ca->tltot, ca->tlforce, other, p->dir);
-        ca->tltot-=amountunused;
-        ca->tlforce-=amountforce;
+        calc_amount(&amount, ca->tl, other, p->dir);
+        ca->tl-=amount;
     }
     
-    amount=amountunused+amountforce;
-
     if(((WSplit*)p)->parent==NULL){
         pg=((WSplit*)p)->geom;
     }else{
@@ -804,24 +794,12 @@ static void initra(RootwardAmount *ra, int p, int s, int op, int os,
                    bool any)
 {
     ra->any=any;
-    ra->tlforce=0;
-    ra->brforce=0;
-    ra->tltot=op-p;
-    ra->brtot=(p+s)-(op+os);
+    ra->tl=op-p;
+    ra->br=(p+s)-(op+os);
     if(any){
-        ra->brtot+=ra->tltot;
-        ra->tltot=0;
+        ra->br+=ra->tl;
+        ra->tl=0;
     }
-}
-
-
-static void updatera(RootwardAmount *ra, int p, int s, int op, int os, 
-                     bool any)
-{
-    int tlf=ra->tltot, brf=ra->brtot;
-    initra(ra, p, s, op, os, any);
-    ra->tlforce=tlf;
-    ra->brforce=brf;
 }
 
 
@@ -839,11 +817,6 @@ static void split_rqgeom_(WSplit *node, const WRectangle *ng,
     initra(&ha, ng->x, ng->w, node->geom.x, node->geom.w, hany);
     initra(&va, ng->y, ng->h, node->geom.y, node->geom.h, vany);
     
-    splitinner_do_rqsize(node->parent, node, &ha, &va, rg, TRUE);
-
-    updatera(&ha, ng->x, ng->w, node->geom.x, node->geom.w, hany);
-    updatera(&va, ng->y, ng->h, node->geom.y, node->geom.h, vany);
-
     splitinner_do_rqsize(node->parent, node, &ha, &va, rg, tryonly);
 }
 
