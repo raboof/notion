@@ -335,5 +335,5 @@ dopath('cfg_statusbar', true)
 
 -- Launch statusd if the user didn't launch it.
 if not statusd_running then
-    launch_statusd()
+    mod_statusbar.launch_statusd()
 end
