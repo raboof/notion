@@ -16,7 +16,7 @@ end
 
 function submap(kcb_)
     local function submap_helper(list)
-	return submap2(%kcb_, list)
+	return submap2(kcb_, list)
     end
     return submap_helper
 end
@@ -70,21 +70,21 @@ function make_active_leaf_fn(fn)
     end
     local function call_active_leaf(reg)
 	lf=region_get_active_leaf(reg)
-	%fn(lf)
+	fn(lf)
     end
     return call_active_leaf
 end
 
 function make_screen_switch_nth_fn(n)
     local function call_nth(scr)
-        screen_switch_nth_on_cvp(scr, %n)
+        screen_switch_nth_on_cvp(scr, n)
     end
     return call_nth
 end
     
 function make_exec_fn(cmd)
     local function do_exec(scr)
-	return exec_on_screen(scr, %cmd)
+	return exec_on_screen(scr, cmd)
     end
     return do_exec
 end
