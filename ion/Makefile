@@ -19,9 +19,9 @@ LIBS += -lm
 LIBS += $(X11_LIBS) $(XINERAMA_LIBS)
 LIBS += $(LUA_LIBS)
 LIBS += $(LTDL_LIBS)
+EXT_OBJS += ../ioncore/ioncore.a ../luaextl/luaextl.a
 #DIST: EXT_OBJS += ../libtu/libtu.a
 LIBS += -ltu
-EXT_OBJS += ../ioncore/ioncore.a ../luaextl/luaextl.a
 
 DEFINES += -DETCDIR=\"$(ETCDIR)\" -DSHAREDIR=\"$(SHAREDIR)\" \
            -DEXTRABINDIR=\"$(EXTRABINDIR)\" -DMODULEDIR=\"$(MODULEDIR)\"
