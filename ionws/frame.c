@@ -352,13 +352,13 @@ void draw_frame_bar(const WFrame *frame, bool complete)
 	
 	if(complete){
 		if(!grdata->bar_inside_frame){
-#if 1
-			XSetForeground(wglobal.dpy, XGC, grdata->frame_bgcolor);
+			if(REGION_IS_ACTIVE(frame))
+				XSetForeground(wglobal.dpy, XGC, grdata->act_frame_colors.bg);
+			else
+				XSetForeground(wglobal.dpy, XGC, grdata->frame_colors.bg);
+				
 			XFillRectangle(wglobal.dpy, WIN, XGC, X, Y,
 						   bg.w, H+grdata->spacing);
-#else
-			XClearArea(wglobal.dpy, WIN, X, Y, bg.w, H, False);
-#endif
 		}else{
 			XClearArea(wglobal.dpy, WIN, X, Y, bg.w, H, False);
 		}
