@@ -54,7 +54,7 @@ include $(TOPDIR)/rules.mk
 ######################################
 
 ioncore: $(OBJS) $(EXT_OBJS)
-	$(LIBTOOL) $(CC) $(LINKOPTS) $(OBJS) $(EXT_OBJS) $(LDFLAGS) -o $@
+	$(LIBTOOL) --mode=link $(CC) $(LINKOPTS) $(OBJS) $(EXT_OBJS) $(LDFLAGS) -o $@
 
 _install:
 	$(INSTALLDIR) $(BINDIR)
