@@ -250,22 +250,19 @@ end
 --DOC
 -- Find winprop table for \var{cwin}.
 function get_winprop(cwin)
-    local id=cwin:get_ident()
-    local prop
-    local names
+    local id, nm=cwin:get_ident(), cwin:name()
+    local names, prop
     
     for c, r, i in alternative_winprop_idents(id) do
-        if pcall(function() names=winprops[c][r][i] end) then
-            if names then
-                for name, prop in names do
-                    if string.find(cwin:name(), name) then
-                        return prop
-                    end
-                end
-                -- no regexp match, use default winprop
-                return winprops[c][r][i][" ! "]
+        names={}
+        pcall(function() names=winprops[c][r][i] or {} end)
+        for name, prop in names do
+            if type(name)=="string" and string.find(nm, name) then
+                return prop
             end
         end
+        -- no regexp match, use default winprop
+        return names[0]
     end
 end
 
@@ -289,7 +286,7 @@ end
 --DOC
 -- Define a winprop. For more information, see section \ref{sec:winprops}.
 function winprop(list)
-    local list2, class, role, instance, name = {}, "*", "*", "*", " ! "
+    local list2, class, role, instance, name = {}, "*", "*", "*", 0
 
     for k, v in list do
 	if k == "class" then
