@@ -23,6 +23,7 @@
 #include <ioncore/reginfo.h>
 #include <ioncore/extlconv.h>
 #include <ioncore/manage.h>
+#include <ioncore/minmax.h>
 #include "ionws.h"
 #include "ionframe.h"
 #include "split.h"
@@ -176,18 +177,6 @@ void set_split_of(WObj *obj, WWsSplit *split)
 
 
 /*}}}*/
-
-
-static int minof(int x, int y)
-{
-	return (x<y ? x : y);
-}
-
-
-static int maxof(int x, int y)
-{
-	return (x>y ? x : y);
-}
 
 
 /* No, there are not even supposed to be proper/consistent 
