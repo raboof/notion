@@ -1,5 +1,5 @@
 --
--- ion/share/ioncorelib-winprops.lua
+-- ion/share/ioncore-winprops.lua
 -- 
 -- Copyright (c) Tuomo Valkonen 2004.
 --
@@ -9,7 +9,7 @@
 -- (at your option) any later version.
 --
 
-local ioncorelib=_G.ioncorelib
+local ioncore=_G.ioncore
 
 local winprops={}
 
@@ -28,7 +28,7 @@ end
 
 --DOC
 -- Find winprop table for \var{cwin}.
-function ioncorelib.get_winprop(cwin)
+function ioncore.getwinprop(cwin)
     local id, nm=cwin:get_ident(), (cwin:name() or "")
     local names, prop
 
@@ -54,7 +54,7 @@ function ioncorelib.get_winprop(cwin)
     end
 end
 
-ioncore.set_get_winprop_fn(ioncorelib.get_winprop)
+ioncore.set_get_winprop_fn(ioncore.getwinprop)
 
 local function ensure_winproptab(class, role, instance)
     if not winprops[class] then
@@ -75,7 +75,7 @@ end
 
 --DOC
 -- Define a winprop. For more information, see section \ref{sec:winprops}.
-function ioncorelib.defwinprop(list)
+function ioncore.defwinprop(list)
     local list2, class, role, instance, name = {}, "*", "*", "*", 0
     
     for k, v in list do

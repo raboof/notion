@@ -30,8 +30,8 @@ extern WBindmap *ioncore_alloc_bindmap_frame(const char *name);
 extern void ioncore_free_bindmap(const char *name, WBindmap *bm);
 extern WBindmap *ioncore_lookup_bindmap(const char *name);
 
-extern bool ioncore_defbindings(const char *name, ExtlTab tab);
-extern ExtlTab ioncore_getbindings();
+extern bool ioncore_do_defbindings(const char *name, ExtlTab tab);
+extern ExtlTab ioncore_do_getbindings();
 
 #endif /* ION_IONCORE_BINDMAP_H */
 

@@ -145,7 +145,7 @@ static bool parse_keybut(const char *str, uint *mod_ret, uint *ksb_ret,
 /*}}}*/
 
 
-/*{{{ ioncore_do_defbindings */
+/*{{{ bindmap_defbindings */
 
 
 static bool do_action(WBindmap *bindmap, const char *str,
@@ -199,7 +199,7 @@ static bool do_submap(WBindmap *bindmap, const char *str,
     bnd=bindmap_lookup_binding(bindmap, action, mod, kcb);
     
     if(bnd!=NULL && bnd->submap!=NULL && bnd->state==mod)
-        return ioncore_do_defbindings(bnd->submap, subtab);
+        return bindmap_defbindings(bnd->submap, subtab);
 
     binding.waitrel=FALSE;
     binding.act=BINDING_KEYPRESS;
@@ -214,7 +214,7 @@ static bool do_submap(WBindmap *bindmap, const char *str,
         return FALSE;
 
     if(bindmap_add_binding(bindmap, &binding))
-        return ioncore_do_defbindings(binding.submap, subtab);
+        return bindmap_defbindings(binding.submap, subtab);
 
     binding_deinit(&binding);
     
@@ -306,7 +306,7 @@ fail:
 }
 
 
-bool ioncore_do_defbindings(WBindmap *bindmap, ExtlTab tab)
+bool bindmap_defbindings(WBindmap *bindmap, ExtlTab tab)
 {
     int i, n, nok=0;
     ExtlTab ent;
@@ -328,7 +328,7 @@ bool ioncore_do_defbindings(WBindmap *bindmap, ExtlTab tab)
 /*}}}*/
 
 
-/*{{{ ioncore_getbindings */
+/*{{{ bindmap_getbindings */
 
 
 static char *get_mods(uint state)
@@ -423,7 +423,7 @@ static bool get_kpress(WBindmap *bindmap, WBinding *b, ExtlTab t)
     free(key);
     
     if(b->submap!=NULL){
-        ExtlTab stab=ioncore_do_getbindings(b->submap);
+        ExtlTab stab=bindmap_getbindings(b->submap);
         extl_table_sets_t(t, "submap", stab);
     }else{
         extl_table_sets_f(t, "func", b->func);
@@ -482,7 +482,7 @@ static ExtlTab getbinding(WBindmap *bindmap, WBinding *b)
 }
 
 
-ExtlTab ioncore_do_getbindings(WBindmap *bindmap)
+ExtlTab bindmap_getbindings(WBindmap *bindmap)
 {
     Rb_node node;
     WBinding *b;

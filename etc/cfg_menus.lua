@@ -7,8 +7,8 @@
 defmenu("mainmenu", {
     submenu("Programs",         "appmenu"),
     menuentry("Lock screen",    "ioncore.exec_on(_, 'xlock')"),
-    menuentry("Help",           "querylib.query_man(_)"),
-    menuentry("About Ion",      "querylib.show_about_ion(_)"),
+    menuentry("Help",           "mod_query.query_man(_)"),
+    menuentry("About Ion",      "mod_query.show_about_ion(_)"),
     submenu("Styles",           "stylemenu"),
     submenu("Session",          "sessionmenu"),
 })
@@ -18,7 +18,7 @@ defmenu("mainmenu", {
 defmenu("appmenu", {
     menuentry("XTerm",          "ioncore.exec_on(_, 'xterm')"),
     menuentry("Mozilla Firefox","ioncore.exec_on(_, 'firefox')"),
-    menuentry("Run...",         "querylib.query_exec(_)"),
+    menuentry("Run...",         "mod_query.query_exec(_)"),
 })
 
 
@@ -41,7 +41,7 @@ defmenu("ctxmenu", {
                                 "_sub:non-nil"),
     menuentry("Attach tagged",  "WFrame.attach_tagged(_)"),
     menuentry("Clear tags",     "ioncore.clear_tags()"),
-    menuentry("Window info",    "querylib.show_clientwin(_, _sub)",
+    menuentry("Window info",    "mod_query.show_clientwin(_, _sub)",
                                 "_sub:WClientWin"),
 })
 

@@ -28,11 +28,11 @@ INCDIR=@includedir@
 # Nothing at the moment
 LIBDIR=@libdir@
 # Modules
-MODULEDIR=@libdir@/@PACKAGE_TARNAME@
+MODULEDIR=@libdir@/@PACKAGE_TARNAME@/mod
 # Compiled Lua source code
 LCDIR=@libdir@/@PACKAGE_TARNAME@/lc
 # ion-completefile (does not belong in SHAREDIR being a binary file)
-EXTRABINDIR=@libexecdir@/@PACKAGE_TARNAME@
+EXTRABINDIR=@libexecdir@/@PACKAGE_TARNAME@/bin
 # For ion-completeman system-wide cache
 #VARDIR=@localstatedir@/cache/@PACKAGE_TARNAME@
 VARDIR=/var/cache/@PACKAGE_TARNAME@

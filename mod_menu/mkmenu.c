@@ -19,7 +19,7 @@
 #include "mkmenu.h"
 
 
-/*EXTL_DOC
+/*--lowlevel routine not to be called--EXTL_DOC
  * Display a menu inside multiplexer. The \var{handler} parameter
  * is a function that gets the selected menu entry as argument and
  * should call it with proper parameters. The table \var{tab} is a
@@ -27,11 +27,12 @@
  * The function \var{submenu_fn} return a similar submenu definition 
  * when called.
  * 
- * Do not use this function directly. Use  \fnref{menulib.menu} and
- * \fnref{menulib.bigmenu}.
+ * Do not use this function directly. Use  \fnref{mod_menu.menu} and
+ * \fnref{mod_menu.bigmenu}.
  */
 EXTL_EXPORT
-WMenu *mod_menu_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab, bool big_mode)
+WMenu *mod_menu_do_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab, 
+                        bool big_mode)
 {
     WMenuCreateParams fnp;
 
@@ -48,17 +49,17 @@ WMenu *mod_menu_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab, bool big_mode)
 }
 
 
-/*EXTL_DOC
+/*--lowlevel routine not to be called--EXTL_DOC
  * Display a pop-up menu inside window \var{where}. This function
  * can only be called from a mouse/pointing device button press handler
  * and the menu will be placed below the point where the press occured.
  * The \var{handler} and \var{tab} parameters are similar to those of
  * \fnref{menu_menu}.
  * 
- * Do not use this function directly. Use \fnref{menulib.pmenu}.
+ * Do not use this function directly. Use \fnref{mod_menu.pmenu}.
  */
 EXTL_EXPORT
-WMenu *mod_menu_pmenu(WWindow *where, ExtlFn handler, ExtlTab tab)
+WMenu *mod_menu_do_pmenu(WWindow *where, ExtlFn handler, ExtlTab tab)
 {
     WScreen *scr;
     WMenuCreateParams fnp;

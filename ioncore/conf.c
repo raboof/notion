@@ -79,7 +79,7 @@ bool ioncore_read_main_config(const char *cfgfile)
     int unset=0;
 
     if(cfgfile==NULL)
-        cfgfile="ioncore";
+        cfgfile="cfg_ion";
     
     ret=ioncore_read_config(cfgfile, ".", TRUE);
     

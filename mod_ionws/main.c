@@ -128,7 +128,7 @@ bool mod_ionws_init()
         goto err;
     }
     
-    ioncore_read_config("ionws", NULL, TRUE);
+    ioncore_read_config("cfg_ionws", NULL, TRUE);
 
     return TRUE;
     

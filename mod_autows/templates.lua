@@ -180,7 +180,7 @@ end
 
 function T.classify(ws, cwin)
     -- Check if there's a winprop override
-    local wp=ioncorelib.get_winprop(cwin)
+    local wp=ioncore.getwinprop(cwin)
     if wp and wp.autows_classification then
         if S.valid_classifications[wp.autows_classification] then
             return wp.autows_classification

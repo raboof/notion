@@ -18,9 +18,6 @@
 #include "wedln.h"
 
 
-/*{{{ Generic */
-
-
 /*EXTL_DOC
  * Show a query window in \var{mplex} with prompt \var{prompt}, initial
  * contents \var{dflt}. The function \var{handler} is called with
@@ -30,8 +27,8 @@
  * second argument when \fnref{WEdln.complete} is called.
  */
 EXTL_EXPORT
-WEdln *mod_query_query(WMPlex *mplex, const char *prompt, const char *dflt,
-                       ExtlFn handler, ExtlFn completor)
+WEdln *mod_query_do_query(WMPlex *mplex, const char *prompt, const char *dflt,
+                          ExtlFn handler, ExtlFn completor)
 {
     WRectangle geom;
     WEdlnCreateParams fnp;
@@ -46,7 +43,4 @@ WEdln *mod_query_query(WMPlex *mplex, const char *prompt, const char *dflt,
                                     (void*)&fnp, 
                                     MPLEX_ATTACH_L2|MPLEX_ATTACH_SWITCHTO);
 }
-
-
-/*}}}*/
 

@@ -13,7 +13,7 @@ INCLUDES += $(X11_INCLUDES) -I..
 CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
 SOURCES=main.c scratchpad.c
-ETC=sp.lua
+ETC=cfg_sp.lua
 
 MAKE_EXPORTS=mod_sp
 

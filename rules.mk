@@ -93,15 +93,10 @@ LD_SHAREDFLAGS=-shared
 $(MODULE).so: $(OBJS) $(EXT_OBJS)
 	$(CC) $(LD_SHAREDFLAGS) $(LDFLAGS) $(OBJS) $(EXT_OBJS) -o $@
 
-$(MODULE).lc: $(MODULE).so
-	echo "ioncore.load_module('$(MODULEDIR)/$(MODULE).so')" \
-	| $(LUAC) -o $@ -
 
-module_install:
+module_install: module_stub_install
 	$(INSTALLDIR) $(MODULEDIR)
 	$(INSTALL) -m $(BIN_MODE) $(MODULE).so $(MODULEDIR)
-	$(INSTALL) -m $(DATA_MODE) $(MODULE).lc $(MODULEDIR)
-
 
 else # PRELOAD_MODULES
 
@@ -118,12 +113,25 @@ $(MODULE).a: $(OBJS) $(EXT_OBJS)
 $(MODULE).lc: $(MODULE).a
 	echo "ioncore.load_module('$(MODULE)')" | $(LUAC) -o $@ -
 
-module_install:
-	$(INSTALLDIR) $(MODULEDIR)
-	$(INSTALL) -m $(DATA_MODE) $(MODULE).lc $(MODULEDIR)
+module_install: module_stub_install
 
 endif # PRELOAD_MODULES
 
+module_stub_install:
+	$(INSTALLDIR) $(LCDIR)
+	$(INSTALL) -m $(DATA_MODE) $(MODULE).lc $(LCDIR)
+
+ifndef MODULE_STUB
+
+$(MODULE).lc: $(MODULE).so
+	echo "ioncore.load_module('$(MODULE)')" \
+	| $(LUAC) -o $@ -
+else
+	
+$(MODULE).lc: $(MODULE_STUB)
+	$(LUAC) -o $@ $(MODULE_STUB)
+
+endif #MODULE_STUB
 
 else # !MODULE
 

@@ -128,7 +128,7 @@ void check_new_user_help()
 
 int main(int argc, char*argv[])
 {
-    const char *cfgfile="ion";
+    const char *cfgfile="cfg_ion";
     const char *display=NULL;
     char *cmd=NULL;
     int stflags=0;

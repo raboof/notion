@@ -1,5 +1,10 @@
 --
--- Ion main configuration file
+-- PWM main configuration file
+--
+
+
+--
+-- Some basic setup
 --
 
 -- Set default modifier. Alt should usually be mapped to Mod1 on
@@ -22,20 +27,7 @@ ioncore.set_opaque_resize(false)
 
 -- Movement commands warp the pointer to frames instead of just
 -- changing focus. Enabled by default.
-ioncore.set_warp(true)
-
--- Load some kludges to make apps behave better.
-dopath("kludges")
-
--- Some usefull routines (needed by ion-bindings and ion-menus)
-dopath("menulib")
-dopath("querylib")
-
--- Make some bindings.
-dopath("ion-bindings")
-
--- Define some menus (menu module loadd to actually use them)
-dopath("ion-menus")
+ioncore.set_warp(false)
 
 -- How to shorten window titles when the full title doesn't fit in
 -- the available space? The first-defined matching rule that succeeds 
@@ -48,10 +40,24 @@ ioncore.add_shortenrule("[^:]+: (.*)", "$1$|$1$<...")
 ioncore.add_shortenrule("(.*)(<[0-9]+>)", "$1$2$|$1$<...$2")
 ioncore.add_shortenrule("(.*)", "$1$|$1$<...")
 
--- Modules.
-dopath("mod_query")
-dopath("mod_menu")
-dopath("mod_ionws")
+
+--
+-- Load some modules and other configuration files
+--
+
+-- Load some modules
 dopath("mod_floatws")
+dopath("mod_menu")
 dopath("mod_dock")
---dopath("mod_sp")
+
+-- Load some useful routines needed by cfg_bindings and cfg_menus
+dopath("ext_misc")
+
+-- Load some kludges to make apps behave better.
+dopath("cfg_kludges")
+
+-- Make some bindings.
+dopath("cfg_pwm_bindings")
+
+-- Define some menus (mod_menu required)
+dopath("cfg_pwm_menus")

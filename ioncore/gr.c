@@ -395,7 +395,7 @@ void grbrush_clear_area(GrBrush *brush, Window win, const WRectangle *geom)
 EXTL_EXPORT_AS(gr, read_config)
 void gr_read_config()
 {
-    ioncore_read_config("draw", NULL, TRUE);
+    ioncore_read_config("look", NULL, TRUE);
     
     /* If nothing has been loaded, try the default engine with
      * default settings.

@@ -159,7 +159,7 @@ bool mod_sp_init()
         return FALSE;
     }
     
-    ioncore_read_config("sp", NULL, FALSE);
+    ioncore_read_config("cfg_sp", NULL, FALSE);
     
     if(ioncore_g.opmode==IONCORE_OPMODE_INIT){
         hook_add(ioncore_post_layout_setup_hook, check_and_create);

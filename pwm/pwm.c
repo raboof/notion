@@ -87,7 +87,7 @@ static OptParserCommonInfo pwm_cinfo={
 
 int main(int argc, char*argv[])
 {
-    const char *cfgfile="pwm";
+    const char *cfgfile="cfg_pwm";
     const char *display=NULL;
     char *cmd=NULL;
     int stflags=IONCORE_STARTUP_NOXINERAMA;

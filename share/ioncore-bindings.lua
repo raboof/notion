@@ -1,5 +1,5 @@
 --
--- ion/share/ioncorelib-bindings.lua
+-- ion/share/ioncore-bindings.lua
 -- 
 -- Copyright (c) Tuomo Valkonen 2004.
 --
@@ -9,7 +9,7 @@
 -- (at your option) any later version.
 --
 
-local ioncorelib=_G.ioncorelib
+local ioncore=_G.ioncore
 
 local warn=ioncore.warn
 
@@ -26,7 +26,7 @@ local compiled2str=setmetatable({}, {__mode="k"})
 -- The string \var{guard}  maybe set to pose limits on \code{_sub}. Currently 
 -- supported guards are \code{_sub:non-nil} and \code{_sub:WFoobar}, where 
 -- \type{WFoobar} is a class.
-function ioncorelib.compile_cmd(cmd, guard)
+function ioncore.compile_cmd(cmd, guard)
     local guardcode=""
     if guard then
         local st, en, condition=string.find(guard, "^_sub:([%w-_]+)$")
@@ -72,7 +72,7 @@ end
 local function putcmd(cmd, guard, tab)
     local func
     if cmd then
-        func=ioncorelib.compile_cmd(cmd, guard)
+        func=ioncore.compile_cmd(cmd, guard)
         if type(func)~="function" then
             return
         end
@@ -90,7 +90,7 @@ end
 -- When the key press action \var{keyspec} occurs, Ioncore will wait for
 -- a further key presse and act according to the submap.
 -- For details, see section \ref{sec:bindings}.
-function ioncorelib.submap(kcb_, list)
+function ioncore.submap(kcb_, list)
     if not list then
         return function(lst)
                    return submap(kcb_, lst)
@@ -103,7 +103,7 @@ end
 -- Creates a binding description table for the action of pressing a key given 
 -- by \var{keyspec} (with possible modifiers) to the function \var{func}.
 -- For more information on bindings, see section \ref{sec:bindings}.
-function ioncorelib.kpress(keyspec, cmd, guard)
+function ioncore.kpress(keyspec, cmd, guard)
     return putcmd(cmd, guard, {action = "kpress", kcb = keyspec})
 end
 
@@ -112,7 +112,7 @@ end
 -- Ioncore waits for all modifiers to be released before processing
 -- any further actions.
 -- For more information on bindings, see section \ref{sec:bindings}.
-function ioncorelib.kpress_wait(keyspec, cmd, guard)
+function ioncore.kpress_wait(keyspec, cmd, guard)
     return putcmd(cmd, guard, {action = "kpress_waitrel", kcb = keyspec})
 end
 
@@ -130,21 +130,21 @@ end
 -- button while possible modifier keys are pressed,
 -- both given by \var{buttonspec}, to the function \var{func}.
 -- For more information, see section \ref{sec:bindings}.
-function ioncorelib.mclick(buttonspec, cmd, guard)
+function ioncore.mclick(buttonspec, cmd, guard)
     return mact("mclick", buttonspec, cmd, guard)
 end
 
 --DOC
 -- Similar to \fnref{mclick} but for double-click.
 -- Also see section \ref{sec:bindings}.
-function ioncorelib.mdblclick(buttonspec, cmd, guard)
+function ioncore.mdblclick(buttonspec, cmd, guard)
     return mact("mdblclick", buttonspec, cmd, guard)
 end
 
 --DOC
 -- Similar to \fnref{mclick} but for just pressing the mouse button.
 -- Also see section \ref{sec:bindings}.
-function ioncorelib.mpress(buttonspec, cmd, guard)
+function ioncore.mpress(buttonspec, cmd, guard)
     return mact("mpress", buttonspec, cmd, guard)
 end
 
@@ -154,16 +154,16 @@ end
 -- is held pressed and the modifiers given by \var{buttonspec} were pressed
 -- when the button was initially pressed.
 -- Also see section \ref{sec:bindings}.
-function ioncorelib.mdrag(buttonspec, cmd, guard)
+function ioncore.mdrag(buttonspec, cmd, guard)
     return mact("mdrag", buttonspec, cmd, guard)
 end
 
 --DOC
 -- Define bindings for context \var{context}. Here \var{binding} is
--- a table composed of entries created with \fnref{ioncorelib.kpress}, 
+-- a table composed of entries created with \fnref{ioncore.kpress}, 
 -- etc.; see section \ref{sec:bindings} for details.
-function ioncorelib.defbindings(context, bindings)
-    return ioncore.defbindings(context, bindings)
+function ioncore.defbindings(context, bindings)
+    return ioncore.do_defbindings(context, bindings)
 end
 
 local function bindings_get_cmds(map)
@@ -179,8 +179,8 @@ end
 
 --DOC
 -- Get a table of all bindings.
-function ioncorelib.getbindings(maybe_context)
-    local bindings=ioncore.getbindings()
+function ioncore.getbindings(maybe_context)
+    local bindings=ioncore.do_getbindings()
     if maybe_context then
         bindings_get_cmds(bindings[maybe_context])
         return bindings[maybe_context]

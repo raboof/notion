@@ -1,5 +1,5 @@
 --
--- ion/query/querylib.lua -- Some common queries for Ion
+-- ion/query/mod_query.lua -- Some common queries for Ion
 -- 
 -- Copyright (c) Tuomo Valkonen 2004.
 -- 
@@ -13,15 +13,24 @@
 -- This is a slight abuse of the _LOADED variable perhaps, but library-like 
 -- packages should handle checking if they're loaded instead of confusing 
 -- the user with require/include differences.
-if _LOADED["querylib"] then return end
+if _LOADED["mod_query"] then return end
 
-local querylib={}
-_G.querylib=querylib
+if not ioncore.load_module("mod_query") then
+    return
+end
+
+local mod_query=_G["mod_query"]
+
+assert(mod_query)
+
+-- Load some useful routines
+dopath("ext_misc")
+
 
 -- Generic helper functions {{{
 
 
-function querylib.make_completor(completefn)
+function mod_query.make_completor(completefn)
     local function completor(wedln, str)
         wedln:set_completions(completefn(str))
     end
@@ -29,7 +38,7 @@ function querylib.make_completor(completefn)
 end
 
     
-function querylib.do_query(mplex, prompt, initvalue, handler, completor)
+function mod_query.query(mplex, prompt, initvalue, handler, completor)
     local function handle_it(str)
         handler(mplex, str)
     end
@@ -40,7 +49,7 @@ function querylib.do_query(mplex, prompt, initvalue, handler, completor)
             return
         end
     end
-    mod_query.query(mplex, prompt, initvalue, handle_it, completor)
+    mod_query.do_query(mplex, prompt, initvalue, handle_it, completor)
 end
 
 
@@ -48,39 +57,38 @@ end
 -- This function query will display a query with prompt \var{prompt} in
 -- \var{mplex} and if the user answers affirmately, call \var{handler}
 -- with \var{mplex} as parameter.
-function querylib.query_yesno(mplex, prompt, handler)
+function mod_query.query_yesno(mplex, prompt, handler)
     local function handler_yesno(mplex, str)
         if str=="y" or str=="Y" or str=="yes" then
             handler(mplex)
         end
     end
-    return querylib.do_query(mplex, prompt, nil, handler_yesno, nil)
+    return mod_query.query(mplex, prompt, nil, handler_yesno, nil)
 end
 
 
-function querylib.do_query_execfile(mplex, prompt, prog)
+function mod_query.query_execfile(mplex, prompt, prog)
     assert(prog~=nil)
     local function handle_execwith(mplex, str)
         ioncore.exec(prog.." "..string.shell_safe(str))
     end
-    return querylib.do_query(mplex, prompt, querylib.get_initdir(),
-                             handle_execwith, querylib.file_completor)
+    return mod_query.query(mplex, prompt, mod_query.get_initdir(),
+                           handle_execwith, mod_query.file_completor)
 end
 
 
-function querylib.do_query_execwith(mplex, prompt, dflt, prog, completor)
+function mod_query.query_execwith(mplex, prompt, dflt, prog, completor)
     local function handle_execwith(frame, str)
         if not str or str=="" then
             str=dflt
         end
         ioncore.exec(prog.." "..string.shell_safe(str))
     end
-    return querylib.do_query(mplex, prompt, nil, 
-                             handle_execwith, completor)
+    return mod_query.query(mplex, prompt, nil, handle_execwith, completor)
 end
 
 
-function querylib.lookup_script_warn(mplex, script)
+function mod_query.lookup_script_warn(mplex, script)
     local script=ioncore.lookup_script(script)
     if not script then
         mod_query.warn(mplex, "Could not find "..script)
@@ -89,9 +97,9 @@ function querylib.lookup_script_warn(mplex, script)
 end
 
 
-function querylib.get_initdir()
-    if querylib.last_dir then
-        return querylib.last_dir
+function mod_query.get_initdir()
+    if mod_query.last_dir then
+        return mod_query.last_dir
     end
     local wd=os.getenv("PWD")
     if wd==nil then
@@ -104,7 +112,7 @@ end
 
 local MAXDEPTH=10
 
-function querylib.lookup_workspace_classes()
+function mod_query.lookup_workspace_classes()
     local classes={}
     
     for k, v in _G do
@@ -127,7 +135,7 @@ function querylib.lookup_workspace_classes()
 end
 
 
-function querylib.complete_from_list(list, str)
+function mod_query.complete_from_list(list, str)
     local results={}
     local len=string.len(str)
     if len==0 then
@@ -146,7 +154,7 @@ end
 
 local pipes={}
 
-querylib.COLLECT_THRESHOLD=2000
+mod_query.COLLECT_THRESHOLD=2000
 
 --DOC
 -- This function can be used to read completions from an external source.
@@ -154,7 +162,7 @@ querylib.COLLECT_THRESHOLD=2000
 -- the command should on the first line write the \var{common_part} 
 -- parameter of \fnref{WEdln.set_completions} and a single actual completion
 -- on each of the successive lines.
-function querylib.popen_completions(wedln, cmd, beg)
+function mod_query.popen_completions(wedln, cmd, beg)
     
     local pst={wedln=wedln, maybe_stalled=0}
     
@@ -172,7 +180,7 @@ function querylib.popen_completions(wedln, cmd, beg)
             pst.maybe_stalled=0
             
             totallen=totallen+string.len(str)
-            if totallen>ioncorelib.RESULT_DATA_LIMIT then
+            if totallen>ioncore.RESULT_DATA_LIMIT then
                 error("Too much result data")
             end
 
@@ -190,7 +198,7 @@ function querylib.popen_completions(wedln, cmd, beg)
                                  lines=lines+1
                              end)
             
-            if lines>querylib.COLLECT_THRESHOLD then
+            if lines>mod_query.COLLECT_THRESHOLD then
                 collectgarbage()
                 lines=0
             end
@@ -254,20 +262,20 @@ local function complete_name(str, list)
     return entries
 end
 
-function querylib.complete_clientwin(str)
+function mod_query.complete_clientwin(str)
     return complete_name(str, ioncore.clientwin_list())
 end
 
-function querylib.complete_workspace(str)
+function mod_query.complete_workspace(str)
     return complete_name(str, ioncore.region_list("WGenWS"))
 end
 
-function querylib.complete_region(str)
+function mod_query.complete_region(str)
     return complete_name(str, ioncore.region_list())
 end
 
 
-function querylib.gotoclient_handler(frame, str)
+function mod_query.gotoclient_handler(frame, str)
     local cwin=ioncore.lookup_clientwin(str)
     
     if cwin==nil then
@@ -278,7 +286,7 @@ function querylib.gotoclient_handler(frame, str)
     end
 end
 
-function querylib.attachclient_handler(frame, str)
+function mod_query.attachclient_handler(frame, str)
     local cwin=ioncore.lookup_clientwin(str)
     
     if not cwin then
@@ -292,17 +300,17 @@ function querylib.attachclient_handler(frame, str)
 end
 
 
-function querylib.workspace_handler(mplex, name)
+function mod_query.workspace_handler(mplex, name)
     local ws=ioncore.lookup_region(name, "WGenWS")
     if ws then
         ws:goto()
         return
     end
     
-    local classes=querylib.lookup_workspace_classes()
+    local classes=mod_query.lookup_workspace_classes()
     
     local function completor(wedln, what)
-        local results=querylib.complete_from_list(classes, what)
+        local results=mod_query.complete_from_list(classes, what)
         wedln:set_completions(results)
     end
     
@@ -331,7 +339,7 @@ function querylib.workspace_handler(mplex, name)
     
     local prompt="Workspace type ("..DEFAULT_WS_TYPE.."):"
     
-    querylib.do_query(mplex, prompt, "", handler, completor)
+    mod_query.query(mplex, prompt, "", handler, completor)
 end
 
 
@@ -339,20 +347,20 @@ end
 -- This query asks for the name of a client window and attaches
 -- it to the frame the query was opened in. It uses the completion
 -- function \fnref{ioncore.complete_clientwin}.
-function querylib.query_gotoclient(mplex)
-    querylib.do_query(mplex, "Go to window:", nil,
-                      querylib.gotoclient_handler,
-                      querylib.make_completor(querylib.complete_clientwin))
+function mod_query.query_gotoclient(mplex)
+    mod_query.query(mplex, "Go to window:", nil,
+                    mod_query.gotoclient_handler,
+                    mod_query.make_completor(mod_query.complete_clientwin))
 end
 
 --DOC
 -- This query asks for the name of a client window and switches
 -- focus to the one entered. It uses the completion function
 -- \fnref{ioncore.complete_clientwin}.
-function querylib.query_attachclient(mplex)
-    querylib.do_query(mplex, "Attach window:", nil,
-                      querylib.attachclient_handler, 
-                      querylib.make_completor(querylib.complete_clientwin))
+function mod_query.query_attachclient(mplex)
+    mod_query.query(mplex, "Attach window:", nil,
+                    mod_query.attachclient_handler, 
+                    mod_query.make_completor(mod_query.complete_clientwin))
 end
 
 
@@ -362,10 +370,10 @@ end
 -- it will be switched to. Otherwise a new workspace with the
 -- entered name will be created and the user will be queried for
 -- the type of the workspace.
-function querylib.query_workspace(mplex)
-    querylib.do_query(mplex, "Go to or create workspace:", nil, 
-                      querylib.workspace_handler,
-                      querylib.make_completor(querylib.complete_workspace))
+function mod_query.query_workspace(mplex)
+    mod_query.query(mplex, "Go to or create workspace:", nil, 
+                    mod_query.workspace_handler,
+                    mod_query.make_completor(mod_query.complete_workspace))
 end
 
 
@@ -373,8 +381,8 @@ end
 -- This query asks whether the user wants to exit Ion (no session manager)
 -- or close the session (running under a session manager that supports such
 -- requests). If the answer is 'y', 'Y' or 'yes', so will happen.
-function querylib.query_shutdown(mplex)
-    querylib.query_yesno(mplex, "Exit Ion/Shutdown session (y/n)?", 
+function mod_query.query_shutdown(mplex)
+    mod_query.query_yesno(mplex, "Exit Ion/Shutdown session (y/n)?", 
                          ioncore.shutdown)
 end
 
@@ -382,29 +390,29 @@ end
 --DOC
 -- This query asks whether the user wants restart Ioncore.
 -- If the answer is 'y', 'Y' or 'yes', so will happen.
-function querylib.query_restart(mplex)
-    querylib.query_yesno(mplex, "Restart Ion (y/n)?", ioncore.restart)
+function mod_query.query_restart(mplex)
+    mod_query.query_yesno(mplex, "Restart Ion (y/n)?", ioncore.restart)
 end
 
 
 --DOC
 -- This function asks for a name new for the frame where the query
 -- was created.
-function querylib.query_renameframe(frame)
-    querylib.do_query(frame, "Frame name:", frame:name(),
-                      function(frame, str) frame:set_name(str) end,
-                      nil)
+function mod_query.query_renameframe(frame)
+    mod_query.query(frame, "Frame name:", frame:name(),
+                    function(frame, str) frame:set_name(str) end,
+                    nil)
 end
 
 
 --DOC
 -- This function asks for a name new for the workspace on which the
 -- query resides.
-function querylib.query_renameworkspace(mplex)
-    local ws=ioncorelib.find_manager(mplex, "WGenWS")
-    querylib.do_query(mplex, "Workspace name:", ws:name(),
-                      function(mplex, str) ws:set_name(str) end,
-                      nil)
+function mod_query.query_renameworkspace(mplex)
+    local ws=ext_misc.find_manager(mplex, "WGenWS")
+    mod_query.query(mplex, "Workspace name:", ws:name(),
+                    function(mplex, str) ws:set_name(str) end,
+                    nil)
 end
 
 
@@ -414,10 +422,10 @@ end
 -- Run/view/edit {{{
 
 
-function querylib.file_completor(wedln, str, wp, beg)
+function mod_query.file_completor(wedln, str, wp, beg)
     local ic=ioncore.lookup_script("ion-completefile")
     if ic then
-        querylib.popen_completions(wedln,
+        mod_query.popen_completions(wedln,
                                    ic..(wp or " ")..string.shell_safe(str),
                                    beg)
     end
@@ -428,9 +436,9 @@ end
 -- Asks for a file to be edited. It uses the script \file{ion-edit} to
 -- start a program to edit the file. This script uses \file{run-mailcap}
 -- by default, but if you don't have it, you may customise the script.
-function querylib.query_editfile(mplex)
-    local script=querylib.lookup_script_warn(mplex, "ion-edit")
-    querylib.do_query_execfile(mplex, "Edit file:", script)
+function mod_query.query_editfile(mplex)
+    local script=mod_query.lookup_script_warn(mplex, "ion-edit")
+    mod_query.query_execfile(mplex, "Edit file:", script)
 end
 
 
@@ -438,25 +446,25 @@ end
 -- Asks for a file to be viewed. It uses the script \file{ion-view} to
 -- start a program to view the file. This script uses \file{run-mailcap}
 -- by default, but if you don't have it, you may customise the script.
-function querylib.query_runfile(mplex)
-    local script=querylib.lookup_script_warn(mplex, "ion-view")
-    querylib.do_query_execfile(mplex, "View file:", script)
+function mod_query.query_runfile(mplex)
+    local script=mod_query.lookup_script_warn(mplex, "ion-view")
+    mod_query.query_execfile(mplex, "View file:", script)
 end
 
 
-function querylib.exec_completor(wedln, str)
+function mod_query.exec_completor(wedln, str)
     local st, en, beg, tocompl=string.find(str, "^(.-)([^%s]*)$")
     if string.len(beg)==0 then
-        querylib.file_completor(wedln, tocompl, " -wp ")
+        mod_query.file_completor(wedln, tocompl, " -wp ")
     else
-        querylib.file_completor(wedln, tocompl, " ", beg)
+        mod_query.file_completor(wedln, tocompl, " ", beg)
     end
 end
 
 
-function querylib.exec_handler(frame, cmd)
+function mod_query.exec_handler(frame, cmd)
     if string.sub(cmd, 1, 1)==":" then
-        local ix=querylib.lookup_script_warn(frame, "ion-runinxterm")
+        local ix=mod_query.lookup_script_warn(frame, "ion-runinxterm")
         if not ix then return end
         cmd=ix.." "..string.sub(cmd, 2)
     end
@@ -468,9 +476,9 @@ end
 -- If the command is prefixed with a colon (':'), the command will
 -- be run in an XTerm (or other terminal emulator) using the script
 -- \file{ion-runinxterm}.
-function querylib.query_exec(mplex)
-    querylib.do_query(mplex, "Run:", nil, 
-                      querylib.exec_handler, querylib.exec_completor)
+function mod_query.query_exec(mplex)
+    mod_query.query(mplex, "Run:", nil, mod_query.exec_handler, 
+                    mod_query.exec_completor)
 end
 
 
@@ -480,11 +488,11 @@ end
 -- SSH {{{
 
 
-querylib.known_hosts={}
+mod_query.known_hosts={}
 
 
-function querylib.get_known_hosts(mplex)
-    querylib.known_hosts={}
+function mod_query.get_known_hosts(mplex)
+    mod_query.known_hosts={}
     local f
     local h=os.getenv("HOME")
     if h then 
@@ -497,14 +505,14 @@ function querylib.get_known_hosts(mplex)
     for l in f:lines() do
         local st, en, hostname=string.find(l, "^([^%s,]+)")
         if hostname then
-            table.insert(querylib.known_hosts, hostname)
+            table.insert(mod_query.known_hosts, hostname)
         end
     end
     f:close()
 end
 
 
-function querylib.complete_ssh(str)
+function mod_query.complete_ssh(str)
     local st, en, user, at, host=string.find(str, "^([^@]*)(@?)(.*)$")
     
     if string.len(at)==0 and string.len(host)==0 then
@@ -519,16 +527,16 @@ function querylib.complete_ssh(str)
     
     if string.len(host)==0 then
         if string.len(user)==0 then
-            return querylib.known_hosts
+            return mod_query.known_hosts
         end
         
-        for _, v in ipairs(querylib.known_hosts) do
+        for _, v in ipairs(mod_query.known_hosts) do
             table.insert(res, user .. v)
         end
         return res
     end
     
-    for _, v in ipairs(querylib.known_hosts) do
+    for _, v in ipairs(mod_query.known_hosts) do
         local s, e=string.find(v, host, 1, true)
         if s==1 and e>=1 then
             table.insert(res, user .. v)
@@ -543,11 +551,11 @@ end
 -- This query asks for a host to connect to with SSH. It starts
 -- up ssh in a terminal using \file{ion-ssh}. Hosts to tab-complete
 -- are read from \file{\~{}/.ssh/known\_hosts}.
-function querylib.query_ssh(mplex)
-    querylib.get_known_hosts(mplex)
-    local script=querylib.lookup_script_warn(mplex, "ion-ssh")
-    querylib.do_query_execwith(mplex, "SSH to:", nil, script,
-                               querylib.make_completor(querylib.complete_ssh))
+function mod_query.query_ssh(mplex)
+    mod_query.get_known_hosts(mplex)
+    local script=mod_query.lookup_script_warn(mplex, "ion-ssh")
+    mod_query.query_execwith(mplex, "SSH to:", nil, script,
+                             mod_query.make_completor(mod_query.complete_ssh))
 end
 
 
@@ -557,11 +565,11 @@ end
 -- Man pages {{{{
 
 
-function querylib.man_completor(wedln, str)
+function mod_query.man_completor(wedln, str)
     local mc=ioncore.lookup_script("ion-completeman")
     if mc then
-        querylib.popen_completions(wedln, mc.." -complete "..
-                                   string.shell_safe(str))
+        mod_query.popen_completions(wedln, mc.." -complete "..
+                                    string.shell_safe(str))
     end
 end
 
@@ -571,10 +579,10 @@ end
 -- \file{ion-man} to run \file{man} in a terminal emulator. By customizing
 -- this script it is possible use some other man page viewer. The script
 -- \file{ion-completeman} is used to complete manual pages.
-function querylib.query_man(mplex)
-    local script=querylib.lookup_script_warn(mplex, "ion-man")
-    querylib.do_query_execwith(mplex, "Manual page (ion):", "ion",
-                               script, querylib.man_completor)
+function mod_query.query_man(mplex)
+    local script=mod_query.lookup_script_warn(mplex, "ion-man")
+    mod_query.query_execwith(mplex, "Manual page (ion):", "ion",
+                             script, mod_query.man_completor)
 end
 
 
@@ -584,7 +592,7 @@ end
 -- Lua code execution {{{
 
 
-function querylib.create_run_env(mplex)
+function mod_query.create_run_env(mplex)
     local origenv=getfenv()
     local meta={__index=origenv, __newindex=origenv}
     local env={
@@ -595,7 +603,7 @@ function querylib.create_run_env(mplex)
     return env
 end
 
-function querylib.do_handle_lua(mplex, env, code)
+function mod_query.do_handle_lua(mplex, env, code)
     local f, err=loadstring(code)
     if not f then
         mod_query.warn(mplex, err)
@@ -614,7 +622,7 @@ local function getindex(t)
     return nil
 end
 
-function querylib.do_complete_lua(env, str)
+function mod_query.do_complete_lua(env, str)
     -- Get the variable to complete, including containing tables.
     -- This will also match string concatenations and such because
     -- Lua's regexps don't support optional subexpressions, but we
@@ -690,18 +698,18 @@ end
 -- in the local environment of the string to point to the mplex where the
 -- query was created. It also sets the table \var{arg} in the local
 -- environment to \code{\{_, _:current()\}}.
-function querylib.query_lua(mplex)
-    local env=querylib.create_run_env(mplex)
+function mod_query.query_lua(mplex)
+    local env=mod_query.create_run_env(mplex)
     
     local function complete(wedln, code)
-        wedln:set_completions(querylib.do_complete_lua(env, code))
+        wedln:set_completions(mod_query.do_complete_lua(env, code))
     end
     
     local function handler(mplex, code)
-        return querylib.do_handle_lua(mplex, env, code)
+        return mod_query.do_handle_lua(mplex, env, code)
     end
     
-    querylib.do_query(mplex, "Lua code to run: ", nil, handler, complete)
+    mod_query.query(mplex, "Lua code to run: ", nil, handler, complete)
 end
 
 -- }}}
@@ -711,8 +719,14 @@ end
 
 --DOC
 -- This query can be used to create a query of a defined menu.
-function querylib.query_menu(mplex, prompt, menuname)
-    local menu=menulib.getmenu(menuname)
+function mod_query.query_menu(mplex, prompt, menuname)
+    if not mod_menu then
+        mod_query.warn(mplex, "mod_menu not loaded.")
+        return
+    end
+    
+    local menu=mod_menu.getmenu(menuname)
+    
     if not menu then
         mod_query.warn(mplex, "Unknown menu "..tostring(menuname))
         return
@@ -744,15 +758,15 @@ function querylib.query_menu(mplex, prompt, menuname)
                     mod_query.warn(mplex, err)
                 end
             elseif e.submenu_fn then
-                querylib.query_menu(mplex, e.name.." menu:", e.submenu_fn())
+                mod_query.query_menu(mplex, e.name.." menu:", e.submenu_fn())
             end
         else
             mod_query.warn(mplex, "No entry '"..str.."'.")
         end
     end
     
-    querylib.do_query(mplex, prompt, nil, handle,
-                      querylib.make_completor(complete))
+    mod_query.query(mplex, prompt, nil, handle, 
+                    mod_query.make_completor(complete))
 end
 
 -- }}}
@@ -763,14 +777,14 @@ end
 
 --DOC 
 -- Display an "About Ion" message in \var{mplex}.
-function querylib.show_about_ion(mplex)
+function mod_query.show_about_ion(mplex)
     mod_query.message(mplex, ioncore.aboutmsg())
 end
 
 
 --DOC
 -- Show information about a client window.
-function querylib.show_clientwin(mplex, cwin)
+function mod_query.show_clientwin(mplex, cwin)
     local function indent(s)
         local i="    "
         return i..string.gsub(s, "\n", "\n"..i)
@@ -799,4 +813,4 @@ end
 
 
 -- Mark ourselves loaded.
-_LOADED["querylib"]=true
+_LOADED["mod_query"]=true

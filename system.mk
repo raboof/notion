@@ -27,11 +27,11 @@ INCDIR=$(PREFIX)/include/ion
 # Nothing at the moment
 LIBDIR=$(PREFIX)/lib
 # Modules
-MODULEDIR=$(LIBDIR)/ion
+MODULEDIR=$(LIBDIR)/ion/mod
 # Compiled Lua source code
 LCDIR=$(LIBDIR)/ion/lc
 # ion-completefile (does not belong in SHAREDIR being a binary file)
-EXTRABINDIR=$(LIBDIR)/ion
+EXTRABINDIR=$(LIBDIR)/ion/bin
 # For ion-completeman system-wide cache
 VARDIR=/var/cache/ion
 

@@ -1,5 +1,5 @@
 --
--- ion/share/ioncorelib-luaext.lua
+-- ion/share/ioncore-luaext.lua
 -- 
 -- Copyright (c) Tuomo Valkonen 2004.
 --
@@ -40,6 +40,7 @@ function table.copy(t, deep)
     return docopy(t, deep, deep and {})
 end
 
+
 --DOC
 -- Create a table containing all entries from \var{t1} and those from
 -- \var{t2} that are missing from \var{t1}.
@@ -54,6 +55,10 @@ function table.join(t1, t2)
 end
 
 
---function os.execute()
---    warn("Do not use os.execute. Use ioncore.exec.")
---end
+--DOC
+-- Export a list of functions from \var{lib} into global namespace.
+function export(lib, ...)
+    for k, v in arg do
+        _G[v]=lib[v]
+    end
+end

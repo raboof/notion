@@ -70,7 +70,7 @@ end
 -- Dock settings menu
 -- 
 
-dopath('menulib')
+dopath('mod_menu')
 
 defmenu("dock-settings", {
     menuentry("Pos-TL", "_:set{pos='tl'}"),
@@ -84,6 +84,6 @@ defmenu("dock-settings", {
 })
 
 defbindings("WDock", {
-    mpress("Button3", "menulib.pmenu(_, _sub, 'dock-settings')"),
+    mpress("Button3", "mod_menu.pmenu(_, _sub, 'dock-settings')"),
 })
 

@@ -1,5 +1,5 @@
 --
--- ion/share/ioncorelib.lua -- Ioncore Lua library
+-- ion/share/ioncore.lua -- Ioncore Lua library
 -- 
 -- Copyright (c) Tuomo Valkonen 2004.
 --
@@ -12,10 +12,9 @@
 -- This is a slight abuse of the _LOADED variable perhaps, but library-like 
 -- packages should handle checking if they're loaded instead of confusing 
 -- the user with require/includer differences.
-if _LOADED["ioncorelib"] then return end
+if _LOADED["ioncore"] then return end
 
-local ioncorelib={}
-_G.ioncorelib=ioncorelib
+local ioncore=_G.ioncore
 
 -- Default modifiers
 MOD1="Mod1+"
@@ -25,30 +24,31 @@ MOD2=""
 DEFAULT_WS_TYPE="WIonWS"
 
 -- How many characters of result data to completions do we allow?
-ioncorelib.RESULT_DATA_LIMIT=1024^2
+ioncore.RESULT_DATA_LIMIT=1024^2
 
 -- Bindings, winprops, hooks and extra commands
-dopath('ioncorelib-luaext')
-dopath('ioncorelib-bindings')
-dopath('ioncorelib-winprops')
-dopath('ioncorelib-extras')
+dopath('ioncore-luaext')
+dopath('ioncore-bindings')
+dopath('ioncore-winprops')
 
 -- Export some important functions into global namespace.
-ioncorelib.export(ioncorelib, 
-                  "submap",
-                  "kpress",
-                  "kpress_wait",
-                  "mpress",
-                  "mclick",
-                  "mdblclick",
-                  "mdrag",
-                  "defbindings",
-                  "defwinprop")
+export(ioncore, 
+       "submap",
+       "kpress",
+       "kpress_wait",
+       "mpress",
+       "mclick",
+       "mdblclick",
+       "mdrag",
+       "defbindings",
+       "defwinprop")
 
---[[ioncorelib.export(ioncore,
-                  "warn",
-                  "exec")--]]
+--[[
+export(ioncore,
+       "warn",
+       "exec")
+--]]
 
 -- Mark ourselves loaded.
-_LOADED["ioncorelib"]=true
+_LOADED["ioncore"]=true
 

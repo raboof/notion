@@ -66,7 +66,7 @@ bool mod_menu_init()
         return FALSE;
     }
     
-    ioncore_read_config("menu", NULL, TRUE);
+    ioncore_read_config("cfg_menu", NULL, TRUE);
     
     return TRUE;
 }

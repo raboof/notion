@@ -15,7 +15,7 @@ INCLUDES += $(X11_INCLUDES) -I..
 CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
 SOURCES=dock.c
-ETC=dock.lua dock-draw.lua
+ETC=cfg_dock.lua dock-draw.lua
 DOCS=LICENSE README.dock
 
 MAKE_EXPORTS=mod_dock

@@ -143,19 +143,19 @@ WBindmap *ioncore_lookup_bindmap(const char *name)
 
 
 EXTL_EXPORT
-bool ioncore_defbindings(const char *name, ExtlTab tab)
+bool ioncore_do_defbindings(const char *name, ExtlTab tab)
 {
     WBindmap *bm=ioncore_lookup_bindmap(name);
     if(bm==NULL){
         warn("Unknown bindmap %s.", name);
         return FALSE;
     }
-    return ioncore_do_defbindings(bm, tab);
+    return bindmap_defbindings(bm, tab);
 }
 
 
 EXTL_EXPORT
-ExtlTab ioncore_getbindings()
+ExtlTab ioncore_do_getbindings()
 {
     Rb_node node;
     ExtlTab tab;
@@ -163,7 +163,7 @@ ExtlTab ioncore_getbindings()
     tab=extl_create_table();
     
     rb_traverse(node, known_bindmaps){
-        ExtlTab bmtab=ioncore_do_getbindings((WBindmap*)rb_val(node));
+        ExtlTab bmtab=bindmap_getbindings((WBindmap*)rb_val(node));
         extl_table_sets_t(tab, (const char*)node->k.key, bmtab);
         extl_unref_table(bmtab);
     }

@@ -29,7 +29,7 @@ defbindings("WFloatFrame", {
      -- in ion-bindings.lua now:
     --mdrag(MOD1.."Button1",      "WFrame.p_move(_)"),
     
-    kpress(MOD1.."M",           "menulib.menu(_, _sub, 'ctxmenu-floatframe')"),
-    mpress("Button3@tab",       "menulib.pmenu(_, _sub, 'ctxmenu-floatframe')"),
+    kpress(MOD1.."M",           "mod_menu.menu(_, _sub, 'ctxmenu-floatframe')"),
+    mpress("Button3@tab",       "mod_menu.pmenu(_, _sub, 'ctxmenu-floatframe')"),
 })
 

@@ -8,8 +8,8 @@ include $(TOPDIR)/system-inc.mk
 
 ######################################
 
-ETC =	ion.lua ion-bindings.lua ion-menus.lua kludges.lua \
-	ionws.lua floatws.lua query.lua menu.lua \
+ETC =	cfg_ion.lua cfg_bindings.lua cfg_menus.lua cfg_kludges.lua \
+	cfg_ionws.lua cfg_floatws.lua cfg_query.lua cfg_menu.lua \
 	look-brownsteel.lua look-clean.lua look-dusky.lua \
 	look-greyviolet.lua look-ios.lua look-cleanviolet.lua \
 	look-simpleblue.lua look-wheat2.lua look-cleanios.lua
@@ -25,5 +25,5 @@ _install:
 	for i in $(ETC); do \
 		$(INSTALL) -m $(DATA_MODE) $$i $(ETCDIR); \
 	done
-	rm -f $(ETCDIR)/draw.lua
-	ln -s look-cleanviolet.lua $(ETCDIR)/draw.lua
+	rm -f $(ETCDIR)/look.lua
+	ln -s look-cleanviolet.lua $(ETCDIR)/look.lua

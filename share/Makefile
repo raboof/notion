@@ -11,9 +11,8 @@ include $(TOPDIR)/system-inc.mk
 SUBDIRS=ion-completefile
 INSTALL_SUBDIRS=$(SUBDIRS)
 
-LUA_SOURCES = ioncorelib.lua ioncorelib-luaext.lua \
-	      ioncorelib-bindings.lua ioncorelib-winprops.lua \
-              ioncorelib-extras.lua ioncore-efbb.lua
+LUA_SOURCES = ioncore-ext.lua ioncore-luaext.lua ioncore-bindings.lua \
+	      ioncore-winprops.lua ioncore-efbb.lua ext_misc.lua
 
 SHELLSCRIPTS = ion-edit ion-man ion-runinxterm ion-ssh ion-view \
 	       ion-completeman
@@ -33,9 +32,9 @@ _install:
 	for i in $(SHELLSCRIPTS); do \
 		$(INSTALL) -m $(BIN_MODE) $$i $(SHAREDIR); \
 	done
-	for i in $(LUA_SOURCES) $(MISC_SHARE); do \
-		$(INSTALL) -m $(DATA_MODE) $$i $(SHAREDIR); \
-	done
+	#for i in $(LUA_SOURCES) $(MISC_SHARE); do \
+	#	$(INSTALL) -m $(DATA_MODE) $$i $(SHAREDIR); \
+	#done
 	$(INSTALLDIR) $(LCDIR)
 	for i in $(LUA_COMPILED); do \
 		$(INSTALL) -m $(DATA_MODE) $$i $(LCDIR); \

@@ -130,7 +130,7 @@ bool mod_autows_init()
     }
     
     ioncore_read_config("templates", NULL, TRUE);
-    ioncore_read_config("autows", NULL, FALSE);
+    ioncore_read_config("cfg_autows", NULL, FALSE);
 
     return TRUE;
     

@@ -108,7 +108,7 @@ bool mod_floatws_init()
         goto err;
     }
 
-    ioncore_read_config("floatws", NULL, TRUE);
+    ioncore_read_config("cfg_floatws", NULL, TRUE);
     
     hook_add(clientwin_do_manage_alt, 
              (WHookDummy*)mod_floatws_clientwin_do_manage);

@@ -38,14 +38,14 @@ defbindings("WScreen", {
     kpress(MOD1.."Shift+Left",  "ioncore.goto_next_screen()"),
     kpress(MOD1.."Shift+Right", "ioncore.goto_prev_screen()"),
     
-    kpress(MOD1.."F1",          "ioncorelib.show_manual('ion')"),
+    kpress(MOD1.."F1",          "ext_misc.show_manual('ion')"),
     kpress(MOD2.."F2",          "ioncore.exec_on(_, 'xterm')"),
     
-    kpress(MOD1.."F9",          "ioncorelib.create_new_ws(_)"),
+    kpress(MOD1.."F9",          "ext_misc.create_new_ws(_)"),
     
-    kpress(MOD2.."F12",         "menulib.bigmenu(_, _sub, 'mainmenu')"),
-    mpress("Button2",           "menulib.pmenu(_, _sub, 'windowlist')"),
-    mpress("Button3",           "menulib.pmenu(_, _sub, 'mainmenu')"),
+    kpress(MOD2.."F12",         "mod_menu.bigmenu(_, _sub, 'mainmenu')"),
+    mpress("Button2",           "mod_menu.pmenu(_, _sub, 'windowlist')"),
+    mpress("Button3",           "mod_menu.pmenu(_, _sub, 'mainmenu')"),
 })
 
 
@@ -76,13 +76,13 @@ defbindings("WMPlex", {
     }),    
     
     -- Queries
-    kpress(MOD2.."F1",          "querylib.query_man(_)"),
-    kpress(MOD2.."F3",          "querylib.query_exec(_)"),
-    kpress(MOD1.."F3",          "querylib.query_lua(_)"),
-    kpress(MOD2.."F4",          "querylib.query_ssh(_)"),
-    kpress(MOD2.."F5",          "querylib.query_editfile(_)"),
-    kpress(MOD2.."F6",          "querylib.query_runfile(_)"),
-    kpress(MOD2.."F9",          "querylib.query_workspace(_)"),
+    kpress(MOD2.."F1",          "mod_query.query_man(_)"),
+    kpress(MOD2.."F3",          "mod_query.query_exec(_)"),
+    kpress(MOD1.."F3",          "mod_query.query_lua(_)"),
+    kpress(MOD2.."F4",          "mod_query.query_ssh(_)"),
+    kpress(MOD2.."F5",          "mod_query.query_editfile(_)"),
+    kpress(MOD2.."F6",          "mod_query.query_runfile(_)"),
+    kpress(MOD2.."F9",          "mod_query.query_workspace(_)"),
 })
 
 
@@ -121,14 +121,14 @@ defbindings("WFrame", {
         -- Attach tagged objects
         kpress("AnyModifier+A", "WFrame.attach_tagged(_)"),
     }),
-           
+
     -- Queries
-    kpress(MOD1.."A",           "querylib.query_attachclient(_)"),
-    kpress(MOD1.."G",           "querylib.query_gotoclient(_)"),
+    kpress(MOD1.."A",           "mod_query.query_attachclient(_)"),
+    kpress(MOD1.."G",           "mod_query.query_gotoclient(_)"),
            
     -- Menus
-    kpress(MOD1.."M",           "menulib.menu(_, _sub, 'ctxmenu')"),
-    mpress("Button3",           "menulib.pmenu(_, _sub, 'ctxmenu')"),
+    kpress(MOD1.."M",           "mod_menu.menu(_, _sub, 'ctxmenu')"),
+    mpress("Button3",           "mod_menu.pmenu(_, _sub, 'ctxmenu')"),
     
     -- Move/resize mode
     kpress(MOD1.."R",           "WFrame.begin_moveres(_)"),

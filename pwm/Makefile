@@ -46,7 +46,7 @@ else
 LINKOPTS = -export-dynamic
 endif
 
-ETC = pwm.lua pwm-menus.lua pwm-bindings.lua
+ETC = cfg_pwm.lua cfg_pwm_menus.lua cfg_pwm_bindings.lua
 TARGETS = pwm
 
 ######################################

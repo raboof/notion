@@ -1382,7 +1382,7 @@ bool mod_dock_init()
         ioncore_unregister_regclass(&CLASSDESCR(WDock));
     }
 
-    ioncore_read_config(modname, NULL, TRUE);
+    ioncore_read_config("cfg_dock", NULL, TRUE);
 
     hook_add(clientwin_do_manage_alt, 
              (WHookDummy*)clientwin_do_manage_hook);

@@ -128,7 +128,7 @@ bool mod_query_init()
         goto err;
     }
 
-    ioncore_read_config("query", NULL, TRUE);
+    ioncore_read_config("cfg_query", NULL, TRUE);
 
     load_history();
     

@@ -1,5 +1,5 @@
 --
--- ion/share/menulib.lua -- Helper functions for defining menus.
+-- ion/share/mod_menu.lua -- Helper functions for defining menus.
 -- 
 -- Copyright (c) Tuomo Valkonen 2004.
 --
@@ -12,10 +12,15 @@
 -- This is a slight abuse of the _LOADED variable perhaps, but library-like 
 -- packages should handle checking if they're loaded instead of confusing 
 -- the user with require/include differences.
-if _LOADED["menulib"] then return end
+if _LOADED["mod_menu"] then return end
 
-local menulib={}
-_G.menulib=menulib
+if not ioncore.load_module("mod_menu") then
+    return
+end
+
+local mod_menu=_G["mod_menu"]
+
+assert(mod_menu)
 
 -- Table to hold defined menus.
 local menus={}
@@ -26,14 +31,14 @@ local menus={}
 --DOC
 -- Define a new menu with \var{name} being the menu's name and \var{tab} 
 -- being a table of menu entries.
-function menulib.defmenu(name, tab)
+function mod_menu.defmenu(name, tab)
     menus[name]=tab
 end
 
 --DOC
 -- If \var{menu_or_name} is a string, returns a menu defined
 -- with \fnref{defmenu}, else return \var{menu_or_name}.
-function menulib.getmenu(menu_or_name)
+function mod_menu.getmenu(menu_or_name)
     if type(menu_or_name)=="string" then
         if type(menus[menu_or_name])=="table" then
             return menus[menu_or_name]
@@ -49,9 +54,9 @@ end
 -- Use this function to define normal menu entries. The string \var{name} 
 -- is the string shown in the visual representation of menu, and the
 -- parameter \var{cmd} and \var{guard} are similar to those of
--- \fnref{ioncorelib.defbindings}.
-function menulib.menuentry(name, cmd, guard)
-    local fn, gfn=ioncorelib.compile_cmd(cmd, guard)
+-- \fnref{ioncore.defbindings}.
+function mod_menu.menuentry(name, cmd, guard)
+    local fn, gfn=ioncore.compile_cmd(cmd, guard)
     if fn then
         return {name=name, func=fn, guard_func=gfn}
     end
@@ -61,11 +66,11 @@ end
 -- Use this function to define menu entries for submenus. The parameter
 -- \fnref{sub_or_name} is either a table of menu entries or the name
 -- of an already defined menu.
-function menulib.submenu(name, sub_or_name)
+function mod_menu.submenu(name, sub_or_name)
     return {
         name=name,
         submenu_fn=function() 
-                       return menulib.getmenu(sub_or_name) 
+                       return mod_menu.getmenu(sub_or_name) 
                    end
     }
 end
@@ -93,29 +98,29 @@ local function do_menu(reg, sub, menu_or_name, fn, check)
         end
     end
     
-    return fn(reg, wrapper, menulib.getmenu(menu_or_name))
+    return fn(reg, wrapper, mod_menu.getmenu(menu_or_name))
 end
 
 
 --DOC
 -- Display a menu in the lower-left corner of \var{mplex}.
 -- The variable \var{menu_or_name} is either the name of a menu
--- defined with \fnref{menulib.defmenu} or directly a table similar
+-- defined with \fnref{mod_menu.defmenu} or directly a table similar
 -- to ones passesd to this function. When this function is
 -- called from a binding handler, \var{sub} should be set to
 -- the second argument of to the binding handler (\var{_sub})
 -- so that the menu handler will get the same parameters as the
 -- binding handler.
-function menulib.menu(mplex, sub, menu_or_name) 
-    return do_menu(mplex, sub, menu_or_name, mod_menu.menu, true)
+function mod_menu.menu(mplex, sub, menu_or_name) 
+    return do_menu(mplex, sub, menu_or_name, mod_menu.do_menu, true)
 end
 
 --DOC
--- This function is similar to \fnref{menulib.menu}, but
+-- This function is similar to \fnref{mod_menu.menu}, but
 -- a style with possibly bigger font and menu entries is used.
-function menulib.bigmenu(mplex, sub, menu_or_name) 
+function mod_menu.bigmenu(mplex, sub, menu_or_name) 
     local function menu_bigmenu(m, s, menu)
-        return mod_menu.menu(m, s, menu, true)
+        return mod_menu.do_menu(m, s, menu, true)
     end
     return do_menu(mplex, sub, menu_or_name, menu_bigmenu, true)
 end
@@ -123,9 +128,9 @@ end
 --DOC
 -- This function displays a drop-down menu and should only
 -- be called from a mouse press handler. The parameters are
--- similar to thos of \fnref{menulib.menu}.
-function menulib.pmenu(win, sub, menu_or_name) 
-    return do_menu(win, sub, menu_or_name, mod_menu.pmenu)
+-- similar to thos of \fnref{mod_menu.menu}.
+function mod_menu.pmenu(win, sub, menu_or_name) 
+    return do_menu(win, sub, menu_or_name, mod_menu.do_pmenu)
 end
 
 -- }}}
@@ -181,7 +186,7 @@ local function selectstyle(look, where)
         end
     end
 
-    if not querylib or not mod_query then
+    if not mod_query then
         if fname then
             writeit()
         end
@@ -198,8 +203,8 @@ local function selectstyle(look, where)
         return
     end
     
-    querylib.query_yesno(where, "Save look selection in "..fname.."?",
-                         writeit)
+    mod_query.query_yesno(where, "Save look selection in "..fname.."?",
+                          writeit)
 end
 
 local function receive_styles(str)
@@ -207,7 +212,7 @@ local function receive_styles(str)
     
     while str do
         data=data .. str
-        if string.len(data)>ioncorelib.RESULT_DATA_LIMIT then
+        if string.len(data)>ioncore.RESULT_DATA_LIMIT then
             error("Too much result data")
         end
         str=coroutine.yield()
@@ -235,7 +240,7 @@ local function receive_styles(str)
     end
     
     table.insert(stylemenu, menuentry("Refresh list",
-                                      menulib.refresh_styles))
+                                      mod_menu.refresh_styles))
     
     menus.stylemenu=stylemenu
 end
@@ -243,7 +248,7 @@ end
 
 --DOC
 -- Refresh list of known style files.
-function menulib.refresh_styles()
+function mod_menu.refresh_styles()
     local cmd=ioncore.lookup_script("ion-completefile")
     if cmd then
         local dirs=ioncore.get_scriptdirs()
@@ -260,12 +265,12 @@ end
 
 -- }}}
 
-ioncorelib.export(menulib,
-                  "defmenu",
-                  "menuentry",
-                  "submenu")
+export(mod_menu,
+       "defmenu",
+       "menuentry",
+       "submenu")
 
-menulib.refresh_styles()
+mod_menu.refresh_styles()
 
 -- Mark ourselves loaded.
-_LOADED["menulib"]=true
+_LOADED["mod_menu"]=true
