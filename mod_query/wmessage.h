@@ -1,5 +1,5 @@
 /*
- * ion/query/wmessage.h
+ * ion/mod_query/wmessage.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -9,8 +9,8 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_QUERY_WMESSAGE_H
-#define ION_QUERY_WMESSAGE_H
+#ifndef ION_MOD_QUERY_WMESSAGE_H
+#define ION_MOD_QUERY_WMESSAGE_H
 
 #include <ioncore/common.h>
 #include <libtu/obj.h>
@@ -29,4 +29,4 @@ DECLCLASS(WMessage){
 extern WMessage *create_wmsg(WWindow *par, const WFitParams *fp,
                              const char *msg);
 
-#endif /* ION_QUERY_WMESSAGE_H */
+#endif /* ION_MOD_QUERY_WMESSAGE_H */

@@ -1,5 +1,5 @@
 /*
- * ion/query/query.h
+ * ion/mod_query/query.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -9,8 +9,8 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_QUERY_QUERY_H
-#define ION_QUERY_QUERY_H
+#ifndef ION_MOD_QUERY_QUERY_H
+#define ION_MOD_QUERY_QUERY_H
 
 #include <ioncore/common.h>
 #include <ioncore/mplex.h>
@@ -21,4 +21,4 @@ extern WEdln *mod_query_query(WMPlex *mplex, const char *prompt,
                              const char *dflt, ExtlFn handler, 
                              ExtlFn completor);
 
-#endif /* ION_QUERY_QUERY_H */
+#endif /* ION_MOD_QUERY_QUERY_H */

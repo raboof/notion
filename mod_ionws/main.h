@@ -1,5 +1,5 @@
 /*
- * ion/ionws/main.h
+ * ion/mod_ionws/main.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -9,8 +9,8 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_IONWS_MAIN_H
-#define ION_IONWS_MAIN_H
+#ifndef ION_MOD_IONWS_MAIN_H
+#define ION_MOD_IONWS_MAIN_H
 
 #include <ioncore/binding.h>
 #include <ioncore/regbind.h>
@@ -21,4 +21,4 @@ extern void mod_ionws_deinit();
 extern WBindmap *mod_ionws_ionws_bindmap;
 extern WBindmap *mod_ionws_ionframe_bindmap;
 
-#endif /* ION_IONWS_MAIN_H */
+#endif /* ION_MOD_IONWS_MAIN_H */

@@ -1,5 +1,5 @@
 /*
- * ion/menu/mkmenu.h
+ * ion/mod_menu/mkmenu.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -9,8 +9,8 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_MENU_MKMENU_H
-#define ION_MENU_MKMENU_H
+#ifndef ION_MOD_MENU_MKMENU_H
+#define ION_MOD_MENU_MKMENU_H
 
 #include <ioncore/common.h>
 #include <ioncore/extl.h>
@@ -20,4 +20,4 @@ extern WMenu *mod_menu_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
                            bool big_mode);
 extern WMenu *mod_menu_pmenu(WWindow *where, ExtlFn handler, ExtlTab tab);
 
-#endif /* ION_MENU_MKMENU_H */
+#endif /* ION_MOD_MENU_MKMENU_H */

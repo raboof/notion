@@ -1,5 +1,5 @@
 /*
- * ion/query/edln.c
+ * ion/mod_query/edln.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *

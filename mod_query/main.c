@@ -1,5 +1,5 @@
 /*
- * ion/query/main.c
+ * ion/mod_query/main.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *

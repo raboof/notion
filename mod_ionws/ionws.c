@@ -1,5 +1,5 @@
 /*
- * ion/ionws/ionws.c
+ * ion/mod_ionws/ionws.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -29,6 +29,7 @@
 #include <ioncore/regbind.h>
 #include <ioncore/extlconv.h>
 #include <ioncore/defer.h>
+#include <ioncore/xwindow.h>
 #include "placement.h"
 #include "ionws.h"
 #include "split.h"

@@ -1,5 +1,5 @@
 /*
- * ion/ionws/split.h
+ * ion/mod_ionws/split.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -9,8 +9,8 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_IONWS_SPLIT_H
-#define ION_IONWS_SPLIT_H
+#ifndef ION_MOD_IONWS_SPLIT_H
+#define ION_MOD_IONWS_SPLIT_H
 
 #include <ioncore/common.h>
 #include <ioncore/window.h>
@@ -98,4 +98,4 @@ extern WMPlex *split_tree_find_mplex(WRegion *from);
 extern void split_transpose(WSplit *split);
 extern void split_transpose_to(WSplit *split, const WRectangle *geom);
 
-#endif /* ION_IONWS_SPLIT_H */
+#endif /* ION_MOD_IONWS_SPLIT_H */

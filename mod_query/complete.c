@@ -1,5 +1,5 @@
 /*
- * ion/query/complete.c
+ * ion/mod_query/complete.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *

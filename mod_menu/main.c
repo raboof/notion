@@ -1,5 +1,5 @@
 /*
- * ion/menu/main.c
+ * ion/mod_menu/main.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *

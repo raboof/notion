@@ -1,5 +1,5 @@
 /*
- * ion/ionws/main.c
+ * ion/mod_ionws/main.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *

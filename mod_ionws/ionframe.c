@@ -1,5 +1,5 @@
 /*
- * ion/ionws/ionframe.c
+ * ion/mod_ionws/ionframe.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *

@@ -1,5 +1,5 @@
 /*
- * ion/ionws/placement.c
+ * ion/mod_ionws/placement.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *

@@ -1,5 +1,5 @@
 /*
- * ion/floatws/placement.c
+ * ion/mod_floatws/placement.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *

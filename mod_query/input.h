@@ -1,5 +1,5 @@
 /*
- * ion/query/input.h
+ * ion/mod_query/input.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -9,8 +9,8 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_QUERY_IONCORE_INPUTMODE_H
-#define ION_QUERY_IONCORE_INPUTMODE_H
+#ifndef ION_MOD_QUERY_INPUT_H
+#define ION_MOD_QUERY_INPUT_H
 
 #include <ioncore/common.h>
 #include <ioncore/window.h>
@@ -39,4 +39,4 @@ DYNFUN void input_scrolldown(WInput *input);
 DYNFUN void input_calc_size(WInput *input, WRectangle *geom);
 DYNFUN const char *input_style(WInput *input);
 
-#endif /* ION_QUERY_IONCORE_INPUTMODE_H */
+#endif /* ION_MOD_QUERY_INPUT_H */

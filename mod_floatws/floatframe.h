@@ -1,5 +1,5 @@
 /*
- * ion/floatws/floatframe.h
+ * ion/mod_floatws/floatframe.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -9,8 +9,8 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_FLOATWS_FLOATFRAME_H
-#define ION_FLOATWS_FLOATFRAME_H
+#ifndef ION_MOD_FLOATWS_FLOATFRAME_H
+#define ION_MOD_FLOATWS_FLOATFRAME_H
 
 #include <ioncore/common.h>
 #include <ioncore/frame.h>
@@ -54,4 +54,4 @@ extern void floatframe_managed_geom(const WFloatFrame *frame, WRectangle *geom);
 extern void floatframe_bar_geom(const WFloatFrame *frame, WRectangle *geom);
 extern void floatframe_border_geom(const WFloatFrame *frame, WRectangle *geom);
 
-#endif /* ION_FLOATWS_FLOATFRAME_H */
+#endif /* ION_MOD_FLOATWS_FLOATFRAME_H */

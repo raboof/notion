@@ -1,5 +1,5 @@
 /*
- * ion/query/listing.c
+ * ion/mod_query/listing.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *

@@ -1,5 +1,5 @@
 /*
- * ion/query/wedln-wrappers.c
+ * ion/mod_query/wedln-wrappers.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *

@@ -1,5 +1,5 @@
 /*
- * ion/floatws/floatws.h
+ * ion/mod_floatws/floatws.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -9,8 +9,8 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_FLOATWS_FLOATWS_H
-#define ION_FLOATWS_FLOATWS_H
+#ifndef ION_MOD_FLOATWS_FLOATWS_H
+#define ION_MOD_FLOATWS_FLOATWS_H
 
 #include <libtu/objlist.h>
 #include <ioncore/common.h>
@@ -61,4 +61,4 @@ extern bool mod_floatws_clientwin_do_manage(WClientWin *cwin,
 
 extern ObjList *floatws_sticky_list;
 
-#endif /* ION_FLOATWS_FLOATWS_H */
+#endif /* ION_MOD_FLOATWS_FLOATWS_H */

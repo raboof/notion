@@ -1,5 +1,5 @@
 /*
- * ion/floatws/floatframe.c
+ * ion/mod_floatws/floatframe.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *

@@ -1,5 +1,5 @@
 /*
- * ion/query/wmessage.c
+ * ion/mod_query/wmessage.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *

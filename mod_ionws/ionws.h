@@ -1,5 +1,5 @@
 /*
- * ion/ionws/ionws.h
+ * ion/mod_ionws/ionws.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -9,8 +9,8 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_IONWS_IONWS_H
-#define ION_IONWS_IONWS_H
+#ifndef ION_MOD_IONWS_IONWS_H
+#define ION_MOD_IONWS_IONWS_H
 
 #include <ioncore/common.h>
 #include <ioncore/region.h>
@@ -80,4 +80,4 @@ extern void ionws_do_set_focus(WIonWS *ws, bool warp);
 extern bool ionws_managed_display(WIonWS *ws, WRegion *reg);
 extern bool ionws_managed_may_destroy(WIonWS *ws, WRegion *reg);
 
-#endif /* ION_IONWS_IONWS_H */
+#endif /* ION_MOD_IONWS_IONWS_H */

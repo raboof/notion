@@ -1,5 +1,5 @@
 /*
- * ion/floatws/main.h
+ * ion/mod_floatws/main.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -9,8 +9,8 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_FLOATWS_MAIN_H
-#define ION_FLOATWS_MAIN_H
+#ifndef ION_MOD_FLOATWS_MAIN_H
+#define ION_MOD_FLOATWS_MAIN_H
 
 #include <ioncore/binding.h>
 
@@ -20,4 +20,4 @@ extern void mod_floatws_deinit();
 extern WBindmap *mod_floatws_floatws_bindmap;
 extern WBindmap *mod_floatws_floatframe_bindmap;
 
-#endif /* ION_FLOATWS_MAIN_H */
+#endif /* ION_MOD_FLOATWS_MAIN_H */

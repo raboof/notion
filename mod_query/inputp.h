@@ -1,5 +1,5 @@
 /*
- * ion/query/inputp.h
+ * ion/mod_query/inputp.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -9,8 +9,8 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_QUERY_INPUTP_H
-#define ION_QUERY_INPUTP_H
+#ifndef ION_MOD_QUERY_INPUTP_H
+#define ION_MOD_QUERY_INPUTP_H
 
 #include <ioncore/common.h>
 #include <libtu/objp.h>
@@ -25,4 +25,4 @@ typedef void WInputDrawFn(WInput*, bool complete);
 extern WBindmap *mod_query_input_bindmap;
 extern WBindmap *mod_query_wedln_bindmap;
 
-#endif /* ION_QUERY_INPUTP_H */
+#endif /* ION_MOD_QUERY_INPUTP_H */

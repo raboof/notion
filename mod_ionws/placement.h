@@ -1,5 +1,5 @@
 /*
- * ion/ionws/placement.h
+ * ion/mod_ionws/placement.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -9,8 +9,8 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_IONWS_PLACEMENT_H
-#define ION_IONWS_PLACEMENT_H
+#ifndef ION_MOD_IONWS_PLACEMENT_H
+#define ION_MOD_IONWS_PLACEMENT_H
 
 #include <ioncore/common.h>
 #include <ioncore/clientwin.h>
@@ -22,4 +22,4 @@ extern bool ionws_manage_clientwin(WIonWS *ws, WClientWin *cwin,
                                    const WManageParams *param,
                                    int redir);
 
-#endif /* ION_IONWS_PLACEMENT_H */
+#endif /* ION_MOD_IONWS_PLACEMENT_H */

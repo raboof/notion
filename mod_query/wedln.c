@@ -1,5 +1,5 @@
 /*
- * ion/query/wedln.c
+ * ion/mod_query/wedln.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *

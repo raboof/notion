@@ -1,5 +1,5 @@
 /*
- * ion/query/edln.h
+ * ion/mod_query/edln.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -9,8 +9,8 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_QUERY_EDLN_H
-#define ION_QUERY_EDLN_H
+#ifndef ION_MOD_QUERY_EDLN_H
+#define ION_MOD_QUERY_EDLN_H
 
 #include <ioncore/common.h>
 #include <libtu/obj.h>
@@ -69,4 +69,4 @@ void mod_query_history_push(const char *str);
 const char *mod_query_history_get(int n);
 void mod_query_history_clear();
 
-#endif /* ION_QUERY_EDLN_H */
+#endif /* ION_MOD_QUERY_EDLN_H */

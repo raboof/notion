@@ -1,5 +1,5 @@
 /*
- * ion/ionws/split.c
+ * ion/mod_ionws/split.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *

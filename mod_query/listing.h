@@ -1,5 +1,5 @@
 /*
- * ion/query/listing.h
+ * ion/mod_query/listing.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -9,8 +9,8 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_QUERY_LISTING_H
-#define ION_QUERY_LISTING_H
+#ifndef ION_MOD_QUERY_LISTING_H
+#define ION_MOD_QUERY_LISTING_H
 
 #include <ioncore/common.h>
 #include <ioncore/gr.h>
@@ -37,4 +37,4 @@ extern void draw_listing(GrBrush *brush, Window win, const WRectangle *geom,
 extern bool scrollup_listing(WListing *l);
 extern bool scrolldown_listing(WListing *l);
 
-#endif /* ION_QUERY_LISTING_H */
+#endif /* ION_MOD_QUERY_LISTING_H */

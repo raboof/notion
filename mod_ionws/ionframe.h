@@ -1,5 +1,5 @@
 /*
- * ion/ionws/ionframe.h
+ * ion/mod_ionws/ionframe.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -9,8 +9,8 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_IONWS_IONFRAME_H
-#define ION_IONWS_IONFRAME_H
+#ifndef ION_MOD_IONWS_IONFRAME_H
+#define ION_MOD_IONWS_IONFRAME_H
 
 #include <ioncore/common.h>
 #include <ioncore/frame.h>
@@ -27,4 +27,4 @@ extern WIonFrame* create_ionframe(WWindow *parent, const WFitParams *fp);
 extern WRegion *ionframe_load(WWindow *par, const WFitParams *fp,
                               ExtlTab tab);
 
-#endif /* ION_IONWS_IONFRAME_H */
+#endif /* ION_MOD_IONWS_IONFRAME_H */

@@ -1,5 +1,5 @@
 /*
- * ion/floatws/floatws.c
+ * ion/mod_floatws/floatws.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *

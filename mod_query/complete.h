@@ -1,5 +1,5 @@
 /*
- * ion/query/complete.h
+ * ion/mod_query/complete.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -9,8 +9,8 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_QUERY_COMPLETE_H
-#define ION_QUERY_COMPLETE_H
+#ifndef ION_MOD_QUERY_COMPLETE_H
+#define ION_MOD_QUERY_COMPLETE_H
 
 #include "edln.h"
 
@@ -18,4 +18,4 @@ extern void edln_complete(Edln *edln);
 extern int edln_do_completions(Edln *edln, char **completions, int ncomp,
                                const char *beg);
 
-#endif /* ION_QUERY_COMPLETE_H */
+#endif /* ION_MOD_QUERY_COMPLETE_H */

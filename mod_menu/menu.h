@@ -1,5 +1,5 @@
 /*
- * ion/menu/menu.h
+ * ion/mod_menu/menu.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -9,8 +9,8 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_MENU_MENU_H
-#define ION_MENU_MENU_H
+#ifndef ION_MOD_MENU_MENU_H
+#define ION_MOD_MENU_MENU_H
 
 #include <ioncore/common.h>
 #include <ioncore/window.h>
@@ -84,4 +84,4 @@ extern void mod_menu_set_scroll_params(int delay, int amount);
 
 extern void menu_typeahead_clear(WMenu *menu);
 
-#endif /* ION_MENU_MENU_H */
+#endif /* ION_MOD_MENU_MENU_H */

@@ -1,5 +1,5 @@
 /*
- * ion/query/main.h
+ * ion/mod_query/main.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -9,10 +9,10 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_QUERY_MAIN_H
-#define ION_QUERY_MAIN_H
+#ifndef ION_MOD_QUERY_MAIN_H
+#define ION_MOD_QUERY_MAIN_H
 
 extern bool mod_query_init();
 extern void mod_query_deinit();
 
-#endif /* ION_QUERY_MAIN_H */
+#endif /* ION_MOD_QUERY_MAIN_H */

@@ -1,5 +1,5 @@
 /*
- * ion/floatws/placement.h
+ * ion/mod_floatws/placement.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2001. 
  *
@@ -9,8 +9,8 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_FLOATWS__PLACEMENT_H
-#define ION_FLOATWS__PLACEMENT_H
+#ifndef ION_MOD_FLOATWS__PLACEMENT_H
+#define ION_MOD_FLOATWS__PLACEMENT_H
 
 #include <ioncore/rectangle.h>
 #include "floatws.h"
@@ -18,4 +18,4 @@
 extern void floatws_calc_placement(WFloatWS *ws, WRectangle *geom);
 extern void mod_floatws_set_placement_method(const char *method);
 
-#endif /* ION_FLOATWS__PLACEMENT_H */
+#endif /* ION_MOD_FLOATWS__PLACEMENT_H */

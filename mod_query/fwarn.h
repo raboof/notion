@@ -1,5 +1,5 @@
 /*
- * ion/query/fwarn.h
+ * ion/mod_query/fwarn.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -9,8 +9,8 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_QUERY_FWARN_H
-#define ION_QUERY_FWARN_H
+#ifndef ION_MOD_QUERY_FWARN_H
+#define ION_MOD_QUERY_FWARN_H
 
 #include <ioncore/mplex.h>
 #include "wmessage.h"
@@ -18,4 +18,4 @@
 extern WMessage *mod_query_message(WMPlex *mplex, const char *p);
 extern WMessage *mod_query_fwarn(WMPlex *mplex, const char *p);
 
-#endif /* ION_QUERY_FWARN_H */
+#endif /* ION_MOD_QUERY_FWARN_H */

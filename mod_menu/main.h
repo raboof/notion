@@ -1,5 +1,5 @@
 /*
- * ion/menu/main.h
+ * ion/mod_menu/main.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2004. 
  *
@@ -9,8 +9,8 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_MENU_MAIN_H
-#define ION_MENU_MAIN_H
+#ifndef ION_MOD_MENU_MAIN_H
+#define ION_MOD_MENU_MAIN_H
 
 #include <ioncore/binding.h>
 
@@ -20,4 +20,4 @@ extern void mod_menu_deinit();
 extern WBindmap *mod_menu_menu_bindmap;
 
 
-#endif /* ION_MENU_MAIN_H */
+#endif /* ION_MOD_MENU_MAIN_H */
