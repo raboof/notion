@@ -27,6 +27,7 @@ query_wedln_bindings{
         kpress("AnyModifier+Y", WEdln.cut),
         kpress("AnyModifier+K", WEdln.copy),
         kpress("AnyModifier+C", WEdln.paste),
+        kpress("AnyModifier+G", WEdln.clear_mark),
     },
 
     kpress("Return", WEdln.finish),
@@ -46,6 +47,7 @@ query_wedln_bindings{
 
 query_bindings{
     kpress("Escape", WInput.cancel),
+    kpress("Control+G", WInput.cancel),
     kpress("Control+C", WInput.cancel),
     kpress("Control+U", WInput.scrollup),
     kpress("Control+V", WInput.scrolldown),
