@@ -544,7 +544,7 @@ static void split_do_resize_rootward(WSplit *node, RootwardAmount *ha,
             og.y=pg.y+pg.h-og.h;
         else
             ng.y=pg.y+pg.h-ng.h;
-        vprimn=(thisnode==PRIMN_TL ? PRIMN_BR : PRIMN_TL);
+        vprimn=thisnode;
     }else{
         og.w=other->geom.w-amount;
         ng.w=pg.w-og.w;
@@ -552,7 +552,7 @@ static void split_do_resize_rootward(WSplit *node, RootwardAmount *ha,
             og.x=pg.x+pg.w-og.w;
         else
             ng.x=pg.x+pg.w-ng.w;
-        hprimn=(thisnode==PRIMN_TL ? PRIMN_BR : PRIMN_TL);
+        hprimn=thisnode;
     }
     
     if(!tryonly){
