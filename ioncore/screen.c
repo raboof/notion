@@ -34,6 +34,7 @@
 #include "stacking.h"
 #include "defer.h"
 #include "activity.h"
+#include "extlconv.h"
 
 #define SCR_MLIST(SCR) ((SCR)->mplex.l1_list)
 #define SCR_MCOUNT(SCR) ((SCR)->mplex.l1_count)
@@ -480,6 +481,33 @@ void screen_set_managed_offset(WScreen *scr, const WRectangle *off)
     mplex_fit_managed((WMPlex*)scr);
 }
 
+
+/*EXTL_DOC
+ * Set offset of objects managed by the screen from actual screen geometry.
+ * The table \var{offset} should contain the entries \code{x}, \code{y}, 
+ * \code{w} and \code{h} indicating offsets of that component of screen 
+ * geometry.
+ */
+EXTL_EXPORT_AS(WScreen, set_managed_offset)
+bool screen_set_managed_offset_extl(WScreen *scr, ExtlTab offset)
+{
+    WRectangle g;
+    
+    if(!extl_table_to_rectangle(offset, &g))
+        goto err;
+    
+    if(-g.w>=REGION_GEOM(scr).w)
+        goto err;
+    if(-g.h>=REGION_GEOM(scr).h)
+        goto err;
+    
+    screen_set_managed_offset(scr, &g);
+    
+    return TRUE;
+err:
+    warn("Invalid offset.");
+    return FALSE;
+}
 
 /*}}}*/
 
