@@ -204,12 +204,7 @@ static bool init_frame(WFrame *frame, WScreen *scr, WWinGeomParams params,
 	
 	frame->tab_w=BAR_W(frame, grdata);
 	
-	/* Input */
 	XSelectInput(wglobal.dpy, win, FRAME_MASK);
-	
-	/*frame->win.flags=WWINDOW_CLIENTCONT;
-	frame->win.bindmap=&(ion_main_bindmap);
-	grab_bindings(&(ion_main_bindmap), win);*/
 	
 	region_add_bindmap((WRegion*)frame, &(ion_frame_bindmap), TRUE);
 	
@@ -400,8 +395,8 @@ void draw_frame_bar(const WFrame *frame, bool complete)
 		
 		if(REGION_LABEL(sub)!=NULL)
 			draw_textbox(dinfo, REGION_LABEL(sub), CF_TAB_TEXT_ALIGN, TRUE);
-		/*else
-			draw_textbox(dinfo, "", CF_TAB_TEXT_ALIGN, TRUE);*/
+		else
+			draw_textbox(dinfo, "?", CF_TAB_TEXT_ALIGN, TRUE);
 		
 #define IS_TAGGED(X) 0
 		/* TODO: IS_TAGGED */
@@ -455,9 +450,6 @@ static bool reparent_or_fit(WFrame *frame, WWinGeomParams params, bool rep)
 						  params.win_x, params.win_y,
 						  params.geom.w, params.geom.h);
 	}
-	
-	/*fprintf(stderr, "reparent or fit: %d %d %d %d\n", params.win_x,
-			params.win_y, params.geom.w, params.geom.h);*/
 	
 	REGION_GEOM(frame)=params.geom;
 

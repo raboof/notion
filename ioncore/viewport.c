@@ -135,19 +135,6 @@ static void viewport_do_attach(WViewport *vp, WRegion *sub, int flags)
 }
 
 
-/*
-bool viewport_attach_sub(WViewport *vp, WRegion *sub, bool switchto)
-{
-	WWinGeomParams params;
-
-	viewport_sub_params(vp, &params);
-	detach_reparent_region(sub, params);
-	viewport_do_attach(vp, sub, switchto ? REGION_ATTACH_SWITCHTO : 0);
-	
-	return TRUE;
-}
-*/
-
 static bool viewport_do_detach_sub(WViewport *vp, WRegion *sub)
 {
 	WRegion *next=NULL;
