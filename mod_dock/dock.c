@@ -1210,8 +1210,8 @@ WDock *mod_dock_create(ExtlTab tab)
     
     if(floating){
         int af=MPLEX_ATTACH_L2|MPLEX_ATTACH_L2_PASSIVE;
-        if(!extl_table_is_bool_set(tab, "floating_hidden"))
-            af|=MPLEX_ATTACH_SWITCHTO;
+        if(extl_table_is_bool_set(tab, "floating_hidden"))
+            af|=MPLEX_ATTACH_L2_HIDDEN;
         
         if(mplex_attach_simple((WMPlex*)screen, (WRegion*)dock, af)!=NULL)
             return dock;

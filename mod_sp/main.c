@@ -118,7 +118,8 @@ static WScratchpad *create(WScreen *scr)
     return (WScratchpad*)mplex_attach_hnd((WMPlex*)scr,
                                           (WRegionAttachHandler*)
                                           create_scratchpad, NULL,
-                                          MPLEX_ATTACH_L2);
+                                          (MPLEX_ATTACH_L2|
+                                           MPLEX_ATTACH_L2_HIDDEN));
 }
 
 

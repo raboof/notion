@@ -696,8 +696,9 @@ bool mplex_l2_set_hidden(WMPlex *mplex, WRegion *reg, bool sp)
         if(mcf)
             region_warp((WRegion*)mplex);
     }else if(hidden && !nhidden){
+        bool psv=node->flags&LLIST_L2_PASSIVE;
         mplex_do_node_goto(mplex, node, TRUE,
-                           (mcf ? REGION_GOTO_FOCUS : 0));
+                           (mcf && !psv ? REGION_GOTO_FOCUS : 0));
     }
     
     return !(node->flags&LLIST_L2_HIDDEN);
@@ -786,17 +787,21 @@ WLListNode *mplex_do_attach_after(WMPlex *mplex,
     region_set_manager(reg, (WRegion*)mplex);
     
     if(l2){
-        if(!sw)
+        if(param->flags&MPLEX_ATTACH_L2_HIDDEN){
             node->flags|=LLIST_L2_HIDDEN;
-        if(param->flags&MPLEX_ATTACH_L2_PASSIVE)
+            sw=FALSE;
+        }
+        if(param->flags&MPLEX_ATTACH_L2_PASSIVE){
             node->flags|=LLIST_L2_PASSIVE;
-    }
-    
-    if(!l2 && mplex->l1_count==1)
+        }
+    }else if(mplex->l1_count==1){
         sw=TRUE;
+    }
     
     if(sw)
         mplex_do_node_goto_sw(mplex, node, FALSE);
+    else if(l2 && !(node->flags&LLIST_L2_HIDDEN))
+        mplex_do_node_display(mplex, node, FALSE);
     else
         region_unmap(reg);
 
@@ -872,6 +877,9 @@ static void get_params(ExtlTab tab, WMPlexAttachParams *par)
     
     if(extl_table_is_bool_set(tab, "switchto"))
         par->flags|=MPLEX_ATTACH_SWITCHTO;
+
+    if(extl_table_is_bool_set(tab, "hidden"))
+        par->flags|=MPLEX_ATTACH_L2_HIDDEN;
 
     if(extl_table_is_bool_set(tab, "passive"))
         par->flags|=MPLEX_ATTACH_L2_PASSIVE;
@@ -1427,8 +1435,12 @@ ExtlTab mplex_get_configuration(WMPlex *mplex)
         ExtlTab st=region_get_configuration(node->reg);
         if(st!=extl_table_none()){
             extl_table_sets_i(st, "layer", 2);
-            extl_table_sets_b(st, "switchto", !(node->flags&LLIST_L2_HIDDEN));
+            if(node==mplex->l2_current){
+                extl_table_sets_b(st, "switchto", 
+                                  !(node->flags&LLIST_L2_PASSIVE));
+            }
             extl_table_sets_b(st, "passive", node->flags&LLIST_L2_PASSIVE);
+            extl_table_sets_b(st, "hidden", node->flags&LLIST_L2_HIDDEN);
             g=extl_table_from_rectangle(&REGION_GEOM(node->reg));
             extl_table_sets_t(st, "geom", g);
             extl_unref_table(g);
