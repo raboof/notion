@@ -125,6 +125,7 @@ DECLCLASS(WDock){
     int max_w, max_h;
     
     bool arrange_called;
+    bool save;
 };
 
 static WDock *docks=NULL;
@@ -953,6 +954,7 @@ static void dock_do_set(WDock *dock, ExtlTab conftab, bool resize)
     bool b;
     bool growset=FALSE;
     bool posset=FALSE;
+    bool save=FALSE;
     
     if(extl_table_gets_s(conftab, dock_param_name.key, &s)){
         if(!region_set_name((WRegion*)dock, s)){
@@ -961,6 +963,9 @@ static void dock_do_set(WDock *dock, ExtlTab conftab, bool resize)
         free(s);
     }
 
+    if(extl_table_gets_b(conftab, "save", &save))
+        dock->save=save;
+    
     if(dock_param_extl_table_set(&dock_param_pos, conftab, &dock->pos))
         posset=TRUE;
 
@@ -1027,6 +1032,7 @@ static void dock_do_get(WDock *dock, ExtlTab conftab)
     dock_param_extl_table_get(&dock_param_pos, conftab, dock->pos);
     dock_param_extl_table_get(&dock_param_grow, conftab, dock->grow);
     extl_table_sets_b(conftab, dock_param_is_auto.key, dock->is_auto);
+    extl_table_sets_b(conftab, "save", dock->save);
 }
 
 
@@ -1063,6 +1069,7 @@ static bool dock_init(WDock *dock, WWindow *parent, const WFitParams *fp)
     dock->max_w=1;
     dock->max_h=1;
     dock->arrange_called=FALSE;
+    dock->save=TRUE;
 
     if(!window_init((WWindow*)dock, parent, fp))
         return FALSE;
@@ -1182,7 +1189,8 @@ WDock *mod_dock_create(ExtlTab tab)
         warn("Failed to create dock.");
         return NULL;
     }
-
+    
+    dock->save=FALSE;
     dock_do_set(dock, tab, FALSE);
     
     if(floating){
@@ -1236,10 +1244,13 @@ void mod_dock_toggle_floating_on(WMPlex *mplex)
 
 /*{{{ Save/load */
 
-/*
+
 ExtlTab dock_get_configuration(WDock *dock)
 {
     ExtlTab tab;
+    
+    if(dock->save==FALSE)
+        return extl_table_none();
     
     tab=region_get_base_configuration((WRegion*)dock);
     dock_do_get(dock, tab);
@@ -1248,7 +1259,7 @@ ExtlTab dock_get_configuration(WDock *dock)
     
     return tab;
 }
-*/
+
 
 WRegion *dock_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 {
@@ -1544,7 +1555,7 @@ static DynFunTab dock_dynfuntab[]={
     {region_managed_rqgeom, dock_managed_rqgeom},
     {(DynFun*)region_manage_clientwin, (DynFun*)dock_manage_clientwin},
     {region_managed_remove, dock_managed_remove},
-    /*{(DynFun*)region_get_configuration, (DynFun*)dock_get_configuration},*/
+    {(DynFun*)region_get_configuration, (DynFun*)dock_get_configuration},
     {region_size_hints, dock_size_hints},
     {(DynFun*)region_fitrep, (DynFun*)dock_fitrep},
     {(DynFun*)region_orientation, (DynFun*)dock_orientation},

@@ -236,6 +236,7 @@ void region_lost_focus(WRegion *reg)
 
 /*{{{ Focus status requests */
 
+
 /*EXTL_DOC
  * Is \var{reg} active/does it or one of it's children of focus?
  */
