@@ -69,6 +69,9 @@ static const char ioncore_about[]=
     "Lesser General Public License for more details.\n";
 
 
+WHooklist *ioncore_post_layout_setup_hook=NULL;
+
+
 /*}}}*/
 
 
@@ -431,6 +434,8 @@ bool ioncore_startup(const char *display, const char *cfgfile,
         warn("Unable to set up layout on any screen.");
         return FALSE;
     }
+    
+    CALL_HOOKS(ioncore_post_layout_setup_hook, ());
     
     FOR_ALL_ROOTWINS(rootwin)
         rootwin_manage_initial_windows(rootwin);

@@ -13,6 +13,7 @@
 #define ION_IONCORE_IONCORE_H
 
 #include "common.h"
+#include "hooks.h"
 
 #define IONCORE_STARTUP_ONEROOT    0x0001
 #define IONCORE_STARTUP_NOXINERAMA 0x0002
@@ -27,5 +28,7 @@ extern void ioncore_deinit();
 extern const char *ioncore_aboutmsg();
 extern const char *ioncore_version();
 extern bool ioncore_is_i18n();
+
+extern WHooklist *ioncore_post_layout_setup_hook;
 
 #endif /* ION_IONCORE_IONCORE_H */
