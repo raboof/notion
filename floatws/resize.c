@@ -171,7 +171,11 @@ void floatframe_cancel_resize(WFloatFrame *frame)
 
 
 /*EXTL_DOC
- * Enter resize mode for \var{frame}.
+ * Enter move/resize mode for \var{frame}. The bindings set with
+ * \fnref{floatframe_moveres_bindings} are used in this mode and of
+ * of the exported functions only \fnref{floatframe_do_resize}, 
+ * \fnref{floatframe_do_move}, \fnref{floatframe_cancel_resize} and
+ * \fnref{floatframe_end_resize} are allowed to be called.
  */
 EXTL_EXPORT
 void floatframe_begin_resize(WFloatFrame *frame)

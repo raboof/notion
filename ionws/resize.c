@@ -136,7 +136,11 @@ void ionframe_cancel_resize(WIonFrame *frame)
 
 
 /*EXTL_DOC
- * Enter resize mode for \var{frame}.
+ * Enter resize mode for \var{frame}. The bindings set with
+ * \fnref{ionframe_moveres_bindings} are used in this mode and of
+ * of the exported functions only \fnref{ionframe_do_resize}, 
+ * \fnref{ionframe_cancel_resize} and \fnref{ionframe_end_resize}
+ * are allowed to be called.
  */
 EXTL_EXPORT
 void ionframe_begin_resize(WIonFrame *frame)
