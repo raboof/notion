@@ -9,10 +9,7 @@ end
 QueryLib={}
 
 
---
--- Helper functions
--- 
-
+-- Functions to generate functions {{{
 
 function QueryLib.make_completor(completefn)
     local function completor(wedln, str)
@@ -58,13 +55,6 @@ function QueryLib.make_rename_fn(prompt, getobj)
     return query_it
 end
 
-function QueryLib.exec_handler(frame, cmd)
-    if string.sub(cmd, 1, 1)==":" then
-        cmd="ion-runinxterm " .. string.sub(cmd, 2)
-    end
-    exec_on_screen(region_screen_of(frame), cmd)
-end
-
 function QueryLib.make_yesno_handler(fn)
     local function handle_yesno(_, yesno)
         if yesno=="y" or yesno=="Y" or yesno=="yes" then
@@ -82,6 +72,25 @@ function QueryLib.make_yesno_fn(prompt, handler)
     return QueryLib.make_frame_fn(prompt, nil,
                                   QueryLib.make_yesno_handler(handler),
                                   nil)
+end
+
+function QueryLib.make_execwith_fn(prompt, init, prog, completor)
+    local function handle_execwith(frame, str)
+        exec_on_screen(region_screen_of(frame), prog .. " " .. str)
+    end
+    return QueryLib.make_frame_fn(prompt, init, handle_execwith, completor)
+end
+
+-- }}}
+
+
+-- Simple handlers and completors {{{
+
+function QueryLib.exec_handler(frame, cmd)
+    if string.sub(cmd, 1, 1)==":" then
+        cmd="ion-runinxterm " .. string.sub(cmd, 2)
+    end
+    exec_on_screen(region_screen_of(frame), cmd)
 end
 
 function QueryLib.getws(obj)
@@ -108,22 +117,64 @@ function QueryLib.complete_ssh(str)
     return res	
 end
 
-function QueryLib.make_execwith_fn(prompt, init, prog, completor)
-    local function handle_execwith(frame, str)
-        exec_on_screen(region_screen_of(frame), prog .. " " .. str)
-    end
-    return QueryLib.make_frame_fn(prompt, init, handle_execwith, completor)
-end
-
 function QueryLib.gotoclient_handler(frame, str)
     local cwin=lookup_clientwin(str)
     
     if cwin==nil then
         query_fwarn(frame, string.format("Could not find client window named"
-                                         .. ' "%s"', str))
+                                         .. ' "%s".', str))
     else
         region_goto(cwin)
     end
+end
+
+function QueryLib.attachclient_handler(frame, str)
+    local cwin=lookup_clientwin(str)
+    
+    if cwin==nil then
+        query_fwarn(frame, string.format("Could not find client window named"
+                                         .. ' "%s".', str))
+        return
+    end
+    
+    if region_screen_of(frame)~=region_screen_of(cwin) then
+        query_fwarn(frame, "Cannot attach: not on same screen.")
+        return
+    end
+    
+    region_manage(frame, cwin, { selected = true })
+end
+
+function QueryLib.workspace_handler(frame, name)
+    name=string.gsub(name, "^%s*(.-)%s*$", "%1")
+    local ws=lookup_workspace(name)
+    if ws then
+        --region_goto(ws)
+        query_fwarn(frame, "ok")
+        return
+    end
+    
+    local vp=region_viewport_of(frame)
+    if not vp then
+        query_fwarn(frame, "Unable to create workspace: no viewport.")
+        return
+    end
+    
+    local _, _, cls, nam=string.find(name, "^(.-):%s*(.-)%s*$")
+    if not cls then
+        -- TODO: This hardcoding should be removed when the C->Lua interfac
+        -- is more object-oriented and we can scan the available classes. 
+        -- I can't be bothered to create such a function at the moment.
+        cls="WIonWS"
+    else
+        name=nam
+    end
+    
+    ws=region_manage_new(vp, { type=cls, name=name, selected=true })
+    if not ws then
+        query_fwarn(frame, "Failed to create workspace")
+    end
+    
 end
 
 function QueryLib.get_initdir()
@@ -135,6 +186,11 @@ function QueryLib.get_initdir()
     end
     return wd
 end
+
+-- }}}
+
+
+-- Lua code execution and completion {{{
 
 function QueryLib.handler_lua(frame, code)
     local f, err=loadstring(code)
@@ -202,10 +258,10 @@ function QueryLib.complete_lua(str)
     return compl
 end
 
+-- }}}
 
---
--- More complex completors that start external programs
---
+
+-- More complex completors that start external programs {{{
 
 -- How many characters of result data to completions do we allow?
 QueryLib.RESULT_DATA_LIMIT=10*1024^2
@@ -304,10 +360,10 @@ function QueryLib.exec_completor(wedln, str)
     QueryLib.file_completor(wedln, str, "-wp")
 end
 
+-- }}}
 
---    
--- The queries
--- 
+
+-- The queries {{{
 
 -- Internal operations
 
@@ -327,7 +383,7 @@ QueryLib.query_gotoclient=QueryLib.make_frame_fn(
 -- \fnref{complete_clientwin}.
 QueryLib.query_attachclient=QueryLib.make_frame_fn(
     "Attach window:", nil,
-    query_handler_attachclient, 
+    QueryLib.attachclient_handler, 
     QueryLib.make_completor(complete_clientwin)
 )
 
@@ -335,10 +391,13 @@ QueryLib.query_attachclient=QueryLib.make_frame_fn(
 -- This query asks for the name of a workspace. If a workspace
 -- (an object inheriting \type{WGenWS}) with such a name exists,
 -- it will be switched to. Otherwise a new workspace with the
--- entered name will be created.
+-- entered name will be created. The default class for such a workspace
+-- has been \emph{temporarily} hardcoded to \type{WIonWS}. By prefixing
+-- the input string with ''classname:'' it is possible to create other 
+-- kinds of workspaces.
 QueryLib.query_workspace=QueryLib.make_frame_fn(
     "Go to or create workspace:", nil, 
-    query_handler_workspace, 
+    QueryLib.workspace_handler,
     QueryLib.make_completor(complete_workspace)
 )
 
@@ -433,3 +492,5 @@ QueryLib.query_lua=QueryLib.make_frame_fn(
     QueryLib.handler_lua,
     QueryLib.make_completor(QueryLib.complete_lua)
 )
+
+-- }}}
