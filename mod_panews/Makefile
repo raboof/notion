@@ -12,7 +12,7 @@ INCLUDES += $(X11_INCLUDES) $(LIBTU_INCLUDES) $(LIBEXTL_INCLUDES) -I..
 CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
 SOURCES=main.c panews.c placement.c splitext.c \
-	panehandle.c unusedwin.c
+	panehandle.c unusedwin.c splitfloat.c
 
 MAKE_EXPORTS=mod_panews
 

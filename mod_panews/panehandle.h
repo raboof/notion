@@ -17,7 +17,7 @@
 
 INTRCLASS(WPaneHandle);
 
-#include "splitext.h"
+#include "splitfloat.h"
 
 DECLCLASS(WPaneHandle){
     WWindow wwin;

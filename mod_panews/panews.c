@@ -32,6 +32,7 @@
 #include "placement.h"
 #include "main.h"
 #include "splitext.h"
+#include "splitfloat.h"
 
 
 /*{{{ Create/destroy */
