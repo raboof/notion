@@ -369,7 +369,7 @@ end
 -- This query asks whether the user wants to have Ioncore exit.
 -- If the answer is 'y', 'Y' or 'yes', so will happen.
 function querylib.query_exit(mplex)
-    querylib.query_yesno("Exit Ion (y/n)?", exit_wm)
+    querylib.query_yesno(mplex, "Exit Ion (y/n)?", ioncore.exit)
 end
 
 
@@ -377,7 +377,7 @@ end
 -- This query asks whether the user wants restart Ioncore.
 -- If the answer is 'y', 'Y' or 'yes', so will happen.
 function querylib.query_restart(mplex)
-    querylib.query_yesno("Restart Ion (y/n)?", restart_wm)
+    querylib.query_yesno(mplex, "Restart Ion (y/n)?", ioncore.restart)
 end
 
 
