@@ -335,6 +335,12 @@ static void splitpane_forall(WSplitPane *pane, WSplitFn *fn)
 }
 
 
+static WSplit *splitpane_current(WSplitPane *pane)
+{
+    return pane->contents;
+}
+
+
 /*}}}*/
 
 
@@ -439,6 +445,7 @@ static DynFunTab splitpane_dynfuntab[]={
     {splitinner_replace, splitpane_replace},
     {splitinner_remove, splitpane_remove},
     {(DynFun*)split_current_todir, (DynFun*)splitpane_current_todir},
+    {(DynFun*)splitinner_current, (DynFun*)splitpane_current},
     /*{splitinner_mark_current, splitpane_mark_current},*/
     {(DynFun*)split_get_config, (DynFun*)splitpane_get_config},
     {splitinner_forall, splitpane_forall},

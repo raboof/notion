@@ -1360,6 +1360,24 @@ void splitinner_forall(WSplitInner *node, WSplitFn *fn)
 }
 
 
+static WSplit *splitsplit_current(WSplitSplit *split)
+{
+    return (split->current==SPLIT_CURRENT_TL ? split->tl : split->br);
+}
+
+
+/*EXTL_DOC
+ * Returns the most previously active child node of \var{split}.
+ */
+EXTL_EXPORT_MEMBER
+WSplit *splitinner_current(WSplitInner *node)
+{
+    WSplit *ret=NULL;
+    CALL_DYN_RET(ret, WSplit*, splitinner_current, node, (node));
+    return ret;
+}
+    
+
 /*}}}*/
 
 
@@ -1465,16 +1483,6 @@ EXTL_EXPORT_MEMBER
 const char *splitsplit_dir(WSplitSplit *split)
 {
     return (split->dir==SPLIT_VERTICAL ? "vertical" : "horizontal");
-}
-
-
-/*EXTL_DOC
- * Returns the most previously active child node of \var{split}.
- */
-EXTL_EXPORT_MEMBER
-WSplit *splitsplit_current(WSplitSplit *split)
-{
-    return (split->current==SPLIT_CURRENT_TL ? split->tl : split->br);
 }
 
 
@@ -1596,6 +1604,7 @@ static DynFunTab splitsplit_dynfuntab[]={
     {splitinner_replace, splitsplit_replace},
     {splitinner_remove, splitsplit_remove},
     {(DynFun*)split_current_todir, (DynFun*)splitsplit_current_todir},
+    {(DynFun*)splitinner_current, (DynFun*)splitsplit_current},
     {(DynFun*)splitinner_nextto, (DynFun*)splitsplit_nextto},
     {splitinner_mark_current, splitsplit_mark_current},
     {(DynFun*)split_get_config, (DynFun*)splitsplit_get_config},
