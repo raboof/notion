@@ -13,14 +13,19 @@
 -- Callback creation {{{
 
 --DOC
--- Create a \type{WMPlex}-bindable function that calls \var{fn} with
--- parameter either the \type{WMPlex}, the current input in it or 
--- currently shown or some other object multiplexed in it dependent 
--- on the passed settings and parameters to the wrapper receives.
--- \var{noself}: Never call with the mplex itself as parameter.
--- \var{noinput}: Never call with current input as parameter.
--- \var{cwincheck}: Only call \var{fn} if the object selected is
--- a \type{WClientWin}.
+-- Create a \type{WMPlex}-bindable function with arguments
+-- (\code{mplex [, sub]}) that calls \var{fn} with parameter chosen
+-- as the first match from the following steps:
+-- \begin{enumerate}
+-- \item The current input in \var{mplex} (see \fnref{WMPlex.current_input})
+--   if one exists and \var{noinput} is not set.
+-- \item \var{sub} if it is not nil.
+-- \item The currently displayed object in \var{mplex} 
+--   (see \fnref{WMPlex.current}), if not nil.
+-- \item \var{mplex} itself, if \var{noself} is not set.
+-- \end{enumerate}
+-- Additionally, if \var{cwincheck} is set, the function is only
+-- called if the object selected above is of type \var{WClientWin}.
 function make_mplex_sub_or_self_fn(fn, noself, noinput, cwincheck)
     if not fn then
         warn("nil parameter to make_mplex_sub_or_self_fn")
@@ -45,14 +50,25 @@ function make_mplex_sub_or_self_fn(fn, noself, noinput, cwincheck)
 end
 
 --DOC
--- Equivalent to \fnref{make_mplex_sub_or_self_fn}\code{(fn, true, true, false)}.
+-- Create a \type{WMPlex}-bindable function with arguments
+-- (\code{mplex [, sub]}) that calls \var{fn} with parameter chosen
+-- as \var{sub} if it is not nil and otherwise \code{mplex:current()}.
+-- 
+-- Calling this functino is equivalent to
+-- \fnref{make_mplex_sub_or_self_fn}\code{(fn, true, true, false)}.
 function make_mplex_sub_fn(fn)
     return make_mplex_sub_or_self_fn(fn, true, true, false)
 end
 
 
 --DOC
--- Equivalent to \fnref{make_mplex_sub_or_self_fn}\code{(fn, true, true, true)}.
+-- Create a \type{WMPlex}-bindable function with arguments
+-- (\code{mplex [, sub]}) that chooses parameter for \var{fn}
+-- as \var{sub} if it is not nil and otherwise \code{mplex:current()},
+-- and calls \var{fn} if the object chosen is of type \fnref{WClientWin}.
+-- 
+-- Calling this functino is equivalent to
+-- \fnref{make_mplex_sub_or_self_fn}\code{(fn, true, true, true)}.
 function make_mplex_clientwin_fn(fn)
     return make_mplex_sub_or_self_fn(fn, true, true, true)
 end
