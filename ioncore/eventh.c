@@ -177,7 +177,7 @@ static void set_initial_focus()
 }
 
 
-void mainloop()
+void ioncore_mainloop()
 {
 	XEvent ev;
 

@@ -87,10 +87,6 @@ static OptParserCommonInfo ioncore_cinfo={
 /*{{{ Main */
 
 
-extern bool ioncore_register_exports();
-extern void ioncore_unregister_exports();
-
-
 int main(int argc, char*argv[])
 {
 	const char *cfgfile=NULL;
@@ -107,9 +103,6 @@ int main(int argc, char*argv[])
 	libtu_init(argv[0]);
 
 	ioncore_add_default_dirs();
-	
-	if(!init_module_support())
-		return EXIT_FAILURE;
 	
 	optparser_init(argc, argv, OPTP_MIDLONG, ioncore_opts, &ioncore_cinfo);
 	
@@ -136,9 +129,6 @@ int main(int argc, char*argv[])
 		}
 	}
 
-	wglobal.argc=argc;
-	wglobal.argv=argv;
-	
 	/* We may have to pass the file to xmessage so just using tmpfile()
 	 * isn't sufficient */
 	
@@ -157,32 +147,9 @@ int main(int argc, char*argv[])
 		begin_errorlog_file(&el, ef);
 	}
 	
-	if(!extl_init())
-		goto fail;
+	if(ioncore_startup(argc, argv, display, oneroot, cfgfile))
+		may_continue=TRUE;
 
-	ioncore_register_exports();
-	
-	if(!read_config_for("ioncorelib"))
-		goto fail;
-	
-	if(!ioncore_init(display, oneroot))
-		goto fail;
-
-	if(!ioncore_read_config(cfgfile)){
-		/* Let's not fail, it might be a minor error */
-		/*
-		warn("Unable to load configuration file. Refusing to start. "
-			 "You *must* install proper configuration files to use Ion.");
-		goto fail;*/
-	}
-	
-	if(!setup_rootwins()){
-		warn("Unable to set up any rootwins.");
-		goto fail;
-	}
-	
-	may_continue=TRUE;
-	
 fail:
 	if(!may_continue)
 		warn("Refusing to start due to encountered errors.");
@@ -216,7 +183,7 @@ fail:
 	if(!may_continue)
 		return EXIT_FAILURE;
 	
-	mainloop();
+	ioncore_mainloop();
 	
 	/* The code should never return here */
 	return EXIT_SUCCESS;
@@ -229,6 +196,10 @@ fail:
 /*{{{ Init */
 
 
+extern bool ioncore_register_exports();
+extern void ioncore_unregister_exports();
+
+
 static void init_hooks()
 {
 	ADD_HOOK(add_clientwin_alt, add_clientwin_default);
@@ -236,7 +207,7 @@ static void init_hooks()
 }
 
 
-static bool init_classes()
+static bool register_classes()
 {
 	if(!register_region_class(&OBJDESCR(WClientWin), NULL,
 							  (WRegionLoadCreateFn*) clientwin_load)){
@@ -246,7 +217,7 @@ static bool init_classes()
 }
 
 
-static void initialize_global()
+static void init_global()
 {
 	WRectangle zero_geom={0, 0, 0, 0};
 	
@@ -323,7 +294,7 @@ static bool set_up_locales(Display *dpy)
 #endif
 
 
-bool ioncore_init(const char *display, bool oneroot)
+static bool init_x(const char *display, bool oneroot)
 {
 	Display *dpy;
 	int i, drw, nrw;
@@ -340,8 +311,6 @@ bool ioncore_init(const char *display, bool oneroot)
 	 * reset to POSIX so that at least fonts will be loadable if not all
 	 * characters supported.
 	 */
-	
-	initialize_global();
 	
 	/* Open the display. */
 	dpy=XOpenDisplay(display);
@@ -393,8 +362,6 @@ bool ioncore_init(const char *display, bool oneroot)
 	wglobal.atom_selection=XInternAtom(dpy, "_ION_SELECTION_STRING", False);
 	wglobal.atom_mwm_hints=XInternAtom(dpy, "_MOTIF_WM_HINTS", False);
 	
-	init_hooks();
-	init_classes();
 	init_bindings();
 	load_cursors();	
 	
@@ -404,6 +371,44 @@ bool ioncore_init(const char *display, bool oneroot)
 	if(wglobal.rootwins==NULL){
 		if(nrw-drw>1)
 			warn("Could not find a screen to manage.");
+		return FALSE;
+	}
+	
+	return TRUE;
+}
+
+
+bool ioncore_startup(int argc, char *argv[], const char *display,
+					 bool oneroot, const char *cfgfile)
+{
+	init_global();
+	
+	wglobal.argc=argc;
+	wglobal.argv=argv;
+
+	register_classes();
+	init_hooks();
+
+	if(!init_module_support())
+		return FALSE;
+	
+	if(!extl_init())
+		return FALSE;
+
+	ioncore_register_exports();
+	
+	if(!read_config_for("ioncorelib"))
+		return FALSE;
+	
+	if(!init_x(display, oneroot))
+		return FALSE;
+
+	if(!ioncore_read_config(cfgfile)){
+		/* Let's not fail, it might be a minor error */
+	}
+	
+	if(!setup_rootwins()){
+		warn("Unable to set up any rootwins.");
 		return FALSE;
 	}
 	

@@ -10,8 +10,9 @@
 
 #include "common.h"
 
-bool ioncore_init(/*const char *name, const char *etcdir, const char *libdir,*/
-				 const char *display, bool onescreen);
+/* argc and argv are needed for restart_wm */
+bool ioncore_startup(int argc, char *argv[], const char *display,
+					 bool oneroot, const char *cfgfile);
 void ioncore_deinit();
 
 #endif /* ION_IONCORE_WMCORE_H */

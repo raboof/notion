@@ -10,7 +10,7 @@
 
 #include "common.h"
 
-extern void mainloop();
+extern void ioncore_mainloop();
 extern bool handle_event_default(XEvent *ev);
 
 extern WHooklist *handle_event_alt;
