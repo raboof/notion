@@ -69,9 +69,9 @@ IMPLOBJ(WWorkspace, WRegion, deinit_workspace, workspace_dynfuntab,
 
 static void fit_workspace(WWorkspace *ws, WRectangle geom)
 {
-	if(ws->splitree!=NULL){
-		split_tree_do_resize(ws->splitree, HORIZONTAL, geom.x, geom.w);
-		split_tree_do_resize(ws->splitree, VERTICAL, geom.y, geom.h);
+	if(ws->split_tree!=NULL){
+		split_tree_do_resize(ws->split_tree, HORIZONTAL, geom.x, geom.w);
+		split_tree_do_resize(ws->split_tree, VERTICAL, geom.y, geom.h);
 	}
 }
 
@@ -166,7 +166,7 @@ static WFrame *create_initial_frame(WWorkspace *ws, WRectangle geom)
 	if(frame==NULL)
 		return NULL;
 	
-	ws->splitree=(WObj*)frame;
+	ws->split_tree=(WObj*)frame;
 	workspace_add_managed(ws, (WRegion*)frame);
 
 	return frame;
@@ -186,7 +186,7 @@ static bool init_workspace(WWorkspace *ws, WRegion *parent,
 	}
 	
 	ws->region.thing.flags|=WTHING_DESTREMPTY;
-	ws->splitree=NULL;
+	ws->split_tree=NULL;
 	
 	if(ci){
 		if(create_initial_frame(ws, bounds)==NULL){
@@ -364,7 +364,7 @@ static void write_obj(WObj *obj, FILE *file, int lvl)
 static bool workspace_save_to_file(WWorkspace *ws, FILE *file, int lvl)
 {
 	begin_saved_region((WRegion*)ws, file, lvl);
-	write_obj(ws->splitree, file, lvl);
+	write_obj(ws->split_tree, file, lvl);
 	end_saved_region((WRegion*)ws, file, lvl);
 	return TRUE;
 }
@@ -429,7 +429,7 @@ static bool check_splits(const Tokenizer *tokz, int l)
 			return FALSE;
 		}
 	}else{
-		if(current_ws->splitree!=NULL){
+		if(current_ws->split_tree!=NULL){
 			tokz_warn(tokz, l, "There can only be one frame or split at "
 					           "workspace level");
 			return FALSE;
@@ -468,7 +468,7 @@ static bool opt_workspace_split(int dir, Tokenizer *tokz, int n, Token *toks)
 	split->tmpsize=tls;
 	
 	if(current_split==NULL)
-		current_ws->splitree=(WObj*)split;
+		current_ws->split_tree=(WObj*)split;
 	else if(current_split->tl==NULL)
 		current_split->tl=(WObj*)split;
 	else
@@ -505,7 +505,7 @@ static bool opt_split_end(Tokenizer *tokz, int n, Token *toks)
 	tokz_warn(tokz, tokz->line, "Split not full");
 	
 	if(current_split==NULL)
-		current_ws->splitree=split->tl;
+		current_ws->split_tree=split->tl;
 	else if(current_split->tl==(WObj*)split)
 		current_split->tl=split->tl;
 	else
@@ -533,7 +533,7 @@ static bool opt_workspace_region(Tokenizer *tokz, int n, Token *toks)
 		return FALSE;
 	
 	if(current_split==NULL)
-		current_ws->splitree=(WObj*)reg;
+		current_ws->split_tree=(WObj*)reg;
 	else if(current_split->tl==NULL)
 		current_split->tl=(WObj*)reg;
 	else
@@ -587,7 +587,7 @@ WRegion *workspace_load(WRegion *par, WRectangle geom, Tokenizer *tokz)
 	current_split=NULL;
 	current_ws=NULL;
 	
-	if(ws->splitree==NULL){
+	if(ws->split_tree==NULL){
 		warn("Workspace empty");
 		destroy_thing((WThing*)ws);
 		return NULL;

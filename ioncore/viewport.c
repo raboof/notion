@@ -212,7 +212,7 @@ static bool viewport_display_managed(WViewport *vp, WRegion *reg)
 		}
 	}
 	
-	if(region_manages_active_reg(vp))
+	if(region_manages_active_reg((WRegion*)vp))
 		do_set_focus(reg, wglobal.warp_enabled);
 	
 	return TRUE;

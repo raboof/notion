@@ -62,7 +62,7 @@ static WObj *do_find_at(WObj *obj, int x, int y)
 
 WFrame *find_frame_at(WWorkspace *ws, int x, int y)
 {
-	WObj *obj=ws->splitree;
+	WObj *obj=ws->split_tree;
 	
 	obj=do_find_at(obj, x, y);
 	
@@ -111,16 +111,16 @@ static void do_split(WRegion *oreg, const char *str, bool attach)
 {
 	WRegion *reg;
 	int dir, primn, mins;
-
+	
 	if(!get_splitparams(&dir, &primn, str)){
 		warn("Unknown parameter to do_split");
 		return;
 	}
-
+	
 	mins=(dir==VERTICAL ? region_min_h(oreg) : region_min_w(oreg));
 	
 	reg=split_reg(oreg, dir, primn, mins, split_create_frame);
-
+	
 	if(reg!=NULL){
 		if(attach && WTHING_IS(oreg, WFrame) &&
 		   ((WFrame*)oreg)->current_sub!=NULL){
@@ -156,7 +156,7 @@ void split_top(WWorkspace *ws, const char *str)
 	mins=(dir==VERTICAL
 		  ? FRAME_MIN_H(SCREEN_OF(ws)) 
 		  : FRAME_MIN_W(SCREEN_OF(ws)));
-
+	
 	reg=split_toplevel(ws, dir, primn, mins, split_create_frame);
 	if(reg!=NULL)
 		warp(reg);
@@ -175,25 +175,25 @@ void frame_close(WFrame *frame)
 	WViewport *vp;
 	WRegion *other;
 	bool was_active=REGION_IS_ACTIVE(frame);
-
+	
 	ws=(WWorkspace*)REGION_MANAGER(frame);
-
-	/* TODO */
 	
-	if(ws!=NULL && !WTHING_IS(ws, WWorkspace))
-		ws=NULL;
+	if(ws!=NULL || !WTHING_IS(ws, WWorkspace)){
+		region_rescue_managed_on_list((WRegion*)frame, frame->managed_list);
+		destroy_thing((WThing*)frame);
+		return;
+	}
 	
-	/*
 	if(ws!=NULL){
-		vp=FIND_PARENT(ws, WViewport);
-		assert(vp!=NULL);
+		vp=(WViewport*)REGION_MANAGER(ws);
 		
-		if(vp->ws_count<=1 && ws->splitree==(WObj*)frame){
-			fwarn(frame, "Cannot destroy only frame on only workspace.");
-			return;
+		if(vp!=NULL && WTHING_IS(vp, WViewport)){
+			if(vp->ws_count<=1 && ws->split_tree==(WObj*)frame){
+				fwarn(frame, "Cannot destroy only frame on only workspace.");
+				return;
+			}
 		}
 	}
-	*/
 	
 	other=workspace_find_new_manager((WRegion*)frame);
 	
@@ -205,9 +205,8 @@ void frame_close(WFrame *frame)
 		}
 		region_move_managed_on_list(other, (WRegion*)frame,
 									frame->managed_list);
-		/*SET_FOCUS(((WWindow*)frame)->win);*/
-
-		assert(frame->managed_count==0);
+		if(frame->managed_count==0)
+			warn("Could not move all managed objects.");
 	}
 	
 	if(other!=NULL && was_active)

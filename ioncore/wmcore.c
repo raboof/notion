@@ -28,6 +28,7 @@
 #include "wsreg.h"
 #include "funtabs.h"
 #include "eventh.h"
+#include "saveload.h"
 
 
 /*{{{ Global variables */

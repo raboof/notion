@@ -22,7 +22,7 @@ INTROBJ(WWorkspace)
 
 DECLOBJ(WWorkspace){
 	WRegion region;
-	WObj *splitree;
+	WObj *split_tree;
 	WRegion *managed_list;
 };
 

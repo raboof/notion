@@ -572,7 +572,7 @@ static WRegion *do_split_at(WWorkspace *ws, WObj *obj, int dir, int primn,
 			split->br=(WObj*)nsplit;
 		nsplit->parent=split;
 	}else{
-		ws->splitree=(WObj*)nsplit;
+		ws->split_tree=(WObj*)nsplit;
 	}
 	
 	return nreg;
@@ -592,10 +592,10 @@ WRegion *split_reg(WRegion *reg, int dir, int primn, int minsize,
 WRegion *split_toplevel(WWorkspace *ws, int dir, int primn, int minsize,
 						WSplitCreate *fn)
 {
-	if(ws->splitree==NULL)
+	if(ws->split_tree==NULL)
 		return NULL;
 	
-	return do_split_at(ws, ws->splitree, dir, primn, minsize, fn);
+	return do_split_at(ws, ws->split_tree, dir, primn, minsize, fn);
 }
 
 
@@ -661,7 +661,7 @@ static WRegion *right_or_bottomost_current(WObj *obj, int dir)
 
 WRegion *workspace_find_current(WWorkspace *ws)
 {
-	return left_or_topmost_current(ws->splitree, -1);
+	return left_or_topmost_current(ws->split_tree, -1);
 }
 
 
@@ -848,10 +848,10 @@ void workspace_remove_managed(WWorkspace *ws, WRegion *reg)
 		
 		remove_split(ws, split);
 	}else{
-		ws->splitree=NULL;
+		ws->split_tree=NULL;
 	}
 	
-	if(ws->splitree==NULL)
+	if(ws->split_tree==NULL)
 		defer_destroy((WThing*)ws);
 }
 
@@ -879,7 +879,7 @@ bool remove_split(WWorkspace *ws, WWsSplit *split)
 		else
 			split2->br=other;
 	}else{
-		ws->splitree=other;
+		ws->split_tree=other;
 	}
 	
 	if(other==NULL)
