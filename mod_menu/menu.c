@@ -22,7 +22,6 @@
 #include <ioncore/defer.h>
 #include <ioncore/strings.h>
 #include <ioncore/pointer.h>
-#include <ioncore/stacking.h>
 #include <ioncore/signal.h>
 #include <ioncore/focus.h>
 #include <ioncore/event.h>
@@ -669,7 +668,7 @@ static void show_sub(WMenu *menu, int n)
     
     region_set_manager((WRegion*)submenu, (WRegion*)menu,
                        (WRegion**)&(menu->submenu));
-    region_stack_above((WRegion*)submenu, (WRegion*)menu);
+    region_restack((WRegion*)submenu, MENU_WIN(menu), Above);
     region_map((WRegion*)submenu);
     
     if(!menu->pmenu_mode && region_may_control_focus((WRegion*)menu))
@@ -686,6 +685,28 @@ static void menu_do_set_focus(WMenu *menu, bool warp)
 }
 
 
+void menu_restack(WMenu *menu, Window other, int mode)
+{
+    xwindow_restack(MENU_WIN(menu), other, mode);
+    if(menu->submenu!=NULL)
+        region_restack((WRegion*)(menu->submenu), MENU_WIN(menu), Above);
+}
+
+
+void menu_stacking(WMenu *menu, Window *bottomret, Window *topret)
+{
+    *topret=None;
+    
+    if(menu->submenu!=NULL)
+        region_stacking((WRegion*)(menu->submenu), bottomret, topret);
+    
+    *bottomret=MENU_WIN(menu);
+    if(*topret==None)
+        *topret=MENU_WIN(menu);
+
+}
+
+    
 /*}}}*/
 
 
@@ -1283,6 +1304,8 @@ static DynFunTab menu_dynfuntab[]={
     {region_activated, menu_activated},
     {region_inactivated, menu_inactivated},
     {window_insstr, menu_insstr},
+    {region_restack, menu_restack},
+    {region_stacking, menu_stacking},
     END_DYNFUNTAB
 };
 

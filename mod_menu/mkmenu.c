@@ -14,7 +14,6 @@
 #include <ioncore/pointer.h>
 #include <ioncore/grab.h>
 #include <ioncore/extl.h>
-#include <ioncore/stacking.h>
 #include "menu.h"
 #include "mkmenu.h"
 
@@ -94,9 +93,7 @@ WMenu *mod_menu_do_pmenu(WWindow *where, ExtlFn handler, ExtlTab tab)
     if(menu==NULL)
         return NULL;
 
-    region_keep_on_top((WRegion*)menu);
     region_raise((WRegion*)menu);
-    /*region_stack_above((WRegion*)menu, (WRegion*)where);*/
     
     if(!ioncore_set_drag_handlers((WRegion*)menu,
                             NULL,

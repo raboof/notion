@@ -25,7 +25,6 @@
 #include <ioncore/defer.h>
 #include <ioncore/frame.h>
 #include <ioncore/region-iter.h>
-#include <ioncore/stacking.h>
 #include <mod_ionws/ionws.h>
 #include <mod_ionws/split.h>
 #include "autows.h"

@@ -80,12 +80,6 @@ DECLCLASS(WRegion){
     WRegion *manager;
     WRegion *mgr_next, *mgr_prev;
     
-    struct{
-        WRegion *below_list;
-        WRegion *above;
-        WRegion *next, *prev;
-    } stacking;
-    
     int mgd_activity;
 };
 
@@ -114,6 +108,12 @@ DYNFUN bool region_managed_may_destroy(WRegion *mgr, WRegion *reg);
 DYNFUN void region_child_removed(WRegion *reg, WRegion *sub);
 
 DYNFUN void region_manager_changed(WRegion *reg, WRegion *mgr_or_null);
+
+DYNFUN void region_restack(WRegion *reg, Window other, int mode);
+DYNFUN void region_stacking(WRegion *reg, Window *bottomret, Window *topret);
+
+extern void region_raise(WRegion *reg);
+extern void region_lower(WRegion *reg);
 
 extern void region_fit(WRegion *reg, const WRectangle *geom, 
                        WRegionFitMode mode);

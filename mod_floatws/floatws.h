@@ -22,6 +22,14 @@
 #include <ioncore/rectangle.h>
 
 INTRCLASS(WFloatWS);
+INTRSTRUCT(WFloatStacking);
+
+DECLSTRUCT(WFloatStacking){
+    WRegion *reg;
+    WRegion *above;
+    WFloatStacking *next, *prev;
+};
+
 
 DECLCLASS(WFloatWS){
     WGenWS genws;
@@ -29,6 +37,7 @@ DECLCLASS(WFloatWS){
     WRegion *managed_stdisp;
     int stdisp_corner;
     WRegion *current_managed;
+    WFloatStacking *stacking;
 };
 
 
@@ -52,6 +61,9 @@ extern bool floatws_rescue_clientwins(WFloatWS *ws);
 
 extern bool floatws_rqclose(WFloatWS *ws);
 extern bool floatws_rqclose_relocate(WFloatWS *ws);
+
+extern void floatws_raise(WFloatWS *ws, WRegion *reg);
+extern void floatws_lower(WFloatWS *ws, WRegion *reg);
 
 /* */
 

@@ -29,7 +29,6 @@
 #include "frame-pointer.h"
 #include "frame-draw.h"
 #include "sizehint.h"
-#include "stacking.h"
 #include "extlconv.h"
 #include "mplex.h"
 #include "bindmaps.h"

@@ -40,6 +40,7 @@
 #define STDISP_OF(WS) \
      ((WS)->stdispnode!=NULL ? (WS)->stdispnode->regnode.reg : NULL)
 
+
 /*{{{ Dynfun implementations */
 
 
@@ -132,6 +133,74 @@ bool ionws_managed_display(WIonWS *ws, WRegion *reg)
 {
     return TRUE;
 }
+
+
+
+void ionws_restack(WIonWS *ws, Window other, int mode)
+{
+    WRegion *reg;
+    
+    xwindow_restack(ws->genws.dummywin, other, mode);
+    other=ws->genws.dummywin;
+    mode=Above;
+    
+    FOR_ALL_MANAGED_ON_LIST(ws->managed_list, reg){
+        Window bottom=None, top=None;
+        region_restack(reg, other, Above);
+        region_stacking(reg, &bottom, &top);
+        if(top!=None)
+            other=top;
+    }
+
+    reg=STDISP_OF(ws);
+    if(reg!=NULL)
+        region_restack(reg, other, Above);
+}
+
+
+static void ionws_do_stacking(WIonWS *ws, Window *bottomret, Window *topret,
+                              bool incl_stdisp)
+{
+    WRegion *reg;
+    
+    *bottomret=ws->genws.dummywin;
+    *topret=ws->genws.dummywin;
+
+    if(incl_stdisp){
+        reg=STDISP_OF(ws);
+        if(reg!=NULL){
+            Window bottom=None, top=None;
+            region_stacking(reg, &bottom, &top);
+            if(top!=None){
+                *topret=top;
+                return;
+            }
+        }
+    }
+    
+    for(reg=REGION_LAST_MANAGED(ws->managed_list);
+        reg!=NULL;
+        reg=REGION_PREV_MANAGED(ws->managed_list, reg)){
+        Window bottom=None, top=None;
+        region_stacking(reg, &bottom, &top);
+        if(top!=None){
+            *topret=top;
+            break;
+        }
+    }
+}
+
+
+void ionws_stacking(WIonWS *ws, Window *bottomret, Window *topret)
+{
+    ionws_do_stacking(ws, bottomret, topret, TRUE);
+}
+
+
+/*}}}*/
+
+
+/*{{{ Status display support code */
 
 
 void ionws_unmanage_stdisp(WIonWS *ws, bool permanent, bool nofocus)
@@ -311,6 +380,11 @@ void ionws_manage_stdisp(WIonWS *ws, WRegion *stdisp, int corner)
 
 void ionws_managed_add_default(WIonWS *ws, WRegion *reg)
 {
+    Window bottom=None, top=None;
+    
+    ionws_do_stacking(ws, &bottom, &top, FALSE);
+    region_restack(reg, top, Above);
+    
     if(STDISP_OF(ws)==reg)
         region_set_manager(reg, (WRegion*)ws, NULL);
     else
@@ -1205,16 +1279,26 @@ WRegion *ionws_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 
 
 static DynFunTab ionws_dynfuntab[]={
-    {region_map, ionws_map},
-    {region_unmap, ionws_unmap},
-    {region_do_set_focus, ionws_do_set_focus},
+    {region_map, 
+     ionws_map},
+    
+    {region_unmap, 
+     ionws_unmap},
+    
+    {region_do_set_focus, 
+     ionws_do_set_focus},
     
     {(DynFun*)region_fitrep,
      (DynFun*)ionws_fitrep},
     
-    {region_managed_rqgeom, ionws_managed_rqgeom},
-    {region_managed_activated, ionws_managed_activated},
-    {region_managed_remove, ionws_managed_remove},
+    {region_managed_rqgeom, 
+     ionws_managed_rqgeom},
+    
+    {region_managed_activated,
+     ionws_managed_activated},
+    
+    {region_managed_remove, 
+     ionws_managed_remove},
     
     {(DynFun*)region_managed_display,
      (DynFun*)ionws_managed_display},
@@ -1248,6 +1332,12 @@ static DynFunTab ionws_dynfuntab[]={
     {(DynFun*)ionws_load_node,
      (DynFun*)ionws_load_node_default},
             
+    {region_restack,
+     ionws_restack},
+
+    {region_stacking,
+     ionws_stacking},
+    
     END_DYNFUNTAB
 };
 

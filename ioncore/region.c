@@ -16,7 +16,6 @@
 #include "focus.h"
 #include "regbind.h"
 #include "names.h"
-#include "stacking.h"
 #include "resize.h"
 #include "manage.h"
 #include "extl.h"
@@ -55,11 +54,6 @@ void region_init(WRegion *reg, WWindow *par, const WFitParams *fp)
     reg->manager=NULL;
     reg->mgr_next=NULL;
     reg->mgr_prev=NULL;
-    
-    reg->stacking.below_list=NULL;
-    reg->stacking.next=NULL;
-    reg->stacking.prev=NULL;
-    reg->stacking.above=NULL;
     
     reg->mgd_activity=FALSE;
 
@@ -309,8 +303,6 @@ void region_detach_parent(WRegion *reg)
     if(p==NULL || p==reg)
         return;
 
-    region_reset_stacking(reg);
-    
     UNLINK_ITEM(p->children, reg, p_next, p_prev);
     reg->parent=NULL;
 
@@ -452,7 +444,7 @@ bool region_goto(WRegion *reg)
 /*}}}*/
 
 
-/*{{{ Helpers/misc */
+/*{{{ Fit/reparent */
 
 
 void region_fit(WRegion *reg, const WRectangle *geom, WRegionFitMode mode)
@@ -474,6 +466,11 @@ bool region_reparent(WRegion *reg, WWindow *par,
 }
 
 
+/*}}}*/
+
+
+/*{{{ Close */
+
 /*EXTL_DOC
  * Recursively attempt to close a region or one of the regions managed by 
  * it. If \var{sub} is set, it will be used as the managed region, otherwise
@@ -489,6 +486,193 @@ WRegion *region_rqclose_propagate(WRegion *reg, WRegion *maybe_sub)
     if(maybe_sub!=NULL)
         return region_rqclose_propagate(maybe_sub, NULL);
     return (region_rqclose(reg) ? reg : NULL);
+}
+
+
+bool region_may_destroy(WRegion *reg)
+{
+    WRegion *mgr=REGION_MANAGER(reg);
+    if(mgr==NULL)
+        return TRUE;
+    else
+        return region_managed_may_destroy(mgr, reg);
+}
+
+
+/*}}}*/
+
+
+/*{{{ Manager/parent stuff */
+
+
+void region_set_manager(WRegion *reg, WRegion *mgr, WRegion **listptr)
+{
+    assert(reg->manager==NULL);
+    
+    reg->manager=mgr;
+    if(listptr!=NULL){
+        LINK_ITEM(*listptr, reg, mgr_next, mgr_prev);
+    }
+    
+    region_manager_changed(reg, mgr);
+}
+
+
+void region_unset_manager(WRegion *reg, WRegion *mgr, WRegion **listptr)
+{
+    if(reg->manager!=mgr)
+        return;
+    reg->manager=NULL;
+    if(listptr!=NULL){
+        UNLINK_ITEM(*listptr, reg, mgr_next, mgr_prev);
+    }
+    
+    if(!OBJ_IS_BEING_DESTROYED(reg))
+        region_manager_changed(reg, NULL);
+}
+
+
+void region_set_parent(WRegion *reg, WRegion *parent)
+{
+    assert(reg->parent==NULL && parent!=NULL);
+    LINK_ITEM(parent->children, reg, p_next, p_prev);
+    reg->parent=parent;
+}
+
+
+void region_attach_parent(WRegion *reg, WRegion *parent)
+{
+    region_set_parent(reg, parent);
+#warning "Do we need the raise?"
+    region_raise(reg);
+}
+
+
+/*EXTL_DOC
+ * Returns the region that manages \var{reg}.
+ */
+EXTL_EXPORT_MEMBER
+WRegion *region_manager(WRegion *reg)
+{
+    return reg->manager;
+}
+
+
+/*EXTL_DOC
+ * Returns the parent region of \var{reg}.
+ */
+EXTL_EXPORT_MEMBER
+WRegion *region_parent(WRegion *reg)
+{
+    return reg->parent;
+}
+
+
+WRegion *region_manager_or_parent(WRegion *reg)
+{
+    if(reg->manager!=NULL)
+        return reg->manager;
+    else
+        return reg->parent;
+}
+
+
+WRegion *region_get_manager_chk(WRegion *p, const ClassDescr *descr)
+{
+    WRegion *mgr=NULL;
+    
+    if(p!=NULL){
+        mgr=REGION_MANAGER(p);
+        if(obj_is((Obj*)mgr, descr))
+            return mgr;
+    }
+    
+    return NULL;
+}
+
+/*}}}*/
+
+
+/*{{{ Stacking */
+
+
+void region_raise(WRegion *reg)
+{
+    region_restack(reg, None, Above);
+}
+
+
+void region_lower(WRegion *reg)
+{
+    region_restack(reg, None, Below);
+}
+
+
+static void region_stacking_default(WRegion *reg, 
+                                    Window *bottomret, Window *topret)
+{
+    Window win=region_xwindow(reg);
+    *bottomret=win;
+    *topret=win;
+}
+
+
+void region_stacking(WRegion *reg, Window *bottomret, Window *topret)
+{
+    CALL_DYN(region_stacking, reg, (reg, bottomret, topret));
+}
+
+
+void region_restack(WRegion *reg, Window other, int mode)
+{
+    CALL_DYN(region_restack, reg, (reg, other, mode));
+}
+
+
+/*}}}*/
+
+
+/*{{{ Misc. */
+
+
+/*EXTL_DOC
+ * Returns the root window \var{reg} is on.
+ */
+EXTL_EXPORT_MEMBER
+WRootWin *region_rootwin_of(const WRegion *reg)
+{
+    WRootWin *rw;
+    assert(reg!=NULL); /* Lua interface should not pass NULL reg. */
+    rw=(WRootWin*)(reg->rootwin);
+    assert(rw!=NULL);
+    return rw;
+}
+
+
+/*EXTL_DOC
+ * Returns the screen \var{reg} is on.
+ */
+EXTL_EXPORT_MEMBER
+WScreen *region_screen_of(WRegion *reg)
+{
+    while(reg!=NULL){
+        if(OBJ_IS(reg, WScreen))
+            return (WScreen*)reg;
+        reg=region_parent(reg);
+    }
+    return NULL;
+}
+
+
+Window region_root_of(const WRegion *reg)
+{
+    return WROOTWIN_ROOT(region_rootwin_of(reg));
+}
+
+
+bool region_same_rootwin(const WRegion *reg1, const WRegion *reg2)
+{
+    return (reg1->rootwin==reg2->rootwin);
 }
 
 
@@ -550,77 +734,6 @@ void region_notify_change(WRegion *reg)
 }
 
 
-void region_set_manager(WRegion *reg, WRegion *mgr, WRegion **listptr)
-{
-    assert(reg->manager==NULL);
-    
-    reg->manager=mgr;
-    if(listptr!=NULL){
-        LINK_ITEM(*listptr, reg, mgr_next, mgr_prev);
-    }
-    
-    region_manager_changed(reg, mgr);
-}
-
-
-void region_unset_manager(WRegion *reg, WRegion *mgr, WRegion **listptr)
-{
-    if(reg->manager!=mgr)
-        return;
-    reg->manager=NULL;
-    if(listptr!=NULL){
-        UNLINK_ITEM(*listptr, reg, mgr_next, mgr_prev);
-    }
-    
-    if(!OBJ_IS_BEING_DESTROYED(reg))
-        region_manager_changed(reg, NULL);
-}
-
-
-void region_set_parent(WRegion *reg, WRegion *parent)
-{
-    assert(reg->parent==NULL && parent!=NULL);
-    LINK_ITEM(parent->children, reg, p_next, p_prev);
-    reg->parent=parent;
-}
-
-
-void region_attach_parent(WRegion *reg, WRegion *parent)
-{
-    region_set_parent(reg, parent);
-    region_raise(reg);
-}
-
-
-/*EXTL_DOC
- * Returns the region that manages \var{reg}.
- */
-EXTL_EXPORT_MEMBER
-WRegion *region_manager(WRegion *reg)
-{
-    return reg->manager;
-}
-
-
-/*EXTL_DOC
- * Returns the parent region of \var{reg}.
- */
-EXTL_EXPORT_MEMBER
-WRegion *region_parent(WRegion *reg)
-{
-    return reg->parent;
-}
-
-
-WRegion *region_manager_or_parent(WRegion *reg)
-{
-    if(reg->manager!=NULL)
-        return reg->manager;
-    else
-        return reg->parent;
-}
-
-
 /*EXTL_DOC
  * Returns the geometry of \var{reg} within its parent; a table with fields
  * \var{x}, \var{y}, \var{w} and \var{h}.
@@ -629,74 +742,6 @@ EXTL_EXPORT_MEMBER
 ExtlTab region_geom(WRegion *reg)
 {
     return extl_table_from_rectangle(&REGION_GEOM(reg));
-}
-
-
-bool region_may_destroy(WRegion *reg)
-{
-    WRegion *mgr=REGION_MANAGER(reg);
-    if(mgr==NULL)
-        return TRUE;
-    else
-        return region_managed_may_destroy(mgr, reg);
-}
-
-
-WRegion *region_get_manager_chk(WRegion *p, const ClassDescr *descr)
-{
-    WRegion *mgr=NULL;
-    
-    if(p!=NULL){
-        mgr=REGION_MANAGER(p);
-        if(obj_is((Obj*)mgr, descr))
-            return mgr;
-    }
-    
-    return NULL;
-}
-
-
-/*{{{ Misc. */
-
-
-/*EXTL_DOC
- * Returns the root window \var{reg} is on.
- */
-EXTL_EXPORT_MEMBER
-WRootWin *region_rootwin_of(const WRegion *reg)
-{
-    WRootWin *rw;
-    assert(reg!=NULL); /* Lua interface should not pass NULL reg. */
-    rw=(WRootWin*)(reg->rootwin);
-    assert(rw!=NULL);
-    return rw;
-}
-
-
-/*EXTL_DOC
- * Returns the screen \var{reg} is on.
- */
-EXTL_EXPORT_MEMBER
-WScreen *region_screen_of(WRegion *reg)
-{
-    while(reg!=NULL){
-        if(OBJ_IS(reg, WScreen))
-            return (WScreen*)reg;
-        reg=region_parent(reg);
-    }
-    return NULL;
-}
-
-
-Window region_root_of(const WRegion *reg)
-{
-    return WROOTWIN_ROOT(region_rootwin_of(reg));
-}
-
-
-bool region_same_rootwin(const WRegion *reg1, const WRegion *reg2)
-{
-    return (reg1->rootwin==reg2->rootwin);
 }
 
 
@@ -721,6 +766,8 @@ static DynFunTab region_dynfuntab[]={
 
     {(DynFun*)region_manage_rescue,
      (DynFun*)region_manage_rescue_default},
+    
+    {region_stacking, region_stacking_default},
     
     END_DYNFUNTAB
 };

@@ -17,7 +17,6 @@
 #include "focus.h"
 #include "rootwin.h"
 #include "region.h"
-#include "stacking.h"
 #include "xwindow.h"
 #include "region-iter.h"
 
@@ -62,14 +61,12 @@ bool window_do_init(WWindow *wwin, WWindow *par, Window win,
 {
     wwin->win=win;
     wwin->xic=NULL;
-    wwin->keep_on_top_list=NULL;
     region_init(&(wwin->region), par, fp);
     if(win!=None){
         XSaveContext(ioncore_g.dpy, win, ioncore_g.win_context, 
                      (XPointer)wwin);
-        if(par!=NULL)
-            window_init_sibling_stacking(par, win);
     }
+    
     return TRUE;
 }
 
@@ -181,10 +178,9 @@ void window_do_set_focus(WWindow *wwin, bool warp)
 }
 
 
-Window window_restack(WWindow *wwin, Window other, int mode)
+void window_restack(WWindow *wwin, Window other, int mode)
 {
     xwindow_restack(wwin->win, other, mode);
-    return wwin->win;
 }
 
 
@@ -205,9 +201,9 @@ static DynFunTab window_dynfuntab[]={
     {region_unmap, window_unmap},
     {region_do_set_focus, window_do_set_focus},
     {(DynFun*)region_fitrep, (DynFun*)window_fitrep},
-    {(DynFun*)region_restack, (DynFun*)window_restack},
     {(DynFun*)region_xwindow, (DynFun*)window_xwindow},
     {region_notify_rootpos, window_notify_subs_rootpos},
+    {region_restack, window_restack},
     END_DYNFUNTAB
 };
 

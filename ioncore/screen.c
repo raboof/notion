@@ -31,7 +31,6 @@
 #include "rectangle.h"
 #include "region-iter.h"
 #include "infowin.h"
-#include "stacking.h"
 #include "defer.h"
 #include "activity.h"
 #include "extlconv.h"
@@ -277,7 +276,8 @@ void screen_notify(WScreen *scr, const char *str)
     watch_setup(&(scr->notifywin_watch), (Obj*)iw, NULL);
 
     infowin_set_text(iw, str);
-    region_keep_on_top((WRegion*)iw);
+#warning "Make passive l2?/don't care if l2 overlaps?"
+    region_raise((WRegion*)iw);
     region_map((WRegion*)iw);
 }
 

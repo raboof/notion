@@ -25,7 +25,6 @@
 #include <ioncore/attach.h>
 #include <ioncore/regbind.h>
 #include <ioncore/frame-pointer.h>
-#include <ioncore/stacking.h>
 #include <ioncore/extlconv.h>
 #include <ioncore/defer.h>
 #include <ioncore/region-iter.h>
@@ -206,6 +205,24 @@ static void floatws_managed_remove(WFloatWS *ws, WRegion *reg)
     bool mcf=region_may_control_focus((WRegion*)ws);
     bool ds=OBJ_IS_BEING_DESTROYED(ws);
     WRegion *next=NULL;
+    WFloatStacking *st, *stnext;
+    bool nextlocked=FALSE;
+    
+    for(st=ws->stacking; st!=NULL; st=stnext){
+        stnext=st->next;
+        if(st->reg==reg){
+            next=st->above;
+            nextlocked=TRUE;
+            UNLINK_ITEM(ws->stacking, st, next, prev);
+            free(st);
+        }else if(st->above==reg){
+            st->above=NULL;
+            next=st->reg;
+            nextlocked=TRUE;
+        }else if(!nextlocked){
+            next=st->reg;
+        }
+    }
     
     if(reg==ws->managed_stdisp){
         region_unset_manager(reg, (WRegion*)ws, NULL);
@@ -222,14 +239,8 @@ static void floatws_managed_remove(WFloatWS *ws, WRegion *reg)
     
     ws->current_managed=NULL;
     
-    if(mcf && !ds){
-        if(reg->stacking.above!=NULL)
-            next=reg->stacking.above;
-        else
-            next=floatws_get_focus_to(ws);
-        
+    if(mcf && !ds)
         region_do_set_focus(next!=NULL ? next : (WRegion*)ws, FALSE);
-    }
 }
 
 
@@ -251,6 +262,7 @@ static bool floatws_init(WFloatWS *ws, WWindow *parent, const WFitParams *fp)
     ws->current_managed=NULL;
     ws->managed_stdisp=NULL;
     ws->stdisp_corner=MPLEX_STDISP_BL;
+    ws->stacking=NULL;
 
     if(!genws_init(&(ws->genws), parent, fp))
         return FALSE;
@@ -327,8 +339,22 @@ bool floatws_rqclose(WFloatWS *ws)
 /*{{{ manage_clientwin/transient */
 
 
-static void floatws_add_managed(WFloatWS *ws, WRegion *reg, bool skip_list)
+static bool floatws_add_managed(WFloatWS *ws, WRegion *reg, bool skip_list)
 {
+    WFloatStacking *st=ALLOC(WFloatStacking);
+    Window bottom=None, top=None;
+    
+    if(st==NULL)
+        return FALSE;
+    
+    st->reg=reg;
+    st->above=NULL;
+    
+    region_stacking((WRegion*)ws, &bottom, &top);
+    region_restack(reg, top, Above);
+    
+    LINK_ITEM(ws->stacking, st, next, prev);
+    
     if(skip_list)
         region_set_manager(reg, (WRegion*)ws, NULL);
     else
@@ -338,6 +364,8 @@ static void floatws_add_managed(WFloatWS *ws, WRegion *reg, bool skip_list)
 
     if(region_is_fully_mapped((WRegion*)ws))
         region_map(reg);
+    
+    return TRUE;
 }
 
 
@@ -551,10 +579,12 @@ bool floatws_attach(WFloatWS *ws, WClientWin *cwin, ExtlTab p)
  * on WFloatWS:s differently from the normal behaviour.
  */
 bool mod_floatws_clientwin_do_manage(WClientWin *cwin, 
-                                    const WManageParams *param)
+                                     const WManageParams *param)
 {
     WRegion *stack_above;
+    WFloatStacking *st;
     WFloatWS *ws;
+    WRegion *mgr;
     
     if(param->tfor==NULL)
         return FALSE;
@@ -570,7 +600,20 @@ bool mod_floatws_clientwin_do_manage(WClientWin *cwin,
     if(!floatws_manage_clientwin(ws, cwin, param, MANAGE_REDIR_PREFER_NO))
         return FALSE;
 
-    region_stack_above(REGION_MANAGER(cwin), stack_above);
+    mgr=REGION_MANAGER(cwin);
+    
+    if(ws->stacking!=NULL){
+        st=ws->stacking->prev; /* Should be the correct one already.. */
+        while(1){
+            if(st->reg==mgr){
+                st->above=stack_above;
+                break;
+            }
+            if(st==ws->stacking)
+                break;
+            st=st->prev;
+        }
+    }
 
     return TRUE;
 }
@@ -670,6 +713,56 @@ WRegion *floatws_backcirculate(WFloatWS *ws)
 }
 
 
+/*}}}*/
+
+
+/*{{{ Stacking */
+
+
+void floatws_stacking(WFloatWS *ws, Window *bottomret, Window *topret)
+{
+    WFloatStacking *st;
+    
+    *bottomret=ws->genws.dummywin;
+    *topret=ws->genws.dummywin;
+
+    if(ws->stacking==NULL)
+        return;
+    
+    st=ws->stacking->prev;
+    
+    while(1){
+        Window bottom=None, top=None;
+        region_stacking(st->reg, &bottom, &top);
+        if(top!=None){
+            *topret=top;
+            break;
+        }
+        if(st==ws->stacking)
+            break;
+        st=st->prev;
+    }
+}
+
+
+void floatws_restack(WFloatWS *ws, Window other, int mode)
+{
+    WFloatStacking *st;
+    
+    xwindow_restack(ws->genws.dummywin, other, mode);
+    other=ws->genws.dummywin;
+    mode=Above;
+    
+    for(st=ws->stacking; st!=NULL; st=st->next){
+        Window bottom=None, top=None;
+        region_restack(st->reg, other, mode);
+        region_stacking(st->reg, &bottom, &top);
+        if(top!=None)
+            other=top;
+    }
+}
+
+
 /*EXTL_DOC
  * Raise \var{reg} that must be managed by \var{ws}.
  * If \var{reg} is \code{nil}, this function silently fails.
@@ -677,11 +770,39 @@ WRegion *floatws_backcirculate(WFloatWS *ws)
 EXTL_EXPORT_MEMBER
 void floatws_raise(WFloatWS *ws, WRegion *reg)
 {
-    if(reg!=NULL){
-        if(REGION_MANAGER(reg)!=(WRegion*)ws)
-            WARN_FUNC("reg not managed by ws");
-        else
-            region_raise(reg);
+    WFloatStacking *st, *stabove, *stnext;
+    Window bottom=None, top=None;
+
+    if(reg==NULL || ws->stacking==NULL)
+        return;
+    
+    if(REGION_MANAGER(reg)!=(WRegion*)ws){
+        WARN_FUNC("reg not managed by ws");
+        return;
+    }
+    
+    for(st=ws->stacking; st!=NULL; st=st->next){
+        if(st->reg==reg)
+            break;
+    }
+    
+    if(st==NULL)
+        return;
+    
+    UNLINK_ITEM(ws->stacking, st, next, prev);
+    region_stacking((WRegion*)ws, &bottom, &top);
+    region_restack(reg, top, Above);
+    LINK_ITEM(ws->stacking, st, next, prev);
+
+    for(stabove=ws->stacking; stabove!=NULL && stabove!=st; stabove=stnext){
+        stnext=stabove->next;
+        
+        if(stabove->above==reg){
+            UNLINK_ITEM(ws->stacking, stabove, next, prev);
+            region_stacking((WRegion*)ws, &bottom, &top);
+            region_restack(stabove->reg, top, Above);
+            LINK_ITEM(ws->stacking, stabove, next, prev);
+        }
     }
 }
 
@@ -693,12 +814,28 @@ void floatws_raise(WFloatWS *ws, WRegion *reg)
 EXTL_EXPORT_MEMBER
 void floatws_lower(WFloatWS *ws, WRegion *reg)
 {
-    if(reg!=NULL){
-        if(REGION_MANAGER(reg)!=(WRegion*)ws)
-            WARN_FUNC("reg not managed by ws");
-        else
-            region_lower(reg);
+    WFloatStacking *st;
+
+    if(reg==NULL || ws->stacking==NULL)
+        return;
+    
+    if(REGION_MANAGER(reg)!=(WRegion*)ws){
+        WARN_FUNC("reg not managed by ws");
+        return;
     }
+    
+    for(st=ws->stacking; st!=NULL; st=st->next){
+        if(st->reg==reg)
+            break;
+    }
+
+    if(st==NULL)
+        return;
+    
+    UNLINK_ITEM(ws->stacking, st, next, prev);
+    region_restack(reg, ws->genws.dummywin, Above);
+    LINK_ITEM_FIRST(ws->stacking, st, next, prev);
+
 }
 
 
@@ -875,6 +1012,12 @@ static DynFunTab floatws_dynfuntab[]={
     
     {genws_manage_stdisp,
      floatws_manage_stdisp},
+    
+    {region_restack,
+     floatws_restack},
+
+    {region_stacking,
+     floatws_stacking},
     
     END_DYNFUNTAB
 };

@@ -27,7 +27,6 @@
 #include "attach.h"
 #include "regbind.h"
 #include "names.h"
-#include "stacking.h"
 #include "saveload.h"
 #include "manage.h"
 #include "extl.h"
@@ -608,7 +607,9 @@ typedef struct{
     WRegion *transient;
 } TransRepar;
 
+
 static TransRepar *transient_reparents=NULL;
+
 
 static WRegion *clientwin_do_attach_transient(WClientWin *cwin, 
                                               WRegionAttachHandler *fn,
@@ -619,6 +620,7 @@ static WRegion *clientwin_do_attach_transient(WClientWin *cwin,
     WRegion *reg;
     TransRepar tp, *tpold;
     WFitParams fp;
+    Window bottom=None, top=None;
 
     if(par==NULL)
         return NULL;
@@ -638,8 +640,9 @@ static WRegion *clientwin_do_attach_transient(WClientWin *cwin,
     if(reg==NULL)
         return NULL;
     
+    region_stacking((WRegion*)cwin, &bottom, &top);
+    region_restack(reg, top, Above);
     region_set_manager(reg, (WRegion*)cwin, &(cwin->transient_list));
-    region_stack_above(reg, (WRegion*)cwin);
     
     if(REGION_IS_MAPPED((WRegion*)cwin))
         region_map(reg);
@@ -667,14 +670,11 @@ static void clientwin_managed_remove(WClientWin *cwin, WRegion *transient)
     bool mcf=region_may_control_focus((WRegion*)cwin);
     
     region_unset_manager(transient, (WRegion*)cwin, &(cwin->transient_list));
-    region_reset_stacking(transient);
     
     if(mcf){
         WRegion *reg=LATEST_TRANSIENT(cwin);
         if(reg==NULL)
             reg=&cwin->region;
-        /*else
-            region_raise(reg);*/
         
         region_set_focus(reg);
     }
@@ -1072,7 +1072,6 @@ static bool clientwin_fitrep(WClientWin *cwin, WWindow *np, WFitParams *fp)
     
     cwin->flags&=~CLIENTWIN_NEED_CFGNTFY;
     
-    
     FOR_ALL_MANAGED_ON_LIST_W_NEXT(cwin->transient_list, transient, next){
         WFitParams fp2;
         fp2.g=fp->g;
@@ -1084,8 +1083,6 @@ static bool clientwin_fitrep(WClientWin *cwin, WWindow *np, WFitParams *fp)
                 OBJ_TYPESTR(transient));
                 region_detach_manager(transient);
         }
-        if(np!=NULL)
-            region_stack_above(transient, (WRegion*)cwin);
     }
     
     return TRUE;
@@ -1146,15 +1143,46 @@ static bool clientwin_managed_display(WClientWin *cwin, WRegion *sub)
     if(!REGION_IS_MAPPED(cwin))
         return FALSE;
     region_map(sub);
-    region_raise(sub);
+#warning "TODO: raise to top"    
     return TRUE;
 }
 
 
-static Window clientwin_restack(WClientWin *cwin, Window other, int mode)
+void clientwin_restack(WClientWin *cwin, Window other, int mode)
 {
+    WRegion *reg;
+    
     xwindow_restack(cwin->win, other, mode);
-    return cwin->win;
+    other=cwin->win;
+    mode=Above;
+    
+    FOR_ALL_MANAGED_ON_LIST(cwin->transient_list, reg){
+        Window bottom=None, top=None;
+        region_restack(reg, other, Above);
+        region_stacking(reg, &bottom, &top);
+        if(top!=None)
+            other=top;
+    }
+}
+
+
+void clientwin_stacking(WClientWin *cwin, Window *bottomret, Window *topret)
+{
+    WRegion *reg;
+    
+    *bottomret=cwin->win;
+    *topret=cwin->win;
+    
+    for(reg=REGION_LAST_MANAGED(cwin->transient_list);
+        reg!=NULL;
+        reg=REGION_PREV_MANAGED(cwin->transient_list, reg)){
+        Window bottom=None, top=None;
+        region_stacking(reg, &bottom, &top);
+        if(top!=None){
+            *topret=top;
+            break;
+        }
+    }
 }
 
 
@@ -1554,8 +1582,11 @@ static DynFunTab clientwin_dynfuntab[]={
     {region_notify_rootpos, 
      clientwin_notify_rootpos},
     
-    {(DynFun*)region_restack, 
-     (DynFun*)clientwin_restack},
+    {region_restack, 
+     clientwin_restack},
+
+    {region_stacking, 
+     clientwin_stacking},
     
     {(DynFun*)region_xwindow, 
      (DynFun*)clientwin_x_window},

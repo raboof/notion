@@ -27,7 +27,6 @@
 #include "resize.h"
 #include "tags.h"
 #include "sizehint.h"
-#include "stacking.h"
 #include "extl.h"
 #include "extlconv.h"
 #include "genws.h"
@@ -639,20 +638,17 @@ bool mplex_l2_hide(WMPlex *mplex, WRegion *reg)
     if(REGION_IS_MAPPED(mplex) && !MPLEX_MGD_UNVIEWABLE(mplex))
         region_unmap(reg);
     
-    FOR_ALL_MANAGED_ON_LIST(mplex->l2_list, reg2){
-        /*if(!l2_is_hidden(reg2))*/
-        if((mgd_flags(reg2)&(MGD_L2_HIDDEN|MGD_L2_PASSIVE))==0)
-            toact=reg2;
-    }
-    
-    if(reg==mplex->l2_current)
+    if(mplex->l2_current==reg){
         mplex->l2_current=NULL;
+        FOR_ALL_MANAGED_ON_LIST(mplex->l2_list, reg2){
+            /*if(!l2_is_hidden(reg2))*/
+            if((mgd_flags(reg2)&(MGD_L2_HIDDEN|MGD_L2_PASSIVE))==0)
+                mplex->l2_current=reg2;
+        }
+    }
     
     if(mcf)
         region_warp((WRegion*)mplex);
-    
-    mplex_managed_changed(mplex, MPLEX_CHANGE_SWITCHONLY, TRUE, 
-                          toact ? toact : mplex->l1_current);
     
     return TRUE;
 }
@@ -674,37 +670,31 @@ bool mplex_l2_show(WMPlex *mplex, WRegion *reg)
     if(!l2_is_hidden(reg))
         return FALSE;
     
+#if 1
+    return mplex_managed_display(mplex, reg);
+#else    
     l2_unmark_hidden(reg);
     if(REGION_IS_MAPPED(mplex) && !MPLEX_MGD_UNVIEWABLE(mplex))
         region_map(reg);
     
-#if 0
-    return mplex_managed_dispplay(mplex, reg);
-#else    
     FOR_ALL_MANAGED_ON_LIST(mplex->l2_list, reg2){
         /*if(!l2_is_hidden(reg2))*/
         if((mgd_flags(reg2)&(MGD_L2_HIDDEN|MGD_L2_PASSIVE))==0)
             toact=reg2;
     }
     
-    /*mplex->l2_current=toact;*/
+    mplex->l2_current=toact;
     
-    if(mcf){
-        if(toact!=NULL)
-            mplex_managed_display(mplex, toact);
-        else
-            region_warp((WRegion*)mplex);
-    }
-    
-    mplex_managed_changed(mplex, MPLEX_CHANGE_SWITCHONLY, TRUE, 
-                          toact ? toact : mplex->l1_current);
+    if(mcf)
+        region_warp((WRegion*)mplex);
 
     return TRUE;
 #endif    
 }
 
 
-static bool mplex_do_managed_display(WMPlex *mplex, WRegion *sub)
+static bool mplex_do_managed_display(WMPlex *mplex, WRegion *sub,
+                                     bool call_changed)
 {
     bool l2=FALSE;
     WRegion *stdisp;
@@ -768,6 +758,9 @@ static bool mplex_do_managed_display(WMPlex *mplex, WRegion *sub)
     
     if(region_may_control_focus((WRegion*)mplex))
         region_warp((WRegion*)mplex);
+
+    if(!l2)
+        mplex_managed_changed(mplex, MPLEX_CHANGE_SWITCHONLY, TRUE, sub);
     
     return TRUE;
 }
@@ -775,12 +768,7 @@ static bool mplex_do_managed_display(WMPlex *mplex, WRegion *sub)
 
 bool mplex_managed_display(WMPlex *mplex, WRegion *sub)
 {
-    if(mplex_do_managed_display(mplex, sub)){
-        mplex_managed_changed(mplex, MPLEX_CHANGE_SWITCHONLY, TRUE, sub);
-        return TRUE;
-    }
-    
-    return FALSE;
+    return mplex_do_managed_display(mplex, sub, TRUE);
 }
 
 
@@ -864,7 +852,6 @@ static WRegion *mplex_do_attach(WMPlex *mplex, WRegionAttachHandler *hnd,
     region_set_manager(reg, (WRegion*)mplex, NULL);
     
     if(l2){
-        region_keep_on_top(reg);
         if(!sw)
             sw=!l2_mark_hidden(reg);
         if(param->flags&MPLEX_ATTACH_L2_PASSIVE)
@@ -874,13 +861,13 @@ static WRegion *mplex_do_attach(WMPlex *mplex, WRegionAttachHandler *hnd,
     if(!l2 && mplex->l1_count==1)
         sw=TRUE;
     
-    if(sw){
-        mplex_do_managed_display(mplex, reg);
-        mplex_managed_changed(mplex, MPLEX_CHANGE_ADD, TRUE, reg);
-    }else{
+    if(sw)
+        mplex_do_managed_display(mplex, reg, FALSE);
+    else
         region_unmap(reg);
-        mplex_managed_changed(mplex, MPLEX_CHANGE_ADD, FALSE, reg);
-    }
+
+    if(!l2)
+        mplex_managed_changed(mplex, MPLEX_CHANGE_ADD, sw, reg);
     
     return reg;
 }
@@ -1105,12 +1092,12 @@ void mplex_managed_remove(WMPlex *mplex, WRegion *sub)
         return;
     
     if(next!=NULL && sw)
-        mplex_do_managed_display(mplex, next);
+        mplex_do_managed_display(mplex, next, FALSE);
     else if(l2 && region_may_control_focus((WRegion*)mplex))
-        region_set_focus((WRegion*)mplex);
+        region_warp((WRegion*)mplex);
     
-    mplex_managed_changed(mplex, MPLEX_CHANGE_REMOVE, sw, sub);
-    
+    if(!l2)
+        mplex_managed_changed(mplex, MPLEX_CHANGE_REMOVE, sw, sub);
 }
 
 
@@ -1466,15 +1453,23 @@ WRegion *mplex_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 
 
 static DynFunTab mplex_dynfuntab[]={
-    {region_do_set_focus, mplex_do_set_focus},
+    {region_do_set_focus, 
+     mplex_do_set_focus},
+    
     {(DynFun*)region_managed_control_focus,
-            (DynFun*)mplex_managed_control_focus},
+     (DynFun*)mplex_managed_control_focus},
     
-    {region_managed_remove, mplex_managed_remove},
-    {region_managed_rqgeom, mplex_managed_rqgeom},
-    {(DynFun*)region_managed_display, (DynFun*)mplex_managed_display},
+    {region_managed_remove, 
+     mplex_managed_remove},
     
-    {(DynFun*)region_handle_drop, (DynFun*)mplex_handle_drop},
+    {region_managed_rqgeom,
+     mplex_managed_rqgeom},
+    
+    {(DynFun*)region_managed_display,
+     (DynFun*)mplex_managed_display},
+    
+    {(DynFun*)region_handle_drop, 
+     (DynFun*)mplex_handle_drop},
     
     {region_map, mplex_map},
     {region_unmap, mplex_unmap},

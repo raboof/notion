@@ -49,7 +49,6 @@
 #include <ioncore/property.h>
 #include <ioncore/readconfig.h>
 #include <ioncore/resize.h>
-#include <ioncore/stacking.h>
 #include <ioncore/window.h>
 #include <ioncore/region-iter.h>
 #include <ioncore/mplex.h>
