@@ -29,8 +29,8 @@ defbindings("WScreen", {
     kpress(MOD1.."0", "WScreen.switch_nth(_, 9)"),
     
     bdoc("Switch to next/previous object within current screen."),
-    kpress(MOD1.."comma", "WScreen.switch_next(_)"),
-    kpress(MOD1.."period", "WScreen.switch_prev(_)"),
+    kpress(MOD1.."comma", "WScreen.switch_prev(_)"),
+    kpress(MOD1.."period", "WScreen.switch_next(_)"),
     
     submap(MOD1.."K", {
         bdoc("Go to previous active object."),
