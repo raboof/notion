@@ -87,11 +87,8 @@ Go to existing workspace or create new (query).
 .B Mod1+F9
 Create a new tiled workspace with a name of the form WIonWS<n>.
 .TP
-.B F11
-Restart Ion (query)
-.TP
 .B F12
-Exit Ion (query)
+Main menu
 
 .SS Navigation
 
@@ -172,6 +169,10 @@ Go to n:th client window within frame (n=1..9, 0)
 .TP
 .B Mod1+A
 Attach named client window in the frame (query)
+.TP
+.B Mod1+M
+Frame context menu
+
 
 .IP "\fITags\fR"
 
@@ -317,7 +318,7 @@ Cancel
 .B Control+M, Enter
 Accept
 
-.SH BUTTONS
+.SH POINTING DEVICE BUTTONS
 
 The bindings for the two types of frames are again different because not
 all legacy/floating frame actions are available on tiled frames and thus
@@ -334,6 +335,9 @@ Drag: resize
 .TP
 .B Mod1+Button1 (left) or Mod1+Button3 (right)
 Resize.
+.TP
+.B Button3 (right) on tab
+Context menu
 
 .SS Floating frames
 
@@ -342,7 +346,7 @@ Resize.
 Press: raise frame, click tab: switch client, double-click tab: toggle
 shade mode, drag border: resize, drag elsewhere: move frame
 .TP
-.B Button2 (middle) ontab
+.B Button2 (middle) on tab
 Click: switch client, drag: drag&drop clients between frames
 .TP
 .B Mod1+Button1 (left)
@@ -350,6 +354,9 @@ Click: raise, drag: move
 .TP
 .B Mod1+Button3 (right)
 Click: lower: drag: resize
+.TP
+.B Button3 (right) on tab
+Context menu
 
 .SH FILES AND DIRECTORIES
 .TP
