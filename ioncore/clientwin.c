@@ -1064,7 +1064,6 @@ static void clientwin_unmap(WClientWin *cwin)
 static void clientwin_set_focus_to(WClientWin *cwin, bool warp)
 {
 	WRegion *reg=region_topmost_stacked_above((WRegion*)cwin);
-	Time stmp;
 	
 	if(warp)
 		do_warp((WRegion*)cwin);
@@ -1075,10 +1074,12 @@ static void clientwin_set_focus_to(WClientWin *cwin, bool warp)
 	}
 
 	if(cwin->flags&CWIN_P_WM_TAKE_FOCUS){
-		stmp=get_timestamp();
+		Time stmp=get_timestamp();
 		send_clientmsg(cwin->win, wglobal.atom_wm_take_focus, stmp);
 	}
+
 	XSetInputFocus(wglobal.dpy, cwin->win, RevertToParent, CurrentTime);
+	
 	XSync(wglobal.dpy, 0);
 }
 

@@ -508,7 +508,6 @@ bool add_clientwin_floatws_transient(WClientWin *cwin,
 	if(!floatws_manage_clientwin(ws, cwin, param))
 		return FALSE;
 
-	region_raise(stack_above);
 	region_stack_above(REGION_MANAGER(cwin), stack_above);
 
 	return TRUE;

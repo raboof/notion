@@ -13,6 +13,7 @@
 #include "region.h"
 #include "window.h"
 #include "stacking.h"
+#include "global.h"
 
 
 /*
@@ -29,6 +30,35 @@
 /*{{{ Functions to set up stacking management */
 
 
+static void do_restack_between(WRegion *reg, WWindow *par, 
+							   WRegion *above, WRegion *below)
+{
+	Window root=None, parent=None, *children=NULL;
+	uint nchildren=0, i=0;
+	Window regwin=region_x_window(reg);
+	Window parwin=region_x_window((WRegion*)par);
+	Window abovewin=(above!=NULL ? region_x_window(above) : None);
+	Window belowwin=(below!=NULL ? region_x_window(below) : None);
+	
+	XQueryTree(wglobal.dpy, parwin, &root, &parent, &children, &nchildren);
+	
+	for(i=0; i<nchildren; i++){
+		if(children[i]==abovewin)
+			break;
+		if(children[i]==regwin){
+			region_restack(reg, abovewin, Above);
+			break;
+		}
+		if(children[i]==belowwin){
+			region_restack(reg, belowwin, Below);
+			break;
+		}
+	}
+	
+	XFree(children);
+}
+
+
 /*EXTL_DOC
  * Inform that \var{reg} should be stacked above the region \var{above}.
  */
@@ -36,14 +66,15 @@ EXTL_EXPORT_MEMBER
 bool region_stack_above(WRegion *reg, WRegion *above)
 {
 	WRegion *r2;
+	WWindow *par=REGION_PARENT_CHK(reg, WWindow);
 	
-	if(reg==above || REGION_PARENT(reg)==NULL ||
-	   REGION_PARENT(reg)!=REGION_PARENT(above)){
+	if(reg==above || par==NULL || (WRegion*)par!=REGION_PARENT(above))
+		return FALSE;
+	
+	if(region_x_window(reg)==None || region_x_window(above)==None ||
+	   region_x_window((WRegion*)par)==None){
 		return FALSE;
 	}
-	
-	if(region_x_window(reg)==None || region_x_window(above)==None)
-		return FALSE;
 	
 	region_reset_stacking(reg);
 	
@@ -53,7 +84,8 @@ bool region_stack_above(WRegion *reg, WRegion *above)
 	else
 		r2=r2->stacking.prev;
 	
-	region_restack(reg, region_x_window(r2), Above);
+	/*region_restack(reg, region_x_window(r2), Above);*/
+	do_restack_between(reg, par, r2, par->keep_on_top_list);
 	
 	LINK_ITEM(above->stacking.below_list, reg, stacking.next, stacking.prev);
 	reg->stacking.above=above;

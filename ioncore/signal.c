@@ -297,7 +297,12 @@ static void ignore_handler(int signal_num)
 void trap_signals()
 {
 	struct sigaction sa;
+	sigset_t set, oldset;
 
+	sigemptyset(&set);
+	sigemptyset(&oldset);
+	sigprocmask(SIG_SETMASK, &set, &oldset);
+	
 #define DEADLY(X) signal(X, deadly_signal_handler);
 #define FATAL(X) signal(X, fatal_signal_handler);
 #define IGNORE(X) signal(X, SIG_IGN)
