@@ -39,7 +39,7 @@ static DynFunTab wedln_dynfuntab[]={
 };
 
 
-IMPLOBJ(WEdln, WInput, deinit_wedln, wedln_dynfuntab)
+IMPLOBJ(WEdln, WInput, deinit_wedln, wedln_dynfuntab, &query_edln_funclist)
 
 
 /*{{{ Drawing primitives */

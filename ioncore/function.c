@@ -10,6 +10,7 @@
 #include "functionp.h"
 #include "modules.h"
 #include "completehelp.h"
+#include "objp.h"
 
 
 /*{{{ lookup_func */
@@ -17,6 +18,9 @@
 
 WFunction *lookup_func(const char *name, WFunction *func)
 {
+	if(func==NULL)
+		return NULL;
+	
 	while(func->callhnd!=NULL){
 		if(strcmp(func->name, name)==0)
 			return func;
@@ -30,10 +34,34 @@ WFunction *lookup_func_ex(const char *name, WFunclist *funclist)
 {
 	WFunction *func, *fr;
 	
+	if(funclist==NULL)
+		return NULL;
+	
 	ITERATE_SYMLIST(WFunction*, func, funclist->funtabs){
 		fr=lookup_func(name, func);
 		if(fr!=NULL)
 			return fr;
+	}
+	
+	return NULL;
+}
+
+
+WFunction *lookup_func_thing(WThing *thing, const char *name)
+{
+	WObjDescr *descr;
+	WFunction *func;
+	
+	if(thing==NULL)
+		return NULL;
+	
+	descr=thing->obj.obj_type;
+	
+	while(descr!=NULL){
+		func=lookup_func_ex(name, (WFunclist*)descr->funclist);
+		if(func!=NULL)
+			return func;
+		descr=descr->ancestor;
 	}
 	
 	return NULL;

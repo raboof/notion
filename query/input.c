@@ -18,7 +18,7 @@ static DynFunTab input_dynfuntab[]={
 };
 
 
-IMPLOBJ(WInput, WWindow, deinit_input, input_dynfuntab)
+IMPLOBJ(WInput, WWindow, deinit_input, input_dynfuntab, &query_input_funclist)
 
 
 /*{{{ Dynfuns */

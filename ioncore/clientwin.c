@@ -73,7 +73,8 @@ static DynFunTab clientwin_dynfuntab[]={
 };
 
 
-IMPLOBJ(WClientWin, WRegion, deinit_clientwin, clientwin_dynfuntab)
+IMPLOBJ(WClientWin, WRegion, deinit_clientwin, clientwin_dynfuntab,
+		&wmcore_clientwin_funclist)
 
 
 static void set_clientwin_state(WClientWin *cwin, int state);

@@ -40,6 +40,8 @@ DECLOBJ(WRegion){
 		WRegion *n_next, *n_prev;
 		WRegion *g_next, *g_prev;
 	} ni;
+	
+	void *funclist;
 };
 
 

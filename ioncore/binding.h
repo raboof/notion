@@ -23,7 +23,8 @@
 
 #define BINDING_MAXARGS		3
 #define BINDING_INIT		\
-	{0, 0, 0, 0, FALSE, NULL, NULL, 0, {TOK_INIT, TOK_INIT, TOK_INIT}}
+	{0, 0, 0, 0, FALSE, NULL, NULL}
+/*	{0, 0, 0, 0, FALSE, NULL, NULL, 0, {TOK_INIT, TOK_INIT, TOK_INIT}}*/
 #define BINDMAP_INIT		{0, 0, NULL, NULL, 0}
 
 
@@ -39,9 +40,10 @@ DECLSTRUCT(WBinding){
 	int area;
 	bool waitrel;
 	WBindmap *submap;
-	WFunction *func;
+	char *cmd;
+	/*WFunction *func;
 	int nargs;
-	Token args[BINDING_MAXARGS];
+	Token args[BINDING_MAXARGS];*/
 };
 
 

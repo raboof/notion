@@ -22,7 +22,7 @@
 #include "splitframe.h"
 
 
-IMPLOBJ(WWsSplit, WObj, NULL, NULL)
+IMPLOBJ(WWsSplit, WObj, NULL, NULL, NULL)
 
 
 /*{{{ Misc helper functions */

@@ -27,7 +27,7 @@ void region_request_close(WRegion *reg)
 		default_request_close(reg);
 }
 
-
+/*
 void close_propagate(WRegion *reg)
 {
 	WRegion *r;
@@ -40,7 +40,7 @@ void close_propagate(WRegion *reg)
 	
 	region_request_close(reg);
 }
-
+*/
 
 void close_sub(WRegion *reg)
 {
@@ -49,11 +49,12 @@ void close_sub(WRegion *reg)
 		region_request_close(reg);
 }
 
-
+/*
 void close_sub_propagate(WRegion *reg)
 {
 	reg=region_selected_sub(reg);
 	if(reg!=NULL)
 		close_propagate(reg);
 }
+*/
 

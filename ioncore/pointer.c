@@ -32,6 +32,37 @@ static WRegion *p_reg=NULL;
 static WScreen *p_screen=NULL;
 static int p_area=0;
 
+static WButtonHandler *p_button_handler=NULL;
+static WMotionHandler *p_motion_handler=NULL;
+static WMotionHandler *p_motion_begin_handler=NULL;
+
+
+/*}}}*/
+
+
+/*{{{ Handler setup */
+
+
+bool set_button_handler(WButtonHandler *handler)
+{
+	p_button_handler=handler;
+	return TRUE;
+}
+
+
+bool set_drag_handlers(WMotionHandler *begin, WMotionHandler *motion,
+					   WButtonHandler *end)
+{
+	if(p_motion==FALSE)
+		return FALSE;
+	
+	p_motion_begin_handler=begin;
+	p_motion_handler=motion;
+	p_button_handler=end;
+	
+	return TRUE;
+}
+
 
 /*}}}*/
 
@@ -80,18 +111,6 @@ bool find_window_at(Window rootwin, int x, int y, Window *childret)
 /*{{{ Call handlers */
 
 
-void callhnd_button_void(WThing *thing, WFunction *func,
-						 int n, const Token *args)
-{
-}
-
-
-void callhnd_drag_void(WThing *thing, WFunction *func,
-					   int n, const Token *args)
-{
-}
-
-
 static void call_button(WThing *thing, WBinding *binding, XButtonEvent *ev)
 {
 	WButtonHandler *fn;
@@ -99,38 +118,20 @@ static void call_button(WThing *thing, WBinding *binding, XButtonEvent *ev)
 	if(binding==NULL)
 		return;
 
-	if(binding->func->callhnd==callhnd_button_void){
-		fn=(WButtonHandler*)binding->func->fn;
-	}else if(binding->func->callhnd==callhnd_drag_void){
-		fn=((WDragHandler*)binding->func->fn)->end;
-	}else{
-		call_binding(binding, thing);
-		return;
-	}
+	call_binding(binding, thing);
 	
-	thing=find_parent(thing, binding->func->objdescr);
-	if(thing!=NULL)
-		fn(thing, ev);
+	if(p_button_handler!=NULL)
+		p_button_handler(thing, ev);
+	
+	p_button_handler=NULL;
 }
 
 
 static void call_motion(WThing *thing, WBinding *binding, XMotionEvent *ev,
 						int dx, int dy)
 {
-	WMotionHandler *fn;
-	
-	if(binding==NULL)
-		return;
-
-	if(binding->func->callhnd!=callhnd_drag_void){
-		/*call_binding(binding, wglobal.grab_holder);*/
-		return;
-	}
-	
-	fn=((WDragHandler*)binding->func->fn)->motion;
-	thing=find_parent(thing, binding->func->objdescr);
-	if(thing!=NULL)
-		fn(thing, ev, dx, dy);
+	if(p_motion_handler!=NULL)
+		p_motion_handler(thing, ev, dx, dy);
 }
 
 
@@ -142,15 +143,12 @@ static void call_motion_begin(WThing *thing, WBinding *binding,
 	if(binding==NULL)
 		return;
 
-	if(binding->func->callhnd!=callhnd_drag_void){
-		/*call_binding(binding, wglobal.grab_holder);*/
-		return;
-	}
+	call_binding(binding, thing);
 	
-	fn=((WDragHandler*)binding->func->fn)->begin;
-	thing=find_parent(thing, binding->func->objdescr);
-	if(thing!=NULL)
-		fn(thing, ev, dx, dy);
+	if(p_motion_begin_handler!=NULL)
+		p_motion_begin_handler(thing, ev, dx, dy);
+	
+	p_motion_begin_handler=NULL;
 }
 
 
@@ -207,6 +205,9 @@ end:
 	p_motiontmp_dirty=TRUE;
 	p_screen=SCREEN_OF(reg);
 	p_area=area;
+	p_button_handler=NULL;
+	p_motion_handler=NULL;
+	p_motion_begin_handler=NULL;
 	
 	call_button(p_thing, pressbind, ev);
 	
@@ -225,15 +226,12 @@ bool handle_button_release(XButtonEvent *ev)
 		p_clickcnt=1;
 		binding=region_lookup_binding_area(p_reg, ACT_BUTTONCLICK,
 										   p_state, p_button, p_area);
-	}else if(p_motiontmp_dirty){
-		binding=region_lookup_binding_area(p_reg, ACT_BUTTONMOTION,
-										   p_state, p_button, p_area);
+		call_button(p_thing, binding,  ev);
 	}else{
-		binding=p_motiontmp;
+		if(p_button_handler!=NULL)
+			p_button_handler(p_thing, ev);
 	}
 
-	call_button(p_thing, binding,  ev);
-	
 	return TRUE;
 }
 
@@ -258,15 +256,14 @@ void handle_pointer_motion(XMotionEvent *ev)
 	p_x=ev->x_root;
 	p_y=ev->y_root;	
 	
-	if(p_motion==FALSE)
+	if(p_motion==FALSE){
+		p_motion=TRUE;
 		call_motion_begin(p_thing, p_motiontmp, ev, dx, dy);
-	else
+	}else{
 		call_motion(p_thing, p_motiontmp, ev, dx, dy);
-	
-	p_motion=TRUE;
+	}
 }
 
 
 /*}}}*/
-
 

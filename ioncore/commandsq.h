@@ -10,7 +10,6 @@
 
 #include "thing.h"
 
-extern bool execute_command_sequence(WThing *thing, char *fn,
-									 WFunclist *funclist);
+extern bool execute_command_sequence(WThing *thing, char *fn);
 
 #endif /* WMCORE_COMMANDSQ_H */

@@ -27,6 +27,7 @@ static const StringIntMap *tmp_areamap=NULL;
 static bool get_func(Tokenizer *tokz, Token *toks, int n,
 					 WBinding *binding, WFunclist *funclist)
 {
+/*
 	const char *name=TOK_STRING_VAL(&(toks[0]));
 	WFunction *func;
 	int i;
@@ -47,6 +48,8 @@ static bool get_func(Tokenizer *tokz, Token *toks, int n,
 		binding->args[i-1]=toks[i];
 		toks[i].type=TOK_INVALID;
 	}
+*/
+	binding->cmd=TOK_TAKE_STRING_VAL(&(toks[0]));
 	
 	return TRUE;
 }
@@ -310,12 +313,12 @@ ConfOpt wmcore_binding_opts[]={
 	{"set_mod", "s", opt_set_mod, NULL},
 	{"submap", "s", opt_submap, wmcore_binding_opts},
 	
-	{"kpress", "ss*", opt_kpress, NULL},
-	{"kpress_waitrel", "ss*", opt_kpress_waitrel, NULL},
-	{"mpress", "?iss*", opt_mpress, NULL},
-	{"mdrag", "?iss*", opt_mdrag, NULL},
-	{"mclick", "?iss*", opt_mclick, NULL},
-	{"mdblclick", "?iss*", opt_mdblclick, NULL},
+	{"kpress", "ss", opt_kpress, NULL},
+	{"kpress_waitrel", "ss", opt_kpress_waitrel, NULL},
+	{"mpress", "?iss", opt_mpress, NULL},
+	{"mdrag", "?iss", opt_mdrag, NULL},
+	{"mclick", "?iss", opt_mclick, NULL},
+	{"mdblclick", "?iss", opt_mdblclick, NULL},
 
 	{"#end", NULL, end_bindings, NULL},
 	{"#cancel", NULL, end_bindings, NULL},

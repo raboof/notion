@@ -65,7 +65,8 @@ static DynFunTab screen_dynfuntab[]={
 };
 
 
-IMPLOBJ(WScreen, WWindow, deinit_screen, screen_dynfuntab)
+IMPLOBJ(WScreen, WWindow, deinit_screen, screen_dynfuntab,
+		&wmcore_screen_funclist)
 
 
 /*{{{ Error handling */

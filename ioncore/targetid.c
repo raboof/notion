@@ -16,8 +16,8 @@
  * problems than lack of target id:s must have occured long before that.
  * It wouldn't be too hard to change this, though...
  */
-#define N_TABS		1024
-#define TAB_SIZE	1024
+#define N_TABS		256
+#define TAB_SIZE	1024*4
 #define MAX_ID		(N_TABS*TAB_SIZE-1)
 
 static WRegion **tabs[N_TABS]={NULL, };

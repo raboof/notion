@@ -21,6 +21,7 @@
 #include "frame-pointer.h"
 #include "bindmaps.h"
 #include "splitframe.h"
+#include "funtabs.h"
 
 
 static void deinit_frame(WFrame *frame);
@@ -76,7 +77,7 @@ static DynFunTab frame_dynfuntab[]={
 };
 									   
 
-IMPLOBJ(WFrame, WWindow, deinit_frame, frame_dynfuntab)
+IMPLOBJ(WFrame, WWindow, deinit_frame, frame_dynfuntab, &ion_frame_funclist)
 
 
 /*{{{ Helpers */

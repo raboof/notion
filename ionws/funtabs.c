@@ -104,13 +104,13 @@ static WFunction ion_frame_funtab[]={
 	FN_VOID(generic, WFrame, 	"switch_prev",		frame_switch_prev),
 	FN_VOID(generic, WFrame,	"attach_tagged",	frame_attach_tagged),
 	FN_VOID(generic, WFrame,	"destroy_frame",	region_request_close),
-	FN_VOID(generic, WFrame,	"closedestroy",		close_propagate),
+/*	FN_VOID(generic, WFrame,	"closedestroy",		close_propagate),*/
 	FN_VOID(generic, WFrame,	"close_main",		close_sub),
 	FN_VOID(generic, WRegion,	"switch_tab",		switch_region),
 
 	/* mouse move/resize and tab drag */
-	FN_VOID(drag, WFrame,		"p_resize",			&frame_resize_handler),
-	FN_VOID(drag, WRegion,		"p_tabdrag", 		&frame_tabdrag_handler),
+	FN_VOID(generic, WFrame,		"p_resize",		p_resize_setup),
+	FN_VOID(generic, WRegion,		"p_tabdrag", 	p_tabdrag_setup),
 
 	END_FUNTAB
 };
@@ -139,12 +139,6 @@ void init_funclists()
 	assert(add_to_funclist(&ion_workspace_funclist, ion_workspace_funtab));
 	assert(add_to_funclist(&ion_frame_funclist, ion_frame_funtab));
 	assert(add_to_funclist(&ion_moveres_funclist, ion_moveres_funtab));
-}
-
-
-bool command_sequence(WThing *thing, char *fn)
-{
-	return execute_command_sequence(thing, fn, &ion_frame_funclist);
 }
 
 

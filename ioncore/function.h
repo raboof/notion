@@ -40,6 +40,7 @@ DECLSTRUCT(WFunclist){
 
 extern WFunction *lookup_func(const char *name, WFunction *func);
 extern WFunction *lookup_func_ex(const char *name, WFunclist *funclist);
+extern WFunction *lookup_func_thing(WThing *thing, const char *name);
 extern int complete_func(const char *nam, char ***cp_ret, char **beg,
 							WFunction *func);
 extern int complete_func_ex(const char *nam, char ***cp_ret, char **beg,

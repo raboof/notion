@@ -165,7 +165,7 @@ static void draw_tabdrag(const WRegion *reg)
 }
 
 
-static void p_tabdrag(WRegion *sub, XMotionEvent *ev, int dx, int dy)
+static void p_tabdrag_motion(WRegion *sub, XMotionEvent *ev, int dx, int dy)
 {
 	WGRData *grdata=GRDATA_OF(sub);
 
@@ -204,7 +204,7 @@ static void p_tabdrag_begin(WRegion *sub, XMotionEvent *ev, int dx, int dy)
 
 	draw_frame_bar(frame, FALSE);
 	
-	p_tabdrag(sub, ev, dx, dy);
+	p_tabdrag_motion(sub, ev, dx, dy);
 	
 	XMapRaised(wglobal.dpy, grdata->drag_win);
 }
@@ -243,11 +243,12 @@ static void p_tabdrag_end(WRegion *sub, XButtonEvent *ev)
 }
 
 
-WDragHandler frame_tabdrag_handler={
-	(WMotionHandler*)p_tabdrag_begin,
-	(WMotionHandler*)p_tabdrag,
-	(WButtonHandler*)p_tabdrag_end
-};
+void p_tabdrag_setup(WFrame *frame)
+{
+	set_drag_handlers((WMotionHandler*)p_tabdrag_begin,
+					  (WMotionHandler*)p_tabdrag_motion,
+					  (WButtonHandler*)p_tabdrag_end);
+}
 
 
 /*}}}*/
@@ -256,17 +257,17 @@ WDragHandler frame_tabdrag_handler={
 /*{{{ Resize */
 
 
-static void p_resize(WFrame *frame, XMotionEvent *ev, int dx, int dy)
+static void p_resize_motion(WFrame *frame, XMotionEvent *ev, int dx, int dy)
 {
 	delta_resize((WRegion*)frame, p_dx1mul*dx, p_dx2mul*dx,
 				 p_dy1mul*dy, p_dy2mul*dy, NULL);
 }
-	
+
 
 static void p_resize_begin(WFrame *frame, XMotionEvent *ev, int dx, int dy)
 {
 	begin_resize((WRegion*)frame, NULL);
-	p_resize(frame, ev, dx, dy);
+	p_resize_motion(frame, ev, dx, dy);
 }
 
 
@@ -276,11 +277,12 @@ static void p_resize_end(WFrame *frame, XButtonEvent *ev)
 }
 
 
-WDragHandler frame_resize_handler={
-	(WMotionHandler*)p_resize_begin,
-	(WMotionHandler*)p_resize,
-	(WButtonHandler*)p_resize_end
-};
+void p_resize_setup(WFrame *frame)
+{
+	set_drag_handlers((WMotionHandler*)p_resize_begin,
+					  (WMotionHandler*)p_resize_motion,
+					  (WButtonHandler*)p_resize_end);
+}
 
 
 /*}}}*/

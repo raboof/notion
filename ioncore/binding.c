@@ -21,6 +21,7 @@
 #include "binding.h"
 #include "global.h"
 #include "objp.h"
+#include "commandsq.h"
 
 
 /* */
@@ -118,8 +119,15 @@ void destroy_binding(WBinding *binding)
 		free(binding->submap);
 	}
 	
+	if(binding->cmd!=NULL)
+		free(binding->cmd);
+	
+	binding->submap=NULL;
+	binding->cmd=NULL;
+	/*
 	for(i=1; i<binding->nargs; i++)
 		tok_free(binding->args+i);
+	 */
 }
 
 
@@ -141,7 +149,7 @@ bool add_binding(WBindmap *bindmap, const WBinding *b)
 	WBinding *binding;
 	int i, j;
 	
-	if(bindmap==NULL || (b->func==NULL && b->submap==NULL))
+	if(bindmap==NULL || (b->cmd==NULL && b->submap==NULL))
 		return FALSE;
 
 	binding=bindmap->bindings;
@@ -347,6 +355,7 @@ WBinding *lookup_binding_area(WBindmap *bindmap,
 	
 void call_binding(const WBinding *binding, WThing *thing)
 {
+/*
 	if(binding->func==NULL)
 		return;
 	
@@ -355,6 +364,9 @@ void call_binding(const WBinding *binding, WThing *thing)
 	
 	binding->func->callhnd(thing, binding->func,
 						   binding->nargs, binding->args);
+*/
+	if(binding->cmd!=NULL)
+		execute_command_sequence(thing, binding->cmd);
 }
 
 

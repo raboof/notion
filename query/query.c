@@ -15,6 +15,7 @@
 #include <wmcore/exec.h>
 #include <wmcore/clientwin.h>
 #include <wmcore/focus.h>
+#include <wmcore/commandsq.h>
 #include <src/frame.h>
 #include <src/workspace.h>
 #include <src/funtabs.h>
@@ -372,10 +373,14 @@ void handler_function(WThing *thing, char *fn, char *userdata)
 	WWatch watch=WWATCH_INIT;
 	bool error;
 	
+	assert(WTHING_IS(thing, WFrame));
+	if(((WFrame*)thing)->current_sub!=NULL)
+		thing=(WThing*)(((WFrame*)thing)->current_sub);
+	
 	setup_watch(&watch, thing, NULL);
 	
 	old_warn_handler=set_warn_handler(function_warn_handler);
-	error=!command_sequence(thing, fn);
+	error=!execute_command_sequence(thing, fn);
 	set_warn_handler(old_warn_handler);
 	
 	if(watch.thing!=NULL){

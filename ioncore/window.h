@@ -30,10 +30,6 @@ DECLOBJ(WWindow){
 	int flags;
 	Window win;
 	XIC xic;
-	/*WBindmap *bindmap;*/
-	
-	/*?*/int min_w, min_h;
-	/*?*/int saved_w, saved_h;
 };
 
 

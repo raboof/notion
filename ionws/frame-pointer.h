@@ -20,8 +20,8 @@ enum{
 	FRAME_AREA_CLIENT
 };
 
-extern WDragHandler frame_tabdrag_handler;
-extern WDragHandler frame_resize_handler;
+extern void p_resize_setup(WFrame *frame);
+extern void p_tabdrag_setup(WFrame *frame);
 
 extern int frame_press(WFrame *frame, XButtonEvent *ev, WThing **thing_ret);
 

@@ -13,9 +13,9 @@
 #include "clientwin.h"
 
 DYNFUN void region_request_close(WRegion *reg);
-extern void close_propagate(WRegion *reg);
+/*extern void close_propagate(WRegion *reg);*/
 extern void close_sub(WRegion *reg);
-extern void close_sub_propagate(WRegion *reg);
+/*extern void close_sub_propagate(WRegion *reg);*/
 
 #endif /* WMCORE_CLOSE_H */
 

@@ -60,7 +60,7 @@ static DynFunTab region_dynfuntab[]={
 };
 
 
-IMPLOBJ(WRegion, WThing, deinit_region, region_dynfuntab)
+IMPLOBJ(WRegion, WThing, deinit_region, region_dynfuntab, NULL)
 
 	
 /* List of named regions */
@@ -86,6 +86,8 @@ void init_region(WRegion *reg, void *scr, WRectangle geom)
 	reg->ni.n_prev=reg;
 	reg->ni.g_next=NULL;
 	reg->ni.g_prev=NULL;
+	
+	reg->funclist=NULL;
 }
 
 

@@ -22,6 +22,7 @@
 #include "split.h"
 #include "frame.h"
 #include "confws.h"
+#include "funtabs.h"
 
 
 static void deinit_workspace(WWorkspace *ws);
@@ -60,7 +61,8 @@ static DynFunTab workspace_dynfuntab[]={
 };
 
 
-IMPLOBJ(WWorkspace, WRegion, deinit_workspace, workspace_dynfuntab)
+IMPLOBJ(WWorkspace, WRegion, deinit_workspace, workspace_dynfuntab,
+		&ion_workspace_funclist)
 
 
 /*{{{ region dynfun implementations */

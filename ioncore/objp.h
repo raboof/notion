@@ -23,18 +23,20 @@ DECLSTRUCT(WObjDescr){
 	WObjDescr *ancestor;
 	DynFunTab *funtab;
 	void (*destroy_fn)();
+	void *funclist;
 };
 
 #define WOBJ_TYPESTR(OBJ) (((WObj*)OBJ)->obj_type->name)
 
-#define IMPLOBJ(OBJ, ANCESTOR, DFN, FUNTAB)                               \
-	WObjDescr OBJDESCR(OBJ)={#OBJ, &OBJDESCR(ANCESTOR), FUNTAB, DFN};
+#define IMPLOBJ(OBJ, ANCESTOR, DFN, FUNTAB, FL)                          \
+		WObjDescr OBJDESCR(OBJ)={#OBJ, &OBJDESCR(ANCESTOR), FUNTAB, DFN, \
+				(void*)FL};
 
 #define WOBJ_INIT(O, TYPE) ((WObj*)(O))->obj_type=&OBJDESCR(TYPE)
 
-#define CREATESTRUCT_IMPL_(OBJ, LOWOBJ, INIT, ARGS)                       \
-	OBJ *p;  p=ALLOC(OBJ); if(p==NULL){ warn_err(); return NULL; }        \
-	INIT;                                                                 \
+#define CREATESTRUCT_IMPL_(OBJ, LOWOBJ, INIT, ARGS)                  \
+	OBJ *p;  p=ALLOC(OBJ); if(p==NULL){ warn_err(); return NULL; }   \
+	INIT;                                                            \
 	if(!init_##LOWOBJ ARGS){ free((void*)p); return NULL; } return p
 
 #define CREATESTRUCT_IMPL(OBJ, LOWOBJ, ARGS) \

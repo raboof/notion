@@ -12,7 +12,7 @@
 #include "region.h"
 
 
-IMPLOBJ(WThing, WObj, NULL, NULL)
+IMPLOBJ(WThing, WObj, NULL, NULL, NULL)
 
 
 static void call_watches(WThing *thing);

@@ -40,7 +40,7 @@ static void callhnd_edln_void(WThing *thing, WFunction *func,
 }
 
 
-static WFunclist query_edln_funclist=INIT_FUNCLIST;
+WFunclist query_edln_funclist=INIT_FUNCLIST;
 
 static WFunction query_edln_funtab[]={
 	FN_VOID(edln, WEdln,		"back",				edln_back),
@@ -68,9 +68,9 @@ static WFunction query_edln_funtab[]={
 };
 
 
-static WFunclist query_funclist=INIT_FUNCLIST;
+WFunclist query_input_funclist=INIT_FUNCLIST;
 
-static WFunction query_funtab[]={
+static WFunction query_input_funtab[]={
 	FN_VOID(generic, WInput,	"cancel",			input_cancel),	
 	FN_VOID(generic, WInput,	"scrollup",			input_scrollup),
 	FN_VOID(generic, WInput,	"scrolldown",		input_scrolldown),
@@ -103,7 +103,7 @@ static WFunction query_frame_funtab[]={
 
 static bool query_begin_bindings(Tokenizer *tokz, int n, Token *toks)
 {
-	return wmcore_begin_bindings(query_bindmap, &query_funclist, NULL);
+	return wmcore_begin_bindings(query_bindmap, &query_input_funclist, NULL);
 }
 
 
@@ -146,7 +146,7 @@ bool query_init()
 		return FALSE;
 	}
 
-	ret=(add_to_funclist(&query_funclist, query_funtab) &&
+	ret=(add_to_funclist(&query_input_funclist, query_input_funtab) &&
 		 add_to_funclist(&query_edln_funclist, query_edln_funtab));
 	
 	if(ret)
@@ -164,7 +164,7 @@ bool query_init()
 
 void query_deinit()
 {
-	clear_funclist(&query_funclist);
+	clear_funclist(&query_input_funclist);
 	clear_funclist(&query_edln_funclist);
 	remove_from_funclist(&ion_frame_funclist, query_frame_funtab);
 	
