@@ -292,7 +292,7 @@ static WScreen *add_screen(WRootWin *rw, int id, const WRectangle *geom,
 	region_map((WRegion*)scr);
 
 	if(!useroot){
-		p[1]=region_x_window((WRegion*)scr);
+		p[0]=region_x_window((WRegion*)scr);
 		XChangeProperty(wglobal.dpy, WROOTWIN_ROOT(rw), net_virtual_roots,
 						XA_WINDOW, 32, PropModeAppend, (uchar*)&(p[1]), 1);
 	}
