@@ -73,10 +73,10 @@ void destyle_create_tab_gcs(DEStyle *style)
     /*gcv.function=GXclear;*/
     gcv.stipple=stipple_pixmap;
     gcvmask=GCFillStyle|GCStipple/*|GCFunction*/;
-    if(style->font->fontstruct!=NULL){
-		gcv.font=style->font->fontstruct->fid;
-		gcvmask|=GCFont;
-	}
+    if(style->font!=NULL && style->font->fontstruct!=NULL){
+        gcv.font=style->font->fontstruct->fid;
+        gcvmask|=GCFont;
+    }
 
     style->stipple_gc=XCreateGC(dpy, root, gcvmask, &gcv);
     XCopyGC(dpy, style->normal_gc, 
