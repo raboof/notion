@@ -630,7 +630,8 @@ static void wedln_do_finish(WEdln *wedln)
     wedln->handler=extl_fn_none();
     p=edln_finish(&(wedln->edln));
     
-    destroy_obj((Obj*)wedln);
+    if(region_manager_allows_destroying((WRegion*)wedln))
+       destroy_obj((Obj*)wedln);
     
     if(p!=NULL)
         extl_call(handler, "s", NULL, p);

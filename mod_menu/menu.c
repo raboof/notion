@@ -831,14 +831,17 @@ static void menu_do_finish(WMenu *menu)
     ExtlFn handler;
     ExtlTab tab;
     bool ok;
-    WMenu *actmenu=menu;
+    WMenu *head=menu_head(menu);
     
-    handler=actmenu->handler;
-    actmenu->handler=extl_fn_none();
+    handler=menu->handler;
+    menu->handler=extl_fn_none();
     
-    ok=extl_table_geti_t(actmenu->tab, actmenu->selected_entry+1, &tab);
+    ok=extl_table_geti_t(menu->tab, menu->selected_entry+1, &tab);
     
-    destroy_obj((Obj*)menu_head(menu));
+    if(region_manager_allows_destroying((WRegion*)head))
+        destroy_obj((Obj*)head);
+    else if(head->submenu!=NULL)
+        destroy_obj((Obj*)head->submenu);
     
     if(ok)
         extl_call(handler, "t", NULL, tab);
@@ -874,7 +877,8 @@ void menu_finish(WMenu *menu)
 EXTL_EXPORT_MEMBER
 void menu_cancel(WMenu *menu)
 {
-    mainloop_defer_destroy((Obj*)menu);
+    if(region_manager_allows_destroying((WRegion*)menu))
+        mainloop_defer_destroy((Obj*)menu);
 }
 
 

@@ -158,7 +158,8 @@ void input_deinit(WInput *input)
 EXTL_EXPORT_MEMBER
 void input_cancel(WInput *input)
 {
-    mainloop_defer_destroy((Obj*)input);
+    if(region_manager_allows_destroying((WRegion*)input))
+        mainloop_defer_destroy((Obj*)input);
 }
 
 
