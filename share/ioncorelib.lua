@@ -176,9 +176,9 @@ end
 --DOC
 -- Find winprop table for \var{cwin}.
 function get_winprop(cwin)
-    local id, nm=cwin:get_ident(), cwin:name()
+    local id, nm=cwin:get_ident(), (cwin:name() or "")
     local names, prop
-    
+
     for c, r, i in alternative_winprop_idents(id) do
         names={}
         pcall(function() names=winprops[c][r][i] or {} end)
