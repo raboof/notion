@@ -241,7 +241,6 @@ static void p_tabdrag_begin(WFrame *frame, XMotionEvent *ev, int dx, int dy)
 				  grdata->drag_geom.w, grdata->drag_geom.h);
 	/*XSelectInput(wglobal.dpy, grdata->drag_win, ExposureMask);*/
 	
-	/* TODO: drawlist */
 	wglobal.draw_dragwin=(WDrawDragwinFn*)draw_tabdrag;
 	wglobal.draw_dragwin_arg=(WRegion*)frame;
 	

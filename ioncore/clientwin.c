@@ -191,6 +191,8 @@ static bool init_clientwin(WClientWin *cwin, WWindow *parent,
 	cwin->cmapwins=NULL;
 	cwin->n_cmapwins=0;
 	
+	init_watch(&(cwin->last_mgr_watch));
+	
 	get_colormaps(cwin);
 	
 	get_clientwin_size_hints(cwin);
@@ -424,6 +426,7 @@ static void reparent_root(WClientWin *cwin)
 
 void deinit_clientwin(WClientWin *cwin)
 {
+	reset_watch(&(cwin->last_mgr_watch));
 	deinit_region((WRegion*)cwin);
 
 	UNLINK_ITEM(wglobal.cwin_list, cwin, g_cwin_next, g_cwin_prev);
@@ -664,7 +667,7 @@ static void convert_geom(WClientWin *cwin, WRectangle geom,
 	geom->x+=geom->w/2-maxw/2;
 	geom->w=maxw;
 	
-	TODO: vertical shrink 
+	/*TODO: vertical shrink */
 #endif
 	
 	*wingeom=cwin_geom(cwin, geom, rq);
@@ -965,11 +968,7 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 		mwm=get_mwm_hints(cwin->win);
 		if(mwm!=NULL && mwm->flags&MWM_HINTS_DECORATIONS &&
 		   mwm->decorations==0){
-#ifdef CF_SWITCH_NEW_CLIENTS
-			if(clientwin_enter_fullscreen(cwin, TRUE))
-#else
-			if(clientwin_enter_fullscreen(cwin, FALSE))
-#endif
+			if(clientwin_enter_fullscreen(cwin, REGION_IS_ACTIVE(cwin)))
 				return;
 		}
 	}
@@ -1030,11 +1029,14 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 
 bool clientwin_fullscreen_vp(WClientWin *cwin, WViewport *vp, bool switchto)
 {
-	/* TODO: Remember last parent */
-
+	if(REGION_MANAGER(cwin)!=NULL)
+		setup_watch(&(cwin->last_mgr_watch), (WThing*)REGION_MANAGER(cwin),
+					NULL);
+	
 	return region_add_managed((WRegion*)vp, (WRegion*)cwin,
 							  switchto ?  REGION_ATTACH_SWITCHTO : 0);
 }
+
 
 bool clientwin_enter_fullscreen(WClientWin *cwin, bool switchto)
 {
@@ -1047,9 +1049,28 @@ bool clientwin_enter_fullscreen(WClientWin *cwin, bool switchto)
 }
 
 
+bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto)
+{	
+	WRegion *reg;
+	
+	if(cwin->last_mgr_watch.thing==NULL)
+		return FALSE;
+
+	reg=(WRegion*)cwin->last_mgr_watch.thing;
+	reset_watch(&(cwin->last_mgr_watch));
+	if(!WTHING_IS(reg, WRegion))
+		return FALSE;
+	if(!region_supports_add_managed(reg))
+		return FALSE;
+	if(region_add_managed(reg, (WRegion*)cwin, REGION_ATTACH_SWITCHTO))
+		return goto_region(reg);
+	return FALSE;
+}
+
 bool clientwin_toggle_fullscreen(WClientWin *cwin)
 {
-	/* TODO */
+	if(cwin->last_mgr_watch.thing!=NULL)
+		return clientwin_leave_fullscreen(cwin, TRUE);
 	
 	return clientwin_enter_fullscreen(cwin, TRUE);
 }

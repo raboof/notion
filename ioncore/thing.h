@@ -64,7 +64,7 @@ extern void setup_watch(WWatch *watch, WThing *thing,
 						WWatchHandler *handler);
 extern void reset_watch(WWatch *watch);
 extern bool watch_ok(WWatch *watch);
-
+extern void init_watch(WWatch *watch);
 
 #define WWATCH_INIT {NULL, NULL, NULL, NULL}
 

@@ -52,8 +52,10 @@ DECLOBJ(WClientWin){
 
 	XSizeHints size_hints;
 	char *name;
-};
 	
+	WWatch last_mgr_watch;
+};
+
 
 extern void get_protocols(WClientWin *cwin);
 extern void get_clientwin_size_hints(WClientWin *cwin);
@@ -78,6 +80,7 @@ extern bool clientwin_fullscreen_vp(WClientWin *cwin, WViewport *vp,
 									bool switchto);
 extern bool clientwin_toggle_fullscreen(WClientWin *cwin);
 extern bool clientwin_enter_fullscreen(WClientWin *cwin, bool switchto);
+extern bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto);
 
 extern void clientwin_broken_app_resize_kludge(WClientWin *cwin);
 

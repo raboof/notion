@@ -110,10 +110,13 @@ WRegion *default_do_find_new_manager(WRegion *reg)
 	if(region_supports_add_managed(reg))
 		return reg;
 	
-	p=FIND_PARENT1(reg, WRegion);
+	p=REGION_MANAGER(reg);
 
-	if(p==NULL)
-		return NULL;
+	if(p==NULL){
+		p=FIND_PARENT1(reg, WRegion);
+		if(p==NULL)
+			return NULL;
+	}
 	
 	return region_do_find_new_manager(p);
 }
@@ -160,8 +163,12 @@ bool region_move_managed_on_list(WRegion *dest, WRegion *src,
 
 bool region_rescue_managed_on_list(WRegion *reg, WRegion *list)
 {
-	WRegion *p=region_find_new_manager(reg);
-	WRegion *r;
+	WRegion *p;
+	
+	if(list==NULL)
+		return TRUE;
+	
+	p=region_find_new_manager(reg);
 	
 	if(p!=NULL){
 		if(region_move_managed_on_list(p, reg, list))
@@ -172,8 +179,8 @@ bool region_rescue_managed_on_list(WRegion *reg, WRegion *list)
 	 * properly in a tree with a WScreen root.
 	 */
 	
-	warn("Unable to move subregions of a (to-be-destroyed) frame"
-		 "somewhere else.");
+	warn("Unable to move subregions of a (to-be-destroyed) %s "
+		 "somewhere else.", WOBJ_TYPESTR(reg));
 	
 	return FALSE;
 }

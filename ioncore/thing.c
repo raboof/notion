@@ -328,5 +328,14 @@ static void call_watches(WThing *thing)
 }
 
 
+void init_watch(WWatch *watch)
+{
+	watch->thing=NULL;
+	watch->next=NULL;
+	watch->prev=NULL;
+	watch->handler=NULL;
+}
+
+
 /*}}}*/
 
