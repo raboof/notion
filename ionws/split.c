@@ -900,7 +900,7 @@ void ionws_remove_managed(WIonWS *ws, WRegion *reg)
 		
 		ionws_remove_split(ws, split);
 		
-		if(region_may_control_focus(ws))
+		if(region_may_control_focus((WRegion*)ws))
 			set_focus(other!=NULL ? other : (WRegion*)ws);
 	}else{
 		ws->split_tree=NULL;
