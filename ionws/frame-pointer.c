@@ -168,9 +168,9 @@ static void draw_tabdrag(const WRegion *reg)
 			dinfo->colors=&(grdata->tab_colors);
 	}
 	
-	assert(((WFrame*)reg)->tab_pressed_sub!=NULL);
-
-	label=REGION_LABEL(((WFrame*)reg)->tab_pressed_sub);
+	
+	if(((WFrame*)reg)->tab_pressed_sub!=NULL)
+		label=REGION_LABEL(((WFrame*)reg)->tab_pressed_sub);
 	if(label==NULL)
 		label="";
 	
@@ -192,11 +192,7 @@ static void p_tabdrag_motion(WFrame *frame, XMotionEvent *ev, int dx, int dy)
 static void p_tabdrag_begin(WFrame *frame, XMotionEvent *ev, int dx, int dy)
 {
 	WGRData *grdata=GRDATA_OF(frame);
-	WRegion *sub;
-	
-	sub=frame->tab_pressed_sub;
-	assert(sub!=NULL);
-	
+
 	change_grab_cursor(CURSOR_DRAG);
 		
 	grdata->drag_geom.w=frame->tab_w;
@@ -210,7 +206,7 @@ static void p_tabdrag_begin(WFrame *frame, XMotionEvent *ev, int dx, int dy)
 	wglobal.draw_dragwin_arg=(WRegion*)frame;
 	
 	p_tabdrag_active=REGION_IS_ACTIVE(frame);
-	p_tabdrag_selected=(frame->current_sub==sub);
+	p_tabdrag_selected=(frame->current_sub==frame->tab_pressed_sub);
 	
 	frame->flags|=FRAME_TAB_DRAGGED;
 		
@@ -232,8 +228,7 @@ static void p_tabdrag_end(WFrame *frame, XButtonEvent *ev)
 	wglobal.draw_dragwin=NULL;
 
 	sub=frame->tab_pressed_sub;
-	assert(sub!=NULL);
-	frame->tab_pressed_sub=NULL; /* TODO: reset jonnekin muualle */
+	frame->tab_pressed_sub=NULL;
 	frame->flags&=~FRAME_TAB_DRAGGED;
 	
 	XUnmapWindow(wglobal.dpy, grdata->drag_win);	
@@ -259,6 +254,9 @@ static void p_tabdrag_end(WFrame *frame, XButtonEvent *ev)
 
 void p_tabdrag_setup(WFrame *frame)
 {
+	if(frame->tab_pressed_sub==NULL)
+		return;
+	
 	set_drag_handlers((WRegion*)frame,
 					  (WMotionHandler*)p_tabdrag_begin,
 					  (WMotionHandler*)p_tabdrag_motion,
