@@ -497,6 +497,7 @@ void genframe_toggle_tab(WGenFrame *genframe)
 	
 	genframe->flags^=WGENFRAME_TAB_HIDE;
 	mplex_fit_managed(&(genframe->mplex));
+	XClearWindow(wglobal.dpy, WGENFRAME_WIN(genframe));
 	genframe_draw(genframe, TRUE);
 }
 
