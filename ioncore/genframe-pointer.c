@@ -123,9 +123,6 @@ void genframe_release(WGenFrame *genframe)
 
 
 static const char *tabdrag_safe_funclist[]={
-	"rootwin_switch_nth_on_cvp",
-	"rootwin_switch_next_on_cvp",
-	"rootwin_switch_prev_on_cvp",
 	"screen_switch_nth",
 	"screen_switch_next",
 	"screen_switch_prev",
@@ -153,7 +150,7 @@ static bool tabdrag_kbd_handler(WRegion *reg, XEvent *xev)
 	
 	if(binding!=NULL && binding->func!=extl_fn_none()){
 		const char **old_safelist=extl_set_safelist(tabdrag_safe_funclist);
-		extl_call(binding->func, "o", NULL, ROOTWIN_OF(reg));
+		extl_call(binding->func, "o", NULL, region_screen_of(reg));
 		extl_set_safelist(old_safelist);
 	}
 	
