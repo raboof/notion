@@ -220,7 +220,7 @@ void floatws_deinit(WFloatWS *ws)
  * Destroys \var{ws} unless this would put the WM in a possibly unusable
  * state.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 bool floatws_relocate_and_close(WFloatWS *ws)
 {
 	if(!region_may_destroy((WRegion*)ws))
@@ -465,7 +465,7 @@ bool add_clientwin_floatws_transient(WClientWin *cwin,
 /*EXTL_DOC
  * Activate next object on \var{ws}.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 WRegion *floatws_circulate(WFloatWS *ws)
 {
 	WRegion *r=NEXT_MANAGED_WRAP(ws->managed_list, ws->current_managed);
@@ -478,7 +478,7 @@ WRegion *floatws_circulate(WFloatWS *ws)
 /*EXTL_DOC
  * Activate previous object on \var{ws}.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 WRegion *floatws_backcirculate(WFloatWS *ws)
 {
 	WRegion *r=PREV_MANAGED_WRAP(ws->managed_list, ws->current_managed);
@@ -497,7 +497,7 @@ WRegion *floatws_backcirculate(WFloatWS *ws)
 /*EXTL_DOC
  * Returns a list of regions managed by the workspace (frames, mostly).
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 ExtlTab floatws_managed_list(WFloatWS *ws)
 {
 	return managed_list_to_table(ws->managed_list, NULL);

@@ -453,7 +453,7 @@ static Window rootwin_x_window(WRootWin *rootwin)
 /*EXTL_DOC
  * Returns the root window \var{reg} is on.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 WRootWin *region_rootwin_of(const WRegion *reg)
 {
 	WRootWin *scr;
@@ -491,7 +491,7 @@ static bool scr_ok(WRegion *r)
 /*EXTL_DOC
  * Returns previously active screen on root window \var{rootwin}.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 WScreen *rootwin_current_scr(WRootWin *rootwin)
 {
 	WRegion *r=REGION_ACTIVE_SUB(rootwin);

@@ -383,7 +383,7 @@ void floatframe_remove_managed(WFloatFrame *frame, WRegion *reg)
  * this should only be used by binding to the \emph{mpress} or
  * \emph{mdrag} actions.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void floatframe_p_move(WFloatFrame *frame)
 {
 	genframe_p_move((WGenFrame*)frame);
@@ -393,7 +393,7 @@ void floatframe_p_move(WFloatFrame *frame)
 /*EXTL_DOC
  * Toggle shade (only titlebar visible) mode.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void floatframe_toggle_shade(WFloatFrame *frame)
 {
 	WRectangle geom;

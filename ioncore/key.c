@@ -102,7 +102,7 @@ static bool quote_next_handler(WRegion *reg, XEvent *xev)
 /*EXTL_DOC
  * Send next key press directly to \var{cwin}.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void clientwin_quote_next(WClientWin *cwin)
 {
     grab_establish((WRegion*)cwin, quote_next_handler, NULL, 0);

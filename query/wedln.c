@@ -367,7 +367,7 @@ static void wedln_completion_handler(WEdln *wedln, const char *nam)
  * completions. If the entry \var{common_part} exists, it gives an
  * extra common prefix of all found completions.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void wedln_set_completions(WEdln *wedln, ExtlTab completions)
 {
 	int n=0, i=0;
@@ -535,7 +535,7 @@ static void wedln_do_finish(WEdln *wedln)
 /*EXTL_DOC
  * Close \var{wedln} and call any handlers.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void wedln_finish(WEdln *wedln)
 {
 	defer_action((WObj*)wedln, (DeferredAction*)wedln_do_finish);
@@ -551,7 +551,7 @@ void wedln_finish(WEdln *wedln)
 /*EXTL_DOC
  * Request selection from application holding such.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void wedln_paste(WEdln *wedln)
 {
 	request_selection(wedln->input.win.win);

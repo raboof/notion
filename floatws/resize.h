@@ -19,11 +19,10 @@
 #include "floatframe.h"
 
 extern void floatframe_begin_resize(WFloatFrame *frame);
-extern void floatframe_grow_vert(WFloatFrame *frame);
-extern void floatframe_shrink_vert(WFloatFrame *frame);
-extern void floatframe_grow_horiz(WFloatFrame *frame);
-extern void floatframe_shrink_horiz(WFloatFrame *frame);
 extern void floatframe_end_resize(WFloatFrame *frame);
 extern void floatframe_cancel_resize(WFloatFrame *frame);
+extern void floatframe_do_move(WFloatFrame *frame, int horizmul, int vertmul);
+extern void floatframe_do_resize(WFloatFrame *frame, int left, int right,
+								 int top, int bottom);
 
 #endif /* FLOAT_FLOATWS_RESIZE_H */

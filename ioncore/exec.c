@@ -93,7 +93,7 @@ static bool do_exec_on_rootwin(int xscr, const char *cmd)
  * Run \var{cmd} with the environment variable DISPLAY set to point to the
  * root window \var{rootwin} of the X display the WM is running on.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER_AS(WRootWin, exec_on)
 bool exec_on_rootwin(WRootWin *rootwin, const char *cmd)
 {
 	return do_exec_on_rootwin(rootwin->xscr, cmd);

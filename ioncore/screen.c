@@ -316,7 +316,7 @@ static void screen_activated(WScreen *scr)
 /*EXTL_DOC
  * Returns the screen \var{reg} is on.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 WScreen *region_screen_of(WRegion *reg)
 {
 	while(reg!=NULL){
@@ -400,7 +400,7 @@ void goto_prev_screen()
 /*EXTL_DOC
  * Return the numerical id for screen \var{scr}.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 int screen_id(WScreen *scr)
 {
 	return scr->id;

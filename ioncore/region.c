@@ -187,7 +187,7 @@ void region_set_focus_to(WRegion *reg, bool warp)
 /*EXTL_DOC
  * Attempt to close/destroy \var{reg}.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void region_close(WRegion *reg)
 {
 	CALL_DYN(region_close, reg, (reg));
@@ -472,7 +472,7 @@ void region_lost_focus(WRegion *reg)
 /*EXTL_DOC
  * Attempt to display \var{reg}.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 bool region_display(WRegion *reg)
 {
 	WRegion *mgr, *preg;
@@ -502,7 +502,7 @@ bool region_display(WRegion *reg)
  * Attempt to display \var{reg} and save the current region
  * activity status for use by \fnref{goto_previous}.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 bool region_display_sp(WRegion *reg)
 {
 	bool ret;
@@ -520,7 +520,7 @@ bool region_display_sp(WRegion *reg)
  * Attempt to display \var{reg}, save region activity status and then
  * warp to (or simply set focus to if warping is disabled) \var{reg}.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 bool region_goto(WRegion *reg)
 {
 	if(region_display_sp(reg)){
@@ -646,7 +646,7 @@ void region_set_parent(WRegion *reg, WRegion *parent)
 /*EXTL_DOC
  * Returns the region that manages \var{reg}.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 WRegion *region_manager(WRegion *reg)
 {
 	return reg->manager;
@@ -656,7 +656,7 @@ WRegion *region_manager(WRegion *reg)
 /*EXTL_DOC
  * Returns the parent region of \var{reg}.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 WRegion *region_parent(WRegion *reg)
 {
 	return reg->parent;
@@ -676,7 +676,7 @@ WRegion *region_manager_or_parent(WRegion *reg)
  * Returns the geometry of \var{reg} within its parent; a table with fields
  * \var{x}, \var{y}, \var{w} and \var{h}.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 ExtlTab region_geom(WRegion *reg)
 {
 	return geom_to_extltab(&REGION_GEOM(reg));
@@ -860,7 +860,7 @@ bool region_is_child(WRegion *reg, WRegion *reg2)
  * Returns most recently active region that has \var{reg} as its
  * parent.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 WRegion *region_active_sub(WRegion *reg)
 {
 	return reg->active_sub;

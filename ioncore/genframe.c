@@ -331,7 +331,7 @@ static bool set_genframe_background(WGenFrame *genframe, bool set_always)
 /*EXTL_DOC
  * Toggle tab visibility.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void genframe_toggle_tab(WGenFrame *genframe)
 {
 	if(genframe->flags&WGENFRAME_SHADED)
@@ -392,6 +392,7 @@ static bool genframe_do_managed_changed(WGenFrame *genframe, bool sw)
 	}
 	return FALSE;
 }
+
 
 static void genframe_managed_changed(WGenFrame *genframe, bool sw)
 {

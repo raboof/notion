@@ -75,7 +75,6 @@ desc2human={
 
 -- Parser {{{
 
-local fns={}
 local classes={}
 local chnds={}
 
@@ -90,6 +89,33 @@ function add_chnd(fnt)
     
     chnds[str]={odesc=odesc, idesc=idesc, itypes=fnt.itypes}
     fnt.chnd=str
+end
+
+function add_class(cls)
+    if cls~="WObj" and not classes[cls] then
+        classes[cls]={}
+    end
+end
+
+function sort_classes(cls)
+    local sorted={}
+    local inserted={}
+    
+    local function insert(cls)
+        if classes[cls] and not inserted[cls] then
+            if classes[cls].parent then
+                insert(classes[cls].parent)
+            end
+            inserted[cls]=true
+            table.insert(sorted, cls)
+        end
+    end
+    
+    for cls in classes do
+        insert(cls)
+    end
+    
+    return sorted
 end
 
 function parse_type(t)
@@ -127,7 +153,7 @@ function parse_type(t)
         if s then
             desc="o"
             otype=string.sub(tn, s, e-1)
-            classes[otype]=true
+            add_class(otype)
         else
             errorf("Error parsing type from \"%s\"", t)
         end
@@ -153,7 +179,7 @@ function parse(d)
         doc=s
     end
     
-    local function do_do_export(efn, ot, fn, param)
+    local function do_do_export(cls, efn, ot, fn, param)
         local odesc, otype=parse_type(ot)
         local idesc, itypes, ivars="", {}, {}
         
@@ -172,11 +198,16 @@ function parse(d)
             end
         end
         
+        if cls=="?" then
+            if string.sub(idesc, 1, 1)~="o" then
+                error("Invalid class for " .. fn)
+            end
+            cls=itypes[1]
+        end
+        
         -- Generate call handler name
         
-        assert(not fns[fn], "Function " .. fn .. " multiply defined!")
-        
-        fns[fn]={
+        local fninfo={
             doc=doc,
             odesc=odesc,
             otype=otype,
@@ -184,9 +215,20 @@ function parse(d)
             itypes=itypes,
             ivars=ivars,
             exported_name=efn,
+            class=cls,
         }
-        add_chnd(fns[fn])
         
+        add_chnd(fninfo)
+        add_class(cls)
+        
+        if not classes[cls].fns then
+            classes[cls].fns={}
+        end
+        
+        assert(not classes[cls].fns[fn], "Function " .. fn .. " multiply defined!")
+
+        classes[cls].fns[fn]=fninfo
+
         -- Reset
         doc=nil
     end
@@ -196,22 +238,49 @@ function parse(d)
         local pat="^[%s\n]+EXTL_EXPORT[%s\n]+([%w%s_*]+[%s\n*])([%w_]+)[%s\n]*(%b())"
         local st, en, ot, fn, param=string.find(s, pat)
         if not st then matcherr(s) end
-        do_do_export(fn, ot, fn, param)
+        do_do_export("", fn, ot, fn, param)
     end
 
     -- Handle EXTL_EXPORT_AS(exported_fn) otype fn(args)
     local function do_export_as(s)
-        local pat="^[%s\n]+EXTL_EXPORT_AS(%b())[%s\n]+([%w%s_*]+[%s\n*])([%w_]+)[%s\n]*(%b())"
+        local pat="^[%s\n]+EXTL_EXPORT_AS%(%s*([%w_]+)%s*%)[%s\n]+([%w%s_*]+[%s\n*])([%w_]+)[%s\n]*(%b())"
         local st, en, efn, ot, fn, param=string.find(s, pat)
         if not st then matcherr(s) end
-        efn=string.gsub(efn, "%([%s\n]*(.*)[%s\n]*%)", "%1");
-        do_do_export(efn, ot, fn, param)
+        do_do_export("", efn, ot, fn, param)
+    end
+
+    -- Handle EXTL_EXPORT_MEMBER otype prefix_fn(class, args)
+    local function do_export_member(s)
+        local pat="^[%s\n]+EXTL_EXPORT_MEMBER[%s\n]+([%w%s_*]+[%s\n*])([%w_]+)[%s\n]*(%b())"
+        local st, en, ot, fn, param=string.find(s, pat)
+        if not st then matcherr(s) end
+        local efn=string.gsub(fn, ".-_(.*)", "%1")
+        do_do_export("?", efn, ot, fn, param)
+    end
+
+    -- Handle EXTL_EXPORT_MEMBER_AS(class, member_fn) otype fn(args)
+    local function do_export_member_as(s)
+        local pat="^[%s\n]+EXTL_EXPORT_MEMBER_AS%(%s*([%w_]+)%s*,%s*([%w_]+)%s*%)[%s\n]+([%w%s_*]+[%s\n*])([%w_]+)[%s\n]*(%b())"
+        local st, en, cls, efn, ot, fn, param=string.find(s, pat)
+        if not st then matcherr(s) end
+        do_do_export(cls, efn, ot, fn, param)
+    end
+    
+    local function do_implobj(s)
+        local pat="^[%s\n]+IMPLOBJ%(%s*([%w_]+)%s*,%s*([%w_]+)%s*, [^)]*%)"
+        local st, en, cls, par=string.find(s, pat)
+        if not st then matcherr(s) end
+        add_class(cls)
+        classes[cls].parent=par
     end
     
     local lookfor={
         ["/%*EXTL_DOC"] = do_doc,
         ["[%s\n]EXTL_EXPORT[%s\n]"] = do_export,
         ["[%s\n]EXTL_EXPORT_AS"] = do_export_as,
+        ["[%s\n]EXTL_EXPORT_MEMBER[%s\n]"] = do_export_member,
+        ["[%s\n]EXTL_EXPORT_MEMBER_AS"] = do_export_member_as,
+        ["[%s\n]IMPLOBJ"] = do_implobj,
     }
     
     do_parse(d, lookfor)
@@ -260,7 +329,8 @@ function parse_luadoc(d)
         
         local fn, param
         st, en, fn, param=
-            string.find(s, "^\n[%s\n]*function ([%w_:%.]+)%s*(%b())")
+        string.find(s, "^\n[%s\n]*function ([%w_:%.]+)%s*(%b())")
+
         if fn then
             
         else
@@ -270,7 +340,20 @@ function parse_luadoc(d)
                        string.sub(s, 1, 50))
             end
         end
-        fns[fn]={doc=doc, paramstr=param}
+
+        local cls=""
+
+        fninfo={
+            doc=doc, 
+            paramstr=param,
+            class=cls,
+        }
+        
+        add_class(cls)
+        if not classes[cls].fns then
+            classes[cls].fns={}
+        end
+        classes[cls].fns[fn]=fninfo
     end
     
     do_parse(d, {["\n%-%-DOC"]=do_luadoc})
@@ -314,6 +397,30 @@ static bool %s(%s (*fn)(), ExtlL2Param *in, ExtlL2Param *out)
     fprintf(h, ");\n    return TRUE;\n}\n")
 end    
 
+function write_class_fns(h, cls, data)
+    if cls=="" then
+        fprintf(h, "\n\nstatic ExtlExportedFnSpec exports[] = {\n")
+    else
+        fprintf(h, "\n\nstatic ExtlExportedFnSpec %s_exports[] = {\n", cls)
+    end
+    
+    for fn, info in data.fns do
+        local ods, ids="NULL", "NULL"
+        if info.odesc~="v" then
+            ods='"' .. info.odesc .. '"'
+        end
+        
+        if info.idesc~="" then
+            ids='"' .. info.idesc .. '"'
+        end
+        
+        fprintf(h, "    {\"%s\", %s, %s, %s, (ExtlL2CallHandler*)%s},\n",
+                info.exported_name, fn, ids, ods, info.chnd)
+    end
+    
+    fprintf(h, "    {NULL, NULL, NULL, NULL, NULL}\n};\n\n")
+end
+
 function write_exports(h)
     -- begin blockwrite
     h:write([[
@@ -326,10 +433,14 @@ function write_exports(h)
     -- end blockwrite
 
     -- Write class infos
-    for c in classes do
+    for c, data in classes do
         -- WObj is defined in obj.h which we include.
-        if c~="WObj" then 
+        if c~="" then
             fprintf(h, "INTROBJ(%s);\n", c)
+            if not data.parent and data.fns then
+                error("Class functions can only be registered if the object "
+                      .. "is implemented in the module in question.")
+            end
         end
     end
     
@@ -355,49 +466,49 @@ static bool chko(ExtlL2Param *in, int ndx, WObjDescr *descr)
     
     fprintf(h, "\n")
     
-    -- Write function declarations
-    for fn in fns do
-        fprintf(h, "extern void %s();\n", fn)
+    for cls, data in classes do
+        if data.fns then
+            -- Write function declarations
+            for fn in data.fns do
+                fprintf(h, "extern void %s();\n", fn)
+            end
+            -- Write function table
+            write_class_fns(h, cls, data)
+        end
     end
     
-    -- Write function table
-    fprintf(h, "\n\nstatic ExtlExportedFnSpec %s_exports[] = {\n", module or "")
-    
-    for fn, info in fns do
-        local ods, ids="NULL", "NULL"
-        if info.odesc~="v" then
-            ods='"' .. info.odesc .. '"'
-        end
-        
-        if info.idesc~="" then
-            ids='"' .. info.idesc .. '"'
-        end
-        
-        fprintf(h, "    {\"%s\", %s, %s, %s, (ExtlL2CallHandler*)%s},\n",
-                info.exported_name, fn, ids, ods, info.chnd)
-    end
-    
-    fprintf(h, "    {NULL, NULL, NULL, NULL, NULL}\n};\n\n")
-    
-    local str=string.gsub([[
-bool module_register_exports()
-{
-    int i;
-    for(i=0; module_exports[i].fn; i++){
-        extl_register_function(module_exports+i);
-    }
-    return TRUE;
-}
+    fprintf(h, "bool %s_register_exports()\n{\n", module);
 
-void module_unregister_exports()
-{
-    int i;
-    for(i=0; module_exports[i].fn; i++){
-        extl_unregister_function(module_exports+i);
-    }
-}
-]], "module", module)
-    h:write(str)
+    local sorted_classes=sort_classes()
+    
+    for _, cls in sorted_classes do
+        if cls=="" then
+            fprintf(h, "    if(!extl_register_functions(exports)) return FALSE;\n");
+        elseif classes[cls].fns then
+            fprintf(h, "    if(!extl_register_class(\"%s\", %s_exports, \"%s\")) return FALSE;\n",
+                    cls, cls, classes[cls].parent);
+        elseif classes[cls].parent then
+            fprintf(h, "    if(!extl_register_class(\"%s\", NULL, \"%s\")) return FALSE;\n",
+                    cls, classes[cls].parent);
+        end
+    end
+
+    fprintf(h, "    return TRUE;\n}\n\nvoid %s_unregister_exports()\n{\n", 
+            module);
+    
+    for _, cls in sorted_classes do
+        if cls=="" then
+            fprintf(h, "    extl_unregister_functions(exports);\n");
+        elseif classes[cls].fns then
+            fprintf(h, "    extl_unregister_class(\"%s\", %s_exports);\n",
+                    cls, cls);
+        elseif classes[cls].parent then
+            fprintf(h, "    extl_unregister_class(\"%s\", NULL);\n",
+                    cls);
+        end
+    end
+    
+    fprintf(h, "}\n\n");
 end
 
 -- }}}
@@ -422,17 +533,29 @@ function write_fndoc(h, fn, info)
     if info.exported_name then
         fn=info.exported_name
     end
-    local fnx=fn
-    fprintf(h, "\\index{")
-    if lua_input then
+    
+    if not lua_input then
+        if info.class~="" then
+            fprintf(h, "\\index{%s@\\type{%s}!", info.class, info.class)
+            fprintf(h, "%s@\\code{%s}}\n", texfriendly(fn), fn)
+        end
+        fprintf(h, "\\index{%s@\\code{%s}}\n", texfriendly(fn), fn)
+    else
+        local fnx=fn
+        fprintf(h, "\\index{")
         fnx=string.gsub(fnx, "(.-)%.", 
                         function(s) 
-                            fprintf(h, "%s@\\var{%s}!", texfriendly(s), s)
+                            fprintf(h, "%s@\\type{%s}!", texfriendly(s), s)
                             return ""
                         end)
+        fprintf(h, "%s@\\code{%s}}\n", texfriendly(fnx), fnx)
     end
-    fprintf(h, "%s@\\code{%s}}\n", texfriendly(fnx), fnx)
-    fprintf(h, "\\hyperlabel{fn:%s}", fn)
+    
+    if info.class~="" then
+        fprintf(h, "\\hyperlabel{fn:%s.%s}", info.class, fn)
+    else
+        fprintf(h, "\\hyperlabel{fn:%s}", fn)
+    end
     if lua_input then
         if info.paramstr then
             fprintf(h, "\\synopsis{%s%s}\n", fn, info.paramstr)
@@ -440,7 +563,11 @@ function write_fndoc(h, fn, info)
             fprintf(h, "\\funcname{%s}\n", fn)
         end
     else
-        fprintf(h, "\\synopsis{%s %s(", tohuman(info.odesc, info.otype), fn)
+        fprintf(h, "\\synopsis{%s ", tohuman(info.odesc, info.otype));
+        if info.class~="" then
+            fprintf(h, "%s.", info.class);
+        end
+        fprintf(h, "%s(", fn);
         local comma=""
         for i, varname in info.ivars do
             fprintf(h, comma .. "%s", tohuman(string.sub(info.idesc, i, i),
@@ -452,22 +579,57 @@ function write_fndoc(h, fn, info)
         end
         fprintf(h, ")}\n")
     end
-    h:write("\\begin{funcdesc}\n" .. trim(info.doc).. "\n\\end{funcdesc}\n")
+    h:write("\\begin{funcdesc}\n" .. trim(info.doc or "").. "\n\\end{funcdesc}\n")
     fprintf(h, "\\end{function}\n\n")
 end
 
-function write_documentation(h)
+
+function write_class_documentation(h, cls)
     sorted={}
     
-    for fn in fns do
+    if not classes[cls].fns then
+        return
+    end
+    
+    if cls~="" then
+        fprintf(h, "\n\n\\subsection{\\type{%s} functions}\n\n", cls);
+        --[[
+        fprintf(h, "\\label{sec:%s-fns}", cls);
+
+        fprintf(h, "This section lists member functions for the class "
+                .."\\type{%s}.\n", cls)
+        
+        if classes[cls].parent then
+            fprintf(h, "this class has \\type{%s} as parent class, so see"
+                    .."section \\ref{sec:%s-fns} for more functions that work"
+                    .."on objects of this type.\n", classes[cls].parent,
+                    classes[cls].parent);
+        end
+        fprintf(h, "\n");
+        --]]
+    end
+            
+    for fn in classes[cls].fns do
         table.insert(sorted, fn)
     end
     table.sort(sorted)
     
     for _, fn in ipairs(sorted) do
-        if fns[fn].doc then
-            write_fndoc(h, fn, fns[fn])
-        end
+        write_fndoc(h, fn, classes[cls].fns[fn])
+    end
+end
+
+
+function write_documentation(h)
+    sorted={}
+
+    for cls in classes do
+        table.insert(sorted, cls)
+    end
+    table.sort(sorted)
+    
+    for _, cls in ipairs(sorted) do
+        write_class_documentation(h, cls)
     end
 end
 

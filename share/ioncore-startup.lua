@@ -61,20 +61,20 @@ if not set_bindings.global_bindings then
 end
 
 if not set_bindings.mplex_bindings then
-    table.insert(mappings, "Mod1+C -> region_close")
+    table.insert(mappings, "Mod1+C -> WRegion.close")
     table.insert(groups, "mplex_bindings")
     mplex_bindings{
-        kpress_waitrel("Mod1+C", make_current_or_self_fn(region_close)),
+        kpress_waitrel("Mod1+C", make_current_or_self_fn(WRegion.close)),
     }
 end
 
 if not set_bindings.genframe_bindings then
-    table.insert(mappings, "\nMod1+K P/N -> genframe_switch_next/prev")
+    table.insert(mappings, "\nMod1+K P/N -> WGEnFrame.switch_next/prev")
     table.insert(groups, "genframe_bindings")
     genframe_bindings{
         submap("Mod1+K") {
-            kpress("AnyModifier+N", genframe_switch_next),
-            kpress("AnyModifier+P", genframe_switch_prev),
+            kpress("AnyModifier+N", WGenFrame.switch_next),
+            kpress("AnyModifier+P", WGenFrame.switch_prev),
         }
     }
 end

@@ -136,17 +136,17 @@ static WIonFrame *do_split(WIonFrame *oframe, const char *str, bool attach)
  * The active manages region in \var{frame}, if any, is moved to the
  * new frame.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 WIonFrame *ionframe_split(WIonFrame *frame, const char *dirstr)
 {
 	return do_split(frame, dirstr, TRUE);
 }
 
 /*EXTL_DOC
- * Similar to \fnref{ionframe_split} except nothing is moved to the newly
+ * Similar to \fnref{WIonFrame.split} except nothing is moved to the newly
  * created frame.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 WIonFrame *ionframe_split_empty(WIonFrame *frame, const char *dirstr)
 {
 	return do_split(frame, dirstr, FALSE);
@@ -158,7 +158,7 @@ WIonFrame *ionframe_split_empty(WIonFrame *frame, const char *dirstr)
  * all other objects depending on \var{dirstr}
  * (one of ''left'', ''right'', ''top'' or ''bottom'').
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 WIonFrame *ionws_newframe(WIonWS *ws, const char *dirstr)
 {
 	WRegion *reg;
@@ -188,7 +188,7 @@ WIonFrame *ionws_newframe(WIonWS *ws, const char *dirstr)
  * Try to relocate regions managed by \var{frame} somewhere else
  * and if possible, destroy the frame.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void ionframe_relocate_and_close(WIonFrame *frame)
 {
 	if(!region_may_destroy((WRegion*)frame)){
@@ -210,7 +210,7 @@ void ionframe_relocate_and_close(WIonFrame *frame)
  * otherwised not desirable that the frame is destroyed (e.g.
  * only frame on only workspace).
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void ionframe_close(WIonFrame *frame)
 {
 	if(WGENFRAME_MCOUNT(frame)!=0 || WGENFRAME_CURRENT(frame)!=NULL){

@@ -16,7 +16,7 @@
 /*EXTL_DOC
  * Move backward one character.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void wedln_back(WEdln *wedln)
 {
     edln_back(&(wedln->edln));
@@ -25,7 +25,7 @@ void wedln_back(WEdln *wedln)
 /*EXTL_DOC
  * Move forward one character.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void wedln_forward(WEdln *wedln)
 {
     edln_forward(&(wedln->edln));
@@ -34,7 +34,7 @@ void wedln_forward(WEdln *wedln)
 /*EXTL_DOC
  * Go to the beginning of line.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void wedln_bol(WEdln *wedln)
 {
     edln_bol(&(wedln->edln));
@@ -43,7 +43,7 @@ void wedln_bol(WEdln *wedln)
 /*EXTL_DOC
  * Go to the end of line.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void wedln_eol(WEdln *wedln)
 {
     edln_eol(&(wedln->edln));
@@ -53,7 +53,7 @@ void wedln_eol(WEdln *wedln)
  * Go to to end of current sequence of whitespace followed by alphanumeric
  * characters..
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void wedln_skip_word(WEdln *wedln)
 {
     edln_skip_word(&(wedln->edln));
@@ -63,7 +63,7 @@ void wedln_skip_word(WEdln *wedln)
  * Go to to beginning of current sequence of alphanumeric characters
  * followed by whitespace.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void wedln_bskip_word(WEdln *wedln)
 {
     edln_bskip_word(&(wedln->edln));
@@ -72,7 +72,7 @@ void wedln_bskip_word(WEdln *wedln)
 /*EXTL_DOC
  * Delete current character.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void wedln_delete(WEdln *wedln)
 {
     edln_delete(&(wedln->edln));
@@ -81,7 +81,7 @@ void wedln_delete(WEdln *wedln)
 /*EXTL_DOC
  * Delete previous character.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void wedln_backspace(WEdln *wedln)
 {
     edln_backspace(&(wedln->edln));
@@ -90,7 +90,7 @@ void wedln_backspace(WEdln *wedln)
 /*EXTL_DOC
  * Delete all characters from current to end of line.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void wedln_kill_to_eol(WEdln *wedln)
 {
     edln_kill_to_eol(&(wedln->edln));
@@ -99,7 +99,7 @@ void wedln_kill_to_eol(WEdln *wedln)
 /*EXTL_DOC
  * Delete all characters from previous to beginning of line.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void wedln_kill_to_bol(WEdln *wedln)
 {
     edln_kill_to_bol(&(wedln->edln));
@@ -108,7 +108,7 @@ void wedln_kill_to_bol(WEdln *wedln)
 /*EXTL_DOC
  * Delete the whole line.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void wedln_kill_line(WEdln *wedln)
 {
     edln_kill_line(&(wedln->edln));
@@ -118,7 +118,7 @@ void wedln_kill_line(WEdln *wedln)
  * Starting from the current point, delete possible whitespace and
  * following alphanumeric characters until next non-alphanumeric character.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void wedln_kill_word(WEdln *wedln)
 {
     edln_kill_word(&(wedln->edln));
@@ -128,7 +128,7 @@ void wedln_kill_word(WEdln *wedln)
  * Starting from the previous characters, delete possible whitespace and
  * preceding alphanumeric characters until previous non-alphanumeric character.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void wedln_bkill_word(WEdln *wedln)
 {
     edln_bkill_word(&(wedln->edln));
@@ -137,7 +137,7 @@ void wedln_bkill_word(WEdln *wedln)
 /*EXTL_DOC
  * Set \emph{mark} to current cursor position.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void wedln_set_mark(WEdln *wedln)
 {
     edln_set_mark(&(wedln->edln));
@@ -147,7 +147,7 @@ void wedln_set_mark(WEdln *wedln)
  * Copy text between \emph{mark} and current cursor position to clipboard
  * and then delete that sequence.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void wedln_cut(WEdln *wedln)
 {
     edln_cut(&(wedln->edln));
@@ -156,7 +156,7 @@ void wedln_cut(WEdln *wedln)
 /*EXTL_DOC
  * Copy text between \emph{mark} and current cursor position to clipboard.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void wedln_copy(WEdln *wedln)
 {
     edln_copy(&(wedln->edln));
@@ -166,7 +166,7 @@ void wedln_copy(WEdln *wedln)
  * Call completion handler with the text between the beginning of line and
  * current cursor position.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void wedln_complete(WEdln *wedln)
 {
     edln_complete(&(wedln->edln));
@@ -175,7 +175,7 @@ void wedln_complete(WEdln *wedln)
 /*EXTL_DOC
  * Replace line editor contents with the entry in history if one exists.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void wedln_history_next(WEdln *wedln)
 {
     edln_history_next(&(wedln->edln));
@@ -184,7 +184,7 @@ void wedln_history_next(WEdln *wedln)
 /*EXTL_DOC
  * Replace line editor contents with the previous in history if one exists.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void wedln_history_prev(WEdln *wedln)
 {
     edln_history_prev(&(wedln->edln));

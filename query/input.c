@@ -23,7 +23,7 @@
 /*EXTL_DOC
  * Scroll input \var{input} text contents up.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void input_scrollup(WInput *input)
 {
 	CALL_DYN(input_scrollup, input, (input));
@@ -33,7 +33,7 @@ void input_scrollup(WInput *input)
 /*EXTL_DOC
  * Scroll input \var{input} text contents down.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void input_scrolldown(WInput *input)
 {
 	CALL_DYN(input_scrolldown, input, (input));
@@ -138,7 +138,7 @@ void input_deinit(WInput *input)
 /*EXTL_DOC
  * Close input not calling any possible finish handlers.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void input_cancel(WInput *input)
 {
 	defer_destroy((WObj*)input);
@@ -146,9 +146,9 @@ void input_cancel(WInput *input)
 
 
 /*EXTL_DOC
- * Same as \fnref{input_cancel}.
+ * Same as \fnref{WInput.cancel}.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void input_close(WInput *input)
 {
 	input_cancel(input);

@@ -684,7 +684,7 @@ static WRegion *right_or_lowest_current(WObj *obj, int dir)
 /*EXTL_DOC
  * Returns most recently active region on \var{ws}.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 WRegion *ionws_current(WIonWS *ws)
 {
 	return left_or_topmost_current(ws->split_tree, -1);
@@ -694,7 +694,7 @@ WRegion *ionws_current(WIonWS *ws)
 /*EXTL_DOC
  * Returns a list of regions managed by the workspace (frames, mostly).
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 ExtlTab ionws_managed_list(WIonWS *ws)
 {
 	return managed_list_to_table(ws->managed_list, NULL);
@@ -784,7 +784,7 @@ static WRegion *up_or_left(WRegion *reg, int dir)
  * Returns the most recently active region above \var{reg} on
  * \var{ws} or NULL.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 WRegion *ionws_above(WIonWS *ws, WRegion *reg)
 {
 	if(REGION_MANAGER(reg)!=(WRegion*)ws)
@@ -797,7 +797,7 @@ WRegion *ionws_above(WIonWS *ws, WRegion *reg)
  * Returns the most recently active region below \var{reg} on
  * \var{ws} or NULL.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 WRegion *ionws_below(WIonWS *ws, WRegion *reg)
 {
 	if(REGION_MANAGER(reg)!=(WRegion*)ws)
@@ -810,7 +810,7 @@ WRegion *ionws_below(WIonWS *ws, WRegion *reg)
  * Returns the most recently active region left of \var{reg} on
  * \var{ws} or NULL.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 WRegion *ionws_left_of(WIonWS *ws, WRegion *reg)
 {
 	if(REGION_MANAGER(reg)!=(WRegion*)ws)
@@ -823,7 +823,7 @@ WRegion *ionws_left_of(WIonWS *ws, WRegion *reg)
  * Returns the most recently active region right of \var{reg} on
  * \var{ws} or NULL.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 WRegion *ionws_right_of(WIonWS *ws, WRegion *reg)
 {
 	if(REGION_MANAGER(reg)!=(WRegion*)ws)
@@ -835,7 +835,7 @@ WRegion *ionws_right_of(WIonWS *ws, WRegion *reg)
  * Returns the most recently active region on \var{ws} with
  * no other regions above it.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 WRegion *ionws_topmost(WIonWS *ws)
 {
 	return left_or_topmost_current(ws->split_tree, VERTICAL);
@@ -846,7 +846,7 @@ WRegion *ionws_topmost(WIonWS *ws)
  * Returns the most recently active region on \var{ws} with
  * no other regions below it.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 WRegion *ionws_lowest(WIonWS *ws)
 {
 	return right_or_lowest_current(ws->split_tree, VERTICAL);
@@ -857,7 +857,7 @@ WRegion *ionws_lowest(WIonWS *ws)
  * Returns the most recently active region on \var{ws} with
  * no other regions left of it.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 WRegion *ionws_leftmost(WIonWS *ws)
 {
 	return left_or_topmost_current(ws->split_tree, HORIZONTAL);
@@ -868,7 +868,7 @@ WRegion *ionws_leftmost(WIonWS *ws)
  * Returns the most recently active region on \var{ws} with
  * no other regions right of it.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 WRegion *ionws_rightmost(WIonWS *ws)
 {
 	return right_or_lowest_current(ws->split_tree, HORIZONTAL);
@@ -890,7 +890,7 @@ static bool goto_reg(WRegion *reg)
  * lowest most recently active region if there is nothing above
  * the current object.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void ionws_goto_above(WIonWS *ws)
 {
 	if(!goto_reg(ionws_above(ws, ionws_current(ws))))
@@ -900,9 +900,9 @@ void ionws_goto_above(WIonWS *ws)
 
 
 /*EXTL_DOC
- * Similar to \fnref{ionws_goto_above}.
+ * Similar to \fnref{WIonWS.goto_above}.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void ionws_goto_below(WIonWS *ws)
 {
 	if(!goto_reg(ionws_below(ws, ionws_current(ws))))
@@ -911,9 +911,9 @@ void ionws_goto_below(WIonWS *ws)
 
 
 /*EXTL_DOC
- * Similar to \fnref{ionws_goto_above}.
+ * Similar to \fnref{WIonWS.goto_above}.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void ionws_goto_left(WIonWS *ws)
 {
 	if(!goto_reg(ionws_left_of(ws, ionws_current(ws))))
@@ -922,9 +922,9 @@ void ionws_goto_left(WIonWS *ws)
 
 
 /*EXTL_DOC
- * Similar to \fnref{ionws_goto_above}.
+ * Similar to \fnref{WIonWS.goto_above}.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void ionws_goto_right(WIonWS *ws)
 {
 	if(!goto_reg(ionws_right_of(ws, ionws_current(ws))))
@@ -1127,7 +1127,7 @@ WRegion *ionws_find_rescue_manager_for(WIonWS *ws, WRegion *reg)
  * For region \var{reg} managed by \var{ws} return the \type{WWsSplit}
  * a leaf of which \var{reg} is.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 WWsSplit *ionws_split_of(WIonWS *ws, WRegion *reg)
 {
 	if(REGION_MANAGER(reg)!=(WRegion*)ws){
@@ -1142,7 +1142,7 @@ WWsSplit *ionws_split_of(WIonWS *ws, WRegion *reg)
 /*EXTL_DOC
  * Return parent split for \var{split}.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 WWsSplit *split_parent(WWsSplit *split)
 {
 	return split->parent;
@@ -1153,7 +1153,7 @@ WWsSplit *split_parent(WWsSplit *split)
  * Return the object (region or split) corresponding to top or left
  * sibling of \var{split} depending on the split's direction.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 WObj *split_tl(WWsSplit *split)
 {
 	return split->tl;
@@ -1164,7 +1164,7 @@ WObj *split_tl(WWsSplit *split)
  * Return the object (region or split) corresponding to bottom or right
  * sibling of \var{split} depending on the split's direction.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 WObj *split_br(WWsSplit *split)
 {
 	return split->br;
@@ -1174,7 +1174,7 @@ WObj *split_br(WWsSplit *split)
 /*EXTL_DOC
  * Is \var{split} a vertical split?
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 bool split_is_vertical(WWsSplit *split)
 {
 	return (split->dir==VERTICAL);
@@ -1184,7 +1184,7 @@ bool split_is_vertical(WWsSplit *split)
 /*EXTL_DOC
  * Is \var{split} a horizontal split?
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 bool split_is_horizontal(WWsSplit *split)
 {
 	return (split->dir==VERTICAL);
@@ -1194,7 +1194,7 @@ bool split_is_horizontal(WWsSplit *split)
 /*EXTL_DOC
  * Returns the area of workspace used by the regions under \var{split}.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 ExtlTab split_geom(WWsSplit *split)
 {
 	return geom_to_extltab(&(split->geom));

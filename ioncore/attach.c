@@ -109,7 +109,6 @@ bool attach_reparent_helper(WRegion *mgr, WRegion *reg,
 /*}}}*/
 
 
-
 /*{{{ Rescue */
 
 

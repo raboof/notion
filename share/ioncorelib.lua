@@ -28,20 +28,18 @@ SECOND_MOD=""
 
 -- Functions to help construct bindmaps {{{
 
-function submap2(kcb_, list)
-    return {action = "kpress", kcb = kcb_, submap = list}
-end
-
 --DOC
 -- Returns a function that creates a submap binding description table.
 -- When the key press action \var{keyspec} occurs, Ioncore will wait for
 -- a further key presse and act according to the submap.
 -- For details, see section \ref{sec:bindings}.
-function submap(keyspec)
-    local function submap_helper(list)
-	return submap2(keyspec, list)
+function submap(keyspec, list)
+    if not list then
+        return function(list)
+                   return submap(keyspec, list)
+               end
     end
-    return submap_helper
+    return {action = "kpress", kcb = kcb_, submap = list}
 end
 
 --DOC
@@ -119,9 +117,9 @@ end
 -- Creates a function that accepts a \type{WMPlex} \var{mplex} as argument 
 -- and that will call \var{fn} with argument as follows:
 -- \begin{enumerate}
--- \item If \fnref{mplex_current_input}\code{(mplex)} is not nil, then
+-- \item If \fnref{WMPlex.current_input}\code{(mplex)} is not nil, then
 --   this object is the parameter
--- \item If \fnref{mplex_current}\code{(mplex)} is not nil, then
+-- \item If \fnref{WMPlex.current}\code{(mplex)} is not nil, then
 --   this object is the parameter
 -- \item Otherwise if \var{self_if_not_current} is set, the \var{mplex} 
 --   itself will be the parameter.
@@ -132,9 +130,9 @@ function make_current_fn(fn, self_if_no_current)
         return
     end
     return function(mplex)
-               local reg=mplex_current_input(mplex)
+               local reg=mplex:current_input()
                if not reg then
-                   reg=mplex_current(mplex)
+                   reg=mplex:current()
                end
                if not reg then
                    if not self_if_no_current then
@@ -155,14 +153,14 @@ end
 --DOC
 -- Creates a function that accepts a \type{WMPlex} \var{mplex} as argument 
 -- and that will call \var{fn} with argument:
--- \fnref{mplex_current}\code{(mplex)} if this is of type \type{WClientWin}.
+-- \fnref{WMPlex.current}\code{(mplex)} if this is of type \type{WClientWin}.
 function make_current_clientwin_fn(fn)
     if not fn then
         warn("nil parameter to make_current_clientwin_fn")
         return
     end
     return function(mplex)
-               local reg=mplex_current(mplex)
+               local reg=mplex:current()
                if reg and obj_is(reg, "WClientWin") then
                    fn(reg)
                end
@@ -171,9 +169,9 @@ end
 
 
 local function execrootw(reg, cmd)
-    local rw=region_rootwin_of(reg)
+    local rw=reg:rootwin_of()
     if rw then
-        exec_on_rootwin(rw, cmd)
+        rw:exec_on(cmd)
     else
         exec_on_wm_display(cmd)
     end
@@ -199,7 +197,7 @@ end
 
 --DOC
 -- Equivalent to 
--- \fnref{exec_on_rootwin}\code{(}\fnref{region_rootwin_of}\code{(where), cmd)}. 
+-- \fnref{exec_on_rootwin}\code{(}\fnref{WRegion.rootwin_of}\code{(where), cmd)}. 
 -- This function should be overridden by scripts and other kludges that
 -- want to attempt to put new windows where they belong.
 function exec_in(where, cmd)
@@ -252,7 +250,7 @@ end
 --DOC
 -- Find winprop table for \var{cwin}.
 function get_winprop(cwin)
-    local id=clientwin_get_ident(cwin)
+    local id=cwin:get_ident()
     local prop
     
     for c, r, i in alternative_winprop_idents(id) do
@@ -310,11 +308,10 @@ function obj_exists(obj)
 end
 
 --DOC
--- Attempt to close using \fnref{region_close} most recently active 
--- child (\fnref{region_active_sub}) of, or if this is nil, \var{reg} itself.
+-- Attempt to close using \fnref{WRegion.close} most recently active 
+-- child (\fnref{WRegion.active_sub}) of, or if this is nil, \var{reg} itself.
 function close_sub_or_self(reg)
-    local r2=region_active_sub(reg)
-    region_close(r2 or reg)
+    WRegion.close(reg:active_sub() or reg)
 end
 
 -- }}}
@@ -371,6 +368,4 @@ end
 
 -- }}}
 
-
-include('ioncore-aliases.lua')
 

@@ -154,7 +154,7 @@ bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto)
 /*EXTL_DOC
  * Toggle between full screen and normal (framed) mode.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 bool clientwin_toggle_fullscreen(WClientWin *cwin)
 {
 	if(cwin->fsinfo.last_mgr_watch.obj!=NULL)

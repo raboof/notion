@@ -403,7 +403,7 @@ void region_request_geom(WRegion *reg, int flags, WRectangle geom,
  * but may contain missing fields, in which case, \var{reg}'s manager may
  * attempt to leave that attribute unchanged.
  */
-EXTL_EXPORT_AS(region_request_geom)
+EXTL_EXPORT_MEMBER_AS(WRegion, request_geom)
 ExtlTab region_request_geom_extl(WRegion *reg, ExtlTab g)
 {
 	WRectangle geom=REGION_GEOM(reg);
@@ -507,7 +507,7 @@ static bool trymaxv(WGenFrame *frame, WRegion *mgr, int tryonlyflag)
 /*EXTL_DOC
  * Attempt to maximize \var{frame} vertically.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void genframe_maximize_vert(WGenFrame *frame)
 {
 	WRegion *mgr=REGION_MANAGER(frame);
@@ -545,7 +545,7 @@ static bool trymaxh(WGenFrame *frame, WRegion *mgr, int tryonlyflag)
 /*EXTL_DOC
  * Attempt to maximize \var{frame} horizontally.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void genframe_maximize_horiz(WGenFrame *frame)
 {
 	WRegion *mgr=REGION_MANAGER(frame);
@@ -585,7 +585,7 @@ void genframe_do_toggle_shade(WGenFrame *frame, int shaded_h)
 /*EXTL_DOC
  * Is \var{frame} shaded?
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 bool genframe_is_shaded(WGenFrame *frame)
 {
 	return ((frame->flags&WGENFRAME_SHADED)!=0);

@@ -257,7 +257,7 @@ static bool use_name_parseinst(WRegion *reg, Namespace *ns,
 /*EXTL_DOC
  * Returns the name for \var{reg}.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 const char *region_name(WRegion *reg)
 {
 	return reg->ni.name;
@@ -297,7 +297,7 @@ static bool do_set_name(bool (*fn)(WRegion *reg, Namespace *ns,
  * such a suffix, it will be modified, otherwise such a suffix will be
  * added. Setting \var{p} to nil will cause current name to be removed.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 bool region_set_name(WRegion *reg, const char *p)
 {
 	return do_set_name(use_name_parseinst, reg, &internal_ns, p, FALSE);
@@ -305,11 +305,11 @@ bool region_set_name(WRegion *reg, const char *p)
 
 
 /*EXTL_DOC
- * Similar to \fnref{region_set_name} except if the name is already in use,
+ * Similar to \fnref{WRegion.set_name} except if the name is already in use,
  * other instance numbers will not be attempted. The string \var{p} should
  * not contain a \code{<n>} suffix or this function will fail.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 bool region_set_name_exact(WRegion *reg, const char *p)
 {
 	return do_set_name(use_name, reg, &internal_ns, p, TRUE);

@@ -76,7 +76,7 @@ void mplex_deinit(WMPlex *mplex)
 /*EXTL_DOC
  * Move currently selected region to the right.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void mplex_move_current_right(WMPlex *mplex)
 {
 	WRegion *reg, *next;
@@ -96,7 +96,7 @@ void mplex_move_current_right(WMPlex *mplex)
 /*EXTL_DOC
  * Move currently selected region to the left.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void mplex_move_current_left(WMPlex *mplex)
 {
 	WRegion *reg, *prev;
@@ -311,7 +311,7 @@ bool mplex_display_managed(WMPlex *mplex, WRegion *sub)
 /*EXTL_DOC
  * Returns the \var{n}:th object managed by \var{mplex}.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 WRegion *mplex_nth_managed(WMPlex *mplex, uint n)
 {
 	WRegion *reg=FIRST_MANAGED(mplex->managed_list);
@@ -333,7 +333,7 @@ static void do_switch(WMPlex *mplex, WRegion *sub)
 /*EXTL_DOC
  * Have \var{mplex} display the \var{n}:th object managed by it.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void mplex_switch_nth(WMPlex *mplex, uint n)
 {
 	do_switch(mplex, mplex_nth_managed(mplex, n));
@@ -344,7 +344,7 @@ void mplex_switch_nth(WMPlex *mplex, uint n)
  * Have \var{mplex} display next (wrt. currently selected) object managed 
  * by it.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void mplex_switch_next(WMPlex *mplex)
 {
 	do_switch(mplex, NEXT_MANAGED_WRAP(mplex->managed_list, 
@@ -356,7 +356,7 @@ void mplex_switch_next(WMPlex *mplex)
  * Have \var{mplex} display previous (wrt. currently selected) object
  * managed by it.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void mplex_switch_prev(WMPlex *mplex)
 {
 	do_switch(mplex, PREV_MANAGED_WRAP(mplex->managed_list, 
@@ -459,9 +459,9 @@ static void get_params(ExtlTab tab, MPlexAttachParams *par)
 /*EXTL_DOC
  * Attach and reparent existing region \var{reg} to \var{mplex}.
  * The table \var{param} may contain the fields \var{index} and
- * \var{switchto} that are interpreted as for \fnref{mplex_attach_new}.
+ * \var{switchto} that are interpreted as for \fnref{WMPlex.attach_new}.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 bool mplex_attach(WMPlex *mplex, WRegion *reg, ExtlTab param)
 {
 	MPlexAttachParams par;
@@ -491,7 +491,7 @@ bool mplex_attach(WMPlex *mplex, WRegion *reg, ExtlTab param)
  * In addition parameters to the region to be created are passed in this 
  * same table.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 WRegion *mplex_attach_new(WMPlex *mplex, ExtlTab param)
 {
 	MPlexAttachParams par;
@@ -506,7 +506,7 @@ WRegion *mplex_attach_new(WMPlex *mplex, ExtlTab param)
 /*EXTL_DOC
  * Attach all tagged regions to \var{mplex}.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void mplex_attach_tagged(WMPlex *mplex)
 {
 	WRegion *reg;
@@ -570,6 +570,7 @@ void mplex_remove_managed(WMPlex *mplex, WRegion *reg)
 	}
 }
 
+
 /*}}}*/
 
 
@@ -580,7 +581,7 @@ void mplex_remove_managed(WMPlex *mplex, WRegion *reg)
  * Returns the currently active ''input'' (query, message etc.) in
  * \var{mplex} or nil.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 WRegion *mplex_current_input(WMPlex *mplex)
 {
 	return mplex->current_input;
@@ -622,7 +623,7 @@ WRegion *mplex_add_input(WMPlex *mplex, WRegionAttachHandler *fn, void *fnp)
 /*EXTL_DOC
  * Return the object managed by and currenly displayed in \var{mplex}.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 WRegion *mplex_current(WMPlex *mplex)
 {
 	return mplex->current_sub;
@@ -631,7 +632,7 @@ WRegion *mplex_current(WMPlex *mplex)
 /*EXTL_DOC
  * Returns a list of regions managed by \var{mplex}.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 ExtlTab mplex_managed_list(WMPlex *mplex)
 {
 	return managed_list_to_table(mplex->managed_list, NULL);
@@ -641,7 +642,7 @@ ExtlTab mplex_managed_list(WMPlex *mplex)
 /*EXTL_DOC
  * Returns the number of regions managed/multiplexed by \var{mplex}.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 int mplex_managed_count(WMPlex *mplex)
 {
 	return mplex->managed_count;

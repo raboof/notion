@@ -145,10 +145,10 @@ void genframe_release(WGenFrame *genframe)
 /*{{{ Tab drag */
 
 
-static const char *tabdrag_safe_funclist[]={
-	"mplex_switch_nth",
-	"mplex_switch_next",
-	"mplex_switch_prev",
+static ExtlSafelist tabdrag_safe_funclist[]={
+	(ExtlExportedFn*)&mplex_switch_nth,
+	(ExtlExportedFn*)&mplex_switch_next,
+	(ExtlExportedFn*)&mplex_switch_prev,
 	NULL
 };
 
@@ -172,7 +172,8 @@ static bool tabdrag_kbd_handler(WRegion *reg, XEvent *xev)
 						   ev->state&~BUTTONS_MASK, ev->keycode);
 	
 	if(binding!=NULL && binding->func!=extl_fn_none()){
-		const char **old_safelist=extl_set_safelist(tabdrag_safe_funclist);
+		const ExtlSafelist *old_safelist=
+			extl_set_safelist(tabdrag_safe_funclist);
 		extl_call(binding->func, "o", NULL, region_screen_of(reg));
 		extl_set_safelist(old_safelist);
 	}
@@ -350,7 +351,7 @@ static void p_tabdrag_end(WGenFrame *genframe, XButtonEvent *ev)
  * This function should only be used by binding it to \emph{mpress} or
  * \emph{mdrag} action with area ''tab''.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void genframe_p_tabdrag(WGenFrame *genframe)
 {
 	if(genframe->tab_pressed_sub==NULL)
@@ -418,7 +419,7 @@ static void p_resize_begin(WGenFrame *genframe, XMotionEvent *ev, int dx, int dy
  * This function should only be used by binding it to \emph{mpress} or
  * \emph{mdrag} action.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void genframe_p_resize(WGenFrame *genframe)
 {
 	if(!p_set_drag_handlers((WRegion*)genframe,
@@ -476,7 +477,7 @@ void genframe_p_move(WGenFrame *genframe)
  * Display the region corresponding to the tab that the user pressed on.
  * This function should only be used by binding it to a mouse action.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void genframe_p_switch_tab(WGenFrame *genframe)
 {
 	if(genframe->tab_pressed_sub!=NULL)

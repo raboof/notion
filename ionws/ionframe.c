@@ -171,7 +171,7 @@ static void ionframe_resize_hints(WIonFrame *frame, XSizeHints *hints_ret,
 /*EXTL_DOC
  * Toggle shade (only titlebar visible) mode.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void ionframe_toggle_shade(WIonFrame *frame)
 {
 	WGRData *grdata=GRDATA_OF(frame);

@@ -48,14 +48,17 @@ typedef union{
 typedef bool ExtlL2CallHandler(void (*fn)(), ExtlL2Param *in,
 							   ExtlL2Param *out);
 
+typedef void ExtlExportedFn(void);
+
 typedef struct{
 	const char *name;
-	void (*fn)(void);
+	ExtlExportedFn *fn;
 	const char *ispec;
 	const char *ospec;
 	ExtlL2CallHandler *l2handler;
 } ExtlExportedFnSpec;
 
+typedef ExtlExportedFn *ExtlSafelist;
 
 extern ExtlFn extl_unref_fn(ExtlFn ref);
 extern ExtlTab extl_unref_table(ExtlTab ref);
@@ -111,7 +114,7 @@ extern bool extl_table_cleari(ExtlTab ref, int entry);
 
 /* Call */
 
-extern const char **extl_set_safelist(const char **list);
+extern const ExtlSafelist *extl_set_safelist(const ExtlSafelist *sl);
 
 extern bool extl_call_vararg(ExtlFn fnref, const char *spec,
 							 const char *rspec, va_list args);
@@ -132,6 +135,12 @@ extern bool extl_loadstring(const char *file, ExtlFn *ret);
 
 extern bool extl_register_function(ExtlExportedFnSpec *spec);
 extern void extl_unregister_function(ExtlExportedFnSpec *spec);
+extern bool extl_register_functions(ExtlExportedFnSpec *spec);
+extern void extl_unregister_functions(ExtlExportedFnSpec *spec);
+
+bool extl_register_class(const char *cls, ExtlExportedFnSpec *fns,
+						 const char *parent);
+void extl_unregister_class(const char *cls, ExtlExportedFnSpec *fns);
 
 /* Misc. */
 

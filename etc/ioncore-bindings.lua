@@ -16,18 +16,18 @@
 -- modifier to some of the F-key bindings.
 
 global_bindings{
-    kpress(DEFAULT_MOD.."1", function(s) screen_switch_nth(s, 0) end),
-    kpress(DEFAULT_MOD.."2", function(s) screen_switch_nth(s, 1) end),
-    kpress(DEFAULT_MOD.."3", function(s) screen_switch_nth(s, 2) end),
-    kpress(DEFAULT_MOD.."4", function(s) screen_switch_nth(s, 3) end),
-    kpress(DEFAULT_MOD.."5", function(s) screen_switch_nth(s, 4) end),
-    kpress(DEFAULT_MOD.."6", function(s) screen_switch_nth(s, 5) end),
-    kpress(DEFAULT_MOD.."7", function(s) screen_switch_nth(s, 6) end),
-    kpress(DEFAULT_MOD.."8", function(s) screen_switch_nth(s, 7) end),
-    kpress(DEFAULT_MOD.."9", function(s) screen_switch_nth(s, 8) end),
-    kpress(DEFAULT_MOD.."0", function(s) screen_switch_nth(s, 9) end),
-    kpress(DEFAULT_MOD.."Left", screen_switch_prev),
-    kpress(DEFAULT_MOD.."Right", screen_switch_next),
+    kpress(DEFAULT_MOD.."1", function(s) s:switch_nth(0) end),
+    kpress(DEFAULT_MOD.."2", function(s) s:switch_nth(1) end),
+    kpress(DEFAULT_MOD.."3", function(s) s:switch_nth(2) end),
+    kpress(DEFAULT_MOD.."4", function(s) s:switch_nth(3) end),
+    kpress(DEFAULT_MOD.."5", function(s) s:switch_nth(4) end),
+    kpress(DEFAULT_MOD.."6", function(s) s:switch_nth(5) end),
+    kpress(DEFAULT_MOD.."7", function(s) s:switch_nth(6) end),
+    kpress(DEFAULT_MOD.."8", function(s) s:switch_nth(7) end),
+    kpress(DEFAULT_MOD.."9", function(s) s:switch_nth(8) end),
+    kpress(DEFAULT_MOD.."0", function(s) s:switch_nth(9) end),
+    kpress(DEFAULT_MOD.."Left", WScreen.switch_prev),
+    kpress(DEFAULT_MOD.."Right", WScreen.switch_next),
     
     submap(DEFAULT_MOD.."K") {
         kpress("AnyModifier+K", goto_previous),
@@ -50,8 +50,7 @@ global_bindings{
     -- Create a new workspace with a default name.
     kpress(DEFAULT_MOD.."F9", 
            function(scr)
-               mplex_attach_new(scr, { type=default_ws_type, 
-                                       switchto=true})
+               scr:attach_new({ type=default_ws_type, switchto=true })
            end)
 }
 
@@ -71,7 +70,7 @@ global_bindings{
 -- make_current_clientwin_fn(fn) expands to
 -- 
 -- function(mplex)
---     local reg=mplex_current(mplex)
+--     local reg=mplex:current()
 --     if obj_is(reg, "WClientWin") then 
 --         fn(reg)
 --     end
@@ -82,15 +81,15 @@ global_bindings{
 mplex_bindings{
     kpress_waitrel(DEFAULT_MOD.."C", close_sub_or_self),
     kpress_waitrel(DEFAULT_MOD.."L", 
-                   make_current_clientwin_fn(clientwin_broken_app_resize_kludge)),
+                   make_current_clientwin_fn(WClientWin.broken_app_resize_kludge)),
     kpress_waitrel(DEFAULT_MOD.."Return", 
-                   make_current_clientwin_fn(clientwin_toggle_fullscreen)),
+                   make_current_clientwin_fn(WClientWin.toggle_fullscreen)),
 
     submap(DEFAULT_MOD.."K") {
         kpress("AnyModifier+C",
-               make_current_clientwin_fn(clientwin_kill)),
+               make_current_clientwin_fn(WClientWin.kill)),
         kpress("AnyModifier+Q", 
-               make_current_clientwin_fn(clientwin_quote_next)),
+               make_current_clientwin_fn(WClientWin.quote_next)),
     }
 }
 
@@ -105,31 +104,21 @@ mplex_bindings{
 
 genframe_bindings{
     submap(DEFAULT_MOD.."K") {
-            kpress("AnyModifier+N", genframe_switch_next),
-            kpress("AnyModifier+P", genframe_switch_prev),
-            kpress("AnyModifier+1", 
-                   function(f) genframe_switch_nth(f, 0) end),
-            kpress("AnyModifier+2",
-                   function(f) genframe_switch_nth(f, 1) end),
-            kpress("AnyModifier+3",
-                   function(f) genframe_switch_nth(f, 2) end),
-            kpress("AnyModifier+4",
-                   function(f) genframe_switch_nth(f, 3) end),
-            kpress("AnyModifier+5",
-                   function(f) genframe_switch_nth(f, 4) end),
-            kpress("AnyModifier+6",
-                   function(f) genframe_switch_nth(f, 5) end),
-            kpress("AnyModifier+7",
-                   function(f) genframe_switch_nth(f, 6) end),
-            kpress("AnyModifier+8",
-                   function(f) genframe_switch_nth(f, 7) end),
-            kpress("AnyModifier+9",
-                   function(f) genframe_switch_nth(f, 8) end),
-            kpress("AnyModifier+0",
-                   function(f) genframe_switch_nth(f, 9) end),
-            kpress("AnyModifier+H", genframe_maximize_horiz),
-            kpress("AnyModifier+V", genframe_maximize_vert),
-    }
+        kpress("AnyModifier+N", WGenFrame.switch_next),
+        kpress("AnyModifier+P", WGenFrame.switch_prev),
+        kpress("AnyModifier+1", function(f) f:switch_nth(0) end),
+        kpress("AnyModifier+2", function(f) f:switch_nth(1) end),
+        kpress("AnyModifier+3", function(f) f:switch_nth(2) end),
+        kpress("AnyModifier+4", function(f) f:switch_nth(3) end),
+        kpress("AnyModifier+5", function(f) f:switch_nth(4) end),
+        kpress("AnyModifier+6", function(f) f:switch_nth(5) end),
+        kpress("AnyModifier+7", function(f) f:switch_nth(6) end),
+        kpress("AnyModifier+8", function(f) f:switch_nth(7) end),
+        kpress("AnyModifier+9", function(f) f:switch_nth(8) end),
+        kpress("AnyModifier+0", function(f) f:switch_nth(9) end),
+        kpress("AnyModifier+H", WGenFrame.maximize_horiz),
+        kpress("AnyModifier+V", WGenFrame.maximize_vert),
+    },
 }
 
 -- }}}
@@ -145,7 +134,7 @@ genframe_bindings{
 
 include("querylib.lua")
 
-if QueryLib then
+if querylib then
     local f11key, f12key="F11", "F12"
     
     -- If we're on SunOS, we need to remap some keys.
@@ -157,24 +146,24 @@ if QueryLib then
     
     -- Frame-level queries
     genframe_bindings{
-        kpress(DEFAULT_MOD.."A", QueryLib.query_attachclient),
-        kpress(DEFAULT_MOD.."G", QueryLib.query_gotoclient),
+        kpress(DEFAULT_MOD.."A", querylib.query_attachclient),
+        kpress(DEFAULT_MOD.."G", querylib.query_gotoclient),
         
-        kpress(SECOND_MOD.."F1", QueryLib.query_man),
-        kpress(SECOND_MOD.."F3", QueryLib.query_exec),
-        kpress(DEFAULT_MOD.."F3", QueryLib.query_lua),
-        kpress(SECOND_MOD.."F4", QueryLib.query_ssh),
-        kpress(SECOND_MOD.."F5", QueryLib.query_editfile),
-        kpress(SECOND_MOD.."F6", QueryLib.query_runfile),
-        kpress(SECOND_MOD.."F9", QueryLib.query_workspace),
+        kpress(SECOND_MOD.."F1", querylib.query_man),
+        kpress(SECOND_MOD.."F3", querylib.query_exec),
+        kpress(DEFAULT_MOD.."F3", querylib.query_lua),
+        kpress(SECOND_MOD.."F4", querylib.query_ssh),
+        kpress(SECOND_MOD.."F5", querylib.query_editfile),
+        kpress(SECOND_MOD.."F6", querylib.query_runfile),
+        kpress(SECOND_MOD.."F9", querylib.query_workspace),
     }
     
     -- Screen-level queries. Queries generally appear in frames to be 
     -- consistent although do not affect the frame, but these two are
     -- special.
     global_bindings{
-        kpress(SECOND_MOD..f11key, QueryLib.query_restart),
-        kpress(SECOND_MOD..f12key, QueryLib.query_exit),
+        kpress(SECOND_MOD..f11key, querylib.query_restart),
+        kpress(SECOND_MOD..f12key, querylib.query_exit),
     }
 end
 

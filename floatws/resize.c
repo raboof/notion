@@ -29,11 +29,11 @@ enum{
 /*{{{ Keyboard resize handler */
 
 
-static const char* moveres_safe_funclist[]={
-	"floatframe_do_resize",
-	"floatframe_do_move",
-	"floatframe_end_resize",
-	"floatframe_cancel_resize",
+static ExtlSafelist moveres_safe_funclist[]={
+	(ExtlExportedFn*)&floatframe_do_resize,
+	(ExtlExportedFn*)&floatframe_do_move,
+	(ExtlExportedFn*)&floatframe_end_resize,
+	(ExtlExportedFn*)&floatframe_cancel_resize,
 	NULL
 };
 
@@ -56,7 +56,8 @@ static bool resize_handler(WRegion *reg, XEvent *xev)
 		return FALSE;
 	
 	if(binding!=NULL){
-		const char **old_safelist=extl_set_safelist(moveres_safe_funclist);
+		const ExtlSafelist *old_safelist=
+			extl_set_safelist(moveres_safe_funclist);
 		extl_call(binding->func, "o", NULL, reg);
 		extl_set_safelist(old_safelist);
 	}
@@ -93,7 +94,7 @@ static WTimer resize_timer=INIT_TIMER(tmr_end_resize);
  * and \var{bottom} attempt to shrink the frame by altering the corresponding
  * border and positive values grow.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void floatframe_do_resize(WFloatFrame *frame, int left, int right,
 						  int top, int bottom)
 {
@@ -125,7 +126,7 @@ void floatframe_do_resize(WFloatFrame *frame, int left, int right,
  * 1 & Move right/down \\
  * \end{tabular}
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void floatframe_do_move(WFloatFrame *frame, int horizmul, int vertmul)
 {
 	int wu, hu;
@@ -146,7 +147,7 @@ void floatframe_do_move(WFloatFrame *frame, int horizmul, int vertmul)
  * Return from move/resize mode and apply changes unless opaque
  * move/resize is enabled.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void floatframe_end_resize(WFloatFrame *frame)
 {
 	if(end_resize()){
@@ -160,7 +161,7 @@ void floatframe_end_resize(WFloatFrame *frame)
  * Return from move/resize cancelling changes if opaque
  * move/resize has not been enabled.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void floatframe_cancel_resize(WFloatFrame *frame)
 {
 	if(cancel_resize()){
@@ -173,11 +174,11 @@ void floatframe_cancel_resize(WFloatFrame *frame)
 /*EXTL_DOC
  * Enter move/resize mode for \var{frame}. The bindings set with
  * \fnref{floatframe_moveres_bindings} are used in this mode and of
- * of the exported functions only \fnref{floatframe_do_resize}, 
- * \fnref{floatframe_do_move}, \fnref{floatframe_cancel_resize} and
- * \fnref{floatframe_end_resize} are allowed to be called.
+ * of the exported functions only \fnref{WFloatFrame.do_resize}, 
+ * \fnref{WFloatFrame.do_move}, \fnref{WFloatFrame.cancel_resize} and
+ * \fnref{WFloatFrame.end_resize} are allowed to be called.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void floatframe_begin_resize(WFloatFrame *frame)
 {
 	if(!begin_resize((WRegion*)frame, NULL, FALSE))

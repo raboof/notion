@@ -19,11 +19,9 @@
 #include "ionframe.h"
 
 extern void ionframe_begin_resize(WIonFrame *frame);
-extern void ionframe_grow_vert(WIonFrame *frame);
-extern void ionframe_shrink_vert(WIonFrame *frame);
-extern void ionframe_grow_horiz(WIonFrame *frame);
-extern void ionframe_shrink_horiz(WIonFrame *frame);
 extern void ionframe_end_resize(WIonFrame *frame);
 extern void ionframe_cancel_resize(WIonFrame *frame);
+extern void ionframe_do_resize(WIonFrame *frame, int left, int right,
+							   int top, int bottom);
 
 #endif /* ION_IONWS_RESIZE_H */

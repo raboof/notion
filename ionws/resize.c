@@ -24,10 +24,10 @@
 /*{{{ Keyboard resize handler */
 
 
-static const char* moveres_safe_funclist[]={
-	"ionframe_do_resize",
-	"ionframe_end_resize",
-	"ionframe_cancel_resize",
+static ExtlSafelist moveres_safe_funclist[]={
+	(ExtlExportedFn*)&ionframe_do_resize,
+	(ExtlExportedFn*)&ionframe_end_resize,
+	(ExtlExportedFn*)&ionframe_cancel_resize,
 	NULL
 };
 
@@ -50,7 +50,8 @@ static bool resize_handler(WRegion *reg, XEvent *xev)
 		return FALSE;
 	
 	if(binding!=NULL){
-		const char **old_safelist=extl_set_safelist(moveres_safe_funclist);
+		const ExtlSafelist *old_safelist=
+			extl_set_safelist(moveres_safe_funclist);
 		extl_call(binding->func, "o", NULL, reg);
 		extl_set_safelist(old_safelist);
 	}
@@ -87,7 +88,7 @@ static WTimer resize_timer=INIT_TIMER(tmr_end_resize);
  * and \var{bottom} attempt to shrink the frame by altering the corresponding
  * border and positive values grow.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void ionframe_do_resize(WIonFrame *frame, int left, int right,
 						int top, int bottom)
 {
@@ -111,7 +112,7 @@ void ionframe_do_resize(WIonFrame *frame, int left, int right,
  * Return from move/resize mode and apply changes unless opaque
  * move/resize is enabled.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void ionframe_end_resize(WIonFrame *frame)
 {
 	if(end_resize()){
@@ -125,7 +126,7 @@ void ionframe_end_resize(WIonFrame *frame)
  * Return from move/resize cancelling changes if opaque
  * move/resize has not been enabled.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void ionframe_cancel_resize(WIonFrame *frame)
 {
 	if(cancel_resize()){
@@ -138,11 +139,11 @@ void ionframe_cancel_resize(WIonFrame *frame)
 /*EXTL_DOC
  * Enter resize mode for \var{frame}. The bindings set with
  * \fnref{ionframe_moveres_bindings} are used in this mode and of
- * of the exported functions only \fnref{ionframe_do_resize}, 
- * \fnref{ionframe_cancel_resize} and \fnref{ionframe_end_resize}
+ * of the exported functions only \fnref{WIonFrame.do_resize}, 
+ * \fnref{ionframe_cancel_resize} and \fnref{WIonFrame.end_resize}
  * are allowed to be called.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void ionframe_begin_resize(WIonFrame *frame)
 {
 	if(!begin_resize((WRegion*)frame, NULL, FALSE))

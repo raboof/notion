@@ -13,6 +13,7 @@
 #include <stdarg.h>
 #include <math.h>
 #include <string.h>
+#include <limits.h>
 
 #include <lua.h>
 #include <lualib.h>
@@ -25,6 +26,8 @@
 #include <ioncore/errorlog.h>
 
 #include "luaextl.h"
+
+#define MAGIC 0xf00ba7
 
 /* Maximum number of parameters and return values for calls from Lua
  * and (if va_copy is not available) return value from Lua functions.
@@ -42,20 +45,13 @@ static void flushtrace();
 /*{{{ WObj userdata handling -- unsafe */
 
 
-static int wobj_metaref=LUA_NOREF;
 static int obj_cache_ref=LUA_NOREF;
-
-
-static void extl_get_wobj_metatable(lua_State *st)
-{
-	lua_rawgeti(st, LUA_REGISTRYINDEX, wobj_metaref);
-}
 
 
 static WObj *extl_get_wobj(lua_State *st, int pos)
 {
 	WWatch *watch;
-	bool eq;
+	int val;
 	
 	if(!lua_isuserdata(st, pos))
 		return NULL;
@@ -63,21 +59,18 @@ static WObj *extl_get_wobj(lua_State *st, int pos)
 	if(!lua_getmetatable(st, pos))
 		return NULL;
 	
-	extl_get_wobj_metatable(st);
-	
-	eq=lua_equal(st, -1, -2);
-	
+	/* If the userdata object is a proper WObj, metatable[MAGIC] must
+	 * have been set to MAGIC.
+	 */
+	lua_pushnumber(st, MAGIC);
+	lua_gettable(st, -2);
+	val=lua_tonumber(st, -1);
 	lua_pop(st, 2);
 	
-	if(eq){
+	if(val==MAGIC){
 		watch=(WWatch*)lua_touserdata(st, pos);
-		if(watch==NULL || watch->obj==NULL){
-			/* Replace dead object with nil */
-			lua_pushnil(st);
-			lua_replace(st, pos);
-		}else{
+		if(watch!=NULL && watch->obj!=NULL)
 			return watch->obj;
-		}
 	}
 
 	return NULL;
@@ -91,7 +84,6 @@ static void extl_obj_dest_handler(WWatch *watch, WObj *obj)
 }
 
 
-/* how to call this? */
 static void extl_push_obj(lua_State *st, WObj *obj)
 {
 	WWatch *watch;
@@ -122,19 +114,26 @@ static void extl_push_obj(lua_State *st, WObj *obj)
 	init_watch(watch);
 	setup_watch(watch, obj, extl_obj_dest_handler);
 	
-	extl_get_wobj_metatable(st);
-	lua_setmetatable(st, -2);
+	lua_pushfstring(st, "luaextl_%s_metatable", WOBJ_TYPESTR(obj));
+	lua_gettable(st, LUA_REGISTRYINDEX);
+	if(lua_isnil(st, -1)){
+		lua_pop(st, 2);		 
+		lua_pushnil(st);
+	}else{
+		lua_setmetatable(st, -2);
 
-	lua_rawgeti(st, LUA_REGISTRYINDEX, obj_cache_ref);
-	lua_pushlightuserdata(st, obj);
-	lua_pushvalue(st, -3);
-	lua_rawset(st, -3);
-	lua_pop(st, 1);
-	obj->flags|=WOBJ_EXTL_CACHED;
+		/* Store in cache */
+		lua_rawgeti(st, LUA_REGISTRYINDEX, obj_cache_ref);
+		lua_pushlightuserdata(st, obj);
+		lua_pushvalue(st, -3);
+		lua_rawset(st, -3);
+		lua_pop(st, 1);
+		obj->flags|=WOBJ_EXTL_CACHED;
+	}
 }
 	
 	
-/*{{{ Functions available to Lua ucode */
+/*{{{ Functions available to Lua code */
 
 
 static int extl_obj_gc_handler(lua_State *st)
@@ -192,6 +191,13 @@ static int extl_obj_is(lua_State *st)
 
 static bool extl_init_obj_info(lua_State *st)
 {
+	static ExtlExportedFnSpec dummy[]={
+		{NULL, NULL, NULL, NULL, NULL}
+	};
+	
+	extl_register_class("WObj", dummy, NULL);
+	
+	/* Create cache */
 	lua_newtable(st);
 	lua_newtable(st);
 	lua_pushstring(st, "__mode");
@@ -199,12 +205,6 @@ static bool extl_init_obj_info(lua_State *st)
 	lua_rawset(st, -3);
 	lua_setmetatable(st, -2);
 	obj_cache_ref=lua_ref(st, -1);
-	
-	lua_newtable(st);
-	lua_pushstring(st, "__gc");
-	lua_pushcfunction(st, extl_obj_gc_handler);
-	lua_rawset(st, -3); /* set metatable.__gc=extl_obj_gc_handler */
-	wobj_metaref=lua_ref(st, -1);
 
 	lua_pushcfunction(st, extl_obj_typename);
 	lua_setglobal(st, "obj_typename");
@@ -1382,11 +1382,11 @@ bool extl_loadstring(const char *str, ExtlFn *ret)
 
 /* List of safe functions */
 
-static const char **extl_safelist=NULL;
+static const ExtlSafelist *extl_safelist=NULL;
 
-const char **extl_set_safelist(const char **newlist)
+const ExtlSafelist *extl_set_safelist(const ExtlSafelist *newlist)
 {
-	const char **oldlist=extl_safelist;
+	const ExtlSafelist *oldlist=extl_safelist;
 	extl_safelist=newlist;
 	return oldlist;
 }
@@ -1433,7 +1433,7 @@ static int extl_l1_call_handler2(lua_State *st)
 	
 	if(extl_safelist!=NULL){
 		for(i=0; extl_safelist[i]!=NULL; i++){
-			if(strcmp(spec->name, extl_safelist[i])==0)
+			if(extl_safelist[i]!=spec->fn)
 				break;
 		}
 		if(extl_safelist[i]==NULL){
@@ -1606,9 +1606,17 @@ static int extl_l1_call_handler(lua_State *st)
 /*{{{ Function registration */
 
 
-static bool extl_do_register_function(lua_State *st, ExtlExportedFnSpec *spec)
+typedef struct{
+	ExtlExportedFnSpec *spec;
+	const char *cls;
+	ExtlTab table;
+} RegData;
+
+
+static bool extl_do_register_function(lua_State *st, RegData *data)
 {
-	ExtlExportedFnSpec *spec2;
+	ExtlExportedFnSpec *spec=data->spec, *spec2;
+	int ind=LUA_GLOBALSINDEX;
 	
 	if((spec->ispec!=NULL && strlen(spec->ispec)>MAX_PARAMS) ||
 	   (spec->ospec!=NULL && strlen(spec->ospec)>MAX_PARAMS)){
@@ -1617,20 +1625,47 @@ static bool extl_do_register_function(lua_State *st, ExtlExportedFnSpec *spec)
 		return FALSE;
 	}
 
-	spec2=lua_newuserdata(st, sizeof(ExtlExportedFnSpec));
-	if(spec2==NULL){
-		warn("Unable to create upvalue for '%s'\n", spec->name);
-		return FALSE;
+	if(data->table!=LUA_NOREF){
+		lua_rawgeti(st, LUA_REGISTRYINDEX, data->table);
+		ind=-3;
 	}
-	memcpy(spec2, spec, sizeof(ExtlExportedFnSpec));
+
+	lua_pushstring(st, spec->name);
+
+	spec2=lua_newuserdata(st, sizeof(ExtlExportedFnSpec));
 	
+	memcpy(spec2, spec, sizeof(ExtlExportedFnSpec));
+
 	lua_getregistry(st);
 	lua_pushvalue(st, -2); /* Get spec2 */
-	lua_pushfstring(st, "ioncore_luaextl_%s_upvalue", spec->name);
-	lua_rawset(st, -3); /* Set registry.ioncore_luaextl_fn_upvalue=spec2 */
+	lua_pushfstring(st, "luaextl_%s_%s_upvalue", 
+					data->cls, spec->name);
+	lua_rawset(st, -3); /* Set registry.luaextl_fn_upvalue=spec2 */
 	lua_pop(st, 1); /* Pop registry */
 	lua_pushcclosure(st, extl_l1_call_handler, 1);
-	lua_setglobal(st, spec->name);
+	lua_rawset(st, ind);
+
+	return TRUE;
+}
+
+
+static bool extl_do_register_functions(ExtlExportedFnSpec *spec, int max,
+									   const char *cls, int table)
+{
+	int i;
+	
+	RegData regdata;
+	regdata.spec=spec;
+	regdata.cls=cls;
+	regdata.table=table;
+	
+	for(i=0; spec[i].name && i<max; i++){
+		regdata.spec=&(spec[i]);
+		if(!extl_cpcall(l_st, (ExtlCPCallFn*)extl_do_register_function, 
+						&regdata)){
+			return FALSE;
+		}
+	}
 	
 	return TRUE;
 }
@@ -1638,18 +1673,26 @@ static bool extl_do_register_function(lua_State *st, ExtlExportedFnSpec *spec)
 
 bool extl_register_function(ExtlExportedFnSpec *spec)
 {
-	return extl_cpcall(l_st, (ExtlCPCallFn*)extl_do_register_function, spec);
+	return extl_do_register_functions(spec, 1, "", LUA_NOREF);
 }
 
 
-static bool extl_do_unregister_function(lua_State *st, ExtlExportedFnSpec *spec)
+bool extl_register_functions(ExtlExportedFnSpec *spec)
 {
-	ExtlExportedFnSpec *spec2;
+	return extl_do_register_functions(spec, INT_MAX, "", LUA_NOREF);
+}
+
+
+static bool extl_do_unregister_function(lua_State *st, RegData *data)
+{
+	ExtlExportedFnSpec *spec=data->spec, *spec2;
+	int ind=LUA_GLOBALSINDEX;
 
 	lua_getregistry(st);
-	lua_pushfstring(st, "ioncore_luaextl_%s_upvalue", spec->name);
+	lua_pushfstring(st, "luaextl_%s_%s_upvalue", 
+					data->cls, spec->name);
 	lua_pushvalue(st, -1);
-	lua_gettable(st, -3); /* Get registry.ioncore_luaextl_fn_upvalue */
+	lua_gettable(st, -3); /* Get registry.luaextl_fn_upvalue */
 	spec2=lua_touserdata(st, -1);
 
 	if(spec2==NULL)
@@ -1663,17 +1706,195 @@ static bool extl_do_unregister_function(lua_State *st, ExtlExportedFnSpec *spec)
 
 	lua_pop(st, 1); /* Pop the upvalue */
 	lua_pushnil(st);
-	lua_rawset(st, -3); /* Clear registry.ioncore_luaextl_fn_upvalue */
-	lua_pushnil(st); /* Clear _G.fn */
-	lua_setglobal(st, spec->name);
+	lua_rawset(st, -3); /* Clear registry.luaextl_fn_upvalue */
+	
+	if(data->table!=LUA_NOREF){
+		lua_rawgeti(st, LUA_REGISTRYINDEX, data->table);
+		ind=-3;
+	}
+	
+	lua_pushnil(st); /* Clear table.fn */
+	lua_rawset(st, ind);
 	
 	return TRUE;
 }
 
 
+static void extl_do_unregister_functions(ExtlExportedFnSpec *spec, int max,
+										 const char *cls, int table)
+{
+	int i;
+	
+	RegData regdata;
+	regdata.spec=spec;
+	regdata.cls=cls;
+	regdata.table=table;
+	
+	for(i=0; spec[i].name && i<max; i++){
+		regdata.spec=&(spec[i]);
+		extl_cpcall(l_st, (ExtlCPCallFn*)extl_do_unregister_function,
+					&regdata);
+	}
+}
+
 void extl_unregister_function(ExtlExportedFnSpec *spec)
 {
-	extl_cpcall(l_st, (ExtlCPCallFn*)extl_do_unregister_function, spec);
+	extl_do_unregister_functions(spec, 1, "", LUA_NOREF);
+}
+
+
+void extl_unregister_functions(ExtlExportedFnSpec *spec)
+{
+	extl_do_unregister_functions(spec, INT_MAX, "", LUA_NOREF);
+}
+
+
+/*}}}*/
+
+
+/*{{{ Class registration */
+
+
+typedef struct{
+	const char *cls, *parent;
+	int refret;
+} ClassData;
+
+		
+static bool extl_do_register_class(lua_State *st, ClassData *data)
+{
+	/* Create the globally visible WFoobar table in which the function
+	 * references reside.
+	 */
+	lua_newtable(st);
+	D(fprintf(stderr, "%s: %d\n", data->cls, lua_topointer(st, -1)));
+
+	/* If we have a parent class (i.e. class!=WObj), we want also the parent's
+	 * functions visible in this table so set up a metatable to do so.
+	 */
+	if(data->parent!=NULL){
+		/* Get luaextl_ParentClass_metatable */
+		lua_pushfstring(st, "luaextl_%s_metatable", data->parent);
+		lua_gettable(st, LUA_REGISTRYINDEX);
+		if(!lua_istable(st, -1)){
+			warn("Could not find metatable for parent class %s of %s.\n",
+				 data->parent, data->cls);
+			return FALSE;
+		}
+		/* Create our metatable */
+		lua_newtable(st);
+		/* Get parent_metatable.__index */
+		lua_pushstring(st, "__index");
+		lua_pushvalue(st, -1);
+		/* Stack: cls, parent_meta, meta, "__index", "__index" */
+		lua_gettable(st, -4);
+		/* Stack: cls, parent_meta, meta, "__index", parent_meta.__index */
+		lua_rawset(st, -3);
+		/* Stack: cls, parent_meta, meta */
+		lua_setmetatable(st, -3);
+		lua_pop(st, 1);
+		/* Stack: cls */
+	}
+	
+	D(fprintf(stderr, "%s-1 %d\n", data->cls, lua_topointer(st, -1)));
+	/* Set the global WFoobar */
+	lua_pushvalue(st, -1);
+	data->refret=lua_ref(st, 1); /* TODO: free on failure */
+	if(data->parent){
+		/* WObj is hidden, other classes should have a parent. */
+		lua_pushstring(st, data->cls);
+		lua_pushvalue(st, -2);
+		lua_rawset(st, LUA_GLOBALSINDEX);
+	}
+
+	D(fprintf(stderr, "%s-2\n", data->cls));
+
+	/* New we create a metatable for the actual objects with __gc metamethod
+	 * and __index pointing to the table created above. The MAGIC entry is 
+	 * used to check that userdatas passed to us really are WWatches with a
+	 * high likelihood.
+	 */
+	lua_newtable(st);
+	D(fprintf(stderr, "%s-meta: %d\n", data->cls, lua_topointer(st, -1)));
+
+	lua_pushnumber(st, MAGIC);
+	lua_pushnumber(st, MAGIC);
+	lua_rawset(st, -3);
+	
+	lua_pushstring(st, "__index");
+	lua_pushvalue(st, -3);
+	lua_rawset(st, -3); /* set metatable.__index=WFoobar created above */
+	lua_pushstring(st, "__gc");
+	lua_pushcfunction(st, extl_obj_gc_handler);
+	lua_rawset(st, -3); /* set metatable.__gc=extl_obj_gc_handler */
+	lua_pushfstring(st, "luaextl_%s_metatable", data->cls);
+	lua_insert(st, -2);
+	lua_rawset(st, LUA_REGISTRYINDEX);
+	
+	D(fprintf(stderr, "%s-4\n", data->cls));
+
+	return TRUE;
+}
+
+
+bool extl_register_class(const char *cls, ExtlExportedFnSpec *fns,
+						 const char *parent)
+{
+	ClassData clsdata;
+	clsdata.cls=cls;
+	clsdata.parent=parent;
+	clsdata.refret=LUA_NOREF;
+	
+	D(assert(strcmp(cls, "WObj")==0 || parent!=NULL));
+		   
+	if(!extl_cpcall(l_st, (ExtlCPCallFn*)extl_do_register_class, &clsdata)){
+		warn("Unable to register class %s.\n", cls);
+		return FALSE;
+	}
+
+	if(fns==NULL)
+		return TRUE;
+	
+	return extl_do_register_functions(fns, INT_MAX, cls, clsdata.refret);
+}
+
+							
+static void extl_do_unregister_class(lua_State *st, ClassData *data)
+{
+	/* Get reference from registry to the metatable. */
+	lua_pushfstring(st, "luaextl_%s_metatable", data->cls);
+	lua_insert(st, -1);
+	lua_gettable(st, LUA_REGISTRYINDEX);
+	/* Get __index and return it for resetting the functions. */
+	lua_pushstring(st, "__index");
+	lua_gettable(st, -2);
+	data->refret=lua_ref(st, -1);
+	lua_pop(st, 1);
+	/* Set the entry from registry to nil. */
+	lua_pushnil(st);
+	lua_rawset(st, LUA_REGISTRYINDEX);
+	
+	/* Reset the global reference to the class to nil. */
+	lua_pushstring(st, data->cls);
+	lua_pushnil(st);
+	lua_rawset(st, LUA_GLOBALSINDEX);
+}
+
+
+void extl_unregister_class(const char *cls, ExtlExportedFnSpec *fns)
+{
+	ClassData clsdata;
+	clsdata.cls=cls;
+	clsdata.parent=NULL;
+	clsdata.refret=LUA_NOREF;
+	
+	if(!extl_cpcall(l_st, (ExtlCPCallFn*)extl_do_unregister_class, 
+					&clsdata))
+		return;
+	
+	/* We still need to reset function upvalues. */
+	if(fns!=NULL)
+		extl_do_unregister_functions(fns, INT_MAX, cls, clsdata.refret);
 }
 
 

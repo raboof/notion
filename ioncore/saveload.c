@@ -223,14 +223,14 @@ static bool do_save_workspaces(WScreen *scr, char *wsconf)
 	
 	name=region_name((WRegion*)scr);
 	if(name!=NULL){
-		fprintf(file, "region_set_name(arg[1], ");
+		fprintf(file, "WRegion.set_name(arg[1], ");
 		write_escaped_string(file, name);
 		fprintf(file, ")\n");
 	}
 	
 	FOR_ALL_MANAGED_ON_LIST(scr->mplex.managed_list, reg){
 		if(region_supports_save(reg)){
-			fprintf(file, "mplex_attach_new(arg[1], {\n");
+			fprintf(file, "WMPlex.attach_new(arg[1], {\n");
 			region_save_to_file(reg, file, 1);
 			fprintf(file, "})\n");
 		}

@@ -6,11 +6,11 @@
 -- object on the workspace.
 
 ionws_bindings{
-    kpress(DEFAULT_MOD .. "N", ionws_goto_below),
-    kpress(DEFAULT_MOD .. "P", ionws_goto_above),
-    kpress(DEFAULT_MOD .. "Tab", ionws_goto_right),
+    kpress(DEFAULT_MOD .. "N", WIonWS.goto_below),
+    kpress(DEFAULT_MOD .. "P", WIonWS.goto_above),
+    kpress(DEFAULT_MOD .. "Tab", WIonWS.goto_right),
     submap(DEFAULT_MOD .. "K") {
-        kpress("AnyModifier+Tab", ionws_goto_left),
+        kpress("AnyModifier+Tab", WIonWS.goto_left),
     },
 }
 
@@ -20,48 +20,48 @@ ionws_bindings{
 -- ioncore-bindings.lua.
 
 ionframe_bindings{
-    kpress(DEFAULT_MOD .. "R", ionframe_begin_resize),
+    kpress(DEFAULT_MOD .. "R", WIonFrame.begin_resize),
     kpress(DEFAULT_MOD .. "S",
-           function(frame) ionframe_split(frame, "bottom") end),
+           function(frame) frame:split("bottom") end),
 
     submap(DEFAULT_MOD .. "K"){
-        kpress("AnyModifier+X", ionframe_relocate_and_close),
+        kpress("AnyModifier+X", WIonFrame.relocate_and_close),
         kpress("AnyModifier+S",
-               function(frame) ionframe_split(frame, "right") end),
+               function(frame) frame:split("right") end),
     },
     
-    mclick("Button1", genframe_p_switch_tab, "tab"),
-    mdrag("Button1", genframe_p_tabdrag, "tab"),
-    mdrag("Button1", genframe_p_resize, "border"),
+    mclick("Button1", WGenFrame.p_switch_tab, "tab"),
+    mdrag("Button1", WGenFrame.p_tabdrag, "tab"),
+    mdrag("Button1", WGenFrame.p_resize, "border"),
     
-    mclick("Button2", genframe_p_switch_tab, "tab"),
-    mdrag("Button2", genframe_p_tabdrag, "tab"),
+    mclick("Button2", WGenFrame.p_switch_tab, "tab"),
+    mdrag("Button2", WGenFrame.p_tabdrag, "tab"),
     
-    mdrag(DEFAULT_MOD .. "Button3", genframe_p_resize),
+    mdrag(DEFAULT_MOD .. "Button3", WGenFrame.p_resize),
 }
 
 
 -- Frame resize mode bindings
 
 ionframe_moveres_bindings{
-    kpress("AnyModifier+Escape", ionframe_cancel_resize),
-    kpress("AnyModifier+Return", ionframe_end_resize),
+    kpress("AnyModifier+Escape", WIonFrame.cancel_resize),
+    kpress("AnyModifier+Return", WIonFrame.end_resize),
     
-    kpress("Left", function(f) ionframe_do_resize(f, 1, 0, 0, 0) end),
-    kpress("Right",function(f) ionframe_do_resize(f, 0, 1, 0, 0) end),
-    kpress("Up",   function(f) ionframe_do_resize(f, 0, 0, 1, 0) end),
-    kpress("Down", function(f) ionframe_do_resize(f, 0, 0, 0, 1) end),
-    kpress("F",    function(f) ionframe_do_resize(f, 1, 0, 0, 0) end),
-    kpress("B",	   function(f) ionframe_do_resize(f, 0, 1, 0, 0) end),
-    kpress("P",    function(f) ionframe_do_resize(f, 0, 0, 1, 0) end),
-    kpress("N",    function(f) ionframe_do_resize(f, 0, 0, 0, 1) end),
+    kpress("Left", function(f) f:do_resize( 1, 0, 0, 0) end),
+    kpress("Right",function(f) f:do_resize( 0, 1, 0, 0) end),
+    kpress("Up",   function(f) f:do_resize( 0, 0, 1, 0) end),
+    kpress("Down", function(f) f:do_resize( 0, 0, 0, 1) end),
+    kpress("F",    function(f) f:do_resize( 1, 0, 0, 0) end),
+    kpress("B",	   function(f) f:do_resize( 0, 1, 0, 0) end),
+    kpress("P",    function(f) f:do_resize( 0, 0, 1, 0) end),
+    kpress("N",    function(f) f:do_resize( 0, 0, 0, 1) end),
 
-    kpress("Shift+Left", function(f) ionframe_do_resize(f,-1, 0, 0, 0) end),
-    kpress("Shift+Right",function(f) ionframe_do_resize(f, 0,-1, 0, 0) end),
-    kpress("Shift+Up",   function(f) ionframe_do_resize(f, 0, 0,-1, 0) end),
-    kpress("Shift+Down", function(f) ionframe_do_resize(f, 0, 0, 0,-1) end),
-    kpress("Shift+F",    function(f) ionframe_do_resize(f,-1, 0, 0, 0) end),
-    kpress("Shift+B",    function(f) ionframe_do_resize(f, 0,-1, 0, 0) end),
-    kpress("Shift+P",    function(f) ionframe_do_resize(f, 0, 0,-1, 0) end),
-    kpress("Shift+N",    function(f) ionframe_do_resize(f, 0, 0, 0,-1) end),
+    kpress("Shift+Left", function(f) f:do_resize(-1, 0, 0, 0) end),
+    kpress("Shift+Right",function(f) f:do_resize( 0,-1, 0, 0) end),
+    kpress("Shift+Up",   function(f) f:do_resize( 0, 0,-1, 0) end),
+    kpress("Shift+Down", function(f) f:do_resize( 0, 0, 0,-1) end),
+    kpress("Shift+F",    function(f) f:do_resize(-1, 0, 0, 0) end),
+    kpress("Shift+B",    function(f) f:do_resize( 0,-1, 0, 0) end),
+    kpress("Shift+P",    function(f) f:do_resize( 0, 0,-1, 0) end),
+    kpress("Shift+N",    function(f) f:do_resize( 0, 0, 0,-1) end),
 }

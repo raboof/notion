@@ -692,7 +692,7 @@ static bool send_clientmsg(Window win, Atom a, Time stmp)
  * Attempt to kill (with XKillWindow) the client that owns the X
  * window correspoding to \var{cwin}.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void clientwin_kill(WClientWin *cwin)
 {
 	XKillClient(wglobal.dpy, cwin->win);
@@ -703,9 +703,9 @@ void clientwin_kill(WClientWin *cwin)
  * Request the application that owns the X window corresponding to
  * \var{cwin} to close the window. This function will fail if the
  * application is not responding or does not support the WM\_DELETE
- * protocol. In that case \fnref{clientwin_kill} should be used.
+ * protocol. In that case \fnref{WClientWin.kill} should be used.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void clientwin_close(WClientWin *cwin)
 {
 	if(cwin->flags&CWIN_P_WM_DELETE)
@@ -1050,14 +1050,14 @@ static WRegion *clientwin_managed_enter_to_focus(WClientWin *cwin, WRegion *reg)
 /*}}}*/
 
 
-/*{{{ Names & lookup */
+/*{{{ Identity & lookup */
 
 
 /*EXTL_DOC
  * Returns a table containing the class, instance and role properties
  * for \var{cwin}.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 ExtlTab clientwin_get_ident(WClientWin *cwin)
 {
 	char **p=NULL, *wrole=NULL;
@@ -1193,7 +1193,7 @@ void clientwin_handle_configure_request(WClientWin *cwin,
  * Attempts to fix window size problems with non-ICCCM compliant
  * programs.
  */
-EXTL_EXPORT
+EXTL_EXPORT_MEMBER
 void clientwin_broken_app_resize_kludge(WClientWin *cwin)
 {
 	XResizeWindow(wglobal.dpy, cwin->win, 2*cwin->max_geom.w,

@@ -121,3 +121,48 @@ obsolete("floatws_destroy", floatws_relocate_and_close)
 -- Added 2003-07-08
 obsolete("region_manage", mplex_attach)
 obsolete("region_manage_new", mplex_attach_new)
+
+-- Added 2003-07-14
+local oldmt=getmetatable(_G)
+
+if not oldmt then 
+    oldmt={} 
+end
+
+local remaps={
+    region=	"WRegion",
+    rootwin=	"WRootWin",
+    mplex=	"WMPlex",
+    screen=	"WScreen",
+    genframe=	"WGenFrame",
+    ionframe=	"WIonFrame",
+    floatframe=	"WFloatFrame",
+    genws=	"WGenWS",
+    ionws=	"WIonWS",
+    floatws=	"WFloatWS",
+    split=	"WSplit",
+    input=	"WInput",
+    wmsg=	"WMessage",
+    wedln=	"WEdln",
+}
+
+local function class_fn_wrapper(tab, name)
+    if type(name)~="string" then
+        return nil
+    end
+    local st, en, clspart, rest=string.find(name, "^([^_]+)_(.*)$")
+    if clspart and rest and remaps[clspart] then
+        return tab[remaps[clspart]][rest]
+    end
+    if oldmt.__index then
+        if type(oldmt.__index)=="function" then
+            return oldmt.__index(tab, name)
+        else
+            return oldmt.__index[name]
+        end
+    else
+        return nil
+    end
+end
+
+setmetatable(_G, {__index=class_fn_wrapper, __newindex=oldmt.__newindex})
