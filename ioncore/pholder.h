@@ -31,6 +31,14 @@ DYNFUN bool pholder_do_attach(WPHolder *ph,
 
 extern bool pholder_attach(WPHolder *ph, WRegion *reg);
 
+DYNFUN WRegion *pholder_do_target(WPHolder *ph);
+
+extern WRegion *pholder_target(WPHolder *ph);
+
+DYNFUN bool pholder_do_check_reparent(WPHolder *ph, WRegion *reg);
+
+extern bool pholder_check_reparent(WPHolder *ph, WRegion *reg);
+
 DYNFUN bool pholder_do_goto(WPHolder *ph);
 
 extern bool pholder_goto(WPHolder *ph);

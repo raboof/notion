@@ -129,6 +129,15 @@ bool floatwsrescueph_do_goto(WFloatWSRescuePH *ph)
 }
 
 
+WRegion *floatwsrescueph_do_target(WFloatWSRescuePH *ph)
+{
+    WRegion *ws=(WRegion*)ph->floatws_watch.obj;
+    WRegion *frame=(WRegion*)ph->frame_watch.obj;
+    
+    return (frame!=NULL ? frame : ws);
+}
+
+
 /*}}}*/
 
 
@@ -154,6 +163,9 @@ static DynFunTab floatwsrescueph_dynfuntab[]={
 
     {(DynFun*)pholder_do_goto, 
      (DynFun*)floatwsrescueph_do_goto},
+
+    {(DynFun*)pholder_do_target, 
+     (DynFun*)floatwsrescueph_do_target},
     
     END_DYNFUNTAB
 };

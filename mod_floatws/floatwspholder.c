@@ -116,6 +116,12 @@ bool floatwspholder_do_goto(WFloatWSPHolder *ph)
 }
 
 
+WRegion *floatwspholder_do_target(WFloatWSPHolder *ph)
+{
+    return (WRegion*)ph->floatws_watch.obj;
+}
+
+
 /*}}}*/
 
 
@@ -140,6 +146,9 @@ static DynFunTab floatwspholder_dynfuntab[]={
 
     {(DynFun*)pholder_do_goto, 
      (DynFun*)floatwspholder_do_goto},
+
+    {(DynFun*)pholder_do_target, 
+     (DynFun*)floatwspholder_do_target},
     
     END_DYNFUNTAB
 };

@@ -251,6 +251,12 @@ bool mplexpholder_do_goto(WMPlexPHolder *ph)
 }
 
 
+WRegion *mplexpholder_do_target(WMPlexPHolder *ph)
+{
+    return (WRegion*)ph->mplex_watch.obj;
+}
+
+
 /*}}}*/
 
 
@@ -367,8 +373,12 @@ static DynFunTab mplexpholder_dynfuntab[]={
     {(DynFun*)pholder_do_goto, 
      (DynFun*)mplexpholder_do_goto},
 
+    {(DynFun*)pholder_do_target, 
+     (DynFun*)mplexpholder_do_target},
+
     END_DYNFUNTAB
 };
+
 
 IMPLCLASS(WMPlexPHolder, WPHolder, mplexpholder_deinit, 
           mplexpholder_dynfuntab);

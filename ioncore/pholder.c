@@ -11,6 +11,7 @@
 
 #include <libtu/objp.h>
 #include "common.h"
+#include "attach.h"
 #include "pholder.h"
 
 
@@ -54,11 +55,58 @@ bool pholder_attach(WPHolder *ph, WRegion *reg)
     if(ph->redirect!=NULL){
         return pholder_attach(ph->redirect, reg);
     }else{
+        if(!pholder_do_check_reparent(ph, reg))
+            return FALSE;
         return pholder_do_attach(ph, (WRegionAttachHandler*)add_fn_reparent, 
                                  reg);
     }
 }
 
+
+WRegion *pholder_do_target(WPHolder *ph)
+{
+    WRegion *ret=NULL;
+    CALL_DYN_RET(ret, WRegion*, pholder_do_target, ph, (ph));
+    return ret;
+}
+
+
+WRegion *pholder_target(WPHolder *ph)
+{
+    if(ph->redirect!=NULL)
+        return pholder_target(ph->redirect);
+    else
+        return pholder_do_target(ph);
+}
+
+
+static bool pholder_do_check_reparent_default(WPHolder *ph, WRegion *reg)
+{
+    WRegion *target=pholder_do_target(ph);
+    
+    if(target==NULL)
+        return FALSE;
+    else
+        return region__attach_reparent_check(target, reg);
+}
+
+
+DYNFUN bool pholder_do_check_reparent(WPHolder *ph, WRegion *reg)
+{
+    bool ret=FALSE;
+    CALL_DYN_RET(ret, bool, pholder_do_check_reparent, ph, (ph, reg));
+    return ret;
+}
+
+
+bool pholder_check_reparent(WPHolder *ph, WRegion *reg)
+{
+    if(ph->redirect!=NULL)
+        return pholder_check_reparent(ph->redirect, reg);
+    else
+        return pholder_do_check_reparent(ph, reg);
+}
+    
 
 bool pholder_do_goto(WPHolder *ph)
 {
@@ -136,5 +184,13 @@ WPHolder *region_get_rescue_pholder(WRegion *reg)
 }
 
 
-IMPLCLASS(WPHolder, Obj, pholder_deinit, NULL);
+static DynFunTab pholder_dynfuntab[]={
+    {(DynFun*)pholder_do_check_reparent, 
+     (DynFun*)pholder_do_check_reparent_default},
+
+    END_DYNFUNTAB
+};
+
+
+IMPLCLASS(WPHolder, Obj, pholder_deinit, pholder_dynfuntab);
 
