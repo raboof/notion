@@ -54,7 +54,7 @@ $(MODULE).so: $(OBJS) $(EXT_OBJS)
 module_install:
 	$(INSTALLDIR) $(MODULEDIR)
 	$(INSTALL) -m $(BIN_MODE) $(MODULE).so $(MODULEDIR)
-	$(STRIP) $(MODULEDIR)/$(MODULE).so
+	# $(STRIP) $(MODULEDIR)/$(MODULE).so
 
 else
 
