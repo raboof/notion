@@ -245,7 +245,7 @@ KEYS
               Shrink the frame in the specific direction
 
        Mod1+Left, Right, Up Down or Mod1+F, B, P, N
-              On  floating  frame  worskacpes:  move the frame in the specific
+              On  floating  frame  workspaces:  move the frame in the specific
               direction.
 
 

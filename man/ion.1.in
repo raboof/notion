@@ -261,7 +261,7 @@ Grow the frame in the specific direction
 Shrink the frame in the specific direction
 .TP
 .B Mod1+Left, Right, Up Down or Mod1+F, B, P, N
-On floating frame worskacpes: move the frame in the specific direction.
+On floating frame workspaces: move the frame in the specific direction.
 
 .SS Miscellaneous
 .TP
