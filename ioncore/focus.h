@@ -27,7 +27,6 @@ extern void region_maybewarp(WRegion *reg, bool warp);
 /* Immediate warp/focus */
 extern void region_do_warp(WRegion *reg);
 extern bool region_do_warp_default(WRegion *reg);
-extern WHook *region_do_warp_alt;
 
 /* Awaiting focus state */
 extern void region_set_await_focus(WRegion *reg);
@@ -47,5 +46,8 @@ extern void ioncore_set_previous_of(WRegion *reg);
 extern void ioncore_protect_previous();
 extern void ioncore_unprotect_previous();
 extern WRegion *ioncore_goto_previous();
+
+/* Handlers to this hook should take WRegion* as parameter. */
+extern WHook *region_do_warp_alt;
 
 #endif /* ION_IONCORE_FOCUS_H */

@@ -58,6 +58,7 @@ extern WScreen *ioncore_goto_screen_id(int id);
 extern WScreen *ioncore_goto_next_screen();
 extern WScreen *ioncore_goto_prev_screen();
 
+/* Handlers of this hook receive a WScreen* as the sole parameter. */
 extern WHook *screen_content_switched_hook;
 
 #endif /* ION_IONCORE_SCREEN_H */

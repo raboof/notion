@@ -27,6 +27,7 @@ extern void ioncore_deinit();
 extern const char *ioncore_aboutmsg();
 extern const char *ioncore_version();
 
+/* These hooks have no parameters. */
 extern WHook *ioncore_post_layout_setup_hook;
 extern WHook *ioncore_snapshot_hook;
 extern WHook *ioncore_deinit_hook;

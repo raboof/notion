@@ -536,15 +536,6 @@ static void frame_size_changed_default(WFrame *frame,
     /* We should get a request from X to draw the frame... */
 }
 
-
-typedef struct{
-    WFrame *frame;
-    int mode;
-    bool sw;
-    WRegion *reg;
-} ChgParam;
-
-
 static const char *mode2str(int mode)
 {
     if(mode==MPLEX_CHANGE_SWITCHONLY)
@@ -559,7 +550,7 @@ static const char *mode2str(int mode)
 }
     
 
-static bool mrsh_chg(ExtlFn fn, ChgParam *p)
+static bool mrsh_chg(ExtlFn fn, WFrameChangedParams *p)
 {
     ExtlTab t=extl_create_table();
     bool ret;
@@ -581,7 +572,7 @@ static void frame_managed_changed(WFrame *frame, int mode, bool sw,
                                   WRegion *reg)
 {
     bool need_draw=TRUE;
-    ChgParam p;
+    WFrameChangedParams p;
     
     p.frame=frame;
     p.mode=mode;

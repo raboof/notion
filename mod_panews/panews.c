@@ -53,14 +53,7 @@ static WRegion *create_frame_panews(WWindow *parent, const WFitParams *fp)
 }
 
 
-
-typedef struct{
-    WPaneWS *ws;
-    ExtlTab layout;
-} InitParams;
-
-
-static bool mrsh_init_layout_extl(ExtlFn fn, InitParams *p)
+static bool mrsh_init_layout_extl(ExtlFn fn, WPaneWSInitParams *p)
 {
     ExtlTab t=extl_create_table();
     bool ret=FALSE;
@@ -79,7 +72,7 @@ static bool mrsh_init_layout_extl(ExtlFn fn, InitParams *p)
 
 static bool panews_init_layout(WPaneWS *ws)
 {
-    InitParams p;
+    WPaneWSInitParams p;
     
     p.ws=ws;
     p.layout=extl_table_none();

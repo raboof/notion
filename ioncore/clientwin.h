@@ -113,7 +113,9 @@ extern WClientWin *clientwin_get_transient_for(WClientWin *cwin);
 
 /* Hooks */
 
+/* This hook has parameters (WClientWin*, WManageParams*). */
 extern WHook *clientwin_do_manage_alt;
+/* This hook has just WClientWin* as parameter. */
 extern WHook *clientwin_added_hook;
 
 /* Manage */

@@ -16,11 +16,33 @@
 #include <ioncore/clientwin.h>
 #include <ioncore/manage.h>
 #include <ioncore/hooks.h>
+#include <ioncore/extl.h>
+#include <mod_ionws/split.h>
 #include "panews.h"
 #include "splitext.h"
 
 
+typedef struct{
+    WPaneWS *ws;
+    ExtlTab layout;
+} WPaneWSInitParams;
+
+
+typedef struct{
+    WPaneWS *ws;
+    WFrame *frame;
+    WRegion *reg;
+    WSplitUnused *specifier;
+    
+    WSplit *res_node;
+    ExtlTab res_config;
+    int res_w, res_h;
+} WPaneWSPlacementParams;
+
+
+/* Handlers of this hook should accept WPaneWSInitParams as parameter. */
 extern WHook *panews_init_layout_alt;
+/* Handlers of this hook should accept WPaneWSPlacementParams as parameter. */
 extern WHook *panews_make_placement_alt;
 
 

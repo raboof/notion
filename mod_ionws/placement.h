@@ -18,11 +18,13 @@
 #include <ioncore/hooks.h>
 #include "ionws.h"
 
+/* Handlers of this hook should take (WClientWin*, WIonWS*, WManageParams*) 
+ * as parameter. 
+ */
+extern WHook *ionws_placement_alt;
 
 extern bool ionws_manage_clientwin(WIonWS *ws, WClientWin *cwin,
                                    const WManageParams *param,
                                    int redir);
-
-extern WHook *ionws_placement_alt;
 
 #endif /* ION_MOD_IONWS_PLACEMENT_H */

@@ -79,19 +79,7 @@ static WFrame *create_frame_for(WPaneWS *ws, WRegion *reg)
 /*{{{ Placement scan */
 
 
-typedef struct{
-    WPaneWS *ws;
-    WFrame *frame;
-    WRegion *reg;
-    WSplitUnused *specifier;
-    
-    WSplit *res_node;
-    ExtlTab res_config;
-    int res_w, res_h;
-} PlacementParams;
-
-
-static bool mrsh_layout_extl(ExtlFn fn, PlacementParams *p)
+static bool mrsh_layout_extl(ExtlFn fn, WPaneWSPlacementParams *p)
 {
     ExtlTab t=extl_create_table();
     bool ret=FALSE;
@@ -145,7 +133,7 @@ static bool fallback_filter(WSplit *node)
 }
 
 
-static bool fallback_layout(PlacementParams *p)
+static bool fallback_layout(WPaneWSPlacementParams *p)
 {
     if(p->ws->ionws.split_tree==NULL)
         return FALSE;
@@ -175,7 +163,7 @@ static bool fallback_layout(PlacementParams *p)
 
 
 static bool do_replace(WPaneWS *ws, WFrame *frame, WRegion *reg, 
-                       PlacementParams *rs)
+                       WPaneWSPlacementParams *rs)
 {
     WSplit *u=rs->res_node;
     WSplit *node=ionws_load_node(&(ws->ionws), &(u->geom), rs->res_config);
@@ -226,7 +214,7 @@ static WRegion *panews_get_target(WPaneWS *ws, WSplitUnused *specifier,
     
     if(frame!=NULL){
         WSplit **tree=&(ws->ionws.split_tree);
-        PlacementParams rs;
+        WPaneWSPlacementParams rs;
         
         rs.ws=ws;
         rs.frame=frame;
