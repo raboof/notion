@@ -60,6 +60,11 @@ extern WGRData *region_grdata_of(const WRegion *reg);
 extern Window region_root_of(const WRegion *reg);
 extern bool same_screen(const WRegion *reg1, const WRegion *reg2);
 
+extern WViewport *screen_current_vp(WScreen *scr);
+extern void screen_switch_nth_on_cvp(WScreen *scr, uint n);
+extern void screen_switch_next_on_cvp(WScreen *scr);
+extern void screen_switch_prev_on_cvp(WScreen *scr);
+
 extern void screen_switch_nth2(int scrnum, int n);
 
 extern void screen_manage_initial_windows(WScreen *scr);

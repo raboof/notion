@@ -518,8 +518,8 @@ void region_got_focus(WRegion *reg)
 			}*/
 			r->active_sub=reg;
 			if(WOBJ_IS(r, WScreen)){
-				D(fprintf(stderr, "cvp: %p, %p [%s]\n", r, viewport_of(reg), WOBJ_TYPESTR(reg)));
-				((WScreen*)r)->current_viewport=viewport_of(reg);
+				D(fprintf(stderr, "cvp: %p, %p [%s]\n", r, region_viewport_of(reg), WOBJ_TYPESTR(reg)));
+				((WScreen*)r)->current_viewport=region_viewport_of(reg);
 			}
 		}
 		

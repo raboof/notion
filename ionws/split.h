@@ -66,7 +66,20 @@ extern void ionws_request_managed_geom(WIonWS *ws, WRegion *reg,
 										 WRectangle geom,
 										 WRectangle *geomret, bool tryonly);
 extern void ionws_remove_managed(WIonWS *ws, WRegion *reg);
-extern WRegion *ionws_find_current(WIonWS *ws);
+
+extern WRegion *ionws_current(WIonWS *ws);
+extern WRegion *ionws_above(WIonWS *ws, WRegion *reg);
+extern WRegion *ionws_below(WIonWS *ws, WRegion *reg);
+extern WRegion *ionws_left_of(WIonWS *ws, WRegion *reg);
+extern WRegion *ionws_right_of(WIonWS *ws, WRegion *reg);
+extern WRegion *ionws_topmost(WIonWS *ws);
+extern WRegion *ionws_lowest(WIonWS *ws);
+extern WRegion *ionws_rightmost(WIonWS *ws);
+extern WRegion *ionws_leftmost(WIonWS *ws);
+extern void ionws_goto_above(WIonWS *ws);
+extern void ionws_goto_below(WIonWS *ws);
+extern void ionws_goto_left(WIonWS *ws);
+extern void ionws_goto_right(WIonWS *ws);
 
 extern WRegion *split_reg(WRegion *reg, int dir, int primn,
 						  int minsize, WRegionSimpleCreateFn *fn);

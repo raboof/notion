@@ -1123,7 +1123,7 @@ bool clientwin_fullscreen_vp(WClientWin *cwin, WViewport *vp, bool switchto)
 
 bool clientwin_enter_fullscreen(WClientWin *cwin, bool switchto)
 {
-	WViewport *vp=viewport_of((WRegion*)cwin);
+	WViewport *vp=region_viewport_of((WRegion*)cwin);
 	
 	if(vp==NULL){
 		vp=SCREEN_OF(cwin)->current_viewport;

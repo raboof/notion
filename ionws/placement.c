@@ -19,7 +19,7 @@
 
 static WRegion *find_suitable_frame(WIonWS *ws)
 {
-	WRegion *r=ionws_find_current(ws);
+	WRegion *r=ionws_current(ws);
 	
 	if(r!=NULL && region_supports_add_managed(r))
 		return r;

@@ -275,6 +275,7 @@ static WRegion *nth_ws(WViewport *vp, uint n)
 }
 
 
+EXTL_EXPORT
 void viewport_switch_nth(WViewport *vp, uint n)
 {
 	WRegion *sub=nth_ws(vp, n);
@@ -283,6 +284,7 @@ void viewport_switch_nth(WViewport *vp, uint n)
 }
 
 
+EXTL_EXPORT
 void viewport_switch_next(WViewport *vp)
 {
 	WRegion *reg=NEXT_MANAGED_WRAP(vp->ws_list, vp->current_ws);
@@ -291,6 +293,7 @@ void viewport_switch_next(WViewport *vp)
 }
 
 
+EXTL_EXPORT
 void viewport_switch_prev(WViewport *vp)
 {
 	WRegion *reg=PREV_MANAGED_WRAP(vp->ws_list, vp->current_ws);
@@ -305,7 +308,8 @@ void viewport_switch_prev(WViewport *vp)
 /*{{{ Misc. */
 
 
-WViewport *viewport_of(WRegion *reg)
+EXTL_EXPORT
+WViewport *region_viewport_of(WRegion *reg)
 {
 	while(reg!=NULL){
 		if(WOBJ_IS(reg, WViewport))
@@ -316,20 +320,7 @@ WViewport *viewport_of(WRegion *reg)
 }
 
 
-WViewport *current_vp(WScreen *scr)
-{
-	if(scr==NULL)
-		return NULL;
-	
-	if(scr->current_viewport==NULL){
-		if(REGION_ACTIVE_SUB(scr)!=NULL)
-			scr->current_viewport=viewport_of(REGION_ACTIVE_SUB(scr));
-	}
-	
-	return scr->current_viewport;
-}
-
-
+EXTL_EXPORT
 WViewport *find_viewport_id(int id)
 {
 	WScreen *scr;
@@ -362,7 +353,7 @@ void goto_nth_viewport(int id)
 EXTL_EXPORT
 void goto_next_viewport()
 {
-	WViewport *vp=current_vp(wglobal.active_screen);
+	WViewport *vp=screen_current_vp(wglobal.active_screen);
 	
 	if(vp!=NULL)
 		vp=find_viewport_id(vp->id+1);
@@ -376,7 +367,7 @@ void goto_next_viewport()
 EXTL_EXPORT
 void goto_prev_viewport()
 {
-	WViewport *vp=current_vp(wglobal.active_screen);
+	WViewport *vp=screen_current_vp(wglobal.active_screen);
 	
 	if(vp==NULL)
 		vp=find_viewport_id(0);
@@ -390,31 +381,17 @@ void goto_prev_viewport()
 
 
 EXTL_EXPORT
-void screen_switch_nth_on_cvp(WScreen *scr, uint n)
+WRegion *viewport_current(WViewport *vp)
 {
-	WViewport *vp=current_vp(scr);
-	if(vp!=NULL)
-		viewport_switch_nth(vp, n);
+	return vp->current_ws;
 }
 
 
 EXTL_EXPORT
-void screen_switch_next_on_cvp(WScreen *scr)
+int viewport_id(WViewport *vp)
 {
-	WViewport *vp=current_vp(scr);
-	if(vp!=NULL)
-		viewport_switch_next(vp);
+	return vp->id;
 }
-
-
-EXTL_EXPORT
-void screen_switch_prev_on_cvp(WScreen *scr)
-{
-	WViewport *vp=current_vp(scr);
-	if(vp!=NULL)
-		viewport_switch_prev(vp);
-}
-
 
 
 static bool viewport_may_destroy_managed(WViewport *vp, WRegion *reg)

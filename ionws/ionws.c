@@ -98,7 +98,7 @@ static void ionws_unmap(WIonWS *ws)
 
 static void ionws_set_focus_to(WIonWS *ws, bool warp)
 {
-	WRegion *sub=ionws_find_current(ws);
+	WRegion *sub=ionws_current(ws);
 	
 	if(sub==NULL){
 		warn("Trying to focus an empty ionws.");

@@ -629,7 +629,7 @@ static WRegion *left_or_topmost_current(WObj *obj, int dir)
 }
 
 
-static WRegion *right_or_bottommost_current(WObj *obj, int dir)
+static WRegion *right_or_lowest_current(WObj *obj, int dir)
 {
 	WWsSplit *split;
 
@@ -656,7 +656,8 @@ static WRegion *right_or_bottommost_current(WObj *obj, int dir)
 }
 
 
-WRegion *ionws_find_current(WIonWS *ws)
+EXTL_EXPORT
+WRegion *ionws_current(WIonWS *ws)
 {
 	return left_or_topmost_current(ws->split_tree, -1);
 }
@@ -688,7 +689,7 @@ static WWsSplit *find_split(WObj *obj, int dir, int *from)
 }
 
 
-static WRegion *right_or_down(WRegion *reg, int dir)
+static WRegion *down_or_right(WRegion *reg, int dir)
 {
 	WObj *prev=(WObj*)reg;
 	WIonWS *ws;
@@ -710,7 +711,8 @@ static WRegion *right_or_down(WRegion *reg, int dir)
 		prev=(WObj*)split;
 	}
 	
-	return left_or_topmost_current(prev, dir);
+	
+	return NULL;
 }
 
 
@@ -731,84 +733,118 @@ static WRegion *up_or_left(WRegion *reg, int dir)
 			break;
 		
 		if(from==BOTTOM_OR_RIGHT)
-			return right_or_bottommost_current(split->tl, dir);
+			return right_or_lowest_current(split->tl, dir);
 		
 		prev=(WObj*)split;
 	}
 	
-	return right_or_bottommost_current(prev, dir);
+	return NULL;
 }
 
 
-static void goto_reg(WRegion *reg)
+EXTL_EXPORT
+WRegion *ionws_above(WIonWS *ws, WRegion *reg)
 {
-	if(reg!=NULL)
-		region_goto(reg);
+	if(REGION_MANAGER(reg)!=(WRegion*)ws)
+		return NULL;
+	return up_or_left(reg, VERTICAL);
 }
 
 
-#if 0
-static void check_mgr(WRegion *reg)
+EXTL_EXPORT
+WRegion *ionws_below(WIonWS *ws, WRegion *reg)
 {
-	assert(REGION_MANAGER(reg)!=NULL && 
-		   WOBJ_IS(REGION_MANAGER(reg), WIonWS));
+	if(REGION_MANAGER(reg)!=(WRegion*)ws)
+		return NULL;
+	return down_or_right(reg, VERTICAL);
 }
 
 
-void goto_above(WRegion *reg)
+EXTL_EXPORT
+WRegion *ionws_left_of(WIonWS *ws, WRegion *reg)
 {
-	check_mgr(reg);
-	goto_reg(up_or_left(reg, VERTICAL));
+	if(REGION_MANAGER(reg)!=(WRegion*)ws)
+		return NULL;
+	return up_or_left(reg, HORIZONTAL);
 }
 
 
-void goto_below(WRegion *reg)
+EXTL_EXPORT
+WRegion *ionws_right_of(WIonWS *ws, WRegion *reg)
 {
-	check_mgr(reg);
-	goto_reg(right_or_down(reg, VERTICAL));
+	if(REGION_MANAGER(reg)!=(WRegion*)ws)
+		return NULL;
+	return down_or_right(reg, HORIZONTAL);
 }
 
 
-void goto_left(WRegion *reg)
+EXTL_EXPORT
+WRegion *ionws_topmost(WIonWS *ws)
 {
-	check_mgr(reg);
-	goto_reg(up_or_left(reg, HORIZONTAL));
+	return left_or_topmost_current(ws->split_tree, VERTICAL);
 }
 
 
-void goto_right(WRegion *reg)
+EXTL_EXPORT
+WRegion *ionws_lowest(WIonWS *ws)
 {
-	check_mgr(reg);
-	goto_reg(right_or_down(reg, HORIZONTAL));
+	return right_or_lowest_current(ws->split_tree, VERTICAL);
 }
-#endif
+
+
+EXTL_EXPORT
+WRegion *ionws_leftmost(WIonWS *ws)
+{
+	return left_or_topmost_current(ws->split_tree, HORIZONTAL);
+}
+
+
+EXTL_EXPORT
+WRegion *ionws_rightmost(WIonWS *ws)
+{
+	return right_or_lowest_current(ws->split_tree, HORIZONTAL);
+}
+
+
+static bool goto_reg(WRegion *reg)
+{
+	if(reg==NULL)
+		return FALSE;
+	region_goto(reg);
+	return TRUE;
+}
 
 
 EXTL_EXPORT
 void ionws_goto_above(WIonWS *ws)
 {
-	goto_reg(up_or_left(ionws_find_current(ws), VERTICAL));
+	if(!goto_reg(ionws_above(ws, ionws_current(ws))))
+		goto_reg(ionws_lowest(ws));
+	   
 }
 
 
 EXTL_EXPORT
 void ionws_goto_below(WIonWS *ws)
 {
-	goto_reg(right_or_down(ionws_find_current(ws), VERTICAL));
+	if(!goto_reg(ionws_below(ws, ionws_current(ws))))
+		goto_reg(ionws_topmost(ws));
 }
 
 
 EXTL_EXPORT
 void ionws_goto_left(WIonWS *ws)
 {
-	goto_reg(up_or_left(ionws_find_current(ws), HORIZONTAL));
+	if(!goto_reg(ionws_left_of(ws, ionws_current(ws))))
+		goto_reg(ionws_rightmost(ws));
 }
 
 
 EXTL_EXPORT
 void ionws_goto_right(WIonWS *ws)
 {
-	goto_reg(right_or_down(ionws_find_current(ws), HORIZONTAL));
+	if(!goto_reg(ionws_right_of(ws, ionws_current(ws))))
+		goto_reg(ionws_leftmost(ws));
 }
 
 
@@ -893,7 +929,7 @@ void ionws_remove_managed(WIonWS *ws, WRegion *reg)
 			other=left_or_topmost_current(split->br, split->dir);
 		}else{
 			split->br=NULL;
-			other=right_or_bottommost_current(split->tl, split->dir);
+			other=right_or_lowest_current(split->tl, split->dir);
 		}
 		
 		SPLIT_OF(reg)=NULL;

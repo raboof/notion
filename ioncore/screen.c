@@ -472,6 +472,48 @@ bool same_screen(const WRegion *reg1, const WRegion *reg2)
 }
 
 
+EXTL_EXPORT
+WViewport *screen_current_vp(WScreen *scr)
+{
+	if(scr==NULL)
+		return NULL;
+	
+	if(scr->current_viewport==NULL){
+		if(REGION_ACTIVE_SUB(scr)!=NULL)
+			scr->current_viewport=region_viewport_of(REGION_ACTIVE_SUB(scr));
+	}
+	
+	return scr->current_viewport;
+}
+
+
+EXTL_EXPORT
+void screen_switch_nth_on_cvp(WScreen *scr, uint n)
+{
+	WViewport *vp=screen_current_vp(scr);
+	if(vp!=NULL)
+		viewport_switch_nth(vp, n);
+}
+
+
+EXTL_EXPORT
+void screen_switch_next_on_cvp(WScreen *scr)
+{
+	WViewport *vp=screen_current_vp(scr);
+	if(vp!=NULL)
+		viewport_switch_next(vp);
+}
+
+
+EXTL_EXPORT
+void screen_switch_prev_on_cvp(WScreen *scr)
+{
+	WViewport *vp=screen_current_vp(scr);
+	if(vp!=NULL)
+		viewport_switch_prev(vp);
+}
+
+
 /*}}}*/
 
 

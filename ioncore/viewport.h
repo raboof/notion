@@ -34,11 +34,9 @@ extern void viewport_switch_nth(WViewport *vp, uint n);
 extern void viewport_switch_next(WViewport *vp);
 extern void viewport_switch_prev(WViewport *vp);
 
-extern void screen_switch_nth_on_cvp(WScreen *scr, uint n);
-extern void screen_switch_next_on_cvp(WScreen *scr);
-extern void screen_switch_prev_on_cvp(WScreen *scr);
+extern WViewport *region_viewport_of(WRegion *reg);
 
-extern WViewport *viewport_of(WRegion *reg);
+extern WRegion *viewport_current(WViewport *vp);
 
 /* For viewports corresponding to Xinerama screens <id> is initially set
  * to the Xinerama screen number. When Xinerama is not enabled, <id> is

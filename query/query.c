@@ -130,7 +130,7 @@ void query_handler_workspace(WGenFrame *frame, const char *name)
 	ws=(WRegion*)lookup_workspace(name);
 	
 	if(ws==NULL){
-		vp=viewport_of((WRegion*)frame);
+		vp=region_viewport_of((WRegion*)frame);
 		if(vp!=NULL)
 			ws=create_ws_on_vp(vp, name);
 		if(ws==NULL){
@@ -170,7 +170,7 @@ static void handler_workspace_with(WObj *obj, char *name, char *userdata)
 			return;
 		}
 		
-		vp=viewport_of((WRegion*)obj);
+		vp=region_viewport_of((WRegion*)obj);
 		if(vp!=NULL)
 			ws=create_new_ionws_on_vp(vp, name);
 		
