@@ -174,7 +174,7 @@ RANLIB=ranlib
 ## Install & strip
 ##
 
-INSTALL=$(TOPDIR)/install-sh
+INSTALL=$(TOPDIR)/install-sh -c
 INSTALLDIR=mkdir -p
 
 BIN_MODE=755
