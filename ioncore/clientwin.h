@@ -97,7 +97,7 @@ extern void clientwin_handle_configure_request(WClientWin *cwin,
 
 extern void clientwin_broken_app_resize_kludge(WClientWin *cwin);
 
-extern WRegion *clientwin_load(WWindow *par, const WRectangle *geom, 
+extern WRegion *clientwin_load(WWindow *par, const WFitParams *fp,
                                ExtlTab tab);
 
 /* Some standard winprops */

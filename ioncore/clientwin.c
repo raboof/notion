@@ -918,10 +918,10 @@ static void do_reparent_clientwin(WClientWin *cwin, Window win, int x, int y)
 }
 
 
-static void convert_geom(WClientWin *cwin, const WRectangle *max_geom,
+static void convert_geom(WClientWin *cwin, const WFitParams *fp,
                          WRectangle *geom)
 {
-    WRectangle r;
+    const WRectangle *max_geom=&(fp->g);
     bool bottom=FALSE;
     bool top=FALSE;
     int htry=max_geom->h;
@@ -934,7 +934,7 @@ static void convert_geom(WClientWin *cwin, const WRectangle *max_geom,
         mgr=REGION_MANAGER_CHK(cwin, WClientWin);
     }
     
-    if(mgr!=NULL){
+    if(mgr!=NULL && fp->mode==REGION_FIT_BOUNDS){
         if(mgr->flags&CLIENTWIN_TRANSIENTS_AT_TOP)
             top=TRUE;
         else
@@ -974,13 +974,15 @@ static void clientwin_managed_rqgeom(WClientWin *cwin, WRegion *sub,
                                      int flags, const WRectangle *geom, 
                                      WRectangle *geomret)
 {
-    WRectangle rgeom=cwin->last_fp.g;
+    WRectangle g=*geom;
 
+    rectangle_constrain(&g, &(cwin->last_fp.g));
+    
     if(geomret!=NULL)
-        *geomret=rgeom;
+        *geomret=g;
     
     if(!(flags&REGION_RQGEOM_TRYONLY))
-        region_fit(sub, &rgeom, REGION_FIT_EXACT);
+        region_fit(sub, &g, REGION_FIT_EXACT);
 }
 
 
@@ -996,7 +998,7 @@ static bool clientwin_fitrep(WClientWin *cwin, WWindow *np, WFitParams *fp)
     if(np!=NULL && !region_same_rootwin((WRegion*)cwin, (WRegion*)np))
         return FALSE;
 
-    convert_geom(cwin, &(fp->g), &geom);
+    convert_geom(cwin, fp, &geom);
 
     changes=(REGION_GEOM(cwin).x!=geom.x ||
              REGION_GEOM(cwin).y!=geom.y ||
@@ -1284,9 +1286,11 @@ void clientwin_handle_configure_request(WClientWin *cwin,
             /* Manager gets to decide how to handle position request. */
             region_rqgeom_clientwin(mgr, cwin, rqflags, &geom);
         }else{
-            region_convert_root_geom(region_parent((WRegion*)cwin),
+            /*region_convert_root_geom(region_parent((WRegion*)cwin),
                                      &geom);
-            region_rqgeom((WRegion*)cwin, rqflags, &geom, NULL);
+            region_rqgeom((WRegion*)cwin, rqflags, &geom, NULL);*/
+            /* Just use any known available space wanted or give up some */
+            region_fitrep((WRegion*)cwin, NULL, &(cwin->last_fp));
         }
     }
 
@@ -1388,7 +1392,7 @@ static ExtlTab clientwin_get_configuration(WClientWin *cwin)
 }
 
 
-WRegion *clientwin_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
+WRegion *clientwin_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 {
     double wind=0;
     Window win=None;
@@ -1425,10 +1429,10 @@ WRegion *clientwin_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
         return NULL;
     }
 
-    attr.x=geom->x;
-    attr.y=geom->y;
-    attr.width=geom->w;
-    attr.height=geom->h;
+    attr.x=fp->g.x;
+    attr.y=fp->g.y;
+    attr.width=fp->g.w;
+    attr.height=fp->g.h;
 
     cwin=create_clientwin(par, win, &attr);
     
@@ -1436,7 +1440,7 @@ WRegion *clientwin_load(WWindow *par, const WRectangle *geom, ExtlTab tab)
         return FALSE;
     
     /* Reparent and resize taking limits set by size hints into account */
-    convert_geom(cwin, geom, &rg);
+    convert_geom(cwin, fp, &rg);
     REGION_GEOM(cwin)=rg;
     do_reparent_clientwin(cwin, par->win, rg.x, rg.y);
     XResizeWindow(ioncore_g.dpy, win, maxof(1, rg.w), maxof(1, rg.h));

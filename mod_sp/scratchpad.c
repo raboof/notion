@@ -186,17 +186,15 @@ bool scratchpad_fitrep(WScratchpad *sp, WWindow *parent, const WFitParams *fp)
         lazyfp=*fp;
     }else{
         lazyfp.mode=REGION_FIT_EXACT;
-        lazyfp.g.w=minof(fp->g.w, REGION_GEOM(sp).w);
-        lazyfp.g.h=minof(fp->g.h, REGION_GEOM(sp).h);
         
         if(parent!=NULL){
+            lazyfp.g.w=minof(fp->g.w, REGION_GEOM(sp).w);
+            lazyfp.g.h=minof(fp->g.h, REGION_GEOM(sp).h);
             lazyfp.g.x=fp->g.x+(fp->g.w-lazyfp.g.w)/2;
             lazyfp.g.y=fp->g.y+(fp->g.h-lazyfp.g.h)/2;
         }else{
-            lazyfp.g.x=minof(maxof(fp->g.x, REGION_GEOM(sp).x),
-                              fp->g.x+fp->g.w-lazyfp.g.w);
-            lazyfp.g.y=minof(maxof(fp->g.y, REGION_GEOM(sp).y),
-                              fp->g.y+fp->g.h-lazyfp.g.h);
+            lazyfp.g=REGION_GEOM(sp);
+            rectangle_constrain(&(lazyfp.g), &(fp->g));
         }
     }
     

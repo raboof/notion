@@ -465,7 +465,7 @@ bool moveresmode_do_end(WMoveresMode *mode, bool apply)
         if(apply){
             WRectangle g2=mode->geom;
             region_rqgeom(reg, mode->rqflags&~REGION_RQGEOM_TRYONLY,
-                                &g2, &mode->geom);
+                          &g2, &mode->geom);
         }
         XUngrabServer(ioncore_g.dpy);
     }
@@ -489,13 +489,13 @@ bool moveresmode_do_end(WMoveresMode *mode, bool apply)
 
 
 void region_rqgeom(WRegion *reg, int flags, const WRectangle *geom,
-                         WRectangle *geomret)
+                   WRectangle *geomret)
 {
     bool tryonly=(flags&REGION_RQGEOM_TRYONLY);
     
     if(REGION_MANAGER(reg)!=NULL){
         region_managed_rqgeom(REGION_MANAGER(reg), reg, flags, geom,
-                                    geomret);
+                              geomret);
     }else{
         if(geomret!=NULL)
             *geomret=REGION_GEOM(reg);
@@ -556,8 +556,8 @@ void region_rqgeom_clientwin(WRegion *mgr, WClientWin *cwin,
 
 
 void region_managed_rqgeom_allow(WRegion *mgr, WRegion *reg,
-                                       int flags, const WRectangle *geom,
-                                       WRectangle *geomret)
+                                 int flags, const WRectangle *geom,
+                                 WRectangle *geomret)
 {
     if(geomret!=NULL)
         *geomret=*geom;

@@ -24,9 +24,9 @@ DECLSTRUCT(WRectangle){
 };
 
 extern bool rectangle_contains(const WRectangle *g, int x, int y);
+extern void rectangle_constrain(WRectangle *g, const WRectangle *bounds);
 
 extern void rectange_debugprint(const WRectangle *g, const char *n);
-extern void rectangle_writecode(const WRectangle *geom, FILE *file);
 
 #endif /* ION_IONCORE_RECTANGLE_H */
 

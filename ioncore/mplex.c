@@ -388,8 +388,8 @@ void mplex_fit_managed(WMPlex *mplex)
 
 
 static void mplex_managed_rqgeom(WMPlex *mplex, WRegion *sub,
-                                       int flags, const WRectangle *geom, 
-                                       WRectangle *geomret)
+                                 int flags, const WRectangle *geom, 
+                                 WRectangle *geomret)
 {
     WRectangle mg, rg;
     
@@ -397,10 +397,8 @@ static void mplex_managed_rqgeom(WMPlex *mplex, WRegion *sub,
     
     if(on_l2_list(mplex, sub)){
         /* allow changes but constrain with managed area */
-        rg.x=minof(maxof(mg.x, geom->x), mg.x+mg.w-1);
-        rg.y=minof(maxof(mg.y, geom->y), mg.y+mg.h-1);
-        rg.w=maxof(1, minof(geom->x+geom->w, mg.x+mg.w)-rg.x);
-        rg.h=maxof(1, minof(geom->y+geom->h, mg.y+mg.h)-rg.y);
+        rg=*geom;
+        rectangle_constrain(&rg, &mg);
     }else{
         rg=mg;
     }

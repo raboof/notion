@@ -9,9 +9,21 @@
  * (at your option) any later version.
  */
 
+#include <libtu/minmax.h>
 #include "common.h"
 #include "extl.h"
 #include "rectangle.h"
+
+
+void rectangle_constrain(WRectangle *g, const WRectangle *bounds)
+{
+    const WRectangle tmpg=*g;
+    
+    g->x=minof(maxof(tmpg.x, bounds->x), tmpg.x+tmpg.w-1);
+    g->y=minof(maxof(tmpg.y, bounds->y), tmpg.y+tmpg.h-1);
+    g->w=maxof(1, minof(bounds->x+bounds->w, tmpg.x+tmpg.w)-g->x);
+    g->h=maxof(1, minof(bounds->y+bounds->h, tmpg.y+tmpg.h)-g->y);
+}
 
 
 bool rectangle_contains(const WRectangle *g, int x, int y)
@@ -26,8 +38,3 @@ void rectangle_debugprint(const WRectangle *g, const char *n)
 }
 
 
-void rectangle_writecode(const WRectangle *geom, FILE *file)
-{
-    fprintf(file, "geom = { x = %d, y = %d, w = %d, h = %d},\n",
-            geom->x, geom->y, geom->w, geom->h);
-}
