@@ -85,7 +85,9 @@ local function do_add_winprop(class, role, instance, name, prop)
 end
 
 
-local function match_name(prop, cwin)
+--DOC
+-- The basic name-based winprop matching criteria.
+function ioncore.match_winprop_name(prop, cwin)
     local nm=cwin:name()
     if not prop.name then
         return true
@@ -96,6 +98,7 @@ local function match_name(prop, cwin)
         return false
     end
 end
+
 
 --DOC
 -- Define a winprop. For more information, see section \ref{sec:winprops}.
@@ -115,7 +118,7 @@ function ioncore.defwinprop(list)
     end
     
     if not list2.match then
-        list2.match=match_name
+        list2.match=ioncore.match_winprop_name
     end
     
     do_add_winprop(class, role, instance, name, list2)
