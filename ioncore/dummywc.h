@@ -26,11 +26,11 @@
 #define iswprint isprint
 #define iswspace isspace
 
-#define mbrlen minimb_mbrlen
-#define mbtowc minimb_mbtowc
-#define mbrtowc minimb_mbrtowc
+#define mbrlen dummywc_mbrlen
+#define mbtowc dummywc_mbtowc
+#define mbrtowc dummywc_mbrtowc
 
-static size_t minimb_mbrlen(const char *s, size_t n, mbstate_t *ps)
+static size_t dummywc_mbrlen(const char *s, size_t n, mbstate_t *ps)
 {
 	size_t i;
 	for(i=0; i<n; i++){
@@ -40,7 +40,7 @@ static size_t minimb_mbrlen(const char *s, size_t n, mbstate_t *ps)
 	return i;
 }
 
-static int minimb_mbtowc(wchar_t *pwc, const char *s, size_t n)
+static int dummywc_mbtowc(wchar_t *pwc, const char *s, size_t n)
 {
 	if(n>0 && *s!='\0'){
 		*pwc=*s;
@@ -49,7 +49,7 @@ static int minimb_mbtowc(wchar_t *pwc, const char *s, size_t n)
 	return 0;
 }
 
-static size_t minimb_mbrtowc(wchar_t *pwc, const char *s, size_t n, mbstate_t *ps)
+static size_t dummywc_mbrtowc(wchar_t *pwc, const char *s, size_t n, mbstate_t *ps)
 {
 	return mbtowc(pwc, s, n);
 }
