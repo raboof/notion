@@ -15,6 +15,7 @@
 #include <libtu/objp.h>
 #include <libtu/minmax.h>
 #include <libextl/extl.h>
+#include <libmainloop/defer.h>
 #include "common.h"
 #include "global.h"
 #include "property.h"
@@ -1117,7 +1118,10 @@ static bool clientwin_fitrep(WClientWin *cwin, WWindow *np, WFitParams *fp)
         if(!CLIENTWIN_IS_FULLSCREEN(cwin) && cwin->fs_pholder!=NULL){
             WPHolder *ph=cwin->fs_pholder;
             cwin->fs_pholder=NULL;
-            destroy_obj((Obj*)ph);
+            /* Can't destroy it yet - messes up mplex placeholder
+             * reorganisation.
+             */
+            mainloop_defer_destroy((Obj*)ph);
         }
         
         netwm_update_state(cwin);

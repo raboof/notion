@@ -219,7 +219,7 @@ bool mplexpholder_do_attach(WMPlexPHolder *ph, WRegionAttachHandler *hnd,
         
         ph3=ph2;
     }
-    
+
     return TRUE;
 }
 
@@ -282,16 +282,35 @@ void mplex_move_phs(WMPlex *mplex, WLListNode *node,
     }
 }
 
+static WMPlexPHolder *node_last_ph(WMPlex *mplex, 
+                                   WLListNode *lnode, int layer)
+{
+    WMPlexPHolder *lph=NULL;
+    
+    if(lnode!=NULL){
+        lph=LIST_LAST(lnode->phs, next, prev);
+    }else if(layer==1){
+        lph=LIST_LAST(mplex->l1_phs, next, prev);
+    }else{
+        lph=LIST_LAST(mplex->l2_phs, next, prev);
+    }
+    
+    return lph;
+}
+
 
 void mplex_move_phs_before(WMPlex *mplex, WLListNode *node, int layer)
 {
-    WLListNode *before;
+    WMPlexPHolder *after=NULL;
+    WLListNode *or_after;
     
-    before=(layer==2 
-            ? LIST_PREV(mplex->l2_list, node, next, prev)
-            : LIST_PREV(mplex->l1_list, node, next, prev));
+    or_after=(layer==2 
+              ? LIST_PREV(mplex->l2_list, node, next, prev)
+              : LIST_PREV(mplex->l1_list, node, next, prev));
                          
-    mplex_move_phs(mplex, node, NULL, before, layer);
+    after=node_last_ph(mplex, or_after, layer);
+        
+    mplex_move_phs(mplex, node, after, or_after, layer);
 }
 
 
@@ -322,6 +341,22 @@ WMPlexPHolder *mplex_get_rescue_pholder_for(WMPlex *mplex, WRegion *mgd)
     }
     
     return ph;
+}
+
+
+WMPlexPHolder *mplex_last_place_holder(WMPlex *mplex, int layer)
+{
+    WLListNode *lnode=NULL;
+    WMPlexPHolder *lph=NULL;
+    
+    if(layer==1)
+        lnode=LIST_LAST(mplex->l1_list, next, prev);
+    else if(layer==2)
+        lnode=LIST_LAST(mplex->l2_list, next, prev);
+
+    lph=node_last_ph(mplex, lnode, layer);
+    
+    return create_mplexpholder(mplex, lph, lnode, layer);
 }
 
 

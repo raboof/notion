@@ -66,4 +66,6 @@ extern WMPlexPHolder *mplex_managed_get_pholder(WMPlex *mplex,
 extern WMPlexPHolder *mplex_get_rescue_pholder_for(WMPlex *mplex, 
                                                        WRegion *mgd);
 
+extern WMPlexPHolder *mplex_last_place_holder(WMPlex *mplex, int layer);
+
 #endif /* ION_IONCORE_MPLEXPHOLDER_H */
