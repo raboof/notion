@@ -11,9 +11,9 @@
 
 #include "common.h"
 #include "global.h"
+#include "objp.h"
 
-
-static WWatch sq_watch=WWATCH_INIT;
+static WWatch *sq_watch=NULL;
 static WFunclist *tmp_funclist=NULL;
 
 /* We don't want to refer to destroyed things. */
@@ -28,19 +28,18 @@ static void sq_watch_handler(WWatch *watch, WThing *t)
 
 static bool opt_default(Tokenizer *tokz, int n, Token *toks)
 {
-	WThing *thing=sq_watch.thing;
+	WThing *thing=sq_watch->thing;
 	WFunction *func;
 	char *name=TOK_IDENT_VAL(&(toks[0]));
 	
 	while(thing!=NULL){
-	
 		if(tmp_funclist!=NULL)
 			func=lookup_func_ex(name, tmp_funclist);
 		else
 			func=lookup_func_thing(thing, name);
 		
 		if(func==NULL){
-			if(tmp_funclist==NULL)
+			if(tmp_funclist!=NULL)
 				break;
 			thing=thing->t_parent;
 			continue;
@@ -54,9 +53,10 @@ static bool opt_default(Tokenizer *tokz, int n, Token *toks)
 	
 		func->callhnd(thing, func, n-1, &(toks[1]));
 	
-		if(wglobal.focus_next!=NULL)
-			setup_watch(&sq_watch, (WThing*)wglobal.focus_next,
+		if(wglobal.focus_next!=NULL){
+			setup_watch(sq_watch, (WThing*)wglobal.focus_next,
 						sq_watch_handler);
+		}
 	
 		return TRUE;
 	}
@@ -75,27 +75,31 @@ static ConfOpt command_opts[]={
 
 bool execute_command_sequence(WThing *thing, char *fn)
 {
-	static bool command_sq=FALSE;
+	static int command_sq=0;
 	bool retval;
 	Tokenizer *tokz;
-
-	if(command_sq){
-		warn("Nested command sequence.");
+	WWatch watch=WWATCH_INIT;
+	WWatch *old_watch=sq_watch;
+	
+	if(command_sq>=CF_MAX_COMMAND_SQ_NEST){
+		warn("Too many nested command sequences.");
 		return FALSE;
 	}
-	
-	command_sq=TRUE;
 
-	setup_watch(&sq_watch, thing, sq_watch_handler);
+	command_sq++;
+
+	setup_watch(&watch, thing, sq_watch_handler);
+	sq_watch=&watch;
 	
 	tokz=tokz_prepare_buffer(fn, -1);
 	tokz->flags|=TOKZ_DEFAULT_OPTION;
 	retval=parse_config_tokz(tokz, command_opts);
 	tokz_close(tokz);
 
-	reset_watch(&sq_watch);
+	sq_watch=old_watch;
+	reset_watch(&watch);
 	
-	command_sq=FALSE;
+	command_sq--;
 
 	return retval;
 }
@@ -106,9 +110,12 @@ bool execute_command_sequence_restricted(WThing *thing, char *fn,
 {
 	bool ret;
 	
+	WFunclist *old_tmp=tmp_funclist;
 	tmp_funclist=funclist;
+	
 	ret=execute_command_sequence(thing, fn);
-	tmp_funclist=NULL;
+	
+	tmp_funclist=old_tmp;
 	
 	return ret;
 }

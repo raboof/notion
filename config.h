@@ -41,6 +41,8 @@
 #define CF_CURSOR_WAITKEY XC_icon
 
 
+#define CF_MAX_COMMAND_SQ_NEST 32
+
 /* PWM
  */
 #define CF_EDGE_RESISTANCE 16

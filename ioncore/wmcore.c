@@ -78,6 +78,7 @@ bool wmcore_init(const char *appname, const char *appetcdir,
 				 const char *display, bool onescreen)
 {
 	Display *dpy;
+	WScreen *scr;
 	int i, dscr, nscr;
 	static bool called=FALSE;
 	
@@ -141,10 +142,16 @@ bool wmcore_init(const char *appname, const char *appetcdir,
 	load_cursors();	
 	init_bindings();
 	
-	for(i=dscr; i<nscr; i++)
-		manage_screen(i);
+	for(i=dscr; i<nscr; i++){
+		scr=manage_screen(i);
+		/* Need to force REGION_ACTIVE on some screen -- temporary kludge */
+		if(i==dscr){
+			XSetInputFocus(wglobal.dpy, scr->root.win, PointerRoot,
+						   CurrentTime);
+			((WRegion*)scr)->flags|=REGION_ACTIVE;
+		}
+	}
 	
-	/*if(wglobal.screens==NULL){*/
 	if(wglobal.screens==NULL){
 		if(nscr-dscr>1)
 			warn("Could not find a screen to manage.");

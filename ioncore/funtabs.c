@@ -44,7 +44,7 @@ WFunclist wmcore_clientwin_funclist=INIT_FUNCLIST;
 static WFunction wmcore_clientwin_funtab[]={
 	FN_VOID(generic, WClientWin,	"close",		close_clientwin),
 	FN_VOID(generic, WClientWin,	"kill",			kill_clientwin),
-	FN_VOID(generic, WClientWin,	"enter_fullscreen",	clientwin_enter_fullscreen),
+	FN(b,	generic, WClientWin,	"enter_fullscreen",	clientwin_enter_fullscreen),
 	
 	END_FUNTAB
 };

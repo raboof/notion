@@ -7,13 +7,13 @@
 
 #include "global.h"
 #include "common.h"
-#include "objp.h"
 #include "region.h"
 #include "attach.h"
 #include "property.h"
 #include "targetid.h"
 #include "wsreg.h"
 #include "mwmhints.h"
+#include "objp.h"
 
 
 /* This file contains the add_clientwin_default handler for managing
@@ -133,24 +133,32 @@ bool add_clientwin_default(WClientWin *cwin, const XWindowAttributes *attr,
 	WRegion *target=NULL, *ws=NULL;
 	WWinProp *props;
 
+	/* Get and set winprops */
+	props=setup_get_winprops(cwin);
+
 	/* check full screen mode */
-	
 	do{
 		WMwmHints *mwm;
+		bool switchto=FALSE;
 		mwm=get_mwm_hints(cwin->win);
 		if(mwm==NULL)
 			break;
 		if(REGION_GEOM(SCREEN_OF(cwin)).w==attr->width &&
 		   REGION_GEOM(SCREEN_OF(cwin)).h==attr->height &&
 		   mwm->flags&MWM_HINTS_DECORATIONS && mwm->decorations==0){
-			if(clientwin_enter_fullscreen(cwin))
+			if(wglobal.opmode!=OPMODE_INIT){
+#ifdef CF_SWITCH_NEW_CLIENTS
+				switchto=TRUE;
+#endif
+				if(props!=NULL)
+					switchto=(props->manage_flags&REGION_ATTACH_SWITCHTO);
+			}
+			if(clientwin_enter_fullscreen(cwin, switchto))
 				return TRUE;
+			warn("Failed to enter full screen mode.");
 		}
 	}while(0);
 		
-	/* Get and set winprops */
-	props=setup_get_winprops(cwin);
-	
 	if(props==NULL || props->transient_mode!=TRANSIENT_MODE_CURRENT){
 		if(props==NULL || props->transient_mode==TRANSIENT_MODE_NORMAL){
 			/* Is it a transient to some other window? */

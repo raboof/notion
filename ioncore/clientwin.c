@@ -299,8 +299,10 @@ again:
 	
 	CALL_ALT_B(managed, add_clientwin_alt, (cwin, &attr, state, dock));
 
-	if(!managed)
+	if(!managed){
+		warn("Unable to manage client window %d\n", win);
 		goto failure;
+	}
 	
 	/* Check that the window exists. The previous check and selectinput
 	 * do not seem to catch all cases of window destroyal.
@@ -721,6 +723,7 @@ static bool reparent_clientwin(WClientWin *cwin, WWinGeomParams params)
 #define CALL_TRANSIENTS(CWIN, FN) {WRegion *sub; \
 	FOR_ALL_TYPED(CWIN, sub, WRegion){FN(sub);} }
 
+
 static void map_clientwin(WClientWin *cwin)
 {
 	show_clientwin(cwin);
@@ -897,7 +900,11 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 		mwm=get_mwm_hints(cwin->win);
 		if(mwm!=NULL && mwm->flags&MWM_HINTS_DECORATIONS &&
 		   mwm->decorations==0){
-			if(clientwin_enter_fullscreen(cwin))
+#ifdef CF_SWITCH_NEW_CLIENTS
+			if(clientwin_enter_fullscreen(cwin, TRUE))
+#else				
+			if(clientwin_enter_fullscreen(cwin, TRUE))
+#endif
 				return;
 		}
 	}
@@ -957,7 +964,7 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 /*{{{ Fullscreen */
 
 
-bool clientwin_enter_fullscreen(WClientWin *cwin)
+bool clientwin_enter_fullscreen(WClientWin *cwin, bool switchto)
 {
 	WScreen *scr=SCREEN_OF(cwin);
 	
@@ -967,7 +974,7 @@ bool clientwin_enter_fullscreen(WClientWin *cwin)
 		return FALSE;
 	
 	return region_attach_sub((WRegion*)scr, (WRegion*)cwin,
-							 REGION_ATTACH_SWITCHTO);
+							 switchto ?  REGION_ATTACH_SWITCHTO : 0);
 }
 
 

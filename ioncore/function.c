@@ -154,6 +154,16 @@ void callhnd_generic_l(WThing *thing, WFunction *func,
 }
 
 
+void callhnd_generic_b(WThing *thing, WFunction *func,
+					   int n, const Token *args)
+{
+	typedef void Func(WThing*, bool);
+	thing=find_parent(thing, func->objdescr);
+	if(thing!=NULL)
+		((Func*)func->fn)(thing, TOK_BOOL_VAL(args));
+}
+
+
 void callhnd_generic_d(WThing *thing, WFunction *func,
 					   int n, const Token *args)
 {

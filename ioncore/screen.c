@@ -330,11 +330,11 @@ static void screen_sub_params(const WScreen *scr, WWinGeomParams *ret)
 
 static void screen_do_attach(WScreen *scr, WRegion *sub, int flags)
 {
-	if(scr->current_sub!=NULL && wglobal.opmode!=OPMODE_INIT)
+	/*if(scr->current_sub!=NULL && wglobal.opmode!=OPMODE_INIT)
 		link_thing_after((WThing*)(scr->current_sub), (WThing*)sub);
-	else
+	else*/{
 		link_thing((WThing*)scr, (WThing*)sub);
-	
+	}
 	scr->sub_count++;
 	
 	if(scr->sub_count==1)

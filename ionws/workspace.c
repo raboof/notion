@@ -249,10 +249,11 @@ void setup_screens()
 	WScreen *scr;
 	
 	FOR_ALL_SCREENS(scr){
-		init_workspaces(scr);
-		manage_initial_windows(scr);
 		/* TODO: Should be moved somewhere else */
 		region_add_bindmap((WRegion*)scr, &wmcore_screen_bindmap, TRUE);
+		
+		init_workspaces(scr);
+		manage_initial_windows(scr);
 	}
 }
 
