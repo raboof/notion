@@ -230,22 +230,22 @@ void mplex_unmap(WMPlex *mplex)
 
 static void mplex_set_focus_to(WMPlex *mplex, bool warp)
 {
+	if(!WMPLEX_MGD_UNVIEWABLE(mplex) && mplex->current_input!=NULL){
+		region_set_focus_to((WRegion*)mplex->current_input, FALSE);
+	}else if(!WMPLEX_MGD_UNVIEWABLE(mplex) && mplex->current_sub!=NULL){
+		/* Allow workspaces to position cursor to their liking. */
+		if(warp && WOBJ_IS(mplex->current_sub, WGenWS)){
+			region_set_focus_to(mplex->current_sub, TRUE);
+			return;
+		}else{
+			region_set_focus_to(mplex->current_sub, FALSE);
+		}
+	}else{
+		SET_FOCUS(WMPLEX_WIN(mplex));
+	}
+
 	if(warp)
 		do_move_pointer_to((WRegion*)mplex);
-
-	if(!WMPLEX_MGD_UNVIEWABLE(mplex)){
-		if(mplex->current_input!=NULL){
-			region_set_focus_to((WRegion*)mplex->current_input, FALSE);
-			return;
-		}else if(mplex->current_sub!=NULL){
-			/* Allow workspaces to position cursor to their liking. */
-			warp=(warp && WOBJ_IS(mplex->current_sub, WGenWS));
-			region_set_focus_to(mplex->current_sub, warp);
-			return;
-		}
-	}
-	
-	SET_FOCUS(WMPLEX_WIN(mplex));
 }
 	
 

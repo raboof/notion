@@ -91,33 +91,29 @@ void goto_previous()
 /*{{{ set_focus, warp */
 
 
-static void pointer_rootpos(Window root, int *xret, int *yret)
-{
-	Window win;
-	int x, y, wx, wy;
-	uint mask;
-	
-	XQueryPointer(wglobal.dpy, root, &root, &win,
-				  xret, yret, &wx, &wy, &mask);
-}
-
-
 void do_move_pointer_to(WRegion *reg)
 {
-	int x, y, w, h, px, py;
-	Window root;
+	Window root, win=None, realroot=None;
+	int x, y, w, h;
+	int wx=0, wy=0, px=0, py=0;
+	uint mask=0;
+	
+	D(fprintf(stderr, "do_move_pointer_to %p %s\n", reg, WOBJ_TYPESTR(reg)));
 	
 	root=ROOT_OF(reg);
-	
-	pointer_rootpos(root, &px, &py);
 	region_rootpos(reg, &x, &y);
-	w=REGION_GEOM(reg).w;
-	h=REGION_GEOM(reg).h;
-	
-	if(px<x || py<y || px>=x+w || py>=y+h){
-		XWarpPointer(wglobal.dpy, None, root, 0, 0, 0, 0,
-					 x+5, y+5);
+
+	if(XQueryPointer(wglobal.dpy, root, &realroot, &win,
+					 &px, &py, &wx, &wy, &mask)){
+		w=REGION_GEOM(reg).w;
+		h=REGION_GEOM(reg).h;
+
+		if(px>=x && py>=y && px<x+w && py<y+h)
+			return;
 	}
+	
+	XWarpPointer(wglobal.dpy, None, root, 0, 0, 0, 0,
+				 x+5, y+5);
 }
 
 
