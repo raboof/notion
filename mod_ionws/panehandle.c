@@ -52,6 +52,8 @@ bool panehandle_init(WPaneHandle *pwin, WWindow *parent, const WFitParams *fp)
     if(!window_init(&(pwin->wwin), parent, fp))
         return FALSE;
     
+    ((WRegion*)pwin)->flags|=REGION_SKIP_FOCUS;
+    
     panehandle_getbrush(pwin);
     
     if(pwin->brush==NULL){
