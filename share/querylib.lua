@@ -383,7 +383,7 @@ function QueryLib.man_completor(wedln, str)
         return
     end
     
-    popen_bgread("find "..dirs.." -type f -or -type l", 
+    popen_bgread("find "..dirs.." -type f -o -type l", 
                  coroutine.wrap(receive_data))
 end
 
