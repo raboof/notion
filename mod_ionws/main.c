@@ -21,6 +21,7 @@
 #include "main.h"
 #include "ionws.h"
 #include "ionframe.h"
+#include "placement.h"
 
 
 /*{{{ Module information */
@@ -75,6 +76,11 @@ void mod_ionws_deinit()
         ioncore_free_bindmap("WIonFrame", mod_ionws_ionframe_bindmap);
         mod_ionws_ionframe_bindmap=NULL;
     }
+    
+    if(ionws_placement_alt!=NULL){
+        destroy_obj((Obj*)ionws_placement_alt);
+        ionws_placement_alt=NULL;
+    }
 }
 
 
@@ -95,8 +101,25 @@ static bool register_regions()
 }
 
 
+#define INIT_HOOK_(NM)                            \
+    NM=ioncore_register_hook(#NM, create_hook()); \
+    if(NM==NULL) return FALSE;
+
+
+static bool init_hooks()
+{
+    INIT_HOOK_(ionws_placement_alt);
+    return TRUE;
+}
+
+
 bool mod_ionws_init()
 {
+    if(!init_hooks()){
+        WARN_FUNC("failed to initialise hooks");
+        goto err;
+    }
+            
     mod_ionws_ionws_bindmap=ioncore_alloc_bindmap("WIonWS", NULL);
     
     mod_ionws_ionframe_bindmap=ioncore_alloc_bindmap("WIonFrame", 

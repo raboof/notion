@@ -20,6 +20,7 @@ INTRSTRUCT(WManageParams);
 #include "genws.h"
 #include "attach.h"
 #include "rectangle.h"
+#include "extl.h"
 
 
 #define MANAGEPARAMS_INIT                                                \
@@ -42,6 +43,9 @@ DECLSTRUCT(WManageParams){
     WRectangle geom;
     WClientWin *tfor;
 };
+
+
+extern ExtlTab manageparams_to_table(WManageParams *mp);
 
 
 extern WScreen *clientwin_find_suitable_screen(WClientWin *cwin,

@@ -71,9 +71,6 @@ bool autows_manage_clientwin(WAutoWS *ws, WClientWin *cwin,
         param.mode=REGION_FIT_BOUNDS;
         target=create_initial_frame(&(ws->ionws),  /* \/ !!! */
                                     (WWindow*)REGION_PARENT(ws), &param);
-    }else{
-        extl_call_named("ionws_placement_method", "oob", "o", 
-                        ws, cwin, param->userpos, &target);
     }
     
     if(target!=NULL && REGION_MANAGER(target)==(WRegion*)ws){

@@ -236,3 +236,24 @@ bool region_rescue_clientwins(WRegion *reg)
 
 /*}}}*/
 
+
+/*{{{ Misc. */
+
+
+ExtlTab manageparams_to_table(WManageParams *mp)
+{
+    ExtlTab t=extl_create_table();
+    extl_table_sets_b(t, "switchto", mp->switchto);
+    extl_table_sets_b(t, "jumpto", mp->jumpto);
+    extl_table_sets_b(t, "userpos", mp->userpos);
+    extl_table_sets_b(t, "dockapp", mp->dockapp);
+    extl_table_sets_b(t, "maprq", mp->maprq);
+    extl_table_sets_i(t, "gravity", mp->gravity);
+    extl_table_sets_rectangle(t, "geom", &(mp->geom));
+    extl_table_sets_o(t, "tfor", (Obj*)(mp->tfor));
+    
+    return t;
+}
+
+
+/*}}}*/

@@ -416,21 +416,13 @@ static bool do_manage_mrsh(bool (*fn)(WClientWin *cwin, WManageParams *pm),
 }
 
 
+
 static bool do_manage_mrsh_extl(ExtlFn fn, void **p)
 {
     WClientWin *cwin=(WClientWin*)p[0];
     WManageParams *mp=(WManageParams*)p[1];
-    ExtlTab t=extl_create_table();
+    ExtlTab t=manageparams_to_table(mp);
     bool ret=FALSE;
-    
-    extl_table_sets_b(t, "switchto", mp->switchto);
-    extl_table_sets_b(t, "jumpto", mp->jumpto);
-    extl_table_sets_b(t, "userpos", mp->userpos);
-    extl_table_sets_b(t, "dockapp", mp->dockapp);
-    extl_table_sets_b(t, "maprq", mp->maprq);
-    extl_table_sets_i(t, "gravity", mp->gravity);
-    extl_table_sets_rectangle(t, "geom", &(mp->geom));
-    extl_table_sets_o(t, "tfor", (Obj*)(mp->tfor));
     
     extl_call(fn, "ot", "b", cwin, t, &ret);
     

@@ -23,6 +23,9 @@
 #include "ionws.h"
 
 
+WHook *ionws_placement_alt=NULL;
+
+
 static WRegion *find_suitable_target(WIonWS *ws)
 {
     WRegion *r=ionws_current(ws);
@@ -37,6 +40,33 @@ static WRegion *find_suitable_target(WIonWS *ws)
 }
 
 
+static bool placement_mrsh(bool (*fn)(WClientWin *cwin, WIonWS *ws,
+                                      WManageParams *pm),
+                           void **p)
+{
+    return fn((WClientWin*)p[0], 
+              (WIonWS*)p[1],
+              (WManageParams*)p[2]);
+}
+
+
+
+static bool placement_mrsh_extl(ExtlFn fn, void **p)
+{
+    WClientWin *cwin=(WClientWin*)p[0];
+    WIonWS *ws=(WIonWS*)p[1];
+    WManageParams *mp=(WManageParams*)p[2];
+    ExtlTab t=manageparams_to_table(mp);
+    bool ret=FALSE;
+    
+    extl_call(fn, "oot", "b", cwin, ws, t, &ret);
+    
+    extl_unref_table(t);
+    
+    return (ret && REGION_MANAGER(cwin)!=NULL);
+}
+
+
 bool ionws_manage_clientwin(WIonWS *ws, WClientWin *cwin,
                             const WManageParams *param,
                             int redir)
@@ -46,15 +76,22 @@ bool ionws_manage_clientwin(WIonWS *ws, WClientWin *cwin,
     if(redir==MANAGE_REDIR_STRICT_NO)
         return FALSE;
 
-    extl_call_named("ionws_placement_method", "oob", "o", 
-                    ws, cwin, param->userpos, &target);
-    
-    if(target!=NULL && REGION_MANAGER(target)==(WRegion*)ws){
-        if(region_manage_clientwin(target, cwin, param, 
-                                   MANAGE_REDIR_PREFER_YES))
+    {
+        void *mrshpm[3];
+        bool managed;
+        
+        mrshpm[0]=cwin;
+        mrshpm[1]=ws;
+        mrshpm[2]=&param;
+        
+        managed=hook_call_alt(ionws_placement_alt, &mrshpm, 
+                              (WHookMarshall*)placement_mrsh,
+                              (WHookMarshallExtl*)placement_mrsh_extl);
+        
+        if(managed && REGION_MANAGER(cwin)!=NULL)
             return TRUE;
     }
-
+    
     target=find_suitable_target(ws);
     
     if(target==NULL){
