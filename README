@@ -18,7 +18,7 @@ BUILDING AND INSTALLING
       that use libltdl require 1.4.3 even more recent than libtool-1.4.3
       releases of those OSes still fail to include but an _ancient_ 1.3.x
       libtool that simply _will_ _not_ _work_.
-    * Lua 5.0 (see <http://www.lua.org/>)
+    * Lua 5.0.1 (see <http://www.lua.org/>)
 
 2. Edit system.mk to suit your system. If heavy modifications are required,
    you might want to save the file somewhere for future use. (Most GNU/Linux
