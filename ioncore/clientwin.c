@@ -253,9 +253,6 @@ static bool clientwin_init(WClientWin *cwin, WRegion *parent,
 	cwin->win=win;
 	cwin->state=WithdrawnState;
 	
-	get_winprops(cwin);
-	clientwin_get_size_hints(cwin);
-
 	geom.x=attr->x;
 	geom.y=attr->y;
 	geom.w=attr->width;
@@ -301,6 +298,9 @@ static bool clientwin_init(WClientWin *cwin, WRegion *parent,
 	XAddToSaveSet(wglobal.dpy, win);
 
 	LINK_ITEM(wglobal.cwin_list, cwin, g_cwin_next, g_cwin_prev);
+
+	get_winprops(cwin);
+	clientwin_get_size_hints(cwin);
 	
 	return TRUE;
 }

@@ -234,7 +234,7 @@ end
 
 local winprops={}
 
-function alternative_winprop_idents(id)
+local function alternative_winprop_idents(id)
     local function g()
         for _, c in {id.class, "*"} do
             for _, r in {id.role, "*"} do
