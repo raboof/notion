@@ -16,7 +16,7 @@ de_define_style("*", {
     highlight_colour = "#eeeeee",
     shadow_colour = "#eeeeee",
     background_colour = "#aaaaaa",
-    foreground_colour = "#ffffff",
+    foreground_colour = "#000000",
     
     shadow_pixels = 1,
     highlight_pixels = 1,
