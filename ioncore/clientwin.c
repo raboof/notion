@@ -578,7 +578,7 @@ static void do_reparent_clientwin(WClientWin *cwin, Window win, int x, int y)
 }
 
 
-static WRectangle cwin_geom(WClientWin *cwin, WRectangle geom)
+static WRectangle cwin_geom(WClientWin *cwin, WRectangle geom, bool rq)
 {
 	WRectangle r;
 	bool bottom=(cwin->transient_for!=None);
@@ -591,8 +591,12 @@ static WRectangle cwin_geom(WClientWin *cwin, WRectangle geom)
 	
 	correct_size(&(r.w), &(r.h), &(cwin->size_hints), FALSE);
 	
-	if(bottom && r.h>cwin->win_geom.h)
+	if(rq){
+		if(r.h>geom.h)
+			r.h=geom.h;
+	}else if(bottom && r.h>cwin->win_geom.h){
 		r.h=cwin->win_geom.h;
+	}
 	
 	r.x=geom.x+geom.w/2-r.w/2;
 	
@@ -606,7 +610,7 @@ static WRectangle cwin_geom(WClientWin *cwin, WRectangle geom)
 
 
 static void convert_geom(WClientWin *cwin, WRectangle geom,
-						 WRectangle *wingeom)
+						 WRectangle *wingeom, bool rq)
 {
 #if 0
 	/* TODO -- Ion doesn't need this stuff at the moment, but PWM will
@@ -639,7 +643,7 @@ static void convert_geom(WClientWin *cwin, WRectangle geom,
 	TODO: vertical shrink 
 #endif
 	
-	*wingeom=cwin_geom(cwin, geom);
+	*wingeom=cwin_geom(cwin, geom, rq);
 }
 
 
@@ -661,14 +665,14 @@ static int max(int a, int b)
 /*{{{ Region dynfuns */
 
 
-static void fit_clientwin(WClientWin *cwin, WRectangle geom)
+static void do_fit_clientwin(WClientWin *cwin, WRectangle geom, bool rq)
 {
 	WRegion *sub;
 	WRectangle wingeom;
 	WWinGeomParams params;
 
 	region_params2(&cwin->region, geom, &params);
-	convert_geom(cwin, geom, &wingeom);
+	convert_geom(cwin, geom, &wingeom, rq);
 	
 	cwin->x_off_cache=params.win_x;
 	cwin->y_off_cache=params.win_y;
@@ -695,6 +699,12 @@ static void fit_clientwin(WClientWin *cwin, WRectangle geom)
 }
 
 
+static void fit_clientwin(WClientWin *cwin, WRectangle geom)
+{
+	do_fit_clientwin(cwin, geom, FALSE);
+}
+
+
 static bool reparent_clientwin(WClientWin *cwin, WWinGeomParams params)
 {
 	WRectangle wingeom;
@@ -702,7 +712,7 @@ static bool reparent_clientwin(WClientWin *cwin, WWinGeomParams params)
 	int rootx, rooty;
 	WRectangle geom;
 
-	convert_geom(cwin, params.geom, &wingeom);
+	convert_geom(cwin, params.geom, &wingeom, FALSE);
 
 	cwin->x_off_cache=params.win_x;
 	cwin->y_off_cache=params.win_y;
@@ -964,7 +974,7 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 #if 0
 	region_request_geom(&(cwin->region), geom, NULL, FALSE);
 #else
-	fit_clientwin(cwin, REGION_GEOM(cwin));
+	do_fit_clientwin(cwin, REGION_GEOM(cwin), TRUE);
 #endif
 }
 
