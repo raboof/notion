@@ -184,14 +184,7 @@ end
 -- \fnref{exec_on_rootwin} to execute \var{cmd}. You should use this
 -- function to bind execution commands to keys.
 function make_exec_fn(cmd)
-    local function do_exec(reg)
-        if obj_is(reg, "WGenFrame") then
-            exec_in(frame, cmd)
-        else
-            execrootw(reg, cmd)
-        end
-    end
-    return do_exec
+    return function(reg) exec_in(reg, cmd) end
 end
 
 
