@@ -11,8 +11,7 @@ include $(TOPDIR)/system-inc.mk
 SUBDIRS=ion-completefile
 INSTALL_SUBDIRS=$(SUBDIRS)
 
-LUA_SOURCES = ioncorelib.lua ioncorelib-mplexfns.lua compat.lua \
-	      ioncore-efbb.lua
+LUA_SOURCES = ioncorelib.lua ioncorelib-mplexfns.lua ioncore-efbb.lua
 
 SHELLSCRIPTS = ion-edit ion-man ion-runinxterm ion-ssh ion-view
 
