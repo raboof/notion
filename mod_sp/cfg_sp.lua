@@ -14,6 +14,6 @@ defbindings("WScreen", {
     -- layouts the following should work:
     --kpress(MOD1.."section", "mod_sp.set_shown_on(_, 'toggle')"),
     -- and on UK and US layouts this should work:
-    --kpress(MOD1.."grave", "mod_sp.set_shown_on(_ 'toggle')"),
+    --kpress(MOD1.."grave", "mod_sp.set_shown_on(_, 'toggle')"),
 })
 
