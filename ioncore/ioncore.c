@@ -227,8 +227,8 @@ static bool init_hooks()
     INIT_HOOK_(ioncore_deinit_hook);
     INIT_HOOK_(screen_content_switched_hook);
     INIT_HOOK_(frame_managed_changed_hook);
-    INIT_HOOK_(frame_activated_hook);
-    INIT_HOOK_(frame_inactivated_hook);
+    INIT_HOOK_(region_activated_hook);
+    INIT_HOOK_(region_inactivated_hook);
     INIT_HOOK_(clientwin_added_hook);
     INIT_HOOK(clientwin_do_manage_alt, clientwin_do_manage_default);
     INIT_HOOK(ioncore_handle_event_alt, ioncore_handle_event);

@@ -88,9 +88,6 @@ extern ExtlTab frame_get_configuration(WFrame *frame);
 extern WRegion *frame_load(WWindow *par, const WFitParams *fp, ExtlTab tab);
 extern void frame_do_load(WFrame *frame, ExtlTab tab);
 
-/* These two hooks have just a WFrame* as parameter. */
-extern WHook *frame_activated_hook;
-extern WHook *frame_inactivated_hook;
 /* This hook has WFrameChangedParams* (see below) as parameter. */
 extern WHook *frame_managed_changed_hook;
 

@@ -49,8 +49,6 @@ static bool frame_initialise_titles(WFrame *frame);
 static void frame_free_titles(WFrame *frame);
 
 
-WHook *frame_activated_hook=NULL;
-WHook *frame_inactivated_hook=NULL;
 WHook *frame_managed_changed_hook=NULL;
 
 
@@ -421,14 +419,12 @@ void frame_resize_hints(WFrame *frame, XSizeHints *hints_ret)
 void frame_inactivated(WFrame *frame)
 {
     window_draw((WWindow*)frame, FALSE);
-    hook_call_o(frame_inactivated_hook, (Obj*)frame);
 }
 
 
 void frame_activated(WFrame *frame)
 {
     window_draw((WWindow*)frame, FALSE);
-    hook_call_o(frame_activated_hook, (Obj*)frame);
 }
 
 

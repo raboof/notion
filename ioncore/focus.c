@@ -20,6 +20,17 @@
 #include "region-iter.h"
 
 
+/*{{{ Hooks. */
+
+
+WHook *region_do_warp_alt=NULL;
+WHook *region_activated_hook=NULL;
+WHook *region_inactivated_hook=NULL;
+
+
+/*}}}*/
+
+
 /*{{{ Previous active region tracking */
 
 
@@ -209,6 +220,8 @@ void region_got_focus(WRegion *reg)
      */
     if(reg->active_sub==NULL && !OBJ_IS(reg, WClientWin))
         rootwin_install_colormap(region_rootwin_of(reg), None); 
+    
+    hook_call_o(region_activated_hook, (Obj*)reg);
 }
 
 
@@ -228,6 +241,8 @@ void region_lost_focus(WRegion *reg)
     r=REGION_MANAGER(reg);
     if(r!=NULL)
         region_managed_inactivated(r, reg);
+    
+    hook_call_o(region_inactivated_hook, (Obj*)reg);
 }
 
 
@@ -280,9 +295,6 @@ bool region_may_control_focus(WRegion *reg)
 
 
 /*{{{ set_focus, warp */
-
-
-WHook *region_do_warp_alt=NULL;
 
 
 bool region_do_warp_default(WRegion *reg)

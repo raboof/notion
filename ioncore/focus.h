@@ -47,7 +47,9 @@ extern void ioncore_protect_previous();
 extern void ioncore_unprotect_previous();
 extern WRegion *ioncore_goto_previous();
 
-/* Handlers to this hook should take WRegion* as parameter. */
+/* Handlers to these shook should take WRegion* as parameter. */
 extern WHook *region_do_warp_alt;
+extern WHook *region_activated_hook;
+extern WHook *region_inactivated_hook;
 
 #endif /* ION_IONCORE_FOCUS_H */
