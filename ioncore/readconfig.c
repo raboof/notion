@@ -45,7 +45,7 @@ bool ioncore_add_searchdir(const char *dir)
             return FALSE;
         }
     }else{
-        char *p=scat3(scriptpath, ":", dir);
+        char *p=scat3(dir, ":", scriptpath);
         if(p==NULL){
             warn_err();
             return FALSE;
@@ -257,7 +257,6 @@ static int try_etcpath(const char *const *files,
                 return ret;
         }
     }
-    
     
     path=scriptpath;
     while(path!=NULL){
