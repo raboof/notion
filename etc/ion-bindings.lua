@@ -57,9 +57,9 @@ defbindings("WScreen", {
 -- client windows can be put in fullscreen mode and therefore may not have a
 -- frame.)
 -- 
--- The @sub_cwin commands are used to call the parameter command on a
--- current client window managed by the multiplexer. For details see the 
--- document "Ion: Configuring and extending with Lua".
+-- The "_sub:WClientWin" guards are used to ensure that _sub is a client
+-- window in order to stop Ion from executing the callback with an invalid
+-- parameter if it is not and then complaining.
 
 defbindings("WMPlex", {
     kpress_wait(MOD1.."C",      "WRegion.rqclose_propagate(_, _sub)"),
