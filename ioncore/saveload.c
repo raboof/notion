@@ -10,9 +10,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include <libtu/parser.h>
-#include <libtu/tokenizer.h>
-
 #include "common.h"
 #include "region.h"
 #include "readconfig.h"
@@ -22,77 +19,55 @@
 #include "objp.h"
 #include "attach.h"
 #include "reginfo.h"
+#include "extl.h"
 
 
 /*{{{ Load support functions */
 
 
-WRegion *load_create_region(WWindow *par, WRectangle geom,
-							Tokenizer *tokz, int n, Token *toks)
+WRegion *load_create_region(WWindow *par, WRectangle geom, ExtlTab tab)
 {
 	char *objclass, *name;
 	WRegionLoadCreateFn* fn;
 	WRegion *reg;
 	
-	assert(n>1);
-	assert(TOK_IS_STRING(&(toks[1])));
-	
-	objclass=TOK_STRING_VAL(&(toks[1]));
+	if(!extl_table_gets_s(tab, "type", &objclass))
+		return NULL;
+
 	fn=lookup_region_load_create_fn(objclass);
 	
 	if(fn==NULL){
 		warn("Unknown class \"%s\", cannot create region", objclass);
-		parse_config_tokz_skip_section(tokz);
+		free(objclass);
 		return NULL;
 	}
+
+	free(objclass);
 	
-	reg=fn(par, geom, tokz);
+	reg=fn(par, geom, tab);
 	
 	if(reg==NULL)
 		return NULL;
 	
-	if(n>=3){
-		assert(TOK_IS_STRING(&(toks[2])));
-		region_set_name(reg, TOK_STRING_VAL(&(toks[2])));
+	if(extl_table_gets_s(tab, "name", &name)){
+		region_set_name(reg, name);
+		free(name);
 	}
 	
 	return reg;
 }
 
 
-typedef struct{
-	Tokenizer *tokz;
-	int n;
-	Token *toks;
-	bool read;
-} AddParams;
-	
-
-static WRegion *add_fn_load(WWindow *par, WRectangle geom, AddParams *params)
+static WRegion *add_fn_load(WWindow *par, WRectangle geom, ExtlTab *tab)
 {
-	params->read=TRUE;
-	return load_create_region(par, geom, params->tokz, params->n, params->toks);
+	return load_create_region(par, geom, *tab);
 }
 
 
-WRegion *region_add_managed_load(WRegion *mgr, Tokenizer *tokz,
-								 int n, Token *toks)
+WRegion *region_add_managed_load(WRegion *mgr, ExtlTab tab)
 {
-	AddParams params;
-	WRegion *reg;
-	
-	params.tokz=tokz;
-	params.n=n;
-	params.toks=toks;
-	params.read=FALSE;
-	
-	reg=region_do_add_managed(mgr, (WRegionAddFn*)&add_fn_load,
-							  (void*)&params, 0, NULL);
-	
-	if(!params.read)
-		parse_config_tokz_skip_section(tokz);
-	
-	return reg;
+	return region_do_add_managed(mgr, (WRegionAddFn*)&add_fn_load,
+								 (void*)&tab, 0, NULL);
 }
 
 
@@ -143,25 +118,27 @@ void begin_saved_region(WRegion *reg, FILE *file, int lvl)
 {
 	const char *name;
 	
-	save_indent_line(file, lvl-1);
-	fprintf(file, "region \"%s\"", WOBJ_TYPESTR(reg));
+	/*save_indent_line(file, lvl-1);*/
+	/*fprintf(file, "{\n");*/
+	save_indent_line(file, lvl);
+	fprintf(file, "type = \"%s\",\n", WOBJ_TYPESTR(reg));
 	
 	name=region_name(reg);
 	
 	if(name!=NULL){
-		fprintf(file, ", ");
+		save_indent_line(file, lvl);
+		fprintf(file, "name = ");
 		write_escaped_string(file, name);
+		fprintf(file, ",\n");
 	}
-	
-	fprintf(file, " {\n");
 }
 
 
-void end_saved_region(WRegion *reg, FILE *file, int lvl)
+/*void end_saved_region(WRegion *reg, FILE *file, int lvl)
 {
 	save_indent_line(file, lvl-1);
-	fprintf(file, "}\n");
-}
+	fprintf(file, "},\n");
+}*/
 
 
 /*}}}*/
@@ -173,17 +150,15 @@ void end_saved_region(WRegion *reg, FILE *file, int lvl)
 static WViewport *current_vp=NULL;
 
 
-static bool opt_viewport_region(Tokenizer *tokz, int n, Token *toks)
+EXTL_EXPORT
+bool add_to_viewport(ExtlTab tab)
 {
-	return (region_add_managed_load((WRegion*)current_vp,
-									tokz, n, toks)!=NULL);
+	if(current_vp==NULL)
+		return FALSE;
+	
+	return (region_add_managed_load((WRegion*)current_vp, tab)!=NULL);
 }
 
-
-static ConfOpt wsconf_opts[]={
-	{"region", "s?s", opt_viewport_region, CONFOPTS_NOT_SET},
-	END_CONFOPTS
-};
 
 
 bool load_workspaces(WViewport *vp)
@@ -191,7 +166,7 @@ bool load_workspaces(WViewport *vp)
 	bool successp;
 
 	current_vp=vp;
-	successp=read_config_for_scr("saves/workspaces", vp->id, wsconf_opts);
+	successp=read_config_for_scr("saves/workspaces", vp->id);
 	current_vp=NULL;
 	
 	return successp;
@@ -235,12 +210,15 @@ static bool do_save_workspaces(WViewport *vp, char *wsconf)
 		return FALSE;
 	}
 	
-	fprintf(file, "# This file was created by and is modified by Ion.\n");
-	
+	fprintf(file, "-- This file was created by and is modified by Ion.\n");
 	FOR_ALL_MANAGED_ON_LIST(vp->ws_list, reg){
-		if(region_supports_save(reg))
-		   region_save_to_file(reg, file, 1);
+		if(region_supports_save(reg)){
+			fprintf(file, "add_to_viewport {\n");
+			region_save_to_file(reg, file, 1);
+			fprintf(file, "}\n");
+		}
 	}
+	
 	
 	fclose(file);
 	

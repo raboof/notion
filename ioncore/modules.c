@@ -17,7 +17,7 @@
 #include "../version.h"
 
 
-INTRSTRUCT(Module)
+INTRSTRUCT(Module);
 	
 DECLSTRUCT(Module){
 	void *handle;
@@ -166,6 +166,7 @@ err1:
 }
 
 
+EXTL_EXPORT
 bool load_module(const char *name)
 {
 	char *name2=NULL;
@@ -252,7 +253,7 @@ void unload_modules()
 
 #include "common.h"
 
-INTRSTRUCT(StatModInfo)
+INTRSTRUCT(StatModInfo);
 
 DECLSTRUCT(StatModInfo){
 	char *name;
@@ -267,6 +268,8 @@ DECLSTRUCT(StatModInfo){
  * linking support
  */
 
+
+EXTL_EXPORT
 bool load_module(const char *name)
 {
 	int i;

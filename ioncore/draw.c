@@ -635,6 +635,7 @@ void clear_clipping(DrawInfo *dinfo)
 /*{{{ reread_draw_config */
 
 
+EXTL_EXPORT
 void reread_draw_config()
 {
 	WScreen *scr;

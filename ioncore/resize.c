@@ -371,7 +371,8 @@ void region_request_geom(WRegion *reg,
 /*{{{ set_width etc. */
 
 
-void set_width(WRegion *reg, int w)
+EXTL_EXPORT
+void region_set_w(WRegion *reg, int w)
 {
 	WRectangle geom=REGION_GEOM(reg);
 	if(w>0){
@@ -381,7 +382,8 @@ void set_width(WRegion *reg, int w)
 }
 
 
-void set_height(WRegion *reg, int h)
+EXTL_EXPORT
+void region_set_h(WRegion *reg, int h)
 {
 	WRectangle geom=REGION_GEOM(reg);
 	if(h>0){
@@ -391,17 +393,31 @@ void set_height(WRegion *reg, int h)
 }
 
 
-void set_widthq(WRegion *reg, double q)
+EXTL_EXPORT
+int region_get_w(WRegion *reg)
 {
-	WScreen *scr=SCREEN_OF(reg);
-	set_width(reg, q*(double)REGION_GEOM(scr).w);
+	return REGION_GEOM(reg).w;
 }
 
 
-void set_heightq(WRegion *reg, double q)
+EXTL_EXPORT
+int region_get_h(WRegion *reg)
 {
-	WScreen *scr=SCREEN_OF(reg);
-	set_height(reg, q*(double)REGION_GEOM(scr).h);
+	return REGION_GEOM(reg).h;
+}
+
+
+EXTL_EXPORT
+int region_get_x(WRegion *reg)
+{
+	return REGION_GEOM(reg).x;
+}
+
+
+EXTL_EXPORT
+int region_get_y(WRegion *reg)
+{
+	return REGION_GEOM(reg).y;
 }
 
 
@@ -434,13 +450,15 @@ void set_heightq(WRegion *reg, double q)
 		(FRAME)->saved_##POS=tmp2;                               \
 	}
 
-						
+
+EXTL_EXPORT
 void genframe_maximize_vert(WGenFrame *frame)
 {
 	DO_MAXIMIZE(frame, h, y);
 }
 
 
+EXTL_EXPORT
 void genframe_maximize_horiz(WGenFrame *frame)
 {
 	DO_MAXIMIZE(frame, w, x);

@@ -9,13 +9,12 @@
 #define ION_FLOATWS_FLOATWS_H
 
 #include <ioncore/common.h>
-#include <libtu/tokenizer.h>
-
 #include <ioncore/region.h>
 #include <ioncore/viewport.h>
 #include <ioncore/genws.h>
+#include <ioncore/extl.h>
 
-INTROBJ(WFloatWS)
+INTROBJ(WFloatWS);
 
 DECLOBJ(WFloatWS){
 	WGenWS genws;
@@ -27,9 +26,9 @@ DECLOBJ(WFloatWS){
 
 extern WFloatWS *create_floatws(WWindow *parent, WRectangle bounds);
 
-extern void floatws_circulate(WFloatWS *ws);
-extern void floatws_backcirculate(WFloatWS *ws);
+extern WRegion *floatws_circulate(WFloatWS *ws);
+extern WRegion *floatws_backcirculate(WFloatWS *ws);
 
-extern WRegion *floatws_load(WWindow *par, WRectangle geom, Tokenizer *tokz);
+extern WRegion *floatws_load(WWindow *par, WRectangle geom, ExtlTab tab);
 
 #endif /* ION_FLOATWS_FLOATWS_H */

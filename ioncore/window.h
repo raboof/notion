@@ -10,7 +10,7 @@
 
 #include "common.h"
 
-INTROBJ(WWindow)
+INTROBJ(WWindow);
 
 #include "region.h"
 #include "binding.h"

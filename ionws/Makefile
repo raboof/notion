@@ -14,8 +14,10 @@ MODULEDIR = $(LIBDIR)/ion-devel
 CFLAGS += $(XOPEN_SOURCE)
 DEFINES += -DETCDIR=\"$(ETCDIR)\"
 
-OBJS =	bindmaps.o conf.o ionframe.o funtabs.o main.o placement.o \
-	split.o splitframe.o ionws.o resize.o
+SOURCES=bindmaps.c conf.c ionframe.c main.c placement.c \
+	split.c splitframe.c ionws.c resize.c
+
+MAKE_EXPORTS=ionws_module
 
 MODULE=ionws
 

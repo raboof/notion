@@ -32,6 +32,7 @@ void clear_sub_tags(WRegion *reg)
 }
 */
 
+EXTL_EXPORT
 void tag_region(WRegion *reg)
 {
 	if(reg->flags&REGION_TAGGED)
@@ -46,6 +47,7 @@ void tag_region(WRegion *reg)
 }
 
 
+EXTL_EXPORT
 void untag_region(WRegion *reg)
 {
 	if(!(reg->flags&REGION_TAGGED))
@@ -58,6 +60,7 @@ void untag_region(WRegion *reg)
 }
 
 
+EXTL_EXPORT
 void toggle_region_tag(WRegion *reg)
 {
 	if(reg->flags&REGION_TAGGED)
@@ -67,6 +70,7 @@ void toggle_region_tag(WRegion *reg)
 }
 
 
+EXTL_EXPORT
 void clear_tags(WRegion *reg)
 {
 	while(taglist!=NULL)

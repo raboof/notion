@@ -7,14 +7,12 @@
 
 #include <string.h>
 #include <unistd.h>
-
-#include <libtu/parser.h>
-#include <libtu/tokenizer.h>
 #include <libtu/output.h>
 
 #include "common.h"
 #include "global.h"
 #include "readconfig.h"
+#include "extl.h"
 
 
 static char* dummy_paths=NULL;
@@ -137,15 +135,16 @@ static char *do_get_cfgfile_for(bool core, const char *module,
 	for(dir=etcpaths; *dir!=NULL; dir++){
 		for(tryno=psfnotset; tryno<2; tryno++){
 			if(tryno==0)
-				libtu_asprintf(&tmp, "%s/%s-%s.conf", *dir, module, postfix);
+				libtu_asprintf(&tmp, "%s/%s-%s.%s", *dir, module, postfix,
+							   extl_extension());
 			else
-				libtu_asprintf(&tmp, "%s/%s.conf", *dir, module);
-		
+				libtu_asprintf(&tmp, "%s/%s.%s", *dir, module,
+							   extl_extension());
 			if(tmp==NULL){
 				warn_err();
 				continue;
 			}
-	
+
 			if(noaccesstest || access(tmp, F_OK)==0)
 				return tmp;
 		
@@ -153,7 +152,8 @@ static char *do_get_cfgfile_for(bool core, const char *module,
 		}
 	}
 	
-	warn("Could not find configuration file %s.conf.", module);
+	warn("Could not find configuration file %s.%s.", module,
+		 extl_extension());
 	
 	return NULL;
 }
@@ -260,59 +260,44 @@ char *get_savefile_for(const char *module)
 /*{{{ read_config */
 
 
-bool read_config(const char *cfgfile, const ConfOpt *opts)
+bool read_config(const char *cfgfile)
 {
-	bool retval=FALSE;
-	Tokenizer *tokz;
-	
-	tokz=tokz_open(cfgfile);
-	    
-	if(tokz==NULL)
-		return FALSE;
-	
-	tokz->flags=TOKZ_ERROR_TOLERANT;
-	tokz_set_includepaths(tokz, etcpaths);
-	retval=parse_config_tokz(tokz, opts);
-	tokz_close(tokz);
-	
-	return retval;
+	return extl_runfile(cfgfile);
 }
 
 
-static bool do_read_config_for(char *cfgfile, const ConfOpt *opts)
+static bool do_read_config_for(char *cfgfile)
 {
 	bool ret=TRUE;
 	if(cfgfile!=NULL){
-		ret=read_config(cfgfile, opts);
+		ret=read_config(cfgfile);
 		free(cfgfile);
 	}
 	return ret;
 }
 
 
-bool read_core_config_for(const char *module, const ConfOpt *opts)
+bool read_core_config_for(const char *module)
 {
-	return do_read_config_for(get_core_cfgfile_for(module), opts);
+	return do_read_config_for(get_core_cfgfile_for(module));
 }
 
 
-bool read_core_config_for_scr(const char *module, int xscr,
-							  const ConfOpt *opts)
+bool read_core_config_for_scr(const char *module, int xscr)
 {
-	return do_read_config_for(get_core_cfgfile_for_scr(module, xscr), opts);
+	return do_read_config_for(get_core_cfgfile_for_scr(module, xscr));
 }
 
 
-bool read_config_for(const char *module, const ConfOpt *opts)
+bool read_config_for(const char *module)
 {
-	return do_read_config_for(get_cfgfile_for(module), opts);
+	return do_read_config_for(get_cfgfile_for(module));
 }
 
 
-bool read_config_for_scr(const char *module, int xscr,
-						 const ConfOpt *opts)
+bool read_config_for_scr(const char *module, int xscr)
 {
-	return do_read_config_for(get_cfgfile_for_scr(module, xscr), opts);
+	return do_read_config_for(get_cfgfile_for_scr(module, xscr));
 }
 
 

@@ -63,6 +63,7 @@ void unprotect_previous()
 }
 
 
+EXTL_EXPORT
 void goto_previous()
 {
 	WRegion *reg=(WRegion*)wglobal.previous_screen;

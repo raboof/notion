@@ -12,8 +12,9 @@
 #include "region.h"
 #include "hooks.h"
 #include "viewport.h"
+#include "extl.h"
 
-INTROBJ(WClientWin)
+INTROBJ(WClientWin);
 
 #define CWIN_P_WM_DELETE 		0x0001
 #define CWIN_P_WM_TAKE_FOCUS 	0x0002
@@ -56,6 +57,8 @@ DECLOBJ(WClientWin){
 	char *name;
 	
 	WWatch last_mgr_watch;
+	
+	ExtlTab proptab;
 };
 
 
@@ -64,8 +67,8 @@ extern void get_clientwin_size_hints(WClientWin *cwin);
 extern WClientWin* manage_clientwin(Window win, int mflags);
 extern void clientwin_unmapped(WClientWin *cwin);
 extern void clientwin_destroyed(WClientWin *cwin);
-extern void kill_clientwin(WClientWin *cwin);
-extern void close_clientwin(WClientWin *cwin);
+extern void clientwin_kill(WClientWin *cwin);
+extern void clientwin_close(WClientWin *cwin);
 extern WClientWin *find_clientwin(Window win);
 extern void set_clientwin_name(WClientWin *cwin, char *p);
 extern WClientWin *lookup_clientwin(const char *name);
@@ -87,6 +90,17 @@ extern bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto);
 extern void clientwin_broken_app_resize_kludge(WClientWin *cwin);
 
 extern void clientwin_get_set_name(WClientWin *cwin);
+
+/* Some standard winprops */
+
+enum{
+	TRANSIENT_MODE_NORMAL,
+	TRANSIENT_MODE_CURRENT,
+	TRANSIENT_MODE_OFF
+};
+
+extern bool clientwin_get_switchto(WClientWin *cwin);
+extern int clientwin_get_transient_mode(WClientWin *cwin);
 
 /* Hooks */
 

@@ -8,15 +8,14 @@
 #ifndef ION_IONCORE_REGINFO_H
 #define ION_IONCORE_REGINFO_H
 
-#include <libtu/tokenizer.h>
-
 #include "common.h"
 #include "obj.h"
 #include "region.h"
 #include "window.h"
+#include "extl.h"
 
 typedef WRegion *WRegionLoadCreateFn(WWindow *par, WRectangle geom,
-									 Tokenizer *tokz);
+									 ExtlTab tab);
 typedef WRegion *WRegionSimpleCreateFn(WWindow *par, WRectangle geom);
 
 

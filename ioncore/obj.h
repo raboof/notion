@@ -13,17 +13,17 @@
 #define WOBJ_IS(OBJ, TYPE) wobj_is((WObj*)OBJ, &OBJDESCR(TYPE))
 #define WOBJ_CAST(OBJ, TYPE) (TYPE*)wobj_cast((WObj*)OBJ, &OBJDESCR(TYPE))
 
-#define INTRSTRUCT(STRU)                                    \
-	struct STRU##_struct; typedef struct STRU##_struct STRU;
+#define INTRSTRUCT(STRU) \
+	struct STRU##_struct; typedef struct STRU##_struct STRU
 #define DECLSTRUCT(STRU)  \
 	struct STRU##_struct
 
-#define INTROBJ(OBJ) INTRSTRUCT(OBJ)
-#define DECLOBJ(OBJ) extern WObjDescr OBJDESCR(OBJ); DECLSTRUCT(OBJ)
+#define INTROBJ(OBJ) INTRSTRUCT(OBJ); extern WObjDescr OBJDESCR(OBJ)
+#define DECLOBJ(OBJ) DECLSTRUCT(OBJ)
 
-INTROBJ(WObj)
-INTRSTRUCT(WObjDescr)
-INTRSTRUCT(WWatch)
+INTRSTRUCT(WObjDescr);
+INTROBJ(WObj);
+INTRSTRUCT(WWatch);
 
 extern bool wobj_is(const WObj *obj, const WObjDescr *descr);
 extern const void *wobj_cast(const WObj *obj, const WObjDescr *descr);

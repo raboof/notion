@@ -16,8 +16,8 @@
 #include "input.h"
 #include "edln.h"
 
-INTROBJ(WEdln)
-INTRSTRUCT(WEdlnCreateParams)
+INTROBJ(WEdln);
+INTRSTRUCT(WEdlnCreateParams);
 
 typedef void WEdlnHandler(WObj *p, char *str, char *userdata);
 

@@ -12,8 +12,8 @@
 
 typedef void DynFun();
 
-INTRSTRUCT(DynFunTab)
-	
+INTRSTRUCT(DynFunTab);
+
 DECLSTRUCT(DynFunTab){
 	DynFun *func, *handler;
 };
@@ -23,14 +23,13 @@ DECLSTRUCT(WObjDescr){
 	WObjDescr *ancestor;
 	DynFunTab *funtab;
 	void (*destroy_fn)();
-	void *funclist;
 };
 
 #define WOBJ_TYPESTR(OBJ) (((WObj*)OBJ)->obj_type->name)
 
-#define IMPLOBJ(OBJ, ANCESTOR, DFN, FUNTAB, FL)                          \
-		WObjDescr OBJDESCR(OBJ)={#OBJ, &OBJDESCR(ANCESTOR), FUNTAB, DFN, \
-				(void*)FL};
+#define IMPLOBJ(OBJ, ANCESTOR, DFN, DYN)                         \
+		WObjDescr OBJDESCR(OBJ)={#OBJ, &OBJDESCR(ANCESTOR), DYN, \
+								 (void (*)())DFN}
 
 #define WOBJ_INIT(O, TYPE) {((WObj*)(O))->obj_type=&OBJDESCR(TYPE); \
 	((WObj*)(O))->obj_watches=NULL;}

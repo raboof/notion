@@ -11,15 +11,14 @@
 
 #include <ioncore/common.h>
 #include <ioncore/global.h>
-#include <ioncore/function.h>
 #include <ioncore/exec.h>
 #include <ioncore/clientwin.h>
 #include <ioncore/focus.h>
-#include <ioncore/commandsq.h>
 #include <ioncore/names.h>
 #include <ioncore/genws.h>
 #include <ioncore/genframe.h>
 #include <ioncore/reginfo.h>
+#include <ioncore/extl.h>
 #include "query.h"
 #include "wedln.h"
 #include "complete_file.h"
@@ -117,7 +116,7 @@ static void handler_runwith(WObj *obj, char *str, char *userdata)
 	if(*str!='\0')
 		do_open_with(scr, userdata, str);
 	else
-		wm_exec(scr, userdata);
+		ioncore_exec(scr, userdata);
 }
 
 
@@ -128,10 +127,11 @@ static void handler_exec(WObj *obj, char *str, char *userdata)
 	if(*str==':')
 		do_open_with(scr, "ion-runinxterm", str+1);
 	else
-		wm_exec(scr, str);
+		ioncore_exec(scr, str);
 }
 
 
+EXTL_EXPORT
 void query_exec(WGenFrame *frame)
 {
 	do_query_edln(frame, handler_exec, "Run:", NULL,
@@ -139,6 +139,7 @@ void query_exec(WGenFrame *frame)
 }
 
 
+EXTL_EXPORT
 void query_runfile(WGenFrame *frame, char *prompt, char *cmd)
 {
 	WEdln *wedln=do_query_edln(frame, handler_runfile,
@@ -148,6 +149,7 @@ void query_runfile(WGenFrame *frame, char *prompt, char *cmd)
 }
 
 
+EXTL_EXPORT
 void query_runwith(WGenFrame *frame, char *prompt, char *cmd)
 {
 	WEdln *wedln=do_query_edln(frame, handler_runwith,
@@ -201,6 +203,7 @@ static void handler_gotoclient(WObj *obj, char *str, char *userdata)
 }
 
 
+EXTL_EXPORT
 void query_attachclient(WGenFrame *frame)
 {
 	do_query_edln(frame, handler_attachclient,
@@ -208,6 +211,7 @@ void query_attachclient(WGenFrame *frame)
 }
 
 
+EXTL_EXPORT
 void query_gotoclient(WGenFrame *frame)
 {
 	do_query_edln(frame, handler_gotoclient,
@@ -278,6 +282,7 @@ static void handler_workspace(WObj *obj, char *name, char *userdata)
 }
 
 
+EXTL_EXPORT
 void query_workspace(WGenFrame *frame)
 {
 	do_query_edln(frame, handler_workspace,
@@ -332,6 +337,7 @@ static void handler_workspace_with(WObj *obj, char *name, char *userdata)
 }
 
 
+EXTL_EXPORT
 void query_workspace_with(WGenFrame *frame)
 {
 #if 0
@@ -369,6 +375,7 @@ void handler_renameworkspace(WObj *obj, char *name, char *userdata)
 }
 
 
+EXTL_EXPORT
 void query_renameworkspace(WGenFrame *frame)
 {
 	WGenWS *ws=FIND_PARENT(frame, WGenWS);
@@ -388,6 +395,7 @@ void handler_renameframe(WObj *obj, char *name, char *userdata)
 }
 
 
+EXTL_EXPORT
 void query_renameframe(WGenFrame *frame)
 {
 	do_query_edln(frame, handler_renameframe,
@@ -413,12 +421,11 @@ static void function_warn_handler(const char *message)
 }
 
 
-void handler_function(WObj *obj, char *fn, char *userdata)
+void handler_commands(WObj *obj, char *cmds, char *userdata)
 {
 	WarnHandler *old_warn_handler;
-	Tokenizer *tokz;
 	WWatch watch=WWATCH_INIT;
-	bool error;
+	bool error=FALSE;
 	
 	assert(WOBJ_IS(obj, WGenFrame));
 	
@@ -428,7 +435,7 @@ void handler_function(WObj *obj, char *fn, char *userdata)
 		obj=(WObj*)(((WGenFrame*)obj)->current_sub);
 	
 	old_warn_handler=set_warn_handler(function_warn_handler);
-	error=!execute_command_sequence((WRegion*)obj, fn);
+	/*error=extl_do_string(cmds, "o", obj);*/
 	set_warn_handler(old_warn_handler);
 	
 	if(watch.obj!=NULL){
@@ -450,44 +457,43 @@ void handler_function(WObj *obj, char *fn, char *userdata)
 }
 
 
-static void handler_yesno(WObj *obj, char *yesno, char *fn)
+static void handler_yesno(WObj *obj, char *yesno, char *fnc)
 {
+	ExtlFn fn;
+	
 	if(strcasecmp(yesno, "y") && strcasecmp(yesno, "yes"))
 		return;
 	
-	handler_function(obj, fn, NULL);
+	if(fnc==NULL)
+		return;
+	
+	fn=*(ExtlFn*)fnc;
+	free(fnc);
+	
+	extl_call(fn, "o", NULL, obj);
 }
 
 
-void query_yesno(WGenFrame *frame, char *prompt, char *fn)
+EXTL_EXPORT
+void query_yesno(WGenFrame *frame, const char *prompt, ExtlFn fn)
 {
 	WEdln *wedln=do_query_edln(frame, handler_yesno,
 							   prompt, NULL, NULL, NULL);
-	if(wedln!=NULL)
-		wedln->userdata=scopy(fn);
+	if(wedln!=NULL){
+		ExtlFn *fnc=ALLOC(ExtlFn);
+		if(fnc==NULL)
+			return;
+		*fnc=extl_ref_fn(fn);
+		wedln->userdata=(char*)fnc;
+	}
 }
 
 
-static int complete_func(char *nam, char ***cp_ret, char **beg, void *fr)
+EXTL_EXPORT
+void query_commands(WGenFrame *frame)
 {
-	WRegion *r;
-	
-	if(fr==NULL || !WOBJ_IS(fr, WGenFrame))
-		return 0;
-	
-	r=((WGenFrame*)fr)->current_sub;
-	
-	if(r==NULL)
-		r=((WRegion*)fr);
-		
-	return complete_func_reg_mgrs(nam, cp_ret, beg, r);
-}
-
-
-void query_function(WGenFrame *frame)
-{
-	do_query_edln(frame, handler_function,
-				  "Function name:", NULL, complete_func, frame);
+	do_query_edln(frame, handler_commands,
+				  "Commands:", NULL, extl_complete_fn, frame);
 }
 
 

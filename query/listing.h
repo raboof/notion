@@ -11,7 +11,7 @@
 #include <ioncore/common.h>
 #include <ioncore/drawp.h>
 
-INTRSTRUCT(WListing)
+INTRSTRUCT(WListing);
 
 DECLSTRUCT(WListing){
 	char **strs;

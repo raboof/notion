@@ -17,21 +17,27 @@ DEFINES += -DETCDIR=\"$(ETCDIR)\" -DLIBDIR=\"$(LIBDIR)\"
 ifeq ($(STATIC_MODULES),1)
 DEFINES += -DCF_STATIC_MODULES
 EXT_OBJS := $(foreach mod, $(MODULE_LIST), ../$(mod)/$(mod).a)
-CLEAN_TARGETS := static-modules-clean
+TO_CLEAN := $(TO_CLEAN) static-modules.h
 endif
 
 CFLAGS += $(XOPEN_SOURCE) $(MODULE_SUPPORT_CFLAGS)
 LDFLAGS += $(MODULE_SUPPORT_LDFLAGS)
 
-OBJS=	binding.o conf-bindings.o conf-draw.o cursor.o draw.o event.o	\
-	exec.o focus.o font.o function.o key.o modules.o mwmhints.o	\
-	obj.o pointer.o property.o readconfig.o screen.o signal.o	\
-	sizehint.o window.o ioncore.o xic.o selection.o			\
-	completehelp.o symlist.o clientwin.o colormap.o region.o	\
-	eventh.o winprops.o targetid.o attach.o resize.o defer.o grab.o \
-	wsreg.o commandsq.o readfds.o regbind.o	funtabs.o viewport.o 	\
-	tags.o names.o saveload.o genws.o genframe.o genframe-pointer.o	\
-	conf.o conf-winprops.o reginfo.o
+# Lua support setup
+EXT_OBJS := $(EXT_OBJS) ../luaextl/luaextl.a
+LIBS := $(LIBS) $(LUA_LIBS)
+
+SOURCES=binding.c conf-bindings.c conf-draw.c cursor.c draw.c event.c	\
+	exec.c focus.c font.c key.c modules.c mwmhints.c	\
+	obj.c pointer.c property.c readconfig.c screen.c signal.c	\
+	sizehint.c window.c ioncore.c xic.c selection.c			\
+	completehelp.c symlist.c clientwin.c colormap.c region.c	\
+	eventh.c winprops.c targetid.c attach.c resize.c defer.c grab.c \
+	wsreg.c readfds.c regbind.c viewport.c 				\
+	tags.c names.c saveload.c genws.c genframe.c genframe-pointer.c	\
+	conf.c reginfo.c
+
+MAKE_EXPORTS=ioncore
 
 TARGETS=ioncore
 
@@ -60,13 +66,10 @@ static-modules.h:
 	done >> static-modules.h; \
 	echo "{NULL, NULL, NULL, FALSE}," >> static-modules.h;
 	echo "};" >> static-modules.h
-
-static-modules-clean:
-	rm -f static-modules.h
-
 endif
 
 _install:
 	$(INSTALLDIR) $(BINDIR)
 	$(INSTALL) -m $(BIN_MODE) ioncore $(BINDIR)
 	# $(STRIP) $(BINDIR)/ioncore
+

@@ -17,6 +17,7 @@ DOCDIR=$(PREFIX)/doc
 LIBDIR=$(PREFIX)/lib
 INCDIR=$(PREFIX)/include
 
+#EXTRA_LIBS=-lefence
 
 ##
 ## Modules
@@ -39,6 +40,24 @@ MODULE_SUPPORT_CFLAGS=
 #MODULE_SUPPORT_LDFLAGS=
 #MODULE_LDFLAGS=
 #MODULE_CFLAGS=
+
+##
+## Lua
+##
+
+# If you have Lua 5.0 in /usr/lib, the following should do:
+#LUA_LIBS = -llua -llualib
+#LUA_INCLUDES =
+
+# If you, for example, have lua 4.0 in /usr/lib and 5.0 somewhere else,
+# the following settings might be what you need. Lame ld.so on my system
+# searches /usr/lib before /usr/local/lib or anything in ld.so.conf so
+# the -Xlinker -rpath $(LUA_PATH) option is used to force sane library
+# lookup order instead of having the user set LD_LIBRARY_PATH. If you're
+# linking to static libraries, this option is not needed.
+LUA_PATH=/usr/local/lib
+LUA_LIBS = -L$(LUA_PATH) -Xlinker -rpath $(LUA_PATH) -llua -llualib
+LUA_INCLUDES = -I$(LUA_PATH)/include
 
 
 ##
@@ -154,4 +173,10 @@ BIN_MODE=755
 DATA_MODE=664
 
 STRIP=strip
+
+##
+## Perl (mkexports.pl)
+##
+
+PERL=perl
 

@@ -261,7 +261,7 @@ static DynFunTab window_dynfuntab[]={
 };
 
 
-IMPLOBJ(WWindow, WRegion, deinit_window, window_dynfuntab, NULL)
+IMPLOBJ(WWindow, WRegion, deinit_window, window_dynfuntab);
 
 	
 /*}}}*/

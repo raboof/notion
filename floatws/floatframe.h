@@ -11,7 +11,7 @@
 #include <ioncore/common.h>
 #include <ioncore/genframe.h>
 
-INTROBJ(WFloatFrame)
+INTROBJ(WFloatFrame);
 
 DECLOBJ(WFloatFrame){
 	WGenFrame genframe;
@@ -30,5 +30,6 @@ extern WRectangle initial_to_floatframe_geom(WGRData *grdata, WRectangle geom,
 
 extern void floatframe_raise(WFloatFrame *frame);
 extern void floatframe_lower(WFloatFrame *frame);
+extern void floatframe_p_move(WFloatFrame *frame);
 
 #endif /* ION_FLOATWS_FLOATFRAME_H */

@@ -5,7 +5,6 @@
  * See the included file LICENSE for details.
  */
 
-#include <libtu/parser.h>
 #include "common.h"
 #include "objp.h"
 #include "window.h"
@@ -22,7 +21,6 @@
 #include "saveload.h"
 #include "genframep.h"
 #include "genframe-pointer.h"
-#include "funtabs.h"
 #include "sizehint.h"
 
 
@@ -148,6 +146,7 @@ int genframe_nth_tab_w(const WGenFrame *genframe, int n)
 }
 
 
+EXTL_EXPORT
 void genframe_move_current_tab_right(WGenFrame *genframe)
 {
 	WRegion *reg, *next;
@@ -164,6 +163,7 @@ void genframe_move_current_tab_right(WGenFrame *genframe)
 }
 
 
+EXTL_EXPORT
 void genframe_move_current_tab_left(WGenFrame *genframe)
 {
 	WRegion *reg, *prev;
@@ -349,6 +349,7 @@ WRegion *genframe_nth_managed(WGenFrame *genframe, uint n)
 }
 
 
+EXTL_EXPORT
 void genframe_switch_nth(WGenFrame *genframe, uint n)
 {
 	WRegion *sub=genframe_nth_managed(genframe, n);
@@ -357,6 +358,7 @@ void genframe_switch_nth(WGenFrame *genframe, uint n)
 }
 
 
+EXTL_EXPORT
 void genframe_switch_next(WGenFrame *genframe)
 {
 	WRegion *sub=NEXT_MANAGED_WRAP(genframe->managed_list, genframe->current_sub);
@@ -365,6 +367,7 @@ void genframe_switch_next(WGenFrame *genframe)
 }
 
 
+EXTL_EXPORT
 void genframe_switch_prev(WGenFrame *genframe)
 {
 	WRegion *sub=PREV_MANAGED_WRAP(genframe->managed_list, genframe->current_sub);
@@ -465,6 +468,7 @@ void genframe_remove_managed(WGenFrame *genframe, WRegion *reg)
 }
 
 
+EXTL_EXPORT
 void genframe_attach_tagged(WGenFrame *genframe)
 {
 	WRegion *reg;
@@ -634,6 +638,7 @@ static void genframe_size_changed_default(WGenFrame *genframe,
 }
 
 
+EXTL_EXPORT
 void genframe_toggle_sub_tag(WGenFrame *genframe)
 {
 	if(genframe->current_sub!=NULL)
@@ -822,8 +827,7 @@ static DynFunTab genframe_dynfuntab[]={
 };
 									   
 
-IMPLOBJ(WGenFrame, WWindow, deinit_genframe, genframe_dynfuntab,
-		&ioncore_genframe_funclist)
+IMPLOBJ(WGenFrame, WWindow, deinit_genframe, genframe_dynfuntab);
 
 
 /*}}}*/

@@ -13,7 +13,7 @@
 #include "screen.h"
 #include "attach.h"
 
-INTROBJ(WGenFrame)
+INTROBJ(WGenFrame);
 
 #define WGENFRAME_NO_SAVED_WH -1
 	

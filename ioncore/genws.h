@@ -11,7 +11,7 @@
 #include "region.h"
 #include "window.h"
 
-INTROBJ(WGenWS)
+INTROBJ(WGenWS);
 
 DECLOBJ(WGenWS){
 	WRegion reg;

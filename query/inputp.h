@@ -31,8 +31,6 @@ typedef void WInputDrawFn(WInput*, bool complete);
 extern void setup_input_dinfo(WInput *input, DrawInfo *dinfo);
 
 extern WBindmap query_bindmap;
-extern WBindmap query_edln_bindmap;
-extern WFunclist query_input_funclist;
-extern WFunclist query_edln_funclist;
+extern WBindmap query_wedln_bindmap;
 
 #endif /* ION_QUERY_INPUTP_H */

@@ -16,6 +16,7 @@
 #include "objp.h"
 #include "grab.h"
 #include "regbind.h"
+#include "extl.h"
 
 
 static void waitrelease(WScreen *screen);
@@ -55,20 +56,21 @@ static void insstr(WWindow *wwin, XKeyEvent *ev)
  * the return values are those expected by GrabHandler's, i.e.
  * you can just pass through the retval obtained from this function
  */
-static bool dispatch_binding(WRegion *reg, WBinding *binding, XKeyEvent *ev)
+static bool dispatch_binding(WRegion *mgr, WRegion *reg, WBinding *binding,
+							 XKeyEvent *ev)
 {
 	WScreen *scr;
 	
-	if(binding){
+	if(binding!=NULL){
 		/* Get the screen now for waitrel grab - the object might
 		 * have been destroyed when call_binding returns.
 		 */
 		scr=SCREEN_OF(reg);
-		call_binding(binding, reg);
+		extl_call(binding->func, "oo", NULL, mgr, reg);
 		if(ev->state!=0 && binding->waitrel){
 			waitrelease(scr);
-			/* return FALSE here to prevent uninstalling the waitrelease handler
-			   immediately after establishing it */
+			/* return FALSE here to prevent uninstalling the waitrelease
+			 * handler immediately after establishing it */
 			return FALSE;
 		}
 	}
@@ -98,7 +100,8 @@ static bool quote_next_handler(WRegion *reg, XEvent *xev)
 }
 
 
-void quote_next(WClientWin *cwin)
+EXTL_EXPORT
+void clientwin_quote_next(WClientWin *cwin)
 {
     grab_establish((WRegion*)cwin, quote_next_handler, FocusChangeMask);
 }
@@ -116,34 +119,6 @@ static void waitrelease(WScreen *screen)
 {
 	grab_establish((WRegion*)screen, waitrelease_handler,
 				   FocusChangeMask|KeyPressMask);
-}
-
-
-static void kgrab_binding_and_reg(WBinding **binding_ret,
-								  WRegion **binding_owner_ret,
-								  WRegion *reg, XKeyEvent *ev)
-{
-	WBinding *binding;
-	WSubmapState *subchain;
-	
-	*binding_ret=NULL;
-	*binding_owner_ret=reg;
-	
-	subchain=&(reg->submapstat);
-		/*(((WRegion*)SCREEN_OF(reg))->submapstat.key==None
-			  ? NULL
-			  : &(((WRegion*)SCREEN_OF(reg))->submapstat));*/
-	
-	while(reg!=NULL){
-		binding=region_lookup_keybinding(reg, ev, subchain, binding_owner_ret);
-		if(binding!=NULL){
-			*binding_ret=binding;
-			return;
-		}
-		if(WOBJ_IS(reg, WScreen))
-			break;
-		reg=FIND_PARENT1(reg, WRegion);
-	}
 }
 
 
@@ -191,34 +166,46 @@ static bool add_sub(WRegion *reg, uint key, uint state)
 
 static bool submapgrab_handler(WRegion *reg, XEvent *ev)
 {
-	WBinding *binding=NULL;
+	WRegion *oreg=reg;
 	WRegion *binding_owner=NULL;
+	WSubmapState *subchain=&(reg->submapstat);
+	WBinding *binding=NULL;
 	
 	if(ev->type==KeyRelease)
 		return FALSE;
 	
-	kgrab_binding_and_reg(&binding, &binding_owner, reg, &ev->xkey);
+	oreg=reg;
+	
+	while(reg!=NULL){
+		binding=region_lookup_keybinding(reg, (XKeyEvent*)ev, subchain,
+										 &binding_owner);
+		if(binding!=NULL)
+			break;
+		if(WOBJ_IS(reg, WScreen))
+			break;
+		reg=FIND_PARENT1(reg, WRegion);
+	}
 
 	/* if it is just a modifier, then return. */
 	if(binding==NULL){
 		if(ismod(ev->xkey.keycode))
 			return FALSE;
-		clear_subs(reg);
+		clear_subs(oreg);
 		return TRUE;
 	}
 	
 	if(binding->submap!=NULL){
-		if(add_sub(reg, ev->xkey.keycode, ev->xkey.state)){
+		if(add_sub(oreg, ev->xkey.keycode, ev->xkey.state)){
 			return FALSE;
 		}else{
-			clear_subs(reg);
+			clear_subs(oreg);
 			return TRUE;
 		}
 	}
 	
-	clear_subs(reg);
+	clear_subs(oreg);
 	
-	return dispatch_binding(binding_owner, binding, &ev->xkey);
+	return dispatch_binding(binding_owner, reg, binding, &ev->xkey);
 }
 
 
@@ -256,7 +243,7 @@ void handle_keypress(XKeyEvent *ev)
 			if(add_sub(reg, ev->keycode, ev->state))
 				submapgrab(reg);
 		}else{
-			dispatch_binding(binding_owner, binding, ev);
+			dispatch_binding(binding_owner, reg, binding, ev);
 		}
 	}else if(WOBJ_IS(oreg, WWindow)){
 		insstr((WWindow*)oreg, ev);

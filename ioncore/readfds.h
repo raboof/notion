@@ -11,7 +11,7 @@
 #include "common.h"
 #include "obj.h"
 
-INTRSTRUCT(InputFd)
+INTRSTRUCT(InputFd);
 	
 DECLSTRUCT(InputFd){
 	int fd;

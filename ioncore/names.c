@@ -16,6 +16,9 @@
 #include "grdata.h"
 
 
+/*{{{ Name setup */
+
+
 #define NAMEDNUM_TMPL "<%d>"
 
 
@@ -23,18 +26,21 @@
 static WRegion *region_list=NULL;
 
 
+EXTL_EXPORT
 uint region_name_instance(WRegion *reg)
 {
 	return reg->ni.instance;
 }
 
 
+EXTL_EXPORT
 const char *region_name(WRegion *reg)
 {
 	return reg->ni.name;
 }
 
 
+EXTL_EXPORT
 char *region_full_name(WRegion *reg)
 {
 	const char *str=region_name(reg);
@@ -144,6 +150,7 @@ void region_unuse_name(WRegion *reg)
 }
 
 
+EXTL_EXPORT
 bool region_set_name(WRegion *reg, const char *p)
 {
 	if(p==NULL || *p=='\0'){
@@ -219,16 +226,8 @@ again:
 			   continue;
 		}
 		
-		cp=REALLOC_N(*cp_ret, char*, n, n+1);
-		
-		if(cp==NULL){
-			warn_err();
+		if(!add_to_complist(nam, cp_ret, &n, name))
 			free(name);
-		}else{
-			cp[n]=name;
-			n++;
-			*cp_ret=cp;
-		}
 	}
 	
 	if(n==0 && lnum==0 && l>1){
@@ -240,6 +239,7 @@ again:
 }
 
 
+EXTL_EXPORT
 WRegion *lookup_region(const char *name)
 {
 	return do_lookup_region(name, &OBJDESCR(WObj));
@@ -252,6 +252,7 @@ int complete_region(char *nam, char ***cp_ret, char **beg, void *unused)
 }
 
 
+EXTL_EXPORT
 void goto_named_region(char *name)
 {
 	WRegion *reg=lookup_region(name);

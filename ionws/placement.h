@@ -16,12 +16,10 @@
 /* These implement dynfuns introduced in ioncore/wsreg.h */
 
 extern bool ionws_add_clientwin(WIonWS *ws, WClientWin *cwin,
-								const XWindowAttributes *attr,
-								int init_state, WWinProp *props);
+								const XWindowAttributes *attr, int init_state);
 
 extern bool ionws_add_transient(WIonWS *ws, WClientWin *tfor,
-								WClientWin *cwin,
-								const XWindowAttributes *attr,
-								int init_state, WWinProp *props);
+								WClientWin *cwin, const XWindowAttributes *attr,
+								int init_state);
 
 #endif /* ION_IONWS_PLACEMENT_H */

@@ -88,9 +88,11 @@ static void do_free_winprop(WWinProp **list, WWinProp *winprop)
 		free(winprop->wrole);
 	if(winprop->winstance!=NULL)
 		free(winprop->winstance);
-	
+	/*
 	if(winprop->target_name!=NULL)
-		free(winprop->target_name);
+		free(winprop->target_name);*/
+	
+	extl_unref_table(winprop->proptab);
 	
 	free(winprop);
 }
@@ -103,7 +105,8 @@ static void do_add_winprop(WWinProp **list, WWinProp *winprop)
 
 
 static bool init_winprop(WWinProp *winprop, const char *cls,
-						 const char *role, const char *inst)
+						 const char *role, const char *inst,
+						 ExtlTab proptab)
 {
 	winprop->next=NULL;
 	winprop->prev=NULL;
@@ -129,13 +132,16 @@ static bool init_winprop(WWinProp *winprop, const char *cls,
 			goto fail;
 	}
 	
-		
+	winprop->proptab=extl_ref_table(proptab);
+	
+	/*
 	winprop->flags=0;
 	winprop->manage_flags=REGION_ATTACH_SWITCHTO;
 	winprop->stubborn=FALSE;
 	winprop->max_w=winprop->max_h=0;
 	winprop->aspect_w=winprop->aspect_h=0;
 	winprop->target_name=NULL;
+	*/
 	
 	return TRUE;
 	
@@ -156,14 +162,8 @@ fail:
 }
 
 
-/*}}}*/
-
-
-/*{{{ Interface */
-
-
-WWinProp *alloc_winprop(const char *cls, const char *role,
-						const char *instance)
+static WWinProp *alloc_winprop(const char *cls, const char *role,
+							   const char *instance, ExtlTab proptab)
 {
 	WWinProp *winprop;
 	
@@ -174,7 +174,7 @@ WWinProp *alloc_winprop(const char *cls, const char *role,
 		return NULL;
 	}
 		
-	if(!init_winprop(winprop, cls, role, instance)){
+	if(!init_winprop(winprop, cls, role, instance, proptab)){
 		free(winprop);
 		return NULL;
 	}
@@ -183,15 +183,36 @@ WWinProp *alloc_winprop(const char *cls, const char *role,
 }
 
 
-void add_winprop(WWinProp *winprop)
+/*}}}*/
+
+
+/*{{{ Interface */
+
+
+EXTL_EXPORT
+void add_winprop(const char *cls, const char *role, const char *inst,
+				 ExtlTab proptab)
 {
+	WWinProp *winprop=alloc_winprop(cls, role, inst, proptab);
+	
+	if(winprop==NULL){
+		warn("Unable to add winprop");
+		return;
+	}
+
 	do_add_winprop(&winprop_list, winprop);
 }
 
 
-WWinProp *find_winprop_win(Window win)
+ExtlTab find_winproptab_win(Window win)
 {
-	return do_find_winprop_win(winprop_list, win);
+	WWinProp *winprop=do_find_winprop_win(winprop_list, win);
+	
+	#warning Should create a new reference and have the window free it on delete?
+	if(winprop!=NULL)
+		return winprop->proptab;
+	else
+		return extl_table_none();
 }
 
 
@@ -209,3 +230,5 @@ void free_winprops()
 
 
 /*}}}*/
+
+

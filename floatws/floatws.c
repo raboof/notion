@@ -7,7 +7,6 @@
 
 #include <string.h>
 
-#include <libtu/parser.h>
 #include <ioncore/common.h>
 #include <ioncore/screen.h>
 #include <ioncore/focus.h>
@@ -15,7 +14,6 @@
 #include <ioncore/objp.h>
 #include <ioncore/region.h>
 #include <ioncore/wsreg.h>
-#include <ioncore/funtabs.h>
 #include <ioncore/viewport.h>
 #include <ioncore/names.h>
 #include <ioncore/saveload.h>
@@ -25,7 +23,7 @@
 
 #include "floatws.h"
 #include "floatframe.h"
-#include "funtabs.h"
+#include "main.h"
 
 
 /*{{{ region dynfun implementations */
@@ -236,25 +234,17 @@ WRegion *find_existing(WFloatWS *ws)
 
 
 static bool floatws_add_clientwin(WFloatWS *ws, WClientWin *cwin,
-								  const XWindowAttributes *attr,
-								  int init_state, WWinProp *props)
+								  const XWindowAttributes *attr, int init_state)
 {
 	WRegion *target=NULL;
 	WWindow *par;
 	bool geomset=FALSE;
 	bool newreg=FALSE;
+	bool b;
 
 	par=FIND_PARENT1(ws, WWindow);
 	assert(par!=NULL);
 
-#if 0 /*def CF_PLACEMENT_GEOM*/
-	geomset=(cwin->size_hints.win_gravity!=ForgetGravity &&
-			 (attr->x>CF_STUBBORN_TRESH &&
-			  attr->y>CF_STUBBORN_TRESH));
-	if(geomset && (!props || !props->stubborn))
-		target=(WRegion*)find_frame_at(ws, attr->x, attr->y);
-#endif
-	
 #ifdef CF_FLOATWS_ATTACH_TO_CURRENT
 	if(target==NULL)
 		target=find_existing(ws);
@@ -278,7 +268,7 @@ static bool floatws_add_clientwin(WFloatWS *ws, WClientWin *cwin,
 
 	assert(SCREEN_OF(target)==SCREEN_OF(cwin));
 	
-	if(!finish_add_clientwin(target, cwin, init_state, props)){
+	if(!finish_add_clientwin(target, cwin, init_state)){
 		if(newreg)
 			destroy_obj((WObj*)target);
 		return FALSE;
@@ -298,10 +288,9 @@ static bool floatws_add_clientwin(WFloatWS *ws, WClientWin *cwin,
 
 static bool floatws_add_transient(WFloatWS *ws, WClientWin *tfor,
 								  WClientWin *cwin,
-								  const XWindowAttributes *attr,
-								  int init_state, WWinProp *props)
+								  const XWindowAttributes *attr, int init_state)
 {
-	if(floatws_add_clientwin(ws, cwin, attr, init_state, props)){
+	if(floatws_add_clientwin(ws, cwin, attr, init_state)){
 		/* TODO: set up stacking */
 		return TRUE;
 	}
@@ -352,18 +341,23 @@ static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
 /*{{{ Circulate */
 
 
-void floatws_circulate(WFloatWS *ws)
+EXTL_EXPORT
+WRegion *floatws_circulate(WFloatWS *ws)
 {
 	WRegion *r=NEXT_MANAGED_WRAP(ws->managed_list, ws->current_managed);
 	if(r!=NULL)
 		goto_region(r);
+	return r;
 }
 
-void floatws_backcirculate(WFloatWS *ws)
+
+EXTL_EXPORT
+WRegion *floatws_backcirculate(WFloatWS *ws)
 {
 	WRegion *r=PREV_MANAGED_WRAP(ws->managed_list, ws->current_managed);
 	if(r!=NULL)
 		goto_region(r);
+	return r;
 }
 
 
@@ -376,20 +370,13 @@ void floatws_backcirculate(WFloatWS *ws)
 static bool floatws_save_to_file(WFloatWS *ws, FILE *file, int lvl)
 {
 	begin_saved_region((WRegion*)ws, file, lvl);
-	end_saved_region((WRegion*)ws, file, lvl);
 	return TRUE;
 }
 
 
-WRegion *floatws_load(WWindow *par, WRectangle geom, Tokenizer *tokz)
+WRegion *floatws_load(WWindow *par, WRectangle geom, ExtlTab tab)
 {
-	WFloatWS *ws;
-	
-	ws=create_floatws(par, geom);
-	
-	parse_config_tokz_skip_section(tokz);
-	
-	return (WRegion*)ws;
+	return (WRegion*)create_floatws(par, geom);
 }
 
 
@@ -425,7 +412,7 @@ static DynFunTab floatws_dynfuntab[]={
 };
 
 
-IMPLOBJ(WFloatWS, WGenWS, deinit_floatws, floatws_dynfuntab, &floatws_funclist)
+IMPLOBJ(WFloatWS, WGenWS, deinit_floatws, floatws_dynfuntab);
 
 
 /*}}}*/

@@ -21,11 +21,11 @@
 #include "colormap.h"
 #include "resize.h"
 #include "attach.h"
-#include "funtabs.h"
 #include "regbind.h"
 #include "mwmhints.h"
 #include "viewport.h"
 #include "names.h"
+#include "winprops.h"
 
 
 #define TOPMOST_TRANSIENT(CWIN) LAST_MANAGED((CWIN)->transient_list)
@@ -64,6 +64,54 @@ void get_protocols(WClientWin *cwin)
 	
 	if(protocols!=NULL)
 		XFree((char*)protocols);
+}
+
+
+static void get_winprops(WClientWin *cwin)
+{
+	ExtlTab tab, tab2;
+	int i1, i2;
+	bool b;
+
+	tab=find_winproptab_win(cwin->win);
+	cwin->proptab=tab;
+	
+	if(tab==extl_table_none())
+		return;
+	
+	if(extl_table_gets_b(tab, "transparent", &b)){
+		if(b)
+			cwin->flags|=CWIN_PROP_TRANSPARENT;
+	}
+
+	if(extl_table_gets_b(tab, "acrobatic", &b)){
+		if(b)
+			cwin->flags|=CWIN_PROP_ACROBATIC;
+	}
+	
+	if(extl_table_gets_t(tab, "max_size", &tab2)){
+		if(extl_table_gets_i(tab2, "w", &i1) &&
+		   extl_table_gets_i(tab2, "h", &i2)){
+			cwin->size_hints.max_width=i1;
+			cwin->size_hints.max_height=i2;
+			cwin->size_hints.flags|=PMaxSize;
+			cwin->flags|=CWIN_PROP_MAXSIZE;
+		}
+		extl_unref_table(tab2);
+	}
+
+	if(extl_table_gets_t(tab, "aspect", &tab2)){
+		if(extl_table_gets_i(tab2, "w", &i1) &&
+		   extl_table_gets_i(tab2, "h", &i2)){
+			cwin->size_hints.min_aspect.x=i1;
+			cwin->size_hints.max_aspect.x=i1;
+			cwin->size_hints.min_aspect.y=i2;
+			cwin->size_hints.max_aspect.y=i2;
+			cwin->size_hints.flags|=PAspect;
+			cwin->flags|=CWIN_PROP_ASPECT;
+		}
+		extl_unref_table(tab2);
+	}
 }
 
 
@@ -123,6 +171,43 @@ void clientwin_get_set_name(WClientWin *cwin)
 	}
 }
 
+
+/* Some standard winprops */
+
+bool clientwin_get_switchto(WClientWin *cwin)
+{
+	/* TODO: make configurable */
+#ifdef CF_SWITCH_NEW_CLIENTS
+	bool switchto=TRUE;
+#else
+	bool switchto=FALSE;
+#endif
+	
+	if(wglobal.opmode==OPMODE_INIT)
+		return FALSE;
+	
+	extl_table_gets_b(cwin->proptab, "switchto", &switchto);
+	
+	return switchto;
+}
+
+
+int clientwin_get_transient_mode(WClientWin *cwin)
+{
+	char *s;
+	int mode=TRANSIENT_MODE_NORMAL;
+	
+	if(extl_table_gets_s(cwin->proptab, "transient_mode", &s)){
+		if(strcmp(s, "current"))
+			mode=TRANSIENT_MODE_CURRENT;
+		else if(strcmp(s, "off"))
+			mode=TRANSIENT_MODE_OFF;
+		free(s);
+	}
+	return mode;
+}
+
+
 /*}}}*/
 
 
@@ -169,7 +254,9 @@ static bool init_clientwin(WClientWin *cwin, WWindow *parent,
 	cwin->cmaps=NULL;
 	cwin->cmapwins=NULL;
 	cwin->n_cmapwins=0;
-	
+
+	get_winprops(cwin);
+
 	init_watch(&(cwin->last_mgr_watch));
 	
 	get_colormaps(cwin);
@@ -478,13 +565,15 @@ static void send_clientmsg(Window win, Atom a)
 }
 
 
-void kill_clientwin(WClientWin *cwin)
+EXTL_EXPORT
+void clientwin_kill(WClientWin *cwin)
 {
 	XKillClient(wglobal.dpy, cwin->win);
 }
 
 
-void close_clientwin(WClientWin *cwin)
+EXTL_EXPORT
+void clientwin_close(WClientWin *cwin)
 {
 	if(cwin->flags&CWIN_P_WM_DELETE)
 		send_clientmsg(cwin->win, wglobal.atom_wm_delete);
@@ -1024,6 +1113,7 @@ bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto)
 }
 
 
+EXTL_EXPORT
 bool clientwin_toggle_fullscreen(WClientWin *cwin)
 {
 	if(cwin->last_mgr_watch.obj!=NULL)
@@ -1039,6 +1129,7 @@ bool clientwin_toggle_fullscreen(WClientWin *cwin)
 /*{{{ Kludges */
 
 
+EXTL_EXPORT
 void clientwin_broken_app_resize_kludge(WClientWin *cwin)
 {
 	XResizeWindow(wglobal.dpy, cwin->win, 2*cwin->max_geom.w,
@@ -1072,12 +1163,13 @@ static DynFunTab clientwin_dynfuntab[]={
 	{region_remove_managed, clientwin_remove_managed},
 	{(DynFun*)region_do_add_managed, (DynFun*)clientwin_do_add_managed},
 	{region_request_managed_geom, clientwin_request_managed_geom},
+	{region_close, clientwin_close},
 	
 	END_DYNFUNTAB
 };
 
 
-IMPLOBJ(WClientWin, WRegion, deinit_clientwin, clientwin_dynfuntab,
-		&ioncore_clientwin_funclist)
+IMPLOBJ(WClientWin, WRegion, deinit_clientwin, clientwin_dynfuntab);
+
 
 /*}}}*/

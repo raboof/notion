@@ -11,7 +11,7 @@
 #include "common.h"
 #include "region.h"
 
-INTROBJ(WViewport)
+INTROBJ(WViewport);
 
 #include "screen.h"
 
@@ -32,9 +32,9 @@ extern void viewport_display_nth(WViewport *vp, uint n);
 extern void viewport_display_next(WViewport *vp);
 extern void viewport_display_prev(WViewport *vp);
 
-extern void switch_ws_nth(uint n);
-extern void switch_ws_next();
-extern void switch_ws_prev();
+extern void switch_ws_nth(WScreen *scr, uint n);
+extern void switch_ws_next(WScreen *scr);
+extern void switch_ws_prev(WScreen *scr);
 
 extern WViewport *viewport_of(WRegion *reg);
 

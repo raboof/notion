@@ -125,7 +125,7 @@ static void call_button(WBinding *binding, XButtonEvent *ev)
 	if(binding==NULL)
 		return;
 
-	call_binding(binding, p_subreg);
+	extl_call(binding->func, "oo", NULL, p_reg, p_subreg);
 	
 	if(p_button_handler!=NULL && p_reg!=NULL)
 		p_button_handler(p_reg, ev);
@@ -150,7 +150,7 @@ static void call_motion_begin(WBinding *binding, XMotionEvent *ev,
 	if(binding==NULL)
 		return;
 
-	call_binding(binding, p_subreg);
+	extl_call(binding->func, "oo", NULL, p_reg, p_subreg);
 	
 	if(p_motion_begin_handler!=NULL && p_reg!=NULL)
 		p_motion_begin_handler(p_reg, ev, dx, dy);

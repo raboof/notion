@@ -13,11 +13,16 @@
 #include "resize.h"
 #include "split.h"
 #include "bindmaps.h"
-#include "funtabs.h"
 #include "ionframe.h"
 
 
 /*{{{ keyboard handling */
+
+
+static const char* moveres_safe_funclist[]={
+	"ionframe_grow", "ionframe_shrink", "ionframe_end_resize",
+	"ionframe_cancel_resize", NULL
+};
 
 
 static bool resize_handler(WRegion *reg, XEvent *xev)
@@ -37,8 +42,10 @@ static bool resize_handler(WRegion *reg, XEvent *xev)
 	if(!binding)
 		return FALSE;
 	
-	if(binding!=NULL)
-		call_binding_restricted(binding, reg, &ionframe_moveres_funclist);
+	if(binding!=NULL){
+		extl_call_restricted(binding->func, moveres_safe_funclist,
+							 "o", NULL, reg);
+	}
 	
 	return !is_resizing();
 }
@@ -76,8 +83,10 @@ static void begin_keyresize(WRegion *reg, int dir)
 #define H_UNIT(REG) (tmpdir==VERTICAL ? SCREEN_OF(REG)->h_unit : 0)
 
 
-void grow(WRegion *reg)
+EXTL_EXPORT
+void ionframe_grow(WIonFrame *frame)
 {
+	WRegion *reg=(WRegion*)frame;
 	int wu=W_UNIT(reg), hu=H_UNIT(reg);
 		
 	if(!may_resize(reg))
@@ -88,8 +97,10 @@ void grow(WRegion *reg)
 }
 
 
-void shrink(WRegion *reg)
+EXTL_EXPORT
+void ionframe_shrink(WIonFrame *frame)
 {
+	WRegion *reg=(WRegion*)frame;
 	int wu=W_UNIT(reg), hu=H_UNIT(reg);
 	
 	if(!may_resize(reg))
@@ -100,15 +111,31 @@ void shrink(WRegion *reg)
 }
 
 
-void resize_vert(WRegion *reg)
+EXTL_EXPORT
+void ionframe_resize_vert(WIonFrame *frame)
 {
-	begin_keyresize(reg, VERTICAL);
+	begin_keyresize((WRegion*)frame, VERTICAL);
 }
 
 
-void resize_horiz(WRegion *reg)
+EXTL_EXPORT
+void ionframe_resize_horiz(WIonFrame *frame)
 {
-	begin_keyresize(reg, HORIZONTAL);
+	begin_keyresize((WRegion*)frame, HORIZONTAL);
+}
+
+
+EXTL_EXPORT
+void ionframe_end_resize(WIonFrame *frame)
+{
+	end_resize((WRegion*)frame);
+}
+
+
+EXTL_EXPORT
+void ionframe_cancel_resize(WIonFrame *frame)
+{
+	cancel_resize((WRegion*)frame);
 }
 
 

@@ -13,7 +13,9 @@ INCLUDES += $(X11_INCLUDES) -I..
 MODULEDIR = $(LIBDIR)/ion-devel
 CFLAGS += $(XOPEN_SOURCE)
 
-OBJS=main.o floatws.o floatframe.o
+SOURCES=main.c floatws.c floatframe.c
+
+MAKE_EXPORTS=floatws_module
 
 MODULE=floatws
 

@@ -10,10 +10,10 @@ include $(TOPDIR)/system-inc.mk
 
 IONETCDIR = $(ETCDIR)/ion-devel
 
-ETC = common-frame-bindings.conf floatws.conf ioncore-bindings.conf \
-      ionws.conf kludges.conf look-blackwheat.conf look-brownsteel.conf \
-      look-clean.conf look-dusky.conf look-greyviolet.conf look-ios.conf \
-      look-simpleblue.conf look-wheat.conf query.conf ioncore-example.conf
+ETC = common-frame-bindings.lua floatws.lua ioncore-bindings.lua \
+      ionws.lua kludges.lua look-blackwheat.lua look-brownsteel.lua \
+      look-clean.lua look-dusky.lua look-greyviolet.lua look-ios.lua \
+      look-simpleblue.lua look-wheat.lua query.lua ioncore-example.lua
 
 ######################################
 
@@ -27,36 +27,30 @@ _install:
 		$(INSTALL) -m $(DATA_MODE) $$i $(IONETCDIR); \
 	done
 
-	@ if uname -s -p|grep "SunOS sparc" > /dev/null; then \
+	@ if test -f $(IONETCDIR)/ioncore.lua ; then \
 		echo ""; \
-		echo "*** Patching common-frame-bindings.conf with common-frame-bindings-sun.diff"; \
-		patch $(IONETCDIR)/common-frame-bindings.conf < common-frame-bindings-sun.diff; \
-	fi
-
-	@ if test -f $(IONETCDIR)/ioncore.conf ; then \
-		echo ""; \
-		echo "*** Not installing $(IONETCDIR)/ioncore.conf."; \
+		echo "*** Not installing $(IONETCDIR)/ioncore.lua."; \
 	else \
 		echo ""; \
-		echo "*** Installing $(IONETCDIR)/ioncore.conf"; \
+		echo "*** Installing $(IONETCDIR)/ioncore.lua"; \
 		echo "*** This file will not be overwritten by subsequent 'make installs', but"; \
-		echo "*** other files in this directory, excluding draw.conf, will be"; \
+		echo "*** other files in this directory, excluding draw.lua, will be"; \
 		echo "*** overwritten. Remember that when modifying system-wide configurations."; \
-		cp $(IONETCDIR)/ioncore-example.conf $(IONETCDIR)/ioncore.conf; \
+		cp $(IONETCDIR)/ioncore-example.lua $(IONETCDIR)/ioncore.lua; \
 	fi
 
-	@ if test ! -f $(IONETCDIR)/draw.conf ; then \
+	@ if test ! -f $(IONETCDIR)/draw.lua ; then \
 		echo ""; \
-		echo "*** Linking draw.conf to look-clean.conf"; \
-		ln -s look-clean.conf $(IONETCDIR)/draw.conf; \
+		echo "*** Linking draw.lua to look-clean.lua"; \
+		ln -s look-clean.lua $(IONETCDIR)/draw.lua; \
 	fi
 
-	@ if test -f $(IONETCDIR)/ion.conf ; then \
+	@ if test -f $(IONETCDIR)/ion.lua ; then \
 		echo ""; \
-		echo "*** You seem to have an old ion.conf file in $(IONETCDIR)."; \
+		echo "*** You seem to have an old ion.lua file in $(IONETCDIR)."; \
 		echo "*** Configuration files have changed drastically lately and old"; \
 		echo "*** configuration files will for the most part not be usable. The new"; \
-		echo "*** main configuration file is ioncore.conf now."; \
+		echo "*** main configuration file is ioncore.lua now."; \
 	fi
 
 	@ echo ""

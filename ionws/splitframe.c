@@ -121,19 +121,22 @@ static void do_split(WRegion *oreg, const char *str, bool attach)
 }
 
 
-void split(WRegion *reg, const char *str)
+EXTL_EXPORT
+void ionws_split(WRegion *reg, const char *str)
 {
 	do_split(reg, str, TRUE);
 }
 
 
-void split_empty(WRegion *reg, const char *str)
+EXTL_EXPORT
+void ionws_split_empty(WRegion *reg, const char *str)
 {
 	do_split(reg, str, FALSE);
 }
 
 
-void split_top(WIonWS *ws, const char *str)
+EXTL_EXPORT
+void ionws_split_top(WIonWS *ws, const char *str)
 {
 	WRegion *reg;
 	int dir, primn, mins;
@@ -158,7 +161,8 @@ void split_top(WIonWS *ws, const char *str)
 /*{{{ Close */
 
 
-void ionframe_close(WIonFrame *frame)
+EXTL_EXPORT
+void ionframe_relocate_and_close(WIonFrame *frame)
 {
 	WIonWS *ws;
 	WViewport *vp;
@@ -204,7 +208,8 @@ void ionframe_close(WIonFrame *frame)
 }
 
 
-void ionframe_close_if_empty(WIonFrame *frame)
+EXTL_EXPORT
+void ionframe_close(WIonFrame *frame)
 {
 	if(frame->genframe.managed_count!=0 ||
 	   frame->genframe.current_input!=NULL)

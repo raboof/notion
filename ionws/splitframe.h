@@ -15,9 +15,9 @@
 
 extern WIonFrame *find_frame_at(WIonWS *ws, int x, int y);
 
-extern void split(WRegion *reg, const char *str);
-extern void split_empty(WRegion *reg, const char *str);
-extern void split_top(WIonWS *ws, const char *str);
+extern void ionws_split(WRegion *reg, const char *str);
+extern void ionws_split_empty(WRegion *reg, const char *str);
+extern void ionws_split_top(WIonWS *ws, const char *str);
 extern void ionframe_close(WIonFrame *frame);
 extern void ionframe_close_if_empty(WIonFrame *frame);
 

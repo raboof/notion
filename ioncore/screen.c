@@ -32,10 +32,17 @@
 #include "clientwin.h"
 #include "property.h"
 #include "focus.h"
-#include "funtabs.h"
 #include "regbind.h"
 #include "viewport.h"
 
+
+/*{{{ The bindmap */
+
+
+WBindmap ioncore_screen_bindmap=BINDMAP_INIT;
+
+
+/*}}}*/
 
 
 /*{{{ Error handling */
@@ -435,7 +442,8 @@ static void screen_remove_managed(WScreen *scr, WRegion *reg)
 /*{{{ Misc */
 
 
-WScreen *screen_of(const WRegion *reg)
+EXTL_EXPORT
+WScreen *region_screen_of(const WRegion *reg)
 {
 	WScreen *scr;
 	assert(reg!=NULL);
@@ -445,16 +453,16 @@ WScreen *screen_of(const WRegion *reg)
 }
 
 
-Window root_of(const WRegion *reg)
+Window region_root_of(const WRegion *reg)
 {
-	WScreen *scr=screen_of(reg);
+	WScreen *scr=region_screen_of(reg);
 	return scr->root.win;
 }
 
 
-WGRData *grdata_of(const WRegion *reg)
+WGRData *region_grdata_of(const WRegion *reg)
 {
-	WScreen *scr=screen_of(reg);
+	WScreen *scr=region_screen_of(reg);
 	return &(scr->grdata);
 }
 
@@ -509,8 +517,7 @@ static DynFunTab screen_dynfuntab[]={
 };
 
 
-IMPLOBJ(WScreen, WWindow, deinit_screen, screen_dynfuntab,
-		&ioncore_screen_funclist)
+IMPLOBJ(WScreen, WWindow, deinit_screen, screen_dynfuntab);
 
 	
 /*}}}*/

@@ -10,9 +10,9 @@
 
 #include "common.h"
 
-INTRSTRUCT(WGRData)
-INTRSTRUCT(WColorGroup)
-INTRSTRUCT(WBorder)
+INTRSTRUCT(WGRData);
+INTRSTRUCT(WColorGroup);
+INTRSTRUCT(WBorder);
 
 #define BORDER_TL_TOTAL(BORDER) ((BORDER)->tl+(BORDER)->ipad)
 #define BORDER_BR_TOTAL(BORDER) ((BORDER)->br+(BORDER)->ipad)

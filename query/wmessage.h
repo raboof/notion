@@ -14,7 +14,7 @@
 #include "listing.h"
 #include "input.h"
 
-INTROBJ(WMessage)
+INTROBJ(WMessage);
 
 DECLOBJ(WMessage){
 	WInput input;

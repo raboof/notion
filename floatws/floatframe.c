@@ -11,6 +11,7 @@
 
 #include <ioncore/genframe.h>
 #include <ioncore/genframep.h>
+#include <ioncore/genframe-pointer.h>
 #include <ioncore/saveload.h>
 #include <ioncore/names.h>
 #include <ioncore/objp.h>
@@ -20,7 +21,7 @@
 #include <ioncore/defer.h>
 #include <ioncore/resize.h>
 #include "floatframe.h"
-#include "funtabs.h"
+#include "main.h"
 
 
 	
@@ -309,15 +310,30 @@ void floatframe_remove_managed(WFloatFrame *frame, WRegion *reg)
 /*{{{ Raise/lower */
 
 
+EXTL_EXPORT
 void floatframe_raise(WFloatFrame *frame)
 {
 	region_restack((WRegion*)frame, None, Above);
 }
 
 
+EXTL_EXPORT
 void floatframe_lower(WFloatFrame *frame)
 {
 	region_restack((WRegion*)frame, None, Below);
+}
+
+
+/*}}}*/
+
+
+/*{{{ Move */
+
+
+EXTL_EXPORT
+void floatframe_p_move(WFloatFrame *frame)
+{
+	genframe_p_move((WGenFrame*)frame);
 }
 
 
@@ -393,7 +409,7 @@ static DynFunTab floatframe_dynfuntab[]={
 };
 									   
 
-IMPLOBJ(WFloatFrame, WGenFrame, deinit_floatframe, floatframe_dynfuntab,
-		&floatframe_funclist)
+IMPLOBJ(WFloatFrame, WGenFrame, deinit_floatframe, floatframe_dynfuntab);
 
+		
 /*}}}*/

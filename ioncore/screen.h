@@ -10,16 +10,16 @@
 
 #include "common.h"
 
-INTROBJ(WScreen)
+INTROBJ(WScreen);
 
 #include "grdata.h"
 #include "window.h"
 #include "viewport.h"
 
 	
-#define SCREEN_OF(X) screen_of((WRegion*)X)
-#define ROOT_OF(X) root_of((WRegion*)X)
-#define GRDATA_OF(X) grdata_of((WRegion*)X)
+#define SCREEN_OF(X) region_screen_of((WRegion*)X)
+#define ROOT_OF(X) region_root_of((WRegion*)X)
+#define GRDATA_OF(X) region_grdata_of((WRegion*)X)
 #define FOR_ALL_SCREENS(SCR)                     \
 	for(SCR=wglobal.screens;                     \
 		SCR!=NULL;                               \
@@ -61,15 +61,19 @@ extern Window create_simple_window(const WScreen *scr, Window par,
 extern WScreen *manage_screen(int xscr);
 extern void deinit_screen(WScreen *scr);
 
-extern WScreen *screen_of(const WRegion *reg);
-extern WGRData *grdata_of(const WRegion *reg);
-extern Window root_of(const WRegion *reg);
+extern WScreen *region_screen_of(const WRegion *reg);
+extern WGRData *region_grdata_of(const WRegion *reg);
+extern Window region_root_of(const WRegion *reg);
 extern bool same_screen(const WRegion *reg1, const WRegion *reg2);
 
 extern void screen_switch_nth2(int scrnum, int n);
 
 extern void manage_initial_windows(WScreen *scr);
 extern bool setup_screens();
+
+
+extern WBindmap ioncore_screen_bindmap;
+
 
 #endif /* ION_IONCORE_SCREEN_H */
 

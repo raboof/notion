@@ -11,7 +11,7 @@
 #include <ioncore/common.h>
 #include <ioncore/obj.h>
 
-INTRSTRUCT(Edln)
+INTRSTRUCT(Edln);
 
 typedef int EdlnCompletionHandler(char *p, char ***ret, char **beg,
 								  void *data);

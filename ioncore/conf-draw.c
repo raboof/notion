@@ -5,12 +5,9 @@
  * See the included file LICENSE for details.
  */
 
-#include <libtu/tokenizer.h>
-
 #include "common.h"
 #include "screen.h"
 #include "grdata.h"
-#include "conf-draw.h"
 #include "readconfig.h"
 #include "font.h"
 #include "global.h"
@@ -20,17 +17,15 @@
 static WScreen *tmp_screen;
 
 
-#define FOR_ALL_SELECTED_SCREENS(SCR) SCR=tmp_screen;
-
-
 /*{{{ Font */
 
 
-static bool opt_screen_font(Tokenizer *tokz, int n, Token *toks)
+EXTL_EXPORT
+bool set_font(const char *fname)
 {
 	WFontPtr fnt;
 	
-	fnt=load_font(wglobal.dpy, TOK_STRING_VAL(&(toks[1])));
+	fnt=load_font(wglobal.dpy, fname);
 	
 	if(fnt!=NULL){
 		if(tmp_screen->grdata.font!=NULL)
@@ -42,11 +37,12 @@ static bool opt_screen_font(Tokenizer *tokz, int n, Token *toks)
 }
 
 
-static bool opt_screen_tab_font(Tokenizer *tokz, int n, Token *toks)
+EXTL_EXPORT
+bool set_tab_font(const char *fname)
 {
 	WFontPtr fnt;
 	
-	fnt=load_font(wglobal.dpy, TOK_STRING_VAL(&(toks[1])));
+	fnt=load_font(wglobal.dpy, fname);
 	if(fnt!=NULL){
 		if(tmp_screen->grdata.tab_font!=NULL)
 			free_font(wglobal.dpy, tmp_screen->grdata.tab_font);
@@ -57,12 +53,13 @@ static bool opt_screen_tab_font(Tokenizer *tokz, int n, Token *toks)
 }
 
 
-static bool opt_screen_term_font(Tokenizer *tokz, int n, Token *toks)
+EXTL_EXPORT
+bool set_term_font(const char *fname)
 {
 
 	WFontPtr term_font;
 	
-	term_font=load_font(wglobal.dpy, TOK_STRING_VAL(&(toks[1])));
+	term_font=load_font(wglobal.dpy, fname);
 	
 	if(term_font!=NULL){
 		tmp_screen->w_unit=MAX_FONT_WIDTH(term_font);
@@ -80,16 +77,10 @@ static bool opt_screen_term_font(Tokenizer *tokz, int n, Token *toks)
 /*{{{ Border */
 
 
-static int do_border(Tokenizer *tokz, int n, Token *toks, WBorder *bd)
+static bool do_border(WBorder *bd, int tl, int br, int ipad)
 {
-	int tl, br, ipad;
-	
-	tl=TOK_LONG_VAL(&(toks[1]));
-	br=TOK_LONG_VAL(&(toks[2]));
-	ipad=TOK_LONG_VAL(&(toks[3]));
-	
 	if(tl<0 || br<0 || ipad<0){
-		tokz_warn(tokz, toks[1].line, "Erroneous values");
+		warn("Erroneous values");
 		return FALSE;
 	}
 
@@ -100,83 +91,134 @@ static int do_border(Tokenizer *tokz, int n, Token *toks, WBorder *bd)
 	return TRUE;
 }
 
-#define BDHAND(NAME)                                               \
- static int opt_screen_##NAME(Tokenizer *tokz, int n, Token *toks) \
- {                                                                 \
-	do_border(tokz, n, toks, &(tmp_screen->grdata.NAME));          \
-	return TRUE;                                                   \
- }
+EXTL_EXPORT
+bool set_frame_border(int tl, int br, int ipad)
+{
+	return do_border(&(tmp_screen->grdata.frame_border), tl, br, ipad);
+}
+
+EXTL_EXPORT
+bool set_tab_border(int tl, int br, int ipad)
+{
+	return do_border(&(tmp_screen->grdata.tab_border), tl, br, ipad);
+}
+
+EXTL_EXPORT
+bool set_input_border(int tl, int br, int ipad)
+{
+	return do_border(&(tmp_screen->grdata.input_border), tl, br, ipad);
+}
 
 
-BDHAND(frame_border)
-BDHAND(tab_border)
-BDHAND(input_border)
-
-#undef BDHAND
-
-			
 /*}}}*/
 
 			
 /*{{{ Colors */
 
 			
-static bool do_colorgroup(Tokenizer *tokz, Token *toks,
-						  WScreen *scr, WColorGroup *cg)
+static bool do_colorgroup(WScreen *scr, WColorGroup *cg,
+						  const char *hl, const char *sh,
+						  const char *bg, const char *fg)
 {
 	int cnt=0;
 
 	/* alloc_color wil free cg->xx */
-	cnt+=alloc_color(scr, TOK_STRING_VAL(&(toks[1])), &(cg->hl));
-	cnt+=alloc_color(scr, TOK_STRING_VAL(&(toks[2])), &(cg->sh));
-	cnt+=alloc_color(scr, TOK_STRING_VAL(&(toks[3])), &(cg->bg));
-	cnt+=alloc_color(scr, TOK_STRING_VAL(&(toks[4])), &(cg->fg));
+	cnt+=alloc_color(scr, hl, &(cg->hl));
+	cnt+=alloc_color(scr, sh, &(cg->sh));
+	cnt+=alloc_color(scr, bg, &(cg->bg));
+	cnt+=alloc_color(scr, fg, &(cg->fg));
 	
 	if(cnt!=4){
-		tokz_warn(tokz, toks[1].line, "Unable to allocate one or more colors");
+		warn("Unable to allocate one or more colors");
 		return FALSE;
 	}
 	
 	return TRUE;
 }
 
-#define CGHAND(CG)                                                          \
- static bool opt_screen_##CG(Tokenizer *tokz, int n, Token *toks)           \
- {                                                                          \
-	return do_colorgroup(tokz, toks, tmp_screen, &(tmp_screen->grdata.CG)); \
- }
 
-CGHAND(frame_colors)
-CGHAND(tab_colors)
-CGHAND(tab_sel_colors)
-CGHAND(act_frame_colors)
-CGHAND(act_tab_colors)
-CGHAND(act_tab_sel_colors)
-CGHAND(input_colors)
-
-#undef CGHAND
-
-
-static bool opt_screen_frame_bgcolor(Tokenizer *tokz, int n, Token *toks)
+EXTL_EXPORT
+bool set_frame_colors(const char *hl, const char *sh, const char *bg,
+					  const char *fg)
 {
-	if(!alloc_color(tmp_screen, TOK_STRING_VAL(&(toks[1])),
-					&(tmp_screen->grdata.frame_bgcolor))){
-		tokz_warn(tokz, toks[1].line, "Unable to allocate one or more colors");
+	return do_colorgroup(tmp_screen, &(tmp_screen->grdata.frame_colors),
+						 hl, sh, bg, fg);
+}
+
+
+EXTL_EXPORT
+bool set_tab_colors(const char *hl, const char *sh, const char *bg,
+					const char *fg)
+{
+	return do_colorgroup(tmp_screen, &(tmp_screen->grdata.tab_colors),
+						 hl, sh, bg, fg);
+}
+
+
+EXTL_EXPORT
+bool set_tab_sel_colors(const char *hl, const char *sh, const char *bg,
+						const char *fg)
+{
+	return do_colorgroup(tmp_screen, &(tmp_screen->grdata.tab_sel_colors),
+						 hl, sh, bg, fg);
+}
+
+
+EXTL_EXPORT
+bool set_act_frame_colors(const char *hl, const char *sh, const char *bg,
+						  const char *fg)
+{
+	return do_colorgroup(tmp_screen, &(tmp_screen->grdata.act_frame_colors),
+						 hl, sh, bg, fg);
+}
+
+
+EXTL_EXPORT
+bool set_act_tab_colors(const char *hl, const char *sh, const char *bg,
+						const char *fg)
+{
+	return do_colorgroup(tmp_screen, &(tmp_screen->grdata.act_tab_colors),
+						 hl, sh, bg, fg);
+}
+
+
+EXTL_EXPORT
+bool set_act_tab_sel_colors(const char *hl, const char *sh, const char *bg,
+							const char *fg)
+{
+	return do_colorgroup(tmp_screen, &(tmp_screen->grdata.act_tab_sel_colors),
+						 hl, sh, bg, fg);
+}
+
+
+EXTL_EXPORT
+bool set_input_colors(const char *hl, const char *sh, const char *bg,
+					  const char *fg)
+{
+	return do_colorgroup(tmp_screen, &(tmp_screen->grdata.input_colors),
+						 hl, sh, bg, fg);
+}
+
+
+EXTL_EXPORT
+bool set_background_color(const char *bg)
+{
+	if(!alloc_color(tmp_screen, bg, &(tmp_screen->grdata.frame_bgcolor))){
+		warn("Unable to allocate one or more colors");
+		return FALSE;
 	}
 	
 	return TRUE;
 }
 
 
-static bool opt_screen_selection_colors(Tokenizer *tokz, int n, Token *toks)
+EXTL_EXPORT
+bool set_selection_colors(const char *bg, const char *fg)
 {
-	if(!alloc_color(tmp_screen, TOK_STRING_VAL(&(toks[1])),
-					&(tmp_screen->grdata.selection_bgcolor)) ||
-	   !alloc_color(tmp_screen, TOK_STRING_VAL(&(toks[2])),
-					&(tmp_screen->grdata.selection_fgcolor))){
-		
-		tokz_warn(tokz, toks[1].line,
-				  "Unable to allocate one or more colors");
+	if(!alloc_color(tmp_screen, bg, &(tmp_screen->grdata.selection_bgcolor)) ||
+	   !alloc_color(tmp_screen, fg, &(tmp_screen->grdata.selection_fgcolor))){
+		warn("Unable to allocate one or more colors");
+		return FALSE;
 	}
 	
 	return TRUE;
@@ -189,12 +231,11 @@ static bool opt_screen_selection_colors(Tokenizer *tokz, int n, Token *toks)
 /*{{{ Ion-specific */
 
 
-static bool opt_screen_spacing(Tokenizer *tokz, int n, Token *toks)
+EXTL_EXPORT
+bool set_ion_spacing(int spacing)
 {
-	long spacing=TOK_LONG_VAL(&(toks[1]));
-
 	if(spacing<0){
-		tokz_warn(tokz, toks[1].line, "Invalid value");
+		warn("Invalid value");
 		return FALSE;
 	}
 	
@@ -204,10 +245,10 @@ static bool opt_screen_spacing(Tokenizer *tokz, int n, Token *toks)
 }
 
 
-static bool opt_screen_bar_inside_frame(Tokenizer *tokz, int n, Token *toks)
+EXTL_EXPORT
+void enable_ion_bar_inside_frame(bool enable)
 {
-	tmp_screen->grdata.bar_inside_frame=TOK_BOOL_VAL(&(toks[1]));
-	return TRUE;
+	tmp_screen->grdata.bar_inside_frame=enable;
 }
 
 
@@ -216,18 +257,14 @@ static bool opt_screen_bar_inside_frame(Tokenizer *tokz, int n, Token *toks)
 
 /*{{{ PWM-specific */
 
+/* Move to floatws module? */
 
-static int opt_screen_bar_widths(Tokenizer *tokz, int n, Token *toks)
+
+EXTL_EXPORT
+bool set_pwm_bar_widths(int i, double j)
 {
-	WScreen *scr;
-	int i, k;
-	float j;
-	
-	i=TOK_LONG_VAL(&(toks[1]));
-	j=TOK_DOUBLE_VAL(&(toks[2]));
-	
 	if(i<0 || j<0.0){
-		warn_obj_line(tokz->name, toks[1].line, "Erroneous values");
+		warn("Erroneous values");
 		return FALSE;
 	}
 	
@@ -244,13 +281,12 @@ static int opt_screen_bar_widths(Tokenizer *tokz, int n, Token *toks)
 /*{{{ Misc. */
 
 
-static bool opt_screen_transparent_background(Tokenizer *tokz, int n, Token *toks)
+EXTL_EXPORT
+bool enable_transparent_background(bool enable)
 {
 	WScreen *scr;
 	
-	FOR_ALL_SELECTED_SCREENS(scr){
-		scr->grdata.transparent_background=TOK_BOOL_VAL(&(toks[1]));
-	}
+	tmp_screen->grdata.transparent_background=enable;
 	
 	return TRUE;
 }
@@ -259,41 +295,12 @@ static bool opt_screen_transparent_background(Tokenizer *tokz, int n, Token *tok
 /*}}}*/
 
 
-static ConfOpt screen_opts[]={
-	{"font", "s", opt_screen_font, NULL},
-	{"tab_font", "s", opt_screen_tab_font, NULL},
-	{"term_font", "s", opt_screen_term_font, NULL},
-
-	{"frame_border", "lll", opt_screen_frame_border, NULL},
-	{"tab_border", "lll", opt_screen_tab_border, NULL},
-	{"input_border", "lll", opt_screen_input_border, NULL},
-	
-	{"act_tab_colors", "ssss", opt_screen_act_tab_colors, NULL},
-	{"act_tab_sel_colors", "ssss", opt_screen_act_tab_sel_colors, NULL},
-	{"act_frame_colors", "ssss", opt_screen_act_frame_colors, NULL},
-	{"tab_colors", "ssss", opt_screen_tab_colors, NULL},
-	{"tab_sel_colors", "ssss", opt_screen_tab_sel_colors, NULL},
-	{"frame_colors", "ssss", opt_screen_frame_colors, NULL},
-	{"input_colors", "ssss", opt_screen_input_colors, NULL},
-	{"background_color", "s", opt_screen_frame_bgcolor, NULL},
-	{"transparent_background", "b", opt_screen_transparent_background, NULL},
-	{"selection_colors", "ss", opt_screen_selection_colors, NULL},
-	
-	{"ion_spacing", "l", opt_screen_spacing, NULL},
-	{"ion_bar_inside_frame", "b", opt_screen_bar_inside_frame, NULL},
-	
-	{"pwm_bar_widths", "ld", opt_screen_bar_widths, NULL},
-
-	{NULL, NULL, NULL, NULL}
-};
-
-
 bool read_draw_config(WScreen *scr)
 {
 	bool ret;
 	
 	tmp_screen=scr;
-	ret=read_core_config_for_scr("draw", scr->xscr, screen_opts);
+	ret=read_core_config_for_scr("draw", scr->xscr);
 	tmp_screen=NULL;
 	
 	return ret;

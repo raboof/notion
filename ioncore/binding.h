@@ -8,12 +8,10 @@
 #ifndef ION_IONCORE_BINDING_H
 #define ION_IONCORE_BINDING_H
 
-#include <libtu/tokenizer.h>
-
 #include "common.h"
-#include "function.h"
 #include "obj.h"
 #include "region.h"
+#include "extl.h"
 
 
 #define ACT_KEYPRESS 		0
@@ -22,17 +20,12 @@
 #define ACT_BUTTONCLICK		3
 #define ACT_BUTTONDBLCLICK	4
 
-#define BINDING_MAXARGS		3
-#define BINDING_INIT		\
-	{0, 0, 0, 0, FALSE, NULL, NULL}
-/*	{0, 0, 0, 0, FALSE, NULL, NULL, 0, {TOK_INIT, TOK_INIT, TOK_INIT}}*/
 #define BINDMAP_INIT		{0, 0, NULL, NULL, NULL}
 
 
-INTRSTRUCT(WBinding)
-INTRSTRUCT(WBindingSimple)
-INTRSTRUCT(WBindmap)
-INTRSTRUCT(WRegBindingInfo)
+INTRSTRUCT(WBinding);
+INTRSTRUCT(WBindmap);
+INTRSTRUCT(WRegBindingInfo);
 
 
 DECLSTRUCT(WBinding){
@@ -42,7 +35,7 @@ DECLSTRUCT(WBinding){
 	int area;
 	bool waitrel;
 	WBindmap *submap;
-	char *cmd;
+	ExtlFn func;
 };
 
 
@@ -55,13 +48,6 @@ DECLSTRUCT(WRegBindingInfo){
 	WRegion *owner;
 };
 
-
-
-DECLSTRUCT(WBindingSimple){
-	WFunction *func;
-	int nargs;
-	Token args[BINDING_MAXARGS];
-};
 
 
 DECLSTRUCT(WBindmap){
@@ -85,9 +71,6 @@ extern WBinding *lookup_binding_area(WBindmap *bindmap, int act,
 extern void grab_binding(const WBinding *binding, Window win);
 extern void ungrab_binding(const WBinding *binding, Window win);
 /*extern void grab_bindings(WBindmap *bindmap, Window win);*/
-extern void call_binding(const WBinding *binding, WRegion *reg);
-extern void call_binding_restricted(const WBinding *binding, WRegion *reg,
-									WFunclist *funclist);
 extern int unmod(int state, int keycode);
 extern bool ismod(int keycode);
 extern void update_modmap();

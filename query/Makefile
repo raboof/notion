@@ -13,8 +13,10 @@ INCLUDES += $(X11_INCLUDES) -I..
 MODULEDIR = $(LIBDIR)/ion-devel
 CFLAGS += $(XOPEN_SOURCE)
 
-OBJS= complete.o complete_file.o edln.o input.o listing.o main.o \
-      wedln.o wmessage.o query.o fwarn.o
+SOURCES=complete.c complete_file.c edln.c input.c listing.c main.c \
+	wedln.c wedln-wrappers.c wmessage.c query.c fwarn.c
+
+MAKE_EXPORTS=query_module
 
 MODULE=query
 

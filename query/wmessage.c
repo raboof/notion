@@ -178,7 +178,7 @@ static DynFunTab wmsg_dynfuntab[]={
 };
 
 
-IMPLOBJ(WMessage, WInput, deinit_wmsg, wmsg_dynfuntab, NULL)
+IMPLOBJ(WMessage, WInput, deinit_wmsg, wmsg_dynfuntab);
 
 	
 /*}}}*/

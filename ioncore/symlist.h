@@ -11,7 +11,7 @@
 #include "common.h"
 
 
-INTRSTRUCT(WSymlist)
+INTRSTRUCT(WSymlist);
 
 
 DECLSTRUCT(WSymlist){

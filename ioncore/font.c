@@ -258,7 +258,7 @@ static char *scatn3(const char *p1, int l1,
 
 /*{{{ Title shortening */
 
-INTRSTRUCT(SR)
+INTRSTRUCT(SR);
 	
 	DECLSTRUCT(SR){
 		regex_t re;
@@ -270,6 +270,7 @@ INTRSTRUCT(SR)
 static SR *shortenrules=NULL;
 
 
+EXTL_EXPORT
 bool add_shortenrule(const char *rx, const char *rule)
 {
 	SR *si;

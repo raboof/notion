@@ -10,7 +10,7 @@
 #include "objp.h"
 
 
-WObjDescr OBJDESCR(WObj)={"WObj", NULL, NULL, NULL, NULL};
+WObjDescr OBJDESCR(WObj)={"WObj", NULL, NULL, NULL};
 
 
 /*{{{ Destroy */

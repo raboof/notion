@@ -7,7 +7,6 @@
 
 #include <string.h>
 
-#include <libtu/parser.h>
 #include <ioncore/common.h>
 #include <ioncore/screen.h>
 #include <ioncore/focus.h>
@@ -15,17 +14,15 @@
 #include <ioncore/objp.h>
 #include <ioncore/region.h>
 #include <ioncore/wsreg.h>
-#include <ioncore/funtabs.h>
 #include <ioncore/viewport.h>
 #include <ioncore/names.h>
 #include <ioncore/saveload.h>
 #include <ioncore/attach.h>
+#include <ioncore/extl.h>
 #include "placement.h"
 #include "ionws.h"
 #include "split.h"
 #include "ionframe.h"
-#include "funtabs.h"
-
 
 
 /*{{{ region dynfun implementations */
@@ -192,16 +189,19 @@ static void write_obj(WObj *obj, FILE *file, int lvl)
 	int tls, brs;
 	const char *name;
 	
+	if(obj==NULL)
+		goto fail2;
+	
 	if(WOBJ_IS(obj, WRegion)){
-		if(!region_supports_save((WRegion*)obj))
-			warn("Unable to save a %s\n", WOBJ_TYPESTR(obj));
-		else
-			region_save_to_file((WRegion*)obj, file, lvl+1);
-		return;
+		if(region_supports_save((WRegion*)obj)){
+			if(region_save_to_file((WRegion*)obj, file, lvl))
+				return;
+		}
+		goto fail;
 	}
 	
 	if(!WOBJ_IS(obj, WWsSplit))
-		return;
+		goto fail;
 	
 	split=(WWsSplit*)obj;
 	
@@ -209,24 +209,41 @@ static void write_obj(WObj *obj, FILE *file, int lvl)
 	brs=split_tree_size(split->br, split->dir);
 	
 	save_indent_line(file, lvl);
-	if(split->dir==HORIZONTAL)
-		fprintf(file, "hsplit %d, %d {\n", tls, brs);
-	else
-		fprintf(file, "vsplit %d, %d {\n", tls, brs);
-	
-	write_obj(split->tl, file, lvl+1);
-	write_obj(split->br, file, lvl+1);
+	fprintf(file, "split_dir = \"%s\",\n", (split->dir==VERTICAL
+										   ? "vertical" : "horizontal"));
 	
 	save_indent_line(file, lvl);
-	fprintf(file, "}\n");
+	fprintf(file, "split_tls = %d, split_brs = %d,\n", tls, brs);
+	
+	save_indent_line(file, lvl);
+	fprintf(file, "tl = {\n");
+	write_obj(split->tl, file, lvl+1);
+	save_indent_line(file, lvl);
+	fprintf(file, "},\n");
+			
+	save_indent_line(file, lvl);
+	fprintf(file, "br = {\n");
+	write_obj(split->br, file, lvl+1);
+	save_indent_line(file, lvl);
+	fprintf(file, "},\n");
+
+	return;
+	
+fail:		
+	warn("Unable to save a %s\n", WOBJ_TYPESTR(obj));
+fail2:
+	fprintf(file, "{},\n");
 }
 
 
 static bool ionws_save_to_file(WIonWS *ws, FILE *file, int lvl)
 {
 	begin_saved_region((WRegion*)ws, file, lvl);
-	write_obj(ws->split_tree, file, lvl);
-	end_saved_region((WRegion*)ws, file, lvl);
+	save_indent_line(file, lvl);
+	fprintf(file, "split_tree = {\n");
+	write_obj(ws->split_tree, file, lvl+1);
+	save_indent_line(file, lvl);
+	fprintf(file, "},\n");
 	return TRUE;
 }
 
@@ -237,212 +254,123 @@ static bool ionws_save_to_file(WIonWS *ws, FILE *file, int lvl)
 /*{{{ Load */
 
 
-static WWindow *tmp_par=NULL;
-static WRectangle tmp_geom;
-static WIonWS *current_ws=NULL;
-static WWsSplit *current_split=NULL;
+extern void set_split_of(WObj *obj, WWsSplit *split);
+static WObj *load_obj(WIonWS *ws, WWindow *par, WRectangle geom, ExtlTab tab);
 
 
-static WRectangle get_geom()
+static WObj *load_split(WIonWS *ws, WWindow *par, WRectangle geom,
+						ExtlTab tab)
 {
-	WRectangle geom;
-	int s, pos;
-	
-	if(current_split==NULL){
-		geom=tmp_geom;
-	}else{
-		geom=current_split->geom;
-
-		if(current_split->dir==VERTICAL){
-			pos=geom.y;
-			s=geom.h;
-		}else{
-			pos=geom.x;
-			s=geom.w;
-		}
-		
-		if(current_split->tl==NULL){
-			s=current_split->tmpsize;
-		}else{
-			s-=current_split->tmpsize;
-			pos+=current_split->tmpsize;
-		}
-			
-		if(current_split->dir==VERTICAL){
-			geom.y=pos;
-			geom.h=s;
-		}else{
-			geom.x=pos;
-			geom.w=s;
-		}
-	}
-	
-	return geom;
-}
-
-
-static bool check_splits(const Tokenizer *tokz, int l)
-{
-	if(current_split!=NULL){
-		if(current_split->br!=NULL){
-			tokz_warn(tokz, l,
-					  "A split can only contain two subsplits or regions");
-			return FALSE;
-		}
-	}else{
-		if(current_ws->split_tree!=NULL){
-			tokz_warn(tokz, l, "There can only be one frame or split at "
-					           "workspace level");
-			return FALSE;
-		}
-	}
-	
-	return TRUE;
-}
-
-
-static bool opt_ionws_split(int dir, Tokenizer *tokz, int n, Token *toks)
-{
-	WRectangle geom;
 	WWsSplit *split;
-	int brs, tls;
-	int w, h;
-	
-	if(!check_splits(tokz, toks[1].line))
+	char *dir_str;
+	int dir, brs, tls;
+	ExtlTab subtab;
+	WObj *tl=NULL, *br=NULL;
+	WRectangle geom2;
+
+	if(!extl_table_gets_i(tab, "split_tls", &tls))
 		return FALSE;
-	
-	tls=TOK_LONG_VAL(&(toks[1]));
-	brs=TOK_LONG_VAL(&(toks[2]));
-	
-	geom=get_geom();
-	
-	if(dir==HORIZONTAL)
-		tls=geom.w*tls/(tls+brs);
-	else
-		tls=geom.h*tls/(tls+brs);
-	
+	if(!extl_table_gets_i(tab, "split_brs", &brs))
+		return FALSE;
+	if(!extl_table_gets_s(tab, "split_dir", &dir_str))
+		return FALSE;
+	if(strcmp(dir_str, "vertical")==0){
+		dir=VERTICAL;
+	}else if(strcmp(dir_str, "horizontal")==0){
+		dir=HORIZONTAL;
+	}else{
+		free(dir_str);
+		return NULL;
+	}
+	free(dir_str);
+
 	split=create_split(dir, NULL, NULL, geom);
-	
-	if(split==NULL)
-		return FALSE;
+	if(split==NULL){
+		warn("Unable to create a split.\n");
+		return NULL;
+	}
 		
+	geom2=geom;
+	if(dir==HORIZONTAL){
+		tls=geom.w*tls/(tls+brs);
+		geom2.w=tls;
+	}else{
+		tls=geom.h*tls/(tls+brs);
+		geom2.h=tls;
+	}
+	
+	if(extl_table_gets_t(tab, "tl", &subtab)){
+		tl=load_obj(ws, par, geom2, subtab);
+		extl_unref_table(subtab);
+	}
+
+	geom2=geom;
+	if(tl!=NULL){
+		if(dir==HORIZONTAL){
+			geom2.w-=tls;
+			geom2.x+=tls;
+		}else{
+			geom2.h-=tls;
+			geom2.y+=tls;
+		}
+	}
+			
+	if(extl_table_gets_t(tab, "br", &subtab)){
+		br=load_obj(ws, par, geom2, subtab);
+		extl_unref_table(subtab);
+	}
+	
+	if(tl==NULL || br==NULL){
+		free(split);
+		return (tl==NULL ? br : tl);
+	}
+	
+	set_split_of(tl, split);
+	set_split_of(br, split);
+
 	split->tmpsize=tls;
+	split->tl=tl;
+	split->br=br;
 	
-	if(current_split==NULL)
-		current_ws->split_tree=(WObj*)split;
-	else if(current_split->tl==NULL)
-		current_split->tl=(WObj*)split;
-	else
-		current_split->br=(WObj*)split;
-	
-	split->parent=current_split;
-	current_split=split;
-	
-	return TRUE;
+	return (WObj*)split;
 }
 
 
-static bool opt_ionws_vsplit(Tokenizer *tokz, int n, Token *toks)
+static WObj *load_obj(WIonWS *ws, WWindow *par, WRectangle geom,
+					  ExtlTab tab)
 {
-	return opt_ionws_split(VERTICAL, tokz, n, toks);
-}
-
-
-static bool opt_ionws_hsplit(Tokenizer *tokz, int n, Token *toks)
-{
-	return opt_ionws_split(HORIZONTAL, tokz, n, toks);
-}
-
-
-static bool opt_split_end(Tokenizer *tokz, int n, Token *toks)
-{
-	WWsSplit *split=current_split;
-
-	current_split=split->parent;
-	
-	if(split->br!=NULL)
-		return TRUE;
-	
-	tokz_warn(tokz, tokz->line, "Split not full");
-	
-	if(current_split==NULL)
-		current_ws->split_tree=split->tl;
-	else if(current_split->tl==(WObj*)split)
-		current_split->tl=split->tl;
-	else
-		current_split->br=split->tl;
-	
-	free(split);
-	
-	return TRUE;
-}
-
-
-static bool opt_ionws_region(Tokenizer *tokz, int n, Token *toks)
-{
+	char *typestr;
 	WRegion *reg;
-	WRectangle geom;
 	
-	if(!check_splits(tokz, toks[1].line))
-		return FALSE;
+	if(extl_table_gets_s(tab, "type", &typestr)){
+		free(typestr);
+		reg=load_create_region(par, geom, tab);
+		if(reg!=NULL)
+			ionws_add_managed(ws, reg);
+		return (WObj*)reg;
+	}
 	
-	geom=get_geom();
-	
-	reg=load_create_region(tmp_par, geom, tokz, n, toks);
-
-	if(reg==NULL)
-		return FALSE;
-	
-	if(current_split==NULL)
-		current_ws->split_tree=(WObj*)reg;
-	else if(current_split->tl==NULL)
-		current_split->tl=(WObj*)reg;
-	else
-		current_split->br=(WObj*)reg;
-	
-	SPLIT_OF((WRegion*)reg)=current_split;
-	ionws_add_managed(current_ws, reg);
-	
-	return TRUE;
+	return load_split(ws, par, geom, tab);
 }
 
 
-static ConfOpt split_opts[]={
-	{"vsplit", "ll",  opt_ionws_vsplit, split_opts},
-	{"hsplit", "ll",  opt_ionws_hsplit, split_opts},
-	{"region", "s?s", opt_ionws_region, CONFOPTS_NOT_SET},
-	{"#end", NULL, opt_split_end, NULL},
-	END_CONFOPTS
-};
-
-
-static ConfOpt ionws_opts[]={
-	{"vsplit", "ll",  opt_ionws_vsplit, split_opts},
-	{"hsplit", "ll",  opt_ionws_hsplit, split_opts},
-	{"region", "s?s", opt_ionws_region, CONFOPTS_NOT_SET},
-	END_CONFOPTS
-};
-
-
-WRegion *ionws_load(WWindow *par, WRectangle geom, Tokenizer *tokz)
+WRegion *ionws_load(WWindow *par, WRectangle geom, ExtlTab tab)
 {
 	WIonWS *ws;
+	ExtlTab treetab;
 	
+	if(!extl_table_gets_t(tab, "split_tree", &treetab))
+		return NULL;
+	   
 	ws=create_ionws(par, geom, FALSE);
 	
-	if(ws==NULL)
+	if(ws==NULL){
+		extl_unref_table(treetab);
 		return NULL;
+	}
 
-	tmp_par=par;
-	tmp_geom=geom;
-	current_split=NULL;
-	current_ws=ws;
-	
-	parse_config_tokz(tokz, ionws_opts);
-	
-	tmp_par=NULL;
-	current_split=NULL;
-	current_ws=NULL;
+	ws->split_tree=load_obj(ws, par, geom, treetab);
+	extl_unref_table(treetab);
 	
 	if(ws->split_tree==NULL){
 		warn("Workspace empty");
@@ -483,8 +411,7 @@ static DynFunTab ionws_dynfuntab[]={
 };
 
 
-IMPLOBJ(WIonWS, WGenWS, deinit_ionws, ionws_dynfuntab,
-		&ionws_funclist)
+IMPLOBJ(WIonWS, WGenWS, deinit_ionws, ionws_dynfuntab);
 
 	
 /*}}}*/

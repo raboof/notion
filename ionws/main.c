@@ -6,13 +6,10 @@
  */
 
 #include <ioncore/common.h>
-#include <ioncore/functionp.h>
-#include <ioncore/function.h>
 #include <ioncore/reginfo.h>
 #include <query/main.h>
 
 #include "conf.h"
-#include "funtabs.h"
 #include "bindmaps.h"
 #include "ionws.h"
 #include "ionframe.h"
@@ -32,9 +29,13 @@ char ionws_module_ion_version[]=ION_VERSION;
 /*{{{ Module init & deinit */
 
 
+extern bool ionws_module_register_exports();
+extern void ionws_module_unregister_exports();
+
+
 void ionws_module_deinit()
 {
-	ionws_module_clear_funclists();
+	ionws_module_unregister_exports();
 	deinit_bindmap(&ionws_bindmap);
 	deinit_bindmap(&ionframe_bindmap);
 	deinit_bindmap(&ionframe_moveres_bindmap);
@@ -62,11 +63,15 @@ static bool register_regions()
 
 bool ionws_module_init()
 {
-	if(!ionws_module_init_funclists())
+	if(!ionws_module_register_exports()){
+		warn_obj("ionws module", "Unable to register exports");
 		goto err;
+	}
 	
-	if(!register_regions())
+	if(!register_regions()){
+		warn_obj("ionws module", "Unable to register classes");
 		goto err;
+	}
 	
 	if(!ionws_module_read_config())
 		goto err2;
@@ -86,7 +91,6 @@ err2:
 	return FALSE;
 
 err:
-	warn_err();
 	ionws_module_deinit();
 	return FALSE;
 }

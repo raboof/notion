@@ -24,7 +24,7 @@
 #include "bindmaps.h"
 
 
-IMPLOBJ(WWsSplit, WObj, NULL, NULL, NULL)
+IMPLOBJ(WWsSplit, WObj, NULL, NULL);
 
 
 /*{{{ Misc helper functions */
@@ -140,7 +140,7 @@ static WWsSplit *split_of(WObj *obj)
 }
 
 
-static void set_split_of(WObj *obj, WWsSplit *split)
+void set_split_of(WObj *obj, WWsSplit *split)
 {
 	if(WOBJ_IS(obj, WRegion)){
 		SPLIT_OF((WRegion*)obj)=split;
@@ -784,24 +784,28 @@ void goto_right(WRegion *reg)
 #endif
 
 
+EXTL_EXPORT
 void ionws_goto_above(WIonWS *ws)
 {
 	goto_reg(up_or_left(ionws_find_current(ws), VERTICAL));
 }
 
 
+EXTL_EXPORT
 void ionws_goto_below(WIonWS *ws)
 {
 	goto_reg(right_or_down(ionws_find_current(ws), VERTICAL));
 }
 
 
+EXTL_EXPORT
 void ionws_goto_left(WIonWS *ws)
 {
 	goto_reg(up_or_left(ionws_find_current(ws), HORIZONTAL));
 }
 
 
+EXTL_EXPORT
 void ionws_goto_right(WIonWS *ws)
 {
 	goto_reg(right_or_down(ionws_find_current(ws), HORIZONTAL));

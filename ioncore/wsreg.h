@@ -9,7 +9,6 @@
 #define ION_IONCORE_WSREG_H
 
 #include "clientwin.h"
-#include "winprops.h"
 #include "obj.h"
 
 
@@ -20,15 +19,15 @@ extern bool add_clientwin_default(WClientWin *cwin,
 
 DYNFUN bool region_ws_add_clientwin(WRegion *reg, WClientWin *cwin,
 									const XWindowAttributes *attr,
-									int init_state, WWinProp *props);
+									int init_state);
 
 
 DYNFUN bool region_ws_add_transient(WRegion *reg, WClientWin *tfor,
 									WClientWin *cwin,
 									const XWindowAttributes *attr,
-									int init_state, WWinProp *props);
+									int init_state);
 
 extern bool finish_add_clientwin(WRegion *reg, WClientWin *cwin,
-								 bool init_state, const WWinProp *props);
+								 bool init_state);
 
 #endif /* ION_IONCORE_WSREG_H */

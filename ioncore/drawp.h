@@ -11,7 +11,7 @@
 #include "common.h"
 #include "draw.h"
 
-INTRSTRUCT(DrawInfo)
+INTRSTRUCT(DrawInfo);
 
 enum{
 	ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT

@@ -58,8 +58,6 @@ void init_region(WRegion *reg, WRegion *parent, WRectangle geom)
 	reg->ni.g_next=NULL;
 	reg->ni.g_prev=NULL;
 	
-	reg->funclist=NULL;
-	
 	reg->manager=NULL;
 	reg->mgr_next=NULL;
 	reg->mgr_prev=NULL;
@@ -172,6 +170,13 @@ void region_inactivated(WRegion *reg)
 void focus_region(WRegion *reg, bool warp)
 {
 	CALL_DYN(focus_region, reg, (reg, warp));
+}
+
+
+EXTL_EXPORT
+void region_close(WRegion *reg)
+{
+	CALL_DYN(region_close, reg, (reg));
 }
 
 
@@ -483,6 +488,7 @@ void region_lost_focus(WRegion *reg)
 /*{{{ Goto */
 
 
+EXTL_EXPORT
 bool display_region(WRegion *reg)
 {
 	WRegion *mgr, *preg;
@@ -508,6 +514,7 @@ bool display_region(WRegion *reg)
 }
 
 
+EXTL_EXPORT
 bool display_region_sp(WRegion *reg)
 {
 	bool ret;
@@ -521,6 +528,7 @@ bool display_region_sp(WRegion *reg)
 }
 
 
+EXTL_EXPORT
 bool goto_region(WRegion *reg)
 {
 	if(display_region_sp(reg)){
@@ -875,6 +883,17 @@ bool region_is_child(WRegion *reg, WRegion *reg2)
 }
 
 
+EXTL_EXPORT
+WRegion *region_get_active_leaf(WRegion *reg)
+{
+	if(reg!=NULL){
+		while(reg->active_sub!=NULL)
+			reg=reg->active_sub;
+	}
+	
+	return reg;
+}
+
 /*}}}*/
 
 
@@ -890,7 +909,7 @@ static DynFunTab region_dynfuntab[]={
 };
 
 
-IMPLOBJ(WRegion, WObj, deinit_region, region_dynfuntab, NULL)
+IMPLOBJ(WRegion, WObj, deinit_region, region_dynfuntab);
 
 	
 /*}}}*/

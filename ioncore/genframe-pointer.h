@@ -12,9 +12,9 @@
 #include "pointer.h"
 #include "genframe.h"
 
-extern void genframe_p_resize_setup(WGenFrame *genframe);
-extern void genframe_p_tabdrag_setup(WGenFrame *genframe);
-extern void genframe_p_move_setup(WGenFrame *genframe);
+extern void genframe_p_resize(WGenFrame *genframe);
+extern void genframe_p_tabdrag(WGenFrame *genframe);
+extern void genframe_p_move(WGenFrame *genframe);
 extern void genframe_switch_tab(WGenFrame *genframe);
 
 extern int genframe_press(WGenFrame *genframe, XButtonEvent *ev,

@@ -5,22 +5,20 @@
  * See the included file LICENSE for details.
  */
 
-#include <libtu/parser.h>
 #include <ioncore/common.h>
 #include <ioncore/genframe.h>
 #include <ioncore/genframep.h>
 #include <ioncore/saveload.h>
 #include <ioncore/names.h>
 #include <ioncore/objp.h>
-#include <ioncore/objp.h>
 #include <ioncore/drawp.h>
 #include <ioncore/resize.h>
 #include <ioncore/targetid.h>
-#include "ionframe.h"
+#include <ioncore/extl.h>
 
+#include "ionframe.h"
 #include "bindmaps.h"
 #include "splitframe.h"
-#include "funtabs.h"
 
 
 static void set_tab_spacing(WIonFrame *frame);
@@ -284,93 +282,50 @@ static bool ionframe_save_to_file(WIonFrame *ionframe, FILE *file, int lvl)
 	
 	begin_saved_region((WRegion*)ionframe, file, lvl);
 	save_indent_line(file, lvl);
-	fprintf(file, "target_id %d\n", ionframe->genframe.target_id);
+	fprintf(file, "target_id = %d,\n", ionframe->genframe.target_id);
 	save_indent_line(file, lvl);
-	fprintf(file, "flags %x\n", ionframe->genframe.flags);
-	
+	fprintf(file, "flags = %d,\n", ionframe->genframe.flags);
+	save_indent_line(file, lvl);
+	fprintf(file, "subs = {\n");
 	FOR_ALL_MANAGED_ON_LIST(ionframe->genframe.managed_list, sub){
 		region_save_to_file((WRegion*)sub, file, lvl+1);
 	}
-	
-	end_saved_region((WRegion*)ionframe, file, lvl);
+	save_indent_line(file, lvl);
+	fprintf(file, "},\n");
 	
 	return TRUE;
 }
 
 
-static WIonFrame *tmp_frame;
-static int tmp_flags=0;
-static int tmp_target_id=0;
-static WWindow *tmp_par=NULL;
-static WRectangle tmp_geom;
-
-
-static bool opt_target_id(Tokenizer *tokz, int n, Token *toks)
+WRegion *ionframe_load(WWindow *par, WRectangle geom, ExtlTab tab)
 {
-	if(tmp_frame!=NULL){
-		warn("Will not set target id after frame has been created.");
-		return FALSE;
-	}
-			
-	tmp_target_id=TOK_LONG_VAL(&(toks[1]));
-	return TRUE;
-}
-
-
-static bool opt_frame_flags(Tokenizer *tokz, int n, Token *toks)
-{
-	if(tmp_frame!=NULL){
-		warn("Will not set flags after frame has been created.");
-		return FALSE;
-	}
-	tmp_flags=TOK_LONG_VAL(&(toks[1]));
-	tmp_flags&=WGENFRAME_TAB_HIDE;
-	return TRUE;
-}
-
-
-static bool opt_region(Tokenizer *tokz, int n, Token *toks)
-{
-	WRegion *reg;
-	WRectangle geom;
+	int target_id=0, flags=0;
+	ExtlTab substab, subtab;
+	WIonFrame *frame;
+	int n, i;
 	
-	if(tmp_frame==NULL){
-		tmp_frame=create_ionframe(tmp_par, tmp_geom, tmp_target_id, tmp_flags);
-		if(tmp_frame==NULL){
-			warn_err();
-			return FALSE;
+	extl_table_gets_i(tab, "target_id", &target_id);
+	extl_table_gets_i(tab, "flags", &flags);
+	flags&=WGENFRAME_TAB_HIDE;
+	
+	frame=create_ionframe(par, geom, target_id, flags);
+	
+	if(frame==NULL)
+		return NULL;
+
+	if(!extl_table_gets_t(tab, "subs", &substab))
+		return (WRegion*)frame;
+	
+	n=extl_table_get_n(substab);
+	for(i=0; i<n; i++){
+		if(extl_table_geti_t(substab, i, &subtab)){
+			region_add_managed_load((WRegion*)frame, subtab);
+			extl_unref_table(subtab);
 		}
 	}
+	extl_unref_table(substab);
 	
-	return (region_add_managed_load((WRegion*)tmp_frame, tokz, n, toks)!=NULL);
-}
-
-
-static ConfOpt ionframe_opts[]={
-	{"target_id",	"l", opt_target_id, 	NULL},
-	{"flags",		"l", opt_frame_flags,	NULL},
-	{"region", 		"s?s", opt_region, CONFOPTS_NOT_SET},
-	END_CONFOPTS
-};
-
-
-WRegion *ionframe_load(WWindow *par, WRectangle geom, Tokenizer *tokz)
-{
-	tmp_target_id=TARGET_ID_ALLOCANY;
-	tmp_flags=0;
-	tmp_par=par;
-	tmp_frame=NULL;
-	tmp_geom=geom;
-	
-	if(!parse_config_tokz(tokz, ionframe_opts)){
-		destroy_obj((WObj*)tmp_frame);
-		return NULL;
-	}
-
-	if(tmp_frame==NULL)
-		tmp_frame=create_ionframe(par, geom, tmp_target_id, tmp_flags);
-	
-	return (WRegion*)tmp_frame;
+	return (WRegion*)frame;
 }
 
 
@@ -394,12 +349,13 @@ static DynFunTab ionframe_dynfuntab[]={
 		
 	{(DynFun*)region_save_to_file, (DynFun*)ionframe_save_to_file},
 	
+	{region_close, ionframe_close},
+	
 	END_DYNFUNTAB
 };
 									   
 
-IMPLOBJ(WIonFrame, WGenFrame, deinit_ionframe, ionframe_dynfuntab,
-		&ionframe_funclist)
+IMPLOBJ(WIonFrame, WGenFrame, deinit_ionframe, ionframe_dynfuntab);
 
 	
 /*}}}*/

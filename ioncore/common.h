@@ -63,4 +63,6 @@ extern void pgeom(const char *n, WRectangle g);
 #define D(X)
 #endif
 
+#define EXTL_EXPORT
+
 #endif /* ION_IONCORE_COMMON_H */

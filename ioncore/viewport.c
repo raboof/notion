@@ -10,7 +10,6 @@
 #include "viewport.h"
 #include "region.h"
 #include "attach.h"
-#include "funtabs.h"
 #include "objp.h"
 #include "focus.h"
 #include "regbind.h"
@@ -356,6 +355,7 @@ WViewport *find_viewport_id(int id)
 }
 
 
+EXTL_EXPORT
 void goto_viewport_id(int id)
 {
 	WViewport *vp=find_viewport_id(id);
@@ -364,6 +364,7 @@ void goto_viewport_id(int id)
 }
 
 
+EXTL_EXPORT
 void goto_next_viewport()
 {
 	WViewport *vp;
@@ -379,6 +380,7 @@ void goto_next_viewport()
 }
 
 
+EXTL_EXPORT
 void goto_prev_viewport()
 {
 	WScreen *scr=wglobal.active_screen;
@@ -397,25 +399,28 @@ void goto_prev_viewport()
 }
 
 
-void switch_ws_nth(uint n)
+EXTL_EXPORT
+void switch_ws_nth(WScreen *scr, uint n)
 {
-	WViewport *vp=current_vp(wglobal.active_screen);
+	WViewport *vp=current_vp(scr);
 	if(vp!=NULL)
 		viewport_display_nth(vp, n);
 }
 
 
-void switch_ws_next()
+EXTL_EXPORT
+void switch_ws_next(WScreen *scr)
 {
-	WViewport *vp=current_vp(wglobal.active_screen);
+	WViewport *vp=current_vp(scr);
 	if(vp!=NULL)
 		viewport_display_next(vp);
 }
 
 
-void switch_ws_prev()
+EXTL_EXPORT
+void switch_ws_prev(WScreen *scr)
 {
-	WViewport *vp=current_vp(wglobal.active_screen);
+	WViewport *vp=current_vp(scr);
 	if(vp!=NULL)
 		viewport_display_prev(vp);
 }
@@ -442,7 +447,7 @@ static DynFunTab viewport_dynfuntab[]={
 };
 
 
-IMPLOBJ(WViewport, WRegion, deinit_viewport, viewport_dynfuntab, NULL)
+IMPLOBJ(WViewport, WRegion, deinit_viewport, viewport_dynfuntab);
 
 
 /*}}}*/

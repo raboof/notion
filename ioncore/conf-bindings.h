@@ -8,15 +8,12 @@
 #ifndef ION_IONCORE_CONF_BINDINGS_H
 #define ION_IONCORE_CONF_BINDINGS_H
 
-#include <libtu/parser.h>
 #include <libtu/map.h>
 
 #include "binding.h"
-#include "function.h"
+#include "extl.h"
 
-extern ConfOpt ioncore_binding_opts[];
-
-extern bool ioncore_begin_bindings(WBindmap *bindmap,
-								  const StringIntMap *areas);
+extern bool process_bindings(WBindmap *bindmap, StringIntMap *areamap,
+							 ExtlTab tab);
 
 #endif /* ION_IONCORE_CONF_BINDINGS_H */

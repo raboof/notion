@@ -15,7 +15,7 @@
 
 typedef void Action(WObj*);
 
-INTRSTRUCT(Defer)
+INTRSTRUCT(Defer);
 	
 DECLSTRUCT(Defer){
 	WWatch watch;

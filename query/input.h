@@ -11,7 +11,7 @@
 #include <ioncore/common.h>
 #include <ioncore/window.h>
 
-INTROBJ(WInput)
+INTROBJ(WInput);
 
 DECLOBJ(WInput){
 	WWindow win;

@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <libtu/parser.h>
 #include <libtu/map.h>
 
 #include "common.h"
@@ -16,105 +15,43 @@
 #include "readconfig.h"
 #include "binding.h"
 #include "conf-bindings.h"
-#include "conf-winprops.h"
 #include "modules.h"
-#include "funtabs.h"
 #include "font.h"
 
 
-/*{{{ Misc */
-
-
-static bool opt_opaque_resize(Tokenizer *tokz, int n, Token *toks)
+EXTL_EXPORT
+void enable_opaque_resize(bool opaque)
 {
-	wglobal.opaque_resize=TOK_BOOL_VAL(&(toks[1]));
-	
-	return TRUE;
+	wglobal.opaque_resize=opaque;
 }
 
 
-static bool opt_dblclick_delay(Tokenizer *tokz, int n, Token *toks)
+EXTL_EXPORT
+void set_dblclick_delay(int dd)
 {
-	int dd=TOK_LONG_VAL(&(toks[1]));
-
 	wglobal.dblclick_delay=(dd<0 ? 0 : dd);
-	
-	return TRUE;
 }
 
 
-static bool opt_resize_delay(Tokenizer *tokz, int n, Token *toks)
+EXTL_EXPORT
+void set_resize_delay(int rd)
 {
-	int rd=TOK_LONG_VAL(&(toks[1]));
-
 	wglobal.resize_delay=(rd<0 ? 0 : rd);
-	
-	return TRUE;
 }
 
 
-static bool opt_warp_enabled(Tokenizer *tokz, int n, Token *toks)
+EXTL_EXPORT
+void enable_warp(bool warp)
 {
-	wglobal.warp_enabled=TOK_BOOL_VAL(&(toks[1]));
-	
-	return TRUE;
+	wglobal.warp_enabled=warp;
 }
 
 
-static bool opt_shorten_rule(Tokenizer *tokz, int n, Token *toks)
+EXTL_EXPORT
+void global_bindings(ExtlTab tab)
 {
-	return add_shortenrule(TOK_STRING_VAL(&(toks[1])),
-						   TOK_STRING_VAL(&(toks[2])));
+	process_bindings(&ioncore_screen_bindmap, NULL, tab);
 }
-
-
-/*}}}*/
-
-
-/*{{{ Bindings*/
-
-
-static bool opt_global_bindings(Tokenizer *tokz, int n, Token *toks)
-{
-	return ioncore_begin_bindings(&ioncore_screen_bindmap, NULL);
-}
-
-
-/*}}}*/
-
-
-/*{{{ Modules */
-
-
-static bool opt_module(Tokenizer *tokz, int n, Token *toks)
-{
-	return load_module(TOK_STRING_VAL(&(toks[1])));
-}
-
-
-/*}}}*/
-
-
-static ConfOpt opts[]={
-	/* misc */
-	{"dblclick_delay", "l", opt_dblclick_delay, NULL},
-	{"resize_delay", "l", opt_resize_delay, NULL},
-	{"opaque_resize", "b", opt_opaque_resize, NULL},
-	{"warp_enabled", "b", opt_warp_enabled, NULL},
-	{"shorten_rule", "ss", opt_shorten_rule, NULL},
-	
-	/* window props */
-	{"winprop" , "sss", ioncore_begin_winprop, ioncore_winprop_opts},
-	
-	/* bindings */
-	{"global_bindings", NULL, opt_global_bindings, ioncore_binding_opts},
-	
-	/* modules */
-	{"module", "s", opt_module, NULL},
-	
-	END_CONFOPTS
-};
-
 
 
 bool ioncore_read_config(const char *cfgfile)
@@ -122,8 +59,8 @@ bool ioncore_read_config(const char *cfgfile)
 	if(cfgfile==NULL){
 		cfgfile="ioncore";
 	}else if(strpbrk(cfgfile, "./")!=NULL){
-		return read_config(cfgfile, opts);
+		return read_config(cfgfile);
 	}
 	
-	return read_config_for(cfgfile, opts);
+	return read_config_for(cfgfile);
 }

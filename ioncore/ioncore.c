@@ -20,18 +20,17 @@
 #include "event.h"
 #include "cursor.h"
 #include "signal.h"
-#include "binding.h"
 #include "readconfig.h"
 #include "global.h"
-#include "draw.h"
 #include "modules.h"
-#include "wsreg.h"
-#include "funtabs.h"
 #include "eventh.h"
 #include "saveload.h"
 #include "ioncore.h"
+#include "wsreg.h"
 #include "exec.h"
 #include "conf.h"
+#include "binding.h"
+#include "extl.h"
 #include "../version.h"
 
 
@@ -84,6 +83,10 @@ static OptParserCommonInfo ioncore_cinfo={
 /*{{{ Main */
 
 
+extern bool ioncore_register_exports();
+extern void ioncore_unregister_exports();
+
+
 int main(int argc, char*argv[])
 {
 	const char *cfgfile=NULL;
@@ -129,10 +132,16 @@ int main(int argc, char*argv[])
 	wglobal.argv=argv;
 	
 	/*ioncore_add_default_dirs("ion-devel", ETCDIR, LIBDIR);*/
+
+	if(!extl_init())
+		return EXIT_FAILURE;
+
+	ioncore_register_exports();
+	read_config_for("ioncore-lib");
 	
 	if(!ioncore_init(display, onescreen))
 		return EXIT_FAILURE;
-	
+
 	if(!ioncore_read_config(cfgfile)){
 		msg="Unable to load configuration file. Refusing to start. "
 			"You *must* install proper configuration files "
@@ -156,7 +165,7 @@ fail:
 	XCloseDisplay(wglobal.dpy);
 	libtu_asprintf(&cmd, "xmessage '%s'", msg);
 	if(cmd!=NULL)
-		wm_do_exec(cmd);
+		ioncore_do_exec(cmd);
 	return EXIT_FAILURE;
 }
 
@@ -237,7 +246,6 @@ bool ioncore_init(const char *display, bool onescreen)
 #endif
 	
 	initialize_global();
-	ioncore_init_funclists();
 	
 	/* Open the display. */
 	dpy=XOpenDisplay(display);

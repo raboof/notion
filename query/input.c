@@ -15,12 +15,14 @@
 /*{{{ Dynfuns */
 
 
+EXTL_EXPORT
 void input_scrollup(WInput *input)
 {
 	CALL_DYN(input_scrollup, input, (input));
 }
 
 
+EXTL_EXPORT
 void input_scrolldown(WInput *input)
 {
 	CALL_DYN(input_scrolldown, input, (input));
@@ -121,9 +123,17 @@ void deinit_input(WInput *input)
 }
 
 
+EXTL_EXPORT
 void input_cancel(WInput *input)
 {
 	destroy_obj((WObj*)input);
+}
+
+
+EXTL_EXPORT
+void input_close(WInput *input)
+{
+	input_cancel(input);
 }
 
 
@@ -136,11 +146,12 @@ void input_cancel(WInput *input)
 static DynFunTab input_dynfuntab[]={
 	{fit_region, fit_input},
 	{region_draw_config_updated, input_draw_config_updated},
+	{region_close, input_close},
 	END_DYNFUNTAB
 };
 
 
-IMPLOBJ(WInput, WWindow, deinit_input, input_dynfuntab, &query_input_funclist)
+IMPLOBJ(WInput, WWindow, deinit_input, input_dynfuntab);
 
 	
 /*}}}*/

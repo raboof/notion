@@ -8,11 +8,11 @@
 #ifndef ION_IONWS_IONFRAME_H
 #define ION_IONWS_IONFRAME_H
 
-#include <libtu/tokenizer.h>
 #include <ioncore/common.h>
 #include <ioncore/genframe.h>
+#include <ioncore/extl.h>
 
-INTROBJ(WIonFrame)
+INTROBJ(WIonFrame);
 
 DECLOBJ(WIonFrame){
 	WGenFrame genframe;
@@ -25,6 +25,6 @@ extern void ionframe_draw_config_updated(WIonFrame *frame);
 extern void ionframe_draw_bar(const WIonFrame *frame, bool complete);
 extern void ionframe_draw(const WIonFrame *frame, bool complete);
 
-extern WRegion *ionframe_load(WWindow *par, WRectangle geom, Tokenizer *tokz);
+extern WRegion *ionframe_load(WWindow *par, WRectangle geom, ExtlTab tab);
 
 #endif /* ION_IONWS_IONFRAME_H */

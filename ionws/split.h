@@ -12,8 +12,8 @@
 #include <ioncore/window.h>
 #include <ioncore/reginfo.h>
 
-INTROBJ(WWsSplit)
-INTRSTRUCT(WResizeTmp)
+INTROBJ(WWsSplit);
+INTRSTRUCT(WResizeTmp);
 
 #define SPLIT_OF(X) ((X)->mgr_data)
 

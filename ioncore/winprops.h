@@ -8,34 +8,22 @@
 #ifndef ION_IONCORE_WINPROPS_H
 #define ION_IONCORE_WINPROPS_H
 
-enum TransientMode{
-	TRANSIENT_MODE_NORMAL,
-	TRANSIENT_MODE_CURRENT,
-	TRANSIENT_MODE_OFF
-};
+#include "common.h"
+#include "extl.h"
 
-INTRSTRUCT(WWinProp)
+INTRSTRUCT(WWinProp);
 
 DECLSTRUCT(WWinProp){
 	char *wclass;
 	char *wrole;
 	char *winstance;
+	ExtlTab proptab;
 	WWinProp *next, *prev;
-	
-	int flags;
-	int manage_flags;
-	int stubborn;
-	int max_w, max_h;
-	int aspect_w, aspect_h;
-	char *target_name;
-	int transient_mode;
 };
 
-extern WWinProp *alloc_winprop(const char *cls, const char *role,
-							   const char *instance);
-extern void add_winprop(WWinProp *winprop);
-extern WWinProp *find_winprop_win(Window win);
-extern void free_winprop(WWinProp *winprop);
+void add_winprop(const char *cls, const char *role, const char *inst,
+				 ExtlTab tab);
+extern ExtlTab find_winproptab_win(Window win);
 extern void free_winprops();
 
 #endif /* ION_IONCORE_WINPROPS_H */

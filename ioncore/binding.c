@@ -11,8 +11,8 @@
 #include "binding.h"
 #include "global.h"
 #include "objp.h"
-#include "commandsq.h"
 #include "regbind.h"
+#include "extl.h"
 
 
 #ifndef CF_NO_LOCK_HACK
@@ -129,11 +129,9 @@ void deinit_binding(WBinding *binding)
 		free(binding->submap);
 	}
 	
-	if(binding->cmd!=NULL)
-		free(binding->cmd);
+	binding->func=extl_unref_fn(binding->func);
 	
 	binding->submap=NULL;
-	binding->cmd=NULL;
 }
 
 
@@ -165,7 +163,7 @@ bool add_binding(WBindmap *bindmap, const WBinding *b)
 	WBinding *binding;
 	int i, j;
 	
-	if(bindmap==NULL || (b->cmd==NULL && b->submap==NULL))
+	if(bindmap==NULL)
 		return FALSE;
 
 	binding=bindmap->bindings;
@@ -375,21 +373,6 @@ WBinding *lookup_binding_area(WBindmap *bindmap,
 }
 
 	
-void call_binding(const WBinding *binding, WRegion *reg)
-{
-	if(binding->cmd!=NULL)
-		execute_command_sequence(reg, binding->cmd);
-}
-
-
-void call_binding_restricted(const WBinding *binding, WRegion *reg,
-							 WFunclist *funclist)
-{
-	if(binding->cmd!=NULL)
-		execute_command_sequence_restricted(reg, binding->cmd, funclist);
-}
-
-
 /*
  * A dirty hack to deal with (==ignore) evil locking modifier keys.
  */

@@ -1,0 +1,957 @@
+/*
+ * ion/lua/luaextl.c
+ *
+ * Copyright (c) Tuomo Valkonen 1999-2003. 
+ * See the included file LICENSE for details.
+ */
+
+#include <stdlib.h>
+#include <math.h>
+#include <string.h>
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
+
+#include <ioncore/common.h>
+#include <ioncore/obj.h>
+#include <ioncore/objp.h>
+#include <ioncore/completehelp.h>
+
+#include "luaextl.h"
+
+
+static lua_State *l_st=NULL;
+
+
+/*{{{ WObj userdata handling */
+
+
+static void extl_get_wobj_metatable(lua_State *st)
+{
+	lua_getregistry(st);
+	lua_pushstring(st, "ioncore_luaextl_WObj_metatable");
+	lua_gettable(st, -2);
+	lua_remove(st, -2);
+}
+
+
+static bool extl_verify_wobj(lua_State *st, int pos)
+{
+	bool ret;
+	
+	if(!lua_isuserdata(st, pos))
+		return FALSE;
+	
+	if(!lua_getmetatable(st, pos))
+		return FALSE;
+	
+	extl_get_wobj_metatable(st);
+	
+	ret=lua_equal(st, -1, -2);
+	
+	lua_pop(st, 2);
+	
+	return ret;
+}
+
+
+static void extl_obj_dest_handler(WWatch *watch, WObj *obj)
+{
+	D(fprintf(stderr, "Object destroyed while Lua code is still referencing it."));
+}
+
+
+static int extl_obj_gc_handler(lua_State *st)
+{
+	WWatch *watch;
+	
+	if(!extl_verify_wobj(st, 1))
+		return 0;
+	
+	watch=(WWatch*)lua_touserdata(st, 1);
+	
+	if(watch!=NULL)
+		reset_watch(watch);
+	
+	return 0;
+}
+
+
+static bool extl_push_obj(lua_State *st, WObj *obj)
+{
+	WWatch *watch;
+	
+	if(obj==NULL){
+		lua_pushnil(st);
+		return TRUE;
+	}
+
+	watch=(WWatch*)lua_newuserdata(l_st, sizeof(WWatch));
+	
+	if(watch==NULL)
+		return FALSE;
+	
+	init_watch(watch);
+	setup_watch(watch, obj, extl_obj_dest_handler);
+	
+	extl_get_wobj_metatable(st);
+	lua_setmetatable(st, -2);
+	
+	return TRUE;
+}
+	
+	
+static bool extl_init_obj_metatable(lua_State *st)
+{
+	lua_getregistry(st);
+	lua_pushstring(st, "ioncore_luaextl_WObj_metatable");
+	lua_newtable(st);
+	lua_pushstring(st, "__gc");
+	lua_pushcfunction(st, extl_obj_gc_handler);
+	lua_settable(st, -3); /* set metatable.__gc=extl_obj_gc_handler */
+	lua_settable(st, -3); /* set registry.WObj_metatable=metatable */
+	lua_pop(st, 1); /* pop registry */
+	
+	return TRUE;
+}
+
+
+/*}}}*/
+
+
+/*{{{ Init */
+
+
+bool extl_init()
+{
+	l_st=lua_open();
+	
+	if(l_st==NULL){
+		warn("Unable to initialize Lua.\n");
+		return FALSE;
+	}
+
+	lua_baselibopen(l_st);
+	lua_tablibopen(l_st);
+	lua_iolibopen(l_st);
+	lua_strlibopen(l_st);
+	lua_mathlibopen(l_st);
+	
+	if(!extl_init_obj_metatable(l_st)){
+		warn("Failed to initialize WObj metatable\n");
+		goto fail;
+	}
+	
+	return TRUE;
+fail:
+	lua_close(l_st);
+	return FALSE;
+}
+
+
+const char *extl_extension()
+{
+	return "lua";
+}
+
+
+/*}}}*/
+
+
+/*{{{ Runfile */
+
+
+bool extl_runfile(const char *file)
+{
+	int ret, oldtop;
+	
+	fprintf(stderr, "lua_dofile(%s)\n", file);
+	
+	oldtop=lua_gettop(l_st);
+	/*lua_pushstring(l_st, file);
+	lua_setglobal(l_st, "THIS_FILE_NAME");*/
+	ret=lua_dofile(l_st, file);
+	
+	if(ret!=0){
+		warn("%s", lua_tostring(l_st, -1));
+		lua_settop(l_st, oldtop);
+		return FALSE;
+	}
+	
+	lua_settop(l_st, oldtop);
+
+	return TRUE;
+}
+
+
+/*}}}*/
+
+
+/*{{{ Stack get */
+
+
+static WObj *do_get_obj(lua_State *st, int pos)
+{
+	WWatch *watch=(WWatch*)lua_touserdata(st, pos);
+	return watch->obj;
+}
+
+
+static bool extl_stack_get(lua_State *st, int pos, char type, bool copystring,
+						   void *valret)
+{
+	double d=0;
+	const char *str;
+			  
+	if(type=='0'){
+		if(!lua_isnil(st, pos))
+			return FALSE;
+		if(valret)
+			*((int*)valret)=lua_ref(st, pos);
+		return TRUE;
+	}
+		
+	if(type=='i' || type=='d'){
+		if(lua_type(st, pos)!=LUA_TNUMBER)
+			return FALSE;
+		
+		if(type=='i'){
+			d=lua_tonumber(st, pos);
+			if(d-floor(d)!=0)
+				return FALSE;
+			if(valret)
+				*((int*)valret)=d;
+		}else{
+			if(valret)
+				*((double*)valret)=d;
+		}
+		return TRUE;
+	}
+	
+	if(type=='b'){
+		if(lua_isboolean(st, pos)){
+			if(valret)
+				*((bool*)valret)=lua_toboolean(st, pos);
+			return TRUE;
+		}
+		if(lua_isnumber(st, pos)){
+			if(valret)
+				*((bool*)valret)=(lua_tonumber(st, pos)==0 ? FALSE : TRUE);
+			return TRUE;
+		}
+		return TRUE;
+	}
+	
+	if(type=='s' || type=='S'){
+		if(lua_type(st, pos)!=LUA_TSTRING)
+			return FALSE;
+		if(valret){
+			str=lua_tostring(st, pos);
+			if(str!=NULL && copystring){
+				str=scopy(str);
+				if(str==NULL){
+					warn_err();
+					return FALSE;
+				}
+			}
+			*((const char**)valret)=str;
+		}
+		return TRUE;
+	}
+	
+	if(type=='f'){
+		if(!lua_isfunction(st, pos))
+			return FALSE;
+		if(valret)
+			*((int*)valret)=lua_ref(st, pos);
+		return TRUE;
+	}
+
+	if(type=='t'){
+		if(!lua_istable(st, pos))
+			return FALSE;
+		if(valret)
+			*((int*)valret)=lua_ref(st, pos);
+		return TRUE;
+	}
+
+	if(type=='o'){
+		if(!extl_verify_wobj(st, pos))
+			return FALSE;
+		if(valret)
+			*((WObj**)valret)=do_get_obj(st, pos);
+		return TRUE;
+	}
+	
+	return FALSE;
+}
+
+
+static bool extl_stack_push(lua_State *st, char spec, void *ptr)
+{
+	if(spec=='i'){
+		lua_pushnumber(st, *(int*)ptr);
+	}else if(spec=='d'){
+		lua_pushnumber(st, *(double*)ptr);
+	}else if(spec=='b'){
+		lua_pushboolean(st, *(bool*)ptr);
+	}else if(spec=='o'){
+		if(!extl_push_obj(st, *(WObj**)ptr)){
+			lua_pushnil(st);
+			return FALSE;
+		}
+	}else if(spec=='s' || spec=='S'){
+		lua_pushstring(st, *(char**)ptr);
+		if(spec=='s')
+			free(*(char**)ptr);
+	}else if(spec=='t' || spec=='f'){
+		lua_rawgeti(l_st, LUA_REGISTRYINDEX, *(int*)ptr);
+		return !lua_isnil(st, -1);
+	}else{
+		lua_pushnil(st);
+		return FALSE;
+	}
+	
+	return TRUE;
+}
+
+
+/*}}}*/
+
+
+/*{{{ References misc. */
+
+
+/* lua_getref macros in 5.0 don't behave as before */
+static bool extl_getref(lua_State *st, int ref)
+{
+	lua_rawgeti(l_st, LUA_REGISTRYINDEX, ref);
+	if(lua_isnil(st, -1)){
+		lua_pop(st, 1);
+		return FALSE;
+	}
+	return TRUE;
+}
+	
+	
+ExtlFn extl_unref_fn(ExtlFn ref)
+{
+	lua_unref(l_st, ref);
+	return LUA_NOREF;
+}
+
+
+ExtlFn extl_unref_table(ExtlTab ref)
+{
+	lua_unref(l_st, ref);
+	return LUA_NOREF;
+}
+
+					   
+ExtlFn extl_fn_none()
+{
+	return LUA_NOREF;
+}
+
+
+ExtlTab extl_table_none()
+{
+	return LUA_NOREF;
+}
+
+
+ExtlTab extl_ref_table(ExtlTab ref)
+{
+	if(extl_getref(l_st, ref)==0)
+		return LUA_NOREF;
+	return lua_ref(l_st, ref);
+}
+
+
+ExtlFn extl_ref_fn(ExtlFn ref)
+{
+	if(extl_getref(l_st, ref)==0)
+		return LUA_NOREF;
+	return lua_ref(l_st, ref);
+}
+
+
+/*}}}*/
+
+
+/*{{{ Tables */
+
+
+static bool extl_table_do_gets(ExtlTab ref, const char *entry, char type,
+							   void *valret)
+{
+	bool ret=FALSE;
+	int oldtop=lua_gettop(l_st);
+	
+	if(extl_getref(l_st, ref)==0)
+		return FALSE;
+	
+	lua_pushstring(l_st, entry);
+	lua_gettable(l_st, -2);
+	ret=extl_stack_get(l_st, -1, type, TRUE, valret);
+	
+	lua_settop(l_st, oldtop);
+	
+	return ret;
+}
+
+
+bool extl_table_gets_o(ExtlTab ref, const char *entry, WObj **ret)
+{
+	return extl_table_do_gets(ref, entry, 'o', (void*)ret);
+}
+
+bool extl_table_gets_i(ExtlTab ref, const char *entry, int *ret)
+{
+	return extl_table_do_gets(ref, entry, 'i', (void*)ret);
+}
+
+bool extl_table_gets_d(ExtlTab ref, const char *entry, double *ret)
+{
+	return extl_table_do_gets(ref, entry, 'd', (void*)ret);
+}
+
+bool extl_table_gets_b(ExtlTab ref, const char *entry, bool *ret)
+{
+	return extl_table_do_gets(ref, entry, 'b', (void*)ret);
+}
+
+bool extl_table_gets_s(ExtlTab ref, const char *entry, char **ret)
+{
+	return extl_table_do_gets(ref, entry, 's', (void*)ret);
+}
+
+bool extl_table_gets_f(ExtlTab ref, const char *entry, ExtlFn *ret)
+{
+	return extl_table_do_gets(ref, entry, 'f', (void*)ret);
+}
+
+bool extl_table_gets_t(ExtlTab ref, const char *entry, ExtlTab *ret)
+{
+	return extl_table_do_gets(ref, entry, 't', (void*)ret);
+}
+
+
+int extl_table_get_n(ExtlTab ref)
+{
+	int oldtop=lua_gettop(l_st);
+	int n=0;
+	
+	if(extl_getref(l_st, ref)==0){
+		fprintf(stderr, "nilref\n");
+		return 0;
+	}
+	
+	lua_getglobal(l_st, "table");
+	lua_pushstring(l_st, "getn");
+	lua_gettable(l_st, -2);
+	lua_pushvalue(l_st, -3);
+	if(lua_pcall(l_st, 1, 1, 0)==0){
+		n=lua_tonumber(l_st, -1);
+	}else{
+		warn("%s", lua_tostring(l_st, -1));
+	}
+	
+	lua_settop(l_st, oldtop);
+	
+	return n;
+}
+
+
+static bool extl_table_do_geti(ExtlTab ref, int entry, char type, void *valret)
+{
+	bool ret=FALSE;
+	int oldtop=lua_gettop(l_st);
+	
+	if(extl_getref(l_st, ref)==0)
+		return FALSE;
+	
+	lua_rawgeti(l_st, -1, entry);
+	ret=extl_stack_get(l_st, -1, type, TRUE, valret);
+	
+	lua_settop(l_st, oldtop);
+	
+	return ret;
+}
+
+
+bool extl_table_geti_o(ExtlTab ref, int entry, WObj **ret)
+{
+	return extl_table_do_geti(ref, entry, 'o', (void*)ret);
+}
+
+bool extl_table_geti_i(ExtlTab ref, int entry, int *ret)
+{
+	return extl_table_do_geti(ref, entry, 'i', (void*)ret);
+}
+
+bool extl_table_geti_d(ExtlTab ref, int entry, double *ret)
+{
+	return extl_table_do_geti(ref, entry, 'd', (void*)ret);
+}
+
+bool extl_table_geti_b(ExtlTab ref, int entry, bool *ret)
+{
+	return extl_table_do_geti(ref, entry, 'b', (void*)ret);
+}
+
+bool extl_table_geti_s(ExtlTab ref, int entry, char **ret)
+{
+	return extl_table_do_geti(ref, entry, 's', (void*)ret);
+}
+
+bool extl_table_geti_f(ExtlTab ref, int entry, ExtlFn *ret)
+{
+	return extl_table_do_geti(ref, entry, 'f', (void*)ret);
+}
+
+bool extl_table_geti_t(ExtlTab ref, int entry, ExtlTab *ret)
+{
+	return extl_table_do_geti(ref, entry, 't', (void*)ret);
+}
+
+
+/*}}}*/
+
+
+/*{{{ Function calls to Lua */
+
+
+static bool extl_push_args(lua_State *st, const char *spec, int *n_ret,
+						   va_list args)
+{
+	*n_ret=0;
+	
+	if(spec==NULL)
+		return TRUE;
+	
+	while(*spec!='\0'){
+		/*fprintf(stderr, "push: %c\n", *spec);*/
+		switch(*spec){
+		case 'i':
+			lua_pushnumber(l_st, (double)va_arg(args, int));
+			break;
+		case 'd':
+			lua_pushnumber(l_st, va_arg(args, double));
+			break;
+		case 'b':
+			lua_pushboolean(l_st, va_arg(args, bool));
+			break;
+		case 'o':
+			if(!extl_push_obj(l_st, va_arg(args, WObj*)))
+				return FALSE;
+			break;
+		case 'S':
+		case 's':
+			lua_pushstring(l_st, va_arg(args, char*));
+			break;
+		case 'f':
+		case 't':
+			if(!extl_getref(l_st, va_arg(args, int)))
+				return FALSE;
+			break;
+		default:
+			return FALSE;
+		}
+		(*n_ret)++;
+		spec++;
+	}
+	
+	return TRUE;
+}
+
+
+static void extl_free_param(void *ptr, char spec, bool strings)
+{
+	if((spec=='s' || spec=='S') && strings && *(char**)ptr!=NULL){
+		free(*(char**)ptr);
+		*(char**)ptr=NULL;
+	}else if(spec=='t'){
+		extl_unref_table(*(ExtlTab*)ptr);
+	}else if(spec=='f'){
+		extl_unref_fn(*(ExtlFn*)ptr);
+	}
+}
+
+
+static bool extl_get_retvals(lua_State *st, const char *spec, int m,
+							 va_list args)
+{
+	int om=m;
+	void *ptr;
+	char *s;
+	va_list oargs;
+	
+	va_copy(oargs,args);
+	
+	while(m>0){
+		ptr=va_arg(args, void*);
+		if(!extl_stack_get(st, -m, *spec, TRUE, ptr)){
+			warn("Invalid return value.\n");
+			goto fail;
+		}
+		spec++;
+		m--;
+	}
+	
+	va_end(oargs);
+	
+	return TRUE;
+	
+fail:
+	/* There was a failure getting some return value. We have to free what
+	 * was already gotten.
+	 */
+	spec-=(om-m);
+	while(om>m){
+		ptr=va_arg(oargs, void*);
+		extl_free_param(ptr, *spec, TRUE);
+		spec++;
+		om--;
+	}
+
+	va_end(oargs);
+	
+	return FALSE;
+}
+
+
+static const char **extl_safelist=NULL;
+static int extl_l1_call_handler(lua_State *st);
+
+
+static bool extl_do_call_vararg(lua_State *st, int oldtop,
+								const char **safelist, const char *spec,
+								const char *rspec, va_list args)
+{
+	bool ret=TRUE;
+	const char **old_safelist=NULL;
+	int n=0, m=0;
+
+	/* First phase of safelist checking: Make sure the called function is our
+	 * l1 call handler. The call handler then checks that the name of the
+	 * called function matches as otherwise we'd  have to do some extra
+	 * bookkeeping (Why can't upvalues be accessed or can they?).
+	 */
+	if(safelist!=NULL){
+		if(lua_tocfunction(st, -1)!=extl_l1_call_handler){
+			lua_settop(st, oldtop);
+			warn("Attempt to call an unsafe function on restricted mode.");
+			return FALSE;
+		}
+	}
+
+	old_safelist=extl_safelist;
+	extl_safelist=safelist;
+	
+	ret=extl_push_args(st, spec, &n, args);
+	
+	if(ret){
+		if(rspec!=NULL)
+			m=strlen(rspec);
+		
+		if(lua_pcall(st, n, m, 0)!=0){
+			warn_obj("extl_do_call_vararg", "%s", lua_tostring(st, -1));
+			ret=FALSE;
+		}else{
+			if(m>0)
+				ret=extl_get_retvals(st, rspec, m, args);
+		}
+	}
+	
+	lua_settop(l_st, oldtop);
+	
+	extl_safelist=old_safelist;
+	
+	return ret;
+}
+
+
+bool extl_call_vararg(ExtlFn fnref, const char **safelist,
+					  const char *spec, const char *rspec, va_list args)
+{
+	int oldtop=lua_gettop(l_st);
+	
+	if(!extl_getref(l_st, fnref))
+		return FALSE;
+	
+	return extl_do_call_vararg(l_st, oldtop, safelist, spec, rspec, args);
+}
+
+
+bool extl_call_named_vararg(const char *name, const char *spec,
+							const char *rspec, va_list args)
+{
+	int oldtop=lua_gettop(l_st);
+	
+	lua_getglobal(l_st, name);
+	
+	return extl_do_call_vararg(l_st, oldtop, NULL, spec, rspec, args);
+}
+
+
+bool extl_call(ExtlFn fnref, const char *spec, const char *rspec, ...)
+{
+	bool retval;
+	va_list args;
+	
+	va_start(args, rspec);
+	retval=extl_call_vararg(fnref, NULL, spec, rspec, args);
+	va_end(args);
+	
+	return retval;
+}
+
+
+bool extl_call_restricted(ExtlFn fnref, const char **safelist,
+						  const char *spec, const char *rspec, ...)
+{
+	bool retval;
+	va_list args;
+	
+	va_start(args, rspec);
+	retval=extl_call_vararg(fnref, safelist, spec, rspec, args);
+	va_end(args);
+	
+	return retval;
+}
+
+
+bool extl_call_named(const char *name, const char *spec, const char *rspec, ...)
+{
+	bool retval;
+	va_list args;
+	
+	va_start(args, rspec);
+	retval=extl_call_named_vararg(name, spec, rspec, args);
+	va_end(args);
+	
+	return retval;
+}
+
+
+/*}}}*/
+
+
+/*{{{ Function calls from lua */
+
+
+#define MAX_PARAMS 16
+
+
+static int extl_l1_call_handler(lua_State *st)
+{
+	ExtlL2Param ip[MAX_PARAMS]={NULL, };
+	ExtlL2Param op[MAX_PARAMS]={NULL, };
+	ExtlExportedFnSpec *spec;
+	int i, ni, no, top;
+	bool ret;
+	
+	top=lua_gettop(st);
+	
+	spec=(ExtlExportedFnSpec*)lua_touserdata(st, lua_upvalueindex(1));
+	if(spec==NULL){
+		warn("L1 call handler upvalues corrupt.");
+		return 0;
+	}
+	
+	if(spec->fn==NULL){
+		warn("Called function has been unregistered");
+		return 0;
+	}
+	
+	/* Second phase of safelist checking */
+	if(extl_safelist!=NULL){
+		for(i=0; extl_safelist[i]!=NULL; i++){
+			if(strcmp(spec->name, extl_safelist[i])==0)
+				break;
+		}
+		if(extl_safelist[i]==NULL){
+			warn("Attempt to call an unsafe function on restricted mode.");
+			return 0;
+		}
+	}
+	
+	ni=(spec->ispec==NULL ? 0 : strlen(spec->ispec));
+	no=(spec->ospec==NULL ? 0 : strlen(spec->ospec));
+	
+	for(i=0; i<ni; i++){
+		if(!extl_stack_get(st, i+1, spec->ispec[i], FALSE, (void*)&(ip[i]))){
+			warn("Invalid arguments. Template is '%s'.", spec->ispec);
+			while(--i>=0)
+				extl_free_param((void*)&(ip[i]), spec->ispec[i], FALSE);
+			return 0;
+		}
+	}
+	
+	ret=spec->l2handler(spec->fn, ip, op);
+	
+	for(i=0; i<ni; i++)
+		extl_free_param((void*)&(ip[i]), spec->ispec[i], FALSE);
+
+	if(!ret)
+		return 0;
+	
+	for(i=0; i<no; i++)
+		extl_stack_push(st, spec->ospec[i], (void*)&(op[i]));
+
+	return no;
+}
+
+
+bool extl_register_function(ExtlExportedFnSpec *spec)
+{
+	ExtlExportedFnSpec *spec2;
+	int oldtop;
+	
+	if((spec->ispec!=NULL && strlen(spec->ispec)>MAX_PARAMS) ||
+	   (spec->ospec!=NULL && strlen(spec->ospec)>MAX_PARAMS)){
+		warn("Function '%s' has more parameters than the level 1 "
+			 "call handler can handle\n", spec->name);
+		return FALSE;
+	}
+
+	oldtop=lua_gettop(l_st);
+
+	spec2=lua_newuserdata(l_st, sizeof(ExtlExportedFnSpec));
+	if(spec2==NULL){
+		warn("Unable to create upvalue for '%s'\n", spec->name);
+		return FALSE;
+	}
+	memcpy(spec2, spec, sizeof(ExtlExportedFnSpec));
+
+	/*lua_pushlightuserdata(l_st, spec);*/
+	lua_getregistry(l_st);
+	lua_pushvalue(l_st, -2); /* Get spec2 */
+	lua_pushfstring(l_st, "ioncore_luaextl_%s_upvalue", spec->name);
+	lua_settable(l_st, -3); /* Set registry.ioncore_luaextl_fn_upvalue=spec2 */
+	lua_pop(l_st, 1); /* Pop registry */
+	lua_pushcclosure(l_st, extl_l1_call_handler, 1);
+	lua_setglobal(l_st, spec->name);
+	
+	lua_settop(l_st, oldtop);
+	
+	return TRUE;
+}
+
+
+void extl_unregister_function(ExtlExportedFnSpec *spec)
+{
+	ExtlExportedFnSpec *spec2;
+	
+	lua_getregistry(l_st);
+	lua_pushfstring(l_st, "ioncore_luaextl_%s_upvalue", spec->name);
+	lua_gettable(l_st, -2); /* Get registry.ioncore_luaextl_fn_upvalue */
+	spec2=lua_touserdata(l_st, -1);
+	if(spec2!=NULL){
+		spec2->ispec=NULL;
+		spec2->ospec=NULL;
+		spec2->fn=NULL;
+		spec2->name=NULL;
+		spec2->l2handler=NULL;
+	}
+	
+	lua_pushnil(l_st);
+	lua_setglobal(l_st, spec->name);
+}
+
+
+/*}}}*/
+
+
+#if 0
+static int extl_type_redef(lua_State *st)
+{
+	const char *s;
+	WObj *obj;
+	
+	if(lua_tag(st, -1)==obj_tag){
+		obj=do_get_obj(st, -1);
+		if(obj==NULL){
+			s="nil";
+		}else{
+			s=WOBJ_TYPESTR(obj);
+		}
+	}else{
+		s=lua_typename(st, -1);
+	}
+	lua_pushstring(st, s);
+	
+	return 1;
+}
+
+
+static int extl_is_a(lua_State *st)
+{
+	int ret=0;
+	const char *s, *s2;
+	WObj *obj;
+	
+	s=lua_tostring(st, -1);
+p	
+	if(s==NULL)
+		return 0;
+	
+	if(strcmp(s, "nil")==0){
+		ret=lua_isnil(st, -2);
+	}else if(strcmp(s, "number")==0){
+		ret=lua_isnumber(st, -2);
+	}else if(strcmp(s, "string")==0){
+		ret=lua_isstring(st, -2);
+	}else if(strcmp(s, "table")==0){
+		ret=lua_istable(st, -2);
+	}else if(strcmp(s, "function")==0){
+		ret=lua_isfunction(st, -2);
+	}else if(strcmp(s, "userdata")==0){
+		ret=lua_isuserdata(st, -2);
+	}else{
+		ret=extl_stack_get(st, -2, 'o', FALSE, NULL);
+		/* ... */
+	}
+	
+	lua_pushnumber(st, ret);
+	
+	return 1;
+}
+
+#endif
+
+/*{{{ Misc */
+
+
+int extl_complete_fn(char *nam, char ***cp_ret, char **beg, void *unused)
+{
+	int oldtop=lua_gettop(l_st);
+	int n=0;
+	int l=strlen(nam);
+	const char *fnam;
+	
+	lua_pushnil(l_st);
+	
+	for(; lua_next(l_st, LUA_GLOBALSINDEX)!=0; lua_pop(l_st, 1)){
+		if(!lua_isfunction(l_st, -1))
+			continue;
+		
+		fnam=lua_tostring(l_st, -2);
+		
+		if(fnam==NULL)
+			continue;
+			
+		if(strncmp(nam, fnam, l)==0)
+			add_to_complist_copy(cp_ret, &n, fnam);
+	}
+	
+	lua_settop(l_st, oldtop);
+	
+	return n;
+}
+	
+	
+/*}}}*/
+
+

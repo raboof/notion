@@ -8,7 +8,12 @@
 #ifndef ION_FLOATWS_MAIN_H
 #define ION_FLOATWS_MAIN_H
 
+#include <ioncore/binding.h>
+
 extern bool floatws_module_init();
 extern void floatws_module_deinit();
+
+extern WBindmap floatws_bindmap;
+extern WBindmap floatframe_bindmap;
 
 #endif /* ION_FLOATWS_MAIN_H */

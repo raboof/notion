@@ -12,13 +12,14 @@ TARGETS := $(TARGETS) $(MODULE).a
 endif
 endif
 
+
 ifdef SUBDIRS
 
 all: subdirs $(TARGETS)
 
-clean: subdirs-clean _clean $(CLEAN_TARGETS)
+clean: subdirs-clean _clean
 
-realclean: subdirs-realclean _clean _realclean $(CLEAN_TARGETS) $(REALCLEAN_TARGETS)
+realclean: subdirs-realclean _clean _realclean
 
 depend: subdirs-depend _depend
 
@@ -26,9 +27,9 @@ else
 
 all: $(TARGETS)
 
-clean: _clean $(CLEAN_TARGETS)
+clean: _clean
 
-realclean: _clean _realclean $(CLEAN_TARGETS) $(REALCLEAN_TARGETS)
+realclean: _clean _realclean
 
 depend: _depend
 
@@ -45,6 +46,19 @@ install: _install
 endif
 
 ######################################
+
+OBJS=$(subst .c,.o,$(SOURCES))
+
+ifdef MAKE_EXPORTS
+
+TO_CLEAN := $(TO_CLEAN) exports.c
+
+OBJS := $(OBJS) exports.o
+
+exports.c: $(SOURCES)
+	$(PERL) $(TOPDIR)/mkexports.pl $(MAKE_EXPORTS) exports.c $(SOURCES)
+
+endif
 
 ifdef MODULE
 
@@ -78,25 +92,20 @@ else
 
 endif
 
-ifdef OBJS
-
 _clean: 
-	rm -f core $(DEPEND_FILE) $(OBJS)
+	rm -f core $(DEPEND_FILE) $(OBJS) $(TO_CLEAN)
 
+_realclean:
+	rm -f $(TARGETS) $(TO_REALCLEAN)
+
+
+ifdef SOURCES
 _depend:
-	$(MAKE_DEPEND) *.c
-
+	$(MAKE_DEPEND) $(SOURCES)
 else
-
-_clean:
-
 _depend:
 	
 endif
-
-_realclean:
-	rm -f $(TARGETS)
-
 
 ######################################
 

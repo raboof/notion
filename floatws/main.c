@@ -5,15 +5,13 @@
  * See the included file LICENSE for details.
  */
 
-#include <libtu/tokenizer.h>
 #include <ioncore/binding.h>
 #include <ioncore/conf-bindings.h>
-#include <ioncore/functionp.h>
-#include <ioncore/function.h>
 #include <ioncore/readconfig.h>
 #include <ioncore/genframep.h>
 #include <ioncore/genframe-pointer.h>
 #include <ioncore/reginfo.h>
+#include <ioncore/extl.h>
 
 #include "floatws.h"
 #include "floatframe.h"
@@ -30,47 +28,11 @@ char floatws_module_ion_version[]=ION_VERSION;
 /*}}}*/
 
 
-/*{{{ Bindmaps */
+/*{{{ Bindmaps w/ config */
 
 
 WBindmap floatws_bindmap=BINDMAP_INIT;
 WBindmap floatframe_bindmap=BINDMAP_INIT;
-
-
-/*}}}*/
-
-
-/*{{{ Function tables */
-
-
-WFunclist floatws_funclist=INIT_FUNCLIST;
-
-static WFunction floatws_funtab[]={
-	FN_VOID(generic, WFloatWS, "floatws_circulate", floatws_circulate),
-	FN_VOID(generic, WFloatWS, "floatws_backcirculate", floatws_backcirculate),
-	END_FUNTAB
-};
-
-
-WFunclist floatframe_funclist=INIT_FUNCLIST;
-
-static WFunction floatframe_funtab[]={
-	FN_VOID(generic, WFloatFrame, "floatframe_p_move", genframe_p_move_setup),
-	FN_VOID(generic, WFloatFrame, "floatframe_raise", floatframe_raise),
-	FN_VOID(generic, WFloatFrame, "floatframe_lower", floatframe_lower),
-#if 0
-	FN_VOID(generic, WFloatFrame, "floatframe_close", floatframe_close),
-	/* Common functions */
-	FN_VOID(generic, WFloatFrame, "close",	floatframe_close),
-#endif	
-	END_FUNTAB
-};
-
-
-/*}}}*/
-
-
-/*{{{ Config */
 
 
 static StringIntMap frame_areas[]={
@@ -82,25 +44,18 @@ static StringIntMap frame_areas[]={
 };
 
 
-static bool begin_floatframe_bindings(Tokenizer *tokz, int n, Token *toks)
+EXTL_EXPORT
+void floatframe_bindings(ExtlTab tab)
 {
-	return ioncore_begin_bindings(&floatframe_bindmap, frame_areas);
+	process_bindings(&floatframe_bindmap, frame_areas, tab);
 }
 
 
-static bool begin_floatws_bindings(Tokenizer *tokz, int n, Token *toks)
+EXTL_EXPORT
+void floatws_bindings(ExtlTab tab)
 {
-	return ioncore_begin_bindings(&floatws_bindmap, NULL);
+	process_bindings(&floatws_bindmap, NULL, tab);
 }
-
-
-static ConfOpt opts[]={
-	{"floatws_bindings", NULL, begin_floatws_bindings,
-	 ioncore_binding_opts},
-	{"floatframe_bindings", NULL, begin_floatframe_bindings,
-	 ioncore_binding_opts},
-	END_CONFOPTS
-};
 
 
 /*}}}*/
@@ -109,10 +64,13 @@ static ConfOpt opts[]={
 /*{{{ Init & deinit */
 
 
+extern bool floatws_module_register_exports();
+extern bool floatws_module_unregister_exports();
+
+
 void floatws_module_deinit()
 {
-	clear_funclist(&floatws_funclist);
-	clear_funclist(&floatframe_funclist);
+	floatws_module_unregister_exports();
 	deinit_bindmap(&floatws_bindmap);
 	deinit_bindmap(&floatframe_bindmap);
 	unregister_region_class(&OBJDESCR(WFloatWS));
@@ -122,18 +80,19 @@ void floatws_module_deinit()
 
 bool floatws_module_init()
 {
-	if(!add_to_funclist(&floatws_funclist, floatws_funtab) ||
-	   !add_to_funclist(&floatframe_funclist, floatframe_funtab)){
+	if(!floatws_module_register_exports()){
+		warn_obj("floatws", "failed to register functions.");
 		goto err;
 	}
 	
 	if(!register_region_class(&OBJDESCR(WFloatWS),
 							  (WRegionSimpleCreateFn*) create_floatws,
 							  (WRegionLoadCreateFn*) floatws_load)){
-	   goto err;
+		warn_obj("floatws", "failed to register classes.");
+		goto err;
 	}
 
-	if(read_config_for("floatws", opts))
+	if(read_config_for("floatws"))
 		return TRUE;
 	
 err:

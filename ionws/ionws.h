@@ -8,17 +8,15 @@
 #ifndef ION_IONWS_IONWS_H
 #define ION_IONWS_IONWS_H
 
-#include <libtu/tokenizer.h>
 #include <ioncore/common.h>
-
-INTROBJ(WIonWS)
-
 #include <ioncore/region.h>
 #include <ioncore/viewport.h>
 #include <ioncore/genws.h>
+#include <ioncore/extl.h>
+
+INTROBJ(WIonWS);
 
 #include "split.h"
-
 
 DECLOBJ(WIonWS){
 	WGenWS genws;
@@ -35,6 +33,6 @@ extern void ionws_goto_below(WIonWS *ws);
 extern void ionws_goto_left(WIonWS *ws);
 extern void ionws_goto_right(WIonWS *ws);
 
-extern WRegion *ionws_load(WWindow *par, WRectangle geom, Tokenizer *tokz);
+extern WRegion *ionws_load(WWindow *par, WRectangle geom, ExtlTab tab);
 
 #endif /* ION_IONWS_IONWS_H */

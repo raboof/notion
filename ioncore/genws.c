@@ -12,9 +12,6 @@
 #include "names.h"
 
 
-IMPLOBJ(WGenWS, WRegion, deinit_genws, NULL, NULL)
-
-
 /*{{{ Create/destroy */
 
 
@@ -59,6 +56,15 @@ bool goto_workspace_name(const char *str)
 	
 	return TRUE;
 }
+
+
+/*}}}*/
+
+
+/*{{{ Class implementation */
+
+
+IMPLOBJ(WGenWS, WRegion, deinit_genws, NULL);
 
 
 /*}}}*/

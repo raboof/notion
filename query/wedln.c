@@ -409,7 +409,7 @@ bool init_wedln(WEdln *wedln, WWindow *par, WRectangle geom,
 
 	wedln->input.win.xic=create_xic(wedln->input.win.win);
 
-	region_add_bindmap((WRegion*)wedln, &query_edln_bindmap);
+	region_add_bindmap((WRegion*)wedln, &query_wedln_bindmap);
 	
 	return TRUE;
 }
@@ -447,6 +447,7 @@ void deinit_wedln(WEdln *wedln)
 }
 
 
+EXTL_EXPORT
 void wedln_finish(WEdln *wedln)
 {
 	WRegion *parent;
@@ -476,6 +477,7 @@ void wedln_finish(WEdln *wedln)
 /*{{{ The rest */
 
 
+EXTL_EXPORT
 void wedln_paste(WEdln *wedln)
 {
 	request_selection(wedln->input.win.win);
@@ -514,7 +516,7 @@ static DynFunTab wedln_dynfuntab[]={
 };
 
 
-IMPLOBJ(WEdln, WInput, deinit_wedln, wedln_dynfuntab, &query_edln_funclist)
+IMPLOBJ(WEdln, WInput, deinit_wedln, wedln_dynfuntab);
 
 	
 /*}}}*/

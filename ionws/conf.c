@@ -7,17 +7,13 @@
 
 #include <stdlib.h>
 
-#include <libtu/parser.h>
-#include <libtu/map.h>
-
 #include <ioncore/common.h>
 #include <ioncore/global.h>
 #include <ioncore/readconfig.h>
 #include <ioncore/binding.h>
 #include <ioncore/conf-bindings.h>
-#include <ioncore/funtabs.h>
 #include <ioncore/genframep.h>
-#include "funtabs.h"
+#include <ioncore/extl.h>
 #include "ionframe.h"
 #include "bindmaps.h"
 
@@ -30,38 +26,29 @@ static StringIntMap frame_areas[]={
 	END_STRINGINTMAP
 };
 
-	
-static bool opt_ionws_bindings(Tokenizer *tokz, int n, Token *toks)
+
+EXTL_EXPORT
+void ionws_bindings(ExtlTab tab)
 {
-	return ioncore_begin_bindings(&ionws_bindmap, NULL);
+	process_bindings(&ionws_bindmap, NULL, tab);
 }
 
 
-static bool opt_ionframe_bindings(Tokenizer *tokz, int n, Token *toks)
+EXTL_EXPORT
+void ionframe_bindings(ExtlTab tab)
 {
-	return ioncore_begin_bindings(&ionframe_bindmap, frame_areas);
+	process_bindings(&ionframe_bindmap, frame_areas, tab);
 }
 
 
-static bool opt_moveres_bindings(Tokenizer *tokz, int n, Token *toks)
+EXTL_EXPORT
+void ionframe_moveres_bindings(ExtlTab tab)
 {
-	return ioncore_begin_bindings(&ionframe_moveres_bindmap, NULL);
+	process_bindings(&ionframe_moveres_bindmap, NULL, tab);
 }
-
-
-static ConfOpt opts[]={
-	/* bindings */
-	{"ionws_bindings", NULL, opt_ionws_bindings, ioncore_binding_opts},
-	{"ionframe_bindings", NULL, opt_ionframe_bindings, ioncore_binding_opts},
-	{"ionframe_moveres_bindings", NULL, opt_moveres_bindings,
-	 ioncore_binding_opts},
-	
-	END_CONFOPTS
-};
-
 
 
 bool ionws_module_read_config()
 {
-	return read_config_for("ionws", opts);
+	return read_config_for("ionws");
 }

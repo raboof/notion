@@ -15,6 +15,8 @@
 #include "mwmhints.h"
 #include "objp.h"
 #include "names.h"
+#include "winprops.h"
+#include "extl.h"
 
 
 /* This file contains the add_clientwin_default handler for managing
@@ -28,50 +30,16 @@
 /*{{{ Static helper functions */
 
 
-static void set_winprops(WClientWin *cwin, const WWinProp *winprop)
-{
-	cwin->flags|=winprop->flags;
-	
-	if(cwin->flags&CWIN_PROP_MAXSIZE){
-		cwin->size_hints.max_width=winprop->max_w;
-		cwin->size_hints.max_height=winprop->max_h;
-		cwin->size_hints.flags|=PMaxSize;
-	}
-
-	if(cwin->flags&CWIN_PROP_ASPECT){
-		cwin->size_hints.min_aspect.x=winprop->aspect_w;
-		cwin->size_hints.max_aspect.x=winprop->aspect_w;
-		cwin->size_hints.min_aspect.y=winprop->aspect_h;
-		cwin->size_hints.max_aspect.y=winprop->aspect_h;
-		cwin->size_hints.flags|=PAspect;
-	}
-}
-
-
-static WWinProp *setup_get_winprops(WClientWin *cwin)
-{
-	WWinProp *props;
-	
-	props=find_winprop_win(cwin->win);
-	
-	if(props!=NULL)
-		set_winprops(cwin, props);
-	
-	return props;
-}
-
-
 static bool add_transient(WClientWin *tfor, WClientWin *cwin,
 						  const XWindowAttributes *attr,
-						  int init_state, WWinProp *props)
+						  int init_state)
 {
 	
 	WRegion *p=(WRegion*)tfor;
 	
 	while(p!=NULL){
 		if(HAS_DYN(p, region_ws_add_transient))
-			return region_ws_add_transient(p, tfor, cwin, attr,
-										   init_state, props);
+			return region_ws_add_transient(p, tfor, cwin, attr, init_state);
 		p=REGION_MANAGER(p);
 	}
 	
@@ -99,16 +67,19 @@ static WRegion *find_suitable_workspace(WViewport *vp)
 }
 
 
-static void find_prop_target(WClientWin *cwin, WWinProp *props,
-							 WRegion **target, WRegion **ws)
+static void find_prop_target(WClientWin *cwin, WRegion **target,
+							 WRegion **ws)
 {
 	WRegion *r;
+	char *target_name;
 	
-	if(props==NULL || props->target_name==NULL)
+	if(!extl_table_gets_s(cwin->proptab, "target", &target_name))
 		return;
 	
 	/* Potential problem: numbering */
-	r=lookup_region(props->target_name);
+	r=lookup_region(target_name);
+	
+	free(target_name);
 	
 	if(r!=NULL && SCREEN_OF(r)==SCREEN_OF(cwin)){
 		if(ws!=NULL && HAS_DYN(r, region_ws_add_clientwin))
@@ -156,44 +127,35 @@ bool add_clientwin_default(WClientWin *cwin, const XWindowAttributes *attr,
 	Window win=cwin->win;
 	WClientWin *tfor;
 	WRegion *target=NULL, *ws=NULL;
-	WWinProp *props;
 	WViewport *vp;
+	int tm;
 	
 	vp=find_suitable_viewport(cwin, attr->x, attr->y);
 	
-	/* Get and set winprops */
-	props=setup_get_winprops(cwin);
-
 	/* check full screen mode */
 	do{
 		WMwmHints *mwm;
-		bool switchto=FALSE;
 		mwm=get_mwm_hints(cwin->win);
 		if(mwm==NULL)
 			break;
 		if(mwm->flags&MWM_HINTS_DECORATIONS && mwm->decorations==0 &&
 		   REGION_GEOM(SCREEN_OF(cwin)).w==attr->width &&
 		   REGION_GEOM(SCREEN_OF(cwin)).h==attr->height){
-			if(wglobal.opmode!=OPMODE_INIT){
-#ifdef CF_SWITCH_NEW_CLIENTS
-				switchto=TRUE;
-#endif
-				if(props!=NULL)
-					switchto=(props->manage_flags&REGION_ATTACH_SWITCHTO);
-			}
-			if(clientwin_fullscreen_vp(cwin, vp, switchto))
+			if(clientwin_fullscreen_vp(cwin, vp, clientwin_get_switchto(cwin)))
 				return TRUE;
 			warn("Failed to enter full screen mode.");
 		}
 	}while(0);
-		
-	if(props==NULL || props->transient_mode!=TRANSIENT_MODE_CURRENT){
-		if(props==NULL || props->transient_mode==TRANSIENT_MODE_NORMAL){
+	
+	tm=clientwin_get_transient_mode(cwin);
+	
+	if(tm!=TRANSIENT_MODE_CURRENT){
+		if(tm==TRANSIENT_MODE_NORMAL){
 			/* Is it a transient to some other window? */
 			if(XGetTransientForHint(wglobal.dpy, win, &(cwin->transient_for))){
 				tfor=find_clientwin(cwin->transient_for);
 				if(tfor!=NULL && tfor!=cwin &&
-				   add_transient(tfor, cwin, attr, init_state, props))
+				   add_transient(tfor, cwin, attr, init_state))
 					return TRUE;
 				cwin->transient_for=None;
 			}
@@ -204,7 +166,7 @@ bool add_clientwin_default(WClientWin *cwin, const XWindowAttributes *attr,
 		if(target_id!=0)
 			target=find_target_by_id(target_id);
 		
-		find_prop_target(cwin, props, target==NULL ? &target : NULL, &ws);
+		find_prop_target(cwin, target==NULL ? &target : NULL, &ws);
 		
 		if(target!=NULL){
 			if(!region_supports_add_managed(target)){
@@ -220,7 +182,7 @@ bool add_clientwin_default(WClientWin *cwin, const XWindowAttributes *attr,
 		
 		/* Found a specific target frame or such? */
 		if(target!=NULL)
-			return finish_add_clientwin(target, cwin, init_state, props);
+			return finish_add_clientwin(target, cwin, init_state);
 	}
 	
 	/* No, need to find a workspace and let it handle this. */
@@ -231,45 +193,43 @@ bool add_clientwin_default(WClientWin *cwin, const XWindowAttributes *attr,
 	if(ws==NULL)
 		return clientwin_fullscreen_vp(cwin, vp, FALSE);
 	
-	return region_ws_add_clientwin(ws, cwin, attr, init_state, props);
+	return region_ws_add_clientwin(ws, cwin, attr, init_state);
 }
 
 
 bool region_ws_add_clientwin(WRegion *reg, WClientWin *cwin,
-							 const XWindowAttributes *attr,
-							 int init_state, WWinProp *props)
+							 const XWindowAttributes *attr, int init_state)
 {
 	bool ret=TRUE;
 	CALL_DYN_RET(ret, bool, region_ws_add_clientwin,
-				 reg, (reg, cwin, attr, init_state, props));
+				 reg, (reg, cwin, attr, init_state));
 	return ret;
 	
 }
 
 
-bool region_ws_add_transient(WRegion *reg, WClientWin *tfor,
-							 WClientWin *cwin,
-							 const XWindowAttributes *attr,
-							 int init_state, WWinProp *props)
+bool region_ws_add_transient(WRegion *reg, WClientWin *tfor, WClientWin *cwin,
+							 const XWindowAttributes *attr, int init_state)
 {
 	bool ret=TRUE;
 	CALL_DYN_RET(ret, bool, region_ws_add_transient,
-				 reg, (reg, tfor, cwin, attr, init_state, props));
+				 reg, (reg, tfor, cwin, attr, init_state));
 	return ret;
 }
 
 
 bool finish_add_clientwin(WRegion *reg, WClientWin *cwin,
-						  bool init_state, const WWinProp *props)
+						  bool init_state)
 {
-	int flags=REGION_ATTACH_SWITCHTO;
-	
+	int flags=0;
+
 	assert(reg!=NULL);
+	
+	if(clientwin_get_switchto(cwin))
+		flags|=REGION_ATTACH_SWITCHTO;
 	
 	if(init_state==IconicState)
 		flags=0;
-	if(wglobal.opmode!=OPMODE_INIT && props!=NULL)
-		flags=props->manage_flags;
 	
 	return region_add_managed(reg, (WRegion*)cwin, flags);
 }

@@ -31,7 +31,7 @@ enum{
 	OPMODE_DEINIT
 };
 
-INTRSTRUCT(WGlobal)
+INTRSTRUCT(WGlobal);
 
 typedef void WDrawDragwinFn(WRegion *reg);
 

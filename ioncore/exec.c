@@ -29,7 +29,7 @@
 /*{{{ Exec */
 
 
-void wm_do_exec(const char *cmd)
+void ioncore_do_exec(const char *cmd)
 {
 	char *argv[4];
 	
@@ -52,7 +52,8 @@ void wm_do_exec(const char *cmd)
 }
 
 
-void wm_exec(WScreen *scr, const char *cmd)
+EXTL_EXPORT
+void ioncore_exec(WScreen *scr, const char *cmd)
 {
 	int pid;
 	char *tmp;
@@ -76,7 +77,7 @@ void wm_exec(WScreen *scr, const char *cmd)
 	
 	sprintf(tmp, "exec %s", cmd);
 	
-	wm_do_exec(tmp);
+	ioncore_do_exec(tmp);
 }
 
 
@@ -103,7 +104,7 @@ void do_open_with(WScreen *scr, const char *cmd, const char *file)
 		die_err();
 	
 	sprintf(tmp, "exec %s '%s'", cmd, file);
-	wm_do_exec(tmp);
+	ioncore_do_exec(tmp);
 }
 
 
@@ -145,33 +146,36 @@ void setup_environ(int scr)
 /*{{{ Exit and restart */
 
 
-void wm_exitret(int retval)
+static void ioncore_exitret(int retval)
 {	
 	ioncore_deinit();
 	exit(retval);
 }
 
 
-void wm_exit()
+EXTL_EXPORT
+void ioncore_exit()
 {
-	wm_exitret(EXIT_SUCCESS);
+	ioncore_exitret(EXIT_SUCCESS);
 }
 
 
-void wm_restart_other(const char *cmd)
+EXTL_EXPORT
+void ioncore_restart_other(const char *cmd)
 {
 	ioncore_deinit();
 	if(cmd!=NULL){
-		wm_do_exec(cmd);
+		ioncore_do_exec(cmd);
 	}
 	execvp(wglobal.argv[0], wglobal.argv);
 	die_err_obj(wglobal.argv[0]);
 }
 
 
-void wm_restart()
+EXTL_EXPORT
+void ioncore_restart()
 {
-	wm_restart_other(NULL);
+	ioncore_restart_other(NULL);
 }
 
 

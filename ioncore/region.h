@@ -11,8 +11,8 @@
 #include "common.h"
 #include "obj.h"
 
-INTROBJ(WRegion)
-INTRSTRUCT(WSubmapState)
+INTROBJ(WRegion);
+INTRSTRUCT(WSubmapState);
 
 
 DECLSTRUCT(WSubmapState){
@@ -42,8 +42,6 @@ DECLOBJ(WRegion){
 		WRegion *n_next, *n_prev;
 		WRegion *g_next, *g_prev;
 	} ni;
-	
-	void *funclist;
 	
 	WRegion *tag_next, *tag_prev;
 	
@@ -106,6 +104,7 @@ DYNFUN Window region_x_window(const WRegion *reg);
 DYNFUN void region_activated(WRegion *reg);
 DYNFUN void region_inactivated(WRegion *reg);
 DYNFUN void region_draw_config_updated(WRegion *reg);
+DYNFUN void region_close(WRegion *reg);
 extern void default_draw_config_updated(WRegion *reg);
 
 extern void region_rootpos(WRegion *reg, int *xret, int *yret);

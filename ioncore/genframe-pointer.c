@@ -14,8 +14,6 @@
 #include "drawp.h"
 #include "attach.h"
 #include "resize.h"
-#include "funtabs.h"
-#include "functionp.h"
 #include "grab.h"
 #include "genframe.h"
 #include "genframe-pointer.h"
@@ -128,16 +126,9 @@ void genframe_release(WGenFrame *genframe)
 /*{{{ Tab drag */
 
 
-static WFunction tabdrag_safe_funtab[]={
-	FN_GLOBAL(l,   "switch_ws_nth",			switch_ws_nth),
-	FN_GLOBAL_VOID("switch_ws_next",		switch_ws_next),
-	FN_GLOBAL_VOID("switch_ws_prev",		switch_ws_prev),
-
-	END_FUNTAB
+static const char *tabdrag_safe_funclist[]={
+	"switch_ws_nth", "switch_ws_next", "switch_ws_prev", NULL
 };
-
-
-static WFunclist tabdrag_safe_funclist=INIT_FUNCLIST;
 
 
 #define BUTTONS_MASK \
@@ -149,7 +140,6 @@ static bool tabdrag_kbd_handler(WRegion *reg, XEvent *xev)
 	XKeyEvent *ev=&xev->xkey;
 	WBinding *binding=NULL;
 	WBindmap **bindptr;
-	WViewport *vp;
 	
 	if(ev->type==KeyRelease)
 		return FALSE;
@@ -159,10 +149,9 @@ static bool tabdrag_kbd_handler(WRegion *reg, XEvent *xev)
 	binding=lookup_binding(&ioncore_screen_bindmap, ACT_KEYPRESS,
 						   ev->state&~BUTTONS_MASK, ev->keycode);
 	
-	vp=viewport_of(reg);
-	if(binding!=NULL && vp!=NULL){
-		call_binding_restricted(binding, (WRegion*)vp,
-								&tabdrag_safe_funclist);
+	if(binding!=NULL && binding->func!=extl_fn_none()){
+		extl_call_restricted(binding->func, tabdrag_safe_funclist,
+							 "o", NULL, SCREEN_OF(reg));
 	}
 	
 	return FALSE;
@@ -319,16 +308,12 @@ static void p_tabdrag_end(WGenFrame *genframe, XButtonEvent *ev)
 }
 
 
-void genframe_p_tabdrag_setup(WGenFrame *genframe)
+EXTL_EXPORT
+void genframe_p_tabdrag(WGenFrame *genframe)
 {
 	if(genframe->tab_pressed_sub==NULL)
 		return;
 
-	if(tabdrag_safe_funclist.funtabs==NULL){
-		add_to_funclist(&tabdrag_safe_funclist,
-						tabdrag_safe_funtab);
-	}
-	
 	set_drag_handlers((WRegion*)genframe,
 					  (WMotionHandler*)p_tabdrag_begin,
 					  (WMotionHandler*)p_tabdrag_motion,
@@ -372,7 +357,8 @@ static void p_resize_end(WGenFrame *genframe, XButtonEvent *ev)
 }
 
 
-void genframe_p_resize_setup(WGenFrame *genframe)
+EXTL_EXPORT
+void genframe_p_resize(WGenFrame *genframe)
 {
 	set_drag_handlers((WRegion*)genframe,
 					  (WMotionHandler*)p_resize_begin,
@@ -406,7 +392,7 @@ static void p_move_end(WGenFrame *genframe, XButtonEvent *ev)
 }
 
 
-void genframe_p_move_setup(WGenFrame *genframe)
+void genframe_p_move(WGenFrame *genframe)
 {
 	set_drag_handlers((WRegion*)genframe,
 					  (WMotionHandler*)p_move_begin,
@@ -421,7 +407,8 @@ void genframe_p_move_setup(WGenFrame *genframe)
 /*{{{ switch_tab */
 
 
-void genframe_switch_tab(WGenFrame *genframe)
+EXTL_EXPORT
+void genframe_p_switch_tab(WGenFrame *genframe)
 {
 	if(genframe->tab_pressed_sub!=NULL)
 		display_region_sp(genframe->tab_pressed_sub);

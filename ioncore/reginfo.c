@@ -17,7 +17,7 @@
 /*{{{ Region class registration */
 
 
-INTRSTRUCT(RegClassInfo)
+INTRSTRUCT(RegClassInfo);
 	
 DECLSTRUCT(RegClassInfo){
 	WObjDescr *descr;

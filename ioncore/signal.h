@@ -13,7 +13,7 @@
 #include <unistd.h>
 #include "common.h"
 
-INTRSTRUCT(WTimer)
+INTRSTRUCT(WTimer);
 
 DECLSTRUCT(WTimer){
 	struct timeval when;
