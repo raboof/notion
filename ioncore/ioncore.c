@@ -507,6 +507,8 @@ void ioncore_deinit()
 	if(wglobal.dpy==NULL)
 		return;
 	
+	extl_call_named("call_hook", "s", NULL, "deinit");
+					
 	if(wglobal.ws_save_enabled){
 		save_workspaces();
 	}else{
