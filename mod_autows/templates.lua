@@ -101,7 +101,7 @@ function T.split2(d, ts, ls, rs, lo, ro)
     else
         rs=ts-ls
     end
-    assert(rs>0 and ls>0)
+    assert(rs>=0 and ls>=0)
     return {
         split_dir=d,
         split_tls=math.floor(ls),
@@ -160,6 +160,7 @@ end
 function T.scan_layout(p, node)
     local cls=T.classify(p.ws, p.cwin)
     local fg=p.frame:geom()
+    local fsh=p.frame:size_hints()
     
     -- TODO: dock
 
@@ -182,25 +183,29 @@ function T.scan_layout(p, node)
         local sg=n:geom()
         if d=="up" or d=="down" then
             p.res_node=n
-            if fg.h>=sg.h then
-                p.res_config={reg=p.frame}
-            elseif d=="up" then
-                p.res_config=T.split2("vertical", sg.h, nil, fg.h,
+            if fsh.min_h>sg.h then
+                return false
+            end
+            local fh=math.min(fg.h, sg.h)
+            if d=="up" then
+                p.res_config=T.split2("vertical", sg.h, nil, fh,
                                       {}, {reg=p.frame})
             else
-                p.res_config=T.split2("vertical", sg.h, fg.h, nil,
+                p.res_config=T.split2("vertical", sg.h, fh, nil,
                                       {reg=p.frame}, {})
             end
             return true
         elseif d=="left" or d=="right" then
             p.res_node=n
-            if fg.w>=sg.w then
-                p.res_config={reg=p.frame}
-            elseif d=="left" then
-                p.res_config=T.split2("horizontal", sg.w, nil, fg.w,
+            if fsh.min_w>sg.w then
+                return false
+            end
+            local fw=math.min(fg.w, sg.w)
+            if d=="left" then
+                p.res_config=T.split2("horizontal", sg.w, nil, fw,
                                       {}, {reg=p.frame})
             else
-                p.res_config=T.split2("horizontal", sg.w, fg.w, nil,
+                p.res_config=T.split2("horizontal", sg.w, fw, nil,
                                       {reg=p.frame}, {})
             end
             return true
