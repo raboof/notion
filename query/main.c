@@ -66,7 +66,7 @@ extern void query_module_unregister_exports();
 
 
 /*EXTL_DOC
- * Push entries into \type{Wedln} history.
+ * Push an entry into \type{Wedln} history.
  */
 EXTL_EXPORT 
 void wedln_history_push(const char *str)
