@@ -31,7 +31,7 @@ WMessage *query_fwarn(WMPlex *mplex, const char *p)
 	if(p==NULL)
 		return NULL;
 	
-	p2=scat("-Error- ", p);
+	p2=scat("Error:\n", p);
 	
 	if(p2==NULL){
 		warn_err();
