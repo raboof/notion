@@ -520,44 +520,24 @@ static void genframe_size_changed_default(WGenFrame *genframe,
 }
 
 
-static bool genframe_do_managed_changed(WGenFrame *genframe, bool sw)
+
+static void genframe_managed_changed(WGenFrame *genframe, int mode, bool sw,
+									 WRegion *reg)
 {
+	if(mode!=MPLEX_CHANGE_SWITCHONLY)
+		genframe_initialise_titles(genframe);
+	else
+		update_attrs(genframe);
+
 	if(sw){
 		extl_call_named("call_hook", "soo", NULL,
 						"genframe_managed_switched",
 						genframe, WGENFRAME_CURRENT(genframe));
-		return set_genframe_background(genframe, FALSE);
+		if(set_genframe_background(genframe, FALSE))
+			return;
 	}
-	return FALSE;
-}
 
-
-static void genframe_managed_changed(WGenFrame *genframe, bool sw)
-{
-	update_attrs(genframe);
-	
-	if(sw)
-		genframe_do_managed_changed(genframe, sw);
-	else
-		genframe_draw_bar(genframe, FALSE);
-}
-
-
-static void genframe_managed_added(WGenFrame *genframe, WRegion *reg, 
-								   bool sw)
-{
-	genframe_initialise_titles(genframe);
-	if(!genframe_do_managed_changed(genframe, sw))
-		genframe_draw_bar(genframe, TRUE);
-}
-
-
-static void genframe_managed_removed(WGenFrame *genframe, WRegion *reg, 
-									 bool sw)
-{
-	genframe_initialise_titles(genframe);
-	if(!genframe_do_managed_changed(genframe, sw))
-		genframe_draw_bar(genframe, TRUE);
+	genframe_draw_bar(genframe, mode!=MPLEX_CHANGE_SWITCHONLY);
 }
 
 
@@ -743,8 +723,6 @@ static DynFunTab genframe_dynfuntab[]={
 	{window_draw, genframe_draw_default},
 
 	{mplex_managed_changed, genframe_managed_changed},
-	{mplex_managed_added, genframe_managed_added},
-	{mplex_managed_removed, genframe_managed_removed},
 	{mplex_size_changed, genframe_size_changed_default},
 	{region_notify_managed_change, genframe_notify_managed_change},
 	

@@ -16,6 +16,13 @@
 #define WMPLEX_ADD_TO_END 0x0001
 #define WMPLEX_MANAGED_UNVIEWABLE 0x0002
 
+enum{
+	MPLEX_CHANGE_SWITCHONLY=0,
+	MPLEX_CHANGE_REORDER=1,
+	MPLEX_CHANGE_ADD=2,
+	MPLEX_CHANGE_REMOVE=3
+};
+
 INTROBJ(WMPlex);
 
 DECLOBJ(WMPlex){
@@ -76,8 +83,7 @@ extern void mplex_move_current_left(WMPlex *mplex);
 /* Dynfuns */
 DYNFUN void mplex_managed_geom(const WMPlex *mplex, WRectangle *geom);
 DYNFUN void mplex_size_changed(WMPlex *mplex, bool wchg, bool hchg);
-DYNFUN void mplex_managed_changed(WMPlex *mplex, bool sw);
-DYNFUN void mplex_managed_added(WMPlex *mplex, WRegion *nreg, bool sw);
-DYNFUN void mplex_managed_removed(WMPlex *mplex, WRegion *oreg, bool sw);
+DYNFUN void mplex_managed_changed(WMPlex *mplex, int what, bool sw,
+								  WRegion *mgd);
 
 #endif /* ION_IONCORE_MPLEX_H */

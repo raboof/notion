@@ -105,7 +105,7 @@ void mplex_move_to_index(WMPlex *mplex, WRegion *reg, int index)
 
 	UNLINK_ITEM(mplex->managed_list, reg, mgr_next, mgr_prev);
 	link_at(mplex, reg, index);
-	mplex_managed_changed(mplex, FALSE);
+	mplex_managed_changed(mplex, MPLEX_CHANGE_REORDER, FALSE, reg);
 }
 
 
@@ -126,7 +126,7 @@ void mplex_move_to_next_index(WMPlex *mplex, WRegion *reg)
 	UNLINK_ITEM(mplex->managed_list, reg, mgr_next, mgr_prev);
 	LINK_ITEM_AFTER(mplex->managed_list, next, reg, mgr_next, mgr_prev);
 	
-	mplex_managed_changed(mplex, FALSE);
+	mplex_managed_changed(mplex, MPLEX_CHANGE_REORDER, FALSE, reg);
 }
 
 
@@ -147,7 +147,7 @@ void mplex_move_to_prev_index(WMPlex *mplex, WRegion *reg)
 	UNLINK_ITEM(mplex->managed_list, reg, mgr_next, mgr_prev);
 	LINK_ITEM_BEFORE(mplex->managed_list, prev, reg, mgr_next, mgr_prev);
 
-	mplex_managed_changed(mplex, FALSE);
+	mplex_managed_changed(mplex, MPLEX_CHANGE_REORDER, FALSE, reg);
 }
 
 
@@ -339,7 +339,7 @@ static bool mplex_do_display_managed(WMPlex *mplex, WRegion *sub)
 bool mplex_display_managed(WMPlex *mplex, WRegion *sub)
 {
 	if(mplex_do_display_managed(mplex, sub)){
-		mplex_managed_changed(mplex, TRUE);
+		mplex_managed_changed(mplex, MPLEX_CHANGE_SWITCHONLY, TRUE, sub);
 		return TRUE;
 	}
 	
@@ -437,10 +437,10 @@ static WRegion *mplex_do_attach(WMPlex *mplex, WRegionAttachHandler *fn,
 	
 	if(mplex->managed_count==1 || param->switchto){
 		mplex_do_display_managed(mplex, reg);
-		mplex_managed_added(mplex, reg, TRUE);
+		mplex_managed_changed(mplex, MPLEX_CHANGE_ADD, FALSE, reg);
 	}else{
 		region_unmap(reg);
-		mplex_managed_added(mplex, reg, FALSE);
+		mplex_managed_changed(mplex, MPLEX_CHANGE_ADD, FALSE, reg);
 	}
 	
 	return reg;
@@ -580,7 +580,7 @@ static void mplex_do_remove(WMPlex *mplex, WRegion *sub)
 		bool sw=(next!=NULL || mplex->managed_count==0);
 		if(next!=NULL)
 			mplex_do_display_managed(mplex, next);
-		mplex_managed_removed(mplex, sub, sw);
+		mplex_managed_changed(mplex,  MPLEX_CHANGE_ADD, sw, sub);
 	}
 }
 
@@ -694,32 +694,11 @@ void mplex_size_changed(WMPlex *mplex, bool wchg, bool hchg)
 }
 
 
-void mplex_managed_changed(WMPlex *mplex, bool sw)
+void mplex_managed_changed(WMPlex *mplex, int mode, bool sw, WRegion *mgd)
 {
-	CALL_DYN(mplex_managed_changed, mplex, (mplex, sw));
+	CALL_DYN(mplex_managed_changed, mplex, (mplex, mode, sw, mgd));
 }
 
-
-void mplex_managed_added(WMPlex *mplex, WRegion *nreg, bool sw)
-{
-	CALL_DYN(mplex_managed_added, mplex, (mplex, nreg, sw));
-}
-
-static void mplex_managed_added_default(WMPlex *mplex, WRegion *nreg, bool sw)
-{
-	mplex_managed_changed(mplex, sw);
-}
-
-void mplex_managed_removed(WMPlex *mplex, WRegion *nreg, bool sw)
-{
-	CALL_DYN(mplex_managed_removed, mplex, (mplex, nreg, sw));
-}
-
-static void mplex_managed_removed_default(WMPlex *mplex, WRegion *nreg, 
-										  bool sw)
-{
-	mplex_managed_changed(mplex, sw);
-}
 
 /*}}}*/
 
@@ -743,9 +722,6 @@ static DynFunTab mplex_dynfuntab[]={
 	
 	{region_map, mplex_map},
 	{region_unmap, mplex_unmap},
-	
-	{mplex_managed_added, mplex_managed_added_default},
-	{mplex_managed_removed, mplex_managed_removed_default},
 	
 	{(DynFun*)region_manage_clientwin,
 	 (DynFun*)mplex_manage_clientwin},
