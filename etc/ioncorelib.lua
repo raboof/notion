@@ -17,6 +17,9 @@ function submap2(kcb_, list)
     return {action = "kpress", kcb = kcb_, submap = list}
 end
 
+--DOC
+-- Create a submap table. For more information, see section
+-- \ref{sec:bindings}.
 function submap(kcb_)
     local function submap_helper(list)
 	return submap2(kcb_, list)
@@ -24,10 +27,17 @@ function submap(kcb_)
     return submap_helper
 end
 
+--DOC
+-- Create a table defining a key press binding. For more information,
+-- see section \ref{sec:bindings}.
 function kpress(kcb_, func_)
     return {action = "kpress", kcb = kcb_, func = func_}
 end
 
+--DOC
+-- Create a table defining a key press binding. When this key is pressed,
+-- Ioncore waits for all modifiers to be released before processing any
+-- further key presses. For more information see section \ref{sec:bindings}.
 function kpress_waitrel(kcb_, func_)
     return {action = "kpress_waitrel", kcb = kcb_, func = func_}
 end
@@ -46,18 +56,30 @@ function mact(act_, kcb_, func_, area_)
     return ret
 end
 
+--DOC
+-- Create a table defining a mouse click binding.
+-- For more information, see section \ref{sec:bindings}.
 function mclick(kcb_, func_, area_)
     return mact("mclick", kcb_, func_, area_)
 end
 
+--DOC
+-- Create a table defining a mouse drag binding.
+-- For more information, see section \ref{sec:bindings}.
 function mdrag(kcb_, func_, area_)
     return mact("mdrag", kcb_, func_, area_)
 end
 
+--DOC
+-- Create a table defining a mouse double click binding.
+-- For more information, see section \ref{sec:bindings}.
 function mdblclick(kcb_, func_, area_)
     return mact("mdblclick", kcb_, func_, area_)
 end
 
+--DOC
+-- Create a table defining a mouse button press binding.
+-- For more information, see section \ref{sec:bindings}.
 function mpress(kcb_, func_, area_)
     return mact("mpress", kcb_, func_, area_)
 end
@@ -67,6 +89,10 @@ end
 
 -- {{{ Callback creation functions
 
+--DOC
+-- Create a function that will call \var{fn} with argument
+-- \fnref{region_get_active_leaf}\code{(param)} where \var{param} is
+-- the parameter to the created function.
 function make_active_leaf_fn(fn)
     if not fn then
 	error("fn==nil", 2)
@@ -78,13 +104,11 @@ function make_active_leaf_fn(fn)
     return call_active_leaf
 end
 
-function make_screen_switch_nth_fn(n)
-    local function call_nth(scr)
-        screen_switch_nth_on_cvp(scr, n)
-    end
-    return call_nth
-end
-    
+
+--DOC    
+-- Create a function that will make the call
+-- \fnref{exec_on_screen}\code{(scr, cmd)} where \var{scr} is is the
+-- argument of the generated function and should be of type \type{WScreen}.
 function make_exec_fn(cmd)
     local function do_exec(scr)
 	return exec_on_screen(scr, cmd)
@@ -96,6 +120,8 @@ end
 
 -- {{{ Includes
 
+--DOC
+-- Execute another file with Lua code.
 function include(file)
     local current_dir = "."
     if CURRENT_FILE ~= nil then
@@ -128,6 +154,8 @@ function alternative_winprop_idents(id)
     return coroutine.wrap(g)
 end
 
+--DOC
+-- Find winprop table for \var{cwin}.
 function get_winprop(cwin)
     local id=clientwin_get_ident(cwin)
     
@@ -140,7 +168,7 @@ function get_winprop(cwin)
     end
 end
 
-function ensure_winproptab(class, role, instance)
+local function ensure_winproptab(class, role, instance)
     if not winprops[class] then
         winprops[class]={}
     end
@@ -149,11 +177,13 @@ function ensure_winproptab(class, role, instance)
     end
 end    
 
-function do_add_winprop(class, role, instance, props)
+local function do_add_winprop(class, role, instance, props)
     ensure_winproptab(class, role, instance)
     winprops[class][role][instance]=props
 end
 
+--DOC
+-- Define a winprop. For more information, see section \ref{sec:winprops}.
 function winprop(list)
     local list2, class, role, instance = {}, "*", "*", "*"
 
@@ -177,6 +207,8 @@ end
 
 -- {{{ Misc
 
+--DOC
+-- Check that the \type{WObj} \var{obj} still exists in Ioncore.
 function obj_exists(obj)
     return (obj_typename(obj)==nil)
 end
@@ -188,6 +220,9 @@ end
 
 local hooks={}
 
+--DOC
+-- Call hook \var{hookname} with the remaining arguments to this function
+-- as parameters.
 function call_hook(hookname, ...)
     if hooks[hookname] then
         for _, fn in hooks[hookname] do
@@ -196,6 +231,8 @@ function call_hook(hookname, ...)
     end
 end
 
+--DOC
+-- Register \var{fn} as a handler for hook \var{hookname}.
 function add_to_hook(hookname, fn)
     if not hooks[hookname] then
         hooks[hookname]={}
@@ -203,6 +240,8 @@ function add_to_hook(hookname, fn)
     hooks[hookname][fn]=fn
 end
 
+--DOC
+-- Unregister \var{fn} as a handler for hook \var{hookname}.
 function remove_from_hook(hookname, fn)
     if hooks[hookname] then
         hooks[hookname][fn]=nil
