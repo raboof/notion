@@ -126,7 +126,7 @@ static void extl_push_obj(lua_State *st, WObj *obj)
 	lua_rawgeti(st, LUA_REGISTRYINDEX, obj_cache_ref);
 	lua_pushlightuserdata(st, obj);
 	lua_pushvalue(st, -3);
-	lua_settable(st, -3);
+	lua_rawset(st, -3);
 	lua_pop(st, 1);
 	obj->flags|=WOBJ_EXTL_CACHED;
 }
@@ -194,14 +194,14 @@ static bool extl_init_obj_info(lua_State *st)
 	lua_newtable(st);
 	lua_pushstring(st, "__mode");
 	lua_pushstring(st, "v");
-	lua_settable(st, -3);
+	lua_rawset(st, -3);
 	lua_setmetatable(st, -2);
 	obj_cache_ref=lua_ref(st, -1);
 	
 	lua_newtable(st);
 	lua_pushstring(st, "__gc");
 	lua_pushcfunction(st, extl_obj_gc_handler);
-	lua_settable(st, -3); /* set metatable.__gc=extl_obj_gc_handler */
+	lua_rawset(st, -3); /* set metatable.__gc=extl_obj_gc_handler */
 	wobj_metaref=lua_ref(st, -1);
 
 	lua_pushcfunction(st, extl_obj_typename);
@@ -831,7 +831,7 @@ static bool extl_table_dodo_sets(lua_State *st, TableParams *params)
 	lua_rawgeti(st, LUA_REGISTRYINDEX, params->ref);
 	lua_pushstring(st, params->sentry);
 	extl_stack_push(st, params->type, params->val);
-	lua_settable(st, -3);
+	lua_rawset(st, -3);
 	return TRUE;
 }
 
@@ -892,7 +892,7 @@ static bool extl_table_do_clears(lua_State *st, TableParams *params)
 	lua_rawgeti(st, LUA_REGISTRYINDEX, params->ref);
 	lua_pushstring(st, params->sentry);
 	lua_pushnil(st);
-	lua_settable(st, -3);
+	lua_rawset(st, -3);
 	return TRUE;
 }
 
@@ -1000,8 +1000,7 @@ bool extl_table_cleari(ExtlTab ref, int entry)
 /*{{{ Function calls to Lua */
 
 
-static bool extl_push_args(lua_State *st, bool intab, const char *spec,
-						   va_list *argsp)
+static bool extl_push_args(lua_State *st, const char *spec, va_list *argsp)
 {
 	int i=1;
 	
@@ -1030,8 +1029,6 @@ static bool extl_push_args(lua_State *st, bool intab, const char *spec,
 		default:
 			return FALSE;
 		}
-		if(intab)
-			lua_rawseti(st, -2, i);
 		i++;
 		spec++;
 	}
@@ -1045,7 +1042,6 @@ typedef struct{
 	const char *rspec;
 	va_list args;
 	void *misc;
-	bool intab;
 	int nret;
 #ifndef CF_HAS_VA_COPY
 	void *ret_ptrs[MAX_PARAMS];
@@ -1120,40 +1116,8 @@ static bool extl_dodo_call_vararg(lua_State *st, ExtlDoCallParam *param)
 	}
 	
 	if(n>0){
-		/* For dostring and dofile arguments are passed in the table 'arg'.
-		 * The make 'arg' appear local without messing up with any such
-		 * variable actually defined in the function, we need to make a new
-		 * environment containg the parameter and __index and __newindex of
-		 * the metatable set to point to the global environment. We don't
-		 * need to reset this environment as we created the function.
-		 */
-		if(param->intab){
-			lua_newtable(st); /* Create arg */
-			lua_newtable(st); /* Create new environment */
-			lua_pushstring(st, "arg");
-			lua_pushvalue(st, -3);
-			lua_settable(st, -3); /* Set arg in the new environment */
-			/* Now there's fn, arg, newenv in stack */
-			lua_newtable(st); /* Create metatable */
-			lua_pushstring(st, "__index");
-			lua_getfenv(st, -5); /* Get old environment */
-			lua_settable(st, -3); /* Set metatable.__index */
-			lua_pushstring(st, "__newindex");
-			lua_getfenv(st, -5); /* Get old environment */
-			lua_settable(st, -3); /* Set metatable.__newindex */
-			/* Now there's fn, arg, newenv, meta in stack */
-			lua_setmetatable(st, -2); /* Set metatable for new environment */
-			lua_setfenv(st, -3);
-			/* Now there should be just fn, arg in stack */
-		}
-
-		if(!extl_push_args(st, param->intab, param->spec, &(param->args)))
+		if(!extl_push_args(st, param->spec, &(param->args)))
 			return FALSE;
-
-		if(param->intab){
-			lua_pop(st, 1); /* Pop "arg"; it now only resides in the env. */
-			n=0;
-		}
 	}
 
 	if(param->rspec!=NULL)
@@ -1222,7 +1186,6 @@ bool extl_call_vararg(ExtlFn fnref, const char *spec,
 	param.rspec=rspec;
 	param.args=args;
 	param.misc=(void*)&fnref;
-	param.intab=FALSE;
 
 	return extl_cpcall_call(l_st, (ExtlCPCallFn*)extl_do_call_vararg, &param);
 }
@@ -1262,7 +1225,6 @@ bool extl_call_named_vararg(const char *name, const char *spec,
 	param.rspec=rspec;
 	param.args=args;
 	param.misc=(void*)name;
-	param.intab=FALSE;
 
 	return extl_cpcall_call(l_st, (ExtlCPCallFn*)extl_do_call_named_vararg,
 							&param);
@@ -1285,117 +1247,113 @@ bool extl_call_named(const char *name, const char *spec, const char *rspec, ...)
 /*}}}*/
 
 
-/*{{{ extl_dofile */
+/*}}}*/
 
 
-static bool extl_do_dofile_vararg(lua_State *st, ExtlDoCallParam *param)
+/*{{{ extl_loadfile/string */
+
+
+static int call_loaded(lua_State *st)
 {
-	bool ret=FALSE;
-	const char *file=(const char*)param->misc;
+	int i, nargs=lua_gettop(st);
+
+	/* Get the loaded file/string as function */
+	lua_pushvalue(st, lua_upvalueindex(1));
 	
-	printf("lua_dofile(%s)\n", file);
+	/* Fill 'arg' */
+	lua_getfenv(st, -1);
+	lua_pushstring(st, "arg");
 	
-	 /* Save CURRENT_FILE.  */
-	lua_getglobal(st, "CURRENT_FILE");
+	if(nargs>0){
+		lua_newtable(st);
+		for(i=1; i<=nargs; i++){
+			lua_pushvalue(st, i);
+			lua_rawseti(st, -2, i);
+		}
+	}else{
+		lua_pushnil(st);
+	}
 	
-	if(luaL_loadfile(st, file)!=0){
+	lua_rawset(st, -3);
+	lua_pop(st, 1);
+	lua_call(st, 0, LUA_MULTRET);
+	return (lua_gettop(st)-nargs);
+}
+
+
+typedef struct{
+	const char *src;
+	bool isfile;
+	ExtlFn *resptr;
+} ExtlLoadParam;
+
+
+static bool extl_do_load(lua_State *st, ExtlLoadParam *param)
+{
+	int res=0;
+	
+	if(param->isfile){
+		res=luaL_loadfile(st, param->src);
+	}else{
+		res=luaL_loadbuffer(st, param->src, strlen(param->src), param->src);
+	}
+	
+	if(res!=0){
 		warn("%s", lua_tostring(st, -1));
 		return FALSE;
 	}
+	
+	lua_newtable(st); /* Create new environment */
+	if(param->isfile){
+		lua_pushstring(st, "CURRENT_FILE");
+		lua_pushstring(st, param->src);
+		lua_rawset(st, -3);
+	}
+	/* Now there's fn, newenv in stack */
+	lua_newtable(st); /* Create metatable */
+	lua_pushstring(st, "__index");
+	lua_getfenv(st, -4); /* Get old environment */
+	lua_rawset(st, -3); /* Set metatable.__index */
+	lua_pushstring(st, "__newindex");
+	lua_getfenv(st, -4); /* Get old environment */
+	lua_rawset(st, -3); /* Set metatable.__newindex */
+	/* Now there's fn, newenv, meta in stack */
+	lua_setmetatable(st, -2); /* Set metatable for new environment */
+	lua_setfenv(st, -2);
+	/* Now there should be just fn in stack */
 
-	/* Set new CURRENT_FILE. If Lua fails in extl_dodo_call_vararg, the
-	 * value will remain incorrect until next return from this function.
-	 * (or within a succeeding include call). But this certainly is not
-	 * critical. If Lua fails, we're probably out of memory anyway and
-	 * keeping Ion from crashing is more important.
+	/* Callloaded will put any parameters it gets in the table 'arg' in
+	 * the newly created environment.
 	 */
-	lua_pushstring(st, file);
-	lua_setglobal(st, "CURRENT_FILE");
-
-	ret=extl_dodo_call_vararg(st, param);
+	lua_pushcclosure(st, call_loaded, 1);
+	*(param->resptr)=lua_ref(st, -1);
 	
-	/* Restore CURRENT_FILE */
-	lua_setglobal(st, "CURRENT_FILE");
-
-	return ret;
+	return TRUE;
 }
 
 
-bool extl_dofile_vararg(const char *file, const char *spec,
-						const char *rspec, va_list args)
+bool extl_loadfile(const char *file, ExtlFn *ret)
 {
-	ExtlDoCallParam param;
-	param.spec=spec;
-	param.rspec=rspec;
-	param.args=args;
-	param.misc=(void*)file;
-	param.intab=TRUE;
-		
-	return extl_cpcall_call(l_st, (ExtlCPCallFn*)extl_do_dofile_vararg, &param);
+	ExtlLoadParam param;
+	param.src=file;
+	param.isfile=TRUE;
+	param.resptr=ret;
+
+	printf("extl_loadfile(%s)\n", file);
+
+	return extl_cpcall(l_st, (ExtlCPCallFn*)extl_do_load, &param);
 }
 
 
-bool extl_dofile(const char *file, const char *spec, const char *rspec, ...)
+bool extl_loadstring(const char *str, ExtlFn *ret)
 {
-	bool retval;
-	va_list args;
-	
-	va_start(args, rspec);
-	retval=extl_dofile_vararg(file, spec, rspec, args);
-	va_end(args);
-	
-	return retval;
+	ExtlLoadParam param;
+	param.src=str;
+	param.isfile=FALSE;
+	param.resptr=ret;
+
+	return extl_cpcall(l_st, (ExtlCPCallFn*)extl_do_load, &param);
 }
-
-
-/*}}}*/
-
-
-/*{{{ extl_dofile */
-
-
-static bool extl_do_dostring_vararg(lua_State *st, ExtlDoCallParam *param)
-{
-	const char *string=(const char*)param->misc;
-	
-	if(luaL_loadbuffer(st, string, strlen(string), string)!=0){
-		warn("%s", lua_tostring(st, -1));
-		return FALSE;
-	}
-	
-	return extl_dodo_call_vararg(st, param);
-}
-
-
-bool extl_dostring_vararg(const char *string, const char *spec,
-						  const char *rspec, va_list args)
-{
-	ExtlDoCallParam param;
-	param.spec=spec;
-	param.rspec=rspec;
-	param.args=args;
-	param.misc=(void*)string;
-	param.intab=TRUE;
-	
-	return extl_cpcall_call(l_st, (ExtlCPCallFn*)extl_do_dostring_vararg,
-							&param);
-}
-
-
-bool extl_dostring(const char *string, const char *spec, const char *rspec, ...)
-{
-	bool retval;
-	va_list args;
-	
-	va_start(args, rspec);
-	retval=extl_dostring_vararg(string, spec, rspec, args);
-	va_end(args);
-	
-	return retval;
-}
-
-
-/*}}}*/
 
 
 /*}}}*/
@@ -1630,7 +1588,7 @@ static bool extl_do_register_function(lua_State *st, ExtlExportedFnSpec *spec)
 	lua_getregistry(st);
 	lua_pushvalue(st, -2); /* Get spec2 */
 	lua_pushfstring(st, "ioncore_luaextl_%s_upvalue", spec->name);
-	lua_settable(st, -3); /* Set registry.ioncore_luaextl_fn_upvalue=spec2 */
+	lua_rawset(st, -3); /* Set registry.ioncore_luaextl_fn_upvalue=spec2 */
 	lua_pop(st, 1); /* Pop registry */
 	lua_pushcclosure(st, extl_l1_call_handler, 1);
 	lua_setglobal(st, spec->name);
@@ -1666,7 +1624,7 @@ static bool extl_do_unregister_function(lua_State *st, ExtlExportedFnSpec *spec)
 
 	lua_pop(st, 1); /* Pop the upvalue */
 	lua_pushnil(st);
-	lua_settable(st, -3); /* Clear registry.ioncore_luaextl_fn_upvalue */
+	lua_rawset(st, -3); /* Clear registry.ioncore_luaextl_fn_upvalue */
 	lua_pushnil(st); /* Clear _G.fn */
 	lua_setglobal(st, spec->name);
 	

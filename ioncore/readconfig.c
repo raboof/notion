@@ -201,17 +201,24 @@ char *lookup_script(const char *file, const char *try_in_dir)
 
 
 EXTL_EXPORT
-void do_include(const char *file, const char *current_file_dir)
+bool do_include(const char *file, const char *current_file_dir)
 {
 	char *tmp=lookup_script(file, current_file_dir);
+	bool successp=FALSE;
+	ExtlFn fn;
 	
 	if(tmp==NULL){
 		warn("Could not find file %s in search path", file);
-		return;
+		return FALSE;
 	}
 	
-	extl_dofile(tmp, NULL, NULL);
+	if(extl_loadfile(tmp, &fn)){
+		successp=extl_call(fn, NULL, NULL);
+		extl_unref_fn(fn);
+	}
 	free(tmp);
+	
+	return successp;
 }
 
 
@@ -330,7 +337,14 @@ char *get_savefile_for(const char *module)
 
 bool read_config(const char *cfgfile)
 {
-	return extl_dofile(cfgfile, NULL, NULL);
+	bool successp=FALSE;
+	ExtlFn fn;
+	
+	if(extl_loadfile(cfgfile, &fn)){
+		successp=extl_call(fn, NULL, NULL);
+		extl_unref_fn(fn);
+	}
+	return successp;
 }
 
 

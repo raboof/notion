@@ -123,15 +123,10 @@ extern bool extl_call_named_vararg(const char *name, const char *spec,
 extern bool extl_call_named(const char *name, const char *spec,
 							const char *rspec, ...);
 
-extern bool extl_dofile_vararg(const char *file, const char *spec,
-							   const char *rspec, va_list args);
-extern bool extl_dofile(const char *file, const char *spec,
-						const char *rspec, ...);
+/* Load file/string */
 
-extern bool extl_dostring_vararg(const char *string, const char *spec,
-								 const char *rspec, va_list args);
-extern bool extl_dostring(const char *string, const char *spec,
-						  const char *rspec, ...);
+extern bool extl_loadfile(const char *file, ExtlFn *ret);
+extern bool extl_loadstring(const char *file, ExtlFn *ret);
 
 /* Register */
 

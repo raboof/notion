@@ -170,7 +170,8 @@ bool add_to_viewport(ExtlTab tab)
 
 bool load_workspaces(WScreen *vp)
 {
-	bool successp;
+	bool successp=FALSE;
+	ExtlFn fn;
 	char *filename;
 	
 	filename=get_cfgfile_for_scr("saves/workspaces", vp->id);
@@ -178,7 +179,10 @@ bool load_workspaces(WScreen *vp)
 		return FALSE;
 	
 	current_scr=vp;
-	successp=extl_dofile(filename, "o", NULL, vp);
+	if(extl_loadfile(filename, &fn)){
+		successp=extl_call(fn, "o", NULL, vp);
+		extl_unref_fn(fn);
+	}
 	current_scr=NULL;
 	
 	free(filename);
