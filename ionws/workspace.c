@@ -216,21 +216,25 @@ void init_workspaces(WScreen *scr)
 	WWorkspace *ws=NULL;
 	char *wsname=NULL;
 
+	wsname=get_string_property(scr->root.win, wglobal.atom_workspace, NULL);
+
 	read_workspaces(scr);
 	
 	if(scr->sub_count==0){
 		ws=create_new_workspace_on_scr(scr, "main");
 	}else{
-		wsname=get_string_property(scr->root.win, wglobal.atom_workspace, NULL);
-		if(wsname!=NULL){
+		if(wsname!=NULL)
 			ws=lookup_workspace(wsname);
-			free(wsname);
-		}
 		if(ws==NULL)
 			ws=FIRST_THING(scr, WWorkspace);
 	}
 	
+	if(wsname!=NULL)
+		free(wsname);
+	
 	assert(ws!=NULL);
+	
+	goto_region((WRegion*)ws);
 }
 
 

@@ -434,13 +434,15 @@ static bool screen_switch_subregion(WScreen *scr, WRegion *sub)
 	scr->current_sub=sub;
 	map_region(sub);
 
-	n=region_full_name(sub);
-	
-	if(n==NULL){
-		set_string_property(scr->root.win, wglobal.atom_workspace, "");
-	}else{
-		set_string_property(scr->root.win, wglobal.atom_workspace, n);
-		free(n);
+	if(wglobal.opmode!=OPMODE_DEINIT){
+		n=region_full_name(sub);
+
+		if(n==NULL){
+			set_string_property(scr->root.win, wglobal.atom_workspace, "");
+		}else{
+			set_string_property(scr->root.win, wglobal.atom_workspace, n);
+			free(n);
+		}
 	}
 	
 	if(REGION_IS_ACTIVE(scr)){
