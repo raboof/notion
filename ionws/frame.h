@@ -31,6 +31,7 @@ DECLOBJ(WFrame){
 	int target_id;
 	int tab_w;
 	int saved_w, saved_h;
+	int saved_x, saved_y;
 	
 	int sub_count;
 	WRegion *current_sub;

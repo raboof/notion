@@ -120,35 +120,39 @@ void resize_horiz(WRegion *reg)
 /*{{{ Maximize */
 
 
-#define DO_MAXIMIZE(FRAME, WH)                                   \
+#define DO_MAXIMIZE(FRAME, WH, POS)                              \
 	WRegion *par=FIND_PARENT1(FRAME, WRegion);                   \
 	WRectangle geom=REGION_GEOM(FRAME);                          \
-	int tmp;                                                     \
+	int tmp, tmp2;                                               \
                                                                  \
 	if(par==NULL)                                                \
 		return;                                                  \
                                                                  \
 	if((FRAME)->saved_##WH!=FRAME_NO_SAVED_WH){                  \
 		geom.WH=(FRAME)->saved_##WH;                             \
+		geom.POS=(FRAME)->saved_##POS;                           \
 		region_request_geom((WRegion*)FRAME, geom, NULL, FALSE); \
 		(FRAME)->saved_##WH=FRAME_NO_SAVED_WH;                   \
 	}else{                                                       \
 		tmp=geom.WH;                                             \
+		tmp2=geom.POS;                                           \
 		geom.WH=REGION_GEOM(par).WH;                             \
+		geom.POS=0; /* Needed to resize both up and down */		 \
 		region_request_geom((WRegion*)FRAME, geom, NULL, FALSE); \
 		(FRAME)->saved_##WH=tmp;                                 \
+		(FRAME)->saved_##POS=tmp2;                               \
 	}
 
 						
 void maximize_vert(WFrame *frame)
 {
-	DO_MAXIMIZE(frame, h);
+	DO_MAXIMIZE(frame, h, y);
 }
 
 
 void maximize_horiz(WFrame *frame)
 {
-	DO_MAXIMIZE(frame, w);
+	DO_MAXIMIZE(frame, w, x);
 }
 
 

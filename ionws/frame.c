@@ -175,6 +175,8 @@ static bool init_frame(WFrame *frame, WScreen *scr, WWinGeomParams params,
 	frame->current_input=NULL;
 	frame->saved_w=FRAME_NO_SAVED_WH;
 	frame->saved_h=FRAME_NO_SAVED_WH;
+	frame->saved_x=FRAME_NO_SAVED_WH;
+	frame->saved_y=FRAME_NO_SAVED_WH;
 
 	if(transparent){
 		attr.background_pixmap=ParentRelative;
