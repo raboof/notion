@@ -9,7 +9,7 @@ fi
 
 if test "$1" = "--"; then
 	shift
-	eval "$@" || {
+	"$@" || {
 		echo "Press enter..."
 		read nothing
 	}

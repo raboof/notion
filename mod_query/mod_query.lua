@@ -167,7 +167,7 @@ mod_query.COLLECT_THRESHOLD=2000
 -- the command should on the first line write the \var{common_part} 
 -- parameter of \fnref{WEdln.set_completions} and a single actual completion
 -- on each of the successive lines.
-function mod_query.popen_completions(wedln, cmd, beg)
+function mod_query.popen_completions(wedln, cmd, beg, fn)
     
     local pst={wedln=wedln, maybe_stalled=0}
     
@@ -215,7 +215,7 @@ function mod_query.popen_completions(wedln, cmd, beg)
             results.common_part=beg
         end
         
-        wedln:set_completions(results)
+        (fn or WEdln.set_completions)(wedln, results)
         
         pipes[rcv]=nil
         results={}
@@ -460,17 +460,123 @@ function mod_query.query_runfile(mplex)
 end
 
 
+function break_cmdline(str, no_ws)
+    local st, en, beg, rest, ch
+    local res={""}
+    local concat=1
+
+    local function ins(str)
+        res[concat]=res[concat]..str
+    end
+
+    local function ins_space(str)
+        if no_ws then
+            if res[table.getn(res)]=="" then
+                return
+            end
+        else
+            table.insert(res, str)
+        end
+        
+        table.insert(res, "")
+        concat=table.getn(res)
+    end
+
+    st, en, beg, rest=string.find(str, "^(%s*):(.*)")
+    if beg then
+        if string.len(beg)>0 then
+            ins_space(beg)
+        end
+        ins(":")
+        ins_space("")
+        str=rest
+    end
+            
+    while str~="" do
+        st, en, beg, rest, ch=string.find(str, "^(.-)(([%s'\"\\]).*)")
+        if not beg then
+            ins(str)
+            break
+        end
+        
+        ins(beg)
+        str=rest
+        
+        local sp=false
+        
+        if ch=="\\" then
+            st, en, beg, rest=string.find(str, "^(\\.)(.*)")
+        elseif ch=='"' then
+            st, en, beg, rest=string.find(str, "^(\".-[^\\]\")(.*)")
+            
+            if not beg then
+                st, en, beg, rest=string.find(str, "^(\"\")(.*)")
+            end
+        elseif ch=="'" then
+            st, en, beg, rest=string.find(str, "^('.-')(.*)")
+        else
+            st, en, beg, rest=string.find(str, "^(%s*)(.*)")
+            assert(beg and rest)
+            ins_space(beg)
+            sp=true
+            str=rest
+        end
+        
+        if not sp then
+            if not beg then
+                beg=str
+                rest=""
+            end
+            ins(beg)
+            str=rest
+        end
+    end
+    
+    return res
+end
+
+
+local function unquote(str)
+    str=string.gsub(str, "\"\"", "")
+    str=string.gsub(str, "\"(.-[^\\])\"", "%1")
+    str=string.gsub(str, "'(.-)'", "%1")
+    str=string.gsub(str, "\\(.)", "%1")
+    return str
+end
+
+
+local function quote(str)
+    return string.gsub(str, "([%(%)\"'\\%*%?%[%] ])", "\\%1")
+end
+
+
 function mod_query.exec_completor(wedln, str)
-    local st, en, beg, tocompl=string.find(str, "^(.-)([^%s]*)$")
-    if string.len(beg)==0 then
-        mod_query.file_completor(wedln, tocompl, " -wp ")
-    else
-        mod_query.file_completor(wedln, tocompl, " ", beg)
+    local parts=break_cmdline(str)
+    local tocompl=unquote(table.remove(parts))
+    local beg=table.concat(parts)
+    local wp=" "
+    
+    if string.find(beg, "^%s*:%s*$") then
+        wp=" -wp "
+    end
+
+    local function set_fn(wedln, res)
+        res=table.map(quote, res)
+        res.common_part=beg..res.common_part
+        wedln:set_completions(res)
+    end
+
+    local ic=ioncore.lookup_script("ion-completefile")
+    if ic then
+        mod_query.popen_completions(wedln,
+                                   ic..(wp or " ")..string.shell_safe(tocompl),
+                                   "", set_fn)
     end
 end
 
 
 local cmd_overrides={}
+
 
 --DOC
 -- Define a command override for the \fnrefx{mod_query}{query_exec} query.
@@ -478,24 +584,25 @@ function mod_query.defcmd(cmd, fn)
     cmd_overrides[cmd]=fn
 end
 
-local function trim(s)
-    local _, _, sn=string.find(s, "^[%s]*(.-)[%s]*$")
-    return sn
-end
 
-function mod_query.exec_handler(frame, cmdline)
-    local _, _, cmd, params=string.find(cmdline, "^([^%s]+)(.*)")
-    if cmd and cmd_overrides[cmd] then
-        cmd_overrides[cmd](frame, trim(params))
-    else
-        if string.sub(cmdline, 1, 1)==":" then
-            local ix=mod_query.lookup_script_warn(frame, "ion-runinxterm")
-            if not ix then return end
-            cmdline=ix.." "..string.sub(cmdline, 2)
+function mod_query.exec_handler(mplex, cmdline)
+    local parts=break_cmdline(cmdline, true)
+    local cmd=table.remove(parts, 1)
+    
+    if cmd_overrides[cmd] then
+        cmd_overrides[cmd](mplex, table.map(unquote, parts))
+    elseif cmd~="" then
+        if cmd==":" then
+            local ix=mod_query.lookup_script_warn(mplex, "ion-runinxterm")
+            if not ix then 
+                return
+            end
+            cmdline=ix.." "..table.concat(parts, " ")
         end
-        ioncore.exec_on(frame, cmdline)
+        ioncore.exec_on(mplex, cmdline)
     end
 end
+
 
 --DOC
 -- This function asks for a command to execute with \file{/bin/sh}.

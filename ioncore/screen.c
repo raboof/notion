@@ -380,8 +380,10 @@ EXTL_EXPORT
 WScreen *ioncore_goto_nth_screen(int id)
 {
     WScreen *scr=ioncore_find_screen_id(id);
-    if(scr!=NULL)
-        region_goto((WRegion*)scr);
+    if(scr!=NULL){
+        if(!region_goto((WRegion*)scr))
+            return NULL;
+    }
     return scr;
 }
 
@@ -401,8 +403,10 @@ WScreen *ioncore_goto_next_screen()
         scr=scr->next_scr;
     if(scr==NULL)
         scr=ioncore_g.screens;
-    if(scr!=NULL)
-        region_goto((WRegion*)scr);
+    if(scr!=NULL){
+        if(!region_goto((WRegion*)scr))
+            return NULL;
+    }
     return scr;
 }
 
@@ -422,8 +426,10 @@ WScreen *ioncore_goto_prev_screen()
         scr=scr->prev_scr;
     else
         scr=ioncore_g.screens;
-    if(scr!=NULL)
-        region_goto((WRegion*)scr);
+    if(scr!=NULL){
+        if(!region_goto((WRegion*)scr))
+            return NULL;
+    }
     return scr;
 }
 

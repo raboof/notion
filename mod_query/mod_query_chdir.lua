@@ -9,12 +9,12 @@
 -- (at your option) any later version.
 --
 
-local function ws_chdir(mplex, dir)
+local function ws_chdir(mplex, params)
     ws=assert(ioncore.find_manager(mplex, "WGenWS"))
-    ioncore.chdir_for(ws, dir)
+    ioncore.chdir_for(ws, params[1] or "")
 end
 
-local function ws_showdir(mplex, dir)
+local function ws_showdir(mplex, params)
     local dir=assert(ioncore.get_dir_for(mplex) or os.getenv("PWD"))
     mod_query.message(mplex, dir)
 end
