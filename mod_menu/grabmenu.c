@@ -66,6 +66,7 @@ WMenu *mod_menu_do_grabmenu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
     fnp.tab=tab;
     fnp.pmenu_mode=FALSE;
     fnp.submenu_mode=FALSE;
+    fnp.big_mode=FALSE;
     
     menu=(WMenu*)mplex_attach_hnd(mplex,
                                   (WRegionAttachHandler*)create_menu,

@@ -175,12 +175,10 @@ end
 -- Workspace and window lists {{{
 
 local function makelist(list)
-    local entries={}
-    for i, tgt_ in list do
-        -- Loop variable scope doesn't work as it should
-        local tgt=tgt_
-        entries[i]=menuentry(tgt:name(), function() tgt:goto() end)
+    local function mkentry(tgt)
+        return menuentry(tgt:name(), function() tgt:goto() end)
     end
+    local entries=table.map(mkentry, list)
     table.sort(entries, function(a, b) return a.name < b.name end)
     return entries
 end
@@ -191,10 +189,6 @@ end
 
 function menus.workspacelist()
     return makelist(ioncore.region_list("WGenWS"))
-end
-
-function menus.ctxmenu()
-    
 end
 
 -- }}}
