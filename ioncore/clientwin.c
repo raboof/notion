@@ -318,21 +318,23 @@ static bool handle_target_props(WClientWin *cwin, const WManageParams *param)
 	WRegion *r=NULL;
 	char *target_name=NULL;
 	
-	if(!extl_table_gets_s(cwin->proptab, "target", &target_name)){
-		if(!extl_table_is_bool_set(cwin->proptab, "fullscreen"))
-			return FALSE;
-		return clientwin_enter_fullscreen(cwin, 
-										  clientwin_get_switchto(cwin));
+	if(extl_table_gets_s(cwin->proptab, "target", &target_name)){
+		r=lookup_region(target_name, NULL);
+		
+		free(target_name);
+	
+		if(r!=NULL){
+			if(region_has_manage_clientwin(r))
+				if(region_manage_clientwin(r, cwin, param))
+					return TRUE;
+		}
 	}
 	
-	r=lookup_region(target_name, NULL);
+	if(!extl_table_is_bool_set(cwin->proptab, "fullscreen"))
+			return FALSE;
 	
-	free(target_name);
-	
-	if(!region_has_manage_clientwin(r))
-		return FALSE;
-	
-	return region_manage_clientwin(r, cwin, param);
+	return clientwin_enter_fullscreen(cwin, 
+									  clientwin_get_switchto(cwin));
 }
 
 
