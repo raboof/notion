@@ -65,7 +65,7 @@ static void keyboard_handler(XEvent *ev);
 /*	fprintf(stderr, "[%#lx] %s\n", ev->xany.window, #X);*/
 
 
-static void skip_focusenter_but(WRegion *reg)
+static void skip_focusenter()
 {
 	XEvent ev;
 	WRegion *r;
@@ -78,23 +78,6 @@ static void skip_focusenter_but(WRegion *reg)
 			handle_focus_out(&(ev.xfocus));
 		else if(ev.type==FocusIn)
 			handle_focus_in(&(ev.xfocus));
-		
-		/*if(ev.type!=FocusIn)
-			continue;*/
-		#if 0
-		r=FIND_WINDOW_T(ev.xany.window, WRegion);
-		
-		while(r!=NULL){
-			if(r==reg){
-				if(ev.type==FocusIn)
-					handle_focus_in(&(ev.xfocus));
-				/*else if(ev.type==EnterNotify)
-					handle_enter_window(&ev);*/
-				break;
-			}
-			r=FIND_PARENT1(r, WRegion);
-		}
-		#endif
 	}
 }
 
@@ -186,17 +169,14 @@ void mainloop()
 		
 		XSync(wglobal.dpy, False);
 		if(wglobal.focus_next!=NULL && wglobal.input_mode==INPUT_NORMAL){
-			skip_focusenter_but(wglobal.focus_next);
+			skip_focusenter();
 			do_set_focus(wglobal.focus_next, wglobal.warp_next);
 			wglobal.focus_next=NULL;
 			wglobal.warp_next=FALSE;
+		}else if(wglobal.grab_released){
+			skip_focusenter();
 		}
-		#if 0
-		else 
-			if(wglobal.grab_released /*|| wglobal.focus_next!=NULL*/){
-			skip_focusenter_but(NULL);
-		}
-		#endif
+
 		wglobal.grab_released=FALSE;
 	}
 }
@@ -588,25 +568,6 @@ static void keyboard_handler(XEvent *ev)
 	
 	if(ev->type==KeyPress)
 		handle_keypress(&(ev->xkey));
-#if 0
-	while(wglobal.input_mode!=INPUT_NORMAL &&
-		  wglobal.input_mode!=INPUT_WAITRELEASE){
-		XFlush(wglobal.dpy);
-		get_event_mask(ev, GRAB_EV_MASK);
-		
-		switch(ev->type){
-		case Expose:
-			handle_expose(&(ev->xexpose));
-			break;
-		case KeyPress:
-			handle_keypress(&(ev->xkey));
-			break;
-		}
-	}
-#endif
-	
-	/*if(wglobal.focus_next==NULL)
-		skip_focusenter();*/
 }
 
 
