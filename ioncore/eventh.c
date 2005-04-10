@@ -201,6 +201,19 @@ void ioncore_handle_client_message(const XClientMessageEvent *ev)
 }
 
 
+static bool pchg_mrsh_extl(ExtlFn fn, void **p)
+{
+    extl_call(fn, "oi", NULL, p[0], ((XPropertyEvent*)p[1])->atom);
+    return TRUE;
+}
+
+static bool pchg_mrsh(void (*fn)(void *p1, void *p2), void **p)
+{
+    fn(p[0], p[1]);
+    return TRUE;
+}
+                             
+
 void ioncore_handle_property(const XPropertyEvent *ev)
 {
     WClientWin *cwin;
@@ -228,12 +241,23 @@ void ioncore_handle_property(const XPropertyEvent *ev)
     }else if(ev->atom==XA_WM_NAME){
         if(!(cwin->flags&CLIENTWIN_USE_NET_WM_NAME))
             clientwin_get_set_name(cwin);
-    }else if(ev->atom== XA_WM_TRANSIENT_FOR){
+    }else if(ev->atom==XA_WM_TRANSIENT_FOR){
         clientwin_tfor_changed(cwin);
     }else if(ev->atom==ioncore_g.atom_wm_protocols){
         clientwin_get_protocols(cwin);
     }else{
-        netwm_handle_property(cwin, ev);
+        if(!netwm_handle_property(cwin, ev))
+            return;
+    }
+    
+    /* Call property hook */
+    {
+        void *p[2];
+        p[0]=(void*)cwin;
+        p[1]=(void*)ev;
+        hook_call(clientwin_property_change_hook, p,
+                  (WHookMarshall*)pchg_mrsh,
+                  (WHookMarshallExtl*)pchg_mrsh_extl);
     }
 }
 

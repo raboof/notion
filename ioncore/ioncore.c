@@ -233,6 +233,7 @@ static bool init_hooks()
     INIT_HOOK_(region_inactivated_hook);
     INIT_HOOK_(clientwin_mapped_hook);
     INIT_HOOK_(clientwin_unmapped_hook);
+    INIT_HOOK_(clientwin_property_change_hook);
     INIT_HOOK(clientwin_do_manage_alt, clientwin_do_manage_default);
     INIT_HOOK(ioncore_handle_event_alt, ioncore_handle_event);
     INIT_HOOK(region_do_warp_alt, region_do_warp_default);

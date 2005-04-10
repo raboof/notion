@@ -29,6 +29,6 @@ extern void netwm_set_active(WRegion *reg);
 extern char **netwm_get_name(WClientWin *cwin);
 
 extern void netwm_handle_client_message(const XClientMessageEvent *ev);
-extern void netwm_handle_property(WClientWin *cwin, const XPropertyEvent *ev);
+extern bool netwm_handle_property(WClientWin *cwin, const XPropertyEvent *ev);
 
 #endif /* ION_IONCORE_NETWM_H */

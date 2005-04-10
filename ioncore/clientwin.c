@@ -48,6 +48,7 @@ static bool send_clientmsg(Window win, Atom a, Time stmp);
 WHook *clientwin_do_manage_alt=NULL;
 WHook *clientwin_mapped_hook=NULL;
 WHook *clientwin_unmapped_hook=NULL;
+WHook *clientwin_property_change_hook=NULL;
 
 
 #define LATEST_TRANSIENT(CWIN) PTRLIST_LAST(WRegion*, (CWIN)->transient_list)

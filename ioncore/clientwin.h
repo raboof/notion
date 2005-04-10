@@ -116,6 +116,10 @@ extern WHook *clientwin_do_manage_alt;
 extern WHook *clientwin_mapped_hook;
 /* This hook has an X Window id as parameter. */
 extern WHook *clientwin_unmapped_hook;
+/* This hook has (WClientWin*, const XPropertyEvent *) as parameters on
+ * C side, and (WClientWin*, int atom) on Lua side.
+ */
+extern WHook *clientwin_property_change_hook;
 
 /* Manage */
 

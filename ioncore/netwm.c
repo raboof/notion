@@ -231,10 +231,13 @@ void netwm_handle_client_message(const XClientMessageEvent *ev)
 /*{{{ netwm_handle_property */
 
 
-void netwm_handle_property(WClientWin *cwin, const XPropertyEvent *ev)
+bool netwm_handle_property(WClientWin *cwin, const XPropertyEvent *ev)
 {
-    if(ev->atom==atom_net_wm_name)
-        clientwin_get_set_name(cwin);
+    if(ev->atom!=atom_net_wm_name)
+        return FALSE;
+    
+    clientwin_get_set_name(cwin);
+    return TRUE;
 }
 
 
