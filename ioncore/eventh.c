@@ -246,8 +246,7 @@ void ioncore_handle_property(const XPropertyEvent *ev)
     }else if(ev->atom==ioncore_g.atom_wm_protocols){
         clientwin_get_protocols(cwin);
     }else{
-        if(!netwm_handle_property(cwin, ev))
-            return;
+        netwm_handle_property(cwin, ev);
     }
     
     /* Call property hook */
