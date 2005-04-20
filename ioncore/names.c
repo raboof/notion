@@ -464,7 +464,10 @@ bool clientwin_register(WClientWin *cwin)
 EXTL_EXPORT_MEMBER
 bool region_set_name(WRegion *reg, const char *p)
 {
-    return do_set_name(use_name_parseany, reg, &ioncore_internal_ns, p);
+/*    return do_set_name(use_name_parseany, reg, &ioncore_internal_ns, p);*/
+    return do_set_name(use_name_parseany, reg, 
+            OBJ_IS(reg, WClientWin) ? &ioncore_clientwin_ns : &ioncore_internal_ns,
+            p);
 }
 
 
