@@ -49,11 +49,11 @@ static OptParserOpt ion_opts[]={
     {OPT_ID('a'), "about", 0, NULL,
      DUMMY_TR("Show about text")},
 
+    {'q', "quiet", 0, NULL, 
+     DUMMY_TR("Quiet mode")},
+
     {'m', "meter", OPT_ARG, "meter_module",
      DUMMY_TR("Load a meter module")},
-
-    {'M', "try-meter", OPT_ARG, "meter_module",
-     DUMMY_TR("Try to load a meter module without complaining")},
 
     END_OPTPARSEROPTS
 };
@@ -137,6 +137,7 @@ int main(int argc, char*argv[])
     char *mod2=NULL;
     int loaded=0;
     int opt;
+    bool quiet=FALSE;
 
     configtab=extl_table_none();
     
@@ -189,8 +190,10 @@ int main(int argc, char*argv[])
                 }
             }
             break;
+        case 'q':
+            quiet=TRUE;
+            break;
         case 'm':
-        case 'M':
             mod=optparser_get_arg();
             if(strchr(mod, '/')==NULL && strchr(mod, '.')==NULL){
                 mod2=scat("statusd_", mod);
@@ -198,7 +201,7 @@ int main(int argc, char*argv[])
                     return EXIT_FAILURE;
                 mod=mod2;
             }
-            if(extl_read_config(mod, NULL, opt=='m'))
+            if(extl_read_config(mod, NULL, !quiet))
                 loaded++;
             if(mod2!=NULL)
                 free(mod2);
@@ -210,7 +213,7 @@ int main(int argc, char*argv[])
         }
     }
     
-    if(loaded==0){
+    if(loaded==0 && !quiet){
         warn(TR("No meters loaded."));
         return EXIT_FAILURE;
     }

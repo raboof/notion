@@ -209,7 +209,7 @@ end
 -- ion-statusd support {{{
 
 local statusd_pid=0
-local statusd_cfg=""
+local statusd_cfg=" -q "
 local statusd_modules={}
 
 function mod_statusbar.rcv_statusd(str)
@@ -259,7 +259,7 @@ local function get_statusd_params()
                          end)
     end
     local params=statusd_cfg
-    table.foreach(mods, function(k) params=params.." -M "..k end)
+    table.foreach(mods, function(k) params=params.." -m "..k end)
     return params
 end
 
@@ -343,7 +343,7 @@ function mod_statusbar.create(param_)
     
     statusbars[sb]=param
     sb:set_template(mod_statusbar.get_template_table(param))
-    sb:update(meters)
+    sb:update(set_date(param, meters))    
     
     return sb
 end
