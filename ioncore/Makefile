@@ -36,6 +36,8 @@ MAKE_EXPORTS=ioncore
 
 TARGETS=ioncore.a
 
+include $(TOPDIR)/libmainloop/rx.mk
+
 ######################################
 
 include $(TOPDIR)/rules.mk

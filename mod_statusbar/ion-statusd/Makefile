@@ -24,6 +24,8 @@ LUA_SOURCES = statusd_mail.lua statusd_load.lua
 
 MAKE_EXPORTS = statusd
 
+include $(TOPDIR)/libmainloop/rx.mk
+
 ######################################
 
 include $(TOPDIR)/rules.mk

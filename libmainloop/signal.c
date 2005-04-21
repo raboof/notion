@@ -161,6 +161,10 @@ static void add_to_current_time(struct timeval *when, uint msecs)
 }
 
 
+/*EXTL_DOC
+ * Is timer set?
+ */
+EXTL_EXPORT_MEMBER
 bool timer_is_set(WTimer *timer)
 {
     WTimer *tmr;
@@ -210,12 +214,20 @@ void timer_set(WTimer *timer, uint msecs, WTimerHandler *handler)
 }
 
 
+/*EXTL_DOC
+ * Set \var{timer} to call \var{fn} in \var{msecs} milliseconds.
+ */
+EXTL_EXPORT_AS(WTimer, set)
 void timer_set_extl(WTimer *timer, uint msecs, ExtlFn fn)
 {
     timer_do_set(timer, msecs, NULL, extl_ref_fn(fn));
 }
 
     
+/*EXTL_DOC
+ * Reset timer.
+ */
+EXTL_EXPORT_MEMBER
 void timer_reset(WTimer *timer)
 {
     WTimer *q=queue, **qptr=&queue;
@@ -258,7 +270,10 @@ WTimer *create_timer()
     CREATEOBJ_IMPL(WTimer, timer, (p));
 }
 
-
+/*EXTL_DOC
+ * Create a new timer.
+ */
+EXTL_EXPORT_AS(mainloop, create_timer)
 WTimer *create_timer_extl_owned()
 {
     WTimer *timer=create_timer();
