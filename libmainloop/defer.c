@@ -148,6 +148,10 @@ bool mainloop_defer_extl_on_list(ExtlFn fn, WDeferred **list)
 }
 
 
+/*EXTL_DOC
+ * Defer execution of \var{fn} until the main loop.
+ */
+EXTL_EXPORT_AS(mainloop, defer)
 bool mainloop_defer_extl(ExtlFn fn)
 {
     return mainloop_defer_extl_on_list(fn, &deferred);
