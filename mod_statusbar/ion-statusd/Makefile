@@ -16,7 +16,7 @@ DEFINES += -DETCDIR=\"$(ETCDIR)\" -DSHAREDIR=\"$(SHAREDIR)\" \
            -DEXTRABINDIR=\"$(EXTRABINDIR)\" -DMODULEDIR=\"$(MODULEDIR)\" \
 	   -DLCDIR=\"$(LCDIR)\" -DLOCALEDIR=\"$(LOCALEDIR)\"
 
-SOURCES = ion-statusd.c extlrx.c
+SOURCES = ion-statusd.c exec.c extlrx.c
 
 TARGETS = ion-statusd
 
