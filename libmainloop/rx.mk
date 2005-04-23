@@ -4,7 +4,7 @@
 
 MAINLOOP_DIR = $(TOPDIR)/libmainloop
 
-MAINLOOP_SOURCES_ = select.c defer.c signal.c hooks.c
+MAINLOOP_SOURCES_ = select.c defer.c signal.c hooks.c exec.c
 
 MAINLOOP_SOURCES = $(patsubst %,$(MAINLOOP_DIR)/%, $(MAINLOOP_SOURCES_))
 

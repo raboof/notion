@@ -10,18 +10,12 @@
  */
 
 #include <limits.h>
-#include <sys/types.h>
-#include <sys/signal.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <signal.h>
-#include <time.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <errno.h>
 
 #include <libmainloop/select.h>
+#include <libmainloop/exec.h>
 
 #include "common.h"
 #include "exec.h"
@@ -31,189 +25,7 @@
 #include "saveload.h"
 
 
-#define SHELL_PATH "/bin/sh"
-#define SHELL_NAME "sh"
-#define SHELL_ARG "-c"
-
-
 /*{{{ Exec */
-
-
-void ioncore_do_exec(const char *cmd)
-{
-    char *argv[4];
-
-    close(ioncore_g.conn);
-    
-    ioncore_g.dpy=NULL;
-    
-#ifndef CF_NO_SETPGID
-    setpgid(0, 0);
-#endif
-    
-    argv[0]=SHELL_NAME;
-    argv[1]=SHELL_ARG;
-    argv[2]=(char*)cmd; /* stupid execve... */
-    argv[3]=NULL;
-    execvp(SHELL_PATH, argv);
-
-    die_err_obj(cmd);
-}
-
-
-EXTL_EXPORT
-int ioncore_do_exec_rw(WRootWin *rw, const char *cmd, const char *wd)
-{
-    int pid;
-    
-    if(cmd==NULL)
-        return -1;
-
-    XSync(ioncore_g.dpy, False);
-    
-    pid=fork();
-    
-    if(pid!=0){
-        if(pid<0)
-            warn_err();
-        return pid;
-    }
-    
-    /* The new process */
-    
-    ioncore_setup_environ(rw==NULL ? -1 : rw->xscr);
-    
-    if(wd!=NULL){
-        if(chdir(wd)!=0)
-            warn_err_obj(wd);
-    }
-    
-    ioncore_do_exec(cmd);
-    
-    /* We should not get here */
-    return FALSE;
-}
-
-
-/*EXTL_DOC
- * Run \var{cmd} with the environment variable DISPLAY set to point to the
- * X display the WM is running on. No specific screen is set unlike with
- * \fnref{WRootWin.exec_on}. The PID of the (shell executing the) new 
- * process is returned.
- */
-EXTL_SAFE
-EXTL_EXPORT
-int ioncore_exec(const char *cmd)
-{
-    return ioncore_do_exec_rw(NULL, cmd, NULL);
-}
-
-
-#define BL 1024
-
-static void process_pipe(int fd, void *p)
-{
-    char buf[BL];
-    int n;
-    
-    while(1){
-        n=read(fd, buf, BL-1);
-        if(n<0){
-            if(errno==EAGAIN || errno==EINTR)
-                return;
-            n=0;
-            warn_err_obj(TR("reading a pipe"));
-        }
-        if(n>0){
-            buf[n]='\0';
-            if(!extl_call(*(ExtlFn*)p, "s", NULL, &buf))
-                break;
-        }
-        if(n==0){
-            /* Call with no argument/NULL string to signify EOF */
-            extl_call(*(ExtlFn*)p, NULL, NULL);
-            break;
-        }
-        if(n<BL-1)
-            return;
-    }
-    
-    /* We get here on EOL or if the handler failed */
-    mainloop_unregister_input_fd(fd);
-    close(fd);
-    extl_unref_fn(*(ExtlFn*)p);
-    free(p);
-}
-
-#undef BL    
-    
-/*EXTL_DOC
- * Run \var{cmd} with a read pipe connected to its stdout.
- * When data is received through the pipe, \var{handler} is called
- * with that data.
- */
-EXTL_SAFE
-EXTL_EXPORT
-int ioncore_popen_bgread(const char *cmd, ExtlFn handler)
-{
-    int pid;
-    int fds[2];
-    
-    if(pipe(fds)!=0){
-        warn_err_obj("pipe()");
-        return -1;
-    }
-
-    fcntl(fds[0], F_SETFD, FD_CLOEXEC);
-    fcntl(fds[1], F_SETFD, FD_CLOEXEC);
-
-    pid=fork();
-    
-    if(pid<0){
-        close(fds[0]);
-        close(fds[1]);
-        warn_err();
-        return -1;
-    }
-    
-    if(pid!=0){
-        ExtlFn *p;
-        close(fds[1]);
-        /* unblock */ {
-            int fl=fcntl(fds[0], F_GETFL);
-            if(fl!=-1)
-                fl=fcntl(fds[0], F_SETFL, fl|O_NONBLOCK);
-            if(fl==-1){
-                warn_err();
-                close(fds[0]);
-                return -1;
-            }
-        }
-            
-        p=ALLOC(ExtlFn);
-        if(p!=NULL){
-            *(ExtlFn*)p=extl_ref_fn(handler);
-            if(mainloop_register_input_fd(fds[0], p, process_pipe))
-                return TRUE;
-            extl_unref_fn(*(ExtlFn*)p);
-            free(p);
-        }
-        close(fds[0]);
-        return -1;
-    }
-    
-    /* Redirect stdout */
-    close(fds[0]);
-    close(1);
-    dup(fds[1]);
-    
-    ioncore_setup_environ(-1);
-    
-    ioncore_do_exec(cmd);
-    
-    /* We should not get here */
-    return pid;
-}
 
 
 void ioncore_setup_environ(int xscr)
@@ -248,6 +60,78 @@ void ioncore_setup_environ(int xscr)
 
     /*XFree(display);*/
 }
+
+
+typedef struct{
+    WRootWin *rw;
+    const char *wd;
+} ExecP;
+
+
+static void setup_exec(void *p_)
+{
+    ExecP *p=(ExecP*)p_;
+    
+    close(ioncore_g.conn);
+    
+    ioncore_g.dpy=NULL;
+    
+#ifndef CF_NO_SETPGID
+    setpgid(0, 0);
+#endif
+    
+    ioncore_setup_environ(p->rw==NULL ? -1 : p->rw->xscr);
+    
+    if(p->wd!=NULL){
+        if(chdir(p->wd)!=0)
+            warn_err_obj(p->wd);
+    }
+}
+
+
+EXTL_EXPORT
+int ioncore_do_exec_rw(WRootWin *rw, const char *cmd, const char *wd)
+{
+    ExecP p;
+    
+    p.rw=rw;
+    p.wd=wd;
+    
+    return mainloop_do_spawn(cmd, setup_exec, (void*)&p, NULL, NULL);
+}
+
+
+/*EXTL_DOC
+ * Run \var{cmd} with the environment variable DISPLAY set to point to the
+ * X display the WM is running on. No specific screen is set unlike with
+ * \fnref{WRootWin.exec_on}. The PID of the (shell executing the) new 
+ * process is returned.
+ */
+EXTL_SAFE
+EXTL_EXPORT
+int ioncore_exec(const char *cmd)
+{
+    return ioncore_do_exec_rw(NULL, cmd, NULL);
+}
+
+
+/*EXTL_DOC
+ * Run \var{cmd} with a read pipe connected to its stdout.
+ * When data is received through the pipe, \var{handler} is called
+ * with that data.
+ */
+EXTL_SAFE
+EXTL_EXPORT
+int ioncore_popen_bgread(const char *cmd, ExtlFn handler)
+{
+    ExecP p;
+    
+    p.rw=NULL;
+    p.wd=NULL;
+    
+    return mainloop_popen_bgread(cmd, handler, setup_exec, (void*)&p);
+}
+
 
 
 /*}}}*/
@@ -311,7 +195,8 @@ void ioncore_do_restart()
     if(other!=NULL){
         if(ioncore_g.display!=NULL)
             ioncore_setup_environ(-1);
-        ioncore_do_exec(other);
+        mainloop_do_exec(other);
+        warn_err_obj(other);
     }
     execvp(ioncore_g.argv[0], ioncore_g.argv);
     die_err_obj(ioncore_g.argv[0]);
