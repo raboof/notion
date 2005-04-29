@@ -79,7 +79,7 @@ end
 -- script. If the command is prefixed by two colons, \command{ion-runinxterm}
 -- will ask you to press enter after the command is finished, even if it
 -- returns succesfully.
-function ioncore.exec_on(reg, cmd)
+function ioncore.exec_on(reg, cmd, merr_internal)
     local _, _, col, c=string.find(cmd, "^[%s]*(:+)(.*)")
     if col then
         cmd=lookup_runinxterm_warn(c, nil, string.len(col)>1)
@@ -87,7 +87,9 @@ function ioncore.exec_on(reg, cmd)
             return
         end
     end
-    return ioncore.do_exec_rw(reg:rootwin_of(), cmd, ioncore.get_dir_for(reg))
+    return ioncore.do_exec_rw(reg:rootwin_of(), cmd, 
+                              ioncore.get_dir_for(reg), 
+                              merr_internal)
 end
 
 

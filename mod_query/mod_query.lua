@@ -24,6 +24,9 @@ local mod_query=_G["mod_query"]
 assert(mod_query)
 
 
+local DIE_TIMEOUT=30*1000 -- 30 seconds
+
+
 -- Generic helper functions {{{
 
 
@@ -69,10 +72,60 @@ function mod_query.query_yesno(mplex, prompt, handler)
 end
 
 
+local errdata={}
+
+--[[
+local function chld_handler(pid)
+    local t=errdata[pid]
+    if t then
+        errdata[pid]=nil
+        if t.errs then
+            mod_query.warn(t.mplex, t.errs)
+        end
+    end
+end
+
+ioncore.get_hook("ioncore_sigchld_hook"):add(chld_handler)
+]]
+
+function mod_query.exec_on_merr(mplex, cmd)
+    local pid
+    
+    local function monitor(str)
+        if pid then
+            local t=errdata[pid]
+            if t then
+                if str then
+                    t.errs=(t.errs or "")..str
+                elseif t.errs then
+                    errdata[pid]=nil
+                    mod_query.warn(t.mplex, t.errs)
+                end
+            end
+        end
+    end
+    
+    local function timeout()
+        errdata[pid]=nil
+    end
+    
+    pid=ioncore.exec_on(mplex, cmd, monitor)
+    
+    if pid<=0 then
+        return
+    end
+
+    local tmr=ioncore.create_timer();
+    tmr:set(DIE_TIMEOUT, timeout)
+    
+    errdata[pid]={tmr=tmr, mplex=mplex}
+end
+
+
 function mod_query.query_execfile(mplex, prompt, prog)
     assert(prog~=nil)
     local function handle_execwith(mplex, str)
-        ioncore.exec_on(mplex, prog.." "..string.shell_safe(str))
+        mod_query.exec_on_merr(mplex, prog.." "..string.shell_safe(str))
     end
     return mod_query.query(mplex, prompt, mod_query.get_initdir(mplex),
                            handle_execwith, mod_query.file_completor,
@@ -86,7 +139,7 @@ function mod_query.query_execwith(mplex, prompt, dflt, prog, completor,
         if not str or str=="" then
             str=dflt
         end
-        ioncore.exec_on(mplex, prog.." "..string.shell_safe(str))
+        mod_query.exec_on_merr(mplex, prog.." "..string.shell_safe(str))
     end
     return mod_query.query(mplex, prompt, nil, handle_execwith, completor,
                            context)
@@ -587,7 +640,7 @@ function mod_query.exec_handler(mplex, cmdline)
     if cmd_overrides[cmd] then
         cmd_overrides[cmd](mplex, table.map(unquote, parts))
     elseif cmd~="" then
-        ioncore.exec_on(mplex, cmdline)
+        mod_query.exec_on_merr(mplex, cmdline)
     end
 end
 
@@ -683,7 +736,7 @@ function mod_query.query_ssh(mplex, ssh)
             return
         end
         
-        ioncore.exec_on(mplex, ssh.." "..string.shell_safe(str))
+        mod_query.exec_on_merr(mplex, ssh.." "..string.shell_safe(str))
     end
     
     return mod_query.query(mplex, TR("SSH to:"), nil, handle_exec,
