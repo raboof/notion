@@ -54,15 +54,15 @@ if mod_menu then
             menuentry("Horizontally at root", 
                       "WIonWS.split_top(_, 'right')"),
         }),
-        submenu("Floating split", {
-            menuentry("Vertically", 
-                      "WIonWS.split_at(_, _sub, 'floating:bottom', true)"),
-            menuentry("Horizontally", 
-                      "WIonWS.split_at(_, _sub, 'floating:right', true)"),
-            menuentry("Vertically at root", 
-                      "WIonWS.split_top(_, 'floating:bottom')"),
-            menuentry("Horizontally at root", 
-                      "WIonWS.split_top(_, 'floating:right')"),
+        submenu("Toggle floating", {
+            menuentry("Left", 
+                      "WIonWS.set_floating_at(_, _sub, 'toggle', 'left')"),
+            menuentry("Right", 
+                      "WIonWS.set_floating_at(_, _sub, 'toggle', 'right')"),
+            menuentry("Up", 
+                      "WIonWS.set_floating_at(_, _sub, 'toggle', 'up')"),
+            menuentry("Down", 
+                      "WIonWS.set_floating_at(_, _sub, 'toggle', 'down')"),
         }),
     })
 end
