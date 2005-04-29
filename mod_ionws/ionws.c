@@ -723,8 +723,10 @@ WPHolder *ionws_get_rescue_pholder_for(WIonWS *ws, WRegion *mgd)
 
 static bool get_split_dir_primn(const char *str, int *dir, int *primn)
 {
-    if(str==NULL)
+    if(str==NULL){
+        warn(TR("Invalid split type parameter."));
         return FALSE;
+    }
     
     if(!strcmp(str, "any")){
         *primn=PRIMN_ANY;
@@ -746,7 +748,7 @@ static bool get_split_dir_primn(const char *str, int *dir, int *primn)
         *primn=PRIMN_BR;
         *dir=SPLIT_VERTICAL;
     }else{
-        return FALSE;
+        warn(TR("Invalid split type parameter."));
     }
     
     return TRUE;
@@ -782,10 +784,8 @@ static WFrame *ionws_do_split(WIonWS *ws, WSplit *node,
         return NULL;
     }
     
-    if(!get_split_dir_primn_float(dirstr, &dir, &primn, &floating)){
-        warn(TR("Invalid split type parameter."));
+    if(!get_split_dir_primn_float(dirstr, &dir, &primn, &floating))
         return NULL;
-    }
     
     mins=(dir==SPLIT_VERTICAL ? minh : minw);
 
@@ -1133,6 +1133,122 @@ WSplitRegion *ionws_node_of(WIonWS *ws, WRegion *reg)
     }
     
     return splittree_node_of(reg);
+}
+
+
+/*}}}*/
+
+
+/*{{{ Floating toggle */
+
+
+static void replace(WSplitSplit *split, WSplitSplit *nsplit)
+{
+    WSplitInner *psplit=split->isplit.split.parent;
+
+    nsplit->tl=split->tl;
+    split->tl=NULL;
+    nsplit->tl->parent=(WSplitInner*)nsplit;
+    
+    nsplit->br=split->br;
+    split->br=NULL;
+    nsplit->br->parent=(WSplitInner*)nsplit;
+    
+    if(psplit!=NULL){
+        splitinner_replace((WSplitInner*)psplit, (WSplit*)split, 
+                           (WSplit*)nsplit);
+    }else{
+        splittree_changeroot((WSplit*)split, (WSplit*)nsplit);
+    }
+}
+
+
+WSplitSplit *ionws_set_floating(WIonWS *ws, WSplitSplit *split, int sp)
+{
+    bool set=OBJ_IS(split, WSplitFloat);
+    bool nset=libtu_do_setparam(sp, set);
+    const WRectangle *g=&((WSplit*)split)->geom;
+    WSplitSplit *ns;
+    
+    if(!XOR(nset, set))
+        return split;
+    
+    if(nset){
+        ns=(WSplitSplit*)create_splitfloat(g, ws, split->dir);
+    }else{
+        if(OBJ_IS(split->tl, WSplitST) || OBJ_IS(split->br, WSplitST)){
+            warn(TR("Refusing to float split directly containing the "
+                    "status display."));
+            return NULL;
+        }
+        ns=create_splitsplit(g, split->dir);
+    }
+
+    if(ns!=NULL){
+        replace(split, ns);
+        split_resize((WSplit*)ns, g, PRIMN_ANY, PRIMN_ANY);
+        mainloop_defer_destroy((Obj*)split);
+    }
+    
+    return ns;
+}
+
+
+/*EXTL_DOC
+ * Toggle floating of a split's sides at \var{split} as indicated by the 
+ * parameter \var{how} (set/unset/toggle). A split of the appropriate is 
+ * returned, if there was a change.
+ */
+EXTL_EXPORT_AS(WIonWS, set_floating)
+WSplitSplit *ionws_set_floating_extl(WIonWS *ws, WSplitSplit *split, 
+                                     const char *how)
+{
+    return ionws_set_floating(ws, split, libtu_string_to_setparam(how));
+}
+
+
+/*EXTL_DOC
+ * Toggle floating of the sides of a split containin \var{reg} as indicated 
+ * by the parameters \var{how} (set/unset/toggle) and \var{dirstr}
+ * (left/right/up/down/any). The new status is returned (and \code{false}
+ * also on error).
+ */
+EXTL_EXPORT_AS(WIonWS, set_floating_at)
+bool ionws_set_floating_at_extl(WIonWS *ws, WRegion *reg, const char *how,
+                                const char *dirstr)
+{
+    WSplit *node;
+    WSplitSplit *split;
+    WSplitSplit *nsplit;
+    int dir=SPLIT_ANY, primn=PRIMN_ANY;
+    
+    node=(WSplit*)get_node_check(ws, reg);
+    if(node==NULL)
+        return FALSE;
+    
+    if(dirstr!=NULL && !get_split_dir_primn(dirstr, &dir, &primn))
+        return FALSE;
+
+    while(TRUE){
+        split=OBJ_CAST(node->parent, WSplitSplit);
+        if(split==NULL){
+            warn(TR("No suitable split here."));
+            return FALSE;
+        }
+
+        if(!(primn==PRIMN_TL && node!=split->br) &&
+           !(primn==PRIMN_BR && node!=split->tl) &&
+           !(dir!=SPLIT_ANY && split->dir!=dir) &&
+           !(OBJ_IS(split->tl, WSplitST) || OBJ_IS(split->br, WSplitST))){
+            break;
+        }
+        
+        node=(WSplit*)split;
+    }
+    
+    nsplit=ionws_set_floating(ws, split, libtu_string_to_setparam(how));
+    
+    return OBJ_IS((Obj*)(nsplit==NULL ? split : nsplit), WSplitFloat);
 }
 
 

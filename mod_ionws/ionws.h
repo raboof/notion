@@ -58,6 +58,9 @@ extern WFrame *ionws_split_at(WIonWS *ws, WFrame *frame,
                               const char *dirstr, bool attach_current);
 extern bool ionws_unsplit_at(WIonWS *ws, WFrame *frame);
 
+extern WSplitSplit *ionws_set_floating(WIonWS *ws, WSplitSplit *split, 
+                                       int sp);
+
 extern WSplit *ionws_split_tree(WIonWS *ws);
 extern WSplit *ionws_split_of(WIonWS *ws, WRegion *reg);
 
