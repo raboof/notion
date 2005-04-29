@@ -19,13 +19,15 @@
 
 extern void mainloop_do_exec(const char *cmd);
 extern pid_t mainloop_fork(void (*fn)(void *p), void *p,
-                           int *infd, int *outfd);
+                           int *infd, int *outfd, int *errfd);
 extern pid_t mainloop_do_spawn(const char *cmd, 
                               void (*initenv)(void *p), void *p,
-                              int *infd, int *outfd);
+                              int *infd, int *outfd, int *errfd);
 extern pid_t mainloop_spawn(const char *cmd);
 
 extern pid_t mainloop_popen_bgread(const char *cmd, ExtlFn handler,
                                    void (*initenv)(void *p), void *p);
+extern pid_t mainloop_spawn_merr(const char *cmd, ExtlFn handler,
+                                 void (*initenv)(void *p), void *p);
 
 #endif /* ION_LIBMAINLOOP_EXEC_H */

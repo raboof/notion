@@ -49,87 +49,115 @@ void mainloop_do_exec(const char *cmd)
 }
 
 
+static int mypipe(int *fds)
+{
+    int r=pipe(fds);
+    if(r==0){
+        fcntl(fds[0], F_SETFD, FD_CLOEXEC);
+        fcntl(fds[1], F_SETFD, FD_CLOEXEC);
+    }else{
+        warn_err_obj("pipe()");
+    }
+    return r;
+}
+
+
+static bool unblock(int fd)
+{
+    int fl=fcntl(fd, F_GETFL);
+    if(fl!=-1)
+        fl=fcntl(fd, F_SETFL, fl|O_NONBLOCK);
+    return (fd!=-1);
+}
+
+
+static void duppipe(int fd, int idx, int *fds)
+{
+    close(fd);
+    dup(fds[idx]);
+    close(fds[0]);
+    close(fds[1]);
+}
+
+
 pid_t mainloop_fork(void (*fn)(void *p), void *fnp,
-                    int *infd, int *outfd)
+                    int *infd, int *outfd, int *errfd)
 {
     int pid;
     int infds[2];
     int outfds[2];
+    int errfds[2];
     
     if(infd!=NULL){
-        if(pipe(infds)!=0){
-            warn_err_obj("pipe()");
+        if(mypipe(infds)!=0)
             return -1;
-        }
-
-        fcntl(infds[0], F_SETFD, FD_CLOEXEC);
-        fcntl(infds[1], F_SETFD, FD_CLOEXEC);
     }
 
     if(outfd!=NULL){
-        if(pipe(outfds)!=0){
-            close(infds[0]);
-            close(infds[1]);
-            warn_err_obj("pipe()");
-            return -1;
-        }
+        if(mypipe(outfds)!=0)
+            goto err1;
+    }
 
-        fcntl(outfds[0], F_SETFD, FD_CLOEXEC);
-        fcntl(outfds[1], F_SETFD, FD_CLOEXEC);
+    if(errfd!=NULL){
+        if(mypipe(errfds)!=0)
+            goto err2;
     }
     
 
     pid=fork();
     
     if(pid<0)
-        goto err;
+        goto err3;
     
     if(pid!=0){
-        if(infd!=NULL){
-            /* unblock */ {
-                int fl=fcntl(infds[0], F_GETFL);
-                if(fl!=-1)
-                    fl=fcntl(infds[0], F_SETFL, fl|O_NONBLOCK);
-                if(fl==-1)
-                    goto err;
-            }
-            *infd=infds[0];
-            close(infds[1]);
-        }
-        
         if(outfd!=NULL){
+            if(!unblock(outfds[0]))
+                goto err3;
             *outfd=outfds[0];
             close(outfds[1]);
+        }
+
+        if(errfd!=NULL){
+            if(!unblock(errfds[0]))
+                goto err3;
+            *errfd=errfds[0];
+            close(errfds[1]);
+        }
+        
+        if(infd!=NULL){
+            *infd=infds[1];
+            close(infds[0]);
         }
         
         return pid;
     }
-    
-    if(outfd!=NULL){
-        close(outfds[1]);
-        close(0);
-        dup(outfds[0]);
-    }
 
-    if(infd!=NULL){
-        close(infds[0]);
-        close(1);
-        dup(infds[1]);
-    }
+    if(infd!=NULL)
+        duppipe(0, 0, infds);
+    if(outfd!=NULL)
+        duppipe(1, 1, outfds);
+    if(errfd!=NULL)
+        duppipe(2, 1, errfds);
     
     fn(fnp);
 
     abort();
 
-err:            
+err3:
     warn_err();
-    if(infd!=NULL){
-        close(infds[0]);
-        close(infds[1]);
+    if(errfd!=NULL){
+        close(errfds[0]);
+        close(errfds[1]);
     }
+err2:
     if(outfd!=NULL){
         close(outfds[0]);
         close(outfds[1]);
+    }
+err1:    
+    if(infd!=NULL){
+        close(infds[0]);
+        close(infds[1]);
     }
     return -1;
 }
@@ -154,7 +182,7 @@ static void do_spawn(void *spawnp)
 
 pid_t mainloop_do_spawn(const char *cmd, 
                         void (*initenv)(void *p), void *p,
-                        int *infd, int *outfd)
+                        int *infd, int *outfd, int *errfd)
 {
     SpawnP spawnp;
     
@@ -162,13 +190,13 @@ pid_t mainloop_do_spawn(const char *cmd,
     spawnp.initenv=initenv;
     spawnp.initenvp=p;
     
-    return mainloop_fork(do_spawn, (void*)&spawnp, infd, outfd);
+    return mainloop_fork(do_spawn, (void*)&spawnp, infd, outfd, errfd);
 }
 
 
 pid_t mainloop_spawn(const char *cmd)
 {
-    return mainloop_do_spawn(cmd, NULL, NULL, NULL, NULL);
+    return mainloop_do_spawn(cmd, NULL, NULL, NULL, NULL, NULL);
 }
 
 
@@ -215,6 +243,19 @@ static void process_pipe(int fd, void *p)
 }
 
 
+static bool setup_bgread(ExtlFn handler, int fd)
+{
+    ExtlFn *p=ALLOC(ExtlFn);
+    if(p!=NULL){
+        *(ExtlFn*)p=extl_ref_fn(handler);
+        if(mainloop_register_input_fd(fd, p, process_pipe))
+            return TRUE;
+        extl_unref_fn(*(ExtlFn*)p);
+        free(p);
+    }
+    return FALSE;
+}
+
 
 pid_t mainloop_popen_bgread(const char *cmd, ExtlFn handler,
                             void (*initenv)(void *p), void *p)
@@ -222,16 +263,31 @@ pid_t mainloop_popen_bgread(const char *cmd, ExtlFn handler,
     pid_t pid;
     int fd;
     
-    pid=mainloop_do_spawn(cmd, initenv, p, &fd, NULL);
+    pid=mainloop_do_spawn(cmd, initenv, p, NULL, &fd, NULL);
     
     if(pid>0){
-        ExtlFn *p=ALLOC(ExtlFn);
-        if(p!=NULL){
-            *(ExtlFn*)p=extl_ref_fn(handler);
-            if(mainloop_register_input_fd(fd, p, process_pipe))
-                return TRUE;
-            extl_unref_fn(*(ExtlFn*)p);
-            free(p);
+        if(!setup_bgread(handler, fd)){
+            close(fd);
+            return -1;
+        }
+    }
+    
+    return pid;
+}
+
+
+pid_t mainloop_spawn_merr(const char *cmd, ExtlFn handler,
+                          void (*initenv)(void *p), void *p)
+{
+    pid_t pid;
+    int fd;
+    
+    pid=mainloop_do_spawn(cmd, initenv, p, NULL, NULL, &fd);
+    
+    if(pid>0){
+        if(!setup_bgread(handler, fd)){
+            close(fd);
+            return -1;
         }
     }
     
@@ -240,4 +296,3 @@ pid_t mainloop_popen_bgread(const char *cmd, ExtlFn handler,
 
 
 /*}}}*/
-
