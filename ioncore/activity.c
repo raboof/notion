@@ -42,7 +42,7 @@ static void propagate_clear(WRegion *reg)
     if(mgr==NULL)
         return;
     
-    mgr->mgd_activity=minof(0, mgr->mgd_activity-1);
+    mgr->mgd_activity=maxof(0, mgr->mgd_activity-1);
     region_managed_notify(mgr, reg);
     
     if(!region_is_activity_r(mgr))
