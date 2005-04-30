@@ -12,11 +12,13 @@ defbindings("WMenu", {
     kpress("Escape", "WMenu.cancel(_)"),
     kpress("Control+G", "WMenu.cancel(_)"),
     kpress("Control+C", "WMenu.cancel(_)"),
+    kpress("Left", "WMenu.cancel(_)"),
     
     bdoc("Activate current menu entry."),
     kpress("Return",  "WMenu.finish(_)"),
     kpress("KP_Enter", "WMenu.finish(_)"),
     kpress("Control+M", "WMenu.finish(_)"),
+    kpress("Right", "WMenu.finish(_)"),
     
     bdoc("Select next/previous menu entry."),
     kpress("Control+N", "WMenu.select_next(_)"),
