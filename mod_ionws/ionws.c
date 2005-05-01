@@ -67,6 +67,19 @@ static WSplitRegion *get_node_check(WIonWS *ws, WRegion *reg)
 }
 
 
+static bool check_node(WIonWS *ws, WSplit *split)
+{
+    if(split->parent)
+        return check_node(ws, (WSplit*)split->parent);
+    
+    if((split->ws_if_root!=(void*)ws)){
+        warn(TR("Split not on workspace."));
+        return FALSE;
+    }
+    return TRUE;
+}
+
+
 /*}}}*/
 
 
@@ -835,6 +848,8 @@ static WFrame *ionws_do_split(WIonWS *ws, WSplit *node,
 EXTL_EXPORT_MEMBER
 WFrame *ionws_split(WIonWS *ws, WSplit *node, const char *dirstr)
 {
+    if(!check_node(ws, node))
+        return NULL;
     return ionws_do_split(ws, node, dirstr,
                           SPLIT_MINS, SPLIT_MINS);
 }
@@ -1203,6 +1218,8 @@ EXTL_EXPORT_AS(WIonWS, set_floating)
 WSplitSplit *ionws_set_floating_extl(WIonWS *ws, WSplitSplit *split, 
                                      const char *how)
 {
+    if(!check_node(ws, (WSplit*)split))
+        return NULL;
     return ionws_set_floating(ws, split, libtu_string_to_setparam(how));
 }
 
