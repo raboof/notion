@@ -393,9 +393,12 @@ static bool region_rqclose_default(WRegion *reg, bool relocate)
  * depends on whether the particular type of region in question has
  * implemented the feature and, in case of client windows, whether
  * the client supports the \code{WM_DELETE} protocol (see also
- * \fnref{WClientWin.kill}). If the operations is likely to succeed,
+ * \fnref{WClientWin.kill}). If the operation is likely to succeed,
  * \code{true} is returned, otherwise \code{false}. In most cases the
  * region will not have been actually destroyed when this function returns.
+ * If \var{relocate} is not set, and \var{reg} manages other regions, it
+ * will not be closed. Otherwise the managed regions will be attempted
+ * to be relocated.
  */
 EXTL_EXPORT_MEMBER
 bool region_rqclose(WRegion *reg, bool relocate)
@@ -422,7 +425,7 @@ static WRegion *region_rqclose_propagate_default(WRegion *reg,
  * it. If \var{sub} is set, it will be used as the managed region, otherwise
  * \fnref{WRegion.current}\code{(reg)}. The object to be closed is
  * returned or NULL if nothing can be closed. Also see notes for
- * \fnref{WRegion.rqclose_propagate}.
+ * \fnref{WRegion.rqclose}.
  */
 EXTL_EXPORT_MEMBER
 WRegion *region_rqclose_propagate(WRegion *reg, WRegion *maybe_sub)
