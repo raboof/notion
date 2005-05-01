@@ -73,6 +73,17 @@ WRegion *floatws_iter(WFloatWSIterTmp *tmp)
 }
 
 
+WRegion *floatws_iter_no_stdisp(WFloatWSIterTmp *tmp)
+{
+    WRegion *r=NULL;
+    
+    do{
+        r=floatws_iter(tmp);
+    }while(r==tmp->ws->managed_stdisp);
+    
+    return r;
+}
+
 WFloatWSIterTmp floatws_iter_default_tmp;
 
 
@@ -383,7 +394,8 @@ bool floatws_rescue_clientwins(WFloatWS *ws, WPHolder *ph)
     floatws_iter_init(&tmp, ws);
     
     return region_rescue_some_clientwins((WRegion*)ws, ph,
-                                         (WRegionIterator*)floatws_iter,
+                                         ((WRegionIterator*)
+                                          floatws_iter_no_stdisp),
                                          &tmp);
 }
 
