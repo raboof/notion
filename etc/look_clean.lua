@@ -71,8 +71,8 @@ de.defstyle("tab", {
 de.defstyle("tab-frame", {
     based_on = "tab",
     de.substyle("*-*-*-*-activity", {
-        shadow_colour = "grey",
-        highlight_colour = "grey",
+        shadow_colour = "#e0c0c0",
+        highlight_colour = "#e0c0c0",
         background_colour = "#990000",
         foreground_colour = "#eeeeee",
     }),
@@ -121,22 +121,7 @@ de.defstyle("input", {
     font = "fixed",
 })
 
-de.defstyle("stdisp", {
-    based_on = "*",
-    shadow_pixels = 0,
-    highlight_pixels = 0,
-    background_colour = "#000000",
-    foreground_colour = "grey",
-    text_align = "left",
-
-    de.substyle("important", {
-        foreground_colour = "green",
-    }),
-
-    de.substyle("critical", {
-        foreground_colour = "red",
-    }),
-})
+dopath("lookcommon_clean")
 
 gr.refresh()
 

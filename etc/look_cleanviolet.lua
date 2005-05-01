@@ -67,19 +67,15 @@ de.defstyle("tab", {
     }),
 })
 
-
 de.defstyle("tab-frame", {
     based_on = "tab",
-
     de.substyle("*-*-*-*-activity", {
-        -- Red tab
-        highlight_colour = "#eeeeff",
-        shadow_colour = "#eeeeff",
+        shadow_colour = "#e0c0c0",
+        highlight_colour = "#e0c0c0",
         background_colour = "#990000",
         foreground_colour = "#eeeeee",
     }),
 })
-
 
 de.defstyle("tab-frame-tiled", {
     based_on = "tab-frame",
@@ -123,23 +119,7 @@ de.defstyle("input", {
     }),
 })
 
-de.defstyle("stdisp", {
-    based_on = "*",
-    shadow_pixels = 0,
-    highlight_pixels = 0,
-    text_align = "left",
-    background_colour = "#000000",
-    foreground_colour = "grey",
-    font="fixed",
-    
-    de.substyle("important", {
-        foreground_colour = "green",
-    }),
-
-    de.substyle("critical", {
-        foreground_colour = "red",
-    }),
-})
+dopath("lookcommon_clean")
     
 -- Refresh objects' brushes.
 gr.refresh()
