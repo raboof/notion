@@ -1203,7 +1203,7 @@ WDock *mod_dock_create(ExtlTab tab)
     fp.g.x=0;
     fp.g.y=0;
     fp.g.w=1;
-    fp.g.w=1;
+    fp.g.h=1;
     fp.mode=REGION_FIT_EXACT;
     
     dock=create_dock((WWindow*)screen, &fp);
