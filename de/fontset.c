@@ -31,14 +31,14 @@ static const char *get_font_element(const char *pattern, char *buf,
     va_list va;
     
     va_start(va, bufsiz);
-    buf[bufsiz-1] = 0;
-    buf[bufsiz-2] = '*';
-    while((v = va_arg(va, char *)) != NULL) {
-        p = libtu_strcasestr(pattern, v);
-        if (p) {
+    buf[bufsiz-1]=0;
+    buf[bufsiz-2]='*';
+    while((v=va_arg(va, char *))!=NULL){
+        p=libtu_strcasestr(pattern, v);
+        if(p){
             strncpy(buf, p+1, bufsiz-2);
-            p2 = strchr(buf, '-');
-            if (p2) *p2=0;
+            p2=strchr(buf, '-');
+            if(p2) *p2=0;
             va_end(va);
             return p;
         }
@@ -55,23 +55,23 @@ static const char *get_font_size(const char *pattern, int *size)
     const char *p2=NULL;
     int n=0;
     
-    for (p=pattern; 1; p++) {
-        if (!*p) {
-            if (p2!=NULL && n>1 && n<72) {
-                *size = n; return p2+1;
-            } else {
-                *size = 16; return NULL;
+    for(p=pattern; 1; p++){
+        if(!*p){
+            if(p2!=NULL && n>1 && n<72){
+                *size=n; return p2+1;
+            }else{
+                *size=16; return NULL;
             }
-        } else if (*p=='-') {
-            if (n>1 && n<72 && p2!=NULL) {
-                *size = n;
+        }else if(*p=='-'){
+            if(n>1 && n<72 && p2!=NULL){
+                *size=n;
                 return p2+1;
             }
             p2=p; n=0;
-        } else if (*p>='0' && *p<='9' && p2!=NULL) {
-            n *= 10;
-            n += *p-'0';
-        } else {
+        }else if(*p>='0' && *p<='9' && p2!=NULL){
+            n*=10;
+            n+=*p-'0';
+        }else{
             p2=NULL; n=0;
         }
     }
@@ -81,26 +81,30 @@ static const char *get_font_size(const char *pattern, int *size)
 XFontSet de_create_font_set(const char *fontname) 
 {
     XFontSet fs;
-    char **missing, *def = "-";
-    int nmissing, pixel_size = 0;
+    char **missing=NULL, *def="-";
+    int nmissing, pixel_size=0;
     char weight[CF_FONT_ELEMENT_SIZE], slant[CF_FONT_ELEMENT_SIZE];
-    const char *nfontname = fontname;
-    char *pattern2 = NULL;
+    const char *nfontname=fontname;
+    char *pattern2=NULL;
+    int i;
     
     FNT_D(fprintf(stderr, "FNTRQ: %s\n", fontname));
     
-    fs = XCreateFontSet(ioncore_g.dpy, fontname, &missing, &nmissing, &def);
-    
-    if (fs && (! nmissing))
+    fs=XCreateFontSet(ioncore_g.dpy, fontname, &missing, &nmissing, &def);
+
+    if(fs && nmissing==0){
+        if(missing!=NULL) 
+            XFreeStringList(missing);
         return fs;
+    }
     
     /* Not a warning, nothing serious */
     FNT_D(fprintf(stderr, "Failed to load fontset.\n"));
     
-    if (! fs) {
+    if(!fs){
         char *lcc=NULL;
         const char *lc;
-        if (nmissing) 
+        if(missing!=NULL)
             XFreeStringList(missing);
         
         lc=setlocale(LC_CTYPE, NULL);
@@ -109,76 +113,74 @@ XFontSet de_create_font_set(const char *fontname)
         
         setlocale(LC_CTYPE, "C");
         
-        fs = XCreateFontSet(ioncore_g.dpy, fontname, &missing, &nmissing, &def);
+        fs=XCreateFontSet(ioncore_g.dpy, fontname, &missing, &nmissing, &def);
         
         if(lcc!=NULL){
             setlocale(LC_CTYPE, lcc);
             free(lcc);
         }
     }
-    
-    if (fs) {
+
+#ifndef CF_NO_FONTSET_KLUDGE    
+
+    if(fs){
         XFontStruct **fontstructs;
         char **fontnames;
         XFontsOfFontSet(fs, &fontstructs, &fontnames);
-        nfontname = fontnames[0];
+        nfontname=fontnames[0];
     }
 
-    /*if(fs){
-        XFontStruct **fontstructs;
-        char **fontnames;
-        int i, n=XFontsOfFontSet(fs, &fontstructs, &fontnames);
-        for(i=0; fontnames[i] && i<n; i++)
-            fprintf(stderr, "%s\n", fontnames[i]);
-    }*/
-    
     get_font_element(nfontname, weight, CF_FONT_ELEMENT_SIZE,
                      "-medium-", "-bold-", "-demibold-", "-regular-", NULL);
     get_font_element(nfontname, slant, CF_FONT_ELEMENT_SIZE,
                      "-r-", "-i-", "-o-", "-ri-", "-ro-", NULL);
     get_font_size(nfontname, &pixel_size);
     
-    if (! strcmp(weight, "*"))
+    if(!strcmp(weight, "*"))
         strncpy(weight, "medium", CF_FONT_ELEMENT_SIZE);
-    if (! strcmp(slant, "*"))
+    if(!strcmp(slant, "*"))
         strncpy(slant, "r", CF_FONT_ELEMENT_SIZE);
-    if (pixel_size < 3)
-        pixel_size = 3;
-    else if (pixel_size > 97)
-        pixel_size = 97;
+    if(pixel_size<3)
+        pixel_size=3;
+    else if(pixel_size>97)
+        pixel_size=97;
     
-    libtu_asprintf(&pattern2,
-                   "%s,"
-                   "-*-*-%s-%s-*-*-%d-*-*-*-*-*-*-*,"
-                   "-*-*-*-*-*-*-%d-*-*-*-*-*-*-*,*",
-                   fontname, weight, slant, pixel_size, pixel_size);
+    if(ioncore_g.enc_utf8){
+        libtu_asprintf(&pattern2,
+                       "%s,"
+                       "-misc-fixed-%s-%s-*-*-%d-*-*-*-*-*-*-*,"
+                       "-misc-fixed-*-*-*-*-%d-*-*-*-*-*-*-*",
+                       fontname, weight, slant, pixel_size, pixel_size);
+    }else{
+        libtu_asprintf(&pattern2,
+                       "%s,"
+                       "-*-*-%s-%s-*-*-%d-*-*-*-*-*-*-*,"
+                       "-*-*-*-*-*-*-%d-*-*-*-*-*-*-*",
+                       fontname, weight, slant, pixel_size, pixel_size);
+    }
     
     if(pattern2==NULL)
         return NULL;
-    
+
     FNT_D(fprintf(stderr, "NRQ: %s\n", pattern2));
     
-    nfontname = pattern2;
+    nfontname=pattern2;
     
-    if (nmissing)
+    if(nmissing)
         XFreeStringList(missing);
-    if (fs)
+    if(fs)
         XFreeFontSet(ioncore_g.dpy, fs);
 
     FNT_D(if(fs) fprintf(stderr, "Trying '%s'.\n", nfontname));
     
-    fs = XCreateFontSet(ioncore_g.dpy, nfontname, &missing, &nmissing, &def);
+    fs=XCreateFontSet(ioncore_g.dpy, nfontname, &missing, &nmissing, &def);
     
     free(pattern2);
     
-    /*if(fs){
-        XFontStruct **fontstructs;
-        char **fontnames;
-        int i, n=XFontsOfFontSet(fs, &fontstructs, &fontnames);
-        for(i=0; fontnames[i] && i<n; i++)
-            fprintf(stderr, "%s\n", fontnames[i]);
-    }*/
-
+#endif
+    
+    if(missing!=NULL) 
+        XFreeStringList(missing);
 
     return fs;
 }
