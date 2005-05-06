@@ -92,8 +92,8 @@ XINERAMA_LIBS=-lXinerama
 DEFINES += -DCF_XFREE86_TEXTPROP_BUG_WORKAROUND
 
 # Use the Xutf8 routines (XFree86 extension) instead of Xmb routines in
-# an UTF8 locale?
-DEFINES += -DCF_DE_USE_XUTF8
+# an UTF8 locale given the -i18n command line option?
+#DEFINES += -DCF_DE_USE_XUTF8
 
 # Remap F11 key to SunF36 and F12 to SunF37? You may want to set this
 # on SunOS.
