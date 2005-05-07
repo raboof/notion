@@ -61,7 +61,7 @@ DECLSTRUCT(WMenuCreateParams){
     bool submenu_mode;
     bool big_mode;
     int initial;
-    int ref_x, ref_y;
+    WRectangle refg;
 };
 
 

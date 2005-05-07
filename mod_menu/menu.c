@@ -270,7 +270,7 @@ static void get_placement_offs(WMenu *menu, int *xoff, int *yoff)
 #define MINIMUM_Y_VISIBILITY 20
 #define POINTER_OFFSET 5
 
-static void menu_firstfit(WMenu *menu, bool submenu, int ref_x, int ref_y)
+static void menu_firstfit(WMenu *menu, bool submenu, const WRectangle *refg)
 {
     WRectangle geom;
     
@@ -280,8 +280,8 @@ static void menu_firstfit(WMenu *menu, bool submenu, int ref_x, int ref_y)
         geom.x=menu->last_fp.g.x;
         geom.y=menu->last_fp.g.y;
     }else if(menu->pmenu_mode){
-        geom.x=ref_x;
-        geom.y=ref_y;
+        geom.x=refg->x;
+        geom.y=refg->y;
         
         if(!submenu){
             const WRectangle *maxg = 
@@ -292,9 +292,9 @@ static void menu_firstfit(WMenu *menu, bool submenu, int ref_x, int ref_y)
 
             if(geom.y+MINIMUM_Y_VISIBILITY>maxg->y+maxg->h){
                 geom.y=maxg->y+maxg->h-MINIMUM_Y_VISIBILITY;
-                geom.x=ref_x+POINTER_OFFSET;
+                geom.x=refg->x+POINTER_OFFSET;
                 if(geom.x+geom.w>maxg->x+maxg->w)
-                    geom.x=ref_x-geom.w-POINTER_OFFSET;
+                    geom.x=refg->x-geom.w-POINTER_OFFSET;
             }else{
                 if(geom.x<0)
                     geom.x=0;
@@ -305,17 +305,21 @@ static void menu_firstfit(WMenu *menu, bool submenu, int ref_x, int ref_y)
     }else{
         const WRectangle *maxg=&(menu->last_fp.g);
         if(submenu){
-            int xoff, yoff, x2, y2;
-            get_placement_offs(menu, &xoff, &yoff);
-            x2=minof(ref_x+xoff, maxg->x+maxg->w);
-            y2=maxof(ref_y-yoff, maxg->y);
-            geom.x=maxg->x+xoff;
-            if(geom.x+geom.w<x2)
-                geom.x=x2-geom.w;
-            geom.y=maxg->y+maxg->h-yoff-geom.h;
-            if(geom.y>y2)
-                geom.y=y2;
+            int l, r, t, b, xoff, yoff;
             
+            get_placement_offs(menu, &xoff, &yoff);
+            l=refg->x+xoff;
+            r=refg->x+refg->w+xoff;
+            t=refg->y-yoff;
+            b=refg->y+refg->h-yoff;
+            
+            geom.x=maxof(l, r-geom.w);
+            if(geom.x+geom.w>maxg->x+maxg->w)
+                geom.x=maxg->x;
+
+            geom.y=minof(b-geom.h, t);
+            if(geom.y<maxg->y)
+                geom.y=maxg->y;
         }else{
             geom.x=maxg->x;
             geom.y=maxg->y+maxg->h-geom.h;
@@ -574,7 +578,7 @@ bool menu_init(WMenu *menu, WWindow *par, const WFitParams *fp,
     if(!menu_init_gr(menu, region_rootwin_of((WRegion*)par), win))
         goto fail2;
 
-    menu_firstfit(menu, params->submenu_mode, params->ref_x, params->ref_y);
+    menu_firstfit(menu, params->submenu_mode, &(params->refg));
     
     window_select_input(&(menu->win), IONCORE_EVENTMASK_NORMAL);
     region_add_bindmap((WRegion*)menu, mod_menu_menu_bindmap);
@@ -693,13 +697,18 @@ static void show_sub(WMenu *menu, int n)
         return;
     
     fp=menu->last_fp;
+
+    fnp.pmenu_mode=menu->pmenu_mode;
+    fnp.big_mode=menu->big_mode;
+    fnp.submenu_mode=TRUE;
     
     if(menu->pmenu_mode){
-        fnp.ref_x=REGION_GEOM(menu).x+REGION_GEOM(menu).w;
-        fnp.ref_y=REGION_GEOM(menu).y+get_sub_y_off(menu, n);
+        fnp.refg.x=REGION_GEOM(menu).x+REGION_GEOM(menu).w;
+        fnp.refg.y=REGION_GEOM(menu).y+get_sub_y_off(menu, n);
+        fnp.refg.w=0;
+        fnp.refg.h=0;
     }else{
-        fnp.ref_x=REGION_GEOM(menu).x+REGION_GEOM(menu).w;
-        fnp.ref_y=REGION_GEOM(menu).y;
+        fnp.refg=REGION_GEOM(menu);
     }
 
     fnp.tab=extl_table_none();
@@ -718,9 +727,6 @@ static void show_sub(WMenu *menu, int n)
     }
     
     fnp.handler=extl_ref_fn(menu->handler);
-    fnp.pmenu_mode=menu->pmenu_mode;
-    fnp.big_mode=menu->big_mode;
-    fnp.submenu_mode=TRUE;
     
     fnp.initial=0;
     {

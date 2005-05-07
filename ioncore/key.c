@@ -102,7 +102,7 @@ static void send_key(XEvent *ev, WClientWin *cwin)
 static bool quote_next_handler(WRegion *reg, XEvent *xev)
 {
     XKeyEvent *ev=&xev->xkey;
-     if(ev->type!=KeyPress)
+    if(ev->type!=KeyPress)
         return FALSE;
     if(ioncore_ismod(ev->keycode))
         return FALSE;

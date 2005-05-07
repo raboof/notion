@@ -41,6 +41,10 @@ WMenu *mod_menu_do_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
     fnp.submenu_mode=FALSE;
     fnp.big_mode=big_mode;
     fnp.initial=initial;
+    fnp.refg.x=0;
+    fnp.refg.y=0;
+    fnp.refg.w=0;
+    fnp.refg.h=0;
     
     return (WMenu*)mplex_attach_hnd(mplex,
                                     (WRegionAttachHandler*)create_menu,
@@ -81,8 +85,10 @@ WMenu *mod_menu_do_pmenu(WWindow *where, ExtlFn handler, ExtlTab tab)
     fnp.big_mode=FALSE;
     fnp.submenu_mode=FALSE;
     fnp.initial=0;
-    fnp.ref_x=ev->xbutton.x_root-REGION_GEOM(scr).x;
-    fnp.ref_y=ev->xbutton.y_root-REGION_GEOM(scr).y;
+    fnp.refg.x=ev->xbutton.x_root-REGION_GEOM(scr).x;
+    fnp.refg.y=ev->xbutton.y_root-REGION_GEOM(scr).y;
+    fnp.refg.w=0;
+    fnp.refg.h=0;
     
     fp.mode=REGION_FIT_BOUNDS;
     fp.g.x=REGION_GEOM(where).x;
