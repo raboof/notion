@@ -30,7 +30,7 @@ _G["mod_statusbar"]=mod_statusbar
 local defaults={
     date_format='%a %Y-%m-%d %H:%M',
     template=string.format(
-        "[ %%date || %s: %%load || %s: %%mail_new/%%mail_total ]",
+        "[ %%date || %s: %%load || %s: %%mail_spool_new/%%mail_spool_total ]",
         TR("load"), TR("mail")
     ),
 }

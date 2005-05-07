@@ -9,17 +9,20 @@
 -- (at your option) any later version.
 --
 
+-- The keyword for this monitor
+local mon = "mail"
+
 local defaults={
     update_interval=10*1000,
     retry_interval=60*10*1000,
-    mbox=os.getenv("MAIL")
+    files = {spool = os.getenv("MAIL")}
 }
 
 local function TR(s, ...)
     return string.format(statusd.gettext(s), unpack(arg))
 end
 
-local settings=table.join(statusd.get_config("mail"), defaults)
+local settings=table.join(statusd.get_config(mon), defaults)
 
 local function calcmail(fname)
     local f, err=io.open(fname, 'r')
@@ -32,7 +35,7 @@ local function calcmail(fname)
         statusd.warn(err)
         return
     end
-    
+
     for l in f:lines() do
         if had_blank and string.find(l, '^From ') then
             total=total+1
@@ -66,50 +69,57 @@ local function calcmail(fname)
     return total, total-read, total-old
 end
 
+
 local mail_timer
-local mail_timestamp=-2.0
-
-local function update_mail()
-    assert(settings.mbox)
-    
-    local old_tm=mail_timestamp
-    mail_timestamp=statusd.last_modified(settings.mbox)
-    
-    if mail_timestamp>old_tm then
-        local mail_total, mail_unread, mail_new=calcmail(settings.mbox)
-        
-        if not mail_total then
-            statusd.warn(TR("Disabling mail monitor for %d seconds.",
-                            settings.retry_interval/1000))
-            mail_timestamp=-2.0
-            mail_timer:set(settings.retry_interval, update_mail)
-            return
-        end
-        
-        statusd.inform("mail_new", tostring(mail_new))
-        statusd.inform("mail_unread", tostring(mail_unread))
-        statusd.inform("mail_total", tostring(mail_total))
-        
-        if mail_new>0 then
-            statusd.inform("mail_new_hint", "important")
-        else
-            statusd.inform("mail_new_hint", "normal")
-        end
-        
-        if mail_unread>0 then
-            statusd.inform("mail_unread_hint", "important")
-        else
-            statusd.inform("mail_unread_hint", "normal")
-        end
+local mail_timestamps = {}
+function init_timestamps ()
+    for key, val in settings.files do
+        mail_timestamps[key]=-2.0
     end
-
-    mail_timer:set(settings.update_interval, update_mail)
 end
 
--- Init
---statusd.inform("mail_new_template", "00")
---statusd.inform("mail_unread_template", "00")
---statusd.inform("mail_total_template", "00")
+local function update_mail()
+    local failed = true
+    for key, mbox in settings.files do
+        assert(mbox)
+    
+        local old_tm=mail_timestamps[key]
+        mail_timestamps[key]=statusd.last_modified(mbox)
+    
+        if mail_timestamps[key]>old_tm then
+	    local mail_total, mail_unread, mail_new=calcmail(mbox)
+	    failed = failed and (not mail_total)
+        
+	    if mail_total then
+	        statusd.inform(mon.."_"..key.."_new", tostring(mail_new))
+	        statusd.inform(mon.."_"..key.."_unread", tostring(mail_unread))
+	        statusd.inform(mon.."_"..key.."_total", tostring(mail_total))
+
+	        if mail_new>0 then
+		    statusd.inform(mon.."_"..key.."_new_hint", "important")
+	        else
+		    statusd.inform(mon.."_"..key.."_new_hint", "normal")
+	        end
+        
+	        if mail_unread>0 then
+		    statusd.inform(mon.."_"..key.."_unread_hint", "important")
+	        else
+		    statusd.inform(mon.."_"..key.."_unread_hint", "normal")
+	        end
+	    end
+	end
+    end
+
+    if failed then
+        statusd.warn(TR("Disabling mail monitor for %d seconds.",
+			settings.retry_interval/1000))
+	init_timestamps()
+	mail_timer:set(settings.retry_interval, update_mail)
+	return
+    end
+   
+    mail_timer:set(settings.update_interval, update_mail)
+end
 
 mail_timer=statusd.create_timer()
 update_mail()

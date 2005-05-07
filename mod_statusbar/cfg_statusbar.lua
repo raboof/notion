@@ -19,15 +19,15 @@ mod_statusbar.create{
 
     -- Template. Tokens %string are replaced with the value of the 
     -- corresponding meter. Currently supported meters are:
-    --   date        date
-    --   load        load average
-    --   mail_new    new mail count (mbox format file $MAIL)
-    --   mail_unread unread mail count
-    --   mail_total  total mail count
+    --   date              date
+    --   load              load average
+    --   mail_spool_new    new mail count (mbox format file $MAIL)
+    --   mail_spool_unread unread mail count
+    --   mail_spool_total  total mail count
     -- Space preceded by % adds stretchable space. > before meter name 
     -- aligns right, < left, and | centers.
-    template="[ %date || load:% %>load || mail:% %>mail_new/%>mail_total ]",
-    --template="[ %date || load: %load || mail: %mail_new/%mail_total ]",
+    template="[ %date || load:% %>load || mail:% %>mail_spool_new/%>mail_spool_total ]",
+    --template="[ %date || load: %load || mail: %mail_spool_new/%mail_spool_total ]",
 }
 
 
@@ -47,7 +47,7 @@ mod_statusbar.launch_statusd{
     --[[
     mail={
         update_interval=60*1000,
-        mbox=os.getenv("MAIL")
+        mbox={spool = os.getenv("MAIL")}
     },
     --]]
 }
