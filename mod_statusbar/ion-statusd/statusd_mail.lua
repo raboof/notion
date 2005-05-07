@@ -77,6 +77,7 @@ function init_timestamps ()
         mail_timestamps[key]=-2.0
     end
 end
+init_timestamps()
 
 local function update_mail()
     local failed = true
