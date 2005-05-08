@@ -196,8 +196,10 @@ static bool region_managed_goto_default(WRegion *mgr, WRegion *reg, int flags)
         return FALSE;
     if(!REGION_IS_MAPPED(reg))
         region_map(reg);
-    if(flags&REGION_GOTO_FOCUS)
+    if(flags&REGION_GOTO_FOCUS){
+        ioncore_set_previous_of(reg);
         region_maybewarp(reg, !(flags&REGION_GOTO_NOWARP));
+    }
     return TRUE;
 }
 
@@ -274,44 +276,39 @@ void region_updategr_default(WRegion *reg)
 /*{{{ Goto */
 
 
-static bool region_do_goto(WRegion *reg, int flags)
+static bool protected_do_goto(WRegion *reg, int flags)
 {
-    WRegion *mgr=REGION_MANAGER(reg);
-    
-    if(mgr!=NULL){
-        if(!region_do_goto(mgr, flags))
-            return FALSE;
-        return region_managed_goto(mgr, reg, flags);
-    }else{
-        WRegion *par=REGION_PARENT_REG(reg);
-        if(par!=NULL){
-            if(!region_do_goto(par, flags))
-                return FALSE;
-        }
-
-        region_map(reg);
-        if(flags&REGION_GOTO_FOCUS)
-            region_maybewarp(reg, !(flags&REGION_GOTO_NOWARP));
-        
-        return TRUE;
-    }
+    bool ret;
+    ioncore_protect_previous();
+    ret=region_goto_flags(reg, flags);
+    ioncore_unprotect_previous();
+    return ret;
 }
 
 
 bool region_goto_flags(WRegion *reg, int flags)
 {
-    bool ret=FALSE;
-
-    if(flags&REGION_GOTO_FOCUS){
-        ioncore_set_previous_of(reg);
-        ioncore_protect_previous();
-        region_do_goto(reg, flags);
-        ioncore_unprotect_previous();
-    }else{
-        region_do_goto(reg, flags);
-    }
+    WRegion *mgr=REGION_MANAGER(reg);
     
-    return ret;
+    if(mgr!=NULL){
+        if(!protected_do_goto(mgr, flags))
+            return FALSE;
+        return region_managed_goto(mgr, reg, flags);
+    }else{
+        WRegion *par=REGION_PARENT_REG(reg);
+        if(par!=NULL){
+            if(!protected_do_goto(par, flags))
+                return FALSE;
+        }
+
+        region_map(reg);
+        if(flags&REGION_GOTO_FOCUS){
+            ioncore_set_previous_of(reg);
+            region_maybewarp(reg, !(flags&REGION_GOTO_NOWARP));
+        }
+        
+        return TRUE;
+    }
 }
 
 

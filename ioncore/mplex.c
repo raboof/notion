@@ -590,8 +590,8 @@ static bool mplex_do_node_goto(WMPlex *mplex, WLListNode *node,
         return FALSE;
     
     if(flags&REGION_GOTO_FOCUS){
+        ioncore_set_previous_of(node->reg);
         region_maybewarp(node->reg, !(flags&REGION_GOTO_NOWARP));
-        /*region_maybewarp((WRegion*)mplex, !(flags&REGION_GOTO_NOWARP));*/
     }
     
     return TRUE;
@@ -622,12 +622,8 @@ static void do_switch(WMPlex *mplex, WLListNode *node)
 {
     if(node!=NULL){
         bool mcf=region_may_control_focus((WRegion*)mplex);
-        if(mcf)
-            ioncore_set_previous_of(node->reg);
         region_managed_goto((WRegion*)mplex, node->reg,
                             (mcf ? REGION_GOTO_FOCUS : 0));
-        /*mplex_do_node_goto(mplex, node->reg, TRUE,
-                             (mcf ? REGION_GOTO_FOCUS : 0));*/
     }
 }
 

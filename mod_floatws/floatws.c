@@ -284,8 +284,10 @@ static bool floatws_managed_goto(WFloatWS *ws, WRegion *reg, int flags)
     
     region_map(reg);
     
-    if(flags&REGION_GOTO_FOCUS)
+    if(flags&REGION_GOTO_FOCUS){
+        ioncore_set_previous_of(reg);
         region_maybewarp(reg, !(flags&REGION_GOTO_NOWARP));
+    }
     
     return TRUE;
 }
@@ -564,10 +566,8 @@ static bool floatws_do_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
     }
 
     /* Don't warp, it is annoying in this case */
-    if(param->switchto && region_may_control_focus((WRegion*)ws)){
-        ioncore_set_previous_of((WRegion*)frame);
+    if(param->switchto && region_may_control_focus((WRegion*)ws))
         region_set_focus((WRegion*)frame);
-    }
     
     return TRUE;
 }

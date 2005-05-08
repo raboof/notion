@@ -391,16 +391,8 @@ void frame_p_switch_tab(WFrame *frame)
     
     if(sub!=NULL){
         bool mcf=region_may_control_focus((WRegion*)frame);
-        
-        if(mcf){
-            ioncore_set_previous_of(sub);
-            ioncore_protect_previous();
-            region_managed_goto((WRegion*)frame, sub, 
-                                REGION_GOTO_FOCUS|REGION_GOTO_NOWARP);
-            ioncore_unprotect_previous();
-        }else{
-            region_managed_goto((WRegion*)frame, sub, 0);
-        }
+        region_managed_goto((WRegion*)frame, sub, 
+                            (mcf ? REGION_GOTO_FOCUS|REGION_GOTO_NOWARP : 0));
     }
 }
 
