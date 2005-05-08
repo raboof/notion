@@ -80,7 +80,7 @@ end
 init_timestamps()
 
 local function update_mail()
-    local failed = true
+    local failed
     for key, mbox in settings.files do
         assert(mbox)
     
@@ -89,7 +89,11 @@ local function update_mail()
     
         if mail_timestamps[key]>old_tm then
 	    local mail_total, mail_unread, mail_new=calcmail(mbox)
-	    failed = failed and (not mail_total)
+	    if failed == nil then
+	        failed = not mail_total
+	    else
+	        failed = failed and (not mail_total)
+	    end
         
 	    if mail_total then
 	        statusd.inform(mon.."_"..key.."_new", tostring(mail_new))
