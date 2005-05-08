@@ -19,15 +19,18 @@ mod_statusbar.create{
 
     -- Template. Tokens %string are replaced with the value of the 
     -- corresponding meter. Currently supported meters are:
-    --   date              date
-    --   load              load average
-    --   mail_spool_new    new mail count (mbox format file $MAIL)
-    --   mail_spool_unread unread mail count
-    --   mail_spool_total  total mail count
+    --   date          date
+    --   load          load average
+    --   mail_new      mail count (mbox format file $MAIL)
+    --   mail_unread   mail count
+    --   mail_total    mail count
+    --   mail_*_new    mail count (from an alternate mail folder, see below)
+    --   mail_*_unread mail count
+    --   mail_*_total  mail count
     -- Space preceded by % adds stretchable space. > before meter name 
     -- aligns right, < left, and | centers.
-    template="[ %date || load:% %>load || mail:% %>mail_spool_new/%>mail_spool_total ]",
-    --template="[ %date || load: %load || mail: %mail_spool_new/%mail_spool_total ]",
+    template="[ %date || load:% %>load || mail:% %>mail_new/%>mail_total ]",
+    --template="[ %date || load: %load || mail: %mail_new/%mail_total ]",
 }
 
 
@@ -44,10 +47,19 @@ mod_statusbar.launch_statusd{
     --]]
 
     -- Mail meter
+    --
+    -- To monitor more mbox files, add them to the files table.  For
+    -- example, add mail_work_new and mail_junk_new to the template
+    -- above, and define them in the files table:
+    --
+    -- files = { work = "/path/to/work_email", junk = "/path/to/junk" }
+    --
+    -- Don't use the keyword 'spool' as it's reserved for mbox.
     --[[
     mail={
         update_interval=60*1000,
-        mbox={spool = os.getenv("MAIL")}
+        mbox=os.getenv("MAIL"),
+	files={}
     },
     --]]
 }

@@ -15,7 +15,8 @@ local mon = "mail"
 local defaults={
     update_interval=10*1000,
     retry_interval=60*10*1000,
-    files = {spool = os.getenv("MAIL")}
+    mbox = os.getenv("MAIL"),
+    files = {}
 }
 
 local function TR(s, ...)
@@ -23,6 +24,13 @@ local function TR(s, ...)
 end
 
 local settings=table.join(statusd.get_config(mon), defaults)
+if not settings.files["spool"] then
+    settings.files["spool"] = settings.mbox
+elseif not(settings.files["spool"] == mbox) then
+    statusd.warn(TR("%s.mbox does not match %s.files['spool']; using %s.mbox",
+		    mon, mon, mon))
+    settings.files["spool"] = settings.mbox
+end
 
 local function calcmail(fname)
     local f, err=io.open(fname, 'r')
@@ -95,21 +103,26 @@ local function update_mail()
 	        failed = failed and (not mail_total)
 	    end
         
+	    if key == "spool" then
+	        meter=mon
+	    else
+	        meter=mon.."_"..key
+	    end
 	    if mail_total then
-	        statusd.inform(mon.."_"..key.."_new", tostring(mail_new))
-	        statusd.inform(mon.."_"..key.."_unread", tostring(mail_unread))
-	        statusd.inform(mon.."_"..key.."_total", tostring(mail_total))
+	        statusd.inform(meter.."_new", tostring(mail_new))
+	        statusd.inform(meter.."_unread", tostring(mail_unread))
+	        statusd.inform(meter.."_total", tostring(mail_total))
 
 	        if mail_new>0 then
-		    statusd.inform(mon.."_"..key.."_new_hint", "important")
+		    statusd.inform(meter.."_new_hint", "important")
 	        else
-		    statusd.inform(mon.."_"..key.."_new_hint", "normal")
+		    statusd.inform(meter.."_new_hint", "normal")
 	        end
         
 	        if mail_unread>0 then
-		    statusd.inform(mon.."_"..key.."_unread_hint", "important")
+		    statusd.inform(meter.."_unread_hint", "important")
 	        else
-		    statusd.inform(mon.."_"..key.."_unread_hint", "normal")
+		    statusd.inform(meter.."_unread_hint", "normal")
 	        end
 	    end
 	end
