@@ -134,12 +134,13 @@ end
 
 
 function mod_query.query_execwith(mplex, prompt, dflt, prog, completor,
-                                  context)
+                                  context, noquote)
     local function handle_execwith(frame, str)
         if not str or str=="" then
             str=dflt
         end
-        mod_query.exec_on_merr(mplex, prog.." "..string.shell_safe(str))
+        local args=(noquote and str or string.shell_safe(str))
+        mod_query.exec_on_merr(mplex, prog.." "..args)
     end
     return mod_query.query(mplex, prompt, nil, handle_execwith, completor,
                            context)
@@ -767,7 +768,8 @@ function mod_query.query_man(mplex, prog)
     local dflt=ioncore.progname()
     mod_query.query_execwith(mplex, TR("Manual page (%s):", dflt), 
                              dflt, prog or ":man", 
-                             mod_query.man_completor, "man")
+                             mod_query.man_completor, "man",
+                             true --[[ no quoting ]])
 end
 
 
