@@ -46,7 +46,7 @@ dopath("mod_floatws")
 dopath("mod_panews")
 dopath("mod_statusbar")
 --dopath("mod_dock")
---dopath("mod_sp")
+dopath("mod_sp")
 
 -- Load some kludges to make apps behave better.
 dopath("cfg_kludges")
@@ -57,4 +57,6 @@ dopath("cfg_bindings")
 -- Define some menus (mod_menu required)
 dopath("cfg_menus")
 
+-- Load additional user configuration. 'true' as second parameter asks
+-- Ion not to complain if the file is not found.
 dopath("cfg_user", true)
