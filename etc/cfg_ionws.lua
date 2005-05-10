@@ -39,10 +39,10 @@ if mod_menu then
         menuentry("Destroy frame", 
                   "WIonWS.unsplit_at(_, _sub)"),
         submenu("Flip&transpose", {          
-            menuentry("Flip", "_:node_of(_sub):parent():flip()"),
-            menuentry("Transpose", "_:node_of(_sub):parent():transpose()"),
-            menuentry("Flip at root", "_:split_tree():flip()"),
-            menuentry("Transpose at root", "_:split_tree():transpose()"),
+            menuentry("Flip", "WIonWS.flip_at(_, _sub)"),
+            menuentry("Transpose", "WIonWS.transpose_at(_, _sub)"),
+            menuentry("Flip at root", "WIonWS.flip_at(_)"),
+            menuentry("Transpose at root", "WIonWS.transpose_at(_)"),
         }),
         submenu("Split", {
             menuentry("Vertically", 

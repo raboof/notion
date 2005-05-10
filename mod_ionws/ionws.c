@@ -1156,6 +1156,85 @@ WSplitRegion *ionws_node_of(WIonWS *ws, WRegion *reg)
 /*}}}*/
 
 
+/*{{{ Flip and transpose */
+
+
+static WSplitSplit *get_at_split(WIonWS *ws, WRegion *reg)
+{
+    WSplit *node;
+    WSplitSplit *split;
+    
+    if(reg==NULL){
+        split=OBJ_CAST(ws->split_tree, WSplitSplit);
+        if(split==NULL)
+            return NULL;
+        else if(split->br==(WSplit*)ws->stdispnode)
+            return OBJ_CAST(split->tl, WSplitSplit);
+        else if(split->tl==(WSplit*)ws->stdispnode)
+            return OBJ_CAST(split->br, WSplitSplit);
+        else
+            return split;
+    }
+    
+    node=(WSplit*)get_node_check(ws, reg);
+    
+    if(node==NULL)
+        return NULL;
+    
+    if(node==(WSplit*)ws->stdispnode){
+        warn(TR("The status display is not a valid parameter for "
+                "this routine."));
+        return NULL;
+    }
+        
+    split=OBJ_CAST(node->parent, WSplitSplit);
+    
+    if(split!=NULL && (split->tl==(WSplit*)ws->stdispnode ||
+                       split->br==(WSplit*)ws->stdispnode)){
+        split=OBJ_CAST(((WSplit*)split)->parent, WSplitSplit);
+    }
+       
+    return split;
+}
+
+
+/*EXTL_DOC
+ * Flip \var{ws} at \var{reg} or root if nil.
+ */
+EXTL_EXPORT_MEMBER
+bool iowns_flip_at(WIonWS *ws, WRegion *reg)
+{
+    WSplitSplit *split=get_at_split(ws, reg);
+    
+    if(split==NULL){
+        return FALSE;
+    }else{
+        splitsplit_flip(split);
+        return TRUE;
+    }
+}
+
+
+/*EXTL_DOC
+ * Transpose \var{ws} at \var{reg} or root if nil.
+ */
+EXTL_EXPORT_MEMBER
+bool iowns_transpose_at(WIonWS *ws, WRegion *reg)
+{
+    WSplitSplit *split=get_at_split(ws, reg);
+    
+    if(split==NULL){
+        return FALSE;
+    }else{
+        split_transpose((WSplit*)split);
+        return TRUE;
+    }
+}
+
+
+/*}}}*/
+
+
 /*{{{ Floating toggle */
 
 
