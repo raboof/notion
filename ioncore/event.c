@@ -51,6 +51,8 @@ static void check_signals()
             assert(0);
         } 
         if(kill_sig==SIGTERM){
+            /* Save state if not running under a session manager. */
+            ioncore_emergency_snapshot();
             ioncore_resign();
             /* We may still return here if running under a session manager. */
         }else{
