@@ -364,6 +364,8 @@ static bool clientwin_init(WClientWin *cwin, WWindow *par, Window win,
     
     region_init(&(cwin->region), par, &(cwin->last_fp));
 
+    XSelectInput(ioncore_g.dpy, win, cwin->event_mask);
+
     clientwin_register(cwin);
     clientwin_get_set_name(cwin);
     clientwin_get_colormaps(cwin);
@@ -371,8 +373,6 @@ static bool clientwin_init(WClientWin *cwin, WWindow *par, Window win,
     clientwin_get_winprops(cwin);
     clientwin_get_size_hints(cwin);
     
-    XSelectInput(ioncore_g.dpy, win, cwin->event_mask);
-
     XSaveContext(ioncore_g.dpy, win, ioncore_g.win_context, (XPointer)cwin);
     XAddToSaveSet(ioncore_g.dpy, win);
 
