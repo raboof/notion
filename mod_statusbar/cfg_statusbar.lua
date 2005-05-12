@@ -20,7 +20,8 @@ mod_statusbar.create{
     -- Template. Tokens %string are replaced with the value of the 
     -- corresponding meter. Currently supported meters are:
     --   date          date
-    --   load          load average
+    --   load          load average (1min, 5min, 15min)
+    --   load_Nmin     N minute load average (N=1, 5, 15)
     --   mail_new      mail count (mbox format file $MAIL)
     --   mail_unread   mail count
     --   mail_total    mail count
@@ -29,8 +30,8 @@ mod_statusbar.create{
     --   mail_*_total  mail count
     -- Space preceded by % adds stretchable space. > before meter name 
     -- aligns right, < left, and | centers.
-    template="[ %date || load:% %>load || mail:% %>02mail_new/%>02mail_total ]",
-    --template="[ %date || load: %load || mail: %mail_new/%mail_total ]",
+    template="[ %date || load:% %>load || mail:% %>mail_new/%>mail_total ]",
+    --template="[ %date || load: %05load_1min || mail: %02mail_new/%02mail_total ]",
 }
 
 

@@ -25,6 +25,8 @@ local defaults={
 
 local settings=table.join(statusd.get_config("load"), defaults)
 
+local loadpat='^(%d+%.%d+).*(%d+%.%d+).*(%d+%.%d+)'
+
 local function get_load_proc()
     local f=io.open('/proc/loadavg', 'r')
     if not f then
@@ -33,6 +35,7 @@ local function get_load_proc()
     local s=f:read('*l')
     f:close()
     local st, en, load=string.find(s, '^(%d+%.%d+ %d+%.%d+ %d+%.%d+)')
+    
     return string.gsub((load or ""), " ", ", ")
 end
 
@@ -58,8 +61,7 @@ end
 local get_load, load_timer
 
 local function get_hint(l)
-    local lds={string.find(l, '^(%d+%.%d+).*(%d+%.%d+).*(%d+%.%d+)')}
-    local v=tonumber(lds[settings.load_hint+2])
+    local v=tonumber(l)
     local i="normal"
     if v then
         if v>settings.critical_threshold then
@@ -71,10 +73,19 @@ local function get_hint(l)
     return i
 end
 
+local l1min, l5min, l15min=2+1, 2+2, 2+3
+
 local function update_load()
-    local l=get_load()
+    local l = get_load()    
+    local lds={string.find(l, loadpat)}
     statusd.inform("load", l)
-    statusd.inform("load_hint", get_hint(l))
+    statusd.inform("load_hint", get_hint(l, lds[settings.load_hint+2]))
+    statusd.inform("load_1min", lds[l1min])
+    statusd.inform("load_1min_hint", get_hint(lds[l1min]))
+    statusd.inform("load_5min", lds[l5min])
+    statusd.inform("load_5min_hint", get_hint(lds[l5min]))
+    statusd.inform("load_15min", lds[l15min])
+    statusd.inform("load_15min_hint", get_hint(lds[l15min]))
     load_timer:set(settings.interval, update_load)
 end
 
