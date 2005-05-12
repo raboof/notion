@@ -32,12 +32,9 @@
 
 static size_t dummywc_mbrlen(const char *s, size_t n, mbstate_t *ps)
 {
-    size_t i;
-    for(i=0; i<n; i++){
-        if(*s=='\0')
-            break;
-    }
-    return i;
+    if(*s=='\0')
+        return 0;
+    return 1;
 }
 
 static int dummywc_mbtowc(wchar_t *pwc, const char *s, size_t n)
