@@ -481,6 +481,14 @@ bool ioncore_startup(const char *display, const char *cfgfile,
                      int stflags)
 {
     WRootWin *rootwin;
+    sigset_t inittrap;
+
+    /* Don't trap termination signals just yet. */
+    sigemptyset(&inittrap);
+    sigaddset(&inittrap, SIGALRM);
+    sigaddset(&inittrap, SIGCHLD);
+    sigaddset(&inittrap, SIGPIPE);
+    mainloop_trap_signals(&inittrap);
 
     if(!extl_init())
         return FALSE;
@@ -490,8 +498,6 @@ bool ioncore_startup(const char *display, const char *cfgfile,
     if(!ioncore_init_x(display, stflags))
         return FALSE;
 
-    mainloop_trap_timer();
-    
     gr_read_config();
 
     if(!extl_read_config("ioncore_ext", NULL, TRUE))

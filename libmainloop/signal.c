@@ -358,30 +358,25 @@ static void ignore_handler(int signal_num)
 #define SA_RESTART 0
 #endif
 
+#define IFTRAP(X) if(sigismember(which, X))
+#define DEADLY(X) IFTRAP(X) signal(X, deadly_signal_handler);
+#define FATAL(X) IFTRAP(X) signal(X, fatal_signal_handler);
+#define IGNORE(X) IFTRAP(X) signal(X, SIG_IGN)
 
-void mainloop_trap_timer()
-{
-    struct sigaction sa;
-    
-    sigemptyset(&(sa.sa_mask));
-    sa.sa_handler=timer_handler;
-    sa.sa_flags=SA_RESTART;
-    sigaction(SIGALRM, &sa, NULL);
-}
-
-
-void mainloop_trap_signals()
+void mainloop_trap_signals(const sigset_t *which)
 {
     struct sigaction sa;
     sigset_t set, oldset;
+    sigset_t dummy;
 
+    if(which==NULL){
+        sigfillset(&dummy);
+        which=&dummy;
+    }
+    
     sigemptyset(&set);
     sigemptyset(&oldset);
     sigprocmask(SIG_SETMASK, &set, &oldset);
-    
-#define DEADLY(X) signal(X, deadly_signal_handler);
-#define FATAL(X) signal(X, fatal_signal_handler);
-#define IGNORE(X) signal(X, SIG_IGN)
     
     DEADLY(SIGHUP);
     DEADLY(SIGQUIT);
@@ -397,26 +392,45 @@ void mainloop_trap_signals()
     /*IGNORE(SIGWINCH);*/
 
     sigemptyset(&(sa.sa_mask));
-    sa.sa_handler=chld_handler;
-    sa.sa_flags=SA_NOCLDSTOP|SA_RESTART;
-    sigaction(SIGCHLD, &sa, NULL);
 
-    sa.sa_handler=exit_handler;
-    sa.sa_flags=SA_RESTART;
-    sigaction(SIGTERM, &sa, NULL);
-    sigaction(SIGUSR1, &sa, NULL);
+    IFTRAP(SIGALRM){
+        sa.sa_handler=timer_handler;
+        sa.sa_flags=SA_RESTART;
+        sigaction(SIGALRM, &sa, NULL);
+    }
+
+    IFTRAP(SIGCHLD){
+        sa.sa_handler=chld_handler;
+        sa.sa_flags=SA_NOCLDSTOP|SA_RESTART;
+        sigaction(SIGCHLD, &sa, NULL);
+    }
+
+    IFTRAP(SIGTERM){
+        sa.sa_handler=exit_handler;
+        sa.sa_flags=SA_RESTART;
+        sigaction(SIGTERM, &sa, NULL);
+    }
+    
+    IFTRAP(SIGUSR1){
+        sa.sa_handler=exit_handler;
+        sa.sa_flags=SA_RESTART;
+        sigaction(SIGUSR1, &sa, NULL);
+    }
     
     /* SIG_IGN is preserved over execve and since the the default action
      * for SIGPIPE is not to ignore it, some programs may get upset if
      * the behaviour is not the default.
      */
-    sa.sa_handler=ignore_handler;
-    sigaction(SIGPIPE, &sa, NULL);
+    IFTRAP(SIGPIPE){
+        sa.sa_handler=ignore_handler;
+        sigaction(SIGPIPE, &sa, NULL);
+    }
+
+}
 
 #undef IGNORE
 #undef FATAL
 #undef DEADLY
-}
 
 
 /*}}}*/

@@ -49,8 +49,7 @@ extern void timer_reset(WTimer *timer);
 extern bool timer_is_set(WTimer *timer);
 
 extern bool mainloop_check_signals();
-extern void mainloop_trap_signals();
-extern void mainloop_trap_timer();
+extern void mainloop_trap_signals(const sigset_t *set);
 
 extern WHook *mainloop_sigchld_hook;
 

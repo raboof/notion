@@ -101,7 +101,11 @@ static void flush_informs()
 
 static void mainloop()
 {
-    mainloop_trap_timer();
+    sigset_t trapset;
+    
+    sigemptyset(&trapset);
+    sigaddset(&trapset, SIGALRM);
+    mainloop_trap_signals(&trapset);
     
     while(1){
         int kill_sig=mainloop_check_signals();
