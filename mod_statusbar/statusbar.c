@@ -299,6 +299,7 @@ ExtlTab statusbar_get_template(WStatusBar *sb)
         extl_table_sets_s(tt, "meter", sb->elems[i].meter);
         extl_table_sets_s(tt, "tmpl", sb->elems[i].tmpl);
         extl_table_sets_i(tt, "align", sb->elems[i].align);
+        extl_table_gets_i(tt, "zeropad", sb->elems[i].zeropad);
 
         extl_table_seti_t(t, (i+1), tt);
         extl_unref_table(tt);
