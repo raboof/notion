@@ -618,6 +618,22 @@ bool mplex_managed_goto(WMPlex *mplex, WRegion *sub, int flags)
 }
 
 
+static void mplex_refocus(WMPlex *mplex, bool warp)
+{
+    WRegion *reg;
+    
+    if(mplex->l2_current!=NULL)
+        reg=mplex->l2_current->reg;
+    else if(mplex->l1_current!=NULL)
+        reg=mplex->l1_current->reg;
+    else
+        reg=(WRegion*)mplex;
+    
+    ioncore_set_previous_of(reg);
+    region_maybewarp(reg, warp);
+}
+
+
 static void do_switch(WMPlex *mplex, WLListNode *node)
 {
     if(node!=NULL){
@@ -690,7 +706,7 @@ bool mplex_l2_set_hidden(WMPlex *mplex, WRegion *reg, bool sp)
         }
         
         if(mcf)
-            region_warp((WRegion*)mplex);
+            mplex_refocus(mplex, TRUE);
     }else if(hidden && !nhidden){
         bool psv=node->flags&LLIST_L2_PASSIVE;
         mplex_do_node_goto(mplex, node, TRUE,
@@ -753,7 +769,7 @@ bool mplex_l2_set_passive(WMPlex *mplex, WRegion *reg, bool sp)
         if(node2==node){
             mplex->l2_current=node;
             if(mcf)
-                region_warp((WRegion*)mplex);
+                mplex_refocus(mplex, TRUE);
         }
     }
 

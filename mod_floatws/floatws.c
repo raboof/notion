@@ -566,8 +566,10 @@ static bool floatws_do_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
     }
 
     /* Don't warp, it is annoying in this case */
-    if(param->switchto && region_may_control_focus((WRegion*)ws))
+    if(param->switchto && region_may_control_focus((WRegion*)ws)){
+        ioncore_set_previous_of((WRegion*)frame);
         region_set_focus((WRegion*)frame);
+    }
     
     return TRUE;
 }
