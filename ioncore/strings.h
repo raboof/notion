@@ -30,6 +30,7 @@ extern char *grbrush_make_label(GrBrush *brush, const char *str, uint maxw);
                                        
 extern int str_nextoff(const char *p, int pos);
 extern int str_prevoff(const char *p, int pos);
+extern int str_len(const char *p);
 extern wchar_t str_wchar_at(char *p, int max);
 extern char *str_stripws(char *p);
 

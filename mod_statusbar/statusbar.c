@@ -22,6 +22,7 @@
 #include <ioncore/resize.h>
 #include <ioncore/gr.h>
 #include <ioncore/names.h>
+#include <ioncore/strings.h>
 
 #include "statusbar.h"
 #include "main.h"
@@ -389,7 +390,7 @@ void statusbar_update(WStatusBar *sb, ExtlTab t)
             }else{
                 /* Zero-pad */
                 int l=strlen(el->text);
-                int ml=mblen(el->text, l);
+                int ml=str_len(el->text);
                 int diff=el->zeropad-ml;
                 if(diff>0){
                     char *tmp=ALLOC_N(char, l+diff+1);
