@@ -117,6 +117,7 @@ static WSBElem *get_sbelems(ExtlTab t, int *nret)
         el[i].attr=NULL;
         el[i].stretch=0;
         el[i].align=WSBELEM_ALIGN_CENTER;
+        el[i].zeropad=0;
 
         if(extl_table_geti_t(t, i+1, &tt)){
             if(extl_table_gets_i(tt, "type", &(el[i].type))){
@@ -126,6 +127,8 @@ static WSBElem *get_sbelems(ExtlTab t, int *nret)
                     extl_table_gets_s(tt, "meter", &(el[i].meter));
                     extl_table_gets_s(tt, "tmpl", &(el[i].tmpl));
                     extl_table_gets_i(tt, "align", &(el[i].align));
+                    extl_table_gets_i(tt, "zeropad", &(el[i].zeropad));
+                    el[i].zeropad=maxof(el[i].zeropad, 0);
                 }
             }
             extl_unref_table(tt);
@@ -381,7 +384,25 @@ void statusbar_update(WStatusBar *sb, ExtlTab t)
             
             extl_table_gets_s(t, el->meter, &(el->text));
             
-            str=(el->text!=NULL ? el->text : STATUSBAR_NX_STR);
+            if(el->text==NULL){
+                str=STATUSBAR_NX_STR;
+            }else{
+                /* Zero-pad */
+                int l=strlen(el->text);
+                int ml=mblen(el->text, l);
+                int diff=el->zeropad-ml;
+                if(diff>0){
+                    char *tmp=ALLOC_N(char, l+diff+1);
+                    if(tmp!=NULL){
+                        memset(tmp, '0', diff);
+                        memcpy(tmp+diff, el->text, l+1);
+                        free(el->text);
+                        el->text=tmp;
+                    }
+                }
+                str=el->text;
+            }
+            
             el->text_w=grbrush_get_text_width(sb->brush, str, strlen(str));
             
             if(el->text_w>el->max_w){

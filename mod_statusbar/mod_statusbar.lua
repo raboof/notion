@@ -106,20 +106,24 @@ end
 -- Template processing {{{
 
 local function process_template(template, meter_f, text_f, stretch_f)
-    local st, en, b, c, r
+    local st, en, b, c, r, p
     
     while template~="" do
+        -- Find '%something'
         st, en, b, r=string.find(template, '^(.-)%%(.*)')
     
         if not b then
+            -- Not found
             text_f(template)
             break
         else
             if b~="" then
+                -- Add preciding text as normal text element
                 text_f(b)
             end
             template=r
 
+            -- Check for '% ' and '%%'
             st, en, c, r=string.find(template, '^([ %%])(.*)')
 
             if c then
@@ -130,10 +134,11 @@ local function process_template(template, meter_f, text_f, stretch_f)
                 end
                 template=r
             else 
-                st, en, c, b, r=string.find(template,
-                                            '^([<|>]?)([a-zA-Z0-9_]+)(.*)')
+                -- Extract [alignment][zero padding]<meter name>
+                local pat='^([<|>]?)(0*[0-9]*)([a-zA-Z0-9_]+)(.*)'
+                st, en, c, p, b, r=string.find(template, pat)
                 if b then
-                    meter_f(b, c)
+                    meter_f(b, c, tonumber(p))
                     template=r
                 end
             end
@@ -150,26 +155,27 @@ function mod_statusbar.get_template_table(stng)
     
     process_template(stng.template,
                      -- meter
-                     function(s, c)
+                     function(s, c, p)
                          table.insert(res, {
                              type=2,
                              meter=s,
                              align=aligns[c],
-                             tmpl=meters[s.."_template"]
+                             tmpl=meters[s.."_template"],
+                             zeropad=p,
                          })
                      end,
                      -- text
                      function(t)
                          table.insert(res, {
                              type=1,
-                             text=t
+                             text=t,
                          })
                      end,
                      -- stretch
                      function(t)
                          table.insert(res, {
                              type=3,
-                             text=t
+                             text=t,
                          })
                      end)
     return res

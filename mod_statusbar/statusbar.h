@@ -47,6 +47,7 @@ DECLSTRUCT(WSBElem){
     int max_w;
     char *tmpl;
     char *attr;
+    int zeropad;
 };
 
 INTRCLASS(WStatusBar);
