@@ -94,13 +94,14 @@ static void string_do_calc_parts(GrBrush *brush, int maxw, char *str, int l,
                                  int wrapw, int ciw)
 {
     int i=iinf->n_parts, l2=l, w;
+    int rmaxw=maxw-(i==0 ? 0 : ciw);
     
     iinf->n_parts++;
     
     w=grbrush_get_text_width(brush, str, l);
     
-    if(w>maxw){
-        l2=getbeg(brush, maxw-wrapw-(i==0 ? 0 : ciw), str, l, &w);
+    if(w>rmaxw){
+        l2=getbeg(brush, rmaxw-wrapw, str, l, &w);
         if(l2<=0)
             l2=1;
     }
@@ -164,8 +165,10 @@ static void draw_multirow(GrBrush *brush, int x, int y, int h,
         
         y+=h;
         str+=l;
-        x+=ciw;
-        maxw-=ciw;
+        if(i==1){
+            x+=ciw;
+            maxw-=ciw;
+        }
         l=iinf->part_lens[i];
             
         grbrush_draw_string(brush, x, y, str, l, TRUE, style);
