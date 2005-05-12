@@ -280,6 +280,32 @@ void statusbar_set_template(WStatusBar *sb, ExtlTab t)
     statusbar_resize(sb);
 }
 
+/*EXTL_DOC
+ * Get statusbar template.
+ */
+EXTL_EXPORT_MEMBER
+ExtlTab statusbar_get_template(WStatusBar *sb)
+{
+    int count = sb->nelems;
+    int i;
+
+    ExtlTab t = extl_create_table();
+
+    for(i=0; i<count; i++){
+        ExtlTab tt = extl_create_table();
+
+        extl_table_sets_i(tt, "type", sb->elems[i].type);
+        extl_table_sets_s(tt, "text", sb->elems[i].text);
+        extl_table_sets_s(tt, "meter", sb->elems[i].meter);
+        extl_table_sets_s(tt, "tmpl", sb->elems[i].tmpl);
+        extl_table_sets_i(tt, "align", sb->elems[i].align);
+
+        extl_table_seti_t(t, (i+1), tt);
+        extl_unref_table(tt);
+    }
+
+    return t;
+}
 
 static void reset_stretch(WStatusBar *sb)
 {
