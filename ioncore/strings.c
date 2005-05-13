@@ -159,6 +159,7 @@ int str_len(const char *p)
         while(*p){
             if(((*p)&0xC0)!=0x80)
                 len++;
+            p++;
         }
         return len;
     }
@@ -171,10 +172,9 @@ int str_len(const char *p)
         
         while(bytes>0){
             l=mbrlen(p, bytes, &ps);
-            if(l<0){
+            if(l<=0){
                 warn(TR("Invalid multibyte string."));
                 break;
-                return len;
             }
             len++;
             bytes-=l;
