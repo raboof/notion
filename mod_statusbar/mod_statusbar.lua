@@ -209,6 +209,25 @@ function mod_statusbar.update(update_template)
     return found
 end
 
+--DOC
+-- Set the contents of a statusbar.
+function mod_statusbar.set_sb(sb, stng)
+    if not obj_is(sb, "WStatusBar") then
+        ioncore.warn(TR("WStatusBar expected."))
+        return
+    end
+    
+    statusbars[sb] = stng
+    sb:set_template(mod_statusbar.get_template_table(stng))
+    sb:update(set_date(stng, meters))
+end
+
+--DOC
+-- Get the contents of a statusbar.
+function mod_statusbar.get_sb(sb)
+    return statusbars[sb]
+end
+
 -- }}}
 
 
