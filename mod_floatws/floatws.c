@@ -79,7 +79,7 @@ WRegion *floatws_iter_no_stdisp(WFloatWSIterTmp *tmp)
     
     do{
         r=floatws_iter(tmp);
-    }while(r==tmp->ws->managed_stdisp);
+    }while(r!=NULL && r==tmp->ws->managed_stdisp);
     
     return r;
 }
