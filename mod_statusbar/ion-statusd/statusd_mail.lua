@@ -1,5 +1,5 @@
 --
--- ion/ext_statusbar/ion-statusd/statusd_mail.lua
+-- ion/mod_statusbar/ion-statusd/statusd_mail.lua
 -- 
 -- Copyright (c) Tuomo Valkonen 2004-2005.
 --

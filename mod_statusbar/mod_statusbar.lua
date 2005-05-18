@@ -28,12 +28,13 @@ _G["mod_statusbar"]=mod_statusbar
 
 -- Default settings
 local defaults={
-    date_format='%a %Y-%m-%d %H:%M',
     template=string.format(
         "[ %%date || %s: %%load || %s: %%mail_new/%%mail_total ]",
         TR("load"), TR("mail")
     ),
 }
+
+local date_format_backcompat_kludge
 
 -- }}}
 
@@ -68,39 +69,6 @@ function mod_statusbar.inform(name, value)
 end
 
 -- }}}
-
-
--- Date meter {{{
-
-local timer
-
-function mod_statusbar.set_timer()
-    local t=os.date('*t')
-    local d=(60-t.sec)*1000
-    
-    timer:set(d, mod_statusbar.timer_handler)
-end
-
-function mod_statusbar.timer_handler(tmr)
-    mod_statusbar.update()
-    mod_statusbar.set_timer()
-end
-
-function mod_statusbar.init_timer()
-    if not timer then
-        timer=ioncore.create_timer()
-        if not timer then
-            error(TR("Failed to create a timer for statusbar."))
-        end
-    end
-    
-    if not timer:is_set() then
-        mod_statusbar.timer_handler(timer)
-    end
-end
-
-
--- }}}
 
 
 -- Template processing {{{
@@ -184,13 +152,6 @@ end
 -- }}}
 
 -- Update {{{
--- 
-local function set_date(stng, meters)
-    local d=os.date(stng.date_format)
-    meters["date"]=d
-    return meters
-end
-
 
 --DOC
 -- Update statusbar contents. To be called after series
@@ -202,7 +163,7 @@ function mod_statusbar.update(update_template)
         if update_template then
             sb:set_template(mod_statusbar.get_template_table(stng))
         end
-        sb:update(set_date(stng, meters))
+        sb:update(meters)
         found=true
     end
     
@@ -290,6 +251,16 @@ end
 
 
 function mod_statusbar.cfg_statusd(cfg)
+    if date_format_backcompat_kludge then
+        if not cfg.date then
+            cfg=table.copy(cfg, false)
+            cfg.date={date_format=date_format_backcompat_kludge}
+        elseif not cfg.date.date_format then
+            cfg=table.copy(cfg, true)
+            cfg.date.date_format=date_format_backcompat_kludge
+        end
+    end
+
     --TODO: don't construct file name twice.
     ioncore.write_savefile("cfg_statusd", cfg)
     return ioncore.get_savefile("cfg_statusd")
@@ -323,14 +294,14 @@ end
 -- Initialisation and default settings {{{
 
 --DOC 
--- Set defaults. For Backwards compatibility.
+-- Set defaults. For Backwards backcompat.
 function mod_statusbar.set(t)
     defaults=table.join(t, defaults)
 end
 
 
 --DOC 
--- Get defaults. For Backwards compatibility.
+-- Get defaults. For Backwards backcompat.
 function mod_statusbar.get(t)
     return defaults
 end
@@ -339,6 +310,10 @@ end
 --DOC
 -- Create a statusbar.
 function mod_statusbar.create(param_)
+    if param_.date_format and not date_format_backcompat_kludge then
+        date_format_backcompat_kludge=param_.date_format
+    end
+    
     local param=table.join(param_, defaults)
     
     local scr=ioncore.find_screen_id(param.screen or 0)
@@ -364,11 +339,9 @@ function mod_statusbar.create(param_)
         error(TR("Failed to create statusbar."))
     end
 
-    mod_statusbar.init_timer()
-    
     statusbars[sb]=param
     sb:set_template(mod_statusbar.get_template_table(param))
-    sb:update(set_date(param, meters))    
+    sb:update(meters)
     
     return sb
 end

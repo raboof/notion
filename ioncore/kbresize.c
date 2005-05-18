@@ -172,7 +172,7 @@ static bool resize_handler(WRegion *reg, XEvent *xev)
     
     if(binding!=NULL){
         extl_protect(&moveres_safelist);
-        extl_call(binding->func, "o", NULL, mode);
+        extl_call(binding->func, "oo", NULL, mode, reg);
         extl_unprotect(&moveres_safelist);
     }
     

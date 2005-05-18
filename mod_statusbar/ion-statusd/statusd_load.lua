@@ -1,5 +1,5 @@
 --
--- ion/ext_statusbar/ion-statusd/statusd_load.lua
+-- ion/mod_statusbar/ion-statusd/statusd_load.lua
 -- 
 -- Copyright (c) Tuomo Valkonen 2004-2005.
 --

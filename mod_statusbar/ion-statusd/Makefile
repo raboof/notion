@@ -20,7 +20,7 @@ SOURCES = ion-statusd.c exec.c extlrx.c
 
 TARGETS = ion-statusd
 
-LUA_SOURCES = statusd_mail.lua statusd_load.lua
+LUA_SOURCES = statusd_date.lua statusd_mail.lua statusd_load.lua
 
 MAKE_EXPORTS = statusd
 

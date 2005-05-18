@@ -1,5 +1,5 @@
 ##
-## Ion ext_statusbar Makefile
+## Ion mod_statusbar Makefile
 ##
 
 # System-specific configuration is in system.mk

@@ -9,14 +9,6 @@ mod_statusbar.create{
     screen=0,
     pos='bl',
 
-    -- ISO-8601 date format with additional abbreviated day name
-    date_format='%a %Y-%m-%d %H:%M',
-    -- Finnish etc. date format
-    --date_format='%a %d.%m.%Y %H:%M'
-    -- Locale date format (usually shows seconds, which would require
-    -- updating rather often and can be distracting)
-    --date_format='%c',
-
     -- Template. Tokens %string are replaced with the value of the 
     -- corresponding meter. Currently supported meters are:
     --   date          date
@@ -38,6 +30,26 @@ mod_statusbar.create{
 -- Launch ion-statusd. This must be done after creating any statusbars
 -- for necessary modules to be parsed from the templates.
 mod_statusbar.launch_statusd{
+    -- Date meter
+    --[[
+    date={    
+        -- ISO-8601 date format with additional abbreviated day name
+        date_format='%a %Y-%m-%d %H:%M',
+        -- Finnish etc. date format
+        --date_format='%a %d.%m.%Y %H:%M',
+    	-- Locale date format (usually shows seconds, which would require
+        -- updating rather often and can be distracting)
+        --date_format='%c',
+        
+        -- Additional date formats. 
+        --[[ 
+        formats={ 
+            time = '%H:%M', -- %date_time
+        }
+        --]]
+    },      
+    --]]
+
     -- Load meter
     --[[
     load={

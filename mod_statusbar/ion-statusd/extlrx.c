@@ -1,5 +1,5 @@
 /*
- * ion/ext_statusbar/ion-statusd/extlrx.c
+ * ion/mod_statusbar/ion-statusd/extlrx.c
  *
  * Copyright (c) Tuomo Valkonen 2004-2005.
  *
