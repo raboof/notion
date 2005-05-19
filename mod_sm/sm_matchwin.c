@@ -151,8 +151,10 @@ void mod_sm_start_purge_timer()
 {
     if(purge_timer==NULL)
         purge_timer=create_timer();
-    if(purge_timer!=NULL)
-        timer_set(purge_timer, TIME_OUT, mod_sm_purge_matches);
+    if(purge_timer!=NULL){
+        timer_set(purge_timer, TIME_OUT, 
+                  (WTimerHandler*)mod_sm_purge_matches, NULL);
+    }
 }
 
 void mod_sm_register_win_match(WWinMatch *match)

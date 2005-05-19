@@ -131,8 +131,10 @@ bool mainloop_check_signals()
                 q->next=NULL;
                 if(q->handler!=NULL){
                     WTimerHandler *handler=q->handler;
+                    Obj *obj=q->objwatch.obj;
                     q->handler=NULL;
-                    handler(q);
+                    watch_reset(&(q->objwatch));
+                    handler(q, obj);
                 }else if(q->extl_handler!=extl_fn_none()){
                     ExtlFn fn=q->extl_handler;
                     q->extl_handler=extl_fn_none();
@@ -177,7 +179,7 @@ bool timer_is_set(WTimer *timer)
 
 
 void timer_do_set(WTimer *timer, uint msecs, WTimerHandler *handler,
-                  ExtlFn fn)
+                  Obj *obj, ExtlFn fn)
 {
     WTimer *q, **qptr;
     bool set=FALSE;
@@ -189,6 +191,10 @@ void timer_do_set(WTimer *timer, uint msecs, WTimerHandler *handler,
     timer->next=NULL;
     timer->handler=handler;
     timer->extl_handler=fn;
+    if(obj!=NULL)
+        watch_setup(&(timer->objwatch), obj, NULL);
+    else
+        watch_reset(&(timer->objwatch));
 
     /* Add timerevent in place to queue */
     q=queue;
@@ -208,9 +214,10 @@ void timer_do_set(WTimer *timer, uint msecs, WTimerHandler *handler,
 }
 
 
-void timer_set(WTimer *timer, uint msecs, WTimerHandler *handler)
+void timer_set(WTimer *timer, uint msecs, WTimerHandler *handler,
+               Obj *obj)
 {
-    timer_do_set(timer, msecs, handler, extl_fn_none());
+    timer_do_set(timer, msecs, handler, obj, extl_fn_none());
 }
 
 
@@ -220,7 +227,7 @@ void timer_set(WTimer *timer, uint msecs, WTimerHandler *handler)
 EXTL_EXPORT_AS(WTimer, set)
 void timer_set_extl(WTimer *timer, uint msecs, ExtlFn fn)
 {
-    timer_do_set(timer, msecs, NULL, extl_ref_fn(fn));
+    timer_do_set(timer, msecs, NULL, NULL, extl_ref_fn(fn));
 }
 
     
@@ -246,6 +253,7 @@ void timer_reset(WTimer *timer)
     timer->handler=NULL;
     extl_unref_fn(timer->extl_handler);
     timer->extl_handler=extl_fn_none();
+    watch_reset(&(timer->objwatch));
 }
 
 
@@ -256,6 +264,7 @@ bool timer_init(WTimer *timer)
     timer->next=NULL;
     timer->handler=NULL;
     timer->extl_handler=extl_fn_none();
+    watch_init(&(timer->objwatch));
     return TRUE;
 }
 

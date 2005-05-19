@@ -189,15 +189,14 @@ static bool resize_handler(WRegion *reg, XEvent *xev)
 static WTimer *resize_timer=NULL;
 
 
-static void tmr_end_resize(WTimer *unused)
+static void tmr_end_resize(WTimer *unused, WMoveresMode *mode)
 {
-    WMoveresMode *mode=moveres_mode(NULL);
     if(mode!=NULL)
         moveresmode_cancel(mode);
 }
 
 
-static bool setup_resize_timer()
+static bool setup_resize_timer(WMoveresMode *mode)
 {
     if(resize_timer==NULL){
         resize_timer=create_timer();
@@ -205,7 +204,8 @@ static bool setup_resize_timer()
             return FALSE;
     }
     
-    timer_set(resize_timer, resize_delay, tmr_end_resize);
+    timer_set(resize_timer, resize_delay, 
+              (WTimerHandler*)tmr_end_resize, (Obj*)mode);
     
     return TRUE;
 }
@@ -270,7 +270,7 @@ void moveresmode_resize(WMoveresMode *mode,
     int wu=0, hu=0;
     int accel_mode=0;
     
-    if(!setup_resize_timer())
+    if(!setup_resize_timer(mode))
         return;
     
     accel_mode=3*limit_and_encode_mode(&left, &right, &top, &bottom);
@@ -298,7 +298,7 @@ void moveresmode_move(WMoveresMode *mode, int horizmul, int vertmul)
 {
     int accel_mode=0, dummy=0;
 
-    if(!setup_resize_timer())
+    if(!setup_resize_timer(mode))
         return;
     
     accel_mode=1+3*limit_and_encode_mode(&horizmul, &vertmul, &dummy, &dummy);
@@ -364,7 +364,7 @@ WMoveresMode *region_begin_kbresize(WRegion *reg)
     if(mode==NULL)
         return NULL;
     
-    if(!setup_resize_timer())
+    if(!setup_resize_timer(mode))
         return NULL;
 
     accel_reset();

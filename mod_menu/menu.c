@@ -942,7 +942,6 @@ void menu_cancel(WMenu *menu)
 static int scroll_time=20;
 static int scroll_amount=3;
 static WTimer *scroll_timer=NULL;
-static Watch scroll_watch=WATCH_INIT;
 
 
 static void reset_scroll_timer()
@@ -951,7 +950,6 @@ static void reset_scroll_timer()
         destroy_obj((Obj*)scroll_timer);
         scroll_timer=NULL;
     }
-    watch_reset(&scroll_watch);
 }
 
 
@@ -1063,52 +1061,53 @@ static void do_scroll(WMenu *menu, int xd, int yd)
 }
 
 
-static void scroll_left(WTimer *timer)
+static void scroll_left(WTimer *timer, WMenu *menu)
 {
-    WMenu *menu=(WMenu*)scroll_watch.obj;
     if(menu!=NULL){
         do_scroll(menu, -scrolld_subs(menu, D_LEFT), 0);
         if(scrolld_subs(menu, D_LEFT)>0){
-            timer_set(timer, scroll_time, (WTimerHandler*)scroll_left);
+            timer_set(timer, scroll_time, (WTimerHandler*)scroll_left,
+                      (Obj*)menu);
             return;
         }
     }
 }
 
 
-static void scroll_up(WTimer *timer)
+static void scroll_up(WTimer *timer, WMenu *menu)
 {
-    WMenu *menu=(WMenu*)scroll_watch.obj;
     if(menu!=NULL){
         do_scroll(menu, 0, -scrolld_subs(menu, D_UP));
         if(scrolld_subs(menu, D_UP)>0){
-            timer_set(timer, scroll_time, (WTimerHandler*)scroll_up);
+            timer_set(timer, scroll_time, (WTimerHandler*)scroll_up,
+                      (Obj*)menu);
+
             return;
         }
     }
 }
 
 
-static void scroll_right(WTimer *timer)
+static void scroll_right(WTimer *timer, WMenu *menu)
 {
-    WMenu *menu=(WMenu*)scroll_watch.obj;
     if(menu!=NULL){
         do_scroll(menu, scrolld_subs(menu, D_RIGHT), 0);
         if(scrolld_subs(menu, D_RIGHT)>0){
-            timer_set(timer, scroll_time, (WTimerHandler*)scroll_right);
+            timer_set(timer, scroll_time, (WTimerHandler*)scroll_right,
+                      (Obj*)menu);
             return;
         }
     }
 }
 
 
-static void scroll_down(WTimer *timer)
+static void scroll_down(WTimer *timer, WMenu *menu)
 {
-    WMenu *menu=(WMenu*)scroll_watch.obj;
     if(menu!=NULL){
         do_scroll(menu, 0, scrolld_subs(menu, D_DOWN));
         if(scrolld_subs(menu, D_DOWN)>0){
-            timer_set(timer, scroll_time, (WTimerHandler*)scroll_down);
+            timer_set(timer, scroll_time, (WTimerHandler*)scroll_down,
+                      (Obj*)menu);
             return;
         }
     }
@@ -1166,12 +1165,7 @@ static void check_scroll(WMenu *menu, int x, int y)
             return;
     }
     
-    watch_setup(&scroll_watch, (Obj*)menu_head(menu), NULL);
-    
-    fn(scroll_timer);
-
-    if(!timer_is_set(scroll_timer))
-        watch_reset(&scroll_watch);
+    fn(scroll_timer, menu_head(menu));
 }
 
 

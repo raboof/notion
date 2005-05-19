@@ -25,7 +25,7 @@
 
 INTRCLASS(WTimer);
 
-typedef void WTimerHandler(WTimer *timer);
+typedef void WTimerHandler(WTimer *timer, Obj *obj);
 
 
 DECLCLASS(WTimer){
@@ -33,6 +33,7 @@ DECLCLASS(WTimer){
     struct timeval when;
     WTimer *next;
     WTimerHandler *handler;
+    Watch objwatch;
     ExtlFn extl_handler;
 };
 
@@ -42,7 +43,8 @@ extern void timer_deinit(WTimer *timer);
 extern WTimer *create_timer();
 extern WTimer *create_timer_extl_owned();
 
-extern void timer_set(WTimer *timer, uint msecs, WTimerHandler *handler);
+extern void timer_set(WTimer *timer, uint msecs, WTimerHandler *handler,
+                      Obj *obj);
 extern void timer_set_extl(WTimer *timer, uint msecs, ExtlFn fn);
 
 extern void timer_reset(WTimer *timer);

@@ -164,28 +164,14 @@ void ionws_do_set_focus(WIonWS *ws, bool warp)
 
 
 static WTimer *restack_timer=NULL;
-static Watch restack_watch=WATCH_INIT;
 
 
-static void expire(WTimer *tmr, bool done)
+static void restack_handler(WTimer *tmr, Obj *obj)
 {
-    WIonWS *ws=(WIonWS*)restack_watch.obj;
-    
-    if(ws!=NULL)
+    if(obj!=NULL){
+        WIonWS *ws=(WIonWS*)obj;
         split_restack(ws->split_tree, ws->genws.dummywin, Above);
-    
-    watch_reset(&restack_watch);
-    
-    if(done && restack_timer!=NULL){
-        destroy_obj((Obj*)restack_timer);
-        restack_timer=NULL;
     }
-}
-
-
-static void restack_handler(WTimer *tmr)
-{
-    expire(tmr, TRUE);
 }
 
 
@@ -208,16 +194,18 @@ bool ionws_managed_goto(WIonWS *ws, WRegion *reg, int flags)
         
         if(use_timer){
             if(restack_timer!=NULL){
-                if(restack_watch.obj!=(Obj*)ws)
-                    expire(restack_timer, FALSE);
+                Obj *obj=restack_timer->objwatch.obj;
+                if(obj!=(Obj*)ws){
+                    timer_reset(restack_timer);
+                    restack_handler(restack_timer, obj);
+                }
             }else{
                 restack_timer=create_timer();
             }
         }
         
         if(use_timer && restack_timer!=NULL){
-            watch_setup(&restack_watch, (Obj*)ws, NULL);
-            timer_set(restack_timer, rd, restack_handler);
+            timer_set(restack_timer, rd, restack_handler, (Obj*)ws);
         }else{
             split_restack(ws->split_tree, ws->genws.dummywin, Above);
         }
