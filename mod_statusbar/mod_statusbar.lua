@@ -180,7 +180,7 @@ function mod_statusbar.set_sb(sb, stng)
     
     statusbars[sb] = stng
     sb:set_template(mod_statusbar.get_template_table(stng))
-    sb:update(set_date(stng, meters))
+    sb:update(meters)
 end
 
 --DOC
