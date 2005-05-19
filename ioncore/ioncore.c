@@ -16,6 +16,7 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/types.h>
+#include <ctype.h>
 #ifndef CF_NO_LOCALE
 #include <locale.h>
 #include <langinfo.h>
@@ -97,6 +98,7 @@ static bool check_encoding()
     char chs[8]=" ";
     wchar_t wc;
     const char *langi, *ctype, *a, *b;
+    bool enc_check_ok=FALSE;
 
     langi=nl_langinfo(CODESET);
     ctype=setlocale(LC_CTYPE, NULL);
@@ -110,17 +112,32 @@ static bool check_encoding()
     if(strcmp(ctype, "C")==0 || strcmp(ctype, "POSIX")==0)
         return TRUE;
     
+    /* Compare encodings case-insensitively, ignoring dashes (-) */
     a=langi; 
     b=strchr(ctype, '.');
     if(b!=NULL){
         b=b+1;
-        while(*a==*b && *a!='\0'){
+        while(1){
+            if(*a=='-'){
+                a++;
+                continue;
+            }
+            if(*b=='-'){
+                b++;
+                continue;
+            }
+            if(*b=='\0' || *b=='@'){
+                enc_check_ok=(*a=='\0');
+                break;
+            }
+            if(*a=='\0' || tolower(*a)!=tolower(*b))
+                break;
             a++;
             b++;
         }
     }
     
-    if(b==NULL || (*a!='\0' || (*a=='\0' && *b!='\0' && *b!='@'))){
+    if(!enc_check_ok){
         warn("Encoding in LC_CTYPE (%s) and encoding reported by "
              "nl_langinfo(CODESET) (%s) do not match. ", ctype, langi);
         return FALSE;
