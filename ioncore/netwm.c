@@ -185,7 +185,11 @@ void netwm_set_active(WRegion *reg)
 static void netwm_active_window_rq(WClientWin *cwin, 
                                    const XClientMessageEvent *ev)
 {
-    if(!extl_table_is_bool_set(cwin->proptab, "ignore_net_active_window"))
+    bool ignore=TRUE;
+    
+    extl_table_gets_b(cwin->proptab, "ignore_net_active_window", &ignore);
+    
+    if(!ignore)
         region_goto((WRegion*)cwin);
 }
 
