@@ -47,7 +47,8 @@ function ioncore.compile_cmd(cmd, guard)
     gfn=gfn()
     
     if type(cmd)=="string" then
-        local fncode="return function(_, _sub) "..guardcode..cmd.." end"
+        local fncode=("return function(_, _sub) "
+                      ..guardcode.."return ("..cmd..") end")
         local fn, err=loadstring(fncode)
         if not fn then
             warn(TR("Error in command string: ", err))
