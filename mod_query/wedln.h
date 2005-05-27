@@ -12,11 +12,12 @@
 #ifndef ION_MOD_QUERY_WEDLN_H
 #define ION_MOD_QUERY_WEDLN_H
 
-#include <ioncore/common.h>
 #include <libtu/obj.h>
+#include <libextl/extl.h>
+#include <libmainloop/signal.h>
+#include <ioncore/common.h>
 #include <ioncore/window.h>
 #include <ioncore/xic.h>
-#include <libextl/extl.h>
 #include <ioncore/rectangle.h>
 #include "listing.h"
 #include "input.h"
@@ -36,7 +37,6 @@ DECLSTRUCT(WEdlnCreateParams){
 DECLCLASS(WEdln){
     WInput input;
 
-    WListing complist;
     Edln edln;
 
     char *prompt;
@@ -46,6 +46,12 @@ DECLCLASS(WEdln){
     
     ExtlFn handler;
     ExtlFn completor;
+    
+    WTimer *autoshowcompl_timer;
+    
+    WListing compl_list;
+    char *compl_beg;
+    char *compl_end;
 };
 
 extern WEdln *create_wedln(WWindow *par, const WFitParams *fp,

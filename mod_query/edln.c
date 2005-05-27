@@ -22,9 +22,23 @@
 
 #define EDLN_ALLOCUNIT 16
 
-#define UPDATE(X) edln->ui_update(edln->uiptr, X, EDLN_UPDATE_STAT)
-#define UPDATE_MOVED(X) edln->ui_update(edln->uiptr, X, EDLN_UPDATE_MOVED)
-#define UPDATE_NEW() edln->ui_update(edln->uiptr, 0, EDLN_UPDATE_NEW)
+#define UPDATE(X) \
+    edln->ui_update(edln->uiptr, X, 0)
+
+#define UPDATE_MOVED(X) \
+    edln->ui_update(edln->uiptr, X, EDLN_UPDATE_MOVED)
+
+#define UPDATE_CHANGED(X)                                  \
+    edln->ui_update(edln->uiptr, X,                        \
+                    EDLN_UPDATE_MOVED|EDLN_UPDATE_CHANGED)
+
+#define UPDATE_CHANGED_NOMOVE(X)         \
+    edln->ui_update(edln->uiptr, X,      \
+                    EDLN_UPDATE_CHANGED)
+
+#define UPDATE_NEW()                                                       \
+    edln->ui_update(edln->uiptr, 0,                                        \
+                    EDLN_UPDATE_NEW|EDLN_UPDATE_MOVED|EDLN_UPDATE_CHANGED)
 
 #define CHAR wchar_t
 #define ISALNUM iswalnum
@@ -149,26 +163,6 @@ static bool edln_setstr(Edln *edln, const char *p)
 
 /*{{{ Insert */
 
-#if 0
-bool edln_insch(Edln *edln, char ch)
-{
-    if(edln_pspc(edln, 1)){
-        edln->p[edln->point]=ch;
-        edln->point++;
-        UPDATE_MOVED(edln->point-1);
-        return TRUE;
-    }
-    return FALSE;
-}
-
-
-bool edln_ovrch(Edln *edln, char ch)
-{
-    edln_delete(edln);
-    return edln_insch(edln, ch);
-}
-#endif
-
 
 bool edln_insstr(Edln *edln, const char *str)
 {
@@ -179,18 +173,25 @@ bool edln_insstr(Edln *edln, const char *str)
     
     l=strlen(str);
     
-    return edln_insstr_n(edln, str, l);
+    return edln_insstr_n(edln, str, l, TRUE, TRUE);
 }
 
 
-bool edln_insstr_n(Edln *edln, const char *str, int l)
+bool edln_insstr_n(Edln *edln, const char *str, int l, 
+                   bool update, bool movepoint)
 {
     if(!edln_pspc(edln, l))
         return FALSE;
     
     memmove(&(edln->p[edln->point]), str, l);
-    edln->point+=l;
-    UPDATE_MOVED(edln->point-l);
+    if(movepoint){
+        edln->point+=l;
+        if(update)
+            UPDATE_CHANGED(edln->point-l);
+    }else{
+        if(update)
+            UPDATE_CHANGED_NOMOVE(edln->point-l);
+    }
 
     return TRUE;
 }
@@ -349,7 +350,7 @@ void edln_delete(Edln *edln)
     if(l>0)
         edln_rspc(edln, l);
     
-    UPDATE(edln->point);
+    UPDATE_CHANGED_NOMOVE(edln->point);
 }
 
 
@@ -361,14 +362,14 @@ void edln_backspace(Edln *edln)
     n=do_edln_back(edln);
     if(n!=0){
         edln_rspc(edln, n);
-        UPDATE_MOVED(edln->point);
+        UPDATE_CHANGED(edln->point);
     }
 }
 
 void edln_kill_to_eol(Edln *edln)
 {
     edln_rspc(edln, edln->psize-edln->point);
-    UPDATE(edln->point);
+    UPDATE_CHANGED_NOMOVE(edln->point);
 }
 
 
@@ -379,7 +380,7 @@ void edln_kill_to_bol(Edln *edln)
     edln_bol(edln);
     edln_rspc(edln, p);
     edln->point=0;
-    UPDATE_MOVED(0);
+    UPDATE_CHANGED(0);
 }
 
 
@@ -387,7 +388,7 @@ void edln_kill_line(Edln *edln)
 {
     edln_bol(edln);
     edln_kill_to_eol(edln);
-    UPDATE_MOVED(0);
+    UPDATE_CHANGED(0);
 }
 
 
@@ -404,7 +405,7 @@ void edln_kill_word(Edln *edln)
     edln->point=oldp;
     edln_rspc(edln, l);
     
-    UPDATE(oldp);
+    UPDATE_CHANGED_NOMOVE(oldp);
 }
 
 
@@ -418,7 +419,7 @@ void edln_bkill_word(Edln *edln)
         return;
     
     edln_rspc(edln, oldp-edln->point);
-    UPDATE(edln->point);
+    UPDATE_CHANGED(edln->point);
 }
 
 
@@ -617,7 +618,6 @@ bool edln_init(Edln *edln, const char *p)
     edln->mark=-1;
     edln->histent=-1;
     edln->modified=FALSE;
-    edln->completion_handler=NULL;
     edln->tmp_p=NULL;
     edln->context=NULL;
     

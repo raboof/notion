@@ -172,16 +172,6 @@ void wedln_copy(WEdln *wedln)
 }
 
 /*EXTL_DOC
- * Call completion handler with the text between the beginning of line and
- * current cursor position.
- */
-EXTL_EXPORT_MEMBER
-void wedln_complete(WEdln *wedln)
-{
-    edln_complete(&(wedln->edln));
-}
-
-/*EXTL_DOC
  * Replace line editor contents with next entry in history if one exists.
  * If \var{match} is \code{true}, the initial part of the history entry
  * must match the current line from beginning to point.

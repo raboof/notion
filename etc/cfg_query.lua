@@ -68,8 +68,12 @@ defbindings("WEdln", {
         kpress("G", "WEdln.clear_mark(_)"),
     }),
 
-    bdoc("Try to complete the entered text."),
-    kpress("Tab", "WEdln.complete(_)"),
+    bdoc("Try to complete the entered text or cycle through completions."),
+    -- true => forward cycle through completions in auto-show-completions 
+    kpress("Tab", "WEdln.complete(_, true)"), 
+    -- false => do not cycle; force evaluation of new completions
+    kpress("Control+Tab", "WEdln.complete(_, false)"),
+    kpress("Shift+Tab", "WEdln.prev_completion(_)"),
     
     bdoc("Close the query and execute bound action."),
     kpress("Control+M", "WEdln.finish(_)"),
@@ -91,3 +95,14 @@ defbindings("WInput", {
     kpress("Page_Down", "WInput.scrolldown(_)"),
 })
 
+
+-- Some settings
+--[[
+mod_query.set{
+     -- Auto-show completions?    
+     autoshowcompl=true,
+     -- Delay for completion after latest keypress/modification in 
+     -- milliseconds
+     autoshowcompl_delay=250,
+}
+--]]

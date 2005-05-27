@@ -15,4 +15,14 @@
 extern bool mod_query_init();
 extern void mod_query_deinit();
 
+INTRSTRUCT(ModQueryConfig);
+
+DECLSTRUCT(ModQueryConfig){
+    int autoshowcompl_delay;
+    bool autoshowcompl;
+};
+
+
+extern ModQueryConfig mod_query_config;
+
 #endif /* ION_MOD_QUERY_MAIN_H */

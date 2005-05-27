@@ -235,6 +235,7 @@ void setup_listing(WListing *l, char **strs, int nstrs, bool onecol)
     l->strs=strs;
     l->nstrs=nstrs;
     l->onecol=onecol;
+    l->selected_str=-1;
 }
 
 
@@ -329,6 +330,7 @@ void init_listing(WListing *l)
     l->strs=NULL;
     l->iteminfos=NULL;
     l->nstrs=0;
+    l->selected_str=-1;
     l->onecol=TRUE;
     l->itemw=0;
     l->itemh=0;
@@ -341,7 +343,8 @@ void init_listing(WListing *l)
 
 
 static void do_draw_listing(GrBrush *brush, const WRectangle *geom, 
-                            WListing *l, const char *style)
+                            WListing *l, const char *style,
+                            const char *selstyle)
 {
     int wrapw=grbrush_get_text_width(brush, "\\", 1);
     int ciw=grbrush_get_text_width(brush, CONT_INDENT, CONT_INDENT_LEN);
@@ -366,7 +369,8 @@ static void do_draw_listing(GrBrush *brush, const WRectangle *geom,
             
             draw_multirow(brush, geom->x+x, y, l->itemh, l->strs[i],
                           (l->iteminfos!=NULL ? &(l->iteminfos[i]) : NULL),
-                          geom->w-x, ciw, wrapw, style);
+                          geom->w-x, ciw, wrapw, 
+                          (i==l->selected_str ? selstyle : style));
 
             y+=l->itemh*ITEMROWS(l, i);
             r+=ITEMROWS(l, i);
@@ -379,7 +383,8 @@ static void do_draw_listing(GrBrush *brush, const WRectangle *geom,
 
 
 void draw_listing(GrBrush *brush, const WRectangle *geom,
-                  WListing *l, bool complete, const char *style)
+                  WListing *l, bool complete, const char *style,
+                  const char *selstyle)
 {
     WRectangle geom2;
     GrBorderWidths bdw;
@@ -398,7 +403,7 @@ void draw_listing(GrBrush *brush, const WRectangle *geom,
     geom2.w=geom->w-bdw.left-bdw.right;
     geom2.h=geom->h-bdw.top-bdw.bottom;
     
-    do_draw_listing(brush, &geom2, l, style);
+    do_draw_listing(brush, &geom2, l, style, selstyle);
     
     grbrush_end(brush);
 }

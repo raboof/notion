@@ -31,8 +31,8 @@ local DIE_TIMEOUT=30*1000 -- 30 seconds
 
 
 function mod_query.make_completor(completefn)
-    local function completor(wedln, str)
-        wedln:set_completions(completefn(str))
+    local function completor(wedln, str, point)
+        wedln:set_completions(completefn(str, point))
     end
     return completor
 end
@@ -119,6 +119,16 @@ function mod_query.exec_on_merr(mplex, cmd)
     tmr:set(DIE_TIMEOUT, timeout)
     
     errdata[pid]={tmr=tmr, mplex=mplex}
+end
+
+
+function mod_query.file_completor(wedln, str)
+    local ic=ioncore.lookup_script("ion-completefile")
+    if ic then
+        mod_query.popen_completions(wedln,
+                                   ic..(wp or " ")..string.shell_safe(str),
+                                   "")
+    end
 end
 
 
@@ -211,7 +221,7 @@ mod_query.COLLECT_THRESHOLD=2000
 --DOC
 -- This function can be used to read completions from an external source.
 -- The string \var{cmd} is a shell command to be executed. To its  stdout, 
--- the command should on the first line write the \var{common_part} 
+-- the command should on the first line write the \var{common_beg} 
 -- parameter of \fnref{WEdln.set_completions} and a single actual completion
 -- on each of the successive lines.
 function mod_query.popen_completions(wedln, cmd, beg, fn)
@@ -242,8 +252,8 @@ function mod_query.popen_completions(wedln, cmd, beg, fn)
                                  -- common part of path on  the first line 
                                  -- and the entries in that directory on the
                                  -- following lines.
-                                 if not results.common_part then
-                                     results.common_part=(beg or "")..a
+                                 if not results.common_beg then
+                                     results.common_beg=(beg or "")..a
                                  else
                                      table.insert(results, a)
                                  end
@@ -258,8 +268,8 @@ function mod_query.popen_completions(wedln, cmd, beg, fn)
             str=coroutine.yield()
         end
         
-        if not results.common_part then
-            results.common_part=beg
+        if not results.common_beg then
+            results.common_beg=beg
         end
         
         (fn or WEdln.set_completions)(wedln, results)
@@ -477,16 +487,6 @@ end
 -- Run/view/edit {{{
 
 
-function mod_query.file_completor(wedln, str, wp, beg)
-    local ic=ioncore.lookup_script("ion-completefile")
-    if ic then
-        mod_query.popen_completions(wedln,
-                                   ic..(wp or " ")..string.shell_safe(str),
-                                   beg)
-    end
-end
-
-
 --DOC
 -- Asks for a file to be edited. This script uses 
 -- \command{run-mailcap --mode=edit} by default, but you may provide an
@@ -599,26 +599,48 @@ local function quote(str)
 end
 
 
-function mod_query.exec_completor(wedln, str)
-    local parts=break_cmdline(str)
-    local tocompl=unquote(table.remove(parts))
-    local beg=table.concat(parts)
-    local wp=" "
-    
-    if string.find(beg, "^%s*:*%s*$") then
-        wp=" -wp "
+local function find_point(strs, point)
+    for i, s in ipairs(strs) do
+        point=point-string.len(s)
+        if point<=1 then
+            return i
+        end
     end
+    return table.getn(strs)
+end
+
+
+function mod_query.exec_completor(wedln, str, point)
+    local parts=break_cmdline(str)
+    local complidx=find_point(parts, point+1)
+    
+    local s_compl, s_beg, s_end="", "", ""
+    
+    if string.find(parts[complidx], "[^%s]") then
+        s_compl=unquote(parts[complidx])
+    end
+    
+    for i=1, complidx-1 do
+        s_beg=s_beg..parts[i]
+    end
+    
+    for i=complidx+1, table.getn(parts) do
+        s_end=s_end..parts[i]
+    end
+    
+    local wp=(complidx==1 and " -wp " or " ")
 
     local function set_fn(wedln, res)
         res=table.map(quote, res)
-        res.common_part=beg..res.common_part
+        res.common_beg=s_beg..(res.common_beg or "")
+        res.common_end=(res.common_end or "")..s_end
         wedln:set_completions(res)
     end
 
     local ic=ioncore.lookup_script("ion-completefile")
     if ic then
         mod_query.popen_completions(wedln,
-                                   ic..(wp or " ")..string.shell_safe(tocompl),
+                                   ic..wp..string.shell_safe(s_compl),
                                    "", set_fn)
     end
 end
@@ -842,7 +864,7 @@ function mod_query.do_complete_lua(env, str)
     local compl={}
     
     -- Get the actual variable to complete without containing tables
-    _, _, compl.common_part, tocomp=string.find(str, "(.-)([%w_]*)$")
+    _, _, compl.common_beg, tocomp=string.find(str, "(.-)([%w_]*)$")
     
     local l=string.len(tocomp)
     

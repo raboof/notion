@@ -91,7 +91,7 @@ static void wmsg_draw(WMessage *wmsg, bool complete)
                   (complete ? 0 : GRBRUSH_NO_CLEAR_OK));
     
     draw_listing(WMSG_BRUSH(wmsg), &geom, &(wmsg->listing), 
-                 FALSE, style);
+                 FALSE, style, style);
     
     grbrush_end(WMSG_BRUSH(wmsg));
 }

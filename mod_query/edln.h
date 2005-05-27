@@ -17,14 +17,11 @@
 
 INTRSTRUCT(Edln);
 
-typedef int EdlnCompletionHandler(void*, const char *p);
 typedef void EdlnUpdateHandler(void*, int from, int mode);
 
-enum{
-    EDLN_UPDATE_STAT,
-    EDLN_UPDATE_MOVED,
-    EDLN_UPDATE_NEW
-};
+#define EDLN_UPDATE_MOVED   0x01
+#define EDLN_UPDATE_CHANGED 0x02
+#define EDLN_UPDATE_NEW     0x04
         
 DECLSTRUCT(Edln){
     char *p;
@@ -39,13 +36,13 @@ DECLSTRUCT(Edln){
     void *uiptr;
     char *context;
 
-    EdlnCompletionHandler *completion_handler;
     EdlnUpdateHandler *ui_update;
 };
 
 
 bool edln_insstr(Edln *edln, const char *str);
-bool edln_insstr_n(Edln *edln, const char *str, int len);
+bool edln_insstr_n(Edln *edln, const char *str, int len,
+                   bool update, bool movepoint);
 void edln_back(Edln *edln);
 void edln_forward(Edln *edln);
 void edln_bol(Edln *edln);

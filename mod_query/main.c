@@ -9,12 +9,13 @@
  * (at your option) any later version.
  */
 
+#include <libextl/readconfig.h>
+#include <libextl/extl.h>
+#include <libtu/minmax.h>
 #include <ioncore/binding.h>
 #include <ioncore/conf-bindings.h>
-#include <libextl/readconfig.h>
 #include <ioncore/frame.h>
 #include <ioncore/saveload.h>
-#include <libextl/extl.h>
 #include <ioncore/bindmaps.h>
 #include <ioncore/ioncore.h>
 
@@ -25,6 +26,7 @@
 #include "complete.h"
 #include "history.h"
 #include "exports.h"
+#include "main.h"
 
 
 /*{{{ Module information */
@@ -43,6 +45,58 @@ char mod_query_ion_api_version[]=ION_API_VERSION;
 
 WBindmap *mod_query_input_bindmap=NULL;
 WBindmap *mod_query_wedln_bindmap=NULL;
+
+
+/*}}}*/
+
+
+/*{{{ Set & get */
+
+
+ModQueryConfig mod_query_config={
+    250,
+    TRUE
+};
+
+
+/*EXTL_DOC
+ * Set module configuration. The following are supported:
+ * \begin{tabularx}{\linewidth}{lX}
+ *  \tabhead{Field & Description}
+ *  \var{autoshowcompl} & (boolean) Is auto-show-completions enabled?
+ *      (default: true). \\
+ *  \var{autoshowcompl_delay} & (integer) auto-show-completions delay
+ *      in milliseconds (default: 250). \\
+ * \end{tabularx}
+ */
+EXTL_EXPORT
+void mod_query_set(ExtlTab tab)
+{
+    ModQueryConfig *c=&mod_query_config;
+
+    extl_table_gets_b(tab, "autoshowcompl", &c->autoshowcompl);
+    
+    if(extl_table_gets_i(tab, "autoshowcompl_delay",
+                         &c->autoshowcompl_delay)){
+        c->autoshowcompl_delay=maxof(c->autoshowcompl_delay, 0);
+    }
+}
+
+/*EXTL_DOC
+ * Get module configuration. For more information see
+ * \fnref{mod_query.set}.
+ */
+EXTL_EXPORT
+ExtlTab mod_query_get()
+{
+    ModQueryConfig *c=&mod_query_config;
+    ExtlTab tab=extl_create_table();
+    
+    extl_table_sets_b(tab, "autoshowcompl", c->autoshowcompl);
+    extl_table_sets_i(tab, "autoshowcompl_delay", c->autoshowcompl_delay);
+    
+    return tab;
+}
 
 
 /*}}}*/

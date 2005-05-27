@@ -73,34 +73,53 @@ static int compare(const void *p1, const void *p2)
 }
 
 
-void edln_complete(Edln *edln)
+static void edln_reset(Edln *edln)
 {
-    char *p;
-    int len;
+    assert(edln->palloced>=1);
     
-    if(edln->completion_handler==NULL)
-        return;
+    edln->p[0]='\0';
+    edln->psize=0;
+    edln->point=0;
+    edln->mark=-1;
+    edln->histent=-1;
+}
+
+
+static void edln_do_set_completion(Edln *edln, const char *comp, int len,
+                                   const char *beg, const char *end)
+{
+    edln_reset(edln);
     
-    len=edln->point;
+    if(beg!=NULL)
+        edln_insstr_n(edln, beg, strlen(beg), FALSE, TRUE);
     
-    p=ALLOC_N(char, len+1);
+    if(len>0)
+        edln_insstr_n(edln, comp, len, FALSE, TRUE);
+        
+    if(end!=NULL)
+        edln_insstr_n(edln, end, strlen(end), FALSE, FALSE);
     
-    if(p==NULL)
-        return;
-    
-    memcpy(p, edln->p, len);
-    p[len]='\0';
-    
-    edln->completion_handler(edln->uiptr, p);
-    
-    free(p);
+    if(edln->ui_update!=NULL){
+        edln->ui_update(edln->uiptr, 0,
+                        EDLN_UPDATE_MOVED|EDLN_UPDATE_CHANGED|
+                        EDLN_UPDATE_NEW);
+    }
+
+}
+
+
+void edln_set_completion(Edln *edln, const char *comp, 
+                         const char *beg, const char *end)
+{
+    edln_do_set_completion(edln, comp, strlen(comp), beg, end);
 }
 
 
 int edln_do_completions(Edln *edln, char **completions, int ncomp,
-                         const char *beg)
+                        const char *beg, const char *end, bool setcommon)
 {
     int len;
+    int i;
     
     if(ncomp==0){
         return 0;
@@ -111,13 +130,8 @@ int edln_do_completions(Edln *edln, char **completions, int ncomp,
         len=get_common_part_rmdup(completions, &ncomp);
     }
     
-    edln_kill_to_bol(edln);
-    
-    if(beg!=NULL)
-        edln_insstr(edln, beg);
-    
-    if(len!=0)
-        edln_insstr_n(edln, completions[0], len);
+    if(setcommon)
+        edln_do_set_completion(edln, completions[0], len, beg, end);
     
     return ncomp;
 }

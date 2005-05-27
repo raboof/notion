@@ -15,6 +15,7 @@
 #include <libtu/minmax.h>
 #include <libextl/extl.h>
 #include <libmainloop/defer.h>
+#include <libmainloop/signal.h>
 
 #include <ioncore/common.h>
 #include <ioncore/global.h>
@@ -27,6 +28,7 @@
 #include "wedln.h"
 #include "inputp.h"
 #include "complete.h"
+#include "main.h"
 
 
 #define WEDLN_BRUSH(X) ((X)->input.brush)
@@ -297,9 +299,9 @@ static void wedln_calc_size(WEdln *wedln, WRectangle *geom)
                                                wedln->prompt_len);
     }
 
-    th=get_textarea_height(wedln, wedln->complist.strs!=NULL);
+    th=get_textarea_height(wedln, wedln->compl_list.strs!=NULL);
     
-    if(wedln->complist.strs==NULL){
+    if(wedln->compl_list.strs==NULL){
         if(max_geom.h<th || wedln->input.last_fp.mode==REGION_FIT_EXACT)
             geom->h=max_geom.h;
         else
@@ -309,11 +311,11 @@ static void wedln_calc_size(WEdln *wedln, WRectangle *geom)
         
         get_completions_geom(wedln, G_MAX, &g);
         
-        fit_listing(WEDLN_BRUSH(wedln), &g, &(wedln->complist));
+        fit_listing(WEDLN_BRUSH(wedln), &g, &(wedln->compl_list));
         
         grbrush_get_border_widths(WEDLN_BRUSH(wedln), &bdw);
         
-        h=wedln->complist.toth;
+        h=wedln->compl_list.toth;
         th+=bdw.top+bdw.bottom;
         
         if(h+th>max_geom.h || wedln->input.last_fp.mode==REGION_FIT_EXACT)
@@ -337,41 +339,22 @@ static void wedln_calc_size(WEdln *wedln, WRectangle *geom)
 /*{{{ Draw */
 
 
-static void wedln_update_handler(WEdln *wedln, int from, int mode)
-{
-    WRectangle geom;
-    
-    if(WEDLN_BRUSH(wedln)==NULL)
-        return;
-    
-    get_textarea_geom(wedln, G_CURRENT, &geom);
-    
-    if(mode==EDLN_UPDATE_NEW)
-        wedln->vstart=0;
-    
-    if(mode==EDLN_UPDATE_MOVED || mode==EDLN_UPDATE_NEW){
-        if(wedln_update_cursor(wedln, geom.w))
-            from=wedln->vstart;
-    }
-    
-    from=maxof(0, from-wedln->vstart);
-
-    wedln_draw_str_box(wedln, &geom, wedln->vstart, wedln->edln.p, from,
-                       wedln->edln.point, wedln->edln.mark);
-}
-
-
 void wedln_draw_completions(WEdln *wedln, bool complete)
 {
     WRectangle geom;
     
-    if(wedln->complist.strs!=NULL && WEDLN_BRUSH(wedln)!=NULL){
-        const char *style=(REGION_IS_ACTIVE(wedln) ? "active" : "inactive");
+    if(wedln->compl_list.strs!=NULL && WEDLN_BRUSH(wedln)!=NULL){
+        const char *style=(REGION_IS_ACTIVE(wedln) 
+                           ? "active" 
+                           : "inactive");
+        const char *selstyle=(REGION_IS_ACTIVE(wedln) 
+                              ? "active-selection" 
+                              : "inactive-selection");
         
         get_completions_geom(wedln, G_CURRENT, &geom);
         
-        draw_listing(WEDLN_BRUSH(wedln), &geom, &(wedln->complist), 
-                     complete, style);
+        draw_listing(WEDLN_BRUSH(wedln), &geom, &(wedln->compl_list), 
+                     complete, style, selstyle);
     }
 }
 
@@ -445,7 +428,7 @@ static void wedln_show_completions(WEdln *wedln, char **strs, int nstrs)
     if(WEDLN_BRUSH(wedln)==NULL)
         return;
     
-    setup_listing(&(wedln->complist), strs, nstrs, FALSE);
+    setup_listing(&(wedln->compl_list), strs, nstrs, FALSE);
     input_refit((WInput*)wedln);
     if(w==REGION_GEOM(wedln).w && h==REGION_GEOM(wedln).h)
         wedln_draw_completions(wedln, TRUE);
@@ -454,8 +437,8 @@ static void wedln_show_completions(WEdln *wedln, char **strs, int nstrs)
 
 void wedln_hide_completions(WEdln *wedln)
 {
-    if(wedln->complist.strs!=NULL){
-        deinit_listing(&(wedln->complist));
+    if(wedln->compl_list.strs!=NULL){
+        deinit_listing(&(wedln->compl_list));
         input_refit((WInput*)wedln);
     }
 }
@@ -463,18 +446,18 @@ void wedln_hide_completions(WEdln *wedln)
 
 void wedln_scrollup_completions(WEdln *wedln)
 {
-    if(wedln->complist.strs==NULL)
+    if(wedln->compl_list.strs==NULL)
         return;
-    if(scrollup_listing(&(wedln->complist)))
+    if(scrollup_listing(&(wedln->compl_list)))
         wedln_draw_completions(wedln, TRUE);
 }
 
 
 void wedln_scrolldown_completions(WEdln *wedln)
 {
-    if(wedln->complist.strs==NULL)
+    if(wedln->compl_list.strs==NULL)
         return;
-    if(scrolldown_listing(&(wedln->complist)))
+    if(scrolldown_listing(&(wedln->compl_list)))
         wedln_draw_completions(wedln, TRUE);
 }
 
@@ -484,14 +467,30 @@ static ExtlExportedFn *sc_safe_fns[]={
     NULL
 };
 
+
 static ExtlSafelist sc_safelist=EXTL_SAFELIST_INIT(sc_safe_fns);
 
 
-static void wedln_completion_handler(WEdln *wedln, const char *nam)
+static void wedln_call_completor(WEdln *wedln)
 {
+    const char *p=wedln->edln.p;
+    int point=wedln->edln.point;
+    
+    if(p==NULL){
+        p="";
+        point=0;
+    }
+        
     extl_protect(&sc_safelist);
-    extl_call(wedln->completor, "os", NULL, wedln, nam);
+    extl_call(wedln->completor, "osi", NULL, wedln, p, point);
     extl_unprotect(&sc_safelist);
+}
+
+
+static void timed_complete(WTimer *tmr, Obj *obj)
+{
+    if(obj!=NULL)
+        wedln_call_completor((WEdln*)obj);
 }
 
 
@@ -506,7 +505,7 @@ EXTL_EXPORT_MEMBER
 void wedln_set_completions(WEdln *wedln, ExtlTab completions)
 {
     int n=0, i=0;
-    char **ptr=NULL, *beg=NULL, *p=NULL;
+    char **ptr=NULL, *beg=NULL, *end=NULL, *p=NULL;
     
     n=extl_table_get_n(completions);
     
@@ -526,15 +525,23 @@ void wedln_set_completions(WEdln *wedln, ExtlTab completions)
         ptr[i]=p;
     }
 
-    extl_table_gets_s(completions, "common_part", &beg);
+    extl_table_gets_s(completions, "common_beg", &beg);
+    extl_table_gets_s(completions, "common_end", &end);
     
-    n=edln_do_completions(&(wedln->edln), ptr, n, beg);
+    if(wedln->compl_beg!=NULL)
+        free(wedln->compl_beg);
+    
+    if(wedln->compl_end!=NULL)
+        free(wedln->compl_end);
+    
+    wedln->compl_beg=beg;
+    wedln->compl_end=end;
+    
+    n=edln_do_completions(&(wedln->edln), ptr, n, beg, end, 
+                          !mod_query_config.autoshowcompl);
     i=n;
 
-    if(beg!=NULL)
-        free(beg);
-    
-    if(n>1){
+    if(n>1 || (mod_query_config.autoshowcompl && n>0)){
         wedln_show_completions(wedln, ptr, n);
         return;
     }
@@ -547,6 +554,129 @@ allocfail:
     }
     free(ptr);
 }
+
+
+static int update_nocompl=0;
+
+
+static void wedln_do_select_completion(WEdln *wedln, int n)
+{
+    wedln->compl_list.selected_str=n;
+    wedln_draw_completions(wedln, FALSE);
+
+    update_nocompl++;
+    edln_set_completion(&(wedln->edln), wedln->compl_list.strs[n],
+                        wedln->compl_beg, wedln->compl_end);
+    update_nocompl--;
+}
+
+
+/*EXTL_DOC
+ * Select next completion.
+ */
+EXTL_EXPORT_MEMBER
+bool wedln_next_completion(WEdln *wedln)
+{
+    int n=-1;
+    
+    if(wedln->compl_list.nstrs<=0)
+        return FALSE;
+    
+    if(wedln->compl_list.selected_str<0 ||
+       wedln->compl_list.selected_str+1>=wedln->compl_list.nstrs){
+        n=0;
+    }else{
+        n=wedln->compl_list.selected_str+1;
+    }
+    
+    if(n!=wedln->compl_list.selected_str)
+        wedln_do_select_completion(wedln, n);
+    
+    return TRUE;
+}
+
+
+/*EXTL_DOC
+ * Select previous completion.
+ */
+EXTL_EXPORT_MEMBER
+bool wedln_prev_completion(WEdln *wedln)
+{
+    int n=-1;
+    
+    if(wedln->compl_list.nstrs<=0)
+        return FALSE;
+    
+    if(wedln->compl_list.selected_str<=0){
+        n=wedln->compl_list.nstrs-1;
+    }else{
+        n=wedln->compl_list.selected_str-1;
+    }
+
+    if(n!=wedln->compl_list.selected_str)
+        wedln_do_select_completion(wedln, n);
+    
+    return TRUE;
+}
+
+
+/*EXTL_DOC
+ * Call completion handler with the text between the beginning of line and
+ * current cursor position, or select next completion from list if in
+ * auto-show-completions mode and \var{cycle} is set.
+ */
+EXTL_EXPORT_MEMBER
+void wedln_complete(WEdln *wedln, bool cycle)
+{
+    if(cycle && mod_query_config.autoshowcompl && wedln->compl_list.nstrs>0){
+        wedln_next_completion(wedln);
+    }else{
+        wedln_call_completor(wedln);
+    }
+}
+
+
+/*}}}*/
+
+
+/*{{{ Update handler */
+
+
+static void wedln_update_handler(WEdln *wedln, int from, int flags)
+{
+    WRectangle geom;
+    
+    if(WEDLN_BRUSH(wedln)==NULL)
+        return;
+    
+    get_textarea_geom(wedln, G_CURRENT, &geom);
+    
+    if(flags&EDLN_UPDATE_NEW)
+        wedln->vstart=0;
+    
+    if(flags&EDLN_UPDATE_MOVED){
+        if(wedln_update_cursor(wedln, geom.w))
+            from=wedln->vstart;
+    }
+    
+    from=maxof(0, from-wedln->vstart);
+
+    wedln_draw_str_box(wedln, &geom, wedln->vstart, wedln->edln.p, from,
+                       wedln->edln.point, wedln->edln.mark);
+    
+    if(update_nocompl==0 &&
+       mod_query_config.autoshowcompl && 
+       flags&EDLN_UPDATE_CHANGED){
+        if(wedln->autoshowcompl_timer==NULL)
+            wedln->autoshowcompl_timer=create_timer();
+        if(wedln->autoshowcompl_timer!=NULL){
+            timer_set(wedln->autoshowcompl_timer, 
+                      mod_query_config.autoshowcompl_delay,
+                      timed_complete, (Obj*)wedln);
+        }
+    }
+}
+
 
 /*}}}*/
 
@@ -594,9 +724,13 @@ static bool wedln_init(WEdln *wedln, WWindow *par, const WFitParams *fp,
     
     wedln->edln.uiptr=wedln;
     wedln->edln.ui_update=(EdlnUpdateHandler*)wedln_update_handler;
-    wedln->edln.completion_handler=(EdlnCompletionHandler*)wedln_completion_handler;
 
-    init_listing(&(wedln->complist));
+    wedln->autoshowcompl_timer=NULL;
+    
+    init_listing(&(wedln->compl_list));
+
+    wedln->compl_beg=NULL;
+    wedln->compl_end=NULL;
     
     if(!input_init((WInput*)wedln, par, fp)){
         edln_deinit(&(wedln->edln));
@@ -627,8 +761,17 @@ static void wedln_deinit(WEdln *wedln)
     if(wedln->prompt!=NULL)
         free(wedln->prompt);
 
-    if(wedln->complist.strs!=NULL)
-        deinit_listing(&(wedln->complist));
+    if(wedln->compl_beg!=NULL)
+        free(wedln->compl_beg);
+
+    if(wedln->compl_end!=NULL)
+        free(wedln->compl_end);
+
+    if(wedln->compl_list.strs!=NULL)
+        deinit_listing(&(wedln->compl_list));
+
+    if(wedln->autoshowcompl_timer!=NULL)
+        destroy_obj((Obj*)wedln->autoshowcompl_timer);
 
     extl_unref_fn(wedln->completor);
     extl_unref_fn(wedln->handler);
@@ -690,7 +833,7 @@ void wedln_paste(WEdln *wedln)
 
 void wedln_insstr(WEdln *wedln, const char *buf, size_t n)
 {
-    edln_insstr_n(&(wedln->edln), buf, n);
+    edln_insstr_n(&(wedln->edln), buf, n, TRUE, TRUE);
 }
 
 
@@ -707,13 +850,12 @@ static const char *wedln_style(WEdln *wedln)
 
 
 static DynFunTab wedln_dynfuntab[]={
-    {window_draw,        wedln_draw},
-    {input_calc_size,     wedln_calc_size},
-    {input_scrollup,     wedln_scrollup_completions},
-    {input_scrolldown,    wedln_scrolldown_completions},
-    {window_insstr,        wedln_insstr},
-    {(DynFun*)input_style,
-     (DynFun*)wedln_style},
+    {window_draw, wedln_draw},
+    {input_calc_size, wedln_calc_size},
+    {input_scrollup, wedln_scrollup_completions},
+    {input_scrolldown, wedln_scrolldown_completions},
+    {window_insstr, wedln_insstr},
+    {(DynFun*)input_style, (DynFun*)wedln_style},
     END_DYNFUNTAB
 };
 
