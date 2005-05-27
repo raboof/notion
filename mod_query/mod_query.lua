@@ -513,23 +513,29 @@ end
 function break_cmdline(str, no_ws)
     local st, en, beg, rest, ch
     local res={""}
-    local concat=1
 
     local function ins(str)
-        res[concat]=res[concat]..str
+        local n=table.getn(res)
+        if string.find(res[n], "^%s+$") then
+            table.insert(res, str)
+        else
+            res[n]=res[n]..str
+        end
     end
 
     local function ins_space(str)
+        local n=table.getn(res)
         if no_ws then
-            if res[table.getn(res)]=="" then
-                return
+            if res[n]~="" then
+                table.insert(res, "")
             end
         else
-            table.insert(res, str)
+            if string.find(res[n], "^%s*$") then
+                res[n]=res[n]..str
+            else
+                table.insert(res, str)
+            end
         end
-        
-        table.insert(res, "")
-        concat=table.getn(res)
     end
 
     st, en, beg, ch, rest=string.find(str, "^(%s*)(:+)(.*)")
@@ -616,6 +622,10 @@ function mod_query.exec_completor(wedln, str, point)
     
     local s_compl, s_beg, s_end="", "", ""
     
+    if complidx==1 and string.find(parts[1], "^:+$") then
+        complidx=complidx+1
+    end
+    
     if string.find(parts[complidx], "[^%s]") then
         s_compl=unquote(parts[complidx])
     end
@@ -628,7 +638,18 @@ function mod_query.exec_completor(wedln, str, point)
         s_end=s_end..parts[i]
     end
     
-    local wp=(complidx==1 and " -wp " or " ")
+    local wp=" "
+    if complidx==1 then
+        wp=" -wp "
+    elseif string.find(parts[1], "^:+$") then
+        if complidx==2 then
+            wp=" -wp "
+        elseif string.find(parts[2], "^%s*$") then
+            if complidx==3 then
+                wp=" -wp "
+            end
+        end
+    end
 
     local function set_fn(wedln, res)
         res=table.map(quote, res)
