@@ -20,10 +20,11 @@ BUILDING AND INSTALLING
 2. a) Edit system.mk to suit your system. Most GNU/Linux users should
       need very little modifications to system.mk.
 
-   b) Alternatively, run ./configure. See README.autoconf for details, 
-      especially if you are using the Debian Lua packages. If you try this
-      method and it fails for some reason, please make sure system-ac.mk
-      does not exist before falling back to alternative a).
+   b) Alternatively, run autoreconf and then ./configure. See README.autoconf
+      for details on parameters, especially if you are using the Debian Lua
+      packages. If you try this method and it fails for some reason, please
+      make sure system-ac.mk does not exist before falling back to alternative
+      a).
 
 3. If you want to build some extra modules now or do not want to build
    some of the standard modules, edit modulelist.mk.

@@ -70,8 +70,8 @@ mv libs.mk.dist libs.mk
 ## Autoconf
 ##
 
-autoconf
-rm -rf autom4te.cache
+#autoconf
+#rm -rf autom4te.cache
 
 ##
 ## Scripts
