@@ -69,13 +69,8 @@ bool region_is_tagged(WRegion *reg)
 EXTL_EXPORT
 void ioncore_clear_tags()
 {
-    WRegion *reg;
-    ObjListIterTmp tmp;
-    
-    FOR_ALL_ON_OBJLIST(WRegion*, reg, taglist, tmp){
-        reg->flags&=~REGION_TAGGED;
-        objlist_remove(&taglist, (Obj*)reg);
-    }
+    while(ioncore_tags_take_first()!=NULL)
+        /* nothing */;
 }
 
 
@@ -95,8 +90,10 @@ WRegion *ioncore_tags_take_first()
 {
     WRegion *reg=(WRegion*)objlist_take_first(&taglist);
     
-    if(reg!=NULL)
+    if(reg!=NULL){
         reg->flags&=~REGION_TAGGED;
+        region_notify_change(reg);
+    }
     
     return reg;
 }
