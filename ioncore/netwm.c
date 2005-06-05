@@ -58,6 +58,7 @@ void netwm_init()
 void netwm_init_rootwin(WRootWin *rw)
 {
     Atom atoms[N_NETWM];
+        const char *p[1];
 
     atoms[0]=atom_net_wm_name;
     atoms[1]=atom_net_wm_state;
@@ -66,18 +67,15 @@ void netwm_init_rootwin(WRootWin *rw)
     atoms[4]=atom_net_virtual_roots;
     atoms[5]=atom_net_active_window;
     
-    FOR_ALL_ROOTWINS(rw){
-        const char *p[1];
-        XChangeProperty(ioncore_g.dpy, WROOTWIN_ROOT(rw),
-                        atom_net_supporting_wm_check, XA_WINDOW,
-                        32, PropModeReplace, (uchar*)&(rw->dummy_win), 1);
-        XChangeProperty(ioncore_g.dpy, WROOTWIN_ROOT(rw),
-                        atom_net_supported, XA_ATOM,
-                        32, PropModeReplace, (uchar*)atoms, N_NETWM);
-        /* Something else should probably be used as WM name here. */
-        p[0]=prog_execname();
-        xwindow_set_text_property(rw->dummy_win, atom_net_wm_name, p, 1);
-    }
+    XChangeProperty(ioncore_g.dpy, WROOTWIN_ROOT(rw),
+                    atom_net_supporting_wm_check, XA_WINDOW,
+                    32, PropModeReplace, (uchar*)&(rw->dummy_win), 1);
+    XChangeProperty(ioncore_g.dpy, WROOTWIN_ROOT(rw),
+                    atom_net_supported, XA_ATOM,
+                    32, PropModeReplace, (uchar*)atoms, N_NETWM);
+    /* Something else should probably be used as WM name here. */
+    p[0]=prog_execname();
+    xwindow_set_text_property(rw->dummy_win, atom_net_wm_name, p, 1);
 }
 
 
