@@ -1312,7 +1312,7 @@ static bool clientwin_managed_goto(WClientWin *cwin, WRegion *sub, int flags)
         region_map(sub);
     
     if(flags&REGION_GOTO_FOCUS){
-        ioncore_protect_previous(sub);
+        ioncore_set_previous_of(sub);
         region_maybewarp(sub, !(flags&REGION_GOTO_NOWARP));
     }
     
