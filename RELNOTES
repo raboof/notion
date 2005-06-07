@@ -1,4 +1,24 @@
 
+=== ion-3ds-20050607 ===
+
+This release mostly features minor bugfixes and other improvements. The most
+visible non-bugfix changes are:
+
+ * Faster "fontset" filling kludge: only -misc-fixed-* fonts are tried. Ion
+   should now load faster in UTF-8 environments, and usually with no less
+   fonts in the fontset than before. (UTF-8 string drawing still does not
+   fully utilise these fonts under XFree86, but it does under XOrg.)
+
+ * Experimental auto-show-completions support, which is also on by default
+   now. In this mode the Tab key can be used to cycle forward through the
+   completions, and Shift+Tab backwards. Modify the settings seen in the 
+   new mod_query.lua to get normal Tab-completion, or change the completion
+   delay.
+
+ * The release scripts do not run automatically autoconf anymore so maybe
+   a few more people would look into the README first.
+
+
 === ion-3ds-20050322 ===
 
 The most visible changes in this release are:
