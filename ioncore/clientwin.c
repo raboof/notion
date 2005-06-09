@@ -1170,7 +1170,14 @@ static bool clientwin_fitrep(WClientWin *cwin, WWindow *np, WFitParams *fp)
     if(np!=NULL && !region_same_rootwin((WRegion*)cwin, (WRegion*)np))
         return FALSE;
 
-    convert_geom(cwin, fp, &geom);
+    /* Use all available space if NetWM full screen request. */
+    if(cwin->flags&CLIENTWIN_FS_RQ
+       && (OBJ_IS(np, WScreen)
+           || (np==NULL && CLIENTWIN_IS_FULLSCREEN(cwin)))){
+        geom=fp->g;
+    }else{
+        convert_geom(cwin, fp, &geom);
+    }
 
     changes=(REGION_GEOM(cwin).x!=geom.x ||
              REGION_GEOM(cwin).y!=geom.y ||
@@ -1192,6 +1199,7 @@ static bool clientwin_fitrep(WClientWin *cwin, WWindow *np, WFitParams *fp)
         if(!CLIENTWIN_IS_FULLSCREEN(cwin) && cwin->fs_pholder!=NULL){
             WPHolder *ph=cwin->fs_pholder;
             cwin->fs_pholder=NULL;
+            cwin->flags&=~CLIENTWIN_FS_RQ;
             /* Can't destroy it yet - messes up mplex placeholder
              * reorganisation.
              */

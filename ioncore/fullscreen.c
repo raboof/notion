@@ -48,15 +48,24 @@ bool clientwin_check_fullscreen_request(WClientWin *cwin, int w, int h,
          * requested position, if any.
          */
         if(REGION_GEOM(scr).w==w && REGION_GEOM(scr).h==h){
-            return clientwin_fullscreen_scr(cwin, (WScreen*)scr, sw);
+            cwin->flags|=CLIENTWIN_FS_RQ;
+            if(!clientwin_fullscreen_scr(cwin, (WScreen*)scr, sw)){
+                cwin->flags&=~CLIENTWIN_FS_RQ;
+                return FALSE;
+            }
+            return TRUE;
         }
     }
     
     rwgeom=&REGION_GEOM(region_rootwin_of((WRegion*)cwin));
                         
     /* Catch Xinerama-unaware apps here */
-    if(rwgeom->w==w && rwgeom->h==h)
-        return clientwin_enter_fullscreen(cwin, sw);
+    if(rwgeom->w==w && rwgeom->h==h){
+        cwin->flags|=CLIENTWIN_FS_RQ;
+        if(clientwin_enter_fullscreen(cwin, sw))
+            return TRUE;
+        cwin->flags&=~CLIENTWIN_FS_RQ;
+    }
 
     return FALSE;
 }

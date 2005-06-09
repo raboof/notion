@@ -146,13 +146,18 @@ static void netwm_state_change_rq(WClientWin *cwin,
         if(ev->data.l[0]==_NET_WM_STATE_ADD || 
            ev->data.l[0]==_NET_WM_STATE_TOGGLE){
             bool sw=clientwin_fullscreen_may_switchto(cwin);
-            clientwin_enter_fullscreen(cwin, sw);
+            cwin->flags|=CLIENTWIN_FS_RQ;
+            if(!clientwin_enter_fullscreen(cwin, sw))
+                cwin->flags&=~CLIENTWIN_FS_RQ;
         }
     }else{
         if(ev->data.l[0]==_NET_WM_STATE_REMOVE || 
            ev->data.l[0]==_NET_WM_STATE_TOGGLE){
             bool sw=clientwin_fullscreen_may_switchto(cwin);
             clientwin_leave_fullscreen(cwin, sw);
+        }else if(CLIENTWIN_IS_FULLSCREEN(cwin)){
+            /* Set the flag */
+            cwin->flags|=CLIENTWIN_FS_RQ;
         }
     }
 }
