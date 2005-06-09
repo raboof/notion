@@ -1434,7 +1434,7 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 
     /* check full screen request */
     if((ev->value_mask&(CWWidth|CWHeight))==(CWWidth|CWHeight)){
-        bool sw=region_may_control_focus((WRegion*)cwin);
+        bool sw=clientwin_fullscreen_may_switchto(cwin);
         if(clientwin_check_fullscreen_request(cwin, ev->width, ev->height, sw))
             return;
     }

@@ -22,6 +22,13 @@
 #include "focus.h"
 
 
+bool clientwin_fullscreen_may_switchto(WClientWin *cwin)
+{
+    return (region_may_control_focus((WRegion*)cwin)
+            || !REGION_IS_ACTIVE(region_screen_of((WRegion*)cwin)));
+}
+
+
 bool clientwin_check_fullscreen_request(WClientWin *cwin, int w, int h,
                                         bool sw)
 {
@@ -103,6 +110,8 @@ bool clientwin_enter_fullscreen(WClientWin *cwin, bool switchto)
 bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto)
 {    
     bool cf;
+    
+    /* TODO: should use switchto param. */
     
     if(cwin->fs_pholder==NULL)
         return FALSE;

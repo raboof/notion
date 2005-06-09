@@ -145,13 +145,13 @@ static void netwm_state_change_rq(WClientWin *cwin,
     if(!CLIENTWIN_IS_FULLSCREEN(cwin)){
         if(ev->data.l[0]==_NET_WM_STATE_ADD || 
            ev->data.l[0]==_NET_WM_STATE_TOGGLE){
-            bool sw=region_may_control_focus((WRegion*)cwin);
+            bool sw=clientwin_fullscreen_may_switchto(cwin);
             clientwin_enter_fullscreen(cwin, sw);
         }
     }else{
         if(ev->data.l[0]==_NET_WM_STATE_REMOVE || 
            ev->data.l[0]==_NET_WM_STATE_TOGGLE){
-            bool sw=region_may_control_focus((WRegion*)cwin);
+            bool sw=clientwin_fullscreen_may_switchto(cwin);
             clientwin_leave_fullscreen(cwin, sw);
         }
     }
