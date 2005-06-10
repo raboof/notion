@@ -463,7 +463,7 @@ void wedln_scrolldown_completions(WEdln *wedln)
 
 
 static ExtlExportedFn *sc_safe_fns[]={
-    (ExtlExportedFn*)&wedln_set_completions,
+    (ExtlExportedFn*)&complproxy_set_completions,
     NULL
 };
 
@@ -475,14 +475,24 @@ static void wedln_call_completor(WEdln *wedln)
 {
     const char *p=wedln->edln.p;
     int point=wedln->edln.point;
+    int id=wedln->compl_waiting_id+1;
+    WComplProxy *proxy=create_complproxy(wedln, id);
+    
+    if(proxy==NULL)
+        return;
+    
+    /* Set Lua-side to own the proxy: it gets freed by Lua's GC */
+    ((Obj*)proxy)->flags|=OBJ_EXTL_OWNED;
     
     if(p==NULL){
         p="";
         point=0;
     }
-        
+    
+    wedln->compl_waiting_id=id;
+    
     extl_protect(&sc_safelist);
-    extl_call(wedln->completor, "osi", NULL, wedln, p, point);
+    extl_call(wedln->completor, "osi", NULL, proxy, p, point);
     extl_unprotect(&sc_safelist);
 }
 
@@ -494,14 +504,6 @@ static void timed_complete(WTimer *tmr, Obj *obj)
 }
 
 
-/*EXTL_DOC
- * This function should be called in completors (such given as
- * parameters to \code{mod_query.query}) to return the set of completions
- * found. The numerical indexes of \var{completions} list the found
- * completions. If the entry \var{common_part} exists, it gives an
- * extra common prefix of all found completions.
- */
-EXTL_EXPORT_MEMBER
 void wedln_set_completions(WEdln *wedln, ExtlTab completions)
 {
     int n=0, i=0;
@@ -536,6 +538,7 @@ void wedln_set_completions(WEdln *wedln, ExtlTab completions)
     
     wedln->compl_beg=beg;
     wedln->compl_end=end;
+    wedln->compl_current_id=-1;
     
     n=edln_do_completions(&(wedln->edln), ptr, n, beg, end, 
                           !mod_query_config.autoshowcompl);
@@ -578,6 +581,9 @@ EXTL_EXPORT_MEMBER
 bool wedln_next_completion(WEdln *wedln)
 {
     int n=-1;
+
+    if(wedln->compl_current_id!=wedln->compl_waiting_id)
+        return FALSE;
     
     if(wedln->compl_list.nstrs<=0)
         return FALSE;
@@ -603,6 +609,9 @@ EXTL_EXPORT_MEMBER
 bool wedln_prev_completion(WEdln *wedln)
 {
     int n=-1;
+
+    if(wedln->compl_current_id!=wedln->compl_waiting_id)
+        return FALSE;
     
     if(wedln->compl_list.nstrs<=0)
         return FALSE;
@@ -670,6 +679,7 @@ static void wedln_update_handler(WEdln *wedln, int from, int flags)
         if(wedln->autoshowcompl_timer==NULL)
             wedln->autoshowcompl_timer=create_timer();
         if(wedln->autoshowcompl_timer!=NULL){
+            wedln->compl_current_id=-1; /* Invalidate completions */
             timer_set(wedln->autoshowcompl_timer, 
                       mod_query_config.autoshowcompl_delay,
                       timed_complete, (Obj*)wedln);
@@ -729,6 +739,8 @@ static bool wedln_init(WEdln *wedln, WWindow *par, const WFitParams *fp,
     
     init_listing(&(wedln->compl_list));
 
+    wedln->compl_waiting_id=-1;
+    wedln->compl_current_id=-1;
     wedln->compl_beg=NULL;
     wedln->compl_end=NULL;
     

@@ -31,8 +31,8 @@ local DIE_TIMEOUT=30*1000 -- 30 seconds
 
 
 function mod_query.make_completor(completefn)
-    local function completor(wedln, str, point)
-        wedln:set_completions(completefn(str, point))
+    local function completor(cp, str, point)
+        cp:set_completions(completefn(str, point))
     end
     return completor
 end
@@ -222,11 +222,11 @@ mod_query.COLLECT_THRESHOLD=2000
 -- This function can be used to read completions from an external source.
 -- The string \var{cmd} is a shell command to be executed. To its  stdout, 
 -- the command should on the first line write the \var{common_beg} 
--- parameter of \fnref{WEdln.set_completions} and a single actual completion
--- on each of the successive lines.
-function mod_query.popen_completions(wedln, cmd, beg, fn)
+-- parameter of \fnref{WComplProxy.set_completions} and a single actual 
+-- completion on each of the successive lines.
+function mod_query.popen_completions(cp, cmd, beg, fn)
     
-    local pst={wedln=wedln, maybe_stalled=0}
+    local pst={cp=cp, maybe_stalled=0}
     
     local function rcv(str)
         local data=""
@@ -272,7 +272,7 @@ function mod_query.popen_completions(wedln, cmd, beg, fn)
             results.common_beg=beg
         end
         
-        (fn or WEdln.set_completions)(wedln, results)
+        (fn or WComplProxy.set_completions)(cp, results)
         
         pipes[rcv]=nil
         results={}
@@ -283,7 +283,7 @@ function mod_query.popen_completions(wedln, cmd, beg, fn)
     local found_clean=false
     
     for k, v in pipes do
-        if v.wedln==wedln then
+        if v.cp==cp then
             if v.maybe_stalled<2 then
                 v.maybe_stalled=v.maybe_stalled+1
                 found_clean=true
@@ -369,9 +369,9 @@ function mod_query.workspace_handler(mplex, name)
     
     local classes=mod_query.lookup_workspace_classes()
     
-    local function completor(wedln, what)
+    local function completor(cp, what)
         local results=mod_query.complete_from_list(classes, what)
-        wedln:set_completions(results)
+        cp:set_completions(results)
     end
     
     local function handler(mplex, cls)
@@ -651,11 +651,11 @@ function mod_query.exec_completor(wedln, str, point)
         end
     end
 
-    local function set_fn(wedln, res)
+    local function set_fn(cp, res)
         res=table.map(quote, res)
         res.common_beg=s_beg..(res.common_beg or "")
         res.common_end=(res.common_end or "")..s_end
-        wedln:set_completions(res)
+        cp:set_completions(res)
     end
 
     local ic=ioncore.lookup_script("ion-completefile")
@@ -931,8 +931,8 @@ end
 function mod_query.query_lua(mplex)
     local env=mod_query.create_run_env(mplex)
     
-    local function complete(wedln, code)
-        wedln:set_completions(mod_query.do_complete_lua(env, code))
+    local function complete(cp, code)
+        cp:set_completions(mod_query.do_complete_lua(env, code))
     end
     
     local function handler(mplex, code)

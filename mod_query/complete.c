@@ -14,10 +14,14 @@
 #include <string.h>
 #include <limits.h>
 
+#include <libtu/objp.h>
 #include <ioncore/common.h>
 #include "complete.h"
 #include "edln.h"
 #include "wedln.h"
+
+
+/*{{{ Completion list processing */
 
 
 static int str_common_part_l(const char *p1, const char *p2)
@@ -135,4 +139,65 @@ int edln_do_completions(Edln *edln, char **completions, int ncomp,
     
     return ncomp;
 }
+
+
+/*}}}*/
+
+
+/*{{{ WComplProxy */
+
+
+bool complproxy_init(WComplProxy *proxy, WEdln *wedln, int id)
+{
+    watch_init(&(proxy->wedln_watch));
+    if(!watch_setup(&(proxy->wedln_watch), (Obj*)wedln, NULL))
+        return FALSE;
+    
+    proxy->id=id;
+    
+    return TRUE;
+}
+
+
+WComplProxy *create_complproxy(WEdln *wedln, int id)
+{
+    CREATEOBJ_IMPL(WComplProxy, complproxy, (p, wedln, id));
+}
+
+
+void complproxy_deinit(WComplProxy *proxy)
+{
+    watch_reset(&(proxy->wedln_watch));
+}
+
+
+/*EXTL_DOC
+ * Set completion list of the \type{WEdln} that \var{proxy} refers to to
+ * \var{compls}, if it is still waiting for this completion run. The 
+ * numerical indexes of \var{compls} list the found completions. If the
+ * entry \var{common_beg} (\var{common_end}) exists, it gives an extra 
+ * common prefix (suffix) of all found completions.
+ */
+EXTL_EXPORT_MEMBER
+bool complproxy_set_completions(WComplProxy *proxy, ExtlTab compls)
+{
+    WEdln *wedln=(WEdln*)proxy->wedln_watch.obj;
+    
+    if(wedln!=NULL){
+        if(wedln->compl_waiting_id==proxy->id){
+            wedln_set_completions(wedln, compls);
+            wedln->compl_current_id=proxy->id;
+            return TRUE;
+        }
+    }
+    
+    return FALSE;
+}
+
+
+EXTL_EXPORT
+IMPLCLASS(WComplProxy, Obj, complproxy_deinit, NULL);
+
+
+/*}}}*/
 

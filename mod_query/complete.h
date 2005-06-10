@@ -12,7 +12,25 @@
 #ifndef ION_MOD_QUERY_COMPLETE_H
 #define ION_MOD_QUERY_COMPLETE_H
 
+#include <libtu/obj.h>
+#include <libextl/extl.h>
+#include <ioncore/common.h>
 #include "edln.h"
+#include "wedln.h"
+
+INTRCLASS(WComplProxy);
+
+DECLCLASS(WComplProxy){
+    Obj o;
+    Watch wedln_watch;
+    int id;
+};
+
+
+extern WComplProxy *create_complproxy(WEdln *wedln, int id);
+
+extern bool complproxy_set_completions(WComplProxy *proxy, ExtlTab compls);
+
 
 extern int edln_do_completions(Edln *edln, char **completions, int ncomp,
                                const char *beg, const char *end,
