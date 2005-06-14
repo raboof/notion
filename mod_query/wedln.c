@@ -585,8 +585,8 @@ static int update_nocompl=0;
 
 static void wedln_do_select_completion(WEdln *wedln, int n)
 {
-    wedln->compl_list.selected_str=n;
-    wedln_draw_completions(wedln, FALSE);
+    bool complredraw=listing_select(&(wedln->compl_list), n);
+    wedln_draw_completions(wedln, complredraw);
 
     update_nocompl++;
     edln_set_completion(&(wedln->edln), wedln->compl_list.strs[n],

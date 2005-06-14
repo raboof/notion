@@ -45,5 +45,6 @@ extern void draw_listing(GrBrush *brush, const WRectangle *geom, WListing *l,
                          const char *selstyle);
 extern bool scrollup_listing(WListing *l);
 extern bool scrolldown_listing(WListing *l);
+extern bool listing_select(WListing *l, int i);
 
 #endif /* ION_MOD_QUERY_LISTING_H */

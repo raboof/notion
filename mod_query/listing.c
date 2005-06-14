@@ -188,7 +188,7 @@ static int col_fit(int w, int itemw, int spacing)
     return ncol;
 }
 
-static bool oneup(WListing *l, int *ip, int *rp)
+static bool one_row_up(WListing *l, int *ip, int *rp)
 {
     int i=*ip, r=*rp;
     int ir=ITEMROWS(l, i);
@@ -207,7 +207,7 @@ static bool oneup(WListing *l, int *ip, int *rp)
 }
 
 
-static bool onedown(WListing *l, int *ip, int *rp)
+static bool one_row_down(WListing *l, int *ip, int *rp)
 {
     int i=*ip, r=*rp;
     int ir=ITEMROWS(l, i);
@@ -296,7 +296,7 @@ void fit_listing(GrBrush *brush, const WRectangle *geom, WListing *l)
     l->firstitem=l->nitemcol-1;
     l->firstoff=ITEMROWS(l, l->nitemcol-1)-1;
     for(i=1; i<visrow; i++)
-        oneup(l, &(l->firstitem), &(l->firstoff));
+        one_row_up(l, &(l->firstitem), &(l->firstoff));
     
 }
 
@@ -416,7 +416,7 @@ static bool do_scrollup_listing(WListing *l, int n)
     bool ret=FALSE;
     
     while(n>0){
-        if(!oneup(l, &i, &r))
+        if(!one_row_up(l, &i, &r))
             break;
         ret=TRUE;
         n--;
@@ -438,12 +438,12 @@ static bool do_scrolldown_listing(WListing *l, int n)
     bool ret=FALSE;
     
     while(--bc>0)
-        onedown(l, &bi, &br);
+        one_row_down(l, &bi, &br);
     
     while(n>0){
-        if(!onedown(l, &bi, &br))
+        if(!one_row_down(l, &bi, &br))
             break;
-        onedown(l, &i, &r);
+        one_row_down(l, &i, &r);
         ret=TRUE;
         n--;
     }
@@ -465,3 +465,60 @@ bool scrolldown_listing(WListing *l)
 {
     return do_scrolldown_listing(l, l->visrow);
 }
+
+
+static int listing_first_row_of_item(WListing *l, int i)
+{
+    int fci=i%l->nitemcol, j;
+    int r=0;
+    
+    for(j=0; j<fci; j++)
+        r+=ITEMROWS(l, j);
+    
+    return r;
+}
+
+
+static int listing_first_visible_row(WListing *l)
+{
+    return listing_first_row_of_item(l, l->firstitem)+l->firstoff;
+}
+
+
+bool listing_select(WListing *l, int i)
+{
+    int irow, frow, lrow;
+    bool complredraw=FALSE;
+    
+    if(i<0){
+        l->selected_str=-1;
+        return FALSE;
+    }
+    
+    assert(i<l->nstrs);
+    
+    l->selected_str=i;
+    
+    /* Adjust visible area */
+    
+    irow=listing_first_row_of_item(l, i);
+    frow=listing_first_visible_row(l);
+    
+    while(irow<frow){
+        one_row_up(l, &(l->firstitem), &(l->firstoff));
+        frow--;
+        complredraw=TRUE;
+    }
+
+    irow+=ITEMROWS(l, i)-1;
+    lrow=frow+l->visrow-1;
+    
+    while(irow>lrow){
+        one_row_down(l, &(l->firstitem), &(l->firstoff));
+        lrow++;
+        complredraw=TRUE;
+    }
+    
+    return complredraw;
+}
+
