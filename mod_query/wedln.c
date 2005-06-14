@@ -471,15 +471,21 @@ static ExtlExportedFn *sc_safe_fns[]={
 static ExtlSafelist sc_safelist=EXTL_SAFELIST_INIT(sc_safe_fns);
 
 
-static void wedln_call_completor(WEdln *wedln)
+static int wedln_alloc_compl_id(WEdln *wedln)
+{
+    int id=wedln->compl_waiting_id+1;
+    wedln->compl_waiting_id=maxof(0, wedln->compl_waiting_id+1);
+    return id;
+}
+
+static bool wedln_do_call_completor(WEdln *wedln, int id)
 {
     const char *p=wedln->edln.p;
     int point=wedln->edln.point;
-    int id=wedln->compl_waiting_id+1;
     WComplProxy *proxy=create_complproxy(wedln, id);
     
     if(proxy==NULL)
-        return;
+        return FALSE;
     
     /* Set Lua-side to own the proxy: it gets freed by Lua's GC */
     ((Obj*)proxy)->flags|=OBJ_EXTL_OWNED;
@@ -489,18 +495,33 @@ static void wedln_call_completor(WEdln *wedln)
         point=0;
     }
     
-    wedln->compl_waiting_id=id;
-    
     extl_protect(&sc_safelist);
     extl_call(wedln->completor, "osi", NULL, proxy, p, point);
     extl_unprotect(&sc_safelist);
+    
+    return TRUE;
+}
+
+
+static void wedln_call_completor(WEdln *wedln)
+{
+    int oldid=wedln->compl_waiting_id;
+    
+    if(!wedln_do_call_completor(wedln, wedln_alloc_compl_id(wedln)))
+        wedln->compl_waiting_id=oldid;
 }
 
 
 static void timed_complete(WTimer *tmr, Obj *obj)
 {
-    if(obj!=NULL)
-        wedln_call_completor((WEdln*)obj);
+    WEdln *wedln=(WEdln*)obj;
+    
+    if(wedln!=NULL){
+        int id=wedln->compl_timed_id;
+        wedln->compl_timed_id=-1;
+        if(id==wedln->compl_waiting_id && id>=0)
+            wedln_do_call_completor((WEdln*)obj, id);
+    }
 }
 
 
@@ -679,7 +700,7 @@ static void wedln_update_handler(WEdln *wedln, int from, int flags)
         if(wedln->autoshowcompl_timer==NULL)
             wedln->autoshowcompl_timer=create_timer();
         if(wedln->autoshowcompl_timer!=NULL){
-            wedln->compl_current_id=-1; /* Invalidate completions */
+            wedln->compl_timed_id=wedln_alloc_compl_id(wedln);
             timer_set(wedln->autoshowcompl_timer, 
                       mod_query_config.autoshowcompl_delay,
                       timed_complete, (Obj*)wedln);
@@ -741,6 +762,7 @@ static bool wedln_init(WEdln *wedln, WWindow *par, const WFitParams *fp,
 
     wedln->compl_waiting_id=-1;
     wedln->compl_current_id=-1;
+    wedln->compl_timed_id=-1;
     wedln->compl_beg=NULL;
     wedln->compl_end=NULL;
     

@@ -54,6 +54,7 @@ DECLCLASS(WEdln){
     char *compl_end;
     int compl_waiting_id;
     int compl_current_id;
+    int compl_timed_id;
 };
 
 extern WEdln *create_wedln(WWindow *par, const WFitParams *fp,
