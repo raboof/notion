@@ -732,6 +732,42 @@ function mod_query.get_known_hosts(mplex)
 end
 
 
+mod_query.hostnicks={}
+
+function mod_query.get_hostnicks(mplex)
+	mod_query.hostnicks={}
+	local f
+	local substr, pat, patterns
+	local h=os.getenv("HOME")
+
+	if h then
+		f=io.open(h.."/.ssh/config")
+	end
+	if not f then 
+		warn(TR("Failed to open ~/.ssh/config"))
+		return
+	end
+
+	for l in f:lines() do
+		_, _, substr=string.find(l, "^%s*[hH][oO][sS][tT](.*)")
+		if substr then
+			_, _, pat=string.find(substr, "^%s*[=%s]%s*(%S.*)")
+			if pat then
+				patterns=pat
+			elseif string.find(substr, "^[nN][aA][mM][eE]")
+				and patterns then
+				for s in string.gfind(patterns, "%S+") do
+					if not string.find(s, "[*?]") then
+						table.insert(mod_query.hostnicks, s)
+					end
+				end
+			end
+		end
+	end
+	f:close()
+end
+
+
 function mod_query.complete_ssh(str)
     local st, en, user, at, host=string.find(str, "^([^@]*)(@?)(.*)$")
     
@@ -747,16 +783,16 @@ function mod_query.complete_ssh(str)
     
     if string.len(host)==0 then
         if string.len(user)==0 then
-            return mod_query.known_hosts
+            return mod_query.ssh_completions
         end
         
-        for _, v in ipairs(mod_query.known_hosts) do
+        for _, v in ipairs(mod_query.ssh_completions) do
             table.insert(res, user .. v)
         end
         return res
     end
     
-    for _, v in ipairs(mod_query.known_hosts) do
+    for _, v in ipairs(mod_query.ssh_completions) do
         local s, e=string.find(v, host, 1, true)
         if s==1 and e>=1 then
             table.insert(res, user .. v)
@@ -766,12 +802,21 @@ function mod_query.complete_ssh(str)
     return res
 end
 
+mod_query.ssh_completions={}
 
 --DOC
 -- This query asks for a host to connect to with SSH. 
 -- Hosts to tab-complete are read from \file{\~{}/.ssh/known\_hosts}.
 function mod_query.query_ssh(mplex, ssh)
     mod_query.get_known_hosts(mplex)
+	mod_query.get_hostnicks(mplex)
+
+	for _, v in ipairs(mod_query.known_hosts) do
+		table.insert(mod_query.ssh_completions, v)
+	end
+	for _, v in ipairs(mod_query.hostnicks) do
+		table.insert(mod_query.ssh_completions, v)
+	end
 
     ssh=(ssh or ":ssh")
 
