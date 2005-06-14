@@ -293,11 +293,16 @@ void fit_listing(GrBrush *brush, const WRectangle *geom, WListing *l)
     l->visrow=visrow;
     l->toth=visrow*l->itemh;
 
+#if 0
     l->firstitem=l->nitemcol-1;
     l->firstoff=ITEMROWS(l, l->nitemcol-1)-1;
     for(i=1; i<visrow; i++)
         one_row_up(l, &(l->firstitem), &(l->firstoff));
-    
+#else
+    l->firstitem=0;
+    l->firstoff=0;
+#endif
+
 }
 
 
