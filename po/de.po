@@ -177,7 +177,7 @@ msgstr "Konnte keinen Arbeitsbereich auf dem Schirm %d erzeugen."
 #, c-format
 msgid "Caught fatal signal %d. Dying without deinit."
 msgstr ""
-"Abbruch Signal %d aufgefangen. Beeendet ohne deinit."
+"Abbruch Signal %d aufgefangen. Beendet ohne deinit."
 
 #: ../ioncore/signal.c:300
 #, c-format
@@ -210,7 +210,7 @@ msgstr ""
 "Lizenz der Version 2.1, oder (nach eigener Wahl) jede spätere Version.\n"
 "\n"
 "Dieses Programm wird mit der Hoffnung das es nützlich ist verteilt, \n"
-"aber OHNE JEGLICHE GARANTIE; ohne jede Garantie von MARKTFAEHIGKEIT oder\n"
+"aber OHNE JEGLICHE GARANTIE; ohne jede Garantie von MARKTFÄHIGKEIT oder\n"
 "EIGNUNG ZU EINEM BESTIMMTEN ZWECK. Siehe die \"GNU Lesser General Public\"\n"
 "Lizenz für detailliertere Angaben.\n"
 
@@ -225,11 +225,11 @@ msgstr "Konnte keinen Bildschirm für diese Aktion finden."
 
 #: ../ioncore/xic.c:43
 msgid "Failed to open input method."
-msgstr "Oeffnen der Eingabemethode ist fehlgeschlagen."
+msgstr "Öffnen der Eingabemethode ist fehlgeschlagen."
 
 #: ../ioncore/xic.c:48
 msgid "Input method doesn't support any style."
-msgstr "Die Eingabemethode unterstütz keine Art von Styles"
+msgstr "Die Eingabemethode unterstützt keine Art von Styles"
 
 #: ../ioncore/xic.c:63
 msgid "input method doesn't support my preedit type."
@@ -340,7 +340,7 @@ msgstr "Xinerama Zustandsüberprüfung fehlgeschlagen; überlappende Screens gefund
 
 #: ../ioncore/rootwin.c:342
 msgid "Don't know how to get Xinerama information for multiple X root windows."
-msgstr "Weiss nicht wie die Xinerama Information für multiple X Wurzelfenster zu bekommen ist."
+msgstr "Weiß nicht wie die Xinerama Information für multiple X Wurzelfenster zu bekommen ist."
 
 #: ../ioncore/rootwin.c:378
 #, c-format
@@ -593,7 +593,7 @@ msgstr "Rettung einiger Client Fenster fehlgeschlagen."
 
 #: ../mod_floatws/floatws.c:370 ../mod_panews/panews.c:254
 msgid "Refusing to close non-empty workspace."
-msgstr "Schliessen von 'nicht-leerem' Arbeitsbereich abgelehnt."
+msgstr "Schließen von 'nicht-leerem' Arbeitsbereich abgelehnt."
 
 #
 #: ../mod_floatws/floatws.c:462
@@ -667,7 +667,7 @@ msgstr "Konnte keine Verbindung zu Sitzungsmanager aufbauen."
 #: ../mod_sp/main.c:137
 #, c-format
 msgid "Unable to create scratchpad for screen %d."
-msgstr "Konnte 'Scratchpad' (Schmirblock) fuer Screen %d nicht erstellen."
+msgstr "Konnte 'Scratchpad' (Schmirblock) für Screen %d nicht erstellen."
 
 #: ../de/init.c:41
 #, c-format
@@ -733,7 +733,7 @@ msgstr "Konfigurationsdatei"
 
 #: ../ion/ion.c:47 ../pwm/pwm.c:47
 msgid "Add directory to search path"
-msgstr "Addiere Verzeichniss zum Suchpfad "
+msgstr "Addiere Verzeichnis zum Suchpfad "
 
 #: ../ion/ion.c:50 ../pwm/pwm.c:50
 msgid "Manage default root window/non-Xinerama screen only"
@@ -1136,7 +1136,7 @@ msgstr "Zerstören"
 
 #: ../pwm/cfg_pwm_menus.lua:25 ../etc/cfg_menus.lua:37
 msgid "Close"
-msgstr "Schliessen"
+msgstr "Schließen"
 
 #: ../mod_query/mod_query.lua:381
 msgid "Go to or create workspace:"
@@ -1189,7 +1189,7 @@ msgstr "Unbekanntes Menü %s."
 
 #: ../etc/cfg_floatws.lua:12
 msgid "Backwards-circulate focus and raise the newly focused frame."
-msgstr "Rückwärts laufender Fokus und zeige fokusiertes Frame."
+msgstr "Rückwärts laufender Fokus und zeige fokussiertes Frame."
 
 #: ../etc/cfg_menus.lua:44
 msgid "Window info"
@@ -1229,7 +1229,7 @@ msgstr "Konnte Client Fenster %s nicht finden."
 
 #: ../etc/cfg_query.lua:82
 msgid "Close the query/message box, not executing bound actions."
-msgstr "Schliesse die Anfrage/Message Box und führe keine daran gebundenen Aktionen aus."
+msgstr "Schließe die Anfrage/Message Box und führe keine daran gebundenen Aktionen aus."
 
 #
 #: ../etc/cfg_bindings.lua:168
@@ -1326,7 +1326,7 @@ msgstr ""
 
 #: ../etc/cfg_menu.lua:11
 msgid "Close the menu."
-msgstr "Schliesse das Menü."
+msgstr "Schließe das Menü."
 
 #: ../etc/cfg_query.lua:87
 msgid "Scroll the message or completions up/down."
@@ -1334,7 +1334,7 @@ msgstr "Verschiebe die Nachricht oder Vervollständigung nach oben/unten."
 
 #: ../etc/cfg_query.lua:74
 msgid "Close the query and execute bound action."
-msgstr "Schliesse die Anfrage und führe die daran gebundene Aktion aus."
+msgstr "Schließe die Anfrage und führe die daran gebundene Aktion aus."
 
 #
 #: ../etc/cfg_bindings.lua:31
@@ -1442,7 +1442,7 @@ msgid ""
 "Switch to n:th object (workspace, full screen client window) within current "
 "screen."
 msgstr ""
-"Wechsle zum n'ten Objekt (Arbeitsbereich,Vollbild Fenster) im aktuellen Arbeitsbereich."
+"Wechsle zum n'ten Objekt (Arbeitsbereich, Vollbild Fenster) im aktuellen Arbeitsbereich."
 
 #: ../etc/cfg_bindings.lua:64
 msgid "Display the window list menu."
@@ -1454,7 +1454,7 @@ msgstr "Wechsle in den Schattenmodus"
 
 #: ../mod_query/mod_query.lua:393
 msgid "Exit Ion/Shutdown session (y/n)?"
-msgstr "Beende Ion/Schliesse Sitzung (y/n)?"
+msgstr "Beende Ion/Schließe Sitzung (y/n)?"
 
 #: ../etc/cfg_floatws.lua:15
 msgid "Raise/lower active frame."
@@ -1466,7 +1466,7 @@ msgstr "Sichere Aussehen in %s?"
 
 #: ../etc/cfg_bindings.lua:82
 msgid "Close current object."
-msgstr "Schliesse aktuelles Objekt."
+msgstr "Schließe aktuelles Objekt."
 
 #
 #: ../etc/cfg_query.lua:64
@@ -1479,7 +1479,7 @@ msgstr "Verknüpfe markierte Objekte mit diesem Frame."
 
 #: ../etc/cfg_ionws.lua:57
 msgid "Floating split"
-msgstr "Fliessende Teilung"
+msgstr "Fließende Teilung"
 
 #: ../mod_query/mod_query.lua:768
 msgid "%s menu:"
@@ -1512,7 +1512,7 @@ msgstr ""
 "  F2 -> xterm\n"
 "  F11 -> Neustart\n"
 "  F12 -> Beenden\n"
-"  Mod1+C -> Schliessen\n"
+"  Mod1+C -> Schließen\n"
 "  Mod1+K P/N -> nächstes/vorheriges Frame\n"
 
 #
@@ -1629,7 +1629,7 @@ msgstr "Aktualisiere Liste"
 
 #: ../etc/cfg_floatws.lua:9
 msgid "Circulate focus and raise the newly focused frame."
-msgstr "Rückwärts laufender Fokus und zeige fokusiertes Frame."
+msgstr "Rückwärts laufender Fokus und zeige fokussiertes Frame."
 
 #
 #: ../etc/cfg_menus.lua:21
