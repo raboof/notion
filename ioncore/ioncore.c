@@ -103,11 +103,8 @@ static bool check_encoding()
     langi=nl_langinfo(CODESET);
     ctype=setlocale(LC_CTYPE, NULL);
     
-    if(langi==NULL || ctype==NULL){
-        warn("Cannot verify locale encoding setting integrity "
-             "(LC_CTYPE=%s, nl_langinfo(CODESET)=%s).", ctype, langi);
-        return FALSE;
-    }
+    if(langi==NULL || ctype==NULL)
+        goto integr_err;
 
     if(strcmp(ctype, "C")==0 || strcmp(ctype, "POSIX")==0)
         return TRUE;
@@ -137,11 +134,8 @@ static bool check_encoding()
         }
     }
     
-    if(!enc_check_ok){
-        warn("Encoding in LC_CTYPE (%s) and encoding reported by "
-             "nl_langinfo(CODESET) (%s) do not match. ", ctype, langi);
-        return FALSE;
-    }
+    if(!enc_check_ok)
+        goto integr_err;
         
     if(strcmp(langi, "UTF-8")==0 || strcmp(langi, "UTF8")==0){
         ioncore_g.enc_sb=FALSE;
@@ -174,6 +168,14 @@ static bool check_encoding()
     ioncore_g.use_mb=TRUE;
 
     return TRUE;
+    
+integr_err:
+    warn("Cannot verify locale encoding setting integrity "
+         "(LC_CTYPE=%s, nl_langinfo(CODESET)=%s). "
+         "The LC_CTYPE environment variable should be of the form "
+         "language_REGION.encoding (e.g. en_GB.UTF-8), and encoding "
+         "should match the nl_langinfo value above.", ctype, langi);
+    return FALSE;
 }
 
 
