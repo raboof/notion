@@ -1,7 +1,7 @@
 #!/bin/sh
 
 tocompl=""
-section="[0-9]"
+section=""
 beg=""
 action=""
 usercache=""
@@ -24,7 +24,7 @@ $2
 EOF
         if test "$tocompl" = ""; then
             tocompl="$section"
-            section="[0-9]"
+            section=""
         else
             beg="$section "
         fi
@@ -53,6 +53,16 @@ filtersect() {
     sed 's:^\(.*\)\.[0-9].*$:\1:p; d'
 }
 
+grepper() {
+    if test "$tocompl" = "" -a "$section" = ""; then
+        cat
+    else
+        if test "$section" = ""; then
+            section="[0-9]"
+        fi
+        grep "^$tocompl.*\.$section"
+    fi
+}
 
 scan() {
     if test "x$ION_MC_MANPATH" != "x"; then
@@ -96,9 +106,9 @@ case "$action" in
         echo "$beg"
         
         if test "x$cachefile" != x; then
-            grep "^$tocompl.*\.$section" "$cachefile" | filtersect
+            grepper < "$cachefile" | filtersect
         else
-            scan | grep "^$tocompl.*\.$section" | filtersect
+            scan | grepper | filtersect
         fi
         ;;
     mkusercache)
