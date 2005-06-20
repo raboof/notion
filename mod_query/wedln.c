@@ -697,6 +697,7 @@ static void wedln_update_handler(WEdln *wedln, int from, int flags)
     if(update_nocompl==0 &&
        mod_query_config.autoshowcompl && 
        flags&EDLN_UPDATE_CHANGED){
+        wedln->compl_current_id=-1; /* invalidate */
         if(wedln->autoshowcompl_timer==NULL)
             wedln->autoshowcompl_timer=create_timer();
         if(wedln->autoshowcompl_timer!=NULL){
