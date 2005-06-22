@@ -143,6 +143,9 @@ int main(int argc, char*argv[])
     int opt;
     bool quiet=FALSE;
 
+    if(setlocale(LC_ALL, "")==NULL)
+        warn("setlocale() call failed.");
+
     configtab=extl_table_none();
     
     libtu_init(argv[0]);
