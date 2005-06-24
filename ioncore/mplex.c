@@ -559,8 +559,10 @@ static bool mplex_do_node_display(WMPlex *mplex, WLListNode *node,
          * window. 'netscape -remote' will not work at all if there are
          * no visible netscape windows.
          */
-        if(OBJ_IS(sub, WClientWin))
+        /*if(OBJ_IS(sub, WClientWin))*/{
+            /* Lower everytyhing to put l1 stuff under l2 stuff */
             region_lower(sub);
+        }
         
         /* This call should be unnecessary... */
         mplex_managed_activated(mplex, sub);
