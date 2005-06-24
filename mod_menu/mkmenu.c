@@ -49,7 +49,9 @@ WMenu *mod_menu_do_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
     return (WMenu*)mplex_attach_hnd(mplex,
                                     (WRegionAttachHandler*)create_menu,
                                     (void*)&fnp, 
-                                    MPLEX_ATTACH_L2|MPLEX_ATTACH_SWITCHTO);
+                                    (MPLEX_ATTACH_SWITCHTO|
+                                     MPLEX_ATTACH_L2|
+                                     MPLEX_ATTACH_L2_SEMIMODAL));
 }
 
 

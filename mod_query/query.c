@@ -41,6 +41,8 @@ WEdln *mod_query_do_query(WMPlex *mplex, const char *prompt, const char *dflt,
     return (WEdln*)mplex_attach_hnd(mplex,
                                     (WRegionAttachHandler*)create_wedln,
                                     (void*)&fnp, 
-                                    MPLEX_ATTACH_L2|MPLEX_ATTACH_SWITCHTO);
+                                    (MPLEX_ATTACH_SWITCHTO|
+                                     MPLEX_ATTACH_L2|
+                                     MPLEX_ATTACH_L2_SEMIMODAL));
 }
 

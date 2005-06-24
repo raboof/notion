@@ -55,6 +55,8 @@ WMessage *mod_query_message(WMPlex *mplex, const char *p)
     return (WMessage*)mplex_attach_hnd(mplex, 
                                        (WRegionAttachHandler*)create_wmsg,
                                        (void*)p,
-                                       MPLEX_ATTACH_L2|MPLEX_ATTACH_SWITCHTO);
+                                       (MPLEX_ATTACH_SWITCHTO|
+                                        MPLEX_ATTACH_L2|
+                                        MPLEX_ATTACH_L2_SEMIMODAL));
 }
 

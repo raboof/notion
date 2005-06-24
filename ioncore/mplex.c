@@ -41,6 +41,10 @@
 #include "names.h"
 
 
+#define SUBS_MAY_BE_MAPPED(MPLEX) \
+    (REGION_IS_MAPPED(MPLEX) && !MPLEX_MGD_UNVIEWABLE(MPLEX))
+
+
 /*{{{ Destroy/create mplex */
 
 
@@ -497,14 +501,31 @@ void mplex_managed_activated(WMPlex *mplex, WRegion *reg)
 /*{{{ Managed region switching */
 
 
-static bool mplex_l2_passive(WMPlex *mplex)
+static bool mplex_l2_try_make_passive(WMPlex *mplex)
 {
     WLListNode *node;
+    bool tohide=FALSE;
+    
     FOR_ALL_NODES_ON_LLIST(node, mplex->l2_list){
-        if((node->flags&(LLIST_L2_HIDDEN|LLIST_L2_PASSIVE))==0)
-            return FALSE;
+        if((node->flags&(LLIST_L2_HIDDEN|LLIST_L2_PASSIVE))==0){
+            if(node->flags&LLIST_L2_SEMIMODAL)
+                return FALSE;
+            tohide=TRUE;
+        }
     }
      
+    if(tohide){
+        FOR_ALL_NODES_ON_LLIST(node, mplex->l2_list){
+            if((node->flags&(LLIST_L2_HIDDEN|LLIST_L2_PASSIVE))==0){
+                node->flags|=LLIST_L2_HIDDEN;
+                if(SUBS_MAY_BE_MAPPED(mplex))
+                    region_unmap(node->reg);
+                if(mplex->l2_current==node)
+                    mplex->l2_current=NULL;
+            }
+        }
+    }
+    
     return TRUE;
 }
 
@@ -522,8 +543,9 @@ static bool mplex_do_node_display(WMPlex *mplex, WLListNode *node,
         WRegion *stdisp=(WRegion*)(mplex->stdispinfo.regwatch.obj);
 
         if(node==mplex->l1_current)
-            return mplex_l2_passive(mplex);
+            return mplex_l2_try_make_passive(mplex);
         
+        /* Move stdisp */
         if(OBJ_IS(sub, WGenWS)){
             if(stdisp!=NULL){
                 WRegion *mgr=REGION_MANAGER(stdisp);
@@ -542,7 +564,7 @@ static bool mplex_do_node_display(WMPlex *mplex, WLListNode *node,
         }
     }
     
-    if(REGION_IS_MAPPED(mplex) && !MPLEX_MGD_UNVIEWABLE(mplex))
+    if(SUBS_MAY_BE_MAPPED(mplex))
         region_map(sub);
     else
         region_unmap(sub);
@@ -568,7 +590,7 @@ static bool mplex_do_node_display(WMPlex *mplex, WLListNode *node,
         mplex_managed_activated(mplex, sub);
 
         mplex_managed_changed(mplex, MPLEX_CHANGE_SWITCHONLY, TRUE, sub);
-        return mplex_l2_passive(mplex);
+        return mplex_l2_try_make_passive(mplex);
     }else{
         mplex_move_phs_before(mplex, node);
         llist_unlink(&(mplex->l2_list), node);
@@ -819,8 +841,11 @@ WLListNode *mplex_do_attach_after(WMPlex *mplex,
     WFitParams fp;
     bool sw=param->flags&MPLEX_ATTACH_SWITCHTO;
     bool l2=param->flags&MPLEX_ATTACH_L2;
+    bool semimodal=param->flags&MPLEX_ATTACH_L2_SEMIMODAL;
     WLListNode *node;
     
+    assert(!(semimodal && param->flags&MPLEX_ATTACH_L2_HIDDEN));
+
     mplex_managed_geom(mplex, &(fp.g));
     if(l2 && param->flags&MPLEX_ATTACH_L2_GEOM){
         WRectangle tmp=param->l2geom;
@@ -846,7 +871,7 @@ WLListNode *mplex_do_attach_after(WMPlex *mplex,
     }
     
     node->reg=reg;
-    node->flags=(l2 ? LLIST_L2 : 0);
+    node->flags=(l2 ? LLIST_L2 : 0) | (semimodal ? LLIST_L2_SEMIMODAL : 0);
     node->phs=NULL;
     
     if(l2){
@@ -1505,7 +1530,13 @@ ExtlTab mplex_get_configuration(WMPlex *mplex)
     }
     
     FOR_ALL_NODES_ON_LLIST(node, mplex->l2_list){
-        ExtlTab st=region_get_configuration(node->reg);
+        ExtlTab st;
+        
+        /* Don't save menus, queries and such even if they'd support it. */
+        if(node->flags&LLIST_L2_SEMIMODAL)
+            continue;
+        
+        st=region_get_configuration(node->reg);
         if(st!=extl_table_none()){
             extl_table_sets_i(st, "layer", 2);
             if(node==mplex->l2_current){
