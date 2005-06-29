@@ -501,14 +501,14 @@ void mplex_managed_activated(WMPlex *mplex, WRegion *reg)
 /*{{{ Managed region switching */
 
 
-static bool mplex_l2_try_make_passive(WMPlex *mplex)
+static bool mplex_l2_try_make_passive(WMPlex *mplex, bool nohide)
 {
     WLListNode *node;
     bool tohide=FALSE;
     
     FOR_ALL_NODES_ON_LLIST(node, mplex->l2_list){
         if((node->flags&(LLIST_L2_HIDDEN|LLIST_L2_PASSIVE))==0){
-            if(node->flags&LLIST_L2_SEMIMODAL)
+            if(node->flags&LLIST_L2_SEMIMODAL || nohide)
                 return FALSE;
             tohide=TRUE;
         }
@@ -531,7 +531,7 @@ static bool mplex_l2_try_make_passive(WMPlex *mplex)
 
 
 static bool mplex_do_node_display(WMPlex *mplex, WLListNode *node,
-                                  bool call_changed)
+                                  bool call_changed, bool nohide)
 {
     WRegion *sub=node->reg;
     bool l2=node->flags&LLIST_L2;
@@ -543,7 +543,7 @@ static bool mplex_do_node_display(WMPlex *mplex, WLListNode *node,
         WRegion *stdisp=(WRegion*)(mplex->stdispinfo.regwatch.obj);
 
         if(node==mplex->l1_current)
-            return mplex_l2_try_make_passive(mplex);
+            return mplex_l2_try_make_passive(mplex, nohide);
         
         /* Move stdisp */
         if(OBJ_IS(sub, WGenWS)){
@@ -590,7 +590,7 @@ static bool mplex_do_node_display(WMPlex *mplex, WLListNode *node,
         mplex_managed_activated(mplex, sub);
 
         mplex_managed_changed(mplex, MPLEX_CHANGE_SWITCHONLY, TRUE, sub);
-        return mplex_l2_try_make_passive(mplex);
+        return mplex_l2_try_make_passive(mplex, nohide);
     }else{
         mplex_move_phs_before(mplex, node);
         llist_unlink(&(mplex->l2_list), node);
@@ -608,9 +608,9 @@ static bool mplex_do_node_display(WMPlex *mplex, WLListNode *node,
 
 
 static bool mplex_do_node_goto(WMPlex *mplex, WLListNode *node,
-                               bool call_changed, int flags)
+                               bool call_changed, bool nohide, int flags)
 {
-    if(!mplex_do_node_display(mplex, node, call_changed))
+    if(!mplex_do_node_display(mplex, node, call_changed, nohide))
         return FALSE;
     
     if(flags&REGION_GOTO_FOCUS){
@@ -623,22 +623,23 @@ static bool mplex_do_node_goto(WMPlex *mplex, WLListNode *node,
 
 
 static bool mplex_do_node_goto_sw(WMPlex *mplex, WLListNode *node,
-                                  bool call_changed)
+                                  bool call_changed, bool nohide)
 {
     bool mcf=region_may_control_focus((WRegion*)mplex);
     int flags=(mcf ? REGION_GOTO_FOCUS : 0)|REGION_GOTO_NOWARP;
-    return mplex_do_node_goto(mplex, node, call_changed, flags);
+    return mplex_do_node_goto(mplex, node, call_changed, nohide, flags);
 }
 
 
 bool mplex_managed_goto(WMPlex *mplex, WRegion *sub, int flags)
 {
     WLListNode *node=mplex_find_node(mplex, sub);
-    
+    bool nohide=(flags&REGION_GOTO_ENTERWINDOW);
+
     if(node==NULL)
         return FALSE;
     else
-        return mplex_do_node_goto(mplex, node, TRUE, flags);
+        return mplex_do_node_goto(mplex, node, TRUE, nohide, flags);
 }
 
 
@@ -662,8 +663,9 @@ static void do_switch(WMPlex *mplex, WLListNode *node)
 {
     if(node!=NULL){
         bool mcf=region_may_control_focus((WRegion*)mplex);
-        region_managed_goto((WRegion*)mplex, node->reg,
-                            (mcf ? REGION_GOTO_FOCUS : 0));
+
+        mplex_do_node_goto(mplex, node, TRUE, TRUE, 
+                           (mcf ? REGION_GOTO_FOCUS : 0));
     }
 }
 
@@ -733,7 +735,7 @@ bool mplex_l2_set_hidden(WMPlex *mplex, WRegion *reg, bool sp)
             mplex_refocus(mplex, TRUE);
     }else if(hidden && !nhidden){
         bool psv=node->flags&LLIST_L2_PASSIVE;
-        mplex_do_node_goto(mplex, node, TRUE,
+        mplex_do_node_goto(mplex, node, TRUE, TRUE,
                            (mcf && !psv ? REGION_GOTO_FOCUS : 0));
     }
     
@@ -897,9 +899,9 @@ WLListNode *mplex_do_attach_after(WMPlex *mplex,
     }
     
     if(sw)
-        mplex_do_node_goto_sw(mplex, node, FALSE);
+        mplex_do_node_goto_sw(mplex, node, FALSE, TRUE);
     else if(l2 && !(node->flags&LLIST_L2_HIDDEN))
-        mplex_do_node_display(mplex, node, FALSE);
+        mplex_do_node_display(mplex, node, FALSE, TRUE);
     else
         region_unmap(reg);
 
@@ -1162,7 +1164,7 @@ void mplex_managed_remove(WMPlex *mplex, WRegion *sub)
         return;
     
     if(next!=NULL && sw)
-        mplex_do_node_goto_sw(mplex, next, FALSE);
+        mplex_do_node_goto_sw(mplex, next, FALSE, TRUE);
     else if(l2 && region_may_control_focus((WRegion*)mplex))
         region_warp((WRegion*)mplex);
     
