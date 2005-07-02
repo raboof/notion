@@ -25,9 +25,8 @@ extern pid_t mainloop_do_spawn(const char *cmd,
                               int *infd, int *outfd, int *errfd);
 extern pid_t mainloop_spawn(const char *cmd);
 
-extern pid_t mainloop_popen_bgread(const char *cmd, ExtlFn handler,
-                                   void (*initenv)(void *p), void *p);
-extern pid_t mainloop_spawn_merr(const char *cmd, ExtlFn handler,
-                                 void (*initenv)(void *p), void *p);
+extern pid_t mainloop_popen_bgread(const char *cmd, 
+                                   void (*initenv)(void *p), void *p,
+                                   ExtlFn handler, ExtlFn errhandler);
 
 #endif /* ION_LIBMAINLOOP_EXEC_H */

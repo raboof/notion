@@ -257,41 +257,37 @@ static bool setup_bgread(ExtlFn handler, int fd)
 }
 
 
-pid_t mainloop_popen_bgread(const char *cmd, ExtlFn handler,
-                            void (*initenv)(void *p), void *p)
+pid_t mainloop_popen_bgread(const char *cmd, 
+                            void (*initenv)(void *p), void *p,
+                            ExtlFn handler, ExtlFn errhandler)
 {
-    pid_t pid;
-    int fd;
+    pid_t pid=-1;
+    int fd=-1, errfd=-1;
+    ExtlFn none=extl_fn_none();
     
-    pid=mainloop_do_spawn(cmd, initenv, p, NULL, &fd, NULL);
+    pid=mainloop_do_spawn(cmd, initenv, p, NULL, 
+                          (handler!=none ? &fd : NULL),
+                          (errhandler!=none ? &errfd : NULL));
     
     if(pid>0){
-        if(!setup_bgread(handler, fd)){
-            close(fd);
-            return -1;
+        if(handler!=none){
+            if(!setup_bgread(handler, fd))
+                goto err;
+        }
+        if(errhandler!=extl_fn_none()){
+            if(!setup_bgread(errhandler, errfd))
+                goto err;
         }
     }
     
     return pid;
-}
 
-
-pid_t mainloop_spawn_merr(const char *cmd, ExtlFn handler,
-                          void (*initenv)(void *p), void *p)
-{
-    pid_t pid;
-    int fd;
-    
-    pid=mainloop_do_spawn(cmd, initenv, p, NULL, NULL, &fd);
-    
-    if(pid>0){
-        if(!setup_bgread(handler, fd)){
-            close(fd);
-            return -1;
-        }
-    }
-    
-    return pid;
+err:
+    if(fd>=0)
+        close(fd);
+    if(errfd>=0)
+        close(errfd);
+    return -1;
 }
 
 

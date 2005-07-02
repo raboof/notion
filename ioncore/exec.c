@@ -91,19 +91,15 @@ static void setup_exec(void *p_)
 
 EXTL_EXPORT
 int ioncore_do_exec_rw(WRootWin *rw, const char *cmd, const char *wd,
-                       ExtlFn merr)
+                       ExtlFn errh)
 {
     ExecP p;
     
     p.rw=rw;
     p.wd=wd;
     
-    if(merr!=extl_fn_none()){
-        return mainloop_spawn_merr(cmd, merr, setup_exec, (void*)&p);
-    }else{
-        return mainloop_do_spawn(cmd, setup_exec, (void*)&p, 
-                                 NULL, NULL, NULL);
-    }
+    return mainloop_popen_bgread(cmd, setup_exec, (void*)&p, 
+                                 extl_fn_none(), errh);
 }
 
 
@@ -128,14 +124,14 @@ int ioncore_exec(const char *cmd)
  */
 EXTL_SAFE
 EXTL_EXPORT
-int ioncore_popen_bgread(const char *cmd, ExtlFn handler)
+int ioncore_popen_bgread(const char *cmd, ExtlFn h, ExtlFn errh)
 {
     ExecP p;
     
     p.rw=NULL;
     p.wd=NULL;
     
-    return mainloop_popen_bgread(cmd, handler, setup_exec, (void*)&p);
+    return mainloop_popen_bgread(cmd, setup_exec, (void*)&p, h, errh);
 }
 
 

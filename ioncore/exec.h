@@ -28,7 +28,7 @@ extern void ioncore_do_exec(const char *cmd);
 extern bool ioncore_exec_on_rootwin(WRootWin *rootwin, const char *cmd);
 extern bool ioncore_exec(const char *cmd);
 extern void ioncore_setup_environ(int scr);
-extern bool ioncore_popen_bgread(const char *cmd, ExtlFn handler);
+extern bool ioncore_popen_bgread(const char *cmd, ExtlFn h, ExtlFn errh);
 
 extern bool ioncore_set_smhook(void (*fn)(int what));
 
