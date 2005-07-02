@@ -19,16 +19,26 @@ local defaults={
     files = {}
 }
 
+local settings=table.join(statusd.get_config(mon), defaults)
+
 local function TR(s, ...)
     return string.format(statusd.gettext(s), unpack(arg))
 end
 
-local settings=table.join(statusd.get_config(mon), defaults)
+local function check_spool()
+    if not settings.mbox then
+        statusd.warn(TR("MAIL environment variable not set "..
+                        "and no spool given."))
+    end
+end
+
 if not settings.files["spool"] then
+    check_spool()
     settings.files["spool"] = settings.mbox
 elseif not(settings.files["spool"] == mbox) then
     statusd.warn(TR("%s.mbox does not match %s.files['spool']; using %s.mbox",
 		    mon, mon, mon))
+    check_spool()
     settings.files["spool"] = settings.mbox
 end
 
@@ -90,7 +100,9 @@ init_timestamps()
 local function update_mail()
     local failed
     for key, mbox in settings.files do
-        assert(mbox)
+        if not mbox then
+            error(TR(key.." not set"))
+        end
     
         local old_tm=mail_timestamps[key]
         mail_timestamps[key]=statusd.last_modified(mbox)
