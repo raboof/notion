@@ -58,6 +58,23 @@ static StringIntMap frame_areas[]={
 /*{{{ Exports */
 
 
+static WScratchpad *create(WScreen *scr, int flags)
+{
+    WScratchpad *sp;
+    
+    sp=(WScratchpad*)mplex_attach_hnd((WMPlex*)scr,
+                                      (WRegionAttachHandler*)
+                                      create_scratchpad, NULL,
+                                      (MPLEX_ATTACH_L2|flags));
+    if(sp==NULL){
+        warn(TR("Unable to create scratchpad for screen %d."),
+             screen_id(scr));
+    }
+    
+    return sp;
+}
+
+
 /*EXTL_DOC
  * Change displayed status of some scratchpad on \var{mplex} if one is 
  * found. The parameter \var{how} is one of (set/unset/toggle).
@@ -67,13 +84,24 @@ bool mod_sp_set_shown_on(WMPlex *mplex, const char *how)
 {
     int i;
     int setpar=libtu_setparam_invert(libtu_string_to_setparam(how));
+    WScratchpad *sp;
+    WScreen *scr;
     
     for(i=mplex_lcount(mplex, 2)-1; i>=0; i--){
-        WScratchpad *sp=OBJ_CAST(mplex_lnth(mplex, 2, i), WScratchpad);
+        sp=OBJ_CAST(mplex_lnth(mplex, 2, i), WScratchpad);
         if(sp!=NULL)
             return mplex_l2_set_hidden(mplex, (WRegion*)sp, setpar);
     }
    
+    /* No scratchpad found; create one if a screen */
+    
+    scr=OBJ_CAST(mplex, WScreen);
+    if(scr!=NULL){
+        sp=create(scr, 0);
+        if(sp!=NULL)
+            return TRUE;
+    }
+    
     return FALSE;
 }
 
@@ -113,16 +141,6 @@ void mod_sp_deinit()
 }
 
 
-static WScratchpad *create(WScreen *scr)
-{
-    return (WScratchpad*)mplex_attach_hnd((WMPlex*)scr,
-                                          (WRegionAttachHandler*)
-                                          create_scratchpad, NULL,
-                                          (MPLEX_ATTACH_L2|
-                                           MPLEX_ATTACH_L2_HIDDEN));
-}
-
-
 static void check_and_create()
 {
     WScreen *scr;
@@ -142,13 +160,8 @@ static void check_and_create()
                 break;
         }
         
-        if(sp==NULL){
-            sp=create(scr);
-            if(sp==NULL){
-                warn(TR("Unable to create scratchpad for screen %d."),
-                     screen_id(scr));
-            }
-        }
+        if(sp==NULL)
+            sp=create(scr, MPLEX_ATTACH_L2_HIDDEN);
     }
 }
     
