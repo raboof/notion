@@ -27,13 +27,13 @@ int statusd_exec(const char *cmd)
 
 /*EXTL_DOC
  * Run \var{cmd} with a read pipe connected to its stdout.
- * When data is received through the pipe, \var{handler} is called
+ * When data is received through the pipe, \var{h} is called
  * with that data.
  */
 EXTL_SAFE
 EXTL_EXPORT
-int statusd_popen_bgread(const char *cmd, ExtlFn handler)
+int statusd_popen_bgread(const char *cmd, ExtlFn h, ExtlFn errh)
 {
-    return mainloop_popen_bgread(cmd, handler, NULL, NULL);
+    return mainloop_popen_bgread(cmd, NULL, NULL, h, errh);
 }
 
