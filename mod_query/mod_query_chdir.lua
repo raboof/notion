@@ -11,7 +11,10 @@
 
 local function ws_chdir(mplex, params)
     ws=assert(ioncore.find_manager(mplex, "WGenWS"))
-    ioncore.chdir_for(ws, params[1] or "")
+    local ok, err=ioncore.chdir_for(ws, params[1] or "")
+    if not ok then
+        mod_query.warn(mplex, err)
+    end
 end
 
 local function ws_showdir(mplex, params)

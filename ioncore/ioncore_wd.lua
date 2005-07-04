@@ -11,6 +11,34 @@
 
 local savefile="saved_wd"
 local dirs={}
+local px
+
+if pcall(function() return require('posix') end) then
+    px=posix
+end
+
+local function checkdir(d)
+    if not px then
+        return true
+    else
+        local t, err=px.stat(d, "type")
+        if not t then
+            return nil, err
+        elseif t=="link" then
+            local d2, err=px.readlink(d)
+            if not d2 then
+                return nil, err
+            else
+                print('follow')
+                return checkdir(d2)
+            end
+        elseif t=="directory" then
+            return true
+        else
+            return TR("Not a directory.")
+        end
+    end
+end
 
 local function regtreepath_i(reg)
     local function f(s, v)
@@ -27,10 +55,15 @@ end
 -- Change default working directory for new programs started in \var{reg}.
 function ioncore.chdir_for(reg, dir)
     assert(type(dir)=="string")
-    if dir=="" then
+    if dir=="" or dir==nil then
         dirs[reg]=nil
-    else
-        dirs[reg]=dir
+        return true
+    else 
+        local ok, err=checkdir(dir)
+        if ok then
+            dirs[reg]=dir
+        end
+        return ok, err
     end
 end
 
@@ -100,7 +133,12 @@ local function load_config()
         for nm, d in d do
             local r=ioncore.lookup_region(nm)
             if r then
-                dirs[r]=d
+                local ok, err=checkdir(d)
+                if ok then
+                    dirs[r]=d
+                else
+                    warn(err)
+                end
             end
         end
     end
