@@ -24,7 +24,8 @@ local mod_query=_G["mod_query"]
 assert(mod_query)
 
 
-local DIE_TIMEOUT=30*1000 -- 30 seconds
+local DIE_TIMEOUT_ERRORCODE=10 -- 10 seconds
+local DIE_TIMEOUT_NO_ERRORCODE=2 -- 2 seconds
 
 
 -- Generic helper functions {{{
@@ -74,19 +75,42 @@ end
 
 local errdata={}
 
---[[
-local function chld_handler(pid)
+local function maybe_finish(pid)
     local t=errdata[pid]
-    if t then
+
+    if t and t.closed and t.dietime then
         errdata[pid]=nil
-        if t.errs then
+        local tmd=os.difftime(t.dietime, t.starttime)
+        --if tmd<DIE_TIMEOUT_ERRORCODE and t.signaled then
+        --    local msg=TR("Program received signal ")..t.termsig.."\n"
+        --    mod_query.warn(t.mplex, msg..(t.errs or ""))
+        --else
+        if ((tmd<DIE_TIMEOUT_ERRORCODE and (t.hadcode or t.signaled)) or
+                (tmd<DIE_TIMEOUT_NO_ERRORCODE)) and t.errs then
             mod_query.warn(t.mplex, t.errs)
         end
     end
 end
 
+
+local badsig_={4, 5, 6, 7, 8, 11}
+local badsig={}
+for _, v in badsig_ do 
+    badsig[v]=true 
+end
+
+local function chld_handler(p)
+    local t=errdata[p.pid]
+    if t then
+        t.dietime=os.time()
+        t.signaled=(p.signaled and badsig[p.termsig])
+        t.termsig=p.termsig
+        t.hadcode=(p.exited and p.exitstatus~=0)
+        maybe_finish(pid)
+    end
+end
+
 ioncore.get_hook("ioncore_sigchld_hook"):add(chld_handler)
-]]
 
 function mod_query.exec_on_merr(mplex, cmd)
     local pid
@@ -97,9 +121,9 @@ function mod_query.exec_on_merr(mplex, cmd)
             if t then
                 if str then
                     t.errs=(t.errs or "")..str
-                elseif t.errs then
-                    errdata[pid]=nil
-                    mod_query.warn(t.mplex, t.errs)
+                else
+                    t.closed=true
+                    maybe_finish(pid)
                 end
             end
         end
@@ -116,9 +140,11 @@ function mod_query.exec_on_merr(mplex, cmd)
     end
 
     local tmr=ioncore.create_timer();
-    tmr:set(DIE_TIMEOUT, timeout)
+    local tmd=math.max(DIE_TIMEOUT_NO_ERRORCODE, DIE_TIMEOUT_ERRORCODE)
+    local now=os.time()  
+    tmr:set(tmd*1000, timeout)
     
-    errdata[pid]={tmr=tmr, mplex=mplex}
+    errdata[pid]={tmr=tmr, mplex=mplex, starttime=now}
 end
 
 

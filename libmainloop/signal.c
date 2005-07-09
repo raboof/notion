@@ -84,16 +84,48 @@ static void do_timer_set()
 }
 
 
-static bool mrsh_chld(void (*fn)(pid_t), pid_t *param)
+typedef struct{
+    pid_t pid;
+    int code;
+} ChldParams;
+
+
+static bool mrsh_chld(void (*fn)(pid_t, int), ChldParams *p)
 {
-    fn(*param);
+    fn(p->pid, p->code);
     return TRUE;
 }
 
 
-static bool mrsh_chld_extl(ExtlFn fn, pid_t *param)
+static bool mrsh_chld_extl(ExtlFn fn, ChldParams *p)
 {
-    return extl_call(fn, "i", NULL, (int)*param);
+    ExtlTab t=extl_create_table();
+    bool ret;
+
+    extl_table_sets_i(t, "pid", (int)p->pid);
+    
+    if(WIFEXITED(p->code)){
+        extl_table_sets_b(t, "exited", TRUE);
+        extl_table_sets_i(t, "exitstatus", WEXITSTATUS(p->code));
+    }
+    if(WIFSIGNALED(p->code)){
+        extl_table_sets_b(t, "signaled", TRUE);
+        extl_table_sets_i(t, "termsig", WTERMSIG(p->code));
+        extl_table_sets_i(t, "coredump", WCOREDUMP(p->code));
+    }
+    if(WIFSTOPPED(p->code)){
+        extl_table_sets_b(t, "stopped", TRUE);
+        extl_table_sets_i(t, "stopsig", WSTOPSIG(p->code));
+    }
+    /*if(WIFCONTINUED(p->code)){
+        extl_table_sets_b(t, "continued", TRUE);
+    }*/
+    
+    ret=extl_call(fn, "t", NULL, t);
+    
+    extl_unref_table(t);
+    
+    return ret;
 }
 
 
@@ -105,11 +137,12 @@ bool mainloop_check_signals()
 
 #if 1    
     if(wait_sig!=0){
-        pid_t pid;
+        ChldParams p;
         wait_sig=0;
-        while((pid=waitpid(-1, NULL, WNOHANG|WUNTRACED))>0){
-            if(mainloop_sigchld_hook!=NULL){
-                hook_call(mainloop_sigchld_hook, &pid, 
+        while((p.pid=waitpid(-1, &p.code, WNOHANG|WUNTRACED))>0){
+            if(mainloop_sigchld_hook!=NULL &&
+               (WIFEXITED(p.code) || WIFSIGNALED(p.code))){
+                hook_call(mainloop_sigchld_hook, &p, 
                           (WHookMarshall*)mrsh_chld,
                           (WHookMarshallExtl*)mrsh_chld_extl);
             }
