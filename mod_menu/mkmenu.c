@@ -31,7 +31,7 @@
  */
 EXTL_EXPORT
 WMenu *mod_menu_do_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab, 
-                        bool big_mode, int initial)
+                        ExtlTab param)
 {
     WMenuCreateParams fnp;
 
@@ -39,8 +39,9 @@ WMenu *mod_menu_do_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
     fnp.tab=tab;
     fnp.pmenu_mode=FALSE;
     fnp.submenu_mode=FALSE;
-    fnp.big_mode=big_mode;
-    fnp.initial=initial;
+    fnp.big_mode=extl_table_is_bool_set(param, "big");
+    fnp.initial=0;
+    extl_table_gets_i(param, "initial", &(fnp.initial));
     fnp.refg.x=0;
     fnp.refg.y=0;
     fnp.refg.w=0;

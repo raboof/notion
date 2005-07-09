@@ -17,7 +17,7 @@
 #include "menu.h"
 
 extern WMenu *mod_menu_do_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab, 
-                               bool big_mode, int initial);
+                               ExtlTab param);
 extern WMenu *mod_menu_do_pmenu(WWindow *where, ExtlFn handler, ExtlTab tab);
 
 #endif /* ION_MOD_MENU_MKMENU_H */

@@ -50,25 +50,31 @@ static bool grabmenu_handler(WRegion *reg, XEvent *xev)
 /*--lowlevel routine not to be called by the user--*/
 EXTL_EXPORT
 WMenu *mod_menu_do_grabmenu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
-                            bool big_mode, const char *key, int initial)
+                            ExtlTab param)
 {
     WMenuCreateParams fnp;
     uint mod=0, ksb=0;
     WMenu *menu;
-
-    if(key==NULL)
+    char *key=NULL;
+    
+    if(!extl_table_gets_s(param, "key", &key))
         return NULL;
     
-    if(!ioncore_parse_keybut(key, &mod, &ksb, FALSE, TRUE))
+    if(!ioncore_parse_keybut(key, &mod, &ksb, FALSE, TRUE)){
+        free(key);
         return NULL;
+    }
+
+    free(key);
 
     fnp.handler=handler;
     fnp.tab=tab;
     fnp.pmenu_mode=FALSE;
     fnp.submenu_mode=FALSE;
-    fnp.big_mode=big_mode;
-    fnp.initial=initial;
-    
+    fnp.big_mode=extl_table_is_bool_set(param, "big");
+    fnp.initial=0;
+    extl_table_gets_i(param, "initial", &(fnp.initial));
+
     menu=(WMenu*)mplex_attach_hnd(mplex,
                                   (WRegionAttachHandler*)create_menu,
                                   (void*)&fnp, 

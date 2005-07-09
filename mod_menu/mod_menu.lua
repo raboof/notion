@@ -129,33 +129,36 @@ end
 -- called from a binding handler, \var{sub} should be set to
 -- the second argument of to the binding handler (\var{_sub})
 -- so that the menu handler will get the same parameters as the
--- binding handler. The initial menu entry to highlight can be
--- specified in \var{initial} as an integer starting from 1.
-function mod_menu.menu(mplex, sub, menu_or_name, initial) 
+-- binding handler. Extra options can be passed in the table
+-- \var{param}. The initial entry can be specified as the field
+-- \var{initial} as an integer starting from 1. Menus can be made
+-- to use a bigger style by setting the field \var{big} to \code{true}.
+function mod_menu.menu(mplex, sub, menu_or_name, param) 
    local function menu_stdmenu(m, s, menu)
-      return mod_menu.do_menu(m, s, menu, false, initial or 0)
+      return mod_menu.do_menu(m, s, menu, param)
    end
-   return menu_(mplex, sub, menu_or_name, menu_stdmenu, true, initial)
+   return menu_(mplex, sub, menu_or_name, menu_stdmenu, true)
 end
 
---DOC
--- This function is similar to \fnref{mod_menu.menu}, but
--- a style with possibly bigger font and menu entries is used.
+-- Compatibility
 function mod_menu.bigmenu(mplex, sub, menu_or_name, initial) 
     local function menu_bigmenu(m, s, menu)
-        return mod_menu.do_menu(m, s, menu, true, initial or 0)
+      return mod_menu.do_menu(m, s, menu, {big=true, initial=initial})
     end
-    return menu_(mplex, sub, menu_or_name, menu_bigmenu, true, initial)
+    return menu_(mplex, sub, menu_or_name, menu_bigmenu, true)
 end
 
 --DOC
 -- This function is similar to \fnref{mod_menu.menu}, but input
--- is grabbed and \var{key} is used to cycle through the menu.
-function mod_menu.grabmenu(mplex, sub, menu_or_name, key, initial) 
-    local function menu_grabmenu(m, s, menu)
-        return mod_menu.do_grabmenu(m, s, menu, false, key, initial or 0)
+-- is grabbed and \var{param.key} is used to cycle through the menu.
+function mod_menu.grabmenu(mplex, sub, menu_or_name, param) 
+    if type(param)=="string" then
+        param={key=param}
     end
-    return menu_(mplex, sub, menu_or_name, menu_grabmenu, true, initial)
+    local function menu_grabmenu(m, s, menu)
+        return mod_menu.do_grabmenu(m, s, menu, param)
+    end
+    return menu_(mplex, sub, menu_or_name, menu_grabmenu, true)
 end
 
 --DOC

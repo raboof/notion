@@ -52,7 +52,7 @@ defbindings("WScreen", {
     kpress(MOD1.."F9", "ioncore.create_ws(_)"),
     
     bdoc("Display the main menu."),
-    kpress(MOD2.."F12", "mod_menu.bigmenu(_, _sub, 'mainmenu')"),
+    kpress(MOD2.."F12", "mod_menu.menu(_, _sub, 'mainmenu', {big=true})"),
     mpress("Button3", "mod_menu.pmenu(_, _sub, 'mainmenu')"),
     
     bdoc("Display the window list menu."),
