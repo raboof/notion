@@ -51,7 +51,8 @@ function mod_query.query(mplex, prompt, initvalue, handler, completor,
             return
         end
     end
-    wedln=mod_query.do_query(mplex, prompt, initvalue, handle_it, completor)
+    local wedln=mod_query.do_query(mplex, prompt, initvalue, 
+                                   handle_it, completor)
     if context then
         wedln:set_context(context)
     end
@@ -536,7 +537,7 @@ function mod_query.query_runfile(mplex, script, prompt)
 end
 
 
-function break_cmdline(str, no_ws)
+local function break_cmdline(str, no_ws)
     local st, en, beg, rest, ch
     local res={""}
 
@@ -573,7 +574,7 @@ function break_cmdline(str, no_ws)
         ins_space("")
         str=rest
     end
-            
+
     while str~="" do
         st, en, beg, rest, ch=string.find(str, "^(.-)(([%s'\"\\]).*)")
         if not beg then
