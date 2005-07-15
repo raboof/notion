@@ -18,10 +18,8 @@ if not ioncore.load_module("mod_statusbar") then
     return
 end
 
---local mod_menu=_G["mod_menu"]
---assert(mod_menu)
-local mod_statusbar={}
-_G["mod_statusbar"]=mod_statusbar
+local mod_statusbar=_G["mod_statusbar"]
+assert(mod_statusbar)
 
 
 -- Settings {{{
@@ -201,10 +199,12 @@ local statusd_modules={}
 function mod_statusbar.rcv_statusd(str)
     local data=""
     local updatenw=false
+    local updated=false
 
     local function doline(i)
         if i=="." then
             mod_statusbar.update(updatenw)
+            updated=true
         else
             local _, _, m, v=string.find(i, "^([^:]+):%s*(.*)")
             if m and v then
@@ -215,8 +215,9 @@ function mod_statusbar.rcv_statusd(str)
     end
     
     while str do
+        updated=false
         data=string.gsub(data..str, "([^\n]*)\n", doline)
-        str=coroutine.yield()
+        str=coroutine.yield(updated)
     end
     
     ioncore.warn(TR("ion-statusd quit."))
@@ -267,6 +268,11 @@ function mod_statusbar.cfg_statusd(cfg)
 end
 
 
+function mod_statusbar.rcv_statusd_err(str)
+    io.stderr:write(str)
+end
+
+
 --DOC
 -- Launch ion-statusd with configuration table \var{cfg}.
 function mod_statusbar.launch_statusd(cfg)
@@ -280,12 +286,28 @@ function mod_statusbar.launch_statusd(cfg)
         return
     end
 
+    local statusd_errors
+    local function initrcverr(str)
+        statusd_errors=(statusd_errors or "")..str
+    end
+
     local cfg=mod_statusbar.cfg_statusd(cfg or {})
     
     local cmd=statusd.." -c "..cfg..get_statusd_params()
-    local cr=coroutine.wrap(mod_statusbar.rcv_statusd)
+    local rcv=coroutine.wrap(mod_statusbar.rcv_statusd)
+    local rcverr=mod_statusbar.rcv_statusd_err
 
-    statusd_pid=ioncore.popen_bgread(cmd, cr)
+    statusd_pid=mod_statusbar.launch_statusd_(cmd, 
+                                              rcv, initrcverr, 
+                                              rcv, rcverr)
+
+    if statusd_errors then
+        warn(TR("Errors starting ion-statusd:\n")..statusd_errors)
+    end
+
+    if statusd_pid<=0 then
+        warn(TR("Failed to start ion-statusd."))
+    end                                              
 end
 
 --}}}
