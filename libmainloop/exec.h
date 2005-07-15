@@ -29,4 +29,7 @@ extern pid_t mainloop_popen_bgread(const char *cmd,
                                    void (*initenv)(void *p), void *p,
                                    ExtlFn handler, ExtlFn errhandler);
 
+extern bool mainloop_register_input_fd_extlfn(int fd, ExtlFn fn);
+extern bool mainloop_process_pipe_extlfn(int fd, ExtlFn fn);
+
 #endif /* ION_LIBMAINLOOP_EXEC_H */

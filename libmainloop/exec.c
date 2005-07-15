@@ -208,46 +208,46 @@ pid_t mainloop_spawn(const char *cmd)
 
 #define BL 1024
 
-static void process_pipe(int fd, void *p)
+bool mainloop_process_pipe_extlfn(int fd, ExtlFn fn)
 {
     char buf[BL];
     int n;
     
-    while(1){
-        n=read(fd, buf, BL-1);
-        if(n<0){
-            if(errno==EAGAIN || errno==EINTR)
-                return;
-            n=0;
-            warn_err_obj(TR("reading a pipe"));
-        }
-        if(n>0){
-            buf[n]='\0';
-            if(!extl_call(*(ExtlFn*)p, "s", NULL, &buf))
-                break;
-        }
-        if(n==0){
-            /* Call with no argument/NULL string to signify EOF */
-            extl_call(*(ExtlFn*)p, NULL, NULL);
-            break;
-        }
-        if(n<BL-1)
-            return;
+    n=read(fd, buf, BL-1);
+    if(n<0){
+        if(errno==EAGAIN || errno==EINTR)
+            return TRUE;
+        n=0;
+        warn_err_obj(TR("reading a pipe"));
+    }else if(n>0){
+        buf[n]='\0';
+        extl_call(fn, "s", NULL, &buf);
+        return TRUE;
+    }else/* if(n==0)*/{
+        /* Call with no argument/NULL string to signify EOF */
+        extl_call(fn, NULL, NULL);
+        return FALSE;
     }
-    
-    /* We get here on EOL or if the handler failed */
-    mainloop_unregister_input_fd(fd);
-    close(fd);
-    extl_unref_fn(*(ExtlFn*)p);
-    free(p);
 }
 
 
-static bool setup_bgread(ExtlFn handler, int fd)
+static void process_pipe(int fd, void *p)
+{
+    if(!mainloop_process_pipe_extlfn(fd, *(ExtlFn*)p)){
+        /* We get here on EOL or if the handler failed */
+        mainloop_unregister_input_fd(fd);
+        close(fd);
+        extl_unref_fn(*(ExtlFn*)p);
+        free(p);
+    }
+}
+
+
+bool mainloop_register_input_fd_extlfn(int fd, ExtlFn fn)
 {
     ExtlFn *p=ALLOC(ExtlFn);
     if(p!=NULL){
-        *(ExtlFn*)p=extl_ref_fn(handler);
+        *(ExtlFn*)p=extl_ref_fn(fn);
         if(mainloop_register_input_fd(fd, p, process_pipe))
             return TRUE;
         extl_unref_fn(*(ExtlFn*)p);
@@ -271,11 +271,11 @@ pid_t mainloop_popen_bgread(const char *cmd,
     
     if(pid>0){
         if(handler!=none){
-            if(!setup_bgread(handler, fd))
+            if(!mainloop_register_input_fd_extlfn(fd, handler))
                 goto err;
         }
         if(errhandler!=extl_fn_none()){
-            if(!setup_bgread(errhandler, errfd))
+            if(!mainloop_register_input_fd_extlfn(errfd, errhandler))
                 goto err;
         }
     }
