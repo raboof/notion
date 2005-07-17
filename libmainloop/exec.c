@@ -219,6 +219,7 @@ bool mainloop_process_pipe_extlfn(int fd, ExtlFn fn)
             return TRUE;
         n=0;
         warn_err_obj(TR("reading a pipe"));
+        return FALSE;
     }else if(n>0){
         buf[n]='\0';
         extl_call(fn, "s", NULL, &buf);
