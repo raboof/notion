@@ -55,16 +55,22 @@ WBindmap *mod_statusbar_statusbar_bindmap=NULL;
 #define BL 1024
 
 
-static bool process_pipe(int fd, ExtlFn fn, bool *doneseen)
+static bool process_pipe(int fd, ExtlFn fn, 
+                         bool *doneseen, bool *eagain)
 {
     char buf[BL];
     int n;
     bool fnret;
     
+    *eagain=FALSE;
+    
     n=read(fd, buf, BL-1);
+    
     if(n<0){
-        if(errno==EAGAIN || errno==EINTR)
+        if(errno==EAGAIN || errno==EINTR){
+            *eagain=(errno==EAGAIN);
             return TRUE;
+        }
         warn_err_obj(TR("reading a pipe"));
         return FALSE;
     }else if(n>0){
@@ -72,6 +78,7 @@ static bool process_pipe(int fd, ExtlFn fn, bool *doneseen)
         *doneseen=FALSE;
         return extl_call(fn, "s", "b", &buf, doneseen);
     }
+    
     return FALSE;
 }
 
@@ -92,7 +99,7 @@ static bool wait_statusd_init(int outfd, int errfd, ExtlFn dh, ExtlFn eh)
     struct timeval tv, endtime, now;
     int nfds=maxof(outfd, errfd);
     int retval;
-    bool dummy, doneseen;
+    bool dummy, doneseen, eagain=FALSE;
 
     if(gettimeofday(&endtime, NULL)!=0){
         warn_err();
@@ -109,6 +116,7 @@ static bool wait_statusd_init(int outfd, int errfd, ExtlFn dh, ExtlFn eh)
 
         normalise_tv(&now);
     
+        /* Calculate remaining time */
         if(now.tv_sec>endtime.tv_sec){
             return FALSE;
         }else if(now.tv_sec==endtime.tv_sec){
@@ -127,14 +135,20 @@ static bool wait_statusd_init(int outfd, int errfd, ExtlFn dh, ExtlFn eh)
         retval=select(nfds+1, &rfds, NULL, NULL, &tv);
         if(retval>0){
             if(FD_ISSET(errfd, &rfds)){
-                if(!process_pipe(errfd, eh, &dummy))
+                if(!process_pipe(errfd, eh, &dummy, &eagain))
                     return FALSE;
             }
             if(FD_ISSET(outfd, &rfds)){
-                if(!process_pipe(outfd, dh, &doneseen))
+                if(!process_pipe(outfd, dh, &doneseen, &eagain))
                     return FALSE;
-                if(doneseen)
+                if(doneseen){
+                    /* Read rest of errors. */
+                    bool ok;
+                    do{
+                        ok=process_pipe(errfd, eh, &dummy, &eagain);
+                    }while(ok && !eagain);
                     return TRUE;
+                }
             }
         }else if(retval==0){
             /* Timeout */
