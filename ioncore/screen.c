@@ -198,25 +198,24 @@ static void screen_managed_changed(WScreen *scr, int mode, bool sw,
 {
     const char *n=NULL;
     WRegion *reg;
-    
-    if(!sw)
+
+    if(ioncore_g.opmode==IONCORE_OPMODE_DEINIT)
         return;
     
     reg=mplex_lcurrent(&(scr->mplex), 1);
 
-    if(scr->atom_workspace!=None && ioncore_g.opmode!=IONCORE_OPMODE_DEINIT){
+    if(sw && scr->atom_workspace!=None){
         if(reg!=NULL)
             n=region_name(reg);
         
         xwindow_set_string_property(region_root_of((WRegion*)scr),
                                     scr->atom_workspace, 
                                     n==NULL ? "" : n);
-    
-        mplex_call_changed_hook((WMPlex*)scr,
-                                screen_managed_changed_hook,
-                                mode, sw, reg_);
     }
-    
+
+    mplex_call_changed_hook((WMPlex*)scr,
+                            screen_managed_changed_hook,
+                            mode, sw, reg_);
 }
 
 
