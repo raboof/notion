@@ -58,6 +58,8 @@
 #include <ioncore/regbind.h>
 #include <ioncore/extlconv.h>
 #include <ioncore/event.h>
+#include <ioncore/resize.h>
+#include <ioncore/sizehint.h>
 
 #include "exports.h"
 
@@ -635,6 +637,41 @@ static void calc_dock_pos(WRectangle *dg, const WRectangle *pg, int pos)
     }
 }
 
+    
+static void dock_set_minmax(WDock *dock, int grow, const WRectangle *g)
+{
+    dock->min_w=g->w;
+    dock->min_h=g->h;
+    if(grow==DOCK_GROW_UP || grow==DOCK_GROW_DOWN){
+        dock->max_w=g->w;
+        dock->max_h=INT_MAX;
+    }else{
+        dock->max_w=INT_MAX;
+        dock->max_h=g->h;
+    }
+}
+
+
+static void dockapp_calc_preferred_size(WDock *dock, int grow, 
+                                        const WRectangle *tile_size,
+                                        WDockApp *da)
+{
+    XSizeHints hints;
+    int w=da->geom.w, h=da->geom.h;
+    
+    if(grow==DOCK_GROW_UP || grow==DOCK_GROW_DOWN){
+        da->geom.w=minof(w, tile_size->w);
+        da->geom.h=h;
+    }else{
+        da->geom.w=w;
+        da->geom.h=minof(h, tile_size->h);
+    }
+    
+    region_size_hints(da->reg, &hints);
+    xsizehints_correct(&hints, &(da->geom.w), &(da->geom.h), TRUE);
+}
+
+
 
 static void dock_managed_rqgeom_(WDock *dock, WRegion *reg, int flags,
                                  const WRectangle *geom, WRectangle *geomret,
@@ -704,6 +741,9 @@ static void dock_managed_rqgeom_(WDock *dock, WRegion *reg, int flags,
         }
         
         if(update){
+            /* Calculcate preferred size */
+            dockapp_calc_preferred_size(dock, grow, &tile_size, da);
+                        
             /* Determine whether dockapp should be placed on a tile */
             da->tile=da->geom.w<=tile_size.w && da->geom.h<=tile_size.h;
             
@@ -715,7 +755,7 @@ static void dock_managed_rqgeom_(WDock *dock, WRegion *reg, int flags,
                 da->tile_geom.w=da->geom.w;
                 da->tile_geom.h=da->geom.h;
             }
-            
+
             /* Calculate border width and height */
             da->border_geom.w=dockapp_bdw.left+da->tile_geom.w+dockapp_bdw.right;
             da->border_geom.h=dockapp_bdw.top+da->tile_geom.h+dockapp_bdw.right;
@@ -751,6 +791,7 @@ static void dock_managed_rqgeom_(WDock *dock, WRegion *reg, int flags,
             break;
         case DOCK_GROW_UP:
         case DOCK_GROW_DOWN:
+        default:
             dock_geom.w=max_w;
             dock_geom.h=total_h;
             break;
@@ -767,31 +808,25 @@ static void dock_managed_rqgeom_(WDock *dock, WRegion *reg, int flags,
     /* Fit dock to new geom if required */
     if(!(flags&REGION_RQGEOM_TRYONLY)){
         int rqgeomflags=REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y;
-        WRectangle *g=&border_dock_geom;
-        dock->min_w=g->w;
-        dock->min_h=g->h;
-        if(grow==DOCK_GROW_UP || grow==DOCK_GROW_DOWN){
-            dock->max_w=g->w;
-            dock->max_h=INT_MAX;
-        }else{
-            dock->max_w=INT_MAX;
-            dock->max_h=g->h;
-        }
+        
+        dock_set_minmax(dock, grow, &border_dock_geom);
         
         if(just_update_minmax)
             return;
         
         dock->arrange_called=FALSE;
-        region_rqgeom((WRegion*)dock, rqgeomflags, g, NULL);
+        region_rqgeom((WRegion*)dock, rqgeomflags, &border_dock_geom, NULL);
         if(!dock->arrange_called)
             dock_arrange_dockapps(dock, &REGION_GEOM(dock), NULL, NULL);
-        if(geomret!=NULL)
+        
+        if(thisdockapp!=NULL && geomret!=NULL)
             *geomret=thisdockapp->geom;
     }else{
-        dock_arrange_dockapps(dock, &border_dock_geom, thisdockapp,
-                              &thisdockapp_copy);
-        if(geomret!=NULL)
+        if(thisdockapp!=NULL && geomret!=NULL){
+            dock_arrange_dockapps(dock, &REGION_GEOM(dock), 
+                                  thisdockapp, &thisdockapp_copy);
             *geomret=thisdockapp_copy.geom;
+        }
     }
 }
 
@@ -1518,11 +1553,7 @@ static bool clientwin_do_manage_hook(WClientWin *cwin, const WManageParams *para
 static bool dock_handle_drop(WDock *dock, int x, int y,
                              WRegion *dropped)
 {
-#ifdef CF_EXPERIMENTAL_DOCK_DROP
     return (do_insert_dockapp(dock, dropped, FALSE, INT_MAX)!=NULL);
-#else
-    return FALSE;
-#endif
 }
 
 
