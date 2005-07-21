@@ -55,9 +55,13 @@ DEFont *de_load_font(const char *fontname)
     
     if(fontstruct==NULL && fontset==NULL){
         if(strcmp(fontname, CF_FALLBACK_FONT_NAME)!=0){
+            DEFont *fnt;
             warn(TR("Could not load font \"%s\", trying \"%s\""),
                  fontname, CF_FALLBACK_FONT_NAME);
-            return de_load_font(CF_FALLBACK_FONT_NAME);
+            fnt=de_load_font(CF_FALLBACK_FONT_NAME);
+            if(fnt==NULL)
+                warn(TR("Failed to load fallback font."));
+            return fnt;
         }
         return NULL;
     }
