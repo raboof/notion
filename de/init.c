@@ -278,7 +278,7 @@ bool de_defstyle_rootwin(WRootWin *rootwin, const char *name, ExtlTab tab)
     if(extl_table_gets_s(tab, "font", &fnt)){
         de_load_font_for_style(style, fnt);
         free(fnt);
-    }else if(based_on!=NULL){
+    }else if(based_on!=NULL && based_on->font!=NULL){
         de_set_font_for_style(style, based_on->font);
     }
     
