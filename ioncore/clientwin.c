@@ -1308,6 +1308,9 @@ static void restack_transients(WClientWin *cwin)
 
 static bool clientwin_managed_goto(WClientWin *cwin, WRegion *sub, int flags)
 {
+    if(flags&REGION_GOTO_ENTERWINDOW)
+        return FALSE;
+    
     if(LATEST_TRANSIENT(cwin)!=sub){
         ptrlist_reinsert_last(&(cwin->transient_list), sub);
         restack_transients(cwin);
