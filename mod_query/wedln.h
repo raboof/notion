@@ -55,6 +55,7 @@ DECLCLASS(WEdln){
     int compl_waiting_id;
     int compl_current_id;
     int compl_timed_id;
+    bool compl_tab;
 };
 
 extern WEdln *create_wedln(WWindow *par, const WFitParams *fp,
@@ -62,7 +63,8 @@ extern WEdln *create_wedln(WWindow *par, const WFitParams *fp,
 extern void wedln_finish(WEdln *wedln);
 extern void wedln_paste(WEdln *wedln);
 extern void wedln_draw(WEdln *wedln, bool complete);
-extern void wedln_set_completions(WEdln *wedln, ExtlTab completions);
+extern void wedln_set_completions(WEdln *wedln, ExtlTab completions,
+                                  bool autoshow_select_first);
 extern void wedln_hide_completions(WEdln *wedln);
 
 #endif /* ION_MOD_QUERY_WEDLN_H */

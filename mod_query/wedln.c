@@ -420,7 +420,8 @@ void wedln_draw(WEdln *wedln, bool complete)
 /*{{{ Completions */
 
 
-static void wedln_show_completions(WEdln *wedln, char **strs, int nstrs)
+static void wedln_show_completions(WEdln *wedln, char **strs, int nstrs,
+                                   int selected)
 {
     int w=REGION_GEOM(wedln).w;
     int h=REGION_GEOM(wedln).h;
@@ -429,6 +430,8 @@ static void wedln_show_completions(WEdln *wedln, char **strs, int nstrs)
         return;
     
     setup_listing(&(wedln->compl_list), strs, nstrs, FALSE);
+    wedln->compl_list.selected_str=selected;
+
     input_refit((WInput*)wedln);
     if(w==REGION_GEOM(wedln).w && h==REGION_GEOM(wedln).h)
         wedln_draw_completions(wedln, TRUE);
@@ -478,11 +481,11 @@ static int wedln_alloc_compl_id(WEdln *wedln)
     return id;
 }
 
-static bool wedln_do_call_completor(WEdln *wedln, int id)
+static bool wedln_do_call_completor(WEdln *wedln, int id, bool tabc)
 {
     const char *p=wedln->edln.p;
     int point=wedln->edln.point;
-    WComplProxy *proxy=create_complproxy(wedln, id);
+    WComplProxy *proxy=create_complproxy(wedln, id, tabc);
     
     if(proxy==NULL)
         return FALSE;
@@ -503,14 +506,6 @@ static bool wedln_do_call_completor(WEdln *wedln, int id)
 }
 
 
-static void wedln_call_completor(WEdln *wedln)
-{
-    int oldid=wedln->compl_waiting_id;
-    
-    if(!wedln_do_call_completor(wedln, wedln_alloc_compl_id(wedln)))
-        wedln->compl_waiting_id=oldid;
-}
-
 
 static void timed_complete(WTimer *tmr, Obj *obj)
 {
@@ -520,15 +515,20 @@ static void timed_complete(WTimer *tmr, Obj *obj)
         int id=wedln->compl_timed_id;
         wedln->compl_timed_id=-1;
         if(id==wedln->compl_waiting_id && id>=0)
-            wedln_do_call_completor((WEdln*)obj, id);
+            wedln_do_call_completor((WEdln*)obj, id, FALSE);
     }
 }
 
 
-void wedln_set_completions(WEdln *wedln, ExtlTab completions)
+static int update_nocompl=0;
+
+
+void wedln_set_completions(WEdln *wedln, ExtlTab completions, 
+                           bool autoshow_select_first)
 {
     int n=0, i=0;
     char **ptr=NULL, *beg=NULL, *end=NULL, *p=NULL;
+    int sel=-1;
     
     n=extl_table_get_n(completions);
     
@@ -565,8 +565,15 @@ void wedln_set_completions(WEdln *wedln, ExtlTab completions)
                           !mod_query_config.autoshowcompl);
     i=n;
 
+    if(mod_query_config.autoshowcompl && n>0 && autoshow_select_first){
+        update_nocompl++;
+        edln_set_completion(&(wedln->edln), ptr[0], beg, end);
+        update_nocompl--;
+        sel=0;
+    }
+
     if(n>1 || (mod_query_config.autoshowcompl && n>0)){
-        wedln_show_completions(wedln, ptr, n);
+        wedln_show_completions(wedln, ptr, n, sel);
         return;
     }
     
@@ -578,9 +585,6 @@ allocfail:
     }
     free(ptr);
 }
-
-
-static int update_nocompl=0;
 
 
 static void wedln_do_select_completion(WEdln *wedln, int n)
@@ -661,7 +665,10 @@ void wedln_complete(WEdln *wedln, bool cycle)
     if(cycle && mod_query_config.autoshowcompl && wedln->compl_list.nstrs>0){
         wedln_next_completion(wedln);
     }else{
-        wedln_call_completor(wedln);
+        int oldid=wedln->compl_waiting_id;
+    
+        if(!wedln_do_call_completor(wedln, wedln_alloc_compl_id(wedln), TRUE))
+            wedln->compl_waiting_id=oldid;
     }
 }
 
@@ -766,6 +773,7 @@ static bool wedln_init(WEdln *wedln, WWindow *par, const WFitParams *fp,
     wedln->compl_timed_id=-1;
     wedln->compl_beg=NULL;
     wedln->compl_end=NULL;
+    wedln->compl_tab=FALSE;
     
     if(!input_init((WInput*)wedln, par, fp)){
         edln_deinit(&(wedln->edln));

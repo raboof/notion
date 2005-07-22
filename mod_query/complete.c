@@ -147,21 +147,22 @@ int edln_do_completions(Edln *edln, char **completions, int ncomp,
 /*{{{ WComplProxy */
 
 
-bool complproxy_init(WComplProxy *proxy, WEdln *wedln, int id)
+bool complproxy_init(WComplProxy *proxy, WEdln *wedln, int id, bool tabc)
 {
     watch_init(&(proxy->wedln_watch));
     if(!watch_setup(&(proxy->wedln_watch), (Obj*)wedln, NULL))
         return FALSE;
     
     proxy->id=id;
+    proxy->tabc=tabc;
     
     return TRUE;
 }
 
 
-WComplProxy *create_complproxy(WEdln *wedln, int id)
+WComplProxy *create_complproxy(WEdln *wedln, int id, bool tabc)
 {
-    CREATEOBJ_IMPL(WComplProxy, complproxy, (p, wedln, id));
+    CREATEOBJ_IMPL(WComplProxy, complproxy, (p, wedln, id, tabc));
 }
 
 
@@ -185,7 +186,7 @@ bool complproxy_set_completions(WComplProxy *proxy, ExtlTab compls)
     
     if(wedln!=NULL){
         if(wedln->compl_waiting_id==proxy->id){
-            wedln_set_completions(wedln, compls);
+            wedln_set_completions(wedln, compls, proxy->tabc);
             wedln->compl_current_id=proxy->id;
             return TRUE;
         }
