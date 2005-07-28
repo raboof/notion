@@ -216,7 +216,7 @@ void xwindow_set_text_property(Window win, Atom a, const char **ptr, int n)
     Status st;
 
     if(!ioncore_g.use_mb){
-        st=XStringListToTextProperty((char **)&ptr, 1, &prop);
+        st=XStringListToTextProperty((char **)&ptr, n, &prop);
     }else{
 #ifdef X_HAVE_UTF8_STRING        
         st=XmbTextListToTextProperty(ioncore_g.dpy, (char **)ptr, n,
