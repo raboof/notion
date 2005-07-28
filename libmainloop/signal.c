@@ -111,7 +111,9 @@ static bool mrsh_chld_extl(ExtlFn fn, ChldParams *p)
     if(WIFSIGNALED(p->code)){
         extl_table_sets_b(t, "signaled", TRUE);
         extl_table_sets_i(t, "termsig", WTERMSIG(p->code));
+#ifdef WCOREDUMP 
         extl_table_sets_i(t, "coredump", WCOREDUMP(p->code));
+#endif
     }
     if(WIFSTOPPED(p->code)){
         extl_table_sets_b(t, "stopped", TRUE);
