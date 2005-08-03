@@ -37,7 +37,7 @@ mod_statusbar.launch_statusd{
         date_format='%a %Y-%m-%d %H:%M',
         -- Finnish etc. date format
         --date_format='%a %d.%m.%Y %H:%M',
-    	-- Locale date format (usually shows seconds, which would require
+        	-- Locale date format (usually shows seconds, which would require
         -- updating rather often and can be distracting)
         --date_format='%c',
         
@@ -72,7 +72,7 @@ mod_statusbar.launch_statusd{
     mail={
         update_interval=60*1000,
         mbox=os.getenv("MAIL"),
-	files={}
+        	files={}
     },
     --]]
 }
