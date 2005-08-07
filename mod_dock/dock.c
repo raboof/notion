@@ -1544,6 +1544,19 @@ static bool clientwin_do_manage_hook(WClientWin *cwin, const WManageParams *para
                                    MANAGE_REDIR_PREFER_NO);
 }
 
+
+/*EXTL_DOC
+ * Attach \var{reg} to \var{dock}.
+ */
+EXTL_EXPORT_MEMBER
+bool dock_attach(WDock *dock, WRegion *reg)
+{
+    if(reg==NULL)
+        return FALSE;
+    return (do_insert_dockapp(dock, reg, FALSE, INT_MAX)!=NULL);
+}
+
+
 /*}}}*/
 
 
