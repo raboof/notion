@@ -321,6 +321,8 @@ static void init_global()
     ioncore_g.use_mb=FALSE;
     
     ioncore_g.screen_notify=TRUE;
+    
+    ioncore_g.frame_add_last=FALSE;
 }
 
 

@@ -69,8 +69,7 @@ extern WLListNode *llist_index_to_after(WLListNode *list,
                                         int index);
 extern void llist_unlink(WLListNode **list, WLListNode *node);
 
-#define INDEX_AFTER_CURRENT (INT_MIN)
-#define DEFAULT_INDEX(MPLEX) \
-    ((MPLEX)->flags&MPLEX_ADD_TO_END ? -1 : INDEX_AFTER_CURRENT)
+#define LLIST_INDEX_AFTER_CURRENT (INT_MIN)
+#define LLIST_INDEX_LAST (-1)
 
 #endif /* ION_IONCORE_LLIST_H */

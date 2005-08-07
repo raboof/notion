@@ -592,6 +592,15 @@ void frame_managed_remove(WFrame *frame, WRegion *reg)
 }
 
 
+int frame_default_index(WFrame *frame)
+{
+    if(ioncore_g.frame_add_last)
+        return LLIST_INDEX_LAST;
+    else
+        return LLIST_INDEX_AFTER_CURRENT;
+}
+
+
 /*}}}*/
 
 
@@ -714,6 +723,9 @@ static DynFunTab frame_dynfuntab[]={
      (DynFun*)frame_fitrep},
 
     {region_managed_remove, frame_managed_remove},
+    
+    {(DynFun*)mplex_default_index,
+     (DynFun*)frame_default_index},
     
     END_DYNFUNTAB
 };

@@ -44,6 +44,8 @@ char *ioncore_default_ws_type=NULL;
  *                        to a newly mapped client window? \\
  *  \var{screen_notify} & (boolean) Should notification tooltips be displayed
  *                        for hidden workspaces with activity? \\
+ *  \var{frame_add_last} & (boolean) Add new regions in frames last instead
+ *                        of after current region. \\
  *  \var{dblclick_delay} & (integer) Delay between clicks of a double click.\\
  *  \var{default_ws_type} & (string) Default workspace type for operations
  *                         that create a workspace.\\
@@ -74,6 +76,7 @@ void ioncore_set(ExtlTab tab)
     extl_table_gets_b(tab, "warp", &(ioncore_g.warp_enabled));
     extl_table_gets_b(tab, "switchto", &(ioncore_g.switchto_new));
     extl_table_gets_b(tab, "screen_notify", &(ioncore_g.screen_notify));
+    extl_table_gets_b(tab, "frame_add_last", &(ioncore_g.frame_add_last));
     
     if(extl_table_gets_i(tab, "dblclick_delay", &dd))
         ioncore_g.dblclick_delay=maxof(0, dd);
@@ -101,6 +104,7 @@ ExtlTab ioncore_get()
     extl_table_sets_i(tab, "dblclick_delay", ioncore_g.dblclick_delay);
     extl_table_sets_b(tab, "screen_notify", ioncore_g.screen_notify);
     extl_table_sets_s(tab, "default_ws_type", ioncore_default_ws_type);
+    extl_table_sets_b(tab, "frame_add_last", ioncore_g.frame_add_last);
     ioncore_get_moveres_accel(tab);
     
     return tab;

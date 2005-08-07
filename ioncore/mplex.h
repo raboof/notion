@@ -180,6 +180,7 @@ DYNFUN void mplex_managed_geom(const WMPlex *mplex, WRectangle *geom);
 DYNFUN void mplex_size_changed(WMPlex *mplex, bool wchg, bool hchg);
 DYNFUN void mplex_managed_changed(WMPlex *mplex, int what, bool sw,
                                   WRegion *mgd);
+DYNFUN int mplex_default_index(WMPlex *mplex);
 
 /* Save/load */
 

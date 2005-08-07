@@ -120,7 +120,7 @@ WLListNode *llist_index_to_after(WLListNode *list,
 {
     WLListNode *after=NULL;
     
-    if(index==INDEX_AFTER_CURRENT){
+    if(index==LLIST_INDEX_AFTER_CURRENT){
         return current;
     }else if(index<0){
         return (list!=NULL ? list->prev : NULL);

@@ -83,6 +83,8 @@ extern bool frame_is_tabbar(WFrame *frame);
 extern bool frame_set_shaded(WFrame *frame, int sp);
 extern bool frame_is_shaded(WFrame *frame);
 
+extern int frame_default_index(WFrame *frame);
+
 /* Misc */
 extern void frame_managed_notify(WFrame *frame, WRegion *sub);
 extern void frame_managed_remove(WFrame *frame, WRegion *reg);

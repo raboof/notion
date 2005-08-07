@@ -939,7 +939,7 @@ WRegion *mplex_attach_simple(WMPlex *mplex, WRegion *reg, int flags)
     if(reg==(WRegion*)mplex)
         return FALSE;
     
-    par.index=DEFAULT_INDEX(mplex);
+    par.index=mplex_default_index(mplex);
     par.flags=flags;
     
     return region__attach_reparent((WRegion*)mplex, reg,
@@ -953,7 +953,7 @@ WRegion *mplex_attach_hnd(WMPlex *mplex, WRegionAttachHandler *hnd,
 {
     WMPlexAttachParams par;
     
-    par.index=DEFAULT_INDEX(mplex);
+    par.index=mplex_default_index(mplex);
     par.flags=flags&~MPLEX_ATTACH_L2_GEOM;
     
     return mplex_do_attach(mplex, hnd, hnd_param, &par);
@@ -965,7 +965,7 @@ static void get_params(WMPlex *mplex, ExtlTab tab, WMPlexAttachParams *par)
     int layer=1;
     
     par->flags=0;
-    par->index=DEFAULT_INDEX(mplex);
+    par->index=mplex_default_index(mplex);
     
     extl_table_gets_i(tab, "layer", &layer);
     if(layer==2){
@@ -1447,6 +1447,14 @@ void mplex_size_changed(WMPlex *mplex, bool wchg, bool hchg)
 void mplex_managed_changed(WMPlex *mplex, int mode, bool sw, WRegion *mgd)
 {
     CALL_DYN(mplex_managed_changed, mplex, (mplex, mode, sw, mgd));
+}
+
+
+int mplex_default_index(WMPlex *mplex)
+{
+    int idx=LLIST_INDEX_LAST;
+    CALL_DYN_RET(idx, int, mplex_default_index, mplex, (mplex));
+    return idx;
 }
 
 
