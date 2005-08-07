@@ -19,12 +19,6 @@ static XIM input_method=NULL;
 static XIMStyle input_style=(XIMPreeditNothing|XIMStatusNothing);
 
 
-static void warn_nolog(const char *str)
-{
-    fputs(str, stderr);
-}
-
-
 void ioncore_init_xim(void)
 {
     char *p;
@@ -40,12 +34,12 @@ void ioncore_init_xim(void)
         xim=XOpenIM(ioncore_g.dpy, NULL, NULL, NULL);
 
     if(xim==NULL){
-        warn_nolog(TR("Failed to open input method."));
+        ioncore_warn_nolog(TR("Failed to open input method."));
         return;
     }
     
     if(XGetIMValues(xim, XNQueryInputStyle, &xim_styles, NULL) || !xim_styles) {
-        warn_nolog(TR("Input method doesn't support any style."));
+        ioncore_warn_nolog(TR("Input method doesn't support any style."));
         XCloseIM(xim);
         return;
     }
@@ -60,7 +54,7 @@ void ioncore_init_xim(void)
     XFree(xim_styles);
     
     if(!found){
-        warn_nolog(TR("input method doesn't support my preedit type."));
+        ioncore_warn_nolog(TR("input method doesn't support my preedit type."));
         XCloseIM(xim);
         return;
     }

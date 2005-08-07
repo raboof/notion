@@ -86,6 +86,18 @@ WHook *ioncore_deinit_hook=NULL;
 /*}}}*/
 
 
+/*{{{ warn_nolog */
+
+
+void ioncore_warn_nolog(const char *str)
+{
+    fprintf(stderr, "%s: %s\n", prog_execname(), str);
+}
+
+
+/*}}}*/
+
+
 /*{{{ init_locale */
 
 
@@ -132,12 +144,13 @@ static bool check_encoding()
             a++;
             b++;
         }
+        if(!enc_check_ok)
+            goto integr_err;
+    }else{
+        ioncore_warn_nolog(TR("No encoding given in LC_CTYPE."));
     }
-    
-    if(!enc_check_ok)
-        goto integr_err;
         
-    if(strcmp(langi, "UTF-8")==0 || strcmp(langi, "UTF8")==0){
+    if(strcasecmp(langi, "UTF-8")==0 || strcasecmp(langi, "UTF8")==0){
         ioncore_g.enc_sb=FALSE;
         ioncore_g.enc_utf8=TRUE;
         ioncore_g.use_mb=TRUE;

@@ -32,4 +32,6 @@ extern WHook *ioncore_post_layout_setup_hook;
 extern WHook *ioncore_snapshot_hook;
 extern WHook *ioncore_deinit_hook;
 
+extern void ioncore_warn_nolog(const char *str);
+
 #endif /* ION_IONCORE_IONCORE_H */
