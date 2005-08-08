@@ -1165,7 +1165,7 @@ static void check_scroll(WMenu *menu, int x, int y)
             return;
     }
     
-    fn(scroll_timer, menu_head(menu));
+    fn(scroll_timer, (Obj*)menu_head(menu));
 }
 
 

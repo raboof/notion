@@ -13,6 +13,7 @@
 #include <string.h>
 #include "common.h"
 #include "global.h"
+#include "ioncore.h"
 
 
 static XIM input_method=NULL;
