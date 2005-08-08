@@ -121,6 +121,14 @@ local function dobindings(fn, bindings)
         assert(not bindings[context])
         bindings[context]=bnd
     end
+
+    local function dummy() 
+    end
+    
+    p.defmenu=dummy
+    p.defctxmenu=dummy
+    p.menuentry=dummy
+    p.submenu=dummy
     
     local env=setmetatable({}, {
         __index=p, 

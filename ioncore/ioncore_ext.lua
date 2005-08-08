@@ -21,12 +21,13 @@ MOD2=""
 -- Maximum number of bytes to read from pipes
 ioncore.RESULT_DATA_LIMIT=1024^2
 
--- Bindings, winprops, hooks and extra commands
+-- Bindings, winprops, hooks, menu database and extra commands
 dopath('ioncore_luaext')
 dopath('ioncore_bindings')
 dopath('ioncore_winprops')
 dopath('ioncore_misc')
 dopath('ioncore_wd')
+dopath('ioncore_menudb')
 
 -- Export some important functions into global namespace.
 export(ioncore, 
@@ -42,7 +43,11 @@ export(ioncore,
        "warn",
        "exec",
        "TR",
-       "bdoc")
+       "bdoc",
+       "defmenu",
+       "defctxmenu",
+       "menuentry",
+       "submenu")
 
 -- Mark ourselves loaded.
 _LOADED["ioncore"]=true

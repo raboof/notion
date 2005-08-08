@@ -1023,7 +1023,7 @@ end
 -- This query can be used to create a query of a defined menu.
 function mod_query.query_menu(mplex, prompt, menuname)
     local _sub=mplex:current()
-    local menu=mod_menu.evalmenu(menuname, {mplex, _sub})
+    local menu=ioncore.evalmenu(menuname, {mplex, _sub})
     
     if not menu then
         mod_query.warn(mplex, TR("Unknown menu %s.", tostring(menuname)))
