@@ -17,7 +17,7 @@
 --
 
 local defaults={
-    interval=10*1000,
+    update_interval=10*1000,
     load_hint=1,
     important_threshold=1.5,
     critical_threshold=4.0
@@ -86,7 +86,7 @@ local function update_load()
     statusd.inform("load_5min_hint", get_hint(lds[l5min]))
     statusd.inform("load_15min", lds[l15min])
     statusd.inform("load_15min_hint", get_hint(lds[l15min]))
-    load_timer:set(settings.interval, update_load)
+    load_timer:set(settings.update_interval, update_load)
 end
 
 -- Init
