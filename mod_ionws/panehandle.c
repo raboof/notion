@@ -29,7 +29,7 @@ static void panehandle_getbrush(WPaneHandle *pwin)
 {
     GrBrush *brush=gr_get_brush(pwin->wwin.win, 
                                 region_rootwin_of((WRegion*)pwin), 
-                                "pane");
+                                "frame-tiled-pane");
 
     if(brush!=NULL){
         if(pwin->brush!=NULL)

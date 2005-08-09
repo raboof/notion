@@ -115,10 +115,12 @@ void statusbar_draw(WStatusBar *sb, bool complete)
             right_align=(corner==MPLEX_STDISP_TR || corner==MPLEX_STDISP_BR);
     }
     
-    ty=(g.y+bdw.top+fnte.baseline+(g.h-bdw.top-bdw.bottom-fnte.max_height)/2);
-    
     g.x+=bdw.left;
     g.w-=bdw.left+bdw.right;
+	g.y+=bdw.top;
+	g.h-=bdw.top+bdw.bottom;
+
+    ty=(g.y+fnte.baseline+(g.h-fnte.max_height)/2);
     
     if(!right_align){
         draw_elems(sb->brush, &g, ty, sb->elems, sb->nelems, 
