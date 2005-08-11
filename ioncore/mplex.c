@@ -398,36 +398,44 @@ bool mplex_fitrep(WMPlex *mplex, WWindow *par, const WFitParams *fp)
 }
 
 
-void mplex_fit_managed(WMPlex *mplex)
+void mplex_do_fit_managed(WMPlex *mplex, WFitParams *fp)
 {
     WRectangle geom;
     WRegion *sub;
-    WFitParams fp;
     WLListIterTmp tmp;
     
-    mplex_managed_geom(mplex, &(fp.g));
-    
-    if(!MPLEX_MGD_UNVIEWABLE(mplex) && (fp.g.w<=1 || fp.g.h<=1)){
+    if(!MPLEX_MGD_UNVIEWABLE(mplex) && (fp->g.w<=1 || fp->g.h<=1)){
         mplex->flags|=MPLEX_MANAGED_UNVIEWABLE;
         if(REGION_IS_MAPPED(mplex))
             mplex_unmap_mgd(mplex);
-    }else if(MPLEX_MGD_UNVIEWABLE(mplex) && !(fp.g.w<=1 || fp.g.h<=1)){
+    }else if(MPLEX_MGD_UNVIEWABLE(mplex) && !(fp->g.w<=1 || fp->g.h<=1)){
         mplex->flags&=~MPLEX_MANAGED_UNVIEWABLE;
         if(REGION_IS_MAPPED(mplex))
             mplex_map_mgd(mplex);
     }
     
     if(!MPLEX_MGD_UNVIEWABLE(mplex)){
-        fp.mode=REGION_FIT_EXACT;
+        fp->mode&=~REGION_FIT_BOUNDS;
         FOR_ALL_REGIONS_ON_LLIST(sub, mplex->l1_list, tmp){
-            region_fitrep(sub, NULL, &fp);
+            region_fitrep(sub, NULL, fp);
         }
         
-        fp.mode=REGION_FIT_BOUNDS;
+        fp->mode|=REGION_FIT_BOUNDS;
         FOR_ALL_REGIONS_ON_LLIST(sub, mplex->l2_list, tmp){
-            region_fitrep(sub, NULL, &fp);
+            region_fitrep(sub, NULL, fp);
         }
     }
+}
+
+
+void mplex_fit_managed(WMPlex *mplex)
+{
+    WFitParams fp;
+    
+    fp.mode=REGION_FIT_EXACT;
+    mplex_managed_geom(mplex, &(fp.g));
+
+    mplex_do_fit_managed(mplex, &fp);
 }
 
 

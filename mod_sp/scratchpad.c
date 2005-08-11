@@ -35,7 +35,7 @@ static bool scratchpad_init(WScratchpad *sp, WWindow *parent,
     
     sp->last_fp=*fp;
     
-    if(fp->mode==REGION_FIT_EXACT){
+    if(!(fp->mode&REGION_FIT_BOUNDS)){
         lazyfp=*fp;
     }else{
         lazyfp.mode=REGION_FIT_EXACT;
@@ -69,14 +69,14 @@ static void scratchpad_deinit(WScratchpad *sp)
 /*}}}*/
 
 
-/*{{{ Fit */
+/*{{{ Fit */
 
 
 bool scratchpad_fitrep(WScratchpad *sp, WWindow *parent, const WFitParams *fp)
 {
     WFitParams lazyfp;
     
-    if(fp->mode==REGION_FIT_EXACT){
+    if(!(fp->mode&REGION_FIT_BOUNDS)){
         lazyfp=*fp;
     }else{
         lazyfp.mode=REGION_FIT_EXACT;

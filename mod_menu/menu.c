@@ -237,7 +237,7 @@ void calc_size(WMenu *menu, int *w, int *h)
     if(menu->pmenu_mode){
         menu_calc_size(menu, FALSE, INT_MAX, INT_MAX, w, h);
     }else{
-        menu_calc_size(menu, menu->last_fp.mode==REGION_FIT_EXACT,
+        menu_calc_size(menu, !(menu->last_fp.mode&REGION_FIT_BOUNDS),
                        menu->last_fp.g.w, menu->last_fp.g.h, w, h);
     }
 }
@@ -276,7 +276,7 @@ static void menu_firstfit(WMenu *menu, bool submenu, const WRectangle *refg)
     
     calc_size(menu, &(geom.w), &(geom.h));
     
-    if(menu->last_fp.mode==REGION_FIT_EXACT){
+    if(!(menu->last_fp.mode&REGION_FIT_BOUNDS)){
         geom.x=menu->last_fp.g.x;
         geom.y=menu->last_fp.g.y;
     }else if(menu->pmenu_mode){
@@ -336,7 +336,7 @@ static void menu_do_refit(WMenu *menu, WWindow *par, const WFitParams *oldfp)
     
     calc_size(menu, &(geom.w), &(geom.h));
     
-    if(menu->last_fp.mode==REGION_FIT_EXACT){
+    if(!(menu->last_fp.mode&REGION_FIT_BOUNDS)){
         geom.x=menu->last_fp.g.x;
         geom.y=menu->last_fp.g.y;
     }else if(menu->pmenu_mode){

@@ -46,10 +46,11 @@
 #define REGION_PARENT(REG)      (((WRegion*)(REG))->parent)
 #define REGION_PARENT_REG(REG)  ((WRegion*)REGION_PARENT(REG))
 
-typedef enum{
-    REGION_FIT_EXACT,
-    REGION_FIT_BOUNDS
-} WRegionFitMode;
+#define REGION_FIT_BOUNDS    0x0001
+#define REGION_FIT_PIVOT     0x0002 /* for Xrandr */
+#define REGION_FIT_EXACT     0x0000
+
+typedef int WRegionFitMode;
 
 INTRSTRUCT(WFitParams);
 DECLSTRUCT(WFitParams){

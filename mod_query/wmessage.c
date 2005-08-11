@@ -61,7 +61,7 @@ static void wmsg_calc_size(WMessage *wmsg, WRectangle *geom)
         h=bdw.top+bdw.bottom+wmsg->listing.toth;
     }
     
-    if(h>max_geom.h || wmsg->input.last_fp.mode==REGION_FIT_EXACT)
+    if(h>max_geom.h || !(wmsg->input.last_fp.mode&REGION_FIT_BOUNDS))
         h=max_geom.h;
     
     geom->h=h;

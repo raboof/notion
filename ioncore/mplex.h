@@ -107,6 +107,7 @@ extern void mplex_deinit(WMPlex *mplex);
 /* Resize and reparent */
 
 extern bool mplex_fitrep(WMPlex *mplex, WWindow *par, const WFitParams *fp);
+extern void mplex_do_fit_managed(WMPlex *mplex, WFitParams *fp);
 extern void mplex_fit_managed(WMPlex *mplex);
 
 /* Mapping */

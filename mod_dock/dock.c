@@ -858,7 +858,7 @@ static bool dock_fitrep(WDock *dock, WWindow *parent, const WFitParams *fp)
 {
     WFitParams fp2;
     
-    if(fp->mode==REGION_FIT_BOUNDS){
+    if(fp->mode&REGION_FIT_BOUNDS){
         int pos, grow;
         dock_get_pos_grow(dock, &pos, &grow);
         fp2.mode=REGION_FIT_EXACT;
@@ -1144,7 +1144,7 @@ static bool dock_init(WDock *dock, WWindow *parent, const WFitParams *fp)
     /* Just calculate real min/max size */
     dock_managed_rqgeom_(dock, NULL, 0, NULL, NULL, TRUE);
     
-    if(fp->mode==REGION_FIT_BOUNDS){
+    if(fp->mode&REGION_FIT_BOUNDS){
         WRectangle dg;
         dg.w=minof(dock->min_w, fp->g.w);
         dg.h=minof(dock->min_h, fp->g.h);

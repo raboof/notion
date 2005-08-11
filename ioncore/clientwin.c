@@ -1082,7 +1082,7 @@ static void convert_geom(WClientWin *cwin, const WFitParams *fp,
         mgr=REGION_MANAGER_CHK(cwin, WClientWin);
     }
     
-    if(mgr!=NULL && fp->mode==REGION_FIT_BOUNDS){
+    if(mgr!=NULL && fp->mode&REGION_FIT_BOUNDS){
 	if(gravity==ForgetGravity)
 	    gravity=mgr->transient_gravity;
         if(cwin->last_h_rq<htry)

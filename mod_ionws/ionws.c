@@ -115,8 +115,12 @@ bool ionws_fitrep(WIonWS *ws, WWindow *par, const WFitParams *fp)
     
     REGION_GEOM(ws)=fp->g;
     
-    if(ws->split_tree!=NULL)
-        split_resize(ws->split_tree, &(fp->g), PRIMN_ANY, PRIMN_ANY);
+    if(ws->split_tree!=NULL){
+        if(fp->mode&REGION_FIT_PIVOT)
+            split_transpose_to(ws->split_tree, &(fp->g));
+        else
+            split_resize(ws->split_tree, &(fp->g), PRIMN_ANY, PRIMN_ANY);
+    }
     
     return TRUE;
 }

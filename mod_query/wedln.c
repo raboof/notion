@@ -302,7 +302,7 @@ static void wedln_calc_size(WEdln *wedln, WRectangle *geom)
     th=get_textarea_height(wedln, wedln->compl_list.strs!=NULL);
     
     if(wedln->compl_list.strs==NULL){
-        if(max_geom.h<th || wedln->input.last_fp.mode==REGION_FIT_EXACT)
+        if(max_geom.h<th || !(wedln->input.last_fp.mode&REGION_FIT_BOUNDS))
             geom->h=max_geom.h;
         else
             geom->h=th;
@@ -318,7 +318,7 @@ static void wedln_calc_size(WEdln *wedln, WRectangle *geom)
         h=wedln->compl_list.toth;
         th+=bdw.top+bdw.bottom;
         
-        if(h+th>max_geom.h || wedln->input.last_fp.mode==REGION_FIT_EXACT)
+        if(h+th>max_geom.h || !(wedln->input.last_fp.mode&REGION_FIT_BOUNDS))
             h=max_geom.h-th;
         geom->h=h+th;
     }

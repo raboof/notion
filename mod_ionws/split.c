@@ -604,8 +604,10 @@ void splitsplit_do_resize(WSplitSplit *node, const WRectangle *ng,
         int brmin, brmax, brunused, brused;
         WRectangle tlg=*ng, brg=*ng;
         
+        /* TODO: transpose handling */
         get_minmaxunused(tl, dir, &tlmin, &tlmax, &tlunused);
         get_minmaxunused(br, dir, &brmin, &brmax, &brunused);
+        
         tlused=maxof(0, tls-maxof(0, tlunused));
         brused=maxof(0, brs-maxof(0, brunused));
         /* tlmin,  brmin >= 1 => (tls>=tlmin, brs>=brmin => sz>0) */
@@ -752,7 +754,10 @@ static void splitsplit_do_rqsize(WSplitSplit *p, WSplit *node,
     
     if(((WSplit*)p)->parent==NULL /*|| 
        (ha->tl==0 && ha->br==0 && va->tl==0 && va->br==0)*/){
-        pg=((WSplit*)p)->geom;
+        if(((WSplit*)p)->ws_if_root!=NULL)
+            pg=REGION_GEOM((WIonWS*)(((WSplit*)p)->ws_if_root));
+        else
+            pg=((WSplit*)p)->geom;
     }else{
         splitinner_do_rqsize(((WSplit*)p)->parent, (WSplit*)p, ha, va,
                              &pg, tryonly);
@@ -832,14 +837,16 @@ void split_do_rqgeom_(WSplit *node, const WRectangle *ng,
     RootwardAmount ha, va;
 
     if(node->parent==NULL){
-        *rg=node->geom;
-        return;
+        if(node->ws_if_root!=NULL)
+            *rg=REGION_GEOM((WIonWS*)(node->ws_if_root));
+        else
+            *rg=*ng;
+    }else{
+        initra(&ha, ng->x, ng->w, node->geom.x, node->geom.w, hany);
+        initra(&va, ng->y, ng->h, node->geom.y, node->geom.h, vany);
+    
+        splitinner_do_rqsize(node->parent, node, &ha, &va, rg, tryonly);
     }
-    
-    initra(&ha, ng->x, ng->w, node->geom.x, node->geom.w, hany);
-    initra(&va, ng->y, ng->h, node->geom.y, node->geom.h, vany);
-    
-    splitinner_do_rqsize(node->parent, node, &ha, &va, rg, tryonly);
 }
 
 
@@ -1572,6 +1579,7 @@ void split_transpose_to(WSplit *node, const WRectangle *geom)
     split_update_bounds(node, TRUE);
     
     split_do_rqgeom_(node, geom, PRIMN_ANY, PRIMN_ANY, &rg, FALSE);
+    
     split_do_resize(node, &rg, PRIMN_ANY, PRIMN_ANY, TRUE);
     
     splittree_end_resize();
