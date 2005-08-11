@@ -1146,9 +1146,11 @@ WSplitRegion *splittree_split(WSplit *node, int dir, int primn,
     if(primn==PRIMN_BR){
         nsplit->tl=node;
         nsplit->br=(WSplit*)nnode;
+        nsplit->current=SPLIT_CURRENT_TL;
     }else{
         nsplit->tl=(WSplit*)nnode;
         nsplit->br=node;
+        nsplit->current=SPLIT_CURRENT_BR;
     }
     
     splittree_end_resize();
