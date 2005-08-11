@@ -12,10 +12,7 @@ BUILDING AND INSTALLING
 1. Make sure you have the following tools and libraries installed:
 
     * GNU make
-    * Lua 5.0.1 (see <http://www.lua.org/>). 
-    
-   Lua 5.0 has a stack management bug that manifests in Ion, resulting in
-   broken .lc files and occasionally missing functions. Please do not use it.
+    * Lua 5.0.2 (see <http://www.lua.org/>). 
 
 2. a) Edit system.mk to suit your system. Most GNU/Linux users should
       need very little modifications to system.mk.
@@ -97,7 +94,7 @@ SOME OPTIONAL INSTALLATION STEPS
 CONFIGURATION
 
 For help on modifying Ion's configuration files, PLEASE READ THE DOCUMENT
-"Ion: Configuring and extending with Lua" available from the Ion web page,
+"Configuring and extending Ion3 with Lua" available from the Ion web page,
 listed at the top of this file.
 
 
@@ -124,8 +121,8 @@ by Tomohiro Kubota; see
 <http://www.debian.org/doc/manuals/intro-i18n/ch-examples.en.html#s13.4.5>.
 
 Various patches have been contributed by other individuals unlisted here.
-(See the mailing list archives.)
-
-For translators see the individual .po files in po/.
+See the mailing list archives and the darcs source repository history at
+<http://iki.fi/tuomov/repos/>. For translators see the individual .po files
+in po/.
 
 See libtu/README for code by others integrated into libtu.
