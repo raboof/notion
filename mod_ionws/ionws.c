@@ -353,9 +353,11 @@ static void ionws_create_stdispnode(WIonWS *ws, WRegion *stdisp,
         (corner==MPLEX_STDISP_TR || corner==MPLEX_STDISP_BR))){
         split->tl=ws->split_tree;
         split->br=(WSplit*)stdispnode;
+        split->current=SPLIT_CURRENT_TL;
     }else{
         split->tl=(WSplit*)stdispnode;
         split->br=ws->split_tree;
+        split->current=SPLIT_CURRENT_BR;
     }
 
     ws->split_tree=(WSplit*)split;
