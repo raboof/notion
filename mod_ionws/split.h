@@ -187,7 +187,7 @@ void split_reparent(WSplit *split, WWindow *wwin);
 /* Transpose & flip */
 
 extern void split_transpose(WSplit *split);
-extern void split_transpose_to(WSplit *split, const WRectangle *geom);
+extern bool split_transpose_to(WSplit *split, const WRectangle *geom);
 
 extern void splitsplit_flip_default(WSplitSplit *split);
 DYNFUN void splitsplit_flip(WSplitSplit *split);

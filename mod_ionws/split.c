@@ -1543,46 +1543,58 @@ void split_reparent(WSplit *split, WWindow *wwin)
 
 /*{{{ Transpose and flip */
 
-static bool move_stdisp_out_of_way(WSplit *node)
+
+static WSplit *move_stdisp_out_of_way(WSplit *node)
 {
-    if(OBJ_IS(node, WSplitSplit)){
-        WSplitSplit *stdispp=splittree_scan_stdisp_parent(node, TRUE);
+    WSplitSplit *stdispp;
+    
+    if(!OBJ_IS(node, WSplitSplit))
+        return node;
+    
+    stdispp=splittree_scan_stdisp_parent(node, TRUE);
         
-        /* split_do_resize can do things right if 'node' has stdisp as child, 
-         * but otherwise transpose will put the stdisp in a bad split
-         * configuration if it is contained within 'node', so we must
-         * first move it out of the way.
-         */
-        if(stdispp!=NULL){
-            /*assert(stdispp!=(WSplitSplit*)node);*/
-            split_try_unsink_stdisp(stdispp, TRUE, TRUE);
-            stdispp=splittree_scan_stdisp_parent(node, FALSE);
-            if(stdispp!=NULL){
-                warn(TR("Unable to move the status display out of way of."));
-                return FALSE;
-            }
+    if(stdispp==NULL)
+        return node;
+        
+    while(stdispp->tl!=node && stdispp->br!=node){
+        if(!split_try_unsink_stdisp(stdispp, FALSE, TRUE)){
+            warn(TR("Unable to move the status display out of way of."));
+            return NULL;
         }
     }
     
-    return TRUE;
+    return (WSplit*)stdispp;
 }
 
-void split_transpose_to(WSplit *node, const WRectangle *geom)
+    
+bool split_transpose_to(WSplit *node, const WRectangle *geom)
 {
     WRectangle rg;
+    WSplit *node2;
     
     splittree_begin_resize();
     
-    if(!move_stdisp_out_of_way(node))
-        return;
+    /* split_do_resize can do things right if 'node' has stdisp as child, 
+     * but otherwise transpose will put the stdisp in a bad split
+     * configuration if it is contained within 'node', so we must
+     * first move it and its fixed parent split below node. For correct
+     * geometry calculation we move it immediately below node, and
+     * resize stdisp's fixed parent node instead.
+     */
+    node2=move_stdisp_out_of_way(node);
     
-    split_update_bounds(node, TRUE);
+    if(node2==NULL)
+        return FALSE;
     
-    split_do_rqgeom_(node, geom, PRIMN_ANY, PRIMN_ANY, &rg, FALSE);
+    split_update_bounds(node2, TRUE);
     
-    split_do_resize(node, &rg, PRIMN_ANY, PRIMN_ANY, TRUE);
+    split_do_rqgeom_(node2, geom, PRIMN_ANY, PRIMN_ANY, &rg, FALSE);
+    
+    split_do_resize(node2, &rg, PRIMN_ANY, PRIMN_ANY, TRUE);
     
     splittree_end_resize();
+    
+    return TRUE;
 }
 
 
