@@ -26,6 +26,10 @@ typedef WRegion *WRegionDoAttachFn(WRegion *reg,
                                    void *handlerparams,
                                    void *param);
 
+typedef WRegion *WRegionDoAttachFnSimple(WRegion *reg, 
+                                         WRegionAttachHandler *handler,
+                                         void *handlerparams);
+
 
 extern WRegion *region__attach_reparent(WRegion *mgr, WRegion *reg, 
                                         WRegionDoAttachFn *fn, void *param);

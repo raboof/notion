@@ -39,6 +39,7 @@
 #include "activity.h"
 #include "netwm.h"
 #include "xwindow.h"
+#include "basicpholder.h"
 
 
 static void set_clientwin_state(WClientWin *cwin, int state);
@@ -719,6 +720,15 @@ static WRegion *clientwin_do_attach_transient(WClientWin *cwin,
 }
 
 
+static WRegion *clientwin_do_attach_transient_simple(WClientWin *cwin, 
+                                                     WRegionAttachHandler *fn,
+                                                     void *fnparams)
+{
+    return clientwin_do_attach_transient(cwin, fn, fnparams, NULL);
+}
+
+
+
 bool clientwin_attach_transient(WClientWin *cwin, WRegion *transient)
 {
     return (region__attach_reparent((WRegion*)cwin, transient,
@@ -773,6 +783,14 @@ bool clientwin_manage_clientwin(WClientWin *cwin, WClientWin *cwin2,
         return FALSE;
     
     return clientwin_attach_transient(cwin, (WRegion*)cwin2);
+}
+
+
+WBasicPHolder *clientwin_managed_get_pholder(WClientWin *cwin, WRegion *mgd)
+{
+    return create_basicpholder((WRegion*)cwin, 
+                               ((WRegionDoAttachFnSimple*)
+                                clientwin_do_attach_transient_simple));
 }
 
 
@@ -1772,6 +1790,9 @@ static DynFunTab clientwin_dynfuntab[]={
     
     {(DynFun*)region_manage_clientwin,
      (DynFun*)clientwin_manage_clientwin},
+
+    {(DynFun*)region_managed_get_pholder,
+     (DynFun*)clientwin_managed_get_pholder},
 
     END_DYNFUNTAB
 };

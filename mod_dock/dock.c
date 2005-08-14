@@ -60,6 +60,7 @@
 #include <ioncore/event.h>
 #include <ioncore/resize.h>
 #include <ioncore/sizehint.h>
+#include <ioncore/basicpholder.h>
 
 #include "exports.h"
 
@@ -1332,34 +1333,38 @@ WRegion *dock_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 /*{{{ Client window management setup */
 
 
-static WDockApp *do_insert_dockapp(WDock *dock, WRegion *reg, 
-                                   bool draw_border,
-                                   int pos)
+static WDockApp *dodo_insert_dockapp(WDock *dock, 
+                                     WRegionAttachHandler *handler,
+                                     void *handlerparams,
+                                     bool draw_border,
+                                     int pos)
 {
     WDockApp *dockapp, *before_dockapp;
-    WRectangle geom;
+    WFitParams fp;
+    WRegion *reg;
     
     /* Create and initialise a new WDockApp struct */
     dockapp=ALLOC(WDockApp);
     
     if(dockapp==NULL)
         return NULL;
+    
 
-    geom.x=0;
-    geom.y=0;
-    geom.w=REGION_GEOM(reg).w;
-    geom.h=REGION_GEOM(reg).h;
+    dock_get_tile_size(dock, &(fp.g));
+    fp.g.x=0;
+    fp.g.y=0;
+    fp.mode=REGION_FIT_WHATEVER|REGION_FIT_BOUNDS;
 
-    if(!region_reparent(reg, (WWindow*)dock, &geom, REGION_FIT_BOUNDS)){
+    reg=handler((WWindow*)dock, &fp, handlerparams);
+    
+    if(reg==NULL){
         free(dockapp);
         return NULL;
     }
 
-    region_detach_manager(reg);
-    
     dockapp->reg=reg;
-    dockapp->draw_border=draw_border; /*TRUE*/
-    dockapp->pos=pos; /*INT_MAX*/
+    dockapp->draw_border=draw_border;
+    dockapp->pos=pos;
     dockapp->tile=FALSE;
 
     /* Insert the dockapp at the correct relative position */
@@ -1377,13 +1382,32 @@ static WDockApp *do_insert_dockapp(WDock *dock, WRegion *reg,
 
     region_set_manager(reg, (WRegion*)dock);
     
+    fp.g=REGION_GEOM(reg);
     dock_managed_rqgeom(dock, reg, 
                         REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y,
-                        &geom, NULL);
+                        &(fp.g), NULL);
     
     region_map(reg);
 
     return dockapp;
+}
+
+static WDockApp *do_insert_dockapp(WDock *dock, WRegion *reg,
+                                   bool draw_border, int pos)
+{
+    return dodo_insert_dockapp(dock, ((WRegionAttachHandler*)
+                                      region__attach_reparent_doit),
+                               reg, draw_border, pos);
+}
+
+
+static WRegion *dock_do_attach_simple(WDock *dock,
+                                      WRegionAttachHandler *handler,
+                                      void *handlerparams)
+{
+    WDockApp *da=dodo_insert_dockapp(dock, handler, handlerparams,
+                                     FALSE, INT_MAX);
+    return (da!=NULL ? da->reg : NULL);
 }
 
 
@@ -1557,6 +1581,14 @@ bool dock_attach(WDock *dock, WRegion *reg)
 }
 
 
+WBasicPHolder *dock_managed_get_pholder(WDock *dock, WRegion *mgd)
+{
+    return create_basicpholder((WRegion*)dock, 
+                               ((WRegionDoAttachFnSimple*)
+                                dock_do_attach_simple));
+}
+
+
 /*}}}*/
 
 
@@ -1657,6 +1689,9 @@ static DynFunTab dock_dynfuntab[]={
     {(DynFun*)region_may_destroy, (DynFun*)dock_may_destroy},
     {(DynFun*)region_handle_drop, (DynFun*)dock_handle_drop},
     {(DynFun*)region_rqgeom_clientwin, (DynFun*)dock_rqgeom_clientwin},
+
+    {(DynFun*)region_managed_get_pholder,
+     (DynFun*)dock_managed_get_pholder},
     END_DYNFUNTAB
 };
 

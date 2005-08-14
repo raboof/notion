@@ -76,6 +76,19 @@ WRegion *region__attach_load(WRegion *mgr, ExtlTab tab,
 WRegion *region__attach_reparent_doit(WWindow *par, const WFitParams *fp, 
                                       WRegion *reg)
 {
+    WFitParams fp2;
+    
+    if(fp->mode&REGION_FIT_WHATEVER){
+        /* fp->g is not final; substitute size with current to avoid
+         * useless resizing. 
+         */
+        fp2.mode=fp->mode;
+        fp2.g.x=fp->g.x;
+        fp2.g.y=fp->g.y;
+        fp2.g.w=REGION_GEOM(reg).w;
+        fp2.g.h=REGION_GEOM(reg).h;
+    }
+    
     if(!region_fitrep(reg, par, fp)){
         warn(TR("Unable to reparent."));
         return NULL;
