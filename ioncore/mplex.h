@@ -140,8 +140,8 @@ extern void mplex_child_removed(WMPlex *mplex, WRegion *sub);
 
 extern bool mplex_rescue_clientwins(WMPlex *mplex, WPHolder *ph);
 
-extern bool mplex_manage_clientwin(WMPlex *mplex, WClientWin *cwin,
-                                   const WManageParams *param, int redir);
+extern WPHolder *mplex_prepare_manage(WMPlex *mplex, const WClientWin *cwin,
+                                      const WManageParams *param, int redir);
 
 /* Switch */
 

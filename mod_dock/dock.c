@@ -1333,23 +1333,22 @@ WRegion *dock_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 /*{{{ Client window management setup */
 
 
-static WDockApp *dodo_insert_dockapp(WDock *dock, 
-                                     WRegionAttachHandler *handler,
-                                     void *handlerparams,
-                                     bool draw_border,
-                                     int pos)
+static WDockApp *dock_do_attach_(WDock *dock, 
+                                 WRegionAttachHandler *handler,
+                                 void *handlerparams)
 {
     WDockApp *dockapp, *before_dockapp;
     WFitParams fp;
     WRegion *reg;
-    
+    bool draw_border=TRUE;
+    int pos=INT_MAX;
+     
     /* Create and initialise a new WDockApp struct */
     dockapp=ALLOC(WDockApp);
     
     if(dockapp==NULL)
         return NULL;
     
-
     dock_get_tile_size(dock, &(fp.g));
     fp.g.x=0;
     fp.g.y=0;
@@ -1360,6 +1359,12 @@ static WDockApp *dodo_insert_dockapp(WDock *dock,
     if(reg==NULL){
         free(dockapp);
         return NULL;
+    }
+
+    if(OBJ_IS(reg, WClientWin)){
+        ExtlTab proptab=((WClientWin*)reg)->proptab;
+        extl_table_gets_b(proptab, CLIENTWIN_WINPROP_BORDER, &draw_border);
+        extl_table_gets_i(proptab, CLIENTWIN_WINPROP_POSITION, &pos);
     }
 
     dockapp->reg=reg;
@@ -1392,40 +1397,63 @@ static WDockApp *dodo_insert_dockapp(WDock *dock,
     return dockapp;
 }
 
-static WDockApp *do_insert_dockapp(WDock *dock, WRegion *reg,
-                                   bool draw_border, int pos)
-{
-    return dodo_insert_dockapp(dock, ((WRegionAttachHandler*)
-                                      region__attach_reparent_doit),
-                               reg, draw_border, pos);
-}
-
 
 static WRegion *dock_do_attach_simple(WDock *dock,
                                       WRegionAttachHandler *handler,
                                       void *handlerparams)
 {
-    WDockApp *da=dodo_insert_dockapp(dock, handler, handlerparams,
-                                     FALSE, INT_MAX);
+    WDockApp *da=dock_do_attach_(dock, handler, handlerparams);
     return (da!=NULL ? da->reg : NULL);
 }
 
 
-static bool dock_manage_clientwin(WDock *dock, WClientWin *cwin,
-                                  const WManageParams *param UNUSED,
-                                  int redir)
+static WRegion *dock_do_attach(WDock *dock,
+                               WRegionAttachHandler *handler,
+                               void *handlerparams,
+                               void *param UNUSED)
 {
-    WRectangle geom;
-    bool draw_border=TRUE;
-    int pos=INT_MAX;
+    return dock_do_attach_simple(dock, handler, handlerparams);
+}
 
+
+/*EXTL_DOC
+ * Attach \var{reg} to \var{dock}.
+ */
+EXTL_EXPORT_MEMBER
+bool dock_attach(WDock *dock, WRegion *reg)
+{
+    return (region__attach_reparent((WRegion*)dock, reg,
+                                    (WRegionDoAttachFn*)dock_do_attach, 
+                                    NULL)
+            !=NULL);
+}
+
+
+static bool dock_handle_drop(WDock *dock, int x, int y,
+                             WRegion *dropped)
+{
+    return dock_attach(dock, dropped);
+}
+
+
+static WBasicPHolder *dock_managed_get_pholder(WDock *dock, WRegion *mgd)
+{
+    return create_basicpholder((WRegion*)dock, 
+                               ((WRegionDoAttachFnSimple*)
+                                dock_do_attach_simple));
+}
+
+
+static WPHolder *dock_prepare_manage(WDock *dock, const WClientWin *cwin,
+                                     const WManageParams *param UNUSED,
+                                     int redir)
+{
     if(redir==MANAGE_REDIR_STRICT_YES)
-        return FALSE;
+        return NULL;
     
-    extl_table_gets_b(cwin->proptab, CLIENTWIN_WINPROP_BORDER, &draw_border);
-    extl_table_gets_i(cwin->proptab, CLIENTWIN_WINPROP_POSITION, &pos);
-    
-    return (do_insert_dockapp(dock, (WRegion*)cwin, draw_border, pos)!=NULL);
+    return (WPHolder*)create_basicpholder((WRegion*)dock, 
+                                          ((WRegionDoAttachFnSimple*)
+                                           dock_do_attach_simple));
 }
 
 
@@ -1569,39 +1597,6 @@ static bool clientwin_do_manage_hook(WClientWin *cwin, const WManageParams *para
 }
 
 
-/*EXTL_DOC
- * Attach \var{reg} to \var{dock}.
- */
-EXTL_EXPORT_MEMBER
-bool dock_attach(WDock *dock, WRegion *reg)
-{
-    if(reg==NULL)
-        return FALSE;
-    return (do_insert_dockapp(dock, reg, FALSE, INT_MAX)!=NULL);
-}
-
-
-WBasicPHolder *dock_managed_get_pholder(WDock *dock, WRegion *mgd)
-{
-    return create_basicpholder((WRegion*)dock, 
-                               ((WRegionDoAttachFnSimple*)
-                                dock_do_attach_simple));
-}
-
-
-/*}}}*/
-
-
-/*{{{ Drop */
-
-
-static bool dock_handle_drop(WDock *dock, int x, int y,
-                             WRegion *dropped)
-{
-    return (do_insert_dockapp(dock, dropped, FALSE, INT_MAX)!=NULL);
-}
-
-
 /*}}}*/
 
 
@@ -1680,7 +1675,7 @@ static DynFunTab dock_dynfuntab[]={
     {window_draw, dock_draw},
     {region_updategr, dock_updategr},
     {region_managed_rqgeom, dock_managed_rqgeom},
-    {(DynFun*)region_manage_clientwin, (DynFun*)dock_manage_clientwin},
+    {(DynFun*)region_prepare_manage, (DynFun*)dock_prepare_manage},
     {region_managed_remove, dock_managed_remove},
     {(DynFun*)region_get_configuration, (DynFun*)dock_get_configuration},
     {region_size_hints, dock_size_hints},

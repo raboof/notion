@@ -1080,28 +1080,31 @@ static bool mplex_handle_drop(WMPlex *mplex, int x, int y,
 }
 
 
-bool mplex_manage_clientwin(WMPlex *mplex, WClientWin *cwin,
-                            const WManageParams *param, int redir)
+WPHolder *mplex_prepare_manage(WMPlex *mplex, const WClientWin *cwin,
+                               const WManageParams *param, int redir)
 {
     int swf=(param->switchto ? MPLEX_ATTACH_SWITCHTO : 0);
+    WPHolder *ph=NULL;
     
     if(redir==MANAGE_REDIR_STRICT_YES || redir==MANAGE_REDIR_PREFER_YES){
         if(mplex->l2_current!=NULL){
-            if(region_manage_clientwin(mplex->l2_current->reg, cwin, param,
-                                       MANAGE_REDIR_PREFER_YES))
-                return TRUE;
+            ph=region_prepare_manage(mplex->l2_current->reg, cwin, param,
+                                     MANAGE_REDIR_PREFER_YES);
+            if(ph!=NULL)
+                return ph;
         }
         if(mplex->l1_current!=NULL){
-            if(region_manage_clientwin(mplex->l1_current->reg, cwin, param,
-                                       MANAGE_REDIR_PREFER_YES))
-                return TRUE;
+            ph=region_prepare_manage(mplex->l1_current->reg, cwin, param,
+                                     MANAGE_REDIR_PREFER_YES);
+            if(ph!=NULL)
+                return ph;
         }
     }
     
     if(redir==MANAGE_REDIR_STRICT_YES)
-        return FALSE;
+        return NULL;
     
-    return (NULL!=mplex_attach_simple(mplex, (WRegion*)cwin, swf));
+    return (WPHolder*)create_mplexpholder(mplex, NULL, mplex->l1_current, 1);
 }
 
 
@@ -1669,8 +1672,8 @@ static DynFunTab mplex_dynfuntab[]={
     {region_map, mplex_map},
     {region_unmap, mplex_unmap},
     
-    {(DynFun*)region_manage_clientwin,
-     (DynFun*)mplex_manage_clientwin},
+    {(DynFun*)region_prepare_manage,
+     (DynFun*)mplex_prepare_manage},
     
     {(DynFun*)region_current,
      (DynFun*)mplex_current},

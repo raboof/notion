@@ -22,6 +22,7 @@ INTRSTRUCT(WManageParams);
 #include "attach.h"
 #include "rectangle.h"
 #include "extlconv.h"
+#include "pholder.h"
 
 
 #define MANAGEPARAMS_INIT                                                \
@@ -60,12 +61,16 @@ extern WScreen *clientwin_find_suitable_screen(WClientWin *cwin,
 extern bool clientwin_do_manage_default(WClientWin *cwin,
                                         const WManageParams *param);
 
-DYNFUN bool region_manage_clientwin(WRegion *reg, WClientWin *cwin,
+extern bool region_manage_clientwin(WRegion *reg, WClientWin *cwin,
                                     const WManageParams *par, int redir);
 
-extern bool region_manage_clientwin_default(WRegion *reg, WClientWin *cwin,
-                                            const WManageParams *par, 
-                                            int redir);
+DYNFUN WPHolder *region_prepare_manage(WRegion *reg, const WClientWin *cwin,
+                                       const WManageParams *par, int redir);
+
+extern WPHolder *region_prepare_manage_default(WRegion *reg, 
+                                               const WClientWin *cwin,
+                                               const WManageParams *par, 
+                                               int redir);
 
 /* Rescue */
 

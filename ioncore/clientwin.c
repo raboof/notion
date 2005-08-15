@@ -206,7 +206,7 @@ static void clientwin_get_winprops(WClientWin *cwin)
         cwin->flags|=CLIENTWIN_PROP_IGNORE_CFGRQ;
 
     if(extl_table_is_bool_set(tab, "transients_at_top"))
-        cwin->transient_gravity = NorthGravity;
+        cwin->transient_gravity=NorthGravity;
 
     cwin->gravity=get_gravity_winprop(cwin,"gravity");
     cwin->transient_gravity=get_gravity_winprop(cwin,"transient_gravity");
@@ -271,7 +271,7 @@ void clientwin_get_set_name(WClientWin *cwin)
 /* Some standard winprops */
 
 
-bool clientwin_get_switchto(WClientWin *cwin)
+bool clientwin_get_switchto(const WClientWin *cwin)
 {
     bool b;
     
@@ -285,7 +285,7 @@ bool clientwin_get_switchto(WClientWin *cwin)
 }
 
 
-int clientwin_get_transient_mode(WClientWin *cwin)
+int clientwin_get_transient_mode(const WClientWin *cwin)
 {
     char *s;
     int mode=TRANSIENT_MODE_NORMAL;
@@ -361,7 +361,7 @@ static bool clientwin_init(WClientWin *cwin, WWindow *par, Window win,
     cwin->fs_pholder=NULL;
 
     cwin->gravity=ForgetGravity;
-    cwin->transient_gravity=SouthGravity;
+    cwin->transient_gravity=ForgetGravity;
     
     region_init(&(cwin->region), par, &(cwin->last_fp));
 
@@ -412,7 +412,7 @@ static bool handle_target_props(WClientWin *cwin, const WManageParams *param)
 }
 
 
-WClientWin *clientwin_get_transient_for(WClientWin *cwin)
+WClientWin *clientwin_get_transient_for(const WClientWin *cwin)
 {
     Window tforwin;
     WClientWin *tfor=NULL;
@@ -661,13 +661,18 @@ void clientwin_tfor_changed(WClientWin *cwin)
 
 /*{{{ Add/remove managed */
 
-typedef struct{
-    WClientWin *cwin;
-    WRegion *transient;
-} TransRepar;
 
+static int clientwin_get_transients_gravity(WClientWin *cwin)
+{
+    if(cwin->transient_gravity!=ForgetGravity)
+        return cwin->transient_gravity;
+    if(cwin->last_fp.mode&REGION_FIT_GRAVITY)
+        return cwin->last_fp.gravity;
+    if(cwin->gravity!=ForgetGravity)
+        return cwin->gravity;
+    return SouthGravity;
+}
 
-static TransRepar *transient_reparents=NULL;
 
 
 static WRegion *clientwin_do_attach_transient(WClientWin *cwin, 
@@ -676,25 +681,18 @@ static WRegion *clientwin_do_attach_transient(WClientWin *cwin,
                                               WRegion *thereg)
 {
     WWindow *par=REGION_PARENT(cwin);
-    WRegion *reg;
-    TransRepar tp, *tpold;
-    WFitParams fp;
     Window bottom=None, top=None;
+    WRegion *reg;
+    WFitParams fp;
 
     if(par==NULL)
         return NULL;
 
-    tp.cwin=cwin;
-    tp.transient=thereg;
-    tpold=transient_reparents;
-    transient_reparents=&tp;
-    
-    fp.mode=REGION_FIT_BOUNDS;
+    fp.mode=REGION_FIT_BOUNDS|REGION_FIT_GRAVITY;
+    fp.gravity=clientwin_get_transients_gravity(cwin);
     fp.g=cwin->last_fp.g;
     
     reg=fn(par, &fp, fnparams);
-    
-    transient_reparents=tpold;
     
     if(reg==NULL)
         return NULL;
@@ -772,17 +770,19 @@ bool clientwin_rescue_clientwins(WClientWin *cwin, WPHolder *ph)
 }
 
 
-bool clientwin_manage_clientwin(WClientWin *cwin, WClientWin *cwin2,
-                                const WManageParams *param, int redir)
+WPHolder *clientwin_prepare_manage(WClientWin *cwin, const WClientWin *cwin2,
+                                   const WManageParams *param, int redir)
 {
     if(redir==MANAGE_REDIR_STRICT_YES)
-        return FALSE;
+        return NULL;
     
     /* Only catch windows with transient mode set to current here. */
     if(clientwin_get_transient_mode(cwin2)!=TRANSIENT_MODE_CURRENT)
-        return FALSE;
+        return NULL;
     
-    return clientwin_attach_transient(cwin, (WRegion*)cwin2);
+    return (WPHolder*)create_basicpholder((WRegion*)cwin,
+                                          ((WRegionDoAttachFnSimple*)
+                                           clientwin_do_attach_transient_simple));
 }
 
 
@@ -1091,18 +1091,12 @@ static void convert_geom(WClientWin *cwin, const WFitParams *fp,
     const WRectangle *max_geom=&(fp->g);
     int gravity=cwin->gravity;
     int htry=max_geom->h;
-    WClientWin *mgr;
     
-    if(transient_reparents!=NULL && 
-       transient_reparents->transient==(WRegion*)cwin){
-        mgr=transient_reparents->cwin;
-    }else{
-        mgr=REGION_MANAGER_CHK(cwin, WClientWin);
-    }
-    
-    if(mgr!=NULL && fp->mode&REGION_FIT_BOUNDS){
-	if(gravity==ForgetGravity)
-	    gravity=mgr->transient_gravity;
+    if(fp->mode&REGION_FIT_BOUNDS){
+	if(gravity==ForgetGravity && fp->mode&REGION_FIT_GRAVITY)
+            gravity=fp->gravity;
+        if(gravity==ForgetGravity)
+            gravity=SouthGravity;
         if(cwin->last_h_rq<htry)
             htry=cwin->last_h_rq;
     }
@@ -1188,10 +1182,16 @@ static bool clientwin_fitrep(WClientWin *cwin, WWindow *np, WFitParams *fp)
     if(np!=NULL && !region_same_rootwin((WRegion*)cwin, (WRegion*)np))
         return FALSE;
 
-    /* Use all available space if NetWM full screen request. */
-    if(cwin->flags&CLIENTWIN_FS_RQ
+    if(fp->mode&REGION_FIT_WHATEVER){
+        /* fp->g is not final geometry; use current size for now. */
+        geom.x=fp->g.x;
+        geom.y=fp->g.y;
+        geom.w=REGION_GEOM(cwin).w;
+        geom.h=REGION_GEOM(cwin).h;
+    }else if(cwin->flags&CLIENTWIN_FS_RQ
        && (OBJ_IS(np, WScreen)
            || (np==NULL && CLIENTWIN_IS_FULLSCREEN(cwin)))){
+        /* Use all available space if NetWM full screen request. */
         geom=fp->g;
     }else{
         convert_geom(cwin, fp, &geom);
@@ -1243,6 +1243,8 @@ static bool clientwin_fitrep(WClientWin *cwin, WWindow *np, WFitParams *fp)
         WFitParams fp2;
         fp2.g=fp->g;
         fp2.mode=REGION_FIT_BOUNDS;
+        fp2.mode|=REGION_FIT_GRAVITY;
+        fp2.gravity=clientwin_get_transients_gravity(cwin);
         
         if(!region_fitrep(transient, np, &fp2) && np!=NULL){
             warn(TR("Error reparenting %s."), region_name(transient));
@@ -1446,10 +1448,6 @@ ExtlTab clientwin_get_ident(WClientWin *cwin)
 /*{{{ ConfigureRequest */
 
 
-#undef MAX
-#define MAX(X, Y) ((X) > (Y) ? (X) : (Y))
-
-
 void clientwin_handle_configure_request(WClientWin *cwin,
                                         XConfigureRequestEvent *ev)
 {
@@ -1501,7 +1499,7 @@ void clientwin_handle_configure_request(WClientWin *cwin,
                 geom.x+=xgravity_deltax(cwin->size_hints.win_gravity, 0,
                                        ev->width-geom.w);
             }
-            geom.w=MAX(ev->width, 1);
+            geom.w=maxof(ev->width, 1);
             rqflags&=~REGION_RQGEOM_WEAK_W;
         }
         if(ev->value_mask&CWHeight){
@@ -1510,7 +1508,7 @@ void clientwin_handle_configure_request(WClientWin *cwin,
                 geom.y+=xgravity_deltay(cwin->size_hints.win_gravity, 0,
                                        ev->height-geom.h);
             }
-            geom.h=MAX(ev->height, 1);
+            geom.h=maxof(ev->height, 1);
             cwin->last_h_rq=geom.h;
             rqflags&=~REGION_RQGEOM_WEAK_H;
         }
@@ -1600,8 +1598,9 @@ void clientwin_toggle_transients_pos(WClientWin *cwin)
     else
 	cwin->transient_gravity=NorthGravity;
 
-    fp.mode=REGION_FIT_BOUNDS;
+    fp.mode=REGION_FIT_BOUNDS|REGION_FIT_GRAVITY;
     fp.g=cwin->last_fp.g;
+    fp.gravity=clientwin_get_transients_gravity(cwin);
     
     FOR_ALL_ON_PTRLIST(WRegion*, transient, cwin->transient_list, tmp){
         region_fitrep(transient, NULL, &fp);
@@ -1788,8 +1787,8 @@ static DynFunTab clientwin_dynfuntab[]={
     {(DynFun*)region_rescue_clientwins,
      (DynFun*)clientwin_rescue_clientwins},
     
-    {(DynFun*)region_manage_clientwin,
-     (DynFun*)clientwin_manage_clientwin},
+    {(DynFun*)region_prepare_manage,
+     (DynFun*)clientwin_prepare_manage},
 
     {(DynFun*)region_managed_get_pholder,
      (DynFun*)clientwin_managed_get_pholder},

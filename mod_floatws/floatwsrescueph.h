@@ -25,14 +25,17 @@ DECLCLASS(WFloatWSRescuePH){
     WRectangle geom;
     Watch floatws_watch;
     Watch frame_watch;
+    int gravity;
 };
 
-extern WFloatWSRescuePH *create_floatwsrescueph(WFloatWS *floatws, 
-                                                WRegion *contents,
-                                                WRegion *or_this);
+extern WFloatWSRescuePH *create_floatwsrescueph(WFloatWS *floatws,
+                                                const WRectangle *geom, 
+                                                bool pos_ok, bool inner_geom, 
+                                                int gravity);
 
-extern bool floatwsrescueph_init(WFloatWSRescuePH *ph, WFloatWS *floatws,
-                                 WRegion *contents, WRegion *or_this);
+extern bool floatwsrescueph_init(WFloatWSRescuePH *ph, WFloatWS *ws,
+                                 const WRectangle *geom, 
+                                 bool pos_ok, bool inner_geom, int gravity);
 
 extern void floatwsrescueph_deinit(WFloatWSRescuePH *ph);
 
@@ -42,7 +45,7 @@ extern WRegion *floatwsrescueph_do_target(WFloatWSRescuePH *ph);
 
 extern bool floatwsrescueph_do_attach(WFloatWSRescuePH *ph, 
                                       WRegionAttachHandler *hnd,
-                                      void *hnd_param);
+                                      void *hnd_param, int flags);
 
 extern WFloatWSRescuePH *floatws_get_rescue_pholder_for(WFloatWS *floatws, 
                                                         WRegion *forwhat);

@@ -421,8 +421,8 @@ static DynFunTab panews_dynfuntab[]={
     {region_managed_remove, 
      panews_managed_remove},
 
-    {(DynFun*)region_manage_clientwin, 
-     (DynFun*)panews_manage_clientwin},
+    {(DynFun*)region_prepare_manage, 
+     (DynFun*)panews_prepare_manage},
     
     {(DynFun*)region_get_configuration,
      (DynFun*)panews_get_configuration},

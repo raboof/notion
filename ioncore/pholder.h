@@ -16,6 +16,10 @@
 #include "attach.h"
 #include "extlconv.h"
 
+
+#define PHOLDER_ATTACH_SWITCHTO 0x0001
+
+
 /* Note: PHolders should be destroyed by their acquirer. */
 
 DECLCLASS(WPHolder){
@@ -23,13 +27,15 @@ DECLCLASS(WPHolder){
     WPHolder *redirect;
 };
 
+
 extern bool pholder_init(WPHolder *ph);
 extern void pholder_deinit(WPHolder *ph);
 
 DYNFUN bool pholder_do_attach(WPHolder *ph, 
-                              WRegionAttachHandler *hnd, void *hnd_param);
+                              WRegionAttachHandler *hnd, void *hnd_param,
+                              int flags);
 
-extern bool pholder_attach(WPHolder *ph, WRegion *reg);
+extern bool pholder_attach(WPHolder *ph, WRegion *reg, int flags);
 
 DYNFUN WRegion *pholder_do_target(WPHolder *ph);
 

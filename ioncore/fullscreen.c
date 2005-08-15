@@ -119,15 +119,14 @@ bool clientwin_enter_fullscreen(WClientWin *cwin, bool switchto)
 bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto)
 {    
     bool cf;
-    
-    /* TODO: should use switchto param. */
+    int swf=(switchto ? PHOLDER_ATTACH_SWITCHTO : 0);
     
     if(cwin->fs_pholder==NULL)
         return FALSE;
     
     cf=region_may_control_focus((WRegion*)cwin);
     
-    if(!pholder_attach(cwin->fs_pholder, (WRegion*)cwin)){
+    if(!pholder_attach(cwin->fs_pholder, (WRegion*)cwin, swf)){
         warn(TR("WClientWin failed to return from full screen mode; "
                 "remaining manager or parent from previous location "
                 "refused to manage us."));

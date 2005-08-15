@@ -336,7 +336,8 @@ void region_fit(WRegion *reg, const WRectangle *geom, WRegionFitMode mode)
 {
     WFitParams fp;
     fp.g=*geom;
-    fp.mode=mode;
+    fp.mode=mode&~REGION_FIT_GRAVITY;
+    fp.gravity=ForgetGravity;
     region_fitrep(reg, NULL, &fp);
 }
 
@@ -760,8 +761,8 @@ static DynFunTab region_dynfuntab[]={
     {(DynFun*)region_rescue_clientwins,
      (DynFun*)region_rescue_child_clientwins},
 
-    {(DynFun*)region_manage_clientwin,
-     (DynFun*)region_manage_clientwin_default},
+    {(DynFun*)region_prepare_manage,
+     (DynFun*)region_prepare_manage_default},
 
     {(DynFun*)region_managed_goto,
      (DynFun*)region_managed_goto_default},

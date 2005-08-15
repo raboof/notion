@@ -24,12 +24,23 @@
 #include "classes.h"
 
 INTRSTRUCT(WFloatStacking);
+INTRSTRUCT(WFloatWSPHAttachParams);
 
 DECLSTRUCT(WFloatStacking){
     WRegion *reg;
     WRegion *above;
     WFloatStacking *next, *prev;
     bool sticky;
+};
+
+
+DECLSTRUCT(WFloatWSPHAttachParams){
+    WFrame *frame;
+    WRectangle geom;
+    bool inner_geom;
+    bool pos_ok;
+    int gravity;
+    int aflags;
 };
 
 
@@ -51,12 +62,15 @@ extern WRegion *floatws_load(WWindow *par, const WFitParams *fp,
 
 extern WRegion* floatws_current(WFloatWS *floatws);
 
-extern WFloatFrame *floatws_create_frame(WFloatWS *ws, 
-                                         const WRectangle *geom, int gravity, 
-                                         bool inner_geom, bool respect_pos);
+extern WFloatFrame *floatws_create_frame(WFloatWS *ws, const WRectangle *geom, 
+                                         bool inner_geom, bool respect_pos,
+                                         int gravity);
+extern bool floatws_phattach(WFloatWS *ws, 
+                             WRegionAttachHandler *hnd, void *hnd_param,
+                             WFloatWSPHAttachParams *param);
 
-extern bool floatws_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
-                                     const WManageParams *param, int redir);
+extern WPHolder *floatws_prepare_manage(WFloatWS *ws, const WClientWin *cwin,
+                                        const WManageParams *param, int redir);
 
 extern bool floatws_add_managed(WFloatWS *ws, WRegion *reg);
 

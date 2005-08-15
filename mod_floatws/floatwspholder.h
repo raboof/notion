@@ -38,7 +38,8 @@ extern WRegion *floatwspholder_do_target(WFloatWSPHolder *ph);
 
 extern bool floatwspholder_do_attach(WFloatWSPHolder *ph, 
                                      WRegionAttachHandler *hnd,
-                                     void *hnd_param);
+                                     void *hnd_param,
+                                     int flags);
 
 extern WFloatWSPHolder *floatws_managed_get_pholder(WFloatWS *floatws, 
                                                     WRegion *mgd);

@@ -71,15 +71,16 @@ static bool placement_mrsh_extl(ExtlFn fn, WIonWSPlacementParams *param)
 }
 
 
-bool ionws_manage_clientwin(WIonWS *ws, WClientWin *cwin,
-                            const WManageParams *mp, int redir)
+WPHolder *ionws_prepare_manage(WIonWS *ws, const WClientWin *cwin,
+                               const WManageParams *mp, int redir)
 {
     WRegion *target=NULL;
     WIonWSPlacementParams param;
+    WPHolder *ph;
     bool ret;
 
     if(redir==MANAGE_REDIR_STRICT_NO)
-        return FALSE;
+        return NULL;
 
     param.ws=ws;
     param.reg=(WRegion*)cwin;
@@ -94,8 +95,9 @@ bool ionws_manage_clientwin(WIonWS *ws, WClientWin *cwin,
         
         target=(WRegion*)param.res_frame;
         
-        if(region_manage_clientwin(target, cwin, mp, redir))
-            return TRUE;
+        ph=region_prepare_manage(target, cwin, mp, redir);
+        if(ph!=NULL)
+            return ph;
     }
 
     target=find_suitable_target(ws);
@@ -103,9 +105,9 @@ bool ionws_manage_clientwin(WIonWS *ws, WClientWin *cwin,
     if(target==NULL){
         warn(TR("Ooops... could not find a region to attach client window "
                 "to on workspace %s."), region_name((WRegion*)ws));
-        return FALSE;
+        return NULL;
     }
     
-    return region_manage_clientwin(target, cwin, mp, redir);
+    return region_prepare_manage(target, cwin, mp, redir);
 }
 

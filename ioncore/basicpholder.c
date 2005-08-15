@@ -66,14 +66,17 @@ void basicpholder_deinit(WBasicPHolder *ph)
 /*{{{ Dynfuns */
 
 
-bool basicpholder_do_attach(WBasicPHolder *ph, WRegionAttachHandler *hnd,
-                            void *hnd_param)
+bool basicpholder_do_attach(WBasicPHolder *ph, 
+                            WRegionAttachHandler *hnd, void *hnd_param,
+                            int flags)
 {
     WRegion *reg=(WRegion*)ph->reg_watch.obj;
 
     if(reg==NULL || ph->hnd==NULL)
         return FALSE;
 
+    /* TODO: flags/switchto */
+    
     return (ph->hnd(reg, hnd, hnd_param)!=NULL);
 }
 

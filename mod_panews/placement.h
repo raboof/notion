@@ -46,9 +46,9 @@ extern WHook *panews_init_layout_alt;
 extern WHook *panews_make_placement_alt;
 
 
-extern bool panews_manage_clientwin(WPaneWS *ws, WClientWin *cwin,
-                                    const WManageParams *param,
-                                    int redir);
+extern WPHolder *panews_prepare_manage(WPaneWS *ws, const WClientWin *cwin,
+                                       const WManageParams *param,
+                                       int redir);
 extern bool panews_handle_unused_drop(WPaneWS *ws, WSplitUnused *specifier, 
                                       WRegion *reg);
 

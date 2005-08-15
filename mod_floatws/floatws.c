@@ -427,7 +427,7 @@ static bool floatws_managed_may_destroy(WFloatWS *ws, WRegion *reg)
 /*}}}*/
 
 
-/*{{{ manage_clientwin/transient */
+/*{{{ attach */
 
 
 bool floatws_add_managed(WFloatWS *ws, WRegion *reg)
@@ -456,28 +456,9 @@ bool floatws_add_managed(WFloatWS *ws, WRegion *reg)
 }
 
 
-#define REG_OK(R) OBJ_IS(R, WMPlex)
-
-
-static WMPlex *find_existing(WFloatWS *ws)
-{
-    WRegion *r=ws->current_managed;
-    
-    if(r!=NULL && REG_OK(r))
-        return (WMPlex*)r;
-    
-    FOR_ALL_MANAGED_BY_FLOATWS_UNSAFE(ws, r){
-        if(REG_OK(r))
-            return (WMPlex*)r;
-    }
-    
-    return NULL;
-}
-
-
-WFloatFrame *floatws_create_frame(WFloatWS *ws, 
-                                  const WRectangle *geom, int gravity, 
-                                  bool inner_geom, bool respect_pos)
+WFloatFrame *floatws_create_frame(WFloatWS *ws, const WRectangle *geom, 
+                                  bool inner_geom, bool respect_pos, 
+                                  int gravity)
 {
     WFloatFrame *frame=NULL;
     WFitParams fp;
@@ -522,93 +503,74 @@ WFloatFrame *floatws_create_frame(WFloatWS *ws,
 }
 
 
-static bool floatws_do_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
-                                        const WManageParams *param, 
-                                        int redir, bool respect_pos)
+bool floatws_phattach(WFloatWS *ws, 
+                      WRegionAttachHandler *hnd, void *hnd_param,
+                      WFloatWSPHAttachParams *p)
 {
-    WFloatFrame *frame=NULL;
-    WFitParams fp;
-    int swf;
+    int mf=(p->aflags&PHOLDER_ATTACH_SWITCHTO ? MPLEX_ATTACH_SWITCHTO : 0);
+    bool newframe=FALSE;
     
-    if(redir==MANAGE_REDIR_PREFER_YES){
-        WMPlex *m=find_existing(ws);
-        if(m!=NULL){
-            if(region_manage_clientwin((WRegion*)m, cwin, param,
-                                       MANAGE_REDIR_STRICT_YES))
-                return TRUE;
+    if(p->frame==NULL){
+        p->frame=(WFrame*)floatws_create_frame(ws, &(p->geom), p->inner_geom,
+                                               p->pos_ok, p->gravity);
+        
+        if(p->frame==NULL)
+            return FALSE;
+        
+        newframe=TRUE;
+    }
+    
+    if(mplex_attach_hnd((WMPlex*)p->frame, hnd, hnd_param, mf)==NULL){
+        if(newframe){
+            destroy_obj((Obj*)p->frame);
+            p->frame=NULL;
         }
-    }
-    
-    if(redir==MANAGE_REDIR_STRICT_YES)
-        return FALSE;
-
-    if(param->maprq && ioncore_g.opmode!=IONCORE_OPMODE_INIT){
-        /* When the window is mapped by application request, position
-         * request is only honoured if the position was given by the user
-         * and in case of a transient (the app may know better where to 
-         * place them) or if we're initialising.
-         */
-        respect_pos=(param->tfor!=NULL || param->userpos);
-    }
-
-    frame=floatws_create_frame(ws, &(param->geom), param->gravity,
-                               TRUE, respect_pos);
-    
-    if(frame==NULL)
-        return FALSE;
-    
-    assert(region_same_rootwin((WRegion*)frame, (WRegion*)cwin));
-
-    swf=(param->switchto ? MPLEX_ATTACH_SWITCHTO : 0);
-    if(!mplex_attach_simple((WMPlex*)frame, (WRegion*)cwin, swf)){
-        destroy_obj((Obj*)frame);
         return FALSE;
     }
 
     /* Don't warp, it is annoying in this case */
-    if(param->switchto && region_may_control_focus((WRegion*)ws)){
-        ioncore_set_previous_of((WRegion*)frame);
-        region_set_focus((WRegion*)frame);
+    if(newframe && p->aflags&PHOLDER_ATTACH_SWITCHTO
+       && region_may_control_focus((WRegion*)ws)){
+        ioncore_set_previous_of((WRegion*)p->frame);
+        region_set_focus((WRegion*)p->frame);
     }
     
     return TRUE;
 }
 
 
-bool floatws_manage_clientwin(WFloatWS *ws, WClientWin *cwin,
-                              const WManageParams *param,
-                              int redir)
+bool floatws_attach_framed(WFloatWS *ws, WRegion *reg,
+                           WFloatWSPHAttachParams *p)
 {
-    return floatws_do_manage_clientwin(ws, cwin, param, redir, TRUE);
+    return (region__attach_reparent((WRegion*)ws, reg,
+                                    (WRegionDoAttachFn*)floatws_phattach, p)
+            !=NULL);
+
 }
 
 
 static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
                                 WRegion *dropped)
 {
-    WFloatFrame *frame;
-    WRectangle g=REGION_GEOM(dropped);
+    WFloatWSPHAttachParams p;
     
-    g.x=x;
-    g.y=y;
-
-    frame=floatws_create_frame(ws, &g, NorthWestGravity, TRUE, TRUE);
+    p.frame=NULL;
+    p.geom.x=x;
+    p.geom.y=y;
+    p.geom.w=REGION_GEOM(dropped).w;
+    p.geom.h=REGION_GEOM(dropped).h;
+    p.inner_geom=TRUE;
+    p.pos_ok=TRUE;
+    p.gravity=NorthWestGravity;
+    p.aflags=PHOLDER_ATTACH_SWITCHTO;
     
-    if(frame==NULL)
-        return FALSE;
-    
-    if(!mplex_attach_simple((WMPlex*)frame, dropped, MPLEX_ATTACH_SWITCHTO)){
-        destroy_obj((Obj*)frame);
-        return FALSE;
-    }
-
-    return TRUE;
+    return floatws_attach_framed(ws, dropped, &p);
 }
 
 
 /*EXTL_DOC
  * Attach client window \var{cwin} on \var{ws}.
- * At least the following fields in \var{p} are supported:
+ * At least the following fields in \var{t} are supported:
  * 
  * \begin{tabularx}{\linewidth}{lX}
  *  \tabhead{Field & Description}
@@ -619,44 +581,114 @@ static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
  * \end{tabularx}
  */
 EXTL_EXPORT_MEMBER
-bool floatws_attach(WFloatWS *ws, WClientWin *cwin, ExtlTab p)
+bool floatws_attach(WFloatWS *ws, WClientWin *cwin, ExtlTab t)
 {
     int posok=0;
-    WManageParams param=MANAGEPARAMS_INIT;
-    ExtlTab g;
+    ExtlTab gt;
+    WFloatWSPHAttachParams p;
     
     if(cwin==NULL)
         return FALSE;
     
-    param.gravity=ForgetGravity;
-    param.geom.x=0;
-    param.geom.y=0;
-    param.geom.w=REGION_GEOM(cwin).w;
-    param.geom.h=REGION_GEOM(cwin).h;
+    p.frame=NULL;
+    p.geom.x=0;
+    p.geom.y=0;
+    p.geom.w=REGION_GEOM(cwin).w;
+    p.geom.h=REGION_GEOM(cwin).h;
+    p.inner_geom=TRUE;
+    p.gravity=ForgetGravity;
+    p.aflags=0;
+
+    if(extl_table_is_bool_set(t, "switchto"))
+        p.aflags|=PHOLDER_ATTACH_SWITCHTO;
     
-    extl_table_gets_b(p, "switchto", &(param.switchto));
-    
-    if(extl_table_gets_t(p, "geom", &g)){
-        if(extl_table_gets_i(g, "x", &(param.geom.x)))
+    if(extl_table_gets_t(t, "geom", &gt)){
+        if(extl_table_gets_i(gt, "x", &(p.geom.x)))
             posok++;
-        if(extl_table_gets_i(g, "y", &(param.geom.y)))
+        if(extl_table_gets_i(gt, "y", &(p.geom.y)))
             posok++;
     
-        extl_table_gets_i(p, "w", &(param.geom.w));
-        extl_table_gets_i(p, "h", &(param.geom.h));
+        extl_table_gets_i(gt, "w", &(p.geom.w));
+        extl_table_gets_i(gt, "h", &(p.geom.h));
         
-        extl_unref_table(g);
+        extl_unref_table(gt);
     }
     
-    param.geom.w=maxof(0, param.geom.w);
-    param.geom.h=maxof(0, param.geom.h);
-
-    /*if(posok==2)
-        param.userpos=TRUE;*/
+    p.geom.w=maxof(0, p.geom.w);
+    p.geom.h=maxof(0, p.geom.h);
+    p.pos_ok=(posok==2);
     
-    return floatws_do_manage_clientwin(ws, cwin, &param, 
-                                       MANAGE_REDIR_STRICT_NO,
-                                       posok==2);
+    return floatws_attach_framed(ws, (WRegion*)cwin, &p);
+}
+
+
+
+/*}}}*/
+
+
+/*{{{ floatws_prepare_manage */
+
+
+#define REG_OK(R) OBJ_IS(R, WMPlex)
+
+
+static WMPlex *find_existing(WFloatWS *ws)
+{
+    WRegion *r=ws->current_managed;
+    
+    if(r!=NULL && REG_OK(r))
+        return (WMPlex*)r;
+    
+    FOR_ALL_MANAGED_BY_FLOATWS_UNSAFE(ws, r){
+        if(REG_OK(r))
+            return (WMPlex*)r;
+    }
+    
+    return NULL;
+}
+
+
+static WPHolder *floatws_do_prepare_manage(WFloatWS *ws, 
+                                           const WClientWin *cwin,
+                                           const WManageParams *param, 
+                                           int redir, bool respect_pos)
+{
+    WPHolder *ph;
+        
+    if(redir==MANAGE_REDIR_PREFER_YES){
+        WMPlex *m=find_existing(ws);
+        if(m!=NULL){
+            ph=region_prepare_manage((WRegion*)m, cwin, param,
+                                     MANAGE_REDIR_STRICT_YES);
+            if(ph!=NULL)
+                return ph;
+        }
+    }
+    
+    if(redir==MANAGE_REDIR_STRICT_YES)
+        return NULL;
+
+    if(param->maprq && ioncore_g.opmode!=IONCORE_OPMODE_INIT){
+        /* When the window is mapped by application request, position
+         * request is only honoured if the position was given by the user
+         * and in case of a transient (the app may know better where to 
+         * place them) or if we're initialising.
+         */
+        respect_pos=(param->tfor!=NULL || param->userpos);
+    }
+
+    ph=(WPHolder*)create_floatwsrescueph(ws, &(param->geom), respect_pos, 
+                                         TRUE, param->gravity);
+    
+    return ph;
+}
+
+
+WPHolder *floatws_prepare_manage(WFloatWS *ws, const WClientWin *cwin,
+                                 const WManageParams *param,
+                                 int redir)
+{
+    return floatws_do_prepare_manage(ws, cwin, param, redir, TRUE);
 }
 
 
@@ -667,6 +699,7 @@ bool mod_floatws_clientwin_do_manage(WClientWin *cwin,
                                      const WManageParams *param)
 {
     WRegion *stack_above;
+    WFloatWSPHAttachParams p;
     WFloatStacking *st;
     WFloatWS *ws;
     WRegion *mgr;
@@ -682,7 +715,14 @@ bool mod_floatws_clientwin_do_manage(WClientWin *cwin,
     if(ws==NULL)
         return FALSE;
     
-    if(!floatws_manage_clientwin(ws, cwin, param, MANAGE_REDIR_PREFER_NO))
+    p.geom=param->geom;
+    p.frame=NULL;
+    p.inner_geom=TRUE;
+    p.pos_ok=TRUE;
+    p.gravity=param->gravity;
+    p.aflags=PHOLDER_ATTACH_SWITCHTO;
+    
+    if(!floatws_attach_framed(ws, (WRegion*)cwin, &p))
         return FALSE;
 
     mgr=REGION_MANAGER(cwin);
@@ -1336,10 +1376,12 @@ static DynFunTab floatws_dynfuntab[]={
     {region_managed_activated, 
      floatws_managed_activated},
     
-    {(DynFun*)region_manage_clientwin, 
-     (DynFun*)floatws_manage_clientwin},
+    {(DynFun*)region_prepare_manage, 
+     (DynFun*)floatws_prepare_manage},
+    
     {(DynFun*)region_handle_drop,
      (DynFun*)floatws_handle_drop},
+    
     {region_managed_remove,
      floatws_managed_remove},
     

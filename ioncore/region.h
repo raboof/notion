@@ -49,6 +49,7 @@
 #define REGION_FIT_BOUNDS    0x0001 /* Geometry is maximum bounds */
 #define REGION_FIT_PIVOT     0x0002 /* for Xrandr */
 #define REGION_FIT_WHATEVER  0x0004 /* for attach routines; g is not final */
+#define REGION_FIT_GRAVITY   0x0008 /* just a hint; for use with BOUNDS */
 #define REGION_FIT_EXACT     0x0000 /* No flags; exact fit */
 
 typedef int WRegionFitMode;
@@ -57,6 +58,7 @@ INTRSTRUCT(WFitParams);
 DECLSTRUCT(WFitParams){
     WRectangle g;
     WRegionFitMode mode;
+    int gravity;
 };
 
 INTRSTRUCT(WSubmapState);

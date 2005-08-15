@@ -285,21 +285,21 @@ static WRegion *panews_get_target(WPaneWS *ws, WSplitUnused *specifier,
 }
 
 
-bool panews_manage_clientwin(WPaneWS *ws, WClientWin *cwin,
-                             const WManageParams *param, int redir)
+WPHolder *panews_prepare_manage(WPaneWS *ws, const WClientWin *cwin,
+                                const WManageParams *param, int redir)
 {
     WRegion *target=panews_get_target(ws, NULL, (WRegion*)cwin);
+    WPHolder *ph;
     
     if(target!=NULL){
-        if(region_manage_clientwin(target, cwin, param,
-                                   MANAGE_REDIR_PREFER_YES)){
-            return TRUE;
-        }
+        ph=region_prepare_manage(target, cwin, param, MANAGE_REDIR_PREFER_YES);
+        if(ph!=NULL)
+            return ph;
     }
 
     warn(TR("Ooops... could not find a region to attach client window to "
             "on workspace %s."), region_name((WRegion*)ws));
-    return FALSE;
+    return NULL;
 }
 
 

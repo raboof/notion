@@ -59,8 +59,11 @@ bool clientwin_do_manage_default(WClientWin *cwin,
 {
     WRegion *r=NULL, *r2;
     WScreen *scr=NULL;
+    WPHolder *ph;
     int fs;
-    
+    int swf;
+    bool ok;
+
     /* Transients are managed by their transient_for client window unless the
      * behaviour is overridden before this function.
      */
@@ -69,8 +72,18 @@ bool clientwin_do_manage_default(WClientWin *cwin,
             return TRUE;
     }
     
-    /* Check fullscreen mode */
+    /* Find a suitable screen */
+    scr=clientwin_find_suitable_screen(cwin, param);
+    if(scr==NULL){
+        warn(TR("Unable to find a screen for a new client window."));
+        return FALSE;
+    }
     
+    /* Find a placeholder for non-fullscreen state */
+    ph=region_prepare_manage((WRegion*)scr, cwin, param,
+                             MANAGE_REDIR_PREFER_YES);
+    
+    /* Check fullscreen mode */
     fs=netwm_check_initial_fullscreen(cwin, param->switchto);
     
     if(fs<0){
@@ -80,52 +93,79 @@ bool clientwin_do_manage_default(WClientWin *cwin,
                                               param->switchto);
     }
 
-    if(fs>0)
+    if(fs>0){
+        /* Full-screen mode succesfull. */
+        if(pholder_target(ph)==(WRegion*)scr){
+            /* Discard useless placeholder. */
+            destroy_obj((Obj*)ph);
+            return TRUE;
+        }
+        assert(cwin->fs_pholder==NULL);
+        cwin->fs_pholder=ph;
         return TRUE;
-
-    /* Find a suitable screen */
-    scr=clientwin_find_suitable_screen(cwin, param);
-    if(scr==NULL){
-        warn(TR("Unable to find a screen for a new client window."));
-        return FALSE;
     }
-
-    return region_manage_clientwin((WRegion*)scr, cwin, param,
-                                   MANAGE_REDIR_PREFER_YES);
+        
+    if(ph==NULL)
+        return FALSE;
+    
+    /* Not in full-screen mode; use the placeholder to attach. */
+    
+    swf=(param->switchto ? PHOLDER_ATTACH_SWITCHTO : 0);
+    ok=pholder_attach(ph, (WRegion*)cwin, swf);
+    destroy_obj((Obj*)ph);
+    
+    return ok;
 }
 
 
 /*}}}*/
 
 
-/*{{{ region_manage_clientwin */
+/*{{{ region_prepare_manage/region_manage_clientwin */
 
 
-bool region_manage_clientwin(WRegion *reg, WClientWin *cwin,
-                             const WManageParams *param, int redir)
+WPHolder *region_prepare_manage(WRegion *reg, const WClientWin *cwin,
+                                const WManageParams *param, int redir)
 {
-    bool ret=FALSE;
-    CALL_DYN_RET(ret, bool, region_manage_clientwin, reg, 
+    WPHolder *ret=NULL;
+    CALL_DYN_RET(ret, WPHolder*, region_prepare_manage, reg, 
                  (reg, cwin, param, redir));
     return ret;
 }
 
 
-bool region_manage_clientwin_default(WRegion *reg, WClientWin *cwin,
-                                     const WManageParams *param, int redir)
+WPHolder *region_prepare_manage_default(WRegion *reg, const WClientWin *cwin,
+                                        const WManageParams *param, int redir)
 {
     WRegion *curr;
     
     if(redir==MANAGE_REDIR_STRICT_NO)
-        return FALSE;
+        return NULL;
     
     curr=region_current(reg);
     
     if(curr==NULL)
-        return FALSE;
+        return NULL;
         
-    return region_manage_clientwin(curr, cwin, param, 
-                                   MANAGE_REDIR_PREFER_YES);
+    return region_prepare_manage(curr, cwin, param, MANAGE_REDIR_PREFER_YES);
+}
+
+
+bool region_manage_clientwin(WRegion *reg, WClientWin *cwin,
+                             const WManageParams *par, int redir)
+{
+    bool ret;
+    WPHolder *ph=region_prepare_manage(reg, cwin, par, redir);
+    int swf=(par->switchto ? PHOLDER_ATTACH_SWITCHTO : 0);
+    
+    if(ph==NULL)
+        return FALSE;
+    
+    ret=pholder_attach(ph, (WRegion*)cwin, swf);
+    
+    destroy_obj((Obj*)ph);
+    
+    return ret;
 }
 
 
@@ -169,7 +209,7 @@ bool region_rescue_some_clientwins(WRegion *reg, WPHolder *ph,
             if(!region_rescue_clientwins(tosave, ph))
                 fails++;
         }else{
-            if(!pholder_attach(ph, tosave))
+            if(!pholder_attach(ph, tosave, 0))
                 fails++;
         }
     }

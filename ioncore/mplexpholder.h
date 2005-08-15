@@ -42,8 +42,8 @@ extern void mplexpholder_deinit(WMPlexPHolder *ph);
 extern int mplexpholder_layer(WMPlexPHolder *ph);
 
 extern bool mplexpholder_do_attach(WMPlexPHolder *ph, 
-                                   WRegionAttachHandler *hnd,
-                                   void *hnd_param);
+                                   WRegionAttachHandler *hnd, void *hnd_param, 
+                                   int flags);
 
 extern bool mplexpholder_do_goto(WMPlexPHolder *ph);
 

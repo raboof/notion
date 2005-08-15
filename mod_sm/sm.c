@@ -57,14 +57,11 @@ static bool sm_do_manage(WClientWin *cwin, const WManageParams *param)
     if(ph==NULL)
         return FALSE;
     
-    ret=pholder_attach(ph, (WRegion*)cwin);
+    ret=pholder_attach(ph, (WRegion*)cwin, 0);
     
     destroy_obj((Obj*)ph);
     
     return ret;
-    
-    /*return region_manage_clientwin(reg, cwin, param, 
-                                     MANAGE_REDIR_PREFER_NO);*/
 }
 
 

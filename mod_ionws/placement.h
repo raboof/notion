@@ -32,8 +32,7 @@ typedef struct{
  */
 extern WHook *ionws_placement_alt;
 
-extern bool ionws_manage_clientwin(WIonWS *ws, WClientWin *cwin,
-                                   const WManageParams *param,
-                                   int redir);
+extern WPHolder *ionws_prepare_manage(WIonWS *ws, const WClientWin *cwin,
+                                      const WManageParams *param, int redir);
 
 #endif /* ION_MOD_IONWS_PLACEMENT_H */

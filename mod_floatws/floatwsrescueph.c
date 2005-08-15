@@ -33,14 +33,15 @@ static void floatws_watch_handler(Watch *watch, Obj *floatws)
 
 
 bool floatwsrescueph_init(WFloatWSRescuePH *ph, WFloatWS *ws,
-                          WRegion *contents, WRegion *or_this)
+                          const WRectangle *geom, 
+                          bool pos_ok, bool inner_geom, int gravity)
 {
-    assert(contents!=NULL || or_this!=NULL);
-    
     pholder_init(&(ph->ph));
 
-    ph->pos_ok=FALSE;
-    ph->inner_geom=FALSE;
+    ph->geom=*geom;
+    ph->pos_ok=pos_ok;
+    ph->inner_geom=inner_geom;
+    ph->gravity=gravity;
     
     watch_init(&(ph->floatws_watch));
     watch_init(&(ph->frame_watch));
@@ -53,28 +54,17 @@ bool floatwsrescueph_init(WFloatWSRescuePH *ph, WFloatWS *ws,
         return FALSE;
     }
     
-    if(contents!=NULL){
-        ph->geom=REGION_GEOM(contents);
-        if(REGION_PARENT(contents)==REGION_PARENT(ws))
-            ph->pos_ok=TRUE;
-    }else{ /* or_this!=NULL */
-        WRegion *mgr=REGION_MANAGER(or_this);
-        if(REGION_PARENT(contents)==REGION_PARENT(ws))
-            ph->pos_ok=TRUE;
-
-        ph->geom=REGION_GEOM(or_this);
-        ph->inner_geom=TRUE;
-    }
-    
     return TRUE;
 }
  
 
 WFloatWSRescuePH *create_floatwsrescueph(WFloatWS *floatws,
-                                         WRegion *contents, WRegion *or_this)
+                                         const WRectangle *geom, 
+                                         bool pos_ok, bool inner_geom, 
+                                         int gravity)
 {
     CREATEOBJ_IMPL(WFloatWSRescuePH, floatwsrescueph, 
-                   (p, floatws, contents, or_this));
+                   (p, floatws, geom, pos_ok, inner_geom, gravity));
 }
 
 
@@ -92,26 +82,30 @@ void floatwsrescueph_deinit(WFloatWSRescuePH *ph)
 /*{{{ Dynfuns */
 
 
-bool floatwsrescueph_do_attach(WFloatWSRescuePH *ph, WRegionAttachHandler *hnd,
-                               void *hnd_param)
+bool floatwsrescueph_do_attach(WFloatWSRescuePH *ph, 
+                               WRegionAttachHandler *hnd, void *hnd_param,
+                               int flags)
 {
     WFloatWS *ws=(WFloatWS*)ph->floatws_watch.obj;
-    WFrame *frame=(WFrame*)ph->frame_watch.obj;
-
+    WFloatWSPHAttachParams p;
+    bool ok;
+    
     if(ws==NULL)
         return FALSE;
+
+    p.frame=(WFrame*)ph->frame_watch.obj;
+    p.geom=ph->geom;
+    p.inner_geom=ph->inner_geom;
+    p.pos_ok=ph->pos_ok;
+    p.gravity=ph->gravity;
+    p.aflags=flags;
     
-    if(frame==NULL){
-        frame=(WFrame*)floatws_create_frame(ws, &(ph->geom), StaticGravity,
-                                            ph->inner_geom, ph->pos_ok);
-        
-        if(frame==NULL)
-            return FALSE;
-        
-        assert(watch_setup(&(ph->frame_watch), (Obj*)frame, NULL));
-    }
+    ok=floatws_phattach(ws, hnd, hnd_param, &p);
     
-    return (mplex_attach_hnd((WMPlex*)frame, hnd, hnd_param, 0)!=NULL);
+    if(p.frame!=NULL && !watch_ok(&(ph->frame_watch)))
+        assert(watch_setup(&(ph->frame_watch), (Obj*)p.frame, NULL));
+    
+    return ok;
 }
 
 
@@ -146,8 +140,16 @@ WRegion *floatwsrescueph_do_target(WFloatWSRescuePH *ph)
 
 WFloatWSRescuePH *floatws_get_rescue_pholder_for(WFloatWS *floatws, 
                                                  WRegion *forwhat)
-{
-    return create_floatwsrescueph(floatws, forwhat, NULL);
+{    
+    bool pos_ok=FALSE;
+    bool inner_geom=FALSE;
+    WRectangle geom=REGION_GEOM(forwhat);
+
+    if(REGION_PARENT(forwhat)==REGION_PARENT(floatws))
+        pos_ok=TRUE;
+
+    return create_floatwsrescueph(floatws, &geom, pos_ok, inner_geom,
+                                  StaticGravity);
 }
 
 

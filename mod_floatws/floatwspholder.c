@@ -75,8 +75,9 @@ void floatwspholder_deinit(WFloatWSPHolder *ph)
 /*{{{ Dynfuns */
 
 
-bool floatwspholder_do_attach(WFloatWSPHolder *ph, WRegionAttachHandler *hnd,
-                              void *hnd_param)
+bool floatwspholder_do_attach(WFloatWSPHolder *ph, 
+                              WRegionAttachHandler *hnd, void *hnd_param,
+                              int flags)
 {
     WFloatWS *ws=(WFloatWS*)ph->floatws_watch.obj;
     WFitParams fp;
@@ -98,6 +99,8 @@ bool floatwspholder_do_attach(WFloatWSPHolder *ph, WRegionAttachHandler *hnd,
     
     if(reg==NULL)
         return FALSE;
+    
+    /* TODO: flags/switchto */
     
     floatws_add_managed(ws, reg);
 

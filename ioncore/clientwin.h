@@ -84,8 +84,10 @@ extern bool clientwin_rqclose(WClientWin *cwin, bool relocate_ignored);
 extern void clientwin_tfor_changed(WClientWin *cwin);
 
 extern bool clientwin_attach_transient(WClientWin *cwin, WRegion *transient);
-extern bool clientwin_manage_clientwin(WClientWin *cwin, WClientWin *cwin2,
-                                       const WManageParams *param, int redir);
+extern WPHolder *clientwin_prepare_manage(WClientWin *cwin, 
+                                          const WClientWin *cwin2,
+                                          const WManageParams *param, 
+                                          int redir);
 
 extern void clientwin_get_set_name(WClientWin *cwin);
 
@@ -105,9 +107,9 @@ enum{
     TRANSIENT_MODE_OFF
 };
 
-extern bool clientwin_get_switchto(WClientWin *cwin);
-extern int clientwin_get_transient_mode(WClientWin *cwin);
-extern WClientWin *clientwin_get_transient_for(WClientWin *cwin);
+extern bool clientwin_get_switchto(const WClientWin *cwin);
+extern int clientwin_get_transient_mode(const WClientWin *cwin);
+extern WClientWin *clientwin_get_transient_for(const WClientWin *cwin);
 
 /* Hooks */
 

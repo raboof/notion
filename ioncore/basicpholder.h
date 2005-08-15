@@ -37,7 +37,7 @@ extern bool basicpholder_do_goto(WBasicPHolder *ph);
 extern WRegion *basicpholder_do_target(WBasicPHolder *ph);
 
 extern bool basicpholder_do_attach(WBasicPHolder *ph, 
-                                   WRegionAttachHandler *hnd,
-                                   void *hnd_param);
+                                   WRegionAttachHandler *hnd, void *hnd_param,
+                                   int flags);
 
 #endif /* ION_IONCORE_BASICPHOLDER_H */

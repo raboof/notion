@@ -1639,8 +1639,8 @@ static DynFunTab ionws_dynfuntab[]={
     {(DynFun*)region_managed_goto,
      (DynFun*)ionws_managed_goto},
     
-    {(DynFun*)region_manage_clientwin, 
-     (DynFun*)ionws_manage_clientwin},
+    {(DynFun*)region_prepare_manage, 
+     (DynFun*)ionws_prepare_manage},
     
     {(DynFun*)region_rescue_clientwins,
      (DynFun*)ionws_rescue_clientwins},

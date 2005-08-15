@@ -177,8 +177,9 @@ int mplexpholder_layer(WMPlexPHolder *ph)
 }
 
 
-bool mplexpholder_do_attach(WMPlexPHolder *ph, WRegionAttachHandler *hnd,
-                            void *hnd_param)
+bool mplexpholder_do_attach(WMPlexPHolder *ph, 
+                            WRegionAttachHandler *hnd, void *hnd_param, 
+                            int flags)
 {
     WMPlex *mplex=(WMPlex*)ph->mplex_watch.obj;
     WLListNode *nnode;
@@ -191,7 +192,12 @@ bool mplexpholder_do_attach(WMPlexPHolder *ph, WRegionAttachHandler *hnd,
     
     layer=mplexpholder_layer(ph);
     
-    param.flags=(layer==2 ? MPLEX_ATTACH_L2 : 0);
+    param.flags=0;
+
+    if(layer==2)
+        param.flags|=MPLEX_ATTACH_L2;
+    if(flags&PHOLDER_ATTACH_SWITCHTO)
+        param.flags|=MPLEX_ATTACH_SWITCHTO;
     
     nnode=mplex_do_attach_after(mplex, ph->after, &param, hnd, hnd_param);
     
