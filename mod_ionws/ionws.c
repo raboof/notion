@@ -157,7 +157,7 @@ void ionws_unmap(WIonWS *ws)
 
 void ionws_do_set_focus(WIonWS *ws, bool warp)
 {
-    WRegion *sub=ionws_current(ws);
+    WRegion *sub=ionws_current_nostdisp(ws);
     
     if(sub==NULL){
         genws_fallback_focus(&(ws->genws), warp);
@@ -1230,7 +1230,7 @@ bool iowns_transpose_at(WIonWS *ws, WRegion *reg)
 /*}}}*/
 
 
-/*{{{ Floating toggle */
+/*{{{ Floating toggle */
 
 
 static void replace(WSplitSplit *split, WSplitSplit *nsplit)
@@ -1614,7 +1614,7 @@ WRegion *ionws_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 /*}}}*/
 
 
-/*{{{ Dynamic function table and class implementation */
+/*{{{ Dynamic function table and class implementation */
 
 
 static DynFunTab ionws_dynfuntab[]={

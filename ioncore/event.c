@@ -67,7 +67,7 @@ static void check_signals()
 /*}}}*/
 
 
-/*{{{ Timestamp management */
+/*{{{ Timestamp stuff */
 
 #define CHKEV(E, T) case E: tm=((T*)ev)->time; break;
 #define CLOCK_SKEW_MS 30000

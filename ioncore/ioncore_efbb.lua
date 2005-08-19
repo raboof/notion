@@ -1,5 +1,5 @@
 --
--- ion/share/ioncore-efbb.lua -- Minimal emergency fallback bindings.
+-- ion/share/ioncore_efbb.lua -- Minimal emergency fallback bindings.
 -- 
 -- Copyright (c) Tuomo Valkonen 2004-2005.
 --
