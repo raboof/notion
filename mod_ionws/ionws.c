@@ -157,7 +157,7 @@ void ionws_unmap(WIonWS *ws)
 
 void ionws_do_set_focus(WIonWS *ws, bool warp)
 {
-    WRegion *sub=ionws_current_nostdisp(ws);
+    WRegion *sub=ionws_current(ws);
     
     if(sub==NULL){
         genws_fallback_focus(&(ws->genws), warp);
