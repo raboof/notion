@@ -485,6 +485,29 @@ static bool stdisp_immediate_child(WSplitSplit *node)
 }
 
 
+static WSplit *move_stdisp_out_of_way(WSplit *node)
+{
+    WSplitSplit *stdispp;
+    
+    if(!OBJ_IS(node, WSplitSplit))
+        return node;
+    
+    stdispp=splittree_scan_stdisp_parent(node, TRUE);
+        
+    if(stdispp==NULL)
+        return node;
+        
+    while(stdispp->tl!=node && stdispp->br!=node){
+        if(!split_try_unsink_stdisp(stdispp, FALSE, TRUE)){
+            warn(TR("Unable to move the status display out of way."));
+            return NULL;
+        }
+    }
+    
+    return (WSplit*)stdispp;
+}
+
+
 /*}}}*/
 
 
@@ -1045,6 +1068,11 @@ WSplitRegion *splittree_split(WSplit *node, int dir, int primn,
         return NULL;
     }
 
+    splittree_begin_resize();
+    
+    if(!move_stdisp_out_of_way(node))
+        return NULL;
+
     if(primn!=PRIMN_TL && primn!=PRIMN_BR)
         primn=PRIMN_BR;
     if(dir!=SPLIT_HORIZONTAL && dir!=SPLIT_VERTICAL)
@@ -1057,8 +1085,6 @@ WSplitRegion *splittree_split(WSplit *node, int dir, int primn,
     sn=maxof(minsize, s/2);
     so=maxof(objmin, s-sn);
 
-    splittree_begin_resize();
-    
     if(sn+so!=s){
         int rs;
         ng=node->geom;
@@ -1544,29 +1570,6 @@ void split_reparent(WSplit *split, WWindow *wwin)
 /*{{{ Transpose and flip */
 
 
-static WSplit *move_stdisp_out_of_way(WSplit *node)
-{
-    WSplitSplit *stdispp;
-    
-    if(!OBJ_IS(node, WSplitSplit))
-        return node;
-    
-    stdispp=splittree_scan_stdisp_parent(node, TRUE);
-        
-    if(stdispp==NULL)
-        return node;
-        
-    while(stdispp->tl!=node && stdispp->br!=node){
-        if(!split_try_unsink_stdisp(stdispp, FALSE, TRUE)){
-            warn(TR("Unable to move the status display out of way of."));
-            return NULL;
-        }
-    }
-    
-    return (WSplit*)stdispp;
-}
-
-    
 bool split_transpose_to(WSplit *node, const WRectangle *geom)
 {
     WRectangle rg;
