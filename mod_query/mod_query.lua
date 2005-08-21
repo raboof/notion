@@ -1021,35 +1021,53 @@ end
 
 --DOC
 -- This query can be used to create a query of a defined menu.
-function mod_query.query_menu(mplex, prompt, menuname)
+function mod_query.query_menu(mplex, menuname, prompt)
     local _sub=mplex:current()
     local menu=ioncore.evalmenu(menuname, {mplex, _sub})
-    
+
     if not menu then
         mod_query.warn(mplex, TR("Unknown menu %s.", tostring(menuname)))
         return
     end
     
+    if not prompt then
+        prompt=menuname..":"
+    end
+
+    local function xform_name(n)
+        return string.lower(string.gsub(n, "[^%w]+", "-"))
+    end
+
+    local function xform_menu(t, m, p)
+        for _, v in m do
+            if v.name then
+                local n=p..xform_name(v.name)
+                while t[n] do
+                    n=n.."'"
+                end
+                t[n]=v
+                if v.submenu_fn then
+                    xform_menu(t, v.submenu_fn(), n.."/")
+                end
+            end
+        end
+        return t
+    end
+    
+    local ntab=xform_menu({}, menu, "")
+    
     function complete(str)
         local results={}
-        local len=string.len(str)
-        for _, m in menu do
-            local mn=m.name
-            if len==0 or string.sub(mn, 1, len)==str then
-                table.insert(results, mn)
+        for s, e in ntab do
+            if string.find(s, str, 1, true) then
+                table.insert(results, s)
             end
         end
         return results
-    end    
+    end
     
     local function handle(mplex, str)
-        local e
-        for k, v in menu do
-            if v.name==str then
-                e=v
-                break
-            end
-        end
+        local e=ntab[str]
         if e then
             if e.func then
                 local err=collect_errors(function() 
@@ -1059,7 +1077,7 @@ function mod_query.query_menu(mplex, prompt, menuname)
                     mod_query.warn(mplex, err)
                 end
             elseif e.submenu_fn then
-                mod_query.query_menu(mplex, TR("%s menu:", e.name), 
+                mod_query.query_menu(mplex, TR("%s:", e.name), 
                                      e.submenu_fn())
             end
         else
