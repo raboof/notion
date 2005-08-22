@@ -14,6 +14,7 @@
 
 #include <sys/time.h>
 #include <sys/signal.h>
+#include <signal.h>
 #include <time.h>
 #include <unistd.h>
 
