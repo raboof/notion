@@ -55,8 +55,11 @@ function ioncore.getwinprop(cwin)
                 --printpp(c, r, i)
                 props={}
                 pcall(function() props=winprops[c][r][i] or {} end)
-                for _, prop in ipairs_r(props) do
+                for idx, prop in ipairs_r(props) do
                     if prop:match(cwin) then
+                        if prop.oneshot then
+                            table.remove(props, idx)
+                        end
                         return prop
                     end
                 end
