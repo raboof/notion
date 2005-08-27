@@ -536,7 +536,7 @@ static void debrush_clear_clipping_rectangle(DEBrush *brush)
 /*}}}*/
 
 
-/*{{{ debrush_begin/end */
+/*{{{ debrush_begin/end */
 
 
 void debrush_begin(DEBrush *brush, const WRectangle *geom, int flags)

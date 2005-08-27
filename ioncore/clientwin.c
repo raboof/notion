@@ -1628,7 +1628,7 @@ double clientwin_xid(WClientWin *cwin)
 /*}}}*/
 
 
-/*{{{ Save/load */
+/*{{{ Save/load */
 
 
 static int last_checkcode=1;

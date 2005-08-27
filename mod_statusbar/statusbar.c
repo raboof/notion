@@ -269,7 +269,7 @@ void statusbar_size_hints(WStatusBar *p, XSizeHints *h)
 /*}}}*/
 
 
-/*{{{ Exports */
+/*{{{ Exports */
 
 
 /*EXTL_DOC
@@ -509,7 +509,7 @@ WRegion *statusbar_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 /*}}}*/
 
 
-/*{{{ Dynamic function table and class implementation */
+/*{{{ Dynamic function table and class implementation */
 
 
 static DynFunTab statusbar_dynfuntab[]={

@@ -265,7 +265,7 @@ void floatframe_resize_hints(WFloatFrame *frame, XSizeHints *hints_ret)
 /*}}}*/
 
 
-/*{{{ Drawing routines and such */
+/*{{{ Drawing routines and such */
 
 
 static void floatframe_brushes_updated(WFloatFrame *frame)

@@ -17,7 +17,7 @@
 #include "global.h"
 
 
-/*{{{ Primitives */
+/*{{{ Primitives */
 
 
 static ulong xwindow_get_property_(Window win, Atom atom, Atom type, 

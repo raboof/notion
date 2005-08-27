@@ -53,7 +53,7 @@ local function live_statusbars()
                           end)
 end
      
--- }}}
+-- }}}
 
 
 -- Meter list {{{
@@ -66,7 +66,7 @@ function mod_statusbar.inform(name, value)
     meters[name]=value
 end
 
--- }}}
+-- }}}
 
 
 -- Template processing {{{

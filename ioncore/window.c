@@ -223,7 +223,7 @@ void window_select_input(WWindow *wwin, long event_mask)
 /*}}}*/
 
 
-/*{{{ Dynamic function table and class implementation */
+/*{{{ Dynamic function table and class implementation */
 
 
 static DynFunTab window_dynfuntab[]={

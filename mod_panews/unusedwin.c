@@ -136,7 +136,7 @@ static int unusedwin_press(WUnusedWin *uwin, XButtonEvent *ev,
 /*}}}*/
 
 
-/*{{{ unusedwin_handle_drop */
+/*{{{ unusedwin_handle_drop */
 
 
 static bool unusedwin_handle_drop(WUnusedWin *uwin, int x, int y,

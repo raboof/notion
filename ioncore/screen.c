@@ -348,7 +348,7 @@ static void screen_managed_notify(WScreen *scr, WRegion *sub)
 /*}}}*/
 
 
-/*{{{ Misc. */
+/*{{{ Misc. */
 
 
 /*EXTL_DOC

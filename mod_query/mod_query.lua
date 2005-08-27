@@ -325,7 +325,7 @@ function mod_query.popen_completions(cp, cmd, beg, fn)
 end
 
 
--- }}}
+-- }}}
 
 
 -- Simple queries for internal actions {{{
@@ -508,7 +508,7 @@ function mod_query.query_renameworkspace(mplex)
 end
 
 
--- }}}
+-- }}}
 
 
 -- Run/view/edit {{{

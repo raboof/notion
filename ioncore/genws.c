@@ -128,7 +128,7 @@ void genws_unmanage_stdisp(WGenWS *ws, bool permanent, bool nofocus)
 /*}}}*/
 
 
-/*{{{ Class implementation */
+/*{{{ Class implementation */
 
 
 static DynFunTab genws_dynfuntab[]={

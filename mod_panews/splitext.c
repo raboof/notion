@@ -26,7 +26,7 @@
 #define GEOM(X) (((WSplit*)(X))->geom)
 
 
-/*{{{ Init/deinit */
+/*{{{ Init/deinit */
 
 
 bool splitunused_init(WSplitUnused *split, const WRectangle *geom,

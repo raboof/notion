@@ -175,7 +175,7 @@ void region_do_set_focus(WRegion *reg, bool warp)
 }
 
 
-/*{{{ Manager region dynfuns */
+/*{{{ Manager region dynfuns */
 
 
 void region_managed_activated(WRegion *mgr, WRegion *reg)
@@ -639,7 +639,7 @@ void region_restack(WRegion *reg, Window other, int mode)
 
 
 /*EXTL_DOC
- * Returns the root window \var{reg} is on.
+ * Returns the root window \var{reg} is on.
  */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
@@ -748,7 +748,7 @@ bool region_handle_drop(WRegion *reg, int x, int y, WRegion *dropped)
 /*}}}*/
 
 
-/*{{{ Dynamic function table and class implementation */
+/*{{{ Dynamic function table and class implementation */
 
 
 static DynFunTab region_dynfuntab[]={

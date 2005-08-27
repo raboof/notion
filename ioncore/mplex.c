@@ -323,7 +323,7 @@ void mplex_dec_index(WMPlex *mplex, WRegion *r)
 /*}}}*/
 
 
-/*{{{ Mapping */
+/*{{{ Mapping */
 
 
 static void mplex_map_mgd(WMPlex *mplex)
@@ -1111,7 +1111,7 @@ WPHolder *mplex_prepare_manage(WMPlex *mplex, const WClientWin *cwin,
 /*}}}*/
 
 
-/*{{{ Remove */
+/*{{{ Remove */
 
 
 void mplex_managed_remove(WMPlex *mplex, WRegion *sub)

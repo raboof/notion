@@ -414,7 +414,7 @@ WRegion *panews_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 /*}}}*/
 
 
-/*{{{ Dynamic function table and class implementation */
+/*{{{ Dynamic function table and class implementation */
 
 
 static DynFunTab panews_dynfuntab[]={

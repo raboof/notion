@@ -28,7 +28,7 @@
 #define GEOM(X) (((WSplit*)(X))->geom)
 
 
-/*{{{ Init/deinit */
+/*{{{ Init/deinit */
 
 
 static void splitfloat_set_borderlines(WSplitFloat *split)
@@ -713,7 +713,7 @@ void splitfloat_flip(WSplitFloat *split)
 /*}}}*/
 
 
-/*{{{ Loading code */
+/*{{{ Loading code */
 
 
 #define MINS 8

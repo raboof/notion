@@ -55,7 +55,7 @@ static bool extl_table_getis(ExtlTab tab, int i, const char *s, char c,
 /*}}}*/
 
 
-/*{{{ Drawing routines */
+/*{{{ Drawing routines */
 
 
 static void get_outer_geom(WMenu *menu, WRectangle *geom)

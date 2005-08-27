@@ -17,7 +17,7 @@
 #include <libtu/objp.h>
 
 
-/*{{{ Grab/ungrab */
+/*{{{ Grab/ungrab */
 
 
 static void do_binding_grab_on_ungrab_on(const WRegion *reg, 
