@@ -7,19 +7,18 @@ based on code by Per Olofsson <pelle@dsv.su.se>
 
 INTRODUCTION
 
-	This module provides a dock for the Ion window manager. It is designed
-	to work with ion-devel-20031211.
+	This module provides a dock for the Ion window manager.
 
 	Features:
 	- supports most dockapps
 	- configurable layout
 	- configurable dockapp order
 	- supports shaped dockapps
-	- uses ion-devel's drawing engine
+	- uses ion's drawing engine
 
 DEPENDENCIES
 
-	ion-devel-20031211
+	ion3
 
 INSTALLATION
 
@@ -32,19 +31,20 @@ INSTALLATION
 	3. Either run (as root)
 		# make install
 	   or (as yourself),
-		$ mkdir -p ~/.ion2/lib
-		$ cp .libs/dock.* ~/.ion2/lib
+		$ mkdir -p ~/.ion3/lib
+		$ cp .libs/dock.* ~/.ion3/lib
 
-	4. Copy the configuration files to your ~/.ion2 directory:
-		$ cp dock.lua dock-draw.lua ~/.ion2 
+
+	4. Copy the configuration files to your ~/.ion3 directory:
+		$ cp dock.lua dock-draw.lua ~/.ion3
 	   Edit dock.lua and dock-draw.lua to suit your preferences.
 
-	5. Add load_module("dock") to ~/.ion2/ion.lua.
+	5. Add load_module("dock") to ~/.ion3/ion.lua.
 
-	6. Add include("dock-draw.lua") near the end of ~/.ion2/draw.lua,
+	6. Add include("dock-draw.lua") near the end of ~/.ion3/draw.lua,
 	   before gr_refresh().
 
-	7. (Re)start ion-devel.
+	7. (Re)start ion3.
 
 CONFIGURATION
 
@@ -53,7 +53,7 @@ CONFIGURATION
 KNOWN BUGS
 
 	Not all dockapps dock. This is because dockapps use a variety of methods
-	to signal that they are dockapps and ion-devel-dock doesn't yet
+	to signal that they are dockapps and the dock doesn't yet
 	recognise all of them. If your favourite dockapp does not work then
 	please inform the author (email address at top of file).
 
@@ -62,13 +62,13 @@ KNOWN BUGS
 	- gkrellm2 can have the wrong shape if it is started after the dock
 	  module is loaded.
 
-	- wmxmms needs a winprop{...}. See the example dock.lua. ion-devel
+	- wmxmms needs a winprop{...}. See the example dock.lua. Ion
 	  complains: Client window "wmxmms" has broken transient_for hint.
 	  ("Extended WM hints" multi-parent brain damage?).
 
 IMPLEMENTATION NOTES
 
-	If you would like to help improve ion-devel-dock then the following
+	If you would like to help improve the dock then the following
 	notes might be useful.
 
 	You should use folding in your editor when you edit/view the source
@@ -76,8 +76,8 @@ IMPLEMENTATION NOTES
 	folds. VIM and Emacs both support folding.
 
 	Dockapps use a variety of methods to signal to the window manager that
-	they are a dockapp. ion-devel automatically detects some (see
-	manage_clientwin() in ioncore/clientwin.c), and ion-devel-dock detects
+	they are a dockapp. Ion automatically detects some (see
+	manage_clientwin() in ioncore/clientwin.c), and the dock detects
 	some others (see dock_clientwin_is_dockapp() in dock.c).  Adding more
 	dockapp types will require editing these functions and possibly writing
 	type-specific management code.
@@ -94,7 +94,7 @@ IMPLEMENTATION NOTES
 	sequence of events is as follows:
 	1. gkrellm2 starts and gets added to the dock with is initial geom.
 	2. gkrellm2 grows as it loads plugins.
-	3. ion-devel-dock allocates more space to gkrellm2 and requests
+	3. The dock allocates more space to gkrellm2 and requests
 	   gkrellm2's new shape, but gkrellm2 reports its old shape.
 	4. Further requests to gkrellm2 return is new (actual) shape, but by
 	    now it's too late...
