@@ -20,35 +20,22 @@ DEPENDENCIES
 
 	ion3
 
-INSTALLATION
+USAGE
 
-	1. Edit Makefile to ensure TOPDIR points to your top-level ion source
-	   directory with a system.mk that matches the version of ion installed
-	   on your system.
+	1. Copy the configuration files cfg_dock.lua and dock-draw.lua to
+	   your ~/.ion3 directory. Edit cfg_dock.lua and dock-draw.lua to
+	   suit your preferences.
 
-	2. Run make.
+	2. Add load_module("mod_dock") to ~/.ion3/cfg_ion.lua.
 
-	3. Either run (as root)
-		# make install
-	   or (as yourself),
-		$ mkdir -p ~/.ion3/lib
-		$ cp .libs/dock.* ~/.ion3/lib
-
-
-	4. Copy the configuration files to your ~/.ion3 directory:
-		$ cp dock.lua dock-draw.lua ~/.ion3
-	   Edit dock.lua and dock-draw.lua to suit your preferences.
-
-	5. Add load_module("dock") to ~/.ion3/ion.lua.
-
-	6. Add include("dock-draw.lua") near the end of ~/.ion3/draw.lua,
+	3. Add include("dock-draw.lua") near the end of ~/.ion3/draw.lua,
 	   before gr_refresh().
 
-	7. (Re)start ion3.
+	4. (Re)start ion3.
 
 CONFIGURATION
 
-	See the comments in dock.lua dock-draw.lua.
+	See the comments in cfg_dock.lua and dock-draw.lua.
 
 KNOWN BUGS
 
@@ -62,7 +49,7 @@ KNOWN BUGS
 	- gkrellm2 can have the wrong shape if it is started after the dock
 	  module is loaded.
 
-	- wmxmms needs a winprop{...}. See the example dock.lua. Ion
+	- wmxmms needs a winprop{...}. See the example cfg_dock.lua. Ion
 	  complains: Client window "wmxmms" has broken transient_for hint.
 	  ("Extended WM hints" multi-parent brain damage?).
 
@@ -84,9 +71,9 @@ IMPLEMENTATION NOTES
 
 	The dock should really implement region_save_to_file()/region_load() to
 	maintain state over a restart and session management. However, over
-	restart a new dock will also be created by dock.lua, meaning that there
+	restart a new dock will also be created by cfg_dock.lua, meaning that there
 	will be multiple docks on the same screen. The solution is probably to
-	automatically create docks as they are required, with dock.lua
+	automatically create docks as they are required, with cfg_dock.lua
 	specifying the default configuration of new docks but not actually
 	creating any docks.
 
