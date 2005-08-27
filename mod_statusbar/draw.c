@@ -87,6 +87,7 @@ void statusbar_draw(WStatusBar *sb, bool complete)
     bool right_align=FALSE;
     WMPlex *mgr;
     int ty, minx, maxx;
+    int nleft=0, nright=0;
     
     if(sb->brush==NULL)
         return;
@@ -122,11 +123,25 @@ void statusbar_draw(WStatusBar *sb, bool complete)
 
     ty=(g.y+fnte.baseline+(g.h-fnte.max_height)/2);
     
-    if(!right_align){
-        draw_elems(sb->brush, &g, ty, sb->elems, sb->nelems, 
-                   TRUE, NULL, complete);
+    if(sb->filleridx>=0){
+        nleft=sb->filleridx;
+        nright=sb->nelems-(sb->filleridx+1);
+    }else if(!right_align){
+        nleft=sb->nelems;
+        nright=0;
     }else{
-        draw_elems_ra(sb->brush, &g, ty, sb->elems, sb->nelems, 
+        nleft=0;
+        nright=sb->nelems;
+    }
+
+        
+    if(nleft>0){
+        draw_elems(sb->brush, &g, ty, sb->elems, nleft,
+                   TRUE, NULL, complete);
+    }
+    
+    if(nright>0){
+        draw_elems_ra(sb->brush, &g, ty, sb->elems+sb->nelems-nright, nright,
                       TRUE, NULL, complete);
     }
     

@@ -20,8 +20,14 @@ mod_statusbar.create{
     --   mail_*_new    mail count (from an alternate mail folder, see below)
     --   mail_*_unread mail count
     --   mail_*_total  mail count
-    -- Space preceded by % adds stretchable space. > before meter name 
-    -- aligns right, < left, and | centers.
+    --
+    -- Space preceded by % adds stretchable space for alignment of variable
+    -- meter value widths. > before meter name aligns right using this 
+    -- stretchable space , < left, and | centers.
+    --
+    -- %filler causes things on the marker's sides to be aligned left and
+    -- right, respectively.
+    --
     --template="[ %date || load:% %>load || mail:% %>mail_new/%>mail_total ]",
     --template="[ %date || load: %05load_1min || mail: %02mail_new/%02mail_total ]",
 }

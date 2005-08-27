@@ -103,7 +103,10 @@ local function process_template(template, meter_f, text_f, stretch_f)
                 -- Extract [alignment][zero padding]<meter name>
                 local pat='^([<|>]?)(0*[0-9]*)([a-zA-Z0-9_]+)(.*)'
                 st, en, c, p, b, r=string.find(template, pat)
-                if b then
+                if b=="filler" then
+                    stretch_f('f')
+                    template=r
+                elseif b then
                     meter_f(b, c, tonumber(p))
                     template=r
                 end
@@ -140,8 +143,7 @@ function mod_statusbar.get_template_table(stng)
                      -- stretch
                      function(t)
                          table.insert(res, {
-                             type=3,
-                             text=t,
+                             type=(t=='f' and 4 or 3),
                          })
                      end)
     return res

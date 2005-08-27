@@ -31,7 +31,8 @@ typedef enum{
     WSBELEM_NONE=0,
     WSBELEM_TEXT=1,
     WSBELEM_METER=2,
-    WSBELEM_STRETCH=3
+    WSBELEM_STRETCH=3,
+    WSBELEM_FILLER=4
 } WSBElemType;
   
 
@@ -58,6 +59,7 @@ DECLCLASS(WStatusBar){
     WSBElem *elems;
     int nelems;
     int natural_w, natural_h;
+    int filleridx;
 };
 
 extern bool statusbar_init(WStatusBar *p, WWindow *parent, 

@@ -49,6 +49,7 @@ bool statusbar_init(WStatusBar *p, WWindow *parent, const WFitParams *fp)
     p->nelems=0;
     p->natural_w=1;
     p->natural_h=1;
+    p->filleridx=-1;
     
     statusbar_updategr(p);
 
@@ -91,12 +92,13 @@ void statusbar_deinit(WStatusBar *p)
 /*{{{ Content stuff */
 
 
-static WSBElem *get_sbelems(ExtlTab t, int *nret)
+static WSBElem *get_sbelems(ExtlTab t, int *nret, int *filleridxret)
 {
     int i, n=extl_table_get_n(t);
     WSBElem *el;
     
     *nret=0;
+    *filleridxret=-1;
     
     if(n<=0)
         return NULL;
@@ -130,6 +132,8 @@ static WSBElem *get_sbelems(ExtlTab t, int *nret)
                     extl_table_gets_i(tt, "align", &(el[i].align));
                     extl_table_gets_i(tt, "zeropad", &(el[i].zeropad));
                     el[i].zeropad=maxof(el[i].zeropad, 0);
+                }else if(el[i].type==WSBELEM_FILLER){
+                    *filleridxret=i;
                 }
             }
             extl_unref_table(tt);
@@ -165,7 +169,7 @@ static void statusbar_set_elems(WStatusBar *sb, ExtlTab t)
 {
     statusbar_free_elems(sb);
     
-    sb->elems=get_sbelems(t, &(sb->nelems));
+    sb->elems=get_sbelems(t, &(sb->nelems), &(sb->filleridx));
 }
 
 
@@ -175,6 +179,7 @@ static void statusbar_free_elems(WStatusBar *sb)
         free_sbelems(sb->elems, sb->nelems);
         sb->elems=NULL;
         sb->nelems=0;
+        sb->filleridx=-1;
     }
 }
 
