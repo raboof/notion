@@ -265,8 +265,8 @@ static bool moveresmode_init(WMoveresMode *mode, WRegion *reg,
     
     /* Set up info window */
     {
-        int x=mode->parent_rx+mode->geom.x+mode->geom.w/2;
-        int y=mode->parent_ry+mode->geom.y+mode->geom.h/2;
+        int x=mode->geom.x+mode->geom.w/2;
+        int y=mode->geom.y+mode->geom.h/2;
         mode->infowin=setup_moveres_display(parent, x, y);
     }
                                         
