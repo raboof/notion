@@ -863,7 +863,7 @@ WRegion *floatws_backcirculate(WFloatWS *ws)
            && st->reg!=ws->managed_stdisp){
             break;
         }
-        st=st->next;
+        st=st->prev;
         if(st==ststart)
             return NULL;
     }
