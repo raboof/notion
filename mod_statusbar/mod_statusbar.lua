@@ -27,7 +27,8 @@ assert(mod_statusbar)
 -- Default settings
 local defaults={
     template=string.format(
-        "[ %%date || %s: %%load || %s: %%mail_new/%%mail_total ]",
+        "[ %%date || %s: %%load ]",
+        --"[ %%date || %s: %%load || %s: %%mail_new/%%mail_total ]",
         TR("load"), TR("mail")
     ),
 }
