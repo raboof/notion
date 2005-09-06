@@ -7,7 +7,8 @@ TOPDIR=..
 include $(TOPDIR)/system-inc.mk
 
 XGETTEXT = xgettext
-MSGFMT = msgfmt -c
+#MSGFMT = msgfmt -c
+MSGFMT = msgfmt
 MSGMERGE = msgmerge
 LXGETTEXT = $(LUA) $(TOPDIR)/build/lxgettext.lua
 
