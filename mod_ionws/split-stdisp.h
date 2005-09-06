@@ -18,4 +18,7 @@ extern bool split_try_sink_stdisp(WSplitSplit *node, bool iterate, bool force);
 extern bool split_try_unsink_stdisp(WSplitSplit *node, bool iterate, bool force);
 extern bool split_regularise_stdisp(WSplitST *stdisp);
 
+extern int stdisp_recommended_w(WSplitST *stdisp);
+extern int stdisp_recommended_h(WSplitST *stdisp);
+
 #endif /* ION_MOD_IONWS_SPLIT_STDISP_H */

@@ -18,7 +18,6 @@
 INTRSTRUCT(WManageParams);
 
 #include "clientwin.h"
-#include "genws.h"
 #include "attach.h"
 #include "rectangle.h"
 #include "extlconv.h"

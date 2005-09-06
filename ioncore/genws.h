@@ -12,10 +12,11 @@
 #ifndef ION_IONCORE_GENWS_H
 #define ION_IONCORE_GENWS_H
 
+#include <libextl/extl.h>
 #include "region.h"
 #include "window.h"
-#include <libextl/extl.h>
 #include "rectangle.h"
+#include "mplex.h"
 
 DECLCLASS(WGenWS){
     WRegion reg;
@@ -31,7 +32,8 @@ extern Window genws_xwindow(const WGenWS *ws);
 extern void genws_do_map(WGenWS *ws);
 extern void genws_do_unmap(WGenWS *ws);
 
-DYNFUN void genws_manage_stdisp(WGenWS *ws, WRegion *stdisp, int pos);
+DYNFUN void genws_manage_stdisp(WGenWS *ws, WRegion *stdisp, 
+                                const WMPlexSTDispInfo *info);
 DYNFUN void genws_unmanage_stdisp(WGenWS *ws, bool permanent, bool nofocus);
 
 #endif /* ION_IONCORE_GENWS_H */

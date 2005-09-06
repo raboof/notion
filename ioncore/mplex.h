@@ -57,8 +57,8 @@ INTRSTRUCT(WLListNode); /* in mplexp.h */
 
 
 DECLSTRUCT(WMPlexSTDispInfo){
-    Watch regwatch;
     int pos;
+    bool fullsize;
 };
 
 
@@ -91,6 +91,7 @@ DECLCLASS(WMPlex){
     WLListNode *l2_current;
     WMPlexPHolder *l2_phs;
     
+    Watch stdispwatch;
     WMPlexSTDispInfo stdispinfo;
 };
 
@@ -192,8 +193,10 @@ extern void mplex_load_contents(WMPlex *frame, ExtlTab tab);
 
 /* Sticky status display support */
 
-extern bool mplex_set_stdisp(WMPlex *mplex, WRegion *stdisp, int pos);
-extern void mplex_get_stdisp(WMPlex *mplex, WRegion **stdisp, int *pos);
+extern bool mplex_set_stdisp(WMPlex *mplex, WRegion *stdisp, 
+                             const WMPlexSTDispInfo *info);
+extern void mplex_get_stdisp(WMPlex *mplex, WRegion **stdisp, 
+                             WMPlexSTDispInfo *info);
 
 extern WRegion *mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t);
 extern ExtlTab mplex_get_stdisp_extl(WMPlex *mplex);

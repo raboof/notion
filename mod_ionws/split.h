@@ -82,6 +82,7 @@ DECLCLASS(WSplitST){
     WSplitRegion regnode;
     int orientation;
     int corner;
+    bool fullsize;
 };
 
 

@@ -497,6 +497,18 @@ void statusbar_updategr(WStatusBar *p)
 /*}}}*/
 
 
+/*{{{ Misc */
+
+
+int statusbar_orientation(WStatusBar *sb)
+{
+    return REGION_ORIENTATION_HORIZONTAL;
+}
+
+
+/*}}}*/
+
+
 /*{{{ Load */
 
 
@@ -516,6 +528,7 @@ static DynFunTab statusbar_dynfuntab[]={
     {window_draw, statusbar_draw},
     {region_updategr, statusbar_updategr},
     {region_size_hints, statusbar_size_hints},
+    {(DynFun*)region_orientation, (DynFun*)statusbar_orientation},
     END_DYNFUNTAB
 };
 

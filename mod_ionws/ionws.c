@@ -301,7 +301,8 @@ void ionws_unmanage_stdisp(WIonWS *ws, bool permanent, bool nofocus)
 
 
 static void ionws_create_stdispnode(WIonWS *ws, WRegion *stdisp, 
-                                    int corner, int orientation)
+                                    int corner, int orientation, 
+                                    bool fullsize)
 {
     int flags=REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y;
     WRectangle *wg=&REGION_GEOM(ws), dg;
@@ -335,6 +336,7 @@ static void ionws_create_stdispnode(WIonWS *ws, WRegion *stdisp,
     
     stdispnode->corner=corner;
     stdispnode->orientation=orientation;
+    stdispnode->fullsize=fullsize;
     
     split=create_splitsplit(wg, (orientation==REGION_ORIENTATION_HORIZONTAL 
                                  ? SPLIT_VERTICAL
@@ -371,7 +373,8 @@ static void ionws_create_stdispnode(WIonWS *ws, WRegion *stdisp,
 }
 
 
-void ionws_manage_stdisp(WIonWS *ws, WRegion *stdisp, int corner)
+void ionws_manage_stdisp(WIonWS *ws, WRegion *stdisp, 
+                         const WMPlexSTDispInfo *di)
 {
     bool mcf=region_may_control_focus((WRegion*)ws);
     int flags=REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y;
@@ -389,13 +392,14 @@ void ionws_manage_stdisp(WIonWS *ws, WRegion *stdisp, int corner)
 
     /* Remove old stdisp if corner and orientation don't match.
      */
-    if(ws->stdispnode!=NULL && (corner!=ws->stdispnode->corner ||
+    if(ws->stdispnode!=NULL && (di->pos!=ws->stdispnode->corner ||
                                 orientation!=ws->stdispnode->orientation)){
         ionws_unmanage_stdisp(ws, TRUE, TRUE);
     }
 
     if(ws->stdispnode==NULL){
-        ionws_create_stdispnode(ws, stdisp, corner, orientation);
+        ionws_create_stdispnode(ws, stdisp, di->pos, orientation, 
+                                di->fullsize);
         if(ws->stdispnode==NULL)
             return;
     }else{
@@ -407,6 +411,7 @@ void ionws_manage_stdisp(WIonWS *ws, WRegion *stdisp, int corner)
             assert(ws->stdispnode->regnode.reg==NULL);
         }
         
+        ws->stdispnode->fullsize=di->fullsize;
         ws->stdispnode->regnode.reg=stdisp;
         splittree_set_node_of(stdisp, &(ws->stdispnode->regnode));
     }
@@ -418,10 +423,8 @@ void ionws_manage_stdisp(WIonWS *ws, WRegion *stdisp, int corner)
     
     dg=((WSplit*)(ws->stdispnode))->geom;
     
-    if(orientation==REGION_ORIENTATION_HORIZONTAL)
-        dg.h=maxof(CF_STDISP_MIN_SZ, region_min_h(stdisp));
-    else
-        dg.w=maxof(CF_STDISP_MIN_SZ, region_min_w(stdisp));
+    dg.h=stdisp_recommended_h(ws->stdispnode);
+    dg.w=stdisp_recommended_w(ws->stdispnode);
     
     splittree_rqgeom((WSplit*)(ws->stdispnode), flags, &dg, FALSE);
     

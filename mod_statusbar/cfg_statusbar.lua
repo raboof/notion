@@ -8,6 +8,7 @@ mod_statusbar.create{
     -- First screen, bottom left corner
     screen=0,
     pos='bl',
+    fullsize=false,
 
     -- Template. Tokens %string are replaced with the value of the 
     -- corresponding meter. Currently supported meters are:

@@ -63,8 +63,9 @@ bool mplex_do_init(WMPlex *mplex, WWindow *parent, Window win,
     mplex->l2_current=NULL;
     mplex->l2_phs=NULL;
     
-    watch_init(&(mplex->stdispinfo.regwatch));
+    watch_init(&(mplex->stdispwatch));
     mplex->stdispinfo.pos=MPLEX_STDISP_BL;
+    mplex->stdispinfo.fullsize=FALSE;
     
     if(create){
         if(!window_init((WWindow*)mplex, parent, fp))
@@ -548,7 +549,7 @@ static bool mplex_do_node_display(WMPlex *mplex, WLListNode *node,
         if(node==mplex->l2_current)
             return TRUE;
     }else{
-        WRegion *stdisp=(WRegion*)(mplex->stdispinfo.regwatch.obj);
+        WRegion *stdisp=(WRegion*)(mplex->stdispwatch.obj);
 
         if(node==mplex->l1_current)
             return mplex_l2_try_make_passive(mplex, nohide);
@@ -564,7 +565,7 @@ static bool mplex_do_node_display(WMPlex *mplex, WLListNode *node,
                     }
                     
                     genws_manage_stdisp((WGenWS*)sub, stdisp, 
-                                        mplex->stdispinfo.pos);
+                                        &(mplex->stdispinfo));
                 }
             }else{
                 genws_unmanage_stdisp((WGenWS*)sub, TRUE, FALSE);
@@ -1118,7 +1119,7 @@ void mplex_managed_remove(WMPlex *mplex, WRegion *sub)
 {
     bool l2=FALSE;
     bool sw=FALSE;
-    WRegion *stdisp=(WRegion*)(mplex->stdispinfo.regwatch.obj);
+    WRegion *stdisp=(WRegion*)(mplex->stdispwatch.obj);
     WLListNode *node, *next=NULL;
     
     if(OBJ_IS(sub, WGenWS) && stdisp!=NULL && REGION_MANAGER(stdisp)==sub){
@@ -1208,11 +1209,9 @@ bool mplex_rescue_clientwins(WMPlex *mplex, WPHolder *ph)
 
 void mplex_child_removed(WMPlex *mplex, WRegion *sub)
 {
-    WMPlexSTDispInfo *di=&(mplex->stdispinfo);
-    
-    if(sub==(WRegion*)(di->regwatch.obj)){
-        watch_reset(&(di->regwatch));
-        mplex_set_stdisp(mplex, NULL, di->pos);
+    if(sub==(WRegion*)(mplex->stdispwatch.obj)){
+        watch_reset(&(mplex->stdispwatch));
+        mplex_set_stdisp(mplex, NULL, NULL);
     }
 }
 
@@ -1242,13 +1241,13 @@ static void stdisp_watch_handler(Watch *watch, Obj *obj)
 }
 
 
-bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg, int pos)
+bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg, 
+                      const WMPlexSTDispInfo *din)
 {
-    WMPlexSTDispInfo *di=&(mplex->stdispinfo);
-    WRegion *oldstdisp=(WRegion*)(di->regwatch.obj);
+    WRegion *oldstdisp=(WRegion*)(mplex->stdispwatch.obj);
     WGenWS *mgr=NULL;
     
-    assert(reg==NULL || (Obj*)reg==di->regwatch.obj ||
+    assert(reg==NULL || (reg==oldstdisp) ||
            (REGION_MANAGER(reg)==NULL && 
             REGION_PARENT(reg)==(WWindow*)mplex));
     
@@ -1256,20 +1255,21 @@ bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg, int pos)
         mgr=OBJ_CAST(REGION_MANAGER(oldstdisp), WGenWS);
         
         if(oldstdisp!=reg){
-            mainloop_defer_destroy(di->regwatch.obj);
-            watch_reset(&(di->regwatch));
+            mainloop_defer_destroy((Obj*)oldstdisp);
+            watch_reset(&(mplex->stdispwatch));
         }
     }
     
-    di->pos=pos;
+    mplex->stdispinfo=*din;
     
     if(reg==NULL){
         if(mgr!=NULL){
             genws_unmanage_stdisp((WGenWS*)mgr, TRUE, FALSE);
-            region_detach_manager(oldstdisp);
+            if(oldstdisp!=NULL)
+                region_detach_manager(oldstdisp);
         }
     }else{
-        watch_setup(&(di->regwatch), (Obj*)reg, stdisp_watch_handler);
+        watch_setup(&(mplex->stdispwatch), (Obj*)reg, stdisp_watch_handler);
         
         if(mplex->l1_current!=NULL
            && OBJ_IS(mplex->l1_current->reg, WGenWS)
@@ -1281,7 +1281,7 @@ bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg, int pos)
             mgr=(WGenWS*)(mplex->l1_current->reg);
         }
         if(mgr!=NULL)
-            genws_manage_stdisp(mgr, reg, di->pos);
+            genws_manage_stdisp(mgr, reg, &(mplex->stdispinfo));
         else
             region_unmap(reg);
     }
@@ -1290,12 +1290,10 @@ bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg, int pos)
 }
 
 
-void mplex_get_stdisp(WMPlex *mplex, WRegion **reg, int *pos)
+void mplex_get_stdisp(WMPlex *mplex, WRegion **reg, WMPlexSTDispInfo *di)
 {
-    WMPlexSTDispInfo *di=&(mplex->stdispinfo);
-    
-    *reg=(WRegion*)di->regwatch.obj;
-    *pos=di->pos;
+    *di=mplex->stdispinfo;
+    *reg=(WRegion*)mplex->stdispwatch.obj;
 }
 
 
@@ -1341,16 +1339,18 @@ EXTL_EXPORT_AS(WMPlex, set_stdisp)
 WRegion *mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t)
 {
     WRegion *stdisp=NULL;
-    int p=mplex->stdispinfo.pos;
+    WMPlexSTDispInfo din=mplex->stdispinfo;
     char *s;
     
     if(extl_table_gets_s(t, "pos", &s)){
-        p=stringintmap_value(pos_map, s, -1);
-        if(p<0){
+        din.pos=stringintmap_value(pos_map, s, -1);
+        if(din.pos<0){
             warn(TR("Invalid position setting."));
             return NULL;
         }
     }
+    
+    extl_table_gets_b(t, "fullsize", &(din.fullsize));
     
     s=NULL;
     extl_table_gets_s(t, "action", &s);
@@ -1378,13 +1378,13 @@ WRegion *mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t)
             return NULL;
         
     }else if(strcmp(s, "keep")==0){
-        stdisp=(WRegion*)(mplex->stdispinfo.regwatch.obj);
+        stdisp=(WRegion*)(mplex->stdispwatch.obj);
     }else if(strcmp(s, "remove")!=0){
         warn(TR("Invalid action setting."));
         return FALSE;
     }
     
-    if(!mplex_set_stdisp(mplex, stdisp, p)){
+    if(!mplex_set_stdisp(mplex, stdisp, &din)){
         destroy_obj((Obj*)stdisp);
         return NULL;
     }
@@ -1395,23 +1395,25 @@ WRegion *mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t)
 
 static ExtlTab mplex_do_get_stdisp_extl(WMPlex *mplex, bool fullconfig)
 {
-    WMPlexSTDispInfo *di=&(mplex->stdispinfo);
+    WRegion *reg=(WRegion*)mplex->stdispwatch.obj;
     ExtlTab t;
     
-    if(di->regwatch.obj==NULL)
+    if(reg==NULL)
         return extl_table_none();
     
     if(fullconfig){
-        t=region_get_configuration((WRegion*)di->regwatch.obj);
-        extl_table_sets_rectangle(t, "geom", &REGION_GEOM(di->regwatch.obj));
+        t=region_get_configuration(reg);
+        extl_table_sets_rectangle(t, "geom", &REGION_GEOM(reg));
     }else{
         t=extl_create_table();
-        extl_table_sets_o(t, "reg", di->regwatch.obj);
+        extl_table_sets_o(t, "reg", (Obj*)reg);
     }
     
-    if(t!=extl_table_none())
+    if(t!=extl_table_none()){
+        WMPlexSTDispInfo *di=&(mplex->stdispinfo);
         extl_table_sets_s(t, "pos", stringintmap_key(pos_map, di->pos, NULL));
-    
+        extl_table_sets_b(t, "fullsize", di->fullsize);
+    }
     return t;
 }
 

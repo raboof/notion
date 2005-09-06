@@ -47,7 +47,7 @@ DECLSTRUCT(WFloatWSPHAttachParams){
 DECLCLASS(WFloatWS){
     WGenWS genws;
     WRegion *managed_stdisp;
-    int stdisp_corner;
+    WMPlexSTDispInfo stdispi;
     WRegion *current_managed;
 };
 

@@ -43,7 +43,7 @@ static WFloatStacking *stacking=NULL;
 
 
 static void floatws_place_stdisp(WFloatWS *ws, WWindow *parent,
-                                 int corner, WRegion *stdisp);
+                                 int pos, WRegion *stdisp);
 static void floatws_do_raise(WFloatWS *ws, WRegion *reg, bool initial);
 
 
@@ -351,7 +351,8 @@ static bool floatws_init(WFloatWS *ws, WWindow *parent, const WFitParams *fp)
 {
     ws->current_managed=NULL;
     ws->managed_stdisp=NULL;
-    ws->stdisp_corner=MPLEX_STDISP_BL;
+    ws->stdispi.pos=MPLEX_STDISP_BL;
+    ws->stdispi.fullsize=FALSE;
 
     if(!genws_init(&(ws->genws), parent, fp))
         return FALSE;
@@ -750,44 +751,83 @@ bool mod_floatws_clientwin_do_manage(WClientWin *cwin,
 /*{{{ Sticky status display support */
 
 
-static void floatws_place_stdisp(WFloatWS *ws, WWindow *par,
-                                 int corner, WRegion *stdisp)
+static void floatws_stdisp_geom(WFloatWS *ws, WRegion *stdisp, 
+                                WRectangle *g)
 {
-    WFitParams fp;
     WRectangle *wg=&REGION_GEOM(ws);
-    
-    fp.g.w=minof(wg->w, maxof(CF_STDISP_MIN_SZ, region_min_w(stdisp)));
-    fp.g.h=minof(wg->h, maxof(CF_STDISP_MIN_SZ, region_min_h(stdisp)));
-    
-    if(corner==MPLEX_STDISP_TL || corner==MPLEX_STDISP_BL)
-        fp.g.x=wg->x;
-    else
-        fp.g.x=wg->x+wg->w-fp.g.w;
+    int pos=ws->stdispi.pos;
+    bool fullsize=ws->stdispi.fullsize;
 
-    if(corner==MPLEX_STDISP_TL || corner==MPLEX_STDISP_TR)
-        fp.g.y=wg->y;
-    else
-        fp.g.y=wg->y+wg->h-fp.g.h;
-        
-    fp.mode=REGION_FIT_EXACT;
+    g->w=minof(wg->w, maxof(CF_STDISP_MIN_SZ, region_min_w(stdisp)));
+    g->h=minof(wg->h, maxof(CF_STDISP_MIN_SZ, region_min_h(stdisp)));
     
-    region_fitrep(stdisp, par, &fp);
+    if(fullsize){
+        switch(region_orientation(stdisp)){
+        case REGION_ORIENTATION_HORIZONTAL:
+            g->w=wg->w;
+            break;
+        case REGION_ORIENTATION_VERTICAL:
+            g->h=wg->h;
+            break;
+        }
+    }
+    
+    if(pos==MPLEX_STDISP_TL || pos==MPLEX_STDISP_BL)
+        g->x=wg->x;
+    else
+        g->x=wg->x+wg->w-g->w;
+
+    if(pos==MPLEX_STDISP_TL || pos==MPLEX_STDISP_TR)
+        g->y=wg->y;
+    else
+        g->y=wg->y+wg->h-g->h;
 }
 
 
-void floatws_manage_stdisp(WFloatWS *ws, WRegion *stdisp, int corner)
+void floatws_manage_stdisp(WFloatWS *ws, WRegion *stdisp, 
+                           const WMPlexSTDispInfo *di)
 {
-    if(REGION_MANAGER(stdisp)==(WRegion*)ws)
-        return;
+    WFitParams fp;
     
-    region_detach_manager(stdisp);
+    if(REGION_MANAGER(stdisp)==(WRegion*)ws){
+        if(di->pos==ws->stdispi.pos && 
+           di->fullsize==ws->stdispi.fullsize){
+            return;
+        }
+    }else{
+        region_detach_manager(stdisp);
+        
+        floatws_add_managed(ws, stdisp);
+        
+        ws->managed_stdisp=stdisp;
+    }
+        
+    ws->stdispi=*di;
     
-    floatws_add_managed(ws, stdisp);
+    floatws_stdisp_geom(ws, stdisp, &fp.g);
+    
+    fp.mode=REGION_FIT_EXACT;
+    
+    region_fitrep(stdisp, NULL, &fp);
+}
 
-    ws->stdisp_corner=corner;
-    ws->managed_stdisp=stdisp;
+
+void floatws_managed_rqgeom(WFloatWS *ws, WRegion *reg,
+                            int flags, const WRectangle *geom,
+                            WRectangle *geomret)
+{
+    WRectangle g;
     
-    floatws_place_stdisp(ws, NULL, corner, stdisp);
+    if(reg==ws->managed_stdisp)
+        floatws_stdisp_geom(ws, reg, &g);
+    else
+        g=*geom;
+    
+    if(geomret!=NULL)
+        *geomret=g;
+    
+    if(!(flags&REGION_RQGEOM_TRYONLY))
+        region_fit(reg, &g, REGION_FIT_EXACT);
 }
 
 
@@ -1414,6 +1454,9 @@ static DynFunTab floatws_dynfuntab[]={
 
     {(DynFun*)region_get_rescue_pholder_for,
      (DynFun*)floatws_get_rescue_pholder_for},
+
+    {region_managed_rqgeom,
+     floatws_managed_rqgeom},
     
     END_DYNFUNTAB
 };

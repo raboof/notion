@@ -15,6 +15,7 @@
 #include <ioncore/resize.h>
 #include "split.h"
 #include "split-stdisp.h"
+#include "ionws.h"
 
 
 /*{{{ Helper routines */
@@ -77,20 +78,32 @@ static void swapgeom(WRectangle *g, WRectangle *h)
 }
 
 
-static int recommended_w(WSplitST *stdisp)
+int stdisp_recommended_w(WSplitST *stdisp)
 {
     if(stdisp->regnode.reg==NULL)
         return CF_STDISP_MIN_SZ;
+    
+    if(stdisp->fullsize && stdisp->orientation==REGION_ORIENTATION_HORIZONTAL){
+        WIonWS *ws=REGION_MANAGER_CHK(stdisp->regnode.reg, WIonWS);
+        assert(ws!=NULL);
+        return REGION_GEOM(ws).w;
+    }
     
     return maxof(CF_STDISP_MIN_SZ, region_min_w(stdisp->regnode.reg));
 }
 
 
-static int recommended_h(WSplitST *stdisp)
+int stdisp_recommended_h(WSplitST *stdisp)
 {
     if(stdisp->regnode.reg==NULL)
         return CF_STDISP_MIN_SZ;
     
+    if(stdisp->fullsize && stdisp->orientation==REGION_ORIENTATION_VERTICAL){
+        WIonWS *ws=REGION_MANAGER_CHK(stdisp->regnode.reg, WIonWS);
+        assert(ws!=NULL);
+        return REGION_GEOM(ws).h;
+    }
+
     return maxof(CF_STDISP_MIN_SZ, region_min_h(stdisp->regnode.reg));
 }
 
@@ -449,11 +462,11 @@ static bool do_try_sink_stdisp_orth(WSplitSplit *p, WSplitST *stdisp,
     if(STDISP_GROWS_T_TO_B(stdisp) || STDISP_GROWS_L_TO_R(stdisp)){
         if(STDISP_GROWS_L_TO_R(stdisp)){
             assert(other->dir==SPLIT_HORIZONTAL);
-            if(other->tl->geom.w>=recommended_w(stdisp))
+            if(other->tl->geom.w>=stdisp_recommended_w(stdisp))
                 doit=TRUE;
         }else{ /* STDISP_GROWS_T_TO_B */
             assert(other->dir==SPLIT_VERTICAL);
-            if(other->tl->geom.h>=recommended_h(stdisp))
+            if(other->tl->geom.h>=stdisp_recommended_h(stdisp))
                 doit=TRUE;
         }
         
@@ -466,11 +479,11 @@ static bool do_try_sink_stdisp_orth(WSplitSplit *p, WSplitST *stdisp,
     }else{ /* STDISP_GROWS_B_TO_T or STDISP_GROW_R_TO_L */
         if(STDISP_GROWS_R_TO_L(stdisp)){
             assert(other->dir==SPLIT_HORIZONTAL);
-            if(other->br->geom.w>=recommended_w(stdisp))
+            if(other->br->geom.w>=stdisp_recommended_w(stdisp))
                 doit=TRUE;
         }else{ /* STDISP_GROWS_B_TO_T */
             assert(other->dir==SPLIT_VERTICAL);
-            if(other->br->geom.h>=recommended_h(stdisp))
+            if(other->br->geom.h>=stdisp_recommended_h(stdisp))
                 doit=TRUE;
         }
         
@@ -491,10 +504,10 @@ static bool do_try_sink_stdisp_para(WSplitSplit *p, WSplitST *stdisp,
 {
     if(!force){
         if(STDISP_IS_HORIZONTAL(stdisp)){
-            if(recommended_w(stdisp)>=GEOM(p).w)
+            if(stdisp_recommended_w(stdisp)>=GEOM(p).w)
                 return FALSE;
         }else{
-            if(recommended_h(stdisp)>=GEOM(p).h)
+            if(stdisp_recommended_h(stdisp)>=GEOM(p).h)
                 return FALSE;
         }
     }
@@ -569,11 +582,11 @@ static bool do_try_unsink_stdisp_orth(WSplitSplit *a, WSplitSplit *p,
     if(STDISP_GROWS_T_TO_B(stdisp) || STDISP_GROWS_L_TO_R(stdisp)){
         if(STDISP_GROWS_L_TO_R(stdisp)){
             assert(a->dir==SPLIT_HORIZONTAL);
-            if(GEOM(stdisp).w<recommended_w(stdisp))
+            if(GEOM(stdisp).w<stdisp_recommended_w(stdisp))
                 doit=TRUE;
         }else{ /* STDISP_GROWS_T_TO_B */
             assert(a->dir==SPLIT_VERTICAL);
-            if(GEOM(stdisp).h<recommended_h(stdisp))
+            if(GEOM(stdisp).h<stdisp_recommended_h(stdisp))
                 doit=TRUE;
         }
         
@@ -599,11 +612,11 @@ static bool do_try_unsink_stdisp_orth(WSplitSplit *a, WSplitSplit *p,
     }else{ /*STDISP_GROWS_B_TO_T || STDISP_GROWS_R_TO_L*/
         if(STDISP_GROWS_R_TO_L(stdisp)){
             assert(a->dir==SPLIT_HORIZONTAL);
-            if(GEOM(stdisp).w<recommended_w(stdisp))
+            if(GEOM(stdisp).w<stdisp_recommended_w(stdisp))
                 doit=TRUE;
         }else{ /* STDISP_GROWS_B_TO_T */
             assert(a->dir==SPLIT_VERTICAL);
-            if(GEOM(stdisp).h<recommended_h(stdisp))
+            if(GEOM(stdisp).h<stdisp_recommended_h(stdisp))
                 doit=TRUE;
         }
         
@@ -637,10 +650,10 @@ static bool do_try_unsink_stdisp_para(WSplitSplit *a, WSplitSplit *p,
 {
     if(!force){
         if(STDISP_IS_HORIZONTAL(stdisp)){
-            if(recommended_w(stdisp)<=GEOM(p).w)
+            if(stdisp_recommended_w(stdisp)<=GEOM(p).w)
                 return FALSE;
         }else{
-            if(recommended_h(stdisp)<=GEOM(p).h)
+            if(stdisp_recommended_h(stdisp)<=GEOM(p).h)
                 return FALSE;
         }
     }
@@ -715,14 +728,14 @@ bool split_regularise_stdisp(WSplitST *stdisp)
         return FALSE;
     
     if(STDISP_IS_HORIZONTAL(stdisp)){
-        if(GEOM(stdisp).w<recommended_w(stdisp))
+        if(GEOM(stdisp).w<stdisp_recommended_w(stdisp))
             return split_try_unsink_stdisp(node, TRUE, FALSE);
-        else if(GEOM(stdisp).w>recommended_w(stdisp))
+        else if(GEOM(stdisp).w>stdisp_recommended_w(stdisp))
             return split_try_sink_stdisp(node, TRUE, FALSE);
     }else{
-        if(GEOM(stdisp).h<recommended_h(stdisp))
+        if(GEOM(stdisp).h<stdisp_recommended_h(stdisp))
             return split_try_unsink_stdisp(node, TRUE, FALSE);
-        else if(GEOM(stdisp).h>recommended_h(stdisp))
+        else if(GEOM(stdisp).h>stdisp_recommended_h(stdisp))
             return split_try_sink_stdisp(node, TRUE, FALSE);
     }
     

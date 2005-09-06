@@ -113,9 +113,10 @@ WRegion *genws_rqclose_propagate(WGenWS *ws, WRegion *maybe_sub)
 /*{{{ Dynfuns */
 
 
-void genws_manage_stdisp(WGenWS *ws, WRegion *stdisp, int pos)
+void genws_manage_stdisp(WGenWS *ws, WRegion *stdisp, 
+                         const WMPlexSTDispInfo *info)
 {
-    CALL_DYN(genws_manage_stdisp, ws, (ws, stdisp, pos));
+    CALL_DYN(genws_manage_stdisp, ws, (ws, stdisp, info));
 }
 
 
