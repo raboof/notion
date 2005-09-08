@@ -609,13 +609,9 @@ void splitsplit_do_resize(WSplitSplit *node, const WRectangle *ng,
     assert(!transpose || (hprimn==PRIMN_ANY && vprimn==PRIMN_ANY));
     
     {
-        /* !!! Gotta do some STDISPNODE checking somewhere here perhaps? 
-         * Or perhaps where this is called from?
-         */
         WSplit *tl=node->tl, *br=node->br;
         int tls=split_size((WSplit*)tl, node->dir);
         int brs=split_size((WSplit*)br, node->dir);
-        /*int sz=split_size((WSplit*)node, node->dir);*/
         int sz=tls+brs;
         /* Status display can not be transposed. */
         int dir=((transpose && !stdisp_immediate_child(node))
@@ -627,7 +623,6 @@ void splitsplit_do_resize(WSplitSplit *node, const WRectangle *ng,
         int brmin, brmax, brunused, brused;
         WRectangle tlg=*ng, brg=*ng;
         
-        /* TODO: transpose handling */
         get_minmaxunused(tl, dir, &tlmin, &tlmax, &tlunused);
         get_minmaxunused(br, dir, &brmin, &brmax, &brunused);
         
@@ -797,32 +792,26 @@ static void splitsplit_do_rqsize(WSplitSplit *p, WSplit *node,
         adjust_sizes(&(ng.h), &(og.h), pg.h, ng.h+og.h,
                      node->min_h, other->min_h, node->max_h, other->max_h, 
                      PRIMN_TL /* node is passed as tl param */);
-        /*og.h=other->geom.h-amount;
-        ng.h=pg.h-og.h;*/
         if(thisnode==PRIMN_TL)
             og.y=pg.y+pg.h-og.h;
         else
             ng.y=pg.y+pg.h-ng.h;
         vprimn=thisnode;
-        /*assert(og.h>=0 && ng.h>=0);*/
     }else{
         ng.w=maxof(0, node->geom.w+amount);
         og.w=maxof(0, other->geom.w-amount);
         adjust_sizes(&(ng.w), &(og.w), pg.w, ng.w+og.w,
                      node->min_w, other->min_w, node->max_w, other->max_w, 
                      PRIMN_TL /* node is passed as tl param */);
-        /*og.w=other->geom.w-amount;
-        ng.w=pg.w-og.w;*/
         if(thisnode==PRIMN_TL)
             og.x=pg.x+pg.w-og.w;
         else
             ng.x=pg.x+pg.w-ng.w;
         hprimn=thisnode;
-        /*assert(og.w>=0 && ng.w>=0);*/
     }
     
     if(!tryonly){
-        /* Entä jos 'other' on stdisp? */
+        /* EntÃ¤ jos 'other' on stdisp? */
         split_do_resize(other, &og, hprimn, vprimn, FALSE);
         
         ((WSplit*)p)->geom=pg;
