@@ -21,9 +21,7 @@
 INTRCLASS(DEBrush);
 
 #include "style.h"
-
-#define MATCHES(S, A) (gr_stylespec_score(S, A)>0)
-#define MATCHES2(S, A1, A2) (gr_stylespec_score2(S, A1, A2)>0)
+#include "colour.h"
 
 
 typedef void DEBrushExtrasFn(DEBrush *brush, 

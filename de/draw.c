@@ -16,7 +16,7 @@
 #include <ioncore/gr.h>
 #include "brush.h"
 #include "font.h"
-#include "misc.h"
+#include "private.h"
 
 #include <X11/extensions/shape.h>
 

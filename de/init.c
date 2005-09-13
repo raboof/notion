@@ -23,7 +23,7 @@
 #include "brush.h"
 #include "font.h"
 #include "colour.h"
-#include "misc.h"
+#include "private.h"
 #include "init.h"
 #include "exports.h"
 

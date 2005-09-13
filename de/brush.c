@@ -23,7 +23,7 @@
 #include "style.h"
 #include "font.h"
 #include "colour.h"
-#include "misc.h"
+#include "private.h"
 
 
 /*{{{ Brush creation and releasing */

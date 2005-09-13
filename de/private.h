@@ -1,5 +1,5 @@
 /*
- * ion/de/misc.h
+ * ion/de/private.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2005. 
  *
@@ -9,10 +9,13 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_DE_MISC_H
-#define ION_DE_MISC_H
+#ifndef ION_DE_PRIVATE_H
+#define ION_DE_PRIVATE_H
 
 #define DE_SUB_IND " ->"
 #define DE_SUB_IND_LEN 3
 
-#endif /* ION_DE_MISC_H */
+#define MATCHES(S, A) (gr_stylespec_score(S, A)>0)
+#define MATCHES2(S, A1, A2) (gr_stylespec_score2(S, A1, A2)>0)
+
+#endif /* ION_DE_PRIVATE_H */
