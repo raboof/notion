@@ -14,7 +14,6 @@ INCLUDES += $(X11_INCLUDES) $(LIBTU_INCLUDES) $(LIBEXTL_INCLUDES) -I..
 CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
 SOURCES=dock.c
-ETC=cfg_dock.lua dock-draw.lua
 DOCS=LICENSE README.dock
 
 MAKE_EXPORTS=mod_dock
@@ -28,10 +27,6 @@ include $(TOPDIR)/rules.mk
 ######################################
 
 _install: module_install
-	$(INSTALLDIR) $(ETCDIR)
-	for i in $(ETC); do \
-		$(INSTALL) -m $(DATA_MODE) $$i $(ETCDIR); \
-	done
 
 ######################################
 

@@ -21,15 +21,13 @@ MAKE_EXPORTS = mod_statusbar
 MODULE = mod_statusbar
 MODULE_STUB = mod_statusbar.lua
 
-ETC = cfg_statusbar.lua
-
 ######################################
 
 include $(TOPDIR)/rules.mk
 
 ######################################
 
-_install: module_install etc_install symlink_install
+_install: module_install symlink_install
 
 symlink_install:
 	rm -f $(LCDIR)/ext_statusbar.lc
