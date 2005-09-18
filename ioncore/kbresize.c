@@ -351,10 +351,11 @@ static void cancel_moveres(WRegion *reg)
     
 /*EXTL_DOC
  * Enter move/resize mode for \var{reg}. The bindings set with
- * \fnref{WMoveresMode.bindings} are used in this mode and of
- * of the exported functions only \fnref{WMoveresMode.resize}, 
- * \fnref{WMoveresMode.move}, \fnref{WMoveresMode.cancel} and
- * \fnref{WMoveresMode.end} are allowed to be called.
+ * \fnref{ioncore.set_bindings} for \type{WMoveresMode} are used in 
+ * this mode. Of the functions exported by the Ion C core, only
+ * \fnref{WMoveresMode.resize}, \fnref{WMoveresMode.move}, 
+ * \fnref{WMoveresMode.cancel} and \fnref{WMoveresMode.end} are
+ * allowed to be called while in this mode.
  */
 EXTL_EXPORT_MEMBER
 WMoveresMode *region_begin_kbresize(WRegion *reg)
