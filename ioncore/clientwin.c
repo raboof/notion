@@ -727,12 +727,16 @@ static WRegion *clientwin_do_attach_transient_simple(WClientWin *cwin,
 
 
 
-bool clientwin_attach_transient(WClientWin *cwin, WRegion *transient)
+/*EXTL_DOC
+ * Manage \var{reg} as a transient of \var{cwin}.
+ */
+EXTL_EXPORT_MEMBER
+bool clientwin_attach_transient(WClientWin *cwin, WRegion *reg)
 {
-    return (region__attach_reparent((WRegion*)cwin, transient,
+    return (region__attach_reparent((WRegion*)cwin, reg,
                                     ((WRegionDoAttachFn*)
                                      clientwin_do_attach_transient), 
-                                    transient)!=NULL);
+                                    reg)!=NULL);
 }
 
 
