@@ -71,16 +71,6 @@ de.defstyle("tab", {
     text_align = "center",
 })
 
-de.defstyle("tab-frame", {
-    based_on = "tab",
-    de.substyle("*-*-*-*-activity", {
-        shadow_colour = "#401010",
-        highlight_colour = "#907070",
-        background_colour = "#990000",
-        foreground_colour = "#eeeeee",
-    }),
-})
-
 de.defstyle("tab-frame-tiled", {
     based_on = "tab-frame",
     spacing = 1,

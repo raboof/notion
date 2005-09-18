@@ -25,3 +25,13 @@ de.defstyle("actnotify", {
     background_colour = "#990000",
     foreground_colour = "#eeeeee",
 })
+
+de.defstyle("tab-frame", {
+    based_on = "tab",
+    de.substyle("*-*-*-*-activity", {
+        shadow_colour = "#e0c0c0",
+        highlight_colour = "#e0c0c0",
+        background_colour = "#990000",
+        foreground_colour = "#eeeeee",
+    }),
+})
