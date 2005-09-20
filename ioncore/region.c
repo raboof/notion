@@ -246,7 +246,7 @@ void region_child_removed(WRegion *reg, WRegion *sub)
 
 void region_manager_changed(WRegion *reg, WRegion *mgr_or_null)
 {
-    CALL_DYN(region_child_removed, reg, (reg, mgr_or_null));
+    CALL_DYN(region_manager_changed, reg, (reg, mgr_or_null));
 }
 
 

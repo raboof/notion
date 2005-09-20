@@ -1209,7 +1209,7 @@ bool mplex_rescue_clientwins(WMPlex *mplex, WPHolder *ph)
 
 void mplex_child_removed(WMPlex *mplex, WRegion *sub)
 {
-    if(sub==(WRegion*)(mplex->stdispwatch.obj)){
+    if(sub!=NULL && sub==(WRegion*)(mplex->stdispwatch.obj)){
         watch_reset(&(mplex->stdispwatch));
         mplex_set_stdisp(mplex, NULL, NULL);
     }
@@ -1260,7 +1260,8 @@ bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg,
         }
     }
     
-    mplex->stdispinfo=*din;
+    if(din!=NULL)
+        mplex->stdispinfo=*din;
     
     if(reg==NULL){
         if(mgr!=NULL){
