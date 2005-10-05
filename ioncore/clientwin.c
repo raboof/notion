@@ -733,6 +733,8 @@ static WRegion *clientwin_do_attach_transient_simple(WClientWin *cwin,
 EXTL_EXPORT_MEMBER
 bool clientwin_attach_transient(WClientWin *cwin, WRegion *reg)
 {
+    if(!reg)
+        return FALSE;
     return (region__attach_reparent((WRegion*)cwin, reg,
                                     ((WRegionDoAttachFn*)
                                      clientwin_do_attach_transient), 
