@@ -98,6 +98,32 @@ WRegion *ioncore_tags_take_first()
     return reg;
 }
 
+/*EXTL_DOC
+ * Returns a list of tagged regions.
+ */
+EXTL_SAFE
+EXTL_EXPORT
+ExtlTab ioncore_tagged_list()
+{
+    int n=0;
+    ExtlTab tab;
+    WRegion *region;
+    ObjListIterTmp tmp;
+
+    region=ioncore_tags_first();
+    if(!region)
+        return extl_table_none();
+
+    tab=extl_create_table();
+
+    FOR_ALL_ON_OBJLIST(WRegion*, region, taglist, tmp){
+        if(extl_table_seti_o(tab, n+1, (Obj*)region))
+            n++;
+    }
+
+    return tab;
+}
+
 
 /*}}}*/
 
