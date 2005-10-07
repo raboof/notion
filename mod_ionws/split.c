@@ -1708,7 +1708,7 @@ bool split_rotate_to(WSplit *node, const WRectangle *geom, int rotation)
         flip=SPLIT_HORIZONTAL;
         trans=TRUE;
     }else if(rotation==SCREEN_ROTATION_180){
-        /*flip=SPLIT_ANY;*/
+        flip=SPLIT_ANY;
     }else if(rotation==SCREEN_ROTATION_270){
         flip=SPLIT_VERTICAL;
         trans=TRUE;
