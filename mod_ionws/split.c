@@ -1556,51 +1556,7 @@ void split_reparent(WSplit *split, WWindow *wwin)
 /*}}}*/
 
 
-/*{{{ Transpose and flip */
-
-
-bool split_transpose_to(WSplit *node, const WRectangle *geom)
-{
-    WRectangle rg;
-    WSplit *node2;
-    
-    splittree_begin_resize();
-    
-    /* split_do_resize can do things right if 'node' has stdisp as child, 
-     * but otherwise transpose will put the stdisp in a bad split
-     * configuration if it is contained within 'node', so we must
-     * first move it and its fixed parent split below node. For correct
-     * geometry calculation we move it immediately below node, and
-     * resize stdisp's fixed parent node instead.
-     */
-    node2=move_stdisp_out_of_way(node);
-    
-    if(node2==NULL)
-        return FALSE;
-    
-    split_update_bounds(node2, TRUE);
-    
-    split_do_rqgeom_(node2, geom, PRIMN_ANY, PRIMN_ANY, &rg, FALSE);
-    
-    split_do_resize(node2, &rg, PRIMN_ANY, PRIMN_ANY, TRUE);
-    
-    splittree_end_resize();
-    
-    return TRUE;
-}
-
-
-/*EXTL_DOC
- * Transpose contents of \var{node}. 
- */
-EXTL_EXPORT_MEMBER
-void split_transpose(WSplit *node)
-{
-    WRectangle g=node->geom;
-    
-    split_transpose_to(node, &g);
-}
-
+/*{{{ Transpose, flip, rotate */
 
 
 void splitsplit_flip_default(WSplitSplit *split)
@@ -1610,11 +1566,6 @@ void splitsplit_flip_default(WSplitSplit *split)
     WSplit *tmp;
     
     assert(split->tl!=NULL && split->br!=NULL);
-
-    splittree_begin_resize();
-
-    if(!move_stdisp_out_of_way((WSplit*)split))
-        return;
     
     split_update_bounds((WSplit*)split, TRUE);
 
@@ -1638,8 +1589,12 @@ void splitsplit_flip_default(WSplitSplit *split)
 
     split_do_resize(split->tl, &brng, PRIMN_ANY, PRIMN_ANY, FALSE);
     split_do_resize(split->br, &tlng, PRIMN_ANY, PRIMN_ANY, FALSE);
+}
 
-    splittree_end_resize();
+
+static void splitsplit_flip_(WSplitSplit *split)
+{
+    CALL_DYN(splitsplit_flip, split, (split));
 }
 
 
@@ -1649,9 +1604,118 @@ void splitsplit_flip_default(WSplitSplit *split)
 EXTL_EXPORT_MEMBER
 void splitsplit_flip(WSplitSplit *split)
 {
-    CALL_DYN(splitsplit_flip, split, (split));
+    splittree_begin_resize();
+
+    if(!move_stdisp_out_of_way((WSplit*)split))
+        return;
+    
+    splitsplit_flip_(split);
+    
+    splittree_end_resize();
 }
 
+
+static int flipdir=SPLIT_VERTICAL;
+
+
+static void do_flip(WSplit *split)
+{
+    WSplitSplit *ss=OBJ_CAST(split, WSplitSplit);
+    if(ss!=NULL){
+        if((ss->dir==flipdir || flipdir==SPLIT_ANY)
+           && !OBJ_IS(ss->tl, WSplitST)
+           && !OBJ_IS(ss->br, WSplitST)){
+            splitsplit_flip_(ss);
+        }else{
+        }
+
+    }
+    
+    if(OBJ_IS(ss, WSplitInner))
+        splitinner_forall((WSplitInner*)ss, do_flip);
+}
+
+    
+static void splittree_flip_dir(WSplit *splittree, int dir)
+{
+    /* todo stdisp outta way */
+    if(OBJ_IS(splittree, WSplitInner)){
+        flipdir=dir;
+        splitinner_forall((WSplitInner*)splittree, do_flip);
+    }
+}
+
+
+static bool split_fliptrans_to(WSplit *node, const WRectangle *geom, 
+                              int trans, int flip)
+{
+    WRectangle rg;
+    WSplit *node2;
+    
+    splittree_begin_resize();
+    
+    /* split_do_resize can do things right if 'node' has stdisp as child, 
+     * but otherwise transpose will put the stdisp in a bad split
+     * configuration if it is contained within 'node', so we must
+     * first move it and its fixed parent split below node. For correct
+     * geometry calculation we move it immediately below node, and
+     * resize stdisp's fixed parent node instead.
+     */
+    node2=move_stdisp_out_of_way(node);
+    
+    if(node2==NULL)
+        return FALSE;
+    
+    split_update_bounds(node2, TRUE);
+    
+    split_do_rqgeom_(node2, geom, PRIMN_ANY, PRIMN_ANY, &rg, FALSE);
+    
+    split_do_resize(node2, &rg, PRIMN_ANY, PRIMN_ANY, trans);
+    
+    if(flip!=SPLIT_NONE)
+        splittree_flip_dir(node2, flip);
+
+    splittree_end_resize();
+    
+    return TRUE;
+}
+
+
+bool split_transpose_to(WSplit *node, const WRectangle *geom)
+{
+    return split_fliptrans_to(node, geom, TRUE, SPLIT_ANY);
+}
+
+
+/*EXTL_DOC
+ * Transpose contents of \var{node}. 
+ */
+EXTL_EXPORT_MEMBER
+void split_transpose(WSplit *node)
+{
+    WRectangle g=node->geom;
+    
+    split_transpose_to(node, &g);
+}
+
+
+bool split_rotate_to(WSplit *node, const WRectangle *geom, int rotation)
+{
+    int flip=SPLIT_NONE;
+    bool trans=FALSE;
+    
+    if(rotation==SCREEN_ROTATION_90){
+        flip=SPLIT_HORIZONTAL;
+        trans=TRUE;
+    }else if(rotation==SCREEN_ROTATION_180){
+        /*flip=SPLIT_ANY;*/
+    }else if(rotation==SCREEN_ROTATION_270){
+        flip=SPLIT_VERTICAL;
+        trans=TRUE;
+    }
+
+    return split_fliptrans_to(node, geom, trans, flip);
+}
 
 /*}}}*/
 

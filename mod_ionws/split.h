@@ -30,7 +30,8 @@ INTRCLASS(WSplitST);
 enum WSplitDir{
     SPLIT_HORIZONTAL,
     SPLIT_VERTICAL,
-    SPLIT_ANY /* Should only be used as parameter to *_nextto */
+    SPLIT_ANY, /* Should only be used as parameter to *_nextto */
+    SPLIT_NONE /* Should only be used internally */
 };
 
 
@@ -185,13 +186,16 @@ void split_map(WSplit *split);
 void split_unmap(WSplit *split);
 void split_reparent(WSplit *split, WWindow *wwin);
 
-/* Transpose & flip */
+/* Transpose, flip, rotate */
 
 extern void split_transpose(WSplit *split);
 extern bool split_transpose_to(WSplit *split, const WRectangle *geom);
 
 extern void splitsplit_flip_default(WSplitSplit *split);
 DYNFUN void splitsplit_flip(WSplitSplit *split);
+
+extern bool split_rotate_to(WSplit *node, const WRectangle *geom, 
+                            int rotation);
 
 /* Save support */
 

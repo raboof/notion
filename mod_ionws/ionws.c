@@ -101,7 +101,7 @@ static void reparent_mgd(WRegion *sub, WWindow *par)
 bool ionws_fitrep(WIonWS *ws, WWindow *par, const WFitParams *fp)
 {
     WIonWSIterTmp tmp;
-    bool rs;
+    bool ok=FALSE;
     
     if(par!=NULL){
         if(!region_same_rootwin((WRegion*)ws, (WRegion*)par))
@@ -117,9 +117,9 @@ bool ionws_fitrep(WIonWS *ws, WWindow *par, const WFitParams *fp)
     
     if(ws->split_tree!=NULL){
         bool done=FALSE;
-        if(fp->mode&REGION_FIT_PIVOT)
-            done=split_transpose_to(ws->split_tree, &(fp->g));
-        if(!done)
+        if(fp->mode&REGION_FIT_ROTATE)
+            ok=split_rotate_to(ws->split_tree, &(fp->g), fp->rotation);
+        if(!ok)
             split_resize(ws->split_tree, &(fp->g), PRIMN_ANY, PRIMN_ANY);
     }
     

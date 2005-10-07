@@ -30,13 +30,20 @@
         (SCR)!=NULL;                                                   \
         (SCR)=(NXT), NXT=((SCR) ? (SCR)->next_scr : NULL))
 
+enum{
+    SCREEN_ROTATION_0,
+    SCREEN_ROTATION_90,
+    SCREEN_ROTATION_180,
+    SCREEN_ROTATION_270
+};
+
 
 DECLCLASS(WScreen){
     WMPlex mplex;
     int id;
     Atom atom_workspace;
     bool uses_root;
-    bool pivoted;
+    int rotation;
     WRectangle managed_off;
     WScreen *next_scr, *prev_scr;
     Watch notifywin_watch;

@@ -58,7 +58,7 @@ static bool screen_init(WScreen *scr, WRootWin *rootwin,
     scr->managed_off.h=0;
     scr->next_scr=NULL;
     scr->prev_scr=NULL;
-    scr->pivoted=FALSE;
+    scr->rotation=SCREEN_ROTATION_0;
     
     watch_init(&(scr->notifywin_watch));
 
