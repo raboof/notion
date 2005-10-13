@@ -25,7 +25,7 @@ Auf X Servern mit mehreren (traditionell non-Xinerama) Screens; handhabt nur den
 voreingestellten Screen (Wurzelfenster); nicht alle, welche durch die '-display'
 Option oder in der DISPLAY Umgebungsvariable bereitgestellt werden
 .TP
-.B \-sessionname sitzungs_name
+.B \-session sitzungs_name
 Setzt einen Sitzungsnamen. Diese Option beeinflusst wo der Arbeitsbereich und
 andere Sicherungsdateien abgelegt werden (~/.ion3/sitzungs_name wenn die Option
 gesetzt wurde).

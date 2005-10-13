@@ -24,7 +24,7 @@ Na X serverech s více obrazovkami (ne-Xinerama) bude spravovat pouze výchozí
 obrazovku (koøenové okno). (Tedy ne v¹echny, které byly zadány v parametru
 -display nebo v promìnné DISPLAY.)
 .TP
-.B \-sessionname název_sezení
+.B \-session název_sezení
 Nastaví název sezení. Tato volba ovlivní, kam se ulo¾í pracovní plochy
 a ostatní soubory. Pokud není nastavená, pou¾ije se ~/.ion3/session_name.
 .TP
