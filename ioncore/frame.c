@@ -582,12 +582,24 @@ static void frame_managed_changed(WFrame *frame, int mode, bool sw,
 }
 
 
+#define EMPTY_SHOULD_BE_DESTROYED(FRAME) \
+    ((FRAME)->flags&FRAME_DEST_EMPTY && FRAME_MCOUNT(FRAME)==0 && \
+     !OBJ_IS_BEING_DESTROYED(frame))
+
+
+static void frame_destroy_empty(WFrame *frame)
+{
+    if(EMPTY_SHOULD_BE_DESTROYED(frame))
+        destroy_obj((Obj*)frame);
+}
+
+
 void frame_managed_remove(WFrame *frame, WRegion *reg)
 {
     mplex_managed_remove((WMPlex*)frame, reg);
-    if(frame->flags&FRAME_DEST_EMPTY && FRAME_MCOUNT(frame)==0 &&
-       !OBJ_IS_BEING_DESTROYED(frame)){
-        mainloop_defer_destroy((Obj*)frame);
+    if(EMPTY_SHOULD_BE_DESTROYED(frame)){
+        mainloop_defer_action((Obj*)frame, 
+                              (WDeferredAction*)frame_destroy_empty);
     }
 }
 
