@@ -370,18 +370,18 @@ static void dock_get_pos_grow(WDock *dock, int *pos, int *grow)
 {
     WMPlex *mplex=OBJ_CAST(REGION_PARENT(dock), WMPlex);
     WRegion *mplex_stdisp;
-    int corner;
+    WMPlexSTDispInfo din;
     
     if(mplex!=NULL){
-        mplex_get_stdisp(mplex, &mplex_stdisp, &corner);
+        mplex_get_stdisp(mplex, &mplex_stdisp, &din);
         if(mplex_stdisp==(WRegion*)dock){
             /* Ok, we're assigned as a status display for mplex, so
              * get parameters from there.
              */
-            *pos=((corner==MPLEX_STDISP_TL || corner==MPLEX_STDISP_BL)
+            *pos=((din.pos==MPLEX_STDISP_TL || din.pos==MPLEX_STDISP_BL)
                   ? DOCK_HPOS_LEFT
                   : DOCK_HPOS_RIGHT) 
-                | ((corner==MPLEX_STDISP_TL || corner==MPLEX_STDISP_TR)
+                | ((din.pos==MPLEX_STDISP_TL || din.pos==MPLEX_STDISP_TR)
                    ? DOCK_VPOS_TOP
                    : DOCK_VPOS_BOTTOM);
             *grow=dock->grow;
@@ -1037,18 +1037,19 @@ static void dock_do_set(WDock *dock, ExtlTab conftab, bool resize)
     if(resize && (growset || posset)){
         WMPlex *par=OBJ_CAST(REGION_PARENT(dock), WMPlex);
         WRegion *stdisp=NULL;
-        int pos;
+        WMPlexSTDispInfo din;
         
         if(par!=NULL){
-            mplex_get_stdisp(par, &stdisp, &pos);
+            mplex_get_stdisp(par, &stdisp, &din);
+            din.fullsize=FALSE; /* not supported. */
             if(stdisp==(WRegion*)dock){
                 if(posset)
-                    mplexpos(dock->pos, &pos);
+                    mplexpos(dock->pos, &din.pos);
                 if(growset){
                     /* Update min/max first */
                     dock_managed_rqgeom_(dock, NULL, 0, NULL, NULL, TRUE);
                 }
-                mplex_set_stdisp(par, (WRegion*)dock, pos);
+                mplex_set_stdisp(par, (WRegion*)dock, &din);
             }
         }
         
@@ -1199,7 +1200,7 @@ WDock *mod_dock_create(ExtlTab tab)
     WDock *dock=NULL;
     WFitParams fp;
     WRegion *stdisp=NULL;
-    int pos=0;
+    WMPlexSTDispInfo din;
     
     if(extl_table_gets_s(tab, "mode", &mode)){
         if(strcmp(mode, "floating")==0){
@@ -1228,7 +1229,7 @@ WDock *mod_dock_create(ExtlTab tab)
     }
 
     if(!floating){
-        mplex_get_stdisp((WMPlex*)screen, &stdisp, &pos);
+        mplex_get_stdisp((WMPlex*)screen, &stdisp, &din);
         if(stdisp!=NULL && !extl_table_is_bool_set(tab, "force")){
             warn("Screen %d already has an stdisp. Refusing to add embedded "
                  "dock.", screenid);
@@ -1259,8 +1260,9 @@ WDock *mod_dock_create(ExtlTab tab)
         if(mplex_attach_simple((WMPlex*)screen, (WRegion*)dock, af)!=NULL)
             return dock;
     }else{
-        mplexpos(dock->pos, &pos);
-        if(mplex_set_stdisp((WMPlex*)screen, (WRegion*)dock, pos))
+        mplexpos(dock->pos, &din.pos);
+        din.fullsize=FALSE; /* not supported */
+        if(mplex_set_stdisp((WMPlex*)screen, (WRegion*)dock, &din))
             return dock;
     }
     
