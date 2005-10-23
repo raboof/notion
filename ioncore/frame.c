@@ -386,9 +386,8 @@ void frame_resize_hints(WFrame *frame, XSizeHints *hints_ret)
 
     if(FRAME_CURRENT(frame)!=NULL){
         region_size_hints(FRAME_CURRENT(frame), hints_ret);
-#if 1
-        hints_ret->flags&=PResizeInc|PBaseSize;
-#endif
+        if(!(frame->flags&FRAME_SZH_USEMINMAX))
+            hints_ret->flags&=PResizeInc|PBaseSize;
     }else{
         hints_ret->flags=0;
     }
@@ -402,14 +401,19 @@ void frame_resize_hints(WFrame *frame, XSizeHints *hints_ret)
         hints_ret->base_height=0;
         hints_ret->flags|=PBaseSize;
     }
+
+    if(!hints_ret->flags&PMinSize){
+        hints_ret->min_width=0;
+        hints_ret->min_height=0;
+        hints_ret->flags|=PMinSize;
+    }
+    
     hints_ret->base_width+=woff;
     hints_ret->base_height+=hoff;
     hints_ret->max_width+=woff;
     hints_ret->max_height+=hoff;
-
-    hints_ret->flags|=PMinSize;
-    hints_ret->min_width=woff;
-    hints_ret->min_height=hoff;
+    hints_ret->min_width+=woff;
+    hints_ret->min_height+=hoff;
 }
 
 
@@ -653,7 +657,10 @@ void frame_do_load(WFrame *frame, ExtlTab tab)
         frame->flags|=FRAME_TAB_HIDE;
     }
 
-    frame->flags|=flags&(FRAME_DEST_EMPTY|FRAME_MAXED_VERT|FRAME_MAXED_HORIZ);
+    frame->flags|=flags&(FRAME_DEST_EMPTY|
+                         FRAME_MAXED_VERT|
+                         FRAME_MAXED_HORIZ|
+                         FRAME_SZH_USEMINMAX);
     
     if(extl_table_gets_i(tab, "saved_x", &p) &&
        extl_table_gets_i(tab, "saved_w", &s)){

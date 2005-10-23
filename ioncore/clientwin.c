@@ -45,6 +45,9 @@
 static void set_clientwin_state(WClientWin *cwin, int state);
 static bool send_clientmsg(Window win, Atom a, Time stmp);
 
+static void do_gravity(const WRectangle *max_geom, int gravity,
+                       WRectangle *geom);
+
 
 WHook *clientwin_do_manage_alt=NULL;
 WHook *clientwin_mapped_hook=NULL;
@@ -346,7 +349,6 @@ static bool clientwin_init(WClientWin *cwin, WWindow *par, Window win,
 
     cwin->last_fp.g=geom;
     cwin->last_fp.mode=REGION_FIT_EXACT;
-    cwin->last_h_rq=geom.h;
 
     cwin->transient_for=None;
     cwin->transient_list=NULL;
@@ -674,6 +676,15 @@ static int clientwin_get_transients_gravity(WClientWin *cwin)
 }
 
 
+static void correct_to_size_hints_of(int *w, int *h, WRegion *reg)
+{
+    XSizeHints hints;
+    
+    region_size_hints(reg, &hints);
+
+    xsizehints_correct(&hints, w, h, FALSE);
+}
+
 
 static WRegion *clientwin_do_attach_transient(WClientWin *cwin, 
                                               WRegionAttachHandler *fn,
@@ -682,37 +693,85 @@ static WRegion *clientwin_do_attach_transient(WClientWin *cwin,
 {
     WWindow *par=REGION_PARENT(cwin);
     Window bottom=None, top=None;
-    WRegion *reg;
+    WRegion *reg, *mreg;
     WFitParams fp;
+    WRectangle mg;
+    WFrame *frame=NULL;
 
     if(par==NULL)
         return NULL;
 
-    fp.mode=REGION_FIT_BOUNDS|REGION_FIT_GRAVITY;
+    fp.mode=REGION_FIT_BOUNDS|REGION_FIT_WHATEVER;
     fp.gravity=clientwin_get_transients_gravity(cwin);
     fp.g=cwin->last_fp.g;
-    
+
+    frame=create_frame(par, &fp, "frame-transientcontainer");
+
     reg=fn(par, &fp, fnparams);
     
-    if(reg==NULL)
+    if(reg==NULL){
+        destroy_obj((Obj*)frame);
         return NULL;
+    }
+
+    if(frame!=NULL){
+        frame->flags|=(FRAME_DEST_EMPTY|
+                       FRAME_TAB_HIDE|
+                       FRAME_SZH_USEMINMAX);
+        mreg=(WRegion*)frame;
+        mplex_managed_geom((WMPlex*)frame, &mg);
+    }else{
+        mreg=reg;
+        mg=REGION_GEOM(reg);
+    }
+        
+        
+    /* border sizes */
+    fp.g.w=REGION_GEOM(mreg).w-mg.w;
+    fp.g.h=REGION_GEOM(mreg).h-mg.h;
+    /* maximum inner size */
+    mg.w=maxof(1, cwin->last_fp.g.w-fp.g.w);
+    mg.h=maxof(1, minof(REGION_GEOM(reg).h, cwin->last_fp.g.h-fp.g.h));
+    /* adjust it to size hints (can only shrink) */
+    correct_to_size_hints_of(&(mg.w), &(mg.h), reg);
+    /* final frame size */
+    fp.g.w+=mg.w;
+    fp.g.h+=mg.h;
+    /* positioning */
+    do_gravity(&(cwin->last_fp.g), fp.gravity, &(fp.g));
+    
+    fp.mode=REGION_FIT_EXACT;
+    
+    region_fitrep((WRegion*)mreg, NULL, &fp);
+
+    if(frame!=NULL){
+        if(!mplex_attach_simple((WMPlex*)frame, reg, 0)){
+            destroy_obj((Obj*)frame);
+            mreg=reg;
+        }else{
+            mreg=(WRegion*)frame;
+        }
+    }
 
     region_stacking((WRegion*)cwin, &bottom, &top);
-    region_restack(reg, top, Above);
+    region_restack(mreg, top, Above);
     
-    if(!ptrlist_insert_last(&(cwin->transient_list), reg)){
+    if(!ptrlist_insert_last(&(cwin->transient_list), mreg)){
+        if(frame!=NULL)
+            destroy_obj((Obj*)frame);
+        /* Not necessarily the right thing to do: */
         destroy_obj((Obj*)reg);
         return NULL;
     }
-    region_set_manager(reg, (WRegion*)cwin);
+    region_set_manager(mreg, (WRegion*)cwin);
     
     if(REGION_IS_MAPPED((WRegion*)cwin))
-        region_map(reg);
+        region_map(mreg);
     else
-        region_unmap(reg);
+        region_unmap(mreg);
     
     if(region_may_control_focus((WRegion*)cwin))
-        region_warp(reg);
+        region_warp(mreg);
     
     return reg;
 }
@@ -1091,27 +1150,10 @@ static void do_reparent_clientwin(WClientWin *cwin, Window win, int x, int y)
     XSelectInput(ioncore_g.dpy, cwin->win, cwin->event_mask);
 }
 
-static void convert_geom(WClientWin *cwin, const WFitParams *fp,
-                         WRectangle *geom)
-{
-    const WRectangle *max_geom=&(fp->g);
-    int gravity=cwin->gravity;
-    int htry=max_geom->h;
-    
-    if(fp->mode&REGION_FIT_BOUNDS){
-	if(gravity==ForgetGravity && fp->mode&REGION_FIT_GRAVITY)
-            gravity=fp->gravity;
-        if(gravity==ForgetGravity)
-            gravity=SouthGravity;
-        if(cwin->last_h_rq<htry)
-            htry=cwin->last_h_rq;
-    }
-    
-    geom->w=max_geom->w;
-    geom->h=htry;
-    
-    xsizehints_correct(&(cwin->size_hints), &(geom->w), &(geom->h), FALSE);
 
+static void do_gravity(const WRectangle *max_geom, int gravity,
+                       WRectangle *geom)
+{
     switch(gravity){
     case WestGravity:
     case NorthWestGravity:
@@ -1153,6 +1195,46 @@ static void convert_geom(WClientWin *cwin, const WFitParams *fp,
 }
 
 
+static void convert_transient_geom(const WFitParams *fp, 
+                                   WRegion *reg, WRectangle *geom)
+{
+    const WRectangle *max_geom=&(fp->g);
+    int htry=max_geom->h;
+    int gravity=ForgetGravity;
+    
+    if(fp->mode&REGION_FIT_BOUNDS){
+	if(fp->mode&REGION_FIT_GRAVITY)
+            gravity=fp->gravity;
+        if(gravity==ForgetGravity)
+            gravity=SouthGravity;
+        
+        /* TODO: old height after size hint adjustments might be
+         *       zero, while htry result in positive size.
+         */
+        htry=minof(htry, REGION_GEOM(reg).h);
+    }
+    
+    geom->w=max_geom->w;
+    geom->h=htry;
+    
+    correct_to_size_hints_of(&(geom->w), &(geom->h), reg);
+    do_gravity(max_geom, gravity, geom);
+}
+
+
+static void convert_geom(const WFitParams *fp, 
+                         WClientWin *cwin, WRectangle *geom)
+{
+    WFitParams fptmp=*fp;
+    if(!(fptmp.mode&REGION_FIT_GRAVITY) || fptmp.gravity==ForgetGravity){
+        fptmp.mode|=REGION_FIT_GRAVITY;
+        fptmp.gravity=StaticGravity;
+    }
+
+    convert_transient_geom(&fptmp, (WRegion*)cwin, geom);
+}
+
+
 /*}}}*/
 
 
@@ -1163,9 +1245,13 @@ static void clientwin_managed_rqgeom(WClientWin *cwin, WRegion *sub,
                                      int flags, const WRectangle *geom, 
                                      WRectangle *geomret)
 {
-    WRectangle g=*geom;
+    WRectangle g, *cg=&(cwin->last_fp.g);
 
-    rectangle_constrain(&g, &(cwin->last_fp.g));
+    /* Constrain to cwin's maximum occupied area. */
+    g.w=minof(geom->w, cg->w);
+    g.h=minof(geom->h, cg->h);
+    g.x=minof(maxof(cg->x, geom->x), cg->x+cg->w-g.w);
+    g.y=minof(maxof(cg->y, geom->y), cg->y+cg->h-g.h);
     
     if(geomret!=NULL)
         *geomret=g;
@@ -1176,7 +1262,8 @@ static void clientwin_managed_rqgeom(WClientWin *cwin, WRegion *sub,
 
 
 
-static bool clientwin_fitrep(WClientWin *cwin, WWindow *np, WFitParams *fp)
+static bool clientwin_fitrep(WClientWin *cwin, WWindow *np, 
+                             const WFitParams *fp)
 {
     WRegion *transient, *next;
     WRectangle geom;
@@ -1184,6 +1271,7 @@ static bool clientwin_fitrep(WClientWin *cwin, WWindow *np, WFitParams *fp)
     int diff;
     bool changes;
     int w, h;
+    WFitParams fptmp;
 
     if(np!=NULL && !region_same_rootwin((WRegion*)cwin, (WRegion*)np))
         return FALSE;
@@ -1200,7 +1288,7 @@ static bool clientwin_fitrep(WClientWin *cwin, WWindow *np, WFitParams *fp)
         /* Use all available space if NetWM full screen request. */
         geom=fp->g;
     }else{
-        convert_geom(cwin, fp, &geom);
+        convert_geom(fp, cwin, &geom);
     }
 
     changes=(REGION_GEOM(cwin).x!=geom.x ||
@@ -1245,13 +1333,18 @@ static bool clientwin_fitrep(WClientWin *cwin, WWindow *np, WFitParams *fp)
     
     cwin->flags&=~CLIENTWIN_NEED_CFGNTFY;
     
+    fptmp.g=fp->g;
+    fptmp.mode=REGION_FIT_BOUNDS;
+    if(!(fptmp.mode&REGION_FIT_GRAVITY) || fptmp.gravity==ForgetGravity){
+        fptmp.mode|=REGION_FIT_GRAVITY;
+        fptmp.gravity=clientwin_get_transients_gravity(cwin);
+    }
+    
     FOR_ALL_ON_PTRLIST(WRegion*, transient, cwin->transient_list, tmp){
         WFitParams fp2;
-        fp2.g=fp->g;
-        fp2.mode=REGION_FIT_BOUNDS;
-        fp2.mode|=REGION_FIT_GRAVITY;
-        fp2.gravity=clientwin_get_transients_gravity(cwin);
-        
+        fp2.mode=REGION_FIT_EXACT;
+        convert_transient_geom(&(fptmp), transient, &(fp2.g));
+                     
         if(!region_fitrep(transient, np, &fp2) && np!=NULL){
             warn(TR("Error reparenting %s."), region_name(transient));
             region_detach_manager(transient);
@@ -1515,7 +1608,6 @@ void clientwin_handle_configure_request(WClientWin *cwin,
                                        ev->height-geom.h);
             }
             geom.h=maxof(ev->height, 1);
-            cwin->last_h_rq=geom.h;
             rqflags&=~REGION_RQGEOM_WEAK_H;
         }
         if(ev->value_mask&CWX){
@@ -1721,7 +1813,7 @@ WRegion *clientwin_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
         return FALSE;
     
     /* Reparent and resize taking limits set by size hints into account */
-    convert_geom(cwin, fp, &rg);
+    convert_geom(fp, cwin, &rg);
     REGION_GEOM(cwin)=rg;
     do_reparent_clientwin(cwin, par->win, rg.x, rg.y);
     XResizeWindow(ioncore_g.dpy, win, maxof(1, rg.w), maxof(1, rg.h));

@@ -64,8 +64,6 @@ DECLCLASS(WClientWin){
     
     WPHolder *fs_pholder;
     
-    int last_h_rq;
-    
     ExtlTab proptab;
 
     int gravity;            /* gravity used when there is slack */
