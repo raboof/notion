@@ -322,7 +322,7 @@ static void moveresmode_delta(WMoveresMode *mode,
                               WRectangle *rret)
 {
     WRectangle geom;
-    int w, h;
+    int w=0, h=0;
     int realdx1, realdx2, realdy1, realdy2;
     
     realdx1=(mode->dx1+=dx1);
@@ -594,7 +594,7 @@ void region_size_hints(WRegion *reg, XSizeHints *hints_ret)
         hints_ret->max_width=INT_MAX;
         hints_ret->max_height=INT_MAX;
     }
-    hints_ret->flags|=(PMinSize|PBaseSize|PMaxSize);
+    /*hints_ret->flags|=(PMinSize|PBaseSize|PMaxSize);*/
 }
 
 
