@@ -323,6 +323,8 @@ static void init_global()
     ioncore_g.screen_notify=TRUE;
     
     ioncore_g.frame_add_last=FALSE;
+    
+    ioncore_g.framed_transients=FALSE;
 }
 
 

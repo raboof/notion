@@ -56,6 +56,7 @@ char *ioncore_default_ws_type=NULL;
  *  \var{kbresize_t_min} & (integer) See below. \\
  *  \var{kbresize_step} & (floating point) See below. \\
  *  \var{kbresize_maxacc} & (floating point) See below. \\
+ *  \var{framed_transients} & (boolean) Put transients in nested frames. \\
  * \end{tabularx}
  * 
  * When a keyboard resize function is called, and at most \var{kbresize_t_max} 
@@ -77,6 +78,7 @@ void ioncore_set(ExtlTab tab)
     extl_table_gets_b(tab, "switchto", &(ioncore_g.switchto_new));
     extl_table_gets_b(tab, "screen_notify", &(ioncore_g.screen_notify));
     extl_table_gets_b(tab, "frame_add_last", &(ioncore_g.frame_add_last));
+    extl_table_gets_b(tab, "framed_transients", &(ioncore_g.framed_transients));
     
     if(extl_table_gets_i(tab, "dblclick_delay", &dd))
         ioncore_g.dblclick_delay=maxof(0, dd);

@@ -705,7 +705,8 @@ static WRegion *clientwin_do_attach_transient(WClientWin *cwin,
     fp.gravity=clientwin_get_transients_gravity(cwin);
     fp.g=cwin->last_fp.g;
 
-    frame=create_frame(par, &fp, "frame-transientcontainer");
+    if(ioncore_g.framed_transients)
+        frame=create_frame(par, &fp, "frame-transientcontainer");
 
     reg=fn(par, &fp, fnparams);
     
