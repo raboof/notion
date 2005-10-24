@@ -110,10 +110,11 @@ void statusbar_draw(WStatusBar *sb, bool complete)
     mgr=OBJ_CAST(REGION_PARENT(sb), WMPlex);
     if(mgr!=NULL){
         WRegion *std=NULL;
-        int corner=MPLEX_STDISP_TL;
-        mplex_get_stdisp(mgr, &std, &corner);
+        WMPlexSTDispInfo din;
+        din.pos=MPLEX_STDISP_TL;
+        mplex_get_stdisp(mgr, &std, &din);
         if(std==(WRegion*)sb)
-            right_align=(corner==MPLEX_STDISP_TR || corner==MPLEX_STDISP_BR);
+            right_align=(din.pos==MPLEX_STDISP_TR || din.pos==MPLEX_STDISP_BR);
     }
     
     g.x+=bdw.left;
