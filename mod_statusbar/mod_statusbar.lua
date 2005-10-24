@@ -145,6 +145,7 @@ function mod_statusbar.get_template_table(stng)
                      function(t)
                          table.insert(res, {
                              type=(t=='f' and 4 or 3),
+                             text=(t~='f' and t or nil),
                          })
                      end)
     return res
