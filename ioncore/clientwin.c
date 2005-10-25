@@ -721,36 +721,35 @@ static WRegion *clientwin_do_attach_transient(WClientWin *cwin,
                        FRAME_SZH_USEMINMAX);
         mreg=(WRegion*)frame;
         mplex_managed_geom((WMPlex*)frame, &mg);
+        
+        /* border sizes */
+        fp.g.w=REGION_GEOM(mreg).w-mg.w;
+        fp.g.h=REGION_GEOM(mreg).h-mg.h;
+        /* maximum inner size */
+        mg.w=maxof(1, cwin->last_fp.g.w-fp.g.w);
+        mg.h=maxof(1, minof(REGION_GEOM(reg).h, cwin->last_fp.g.h-fp.g.h));
+        /* adjust it to size hints (can only shrink) */
+        correct_to_size_hints_of(&(mg.w), &(mg.h), reg);
+        /* final frame size */
+        fp.g.w+=mg.w;
+        fp.g.h+=mg.h;
+        /* positioning */
+        do_gravity(&(cwin->last_fp.g), fp.gravity, &(fp.g));
+        
+        fp.mode=REGION_FIT_EXACT;
     }else{
         mreg=reg;
-        mg=REGION_GEOM(reg);
+        fp.g=cwin->last_fp.g;
+        fp.mode=REGION_FIT_BOUNDS|REGION_FIT_GRAVITY;
+        fp.gravity=clientwin_get_transients_gravity(cwin);
     }
-        
-        
-    /* border sizes */
-    fp.g.w=REGION_GEOM(mreg).w-mg.w;
-    fp.g.h=REGION_GEOM(mreg).h-mg.h;
-    /* maximum inner size */
-    mg.w=maxof(1, cwin->last_fp.g.w-fp.g.w);
-    mg.h=maxof(1, minof(REGION_GEOM(reg).h, cwin->last_fp.g.h-fp.g.h));
-    /* adjust it to size hints (can only shrink) */
-    correct_to_size_hints_of(&(mg.w), &(mg.h), reg);
-    /* final frame size */
-    fp.g.w+=mg.w;
-    fp.g.h+=mg.h;
-    /* positioning */
-    do_gravity(&(cwin->last_fp.g), fp.gravity, &(fp.g));
-    
-    fp.mode=REGION_FIT_EXACT;
     
     region_fitrep((WRegion*)mreg, NULL, &fp);
-
+    
     if(frame!=NULL){
         if(!mplex_attach_simple((WMPlex*)frame, reg, 0)){
             destroy_obj((Obj*)frame);
             mreg=reg;
-        }else{
-            mreg=(WRegion*)frame;
         }
     }
 
@@ -1344,8 +1343,11 @@ static bool clientwin_fitrep(WClientWin *cwin, WWindow *np,
     FOR_ALL_ON_PTRLIST(WRegion*, transient, cwin->transient_list, tmp){
         WFitParams fp2;
         fp2.mode=REGION_FIT_EXACT;
-        convert_transient_geom(&(fptmp), transient, &(fp2.g));
-                     
+        if(ioncore_g.framed_transients)
+            convert_transient_geom(&(fptmp), transient, &(fp2.g));
+        else
+            fp2=fptmp;
+
         if(!region_fitrep(transient, np, &fp2) && np!=NULL){
             warn(TR("Error reparenting %s."), region_name(transient));
             region_detach_manager(transient);

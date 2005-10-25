@@ -119,8 +119,8 @@ void statusbar_draw(WStatusBar *sb, bool complete)
     
     g.x+=bdw.left;
     g.w-=bdw.left+bdw.right;
-	g.y+=bdw.top;
-	g.h-=bdw.top+bdw.bottom;
+    g.y+=bdw.top;
+    g.h-=bdw.top+bdw.bottom;
 
     ty=(g.y+fnte.baseline+(g.h-fnte.max_height)/2);
     
