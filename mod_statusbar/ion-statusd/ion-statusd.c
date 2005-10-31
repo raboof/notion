@@ -143,8 +143,10 @@ int main(int argc, char*argv[])
     int opt;
     bool quiet=FALSE;
 
+#ifndef CF_NO_LOCALE    
     if(setlocale(LC_ALL, "")==NULL)
         warn("setlocale() call failed.");
+#endif
 
     configtab=extl_table_none();
     
