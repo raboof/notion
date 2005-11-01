@@ -26,7 +26,6 @@ defmenu("appmenu", {
 defmenu("sessionmenu", {
     menuentry("Save",           "ioncore.snapshot()"),
     menuentry("Restart",        "ioncore.restart()"),
-    menuentry("Restart PWM",    "ioncore.restart_other('pwm')"),
     menuentry("Restart TWM",    "ioncore.restart_other('twm')"),
     menuentry("Exit",           "ioncore.shutdown()"),
 })
