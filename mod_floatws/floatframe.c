@@ -231,12 +231,13 @@ void floatframe_resize_hints(WFloatFrame *frame, XSizeHints *hints_ret)
     WRectangle subgeom;
     WLListIterTmp tmp;
     WRegion *sub;
-    int woff, hoff;
+    int woff, hoff, basehoff;
     
     mplex_managed_geom((WMPlex*)frame, &subgeom);
     
     woff=maxof(REGION_GEOM(frame).w-subgeom.w, 0);
     hoff=frame->frame.bar_h;
+    basehoff=maxof(REGION_GEOM(frame).h-subgeom.h, 0);
 
     if(FRAME_CURRENT(&(frame->frame))!=NULL){
         region_size_hints(FRAME_CURRENT(&(frame->frame)), hints_ret);
@@ -254,7 +255,7 @@ void floatframe_resize_hints(WFloatFrame *frame, XSizeHints *hints_ret)
         hints_ret->flags|=PBaseSize;
     }
     hints_ret->base_width+=woff;
-    hints_ret->base_height+=hoff;
+    hints_ret->base_height+=basehoff;
 
     hints_ret->flags|=PMinSize;
     hints_ret->min_width=woff;
