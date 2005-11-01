@@ -24,6 +24,10 @@
 #include <libmainloop/signal.h>
 #include <libmainloop/defer.h>
 
+#ifndef CF_NO_LOCALE
+#include <locale.h>
+#endif
+
 #include "../../version.h"
 
 
