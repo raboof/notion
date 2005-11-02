@@ -396,13 +396,13 @@ void frame_resize_hints(WFrame *frame, XSizeHints *hints_ret)
         xsizehints_adjust_for(hints_ret, sub);
     }
     
-    if(!hints_ret->flags&PBaseSize){
+    if(!(hints_ret->flags&PBaseSize)){
         hints_ret->base_width=0;
         hints_ret->base_height=0;
         hints_ret->flags|=PBaseSize;
     }
 
-    if(!hints_ret->flags&PMinSize){
+    if(!(hints_ret->flags&PMinSize)){
         hints_ret->min_width=0;
         hints_ret->min_height=0;
         hints_ret->flags|=PMinSize;

@@ -249,7 +249,7 @@ void floatframe_resize_hints(WFloatFrame *frame, XSizeHints *hints_ret)
         xsizehints_adjust_for(hints_ret, sub);
     }
     
-    if(!hints_ret->flags&PBaseSize){
+    if(!(hints_ret->flags&PBaseSize)){
         hints_ret->base_width=0;
         hints_ret->base_height=0;
         hints_ret->flags|=PBaseSize;
