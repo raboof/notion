@@ -538,7 +538,7 @@ end
 
 
 local function break_cmdline(str, no_ws)
-    local st, en, beg, rest, ch
+    local st, en, beg, rest, ch, rem
     local res={""}
 
     local function ins(str)
@@ -565,6 +565,7 @@ local function break_cmdline(str, no_ws)
         end
     end
 
+    -- Handle terminal startup syntax
     st, en, beg, ch, rest=string.find(str, "^(%s*)(:+)(.*)")
     if beg then
         if string.len(beg)>0 then
@@ -576,11 +577,13 @@ local function break_cmdline(str, no_ws)
     end
 
     while str~="" do
-        st, en, beg, rest, ch=string.find(str, "^(.-)(([%s'\"\\]).*)")
+        st, en, beg, rest, ch=string.find(str, "^(.-)(([%s'\"\\|])(.*))")
         if not beg then
             ins(str)
             break
         end
+
+        print(beg, rest, ch)
         
         ins(beg)
         str=rest
@@ -598,7 +601,11 @@ local function break_cmdline(str, no_ws)
         elseif ch=="'" then
             st, en, beg, rest=string.find(str, "^('.-')(.*)")
         else
-            st, en, beg, rest=string.find(str, "^(%s*)(.*)")
+            if ch=='|' then
+                ins_space('')
+                ins(ch)
+            end
+            st, en, beg, rest=string.find(str, "^.(%s*)(.*)")
             assert(beg and rest)
             ins_space(beg)
             sp=true
@@ -628,7 +635,7 @@ end
 
 
 local function quote(str)
-    return string.gsub(str, "([%(%)\"'\\%*%?%[%] ])", "\\%1")
+    return string.gsub(str, "([%(%)\"'\\%*%?%[%]%| ])", "\\%1")
 end
 
 
