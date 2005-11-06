@@ -583,8 +583,6 @@ local function break_cmdline(str, no_ws)
             break
         end
 
-        print(beg, rest, ch)
-        
         ins(beg)
         str=rest
         
