@@ -55,25 +55,17 @@ static void prev_watch_handler(Watch *watch, WRegion *prev)
 
 void ioncore_set_previous_of(WRegion *reg)
 {
-    WRegion *r2=NULL, *r3=NULL;
-    
     if(reg==NULL || ioncore_g.previous_protect!=0)
         return;
 
     if(REGION_IS_ACTIVE(reg))
         return;
     
-    r3=(WRegion*)ioncore_g.active_screen;
-    
-    while(r3!=NULL){
-        r2=r3;
-        r3=r2->active_sub;
-        if(r3==NULL)
-            r3=region_current(r2);
+    if(ioncore_g.focus_current!=NULL){
+        watch_setup(&prev_watch, 
+                    (Obj*)ioncore_g.focus_current,
+                    (WatchHandler*)prev_watch_handler);
     }
-
-    if(r2!=NULL)
-        watch_setup(&prev_watch, (Obj*)r2, (WatchHandler*)prev_watch_handler);
 }
 
 

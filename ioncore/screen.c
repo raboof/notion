@@ -113,9 +113,6 @@ static bool screen_init(WScreen *scr, WRootWin *rootwin,
 
     LINK_ITEM(ioncore_g.screens, scr, next_scr, prev_scr);
     
-    if(ioncore_g.active_screen==NULL)
-        ioncore_g.active_screen=scr;
-
     return TRUE;
 }
 
@@ -233,12 +230,6 @@ static void screen_unmap(WScreen *scr)
     if(scr->uses_root)
         return;
     mplex_unmap((WMPlex*)scr);
-}
-
-
-static void screen_activated(WScreen *scr)
-{
-    ioncore_g.active_screen=scr;
 }
 
 
@@ -393,6 +384,15 @@ WScreen *ioncore_goto_nth_screen(int id)
 }
 
 
+static WScreen *current_screen()
+{
+    if(ioncore_g.focus_current==NULL)
+        return ioncore_g.screens;
+    else
+        return region_screen_of(ioncore_g.focus_current);
+}
+
+       
 /*EXTL_DOC
  * Switch focus to the next screen and return it.
  * 
@@ -402,7 +402,7 @@ WScreen *ioncore_goto_nth_screen(int id)
 EXTL_EXPORT
 WScreen *ioncore_goto_next_screen()
 {
-    WScreen *scr=ioncore_g.active_screen;
+    WScreen *scr=current_screen();
     
     if(scr!=NULL)
         scr=scr->next_scr;
@@ -425,7 +425,7 @@ WScreen *ioncore_goto_next_screen()
 EXTL_EXPORT
 WScreen *ioncore_goto_prev_screen()
 {
-    WScreen *scr=ioncore_g.active_screen;
+    WScreen *scr=current_screen();
 
     if(scr!=NULL)
         scr=scr->prev_scr;
@@ -637,9 +637,6 @@ static DynFunTab screen_dynfuntab[]={
     
     {region_unmap, 
      screen_unmap},
-    
-    {region_activated, 
-     screen_activated},
     
     {(DynFun*)region_managed_may_destroy,
      (DynFun*)screen_managed_may_destroy},

@@ -306,7 +306,6 @@ static void init_global()
     ioncore_g.focus_next=NULL;
     ioncore_g.warp_next=FALSE;
     
-    ioncore_g.active_screen=NULL;
     ioncore_g.focus_current=NULL;
 
     ioncore_g.input_mode=IONCORE_INPUTMODE_NORMAL;
@@ -509,7 +508,7 @@ static void set_initial_focus()
     if(scr==NULL)
         scr=ioncore_g.screens;
     
-    ioncore_g.active_screen=scr;
+    ioncore_g.focus_current=(WRegion*)scr;
     region_do_set_focus((WRegion*)scr, FALSE);
 }
 
