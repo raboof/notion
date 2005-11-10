@@ -307,6 +307,7 @@ static void init_global()
     ioncore_g.warp_next=FALSE;
     
     ioncore_g.active_screen=NULL;
+    ioncore_g.focus_current=NULL;
 
     ioncore_g.input_mode=IONCORE_INPUTMODE_NORMAL;
     ioncore_g.opmode=IONCORE_OPMODE_INIT;

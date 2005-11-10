@@ -186,6 +186,9 @@ void region_got_focus(WRegion *reg)
     check_clear_await(reg);
     
     region_set_activity(reg, SETPARAM_UNSET);
+
+    if(reg->active_sub==NULL)
+        ioncore_g.focus_current=reg;
     
     if(!REGION_IS_ACTIVE(reg)){
         D(fprintf(stderr, "got focus (inact) %s [%p]\n", OBJ_TYPESTR(reg), reg);)
@@ -229,13 +232,26 @@ void region_got_focus(WRegion *reg)
 
 void region_lost_focus(WRegion *reg)
 {
-    WRegion *r;
+    WRegion *r, *par;
     
     if(!REGION_IS_ACTIVE(reg)){
         D(fprintf(stderr, "lost focus (inact) %s [%p:]\n", OBJ_TYPESTR(reg), reg);)
         return;
     }
     
+    par=REGION_PARENT_REG(reg);
+    if(par!=NULL && par->active_sub==reg)
+        par->active_sub=NULL;
+    
+    if(ioncore_g.focus_current==reg){
+        /* Find the closest active parent, or if none is found, stop at the
+         * screen and mark it "currently focused".
+         */
+        while(par!=NULL && !REGION_IS_ACTIVE(par) && !OBJ_IS(par, WScreen))
+            par=REGION_PARENT_REG(par);
+        ioncore_g.focus_current=par;
+    }
+
     D(fprintf(stderr, "lost focus (act) %s [%p:]\n", OBJ_TYPESTR(reg), reg);)
     
     reg->flags&=~REGION_ACTIVE;
@@ -385,5 +401,13 @@ bool region_skip_focus(WRegion *reg)
     return FALSE;
 }
 
+/*EXTL_DOC
+ * Returns the currently focused region, if any.
+ */
+EXTL_EXPORT
+WRegion *ioncore_current()
+{
+    return ioncore_g.focus_current;
+}
 
 /*}}}*/

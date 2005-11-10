@@ -54,5 +54,6 @@ extern WHook *region_inactivated_hook;
 
 /* Misc. */
 extern bool region_skip_focus(WRegion *reg);
+WRegion *ioncore_current();
 
 #endif /* ION_IONCORE_FOCUS_H */

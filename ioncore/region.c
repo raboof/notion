@@ -97,12 +97,15 @@ void region_deinit(WRegion *reg)
         D(warn("Region to be focused next destroyed[1]."));
         ioncore_g.focus_next=NULL;
     }
-    
+
     region_detach_manager(reg);
     region_unset_parent(reg);
     region_remove_bindings(reg);
     
     region_unregister(reg);
+
+    if(ioncore_g.focus_current==reg)
+        ioncore_g.focus_current=REGION_PARENT_REG(reg);
 
     if(ioncore_g.focus_next==reg){
         D(warn("Region to be focused next destroyed[2]."));
