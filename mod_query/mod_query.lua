@@ -1040,7 +1040,7 @@ function mod_query.query_menu(mplex, themenu, prompt)
     end
 
     local function xform_name(n)
-        return string.lower(string.gsub(n, "[^%w]+", "-"))
+        return string.lower(string.gsub(n, "[^%w%.%-_<>]+", "-"))
     end
 
     local function xform_menu(t, m, p)
