@@ -25,10 +25,11 @@ local function update()
     for k, f in settings.formats do
         statusd.inform('date_'..k, os.date(f, tm))
     end
+    return tm
 end
 
 local function timer_handler(tmr)
-    update()
+    local tm=update()
     
     local t=os.date('*t', tm)
     local d=(60-t.sec)*1000
