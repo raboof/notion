@@ -52,7 +52,8 @@ defbindings("WScreen", {
     kpress(MOD1.."F9", "ioncore.create_ws(_)"),
     
     bdoc("Display the main menu."),
-    kpress(MOD2.."F12", "mod_menu.menu(_, _sub, 'mainmenu', {big=true})"),
+    kpress(MOD2.."F12", "mod_query.query_menu(_, 'mainmenu', 'Main menu: ')"),
+    --kpress(MOD2.."F12", "mod_menu.menu(_, _sub, 'mainmenu', {big=true})"),
     mpress("Button3", "mod_menu.pmenu(_, _sub, 'mainmenu')"),
     
     bdoc("Display the window list menu."),
@@ -171,7 +172,8 @@ defbindings("WFrame", {
     kpress(MOD1.."A", "mod_query.query_attachclient(_)"),
 
     bdoc("Display frame context menu."),
-    kpress(MOD1.."M", "mod_menu.menu(_, _sub, 'ctxmenu')"),
+    kpress(MOD1.."M", "mod_query.query_menu(_, 'ctxmenu', 'Context menu: ')"),
+    --kpress(MOD1.."M", "mod_menu.menu(_, _sub, 'ctxmenu')"),
     mpress("Button3", "mod_menu.pmenu(_, _sub, 'ctxmenu')"),
     
     bdoc("Begin move/resize mode."),
