@@ -42,7 +42,9 @@ static bool floatframe_init(WFloatFrame *frame, WWindow *parent,
     if(!frame_init((WFrame*)frame, parent, fp, "frame-floating-floatws"))
         return FALSE;
     
-    frame->frame.flags|=(FRAME_BAR_OUTSIDE|FRAME_DEST_EMPTY);
+    frame->frame.flags|=(FRAME_BAR_OUTSIDE|
+                         FRAME_DEST_EMPTY|
+                         FRAME_SZH_USEMINMAX);
 
     region_add_bindmap((WRegion*)frame, mod_floatws_floatframe_bindmap);
     
