@@ -228,38 +228,17 @@ static void floatframe_rqgeom_clientwin(WFloatFrame *frame, WClientWin *cwin,
 
 void floatframe_resize_hints(WFloatFrame *frame, XSizeHints *hints_ret)
 {
-    WRectangle subgeom;
-    WLListIterTmp tmp;
-    WRegion *sub;
-    int woff, hoff, basehoff;
+    frame_resize_hints(&frame->frame, hints_ret);
     
-    mplex_managed_geom((WMPlex*)frame, &subgeom);
-    
-    woff=maxof(REGION_GEOM(frame).w-subgeom.w, 0);
-    hoff=frame->frame.bar_h;
-    basehoff=maxof(REGION_GEOM(frame).h-subgeom.h, 0);
-
-    if(FRAME_CURRENT(&(frame->frame))!=NULL){
-        region_size_hints(FRAME_CURRENT(&(frame->frame)), hints_ret);
-    }else{
-        hints_ret->flags=0;
+    if(frame->frame.flags&FRAME_SHADED){
+        hints_ret->min_height=frame->frame.bar_h;
+        hints_ret->max_height=frame->frame.bar_h;
+        hints_ret->base_height=frame->frame.bar_h;
+        if(!(hints_ret->flags&PMaxSize)){
+            hints_ret->max_width=INT_MAX;
+            hints_ret->flags|=PMaxSize;
+        }
     }
-    
-    FRAME_L1_FOR_ALL(sub, &(frame->frame), tmp){
-        xsizehints_adjust_for(hints_ret, sub);
-    }
-    
-    if(!(hints_ret->flags&PBaseSize)){
-        hints_ret->base_width=0;
-        hints_ret->base_height=0;
-        hints_ret->flags|=PBaseSize;
-    }
-    hints_ret->base_width+=woff;
-    hints_ret->base_height+=basehoff;
-
-    hints_ret->flags|=PMinSize;
-    hints_ret->min_width=woff;
-    hints_ret->min_height=hoff;
 }
 
 
