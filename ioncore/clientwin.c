@@ -1195,6 +1195,18 @@ static void do_gravity(const WRectangle *max_geom, int gravity,
 }
 
 
+static void do_convert_geom(int htry, int gravity,
+                            const WRectangle *max_geom,
+                            WRegion *reg, WRectangle *geom)
+{
+    geom->w=max_geom->w;
+    geom->h=minof(htry, max_geom->h);
+    
+    correct_to_size_hints_of(&(geom->w), &(geom->h), reg);
+    do_gravity(max_geom, gravity, geom);
+}
+
+
 static void convert_transient_geom(const WFitParams *fp, 
                                    WRegion *reg, WRectangle *geom)
 {
@@ -1211,14 +1223,10 @@ static void convert_transient_geom(const WFitParams *fp,
         /* TODO: old height after size hint adjustments might be
          *       zero, while htry result in positive size.
          */
-        htry=minof(htry, REGION_GEOM(reg).h);
+        htry=REGION_GEOM(reg).h;
     }
     
-    geom->w=max_geom->w;
-    geom->h=htry;
-    
-    correct_to_size_hints_of(&(geom->w), &(geom->h), reg);
-    do_gravity(max_geom, gravity, geom);
+    do_convert_geom(htry, gravity, max_geom, reg, geom);
 }
 
 
@@ -1334,19 +1342,21 @@ static bool clientwin_fitrep(WClientWin *cwin, WWindow *np,
     cwin->flags&=~CLIENTWIN_NEED_CFGNTFY;
     
     fptmp.g=fp->g;
-    fptmp.mode=REGION_FIT_BOUNDS;
-    if(!(fptmp.mode&REGION_FIT_GRAVITY) || fptmp.gravity==ForgetGravity){
-        fptmp.mode|=REGION_FIT_GRAVITY;
+    fptmp.mode=REGION_FIT_BOUNDS|REGION_FIT_GRAVITY;
+    if(!(fp->mode&REGION_FIT_GRAVITY) || fp->gravity==ForgetGravity)
         fptmp.gravity=clientwin_get_transients_gravity(cwin);
-    }
+    else
+        fptmp.gravity=fp->gravity;
     
     FOR_ALL_ON_PTRLIST(WRegion*, transient, cwin->transient_list, tmp){
         WFitParams fp2;
         fp2.mode=REGION_FIT_EXACT;
-        if(ioncore_g.framed_transients)
+        if(ioncore_g.framed_transients){
             convert_transient_geom(&(fptmp), transient, &(fp2.g));
-        else
+        }else{
+            /* Hack */
             fp2=fptmp;
+        }
 
         if(!region_fitrep(transient, np, &fp2) && np!=NULL){
             warn(TR("Error reparenting %s."), region_name(transient));
@@ -1631,6 +1641,9 @@ void clientwin_handle_configure_request(WClientWin *cwin,
                                      &geom);
             region_rqgeom((WRegion*)cwin, rqflags, &geom, NULL);*/
             /* Just use any known available space wanted or give up some */
+            /* Temporary hack. */
+            REGION_GEOM(cwin).w=geom.w;
+            REGION_GEOM(cwin).h=geom.h;
             region_fitrep((WRegion*)cwin, NULL, &(cwin->last_fp));
         }
     }
