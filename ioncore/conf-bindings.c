@@ -400,7 +400,7 @@ static bool get_kpress(WBindmap *bindmap, WBinding *b, ExtlTab t)
     char *key;
     
     if(b->waitrel)
-        extl_table_sets_s(t, "action", "kpress_wairel");
+        extl_table_sets_s(t, "action", "kpress_waitrel");
     else
         extl_table_sets_s(t, "action", "kpress");
     
