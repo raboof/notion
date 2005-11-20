@@ -65,7 +65,6 @@ DECLSTRUCT(WGlobal){
     /* We could have a display WRegion but the screen-link could impose
      * some problems so these are handled as a special case.
      */
-    WScreen *active_screen;
     WRegion *focus_current;
     
     int input_mode;
