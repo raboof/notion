@@ -90,6 +90,7 @@ DECLCLASS(WRegion){
     WSubmapState submapstat;
     
     WRegion *active_sub;
+    WRegion *active_prev, *active_next;
     
     WRegionNameInfo ni;
     

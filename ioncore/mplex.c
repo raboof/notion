@@ -622,10 +622,8 @@ static bool mplex_do_node_goto(WMPlex *mplex, WLListNode *node,
     if(!mplex_do_node_display(mplex, node, call_changed, nohide))
         return FALSE;
     
-    if(flags&REGION_GOTO_FOCUS){
-        ioncore_set_previous_of(node->reg);
+    if(flags&REGION_GOTO_FOCUS)
         region_maybewarp(node->reg, !(flags&REGION_GOTO_NOWARP));
-    }
     
     return TRUE;
 }
@@ -663,7 +661,6 @@ static void mplex_refocus(WMPlex *mplex, bool warp)
     else
         reg=(WRegion*)mplex;
     
-    ioncore_set_previous_of(reg);
     region_maybewarp(reg, warp);
 }
 

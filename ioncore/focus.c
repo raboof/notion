@@ -31,60 +31,43 @@ WHook *region_inactivated_hook=NULL;
 /*}}}*/
 
 
-/*{{{ Previous active region tracking */
+/*{{{ Focus list */
 
 
-static Watch prev_watch=WATCH_INIT;
-
-
-static void prev_watch_handler(Watch *watch, WRegion *prev)
+void region_focuslist_remove(WRegion *reg)
 {
-    WRegion *r;
-    while(1){
-        r=region_manager_or_parent(prev);
-        if(r==NULL)
-            break;
-        
-        if(watch_setup(&prev_watch, (Obj*)r, 
-                       (WatchHandler*)prev_watch_handler))
-            break;
-        prev=r;
-    }
+    UNLINK_ITEM(ioncore_g.focus_current, reg, active_next, active_prev);
 }
 
 
-void ioncore_set_previous_of(WRegion *reg)
+void region_focuslist_push(WRegion *reg)
 {
-    if(reg==NULL || ioncore_g.previous_protect!=0)
-        return;
+    region_focuslist_remove(reg);
+    LINK_ITEM_FIRST(ioncore_g.focus_current, reg, active_next, active_prev);
+}
 
-    if(REGION_IS_ACTIVE(reg))
-        return;
+
+void region_focuslist_move_after(WRegion *reg, WRegion *after)
+{
+    region_focuslist_remove(reg);
+    LINK_ITEM_AFTER(ioncore_g.focus_current, after, reg, 
+                    active_next, active_prev);
+}
+
+
+void region_focuslist_deinit(WRegion *reg)
+{
+    WRegion *replace=region_manager_or_parent(reg);
     
-    if(ioncore_g.focus_current!=NULL){
-        watch_setup(&prev_watch, 
-                    (Obj*)ioncore_g.focus_current,
-                    (WatchHandler*)prev_watch_handler);
-    }
-}
-
-
-void ioncore_protect_previous()
-{
-    ioncore_g.previous_protect++;
-}
-
-
-void ioncore_unprotect_previous()
-{
-    assert(ioncore_g.previous_protect>0);
-    ioncore_g.previous_protect--;
+    if(replace!=NULL)
+        region_focuslist_move_after(replace, reg);
+    
+    region_focuslist_remove(reg);
 }
 
 
 /*EXTL_DOC
- * Go to and return the region that had its activity state previously 
- * saved.
+ * Go to and return to a previously active region (if any).
  * 
  * Note that this function is asynchronous; the region will not
  * actually have received the focus when this function returns.
@@ -92,14 +75,26 @@ void ioncore_unprotect_previous()
 EXTL_EXPORT
 WRegion *ioncore_goto_previous()
 {
-    WRegion *r=(WRegion*)prev_watch.obj;
+    WRegion *next;
     
-    if(r!=NULL){
-        watch_reset(&prev_watch);
-        region_goto(r);
+    if(ioncore_g.focus_current==NULL)
+        return NULL;
+    
+    /* Find the first region on focus history list that isn't currently
+     * active.
+     */
+    for(next=ioncore_g.focus_current->active_next;
+        next!=NULL; 
+        next=next->active_next){
+        
+        if(!REGION_IS_ACTIVE(next))
+            break;
     }
     
-    return r;
+    if(next!=NULL)
+        region_goto(next);
+    
+    return next;
 }
 
 
@@ -179,8 +174,10 @@ void region_got_focus(WRegion *reg)
     
     region_set_activity(reg, SETPARAM_UNSET);
 
-    if(reg->active_sub==NULL)
-        ioncore_g.focus_current=reg;
+    if(reg->active_sub==NULL){
+        region_focuslist_push(reg);
+        /*ioncore_g.focus_current=reg;*/
+    }
     
     if(!REGION_IS_ACTIVE(reg)){
         D(fprintf(stderr, "got focus (inact) %s [%p]\n", OBJ_TYPESTR(reg), reg);)
@@ -234,7 +231,8 @@ void region_lost_focus(WRegion *reg)
     par=REGION_PARENT_REG(reg);
     if(par!=NULL && par->active_sub==reg)
         par->active_sub=NULL;
-    
+
+#if 0    
     if(ioncore_g.focus_current==reg){
         /* Find the closest active parent, or if none is found, stop at the
          * screen and mark it "currently focused".
@@ -243,6 +241,7 @@ void region_lost_focus(WRegion *reg)
             par=REGION_PARENT_REG(par);
         ioncore_g.focus_current=par;
     }
+#endif
 
     D(fprintf(stderr, "lost focus (act) %s [%p:]\n", OBJ_TYPESTR(reg), reg);)
     

@@ -216,10 +216,8 @@ bool ionws_managed_goto(WIonWS *ws, WRegion *reg, int flags)
         }
     }
 
-    if(flags&REGION_GOTO_FOCUS){
-        ioncore_set_previous_of(reg);
+    if(flags&REGION_GOTO_FOCUS)
         region_maybewarp(reg, !(flags&REGION_GOTO_NOWARP));
-    }
 
     return TRUE;
 }

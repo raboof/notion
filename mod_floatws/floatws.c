@@ -284,10 +284,8 @@ static bool floatws_managed_goto(WFloatWS *ws, WRegion *reg, int flags)
     
     region_map(reg);
     
-    if(flags&REGION_GOTO_FOCUS){
-        ioncore_set_previous_of(reg);
+    if(flags&REGION_GOTO_FOCUS)
         region_maybewarp(reg, !(flags&REGION_GOTO_NOWARP));
-    }
     
     return TRUE;
 }
@@ -532,7 +530,6 @@ bool floatws_phattach(WFloatWS *ws,
     /* Don't warp, it is annoying in this case */
     if(newframe && p->aflags&PHOLDER_ATTACH_SWITCHTO
        && region_may_control_focus((WRegion*)ws)){
-        ioncore_set_previous_of((WRegion*)p->frame);
         region_set_focus((WRegion*)p->frame);
     }
     

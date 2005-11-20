@@ -310,7 +310,6 @@ static void init_global()
 
     ioncore_g.input_mode=IONCORE_INPUTMODE_NORMAL;
     ioncore_g.opmode=IONCORE_OPMODE_INIT;
-    ioncore_g.previous_protect=0;
     ioncore_g.dblclick_delay=CF_DBLCLICK_DELAY;
     ioncore_g.opaque_resize=0;
     ioncore_g.warp_enabled=TRUE;
@@ -508,7 +507,7 @@ static void set_initial_focus()
     if(scr==NULL)
         scr=ioncore_g.screens;
     
-    ioncore_g.focus_current=(WRegion*)scr;
+    region_focuslist_push((WRegion*)scr);
     region_do_set_focus((WRegion*)scr, FALSE);
 }
 

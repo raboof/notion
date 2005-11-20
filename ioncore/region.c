@@ -48,6 +48,8 @@ void region_init(WRegion *reg, WWindow *par, const WFitParams *fp)
     reg->p_prev=NULL;
     
     reg->active_sub=NULL;
+    reg->active_prev=NULL;
+    reg->active_next=NULL;
     
     reg->ni.name=NULL;
     reg->ni.inst_off=0;
@@ -104,8 +106,7 @@ void region_deinit(WRegion *reg)
     
     region_unregister(reg);
 
-    if(ioncore_g.focus_current==reg)
-        ioncore_g.focus_current=REGION_PARENT_REG(reg);
+    region_focuslist_deinit(reg);
 
     if(ioncore_g.focus_next==reg){
         D(warn("Region to be focused next destroyed[2]."));
@@ -199,10 +200,8 @@ static bool region_managed_goto_default(WRegion *mgr, WRegion *reg, int flags)
         return FALSE;
     if(!REGION_IS_MAPPED(reg))
         region_map(reg);
-    if(flags&REGION_GOTO_FOCUS){
-        ioncore_set_previous_of(reg);
+    if(flags&REGION_GOTO_FOCUS)
         region_maybewarp(reg, !(flags&REGION_GOTO_NOWARP));
-    }
     return TRUE;
 }
 
@@ -279,36 +278,24 @@ void region_updategr_default(WRegion *reg)
 /*{{{ Goto */
 
 
-static bool protected_do_goto(WRegion *reg, int flags)
-{
-    bool ret;
-    ioncore_protect_previous();
-    ret=region_goto_flags(reg, flags);
-    ioncore_unprotect_previous();
-    return ret;
-}
-
-
 bool region_goto_flags(WRegion *reg, int flags)
 {
     WRegion *mgr=REGION_MANAGER(reg);
     
     if(mgr!=NULL){
-        if(!protected_do_goto(mgr, flags))
+        if(!region_goto_flags(mgr, flags))
             return FALSE;
         return region_managed_goto(mgr, reg, flags);
     }else{
         WRegion *par=REGION_PARENT_REG(reg);
         if(par!=NULL){
-            if(!protected_do_goto(par, flags))
+            if(!region_goto_flags(par, flags))
                 return FALSE;
         }
 
         region_map(reg);
-        if(flags&REGION_GOTO_FOCUS){
-            ioncore_set_previous_of(reg);
+        if(flags&REGION_GOTO_FOCUS)
             region_maybewarp(reg, !(flags&REGION_GOTO_NOWARP));
-        }
         
         return TRUE;
     }

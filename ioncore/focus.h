@@ -41,10 +41,12 @@ extern bool region_may_control_focus(WRegion *reg);
 /* Does reg have focus? */
 extern bool region_is_active(WRegion *reg);
 
-/* Previously active region tracking */
-extern void ioncore_set_previous_of(WRegion *reg);
-extern void ioncore_protect_previous();
-extern void ioncore_unprotect_previous();
+/* Focus history */
+extern void region_focuslist_remove(WRegion *reg);
+extern void region_focuslist_push(WRegion *reg);
+extern void region_focuslist_move_after(WRegion *reg, WRegion *after);
+extern void region_focuslist_deinit(WRegion *reg);
+
 extern WRegion *ioncore_goto_previous();
 
 /* Handlers to these shook should take WRegion* as parameter. */

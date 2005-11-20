@@ -1454,10 +1454,8 @@ static bool clientwin_managed_goto(WClientWin *cwin, WRegion *sub, int flags)
     if(!REGION_IS_MAPPED(sub))
         region_map(sub);
     
-    if(flags&REGION_GOTO_FOCUS){
-        ioncore_set_previous_of(sub);
+    if(flags&REGION_GOTO_FOCUS)
         region_maybewarp(sub, !(flags&REGION_GOTO_NOWARP));
-    }
     
     return TRUE;
 }

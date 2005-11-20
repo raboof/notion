@@ -69,7 +69,6 @@ DECLSTRUCT(WGlobal){
     
     int input_mode;
     int opmode;
-    int previous_protect;
     
     Time dblclick_delay;
     int opaque_resize;
