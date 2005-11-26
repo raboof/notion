@@ -32,4 +32,6 @@ extern pid_t mainloop_popen_bgread(const char *cmd,
 extern bool mainloop_register_input_fd_extlfn(int fd, ExtlFn fn);
 extern bool mainloop_process_pipe_extlfn(int fd, ExtlFn fn);
 
+extern void cloexec_braindamage_fix(int fd);
+
 #endif /* ION_LIBMAINLOOP_EXEC_H */

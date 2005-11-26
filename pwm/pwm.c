@@ -23,6 +23,7 @@
 #include <libtu/optparser.h>
 #include <libtu/errorlog.h>
 #include <libextl/readconfig.h>
+#include <libmainloop/exec.h>
 
 #include <ioncore/common.h>
 #include <ioncore/global.h>
@@ -186,6 +187,7 @@ int main(int argc, char*argv[])
                 free(efnam);
                 efnam=NULL;
             }
+            cloexec_braindamage_fix(fileno(ef));
             fprintf(ef, TR("PWM startup error log:\n"));
             errorlog_begin_file(&el, ef);
         }

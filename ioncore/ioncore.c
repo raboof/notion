@@ -30,6 +30,7 @@
 #include <libmainloop/select.h>
 #include <libmainloop/signal.h>
 #include <libmainloop/hooks.h>
+#include <libmainloop/exec.h>
 
 #include "common.h"
 #include "rootwin.h"
@@ -447,7 +448,7 @@ static bool ioncore_init_x(const char *display, int stflags)
     ioncore_g.win_context=XUniqueContext();
     ioncore_g.conn=ConnectionNumber(dpy);
     
-    fcntl(ioncore_g.conn, F_SETFD, FD_CLOEXEC);
+    cloexec_braindamage_fix(ioncore_g.conn);
     
     ioncore_g.atom_wm_state=XInternAtom(dpy, "WM_STATE", False);
     ioncore_g.atom_wm_change_state=XInternAtom(dpy, "WM_CHANGE_STATE", False);

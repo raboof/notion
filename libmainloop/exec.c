@@ -53,8 +53,8 @@ static int mypipe(int *fds)
 {
     int r=pipe(fds);
     if(r==0){
-        fcntl(fds[0], F_SETFD, FD_CLOEXEC);
-        fcntl(fds[1], F_SETFD, FD_CLOEXEC);
+        cloexec_braindamage_fix(fds[0]);
+        cloexec_braindamage_fix(fds[1]);
     }else{
         warn_err_obj("pipe()");
     }
@@ -293,3 +293,16 @@ err:
 
 
 /*}}}*/
+
+
+/*{{{ Misc. */
+
+
+void cloexec_braindamage_fix(int fd)
+{
+    fcntl(fd, F_SETFD, FD_CLOEXEC);
+}
+
+
+/*}}}*/
+

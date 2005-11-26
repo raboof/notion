@@ -24,9 +24,10 @@
 
 #include <libextl/readconfig.h>
 #include <libmainloop/select.h>
+#include <libmainloop/exec.h>
+#include <ioncore/exec.h>
 #include <ioncore/global.h>
 #include <ioncore/ioncore.h>
-#include <ioncore/exec.h>
 #include "sm_session.h"
 
 
@@ -86,7 +87,7 @@ static void sm_ice_watch_fd(IceConn conn,
         }
         else{
             sm_fd=IceConnectionNumber(conn);
-            fcntl(sm_fd, F_SETFD, FD_CLOEXEC);
+            cloexec_braindamage_fix(sm_fd);
             mainloop_register_input_fd(sm_fd, NULL, &sm_process_messages);
         }
     }
