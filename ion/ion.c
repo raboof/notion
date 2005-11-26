@@ -236,10 +236,11 @@ int main(int argc, char*argv[])
                 warn_err_obj(efnam);
                 free(efnam);
                 efnam=NULL;
+            }else{
+                cloexec_braindamage_fix(fileno(ef));
+                fprintf(ef, TR("Ion startup error log:\n"));
+                errorlog_begin_file(&el, ef);
             }
-            cloexec_braindamage_fix(fileno(ef));
-            fprintf(ef, TR("Ion startup error log:\n"));
-            errorlog_begin_file(&el, ef);
         }
     }
 
