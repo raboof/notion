@@ -358,6 +358,7 @@ function mod_statusbar.create(param_)
     local sb=scr:set_stdisp({
         type="WStatusBar", 
         pos=(param.pos or "bl"),
+        fullsize=param.fullsize,
         name="*statusbar*",
     })
     
