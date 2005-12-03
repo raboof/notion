@@ -1007,7 +1007,7 @@ WRegion *mplex_attach(WMPlex *mplex, WRegion *reg, ExtlTab param)
     
     /* region__attach_reparent should do better checks. */
     if(reg==NULL || reg==(WRegion*)mplex)
-        return FALSE;
+        return NULL;
     
     return region__attach_reparent((WRegion*)mplex, reg,
                                    (WRegionDoAttachFn*)mplex_do_attach, 

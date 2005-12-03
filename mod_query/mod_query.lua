@@ -331,6 +331,15 @@ end
 -- Simple queries for internal actions {{{
 
 
+function mod_query.call_warn(mplex, fn)
+    local err = collect_errors(fn)
+    if err then
+        mod_query.warn(mplex, err)
+    end
+    return err
+end
+
+
 function mod_query.complete_name(str, list)
     local entries={}
     local l=string.len(str)
@@ -381,8 +390,13 @@ function mod_query.attachclient_handler(frame, str)
         mod_query.warn(frame, TR("Could not find client window %s.", str))
     elseif frame:rootwin_of()~=cwin:rootwin_of() then
         mod_query.warn(frame, TR("Cannot attach: different root windows."))
+    elseif cwin:manager()==frame then
+        cwin:goto()
     else
-        frame:attach(cwin, { switchto = true })
+        mod_query.call_warn(frame, 
+                            function() 
+                                frame:attach(cwin, { switchto = true }) 
+                            end)
     end
 end
 
@@ -411,17 +425,18 @@ function mod_query.workspace_handler(mplex, name)
         if not cls or cls=="" then
             cls=ioncore.get().default_ws_type
         end
-        
-        local err=collect_errors(function()
-                                     ws=scr:attach_new({ 
-                                         type=cls, 
-                                         name=name, 
-                                         switchto=true 
-                                     })
-                                 end)
-        if not ws then
-            mod_query.warn(mplex, err or TR("Unknown error"))
-        end
+
+        mod_query.call_warn(mplex, 
+                            function()
+                                ws=scr:attach_new({ 
+                                    type=cls, 
+                                    name=name, 
+                                    switchto=true 
+                                 })
+                                 if not ws then
+                                     error(TR("Unknown error"))
+                                 end
+                            end)
     end
     
     local defcls=ioncore.get().default_ws_type
