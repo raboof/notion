@@ -15,8 +15,8 @@
 if _LOADED["ioncore"] then return end
 
 -- Default modifiers
-MOD1="Mod1+"
-MOD2=""
+--MOD1="Mod1+"
+--MOD2=""
 
 -- Maximum number of bytes to read from pipes
 ioncore.RESULT_DATA_LIMIT=1024^2
@@ -28,6 +28,31 @@ dopath('ioncore_winprops')
 dopath('ioncore_misc')
 dopath('ioncore_wd')
 dopath('ioncore_menudb')
+
+-- Modifier setup compatibility kludge
+local oldindex
+
+local function getmod(t, s)
+    if s=="META" then
+        return rawget(t, "MOD1") or "Mod1+"
+    elseif s=="MOD1" then
+        return rawget(t, "META") or "Mod1+"
+    elseif s=="ALTMETA" then
+        return rawget(t, "MOD2") or ""
+    elseif s=="MOD2" then
+        return rawget(t, "ALTMETA") or ""
+    elseif oldindex then
+        return oldindex(t, s)
+    end
+end
+
+local oldmeta, newmeta=getmetatable(_G), {}
+if oldmeta then
+    newmeta=table.copy(oldmeta)
+    oldindex=oldmeta.__index
+end
+newmeta.__index=getmod
+setmetatable(_G, newmeta)
 
 -- Export some important functions into global namespace.
 export(ioncore, 
