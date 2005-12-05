@@ -62,8 +62,8 @@ end
 local function dobindings(fn, bindings)
     local p={}
     
-    p.MOD1="Mod1+"
-    p.MOD2=""
+    p.META="Mod1+"
+    p.ALTMETA=""
     
     function p.bdoc(text)
         return {action = "doc", text = text}

@@ -9,8 +9,8 @@
 -- Set default modifiers. Alt should usually be mapped to Mod1 on
 -- XFree86-based systems. The flying window keys are probably Mod3
 -- or Mod4; see the output of 'xmodmap'.
-MOD1="Mod1+"
-MOD2=""
+META="Mod1+"
+ALTMETA=""
 
 ioncore.set{
     -- Maximum delay between clicks in milliseconds to be considered a

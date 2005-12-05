@@ -7,13 +7,13 @@
 
 defbindings("WIonWS", {
     bdoc("Split current frame vertically."),
-    kpress(MOD1.."S", "WIonWS.split_at(_, _sub, 'bottom', true)"),
+    kpress(META.."S", "WIonWS.split_at(_, _sub, 'bottom', true)"),
     
     bdoc("Go to frame above/below/right/left of current frame."),
-    kpress(MOD1.."P", "WIonWS.goto_dir(_, 'above')"),
-    kpress(MOD1.."N", "WIonWS.goto_dir(_, 'below')"),
-    kpress(MOD1.."Tab", "WIonWS.goto_dir(_, 'right')"),
-    submap(MOD1.."K", {
+    kpress(META.."P", "WIonWS.goto_dir(_, 'above')"),
+    kpress(META.."N", "WIonWS.goto_dir(_, 'below')"),
+    kpress(META.."Tab", "WIonWS.goto_dir(_, 'right')"),
+    submap(META.."K", {
         kpress("Tab", "WIonWS.goto_dir(_, 'left')"),
         
         bdoc("Split current frame horizontally."),

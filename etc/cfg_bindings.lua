@@ -9,30 +9,30 @@
 --
 -- The bindings in this context are available all the time.
 --
--- The variable MOD1 should contain a string of the form 'Mod1+'
+-- The variable META should contain a string of the form 'Mod1+'
 -- where Mod1 maybe replaced with the modifier you want to use for most
--- of the bindings. Similarly MOD2 may be redefined to add a 
+-- of the bindings. Similarly ALTMETA may be redefined to add a 
 -- modifier to some of the F-key bindings.
 
 defbindings("WScreen", {
     bdoc("Switch to n:th object (workspace, full screen client window) "..
          "within current screen."),
-    kpress(MOD1.."1", "WScreen.switch_nth(_, 0)"),
-    kpress(MOD1.."2", "WScreen.switch_nth(_, 1)"),
-    kpress(MOD1.."3", "WScreen.switch_nth(_, 2)"),
-    kpress(MOD1.."4", "WScreen.switch_nth(_, 3)"),
-    kpress(MOD1.."5", "WScreen.switch_nth(_, 4)"),
-    kpress(MOD1.."6", "WScreen.switch_nth(_, 5)"),
-    kpress(MOD1.."7", "WScreen.switch_nth(_, 6)"),
-    kpress(MOD1.."8", "WScreen.switch_nth(_, 7)"),
-    kpress(MOD1.."9", "WScreen.switch_nth(_, 8)"),
-    kpress(MOD1.."0", "WScreen.switch_nth(_, 9)"),
+    kpress(META.."1", "WScreen.switch_nth(_, 0)"),
+    kpress(META.."2", "WScreen.switch_nth(_, 1)"),
+    kpress(META.."3", "WScreen.switch_nth(_, 2)"),
+    kpress(META.."4", "WScreen.switch_nth(_, 3)"),
+    kpress(META.."5", "WScreen.switch_nth(_, 4)"),
+    kpress(META.."6", "WScreen.switch_nth(_, 5)"),
+    kpress(META.."7", "WScreen.switch_nth(_, 6)"),
+    kpress(META.."8", "WScreen.switch_nth(_, 7)"),
+    kpress(META.."9", "WScreen.switch_nth(_, 8)"),
+    kpress(META.."0", "WScreen.switch_nth(_, 9)"),
     
     bdoc("Switch to next/previous object within current screen."),
-    kpress(MOD1.."comma", "WScreen.switch_prev(_)"),
-    kpress(MOD1.."period", "WScreen.switch_next(_)"),
+    kpress(META.."comma", "WScreen.switch_prev(_)"),
+    kpress(META.."period", "WScreen.switch_next(_)"),
     
-    submap(MOD1.."K", {
+    submap(META.."K", {
         bdoc("Go to previous active object."),
         kpress("K", "ioncore.goto_previous()"),
         
@@ -41,19 +41,19 @@ defbindings("WScreen", {
     }),
     
     bdoc("Go to n:th screen on multihead setup."),
-    kpress(MOD1.."Shift+1", "ioncore.goto_nth_screen(0)"),
-    kpress(MOD1.."Shift+2", "ioncore.goto_nth_screen(1)"),
+    kpress(META.."Shift+1", "ioncore.goto_nth_screen(0)"),
+    kpress(META.."Shift+2", "ioncore.goto_nth_screen(1)"),
     
     bdoc("Go to next/previous screen on multihead setup."),
-    kpress(MOD1.."Shift+comma", "ioncore.goto_prev_screen()"),
-    kpress(MOD1.."Shift+period", "ioncore.goto_next_screen()"),
+    kpress(META.."Shift+comma", "ioncore.goto_prev_screen()"),
+    kpress(META.."Shift+period", "ioncore.goto_next_screen()"),
     
     bdoc("Create a new workspace of chosen default type."),
-    kpress(MOD1.."F9", "ioncore.create_ws(_)"),
+    kpress(META.."F9", "ioncore.create_ws(_)"),
     
     bdoc("Display the main menu."),
-    kpress(MOD2.."F12", "mod_query.query_menu(_, 'mainmenu', 'Main menu: ')"),
-    --kpress(MOD2.."F12", "mod_menu.menu(_, _sub, 'mainmenu', {big=true})"),
+    kpress(ALTMETA.."F12", "mod_query.query_menu(_, 'mainmenu', 'Main menu: ')"),
+    --kpress(ALTMETA.."F12", "mod_menu.menu(_, _sub, 'mainmenu', {big=true})"),
     mpress("Button3", "mod_menu.pmenu(_, _sub, 'mainmenu')"),
     
     bdoc("Display the window list menu."),
@@ -74,19 +74,19 @@ defbindings("WScreen", {
 
 defbindings("WMPlex", {
     bdoc("Close current object."),
-    kpress_wait(MOD1.."C", "WRegion.rqclose_propagate(_, _sub)"),
+    kpress_wait(META.."C", "WRegion.rqclose_propagate(_, _sub)"),
     
     bdoc("Nudge current client window. This might help with some "..
          "programs' resizing problems."),
-    kpress_wait(MOD1.."L", 
+    kpress_wait(META.."L", 
                 "WClientWin.nudge(_sub)", "_sub:WClientWin"),
 
     bdoc("Toggle fullscreen mode of current client window."),
-    kpress_wait(MOD1.."Return", 
+    kpress_wait(META.."Return", 
                 "WClientWin.set_fullscreen(_sub, 'toggle')", 
                 "_sub:WClientWin"),
 
-    submap(MOD1.."K", {
+    submap(META.."K", {
        bdoc("Kill client owning current client window."),
        kpress("C", "WClientWin.kill(_sub)", "_sub:WClientWin"),
                                 
@@ -96,36 +96,36 @@ defbindings("WMPlex", {
     }),
 
     bdoc("Query for manual page to be displayed."),
-    kpress(MOD2.."F1", "mod_query.query_man(_, ':man')"),
+    kpress(ALTMETA.."F1", "mod_query.query_man(_, ':man')"),
 
     bdoc("Show the Ion manual page."),
-    kpress(MOD1.."F1", "ioncore.exec_on(_, ':man ion3')"),
+    kpress(META.."F1", "ioncore.exec_on(_, ':man ion3')"),
 
     bdoc("Run a terminal emulator."),
-    kpress(MOD2.."F2", "ioncore.exec_on(_, 'xterm')"),
+    kpress(ALTMETA.."F2", "ioncore.exec_on(_, 'xterm')"),
     
     bdoc("Query for command line to execute."),
-    kpress(MOD2.."F3", "mod_query.query_exec(_)"),
+    kpress(ALTMETA.."F3", "mod_query.query_exec(_)"),
 
     bdoc("Query for Lua code to execute."),
-    kpress(MOD1.."F3", "mod_query.query_lua(_)"),
+    kpress(META.."F3", "mod_query.query_lua(_)"),
 
     bdoc("Query for host to connect to with SSH."),
-    kpress(MOD2.."F4", "mod_query.query_ssh(_, ':ssh')"),
+    kpress(ALTMETA.."F4", "mod_query.query_ssh(_, ':ssh')"),
 
     bdoc("Query for file to edit."),
-    kpress(MOD2.."F5", 
+    kpress(ALTMETA.."F5", 
            "mod_query.query_editfile(_, 'run-mailcap --action=edit')"),
 
     bdoc("Query for file to view."),
-    kpress(MOD2.."F6", 
+    kpress(ALTMETA.."F6", 
            "mod_query.query_runfile(_, 'run-mailcap --action=view')"),
 
     bdoc("Query for workspace to go to or create a new one."),
-    kpress(MOD2.."F9", "mod_query.query_workspace(_)"),
+    kpress(ALTMETA.."F9", "mod_query.query_workspace(_)"),
     
     bdoc("Query for a client window to go to."),
-    kpress(MOD1.."G", "mod_query.query_gotoclient(_)"),
+    kpress(META.."G", "mod_query.query_gotoclient(_)"),
 })
 
 
@@ -137,9 +137,9 @@ defbindings("WMPlex", {
 
 defbindings("WFrame", {
     bdoc("Tag current object within the frame."),
-    kpress(MOD1.."T", "WRegion.set_tagged(_sub, 'toggle')", "_sub:non-nil"),
+    kpress(META.."T", "WRegion.set_tagged(_sub, 'toggle')", "_sub:non-nil"),
 
-    submap(MOD1.."K", {
+    submap(META.."K", {
         bdoc("Switch to n:th object within the frame."),
         kpress("1", "WFrame.switch_nth(_, 0)"),
         kpress("2", "WFrame.switch_nth(_, 1)"),
@@ -169,15 +169,15 @@ defbindings("WFrame", {
     }),
 
     bdoc("Query for a client window to attach to active frame."),
-    kpress(MOD1.."A", "mod_query.query_attachclient(_)"),
+    kpress(META.."A", "mod_query.query_attachclient(_)"),
 
     bdoc("Display frame context menu."),
-    kpress(MOD1.."M", "mod_query.query_menu(_, 'ctxmenu', 'Context menu: ')"),
-    --kpress(MOD1.."M", "mod_menu.menu(_, _sub, 'ctxmenu')"),
+    kpress(META.."M", "mod_query.query_menu(_, 'ctxmenu', 'Context menu: ')"),
+    --kpress(META.."M", "mod_menu.menu(_, _sub, 'ctxmenu')"),
     mpress("Button3", "mod_menu.pmenu(_, _sub, 'ctxmenu')"),
     
     bdoc("Begin move/resize mode."),
-    kpress(MOD1.."R", "WFrame.begin_kbresize(_)"),
+    kpress(META.."R", "WFrame.begin_kbresize(_)"),
     
     bdoc("Switch the frame to display the object indicated by the tab."),
     mclick("Button1@tab", "WFrame.p_switch_tab(_)"),
@@ -185,10 +185,10 @@ defbindings("WFrame", {
     
     bdoc("Resize the frame."),
     mdrag("Button1@border", "WFrame.p_resize(_)"),
-    mdrag(MOD1.."Button3", "WFrame.p_resize(_)"),
+    mdrag(META.."Button3", "WFrame.p_resize(_)"),
     
     bdoc("Move the frame."),
-    mdrag(MOD1.."Button1", "WFrame.p_move(_)"),
+    mdrag(META.."Button1", "WFrame.p_move(_)"),
     
     bdoc("Move objects between frames by dragging and dropping the tab."),
     mdrag("Button1@tab", "WFrame.p_tabdrag(_)"),
@@ -201,7 +201,7 @@ defbindings("WFrame", {
 -- 
 -- These bindings are available keyboard move/resize mode. The mode
 -- is activated on frames with the command begin_kbresize (bound to
--- MOD1.."R" above by default).
+-- META.."R" above by default).
 
 defbindings("WMoveresMode", {
     bdoc("Cancel the resize mode."),
@@ -231,13 +231,13 @@ defbindings("WMoveresMode", {
     kpress("Shift+N",     "WMoveresMode.resize(_, 0, 0, 0,-1)"),
     
     bdoc("Move in specified direction."),
-    kpress(MOD1.."Left",  "WMoveresMode.move(_,-1, 0)"),
-    kpress(MOD1.."Right", "WMoveresMode.move(_, 1, 0)"),
-    kpress(MOD1.."Up",    "WMoveresMode.move(_, 0,-1)"),
-    kpress(MOD1.."Down",  "WMoveresMode.move(_, 0, 1)"),
-    kpress(MOD1.."F",     "WMoveresMode.move(_,-1, 0)"),
-    kpress(MOD1.."B",     "WMoveresMode.move(_, 1, 0)"),
-    kpress(MOD1.."P",     "WMoveresMode.move(_, 0,-1)"),
-    kpress(MOD1.."N",     "WMoveresMode.move(_, 0, 1)"),
+    kpress(META.."Left",  "WMoveresMode.move(_,-1, 0)"),
+    kpress(META.."Right", "WMoveresMode.move(_, 1, 0)"),
+    kpress(META.."Up",    "WMoveresMode.move(_, 0,-1)"),
+    kpress(META.."Down",  "WMoveresMode.move(_, 0, 1)"),
+    kpress(META.."F",     "WMoveresMode.move(_,-1, 0)"),
+    kpress(META.."B",     "WMoveresMode.move(_, 1, 0)"),
+    kpress(META.."P",     "WMoveresMode.move(_, 0,-1)"),
+    kpress(META.."N",     "WMoveresMode.move(_, 0, 1)"),
 })
 
