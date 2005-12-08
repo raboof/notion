@@ -42,6 +42,6 @@ defbindings("WFloatFrame", {
 -- WFloatFrame context menu extras
 
 defctxmenu("WFloatFrame", {
-    menuentry("(Un)stick",      "WFloatFrame.toggle_sticky(_)"),
+    menuentry("(Un)stick",      "WFloatFrame.set_sticky(_, 'toggle')"),
 })
 
