@@ -26,6 +26,7 @@ DECLCLASS(WFloatWSRescuePH){
     Watch floatws_watch;
     Watch frame_watch;
     int gravity;
+    Watch stack_above_watch;
 };
 
 extern WFloatWSRescuePH *create_floatwsrescueph(WFloatWS *floatws,

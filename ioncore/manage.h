@@ -71,6 +71,17 @@ extern WPHolder *region_prepare_manage_default(WRegion *reg,
                                                const WManageParams *par, 
                                                int redir);
 
+
+extern WPHolder *region_prepare_manage_transient(WRegion *reg, 
+                                                 const WClientWin *cwin,
+                                                 const WManageParams *param,
+                                                 int unused);
+
+extern WPHolder *region_prepare_manage_transient_default(WRegion *reg, 
+                                                         const WClientWin *cwin,
+                                                         const WManageParams *param,
+                                                         int unused);
+
 /* Rescue */
 
 extern bool region_rescue_clientwins(WRegion *reg, WPHolder *ph);

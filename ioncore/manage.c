@@ -10,6 +10,7 @@
  */
 
 #include <libtu/objp.h>
+#include <libextl/extl.h>
 #include "global.h"
 #include "common.h"
 #include "region.h"
@@ -17,7 +18,6 @@
 #include "names.h"
 #include "fullscreen.h"
 #include "pointer.h"
-#include <libextl/extl.h>
 #include "netwm.h"
 #include "extlconv.h"
 
@@ -59,17 +59,16 @@ bool clientwin_do_manage_default(WClientWin *cwin,
 {
     WRegion *r=NULL, *r2;
     WScreen *scr=NULL;
-    WPHolder *ph;
+    WPHolder *ph=NULL;
     int fs;
     int swf;
     bool ok;
 
-    /* Transients are managed by their transient_for client window unless the
-     * behaviour is overridden before this function.
-     */
+    /* Check if param->tfor or any of its managers want to manage cwin. */
     if(param->tfor!=NULL){
-        if(clientwin_attach_transient(param->tfor, (WRegion*)cwin))
-            return TRUE;
+        assert(param->tfor!=cwin);
+        ph=region_prepare_manage_transient((WRegion*)param->tfor, cwin, 
+                                           param, 0);
     }
     
     /* Find a suitable screen */
@@ -79,9 +78,11 @@ bool clientwin_do_manage_default(WClientWin *cwin,
         return FALSE;
     }
     
-    /* Find a placeholder for non-fullscreen state */
-    ph=region_prepare_manage((WRegion*)scr, cwin, param,
-                             MANAGE_REDIR_PREFER_YES);
+    if(ph==NULL){
+        /* Find a placeholder for non-fullscreen state */
+        ph=region_prepare_manage((WRegion*)scr, cwin, param,
+                                 MANAGE_REDIR_PREFER_YES);
+    }
     
     /* Check fullscreen mode */
     fs=netwm_check_initial_fullscreen(cwin, param->switchto);
@@ -121,7 +122,7 @@ bool clientwin_do_manage_default(WClientWin *cwin,
 /*}}}*/
 
 
-/*{{{ region_prepare_manage/region_manage_clientwin */
+/*{{{ region_prepare_manage/region_manage_clientwin/etc. */
 
 
 WPHolder *region_prepare_manage(WRegion *reg, const WClientWin *cwin,
@@ -148,6 +149,32 @@ WPHolder *region_prepare_manage_default(WRegion *reg, const WClientWin *cwin,
         return NULL;
         
     return region_prepare_manage(curr, cwin, param, MANAGE_REDIR_PREFER_YES);
+}
+
+
+WPHolder *region_prepare_manage_transient(WRegion *reg, 
+                                          const WClientWin *cwin,
+                                          const WManageParams *param,
+                                          int unused)
+{
+    WPHolder *ret=NULL;
+    CALL_DYN_RET(ret, WPHolder*, region_prepare_manage_transient, reg, 
+                 (reg, cwin, param, unused));
+    return ret;
+}
+
+
+WPHolder *region_prepare_manage_transient_default(WRegion *reg, 
+                                                  const WClientWin *cwin,
+                                                  const WManageParams *param,
+                                                  int unused)
+{
+    WRegion *mgr=REGION_MANAGER(reg);
+    
+    if(mgr!=NULL)
+        return region_prepare_manage_transient(mgr, cwin, param, unused);
+    else
+        return NULL;
 }
 
 

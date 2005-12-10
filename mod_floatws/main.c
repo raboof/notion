@@ -58,9 +58,6 @@ static StringIntMap frame_areas[]={
 
 void mod_floatws_deinit()
 {
-    hook_remove(clientwin_do_manage_alt, 
-                (WHookDummy*)mod_floatws_clientwin_do_manage);
-
     if(mod_floatws_floatws_bindmap!=NULL){
         ioncore_free_bindmap("WFloatWS", mod_floatws_floatws_bindmap);
         mod_floatws_floatws_bindmap=NULL;
@@ -103,9 +100,6 @@ bool mod_floatws_init()
 
     extl_read_config("cfg_floatws", NULL, TRUE);
     
-    hook_add(clientwin_do_manage_alt, 
-             (WHookDummy*)mod_floatws_clientwin_do_manage);
-
     return TRUE;
     
 err:

@@ -754,6 +754,9 @@ static DynFunTab region_dynfuntab[]={
     {(DynFun*)region_prepare_manage,
      (DynFun*)region_prepare_manage_default},
 
+    {(DynFun*)region_prepare_manage_transient,
+     (DynFun*)region_prepare_manage_transient_default},
+
     {(DynFun*)region_managed_goto,
      (DynFun*)region_managed_goto_default},
 

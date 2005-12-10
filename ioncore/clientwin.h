@@ -87,6 +87,11 @@ extern WPHolder *clientwin_prepare_manage(WClientWin *cwin,
                                           const WManageParams *param, 
                                           int redir);
 
+extern WPHolder *clientwin_prepare_manage_transient(WClientWin *cwin, 
+                                                    const WClientWin *transient,
+                                                    const WManageParams *param,
+                                                    int unused);
+
 extern void clientwin_get_set_name(WClientWin *cwin);
 
 extern void clientwin_handle_configure_request(WClientWin *cwin,

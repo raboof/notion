@@ -851,6 +851,44 @@ WPHolder *clientwin_prepare_manage(WClientWin *cwin, const WClientWin *cwin2,
 }
 
 
+static bool clientwin_should_manage_transient(WClientWin *cwin, 
+                                              WClientWin *tfor)
+{
+
+    WRegion *mgr;
+    
+    if(tfor==cwin)
+        return TRUE;
+    
+    mgr=REGION_MANAGER(tfor);
+    
+    if(ioncore_g.framed_transients && OBJ_IS(mgr, WFrame))
+        mgr=REGION_MANAGER(mgr);
+
+    return (mgr==(WRegion*)cwin);
+}
+
+
+WPHolder *clientwin_prepare_manage_transient(WClientWin *cwin, 
+                                             const WClientWin *transient,
+                                             const WManageParams *param,
+                                             int unused)
+{
+    WPHolder *ph=region_prepare_manage_transient_default((WRegion*)cwin,
+                                                         transient,
+                                                         param,
+                                                         unused);
+    
+    if(ph==NULL && clientwin_should_manage_transient(cwin, param->tfor)){
+        ph=(WPHolder*)create_basicpholder((WRegion*)cwin,
+                                          ((WRegionDoAttachFnSimple*)
+                                           clientwin_do_attach_transient_simple));
+    }
+
+    return ph;
+}
+
+
 WBasicPHolder *clientwin_managed_get_pholder(WClientWin *cwin, WRegion *mgd)
 {
     return create_basicpholder((WRegion*)cwin, 
@@ -1901,6 +1939,9 @@ static DynFunTab clientwin_dynfuntab[]={
     
     {(DynFun*)region_prepare_manage,
      (DynFun*)clientwin_prepare_manage},
+
+    {(DynFun*)region_prepare_manage_transient,
+     (DynFun*)clientwin_prepare_manage_transient},
 
     {(DynFun*)region_managed_get_pholder,
      (DynFun*)clientwin_managed_get_pholder},

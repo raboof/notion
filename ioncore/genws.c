@@ -18,6 +18,7 @@
 #include "xwindow.h"
 #include "focus.h"
 #include "names.h"
+#include "manage.h"
 
 
 /*{{{ Create/destroy */
@@ -107,6 +108,16 @@ WRegion *genws_rqclose_propagate(WGenWS *ws, WRegion *maybe_sub)
 }
 
 
+WPHolder *genws_prepare_manage_transient(WGenWS *ws,
+                                         const WClientWin *transient,
+                                         const WManageParams *param,
+                                         int unused)
+{
+    /* Transient manager searches should not cross workspaces. */
+    return NULL;
+}
+    
+
 /*}}}*/
 
 
@@ -137,6 +148,8 @@ static DynFunTab genws_dynfuntab[]={
      (DynFun*)genws_xwindow},
     {(DynFun*)region_rqclose_propagate,
      (DynFun*)genws_rqclose_propagate},
+    {(DynFun*)region_prepare_manage_transient,
+     (DynFun*)genws_prepare_manage_transient},
     END_DYNFUNTAB
 };
 

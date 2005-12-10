@@ -45,6 +45,7 @@ bool floatwsrescueph_init(WFloatWSRescuePH *ph, WFloatWS *ws,
     
     watch_init(&(ph->floatws_watch));
     watch_init(&(ph->frame_watch));
+    watch_init(&(ph->stack_above_watch));
     
     if(ws==NULL)
         return TRUE;
@@ -72,6 +73,7 @@ void floatwsrescueph_deinit(WFloatWSRescuePH *ph)
 {
     watch_reset(&(ph->floatws_watch));
     watch_reset(&(ph->frame_watch));
+    watch_reset(&(ph->stack_above_watch));
     pholder_deinit(&(ph->ph));
 }
 
@@ -99,7 +101,8 @@ bool floatwsrescueph_do_attach(WFloatWSRescuePH *ph,
     p.pos_ok=ph->pos_ok;
     p.gravity=ph->gravity;
     p.aflags=flags;
-    
+    p.stack_above=(WRegion*)ph->stack_above_watch.obj;
+        
     ok=floatws_phattach(ws, hnd, hnd_param, &p);
     
     if(p.frame!=NULL && !watch_ok(&(ph->frame_watch)))

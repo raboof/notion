@@ -508,6 +508,7 @@ bool floatws_phattach(WFloatWS *ws,
 {
     int mf=(p->aflags&PHOLDER_ATTACH_SWITCHTO ? MPLEX_ATTACH_SWITCHTO : 0);
     bool newframe=FALSE;
+    WFloatStacking *st;
     
     if(p->frame==NULL){
         p->frame=(WFrame*)floatws_create_frame(ws, &(p->geom), p->inner_geom,
@@ -517,6 +518,20 @@ bool floatws_phattach(WFloatWS *ws,
             return FALSE;
         
         newframe=TRUE;
+        
+        
+        if(stacking!=NULL && p->stack_above!=NULL){
+            st=stacking->prev;
+            while(1){
+                if(st->reg==(WRegion*)p->frame){
+                    st->above=p->stack_above;
+                    break;
+                }
+                if(st==stacking)
+                    break;
+                st=st->prev;
+            }
+        }
     }
     
     if(mplex_attach_hnd((WMPlex*)p->frame, hnd, hnd_param, mf)==NULL){
@@ -561,6 +576,7 @@ static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
     p.pos_ok=TRUE;
     p.gravity=NorthWestGravity;
     p.aflags=PHOLDER_ATTACH_SWITCHTO;
+    p.stack_above=NULL;
     
     return floatws_attach_framed(ws, dropped, &p);
 }
@@ -596,6 +612,7 @@ bool floatws_attach(WFloatWS *ws, WClientWin *cwin, ExtlTab t)
     p.inner_geom=TRUE;
     p.gravity=ForgetGravity;
     p.aflags=0;
+    p.stack_above=NULL;
 
     if(extl_table_is_bool_set(t, "switchto"))
         p.aflags|=PHOLDER_ATTACH_SWITCHTO;
@@ -646,6 +663,25 @@ static WMPlex *find_existing(WFloatWS *ws)
 }
 
 
+static WFloatWSRescuePH *floatws_prepare_manage_in_frame(WFloatWS *ws, 
+                                                         const WClientWin *cwin,
+                                                         const WManageParams *param, 
+                                                         bool respect_pos)
+{
+    if(param->maprq && ioncore_g.opmode!=IONCORE_OPMODE_INIT){
+        /* When the window is mapped by application request, position
+         * request is only honoured if the position was given by the user
+         * and in case of a transient (the app may know better where to 
+         * place them) or if we're initialising.
+         */
+        respect_pos=(param->tfor!=NULL || param->userpos);
+    }
+
+    return create_floatwsrescueph(ws, &(param->geom), respect_pos, 
+                                  TRUE, param->gravity);
+}
+
+
 static WPHolder *floatws_do_prepare_manage(WFloatWS *ws, 
                                            const WClientWin *cwin,
                                            const WManageParams *param, 
@@ -666,19 +702,8 @@ static WPHolder *floatws_do_prepare_manage(WFloatWS *ws,
     if(redir==MANAGE_REDIR_STRICT_YES)
         return NULL;
 
-    if(param->maprq && ioncore_g.opmode!=IONCORE_OPMODE_INIT){
-        /* When the window is mapped by application request, position
-         * request is only honoured if the position was given by the user
-         * and in case of a transient (the app may know better where to 
-         * place them) or if we're initialising.
-         */
-        respect_pos=(param->tfor!=NULL || param->userpos);
-    }
-
-    ph=(WPHolder*)create_floatwsrescueph(ws, &(param->geom), respect_pos, 
-                                         TRUE, param->gravity);
-    
-    return ph;
+    return (WPHolder*) floatws_prepare_manage_in_frame(ws, cwin, param,
+                                                       respect_pos);
 }
 
 
@@ -690,55 +715,26 @@ WPHolder *floatws_prepare_manage(WFloatWS *ws, const WClientWin *cwin,
 }
 
 
-/* A handler for clientwin_do_manage_alt hook to handle transients for windows
- * on WFloatWS:s differently from the normal behaviour.
- */
-bool mod_floatws_clientwin_do_manage(WClientWin *cwin, 
-                                     const WManageParams *param)
+WPHolder *floatws_prepare_manage_transient(WFloatWS *ws, const WClientWin *cwin,
+                                           const WManageParams *param,
+                                           int unused)
 {
+    WFloatWSRescuePH *ph;
     WRegion *stack_above;
-    WFloatWSPHAttachParams p;
-    WFloatStacking *st;
-    WFloatWS *ws;
-    WRegion *mgr;
     
-    if(param->tfor==NULL)
-        return FALSE;
-
     stack_above=OBJ_CAST(REGION_PARENT(param->tfor), WRegion);
     if(stack_above==NULL)
-        return FALSE;
-    
+        return NULL;
     ws=REGION_MANAGER_CHK(stack_above, WFloatWS);
     if(ws==NULL)
-        return FALSE;
+        return NULL;
     
-    p.geom=param->geom;
-    p.frame=NULL;
-    p.inner_geom=TRUE;
-    p.pos_ok=TRUE;
-    p.gravity=param->gravity;
-    p.aflags=PHOLDER_ATTACH_SWITCHTO;
+    ph=floatws_prepare_manage_in_frame(ws, cwin, param, TRUE);
     
-    if(!floatws_attach_framed(ws, (WRegion*)cwin, &p))
-        return FALSE;
+    if(ph!=NULL)
+        watch_setup(&(ph->stack_above_watch), (Obj*)stack_above, NULL);
 
-    mgr=REGION_MANAGER(cwin);
-    
-    if(stacking!=NULL){
-        st=stacking->prev;
-        while(1){
-            if(st->reg==mgr){
-                st->above=stack_above;
-                break;
-            }
-            if(st==stacking)
-                break;
-            st=st->prev;
-        }
-    }
-
-    return TRUE;
+    return (WPHolder*)ph;
 }
 
 
@@ -1415,6 +1411,9 @@ static DynFunTab floatws_dynfuntab[]={
     
     {(DynFun*)region_prepare_manage, 
      (DynFun*)floatws_prepare_manage},
+    
+    {(DynFun*)region_prepare_manage_transient,
+     (DynFun*)floatws_prepare_manage_transient},
     
     {(DynFun*)region_handle_drop,
      (DynFun*)floatws_handle_drop},

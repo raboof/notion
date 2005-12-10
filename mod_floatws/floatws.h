@@ -41,6 +41,7 @@ DECLSTRUCT(WFloatWSPHAttachParams){
     bool pos_ok;
     int gravity;
     int aflags;
+    WRegion *stack_above;
 };
 
 
@@ -82,14 +83,8 @@ extern bool floatws_rqclose_relocate(WFloatWS *ws);
 extern void floatws_raise(WFloatWS *ws, WRegion *reg);
 extern void floatws_lower(WFloatWS *ws, WRegion *reg);
 
-/* */
-
-extern bool mod_floatws_clientwin_do_manage(WClientWin *cwin, 
-                                            const WManageParams *param);
-
 extern WFloatStacking *mod_floatws_find_stacking(WRegion *r);
 
-/* */
 
 typedef struct{
     WFloatWS *ws;
