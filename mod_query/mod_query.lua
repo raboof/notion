@@ -552,6 +552,11 @@ function mod_query.query_runfile(mplex, script, prompt)
 end
 
 
+local function isspace(s)
+    return string.find(s, "^%s*$")~=nil
+end
+
+
 local function break_cmdline(str, no_ws)
     local st, en, beg, rest, ch, rem
     local res={""}
@@ -572,7 +577,7 @@ local function break_cmdline(str, no_ws)
                 table.insert(res, "")
             end
         else
-            if string.find(res[n], "^%s*$") then
+            if isspace(res[n]) then
                 res[n]=res[n]..str
             else
                 table.insert(res, str)
@@ -617,6 +622,8 @@ local function break_cmdline(str, no_ws)
             if ch=='|' then
                 ins_space('')
                 ins(ch)
+            else -- ch==' '
+                ins_space(ch)
             end
             st, en, beg, rest=string.find(str, "^.(%s*)(.*)")
             assert(beg and rest)
@@ -686,7 +693,7 @@ function mod_query.exec_completor(wedln, str, point)
     end
     
     local wp=" "
-    if complidx==1 then
+    if complidx==1 or (complidx==2 and isspace(parts[1])) then
         wp=" -wp "
     elseif string.find(parts[1], "^:+$") then
         if complidx==2 then
