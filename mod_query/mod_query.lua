@@ -38,7 +38,18 @@ function mod_query.make_completor(completefn)
     return completor
 end
 
-    
+
+--DOC
+-- Low-level query routine. \var{mplex} is the \type{WMPlex} to display
+-- the query in, \var{prompt} the prompt string, and \var{initvalue}
+-- the initial contents of the query box. \var{handler} is a function
+-- that receives (\var{mplex}, result string) as parameter when the
+-- query has been succesfully completed, \var{completor} the completor
+-- routine which receives a (\var{cp}, \var{str}, \var{point}) as parameters.
+-- The parameter \var{str} is the string to be completed and \var{point}
+-- cursor's location within it. Completions should be eventually,
+-- possibly asynchronously, set with \fnref{WComplProxy.set_completions} 
+-- on \var{cp}.
 function mod_query.query(mplex, prompt, initvalue, handler, completor,
                          context)
     local function handle_it(str)
