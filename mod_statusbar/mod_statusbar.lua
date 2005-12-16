@@ -73,7 +73,7 @@ end
 -- Template processing {{{
 
 local function process_template(template, meter_f, text_f, stretch_f)
-    local st, en, b, c, r, p
+    local st, en, b, c, r, p, tmp
     
     while template~="" do
         -- Find '%something'
@@ -102,8 +102,13 @@ local function process_template(template, meter_f, text_f, stretch_f)
                 template=r
             else 
                 -- Extract [alignment][zero padding]<meter name>
-                local pat='^([<|>]?)(0*[0-9]*)([a-zA-Z0-9_]+)(.*)'
-                st, en, c, p, b, r=string.find(template, pat)
+                local pat='([<|>]?)(0*[0-9]*)([a-zA-Z0-9_]+)'
+                -- First within {...}
+                st, en, c, p, b, r=string.find(template, '^{'..pat..'}(.*)')
+                if not st then
+                    -- And then without
+                    st, en, c, p, b, r=string.find(template, '^'..pat..'(.*)')
+                end
                 if b=="filler" then
                     stretch_f('f')
                     template=r

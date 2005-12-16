@@ -25,6 +25,9 @@ mod_statusbar.create{
     -- Space preceded by % adds stretchable space for alignment of variable
     -- meter value widths. > before meter name aligns right using this 
     -- stretchable space , < left, and | centers.
+    -- Meter values may be zero-padded to a width preceding the meter name.
+    -- These alignment and padding specifiers and the meter name may be
+    -- enclosed in braces {}.
     --
     -- %filler causes things on the marker's sides to be aligned left and
     -- right, respectively.
