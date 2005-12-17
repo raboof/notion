@@ -769,7 +769,7 @@ static WRegion *clientwin_do_attach_transient(WClientWin *cwin,
         region_unmap(mreg);
     
     if(region_may_control_focus((WRegion*)cwin))
-        region_warp(mreg);
+        region_set_focus(mreg);
     
     return reg;
 }
