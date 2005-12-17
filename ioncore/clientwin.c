@@ -1294,8 +1294,13 @@ static void clientwin_managed_rqgeom(WClientWin *cwin, WRegion *sub,
     /* Constrain to cwin's maximum occupied area. */
     g.w=minof(geom->w, cg->w);
     g.h=minof(geom->h, cg->h);
-    g.x=minof(maxof(cg->x, geom->x), cg->x+cg->w-g.w);
-    g.y=minof(maxof(cg->y, geom->y), cg->y+cg->h-g.h);
+    
+    do_gravity(cg, clientwin_get_transients_gravity(cwin), &g);
+    
+    if(!(flags&REGION_RQGEOM_WEAK_X))
+        g.x=minof(maxof(cg->x, geom->x), cg->x+cg->w-g.w);
+    if(!(flags&REGION_RQGEOM_WEAK_Y))
+        g.y=minof(maxof(cg->y, geom->y), cg->y+cg->h-g.h);
     
     if(geomret!=NULL)
         *geomret=g;
@@ -1668,6 +1673,7 @@ void clientwin_handle_configure_request(WClientWin *cwin,
         }else{
             region_convert_root_geom(REGION_PARENT_REG((WRegion*)cwin),
                                      &geom);
+            rqflags|=(REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y);
             region_rqgeom((WRegion*)cwin, rqflags, &geom, NULL);
             /* Just use any known available space wanted or give up some */
             /* Temporary hack. */
