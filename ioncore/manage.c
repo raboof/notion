@@ -60,9 +60,9 @@ bool clientwin_do_manage_default(WClientWin *cwin,
     WRegion *r=NULL, *r2;
     WScreen *scr=NULL;
     WPHolder *ph=NULL;
-    int fs;
+    int fs=-1;
     int swf;
-    bool ok;
+    bool ok, tmp;
 
     /* Check if param->tfor or any of its managers want to manage cwin. */
     if(param->tfor!=NULL){
@@ -85,7 +85,11 @@ bool clientwin_do_manage_default(WClientWin *cwin,
     }
     
     /* Check fullscreen mode */
-    fs=netwm_check_initial_fullscreen(cwin, param->switchto);
+    if(extl_table_gets_b(cwin->proptab, "fullscreen", &tmp))
+        fs=tmp;
+
+    if(fs<0)
+        fs=netwm_check_initial_fullscreen(cwin, param->switchto);
     
     if(fs<0){
         fs=clientwin_check_fullscreen_request(cwin, 

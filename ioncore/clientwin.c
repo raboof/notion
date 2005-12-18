@@ -390,7 +390,7 @@ static WClientWin *create_clientwin(WWindow *par, Window win,
 }
 
 
-static bool handle_target_props(WClientWin *cwin, const WManageParams *param)
+static bool handle_target_prop(WClientWin *cwin, const WManageParams *param)
 {
     WRegion *r=NULL;
     char *target_name=NULL;
@@ -407,10 +407,7 @@ static bool handle_target_props(WClientWin *cwin, const WManageParams *param)
         }
     }
     
-    if(!extl_table_is_bool_set(cwin->proptab, "fullscreen"))
-            return FALSE;
-    
-    return clientwin_enter_fullscreen(cwin, param->switchto);
+    return FALSE;
 }
 
 
@@ -590,7 +587,7 @@ again:
     
     param.tfor=clientwin_get_transient_for(cwin);
 
-    if(!handle_target_props(cwin, &param)){
+    if(!handle_target_prop(cwin, &param)){
         bool managed;
         void *mrshpm[2];
         
