@@ -1085,7 +1085,12 @@ function mod_query.query_menu(mplex, themenu, prompt)
                 end
                 t[n]=v
                 if v.submenu_fn then
-                    xform_menu(t, v.submenu_fn(), n.."/")
+                    local sm=v.submenu_fn()
+                    if sm then
+                        xform_menu(t, sm, n.."/")
+                    else
+                        ioncore.warn(TR("Missing submenu ")..(v.name or ""))
+                    end
                 end
             end
         end
