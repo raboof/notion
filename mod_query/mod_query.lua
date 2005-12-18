@@ -938,21 +938,37 @@ function mod_query.create_run_env(mplex)
     local env={
         _=mplex, 
         _sub=mplex:current(),
+        print=my_print
     }
     setmetatable(env, meta)
     return env
 end
 
 function mod_query.do_handle_lua(mplex, env, code)
+    local print_res
+    local function collect_print(...)
+        local tmp=""
+        local l=table.getn(arg)
+        for i=1,l do
+            tmp=tmp..tostring(arg[i])..(i==l and "\n" or "\t")
+        end
+        print_res=(print_res and print_res..tmp or tmp)
+    end
+
     local f, err=loadstring(code)
     if not f then
         mod_query.warn(mplex, err)
         return
     end
+    
+    env.print=collect_print
     setfenv(f, env)
+    
     err=collect_errors(f)
     if err then
         mod_query.warn(mplex, err)
+    elseif print_res then
+        mod_query.message(mplex, print_res)
     end
 end
 
