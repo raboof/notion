@@ -746,6 +746,9 @@ static DynFunTab frame_dynfuntab[]={
     {(DynFun*)mplex_default_index,
      (DynFun*)frame_default_index},
     
+    {frame_brushes_updated, 
+     frame_brushes_updated_default},
+    
     END_DYNFUNTAB
 };
                                        
