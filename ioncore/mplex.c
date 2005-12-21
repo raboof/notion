@@ -570,6 +570,8 @@ static bool mplex_do_node_display(WMPlex *mplex, WLListNode *node,
             }else{
                 genws_unmanage_stdisp((WGenWS*)sub, TRUE, FALSE);
             }
+        }else if(stdisp!=NULL){
+            region_unmap(stdisp);
         }
     }
     

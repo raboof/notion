@@ -556,7 +556,9 @@ void ionws_deinit(WIonWS *ws)
 {
     WRegion *reg;
     WIonWSIterTmp tmp;
-    
+
+    ionws_unmanage_stdisp(ws, FALSE, TRUE);
+
     FOR_ALL_MANAGED_BY_IONWS(reg, ws, tmp){
         destroy_obj((Obj*)reg);
     }
@@ -565,8 +567,6 @@ void ionws_deinit(WIonWS *ws)
         assert(FALSE);
     }
     
-    ionws_unmanage_stdisp(ws, TRUE, TRUE);
-
     if(ws->split_tree!=NULL)
         destroy_obj((Obj*)(ws->split_tree));
 
