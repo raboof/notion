@@ -29,18 +29,6 @@ de.defstyle("frame", {
     shadow_pixels = 1,
 })
 
-de.defstyle("frame-tiled", {
-    based_on = "frame",
-    border_style = "inlaid",
-    padding_pixels = 1,
-    spacing = 1,
-})
-
-de.defstyle("frame-floating", {
-    based_on = "frame",
-    border_style = "ridge"
-})
-
 de.defstyle("tab", {
     based_on = "*",
     font = "-*-helvetica-medium-r-normal-*-12-*-*-*-*-*-*-*",
@@ -69,11 +57,6 @@ de.defstyle("tab", {
         foreground_colour = "#000000",
     }),
     text_align = "center",
-})
-
-de.defstyle("tab-frame-tiled", {
-    based_on = "tab-frame",
-    spacing = 1,
 })
 
 de.defstyle("tab-menuentry", {

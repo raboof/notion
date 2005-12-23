@@ -87,11 +87,6 @@ de.defstyle("tab-frame", {
     }),
 })
 
-de.defstyle("tab-frame-tiled", {
-    based_on = "tab-frame",
-    spacing = 1,
-})
-
 de.defstyle("tab-menuentry", {
     based_on = "tab",
     text_align = "left",

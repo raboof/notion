@@ -35,18 +35,6 @@ de.defstyle("frame", {
     }),
 })
 
-de.defstyle("frame-tiled", {
-    based_on = "frame",
-    border_style = "inlaid",
-    padding_pixels = 1,
-    spacing = 0,
-})
-
-de.defstyle("frame-floating", {
-    based_on = "frame",
-    border_style = "ridge"
-})
-
 de.defstyle("tab", {
     based_on = "*",
     font = "-*-helvetica-bold-r-normal-*-10-*-*-*-*-*-*-*",
@@ -75,21 +63,6 @@ de.defstyle("tab", {
         foreground_colour = "#000000",
     }),
     text_align = "center",
-})
-
-de.defstyle("tab-frame", {
-    based_on = "tab",
-    de.substyle("*-*-*-*-activity", {
-        shadow_colour = "#401010",
-        highlight_colour = "#907070",
-        background_colour = "#990000",
-        foreground_colour = "#eeeeee",
-    }),
-})
-
-de.defstyle("tab-frame-tiled", {
-    based_on = "tab-frame",
-    spacing = 0,
 })
 
 de.defstyle("tab-menuentry", {

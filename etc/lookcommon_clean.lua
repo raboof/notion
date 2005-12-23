@@ -35,3 +35,9 @@ de.defstyle("tab-frame", {
         foreground_colour = "#eeeeee",
     }),
 })
+
+de.defstyle("tab-frame-tiled", {
+    based_on = "tab-frame",
+    spacing = 1,
+})
+
