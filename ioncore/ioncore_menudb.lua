@@ -76,15 +76,21 @@ end
 -- Use this function to define menu entries for submenus. The parameter
 -- \fnref{sub_or_name} is either a table of menu entries or the name
 -- of an already defined menu. The initial menu entry to highlight can be
--- specified in \var{initial} as either an integer starting from 1, or a
--- function that returns such a number.
-function ioncore.submenu(name, sub_or_name, initial)
+-- specified by \var{options.initial} as either an integer starting from 1, 
+-- or a  function that returns such a number. Another option supported is
+-- \var{options.noautoexpand} that will cause \fnref{mod_query.query_menu}
+-- to not automatically expand this submenu.
+function ioncore.submenu(name, sub_or_name, options)
+    if not options then
+        options={}
+    end
     return {
         name=ioncore.gettext(name),
-        initial=initial or 0,
         submenu_fn=function()
                        return ioncore.evalmenu(sub_or_name)
-                   end
+                   end,
+        initial=options.initial,
+        noautoexpand=options.noautoexpand,
     }
 end
 

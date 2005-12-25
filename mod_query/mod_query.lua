@@ -1100,7 +1100,7 @@ function mod_query.query_menu(mplex, themenu, prompt)
                     n=n.."'"
                 end
                 t[n]=v
-                if v.submenu_fn then
+                if v.submenu_fn and not v.noautoexpand then
                     local sm=v.submenu_fn()
                     if sm then
                         xform_menu(t, sm, n.."/")
