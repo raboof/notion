@@ -60,6 +60,7 @@ DECLCLASS(WStatusBar){
     int nelems;
     int natural_w, natural_h;
     int filleridx;
+    WStatusBar *sb_next, *sb_prev;
 };
 
 extern bool statusbar_init(WStatusBar *p, WWindow *parent, 
@@ -74,5 +75,9 @@ extern void statusbar_set_natural_w(WStatusBar *p, const char *str);
 extern void statusbar_size_hints(WStatusBar *p, XSizeHints *h);
 extern void statusbar_updategr(WStatusBar *p);
 extern void statusbar_set_contents(WStatusBar *sb, ExtlTab t);
+
+extern void statusbar_set_template(WStatusBar *sb, const char *tmpl);
+extern void statusbar_set_template_table(WStatusBar *sb, ExtlTab t);
+extern ExtlTab statusbar_get_template_table(WStatusBar *sb);
 
 #endif /* ION_MOD_STATUSBAR_STATUSBAR_H */

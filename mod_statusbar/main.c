@@ -165,7 +165,7 @@ static bool wait_statusd_init(int outfd, int errfd, ExtlFn dh, ExtlFn eh)
 
 
 EXTL_EXPORT
-int mod_statusbar_launch_statusd_(const char *cmd,
+int mod_statusbar__launch_statusd(const char *cmd,
                                   ExtlFn initdatahandler,
                                   ExtlFn initerrhandler,
                                   ExtlFn datahandler,

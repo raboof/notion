@@ -22,41 +22,6 @@ local mod_statusbar=_G["mod_statusbar"]
 assert(mod_statusbar)
 
 
--- Settings {{{
-
--- Default settings
-local defaults={
-    template=string.format(
-        "[ %%date || %s: %%load ]",
-        --"[ %%date || %s: %%load || %s: %%mail_new/%%mail_total ]",
-        TR("load"), TR("mail")
-    ),
-}
-
-local date_format_backcompat_kludge
-
--- }}}
-
-
--- Statusbar list {{{
-
-local statusbars={}
-
-local function live_statusbars()
-    return coroutine.wrap(function()
-                              for sb, stng in statusbars do
-                                  if obj_exists(sb) then
-                                      coroutine.yield(sb, stng)
-                                  else
-                                      statusbars[sb]=nil
-                                  end
-                              end
-                          end)
-end
-     
--- }}}
-
-
 -- Meter list {{{
 
 local meters={}
@@ -123,12 +88,12 @@ end
 
 
 
-function mod_statusbar.get_template_table(stng)
+function mod_statusbar.template_to_table(template)
     local res={}
     local m=meters --set_date(stng, meters)
     local aligns={["<"]=0, ["|"]=1, [">"]=2}
     
-    process_template(stng.template,
+    process_template(template,
                      -- meter
                      function(s, c, p)
                          table.insert(res, {
@@ -156,6 +121,10 @@ function mod_statusbar.get_template_table(stng)
     return res
 end
 
+
+mod_statusbar._set_template_parser(mod_statusbar.template_to_table)
+
+
 -- }}}
 
 -- Update {{{
@@ -163,37 +132,19 @@ end
 --DOC
 -- Update statusbar contents. To be called after series
 -- of \fnref{mod_statusbar.inform} calls.
-function mod_statusbar.update(update_template)
-    local found=false
-    
-    for sb, stng in live_statusbars() do
-        if update_template then
-            sb:set_template(mod_statusbar.get_template_table(stng))
+function mod_statusbar.update(update_templates)
+    for _, sb in mod_statusbar.statusbars() do
+        if update_templates then
+            local t=sb:get_template_table()
+            for _, v in t do
+                if t.meter then
+                    t.tmpl=meters[t.meter.."_template"]
+                end
+            end
+            sb:set_template_table(t)
         end
         sb:update(meters)
-        found=true
     end
-    
-    return found
-end
-
---DOC
--- Set the contents of a statusbar.
-function mod_statusbar.set_sb(sb, stng)
-    if not obj_is(sb, "WStatusBar") then
-        ioncore.warn(TR("WStatusBar expected."))
-        return
-    end
-    
-    statusbars[sb] = stng
-    sb:set_template(mod_statusbar.get_template_table(stng))
-    sb:update(meters)
-end
-
---DOC
--- Get the contents of a statusbar.
-function mod_statusbar.get_sb(sb)
-    return statusbars[sb]
 end
 
 -- }}}
@@ -238,21 +189,15 @@ end
 
 local function get_statusd_params()
     local mods={}
-    for sb, stng in live_statusbars() do
-        process_template(stng.template,
-                         -- meter
-                         function(s)
-                             local _, _, m = string.find(s, "^([^_]+)")
-                             if m then
-                                 mods[m]=true
-                             end
-                         end,
-                         -- text
-                         function() 
-                         end,
-                         -- stretch
-                         function()
-                         end)
+    for _, sb in mod_statusbar.statusbars() do
+        for _, item in sb:get_template_table() do
+            if item.type==2 then
+                local _, _, m=string.find(item.meter, "^([^_]*)");
+                if m and m~="" then
+                    mods[m]=true
+                end
+            end
+        end
     end
     local params=statusd_cfg
     table.foreach(mods, function(k) params=params.." -m "..k end)
@@ -278,7 +223,9 @@ end
 
 
 function mod_statusbar.rcv_statusd_err(str)
-    io.stderr:write(str)
+    if str then
+        io.stderr:write(str)
+    end
 end
 
 
@@ -306,7 +253,7 @@ function mod_statusbar.launch_statusd(cfg)
     local rcv=coroutine.wrap(mod_statusbar.rcv_statusd)
     local rcverr=mod_statusbar.rcv_statusd_err
 
-    statusd_pid=mod_statusbar.launch_statusd_(cmd, 
+    statusd_pid=mod_statusbar._launch_statusd(cmd, 
                                               rcv, initrcverr, 
                                               rcv, rcverr)
 
@@ -324,29 +271,9 @@ end
 
 -- Initialisation and default settings {{{
 
---DOC 
--- Set defaults. For Backwards backcompat.
-function mod_statusbar.set(t)
-    defaults=table.join(t, defaults)
-end
-
-
---DOC 
--- Get defaults. For Backwards backcompat.
-function mod_statusbar.get(t)
-    return defaults
-end
-
-    
 --DOC
 -- Create a statusbar.
-function mod_statusbar.create(param_)
-    if param_.date_format and not date_format_backcompat_kludge then
-        date_format_backcompat_kludge=param_.date_format
-    end
-    
-    local param=table.join(param_, defaults)
-    
+function mod_statusbar.create(param)
     local scr=ioncore.find_screen_id(param.screen or 0)
     if not scr then
         error(TR("Screen not found."))
@@ -365,15 +292,13 @@ function mod_statusbar.create(param_)
         pos=(param.pos or "bl"),
         fullsize=param.fullsize,
         name="*statusbar*",
+        template=param.template,
+        template_table=param.template_table,
     })
     
     if not sb then
         error(TR("Failed to create statusbar."))
     end
-
-    statusbars[sb]=param
-    sb:set_template(mod_statusbar.get_template_table(param))
-    sb:update(meters)
     
     return sb
 end

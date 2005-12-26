@@ -34,6 +34,9 @@ static void statusbar_free_elems(WStatusBar *sb);
 static void statusbar_update_natural_size(WStatusBar *p);
 
 
+static WStatusBar *statusbars=NULL;
+
+
 /*{{{ Init/deinit */
 
 
@@ -50,6 +53,8 @@ bool statusbar_init(WStatusBar *p, WWindow *parent, const WFitParams *fp)
     p->natural_w=1;
     p->natural_h=1;
     p->filleridx=-1;
+    p->sb_next=NULL;
+    p->sb_prev=NULL;
     
     statusbar_updategr(p);
 
@@ -64,6 +69,8 @@ bool statusbar_init(WStatusBar *p, WWindow *parent, const WFitParams *fp)
     
     ((WRegion*)p)->flags|=REGION_SKIP_FOCUS;
 
+    LINK_ITEM(statusbars, p, sb_next, sb_prev);
+    
     return TRUE;
 }
 
@@ -77,6 +84,8 @@ WStatusBar *create_statusbar(WWindow *parent, const WFitParams *fp)
 
 void statusbar_deinit(WStatusBar *p)
 {
+    UNLINK_ITEM(statusbars, p, sb_next, sb_prev);
+
     statusbar_free_elems(p);
     
     if(p->brush!=NULL)
@@ -272,11 +281,45 @@ void statusbar_size_hints(WStatusBar *p, XSizeHints *h)
 /*{{{ Exports */
 
 
+static ExtlFn parse_template_fn;
+static bool parse_template_fn_set=FALSE;
+
+
+EXTL_EXPORT
+void mod_statusbar__set_template_parser(ExtlFn fn)
+{
+    if(parse_template_fn_set)
+        extl_unref_fn(parse_template_fn);
+    parse_template_fn=extl_ref_fn(fn);
+    parse_template_fn_set=TRUE;
+}
+
+
 /*EXTL_DOC
  * Set statusbar template.
  */
 EXTL_EXPORT_MEMBER
-void statusbar_set_template(WStatusBar *sb, ExtlTab t)
+void statusbar_set_template(WStatusBar *sb, const char *tmpl)
+{
+    ExtlTab t=extl_table_none();
+    bool ok=FALSE;
+    
+    if(parse_template_fn_set){
+        extl_protect(NULL);
+        ok=extl_call(parse_template_fn, "s", "t", tmpl, &t);
+        extl_unprotect(NULL);
+    }
+
+    if(ok)
+        statusbar_set_template_table(sb, t);
+}
+
+
+/*EXTL_DOC
+ * Set statusbar template as table.
+ */
+EXTL_EXPORT_MEMBER
+void statusbar_set_template_table(WStatusBar *sb, ExtlTab t)
 {
     statusbar_set_elems(sb, t);
     
@@ -285,11 +328,12 @@ void statusbar_set_template(WStatusBar *sb, ExtlTab t)
     statusbar_resize(sb);
 }
 
+
 /*EXTL_DOC
- * Get statusbar template.
+ * Get statusbar template as table.
  */
 EXTL_EXPORT_MEMBER
-ExtlTab statusbar_get_template(WStatusBar *sb)
+ExtlTab statusbar_get_template_table(WStatusBar *sb)
 {
     int count = sb->nelems;
     int i;
@@ -298,7 +342,7 @@ ExtlTab statusbar_get_template(WStatusBar *sb)
 
     for(i=0; i<count; i++){
         ExtlTab tt = extl_create_table();
-
+        
         extl_table_sets_i(tt, "type", sb->elems[i].type);
         extl_table_sets_s(tt, "text", sb->elems[i].text);
         extl_table_sets_s(tt, "meter", sb->elems[i].meter);
@@ -312,6 +356,7 @@ ExtlTab statusbar_get_template(WStatusBar *sb)
 
     return t;
 }
+
 
 static void reset_stretch(WStatusBar *sb)
 {
@@ -506,6 +551,24 @@ int statusbar_orientation(WStatusBar *sb)
 }
 
 
+/*EXTL_DOC
+ * Returns a list of all statusbars.
+ */
+EXTL_EXPORT
+ExtlTab mod_statusbar_statusbars()
+{
+    ExtlTab t=extl_create_table();
+    WStatusBar *sb;
+    int i=1;
+    
+    for(sb=statusbars; sb!=NULL; sb=sb->sb_next){
+        extl_table_seti_o(t, i, (Obj*)sb);
+    }
+    
+    return t;
+}
+
+
 /*}}}*/
 
 
@@ -514,7 +577,24 @@ int statusbar_orientation(WStatusBar *sb)
 
 WRegion *statusbar_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 {
-    return (WRegion*)create_statusbar(par, fp);
+    WStatusBar *sb=create_statusbar(par, fp);
+
+    if(sb!=NULL){
+        char *tmpl=NULL;
+        ExtlTab t=extl_table_none();
+        if(extl_table_gets_s(tab, "template", &tmpl)){
+            statusbar_set_template(sb, tmpl);
+            free(tmpl);
+        }else if(extl_table_gets_t(tab, "template_table", &t)){
+            statusbar_set_template_table(sb, t);
+            extl_unref_table(t);
+        }else{
+            const char *tmpl=TR("[ %date || load: %load ]");
+            statusbar_set_template(sb, tmpl);
+        }
+    }
+    
+    return (WRegion*)sb;
 }
 
 

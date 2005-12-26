@@ -79,7 +79,10 @@ static const char statusd_license[]=DUMMY_TR(
     "Lesser General Public License for more details.\n");
 
 
-static bool new_informs=FALSE;
+/* new_informs=TRUE because we should always print period when 
+ * initialisation is done. 
+ */
+static bool new_informs=TRUE;
 static ExtlTab configtab;
 
 static void help()
