@@ -74,10 +74,7 @@ local function process_template(template, meter_f, text_f, stretch_f)
                     -- And then without
                     st, en, c, p, b, r=string.find(template, '^'..pat..'(.*)')
                 end
-                if b=="filler" then
-                    stretch_f('f')
-                    template=r
-                elseif b then
+                if b then
                     meter_f(b, c, tonumber(p))
                     template=r
                 end
@@ -96,13 +93,22 @@ function mod_statusbar.template_to_table(template)
     process_template(template,
                      -- meter
                      function(s, c, p)
-                         table.insert(res, {
-                             type=2,
-                             meter=s,
-                             align=aligns[c],
-                             tmpl=meters[s.."_template"],
-                             zeropad=p,
-                         })
+                         if s=="filler" then
+                             table.insert(res, {type=4})
+                         elseif s=="systray" then
+                             table.insert(res, {
+                                 type=5,
+                                 align=aligns[c],
+                             })
+                         else
+                             table.insert(res, {
+                                 type=2,
+                                 meter=s,
+                                 align=aligns[c],
+                                 tmpl=meters[s.."_template"],
+                                 zeropad=p,
+                             })
+                         end
                      end,
                      -- text
                      function(t)
@@ -114,8 +120,8 @@ function mod_statusbar.template_to_table(template)
                      -- stretch
                      function(t)
                          table.insert(res, {
-                             type=(t=='f' and 4 or 3),
-                             text=(t~='f' and t or nil),
+                             type=3,
+                             text=t,
                          })
                      end)
     return res
@@ -189,9 +195,11 @@ end
 
 local function get_statusd_params()
     local mods={}
+    local specials={["filler"]=true, ["systray"]=true}
+    
     for _, sb in mod_statusbar.statusbars() do
         for _, item in sb:get_template_table() do
-            if item.type==2 then
+            if item.type==2 and not specials[item.meter] then
                 local _, _, m=string.find(item.meter, "^([^_]*)");
                 if m and m~="" then
                     mods[m]=true
@@ -294,6 +302,7 @@ function mod_statusbar.create(param)
         name="*statusbar*",
         template=param.template,
         template_table=param.template_table,
+        systray=param.systray,
     })
     
     if not sb then

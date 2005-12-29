@@ -17,64 +17,127 @@
 #include "draw.h"
 
 
-static void draw_elems(GrBrush *brush, WRectangle *g, int ty,
-                       WSBElem *elems, int nelems, bool needfill, 
-                       const char *dfltattr, bool complete)
+static void calc_elems_x(WRectangle *g, WSBElem *elems, int nelems)
 {
     int x=g->x;
-    int maxx=g->x+g->w;
     
     while(nelems>0){
-        if(elems->type==WSBELEM_STRETCH){
-            int w=elems->text_w+elems->stretch;
-            if(!complete && w>0){
-                g->x=x;
-                g->w=w;
-                grbrush_clear_area(brush, g);
-            }
-            x+=w;
-        }else{
-            const char *s=(elems->text!=NULL
-                           ? elems->text 
-                           : STATUSBAR_NX_STR);
-            grbrush_draw_string(brush, x, ty, s, strlen(s), needfill, 
-                                elems->attr ? elems->attr : dfltattr);
+        elems->x=x;
+        if(elems->type==WSBELEM_STRETCH)
+            x+=elems->text_w+elems->stretch;
+        else
             x+=elems->text_w;
-        }
+        
         nelems--;
         elems++;
-    }
-
-    if(!complete && x<maxx){
-        g->x=x;
-        g->w=maxx-x;
-        grbrush_clear_area(brush, g);
     }
 }
 
 
-static void draw_elems_ra(GrBrush *brush, WRectangle *g, int ty,
-                          WSBElem *elems, int nelems, bool needfill, 
-                          const char *dfltattr, bool complete)
+static void calc_elems_x_ra(WRectangle *g, WSBElem *elems, int nelems)
 {
-    int i;
-    int elsw=0;
-    WRectangle tmp=*g;
+    int x=g->x+g->w;
     
-    for(i=0; i<nelems; i++){
-        elsw+=elems[i].text_w;
-        if(elems[i].type==WSBELEM_STRETCH)
-            elsw+=elems[i].stretch;
+    elems+=nelems-1;
+    
+    while(nelems>0){
+        if(elems->type==WSBELEM_STRETCH)
+            x-=elems->text_w+elems->stretch;
+        else
+            x-=elems->text_w;
+        elems->x=x;
+        
+        elems--;
+        nelems--;
+    }
+}
+
+
+void statusbar_calculate_xs(WStatusBar *sb)
+{
+    WRectangle g;
+    GrBorderWidths bdw;
+    WMPlex *mgr=NULL;
+    bool right_align=FALSE;
+    int minx, maxx;
+    int nleft=0, nright=0;
+    
+    if(sb->brush==NULL || sb->elems==NULL)
+        return;
+    
+    grbrush_get_border_widths(sb->brush, &bdw);
+
+    g.x=0;
+    g.y=0;
+    g.w=REGION_GEOM(sb).w;
+    g.h=REGION_GEOM(sb).h;
+    
+    mgr=OBJ_CAST(REGION_PARENT(sb), WMPlex);
+    if(mgr!=NULL){
+        WRegion *std=NULL;
+        WMPlexSTDispInfo din;
+        din.pos=MPLEX_STDISP_TL;
+        mplex_get_stdisp(mgr, &std, &din);
+        if(std==(WRegion*)sb)
+            right_align=(din.pos==MPLEX_STDISP_TR || din.pos==MPLEX_STDISP_BR);
     }
     
-    tmp.w=g->w-elsw;
-    g->x+=tmp.w;
-    g->w=elsw;
-        
-    if(tmp.w>0 && complete)
-        grbrush_clear_area(brush, g);
+    g.x+=bdw.left;
+    g.w-=bdw.left+bdw.right;
+    g.y+=bdw.top;
+    g.h-=bdw.top+bdw.bottom;
 
-    draw_elems(brush, g, ty, elems, nelems, needfill, dfltattr, complete);
+    if(sb->filleridx>=0){
+        nleft=sb->filleridx;
+        nright=sb->nelems-(sb->filleridx+1);
+    }else if(!right_align){
+        nleft=sb->nelems;
+        nright=0;
+    }else{
+        nleft=0;
+        nright=sb->nelems;
+    }
+
+    if(nleft>0)
+        calc_elems_x(&g, sb->elems, nleft);
+    
+    if(nright>0)
+        calc_elems_x_ra(&g, sb->elems+sb->nelems-nright, nright);
+}
+
+
+
+static void draw_elems(GrBrush *brush, WRectangle *g, int ty,
+                       WSBElem *elems, int nelems, bool needfill, 
+                       const char *dfltattr, bool complete)
+{
+    int prevx=g->x;
+    int maxx=g->x+g->w;
+    
+    while(nelems>0){
+        if(prevx<elems->x){
+            g->x=prevx;
+            g->w=elems->x-prevx;
+            grbrush_clear_area(brush, g);
+        }
+            
+        if(elems->type==WSBELEM_TEXT || elems->type==WSBELEM_METER){
+            const char *s=(elems->text!=NULL
+                           ? elems->text 
+                           : STATUSBAR_NX_STR);
+            grbrush_draw_string(brush, elems->x, ty, s, strlen(s), needfill, 
+                                elems->attr ? elems->attr : dfltattr);
+            prevx=elems->x+elems->text_w;
+        }
+        elems++;
+        nelems--;
+    }
+
+    if(prevx<maxx){
+        g->x=prevx;
+        g->w=maxx-prevx;
+        grbrush_clear_area(brush, g);
+    }
 }
 
 
@@ -84,11 +147,8 @@ void statusbar_draw(WStatusBar *sb, bool complete)
     GrBorderWidths bdw;
     GrFontExtents fnte;
     Window win=sb->wwin.win;
-    bool right_align=FALSE;
-    WMPlex *mgr;
-    int ty, minx, maxx;
-    int nleft=0, nright=0;
-    
+    int ty;
+
     if(sb->brush==NULL)
         return;
     
@@ -107,45 +167,17 @@ void statusbar_draw(WStatusBar *sb, bool complete)
     if(sb->elems==NULL)
         return;
     
-    mgr=OBJ_CAST(REGION_PARENT(sb), WMPlex);
-    if(mgr!=NULL){
-        WRegion *std=NULL;
-        WMPlexSTDispInfo din;
-        din.pos=MPLEX_STDISP_TL;
-        mplex_get_stdisp(mgr, &std, &din);
-        if(std==(WRegion*)sb)
-            right_align=(din.pos==MPLEX_STDISP_TR || din.pos==MPLEX_STDISP_BR);
-    }
-    
     g.x+=bdw.left;
     g.w-=bdw.left+bdw.right;
     g.y+=bdw.top;
     g.h-=bdw.top+bdw.bottom;
 
     ty=(g.y+fnte.baseline+(g.h-fnte.max_height)/2);
-    
-    if(sb->filleridx>=0){
-        nleft=sb->filleridx;
-        nright=sb->nelems-(sb->filleridx+1);
-    }else if(!right_align){
-        nleft=sb->nelems;
-        nright=0;
-    }else{
-        nleft=0;
-        nright=sb->nelems;
-    }
-
         
-    if(nleft>0){
-        draw_elems(sb->brush, &g, ty, sb->elems, nleft,
-                   TRUE, NULL, complete);
-    }
-    
-    if(nright>0){
-        draw_elems_ra(sb->brush, &g, ty, sb->elems+sb->nelems-nright, nright,
-                      TRUE, NULL, complete);
-    }
+    draw_elems(sb->brush, &g, ty, sb->elems, sb->nelems,
+               TRUE, NULL, complete);
     
     grbrush_end(sb->brush);
 }
+
 

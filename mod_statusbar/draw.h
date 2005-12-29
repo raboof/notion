@@ -16,5 +16,6 @@
 #include "statusbar.h"
 
 extern void statusbar_draw(WStatusBar *sb, bool complete);
+extern void statusbar_calculate_xs(WStatusBar *sb);
 
 #endif /* ION_MOD_STATUSBAR_DRAW_H */

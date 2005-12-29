@@ -13,6 +13,8 @@
 
 #include <libtu/objp.h>
 #include <libtu/minmax.h>
+#include <libtu/objlist.h>
+#include <libtu/misc.h>
 #include <ioncore/common.h>
 #include <ioncore/global.h>
 #include <ioncore/window.h>
@@ -23,6 +25,7 @@
 #include <ioncore/gr.h>
 #include <ioncore/names.h>
 #include <ioncore/strings.h>
+#include <ioncore/basicpholder.h>
 
 #include "statusbar.h"
 #include "main.h"
@@ -32,6 +35,11 @@
 static void statusbar_set_elems(WStatusBar *sb, ExtlTab t);
 static void statusbar_free_elems(WStatusBar *sb);
 static void statusbar_update_natural_size(WStatusBar *p);
+static void statusbar_arrange_systray(WStatusBar *p, int x);
+static int statusbar_systray_x(WStatusBar *p);
+static void statusbar_rearrange(WStatusBar *sb, bool rs);
+static void do_calc_systray_w(WStatusBar *p, WSBElem *el);
+static void statusbar_calc_systray_w(WStatusBar *p);
 
 
 static WStatusBar *statusbars=NULL;
@@ -55,6 +63,8 @@ bool statusbar_init(WStatusBar *p, WWindow *parent, const WFitParams *fp)
     p->filleridx=-1;
     p->sb_next=NULL;
     p->sb_prev=NULL;
+    p->traywins=NULL;
+    p->systray_enabled=TRUE;
     
     statusbar_updategr(p);
 
@@ -88,8 +98,10 @@ void statusbar_deinit(WStatusBar *p)
 
     statusbar_free_elems(p);
     
-    if(p->brush!=NULL)
+    if(p->brush!=NULL){
         grbrush_release(p->brush);
+        p->brush=NULL;
+    }
     
     window_deinit(&(p->wwin));
 }
@@ -100,11 +112,27 @@ void statusbar_deinit(WStatusBar *p)
 
 /*{{{ Content stuff */
 
+static void init_sbelem(WSBElem *el)
+{
+    el->type=WSBELEM_NONE;
+    el->meter=NULL;
+    el->text_w=0;
+    el->text=NULL;
+    el->max_w=0;
+    el->tmpl=NULL;
+    el->attr=NULL;
+    el->stretch=0;
+    el->align=WSBELEM_ALIGN_CENTER;
+    el->zeropad=0;
+    el->x=0;
+}
+
 
 static WSBElem *get_sbelems(ExtlTab t, int *nret, int *filleridxret)
 {
     int i, n=extl_table_get_n(t);
     WSBElem *el;
+    int systrayidx=-1;
     
     *nret=0;
     *filleridxret=-1;
@@ -112,7 +140,7 @@ static WSBElem *get_sbelems(ExtlTab t, int *nret, int *filleridxret)
     if(n<=0)
         return NULL;
     
-    el=ALLOC_N(WSBElem, n);
+    el=ALLOC_N(WSBElem, n); 
     
     if(el==NULL)
         return NULL;
@@ -120,16 +148,7 @@ static WSBElem *get_sbelems(ExtlTab t, int *nret, int *filleridxret)
     for(i=0; i<n; i++){
         ExtlTab tt;
         
-        el[i].type=WSBELEM_NONE;
-        el[i].meter=NULL;
-        el[i].text_w=0;
-        el[i].text=NULL;
-        el[i].max_w=0;
-        el[i].tmpl=NULL;
-        el[i].attr=NULL;
-        el[i].stretch=0;
-        el[i].align=WSBELEM_ALIGN_CENTER;
-        el[i].zeropad=0;
+        init_sbelem(&el[i]);
 
         if(extl_table_geti_t(t, i+1, &tt)){
             if(extl_table_gets_i(tt, "type", &(el[i].type))){
@@ -141,11 +160,29 @@ static WSBElem *get_sbelems(ExtlTab t, int *nret, int *filleridxret)
                     extl_table_gets_i(tt, "align", &(el[i].align));
                     extl_table_gets_i(tt, "zeropad", &(el[i].zeropad));
                     el[i].zeropad=maxof(el[i].zeropad, 0);
+                }else if(el[i].type==WSBELEM_SYSTRAY){
+                    if(systrayidx==-1){
+                        systrayidx=i;
+                        extl_table_gets_i(tt, "align", &(el[i].align));
+                    }else{
+                        warn(TR("Multiple systray fields in statusbar template."));
+                        el[i].type=WSBELEM_NONE;
+                    }
                 }else if(el[i].type==WSBELEM_FILLER){
                     *filleridxret=i;
                 }
             }
             extl_unref_table(tt);
+        }
+    }
+    
+    if(systrayidx==-1){
+        WSBElem *el2=REALLOC_N(el, WSBElem, n, n+1);
+        if(el2!=NULL){
+            el=el2;
+            init_sbelem(&el[n]);
+            el[n].type=WSBELEM_SYSTRAY;
+            n++;
         }
     }
     
@@ -215,10 +252,20 @@ static void statusbar_resize(WStatusBar *p)
 }
 
 
-static void calc_elem_w(WSBElem *el, GrBrush *brush)
+static void calc_elem_w(WStatusBar *p, WSBElem *el, GrBrush *brush)
 {
     const char *str;
 
+    if(el->type==WSBELEM_SYSTRAY){
+        do_calc_systray_w(p, el);
+        return;
+    }
+    
+    if(brush==NULL){
+        el->text_w=0;
+        return;
+    }
+    
     if(el->type==WSBELEM_METER){
         str=(el->text!=NULL ? el->text : STATUSBAR_NX_STR);
         el->text_w=grbrush_get_text_width(brush, str, strlen(str));
@@ -237,32 +284,55 @@ static void calc_elem_w(WSBElem *el, GrBrush *brush)
 }
 
 
+static void statusbar_calc_widths(WStatusBar *sb)
+{
+    int i;
+    
+    for(i=0; i<sb->nelems; i++)
+        calc_elem_w(sb, &(sb->elems[i]), sb->brush);
+}
+
+
 static void statusbar_do_update_natural_size(WStatusBar *p)
 {
     GrBorderWidths bdw;
     GrFontExtents fnte;
-    int totw=0;
+    WRegion *reg;
+    ObjListIterTmp tmp;
+    int totw=0, stmh=0;
     int i;
 
-    grbrush_get_border_widths(p->brush, &bdw);
-    grbrush_get_font_extents(p->brush, &fnte);
+    if(p->brush==NULL){
+        bdw.left=0; bdw.right=0;
+        bdw.top=0; bdw.bottom=0;
+        fnte.max_height=4;
+    }else{
+        grbrush_get_border_widths(p->brush, &bdw);
+        grbrush_get_font_extents(p->brush, &fnte);
+    }
     
     for(i=0; i<p->nelems; i++)
         totw+=p->elems[i].max_w;
+        
+    FOR_ALL_ON_OBJLIST(WRegion*, reg, p->traywins, tmp){
+        stmh=maxof(stmh, REGION_GEOM(reg).h);
+    }
     
     p->natural_w=bdw.left+totw+bdw.right;
-    p->natural_h=fnte.max_height+bdw.top+bdw.bottom;
+    p->natural_h=maxof(stmh, fnte.max_height)+bdw.top+bdw.bottom;
 }
 
-static void statusbar_update_natural_size(WStatusBar *p)
+
+/*static void statusbar_update_natural_size(WStatusBar *p)
 {
     int i;
     
     for(i=0; i<p->nelems; i++)
-        calc_elem_w(&(p->elems[i]), p->brush);
+        calc_elem_w(p, &(p->elems[i]), p->brush);
     
     statusbar_do_update_natural_size(p);
-}
+    statusbar_calculate_xs(p);
+}*/
 
 
 void statusbar_size_hints(WStatusBar *p, XSizeHints *h)
@@ -274,6 +344,209 @@ void statusbar_size_hints(WStatusBar *p, XSizeHints *h)
     h->max_height=p->natural_h;
 }
 
+
+/*}}}*/
+
+
+/*{{{ Systray */
+
+
+static int statusbar_systray_index(WStatusBar *p)
+{
+    int i;
+    
+    for(i=0; i<p->nelems; i++){
+        if(p->elems[i].type==WSBELEM_SYSTRAY)
+            return i;
+    }
+    
+    return -1;
+}
+
+
+static void do_calc_systray_w(WStatusBar *p, WSBElem *el)
+{
+    WRegion *reg;
+    ObjListIterTmp tmp;
+    int padding=0;
+    int w=-padding;
+    
+    FOR_ALL_ON_OBJLIST(WRegion*, reg, p->traywins, tmp){
+        w=w+REGION_GEOM(reg).w+padding;
+    }
+    
+    el->text_w=maxof(0, w);
+    el->max_w=el->text_w; /* for now */
+}
+
+
+static void statusbar_calc_systray_w(WStatusBar *p)
+{
+    int i=statusbar_systray_index(p);
+    
+    if(i>=0)
+        do_calc_systray_w(p, &p->elems[i]);
+}
+
+static int statusbar_systray_x(WStatusBar *p)
+{
+    int i=statusbar_systray_index(p);
+    
+    return (i>=0 ? p->elems[i].x : 0);
+}
+
+
+static void statusbar_arrange_systray(WStatusBar *p, int x)
+{
+    WRegion *reg;
+    ObjListIterTmp tmp;
+    GrBorderWidths bdw;
+    int padding=0, ymiddle;
+    
+    if(p->brush!=NULL){
+        grbrush_get_border_widths(p->brush, &bdw);
+    }else{
+        bdw.top=0;
+        bdw.bottom=0;
+    }
+    
+    ymiddle=bdw.top+(REGION_GEOM(p).h-bdw.top-bdw.bottom)/2;
+    
+    FOR_ALL_ON_OBJLIST(WRegion*, reg, p->traywins, tmp){
+        WRectangle g=REGION_GEOM(reg);
+        g.x=x;
+        g.y=ymiddle-g.h/2;
+        region_fit(reg, &g, REGION_FIT_EXACT);
+        x=x+g.w+padding;
+    }
+}
+
+
+static WRegion *statusbar_attach_simple(WStatusBar *sb,
+                                        WRegionAttachHandler *handler,
+                                        void *handlerparams)
+{
+    WRegion *reg;
+    WFitParams fp;
+
+    fp.g.x=0;
+    fp.g.y=0;
+    fp.mode=REGION_FIT_WHATEVER|REGION_FIT_BOUNDS;
+
+    reg=handler((WWindow*)sb, &fp, handlerparams);
+    
+    if(reg==NULL)
+        return NULL;
+    
+    if(!objlist_insert_last(&sb->traywins, (Obj*)reg)){
+        /* TODO: failure handling */
+        return NULL;
+    }
+
+    region_set_manager(reg, (WRegion*)sb);
+    
+    statusbar_calc_systray_w(sb);
+    statusbar_rearrange(sb, TRUE);
+    
+    if(REGION_IS_MAPPED(sb))
+        region_map(reg);
+    
+    return reg;
+}
+
+
+static WPHolder *statusbar_prepare_manage(WStatusBar *sb, 
+                                          const WClientWin *cwin,
+                                          const WManageParams *param,
+                                          int redir)
+{
+    if(redir==MANAGE_REDIR_STRICT_YES)
+        return NULL;
+    
+    return (WPHolder*)create_basicpholder((WRegion*)sb, 
+                                          ((WRegionDoAttachFnSimple*)
+                                           statusbar_attach_simple));
+}
+
+
+static void statusbar_managed_remove(WStatusBar *sb, WRegion *reg)
+{
+    objlist_remove(&sb->traywins, (Obj*)reg);
+    region_unset_manager(reg, (WRegion*)sb);
+    if(ioncore_g.opmode!=IONCORE_OPMODE_DEINIT){
+        statusbar_calc_systray_w(sb);
+        statusbar_rearrange(sb, TRUE);
+    }
+}
+
+
+static void statusbar_managed_rqgeom(WStatusBar *sb, WRegion *reg, int flags,
+                                     const WRectangle *geom, 
+                                     WRectangle *geomret)
+{
+    WRectangle g;
+    
+    g.x=REGION_GEOM(reg).x;
+    g.y=REGION_GEOM(reg).y;
+    g.w=geom->w;
+    g.h=geom->h;
+
+    if(flags&REGION_RQGEOM_TRYONLY){
+        if(geomret!=NULL)
+            *geomret=g;
+        return;
+    }
+    
+    statusbar_calc_systray_w(sb);
+    statusbar_rearrange(sb, TRUE);
+    
+    if(geomret!=NULL)
+        *geomret=REGION_GEOM(reg);
+    
+}
+
+
+void statusbar_map(WStatusBar *sb)
+{
+    WRegion *reg;
+    ObjListIterTmp tmp;
+    
+    window_map((WWindow*)sb);
+    
+    FOR_ALL_ON_OBJLIST(WRegion*, reg, sb->traywins, tmp)
+        region_map(reg);
+}
+
+
+void statusbar_unmap(WStatusBar *sb)
+{
+    WRegion *reg;
+    ObjListIterTmp tmp;
+    
+    window_unmap((WWindow*)sb);
+    
+    FOR_ALL_ON_OBJLIST(WRegion*, reg, sb->traywins, tmp)
+        region_unmap(reg);
+}
+
+
+bool statusbar_fitrep(WStatusBar *sb, WWindow *par, const WFitParams *fp)
+{
+    bool wchg=(REGION_GEOM(sb).w!=fp->g.w);
+    bool hchg=(REGION_GEOM(sb).h!=fp->g.h);
+    
+    window_do_fitrep(&(sb->wwin), par, &(fp->g));
+    
+    if(wchg || hchg){
+        statusbar_calculate_xs(sb);
+        statusbar_arrange_systray(sb, statusbar_systray_x(sb));
+        statusbar_draw(sb, TRUE);
+    }
+    
+    return TRUE;
+}
+
+    
 
 /*}}}*/
 
@@ -323,9 +596,8 @@ void statusbar_set_template_table(WStatusBar *sb, ExtlTab t)
 {
     statusbar_set_elems(sb, t);
     
-    statusbar_update_natural_size(sb);
-    
-    statusbar_resize(sb);
+    statusbar_calc_widths(sb);
+    statusbar_rearrange(sb, FALSE);
 }
 
 
@@ -386,7 +658,7 @@ static void spread_stretch(WStatusBar *sb)
     for(i=0; i<sb->nelems; i++){
         el=&(sb->elems[i]);
 
-        if(el->type!=WSBELEM_METER)
+        if(el->type!=WSBELEM_METER && el->type!=WSBELEM_SYSTRAY)
             continue;
         
         diff=el->max_w-el->text_w;
@@ -423,6 +695,23 @@ static void spread_stretch(WStatusBar *sb)
             rel->stretch+=diff;
         }
     }
+}
+
+
+static void statusbar_rearrange(WStatusBar *sb, bool rs)
+{
+    if(rs){
+        statusbar_do_update_natural_size(sb);
+        statusbar_resize(sb);
+    }
+
+    reset_stretch(sb);
+    spread_stretch(sb);
+    positive_stretch(sb);
+    statusbar_calculate_xs(sb);
+    
+    if(rs)
+        statusbar_arrange_systray(sb, statusbar_systray_x(sb));
 }
 
 
@@ -496,14 +785,7 @@ void statusbar_update(WStatusBar *sb, ExtlTab t)
         }
     }
 
-    reset_stretch(sb);
-    spread_stretch(sb);
-    positive_stretch(sb);
-    
-    if(grow){
-        statusbar_do_update_natural_size(sb);
-        statusbar_resize(sb);
-    }
+    statusbar_rearrange(sb, grow);
     
     window_draw((WWindow*)sb, FALSE);
 }
@@ -528,12 +810,9 @@ void statusbar_updategr(WStatusBar *p)
         grbrush_release(p->brush);
     
     p->brush=nbrush;
-    
-    statusbar_update_natural_size(p);
-    
-    reset_stretch(p);
-    spread_stretch(p);
-    positive_stretch(p);
+
+    statusbar_calc_widths(p);
+    statusbar_rearrange(p, TRUE);
     
     window_draw(&(p->wwin), TRUE);
 }
@@ -569,6 +848,58 @@ ExtlTab mod_statusbar_statusbars()
 }
 
 
+WStatusBar *mod_statusbar_find_suitable(WClientWin *cwin,
+                                        const WManageParams *param)
+{
+    WStatusBar *sb;
+
+    for(sb=statusbars; sb!=NULL; sb=sb->sb_next){
+        /*if(!sb->is_auto)
+            continue;*/
+        if(!sb->systray_enabled)
+            continue;
+        if(!region_same_rootwin((WRegion*)sb, (WRegion*)cwin))
+            continue;
+        break;
+    }
+
+    return sb;
+}
+
+
+bool statusbar_set_systray(WStatusBar *sb, int sp)
+{
+    bool set=sb->systray_enabled;
+    bool nset=libtu_do_setparam(sp, set);
+    
+    sb->systray_enabled=nset;
+    
+    return nset;
+}
+
+
+/*EXTL_DOC
+ * Enable or disable use of \var{sb} as systray.
+ * The parameter \var{how} can be one of (set/unset/toggle). 
+ * Resulting state is returned.
+ */
+EXTL_EXPORT_AS(WStatusBar, set_systray)
+bool statusbar_set_systray_extl(WStatusBar *sb, const char *how)
+{
+    return statusbar_set_systray(sb, libtu_string_to_setparam(how));
+}
+
+
+/*EXTL_DOC
+ * Is \var{sb} used as a systray?
+ */
+EXTL_EXPORT_MEMBER
+bool statusbar_is_systray_extl(WStatusBar *sb)
+{
+    return sb->systray_enabled;
+}
+
+
 /*}}}*/
 
 
@@ -589,9 +920,11 @@ WRegion *statusbar_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
             statusbar_set_template_table(sb, t);
             extl_unref_table(t);
         }else{
-            const char *tmpl=TR("[ %date || load: %load ]");
+            const char *tmpl=TR("[ %date || load: %load ] %filler%systray");
             statusbar_set_template(sb, tmpl);
         }
+        
+        extl_table_gets_b(tab, "systray", &sb->systray_enabled);
     }
     
     return (WRegion*)sb;
@@ -609,6 +942,17 @@ static DynFunTab statusbar_dynfuntab[]={
     {region_updategr, statusbar_updategr},
     {region_size_hints, statusbar_size_hints},
     {(DynFun*)region_orientation, (DynFun*)statusbar_orientation},
+
+    {region_managed_rqgeom, statusbar_managed_rqgeom},
+    {(DynFun*)region_prepare_manage, (DynFun*)statusbar_prepare_manage},
+    {region_managed_remove, statusbar_managed_remove},
+    
+    {region_map, statusbar_map},
+    {region_unmap, statusbar_unmap},
+    
+    {(DynFun*)region_fitrep,
+     (DynFun*)statusbar_fitrep},
+    
     END_DYNFUNTAB
 };
 

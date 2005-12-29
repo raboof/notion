@@ -12,9 +12,11 @@
 #ifndef ION_MOD_STATUSBAR_STATUSBAR_H
 #define ION_MOD_STATUSBAR_STATUSBAR_H
 
+#include <libtu/objlist.h>
 #include <libextl/extl.h>
 #include <ioncore/common.h>
 #include <ioncore/gr.h>
+#include <ioncore/manage.h>
 
 
 #define STATUSBAR_NX_STR "?"
@@ -32,7 +34,8 @@ typedef enum{
     WSBELEM_TEXT=1,
     WSBELEM_METER=2,
     WSBELEM_STRETCH=3,
-    WSBELEM_FILLER=4
+    WSBELEM_FILLER=4,
+    WSBELEM_SYSTRAY=5
 } WSBElemType;
   
 
@@ -49,6 +52,7 @@ DECLSTRUCT(WSBElem){
     char *tmpl;
     char *attr;
     int zeropad;
+    int x;
 };
 
 INTRCLASS(WStatusBar);
@@ -61,6 +65,8 @@ DECLCLASS(WStatusBar){
     int natural_w, natural_h;
     int filleridx;
     WStatusBar *sb_next, *sb_prev;
+    ObjList *traywins;
+    bool systray_enabled;
 };
 
 extern bool statusbar_init(WStatusBar *p, WWindow *parent, 
@@ -79,5 +85,8 @@ extern void statusbar_set_contents(WStatusBar *sb, ExtlTab t);
 extern void statusbar_set_template(WStatusBar *sb, const char *tmpl);
 extern void statusbar_set_template_table(WStatusBar *sb, ExtlTab t);
 extern ExtlTab statusbar_get_template_table(WStatusBar *sb);
+
+extern WStatusBar *mod_statusbar_find_suitable(WClientWin *cwin,
+                                               const WManageParams *param);
 
 #endif /* ION_MOD_STATUSBAR_STATUSBAR_H */
