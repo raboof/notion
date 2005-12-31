@@ -546,6 +546,24 @@ bool statusbar_fitrep(WStatusBar *sb, WWindow *par, const WFitParams *fp)
     return TRUE;
 }
 
+
+WPHolder *statusbar_prepare_manage_transient(WStatusBar *sb, 
+                                             const WClientWin *cwin,
+                                             const WManageParams *param,
+                                             int unused)
+{
+    WRegion *mgr=REGION_MANAGER(sb);
+    
+    if(mgr==NULL)
+        mgr=region_screen_of((WRegion*)sb);
+    
+    if(mgr!=NULL)
+        return region_prepare_manage(mgr, cwin, param, 
+                                     MANAGE_REDIR_PREFER_NO);
+    else
+        return NULL;
+}
+
     
 
 /*}}}*/
@@ -946,6 +964,9 @@ static DynFunTab statusbar_dynfuntab[]={
     {region_managed_rqgeom, statusbar_managed_rqgeom},
     {(DynFun*)region_prepare_manage, (DynFun*)statusbar_prepare_manage},
     {region_managed_remove, statusbar_managed_remove},
+    
+    {(DynFun*)region_prepare_manage_transient, 
+     (DynFun*)statusbar_prepare_manage_transient},
     
     {region_map, statusbar_map},
     {region_unmap, statusbar_unmap},
