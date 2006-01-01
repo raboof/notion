@@ -72,7 +72,8 @@ end
 
 --DOC
 -- This function is similar to \fnref{mod_menu.menu}, but input
--- is grabbed and \var{param.key} is used to cycle through the menu.
+-- is grabbed and the key given either directly as \var{param} or
+-- as \var{param.key} is used to cycle through the menu.
 function mod_menu.grabmenu(mplex, sub, menu_or_name, param) 
     if type(param)=="string" then
         param={key=param}
