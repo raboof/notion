@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/mplexpholder.h
  *
- * Copyright (c) Tuomo Valkonen 2005. 
+ * Copyright (c) Tuomo Valkonen 2005-2006. 
  *
  * Ion is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by

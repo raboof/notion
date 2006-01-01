@@ -1,7 +1,7 @@
 /*
  * ion/mod_sp/scratchpad.h
  *
- * Copyright (c) Tuomo Valkonen 2004-2005. 
+ * Copyright (c) Tuomo Valkonen 2004-2006. 
  *
  * Ion is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by
