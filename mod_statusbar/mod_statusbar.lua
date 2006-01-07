@@ -95,9 +95,11 @@ function mod_statusbar.template_to_table(template)
                      function(s, c, p)
                          if s=="filler" then
                              table.insert(res, {type=4})
-                         elseif s=="systray" then
+                         elseif (string.find(s, "^systray$") or
+                                 string.find(s, "^systray_")) then
                              table.insert(res, {
                                  type=5,
+                                 meter=s,
                                  align=aligns[c],
                              })
                          else

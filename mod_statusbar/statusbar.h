@@ -53,6 +53,7 @@ DECLSTRUCT(WSBElem){
     char *attr;
     int zeropad;
     int x;
+    ObjList *traywins;
 };
 
 INTRCLASS(WStatusBar);

@@ -218,8 +218,14 @@ static bool is_systray(WClientWin *cwin)
     unsigned long nitems;
     unsigned long bytes_after;
     unsigned char *prop;
+    char *dummy;
     bool is=FALSE;
 
+    if(extl_table_gets_s(cwin->proptab, "statusbar", &dummy)){
+        free(dummy);
+        return TRUE;
+    }
+    
     if(atom__kde_net_wm_system_tray_window_for==None){
         atom__kde_net_wm_system_tray_window_for=XInternAtom(ioncore_g.dpy,
                                                             "_KDE_NET_WM_SYSTEM_TRAY_WINDOW_FOR",

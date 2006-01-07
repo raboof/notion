@@ -35,7 +35,7 @@
 static void statusbar_set_elems(WStatusBar *sb, ExtlTab t);
 static void statusbar_free_elems(WStatusBar *sb);
 static void statusbar_update_natural_size(WStatusBar *p);
-static void statusbar_arrange_systray(WStatusBar *p, int x);
+static void statusbar_arrange_systray(WStatusBar *p);
 static int statusbar_systray_x(WStatusBar *p);
 static void statusbar_rearrange(WStatusBar *sb, bool rs);
 static void do_calc_systray_w(WStatusBar *p, WSBElem *el);
@@ -125,6 +125,7 @@ static void init_sbelem(WSBElem *el)
     el->align=WSBELEM_ALIGN_CENTER;
     el->zeropad=0;
     el->x=0;
+    el->traywins=NULL;
 }
 
 
@@ -161,13 +162,10 @@ static WSBElem *get_sbelems(ExtlTab t, int *nret, int *filleridxret)
                     extl_table_gets_i(tt, "zeropad", &(el[i].zeropad));
                     el[i].zeropad=maxof(el[i].zeropad, 0);
                 }else if(el[i].type==WSBELEM_SYSTRAY){
-                    if(systrayidx==-1){
+                    extl_table_gets_s(tt, "meter", &(el[i].meter));
+                    extl_table_gets_i(tt, "align", &(el[i].align));
+                    if(el[i].meter==NULL || strcmp(el[i].meter, "systray")==0)
                         systrayidx=i;
-                        extl_table_gets_i(tt, "align", &(el[i].align));
-                    }else{
-                        warn(TR("Multiple systray fields in statusbar template."));
-                        el[i].type=WSBELEM_NONE;
-                    }
                 }else if(el[i].type==WSBELEM_FILLER){
                     *filleridxret=i;
                 }
@@ -205,6 +203,8 @@ static void free_sbelems(WSBElem *el, int n)
             free(el[i].tmpl);
         if(el[i].attr!=NULL)
             free(el[i].attr);
+        if(el[i].traywins!=NULL)
+            objlist_clear(&el[i].traywins);
     }
     
     free(el);
@@ -323,18 +323,6 @@ static void statusbar_do_update_natural_size(WStatusBar *p)
 }
 
 
-/*static void statusbar_update_natural_size(WStatusBar *p)
-{
-    int i;
-    
-    for(i=0; i<p->nelems; i++)
-        calc_elem_w(p, &(p->elems[i]), p->brush);
-    
-    statusbar_do_update_natural_size(p);
-    statusbar_calculate_xs(p);
-}*/
-
-
 void statusbar_size_hints(WStatusBar *p, XSizeHints *h)
 {
     h->flags=PMaxSize|PMinSize;
@@ -351,18 +339,59 @@ void statusbar_size_hints(WStatusBar *p, XSizeHints *h)
 /*{{{ Systray */
 
 
-static int statusbar_systray_index(WStatusBar *p)
+static WSBElem *statusbar_associate_systray(WStatusBar *sb, WRegion *reg)
+{
+    WClientWin *cwin=OBJ_CAST(reg, WClientWin);
+    WSBElem *el=NULL, *fbel=NULL;
+    char *name=NULL;
+    int i;
+    
+    if(cwin!=NULL)
+        extl_table_gets_s(cwin->proptab, "statusbar", &name);
+    
+    for(i=0; i<sb->nelems; i++){
+        if(sb->elems[i].type!=WSBELEM_SYSTRAY)
+            continue;
+        if(sb->elems[i].meter==NULL){
+            fbel=&sb->elems[i];
+            continue;
+        }
+        if(name!=NULL && strcmp(sb->elems[i].meter, name)==0){
+            el=&sb->elems[i];
+            break;
+        }
+        if(strcmp(sb->elems[i].meter, "systray")==0)
+            fbel=&sb->elems[i];
+    }
+    
+    if(name!=NULL)
+        free(name);
+        
+    if(el==NULL)
+        el=fbel;
+    
+    if(fbel==NULL)
+        return NULL;
+    
+    objlist_insert_last(&el->traywins, (Obj*)reg);
+    
+    return el;
+}
+
+
+static WSBElem *statusbar_unassociate_systray(WStatusBar *sb, WRegion *reg)
 {
     int i;
     
-    for(i=0; i<p->nelems; i++){
-        if(p->elems[i].type==WSBELEM_SYSTRAY)
-            return i;
+    for(i=0; i<sb->nelems; i++){
+        if(objlist_remove(&(sb->elems[i].traywins), (Obj*)reg))
+            return &sb->elems[i];
     }
     
-    return -1;
+    return NULL;
 }
 
+    
 
 static void do_calc_systray_w(WStatusBar *p, WSBElem *el)
 {
@@ -371,7 +400,7 @@ static void do_calc_systray_w(WStatusBar *p, WSBElem *el)
     int padding=0;
     int w=-padding;
     
-    FOR_ALL_ON_OBJLIST(WRegion*, reg, p->traywins, tmp){
+    FOR_ALL_ON_OBJLIST(WRegion*, reg, el->traywins, tmp){
         w=w+REGION_GEOM(reg).w+padding;
     }
     
@@ -382,26 +411,22 @@ static void do_calc_systray_w(WStatusBar *p, WSBElem *el)
 
 static void statusbar_calc_systray_w(WStatusBar *p)
 {
-    int i=statusbar_systray_index(p);
+    int i;
     
-    if(i>=0)
-        do_calc_systray_w(p, &p->elems[i]);
-}
-
-static int statusbar_systray_x(WStatusBar *p)
-{
-    int i=statusbar_systray_index(p);
-    
-    return (i>=0 ? p->elems[i].x : 0);
+    for(i=0; i<p->nelems; i++){
+        if(p->elems[i].type==WSBELEM_SYSTRAY)
+            do_calc_systray_w(p, &p->elems[i]);
+    }
 }
 
 
-static void statusbar_arrange_systray(WStatusBar *p, int x)
+static void statusbar_arrange_systray(WStatusBar *p)
 {
     WRegion *reg;
     ObjListIterTmp tmp;
     GrBorderWidths bdw;
     int padding=0, ymiddle;
+    int i, x;
     
     if(p->brush!=NULL){
         grbrush_get_border_widths(p->brush, &bdw);
@@ -412,12 +437,18 @@ static void statusbar_arrange_systray(WStatusBar *p, int x)
     
     ymiddle=bdw.top+(REGION_GEOM(p).h-bdw.top-bdw.bottom)/2;
     
-    FOR_ALL_ON_OBJLIST(WRegion*, reg, p->traywins, tmp){
-        WRectangle g=REGION_GEOM(reg);
-        g.x=x;
-        g.y=ymiddle-g.h/2;
-        region_fit(reg, &g, REGION_FIT_EXACT);
-        x=x+g.w+padding;
+    for(i=0; i<p->nelems; i++){
+        WSBElem *el=&p->elems[i];
+        if(el->type!=WSBELEM_SYSTRAY)
+            continue;
+        x=el->x;
+        FOR_ALL_ON_OBJLIST(WRegion*, reg, el->traywins, tmp){
+            WRectangle g=REGION_GEOM(reg);
+            g.x=x;
+            g.y=ymiddle-g.h/2;
+            region_fit(reg, &g, REGION_FIT_EXACT);
+            x=x+g.w+padding;
+        }
     }
 }
 
@@ -428,7 +459,8 @@ static WRegion *statusbar_attach_simple(WStatusBar *sb,
 {
     WRegion *reg;
     WFitParams fp;
-
+    WSBElem *el;
+    
     fp.g.x=0;
     fp.g.y=0;
     fp.mode=REGION_FIT_WHATEVER|REGION_FIT_BOUNDS;
@@ -442,10 +474,18 @@ static WRegion *statusbar_attach_simple(WStatusBar *sb,
         /* TODO: failure handling */
         return NULL;
     }
+    
+    el=statusbar_associate_systray(sb, reg);
+    if(el==NULL){
+        /* TODO: failure handling */
+        objlist_remove(&sb->traywins, (Obj*)reg);
+        return NULL;
+    }
+
+    do_calc_systray_w(sb, el);
 
     region_set_manager(reg, (WRegion*)sb);
     
-    statusbar_calc_systray_w(sb);
     statusbar_rearrange(sb, TRUE);
     
     if(REGION_IS_MAPPED(sb))
@@ -471,10 +511,14 @@ static WPHolder *statusbar_prepare_manage(WStatusBar *sb,
 
 static void statusbar_managed_remove(WStatusBar *sb, WRegion *reg)
 {
+    WSBElem *el;
+        
     objlist_remove(&sb->traywins, (Obj*)reg);
     region_unset_manager(reg, (WRegion*)sb);
-    if(ioncore_g.opmode!=IONCORE_OPMODE_DEINIT){
-        statusbar_calc_systray_w(sb);
+    
+    el=statusbar_unassociate_systray(sb, reg);
+    if(el!=NULL && ioncore_g.opmode!=IONCORE_OPMODE_DEINIT){
+        do_calc_systray_w(sb, el);
         statusbar_rearrange(sb, TRUE);
     }
 }
@@ -539,7 +583,7 @@ bool statusbar_fitrep(WStatusBar *sb, WWindow *par, const WFitParams *fp)
     
     if(wchg || hchg){
         statusbar_calculate_xs(sb);
-        statusbar_arrange_systray(sb, statusbar_systray_x(sb));
+        statusbar_arrange_systray(sb);
         statusbar_draw(sb, TRUE);
     }
     
@@ -555,7 +599,7 @@ WPHolder *statusbar_prepare_manage_transient(WStatusBar *sb,
     WRegion *mgr=REGION_MANAGER(sb);
     
     if(mgr==NULL)
-        mgr=region_screen_of((WRegion*)sb);
+        mgr=(WRegion*)region_screen_of((WRegion*)sb);
     
     if(mgr!=NULL)
         return region_prepare_manage(mgr, cwin, param, 
@@ -612,7 +656,14 @@ void statusbar_set_template(WStatusBar *sb, const char *tmpl)
 EXTL_EXPORT_MEMBER
 void statusbar_set_template_table(WStatusBar *sb, ExtlTab t)
 {
+    WRegion *reg;
+    ObjListIterTmp tmp;
+    
     statusbar_set_elems(sb, t);
+
+    FOR_ALL_ON_OBJLIST(WRegion*, reg, sb->traywins, tmp){
+        statusbar_associate_systray(sb, reg);
+    }
     
     statusbar_calc_widths(sb);
     statusbar_rearrange(sb, FALSE);
@@ -729,7 +780,7 @@ static void statusbar_rearrange(WStatusBar *sb, bool rs)
     statusbar_calculate_xs(sb);
     
     if(rs)
-        statusbar_arrange_systray(sb, statusbar_systray_x(sb));
+        statusbar_arrange_systray(sb);
 }
 
 
