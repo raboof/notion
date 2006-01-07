@@ -26,6 +26,7 @@
 #include <ioncore/names.h>
 #include <ioncore/strings.h>
 #include <ioncore/basicpholder.h>
+#include <ioncore/sizehint.h>
 
 #include "statusbar.h"
 #include "main.h"
@@ -453,6 +454,19 @@ static void statusbar_arrange_systray(WStatusBar *p)
 }
 
 
+static void systray_adjust_size(WRegion *reg, WRectangle *g)
+{
+    XSizeHints hints;
+    
+    region_size_hints(reg, &hints);
+
+    g->h=CF_STATUSBAR_SYSTRAY_HEIGHT;
+    
+    xsizehints_correct(&hints, &g->w, &g->h, TRUE);
+}
+
+
+
 static WRegion *statusbar_attach_simple(WStatusBar *sb,
                                         WRegionAttachHandler *handler,
                                         void *handlerparams)
@@ -482,6 +496,12 @@ static WRegion *statusbar_attach_simple(WStatusBar *sb,
         return NULL;
     }
 
+    fp.g=REGION_GEOM(reg);
+    fp.mode=REGION_FIT_EXACT;
+    systray_adjust_size(reg, &fp.g);
+    
+    region_fitrep(reg, NULL, &fp);
+    
     do_calc_systray_w(sb, el);
 
     region_set_manager(reg, (WRegion*)sb);
@@ -535,11 +555,15 @@ static void statusbar_managed_rqgeom(WStatusBar *sb, WRegion *reg, int flags,
     g.w=geom->w;
     g.h=geom->h;
 
+    systray_adjust_size(reg, &g);
+
     if(flags&REGION_RQGEOM_TRYONLY){
         if(geomret!=NULL)
             *geomret=g;
         return;
     }
+    
+    region_fit(reg, &g, REGION_FIT_EXACT);
     
     statusbar_calc_systray_w(sb);
     statusbar_rearrange(sb, TRUE);

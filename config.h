@@ -30,6 +30,8 @@
 
 #define CF_RAISE_DELAY 500
 
+#define CF_STATUSBAR_SYSTRAY_HEIGHT 24
+
 /* Cursors
  */
 
