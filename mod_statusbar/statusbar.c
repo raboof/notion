@@ -371,7 +371,7 @@ static WSBElem *statusbar_associate_systray(WStatusBar *sb, WRegion *reg)
     if(el==NULL)
         el=fbel;
     
-    if(fbel==NULL)
+    if(el==NULL)
         return NULL;
     
     objlist_insert_last(&el->traywins, (Obj*)reg);
