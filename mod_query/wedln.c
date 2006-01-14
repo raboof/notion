@@ -667,7 +667,7 @@ void wedln_complete(WEdln *wedln, bool cycle)
     }else{
         int oldid=wedln->compl_waiting_id;
     
-        if(!wedln_do_call_completor(wedln, wedln_alloc_compl_id(wedln), FALSE))
+        if(!wedln_do_call_completor(wedln, wedln_alloc_compl_id(wedln), cycle))
             wedln->compl_waiting_id=oldid;
     }
 }
