@@ -145,8 +145,8 @@ function mod_statusbar.update(update_templates)
         if update_templates then
             local t=sb:get_template_table()
             for _, v in t do
-                if t.meter then
-                    t.tmpl=meters[t.meter.."_template"]
+                if v.meter then
+                    v.tmpl=meters[v.meter.."_template"]
                 end
             end
             sb:set_template_table(t)
