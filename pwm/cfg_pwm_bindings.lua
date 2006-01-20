@@ -7,22 +7,27 @@
 -- Load Ion bindings
 dopath("cfg_bindings")
 
--- Unbind anything using mod_query.
+-- Unbind anything using mod_query and rebinding to mod_menu where
+-- applicable.
 
-defbindings("WMPlex", {
-    kpress(MOD2.."F1", nil),
-    kpress(MOD1.."F1", "ioncore.exec_on(_, ':man pwm3')"),
-    kpress(MOD2.."F3", nil),
-    kpress(MOD1.."F3", nil),
-    kpress(MOD2.."F4", nil),
-    kpress(MOD2.."F5", nil),
-    kpress(MOD2.."F6", nil),
-    kpress(MOD2.."F9", nil),
-    kpress(MOD1.."G", nil),
+defbindings("WScreen", {
+    kpress(ALTMETA.."F12", "mod_menu.menu(_, _sub, 'mainmenu', {big=true})"),
 })
 
+defbindings("WMPlex", {
+    kpress(ALTMETA.."F1", nil),
+    kpress(META..   "F1", "ioncore.exec_on(_, ':man pwm3')"),
+    kpress(ALTMETA.."F3", nil),
+    kpress(META..   "F3", nil),
+    kpress(ALTMETA.."F4", nil),
+    kpress(ALTMETA.."F5", nil),
+    kpress(ALTMETA.."F6", nil),
+    kpress(ALTMETA.."F9", nil),
+    kpress(META.."G", nil),
+})
 
 defbindings("WFrame", {
-    kpress(MOD1.."A", nil),
+    kpress(META.."A", nil),
+    kpress(META.."M", "mod_menu.menu(_, _sub, 'ctxmenu')"),
 })
 
