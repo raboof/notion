@@ -12,7 +12,7 @@
 #ifndef ION_MOD_STATUSBAR_STATUSBAR_H
 #define ION_MOD_STATUSBAR_STATUSBAR_H
 
-#include <libtu/objlist.h>
+#include <libtu/ptrlist.h>
 #include <libextl/extl.h>
 #include <ioncore/common.h>
 #include <ioncore/gr.h>
@@ -53,7 +53,7 @@ DECLSTRUCT(WSBElem){
     char *attr;
     int zeropad;
     int x;
-    ObjList *traywins;
+    PtrList *traywins;
 };
 
 INTRCLASS(WStatusBar);
@@ -66,7 +66,7 @@ DECLCLASS(WStatusBar){
     int natural_w, natural_h;
     int filleridx;
     WStatusBar *sb_next, *sb_prev;
-    ObjList *traywins;
+    PtrList *traywins;
     bool systray_enabled;
 };
 

@@ -164,7 +164,7 @@ function mod_query.file_completor(wedln, str)
     local ic=ioncore.lookup_script("ion-completefile")
     if ic then
         mod_query.popen_completions(wedln,
-                                   ic..(wp or " ")..string.shell_safe(str),
+                                   ic.." "..string.shell_safe(str),
                                    "")
     end
 end

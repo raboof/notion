@@ -13,7 +13,7 @@
 
 #include <libtu/objp.h>
 #include <libtu/minmax.h>
-#include <libtu/objlist.h>
+#include <libtu/ptrlist.h>
 #include <libtu/misc.h>
 #include <ioncore/common.h>
 #include <ioncore/global.h>
@@ -205,7 +205,7 @@ static void free_sbelems(WSBElem *el, int n)
         if(el[i].attr!=NULL)
             free(el[i].attr);
         if(el[i].traywins!=NULL)
-            objlist_clear(&el[i].traywins);
+            ptrlist_clear(&el[i].traywins);
     }
     
     free(el);
@@ -299,7 +299,7 @@ static void statusbar_do_update_natural_size(WStatusBar *p)
     GrBorderWidths bdw;
     GrFontExtents fnte;
     WRegion *reg;
-    ObjListIterTmp tmp;
+    PtrListIterTmp tmp;
     int totw=0, stmh=0;
     int i;
 
@@ -315,7 +315,7 @@ static void statusbar_do_update_natural_size(WStatusBar *p)
     for(i=0; i<p->nelems; i++)
         totw+=p->elems[i].max_w;
         
-    FOR_ALL_ON_OBJLIST(WRegion*, reg, p->traywins, tmp){
+    FOR_ALL_ON_PTRLIST(WRegion*, reg, p->traywins, tmp){
         stmh=maxof(stmh, REGION_GEOM(reg).h);
     }
     
@@ -374,7 +374,7 @@ static WSBElem *statusbar_associate_systray(WStatusBar *sb, WRegion *reg)
     if(el==NULL)
         return NULL;
     
-    objlist_insert_last(&el->traywins, (Obj*)reg);
+    ptrlist_insert_last(&el->traywins, (Obj*)reg);
     
     return el;
 }
@@ -385,7 +385,7 @@ static WSBElem *statusbar_unassociate_systray(WStatusBar *sb, WRegion *reg)
     int i;
     
     for(i=0; i<sb->nelems; i++){
-        if(objlist_remove(&(sb->elems[i].traywins), (Obj*)reg))
+        if(ptrlist_remove(&(sb->elems[i].traywins), (Obj*)reg))
             return &sb->elems[i];
     }
     
@@ -397,11 +397,11 @@ static WSBElem *statusbar_unassociate_systray(WStatusBar *sb, WRegion *reg)
 static void do_calc_systray_w(WStatusBar *p, WSBElem *el)
 {
     WRegion *reg;
-    ObjListIterTmp tmp;
+    PtrListIterTmp tmp;
     int padding=0;
     int w=-padding;
     
-    FOR_ALL_ON_OBJLIST(WRegion*, reg, el->traywins, tmp){
+    FOR_ALL_ON_PTRLIST(WRegion*, reg, el->traywins, tmp){
         w=w+REGION_GEOM(reg).w+padding;
     }
     
@@ -424,7 +424,7 @@ static void statusbar_calc_systray_w(WStatusBar *p)
 static void statusbar_arrange_systray(WStatusBar *p)
 {
     WRegion *reg;
-    ObjListIterTmp tmp;
+    PtrListIterTmp tmp;
     GrBorderWidths bdw;
     int padding=0, ymiddle;
     int i, x;
@@ -443,7 +443,7 @@ static void statusbar_arrange_systray(WStatusBar *p)
         if(el->type!=WSBELEM_SYSTRAY)
             continue;
         x=el->x;
-        FOR_ALL_ON_OBJLIST(WRegion*, reg, el->traywins, tmp){
+        FOR_ALL_ON_PTRLIST(WRegion*, reg, el->traywins, tmp){
             WRectangle g=REGION_GEOM(reg);
             g.x=x;
             g.y=ymiddle-g.h/2;
@@ -484,7 +484,7 @@ static WRegion *statusbar_attach_simple(WStatusBar *sb,
     if(reg==NULL)
         return NULL;
     
-    if(!objlist_insert_last(&sb->traywins, (Obj*)reg)){
+    if(!ptrlist_insert_last(&sb->traywins, (Obj*)reg)){
         /* TODO: failure handling */
         return NULL;
     }
@@ -492,7 +492,7 @@ static WRegion *statusbar_attach_simple(WStatusBar *sb,
     el=statusbar_associate_systray(sb, reg);
     if(el==NULL){
         /* TODO: failure handling */
-        objlist_remove(&sb->traywins, (Obj*)reg);
+        ptrlist_remove(&sb->traywins, (Obj*)reg);
         return NULL;
     }
 
@@ -533,10 +533,11 @@ static void statusbar_managed_remove(WStatusBar *sb, WRegion *reg)
 {
     WSBElem *el;
         
-    objlist_remove(&sb->traywins, (Obj*)reg);
+    ptrlist_remove(&sb->traywins, (Obj*)reg);
     region_unset_manager(reg, (WRegion*)sb);
     
     el=statusbar_unassociate_systray(sb, reg);
+    
     if(el!=NULL && ioncore_g.opmode!=IONCORE_OPMODE_DEINIT){
         do_calc_systray_w(sb, el);
         statusbar_rearrange(sb, TRUE);
@@ -577,11 +578,11 @@ static void statusbar_managed_rqgeom(WStatusBar *sb, WRegion *reg, int flags,
 void statusbar_map(WStatusBar *sb)
 {
     WRegion *reg;
-    ObjListIterTmp tmp;
+    PtrListIterTmp tmp;
     
     window_map((WWindow*)sb);
     
-    FOR_ALL_ON_OBJLIST(WRegion*, reg, sb->traywins, tmp)
+    FOR_ALL_ON_PTRLIST(WRegion*, reg, sb->traywins, tmp)
         region_map(reg);
 }
 
@@ -589,11 +590,11 @@ void statusbar_map(WStatusBar *sb)
 void statusbar_unmap(WStatusBar *sb)
 {
     WRegion *reg;
-    ObjListIterTmp tmp;
+    PtrListIterTmp tmp;
     
     window_unmap((WWindow*)sb);
     
-    FOR_ALL_ON_OBJLIST(WRegion*, reg, sb->traywins, tmp)
+    FOR_ALL_ON_PTRLIST(WRegion*, reg, sb->traywins, tmp)
         region_unmap(reg);
 }
 
@@ -681,11 +682,11 @@ EXTL_EXPORT_MEMBER
 void statusbar_set_template_table(WStatusBar *sb, ExtlTab t)
 {
     WRegion *reg;
-    ObjListIterTmp tmp;
+    PtrListIterTmp tmp;
     
     statusbar_set_elems(sb, t);
 
-    FOR_ALL_ON_OBJLIST(WRegion*, reg, sb->traywins, tmp){
+    FOR_ALL_ON_PTRLIST(WRegion*, reg, sb->traywins, tmp){
         statusbar_associate_systray(sb, reg);
     }
     
