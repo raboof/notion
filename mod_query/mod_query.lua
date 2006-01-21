@@ -1115,7 +1115,7 @@ function mod_query.query_menu(mplex, themenu, prompt)
     
     local ntab=xform_menu({}, menu, "")
     
-    function complete(str)
+    local function complete(str)
         local results={}
         for s, e in ntab do
             if string.find(s, str, 1, true) then
