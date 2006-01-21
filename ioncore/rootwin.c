@@ -446,7 +446,7 @@ static void rootwin_do_set_focus(WRootWin *rootwin, bool warp)
     if(sub==NULL || !REGION_IS_MAPPED(sub)){
         WScreen *scr;
         FOR_ALL_SCREENS(scr){
-            if(REGION_IS_MAPPED(sub)){
+            if(REGION_IS_MAPPED(scr)){
                 sub=(WRegion*)scr;
                 break;
             }
