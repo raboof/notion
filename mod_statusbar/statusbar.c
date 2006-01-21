@@ -936,6 +936,7 @@ ExtlTab mod_statusbar_statusbars()
     
     for(sb=statusbars; sb!=NULL; sb=sb->sb_next){
         extl_table_seti_o(t, i, (Obj*)sb);
+        i++;
     }
     
     return t;
