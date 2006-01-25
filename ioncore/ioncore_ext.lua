@@ -77,3 +77,14 @@ export(ioncore,
 -- Mark ourselves loaded.
 _LOADED["ioncore"]=true
 
+
+
+local function dummy_gettext_hack()
+    -- For context menu labels in configuration files. 
+    -- Alternative would be to hack lxgettext to support parsing
+    -- the second argument to a function, or using TR in the
+    -- configuration files, but I don't want the latter.
+    TR("Frame")
+    TR("Workspace")
+end
+
