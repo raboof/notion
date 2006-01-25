@@ -34,7 +34,14 @@ end
 --DOC
 -- Define context menu for context \var{ctx}, \var{tab} being a table 
 -- of menu entries.
-function ioncore.defctxmenu(ctx, tab)
+function ioncore.defctxmenu(ctx, ...)
+    local tab
+    if table.getn(arg)>1 and type(arg[1])=="string" then
+        tab=arg[2]
+        tab.label=ioncore.gettext(arg[1])
+    else
+        tab=arg[1]
+    end
     menus["ctxmenu-"..ctx]=tab
 end
 
@@ -248,7 +255,7 @@ local function get_ctxmenu(reg, sub, is_par)
     
     local function cp(m2)
         local m3={}
-        for k, v in m2 do
+        for k, v in ipairs(m2) do
             local v2=table.copy(v)
             
             if v2.func then
@@ -263,6 +270,7 @@ local function get_ctxmenu(reg, sub, is_par)
             
             m3[k]=v2
         end
+        m3.label=m2.label
         return m3
     end
     
@@ -270,10 +278,11 @@ local function get_ctxmenu(reg, sub, is_par)
         local m2=ioncore.evalmenu("ctxmenu-"..s)
         if m2 then
             if is_par then
-                m=table.icat(m, cp(m2))
-            else
-                m=table.icat(m, m2)
+                m2=cp(m2)
             end
+
+            m=table.icat(m, m2)
+            m.label=(m2.label or m.label)
         end
     end
     return m
@@ -288,7 +297,8 @@ function menus.ctxmenu(reg, sub)
     while reg do
         local mm = get_ctxmenu(reg, sub, true)
         if table.getn(mm)>0 then
-            table.insert(m, ioncore.submenu(reg:name(), mm))
+            local nm=mm.label or obj_typename(reg)
+            table.insert(m, ioncore.submenu(nm, mm))
         end
         sub=reg
         reg=reg:manager()

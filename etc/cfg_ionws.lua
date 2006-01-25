@@ -34,7 +34,7 @@ defbindings("WIonWS", {
 
 -- Context menu for tiled workspaces.
 
-defctxmenu("WIonWS", {
+defctxmenu("WIonWS", "Workspace", {
     menuentry("Destroy frame", 
               "WIonWS.unsplit_at(_, _sub)"),
 

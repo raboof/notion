@@ -32,7 +32,7 @@ defmenu("sessionmenu", {
 
 
 -- Context menu (frame/client window actions)
-defctxmenu("WFrame", {
+defctxmenu("WFrame", "Frame", {
     menuentry("Close",          "WRegion.rqclose_propagate(_, _sub)"),
     menuentry("Kill",           "WClientWin.kill(_sub)",
                                 "_sub:WClientWin"),

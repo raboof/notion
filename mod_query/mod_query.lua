@@ -1093,7 +1093,7 @@ function mod_query.query_menu(mplex, themenu, prompt)
     end
 
     local function xform_menu(t, m, p)
-        for _, v in m do
+        for _, v in ipairs(m) do
             if v.name then
                 local n=p..xform_name(v.name)
                 while t[n] do
