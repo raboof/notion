@@ -249,7 +249,7 @@ static void statusbar_resize(WStatusBar *p)
     g.y=REGION_GEOM(p).y;
 
     if(g.w!=REGION_GEOM(p).w || g.h!=REGION_GEOM(p).h)
-        region_rqgeom((WRegion*)p, rqflags, &g, NULL);
+    region_rqgeom((WRegion*)p, rqflags, &g, NULL);
 }
 
 
@@ -795,8 +795,18 @@ static void spread_stretch(WStatusBar *sb)
 static void statusbar_rearrange(WStatusBar *sb, bool rs)
 {
     if(rs){
+        int onw=sb->natural_w;
+        int onh=sb->natural_h;
+        
         statusbar_do_update_natural_size(sb);
-        statusbar_resize(sb);
+        
+        if(    (sb->natural_h>onh && REGION_GEOM(sb).h>=onh)
+            || (sb->natural_h<onh && REGION_GEOM(sb).h<=onh)
+            || (sb->natural_w>onw && REGION_GEOM(sb).w>=onw)
+            || (sb->natural_w<onw && REGION_GEOM(sb).w<=onw)){
+            
+            statusbar_resize(sb);
+        }
     }
 
     reset_stretch(sb);
