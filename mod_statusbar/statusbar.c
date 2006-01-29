@@ -874,9 +874,18 @@ void statusbar_update(WStatusBar *sb, ExtlTab t)
                 str=el->text;
             }
             
+            if(el->tmpl!=NULL){
+                char *tmp=grbrush_make_label(sb->brush, el->text, el->max_w);
+                if(tmp!=NULL){
+                    free(el->text);
+                    el->text=tmp;
+                    str=tmp;
+                }
+            }
+
             el->text_w=grbrush_get_text_width(sb->brush, str, strlen(str));
             
-            if(el->text_w>el->max_w){
+            if(el->text_w>el->max_w && el->tmpl==NULL){
                 el->max_w=el->text_w;
                 grow=TRUE;
             }
