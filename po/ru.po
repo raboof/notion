@@ -1,0 +1,1637 @@
+# translation of ru.po to RUSSIAN
+# #
+# This file is distributed under the same license as the Ion3 package.
+# Vassily Leushin <basileus@kirov.lug.ru>, 2006.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: ru\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2004-10-11 18:33+0300\n"
+"PO-Revision-Date: 2006-02-01 19:55+0300\n"
+"Last-Translator: Vassily Leushin <basileus@kirov.lug.ru>\n"
+"Language-Team: RUSSIAN <ru@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=KOI8-R\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Russian\n"
+"X-Poedit-Country: RUSSIAN FEDERATION\n"
+"X-Generator: KBabel 1.10.1\n"
+"Plural-Forms:  nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#: ../ioncore/conf-bindings.c:96
+msgid "Insane key combination."
+msgstr "Неправильная комбинация клавиш."
+
+#: ../ioncore/conf-bindings.c:100
+msgid "Could not convert keysym to keycode."
+msgstr "Не могу перевести keysym в keycode"
+
+#: ../ioncore/conf-bindings.c:111
+#, c-format
+msgid "Unknown button \"%s\"."
+msgstr "Неизвестная кнопка \"%s\" "
+
+#: ../ioncore/conf-bindings.c:116
+msgid "Insane button combination."
+msgstr "Неправильная комбинация кнопок"
+
+#: ../ioncore/conf-bindings.c:123
+#: ../ioncore/conf-bindings.c:130
+msgid "Insane modifier combination."
+msgstr "Неправильная комбинация модификаторов"
+
+#: ../ioncore/conf-bindings.c:168
+#, c-format
+msgid "Can not wait on modifiers when no modifiers set in \"%s\"."
+msgstr "Ожидание модификаторов невозможно, если они не установлены в \"%s\" "
+
+#: ../ioncore/conf-bindings.c:186
+#, c-format
+msgid "Unable to add binding %s."
+msgstr "Невозможно добавить привязку %s."
+
+#: ../ioncore/conf-bindings.c:191
+#, c-format
+msgid "Unable to remove binding %s."
+msgstr "Невозможно удалить привязку %s."
+
+#: ../ioncore/conf-bindings.c:230
+#, c-format
+msgid "Unable to add submap for binding %s."
+msgstr ""
+
+#
+#: ../ioncore/conf-bindings.c:260
+msgid "Binding type not set."
+msgstr "Тип привязки не установлен"
+
+#: ../ioncore/conf-bindings.c:270
+#, c-format
+msgid "Unknown binding type \"%s\"."
+msgstr "Неизвестный тип привязки \"%s\"."
+
+#: ../ioncore/conf-bindings.c:291
+#, c-format
+msgid "Unknown area \"%s\" for binding %s."
+msgstr "Неизвестная область \"%s\" для привязки %s."
+
+#: ../ioncore/conf-bindings.c:332
+#, c-format
+msgid "Unable to get bindmap entry %d."
+msgstr ""
+
+#: ../ioncore/conf-bindings.c:374
+msgid "Unable to convert keysym to string."
+msgstr "Не могу перевести keysym  в строку."
+
+#: ../ioncore/conf-bindings.c:388
+msgid "Unable to convert button to string."
+msgstr "Не могу перевести кнопку в строку."
+
+#
+#: ../ioncore/event.c:78
+msgid "Time request from X server failed."
+msgstr "Неудачный запрос времени от X сервера"
+
+#
+#: ../ioncore/exec.c:101
+msgid "Could not find a root window."
+msgstr "Не могу найти корневое окно."
+
+#: ../ioncore/exec.c:134
+msgid "reading a pipe"
+msgstr "чтение из канала"
+
+#
+#: ../ioncore/exec.c:296
+msgid "Not saving state: running under session manager."
+msgstr "Состояние не сохранено: работа под менеджером сессий."
+
+#: ../ioncore/strings.c:107
+#: ../ioncore/strings.c:143
+msgid "Invalid multibyte string."
+msgstr "Неправильная многобайтная строка"
+
+#: ../ioncore/strings.c:234
+#, c-format
+msgid "Error compiling regular expression: %s"
+msgstr "Ошибка компиляции рег. выражения: %s"
+
+#: ../ioncore/modules.c:158
+msgid "Invalid module name."
+msgstr "Неправильное имя модуля."
+
+#
+#: ../ioncore/modules.c:170
+msgid "The module is already loaded."
+msgstr "Данный модуль уже загружен."
+
+#: ../ioncore/modules.c:185
+msgid "Module version information not found or version mismatch. Refusing to use."
+msgstr ""
+"Информация о версии модуля не найдена, или несоответствие версий "
+"Отказ в использовании."
+
+#: ../ioncore/modules.c:196
+#, c-format
+msgid "Unable to initialise module %s."
+msgstr "Не могу инициализировать модуль  %s ."
+
+#: ../ioncore/modules.c:220
+#: ../../libextl/readconfig.c:368
+#, c-format
+msgid "Unable to find '%s' on search path."
+msgstr "Не могу найти '%s' в пути поиска."
+
+#: ../ioncore/modules.c:291
+msgid "Unknown module."
+msgstr "Неизвестный модуль."
+
+#: ../ioncore/modules.c:299
+msgid "Unable to initialise module."
+msgstr "Не могу инициализировать модуль."
+
+#: ../ioncore/modules.c:344
+msgid "No module to load given."
+msgstr "Не указан модуль для загрузки."
+
+#: ../ioncore/screen.c:301
+msgid "act: "
+msgstr "act: "
+
+#: ../ioncore/screen.c:490
+msgid "Invalid offset."
+msgstr "Неправильный отступ."
+
+#: ../ioncore/screen.c:535
+msgid "Could not find a complete workspace class. Please load some modules."
+msgstr ""
+"Не могу найти класс полного рабочего стола. Пожалуйста "
+"загрузите какие-нибудь модули."
+
+#: ../ioncore/screen.c:545
+#, c-format
+msgid "Unable to create a workspace on screen %d."
+msgstr "Не могу создать раб. пространство на экране  %d ."
+
+#: ../ioncore/signal.c:291
+#, c-format
+msgid "Caught fatal signal %d. Dying without deinit."
+msgstr "Принят фатальный сигнал %d. Умираю без deinit'а."
+
+#: ../ioncore/signal.c:300
+#, c-format
+msgid "Caught signal %d. Dying."
+msgstr "Получен сигнал %d. Умираю."
+
+#: ../ioncore/sizehint.c:150
+msgid "Invalid client-supplied width/height increment."
+msgstr "Получен неправильный инкремент ширины/высоты от клиента."
+
+#: ../ioncore/sizehint.c:158
+msgid "Invalid client-supplied aspect-ratio."
+msgstr "Получены неправильные пропорции от клиента."
+
+#: ../ioncore/ioncore.c:66
+msgid ""
+"This program is free software; you can redistribute it and/or\n"
+"modify it under the terms of the GNU Lesser General Public\n"
+"License as published by the Free Software Foundation; either\n"
+"version 2.1 of the License, or (at your option) any later version.\n"
+"\n"
+"This program is distributed in the hope that it will be useful,\n"
+"but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
+"MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU\n"
+"Lesser General Public License for more details.\n"
+msgstr ""
+
+#: ../ioncore/ioncore.c:385
+#, c-format
+msgid "Could not connect to X display '%s'"
+msgstr "Не могу соединиться с X дисплеем '%s'"
+
+#: ../ioncore/ioncore.c:438
+msgid "Could not find a screen to manage."
+msgstr "Не могу найти экран для управления."
+
+#: ../ioncore/xic.c:43
+msgid "Failed to open input method."
+msgstr "Метод ввода не открыт."
+
+#: ../ioncore/xic.c:48
+msgid "Input method doesn't support any style."
+msgstr "Метод ввода не поддерживает стили"
+
+#: ../ioncore/xic.c:63
+msgid "input method doesn't support my preedit type."
+msgstr "Метод ввода не поддерживает мой тип preedit'а. "
+
+#: ../ioncore/xic.c:91
+msgid "Failed to create input context."
+msgstr "Контекст ввода не создан."
+
+#: ../ioncore/clientwin.c:376
+#, c-format
+msgid "The transient_for hint for \"%s\" points to itself."
+msgstr "Хинт transient_for для \"%s\" указывает на самого себя."
+
+#: ../ioncore/clientwin.c:380
+#, c-format
+msgid "Client window \"%s\" has broken transient_for hint. (\"Extended WM hints\" multi-parent brain damage?)"
+msgstr ""
+
+#: ../ioncore/clientwin.c:385
+#, c-format
+msgid "The transient_for window for \"%s\" is not on the same screen."
+msgstr "Окно transient_for для \"%s\" не на том же экране."
+
+#: ../ioncore/clientwin.c:405
+#: ../ioncore/clientwin.c:492
+#: ../ioncore/clientwin.c:1554
+#, c-format
+msgid "Window %#x disappeared."
+msgstr "Окно %#x исчезло."
+
+#: ../ioncore/clientwin.c:512
+msgid "Unable to find a matching root window!"
+msgstr "Не могу найти соответствующее корневое окно!"
+
+#: ../ioncore/clientwin.c:547
+#, c-format
+msgid "Unable to manage client window %#x."
+msgstr "Не могу управлять клиентским окном %#x."
+
+#: ../ioncore/clientwin.c:597
+msgid "Changes is WM_TRANSIENT_FOR property are unsupported."
+msgstr ""
+
+#
+#: ../ioncore/clientwin.c:874
+msgid "Client does not support the WM_DELETE protocol."
+msgstr "Клиент не поддерживает протокол WM_DELETE. "
+
+#: ../ioncore/clientwin.c:1103
+#: ../mod_ionws/ionws.c:76
+#: ../mod_floatws/floatws.c:103
+#, c-format
+msgid "Error reparenting %s."
+msgstr "Ошибка переназначения родителя %s."
+
+#: ../ioncore/clientwin.c:1560
+msgid "Saved client window does not want to be managed."
+msgstr "Сохраненное окно клиента не хочет быть под управлением."
+
+#
+#: ../ioncore/colormap.c:96
+msgid "Unable to store colourmap watch info."
+msgstr ""
+
+#: ../ioncore/region.c:36
+msgid "Creating region with negative width or height!"
+msgstr "Создание региона с отрицательной высотой или шириной!"
+
+#: ../ioncore/region.c:84
+#, c-format
+msgid "Destroying object \"%s\" with client windows as children."
+msgstr "Удаление объекта \"%s\" с окнами клиента как потомками."
+
+#: ../ioncore/attach.c:80
+msgid "Unable to reparent."
+msgstr "Невозможно переназначить родителя."
+
+#: ../ioncore/attach.c:112
+#: ../ioncore/frame-pointer.c:295
+#, c-format
+msgid "Attempt to make region %s manage its ancestor %s."
+msgstr "Попытка управления регионом %s его предком %s."
+
+#
+#: ../ioncore/defer.c:93
+msgid "Object destroyed while deferred actions are still pending."
+msgstr "Объект удален при отложенном действии."
+
+#: ../ioncore/manage.c:90
+msgid "Unable to find a screen for a new client window."
+msgstr "Не могу найти экран для нового клиентского окна."
+
+#: ../ioncore/manage.c:187
+#, c-format
+msgid "Unable to rescue \"%s\"."
+msgstr "Не могу спасти \"%s\"."
+
+#: ../ioncore/rootwin.c:222
+#, c-format
+msgid "Unable to redirect root window events for screen %d."
+msgstr "Не могу перенаправить события корневого окна для экрана %d."
+
+#: ../ioncore/rootwin.c:316
+msgid "Xinerama sanity check failed; overlapping screens detected."
+msgstr "Проверка Xinerama не удалась; обнаружено наложение экранов."
+
+#: ../ioncore/rootwin.c:342
+msgid "Don't know how to get Xinerama information for multiple X root windows."
+msgstr "Не знаю как получить информацию по множественным корневым окнам в Xinerama."
+
+#: ../ioncore/rootwin.c:378
+#, c-format
+msgid "Unable to setup Xinerama screen %d."
+msgstr "Не могу настроить экран Xinerama  %d."
+
+#: ../ioncore/rootwin.c:389
+#, c-format
+msgid "Unable to setup X screen %d."
+msgstr "Не могу настроить экран X %d."
+
+#: ../ioncore/names.c:90
+#, c-format
+msgid "Corrupt instance number %s."
+msgstr "Неверный номер экземпляра %s."
+
+#: ../ioncore/saveload.c:55
+#, c-format
+msgid "Unknown class \"%s\", cannot create region."
+msgstr "Неизвестный класс \"%s\", не могу создать регион."
+
+#: ../ioncore/saveload.c:124
+#, c-format
+msgid ""
+"There were errors loading layout. Backing up current layout savefile as\n"
+"%s.\n"
+"If you are _not_ running under a session manager and wish to restore your\n"
+"old layout, copy this backup file over the layout savefile found in the\n"
+"same directory while Ion is not running and after having fixed your other\n"
+"configuration files that are causing this problem. (Maybe a missing\n"
+"module?)\n"
+msgstr ""
+
+#: ../ioncore/saveload.c:167
+msgid "Unable to get file for layout backup."
+msgstr "Не могу получить резервный файл расположения."
+
+#: ../ioncore/saveload.c:171
+#, c-format
+msgid "Backup file %s already exists."
+msgstr "резервный файл %s уже существует."
+
+#: ../ioncore/saveload.c:177
+msgid "Failed backup."
+msgstr "Резервная копия не создана."
+
+#
+#: ../ioncore/saveload.c:182
+msgid "Unable to initialise layout on any screen."
+msgstr "Не могу инициализировать расположение ни на одном экране."
+
+#: ../ioncore/saveload.c:202
+#, c-format
+msgid "Unable to get configuration for screen %d."
+msgstr "Не могу получить конфигурацию экрана %d."
+
+#: ../ioncore/saveload.c:215
+msgid "Unable to save layout."
+msgstr "Не могу сохранить расположение."
+
+#: ../ioncore/frame.c:122
+msgid "Frame is not empty."
+msgstr "Фрейм не пуст."
+
+#: ../ioncore/conf.c:134
+msgid "User directory can not be set."
+msgstr "Директория пользователя не установлена."
+
+#: ../ioncore/conf.c:197
+msgid "Some bindmaps were empty, loading ioncore-efbb."
+msgstr ""
+
+#: ../ioncore/fullscreen.c:100
+msgid "Failed to enter full screen mode."
+msgstr "Ошибка полноэкранного режима."
+
+#: ../ioncore/fullscreen.c:158
+msgid "WClientWin failed to return from full screen mode; remaining manager or parent from previous location refused to manage us."
+msgstr ""
+
+#
+#: ../ioncore/mplex.c:1247
+msgid "Invalid position setting."
+msgstr "Неправильные установки местоположения"
+
+#
+#: ../ioncore/mplex.c:1280
+msgid "Invalid action setting."
+msgstr "Неправильные установки действия."
+
+#: ../ioncore/gr.c:119
+#, c-format
+msgid "Drawing engine %s is not registered!"
+msgstr "Движок отрисовки %s не зарегистрирован."
+
+#: ../ioncore/gr.c:138
+#, c-format
+msgid "Unable to find brush for style '%s'."
+msgstr "Не могу найти кисть для стиля '%s'."
+
+#: ../ioncore/gr.c:409
+msgid "No drawing engines loaded, trying \"de\"."
+msgstr "Ни одно движка отрисовки не загружено, пробую \"ru\"."
+
+#
+#: ../ioncore/hooks.c:219
+msgid "No function given."
+msgstr "Нет функции."
+
+#: ../mod_ionws/ionws.c:311
+msgid "Unable to create a node for status display."
+msgstr "Не  могу создать узел для показа статуса."
+
+#: ../mod_ionws/ionws.c:323
+msgid "Unable to create new split for status display."
+msgstr "Не могу создать новое разделение для показа статуса."
+
+#
+#: ../mod_ionws/ionws.c:742
+msgid "Frame not managed by the workspace."
+msgstr "Фрейм не управляется рабочим столом."
+
+#
+#: ../mod_ionws/ionws.c:747
+msgid "Invalid direction parameter."
+msgstr "Неверный параметр направления."
+
+#
+#: ../mod_ionws/ionws.c:765
+msgid "Unable to split."
+msgstr "Не могу разделить."
+
+#: ../mod_ionws/ionws.c:803
+msgid "Nil frame."
+msgstr "Нулевой фрейм"
+
+#: ../mod_ionws/ionws.c:807
+msgid "The frame is not managed by the workspace."
+msgstr "Данный фрейм не управляется рабочим столом."
+
+#: ../mod_ionws/ionws.c:812
+msgid "Frame may not be destroyed."
+msgstr "Фрейм не удаляется"
+
+#: ../mod_ionws/ionws.c:817
+msgid "Failed to rescue managed objects."
+msgstr ""
+
+#: ../mod_ionws/ionws.c:1028
+msgid "Nil parameter."
+msgstr "Нулевой параметр."
+
+#: ../mod_ionws/ionws.c:1033
+msgid "Manager doesn't match."
+msgstr "Менеджер не соответствует."
+
+#
+#: ../mod_ionws/ionws.c:1055
+msgid "Could not get split tree."
+msgstr "Не могу получить дерево разделений."
+
+#: ../mod_ionws/ionws.c:1076
+msgid "Workspace already has a status display node."
+msgstr "Рабочий стол уже имеет узел показа статуса."
+
+#
+#: ../mod_ionws/ionws.c:1126
+msgid "Missing region parameters."
+msgstr "Отсутствуют параметры региона."
+
+#: ../mod_ionws/ionws.c:1162
+#: ../mod_ionws/splitfloat.c:783
+msgid "Invalid direction."
+msgstr "Неправильное направление"
+
+#
+#: ../mod_ionws/ionws.c:1236
+msgid "No split type given."
+msgstr "Нет указан тип разделения"
+
+#: ../mod_ionws/ionws.c:1249
+msgid "Unknown split type."
+msgstr "Неизвестный тип разделения"
+
+#
+#
+#: ../mod_ionws/ionws.c:1289
+msgid "The workspace is empty."
+msgstr "Рабочий стол пуст."
+
+#: ../mod_ionws/placement.c:97
+#: ../mod_panews/placement.c:299
+#, c-format
+msgid "Ooops... could not find a region to attach client window to on workspace %s."
+msgstr "Ой... не могу найти регион для присоединения окна клиента на рабочем столе %s."
+
+#: ../mod_ionws/split.c:906
+msgid "REGION_RQGEOM_TRYONLY unsupported for status display."
+msgstr "REGION_RQGEOM_TRYONLY не поддерживается для дисплея статуса."
+
+#
+#: ../mod_ionws/split.c:979
+msgid "Invalid node."
+msgstr "Неправильный узел."
+
+#
+#: ../mod_ionws/split.c:1044
+msgid "Splitting the status display is not allowed."
+msgstr "Разделение дисплея статуса не допускается."
+
+#: ../mod_ionws/split.c:1072
+#: ../mod_ionws/splitfloat.c:896
+msgid "Unable to split: not enough free space."
+msgstr "Не могу разделить: недостаточно свободного пространства."
+
+#
+#: ../mod_ionws/split.c:1558
+msgid "Unable to move the status display out of way of transpose."
+msgstr ""
+
+#: ../mod_ionws/split.c:1722
+#, c-format
+msgid "Unable to get configuration for %s."
+msgstr "Не могу найти настройки для \"%s\"."
+
+#: ../mod_ionws/split-stdisp.c:591
+#: ../mod_ionws/split-stdisp.c:616
+msgid "Status display in bad split configuration."
+msgstr ""
+
+#: ../mod_ionws/split-stdisp.c:657
+msgid "Status display badly located in split tree."
+msgstr "Дисплей статуса плохо размещен в дереве разделений."
+
+#: ../mod_floatws/floatws.c:351
+#: ../mod_panews/panews.c:259
+msgid "Workspace may not be destroyed."
+msgstr "Рабочий стол не может быть удален."
+
+#: ../mod_floatws/floatws.c:358
+msgid "Failed to rescue some client windows!"
+msgstr "Некоторые окна клиентов не сохранены!"
+
+#: ../mod_floatws/floatws.c:370
+#: ../mod_panews/panews.c:254
+msgid "Refusing to close non-empty workspace."
+msgstr "Отказ в  закрытии не пустого раб. пространства."
+
+#
+#: ../mod_floatws/floatws.c:462
+msgid "Failure to create a new frame."
+msgstr "Новый фрейм не создан."
+
+#
+#: ../mod_floatws/floatws.c:1037
+#: ../mod_floatws/floatws.c:1115
+msgid "Region not managed by the workspace."
+msgstr "Регион не управляется рабочим столом."
+
+#: ../mod_floatws/floatws.c:1236
+msgid "No geometry specified."
+msgstr "Геометрия не указана."
+
+#: ../mod_floatws/placement.c:125
+#, c-format
+msgid "Unknown placement method \"%s\"."
+msgstr "Неизвестный метод размещения \"%s\"."
+
+#: ../mod_panews/panews.c:193
+msgid "Unable to re-initialise workspace. Destroying."
+msgstr "Не могу реинициализировать рабочее пространство. Удаление."
+
+#: ../mod_panews/placement.c:104
+#: ../mod_panews/placement.c:108
+#: ../mod_panews/placement.c:175
+#: ../mod_panews/placement.c:180
+#, c-format
+msgid "Malfunctioning placement hook; condition #%d."
+msgstr ""
+
+#: ../mod_query/fwarn.c:34
+msgid "Error:\n"
+msgstr "Ошибка:\n"
+
+#
+#: ../mod_menu/menu.c:490
+msgid "Empty menu."
+msgstr "Пустое меню."
+
+#
+#: ../mod_sm/sm.c:110
+msgid "Failed to set session directory."
+msgstr "Директория сессии не установлена."
+
+#: ../mod_sm/sm_session.c:85
+msgid "Too many ICE connections."
+msgstr "Слишком много соединений  'ICE'."
+
+#: ../mod_sm/sm_session.c:227
+msgid "Failed to save session state"
+msgstr "Состояние сессии не сохранилось"
+
+#: ../mod_sm/sm_session.c:246
+msgid "Failed to request save-yourself-phase2 from session manager."
+msgstr ""
+
+#
+#: ../mod_sm/sm_session.c:295
+msgid "SESSION_MANAGER environment variable not set."
+msgstr "переменная окружения SESSION_MANAGER не установлена."
+
+#: ../mod_sm/sm_session.c:300
+msgid "Session Manager: IceAddConnectionWatch failed."
+msgstr ""
+
+#
+#: ../mod_sm/sm_session.c:325
+msgid "Unable to connect to the session manager."
+msgstr "Не могу соединиться с менеджером сессий."
+
+#: ../mod_sp/main.c:137
+#, c-format
+msgid "Unable to create scratchpad for screen %d."
+msgstr ""
+
+#: ../de/init.c:41
+#, c-format
+msgid "Border attribute %s sanity check failed."
+msgstr ""
+
+#: ../de/init.c:64
+#, c-format
+msgid "Unknown border style \"%s\"."
+msgstr "Неизвестный стиль бордюра \"%s\"."
+
+#: ../de/init.c:96
+#, c-format
+msgid "Unable to allocate colour \"%s\"."
+msgstr "Не могу разместить цвет \"%s\"."
+
+#: ../de/init.c:160
+#, c-format
+msgid "Corrupt substyle table %d."
+msgstr "Поврежденная таблица подстилей %d."
+
+#: ../de/init.c:193
+#, c-format
+msgid "Unknown text alignment \"%s\"."
+msgstr "Неизвестное выравнивание текста \"%s\"."
+
+#: ../de/init.c:263
+#, c-format
+msgid "'based_on' for %s points back to the style itself."
+msgstr "'based_on' для %s указывает на сам стиль."
+
+#: ../de/init.c:266
+#, c-format
+msgid "Unknown base style \"%s\"."
+msgstr "Неизвестный базовый стиль \"%s\"."
+
+#: ../de/font.c:47
+#, c-format
+msgid "Fontset for font pattern '%s' implements context dependent drawing, which is unsupported. Expect clutter."
+msgstr ""
+
+#: ../de/font.c:58
+#, c-format
+msgid "Could not load font \"%s\", trying \"%s\""
+msgstr "Не могу загрузить шрифт \"%s\", пробую \"%s\""
+
+#: ../de/style.c:315
+#, c-format
+msgid "Style %s still in use [%d] but the module is being unloaded!"
+msgstr "Стиль %s все еще используется [%d] но модуль выгружается!"
+
+#: ../ion/ion.c:41
+#: ../pwm/pwm.c:41
+msgid "X display to use"
+msgstr "Использовать X дисплей"
+
+#: ../ion/ion.c:44
+#: ../pwm/pwm.c:44
+msgid "Configuration file"
+msgstr "Файл конфигурации"
+
+#: ../ion/ion.c:47
+#: ../pwm/pwm.c:47
+msgid "Add directory to search path"
+msgstr "Добавить директорию к пути поиска"
+
+#: ../ion/ion.c:50
+#: ../pwm/pwm.c:50
+msgid "Manage default root window/non-Xinerama screen only"
+msgstr ""
+
+#: ../ion/ion.c:54
+msgid "Use Xinerama screen information (default: 1/yes)"
+msgstr ""
+
+#: ../ion/ion.c:57
+#: ../pwm/pwm.c:57
+msgid "Ignored: not compiled with Xinerama support"
+msgstr "Игнорирую: скомпилировано без поддержки Xinerama"
+
+#: ../ion/ion.c:61
+#: ../pwm/pwm.c:61
+msgid "Name of session (affects savefiles)"
+msgstr ""
+
+#: ../ion/ion.c:64
+#: ../pwm/pwm.c:64
+msgid "Session manager client ID"
+msgstr ""
+
+#: ../ion/ion.c:67
+#: ../pwm/pwm.c:67
+msgid "Do not create startup error log and display it with xmessage."
+msgstr "Не создавать журнал ошибок запуска, а показывать его с помощью xmessage."
+
+#: ../ion/ion.c:71
+#: ../pwm/pwm.c:71
+msgid "Show this help"
+msgstr "Показать помощь"
+
+#: ../ion/ion.c:74
+#: ../pwm/pwm.c:74
+msgid "Show program version"
+msgstr "Показать версию программы"
+
+#: ../ion/ion.c:77
+#: ../pwm/pwm.c:77
+msgid "Show about text"
+msgstr "Показать 'О программе...'"
+
+#: ../ion/ion.c:92
+msgid "Could not get user configuration file directory."
+msgstr "Не могу получить директорию с файлами пользовательских настроек "
+
+#: ../ion/ion.c:106
+#, c-format
+msgid "%s/welcome.txt"
+msgstr "%s/welcome.ru.txt"
+
+#: ../ion/ion.c:139
+#: ../pwm/pwm.c:86
+#, c-format
+msgid ""
+"Usage: %s [options]\n"
+"\n"
+msgstr ""
+
+#: ../ion/ion.c:199
+#: ../pwm/pwm.c:149
+msgid "Invalid parameter to -xinerama."
+msgstr "Неправильный параметр для  '-xinerama'."
+
+#
+#: ../ion/ion.c:218
+#: ../pwm/pwm.c:168
+msgid "Invalid command line."
+msgstr "Неправильная командная строка"
+
+#: ../ion/ion.c:239
+msgid "Ion startup error log:\n"
+msgstr "Журнал ошибок запуска Ion:\n"
+
+#: ../ion/ion.c:249
+#: ../pwm/pwm.c:199
+msgid "Refusing to start due to encountered errors."
+msgstr "В запуске отказано в силу возникших ошибок."
+
+#: ../pwm/pwm.c:54
+msgid "Use Xinerama screen information (default: 0/no)"
+msgstr ""
+
+#: ../pwm/pwm.c:189
+msgid "PWM startup error log:\n"
+msgstr "Журнал ошибок запуска PWM:\n"
+
+#: ../../libextl/readconfig.c:86
+msgid "$HOME not set"
+msgstr "$HOME не установлена"
+
+#: ../../libextl/readconfig.c:113
+msgid "User directory not set. Unable to set session directory."
+msgstr "Директория пользователя не установлена. Не могу установить директорию сессии."
+
+#: ../../libextl/readconfig.c:247
+#, c-format
+msgid "Falling back to %s."
+msgstr "Откат к  %s."
+
+#: ../../libextl/readconfig.c:441
+#, c-format
+msgid "Unable to create session directory \"%s\"."
+msgstr "Не могу создать директорию сессии \"%s\"."
+
+#: ../../libextl/luaextl.c:113
+msgid "Lua stack full."
+msgstr "Стек Lua полон."
+
+#
+#: ../../libextl/luaextl.c:139
+msgid "Unknown Lua error."
+msgstr "Неизвестная ошибка в Lua."
+
+#: ../../libextl/luaextl.c:456
+msgid "Stack trace:"
+msgstr "Трассировка стека:"
+
+#: ../../libextl/luaextl.c:463
+#, c-format
+msgid ""
+"\n"
+"(Unable to get debug info for level %d)"
+msgstr ""
+"\n"
+"(Невозможно получить отладочную информацию для уровня %d)"
+
+#: ../../libextl/luaextl.c:481
+msgid ""
+"\n"
+"  [Skipping unnamed C functions.]"
+msgstr ""
+
+#: ../../libextl/luaextl.c:532
+msgid "Internal error."
+msgstr "Внутренняя ошибка."
+
+#: ../../libextl/luaextl.c:551
+msgid "Unable to initialize Lua."
+msgstr "Не могу инициализировать Lua."
+
+#: ../../libextl/luaextl.c:1277
+msgid "Too many return values. Use a C compiler that has va_copy to support more."
+msgstr "Слишком много возвращаемых значений. Используйте компилятор C у которого есть va_copy для большей поддержки"
+
+#: ../../libextl/luaextl.c:1295
+#, c-format
+msgid "Invalid return value (expected '%c', got lua type \"%s\")."
+msgstr "Недопустимое возвращаемое значение (ожидалось '%c', получен lua-тип \"%s\")."
+
+#: ../../libextl/luaextl.c:1330
+#: ../../libextl/luaextl.c:1594
+msgid "Stack full."
+msgstr "Стек полон."
+
+#: ../../libextl/luaextl.c:1570
+msgid "L1 call handler upvalues corrupt."
+msgstr ""
+
+#: ../../libextl/luaextl.c:1575
+msgid "Called function has been unregistered."
+msgstr ""
+
+#: ../../libextl/luaextl.c:1587
+#, c-format
+msgid "Attempt to call an unsafe function \"%s\" in restricted mode."
+msgstr "Попытка вызова небезопасной функции \"%s\" в ограниченном режиме. "
+
+#: ../../libextl/luaextl.c:1603
+#, c-format
+msgid "Argument %d to %s is of invalid type. (Argument template is '%s', got lua type %s)."
+msgstr ""
+
+#: ../../libextl/luaextl.c:1782
+#, c-format
+msgid "Function '%s' has more parameters than the level 1 call handler can handle"
+msgstr ""
+
+#
+#: ../../libextl/luaextl.c:2199
+msgid "Maximal serialisation depth reached."
+msgstr "Достигнута максимальная глубина сериализации."
+
+#: ../../libextl/luaextl.c:2220
+#, c-format
+msgid "Unable to serialise type %s."
+msgstr "Невозможно сериализировать тип %s."
+
+#: ../../libextl/luaextl.c:2251
+msgid "-- This file has been generated by Ion. Do not edit.\n"
+msgstr "-- Данный файл был создан Ионом. Не редактировать.\n"
+
+#: ../../libextl/misc.c:17
+#, c-format
+msgid "Type checking failed in level 2 call handler for parameter %d (got %s, expected %s)."
+msgstr ""
+
+#: ../etc/cfg_floatws.lua:34
+msgid "Lower the frame."
+msgstr "Опустить фрейм"
+
+#: ../etc/cfg_bindings.lua:171
+msgid "Display frame context menu."
+msgstr "Показать контекстное меню фрейма."
+
+#
+#: ../etc/cfg_ionws.lua:44
+msgid "Flip at root"
+msgstr "Первернуть в корневом"
+
+#
+#: ../etc/cfg_bindings.lua:43
+msgid "Go to n:th screen on multihead setup."
+msgstr ""
+
+#: ../ext_statusbar/ext_statusbar.lua:308
+msgid "Failed to create statusbar."
+msgstr "Статусбар не создан"
+
+#: ../pwm/cfg_pwm_menus.lua:13
+#: ../etc/cfg_menus.lua:10
+msgid "Help"
+msgstr "Помощь"
+
+#: ../mod_query/mod_query.lua:566
+msgid "SSH to:"
+msgstr "SSH to:"
+
+#: ../etc/cfg_menus.lua:28
+msgid "Restart"
+msgstr "Перезапуск"
+
+#: ../mod_menu/mod_menu.lua:231
+msgid "Cannot save selection."
+msgstr "Не могу сохранить выделение"
+
+#: ../etc/cfg_bindings.lua:206
+msgid "End the resize mode."
+msgstr "Завершить режим размера."
+
+#
+#
+#: ../etc/cfg_ionws.lua:48
+#: ../etc/cfg_ionws.lua:58
+msgid "Vertically"
+msgstr "Вертикально"
+
+#: ../ioncore/ioncore-bindings.lua:34
+msgid "Invalid guard %s."
+msgstr ""
+
+#: ../etc/cfg_bindings.lua:109
+msgid "Query for Lua code to execute."
+msgstr "Очередь на выполнение кода Lua."
+
+#
+#: ../etc/cfg_bindings.lua:47
+msgid "Go to next/previous screen on multihead setup."
+msgstr " "
+
+#: ../mod_query/mod_query.lua:344
+msgid "none"
+msgstr "ничего"
+
+#: ../etc/cfg_bindings.lua:219
+msgid "Shrink in specified direction."
+msgstr "Уменьшить в указанном направлении"
+
+#: ../etc/cfg_bindings.lua:160
+msgid "Maximize the frame horizontally/vertically."
+msgstr "Развернуть фрейм по вертикали/горизонтали."
+
+#: ../etc/cfg_bindings.lua:156
+msgid "Move current object within the frame left/right."
+msgstr "Переместить текущий объект в пределах фрейма вправо/влево"
+
+#: ../etc/cfg_ionws.lua:12
+msgid "Go to frame above/below/right/left of current frame."
+msgstr "Перейти к фрейму выше/ниже/правее/левее текущего фрейма"
+
+#: ../ext_statusbar/ext_statusbar.lua:289
+msgid "Screen not found."
+msgstr "Экран не найден"
+
+#: ../etc/cfg_bindings.lua:182
+msgid "Resize the frame."
+msgstr "Изменить размер фрейма"
+
+#: ../etc/cfg_bindings.lua:189
+msgid "Move objects between frames by dragging and dropping the tab."
+msgstr "Переместить объекты между фреймами при помощи перетаскивания табов."
+
+#: ../mod_query/mod_query.lua:99
+msgid "Could not find %s"
+msgstr "Не могу найти %s:"
+
+#: ../ext_statusbar/ext_statusbar.lua:295
+msgid "Screen already has an stdisp. Refusing to create a statusbar."
+msgstr "Экран уже имеет stdisp. Отказ в создании статусбара."
+
+#: ../etc/cfg_bindings.lua:112
+msgid "Query for host to connect to with SSH."
+msgstr "Запрос хоста для соединения через SSH."
+
+#
+#: ../etc/cfg_bindings.lua:229
+msgid "Move in specified direction."
+msgstr "Переместить в указанном направлении."
+
+#
+#: ../ext_statusbar/ext_statusbar.lua:27
+msgid "mail"
+msgstr "почта"
+
+#: ../mod_query/mod_query.lua:807
+msgid ""
+"\n"
+"Transients:\n"
+msgstr ""
+
+#: ../etc/cfg_menu.lua:21
+msgid "Select next/previous menu entry."
+msgstr "выбрать след/пред пункт меню"
+
+#: ../ioncore/ioncore-luaext.lua:30
+msgid "Recursive table - unable to deepcopy"
+msgstr "Рекурсивная таблица - глубокое копирование невозможно"
+
+#
+#: ../etc/cfg_bindings.lua:209
+msgid "Grow in specified direction."
+msgstr "Вырасти в указанном направлении."
+
+#: ../ioncore/ioncore-bindings.lua:68
+msgid "Invalid command"
+msgstr "Неправильная команда"
+
+#: ../mod_query/mod_query.lua:189
+#: ../mod_menu/mod_menu.lua:245
+msgid "Too much result data"
+msgstr "Слишком много конечных данных "
+
+#: ../mod_query/mod_query.lua:344
+msgid "Workspace type (%s):"
+msgstr "Тип рабочего стола (%s):"
+
+#: ../etc/cfg_bindings.lua:36
+msgid "Go to previous active object."
+msgstr "перейти к след. активному объекту"
+
+#
+#: ../etc/cfg_query.lua:67
+msgid "Clear mark/cancel selection."
+msgstr "Очистка метки/отмена выделения"
+
+#: ../mod_query/mod_query.lua:772
+msgid "No entry '%s'"
+msgstr "Нет пункта '%s'"
+
+#
+#
+#: ../etc/cfg_bindings.lua:90
+msgid "Toggle fullscreen mode of current client window."
+msgstr "Переключить текущее окно в полноэкранный режим."
+
+#: ../etc/cfg_bindings.lua:103
+msgid "Query for manual page to be displayed."
+msgstr "Запрос на отображение страницы man."
+
+#: ../etc/cfg_bindings.lua:51
+msgid "Show the Ion manual page."
+msgstr "Показать страницу руководства по Ион."
+
+#: ../etc/cfg_bindings.lua:60
+msgid "Display the main menu."
+msgstr "Показать главное меню"
+
+#
+#: ../etc/cfg_bindings.lua:54
+msgid "Run a terminal emulator."
+msgstr "Запуск эмулятора терминала"
+
+#: ../etc/cfg_bindings.lua:121
+msgid "Query for workspace to go to or create a new one."
+msgstr ""
+
+#: ../etc/cfg_menus.lua:38
+msgid "Kill"
+msgstr "Убить"
+
+#: ../pwm/cfg_pwm_menus.lua:25
+#: ../etc/cfg_menus.lua:37
+msgid "Close"
+msgstr "Закрыть"
+
+#: ../mod_query/mod_query.lua:381
+msgid "Go to or create workspace:"
+msgstr "Перейти к или создать рабочий стол:"
+
+#: ../etc/cfg_query.lua:35
+msgid "Delete one word forward/backward."
+msgstr "Удалить одно слово впереди/сзади."
+
+#: ../etc/cfg_query.lua:17
+msgid "Go to end/beginning."
+msgstr "Перейти в конец/начало"
+
+#
+#: ../etc/cfg_ionws.lua:43
+msgid "Transpose"
+msgstr "Переместить"
+
+#: ../etc/cfg_bindings.lua:152
+msgid "Switch to next/previous object within the frame."
+msgstr "Переключиться на след/пред объект внутри фрейма."
+
+#: ../mod_query/mod_query.lua:402
+msgid "Restart Ion (y/n)?"
+msgstr "Перезапустить Ион (y/n)?"
+
+#: ../mod_query/mod_query.lua:724
+msgid "Lua code: "
+msgstr "Код Lua:"
+
+#: ../mod_query/mod_query.lua:367
+msgid "Attach window:"
+msgstr "Прицепить окно:"
+
+#: ../etc/cfg_bindings.lua:186
+#: ../etc/cfg_floatws.lua:37
+msgid "Move the frame."
+msgstr "Переместить фрейм."
+
+#: ../pwm/cfg_pwm_menus.lua:11
+#: ../etc/cfg_menus.lua:8
+msgid "Programs"
+msgstr "Программы"
+
+#: ../etc/cfg_query.lua:23
+msgid "Skip one word forward/backward."
+msgstr "Пропустить одно слово вперед/назад."
+
+#: ../mod_query/mod_query.lua:738
+msgid "Unknown menu %s."
+msgstr "Неизвестное меню %s."
+
+#: ../etc/cfg_floatws.lua:12
+msgid "Backwards-circulate focus and raise the newly focused frame."
+msgstr ""
+
+#: ../etc/cfg_menus.lua:44
+msgid "Window info"
+msgstr "Информация об окне"
+
+#
+#: ../etc/cfg_query.lua:58
+msgid "Set mark/begin selection."
+msgstr ""
+
+#: ../etc/cfg_menus.lua:30
+msgid "Restart TWM"
+msgstr "Перезапуск TWM"
+
+#: ../etc/cfg_ionws.lua:9
+msgid "Split current frame vertically."
+msgstr "Разделить текущий фрейм по вертикали"
+
+#
+#
+#: ../etc/cfg_bindings.lua:57
+msgid "Create a new workspace of chosen default type."
+msgstr "Создать новый рабочий стол с типом выбранным по-умолчанию."
+
+#
+#: ../etc/cfg_floatws.lua:29
+msgid "Raise the frame."
+msgstr "Поднять фрейм"
+
+#: ../etc/cfg_floatws.lua:46
+msgid "(Un)stick"
+msgstr ""
+
+#: ../mod_query/mod_query.lua:287
+#: ../mod_query/mod_query.lua:297
+msgid "Could not find client window %s."
+msgstr "Не могу найти окно клиента %s."
+
+#: ../etc/cfg_query.lua:82
+msgid "Close the query/message box, not executing bound actions."
+msgstr ""
+
+#
+#: ../etc/cfg_bindings.lua:168
+msgid "Query for a client window to attach to active frame."
+msgstr ""
+
+#: ../mod_query/mod_query.lua:488
+msgid "Run:"
+msgstr "Запустить:"
+
+#
+#: ../etc/cfg_panews.lua:11
+msgid "Resize the area."
+msgstr "Изменить размер области."
+
+#
+#: ../etc/cfg_bindings.lua:95
+msgid "Kill client owning current client window."
+msgstr "Убить клиента текущего окна."
+
+#: ../mod_query/mod_query.lua:595
+msgid "Manual page (%s):"
+msgstr "Страница руководства (%s):"
+
+#
+#: ../etc/cfg_bindings.lua:124
+msgid "Query for a client window to go to."
+msgstr ""
+
+#
+#: ../etc/cfg_ionws.lua:39
+msgid "Destroy frame"
+msgstr "Удалить фрейм"
+
+#: ../mod_query/mod_query.lua:339
+msgid "Unknown error"
+msgstr "неизвестная ошибка"
+
+#: ../etc/cfg_bindings.lua:175
+#: ../etc/cfg_panews.lua:8
+msgid "Begin move/resize mode."
+msgstr "Вход в режим перемещения/размера"
+
+#: ../etc/cfg_bindings.lua:136
+msgid "Tag current object within the frame."
+msgstr ""
+
+#: ../etc/cfg_bindings.lua:140
+msgid "Switch to n:th object within the frame."
+msgstr ""
+
+#: ../etc/cfg_bindings.lua:203
+msgid "Cancel the resize mode."
+msgstr "Отмена режима размера."
+
+#: ../build/mkman.lua:196
+msgid "%s %s"
+msgstr "%s %s"
+
+#: ../etc/cfg_query.lua:27
+msgid "Delete next character."
+msgstr "Удалить следующий символ"
+
+#: ../mod_query/mod_query.lua:356
+msgid "Go to window:"
+msgstr "Перейти к окну:"
+
+#: ../build/mkman.lua:182
+msgid "drag"
+msgstr "перетащить"
+
+#: ../build/mkman.lua:181
+msgid "click"
+msgstr "кликнуть"
+
+#: ../build/mkman.lua:180
+msgid "press"
+msgstr "нажать"
+
+#: ../etc/cfg_menu.lua:27
+msgid "Clear the menu's typeahead find buffer."
+msgstr ""
+
+#: ../etc/cfg_ionws.lua:47
+msgid "Split"
+msgstr "Разделить"
+
+#
+#: ../etc/cfg_bindings.lua:98
+msgid "Send next key press to current client window. Some programs may not allow this by default."
+msgstr ""
+
+#: ../etc/cfg_menu.lua:11
+msgid "Close the menu."
+msgstr "Закрыть меню"
+
+#: ../etc/cfg_query.lua:87
+msgid "Scroll the message or completions up/down."
+msgstr ""
+
+#: ../etc/cfg_query.lua:74
+msgid "Close the query and execute bound action."
+msgstr ""
+
+#
+#: ../etc/cfg_bindings.lua:31
+msgid "Switch to next/previous object within current screen."
+msgstr "Переключиться на след./пред. объект внутри текущего экрана."
+
+#: ../etc/cfg_query.lua:39
+msgid "Delete to end of line."
+msgstr "Удалить до конца строки."
+
+#: ../pwm/cfg_pwm_menus.lua:14
+#: ../etc/cfg_menus.lua:11
+msgid "About Ion"
+msgstr "Об Ion"
+
+#: ../mod_query/mod_query.lua:804
+msgid ""
+"Title: %s\n"
+"Class: %s\n"
+"Role: %s\n"
+"Instance: %s\n"
+"XID: 0x%x"
+msgstr ""
+"Название: %s\n"
+"Класс(class): %s\n"
+"Роль(role): %s\n"
+"Экземпляр(instance): %s\n"
+"XID: 0x%x"
+
+#
+#: ../etc/cfg_query.lua:61
+msgid "Cut selection."
+msgstr "Вырезать выделенное."
+
+#: ../etc/cfg_query.lua:53
+msgid "Paste from the clipboard."
+msgstr "Вставить из клипборда."
+
+#
+#: ../etc/cfg_query.lua:45
+msgid "Select next/previous (matching) history entry."
+msgstr "Выбрать след./пред. (соответствующий) пункт истории."
+
+#: ../etc/cfg_menus.lua:43
+msgid "Clear tags"
+msgstr "Очистить теги"
+
+#: ../etc/cfg_query.lua:42
+msgid "Delete the whole line."
+msgstr "Удалить строку целиком"
+
+#: ../etc/cfg_query.lua:71
+msgid "Try to complete the entered text."
+msgstr "Попытка завершить введенный текст."
+
+#: ../etc/cfg_query.lua:31
+msgid "Delete previous character."
+msgstr "Удалить предыдущий символ."
+
+#: ../mod_query/mod_query.lua:299
+msgid "Cannot attach: different root windows."
+msgstr "Не могу прицепить: разные корневые окна."
+
+#: ../build/mkman.lua:183
+msgid "double click"
+msgstr "двойной клик"
+
+#: ../etc/cfg_query.lua:11
+msgid "Move one character forward/backward."
+msgstr "Переместиться на один символ вперед/назад."
+
+#: ../etc/cfg_menus.lua:29
+msgid "Restart PWM"
+msgstr "Перезапуск PWM"
+
+#: ../etc/cfg_bindings.lua:115
+msgid "Query for file to edit."
+msgstr "Запрос на редактирование файла."
+
+#
+#: ../etc/cfg_bindings.lua:39
+msgid "Clear all tags."
+msgstr "Очистить все теги."
+
+#: ../etc/cfg_bindings.lua:178
+msgid "Switch the frame to display the object indicated by the tab."
+msgstr "Переключить фрейм на показ объекта указанного табом."
+
+#
+#
+#: ../etc/cfg_ionws.lua:50
+#: ../etc/cfg_ionws.lua:60
+msgid "Horizontally"
+msgstr "Горизонтально"
+
+#: ../pwm/cfg_pwm_menus.lua:16
+#: ../pwm/cfg_pwm_menus.lua:24
+msgid "New"
+msgstr "Новый"
+
+#: ../mod_query/mod_query.lua:410
+msgid "Frame name:"
+msgstr "Имя фрейма:"
+
+#
+#: ../etc/cfg_bindings.lua:18
+msgid "Switch to n:th object (workspace, full screen client window) within current screen."
+msgstr "Переключиться на n-ный объект (раб.стол, полноэкранное окно) внутри текущего экрана."
+
+#: ../etc/cfg_bindings.lua:64
+msgid "Display the window list menu."
+msgstr "Показать меню списка окон."
+
+#: ../etc/cfg_floatws.lua:26
+msgid "Toggle shade mode"
+msgstr "Переключить режим тени"
+
+#: ../mod_query/mod_query.lua:393
+msgid "Exit Ion/Shutdown session (y/n)?"
+msgstr "Выход из Ион/Завершить сессию (y/n)?"
+
+#: ../etc/cfg_floatws.lua:15
+msgid "Raise/lower active frame."
+msgstr "Поднять/опустить активный фрейм"
+
+#: ../mod_menu/mod_menu.lua:235
+msgid "Save look selection in %s?"
+msgstr "Сохранить внешний вид в %s?"
+
+#: ../etc/cfg_bindings.lua:82
+msgid "Close current object."
+msgstr "Закрыть текущий объект."
+
+#
+#: ../etc/cfg_query.lua:64
+msgid "Copy selection."
+msgstr "Копировать выденение"
+
+#: ../etc/cfg_bindings.lua:164
+msgid "Attach tagged objects to this frame."
+msgstr "Прицепить объект с тегом к этому фрейму."
+
+#: ../etc/cfg_ionws.lua:57
+msgid "Floating split"
+msgstr "Плавающее разделение."
+
+#: ../mod_query/mod_query.lua:768
+msgid "%s menu:"
+msgstr "%s меню:"
+
+#: ../ext_statusbar/ext_statusbar.lua:318
+msgid "Failed to create a timer for statusbar."
+msgstr "Таймер для статусбара не создан."
+
+#: ../etc/cfg_ionws.lua:52
+#: ../etc/cfg_ionws.lua:62
+msgid "Vertically at root"
+msgstr "Вертикально в корневом"
+
+#
+#
+#: ../etc/cfg_menu.lua:16
+msgid "Activate current menu entry."
+msgstr "Активировать текущий пункт меню."
+
+#: ../ioncore/ioncore-efbb.lua:12
+msgid ""
+"Making the following minimal emergency mappings:\n"
+"  F2 -> xterm\n"
+"  F11 -> restart\n"
+"  F12 -> exit\n"
+"  Mod1+C -> close\n"
+"  Mod1+K P/N -> WFrame.switch_next/switch_prev\n"
+msgstr ""
+"Making the following minimal emergency mappings:\n"
+"  F2 -> xterm\n"
+"  F11 -> restart\n"
+"  F12 -> exit\n"
+"  Mod1+C -> close\n"
+"  Mod1+K P/N -> WFrame.switch_next/switch_prev\n"
+
+#
+#: ../etc/cfg_ionws.lua:45
+msgid "Transpose at root"
+msgstr "Переместить в корневом"
+
+#: ../pwm/cfg_pwm_menus.lua:17
+#: ../etc/cfg_menus.lua:12
+msgid "Styles"
+msgstr "Стили"
+
+#: ../etc/cfg_bindings.lua:106
+msgid "Query for command line to execute."
+msgstr "Запрос на исполнение командной строки"
+
+#: ../mod_query/mod_query.lua:323
+msgid "Unable to create workspace: no screen."
+msgstr "Не могу создать рабочий стол: нет экрана."
+
+#: ../ext_statusbar/ext_statusbar.lua:27
+msgid "load"
+msgstr "загрузка"
+
+#
+#: ../etc/cfg_ionws.lua:42
+msgid "Flip"
+msgstr "Перевернуть"
+
+#: ../etc/cfg_ionws.lua:41
+msgid "Flip&transpose"
+msgstr "Перевернуть и переместить"
+
+#: ../pwm/cfg_pwm_menus.lua:12
+#: ../etc/cfg_menus.lua:9
+msgid "Lock screen"
+msgstr "Заблокировать экран"
+
+#: ../mod_query/mod_query.lua:449
+msgid "Edit file:"
+msgstr "Редактировать файл:"
+
+#: ../etc/cfg_menus.lua:19
+msgid "XTerm"
+msgstr "XTerm"
+
+#: ../build/mkman.lua:198
+msgid "%s %s at %s"
+msgstr "%s %s на %s"
+
+#
+#: ../etc/cfg_bindings.lua:85
+msgid "Nudge current client window. This might help with some programs' resizing problems."
+msgstr ""
+
+#: ../etc/cfg_ionws.lua:22
+msgid "Destroy current frame."
+msgstr "Удалить текущий фрейм."
+
+#: ../ioncore/ioncore-bindings.lua:53
+msgid "Error in command string: "
+msgstr "Ошибка в строке команды:"
+
+#: ../etc/cfg_ionws.lua:19
+msgid "Split current frame horizontally."
+msgstr "Разделить текущий фрейм по горизонтали."
+
+#: ../etc/cfg_menus.lua:42
+msgid "Attach tagged"
+msgstr "Прицепить окна с тегами"
+
+#: ../etc/cfg_ionws.lua:54
+#: ../etc/cfg_ionws.lua:64
+msgid "Horizontally at root"
+msgstr "Горизонтально в корневом"
+
+#: ../etc/cfg_menus.lua:40
+msgid "(Un)tag"
+msgstr "Поставить/удалить тег"
+
+#: ../mod_query/mod_query.lua:459
+msgid "View file:"
+msgstr "Просмотр файла:"
+
+#: ../mod_query/mod_query.lua:421
+msgid "Workspace name:"
+msgstr "Имя рабочего стола:"
+
+#: ../etc/cfg_menus.lua:31
+msgid "Exit"
+msgstr "Выход"
+
+#: ../etc/cfg_menus.lua:27
+msgid "Save"
+msgstr "Сохранить"
+
+#
+#: ../pwm/cfg_pwm_menus.lua:15
+msgid "Workspaces"
+msgstr "Рабочие столы"
+
+#: ../etc/cfg_menus.lua:20
+msgid "Mozilla Firefox"
+msgstr "Mozilla Firefox"
+
+#: ../ioncore/ioncore-bindings.lua:45
+msgid "Error compiling guard: %s"
+msgstr ""
+
+#: ../mod_menu/mod_menu.lua:271
+msgid "Refresh list"
+msgstr "Обновить список"
+
+#: ../etc/cfg_floatws.lua:9
+msgid "Circulate focus and raise the newly focused frame."
+msgstr "Передать фокус и поднять фрейм с новым фокусом."
+
+#
+#: ../etc/cfg_menus.lua:21
+msgid "Run..."
+msgstr "Выполнить..."
+
+#: ../etc/cfg_bindings.lua:118
+msgid "Query for file to view."
+msgstr "Запрос просмотра файла."
+
+#: ../mod_query/mod_query.lua:511
+msgid "Failed to open ~/.ssh/known_hosts"
+msgstr "Не могу открыть ~/.ssh/known_hosts"
+
+#: ../pwm/cfg_pwm_menus.lua:18
+#: ../etc/cfg_menus.lua:13
+msgid "Session"
+msgstr "Сессия"
+
+#: ../pwm/cfg_pwm_menus.lua:27
+msgid "List"
+msgstr "Список"
+
