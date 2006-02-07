@@ -8,7 +8,9 @@ mod_statusbar.create{
     -- First screen, bottom left corner
     screen=0,
     pos='bl',
+    -- Set this to true if you want a full-width statusbar
     fullsize=false,
+    -- Swallow systray windows
     systray=true,
 
     -- Template. Tokens %string are replaced with the value of the 
@@ -40,16 +42,15 @@ mod_statusbar.create{
 
 
 -- Launch ion-statusd. This must be done after creating any statusbars
--- for necessary modules to be parsed from the templates.
+-- for necessary statusd modules to be parsed from the templates.
 mod_statusbar.launch_statusd{
     -- Date meter
-    --[[
-    date={    
+    date={
         -- ISO-8601 date format with additional abbreviated day name
         date_format='%a %Y-%m-%d %H:%M',
         -- Finnish etc. date format
         --date_format='%a %d.%m.%Y %H:%M',
-        	-- Locale date format (usually shows seconds, which would require
+        -- Locale date format (usually shows seconds, which would require
         -- updating rather often and can be distracting)
         --date_format='%c',
         
@@ -60,16 +61,13 @@ mod_statusbar.launch_statusd{
         }
         --]]
     },      
-    --]]
 
     -- Load meter
-    --[[
     load={
-        update_interval=10*1000,
-        important_threshold=1.5,
-        critical_threshold=4.0
+        --update_interval=10*1000,
+        --important_threshold=1.5,
+        --critical_threshold=4.0,
     },
-    --]]
 
     -- Mail meter
     --
@@ -80,12 +78,10 @@ mod_statusbar.launch_statusd{
     -- files = { work = "/path/to/work_email", junk = "/path/to/junk" }
     --
     -- Don't use the keyword 'spool' as it's reserved for mbox.
-    --[[
     mail={
-        update_interval=60*1000,
-        mbox=os.getenv("MAIL"),
-        	files={}
+        --update_interval=60*1000,
+        --mbox=os.getenv("MAIL"),
+        --files={},
     },
-    --]]
 }
 
