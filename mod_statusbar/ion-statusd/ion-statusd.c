@@ -112,6 +112,7 @@ static void mainloop()
     
     sigemptyset(&trapset);
     sigaddset(&trapset, SIGALRM);
+    sigaddset(&trapset, SIGCHLD);
     mainloop_trap_signals(&trapset);
     
     while(1){
