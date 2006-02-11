@@ -52,6 +52,7 @@
  * Tuomo Valkonen <tuomov@cc.tut.fi>, 2000-08-23.
  */
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <stdlib.h>
 #include <dirent.h>
@@ -98,7 +99,13 @@ static int el_is_directory(char *path)
 static int el_is_executable(char *path)
 {
 	unsigned int t_uid = geteuid();
+	gid_t t_gids[NGROUPS];
+	int groupcount;
 	struct stat sb;
+	int i;
+	
+	groupcount = getgroups(NGROUPS, t_gids);
+
 	if((stat(path, &sb) >= 0) && S_ISREG(sb.st_mode)) {
 		/* Normal file, see if we can execute it. */
 		
@@ -107,6 +114,13 @@ static int el_is_executable(char *path)
 		}
 		if (sb.st_uid == t_uid && (sb.st_mode & S_IXUSR)) {
 			return (1);
+		}
+		if (sb.st_mode & S_IXGRP) {
+			for (i = 0; i < groupcount; i++) {
+			    if (sb.st_gid == t_gids[i]) {
+				return (1);
+			    }
+			}
 		}
 	}
 	return (0);
