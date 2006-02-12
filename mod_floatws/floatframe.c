@@ -44,7 +44,8 @@ static bool floatframe_init(WFloatFrame *frame, WWindow *parent,
     
     frame->frame.flags|=(FRAME_BAR_OUTSIDE|
                          FRAME_DEST_EMPTY|
-                         FRAME_SZH_USEMINMAX);
+                         FRAME_SZH_USEMINMAX|
+                         FRAME_FWD_CWIN_RQGEOM);
 
     region_add_bindmap((WRegion*)frame, mod_floatws_floatframe_bindmap);
     
@@ -172,62 +173,6 @@ void floatframe_geom_from_initial_geom(WFloatFrame *frame,
 }
 
     
-/* geom parameter==client requested geometry minus border crap */
-static void floatframe_rqgeom_clientwin(WFloatFrame *frame, WClientWin *cwin,
-                                        int rqflags, const WRectangle *geom_)
-{
-    int gravity=NorthWestGravity;
-    XSizeHints hints;
-    WRectangle off;
-    WRegion *par;
-    WRectangle geom=*geom_;
-    
-    if(cwin->size_hints.flags&PWinGravity)
-        gravity=cwin->size_hints.win_gravity;
-
-    floatframe_offsets(frame, &off);
-
-    region_size_hints((WRegion*)frame, &hints);
-    xsizehints_correct(&hints, &(geom.w), &(geom.h), TRUE);
-    
-    geom.w=maxof(geom.w, 0);
-    geom.h=maxof(geom.h, 0);
-    geom.w+=off.w;
-    geom.h+=off.h;
-    
-    /* If WEAK_? is set, then geom.(x|y) is root-relative as it was not 
-     * requested by the client and clientwin_handle_configure_request has
-     * no better guess. Otherwise the coordinates are those requested by 
-     * the client (modulo borders/gravity) and we interpret them to be 
-     * root-relative coordinates for this frame modulo gravity.
-     */
-    if(rqflags&REGION_RQGEOM_WEAK_X)
-        geom.x+=off.x;
-    else
-        geom.x+=xgravity_deltax(gravity, -off.x, off.x+off.w);
-
-    if(rqflags&REGION_RQGEOM_WEAK_Y)
-        geom.y+=off.y;  /* geom.y was clientwin root relative y */
-    else
-        geom.y+=xgravity_deltay(gravity, -off.y, off.y+off.h);
-
-    par=REGION_PARENT_REG(frame);
-    region_convert_root_geom(par, &geom);
-    if(par!=NULL){
-        if(geom.x+geom.w<4)
-            geom.x=-geom.w+4;
-        if(geom.x>REGION_GEOM(par).w-4)
-            geom.x=REGION_GEOM(par).w-4;
-        if(geom.y+geom.h<4)
-            geom.y=-geom.h+4;
-        if(geom.y>REGION_GEOM(par).h-4)
-            geom.y=REGION_GEOM(par).h-4;
-    }
-
-    region_rqgeom((WRegion*)frame, REGION_RQGEOM_NORMAL, &geom, NULL);
-}
-
-
 void floatframe_resize_hints(WFloatFrame *frame, XSizeHints *hints_ret)
 {
     frame_resize_hints(&frame->frame, hints_ret);
@@ -484,8 +429,6 @@ static DynFunTab floatframe_dynfuntab[]={
     {frame_bar_geom, floatframe_bar_geom},
     {frame_border_inner_geom, floatframe_border_inner_geom},
     {frame_border_geom, floatframe_border_geom},
-    
-    {region_rqgeom_clientwin, floatframe_rqgeom_clientwin},
     
     {(DynFun*)region_get_configuration,
      (DynFun*)floatframe_get_configuration},

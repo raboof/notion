@@ -438,6 +438,78 @@ void frame_activated(WFrame *frame)
 /*}}}*/
 
 
+/*{{{ Client window rqgeom */
+
+
+/* geom parameter==client requested geometry minus border crap */
+static void frame_rqgeom_clientwin(WFrame *frame, WClientWin *cwin,
+                                   int rqflags, const WRectangle *geom_)
+{
+    int gravity=NorthWestGravity;
+    XSizeHints hints;
+    WRectangle off;
+    WRegion *par;
+    WRectangle geom=*geom_;
+    
+    if(!(frame->flags&FRAME_FWD_CWIN_RQGEOM)){
+        region_managed_rqgeom((WRegion*)frame, (WRegion*)cwin,
+                              rqflags, geom_, NULL);
+        return;
+    }
+    
+    if(cwin->size_hints.flags&PWinGravity)
+        gravity=cwin->size_hints.win_gravity;
+
+    mplex_managed_geom(&frame->mplex, &off);
+    off.x=-off.x;
+    off.y=-off.y;
+    off.w=REGION_GEOM(frame).w-off.w;
+    off.h=REGION_GEOM(frame).h-off.h;
+
+    geom.w=maxof(geom.w, 0);
+    geom.h=maxof(geom.h, 0);
+    geom.w+=off.w;
+    geom.h+=off.h;
+    
+    region_size_hints((WRegion*)frame, &hints);
+    xsizehints_correct(&hints, &(geom.w), &(geom.h), TRUE);
+    
+    /* If WEAK_? is set, then geom.(x|y) is root-relative as it was not 
+     * requested by the client and clientwin_handle_configure_request has
+     * no better guess. Otherwise the coordinates are those requested by 
+     * the client (modulo borders/gravity) and we interpret them to be 
+     * root-relative coordinates for this frame modulo gravity.
+     */
+    if(rqflags&REGION_RQGEOM_WEAK_X)
+        geom.x+=off.x;
+    else
+        geom.x+=xgravity_deltax(gravity, -off.x, off.x+off.w);
+
+    if(rqflags&REGION_RQGEOM_WEAK_Y)
+        geom.y+=off.y;  /* geom.y was clientwin root relative y */
+    else
+        geom.y+=xgravity_deltay(gravity, -off.y, off.y+off.h);
+
+    par=REGION_PARENT_REG(frame);
+    region_convert_root_geom(par, &geom);
+    if(par!=NULL){
+        if(geom.x+geom.w<4)
+            geom.x=-geom.w+4;
+        if(geom.x>REGION_GEOM(par).w-4)
+            geom.x=REGION_GEOM(par).w-4;
+        if(geom.y+geom.h<4)
+            geom.y=-geom.h+4;
+        if(geom.y>REGION_GEOM(par).h-4)
+            geom.y=REGION_GEOM(par).h-4;
+    }
+
+    region_rqgeom((WRegion*)frame, REGION_RQGEOM_NORMAL, &geom, NULL);
+}
+
+
+/*}}}*/
+
+
 /*{{{ Misc. */
 
 
@@ -740,6 +812,8 @@ static DynFunTab frame_dynfuntab[]={
 
     {(DynFun*)region_fitrep,
      (DynFun*)frame_fitrep},
+
+    {region_rqgeom_clientwin, frame_rqgeom_clientwin},
 
     {region_managed_remove, frame_managed_remove},
     

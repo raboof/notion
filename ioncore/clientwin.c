@@ -715,7 +715,8 @@ static WRegion *clientwin_do_attach_transient(WClientWin *cwin,
     if(frame!=NULL){
         frame->flags|=(FRAME_DEST_EMPTY|
                        FRAME_TAB_HIDE|
-                       FRAME_SZH_USEMINMAX);
+                       FRAME_SZH_USEMINMAX|
+                       FRAME_FWD_CWIN_RQGEOM);
         mreg=(WRegion*)frame;
         mplex_managed_geom((WMPlex*)frame, &mg);
     }else{

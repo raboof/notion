@@ -34,6 +34,7 @@
 #define FRAME_MAXED_HORIZ 0x0400
 #define FRAME_MIN_HORIZ   0x0800
 #define FRAME_SZH_USEMINMAX 0x1000
+#define FRAME_FWD_CWIN_RQGEOM 0x2000
 
 typedef void WFrameStyleFn(const char **, const char **);
 
