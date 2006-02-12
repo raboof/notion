@@ -247,7 +247,7 @@ function mod_statusbar.launch_statusd(cfg)
     
     -- Load modules
     for m in mods do
-        if dopath("status_"..m, true) then
+        if dopath("statusbar_"..m, true) then
             mods[m]=nil
         end
     end
