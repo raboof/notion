@@ -17,6 +17,9 @@
 #include "activity.h"
 
 
+WHook *region_activity_hook=NULL;
+
+
 static void propagate_activity(WRegion *reg)
 {
     WRegion *mgr=region_manager(reg);
@@ -72,6 +75,10 @@ bool region_set_activity(WRegion *reg, int sp)
             propagate_clear(reg);
     }
     
+    extl_protect(NULL);
+    hook_call_o(region_activity_hook, (Obj*)reg);
+    extl_unprotect(NULL);
+
     return nset;
 }
 
