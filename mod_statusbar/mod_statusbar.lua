@@ -161,8 +161,6 @@ end
 -- ion-statusd support {{{
 
 local statusd_pid=0
-local statusd_cfg=" -q "
-local statusd_modules={}
 
 function mod_statusbar.rcv_statusd(str)
     local data=""
@@ -195,7 +193,7 @@ function mod_statusbar.rcv_statusd(str)
 end
 
 
-local function get_statusd_params()
+local function get_modules()
     local mods={}
     local specials={["filler"]=true, ["systray"]=true}
     
@@ -209,9 +207,8 @@ local function get_statusd_params()
             end
         end
     end
-    local params=statusd_cfg
-    table.foreach(mods, function(k) params=params.." -m "..k end)
-    return params
+    
+    return mods
 end
 
 
@@ -240,12 +237,22 @@ end
 
 
 --DOC
--- Launch ion-statusd with configuration table \var{cfg}.
+-- Load modules and launch ion-statusd with configuration table \var{cfg}.
 function mod_statusbar.launch_statusd(cfg)
     if statusd_pid>0 then
         return
     end
     
+    local mods=get_modules()
+    
+    -- Load modules
+    for m in mods do
+        if dopath("status_"..m, true) then
+            mods[m]=nil
+        end
+    end
+
+    -- Lookup ion-statusd
     local statusd=ioncore.lookup_script("ion-statusd")
     if not statusd then
         ioncore.warn(TR("Could not find %s", script))
@@ -258,11 +265,13 @@ function mod_statusbar.launch_statusd(cfg)
     end
 
     local cfg=mod_statusbar.cfg_statusd(cfg or {})
+    local params=""
+    table.foreach(mods, function(k) params=params.." -m "..k end)
+    local cmd=statusd.." -q -c "..cfg..params
     
-    local cmd=statusd.." -c "..cfg..get_statusd_params()
     local rcv=coroutine.wrap(mod_statusbar.rcv_statusd)
     local rcverr=mod_statusbar.rcv_statusd_err
-
+    
     statusd_pid=mod_statusbar._launch_statusd(cmd, 
                                               rcv, initrcverr, 
                                               rcv, rcverr)
