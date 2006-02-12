@@ -874,7 +874,7 @@ void statusbar_update(WStatusBar *sb, ExtlTab t)
                 str=el->text;
             }
             
-            if(el->tmpl!=NULL){
+            if(el->tmpl!=NULL && el->text!=NULL){
                 char *tmp=grbrush_make_label(sb->brush, el->text, el->max_w);
                 if(tmp!=NULL){
                     free(el->text);
