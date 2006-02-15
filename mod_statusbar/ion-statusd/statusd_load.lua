@@ -79,7 +79,7 @@ local function update_load()
     local l = get_load()    
     local lds={string.find(l, loadpat)}
     statusd.inform("load", l)
-    statusd.inform("load_hint", get_hint(l, lds[settings.load_hint+2]))
+    statusd.inform("load_hint", get_hint(lds[settings.load_hint+2]))
     statusd.inform("load_1min", lds[l1min])
     statusd.inform("load_1min_hint", get_hint(lds[l1min]))
     statusd.inform("load_5min", lds[l5min])
