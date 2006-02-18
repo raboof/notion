@@ -383,6 +383,30 @@ void mplex_unmap(WMPlex *mplex)
 /*{{{ Resize and reparent */
 
 
+static void sizepolicy(WMPlexSizePolicy szplcy, const WRegion *reg,
+                       const WRectangle *rq_geom, WFitParams *fp)
+{
+    if(szplcy==MPLEX_SIZEPOLICY_FREE){
+        WRectangle tmp;
+        if(rq_geom!=NULL)
+            tmp=*rq_geom;
+        else if(reg!=NULL)
+            tmp=REGION_GEOM(reg);
+        else
+            tmp=fp->g;
+        
+        /* TODO: size hints */
+        rectangle_constrain(&tmp, &(fp->g));
+        fp->g=tmp;
+        fp->mode=REGION_FIT_EXACT;
+    }else{
+        fp->mode=(szplcy==MPLEX_SIZEPOLICY_FULL_BOUNDS
+                  ? REGION_FIT_BOUNDS
+                  : REGION_FIT_EXACT);
+    }
+}
+
+
 bool mplex_fitrep(WMPlex *mplex, WWindow *par, const WFitParams *fp)
 {
     bool wchg=(REGION_GEOM(mplex).w!=fp->g.w);
@@ -402,8 +426,8 @@ bool mplex_fitrep(WMPlex *mplex, WWindow *par, const WFitParams *fp)
 void mplex_do_fit_managed(WMPlex *mplex, WFitParams *fp)
 {
     WRectangle geom;
-    WRegion *sub;
-    WLListIterTmp tmp;
+    WLListNode *node;
+    WFitParams fp2;
     
     if(!MPLEX_MGD_UNVIEWABLE(mplex) && (fp->g.w<=1 || fp->g.h<=1)){
         mplex->flags|=MPLEX_MANAGED_UNVIEWABLE;
@@ -416,14 +440,17 @@ void mplex_do_fit_managed(WMPlex *mplex, WFitParams *fp)
     }
     
     if(!MPLEX_MGD_UNVIEWABLE(mplex)){
-        fp->mode&=~REGION_FIT_BOUNDS;
-        FOR_ALL_REGIONS_ON_LLIST(sub, mplex->l1_list, tmp){
-            region_fitrep(sub, NULL, fp);
+        FOR_ALL_NODES_ON_LLIST(node, mplex->l1_list){
+            fp2=*fp;
+            sizepolicy(node->szplcy, node->reg, NULL, &fp2);
+            region_fitrep(node->reg, NULL, &fp2);
         }
         
         fp->mode|=REGION_FIT_BOUNDS;
-        FOR_ALL_REGIONS_ON_LLIST(sub, mplex->l2_list, tmp){
-            region_fitrep(sub, NULL, fp);
+        FOR_ALL_NODES_ON_LLIST(node, mplex->l2_list){
+            fp2=*fp;
+            sizepolicy(node->szplcy, node->reg, NULL, &fp2);
+            region_fitrep(node->reg, NULL, &fp2);
         }
     }
 }
@@ -444,23 +471,23 @@ static void mplex_managed_rqgeom(WMPlex *mplex, WRegion *sub,
                                  int flags, const WRectangle *geom, 
                                  WRectangle *geomret)
 {
-    WRectangle mg, rg;
+    WRectangle rg;
+    WFitParams fp;
+    WLListNode *node;
+
+    node=mplex_find_node(mplex, sub);
     
-    mplex_managed_geom(mplex, &mg);
-    
-    if(llist_is_on(mplex->l2_list, sub)){
-        /* allow changes but constrain with managed area */
-        rg=*geom;
-        rectangle_constrain(&rg, &mg);
-    }else{
-        rg=mg;
-    }
+    assert(node!=NULL);
+
+    mplex_managed_geom(mplex, &fp.g);
+
+    sizepolicy(node->szplcy, sub, geom, &fp);
     
     if(geomret!=NULL)
-        *geomret=rg;
+        *geomret=fp.g;
     
     if(!(flags&REGION_RQGEOM_TRYONLY))
-        region_fit(sub, &rg, REGION_FIT_EXACT);
+        region_fitrep(sub, NULL, &fp);
 }
 
 
@@ -853,21 +880,25 @@ WLListNode *mplex_do_attach_after(WMPlex *mplex,
     bool l2=param->flags&MPLEX_ATTACH_L2;
     bool semimodal=param->flags&MPLEX_ATTACH_L2_SEMIMODAL;
     WLListNode *node;
+    WMPlexSizePolicy szplcy;
     
     assert(!(semimodal && param->flags&MPLEX_ATTACH_L2_HIDDEN));
-
-    mplex_managed_geom(mplex, &(fp.g));
-    if(l2 && param->flags&MPLEX_ATTACH_L2_GEOM){
-        WRectangle tmp=param->l2geom;
-        rectangle_constrain(&tmp, &(fp.g));
-        fp.g=tmp;
-        fp.mode=REGION_FIT_EXACT;
-    }else if(l2){
-        fp.mode=REGION_FIT_BOUNDS;
-    }else{
-        fp.mode=REGION_FIT_EXACT;
-    }
     
+    szplcy=(param->flags&MPLEX_ATTACH_SIZEPOLICY &&
+            param->szplcy!=MPLEX_SIZEPOLICY_DEFAULT
+            ? param->szplcy
+            : (l2 
+               ? MPLEX_SIZEPOLICY_FULL_BOUNDS
+               : MPLEX_SIZEPOLICY_FULL_EXACT));
+    
+    mplex_managed_geom(mplex, &(fp.g));
+    
+    sizepolicy(szplcy, NULL, 
+               (param->flags&MPLEX_ATTACH_L2_GEOM 
+                ? &(param->l2geom)
+                : NULL),
+               &fp);
+
     node=ALLOC(WLListNode);
     
     if(node==NULL)
@@ -883,7 +914,8 @@ WLListNode *mplex_do_attach_after(WMPlex *mplex,
     node->reg=reg;
     node->flags=(l2 ? LLIST_L2 : 0) | (semimodal ? LLIST_L2_SEMIMODAL : 0);
     node->phs=NULL;
-    
+    node->szplcy=szplcy;
+               
     if(l2){
         llist_link_after(&(mplex->l2_list), after, node);
         mplex->l2_count++;
@@ -948,7 +980,7 @@ WRegion *mplex_attach_simple(WMPlex *mplex, WRegion *reg, int flags)
         return FALSE;
     
     par.index=mplex_default_index(mplex);
-    par.flags=flags;
+    par.flags=flags&~(MPLEX_ATTACH_L2_GEOM|MPLEX_ATTACH_SIZEPOLICY);
     
     return region__attach_reparent((WRegion*)mplex, reg,
                                    (WRegionDoAttachFn*)mplex_do_attach, 
@@ -962,7 +994,7 @@ WRegion *mplex_attach_hnd(WMPlex *mplex, WRegionAttachHandler *hnd,
     WMPlexAttachParams par;
     
     par.index=mplex_default_index(mplex);
-    par.flags=flags&~MPLEX_ATTACH_L2_GEOM;
+    par.flags=flags&~(MPLEX_ATTACH_L2_GEOM|MPLEX_ATTACH_SIZEPOLICY);
     
     return mplex_do_attach(mplex, hnd, hnd_param, &par);
 }
@@ -971,6 +1003,7 @@ WRegion *mplex_attach_hnd(WMPlex *mplex, WRegionAttachHandler *hnd,
 static void get_params(WMPlex *mplex, ExtlTab tab, WMPlexAttachParams *par)
 {
     int layer=1;
+    int tmp;
     
     par->flags=0;
     par->index=mplex_default_index(mplex);
@@ -993,6 +1026,11 @@ static void get_params(WMPlex *mplex, ExtlTab tab, WMPlexAttachParams *par)
         par->flags|=MPLEX_ATTACH_L2_PASSIVE;
     
     extl_table_gets_i(tab, "index", &(par->index));
+
+    if(extl_table_gets_i(tab, "sizepolicy", &tmp)){
+        par->flags|=MPLEX_ATTACH_SIZEPOLICY;
+        par->szplcy=tmp;
+    }
 }
 
 
@@ -1548,6 +1586,7 @@ ExtlTab mplex_get_configuration(WMPlex *mplex)
             if(node==mplex->l1_current)
                 extl_table_sets_b(st, "switchto", TRUE);
             extl_table_seti_t(subs, ++n, st);
+            extl_table_sets_i(st, "sizepolicy", node->szplcy);
             extl_unref_table(st);
         }
     }
@@ -1566,6 +1605,7 @@ ExtlTab mplex_get_configuration(WMPlex *mplex)
                 extl_table_sets_b(st, "switchto", 
                                   !(node->flags&LLIST_L2_PASSIVE));
             }
+            extl_table_sets_i(st, "sizepolicy", node->szplcy);
             extl_table_sets_b(st, "passive", node->flags&LLIST_L2_PASSIVE);
             extl_table_sets_b(st, "hidden", node->flags&LLIST_L2_HIDDEN);
             g=extl_table_from_rectangle(&REGION_GEOM(node->reg));

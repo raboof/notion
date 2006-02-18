@@ -22,6 +22,7 @@ DECLCLASS(WMPlexPHolder){
     Watch mplex_watch;
     WLListNode *after;
     WMPlexPHolder *next, *prev;
+    int szplcy;
 };
 
 

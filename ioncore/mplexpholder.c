@@ -118,6 +118,7 @@ bool mplexpholder_init(WMPlexPHolder *ph, WMPlex *mplex,
     ph->after=NULL;
     ph->next=NULL;
     ph->prev=NULL;
+    ph->szplcy=MPLEX_SIZEPOLICY_DEFAULT;
     
     if(mplex==NULL)
         return TRUE;
@@ -198,6 +199,9 @@ bool mplexpholder_do_attach(WMPlexPHolder *ph,
         param.flags|=MPLEX_ATTACH_L2;
     if(flags&PHOLDER_ATTACH_SWITCHTO)
         param.flags|=MPLEX_ATTACH_SWITCHTO;
+    
+    param.flags|=MPLEX_ATTACH_SIZEPOLICY;
+    param.szplcy=ph->szplcy;
     
     nnode=mplex_do_attach_after(mplex, ph->after, &param, hnd, hnd_param);
     
@@ -319,16 +323,21 @@ void mplex_move_phs_before(WMPlex *mplex, WLListNode *node)
 WMPlexPHolder *mplex_managed_get_pholder(WMPlex *mplex, WRegion *mgd)
 {
     WLListNode *node;
+    WMPlexPHolder *ph=NULL;
     
     node=llist_find_on(mplex->l2_list, mgd);
-    if(node!=NULL)
-        return create_mplexpholder(mplex, NULL, node, 2);
-
-    node=llist_find_on(mplex->l1_list, mgd);
-    if(node!=NULL)
-        return create_mplexpholder(mplex, NULL, node, 1);
+    if(node!=NULL){
+        ph=create_mplexpholder(mplex, NULL, node, 2);
+    }else{
+        node=llist_find_on(mplex->l1_list, mgd);
+        if(node!=NULL)
+            ph=create_mplexpholder(mplex, NULL, node, 1);
+    }
+    
+    if(node!=NULL && ph!=NULL)
+        ph->szplcy=node->szplcy;
         
-    return NULL;
+    return ph;
 }
 
 

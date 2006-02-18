@@ -24,12 +24,12 @@
 #define LLIST_L2         0x0004
 #define LLIST_L2_SEMIMODAL 0x0008
 
-
 DECLSTRUCT(WLListNode){
     WLListNode *next, *prev;
     int flags;
     WRegion *reg;
     WMPlexPHolder *phs;
+    WMPlexSizePolicy szplcy;
 };
 
 

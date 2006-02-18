@@ -27,12 +27,15 @@
 #define MPLEX_MGD_UNVIEWABLE(MPLEX) \
     ((MPLEX)->flags&MPLEX_MANAGED_UNVIEWABLE)
 
-#define MPLEX_ATTACH_SWITCHTO 0x01
-#define MPLEX_ATTACH_L2 0x02
-#define MPLEX_ATTACH_L2_PASSIVE 0x04
-#define MPLEX_ATTACH_L2_GEOM 0x08
-#define MPLEX_ATTACH_L2_HIDDEN 0x10
-#define MPLEX_ATTACH_L2_SEMIMODAL 0x20
+
+#define MPLEX_ATTACH_SWITCHTO     0x01 /* switch to region */
+#define MPLEX_ATTACH_L2           0x02 /* put on layer2 */
+#define MPLEX_ATTACH_L2_PASSIVE   0x04 /* should be passive on l2 */
+#define MPLEX_ATTACH_L2_GEOM      0x08 /* geometry field is set for l2 */
+#define MPLEX_ATTACH_L2_HIDDEN    0x10 /* should be hidden on l2 */
+#define MPLEX_ATTACH_L2_SEMIMODAL 0x20 /* should semimodal on l2 */
+#define MPLEX_ATTACH_SIZEPOLICY   0x40 /* size policy field set */
+
 
 enum{
     MPLEX_CHANGE_SWITCHONLY=0,
@@ -48,6 +51,14 @@ enum{
     MPLEX_STDISP_BL,
     MPLEX_STDISP_BR
 };
+
+
+typedef enum{
+    MPLEX_SIZEPOLICY_DEFAULT,
+    MPLEX_SIZEPOLICY_FULL_EXACT,
+    MPLEX_SIZEPOLICY_FULL_BOUNDS,
+    MPLEX_SIZEPOLICY_FREE
+} WMPlexSizePolicy;
 
 
 INTRSTRUCT(WMPlexSTDispInfo);
@@ -74,6 +85,7 @@ DECLSTRUCT(WMPlexAttachParams){
     int flags;
     int index;
     WRectangle l2geom;
+    WMPlexSizePolicy szplcy;
 };
 
 
