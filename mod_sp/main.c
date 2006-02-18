@@ -10,6 +10,7 @@
  */
 
 #include <libtu/map.h>
+#include <libtu/minmax.h>
 #include <libextl/readconfig.h>
 #include <libmainloop/hooks.h>
 #include <ioncore/conf-bindings.h>
@@ -19,10 +20,12 @@
 #include <ioncore/ioncore.h>
 #include <ioncore/global.h>
 #include <ioncore/framep.h>
+#include <ioncore/frame.h>
+#include <ioncore/regbind.h>
 #include <ioncore/bindmaps.h>
+#include <ioncore/names.h>
 
 #include "main.h"
-#include "scratchpad.h"
 #include "exports.h"
 
 
@@ -58,18 +61,37 @@ static StringIntMap frame_areas[]={
 /*{{{ Exports */
 
 
-static WScratchpad *create(WScreen *scr, int flags)
+
+
+static WFrame *create(WScreen *scr, int flags)
 {
-    WScratchpad *sp;
+    WFrame *sp;
+    WMPlexAttachParams par;
+    int sw=REGION_GEOM(scr).w, sh=REGION_GEOM(scr).h;
+
+    par.flags=(flags
+               |MPLEX_ATTACH_L2
+               |MPLEX_ATTACH_SIZEPOLICY
+               |MPLEX_ATTACH_L2_GEOM);
+    par.szplcy=MPLEX_SIZEPOLICY_FREE;
     
-    sp=(WScratchpad*)mplex_attach_hnd((WMPlex*)scr,
-                                      (WRegionAttachHandler*)
-                                      create_scratchpad, NULL,
-                                      (MPLEX_ATTACH_L2|flags));
+    par.l2geom.w=minof(sw, CF_SCRATCHPAD_DEFAULT_W);
+    par.l2geom.h=minof(sh, CF_SCRATCHPAD_DEFAULT_H);
+    par.l2geom.x=(sw-par.l2geom.w)/2;
+    par.l2geom.y=(sh-par.l2geom.h)/2;
+
+    sp=(WFrame*)mplex_do_attach((WMPlex*)scr,
+                                (WRegionAttachHandler*)create_frame,
+                                "frame-scratchpad", &par);
+    
+
     if(sp==NULL){
         warn(TR("Unable to create scratchpad for screen %d."),
              screen_id(scr));
     }
+    
+    region_add_bindmap((WRegion*)sp, mod_sp_scratchpad_bindmap);
+    region_set_name((WRegion*)sp, "*scratchpad*");
     
     return sp;
 }
@@ -84,11 +106,11 @@ bool mod_sp_set_shown_on(WMPlex *mplex, const char *how)
 {
     int i;
     int setpar=libtu_setparam_invert(libtu_string_to_setparam(how));
-    WScratchpad *sp;
+    WFrame *sp;
     WScreen *scr;
     
     for(i=mplex_lcount(mplex, 2)-1; i>=0; i--){
-        sp=OBJ_CAST(mplex_lnth(mplex, 2, i), WScratchpad);
+        sp=OBJ_CAST(mplex_lnth(mplex, 2, i), WFrame);
         if(sp!=NULL)
             return mplex_l2_set_hidden(mplex, (WRegion*)sp, setpar);
     }
@@ -111,7 +133,7 @@ bool mod_sp_set_shown_on(WMPlex *mplex, const char *how)
  * The parameter \var{how} is one of (set/unset/toggle).
  */
 EXTL_EXPORT
-bool mod_sp_set_shown(WScratchpad *sp, const char *how)
+bool mod_sp_set_shown(WFrame *sp, const char *how)
 {
     if(sp!=NULL){
         int setpar=libtu_setparam_invert(libtu_string_to_setparam(how));
@@ -133,11 +155,10 @@ bool mod_sp_set_shown(WScratchpad *sp, const char *how)
 void mod_sp_deinit()
 {
     if(mod_sp_scratchpad_bindmap!=NULL){
-        ioncore_free_bindmap("WScratchpad", mod_sp_scratchpad_bindmap);
+        ioncore_free_bindmap("WFrame-as-scratchpad", mod_sp_scratchpad_bindmap);
         mod_sp_scratchpad_bindmap=NULL;
     }
     mod_sp_unregister_exports();
-    ioncore_unregister_regclass(&CLASSDESCR(WScratchpad));
 }
 
 
@@ -150,12 +171,12 @@ static void check_and_create()
     hook_remove(ioncore_post_layout_setup_hook, check_and_create);
     
     FOR_ALL_SCREENS(scr){
-        WScratchpad *sp=NULL;
+        WFrame *sp=NULL;
         /* This is really inefficient, but most likely there's just
          * the scratchpad on the list... 
          */
         for(i=0; i<mplex_lcount((WMPlex*)scr, 2); i++){
-            sp=OBJ_CAST(mplex_lnth((WMPlex*)scr, 2, i), WScratchpad);
+            sp=OBJ_CAST(mplex_lnth((WMPlex*)scr, 2, i), WFrame);
             if(sp!=NULL)
                 break;
         }
@@ -171,15 +192,9 @@ bool mod_sp_init()
     if(!mod_sp_register_exports())
         return FALSE;
 
-    mod_sp_scratchpad_bindmap=ioncore_alloc_bindmap("WScratchpad", NULL);
+    mod_sp_scratchpad_bindmap=ioncore_alloc_bindmap("WFrame-as-scratchpad", NULL);
     
     if(mod_sp_scratchpad_bindmap==NULL){
-        mod_sp_deinit();
-        return FALSE;
-    }
-    
-    if(!ioncore_register_regclass(&CLASSDESCR(WScratchpad),
-                                  (WRegionLoadCreateFn*)scratchpad_load)){
         mod_sp_deinit();
         return FALSE;
     }
