@@ -164,8 +164,7 @@ function mod_query.file_completor(wedln, str)
     local ic=ioncore.lookup_script("ion-completefile")
     if ic then
         mod_query.popen_completions(wedln,
-                                   ic.." "..string.shell_safe(str),
-                                   "")
+                                   ic.." "..string.shell_safe(str))
     end
 end
 
@@ -258,14 +257,27 @@ mod_query.COLLECT_THRESHOLD=2000
 
 --DOC
 -- This function can be used to read completions from an external source.
--- The string \var{cmd} is a shell command to be executed. To its  stdout, 
+-- The parameter \var{cp} is the completion proxy to be used,
+-- and the string \var{cmd} the shell command to be executed. To its stdout, 
 -- the command should on the first line write the \var{common_beg} 
--- parameter of \fnref{WComplProxy.set_completions} and a single actual 
--- completion on each of the successive lines.
-function mod_query.popen_completions(cp, cmd, beg, fn)
+-- parameter of \fnref{WComplProxy.set_completions} (which \var{fn} maybe used
+-- to override) and a single actual completion on each of the successive lines.
+-- The function \var{reshnd} may be used to override a result table
+-- building routine.
+function mod_query.popen_completions(cp, cmd, fn, reshnd)
     
     local pst={cp=cp, maybe_stalled=0}
     
+    if not reshnd then
+        reshnd = function(rs, a)
+                     if not rs.common_beg then
+                         rs.common_beg=a
+                     else
+                         table.insert(rs, a)
+                     end
+                 end
+    end
+
     local function rcv(str)
         local data=""
         local results={}
@@ -283,18 +295,11 @@ function mod_query.popen_completions(cp, cmd, beg, fn)
             if totallen>ioncore.RESULT_DATA_LIMIT then
                 error(TR("Too much result data"))
             end
+            
 
-            data=string.gsub(data..str, "([^\n]*)\n",
-                             function(a)
-                                 -- ion-completefile will return possible 
-                                 -- common part of path on  the first line 
-                                 -- and the entries in that directory on the
-                                 -- following lines.
-                                 if not results.common_beg then
-                                     results.common_beg=(beg or "")..a
-                                 else
-                                     table.insert(results, a)
-                                 end
+            data=string.gsub(data..str, "([^\n]*)\n", 
+                             function(s) 
+                                 reshnd(results, s) 
                                  lines=lines+1
                              end)
             
@@ -723,11 +728,23 @@ function mod_query.exec_completor(wedln, str, point)
         cp:set_completions(res)
     end
 
+    local function filter_fn(res, s)
+        if not res.common_beg then
+            if s=="./" then
+                res.common_beg=""
+            else
+                res.common_beg=s
+            end
+        else
+            table.insert(res, s)
+        end
+    end
+    
     local ic=ioncore.lookup_script("ion-completefile")
     if ic then
         mod_query.popen_completions(wedln,
                                    ic..wp..string.shell_safe(s_compl),
-                                   "", set_fn)
+                                   set_fn, filter_fn)
     end
 end
 
@@ -907,8 +924,8 @@ end
 function mod_query.man_completor(wedln, str)
     local mc=ioncore.lookup_script("ion-completeman")
     if mc then
-        mod_query.popen_completions(wedln, mc.." -complete "..
-                                    string.shell_safe(str))
+        mod_query.popen_completions(wedln, (mc.." -complete "
+                                            ..string.shell_safe(str)))
     end
 end
 
