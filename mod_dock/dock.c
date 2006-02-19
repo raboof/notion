@@ -857,18 +857,6 @@ void dock_size_hints(WDock *dock, XSizeHints *hints)
 
 static bool dock_fitrep(WDock *dock, WWindow *parent, const WFitParams *fp)
 {
-    WFitParams fp2;
-    
-    if(fp->mode&REGION_FIT_BOUNDS){
-        int pos, grow;
-        dock_get_pos_grow(dock, &pos, &grow);
-        fp2.mode=REGION_FIT_EXACT;
-        fp2.g.w=minof(dock->min_w, fp->g.w);
-        fp2.g.h=minof(dock->min_h, fp->g.h);
-        calc_dock_pos(&(fp2.g), &(fp->g), pos);
-        fp=&fp2;
-    }
-
     if(!window_fitrep(&(dock->win), parent, fp))
         return FALSE;
 
@@ -1120,11 +1108,6 @@ static bool dock_init(WDock *dock, WWindow *parent, const WFitParams *fp)
 {
     WFitParams fp2=*fp;
     
-    if(fp2.mode==REGION_FIT_BOUNDS){
-        fp2.g.w=1;
-        fp2.g.h=1;
-    }
-        
     dock->pos=dock_param_pos.dflt;
     dock->grow=dock_param_grow.dflt;
     dock->is_auto=dock_param_is_auto.dflt;
@@ -1240,9 +1223,14 @@ WDock *mod_dock_create(ExtlTab tab)
         
         par.flags=(MPLEX_ATTACH_L2
                    |MPLEX_ATTACH_L2_PASSIVE
-                   |MPLEX_ATTACH_SIZEPOLICY);
+                   |MPLEX_ATTACH_SIZEPOLICY
+                   |MPLEX_ATTACH_L2_GEOM);
         
-        par.szplcy=MPLEX_SIZEPOLICY_FULL_BOUNDS;
+        par.szplcy=MPLEX_SIZEPOLICY_FREE;
+        par.l2geom.x=0;
+        par.l2geom.y=0;
+        par.l2geom.w=1;
+        par.l2geom.h=1;
         
         if(extl_table_is_bool_set(tab, "floating_hidden"))
             par.flags|=MPLEX_ATTACH_L2_HIDDEN;

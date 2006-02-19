@@ -1103,7 +1103,7 @@ WSplitRegion *splittree_split(WSplit *node, int dir, int primn,
 
     /* Create split and new window
      */
-    fp.mode=REGION_FIT_BOUNDS;
+    fp.mode=REGION_FIT_EXACT;
     fp.g=rg;
     
     nsplit=create_splitsplit(&(fp.g), dir);

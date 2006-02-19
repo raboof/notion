@@ -446,7 +446,6 @@ void mplex_do_fit_managed(WMPlex *mplex, WFitParams *fp)
             region_fitrep(node->reg, NULL, &fp2);
         }
         
-        fp->mode|=REGION_FIT_BOUNDS;
         FOR_ALL_NODES_ON_LLIST(node, mplex->l2_list){
             fp2=*fp;
             sizepolicy(node->szplcy, node->reg, NULL, &fp2);
@@ -1401,7 +1400,7 @@ WRegion *mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t)
         fp.g.y=0;
         fp.g.w=REGION_GEOM(mplex).w;
         fp.g.h=REGION_GEOM(mplex).h;
-        fp.mode=REGION_FIT_BOUNDS;
+        fp.mode=REGION_FIT_BOUNDS|REGION_FIT_WHATEVER;
         
         /* Full mplex size is stupid so use saved geometry initially
          * if there's one.
