@@ -1118,6 +1118,13 @@ ExtlTab dock_get(WDock *dock)
 
 static bool dock_init(WDock *dock, WWindow *parent, const WFitParams *fp)
 {
+    WFitParams fp2=*fp;
+    
+    if(fp2.mode==REGION_FIT_BOUNDS){
+        fp2.g.w=1;
+        fp2.g.h=1;
+    }
+        
     dock->pos=dock_param_pos.dflt;
     dock->grow=dock_param_grow.dflt;
     dock->is_auto=dock_param_is_auto.dflt;
@@ -1130,7 +1137,8 @@ static bool dock_init(WDock *dock, WWindow *parent, const WFitParams *fp)
     dock->arrange_called=FALSE;
     dock->save=TRUE;
 
-    if(!window_init((WWindow*)dock, parent, fp))
+    
+    if(!window_init((WWindow*)dock, parent, &fp2))
         return FALSE;
     
     region_add_bindmap((WRegion*)dock, dock_bindmap);
@@ -1143,19 +1151,7 @@ static bool dock_init(WDock *dock, WWindow *parent, const WFitParams *fp)
 
     LINK_ITEM(docks, dock, dock_next, dock_prev);
     
-    /* Just calculate real min/max size */
-    dock_managed_rqgeom_(dock, NULL, 0, NULL, NULL, TRUE);
-    
-    if(fp->mode&REGION_FIT_BOUNDS){
-        WRectangle dg;
-        dg.w=minof(dock->min_w, fp->g.w);
-        dg.h=minof(dock->min_h, fp->g.h);
-        calc_dock_pos(&dg, &(fp->g), dock->pos);
-        window_do_fitrep((WWindow*)dock, NULL, &dg);
-    }
-
     return TRUE;
-
 }
 
 
@@ -1237,35 +1233,58 @@ WDock *mod_dock_create(ExtlTab tab)
         }
     }
 
-    fp.g.x=0;
-    fp.g.y=0;
-    fp.g.w=1;
-    fp.g.h=1;
-    fp.mode=REGION_FIT_EXACT;
+    /* Create the dock */
     
-    dock=create_dock((WWindow*)screen, &fp);
+    if(floating){
+        WMPlexAttachParams par;
+        
+        par.flags=(MPLEX_ATTACH_L2
+                   |MPLEX_ATTACH_L2_PASSIVE
+                   |MPLEX_ATTACH_SIZEPOLICY);
+        
+        par.szplcy=MPLEX_SIZEPOLICY_FULL_BOUNDS;
+        
+        if(extl_table_is_bool_set(tab, "floating_hidden"))
+            par.flags|=MPLEX_ATTACH_L2_HIDDEN;
+        
+        dock=(WDock*)mplex_do_attach((WMPlex*)screen, 
+                                     (WRegionAttachHandler*)create_dock,
+                                     NULL,
+                                     &par);
+    }else{
+        dock=create_dock((WWindow*)screen, &fp);
+    }
+
     if(dock==NULL){
         warn("Failed to create dock.");
         return NULL;
     }
     
+    /* Get parameters */
     dock->save=FALSE;
     dock_do_set(dock, tab, FALSE);
     
+    /* Final setup */    
     if(floating){
-        int af=MPLEX_ATTACH_L2|MPLEX_ATTACH_L2_PASSIVE;
-        if(extl_table_is_bool_set(tab, "floating_hidden"))
-            af|=MPLEX_ATTACH_L2_HIDDEN;
+        WRectangle dg;
+        const WRectangle *pg=&REGION_GEOM(screen);
         
-        if(mplex_attach_simple((WMPlex*)screen, (WRegion*)dock, af)!=NULL)
-            return dock;
+        /* Just calculate real min/max size */
+        dock_managed_rqgeom_(dock, NULL, 0, NULL, NULL, TRUE);
+        
+        dg.w=minof(dock->min_w, pg->w);
+        dg.h=minof(dock->min_h, pg->h);
+        calc_dock_pos(&dg, pg, dock->pos);
+        region_rqgeom((WRegion*)dock, 0, &dg, NULL);
+        
+        return dock;
     }else{
         mplexpos(dock->pos, &din.pos);
         din.fullsize=FALSE; /* not supported */
         if(mplex_set_stdisp((WMPlex*)screen, (WRegion*)dock, &din))
             return dock;
     }
-    
+
     /* Failed to attach. */
     warn("Failed to attach dock to screen.");
     destroy_obj((Obj*)dock);
