@@ -579,6 +579,9 @@ static bool create_initial_ws(WScreen *scr)
 {
     WRegionLoadCreateFn *fn=NULL;
     WRegion *reg=NULL;
+    WMPlexAttachParams par;
+    
+    par.flags=0;
     
     if(ioncore_default_ws_type!=NULL){
         WRegClassInfo *info;
@@ -599,9 +602,9 @@ static bool create_initial_ws(WScreen *scr)
         return FALSE;
     }
     
-    reg=mplex_attach_hnd(&scr->mplex,
-                         (WRegionAttachHandler*)do_create_initial, 
-                         (void*)fn, 0);
+    reg=mplex_do_attach(&scr->mplex,
+                        (WRegionAttachHandler*)do_create_initial, 
+                        (void*)fn, &par);
     
     if(reg==NULL){
         warn(TR("Unable to create a workspace on screen %d."), scr->id);

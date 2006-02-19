@@ -32,17 +32,22 @@ WEdln *mod_query_do_query(WMPlex *mplex, const char *prompt, const char *dflt,
 {
     WRectangle geom;
     WEdlnCreateParams fnp;
-    
+    WMPlexAttachParams par;
+
     fnp.prompt=prompt;
     fnp.dflt=dflt;
     fnp.handler=handler;
     fnp.completor=completor;
     
-    return (WEdln*)mplex_attach_hnd(mplex,
-                                    (WRegionAttachHandler*)create_wedln,
-                                    (void*)&fnp, 
-                                    (MPLEX_ATTACH_SWITCHTO|
-                                     MPLEX_ATTACH_L2|
-                                     MPLEX_ATTACH_L2_SEMIMODAL));
+    par.flags=(MPLEX_ATTACH_SWITCHTO|
+               MPLEX_ATTACH_L2|
+               MPLEX_ATTACH_L2_SEMIMODAL|
+               MPLEX_ATTACH_SIZEPOLICY);
+    par.szplcy=MPLEX_SIZEPOLICY_FULL_BOUNDS;
+
+    return (WEdln*)mplex_do_attach(mplex,
+                                   (WRegionAttachHandler*)create_wedln,
+                                   (void*)&fnp, 
+                                   &par);
 }
 

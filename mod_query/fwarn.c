@@ -49,14 +49,20 @@ WMessage *mod_query_warn(WMPlex *mplex, const char *p)
 EXTL_EXPORT
 WMessage *mod_query_message(WMPlex *mplex, const char *p)
 {
+    WMPlexAttachParams par;
+
     if(p==NULL)
         return NULL;
+    
+    par.flags=(MPLEX_ATTACH_SWITCHTO|
+               MPLEX_ATTACH_L2|
+               MPLEX_ATTACH_L2_SEMIMODAL|
+               MPLEX_ATTACH_SIZEPOLICY);
+    par.szplcy=MPLEX_SIZEPOLICY_FULL_BOUNDS;
 
-    return (WMessage*)mplex_attach_hnd(mplex, 
-                                       (WRegionAttachHandler*)create_wmsg,
-                                       (void*)p,
-                                       (MPLEX_ATTACH_SWITCHTO|
-                                        MPLEX_ATTACH_L2|
-                                        MPLEX_ATTACH_L2_SEMIMODAL));
+    return (WMessage*)mplex_do_attach(mplex, 
+                                      (WRegionAttachHandler*)create_wmsg,
+                                      (void*)p,
+                                      &par);
 }
 

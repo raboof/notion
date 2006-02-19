@@ -34,6 +34,7 @@ WMenu *mod_menu_do_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
                         ExtlTab param)
 {
     WMenuCreateParams fnp;
+    WMPlexAttachParams par;
 
     fnp.handler=handler;
     fnp.tab=tab;
@@ -47,12 +48,16 @@ WMenu *mod_menu_do_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
     fnp.refg.w=0;
     fnp.refg.h=0;
     
-    return (WMenu*)mplex_attach_hnd(mplex,
-                                    (WRegionAttachHandler*)create_menu,
-                                    (void*)&fnp, 
-                                    (MPLEX_ATTACH_SWITCHTO|
-                                     MPLEX_ATTACH_L2|
-                                     MPLEX_ATTACH_L2_SEMIMODAL));
+    par.flags=(MPLEX_ATTACH_SWITCHTO|
+               MPLEX_ATTACH_L2|
+               MPLEX_ATTACH_L2_SEMIMODAL|
+               MPLEX_ATTACH_SIZEPOLICY);
+    par.szplcy=MPLEX_SIZEPOLICY_FULL_BOUNDS;
+        
+    return (WMenu*)mplex_do_attach(mplex,
+                                   (WRegionAttachHandler*)create_menu,
+                                   (void*)&fnp, 
+                                   &par);
 }
 
 

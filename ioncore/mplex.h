@@ -31,10 +31,11 @@
 #define MPLEX_ATTACH_SWITCHTO     0x01 /* switch to region */
 #define MPLEX_ATTACH_L2           0x02 /* put on layer2 */
 #define MPLEX_ATTACH_L2_PASSIVE   0x04 /* should be passive on l2 */
-#define MPLEX_ATTACH_L2_GEOM      0x08 /* geometry field is set for l2 */
-#define MPLEX_ATTACH_L2_HIDDEN    0x10 /* should be hidden on l2 */
-#define MPLEX_ATTACH_L2_SEMIMODAL 0x20 /* should semimodal on l2 */
-#define MPLEX_ATTACH_SIZEPOLICY   0x40 /* size policy field set */
+#define MPLEX_ATTACH_L2_HIDDEN    0x08 /* should be hidden on l2 */
+#define MPLEX_ATTACH_L2_SEMIMODAL 0x10 /* should semimodal on l2 */
+#define MPLEX_ATTACH_GEOM         0x20 /* geometry field is set */
+#define MPLEX_ATTACH_SIZEPOLICY   0x40 /* size policy field is set */
+#define MPLEX_ATTACH_INDEX        0x80 /* index field is set */
 
 
 enum{
@@ -84,7 +85,7 @@ DECLSTRUCT(WMPlexChangedParams){
 DECLSTRUCT(WMPlexAttachParams){
     int flags;
     int index;
-    WRectangle l2geom;
+    WRectangle geom;
     WMPlexSizePolicy szplcy;
 };
 
@@ -132,8 +133,6 @@ extern void mplex_unmap(WMPlex *mplex);
 
 extern WRegion *mplex_attach_simple(WMPlex *mplex, WRegion *reg, 
                                     int flags);
-extern WRegion *mplex_attach_hnd(WMPlex *mplex, WRegionAttachHandler *hnd,
-                                 void *hnd_param, int flags);
 
 extern WRegion *mplex_attach(WMPlex *mplex, WRegion *reg, ExtlTab param);
 extern WRegion *mplex_attach_new(WMPlex *mplex, ExtlTab param);

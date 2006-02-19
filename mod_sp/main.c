@@ -72,13 +72,13 @@ static WFrame *create(WScreen *scr, int flags)
     par.flags=(flags
                |MPLEX_ATTACH_L2
                |MPLEX_ATTACH_SIZEPOLICY
-               |MPLEX_ATTACH_L2_GEOM);
+               |MPLEX_ATTACH_GEOM);
     par.szplcy=MPLEX_SIZEPOLICY_FREE;
     
-    par.l2geom.w=minof(sw, CF_SCRATCHPAD_DEFAULT_W);
-    par.l2geom.h=minof(sh, CF_SCRATCHPAD_DEFAULT_H);
-    par.l2geom.x=(sw-par.l2geom.w)/2;
-    par.l2geom.y=(sh-par.l2geom.h)/2;
+    par.geom.w=minof(sw, CF_SCRATCHPAD_DEFAULT_W);
+    par.geom.h=minof(sh, CF_SCRATCHPAD_DEFAULT_H);
+    par.geom.x=(sw-par.geom.w)/2;
+    par.geom.y=(sh-par.geom.h)/2;
 
     sp=(WFrame*)mplex_do_attach((WMPlex*)scr,
                                 (WRegionAttachHandler*)create_frame,

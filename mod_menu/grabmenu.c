@@ -53,6 +53,7 @@ WMenu *mod_menu_do_grabmenu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
                             ExtlTab param)
 {
     WMenuCreateParams fnp;
+    WMPlexAttachParams par;
     uint mod=0, ksb=0;
     WMenu *menu;
     char *key=NULL;
@@ -75,10 +76,15 @@ WMenu *mod_menu_do_grabmenu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
     fnp.initial=0;
     extl_table_gets_i(param, "initial", &(fnp.initial));
 
-    menu=(WMenu*)mplex_attach_hnd(mplex,
-                                  (WRegionAttachHandler*)create_menu,
-                                  (void*)&fnp, 
-                                  MPLEX_ATTACH_L2|MPLEX_ATTACH_SWITCHTO);
+    par.flags=(MPLEX_ATTACH_SWITCHTO|
+               MPLEX_ATTACH_L2|
+               MPLEX_ATTACH_SIZEPOLICY);
+    par.szplcy=MPLEX_SIZEPOLICY_FULL_BOUNDS;
+
+    menu=(WMenu*)mplex_do_attach(mplex,
+                                 (WRegionAttachHandler*)create_menu,
+                                 (void*)&fnp, 
+                                 &par);
     
     if(menu==NULL)
         return FALSE;

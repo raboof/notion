@@ -1224,13 +1224,13 @@ WDock *mod_dock_create(ExtlTab tab)
         par.flags=(MPLEX_ATTACH_L2
                    |MPLEX_ATTACH_L2_PASSIVE
                    |MPLEX_ATTACH_SIZEPOLICY
-                   |MPLEX_ATTACH_L2_GEOM);
+                   |MPLEX_ATTACH_GEOM);
         
         par.szplcy=MPLEX_SIZEPOLICY_FREE;
-        par.l2geom.x=0;
-        par.l2geom.y=0;
-        par.l2geom.w=1;
-        par.l2geom.h=1;
+        par.geom.x=0;
+        par.geom.y=0;
+        par.geom.w=1;
+        par.geom.h=1;
         
         if(extl_table_is_bool_set(tab, "floating_hidden"))
             par.flags|=MPLEX_ATTACH_L2_HIDDEN;

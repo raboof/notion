@@ -893,8 +893,8 @@ WLListNode *mplex_do_attach_after(WMPlex *mplex,
     mplex_managed_geom(mplex, &(fp.g));
     
     sizepolicy(szplcy, NULL, 
-               (param->flags&MPLEX_ATTACH_L2_GEOM 
-                ? &(param->l2geom)
+               (param->flags&MPLEX_ATTACH_GEOM 
+                ? &(param->geom)
                 : NULL),
                &fp);
 
@@ -954,22 +954,25 @@ WLListNode *mplex_do_attach_after(WMPlex *mplex,
 WRegion *mplex_do_attach(WMPlex *mplex, WRegionAttachHandler *hnd,
                          void *hnd_param, WMPlexAttachParams *param)
 {
-    bool l2=param->flags&MPLEX_ATTACH_L2;
     WLListNode *node, *after;
-    
-    if(l2){
-        after=llist_index_to_after(mplex->l2_list, mplex->l2_current, 
-                                   param->index);
-    }else{
-        after=llist_index_to_after(mplex->l1_list, mplex->l1_current, 
-                                   param->index);
-    }
+    bool l2=param->flags&MPLEX_ATTACH_L2;
+    int index=(param->flags&MPLEX_ATTACH_INDEX
+               ? param->index
+               : mplex_default_index(mplex));
+
+    if(l2)
+        after=llist_index_to_after(mplex->l2_list, mplex->l2_current, index);
+    else
+        after=llist_index_to_after(mplex->l1_list, mplex->l1_current, index);
 
     node=mplex_do_attach_after(mplex, after, param, hnd, hnd_param);
     
     return (node!=NULL ? node->reg : NULL);
 }
 
+#define MPLEX_ATTACH_SET_FLAGS (MPLEX_ATTACH_GEOM|    \
+                                MPLEX_ATTACH_SIZEPOLICY| \
+                                MPLEX_ATTACH_INDEX)
 
 WRegion *mplex_attach_simple(WMPlex *mplex, WRegion *reg, int flags)
 {
@@ -978,24 +981,11 @@ WRegion *mplex_attach_simple(WMPlex *mplex, WRegion *reg, int flags)
     if(reg==(WRegion*)mplex)
         return FALSE;
     
-    par.index=mplex_default_index(mplex);
-    par.flags=flags&~(MPLEX_ATTACH_L2_GEOM|MPLEX_ATTACH_SIZEPOLICY);
+    par.flags=flags&~MPLEX_ATTACH_SET_FLAGS;
     
     return region__attach_reparent((WRegion*)mplex, reg,
                                    (WRegionDoAttachFn*)mplex_do_attach, 
                                    &par);
-}
-
-
-WRegion *mplex_attach_hnd(WMPlex *mplex, WRegionAttachHandler *hnd,
-                          void *hnd_param, int flags)
-{
-    WMPlexAttachParams par;
-    
-    par.index=mplex_default_index(mplex);
-    par.flags=flags&~(MPLEX_ATTACH_L2_GEOM|MPLEX_ATTACH_SIZEPOLICY);
-    
-    return mplex_do_attach(mplex, hnd, hnd_param, &par);
 }
 
 
@@ -1005,14 +995,13 @@ static void get_params(WMPlex *mplex, ExtlTab tab, WMPlexAttachParams *par)
     int tmp;
     
     par->flags=0;
-    par->index=mplex_default_index(mplex);
     
     extl_table_gets_i(tab, "layer", &layer);
     if(layer==2){
         par->flags|=MPLEX_ATTACH_L2;
         
-        if(extl_table_gets_rectangle(tab, "geom", &(par->l2geom)))
-            par->flags|=MPLEX_ATTACH_L2_GEOM;
+        if(extl_table_gets_rectangle(tab, "geom", &(par->geom)))
+            par->flags|=MPLEX_ATTACH_GEOM;
     }
     
     if(extl_table_is_bool_set(tab, "switchto"))
@@ -1024,7 +1013,8 @@ static void get_params(WMPlex *mplex, ExtlTab tab, WMPlexAttachParams *par)
     if(extl_table_is_bool_set(tab, "passive"))
         par->flags|=MPLEX_ATTACH_L2_PASSIVE;
     
-    extl_table_gets_i(tab, "index", &(par->index));
+    if(extl_table_gets_i(tab, "index", &(par->index)))
+        par->flags|=MPLEX_ATTACH_INDEX;
 
     if(extl_table_gets_i(tab, "sizepolicy", &tmp)){
         par->flags|=MPLEX_ATTACH_SIZEPOLICY;
@@ -1657,8 +1647,6 @@ void mplex_load_contents(WMPlex *mplex, ExtlTab tab)
                 char *tmp=NULL;
                 
                 get_params(mplex, subtab, &par);
-                
-                par.index=-1;
                 
                 tmp_layer=(par.flags&MPLEX_ATTACH_L2 ? 2 : 1);
                 tmp_mplex=mplex;

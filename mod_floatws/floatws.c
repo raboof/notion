@@ -506,9 +506,11 @@ bool floatws_phattach(WFloatWS *ws,
                       WRegionAttachHandler *hnd, void *hnd_param,
                       WFloatWSPHAttachParams *p)
 {
-    int mf=(p->aflags&PHOLDER_ATTACH_SWITCHTO ? MPLEX_ATTACH_SWITCHTO : 0);
     bool newframe=FALSE;
     WFloatStacking *st;
+    WMPlexAttachParams par;
+
+    par.flags=(p->aflags&PHOLDER_ATTACH_SWITCHTO ? MPLEX_ATTACH_SWITCHTO : 0);
     
     if(p->frame==NULL){
         p->frame=(WFrame*)floatws_create_frame(ws, &(p->geom), p->inner_geom,
@@ -534,7 +536,7 @@ bool floatws_phattach(WFloatWS *ws,
         }
     }
     
-    if(mplex_attach_hnd((WMPlex*)p->frame, hnd, hnd_param, mf)==NULL){
+    if(mplex_do_attach((WMPlex*)p->frame, hnd, hnd_param, &par)==NULL){
         if(newframe){
             destroy_obj((Obj*)p->frame);
             p->frame=NULL;
