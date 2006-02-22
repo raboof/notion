@@ -1105,22 +1105,24 @@ function mod_query.query_menu(mplex, themenu, prompt)
         prompt=menuname..":"
     end
 
-    local function xform_name(n)
-        return string.lower(string.gsub(n, "[-%s]+", "-"))
+    local function xform_name(n, is_submenu)
+        return (string.lower(string.gsub(n, "[-%s]+", "-"))
+                ..(is_submenu and "/" or ""))
     end
 
     local function xform_menu(t, m, p)
         for _, v in ipairs(m) do
             if v.name then
-                local n=p..xform_name(v.name)
+                local is_submenu=v.submenu_fn
+                local n=p..xform_name(v.name, is_submenu)
                 while t[n] do
                     n=n.."'"
                 end
                 t[n]=v
-                if v.submenu_fn and not v.noautoexpand then
+                if is_submenu and not v.noautoexpand then
                     local sm=v.submenu_fn()
                     if sm then
-                        xform_menu(t, sm, n.."/")
+                        xform_menu(t, sm, n)
                     else
                         ioncore.warn(TR("Missing submenu ")..(v.name or ""))
                     end
