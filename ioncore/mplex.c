@@ -39,6 +39,7 @@
 #include "mplexpholder.h"
 #include "llist.h"
 #include "names.h"
+#include "sizepolicy.h"
 
 
 #define SUBS_MAY_BE_MAPPED(MPLEX) \
@@ -381,30 +382,6 @@ void mplex_unmap(WMPlex *mplex)
 
 
 /*{{{ Resize and reparent */
-
-
-static void sizepolicy(WMPlexSizePolicy szplcy, const WRegion *reg,
-                       const WRectangle *rq_geom, WFitParams *fp)
-{
-    if(szplcy==MPLEX_SIZEPOLICY_FREE){
-        WRectangle tmp;
-        if(rq_geom!=NULL)
-            tmp=*rq_geom;
-        else if(reg!=NULL)
-            tmp=REGION_GEOM(reg);
-        else
-            tmp=fp->g;
-        
-        /* TODO: size hints */
-        rectangle_constrain(&tmp, &(fp->g));
-        fp->g=tmp;
-        fp->mode=REGION_FIT_EXACT;
-    }else{
-        fp->mode=(szplcy==MPLEX_SIZEPOLICY_FULL_BOUNDS
-                  ? REGION_FIT_BOUNDS
-                  : REGION_FIT_EXACT);
-    }
-}
 
 
 bool mplex_fitrep(WMPlex *mplex, WWindow *par, const WFitParams *fp)
@@ -879,16 +856,16 @@ WLListNode *mplex_do_attach_after(WMPlex *mplex,
     bool l2=param->flags&MPLEX_ATTACH_L2;
     bool semimodal=param->flags&MPLEX_ATTACH_L2_SEMIMODAL;
     WLListNode *node;
-    WMPlexSizePolicy szplcy;
+    WSizePolicy szplcy;
     
     assert(!(semimodal && param->flags&MPLEX_ATTACH_L2_HIDDEN));
     
     szplcy=(param->flags&MPLEX_ATTACH_SIZEPOLICY &&
-            param->szplcy!=MPLEX_SIZEPOLICY_DEFAULT
+            param->szplcy!=SIZEPOLICY_DEFAULT
             ? param->szplcy
             : (l2 
-               ? MPLEX_SIZEPOLICY_FULL_BOUNDS
-               : MPLEX_SIZEPOLICY_FULL_EXACT));
+               ? SIZEPOLICY_FULL_BOUNDS
+               : SIZEPOLICY_FULL_EXACT));
     
     mplex_managed_geom(mplex, &(fp.g));
     

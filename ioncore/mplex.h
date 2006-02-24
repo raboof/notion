@@ -20,6 +20,8 @@
 #include "manage.h"
 #include "rectangle.h"
 #include "pholder.h"
+#include "sizepolicy.h"
+
 
 #define MPLEX_ADD_TO_END 0x0001
 #define MPLEX_MANAGED_UNVIEWABLE 0x0002
@@ -54,14 +56,6 @@ enum{
 };
 
 
-typedef enum{
-    MPLEX_SIZEPOLICY_DEFAULT,
-    MPLEX_SIZEPOLICY_FULL_EXACT,
-    MPLEX_SIZEPOLICY_FULL_BOUNDS,
-    MPLEX_SIZEPOLICY_FREE
-} WMPlexSizePolicy;
-
-
 INTRSTRUCT(WMPlexSTDispInfo);
 INTRSTRUCT(WMPlexChangedParams);
 INTRSTRUCT(WMPlexAttachParams);
@@ -86,7 +80,7 @@ DECLSTRUCT(WMPlexAttachParams){
     int flags;
     int index;
     WRectangle geom;
-    WMPlexSizePolicy szplcy;
+    WSizePolicy szplcy;
 };
 
 

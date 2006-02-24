@@ -43,7 +43,7 @@ WEdln *mod_query_do_query(WMPlex *mplex, const char *prompt, const char *dflt,
                MPLEX_ATTACH_L2|
                MPLEX_ATTACH_L2_SEMIMODAL|
                MPLEX_ATTACH_SIZEPOLICY);
-    par.szplcy=MPLEX_SIZEPOLICY_FULL_BOUNDS;
+    par.szplcy=SIZEPOLICY_FULL_BOUNDS;
 
     return (WEdln*)mplex_do_attach(mplex,
                                    (WRegionAttachHandler*)create_wedln,

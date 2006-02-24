@@ -29,7 +29,7 @@ DECLSTRUCT(WLListNode){
     int flags;
     WRegion *reg;
     WMPlexPHolder *phs;
-    WMPlexSizePolicy szplcy;
+    WSizePolicy szplcy;
 };
 
 

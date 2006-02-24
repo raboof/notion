@@ -58,7 +58,7 @@ WMessage *mod_query_message(WMPlex *mplex, const char *p)
                MPLEX_ATTACH_L2|
                MPLEX_ATTACH_L2_SEMIMODAL|
                MPLEX_ATTACH_SIZEPOLICY);
-    par.szplcy=MPLEX_SIZEPOLICY_FULL_BOUNDS;
+    par.szplcy=SIZEPOLICY_FULL_BOUNDS;
 
     return (WMessage*)mplex_do_attach(mplex, 
                                       (WRegionAttachHandler*)create_wmsg,

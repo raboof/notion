@@ -1226,7 +1226,7 @@ WDock *mod_dock_create(ExtlTab tab)
                    |MPLEX_ATTACH_SIZEPOLICY
                    |MPLEX_ATTACH_GEOM);
         
-        par.szplcy=MPLEX_SIZEPOLICY_FREE;
+        par.szplcy=SIZEPOLICY_FREE;
         par.geom.x=0;
         par.geom.y=0;
         par.geom.w=1;

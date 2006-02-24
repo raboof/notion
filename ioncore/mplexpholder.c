@@ -118,7 +118,7 @@ bool mplexpholder_init(WMPlexPHolder *ph, WMPlex *mplex,
     ph->after=NULL;
     ph->next=NULL;
     ph->prev=NULL;
-    ph->szplcy=MPLEX_SIZEPOLICY_DEFAULT;
+    ph->szplcy=SIZEPOLICY_DEFAULT;
     
     if(mplex==NULL)
         return TRUE;

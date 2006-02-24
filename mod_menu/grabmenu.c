@@ -79,7 +79,7 @@ WMenu *mod_menu_do_grabmenu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
     par.flags=(MPLEX_ATTACH_SWITCHTO|
                MPLEX_ATTACH_L2|
                MPLEX_ATTACH_SIZEPOLICY);
-    par.szplcy=MPLEX_SIZEPOLICY_FULL_BOUNDS;
+    par.szplcy=SIZEPOLICY_FULL_BOUNDS;
 
     menu=(WMenu*)mplex_do_attach(mplex,
                                  (WRegionAttachHandler*)create_menu,
