@@ -20,10 +20,29 @@ typedef enum{
     SIZEPOLICY_DEFAULT,
     SIZEPOLICY_FULL_EXACT,
     SIZEPOLICY_FULL_BOUNDS,
-    SIZEPOLICY_FREE
+    SIZEPOLICY_FREE,
+    /* Sigh. Algebraic data types would make this so 
+     * much more convenient.. 
+     */
+    SIZEPOLICY_GRAVITY_NORTHWEST,
+    SIZEPOLICY_GRAVITY_NORTH,
+    SIZEPOLICY_GRAVITY_NORTHEAST,
+    SIZEPOLICY_GRAVITY_WEST,
+    SIZEPOLICY_GRAVITY_CENTER,
+    SIZEPOLICY_GRAVITY_EAST,
+    SIZEPOLICY_GRAVITY_SOUTHWEST,
+    SIZEPOLICY_GRAVITY_SOUTH,
+    SIZEPOLICY_GRAVITY_SOUTHEAST,
+    
+    SIZEPOLICY_STRETCH_NORTH,
+    SIZEPOLICY_STRETCH_WEST,
+    SIZEPOLICY_STRETCH_EAST,
+    SIZEPOLICY_STRETCH_SOUTH
 } WSizePolicy;
 
-extern void sizepolicy(WSizePolicy szplcy, const WRegion *reg,
+
+extern void sizepolicy(WSizePolicy szplcy, WRegion *reg,
                        const WRectangle *rq_geom, WFitParams *fp);
+
 
 #endif /* ION_IONCORE_SIZEPOLICY_H */
