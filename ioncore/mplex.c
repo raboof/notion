@@ -1625,6 +1625,9 @@ void mplex_load_contents(WMPlex *mplex, ExtlTab tab)
                 
                 get_params(mplex, subtab, &par);
                 
+                par.flags|=MPLEX_ATTACH_INDEX;
+                par.index=LLIST_INDEX_LAST;
+
                 tmp_layer=(par.flags&MPLEX_ATTACH_L2 ? 2 : 1);
                 tmp_mplex=mplex;
                 
