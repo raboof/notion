@@ -22,6 +22,8 @@
 #include "attach.h"
 #include "manage.h"
 #include "pholder.h"
+#include "sizepolicy.h"
+
 
 #define CLIENTWIN_P_WM_DELETE        0x00001
 #define CLIENTWIN_P_WM_TAKE_FOCUS    0x00002
@@ -66,9 +68,10 @@ DECLCLASS(WClientWin){
     
     ExtlTab proptab;
 
-    int gravity;            /* gravity used when there is slack */
-    int transient_gravity;  /* gravity used for transients of this window  */
-                            /* if the transient's gravity is ForgetGravity */
+    WSizePolicy szplcy;           /* size policy (when there is slack) */
+    WSizePolicy transient_szplcy; /* size policy used for transients managed */
+                                  /* by this window, if the transient does */
+                                  /* not have a size policy. */
 };
 
 

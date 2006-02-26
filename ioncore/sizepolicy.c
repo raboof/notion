@@ -10,6 +10,7 @@
  */
 
 #include <libtu/minmax.h>
+#include <string.h>
 
 #include "common.h"
 #include "region.h"
@@ -102,17 +103,24 @@ static void gravity_stretch_policy(int gravity, WRegion *reg,
 
 
 #define STRETCHPOLICY(G, X, WS, HS)                                \
-    if(szplcy==SIZEPOLICY_GRAVITY_##G){                            \
+    if(szplcy==SIZEPOLICY_STRETCH_##G){                            \
         gravity_stretch_policy(X##Gravity, reg, &tmp, fp, WS, HS); \
         return;                                                    \
     }
 
-#define GRAVPOLICY(G, X) STRETCHPOLICY(G, X, FALSE, FALSE);
+#define GRAVPOLICY(G, X)                                                 \
+    if(szplcy==SIZEPOLICY_GRAVITY_##G){                                  \
+        gravity_stretch_policy(X##Gravity, reg, &tmp, fp, FALSE, FALSE); \
+        return;                                                          \
+    }
 
 
 void sizepolicy(WSizePolicy szplcy, WRegion *reg,
-                const WRectangle *rq_geom, WFitParams *fp)
+                const WRectangle *rq_geom, int rq_flags,
+                WFitParams *fp)
 {
+    /* TODO: use WEAK_* in rq_flags */
+    
     WRectangle tmp;
     if(rq_geom!=NULL)
         tmp=*rq_geom;
@@ -147,5 +155,50 @@ void sizepolicy(WSizePolicy szplcy, WRegion *reg,
     }else{ /* szplcy==SIZEPOLICY_FULL_BOUNDS */
         fp->mode=REGION_FIT_BOUNDS;
     }
+}
+
+
+struct szplcy_spec {
+    const char *spec;
+    int szplcy;
+};
+
+/* translation table for sizepolicy specifications */
+static struct szplcy_spec szplcy_specs[] = {
+    {"default",         SIZEPOLICY_DEFAULT},
+    {"full",            SIZEPOLICY_FULL_EXACT},
+    {"full_bounds",     SIZEPOLICY_FULL_BOUNDS},
+    {"free",            SIZEPOLICY_FREE},
+    {"northwest",       SIZEPOLICY_GRAVITY_NORTHWEST},
+    {"north",           SIZEPOLICY_GRAVITY_NORTH},
+    {"northeast",       SIZEPOLICY_GRAVITY_NORTHEAST},
+    {"west",            SIZEPOLICY_GRAVITY_WEST},
+    {"center",          SIZEPOLICY_GRAVITY_CENTER},
+    {"east",            SIZEPOLICY_GRAVITY_EAST},
+    {"southwest",       SIZEPOLICY_GRAVITY_SOUTHWEST},
+    {"south",           SIZEPOLICY_GRAVITY_SOUTH},
+    {"southeast",       SIZEPOLICY_GRAVITY_SOUTHEAST},
+    {"stretch_north",   SIZEPOLICY_STRETCH_NORTH},
+    {"stretch_west",    SIZEPOLICY_STRETCH_WEST},
+    {"stretch_east",    SIZEPOLICY_STRETCH_EAST},
+    {"stretch_south",   SIZEPOLICY_STRETCH_SOUTH},
+    { NULL,             SIZEPOLICY_DEFAULT}   /* end marker */
+};
+
+
+bool string2sizepolicy(const char *szplcy, WSizePolicy *value)
+{
+    const struct szplcy_spec *sp;
+    
+    *value=SIZEPOLICY_DEFAULT;
+
+    for(sp=szplcy_specs; sp->spec; ++sp){
+	if(strcasecmp(szplcy,sp->spec)==0){
+	    *value=sp->szplcy;
+	    return TRUE;
+        }
+    }
+    
+    return FALSE;
 }
 

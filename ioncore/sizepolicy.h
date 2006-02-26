@@ -42,7 +42,11 @@ typedef enum{
 
 
 extern void sizepolicy(WSizePolicy szplcy, WRegion *reg,
-                       const WRectangle *rq_geom, WFitParams *fp);
+                       const WRectangle *rq_geom, int rq_flags,
+                       WFitParams *fp);
+
+
+bool string2sizepolicy(const char *szplcy, WSizePolicy *value);
 
 
 #endif /* ION_IONCORE_SIZEPOLICY_H */

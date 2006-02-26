@@ -419,13 +419,13 @@ void mplex_do_fit_managed(WMPlex *mplex, WFitParams *fp)
     if(!MPLEX_MGD_UNVIEWABLE(mplex)){
         FOR_ALL_NODES_ON_LLIST(node, mplex->l1_list){
             fp2=*fp;
-            sizepolicy(node->szplcy, node->reg, NULL, &fp2);
+            sizepolicy(node->szplcy, node->reg, NULL, 0, &fp2);
             region_fitrep(node->reg, NULL, &fp2);
         }
         
         FOR_ALL_NODES_ON_LLIST(node, mplex->l2_list){
             fp2=*fp;
-            sizepolicy(node->szplcy, node->reg, NULL, &fp2);
+            sizepolicy(node->szplcy, node->reg, NULL, 0, &fp2);
             region_fitrep(node->reg, NULL, &fp2);
         }
     }
@@ -457,7 +457,7 @@ static void mplex_managed_rqgeom(WMPlex *mplex, WRegion *sub,
 
     mplex_managed_geom(mplex, &fp.g);
 
-    sizepolicy(node->szplcy, sub, geom, &fp);
+    sizepolicy(node->szplcy, sub, geom, flags, &fp);
     
     if(geomret!=NULL)
         *geomret=fp.g;
@@ -873,13 +873,16 @@ WLListNode *mplex_do_attach_after(WMPlex *mplex,
                (param->flags&MPLEX_ATTACH_GEOM 
                 ? &(param->geom)
                 : NULL),
-               &fp);
+               0, &fp);
 
     node=ALLOC(WLListNode);
     
     if(node==NULL)
         return NULL;
     
+    if(param->flags&MPLEX_ATTACH_WHATEVER)
+        fp.mode|=REGION_FIT_WHATEVER;
+        
     reg=hnd((WWindow*)mplex, &fp, hnd_param);
     
     if(reg==NULL){
@@ -947,9 +950,11 @@ WRegion *mplex_do_attach(WMPlex *mplex, WRegionAttachHandler *hnd,
     return (node!=NULL ? node->reg : NULL);
 }
 
-#define MPLEX_ATTACH_SET_FLAGS (MPLEX_ATTACH_GEOM|    \
+
+#define MPLEX_ATTACH_SET_FLAGS (MPLEX_ATTACH_GEOM|       \
                                 MPLEX_ATTACH_SIZEPOLICY| \
                                 MPLEX_ATTACH_INDEX)
+
 
 WRegion *mplex_attach_simple(WMPlex *mplex, WRegion *reg, int flags)
 {
