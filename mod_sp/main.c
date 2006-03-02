@@ -73,7 +73,7 @@ static WFrame *create(WScreen *scr, int flags)
                |MPLEX_ATTACH_L2
                |MPLEX_ATTACH_SIZEPOLICY
                |MPLEX_ATTACH_GEOM);
-    par.szplcy=SIZEPOLICY_FREE;
+    par.szplcy=SIZEPOLICY_FREE_GLUE;
     
     par.geom.w=minof(sw, CF_SCRATCHPAD_DEFAULT_W);
     par.geom.h=minof(sh, CF_SCRATCHPAD_DEFAULT_H);

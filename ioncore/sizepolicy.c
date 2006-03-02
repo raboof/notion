@@ -19,47 +19,65 @@
 #include "sizepolicy.h"
 
 
-static void do_gravity(const WRectangle *max_geom, int gravity,
+
+static int fit_x(int x, int w, const WRectangle *max_geom)
+{
+    int mw=maxof(max_geom->w, 1);
+    w=minof(mw, w);
+    return minof(maxof(x, max_geom->x), max_geom->x+mw-w);
+}
+
+
+static int fit_y(int y, int h, const WRectangle *max_geom)
+{
+    int mh=maxof(max_geom->h, 1);
+    h=minof(mh, h);
+    return minof(maxof(y, max_geom->y), max_geom->y+mh-h);
+}
+
+
+static void do_gravity(const WRectangle *max_geom, int szplcy,
                        WRectangle *geom)
 {
-    switch(gravity){
-    case WestGravity:
-    case NorthWestGravity:
-    case SouthWestGravity:
+    /* Assumed: width and height already adjusted within limits */
+    if(geom->h<1)
+        geom->h=1;
+    if(geom->w<1)
+        geom->w=1;
+    
+    switch(szplcy&SIZEPOLICY_HORIZ_MASK){
+    case SIZEPOLICY_HORIZ_LEFT:
         geom->x=max_geom->x;
         break;
-
-    case EastGravity:
-    case NorthEastGravity:
-    case SouthEastGravity:
+        
+    case SIZEPOLICY_HORIZ_RIGHT:
         geom->x=max_geom->x+max_geom->w-geom->w;
         break;
 
-    default:
+    case SIZEPOLICY_HORIZ_CENTER:
         geom->x=max_geom->x+max_geom->w/2-geom->w/2;
+        break;
+        
+    default:
+        geom->x=fit_x(geom->x, geom->w, max_geom);
     }
 
-    switch(gravity){
-    case NorthGravity:
-    case NorthWestGravity:
-    case NorthEastGravity:
+    switch(szplcy&SIZEPOLICY_VERT_MASK){
+    case SIZEPOLICY_VERT_TOP:
         geom->y=max_geom->y;
         break;
-
-    case SouthGravity:
-    case SouthWestGravity:
-    case SouthEastGravity:
+        
+    case SIZEPOLICY_VERT_BOTTOM:
         geom->y=max_geom->y+max_geom->h-geom->h;
         break;
 
-    default:
+    case SIZEPOLICY_VERT_CENTER:
         geom->y=max_geom->y+max_geom->h/2-geom->h/2;
+        break;
+        
+    default:
+        geom->y=fit_x(geom->y, geom->h, max_geom);
     }
-    
-    if(geom->h<=1)
-        geom->h=1;
-    if(geom->w<=1)
-        geom->w=1;
 }
 
 
@@ -74,13 +92,13 @@ static void correct_size(WRegion *reg, int *w, int *h)
 }
 
 
-static void gravity_stretch_policy(int gravity, WRegion *reg,
+static void gravity_stretch_policy(int szplcy, WRegion *reg,
                                    const WRectangle *rq_geom, WFitParams *fp, 
                                    bool ws, bool hs)
 {
     WRectangle max_geom=fp->g;
     int w, h;
-    
+
     fp->g=*rq_geom;
     
     w=(ws ? max_geom.w : minof(fp->g.w, max_geom.w));
@@ -96,26 +114,106 @@ static void gravity_stretch_policy(int gravity, WRegion *reg,
     fp->g.w=w;
     fp->g.h=h;
 
-    do_gravity(&max_geom, gravity, &(fp->g));
+    do_gravity(&max_geom, szplcy, &(fp->g));
     
     fp->mode=REGION_FIT_EXACT;
 }
 
 
-#define STRETCHPOLICY(G, X, WS, HS)                                \
-    if(szplcy==SIZEPOLICY_STRETCH_##G){                            \
-        gravity_stretch_policy(X##Gravity, reg, &tmp, fp, WS, HS); \
-        return;                                                    \
+static void sizepolicy_free_snap(WSizePolicy *szplcy, WRegion *reg,
+                                 WRectangle *rq_geom, int rq_flags,
+                                 WFitParams *fp)
+{
+    WRectangle max_geom=fp->g;
+    
+    int w=minof(rq_geom->w, max_geom.w);
+    int h=minof(rq_geom->h, max_geom.h);
+    int x_=0, y_=0;
+
+    
+    if(!(rq_flags&REGION_RQGEOM_WEAK_X) 
+       && rq_flags&REGION_RQGEOM_WEAK_W){
+        x_=fit_x(rq_geom->x, 1, &max_geom);
+        if(((*szplcy)&SIZEPOLICY_HORIZ_MASK)==SIZEPOLICY_HORIZ_RIGHT)
+            w=max_geom.x+max_geom.w-x_;
+        else
+            w=minof(w, max_geom.x+max_geom.w-x_);
     }
-
-#define GRAVPOLICY(G, X)                                                 \
-    if(szplcy==SIZEPOLICY_GRAVITY_##G){                                  \
-        gravity_stretch_policy(X##Gravity, reg, &tmp, fp, FALSE, FALSE); \
-        return;                                                          \
+    
+    if(!(rq_flags&REGION_RQGEOM_WEAK_Y)
+       && rq_flags&REGION_RQGEOM_WEAK_H){
+        y_=fit_x(rq_geom->y, 1, &max_geom);
+        if(((*szplcy)&SIZEPOLICY_VERT_MASK)==SIZEPOLICY_VERT_BOTTOM)
+            h=max_geom.y+max_geom.h-y_;
+        else
+            h=minof(h, max_geom.y+max_geom.h-y_);
     }
+       
+    correct_size(reg, &w, &h);
+    
+    fp->g.w=w;
+    fp->g.h=h;
+    
+    if(!(rq_flags&REGION_RQGEOM_WEAK_X) 
+       && rq_flags&REGION_RQGEOM_WEAK_W){
+        fp->g.x=x_;
+    }else if(rq_flags&REGION_RQGEOM_WEAK_X){
+        switch((*szplcy)&SIZEPOLICY_HORIZ_MASK){
+        case SIZEPOLICY_HORIZ_LEFT:
+            fp->g.x=max_geom.x;
+            break;
+            
+        case SIZEPOLICY_HORIZ_RIGHT:
+            fp->g.x=max_geom.x+max_geom.w-w;
+            break;
+            
+        default:
+            fp->g.x=fit_x(rq_geom->x, w, &max_geom);
+            break;
+        }
+    }else{
+        fp->g.x=fit_x(rq_geom->x, w, &max_geom);
+    }
+    
+    if(!(rq_flags&REGION_RQGEOM_WEAK_Y)
+       && rq_flags&REGION_RQGEOM_WEAK_H){
+        fp->g.y=y_;
+    }else if(rq_flags&REGION_RQGEOM_WEAK_Y){
+        switch((*szplcy)&SIZEPOLICY_VERT_MASK){
+        case SIZEPOLICY_VERT_TOP:
+            fp->g.y=max_geom.y;
+            break;
+            
+        case SIZEPOLICY_VERT_BOTTOM:
+            fp->g.y=max_geom.y+max_geom.h-h;
+            break;
+            
+        default:
+            fp->g.y=fit_y(rq_geom->y, h, &max_geom);
+            break;
+        }
+    }else{
+        fp->g.y=fit_y(rq_geom->y, h, &max_geom);
+    }
+    
+    fp->mode=REGION_FIT_EXACT;
+    
+    (*szplcy)&=~(SIZEPOLICY_VERT_MASK|SIZEPOLICY_HORIZ_MASK);
+    
+    *szplcy|=(fp->g.x<=max_geom.x
+              ? SIZEPOLICY_HORIZ_LEFT
+              : (fp->g.x+fp->g.w>=max_geom.x+max_geom.w
+                 ? SIZEPOLICY_HORIZ_RIGHT
+                 : SIZEPOLICY_HORIZ_NONE));
+    *szplcy|=(fp->g.y<=max_geom.y
+              ? SIZEPOLICY_VERT_TOP
+              : (fp->g.y+fp->g.h>=max_geom.y+max_geom.h
+                 ? SIZEPOLICY_VERT_BOTTOM
+                 : SIZEPOLICY_VERT_NONE));
+}
 
 
-void sizepolicy(WSizePolicy szplcy, WRegion *reg,
+void sizepolicy(WSizePolicy *szplcy, WRegion *reg,
                 const WRectangle *rq_geom, int rq_flags,
                 WFitParams *fp)
 {
@@ -129,31 +227,51 @@ void sizepolicy(WSizePolicy szplcy, WRegion *reg,
     else
         tmp=fp->g;
 
-    GRAVPOLICY(NORTHWEST, NorthWest);
-    GRAVPOLICY(NORTH, North);
-    GRAVPOLICY(NORTHEAST, NorthEast);
-    GRAVPOLICY(WEST, West);
-    GRAVPOLICY(CENTER, Center);
-    GRAVPOLICY(EAST, East);
-    GRAVPOLICY(SOUTHWEST, SouthWest);
-    GRAVPOLICY(SOUTH, South);
-    GRAVPOLICY(SOUTHEAST, SouthEast);
-
-    STRETCHPOLICY(NORTH, North, TRUE, FALSE);
-    STRETCHPOLICY(EAST, East, FALSE, TRUE);
-    STRETCHPOLICY(WEST, West, FALSE, TRUE);
-    STRETCHPOLICY(SOUTH, South, TRUE, FALSE);
-
-    if(szplcy==SIZEPOLICY_FREE){
-        /* TODO: size hints */
+    switch((*szplcy)&SIZEPOLICY_MASK){
+    case SIZEPOLICY_GRAVITY:
+        gravity_stretch_policy(*szplcy, reg, &tmp, fp, FALSE, FALSE);
+        break;
+        
+    case SIZEPOLICY_STRETCH_LEFT:
+        gravity_stretch_policy(SIZEPOLICY_HORIZ_LEFT, 
+                               reg, &tmp, fp, FALSE, TRUE);
+        break;
+        
+    case SIZEPOLICY_STRETCH_RIGHT:
+        gravity_stretch_policy(SIZEPOLICY_HORIZ_RIGHT, 
+                               reg, &tmp, fp, FALSE, TRUE);
+        break;
+        
+    case SIZEPOLICY_STRETCH_TOP:
+        gravity_stretch_policy(SIZEPOLICY_VERT_TOP, 
+                               reg, &tmp, fp, TRUE, FALSE);
+        break;
+        
+    case SIZEPOLICY_STRETCH_BOTTOM:
+        gravity_stretch_policy(SIZEPOLICY_VERT_BOTTOM, 
+                               reg, &tmp, fp, TRUE, FALSE);
+        break;
+        
+    case SIZEPOLICY_FULL_EXACT:
+        gravity_stretch_policy(SIZEPOLICY_VERT_CENTER|SIZEPOLICY_HORIZ_CENTER, 
+                               reg, &tmp, fp, TRUE, TRUE);
+        break;
+        
+    case SIZEPOLICY_FREE:
         rectangle_constrain(&tmp, &(fp->g));
         correct_size(reg, &fp->g.w, &fp->g.h);
         fp->g=tmp;
         fp->mode=REGION_FIT_EXACT;
-    }else if(szplcy==SIZEPOLICY_FULL_EXACT){
-        gravity_stretch_policy(CenterGravity, reg, &tmp, fp, TRUE, TRUE);
-    }else{ /* szplcy==SIZEPOLICY_FULL_BOUNDS */
+        break;
+
+    case SIZEPOLICY_FREE_GLUE:
+        sizepolicy_free_snap(szplcy, reg, &tmp, rq_flags, fp);
+        break;
+        
+    case SIZEPOLICY_FULL_BOUNDS:
+    default:
         fp->mode=REGION_FIT_BOUNDS;
+        break;
     }
 }
 
@@ -163,12 +281,14 @@ struct szplcy_spec {
     int szplcy;
 };
 
+
 /* translation table for sizepolicy specifications */
 static struct szplcy_spec szplcy_specs[] = {
     {"default",         SIZEPOLICY_DEFAULT},
     {"full",            SIZEPOLICY_FULL_EXACT},
     {"full_bounds",     SIZEPOLICY_FULL_BOUNDS},
     {"free",            SIZEPOLICY_FREE},
+    {"free_glue",       SIZEPOLICY_FREE_GLUE},
     {"northwest",       SIZEPOLICY_GRAVITY_NORTHWEST},
     {"north",           SIZEPOLICY_GRAVITY_NORTH},
     {"northeast",       SIZEPOLICY_GRAVITY_NORTHEAST},
@@ -178,10 +298,10 @@ static struct szplcy_spec szplcy_specs[] = {
     {"southwest",       SIZEPOLICY_GRAVITY_SOUTHWEST},
     {"south",           SIZEPOLICY_GRAVITY_SOUTH},
     {"southeast",       SIZEPOLICY_GRAVITY_SOUTHEAST},
-    {"stretch_north",   SIZEPOLICY_STRETCH_NORTH},
-    {"stretch_west",    SIZEPOLICY_STRETCH_WEST},
-    {"stretch_east",    SIZEPOLICY_STRETCH_EAST},
-    {"stretch_south",   SIZEPOLICY_STRETCH_SOUTH},
+    {"stretch_top",     SIZEPOLICY_STRETCH_TOP},
+    {"stretch_bottom",  SIZEPOLICY_STRETCH_BOTTOM},
+    {"stretch_left",    SIZEPOLICY_STRETCH_LEFT},
+    {"stretch_right",   SIZEPOLICY_STRETCH_RIGHT},
     { NULL,             SIZEPOLICY_DEFAULT}   /* end marker */
 };
 

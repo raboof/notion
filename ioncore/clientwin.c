@@ -330,7 +330,7 @@ static bool clientwin_init(WClientWin *cwin, WWindow *par, Window win,
     cwin->fs_pholder=NULL;
 
     cwin->szplcy=SIZEPOLICY_DEFAULT;
-    cwin->transient_szplcy=SIZEPOLICY_STRETCH_SOUTH;
+    cwin->transient_szplcy=SIZEPOLICY_STRETCH_BOTTOM;
     
     region_init(&(cwin->region), par, &(cwin->last_fp));
 
@@ -639,7 +639,7 @@ static WSizePolicy clientwin_get_transient_sizepolicy(WClientWin *cwin,
     if(cwin->transient_szplcy!=SIZEPOLICY_DEFAULT)
         return cwin->transient_szplcy;
     
-    return SIZEPOLICY_STRETCH_SOUTH;
+    return SIZEPOLICY_STRETCH_BOTTOM;
 }
 
 
@@ -664,7 +664,8 @@ static WRegion *clientwin_do_attach_transient(WClientWin *cwin,
     WFitParams fp;
     WRectangle mg, rqgeom;
     WFrame *frame=NULL;
-    int szplcy, rqflags;
+    WSizePolicy szplcy;
+    int rqflags;
 
     if(par==NULL)
         return NULL;
@@ -716,7 +717,7 @@ static WRegion *clientwin_do_attach_transient(WClientWin *cwin,
     
     szplcy=clientwin_get_transient_sizepolicy(cwin, mreg);
     
-    sizepolicy(szplcy, mreg, &rqgeom, rqflags, &fp);
+    sizepolicy(&szplcy, mreg, &rqgeom, rqflags, &fp);
     
     region_fitrep((WRegion*)mreg, NULL, &fp);
 
@@ -1156,11 +1157,11 @@ static void do_reparent_clientwin(WClientWin *cwin, Window win, int x, int y)
 }
 
 
-static void convert_transient_geom(const WFitParams *fp, int szplcy,
+static void convert_transient_geom(const WFitParams *fp, WSizePolicy szplcy,
                                    WRegion *reg, WFitParams *resfp)
 {
     *resfp=*fp;
-    sizepolicy(szplcy, reg, NULL, 0, resfp);
+    sizepolicy(&szplcy, reg, NULL, 0, resfp);
 }
 
 
@@ -1168,12 +1169,12 @@ static void convert_geom(const WFitParams *fp,
                          WClientWin *cwin, WRectangle *geom)
 {
     WFitParams fptmp=*fp;
-    int szplcy=SIZEPOLICY_FULL_EXACT;
+    WSizePolicy szplcy=SIZEPOLICY_FULL_EXACT;
     
     if(cwin->szplcy!=SIZEPOLICY_DEFAULT)
         szplcy=cwin->szplcy;
     
-    sizepolicy(szplcy, (WRegion*)cwin, NULL, 0, &fptmp);
+    sizepolicy(&szplcy, (WRegion*)cwin, NULL, 0, &fptmp);
     
     *geom=fptmp.g;
 }
@@ -1190,9 +1191,9 @@ static void clientwin_managed_rqgeom(WClientWin *cwin, WRegion *sub,
                                      WRectangle *geomret)
 {
     WFitParams fp=cwin->last_fp;
-    int szplcy=clientwin_get_transient_sizepolicy(cwin, sub);
+    WSizePolicy szplcy=clientwin_get_transient_sizepolicy(cwin, sub);
     
-    sizepolicy(szplcy, sub, geom, flags, &fp);
+    sizepolicy(&szplcy, sub, geom, flags, &fp);
     
     if(geomret!=NULL)
         *geomret=fp.g;
@@ -1627,10 +1628,10 @@ void clientwin_toggle_transients_pos(WClientWin *cwin)
     WRegion *transient;
     PtrListIterTmp tmp;
     
-    if(cwin->transient_szplcy==SIZEPOLICY_STRETCH_SOUTH)
-	cwin->transient_szplcy=SIZEPOLICY_STRETCH_NORTH;
+    if(cwin->transient_szplcy==SIZEPOLICY_STRETCH_BOTTOM)
+	cwin->transient_szplcy=SIZEPOLICY_STRETCH_TOP;
     else
-	cwin->transient_szplcy=SIZEPOLICY_STRETCH_SOUTH;
+	cwin->transient_szplcy=SIZEPOLICY_STRETCH_BOTTOM;
 
     FOR_ALL_ON_PTRLIST(WRegion*, transient, cwin->transient_list, tmp){
         WFitParams fp2;
