@@ -125,9 +125,13 @@ static void sizepolicy_free_snap(WSizePolicy *szplcy, WRegion *reg,
                                  WFitParams *fp)
 {
     WRectangle max_geom=fp->g;
-    
-    int w=minof(rq_geom->w, max_geom.w);
-    int h=minof(rq_geom->h, max_geom.h);
+    bool fullw=((rq_flags&REGION_RQGEOM_WEAK_W) &&
+                (*szplcy&SIZEPOLICY_HORIZ_MASK)==SIZEPOLICY_HORIZ_CENTER);
+    bool fullh=((rq_flags&REGION_RQGEOM_WEAK_H) &&
+                (*szplcy&SIZEPOLICY_VERT_MASK)==SIZEPOLICY_VERT_CENTER);
+
+    int w=(fullw ? max_geom.w : minof(rq_geom->w, max_geom.w));
+    int h=(fullh ? max_geom.h : minof(rq_geom->h, max_geom.h));
     int x_=0, y_=0;
 
     
@@ -159,6 +163,10 @@ static void sizepolicy_free_snap(WSizePolicy *szplcy, WRegion *reg,
         fp->g.x=x_;
     }else if(rq_flags&REGION_RQGEOM_WEAK_X){
         switch((*szplcy)&SIZEPOLICY_HORIZ_MASK){
+        case SIZEPOLICY_HORIZ_CENTER:
+            fp->g.x=max_geom.x+(max_geom.w-w)/2;
+            break;
+ 
         case SIZEPOLICY_HORIZ_LEFT:
             fp->g.x=max_geom.x;
             break;
@@ -180,6 +188,10 @@ static void sizepolicy_free_snap(WSizePolicy *szplcy, WRegion *reg,
         fp->g.y=y_;
     }else if(rq_flags&REGION_RQGEOM_WEAK_Y){
         switch((*szplcy)&SIZEPOLICY_VERT_MASK){
+        case SIZEPOLICY_VERT_CENTER:
+            fp->g.y=max_geom.y+(max_geom.h-h)/2;
+            break;
+            
         case SIZEPOLICY_VERT_TOP:
             fp->g.y=max_geom.y;
             break;
@@ -200,16 +212,10 @@ static void sizepolicy_free_snap(WSizePolicy *szplcy, WRegion *reg,
     
     (*szplcy)&=~(SIZEPOLICY_VERT_MASK|SIZEPOLICY_HORIZ_MASK);
     
-    *szplcy|=(fp->g.x<=max_geom.x
-              ? SIZEPOLICY_HORIZ_LEFT
-              : (fp->g.x+fp->g.w>=max_geom.x+max_geom.w
-                 ? SIZEPOLICY_HORIZ_RIGHT
-                 : SIZEPOLICY_HORIZ_NONE));
-    *szplcy|=(fp->g.y<=max_geom.y
-              ? SIZEPOLICY_VERT_TOP
-              : (fp->g.y+fp->g.h>=max_geom.y+max_geom.h
-                 ? SIZEPOLICY_VERT_BOTTOM
-                 : SIZEPOLICY_VERT_NONE));
+    *szplcy|=( (fullw || fp->g.x<=max_geom.x ? SIZEPOLICY_HORIZ_LEFT : 0)
+              |(fullw || fp->g.x+fp->g.w>=max_geom.x+max_geom.w ? SIZEPOLICY_HORIZ_RIGHT : 0)
+              |(fullh || fp->g.y<=max_geom.y ? SIZEPOLICY_VERT_TOP : 0)
+              |(fullh || fp->g.y+fp->g.h>=max_geom.y+max_geom.h ? SIZEPOLICY_VERT_BOTTOM : 0));
 }
 
 
@@ -233,22 +239,22 @@ void sizepolicy(WSizePolicy *szplcy, WRegion *reg,
         break;
         
     case SIZEPOLICY_STRETCH_LEFT:
-        gravity_stretch_policy(SIZEPOLICY_HORIZ_LEFT, 
+        gravity_stretch_policy(SIZEPOLICY_HORIZ_LEFT|SIZEPOLICY_VERT_CENTER, 
                                reg, &tmp, fp, FALSE, TRUE);
         break;
         
     case SIZEPOLICY_STRETCH_RIGHT:
-        gravity_stretch_policy(SIZEPOLICY_HORIZ_RIGHT, 
+        gravity_stretch_policy(SIZEPOLICY_HORIZ_RIGHT|SIZEPOLICY_VERT_CENTER, 
                                reg, &tmp, fp, FALSE, TRUE);
         break;
         
     case SIZEPOLICY_STRETCH_TOP:
-        gravity_stretch_policy(SIZEPOLICY_VERT_TOP, 
+        gravity_stretch_policy(SIZEPOLICY_VERT_TOP|SIZEPOLICY_HORIZ_CENTER, 
                                reg, &tmp, fp, TRUE, FALSE);
         break;
         
     case SIZEPOLICY_STRETCH_BOTTOM:
-        gravity_stretch_policy(SIZEPOLICY_VERT_BOTTOM, 
+        gravity_stretch_policy(SIZEPOLICY_VERT_BOTTOM|SIZEPOLICY_HORIZ_CENTER, 
                                reg, &tmp, fp, TRUE, FALSE);
         break;
         
