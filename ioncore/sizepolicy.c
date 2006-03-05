@@ -308,6 +308,15 @@ static struct szplcy_spec szplcy_specs[] = {
     {"stretch_bottom",  SIZEPOLICY_STRETCH_BOTTOM},
     {"stretch_left",    SIZEPOLICY_STRETCH_LEFT},
     {"stretch_right",   SIZEPOLICY_STRETCH_RIGHT},
+    {"free_glue_northwest",  SIZEPOLICY_FREE_GLUE__NORTHWEST},
+    {"free_glue_north",      SIZEPOLICY_FREE_GLUE__NORTH},
+    {"free_glue_northeast",  SIZEPOLICY_FREE_GLUE__NORTHEAST},
+    {"free_glue_west",       SIZEPOLICY_FREE_GLUE__WEST},
+    {"free_glue_center",     SIZEPOLICY_FREE_GLUE__CENTER},
+    {"free_glue_east",       SIZEPOLICY_FREE_GLUE__EAST},
+    {"free_glue_southwest",  SIZEPOLICY_FREE_GLUE__SOUTHWEST},
+    {"free_glue_south",      SIZEPOLICY_FREE_GLUE__SOUTH},
+    {"free_glue_southeast",  SIZEPOLICY_FREE_GLUE__SOUTHEAST},
     { NULL,             SIZEPOLICY_DEFAULT}   /* end marker */
 };
 

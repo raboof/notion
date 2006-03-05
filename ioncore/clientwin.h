@@ -53,7 +53,7 @@ DECLCLASS(WClientWin){
 
     Window transient_for;
     
-    PtrList *transient_list;
+    WLListNode *transient_list;
     
     WClientWin *g_cwin_next, *g_cwin_prev;
     
@@ -69,9 +69,7 @@ DECLCLASS(WClientWin){
     ExtlTab proptab;
 
     WSizePolicy szplcy;           /* size policy (when there is slack) */
-    WSizePolicy transient_szplcy; /* size policy used for transients managed */
-                                  /* by this window, if the transient does */
-                                  /* not have a size policy. */
+    WSizePolicy transient_szplcy; /* default transient size policy */
 };
 
 

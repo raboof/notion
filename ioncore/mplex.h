@@ -60,7 +60,6 @@ enum{
 INTRSTRUCT(WMPlexSTDispInfo);
 INTRSTRUCT(WMPlexChangedParams);
 INTRSTRUCT(WMPlexAttachParams);
-INTRSTRUCT(WLListNode); /* in mplexp.h */
 
 
 DECLSTRUCT(WMPlexSTDispInfo){
