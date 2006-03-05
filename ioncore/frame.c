@@ -503,7 +503,7 @@ static void frame_rqgeom_clientwin(WFrame *frame, WClientWin *cwin,
             geom.y=REGION_GEOM(par).h-4;
     }
 
-    region_rqgeom((WRegion*)frame, REGION_RQGEOM_NORMAL, &geom, NULL);
+    region_rqgeom((WRegion*)frame, rqflags, &geom, NULL);
 }
 
 
