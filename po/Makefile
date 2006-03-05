@@ -12,7 +12,7 @@ MSGFMT = msgfmt
 MSGMERGE = msgmerge
 LXGETTEXT = $(LUA) $(TOPDIR)/build/lxgettext.lua
 
-TRANSLATIONS := fi cs de
+TRANSLATIONS := fi cs de ru
 MO_FILES := $(patsubst %,%.mo, $(TRANSLATIONS))
 PO_FILES := $(patsubst %,%.po, $(TRANSLATIONS))
 
