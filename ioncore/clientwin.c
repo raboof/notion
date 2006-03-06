@@ -58,6 +58,9 @@ WHook *clientwin_property_change_hook=NULL;
                                 : NULL)
 
 
+#define DFLT_SZPLCY SIZEPOLICY_FREE_GLUE__SOUTH
+
+
 /*{{{ Get properties */
 
 
@@ -103,7 +106,7 @@ static WSizePolicy get_sizepolicy_winprop(WClientWin *cwin,
                                           const char *propname)
 {
     char *szplcy;
-    WSizePolicy value=SIZEPOLICY_DEFAULT;
+    WSizePolicy value=DFLT_SZPLCY;
 
     if(extl_table_gets_s(cwin->proptab, propname, &szplcy)){
         string2sizepolicy(szplcy, &value);
@@ -333,7 +336,7 @@ static bool clientwin_init(WClientWin *cwin, WWindow *par, Window win,
     cwin->fs_pholder=NULL;
 
     cwin->szplcy=SIZEPOLICY_DEFAULT;
-    cwin->transient_szplcy=SIZEPOLICY_FREE_GLUE__SOUTH;
+    cwin->transient_szplcy=DFLT_SZPLCY;
     
     region_init(&(cwin->region), par, &(cwin->last_fp));
 
