@@ -96,6 +96,22 @@ static int compare_bindings(const WBinding *a, const WBinding *b)
     }
     return r;
 }
+
+/* This is only used for searching AnyKey etc. */
+static int compare_bindings_ksb(const WBinding *a, const WBinding *b)
+{
+    int r=CVAL(a, b, act);
+    if(r==0){
+        r=CVAL(a, b, ksb);
+        if(r==0){
+            r=CVAL(a, b, state);
+            if(r==0){
+                r=CVAL(a, b, area);
+            }
+        }
+    }
+    return r;
+}
                     
 #undef CVAL
 
@@ -352,14 +368,14 @@ void ioncore_update_modmap()
 
 void binding_grab_on(const WBinding *binding, Window win)
 {
-    if(binding->act==BINDING_KEYPRESS){
-#ifndef CF_HACK_IGNORE_EVIL_LOCKS            
+    if(binding->act==BINDING_KEYPRESS && binding->kcb!=0){
+#ifndef CF_HACK_IGNORE_EVIL_LOCKS
         XGrabKey(ioncore_g.dpy, binding->kcb, binding->state, win,
                  True, GrabModeAsync, GrabModeAsync);
-#else        
+#else
         evil_grab_key(ioncore_g.dpy, binding->kcb, binding->state, win,
                       True, GrabModeAsync, GrabModeAsync);
-#endif            
+#endif
     }
     
     if(binding->act!=BINDING_BUTTONPRESS &&
@@ -371,11 +387,11 @@ void binding_grab_on(const WBinding *binding, Window win)
     if(binding->state==0)
         return;
     
-#ifndef CF_HACK_IGNORE_EVIL_LOCKS            
+#ifndef CF_HACK_IGNORE_EVIL_LOCKS
     XGrabButton(ioncore_g.dpy, binding->kcb, binding->state, win,
                 True, IONCORE_EVENTMASK_PTRGRAB, GrabModeAsync, GrabModeAsync,
                 None, None);
-#else            
+#else
     evil_grab_button(ioncore_g.dpy, binding->kcb, binding->state, win,
                      True, IONCORE_EVENTMASK_PTRGRAB, GrabModeAsync, GrabModeAsync,
                      None, None);
@@ -431,8 +447,27 @@ static WBinding *search_binding(WBindmap *bindmap, WBinding *binding)
 }
 
 
+static WBinding *search_binding_ksb(WBindmap *bindmap, WBinding *binding)
+{
+    Rb_node node;
+    int found=0;
+
+    if(bindmap->bindings==NULL)
+        return NULL;
+    
+    node=rb_find_gkey_n(bindmap->bindings, binding,
+                        (Rb_compfn*)compare_bindings_ksb, &found);
+    
+    if(found==0)
+        return NULL;
+    
+    return (WBinding*)rb_val(node);
+}
+
+
 static WBinding *do_bindmap_lookup_binding(WBindmap *bindmap,
-                                   int act, uint state, uint kcb, int area)
+                                           int act, uint state, 
+                                           uint kcb, int area)
 {
     WBinding *binding, tmp;
 
@@ -457,12 +492,13 @@ static WBinding *do_bindmap_lookup_binding(WBindmap *bindmap,
 
         if(binding==NULL){
             tmp.state=state;
-            tmp.kcb=(act==BINDING_KEYPRESS ? AnyKey : AnyButton);
-            binding=search_binding(bindmap, &tmp);
+            tmp.ksb=(act==BINDING_KEYPRESS ? AnyKey : AnyButton);
+            
+            binding=search_binding_ksb(bindmap, &tmp);
 
             if(binding==NULL){
                 tmp.state=AnyModifier;
-                binding=search_binding(bindmap, &tmp);
+                binding=search_binding_ksb(bindmap, &tmp);
             }
         }
     }
@@ -471,14 +507,15 @@ static WBinding *do_bindmap_lookup_binding(WBindmap *bindmap,
 }
 
 
-WBinding *bindmap_lookup_binding(WBindmap *bindmap, int act, uint state, uint kcb)
+WBinding *bindmap_lookup_binding(WBindmap *bindmap,
+                                 int act, uint state, uint kcb)
 {
     return do_bindmap_lookup_binding(bindmap, act, state, kcb, 0);
 }
 
 
 WBinding *bindmap_lookup_binding_area(WBindmap *bindmap,
-                              int act, uint state, uint kcb, int area)
+                                      int act, uint state, uint kcb, int area)
 {
     WBinding *binding;
     
