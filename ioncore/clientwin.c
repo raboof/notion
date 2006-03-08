@@ -784,7 +784,7 @@ static void clientwin_managed_remove(WClientWin *cwin, WRegion *transient)
         if(reg==NULL)
             reg=&cwin->region;
         
-        region_warp(reg);
+        region_set_focus(reg);
     }
 }
 
