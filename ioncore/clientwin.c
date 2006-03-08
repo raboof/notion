@@ -797,7 +797,7 @@ bool clientwin_rescue_clientwins(WClientWin *cwin, WPHolder *ph)
     llist_iter_init(&tmp, cwin->transient_list);
     
     ret1=region_rescue_some_clientwins((WRegion*)cwin, ph,
-                                       (WRegionIterator*)llist_iter, 
+                                       (WRegionIterator*)llist_iter_regions, 
                                        &tmp);
 
     ret2=region_rescue_child_clientwins((WRegion*)cwin, ph);
@@ -1625,7 +1625,7 @@ ExtlTab clientwin_managed_list(WClientWin *cwin)
     
     llist_iter_init(&tmp, cwin->transient_list);
     
-    return extl_obj_iterable_to_table((ObjIterator*)llist_iter, &tmp);
+    return extl_obj_iterable_to_table((ObjIterator*)llist_iter_regions, &tmp);
 }
 
 
