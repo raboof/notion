@@ -101,11 +101,11 @@ static void gravity_stretch_policy(int szplcy, WRegion *reg,
 
     fp->g=*rq_geom;
     
-    w=(ws ? max_geom.w : minof(fp->g.w, max_geom.w));
-    h=(hs ? max_geom.h : minof(fp->g.h, max_geom.h));
+    w=(ws ? max_geom.w : minof(rq_geom->w, max_geom.w));
+    h=(hs ? max_geom.h : minof(rq_geom->h, max_geom.h));
     
-    if(fp->g.w!=w || fp->g.h!=h){
-        /* Only apply size hint correction if we shrunk the 
+    if(rq_geom->w!=w || rq_geom->h!=h){
+        /* Only apply size hint correction if we altered the 
          * requested geometry.
          */
         correct_size(reg, &w, &h);
