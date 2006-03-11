@@ -1095,7 +1095,8 @@ end
 function mod_query.query_menu(mplex, themenu, prompt)
     local _sub=mplex:current()
     local menu=ioncore.evalmenu(themenu, {mplex, _sub})
-
+    local menuname=(type(themenu)=="string" and themenu or "?")
+    
     if not menu then
         mod_query.warn(mplex, TR("Unknown menu %s.", tostring(themenu)))
         return
@@ -1164,7 +1165,7 @@ function mod_query.query_menu(mplex, themenu, prompt)
     end
     
     mod_query.query(mplex, prompt, nil, handle, 
-                    mod_query.make_completor(complete), "menu")
+                    mod_query.make_completor(complete), "menu."..menuname)
 end
 
 -- }}}
