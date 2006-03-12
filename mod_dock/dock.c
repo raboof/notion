@@ -1177,7 +1177,6 @@ WDock *mod_dock_create(ExtlTab tab)
     int screenid=0;
     WScreen *screen=NULL;
     WDock *dock=NULL;
-    WFitParams fp;
     WRegion *stdisp=NULL;
     WMPlexSTDispInfo din;
     
@@ -1240,6 +1239,14 @@ WDock *mod_dock_create(ExtlTab tab)
                                      NULL,
                                      &par);
     }else{
+        WFitParams fp;
+        
+        fp.mode=REGION_FIT_BOUNDS|REGION_FIT_WHATEVER;
+        fp.g.x=0;
+        fp.g.y=0;
+        fp.g.w=1;
+        fp.g.h=1;
+        
         dock=create_dock((WWindow*)screen, &fp);
     }
 
