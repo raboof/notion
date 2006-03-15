@@ -172,8 +172,10 @@ bool mainloop_check_signals()
                     handler(q, obj);
                 }else if(q->extl_handler!=extl_fn_none()){
                     ExtlFn fn=q->extl_handler;
+                    Obj *obj=q->objwatch.obj;
+                    watch_reset(&(q->objwatch));
                     q->extl_handler=extl_fn_none();
-                    extl_call(fn, "o", NULL, q);
+                    extl_call(fn, "o", NULL, obj);
                     extl_unref_fn(fn);
                 }
             }else{
