@@ -103,10 +103,10 @@ void ioncore_set_get_winprop_fn(ExtlFn fn)
 
 
 static WSizePolicy get_sizepolicy_winprop(WClientWin *cwin,
-                                          const char *propname)
+                                          const char *propname,
+                                          WSizePolicy value)
 {
     char *szplcy;
-    WSizePolicy value=DFLT_SZPLCY;
 
     if(extl_table_gets_s(cwin->proptab, propname, &szplcy)){
         string2sizepolicy(szplcy, &value);
@@ -184,8 +184,11 @@ static void clientwin_get_winprops(WClientWin *cwin)
     if(extl_table_is_bool_set(tab, "ignore_cfgrq"))
         cwin->flags|=CLIENTWIN_PROP_IGNORE_CFGRQ;
 
-    cwin->szplcy=get_sizepolicy_winprop(cwin, "sizepolicy");
-    cwin->transient_szplcy=get_sizepolicy_winprop(cwin, "transient_sizepolicy");
+    cwin->szplcy=get_sizepolicy_winprop(cwin, "sizepolicy", 
+                                        SIZEPOLICY_DEFAULT);
+    cwin->transient_szplcy=get_sizepolicy_winprop(cwin, 
+                                                  "transient_sizepolicy",
+                                                  DFLT_SZPLCY);
 }
 
 
