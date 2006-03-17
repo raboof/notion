@@ -580,18 +580,21 @@ static bool create_initial_ws(WScreen *scr)
     WRegionLoadCreateFn *fn=NULL;
     WRegion *reg=NULL;
     WMPlexAttachParams par;
+    const char *wstype;
+    WRegClassInfo *info;
     
     par.flags=0;
     
-    if(ioncore_default_ws_type!=NULL){
-        WRegClassInfo *info;
-        info=ioncore_lookup_regclass(ioncore_default_ws_type, FALSE);
-        if(info!=NULL)
-            fn=info->lc_fn;
-    }
+    wstype=(ioncore_default_ws_type!=NULL
+            ? ioncore_default_ws_type
+            : "WIonWS");
         
+    info=ioncore_lookup_regclass(ioncore_default_ws_type, FALSE);
+    if(info!=NULL)
+        fn=info->lc_fn;
+    
     if(fn==NULL){
-        WRegClassInfo *info=ioncore_lookup_regclass("WGenWS", TRUE);
+        info=ioncore_lookup_regclass("WGenWS", TRUE);
         if(info!=NULL)
             fn=info->lc_fn;
     }
