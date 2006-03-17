@@ -588,8 +588,8 @@ static bool create_initial_ws(WScreen *scr)
     wstype=(ioncore_default_ws_type!=NULL
             ? ioncore_default_ws_type
             : "WIonWS");
-        
-    info=ioncore_lookup_regclass(ioncore_default_ws_type, FALSE);
+    
+    info=ioncore_lookup_regclass(wstype, FALSE);
     if(info!=NULL)
         fn=info->lc_fn;
     
