@@ -266,7 +266,12 @@ defmenu("mainmenu", {
 -- Application menu
 defmenu("appmenu", {
     menuentry("XTerm",          "ioncore.exec_on(_, 'xterm')"),
-    menuentry("Mozilla Firefox","ioncore.exec_on(_, 'firefox')"),
+    menuentry("W3M",            "ioncore.exec_on(_, ':w3m -v')"),
+    menuentry("Rxvt",           "ioncore.exec_on(_, 'rxvt')"),
+    menuentry("Opera",          "ioncore.exec_on(_, 'opera')"),
+    menuentry("Links",          "ioncore.exec_on(_, ':links')"),
+    menuentry("Konqueror",      "ioncore.exec_on(_, 'konqueror')"),
+    menuentry("Dillo",          "ioncore.exec_on(_, 'dillo')"),
     menuentry("Run...",         "mod_query.query_exec(_)"),
 })
 
