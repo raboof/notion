@@ -44,6 +44,8 @@ TO_CLEAN += preload.c
 LIBS += -lSM -lICE
 else
 LINKOPTS = $(EXPORT_DYNAMIC)
+# Ugly hack to make ld include ptrlist.o from libtu for modules.
+LINKOPTS += -u ptrlist_iter
 endif
 
 ETC = cfg_pwm.lua
