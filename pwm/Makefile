@@ -16,7 +16,7 @@ INCLUDES += $(LIBMAINLOOP_INCLUDES) $(LIBTU_INCLUDES) $(LIBEXTL_INCLUDES)
 INCLUDES += -I..
 
 LIBS += $(X11_LIBS) $(XINERAMA_LIBS)
-LIBS += $(LIBMAINLOOP_LIBS) $(LIBEXTL_LIBS) $(LIBTU_LIBS)
+LIBS += $(WHOLEA) $(LIBMAINLOOP_LIBS) $(LIBEXTL_LIBS) $(LIBTU_LIBS) $(NO_WHOLEA)
 LIBS += $(LUA_LIBS) $(DL_LIBS)
 LIBS += -lm
 
@@ -44,8 +44,8 @@ TO_CLEAN += preload.c
 LIBS += -lSM -lICE
 else
 LINKOPTS = $(EXPORT_DYNAMIC)
-# Ugly hack to make ld include ptrlist.o from libtu for modules.
-LINKOPTS += -u ptrlist_iter
+WHOLEA = -Wl,-whole-archive
+NO_WHOLEA = -Wl,-no-whole-archive
 endif
 
 ETC = cfg_pwm.lua
