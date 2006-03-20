@@ -296,6 +296,17 @@ static void configure_cwin_bw(Window win, int bw)
 }
 
 
+static void set_sane_gravity(Window win)
+{
+    XSetWindowAttributes attr;
+    
+    attr.win_gravity=NorthWestGravity;
+    
+    XChangeWindowAttributes(ioncore_g.dpy, win,
+                            CWWinGravity, &attr);
+}
+
+
 static bool clientwin_init(WClientWin *cwin, WWindow *par, Window win,
                            XWindowAttributes *attr)
 {
@@ -322,6 +333,8 @@ static bool clientwin_init(WClientWin *cwin, WWindow *par, Window win,
         geom.y+=xgravity_deltay(cwin->size_hints.win_gravity, 
                                -cwin->orig_bw, -cwin->orig_bw);
     }
+    
+    set_sane_gravity(cwin->win);
 
     cwin->last_fp.g=geom;
     cwin->last_fp.mode=REGION_FIT_EXACT;
