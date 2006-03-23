@@ -1,0 +1,757 @@
+From background-static Thu Mar 23 17:30:06 EET 2006
+Message-Id: <riot.20060323173006.1@riot.invalid>
+Date: Thu Mar 23 17:30:06 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 17:30:06 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: Ion TODO list
+
+Ion TODO list
+
+From background-static Thu Mar 23 18:08:00 EET 2006
+Message-Id: <riot.20060323180800.34@riot.invalid>
+Date: Thu Mar 23 18:08:00 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 18:08:12 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: Core/general
+In-Reply-To: <riot.20060323173006.1@riot.invalid>
+
+Core/general
+
+From background-static Thu Mar 23 17:31:43 EET 2006
+Message-Id: <riot.20060323173143.2@riot.invalid>
+Date: Thu Mar 23 17:31:43 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 17:31:46 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: Startup sequence support
+In-Reply-To: <riot.20060323180800.34@riot.invalid>
+
+Startup sequence support
+
+Support for the FDO startup notification specification should be
+added. Ion should arrange things in the right frame by LAUNCHED_BY.
+
+The specification is at
+
+<http://standards.freedesktop.org/startup-notification-spec/startup-notification-latest.txt>
+
+From background-static Thu Mar 23 17:37:02 EET 2006
+Message-Id: <riot.20060323173702.3@riot.invalid>
+Date: Thu Mar 23 17:37:02 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 17:37:02 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: Transition to Lua 5.1
+In-Reply-To: <riot.20060323180800.34@riot.invalid>
+
+Transition to Lua 5.1
+
+From background-static Thu Mar 23 17:38:29 EET 2006
+Message-Id: <riot.20060323173829.4@riot.invalid>
+Date: Thu Mar 23 17:38:29 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 17:38:29 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: goto_notification_target
+In-Reply-To: <riot.20060323180800.34@riot.invalid>
+
+goto_notification_target
+
+It should be possible to go to a region with activity flag set in
+the order of the flags being set by hitting a key.
+
+From background-static Thu Mar 23 17:41:20 EET 2006
+Message-Id: <riot.20060323174120.11@riot.invalid>
+Date: Thu Mar 23 17:41:20 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 17:41:20 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: Better support for the few applicable EWMH hints
+In-Reply-To: <riot.20060323180800.34@riot.invalid>
+
+Better support for the few applicable EWMH hints
+
+From background-static Thu Mar 23 17:47:26 EET 2006
+Message-Id: <riot.20060323174726.1@riot.invalid>
+Date: Thu Mar 23 17:47:26 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 17:47:26 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: Should separate stacking code from mod_floatws
+In-Reply-To: <riot.20060323180800.34@riot.invalid>
+
+Should separate stacking code from mod_floatws 
+into a separate independent source file ("module").
+
+From background-static Thu Mar 23 17:52:17 EET 2006
+Message-Id: <riot.20060323175217.6@riot.invalid>
+Date: Thu Mar 23 17:52:17 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 17:52:17 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: Numbered tabs
+In-Reply-To: <riot.20060323180800.34@riot.invalid>
+
+Numbered tabs
+
+Either togglable, or perhaps the numbers should be shown when
+a prefix of the key combo to switch tabs has been entered.
+The latter will be quite more complicated to implement.
+
+From background-static Thu Mar 23 17:54:55 EET 2006
+Message-Id: <riot.20060323175455.10@riot.invalid>
+Date: Thu Mar 23 17:54:55 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 17:55:31 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: Framed transients should be better
+In-Reply-To: <riot.20060323180800.34@riot.invalid>
+
+Framed transients should be better
+
+It's not really nice that the transient blocks tab-switching bindings
+for the containing frame and so on.
+
+From background-static Thu Mar 23 17:57:15 EET 2006
+Message-Id: <riot.20060323175715.12@riot.invalid>
+Date: Thu Mar 23 17:57:15 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 17:57:15 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: It should be possible to re-attach regions within same manager
+In-Reply-To: <riot.20060323180800.34@riot.invalid>
+
+It should be possible to re-attach regions within same manager 
+at a new location. (Not really that important, though, but 
+it's ugly that it has to be forbidden ATM.)
+
+From background-static Thu Mar 23 17:58:26 EET 2006
+Message-Id: <riot.20060323175826.14@riot.invalid>
+Date: Thu Mar 23 17:58:26 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 17:58:33 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: A version of ioncore.warn() that doesn't dump stack trace
+In-Reply-To: <riot.20060323180800.34@riot.invalid>
+
+A version of ioncore.warn() that doesn't dump stack trace
+should be available for Lua-side Ion code.
+
+From background-static Thu Mar 23 18:00:25 EET 2006
+Message-Id: <riot.20060323180025.17@riot.invalid>
+Date: Thu Mar 23 18:00:25 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 18:00:25 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: Some way to load/initialise inherited drawing engines properly.
+In-Reply-To: <riot.20060323180800.34@riot.invalid>
+
+Some way to load/initialise inherited drawing engines properly.
+
+From background-static Thu Mar 23 18:04:35 EET 2006
+Message-Id: <riot.20060323180435.27@riot.invalid>
+Date: Thu Mar 23 18:04:35 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 18:04:35 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: New hooks?
+In-Reply-To: <riot.20060323180800.34@riot.invalid>
+
+New hooks?
+
+From background-static Thu Mar 23 18:10:34 EET 2006
+Message-Id: <riot.20060323181034.36@riot.invalid>
+Date: Thu Mar 23 18:10:34 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 18:10:34 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: Tiled workspaces
+In-Reply-To: <riot.20060323173006.1@riot.invalid>
+
+Tiled workspaces
+
+From background-static Thu Mar 23 17:40:03 EET 2006
+Message-Id: <riot.20060323174003.7@riot.invalid>
+Date: Thu Mar 23 17:40:03 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 17:40:03 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: A general solution to transients, queries and menus in tiny frames.
+In-Reply-To: <riot.20060323181034.36@riot.invalid>
+
+A general solution to transients, queries and menus in tiny frames.
+
+From background-static Thu Mar 23 17:40:08 EET 2006
+Message-Id: <riot.20060323174008.8@riot.invalid>
+Date: Thu Mar 23 17:40:08 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 17:40:10 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: PaneWS
+In-Reply-To: <riot.20060323181034.36@riot.invalid>
+
+PaneWS
+
+From background-static Thu Mar 23 17:40:13 EET 2006
+Message-Id: <riot.20060323174013.9@riot.invalid>
+Date: Thu Mar 23 17:40:13 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 17:40:13 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: Lots of fine-tuning
+In-Reply-To: <riot.20060323174008.8@riot.invalid>
+
+Lots of fine-tuning
+
+From background-static Thu Mar 23 17:50:02 EET 2006
+Message-Id: <riot.20060323175002.4@riot.invalid>
+Date: Thu Mar 23 17:50:02 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 17:50:22 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: Pane handles should allow resizing with the rodent.
+In-Reply-To: <riot.20060323181034.36@riot.invalid>
+
+Pane handles should allow resizing with the rodent.
+(You know, those things on the sides of floating splits.)
+
+From background-static Thu Mar 23 18:09:58 EET 2006
+Message-Id: <riot.20060323180958.35@riot.invalid>
+Date: Thu Mar 23 18:09:58 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 18:10:27 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: mod_statusbar and ion-statusd
+In-Reply-To: <riot.20060323173006.1@riot.invalid>
+
+mod_statusbar and ion-statusd
+
+From background-static Thu Mar 23 17:36:11 EET 2006
+Message-Id: <riot.20060323173611.1@riot.invalid>
+Date: Thu Mar 23 17:36:11 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 17:36:11 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: Multi-line statusbar
+In-Reply-To: <riot.20060323180958.35@riot.invalid>
+
+Multi-line statusbar
+
+From background-static Thu Mar 23 17:36:44 EET 2006
+Message-Id: <riot.20060323173644.2@riot.invalid>
+Date: Thu Mar 23 17:36:44 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 17:39:08 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: Better control of layout etc.
+In-Reply-To: <riot.20060323180958.35@riot.invalid>
+
+Better control of layout etc.
+
+From background-static Thu Mar 23 17:39:20 EET 2006
+Message-Id: <riot.20060323173920.6@riot.invalid>
+Date: Thu Mar 23 17:39:20 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 17:39:20 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: mpress support for meters or other areas.
+In-Reply-To: <riot.20060323180958.35@riot.invalid>
+
+mpress support for meters or other areas.
+
+From background-static Thu Mar 23 17:54:07 EET 2006
+Message-Id: <riot.20060323175407.8@riot.invalid>
+Date: Thu Mar 23 17:54:07 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 17:54:07 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: Communicating configuration to statusd shouldn't use temp file
+In-Reply-To: <riot.20060323180958.35@riot.invalid>
+
+Communicating configuration to statusd shouldn't use temp file
+
+From background-static Thu Mar 23 18:11:44 EET 2006
+Message-Id: <riot.20060323181144.39@riot.invalid>
+Date: Thu Mar 23 18:11:44 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 18:11:44 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: mod_query
+In-Reply-To: <riot.20060323173006.1@riot.invalid>
+
+mod_query
+
+From background-static Thu Mar 23 17:40:27 EET 2006
+Message-Id: <riot.20060323174027.10@riot.invalid>
+Date: Thu Mar 23 17:40:27 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 17:40:35 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: mod_query.message should handle tabs properly
+In-Reply-To: <riot.20060323181144.39@riot.invalid>
+
+mod_query.message should handle tabs properly
+
+From background-static Thu Mar 23 18:11:52 EET 2006
+Message-Id: <riot.20060323181152.40@riot.invalid>
+Date: Thu Mar 23 18:11:52 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 18:11:52 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: mod_dock
+In-Reply-To: <riot.20060323173006.1@riot.invalid>
+
+mod_dock
+
+From background-static Thu Mar 23 17:58:56 EET 2006
+Message-Id: <riot.20060323175856.15@riot.invalid>
+Date: Thu Mar 23 17:58:56 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 17:58:56 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: There are some problems with user geometries of docked apps.
+In-Reply-To: <riot.20060323181152.40@riot.invalid>
+
+There are some problems with user geometries of docked apps.
+
+From background-static Thu Mar 23 18:12:02 EET 2006
+Message-Id: <riot.20060323181202.41@riot.invalid>
+Date: Thu Mar 23 18:12:02 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 18:12:02 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: mod_mgmtmode
+In-Reply-To: <riot.20060323173006.1@riot.invalid>
+
+mod_mgmtmode
+
+From background-static Thu Mar 23 18:04:54 EET 2006
+Message-Id: <riot.20060323180454.28@riot.invalid>
+Date: Thu Mar 23 18:04:54 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 18:04:54 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: An actual management mode for mod_mgmtmode.
+In-Reply-To: <riot.20060323181202.41@riot.invalid>
+
+An actual management mode for mod_mgmtmode.
+
+From background-static Thu Mar 23 18:11:20 EET 2006
+Message-Id: <riot.20060323181120.38@riot.invalid>
+Date: Thu Mar 23 18:11:20 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 18:11:20 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: Drawing engine(s)
+In-Reply-To: <riot.20060323173006.1@riot.invalid>
+
+Drawing engine(s)
+
+From background-static Thu Mar 23 18:02:32 EET 2006
+Message-Id: <riot.20060323180232.22@riot.invalid>
+Date: Thu Mar 23 18:02:32 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 18:02:32 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: There should be a sticky attribute for the drawing engine
+In-Reply-To: <riot.20060323181120.38@riot.invalid>
+
+There should be a sticky attribute for the drawing engine
+for sticky floatws frames.
+
+From background-static Thu Mar 23 18:06:40 EET 2006
+Message-Id: <riot.20060323180640.31@riot.invalid>
+Date: Thu Mar 23 18:06:40 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 18:06:40 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: There are some problems with transparent backgrounds of tabs, IIRC.
+In-Reply-To: <riot.20060323181120.38@riot.invalid>
+
+There are some problems with transparent backgrounds of tabs, IIRC.
+
+From background-static Thu Mar 23 18:07:53 EET 2006
+Message-Id: <riot.20060323180753.33@riot.invalid>
+Date: Thu Mar 23 18:07:53 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 18:07:53 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: Documentation
+In-Reply-To: <riot.20060323173006.1@riot.invalid>
+
+Documentation
+
+From background-static Thu Mar 23 17:32:26 EET 2006
+Message-Id: <riot.20060323173226.3@riot.invalid>
+Date: Thu Mar 23 17:32:26 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 17:32:26 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: Documentation doesn't build ATM.
+In-Reply-To: <riot.20060323180753.33@riot.invalid>
+
+Documentation doesn't build ATM.
+
+It should be changed to build, or converted to some yet non-existent
+latex replacement that doesn't have all the problems of latex.
+
+From background-static Thu Mar 23 18:03:14 EET 2006
+Message-Id: <riot.20060323180314.23@riot.invalid>
+Date: Thu Mar 23 18:03:14 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 18:03:14 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: Autoconf
+In-Reply-To: <riot.20060323173006.1@riot.invalid>
+
+Autoconf
+
+From background-static Thu Mar 23 18:03:17 EET 2006
+Message-Id: <riot.20060323180317.24@riot.invalid>
+Date: Thu Mar 23 18:03:17 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 18:03:17 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: -lintl check
+In-Reply-To: <riot.20060323180314.23@riot.invalid>
+
+-lintl check
+
+From background-static Thu Mar 23 18:03:25 EET 2006
+Message-Id: <riot.20060323180325.25@riot.invalid>
+Date: Thu Mar 23 18:03:25 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 18:03:25 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: xmessage check?
+In-Reply-To: <riot.20060323180314.23@riot.invalid>
+
+xmessage check?
+
+From background-static Thu Mar 23 18:03:33 EET 2006
+Message-Id: <riot.20060323180333.26@riot.invalid>
+Date: Thu Mar 23 18:03:33 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 18:03:33 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: What else is broken (besides ac itself)?
+In-Reply-To: <riot.20060323180314.23@riot.invalid>
+
+What else is broken (besides ac itself)?
+
+From background-static Thu Mar 23 17:33:17 EET 2006
+Message-Id: <riot.20060323173317.5@riot.invalid>
+Date: Thu Mar 23 17:33:17 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 17:49:42 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: Random ideas to try (semi-TODO)
+
+Random ideas to try (semi-TODO)
+
+Just some stuff here for interested people to try. No guarantees
+that even a good patch will ever be accepted though. 
+
+From background-static Thu Mar 23 18:13:35 EET 2006
+Message-Id: <riot.20060323181335.42@riot.invalid>
+Date: Thu Mar 23 18:13:35 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 18:13:35 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: Perhaps the functionality of detach.lua could be implemented
+In-Reply-To: <riot.20060323173317.5@riot.invalid>
+
+Perhaps the functionality of detach.lua could be implemented
+in a better and more integrated manner. (This could be related
+to the problem of transients etc. in tiny frames in the actual
+TODO list.)
+
+From background-static Thu Mar 23 18:06:20 EET 2006
+Message-Id: <riot.20060323180620.30@riot.invalid>
+Date: Thu Mar 23 18:06:20 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 18:06:20 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: Movement threshold would be better for floating splits, raise delay
+In-Reply-To: <riot.20060323173317.5@riot.invalid>
+
+Movement threshold would be better for floating splits, raise delay 
+is just an ugly hack. This is just not implementable in a nice way
+without proper translucency support.
+
+From background-static Thu Mar 23 18:07:15 EET 2006
+Message-Id: <riot.20060323180715.32@riot.invalid>
+Date: Thu Mar 23 18:07:15 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 18:07:15 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: Composition manager and all the nice stuff possible with it
+In-Reply-To: <riot.20060323173317.5@riot.invalid>
+
+Composition manager and all the nice stuff possible with it
+
+From background-static Thu Mar 23 18:05:04 EET 2006
+Message-Id: <riot.20060323180504.29@riot.invalid>
+Date: Thu Mar 23 18:05:04 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 18:05:04 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: Key grabs from scripts?
+In-Reply-To: <riot.20060323173317.5@riot.invalid>
+
+Key grabs from scripts?
+
+From background-static Thu Mar 23 18:01:56 EET 2006
+Message-Id: <riot.20060323180156.21@riot.invalid>
+Date: Thu Mar 23 18:01:56 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 18:01:56 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: Dock resizing improvements?
+In-Reply-To: <riot.20060323173317.5@riot.invalid>
+
+Dock resizing improvements?
+
+From background-static Thu Mar 23 18:01:40 EET 2006
+Message-Id: <riot.20060323180140.20@riot.invalid>
+Date: Thu Mar 23 18:01:40 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 18:01:40 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: Perhaps dock/statusbar should be able to use a different style
+In-Reply-To: <riot.20060323173317.5@riot.invalid>
+
+Perhaps dock/statusbar should be able to use a different style
+on floatws.
+
+From background-static Thu Mar 23 18:01:23 EET 2006
+Message-Id: <riot.20060323180123.19@riot.invalid>
+Date: Thu Mar 23 18:01:23 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 18:01:23 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: Make lines with other frame splits "sticking" for resize.
+In-Reply-To: <riot.20060323173317.5@riot.invalid>
+
+Make lines with other frame splits "sticking" for resize.
+
+From background-static Thu Mar 23 18:00:54 EET 2006
+Message-Id: <riot.20060323180054.18@riot.invalid>
+Date: Thu Mar 23 18:00:54 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 18:00:54 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: Better support for nesting workspaces etc.
+In-Reply-To: <riot.20060323173317.5@riot.invalid>
+
+Better support for nesting workspaces etc.
+
+From background-static Thu Mar 23 17:59:40 EET 2006
+Message-Id: <riot.20060323175940.16@riot.invalid>
+Date: Thu Mar 23 17:59:40 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 17:59:40 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: Maybe parent window should shrink out of the way of transients
+In-Reply-To: <riot.20060323173317.5@riot.invalid>
+
+Maybe parent window should shrink out of the way of transients
+at least to some threshold.
+
+From background-static Thu Mar 23 17:57:42 EET 2006
+Message-Id: <riot.20060323175742.13@riot.invalid>
+Date: Thu Mar 23 17:57:42 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 17:57:42 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: Maybe placeholders should be exported to Lua side,
+In-Reply-To: <riot.20060323173317.5@riot.invalid>
+
+Maybe placeholders should be exported to Lua side, 
+for initial placement setup and so on.
+
+From background-static Thu Mar 23 17:54:38 EET 2006
+Message-Id: <riot.20060323175438.9@riot.invalid>
+Date: Thu Mar 23 17:54:38 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 17:54:38 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: Some kind of error reporting system for bindings
+In-Reply-To: <riot.20060323173317.5@riot.invalid>
+
+Some kind of error reporting system for bindings 
+as well while Ion is running.
+
+From background-static Thu Mar 23 17:51:09 EET 2006
+Message-Id: <riot.20060323175109.5@riot.invalid>
+Date: Thu Mar 23 17:51:09 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 17:51:09 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: Perhaps transients should restore their sizes
+In-Reply-To: <riot.20060323173317.5@riot.invalid>
+
+Perhaps transients should restore their sizes 
+when moving from a small to big frame, if the user has not resized it.
+
+From background-static Thu Mar 23 17:48:55 EET 2006
+Message-Id: <riot.20060323174855.2@riot.invalid>
+Date: Thu Mar 23 17:48:55 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 17:48:55 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: Perhaps / should be stripped from completed directory names.
+In-Reply-To: <riot.20060323173317.5@riot.invalid>
+
+Perhaps / should be stripped from completed directory names.
+It should however remain in the list of completions as a hint.
+Then typing the slash would trigger a new completion run in
+auto-show-completions mode.
+
+From background-static Thu Mar 23 17:49:07 EET 2006
+Message-Id: <riot.20060323174907.3@riot.invalid>
+Date: Thu Mar 23 17:49:07 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 17:49:07 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: How about pane handles on all splits?
+In-Reply-To: <riot.20060323173317.5@riot.invalid>
+
+How about pane handles on all splits?
+
+From background-static Thu Mar 23 17:53:19 EET 2006
+Message-Id: <riot.20060323175319.7@riot.invalid>
+Date: Thu Mar 23 17:53:19 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 17:53:19 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: Query activation key cycles completions
+In-Reply-To: <riot.20060323173317.5@riot.invalid>
+
+Query activation key cycles completions
+
+Maybe it should be possible to use a key activating a query to cycle
+the completions within the query, a bit like grabmenu.
+
+From background-static Thu Mar 23 17:32:44 EET 2006
+Message-Id: <riot.20060323173244.4@riot.invalid>
+Date: Thu Mar 23 17:32:44 EET 2006
+Status: RO
+X-Riot-Version: 1ds-yyyymmdd
+From: Riot
+X-Riot-Edited: Thu Mar 23 17:32:44 EET 2006
+Content-Type: text/plain; charset=utf-8
+Subject: Done
+
+Done
+
