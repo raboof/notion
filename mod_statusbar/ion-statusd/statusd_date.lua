@@ -22,7 +22,7 @@ local settings=table.join(statusd.get_config('date'), defaults)
 local function update()
     local tm=os.time()
     statusd.inform('date', os.date(settings.date_format, tm))
-    for k, f in settings.formats do
+    for k, f in pairs(settings.formats) do
         statusd.inform('date_'..k, os.date(f, tm))
     end
     return tm

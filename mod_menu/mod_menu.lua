@@ -30,7 +30,7 @@ local function menu_(reg, sub, menu_or_name, fn, check)
     if check then
         -- Check that no other menus are open in reg.
         local l=reg:llist(2)
-        for i, r in l do
+        for i, r in pairs(l) do
             if obj_is(r, "WMenu") then
                 return
             end

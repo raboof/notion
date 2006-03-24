@@ -23,7 +23,7 @@ end
 function table.copy(t, deep)
     local function docopy(t, deep, seen)
         local nt={}
-        for k, v in t do
+        for k, v in pairs(t) do
             local v2=v
             if deep and type(v)=="table" then
                 if seen[v] then
@@ -46,7 +46,7 @@ end
 -- \var{t2} that are missing from \var{t1}.
 function table.join(t1, t2)
     local t=table.copy(t1, false)
-    for k, v in t2 do
+    for k, v in pairs(t2) do
         if t[k]==nil then
             t[k]=v
         end
@@ -69,7 +69,7 @@ end
 -- Map all entries of \var{t} by \var{f}.
 function table.map(f, t)
     local res={}
-    for k, v in t do
+    for k, v in pairs(t) do
         res[k]=f(v)
     end
     return res
@@ -79,7 +79,7 @@ end
 --DOC
 -- Export a list of functions from \var{lib} into global namespace.
 function export(lib, ...)
-    for k, v in arg do
+    for k, v in pairs(arg) do
         _G[v]=lib[v]
     end
 end

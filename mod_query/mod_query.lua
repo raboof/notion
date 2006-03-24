@@ -57,7 +57,7 @@ function mod_query.query(mplex, prompt, initvalue, handler, completor,
     end
     -- Check that no other queries are open in the mplex.
     local l=mplex:llist(2)
-    for i, r in l do
+    for i, r in pairs(l) do
         if obj_is(r, "WEdln") then
             return
         end
@@ -107,7 +107,7 @@ end
 
 local badsig_={4, 5, 6, 7, 8, 11}
 local badsig={}
-for _, v in badsig_ do 
+for _, v in pairs(badsig_) do 
     badsig[v]=true 
 end
 
@@ -214,7 +214,7 @@ local MAXDEPTH=10
 function mod_query.lookup_workspace_classes()
     local classes={}
     
-    for k, v in _G do
+    for k, v in pairs(_G) do
         if type(v)=="table" and v.__typename then
             v2=v.__parentclass
             for i=1, MAXDEPTH do
@@ -240,7 +240,7 @@ function mod_query.complete_from_list(list, str)
     if len==0 then
         results=list
     else
-        for _, m in list do
+        for _, m in pairs(list) do
             if string.sub(m, 1, len)==str then
                 table.insert(results, m)
             end
@@ -325,7 +325,7 @@ function mod_query.popen_completions(cp, cmd, fn, reshnd)
     
     local found_clean=false
     
-    for k, v in pipes do
+    for k, v in pairs(pipes) do
         if v.cp==cp then
             if v.maybe_stalled<2 then
                 v.maybe_stalled=v.maybe_stalled+1
@@ -359,14 +359,14 @@ end
 function mod_query.complete_name(str, list)
     local entries={}
     local l=string.len(str)
-    for i, reg in list do
+    for i, reg in pairs(list) do
         local nm=reg:name()
         if nm and string.sub(nm, 1, l)==str then
             table.insert(entries, nm)
         end
     end
     if table.getn(entries)==0 then
-        for i, reg in list do
+        for i, reg in pairs(list) do
             local nm=reg:name()
             if nm and string.find(nm, str, 1, true) then
                 table.insert(entries, nm)
@@ -1035,14 +1035,16 @@ function mod_query.do_complete_lua(env, str)
     local tab=comptab
     local seen={}
     while true do
-        for k in tab do
-            if type(k)=="string" then
-                if string.sub(k, 1, l)==tocomp then
-                    table.insert(compl, k)
+        if type(tab) == "table" then
+            for k in pairs(tab) do
+                if type(k)=="string" then
+                    if string.sub(k, 1, l)==tocomp then
+                        table.insert(compl, k)
+                    end
                 end
             end
         end
-        
+
         -- We only want to display full list of functions for objects, not 
         -- the tables representing the classes.
         --if not metas then break end
@@ -1138,7 +1140,7 @@ function mod_query.query_menu(mplex, themenu, prompt)
     
     local function complete(str)
         local results={}
-        for s, e in ntab do
+        for s, e in pairs(ntab) do
             if string.find(s, str, 1, true) then
                 table.insert(results, s)
             end
@@ -1197,7 +1199,7 @@ function mod_query.show_clientwin(mplex, cwin)
                    n(cwin:name()), n(i.class), n(i.role), n(i.instance), 
                    cwin:xid())
         local t=TR("\nTransients:\n")
-        for k, v in cwin:managed_list() do
+        for k, v in pairs(cwin:managed_list()) do
             if obj_is(v, "WClientWin") then
                 s=s..t..indent(get_info(v))
                 t="\n"

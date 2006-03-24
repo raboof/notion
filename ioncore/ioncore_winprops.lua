@@ -109,7 +109,7 @@ function ioncore.defwinprop(list)
     local list2 = {}
     local class, role, instance = "*", "*", "*"
     
-    for k, v in list do
+    for k, v in pairs(list) do
         if k == "class" then
             class = v
         elseif k == "role" then

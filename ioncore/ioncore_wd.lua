@@ -130,7 +130,7 @@ local function load_config()
     local d=ioncore.read_savefile(savefile)
     if d then
         dirs={}
-        for nm, d in d do
+        for nm, d in pairs(d) do
             local r=ioncore.lookup_region(nm)
             if r then
                 local ok, err=checkdir(d)
@@ -147,7 +147,7 @@ end
 
 local function save_config()
     local t={}
-    for r, d in dirs do
+    for r, d in pairs(dirs) do
         t[r:name()]=d
     end
     ioncore.write_savefile(savefile, t)

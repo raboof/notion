@@ -280,7 +280,7 @@ for l in f:lines() do
                       return write_bindings_man(db)
                   end)
     
-    for pat, rep in replaces do
+    for pat, rep in pairs(replaces) do
         l=string.gsub(l, pat, rep)
     end
     

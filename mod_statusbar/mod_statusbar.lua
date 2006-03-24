@@ -141,10 +141,10 @@ mod_statusbar._set_template_parser(mod_statusbar.template_to_table)
 -- Update statusbar contents. To be called after series
 -- of \fnref{mod_statusbar.inform} calls.
 function mod_statusbar.update(update_templates)
-    for _, sb in mod_statusbar.statusbars() do
+    for _, sb in pairs(mod_statusbar.statusbars()) do
         if update_templates then
             local t=sb:get_template_table()
-            for _, v in t do
+            for _, v in pairs(t) do
                 if v.meter then
                     v.tmpl=meters[v.meter.."_template"]
                 end
@@ -197,8 +197,8 @@ local function get_modules()
     local mods={}
     local specials={["filler"]=true, ["systray"]=true}
     
-    for _, sb in mod_statusbar.statusbars() do
-        for _, item in sb:get_template_table() do
+    for _, sb in pairs(mod_statusbar.statusbars()) do
+        for _, item in pairs(sb:get_template_table()) do
             if item.type==2 and not specials[item.meter] then
                 local _, _, m=string.find(item.meter, "^([^_]*)");
                 if m and m~="" then
@@ -246,7 +246,7 @@ function mod_statusbar.launch_statusd(cfg)
     local mods=get_modules()
     
     -- Load modules
-    for m in mods do
+    for m in pairs(mods) do
         if dopath("statusbar_"..m, true) then
             mods[m]=nil
         end
