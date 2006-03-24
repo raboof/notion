@@ -10,10 +10,10 @@
 --
 
 
--- This is a slight abuse of the _LOADED variable perhaps, but library-like 
--- packages should handle checking if they're loaded instead of confusing 
--- the user with require/include differences.
-if _LOADED["templates"] then return end
+-- This is a slight abuse of the package.loaded variable perhaps, but
+-- library-like packages should handle checking if they're loaded instead of
+-- confusing the user with require/include differences.
+if package.loaded["templates"] then return end
 
 if not ioncore.load_module("mod_panews") then
     return
@@ -553,7 +553,7 @@ private.setup_hooks()
 
 
 -- Mark ourselves loaded.
-_LOADED["templates"]=true
+package.loaded["templates"]=true
 
 
 -- Load configuration file

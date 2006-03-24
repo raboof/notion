@@ -9,10 +9,10 @@
 -- (at your option) any later version.
 --
 
--- This is a slight abuse of the _LOADED variable perhaps, but library-like 
--- packages should handle checking if they're loaded instead of confusing 
--- the user with require/include differences.
-if _LOADED["mod_menu"] then return end
+-- This is a slight abuse of the package.loaded variable perhaps, but
+-- library-like packages should handle checking if they're loaded instead of
+-- confusing the user with require/include differences.
+if package.loaded["mod_menu"] then return end
 
 if not ioncore.load_module("mod_menu") then
     return
@@ -104,7 +104,7 @@ end
 
 
 -- Mark ourselves loaded.
-_LOADED["mod_menu"]=true
+package.loaded["mod_menu"]=true
 
 
 -- Load configuration file

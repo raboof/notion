@@ -9,10 +9,10 @@
 -- (at your option) any later version.
 --
 
--- This is a slight abuse of the _LOADED variable perhaps, but library-like 
--- packages should handle checking if they're loaded instead of confusing 
--- the user with require/includer differences.
-if _LOADED["ioncore"] then return end
+-- This is a slight abuse of the package.loaded variable perhaps, but
+-- library-like packages should handle checking if they're loaded instead of
+-- confusing the user with require/includer differences.
+if package.loaded["ioncore"] then return end
 
 -- Default modifiers
 --MOD1="Mod1+"
@@ -75,7 +75,7 @@ export(ioncore,
        "submenu")
 
 -- Mark ourselves loaded.
-_LOADED["ioncore"]=true
+package.loaded["ioncore"]=true
 
 
 

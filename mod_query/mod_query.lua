@@ -10,10 +10,10 @@
 --
 
 
--- This is a slight abuse of the _LOADED variable perhaps, but library-like 
--- packages should handle checking if they're loaded instead of confusing 
--- the user with require/include differences.
-if _LOADED["mod_query"] then return end
+-- This is a slight abuse of the package.loaded variable perhaps, but
+-- library-like packages should handle checking if they're loaded instead of
+-- confusing the user with require/include differences.
+if package.loaded["mod_query"] then return end
 
 if not ioncore.load_module("mod_query") then
     return
@@ -1217,7 +1217,7 @@ end
 dopath('mod_query_chdir')
 
 -- Mark ourselves loaded.
-_LOADED["mod_query"]=true
+package.loaded["mod_query"]=true
 
 
 -- Load configuration file
