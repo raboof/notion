@@ -1094,6 +1094,7 @@ WPHolder *mplex_prepare_manage(WMPlex *mplex, const WClientWin *cwin,
 {
     int swf=(param->switchto ? MPLEX_ATTACH_SWITCHTO : 0);
     WPHolder *ph=NULL;
+    WMPlexPHolder *mph;
     
     if(redir==MANAGE_REDIR_STRICT_YES || redir==MANAGE_REDIR_PREFER_YES){
         if(mplex->l2_current!=NULL){
@@ -1112,8 +1113,13 @@ WPHolder *mplex_prepare_manage(WMPlex *mplex, const WClientWin *cwin,
     
     if(redir==MANAGE_REDIR_STRICT_YES)
         return NULL;
+        
+    mph=create_mplexpholder(mplex, NULL, mplex->l1_current, 1);
     
-    return (WPHolder*)create_mplexpholder(mplex, NULL, mplex->l1_current, 1);
+    if(mph!=NULL)
+        mph->szplcy=SIZEPOLICY_FULL_BOUNDS;
+        
+    return (WPHolder*)mph;
 }
 
 
