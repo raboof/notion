@@ -572,9 +572,6 @@ static WRegion *do_create_initial(WWindow *parent, const WFitParams *fp,
 }
 
 
-extern char *ioncore_default_ws_type;
-
-
 static bool create_initial_ws(WScreen *scr)
 {
     WRegionLoadCreateFn *fn=NULL;
@@ -585,11 +582,7 @@ static bool create_initial_ws(WScreen *scr)
     
     par.flags=0;
     
-    wstype=(ioncore_default_ws_type!=NULL
-            ? ioncore_default_ws_type
-            : "WIonWS");
-    
-    info=ioncore_lookup_regclass(wstype, FALSE);
+    info=ioncore_default_ws_class();
     if(info!=NULL)
         fn=info->lc_fn;
     

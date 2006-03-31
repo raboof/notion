@@ -14,18 +14,16 @@
 
 #include <libtu/map.h>
 #include <libtu/minmax.h>
+#include <libtu/objp.h>
+#include <libextl/readconfig.h>
 
 #include "common.h"
 #include "global.h"
-#include <libextl/readconfig.h>
 #include "modules.h"
 #include "rootwin.h"
 #include "bindmaps.h"
 #include "kbresize.h"
-#include <libextl/readconfig.h>
-
-
-char *ioncore_default_ws_type=NULL;
+#include "reginfo.h"
 
 
 /*EXTL_DOC
@@ -99,13 +97,16 @@ EXTL_EXPORT
 ExtlTab ioncore_get()
 {
     ExtlTab tab=extl_create_table();
+    WRegClassInfo *info=ioncore_default_ws_class();
     
     extl_table_sets_b(tab, "opaque_resize", ioncore_g.opaque_resize);
     extl_table_sets_b(tab, "warp", ioncore_g.warp_enabled);
     extl_table_sets_b(tab, "switchto", ioncore_g.switchto_new);
     extl_table_sets_i(tab, "dblclick_delay", ioncore_g.dblclick_delay);
     extl_table_sets_b(tab, "screen_notify", ioncore_g.screen_notify);
-    extl_table_sets_s(tab, "default_ws_type", ioncore_default_ws_type);
+    extl_table_sets_s(tab, "default_ws_type", (info!=NULL
+                                               ? info->descr->name
+                                               : NULL));
     extl_table_sets_b(tab, "frame_add_last", ioncore_g.frame_add_last);
     ioncore_get_moveres_accel(tab);
     
