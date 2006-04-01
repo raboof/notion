@@ -349,7 +349,7 @@ static void floatframe_size_changed(WFloatFrame *frame, bool wchg, bool hchg)
 
 bool floatframe_set_sticky(WFloatFrame *frame, int sp)
 {
-    WFloatStacking *st=mod_floatws_find_stacking((WRegion*)frame);
+    WStacking *st=mod_floatws_find_stacking((WRegion*)frame);
     
     if(st==NULL)
         return FALSE;
@@ -379,7 +379,7 @@ EXTL_SAFE
 EXTL_EXPORT_MEMBER
 bool floatframe_is_sticky(WFloatFrame *frame)
 {
-    WFloatStacking *st=mod_floatws_find_stacking((WRegion*)frame);
+    WStacking *st=mod_floatws_find_stacking((WRegion*)frame);
     return (st!=NULL ? st->sticky : FALSE);
 }
 

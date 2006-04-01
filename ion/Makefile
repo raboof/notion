@@ -51,7 +51,7 @@ include $(TOPDIR)/rules.mk
 ######################################
 
 ion3: $(OBJS) $(EXT_OBJS)
-	$(CC) $(LINKOPTS) $(OBJS) $(EXT_OBJS) $(LDFLAGS) -o $@
+	$(CC) $(LINKOPTS) $(OBJS) $(WHOLEA) $(EXT_OBJS) $(NO_WHOLEA) $(LDFLAGS) -o $@
 
 preload.c:
 	$(LUA) ../build/mkpreload.lua $(MODULE_LIST) > preload.c

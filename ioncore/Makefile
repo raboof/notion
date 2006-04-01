@@ -21,7 +21,8 @@ SOURCES=binding.c conf-bindings.c cursor.c event.c exec.c focus.c         \
 	frame-pointer.c conf.c reginfo.c extlconv.c fullscreen.c mplex.c  \
 	bindmaps.c gr.c infowin.c activity.c netwm.c frame-draw.c         \
 	kbresize.c rectangle.c xwindow.c presize.c extlrx.c               \
-        pholder.c mplexpholder.c llist.c basicpholder.c sizepolicy.c
+        pholder.c mplexpholder.c llist.c basicpholder.c sizepolicy.c      \
+        stacking.c
 
 LUA_SOURCES=\
 	ioncore_ext.lua ioncore_luaext.lua ioncore_bindings.lua \

@@ -20,18 +20,12 @@
 #include <ioncore/manage.h>
 #include <ioncore/rectangle.h>
 #include <ioncore/pholder.h>
+#include <ioncore/stacking.h>
 
 #include "classes.h"
 
-INTRSTRUCT(WFloatStacking);
-INTRSTRUCT(WFloatWSPHAttachParams);
 
-DECLSTRUCT(WFloatStacking){
-    WRegion *reg;
-    WRegion *above;
-    WFloatStacking *next, *prev;
-    bool sticky;
-};
+INTRSTRUCT(WFloatWSPHAttachParams);
 
 
 DECLSTRUCT(WFloatWSPHAttachParams){
@@ -43,6 +37,7 @@ DECLSTRUCT(WFloatWSPHAttachParams){
     int aflags;
     WRegion *stack_above;
 };
+
 
 
 DECLCLASS(WFloatWS){
@@ -83,12 +78,11 @@ extern bool floatws_rqclose_relocate(WFloatWS *ws);
 extern void floatws_raise(WFloatWS *ws, WRegion *reg);
 extern void floatws_lower(WFloatWS *ws, WRegion *reg);
 
-extern WFloatStacking *mod_floatws_find_stacking(WRegion *r);
-
+extern WStacking *mod_floatws_find_stacking(WRegion *r);
 
 typedef struct{
     WFloatWS *ws;
-    WFloatStacking *st;
+    WStacking *st;
 } WFloatWSIterTmp;
 
 extern void floatws_iter_init(WFloatWSIterTmp *tmp, WFloatWS *ws);
