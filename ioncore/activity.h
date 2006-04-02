@@ -14,11 +14,16 @@
 
 #include <libtu/setparam.h>
 #include <libmainloop/hooks.h>
+#include <libextl/extl.h>
 #include "region.h"
 
 extern bool region_set_activity(WRegion *reg, int sp);
 extern bool region_is_activity(WRegion* re);
 extern bool region_is_activity_r(WRegion *reg);
+
+extern ExtlTab ioncore_activity_list();
+extern WRegion *ioncore_activity_first();
+extern bool ioncore_activity_goto();
 
 extern WHook *region_activity_hook;
 
