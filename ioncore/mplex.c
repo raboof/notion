@@ -929,21 +929,28 @@ WLListNode *mplex_do_attach_after(WMPlex *mplex,
     
     return node;
 }
+
+
+static WLListNode *mplex_get_after(WMPlex *mplex, bool l2,
+                                   bool index_given, int index)
+{
+    if(!index_given)
+        index=mplex_default_index(mplex);
+
+    if(l2)
+        return llist_index_to_after(mplex->l2_list, mplex->l2_current, index);
+    else
+        return llist_index_to_after(mplex->l1_list, mplex->l1_current, index);
+}
     
 
 WRegion *mplex_do_attach(WMPlex *mplex, WRegionAttachHandler *hnd,
                          void *hnd_param, WMPlexAttachParams *param)
 {
     WLListNode *node, *after;
-    bool l2=param->flags&MPLEX_ATTACH_L2;
-    int index=(param->flags&MPLEX_ATTACH_INDEX
-               ? param->index
-               : mplex_default_index(mplex));
-
-    if(l2)
-        after=llist_index_to_after(mplex->l2_list, mplex->l2_current, index);
-    else
-        after=llist_index_to_after(mplex->l1_list, mplex->l1_current, index);
+    
+    after=mplex_get_after(mplex, param->flags&MPLEX_ATTACH_L2, 
+                          param->flags&MPLEX_ATTACH_INDEX, param->index);
 
     node=mplex_do_attach_after(mplex, after, param, hnd, hnd_param);
     
@@ -1095,6 +1102,7 @@ WPHolder *mplex_prepare_manage(WMPlex *mplex, const WClientWin *cwin,
     int swf=(param->switchto ? MPLEX_ATTACH_SWITCHTO : 0);
     WPHolder *ph=NULL;
     WMPlexPHolder *mph;
+    WLListNode *after;
     
     if(redir==MANAGE_REDIR_STRICT_YES || redir==MANAGE_REDIR_PREFER_YES){
         if(mplex->l2_current!=NULL){
@@ -1113,8 +1121,10 @@ WPHolder *mplex_prepare_manage(WMPlex *mplex, const WClientWin *cwin,
     
     if(redir==MANAGE_REDIR_STRICT_YES)
         return NULL;
-        
-    mph=create_mplexpholder(mplex, NULL, mplex->l1_current, 1);
+    
+    after=mplex_get_after(mplex, FALSE, FALSE, 0);
+    
+    mph=create_mplexpholder(mplex, NULL, after, 1);
     
     if(mph!=NULL)
         mph->szplcy=SIZEPOLICY_FULL_BOUNDS;
