@@ -74,8 +74,7 @@ AC_SUBST([_DCF_DE_USE_XUTF8])
 AC_ARG_ENABLE([Xutf8],
               [AS_HELP_STRING([--enable-Xutf8],
                               [Use the Xutf8 routines (XFree86 extension)
-                               instead of Xmb routines in an UTF-8 locale given
-                               the -i18n command line option])])
+                               instead of Xmb routines in an UTF-8 locale.])])
 
 if test "x$enable_Xutf8" = xyes; then
     AC_MSG_CHECKING([for Xutf8*])
