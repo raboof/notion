@@ -23,6 +23,7 @@
 #include <ioncore/resize.h>
 #include <ioncore/sizehint.h>
 #include <ioncore/extlconv.h>
+#include <ioncore/strings.h>
 #include <libtu/minmax.h>
 #include "floatframe.h"
 #include "floatws.h"
@@ -322,7 +323,18 @@ static void floatframe_recalc_bar(WFloatFrame *frame)
     FRAME_L1_FOR_ALL(sub, &(frame->frame), itmp){
         textw=init_title(frame, i);
         if(textw>0){
-            title=region_make_label(sub, textw, frame->frame.bar_brush);
+            if(frame->frame.flags&FRAME_SHOW_NUMBERS){
+                char *s=NULL;
+                libtu_asprintf(&s, "%d", i+1);
+                if(s!=NULL){
+                    title=grbrush_make_label(frame->frame.bar_brush, s, textw);
+                    free(s);
+                }else{
+                    title=NULL;
+                }
+            }else{
+                title=region_make_label(sub, textw, frame->frame.bar_brush);
+            }
             frame->frame.titles[i].text=title;
         }
         i++;

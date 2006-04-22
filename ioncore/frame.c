@@ -618,6 +618,42 @@ bool frame_is_shaded(WFrame *frame)
 }
 
 
+bool frame_set_numbers(WFrame *frame, int sp)
+{
+    bool set=frame->flags&FRAME_SHOW_NUMBERS;
+    bool nset=libtu_do_setparam(sp, set);
+    
+    if(XOR(nset, set)){
+        frame->flags^=FRAME_SHOW_NUMBERS;
+        frame_recalc_bar(frame);
+        frame_draw_bar(frame, TRUE);
+    }
+    
+    return frame->flags&FRAME_SHOW_NUMBERS;
+}
+
+
+/*EXTL_DOC
+ * Control whether tabs show numbers (set/unset/toggle). 
+ * Resulting state is returned, which may not be what was 
+ * requested.
+ */
+EXTL_EXPORT_AS(WFrame, set_numbers)
+bool frame_set_numbers_extl(WFrame *frame, const char *how)
+{
+    return frame_set_numbers(frame, libtu_string_to_setparam(how));
+}
+
+
+/*EXTL_DOC
+ * Does \var{frame} show numbers for tabs?
+ */
+bool frame_is_numbers(WFrame *frame)
+{
+    return frame->flags&FRAME_SHOW_NUMBERS;
+}
+
+
 void frame_managed_notify(WFrame *frame, WRegion *sub)
 {
     /* TODO: Should only draw/update the affected tab.*/

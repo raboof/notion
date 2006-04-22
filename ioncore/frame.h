@@ -35,6 +35,7 @@
 #define FRAME_MIN_HORIZ   0x0800
 #define FRAME_SZH_USEMINMAX 0x1000
 #define FRAME_FWD_CWIN_RQGEOM 0x2000
+#define FRAME_SHOW_NUMBERS 0x4000
 
 typedef void WFrameStyleFn(const char **, const char **);
 
@@ -84,6 +85,8 @@ extern bool frame_set_tabbar(WFrame *frame, int sp);
 extern bool frame_is_tabbar(WFrame *frame);
 extern bool frame_set_shaded(WFrame *frame, int sp);
 extern bool frame_is_shaded(WFrame *frame);
+extern bool frame_set_numbers(WFrame *frame, int sp);
+extern bool frame_is_numbers(WFrame *frame);
 
 extern int frame_default_index(WFrame *frame);
 
