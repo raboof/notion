@@ -85,13 +85,21 @@ the module that whose configuration file defines these bindings.
 
 BINDINGS:WScreen
 
+.".SS Bindings operating on top-level frames and screens and their children
+
+BINDINGS:WMPlex.toplevel
+
 .".SS Bindings operating on frames and screens and their children
 
 BINDINGS:WMPlex
 
-.SS Bindings operating on frames and their children
+.SS Bindings operating on all frames (including transient) and their children
 
 BINDINGS:WFrame
+
+.SS Bindings operating on top-level (non-transient) frames and their children
+
+BINDINGS:WFrame.toplevel
 
 .SS Move/resize mode bindings
 

@@ -89,6 +89,7 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
     frame_initialise_titles(frame);
     
     region_add_bindmap((WRegion*)frame, ioncore_frame_bindmap);
+    region_add_bindmap((WRegion*)frame, ioncore_frame_toplevel_bindmap);
 
     mplex_managed_geom((WMPlex*)frame, &mg);
     

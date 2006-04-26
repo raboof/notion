@@ -89,11 +89,17 @@ BINDINGS:WScreen
 
 .".SS Kehyksiä ja näyttöjä, sekä niiden lapsia käsittelevät sidonnat
 
+BINDINGS:WMPlex.toplevel
+
 BINDINGS:WMPlex
 
-.SS Kehyksiä, sekä niiden lapsia käsittelevät sidonnat
+.SS Kaikkia kehyksiä (myös väliaikaisikkuneiden), sekä niiden lapsia käsittelevät sidonnat
 
 BINDINGS:WFrame
+
+.SS Ylimmän tason kehyksiä (ei väliaikaisikkunoiden), sekä niiden lapsia käsittelevät sidonnat
+
+BINDINGS:WFrame.toplevel
 
 .SS Siirto ja koonmuutostilan sidonnat
 

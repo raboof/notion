@@ -25,7 +25,9 @@
 
 WBindmap *ioncore_rootwin_bindmap=NULL;
 WBindmap *ioncore_mplex_bindmap=NULL;
+WBindmap *ioncore_mplex_toplevel_bindmap=NULL;
 WBindmap *ioncore_frame_bindmap=NULL;
+WBindmap *ioncore_frame_toplevel_bindmap=NULL;
 WBindmap *ioncore_moveres_bindmap=NULL;
 
 static Rb_node known_bindmaps=NULL;
@@ -49,7 +51,9 @@ void ioncore_deinit_bindmaps()
 {
     DO_FREE(rootwin, "WScreen");
     DO_FREE(mplex, "WMPlex");
+    DO_FREE(mplex_toplevel, "WMPlex.toplevel");
     DO_FREE(frame, "WFrame");
+    DO_FREE(frame_toplevel, "WFrame.toplevel");
     DO_FREE(moveres, "WMoveresMode");
     rb_free_tree(known_bindmaps);
     known_bindmaps=NULL;
@@ -70,7 +74,9 @@ bool ioncore_init_bindmaps()
     
     DO_ALLOC(rootwin, "WScreen", NULL);
     DO_ALLOC(mplex, "WMPlex", NULL);
+    DO_ALLOC(mplex_toplevel, "WMPlex.toplevel", NULL);
     DO_ALLOC(frame, "WFrame", frame_areas);
+    DO_ALLOC(frame_toplevel, "WFrame.toplevel", frame_areas);
     DO_ALLOC(moveres, "WMoveresMode", NULL);
     
     return TRUE;

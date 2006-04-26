@@ -50,7 +50,7 @@ defbindings("WScreen", {
         bdoc("Clear all tags."),
         kpress("T", "ioncore.clear_tags()"),
     }),
-    
+
     bdoc("Go to n:th screen on multihead setup."),
     kpress(META.."Shift+1", "ioncore.goto_nth_screen(0)"),
     kpress(META.."Shift+2", "ioncore.goto_nth_screen(1)"),
@@ -92,11 +92,6 @@ defbindings("WMPlex", {
     kpress_wait(META.."L", 
                 "WClientWin.nudge(_sub)", "_sub:WClientWin"),
 
-    bdoc("Toggle fullscreen mode of current client window."),
-    kpress_wait(META.."Return", 
-                "WClientWin.set_fullscreen(_sub, 'toggle')", 
-                "_sub:WClientWin"),
-
     submap(META.."K", {
        bdoc("Kill client owning current client window."),
        kpress("C", "WClientWin.kill(_sub)", "_sub:WClientWin"),
@@ -105,6 +100,15 @@ defbindings("WMPlex", {
             "Some programs may not allow this by default."),
        kpress("Q", "WClientWin.quote_next(_sub)", "_sub:WClientWin"),
     }),
+})
+
+-- Frames for transient windows ignore this bindmap
+
+defbindings("WMPlex.toplevel", {
+    bdoc("Toggle client window full-screen mode"),
+    kpress_wait(META.."Return", 
+                "WClientWin.set_fullscreen(_sub, 'toggle')", 
+                "_sub:WClientWin"),
 
     bdoc("Query for manual page to be displayed."),
     kpress(ALTMETA.."F1", "mod_query.query_man(_, ':man')"),
@@ -137,6 +141,9 @@ defbindings("WMPlex", {
     
     bdoc("Query for a client window to go to."),
     kpress(META.."G", "mod_query.query_gotoclient(_)"),
+    
+    bdoc("Query for a client window to attach."),
+    kpress(META.."A", "mod_query.query_attachclient(_)"),
 })
 
 
@@ -147,9 +154,43 @@ defbindings("WMPlex", {
 -- configuration files.
 
 defbindings("WFrame", {
+    submap(META.."K", {
+        bdoc("Maximize the frame horizontally/vertically."),
+        kpress("H", "WFrame.maximize_horiz(_)"),
+        kpress("V", "WFrame.maximize_vert(_)"),
+    }),
+
+    bdoc("Display frame context menu."),
+    kpress(META.."M", "mod_query.query_menu(_, 'ctxmenu', 'Context menu: ')"),
+    --kpress(META.."M", "mod_menu.menu(_, _sub, 'ctxmenu')"),
+    mpress("Button3", "mod_menu.pmenu(_, _sub, 'ctxmenu')"),
+    
+    bdoc("Begin move/resize mode."),
+    kpress(META.."R", "WFrame.begin_kbresize(_)"),
+    
+    bdoc("Switch the frame to display the object indicated by the tab."),
+    mclick("Button1@tab", "WFrame.p_switch_tab(_)"),
+    mclick("Button2@tab", "WFrame.p_switch_tab(_)"),
+    
+    bdoc("Resize the frame."),
+    mdrag("Button1@border", "WFrame.p_resize(_)"),
+    mdrag(META.."Button3", "WFrame.p_resize(_)"),
+    
+    bdoc("Move the frame."),
+    mdrag(META.."Button1", "WFrame.p_move(_)"),
+    
+    bdoc("Move objects between frames by dragging and dropping the tab."),
+    mdrag("Button1@tab", "WFrame.p_tabdrag(_)"),
+    mdrag("Button2@tab", "WFrame.p_tabdrag(_)"),
+           
+})
+
+-- Frames for transient windows ignore this bindmap
+
+defbindings("WFrame.toplevel", {
     bdoc("Tag current object within the frame."),
     kpress(META.."T", "WRegion.set_tagged(_sub, 'toggle')", "_sub:non-nil"),
-
+    
     submap(META.."K", {
         bdoc("Switch to n:th object within the frame."),
         kpress("1", "WFrame.switch_nth(_, 0)"),
@@ -178,35 +219,8 @@ defbindings("WFrame", {
         bdoc("Attach tagged objects to this frame."),
         kpress("A", "WFrame.attach_tagged(_)"),
     }),
-
-    bdoc("Query for a client window to attach to active frame."),
-    kpress(META.."A", "mod_query.query_attachclient(_)"),
-
-    bdoc("Display frame context menu."),
-    kpress(META.."M", "mod_query.query_menu(_, 'ctxmenu', 'Context menu: ')"),
-    --kpress(META.."M", "mod_menu.menu(_, _sub, 'ctxmenu')"),
-    mpress("Button3", "mod_menu.pmenu(_, _sub, 'ctxmenu')"),
-    
-    bdoc("Begin move/resize mode."),
-    kpress(META.."R", "WFrame.begin_kbresize(_)"),
-    
-    bdoc("Switch the frame to display the object indicated by the tab."),
-    mclick("Button1@tab", "WFrame.p_switch_tab(_)"),
-    mclick("Button2@tab", "WFrame.p_switch_tab(_)"),
-    
-    bdoc("Resize the frame."),
-    mdrag("Button1@border", "WFrame.p_resize(_)"),
-    mdrag(META.."Button3", "WFrame.p_resize(_)"),
-    
-    bdoc("Move the frame."),
-    mdrag(META.."Button1", "WFrame.p_move(_)"),
-    
-    bdoc("Move objects between frames by dragging and dropping the tab."),
-    mdrag("Button1@tab", "WFrame.p_tabdrag(_)"),
-    mdrag("Button2@tab", "WFrame.p_tabdrag(_)"),
-           
 })
-
+    
 
 -- WMoveresMode context bindings
 -- 

@@ -41,6 +41,7 @@
 #include "xwindow.h"
 #include "basicpholder.h"
 #include "llist.h"
+#include "bindmaps.h"
 
 
 static void set_clientwin_state(WClientWin *cwin, int state);
@@ -705,6 +706,11 @@ static WRegion *clientwin_do_attach_transient(WClientWin *cwin,
                 mreg=(WRegion*)frame;
                 mplex_managed_geom((WMPlex*)frame, &mg);
             }
+            
+            region_remove_bindmap((WRegion*)frame, 
+                                  ioncore_mplex_toplevel_bindmap);
+            region_remove_bindmap((WRegion*)frame, 
+                                  ioncore_frame_toplevel_bindmap);
         }
     }
 
