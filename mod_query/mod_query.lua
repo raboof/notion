@@ -1125,7 +1125,8 @@ function mod_query.query_menu(mplex, themenu, prompt)
                     if sm then
                         xform_menu(t, sm, n)
                     else
-                        ioncore.warn(TR("Missing submenu ")..(v.name or ""))
+                        ioncore.warn_traced(TR("Missing submenu ")
+                                            ..(v.name or ""))
                     end
                 end
             end

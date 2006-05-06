@@ -31,7 +31,7 @@ function ioncore.compile_cmd(cmd, guard)
     if guard then
         local st, en, condition=string.find(guard, "^_sub:([%w-_]+)$")
         if not condition then
-            warn(TR("Invalid guard %s.", guard))
+            ioncore.warn_traced(TR("Invalid guard %s.", guard))
         elseif condition=="non-nil" then
             guardcode='if not _sub then return end; '
         else
@@ -42,7 +42,7 @@ function ioncore.compile_cmd(cmd, guard)
     local gfncode="return function(_, _sub) "..guardcode.." return true end"
     local gfn, gerr=loadstring(gfncode)
     if not gfn then
-        warn(TR("Error compiling guard: %s", gerr))
+        ioncore.warn_traced(TR("Error compiling guard: %s", gerr))
     end
     gfn=gfn()
     
@@ -51,7 +51,7 @@ function ioncore.compile_cmd(cmd, guard)
                       ..guardcode.."return ("..cmd..") end")
         local fn, err=loadstring(fncode)
         if not fn then
-            warn(TR("Error in command string: ", err))
+            ioncore.warn_traced(TR("Error in command string: ", err))
             return
         end
         fn=fn()
@@ -66,7 +66,7 @@ function ioncore.compile_cmd(cmd, guard)
         return cmd
     end
 
-    warn(TR("Invalid command"))
+    ioncore.warn_traced(TR("Invalid command"))
 end
 
 

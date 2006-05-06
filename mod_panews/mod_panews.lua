@@ -168,12 +168,12 @@ function mod_panews.set(s)
             settings.template=s.template
         end
         if not ok then
-            warn("Invalid template.")
+            ioncore.warn_traced("Invalid template.")
         end
     end
     if s.scalef then
         if type(s.scalef)~="number" or s.scalef<=0 then
-            warn('Invalid scale factor')
+            ioncore.warn_traced('Invalid scale factor')
         else
             settings.scalef=s.scalef
         end

@@ -21,8 +21,20 @@
  * warning handler.
  */
 EXTL_SAFE
+EXTL_UNTRACED
 EXTL_EXPORT
 void ioncore_warn(const char *str)
+{
+    warn("%s", str);
+}
+
+
+/*EXTL_DOC
+ * Similar to \fnref{ioncore.warn}, but also print Lua stack trace.
+ */
+EXTL_SAFE
+EXTL_EXPORT
+void ioncore_warn_traced(const char *str)
 {
     warn("%s", str);
 }
