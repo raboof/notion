@@ -225,6 +225,7 @@ function ioncore.refresh_stylelist()
                 return (" "..string.shell_safe(s).."/look_"..
                         " "..string.shell_safe(s).."/look-")
             end
+            return ""
         end
 
         cmd=cmd..string.gsub(path..":", "([^:]*):", mkarg)

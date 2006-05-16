@@ -178,6 +178,7 @@ function mod_statusbar.rcv_statusd(str)
                 updatenw=updatenw or string.find(m, "_template")
             end
         end
+        return ""
     end
     
     while str do
