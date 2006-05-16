@@ -91,7 +91,7 @@ end
 local mail_timer
 local mail_timestamps = {}
 function init_timestamps ()
-    for key, val in settings.files do
+    for key, val in pairs(settings.files) do
         mail_timestamps[key]=-2.0
     end
 end
@@ -99,7 +99,7 @@ init_timestamps()
 
 local function update_mail()
     local failed
-    for key, mbox in settings.files do
+    for key, mbox in pairs(settings.files) do
         if not mbox then
             error(TR(key.." not set"))
         end
