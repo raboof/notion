@@ -55,5 +55,6 @@ extern bool mainloop_check_signals();
 extern void mainloop_trap_signals(const sigset_t *set);
 
 extern WHook *mainloop_sigchld_hook;
+extern WHook *mainloop_sigusr2_hook;
 
 #endif /* ION_LIBMAINLOOP_SIGNAL_H */

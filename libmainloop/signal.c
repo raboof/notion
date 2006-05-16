@@ -31,9 +31,12 @@ static int kill_sig=0;
 #if 1
 static int wait_sig=0;
 #endif
+
+static int usr2_sig=0;
 static bool had_tmr=FALSE;
 
 WHook *mainloop_sigchld_hook=NULL;
+WHook *mainloop_sigusr2_hook=NULL;
 
 
 /*{{{ Timers */
@@ -130,12 +133,36 @@ static bool mrsh_chld_extl(ExtlFn fn, ChldParams *p)
     return ret;
 }
 
+static bool mrsh_usr2(void (*fn)(void), void *p)
+{
+    fn();
+    return TRUE;
+}
+
+static bool mrsh_usr2_extl(ExtlFn fn, void *p)
+{
+    bool ret;
+    ExtlTab t=extl_create_table();
+    ret=extl_call(fn, "t", NULL, t);
+    extl_unref_table(t);
+    return ret;
+}
+
 
 bool mainloop_check_signals()
 {
     struct timeval current_time;
     WTimer *q;
     int ret=0;
+
+    if(usr2_sig!=0){
+        usr2_sig=0;
+        if(mainloop_sigusr2_hook!=NULL){
+            hook_call(mainloop_sigusr2_hook, NULL,
+                      (WHookMarshall*)mrsh_usr2,
+                      (WHookMarshallExtl*)mrsh_usr2_extl);
+        }
+    }
 
 #if 1    
     if(wait_sig!=0){
@@ -373,6 +400,11 @@ static void chld_handler(int signal_num)
 #endif
 }
 
+static void usr2_handler(int signal_num)
+{
+    usr2_sig=1;
+}
+
 
 static void exit_handler(int signal_num)
 {
@@ -449,6 +481,12 @@ void mainloop_trap_signals(const sigset_t *which)
         sa.sa_handler=chld_handler;
         sa.sa_flags=SA_NOCLDSTOP|SA_RESTART;
         sigaction(SIGCHLD, &sa, NULL);
+    }
+
+    IFTRAP(SIGUSR2){
+        sa.sa_handler=usr2_handler;
+        sa.sa_flags=SA_RESTART;
+        sigaction(SIGUSR2, &sa, NULL);
     }
 
     IFTRAP(SIGTERM){

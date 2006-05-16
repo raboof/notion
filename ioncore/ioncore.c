@@ -275,6 +275,8 @@ static bool init_hooks()
     
     mainloop_sigchld_hook=mainloop_register_hook("ioncore_sigchld_hook",
                                                  create_hook());
+    mainloop_sigusr2_hook=mainloop_register_hook("ioncore_sigusr2_hook",
+                                                 create_hook());
     
     return TRUE;
 }
@@ -526,6 +528,7 @@ bool ioncore_startup(const char *display, const char *cfgfile,
     sigaddset(&inittrap, SIGALRM);
     sigaddset(&inittrap, SIGCHLD);
     sigaddset(&inittrap, SIGPIPE);
+    sigaddset(&inittrap, SIGUSR2);
     mainloop_trap_signals(&inittrap);
 
     if(!extl_init())
