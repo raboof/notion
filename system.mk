@@ -55,7 +55,7 @@ DL_LIBS=-ldl
 ## Lua
 ##
 
-# If you have installed Lua 5.0 from the official tarball without changing
+# If you have installed Lua 5.1 from the official tarball without changing
 # paths, this should do it.
 LUA_DIR=/usr/local
 LUA_LIBS = -L$(LUA_DIR)/lib -llua

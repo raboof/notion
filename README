@@ -12,7 +12,7 @@ BUILDING AND INSTALLING
 1. Make sure you have the following tools and libraries installed:
 
     * GNU make
-    * Lua 5.0.2 (see <http://www.lua.org/>). 
+    * Lua 5.1 (see <http://www.lua.org/>). 
 
 2. a) Edit system.mk to suit your system. Most GNU/Linux users should
       need very little modifications to system.mk.
