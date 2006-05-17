@@ -16,11 +16,27 @@ AC_PROG_INSTALL()
 AC_PROG_RANLIB()
 AC_CHECK_TOOL([STRIP], [strip], [:])
 AC_CHECK_TOOL([AR], [ar], [])
+AC_CHECK_PROG(XMESSAGE, xmessage, xmessage)
+if test "x${XMESSAGE}" = "x"; then
+   AC_MSG_WARN([*** ion needs xmessage to run correctly])
+fi
 dnl }}}
 
 dnl Checks for libraries. {{{
 AC_PATH_XTRA()
+AC_CHECK_HEADER([libintl.h], [],
+                [AC_MSG_ERROR([*** libintl.h not found.
+                  *** You probably need to install libc6-dev])])
+dnl Perhaps we should check for -lintl, but on my machine, 
+dnl the library isn't needed. Only the #include is necessary.
+
 test "${X_DISPLAY_MISSING+set}" = set && exit 1
+AC_CHECK_HEADER([X11/SM/SMlib.h], [], 
+                [AC_MSG_ERROR([*** SMlib.h not found.
+                  *** You probably need to install libsm-dev])])
+AC_CHECK_HEADER([X11/Xresource.h], [], 
+                [AC_MSG_ERROR([*** Xresource.h.h not found.
+                  *** You probably need to install libx11-dev])])
 AC_CHECK_LIB([Xext],
              [XMissingExtension],
              [X_LIBS="$X_LIBS -lXext"],
@@ -249,13 +265,14 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <lua.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 int main()
 {
-    printf("(found %s)... ", LUA_VERSION);
+    printf("(found %s, %d)... ", LUA_VERSION, LUA_VERSION_NUM);
     if(LUA_VERSION_NUM >= 501)
-        exit(EXIT_FAILURE);
-    exit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
+    exit(EXIT_FAILURE);
 }
 
 ]])],
