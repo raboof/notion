@@ -176,11 +176,11 @@ fi
 dnl }}}
 
 dnl lua_version {{{
-AC_MSG_CHECKING([for lua version >= 5.0])
+AC_MSG_CHECKING([for lua version >= 5.1])
 lua_version=$($LUA -v 2>&1 | head -n 1 | cut -d' ' -f2)
 dnl lua_version=$($LUA -v 2>&1 >/dev/null | head -n 1 | $EGREP -o '[0-9]+(\.[0-9]+)+')
 case $lua_version in
-0.* | 1.* | 2.* | 3.* | 4.*)
+0.* | 1.* | 2.* | 3.* | 4.* | 5.0)
     AC_MSG_RESULT([no (found $lua_version)])
     AC_MSG_ERROR([*** can't build ion with this version of lua])
     ;;
@@ -229,22 +229,17 @@ elif test "x$with_lua_prefix" != x; then
     LUA_LIBS="-L$with_lua_prefix/lib"
 fi
 AC_CHECK_LIB([lua$with_lua_suffix],
-             [lua_open],
+             [lua_call],
              [LUA_LIBS="$LUA_LIBS -llua$with_lua_suffix"],
-             [AC_MSG_ERROR([*** Can't find lua_open in lua$with_lua_suffix.
+             [AC_MSG_ERROR([*** Can't find lua_call in lua$with_lua_suffix.
                   *** Check for liblua installation or --with-lua-libraries or --with-lua-suffix options])],
              [$LUA_LIBS])
 AC_CHECK_LIB([dl], [dlopen], [lua_extra_libs="$lua_extra_libs -ldl"], [])
 AC_CHECK_LIB([m], [exp], [lua_extra_libs="$lua_extra_libs -lm"], [])
-AC_CHECK_LIB([lualib$with_lua_suffix],
-             [luaopen_loadlib],
-             [LUA_LIBS="$LUA_LIBS $lua_extra_libs -llualib$with_lua_suffix"],
-             [exit 1],
-             [$LUA_LIBS $lua_extra_libs])
 dnl }}}
 
 dnl liblua_version {{{
-AC_MSG_CHECKING([for liblua version >= 5.0])
+AC_MSG_CHECKING([for liblua version >= 5.1])
 save_CFLAGS="$CFLAGS"
 save_LIBS="$LIBS"
 CFLAGS="$CFLAGS $LUA_INCLUDES"
@@ -257,12 +252,8 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[
 
 int main()
 {
-    if(strcmp(lua_version(), LUA_VERSION)!=0){
-        printf("Error: lua_version() does not match LUA_VERSION. ");
-        exit(EXIT_FAILURE);
-    }
-    printf("(found %s)... ", lua_version());
-    if(strcmp(lua_version(), "Lua 5.0")<0)
+    printf("(found %s)... ", LUA_VERSION);
+    if(LUA_VERSION_NUM >= 501)
         exit(EXIT_FAILURE);
     exit(EXIT_SUCCESS);
 }
