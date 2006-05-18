@@ -1,14 +1,16 @@
 
-=== ion-3ds-2006???? ===
+ion-3ds-2006????
+----------------
 
 Lua 5.1 is now required.
 
-=== ion-3ds-20050607 ===
+ion-3ds-20050607
+----------------
 
 This release mostly features minor bugfixes and other improvements. The most
 visible non-bugfix changes are:
 
- * Faster "fontset" filling kludge: only -misc-fixed-* fonts are tried. Ion
+ * Faster "fontset" filling kludge: only `-misc-fixed-*` fonts are tried. Ion
    should now load faster in UTF-8 environments, and usually with no less
    fonts in the fontset than before. (UTF-8 string drawing still does not
    fully utilise these fonts under XFree86, but it does under XOrg.)
@@ -16,58 +18,61 @@ visible non-bugfix changes are:
  * Experimental auto-show-completions support, which is also on by default
    now. In this mode the Tab key can be used to cycle forward through the
    completions, and Shift+Tab backwards. Modify the settings seen in the 
-   new mod_query.lua to get normal Tab-completion, or change the completion
+   new `mod_query.lua` to get normal Tab-completion, or change the completion
    delay.
 
  * The release scripts do not run automatically autoconf anymore so maybe
    a few more people would look into the README first.
 
 
-=== ion-3ds-20050322 ===
+ion-3ds-20050322
+----------------
 
 The most visible changes in this release are:
 
  * Mod1+space now toggles the scratchpad by default and Mod1+D the dock.
 
- * The ion-(ssh|man|view|edit) wrapper scripts were removed and instead
+ * The `ion-(ssh|man|view|edit)` wrapper scripts were removed and instead
    the programs used can be configured in Ion's configuration files.
 
- * ioncore.exec(_on) also support the ':cmd' notation for "run cmd in 
-   xterm" familiar from the run query. The '::cmd' notation can be used 
+ * `ioncore.exec(_on)` also support the `:cmd` notation for "run cmd in 
+   xterm" familiar from the run query. The `::cmd` notation can be used 
    to ask for enter to be pressed even when the program quit succesfully.
 
  * Those with custom configuration files should note that many exported toggle
    functions were changed and renamed, and now accept a string parameter
    incidating whether to toggle, set or unset the property.
   
-    - WClientwin.set_fullsreen (replaces WClientWin.toggle_fullscreen)
-    - WRegion.set_tagged (replaces WRegion.tag/untag/toggle_tag)
-    - WFrame.set_tabbar (replaces WFrame.toggle_tabbar)
-    - WFrame.set_shaded (replaces WFrame.toggle_shade)
-    - WFloatFrame.set_sticky (replaces WFloatFrame.toggle_sticky)
-    - WMPlex.l2_set_hidden (replaces WMPlex.l2_hide/show)
-    - mod_sp.set_shown(_on) (replaces mod_sp.toggle(_on))
-    - mod_dock.set_floating_shown_on (replaces mod_dock.toggle_floating_on)
-    - WRegion.set_activity (replaces WRegion.clear_activity and 
-      WRegion.notify_activity)
+    - `WClientwin.set_fullsreen` (replaces `WClientWin.toggle_fullscreen`)
+    - `WRegion.set_tagged` (replaces `WRegion.tag/untag/toggle_tag`)
+    - `WFrame.set_tabbar` (replaces `WFrame.toggle_tabbar`)
+    - `WFrame.set_shaded` (replaces `WFrame.toggle_shade`)
+    - `WFloatFrame.set_sticky` (replaces `WFloatFrame.toggle_sticky`)
+    - `WMPlex.l2_set_hidden` (replaces `WMPlex.l2_hide/show`)
+    - `mod_sp.set_shown(_on)` (replaces `mod_sp.toggle(_on)`)
+    - `mod_dock.set_floating_shown_on` (replaces `mod_dock.toggle_floating_on`)
+    - `WRegion.set_activity` (replaces `WRegion.clear_activity` and 
+      `WRegion.notify_activity`)
       
-   For example, WRegion.set_tagged(_, 'toggle') should be used in place of
-   WRegion.toggle_tagged(_) now.
+   For example, `WRegion.set_tagged(_, 'toggle')` should be used in place of
+   `WRegion.toggle_tagged(_)` now.
 
 Obviously there are some other changes and fixes too. See the changelog
 for details as usual.
 
 
-=== ion-3ds-20050304 ===
+ion-3ds-20050304
+----------------
 
 This is mostly a bug fix release, but also features improved
-mod_query.query_exec (F3 key) completion support. Script writers should be
+`mod_query.query_exec` (F3 key) completion support. Script writers should be
 aware that As a side effect of one of these bug fixes, many hooks are now 
 called in "protected mode" and can not call any functions that modify the 
 internal state of Ion, except ioncore.defer.
 
 
-=== ion-3ds-20050227 ===
+ion-3ds-20050227
+----------------
 
 The most important changes in this release are:
 
@@ -77,29 +82,30 @@ The most important changes in this release are:
    full-screen mode. Under a session manager placeholders are also used
    to remember the original order of windows.
 
- * Improved mod_statusbar and ion-statusd communication, and colouring
+ * Improved `mod_statusbar` and `ion-statusd` communication, and colouring
    of important/critical meters.
 
  * A number of small fixes.
 
 
-=== ion-3ds-20041104 ===
+ion-3ds-20041104
+----------------
 
 This monthly snapshot adds a few new and improved features.
 
  * 'Grabbed menus' that have a single cycling key and activate selected
    entry when all modifiers have been released. See
 
-	http://iki.fi/tuomov/repos/ion-scripts-3/scripts/wcirculate.lua
+   <http://iki.fi/tuomov/repos/ion-scripts-3/scripts/wcirculate.lua>
    
    for an application.
 
  * Potentially blocking status meters are now in a separate ion-statusd
    program. Please write your additional status meters that do not monitor
    the state of Ion itself for ion-statusd (and contribute them in the
-   Ion3 scripts repository at http://iki.fi/tuomov/repos/ion-scripts-3/).
-   For help on writing such status meters, see e.g. source for statusd_load
-   in ext_statusbar/ion-statusd.
+   Ion3 scripts repository at <http://iki.fi/tuomov/repos/ion-scripts-3/>).
+   For help on writing such status meters, see e.g. source for
+   `statusd_load` in `ext_statusbar/ion-statusd`.
 
  * Floating splits are now supported on plain tiled workspaces as well as
    on pane workspaces. To create such a split, use the workspace context
@@ -114,14 +120,14 @@ This monthly snapshot adds a few new and improved features.
 Of course there are some other minor fixes and improvements as well.
 
 
-=== ion-3ds-20040906 ===
-
+ion-3ds-20040906
+----------------
 
 This release finally includes a usable (yet still incomplete) version
-of the mod_panews workspace module (that has also bored the name 'autows'
+of the `mod_panews` workspace module (that has also bored the name 'autows'
 and 'rubberws' previously). The final outcome is not exactly what I
 initially planned, as those plans turned out not to be that workable.
-Instead, what mod_panews does is add to the basic tiled ionws approach
+Instead, what `mod_panews` does is add to the basic tiled ionws approach
 overlappable splits and automatically filled panes that are initially
 empty. Each window is classified and assigned to the pane matching that
 classification. (The default classifications are T(erminal), V(iewer)
@@ -134,23 +140,23 @@ first, but you'll get used to them if you use the feature, and e.g.
 the Gimp works quite splendidly with the toolboxes in the 'M' pane and
 image windows in the 'V' pane --  although the simple initial size-based
 classification heuristics don't always get it right and overriding
-winprops (setting: panews_classification) should eventually added. 
+winprops (setting: `panews_classification`) should eventually added. 
 
 In addition to the new module, this release adds support for translations
 of program messages and the manual page, regardless of whether such is
 of any use in a program like Ion or not. (Currently Finnish and Czech
 translations are available.) Of course there are some bug fixes and
-other minor additions as well, and the ./configure script is also back,
+other minor additions as well, and the `./configure` script is also back,
 the abandonment of libtool being final now. 
 
 
-=== ion-3ds-20040730 ===
-
+ion-3ds-20040730
+----------------
 
 The first thing you'll notice when you start up this release of Ion is
 that isn't reading your old configuration that. The next thing you 
 should notice is a neat layout-adapting statusbar at the bottom of the
-screen. That's right, Ion now includes an ext_statusbar Lua script that
+screen. That's right, Ion now includes an `ext_statusbar` Lua script that
 is enabled by default and displays date/time/load/mail count in a
 configurable format.
 
@@ -168,20 +174,20 @@ The .lua files are now named as follows:
     ext_*.lua    A bigger Lua extension without a C counterpart
                  so that it is not a module
                  
-The configuration file for mod_foobar or ext_foobar, if it has one, is,
-of course, cfg_foobar.lua. In the topic of file names, also note that 
+The configuration file for `mod_foobar` or `ext_foobar`, if it has one, is,
+of course, `cfg_foobar.lua`. In the topic of file names, also note that 
 the default installation paths and binary names have changed to include
 the component '3' to reflect the situation with many binary packages
 of Ion.
 
 You perhaps noticed above that modules have stub loaders now, so the 
-user has no need to use the ioncore.load_module routine. All extensions
+user has no need to use the `ioncore.load_module` routine. All extensions
 and additional configuration files can now be loaded  with 'dopath'
 (used to be 'include'). Also, the menulib, querylib, and ioncorelib Lua
 libraries are gone and instead their contents can be found in the same 
-mod_whatever namespace with the corresponding module (the "stub" loader
+`mod_whatever` namespace with the corresponding module (the "stub" loader
 for these modules is a bit more than just a stub...). Some may also
-want to know that for mod_* and ext_* only the compiled .lc files are
+want to know that for `mod_*` and `ext_*` only the compiled .lc files are
 now installed, and not the source .lua files, thus removing redundant
 files and making the installation slightly smaller.
 
@@ -195,32 +201,32 @@ to be renamed or changed.
 
 In addition to being renamed, the layout savefile of this Ion release
 is incompatible with older releases. This is due to the changes made
-to the WIonWS (and WAutoWS) split tree code to make it more modularly
-extensible with the new kinds of nodes that WAutoWS requires.
+to the `WIonWS` (and `WAutoWS`) split tree code to make it more modularly
+extensible with the new kinds of nodes that `WAutoWS` requires.
 
-The mod_autows module has infact been through many changes since the 
+The `mod_autows` module has infact been through many changes since the 
 last release, and I think I have the final form of it finally figured
 out. However, it is still far from finished and unlikely to be ready 
 for use yet.
 
 
-=== ion-3ds-20040703 ===
-
+ion-3ds-20040703
+----------------
 
 The major new features of this snapshot release are:
 
- * WMPlex support for a sticky status display area to which WIonWS:s
+ * `WMPlex` support for a sticky status display area to which `WIonWS`s
    adjust properly. Modified to the dock module to support this method. 
    See the new dock.lua to set up the dock in the new embedded or old 
    floating manner (the API for the latter has also changed).
  * Primitive session management support.
 
 There are also some bug fixes and many minor improvements; see the ChangeLog
-for details. Work on mod_autows has also started, but it isn't ready for use
-yet.
+for details. Work on `mod_autows` has also started, but it isn't ready for 
+use yet.
  
 
-Note on ./configure:
+### Note on ./configure:
 
 ./configure does not exist for the moment as the source autoconf script
 is not up-to-date. Ion no longer uses libtool/libltdl due to problems
@@ -231,11 +237,11 @@ binary format such as ELF will just have to link statically against the
 modules).
 
 
-Notes on session management:
+### Notes on session management:
 
-Ion loads mod_sm automatically when the SESSION_MANAGER environment variable
-that should be set by the session manager is set, so there's no need load
-it in ion.lua. 
+Ion loads `mod_sm` automatically when the SESSION_MANAGER environment 
+variable that should be set by the session manager is set, so there's 
+no need load it in ion.lua. 
 
 When session management is in use, all entries in the 'Session' menu
 (previously 'Exit' menu) actually invoke the session manager to do the
@@ -256,45 +262,46 @@ gnome-session: This seems the most complete of the all the session managers
 and works fine until it is requested to shut down the session, when it dumps
 core and session state is lost if was not explicitly saved previously.
 
-A ~/.gnome2/session file to use with Ion follows:
+A `~/.gnome2/session` file to use with Ion follows:
 
-[Default]
-num_clients=2
-0,id=default0
-0,Priority=0
-0,RestartCommand=gnome-smproxy --sm-client-id default0
-1,id=default1
-1,Priority=10
-1,RestartCommand=/usr/local/ion-3/bin/ion -smclientid default1
+    [Default]
+    num_clients=2
+    0,id=default0
+    0,Priority=0
+    0,RestartCommand=gnome-smproxy --sm-client-id default0
+    1,id=default1
+    1,Priority=10
+    1,RestartCommand=/usr/local/ion-3/bin/ion -smclientid default1
 
 
 ksmserver: Only supports a global shutdown request, so that Ion can not be
 restarted or session state saved in the middle of a session.
 
 
-=== ion-3ds-20040316 ===
-
+ion-3ds-20040316
+----------------
 
 This is the first development snapshot release of what is to be Ion3. 
 The most visible changes to Ion2 so far are:
 
-  * Default installation directory is /usr/local/ion-3 while user
-    configuration files go in ~/.ion3
+  * Default installation directory is `/usr/local/ion-3` while user
+    configuration files go in `~/.ion3`
 
-  * The mod_sp module was added. It creates an extra toggleable 
+  * The `mod_sp` module was added. It creates an extra toggleable 
     "scratchpad" frame on each screen. Toggle is for now bound by default 
     to Mod1+section, which should be very conveniently located on most 
     Nordic keyboards (left of "1"), but you may have to change it. The 
     scratchpad should be nice for xconsole or similar monitors, xmessage 
     and other popups and just as temporary holding space for windows.
 
-  * All modules except the drawing engine are now called mod_something.
+  * All modules except the drawing engine are now called `mod_something`.
 
   * Man-page complection supports a cache of known man-pages for faster
     completion. See the README for instructions on setting up a cronjob
     or manually generating the index if you want to use the feature.
-    Also query_man_path is no longer used. Instead we try the ION_MC_MANPATH
-    and MANPATH environment variables and the 'manpath' program.
+    Also `query_man_path` is no longer used. Instead we try the 
+    `ION_MC_MANPATH` and `MANPATH` environment variables and the 
+    'manpath' program.
 
   * Exported functions are now separated into tables (namespaces)
     instead of cluttering the globals table. Some frequently used
@@ -302,7 +309,7 @@ The most visible changes to Ion2 so far are:
     Some functions have also been removed or renamed for simpler and
     more consistent function set.
 
-  * New binding configuration mechanism. Dozens of *_bindings functions
+  * New binding configuration mechanism. Dozens of `*_bindings` functions
     were replaced with a single [ioncorelib.]defbindings function that
     accepts a context parameter. Callbacks are specified as strings
     (although passing functions still works) to make it easier for
@@ -328,8 +335,8 @@ Subversion repository with
 and build the documentation.
 
 
-=== ion-2rc-20040114 ===
-
+ion-2rc-20040114
+----------------
 
 This release is finally what can be called "Ion 2 release candidate #1". 
 No more new features will be added to "Ion 2" after this release, and the
@@ -359,22 +366,22 @@ simple  lexicographical sorting could be used to order the packages, but
 in the end I decided to stick with a scheme that is consistent with the
 'ion-devel' package names:
 
-	project-branch_and_status-release_date
-	
+    project-branch_and_status-release_date
+
 Therefore this release is 'ion-2rc-20040114', and the "stable" one will be
 'ion-2-20040???'.
 
 
-=== ion-devel-20031211 ===
-
+ion-devel-20031211
+------------------
 
 This is a big clean-up release. The most noticeable changes are that 
 '-devel' has been removed from path names, user configuration files go
-in ~/.ion2/ and the main configuration file is 'ion.lua'. (The other 
+in `~/.ion2/` and the main configuration file is 'ion.lua'. (The other 
 ioncore-*.lua files have also been renamed.) There have been no notable
 changes in the configuration files themselves, so your old files will 
 work if you move them to the correct directory and rename the changed
-files. (mv ~/.ion-devel ~/.ion2; cd ~/.ion2; mv ioncore.lua ion.lua; 
+files. (`mv ~/.ion-devel ~/.ion2; cd ~/.ion2; mv ioncore.lua ion.lua;`
 etc.)
 
 This release also finally contains a working PWM binary. (The ioncore+
@@ -385,7 +392,7 @@ sticky windows, but some PWM features are probably still missing.
 Some bugs were also fixed and users are now force-fed the manual page 
 the first time Ion is started. Transients can be toggled between
 top/bottom of the main window with Mod1+K T. The SSH query uses
-~/.ssh/known_hosts for completion instead of a manually defined list.
+`~/.ssh/known_hosts` for completion instead of a manually defined list.
 
 There may be a few additions (e.g. the dock) and bug fixes, of course,
 before the stable release, but this release should pretty much be what
@@ -394,7 +401,8 @@ weed out the bugs. Note that you need to upgrade Lua to the 5.0.1
 pre-release.
 
 
-=== ion-devel-20031119 ===
+ion-devel-20031119
+------------------
 
 
 It's finally time for a new release on Ion's development branch. Most
@@ -413,10 +421,10 @@ are:
   * Quite a few fixes
   * And most important of all:
 
-	Configuration files written for the previous release should
-	still work this time!
+>    Configuration files written for the previous release should
+>    still work this time!
 
-    (However, Ion will complain of old drawing engine styles.)
+(However, Ion will complain of old drawing engine styles.)
 
 The menu module provides both drop-down menus (in the stock configuration
 pressing Button3 on a tab should show a context menu) and query-like 
@@ -447,11 +455,11 @@ be fixed, decent text output in an UTF-8 locale is still unlikely and
 dependent on the fonts loaded in the system. The Xmb routines that are now
 used always use an iso10646-1 font even if other fonts are loaded and the 
 unicode font does not contain a particular glyph to be drawn. The use of 
-the Xutf8 routines  in an utf8 locale can be enabled with the CF_DE_USE_XUTF8
-compile-time  option. The advantage of this is that these routines seem 
-to choose the font to draw particular character in most cases more sanely.
-The downside is that there are other more serious problems with unknown
-characters.
+the Xutf8 routines  in an utf8 locale can be enabled with the
+`CF_DE_USE_XUTF8` compile-time  option. The advantage of this is that 
+these routines seem to choose the font to draw particular character in 
+most cases more sanely. The downside is that there are other more serious
+problems with unknown characters.
 
 All in all, even if I'd like to support a universal move to UTF-8, thanks 
 to Xlib brokenness I can't really recommend using UTF-8 locales with Ion 
@@ -467,8 +475,8 @@ point to the Lua compiler there as some of the share/ files
 are compiled now.
 
 
-=== ion-devel-20030810 ===
-
+ion-devel-20030810
+------------------
 
 It's been a while since the previous release as I wanted to freeze the
 Lua configuration/scripting interface for this release and therefore 
@@ -482,8 +490,8 @@ grow.
 What's new for this release then?
 
   * Drawing engine module support.
-  * OO-style exported functions. The old class_fn functions are now
-    WClass.fn (an ugly wrapper is provided in compat.lua).
+  * OO-style exported functions. The old `class_fn` functions are now
+    `WClass.fn` (an ugly wrapper is provided in compat.lua).
   * No more screen-specific configuration or savefiles.
   * Session name (can be specified on command line) instead of display
     name based savefiles. Also affects query history and not just workspace
@@ -499,41 +507,43 @@ converted to a format suitable to be loaded by this latest release.
 Other files will have to be ported manually. To convert colour schemes,
 use the script utils/lookconv.lua. The usage is
 
-	lookconv.lua look-old.lua > look-new.lua
+    lookconv.lua look-old.lua > look-new.lua
 
 To convert workspaces savefiles, use the script utils/saveconv.sh. The
 usage is
 
-	saveconf.sh ~/.ion-devel/saves/workspaces-DISPLAY.*.lua \
-		> ~/.ion-devel/SESSIONNAME/workspaces.lua
+    saveconf.sh ~/.ion-devel/saves/workspaces-DISPLAY.*.lua \
+        > ~/.ion-devel/SESSIONNAME/workspaces.lua
 
-DISPLAY here is the actual display part of $DISPLAY, probably just ':0'.
-'*' stands for all screens (if you have only one screen you could do
-with perhaps just workspaces-:0.0.lua). SESSIONNAME is the name of
-the session where you want to use the converted savefiles. Default
-session name for DISPLAY is default-session-DISPLAY with the colon in
-DISPLAY converted to a dash. For most people this is default-session--0.
-In the simplest case the whole command line is therefore
+`DISPLAY` here is the actual display part of `$DISPLAY`, probably just `:0`.
+'*' stands for all screens (if you have only one screen you could do with
+perhaps just workspaces-:0.0.lua). SESSIONNAME is the name of the session
+where you want to use the converted savefiles. Default session name for
+`DISPLAY` is `default-session-DISPLAY` with the colon in `DISPLAY` converted
+to a dash. For most people this is `default-session--0`. In the simplest
+case the whole command line is therefore
 
-	saveconv.sh ~/.ion-devel/saves/workspaces-:0.0.lua \
-		> ~/.ion-devel/default-session--0/workspaces.lua
+    saveconv.sh ~/.ion-devel/saves/workspaces-:0.0.lua \
+        > ~/.ion-devel/default-session--0/workspaces.lua
 
 The scripts may or may not work and are only provided as a potential
 convenience that will not be maintained and will be removed eventually.
 
 
-=== ion-devel-20030623 ===
-
+ion-devel-20030623
+------------------
 
 Quite a few bug fixes and one most likely unnoticeable improvement:
 
 2003-06-23:
+
   * Fixed pointer warping on screen change.
   * A bug in grab handler calling code could crash Ion when leaving
     keyboard resize mode manually.
   * Resize display was showing incorrect values for keyboard resize.
 
 2003-06-21:
+
   * Client window last height request bookkeeping code had been lost
     when configure request policy was changed. This caused transient
     sizes to be calculated incorrectly.
@@ -545,15 +555,15 @@ Quite a few bug fixes and one most likely unnoticeable improvement:
     on any screen.
 
 
-=== ion-devel-20030620 ===
-
+ion-devel-20030620
+------------------
 
 Just some bug fixes and minor behavioural changes and improvements in
 this release:
 
 
-=== ion-devel-20030617 ===
-
+ion-devel-20030617
+------------------
 
 This release fixes some small problems with the previous release and
 adds a workaround kludge for the XFree86 textprop bug (it's been fixed
@@ -563,8 +573,8 @@ needed for galeon's find dialog to default kludges.lua and there's
 some extra documentation and defaults for some systems in system.mk.
 
 
-=== ion-devel-20030614 ===
-
+ion-devel-20030614
+------------------
 
 Most changes in this release centre around making Ion more tolerant
 to broken configuration files; for details see the ChangeLog. There
@@ -572,41 +582,42 @@ are also changes in binding configuration as I already mentioned in
 an earlier poting. Namely common-frame-bindings.lua is gone and the
 bindings previously set there (into variables that the *ws.lua
 files later referenced) were moved to ioncore-bindings.lua and are
-set using the new functions mplex_bindings and genframe_bindings 
+set using the new functions `mplex_bindings` and `genframe_bindings`
 are were  added. Old modified configuration files should still work,
-however, but if you use 'make_active_leaf_fn', you will need to 
-include compat.lua as the global_bindings that used this were
-replaced by bindings in mplex_bindings and the function
-'make_current_clientwin_fn'.
+however, but if you use `make_active_leaf_fn`, you will need to 
+include compat.lua as the `global_bindings` that used this were
+replaced by bindings in `mplex_bindings` and the function
+`make_current_clientwin_fn`.
 
 There are also some (minor) bug fixes and a few other improvements 
 worth a mention. In particular all regions are now given names of 
-the form  WFoobar<n> by default and DEFAULT_MOD.."F9" was bound to 
+the form  `WFoobar<n>` by default and `DEFAULT_MOD.."F9"` was bound to 
 create a new workspace without asking for a name. This binding and 
-QueryLib.query_workspace use the workspace type defined in the 
-variable default_ws_type instead of being hardcoded to WIonWS.
+`QueryLib.query_workspace` use the workspace type defined in the 
+variable `default_ws_type` instead of being hardcoded to `WIonWS`.
 
-All objects passed to Lua now have a unique userdata (a WWatch cached in
-a weak table) so they can be used e.g. as indices to tables. 
-
-
-=== ion-devel-20030606 ===
+All objects passed to Lua now have a unique userdata (a `WWatch` 
+cached in a weak table) so they can be used e.g. as indices to tables. 
 
 
-This release unifies some parts of WScreen and WGenFrame, which makes
+ion-devel-20030606
+------------------
+
+This release unifies some parts of `WScreen` and `WGenFrame`, which makes
 screen-level queries possible. (Later the queries for small frames might
 be changed to be shown at screen level.) The statusbar restriction from
 ion-devel-20030531 was also removed by this some change and a few
 non-fatal bugs have been fixed.
 
 
-=== ion-devel-20030601 ===
-
+ion-devel-20030601
+------------------
 
 A bug was discovered:
 
 2003-06-01:
-  * An off-by-one error in extl_l1_finalize caused references to some
+
+  * An off-by-one error in `extl_l1_finalize` caused references to some
     Lua tables (including large completions) never to be released.
 
 It could be that this bug was causing some other errors in Lua as well.
@@ -617,34 +628,35 @@ to remove those problems.
 
 
 One more note: as ioncorelib.lua and querylib.lua are now installed
-in $SHAREDIR, you must remove the old files in $ETCDIR if installing
+in `$SHAREDIR`, you must remove the old files in `$ETCDIR` if installing
 over a previous release or else there will be errors. You should also
-not use any possible old copies you have in ~/.ion-devel/. (One of the
-reasons for moving these to $SHAREDIR is to stop users from making
+not use any possible old copies you have in `~/.ion-devel/`. (One of the
+reasons for moving these to `$SHAREDIR` is to stop users from making
 copies of them as they are not configuration files.)
 
 
-=== ion-devel-20030531 ===
-
+ion-devel-20030531
+------------------
 
 As the subject line says, Ion-devel-20030531 was just released. The short
 list of changes is:
+
  * The license was changed from the Clarified Artistic License to the
    GNU Library/Lesser General Public License (LGPL).
  * Screen, viewport and root window renames and other changes (see below).
  * Some installation directory changes; the ion-* helper programs are now
-   installed either in $SHAREDIR or $EXTRABINDIR and QueryLib searches for
-   them on the script path (~/.ion-devel/, $ETCDIR, $SHAREDIR, $EXTRABINDIR)
-   instead of assuming them being on $PATH.
+   installed either in `$SHAREDIR` or `$EXTRABINDIR` and QueryLib searches 
+   for them on the script path (`~/.ion-devel/`, `$ETCDIR`, `$SHAREDIR`, 
+   `$EXTRABINDIR`) instead of assuming them being on `$PATH`.
  * Client windows are now in a separate namespace.
- * Resize/maximize/shade changes: Shading should work on WIonFrames too
+ * Resize/maximize/shade changes: Shading should work on `WIonFrame`s too
    and shade mode is automatic when the client area gets too small when
    resizing. Maximize toggle restores frame to previous size if shaded
    instead of maximizing. The move/resize mode bindings were changed again
    to be more consistent and predictable: Left/Right/Up/Down and F/B/P/N
    grow the frame in the specific direction, Shift+keys shrink and in
-   case of floating frames, DEFAULT_MOD+keys move
- * Returning from full screen mode should work on WFloatWS:s too.
+   case of floating frames, `DEFAULT_MOD+keys` move
+ * Returning from full screen mode should work on `WFloatWS`s too.
  * Lots of minor fixes, export additions and clean-up.
 
 As usual, see the (long!) list of new ChangeLog entries at the end of
@@ -677,17 +689,20 @@ Especially the virtual roots are there to keep the windows that are on
 a floatws on the right screen.
 
 Virtual root windows will, however, break a few apps:
+
  * Mozilla -remote won't work because of its crappy method for looking
    up existing windows that can't handle multiple levels of WM windows.
    Nested workspaces have the same problem. There is, however, a simple
    solution to this problem: gnome-moz-remote. It seems to use a saner
    method for looking up an existing Gecko browser and also works with
    at least Phoenix/MozillaFirebird and Galeon.
+
 These two are problems only if you use floatws:s (other problems with
 which virtual root windows are intended to solve):
+
  * The background-setting apps I am aware of will require a following
    'xrefresh' for the changes to be updated to the (transparent) virtual
-   roots. Background setting apps that support the _NET_VIRTUAL_ROOTS
+   roots. Background setting apps that support the `_NET_VIRTUAL_ROOTS`
    property (which, I think, was meant for root window-sized WS 
    backgrounds) could be used to set a separate background for each
    Xinerama screen, though. I am not aware of any such app.
@@ -702,35 +717,36 @@ which virtual root windows are intended to solve):
    the same problem.
 
 There is one more temporary problem:
+
  * Status bar modules (and the dock module's statusbar mode) will be
    *temporarily* broken when virtual roots are _not_ used. This will be
    fixed later when parts of screen and frame code are unified (it should
    then be possible to run Ion without any workspace modules and have
    queries attached to screens). In the meanwhile, if you don't care about
    the above-mentioned problems and want a statusbar (which probably needs
-   to be ported to this release), you can defined CF_ALWAYS_VIRTUAL_ROOT
+   to be ported to this release), you can defined `CF_ALWAYS_VIRTUAL_ROOT`
    when compiling Ion.
 
 
-=== ion-devel-20030510 ===
-
+ion-devel-20030510
+------------------
 
 There are quite a few small fixes and minor enhancements invisible to
 the user in this release. The splitting functions were renamed to be
 more consistent and there are a couple of enhancements in the Lua code
 query that should make it much more usable. First, tab-completion can
 now descend into tables and complete subexpressions. Secondly, the local
-variable '_' in addition to 'arg[1]' is set to point to the the frame in
+variable `_` in addition to 'arg[1]' is set to point to the the frame in
 which the query is executing. 
 
 I have also written some new documentation that is now available from
 the Ion web page.
 
 
-=== ion-devel-20030506 ===
+ion-devel-20030506
+------------------
 
-
-The most notable change in this release is that the target_id system
+The most notable change in this release is that the `target_id` system
 was removed and instead client window status is also saved over
 restarts in the saves/workspaces-* files. (It shouldn't be too hard
 to hook a session management module over this.) Thanks to this
@@ -742,15 +758,15 @@ There are also a few bug fixes and code to save and load line editor
 history was added.
 
 
-=== ion-devel-20030503 ===
-
+ion-devel-20030503
+------------------
 
 There are lots of minor improvements in this release, see the
 new ChangeLog entries for details.
 
 
-=== ion-devel-20030427 ===
-
+ion-devel-20030427
+------------------
 
 Some minor feature enhancements and a few fixes in this new release:
 
@@ -763,11 +779,11 @@ it.
 Basic window stacking management support code was added. Transients
 on floatws:s should now be stacked above their parents. If you don't
 want to change your modified binding configurations at this point and
-need the functions floatframe_raise/lower, include compat.lua.
+need the functions `floatframe_raise/lower`, include compat.lua.
 
 
-=== ion-devel-20030412 ===
-
+ion-devel-20030412
+------------------
 
 This release again fixes some minor problems and enhances a few
 features. Most of the enhancements are related to UTF8 support and
@@ -778,9 +794,9 @@ back to "POSIX" as this might make fonts loadable although support for
 non-ASCII characters will be crippled. It might now be safe for
 package maintainers to enable UTF8 support by default
 
-As apps seem to have switched to using _NET_WM_NAME for UTF8 titles
-and filling WM_NAME with crap, this property is also preferred over
-WM_NAME if set. Support for some other "extended" WM hints might be
+As apps seem to have switched to using `_NET_WM_NAME` for UTF8 titles
+and filling `WM_NAME` with crap, this property is also preferred over
+`WM_NAME` if set. Support for some other "extended" WM hints might be
 added in the future but I have no intentions of moking Ion NetWM-
 compliant. I might have thought of attempting to do so a few years
 ago when I last read the specification but it seems that since then
@@ -791,25 +807,25 @@ Full error log is also displayed with xmessage on startup whether
 it is possible to continue or not.
 
 
-=== ion-devel-20030410 ===
-
+ion-devel-20030410
+------------------
 
 There was a bug in QueryLib written yesterday, therefore this release.
 
 
-=== ion-devel-20030409 ===
-
+ion-devel-20030409
+------------------
 
 I started converting the query code to Lua and discovered some rather
 silly bugs in the Lua interface so here's a new release with the new
 and improved query code included. The names of queries have changed
 (they're all in the table QueryLib defined in querylib.lua -- only
-query_query and a few temporary handlers are implemented in query.so)
+`query_query` and a few temporary handlers are implemented in query.so)
 so your modified configuration files will be broken again :(.
 
 
-=== ion-devel-20030408 ===
-
+ion-devel-20030408
+------------------
 
 Be prepared to completely rewrite your configuration files once
 again: a new version of Ion-devel has been released that uses Lua
@@ -830,8 +846,8 @@ Finally, the preferred linking address for Ion's home page is now
 old address, but this redirected address should be more permanent.
 
 
-=== ion-devel-20030327 ===
-
+ion-devel-20030327
+------------------
 
 Just some minor fixes, binary rename and better embedded workspace
 support in this release. I'm still contemplating whether to convert
@@ -842,10 +858,10 @@ To create an embedded workspaces in a frame, at the moment you have
 to modify the appropriate workspace save file (when Ion is not running!)
 by  adding lines such as
 
-        region "WFloatWS", "testiupotus" {
-        }
+    region "WFloatWS", "testiupotus" {
+    }
 
-inside the frame definition after the other options (flags, target_id;
+inside the frame definition after the other options (flags, `target_id`;
 those options will be ignored if after any region definitions).
 
 One more thing to note: debugging infos are no longer automatically
@@ -856,8 +872,8 @@ when you find a bug (or maybe can fix it yourself), you can make the
 binary and the modules a _lot_ smaller by running 'strip' on them.
 
 
-=== ion-devel-20030311 ===
-
+ion-devel-20030311
+------------------
 
 The list of new ChangeLog entries is long this time, but I'm finally
 starting to get to what I started working on almost two years ago. Yes,
@@ -867,7 +883,7 @@ such at the time -- but the floatws.so module and basic functionality
 is there. Most notably perhaps a menu module is not yet implemented.
 (Porting the PWM menu code should a nice little task for whomever
 interested... *wink*.) To create some PWM workspaces, load the floatws.so
-module (should be loaded by default) and in query_workspace (F9)
+module (should be loaded by default) and in `query_workspace` (F9)
 prefix workspace name with 'WFloatWS:' (or load the module before
 ionws.so). 
 
@@ -885,25 +901,25 @@ must be properly set up or else X will stop drawing strings at non-ascii
 characters instead of ignoring them. See my earlier rants on the mailing
 list for reasons on not using the more standard Xmb functions.
 To actually see any special characters, you must load the necessary fonts
-by specifying a comma-separated list of fonts to the font and tab_font
+by specifying a comma-separated list of fonts to the font and `tab_font`
 draw.conf options. Multiple font loading does not work when Xft support
 is enabled at the time being.
 
 There has been a lot of changes in the config files, again, and I can
 promise there's still more to come. See the ChangeLog for details.
 If you want to use your old workspaces configurations, move them to
-~/.ion-devel/saves and replace the strings "WFrame" and "WWorkspace"
+`~/.ion-devel/saves` and replace the strings "WFrame" and "WWorkspace"
 with "WIonFrame" and "WIonWS", respectively.
 
 
-=== ion-devel-20030225 ===
-
+ion-devel-20030225
+------------------
 
 I've made the bugfix release as promised. Get it from the usual place.
 
 
-=== ion-devel-20030223 ===
-
+ion-devel-20030223
+------------------
 
 There's a new major development release available from Ion web page.
 Not many changes are visible to the end user, though, but a lot was
@@ -928,12 +944,12 @@ Some notes on full screen mode toggle:
    enter full screen mode, so Ion doesn't remember the last frame.
  * Mozilla sometimes has trouble entering full screen mode but when it
    succeeds, Ion remembers the last frame. However, if
-   clientwin_toggle_fullscreen is used to leave the full screen mode
+   `clientwin_toggle_fullscreen` is used to leave the full screen mode
    started from Mozilla, Mozilla doesn't know that the mode has been
    left.
 
 Clearly there should be some method of communication between Ion and the
 programs for full screen toggles to fully work. At the moment I suggest
-using clientwin_toggle_fullscreen instead of the programs' native toggles
+using `clientwin_toggle_fullscreen` instead of the programs' native toggles
 unless the program has some special full screen mode and you really want
 it.
