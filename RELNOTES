@@ -1,8 +1,28 @@
 
-ion-3ds-2006????
+ion-3ds-20060519
 ----------------
 
-Lua 5.1 is now required.
+Some notable changes in this release include
+
+ * Lua 5.1 is now required.
+
+ * Framed transients on by default now. New binding context
+   "WFrame.toplevel" and "WMPlex.toplevel" were added to allow
+   for separate sets of bindings for nested transient frames and
+   top-level frames. Some of the bindings in the default binding
+   maps that are likely to be unwanted on transient frames were
+   moved to this contexts. Old custom bindings will continue to 
+   work unless they modify the defaults by unbinding some of the
+   moved bindings.
+
+ * Pressing Mod1+K K in the default bindings now switches to any
+   region with the "activity" flag set (indicated by the a box
+   at a corner of the screen), if there's one, before cycling to 
+   previously active region. The same effect can be achieved in
+   your custom bindings with
+
+        ioncore.activity_goto() or ioncore.goto_previous()
+
 
 ion-3ds-20050607
 ----------------
