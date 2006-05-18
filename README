@@ -122,7 +122,7 @@ The dock module was written by Tom Payne and Per Olofsson.
 `share/ion-completefile/ion-completefile.c` is based on editline, (c)
 1992 Simmule Turner and Rich Salz. See the file for details.
 
-The code that de/fontset.c is based on was apparently originally written 
+The code that `de/fontset.c` is based on was apparently originally written 
 by Tomohiro Kubota; see
 <http://www.debian.org/doc/manuals/intro-i18n/ch-examples.en.html#s13.4.5>.
 

@@ -161,11 +161,11 @@ is enabled by default and displays date/time/load/mail count in a
 configurable format.
 
 So why is it not reading your configuration and save files? Firstly,
-all of the .lua files were renamed to be indicative of their purpose.
+all of the `.lua` files were renamed to be indicative of their purpose.
 Secondly, there have been so many changes that your old files would be
 incompatible anyway.
 
-The .lua files are now named as follows:
+The `.lua` files are now named as follows:
 
     cfg_*.lua    Configuration file that the user may wish to edit
     look_*.lua   Drawing engine style file
@@ -183,12 +183,12 @@ of Ion.
 You perhaps noticed above that modules have stub loaders now, so the 
 user has no need to use the `ioncore.load_module` routine. All extensions
 and additional configuration files can now be loaded  with 'dopath'
-(used to be 'include'). Also, the menulib, querylib, and ioncorelib Lua
-libraries are gone and instead their contents can be found in the same 
+(used to be 'include'). Also, the `menulib`, `querylib`, and `ioncorelib`
+Lua libraries are gone and instead their contents can be found in the same 
 `mod_whatever` namespace with the corresponding module (the "stub" loader
 for these modules is a bit more than just a stub...). Some may also
 want to know that for `mod_*` and `ext_*` only the compiled .lc files are
-now installed, and not the source .lua files, thus removing redundant
+now installed, and not the source `.lua` files, thus removing redundant
 files and making the installation slightly smaller.
 
 There are few other changes to the contents of the configuration files
@@ -217,7 +217,7 @@ The major new features of this snapshot release are:
 
  * `WMPlex` support for a sticky status display area to which `WIonWS`s
    adjust properly. Modified to the dock module to support this method. 
-   See the new dock.lua to set up the dock in the new embedded or old 
+   See the new `dock.lua` to set up the dock in the new embedded or old 
    floating manner (the API for the latter has also changed).
  * Primitive session management support.
 
@@ -241,7 +241,7 @@ modules).
 
 Ion loads `mod_sm` automatically when the SESSION_MANAGER environment 
 variable that should be set by the session manager is set, so there's 
-no need load it in ion.lua. 
+no need load it in `ion.lua`. 
 
 When session management is in use, all entries in the 'Session' menu
 (previously 'Exit' menu) actually invoke the session manager to do the
@@ -310,7 +310,7 @@ The most visible changes to Ion2 so far are:
     more consistent function set.
 
   * New binding configuration mechanism. Dozens of `*_bindings` functions
-    were replaced with a single [ioncorelib.]defbindings function that
+    were replaced with a single `[ioncorelib.]defbindings` function that
     accepts a context parameter. Callbacks are specified as strings
     (although passing functions still works) to make it easier for
     external configuration programs to understand the configuration 
@@ -319,7 +319,7 @@ The most visible changes to Ion2 so far are:
     concept of anonymous functions.
 
   * It is now also possible to retrieve a list of bindings with
-    ioncorelib.getbindings, for example, for self-documentation.
+    `ioncorelib.getbindings`, for example, for self-documentation.
 
   * Single move/resize mode bindings instead of separate for both
     ionframe and floatframe.
@@ -378,7 +378,7 @@ ion-devel-20031211
 This is a big clean-up release. The most noticeable changes are that 
 '-devel' has been removed from path names, user configuration files go
 in `~/.ion2/` and the main configuration file is 'ion.lua'. (The other 
-ioncore-*.lua files have also been renamed.) There have been no notable
+`ioncore-*.lua` files have also been renamed.) There have been no notable
 changes in the configuration files themselves, so your old files will 
 work if you move them to the correct directory and rename the changed
 files. (`mv ~/.ion-devel ~/.ion2; cd ~/.ion2; mv ioncore.lua ion.lua;`
@@ -491,7 +491,7 @@ What's new for this release then?
 
   * Drawing engine module support.
   * OO-style exported functions. The old `class_fn` functions are now
-    `WClass.fn` (an ugly wrapper is provided in compat.lua).
+    `WClass.fn` (an ugly wrapper is provided in `compat.lua`).
   * No more screen-specific configuration or savefiles.
   * Session name (can be specified on command line) instead of display
     name based savefiles. Also affects query history and not just workspace
@@ -502,22 +502,22 @@ What's new for this release then?
 
 Converting configuration files.
 
-Old .lua colour schemes and workspace save files can be automatically
+Old `.lua` colour schemes and workspace save files can be automatically
 converted to a format suitable to be loaded by this latest release.
 Other files will have to be ported manually. To convert colour schemes,
-use the script utils/lookconv.lua. The usage is
+use the script `utils/lookconv.lua`. The usage is
 
     lookconv.lua look-old.lua > look-new.lua
 
-To convert workspaces savefiles, use the script utils/saveconv.sh. The
-usage is
+To convert workspaces savefiles, use the script `utils/saveconv.sh`. 
+The usage is
 
     saveconf.sh ~/.ion-devel/saves/workspaces-DISPLAY.*.lua \
         > ~/.ion-devel/SESSIONNAME/workspaces.lua
 
 `DISPLAY` here is the actual display part of `$DISPLAY`, probably just `:0`.
 '*' stands for all screens (if you have only one screen you could do with
-perhaps just workspaces-:0.0.lua). SESSIONNAME is the name of the session
+perhaps just `workspaces-:0.0.lua`). SESSIONNAME is the name of the session
 where you want to use the converted savefiles. Default session name for
 `DISPLAY` is `default-session-DISPLAY` with the colon in `DISPLAY` converted
 to a dash. For most people this is `default-session--0`. In the simplest
@@ -569,7 +569,7 @@ This release fixes some small problems with the previous release and
 adds a workaround kludge for the XFree86 textprop bug (it's been fixed
 but no release with the fix is available) that could cause Opera to 
 crash Ion when UTF8 support was enabled. I also added the winprop
-needed for galeon's find dialog to default kludges.lua and there's
+needed for galeon's find dialog to default `kludges.lua` and there's
 some extra documentation and defaults for some systems in system.mk.
 
 
@@ -579,13 +579,13 @@ ion-devel-20030614
 Most changes in this release centre around making Ion more tolerant
 to broken configuration files; for details see the ChangeLog. There
 are also changes in binding configuration as I already mentioned in
-an earlier poting. Namely common-frame-bindings.lua is gone and the
-bindings previously set there (into variables that the *ws.lua
-files later referenced) were moved to ioncore-bindings.lua and are
+an earlier poting. Namely `common-frame-bindings.lua` is gone and the
+bindings previously set there (into variables that the `*ws.lua`
+files later referenced) were moved to `ioncore-bindings.lua` and are
 set using the new functions `mplex_bindings` and `genframe_bindings`
 are were  added. Old modified configuration files should still work,
 however, but if you use `make_active_leaf_fn`, you will need to 
-include compat.lua as the `global_bindings` that used this were
+include `compat.lua` as the `global_bindings` that used this were
 replaced by bindings in `mplex_bindings` and the function
 `make_current_clientwin_fn`.
 
@@ -627,7 +627,7 @@ functions fixed the problem and for some reason this patch also seemed
 to remove those problems.
 
 
-One more note: as ioncorelib.lua and querylib.lua are now installed
+One more note: as `ioncorelib.lua` and `querylib.lua` are now installed
 in `$SHAREDIR`, you must remove the old files in `$ETCDIR` if installing
 over a previous release or else there will be errors. You should also
 not use any possible old copies you have in `~/.ion-devel/`. (One of the
@@ -779,7 +779,7 @@ it.
 Basic window stacking management support code was added. Transients
 on floatws:s should now be stacked above their parents. If you don't
 want to change your modified binding configurations at this point and
-need the functions `floatframe_raise/lower`, include compat.lua.
+need the functions `floatframe_raise/lower`, include `compat.lua`.
 
 
 ion-devel-20030412
@@ -819,7 +819,7 @@ ion-devel-20030409
 I started converting the query code to Lua and discovered some rather
 silly bugs in the Lua interface so here's a new release with the new
 and improved query code included. The names of queries have changed
-(they're all in the table QueryLib defined in querylib.lua -- only
+(they're all in the table QueryLib defined in `querylib.lua` -- only
 `query_query` and a few temporary handlers are implemented in query.so)
 so your modified configuration files will be broken again :(.
 
