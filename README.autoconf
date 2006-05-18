@@ -23,10 +23,10 @@ Ion default.
 
 DEBIAN NOTES
 
-If you are using the Lua 5.0 package on Debian then use
+If you are using the Lua 5.1 package on Debian then use
 
-    ./configure --with-lua-suffix=50 \
-    --with-lua-includes=/usr/include/lua50
+    ./configure --with-lua-suffix=5.1 \
+    --with-lua-includes=/usr/include/lua5.1
 
 This will allow the script to find the Lua headers, binaries and
 libraries as renamed and located on Debian.
