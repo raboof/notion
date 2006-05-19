@@ -219,7 +219,7 @@ local function write_bindings_man(db)
     local s=""
     
     for _, v in ipairs(db) do
-        if table.getn(v.bindings)>0 then
+        if #(v.bindings)>0 then
             s=s..write_binding_man(v)
         end
     end
@@ -238,7 +238,7 @@ local replaces={}
 
 local function doargs(a)
     local i=1
-    while i<=table.getn(a) do
+    while i<=#a do
         if a[i]=='-o' then
             outfile=a[i+1]
             i=i+2

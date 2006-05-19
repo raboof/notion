@@ -98,7 +98,7 @@ local function parsefile(f)
         error(err)
     end
     local i=1
-    while i<=table.getn(tokens) do
+    while i<=#tokens do
         if tokens[i].token=="name" and keywords[tokens[i].value] then
             i=i+(try_keyword(f, tokens, i) or 1)
         else
@@ -196,7 +196,7 @@ end
 
 local function doargs(a)
     local i=1
-    while i<=table.getn(a) do
+    while i<=#a do
         if a[i]=='-f' then
             parsefiles(a[i+1])
             i=i+2
@@ -222,7 +222,7 @@ local function doargs(a)
     end
 end
 
-if table.getn(arg)==0 then
+if #arg==0 then
     help()
 end
 

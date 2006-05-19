@@ -14,7 +14,7 @@ local ioncore=_G.ioncore
 local winprops={}
 
 local function ifnil(...)
-    local n=table.getn(arg)
+    local n=#arg
     local function nxt(_, i)
         local j=i+1
         if i==n then
@@ -40,7 +40,7 @@ local function ipairs_r(tab)
             return n-1, tab[n-1]
         end
     end
-    return nxt, nil, table.getn(tab)+1
+    return nxt, nil, #tab+1
 end
 
 --DOC

@@ -365,7 +365,7 @@ function mod_query.complete_name(str, list)
             table.insert(entries, nm)
         end
     end
-    if table.getn(entries)==0 then
+    if #entries==0 then
         for i, reg in pairs(list) do
             local nm=reg:name()
             if nm and string.find(nm, str, 1, true) then
@@ -578,7 +578,7 @@ local function break_cmdline(str, no_ws)
     local res={""}
 
     local function ins(str)
-        local n=table.getn(res)
+        local n=#res
         if string.find(res[n], "^%s+$") then
             table.insert(res, str)
         else
@@ -587,7 +587,7 @@ local function break_cmdline(str, no_ws)
     end
 
     local function ins_space(str)
-        local n=table.getn(res)
+        local n=#res
         if no_ws then
             if res[n]~="" then
                 table.insert(res, "")
@@ -682,7 +682,7 @@ local function find_point(strs, point)
             return i
         end
     end
-    return table.getn(strs)
+    return #strs
 end
 
 
@@ -704,7 +704,7 @@ function mod_query.exec_completor(wedln, str, point)
         s_beg=s_beg..parts[i]
     end
     
-    for i=complidx+1, table.getn(parts) do
+    for i=complidx+1, #parts do
         s_end=s_end..parts[i]
     end
     
@@ -965,7 +965,7 @@ function mod_query.do_handle_lua(mplex, env, code)
     local print_res
     local function collect_print(...)
         local tmp=""
-        local l=table.getn(arg)
+        local l=#arg
         for i=1,l do
             tmp=tmp..tostring(arg[i])..(i==l and "\n" or "\t")
         end
@@ -1056,7 +1056,7 @@ function mod_query.do_complete_lua(env, str)
     
     -- If there was only one completion and it is a string or function,
     -- concatenate it with "." or "(", respectively.
-    if table.getn(compl)==1 then
+    if #compl==1 then
         if type(comptab[compl[1]])=="table" then
             compl[1]=compl[1] .. "."
         elseif type(comptab[compl[1]])=="function" then

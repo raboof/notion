@@ -36,7 +36,7 @@ end
 -- of menu entries.
 function ioncore.defctxmenu(ctx, ...)
     local tab
-    if table.getn(arg)>1 and type(arg[1])=="string" then
+    if #arg>1 and type(arg[1])=="string" then
         tab=arg[2]
         tab.label=ioncore.gettext(arg[1])
     else
@@ -297,7 +297,7 @@ function menus.ctxmenu(reg, sub)
     
     while reg do
         local mm = get_ctxmenu(reg, sub, true)
-        if table.getn(mm)>0 then
+        if #mm>0 then
             local nm=mm.label or obj_typename(reg)
             table.insert(m, ioncore.submenu(nm, mm))
         end
