@@ -17,8 +17,8 @@ Building and installing
     * GNU make
     * Lua 5.1 (see <http://www.lua.org/>). 
 
-2. a) Edit system.mk to suit your system. Most GNU/Linux users should
-      need very little modifications to system.mk.
+2. a) Edit `system.mk` to suit your system. Most GNU/Linux users should
+      need very little modifications to `system.mk`.
 
    b) Alternatively, run `autoreconf` and then `./configure`. See 
       `README.autoconf` for details on parameters, especially if you 
@@ -27,7 +27,7 @@ Building and installing
       not exist before falling back to alternative a).
 
 3. If you want to build some extra modules now or do not want to build
-   some of the standard modules, edit modulelist.mk.
+   some of the standard modules, edit `modulelist.mk`.
    
 4. Run `make`. Note that `make` here refers to GNU make which is usually
    named `gmake` on systems with some other implementation of make as 
@@ -64,7 +64,7 @@ Some optional installation steps
    program (or just plain old text editor) will do as well - just the bindings
    in `cfg_bindings.lua`. Of course, if you don't want to use the feature at 
    this time or never, you may simply skip this step. If you want to use 
-   run-mailcap, it can be found from the following address, as a source 
+   `run-mailcap`, it can be found from the following address, as a source 
    tarball as well:
    
        <http://www.debian.org/Packages/unstable/net/mime-support.html>
