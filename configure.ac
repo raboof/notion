@@ -244,14 +244,14 @@ if test "x$with_lua_libraries" != x; then
 elif test "x$with_lua_prefix" != x; then
     LUA_LIBS="-L$with_lua_prefix/lib"
 fi
+AC_CHECK_LIB([m], [exp], [lua_extra_libs="$lua_extra_libs -lm"], [])
+AC_CHECK_LIB([dl], [dlopen], [lua_extra_libs="$lua_extra_libs -ldl"], [])
 AC_CHECK_LIB([lua$with_lua_suffix],
              [lua_call],
-             [LUA_LIBS="$LUA_LIBS -llua$with_lua_suffix"],
+             [LUA_LIBS="$LUA_LIBS -llua$with_lua_suffix $lua_extra_libs"],
              [AC_MSG_ERROR([*** Can't find lua_call in lua$with_lua_suffix.
                   *** Check for liblua installation or --with-lua-libraries or --with-lua-suffix options])],
-             [$LUA_LIBS])
-AC_CHECK_LIB([dl], [dlopen], [lua_extra_libs="$lua_extra_libs -ldl"], [])
-AC_CHECK_LIB([m], [exp], [lua_extra_libs="$lua_extra_libs -lm"], [])
+             [$LUA_LIBS $lua_extra_libs])
 dnl }}}
 
 dnl liblua_version {{{
