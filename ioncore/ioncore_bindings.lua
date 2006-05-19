@@ -189,7 +189,7 @@ function ioncore.defbindings(context, bindings)
 end
 
 local function bindings_get_cmds(map)
-    for k, v in map do
+    for k, v in pairs(map) do
         if v.func then
             v.cmd=compiled2str[v.func]
         end
@@ -207,7 +207,7 @@ function ioncore.getbindings(maybe_context)
         bindings_get_cmds(bindings[maybe_context])
         return bindings[maybe_context]
     else
-        for k, v in bindings do
+        for k, v in pairs(bindings) do
             bindings_get_cmds(v)
         end
         return bindings
