@@ -121,7 +121,7 @@ end
 -- any further actions.
 -- For more information on bindings, see section \ref{sec:bindings}.
 function ioncore.kpress_wait(keyspec, cmd, guard)
-    return putcmd(cmd, guard, {action = "kpress_waitrel", kcb = keyspec})
+    return putcmd(cmd, guard, {action = "kpress_wait", kcb = keyspec})
 end
 
 local function mact(act_, kcb_, cmd, guard)

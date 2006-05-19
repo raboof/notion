@@ -170,7 +170,7 @@ static bool do_action(WBindmap *bindmap, const char *str,
         wr=FALSE;
     }
     
-    binding.waitrel=wr;
+    binding.wait=wr;
     binding.act=act;
     binding.state=mod;
     binding.ksb=ksb;
@@ -210,7 +210,7 @@ static bool do_submap(WBindmap *bindmap, const char *str,
     if(bnd!=NULL && bnd->submap!=NULL && bnd->state==mod)
         return bindmap_defbindings(bnd->submap, subtab, TRUE);
 
-    binding.waitrel=FALSE;
+    binding.wait=FALSE;
     binding.act=BINDING_KEYPRESS;
     binding.state=mod;
     binding.ksb=ksb;
@@ -261,7 +261,7 @@ static bool do_entry(WBindmap *bindmap, ExtlTab tab,
         goto fail;
     }
 
-    if(strcmp(action_str, "kpress_waitrel")==0){
+    if(strcmp(action_str, "kpress_wait")==0){
         action=BINDING_KEYPRESS;
         wr=TRUE;
     }else{
@@ -399,8 +399,8 @@ static bool get_kpress(WBindmap *bindmap, WBinding *b, ExtlTab t)
     char *mods;
     char *key;
     
-    if(b->waitrel)
-        extl_table_sets_s(t, "action", "kpress_waitrel");
+    if(b->wait)
+        extl_table_sets_s(t, "action", "kpress_wait");
     else
         extl_table_sets_s(t, "action", "kpress");
     

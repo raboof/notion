@@ -83,7 +83,7 @@ static bool dispatch_binding(WRegion *binding_owner,
 
         extl_call(binding->func, "oo", NULL, binding_owner, subctx);
 		
-        if(ev->state!=0 && binding->waitrel)
+        if(ev->state!=0 && binding->wait)
             waitrelease(grab_reg);
     }
     return TRUE;
@@ -138,7 +138,7 @@ static void waitrelease(WRegion *reg)
 	
     /* We need to grab on the root window as <reg> might have been
      * ioncore_defer_destroy:ed by the binding handler (the most common case
-     * for using this kpress_waitrel!). In such a case the grab may
+     * for using this kpress_wait!). In such a case the grab may
      * be removed before the modifiers are released.
      */
     ioncore_grab_establish((WRegion*)region_rootwin_of(reg), 

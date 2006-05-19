@@ -42,7 +42,7 @@ DECLSTRUCT(WBinding){
     uint state;
     uint act;
     int area;
-    bool waitrel;
+    bool wait;
     WBindmap *submap;
     ExtlFn func;
 };

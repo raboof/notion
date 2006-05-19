@@ -89,7 +89,7 @@ local function dobindings(fn, bindings)
     end
     
     function p.kpress_wait(keyspec, cmd, guard)
-        return putcmd(cmd, guard, {action = "kpress_waitrel", kcb = keyspec})
+        return putcmd(cmd, guard, {action = "kpress_wait", kcb = keyspec})
     end
     
     local function mact(act_, kcb_, cmd, guard)
@@ -197,7 +197,7 @@ local function combine_bindings(v)
             s=s..', '
         end
         first=false
-        if b.action=="kpress" or b.action=="kpress_waitrel" then
+        if b.action=="kpress" or b.action=="kpress_wait" then
             s=s..b.kcb
         else
             if not b.area then
