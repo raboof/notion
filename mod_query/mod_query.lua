@@ -301,6 +301,7 @@ function mod_query.popen_completions(cp, cmd, fn, reshnd)
                              function(s) 
                                  reshnd(results, s) 
                                  lines=lines+1
+                                 return ""
                              end)
             
             if lines>mod_query.COLLECT_THRESHOLD then
