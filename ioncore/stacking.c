@@ -83,10 +83,11 @@ void stacking_restack(WStacking **stacking, Window other, int mode,
     for(st=*stacking; st!=NULL; st=stnext){
         stnext=st->next;
         
-        assert(st!=other_on_list);
-        
         if(cf(filt, filt_data, st->reg)){
             Window bottom=None, top=None;
+            
+            assert(st!=other_on_list);
+
             region_restack(st->reg, ref, mode2);
             region_stacking(st->reg, &bottom, &top);
             if(top!=None){
