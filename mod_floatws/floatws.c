@@ -200,7 +200,8 @@ static WFloatWS *sticky_source(WFloatWS *ws, WRegion *reg)
 
 static bool same_stacking_filt(WRegion *reg, void *ws)
 {
-    return (sticky_source((WFloatWS*)ws, reg)!=NULL);
+    return (REGION_MANAGER(reg)==(WRegion*)ws ||
+            (sticky_source((WFloatWS*)ws, reg)!=NULL));
 }
 
 
@@ -512,7 +513,7 @@ bool floatws_phattach(WFloatWS *ws,
                       WFloatWSPHAttachParams *p)
 {
     bool newframe=FALSE;
-    WStacking *st;
+    WStacking *st, *stabove;
     WMPlexAttachParams par;
     WStacking *stacking=get_stacking(ws);
 
@@ -529,16 +530,14 @@ bool floatws_phattach(WFloatWS *ws,
         
         
         if(stacking!=NULL && p->stack_above!=NULL){
-            st=stacking->prev;
-            while(1){
-                if(st->reg==(WRegion*)p->frame){
-                    st->above=p->stack_above;
-                    break;
-                }
-                if(st==stacking)
-                    break;
-                st=st->prev;
-            }
+            /* TODO: should not need to scan for st, as we just 
+             * created it
+             */
+            st=stacking_find(stacking, (WRegion*)p->frame);
+            stabove=stacking_find(stacking, (WRegion*)p->stack_above);
+            
+            if(st!=NULL)
+                st->above=stabove;
         }
     }
     
@@ -997,7 +996,7 @@ void floatws_restack(WFloatWS *ws, Window other, int mode)
         XQueryTree(ioncore_g.dpy, region_xwindow((WRegion*)par),
                    &root, &parent, &children, &n);
         if(mode==Above){
-            WStacking *below=NULL, *st;
+            WStacking *st;
             for(i=n; i>0; ){
                 i--;
                 if(children[i]==other)
@@ -1007,7 +1006,7 @@ void floatws_restack(WFloatWS *ws, Window other, int mode)
                     other_on_list=st;
             }
         }else{
-            WStacking *above=NULL, *st;
+            WStacking *st;
             for(i=0; i<n; i++){
                 if(children[i]==other)
                     break;

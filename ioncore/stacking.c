@@ -68,46 +68,53 @@ static WStacking *link_list_after(WStacking *l1,
 }
 
 
-WRegion *stacking_remove(WWindow *par, WRegion *reg)
+WStacking *stacking_find(WStacking *st, WRegion *reg)
 {
-    bool nextlocked=FALSE;
-    WStacking *st, *stnext;
-    WRegion *next=NULL;
-    
-    if(par!=NULL && par->stacking!=NULL){
-        for(st=par->stacking; st!=NULL; st=stnext){
-            stnext=st->next;
-            if(st->reg==reg){
-                next=st->above;
-                nextlocked=TRUE;
-                UNLINK_ITEM(par->stacking, st, next, prev);
-                free(st);
-            }else if(st->above==reg){
-                st->above=NULL;
-                next=st->reg;
-                nextlocked=TRUE;
-            }else if(!nextlocked){
-                next=st->reg;
-            }
-        }
+    while(st!=NULL){
+        if(st->reg==reg)
+            return st;
+        st=st->next;
     }
     
-    return next;
+    return NULL;
 }
 
 
-void stacking_unlink(WWindow *par, WStacking *st)
+WRegion *stacking_remove(WWindow *par, WRegion *reg)
 {
-    if(par!=NULL){
-        UNLINK_ITEM(par->stacking, st, next, prev);
-    }else{
-        if(st->next!=NULL)
-            st->next->prev=st->prev;
-        if(st->prev!=NULL)
-            st->prev->next=st->next;
-        st->next=NULL;
-        st->prev=NULL;
+    WStacking *regst, *st, *nxt=NULL;
+    
+    if(par!=NULL && par->stacking!=NULL){
+        WStacking *regst=stacking_find(par->stacking, reg);
+        
+        if(regst!=NULL){
+            nxt=stacking_unlink(par, regst);
+            free(regst);
+        }
     }
+    
+    return (nxt!=NULL ? nxt->reg : NULL);
+}
+
+
+WStacking *stacking_unlink(WWindow *par, WStacking *regst)
+{
+    WStacking *nxt=NULL, *st;
+    
+    st=regst->next;
+    
+    UNLINK_ITEM(par->stacking, regst, next, prev);
+            
+    /*while(st!=NULL){*/
+    for(st=par->stacking; st!=NULL; st=st->next){
+        if(st->above==regst){
+            st->above=NULL;
+            nxt=st;
+        }
+        /*st=st->next;*/
+    }
+    
+    return nxt;
 }
 
 
@@ -226,53 +233,29 @@ void stacking_stacking(WStacking *stacking, Window *bottomret, Window *topret,
 /*{{{ Raise/lower */
 
 
-void stacking_do_raise(WStacking **stacking, WRegion *reg, bool initial,
-                       Window fb_win,
-                       WStackingFilter *filt, void *filt_data)
+static void restack_above(WStacking **stacking, WStacking *regst,
+                          Window fb_other)
 {
-    WStacking *st, *sttop=NULL, *stabove, *stnext;
-    Window bottom=None, top=None, other=None;
-    
-    if(*stacking==NULL)
-        return;
-    
-    st=(*stacking)->prev;
-    while(1){
-        if(st->reg==reg)
-            break;
-        if(st->above!=reg && sttop==NULL && cf(filt, filt_data, st->reg)){
-            region_stacking(st->reg, &bottom, &top);
-            if(top!=None){
-                other=top;
-                sttop=st;
-            }
-        }
-        if(st==*stacking) /* reg not found */
-            return;
-        st=st->prev;
-    }
+    Window bottom, top, other;
+    WStacking *stabove, *stnext;
+    WStacking *sttop;
 
-    if(sttop!=NULL){
-        UNLINK_ITEM(*stacking, st, next, prev);
-        region_restack(reg, other, Above);
-        LINK_ITEM_AFTER(*stacking, sttop, st, next, prev);
-    }else if(initial){
-        region_restack(reg, fb_win, Above);
-    }
+    region_stacking(regst->reg, &bottom, &top);
     
-    if(initial)
+    other=(top==None ? fb_other : top);
+    
+    if(other==None)
         return;
     
-    region_stacking(reg, &bottom, &top);
-    if(top==None)
-        return;
-    other=top;
-    sttop=st;
-
-    for(stabove=*stacking; stabove!=NULL && stabove!=st; stabove=stnext){
+    sttop=regst;
+    
+    for(stabove=*stacking; stabove!=NULL; stabove=stnext){
         stnext=stabove->next;
         
-        if(stabove->above==reg){
+        if(stabove==regst)
+            continue;
+        
+        if(stabove->above==regst){
             UNLINK_ITEM(*stacking, stabove, next, prev);
             region_restack(stabove->reg, other, Above);
             LINK_ITEM_AFTER(*stacking, sttop, stabove, next, prev);
@@ -285,15 +268,69 @@ void stacking_do_raise(WStacking **stacking, WRegion *reg, bool initial,
 }
 
 
+void stacking_do_raise(WStacking **stacking, WRegion *reg, bool initial,
+                       Window fb_win,
+                       WStackingFilter *filt, void *filt_data)
+{
+    WStacking *regst, *st, *sttop=NULL;
+    Window bottom=None, top=None, other=None;
+    
+    if(*stacking==NULL)
+        return;
+    
+    regst=stacking_find(*stacking, reg);
+    
+    if(regst==NULL)
+        return;
+
+    /* Find top and bottom of everything above regst except stuff to
+     * be stacked above it.
+     */
+    for(st=(*stacking)->prev; st!=*stacking; st=st->prev){
+        if(st==regst)
+            break;
+        if(st->above!=regst && cf(filt, filt_data, st->reg)){
+            region_stacking(st->reg, &bottom, &top);
+            if(top!=None){
+                other=top;
+                sttop=st;
+                break;
+            }
+        }
+    }
+
+    /* Restack reg */
+    
+    if(sttop!=NULL){
+        UNLINK_ITEM(*stacking, regst, next, prev);
+        region_restack(reg, other, Above);
+        LINK_ITEM_AFTER(*stacking, sttop, regst, next, prev);
+    }else if(initial){
+        other=fb_win;
+        region_restack(reg, other, Above);
+    }
+    
+    if(!initial){
+        /* Restack stuff above reg */
+        restack_above(stacking, regst, other);
+    }
+}
+
+
 void stacking_do_lower(WStacking **stacking, WRegion *reg, Window fb_win,
                        WStackingFilter *filt, void *filt_data)
 {
-    WStacking *st, *stbottom=NULL, *stabove, *stnext;
+    WStacking *regst=NULL, *st, *stbottom=NULL;
     Window bottom=None, top=None, other=None;
+    
+    if(*stacking==NULL)
+        return;
 
     for(st=*stacking; st!=NULL; st=st->next){
-        if(st->reg==reg)
+        if(st->reg==reg){
+            regst=st;
             break;
+        }
         if(stbottom==NULL && cf(filt, filt_data, st->reg)){
             region_stacking(st->reg, &bottom, &top);
             if(bottom!=None){
@@ -303,13 +340,13 @@ void stacking_do_lower(WStacking **stacking, WRegion *reg, Window fb_win,
         }
     }
     
-    if(st!=NULL){
+    if(regst!=NULL){
         if(stbottom==NULL){
             region_restack(reg, fb_win, Above);
         }else{
-            UNLINK_ITEM(*stacking, st, next, prev);
+            UNLINK_ITEM(*stacking, regst, next, prev);
             region_restack(reg, other, Below);
-            LINK_ITEM_BEFORE(*stacking, stbottom, st, next, prev);
+            LINK_ITEM_BEFORE(*stacking, stbottom, regst, next, prev);
         }
     }
 }
