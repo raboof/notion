@@ -33,5 +33,6 @@ INTRCLASS(WPHolder);
 INTRCLASS(WMPlexPHolder);
 
 INTRSTRUCT(WLListNode);
+INTRSTRUCT(WStacking);
 
 #endif /* ION_IONCORE_CLASSES_H */

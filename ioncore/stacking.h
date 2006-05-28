@@ -15,7 +15,6 @@
 #include "common.h"
 #include "region.h"
 
-INTRSTRUCT(WStacking);
 
 DECLSTRUCT(WStacking){
     WRegion *reg;
@@ -41,5 +40,24 @@ void stacking_restack(WStacking **stacking, Window other, int mode,
 
 void stacking_stacking(WStacking *stacking, Window *bottomret, Window *topret,
                        WStackingFilter *filt, void *filt_data);
+
+WStacking **window_get_stackingp(WWindow *wwin);
+WStacking *window_get_stacking(WWindow *wwin);
+
+WRegion *stacking_remove(WWindow *par, WRegion *reg);
+void stacking_unlink(WWindow *par, WStacking *st);
+
+typedef struct{
+    WStacking *st;
+    WStackingFilter *filt;
+    void *filt_data;
+} WStackingIterTmp;
+
+extern void stacking_iter_init(WStackingIterTmp *tmp,
+                               WStacking *st,
+                               WStackingFilter *filt,
+                               void *filt_data);
+extern WRegion *stacking_iter(WStackingIterTmp *tmp);
+extern WStacking *stacking_iter_nodes(WStackingIterTmp *tmp);
 
 #endif /* ION_IONCORE_STACKING_H */

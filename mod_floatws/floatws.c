@@ -50,52 +50,61 @@ static void floatws_do_raise(WFloatWS *ws, WRegion *reg, bool initial);
 
 static WStacking *get_stacking(WFloatWS *ws)
 {
-    return stacking_;
+    WWindow *par=REGION_PARENT(ws);
+    
+    return (par==NULL 
+            ? NULL
+            : window_get_stacking(par));
 }
 
 
 static WStacking **get_stackingp(WFloatWS *ws)
 {
-    return &stacking_;
+    WWindow *par=REGION_PARENT(ws);
+    
+    return (par==NULL 
+            ? NULL
+            : window_get_stackingp(par));
 }
 
     
 /*{{{ Stacking list iteration */
 
 
+static bool wsfilt(WRegion *reg, void *ws)
+{
+    return (REGION_MANAGER(reg)==(WRegion*)ws);
+}
+
+
+static bool wsfilt_nostdisp(WRegion *reg, void *ws_)
+{
+    WFloatWS *ws=(WFloatWS*)ws_;
+    
+    return (REGION_MANAGER(reg)==(WRegion*)ws 
+            && reg!=ws->managed_stdisp);
+}
+
+
 void floatws_iter_init(WFloatWSIterTmp *tmp, WFloatWS *ws)
 {
-    tmp->ws=ws;
-    tmp->st=get_stacking(ws);
+    WStacking *st=get_stacking(ws);
+    stacking_iter_init(tmp, st, wsfilt, ws);
+}
+
+
+void floatws_iter_init_nostdisp(WFloatWSIterTmp *tmp, WFloatWS *ws)
+{
+    WStacking *st=get_stacking(ws);
+    stacking_iter_init(tmp, st, wsfilt_nostdisp, ws);
 }
 
 
 WRegion *floatws_iter(WFloatWSIterTmp *tmp)
 {
-    WRegion *next=NULL;
-    
-    while(tmp->st!=NULL){
-        next=tmp->st->reg;
-        tmp->st=tmp->st->next;
-        if(tmp->ws==NULL || REGION_MANAGER(next)==(WRegion*)tmp->ws)
-            break;
-        next=NULL;
-    }
-    
-    return next;
+    return stacking_iter(tmp);
 }
 
-
-WRegion *floatws_iter_no_stdisp(WFloatWSIterTmp *tmp)
-{
-    WRegion *r=NULL;
-    
-    do{
-        r=floatws_iter(tmp);
-    }while(r!=NULL && r==tmp->ws->managed_stdisp);
-    
-    return r;
-}
 
 WFloatWSIterTmp floatws_iter_default_tmp;
 
@@ -169,47 +178,29 @@ bool floatws_fitrep(WFloatWS *ws, WWindow *par, const WFitParams *fp)
 }
 
 
-static bool is_l1(WFloatWS *ws)
+static WFloatWS *sticky_source(WFloatWS *ws, WRegion *reg)
 {
     WMPlex *mplex=REGION_MANAGER_CHK(ws, WMPlex);
-    return (mplex!=NULL && mplex_layer(mplex, (WRegion*)ws)==1);
-}
-
-
-static WFloatWS *same_stacking(WFloatWS *ws, WRegion *reg)
-{
-    WMPlex *mplex;
     WFloatWS *ws2;
-
+    
+    if(mplex==NULL || mplex_layer(mplex, (WRegion*)ws)!=1)
+        return NULL;
+    
     ws2=REGION_MANAGER_CHK(reg, WFloatWS);
     
-    if(ws2==ws)
-        return ws;
-    
-    if(ws2==NULL)
+    if(ws2==NULL || REGION_MANAGER(ws2)!=(WRegion*)mplex)
         return NULL;
     
-    if(REGION_MANAGER(ws)==NULL){
-        if(REGION_PARENT(ws)==REGION_PARENT(ws2) && is_l1(ws2))
-            return ws2;
+    if(mplex_layer(mplex, (WRegion*)ws2)!=1)
         return NULL;
-    }
-
-    if(REGION_MANAGER(ws2)==NULL){
-        if(REGION_PARENT(ws)==REGION_PARENT(ws2) && is_l1(ws))
-            return ws2;
-        return NULL;
-    }
     
-    if(REGION_MANAGER(ws2)==REGION_MANAGER(ws) && is_l1(ws) && is_l1(ws2))
-        return ws2;
-    return NULL;
+    return ws2;
 }
 
 
 static bool same_stacking_filt(WRegion *reg, void *ws)
 {
-    return (same_stacking((WFloatWS*)ws, reg)!=NULL);
+    return (sticky_source((WFloatWS*)ws, reg)!=NULL);
 }
 
 
@@ -226,7 +217,7 @@ static void move_sticky(WFloatWS *ws)
         if(!st->sticky || REGION_MANAGER(st->reg)==(WRegion*)ws)
             continue;
         
-        ws2=same_stacking(ws, st->reg);
+        ws2=sticky_source(ws, st->reg);
         
         if(ws2==NULL)
             continue;
@@ -320,28 +311,9 @@ static void floatws_managed_remove(WFloatWS *ws, WRegion *reg)
 {
     bool mcf=region_may_control_focus((WRegion*)ws);
     bool ds=OBJ_IS_BEING_DESTROYED(ws);
-    WRegion *next=NULL;
-    WStacking *st, *stnext;
-    bool nextlocked=FALSE;
-    WStacking **stackingp=get_stackingp(ws);
+    WRegion *next;
     
-    if(stackingp!=NULL){
-        for(st=*stackingp; st!=NULL; st=stnext){
-            stnext=st->next;
-            if(st->reg==reg){
-                next=st->above;
-                nextlocked=TRUE;
-                UNLINK_ITEM(*stackingp, st, next, prev);
-                free(st);
-            }else if(st->above==reg){
-                st->above=NULL;
-                next=st->reg;
-                nextlocked=TRUE;
-            }else if(!nextlocked){
-                next=st->reg;
-            }
-        }
-    }
+    next=stacking_remove(REGION_PARENT(ws), reg);
     
     if(reg==ws->managed_stdisp)
         ws->managed_stdisp=NULL;
@@ -420,11 +392,10 @@ bool floatws_rescue_clientwins(WFloatWS *ws, WPHolder *ph)
 {
     WFloatWSIterTmp tmp;
     
-    floatws_iter_init(&tmp, ws);
+    floatws_iter_init_nostdisp(&tmp, ws);
     
     return region_rescue_some_clientwins((WRegion*)ws, ph,
-                                         ((WRegionIterator*)
-                                          floatws_iter_no_stdisp),
+                                         (WRegionIterator*)floatws_iter,
                                          &tmp);
 }
 
@@ -687,11 +658,12 @@ bool floatws_attach(WFloatWS *ws, WClientWin *cwin, ExtlTab t)
 static WMPlex *find_existing(WFloatWS *ws)
 {
     WRegion *r=ws->current_managed;
+    WFloatWSIterTmp tmp;
     
     if(r!=NULL && REG_OK(r))
         return (WMPlex*)r;
     
-    FOR_ALL_MANAGED_BY_FLOATWS_UNSAFE(ws, r){
+    FOR_ALL_MANAGED_BY_FLOATWS(ws, r, tmp){
         if(REG_OK(r))
             return (WMPlex*)r;
     }
@@ -951,12 +923,6 @@ WRegion *floatws_backcirculate(WFloatWS *ws)
 
 
 /*{{{ Stacking */
-
-
-static bool wsfilt(WRegion *reg, void *ws)
-{
-    return (REGION_MANAGER(reg)==(WRegion*)ws);
-}
 
 
 void floatws_stacking(WFloatWS *ws, Window *bottomret, Window *topret)

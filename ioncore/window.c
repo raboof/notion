@@ -63,6 +63,7 @@ bool window_do_init(WWindow *wwin, WWindow *par, Window win,
     wwin->win=win;
     wwin->xic=NULL;
     wwin->event_mask=0;
+    wwin->stacking=NULL;
     
     region_init(&(wwin->region), par, fp);
     
@@ -99,6 +100,10 @@ void window_deinit(WWindow *wwin)
         XDeleteContext(ioncore_g.dpy, wwin->win, ioncore_g.win_context);
         XDestroyWindow(ioncore_g.dpy, wwin->win);
     }
+    
+    /* There are no backlinks from WStacking to us, so it is not
+     * necessary to do any deinitialisation there.
+     */
 }
 
 

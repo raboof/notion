@@ -12,6 +12,10 @@
 #include "common.h"
 #include "region.h"
 #include "stacking.h"
+#include "window.h"
+
+
+/*{{{ List processing */
 
 
 static WStacking *link_lists(WStacking *l1, WStacking *l2)
@@ -62,6 +66,55 @@ static WStacking *link_list_after(WStacking *l1,
     
     return l1;
 }
+
+
+WRegion *stacking_remove(WWindow *par, WRegion *reg)
+{
+    bool nextlocked=FALSE;
+    WStacking *st, *stnext;
+    WRegion *next=NULL;
+    
+    if(par!=NULL && par->stacking!=NULL){
+        for(st=par->stacking; st!=NULL; st=stnext){
+            stnext=st->next;
+            if(st->reg==reg){
+                next=st->above;
+                nextlocked=TRUE;
+                UNLINK_ITEM(par->stacking, st, next, prev);
+                free(st);
+            }else if(st->above==reg){
+                st->above=NULL;
+                next=st->reg;
+                nextlocked=TRUE;
+            }else if(!nextlocked){
+                next=st->reg;
+            }
+        }
+    }
+    
+    return next;
+}
+
+
+void stacking_unlink(WWindow *par, WStacking *st)
+{
+    if(par!=NULL){
+        UNLINK_ITEM(par->stacking, st, next, prev);
+    }else{
+        if(st->next!=NULL)
+            st->next->prev=st->prev;
+        if(st->prev!=NULL)
+            st->prev->next=st->next;
+        st->next=NULL;
+        st->prev=NULL;
+    }
+}
+
+
+/*}}}*/
+
+
+/*{{{ Restack */
 
 
 static bool cf(WStackingFilter *filt, void *filt_data, WRegion *reg)
@@ -121,6 +174,10 @@ void stacking_restack(WStacking **stacking, Window other, int mode,
     }
 }
 
+/*}}}*/
+
+
+/*{{{ Find top/bottom */
 
 void stacking_stacking(WStacking *stacking, Window *bottomret, Window *topret,
                        WStackingFilter *filt, void *filt_data)
@@ -162,6 +219,11 @@ void stacking_stacking(WStacking *stacking, Window *bottomret, Window *topret,
     }
 }
 
+
+/*}}}*/
+
+
+/*{{{ Raise/lower */
 
 
 void stacking_do_raise(WStacking **stacking, WRegion *reg, bool initial,
@@ -252,4 +314,64 @@ void stacking_do_lower(WStacking **stacking, WRegion *reg, Window fb_win,
     }
 }
 
+
+/*}}}*/
+
+
+/*{{{ Stacking lists */
+
+
+WStacking **window_get_stackingp(WWindow *wwin)
+{
+    return &(wwin->stacking);
+}
+
+
+WStacking *window_get_stacking(WWindow *wwin)
+{
+    return wwin->stacking;
+}
+
+
+/*}}}*/
+
+
+/*{{{ Stacking list iteration */
+
+
+void stacking_iter_init(WStackingIterTmp *tmp, 
+                        WStacking *st,
+                        WStackingFilter *filt,
+                        void *filt_data)
+{
+    tmp->st=st;
+    tmp->filt=filt;
+    tmp->filt_data=filt_data;
+}
+
+
+WStacking *stacking_iter_nodes(WStackingIterTmp *tmp)
+{
+    WStacking *next=NULL;
+    
+    while(tmp->st!=NULL){
+        next=tmp->st;
+        tmp->st=tmp->st->next;
+        if(tmp->filt==NULL || tmp->filt(next->reg, tmp->filt_data))
+            break;
+        next=NULL;
+    }
+    
+    return next;
+}
+
+
+WRegion *stacking_iter(WStackingIterTmp *tmp)
+{
+    WStacking *st=stacking_iter_nodes(tmp);
+    return (st!=NULL ? st->reg : NULL);
+}
+
+    
+/*}}}*/
 

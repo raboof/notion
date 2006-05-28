@@ -23,6 +23,7 @@ DECLCLASS(WWindow){
     Window win;
     XIC xic;
     long event_mask;
+    WStacking *stacking;
 };
 
 

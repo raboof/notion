@@ -80,13 +80,11 @@ extern void floatws_lower(WFloatWS *ws, WRegion *reg);
 
 extern WStacking *mod_floatws_find_stacking(WRegion *r);
 
-typedef struct{
-    WFloatWS *ws;
-    WStacking *st;
-} WFloatWSIterTmp;
+typedef WStackingIterTmp WFloatWSIterTmp;
 
 extern void floatws_iter_init(WFloatWSIterTmp *tmp, WFloatWS *ws);
 extern WRegion *floatws_iter(WFloatWSIterTmp *tmp);
+extern WStacking *floatws_iter_nodes(WFloatWSIterTmp *tmp);
 
 #define FOR_ALL_MANAGED_BY_FLOATWS(WS, VAR, TMP) \
     for(floatws_iter_init(&(TMP), WS),           \
@@ -95,9 +93,6 @@ extern WRegion *floatws_iter(WFloatWSIterTmp *tmp);
         VAR=floatws_iter(&(TMP)))
     
 extern WFloatWSIterTmp floatws_iter_default_tmp;
-
-#define FOR_ALL_MANAGED_BY_FLOATWS_UNSAFE(WS, VAR) \
-    FOR_ALL_MANAGED_BY_FLOATWS(WS, VAR, floatws_iter_default_tmp)
 
 
 #endif /* ION_MOD_FLOATWS_FLOATWS_H */
