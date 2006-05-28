@@ -361,14 +361,18 @@ static void floatframe_size_changed(WFloatFrame *frame, bool wchg, bool hchg)
 
 bool floatframe_set_sticky(WFloatFrame *frame, int sp)
 {
-    WStacking *st=mod_floatws_find_stacking((WRegion*)frame);
+    WStacking *st;
+    WFloatWS *ws=OBJ_CAST(REGION_MANAGER(frame), WFloatWS);
     
-    if(st==NULL)
-        return FALSE;
+    if(ws!=NULL){
+        st=floatws_find_stacking(ws, (WRegion*)frame);
+        if(st!=NULL){
+            st->sticky=libtu_do_setparam(sp, st->sticky);
+            return st->sticky;
+        }
+    }
     
-    st->sticky=libtu_do_setparam(sp, st->sticky);
-    
-    return st->sticky;
+    return FALSE;
 }
 
 
@@ -391,8 +395,15 @@ EXTL_SAFE
 EXTL_EXPORT_MEMBER
 bool floatframe_is_sticky(WFloatFrame *frame)
 {
-    WStacking *st=mod_floatws_find_stacking((WRegion*)frame);
-    return (st!=NULL ? st->sticky : FALSE);
+    WStacking *st;
+    WFloatWS *ws=OBJ_CAST(REGION_MANAGER(frame), WFloatWS);
+    
+    if(ws!=NULL){
+        st=floatws_find_stacking(ws, (WRegion*)frame);
+        return (st!=NULL ? st->sticky : FALSE);
+    }
+    
+    return FALSE;
 }
 
 

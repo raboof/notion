@@ -78,7 +78,7 @@ extern bool floatws_rqclose_relocate(WFloatWS *ws);
 extern void floatws_raise(WFloatWS *ws, WRegion *reg);
 extern void floatws_lower(WFloatWS *ws, WRegion *reg);
 
-extern WStacking *mod_floatws_find_stacking(WRegion *r);
+extern WStacking *floatws_find_stacking(WFloatWS *ws, WRegion *r);
 
 typedef WStackingIterTmp WFloatWSIterTmp;
 

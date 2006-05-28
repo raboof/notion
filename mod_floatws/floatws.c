@@ -851,7 +851,7 @@ WRegion *floatws_circulate(WFloatWS *ws)
         return NULL;
     
     if(ws->current_managed!=NULL){
-        st=mod_floatws_find_stacking(ws->current_managed);
+        st=floatws_find_stacking(ws, ws->current_managed);
         if(st!=NULL)
             st=st->next;
     }
@@ -892,7 +892,7 @@ WRegion *floatws_backcirculate(WFloatWS *ws)
         return NULL;
     
     if(ws->current_managed!=NULL){
-        st=mod_floatws_find_stacking(ws->current_managed);
+        st=floatws_find_stacking(ws, ws->current_managed);
         if(st!=NULL)
             st=st->prev;
     }
@@ -938,23 +938,14 @@ void floatws_stacking(WFloatWS *ws, Window *bottomret, Window *topret)
 }
 
 
-WStacking *mod_floatws_find_stacking(WRegion *r)
+WStacking *floatws_find_stacking(WFloatWS *ws, WRegion *r)
 {
-    WStacking *st;
-    WStacking *stacking;
-    WFloatWS *ws=REGION_MANAGER_CHK(r, WFloatWS);
+    WStacking *stacking=get_stacking(ws);
     
-    if(ws==NULL)
+    if(stacking!=NULL)
+        return stacking_find(stacking, r);
+    else
         return NULL;
-    
-    stacking=get_stacking(ws);
-
-    for(st=stacking; st!=NULL; st=st->next){
-        if(st->reg==r)
-            return st;
-    }
-    
-    return NULL;
 }
 
 
@@ -966,7 +957,7 @@ static WStacking *find_stacking_if_not_on_ws(WFloatWS *ws, Window w)
     while(r!=NULL){
         if(REGION_MANAGER(r)==(WRegion*)ws)
             break;
-        st=mod_floatws_find_stacking(r);
+        st=floatws_find_stacking(ws, r);
         if(st!=NULL)
             break;
         r=REGION_MANAGER(r);
@@ -1135,7 +1126,7 @@ static ExtlTab floatws_get_configuration(WFloatWS *ws)
         extl_table_sets_t(subtab, "geom", g);
         extl_unref_table(g);
         
-        st=mod_floatws_find_stacking(mgd);
+        st=floatws_find_stacking(ws, mgd);
         if(st!=NULL && st->sticky)
             extl_table_sets_b(subtab, "sticky", TRUE);
         
@@ -1186,7 +1177,7 @@ static WRegion *floatws_attach_load(WFloatWS *ws, ExtlTab param)
                             &geom);
     
     if(reg!=NULL && extl_table_is_bool_set(param, "sticky")){
-        WStacking *st=mod_floatws_find_stacking(reg);
+        WStacking *st=floatws_find_stacking(ws, reg);
         if(st!=NULL)
             st->sticky=TRUE;
     }
