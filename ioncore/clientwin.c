@@ -1777,10 +1777,12 @@ WRegion *clientwin_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
         return NULL;
     }
 
+    /*
     attr.x=fp->g.x;
     attr.y=fp->g.y;
     attr.width=fp->g.w;
     attr.height=fp->g.h;
+     */
 
     cwin=create_clientwin(par, win, &attr);
     

@@ -265,7 +265,7 @@ void sizepolicy(WSizePolicy *szplcy, WRegion *reg,
         
     case SIZEPOLICY_FREE:
         rectangle_constrain(&tmp, &(fp->g));
-        correct_size(reg, &fp->g.w, &fp->g.h);
+        correct_size(reg, &tmp.w, &tmp.h);
         fp->g=tmp;
         fp->mode=REGION_FIT_EXACT;
         break;
