@@ -181,10 +181,12 @@ void stacking_restack(WStacking **stacking, Window other, int mode,
     }
 }
 
+
 /*}}}*/
 
 
 /*{{{ Find top/bottom */
+
 
 void stacking_stacking(WStacking *stacking, Window *bottomret, Window *topret,
                        WStackingFilter *filt, void *filt_data)
@@ -234,15 +236,22 @@ void stacking_stacking(WStacking *stacking, Window *bottomret, Window *topret,
 
 
 static void restack_above(WStacking **stacking, WStacking *regst,
-                          Window fb_other)
+                          Window fb_other, int fb_mode)
 {
     Window bottom, top, other;
     WStacking *stabove, *stnext;
     WStacking *sttop;
+    int mode;
 
     region_stacking(regst->reg, &bottom, &top);
     
-    other=(top==None ? fb_other : top);
+    if(top==None){
+        other=fb_other;
+        mode=fb_mode;
+    }else{
+        other=top;
+        mode=Above;
+    }
     
     if(other==None)
         return;
@@ -257,11 +266,13 @@ static void restack_above(WStacking **stacking, WStacking *regst,
         
         if(stabove->above==regst){
             UNLINK_ITEM(*stacking, stabove, next, prev);
-            region_restack(stabove->reg, other, Above);
+            region_restack(stabove->reg, other, mode);
             LINK_ITEM_AFTER(*stacking, sttop, stabove, next, prev);
             region_stacking(stabove->reg, &bottom, &top);
-            if(top!=None)
+            if(top!=None){
                 other=top;
+                mode=Above;
+            }
             sttop=stabove;
         }
     }
@@ -274,6 +285,7 @@ void stacking_do_raise(WStacking **stacking, WRegion *reg, bool initial,
 {
     WStacking *regst, *st, *sttop=NULL;
     Window bottom=None, top=None, other=None;
+    int mode=Above;
     
     if(*stacking==NULL)
         return;
@@ -291,10 +303,19 @@ void stacking_do_raise(WStacking **stacking, WRegion *reg, bool initial,
             break;
         if(st->above!=regst && cf(filt, filt_data, st->reg)){
             region_stacking(st->reg, &bottom, &top);
-            if(top!=None){
-                other=top;
-                sttop=st;
-                break;
+            if(st->level>regst->level){
+                if(bottom!=None){
+                    other=bottom;
+                    mode=Below;
+                    sttop=st;
+                }
+            }else{
+                if(top!=None){
+                    other=top;
+                    mode=Above;
+                    sttop=st;
+                    break;
+                }
             }
         }
     }
@@ -303,16 +324,21 @@ void stacking_do_raise(WStacking **stacking, WRegion *reg, bool initial,
     
     if(sttop!=NULL){
         UNLINK_ITEM(*stacking, regst, next, prev);
-        region_restack(reg, other, Above);
-        LINK_ITEM_AFTER(*stacking, sttop, regst, next, prev);
+        region_restack(reg, other, mode);
+        if(mode==Above){
+            LINK_ITEM_AFTER(*stacking, sttop, regst, next, prev);
+        }else{
+            LINK_ITEM_BEFORE(*stacking, sttop, regst, next, prev);
+        }
     }else if(initial){
         other=fb_win;
-        region_restack(reg, other, Above);
+        mode=Above;
+        region_restack(reg, other, mode);
     }
     
     if(!initial){
         /* Restack stuff above reg */
-        restack_above(stacking, regst, other);
+        restack_above(stacking, regst, other, mode);
     }
 }
 
@@ -322,32 +348,51 @@ void stacking_do_lower(WStacking **stacking, WRegion *reg, Window fb_win,
 {
     WStacking *regst=NULL, *st, *stbottom=NULL;
     Window bottom=None, top=None, other=None;
+    int mode=Below;
     
     if(*stacking==NULL)
         return;
+    
+    regst=stacking_find(*stacking, reg);
+    
+    if(regst==NULL)
+        return;
 
     for(st=*stacking; st!=NULL; st=st->next){
-        if(st->reg==reg){
-            regst=st;
+        if(st==regst)
             break;
-        }
-        if(stbottom==NULL && cf(filt, filt_data, st->reg)){
+        
+        if(st->above!=regst && cf(filt, filt_data, st->reg)){
             region_stacking(st->reg, &bottom, &top);
-            if(bottom!=None){
-                other=bottom;
-                stbottom=st;
+            if(st->level<regst->level){
+                if(top!=None){
+                    other=top;
+                    mode=Above;
+                    stbottom=st;
+                }
+            }else{
+                if(bottom!=None){
+                    other=bottom;
+                    mode=Below;
+                    stbottom=st;
+                    break;
+                }
             }
         }
     }
     
-    if(regst!=NULL){
-        if(stbottom==NULL){
-            region_restack(reg, fb_win, Above);
+    if(stbottom!=NULL){
+        UNLINK_ITEM(*stacking, regst, next, prev);
+        region_restack(reg, other, mode);
+        if(mode==Above){
+            LINK_ITEM_AFTER(*stacking, stbottom, regst, next, prev);
         }else{
-            UNLINK_ITEM(*stacking, regst, next, prev);
-            region_restack(reg, other, Below);
             LINK_ITEM_BEFORE(*stacking, stbottom, regst, next, prev);
         }
+    }else{
+        other=fb_win;
+        mode=Above;
+        region_restack(reg, other, mode);
     }
 }
 

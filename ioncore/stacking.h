@@ -21,6 +21,7 @@ DECLSTRUCT(WStacking){
     WStacking *next, *prev;
     WStacking *above;
     bool sticky;
+    int level;
 };
 
 

@@ -446,6 +446,7 @@ bool floatws_add_managed(WFloatWS *ws, WRegion *reg)
     st->reg=reg;
     st->above=NULL;
     st->sticky=FALSE;
+    st->level=1;
 
     region_set_manager(reg, (WRegion*)ws);
     
