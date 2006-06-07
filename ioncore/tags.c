@@ -80,6 +80,11 @@ void ioncore_clear_tags()
 /*{{{ Iteration */
 
 
+/*EXTL_DOC
+ * Returns first tagged object.
+ */
+EXTL_SAFE
+EXTL_EXPORT
 WRegion *ioncore_tags_first()
 {
     return (WRegion*)OBJLIST_FIRST(WRegion*, taglist);
