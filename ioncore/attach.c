@@ -87,6 +87,7 @@ WRegion *region__attach_reparent_doit(WWindow *par, const WFitParams *fp,
         fp2.g.y=fp->g.y;
         fp2.g.w=REGION_GEOM(reg).w;
         fp2.g.h=REGION_GEOM(reg).h;
+        fp=&fp2;
     }
     
     if(!region_fitrep(reg, par, fp)){
