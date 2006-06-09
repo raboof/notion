@@ -73,7 +73,7 @@ static void do_timer_set()
         val.it_value.tv_sec=queue->when.tv_sec-val.it_value.tv_sec;
         if(val.it_value.tv_usec<0)
             val.it_value.tv_usec=0;
-        while(val.it_value.tv_usec>USECS_IN_SEC){
+        while(val.it_value.tv_usec>=USECS_IN_SEC){
             val.it_value.tv_sec++;
             val.it_value.tv_usec-=USECS_IN_SEC;
         }
