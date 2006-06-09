@@ -50,6 +50,8 @@ static WTimer *queue=NULL;
     ((a.tv_sec == b.tv_sec) && \
      (a.tv_usec > b.tv_usec)))
 
+#define USECS_IN_SEC 1000000
+
 
 static void do_timer_set()
 {
@@ -64,13 +66,17 @@ static void do_timer_set()
     gettimeofday(&(val.it_value), NULL);
     if(TIMEVAL_LATER((queue)->when, val.it_value)){
         if(queue->when.tv_usec<val.it_value.tv_usec){
-            queue->when.tv_usec+=1000000;
+            queue->when.tv_usec+=USECS_IN_SEC;
             queue->when.tv_sec--;
         }
         val.it_value.tv_usec=queue->when.tv_usec-val.it_value.tv_usec;
         val.it_value.tv_sec=queue->when.tv_sec-val.it_value.tv_sec;
         if(val.it_value.tv_usec<0)
             val.it_value.tv_usec=0;
+        while(val.it_value.tv_usec>USECS_IN_SEC){
+            val.it_value.tv_sec++;
+            val.it_value.tv_usec-=USECS_IN_SEC;
+        }
         if(val.it_value.tv_sec<0)
             val.it_value.tv_sec=0;
     }else{
