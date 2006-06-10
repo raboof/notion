@@ -45,6 +45,7 @@ DECLCLASS(WFloatWS){
     WRegion *managed_stdisp;
     WMPlexSTDispInfo stdispi;
     WRegion *current_managed;
+    WRegion *bottom;
 };
 
 

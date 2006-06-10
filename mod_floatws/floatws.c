@@ -319,6 +319,9 @@ static void floatws_managed_remove(WFloatWS *ws, WRegion *reg)
     if(reg==ws->managed_stdisp)
         ws->managed_stdisp=NULL;
     
+    if(reg==ws->bottom)
+        ws->bottom=NULL;
+    
     region_unset_manager(reg, (WRegion*)ws);
     
     region_remove_bindmap_owned(reg, mod_floatws_floatws_bindmap,
@@ -352,6 +355,7 @@ static bool floatws_init(WFloatWS *ws, WWindow *parent, const WFitParams *fp)
     ws->managed_stdisp=NULL;
     ws->stdispi.pos=MPLEX_STDISP_BL;
     ws->stdispi.fullsize=FALSE;
+    ws->bottom=NULL;
 
     if(!genws_init(&(ws->genws), parent, fp))
         return FALSE;
@@ -429,7 +433,7 @@ static bool floatws_managed_may_destroy(WFloatWS *ws, WRegion *reg)
 /*{{{ attach */
 
 
-bool floatws_add_managed(WFloatWS *ws, WRegion *reg)
+WStacking *floatws_do_add_managed(WFloatWS *ws, WRegion *reg, int level)
 {
     WStacking *st=NULL, *sttop=NULL;
     Window bottom=None, top=None;
@@ -446,19 +450,27 @@ bool floatws_add_managed(WFloatWS *ws, WRegion *reg)
     st->reg=reg;
     st->above=NULL;
     st->sticky=FALSE;
-    st->level=1;
+    st->level=level;
 
     region_set_manager(reg, (WRegion*)ws);
     
+    /* TODO: stacking fscked up for new regions. */
+    
     region_add_bindmap_owned(reg, mod_floatws_floatws_bindmap, (WRegion*)ws);
-
+    
     LINK_ITEM_FIRST(*stackingp, st, next, prev);
     floatws_do_raise(ws, reg, TRUE);
 
     if(region_is_fully_mapped((WRegion*)ws))
         region_map(reg);
     
-    return TRUE;
+    return st;
+}
+
+    
+bool floatws_add_managed(WFloatWS *ws, WRegion *reg)
+{
+    return (floatws_do_add_managed(ws, reg, 1)!=NULL);
 }
 
 
@@ -1070,6 +1082,89 @@ void floatws_lower(WFloatWS *ws, WRegion *reg)
     
     stacking_do_lower(stackingp, reg, ws->genws.dummywin,
                       same_stacking_filt, ws);
+}
+
+
+/*}}}*/
+
+
+/*{{{ Bottom */
+
+
+static WRegion *floatws_do_attach_bottom(WFloatWS *ws, 
+                                         WRegionAttachHandler *handler,
+                                         void *handlerparams,
+                                         void *param)
+{
+    WFitParams fp;
+    WRegion *reg;
+    WWindow *par=REGION_PARENT(ws);
+    
+    if(par==NULL)
+        return NULL;
+    
+    if(ws->bottom!=NULL){
+        warn(TR("Workspace already has bottom."));
+        return NULL;
+    }
+    
+    /* TODO: sizepolicy */
+    fp.g=REGION_GEOM(ws);
+    fp.mode=REGION_FIT_EXACT;
+    
+    reg=handler(par, &fp, handlerparams);
+    
+    if(reg==NULL)
+        return NULL;
+    
+    if(floatws_do_add_managed(ws, reg, 0)==NULL){
+        destroy_obj((Obj*)reg);
+        return NULL;
+    }
+    
+    ws->bottom=reg;
+
+    return reg;
+}
+
+
+/*EXTL_DOC
+ * Attach \var{reg} as 'bottom' of \var{ws}.
+ * There must not exist one already.
+ */
+EXTL_EXPORT_MEMBER
+WRegion *floatws_attach_bottom(WFloatWS *ws, WRegion *reg)
+{
+    return region__attach_reparent((WRegion*)ws, reg, 
+                                   ((WRegionDoAttachFn*)
+                                    floatws_do_attach_bottom),
+                                   NULL);
+}
+
+
+/*EXTL_DOC
+ * Create a 'new' bottom for \var{ws}. 
+ * There must not exist one already.
+ * The table \var{tab} should contain the usual parameters for
+ * creating a region; in particular the \code{type} field.
+ */
+EXTL_EXPORT_MEMBER
+WRegion *floatws_attach_bottom_new(WFloatWS *ws, ExtlTab tab)
+{
+    return region__attach_load((WRegion*)ws, tab, 
+                               ((WRegionDoAttachFn*)
+                                floatws_do_attach_bottom),
+                               NULL);
+}
+
+
+/*EXTL_DOC
+ * Returns the 'bottom' of \var{ws}.
+ */
+EXTL_EXPORT_MEMBER
+WRegion *floatws_bottom(WFloatWS *ws)
+{
+    return ws->bottom;
 }
 
 
