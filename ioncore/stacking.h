@@ -14,6 +14,7 @@
 
 #include "common.h"
 #include "region.h"
+#include "sizepolicy.h"
 
 
 DECLSTRUCT(WStacking){
@@ -22,6 +23,7 @@ DECLSTRUCT(WStacking){
     WStacking *above;
     bool sticky;
     int level;
+    WSizePolicy szplcy;
 };
 
 

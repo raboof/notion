@@ -31,6 +31,7 @@
 #include <ioncore/xwindow.h>
 #include <ioncore/resize.h>
 #include <ioncore/stacking.h>
+#include <ioncore/sizepolicy.h>
 
 #include "floatws.h"
 #include "floatwspholder.h"
@@ -433,7 +434,8 @@ static bool floatws_managed_may_destroy(WFloatWS *ws, WRegion *reg)
 /*{{{ attach */
 
 
-WStacking *floatws_do_add_managed(WFloatWS *ws, WRegion *reg, int level)
+WStacking *floatws_do_add_managed(WFloatWS *ws, WRegion *reg, int level,
+                                  WSizePolicy szplcy)
 {
     WStacking *st=NULL, *sttop=NULL;
     Window bottom=None, top=None;
@@ -451,6 +453,7 @@ WStacking *floatws_do_add_managed(WFloatWS *ws, WRegion *reg, int level)
     st->above=NULL;
     st->sticky=FALSE;
     st->level=level;
+    st->szplcy=szplcy;
 
     region_set_manager(reg, (WRegion*)ws);
     
@@ -470,7 +473,8 @@ WStacking *floatws_do_add_managed(WFloatWS *ws, WRegion *reg, int level)
     
 bool floatws_add_managed(WFloatWS *ws, WRegion *reg)
 {
-    return (floatws_do_add_managed(ws, reg, 1)!=NULL);
+    return (floatws_do_add_managed(ws, reg, 1, SIZEPOLICY_UNCONSTRAINED)
+            !=NULL);
 }
 
 
@@ -830,18 +834,28 @@ void floatws_managed_rqgeom(WFloatWS *ws, WRegion *reg,
                             int flags, const WRectangle *geom,
                             WRectangle *geomret)
 {
-    WRectangle g;
-    
-    if(reg==ws->managed_stdisp)
-        floatws_stdisp_geom(ws, reg, &g);
-    else
-        g=*geom;
+    WFitParams fp;
+    WStacking *st;
+        
+    if(reg==ws->managed_stdisp){
+        floatws_stdisp_geom(ws, reg, &fp.g);
+        fp.mode=REGION_FIT_EXACT;
+    }else{
+        st=floatws_find_stacking(ws, reg);
+        if(st==NULL){
+            fp.g=*geom;
+            fp.mode=REGION_FIT_EXACT;
+        }else{
+            fp.g=REGION_GEOM(ws);
+            sizepolicy(&st->szplcy, reg, geom, flags, &fp);
+        }
+    }
     
     if(geomret!=NULL)
-        *geomret=g;
+        *geomret=fp.g;
     
     if(!(flags&REGION_RQGEOM_TRYONLY))
-        region_fit(reg, &g, REGION_FIT_EXACT);
+        region_fitrep(reg, NULL, &fp);
 }
 
 
@@ -1099,6 +1113,7 @@ static WRegion *floatws_do_attach_bottom(WFloatWS *ws,
     WFitParams fp;
     WRegion *reg;
     WWindow *par=REGION_PARENT(ws);
+    WSizePolicy szplcy;
     
     if(par==NULL)
         return NULL;
@@ -1108,16 +1123,19 @@ static WRegion *floatws_do_attach_bottom(WFloatWS *ws,
         return NULL;
     }
     
-    /* TODO: sizepolicy */
     fp.g=REGION_GEOM(ws);
-    fp.mode=REGION_FIT_EXACT;
+    fp.mode=REGION_FIT_WHATEVER;
     
     reg=handler(par, &fp, handlerparams);
     
     if(reg==NULL)
         return NULL;
     
-    if(floatws_do_add_managed(ws, reg, 0)==NULL){
+    szplcy=SIZEPOLICY_FULL_EXACT;
+    sizepolicy(&szplcy, reg, &REGION_GEOM(ws), 0, &fp);
+    region_fitrep(reg, NULL, &fp);
+
+    if(floatws_do_add_managed(ws, reg, 0, szplcy)==NULL){
         destroy_obj((Obj*)reg);
         return NULL;
     }
@@ -1226,6 +1244,9 @@ static ExtlTab floatws_get_configuration(WFloatWS *ws)
         if(st!=NULL && st->sticky)
             extl_table_sets_b(subtab, "sticky", TRUE);
         
+        if(ws->bottom==mgd)
+            extl_table_sets_b(subtab, "bottom", TRUE);
+        
         extl_table_seti_t(mgds, ++n, subtab);
         extl_unref_table(subtab);
     }
@@ -1260,6 +1281,9 @@ static WRegion *floatws_attach_load(WFloatWS *ws, ExtlTab param)
     WRectangle geom;
     WRegion *reg;
     
+    if(extl_table_is_bool_set(param, "bottom"))
+        return floatws_attach_bottom_new(ws, param);
+
     if(!extl_table_gets_rectangle(param, "geom", &geom)){
         warn(TR("No geometry specified."));
         return NULL;
