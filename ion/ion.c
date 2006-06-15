@@ -50,7 +50,7 @@ static OptParserOpt ion_opts[]={
     {OPT_ID('o'), "oneroot",  0, NULL,
      DUMMY_TR("Manage default root window/non-Xinerama screen only")},
 
-#ifndef CF_NOXINERAMA    
+#if defined(CF_XINERAMA) || defined(CF_SUN_XINERAMA)
     {OPT_ID('x'), "xinerama", OPT_ARG, "1|0", 
      DUMMY_TR("Use Xinerama screen information (default: 1/yes)")},
 #else

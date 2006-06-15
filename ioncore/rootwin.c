@@ -21,8 +21,10 @@
 #include <X11/Xlib.h>
 #include <X11/Xproto.h>
 /*#include <X11/Xmu/Error.h>*/
-#ifndef CF_NO_XINERAMA
+#ifdef CF_XINERAMA
 #include <X11/extensions/Xinerama.h>
+#elif defined(CF_SUN_XINERAMA)
+#include <X11/extensions/xinerama.h>
 #endif
 
 #include <libtu/objp.h>
@@ -304,16 +306,16 @@ static WScreen *add_screen(WRootWin *rw, int id, const WRectangle *geom,
 }
 
 
-#ifndef CF_NO_XINERAMA
+#ifdef CF_XINERAMA
 static bool xinerama_sanity_check(XineramaScreenInfo *xi, int nxi)
 {
     int i, j;
-    
+
     for(i=0; i<nxi; i++){
         for(j=0; j<nxi; j++){
             if(i!=j &&
                (xi[j].x_org>=xi[i].x_org && xi[j].x_org<xi[i].x_org+xi[i].width) &&
-               (xi[j].y_org>=xi[i].y_org  && xi[j].y_org<xi[i].y_org+xi[i].height)){
+               (xi[j].y_org>=xi[i].y_org && xi[j].y_org<xi[i].y_org+xi[i].height)){
                 warn(TR("Xinerama sanity check failed; overlapping "
                         "screens detected."));
                 return FALSE;
@@ -321,7 +323,26 @@ static bool xinerama_sanity_check(XineramaScreenInfo *xi, int nxi)
         }
     }
     return TRUE;
-        
+}
+#elif defined(CF_SUN_XINERAMA)
+static bool xinerama_sanity_check(XRectangle *monitors, int nxi)
+{
+    int i, j;
+
+    for(i=0; i<nxi; i++){
+        for(j=0; j<nxi; j++){
+            if(i!=j &&
+               (monitors[j].x>=monitors[i].x &&
+                monitors[j].x<monitors[i].x+monitors[i].width) &&
+               (monitors[j].y>=monitors[i].y &&
+                monitors[j].y<monitors[i].y+monitors[i].height)){
+                warn(TR("Xinerama sanity check failed; overlapping "
+                        "screens detected."));
+                return FALSE;
+            }
+        }
+    }
+    return TRUE;
 }
 #endif
 
@@ -330,15 +351,20 @@ WRootWin *ioncore_manage_rootwin(int xscr, bool noxinerama)
 {
     WRootWin *rootwin;
     int nxi=0, fail=0;
-#ifndef CF_NO_XINERAMA
+#ifdef CF_XINERAMA
     XineramaScreenInfo *xi=NULL;
     int i;
     int event_base, error_base;
-    
+#elif defined(CF_SUN_XINERAMA)
+    XRectangle monitors[MAXFRAMEBUFFERS];
+    int i;
+#endif
+
     if(!noxinerama){
+#ifdef CF_XINERAMA
         if(XineramaQueryExtension(ioncore_g.dpy, &event_base, &error_base)){
             xi=XineramaQueryScreens(ioncore_g.dpy, &nxi);
-            
+
             if(xi!=NULL && ioncore_g.rootwins!=NULL){
                 warn(TR("Don't know how to get Xinerama information for "
                         "multiple X root windows."));
@@ -347,13 +373,30 @@ WRootWin *ioncore_manage_rootwin(int xscr, bool noxinerama)
                 nxi=0;
             }
         }
-    }
+#elif defined(CF_SUN_XINERAMA)
+        if(XineramaGetState(ioncore_g.dpy, xscr)){
+            unsigned char hints[16];
+            int num;
+
+            if(XineramaGetInfo(ioncore_g.dpy, xscr, monitors, hints,
+                               &nxi)==0){
+                warn(TR("Error retrieving Xinerama information."));
+                nxi=0;
+            }else{
+                if(ioncore_g.rootwins!=NULL){
+                    warn(TR("Don't know how to get Xinerama information for "
+                            "multiple X root windows."));
+                    nxi=0;
+                }
+            }
+        }
 #endif
-    
+    }
+
     rootwin=preinit_rootwin(xscr);
 
     if(rootwin==NULL){
-#ifndef CF_NO_XINERAMA
+#ifdef CF_XINERAMA
         if(xi!=NULL)
             XFree(xi);
 #endif
@@ -363,7 +406,7 @@ WRootWin *ioncore_manage_rootwin(int xscr, bool noxinerama)
     net_virtual_roots=XInternAtom(ioncore_g.dpy, "_NET_VIRTUAL_ROOTS", False);
     XDeleteProperty(ioncore_g.dpy, WROOTWIN_ROOT(rootwin), net_virtual_roots);
 
-#ifndef CF_NO_XINERAMA
+#ifdef CF_XINERAMA
     if(xi!=NULL && nxi!=0 && xinerama_sanity_check(xi, nxi)){
         bool useroot=FALSE;
         WRectangle geom;
@@ -381,6 +424,24 @@ WRootWin *ioncore_manage_rootwin(int xscr, bool noxinerama)
             }
         }
         XFree(xi);
+    }else
+#elif defined(CF_SUN_XINERAMA)
+    if(nxi!=0 && xinerama_sanity_check(monitors, nxi)){
+        bool useroot=FALSE;
+        WRectangle geom;
+
+        for(i=0; i<nxi; i++){
+            geom.x=monitors[i].x;
+            geom.y=monitors[i].y;
+            geom.w=monitors[i].width;
+            geom.h=monitors[i].height;
+            /*if(nxi==1)
+                useroot=(geom.x==0 && geom.y==0);*/
+            if(!add_screen(rootwin, i, &geom, useroot)){
+                warn(TR("Unable to setup Xinerama screen %d."), i);
+                fail++;
+            }
+        }
     }else
 #endif
     {

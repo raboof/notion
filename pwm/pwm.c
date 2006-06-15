@@ -50,11 +50,11 @@ static OptParserOpt pwm_opts[]={
     {OPT_ID('o'), "oneroot",  0, NULL,
      DUMMY_TR("Manage default root window/non-Xinerama screen only")},
 
-#ifndef CF_NOXINERAMA    
-    {OPT_ID('x'), "xinerama", OPT_ARG, "1|0", 
+#if defined(CF_XINERAMA) || defined(CF_SUN_XINERAMA)
+    {OPT_ID('x'), "xinerama", OPT_ARG, "1|0",
      DUMMY_TR("Use Xinerama screen information (default: 0/no)")},
 #else
-    {OPT_ID('x'), "xinerama", OPT_ARG, "?", 
+    {OPT_ID('x'), "xinerama", OPT_ARG, "?",
      DUMMY_TR("Ignored: not compiled with Xinerama support")},
 #endif
     
