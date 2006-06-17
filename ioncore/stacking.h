@@ -24,6 +24,7 @@ DECLSTRUCT(WStacking){
     bool sticky;
     int level;
     WSizePolicy szplcy;
+    WStacking *mgr_next, *mgr_prev;
 };
 
 
@@ -47,9 +48,8 @@ void stacking_stacking(WStacking *stacking, Window *bottomret, Window *topret,
 WStacking **window_get_stackingp(WWindow *wwin);
 WStacking *window_get_stacking(WWindow *wwin);
 
-WRegion *stacking_remove(WWindow *par, WRegion *reg);
 /* Returns the topmost node with 'above' pointing to st. */
-WStacking *stacking_unlink(WWindow *par, WStacking *st);
+WStacking *stacking_unstack(WWindow *par, WStacking *st);
 
 typedef struct{
     WStacking *st;
@@ -63,6 +63,13 @@ void stacking_iter_init(WStackingIterTmp *tmp,
                         void *filt_data);
 WRegion *stacking_iter(WStackingIterTmp *tmp);
 WStacking *stacking_iter_nodes(WStackingIterTmp *tmp);
+
+void stacking_iter_mgr_init(WStackingIterTmp *tmp,
+                            WStacking *st,
+                            WStackingFilter *filt,
+                            void *filt_data);
+WRegion *stacking_iter_mgr(WStackingIterTmp *tmp);
+WStacking *stacking_iter_mgr_nodes(WStackingIterTmp *tmp);
 
 WStacking *stacking_find(WStacking *st, WRegion *reg);
 

@@ -46,6 +46,7 @@ DECLCLASS(WFloatWS){
     WMPlexSTDispInfo stdispi;
     WRegion *current_managed;
     WRegion *bottom;
+    WStacking *managed_list;
 };
 
 
@@ -81,6 +82,7 @@ extern void floatws_lower(WFloatWS *ws, WRegion *reg);
 
 extern WStacking *floatws_find_stacking(WFloatWS *ws, WRegion *r);
 
+typedef WStackingFilter WFloatWSIterFilter;
 typedef WStackingIterTmp WFloatWSIterTmp;
 
 extern void floatws_iter_init(WFloatWSIterTmp *tmp, WFloatWS *ws);

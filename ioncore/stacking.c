@@ -80,24 +80,7 @@ WStacking *stacking_find(WStacking *st, WRegion *reg)
 }
 
 
-WRegion *stacking_remove(WWindow *par, WRegion *reg)
-{
-    WStacking *regst, *st, *nxt=NULL;
-    
-    if(par!=NULL && par->stacking!=NULL){
-        WStacking *regst=stacking_find(par->stacking, reg);
-        
-        if(regst!=NULL){
-            nxt=stacking_unlink(par, regst);
-            free(regst);
-        }
-    }
-    
-    return (nxt!=NULL ? nxt->reg : NULL);
-}
-
-
-WStacking *stacking_unlink(WWindow *par, WStacking *regst)
+WStacking *stacking_unstack(WWindow *par, WStacking *regst)
 {
     WStacking *nxt=NULL, *st;
     
@@ -451,6 +434,40 @@ WStacking *stacking_iter_nodes(WStackingIterTmp *tmp)
 WRegion *stacking_iter(WStackingIterTmp *tmp)
 {
     WStacking *st=stacking_iter_nodes(tmp);
+    return (st!=NULL ? st->reg : NULL);
+}
+
+
+void stacking_iter_mgr_init(WStackingIterTmp *tmp, 
+                            WStacking *st,
+                            WStackingFilter *filt,
+                            void *filt_data)
+{
+    tmp->st=st;
+    tmp->filt=filt;
+    tmp->filt_data=filt_data;
+}
+
+
+WStacking *stacking_iter_mgr_nodes(WStackingIterTmp *tmp)
+{
+    WStacking *next=NULL;
+    
+    while(tmp->st!=NULL){
+        next=tmp->st;
+        tmp->st=tmp->st->mgr_next;
+        if(tmp->filt==NULL || tmp->filt(next->reg, tmp->filt_data))
+            break;
+        next=NULL;
+    }
+    
+    return next;
+}
+
+
+WRegion *stacking_iter_mgr(WStackingIterTmp *tmp)
+{
+    WStacking *st=stacking_iter_mgr_nodes(tmp);
     return (st!=NULL ? st->reg : NULL);
 }
 

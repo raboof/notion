@@ -90,20 +90,20 @@ static bool wsfilt_nostdisp(WRegion *reg, void *ws_)
 void floatws_iter_init(WFloatWSIterTmp *tmp, WFloatWS *ws)
 {
     WStacking *st=get_stacking(ws);
-    stacking_iter_init(tmp, st, wsfilt, ws);
+    stacking_iter_mgr_init(tmp, st, NULL, ws);
 }
 
 
 void floatws_iter_init_nostdisp(WFloatWSIterTmp *tmp, WFloatWS *ws)
 {
     WStacking *st=get_stacking(ws);
-    stacking_iter_init(tmp, st, wsfilt_nostdisp, ws);
+    stacking_iter_mgr_init(tmp, st, wsfilt_nostdisp, ws);
 }
 
 
 WRegion *floatws_iter(WFloatWSIterTmp *tmp)
 {
-    return stacking_iter(tmp);
+    return stacking_iter_mgr(tmp);
 }
 
 
@@ -313,9 +313,18 @@ static void floatws_managed_remove(WFloatWS *ws, WRegion *reg)
 {
     bool mcf=region_may_control_focus((WRegion*)ws);
     bool ds=OBJ_IS_BEING_DESTROYED(ws);
-    WRegion *next;
+    WRegion *next=NULL;
+    WStacking *st;
     
-    next=stacking_remove(REGION_PARENT(ws), reg);
+    st=floatws_find_stacking(ws, reg);
+    
+    if(st!=NULL){
+        WStacking *next_st=stacking_unstack(REGION_PARENT(ws), st);
+        UNLINK_ITEM(ws->managed_list, st, mgr_next, mgr_prev);
+        free(st);
+        if(next_st!=NULL)
+            next=next_st->reg;
+    }
     
     if(reg==ws->managed_stdisp)
         ws->managed_stdisp=NULL;
@@ -357,6 +366,7 @@ static bool floatws_init(WFloatWS *ws, WWindow *parent, const WFitParams *fp)
     ws->stdispi.pos=MPLEX_STDISP_BL;
     ws->stdispi.fullsize=FALSE;
     ws->bottom=NULL;
+    ws->managed_list=NULL;
 
     if(!genws_init(&(ws->genws), parent, fp))
         return FALSE;
@@ -455,6 +465,7 @@ WStacking *floatws_do_add_managed(WFloatWS *ws, WRegion *reg, int level,
     st->level=level;
     st->szplcy=szplcy;
 
+    LINK_ITEM(ws->managed_list, st, mgr_next, mgr_prev);
     region_set_manager(reg, (WRegion*)ws);
     
     /* TODO: stacking fscked up for new regions. */
