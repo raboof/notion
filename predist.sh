@@ -64,7 +64,7 @@ mkdist() {
 }
 
 mkdist Makefile system.mk
-mv libs.mk.dist libs.mk
+mv build/libs.mk.dist build/libs.mk
 
 ##
 ## Autoconf

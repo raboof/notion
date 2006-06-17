@@ -4,7 +4,7 @@
 
 # System-specific configuration is in system.mk
 TOPDIR=..
-include $(TOPDIR)/system-inc.mk
+include $(TOPDIR)/build/system-inc.mk
 
 ######################################
 
@@ -22,7 +22,7 @@ LUA_SOURCES=mod_query_chdir.lua
 
 ######################################
 
-include $(TOPDIR)/rules.mk
+include $(TOPDIR)/build/rules.mk
 
 ######################################
 

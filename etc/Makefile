@@ -4,7 +4,7 @@
 
 # System-specific configuration is in system.mk
 TOPDIR=..
-include $(TOPDIR)/system-inc.mk
+include $(TOPDIR)/build/system-inc.mk
 
 ######################################
 
@@ -18,7 +18,7 @@ ETC =	cfg_ion.lua cfg_ioncore.lua cfg_kludges.lua cfg_modules.lua \
 
 ######################################
 
-include $(TOPDIR)/rules.mk
+include $(TOPDIR)/build/rules.mk
 
 ######################################
 

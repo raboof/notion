@@ -4,7 +4,7 @@
 
 # System-specific configuration is in system.mk
 TOPDIR=..
-include $(TOPDIR)/system-inc.mk
+include $(TOPDIR)/build/system-inc.mk
 
 ######################################
 
@@ -41,7 +41,7 @@ include $(TOPDIR)/libmainloop/rx.mk
 
 ######################################
 
-include $(TOPDIR)/rules.mk
+include $(TOPDIR)/build/rules.mk
 
 ######################################
 

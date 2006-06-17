@@ -3,7 +3,7 @@
 ##
 
 # System-specific configuration is in system.mk
-include system-inc.mk
+include build/system-inc.mk
 
 # List of modules
 include modulelist.mk
@@ -19,13 +19,13 @@ SUBDIRS = $(LIBS_SUBDIRS) $(INSTALL_SUBDIRS)
 
 DOCS = README LICENSE ChangeLog RELNOTES
 
-TO_REALCLEAN = system-ac.mk
+TO_REALCLEAN = build/ac/system-ac.mk
 
 POTFILE=po/ion.pot
 
 ######################################
 
-include rules.mk
+include build/rules.mk
 
 ######################################
 
