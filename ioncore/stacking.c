@@ -96,7 +96,7 @@ WStacking *stacking_unstack(WWindow *par, WStacking *regst)
 {
     WStacking *nxt=NULL, *st;
     
-    st=regst->next;
+    /*st=regst->next;*/
     
     UNLINK_ITEM(par->stacking, regst, next, prev);
             
@@ -113,16 +113,155 @@ WStacking *stacking_unstack(WWindow *par, WStacking *regst)
 }
 
 
-/*}}}*/
-
-
-/*{{{ Restack */
-
-
 static bool cf(WStackingFilter *filt, void *filt_data, WStacking *st)
 {
     return (filt==NULL || filt(st, filt_data));
 }
+
+
+static bool check_unweave(WStacking *st)
+{
+    /* 2: unknown, 1: yes, 0: no */
+    
+    if(st->to_unweave==2){
+        if(st->above!=NULL)
+            st->to_unweave=check_unweave(st->above);
+        else
+            st->to_unweave=0;
+    }
+    
+    return st->to_unweave;
+}
+
+
+WStacking *stacking_unweave(WStacking **stacking, 
+                            WStackingFilter *filt, void *filt_data)
+{
+    WStacking *np=NULL;
+    WStacking *st, *next;
+
+    /* TODO: above-list? */
+    
+    for(st=*stacking; st!=NULL; st=st->next){
+        st->to_unweave=2;
+        if(st->above==NULL && cf(filt, filt_data, st))
+            st->to_unweave=1;
+    }
+    
+    for(st=*stacking; st!=NULL; st=st->next)
+        check_unweave(st);
+    
+    for(st=*stacking; st!=NULL; st=next){
+        next=st->next;
+        if(st->to_unweave==1){
+            UNLINK_ITEM(*stacking, st, next, prev);
+            LINK_ITEM(np, st, next, prev);
+        }
+    }
+    
+    return np;
+}
+
+
+static int check_above_lvl(WStacking *st)
+{
+    if(st->above==NULL)
+        return st->level;
+    st->level=check_above_lvl(st->above);
+    return st->level;
+}
+
+    
+static void enforce_level_sanity(WStacking **np)
+{
+    WStacking *st;
+    
+    /* Make sure that the levels of stuff stacked 'above' match
+     * the level of the thing stacked above.
+     */
+    for(st=*np; st!=NULL; st=st->next)
+        check_above_lvl(st);
+
+    /* And now make sure things are ordered by levels. */
+    st=*np; 
+    while(st->next!=NULL){
+        if(st->next->level < st->level){
+            WStacking *st2=st->next;
+            UNLINK_ITEM(*np, st2, next, prev);
+            LINK_ITEM_BEFORE(*np, st2, st, next, prev);
+            if(st2->prev!=NULL)
+                st=st2->prev;
+        }else{
+            st=st->next;
+        }
+    }
+}
+
+
+static void get_bottom(WStacking *st, Window *other, int *mode)
+{
+    Window bottom, top;
+    
+    while(st!=NULL){
+        if(st->reg!=NULL){
+            region_stacking(st->reg, &bottom, &top);
+            if(bottom!=None){
+                *other=bottom;
+                *mode=Below;
+            }
+        }
+    }
+    
+    *other=None;
+    *mode=Above;
+}
+
+
+void stacking_weave(WStacking **stacking, WStacking **np, bool below)
+{
+    WStacking *st, *ab;
+    uint lvl;
+    Window other;
+    int mode;
+
+    if(*np==NULL)
+        return;
+    
+    /* Should do nothing.. */
+    enforce_level_sanity(np);
+    
+    ab=*stacking;
+    
+    while(*np!=NULL){
+        lvl=(*np)->level;
+        
+        while(ab!=NULL){
+            if(ab->level>lvl || (below && ab->level==lvl))
+                break;
+            ab=ab->next;
+        }
+        get_bottom(ab, &other, &mode);
+        
+        while(1){
+            st=*np;
+            if(st==NULL || st->level>lvl)
+                break;
+            UNLINK_ITEM(*np, st, next, prev);
+            if(ab!=NULL){
+                LINK_ITEM_BEFORE(*stacking, ab, st, next, prev);
+            }else{
+                LINK_ITEM_LAST(*stacking, st, next, prev);
+            }
+            region_restack(st->reg, other, mode);
+        }
+    }
+}
+
+
+/*}}}*/
+
+
+/*{{{ Restack */
 
 
 void stacking_restack(WStacking **stacking, Window other, int mode,

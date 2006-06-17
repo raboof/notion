@@ -21,10 +21,12 @@ DECLSTRUCT(WStacking){
     WRegion *reg;
     WStacking *next, *prev;
     WStacking *above;
-    bool sticky;
-    int level;
+    uint level;
     WSizePolicy szplcy;
     WStacking *mgr_next, *mgr_prev;
+    /* flags */
+    bool sticky:1;
+    uint to_unweave:2;
 };
 
 
@@ -73,5 +75,9 @@ WStacking *stacking_iter_mgr_nodes(WStackingIterTmp *tmp);
 
 WStacking *stacking_find(WStacking *st, WRegion *reg);
 WStacking *stacking_find_mgr(WStacking *st, WRegion *reg);
+
+void stacking_weave(WStacking **stacking, WStacking **np, bool below);
+WStacking *stacking_unweave(WStacking **stacking, 
+                            WStackingFilter *filt, void *filt_data);
 
 #endif /* ION_IONCORE_STACKING_H */

@@ -125,13 +125,16 @@ static void floatws_fit(WFloatWS *ws, const WRectangle *geom)
 
 bool floatws_fitrep(WFloatWS *ws, WWindow *par, const WFitParams *fp)
 {
-    WStacking *st, *stnext, *end;
+    WFloatWSIterTmp tmp;
+    WStacking *unweaved;
     int xdiff, ydiff;
     WRectangle g;
-    bool rs;
-    WStacking **stackingp=get_stackingp(ws);
+    WStacking *st;
+    WWindow *oldpar;
     
-    if(par==NULL || stackingp==NULL){
+    oldpar=REGION_PARENT(ws);
+    
+    if(par==NULL || oldpar==NULL){
         REGION_GEOM(ws)=fp->g;
         return TRUE;
     }
@@ -144,35 +147,23 @@ bool floatws_fitrep(WFloatWS *ws, WWindow *par, const WFitParams *fp)
     
     assert(ws->managed_stdisp==NULL);
 
-    genws_do_reparent(&(ws->genws), par, fp);
-    
     xdiff=fp->g.x-REGION_GEOM(ws).x;
     ydiff=fp->g.y-REGION_GEOM(ws).y;
     
-    end=NULL;
+    genws_do_reparent(&(ws->genws), par, fp);
+    REGION_GEOM(ws)=fp->g;
+    
+    unweaved=stacking_unweave(&oldpar->stacking, wsfilt, (void*)ws);
+    stacking_weave(&par->stacking, &unweaved, FALSE);
 
-    for(st=*stackingp; st!=end && st!=NULL; st=stnext){
-        stnext=st->next;
+    FOR_ALL_NODES_ON_FLOATWS(ws, st, tmp){
+        g=REGION_GEOM(st->reg);
+        g.x+=xdiff;
+        g.y+=ydiff;
         
-        if(REGION_MANAGER(st->reg)==(WRegion*)ws){
-            /* It doesn't matter in which order the frames for different
-             * parents are, just that the frames with the same parent are
-             * ordered properly.
-             */
-            UNLINK_ITEM(*stackingp, st, next, prev);
-            LINK_ITEM(*stackingp, st, next, prev);
-            
-            if(end==NULL)
-                end=st;
-            
-            g=REGION_GEOM(st->reg);
-            g.x+=xdiff;
-            g.y+=ydiff;
-        
-            if(!region_reparent(st->reg, par, &g, REGION_FIT_EXACT)){
-                warn(TR("Error reparenting %s."), region_name(st->reg));
-                region_detach_manager(st->reg);
-            }
+        if(!region_reparent(st->reg, par, &g, REGION_FIT_EXACT)){
+            warn(TR("Error reparenting %s."), region_name(st->reg));
+            region_detach_manager(st->reg);
         }
     }
     
@@ -561,8 +552,10 @@ bool floatws_phattach(WFloatWS *ws,
             st=stacking_find(stacking, (WRegion*)p->frame);
             stabove=stacking_find(stacking, (WRegion*)p->stack_above);
             
-            if(st!=NULL)
+            if(st!=NULL){
                 st->above=stabove;
+                st->level=stabove->level;
+            }
         }
     }
     
