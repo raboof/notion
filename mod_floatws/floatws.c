@@ -86,15 +86,13 @@ static bool wsfilt_nostdisp(WStacking *st, void *ws)
 
 void floatws_iter_init(WFloatWSIterTmp *tmp, WFloatWS *ws)
 {
-    WStacking *st=get_stacking(ws);
-    stacking_iter_mgr_init(tmp, st, NULL, ws);
+    stacking_iter_mgr_init(tmp, ws->managed_list, NULL, ws);
 }
 
 
 void floatws_iter_init_nostdisp(WFloatWSIterTmp *tmp, WFloatWS *ws)
 {
-    WStacking *st=get_stacking(ws);
-    stacking_iter_mgr_init(tmp, st, wsfilt_nostdisp, ws);
+    stacking_iter_mgr_init(tmp, ws->managed_list, wsfilt_nostdisp, ws);
 }
 
 
