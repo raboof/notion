@@ -42,11 +42,11 @@ DECLSTRUCT(WFloatWSPHAttachParams){
 
 DECLCLASS(WFloatWS){
     WGenWS genws;
-    WRegion *managed_stdisp;
     WMPlexSTDispInfo stdispi;
-    WRegion *current_managed;
-    WRegion *bottom;
     WStacking *managed_list;
+    WStacking *managed_stdisp;
+    WStacking *current_managed;
+    WStacking *bottom;
 };
 
 
@@ -94,7 +94,13 @@ extern WStacking *floatws_iter_nodes(WFloatWSIterTmp *tmp);
          VAR=floatws_iter(&(TMP));               \
         VAR!=NULL;                               \
         VAR=floatws_iter(&(TMP)))
-    
+
+#define FOR_ALL_NODES_ON_FLOATWS(WS, VAR, TMP) \
+    for(floatws_iter_init(&(TMP), WS),         \
+         VAR=floatws_iter_nodes(&(TMP));       \
+        VAR!=NULL;                             \
+        VAR=floatws_iter_nodes(&(TMP)))
+
 extern WFloatWSIterTmp floatws_iter_default_tmp;
 
 

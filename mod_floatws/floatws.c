@@ -72,18 +72,15 @@ static WStacking **get_stackingp(WFloatWS *ws)
 /*{{{ Stacking list iteration */
 
 
-static bool wsfilt(WRegion *reg, void *ws)
+static bool wsfilt(WStacking *st, void *ws)
 {
-    return (REGION_MANAGER(reg)==(WRegion*)ws);
+    return (st->reg!=NULL && REGION_MANAGER(st->reg)==(WRegion*)ws);
 }
 
 
-static bool wsfilt_nostdisp(WRegion *reg, void *ws_)
+static bool wsfilt_nostdisp(WStacking *st, void *ws)
 {
-    WFloatWS *ws=(WFloatWS*)ws_;
-    
-    return (REGION_MANAGER(reg)==(WRegion*)ws 
-            && reg!=ws->managed_stdisp);
+    return (wsfilt(st, ws) && ((WFloatWS*)ws)->managed_stdisp!=st);
 }
 
 
@@ -104,6 +101,12 @@ void floatws_iter_init_nostdisp(WFloatWSIterTmp *tmp, WFloatWS *ws)
 WRegion *floatws_iter(WFloatWSIterTmp *tmp)
 {
     return stacking_iter_mgr(tmp);
+}
+
+
+WStacking *floatws_iter_nodes(WFloatWSIterTmp *tmp)
+{
+    return stacking_iter_mgr_nodes(tmp);
 }
 
 
@@ -138,8 +141,8 @@ bool floatws_fitrep(WFloatWS *ws, WWindow *par, const WFitParams *fp)
     if(!region_same_rootwin((WRegion*)ws, (WRegion*)par))
         return FALSE;
 
-    if(ws->managed_stdisp!=NULL)
-        region_detach_manager(ws->managed_stdisp);
+    if(ws->managed_stdisp!=NULL && ws->managed_stdisp->reg!=NULL)
+        region_detach_manager(ws->managed_stdisp->reg);
     
     assert(ws->managed_stdisp==NULL);
 
@@ -199,10 +202,12 @@ static WFloatWS *sticky_source(WFloatWS *ws, WRegion *reg)
 }
 
 
-static bool same_stacking_filt(WRegion *reg, void *ws)
+static bool same_stacking_filt(WStacking *st, void *ws)
 {
-    return (REGION_MANAGER(reg)==(WRegion*)ws ||
-            (sticky_source((WFloatWS*)ws, reg)!=NULL));
+    WRegion *reg=st->reg;
+    
+    return (reg!=NULL && (REGION_MANAGER(reg)==(WRegion*)ws ||
+                          (sticky_source((WFloatWS*)ws, reg)!=NULL)));
 }
 
 
@@ -224,9 +229,9 @@ static void move_sticky(WFloatWS *ws)
         if(ws2==NULL)
             continue;
 
-        if(ws2->current_managed==st->reg){
+        if(ws2->current_managed==st){
             ws2->current_managed=NULL;
-            ws->current_managed=st->reg;
+            ws->current_managed=st;
         }
         
         region_unset_manager(st->reg, (WRegion*)ws2);
@@ -247,9 +252,6 @@ static void floatws_map(WFloatWS *ws)
     FOR_ALL_MANAGED_BY_FLOATWS(ws, reg, tmp){
         region_map(reg);
     }
-    
-    if(ws->managed_stdisp!=NULL)
-        region_map(ws->managed_stdisp);
 }
 
 
@@ -263,23 +265,19 @@ static void floatws_unmap(WFloatWS *ws)
     FOR_ALL_MANAGED_BY_FLOATWS(ws, reg, tmp){
         region_unmap(reg);
     }
-
-    if(ws->managed_stdisp!=NULL)
-        region_unmap(ws->managed_stdisp);
 }
 
 
 static void floatws_do_set_focus(WFloatWS *ws, bool warp)
 {
-    WRegion *r=ws->current_managed;
+    WStacking *st=ws->current_managed;
     WStacking *stacking=get_stacking(ws);
         
-    if(r==NULL && stacking!=NULL){
-        WStacking *st=stacking->prev;
+    if((st==NULL || st->reg==NULL) && stacking!=NULL){
+        st=stacking->prev;
         while(1){
             if(REGION_MANAGER(st->reg)==(WRegion*)ws && 
-               st->reg!=ws->managed_stdisp){
-                r=st->reg;
+               st!=ws->managed_stdisp){
                 break;
             }
             if(st==stacking)
@@ -288,8 +286,8 @@ static void floatws_do_set_focus(WFloatWS *ws, bool warp)
         }
     }
 
-    if(r!=NULL)
-        region_do_set_focus(r, warp);
+    if(st!=NULL && st->reg!=NULL)
+        region_do_set_focus(st->reg, warp);
     else
         genws_fallback_focus(&(ws->genws), warp);
 }
@@ -315,41 +313,42 @@ static void floatws_managed_remove(WFloatWS *ws, WRegion *reg)
     bool ds=OBJ_IS_BEING_DESTROYED(ws);
     WRegion *next=NULL;
     WStacking *st;
+    bool cur=FALSE;
     
     st=floatws_find_stacking(ws, reg);
     
     if(st!=NULL){
         WStacking *next_st=stacking_unstack(REGION_PARENT(ws), st);
         UNLINK_ITEM(ws->managed_list, st, mgr_next, mgr_prev);
-        free(st);
+        
+        if(st==ws->managed_stdisp)
+            ws->managed_stdisp=NULL;
+        
+        if(st==ws->bottom)
+            ws->bottom=NULL;
+
+        if(st==ws->current_managed){
+            cur=TRUE;
+            ws->current_managed=NULL;
+        }
+        
         if(next_st!=NULL)
             next=next_st->reg;
     }
-    
-    if(reg==ws->managed_stdisp)
-        ws->managed_stdisp=NULL;
-    
-    if(reg==ws->bottom)
-        ws->bottom=NULL;
     
     region_unset_manager(reg, (WRegion*)ws);
     
     region_remove_bindmap_owned(reg, mod_floatws_floatws_bindmap,
                                 (WRegion*)ws);
     
-    if(ws->current_managed!=reg)
-        return;
-    
-    ws->current_managed=NULL;
-    
-    if(mcf && !ds)
+    if(cur && mcf && !ds)
         region_do_set_focus(next!=NULL ? next : (WRegion*)ws, FALSE);
 }
 
 
 static void floatws_managed_activated(WFloatWS *ws, WRegion *reg)
 {
-    ws->current_managed=reg;
+    ws->current_managed=floatws_find_stacking(ws, reg);
 }
 
 
@@ -388,16 +387,16 @@ void floatws_deinit(WFloatWS *ws)
     WFloatWSIterTmp tmp;
     WRegion *reg;
 
-    if(ws->managed_stdisp!=NULL)
-        floatws_managed_remove(ws, ws->managed_stdisp);
+    if(ws->managed_stdisp!=NULL && ws->managed_stdisp->reg!=NULL){
+        floatws_managed_remove(ws, ws->managed_stdisp->reg);
+        assert(ws->managed_stdisp==NULL);
+    }
 
     FOR_ALL_MANAGED_BY_FLOATWS(ws, reg, tmp){
         destroy_obj((Obj*)reg);
     }
 
-    FOR_ALL_MANAGED_BY_FLOATWS(ws, reg, tmp){
-        assert(FALSE);
-    }
+    assert(ws->managed_list==NULL);
 
     genws_deinit(&(ws->genws));
 }
@@ -419,10 +418,10 @@ bool floatws_rescue_clientwins(WFloatWS *ws, WPHolder *ph)
 bool floatws_may_destroy(WFloatWS *ws)
 {
     WFloatWSIterTmp tmp;
-    WRegion *reg;
+    WStacking *st;
     
-    FOR_ALL_MANAGED_BY_FLOATWS(ws, reg, tmp){
-        if(reg!=ws->managed_stdisp){
+    FOR_ALL_NODES_ON_FLOATWS(ws, st, tmp){
+        if(st!=ws->managed_stdisp){
             warn(TR("Workspace not empty - refusing to destroy."));
             return FALSE;
         }
@@ -684,8 +683,10 @@ bool floatws_attach(WFloatWS *ws, WClientWin *cwin, ExtlTab t)
 
 static WMPlex *find_existing(WFloatWS *ws)
 {
-    WRegion *r=ws->current_managed;
     WFloatWSIterTmp tmp;
+    WRegion *r=(ws->current_managed!=NULL 
+                ? ws->current_managed->reg 
+                : NULL);
     
     if(r!=NULL && REG_OK(r))
         return (WMPlex*)r;
@@ -826,9 +827,8 @@ void floatws_manage_stdisp(WFloatWS *ws, WRegion *stdisp,
     }else{
         region_detach_manager(stdisp);
         
-        floatws_add_managed(ws, stdisp);
-        
-        ws->managed_stdisp=stdisp;
+        ws->managed_stdisp=floatws_do_add_managed(ws, stdisp, 2, 
+                                                  SIZEPOLICY_UNCONSTRAINED);
     }
         
     ws->stdispi=*di;
@@ -848,18 +848,17 @@ void floatws_managed_rqgeom(WFloatWS *ws, WRegion *reg,
     WFitParams fp;
     WStacking *st;
         
-    if(reg==ws->managed_stdisp){
+    st=floatws_find_stacking(ws, reg);
+
+    if(st==NULL){
+        fp.g=*geom;
+        fp.mode=REGION_FIT_EXACT;
+    }else if(st==ws->managed_stdisp){
         floatws_stdisp_geom(ws, reg, &fp.g);
         fp.mode=REGION_FIT_EXACT;
     }else{
-        st=floatws_find_stacking(ws, reg);
-        if(st==NULL){
-            fp.g=*geom;
-            fp.mode=REGION_FIT_EXACT;
-        }else{
-            fp.g=REGION_GEOM(ws);
-            sizepolicy(&st->szplcy, reg, geom, flags, &fp);
-        }
+        fp.g=REGION_GEOM(ws);
+        sizepolicy(&st->szplcy, reg, geom, flags, &fp);
     }
     
     if(geomret!=NULL)
@@ -888,11 +887,8 @@ WRegion *floatws_circulate(WFloatWS *ws)
     if(stacking==NULL)
         return NULL;
     
-    if(ws->current_managed!=NULL){
-        st=floatws_find_stacking(ws, ws->current_managed);
-        if(st!=NULL)
-            st=st->next;
-    }
+    if(ws->current_managed!=NULL)
+        st=ws->current_managed->next;
     
     if(st==NULL)
         st=stacking;
@@ -900,7 +896,7 @@ WRegion *floatws_circulate(WFloatWS *ws)
     
     while(1){
         if(REGION_MANAGER(st->reg)==(WRegion*)ws
-           && st->reg!=ws->managed_stdisp){
+           && st!=ws->managed_stdisp){
             break;
         }
         st=st->next;
@@ -929,11 +925,8 @@ WRegion *floatws_backcirculate(WFloatWS *ws)
     if(stacking==NULL)
         return NULL;
     
-    if(ws->current_managed!=NULL){
-        st=floatws_find_stacking(ws, ws->current_managed);
-        if(st!=NULL)
-            st=st->prev;
-    }
+    if(ws->current_managed!=NULL)
+        st=ws->current_managed->prev;
     
     if(st==NULL)
         st=stacking->prev;
@@ -941,7 +934,7 @@ WRegion *floatws_backcirculate(WFloatWS *ws)
     
     while(1){
         if(REGION_MANAGER(st->reg)==(WRegion*)ws
-           && st->reg!=ws->managed_stdisp){
+           && st!=ws->managed_stdisp){
             break;
         }
         st=st->prev;
@@ -978,12 +971,7 @@ void floatws_stacking(WFloatWS *ws, Window *bottomret, Window *topret)
 
 WStacking *floatws_find_stacking(WFloatWS *ws, WRegion *r)
 {
-    WStacking *stacking=get_stacking(ws);
-    
-    if(stacking!=NULL)
-        return stacking_find(stacking, r);
-    else
-        return NULL;
+    return stacking_find_mgr(ws->managed_list, r);
 }
 
 
@@ -1146,12 +1134,12 @@ static WRegion *floatws_do_attach_bottom(WFloatWS *ws,
     sizepolicy(&szplcy, reg, &REGION_GEOM(ws), 0, &fp);
     region_fitrep(reg, NULL, &fp);
 
-    if(floatws_do_add_managed(ws, reg, 0, szplcy)==NULL){
+    ws->bottom=floatws_do_add_managed(ws, reg, 0, szplcy);
+    
+    if(ws->bottom==NULL){
         destroy_obj((Obj*)reg);
         return NULL;
     }
-    
-    ws->bottom=reg;
 
     return reg;
 }
@@ -1193,7 +1181,7 @@ WRegion *floatws_attach_bottom_new(WFloatWS *ws, ExtlTab tab)
 EXTL_EXPORT_MEMBER
 WRegion *floatws_bottom(WFloatWS *ws)
 {
-    return ws->bottom;
+    return (ws->bottom!=NULL ? ws->bottom->reg : NULL);
 }
 
 
@@ -1219,7 +1207,7 @@ ExtlTab floatws_managed_list(WFloatWS *ws)
 
 WRegion* floatws_current(WFloatWS *ws)
 {
-    return ws->current_managed;
+    return (ws->current_managed!=NULL ? ws->current_managed->reg : NULL);
 }
 
 
@@ -1234,7 +1222,6 @@ static ExtlTab floatws_get_configuration(WFloatWS *ws)
     ExtlTab tab, mgds, subtab, g;
     WStacking *st;
     WFloatWSIterTmp tmp;
-    WRegion *mgd;
     WMPlex *par;
     int n=0;
     
@@ -1244,18 +1231,20 @@ static ExtlTab floatws_get_configuration(WFloatWS *ws)
     
     extl_table_sets_t(tab, "managed", mgds);
     
-    FOR_ALL_MANAGED_BY_FLOATWS(ws, mgd, tmp){
-        subtab=region_get_configuration(mgd);
+    FOR_ALL_NODES_ON_FLOATWS(ws, st, tmp){
+        if(st->reg==NULL)
+            continue;
+        
+        subtab=region_get_configuration(st->reg);
 
-        g=extl_table_from_rectangle(&REGION_GEOM(mgd));
+        g=extl_table_from_rectangle(&REGION_GEOM(st->reg));
         extl_table_sets_t(subtab, "geom", g);
         extl_unref_table(g);
         
-        st=floatws_find_stacking(ws, mgd);
-        if(st!=NULL && st->sticky)
+        if(st->sticky)
             extl_table_sets_b(subtab, "sticky", TRUE);
         
-        if(ws->bottom==mgd)
+        if(ws->bottom==st)
             extl_table_sets_b(subtab, "bottom", TRUE);
         
         extl_table_seti_t(mgds, ++n, subtab);

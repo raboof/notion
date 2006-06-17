@@ -28,7 +28,7 @@ DECLSTRUCT(WStacking){
 };
 
 
-typedef bool WStackingFilter(WRegion *reg, void *data);
+typedef bool WStackingFilter(WStacking *st, void *data);
 
 
 void stacking_do_raise(WStacking **stacking, WRegion *reg, bool initial,
@@ -72,5 +72,6 @@ WRegion *stacking_iter_mgr(WStackingIterTmp *tmp);
 WStacking *stacking_iter_mgr_nodes(WStackingIterTmp *tmp);
 
 WStacking *stacking_find(WStacking *st, WRegion *reg);
+WStacking *stacking_find_mgr(WStacking *st, WRegion *reg);
 
 #endif /* ION_IONCORE_STACKING_H */

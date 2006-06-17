@@ -80,6 +80,18 @@ WStacking *stacking_find(WStacking *st, WRegion *reg)
 }
 
 
+WStacking *stacking_find_mgr(WStacking *st, WRegion *reg)
+{
+    while(st!=NULL){
+        if(st->reg==reg)
+            return st;
+        st=st->mgr_next;
+    }
+    
+    return NULL;
+}
+
+
 WStacking *stacking_unstack(WWindow *par, WStacking *regst)
 {
     WStacking *nxt=NULL, *st;
@@ -107,9 +119,9 @@ WStacking *stacking_unstack(WWindow *par, WStacking *regst)
 /*{{{ Restack */
 
 
-static bool cf(WStackingFilter *filt, void *filt_data, WRegion *reg)
+static bool cf(WStackingFilter *filt, void *filt_data, WStacking *st)
 {
-    return (filt==NULL || filt(reg, filt_data));
+    return (filt==NULL || filt(st, filt_data));
 }
 
 
@@ -126,7 +138,7 @@ void stacking_restack(WStacking **stacking, Window other, int mode,
     for(st=*stacking; st!=NULL; st=stnext){
         stnext=st->next;
         
-        if(cf(filt, filt_data, st->reg)){
+        if(cf(filt, filt_data, st)){
             Window bottom=None, top=None;
             
             assert(st!=other_on_list);
@@ -187,7 +199,7 @@ void stacking_stacking(WStacking *stacking, Window *bottomret, Window *topret,
     
     while(1){
         Window bottom=None, top=None;
-        if(cf(filt, filt_data, st->reg)){
+        if(cf(filt, filt_data, st)){
             region_stacking(st->reg, &bottom, &top);
             if(top!=None){
                 *topret=top;
@@ -201,7 +213,7 @@ void stacking_stacking(WStacking *stacking, Window *bottomret, Window *topret,
     
     for(st=stacking; st!=NULL; st=st->next){
         Window bottom=None, top=None;
-        if(filt==NULL || filt(st->reg, filt_data)){
+        if(cf(filt, filt_data, st)){
             region_stacking(st->reg, &bottom, &top);
             if(bottom!=None){
                 *bottomret=top;
@@ -284,7 +296,7 @@ void stacking_do_raise(WStacking **stacking, WRegion *reg, bool initial,
     for(st=(*stacking)->prev; st!=*stacking; st=st->prev){
         if(st==regst)
             break;
-        if(st->above!=regst && cf(filt, filt_data, st->reg)){
+        if(st->above!=regst && cf(filt, filt_data, st)){
             region_stacking(st->reg, &bottom, &top);
             if(st->level>regst->level){
                 if(bottom!=None){
@@ -345,7 +357,7 @@ void stacking_do_lower(WStacking **stacking, WRegion *reg, Window fb_win,
         if(st==regst)
             break;
         
-        if(st->above!=regst && cf(filt, filt_data, st->reg)){
+        if(st->above!=regst && cf(filt, filt_data, st)){
             region_stacking(st->reg, &bottom, &top);
             if(st->level<regst->level){
                 if(top!=None){
@@ -422,7 +434,7 @@ WStacking *stacking_iter_nodes(WStackingIterTmp *tmp)
     while(tmp->st!=NULL){
         next=tmp->st;
         tmp->st=tmp->st->next;
-        if(tmp->filt==NULL || tmp->filt(next->reg, tmp->filt_data))
+        if(cf(tmp->filt, tmp->filt_data, next))
             break;
         next=NULL;
     }
@@ -456,7 +468,7 @@ WStacking *stacking_iter_mgr_nodes(WStackingIterTmp *tmp)
     while(tmp->st!=NULL){
         next=tmp->st;
         tmp->st=tmp->st->mgr_next;
-        if(tmp->filt==NULL || tmp->filt(next->reg, tmp->filt_data))
+        if(cf(tmp->filt, tmp->filt_data, next))
             break;
         next=NULL;
     }
