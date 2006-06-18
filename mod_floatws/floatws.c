@@ -127,41 +127,55 @@ bool floatws_fitrep(WFloatWS *ws, WWindow *par, const WFitParams *fp)
 {
     WFloatWSIterTmp tmp;
     WStacking *unweaved;
-    int xdiff, ydiff;
-    WRectangle g;
+    int xdiff=0, ydiff=0;
     WStacking *st;
     WWindow *oldpar;
+    WRectangle g;
     
     oldpar=REGION_PARENT(ws);
     
-    if(par==NULL || oldpar==NULL){
+    if(par==NULL){
         REGION_GEOM(ws)=fp->g;
-        return TRUE;
+    }else if(oldpar!=NULL){
+        if(!region_same_rootwin((WRegion*)ws, (WRegion*)par))
+            return FALSE;
+        
+        if(ws->managed_stdisp!=NULL && ws->managed_stdisp->reg!=NULL)
+            region_detach_manager(ws->managed_stdisp->reg);
+        
+        assert(ws->managed_stdisp==NULL);
+        
+        xdiff=fp->g.x-REGION_GEOM(ws).x;
+        ydiff=fp->g.y-REGION_GEOM(ws).y;
+    
+        genws_do_reparent(&(ws->genws), par, fp);
+        REGION_GEOM(ws)=fp->g;
+    
+        unweaved=stacking_unweave(&oldpar->stacking, wsfilt, (void*)ws);
+        stacking_weave(&par->stacking, &unweaved, FALSE);
     }
 
-    if(!region_same_rootwin((WRegion*)ws, (WRegion*)par))
-        return FALSE;
-
-    if(ws->managed_stdisp!=NULL && ws->managed_stdisp->reg!=NULL)
-        region_detach_manager(ws->managed_stdisp->reg);
+    g=fp->g;
+    g.x+=xdiff;
+    g.y+=ydiff;
     
-    assert(ws->managed_stdisp==NULL);
-
-    xdiff=fp->g.x-REGION_GEOM(ws).x;
-    ydiff=fp->g.y-REGION_GEOM(ws).y;
-    
-    genws_do_reparent(&(ws->genws), par, fp);
-    REGION_GEOM(ws)=fp->g;
-    
-    unweaved=stacking_unweave(&oldpar->stacking, wsfilt, (void*)ws);
-    stacking_weave(&par->stacking, &unweaved, FALSE);
-
     FOR_ALL_NODES_ON_FLOATWS(ws, st, tmp){
+        WFitParams fp2;
+        
+        if(st->reg==NULL)
+            continue;
+        
+        fp2=*fp;
+        fp2.g.x+=xdiff;
+        fp2.g.y+=ydiff;
+
         g=REGION_GEOM(st->reg);
         g.x+=xdiff;
         g.y+=ydiff;
         
-        if(!region_reparent(st->reg, par, &g, REGION_FIT_EXACT)){
+        sizepolicy(&st->szplcy, st->reg, &g, 0, &fp2);
+
+        if(!region_fitrep(st->reg, par, &fp2)){
             warn(TR("Error reparenting %s."), region_name(st->reg));
             region_detach_manager(st->reg);
         }
@@ -351,8 +365,6 @@ static bool floatws_init(WFloatWS *ws, WWindow *parent, const WFitParams *fp)
 {
     ws->current_managed=NULL;
     ws->managed_stdisp=NULL;
-    ws->stdispi.pos=MPLEX_STDISP_BL;
-    ws->stdispi.fullsize=FALSE;
     ws->bottom=NULL;
     ws->managed_list=NULL;
 
@@ -772,61 +784,53 @@ WPHolder *floatws_prepare_manage_transient(WFloatWS *ws, const WClientWin *cwin,
 /*{{{ Sticky status display support */
 
 
-static void floatws_stdisp_geom(WFloatWS *ws, WRegion *stdisp, 
-                                WRectangle *g)
+static int stdisp_szplcy(const WMPlexSTDispInfo *di, WRegion *stdisp)
 {
-    WRectangle *wg=&REGION_GEOM(ws);
-    int pos=ws->stdispi.pos;
-    bool fullsize=ws->stdispi.fullsize;
-
-    g->w=minof(wg->w, maxof(CF_STDISP_MIN_SZ, region_min_w(stdisp)));
-    g->h=minof(wg->h, maxof(CF_STDISP_MIN_SZ, region_min_h(stdisp)));
+    int pos=di->pos;
     
-    if(fullsize){
-        switch(region_orientation(stdisp)){
-        case REGION_ORIENTATION_HORIZONTAL:
-            g->w=wg->w;
-            break;
-        case REGION_ORIENTATION_VERTICAL:
-            g->h=wg->h;
-            break;
+    if(di->fullsize){
+        if(region_orientation(stdisp)==REGION_ORIENTATION_VERTICAL){
+            if(pos==MPLEX_STDISP_TL || pos==MPLEX_STDISP_BL)
+                return SIZEPOLICY_GRAVITY_WEST;
+            else
+                return SIZEPOLICY_GRAVITY_EAST;
+        }else{
+            if(pos==MPLEX_STDISP_TL || pos==MPLEX_STDISP_TR)
+                return SIZEPOLICY_GRAVITY_NORTH;
+            else
+                return SIZEPOLICY_GRAVITY_SOUTH;
         }
+    }else{
+        if(pos==MPLEX_STDISP_TL)
+            return SIZEPOLICY_GRAVITY_NORTHWEST;
+        else if(pos==MPLEX_STDISP_BL)
+            return SIZEPOLICY_GRAVITY_SOUTHWEST;
+        else if(pos==MPLEX_STDISP_TR)
+            return SIZEPOLICY_GRAVITY_NORTHEAST;
+        else /*if(pos=MPLEX_STDISP_BR)*/
+            return SIZEPOLICY_GRAVITY_SOUTHEAST;
     }
-    
-    if(pos==MPLEX_STDISP_TL || pos==MPLEX_STDISP_BL)
-        g->x=wg->x;
-    else
-        g->x=wg->x+wg->w-g->w;
-
-    if(pos==MPLEX_STDISP_TL || pos==MPLEX_STDISP_TR)
-        g->y=wg->y;
-    else
-        g->y=wg->y+wg->h-g->h;
 }
 
-
+    
 void floatws_manage_stdisp(WFloatWS *ws, WRegion *stdisp, 
                            const WMPlexSTDispInfo *di)
 {
     WFitParams fp;
+    uint szplcy=stdisp_szplcy(di, stdisp);
     
-    if(REGION_MANAGER(stdisp)==(WRegion*)ws){
-        if(di->pos==ws->stdispi.pos && 
-           di->fullsize==ws->stdispi.fullsize){
+    if(ws->managed_stdisp!=NULL && ws->managed_stdisp->reg==stdisp){
+        if(ws->managed_stdisp->szplcy==szplcy)
             return;
-        }
+        ws->managed_stdisp->szplcy=szplcy;
     }else{
         region_detach_manager(stdisp);
-        
-        ws->managed_stdisp=floatws_do_add_managed(ws, stdisp, 2, 
-                                                  SIZEPOLICY_UNCONSTRAINED);
+        ws->managed_stdisp=floatws_do_add_managed(ws, stdisp, 2, szplcy);
     }
-        
-    ws->stdispi=*di;
-    
-    floatws_stdisp_geom(ws, stdisp, &fp.g);
-    
-    fp.mode=REGION_FIT_EXACT;
+
+    fp.g=REGION_GEOM(ws);
+    sizepolicy(&ws->managed_stdisp->szplcy, stdisp, &REGION_GEOM(stdisp), 
+               0, &fp);
     
     region_fitrep(stdisp, NULL, &fp);
 }
@@ -843,9 +847,6 @@ void floatws_managed_rqgeom(WFloatWS *ws, WRegion *reg,
 
     if(st==NULL){
         fp.g=*geom;
-        fp.mode=REGION_FIT_EXACT;
-    }else if(st==ws->managed_stdisp){
-        floatws_stdisp_geom(ws, reg, &fp.g);
         fp.mode=REGION_FIT_EXACT;
     }else{
         fp.g=REGION_GEOM(ws);

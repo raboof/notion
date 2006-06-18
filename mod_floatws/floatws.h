@@ -42,7 +42,6 @@ DECLSTRUCT(WFloatWSPHAttachParams){
 
 DECLCLASS(WFloatWS){
     WGenWS genws;
-    WMPlexSTDispInfo stdispi;
     WStacking *managed_list;
     WStacking *managed_stdisp;
     WStacking *current_managed;
