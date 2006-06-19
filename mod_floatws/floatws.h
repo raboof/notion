@@ -26,6 +26,7 @@
 
 
 INTRSTRUCT(WFloatWSPHAttachParams);
+INTRSTRUCT(WFloatWSAttachParams);
 
 
 DECLSTRUCT(WFloatWSPHAttachParams){
@@ -38,6 +39,22 @@ DECLSTRUCT(WFloatWSPHAttachParams){
     WRegion *stack_above;
 };
 
+
+DECLSTRUCT(WFloatWSAttachParams){
+    uint level_set:1;
+    uint szplcy_set:1;
+    uint geom_set:1;
+    uint switchto_set:1;
+    uint switchto:1;
+    
+    uint modal:1;
+    uint sticky:1;
+    uint bottom:1;
+    
+    uint level;
+    WRectangle geom;
+    WSizePolicy szplcy;
+};
 
 
 DECLCLASS(WFloatWS){

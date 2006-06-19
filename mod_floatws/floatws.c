@@ -631,8 +631,8 @@ static bool floatws_handle_drop(WFloatWS *ws, int x, int y,
  *   the size of the client window within that frame. Optional.
  * \end{tabularx}
  */
-EXTL_EXPORT_MEMBER
-bool floatws_attach(WFloatWS *ws, WClientWin *cwin, ExtlTab t)
+EXTL_EXPORT_AS(WFloatWS, attach_framed)
+bool floatws_attach_framed_extl(WFloatWS *ws, WClientWin *cwin, ExtlTab t)
 {
     int posok=0;
     ExtlTab gt;
@@ -673,6 +673,187 @@ bool floatws_attach(WFloatWS *ws, WClientWin *cwin, ExtlTab t)
     return floatws_attach_framed(ws, (WRegion*)cwin, &p);
 }
 
+
+static WRegion *floatws_do_attach(WFloatWS *ws, 
+                                  WRegionAttachHandler *fn, void *fnparams, 
+                                  const WFloatWSAttachParams *param)
+{
+    WWindow *par;
+    WRegion *reg;
+    WFitParams fp;
+    WSizePolicy szplcy;
+    uint level;
+    WRectangle g;
+    WStacking *st;
+    bool sw;
+
+    if(ws->bottom!=NULL && param->bottom){
+        warn(TR("'bottom' already set."));
+        return NULL;
+    }
+    
+    par=REGION_PARENT(ws);
+    assert(par!=NULL);
+    
+    fp.g=REGION_GEOM(ws);
+    fp.mode=REGION_FIT_WHATEVER;
+    
+    reg=fn(par, &fp, fnparams);
+    
+    if(reg==NULL)
+        return NULL;
+    
+    szplcy=(param->szplcy_set
+            ? param->szplcy
+            : SIZEPOLICY_UNCONSTRAINED);
+        
+    if(param->geom_set){
+        g.x=param->geom.x+REGION_GEOM(ws).x;
+        g.x=param->geom.y+REGION_GEOM(ws).y;
+        g.w=maxof(param->geom.w, 1);
+        g.h=maxof(param->geom.h, 1);
+    }else{
+        g=REGION_GEOM(ws);
+    }
+
+    sizepolicy(&szplcy, reg, &g, 0, &fp);
+    region_fitrep(reg, NULL, &fp);
+    
+    level=(param->level_set ? param->level : 1);
+
+    st=floatws_do_add_managed(ws, reg, level, szplcy);
+    
+    if(st==NULL){
+        /* TODO: ? If the region was created by fn, it could be destroyed... */
+        return NULL;
+    }
+    
+    st->sticky=param->sticky;
+    /* TODO: st->modal=param->modal; */
+    
+    if(param->bottom)
+        ws->bottom=st;
+    
+    if(param->switchto_set)
+        sw=param->switchto;
+    else
+        sw=ioncore_g.switchto_new;
+    
+    if(sw && region_may_control_focus((WRegion*)ws))
+        region_set_focus(reg);
+    
+    return reg;
+}
+
+
+static void get_params(WFloatWS *ws, ExtlTab tab, WFloatWSAttachParams *par)
+{
+    int tmp;
+    char *tmps;
+    ExtlTab g;
+    
+    par->switchto_set=0;
+    par->level_set=0;
+    par->szplcy_set=0;
+    par->geom_set=0;
+    par->modal=0;
+    par->sticky=0;
+    par->bottom=0;
+    
+    if(extl_table_gets_i(tab, "level", &tmp)){
+        if(tmp>=0){
+            par->level_set=1;
+            par->level=tmp;
+        }
+    }
+    
+    if(extl_table_is_bool_set(tab, "switchto"))
+        par->switchto=1;
+    
+    if(extl_table_is_bool_set(tab, "sticky"))
+        par->sticky=1;
+    
+    if(extl_table_is_bool_set(tab, "bottom"))
+        par->bottom=1;
+
+    if(extl_table_is_bool_set(tab, "modal"))
+        par->modal=1;
+    
+    if(extl_table_gets_i(tab, "sizepolicy", &tmp)){
+        par->szplcy_set=1;
+        par->szplcy=tmp;
+    }else if(extl_table_gets_s(tab, "sizepolicy", &tmps)){
+        if(string2sizepolicy(tmps, &par->szplcy))
+            par->szplcy_set=1;
+        free(tmps);
+    }
+    
+    if(extl_table_gets_t(tab, "geom", &g)){
+        int n=0;
+        if(extl_table_gets_i(g, "x", &(par->geom.x)))
+            n++;
+        if(extl_table_gets_i(g, "y", &(par->geom.y)))
+            n++;
+        if(extl_table_gets_i(g, "w", &(par->geom.w)))
+            n++;
+        if(extl_table_gets_i(g, "h", &(par->geom.h)))
+            n++;
+        if(n==4)
+            par->geom_set=1;
+        extl_unref_table(g);
+    }
+}
+
+
+
+/*EXTL_DOC
+ * Attach and reparent existing region \var{reg} to \var{ws}.
+ * The table \var{param} may contain the fields \var{index} and
+ * \var{switchto} that are interpreted as for \fnref{WMPlex.attach_new}.
+ */
+EXTL_EXPORT_MEMBER
+WRegion *floatws_attach(WFloatWS *ws, WRegion *reg, ExtlTab param)
+{
+    WFloatWSAttachParams par;
+    get_params(ws, param, &par);
+    
+    /* region__attach_reparent should do better checks. */
+    if(reg==NULL || reg==(WRegion*)ws)
+        return NULL;
+    
+    return region__attach_reparent((WRegion*)ws, reg,
+                                   (WRegionDoAttachFn*)floatws_do_attach, 
+                                   &par);
+}
+
+
+/*EXTL_DOC
+ * Create a new region to be managed by \var{ws}. At least the following
+ * fields in \var{param} are understood:
+ * 
+ * \begin{tabularx}{\linewidth}{lX}
+ *  \tabhead{Field & Description}
+ *  \var{type} & Class name (a string) of the object to be created. Mandatory. \\
+ *  \var{name} & Name of the object to be created (a string). Optional. \\
+ *  \var{switchto} & Should the region be switched to (boolean)? Optional. \\
+ *  \var{level} & Stacking level; default is 1. \\
+ *  \var{modal} & Make object modal. \\
+ *  \var{sizepolicy} & Size policy. \\
+ * \end{tabularx}
+ * 
+ * In addition parameters to the region to be created are passed in this 
+ * same table.
+ */
+EXTL_EXPORT_MEMBER
+WRegion *floatws_attach_new(WFloatWS *ws, ExtlTab param)
+{
+    WFloatWSAttachParams par;
+    get_params(ws, param, &par);
+    
+    return region__attach_load((WRegion*)ws, param,
+                               (WRegionDoAttachFn*)floatws_do_attach, 
+                               &par);
+}
 
 
 /*}}}*/
@@ -1096,77 +1277,6 @@ void floatws_lower(WFloatWS *ws, WRegion *reg)
 /*{{{ Bottom */
 
 
-static WRegion *floatws_do_attach_bottom(WFloatWS *ws, 
-                                         WRegionAttachHandler *handler,
-                                         void *handlerparams,
-                                         void *param)
-{
-    WFitParams fp;
-    WRegion *reg;
-    WWindow *par=REGION_PARENT(ws);
-    WSizePolicy szplcy;
-    
-    if(par==NULL)
-        return NULL;
-    
-    if(ws->bottom!=NULL){
-        warn(TR("Workspace already has bottom."));
-        return NULL;
-    }
-    
-    fp.g=REGION_GEOM(ws);
-    fp.mode=REGION_FIT_WHATEVER;
-    
-    reg=handler(par, &fp, handlerparams);
-    
-    if(reg==NULL)
-        return NULL;
-    
-    szplcy=SIZEPOLICY_FULL_EXACT;
-    sizepolicy(&szplcy, reg, &REGION_GEOM(ws), 0, &fp);
-    region_fitrep(reg, NULL, &fp);
-
-    ws->bottom=floatws_do_add_managed(ws, reg, 0, szplcy);
-    
-    if(ws->bottom==NULL){
-        destroy_obj((Obj*)reg);
-        return NULL;
-    }
-
-    return reg;
-}
-
-
-/*EXTL_DOC
- * Attach \var{reg} as 'bottom' of \var{ws}.
- * There must not exist one already.
- */
-EXTL_EXPORT_MEMBER
-WRegion *floatws_attach_bottom(WFloatWS *ws, WRegion *reg)
-{
-    return region__attach_reparent((WRegion*)ws, reg, 
-                                   ((WRegionDoAttachFn*)
-                                    floatws_do_attach_bottom),
-                                   NULL);
-}
-
-
-/*EXTL_DOC
- * Create a 'new' bottom for \var{ws}. 
- * There must not exist one already.
- * The table \var{tab} should contain the usual parameters for
- * creating a region; in particular the \code{type} field.
- */
-EXTL_EXPORT_MEMBER
-WRegion *floatws_attach_bottom_new(WFloatWS *ws, ExtlTab tab)
-{
-    return region__attach_load((WRegion*)ws, tab, 
-                               ((WRegionDoAttachFn*)
-                                floatws_do_attach_bottom),
-                               NULL);
-}
-
-
 /*EXTL_DOC
  * Returns the 'bottom' of \var{ws}.
  */
@@ -1223,12 +1333,17 @@ static ExtlTab floatws_get_configuration(WFloatWS *ws)
     
     extl_table_sets_t(tab, "managed", mgds);
     
+    /* TODO: stacking order messed up */
+    
     FOR_ALL_NODES_ON_FLOATWS(ws, st, tmp){
         if(st->reg==NULL)
             continue;
         
         subtab=region_get_configuration(st->reg);
 
+        extl_table_sets_i(subtab, "sizepolicy", st->szplcy);
+        extl_table_sets_i(subtab, "level", st->level);
+        
         g=extl_table_from_rectangle(&REGION_GEOM(st->reg));
         extl_table_sets_t(subtab, "geom", g);
         extl_unref_table(g);
@@ -1249,50 +1364,16 @@ static ExtlTab floatws_get_configuration(WFloatWS *ws)
 }
 
 
-static WRegion *floatws_do_attach(WFloatWS *ws, WRegionAttachHandler *fn,
-                                  void *fnparams, const WFitParams *fp)
-{
-    WWindow *par;
-    WRegion *reg;
-
-    par=REGION_PARENT(ws);
-    assert(par!=NULL);
-    
-    reg=fn(par, fp, fnparams);
-
-    if(reg!=NULL)
-        floatws_add_managed(ws, reg);
-    
-    return reg;
-}
-
-
-
 static WRegion *floatws_attach_load(WFloatWS *ws, ExtlTab param)
 {
-    WRectangle geom;
+    WFloatWSAttachParams par;
     WRegion *reg;
     
-    if(extl_table_is_bool_set(param, "bottom"))
-        return floatws_attach_bottom_new(ws, param);
+    get_params(ws, param, &par);
 
-    if(!extl_table_gets_rectangle(param, "geom", &geom)){
-        warn(TR("No geometry specified."));
-        return NULL;
-    }
-
-    geom.w=maxof(geom.w, 0);
-    geom.h=maxof(geom.h, 0);
-    
     reg=region__attach_load((WRegion*)ws, param, 
                             (WRegionDoAttachFn*)floatws_do_attach,
-                            &geom);
-    
-    if(reg!=NULL && extl_table_is_bool_set(param, "sticky")){
-        WStacking *st=floatws_find_stacking(ws, reg);
-        if(st!=NULL)
-            st->sticky=TRUE;
-    }
+                            &par);
     
     return reg;
 }
