@@ -993,12 +993,12 @@ static int stdisp_szplcy(const WMPlexSTDispInfo *di, WRegion *stdisp)
     }
 }
 
-    
+
 void floatws_manage_stdisp(WFloatWS *ws, WRegion *stdisp, 
                            const WMPlexSTDispInfo *di)
 {
     WFitParams fp;
-    uint szplcy=stdisp_szplcy(di, stdisp);
+    uint szplcy=stdisp_szplcy(di, stdisp)|SIZEPOLICY_SHRUNK;
     
     if(ws->managed_stdisp!=NULL && ws->managed_stdisp->reg==stdisp){
         if(ws->managed_stdisp->szplcy==szplcy)
@@ -1010,8 +1010,8 @@ void floatws_manage_stdisp(WFloatWS *ws, WRegion *stdisp,
     }
 
     fp.g=REGION_GEOM(ws);
-    sizepolicy(&ws->managed_stdisp->szplcy, stdisp, &REGION_GEOM(stdisp), 
-               0, &fp);
+    sizepolicy(&ws->managed_stdisp->szplcy, stdisp, 
+               &REGION_GEOM(stdisp), 0, &fp);
     
     region_fitrep(stdisp, NULL, &fp);
 }

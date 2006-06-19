@@ -232,6 +232,16 @@ void sizepolicy(WSizePolicy *szplcy, WRegion *reg,
         tmp=REGION_GEOM(reg);
     else
         tmp=fp->g;
+    
+    if((*szplcy)&SIZEPOLICY_SHRUNK){
+        if(reg!=NULL){
+            tmp.w=region_min_w(reg);
+            tmp.h=region_min_h(reg);
+        }else{
+            tmp.w=1;
+            tmp.h=1;
+        }
+    }
 
     switch((*szplcy)&SIZEPOLICY_MASK){
     case SIZEPOLICY_GRAVITY:

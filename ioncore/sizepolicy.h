@@ -15,10 +15,7 @@
 #include "common.h"
 #include "region.h"
 
-/* Sigh. Algebraic data types would make this so 
- * much more convenient, and safer.
- */
-
+/* Modifiers for some policies */
 #define SIZEPOLICY_VERT_NONE    0x0000
 #define SIZEPOLICY_VERT_TOP     0x0100
 #define SIZEPOLICY_VERT_BOTTOM  0x0200
@@ -31,6 +28,9 @@
 #define SIZEPOLICY_HORIZ_CENTER 0x0c00
 #define SIZEPOLICY_HORIZ_MASK   0x0c00
 
+#define SIZEPOLICY_SHRUNK       0x1000
+
+/* The policies */
 #define SIZEPOLICY_MASK           0xff
 #define SIZEPOLICY_DEFAULT        0x00
 #define SIZEPOLICY_FULL_EXACT     0x01
