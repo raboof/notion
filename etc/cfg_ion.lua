@@ -12,6 +12,9 @@
 --META="Mod1+"
 --ALTMETA=""
 
+-- Terminal emulator
+--XTERM="xterm"
+
 -- Some basic settings
 ioncore.set{
     -- Maximum delay between clicks in milliseconds to be considered a

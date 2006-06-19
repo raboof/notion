@@ -119,6 +119,9 @@ function ioncore.exec_on(reg, cmd, merr_internal)
         if not cmd then
             return
         end
+        if XTERM then
+            cmd='XTERMCMD='..string.shell_safe(XTERM)..' '..cmd
+        end
     end
     return ioncore.do_exec_rw(reg:rootwin_of(), cmd, 
                               ioncore.get_dir_for(reg), 
