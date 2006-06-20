@@ -76,15 +76,8 @@ extern WRegion *floatws_load(WWindow *par, const WFitParams *fp,
 
 extern WRegion* floatws_current(WFloatWS *floatws);
 
-extern WFloatFrame *floatws_create_frame(WFloatWS *ws, const WRectangle *geom, 
-                                         bool inner_geom, bool respect_pos,
-                                         int gravity);
-extern bool floatws_phattach(WFloatWS *ws, 
-                             WRegionAttachHandler *hnd, void *hnd_param,
-                             WFloatWSPHAttachParams *param);
-
-extern WPHolder *floatws_prepare_manage(WFloatWS *ws, const WClientWin *cwin,
-                                        const WManageParams *param, int redir);
+extern WStacking *floatws_do_add_managed(WFloatWS *ws, WRegion *reg, 
+                                         int level, WSizePolicy szplcy);
 
 extern WRegion *floatws_do_attach(WFloatWS *ws, 
                                   WRegionAttachHandler *fn, void *fnparams, 
@@ -106,6 +99,9 @@ typedef WStackingIterTmp WFloatWSIterTmp;
 extern void floatws_iter_init(WFloatWSIterTmp *tmp, WFloatWS *ws);
 extern WRegion *floatws_iter(WFloatWSIterTmp *tmp);
 extern WStacking *floatws_iter_nodes(WFloatWSIterTmp *tmp);
+
+extern WStacking *floatws_get_stacking(WFloatWS *ws);
+extern WStacking **floatws_get_stackingp(WFloatWS *ws);
 
 #define FOR_ALL_MANAGED_BY_FLOATWS(WS, VAR, TMP) \
     for(floatws_iter_init(&(TMP), WS),           \
