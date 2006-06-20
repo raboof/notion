@@ -41,9 +41,6 @@
 #include "main.h"
 
 
-static WStacking *stacking_=NULL;
-
-
 static void floatws_place_stdisp(WFloatWS *ws, WWindow *parent,
                                  int pos, WRegion *stdisp);
 static void floatws_do_raise(WFloatWS *ws, WRegion *reg, bool initial);
