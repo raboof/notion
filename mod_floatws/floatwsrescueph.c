@@ -16,6 +16,7 @@
 #include <ioncore/common.h>
 #include "floatws.h"
 #include "floatwsrescueph.h"
+#include "placement.h"
 
 
 static void floatws_watch_handler(Watch *watch, Obj *floatws);

@@ -25,20 +25,7 @@
 #include "classes.h"
 
 
-INTRSTRUCT(WFloatWSPHAttachParams);
 INTRSTRUCT(WFloatWSAttachParams);
-
-
-DECLSTRUCT(WFloatWSPHAttachParams){
-    WFrame *frame;
-    WRectangle geom;
-    bool inner_geom;
-    bool pos_ok;
-    int gravity;
-    int aflags;
-    WRegion *stack_above;
-};
-
 
 DECLSTRUCT(WFloatWSAttachParams){
     uint level_set:1;

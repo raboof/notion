@@ -15,6 +15,20 @@
 #include <ioncore/rectangle.h>
 #include "floatws.h"
 
+
+INTRSTRUCT(WFloatWSPHAttachParams);
+
+DECLSTRUCT(WFloatWSPHAttachParams){
+    WFrame *frame;
+    WRectangle geom;
+    bool inner_geom;
+    bool pos_ok;
+    int gravity;
+    int aflags;
+    WRegion *stack_above;
+};
+
+
 extern void floatws_calc_placement(WFloatWS *ws, WRectangle *geom);
 extern void mod_floatws_set_placement_method(const char *method);
 
