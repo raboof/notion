@@ -1,5 +1,5 @@
 /*
- * ion/mod_floatws/placement.h
+ * ion/mod_floatws/floatws.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2006. 
  *
@@ -9,11 +9,19 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_MOD_FLOATWS__PLACEMENT_H
-#define ION_MOD_FLOATWS__PLACEMENT_H
+#ifndef ION_MOD_FLOATWS_FLOATWS_H
+#define ION_MOD_FLOATWS_FLOATWS_H
 
+#include <ioncore/common.h>
 #include <ioncore/rectangle.h>
+#include <ioncore/group.h>
 #include "floatws.h"
+#include "classes.h"
+
+
+DECLCLASS(WFloatWS){
+    WGroup grp;
+};
 
 
 INTRSTRUCT(WFloatWSPHAttachParams);
@@ -52,4 +60,6 @@ extern WPHolder *floatws_prepare_manage_transient(WFloatWS *ws,
 extern bool floatws_handle_drop(WFloatWS *ws, int x, int y,
                                 WRegion *dropped);
 
-#endif /* ION_MOD_FLOATWS__PLACEMENT_H */
+extern WRegion *floatws_load(WWindow *par, const WFitParams *fp, ExtlTab tab);
+
+#endif /* ION_MOD_FLOATWS_FLOATWS_H */

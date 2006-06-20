@@ -11,8 +11,7 @@ include $(TOPDIR)/build/system-inc.mk
 INCLUDES += $(X11_INCLUDES) $(LIBTU_INCLUDES) $(LIBEXTL_INCLUDES) -I..
 CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
-SOURCES=main.c floatws.c floatframe.c placement.c \
-	floatwspholder.c floatwsrescueph.c
+SOURCES=main.c floatws.c floatframe.c floatwsrescueph.c
 
 MAKE_EXPORTS=mod_floatws
 

@@ -305,7 +305,7 @@ static bool group_managed_goto(WGroup *ws, WRegion *reg, int flags)
 }
 
 
-static void group_managed_remove(WGroup *ws, WRegion *reg)
+void group_managed_remove(WGroup *ws, WRegion *reg)
 {
     bool mcf=region_may_control_focus((WRegion*)ws);
     bool ds=OBJ_IS_BEING_DESTROYED(ws);
@@ -356,7 +356,7 @@ static void group_managed_activated(WGroup *ws, WRegion *reg)
 /*{{{ Create/destroy */
 
 
-static bool group_init(WGroup *ws, WWindow *parent, const WFitParams *fp)
+bool group_init(WGroup *ws, WWindow *parent, const WFitParams *fp)
 {
     ws->current_managed=NULL;
     ws->managed_stdisp=NULL;
@@ -440,7 +440,17 @@ static bool group_managed_may_destroy(WGroup *ws, WRegion *reg)
 
 
 WStacking *group_do_add_managed(WGroup *ws, WRegion *reg, int level,
-                                  WSizePolicy szplcy)
+                                WSizePolicy szplcy)
+{
+    WStacking *st=NULL;
+    CALL_DYN_RET(st, WStacking*, group_do_add_managed, ws, 
+                 (ws, reg, level, szplcy));
+    return st;
+}
+    
+
+WStacking *group_do_add_managed_default(WGroup *ws, WRegion *reg, int level,
+                                        WSizePolicy szplcy)
 {
     WStacking *st=NULL, *sttop=NULL;
     Window bottom=None, top=None;
@@ -1064,21 +1074,6 @@ static ExtlTab group_get_configuration(WGroup *ws)
 }
 
 
-static WRegion *group_attach_load(WGroup *ws, ExtlTab param)
-{
-    WGroupAttachParams par;
-    WRegion *reg;
-    
-    get_params(ws, param, &par);
-
-    reg=region__attach_load((WRegion*)ws, param, 
-                            (WRegionDoAttachFn*)group_do_attach,
-                            &par);
-    
-    return reg;
-}
-
-
 WRegion *group_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 {
     WGroup *ws;
@@ -1096,7 +1091,7 @@ WRegion *group_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
     n=extl_table_get_n(substab);
     for(i=1; i<=n; i++){
         if(extl_table_geti_t(substab, i, &subtab)){
-            group_attach_load(ws, subtab);
+            group_attach_new(ws, subtab);
             extl_unref_table(subtab);
         }
     }
@@ -1129,17 +1124,6 @@ static DynFunTab group_dynfuntab[]={
     {region_managed_activated, 
      group_managed_activated},
     
-    /*
-    {(DynFun*)region_prepare_manage, 
-     (DynFun*)group_prepare_manage},
-    
-    {(DynFun*)region_prepare_manage_transient,
-     (DynFun*)group_prepare_manage_transient},
-    
-    {(DynFun*)region_handle_drop,
-     (DynFun*)group_handle_drop},
-    */
-    
     {region_managed_remove,
      group_managed_remove},
     
@@ -1170,13 +1154,11 @@ static DynFunTab group_dynfuntab[]={
     {(DynFun*)region_managed_get_pholder,
      (DynFun*)group_managed_get_pholder},
 
-    /*
-    {(DynFun*)region_get_rescue_pholder_for,
-     (DynFun*)group_get_rescue_pholder_for},
-     */
-
     {region_managed_rqgeom,
      group_managed_rqgeom},
+    
+    {(DynFun*)group_do_add_managed,
+     (DynFun*)group_do_add_managed_default},
     
     END_DYNFUNTAB
 };

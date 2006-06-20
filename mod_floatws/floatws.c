@@ -12,16 +12,22 @@
 #include <string.h>
 
 #include <libtu/minmax.h>
+#include <libtu/objp.h>
 
 #include <ioncore/common.h>
 #include <ioncore/global.h>
 #include <ioncore/region.h>
 #include <ioncore/focus.h>
+#include <ioncore/group.h>
+#include <ioncore/regbind.h>
 
-#include "placement.h"
+#include "main.h"
 #include "floatws.h"
 #include "floatframe.h"
 #include "floatwsrescueph.h"
+
+#define FOR_ALL_MANAGED_BY_FLOATWS(A, B, C) \
+    FOR_ALL_MANAGED_BY_GROUP(&((A)->grp), B, C)
 
 
 /*{{{ Placement policies */
@@ -46,7 +52,7 @@ static WRegion* is_occupied(WFloatWS *ws, const WRectangle *r)
 {
     WRegion *reg;
     WRectangle p;
-    WFloatWSIterTmp tmp;
+    WGroupIterTmp tmp;
     
     FOR_ALL_MANAGED_BY_FLOATWS(ws, reg, tmp){
         ggeom(reg, &p);
@@ -71,7 +77,7 @@ static int next_least_x(WFloatWS *ws, int x)
     WRegion *reg;
     WRectangle p;
     int retx=REGION_GEOM(ws).x+REGION_GEOM(ws).w;
-    WFloatWSIterTmp tmp;
+    WGroupIterTmp tmp;
     
     FOR_ALL_MANAGED_BY_FLOATWS(ws, reg, tmp){
         ggeom(reg, &p);
@@ -89,7 +95,7 @@ static int next_lowest_y(WFloatWS *ws, int y)
     WRegion *reg;
     WRectangle p;
     int rety=REGION_GEOM(ws).y+REGION_GEOM(ws).h;
-    WFloatWSIterTmp tmp;
+    WGroupIterTmp tmp;
     
     FOR_ALL_MANAGED_BY_FLOATWS(ws, reg, tmp){
         ggeom(reg, &p);
@@ -265,7 +271,7 @@ WFloatFrame *floatws_create_frame(WFloatWS *ws, const WRectangle *geom,
     /* Set proper geometry */
     region_fit((WRegion*)frame, &fp.g, REGION_FIT_EXACT);
 
-    if(!floatws_do_add_managed(ws, (WRegion*)frame, 1, 
+    if(!group_do_add_managed(&ws->grp, (WRegion*)frame, 1, 
                                SIZEPOLICY_UNCONSTRAINED)){
         destroy_obj((Obj*)frame);
         return NULL;
@@ -282,7 +288,7 @@ bool floatws_phattach(WFloatWS *ws,
     bool newframe=FALSE;
     WStacking *st, *stabove;
     WMPlexAttachParams par;
-    WStacking *stacking=floatws_get_stacking(ws);
+    WStacking *stacking=group_get_stacking(&ws->grp);
 
     par.flags=(p->aflags&PHOLDER_ATTACH_SWITCHTO ? MPLEX_ATTACH_SWITCHTO : 0);
     
@@ -424,9 +430,9 @@ bool floatws_attach_framed_extl(WFloatWS *ws, WClientWin *cwin, ExtlTab t)
 
 static WMPlex *find_existing(WFloatWS *ws)
 {
-    WFloatWSIterTmp tmp;
-    WRegion *r=(ws->current_managed!=NULL 
-                ? ws->current_managed->reg 
+    WGroupIterTmp tmp;
+    WRegion *r=(ws->grp.current_managed!=NULL 
+                ? ws->grp.current_managed->reg 
                 : NULL);
     
     if(r!=NULL && REG_OK(r))
@@ -517,3 +523,111 @@ WPHolder *floatws_prepare_manage_transient(WFloatWS *ws, const WClientWin *cwin,
 
 
 /*}}}*/
+
+
+/*{{{ WFloatWS class */
+
+
+static bool floatws_init(WFloatWS *ws, WWindow *parent, const WFitParams *fp)
+{
+    if(!group_init(&(ws->grp), parent, fp))
+        return FALSE;
+
+    region_add_bindmap((WRegion*)ws, mod_floatws_floatws_bindmap);
+    
+    return TRUE;
+}
+
+
+WFloatWS *create_floatws(WWindow *parent, const WFitParams *fp)
+{
+    CREATEOBJ_IMPL(WFloatWS, floatws, (p, parent, fp));
+}
+
+
+void floatws_deinit(WFloatWS *ws)
+{    
+    group_deinit(&(ws->grp));
+}
+
+
+static WStacking *floatws_do_add_managed(WFloatWS *ws, WRegion *reg, 
+                                         int level, WSizePolicy szplcy)
+{
+    WStacking *st=group_do_add_managed_default(&ws->grp, reg, level, szplcy);
+    
+    if(st!=NULL && st->reg!=NULL){
+        region_add_bindmap_owned(reg, mod_floatws_floatws_bindmap, 
+                                 (WRegion*)ws);
+    }
+    
+    return st;
+}
+
+
+static void floatws_managed_remove(WFloatWS *ws, WRegion *reg)
+{
+    group_managed_remove(&ws->grp, reg);
+    region_remove_bindmap_owned(reg, mod_floatws_floatws_bindmap,
+                                (WRegion*)ws);
+}
+
+
+
+WRegion *floatws_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
+{
+    WFloatWS *ws;
+    ExtlTab substab, subtab;
+    int i, n;
+    
+    ws=create_floatws(par, fp);
+    
+    if(ws==NULL)
+        return NULL;
+        
+    if(!extl_table_gets_t(tab, "managed", &substab))
+        return (WRegion*)ws;
+
+    n=extl_table_get_n(substab);
+    for(i=1; i<=n; i++){
+        if(extl_table_geti_t(substab, i, &subtab)){
+            group_attach_new(&ws->grp, subtab);
+            extl_unref_table(subtab);
+        }
+    }
+    
+    extl_unref_table(substab);
+
+    return (WRegion*)ws;
+}
+
+
+static DynFunTab floatws_dynfuntab[]={
+    {(DynFun*)region_prepare_manage, 
+     (DynFun*)floatws_prepare_manage},
+    
+    {(DynFun*)region_prepare_manage_transient,
+     (DynFun*)floatws_prepare_manage_transient},
+    
+    {(DynFun*)region_handle_drop,
+     (DynFun*)floatws_handle_drop},
+    
+    {(DynFun*)group_do_add_managed,
+     (DynFun*)floatws_do_add_managed},
+    
+    {region_managed_remove,
+     floatws_managed_remove},
+    
+    {(DynFun*)region_get_rescue_pholder_for,
+     (DynFun*)floatws_get_rescue_pholder_for},
+    
+    END_DYNFUNTAB
+};
+
+
+EXTL_EXPORT
+IMPLCLASS(WFloatWS, WGroup, floatws_deinit, floatws_dynfuntab);
+
+
+/*}}}*/
+

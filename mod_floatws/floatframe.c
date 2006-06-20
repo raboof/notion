@@ -365,7 +365,7 @@ bool floatframe_set_sticky(WFloatFrame *frame, int sp)
     WFloatWS *ws=OBJ_CAST(REGION_MANAGER(frame), WFloatWS);
     
     if(ws!=NULL){
-        st=floatws_find_stacking(ws, (WRegion*)frame);
+        st=group_find_stacking(&ws->grp, (WRegion*)frame);
         if(st!=NULL){
             st->sticky=libtu_do_setparam(sp, st->sticky);
             return st->sticky;
@@ -399,7 +399,7 @@ bool floatframe_is_sticky(WFloatFrame *frame)
     WFloatWS *ws=OBJ_CAST(REGION_MANAGER(frame), WFloatWS);
     
     if(ws!=NULL){
-        st=floatws_find_stacking(ws, (WRegion*)frame);
+        st=group_find_stacking(&ws->grp, (WRegion*)frame);
         return (st!=NULL ? st->sticky : FALSE);
     }
     

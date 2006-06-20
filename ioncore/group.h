@@ -51,7 +51,9 @@ DECLCLASS(WGroup){
 };
 
 
+extern bool group_init(WGroup *grp, WWindow *parent, const WFitParams *fp);
 extern WGroup *create_group(WWindow *parent, const WFitParams *fp);
+extern void group_deinit(WGroup *grp);
 
 extern WRegion *group_circulate(WGroup *ws);
 extern WRegion *group_backcirculate(WGroup *ws);
@@ -61,12 +63,19 @@ extern WRegion *group_load(WWindow *par, const WFitParams *fp,
 
 extern WRegion* group_current(WGroup *group);
 
-extern WStacking *group_do_add_managed(WGroup *ws, WRegion *reg, 
+DYNFUN WStacking *group_do_add_managed(WGroup *ws, WRegion *reg, 
                                        int level, WSizePolicy szplcy);
+extern WStacking *group_do_add_managed_default(WGroup *ws, WRegion *reg, 
+                                               int level, WSizePolicy szplcy);
 
 extern WRegion *group_do_attach(WGroup *ws, 
                                 WRegionAttachHandler *fn, void *fnparams, 
                                 const WGroupAttachParams *param);
+
+extern WRegion *group_attach(WGroup *ws, WRegion *reg, ExtlTab param);
+extern WRegion *group_attach_new(WGroup *ws, ExtlTab param);
+
+extern void group_managed_remove(WGroup *ws, WRegion *reg);
 
 extern bool group_rescue_clientwins(WGroup *ws, WPHolder *ph);
 
