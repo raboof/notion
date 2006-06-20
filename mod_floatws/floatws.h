@@ -86,7 +86,9 @@ extern bool floatws_phattach(WFloatWS *ws,
 extern WPHolder *floatws_prepare_manage(WFloatWS *ws, const WClientWin *cwin,
                                         const WManageParams *param, int redir);
 
-extern bool floatws_add_managed(WFloatWS *ws, WRegion *reg);
+extern WRegion *floatws_do_attach(WFloatWS *ws, 
+                                  WRegionAttachHandler *fn, void *fnparams, 
+                                  const WFloatWSAttachParams *param);
 
 extern bool floatws_rescue_clientwins(WFloatWS *ws, WPHolder *ph);
 

@@ -22,13 +22,15 @@ DECLCLASS(WFloatWSPHolder){
     WPHolder ph;
     Watch floatws_watch;
     WRectangle geom;
+    uint level;
+    WSizePolicy szplcy;
 };
 
 extern WFloatWSPHolder *create_floatwspholder(WFloatWS *floatws, 
-                                              const WRectangle *geom);
+                                              const WStacking *st);
 
 extern bool floatwspholder_init(WFloatWSPHolder *ph, WFloatWS *floatws,
-                                const WRectangle *geom);
+                                const WStacking *st);
 
 extern void floatwspholder_deinit(WFloatWSPHolder *ph);
 

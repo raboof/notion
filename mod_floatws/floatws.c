@@ -482,13 +482,6 @@ WStacking *floatws_do_add_managed(WFloatWS *ws, WRegion *reg, int level,
 }
 
     
-bool floatws_add_managed(WFloatWS *ws, WRegion *reg)
-{
-    return (floatws_do_add_managed(ws, reg, 1, SIZEPOLICY_UNCONSTRAINED)
-            !=NULL);
-}
-
-
 WFloatFrame *floatws_create_frame(WFloatWS *ws, const WRectangle *geom, 
                                   bool inner_geom, bool respect_pos, 
                                   int gravity)
@@ -530,7 +523,11 @@ WFloatFrame *floatws_create_frame(WFloatWS *ws, const WRectangle *geom,
     /* Set proper geometry */
     region_fit((WRegion*)frame, &fp.g, REGION_FIT_EXACT);
 
-    floatws_add_managed(ws, (WRegion*)frame);
+    if(!floatws_do_add_managed(ws, (WRegion*)frame, 1, 
+                               SIZEPOLICY_UNCONSTRAINED)){
+        destroy_obj((Obj*)frame);
+        return NULL;
+    }
 
     return frame;
 }
@@ -674,9 +671,9 @@ bool floatws_attach_framed_extl(WFloatWS *ws, WClientWin *cwin, ExtlTab t)
 }
 
 
-static WRegion *floatws_do_attach(WFloatWS *ws, 
-                                  WRegionAttachHandler *fn, void *fnparams, 
-                                  const WFloatWSAttachParams *param)
+WRegion *floatws_do_attach(WFloatWS *ws, 
+                           WRegionAttachHandler *fn, void *fnparams, 
+                           const WFloatWSAttachParams *param)
 {
     WWindow *par;
     WRegion *reg;

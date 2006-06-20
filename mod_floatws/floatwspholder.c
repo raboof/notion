@@ -18,47 +18,56 @@
 #include "floatwspholder.h"
 
 
-static void floatws_watch_handler(Watch *watch, Obj *floatws);
+static void floatws_watch_handler(Watch *watch, Obj *ws);
 
 
 /*{{{ Init/deinit */
 
 
-static void floatws_watch_handler(Watch *watch, Obj *floatws)
+static void floatws_watch_handler(Watch *watch, Obj *ws)
 {
     WFloatWSPHolder *ph=FIELD_TO_STRUCT(WFloatWSPHolder, 
                                         floatws_watch, watch);
-    pholder_redirect(&(ph->ph), (WRegion*)floatws);
+    pholder_redirect(&(ph->ph), (WRegion*)ws);
 }
 
 
-bool floatwspholder_init(WFloatWSPHolder *ph, WFloatWS *floatws,
-                         const WRectangle *geom)
+bool floatwspholder_init(WFloatWSPHolder *ph, WFloatWS *ws,
+                         const WStacking *st)
 {
     pholder_init(&(ph->ph));
 
     watch_init(&(ph->floatws_watch));
     
-    if(floatws==NULL)
+    if(ws==NULL)
         return TRUE;
     
-    if(!watch_setup(&(ph->floatws_watch), (Obj*)floatws, 
+    if(!watch_setup(&(ph->floatws_watch), (Obj*)ws, 
                     floatws_watch_handler)){
         pholder_deinit(&(ph->ph));
         return FALSE;
     }
     
-    ph->geom=*geom;
+    /* TODO? Just link to the stacking structure to remember 
+     * stacking order? 
+     */
+    
+    ph->szplcy=st->szplcy;
+    ph->level=st->level;
+    
+    if(st->reg!=NULL)
+        ph->geom=REGION_GEOM(st->reg);
+    else
+        ph->geom=REGION_GEOM(ws);
     
     return TRUE;
 }
  
 
-WFloatWSPHolder *create_floatwspholder(WFloatWS *floatws,
-                                       const WRectangle *geom)
+WFloatWSPHolder *create_floatwspholder(WFloatWS *ws,
+                                       const WStacking *st)
 {
-    CREATEOBJ_IMPL(WFloatWSPHolder, floatwspholder, 
-                   (p, floatws, geom));
+    CREATEOBJ_IMPL(WFloatWSPHolder, floatwspholder, (p, ws, st));
 }
 
 
@@ -80,31 +89,32 @@ bool floatwspholder_do_attach(WFloatWSPHolder *ph,
                               int flags)
 {
     WFloatWS *ws=(WFloatWS*)ph->floatws_watch.obj;
-    WFitParams fp;
     WRegion *reg;
-    WWindow *par;
+    WFloatWSAttachParams param;
 
     if(ws==NULL)
         return FALSE;
-    
-    par=REGION_PARENT(ws);
-    
-    if(par==NULL)
-        return FALSE;
-    
-    fp.g=ph->geom;
-    fp.mode=REGION_FIT_EXACT;
 
-    reg=hnd(par, &fp, hnd_param);
+    param.level_set=1;
+    param.level=ph->level;
     
-    if(reg==NULL)
-        return FALSE;
+    param.szplcy_set=1;
+    param.szplcy=ph->szplcy;
     
-    /* TODO: flags/switchto */
+    param.geom_set=1;
+    param.geom=ph->geom;
     
-    floatws_add_managed(ws, reg);
+    param.switchto_set=1;
+    param.switchto=(flags&PHOLDER_ATTACH_SWITCHTO ? 1 : 0);
+    
+    /* Should these be remembered? */
+    param.modal=0;
+    param.sticky=0;
+    param.bottom=0;
+    
+    reg=floatws_do_attach(ws, hnd, hnd_param, &param);
 
-    return TRUE;
+    return (reg!=NULL);
 }
 
 
@@ -131,9 +141,14 @@ WRegion *floatwspholder_do_target(WFloatWSPHolder *ph)
 /*{{{ WFloatWS stuff */
 
 
-WFloatWSPHolder *floatws_managed_get_pholder(WFloatWS *floatws, WRegion *mgd)
+WFloatWSPHolder *floatws_managed_get_pholder(WFloatWS *ws, WRegion *mgd)
 {
-    return create_floatwspholder(floatws, &REGION_GEOM(mgd));
+    WStacking *st=floatws_find_stacking(ws, mgd);
+    
+    if(mgd==NULL)
+        return NULL;
+    else
+        return create_floatwspholder(ws, st);
 }
 
 
