@@ -28,6 +28,7 @@ INTRCLASS(WMoveresMode);
 INTRCLASS(WRootWin);
 INTRCLASS(WScreen);
 INTRCLASS(WWindow);
+INTRCLASS(WGroup);
 
 INTRCLASS(WPHolder);
 INTRCLASS(WMPlexPHolder);

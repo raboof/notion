@@ -21,6 +21,7 @@ extern WBindmap *ioncore_mplex_toplevel_bindmap;
 extern WBindmap *ioncore_frame_bindmap;
 extern WBindmap *ioncore_frame_toplevel_bindmap;
 extern WBindmap *ioncore_moveres_bindmap;
+extern WBindmap *ioncore_group_bindmap;
 
 extern void ioncore_deinit_bindmaps();
 extern bool ioncore_init_bindmaps();

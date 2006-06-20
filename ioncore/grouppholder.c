@@ -1,5 +1,5 @@
 /*
- * ion/mod_floatws/floatwspholder.c
+ * ion/ioncore/grouppholder.c
  *
  * Copyright (c) Tuomo Valkonen 2005-2006. 
  *
@@ -14,36 +14,36 @@
 #include <libtu/pointer.h>
 
 #include <ioncore/common.h>
-#include "floatws.h"
-#include "floatwspholder.h"
+#include "group.h"
+#include "grouppholder.h"
 
 
-static void floatws_watch_handler(Watch *watch, Obj *ws);
+static void group_watch_handler(Watch *watch, Obj *ws);
 
 
 /*{{{ Init/deinit */
 
 
-static void floatws_watch_handler(Watch *watch, Obj *ws)
+static void group_watch_handler(Watch *watch, Obj *ws)
 {
-    WFloatWSPHolder *ph=FIELD_TO_STRUCT(WFloatWSPHolder, 
-                                        floatws_watch, watch);
+    WGroupPHolder *ph=FIELD_TO_STRUCT(WGroupPHolder, 
+                                        group_watch, watch);
     pholder_redirect(&(ph->ph), (WRegion*)ws);
 }
 
 
-bool floatwspholder_init(WFloatWSPHolder *ph, WFloatWS *ws,
+bool grouppholder_init(WGroupPHolder *ph, WGroup *ws,
                          const WStacking *st)
 {
     pholder_init(&(ph->ph));
 
-    watch_init(&(ph->floatws_watch));
+    watch_init(&(ph->group_watch));
     
     if(ws==NULL)
         return TRUE;
     
-    if(!watch_setup(&(ph->floatws_watch), (Obj*)ws, 
-                    floatws_watch_handler)){
+    if(!watch_setup(&(ph->group_watch), (Obj*)ws, 
+                    group_watch_handler)){
         pholder_deinit(&(ph->ph));
         return FALSE;
     }
@@ -64,16 +64,16 @@ bool floatwspholder_init(WFloatWSPHolder *ph, WFloatWS *ws,
 }
  
 
-WFloatWSPHolder *create_floatwspholder(WFloatWS *ws,
+WGroupPHolder *create_grouppholder(WGroup *ws,
                                        const WStacking *st)
 {
-    CREATEOBJ_IMPL(WFloatWSPHolder, floatwspholder, (p, ws, st));
+    CREATEOBJ_IMPL(WGroupPHolder, grouppholder, (p, ws, st));
 }
 
 
-void floatwspholder_deinit(WFloatWSPHolder *ph)
+void grouppholder_deinit(WGroupPHolder *ph)
 {
-    watch_reset(&(ph->floatws_watch));
+    watch_reset(&(ph->group_watch));
     pholder_deinit(&(ph->ph));
 }
 
@@ -84,13 +84,13 @@ void floatwspholder_deinit(WFloatWSPHolder *ph)
 /*{{{ Dynfuns */
 
 
-bool floatwspholder_do_attach(WFloatWSPHolder *ph, 
+bool grouppholder_do_attach(WGroupPHolder *ph, 
                               WRegionAttachHandler *hnd, void *hnd_param,
                               int flags)
 {
-    WFloatWS *ws=(WFloatWS*)ph->floatws_watch.obj;
+    WGroup *ws=(WGroup*)ph->group_watch.obj;
     WRegion *reg;
-    WFloatWSAttachParams param;
+    WGroupAttachParams param;
 
     if(ws==NULL)
         return FALSE;
@@ -112,15 +112,15 @@ bool floatwspholder_do_attach(WFloatWSPHolder *ph,
     param.sticky=0;
     param.bottom=0;
     
-    reg=floatws_do_attach(ws, hnd, hnd_param, &param);
+    reg=group_do_attach(ws, hnd, hnd_param, &param);
 
     return (reg!=NULL);
 }
 
 
-bool floatwspholder_do_goto(WFloatWSPHolder *ph)
+bool grouppholder_do_goto(WGroupPHolder *ph)
 {
-    WFloatWS *ws=(WFloatWS*)ph->floatws_watch.obj;
+    WGroup *ws=(WGroup*)ph->group_watch.obj;
     
     if(ws!=NULL)
         return region_goto((WRegion*)ws);
@@ -129,26 +129,26 @@ bool floatwspholder_do_goto(WFloatWSPHolder *ph)
 }
 
 
-WRegion *floatwspholder_do_target(WFloatWSPHolder *ph)
+WRegion *grouppholder_do_target(WGroupPHolder *ph)
 {
-    return (WRegion*)ph->floatws_watch.obj;
+    return (WRegion*)ph->group_watch.obj;
 }
 
 
 /*}}}*/
 
 
-/*{{{ WFloatWS stuff */
+/*{{{ WGroup stuff */
 
 
-WFloatWSPHolder *floatws_managed_get_pholder(WFloatWS *ws, WRegion *mgd)
+WGroupPHolder *group_managed_get_pholder(WGroup *ws, WRegion *mgd)
 {
-    WStacking *st=floatws_find_stacking(ws, mgd);
+    WStacking *st=group_find_stacking(ws, mgd);
     
     if(mgd==NULL)
         return NULL;
     else
-        return create_floatwspholder(ws, st);
+        return create_grouppholder(ws, st);
 }
 
 
@@ -158,21 +158,21 @@ WFloatWSPHolder *floatws_managed_get_pholder(WFloatWS *ws, WRegion *mgd)
 /*{{{ Class information */
 
 
-static DynFunTab floatwspholder_dynfuntab[]={
+static DynFunTab grouppholder_dynfuntab[]={
     {(DynFun*)pholder_do_attach, 
-     (DynFun*)floatwspholder_do_attach},
+     (DynFun*)grouppholder_do_attach},
 
     {(DynFun*)pholder_do_goto, 
-     (DynFun*)floatwspholder_do_goto},
+     (DynFun*)grouppholder_do_goto},
 
     {(DynFun*)pholder_do_target, 
-     (DynFun*)floatwspholder_do_target},
+     (DynFun*)grouppholder_do_target},
     
     END_DYNFUNTAB
 };
 
-IMPLCLASS(WFloatWSPHolder, WPHolder, floatwspholder_deinit, 
-          floatwspholder_dynfuntab);
+IMPLCLASS(WGroupPHolder, WPHolder, grouppholder_deinit, 
+          grouppholder_dynfuntab);
 
 
 /*}}}*/
