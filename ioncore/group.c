@@ -482,7 +482,7 @@ WStacking *group_do_add_managed_default(WGroup *ws, WRegion *reg, int level,
 
     if(region_is_fully_mapped((WRegion*)ws))
         region_map(reg);
-    
+
     return st;
 }
 
@@ -508,7 +508,11 @@ WRegion *group_do_attach(WGroup *ws,
     par=REGION_PARENT(ws);
     assert(par!=NULL);
     
-    fp.g=REGION_GEOM(ws);
+    if(param->geom_set)
+        fp.g=param->geom;
+    else
+        fp.g=REGION_GEOM(ws);
+    
     fp.mode=REGION_FIT_WHATEVER;
     
     reg=fn(par, &fp, fnparams);
@@ -522,7 +526,7 @@ WRegion *group_do_attach(WGroup *ws,
         
     if(param->geom_set){
         g.x=param->geom.x+REGION_GEOM(ws).x;
-        g.x=param->geom.y+REGION_GEOM(ws).y;
+        g.y=param->geom.y+REGION_GEOM(ws).y;
         g.w=maxof(param->geom.w, 1);
         g.h=maxof(param->geom.h, 1);
     }else{
@@ -603,6 +607,7 @@ static void get_params(WGroup *ws, ExtlTab tab, WGroupAttachParams *par)
     
     if(extl_table_gets_t(tab, "geom", &g)){
         int n=0;
+        
         if(extl_table_gets_i(g, "x", &(par->geom.x)))
             n++;
         if(extl_table_gets_i(g, "y", &(par->geom.y)))
@@ -611,8 +616,10 @@ static void get_params(WGroup *ws, ExtlTab tab, WGroupAttachParams *par)
             n++;
         if(extl_table_gets_i(g, "h", &(par->geom.h)))
             n++;
+        
         if(n==4)
             par->geom_set=1;
+        
         extl_unref_table(g);
     }
 }
@@ -1036,6 +1043,7 @@ static ExtlTab group_get_configuration(WGroup *ws)
     WGroupIterTmp tmp;
     WMPlex *par;
     int n=0;
+    WRectangle tmpg;
     
     tab=region_get_base_configuration((WRegion*)ws);
     
@@ -1054,7 +1062,11 @@ static ExtlTab group_get_configuration(WGroup *ws)
         extl_table_sets_i(subtab, "sizepolicy", st->szplcy);
         extl_table_sets_i(subtab, "level", st->level);
         
-        g=extl_table_from_rectangle(&REGION_GEOM(st->reg));
+        tmpg=REGION_GEOM(st->reg);
+        tmpg.x-=REGION_GEOM(ws).x;
+        tmpg.y-=REGION_GEOM(ws).y;
+        
+        g=extl_table_from_rectangle(&tmpg);
         extl_table_sets_t(subtab, "geom", g);
         extl_unref_table(g);
         
