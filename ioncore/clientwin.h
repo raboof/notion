@@ -55,8 +55,6 @@ DECLCLASS(WClientWin){
     
     WLListNode *transient_list;
     
-    WClientWin *g_cwin_next, *g_cwin_prev;
-    
     Colormap cmap;
     Colormap *cmaps;
     Window *cmapwins;
