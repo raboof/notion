@@ -6,12 +6,12 @@ Some notable changes in this release include
 
  * Lua 5.1 is now required.
 
- * Framed transients on by default now. New binding context
+ * Framed transients on by default now. New binding contexts
    "WFrame.toplevel" and "WMPlex.toplevel" were added to allow
    for separate sets of bindings for nested transient frames and
    top-level frames. Some of the bindings in the default binding
    maps that are likely to be unwanted on transient frames were
-   moved to this contexts. Old custom bindings will continue to 
+   moved to these contexts. Old custom bindings will continue to 
    work unless they modify the defaults by unbinding some of the
    moved bindings.
 
