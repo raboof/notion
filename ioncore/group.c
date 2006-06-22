@@ -168,7 +168,7 @@ bool group_fitrep(WGroup *ws, WWindow *par, const WFitParams *fp)
         g.x+=xdiff;
         g.y+=ydiff;
         
-        sizepolicy(&st->szplcy, st->reg, &g, 0, &fp2);
+        sizepolicy(&st->szplcy, st->reg, &g, REGION_RQGEOM_WEAK_ALL, &fp2);
 
         if(!region_fitrep(st->reg, par, &fp2)){
             warn(TR("Error reparenting %s."), region_name(st->reg));
@@ -488,8 +488,8 @@ WStacking *group_do_add_managed_default(WGroup *ws, WRegion *reg, int level,
 
     
 WRegion *group_do_attach(WGroup *ws, 
-                           WRegionAttachHandler *fn, void *fnparams, 
-                           const WGroupAttachParams *param)
+                         WRegionAttachHandler *fn, void *fnparams, 
+                         const WGroupAttachParams *param)
 {
     WWindow *par;
     WRegion *reg;
@@ -508,12 +508,16 @@ WRegion *group_do_attach(WGroup *ws,
     par=REGION_PARENT(ws);
     assert(par!=NULL);
     
-    if(param->geom_set)
-        fp.g=param->geom;
-    else
+    if(param->geom_set){
+        fp.g.x=param->geom.x+REGION_GEOM(ws).x;
+        fp.g.y=param->geom.y+REGION_GEOM(ws).y;
+        fp.g.w=maxof(param->geom.w, 1);
+        fp.g.h=maxof(param->geom.h, 1);
+        fp.mode=REGION_FIT_EXACT;
+    }else{
         fp.g=REGION_GEOM(ws);
-    
-    fp.mode=REGION_FIT_WHATEVER;
+        fp.mode=REGION_FIT_WHATEVER;
+    }
     
     reg=fn(par, &fp, fnparams);
     
@@ -524,17 +528,13 @@ WRegion *group_do_attach(WGroup *ws,
             ? param->szplcy
             : SIZEPOLICY_UNCONSTRAINED);
         
-    if(param->geom_set){
-        g.x=param->geom.x+REGION_GEOM(ws).x;
-        g.y=param->geom.y+REGION_GEOM(ws).y;
-        g.w=maxof(param->geom.w, 1);
-        g.h=maxof(param->geom.h, 1);
-    }else{
-        g=REGION_GEOM(ws);
-    }
+    if(szplcy!=SIZEPOLICY_UNCONSTRAINED){
+        fp.g=REGION_GEOM(ws);
 
-    sizepolicy(&szplcy, reg, &g, 0, &fp);
-    region_fitrep(reg, NULL, &fp);
+        sizepolicy(&szplcy, reg, NULL, REGION_RQGEOM_WEAK_ALL, &fp);
+        
+        region_fitrep(reg, NULL, &fp);
+    }
     
     level=(param->level_set ? param->level : 1);
 
@@ -556,8 +556,12 @@ WRegion *group_do_attach(WGroup *ws,
     else
         sw=ioncore_g.switchto_new;
     
-    if(sw && region_may_control_focus((WRegion*)ws))
-        region_set_focus(reg);
+    if(sw){
+        if(region_may_control_focus((WRegion*)ws))
+            region_set_focus(reg);
+        else
+            ws->current_managed=st;
+    }
     
     return reg;
 }

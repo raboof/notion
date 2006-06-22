@@ -23,6 +23,7 @@ DECLCLASS(WMPlexPHolder){
     WLListNode *after;
     WMPlexPHolder *next, *prev;
     int szplcy;
+    bool initial;
 };
 
 

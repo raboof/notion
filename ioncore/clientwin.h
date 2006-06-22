@@ -47,13 +47,9 @@ DECLCLASS(WClientWin){
     int event_mask;
     Window win;
     
-    WFitParams last_fp;
-    
     int orig_bw;
 
     Window transient_for;
-    
-    WLListNode *transient_list;
     
     Colormap cmap;
     Colormap *cmaps;
@@ -65,9 +61,6 @@ DECLCLASS(WClientWin){
     WPHolder *fs_pholder;
     
     ExtlTab proptab;
-
-    WSizePolicy szplcy;           /* size policy (when there is slack) */
-    WSizePolicy transient_szplcy; /* default transient size policy */
 };
 
 
@@ -79,17 +72,6 @@ extern void clientwin_kill(WClientWin *cwin);
 extern bool clientwin_rqclose(WClientWin *cwin, bool relocate_ignored);
 
 extern void clientwin_tfor_changed(WClientWin *cwin);
-
-extern bool clientwin_attach_transient(WClientWin *cwin, WRegion *transient);
-extern WPHolder *clientwin_prepare_manage(WClientWin *cwin, 
-                                          const WClientWin *cwin2,
-                                          const WManageParams *param, 
-                                          int redir);
-
-extern WPHolder *clientwin_prepare_manage_transient(WClientWin *cwin, 
-                                                    const WClientWin *transient,
-                                                    const WManageParams *param,
-                                                    int unused);
 
 extern void clientwin_get_set_name(WClientWin *cwin);
 

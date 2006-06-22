@@ -17,6 +17,7 @@
 #include "mplex.h"
 #include "mplexpholder.h"
 #include "llist.h"
+#include "group-cw.h"
 
 
 static void mplex_watch_handler(Watch *watch, Obj *mplex);
@@ -119,6 +120,7 @@ bool mplexpholder_init(WMPlexPHolder *ph, WMPlex *mplex,
     ph->next=NULL;
     ph->prev=NULL;
     ph->szplcy=SIZEPOLICY_DEFAULT;
+    ph->initial=FALSE;
     
     if(mplex==NULL)
         return TRUE;
@@ -177,13 +179,64 @@ int mplexpholder_layer(WMPlexPHolder *ph)
     }
 }
 
+typedef struct{
+    WRegionAttachHandler *trs_fn;
+    void *trs_fnparams;
+} GroupedParam;
+
+
+WRegion *grouped_handler(WWindow *par, 
+                         const WFitParams *fp, 
+                         void *frp_)
+{
+    GroupedParam *frp=(GroupedParam*)frp_;
+    WGroupAttachParams param=GROUPATTACHPARAMS_INIT;
+    WGroupCW *cwg;
+    WRegion *reg;
+    WStacking *st;
+
+    cwg=create_groupcw(par, fp);
+    
+    if(cwg==NULL)
+        return NULL;
+    
+    param.level_set=1;
+    param.level=0;
+    param.switchto_set=1;
+    param.switchto=1;
+    param.bottom=1;
+    
+    if(!(fp->mode&REGION_FIT_WHATEVER)){
+        param.geom_set=1;
+        param.geom=fp->g;
+        param.szplcy=SIZEPOLICY_FULL_EXACT;
+        param.szplcy_set=TRUE;
+    }
+    
+    reg=group_do_attach(&cwg->grp, frp->trs_fn, frp->trs_fnparams, &param);
+    
+    if(reg==NULL){
+        destroy_obj((Obj*)cwg);
+        return NULL;
+    }
+    
+    st=group_find_stacking(&cwg->grp, reg);
+    
+    if(st!=NULL){
+        st->szplcy=SIZEPOLICY_FULL_EXACT;
+        REGION_GEOM(cwg)=REGION_GEOM(reg);
+    }
+    
+    return (WRegion*)cwg;
+}
+
 
 bool mplexpholder_do_attach(WMPlexPHolder *ph, 
                             WRegionAttachHandler *hnd, void *hnd_param, 
                             int flags)
 {
     WMPlex *mplex=(WMPlex*)ph->mplex_watch.obj;
-    WLListNode *nnode;
+    WLListNode *nnode=NULL;
     WMPlexAttachParams param;
     WMPlexPHolder *ph2, *ph3=NULL;
     int layer;
@@ -203,7 +256,17 @@ bool mplexpholder_do_attach(WMPlexPHolder *ph,
     param.flags|=MPLEX_ATTACH_SIZEPOLICY;
     param.szplcy=ph->szplcy;
     
-    nnode=mplex_do_attach_after(mplex, ph->after, &param, hnd, hnd_param);
+    if(ph->initial){
+        GroupedParam frp;
+        frp.trs_fn=hnd;
+        frp.trs_fnparams=hnd_param;
+        
+        nnode=mplex_do_attach_after(mplex, ph->after, &param, 
+                                    grouped_handler, &frp);
+    }
+    
+    if(nnode==NULL)
+        nnode=mplex_do_attach_after(mplex, ph->after, &param, hnd, hnd_param);
     
     if(nnode==NULL)
         return FALSE;

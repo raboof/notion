@@ -41,6 +41,8 @@ DECLSTRUCT(WGroupAttachParams){
     WSizePolicy szplcy;
 };
 
+#define GROUPATTACHPARAMS_INIT \
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, {0, 0, 0, 0}, 0}
 
 DECLCLASS(WGroup){
     WGenWS genws;

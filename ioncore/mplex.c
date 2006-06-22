@@ -1127,8 +1127,10 @@ WPHolder *mplex_prepare_manage(WMPlex *mplex, const WClientWin *cwin,
     
     mph=create_mplexpholder(mplex, NULL, after, 1);
     
-    if(mph!=NULL)
+    if(mph!=NULL){
         mph->szplcy=SIZEPOLICY_FULL_BOUNDS;
+        mph->initial=TRUE;
+    }
         
     return (WPHolder*)mph;
 }
