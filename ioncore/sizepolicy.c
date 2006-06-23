@@ -241,6 +241,7 @@ void sizepolicy(WSizePolicy *szplcy, WRegion *reg,
             tmp.w=1;
             tmp.h=1;
         }
+        rq_flags&=~(REGION_RQGEOM_WEAK_W|REGION_RQGEOM_WEAK_H);
     }
 
     switch((*szplcy)&SIZEPOLICY_MASK){

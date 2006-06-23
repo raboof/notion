@@ -266,23 +266,63 @@ static void group_unmap(WGroup *ws)
 }
 
 
+WStacking *group_find_to_focus(WGroup *ws, WStacking *to_try)
+{
+    WStacking *stacking=group_get_stacking(ws);
+    WStacking *st=NULL;
+        
+    if(stacking==NULL)
+        return NULL;
+    
+    st=stacking->prev;
+    while(1){
+        if(st->reg!=NULL 
+           && REGION_MANAGER(st->reg)==(WRegion*)ws
+           && !(st->reg->flags&REGION_SKIP_FOCUS)){
+            
+            if(st->level>=STACKING_LEVEL_MODAL1){
+                if(to_try!=NULL && to_try->level==st->level)
+                    return to_try;
+            }else{
+                if(to_try!=NULL)
+                    return to_try;
+            }
+            return st;
+        }
+        
+        if(st==stacking){
+            st=NULL;
+            break;
+        }
+        st=st->prev;
+    }
+    
+    return NULL;
+}
+
+
+static bool group_refocus(WGroup *ws, WStacking *st)
+{
+    WStacking *stf=group_find_to_focus(ws, st);
+
+    if(stf!=ws->current_managed && stf->reg!=NULL){
+        if(region_may_control_focus((WRegion*)ws))
+            region_set_focus(stf->reg);
+        else
+            ws->current_managed=stf;
+        return TRUE;
+    }
+    
+    return FALSE;
+}
+
+
 static void group_do_set_focus(WGroup *ws, bool warp)
 {
     WStacking *st=ws->current_managed;
-    WStacking *stacking=group_get_stacking(ws);
-        
-    if((st==NULL || st->reg==NULL) && stacking!=NULL){
-        st=stacking->prev;
-        while(1){
-            if(REGION_MANAGER(st->reg)==(WRegion*)ws && 
-               st!=ws->managed_stdisp){
-                break;
-            }
-            if(st==stacking)
-                break;
-            st=st->prev;
-        }
-    }
+    
+    if(st==NULL || st->reg==NULL)
+        st=group_find_to_focus(ws, NULL);
 
     if(st!=NULL && st->reg!=NULL)
         region_do_set_focus(st->reg, warp);
@@ -293,13 +333,22 @@ static void group_do_set_focus(WGroup *ws, bool warp)
 
 static bool group_managed_goto(WGroup *ws, WRegion *reg, int flags)
 {
+    WStacking *st;
+    
     if(!region_is_fully_mapped((WRegion*)ws))
        return FALSE;
     
-    region_map(reg);
+    st=group_find_stacking(ws, reg);    
     
-    if(flags&REGION_GOTO_FOCUS)
-        region_maybewarp(reg, !(flags&REGION_GOTO_NOWARP));
+    if(st==NULL)
+        return FALSE;
+    
+    st=group_find_to_focus(ws, st);
+    
+#warning "TODO: raise?"
+    
+    if(st!=ws->current_managed && flags&REGION_GOTO_FOCUS)
+        region_maybewarp(st->reg, !(flags&REGION_GOTO_NOWARP));
     
     return TRUE;
 }
@@ -309,14 +358,14 @@ void group_managed_remove(WGroup *ws, WRegion *reg)
 {
     bool mcf=region_may_control_focus((WRegion*)ws);
     bool ds=OBJ_IS_BEING_DESTROYED(ws);
-    WRegion *next=NULL;
-    WStacking *st;
+    WStacking *st, *next_st=NULL;
     bool cur=FALSE;
     
     st=group_find_stacking(ws, reg);
     
     if(st!=NULL){
-        WStacking *next_st=stacking_unstack(REGION_PARENT(ws), st);
+        next_st=stacking_unstack(REGION_PARENT(ws), st);
+        
         UNLINK_ITEM(ws->managed_list, st, mgr_next, mgr_prev);
         
         if(st==ws->managed_stdisp)
@@ -329,9 +378,6 @@ void group_managed_remove(WGroup *ws, WRegion *reg)
             cur=TRUE;
             ws->current_managed=NULL;
         }
-        
-        if(next_st!=NULL)
-            next=next_st->reg;
     }
     
     region_unset_manager(reg, (WRegion*)ws);
@@ -339,8 +385,8 @@ void group_managed_remove(WGroup *ws, WRegion *reg)
     region_remove_bindmap_owned(reg, ioncore_group_bindmap,
                                 (WRegion*)ws);
     
-    if(cur && mcf && !ds)
-        region_do_set_focus(next!=NULL ? next : (WRegion*)ws, FALSE);
+    if(cur && !ds)
+        group_refocus(ws, next_st);
 }
 
 
@@ -486,7 +532,7 @@ WStacking *group_do_add_managed_default(WGroup *ws, WRegion *reg, int level,
     return st;
 }
 
-    
+
 WRegion *group_do_attach(WGroup *ws, 
                          WRegionAttachHandler *fn, void *fnparams, 
                          const WGroupAttachParams *param)
@@ -536,7 +582,7 @@ WRegion *group_do_attach(WGroup *ws,
         region_fitrep(reg, NULL, &fp);
     }
     
-    level=(param->level_set ? param->level : 1);
+    level=(param->level_set ? param->level : STACKING_LEVEL_NORMAL);
 
     st=group_do_add_managed(ws, reg, level, szplcy);
     
@@ -546,22 +592,14 @@ WRegion *group_do_attach(WGroup *ws,
     }
     
     st->sticky=param->sticky;
-    /* TODO: st->modal=param->modal; */
     
     if(param->bottom)
         ws->bottom=st;
     
-    if(param->switchto_set)
-        sw=param->switchto;
-    else
-        sw=ioncore_g.switchto_new;
+    sw=(param->switchto_set ? param->switchto : ioncore_g.switchto_new);
     
-    if(sw){
-        if(region_may_control_focus((WRegion*)ws))
-            region_set_focus(reg);
-        else
-            ws->current_managed=st;
-    }
+    if(sw || st->level>=STACKING_LEVEL_MODAL1)
+        group_refocus(ws, (sw ? st : NULL));
     
     return reg;
 }
@@ -577,13 +615,12 @@ static void get_params(WGroup *ws, ExtlTab tab, WGroupAttachParams *par)
     par->level_set=0;
     par->szplcy_set=0;
     par->geom_set=0;
-    par->modal=0;
     par->sticky=0;
     par->bottom=0;
     
     if(extl_table_gets_i(tab, "level", &tmp)){
         if(tmp>=0){
-            par->level_set=1;
+            par->level_set=STACKING_LEVEL_NORMAL;
             par->level=tmp;
         }
     }
@@ -597,8 +634,10 @@ static void get_params(WGroup *ws, ExtlTab tab, WGroupAttachParams *par)
     if(extl_table_is_bool_set(tab, "bottom"))
         par->bottom=1;
 
-    if(extl_table_is_bool_set(tab, "modal"))
-        par->modal=1;
+    if(!par->level_set && extl_table_is_bool_set(tab, "modal")){
+        par->level=STACKING_LEVEL_MODAL1;
+        par->level_set=1;
+    }
     
     if(extl_table_gets_i(tab, "sizepolicy", &tmp)){
         par->szplcy_set=1;
@@ -661,7 +700,7 @@ WRegion *group_attach(WGroup *ws, WRegion *reg, ExtlTab param)
  *  \var{name} & Name of the object to be created (a string). Optional. \\
  *  \var{switchto} & Should the region be switched to (boolean)? Optional. \\
  *  \var{level} & Stacking level; default is 1. \\
- *  \var{modal} & Make object modal. \\
+ *  \var{modal} & Make object modal; ignored if level is set. \\
  *  \var{sizepolicy} & Size policy. \\
  * \end{tabularx}
  * 
@@ -716,7 +755,7 @@ static int stdisp_szplcy(const WMPlexSTDispInfo *di, WRegion *stdisp)
 
 
 void group_manage_stdisp(WGroup *ws, WRegion *stdisp, 
-                           const WMPlexSTDispInfo *di)
+                         const WMPlexSTDispInfo *di)
 {
     WFitParams fp;
     uint szplcy=stdisp_szplcy(di, stdisp)|SIZEPOLICY_SHRUNK;
@@ -727,13 +766,14 @@ void group_manage_stdisp(WGroup *ws, WRegion *stdisp,
         ws->managed_stdisp->szplcy=szplcy;
     }else{
         region_detach_manager(stdisp);
-        ws->managed_stdisp=group_do_add_managed(ws, stdisp, 2, szplcy);
+        ws->managed_stdisp=group_do_add_managed(ws, stdisp, 
+                                                STACKING_LEVEL_ON_TOP, 
+                                                szplcy);
     }
 
     fp.g=REGION_GEOM(ws);
-    sizepolicy(&ws->managed_stdisp->szplcy, stdisp, 
-               &REGION_GEOM(stdisp), 0, &fp);
-    
+    sizepolicy(&ws->managed_stdisp->szplcy, stdisp, NULL, 0, &fp);
+
     region_fitrep(stdisp, NULL, &fp);
 }
 
@@ -1167,8 +1207,8 @@ static DynFunTab group_dynfuntab[]={
     {(DynFun*)region_rescue_clientwins,
      (DynFun*)group_rescue_clientwins},
     
-    /*{genws_manage_stdisp,
-     group_manage_stdisp},*/
+    {genws_manage_stdisp,
+     group_manage_stdisp},
     
     {region_restack,
      group_restack},

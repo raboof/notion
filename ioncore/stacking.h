@@ -17,6 +17,12 @@
 #include "sizepolicy.h"
 
 
+#define STACKING_LEVEL_BOTTOM 0
+#define STACKING_LEVEL_NORMAL 1
+#define STACKING_LEVEL_ON_TOP 2
+#define STACKING_LEVEL_MODAL1 1024
+
+
 DECLSTRUCT(WStacking){
     WRegion *reg;
     WStacking *next, *prev;

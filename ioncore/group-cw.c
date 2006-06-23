@@ -103,7 +103,7 @@ static WRegion *groupcw_do_attach_transient(WGroupCW *cwg,
     WStacking *st;
     
     param.level_set=1;
-    param.level=1;
+    param.level=STACKING_LEVEL_MODAL1;
     
     param.szplcy_set=1;
     param.szplcy=cwg->transient_szplcy;
@@ -111,8 +111,6 @@ static WRegion *groupcw_do_attach_transient(WGroupCW *cwg,
     param.switchto_set=1;
     param.switchto=1;
     
-    param.modal=1;
-
     if(ioncore_g.framed_transients){
         FramedParam frp;
         frp.trs_fn=fn;

@@ -35,6 +35,7 @@ DECLSTRUCT(WGroupAttachParams){
     uint modal:1;
     uint sticky:1;
     uint bottom:1;
+    uint passive:1;
     
     uint level;
     WRectangle geom;
@@ -42,7 +43,7 @@ DECLSTRUCT(WGroupAttachParams){
 };
 
 #define GROUPATTACHPARAMS_INIT \
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, {0, 0, 0, 0}, 0}
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {0, 0, 0, 0}, 0}
 
 DECLCLASS(WGroup){
     WGenWS genws;
@@ -88,6 +89,7 @@ extern void group_raise(WGroup *ws, WRegion *reg);
 extern void group_lower(WGroup *ws, WRegion *reg);
 
 extern WStacking *group_find_stacking(WGroup *ws, WRegion *r);
+extern WStacking *group_find_to_focus(WGroup *ws, WStacking *to_try);
 
 typedef WStackingFilter WGroupIterFilter;
 typedef WStackingIterTmp WGroupIterTmp;

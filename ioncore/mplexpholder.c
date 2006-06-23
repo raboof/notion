@@ -201,7 +201,7 @@ WRegion *grouped_handler(WWindow *par,
         return NULL;
     
     param.level_set=1;
-    param.level=0;
+    param.level=STACKING_LEVEL_BOTTOM;
     param.switchto_set=1;
     param.switchto=1;
     param.bottom=1;
