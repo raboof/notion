@@ -10,6 +10,7 @@
  */
 
 #include <libtu/objp.h>
+#include <libmainloop/defer.h>
 #include "common.h"
 #include "group-cw.h"
 #include "clientwin.h"
@@ -199,8 +200,27 @@ WPHolder *groupcw_prepare_manage_transient(WGroupCW *cwg,
 }
 
 
+static void destroy_empty(WGroupCW *cwg)
+{
+    if(cwg->grp.managed_list==NULL)
+        destroy_obj((Obj*)cwg);
+}
+
+
+void groupcw_managed_remove(WGroupCW *cwg, WRegion *reg)
+{
+    group_managed_remove(&cwg->grp, reg);
+    
+    if(cwg->grp.managed_list==NULL)
+        mainloop_defer_action((Obj*)cwg, 
+                              (WDeferredAction*)destroy_empty);
+}
+
+
 /*}}}*/
 
+
+/*{{{ Misc. */
 
 
 /*_EXTL_DOC
@@ -236,6 +256,9 @@ void groupcw_toggle_transients_pos(WGroupCW *cwg)
         }
     }
 }
+
+
+/*}}}*/
 
 
 /*{{{ WGroupCW class */
@@ -308,10 +331,12 @@ static DynFunTab groupcw_dynfuntab[]={
     
     {(DynFun*)group_do_add_managed,
      (DynFun*)groupcw_do_add_managed},
+    */
     
     {region_managed_remove,
      groupcw_managed_remove},
     
+    /*
     {(DynFun*)region_get_rescue_pholder_for,
      (DynFun*)groupcw_get_rescue_pholder_for},
      */
