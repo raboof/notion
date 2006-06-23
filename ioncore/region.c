@@ -766,6 +766,9 @@ static DynFunTab region_dynfuntab[]={
     {(DynFun*)region_rqclose,
      (DynFun*)region_rqclose_default},
     
+    {(DynFun*)region_displayname,
+     (DynFun*)region_name},
+    
     {region_stacking, 
      region_stacking_default},
     

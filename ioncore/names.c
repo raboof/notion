@@ -390,15 +390,6 @@ const char *region_name(WRegion *reg)
 }
 
 
-char *region_make_label(WRegion *reg, int maxw, GrBrush *brush)
-{
-    if(reg->ni.name==NULL)
-        return NULL;
-    
-    return grbrush_make_label(brush, reg->ni.name, maxw);
-}
-
-
 static bool do_set_name(bool (*fn)(WRegion *reg, WNamespace *ns, const char *p),
                         WRegion *reg, WNamespace *ns, const char *p)
 {
@@ -597,3 +588,27 @@ ExtlTab ioncore_clientwin_list()
 
 /*}}}*/
 
+
+/*{{{ Displayname */
+
+
+const char *region_displayname(WRegion *reg)
+{
+    const char *ret=NULL;
+    CALL_DYN_RET(ret, const char *, region_displayname, reg, (reg));
+    return ret;
+}
+
+
+char *region_make_label(WRegion *reg, int maxw, GrBrush *brush)
+{
+    const char *name=region_displayname(reg);
+
+    if(name==NULL)
+        return NULL;
+    
+    return grbrush_make_label(brush, name, maxw);
+}
+
+
+/*}}}*/

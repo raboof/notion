@@ -39,6 +39,7 @@ extern void region_unregister(WRegion *reg);
 extern void region_do_unuse_name(WRegion *reg, bool insert_unnamed);
 
 extern const char *region_name(WRegion *reg);
+DYNFUN const char *region_displayname(WRegion *reg);
 
 extern char *region_make_label(WRegion *reg, int maxw, GrBrush *brush);
 

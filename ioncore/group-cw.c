@@ -19,6 +19,7 @@
 #include "frame.h"
 #include "resize.h"
 #include "pholder.h"
+#include "names.h"
 #include "basicpholder.h"
 
 
@@ -258,6 +259,20 @@ void groupcw_toggle_transients_pos(WGroupCW *cwg)
 }
 
 
+const char *groupcw_displayname(WGroupCW *cwg)
+{
+    const char *name=NULL;
+    
+    if(cwg->grp.bottom!=NULL && cwg->grp.bottom->reg!=NULL)
+        name=region_name(cwg->grp.bottom->reg);
+    
+    if(name==NULL)
+        name=region_name((WRegion*)cwg);
+    
+    return name;
+}
+
+
 /*}}}*/
 
 
@@ -346,6 +361,9 @@ static DynFunTab groupcw_dynfuntab[]={
 
     {(DynFun*)region_prepare_manage_transient,
      (DynFun*)groupcw_prepare_manage_transient},
+    
+    {(DynFun*)region_displayname,
+     (DynFun*)groupcw_displayname},
     
     END_DYNFUNTAB
 };
