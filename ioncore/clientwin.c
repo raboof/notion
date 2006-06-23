@@ -39,7 +39,6 @@
 #include "activity.h"
 #include "netwm.h"
 #include "xwindow.h"
-#include "basicpholder.h"
 #include "bindmaps.h"
 
 

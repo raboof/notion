@@ -852,14 +852,17 @@ WRegion *group_backcirculate(WGroup *ws)
 void group_stacking(WGroup *ws, Window *bottomret, Window *topret)
 {
     WStacking *stacking=group_get_stacking(ws);
+    Window win;
 
     if(stacking!=NULL)
         stacking_stacking(stacking, bottomret, topret, wsfilt, ws);
     
+    win=region_xwindow((WRegion*)ws);
+    
     if(*bottomret==None)
-        *bottomret=ws->genws.dummywin;
+        *bottomret=win;
     if(*topret==None)
-        *topret=ws->genws.dummywin;
+        *topret=win;
 }
 
 
@@ -892,6 +895,7 @@ void group_restack(WGroup *ws, Window other, int mode)
     WStacking *other_on_list=NULL;
     WWindow *par=REGION_PARENT(ws);
     WStacking **stackingp=group_get_stackingp(ws);
+    Window win;
 
     if(stackingp==NULL)
        return;
@@ -929,9 +933,12 @@ void group_restack(WGroup *ws, Window other, int mode)
         XFree(children);
     }
     
-    xwindow_restack(ws->genws.dummywin, other, mode);
-    other=ws->genws.dummywin;
-    mode=Above;
+    win=region_xwindow((WRegion*)ws);
+    if(win!=None){
+        xwindow_restack(win, other, mode);
+        other=win;
+        mode=Above;
+    }
     
     if(*stackingp==NULL)
         return;
@@ -952,7 +959,8 @@ static void group_do_raise(WGroup *ws, WRegion *reg, bool initial)
         return;
     }
     
-    stacking_do_raise(stackingp, reg, initial, ws->genws.dummywin,
+    stacking_do_raise(stackingp, reg, initial, 
+                      region_xwindow((WRegion*)ws),
                       same_stacking_filt, ws);
 }
                       
@@ -987,7 +995,8 @@ void group_lower(WGroup *ws, WRegion *reg)
         return;
     }
     
-    stacking_do_lower(stackingp, reg, ws->genws.dummywin,
+    stacking_do_lower(stackingp, reg, 
+                      region_xwindow((WRegion*)ws),
                       same_stacking_filt, ws);
 }
 
@@ -1158,8 +1167,8 @@ static DynFunTab group_dynfuntab[]={
     {(DynFun*)region_rescue_clientwins,
      (DynFun*)group_rescue_clientwins},
     
-    {genws_manage_stdisp,
-     group_manage_stdisp},
+    /*{genws_manage_stdisp,
+     group_manage_stdisp},*/
     
     {region_restack,
      group_restack},

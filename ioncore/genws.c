@@ -146,8 +146,8 @@ void genws_unmanage_stdisp(WGenWS *ws, bool permanent, bool nofocus)
 static DynFunTab genws_dynfuntab[]={
     {(DynFun*)region_xwindow,
      (DynFun*)genws_xwindow},
-    {(DynFun*)region_rqclose_propagate,
-     (DynFun*)genws_rqclose_propagate},
+    /*{(DynFun*)region_rqclose_propagate,
+     (DynFun*)genws_rqclose_propagate},*/
     {(DynFun*)region_prepare_manage_transient,
      (DynFun*)genws_prepare_manage_transient},
     END_DYNFUNTAB
