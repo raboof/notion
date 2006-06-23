@@ -1,4 +1,12 @@
 
+ion-3ds-2006????
+----------------
+
+Note that if you restart from old version to this new version of Ion, 
+transients will stop working as expected for already existing windows.
+They will work for newly-created windows, however.
+
+
 ion-3ds-20060519
 ----------------
 
