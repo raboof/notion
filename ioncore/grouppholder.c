@@ -108,7 +108,6 @@ bool grouppholder_do_attach(WGroupPHolder *ph,
     param.switchto=(flags&PHOLDER_ATTACH_SWITCHTO ? 1 : 0);
     
     /* Should these be remembered? */
-    param.sticky=0;
     param.bottom=0;
     
     reg=group_do_attach(ws, hnd, hnd_param, &param);

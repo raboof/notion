@@ -180,64 +180,6 @@ bool group_fitrep(WGroup *ws, WWindow *par, const WFitParams *fp)
 }
 
 
-static WGroup *sticky_source(WGroup *ws, WRegion *reg)
-{
-    WMPlex *mplex=REGION_MANAGER_CHK(ws, WMPlex);
-    WGroup *ws2;
-    
-    if(mplex==NULL || mplex_layer(mplex, (WRegion*)ws)!=1)
-        return NULL;
-    
-    ws2=REGION_MANAGER_CHK(reg, WGroup);
-    
-    if(ws2==NULL || REGION_MANAGER(ws2)!=(WRegion*)mplex)
-        return NULL;
-    
-    if(mplex_layer(mplex, (WRegion*)ws2)!=1)
-        return NULL;
-    
-    return ws2;
-}
-
-
-static bool same_stacking_filt(WStacking *st, void *ws)
-{
-    WRegion *reg=st->reg;
-    
-    return (reg!=NULL && (REGION_MANAGER(reg)==(WRegion*)ws ||
-                          (sticky_source((WGroup*)ws, reg)!=NULL)));
-}
-
-
-static void move_sticky(WGroup *ws)
-{
-    WStacking *st;
-    WGroup *ws2;
-    WStacking *stacking=group_get_stacking(ws);
-
-    if(stacking==NULL)
-        return;
-    
-    for(st=stacking; st!=NULL; st=st->next){
-        if(!st->sticky || REGION_MANAGER(st->reg)==(WRegion*)ws)
-            continue;
-        
-        ws2=sticky_source(ws, st->reg);
-        
-        if(ws2==NULL)
-            continue;
-
-        if(ws2->current_managed==st){
-            ws2->current_managed=NULL;
-            ws->current_managed=st;
-        }
-        
-        region_unset_manager(st->reg, (WRegion*)ws2);
-        region_set_manager(st->reg, (WRegion*)ws);
-    }
-}
-
-
 static void group_map(WGroup *ws)
 {
     WRegion *reg;
@@ -245,8 +187,6 @@ static void group_map(WGroup *ws)
 
     genws_do_map(&(ws->genws));
     
-    move_sticky(ws);
-
     FOR_ALL_MANAGED_BY_GROUP(ws, reg, tmp){
         region_map(reg);
     }
@@ -512,7 +452,6 @@ WStacking *group_do_add_managed_default(WGroup *ws, WRegion *reg, int level,
     
     st->reg=reg;
     st->above=NULL;
-    st->sticky=FALSE;
     st->level=level;
     st->szplcy=szplcy;
 
@@ -591,8 +530,6 @@ WRegion *group_do_attach(WGroup *ws,
         return NULL;
     }
     
-    st->sticky=param->sticky;
-    
     if(param->bottom)
         ws->bottom=st;
     
@@ -615,7 +552,6 @@ static void get_params(WGroup *ws, ExtlTab tab, WGroupAttachParams *par)
     par->level_set=0;
     par->szplcy_set=0;
     par->geom_set=0;
-    par->sticky=0;
     par->bottom=0;
     
     if(extl_table_gets_i(tab, "level", &tmp)){
@@ -627,9 +563,6 @@ static void get_params(WGroup *ws, ExtlTab tab, WGroupAttachParams *par)
     
     if(extl_table_is_bool_set(tab, "switchto"))
         par->switchto=1;
-    
-    if(extl_table_is_bool_set(tab, "sticky"))
-        par->sticky=1;
     
     if(extl_table_is_bool_set(tab, "bottom"))
         par->bottom=1;
@@ -722,7 +655,7 @@ WRegion *group_attach_new(WGroup *ws, ExtlTab param)
 /*}}}*/
 
 
-/*{{{ Sticky status display support */
+/*{{{ Status display support */
 
 
 static int stdisp_szplcy(const WMPlexSTDispInfo *di, WRegion *stdisp)
@@ -1001,7 +934,7 @@ static void group_do_raise(WGroup *ws, WRegion *reg, bool initial)
     
     stacking_do_raise(stackingp, reg, initial, 
                       region_xwindow((WRegion*)ws),
-                      same_stacking_filt, ws);
+                      NULL, ws);
 }
                       
 
@@ -1037,7 +970,7 @@ void group_lower(WGroup *ws, WRegion *reg)
     
     stacking_do_lower(stackingp, reg, 
                       region_xwindow((WRegion*)ws),
-                      same_stacking_filt, ws);
+                      NULL, ws);
 }
 
 
@@ -1122,9 +1055,6 @@ static ExtlTab group_get_configuration(WGroup *ws)
         g=extl_table_from_rectangle(&tmpg);
         extl_table_sets_t(subtab, "geom", g);
         extl_unref_table(g);
-        
-        if(st->sticky)
-            extl_table_sets_b(subtab, "sticky", TRUE);
         
         if(ws->bottom==st)
             extl_table_sets_b(subtab, "bottom", TRUE);

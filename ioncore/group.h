@@ -33,7 +33,6 @@ DECLSTRUCT(WGroupAttachParams){
     uint switchto:1;
     
     uint modal:1;
-    uint sticky:1;
     uint bottom:1;
     uint passive:1;
     
@@ -43,7 +42,7 @@ DECLSTRUCT(WGroupAttachParams){
 };
 
 #define GROUPATTACHPARAMS_INIT \
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {0, 0, 0, 0}, 0}
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, {0, 0, 0, 0}, 0}
 
 DECLCLASS(WGroup){
     WGenWS genws;

@@ -31,7 +31,6 @@ DECLSTRUCT(WStacking){
     WSizePolicy szplcy;
     WStacking *mgr_next, *mgr_prev;
     /* flags */
-    uint sticky:1;
     uint to_unweave:2;
 };
 

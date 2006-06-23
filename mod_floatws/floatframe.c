@@ -361,17 +361,7 @@ static void floatframe_size_changed(WFloatFrame *frame, bool wchg, bool hchg)
 
 bool floatframe_set_sticky(WFloatFrame *frame, int sp)
 {
-    WStacking *st;
-    WFloatWS *ws=OBJ_CAST(REGION_MANAGER(frame), WFloatWS);
-    
-    if(ws!=NULL){
-        st=group_find_stacking(&ws->grp, (WRegion*)frame);
-        if(st!=NULL){
-            st->sticky=libtu_do_setparam(sp, st->sticky);
-            return st->sticky;
-        }
-    }
-    
+    warn(TR("Temporarily unimplemented"));
     return FALSE;
 }
 
@@ -380,6 +370,7 @@ bool floatframe_set_sticky(WFloatFrame *frame, int sp)
  * Set \var{frame} stickyness accoding to \var{how} (set/unset/toggle).
  * The resulting state is returned. This function only works across frames
  * on  \type{WFloatWS} that have the same \type{WMPlex} parent.
+ * (Temporarily unimplemented)
  */
 EXTL_EXPORT_AS(WFloatFrame, set_sticky)
 bool floatframe_set_sticky_extl(WFloatFrame *frame, const char *how)
@@ -389,20 +380,13 @@ bool floatframe_set_sticky_extl(WFloatFrame *frame, const char *how)
 
 
 /*EXTL_DOC
- * Is \var{frame} sticky?
+ * Is \var{frame} sticky? (Temporarily unimplemented)
  */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
 bool floatframe_is_sticky(WFloatFrame *frame)
 {
-    WStacking *st;
-    WFloatWS *ws=OBJ_CAST(REGION_MANAGER(frame), WFloatWS);
-    
-    if(ws!=NULL){
-        st=group_find_stacking(&ws->grp, (WRegion*)frame);
-        return (st!=NULL ? st->sticky : FALSE);
-    }
-    
+    warn(TR("Temporarily unimplemented"));
     return FALSE;
 }
 
