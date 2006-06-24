@@ -46,6 +46,10 @@
     (REGION_IS_MAPPED(MPLEX) && !MPLEX_MGD_UNVIEWABLE(MPLEX))
 
 
+#define MANAGES_STDISP(REG) \
+    (OBJ_IS(REG, WGenWS) && HAS_DYN(REG, genws_manage_stdisp))
+
+
 /*{{{ Destroy/create mplex */
 
 
@@ -559,11 +563,11 @@ static bool mplex_do_node_display(WMPlex *mplex, WLListNode *node,
             return mplex_l2_try_make_passive(mplex, nohide);
         
         /* Move stdisp */
-        if(OBJ_IS(sub, WGenWS)){
+        if(MANAGES_STDISP(sub)){
             if(stdisp!=NULL){
                 WRegion *mgr=REGION_MANAGER(stdisp);
                 if(mgr!=sub){
-                    if(OBJ_IS(mgr, WGenWS)){
+                    if(MANAGES_STDISP(mgr)){
                         genws_unmanage_stdisp((WGenWS*)mgr, FALSE, FALSE);
                         region_detach_manager(stdisp);
                     }
@@ -1149,7 +1153,7 @@ void mplex_managed_remove(WMPlex *mplex, WRegion *sub)
     WRegion *stdisp=(WRegion*)(mplex->stdispwatch.obj);
     WLListNode *node, *next=NULL;
     
-    if(OBJ_IS(sub, WGenWS) && stdisp!=NULL && REGION_MANAGER(stdisp)==sub){
+    if(MANAGES_STDISP(sub) && stdisp!=NULL && REGION_MANAGER(stdisp)==sub){
         genws_unmanage_stdisp((WGenWS*)sub, TRUE, TRUE);
         region_detach_manager(stdisp);
     }
@@ -1279,7 +1283,9 @@ bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg,
             REGION_PARENT(reg)==(WWindow*)mplex));
     
     if(oldstdisp!=NULL){
-        mgr=OBJ_CAST(REGION_MANAGER(oldstdisp), WGenWS);
+        mgr=REGION_MANAGER(oldstdisp);
+        if(!MANAGES_STDISP(mgr))
+            mgr=NULL;
         
         if(oldstdisp!=reg){
             mainloop_defer_destroy((Obj*)oldstdisp);
@@ -1300,7 +1306,7 @@ bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg,
         watch_setup(&(mplex->stdispwatch), (Obj*)reg, stdisp_watch_handler);
         
         if(mplex->l1_current!=NULL
-           && OBJ_IS(mplex->l1_current->reg, WGenWS)
+           && MANAGES_STDISP(mplex->l1_current->reg)
            && mgr!=(WGenWS*)(mplex->l1_current->reg)){
             if(mgr!=NULL){
                 genws_unmanage_stdisp(mgr, FALSE, TRUE);
