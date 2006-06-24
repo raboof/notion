@@ -533,6 +533,8 @@ static bool floatws_init(WFloatWS *ws, WWindow *parent, const WFitParams *fp)
     if(!group_init(&(ws->grp), parent, fp))
         return FALSE;
 
+    ((WRegion*)ws)->flags|=REGION_GRAB_ON_PARENT;
+    
     region_add_bindmap((WRegion*)ws, mod_floatws_floatws_bindmap);
     
     return TRUE;
@@ -549,29 +551,6 @@ void floatws_deinit(WFloatWS *ws)
 {    
     group_deinit(&(ws->grp));
 }
-
-
-static WStacking *floatws_do_add_managed(WFloatWS *ws, WRegion *reg, 
-                                         int level, WSizePolicy szplcy)
-{
-    WStacking *st=group_do_add_managed_default(&ws->grp, reg, level, szplcy);
-    
-    if(st!=NULL && st->reg!=NULL){
-        region_add_bindmap_owned(reg, mod_floatws_floatws_bindmap, 
-                                 (WRegion*)ws);
-    }
-    
-    return st;
-}
-
-
-static void floatws_managed_remove(WFloatWS *ws, WRegion *reg)
-{
-    group_managed_remove(&ws->grp, reg);
-    region_remove_bindmap_owned(reg, mod_floatws_floatws_bindmap,
-                                (WRegion*)ws);
-}
-
 
 
 WRegion *floatws_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
@@ -611,12 +590,6 @@ static DynFunTab floatws_dynfuntab[]={
     
     {(DynFun*)region_handle_drop,
      (DynFun*)floatws_handle_drop},
-    
-    {(DynFun*)group_do_add_managed,
-     (DynFun*)floatws_do_add_managed},
-    
-    {region_managed_remove,
-     floatws_managed_remove},
     
     {(DynFun*)region_get_rescue_pholder_for,
      (DynFun*)floatws_get_rescue_pholder_for},

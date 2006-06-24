@@ -10,11 +10,12 @@
  */
 
 #include <string.h>
+#include <libtu/objp.h>
+#include <libmainloop/defer.h>
 #include "common.h"
 #include "region.h"
 #include "binding.h"
 #include "regbind.h"
-#include <libtu/objp.h>
 
 
 /*{{{ Grab/ungrab */
@@ -97,12 +98,13 @@ void rbind_binding_removed(const WRegBindingInfo *rbind,
 /*{{{ Find */
 
 
-static WRegBindingInfo *find_rbind(WRegion *reg, WBindmap *bindmap)
+static WRegBindingInfo *find_rbind(WRegion *reg, WBindmap *bindmap,
+                                   WRegion *owner)
 {
     WRegBindingInfo *rbind;
     
     for(rbind=(WRegBindingInfo*)reg->bindings; rbind!=NULL; rbind=rbind->next){
-        if(rbind->bindmap==bindmap)
+        if(rbind->bindmap==bindmap && rbind->owner==owner)
             return rbind;
     }
     
@@ -116,30 +118,29 @@ static WRegBindingInfo *find_rbind(WRegion *reg, WBindmap *bindmap)
 /*{{{ Interface */
 
 
-bool region_add_bindmap_owned(WRegion *reg, WBindmap *bindmap, WRegion *owner)
+static WRegBindingInfo *region_do_add_bindmap_owned(WRegion *reg, 
+                                                    WBindmap *bindmap, 
+                                                    WRegion *owner)
 {
     WRegBindingInfo *rbind;
     
-    if(region_xwindow(reg)==None)
-        return FALSE;
-    
     if(bindmap==NULL)
-        return FALSE;
-    
-    if(find_rbind(reg, bindmap)!=NULL)
-        return FALSE;
+        return NULL;
     
     rbind=ALLOC(WRegBindingInfo);
     
     if(rbind==NULL)
-        return FALSE;
+        return NULL;
     
     rbind->bindmap=bindmap;
     rbind->owner=owner;
     rbind->reg=reg;
+    rbind->tmp=0;
+    
     LINK_ITEM(bindmap->rbind_list, rbind, bm_next, bm_prev);
 
-    grab_ungrabbed_bindings(reg, bindmap);
+    if(region_xwindow(reg)!=None && !(reg->flags&REGION_GRAB_ON_PARENT))
+        grab_ungrabbed_bindings(reg, bindmap);
     
     /* Link to reg's rbind list*/ {
         WRegBindingInfo *b=reg->bindings;
@@ -151,7 +152,15 @@ bool region_add_bindmap_owned(WRegion *reg, WBindmap *bindmap, WRegion *owner)
         reg->bindings=b;
     }
     
-    return TRUE;
+    return rbind;
+}
+
+
+bool region_add_bindmap_owned(WRegion *reg, WBindmap *bindmap, WRegion *owner)
+{
+    if(find_rbind(reg, bindmap, owner)!=NULL)
+        return FALSE;
+    return (region_do_add_bindmap_owned(reg, bindmap, owner)!=NULL);
 }
 
 
@@ -170,8 +179,9 @@ static void remove_rbind(WRegion *reg, WRegBindingInfo *rbind)
         UNLINK_ITEM(b, rbind, next, prev);
         reg->bindings=b;
     }
-
-    ungrab_freed_bindings(reg, rbind->bindmap);
+    
+    if(region_xwindow(reg)!=None && !(reg->flags&REGION_GRAB_ON_PARENT))
+        ungrab_freed_bindings(reg, rbind->bindmap);
 
     free(rbind);
 }
@@ -180,7 +190,7 @@ static void remove_rbind(WRegion *reg, WRegBindingInfo *rbind)
 void region_remove_bindmap_owned(WRegion *reg, WBindmap *bindmap,
                                  WRegion *owner)
 {
-    WRegBindingInfo *rbind=find_rbind(reg, bindmap);
+    WRegBindingInfo *rbind=find_rbind(reg, bindmap, owner);
     
     if(rbind!=NULL /*&& rbind->owner==owner*/)
         remove_rbind(reg, rbind);
@@ -250,7 +260,7 @@ WBinding *region_lookup_keybinding(WRegion *reg, const XKeyEvent *ev,
 
 
 WBinding *region_lookup_binding(WRegion *reg, int act, uint state,
-                                     uint kcb, int area)
+                                uint kcb, int area)
 {
     WRegBindingInfo *rbind;
     WBinding *binding=NULL;
@@ -269,3 +279,60 @@ WBinding *region_lookup_binding(WRegion *reg, int act, uint state,
 
 /*}}}*/
 
+
+/*{{{ Update */
+
+
+void region_do_update_owned_grabs(WRegion *reg)
+{
+    WRegBindingInfo *rbind, *rb2;
+    WBinding *binding=NULL;
+    WRegion *r2;
+
+    reg->flags&=~REGION_BINDING_UPDATE_SCHEDULED;
+    
+    /* clear flags */
+    for(rbind=(WRegBindingInfo*)reg->bindings; rbind!=NULL; rbind=rbind->next)
+        rbind->tmp=0;
+    
+    /* make new grabs */
+    r2=reg->active_sub;
+    while(r2!=NULL && REGION_PARENT_REG(r2)==reg){
+        if(r2->flags&REGION_GRAB_ON_PARENT){
+            for(rb2=(WRegBindingInfo*)r2->bindings; rb2!=NULL; rb2=rbind->next){
+                rbind=find_rbind(reg, rb2->bindmap, r2);
+                if(rbind==NULL)
+                    rbind=region_do_add_bindmap_owned(reg, rb2->bindmap, r2);
+                if(rbind!=NULL)
+                    rbind->tmp=1;
+            }
+        }
+        r2=REGION_MANAGER(r2);
+    }
+
+    /* remove old grabs */
+    for(rbind=(WRegBindingInfo*)reg->bindings; rbind!=NULL; rbind=rb2){
+        rb2=rbind->next;
+        if(rbind->tmp!=1 && rbind->owner!=NULL)
+            remove_rbind(reg, rbind);
+    }
+}
+
+void region_update_owned_grabs(WRegion *reg)
+{
+    if(reg->flags&REGION_BINDING_UPDATE_SCHEDULED 
+       || OBJ_IS_BEING_DESTROYED(reg)
+       || ioncore_g.opmode==IONCORE_OPMODE_DEINIT){
+        return;
+    }
+    
+    if(mainloop_defer_action((Obj*)reg, 
+                             (WDeferredAction*)region_do_update_owned_grabs)){
+        reg->flags|=REGION_BINDING_UPDATE_SCHEDULED;
+    }else{
+        region_do_update_owned_grabs(reg);
+    }
+}
+
+
+/*}}}*/

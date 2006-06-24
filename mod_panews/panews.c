@@ -39,7 +39,6 @@
 
 bool panews_managed_add(WPaneWS *ws, WRegion *reg)
 {
-    region_add_bindmap_owned(reg, mod_panews_panews_bindmap, (WRegion*)ws);
     if(OBJ_IS(reg, WFrame))
         region_add_bindmap(reg, mod_panews_frame_bindmap);
     
@@ -106,6 +105,8 @@ bool panews_init(WPaneWS *ws, WWindow *parent, const WFitParams *fp,
                    create_frame_panews, FALSE))
         return FALSE;
     
+    region_add_bindmap((WRegion*)ws, mod_panews_panews_bindmap);
+
     assert(ws->ionws.split_tree==NULL);
     
     if(ilo){
@@ -156,7 +157,6 @@ static WSplitRegion *get_node_check(WPaneWS *ws, WRegion *reg)
 static void panews_do_managed_remove(WPaneWS *ws, WRegion *reg)
 {
     ionws_do_managed_remove(&(ws->ionws), reg);
-    region_remove_bindmap_owned(reg, mod_panews_panews_bindmap, (WRegion*)ws);
     if(OBJ_IS(reg, WFrame))
         region_remove_bindmap(reg, mod_panews_frame_bindmap);
 }

@@ -322,9 +322,6 @@ void group_managed_remove(WGroup *ws, WRegion *reg)
     
     region_unset_manager(reg, (WRegion*)ws);
     
-    region_remove_bindmap_owned(reg, ioncore_group_bindmap,
-                                (WRegion*)ws);
-    
     if(cur && !ds)
         group_refocus(ws, next_st);
 }
@@ -352,6 +349,7 @@ bool group_init(WGroup *ws, WWindow *parent, const WFitParams *fp)
     if(!genws_init(&(ws->genws), parent, fp))
         return FALSE;
 
+    ((WRegion*)ws)->flags|=REGION_GRAB_ON_PARENT;
     region_add_bindmap((WRegion*)ws, ioncore_group_bindmap);
     
     return TRUE;
@@ -459,8 +457,6 @@ WStacking *group_do_add_managed_default(WGroup *ws, WRegion *reg, int level,
     region_set_manager(reg, (WRegion*)ws);
     
     /* TODO: stacking fscked up for new regions. */
-    
-    region_add_bindmap_owned(reg, ioncore_group_bindmap, (WRegion*)ws);
     
     LINK_ITEM_FIRST(*stackingp, st, next, prev);
     group_do_raise(ws, reg, TRUE);

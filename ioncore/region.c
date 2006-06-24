@@ -532,8 +532,10 @@ void region_unset_parent(WRegion *reg)
     UNLINK_ITEM(p->children, reg, p_next, p_prev);
     reg->parent=NULL;
 
-    if(p->active_sub==reg)
+    if(p->active_sub==reg){
         p->active_sub=NULL;
+        region_update_owned_grabs(p);
+    }
     
     region_child_removed(p, reg);
 }

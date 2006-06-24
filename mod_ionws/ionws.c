@@ -459,7 +459,6 @@ bool ionws_managed_add_default(WIonWS *ws, WRegion *reg)
     
     region_set_manager(reg, (WRegion*)ws);
     
-    region_add_bindmap_owned(reg, mod_ionws_ionws_bindmap, (WRegion*)ws);
     if(OBJ_IS(reg, WFrame))
         region_add_bindmap(reg, mod_ionws_frame_bindmap);
     
@@ -527,6 +526,9 @@ bool ionws_init(WIonWS *ws, WWindow *parent, const WFitParams *fp,
 
     if(!genws_init(&(ws->genws), parent, fp))
         return FALSE;
+    
+    ((WRegion*)ws)->flags|=REGION_GRAB_ON_PARENT;
+    region_add_bindmap((WRegion*)ws, mod_ionws_ionws_bindmap);
     
     if(ci){
         if(create_initial_frame(ws, parent, fp)==NULL){
@@ -627,7 +629,6 @@ void ionws_do_managed_remove(WIonWS *ws, WRegion *reg)
         ptrlist_remove(&(ws->managed_list), reg);
     }
     
-    region_remove_bindmap_owned(reg, mod_ionws_ionws_bindmap, (WRegion*)ws);
     if(OBJ_IS(reg, WFrame))
         region_remove_bindmap(reg, mod_ionws_frame_bindmap);
 }

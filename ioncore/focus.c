@@ -18,6 +18,7 @@
 #include "colormap.h"
 #include "activity.h"
 #include "xwindow.h"
+#include "regbind.h"
 
 
 /*{{{ Hooks. */
@@ -184,9 +185,11 @@ void region_got_focus(WRegion *reg)
         reg->flags|=REGION_ACTIVE;
         
         par=REGION_PARENT_REG(reg);
-        if(par!=NULL)
+        if(par!=NULL){
             par->active_sub=reg;
-        
+            region_update_owned_grabs(par);
+        }
+
         region_activated(reg);
         
         mgr=REGION_MANAGER(reg);
@@ -196,8 +199,10 @@ void region_got_focus(WRegion *reg)
              * signal their managers.
              */
             region_managed_activated(mgr, tmp);
+            
             if(REGION_PARENT_REG(reg)==mgr)
                 break;
+            
             tmp=mgr;
             mgr=REGION_MANAGER(mgr);
         }
@@ -229,8 +234,11 @@ void region_lost_focus(WRegion *reg)
     }
     
     par=REGION_PARENT_REG(reg);
-    if(par!=NULL && par->active_sub==reg)
+    if(par!=NULL && par->active_sub==reg){
         par->active_sub=NULL;
+        region_update_owned_grabs(par);
+    }
+
 
 #if 0    
     if(ioncore_g.focus_current==reg){

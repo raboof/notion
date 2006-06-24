@@ -55,6 +55,7 @@ DECLSTRUCT(WRegBindingInfo){
     WRegBindingInfo *bm_next, *bm_prev;
     WRegion *reg;
     WRegion *owner;
+    int tmp;
 };
 
 

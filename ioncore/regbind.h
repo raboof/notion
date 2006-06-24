@@ -39,5 +39,8 @@ extern void rbind_binding_removed(const WRegBindingInfo *rbind,
                                   const WBinding *binding,
                                   const WBindmap *bindmap);
 
+extern void region_update_owned_grabs(WRegion *reg);
+extern void region_do_update_owned_grabs(WRegion *reg);
+
 #endif /* ION_IONCORE_REGBIND_H */
 
