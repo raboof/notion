@@ -820,17 +820,17 @@ WRegion *group_backcirculate(WGroup *ws)
 
 void group_stacking(WGroup *ws, Window *bottomret, Window *topret)
 {
-    WStacking *stacking=group_get_stacking(ws);
     Window win;
+    /*WStacking *stacking=group_get_stacking(ws);
 
     if(stacking!=NULL)
         stacking_stacking(stacking, bottomret, topret, wsfilt, ws);
-    
+    */
     win=region_xwindow((WRegion*)ws);
     
-    if(*bottomret==None)
+    /*if(*bottomret==None)*/
         *bottomret=win;
-    if(*topret==None)
+    /*if(*topret==None)*/
         *topret=win;
 }
 
@@ -861,10 +861,11 @@ static WStacking *find_stacking_if_not_on_ws(WGroup *ws, Window w)
 
 void group_restack(WGroup *ws, Window other, int mode)
 {
+    Window win;
+#if 0
     WStacking *other_on_list=NULL;
     WWindow *par=REGION_PARENT(ws);
     WStacking **stackingp=group_get_stackingp(ws);
-    Window win;
 
     if(stackingp==NULL)
        return;
@@ -901,6 +902,7 @@ void group_restack(WGroup *ws, Window other, int mode)
         }
         XFree(children);
     }
+#endif
     
     win=region_xwindow((WRegion*)ws);
     if(win!=None){
@@ -908,11 +910,12 @@ void group_restack(WGroup *ws, Window other, int mode)
         other=win;
         mode=Above;
     }
-    
+#if 0    
     if(*stackingp==NULL)
         return;
     
     stacking_restack(stackingp, other, mode, other_on_list, wsfilt, ws);
+#endif    
 }
 
 
