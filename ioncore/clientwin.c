@@ -29,6 +29,7 @@
 #include "resize.h"
 #include "attach.h"
 #include "regbind.h"
+#include "bindmaps.h"
 #include "names.h"
 #include "saveload.h"
 #include "manage.h"
@@ -343,6 +344,9 @@ static bool clientwin_init(WClientWin *cwin, WWindow *par, Window win,
 
     region_init(&(cwin->region), par, &fp);
 
+    cwin->region.flags|=REGION_GRAB_ON_PARENT;
+    region_add_bindmap(&cwin->region, ioncore_clientwin_bindmap);
+        
     XSelectInput(ioncore_g.dpy, win, cwin->event_mask);
 
     clientwin_register(cwin);

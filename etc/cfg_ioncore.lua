@@ -72,44 +72,44 @@ defbindings("WScreen", {
 })
 
 
+-- WClientWin context bindings
+--
+-- These bindings affect client windows directly.
+
+defbindings("WClientWin", {
+    bdoc("Nudge current client window. This might help with some "..
+         "programs' resizing problems."),
+    kpress_wait(META.."L", "WClientWin.nudge(_)"),
+    
+    bdoc("Toggle client window full-screen mode"),
+    kpress_wait(META.."Return", "WClientWin.set_fullscreen(_, 'toggle')"),
+    
+    submap(META.."K", {
+       bdoc("Kill client owning current client window."),
+       kpress("C", "WClientWin.kill(_)"),
+       
+       bdoc("Send next key press to current client window. "..
+            "Some programs may not allow this by default."),
+       kpress("Q", "WClientWin.quote_next(_)"),
+    }),
+})
+
+
 -- WMPlex context bindings
 --
 -- These bindings work in frames and on screens. The innermost of such
 -- contexts/objects always gets to handle the key press. Most of these 
 -- bindings define actions on client windows. (Remember that client windows 
 -- can be put in fullscreen mode and therefore may not have a frame.)
--- 
--- The "_sub:WClientWin" guards are used to ensure that _sub is a client
--- window in order to stop Ion from executing the callback with an invalid
--- parameter if it is not and then complaining.
 
 defbindings("WMPlex", {
     bdoc("Close current object."),
     kpress_wait(META.."C", "WRegion.rqclose_propagate(_, _sub)"),
-    
-    bdoc("Nudge current client window. This might help with some "..
-         "programs' resizing problems."),
-    kpress_wait(META.."L", 
-                "WClientWin.nudge(_sub)", "_sub:WClientWin"),
-
-    submap(META.."K", {
-       bdoc("Kill client owning current client window."),
-       kpress("C", "WClientWin.kill(_sub)", "_sub:WClientWin"),
-                                
-       bdoc("Send next key press to current client window. "..
-            "Some programs may not allow this by default."),
-       kpress("Q", "WClientWin.quote_next(_sub)", "_sub:WClientWin"),
-    }),
 })
 
 -- Frames for transient windows ignore this bindmap
 
 defbindings("WMPlex.toplevel", {
-    bdoc("Toggle client window full-screen mode"),
-    kpress_wait(META.."Return", 
-                "WClientWin.set_fullscreen(_sub, 'toggle')", 
-                "_sub:WClientWin"),
-
     bdoc("Query for manual page to be displayed."),
     kpress(ALTMETA.."F1", "mod_query.query_man(_, ':man')"),
 

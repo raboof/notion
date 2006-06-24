@@ -30,6 +30,7 @@ WBindmap *ioncore_frame_bindmap=NULL;
 WBindmap *ioncore_frame_toplevel_bindmap=NULL;
 WBindmap *ioncore_moveres_bindmap=NULL;
 WBindmap *ioncore_group_bindmap=NULL;
+WBindmap *ioncore_clientwin_bindmap=NULL;
 
 static Rb_node known_bindmaps=NULL;
 
@@ -57,6 +58,7 @@ void ioncore_deinit_bindmaps()
     DO_FREE(frame_toplevel, "WFrame.toplevel");
     DO_FREE(moveres, "WMoveresMode");
     DO_FREE(group, "WGroup");
+    DO_FREE(clientwin, "WClientWin");
     rb_free_tree(known_bindmaps);
     known_bindmaps=NULL;
 }
@@ -81,6 +83,7 @@ bool ioncore_init_bindmaps()
     DO_ALLOC(frame_toplevel, "WFrame.toplevel", frame_areas);
     DO_ALLOC(moveres, "WMoveresMode", NULL);
     DO_ALLOC(group, "WGroup", NULL);
+    DO_ALLOC(clientwin, "WClientWin", NULL);
     
     return TRUE;
 }
