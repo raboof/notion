@@ -970,7 +970,7 @@ void group_lower(WGroup *ws, WRegion *reg)
 /*}}}*/
 
 
-/*{{{ Bottom */
+/*{{{ Misc. */
 
 
 /*EXTL_DOC
@@ -981,12 +981,6 @@ WRegion *group_bottom(WGroup *ws)
 {
     return (ws->bottom!=NULL ? ws->bottom->reg : NULL);
 }
-
-
-/*}}}*/
-
-
-/*{{{ Misc. */
 
 
 /*EXTL_DOC
@@ -1006,6 +1000,17 @@ ExtlTab group_managed_list(WGroup *ws)
 WRegion* group_current(WGroup *ws)
 {
     return (ws->current_managed!=NULL ? ws->current_managed->reg : NULL);
+}
+
+
+void group_size_hints(WGroup *ws, XSizeHints *hints_ret)
+{
+    if(ws->bottom==NULL || ws->bottom->reg==NULL){
+        hints_ret->flags=0;
+    }else{
+        region_size_hints(ws->bottom->reg, hints_ret);
+        hints_ret->flags&=PMinSize;
+    }
 }
 
 
@@ -1147,6 +1152,9 @@ static DynFunTab group_dynfuntab[]={
     
     {(DynFun*)group_do_add_managed,
      (DynFun*)group_do_add_managed_default},
+    
+    {region_size_hints,
+     group_size_hints},
     
     END_DYNFUNTAB
 };
