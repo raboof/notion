@@ -77,7 +77,12 @@ extern WRegion *group_do_attach(WGroup *ws,
 extern WRegion *group_attach(WGroup *ws, WRegion *reg, ExtlTab param);
 extern WRegion *group_attach_new(WGroup *ws, ExtlTab param);
 
+extern void group_manage_stdisp(WGroup *ws, WRegion *stdisp, 
+                                const WMPlexSTDispInfo *di);
+
 extern void group_managed_remove(WGroup *ws, WRegion *reg);
+
+extern WRegion *group_bottom(WGroup *ws);
 
 extern bool group_rescue_clientwins(WGroup *ws, WPHolder *ph);
 

@@ -72,7 +72,7 @@ defbindings("WScreen", {
 })
 
 
--- WClientWin context bindings
+-- Client window bindings
 --
 -- These bindings affect client windows directly.
 
@@ -80,9 +80,6 @@ defbindings("WClientWin", {
     bdoc("Nudge current client window. This might help with some "..
          "programs' resizing problems."),
     kpress_wait(META.."L", "WClientWin.nudge(_)"),
-    
-    bdoc("Toggle client window full-screen mode"),
-    kpress_wait(META.."Return", "WClientWin.set_fullscreen(_, 'toggle')"),
     
     submap(META.."K", {
        bdoc("Kill client owning current client window."),
@@ -92,6 +89,15 @@ defbindings("WClientWin", {
             "Some programs may not allow this by default."),
        kpress("Q", "WClientWin.quote_next(_)"),
     }),
+})
+
+
+-- Client window group bindings
+
+defbindings("WGroupCW", {
+    bdoc("Toggle client window group full-screen mode"),
+    kpress_wait(META.."Return",
+                "WClientWin.set_fullscreen(_:bottom(), 'toggle')"),
 })
 
 

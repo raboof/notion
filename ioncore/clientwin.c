@@ -979,7 +979,7 @@ static bool clientwin_fitrep(WClientWin *cwin, WWindow *np,
         region_set_parent((WRegion*)cwin, np);
         sendconfig_clientwin(cwin);
         
-        if(!CLIENTWIN_IS_FULLSCREEN(cwin) && cwin->fs_pholder!=NULL){
+        if(!REGION_IS_FULLSCREEN(cwin) && cwin->fs_pholder!=NULL){
             WPHolder *ph=cwin->fs_pholder;
             cwin->fs_pholder=NULL;
             cwin->flags&=~CLIENTWIN_FS_RQ;

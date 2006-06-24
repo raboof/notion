@@ -17,7 +17,7 @@
 #include "screen.h"
 #include "clientwin.h"
 
-#define CLIENTWIN_IS_FULLSCREEN(cwin) OBJ_IS(REGION_PARENT(cwin), WScreen)
+#define REGION_IS_FULLSCREEN(REG) OBJ_IS(REGION_PARENT(REG), WScreen)
 
 extern bool clientwin_check_fullscreen_request(WClientWin *cwin, 
                                                int w, int h, bool switchto);
