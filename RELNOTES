@@ -2,9 +2,13 @@
 ion-3ds-2006????
 ----------------
 
-Note that if you restart from old version to this new version of Ion, 
-transients will stop working as expected for already existing windows.
-They will work for newly-created windows, however.
+ * Note that if you restart from old version to this new version of Ion, 
+   transients will stop working as expected for already existing windows.
+   They will work for newly-created windows, however.
+
+ * There are a few new sets of binding (including one for `WClientWin`!),
+   and some old bindings may not work exactly as expected anymore. In
+   particular, those for switching to full-screen mode.
 
 
 ion-3ds-20060519
