@@ -208,8 +208,10 @@ static void get_bottom(WStacking *st, Window *other, int *mode)
             if(bottom!=None){
                 *other=bottom;
                 *mode=Below;
+                break;
             }
         }
+        st=st->next;
     }
     
     *other=None;
