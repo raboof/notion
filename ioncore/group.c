@@ -150,10 +150,6 @@ bool group_fitrep(WGroup *ws, WWindow *par, const WFitParams *fp)
         stacking_weave(&par->stacking, &unweaved, FALSE);
     }
 
-    g=fp->g;
-    g.x+=xdiff;
-    g.y+=ydiff;
-    
     FOR_ALL_NODES_IN_GROUP(ws, st, tmp){
         WFitParams fp2;
         
@@ -161,8 +157,6 @@ bool group_fitrep(WGroup *ws, WWindow *par, const WFitParams *fp)
             continue;
         
         fp2=*fp;
-        fp2.g.x+=xdiff;
-        fp2.g.y+=ydiff;
 
         g=REGION_GEOM(st->reg);
         g.x+=xdiff;
