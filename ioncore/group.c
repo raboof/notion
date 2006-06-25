@@ -327,6 +327,8 @@ void group_managed_remove(WGroup *ws, WRegion *reg)
             cur=TRUE;
             ws->current_managed=NULL;
         }
+        
+        free(st);
     }
     
     region_unset_manager(reg, (WRegion*)ws);
@@ -469,12 +471,12 @@ WStacking *group_do_add_managed_default(WGroup *ws, WRegion *reg, int level,
     WStacking **stackingp=group_get_stackingp(ws);
     
     if(stackingp==NULL)
-        return FALSE;
+        return NULL;
     
     st=ALLOC(WStacking);
     
     if(st==NULL)
-        return FALSE;
+        return NULL;
     
     st->reg=reg;
     st->above=NULL;
