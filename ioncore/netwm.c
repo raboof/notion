@@ -116,7 +116,7 @@ void netwm_update_state(WClientWin *cwin)
     CARD32 data[1];
     int n=0;
     
-    if(CLIENTWIN_IS_FULLSCREEN(cwin))
+    if(REGION_IS_FULLSCREEN(cwin))
         data[n++]=atom_net_wm_state_fullscreen;
 
     XChangeProperty(ioncore_g.dpy, cwin->win, atom_net_wm_state, 
@@ -142,7 +142,7 @@ static void netwm_state_change_rq(WClientWin *cwin,
     }
     
     /* Ok, full screen add/remove/toggle */
-    if(!CLIENTWIN_IS_FULLSCREEN(cwin)){
+    if(!REGION_IS_FULLSCREEN(cwin)){
         if(ev->data.l[0]==_NET_WM_STATE_ADD || 
            ev->data.l[0]==_NET_WM_STATE_TOGGLE){
             bool sw=clientwin_fullscreen_may_switchto(cwin);
@@ -155,7 +155,7 @@ static void netwm_state_change_rq(WClientWin *cwin,
            ev->data.l[0]==_NET_WM_STATE_TOGGLE){
             bool sw=clientwin_fullscreen_may_switchto(cwin);
             clientwin_leave_fullscreen(cwin, sw);
-        }else if(CLIENTWIN_IS_FULLSCREEN(cwin)){
+        }else if(REGION_IS_FULLSCREEN(cwin)){
             /* Set the flag */
             cwin->flags|=CLIENTWIN_FS_RQ;
         }
