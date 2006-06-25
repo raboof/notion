@@ -121,25 +121,6 @@ WPHolder *genws_prepare_manage_transient(WGenWS *ws,
 /*}}}*/
 
 
-/*{{{ Dynfuns */
-
-
-void genws_manage_stdisp(WGenWS *ws, WRegion *stdisp, 
-                         const WMPlexSTDispInfo *info)
-{
-    CALL_DYN(genws_manage_stdisp, ws, (ws, stdisp, info));
-}
-
-
-void genws_unmanage_stdisp(WGenWS *ws, bool permanent, bool nofocus)
-{
-    CALL_DYN(genws_unmanage_stdisp, ws, (ws, permanent, nofocus));
-}
-
-
-/*}}}*/
-
-
 /*{{{ Class implementation */
 
 

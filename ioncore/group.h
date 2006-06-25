@@ -45,11 +45,12 @@ DECLSTRUCT(WGroupAttachParams){
     {0, 0, 0, 0, 0, 0, 0, 0, 0, {0, 0, 0, 0}, 0}
 
 DECLCLASS(WGroup){
-    WGenWS genws;
+    WRegion reg;
     WStacking *managed_list;
     WStacking *managed_stdisp;
     WStacking *current_managed;
     WStacking *bottom;
+    Window dummywin;
 };
 
 

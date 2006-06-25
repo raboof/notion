@@ -1660,10 +1660,10 @@ static DynFunTab ionws_dynfuntab[]={
     {(DynFun*)ionws_managed_add,
      (DynFun*)ionws_managed_add_default},
     
-    {genws_manage_stdisp,
+    {region_manage_stdisp,
      ionws_manage_stdisp},
 
-    {genws_unmanage_stdisp,
+    {region_unmanage_stdisp,
      ionws_unmanage_stdisp},
     
     {(DynFun*)ionws_load_node,

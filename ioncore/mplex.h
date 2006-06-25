@@ -207,5 +207,8 @@ extern void mplex_get_stdisp(WMPlex *mplex, WRegion **stdisp,
 extern WRegion *mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t);
 extern ExtlTab mplex_get_stdisp_extl(WMPlex *mplex);
 
+DYNFUN void region_manage_stdisp(WRegion *reg, WRegion *stdisp, 
+                                 const WMPlexSTDispInfo *info);
+DYNFUN void region_unmanage_stdisp(WRegion *reg, bool permanent, bool nofocus);
 
 #endif /* ION_IONCORE_MPLEX_H */

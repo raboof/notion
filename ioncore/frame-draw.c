@@ -368,7 +368,7 @@ bool frame_set_background(WFrame *frame, bool set_always)
             WClientWin *cwin=(WClientWin*)FRAME_CURRENT(frame);
             mode=(cwin->flags&CLIENTWIN_PROP_TRANSPARENT
                   ? GR_TRANSPARENCY_YES : GR_TRANSPARENCY_NO);
-        }else if(!OBJ_IS(FRAME_CURRENT(frame), WGenWS)){
+        }else if(!OBJ_IS(FRAME_CURRENT(frame), WGroup)){
             mode=GR_TRANSPARENCY_NO;
         }
     }

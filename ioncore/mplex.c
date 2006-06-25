@@ -46,8 +46,7 @@
     (REGION_IS_MAPPED(MPLEX) && !MPLEX_MGD_UNVIEWABLE(MPLEX))
 
 
-#define MANAGES_STDISP(REG) \
-    (OBJ_IS(REG, WGenWS) && HAS_DYN(REG, genws_manage_stdisp))
+#define MANAGES_STDISP(REG) HAS_DYN(REG, region_manage_stdisp)
 
 
 /*{{{ Destroy/create mplex */
@@ -568,15 +567,15 @@ static bool mplex_do_node_display(WMPlex *mplex, WLListNode *node,
                 WRegion *mgr=REGION_MANAGER(stdisp);
                 if(mgr!=sub){
                     if(MANAGES_STDISP(mgr)){
-                        genws_unmanage_stdisp((WGenWS*)mgr, FALSE, FALSE);
+                        region_unmanage_stdisp(mgr, FALSE, FALSE);
                         region_detach_manager(stdisp);
                     }
                     
-                    genws_manage_stdisp((WGenWS*)sub, stdisp, 
-                                        &(mplex->stdispinfo));
+                    region_manage_stdisp(sub, stdisp, 
+                                         &(mplex->stdispinfo));
                 }
             }else{
-                genws_unmanage_stdisp((WGenWS*)sub, TRUE, FALSE);
+                region_unmanage_stdisp(sub, TRUE, FALSE);
             }
         }else if(stdisp!=NULL){
             region_unmap(stdisp);
@@ -1157,7 +1156,7 @@ void mplex_managed_remove(WMPlex *mplex, WRegion *sub)
     WLListNode *node, *next=NULL;
     
     if(MANAGES_STDISP(sub) && stdisp!=NULL && REGION_MANAGER(stdisp)==sub){
-        genws_unmanage_stdisp((WGenWS*)sub, TRUE, TRUE);
+        region_unmanage_stdisp(sub, TRUE, TRUE);
         region_detach_manager(stdisp);
     }
     
@@ -1279,7 +1278,7 @@ bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg,
                       const WMPlexSTDispInfo *din)
 {
     WRegion *oldstdisp=(WRegion*)(mplex->stdispwatch.obj);
-    WGenWS *mgr=NULL;
+    WRegion *mgr=NULL;
     
     assert(reg==NULL || (reg==oldstdisp) ||
            (REGION_MANAGER(reg)==NULL && 
@@ -1301,7 +1300,7 @@ bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg,
     
     if(reg==NULL){
         if(mgr!=NULL){
-            genws_unmanage_stdisp((WGenWS*)mgr, TRUE, FALSE);
+            region_unmanage_stdisp(mgr, TRUE, FALSE);
             if(oldstdisp!=NULL)
                 region_detach_manager(oldstdisp);
         }
@@ -1310,15 +1309,15 @@ bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg,
         
         if(mplex->l1_current!=NULL
            && MANAGES_STDISP(mplex->l1_current->reg)
-           && mgr!=(WGenWS*)(mplex->l1_current->reg)){
+           && mgr!=mplex->l1_current->reg){
             if(mgr!=NULL){
-                genws_unmanage_stdisp(mgr, FALSE, TRUE);
+                region_unmanage_stdisp(mgr, FALSE, TRUE);
                 region_detach_manager(oldstdisp);
             }
-            mgr=(WGenWS*)(mplex->l1_current->reg);
+            mgr=mplex->l1_current->reg;
         }
         if(mgr!=NULL)
-            genws_manage_stdisp(mgr, reg, &(mplex->stdispinfo));
+            region_manage_stdisp(mgr, reg, &(mplex->stdispinfo));
         else
             region_unmap(reg);
     }
@@ -1505,6 +1504,21 @@ int mplex_default_index(WMPlex *mplex)
     int idx=LLIST_INDEX_LAST;
     CALL_DYN_RET(idx, int, mplex_default_index, mplex, (mplex));
     return idx;
+}
+
+
+/* For regions managing stdisps */
+
+void region_manage_stdisp(WRegion *reg, WRegion *stdisp, 
+                          const WMPlexSTDispInfo *info)
+{
+    CALL_DYN(region_manage_stdisp, reg, (reg, stdisp, info));
+}
+
+
+void region_unmanage_stdisp(WRegion *reg, bool permanent, bool nofocus)
+{
+    CALL_DYN(region_unmanage_stdisp, reg, (reg, permanent, nofocus));
 }
 
 

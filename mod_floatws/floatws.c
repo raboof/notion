@@ -594,6 +594,9 @@ static DynFunTab floatws_dynfuntab[]={
     {(DynFun*)region_get_rescue_pholder_for,
      (DynFun*)floatws_get_rescue_pholder_for},
     
+    {region_manage_stdisp,
+     group_manage_stdisp},
+    
     END_DYNFUNTAB
 };
 

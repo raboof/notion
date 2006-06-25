@@ -131,7 +131,7 @@ bool group_fitrep(WGroup *ws, WWindow *par, const WFitParams *fp)
     
     if(par==NULL){
         REGION_GEOM(ws)=fp->g;
-    }else if(oldpar!=NULL){
+    }else{
         if(!region_same_rootwin((WRegion*)ws, (WRegion*)par))
             return FALSE;
         
@@ -143,11 +143,16 @@ bool group_fitrep(WGroup *ws, WWindow *par, const WFitParams *fp)
         xdiff=fp->g.x-REGION_GEOM(ws).x;
         ydiff=fp->g.y-REGION_GEOM(ws).y;
     
-        genws_do_reparent(&(ws->genws), par, fp);
+        region_unset_parent((WRegion*)ws);
+        XReparentWindow(ioncore_g.dpy, ws->dummywin, par->win, -1, -1);
+        region_set_parent((WRegion*)ws, par);
+
         REGION_GEOM(ws)=fp->g;
     
-        unweaved=stacking_unweave(&oldpar->stacking, wsfilt, (void*)ws);
-        stacking_weave(&par->stacking, &unweaved, FALSE);
+        if(oldpar!=NULL){
+            unweaved=stacking_unweave(&oldpar->stacking, wsfilt, (void*)ws);
+            stacking_weave(&par->stacking, &unweaved, FALSE);
+        }
     }
 
     FOR_ALL_NODES_IN_GROUP(ws, st, tmp){
@@ -179,7 +184,8 @@ static void group_map(WGroup *ws)
     WRegion *reg;
     WGroupIterTmp tmp;
 
-    genws_do_map(&(ws->genws));
+    REGION_MARK_MAPPED(ws);
+    XMapWindow(ioncore_g.dpy, ws->dummywin);
     
     FOR_ALL_MANAGED_BY_GROUP(ws, reg, tmp){
         region_map(reg);
@@ -192,7 +198,8 @@ static void group_unmap(WGroup *ws)
     WRegion *reg;
     WGroupIterTmp tmp;
 
-    genws_do_unmap(&(ws->genws));
+    REGION_MARK_UNMAPPED(ws);
+    XUnmapWindow(ioncore_g.dpy, ws->dummywin);
 
     FOR_ALL_MANAGED_BY_GROUP(ws, reg, tmp){
         region_unmap(reg);
@@ -251,6 +258,16 @@ static bool group_refocus(WGroup *ws, WStacking *st)
 }
 
 
+static void group_fallback_focus(WGroup *ws, bool warp)
+{
+    if(warp)
+        region_do_warp((WRegion*)ws);
+    
+    region_set_await_focus((WRegion*)ws);
+    xwindow_do_set_focus(ws->dummywin);
+}
+
+
 static void group_do_set_focus(WGroup *ws, bool warp)
 {
     WStacking *st=ws->current_managed;
@@ -261,7 +278,7 @@ static void group_do_set_focus(WGroup *ws, bool warp)
     if(st!=NULL && st->reg!=NULL)
         region_do_set_focus(st->reg, warp);
     else
-        genws_fallback_focus(&(ws->genws), warp);
+        group_fallback_focus(ws, warp);
 }
 
 
@@ -331,26 +348,41 @@ static void group_managed_activated(WGroup *ws, WRegion *reg)
 /*{{{ Create/destroy */
 
 
-bool group_init(WGroup *ws, WWindow *parent, const WFitParams *fp)
+bool group_init(WGroup *ws, WWindow *par, const WFitParams *fp)
 {
     ws->current_managed=NULL;
     ws->managed_stdisp=NULL;
     ws->bottom=NULL;
     ws->managed_list=NULL;
-
-    if(!genws_init(&(ws->genws), parent, fp))
+    
+    ws->dummywin=XCreateWindow(ioncore_g.dpy, par->win,
+                                fp->g.x, fp->g.y, 1, 1, 0,
+                                CopyFromParent, InputOnly,
+                                CopyFromParent, 0, NULL);
+    if(ws->dummywin==None)
         return FALSE;
 
-    ((WRegion*)ws)->flags|=REGION_GRAB_ON_PARENT;
+    region_init(&ws->reg, par, fp);
+    region_register(&ws->reg);
+
+    XSelectInput(ioncore_g.dpy, ws->dummywin,
+                 FocusChangeMask|KeyPressMask|KeyReleaseMask|
+                 ButtonPressMask|ButtonReleaseMask);
+    XSaveContext(ioncore_g.dpy, ws->dummywin, ioncore_g.win_context,
+                 (XPointer)ws);
+    
+    ((WRegion*)ws)->flags|=(REGION_PLEASE_WARP|
+                            REGION_GRAB_ON_PARENT);
+    
     region_add_bindmap((WRegion*)ws, ioncore_group_bindmap);
     
     return TRUE;
 }
 
 
-WGroup *create_group(WWindow *parent, const WFitParams *fp)
+WGroup *create_group(WWindow *par, const WFitParams *fp)
 {
-    CREATEOBJ_IMPL(WGroup, group, (p, parent, fp));
+    CREATEOBJ_IMPL(WGroup, group, (p, par, fp));
 }
 
 
@@ -370,7 +402,11 @@ void group_deinit(WGroup *ws)
 
     assert(ws->managed_list==NULL);
 
-    genws_deinit(&(ws->genws));
+    XDeleteContext(ioncore_g.dpy, ws->dummywin, ioncore_g.win_context);
+    XDestroyWindow(ioncore_g.dpy, ws->dummywin);
+    ws->dummywin=None;
+
+    region_deinit(&ws->reg);
 }
 
 
@@ -1012,6 +1048,12 @@ void group_size_hints(WGroup *ws, XSizeHints *hints_ret)
 }
 
 
+Window group_xwindow(const WGroup *ws)
+{
+    return ws->dummywin;
+}
+
+
 /*}}}*/
 
 
@@ -1105,8 +1147,10 @@ static DynFunTab group_dynfuntab[]={
 
     {region_map, 
      group_map},
+    
     {region_unmap, 
      group_unmap},
+    
     {(DynFun*)region_managed_goto, 
      (DynFun*)group_managed_goto},
 
@@ -1133,9 +1177,6 @@ static DynFunTab group_dynfuntab[]={
     {(DynFun*)region_rescue_clientwins,
      (DynFun*)group_rescue_clientwins},
     
-    {genws_manage_stdisp,
-     group_manage_stdisp},
-    
     {region_restack,
      group_restack},
 
@@ -1154,12 +1195,15 @@ static DynFunTab group_dynfuntab[]={
     {region_size_hints,
      group_size_hints},
     
+    {(DynFun*)region_xwindow,
+     (DynFun*)group_xwindow},
+    
     END_DYNFUNTAB
 };
 
 
 EXTL_EXPORT
-IMPLCLASS(WGroup, WGenWS, group_deinit, group_dynfuntab);
+IMPLCLASS(WGroup, WRegion, group_deinit, group_dynfuntab);
 
 
 /*}}}*/

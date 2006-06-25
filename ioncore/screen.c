@@ -462,7 +462,7 @@ static bool screen_managed_may_destroy(WScreen *scr, WRegion *reg)
     FOR_ALL_NODES_ON_LLIST(node, scr->mplex.l1_list){
         if(node->reg==reg)
             onl1list=TRUE;
-        else if(OBJ_IS(node->reg, WGenWS))
+        else /*if(OBJ_IS(node->reg, WGenWS))*/
             return TRUE;
     }
     
@@ -586,11 +586,13 @@ static bool create_initial_ws(WScreen *scr)
     if(info!=NULL)
         fn=info->lc_fn;
     
+    /*
     if(fn==NULL){
         info=ioncore_lookup_regclass("WGenWS", TRUE);
         if(info!=NULL)
             fn=info->lc_fn;
     }
+     */
     
     if(fn==NULL){
         warn(TR("Could not find a complete workspace class. "
