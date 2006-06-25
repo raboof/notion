@@ -273,6 +273,15 @@ const char *groupcw_displayname(WGroupCW *cwg)
 }
 
 
+void groupcw_managed_notify(WGroupCW *cwg, WRegion *reg)
+{
+    if(group_bottom(&cwg->grp)==reg){
+        /* Title may have changed */
+        region_notify_change((WRegion*)cwg);
+    }
+}
+
+
 /*}}}*/
 
 
@@ -364,6 +373,9 @@ static DynFunTab groupcw_dynfuntab[]={
     
     {(DynFun*)region_displayname,
      (DynFun*)groupcw_displayname},
+    
+    {region_managed_notify,
+     groupcw_managed_notify},
     
     END_DYNFUNTAB
 };
