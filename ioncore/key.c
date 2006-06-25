@@ -25,6 +25,7 @@
 
 
 static void waitrelease(WRegion *reg);
+static void submapgrab(WRegion *reg);
 
 
 static void insstr(WWindow *wwin, XKeyEvent *ev)
@@ -65,27 +66,19 @@ static void insstr(WWindow *wwin, XKeyEvent *ev)
  * the return values are those expected by GrabHandler's, i.e.
  * you can just pass through the retval obtained from this function
  */
-static bool dispatch_binding(WRegion *binding_owner, 
-                             WRegion *grab_reg, WBinding *binding,
-                             XKeyEvent *ev)
+static bool dispatch_binding(WRegion *grab_reg, WRegion *reg, WRegion *subreg, 
+                             WBinding *binding, XKeyEvent *ev)
 {
-    WRootWin *rootwin;
-    WRegion *subctx;
+    if(reg==NULL)
+        reg=grab_reg;
     
     if(binding!=NULL){
-        /* Get the screen now for waitrel grab - the object might
-         * have been destroyed when call_binding returns.
-         */
-        if(grab_reg==binding_owner || grab_reg==NULL)
-            subctx=region_current(binding_owner);
-        else
-            subctx=grab_reg;
-
-        extl_call(binding->func, "oo", NULL, binding_owner, subctx);
+        extl_call(binding->func, "oo", NULL, reg, subreg);
 		
         if(ev->state!=0 && binding->wait)
             waitrelease(grab_reg);
     }
+    
     return TRUE;
 }
 
@@ -133,8 +126,8 @@ static bool waitrelease_handler(WRegion *reg, XEvent *ev)
 
 static void waitrelease(WRegion *reg)
 {
-	if(ioncore_modstate()==0)
-		return;
+    if(ioncore_modstate()==0)
+        return;
 	
     /* We need to grab on the root window as <reg> might have been
      * ioncore_defer_destroy:ed by the binding handler (the most common case
@@ -162,76 +155,108 @@ static void free_subs(WSubmapState *p)
 
 static void clear_subs(WRegion *reg)
 {
-    reg->submapstat.key=None;
-    free_subs(reg->submapstat.next);
-    reg->submapstat.next=NULL;
+    while(reg->submapstat!=NULL){
+        WSubmapState *tmp=reg->submapstat;
+        reg->submapstat=tmp->next;
+        free(tmp);
+    }
 }
 
 
 static bool add_sub(WRegion *reg, uint key, uint state)
 {
-    WSubmapState *p=&(reg->submapstat);
+    WSubmapState **p;
+    WSubmapState *s;
     
-    if(p->key!=None){
-        if(p->next!=NULL)
-            p=p->next;
-        p->next=ALLOC(WSubmapState);
-        if(p->next==NULL)
-            return FALSE;
-        p=p->next;
-        p->next=NULL;
+    if(reg->submapstat==NULL){
+        p=&(reg->submapstat);
+    }else{
+        s=reg->submapstat;
+        while(s->next!=NULL)
+            s=s->next;
+        p=&(s->next);
     }
     
-    p->key=key;
-    p->state=state;
+    s=ALLOC(WSubmapState);
+    
+    if(s==NULL)
+        return FALSE;
+    
+    s->key=key;
+    s->state=state;
+    
+    *p=s;
     
     return TRUE;
 
 }
 
 
-static bool submapgrab_handler(WRegion *reg, XEvent *ev)
+/* Return value TRUE = grab needed */
+static bool do_key(WRegion *reg, XKeyEvent *ev)
 {
-    WRegion *oreg=reg;
-    WRegion *binding_owner=NULL;
-    WSubmapState *subchain=&(reg->submapstat);
     WBinding *binding=NULL;
-    
-    if(ev->type!=KeyPress)
-        return FALSE;
+    WRegion *oreg=NULL, *binding_owner=NULL, *subreg=NULL;
+    bool grabbed;
     
     oreg=reg;
+    grabbed=(oreg->flags&REGION_BINDINGS_ARE_GRABBED);
     
-    while(reg!=NULL){
-        binding=region_lookup_keybinding(reg, (XKeyEvent*)ev, subchain,
+    if(grabbed){
+        /*if(subreg!=NULL && REGION_PARENT_REG(subreg)==reg){
+            reg=subreg;
+            subreg=NULL;
+        }*/
+        
+        /* Find the deepest nested active window grabbing this key. */
+        while(reg->active_sub!=NULL)
+            reg=reg->active_sub;
+        
+        do{
+            /*if(reg->flags&REGION_BINDINGS_ARE_GRABBED){*/
+                binding=region_lookup_keybinding(reg, ev, oreg->submapstat, 
+                                                 &binding_owner);
+            /*}*/
+            if(binding!=NULL)
+                break;
+            if(OBJ_IS(reg, WRootWin))
+                break;
+            
+            subreg=reg;
+            reg=REGION_PARENT_REG(reg);
+        }while(reg!=NULL);
+    }else{
+        binding=region_lookup_keybinding(oreg, ev, oreg->submapstat, 
                                          &binding_owner);
-        if(binding!=NULL)
-            break;
-        if(OBJ_IS(reg, WRootWin))
-            break;
-        reg=REGION_PARENT_REG(reg);
-    }
-
-    /* if it is just a modifier, then return. */
-    if(binding==NULL){
-        if(ioncore_ismod(ev->xkey.keycode))
-            return FALSE;
-        clear_subs(oreg);
-        return TRUE;
     }
     
-    if(binding->submap!=NULL){
-        if(add_sub(oreg, ev->xkey.keycode, ev->xkey.state)){
-            return FALSE;
+    if(binding!=NULL){
+        if(binding->submap!=NULL){
+            if(add_sub(oreg, ev->keycode, ev->state))
+                return grabbed;
+            else
+                clear_subs(oreg);
         }else{
             clear_subs(oreg);
-            return TRUE;
+            if(grabbed)
+                XUngrabKeyboard(ioncore_g.dpy, CurrentTime);
+            dispatch_binding(oreg, binding_owner, subreg, binding, ev);
         }
+    }else if(oreg->submapstat!=NULL){
+        clear_subs(oreg);
+    }else if(OBJ_IS(oreg, WWindow)){
+        insstr((WWindow*)oreg, ev);
     }
     
-    clear_subs(oreg);
-    
-    return dispatch_binding(binding_owner, reg, binding, &ev->xkey);
+    return FALSE;
+}
+
+
+static bool submapgrab_handler(WRegion* reg, XEvent *ev)
+{
+    if(ev->type!=KeyPress)
+        return FALSE;
+    return !do_key(reg, &ev->xkey);
 }
 
 
@@ -244,55 +269,11 @@ static void submapgrab(WRegion *reg)
 
 void ioncore_do_handle_keypress(XKeyEvent *ev)
 {
-    WBinding *binding=NULL;
-    WRegion *reg=NULL, *oreg=NULL, *binding_owner=NULL;
-    bool grabbed;
 
-    reg=(WRegion*)XWINDOW_REGION_OF(ev->window);
+    WRegion *reg=(WRegion*)XWINDOW_REGION_OF(ev->window);
     
-    if(reg==NULL)
-        return;
-    
-    grabbed=(reg->flags&REGION_BINDINGS_ARE_GRABBED);
-    
-    oreg=reg;
-    
-    if(grabbed){
-        /* Find the deepest nested active window grabbing this key. */
-        while(reg->active_sub!=NULL)
-            reg=reg->active_sub;
-        
-        do{
-            if(reg->flags&REGION_BINDINGS_ARE_GRABBED){
-                binding=region_lookup_keybinding(reg, ev, NULL, 
-                                                 &binding_owner);
-            }
-            if(binding!=NULL)
-                break;
-            if(OBJ_IS(reg, WRootWin))
-                break;
-            reg=REGION_PARENT_REG(reg);
-        }while(reg!=NULL);
-    }else{
-        if(reg->submapstat.key!=None){
-            submapgrab_handler(reg, (XEvent*)ev);
-            return;
-        }
-        binding=region_lookup_keybinding(reg, ev, NULL, &binding_owner);
-    }
-    
-    if(binding!=NULL){
-        if(binding->submap!=NULL){
-            if(add_sub(reg, ev->keycode, ev->state)){
-                if(grabbed)
-                    submapgrab(reg);
-            }
-        }else{
-            if(grabbed)
-                XUngrabKeyboard(ioncore_g.dpy, CurrentTime);
-            dispatch_binding(binding_owner, reg, binding, ev);
-        }
-    }else if(OBJ_IS(oreg, WWindow)){
-        insstr((WWindow*)oreg, ev);
+    if(reg!=NULL){
+        if(do_key(reg, ev))
+            submapgrab(reg);
     }
 }

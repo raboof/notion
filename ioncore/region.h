@@ -54,7 +54,9 @@
 #define REGION_FIT_GRAVITY   0x0008 /* just a hint; for use with BOUNDS */
 #define REGION_FIT_EXACT     0x0000 /* No flags; exact fit */
 
+
 typedef int WRegionFitMode;
+
 
 INTRSTRUCT(WFitParams);
 DECLSTRUCT(WFitParams){
@@ -64,11 +66,6 @@ DECLSTRUCT(WFitParams){
     int rotation;
 };
 
-INTRSTRUCT(WSubmapState);
-DECLSTRUCT(WSubmapState){
-    uint key, state;
-    WSubmapState *next;
-};
 
 INTRSTRUCT(WRegionNameInfo);
 DECLSTRUCT(WRegionNameInfo){
@@ -76,6 +73,7 @@ DECLSTRUCT(WRegionNameInfo){
     int inst_off;
     void *node;
 };
+
 
 DECLCLASS(WRegion){
     Obj obj;
@@ -89,7 +87,7 @@ DECLCLASS(WRegion){
     WRegion *p_next, *p_prev;
     
     void *bindings;
-    WSubmapState submapstat;
+    WSubmapState *submapstat;
     
     WRegion *active_sub;
     WRegion *active_prev, *active_next;
@@ -100,6 +98,7 @@ DECLCLASS(WRegion){
     
     int mgd_activity;
 };
+
 
 extern void region_init(WRegion *reg, WWindow *par, const WFitParams *fp);
 extern void region_deinit(WRegion *reg);

@@ -18,6 +18,12 @@
 #include "binding.h"
 
 
+DECLSTRUCT(WSubmapState){
+    uint key, state;
+    WSubmapState *next;
+};
+
+
 extern bool region_add_bindmap(WRegion *reg, WBindmap *bindmap);
 extern bool region_add_bindmap_owned(WRegion *reg, WBindmap *bindmap,
                                      WRegion *owner);

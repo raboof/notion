@@ -37,4 +37,6 @@ INTRCLASS(WMPlexPHolder);
 INTRSTRUCT(WLListNode);
 INTRSTRUCT(WStacking);
 
+INTRSTRUCT(WSubmapState);
+
 #endif /* ION_IONCORE_CLASSES_H */

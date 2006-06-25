@@ -57,6 +57,8 @@ void region_init(WRegion *reg, WWindow *par, const WFitParams *fp)
     
     reg->manager=NULL;
     
+    reg->submapstat=NULL;
+    
     reg->mgd_activity=FALSE;
 
     if(par!=NULL){
