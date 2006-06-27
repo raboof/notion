@@ -62,27 +62,6 @@ static void insstr(WWindow *wwin, XKeyEvent *ev)
 }
 
 
-/* dispatch_binding
- * the return values are those expected by GrabHandler's, i.e.
- * you can just pass through the retval obtained from this function
- */
-static bool dispatch_binding(WRegion *grab_reg, WRegion *reg, WRegion *subreg, 
-                             WBinding *binding, XKeyEvent *ev)
-{
-    if(reg==NULL)
-        reg=grab_reg;
-    
-    if(binding!=NULL){
-        extl_call(binding->func, "oo", NULL, reg, subreg);
-		
-        if(ev->state!=0 && binding->wait)
-            waitrelease(grab_reg);
-    }
-    
-    return TRUE;
-}
-
-
 static void send_key(XEvent *ev, WClientWin *cwin)
 {
     Window win=cwin->win;
@@ -237,10 +216,29 @@ static bool do_key(WRegion *reg, XKeyEvent *ev)
             else
                 clear_subs(oreg);
         }else{
+            bool subs=(oreg->submapstat!=NULL);
+            
             clear_subs(oreg);
+            
             if(grabbed)
                 XUngrabKeyboard(ioncore_g.dpy, CurrentTime);
-            dispatch_binding(oreg, binding_owner, subreg, binding, ev);
+            
+            /* Find something binding_owner can understand. */
+            /* TODO: What if there are multiple 'owner' grabs? */
+            while(1){
+                if(REGION_PARENT_REG(subreg)!=reg){
+                    subreg=NULL;
+                    break;
+                }
+                if(REGION_MANAGER(subreg)==binding_owner)
+                    break;
+                subreg=REGION_MANAGER(subreg);
+            }
+            
+            extl_call(binding->func, "oo", NULL, binding_owner, subreg);
+            
+            if(ev->state!=0 && !subs && binding->wait)
+                waitrelease(oreg);
         }
     }else if(oreg->submapstat!=NULL){
         clear_subs(oreg);
