@@ -225,7 +225,7 @@ static bool do_key(WRegion *reg, XKeyEvent *ev)
             
             /* Find something binding_owner can understand. */
             /* TODO: What if there are multiple 'owner' grabs? */
-            while(1){
+            while(subreg!=NULL){
                 if(REGION_PARENT_REG(subreg)!=reg){
                     subreg=NULL;
                     break;
