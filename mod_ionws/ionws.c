@@ -895,7 +895,7 @@ WFrame *ionws_split_at(WIonWS *ws, WFrame *frame, const char *dirstr,
     if(newframe==NULL)
         return NULL;
 
-    curr=mplex_lcurrent(&(frame->mplex), 1);
+    curr=mplex_l1_current(&(frame->mplex));
     
     if(attach_current && curr!=NULL){
         if(mplex_lcount(&(frame->mplex), 1)<=1)

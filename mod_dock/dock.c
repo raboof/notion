@@ -1221,7 +1221,7 @@ WDock *mod_dock_create(ExtlTab tab)
         WMPlexAttachParams par;
         
         par.flags=(MPLEX_ATTACH_L2
-                   |MPLEX_ATTACH_L2_PASSIVE
+                   /*|MPLEX_ATTACH_L2_PASSIVE*/
                    |MPLEX_ATTACH_SIZEPOLICY
                    |MPLEX_ATTACH_GEOM);
         

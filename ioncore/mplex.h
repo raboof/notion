@@ -32,7 +32,6 @@
 
 #define MPLEX_ATTACH_SWITCHTO     0x0001 /* switch to region */
 #define MPLEX_ATTACH_L2           0x0002 /* put on layer2 */
-#define MPLEX_ATTACH_L2_PASSIVE   0x0004 /* should be passive on l2 */
 #define MPLEX_ATTACH_L2_HIDDEN    0x0008 /* should be hidden on l2 */
 #define MPLEX_ATTACH_L2_SEMIMODAL 0x0010 /* should semimodal on l2 */
 #define MPLEX_ATTACH_GEOM         0x0020 /* geometry field is set */
@@ -95,7 +94,6 @@ DECLCLASS(WMPlex){
     
     int l2_count;
     WLListNode *l2_list;
-    WLListNode *l2_current;
     WMPlexPHolder *l2_phs;
     
     Watch stdispwatch;
@@ -153,6 +151,10 @@ extern WPHolder *mplex_prepare_manage(WMPlex *mplex, const WClientWin *cwin,
 
 extern bool mplex_managed_prepare_focus(WMPlex *mplex, WRegion *sub, 
                                         int flags, WPrepareFocusResult *res);
+extern bool mplex_do_prepare_focus(WMPlex *mplex, WRegion *disp, 
+                                   WRegion *sub, int flags, 
+                                   WPrepareFocusResult *res);
+
 extern void mplex_switch_nth(WMPlex *mplex, uint n);
 extern void mplex_switch_next(WMPlex *mplex);
 extern void mplex_switch_prev(WMPlex *mplex);
@@ -164,18 +166,17 @@ extern bool mplex_l2_set_passive(WMPlex *mplex, WRegion *reg, bool sp);
 /* Focus */
 
 extern void mplex_do_set_focus(WMPlex *mplex, bool warp);
-extern void mplex_managed_activated(WMPlex *mplex, WRegion *reg);
 
 /* Misc */
 
 extern WRegion *mplex_current(WMPlex *mplex);
 extern bool mplex_may_destroy(WMPlex *mplex);
 
-extern int mplex_layer(WMPlex *mplex, WRegion *reg);
+extern int mplex_lno(WMPlex *mplex, WRegion *reg);
 extern int mplex_lcount(WMPlex *mplex, uint l);
 extern WRegion *mplex_lnth(WMPlex *mplex, uint l, uint n);
 extern ExtlTab mplex_llist(WMPlex *mplex, uint l);
-extern WRegion *mplex_lcurrent(WMPlex *mplex, uint l);
+extern WRegion *mplex_l1_current(WMPlex *mplex);
 
 extern void mplex_call_changed_hook(WMPlex *mplex, WHook *hook, 
                                     int mode, bool sw, WRegion *reg);

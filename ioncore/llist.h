@@ -19,9 +19,8 @@
 #include "extlconv.h"
 
 
-#define LLIST_L2_HIDDEN  0x0001
-#define LLIST_L2_PASSIVE 0x0002
-#define LLIST_L2         0x0004
+#define LLIST_HIDDEN       0x0001
+#define LLIST_L2           0x0004
 #define LLIST_L2_SEMIMODAL 0x0008
 
 DECLSTRUCT(WLListNode){

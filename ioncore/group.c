@@ -210,35 +210,11 @@ static void group_unmap(WGroup *ws)
 WStacking *group_find_to_focus(WGroup *ws, WStacking *to_try)
 {
     WStacking *stacking=group_get_stacking(ws);
-    WStacking *st=NULL;
         
     if(stacking==NULL)
         return NULL;
-    
-    st=stacking->prev;
-    while(1){
-        if(st->reg!=NULL 
-           && REGION_MANAGER(st->reg)==(WRegion*)ws
-           && !(st->reg->flags&REGION_SKIP_FOCUS)){
-            
-            if(st->level>=STACKING_LEVEL_MODAL1){
-                if(to_try!=NULL && to_try->level==st->level)
-                    return to_try;
-            }else{
-                if(to_try!=NULL)
-                    return to_try;
-            }
-            return st;
-        }
-        
-        if(st==stacking){
-            st=NULL;
-            break;
-        }
-        st=st->prev;
-    }
-    
-    return NULL;
+
+    return stacking_find_to_focus(stacking, to_try, wsfilt, ws);
 }
 
 
@@ -286,26 +262,32 @@ static bool group_managed_prepare_focus(WGroup *ws, WRegion *reg,
                                         int flags, WPrepareFocusResult *res)
 {
     WStacking *st;
+    WMPlex *mplex=OBJ_CAST(REGION_MANAGER(ws), WMPlex);
     
-    if(!region_prepare_focus((WRegion*)ws, flags, res))
-        return FALSE;
+    if(mplex!=NULL){
+        return mplex_do_prepare_focus(mplex, (WRegion*)ws, reg,
+                                      flags, res);
+    }else{
+        st=group_find_stacking(ws, reg);    
     
-    st=group_find_stacking(ws, reg);    
-    
-    if(st==NULL)
-        return FALSE;
-    
-    st=group_find_to_focus(ws, st);
-    
+        if(st==NULL)
+            return FALSE;
+
+        if(!region_prepare_focus((WRegion*)ws, flags, res))
+            return FALSE;
+
+        st=group_find_to_focus(ws, st);
+        
 #warning "TODO: raise in some cases (not enter-window)?"
-    
-    if(st==NULL)
-        return FALSE;
-    
-    res->reg=st->reg;
-    res->flags=flags;
-    
-    return (res->reg==reg);
+        
+        if(st==NULL)
+            return FALSE;
+        
+        res->reg=st->reg;
+        res->flags=flags;
+        
+        return (res->reg==reg);
+    }
 }
 
 

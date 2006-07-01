@@ -71,6 +71,7 @@ static WFrame *create(WScreen *scr, int flags)
 
     par.flags=(flags
                |MPLEX_ATTACH_L2
+               |MPLEX_ATTACH_L2_SEMIMODAL
                |MPLEX_ATTACH_SIZEPOLICY
                |MPLEX_ATTACH_GEOM);
     par.szplcy=SIZEPOLICY_FREE_GLUE;

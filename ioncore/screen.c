@@ -154,7 +154,7 @@ void screen_managed_geom(WScreen *scr, WRectangle *geom)
 
 static bool screen_handle_drop(WScreen *scr, int x, int y, WRegion *dropped)
 {
-    WRegion *curr=mplex_lcurrent(&(scr->mplex), 1);
+    WRegion *curr=mplex_l1_current(&(scr->mplex));
 
     /* This code should handle dropping tabs on floating workspaces. */
     if(curr && HAS_DYN(curr, region_handle_drop)){
@@ -200,7 +200,7 @@ static void screen_managed_changed(WScreen *scr, int mode, bool sw,
     if(ioncore_g.opmode==IONCORE_OPMODE_DEINIT)
         return;
     
-    reg=mplex_lcurrent(&(scr->mplex), 1);
+    reg=mplex_l1_current(&(scr->mplex));
 
     if(sw && scr->atom_workspace!=None){
         if(reg!=NULL)
