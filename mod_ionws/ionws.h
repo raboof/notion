@@ -83,8 +83,8 @@ extern void ionws_managed_activated(WIonWS *ws, WRegion *reg);
 extern bool ionws_rescue_clientwins(WIonWS *ws, WPHolder *ph);
 extern WPHolder *ionws_get_rescue_pholder_for(WIonWS *ws, WRegion *mgd);
 extern void ionws_do_set_focus(WIonWS *ws, bool warp);
-extern bool ionws_managed_goto(WIonWS *ws, WRegion *reg, 
-                               WManagedGotoCont *p, int flags);
+extern bool ionws_managed_prepare_focus(WIonWS *ws, WRegion *reg, 
+                                        int flags, WPrepareFocusResult *res);
 extern bool ionws_managed_may_destroy(WIonWS *ws, WRegion *reg);
 extern void ionws_manage_stdisp(WIonWS *ws, WRegion *stdisp, 
                                 const WMPlexSTDispInfo *di);

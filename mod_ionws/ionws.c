@@ -180,12 +180,16 @@ static void restack_handler(WTimer *tmr, Obj *obj)
 }
 
 
-bool ionws_managed_goto(WIonWS *ws, WRegion *reg, 
-                        WManagedGotoCont *p, int flags)
+bool ionws_managed_prepare_focus(WIonWS *ws, WRegion *reg, 
+                                 int flags, WPrepareFocusResult *res)
 {
-    WSplitRegion *node=get_node_check(ws, reg);
-    int rd=mod_ionws_raise_delay;
+    WSplitRegion *node; 
 
+    if(!region_prepare_focus((WRegion*)ws, flags, res))
+        return FALSE;
+    
+    node=get_node_check(ws, reg);
+    
     if(node!=NULL && node->split.parent!=NULL)
         splitinner_mark_current(node->split.parent, &(node->split));
         
@@ -193,6 +197,7 @@ bool ionws_managed_goto(WIonWS *ws, WRegion *reg,
      * so we must restack here.
      */
     if(ws->split_tree!=NULL){
+        int rd=mod_ionws_raise_delay;
         bool use_timer=rd>0 && flags&REGION_GOTO_ENTERWINDOW;
         
         if(use_timer){
@@ -214,7 +219,9 @@ bool ionws_managed_goto(WIonWS *ws, WRegion *reg,
         }
     }
 
-    return region_managed_goto_cont(reg, p, flags);
+    res->reg=reg;
+    res->flags=flags;
+    return TRUE;
 }
 
 
@@ -1633,8 +1640,8 @@ static DynFunTab ionws_dynfuntab[]={
     {region_managed_remove, 
      ionws_managed_remove},
     
-    {(DynFun*)region_managed_goto,
-     (DynFun*)ionws_managed_goto},
+    {(DynFun*)region_managed_prepare_focus,
+     (DynFun*)ionws_managed_prepare_focus},
     
     {(DynFun*)region_prepare_manage, 
      (DynFun*)ionws_prepare_manage},

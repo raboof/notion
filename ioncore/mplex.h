@@ -151,8 +151,8 @@ extern WPHolder *mplex_prepare_manage(WMPlex *mplex, const WClientWin *cwin,
 
 /* Switch */
 
-extern bool mplex_managed_goto(WMPlex *mplex, WRegion *sub, 
-                               WManagedGotoCont *p, int flags);
+extern bool mplex_managed_prepare_focus(WMPlex *mplex, WRegion *sub, 
+                                        int flags, WPrepareFocusResult *res);
 extern void mplex_switch_nth(WMPlex *mplex, uint n);
 extern void mplex_switch_next(WMPlex *mplex);
 extern void mplex_switch_prev(WMPlex *mplex);

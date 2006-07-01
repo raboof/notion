@@ -647,18 +647,27 @@ static bool mplex_do_node_goto_sw(WMPlex *mplex, WLListNode *node,
 }
 
 
-bool mplex_managed_goto(WMPlex *mplex, WRegion *sub, 
-                        WManagedGotoCont *p, int flags)
+bool mplex_managed_prepare_focus(WMPlex *mplex, WRegion *sub, 
+                                 int flags, WPrepareFocusResult *res)
 {
-    WLListNode *node=mplex_find_node(mplex, sub);
-    bool nohide=(flags&REGION_GOTO_ENTERWINDOW);
-
-    if(!mplex_do_node_display(mplex, node, TRUE, flags))
-        sub=mplex_current(mplex);
-    if(sub==NULL)
-        sub=(WRegion*)mplex;
+    WLListNode *node;
+    bool nohide;
+    bool ret;
     
-    return region_managed_goto_cont(sub, p, flags);
+    ret=region_prepare_focus((WRegion*)mplex, flags, res);
+    
+    node=mplex_find_node(mplex, sub);
+    nohide=(flags&REGION_GOTO_ENTERWINDOW);
+
+    mplex_do_node_display(mplex, node, TRUE, flags);
+    
+    if(ret){
+        res->reg=mplex_current(mplex);
+        res->flags=flags;
+        ret=(res->reg==sub);
+    }
+    
+    return ret;
 }
 
 
@@ -1719,8 +1728,8 @@ static DynFunTab mplex_dynfuntab[]={
     {region_managed_rqgeom,
      mplex_managed_rqgeom},
     
-    {(DynFun*)region_managed_goto,
-     (DynFun*)mplex_managed_goto},
+    {(DynFun*)region_managed_prepare_focus,
+     (DynFun*)mplex_managed_prepare_focus},
     
     {(DynFun*)region_handle_drop, 
      (DynFun*)mplex_handle_drop},

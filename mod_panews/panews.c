@@ -213,8 +213,8 @@ void panews_managed_remove(WPaneWS *ws, WRegion *reg)
 /*{{{ Misc. */
 
 
-bool panews_managed_goto(WPaneWS *ws, WRegion *reg,
-                         WManagedGotoCont *p, int flags)
+bool panews_managed_prepare_focus(WPaneWS *ws, WRegion *reg,
+                                  int flags, WPrepareFocusResult *res)
 {
     if(flags&REGION_GOTO_ENTERWINDOW){
         WSplitRegion *other, *node=get_node_check(ws, reg);
@@ -224,14 +224,15 @@ bool panews_managed_goto(WPaneWS *ws, WRegion *reg,
              */
             other=split_tree_find_region_in_pane_of((WSplit*)node);
             if(other!=NULL){
-                ionws_managed_goto(&(ws->ionws), other->reg, 
-                                   p, flags&~REGION_GOTO_ENTERWINDOW);
+                ionws_managed_prepare_focus(&(ws->ionws), other->reg, 
+                                            flags&~REGION_GOTO_ENTERWINDOW, 
+                                            res);
                 return FALSE;
             }
         }
     }
         
-    return ionws_managed_goto(&(ws->ionws), reg, p, flags);
+    return ionws_managed_prepare_focus(&(ws->ionws), reg, flags, res);
 }
 
 
@@ -446,8 +447,8 @@ static DynFunTab panews_dynfuntab[]={
     {(DynFun*)ionws_do_get_farthest,
      (DynFun*)panews_do_get_farthest},
 
-    {(DynFun*)region_managed_goto,
-     (DynFun*)panews_managed_goto},
+    {(DynFun*)region_managed_prepare_focus,
+     (DynFun*)panews_managed_prepare_focus},
 
     /*
     {(DynFun*)region_rqclose_propagate,

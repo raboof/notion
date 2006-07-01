@@ -282,10 +282,13 @@ static void group_do_set_focus(WGroup *ws, bool warp)
 }
 
 
-static bool group_managed_goto(WGroup *ws, WRegion *reg, 
-                               WManagedGotoCont *p, int flags)
+static bool group_managed_prepare_focus(WGroup *ws, WRegion *reg, 
+                                        int flags, WPrepareFocusResult *res)
 {
     WStacking *st;
+    
+    if(!region_prepare_focus((WRegion*)ws, flags, res))
+        return FALSE;
     
     st=group_find_stacking(ws, reg);    
     
@@ -296,10 +299,13 @@ static bool group_managed_goto(WGroup *ws, WRegion *reg,
     
 #warning "TODO: raise in some cases (not enter-window)?"
     
-    if(st!=NULL)
-        return region_managed_goto_cont(st->reg, p, flags);
-    else
-        return region_managed_goto_cont((WRegion*)ws, p, flags);
+    if(st==NULL)
+        return FALSE;
+    
+    res->reg=st->reg;
+    res->flags=flags;
+    
+    return (res->reg==reg);
 }
 
 
@@ -1153,8 +1159,8 @@ static DynFunTab group_dynfuntab[]={
     {region_unmap, 
      group_unmap},
     
-    {(DynFun*)region_managed_goto, 
-     (DynFun*)group_managed_goto},
+    {(DynFun*)region_managed_prepare_focus, 
+     (DynFun*)group_managed_prepare_focus},
 
     {region_do_set_focus, 
      group_do_set_focus},

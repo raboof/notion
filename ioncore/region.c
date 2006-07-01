@@ -196,21 +196,26 @@ void region_managed_inactivated(WRegion *mgr, WRegion *reg)
 }
 
 
-static bool region_managed_goto_default(WRegion *mgr, WRegion *reg, 
-                                        WManagedGotoCont *p,
-                                        int flags)
+static bool region_managed_prepare_focus_default(WRegion *mgr, WRegion *reg, 
+                                                 int flags, 
+                                                 WPrepareFocusResult *res)
 {
-    if(!REGION_IS_MAPPED(reg))
-        region_map(reg);
-    return region_managed_goto_cont(reg, p, flags);
+    if(!region_prepare_focus(mgr, flags, res))
+        return FALSE;
+    
+    res->reg=reg;
+    res->flags=flags;
+    return TRUE;
 }
 
     
-bool region_managed_goto(WRegion *mgr, WRegion *reg, 
-                         WManagedGotoCont *p, int flags)
+bool region_managed_prepare_focus(WRegion *mgr, WRegion *reg, 
+                                  int flags, 
+                                  WPrepareFocusResult *res)
 {
     bool ret=TRUE;
-    CALL_DYN_RET(ret, bool, region_managed_goto, mgr, (mgr, reg, p, flags));
+    CALL_DYN_RET(ret, bool, region_managed_prepare_focus, mgr, 
+                 (mgr, reg, flags, res));
     return ret;
 }
 
@@ -256,9 +261,6 @@ void region_manager_changed(WRegion *reg, WRegion *mgr_or_null)
 /*}}}*/
 
 
-/*}}}*/
-
-
 /*{{{ Dynfun defaults */
 
 
@@ -275,81 +277,52 @@ void region_updategr_default(WRegion *reg)
 /*}}}*/
 
 
+/*}}}*/
+
+
 /*{{{ Goto */
 
 
-DECLSTRUCT(WManagedGotoCont){
-    WRegion *reg;
-    WRegion *sub;
-    WManagedGotoCont *next;
-    bool ignore;
-};
-
-
-bool region_managed_goto_cont(WRegion *reg, WManagedGotoCont *p, 
-                              int flags)
+bool region_prepare_focus(WRegion *reg, int flags, 
+                          WPrepareFocusResult *res)
 {
-    bool ok=TRUE;
-    
-    assert(reg!=NULL);
-    
-    if(p!=NULL){
-        if(p->ignore)
-            reg=p->reg;
-        
-        if(reg==p->reg){
-            if(p->sub!=NULL && p->next!=NULL)
-                return region_managed_goto(reg, p->sub, p->next, flags);
-        }else{
-            ok=FALSE;
-        }
-    }
-    
-    if(flags&REGION_GOTO_FOCUS)
-        region_maybewarp(reg, !(flags&REGION_GOTO_NOWARP));
-    
-    return ok;
-}
+    WRegion *mgr=REGION_MANAGER(reg);
+    WRegion *par=REGION_PARENT_REG(reg);
 
-
-bool region_goto_cont(WRegion *reg, WManagedGotoCont *next, int flags)
-{
-    
-    if(REGION_IS_ACTIVE(reg) && REGION_IS_MAPPED(reg)){
-        return region_managed_goto_cont(reg, next, flags);
+    if(REGION_IS_MAPPED(reg) && region_may_control_focus(reg)){
+        res->reg=reg;
+        res->flags=0;
+        return TRUE;
     }else{
-        WManagedGotoCont p;
-        WRegion *mgr=REGION_MANAGER(reg);
-        WRegion *par=REGION_PARENT_REG(reg);
-
-        p.sub=reg;
-        p.next=next;
-        
         if(mgr!=NULL){
-            p.reg=mgr;
-            p.ignore=FALSE;
+            return region_managed_prepare_focus(mgr, reg, flags, res);
         }else if(par!=NULL){
-            p.reg=par;
-            p.ignore=TRUE;
-        }else{
-            return region_managed_goto_cont(reg, next, flags);
+            if(!region_prepare_focus(par, flags, res))
+                return FALSE;
+            /* Just focus reg, if it has no manager, and parent can be 
+             * focused. 
+             */
         }
-        
-        return region_goto_cont(mgr, &p, flags);
+        res->reg=reg;
+        res->flags=flags;
+        return TRUE;
     }
 }
 
 
 bool region_goto_flags(WRegion *reg, int flags)
 {
-    WManagedGotoCont p;
+    WPrepareFocusResult res;
+    bool ret;
     
-    p.reg=reg;
-    p.sub=NULL;
-    p.next=NULL;
-    p.ignore=FALSE;
+    ret=region_prepare_focus(reg, flags, &res);
     
-    return region_goto_cont(reg, &p, flags);
+    if(res.reg!=NULL){
+        if(res.flags&REGION_GOTO_FOCUS)
+            region_maybewarp(res.reg, !(res.flags&REGION_GOTO_NOWARP));
+    }
+    
+    return ret;
 }
 
 
@@ -810,8 +783,8 @@ static DynFunTab region_dynfuntab[]={
     {(DynFun*)region_prepare_manage_transient,
      (DynFun*)region_prepare_manage_transient_default},
 
-    {(DynFun*)region_managed_goto,
-     (DynFun*)region_managed_goto_default},
+    {(DynFun*)region_managed_prepare_focus,
+     (DynFun*)region_managed_prepare_focus_default},
 
     {(DynFun*)region_rqclose_propagate,
      (DynFun*)region_rqclose_propagate_default},
