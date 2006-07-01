@@ -180,13 +180,11 @@ static void restack_handler(WTimer *tmr, Obj *obj)
 }
 
 
-bool ionws_managed_goto(WIonWS *ws, WRegion *reg, int flags)
+bool ionws_managed_goto(WIonWS *ws, WRegion *reg, 
+                        WManagedGotoCont *p, int flags)
 {
     WSplitRegion *node=get_node_check(ws, reg);
     int rd=mod_ionws_raise_delay;
-
-    if(!REGION_IS_MAPPED(ws))
-        return FALSE;
 
     if(node!=NULL && node->split.parent!=NULL)
         splitinner_mark_current(node->split.parent, &(node->split));
@@ -216,10 +214,7 @@ bool ionws_managed_goto(WIonWS *ws, WRegion *reg, int flags)
         }
     }
 
-    if(flags&REGION_GOTO_FOCUS)
-        region_maybewarp(reg, !(flags&REGION_GOTO_NOWARP));
-
-    return TRUE;
+    return region_managed_goto_cont(reg, p, flags);
 }
 
 

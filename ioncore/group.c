@@ -265,12 +265,10 @@ static void group_do_set_focus(WGroup *ws, bool warp)
 }
 
 
-static bool group_managed_goto(WGroup *ws, WRegion *reg, int flags)
+static bool group_managed_goto(WGroup *ws, WRegion *reg, 
+                               WManagedGotoCont *p, int flags)
 {
     WStacking *st;
-    
-    if(!region_is_fully_mapped((WRegion*)ws))
-       return FALSE;
     
     st=group_find_stacking(ws, reg);    
     
@@ -279,12 +277,12 @@ static bool group_managed_goto(WGroup *ws, WRegion *reg, int flags)
     
     st=group_find_to_focus(ws, st);
     
-#warning "TODO: raise?"
+#warning "TODO: raise in some cases (not enter-window)?"
     
-    if(st!=ws->current_managed && flags&REGION_GOTO_FOCUS)
-        region_maybewarp(st->reg, !(flags&REGION_GOTO_NOWARP));
-    
-    return TRUE;
+    if(st!=NULL)
+        return region_managed_goto_cont(st->reg, p, flags);
+    else
+        return region_managed_goto_cont((WRegion*)ws, p, flags);
 }
 
 

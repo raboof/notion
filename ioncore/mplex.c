@@ -648,15 +648,18 @@ static bool mplex_do_node_goto_sw(WMPlex *mplex, WLListNode *node,
 }
 
 
-bool mplex_managed_goto(WMPlex *mplex, WRegion *sub, int flags)
+bool mplex_managed_goto(WMPlex *mplex, WRegion *sub, 
+                        WManagedGotoCont *p, int flags)
 {
     WLListNode *node=mplex_find_node(mplex, sub);
     bool nohide=(flags&REGION_GOTO_ENTERWINDOW);
 
-    if(node==NULL)
-        return FALSE;
-    else
-        return mplex_do_node_goto(mplex, node, TRUE, nohide, flags);
+    if(!mplex_do_node_display(mplex, node, TRUE, flags))
+        sub=mplex_current(mplex);
+    if(sub==NULL)
+        sub=(WRegion*)mplex;
+    
+    return region_managed_goto_cont(sub, p, flags);
 }
 
 

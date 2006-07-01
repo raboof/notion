@@ -75,6 +75,9 @@ DECLSTRUCT(WRegionNameInfo){
 };
 
 
+INTRSTRUCT(WManagedGotoCont);
+
+
 DECLCLASS(WRegion){
     Obj obj;
     
@@ -100,6 +103,8 @@ DECLCLASS(WRegion){
 };
 
 
+
+
 extern void region_init(WRegion *reg, WWindow *par, const WFitParams *fp);
 extern void region_deinit(WRegion *reg);
 
@@ -115,10 +120,10 @@ DYNFUN WRegion *region_rqclose_propagate(WRegion *reg, WRegion *maybe_sub);
 DYNFUN WRegion *region_current(WRegion *mgr);
 DYNFUN void region_notify_rootpos(WRegion *reg, int x, int y);
 DYNFUN bool region_may_destroy(WRegion *reg);
-
 DYNFUN WRegion *region_managed_control_focus(WRegion *mgr, WRegion *reg);
 DYNFUN void region_managed_remove(WRegion *reg, WRegion *sub);
-DYNFUN bool region_managed_goto(WRegion *reg, WRegion *sub, int flags);
+DYNFUN bool region_managed_goto(WRegion *reg, WRegion *sub, 
+                                WManagedGotoCont *p, int flags);
 DYNFUN void region_managed_activated(WRegion *reg, WRegion *sub);
 DYNFUN void region_managed_inactivated(WRegion *reg, WRegion *sub);
 DYNFUN void region_managed_notify(WRegion *reg, WRegion *sub);
@@ -132,6 +137,9 @@ DYNFUN void region_restack(WRegion *reg, Window other, int mode);
 DYNFUN void region_stacking(WRegion *reg, Window *bottomret, Window *topret);
 
 DYNFUN bool region_handle_drop(WRegion *reg, int x, int y, WRegion *dropped);
+
+extern bool region_managed_goto_cont(WRegion *reg, 
+                                     WManagedGotoCont *p, int flags);
 
 extern void region_raise(WRegion *reg);
 extern void region_lower(WRegion *reg);

@@ -391,8 +391,9 @@ void frame_p_switch_tab(WFrame *frame)
     
     if(sub!=NULL){
         bool mcf=region_may_control_focus((WRegion*)frame);
-        region_managed_goto((WRegion*)frame, sub, 
-                            (mcf ? REGION_GOTO_FOCUS|REGION_GOTO_NOWARP : 0));
+        region_goto_flags(sub, (mcf 
+                                ? REGION_GOTO_FOCUS|REGION_GOTO_NOWARP 
+                                : 0));
     }
 }
 

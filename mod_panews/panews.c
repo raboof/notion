@@ -213,7 +213,8 @@ void panews_managed_remove(WPaneWS *ws, WRegion *reg)
 /*{{{ Misc. */
 
 
-bool panews_managed_goto(WPaneWS *ws, WRegion *reg, int flags)
+bool panews_managed_goto(WPaneWS *ws, WRegion *reg,
+                         WManagedGotoCont *p, int flags)
 {
     if(flags&REGION_GOTO_ENTERWINDOW){
         WSplitRegion *other, *node=get_node_check(ws, reg);
@@ -224,13 +225,13 @@ bool panews_managed_goto(WPaneWS *ws, WRegion *reg, int flags)
             other=split_tree_find_region_in_pane_of((WSplit*)node);
             if(other!=NULL){
                 ionws_managed_goto(&(ws->ionws), other->reg, 
-                                   flags&~REGION_GOTO_ENTERWINDOW);
+                                   p, flags&~REGION_GOTO_ENTERWINDOW);
                 return FALSE;
             }
         }
     }
         
-    return ionws_managed_goto(&(ws->ionws), reg, flags);
+    return ionws_managed_goto(&(ws->ionws), reg, p, flags);
 }
 
 

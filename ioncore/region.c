@@ -196,22 +196,21 @@ void region_managed_inactivated(WRegion *mgr, WRegion *reg)
 }
 
 
-static bool region_managed_goto_default(WRegion *mgr, WRegion *reg, int flags)
+static bool region_managed_goto_default(WRegion *mgr, WRegion *reg, 
+                                        WManagedGotoCont *p,
+                                        int flags)
 {
-    if(!region_is_fully_mapped(mgr))
-        return FALSE;
     if(!REGION_IS_MAPPED(reg))
         region_map(reg);
-    if(flags&REGION_GOTO_FOCUS)
-        region_maybewarp(reg, !(flags&REGION_GOTO_NOWARP));
-    return TRUE;
+    return region_managed_goto_cont(reg, p, flags);
 }
 
     
-bool region_managed_goto(WRegion *mgr, WRegion *reg, int flags)
+bool region_managed_goto(WRegion *mgr, WRegion *reg, 
+                         WManagedGotoCont *p, int flags)
 {
     bool ret=TRUE;
-    CALL_DYN_RET(ret, bool, region_managed_goto, mgr, (mgr, reg, flags));
+    CALL_DYN_RET(ret, bool, region_managed_goto, mgr, (mgr, reg, p, flags));
     return ret;
 }
 
@@ -276,31 +275,81 @@ void region_updategr_default(WRegion *reg)
 /*}}}*/
 
 
-
 /*{{{ Goto */
+
+
+DECLSTRUCT(WManagedGotoCont){
+    WRegion *reg;
+    WRegion *sub;
+    WManagedGotoCont *next;
+    bool ignore;
+};
+
+
+bool region_managed_goto_cont(WRegion *reg, WManagedGotoCont *p, 
+                              int flags)
+{
+    bool ok=TRUE;
+    
+    assert(reg!=NULL);
+    
+    if(p!=NULL){
+        if(p->ignore)
+            reg=p->reg;
+        
+        if(reg==p->reg){
+            if(p->sub!=NULL && p->next!=NULL)
+                return region_managed_goto(reg, p->sub, p->next, flags);
+        }else{
+            ok=FALSE;
+        }
+    }
+    
+    if(flags&REGION_GOTO_FOCUS)
+        region_maybewarp(reg, !(flags&REGION_GOTO_NOWARP));
+    
+    return ok;
+}
+
+
+bool region_goto_cont(WRegion *reg, WManagedGotoCont *next, int flags)
+{
+    
+    if(REGION_IS_ACTIVE(reg) && REGION_IS_MAPPED(reg)){
+        return region_managed_goto_cont(reg, next, flags);
+    }else{
+        WManagedGotoCont p;
+        WRegion *mgr=REGION_MANAGER(reg);
+        WRegion *par=REGION_PARENT_REG(reg);
+
+        p.sub=reg;
+        p.next=next;
+        
+        if(mgr!=NULL){
+            p.reg=mgr;
+            p.ignore=FALSE;
+        }else if(par!=NULL){
+            p.reg=par;
+            p.ignore=TRUE;
+        }else{
+            return region_managed_goto_cont(reg, next, flags);
+        }
+        
+        return region_goto_cont(mgr, &p, flags);
+    }
+}
 
 
 bool region_goto_flags(WRegion *reg, int flags)
 {
-    WRegion *mgr=REGION_MANAGER(reg);
+    WManagedGotoCont p;
     
-    if(mgr!=NULL){
-        if(!region_goto_flags(mgr, flags))
-            return FALSE;
-        return region_managed_goto(mgr, reg, flags);
-    }else{
-        WRegion *par=REGION_PARENT_REG(reg);
-        if(par!=NULL){
-            if(!region_goto_flags(par, flags))
-                return FALSE;
-        }
-
-        region_map(reg);
-        if(flags&REGION_GOTO_FOCUS)
-            region_maybewarp(reg, !(flags&REGION_GOTO_NOWARP));
-        
-        return TRUE;
-    }
+    p.reg=reg;
+    p.sub=NULL;
+    p.next=NULL;
+    p.ignore=FALSE;
+    
+    return region_goto_cont(reg, &p, flags);
 }
 
 
