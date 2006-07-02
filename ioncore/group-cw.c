@@ -337,6 +337,11 @@ WRegion *groupcw_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
     }
     
     extl_unref_table(substab);
+    
+    if(ws->grp.managed_list==NULL){
+        destroy_obj((Obj*)ws);
+        return NULL;
+    }
 
     return (WRegion*)ws;
 }
