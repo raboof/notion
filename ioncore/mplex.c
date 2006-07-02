@@ -702,7 +702,7 @@ static bool mplex_do_node_goto_sw(WMPlex *mplex, WLListNode *node,
                                   bool call_changed)
 {
     bool mcf=region_may_control_focus((WRegion*)mplex);
-    int flags=(mcf ? REGION_GOTO_FOCUS : 0)|REGION_GOTO_NOWARP;
+    int flags=(mcf ? REGION_GOTO_FOCUS : 0)/*|REGION_GOTO_NOWARP*/;
     return mplex_do_node_goto(mplex, node, call_changed, flags);
 }
 
@@ -758,12 +758,8 @@ static void mplex_refocus(WMPlex *mplex, bool warp)
 
 static void do_switch(WMPlex *mplex, WLListNode *node)
 {
-    if(node!=NULL){
-        bool mcf=region_may_control_focus((WRegion*)mplex);
-
-        mplex_do_node_goto(mplex, node, TRUE,
-                           (mcf ? REGION_GOTO_FOCUS : 0));
-    }
+    if(node!=NULL)
+        mplex_do_node_goto_sw(mplex, node, TRUE);
 }
 
 
