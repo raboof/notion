@@ -21,7 +21,7 @@
 
 #define LLIST_HIDDEN       0x0001
 #define LLIST_L2           0x0004
-#define LLIST_L2_SEMIMODAL 0x0008
+#define LLIST_L2_MODAL 0x0008
 
 DECLSTRUCT(WLListNode){
     WLListNode *next, *prev;

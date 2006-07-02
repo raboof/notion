@@ -498,27 +498,9 @@ static void mplex_managed_rqgeom(WMPlex *mplex, WRegion *sub,
 /*{{{ Focus  */
 
 
-static bool mgr_ok_filt(WStacking *st, void *mplex_)
+static bool mapped_filt(WStacking *st, void *unused)
 {
-#if 0    
-    WRegion *mgr;
-    WLListNode *node;
-    WMPlex *mplex=(WMPlex*)mplex_;
-    
-    mgr=mgr_within_mplex(mplex, st->reg);
-    
-    if(mgr==NULL)
-        return FALSE;
-    
-    node=mplex_find_node(mplex, mgr);
-    
-    if(node==NULL)
-        return FALSE;
-    
-    return !(node->flags&LLIST_HIDDEN);
-#else
     return (st->reg!=NULL && REGION_IS_MAPPED(st->reg));
-#endif
 }
 
 
@@ -532,11 +514,11 @@ static WRegion *mplex_do_to_focus(WMPlex *mplex, WRegion *to_try)
 
     if(to_try!=NULL){
         st=stacking_find(stacking, to_try);
-        if(st!=NULL && !mgr_ok_filt(st, mplex))
+        if(st!=NULL && !mapped_filt(st, mplex))
             st=NULL;
     }
     
-    st=stacking_find_to_focus(stacking, st, mgr_ok_filt, mplex);
+    st=stacking_find_to_focus(stacking, st, mapped_filt, NULL, NULL);
     
     if(st!=NULL)
         return st->reg;
@@ -553,37 +535,53 @@ WRegion *mplex_to_focus(WMPlex *mplex)
 }
 
 
-WRegion *mplex_to_focus_on(WMPlex *mplex, WLListNode *node)
+static bool mgr_filt(WStacking *st, void *mgr_)
 {
-    WStacking *stacking=window_get_stacking(&mplex->win);
+    return (st->reg!=NULL && REGION_MANAGER(st->reg)==(WRegion*)mgr_);
+}
+
+
+static WRegion *mplex_do_to_focus_on(WMPlex *mplex, WLListNode *node,
+                                     WRegion *to_try)
+{
     WStacking *st=NULL;
-    bool seen_modal=FALSE;
-    WRegion *mgr;
+    WStacking *stacking=window_get_stacking(&mplex->win);
     
     if(stacking==NULL)
         return NULL;
 
-    st=stacking->prev;
-    for(st=stacking->prev; st!=stacking; st=st->prev){
-        if(st->reg==NULL || !REGION_IS_MAPPED(st->reg))
-            continue;
-        
-        mgr=mgr_within_mplex(mplex, st->reg);
-    
-        if(mgr==NULL)
-            continue;
-    
-        if(node->reg==mgr){
-            if(st->level<STACKING_LEVEL_MODAL1 && seen_modal)
-                return NULL;
-            return st->reg;
-        }
-        
-        if(st->level>=STACKING_LEVEL_MODAL1)
-            seen_modal=TRUE;
+    if(to_try!=NULL){
+        st=stacking_find(stacking, to_try);
+        if(st!=NULL && !mapped_filt(st, mplex))
+            st=NULL;
     }
     
-    return NULL;
+    st=stacking_find_to_focus(stacking, st, mapped_filt, mgr_filt, 
+                              node->reg);
+    
+    return (st!=NULL ? st->reg : NULL);
+}
+
+
+static WRegion *mplex_to_focus_on(WMPlex *mplex, WLListNode *node,
+                                  WRegion *to_try)
+{
+    WRegion *reg;
+    
+    if(OBJ_IS(node->reg, WGroup)){
+        if(to_try==NULL)
+            to_try=region_current(node->reg);
+        reg=mplex_do_to_focus_on(mplex, node, to_try);
+        if(reg!=NULL || to_try!=NULL)
+            return reg;
+        /* We don't know whether something is blocking focus here,
+         * or if there was nothing to focus (as node->reg itself
+         * isn't on the stacking list).
+         */
+    }
+        
+    reg=mplex_do_to_focus(mplex, node->reg);
+    return (reg==node->reg ? reg : NULL);
 }
 
 
@@ -681,20 +679,23 @@ static void mplex_do_node_display(WMPlex *mplex, WLListNode *node,
 static bool mplex_do_node_goto(WMPlex *mplex, WLListNode *node,
                                bool call_changed, int flags)
 {
+    bool ret=TRUE;
+    
     mplex_do_node_display(mplex, node, call_changed);
     
     if(flags&REGION_GOTO_FOCUS){
-        WRegion *foc=mplex_to_focus_on(mplex, node);
-
+        WRegion *foc=mplex_to_focus_on(mplex, node, NULL);
+        
         if(foc==NULL){
-            return FALSE;
-        }else{
-            region_maybewarp(foc, !(flags&REGION_GOTO_NOWARP));
-            return TRUE;
+            ret=FALSE;
+            foc=mplex_to_focus(mplex);
         }
+        
+        if(foc!=NULL && !REGION_IS_ACTIVE(foc))
+            region_maybewarp(foc, !(flags&REGION_GOTO_NOWARP));
     }
     
-    return TRUE;
+    return ret;
 }
 
 
@@ -726,8 +727,8 @@ bool mplex_do_prepare_focus(WMPlex *mplex, WRegion *disp,
     if(!region_prepare_focus((WRegion*)mplex, flags, res))
         return FALSE;
 
-    if(sub==NULL && node!=NULL)
-        foc=mplex_to_focus_on(mplex, node);
+    if(node!=NULL)
+        foc=mplex_to_focus_on(mplex, node, sub);
     else
         foc=mplex_do_to_focus(mplex, sub);
 
@@ -858,7 +859,7 @@ bool mplex_l2_is_hidden(WMPlex *mplex, WRegion *reg)
 
 
 static bool mplex_stack(WMPlex *mplex, WRegion *reg, 
-                        bool l2, bool semimodal, WSizePolicy szplcy)
+                        bool l2, bool modal, WSizePolicy szplcy)
 {
     WStacking *st=NULL, *sttop=NULL;
     Window bottom=None, top=None;
@@ -875,16 +876,17 @@ static bool mplex_stack(WMPlex *mplex, WRegion *reg,
     st->reg=reg;
     st->above=NULL;
     st->level=(l2 
-               ? (semimodal 
+               ? (modal 
                   ? STACKING_LEVEL_MODAL1
                   : STACKING_LEVEL_NORMAL)
                : STACKING_LEVEL_BOTTOM);
     st->szplcy=szplcy;
+    st->next=NULL;
+    st->prev=st;
 
-    /* TODO: stacking fscked up for new regions. */
+    stacking_weave(stackingp, &st, FALSE);
     
-    LINK_ITEM_FIRST(*stackingp, st, next, prev);
-    stacking_do_raise(stackingp, reg, TRUE, None, NULL, NULL);
+    assert(st==NULL);
     
     return TRUE;
 }
@@ -914,11 +916,11 @@ WLListNode *mplex_do_attach_after(WMPlex *mplex,
     WFitParams fp;
     bool sw=param->flags&MPLEX_ATTACH_SWITCHTO;
     bool l2=param->flags&MPLEX_ATTACH_L2;
-    bool semimodal=param->flags&MPLEX_ATTACH_L2_SEMIMODAL;
+    bool modal=param->flags&MPLEX_ATTACH_L2_MODAL;
     WLListNode *node;
     WSizePolicy szplcy;
     
-    /*assert(!(semimodal && param->flags&MPLEX_ATTACH_HIDDEN));*/
+    /*assert(!(modal && param->flags&MPLEX_ATTACH_HIDDEN));*/
     
     szplcy=(param->flags&MPLEX_ATTACH_SIZEPOLICY &&
             param->szplcy!=SIZEPOLICY_DEFAULT
@@ -953,7 +955,7 @@ WLListNode *mplex_do_attach_after(WMPlex *mplex,
     node->reg=reg;
     node->flags=(LLIST_HIDDEN |
                  (l2 ? LLIST_L2 : 0) |
-                 (semimodal ? LLIST_L2_SEMIMODAL : 0));
+                 (modal ? LLIST_L2_MODAL : 0));
     node->phs=NULL;
     node->szplcy=szplcy;
     
@@ -969,12 +971,12 @@ WLListNode *mplex_do_attach_after(WMPlex *mplex,
 
 #warning "TODO: better check"
     if(!OBJ_IS(reg, WGroup))
-        mplex_stack(mplex, reg, l2, semimodal, szplcy);
+        mplex_stack(mplex, reg, l2, modal, szplcy);
     
     if(l2){
         if(param->flags&MPLEX_ATTACH_L2_HIDDEN)
             sw=FALSE;
-        else if(param->flags&MPLEX_ATTACH_L2_SEMIMODAL)
+        else if(param->flags&MPLEX_ATTACH_L2_MODAL)
             sw=TRUE;
     }else if(mplex->l1_count==1){
         sw=TRUE;
@@ -1063,6 +1065,9 @@ static void get_params(WMPlex *mplex, ExtlTab tab, WMPlexAttachParams *par)
 
     if(extl_table_is_bool_set(tab, "hidden"))
         par->flags|=MPLEX_ATTACH_L2_HIDDEN;
+    
+    if(extl_table_is_bool_set(tab, "modal"))
+        par->flags|=MPLEX_ATTACH_L2_MODAL;
 
     if(extl_table_gets_i(tab, "index", &(par->index)))
         par->flags|=MPLEX_ATTACH_INDEX;
@@ -1655,14 +1660,18 @@ ExtlTab mplex_get_configuration(WMPlex *mplex)
         ExtlTab st;
         
         /* Don't save menus, queries and such even if they'd support it. 
-        if(node->flags&LLIST_L2_SEMIMODAL)
+        if(node->flags&LLIST_L2_MODAL)
             continue;*/
         
         st=region_get_configuration(node->reg);
         if(st!=extl_table_none()){
             extl_table_sets_i(st, "layer", 2);
+            extl_table_sets_i(st, "list", 2);
             extl_table_sets_i(st, "sizepolicy", node->szplcy);
-            extl_table_sets_b(st, "hidden", node->flags&LLIST_HIDDEN);
+            if(node->flags&LLIST_HIDDEN)
+                extl_table_sets_b(st, "hidden", TRUE);
+            if(node->flags&LLIST_L2_MODAL)
+                extl_table_sets_b(st, "modal", TRUE);
             g=extl_table_from_rectangle(&REGION_GEOM(node->reg));
             extl_table_sets_t(st, "geom", g);
             extl_unref_table(g);

@@ -33,7 +33,7 @@
 #define MPLEX_ATTACH_SWITCHTO     0x0001 /* switch to region */
 #define MPLEX_ATTACH_L2           0x0002 /* put on layer2 */
 #define MPLEX_ATTACH_L2_HIDDEN    0x0008 /* should be hidden on l2 */
-#define MPLEX_ATTACH_L2_SEMIMODAL 0x0010 /* should semimodal on l2 */
+#define MPLEX_ATTACH_L2_MODAL 0x0010 /* should semimodal on l2 */
 #define MPLEX_ATTACH_GEOM         0x0020 /* geometry field is set */
 #define MPLEX_ATTACH_SIZEPOLICY   0x0040 /* size policy field is set */
 #define MPLEX_ATTACH_INDEX        0x0080 /* index field is set */

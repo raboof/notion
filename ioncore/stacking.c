@@ -632,35 +632,39 @@ WRegion *stacking_iter_mgr(WStackingIterTmp *tmp)
 
 
 WStacking *stacking_find_to_focus(WStacking *stacking, WStacking *to_try,
-                                  WStackingFilter *filt, void *filt_data)
+                                  WStackingFilter *include_filt, 
+                                  WStackingFilter *approve_filt, 
+                                  void *filt_data)
 {
     WStacking *st=NULL;
+    uint min_level=0;
     
     if(stacking==NULL)
         return NULL;
     
-    st=stacking->prev;
-    while(1){
+    st=stacking;
+    do{
+        st=st->prev;
+        
         if(st->reg!=NULL 
            && !(st->reg->flags&REGION_SKIP_FOCUS)
-           && cf(filt, filt_data, st)){
+           && cf(include_filt, filt_data, st)){
             
-            if(st->level>=STACKING_LEVEL_MODAL1){
-                if(to_try!=NULL && to_try->level==st->level)
+            if(st->level<min_level){
+                return NULL;
+            }else if(st->level>=STACKING_LEVEL_MODAL1){
+                if(to_try!=NULL && to_try->level>=st->level)
                     return to_try;
+                min_level=st->level;
             }else{
                 if(to_try!=NULL)
                     return to_try;
             }
-            return st;
+            
+            if(cf(approve_filt, filt_data, st))
+                return st;
         }
-        
-        if(st==stacking){
-            st=NULL;
-            break;
-        }
-        st=st->prev;
-    }
+    }while(st!=stacking);
     
     return NULL;
 }

@@ -214,7 +214,7 @@ WStacking *group_find_to_focus(WGroup *ws, WStacking *to_try)
     if(stacking==NULL)
         return NULL;
 
-    return stacking_find_to_focus(stacking, to_try, wsfilt, ws);
+    return stacking_find_to_focus(stacking, to_try, wsfilt, NULL, ws);
 }
 
 

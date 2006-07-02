@@ -86,6 +86,8 @@ WStacking *stacking_unweave(WStacking **stacking,
                             WStackingFilter *filt, void *filt_data);
 
 WStacking *stacking_find_to_focus(WStacking *stacking, WStacking *to_try,
-                                  WStackingFilter *filt, void *filt_data);
+                                  WStackingFilter *include_filt, 
+                                  WStackingFilter *approve_filt, 
+                                  void *filt_data);
 
 #endif /* ION_IONCORE_STACKING_H */

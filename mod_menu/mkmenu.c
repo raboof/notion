@@ -50,7 +50,7 @@ WMenu *mod_menu_do_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
     
     par.flags=(MPLEX_ATTACH_SWITCHTO|
                MPLEX_ATTACH_L2|
-               MPLEX_ATTACH_L2_SEMIMODAL|
+               MPLEX_ATTACH_L2_MODAL|
                MPLEX_ATTACH_SIZEPOLICY);
     par.szplcy=SIZEPOLICY_FULL_BOUNDS;
         
