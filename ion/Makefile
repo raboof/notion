@@ -20,16 +20,6 @@ LIBS += $(WHOLEA) $(LIBMAINLOOP_LIBS) $(LIBEXTL_LIBS) $(LIBTU_LIBS) $(NO_WHOLEA)
 LIBS += $(LUA_LIBS) $(DL_LIBS)
 LIBS += -lm
 
-EXT_OBJS += ../ioncore/ioncore.a
-
-DEFINES += -DETCDIR=\"$(ETCDIR)\" -DSHAREDIR=\"$(SHAREDIR)\" \
-           -DEXTRABINDIR=\"$(EXTRABINDIR)\" -DMODULEDIR=\"$(MODULEDIR)\" \
-	   -DLCDIR=\"$(LCDIR)\" -DLOCALEDIR=\"$(LOCALEDIR)\"
-
-CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
-
-SOURCES=ion.c
-
 ifeq ($(PRELOAD_MODULES),1)
 EXT_OBJS += $(foreach mod, $(MODULE_LIST), ../$(mod)/$(mod).a)
 DEPEND_DEPENDS += preload.c
@@ -41,6 +31,16 @@ LINKOPTS = $(EXPORT_DYNAMIC)
 WHOLEA = -Wl,-whole-archive
 NO_WHOLEA = -Wl,-no-whole-archive
 endif
+
+EXT_OBJS += ../ioncore/ioncore.a
+
+DEFINES += -DETCDIR=\"$(ETCDIR)\" -DSHAREDIR=\"$(SHAREDIR)\" \
+           -DEXTRABINDIR=\"$(EXTRABINDIR)\" -DMODULEDIR=\"$(MODULEDIR)\" \
+	   -DLCDIR=\"$(LCDIR)\" -DLOCALEDIR=\"$(LOCALEDIR)\"
+
+CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
+
+SOURCES=ion.c
 
 TARGETS=ion3
 

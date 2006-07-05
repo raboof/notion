@@ -20,6 +20,18 @@ LIBS += $(WHOLEA) $(LIBMAINLOOP_LIBS) $(LIBEXTL_LIBS) $(LIBTU_LIBS) $(NO_WHOLEA)
 LIBS += $(LUA_LIBS) $(DL_LIBS)
 LIBS += -lm
 
+ifeq ($(PRELOAD_MODULES),1)
+EXT_OBJS += $(foreach mod, $(PWM_MODULE_LIST), ../$(mod)/$(mod).a)
+DEPEND_DEPENDS += preload.c
+SOURCES += preload.c
+TO_CLEAN += preload.c
+LIBS += -lSM -lICE
+else
+LINKOPTS = $(EXPORT_DYNAMIC)
+WHOLEA = -Wl,-whole-archive
+NO_WHOLEA = -Wl,-no-whole-archive
+endif
+
 EXT_OBJS += ../ioncore/ioncore.a
 
 DEFINES += -DETCDIR=\"$(ETCDIR)\" -DSHAREDIR=\"$(SHAREDIR)\" \
@@ -35,18 +47,6 @@ endif
 CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
 SOURCES=pwm.c
-
-ifeq ($(PRELOAD_MODULES),1)
-EXT_OBJS += $(foreach mod, $(PWM_MODULE_LIST), ../$(mod)/$(mod).a)
-DEPEND_DEPENDS += preload.c
-SOURCES += preload.c
-TO_CLEAN += preload.c
-LIBS += -lSM -lICE
-else
-LINKOPTS = $(EXPORT_DYNAMIC)
-WHOLEA = -Wl,-whole-archive
-NO_WHOLEA = -Wl,-no-whole-archive
-endif
 
 ETC = cfg_pwm.lua
 TARGETS = pwm3
