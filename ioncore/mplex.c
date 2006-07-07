@@ -47,7 +47,7 @@
     (REGION_IS_MAPPED(MPLEX) && !MPLEX_MGD_UNVIEWABLE(MPLEX))
 
 
-#define MANAGES_STDISP(REG) HAS_DYN(REG, region_manage_stdisp)
+#define CAN_MANAGE_STDISP(REG) HAS_DYN(REG, region_manage_stdisp)
 
 
 /*{{{ Destroy/create mplex */
@@ -622,12 +622,13 @@ static void mplex_do_node_display(WMPlex *mplex, WLListNode *node,
             return;
         
         /* Move stdisp */
-        if(MANAGES_STDISP(sub)){
+        if(CAN_MANAGE_STDISP(sub)){
             if(stdisp!=NULL){
-                WRegion *mgr=REGION_MANAGER(stdisp);
+                WRegion *mgr=mgr_within_mplex(mplex, stdisp);
                 if(mgr!=sub){
-                    if(MANAGES_STDISP(mgr)){
-                        region_unmanage_stdisp(mgr, FALSE, FALSE);
+                    if(mgr!=NULL){
+                        if(CAN_MANAGE_STDISP(mgr))
+                            region_unmanage_stdisp(mgr, FALSE, FALSE);
                         region_detach_manager(stdisp);
                     }
                     
@@ -1218,10 +1219,13 @@ void mplex_managed_remove(WMPlex *mplex, WRegion *sub)
     bool sw=FALSE;
     WRegion *stdisp=(WRegion*)(mplex->stdispwatch.obj);
     WLListNode *node, *next=NULL;
-    
-    if(MANAGES_STDISP(sub) && stdisp!=NULL && REGION_MANAGER(stdisp)==sub){
-        region_unmanage_stdisp(sub, TRUE, TRUE);
-        region_detach_manager(stdisp);
+ 
+    if(stdisp!=NULL){
+        if(CAN_MANAGE_STDISP(sub) && 
+           mgr_within_mplex(mplex, stdisp)==sub){
+            region_unmanage_stdisp(sub, TRUE, TRUE);
+            region_detach_manager(stdisp);
+        }
     }
     
     mplex_unstack(mplex, sub);
@@ -1340,8 +1344,9 @@ bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg,
             REGION_PARENT(reg)==(WWindow*)mplex));
     
     if(oldstdisp!=NULL){
-        mgr=REGION_MANAGER(oldstdisp);
-        if(!MANAGES_STDISP(mgr))
+        mgr=mgr_within_mplex(mplex, oldstdisp);
+        
+        if(!CAN_MANAGE_STDISP(mgr))
             mgr=NULL;
         
         if(oldstdisp!=reg){
@@ -1363,7 +1368,7 @@ bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg,
         watch_setup(&(mplex->stdispwatch), (Obj*)reg, stdisp_watch_handler);
         
         if(mplex->l1_current!=NULL
-           && MANAGES_STDISP(mplex->l1_current->reg)
+           && CAN_MANAGE_STDISP(mplex->l1_current->reg)
            && mgr!=mplex->l1_current->reg){
             if(mgr!=NULL){
                 region_unmanage_stdisp(mgr, FALSE, TRUE);

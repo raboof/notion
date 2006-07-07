@@ -712,7 +712,19 @@ void group_manage_stdisp(WGroup *ws, WRegion *stdisp,
                          const WMPlexSTDispInfo *di)
 {
     WFitParams fp;
-    uint szplcy=stdisp_szplcy(di, stdisp)|SIZEPOLICY_SHRUNK;
+    uint szplcy;
+    WRegion *b=(ws->bottom==NULL ? NULL : ws->bottom->reg);
+    
+    /* Check if 'bottom' wants to manage the stdisp. */
+    if(b!=NULL && HAS_DYN(b, region_manage_stdisp)){
+        region_manage_stdisp(b, stdisp, di);
+        if(REGION_MANAGER(stdisp)==b)
+            return;
+    }
+    
+    /* No. */
+    
+    szplcy=stdisp_szplcy(di, stdisp)|SIZEPOLICY_SHRUNK;
     
     if(ws->managed_stdisp!=NULL && ws->managed_stdisp->reg==stdisp){
         if(ws->managed_stdisp->szplcy==szplcy)
