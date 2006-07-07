@@ -32,6 +32,7 @@
 #include <ioncore/regbind.h>
 #include <ioncore/extlconv.h>
 #include <ioncore/xwindow.h>
+#include <ioncore/navi.h>
 #include "placement.h"
 #include "ionws.h"
 #include "split.h"
@@ -732,42 +733,79 @@ WPHolder *ionws_get_rescue_pholder_for(WIonWS *ws, WRegion *mgd)
 /*}}}*/
 
 
-/*{{{ Split/unsplit */
+/*{{{ Navigation */
 
+
+static void navi_to_dir_primn(WRegionNavi nh, int *dir, int *primn)
+{
+    switch(nh){
+    case REGION_NAVI_ANY:
+    case REGION_NAVI_FIRST:
+    case REGION_NAVI_LAST:
+        *primn=PRIMN_ANY;
+        *dir=SPLIT_ANY;
+        break;
+        
+    case REGION_NAVI_LEFT:
+        *primn=PRIMN_TL;
+        *dir=SPLIT_HORIZONTAL;
+        break;
+        
+    case REGION_NAVI_RIGHT:
+        *primn=PRIMN_BR;
+        *dir=SPLIT_HORIZONTAL;
+        break;
+        
+    case REGION_NAVI_TOP:
+        *primn=PRIMN_TL;
+        *dir=SPLIT_VERTICAL;
+        break;
+        
+    case REGION_NAVI_BOTTOM:
+        *primn=PRIMN_BR;
+        *dir=SPLIT_VERTICAL;
+        break;
+    }
+}
+        
 
 static bool get_split_dir_primn(const char *str, int *dir, int *primn)
 {
-    if(str==NULL){
-        warn(TR("Invalid split type parameter."));
-        return FALSE;
-    }
+    WRegionNavi nh;
     
-    if(!strcmp(str, "any")){
-        *primn=PRIMN_ANY;
-        *dir=SPLIT_ANY;
-    }else if(!strcmp(str, "left")){
-        *primn=PRIMN_TL;
-        *dir=SPLIT_HORIZONTAL;
-    }else if(!strcmp(str, "right")){
-        *primn=PRIMN_BR;
-        *dir=SPLIT_HORIZONTAL;
-    }else if(!strcmp(str, "top") || 
-             !strcmp(str, "above") || 
-             !strcmp(str, "up")){
-        *primn=PRIMN_TL;
-        *dir=SPLIT_VERTICAL;
-    }else if(!strcmp(str, "bottom") || 
-             !strcmp(str, "below") ||
-             !strcmp(str, "down")){
-        *primn=PRIMN_BR;
-        *dir=SPLIT_VERTICAL;
-    }else{
-        warn(TR("Invalid split type parameter."));
-    }
+    if(!ioncore_string_to_navi(str, &nh))
+        return FALSE;
+    
+    navi_to_dir_primn(nh, dir, primn);
     
     return TRUE;
 }
 
+
+WRegion *ionws_navi_next(WIonWS *ws, WRegion *reg, WRegionNavi nh)
+{
+    int dir, primn;
+    
+    navi_to_dir_primn(nh, &dir, &primn);
+    
+    return ionws_do_get_nextto(ws, reg, dir, primn, FALSE);
+}
+
+
+WRegion *ionws_navi_first(WIonWS *ws, WRegionNavi nh)
+{
+    int dir, primn;
+    
+    navi_to_dir_primn(nh, &dir, &primn);
+    
+    return ionws_do_get_farthest(ws, dir, primn, FALSE);
+}
+
+
+/*}}}*/
+
+
+/*{{{ Split/unsplit */
 
 static bool get_split_dir_primn_float(const char *str, int *dir, int *primn,
                                       bool *floating)
@@ -1687,6 +1725,12 @@ static DynFunTab ionws_dynfuntab[]={
 
     {(DynFun*)ionws_do_get_farthest,
      (DynFun*)ionws_do_get_farthest_default},
+     
+    {(DynFun*)region_navi_first,
+     (DynFun*)ionws_navi_first},
+    
+    {(DynFun*)region_navi_next,
+     (DynFun*)ionws_navi_next},
      
     END_DYNFUNTAB
 };

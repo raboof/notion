@@ -33,6 +33,7 @@
 #include <ioncore/stacking.h>
 #include <ioncore/sizepolicy.h>
 #include <ioncore/bindmaps.h>
+#include <ioncore/navi.h>
 
 #include "group.h"
 #include "grouppholder.h"
@@ -775,38 +776,107 @@ void group_managed_rqgeom(WGroup *ws, WRegion *reg,
 /*{{{ Circulate */
 
 
+static WStacking *nxt(WGroup *ws, WStacking *st)
+{
+    return (st->mgr_next!=NULL ? st->mgr_next : ws->managed_list);
+}
+
+
+static bool stacking_ok(WGroup *ws, WStacking *st)
+{
+    return (st->reg!=NULL && REGION_IS_MAPPED(st->reg));
+}
+
+       
+static WStacking *do_get_next(WGroup *ws, WStacking *sti)
+{
+    WStacking *st=nxt(ws, sti);
+    
+    for(; st!=sti; st=nxt(ws, st)){
+        if(stacking_ok(ws, st))
+            return st;
+    }
+    
+    return NULL;
+}
+
+       
+static WStacking *do_get_prev(WGroup *ws, WStacking *sti)
+{
+    WStacking *st=sti->mgr_prev;
+    
+    for(; st!=sti; st=st->mgr_prev){
+        if(stacking_ok(ws, st))
+            return st;
+    }
+    
+    return NULL;
+}
+
+
+static WStacking *group_do_navi_first(WGroup *ws, WRegionNavi nh)
+{
+    WStacking *lst=ws->managed_list;
+    
+    if(lst==NULL)
+        return NULL;
+
+    if(nh==REGION_NAVI_ANY && 
+       ws->current_managed!=NULL &&
+       ws->current_managed->reg!=NULL){
+        return ws->current_managed;
+    }
+    
+    if(nh==REGION_NAVI_ANY || nh==REGION_NAVI_FIRST || 
+       nh==REGION_NAVI_BOTTOM || nh==REGION_NAVI_RIGHT){
+        return do_get_next(ws, lst->prev);
+    }else{
+        return do_get_prev(ws, lst);
+    }
+}
+
+
+static WRegion *group_navi_first(WGroup *ws, WRegionNavi nh)
+{
+    WStacking *st=group_do_navi_first(ws, nh);
+    return (st!=NULL ? st->reg : NULL);
+}
+
+
+static WStacking *group_do_navi_next(WGroup *ws, WStacking *st, WRegionNavi nh)
+{
+    if(st==NULL)
+        return group_do_navi_first(ws, nh);
+    
+    if(nh==REGION_NAVI_ANY || nh==REGION_NAVI_FIRST || 
+       nh==REGION_NAVI_BOTTOM || nh==REGION_NAVI_RIGHT){
+        return do_get_next(ws, st);
+    }else{
+        return do_get_prev(ws, st);
+    }
+}
+
+static WRegion *group_navi_next(WGroup *ws, WRegion *reg, WRegionNavi nh)
+{
+    WStacking *st=group_find_stacking(ws, reg);
+    st=group_do_navi_next(ws, st, nh);
+    return (st!=NULL ? st->reg : NULL);
+}
+
+
 /*EXTL_DOC
  * Activate next object in stacking order on \var{ws}.
  */
 EXTL_EXPORT_MEMBER
 WRegion *group_circulate(WGroup *ws)
 {
-    WStacking *st=NULL, *ststart;
-    WStacking *stacking=group_get_stacking(ws);
-    
-    if(stacking==NULL)
-        return NULL;
-    
-    if(ws->current_managed!=NULL)
-        st=ws->current_managed->next;
+    WStacking *st=group_do_navi_next(ws, ws->current_managed, 
+                                     REGION_NAVI_FIRST);
     
     if(st==NULL)
-        st=stacking;
-    ststart=st;
+        return NULL;
     
-    while(1){
-        if(REGION_MANAGER(st->reg)==(WRegion*)ws
-           && st!=ws->managed_stdisp){
-            break;
-        }
-        st=st->next;
-        if(st==NULL)
-            st=stacking;
-        if(st==ststart)
-            return NULL;
-    }
-        
-    if(region_may_control_focus((WRegion*)ws))
+    if(st!=NULL && region_may_control_focus((WRegion*)ws))
        region_goto(st->reg);
     
     return st->reg;
@@ -819,30 +889,13 @@ WRegion *group_circulate(WGroup *ws)
 EXTL_EXPORT_MEMBER
 WRegion *group_backcirculate(WGroup *ws)
 {
-    WStacking *st=NULL, *ststart;
-    WStacking *stacking=group_get_stacking(ws);
-    
-    if(stacking==NULL)
+    WStacking *st=group_do_navi_next(ws, ws->current_managed, 
+                                     REGION_NAVI_LAST);
+        
+    if(st==NULL)
         return NULL;
     
-    if(ws->current_managed!=NULL)
-        st=ws->current_managed->prev;
-    
-    if(st==NULL)
-        st=stacking->prev;
-    ststart=st;
-    
-    while(1){
-        if(REGION_MANAGER(st->reg)==(WRegion*)ws
-           && st!=ws->managed_stdisp){
-            break;
-        }
-        st=st->prev;
-        if(st==ststart)
-            return NULL;
-    }
-        
-    if(region_may_control_focus((WRegion*)ws))
+    if(st!=NULL && region_may_control_focus((WRegion*)ws))
        region_goto(st->reg);
     
     return st->reg;
@@ -1206,6 +1259,12 @@ static DynFunTab group_dynfuntab[]={
     
     {(DynFun*)region_xwindow,
      (DynFun*)group_xwindow},
+    
+    {(DynFun*)region_navi_first,
+     (DynFun*)group_navi_first},
+    
+    {(DynFun*)region_navi_next,
+     (DynFun*)group_navi_next},
     
     END_DYNFUNTAB
 };
