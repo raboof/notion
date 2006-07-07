@@ -474,8 +474,6 @@ WStacking *group_do_add_managed_default(WGroup *ws, WRegion *reg, int level,
     LINK_ITEM(ws->managed_list, st, mgr_next, mgr_prev);
     region_set_manager(reg, (WRegion*)ws);
     
-    /* TODO: stacking fscked up for new regions. */
-    
     LINK_ITEM_FIRST(*stackingp, st, next, prev);
     group_do_raise(ws, reg, TRUE);
 
@@ -575,17 +573,20 @@ static void get_params(WGroup *ws, ExtlTab tab, WGroupAttachParams *par)
         }
     }
     
-    if(extl_table_is_bool_set(tab, "switchto"))
-        par->switchto=1;
-    
-    if(extl_table_is_bool_set(tab, "bottom"))
+    if(extl_table_is_bool_set(tab, "bottom")){
+        par->level=STACKING_LEVEL_BOTTOM;
+        par->level_set=1;
         par->bottom=1;
-
+    }
+    
     if(!par->level_set && extl_table_is_bool_set(tab, "modal")){
         par->level=STACKING_LEVEL_MODAL1;
         par->level_set=1;
     }
     
+    if(extl_table_is_bool_set(tab, "switchto"))
+        par->switchto=1;
+
     if(extl_table_gets_i(tab, "sizepolicy", &tmp)){
         par->szplcy_set=1;
         par->szplcy=tmp;
