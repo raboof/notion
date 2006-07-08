@@ -200,7 +200,7 @@ static void enforce_level_sanity(WStacking **np)
 
 static void get_bottom(WStacking *st, Window *other, int *mode)
 {
-    Window bottom, top;
+    Window bottom=None, top=None;
     
     while(st!=NULL){
         if(st->reg!=NULL){
@@ -208,7 +208,7 @@ static void get_bottom(WStacking *st, Window *other, int *mode)
             if(bottom!=None){
                 *other=bottom;
                 *mode=Below;
-                break;
+                return;
             }
         }
         st=st->next;
@@ -244,17 +244,16 @@ void stacking_weave(WStacking **stacking, WStacking **np, bool below)
         }
         get_bottom(ab, &other, &mode);
         
-        while(1){
-            st=*np;
-            if(st==NULL || st->level>lvl)
-                break;
-            UNLINK_ITEM(*np, st, next, prev);
-            if(ab!=NULL){
-                LINK_ITEM_BEFORE(*stacking, ab, st, next, prev);
-            }else{
-                LINK_ITEM_LAST(*stacking, st, next, prev);
-            }
-            region_restack(st->reg, other, mode);
+        st=*np;
+
+        UNLINK_ITEM(*np, st, next, prev);
+        
+        region_restack(st->reg, other, mode);
+
+        if(ab!=NULL){
+            LINK_ITEM_BEFORE(*stacking, ab, st, next, prev);
+        }else{
+            LINK_ITEM_LAST(*stacking, st, next, prev);
         }
     }
 }
@@ -434,7 +433,9 @@ void stacking_do_raise(WStacking **stacking, WRegion *reg, bool initial,
     /* Find top and bottom of everything above regst except stuff to
      * be stacked above it.
      */
-    for(st=(*stacking)->prev; st!=*stacking; st=st->prev){
+    st=*stacking;
+    do{
+        st=st->prev;
         if(st==regst)
             break;
         if(st->above!=regst && cf(filt, filt_data, st)){
@@ -454,7 +455,7 @@ void stacking_do_raise(WStacking **stacking, WRegion *reg, bool initial,
                 }
             }
         }
-    }
+    }while(st!=*stacking);
 
     /* Restack reg */
     

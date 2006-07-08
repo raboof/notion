@@ -861,7 +861,7 @@ bool mplex_l2_is_hidden(WMPlex *mplex, WRegion *reg)
 static bool mplex_stack(WMPlex *mplex, WRegion *reg, 
                         bool l2, bool modal, WSizePolicy szplcy)
 {
-    WStacking *st=NULL, *sttop=NULL;
+    WStacking *st=NULL, *sttop=NULL, *tmp=NULL;
     Window bottom=None, top=None;
     WStacking **stackingp=window_get_stackingp(&mplex->win);
     
@@ -881,12 +881,15 @@ static bool mplex_stack(WMPlex *mplex, WRegion *reg,
                   : STACKING_LEVEL_NORMAL)
                : STACKING_LEVEL_BOTTOM);
     st->szplcy=szplcy;
-    st->next=NULL;
-    st->prev=st;
 
-    stacking_weave(stackingp, &st, FALSE);
+    LINK_ITEM_FIRST(tmp, st, next, prev);
+    stacking_weave(stackingp, &tmp, FALSE);
+    assert(tmp==NULL);
     
-    assert(st==NULL);
+    /*
+    LINK_ITEM_FIRST(*stackingp, st, next, prev);
+    stacking_do_raise(stackingp, reg, TRUE, None, NULL, NULL);
+     */
     
     return TRUE;
 }

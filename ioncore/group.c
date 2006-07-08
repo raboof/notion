@@ -454,7 +454,7 @@ WStacking *group_do_add_managed(WGroup *ws, WRegion *reg, int level,
 WStacking *group_do_add_managed_default(WGroup *ws, WRegion *reg, int level,
                                         WSizePolicy szplcy)
 {
-    WStacking *st=NULL, *sttop=NULL;
+    WStacking *st=NULL, *tmp=NULL;
     Window bottom=None, top=None;
     WStacking **stackingp=group_get_stackingp(ws);
     
@@ -474,8 +474,14 @@ WStacking *group_do_add_managed_default(WGroup *ws, WRegion *reg, int level,
     LINK_ITEM(ws->managed_list, st, mgr_next, mgr_prev);
     region_set_manager(reg, (WRegion*)ws);
     
+    LINK_ITEM_FIRST(tmp, st, next, prev);
+    stacking_weave(stackingp, &tmp, FALSE);
+    assert(tmp==NULL);
+    
+    /*
     LINK_ITEM_FIRST(*stackingp, st, next, prev);
     group_do_raise(ws, reg, TRUE);
+     */
 
     if(region_is_fully_mapped((WRegion*)ws))
         region_map(reg);
@@ -951,8 +957,8 @@ static void group_do_raise(WGroup *ws, WRegion *reg, bool initial)
     }
     
     stacking_do_raise(stackingp, reg, initial, 
-                      region_xwindow((WRegion*)ws),
-                      NULL, ws);
+                      None /*region_xwindow((WRegion*)ws)*/,
+                      NULL, NULL);
 }
                       
 
