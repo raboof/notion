@@ -1304,7 +1304,7 @@ void mod_dock_set_floating_shown_on(WMPlex *mplex, const char *how)
     
     for(dock=docks; dock; dock=dock->dock_next){
         if(REGION_MANAGER(dock)==(WRegion*)mplex &&
-           mplex_layer(mplex, (WRegion*)dock)==2){
+           mplex_lno(mplex, (WRegion*)dock)==2){
             mplex_l2_set_hidden(mplex, (WRegion*)dock, setpar);
         }
     }
