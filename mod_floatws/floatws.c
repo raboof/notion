@@ -495,6 +495,14 @@ WPHolder *floatws_prepare_manage(WFloatWS *ws, const WClientWin *cwin,
                                  const WManageParams *param,
                                  int redir)
 {
+    WRegion *b=(ws->grp.bottom!=NULL ? ws->grp.bottom->reg : NULL);
+    
+    if(b!=NULL && HAS_DYN(b, region_prepare_manage)){
+        WPHolder *ph=region_prepare_manage(b, cwin, param, redir);
+        if(ph!=NULL)
+            return ph;
+    }
+    
     return floatws_do_prepare_manage(ws, cwin, param, redir, TRUE);
 }
 
