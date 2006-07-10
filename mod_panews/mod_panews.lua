@@ -166,6 +166,7 @@ function mod_panews.set(s)
             end
         elseif type(s.template)=="table" then
             settings.template=s.template
+            ok=true
         end
         if not ok then
             ioncore.warn_traced("Invalid template.")
