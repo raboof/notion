@@ -16,7 +16,6 @@
 #include <ioncore/common.h>
 #include <ioncore/region.h>
 #include <ioncore/screen.h>
-#include <ioncore/genws.h>
 #include <ioncore/manage.h>
 #include <ioncore/rectangle.h>
 #include <ioncore/pholder.h>

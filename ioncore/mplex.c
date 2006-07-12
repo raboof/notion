@@ -30,7 +30,6 @@
 #include "tags.h"
 #include "sizehint.h"
 #include "extlconv.h"
-#include "genws.h"
 #include "frame-pointer.h"
 #include "bindmaps.h"
 #include "regbind.h"

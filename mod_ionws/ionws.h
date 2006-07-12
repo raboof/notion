@@ -17,7 +17,6 @@
 #include <ioncore/common.h>
 #include <ioncore/region.h>
 #include <ioncore/screen.h>
-#include <ioncore/genws.h>
 #include <ioncore/rectangle.h>
 #include <ioncore/pholder.h>
 #include "split.h"
@@ -25,11 +24,12 @@
 
 INTRCLASS(WIonWS);
 DECLCLASS(WIonWS){
-    WGenWS genws;
+    WRegion reg;
     WSplit *split_tree;
     WSplitST *stdispnode;
     PtrList *managed_list;
     WRegionSimpleCreateFn *create_frame_fn;
+    Window dummywin;
 };
 
 
@@ -89,6 +89,8 @@ extern bool ionws_managed_may_destroy(WIonWS *ws, WRegion *reg);
 extern void ionws_manage_stdisp(WIonWS *ws, WRegion *stdisp, 
                                 const WMPlexSTDispInfo *di);
 extern void ionws_unmanage_stdisp(WIonWS *ws, bool permanent, bool nofocus);
+
+extern void ionws_fallback_focus(WIonWS *ws, bool warp);
 
 /* Loading */
 

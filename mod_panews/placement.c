@@ -195,7 +195,7 @@ static bool do_replace(WPaneWS *ws, WFrame *frame, WRegion *reg,
         split_regularise_stdisp(ws->ionws.stdispnode);
 
     if(ws->ionws.split_tree!=NULL)
-        split_restack(ws->ionws.split_tree, ((WGenWS*)ws)->dummywin, Above);
+        split_restack(ws->ionws.split_tree, ws->ionws.dummywin, Above);
 
     return TRUE;
 }

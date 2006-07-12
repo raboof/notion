@@ -15,7 +15,6 @@
 #include <ioncore/common.h>
 #include <ioncore/region.h>
 #include <ioncore/screen.h>
-#include <ioncore/genws.h>
 #include <libextl/extl.h>
 #include <ioncore/rectangle.h>
 

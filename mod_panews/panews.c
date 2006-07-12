@@ -198,7 +198,7 @@ void panews_managed_remove(WPaneWS *ws, WRegion *reg)
                 /* We don't want to give the stdisp focus, even if one exists. 
                  * Or do we?
                  */
-                genws_fallback_focus((WGenWS*)ws, FALSE);
+                ionws_fallback_focus(&ws->ionws, FALSE);
             }
         }else if(act && mcf){
             region_warp(other);
@@ -407,7 +407,7 @@ WRegion *panews_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
     }
     
     ws->ionws.split_tree->ws_if_root=ws;
-    split_restack(ws->ionws.split_tree, ((WGenWS*)ws)->dummywin, Above);
+    split_restack(ws->ionws.split_tree, ws->ionws.dummywin, Above);
     
     return (WRegion*)ws;
 }

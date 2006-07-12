@@ -24,7 +24,6 @@
 #include "reginfo.h"
 #include "saveload.h"
 #include "resize.h"
-#include "genws.h"
 #include "event.h"
 #include "bindmaps.h"
 #include "regbind.h"

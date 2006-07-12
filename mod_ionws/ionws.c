@@ -108,7 +108,12 @@ bool ionws_fitrep(WIonWS *ws, WWindow *par, const WFitParams *fp)
         if(!region_same_rootwin((WRegion*)ws, (WRegion*)par))
             return FALSE;
     
-        genws_do_reparent(&(ws->genws), par, fp);
+        region_unset_parent((WRegion*)ws);
+        
+        XReparentWindow(ioncore_g.dpy, ws->dummywin, 
+                        par->win, fp->g.x, fp->g.h);
+        
+        region_set_parent((WRegion*)ws, par);
     
         if(ws->split_tree!=NULL)
             split_reparent(ws->split_tree, par);
@@ -140,7 +145,8 @@ void ionws_managed_rqgeom(WIonWS *ws, WRegion *mgd,
 
 void ionws_map(WIonWS *ws)
 {
-    genws_do_map(&(ws->genws));
+    REGION_MARK_MAPPED(ws);
+    XMapWindow(ioncore_g.dpy, ws->dummywin);
     
     if(ws->split_tree!=NULL)
         split_map(ws->split_tree);
@@ -149,10 +155,21 @@ void ionws_map(WIonWS *ws)
 
 void ionws_unmap(WIonWS *ws)
 {
-    genws_do_unmap(&(ws->genws));
+    REGION_MARK_UNMAPPED(ws);
+    XUnmapWindow(ioncore_g.dpy, ws->dummywin);
 
     if(ws->split_tree!=NULL)
         split_unmap(ws->split_tree);
+}
+
+
+void ionws_fallback_focus(WIonWS *ws, bool warp)
+{
+    if(warp)
+        region_do_warp((WRegion*)ws);
+    
+    region_set_await_focus((WRegion*)ws);
+    xwindow_do_set_focus(ws->dummywin);
 }
 
 
@@ -161,7 +178,7 @@ void ionws_do_set_focus(WIonWS *ws, bool warp)
     WRegion *sub=ionws_current(ws);
     
     if(sub==NULL){
-        genws_fallback_focus(&(ws->genws), warp);
+        ionws_fallback_focus(ws, warp);
         return;
     }
 
@@ -176,7 +193,7 @@ static void restack_handler(WTimer *tmr, Obj *obj)
 {
     if(obj!=NULL){
         WIonWS *ws=(WIonWS*)obj;
-        split_restack(ws->split_tree, ws->genws.dummywin, Above);
+        split_restack(ws->split_tree, ws->dummywin, Above);
     }
 }
 
@@ -216,7 +233,7 @@ bool ionws_managed_prepare_focus(WIonWS *ws, WRegion *reg,
         if(use_timer && restack_timer!=NULL){
             timer_set(restack_timer, rd, restack_handler, (Obj*)ws);
         }else{
-            split_restack(ws->split_tree, ws->genws.dummywin, Above);
+            split_restack(ws->split_tree, ws->dummywin, Above);
         }
     }
 
@@ -229,9 +246,9 @@ bool ionws_managed_prepare_focus(WIonWS *ws, WRegion *reg,
 
 void ionws_restack(WIonWS *ws, Window other, int mode)
 {
-    xwindow_restack(ws->genws.dummywin, other, mode);
+    xwindow_restack(ws->dummywin, other, mode);
     if(ws->split_tree!=NULL)
-        split_restack(ws->split_tree, ws->genws.dummywin, Above);
+        split_restack(ws->split_tree, ws->dummywin, Above);
 }
 
 
@@ -242,10 +259,33 @@ void ionws_stacking(WIonWS *ws, Window *bottomret, Window *topret)
     if(ws->split_tree!=None)
         split_stacking(ws->split_tree, &sbottom, &stop);
     
-    *bottomret=ws->genws.dummywin;
-    *topret=(stop!=None ? stop : ws->genws.dummywin);
+    *bottomret=ws->dummywin;
+    *topret=(stop!=None ? stop : ws->dummywin);
 }
 
+
+Window ionws_xwindow(const WIonWS *ws)
+{
+    return ws->dummywin;
+}
+
+
+/*
+WRegion *ionws_rqclose_propagate(WIonWS *ws, WRegion *maybe_sub)
+{
+    return (region_rqclose((WRegion*)ws, FALSE) ? (WRegion*)ws : NULL);
+}
+*/
+
+WPHolder *ionws_prepare_manage_transient(WIonWS *ws,
+                                         const WClientWin *transient,
+                                         const WManageParams *param,
+                                         int unused)
+{
+    /* Transient manager searches should not cross workspaces. */
+    return NULL;
+}
+    
 
 /*}}}*/
 
@@ -296,7 +336,7 @@ void ionws_unmanage_stdisp(WIonWS *ws, bool permanent, bool nofocus)
         if(tofocus!=NULL)
             region_set_focus(tofocus->reg);
         else
-            genws_fallback_focus((WGenWS*)ws, FALSE);
+            ionws_fallback_focus(ws, FALSE);
     }
 }
 
@@ -438,7 +478,7 @@ void ionws_manage_stdisp(WIonWS *ws, WRegion *stdisp,
 
     /* Restack to ensure the split tree is stacked in the expected order. */
     if(ws->split_tree!=NULL)
-        split_restack(ws->split_tree, ws->genws.dummywin, Above);
+        split_restack(ws->split_tree, ws->dummywin, Above);
     
     if(mcf && act)
         region_set_focus(stdisp);
@@ -527,18 +567,33 @@ bool ionws_init(WIonWS *ws, WWindow *parent, const WFitParams *fp,
     ws->stdispnode=NULL;
     ws->managed_list=NULL;
 
-    if(!genws_init(&(ws->genws), parent, fp))
+    ws->dummywin=XCreateWindow(ioncore_g.dpy, parent->win,
+                                fp->g.x, fp->g.y, 1, 1, 0,
+                                CopyFromParent, InputOnly,
+                                CopyFromParent, 0, NULL);
+    if(ws->dummywin==None)
         return FALSE;
-    
-    ((WRegion*)ws)->flags|=REGION_GRAB_ON_PARENT;
-    region_add_bindmap((WRegion*)ws, mod_ionws_ionws_bindmap);
+
+    region_init(&(ws->reg), parent, fp);
+
+    ws->reg.flags|=(REGION_GRAB_ON_PARENT|
+                    REGION_PLEASE_WARP);
     
     if(ci){
         if(create_initial_frame(ws, parent, fp)==NULL){
-            genws_deinit(&(ws->genws));
+            XDestroyWindow(ioncore_g.dpy, ws->dummywin);
             return FALSE;
         }
     }
+    
+    XSelectInput(ioncore_g.dpy, ws->dummywin,
+                 FocusChangeMask|KeyPressMask|KeyReleaseMask|
+                 ButtonPressMask|ButtonReleaseMask);
+    XSaveContext(ioncore_g.dpy, ws->dummywin, ioncore_g.win_context,
+                 (XPointer)ws);
+    
+    region_register(&(ws->reg));
+    region_add_bindmap((WRegion*)ws, mod_ionws_ionws_bindmap);
     
     return TRUE;
 }
@@ -575,7 +630,11 @@ void ionws_deinit(WIonWS *ws)
     if(ws->split_tree!=NULL)
         destroy_obj((Obj*)(ws->split_tree));
 
-    genws_deinit(&(ws->genws));
+    XDeleteContext(ioncore_g.dpy, ws->dummywin, ioncore_g.win_context);
+    XDestroyWindow(ioncore_g.dpy, ws->dummywin);
+    ws->dummywin=None;
+
+    region_deinit(&(ws->reg));
 }
 
 
@@ -859,7 +918,7 @@ static WFrame *ionws_do_split(WIonWS *ws, WSplit *node,
      * expected order.
      */
     if(ws->split_tree!=NULL)
-        split_restack(ws->split_tree, ws->genws.dummywin, Above);
+        split_restack(ws->split_tree, ws->dummywin, Above);
 
     newframe=OBJ_CAST(nnode->reg, WFrame);
     assert(newframe!=NULL);
@@ -873,7 +932,7 @@ static WFrame *ionws_do_split(WIonWS *ws, WSplit *node,
 
     /* Restack */
     if(ws->split_tree!=NULL)
-        split_restack(ws->split_tree, ws->genws.dummywin, Above);
+        split_restack(ws->split_tree, ws->dummywin, Above);
     
     return newframe;
 }
@@ -1647,7 +1706,7 @@ WRegion *ionws_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
     }
     
     ws->split_tree->ws_if_root=ws;
-    split_restack(ws->split_tree, ws->genws.dummywin, Above);
+    split_restack(ws->split_tree, ws->dummywin, Above);
     
     return (WRegion*)ws;
 }
@@ -1731,13 +1790,19 @@ static DynFunTab ionws_dynfuntab[]={
     
     {(DynFun*)region_navi_next,
      (DynFun*)ionws_navi_next},
+    
+    {(DynFun*)region_xwindow,
+     (DynFun*)ionws_xwindow},
+    
+    {(DynFun*)region_prepare_manage_transient,
+     (DynFun*)ionws_prepare_manage_transient},
      
     END_DYNFUNTAB
 };
 
 
 EXTL_EXPORT
-IMPLCLASS(WIonWS, WGenWS, ionws_deinit, ionws_dynfuntab);
+IMPLCLASS(WIonWS, WRegion, ionws_deinit, ionws_dynfuntab);
 
     
 /*}}}*/
