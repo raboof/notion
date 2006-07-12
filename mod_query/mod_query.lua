@@ -1085,7 +1085,7 @@ function mod_query.query_lua(mplex)
         return mod_query.do_handle_lua(mplex, env, code)
     end
     
-    mod_query.query(mplex, TR("Lua code: "), nil, handler, complete, "lua")
+    mod_query.query(mplex, TR("Lua code:"), nil, handler, complete, "lua")
 end
 
 -- }}}
