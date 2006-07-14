@@ -123,8 +123,6 @@ bool input_init(WInput *input, WWindow *par, const WFitParams *fp)
     if(!window_init((WWindow*)input, par, fp))
         return FALSE;
 
-    region_register((WRegion*)input);
-    
     win=input->win.win;
     
     input->brush=gr_get_brush(win, region_rootwin_of((WRegion*)par),
@@ -137,6 +135,8 @@ bool input_init(WInput *input, WWindow *par, const WFitParams *fp)
     window_select_input(&(input->win), IONCORE_EVENTMASK_NORMAL);
 
     region_add_bindmap((WRegion*)input, mod_query_input_bindmap);
+    
+    region_register((WRegion*)input);
     
     return TRUE;
     

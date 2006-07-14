@@ -571,8 +571,6 @@ bool menu_init(WMenu *menu, WWindow *par, const WFitParams *fp,
     if(!window_init((WWindow*)menu, par, fp))
         goto fail;
 
-    region_register((WRegion*)menu);
-
     win=menu->win.win;
     
     if(!menu_init_gr(menu, region_rootwin_of((WRegion*)par), win))
@@ -581,7 +579,10 @@ bool menu_init(WMenu *menu, WWindow *par, const WFitParams *fp,
     menu_firstfit(menu, params->submenu_mode, &(params->refg));
     
     window_select_input(&(menu->win), IONCORE_EVENTMASK_NORMAL);
+    
     region_add_bindmap((WRegion*)menu, mod_menu_menu_bindmap);
+    
+    region_register((WRegion*)menu);
     
     return TRUE;
 
