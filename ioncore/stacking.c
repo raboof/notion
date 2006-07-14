@@ -198,7 +198,8 @@ static void enforce_level_sanity(WStacking **np)
 }
 
 
-static void get_bottom(WStacking *st, Window *other, int *mode)
+static void get_bottom(WStacking *st, Window fb_win,
+                       Window *other, int *mode)
 {
     Window bottom=None, top=None;
     
@@ -214,12 +215,13 @@ static void get_bottom(WStacking *st, Window *other, int *mode)
         st=st->next;
     }
     
-    *other=None;
+    *other=fb_win;
     *mode=Above;
 }
 
 
-void stacking_weave(WStacking **stacking, WStacking **np, bool below)
+static void stacking_do_weave(WStacking **stacking, WStacking **np, 
+                              bool below, Window fb_win)
 {
     WStacking *st, *ab;
     uint lvl;
@@ -242,7 +244,7 @@ void stacking_weave(WStacking **stacking, WStacking **np, bool below)
                 break;
             ab=ab->next;
         }
-        get_bottom(ab, &other, &mode);
+        get_bottom(ab, fb_win, &other, &mode);
         
         st=*np;
 
@@ -256,6 +258,12 @@ void stacking_weave(WStacking **stacking, WStacking **np, bool below)
             LINK_ITEM_LAST(*stacking, st, next, prev);
         }
     }
+}
+
+
+void stacking_weave(WStacking **stacking, WStacking **np, bool below)
+{
+    stacking_do_weave(stacking, np, below, None);
 }
 
 
@@ -370,167 +378,80 @@ void stacking_stacking(WStacking *stacking, Window *bottomret, Window *topret,
 /*{{{ Raise/lower */
 
 
-static void restack_above(WStacking **stacking, WStacking *regst,
-                          Window fb_other, int fb_mode)
+static bool is_above(WStacking *st, WStacking *p)
 {
-    Window bottom, top, other;
-    WStacking *stabove, *stnext;
-    WStacking *sttop;
-    int mode;
+    if(st->above==NULL)
+        return FALSE;
+    else if(st->above==p)
+        return TRUE;
+    else
+        return is_above(st->above, p);
+}
 
-    region_stacking(regst->reg, &bottom, &top);
+
+static void collect_above(WStacking **dst, WStacking **src, WStacking *regst)
+{
+    WStacking *stabove, *stnext;
     
-    if(top==None){
-        other=fb_other;
-        mode=fb_mode;
-    }else{
-        other=top;
-        mode=Above;
-    }
-    
-    if(other==None)
-        return;
-    
-    sttop=regst;
-    
-    for(stabove=*stacking; stabove!=NULL; stabove=stnext){
+    for(stabove=*src; stabove!=NULL; stabove=stnext){
         stnext=stabove->next;
         
-        if(stabove==regst)
-            continue;
-        
-        if(stabove->above==regst){
-            UNLINK_ITEM(*stacking, stabove, next, prev);
-            region_restack(stabove->reg, other, mode);
-            LINK_ITEM_AFTER(*stacking, sttop, stabove, next, prev);
-            region_stacking(stabove->reg, &bottom, &top);
-            if(top!=None){
-                other=top;
-                mode=Above;
-            }
-            sttop=stabove;
+        if(is_above(stabove, regst)){
+            UNLINK_ITEM(*src, stabove, next, prev);
+            LINK_ITEM_LAST(*dst, stabove, next, prev);
         }
     }
 }
 
 
-void stacking_do_raise(WStacking **stacking, WRegion *reg, bool initial,
-                       Window fb_win,
+static WStacking *unweave_subtree(WStacking **stacking, WStacking *regst)
+{
+    WStacking *tmp=NULL;
+    
+    UNLINK_ITEM(*stacking, regst, next, prev);
+    LINK_ITEM(tmp, regst, next, prev);
+    
+    collect_above(&tmp, stacking, regst);
+    
+    return tmp;
+}
+
+
+void stacking_do_raise(WStacking **stacking, WRegion *reg, Window fb_win,
                        WStackingFilter *filt, void *filt_data)
 {
-    WStacking *regst, *st, *sttop=NULL;
-    Window bottom=None, top=None, other=None;
-    int mode=Above;
-    
-    if(*stacking==NULL)
-        return;
+    WStacking *regst, *tmp;
     
     regst=stacking_find(*stacking, reg);
     
     if(regst==NULL)
         return;
-
-    /* Find top and bottom of everything above regst except stuff to
-     * be stacked above it.
-     */
-    st=*stacking;
-    do{
-        st=st->prev;
-        if(st==regst)
-            break;
-        if(st->above!=regst && cf(filt, filt_data, st)){
-            region_stacking(st->reg, &bottom, &top);
-            if(st->level>regst->level){
-                if(bottom!=None){
-                    other=bottom;
-                    mode=Below;
-                    sttop=st;
-                }
-            }else{
-                if(top!=None){
-                    other=top;
-                    mode=Above;
-                    sttop=st;
-                    break;
-                }
-            }
-        }
-    }while(st!=*stacking);
-
-    /* Restack reg */
     
-    if(sttop!=NULL){
-        UNLINK_ITEM(*stacking, regst, next, prev);
-        region_restack(reg, other, mode);
-        if(mode==Above){
-            LINK_ITEM_AFTER(*stacking, sttop, regst, next, prev);
-        }else{
-            LINK_ITEM_BEFORE(*stacking, sttop, regst, next, prev);
-        }
-    }else if(initial){
-        other=fb_win;
-        mode=Above;
-        region_restack(reg, other, mode);
-    }
+    tmp=unweave_subtree(stacking, regst);
     
-    if(!initial){
-        /* Restack stuff above reg */
-        restack_above(stacking, regst, other, mode);
-    }
+    stacking_do_weave(stacking, &tmp, FALSE, fb_win);
+    
+    assert(tmp==NULL);
 }
 
 
 void stacking_do_lower(WStacking **stacking, WRegion *reg, Window fb_win,
                        WStackingFilter *filt, void *filt_data)
 {
-    WStacking *regst=NULL, *st, *stbottom=NULL;
-    Window bottom=None, top=None, other=None;
-    int mode=Below;
-    
-    if(*stacking==NULL)
-        return;
+    WStacking *regst, *tmp;
     
     regst=stacking_find(*stacking, reg);
     
     if(regst==NULL)
         return;
 
-    for(st=*stacking; st!=NULL; st=st->next){
-        if(st==regst)
-            break;
-        
-        if(st->above!=regst && cf(filt, filt_data, st)){
-            region_stacking(st->reg, &bottom, &top);
-            if(st->level<regst->level){
-                if(top!=None){
-                    other=top;
-                    mode=Above;
-                    stbottom=st;
-                }
-            }else{
-                if(bottom!=None){
-                    other=bottom;
-                    mode=Below;
-                    stbottom=st;
-                    break;
-                }
-            }
-        }
-    }
+#warning "TODO: special handling of regst->above!=NULL?"
+
+    tmp=unweave_subtree(stacking, regst);
     
-    if(stbottom!=NULL){
-        UNLINK_ITEM(*stacking, regst, next, prev);
-        region_restack(reg, other, mode);
-        if(mode==Above){
-            LINK_ITEM_AFTER(*stacking, stbottom, regst, next, prev);
-        }else{
-            LINK_ITEM_BEFORE(*stacking, stbottom, regst, next, prev);
-        }
-    }else{
-        other=fb_win;
-        mode=Above;
-        region_restack(reg, other, mode);
-    }
+    stacking_do_weave(stacking, &tmp, TRUE, fb_win);
+    
+    assert(tmp==NULL);
 }
 
 

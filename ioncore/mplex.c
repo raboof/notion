@@ -886,11 +886,6 @@ static bool mplex_stack(WMPlex *mplex, WRegion *reg,
     stacking_weave(stackingp, &tmp, FALSE);
     assert(tmp==NULL);
     
-    /*
-    LINK_ITEM_FIRST(*stackingp, st, next, prev);
-    stacking_do_raise(stackingp, reg, TRUE, None, NULL, NULL);
-     */
-    
     return TRUE;
 }
 

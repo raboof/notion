@@ -41,7 +41,6 @@
 
 static void group_place_stdisp(WGroup *ws, WWindow *parent,
                                  int pos, WRegion *stdisp);
-static void group_do_raise(WGroup *ws, WRegion *reg, bool initial);
 
 
 
@@ -479,11 +478,6 @@ WStacking *group_do_add_managed_default(WGroup *ws, WRegion *reg, int level,
     stacking_weave(stackingp, &tmp, FALSE);
     assert(tmp==NULL);
     
-    /*
-    LINK_ITEM_FIRST(*stackingp, st, next, prev);
-    group_do_raise(ws, reg, TRUE);
-     */
-
     if(region_is_fully_mapped((WRegion*)ws))
         region_map(reg);
 
@@ -1009,7 +1003,12 @@ void group_restack(WGroup *ws, Window other, int mode)
 }
 
 
-static void group_do_raise(WGroup *ws, WRegion *reg, bool initial)
+/*EXTL_DOC
+ * Raise \var{reg} that must be managed by \var{ws}.
+ * If \var{reg} is \code{nil}, this function silently fails.
+ */
+EXTL_EXPORT_MEMBER
+void group_raise(WGroup *ws, WRegion *reg)
 {
     WStacking **stackingp=group_get_stackingp(ws);
 
@@ -1021,20 +1020,9 @@ static void group_do_raise(WGroup *ws, WRegion *reg, bool initial)
         return;
     }
     
-    stacking_do_raise(stackingp, reg, initial, 
+    stacking_do_raise(stackingp, reg, 
                       None /*region_xwindow((WRegion*)ws)*/,
                       NULL, NULL);
-}
-                      
-
-/*EXTL_DOC
- * Raise \var{reg} that must be managed by \var{ws}.
- * If \var{reg} is \code{nil}, this function silently fails.
- */
-EXTL_EXPORT_MEMBER
-void group_raise(WGroup *ws, WRegion *reg)
-{
-    group_do_raise(ws, reg, FALSE);
 }
 
 
@@ -1045,8 +1033,6 @@ void group_raise(WGroup *ws, WRegion *reg)
 EXTL_EXPORT_MEMBER
 void group_lower(WGroup *ws, WRegion *reg)
 {
-    WStacking *st, *stbottom=NULL, *stabove, *stnext;
-    Window bottom=None, top=None, other=None;
     WStacking **stackingp=group_get_stackingp(ws);
 
     if(reg==NULL || stackingp==NULL || *stackingp==NULL)
@@ -1058,8 +1044,8 @@ void group_lower(WGroup *ws, WRegion *reg)
     }
     
     stacking_do_lower(stackingp, reg, 
-                      region_xwindow((WRegion*)ws),
-                      NULL, ws);
+                      None /*region_xwindow((WRegion*)ws)*/,
+                      NULL, NULL);
 }
 
 

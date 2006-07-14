@@ -38,8 +38,7 @@ DECLSTRUCT(WStacking){
 typedef bool WStackingFilter(WStacking *st, void *data);
 
 
-void stacking_do_raise(WStacking **stacking, WRegion *reg, bool initial,
-                       Window fb_win,
+void stacking_do_raise(WStacking **stacking, WRegion *reg, Window fb_win,
                        WStackingFilter *filt, void *filt_data);
 
 void stacking_do_lower(WStacking **stacking, WRegion *reg, Window fb_win,
