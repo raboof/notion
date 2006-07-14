@@ -20,9 +20,11 @@ extern WBindmap *ioncore_mplex_bindmap;
 extern WBindmap *ioncore_mplex_toplevel_bindmap;
 extern WBindmap *ioncore_frame_bindmap;
 extern WBindmap *ioncore_frame_toplevel_bindmap;
+extern WBindmap *ioncore_floatframe_bindmap;
 extern WBindmap *ioncore_moveres_bindmap;
 extern WBindmap *ioncore_group_bindmap;
 extern WBindmap *ioncore_groupcw_bindmap;
+extern WBindmap *ioncore_groupws_bindmap;
 extern WBindmap *ioncore_clientwin_bindmap;
 
 extern void ioncore_deinit_bindmaps();

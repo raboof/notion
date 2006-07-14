@@ -73,7 +73,7 @@ BINDINGS:WMoveresMode
 
 .SS Kelluvien työpöytien ja kehyksien sidonnat [mod_floatws]
 
-BINDINGS:WFloatWS
+BINDINGS:WGroupWS
 
 BINDINGS:WFloatFrame
 

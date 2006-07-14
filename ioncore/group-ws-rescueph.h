@@ -1,5 +1,5 @@
 /*
- * ion/mod_floatws/floatwsrescueph.h
+ * ion/ioncore/groupwsrescueph.h
  *
  * Copyright (c) Tuomo Valkonen 2005-2006. 
  *
@@ -9,46 +9,46 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_MOD_FLOATWS_FLOATWSRESCUEPH_H
-#define ION_MOD_FLOATWS_FLOATWSRESCUEPH_H
+#ifndef ION_IONCORE_GROUPWSRESCUEPH_H
+#define ION_IONCORE_GROUPWSRESCUEPH_H
 
 #include <ioncore/common.h>
 #include <ioncore/pholder.h>
-#include "floatws.h"
+#include "group-ws.h"
 
-INTRCLASS(WFloatWSRescuePH);
+INTRCLASS(WGroupWSRescuePH);
 
-DECLCLASS(WFloatWSRescuePH){
+DECLCLASS(WGroupWSRescuePH){
     WPHolder ph;
     bool pos_ok;
     bool inner_geom;
     WRectangle geom;
-    Watch floatws_watch;
+    Watch groupws_watch;
     Watch frame_watch;
     int gravity;
     Watch stack_above_watch;
 };
 
-extern WFloatWSRescuePH *create_floatwsrescueph(WFloatWS *floatws,
+extern WGroupWSRescuePH *create_groupwsrescueph(WGroupWS *groupws,
                                                 const WRectangle *geom, 
                                                 bool pos_ok, bool inner_geom, 
                                                 int gravity);
 
-extern bool floatwsrescueph_init(WFloatWSRescuePH *ph, WFloatWS *ws,
+extern bool groupwsrescueph_init(WGroupWSRescuePH *ph, WGroupWS *ws,
                                  const WRectangle *geom, 
                                  bool pos_ok, bool inner_geom, int gravity);
 
-extern void floatwsrescueph_deinit(WFloatWSRescuePH *ph);
+extern void groupwsrescueph_deinit(WGroupWSRescuePH *ph);
 
-extern bool floatwsrescueph_do_goto(WFloatWSRescuePH *ph);
+extern bool groupwsrescueph_do_goto(WGroupWSRescuePH *ph);
 
-extern WRegion *floatwsrescueph_do_target(WFloatWSRescuePH *ph);
+extern WRegion *groupwsrescueph_do_target(WGroupWSRescuePH *ph);
 
-extern bool floatwsrescueph_do_attach(WFloatWSRescuePH *ph, 
+extern bool groupwsrescueph_do_attach(WGroupWSRescuePH *ph, 
                                       WRegionAttachHandler *hnd,
                                       void *hnd_param, int flags);
 
-extern WFloatWSRescuePH *floatws_get_rescue_pholder_for(WFloatWS *floatws, 
+extern WGroupWSRescuePH *groupws_get_rescue_pholder_for(WGroupWS *groupws, 
                                                         WRegion *forwhat);
 
-#endif /* ION_MOD_FLOATWS_FLOATWSRESCUEPH_H */
+#endif /* ION_IONCORE_GROUPWSRESCUEPH_H */

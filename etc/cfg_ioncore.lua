@@ -226,7 +226,44 @@ defbindings("WFrame.toplevel", {
         kpress("A", "WFrame.attach_tagged(_)"),
     }),
 })
+
+
+-- Frame bindings. These work in (floating/PWM-style) frames. Some bindings
+-- that are common to all frame types and multiplexes are defined in
+-- ion-bindings.lua.
+
+defbindings("WFloatFrame", {
+    bdoc("Toggle shade mode"),
+    mdblclick("Button1@tab", "WFloatFrame.set_shaded(_, 'toggle')"),
     
+    bdoc("Raise the frame."),
+    mpress("Button1@tab", "WGroupWS.raise(WRegion.manager(_), _)"),
+    mpress("Button1@border", "WGroupWS.raise(WRegion.manager(_), _)"),
+    mclick(META.."Button1", "WGroupWS.raise(WRegion.manager(_), _)"),
+    
+    bdoc("Lower the frame."),
+    mclick(META.."Button3", "WGroupWS.lower(WRegion.manager(_), _)"),
+    
+    bdoc("Move the frame."),
+    mdrag("Button1@tab", "WFrame.p_move(_)"),
+})
+
+
+-- Bindings for "groups". Note that tilers (WIonWS) override some
+-- of these bindings.
+
+defbindings("WGroupWS", {
+    bdoc("Circulate focus and raise the newly focused frame."),
+    kpress(META.."Tab", "WGroupWS.raise(_, WGroupWS.circulate(_))"),
+    submap(META.."K", { 
+        bdoc("Backwards-circulate focus and raise the newly focused frame."),
+        kpress("Tab", "WGroupWS.raise(_, WGroupWS.backcirculate(_))"),
+    }),
+    bdoc("Raise/lower active frame."),
+    kpress(META.."P", "WGroupWS.lower(_, _sub)", "_sub:non-nil"),
+    kpress(META.."N", "WGroupWS.raise(_, _sub)", "_sub:non-nil"),
+})
+
 
 -- WMoveresMode context bindings
 -- 

@@ -1,5 +1,5 @@
 /*
- * ion/mod_floatws/floatframe.h
+ * ion/ioncore/floatframe.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2006. 
  *
@@ -9,8 +9,8 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_MOD_FLOATWS_FLOATFRAME_H
-#define ION_MOD_FLOATWS_FLOATFRAME_H
+#ifndef ION_IONCORE_FLOATFRAME_H
+#define ION_IONCORE_FLOATFRAME_H
 
 #include <libtu/setparam.h>
 #include <libextl/extl.h>
@@ -45,7 +45,7 @@ extern void floatframe_offsets(const WFloatFrame *frame, WRectangle *off);
 extern void floatframe_geom_from_managed_geom(const WFloatFrame *frame, 
                                               WRectangle *geom);
 extern void floatframe_geom_from_initial_geom(WFloatFrame *frame, 
-                                              WFloatWS *ws,
+                                              WGroupWS *ws,
                                               WRectangle *geom, 
                                               int gravity);
 extern void floatframe_managed_geom(const WFloatFrame *frame, WRectangle *geom);
@@ -57,4 +57,4 @@ extern void floatframe_border_geom(const WFloatFrame *frame, WRectangle *geom);
 extern bool floatframe_set_sticky(WFloatFrame *frame, int sp);
 extern bool floatframe_is_sticky(WFloatFrame *frame);
 
-#endif /* ION_MOD_FLOATWS_FLOATFRAME_H */
+#endif /* ION_IONCORE_FLOATFRAME_H */

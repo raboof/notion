@@ -76,7 +76,7 @@ BINDINGS:WMoveresMode
 
 .SS Bindungen für den fliessenden Arbeitsbereich und Frames [mod_floatws]
 
-BINDINGS:WFloatWS
+BINDINGS:WGroupWS
 
 BINDINGS:WFloatFrame
 

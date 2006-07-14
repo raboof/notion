@@ -103,7 +103,7 @@ BINDINGS:WIonWS
 
 .SS Pøiøazení pro plovoucí pracovní plochy a rámy [mod_floatws]
 
-BINDINGS:WFloatWS
+BINDINGS:WGroupWS
 
 BINDINGS:WFloatFrame
 

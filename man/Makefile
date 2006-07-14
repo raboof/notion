@@ -25,14 +25,12 @@ FILTERCRAP=$(LUA) -e 'io.write((string.gsub(io.read("*a"), ".\8", "")))'
 
 CONFIGS=../etc/cfg_ioncore.lua \
 	../etc/cfg_ionws.lua \
-	../etc/cfg_floatws.lua \
 	../etc/cfg_query.lua \
 	../etc/cfg_menu.lua
 
 # TODO: PWM configuration file is undocumented
 PWM_CONFIGS=\
 	../etc/cfg_ioncore.lua \
-	../etc/cfg_floatws.lua \
 	../etc/cfg_menu.lua
 
 ######################################

@@ -24,6 +24,7 @@
 #include "bindmaps.h"
 #include "kbresize.h"
 #include "reginfo.h"
+#include "group-ws.h"
 
 
 /*EXTL_DOC
@@ -55,6 +56,9 @@
  *  \var{kbresize_step} & (floating point) See below. \\
  *  \var{kbresize_maxacc} & (floating point) See below. \\
  *  \var{framed_transients} & (boolean) Put transients in nested frames. \\
+ *  \var{float_placement_method} & (string) How to place floating frames.
+ *                          One of ''udlr'' (up-down, then left-right), 
+ *                          ''lrud'' (left-right, then up-down) or ''random''.
  * \end{tabularx}
  * 
  * When a keyboard resize function is called, and at most \var{kbresize_t_max} 
@@ -85,7 +89,10 @@ void ioncore_set(ExtlTab tab)
             free(ioncore_default_ws_type);
         ioncore_default_ws_type=wst;
     }
+    
     ioncore_set_moveres_accel(tab);
+    
+    ioncore_groupws_set(tab);
 }
 
 
@@ -108,7 +115,10 @@ ExtlTab ioncore_get()
                                                ? info->descr->name
                                                : NULL));
     extl_table_sets_b(tab, "frame_add_last", ioncore_g.frame_add_last);
+    
     ioncore_get_moveres_accel(tab);
+    
+    ioncore_groupws_get(tab);
     
     return tab;
 }

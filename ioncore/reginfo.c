@@ -72,6 +72,10 @@ WRegClassInfo *ioncore_lookup_regclass(const char *name, bool inheriting_ok)
     if(name==NULL)
         return NULL;
     
+    /* Backwards compatibility hack. */
+    if(strcmp(name, "WFloatWS")==0)
+        name="WGroupWS";
+    
     for(info=reg_class_infos; info!=NULL; info=info->next){
         for(descr=info->descr; 
             descr!=NULL; 

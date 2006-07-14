@@ -72,7 +72,7 @@ BINDINGS:WMoveresMode
 
 .SS Pøiøazení pro plovoucí pracovní plochy [mod_floatws]
 
-BINDINGS:WFloatWS
+BINDINGS:WGroupWS
 
 BINDINGS:WFloatFrame
 

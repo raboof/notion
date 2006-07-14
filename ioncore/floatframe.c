@@ -1,5 +1,5 @@
 /*
- * ion/mod_floatws/floatframe.c
+ * ion/ioncore/floatframe.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2006. 
  *
@@ -10,7 +10,9 @@
  */
 
 #include <string.h>
+
 #include <libtu/objp.h>
+#include <libtu/minmax.h>
 
 #include <ioncore/common.h>
 #include <ioncore/frame.h>
@@ -24,10 +26,10 @@
 #include <ioncore/sizehint.h>
 #include <ioncore/extlconv.h>
 #include <ioncore/strings.h>
-#include <libtu/minmax.h>
+#include <ioncore/bindmaps.h>
+
 #include "floatframe.h"
-#include "floatws.h"
-#include "main.h"
+#include "group-ws.h"
 
 
 /*{{{ Destroy/create frame */
@@ -40,7 +42,7 @@ static bool floatframe_init(WFloatFrame *frame, WWindow *parent,
     frame->tab_min_w=0;
     frame->bar_max_width_q=1.0;
     
-    if(!frame_init((WFrame*)frame, parent, fp, "frame-floating-floatws"))
+    if(!frame_init((WFrame*)frame, parent, fp, "frame-floating-groupws"))
         return FALSE;
     
     frame->frame.flags|=(FRAME_BAR_OUTSIDE|
@@ -48,7 +50,7 @@ static bool floatframe_init(WFloatFrame *frame, WWindow *parent,
                          FRAME_SZH_USEMINMAX|
                          FRAME_FWD_CWIN_RQGEOM);
 
-    region_add_bindmap((WRegion*)frame, mod_floatws_floatframe_bindmap);
+    region_add_bindmap((WRegion*)frame, ioncore_floatframe_bindmap);
     
     return TRUE;
 }
@@ -137,7 +139,7 @@ void floatframe_managed_geom(const WFloatFrame *frame, WRectangle *geom)
 
 
 void floatframe_geom_from_initial_geom(WFloatFrame *frame, 
-                                       WFloatWS *ws,
+                                       WGroupWS *ws,
                                        WRectangle *geom, 
                                        int gravity)
 {
@@ -369,7 +371,7 @@ bool floatframe_set_sticky(WFloatFrame *frame, int sp)
 /*EXTL_DOC
  * Set \var{frame} stickyness accoding to \var{how} (set/unset/toggle).
  * The resulting state is returned. This function only works across frames
- * on  \type{WFloatWS} that have the same \type{WMPlex} parent.
+ * on  \type{WGroupWS} that have the same \type{WMPlex} parent.
  * (Temporarily unimplemented)
  */
 EXTL_EXPORT_AS(WFloatFrame, set_sticky)

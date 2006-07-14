@@ -1,5 +1,5 @@
 /*
- * ion/mod_floatws/floatws.h
+ * ion/ioncore/groupws.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2006. 
  *
@@ -9,24 +9,23 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_MOD_FLOATWS_FLOATWS_H
-#define ION_MOD_FLOATWS_FLOATWS_H
+#ifndef ION_IONCORE_GROUPWS_H
+#define ION_IONCORE_GROUPWS_H
 
 #include <ioncore/common.h>
 #include <ioncore/rectangle.h>
 #include <ioncore/group.h>
-#include "floatws.h"
 #include "classes.h"
 
 
-DECLCLASS(WFloatWS){
+DECLCLASS(WGroupWS){
     WGroup grp;
 };
 
 
-INTRSTRUCT(WFloatWSPHAttachParams);
+INTRSTRUCT(WGroupWSPHAttachParams);
 
-DECLSTRUCT(WFloatWSPHAttachParams){
+DECLSTRUCT(WGroupWSPHAttachParams){
     WFrame *frame;
     WRectangle geom;
     bool inner_geom;
@@ -37,29 +36,31 @@ DECLSTRUCT(WFloatWSPHAttachParams){
 };
 
 
-extern void floatws_calc_placement(WFloatWS *ws, WRectangle *geom);
-extern void mod_floatws_set_placement_method(const char *method);
+extern void groupws_calc_placement(WGroupWS *ws, WRectangle *geom);
 
-extern WFloatFrame *floatws_create_frame(WFloatWS *ws, const WRectangle *geom, 
+extern WFloatFrame *groupws_create_frame(WGroupWS *ws, const WRectangle *geom, 
                                          bool inner_geom, bool respect_pos,
                                          int gravity);
-extern bool floatws_phattach(WFloatWS *ws, 
+extern bool groupws_phattach(WGroupWS *ws, 
                              WRegionAttachHandler *hnd, void *hnd_param,
-                             WFloatWSPHAttachParams *param);
+                             WGroupWSPHAttachParams *param);
 
-extern WPHolder *floatws_prepare_manage(WFloatWS *ws, 
+extern WPHolder *groupws_prepare_manage(WGroupWS *ws, 
                                         const WClientWin *cwin,
                                         const WManageParams *param, 
                                         int redir);
 
-extern WPHolder *floatws_prepare_manage_transient(WFloatWS *ws, 
+extern WPHolder *groupws_prepare_manage_transient(WGroupWS *ws, 
                                                   const WClientWin *cwin,
                                                   const WManageParams *param,
                                                   int unused);
 
-extern bool floatws_handle_drop(WFloatWS *ws, int x, int y,
+extern bool groupws_handle_drop(WGroupWS *ws, int x, int y,
                                 WRegion *dropped);
 
-extern WRegion *floatws_load(WWindow *par, const WFitParams *fp, ExtlTab tab);
+extern WRegion *groupws_load(WWindow *par, const WFitParams *fp, ExtlTab tab);
 
-#endif /* ION_MOD_FLOATWS_FLOATWS_H */
+extern void ioncore_groupws_set(ExtlTab tab);
+extern void ioncore_groupws_get(ExtlTab t);
+
+#endif /* ION_IONCORE_GROUPWS_H */

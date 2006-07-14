@@ -9,7 +9,7 @@ include $(TOPDIR)/build/system-inc.mk
 ######################################
 
 ETC =	cfg_ion.lua cfg_ioncore.lua cfg_kludges.lua cfg_modules.lua \
-	cfg_ionws.lua cfg_floatws.lua cfg_query.lua cfg_menu.lua \
+	cfg_ionws.lua cfg_query.lua cfg_menu.lua \
 	cfg_statusbar.lua cfg_dock.lua cfg_panews.lua \
 	look_brownsteel.lua look_clean.lua look_dusky.lua \
 	look_greyviolet.lua look_ios.lua look_cleanviolet.lua \

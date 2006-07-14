@@ -73,7 +73,7 @@ BINDINGS:WMoveresMode
 
 .SS Bindings for floating workspaces and frames [mod_floatws]
 
-BINDINGS:WFloatWS
+BINDINGS:WGroupWS
 
 BINDINGS:WFloatFrame
 

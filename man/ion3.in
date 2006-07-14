@@ -105,13 +105,13 @@ BINDINGS:WFrame.toplevel
 
 BINDINGS:WMoveresMode
 
-.SS Bindings for tiled workspaces [mod_ionws]
+.SS Bindings for tilers [mod_ionws]
 
 BINDINGS:WIonWS
 
-.SS Bindings for floating workspaces and frames [mod_floatws]
+.SS Bindings for groups and floating frames [mod_floatws]
 
-BINDINGS:WFloatWS
+BINDINGS:WGroupWS
 
 BINDINGS:WFloatFrame
 

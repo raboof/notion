@@ -1,5 +1,5 @@
 /*
- * ion/mod_floatws/floatwsrescueph.c
+ * ion/ioncore/groupwsrescueph.c
  *
  * Copyright (c) Tuomo Valkonen 2005-2006. 
  *
@@ -14,25 +14,25 @@
 #include <libtu/pointer.h>
 
 #include <ioncore/common.h>
-#include "floatws.h"
-#include "floatwsrescueph.h"
+#include "group-ws.h"
+#include "group-ws-rescueph.h"
 
 
-static void floatws_watch_handler(Watch *watch, Obj *floatws);
+static void groupws_watch_handler(Watch *watch, Obj *groupws);
 
 
 /*{{{ Init/deinit */
 
 
-static void floatws_watch_handler(Watch *watch, Obj *floatws)
+static void groupws_watch_handler(Watch *watch, Obj *groupws)
 {
-    WFloatWSRescuePH *ph=FIELD_TO_STRUCT(WFloatWSRescuePH, 
-                                         floatws_watch, watch);
-    pholder_redirect(&(ph->ph), (WRegion*)floatws);
+    WGroupWSRescuePH *ph=FIELD_TO_STRUCT(WGroupWSRescuePH, 
+                                         groupws_watch, watch);
+    pholder_redirect(&(ph->ph), (WRegion*)groupws);
 }
 
 
-bool floatwsrescueph_init(WFloatWSRescuePH *ph, WFloatWS *ws,
+bool groupwsrescueph_init(WGroupWSRescuePH *ph, WGroupWS *ws,
                           const WRectangle *geom, 
                           bool pos_ok, bool inner_geom, int gravity)
 {
@@ -43,14 +43,14 @@ bool floatwsrescueph_init(WFloatWSRescuePH *ph, WFloatWS *ws,
     ph->inner_geom=inner_geom;
     ph->gravity=gravity;
     
-    watch_init(&(ph->floatws_watch));
+    watch_init(&(ph->groupws_watch));
     watch_init(&(ph->frame_watch));
     watch_init(&(ph->stack_above_watch));
     
     if(ws==NULL)
         return TRUE;
     
-    if(!watch_setup(&(ph->floatws_watch), (Obj*)ws, floatws_watch_handler)){
+    if(!watch_setup(&(ph->groupws_watch), (Obj*)ws, groupws_watch_handler)){
         pholder_deinit(&(ph->ph));
         return FALSE;
     }
@@ -59,19 +59,19 @@ bool floatwsrescueph_init(WFloatWSRescuePH *ph, WFloatWS *ws,
 }
  
 
-WFloatWSRescuePH *create_floatwsrescueph(WFloatWS *floatws,
+WGroupWSRescuePH *create_groupwsrescueph(WGroupWS *groupws,
                                          const WRectangle *geom, 
                                          bool pos_ok, bool inner_geom, 
                                          int gravity)
 {
-    CREATEOBJ_IMPL(WFloatWSRescuePH, floatwsrescueph, 
-                   (p, floatws, geom, pos_ok, inner_geom, gravity));
+    CREATEOBJ_IMPL(WGroupWSRescuePH, groupwsrescueph, 
+                   (p, groupws, geom, pos_ok, inner_geom, gravity));
 }
 
 
-void floatwsrescueph_deinit(WFloatWSRescuePH *ph)
+void groupwsrescueph_deinit(WGroupWSRescuePH *ph)
 {
-    watch_reset(&(ph->floatws_watch));
+    watch_reset(&(ph->groupws_watch));
     watch_reset(&(ph->frame_watch));
     watch_reset(&(ph->stack_above_watch));
     pholder_deinit(&(ph->ph));
@@ -84,12 +84,12 @@ void floatwsrescueph_deinit(WFloatWSRescuePH *ph)
 /*{{{ Dynfuns */
 
 
-bool floatwsrescueph_do_attach(WFloatWSRescuePH *ph, 
+bool groupwsrescueph_do_attach(WGroupWSRescuePH *ph, 
                                WRegionAttachHandler *hnd, void *hnd_param,
                                int flags)
 {
-    WFloatWS *ws=(WFloatWS*)ph->floatws_watch.obj;
-    WFloatWSPHAttachParams p;
+    WGroupWS *ws=(WGroupWS*)ph->groupws_watch.obj;
+    WGroupWSPHAttachParams p;
     bool ok;
     
     if(ws==NULL)
@@ -103,7 +103,7 @@ bool floatwsrescueph_do_attach(WFloatWSRescuePH *ph,
     p.aflags=flags;
     p.stack_above=(WRegion*)ph->stack_above_watch.obj;
         
-    ok=floatws_phattach(ws, hnd, hnd_param, &p);
+    ok=groupws_phattach(ws, hnd, hnd_param, &p);
     
     if(p.frame!=NULL && !watch_ok(&(ph->frame_watch)))
         assert(watch_setup(&(ph->frame_watch), (Obj*)p.frame, NULL));
@@ -112,9 +112,9 @@ bool floatwsrescueph_do_attach(WFloatWSRescuePH *ph,
 }
 
 
-bool floatwsrescueph_do_goto(WFloatWSRescuePH *ph)
+bool groupwsrescueph_do_goto(WGroupWSRescuePH *ph)
 {
-    WFloatWS *ws=(WFloatWS*)ph->floatws_watch.obj;
+    WGroupWS *ws=(WGroupWS*)ph->groupws_watch.obj;
     WFrame *frame=(WFrame*)ph->frame_watch.obj;
     
     if(frame!=NULL)
@@ -126,9 +126,9 @@ bool floatwsrescueph_do_goto(WFloatWSRescuePH *ph)
 }
 
 
-WRegion *floatwsrescueph_do_target(WFloatWSRescuePH *ph)
+WRegion *groupwsrescueph_do_target(WGroupWSRescuePH *ph)
 {
-    WRegion *ws=(WRegion*)ph->floatws_watch.obj;
+    WRegion *ws=(WRegion*)ph->groupws_watch.obj;
     WRegion *frame=(WRegion*)ph->frame_watch.obj;
     
     return (frame!=NULL ? frame : ws);
@@ -138,20 +138,20 @@ WRegion *floatwsrescueph_do_target(WFloatWSRescuePH *ph)
 /*}}}*/
 
 
-/*{{{ WFloatWS stuff */
+/*{{{ WGroupWS stuff */
 
 
-WFloatWSRescuePH *floatws_get_rescue_pholder_for(WFloatWS *floatws, 
+WGroupWSRescuePH *groupws_get_rescue_pholder_for(WGroupWS *groupws, 
                                                  WRegion *forwhat)
 {    
     bool pos_ok=FALSE;
     bool inner_geom=FALSE;
     WRectangle geom=REGION_GEOM(forwhat);
 
-    if(REGION_PARENT(forwhat)==REGION_PARENT(floatws))
+    if(REGION_PARENT(forwhat)==REGION_PARENT(groupws))
         pos_ok=TRUE;
 
-    return create_floatwsrescueph(floatws, &geom, pos_ok, inner_geom,
+    return create_groupwsrescueph(groupws, &geom, pos_ok, inner_geom,
                                   StaticGravity);
 }
 
@@ -162,21 +162,21 @@ WFloatWSRescuePH *floatws_get_rescue_pholder_for(WFloatWS *floatws,
 /*{{{ Class information */
 
 
-static DynFunTab floatwsrescueph_dynfuntab[]={
+static DynFunTab groupwsrescueph_dynfuntab[]={
     {(DynFun*)pholder_do_attach, 
-     (DynFun*)floatwsrescueph_do_attach},
+     (DynFun*)groupwsrescueph_do_attach},
 
     {(DynFun*)pholder_do_goto, 
-     (DynFun*)floatwsrescueph_do_goto},
+     (DynFun*)groupwsrescueph_do_goto},
 
     {(DynFun*)pholder_do_target, 
-     (DynFun*)floatwsrescueph_do_target},
+     (DynFun*)groupwsrescueph_do_target},
     
     END_DYNFUNTAB
 };
 
-IMPLCLASS(WFloatWSRescuePH, WPHolder, floatwsrescueph_deinit, 
-          floatwsrescueph_dynfuntab);
+IMPLCLASS(WGroupWSRescuePH, WPHolder, groupwsrescueph_deinit, 
+          groupwsrescueph_dynfuntab);
 
 
 /*}}}*/
