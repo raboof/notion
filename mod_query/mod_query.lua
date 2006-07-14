@@ -221,7 +221,7 @@ function mod_query.lookup_workspace_classes()
                 if not v2 then 
                     break
                 end
-                if v2.__typename=="WGenWS" then
+                if v2.__typename=="WGroupWS" then
                     table.insert(classes, v.__typename)
                     break
                 end
@@ -382,7 +382,7 @@ function mod_query.complete_clientwin(str)
 end
 
 function mod_query.complete_workspace(str)
-    return mod_query.complete_name(str, ioncore.region_list("WGenWS"))
+    return mod_query.complete_name(str, ioncore.region_list("WGroupWS"))
 end
 
 function mod_query.complete_region(str)
@@ -419,7 +419,7 @@ end
 
 
 function mod_query.workspace_handler(mplex, name)
-    local ws=ioncore.lookup_region(name, "WGenWS")
+    local ws=ioncore.lookup_region(name, "WGroupWS")
     if ws then
         ws:goto()
         return
@@ -489,7 +489,7 @@ end
 
 --DOC
 -- This query asks for the name of a workspace. If a workspace
--- (an object inheriting \type{WGenWS}) with such a name exists,
+-- (an object inheriting \type{WGroupWS}) with such a name exists,
 -- it will be switched to. Otherwise a new workspace with the
 -- entered name will be created and the user will be queried for
 -- the type of the workspace.
@@ -533,7 +533,7 @@ end
 -- This function asks for a name new for the workspace on which the
 -- query resides.
 function mod_query.query_renameworkspace(mplex)
-    local ws=ioncore.find_manager(mplex, "WGenWS")
+    local ws=ioncore.find_manager(mplex, "WGroupWS")
     mod_query.query(mplex, TR("Workspace name:"), ws:name(),
                     function(mplex, str) ws:set_name(str) end,
                     nil, "framename")

@@ -95,7 +95,7 @@ defmenu("mainmenu", {
 defmenu("wsmenu", {
     menuentry("New",         "ioncore.create_ws(_)"),
     menuentry("Close",       "WRegion.rqclose(_sub)",
-                             "_sub:WGenWS"),
+                             "_sub:WGroupWS"),
     submenu("List",          "workspacelist"),
 })
 
