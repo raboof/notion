@@ -30,9 +30,6 @@ ioncore.set{
     -- Movement commands warp the pointer to frames instead of just
     -- changing focus. Enabled by default.
     --warp=true,
-    
-    -- Default workspace type.
-    default_ws_type="WFloatWS",
 }
 
 -- cfg_ioncore contains configuration of the Ion 'core'
@@ -42,8 +39,7 @@ dopath("cfg_ioncore")
 --dopath("cfg_modules")
 --dopath("mod_query")
 dopath("mod_menu")
---dopath("mod_ionws")
-dopath("mod_floatws")
+--dopath("mod_tiling")
 --dopath("mod_panews")
 --dopath("mod_statusbar")
 dopath("mod_dock")
@@ -62,7 +58,7 @@ defbindings("WScreen", {
     kpress(ALTMETA.."F12", "mod_menu.menu(_, _sub, 'mainmenu', {big=true})"),
 })
 
-defbindings("WMPlex", {
+defbindings("WMPlex.toplevel", {
     kpress(ALTMETA.."F1", nil),
     kpress(META..   "F1", "ioncore.exec_on(_, ':man pwm3')"),
     kpress(ALTMETA.."F3", nil),
@@ -72,10 +68,10 @@ defbindings("WMPlex", {
     kpress(ALTMETA.."F6", nil),
     kpress(ALTMETA.."F9", nil),
     kpress(META.."G", nil),
+    kpress(META.."A", nil),
 })
 
 defbindings("WFrame", {
-    kpress(META.."A", nil),
     kpress(META.."M", "mod_menu.menu(_, _sub, 'ctxmenu')"),
 })
 
