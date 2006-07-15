@@ -1,5 +1,5 @@
 /*
- * ion/mod_ionws/main.c
+ * ion/mod_tiling/main.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2006. 
  *
@@ -19,7 +19,7 @@
 #include <ioncore/bindmaps.h>
 
 #include "main.h"
-#include "ionws.h"
+#include "tiling.h"
 #include "placement.h"
 #include "exports.h"
 
@@ -29,7 +29,7 @@
 
 #include "../version.h"
 
-char mod_ionws_ion_api_version[]=ION_API_VERSION;
+char mod_tiling_ion_api_version[]=ION_API_VERSION;
 
 
 /*}}}*/
@@ -38,10 +38,10 @@ char mod_ionws_ion_api_version[]=ION_API_VERSION;
 /*{{{ Bindmaps and configuration variables */
 
 
-WBindmap *mod_ionws_ionws_bindmap=NULL;
-WBindmap *mod_ionws_frame_bindmap=NULL;
+WBindmap *mod_tiling_tiling_bindmap=NULL;
+WBindmap *mod_tiling_frame_bindmap=NULL;
 
-int mod_ionws_raise_delay=CF_RAISE_DELAY;
+int mod_tiling_raise_delay=CF_RAISE_DELAY;
 
 
 /*}}}*/
@@ -55,26 +55,26 @@ int mod_ionws_raise_delay=CF_RAISE_DELAY;
  * is supported.
  */
 EXTL_EXPORT
-void mod_ionws_set(ExtlTab tab)
+void mod_tiling_set(ExtlTab tab)
 {
     int d;
     if(extl_table_gets_i(tab, "raise_delay", &d)){
         if(d>=0)
-            mod_ionws_raise_delay=d;
+            mod_tiling_raise_delay=d;
     }
 }
 
 
 /*EXTL_DOC
- * Get parameters. For details see \fnref{mod_ionws.set}.
+ * Get parameters. For details see \fnref{mod_tiling.set}.
  */
 EXTL_SAFE
 EXTL_EXPORT
-ExtlTab mod_ionws_get()
+ExtlTab mod_tiling_get()
 {
     ExtlTab tab=extl_create_table();
     
-    extl_table_sets_i(tab, "raise_delay", mod_ionws_raise_delay);
+    extl_table_sets_i(tab, "raise_delay", mod_tiling_raise_delay);
     
     return tab;
 }
@@ -88,32 +88,32 @@ ExtlTab mod_ionws_get()
 /*{{{ Module init & deinit */
 
 
-void mod_ionws_deinit()
+void mod_tiling_deinit()
 {
-    mod_ionws_unregister_exports();
-    ioncore_unregister_regclass(&CLASSDESCR(WIonWS));
+    mod_tiling_unregister_exports();
+    ioncore_unregister_regclass(&CLASSDESCR(WTiling));
     
-    if(mod_ionws_ionws_bindmap!=NULL){
-        ioncore_free_bindmap("WIonWS", mod_ionws_ionws_bindmap);
-        mod_ionws_ionws_bindmap=NULL;
+    if(mod_tiling_tiling_bindmap!=NULL){
+        ioncore_free_bindmap("WTiling", mod_tiling_tiling_bindmap);
+        mod_tiling_tiling_bindmap=NULL;
     }
     
-    if(mod_ionws_frame_bindmap!=NULL){
-        ioncore_free_bindmap("WFrame-on-WIonWS", mod_ionws_frame_bindmap);
-        mod_ionws_frame_bindmap=NULL;
+    if(mod_tiling_frame_bindmap!=NULL){
+        ioncore_free_bindmap("WFrame-on-WTiling", mod_tiling_frame_bindmap);
+        mod_tiling_frame_bindmap=NULL;
     }
     
-    if(ionws_placement_alt!=NULL){
-        destroy_obj((Obj*)ionws_placement_alt);
-        ionws_placement_alt=NULL;
+    if(tiling_placement_alt!=NULL){
+        destroy_obj((Obj*)tiling_placement_alt);
+        tiling_placement_alt=NULL;
     }
 }
 
 
 static bool register_regions()
 {
-    if(!ioncore_register_regclass(&CLASSDESCR(WIonWS),
-                                  (WRegionLoadCreateFn*)ionws_load)){
+    if(!ioncore_register_regclass(&CLASSDESCR(WTiling),
+                                  (WRegionLoadCreateFn*)tiling_load)){
         return FALSE;
     }
     
@@ -128,35 +128,35 @@ static bool register_regions()
 
 static bool init_hooks()
 {
-    INIT_HOOK_(ionws_placement_alt);
+    INIT_HOOK_(tiling_placement_alt);
     return TRUE;
 }
 
 
-bool mod_ionws_init()
+bool mod_tiling_init()
 {
     if(!init_hooks())
         goto err;
             
-    mod_ionws_ionws_bindmap=ioncore_alloc_bindmap("WIonWS", NULL);
+    mod_tiling_tiling_bindmap=ioncore_alloc_bindmap("WTiling", NULL);
     
-    mod_ionws_frame_bindmap=ioncore_alloc_bindmap_frame("WFrame-on-WIonWS");
+    mod_tiling_frame_bindmap=ioncore_alloc_bindmap_frame("WFrame-on-WTiling");
 
-    if(mod_ionws_ionws_bindmap==NULL || mod_ionws_frame_bindmap==NULL)
+    if(mod_tiling_tiling_bindmap==NULL || mod_tiling_frame_bindmap==NULL)
         goto err;
 
-    if(!mod_ionws_register_exports())
+    if(!mod_tiling_register_exports())
         goto err;
 
     if(!register_regions())
         goto err;
     
-    extl_read_config("cfg_ionws", NULL, TRUE);
+    extl_read_config("cfg_tiling", NULL, TRUE);
 
     return TRUE;
     
 err:
-    mod_ionws_deinit();
+    mod_tiling_deinit();
     return FALSE;
 }
 

@@ -15,7 +15,7 @@
 #include <ioncore/common.h>
 #include <ioncore/gr.h>
 #include "split.h"
-#include "ionws.h"
+#include "tiling.h"
 
 INTRCLASS(WSplitFloat);
 
@@ -28,10 +28,10 @@ DECLCLASS(WSplitFloat){
 
 
 extern bool splitfloat_init(WSplitFloat *split, const WRectangle *geom,
-                            WIonWS *ws, int dir);
+                            WTiling *ws, int dir);
 
 extern WSplitFloat *create_splitfloat(const WRectangle *geom, 
-                                      WIonWS *ws, int dir);
+                                      WTiling *ws, int dir);
 
 extern void splitfloat_deinit(WSplitFloat *split);
 
@@ -45,12 +45,12 @@ extern void splitfloat_br_cnt_to_pwin(WSplitFloat *split, WRectangle *g);
 
 extern void splitfloat_flip(WSplitFloat *split);
 
-extern WSplit *load_splitfloat(WIonWS *ws, const WRectangle *geom, 
+extern WSplit *load_splitfloat(WTiling *ws, const WRectangle *geom, 
                                ExtlTab tab);
 
 extern WSplitRegion *splittree_split_floating(WSplit *node, int dir, 
                                               int primn, int nmins, 
                                               WRegionSimpleCreateFn *fn, 
-                                              WIonWS *ws);
+                                              WTiling *ws);
 
 #endif /* ION_PANEWS_SPLITFLOAT_H */

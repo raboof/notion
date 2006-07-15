@@ -1,5 +1,5 @@
 /*
- * ion/mod_ionws/placement.c
+ * ion/mod_tiling/placement.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2006. 
  *
@@ -18,18 +18,18 @@
 #include <ioncore/framep.h>
 #include <ioncore/names.h>
 #include "placement.h"
-#include "ionws.h"
+#include "tiling.h"
 
 
-WHook *ionws_placement_alt=NULL;
+WHook *tiling_placement_alt=NULL;
 
 
-static WRegion *find_suitable_target(WIonWS *ws)
+static WRegion *find_suitable_target(WTiling *ws)
 {
-    WRegion *r=ionws_current(ws);
+    WRegion *r=tiling_current(ws);
     
     if(r==NULL){
-        FOR_ALL_MANAGED_BY_IONWS_UNSAFE(r, ws)
+        FOR_ALL_MANAGED_BY_TILING_UNSAFE(r, ws)
             break;
     }
     
@@ -37,7 +37,7 @@ static WRegion *find_suitable_target(WIonWS *ws)
 }
 
 
-static bool placement_mrsh_extl(ExtlFn fn, WIonWSPlacementParams *param)
+static bool placement_mrsh_extl(ExtlFn fn, WTilingPlacementParams *param)
 {
     ExtlTab t, mp;
     bool ret=FALSE;
@@ -71,11 +71,11 @@ static bool placement_mrsh_extl(ExtlFn fn, WIonWSPlacementParams *param)
 }
 
 
-WPHolder *ionws_prepare_manage(WIonWS *ws, const WClientWin *cwin,
+WPHolder *tiling_prepare_manage(WTiling *ws, const WClientWin *cwin,
                                const WManageParams *mp, int redir)
 {
     WRegion *target=NULL;
-    WIonWSPlacementParams param;
+    WTilingPlacementParams param;
     WPHolder *ph;
     bool ret;
 
@@ -87,7 +87,7 @@ WPHolder *ionws_prepare_manage(WIonWS *ws, const WClientWin *cwin,
     param.mp=mp;
     param.res_frame=NULL;
     
-    ret=hook_call_alt_p(ionws_placement_alt, &param, 
+    ret=hook_call_alt_p(tiling_placement_alt, &param, 
                         (WHookMarshallExtl*)placement_mrsh_extl);
         
     if(ret && param.res_frame!=NULL &&

@@ -24,7 +24,7 @@ NROFF=nroff -man -Tlatin1
 FILTERCRAP=$(LUA) -e 'io.write((string.gsub(io.read("*a"), ".\8", "")))'
 
 CONFIGS=../etc/cfg_ioncore.lua \
-	../etc/cfg_ionws.lua \
+	../etc/cfg_tiling.lua \
 	../etc/cfg_query.lua \
 	../etc/cfg_menu.lua
 

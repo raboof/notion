@@ -1,5 +1,5 @@
 /*
- * ion/mod_ionws/split.c
+ * ion/mod_tiling/split.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2006. 
  *
@@ -27,7 +27,7 @@
 #include <ioncore/rectangle.h>
 #include <ioncore/saveload.h>
 #include <ioncore/names.h>
-#include "ionws.h"
+#include "tiling.h"
 #include "split.h"
 #include "split-stdisp.h"
 
@@ -130,7 +130,7 @@ WSplitRegion *splittree_node_of(WRegion *reg)
     Rb_node node=NULL;
     int found=0;
     
-    /*assert(REGION_MANAGER_CHK(reg, WIonWS)!=NULL);*/
+    /*assert(REGION_MANAGER_CHK(reg, WTiling)!=NULL);*/
     
     if(split_of_map!=NULL){
         node=rb_find_pkey_n(split_of_map, reg, &found);
@@ -150,7 +150,7 @@ bool splittree_set_node_of(WRegion *reg, WSplitRegion *split)
     Rb_node node=NULL;
     int found;
     
-    /*assert(REGION_MANAGER_CHK(reg, WIonWS)!=NULL);*/
+    /*assert(REGION_MANAGER_CHK(reg, WTiling)!=NULL);*/
     
     if(split_of_map==NULL){
         if(split==NULL)
@@ -773,7 +773,7 @@ static void splitsplit_do_rqsize(WSplitSplit *p, WSplit *node,
     if(((WSplit*)p)->parent==NULL /*|| 
        (ha->tl==0 && ha->br==0 && va->tl==0 && va->br==0)*/){
         if(((WSplit*)p)->ws_if_root!=NULL)
-            pg=REGION_GEOM((WIonWS*)(((WSplit*)p)->ws_if_root));
+            pg=REGION_GEOM((WTiling*)(((WSplit*)p)->ws_if_root));
         else
             pg=((WSplit*)p)->geom;
     }else{
@@ -850,7 +850,7 @@ void split_do_rqgeom_(WSplit *node, const WRectangle *ng,
 
     if(node->parent==NULL){
         if(node->ws_if_root!=NULL)
-            *rg=REGION_GEOM((WIonWS*)(node->ws_if_root));
+            *rg=REGION_GEOM((WTiling*)(node->ws_if_root));
         else
             *rg=*ng;
     }else{
@@ -1002,7 +1002,7 @@ err:
 
 void splittree_changeroot(WSplit *root, WSplit *node)
 {
-    WIonWS *ws=(WIonWS*)(root->ws_if_root);
+    WTiling *ws=(WTiling*)(root->ws_if_root);
     assert(ws!=NULL);
     assert(ws->split_tree==root);
     root->ws_if_root=NULL;

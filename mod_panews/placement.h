@@ -17,7 +17,7 @@
 #include <ioncore/common.h>
 #include <ioncore/clientwin.h>
 #include <ioncore/manage.h>
-#include <mod_ionws/split.h>
+#include <mod_tiling/split.h>
 #include "panews.h"
 #include "splitext.h"
 

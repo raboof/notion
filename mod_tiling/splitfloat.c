@@ -19,7 +19,7 @@
 #include <ioncore/xwindow.h>
 #include <ioncore/window.h>
 
-#include "ionws.h"
+#include "tiling.h"
 #include "split.h"
 #include "splitfloat.h"
 #include "panehandle.h"
@@ -46,7 +46,7 @@ static void splitfloat_set_borderlines(WSplitFloat *split)
 
 
 bool splitfloat_init(WSplitFloat *split, const WRectangle *geom, 
-                     WIonWS *ws, int dir)
+                     WTiling *ws, int dir)
 {
     WFitParams fp;
     WWindow *par=REGION_PARENT(ws);
@@ -87,7 +87,7 @@ bool splitfloat_init(WSplitFloat *split, const WRectangle *geom,
 }
 
 
-WSplitFloat *create_splitfloat(const WRectangle *geom, WIonWS *ws, int dir)
+WSplitFloat *create_splitfloat(const WRectangle *geom, WTiling *ws, int dir)
 {
     CREATEOBJ_IMPL(WSplitFloat, splitfloat, (p, geom, ws, dir));
 }
@@ -755,7 +755,7 @@ static void calc_tlg_brg(const WRectangle *geom, int tls, int brs, int dir,
 }
 
 
-WSplit *load_splitfloat(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
+WSplit *load_splitfloat(WTiling *ws, const WRectangle *geom, ExtlTab tab)
 {
     WSplit *tl=NULL, *br=NULL;
     WSplitFloat *split;
@@ -804,7 +804,7 @@ WSplit *load_splitfloat(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
     if(extl_table_gets_t(tab, "tl", &subtab)){
         WRectangle g=tlg;
         splitfloat_tl_pwin_to_cnt(split, &g);
-        tl=ionws_load_node(ws, &g, subtab);
+        tl=tiling_load_node(ws, &g, subtab);
         extl_unref_table(subtab);
     }
     
@@ -816,7 +816,7 @@ WSplit *load_splitfloat(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
             g=brg;
             splitfloat_br_pwin_to_cnt(split, &g);
         }
-        br=ionws_load_node(ws, &g, subtab);
+        br=tiling_load_node(ws, &g, subtab);
         extl_unref_table(subtab);
     }
     
@@ -851,7 +851,7 @@ WSplit *load_splitfloat(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
 
 WSplitRegion *splittree_split_floating(WSplit *node, int dir, int primn,
                                        int nmins, WRegionSimpleCreateFn *fn, 
-                                       WIonWS *ws)
+                                       WTiling *ws)
 {
     WSplitFloat *sf;
     int omins, mins;

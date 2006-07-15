@@ -1,5 +1,5 @@
 /*
- * ion/mod_ionws/placement.h
+ * ion/mod_tiling/placement.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2006. 
  *
@@ -9,30 +9,30 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_MOD_IONWS_PLACEMENT_H
-#define ION_MOD_IONWS_PLACEMENT_H
+#ifndef ION_MOD_TILING_PLACEMENT_H
+#define ION_MOD_TILING_PLACEMENT_H
 
 #include <libmainloop/hooks.h>
 #include <ioncore/common.h>
 #include <ioncore/clientwin.h>
 #include <ioncore/manage.h>
-#include "ionws.h"
+#include "tiling.h"
 
 
 typedef struct{
-    WIonWS *ws;
+    WTiling *ws;
     WRegion *reg;
     const WManageParams *mp;
     
     WFrame *res_frame;
-} WIonWSPlacementParams;
+} WTilingPlacementParams;
 
-/* Handlers of this hook should take (WClientWin*, WIonWS*, WManageParams*) 
+/* Handlers of this hook should take (WClientWin*, WTiling*, WManageParams*) 
  * as parameter. 
  */
-extern WHook *ionws_placement_alt;
+extern WHook *tiling_placement_alt;
 
-extern WPHolder *ionws_prepare_manage(WIonWS *ws, const WClientWin *cwin,
+extern WPHolder *tiling_prepare_manage(WTiling *ws, const WClientWin *cwin,
                                       const WManageParams *param, int redir);
 
-#endif /* ION_MOD_IONWS_PLACEMENT_H */
+#endif /* ION_MOD_TILING_PLACEMENT_H */

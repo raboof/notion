@@ -18,7 +18,7 @@
 #include <ioncore/rootwin.h>
 #include <ioncore/xwindow.h>
 #include <ioncore/window.h>
-#include <mod_ionws/split.h>
+#include <mod_tiling/split.h>
 #include "splitext.h"
 #include "unusedwin.h"
 
@@ -51,7 +51,7 @@ bool splitunused_init(WSplitUnused *split, const WRectangle *geom,
         return FALSE;
     }
     
-    if(!ionws_managed_add(&ws->ionws, (WRegion*)uwin)){
+    if(!tiling_managed_add(&ws->tiling, (WRegion*)uwin)){
         split->regnode.reg=NULL;
         destroy_obj((Obj*)uwin);
         return FALSE;
@@ -478,8 +478,8 @@ WRegion *panews_do_get_farthest(WPaneWS *ws,
 {
     WSplitFilter *filter=(any ? filter_any : filter_no_stdisp);
     WSplit *node=NULL;
-    if(ws->ionws.split_tree!=NULL)
-        node=split_current_todir(ws->ionws.split_tree, dir, primn, filter);
+    if(ws->tiling.split_tree!=NULL)
+        node=split_current_todir(ws->tiling.split_tree, dir, primn, filter);
     if(node!=NULL && OBJ_IS(node, WSplitRegion))
         return ((WSplitRegion*)node)->reg;
     return NULL;

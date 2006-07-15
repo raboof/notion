@@ -1,5 +1,5 @@
 /*
- * ion/mod_ionws/ionws.c
+ * ion/mod_tiling/tiling.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2006. 
  *
@@ -34,7 +34,7 @@
 #include <ioncore/xwindow.h>
 #include <ioncore/navi.h>
 #include "placement.h"
-#include "ionws.h"
+#include "tiling.h"
 #include "split.h"
 #include "splitfloat.h"
 #include "split-stdisp.h"
@@ -42,7 +42,7 @@
 
 
 
-static WIonWSIterTmp ionws_iter_default_tmp;
+static WTilingIterTmp tiling_iter_default_tmp;
 
 
 /*{{{ Some helper routines */
@@ -52,7 +52,7 @@ static WIonWSIterTmp ionws_iter_default_tmp;
      ((WS)->stdispnode!=NULL ? (WS)->stdispnode->regnode.reg : NULL)
 
 
-static WSplitRegion *get_node_check(WIonWS *ws, WRegion *reg)
+static WSplitRegion *get_node_check(WTiling *ws, WRegion *reg)
 {
     WSplitRegion *node;
 
@@ -68,7 +68,7 @@ static WSplitRegion *get_node_check(WIonWS *ws, WRegion *reg)
 }
 
 
-static bool check_node(WIonWS *ws, WSplit *split)
+static bool check_node(WTiling *ws, WSplit *split)
 {
     if(split->parent)
         return check_node(ws, (WSplit*)split->parent);
@@ -99,9 +99,9 @@ static void reparent_mgd(WRegion *sub, WWindow *par)
 }
 
 
-bool ionws_fitrep(WIonWS *ws, WWindow *par, const WFitParams *fp)
+bool tiling_fitrep(WTiling *ws, WWindow *par, const WFitParams *fp)
 {
-    WIonWSIterTmp tmp;
+    WTilingIterTmp tmp;
     bool ok=FALSE;
     
     if(par!=NULL){
@@ -133,7 +133,7 @@ bool ionws_fitrep(WIonWS *ws, WWindow *par, const WFitParams *fp)
 }
 
 
-void ionws_managed_rqgeom(WIonWS *ws, WRegion *mgd, 
+void tiling_managed_rqgeom(WTiling *ws, WRegion *mgd, 
                           int flags, const WRectangle *geom,
                           WRectangle *geomret)
 {
@@ -143,7 +143,7 @@ void ionws_managed_rqgeom(WIonWS *ws, WRegion *mgd,
 }
 
 
-void ionws_map(WIonWS *ws)
+void tiling_map(WTiling *ws)
 {
     REGION_MARK_MAPPED(ws);
     XMapWindow(ioncore_g.dpy, ws->dummywin);
@@ -153,7 +153,7 @@ void ionws_map(WIonWS *ws)
 }
 
 
-void ionws_unmap(WIonWS *ws)
+void tiling_unmap(WTiling *ws)
 {
     REGION_MARK_UNMAPPED(ws);
     XUnmapWindow(ioncore_g.dpy, ws->dummywin);
@@ -163,7 +163,7 @@ void ionws_unmap(WIonWS *ws)
 }
 
 
-void ionws_fallback_focus(WIonWS *ws, bool warp)
+void tiling_fallback_focus(WTiling *ws, bool warp)
 {
     if(warp)
         region_do_warp((WRegion*)ws);
@@ -173,12 +173,12 @@ void ionws_fallback_focus(WIonWS *ws, bool warp)
 }
 
 
-void ionws_do_set_focus(WIonWS *ws, bool warp)
+void tiling_do_set_focus(WTiling *ws, bool warp)
 {
-    WRegion *sub=ionws_current(ws);
+    WRegion *sub=tiling_current(ws);
     
     if(sub==NULL){
-        ionws_fallback_focus(ws, warp);
+        tiling_fallback_focus(ws, warp);
         return;
     }
 
@@ -192,13 +192,13 @@ static WTimer *restack_timer=NULL;
 static void restack_handler(WTimer *tmr, Obj *obj)
 {
     if(obj!=NULL){
-        WIonWS *ws=(WIonWS*)obj;
+        WTiling *ws=(WTiling*)obj;
         split_restack(ws->split_tree, ws->dummywin, Above);
     }
 }
 
 
-bool ionws_managed_prepare_focus(WIonWS *ws, WRegion *reg, 
+bool tiling_managed_prepare_focus(WTiling *ws, WRegion *reg, 
                                  int flags, WPrepareFocusResult *res)
 {
     WSplitRegion *node; 
@@ -215,7 +215,7 @@ bool ionws_managed_prepare_focus(WIonWS *ws, WRegion *reg,
      * so we must restack here.
      */
     if(ws->split_tree!=NULL){
-        int rd=mod_ionws_raise_delay;
+        int rd=mod_tiling_raise_delay;
         bool use_timer=rd>0 && flags&REGION_GOTO_ENTERWINDOW;
         
         if(use_timer){
@@ -244,7 +244,7 @@ bool ionws_managed_prepare_focus(WIonWS *ws, WRegion *reg,
 
 
 
-void ionws_restack(WIonWS *ws, Window other, int mode)
+void tiling_restack(WTiling *ws, Window other, int mode)
 {
     xwindow_restack(ws->dummywin, other, mode);
     if(ws->split_tree!=NULL)
@@ -252,7 +252,7 @@ void ionws_restack(WIonWS *ws, Window other, int mode)
 }
 
 
-void ionws_stacking(WIonWS *ws, Window *bottomret, Window *topret)
+void tiling_stacking(WTiling *ws, Window *bottomret, Window *topret)
 {
     Window sbottom=None, stop=None;
     
@@ -264,20 +264,20 @@ void ionws_stacking(WIonWS *ws, Window *bottomret, Window *topret)
 }
 
 
-Window ionws_xwindow(const WIonWS *ws)
+Window tiling_xwindow(const WTiling *ws)
 {
     return ws->dummywin;
 }
 
 
 /*
-WRegion *ionws_rqclose_propagate(WIonWS *ws, WRegion *maybe_sub)
+WRegion *tiling_rqclose_propagate(WTiling *ws, WRegion *maybe_sub)
 {
     return (region_rqclose((WRegion*)ws, FALSE) ? (WRegion*)ws : NULL);
 }
 */
 
-WPHolder *ionws_prepare_manage_transient(WIonWS *ws,
+WPHolder *tiling_prepare_manage_transient(WTiling *ws,
                                          const WClientWin *transient,
                                          const WManageParams *param,
                                          int unused)
@@ -299,7 +299,7 @@ static bool regnodefilter(WSplit *split)
 }
 
 
-void ionws_unmanage_stdisp(WIonWS *ws, bool permanent, bool nofocus)
+void tiling_unmanage_stdisp(WTiling *ws, bool permanent, bool nofocus)
 {
     WSplitRegion *tofocus=NULL;
     bool setfocus=FALSE;
@@ -318,11 +318,11 @@ void ionws_unmanage_stdisp(WIonWS *ws, bool permanent, bool nofocus)
                                                 SPLIT_ANY, PRIMN_ANY,
                                                 regnodefilter);
         }
-        /* Reset node_of info here so ionws_managed_remove will not
+        /* Reset node_of info here so tiling_managed_remove will not
          * remove the node.
          */
         splittree_set_node_of(od, NULL);
-        ionws_managed_remove(ws, od);
+        tiling_managed_remove(ws, od);
         /*ws->stdispnode->u.reg=NULL;*/
     }
     
@@ -336,12 +336,12 @@ void ionws_unmanage_stdisp(WIonWS *ws, bool permanent, bool nofocus)
         if(tofocus!=NULL)
             region_set_focus(tofocus->reg);
         else
-            ionws_fallback_focus(ws, FALSE);
+            tiling_fallback_focus(ws, FALSE);
     }
 }
 
 
-static void ionws_create_stdispnode(WIonWS *ws, WRegion *stdisp, 
+static void tiling_create_stdispnode(WTiling *ws, WRegion *stdisp, 
                                     int corner, int orientation, 
                                     bool fullsize)
 {
@@ -414,7 +414,7 @@ static void ionws_create_stdispnode(WIonWS *ws, WRegion *stdisp,
 }
 
 
-void ionws_manage_stdisp(WIonWS *ws, WRegion *stdisp, 
+void tiling_manage_stdisp(WTiling *ws, WRegion *stdisp, 
                          const WMPlexSTDispInfo *di)
 {
     bool mcf=region_may_control_focus((WRegion*)ws);
@@ -435,11 +435,11 @@ void ionws_manage_stdisp(WIonWS *ws, WRegion *stdisp,
      */
     if(ws->stdispnode!=NULL && (di->pos!=ws->stdispnode->corner ||
                                 orientation!=ws->stdispnode->orientation)){
-        ionws_unmanage_stdisp(ws, TRUE, TRUE);
+        tiling_unmanage_stdisp(ws, TRUE, TRUE);
     }
 
     if(ws->stdispnode==NULL){
-        ionws_create_stdispnode(ws, stdisp, di->pos, orientation, 
+        tiling_create_stdispnode(ws, stdisp, di->pos, orientation, 
                                 di->fullsize);
         if(ws->stdispnode==NULL)
             return;
@@ -448,7 +448,7 @@ void ionws_manage_stdisp(WIonWS *ws, WRegion *stdisp,
         if(od!=NULL){
             act=REGION_IS_ACTIVE(od);
             splittree_set_node_of(od, NULL);
-            ionws_managed_remove(ws, od);
+            tiling_managed_remove(ws, od);
             assert(ws->stdispnode->regnode.reg==NULL);
         }
         
@@ -457,8 +457,8 @@ void ionws_manage_stdisp(WIonWS *ws, WRegion *stdisp,
         splittree_set_node_of(stdisp, &(ws->stdispnode->regnode));
     }
     
-    if(!ionws_managed_add(ws, stdisp)){
-        ionws_unmanage_stdisp(ws, TRUE, TRUE);
+    if(!tiling_managed_add(ws, stdisp)){
+        tiling_unmanage_stdisp(ws, TRUE, TRUE);
         return;
     }
     
@@ -491,7 +491,7 @@ void ionws_manage_stdisp(WIonWS *ws, WRegion *stdisp,
 /*{{{ Create/destroy */
 
 
-bool ionws_managed_add_default(WIonWS *ws, WRegion *reg)
+bool tiling_managed_add_default(WTiling *ws, WRegion *reg)
 {
     Window bottom=None, top=None;
     
@@ -503,13 +503,13 @@ bool ionws_managed_add_default(WIonWS *ws, WRegion *reg)
     region_set_manager(reg, (WRegion*)ws);
     
     if(OBJ_IS(reg, WFrame))
-        region_add_bindmap(reg, mod_ionws_frame_bindmap);
+        region_add_bindmap(reg, mod_tiling_frame_bindmap);
     
     if(REGION_IS_MAPPED(ws))
         region_map(reg);
     
     if(region_may_control_focus((WRegion*)ws)){
-        WRegion *curr=ionws_current(ws);
+        WRegion *curr=tiling_current(ws);
         if(curr==NULL || !REGION_IS_ACTIVE(curr))
             region_warp(reg);
     }
@@ -518,15 +518,15 @@ bool ionws_managed_add_default(WIonWS *ws, WRegion *reg)
 }
 
 
-bool ionws_managed_add(WIonWS *ws, WRegion *reg)
+bool tiling_managed_add(WTiling *ws, WRegion *reg)
 {
     bool ret=FALSE;
-    CALL_DYN_RET(ret, bool, ionws_managed_add, ws, (ws, reg));
+    CALL_DYN_RET(ret, bool, tiling_managed_add, ws, (ws, reg));
     return ret;
 }
 
 
-static WRegion *create_initial_frame(WIonWS *ws, WWindow *parent,
+static WRegion *create_initial_frame(WTiling *ws, WWindow *parent,
                                      const WFitParams *fp)
 {
     WRegion *reg=ws->create_frame_fn(parent, fp);
@@ -541,7 +541,7 @@ static WRegion *create_initial_frame(WIonWS *ws, WWindow *parent,
     }
     ws->split_tree->ws_if_root=ws;
     
-    if(!ionws_managed_add(ws, reg)){
+    if(!tiling_managed_add(ws, reg)){
         destroy_obj((Obj*)reg);
         destroy_obj((Obj*)ws->split_tree);
         return NULL;
@@ -551,19 +551,19 @@ static WRegion *create_initial_frame(WIonWS *ws, WWindow *parent,
 }
 
 
-static WRegion *create_frame_ionws(WWindow *parent, const WFitParams *fp)
+static WRegion *create_frame_tiling(WWindow *parent, const WFitParams *fp)
 {
-    return (WRegion*)create_frame(parent, fp, "frame-tiled-ionws");
+    return (WRegion*)create_frame(parent, fp, "frame-tiled-tiling");
 }
 
 
-bool ionws_init(WIonWS *ws, WWindow *parent, const WFitParams *fp, 
+bool tiling_init(WTiling *ws, WWindow *parent, const WFitParams *fp, 
                 WRegionSimpleCreateFn *create_frame_fn, bool ci)
 {
     ws->split_tree=NULL;
     ws->create_frame_fn=(create_frame_fn 
                          ? create_frame_fn
-                         : create_frame_ionws);
+                         : create_frame_tiling);
     ws->stdispnode=NULL;
     ws->managed_list=NULL;
 
@@ -593,37 +593,37 @@ bool ionws_init(WIonWS *ws, WWindow *parent, const WFitParams *fp,
                  (XPointer)ws);
     
     region_register(&(ws->reg));
-    region_add_bindmap((WRegion*)ws, mod_ionws_ionws_bindmap);
+    region_add_bindmap((WRegion*)ws, mod_tiling_tiling_bindmap);
     
     return TRUE;
 }
 
 
-WIonWS *create_ionws(WWindow *parent, const WFitParams *fp, 
+WTiling *create_tiling(WWindow *parent, const WFitParams *fp, 
                      WRegionSimpleCreateFn *create_frame_fn, bool ci)
 {
-    CREATEOBJ_IMPL(WIonWS, ionws, (p, parent, fp, create_frame_fn, ci));
+    CREATEOBJ_IMPL(WTiling, tiling, (p, parent, fp, create_frame_fn, ci));
 }
 
 
-WIonWS *create_ionws_simple(WWindow *parent, const WFitParams *fp)
+WTiling *create_tiling_simple(WWindow *parent, const WFitParams *fp)
 {
-    return create_ionws(parent, fp, NULL, TRUE);
+    return create_tiling(parent, fp, NULL, TRUE);
 }
 
 
-void ionws_deinit(WIonWS *ws)
+void tiling_deinit(WTiling *ws)
 {
     WRegion *reg;
-    WIonWSIterTmp tmp;
+    WTilingIterTmp tmp;
 
-    ionws_unmanage_stdisp(ws, FALSE, TRUE);
+    tiling_unmanage_stdisp(ws, FALSE, TRUE);
 
-    FOR_ALL_MANAGED_BY_IONWS(reg, ws, tmp){
+    FOR_ALL_MANAGED_BY_TILING(reg, ws, tmp){
         destroy_obj((Obj*)reg);
     }
 
-    FOR_ALL_MANAGED_BY_IONWS(reg, ws, tmp){
+    FOR_ALL_MANAGED_BY_TILING(reg, ws, tmp){
         assert(FALSE);
     }
     
@@ -638,12 +638,12 @@ void ionws_deinit(WIonWS *ws)
 }
 
 
-bool ionws_managed_may_destroy(WIonWS *ws, WRegion *reg)
+bool tiling_managed_may_destroy(WTiling *ws, WRegion *reg)
 {
-    WIonWSIterTmp tmp;
+    WTilingIterTmp tmp;
     WRegion *mgd;
 
-    FOR_ALL_MANAGED_BY_IONWS(mgd, ws, tmp){
+    FOR_ALL_MANAGED_BY_TILING(mgd, ws, tmp){
         if(mgd!=STDISP_OF(ws) && mgd!=reg){
             return TRUE;
         }
@@ -653,12 +653,12 @@ bool ionws_managed_may_destroy(WIonWS *ws, WRegion *reg)
 }
 
 
-bool ionws_may_destroy(WIonWS *ws, WRegion *reg)
+bool tiling_may_destroy(WTiling *ws, WRegion *reg)
 {
-    WIonWSIterTmp tmp;
+    WTilingIterTmp tmp;
     WRegion *mgd;
     
-    FOR_ALL_MANAGED_BY_IONWS(mgd, ws, tmp){
+    FOR_ALL_MANAGED_BY_TILING(mgd, ws, tmp){
         if(mgd!=STDISP_OF(ws)){
             warn(TR("Workspace not empty - refusing to destroy."));
             return FALSE;
@@ -669,9 +669,9 @@ bool ionws_may_destroy(WIonWS *ws, WRegion *reg)
 }
 
 
-bool ionws_rescue_clientwins(WIonWS *ws, WPHolder *ph)
+bool tiling_rescue_clientwins(WTiling *ws, WPHolder *ph)
 {
-    WIonWSIterTmp tmp;
+    WTilingIterTmp tmp;
     
     ptrlist_iter_init(&tmp, ws->managed_list);
     
@@ -681,7 +681,7 @@ bool ionws_rescue_clientwins(WIonWS *ws, WPHolder *ph)
 }
 
 
-void ionws_do_managed_remove(WIonWS *ws, WRegion *reg)
+void tiling_do_managed_remove(WTiling *ws, WRegion *reg)
 {
     region_unset_manager(reg, (WRegion*)ws);
     
@@ -692,7 +692,7 @@ void ionws_do_managed_remove(WIonWS *ws, WRegion *reg)
     }
     
     if(OBJ_IS(reg, WFrame))
-        region_remove_bindmap(reg, mod_ionws_frame_bindmap);
+        region_remove_bindmap(reg, mod_tiling_frame_bindmap);
 }
 
 
@@ -702,7 +702,7 @@ static bool nostdispfilter(WSplit *node)
 }
 
 
-void ionws_managed_remove(WIonWS *ws, WRegion *reg)
+void tiling_managed_remove(WTiling *ws, WRegion *reg)
 {
     bool ds=OBJ_IS_BEING_DESTROYED(ws);
     bool act=REGION_IS_ACTIVE(reg);
@@ -710,9 +710,9 @@ void ionws_managed_remove(WIonWS *ws, WRegion *reg)
     WSplitRegion *node=get_node_check(ws, reg);
     WRegion *other;
 
-    other=ionws_do_get_nextto(ws, reg, SPLIT_ANY, PRIMN_ANY, FALSE);
+    other=tiling_do_get_nextto(ws, reg, SPLIT_ANY, PRIMN_ANY, FALSE);
     
-    ionws_do_managed_remove(ws, reg);
+    tiling_do_managed_remove(ws, reg);
 
     if(node==(WSplitRegion*)(ws->stdispnode))
         ws->stdispnode=NULL;
@@ -759,7 +759,7 @@ static bool find_ph(WSplit *split)
 }
 
 
-WPHolder *ionws_get_rescue_pholder_for(WIonWS *ws, WRegion *mgd)
+WPHolder *tiling_get_rescue_pholder_for(WTiling *ws, WRegion *mgd)
 {
     WSplit *node=(WSplit*)get_node_check(ws, mgd);
     WPHolder *ph;
@@ -841,23 +841,23 @@ static bool get_split_dir_primn(const char *str, int *dir, int *primn)
 }
 
 
-WRegion *ionws_navi_next(WIonWS *ws, WRegion *reg, WRegionNavi nh)
+WRegion *tiling_navi_next(WTiling *ws, WRegion *reg, WRegionNavi nh)
 {
     int dir, primn;
     
     navi_to_dir_primn(nh, &dir, &primn);
     
-    return ionws_do_get_nextto(ws, reg, dir, primn, FALSE);
+    return tiling_do_get_nextto(ws, reg, dir, primn, FALSE);
 }
 
 
-WRegion *ionws_navi_first(WIonWS *ws, WRegionNavi nh)
+WRegion *tiling_navi_first(WTiling *ws, WRegionNavi nh)
 {
     int dir, primn;
     
     navi_to_dir_primn(nh, &dir, &primn);
     
-    return ionws_do_get_farthest(ws, dir, primn, FALSE);
+    return tiling_do_get_farthest(ws, dir, primn, FALSE);
 }
 
 
@@ -882,7 +882,7 @@ static bool get_split_dir_primn_float(const char *str, int *dir, int *primn,
 #define SPLIT_MINS 16 /* totally arbitrary */
 
 
-static WFrame *ionws_do_split(WIonWS *ws, WSplit *node, 
+static WFrame *tiling_do_split(WTiling *ws, WSplit *node, 
                               const char *dirstr, int minw, int minh)
 {
     int dir, primn, mins;
@@ -923,7 +923,7 @@ static WFrame *ionws_do_split(WIonWS *ws, WSplit *node,
     newframe=OBJ_CAST(nnode->reg, WFrame);
     assert(newframe!=NULL);
 
-    if(!ionws_managed_add(ws, nnode->reg)){
+    if(!tiling_managed_add(ws, nnode->reg)){
         nnode->reg=NULL;
         destroy_obj((Obj*)nnode);
         destroy_obj((Obj*)newframe);
@@ -944,22 +944,22 @@ static WFrame *ionws_do_split(WIonWS *ws, WSplit *node,
  * prefixed with ''floating:'' a floating split is created.
  */
 EXTL_EXPORT_MEMBER
-WFrame *ionws_split(WIonWS *ws, WSplit *node, const char *dirstr)
+WFrame *tiling_split(WTiling *ws, WSplit *node, const char *dirstr)
 {
     if(!check_node(ws, node))
         return NULL;
-    return ionws_do_split(ws, node, dirstr,
+    return tiling_do_split(ws, node, dirstr,
                           SPLIT_MINS, SPLIT_MINS);
 }
 
 
 /*EXTL_DOC
- * Same as \fnref{WIonWS.split} at the root of the split tree.
+ * Same as \fnref{WTiling.split} at the root of the split tree.
  */
 EXTL_EXPORT_MEMBER
-WFrame *ionws_split_top(WIonWS *ws, const char *dirstr)
+WFrame *tiling_split_top(WTiling *ws, const char *dirstr)
 {
-    return ionws_do_split(ws, ws->split_tree, dirstr, 
+    return tiling_do_split(ws, ws->split_tree, dirstr, 
                           SPLIT_MINS, SPLIT_MINS);
 }
 
@@ -973,7 +973,7 @@ WFrame *ionws_split_top(WIonWS *ws, const char *dirstr)
  * created.
  */
 EXTL_EXPORT_MEMBER
-WFrame *ionws_split_at(WIonWS *ws, WFrame *frame, const char *dirstr, 
+WFrame *tiling_split_at(WTiling *ws, WFrame *frame, const char *dirstr, 
                        bool attach_current)
 {
     WRegion *curr;
@@ -985,7 +985,7 @@ WFrame *ionws_split_at(WIonWS *ws, WFrame *frame, const char *dirstr,
     
     node=get_node_check(ws, (WRegion*)frame);
 
-    newframe=ionws_do_split(ws, (WSplit*)node, dirstr, 
+    newframe=tiling_do_split(ws, (WSplit*)node, dirstr, 
                             region_min_w((WRegion*)frame),
                             region_min_h((WRegion*)frame));
 
@@ -1012,7 +1012,7 @@ WFrame *ionws_split_at(WIonWS *ws, WFrame *frame, const char *dirstr,
  * and, if possible, destroy the frame.
  */
 EXTL_EXPORT_MEMBER
-bool ionws_unsplit_at(WIonWS *ws, WFrame *frame)
+bool tiling_unsplit_at(WTiling *ws, WFrame *frame)
 {
     if(frame==NULL){
         warn(TR("Nil frame."));
@@ -1034,7 +1034,7 @@ bool ionws_unsplit_at(WIonWS *ws, WFrame *frame)
 /*{{{ Navigation etc. exports */
 
 
-WRegion *ionws_current(WIonWS *ws)
+WRegion *tiling_current(WTiling *ws)
 {
     WSplitRegion *node=NULL;
     if(ws->split_tree!=NULL){
@@ -1050,7 +1050,7 @@ WRegion *ionws_current(WIonWS *ws)
  */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
-ExtlTab ionws_managed_list(WIonWS *ws)
+ExtlTab tiling_managed_list(WTiling *ws)
 {
     PtrListIterTmp tmp;
     
@@ -1065,13 +1065,13 @@ ExtlTab ionws_managed_list(WIonWS *ws)
  */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
-WSplit *ionws_split_tree(WIonWS *ws)
+WSplit *tiling_split_tree(WTiling *ws)
 {
     return ws->split_tree;
 }
 
 
-static WRegion *ionws_do_get_nextto_default(WIonWS *ws, WRegion *reg,
+static WRegion *tiling_do_get_nextto_default(WTiling *ws, WRegion *reg,
                                             int dir, int primn, bool any)
 {
     WSplitFilter *filter=(any ? NULL : nostdispfilter);
@@ -1082,11 +1082,11 @@ static WRegion *ionws_do_get_nextto_default(WIonWS *ws, WRegion *reg,
 }
 
 
-WRegion *ionws_do_get_nextto(WIonWS *ws, WRegion *reg,
+WRegion *tiling_do_get_nextto(WTiling *ws, WRegion *reg,
                              int dir, int primn, bool any)
 {
     WRegion *ret=NULL;
-    CALL_DYN_RET(ret, WRegion*, ionws_do_get_nextto, ws,
+    CALL_DYN_RET(ret, WRegion*, tiling_do_get_nextto, ws,
                  (ws, reg, dir, primn, any));
     return ret;
 }
@@ -1100,7 +1100,7 @@ WRegion *ionws_do_get_nextto(WIonWS *ws, WRegion *reg,
  */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
-WRegion *ionws_nextto(WIonWS *ws, WRegion *reg, const char *dirstr,
+WRegion *tiling_nextto(WTiling *ws, WRegion *reg, const char *dirstr,
                       bool any)
 {
     int dir=0, primn=0;
@@ -1108,11 +1108,11 @@ WRegion *ionws_nextto(WIonWS *ws, WRegion *reg, const char *dirstr,
     if(!get_split_dir_primn(dirstr, &dir, &primn))
         return NULL;
     
-    return ionws_do_get_nextto(ws, reg, dir, primn, any);
+    return tiling_do_get_nextto(ws, reg, dir, primn, any);
 }
 
 
-static WRegion *ionws_do_get_farthest_default(WIonWS *ws,
+static WRegion *tiling_do_get_farthest_default(WTiling *ws,
                                               int dir, int primn, bool any)
 {
     WSplitFilter *filter=(any ? NULL : nostdispfilter);
@@ -1123,11 +1123,11 @@ static WRegion *ionws_do_get_farthest_default(WIonWS *ws,
 }
 
 
-WRegion *ionws_do_get_farthest(WIonWS *ws, 
+WRegion *tiling_do_get_farthest(WTiling *ws, 
                                int dir, int primn, bool any)
 {
     WRegion *ret=NULL;
-    CALL_DYN_RET(ret, WRegion*, ionws_do_get_farthest, ws,
+    CALL_DYN_RET(ret, WRegion*, tiling_do_get_farthest, ws,
                  (ws, dir, primn, any));
     return ret;
 }
@@ -1141,25 +1141,25 @@ WRegion *ionws_do_get_farthest(WIonWS *ws,
  */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
-WRegion *ionws_farthest(WIonWS *ws, const char *dirstr, bool any)
+WRegion *tiling_farthest(WTiling *ws, const char *dirstr, bool any)
 {
     int dir=0, primn=0;
 
     if(!get_split_dir_primn(dirstr, &dir, &primn))
         return NULL;
     
-    return ionws_do_get_farthest(ws, dir, primn, any);
+    return tiling_do_get_farthest(ws, dir, primn, any);
 }
 
 
-static WRegion *do_goto_dir(WIonWS *ws, int dir, int primn)
+static WRegion *do_goto_dir(WTiling *ws, int dir, int primn)
 {
-    WRegion *reg=NULL, *curr=ionws_current(ws);
+    WRegion *reg=NULL, *curr=tiling_current(ws);
     if(curr!=NULL)
-        reg=ionws_do_get_nextto(ws, curr, dir, primn, FALSE);
+        reg=tiling_do_get_nextto(ws, curr, dir, primn, FALSE);
     if(reg==NULL && primn!=PRIMN_ANY){
         int primn2=(primn==PRIMN_TL ? PRIMN_BR : PRIMN_TL);
-        reg=ionws_do_get_farthest(ws, dir, primn2, FALSE);
+        reg=tiling_do_get_farthest(ws, dir, primn2, FALSE);
     }
     if(reg!=NULL)
         region_goto(reg);
@@ -1177,7 +1177,7 @@ static WRegion *do_goto_dir(WIonWS *ws, int dir, int primn)
  * actually have received the focus when this function returns.
  */
 EXTL_EXPORT_MEMBER
-WRegion *ionws_goto_dir(WIonWS *ws, const char *dirstr)
+WRegion *tiling_goto_dir(WTiling *ws, const char *dirstr)
 {
     int dir=0, primn=0;
 
@@ -1188,11 +1188,11 @@ WRegion *ionws_goto_dir(WIonWS *ws, const char *dirstr)
 }
 
 
-static WRegion *do_goto_dir_nowrap(WIonWS *ws, int dir, int primn)
+static WRegion *do_goto_dir_nowrap(WTiling *ws, int dir, int primn)
 {
-    WRegion *reg=NULL, *curr=ionws_current(ws);
+    WRegion *reg=NULL, *curr=tiling_current(ws);
     if(curr!=NULL)
-        reg=ionws_do_get_nextto(ws, curr, dir, primn, FALSE);
+        reg=tiling_do_get_nextto(ws, curr, dir, primn, FALSE);
     if(reg!=NULL)
         region_goto(reg);
     return reg;
@@ -1204,7 +1204,7 @@ static WRegion *do_goto_dir_nowrap(WIonWS *ws, int dir, int primn)
  * direction \var{dirstr} (up/down/left/right) without wrapping around.
  */
 EXTL_EXPORT_MEMBER
-WRegion *ionws_goto_dir_nowrap(WIonWS *ws, const char *dirstr)
+WRegion *tiling_goto_dir_nowrap(WTiling *ws, const char *dirstr)
 {
     int dir=0, primn=0;
 
@@ -1219,7 +1219,7 @@ WRegion *ionws_goto_dir_nowrap(WIonWS *ws, const char *dirstr)
  * Find region on \var{ws} overlapping coordinates $(x, y)$.
  */
 /*EXTL_EXPORT_MEMBER
-WRegion *ionws_region_at(WIonWS *ws, int x, int y)
+WRegion *tiling_region_at(WTiling *ws, int x, int y)
 {
     if(ws->split_tree==NULL)
         return NULL;
@@ -1233,7 +1233,7 @@ WRegion *ionws_region_at(WIonWS *ws, int x, int y)
  */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
-WSplitRegion *ionws_node_of(WIonWS *ws, WRegion *reg)
+WSplitRegion *tiling_node_of(WTiling *ws, WRegion *reg)
 {
     if(reg==NULL){
         warn(TR("Nil parameter."));
@@ -1255,7 +1255,7 @@ WSplitRegion *ionws_node_of(WIonWS *ws, WRegion *reg)
 /*{{{ Flip and transpose */
 
 
-static WSplitSplit *get_at_split(WIonWS *ws, WRegion *reg)
+static WSplitSplit *get_at_split(WTiling *ws, WRegion *reg)
 {
     WSplit *node;
     WSplitSplit *split;
@@ -1298,7 +1298,7 @@ static WSplitSplit *get_at_split(WIonWS *ws, WRegion *reg)
  * Flip \var{ws} at \var{reg} or root if nil.
  */
 EXTL_EXPORT_MEMBER
-bool iowns_flip_at(WIonWS *ws, WRegion *reg)
+bool iowns_flip_at(WTiling *ws, WRegion *reg)
 {
     WSplitSplit *split=get_at_split(ws, reg);
     
@@ -1315,7 +1315,7 @@ bool iowns_flip_at(WIonWS *ws, WRegion *reg)
  * Transpose \var{ws} at \var{reg} or root if nil.
  */
 EXTL_EXPORT_MEMBER
-bool iowns_transpose_at(WIonWS *ws, WRegion *reg)
+bool iowns_transpose_at(WTiling *ws, WRegion *reg)
 {
     WSplitSplit *split=get_at_split(ws, reg);
     
@@ -1355,7 +1355,7 @@ static void replace(WSplitSplit *split, WSplitSplit *nsplit)
 }
 
 
-WSplitSplit *ionws_set_floating(WIonWS *ws, WSplitSplit *split, int sp)
+WSplitSplit *tiling_set_floating(WTiling *ws, WSplitSplit *split, int sp)
 {
     bool set=OBJ_IS(split, WSplitFloat);
     bool nset=libtu_do_setparam(sp, set);
@@ -1391,13 +1391,13 @@ WSplitSplit *ionws_set_floating(WIonWS *ws, WSplitSplit *split, int sp)
  * parameter \var{how} (set/unset/toggle). A split of the appropriate is 
  * returned, if there was a change.
  */
-EXTL_EXPORT_AS(WIonWS, set_floating)
-WSplitSplit *ionws_set_floating_extl(WIonWS *ws, WSplitSplit *split, 
+EXTL_EXPORT_AS(WTiling, set_floating)
+WSplitSplit *tiling_set_floating_extl(WTiling *ws, WSplitSplit *split, 
                                      const char *how)
 {
     if(!check_node(ws, (WSplit*)split))
         return NULL;
-    return ionws_set_floating(ws, split, libtu_string_to_setparam(how));
+    return tiling_set_floating(ws, split, libtu_string_to_setparam(how));
 }
 
 
@@ -1407,8 +1407,8 @@ WSplitSplit *ionws_set_floating_extl(WIonWS *ws, WSplitSplit *split,
  * (left/right/up/down/any). The new status is returned (and \code{false}
  * also on error).
  */
-EXTL_EXPORT_AS(WIonWS, set_floating_at)
-bool ionws_set_floating_at_extl(WIonWS *ws, WRegion *reg, const char *how,
+EXTL_EXPORT_AS(WTiling, set_floating_at)
+bool tiling_set_floating_at_extl(WTiling *ws, WRegion *reg, const char *how,
                                 const char *dirstr)
 {
     WSplit *node;
@@ -1440,7 +1440,7 @@ bool ionws_set_floating_at_extl(WIonWS *ws, WRegion *reg, const char *how,
         node=(WSplit*)split;
     }
     
-    nsplit=ionws_set_floating(ws, split, libtu_string_to_setparam(how));
+    nsplit=tiling_set_floating(ws, split, libtu_string_to_setparam(how));
     
     return OBJ_IS((Obj*)(nsplit==NULL ? split : nsplit), WSplitFloat);
 }
@@ -1452,7 +1452,7 @@ bool ionws_set_floating_at_extl(WIonWS *ws, WRegion *reg, const char *how,
 /*{{{ Save */
 
 
-ExtlTab ionws_get_configuration(WIonWS *ws)
+ExtlTab tiling_get_configuration(WTiling *ws)
 {
     ExtlTab tab, split_tree=extl_table_none();
     
@@ -1476,7 +1476,7 @@ ExtlTab ionws_get_configuration(WIonWS *ws)
 /*{{{ Load */
 
 
-WSplit *load_splitst(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
+WSplit *load_splitst(WTiling *ws, const WRectangle *geom, ExtlTab tab)
 {
     WSplitST *st;
 
@@ -1491,7 +1491,7 @@ WSplit *load_splitst(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
 }
 
 
-static WRegion *do_attach(WIonWS *ws, WRegionAttachHandler *handler,
+static WRegion *do_attach(WTiling *ws, WRegionAttachHandler *handler,
                           void *handlerparams, const WRectangle *geom)
 {
     WWindow *par=REGION_PARENT(ws);
@@ -1504,7 +1504,7 @@ static WRegion *do_attach(WIonWS *ws, WRegionAttachHandler *handler,
 }
 
 
-WSplit *load_splitregion_doit(WIonWS *ws, const WRectangle *geom, ExtlTab rt)
+WSplit *load_splitregion_doit(WTiling *ws, const WRectangle *geom, ExtlTab rt)
 {
     WSplitRegion *node=NULL;
     WRegion *reg;
@@ -1518,7 +1518,7 @@ WSplit *load_splitregion_doit(WIonWS *ws, const WRectangle *geom, ExtlTab rt)
         if(node==NULL){
             destroy_obj((Obj*)reg);
         }else{
-            if(!ionws_managed_add(ws, reg)){
+            if(!tiling_managed_add(ws, reg)){
                 node->reg=NULL;
                 destroy_obj((Obj*)node);
                 destroy_obj((Obj*)reg);
@@ -1531,7 +1531,7 @@ WSplit *load_splitregion_doit(WIonWS *ws, const WRectangle *geom, ExtlTab rt)
 }
 
 
-WSplit *load_splitregion(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
+WSplit *load_splitregion(WTiling *ws, const WRectangle *geom, ExtlTab tab)
 {
     WSplit *node=NULL;
     ExtlTab rt;
@@ -1551,7 +1551,7 @@ WSplit *load_splitregion(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
 
 #define MINS 1
 
-WSplit *load_splitsplit(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
+WSplit *load_splitsplit(WTiling *ws, const WRectangle *geom, ExtlTab tab)
 {
     WSplit *tl=NULL, *br=NULL;
     WSplitSplit *split;
@@ -1596,7 +1596,7 @@ WSplit *load_splitsplit(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
     }
     
     if(extl_table_gets_t(tab, "tl", &subtab)){
-        tl=ionws_load_node(ws, &geom2, subtab);
+        tl=tiling_load_node(ws, &geom2, subtab);
         extl_unref_table(subtab);
     }
 
@@ -1610,7 +1610,7 @@ WSplit *load_splitsplit(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
     }
             
     if(extl_table_gets_t(tab, "br", &subtab)){
-        br=ionws_load_node(ws, &geom2, subtab);
+        br=tiling_load_node(ws, &geom2, subtab);
         extl_unref_table(subtab);
     }
     
@@ -1638,7 +1638,7 @@ WSplit *load_splitsplit(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
 }
 
 
-WSplit *ionws_load_node_default(WIonWS *ws, const WRectangle *geom, 
+WSplit *tiling_load_node_default(WTiling *ws, const WRectangle *geom, 
                                 ExtlTab tab)
 {
     char *typestr=NULL;
@@ -1668,25 +1668,25 @@ WSplit *ionws_load_node_default(WIonWS *ws, const WRectangle *geom,
 }
 
 
-WSplit *ionws_load_node(WIonWS *ws, const WRectangle *geom, ExtlTab tab)
+WSplit *tiling_load_node(WTiling *ws, const WRectangle *geom, ExtlTab tab)
 {
     WSplit *ret=NULL;
-    CALL_DYN_RET(ret, WSplit*, ionws_load_node, ws, (ws, geom, tab));
+    CALL_DYN_RET(ret, WSplit*, tiling_load_node, ws, (ws, geom, tab));
     return ret;
 }
 
 
 
-WRegion *ionws_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
+WRegion *tiling_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 {
-    WIonWS *ws;
+    WTiling *ws;
     ExtlTab treetab;
     bool ci=TRUE;
 
     if(extl_table_gets_t(tab, "split_tree", &treetab))
         ci=FALSE;
     
-    ws=create_ionws(par, fp, NULL, ci);
+    ws=create_tiling(par, fp, NULL, ci);
     
     if(ws==NULL){
         if(!ci)
@@ -1695,7 +1695,7 @@ WRegion *ionws_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
     }
 
     if(!ci){
-        ws->split_tree=ionws_load_node(ws, &REGION_GEOM(ws), treetab);
+        ws->split_tree=tiling_load_node(ws, &REGION_GEOM(ws), treetab);
         extl_unref_table(treetab);
     }
     
@@ -1718,91 +1718,91 @@ WRegion *ionws_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 /*{{{ Dynamic function table and class implementation */
 
 
-static DynFunTab ionws_dynfuntab[]={
+static DynFunTab tiling_dynfuntab[]={
     {region_map, 
-     ionws_map},
+     tiling_map},
     
     {region_unmap, 
-     ionws_unmap},
+     tiling_unmap},
     
     {region_do_set_focus, 
-     ionws_do_set_focus},
+     tiling_do_set_focus},
     
     {(DynFun*)region_fitrep,
-     (DynFun*)ionws_fitrep},
+     (DynFun*)tiling_fitrep},
     
     {region_managed_rqgeom, 
-     ionws_managed_rqgeom},
+     tiling_managed_rqgeom},
     
     {region_managed_remove, 
-     ionws_managed_remove},
+     tiling_managed_remove},
     
     {(DynFun*)region_managed_prepare_focus,
-     (DynFun*)ionws_managed_prepare_focus},
+     (DynFun*)tiling_managed_prepare_focus},
     
     {(DynFun*)region_prepare_manage, 
-     (DynFun*)ionws_prepare_manage},
+     (DynFun*)tiling_prepare_manage},
     
     {(DynFun*)region_rescue_clientwins,
-     (DynFun*)ionws_rescue_clientwins},
+     (DynFun*)tiling_rescue_clientwins},
 
     {(DynFun*)region_get_rescue_pholder_for,
-     (DynFun*)ionws_get_rescue_pholder_for},
+     (DynFun*)tiling_get_rescue_pholder_for},
     
     {(DynFun*)region_get_configuration,
-     (DynFun*)ionws_get_configuration},
+     (DynFun*)tiling_get_configuration},
 
     {(DynFun*)region_managed_may_destroy,
-     (DynFun*)ionws_managed_may_destroy},
+     (DynFun*)tiling_managed_may_destroy},
 
     {(DynFun*)region_may_destroy,
-     (DynFun*)ionws_may_destroy},
+     (DynFun*)tiling_may_destroy},
 
     {(DynFun*)region_current,
-     (DynFun*)ionws_current},
+     (DynFun*)tiling_current},
 
-    {(DynFun*)ionws_managed_add,
-     (DynFun*)ionws_managed_add_default},
+    {(DynFun*)tiling_managed_add,
+     (DynFun*)tiling_managed_add_default},
     
     {region_manage_stdisp,
-     ionws_manage_stdisp},
+     tiling_manage_stdisp},
 
     {region_unmanage_stdisp,
-     ionws_unmanage_stdisp},
+     tiling_unmanage_stdisp},
     
-    {(DynFun*)ionws_load_node,
-     (DynFun*)ionws_load_node_default},
+    {(DynFun*)tiling_load_node,
+     (DynFun*)tiling_load_node_default},
             
     {region_restack,
-     ionws_restack},
+     tiling_restack},
 
     {region_stacking,
-     ionws_stacking},
+     tiling_stacking},
     
-    {(DynFun*)ionws_do_get_nextto,
-     (DynFun*)ionws_do_get_nextto_default},
+    {(DynFun*)tiling_do_get_nextto,
+     (DynFun*)tiling_do_get_nextto_default},
 
-    {(DynFun*)ionws_do_get_farthest,
-     (DynFun*)ionws_do_get_farthest_default},
+    {(DynFun*)tiling_do_get_farthest,
+     (DynFun*)tiling_do_get_farthest_default},
      
     {(DynFun*)region_navi_first,
-     (DynFun*)ionws_navi_first},
+     (DynFun*)tiling_navi_first},
     
     {(DynFun*)region_navi_next,
-     (DynFun*)ionws_navi_next},
+     (DynFun*)tiling_navi_next},
     
     {(DynFun*)region_xwindow,
-     (DynFun*)ionws_xwindow},
+     (DynFun*)tiling_xwindow},
     
     {(DynFun*)region_prepare_manage_transient,
-     (DynFun*)ionws_prepare_manage_transient},
+     (DynFun*)tiling_prepare_manage_transient},
      
     END_DYNFUNTAB
 };
 
 
 EXTL_EXPORT
-IMPLCLASS(WIonWS, WRegion, ionws_deinit, ionws_dynfuntab);
+IMPLCLASS(WTiling, WRegion, tiling_deinit, tiling_dynfuntab);
 
     
 /*}}}*/

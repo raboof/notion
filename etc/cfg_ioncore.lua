@@ -249,7 +249,7 @@ defbindings("WFloatFrame", {
 })
 
 
--- Bindings for "groups". Note that tilers (WIonWS) override some
+-- Bindings for "groups". Note that "tilings" override some
 -- of these bindings.
 
 defbindings("WGroupWS", {

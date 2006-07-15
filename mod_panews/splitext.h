@@ -13,7 +13,7 @@
 #define ION_PANEWS_SPLITEXT_H
 
 #include <ioncore/common.h>
-#include <mod_ionws/split.h>
+#include <mod_tiling/split.h>
 
 INTRCLASS(WSplitUnused);
 INTRCLASS(WSplitPane);

@@ -106,7 +106,7 @@ BINDINGS:WMoveresMode
 
 .SS Bindungen zum teilen der Arbeitsfläche [mod_ionws]
 
-BINDINGS:WIonWS
+BINDINGS:WTiling
 
 .SS Bindungen für den fliessenden Arbeitsbereich und Frames [mod_floatws]
 

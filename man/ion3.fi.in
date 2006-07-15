@@ -107,7 +107,7 @@ BINDINGS:WMoveresMode
 
 .SS Laatoitettavien työpöytien sidonnat [mod_ionws]
 
-BINDINGS:WIonWS
+BINDINGS:WTiling
 
 .SS Kelluvien työpöytien ja kehyksien sidonnat [mod_floatws]
 

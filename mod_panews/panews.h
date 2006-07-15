@@ -18,12 +18,12 @@
 #include <libextl/extl.h>
 #include <ioncore/rectangle.h>
 
-#include <mod_ionws/ionws.h>
+#include <mod_tiling/tiling.h>
 
 
 INTRCLASS(WPaneWS);
 DECLCLASS(WPaneWS){
-    WIonWS ionws;
+    WTiling tiling;
 };
 
 

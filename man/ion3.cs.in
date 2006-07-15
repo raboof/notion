@@ -99,7 +99,7 @@ BINDINGS:WMoveresMode
 
 .SS Pøiøazení pro dla¾dicové pracovní plochy [mod_ionws]
 
-BINDINGS:WIonWS
+BINDINGS:WTiling
 
 .SS Pøiøazení pro plovoucí pracovní plochy a rámy [mod_floatws]
 

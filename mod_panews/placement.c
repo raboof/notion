@@ -26,8 +26,8 @@
 #include <ioncore/framep.h>
 #include <ioncore/names.h>
 #include <ioncore/resize.h>
-#include <mod_ionws/split.h>
-#include <mod_ionws/split-stdisp.h>
+#include <mod_tiling/split.h>
+#include <mod_tiling/split-stdisp.h>
 #include "placement.h"
 #include "panews.h"
 #include "splitext.h"
@@ -54,7 +54,7 @@ static WFrame *create_frame_for(WPaneWS *ws, WRegion *reg)
     fp.g=REGION_GEOM(ws);
     fp.mode=REGION_FIT_BOUNDS;
     
-    frame=(WFrame*)ws->ionws.create_frame_fn(par, &fp);
+    frame=(WFrame*)ws->tiling.create_frame_fn(par, &fp);
     
     if(frame==NULL)
         return NULL;
@@ -137,13 +137,13 @@ static bool fallback_filter(WSplit *node)
 
 static bool fallback_layout(WPaneWSPlacementParams *p)
 {
-    if(p->ws->ionws.split_tree==NULL)
+    if(p->ws->tiling.split_tree==NULL)
         return FALSE;
     
     if(p->specifier!=NULL){
         p->res_node=(WSplit*)p->specifier;
     }else{
-        p->res_node=split_current_todir(p->ws->ionws.split_tree, SPLIT_ANY,
+        p->res_node=split_current_todir(p->ws->tiling.split_tree, SPLIT_ANY,
                                         PRIMN_ANY, fallback_filter);
     }
 
@@ -168,7 +168,7 @@ static bool do_replace(WPaneWS *ws, WFrame *frame, WRegion *reg,
                        WPaneWSPlacementParams *rs)
 {
     WSplit *u=rs->res_node;
-    WSplit *node=ionws_load_node(&(ws->ionws), &(u->geom), rs->res_config);
+    WSplit *node=tiling_load_node(&(ws->tiling), &(u->geom), rs->res_config);
     
     assert(OBJ_IS(u, WSplitUnused));
     
@@ -191,11 +191,11 @@ static bool do_replace(WPaneWS *ws, WFrame *frame, WRegion *reg,
     u->parent=NULL;
     mainloop_defer_destroy((Obj*)u);
     
-    if(ws->ionws.stdispnode!=NULL)
-        split_regularise_stdisp(ws->ionws.stdispnode);
+    if(ws->tiling.stdispnode!=NULL)
+        split_regularise_stdisp(ws->tiling.stdispnode);
 
-    if(ws->ionws.split_tree!=NULL)
-        split_restack(ws->ionws.split_tree, ws->ionws.dummywin, Above);
+    if(ws->tiling.split_tree!=NULL)
+        split_restack(ws->tiling.split_tree, ws->tiling.dummywin, Above);
 
     return TRUE;
 }
@@ -208,7 +208,7 @@ static bool do_replace(WPaneWS *ws, WFrame *frame, WRegion *reg,
 
 static bool current_unused(WPaneWS *ws)
 {
-    return OBJ_IS(ionws_current(&ws->ionws), WUnusedWin);
+    return OBJ_IS(tiling_current(&ws->tiling), WUnusedWin);
 }
 
 
@@ -217,10 +217,10 @@ static WRegion *panews_get_target(WPaneWS *ws, WSplitUnused *specifier,
 {
     WRegion *target=NULL;
     WFrame *frame=create_frame_for(ws, reg);
-    WSplit **tree=&(ws->ionws.split_tree);
+    WSplit **tree=&(ws->tiling.split_tree);
     WPaneWSPlacementParams rs;
     
-    assert(ws->ionws.split_tree!=NULL);
+    assert(ws->tiling.split_tree!=NULL);
 
     rs.ws=ws;
     rs.frame=frame;

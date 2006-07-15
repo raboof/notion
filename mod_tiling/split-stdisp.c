@@ -1,5 +1,5 @@
 /*
- * ion/mod_ionws/split-stdisp.c
+ * ion/mod_tiling/split-stdisp.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2006. 
  *
@@ -15,7 +15,7 @@
 #include <ioncore/resize.h>
 #include "split.h"
 #include "split-stdisp.h"
-#include "ionws.h"
+#include "tiling.h"
 
 
 /*{{{ Helper routines */
@@ -84,7 +84,7 @@ int stdisp_recommended_w(WSplitST *stdisp)
         return CF_STDISP_MIN_SZ;
     
     if(stdisp->fullsize && stdisp->orientation==REGION_ORIENTATION_HORIZONTAL){
-        WIonWS *ws=REGION_MANAGER_CHK(stdisp->regnode.reg, WIonWS);
+        WTiling *ws=REGION_MANAGER_CHK(stdisp->regnode.reg, WTiling);
         assert(ws!=NULL);
         return REGION_GEOM(ws).w;
     }
@@ -99,7 +99,7 @@ int stdisp_recommended_h(WSplitST *stdisp)
         return CF_STDISP_MIN_SZ;
     
     if(stdisp->fullsize && stdisp->orientation==REGION_ORIENTATION_VERTICAL){
-        WIonWS *ws=REGION_MANAGER_CHK(stdisp->regnode.reg, WIonWS);
+        WTiling *ws=REGION_MANAGER_CHK(stdisp->regnode.reg, WTiling);
         assert(ws!=NULL);
         return REGION_GEOM(ws).h;
     }

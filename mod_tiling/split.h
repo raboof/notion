@@ -1,5 +1,5 @@
 /*
- * ion/mod_ionws/split.h
+ * ion/mod_tiling/split.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2006. 
  *
@@ -9,8 +9,8 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_MOD_IONWS_SPLIT_H
-#define ION_MOD_IONWS_SPLIT_H
+#ifndef ION_MOD_TILING_SPLIT_H
+#define ION_MOD_TILING_SPLIT_H
 
 #include <ioncore/common.h>
 #include <ioncore/window.h>
@@ -213,4 +213,4 @@ extern void split_do_rqgeom_(WSplit *node, const WRectangle *ng,
                              bool tryonly);
 
 
-#endif /* ION_MOD_IONWS_SPLIT_H */
+#endif /* ION_MOD_TILING_SPLIT_H */

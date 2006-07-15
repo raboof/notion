@@ -105,11 +105,11 @@ BINDINGS:WFrame.toplevel
 
 BINDINGS:WMoveresMode
 
-.SS Bindings for tilers [mod_ionws]
+.SS Bindings for tilers [mod_tiling]
 
-BINDINGS:WIonWS
+BINDINGS:WTiling
 
-.SS Bindings for groups and floating frames [mod_floatws]
+.SS Bindings for groups and floating frames
 
 BINDINGS:WGroupWS
 
