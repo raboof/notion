@@ -211,29 +211,6 @@ end
 local MAXDEPTH=10
 
 
-function mod_query.lookup_workspace_classes()
-    local classes={}
-    
-    for k, v in pairs(_G) do
-        if type(v)=="table" and v.__typename then
-            v2=v.__parentclass
-            for i=1, MAXDEPTH do
-                if not v2 then 
-                    break
-                end
-                if v2.__typename=="WGroupWS" then
-                    table.insert(classes, v.__typename)
-                    break
-                end
-                v2=v2.__parentclass
-            end
-        end
-    end
-    
-    return classes
-end
-
-
 function mod_query.complete_from_list(list, str)
     local results={}
     local len=string.len(str)
@@ -424,43 +401,15 @@ function mod_query.workspace_handler(mplex, name)
         ws:goto()
         return
     end
-    
-    local classes=mod_query.lookup_workspace_classes()
-    
-    local function completor(cp, what)
-        local results=mod_query.complete_from_list(classes, what)
-        cp:set_completions(results)
-    end
-    
-    local function handler(mplex, cls)
-        local scr=mplex:screen_of()
-        if not scr then
-            mod_query.warn(mplex, TR("Unable to create workspace: no screen."))
-            return
-        end
-        
-        if not cls or cls=="" then
-            cls=ioncore.get().default_ws_type
-        end
 
-        mod_query.call_warn(mplex, 
-                            function()
-                                ws=scr:attach_new({ 
-                                    type=cls, 
-                                    name=name, 
-                                    switchto=true 
-                                 })
-                                 if not ws then
-                                     error(TR("Unknown error"))
-                                 end
-                            end)
-    end
-    
-    local defcls=ioncore.get().default_ws_type
-    local prompt=TR("Workspace type (%s):", defcls or TR("none"))
-    
-    mod_query.query(mplex, prompt, "", handler, completor,
-                    "workspacename")
+    local scr=mplex:screen_of()
+
+    mod_query.call_warn(mplex, 
+                        function()
+			    if not ioncore.create_ws(scr, name) then
+                                error(TR("Unknown error"))
+                            end
+                        end)
 end
 
 

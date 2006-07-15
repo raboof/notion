@@ -96,21 +96,3 @@ WRegClassInfo *ioncore_lookup_regclass(const char *name, bool inheriting_ok)
 /*}}}*/
 
 
-/*{{{ default_ws_type stuff */
-
-
-char *ioncore_default_ws_type=NULL;
-
-
-WRegClassInfo *ioncore_default_ws_class()
-{
-    const char *wstype=(ioncore_default_ws_type!=NULL
-                        ? ioncore_default_ws_type
-                        : "WIonWS");
-    
-    return ioncore_lookup_regclass(wstype, FALSE);
-}
-
-
-/*}}}*/
-

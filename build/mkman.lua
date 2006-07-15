@@ -129,6 +129,8 @@ local function dobindings(fn, bindings)
     p.defctxmenu=dummy
     p.menuentry=dummy
     p.submenu=dummy
+
+    p.ioncore={ set=dummy }
     
     local env=setmetatable({}, {
         __index=p, 

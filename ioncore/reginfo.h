@@ -39,9 +39,5 @@ extern void ioncore_unregister_regclass(ClassDescr *descr);
 extern WRegClassInfo *ioncore_lookup_regclass(const char *name, 
                                               bool inheriting_ok);
 
-extern WRegClassInfo *ioncore_default_ws_class();
-
-extern char *ioncore_default_ws_type;
-
 #endif /* ION_IONCORE_REGINFO_H */
 

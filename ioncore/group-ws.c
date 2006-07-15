@@ -108,9 +108,12 @@ static int next_lowest_y(WGroupWS *ws, int y)
 }
 
 
-enum{
+static enum{
     PLACEMENT_LRUD, PLACEMENT_UDLR, PLACEMENT_RANDOM
 } placement_method=PLACEMENT_LRUD;
+
+static bool default_ws_params_set=FALSE;
+static ExtlTab default_ws_params;
 
 
 /*EXTL_DOC
@@ -129,6 +132,7 @@ enum{
 void ioncore_groupws_set(ExtlTab tab)
 {
     char *method=NULL;
+    ExtlTab t;
     
     if(extl_table_gets_s(tab, "float_placement_method", &method)){
         if(strcmp(method, "udlr")==0)
@@ -141,6 +145,13 @@ void ioncore_groupws_set(ExtlTab tab)
             warn(TR("Unknown placement method \"%s\"."), method);
         free(method);
     }
+    
+    if(extl_table_gets_t(tab, "default_ws_params", &t)){
+        if(default_ws_params_set)
+            extl_unref_table(default_ws_params);
+        default_ws_params=t;
+        default_ws_params_set=TRUE;
+    }
 }
 
 
@@ -152,6 +163,9 @@ void ioncore_groupws_get(ExtlTab t)
                        : (placement_method==PLACEMENT_LRUD
                           ? "lrud" 
                           : "random")));
+    
+    if(default_ws_params_set)
+        extl_table_sets_t(t, "default_ws_params", default_ws_params);
 }
 
 
@@ -530,7 +544,7 @@ WPHolder *groupws_prepare_manage_transient(WGroupWS *ws, const WClientWin *cwin,
 /*{{{ WGroupWS class */
 
 
-static bool groupws_init(WGroupWS *ws, WWindow *parent, const WFitParams *fp)
+bool groupws_init(WGroupWS *ws, WWindow *parent, const WFitParams *fp)
 {
     if(!group_init(&(ws->grp), parent, fp))
         return FALSE;
@@ -555,31 +569,38 @@ void groupws_deinit(WGroupWS *ws)
 }
 
 
-WRegion *groupws_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
+WRegion *groupws_load(WWindow *par, const WFitParams *fp, 
+                       ExtlTab tab)
 {
     WGroupWS *ws;
-    ExtlTab substab, subtab;
+    ExtlTab subtab, substab;
     int i, n;
     
     ws=create_groupws(par, fp);
     
     if(ws==NULL)
         return NULL;
-        
-    if(!extl_table_gets_t(tab, "managed", &substab))
-        return (WRegion*)ws;
 
-    n=extl_table_get_n(substab);
-    for(i=1; i<=n; i++){
-        if(extl_table_geti_t(substab, i, &subtab)){
-            group_attach_new(&ws->grp, subtab);
-            extl_unref_table(subtab);
-        }
+    if(extl_table_gets_t(tab, "managed", &substab)){
+	n=extl_table_get_n(substab);
+	for(i=1; i<=n; i++){
+	    if(extl_table_geti_t(substab, i, &subtab)){
+		group_attach_new(&ws->grp, subtab);
+		extl_unref_table(subtab);
+	    }
+	}
+        extl_unref_table(substab);
     }
     
-    extl_unref_table(substab);
-
     return (WRegion*)ws;
+}
+
+
+WRegion *groupws_load_default(WWindow *par, const WFitParams *fp)
+{
+    return groupws_load(par, fp, (default_ws_params_set
+                                  ? default_ws_params
+                                  : extl_table_none()));
 }
 
 

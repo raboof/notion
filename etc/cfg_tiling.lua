@@ -65,3 +65,37 @@ defctxmenu("WTiling", "Tiling", {
         menuentry("Transpose", "WTiling.transpose_at(_)"),
     }),
 })
+
+
+-- Adjust default workspace layout
+
+local a_frame = {
+    type="WSplitRegion",
+    regparams = {
+        type = "WFrame", 
+        frame_style = "frame-tiled"
+    }
+}
+    
+ioncore.set{
+    default_ws_params = {
+        managed = {
+            {
+                type = "WTiling",
+                bottom = true,
+                -- The default is a single 1:1 horizontal split
+                split_tree = {
+                    type = "WSplitSplit",
+                    dir = "horizontal",
+                    tls = 1,
+                    brs = 1,
+                    tl = a_frame,
+                    br = a_frame
+                }
+                -- For a single frame
+                --split_tree = nil
+            }
+        }
+    }
+}
+

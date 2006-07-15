@@ -33,6 +33,7 @@
 #include "activity.h"
 #include "extlconv.h"
 #include "llist.h"
+#include "group-ws.h"
 
 
 WHook *screen_managed_changed_hook=NULL;
@@ -573,35 +574,15 @@ static WRegion *do_create_initial(WWindow *parent, const WFitParams *fp,
 
 static bool create_initial_ws(WScreen *scr)
 {
-    WRegionLoadCreateFn *fn=NULL;
     WRegion *reg=NULL;
     WMPlexAttachParams par;
-    const char *wstype;
-    WRegClassInfo *info;
     
     par.flags=0;
     
-    info=ioncore_default_ws_class();
-    if(info!=NULL)
-        fn=info->lc_fn;
-    
-    /*
-    if(fn==NULL){
-        info=ioncore_lookup_regclass("WGenWS", TRUE);
-        if(info!=NULL)
-            fn=info->lc_fn;
-    }
-     */
-    
-    if(fn==NULL){
-        warn(TR("Could not find a complete workspace class. "
-                "Please load some modules."));
-        return FALSE;
-    }
-    
     reg=mplex_do_attach(&scr->mplex,
-                        (WRegionAttachHandler*)do_create_initial, 
-                        (void*)fn, &par);
+                        (WRegionAttachHandler*)groupws_load_default, 
+                        NULL, 
+                        &par);
     
     if(reg==NULL){
         warn(TR("Unable to create a workspace on screen %d."), scr->id);

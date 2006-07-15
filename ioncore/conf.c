@@ -46,8 +46,6 @@
  *  \var{frame_add_last} & (boolean) Add new regions in frames last instead
  *                        of after current region. \\
  *  \var{dblclick_delay} & (integer) Delay between clicks of a double click.\\
- *  \var{default_ws_type} & (string) Default workspace type for operations
- *                         that create a workspace.\\
  *  \var{kbresize_delay} & (integer) Delay in milliseconds for ending keyboard
  *                         resize mode after inactivity. \\
  *  \var{kbresize_t_max} & (integer) Controls keyboard resize acceleration. 
@@ -59,6 +57,9 @@
  *  \var{float_placement_method} & (string) How to place floating frames.
  *                          One of ''udlr'' (up-down, then left-right), 
  *                          ''lrud'' (left-right, then up-down) or ''random''.
+ *  \var{default_ws_layout} & (table) Default workspace layout;
+ *                          The \var{managed} field of \class{WGroup}
+ *                          load parameters. \\
  * \end{tabularx}
  * 
  * When a keyboard resize function is called, and at most \var{kbresize_t_max} 
@@ -74,6 +75,7 @@ void ioncore_set(ExtlTab tab)
 {
     int dd, rd;
     char *wst;
+    ExtlTab t;
     
     extl_table_gets_b(tab, "opaque_resize", &(ioncore_g.opaque_resize));
     extl_table_gets_b(tab, "warp", &(ioncore_g.warp_enabled));
@@ -84,11 +86,6 @@ void ioncore_set(ExtlTab tab)
     
     if(extl_table_gets_i(tab, "dblclick_delay", &dd))
         ioncore_g.dblclick_delay=maxof(0, dd);
-    if(extl_table_gets_s(tab, "default_ws_type", &wst)){
-        if(ioncore_default_ws_type!=NULL)
-            free(ioncore_default_ws_type);
-        ioncore_default_ws_type=wst;
-    }
     
     ioncore_set_moveres_accel(tab);
     
@@ -104,16 +101,12 @@ EXTL_EXPORT
 ExtlTab ioncore_get()
 {
     ExtlTab tab=extl_create_table();
-    WRegClassInfo *info=ioncore_default_ws_class();
     
     extl_table_sets_b(tab, "opaque_resize", ioncore_g.opaque_resize);
     extl_table_sets_b(tab, "warp", ioncore_g.warp_enabled);
     extl_table_sets_b(tab, "switchto", ioncore_g.switchto_new);
     extl_table_sets_i(tab, "dblclick_delay", ioncore_g.dblclick_delay);
     extl_table_sets_b(tab, "screen_notify", ioncore_g.screen_notify);
-    extl_table_sets_s(tab, "default_ws_type", (info!=NULL
-                                               ? info->descr->name
-                                               : NULL));
     extl_table_sets_b(tab, "frame_add_last", ioncore_g.frame_add_last);
     
     ioncore_get_moveres_accel(tab);
