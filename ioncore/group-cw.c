@@ -201,23 +201,6 @@ WPHolder *groupcw_prepare_manage_transient(WGroupCW *cwg,
 }
 
 
-static void destroy_empty(WGroupCW *cwg)
-{
-    if(cwg->grp.managed_list==NULL)
-        destroy_obj((Obj*)cwg);
-}
-
-
-void groupcw_managed_remove(WGroupCW *cwg, WRegion *reg)
-{
-    group_managed_remove(&cwg->grp, reg);
-    
-    if(cwg->grp.managed_list==NULL)
-        mainloop_defer_action((Obj*)cwg, 
-                              (WDeferredAction*)destroy_empty);
-}
-
-
 /*}}}*/
 
 
@@ -295,6 +278,8 @@ bool groupcw_init(WGroupCW *cwg, WWindow *parent, const WFitParams *fp)
     
     if(!group_init(&(cwg->grp), parent, fp))
         return FALSE;
+    
+    cwg->grp.bottom_last_close=TRUE;
 
     region_add_bindmap((WRegion*)cwg, ioncore_groupcw_bindmap);
     
@@ -361,9 +346,6 @@ static DynFunTab groupcw_dynfuntab[]={
     {(DynFun*)group_do_add_managed,
      (DynFun*)groupcw_do_add_managed},
     */
-    
-    {region_managed_remove,
-     groupcw_managed_remove},
     
     /*
     {(DynFun*)region_get_rescue_pholder_for,
