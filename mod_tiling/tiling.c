@@ -616,7 +616,8 @@ void tiling_deinit(WTiling *ws)
 {
     WRegion *reg;
     WTilingIterTmp tmp;
-
+    WMPlex *remanage_mplex=NULL;
+    
     tiling_unmanage_stdisp(ws, FALSE, TRUE);
 
     FOR_ALL_MANAGED_BY_TILING(reg, ws, tmp){
@@ -720,7 +721,7 @@ void tiling_managed_remove(WTiling *ws, WRegion *reg)
     if(node==NULL)
         return;
     
-    splittree_remove((WSplit*)node, !ds);
+    splittree_remove((WSplit*)node, (!ds && other!=NULL));
     
     if(!ds){
         if(other==NULL)

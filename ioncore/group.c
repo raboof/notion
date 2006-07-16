@@ -34,6 +34,7 @@
 #include <ioncore/sizepolicy.h>
 #include <ioncore/bindmaps.h>
 #include <ioncore/navi.h>
+#include <ioncore/llist.h>
 
 #include "group.h"
 #include "grouppholder.h"
@@ -296,21 +297,26 @@ void group_managed_remove(WGroup *ws, WRegion *reg)
     bool mcf=region_may_control_focus((WRegion*)ws);
     bool ds=OBJ_IS_BEING_DESTROYED(ws);
     WStacking *st, *next_st=NULL;
+    bool was_stdisp=FALSE, was_bottom=FALSE;
     bool cur=FALSE;
     
     st=group_find_stacking(ws, reg);
-    
+
     if(st!=NULL){
         next_st=stacking_unstack(REGION_PARENT(ws), st);
         
         UNLINK_ITEM(ws->managed_list, st, mgr_next, mgr_prev);
         
-        if(st==ws->managed_stdisp)
+        if(st==ws->managed_stdisp){
             ws->managed_stdisp=NULL;
+            was_stdisp=TRUE;
+        }
         
-        if(st==ws->bottom)
+        if(st==ws->bottom){
             ws->bottom=NULL;
-
+            was_bottom=TRUE;
+        }
+            
         if(st==ws->current_managed){
             cur=TRUE;
             ws->current_managed=NULL;
@@ -320,6 +326,19 @@ void group_managed_remove(WGroup *ws, WRegion *reg)
     }
     
     region_unset_manager(reg, (WRegion*)ws);
+
+    if(!ds && was_bottom && !was_stdisp && ws->managed_stdisp==NULL){
+        /* We should probably be managing any stdisp, that 'bottom' was
+         * managing.
+         */
+        WMPlex *mplex=OBJ_CAST(REGION_MANAGER(ws), WMPlex);
+            
+        if(mplex!=NULL 
+           && mplex->l1_current!=NULL 
+           && mplex->l1_current->reg==(WRegion*)ws){
+            mplex_remanage_stdisp(mplex);
+        }
+    }
     
     if(cur && !ds)
         group_refocus(ws, next_st);
@@ -711,7 +730,9 @@ void group_manage_stdisp(WGroup *ws, WRegion *stdisp,
     WRegion *b=(ws->bottom==NULL ? NULL : ws->bottom->reg);
     
     /* Check if 'bottom' wants to manage the stdisp. */
-    if(b!=NULL && HAS_DYN(b, region_manage_stdisp)){
+    if(b!=NULL 
+       && !OBJ_IS_BEING_DESTROYED(b)
+       && HAS_DYN(b, region_manage_stdisp)){
         region_manage_stdisp(b, stdisp, di);
         if(REGION_MANAGER(stdisp)==b)
             return;

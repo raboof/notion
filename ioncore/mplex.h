@@ -183,6 +183,8 @@ extern void mplex_call_changed_hook(WMPlex *mplex, WHook *hook,
 
 extern WLListNode *mplex_find_node(WMPlex *mplex, WRegion *reg);
 
+extern void mplex_remanage_stdisp(WMPlex *mplex);
+
 /* Dynfuns */
 
 DYNFUN void mplex_managed_geom(const WMPlex *mplex, WRectangle *geom);

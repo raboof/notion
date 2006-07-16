@@ -605,6 +605,42 @@ void mplex_do_set_focus(WMPlex *mplex, bool warp)
 /*{{{ Managed region switching */
 
 
+static void mplex_do_remanage_stdisp(WMPlex *mplex, WRegion *sub)
+{
+    WRegion *stdisp=(WRegion*)(mplex->stdispwatch.obj);
+
+    /* Move stdisp */
+    if(sub!=NULL && CAN_MANAGE_STDISP(sub)){
+        if(stdisp!=NULL){
+            WRegion *mgr=mgr_within_mplex(mplex, stdisp);
+            if(mgr!=sub){
+                if(mgr!=NULL){
+                    if(CAN_MANAGE_STDISP(mgr))
+                        region_unmanage_stdisp(mgr, FALSE, FALSE);
+                    region_detach_manager(stdisp);
+                }
+                
+                region_manage_stdisp(sub, stdisp, 
+                                     &(mplex->stdispinfo));
+            }
+        }else{
+            region_unmanage_stdisp(sub, TRUE, FALSE);
+        }
+    }else if(stdisp!=NULL){
+        region_detach_manager(stdisp);
+        region_unmap(stdisp);
+    }
+}
+
+
+void mplex_remanage_stdisp(WMPlex *mplex)
+{
+    mplex_do_remanage_stdisp(mplex, (mplex->l1_current!=NULL
+                                     ? mplex->l1_current->reg
+                                     : NULL));
+}
+
+
 static void mplex_do_node_display(WMPlex *mplex, WLListNode *node,
                                   bool call_changed)
 {
@@ -614,33 +650,8 @@ static void mplex_do_node_display(WMPlex *mplex, WLListNode *node,
     if(!(node->flags&LLIST_HIDDEN))
         return;
     
-    if(!l2){
-        WRegion *stdisp=(WRegion*)(mplex->stdispwatch.obj);
-
-        if(node==mplex->l1_current)
-            return;
-        
-        /* Move stdisp */
-        if(CAN_MANAGE_STDISP(sub)){
-            if(stdisp!=NULL){
-                WRegion *mgr=mgr_within_mplex(mplex, stdisp);
-                if(mgr!=sub){
-                    if(mgr!=NULL){
-                        if(CAN_MANAGE_STDISP(mgr))
-                            region_unmanage_stdisp(mgr, FALSE, FALSE);
-                        region_detach_manager(stdisp);
-                    }
-                    
-                    region_manage_stdisp(sub, stdisp, 
-                                         &(mplex->stdispinfo));
-                }
-            }else{
-                region_unmanage_stdisp(sub, TRUE, FALSE);
-            }
-        }else if(stdisp!=NULL){
-            region_unmap(stdisp);
-        }
-    }
+    if(!l2 && node!=mplex->l1_current)
+        mplex_do_remanage_stdisp(mplex, sub);
 
     node->flags&=~LLIST_HIDDEN;
     
@@ -1361,19 +1372,7 @@ bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg,
     }else{
         watch_setup(&(mplex->stdispwatch), (Obj*)reg, stdisp_watch_handler);
         
-        if(mplex->l1_current!=NULL
-           && CAN_MANAGE_STDISP(mplex->l1_current->reg)
-           && mgr!=mplex->l1_current->reg){
-            if(mgr!=NULL){
-                region_unmanage_stdisp(mgr, FALSE, TRUE);
-                region_detach_manager(oldstdisp);
-            }
-            mgr=mplex->l1_current->reg;
-        }
-        if(mgr!=NULL)
-            region_manage_stdisp(mgr, reg, &(mplex->stdispinfo));
-        else
-            region_unmap(reg);
+        mplex_remanage_stdisp(mplex);
     }
     
     return TRUE;
