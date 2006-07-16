@@ -79,6 +79,9 @@ local a_frame = {
     
 ioncore.set{
     default_ws_params = {
+        -- Destroy workspace if the 'bottom' tiling is destroyed last
+        bottom_last_close = true,
+        -- Layout
         managed = {
             {
                 type = "WTiling",

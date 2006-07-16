@@ -573,24 +573,13 @@ WRegion *groupws_load(WWindow *par, const WFitParams *fp,
                        ExtlTab tab)
 {
     WGroupWS *ws;
-    ExtlTab subtab, substab;
-    int i, n;
     
     ws=create_groupws(par, fp);
     
     if(ws==NULL)
         return NULL;
 
-    if(extl_table_gets_t(tab, "managed", &substab)){
-	n=extl_table_get_n(substab);
-	for(i=1; i<=n; i++){
-	    if(extl_table_geti_t(substab, i, &subtab)){
-		group_attach_new(&ws->grp, subtab);
-		extl_unref_table(subtab);
-	    }
-	}
-        extl_unref_table(substab);
-    }
+    group_do_load(&ws->grp, tab);
     
     return (WRegion*)ws;
 }

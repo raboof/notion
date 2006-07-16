@@ -292,12 +292,27 @@ static bool group_managed_prepare_focus(WGroup *ws, WRegion *reg,
 }
 
 
+static bool group_essentially_empty(WGroup *ws)
+{
+    WGroupIterTmp tmp;
+    WStacking *st;
+    
+    FOR_ALL_NODES_IN_GROUP(ws, st, tmp){
+        if(st!=ws->managed_stdisp)
+            return FALSE;
+    }
+    
+    return TRUE;
+}
+
+
 void group_managed_remove(WGroup *ws, WRegion *reg)
 {
     bool mcf=region_may_control_focus((WRegion*)ws);
     bool ds=OBJ_IS_BEING_DESTROYED(ws);
     WStacking *st, *next_st=NULL;
     bool was_stdisp=FALSE, was_bottom=FALSE;
+    bool dest=FALSE;
     bool cur=FALSE;
     
     st=group_find_stacking(ws, reg);
@@ -315,6 +330,8 @@ void group_managed_remove(WGroup *ws, WRegion *reg)
         if(st==ws->bottom){
             ws->bottom=NULL;
             was_bottom=TRUE;
+            if(ws->bottom_last_close && group_essentially_empty(ws))
+                dest=TRUE;
         }
             
         if(st==ws->current_managed){
@@ -327,21 +344,25 @@ void group_managed_remove(WGroup *ws, WRegion *reg)
     
     region_unset_manager(reg, (WRegion*)ws);
 
-    if(!ds && was_bottom && !was_stdisp && ws->managed_stdisp==NULL){
-        /* We should probably be managing any stdisp, that 'bottom' was
-         * managing.
-         */
-        WMPlex *mplex=OBJ_CAST(REGION_MANAGER(ws), WMPlex);
+    if(!dest && !ds){
+       if(was_bottom && !was_stdisp && ws->managed_stdisp==NULL){
+           /* We should probably be managing any stdisp, that 'bottom' 
+            * was managing.
+            */
+           WMPlex *mplex=OBJ_CAST(REGION_MANAGER(ws), WMPlex);
             
-        if(mplex!=NULL 
-           && mplex->l1_current!=NULL 
-           && mplex->l1_current->reg==(WRegion*)ws){
-            mplex_remanage_stdisp(mplex);
-        }
-    }
+           if(mplex!=NULL 
+              && mplex->l1_current!=NULL 
+              && mplex->l1_current->reg==(WRegion*)ws){
+               mplex_remanage_stdisp(mplex);
+           }
+       }
     
-    if(cur && !ds)
-        group_refocus(ws, next_st);
+        if(cur)
+            group_refocus(ws, next_st);
+    }else if(dest && !ds){
+        mainloop_defer_destroy((Obj*)ws);
+    }
 }
 
 
@@ -434,17 +455,10 @@ bool group_rescue_clientwins(WGroup *ws, WPHolder *ph)
 
 bool group_may_destroy(WGroup *ws)
 {
-    WGroupIterTmp tmp;
-    WStacking *st;
-    
-    FOR_ALL_NODES_IN_GROUP(ws, st, tmp){
-        if(st!=ws->managed_stdisp){
-            warn(TR("Workspace not empty - refusing to destroy."));
-            return FALSE;
-        }
-    }
-    
-    return TRUE;
+    bool ret=group_essentially_empty(ws);
+    if(!ret)
+        warn(TR("Workspace not empty - refusing to destroy."));
+    return ret;
 }
 
 
@@ -1176,30 +1190,38 @@ static ExtlTab group_get_configuration(WGroup *ws)
 }
 
 
+void group_do_load(WGroup *ws, ExtlTab tab)
+{
+    ExtlTab substab, subtab;
+    int i, n;
+    
+    if(extl_table_gets_t(tab, "managed", &substab)){
+        n=extl_table_get_n(substab);
+        for(i=1; i<=n; i++){
+            if(extl_table_geti_t(substab, i, &subtab)){
+                group_attach_new(ws, subtab);
+                extl_unref_table(subtab);
+            }
+        }
+        
+        extl_unref_table(substab);
+    }
+
+    ws->bottom_last_close=extl_table_is_bool_set(tab, "bottom_last_close");
+}
+
+
 WRegion *group_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 {
     WGroup *ws;
-    ExtlTab substab, subtab;
-    int i, n;
     
     ws=create_group(par, fp);
     
     if(ws==NULL)
         return NULL;
         
-    if(!extl_table_gets_t(tab, "managed", &substab))
-        return (WRegion*)ws;
-
-    n=extl_table_get_n(substab);
-    for(i=1; i<=n; i++){
-        if(extl_table_geti_t(substab, i, &subtab)){
-            group_attach_new(ws, subtab);
-            extl_unref_table(subtab);
-        }
-    }
+    group_do_load(ws, tab);
     
-    extl_unref_table(substab);
-
     return (WRegion*)ws;
 }
 

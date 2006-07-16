@@ -50,6 +50,7 @@ DECLCLASS(WGroup){
     WStacking *current_managed;
     WStacking *bottom;
     Window dummywin;
+    uint bottom_last_close:1;
 };
 
 
@@ -62,6 +63,7 @@ extern WRegion *group_backcirculate(WGroup *ws);
 
 extern WRegion *group_load(WWindow *par, const WFitParams *fp, 
                            ExtlTab tab);
+extern void group_do_load(WGroup *ws, ExtlTab tab);
 
 extern WRegion* group_current(WGroup *group);
 
