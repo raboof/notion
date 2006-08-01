@@ -26,7 +26,7 @@ WLListNode *llist_iter(WLListIterTmp *tmp)
 {
     WLListNode *mgd=*tmp;
     if(mgd!=NULL)
-        *tmp=mgd->next;
+        *tmp=mgd->llist_next;
     return mgd;
 }
 
@@ -35,7 +35,7 @@ WRegion *llist_iter_regions(WLListIterTmp *tmp)
 {
     WLListNode *mgd=*tmp;
     if(mgd!=NULL){
-        *tmp=mgd->next;
+        *tmp=mgd->llist_next;
         return mgd->reg;
     }
     return NULL;
@@ -101,16 +101,16 @@ void llist_link_after(WLListNode **list,
                       WLListNode *after, WLListNode *node)
 {
     if(after!=NULL){
-        LINK_ITEM_AFTER(*list, after, node, next, prev);
+        LINK_ITEM_AFTER(*list, after, node, llist_next, llist_prev);
     }else{
-        LINK_ITEM_FIRST(*list, node, next, prev);
+        LINK_ITEM_FIRST(*list, node, llist_next, llist_prev);
     }
 }
 
 
 void llist_link_last(WLListNode **list, WLListNode *node)
 {
-    LINK_ITEM_LAST(*list, node, next, prev);
+    LINK_ITEM_LAST(*list, node, llist_next, llist_prev);
 }
 
 
@@ -123,7 +123,7 @@ WLListNode *llist_index_to_after(WLListNode *list,
     if(index==LLIST_INDEX_AFTER_CURRENT){
         return current;
     }else if(index<0){
-        return (list!=NULL ? list->prev : NULL);
+        return (list!=NULL ? list->llist_prev : NULL);
     }else if(index==0){
         return NULL;
     }else{ /* index>0 */
@@ -134,7 +134,7 @@ WLListNode *llist_index_to_after(WLListNode *list,
 
 void llist_unlink(WLListNode **list, WLListNode *node)
 {
-    UNLINK_ITEM(*list, node, next, prev);
+    UNLINK_ITEM(*list, node, llist_next, llist_prev);
 }
 
 

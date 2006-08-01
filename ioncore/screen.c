@@ -537,13 +537,19 @@ WPHolder *screen_get_rescue_pholder_for(WScreen *scr, WRegion *mgd)
     }
             
     if(node!=NULL){
-        node2=node->prev;
-        for(node2=node->prev; node2->next!=NULL; node2=node2->prev){
+        node2=node->llist_prev;
+        for(node2=node->llist_prev; 
+            node2->llist_next!=NULL; 
+            node2=node2->llist_prev){
+            
             ph=region_get_rescue_pholder_for(node2->reg, mgd);
             if(ph!=NULL)
                 return ph;
         }
-        for(node2=node->next; node2!=NULL; node2=node->next){
+        for(node2=node->llist_next; 
+            node2!=NULL; 
+            node2=node->llist_next){
+            
             ph=region_get_rescue_pholder_for(node2->reg, mgd);
             if(ph!=NULL)
                 return ph;

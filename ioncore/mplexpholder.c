@@ -49,7 +49,7 @@ static void do_link_ph(WMPlexPHolder *ph,
     
     if(after!=NULL){
         if(after->after!=NULL){
-            LINK_ITEM_AFTER(after->after->phs, after, ph, next, prev);
+            LINK_ITEM_AFTER(after->after->llist_phs, after, ph, next, prev);
         }else if(on_ph_list(mplex->l1_phs, after)){
             LINK_ITEM_AFTER(mplex->l1_phs, after, ph, next, prev);
         }else if(on_ph_list(mplex->l2_phs, after)){
@@ -59,7 +59,7 @@ static void do_link_ph(WMPlexPHolder *ph,
         }
         ph->after=after->after;
     }else if(or_after!=NULL){
-        LINK_ITEM_FIRST(or_after->phs, ph, next, prev);
+        LINK_ITEM_FIRST(or_after->llist_phs, ph, next, prev);
         ph->after=or_after;
     }else if(or_layer==1){
         LINK_ITEM_FIRST(mplex->l1_phs, ph, next, prev);
@@ -76,7 +76,7 @@ static void do_link_ph(WMPlexPHolder *ph,
 static void do_unlink_ph(WMPlexPHolder *ph, WMPlex *mplex)
 {
     if(ph->after!=NULL){
-        UNLINK_ITEM(ph->after->phs, ph, next, prev);
+        UNLINK_ITEM(ph->after->llist_phs, ph, next, prev);
     }else if(mplex!=NULL){
         if(on_ph_list(mplex->l1_phs, ph)){
             UNLINK_ITEM(mplex->l1_phs, ph, next, prev);
@@ -340,8 +340,8 @@ void mplex_move_phs(WMPlex *mplex, WLListNode *node,
     
     assert(node!=or_after);
     
-    while(node->phs!=NULL){
-        ph=node->phs;
+    while(node->llist_phs!=NULL){
+        ph=node->llist_phs;
         
         do_unlink_ph(ph, mplex);
         do_link_ph(ph, mplex, after, or_after, or_layer);
@@ -356,7 +356,7 @@ static WMPlexPHolder *node_last_ph(WMPlex *mplex,
     WMPlexPHolder *lph=NULL;
     
     if(lnode!=NULL){
-        lph=LIST_LAST(lnode->phs, next, prev);
+        lph=LIST_LAST(lnode->llist_phs, next, prev);
     }else if(layer==1){
         lph=LIST_LAST(mplex->l1_phs, next, prev);
     }else{
@@ -371,11 +371,11 @@ void mplex_move_phs_before(WMPlex *mplex, WLListNode *node)
 {
     WMPlexPHolder *after=NULL;
     WLListNode *or_after;
-    int layer=(node->flags&LLIST_L2 ? 2 : 1);
+    int layer=LLIST_LAYER(node);
     
     or_after=(layer==2 
-              ? LIST_PREV(mplex->l2_list, node, next, prev)
-              : LIST_PREV(mplex->l1_list, node, next, prev));
+              ? LIST_PREV(mplex->l2_list, node, llist_next, llist_prev)
+              : LIST_PREV(mplex->l1_list, node, llist_next, llist_prev));
                          
     after=node_last_ph(mplex, or_after, layer);
         
@@ -411,7 +411,9 @@ WMPlexPHolder *mplex_get_rescue_pholder_for(WMPlex *mplex, WRegion *mgd)
     if(ph==NULL){
         /* Just put stuff at the end. We don't want rescues to fail. */
         ph=create_mplexpholder(mplex, NULL,
-                               LIST_LAST(mplex->l1_list, next, prev), 1);
+                               LIST_LAST(mplex->l1_list, 
+                                         llist_next, llist_prev), 
+                               1);
     }
     
     return ph;
@@ -424,9 +426,9 @@ WMPlexPHolder *mplex_last_place_holder(WMPlex *mplex, int layer)
     WMPlexPHolder *lph=NULL;
     
     if(layer==1)
-        lnode=LIST_LAST(mplex->l1_list, next, prev);
+        lnode=LIST_LAST(mplex->l1_list, llist_next, llist_prev);
     else if(layer==2)
-        lnode=LIST_LAST(mplex->l2_list, next, prev);
+        lnode=LIST_LAST(mplex->l2_list, llist_next, llist_prev);
 
     lph=node_last_ph(mplex, lnode, layer);
     

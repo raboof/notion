@@ -24,10 +24,10 @@
 #define LLIST_L2_MODAL 0x0008
 
 DECLSTRUCT(WLListNode){
-    WLListNode *next, *prev;
-    int flags;
+    WLListNode *llist_next, *llist_prev;
+    int llist_flags;
     WRegion *reg;
-    WMPlexPHolder *phs;
+    WMPlexPHolder *llist_phs;
     WSizePolicy szplcy;
 };
 
@@ -35,14 +35,15 @@ DECLSTRUCT(WLListNode){
 typedef WLListNode *WLListIterTmp;
 
 #define LLIST_REG(NODE) ((NODE)!=NULL ? (NODE)->reg : NULL)
-#define LLIST_LAYER(NODE) ((NODE)->flags&LLIST_L2 ? 2 : 1)
-
+#define LLIST_LAYER(NODE) ((NODE)->llist_flags&LLIST_L2 ? 2 : 1)
+#define LLIST_IS_L2(NODE) ((NODE)->llist_flags&LLIST_L2)
+#define LLIST_IS_HIDDEN(NODE) ((NODE)->llist_flags&LLIST_HIDDEN)
 
 #define FOR_ALL_NODES_ON_LLIST(NODE, LL) \
-    LIST_FOR_ALL(LL, NODE, next, prev)
+    LIST_FOR_ALL(LL, NODE, llist_next, llist_prev)
 
 #define FOR_ALL_NODES_ON_LLIST_REV(NODE, LL) \
-    LIST_FOR_ALL_REV(LL, NODE, next, prev)
+    LIST_FOR_ALL_REV(LL, NODE, llist_next, llist_prev)
 
 #define FOR_ALL_NODES_ON_LLIST_W_NEXT(NODE, LL, TMP) \
     FOR_ALL_ITER(llist_iter_init, llist_iter, NODE, LL, &(TMP))
