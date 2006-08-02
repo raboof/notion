@@ -13,6 +13,31 @@
 #include "region.h"
 #include "stacking.h"
 #include "window.h"
+#include "sizepolicy.h"
+
+
+/*{{{ Alloc */
+
+
+WStacking *create_stacking()
+{
+    WStacking *st=ALLOC(WStacking);
+    
+    if(st!=NULL){
+        st->reg=NULL;
+        st->above=NULL;
+        st->level=0;
+        st->szplcy=SIZEPOLICY_DEFAULT;
+        st->llist_next=NULL;
+        st->llist_prev=NULL;
+        st->llist_phs=NULL;
+    }
+    
+    return st;
+}
+
+
+/*}}}*/
 
 
 /*{{{ List processing */

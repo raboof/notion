@@ -494,13 +494,12 @@ WStacking *group_do_add_managed_default(WGroup *ws, WRegion *reg, int level,
     if(stackingp==NULL)
         return NULL;
     
-    st=ALLOC(WStacking);
+    st=create_stacking();
     
     if(st==NULL)
         return NULL;
     
     st->reg=reg;
-    st->above=NULL;
     st->level=level;
     st->szplcy=szplcy;
 

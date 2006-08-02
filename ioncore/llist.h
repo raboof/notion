@@ -17,27 +17,18 @@
 #include "mplex.h"
 #include "mplexpholder.h"
 #include "extlconv.h"
-
+#include "stacking.h"
 
 #define LLIST_HIDDEN       0x0001
 #define LLIST_L2           0x0004
 #define LLIST_L2_MODAL 0x0008
 
-DECLSTRUCT(WLListNode){
-    WLListNode *llist_next, *llist_prev;
-    int llist_flags;
-    WRegion *reg;
-    WMPlexPHolder *llist_phs;
-    WSizePolicy szplcy;
-};
-
-
 typedef WLListNode *WLListIterTmp;
 
 #define LLIST_REG(NODE) ((NODE)!=NULL ? (NODE)->reg : NULL)
-#define LLIST_LAYER(NODE) ((NODE)->llist_flags&LLIST_L2 ? 2 : 1)
-#define LLIST_IS_L2(NODE) ((NODE)->llist_flags&LLIST_L2)
-#define LLIST_IS_HIDDEN(NODE) ((NODE)->llist_flags&LLIST_HIDDEN)
+#define LLIST_LAYER(NODE) ((NODE)->llist_l2 ? 2 : 1)
+#define LLIST_IS_L2(NODE) ((NODE)->llist_l2)
+#define LLIST_IS_HIDDEN(NODE) ((NODE)->llist_hidden)
 
 #define FOR_ALL_NODES_ON_LLIST(NODE, LL) \
     LIST_FOR_ALL(LL, NODE, llist_next, llist_prev)

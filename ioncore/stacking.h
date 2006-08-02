@@ -30,12 +30,23 @@ DECLSTRUCT(WStacking){
     uint level;
     WSizePolicy szplcy;
     WStacking *mgr_next, *mgr_prev;
+    
+    /* llist stuff */
+    WStacking *llist_next, *llist_prev;
+    WMPlexPHolder *llist_phs;
+    
     /* flags */
     uint to_unweave:2;
+    uint llist_hidden:1;
+    uint llist_l2:1;
+    uint llist_l2_modal:1;
 };
 
 
 typedef bool WStackingFilter(WStacking *st, void *data);
+
+
+WStacking *create_stacking();
 
 
 void stacking_do_raise(WStacking **stacking, WRegion *reg, Window fb_win,

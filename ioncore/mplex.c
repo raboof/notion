@@ -653,7 +653,7 @@ static void mplex_do_node_display(WMPlex *mplex, WLListNode *node,
     if(!l2 && node!=mplex->l1_current)
         mplex_do_remanage_stdisp(mplex, sub);
 
-    node->llist_flags&=~LLIST_HIDDEN;
+    node->llist_hidden=FALSE;
     
     if(SUBS_MAY_BE_MAPPED(mplex))
         region_map(sub);
@@ -667,7 +667,7 @@ static void mplex_do_node_display(WMPlex *mplex, WLListNode *node,
              */
             if(REGION_IS_MAPPED(mplex))
                 region_unmap(mplex->l1_current->reg);
-            mplex->l1_current->llist_flags|=LLIST_HIDDEN;
+            mplex->l1_current->llist_hidden=TRUE;
         }
         
         mplex->l1_current=node;
@@ -724,7 +724,6 @@ bool mplex_do_prepare_focus(WMPlex *mplex, WRegion *disp,
                             WPrepareFocusResult *res)
 {
     WLListNode *node=NULL;
-    WStacking *st;
     WRegion *foc;
     
     /* Display the node in any case */
@@ -822,7 +821,7 @@ bool mplex_l2_set_hidden(WMPlex *mplex, WRegion *reg, bool sp)
     nhidden=libtu_do_setparam(sp, hidden);
     
     if(!hidden && nhidden){
-        node->llist_flags|=LLIST_HIDDEN;
+        node->llist_hidden=TRUE;
         
         if(REGION_IS_MAPPED(mplex) && !MPLEX_MGD_UNVIEWABLE(mplex))
             region_unmap(reg);
@@ -869,29 +868,21 @@ bool mplex_l2_is_hidden(WMPlex *mplex, WRegion *reg)
 /*{{{ Attach */
 
 
-static bool mplex_stack(WMPlex *mplex, WRegion *reg, 
-                        bool l2, bool modal, WSizePolicy szplcy)
+static bool mplex_stack(WMPlex *mplex, WStacking *st,
+                        bool l2, bool modal)
 {
-    WStacking *st=NULL, *sttop=NULL, *tmp=NULL;
+    WStacking *tmp=NULL;
     Window bottom=None, top=None;
     WStacking **stackingp=window_get_stackingp(&mplex->win);
     
     if(stackingp==NULL)
         return FALSE;
     
-    st=ALLOC(WStacking);
-    
-    if(st==NULL)
-        return FALSE;
-    
-    st->reg=reg;
-    st->above=NULL;
     st->level=(l2 
                ? (modal 
                   ? STACKING_LEVEL_MODAL1
                   : STACKING_LEVEL_NORMAL)
                : STACKING_LEVEL_BOTTOM);
-    st->szplcy=szplcy;
 
     LINK_ITEM_FIRST(tmp, st, next, prev);
     stacking_weave(stackingp, &tmp, FALSE);
@@ -901,17 +892,13 @@ static bool mplex_stack(WMPlex *mplex, WRegion *reg,
 }
 
 
-static void mplex_unstack(WMPlex *mplex, WRegion *reg)
+static void mplex_unstack(WMPlex *mplex, WStacking *st)
 {
-    WStacking *stacking, *st;
+    WStacking *stacking;
     
     stacking=window_get_stacking(&mplex->win);
-    st=stacking_find(stacking, reg);
-
-    if(st!=NULL){
-        stacking_unstack(&mplex->win, st);
-        free(st);
-    }
+    
+    stacking_unstack(&mplex->win, st);
 }
 
 
@@ -946,7 +933,7 @@ WLListNode *mplex_do_attach_after(WMPlex *mplex,
                 : NULL),
                0, &fp);
 
-    node=ALLOC(WLListNode);
+    node=create_stacking();
     
     if(node==NULL)
         return NULL;
@@ -962,9 +949,9 @@ WLListNode *mplex_do_attach_after(WMPlex *mplex,
     }
     
     node->reg=reg;
-    node->llist_flags=(LLIST_HIDDEN |
-                       (l2 ? LLIST_L2 : 0) |
-                       (modal ? LLIST_L2_MODAL : 0));
+    node->llist_hidden=TRUE;
+    node->llist_l2=(l2 ? TRUE : FALSE);
+    node->llist_l2_modal=(modal ? TRUE : FALSE);
     node->llist_phs=NULL;
     node->szplcy=szplcy;
     
@@ -980,7 +967,7 @@ WLListNode *mplex_do_attach_after(WMPlex *mplex,
 
 #warning "TODO: better check"
     if(!OBJ_IS(reg, WGroup))
-        mplex_stack(mplex, reg, l2, modal, szplcy);
+        mplex_stack(mplex, node, l2, modal);
     
     if(l2){
         if(param->flags&MPLEX_ATTACH_L2_HIDDEN)
@@ -1077,7 +1064,7 @@ static void get_params(WMPlex *mplex, ExtlTab tab, WMPlexAttachParams *par)
     if(extl_table_is_bool_set(tab, "hidden"))
         par->flags|=MPLEX_ATTACH_L2_HIDDEN;
     
-    if(extl_table_is_bool_set(tab, "modal"))
+    if(extl_table_is_bool_set(tab, "modal" ))
         par->flags|=MPLEX_ATTACH_L2_MODAL;
 
     if(extl_table_gets_i(tab, "index", &(par->index)))
@@ -1235,8 +1222,6 @@ void mplex_managed_remove(WMPlex *mplex, WRegion *sub)
         }
     }
     
-    mplex_unstack(mplex, sub);
-    
     region_unset_manager(sub, (WRegion*)mplex);
 
     node=llist_find_on(mplex->l2_list, sub);
@@ -1268,6 +1253,8 @@ void mplex_managed_remove(WMPlex *mplex, WRegion *sub)
         llist_unlink(&(mplex->l1_list), node);
         mplex->l1_count--;
     }
+
+    mplex_unstack(mplex, node);
     
     free(node);
     
@@ -1673,7 +1660,7 @@ ExtlTab mplex_get_configuration(WMPlex *mplex)
             extl_table_sets_i(st, "sizepolicy", node->szplcy);
             if(LLIST_IS_HIDDEN(node))
                 extl_table_sets_b(st, "hidden", TRUE);
-            if(node->llist_flags&LLIST_L2_MODAL)
+            if(node->llist_l2_modal)
                 extl_table_sets_b(st, "modal", TRUE);
             g=extl_table_from_rectangle(&REGION_GEOM(node->reg));
             extl_table_sets_t(st, "geom", g);
