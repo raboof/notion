@@ -1616,13 +1616,14 @@ WSplit *load_splitsplit(WTiling *ws, const WRectangle *geom, ExtlTab tab)
     }
     
     if(tl==NULL || br==NULL){
+        /* PRIMN_TL/BR instead of ANY because of stdisp. */
         destroy_obj((Obj*)split);
         if(tl!=NULL){
-            split_do_resize(tl, geom, PRIMN_ANY, PRIMN_ANY, FALSE);
+            split_do_resize(tl, geom, PRIMN_BR, PRIMN_BR, FALSE);
             return tl;
         }
         if(br!=NULL){
-            split_do_resize(br, geom, PRIMN_ANY, PRIMN_ANY, FALSE);
+            split_do_resize(br, geom, PRIMN_TL, PRIMN_TL, FALSE);
             return br;
         }
         return NULL;

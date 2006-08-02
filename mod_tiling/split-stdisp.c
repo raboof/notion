@@ -196,8 +196,8 @@ static void rot_rs_rotate_right(WSplitSplit *a, WSplitSplit *p, WSplit *y)
     GEOM(p)=pg;
     GEOM(a)=ag;
     
-    split_do_resize(x, &xg, PRIMN_ANY, PRIMN_ANY, FALSE);
-    split_do_resize(y, &yg, PRIMN_ANY, PRIMN_ANY, FALSE);
+    split_do_resize(x, &xg, PRIMN_TL, PRIMN_TL, FALSE);
+    split_do_resize(y, &yg, PRIMN_BR, PRIMN_BR, FALSE);
 }
 
 
@@ -265,8 +265,8 @@ static void rot_rs_rotate_left(WSplitSplit *a, WSplitSplit *p, WSplit *y)
     GEOM(p)=pg;
     GEOM(a)=ag;
     
-    split_do_resize(x, &xg, PRIMN_ANY, PRIMN_ANY, FALSE);
-    split_do_resize(y, &yg, PRIMN_ANY, PRIMN_ANY, FALSE);
+    split_do_resize(x, &xg, PRIMN_BR, PRIMN_BR, FALSE);
+    split_do_resize(y, &yg, PRIMN_TL, PRIMN_TL, FALSE);
 }
 
 
@@ -332,8 +332,8 @@ static void rot_rs_flip_right(WSplitSplit *a, WSplitSplit *p)
     GEOM(p)=pg;
     GEOM(a)=ag;
     
-    split_do_resize(x, &xg, PRIMN_ANY, PRIMN_ANY, FALSE);
-    split_do_resize(y, &yg, PRIMN_ANY, PRIMN_ANY, FALSE);
+    split_do_resize(x, &xg, PRIMN_BR, PRIMN_BR, FALSE);
+    split_do_resize(y, &yg, PRIMN_BR, PRIMN_BR, FALSE);
 }
 
 
@@ -406,8 +406,8 @@ static void rot_rs_flip_left(WSplitSplit *a, WSplitSplit *p)
     GEOM(p)=pg;
     GEOM(a)=ag;
     
-    split_do_resize(x, &xg, PRIMN_ANY, PRIMN_ANY, FALSE);
-    split_do_resize(y, &yg, PRIMN_ANY, PRIMN_ANY, FALSE);
+    split_do_resize(x, &xg, PRIMN_TL, PRIMN_TL, FALSE);
+    split_do_resize(y, &yg, PRIMN_TL, PRIMN_TL, FALSE);
 }
 
 
