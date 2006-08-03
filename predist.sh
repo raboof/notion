@@ -7,13 +7,10 @@ do_darcs_export() {
 	set -e
 	
 	! test -f "${project}" || { echo "${project} exists"; exit 1; }
-	! test -f "${project}.tmp" || { echo "${project}.tmp exists"; exit 1; }
 
-	darcs get --partial "${url}" "${project}.tmp"
-	darcs changes --context --repo="${project}.tmp" > "${project}.context"
-	mv "${project}.tmp/_darcs/current" "${project}"
-	mv "${project}.context" "${project}/exact-version"
-	rm -r "${project}.tmp"
+	darcs get --partial "${url}" "${project}"
+	darcs changes --context --repo="${project}" > "${project}/exact-version"
+	rm -r "${project}/_darcs"
 }
 
 ##
