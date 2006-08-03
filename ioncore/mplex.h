@@ -151,8 +151,8 @@ extern WPHolder *mplex_prepare_manage(WMPlex *mplex, const WClientWin *cwin,
 
 extern bool mplex_managed_prepare_focus(WMPlex *mplex, WRegion *sub, 
                                         int flags, WPrepareFocusResult *res);
-extern bool mplex_do_prepare_focus(WMPlex *mplex, WRegion *disp, 
-                                   WRegion *sub, int flags, 
+extern bool mplex_do_prepare_focus(WMPlex *mplex, WLListNode *disp, 
+                                   WStacking *sub, int flags, 
                                    WPrepareFocusResult *res);
 
 extern void mplex_switch_nth(WMPlex *mplex, uint n);

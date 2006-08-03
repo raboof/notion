@@ -262,18 +262,21 @@ static void group_do_set_focus(WGroup *ws, bool warp)
 static bool group_managed_prepare_focus(WGroup *ws, WRegion *reg, 
                                         int flags, WPrepareFocusResult *res)
 {
-    WStacking *st;
     WMPlex *mplex=OBJ_CAST(REGION_MANAGER(ws), WMPlex);
+    WStacking *st=group_find_stacking(ws, reg);    
     
+    if(st==NULL)
+        return FALSE;
+
     if(mplex!=NULL){
-        return mplex_do_prepare_focus(mplex, (WRegion*)ws, reg,
+        WLListNode *node=mplex_find_node(mplex, (WRegion*)ws);
+        
+        if(node==NULL)
+            return FALSE;
+        
+        return mplex_do_prepare_focus(mplex, node, st,
                                       flags, res);
     }else{
-        st=group_find_stacking(ws, reg);    
-    
-        if(st==NULL)
-            return FALSE;
-
         if(!region_prepare_focus((WRegion*)ws, flags, res))
             return FALSE;
 

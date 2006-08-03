@@ -40,6 +40,7 @@
 #include "names.h"
 #include "sizepolicy.h"
 #include "stacking.h"
+#include "group.h"
 
 
 #define SUBS_MAY_BE_MAPPED(MPLEX) \
@@ -503,21 +504,18 @@ static bool mapped_filt(WStacking *st, void *unused)
 }
 
 
-static WRegion *mplex_do_to_focus(WMPlex *mplex, WRegion *to_try)
+static WRegion *mplex_do_to_focus(WMPlex *mplex, WStacking *to_try)
 {
-    WStacking *st=NULL;
     WStacking *stacking=window_get_stacking(&mplex->win);
+    WStacking *st=NULL;
     
     if(stacking==NULL)
         return NULL;
 
-    if(to_try!=NULL){
-        st=stacking_find(stacking, to_try);
-        if(st!=NULL && !mapped_filt(st, mplex))
-            st=NULL;
-    }
-    
-    st=stacking_find_to_focus(stacking, st, mapped_filt, NULL, NULL);
+    if(to_try!=NULL && !mapped_filt(to_try, mplex))
+        to_try=NULL;
+
+    st=stacking_find_to_focus(stacking, to_try, mapped_filt, NULL, NULL);
     
     if(st!=NULL)
         return st->reg;
@@ -530,7 +528,14 @@ static WRegion *mplex_do_to_focus(WMPlex *mplex, WRegion *to_try)
 
 WRegion *mplex_to_focus(WMPlex *mplex)
 {
-    return mplex_do_to_focus(mplex, REGION_ACTIVE_SUB(mplex));
+    WStacking *stacking=window_get_stacking(&mplex->win);
+    WRegion *reg=REGION_ACTIVE_SUB(mplex);
+    WStacking *to_try=NULL;
+    
+    if(reg!=NULL && stacking!=NULL)
+        to_try=stacking_find(stacking, reg);
+
+    return mplex_do_to_focus(mplex, to_try);
 }
 
 
@@ -541,21 +546,19 @@ static bool mgr_filt(WStacking *st, void *mgr_)
 
 
 static WRegion *mplex_do_to_focus_on(WMPlex *mplex, WLListNode *node,
-                                     WRegion *to_try)
+                                     WStacking *to_try)
 {
-    WStacking *st=NULL;
     WStacking *stacking=window_get_stacking(&mplex->win);
+    WStacking *st=NULL;
     
     if(stacking==NULL)
         return NULL;
 
-    if(to_try!=NULL){
-        st=stacking_find(stacking, to_try);
-        if(st!=NULL && !mapped_filt(st, mplex))
-            st=NULL;
-    }
+    if(to_try!=NULL && !mapped_filt(to_try, mplex))
+        to_try=NULL;
     
-    st=stacking_find_to_focus(stacking, st, mapped_filt, mgr_filt, 
+    st=stacking_find_to_focus(stacking, to_try, 
+                              mapped_filt, mgr_filt, 
                               node->reg);
     
     return (st!=NULL ? st->reg : NULL);
@@ -563,13 +566,14 @@ static WRegion *mplex_do_to_focus_on(WMPlex *mplex, WLListNode *node,
 
 
 static WRegion *mplex_to_focus_on(WMPlex *mplex, WLListNode *node,
-                                  WRegion *to_try)
+                                  WStacking *to_try)
 {
     WRegion *reg;
+    WGroup *grp=OBJ_CAST(node->reg, WGroup);
     
-    if(OBJ_IS(node->reg, WGroup)){
+    if(grp!=NULL){
         if(to_try==NULL)
-            to_try=region_current(node->reg);
+            to_try=grp->current_managed;
         reg=mplex_do_to_focus_on(mplex, node, to_try);
         if(reg!=NULL || to_try!=NULL)
             return reg;
@@ -578,8 +582,8 @@ static WRegion *mplex_to_focus_on(WMPlex *mplex, WLListNode *node,
          * isn't on the stacking list).
          */
     }
-        
-    reg=mplex_do_to_focus(mplex, node->reg);
+    
+    reg=mplex_do_to_focus(mplex, node);
     return (reg==node->reg ? reg : NULL);
 }
 
@@ -719,20 +723,18 @@ static bool mplex_do_node_goto_sw(WMPlex *mplex, WLListNode *node,
 }
 
 
-bool mplex_do_prepare_focus(WMPlex *mplex, WRegion *disp, 
-                            WRegion *sub, int flags, 
+bool mplex_do_prepare_focus(WMPlex *mplex, WLListNode *node,
+                            WStacking *sub, int flags, 
                             WPrepareFocusResult *res)
 {
-    WLListNode *node=NULL;
     WRegion *foc;
     
-    /* Display the node in any case */
-    if(disp!=NULL){
-        node=mplex_find_node(mplex, disp);
+    if(sub==NULL && node==NULL)
+        return FALSE;
     
-        if(node!=NULL && !(flags&REGION_GOTO_ENTERWINDOW))
-            mplex_do_node_display(mplex, node, TRUE);
-    }
+    /* Display the node in any case */
+    if(node!=NULL && !(flags&REGION_GOTO_ENTERWINDOW))
+        mplex_do_node_display(mplex, node, TRUE);
     
     if(!region_prepare_focus((WRegion*)mplex, flags, res))
         return FALSE;
@@ -745,16 +747,26 @@ bool mplex_do_prepare_focus(WMPlex *mplex, WRegion *disp,
     if(foc!=NULL){
         res->reg=foc;
         res->flags=flags;
+        
+        if(sub==NULL)
+            return (foc==node->reg);
+        else
+            return (foc==sub->reg);
+    }else{
+        return FALSE;
     }
-   
-    return (foc==sub && foc!=NULL);
 }
 
 
-bool mplex_managed_prepare_focus(WMPlex *mplex, WRegion *sub, 
+bool mplex_managed_prepare_focus(WMPlex *mplex, WRegion *disp, 
                                  int flags, WPrepareFocusResult *res)
 {
-    return mplex_do_prepare_focus(mplex, sub, NULL, flags, res);
+    WLListNode *node=mplex_find_node(mplex, disp);
+    
+    if(node==NULL)
+        return FALSE;
+    else
+        return mplex_do_prepare_focus(mplex, node, NULL, flags, res);
 }
 
 
