@@ -87,12 +87,10 @@ DECLCLASS(WMPlex){
     WWindow win;
     int flags;
     
-    int l1_count;
     WLListNode *l1_list;
     WLListNode *l1_current;
     WMPlexPHolder *l1_phs;
     
-    int l2_count;
     WLListNode *l2_list;
     WMPlexPHolder *l2_phs;
     

@@ -58,12 +58,10 @@ bool mplex_do_init(WMPlex *mplex, WWindow *parent, Window win,
 {
     mplex->flags=0;
     
-    mplex->l1_count=0;
     mplex->l1_list=NULL;
     mplex->l1_current=NULL;
     mplex->l1_phs=NULL;
     
-    mplex->l2_count=0;
     mplex->l2_list=NULL;
     mplex->l2_phs=NULL;
     
@@ -252,21 +250,6 @@ ExtlTab mplex_llist(WMPlex *mplex, uint l)
             : (l==2
                ? llist_to_table(mplex->l2_list)
                : extl_table_none()));
-}
-
-
-/*EXTL_DOC
- * Returns the number of regions managed by \var{mplex} on list \var{l}.
- */
-EXTL_SAFE
-EXTL_EXPORT_MEMBER
-int mplex_lcount(WMPlex *mplex, uint l)
-{
-    return (l==1 
-            ? mplex->l1_count
-            : (l==2
-               ? mplex->l2_count
-               : 0));
 }
 
 
@@ -927,6 +910,7 @@ WLListNode *mplex_do_attach_after(WMPlex *mplex,
     bool modal=param->flags&MPLEX_ATTACH_L2_MODAL;
     WLListNode *node;
     WSizePolicy szplcy;
+    bool l1_was_empty=(mplex->l1_list==NULL);
     
     /*assert(!(modal && param->flags&MPLEX_ATTACH_HIDDEN));*/
     
@@ -967,13 +951,10 @@ WLListNode *mplex_do_attach_after(WMPlex *mplex,
     node->llist_phs=NULL;
     node->szplcy=szplcy;
     
-    if(l2){
+    if(l2)
         llist_link_after(&(mplex->l2_list), after, node);
-        mplex->l2_count++;
-    }else{
+    else
         llist_link_after(&(mplex->l1_list), after, node);
-        mplex->l1_count++;
-    }
     
     region_set_manager(reg, (WRegion*)mplex);
 
@@ -986,7 +967,7 @@ WLListNode *mplex_do_attach_after(WMPlex *mplex,
             sw=FALSE;
         else if(param->flags&MPLEX_ATTACH_L2_MODAL)
             sw=TRUE;
-    }else if(mplex->l1_count==1){
+    }else if(l1_was_empty){
         sw=TRUE;
     }
     
@@ -1242,7 +1223,6 @@ void mplex_managed_remove(WMPlex *mplex, WRegion *sub)
         
         mplex_move_phs_before(mplex, node);
         llist_unlink(&(mplex->l2_list), node);
-        mplex->l2_count--;
 
         assert(node!=mplex->l1_current);
     }else{
@@ -1263,7 +1243,6 @@ void mplex_managed_remove(WMPlex *mplex, WRegion *sub)
         
         mplex_move_phs_before(mplex, node);
         llist_unlink(&(mplex->l1_list), node);
-        mplex->l1_count--;
     }
 
     mplex_unstack(mplex, node);
