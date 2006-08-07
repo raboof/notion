@@ -1180,16 +1180,24 @@ WRegion *mplex_attach(WMPlex *mplex, WRegion *reg, ExtlTab param)
 
 /*EXTL_DOC
  * Create a new region to be managed by \var{mplex}. At least the following
- * fields in \var{param} are understood:
+ * fields in \var{param} are understood (all but \var{type} are optional).
  * 
  * \begin{tabularx}{\linewidth}{lX}
  *  \tabhead{Field & Description}
- *  \var{type} & Class name (a string) of the object to be created. Mandatory. \\
- *  \var{name} & Name of the object to be created (a string). Optional. \\
- *  \var{switchto} & Should the region be switched to (boolean)? Optional. \\
- *  \var{index} & Index of the new region in \var{mplex}'s list of
- *   managed objects (integer, 0 = first). Optional. \\
- *  \var{layer} & Layer to attach on; 1 (default) or 2. \\
+ *  \var{type} & (string) Class name (a string) of the object to be created. \\
+ *  \var{name} & (string) Name of the object to be created (a string). \\
+ *  \var{switchto} & (boolean) Should the region be switched to (boolean)? \\
+ *  \var{unnumbered} & (boolean) Do not put on the numbered mutually 
+ *                     exclusive list. \\
+ *  \var{index} & (integer) Index on this list, same as for 
+ *                \fnref{WMPlex.set_index}. \\
+ *  \var{level} & (integer) Stacking level. \\
+ *  \var{modal} & (boolean) Shortcut for modal stacking level. \\
+ *  \var{hidden} & (boolean) Start hidden (some interplay with 
+ *                  \var{switchto}).
+ *  \var{sizepolicy} & (integer) Size policy.
+ *                     (TODO: document them somewhere.) \\
+ *  \var{geom} & (table) Geometry specification. \\
  * \end{tabularx}
  * 
  * In addition parameters to the region to be created are passed in this 
