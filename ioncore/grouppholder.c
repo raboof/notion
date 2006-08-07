@@ -27,25 +27,24 @@ static void group_watch_handler(Watch *watch, Obj *ws);
 static void group_watch_handler(Watch *watch, Obj *ws)
 {
     WGroupPHolder *ph=FIELD_TO_STRUCT(WGroupPHolder, 
-                                        group_watch, watch);
+                                      group_watch, watch);
     pholder_redirect(&(ph->ph), (WRegion*)ws);
 }
 
 
 bool grouppholder_init(WGroupPHolder *ph, WGroup *ws,
-                         const WStacking *st)
+                       const WStacking *st)
 {
     pholder_init(&(ph->ph));
 
     watch_init(&(ph->group_watch));
     
-    if(ws==NULL)
-        return TRUE;
-    
-    if(!watch_setup(&(ph->group_watch), (Obj*)ws, 
-                    group_watch_handler)){
-        pholder_deinit(&(ph->ph));
-        return FALSE;
+    if(ws!=NULL){
+        if(!watch_setup(&(ph->group_watch), (Obj*)ws, 
+                        group_watch_handler)){
+            pholder_deinit(&(ph->ph));
+            return FALSE;
+        }
     }
     
     /* TODO? Just link to the stacking structure to remember 
@@ -65,7 +64,7 @@ bool grouppholder_init(WGroupPHolder *ph, WGroup *ws,
  
 
 WGroupPHolder *create_grouppholder(WGroup *ws,
-                                       const WStacking *st)
+                                   const WStacking *st)
 {
     CREATEOBJ_IMPL(WGroupPHolder, grouppholder, (p, ws, st));
 }
@@ -85,8 +84,8 @@ void grouppholder_deinit(WGroupPHolder *ph)
 
 
 bool grouppholder_do_attach(WGroupPHolder *ph, 
-                              WRegionAttachHandler *hnd, void *hnd_param,
-                              int flags)
+                            WRegionAttachHandler *hnd, void *hnd_param,
+                            int flags)
 {
     WGroup *ws=(WGroup*)ph->group_watch.obj;
     WRegion *reg;

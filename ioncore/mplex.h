@@ -31,9 +31,10 @@
 
 
 #define MPLEX_ATTACH_SWITCHTO     0x0001 /* switch to region */
-#define MPLEX_ATTACH_L2           0x0002 /* put on layer2 */
-#define MPLEX_ATTACH_L2_HIDDEN    0x0008 /* should be hidden on l2 */
-#define MPLEX_ATTACH_L2_MODAL 0x0010 /* should semimodal on l2 */
+#define MPLEX_ATTACH_UNNUMBERED   0x0002 /* do not put on mut.ex list */
+#define MPLEX_ATTACH_HIDDEN       0x0004 /* should be hidden */
+#define MPLEX_ATTACH_MODAL        0x0008 /* shortcut.. */
+#define MPLEX_ATTACH_LEVEL        0x0010 /* level field set */
 #define MPLEX_ATTACH_GEOM         0x0020 /* geometry field is set */
 #define MPLEX_ATTACH_SIZEPOLICY   0x0040 /* size policy field is set */
 #define MPLEX_ATTACH_INDEX        0x0080 /* index field is set */
@@ -80,6 +81,7 @@ DECLSTRUCT(WMPlexAttachParams){
     int index;
     WRectangle geom;
     WSizePolicy szplcy;
+    uint level;
 };
 
 
@@ -87,12 +89,12 @@ DECLCLASS(WMPlex){
     WWindow win;
     int flags;
     
-    WLListNode *l1_list;
-    WLListNode *l1_current;
-    WMPlexPHolder *l1_phs;
+    WStacking *mgd;
     
-    WLListNode *l2_list;
-    WMPlexPHolder *l2_phs;
+    int mx_count;
+    WLListNode *mx_current;
+    WLListNode *mx_list;
+    WMPlexPHolder *mx_phs;
     
     Watch stdispwatch;
     WMPlexSTDispInfo stdispinfo;
@@ -129,11 +131,11 @@ extern WRegion *mplex_attach_new(WMPlex *mplex, ExtlTab param);
 
 extern WRegion *mplex_do_attach(WMPlex *mplex, WRegionAttachHandler *hnd,
                                 void *hnd_param, WMPlexAttachParams *param);
-extern WLListNode *mplex_do_attach_after(WMPlex *mplex, 
-                                            WLListNode *after, 
-                                            WMPlexAttachParams *param,
-                                            WRegionAttachHandler *hnd,
-                                            void *hnd_param);
+extern WStacking *mplex_do_attach_after(WMPlex *mplex, 
+                                        WLListNode *after, 
+                                        WMPlexAttachParams *param,
+                                        WRegionAttachHandler *hnd,
+                                        void *hnd_param);
 
 extern void mplex_attach_tagged(WMPlex *mplex);
 
@@ -149,17 +151,15 @@ extern WPHolder *mplex_prepare_manage(WMPlex *mplex, const WClientWin *cwin,
 
 extern bool mplex_managed_prepare_focus(WMPlex *mplex, WRegion *sub, 
                                         int flags, WPrepareFocusResult *res);
-extern bool mplex_do_prepare_focus(WMPlex *mplex, WLListNode *disp, 
+extern bool mplex_do_prepare_focus(WMPlex *mplex, WStacking *disp, 
                                    WStacking *sub, int flags, 
                                    WPrepareFocusResult *res);
 
 extern void mplex_switch_nth(WMPlex *mplex, uint n);
 extern void mplex_switch_next(WMPlex *mplex);
 extern void mplex_switch_prev(WMPlex *mplex);
-extern bool mplex_l2_is_hidden(WMPlex *mplex, WRegion *reg);
-extern bool mplex_l2_set_hidden(WMPlex *mplex, WRegion *reg, bool sp);
-extern bool mplex_l2_is_passive(WMPlex *mplex, WRegion *reg);
-extern bool mplex_l2_set_passive(WMPlex *mplex, WRegion *reg, bool sp);
+extern bool mplex_is_hidden(WMPlex *mplex, WRegion *reg);
+extern bool mplex_set_hidden(WMPlex *mplex, WRegion *reg, int sp);
 
 /* Focus */
 
@@ -170,11 +170,10 @@ extern void mplex_do_set_focus(WMPlex *mplex, bool warp);
 extern WRegion *mplex_current(WMPlex *mplex);
 extern bool mplex_may_destroy(WMPlex *mplex);
 
-extern int mplex_lno(WMPlex *mplex, WRegion *reg);
-extern int mplex_lcount(WMPlex *mplex, uint l);
-extern WRegion *mplex_lnth(WMPlex *mplex, uint l, uint n);
-extern ExtlTab mplex_llist(WMPlex *mplex, uint l);
-extern WRegion *mplex_l1_current(WMPlex *mplex);
+extern int mplex_mx_count(WMPlex *mplex);
+extern WRegion *mplex_mx_nth(WMPlex *mplex, uint n);
+extern ExtlTab mplex_mx_list(WMPlex *mplex);
+extern WRegion *mplex_mx_current(WMPlex *mplex);
 
 extern void mplex_call_changed_hook(WMPlex *mplex, WHook *hook, 
                                     int mode, bool sw, WRegion *reg);
@@ -211,5 +210,30 @@ extern ExtlTab mplex_get_stdisp_extl(WMPlex *mplex);
 DYNFUN void region_manage_stdisp(WRegion *reg, WRegion *stdisp, 
                                  const WMPlexSTDispInfo *info);
 DYNFUN void region_unmanage_stdisp(WRegion *reg, bool permanent, bool nofocus);
+
+/* Stacking list stuff */
+
+typedef WStackingIterTmp WMPlexIterTmp;
+
+extern void mplex_iter_init(WMPlexIterTmp *tmp, WMPlex *ws);
+extern WRegion *mplex_iter(WMPlexIterTmp *tmp);
+extern WStacking *mplex_iter_nodes(WMPlexIterTmp *tmp);
+
+extern WStacking *mplex_get_stacking(WMPlex *ws);
+extern WStacking **mplex_get_stackingp(WMPlex *ws);
+
+#define FOR_ALL_MANAGED_BY_MPLEX(MPLEX, VAR, TMP) \
+    for(mplex_iter_init(&(TMP), MPLEX),           \
+         VAR=mplex_iter(&(TMP));                  \
+        VAR!=NULL;                                \
+        VAR=mplex_iter(&(TMP)))
+
+#define FOR_ALL_NODES_IN_MPLEX(MPLEX, VAR, TMP) \
+    for(mplex_iter_init(&(TMP), MPLEX),         \
+         VAR=mplex_iter_nodes(&(TMP));          \
+        VAR!=NULL;                              \
+        VAR=mplex_iter_nodes(&(TMP)))
+
+extern WStacking *mplex_find_stacking(WMPlex *mplex, WRegion *reg);
 
 #endif /* ION_IONCORE_MPLEX_H */

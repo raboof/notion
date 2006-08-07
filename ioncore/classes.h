@@ -36,7 +36,8 @@ INTRCLASS(WPHolder);
 INTRCLASS(WMPlexPHolder);
 
 INTRSTRUCT(WStacking);
-typedef WStacking WLListNode;
+INTRSTRUCT(WLListNode);
+INTRSTRUCT(WStackingIterTmp);
 
 INTRSTRUCT(WSubmapState);
 

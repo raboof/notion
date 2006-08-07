@@ -1220,8 +1220,7 @@ WDock *mod_dock_create(ExtlTab tab)
     if(floating){
         WMPlexAttachParams par;
         
-        par.flags=(MPLEX_ATTACH_L2
-                   /*|MPLEX_ATTACH_L2_PASSIVE*/
+        par.flags=(MPLEX_ATTACH_UNNUMBERED
                    |MPLEX_ATTACH_SIZEPOLICY
                    |MPLEX_ATTACH_GEOM);
         
@@ -1232,7 +1231,7 @@ WDock *mod_dock_create(ExtlTab tab)
         par.geom.h=1;
         
         if(extl_table_is_bool_set(tab, "floating_hidden"))
-            par.flags|=MPLEX_ATTACH_L2_HIDDEN;
+            par.flags|=MPLEX_ATTACH_HIDDEN;
         
         dock=(WDock*)mplex_do_attach((WMPlex*)screen, 
                                      (WRegionAttachHandler*)create_dock,

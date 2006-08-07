@@ -28,9 +28,8 @@ WStacking *create_stacking()
         st->above=NULL;
         st->level=0;
         st->szplcy=SIZEPOLICY_DEFAULT;
-        st->llist_next=NULL;
-        st->llist_prev=NULL;
-        st->llist_phs=NULL;
+        st->hidden=FALSE;
+        st->lnode=NULL;
     }
     
     return st;

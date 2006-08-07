@@ -77,7 +77,7 @@ WMenu *mod_menu_do_grabmenu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
     extl_table_gets_i(param, "initial", &(fnp.initial));
 
     par.flags=(MPLEX_ATTACH_SWITCHTO|
-               MPLEX_ATTACH_L2|
+               MPLEX_ATTACH_UNNUMBERED|
                MPLEX_ATTACH_SIZEPOLICY);
     par.szplcy=SIZEPOLICY_FULL_BOUNDS;
 

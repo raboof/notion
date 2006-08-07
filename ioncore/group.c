@@ -269,7 +269,7 @@ static bool group_managed_prepare_focus(WGroup *ws, WRegion *reg,
         return FALSE;
 
     if(mplex!=NULL){
-        WLListNode *node=mplex_find_node(mplex, (WRegion*)ws);
+        WStacking *node=mplex_find_stacking(mplex, (WRegion*)ws);
         
         if(node==NULL)
             return FALSE;
@@ -355,8 +355,8 @@ void group_managed_remove(WGroup *ws, WRegion *reg)
            WMPlex *mplex=OBJ_CAST(REGION_MANAGER(ws), WMPlex);
             
            if(mplex!=NULL 
-              && mplex->l1_current!=NULL 
-              && mplex->l1_current->reg==(WRegion*)ws){
+              && mplex->mx_current!=NULL 
+              && mplex->mx_current->st->reg==(WRegion*)ws){
                mplex_remanage_stdisp(mplex);
            }
        }

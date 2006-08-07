@@ -273,14 +273,14 @@ static void floatframe_recalc_bar(WFloatFrame *frame)
     if(frame->frame.bar_brush==NULL)
         return;
     
-    m=FRAME_MCOUNT(frame);
+    m=FRAME_MCOUNT(&frame->frame);
     
     if(m>0){
         grbrush_get_border_widths(frame->frame.bar_brush, &bdw);
         bdtotal=((m-1)*(bdw.tb_ileft+bdw.tb_iright)
                  +bdw.right+bdw.left);
 
-        FRAME_L1_FOR_ALL(sub, &(frame->frame), itmp){
+        FRAME_MX_FOR_ALL(sub, &(frame->frame), itmp){
             p=region_name(sub);
             if(p==NULL)
                 continue;
@@ -322,7 +322,7 @@ static void floatframe_recalc_bar(WFloatFrame *frame)
         return;
     
     i=0;
-    FRAME_L1_FOR_ALL(sub, &(frame->frame), itmp){
+    FRAME_MX_FOR_ALL(sub, &(frame->frame), itmp){
         textw=init_title(frame, i);
         if(textw>0){
             if(frame->frame.flags&FRAME_SHOW_NUMBERS){
@@ -414,7 +414,7 @@ WRegion *floatframe_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
     
     frame_do_load((WFrame*)frame, tab);
     
-    if(FRAME_MCOUNT(frame)==0){
+    if(FRAME_MCOUNT(&frame->frame)==0){
         /* Nothing to manage, destroy */
         destroy_obj((Obj*)frame);
         frame=NULL;

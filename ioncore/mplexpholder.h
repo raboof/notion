@@ -22,7 +22,7 @@ DECLCLASS(WMPlexPHolder){
     Watch mplex_watch;
     WLListNode *after;
     WMPlexPHolder *next, *prev;
-    int szplcy;
+    WMPlexAttachParams param;
     bool initial;
 };
 
@@ -32,13 +32,12 @@ DECLCLASS(WMPlexPHolder){
  */
 
 extern WMPlexPHolder *create_mplexpholder(WMPlex *mplex, 
-                                          WMPlexPHolder *after,
-                                          WLListNode *or_after, 
-                                          int or_layer);
-extern bool mplexpholder_init(WMPlexPHolder *ph, WMPlex *mplex, 
-                              WMPlexPHolder *after,
-                              WLListNode *or_after, 
-                              int or_layer);
+                                          WStacking *either_st,
+                                          WMPlexAttachParams *or_param);
+extern bool mplexpholder_init(WMPlexPHolder *ph, 
+                              WMPlex *mplex, 
+                              WStacking *either_st,
+                              WMPlexAttachParams *or_param);
 extern void mplexpholder_deinit(WMPlexPHolder *ph);
 
 extern int mplexpholder_layer(WMPlexPHolder *ph);
@@ -53,20 +52,16 @@ extern WRegion *mplexpholder_do_target(WMPlexPHolder *ph);
 
 extern bool mplexpholder_move(WMPlexPHolder *ph, WMPlex *mplex, 
                               WMPlexPHolder *after,
-                              WLListNode *or_after, 
-                              int or_layer);
+                              WLListNode *or_after);
 
 extern void mplex_move_phs(WMPlex *mplex, WLListNode *node,
                            WMPlexPHolder *after,
-                           WLListNode *or_after, 
-                           int or_layer);
+                           WLListNode *or_after);
 extern void mplex_move_phs_before(WMPlex *mplex, WLListNode *node);
 
 extern WMPlexPHolder *mplex_managed_get_pholder(WMPlex *mplex, 
                                                 WRegion *mgd);
 extern WMPlexPHolder *mplex_get_rescue_pholder_for(WMPlex *mplex, 
                                                        WRegion *mgd);
-
-extern WMPlexPHolder *mplex_last_place_holder(WMPlex *mplex, int layer);
 
 #endif /* ION_IONCORE_MPLEXPHOLDER_H */

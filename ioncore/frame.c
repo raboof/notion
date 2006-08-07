@@ -122,7 +122,7 @@ void frame_deinit(WFrame *frame)
 /*{{{ Tabs */
 
 
-int frame_tab_at_x(const WFrame *frame, int x)
+int frame_tab_at_x(WFrame *frame, int x)
 {
     WRectangle bg;
     int tab, tx;
@@ -144,7 +144,7 @@ int frame_tab_at_x(const WFrame *frame, int x)
 }
 
 
-int frame_nth_tab_x(const WFrame *frame, int n)
+int frame_nth_tab_x(WFrame *frame, int n)
 {
     uint x=0;
     int i;
@@ -156,7 +156,7 @@ int frame_nth_tab_x(const WFrame *frame, int n)
 }
 
 
-static int frame_nth_tab_w_iw(const WFrame *frame, int n, bool inner)
+static int frame_nth_tab_w_iw(WFrame *frame, int n, bool inner)
 {
     WRectangle bg;
     GrBorderWidths bdw=GR_BORDER_WIDTHS_INIT;
@@ -190,13 +190,13 @@ static int frame_nth_tab_w_iw(const WFrame *frame, int n, bool inner)
 }
 
 
-int frame_nth_tab_w(const WFrame *frame, int n)
+int frame_nth_tab_w(WFrame *frame, int n)
 {
     return frame_nth_tab_w_iw(frame, n, FALSE);
 }
 
 
-int frame_nth_tab_iw(const WFrame *frame, int n)
+int frame_nth_tab_iw(WFrame *frame, int n)
 {
     return frame_nth_tab_w_iw(frame, n, TRUE);
 }
@@ -250,7 +250,7 @@ void frame_update_attr_nth(WFrame *frame, int i)
     if(i<0 || i>=frame->titles_n)
         return;
 
-    update_attr(frame, i, mplex_lnth((WMPlex*)frame, 1, i));
+    update_attr(frame, i, mplex_mx_nth((WMPlex*)frame, i));
 }
 
 
@@ -260,7 +260,7 @@ static void update_attrs(WFrame *frame)
     WRegion *sub;
     WLListIterTmp tmp;
     
-    FRAME_L1_FOR_ALL(sub, frame, tmp){
+    FRAME_MX_FOR_ALL(sub, frame, tmp){
         update_attr(frame, i, sub);
         i++;
     }
@@ -311,7 +311,7 @@ static bool frame_initialise_titles(WFrame *frame)
         WLListIterTmp tmp;
         WRegion *sub;
         i=0;
-        FRAME_L1_FOR_ALL(sub, frame, tmp){
+        FRAME_MX_FOR_ALL(sub, frame, tmp){
             do_init_title(frame, i, sub);
             i++;
         }
@@ -392,7 +392,7 @@ void frame_resize_hints(WFrame *frame, XSizeHints *hints_ret)
         hints_ret->flags=0;
     }
     
-    FRAME_L1_FOR_ALL(sub, frame, tmp){
+    FRAME_MX_FOR_ALL(sub, frame, tmp){
         xsizehints_adjust_for(hints_ret, sub);
     }
     

@@ -31,16 +31,16 @@ DECLSTRUCT(WStacking){
     WSizePolicy szplcy;
     WStacking *mgr_next, *mgr_prev;
     
-    /* llist stuff */
-    WStacking *llist_next, *llist_prev;
-    WMPlexPHolder *llist_phs;
-    
     /* flags */
     uint to_unweave:2;
-    uint llist_hidden:1;
-    uint llist_l2:1;
-    uint llist_l2_modal:1;
+    uint hidden:1;
+    
+    /* WMPlex stuff */
+    WLListNode *lnode;
 };
+
+
+#define STACKING_IS_HIDDEN(ST) ((ST)->hidden)
 
 
 typedef bool WStackingFilter(WStacking *st, void *data);
@@ -68,11 +68,11 @@ WStacking *window_get_stacking(WWindow *wwin);
 /* Returns the topmost node with 'above' pointing to st. */
 WStacking *stacking_unstack(WWindow *par, WStacking *st);
 
-typedef struct{
+DECLSTRUCT(WStackingIterTmp){
     WStacking *st;
     WStackingFilter *filt;
     void *filt_data;
-} WStackingIterTmp;
+};
 
 void stacking_iter_init(WStackingIterTmp *tmp,
                         WStacking *st,

@@ -75,10 +75,10 @@ extern void frame_activated(WFrame *frame);
 extern void frame_inactivated(WFrame *frame);
 
 /* Tabs */
-extern int frame_nth_tab_w(const WFrame *frame, int n);
-extern int frame_nth_tab_iw(const WFrame *frame, int n);
-extern int frame_nth_tab_x(const WFrame *frame, int n);
-extern int frame_tab_at_x(const WFrame *frame, int x);
+extern int frame_nth_tab_w(WFrame *frame, int n);
+extern int frame_nth_tab_iw(WFrame *frame, int n);
+extern int frame_nth_tab_x(WFrame *frame, int n);
+extern int frame_tab_at_x(WFrame *frame, int x);
 extern void frame_update_attr_nth(WFrame *frame, int i);
 
 extern bool frame_set_tabbar(WFrame *frame, int sp);

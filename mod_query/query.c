@@ -40,8 +40,8 @@ WEdln *mod_query_do_query(WMPlex *mplex, const char *prompt, const char *dflt,
     fnp.completor=completor;
     
     par.flags=(MPLEX_ATTACH_SWITCHTO|
-               MPLEX_ATTACH_L2|
-               MPLEX_ATTACH_L2_MODAL|
+               MPLEX_ATTACH_MODAL|
+               MPLEX_ATTACH_UNNUMBERED|
                MPLEX_ATTACH_SIZEPOLICY);
     par.szplcy=SIZEPOLICY_FULL_BOUNDS;
 

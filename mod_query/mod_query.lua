@@ -56,7 +56,7 @@ function mod_query.query(mplex, prompt, initvalue, handler, completor,
         handler(mplex, str)
     end
     -- Check that no other queries are open in the mplex.
-    local l=mplex:llist(2)
+    local l=mplex:managed_list()
     for i, r in pairs(l) do
         if obj_is(r, "WEdln") then
             return

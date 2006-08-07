@@ -200,7 +200,7 @@ void frame_recalc_bar_default(WFrame *frame)
         return;
     }
     
-    FRAME_L1_FOR_ALL(sub, frame, tmp){
+    FRAME_MX_FOR_ALL(sub, frame, tmp){
         textw=init_title(frame, i);
         if(textw>0){
             if(frame->flags&FRAME_SHOW_NUMBERS){

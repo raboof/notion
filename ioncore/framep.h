@@ -15,12 +15,11 @@
 #include "frame.h"
 #include "llist.h"
 
-#define FRAME_MCOUNT(FRAME) (((WFrame*)(FRAME))->mplex.l1_count)
-#define FRAME_CURRENT(FRAME) ((FRAME)->mplex.l1_current!=NULL \
-                              ? (FRAME)->mplex.l1_current->reg : NULL)
+#define FRAME_MCOUNT(FRAME) mplex_mx_count(&(FRAME)->mplex)
+#define FRAME_CURRENT(FRAME) mplex_mx_current(&(FRAME)->mplex)
 
-#define FRAME_L1_FOR_ALL(REG, FRAME, TMP) \
-    FOR_ALL_REGIONS_ON_LLIST(REG, (FRAME)->mplex.l1_list, TMP)
+#define FRAME_MX_FOR_ALL(REG, FRAME, TMP) \
+    FOR_ALL_REGIONS_ON_LLIST(REG, (FRAME)->mplex.mx_list, TMP)
 
 enum{
     FRAME_AREA_NONE=0,

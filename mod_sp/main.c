@@ -9,10 +9,13 @@
  * (at your option) any later version.
  */
 
+#include <string.h>
+
 #include <libtu/map.h>
 #include <libtu/minmax.h>
 #include <libextl/readconfig.h>
 #include <libmainloop/hooks.h>
+
 #include <ioncore/conf-bindings.h>
 #include <ioncore/saveload.h>
 #include <ioncore/screen.h>
@@ -31,7 +34,6 @@
 
 /*{{{ Module information */
 
-
 #include "../version.h"
 
 char mod_sp_ion_api_version[]=ION_API_VERSION;
@@ -40,7 +42,10 @@ char mod_sp_ion_api_version[]=ION_API_VERSION;
 /*}}}*/
 
 
-/*{{{ Bindmaps w/ config */
+/*{{{ Bindmaps, config, etc. */
+
+
+#define SP_NAME  "*scratchpad*"
 
 
 WBindmap *mod_sp_scratchpad_bindmap=NULL;
@@ -63,15 +68,15 @@ static StringIntMap frame_areas[]={
 
 
 
-static WFrame *create(WScreen *scr, int flags)
+static WFrame *create(WMPlex *mplex, int flags)
 {
     WFrame *sp;
     WMPlexAttachParams par;
-    int sw=REGION_GEOM(scr).w, sh=REGION_GEOM(scr).h;
+    int sw=REGION_GEOM(mplex).w, sh=REGION_GEOM(mplex).h;
 
     par.flags=(flags
-               |MPLEX_ATTACH_L2
-               |MPLEX_ATTACH_L2_MODAL
+               |MPLEX_ATTACH_UNNUMBERED
+               |MPLEX_ATTACH_MODAL
                |MPLEX_ATTACH_SIZEPOLICY
                |MPLEX_ATTACH_GEOM);
     par.szplcy=SIZEPOLICY_FREE_GLUE;
@@ -81,20 +86,34 @@ static WFrame *create(WScreen *scr, int flags)
     par.geom.x=(sw-par.geom.w)/2;
     par.geom.y=(sh-par.geom.h)/2;
 
-    sp=(WFrame*)mplex_do_attach((WMPlex*)scr,
+    sp=(WFrame*)mplex_do_attach((WMPlex*)mplex,
                                 (WRegionAttachHandler*)create_frame,
                                 "frame-scratchpad", &par);
     
 
     if(sp==NULL){
-        warn(TR("Unable to create scratchpad for screen %d."),
-             screen_id(scr));
+        warn(TR("Unable to create scratchpad."));
     }
     
     region_add_bindmap((WRegion*)sp, mod_sp_scratchpad_bindmap);
-    region_set_name((WRegion*)sp, "*scratchpad*");
+    region_set_name((WRegion*)sp, SP_NAME);
     
     return sp;
+}
+
+
+static bool is_scratchpad(WRegion *reg)
+{
+    char *nm=reg->ni.name;
+    int inst_off=reg->ni.inst_off;
+    
+    if(nm==NULL)
+        return FALSE;
+    
+    if(inst_off<0)
+        return (strcmp(nm, SP_NAME)==0);
+    else
+        return (strncmp(nm, SP_NAME, inst_off)==0);
 }
 
 
@@ -105,27 +124,25 @@ static WFrame *create(WScreen *scr, int flags)
 EXTL_EXPORT
 bool mod_sp_set_shown_on(WMPlex *mplex, const char *how)
 {
-    int i;
     int setpar=libtu_setparam_invert(libtu_string_to_setparam(how));
-    WFrame *sp;
-    WScreen *scr;
+    WMPlexIterTmp tmp;
+    WRegion *reg;
+    bool found=FALSE;
     
-    for(i=mplex_lcount(mplex, 2)-1; i>=0; i--){
-        sp=OBJ_CAST(mplex_lnth(mplex, 2, i), WFrame);
-        if(sp!=NULL)
-            return mplex_l2_set_hidden(mplex, (WRegion*)sp, setpar);
+    FOR_ALL_MANAGED_BY_MPLEX(mplex, reg, tmp){
+        if(is_scratchpad(reg)){
+            mplex_set_hidden(mplex, reg, setpar);
+            found=TRUE;
+        }
     }
-   
-    /* No scratchpad found; create one if a screen */
-    
-    scr=OBJ_CAST(mplex, WScreen);
-    if(scr!=NULL){
-        sp=create(scr, 0);
-        if(sp!=NULL)
-            return TRUE;
+
+    if(!found){
+        int sp=libtu_string_to_setparam(how);
+        if(sp==SETPARAM_SET || sp==SETPARAM_TOGGLE)
+            found=(create(mplex, 0)!=NULL);
     }
     
-    return FALSE;
+    return found;
 }
 
 
@@ -140,7 +157,7 @@ bool mod_sp_set_shown(WFrame *sp, const char *how)
         int setpar=libtu_setparam_invert(libtu_string_to_setparam(how));
         WMPlex *mplex=OBJ_CAST(REGION_MANAGER(sp), WMPlex);
         if(mplex!=NULL)
-            return mplex_l2_set_hidden(mplex, (WRegion*)sp, setpar);
+            return mplex_set_hidden(mplex, (WRegion*)sp, setpar);
     }
     
     return FALSE;
@@ -165,25 +182,20 @@ void mod_sp_deinit()
 
 static void check_and_create()
 {
+    WMPlexIterTmp tmp;
     WScreen *scr;
-    int i;
+    WRegion *reg;
     
     /* No longer needed, free the memory the list uses. */
     hook_remove(ioncore_post_layout_setup_hook, check_and_create);
     
     FOR_ALL_SCREENS(scr){
-        WFrame *sp=NULL;
-        /* This is really inefficient, but most likely there's just
-         * the scratchpad on the list... 
-         */
-        for(i=0; i<mplex_lcount((WMPlex*)scr, 2); i++){
-            sp=OBJ_CAST(mplex_lnth((WMPlex*)scr, 2, i), WFrame);
-            if(sp!=NULL)
-                break;
+        FOR_ALL_MANAGED_BY_MPLEX((WMPlex*)scr, reg, tmp){
+            if(is_scratchpad(reg))
+                return;
         }
         
-        if(sp==NULL)
-            sp=create(scr, MPLEX_ATTACH_L2_HIDDEN);
+        create(&scr->mplex, MPLEX_ATTACH_HIDDEN);
     }
 }
     

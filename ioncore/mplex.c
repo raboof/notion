@@ -50,6 +50,42 @@
 #define CAN_MANAGE_STDISP(REG) HAS_DYN(REG, region_manage_stdisp)
 
 
+/*{{{ Stacking list stuff */
+
+
+WStacking *mplex_get_stacking(WMPlex *mplex)
+{
+    return window_get_stacking(&mplex->win);
+}
+
+
+WStacking **mplex_get_stackingp(WMPlex *mplex)
+{
+    return window_get_stackingp(&mplex->win);
+}
+
+
+void mplex_iter_init(WMPlexIterTmp *tmp, WMPlex *mplex)
+{
+    stacking_iter_mgr_init(tmp, mplex->mgd, NULL, mplex);
+}
+
+
+WRegion *mplex_iter(WMPlexIterTmp *tmp)
+{
+    return stacking_iter_mgr(tmp);
+}
+
+
+WStacking *mplex_iter_nodes(WMPlexIterTmp *tmp)
+{
+    return stacking_iter_mgr_nodes(tmp);
+}
+
+
+/*}}}*/
+
+
 /*{{{ Destroy/create mplex */
 
 
@@ -58,12 +94,12 @@ bool mplex_do_init(WMPlex *mplex, WWindow *parent, Window win,
 {
     mplex->flags=0;
     
-    mplex->l1_list=NULL;
-    mplex->l1_current=NULL;
-    mplex->l1_phs=NULL;
+    mplex->mx_list=NULL;
+    mplex->mx_current=NULL;
+    mplex->mx_phs=NULL;
+    mplex->mx_count=0;
     
-    mplex->l2_list=NULL;
-    mplex->l2_phs=NULL;
+    mplex->mgd=NULL;
     
     watch_init(&(mplex->stdispwatch));
     mplex->stdispinfo.pos=MPLEX_STDISP_BL;
@@ -107,26 +143,18 @@ WMPlex *create_mplex(WWindow *parent, const WFitParams *fp)
 
 void mplex_deinit(WMPlex *mplex)
 {
-    WLListIterTmp tmp;
+    WMPlexIterTmp tmp;
     WRegion *reg;
     
-    FOR_ALL_REGIONS_ON_LLIST(reg, mplex->l1_list, tmp){
+    FOR_ALL_MANAGED_BY_MPLEX(mplex, reg, tmp){
         destroy_obj((Obj*)reg);
     }
+    
+    assert(mplex->mgd==NULL);
+    assert(mplex->mx_list==NULL);
 
-    FOR_ALL_REGIONS_ON_LLIST(reg, mplex->l2_list, tmp){
-        destroy_obj((Obj*)reg);
-    }
-
-    assert(mplex->l1_list==NULL);
-    assert(mplex->l2_list==NULL);
-
-    while(mplex->l1_phs!=NULL){
-        assert(mplexpholder_move(mplex->l1_phs, NULL, NULL, NULL, 1));
-    }
-
-    while(mplex->l2_phs!=NULL){
-        assert(mplexpholder_move(mplex->l2_phs, NULL, NULL, NULL, 1));
+    while(mplex->mx_phs!=NULL){
+        assert(mplexpholder_move(mplex->mx_phs, NULL, NULL, NULL));
     }
     
     window_deinit((WWindow*)mplex);
@@ -135,7 +163,7 @@ void mplex_deinit(WMPlex *mplex)
 
 bool mplex_may_destroy(WMPlex *mplex)
 {
-    if(mplex->l1_list!=NULL || mplex->l2_list!=NULL){
+    if(mplex->mgd!=NULL){
         warn(TR("Refusing to destroy - not empty."));
         return FALSE;
     }
@@ -147,17 +175,23 @@ bool mplex_may_destroy(WMPlex *mplex)
 /*}}}*/
 
 
-/*{{{ Higher-level layer list stuff */
+/*{{{ Node lookup etc. */
 
 
-WLListNode *mplex_find_node(WMPlex *mplex, WRegion *reg)
+WStacking *mplex_find_stacking(WMPlex *mplex, WRegion *reg)
 {
-    WLListNode *node=llist_find_on(mplex->l2_list, reg);
+    WMPlexIterTmp tmp;
+    WStacking *st;
+
+    if(reg==NULL)
+        return NULL;
     
-    if(node==NULL)
-        node=llist_find_on(mplex->l1_list, reg);
+    FOR_ALL_NODES_IN_MPLEX(mplex, st, tmp){
+        if(st->reg==reg)
+            return st;
+    }
     
-    return node;
+    return NULL;
 }
 
 
@@ -175,50 +209,50 @@ static WRegion *mgr_within_mplex(WMPlex *mplex, WRegion *reg)
 }
 
 
-WLListNode *mplex_current_node(WMPlex *mplex)
+WStacking *mplex_current_node(WMPlex *mplex)
 {
     WRegion *reg;
     
     reg=REGION_ACTIVE_SUB(mplex);
     reg=mgr_within_mplex(mplex, reg);
     
-    return (reg==NULL ? NULL : mplex_find_node(mplex, reg));
+    return (reg==NULL ? NULL : mplex_find_stacking(mplex, reg));
 }
 
 
 WRegion *mplex_current(WMPlex *mplex)
 {
-    WLListNode *node=mplex_current_node(mplex);
+    WStacking *node=mplex_current_node(mplex);
     return (node==NULL ? NULL : node->reg);
 }
 
 
+/*}}}*/
+
+
+/*{{{ Exclusive list management and exports */
+
 /*EXTL_DOC
- * Returns the layer \var{reg} is on \var{mplex} or $-1$ if \var{reg}
- * is not managed by \var{mplex}.
+ * Returns the number of objects on the mutually exclusive list of \var{mplex}.
  */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
-int mplex_lno(WMPlex *mplex, WRegion *reg)
+int mplex_mx_count(WMPlex *mplex)
 {
-    WLListNode *node=mplex_find_node(mplex, reg);
-    
-    if(node==NULL)
-        return -1;
-    else
-        return LLIST_LAYER(node);
+    return mplex->mx_count;
 }
 
 
 /*EXTL_DOC
- * Return the managed object currently active within (the mutually exclusive)
- * list 1 of \var{mplex}.
+ * Returns the managed object currently active within the mutually exclusive
+ * list of \var{mplex}.
  */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
-WRegion *mplex_l1_current(WMPlex *mplex)
+WRegion *mplex_mx_current(WMPlex *mplex)
 {
-    return (mplex->l1_current!=NULL ? mplex->l1_current->reg : NULL);
+    WLListNode *lnode=mplex->mx_current;
+    return (lnode==NULL ? NULL : lnode->st->reg);
 }
 
 
@@ -228,54 +262,82 @@ WRegion *mplex_l1_current(WMPlex *mplex)
  */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
-WRegion *mplex_lnth(WMPlex *mplex, uint l, uint n)
+WRegion *mplex_mx_nth(WMPlex *mplex, uint n)
 {
-    return (l==1 
-            ? llist_nth_region(mplex->l1_list, n)
-            : (l==2
-               ? llist_nth_region(mplex->l2_list, n)
-               : 0));
+    WLListNode *lnode=llist_nth_node(mplex->mx_list, n);
+    return (lnode==NULL ? NULL : lnode->st->reg);
 }
 
 
 /*EXTL_DOC
- * Returns a list of regions managed by \var{mplex} on list \var{l}.
+ * Returns a list of regions on the numbered/mutually exclusive list of 
+ * \var{mplex}.
  */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
-ExtlTab mplex_llist(WMPlex *mplex, uint l)
+ExtlTab mplex_mx_list(WMPlex *mplex)
 {
-    return (l==1 
-            ? llist_to_table(mplex->l1_list)
-            : (l==2
-               ? llist_to_table(mplex->l2_list)
-               : extl_table_none()));
+    WLListIterTmp tmp;
+    llist_iter_init(&tmp, mplex->mx_list);
+    
+    return extl_obj_iterable_to_table((ObjIterator*)llist_iter_regions, &tmp);
+}
+
+
+/*EXTL_DOC
+ * Returns a list of all regions managed by \var{mplex}.
+ */
+EXTL_SAFE
+EXTL_EXPORT_MEMBER
+ExtlTab mplex_managed_list(WMPlex *mplex)
+{
+    WMPlexIterTmp tmp;
+    mplex_iter_init(&tmp, mplex);
+    
+    return extl_obj_iterable_to_table((ObjIterator*)mplex_iter, &tmp);
 }
 
 
 /*EXTL_DOC
  * Set index of \var{reg} within the multiplexer to \var{index} within 
- * list 1.
+ * the mutually exclusive list. Special values for \var{index} are:
+ * \begin{tabularx}{\linewidth}{lX}
+ *   $-1$ & After \fnref{WMPlex.mx_current}. \\
+ *   $-2$ & Last. \\
+ * \end{tabularx}
  */
 EXTL_EXPORT_MEMBER
 void mplex_set_index(WMPlex *mplex, WRegion *reg, int index)
 {
-    WLListNode *node, *after;
+    WLListNode *lnode, *after;
+    WStacking *node;
     
-    if(reg==NULL)
-        return;
-    
-    node=llist_find_on(mplex->l1_list, reg);
-    
+    node=mplex_find_stacking(mplex, reg);
+
     if(node==NULL)
         return;
     
-    mplex_move_phs_before(mplex, node);
-    llist_unlink(&(mplex->l1_list), node);
+    lnode=node->lnode;
     
-    after=llist_index_to_after(mplex->l1_list, mplex->l1_current, index);
-    llist_link_after(&(mplex->l1_list), after, node);
+    if(lnode==NULL){
+        lnode=ALLOC(WLListNode);
+        if(lnode==NULL)
+            return;
+        lnode->next=NULL;
+        lnode->prev=NULL;
+        lnode->phs=NULL;
+        lnode->st=node;
+        node->lnode=lnode;
+        mplex->mx_count++;
+    }else{
+        mplex_move_phs_before(mplex, lnode);
+        llist_unlink(&(mplex->mx_list), lnode);
+    }
     
+    /* TODO: Support remove? */
+    
+    after=llist_index_to_after(mplex->mx_list, mplex->mx_current, index);
+    llist_link_after(&(mplex->mx_list), after, lnode);
     mplex_managed_changed(mplex, MPLEX_CHANGE_REORDER, FALSE, reg);
 }
 
@@ -290,11 +352,11 @@ EXTL_EXPORT_MEMBER
 int mplex_get_index(WMPlex *mplex, WRegion *reg)
 {
     WLListIterTmp tmp;
-    WRegion *other;
+    WLListNode *lnode;
     int index=0;
     
-    FOR_ALL_REGIONS_ON_LLIST(other, mplex->l1_list, tmp){
-        if(reg==other)
+    FOR_ALL_NODES_ON_LLIST(lnode, mplex->mx_list, tmp){
+        if(reg==lnode->st->reg)
             return index;
         index++;
     }
@@ -310,7 +372,7 @@ EXTL_EXPORT_MEMBER
 void mplex_inc_index(WMPlex *mplex, WRegion *r)
 {
     if(r==NULL)
-        r=mplex_l1_current(mplex);
+        r=mplex_mx_current(mplex);
     if(r!=NULL)
         mplex_set_index(mplex, r, mplex_get_index(mplex, r)+1);
 }
@@ -323,7 +385,7 @@ EXTL_EXPORT_MEMBER
 void mplex_dec_index(WMPlex *mplex, WRegion *r)
 {
     if(r==NULL)
-        r=mplex_l1_current(mplex);
+        r=mplex_mx_current(mplex);
     if(r!=NULL)
         mplex_set_index(mplex, r, mplex_get_index(mplex, r)-1);
 }
@@ -337,13 +399,11 @@ void mplex_dec_index(WMPlex *mplex, WRegion *r)
 
 static void mplex_map_mgd(WMPlex *mplex)
 {
-    WLListNode *node;
+    WMPlexIterTmp tmp;
+    WStacking *node;
 
-    if(mplex->l1_current!=NULL)
-        region_map(mplex->l1_current->reg);
-    
-    FOR_ALL_NODES_ON_LLIST(node, mplex->l2_list){
-        if(!LLIST_IS_HIDDEN(node))
+    FOR_ALL_NODES_IN_MPLEX(mplex, node, tmp){
+        if(!STACKING_IS_HIDDEN(node))
             region_map(node->reg);
     }
 }
@@ -351,13 +411,11 @@ static void mplex_map_mgd(WMPlex *mplex)
 
 static void mplex_unmap_mgd(WMPlex *mplex)
 {
-    WLListNode *node;
-    
-    if(mplex->l1_current!=NULL)
-        region_unmap(mplex->l1_current->reg);
-    
-    FOR_ALL_NODES_ON_LLIST(node, mplex->l2_list){
-        if(!LLIST_IS_HIDDEN(node))
+    WMPlexIterTmp tmp;
+    WStacking *node;
+
+    FOR_ALL_NODES_IN_MPLEX(mplex, node, tmp){
+        if(!STACKING_IS_HIDDEN(node))
             region_unmap(node->reg);
     }
 }
@@ -411,7 +469,8 @@ bool mplex_fitrep(WMPlex *mplex, WWindow *par, const WFitParams *fp)
 void mplex_do_fit_managed(WMPlex *mplex, WFitParams *fp)
 {
     WRectangle geom;
-    WLListNode *node;
+    WMPlexIterTmp tmp;
+    WStacking *node;
     WFitParams fp2;
     
     if(!MPLEX_MGD_UNVIEWABLE(mplex) && (fp->g.w<=1 || fp->g.h<=1)){
@@ -425,13 +484,7 @@ void mplex_do_fit_managed(WMPlex *mplex, WFitParams *fp)
     }
     
     if(!MPLEX_MGD_UNVIEWABLE(mplex)){
-        FOR_ALL_NODES_ON_LLIST(node, mplex->l1_list){
-            fp2=*fp;
-            sizepolicy(&node->szplcy, node->reg, NULL, 0, &fp2);
-            region_fitrep(node->reg, NULL, &fp2);
-        }
-        
-        FOR_ALL_NODES_ON_LLIST(node, mplex->l2_list){
+        FOR_ALL_NODES_IN_MPLEX(mplex, node, tmp){
             fp2=*fp;
             sizepolicy(&node->szplcy, node->reg, NULL, 0, &fp2);
             region_fitrep(node->reg, NULL, &fp2);
@@ -457,9 +510,9 @@ static void mplex_managed_rqgeom(WMPlex *mplex, WRegion *sub,
 {
     WRectangle rg;
     WFitParams fp;
-    WLListNode *node;
+    WStacking *node;
 
-    node=mplex_find_node(mplex, sub);
+    node=mplex_find_stacking(mplex, sub);
     
     assert(node!=NULL);
 
@@ -489,7 +542,7 @@ static bool mapped_filt(WStacking *st, void *unused)
 
 static WRegion *mplex_do_to_focus(WMPlex *mplex, WStacking *to_try)
 {
-    WStacking *stacking=window_get_stacking(&mplex->win);
+    WStacking *stacking=mplex_get_stacking(mplex);
     WStacking *st=NULL;
     
     if(stacking==NULL)
@@ -502,8 +555,8 @@ static WRegion *mplex_do_to_focus(WMPlex *mplex, WStacking *to_try)
     
     if(st!=NULL)
         return st->reg;
-    else if(mplex->l1_current!=NULL)
-        return mplex->l1_current->reg;
+    else if(mplex->mx_current!=NULL)
+        return mplex->mx_current->st->reg;
     else
         return NULL;
 }
@@ -511,7 +564,7 @@ static WRegion *mplex_do_to_focus(WMPlex *mplex, WStacking *to_try)
 
 WRegion *mplex_to_focus(WMPlex *mplex)
 {
-    WStacking *stacking=window_get_stacking(&mplex->win);
+    WStacking *stacking=mplex_get_stacking(mplex);
     WRegion *reg=REGION_ACTIVE_SUB(mplex);
     WStacking *to_try=NULL;
     
@@ -528,10 +581,10 @@ static bool mgr_filt(WStacking *st, void *mgr_)
 }
 
 
-static WRegion *mplex_do_to_focus_on(WMPlex *mplex, WLListNode *node,
+static WRegion *mplex_do_to_focus_on(WMPlex *mplex, WStacking *node,
                                      WStacking *to_try)
 {
-    WStacking *stacking=window_get_stacking(&mplex->win);
+    WStacking *stacking=mplex_get_stacking(mplex);
     WStacking *st=NULL;
     
     if(stacking==NULL)
@@ -548,7 +601,7 @@ static WRegion *mplex_do_to_focus_on(WMPlex *mplex, WLListNode *node,
 }
 
 
-static WRegion *mplex_to_focus_on(WMPlex *mplex, WLListNode *node,
+static WRegion *mplex_to_focus_on(WMPlex *mplex, WStacking *node,
                                   WStacking *to_try)
 {
     WRegion *reg;
@@ -589,7 +642,7 @@ void mplex_do_set_focus(WMPlex *mplex, bool warp)
 /*}}}*/
 
 
-/*{{{ Managed region switching */
+/*{{{ Switch */
 
 
 static void mplex_do_remanage_stdisp(WMPlex *mplex, WRegion *sub)
@@ -622,50 +675,55 @@ static void mplex_do_remanage_stdisp(WMPlex *mplex, WRegion *sub)
 
 void mplex_remanage_stdisp(WMPlex *mplex)
 {
-    mplex_do_remanage_stdisp(mplex, (mplex->l1_current!=NULL
-                                     ? mplex->l1_current->reg
+    mplex_do_remanage_stdisp(mplex, (mplex->mx_current!=NULL
+                                     ? mplex->mx_current->st->reg
                                      : NULL));
 }
 
 
-static void mplex_do_node_display(WMPlex *mplex, WLListNode *node,
+static void mplex_do_node_display(WMPlex *mplex, WStacking *node,
                                   bool call_changed)
 {
     WRegion *sub=node->reg;
-    bool l2=LLIST_IS_L2(node);
+    WLListNode *mxc=mplex->mx_current;
 
-    if(!LLIST_IS_HIDDEN(node))
+    if(!STACKING_IS_HIDDEN(node))
         return;
     
-    if(!l2 && node!=mplex->l1_current)
+    if(node->lnode!=NULL && node->lnode!=mxc)
         mplex_do_remanage_stdisp(mplex, sub);
 
-    node->llist_hidden=FALSE;
+    node->hidden=FALSE;
     
     if(SUBS_MAY_BE_MAPPED(mplex))
         region_map(sub);
     else
         region_unmap(sub);
     
-    if(!l2){
-        if(mplex->l1_current!=NULL){
-            /* Hide current l1 region. We do it after mapping the
+    if(node->lnode!=NULL){
+        if(mxc!=NULL){
+            /* Hide current mx region. We do it after mapping the
              * new one to avoid flicker.
              */
             if(REGION_IS_MAPPED(mplex))
-                region_unmap(mplex->l1_current->reg);
-            mplex->l1_current->llist_hidden=TRUE;
+                region_unmap(mxc->st->reg);
+            mxc->st->hidden=TRUE;
         }
         
-        mplex->l1_current=node;
+        mplex->mx_current=node->lnode;
         
-        /* Many programs will get upset if the visible, although only 
+        /* Ugly hack:
+         * Many programs will get upset if the visible, although only 
          * such, client window is not the lowest window in the mplex. 
          * xprop/xwininfo will return the information for the lowest 
          * window. 'netscape -remote' will not work at all if there are
          * no visible netscape windows.
          */
-#warning "TODO: the ugly client window stacking hack."        
+        {
+            WGroup *grp=(WGroup*)OBJ_CAST(sub, WGroupCW);
+            if(grp!=NULL && grp->bottom!=NULL)
+                group_lower(grp, grp->bottom->reg);
+        }
         /*region_lower(sub);*/
         
         if(call_changed)
@@ -674,7 +732,7 @@ static void mplex_do_node_display(WMPlex *mplex, WLListNode *node,
 }
 
 
-static bool mplex_do_node_goto(WMPlex *mplex, WLListNode *node,
+static bool mplex_do_node_goto(WMPlex *mplex, WStacking *node,
                                bool call_changed, int flags)
 {
     bool ret=TRUE;
@@ -697,7 +755,7 @@ static bool mplex_do_node_goto(WMPlex *mplex, WLListNode *node,
 }
 
 
-static bool mplex_do_node_goto_sw(WMPlex *mplex, WLListNode *node,
+static bool mplex_do_node_goto_sw(WMPlex *mplex, WStacking *node,
                                   bool call_changed)
 {
     bool mcf=region_may_control_focus((WRegion*)mplex);
@@ -706,7 +764,7 @@ static bool mplex_do_node_goto_sw(WMPlex *mplex, WLListNode *node,
 }
 
 
-bool mplex_do_prepare_focus(WMPlex *mplex, WLListNode *node,
+bool mplex_do_prepare_focus(WMPlex *mplex, WStacking *node,
                             WStacking *sub, int flags, 
                             WPrepareFocusResult *res)
 {
@@ -744,7 +802,7 @@ bool mplex_do_prepare_focus(WMPlex *mplex, WLListNode *node,
 bool mplex_managed_prepare_focus(WMPlex *mplex, WRegion *disp, 
                                  int flags, WPrepareFocusResult *res)
 {
-    WLListNode *node=mplex_find_node(mplex, disp);
+    WStacking *node=mplex_find_stacking(mplex, disp);
     
     if(node==NULL)
         return FALSE;
@@ -761,11 +819,16 @@ static void mplex_refocus(WMPlex *mplex, bool warp)
         region_maybewarp(reg, warp);
 }
 
+/*}}}*/
+
+
+/*{{{ switch exports */
+
 
 static void do_switch(WMPlex *mplex, WLListNode *node)
 {
     if(node!=NULL)
-        mplex_do_node_goto_sw(mplex, node, TRUE);
+        mplex_do_node_goto_sw(mplex, node->st, TRUE);
 }
 
 
@@ -775,7 +838,7 @@ static void do_switch(WMPlex *mplex, WLListNode *node)
 EXTL_EXPORT_MEMBER
 void mplex_switch_nth(WMPlex *mplex, uint n)
 {
-    do_switch(mplex, llist_nth_node(mplex->l1_list, n));
+    do_switch(mplex, llist_nth_node(mplex->mx_list, n));
 }
 
 
@@ -786,8 +849,8 @@ void mplex_switch_nth(WMPlex *mplex, uint n)
 EXTL_EXPORT_MEMBER
 void mplex_switch_next(WMPlex *mplex)
 {
-    do_switch(mplex, LIST_NEXT_WRAP(mplex->l1_list, mplex->l1_current, 
-                                    llist_next, llist_prev));
+    do_switch(mplex, LIST_NEXT_WRAP(mplex->mx_list, mplex->mx_current, 
+                                    next, prev));
 }
 
 
@@ -798,25 +861,25 @@ void mplex_switch_next(WMPlex *mplex)
 EXTL_EXPORT_MEMBER
 void mplex_switch_prev(WMPlex *mplex)
 {
-    do_switch(mplex, LIST_PREV_WRAP(mplex->l1_list, mplex->l1_current,
-                                    llist_next, llist_prev));
+    do_switch(mplex, LIST_PREV_WRAP(mplex->mx_list, mplex->mx_current,
+                                    next, prev));
 }
 
 
-bool mplex_l2_set_hidden(WMPlex *mplex, WRegion *reg, bool sp)
+bool mplex_set_hidden(WMPlex *mplex, WRegion *reg, int sp)
 {
     bool mcf=region_may_control_focus((WRegion*)mplex);
-    WLListNode *node=llist_find_on(mplex->l2_list, reg);
+    WStacking *node=mplex_find_stacking(mplex, reg);
     bool hidden, nhidden;
     
     if(node==NULL)
         return FALSE;
     
-    hidden=LLIST_IS_HIDDEN(node);
+    hidden=STACKING_IS_HIDDEN(node);
     nhidden=libtu_do_setparam(sp, hidden);
     
     if(!hidden && nhidden){
-        node->llist_hidden=TRUE;
+        node->hidden=TRUE;
         
         if(REGION_IS_MAPPED(mplex) && !MPLEX_MGD_UNVIEWABLE(mplex))
             region_unmap(reg);
@@ -828,32 +891,32 @@ bool mplex_l2_set_hidden(WMPlex *mplex, WRegion *reg, bool sp)
                            (mcf ? REGION_GOTO_FOCUS : 0));
     }
     
-    return LLIST_IS_HIDDEN(node);
+    return STACKING_IS_HIDDEN(node);
 }
 
 
 /*EXTL_DOC
- * Set the visibility of the layer2 region \var{reg} on \var{mplex}
+ * Set the visibility of the region \var{reg} on \var{mplex}
  * as specified with the parameter \var{how} (set/unset/toggle).
  * The resulting state is returned.
  */
-EXTL_EXPORT_AS(WMPlex, l2_set_hidden)
-bool mplex_l2_set_hidden_extl(WMPlex *mplex, WRegion *reg, const char *how)
+EXTL_EXPORT_AS(WMPlex, set_hidden)
+bool mplex_set_hidden_extl(WMPlex *mplex, WRegion *reg, const char *how)
 {
-    return mplex_l2_set_hidden(mplex, reg, libtu_string_to_setparam(how));
+    return mplex_set_hidden(mplex, reg, libtu_string_to_setparam(how));
 }
 
 
 /*EXTL_DOC
- * Is \var{reg} on the layer2 of \var{mplex} and hidden?
+ * Is \var{reg} on within \var{mplex} and hidden?
  */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
-bool mplex_l2_is_hidden(WMPlex *mplex, WRegion *reg)
+bool mplex_is_hidden(WMPlex *mplex, WRegion *reg)
 {
-    WLListNode *node=llist_find_on(mplex->l2_list, reg);
+    WStacking *node=mplex_find_stacking(mplex, reg);
     
-    return (node!=NULL && LLIST_IS_HIDDEN(node));
+    return (node!=NULL && STACKING_IS_HIDDEN(node));
 }
 
 
@@ -863,21 +926,14 @@ bool mplex_l2_is_hidden(WMPlex *mplex, WRegion *reg)
 /*{{{ Attach */
 
 
-static bool mplex_stack(WMPlex *mplex, WStacking *st,
-                        bool l2, bool modal)
+static bool mplex_stack(WMPlex *mplex, WStacking *st)
 {
     WStacking *tmp=NULL;
     Window bottom=None, top=None;
-    WStacking **stackingp=window_get_stackingp(&mplex->win);
+    WStacking **stackingp=mplex_get_stackingp(mplex);
     
     if(stackingp==NULL)
         return FALSE;
-    
-    st->level=(l2 
-               ? (modal 
-                  ? STACKING_LEVEL_MODAL1
-                  : STACKING_LEVEL_NORMAL)
-               : STACKING_LEVEL_BOTTOM);
 
     LINK_ITEM_FIRST(tmp, st, next, prev);
     stacking_weave(stackingp, &tmp, FALSE);
@@ -891,33 +947,49 @@ static void mplex_unstack(WMPlex *mplex, WStacking *st)
 {
     WStacking *stacking;
     
-    stacking=window_get_stacking(&mplex->win);
+    stacking=mplex_get_stacking(mplex);
     
     stacking_unstack(&mplex->win, st);
 }
 
 
-WLListNode *mplex_do_attach_after(WMPlex *mplex, 
-                                  WLListNode *after, 
-                                  WMPlexAttachParams *param,
-                                  WRegionAttachHandler *hnd,
-                                  void *hnd_param)
+WStacking *mplex_do_attach_after(WMPlex *mplex, 
+                                 WLListNode *after,
+                                 WMPlexAttachParams *param,
+                                 WRegionAttachHandler *hnd,
+                                 void *hnd_param)
 {
     WRegion *reg;
     WFitParams fp;
-    bool sw=param->flags&MPLEX_ATTACH_SWITCHTO;
-    bool l2=param->flags&MPLEX_ATTACH_L2;
-    bool modal=param->flags&MPLEX_ATTACH_L2_MODAL;
-    WLListNode *node;
+    WStacking *node=NULL;
+    WLListNode *lnode=NULL;
     WSizePolicy szplcy;
-    bool l1_was_empty=(mplex->l1_list==NULL);
+    bool mx_was_empty, sw, modal;
+    uint level;
     
-    /*assert(!(modal && param->flags&MPLEX_ATTACH_HIDDEN));*/
+    mx_was_empty=(mplex->mx_list==NULL);
+    
+    modal=(param->flags&MPLEX_ATTACH_LEVEL
+           ? param->level>=STACKING_LEVEL_MODAL1
+           : param->flags&MPLEX_ATTACH_MODAL);
+    
+    level=(param->flags&MPLEX_ATTACH_LEVEL
+           ? param->level
+           : (param->flags&MPLEX_ATTACH_MODAL
+              ? STACKING_LEVEL_MODAL1
+              : (param->flags&MPLEX_ATTACH_UNNUMBERED
+                 ? STACKING_LEVEL_NORMAL
+                 : STACKING_LEVEL_BOTTOM)));
+    
+    sw=((param->flags&MPLEX_ATTACH_SWITCHTO)
+        || (param->flags&MPLEX_ATTACH_UNNUMBERED
+            ? modal && !(param->flags&MPLEX_ATTACH_HIDDEN)
+            : mx_was_empty || !(param->flags&MPLEX_ATTACH_HIDDEN)));
     
     szplcy=(param->flags&MPLEX_ATTACH_SIZEPOLICY &&
             param->szplcy!=SIZEPOLICY_DEFAULT
             ? param->szplcy
-            : (l2 
+            : (param->flags&MPLEX_ATTACH_UNNUMBERED
                ? SIZEPOLICY_FULL_BOUNDS
                : SIZEPOLICY_FULL_EXACT));
     
@@ -934,6 +1006,19 @@ WLListNode *mplex_do_attach_after(WMPlex *mplex,
     if(node==NULL)
         return NULL;
     
+    if(!(param->flags&MPLEX_ATTACH_UNNUMBERED)){
+        lnode=ALLOC(WLListNode);
+        if(lnode==NULL){
+            free(node);
+            return NULL;
+        }
+        lnode->next=NULL;
+        lnode->prev=NULL;
+        lnode->phs=NULL;
+        lnode->st=node;
+        node->lnode=lnode;
+    }
+    
     if(param->flags&MPLEX_ATTACH_WHATEVER)
         fp.mode|=REGION_FIT_WHATEVER;
         
@@ -941,74 +1026,62 @@ WLListNode *mplex_do_attach_after(WMPlex *mplex,
     
     if(reg==NULL){
         free(node);
+        if(lnode!=NULL)
+            free(lnode);
         return NULL;
     }
     
     node->reg=reg;
-    node->llist_hidden=TRUE;
-    node->llist_l2=(l2 ? TRUE : FALSE);
-    node->llist_l2_modal=(modal ? TRUE : FALSE);
-    node->llist_phs=NULL;
+    node->hidden=TRUE;
     node->szplcy=szplcy;
+    node->level=level;
     
-    if(l2)
-        llist_link_after(&(mplex->l2_list), after, node);
-    else
-        llist_link_after(&(mplex->l1_list), after, node);
+    if(lnode!=NULL){
+        llist_link_after(&(mplex->mx_list), after, lnode);
+        mplex->mx_count++;
+    }
     
     region_set_manager(reg, (WRegion*)mplex);
-
-#warning "TODO: better check"
-    if(!OBJ_IS(reg, WGroup))
-        mplex_stack(mplex, node, l2, modal);
     
-    if(l2){
-        if(param->flags&MPLEX_ATTACH_L2_HIDDEN)
-            sw=FALSE;
-        else if(param->flags&MPLEX_ATTACH_L2_MODAL)
-            sw=TRUE;
-    }else if(l1_was_empty){
-        sw=TRUE;
-    }
+    LINK_ITEM(mplex->mgd, node, mgr_next, mgr_prev);
+
+    if(!OBJ_IS(reg, WGroup))
+        mplex_stack(mplex, node);
     
     if(sw)
         mplex_do_node_goto_sw(mplex, node, FALSE);
-    else if(l2 && !(param->flags&MPLEX_ATTACH_L2_HIDDEN))
+    else if(lnode==NULL && !(param->flags&MPLEX_ATTACH_HIDDEN))
         mplex_do_node_display(mplex, node, FALSE);
     else
         region_unmap(reg);
 
-    if(!l2)
+    if(lnode!=NULL)
         mplex_managed_changed(mplex, MPLEX_CHANGE_ADD, sw, reg);
     
     return node;
 }
 
 
-static WLListNode *mplex_get_after(WMPlex *mplex, bool l2,
+static WLListNode *mplex_get_after(WMPlex *mplex, 
                                    bool index_given, int index)
 {
     if(!index_given)
         index=mplex_default_index(mplex);
 
-    if(l2){
-        WLListNode *l2_last=(mplex->l2_list 
-                             ? mplex->l2_list->llist_prev 
-                             : NULL);
-        return llist_index_to_after(mplex->l2_list, l2_last, index);
-    }else{
-        return llist_index_to_after(mplex->l1_list, mplex->l1_current, index);
-    }
+    return llist_index_to_after(mplex->mx_list, mplex->mx_current, index);
 }
     
 
 WRegion *mplex_do_attach(WMPlex *mplex, WRegionAttachHandler *hnd,
                          void *hnd_param, WMPlexAttachParams *param)
 {
-    WLListNode *node, *after;
+    WLListNode *after=NULL;
+    WStacking *node;
     
-    after=mplex_get_after(mplex, param->flags&MPLEX_ATTACH_L2, 
-                          param->flags&MPLEX_ATTACH_INDEX, param->index);
+    if(!(param->flags&MPLEX_ATTACH_UNNUMBERED)){
+        after=mplex_get_after(mplex, param->flags&MPLEX_ATTACH_INDEX, 
+                              param->index);
+    }
 
     node=mplex_do_attach_after(mplex, after, param, hnd, hnd_param);
     
@@ -1043,22 +1116,33 @@ static void get_params(WMPlex *mplex, ExtlTab tab, WMPlexAttachParams *par)
     
     par->flags=0;
     
-    extl_table_gets_i(tab, "layer", &layer);
-    if(layer==2){
-        par->flags|=MPLEX_ATTACH_L2;
-        
-        if(extl_table_gets_rectangle(tab, "geom", &(par->geom)))
-            par->flags|=MPLEX_ATTACH_GEOM;
+    if(extl_table_gets_i(tab, "layer", &tmp)){
+        /* backwards compatibility */
+        if(tmp==2){
+            par->flags|=MPLEX_ATTACH_UNNUMBERED;
+            if(!extl_table_is_bool_set(tab, "passive"))
+                par->flags|=MPLEX_ATTACH_MODAL;
+        }
     }
+
+    if(extl_table_gets_i(tab, "level", &tmp)){
+        if(tmp>=0){
+            par->flags|=MPLEX_ATTACH_LEVEL;
+            par->level=tmp;
+        }
+    }
+    
+    if(extl_table_is_bool_set(tab, "modal"))
+        par->flags|=MPLEX_ATTACH_MODAL;
+
+    if(extl_table_is_bool_set(tab, "unnumbered"))
+        par->flags|=MPLEX_ATTACH_UNNUMBERED;
     
     if(extl_table_is_bool_set(tab, "switchto"))
         par->flags|=MPLEX_ATTACH_SWITCHTO;
 
     if(extl_table_is_bool_set(tab, "hidden"))
-        par->flags|=MPLEX_ATTACH_L2_HIDDEN;
-    
-    if(extl_table_is_bool_set(tab, "modal" ))
-        par->flags|=MPLEX_ATTACH_L2_MODAL;
+        par->flags|=MPLEX_ATTACH_HIDDEN;
 
     if(extl_table_gets_i(tab, "index", &(par->index)))
         par->flags|=MPLEX_ATTACH_INDEX;
@@ -1067,6 +1151,9 @@ static void get_params(WMPlex *mplex, ExtlTab tab, WMPlexAttachParams *par)
         par->flags|=MPLEX_ATTACH_SIZEPOLICY;
         par->szplcy=tmp;
     }
+    
+    if(extl_table_gets_rectangle(tab, "geom", &par->geom))
+        par->flags|=MPLEX_ATTACH_GEOM;
 }
 
 
@@ -1136,7 +1223,7 @@ void mplex_attach_tagged(WMPlex *mplex)
 static bool mplex_handle_drop(WMPlex *mplex, int x, int y,
                               WRegion *dropped)
 {
-    WRegion *curr=mplex_l1_current(mplex);
+    WRegion *curr=mplex_mx_current(mplex);
     
     /* This code should handle dropping tabs on floating workspaces. */
     if(curr && HAS_DYN(curr, region_handle_drop)){
@@ -1155,13 +1242,13 @@ static bool mplex_handle_drop(WMPlex *mplex, int x, int y,
 WPHolder *mplex_prepare_manage(WMPlex *mplex, const WClientWin *cwin,
                                const WManageParams *param, int redir)
 {
-    int swf=(param->switchto ? MPLEX_ATTACH_SWITCHTO : 0);
+    WMPlexAttachParams ap;
     WPHolder *ph=NULL;
     WMPlexPHolder *mph;
     WLListNode *after;
     
     if(redir==MANAGE_REDIR_STRICT_YES || redir==MANAGE_REDIR_PREFER_YES){
-        WLListNode *cur=mplex_current_node(mplex);
+        WStacking *cur=mplex_current_node(mplex);
         
         if(cur!=NULL){
             ph=region_prepare_manage(cur->reg, cwin, param,
@@ -1170,8 +1257,9 @@ WPHolder *mplex_prepare_manage(WMPlex *mplex, const WClientWin *cwin,
                 return ph;
         }
         
-        if(mplex->l1_current!=NULL && mplex->l1_current!=cur){
-            ph=region_prepare_manage(mplex->l1_current->reg, cwin, param,
+        if(mplex->mx_current!=NULL && mplex->mx_current->st!=cur){
+            ph=region_prepare_manage(mplex->mx_current->st->reg, 
+                                     cwin, param, 
                                      MANAGE_REDIR_PREFER_YES);
             if(ph!=NULL)
                 return ph;
@@ -1181,15 +1269,15 @@ WPHolder *mplex_prepare_manage(WMPlex *mplex, const WClientWin *cwin,
     if(redir==MANAGE_REDIR_STRICT_YES)
         return NULL;
     
-    after=mplex_get_after(mplex, FALSE, FALSE, 0);
+    ap.flags=((param->switchto ? MPLEX_ATTACH_SWITCHTO : 0)
+              |MPLEX_ATTACH_SIZEPOLICY);
+    ap.szplcy=SIZEPOLICY_FULL_BOUNDS;
     
-    mph=create_mplexpholder(mplex, NULL, after, 1);
+    mph=create_mplexpholder(mplex, NULL, &ap);
     
-    if(mph!=NULL){
-        mph->szplcy=SIZEPOLICY_FULL_BOUNDS;
+    if(mph!=NULL)
         mph->initial=TRUE;
-    }
-        
+    
     return (WPHolder*)mph;
 }
 
@@ -1202,11 +1290,12 @@ WPHolder *mplex_prepare_manage(WMPlex *mplex, const WClientWin *cwin,
 
 void mplex_managed_remove(WMPlex *mplex, WRegion *sub)
 {
-    bool l2=FALSE;
-    bool sw=FALSE;
+    bool mx=FALSE, hadfocus=FALSE, mcf;
     WRegion *stdisp=(WRegion*)(mplex->stdispwatch.obj);
-    WLListNode *node, *next=NULL;
+    WStacking *node, *next=NULL;
  
+    mcf=region_may_control_focus((WRegion*)mplex);
+    
     if(stdisp!=NULL){
         if(CAN_MANAGE_STDISP(sub) && 
            mgr_within_mplex(mplex, stdisp)==sub){
@@ -1215,71 +1304,75 @@ void mplex_managed_remove(WMPlex *mplex, WRegion *sub)
         }
     }
     
-    region_unset_manager(sub, (WRegion*)mplex);
-
-    node=llist_find_on(mplex->l2_list, sub);
-    if(node!=NULL){
-        l2=TRUE;
-        
-        mplex_move_phs_before(mplex, node);
-        llist_unlink(&(mplex->l2_list), node);
-
-        assert(node!=mplex->l1_current);
-    }else{
-        node=llist_find_on(mplex->l1_list, sub);
-        if(node==NULL)
-            return;
-        
-        if(mplex->l1_current==node){
-            mplex->l1_current=NULL;
-            sw=TRUE;
-            next=LIST_PREV(mplex->l1_list, node, llist_next, llist_prev);
-            if(next==NULL){
-                next=LIST_NEXT(mplex->l1_list, node, llist_next, llist_prev);
-                if(next==node)
-                    next=NULL;
+    node=mplex_find_stacking(mplex, sub);
+    
+    if(node==NULL)
+        return;
+    
+    hadfocus=(mplex_current_node(mplex)==node);
+    
+    if(node->lnode!=NULL){
+        if(mplex->mx_current==node->lnode){
+            WLListNode *lnext;
+            
+            mplex->mx_current=NULL;
+            lnext=LIST_PREV(mplex->mx_list, node->lnode, next, prev);
+            if(lnext==NULL){
+                lnext=LIST_NEXT(mplex->mx_list, node->lnode, next, prev);
+                if(lnext==node->lnode)
+                    lnext=NULL;
             }
+            if(lnext!=NULL)
+                next=lnext->st;
         }
         
-        mplex_move_phs_before(mplex, node);
-        llist_unlink(&(mplex->l1_list), node);
-    }
+        mplex_move_phs_before(mplex, node->lnode);
+        llist_unlink(&(mplex->mx_list), node->lnode);
+        mplex->mx_count--;
 
+        free(node->lnode);
+        node->lnode=NULL;
+        mx=TRUE;
+    }
+        
     mplex_unstack(mplex, node);
+    
+    region_unset_manager(sub, (WRegion*)mplex);
+    
+    UNLINK_ITEM(mplex->mgd, node, mgr_next, mgr_prev);
     
     free(node);
     
     if(OBJ_IS_BEING_DESTROYED(mplex))
         return;
     
-    if(next!=NULL && sw)
-        mplex_do_node_goto_sw(mplex, next, FALSE);
-    else if(l2 && region_may_control_focus((WRegion*)mplex))
-        region_warp((WRegion*)mplex);
-    
-    if(!l2)
-        mplex_managed_changed(mplex, MPLEX_CHANGE_REMOVE, sw, sub);
+    if(next!=NULL){
+        if(hadfocus)
+            mplex_do_node_goto_sw(mplex, next, FALSE);
+        else
+            mplex_do_node_display(mplex, next, FALSE);
+    }else if(hadfocus && mcf){
+        mplex_refocus(mplex, TRUE);
+    }
+
+    if(mx)
+        mplex_managed_changed(mplex, MPLEX_CHANGE_REMOVE, next!=NULL, sub);
 }
 
 
 bool mplex_rescue_clientwins(WMPlex *mplex, WPHolder *ph)
 {
-    bool ret1, ret2, ret3;
-    WLListIterTmp tmp;
+    bool ret1, ret2;
+    WMPlexIterTmp tmp;
     
-    llist_iter_init(&tmp, mplex->l1_list);
+    mplex_iter_init(&tmp, mplex);
     ret1=region_rescue_some_clientwins((WRegion*)mplex, ph,
-                                       (WRegionIterator*)llist_iter_regions,
-                                       &tmp);
-
-    llist_iter_init(&tmp, mplex->l2_list);
-    ret2=region_rescue_some_clientwins((WRegion*)mplex, ph,
-                                       (WRegionIterator*)llist_iter_regions,
+                                       (WRegionIterator*)mplex_iter,
                                        &tmp);
     
-    ret3=region_rescue_child_clientwins((WRegion*)mplex, ph);
+    ret2=region_rescue_child_clientwins((WRegion*)mplex, ph);
     
-    return (ret1 && ret2 && ret3);
+    return (ret1 && ret2);
 }
 
 
@@ -1615,10 +1708,40 @@ void mplex_call_changed_hook(WMPlex *mplex, WHook *hook,
 /*{{{ Save/load */
 
 
+static void save_node(WMPlex *mplex, ExtlTab subs, int *n, 
+                      WStacking *node, bool unnumbered)
+{
+    ExtlTab st, g;
+    
+    st=region_get_configuration(node->reg);
+    
+    if(st!=extl_table_none()){
+        /*"TODO: better switchto saving? */
+        if(mplex->mx_current!=NULL && node==mplex->mx_current->st)
+            extl_table_sets_b(st, "switchto", TRUE);
+        extl_table_sets_i(st, "sizepolicy", node->szplcy);
+        extl_table_sets_i(st, "level", node->level);
+        g=extl_table_from_rectangle(&REGION_GEOM(node->reg));
+        extl_table_sets_t(st, "geom", g);
+        extl_unref_table(g);
+        if(STACKING_IS_HIDDEN(node))
+            extl_table_sets_b(st, "hidden", TRUE);
+        if(unnumbered)
+            extl_table_sets_b(st, "unnumbered", TRUE);
+        
+        extl_table_seti_t(subs, ++(*n), st);
+        extl_unref_table(st);
+    }
+}
+
+
 ExtlTab mplex_get_configuration(WMPlex *mplex)
 {
-    WLListNode *node;
-    ExtlTab tab, subs, stdisptab, g;
+    ExtlTab tab, subs, stdisptab;
+    WMPlexIterTmp tmp;
+    WLListIterTmp ltmp;
+    WLListNode *lnode;
+    WStacking *node;
     int n=0;
     
     tab=region_get_base_configuration((WRegion*)mplex);
@@ -1626,41 +1749,16 @@ ExtlTab mplex_get_configuration(WMPlex *mplex)
     subs=extl_create_table();
     extl_table_sets_t(tab, "subs", subs);
     
-    FOR_ALL_NODES_ON_LLIST(node, mplex->l1_list){
-        ExtlTab st=region_get_configuration(node->reg);
-        if(st!=extl_table_none()){
-            if(node==mplex->l1_current)
-                extl_table_sets_b(st, "switchto", TRUE);
-            extl_table_seti_t(subs, ++n, st);
-            extl_table_sets_i(st, "sizepolicy", node->szplcy);
-            extl_unref_table(st);
-        }
+    /* First the numbered/mutually exclusive nodes */
+    FOR_ALL_NODES_ON_LLIST(lnode, mplex->mx_list, ltmp){
+        save_node(mplex, subs, &n, lnode->st, FALSE);
     }
-    
-    FOR_ALL_NODES_ON_LLIST(node, mplex->l2_list){
-        ExtlTab st;
-        
-        /* Don't save menus, queries and such even if they'd support it. 
-        if(node->flags&LLIST_L2_MODAL)
-            continue;*/
-        
-        st=region_get_configuration(node->reg);
-        if(st!=extl_table_none()){
-            extl_table_sets_i(st, "layer", 2);
-            extl_table_sets_i(st, "list", 2);
-            extl_table_sets_i(st, "sizepolicy", node->szplcy);
-            if(LLIST_IS_HIDDEN(node))
-                extl_table_sets_b(st, "hidden", TRUE);
-            if(node->llist_l2_modal)
-                extl_table_sets_b(st, "modal", TRUE);
-            g=extl_table_from_rectangle(&REGION_GEOM(node->reg));
-            extl_table_sets_t(st, "geom", g);
-            extl_unref_table(g);
-            extl_table_seti_t(subs, ++n, st);
-            extl_unref_table(st);
-        }
+
+    FOR_ALL_NODES_IN_MPLEX(mplex, node, tmp){
+        if(node->lnode==NULL)
+            save_node(mplex, subs, &n, node, TRUE);
     }
-    
+
     extl_unref_table(subs);
     
     /*stdisptab=mplex_do_get_stdisp_extl(mplex, TRUE);
@@ -1673,14 +1771,13 @@ ExtlTab mplex_get_configuration(WMPlex *mplex)
 }
 
 
-static int tmp_layer=0;
 static WMPlex *tmp_mplex=NULL;
-
+static WMPlexAttachParams *tmp_par=NULL;
 
 static WPHolder *pholder_callback()
 {
     assert(tmp_mplex!=NULL);
-    return (WPHolder*)mplex_last_place_holder(tmp_mplex, tmp_layer);
+    return (WPHolder*)create_mplexpholder(tmp_mplex, NULL, tmp_par);
 }
 
 
@@ -1706,8 +1803,8 @@ void mplex_load_contents(WMPlex *mplex, ExtlTab tab)
                 
                 par.flags|=MPLEX_ATTACH_INDEX;
                 par.index=LLIST_INDEX_LAST;
-
-                tmp_layer=(par.flags&MPLEX_ATTACH_L2 ? 2 : 1);
+                
+                tmp_par=&par;
                 tmp_mplex=mplex;
                 
                 ioncore_set_sm_pholder_callback(pholder_callback);

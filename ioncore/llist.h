@@ -19,38 +19,27 @@
 #include "extlconv.h"
 #include "stacking.h"
 
-#define LLIST_HIDDEN       0x0001
-#define LLIST_L2           0x0004
-#define LLIST_L2_MODAL 0x0008
+
+DECLSTRUCT(WLListNode){
+    WLListNode *next, *prev;
+    WMPlexPHolder *phs;
+    WStacking *st;
+};
 
 typedef WLListNode *WLListIterTmp;
 
-#define LLIST_REG(NODE) ((NODE)!=NULL ? (NODE)->reg : NULL)
-#define LLIST_LAYER(NODE) ((NODE)->llist_l2 ? 2 : 1)
-#define LLIST_IS_L2(NODE) ((NODE)->llist_l2)
-#define LLIST_IS_HIDDEN(NODE) ((NODE)->llist_hidden)
 
-#define FOR_ALL_NODES_ON_LLIST(NODE, LL) \
-    LIST_FOR_ALL(LL, NODE, llist_next, llist_prev)
-
-#define FOR_ALL_NODES_ON_LLIST_REV(NODE, LL) \
-    LIST_FOR_ALL_REV(LL, NODE, llist_next, llist_prev)
-
-#define FOR_ALL_NODES_ON_LLIST_W_NEXT(NODE, LL, TMP) \
+#define FOR_ALL_NODES_ON_LLIST(NODE, LL, TMP) \
     FOR_ALL_ITER(llist_iter_init, llist_iter, NODE, LL, &(TMP))
 
-#define FOR_ALL_REGIONS_ON_LLIST(REG, LL, TMP) \
-    FOR_ALL_ITER(llist_iter_init, llist_iter_regions, REG, LL, &(TMP))
+#define FOR_ALL_REGIONS_ON_LLIST(NODE, LL, TMP) \
+    FOR_ALL_ITER(llist_iter_init, llist_iter_regions, NODE, LL, &(TMP))
 
 
 extern void llist_iter_init(WLListIterTmp *tmp, WLListNode *llist);
 extern WLListNode *llist_iter(WLListIterTmp *tmp);
 extern WRegion *llist_iter_regions(WLListIterTmp *tmp);
-extern WLListNode *llist_find_on(WLListNode *list, WRegion *reg);
-extern bool llist_is_on(WLListNode *list, WRegion *reg);
-extern bool llist_is_node_on(WLListNode *list, WLListNode *node);
 extern WLListNode *llist_nth_node(WLListNode *list, uint n);
-extern WRegion *llist_nth_region(WLListNode *list, uint n);
 extern ExtlTab llist_to_table(WLListNode *list);
 extern void llist_link_after(WLListNode **list, 
                              WLListNode *after, WLListNode *node);
@@ -60,7 +49,7 @@ extern WLListNode *llist_index_to_after(WLListNode *list,
                                         int index);
 extern void llist_unlink(WLListNode **list, WLListNode *node);
 
-#define LLIST_INDEX_AFTER_CURRENT (INT_MIN)
 #define LLIST_INDEX_LAST (-1)
+#define LLIST_INDEX_AFTER_CURRENT (-2)
 
 #endif /* ION_IONCORE_LLIST_H */

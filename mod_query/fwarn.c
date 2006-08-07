@@ -55,8 +55,8 @@ WMessage *mod_query_message(WMPlex *mplex, const char *p)
         return NULL;
     
     par.flags=(MPLEX_ATTACH_SWITCHTO|
-               MPLEX_ATTACH_L2|
-               MPLEX_ATTACH_L2_MODAL|
+               MPLEX_ATTACH_MODAL|
+               MPLEX_ATTACH_UNNUMBERED|
                MPLEX_ATTACH_SIZEPOLICY);
     par.szplcy=SIZEPOLICY_FULL_BOUNDS;
 

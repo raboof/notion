@@ -34,6 +34,7 @@
 #include "extlconv.h"
 #include "llist.h"
 #include "group-ws.h"
+#include "mplex.h"
 
 
 WHook *screen_managed_changed_hook=NULL;
@@ -154,7 +155,7 @@ void screen_managed_geom(WScreen *scr, WRectangle *geom)
 
 static bool screen_handle_drop(WScreen *scr, int x, int y, WRegion *dropped)
 {
-    WRegion *curr=mplex_l1_current(&(scr->mplex));
+    WRegion *curr=mplex_mx_current(&(scr->mplex));
 
     /* This code should handle dropping tabs on floating workspaces. */
     if(curr && HAS_DYN(curr, region_handle_drop)){
@@ -200,7 +201,7 @@ static void screen_managed_changed(WScreen *scr, int mode, bool sw,
     if(ioncore_g.opmode==IONCORE_OPMODE_DEINIT)
         return;
     
-    reg=mplex_l1_current(&(scr->mplex));
+    reg=mplex_mx_current(&(scr->mplex));
 
     if(sw && scr->atom_workspace!=None){
         if(reg!=NULL)
@@ -298,16 +299,11 @@ static char *addnot(char *str, WRegion *reg)
 
 static char *screen_managed_activity(WScreen *scr)
 {
-    WLListIterTmp tmp;
     char *notstr=NULL;
+    WMPlexIterTmp tmp;
     WRegion *reg;
     
-    FOR_ALL_REGIONS_ON_LLIST(reg, scr->mplex.l1_list, tmp){
-        if(region_is_activity_r(reg) && !REGION_IS_MAPPED(reg))
-            notstr=addnot(notstr, reg);
-    }
-
-    FOR_ALL_REGIONS_ON_LLIST(reg, scr->mplex.l2_list, tmp){
+    FOR_ALL_MANAGED_BY_MPLEX(&scr->mplex, reg, tmp){
         if(region_is_activity_r(reg) && !REGION_IS_MAPPED(reg))
             notstr=addnot(notstr, reg);
     }
@@ -453,20 +449,21 @@ int screen_id(WScreen *scr)
 
 static bool screen_managed_may_destroy(WScreen *scr, WRegion *reg)
 {
-    WLListNode *node;
-    bool onl1list=FALSE;
+    bool onmxlist=FALSE;
+    WLListNode *lnode;
+    WLListIterTmp tmp;
 
     if(OBJ_IS(reg, WClientWin))
         return TRUE;
     
-    FOR_ALL_NODES_ON_LLIST(node, scr->mplex.l1_list){
-        if(node->reg==reg)
-            onl1list=TRUE;
+    FOR_ALL_NODES_ON_LLIST(lnode, scr->mplex.mx_list, tmp){
+        if(lnode->st->reg==reg)
+            onmxlist=TRUE;
         else /*if(OBJ_IS(node->reg, WGenWS))*/
             return TRUE;
     }
     
-    if(!onl1list)
+    if(!onmxlist)
         return TRUE;
     
     warn(TR("Only workspace may not be destroyed."));
@@ -520,41 +517,7 @@ err:
 
 WPHolder *screen_get_rescue_pholder_for(WScreen *scr, WRegion *mgd)
 {
-    WPHolder *ph;
-    WLListNode *node, *node2;
-
-    node=mplex_find_node(&(scr->mplex), mgd);
-
-    if(node==NULL){
-        node=scr->mplex.l1_current;
-        if(node==NULL)
-            node=scr->mplex.l1_list;
-        if(node!=NULL){
-            ph=region_get_rescue_pholder_for(node->reg, mgd);
-            if(ph!=NULL)
-                return ph;
-        }
-    }
-            
-    if(node!=NULL){
-        node2=node->llist_prev;
-        for(node2=node->llist_prev; 
-            node2->llist_next!=NULL; 
-            node2=node2->llist_prev){
-            
-            ph=region_get_rescue_pholder_for(node2->reg, mgd);
-            if(ph!=NULL)
-                return ph;
-        }
-        for(node2=node->llist_next; 
-            node2!=NULL; 
-            node2=node->llist_next){
-            
-            ph=region_get_rescue_pholder_for(node2->reg, mgd);
-            if(ph!=NULL)
-                return ph;
-        }
-    }
+#warning "TODO: better special case handling for groups"
     
     return (WPHolder*)mplex_get_rescue_pholder_for(&(scr->mplex), mgd);
 }

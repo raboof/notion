@@ -993,10 +993,10 @@ WFrame *tiling_split_at(WTiling *ws, WFrame *frame, const char *dirstr,
     if(newframe==NULL)
         return NULL;
 
-    curr=mplex_l1_current(&(frame->mplex));
+    curr=mplex_mx_current(&(frame->mplex));
     
     if(attach_current && curr!=NULL){
-        if(mplex_lcount(&(frame->mplex), 1)<=1)
+        if(mplex_mx_count(&(frame->mplex))<=1)
             frame->flags&=~FRAME_DEST_EMPTY;
         mplex_attach_simple(&(newframe->mplex), curr, MPLEX_ATTACH_SWITCHTO);
     }
