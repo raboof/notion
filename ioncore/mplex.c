@@ -180,18 +180,17 @@ bool mplex_may_destroy(WMPlex *mplex)
 
 WStacking *mplex_find_stacking(WMPlex *mplex, WRegion *reg)
 {
-    WMPlexIterTmp tmp;
     WStacking *st;
-
-    if(reg==NULL)
+    
+    /* Some routines that call us expect us to this check. */
+    if(reg==NULL || REGION_MANAGER(reg)!=(WRegion*)mplex)
         return NULL;
     
-    FOR_ALL_NODES_IN_MPLEX(mplex, st, tmp){
-        if(st->reg==reg)
-            return st;
-    }
+    st=ioncore_find_stacking(reg);
+
+    assert(st==NULL || st->mgr_prev!=NULL);
     
-    return NULL;
+    return st;
 }
 
 
@@ -564,12 +563,11 @@ static WRegion *mplex_do_to_focus(WMPlex *mplex, WStacking *to_try)
 
 WRegion *mplex_to_focus(WMPlex *mplex)
 {
-    WStacking *stacking=mplex_get_stacking(mplex);
     WRegion *reg=REGION_ACTIVE_SUB(mplex);
     WStacking *to_try=NULL;
     
-    if(reg!=NULL && stacking!=NULL)
-        to_try=stacking_find(stacking, reg);
+    if(reg!=NULL)
+        to_try=ioncore_find_stacking(reg);
 
     return mplex_do_to_focus(mplex, to_try);
 }
@@ -1009,7 +1007,7 @@ WStacking *mplex_do_attach_after(WMPlex *mplex,
     if(!(param->flags&MPLEX_ATTACH_UNNUMBERED)){
         lnode=ALLOC(WLListNode);
         if(lnode==NULL){
-            free(node);
+            stacking_free(node);
             return NULL;
         }
         lnode->next=NULL;
@@ -1025,13 +1023,17 @@ WStacking *mplex_do_attach_after(WMPlex *mplex,
     reg=hnd((WWindow*)mplex, &fp, hnd_param);
     
     if(reg==NULL){
-        free(node);
+        stacking_free(node);
         if(lnode!=NULL)
             free(lnode);
         return NULL;
     }
     
-    node->reg=reg;
+    if(!stacking_assoc(node, reg)){
+        #warning "TODO: What to do?"
+        node->reg=reg;
+    }
+
     node->hidden=TRUE;
     node->szplcy=szplcy;
     node->level=level;
@@ -1349,7 +1351,8 @@ void mplex_managed_remove(WMPlex *mplex, WRegion *sub)
     
     UNLINK_ITEM(mplex->mgd, node, mgr_next, mgr_prev);
     
-    free(node);
+    stacking_unassoc(node);
+    stacking_free(node);
     
     if(OBJ_IS_BEING_DESTROYED(mplex))
         return;

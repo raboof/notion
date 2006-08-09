@@ -9,6 +9,8 @@
  * (at your option) any later version.
  */
 
+#include <libtu/rb.h>
+
 #include "common.h"
 #include "region.h"
 #include "stacking.h"
@@ -36,7 +38,77 @@ WStacking *create_stacking()
 }
 
 
+void stacking_free(WStacking *st)
+{
+    assert(st->mgr_next==NULL && st->mgr_prev==NULL &&
+           st->next==NULL && st->prev==NULL &&
+           st->above==NULL &&
+           st->lnode==NULL &&
+           st->reg==NULL);
+    
+    free(st);
+}
+
+
 /*}}}*/
+
+
+/*{{{ Lookup */
+
+
+static Rb_node stacking_of_reg=NULL;
+
+
+WStacking *ioncore_find_stacking(WRegion *reg)
+{
+    Rb_node node=NULL;
+    int found=0;
+    
+    if(stacking_of_reg!=NULL)
+        node=rb_find_pkey_n(stacking_of_reg, reg, &found);
+    
+    return (found ? (WStacking*)node->v.val : NULL);
+}
+
+
+void stacking_unassoc(WStacking *st)
+{
+    Rb_node node=NULL;
+    int found=0;
+    
+    if(st->reg==NULL)
+        return;
+    
+    if(stacking_of_reg!=NULL)
+        node=rb_find_pkey_n(stacking_of_reg, st->reg, &found);
+    
+    if(node!=NULL)
+        rb_delete_node(node);
+    
+    st->reg=NULL;
+}
+
+
+bool stacking_assoc(WStacking *st, WRegion *reg)
+{
+    assert(st->reg==NULL);
+    
+    if(stacking_of_reg==NULL){
+        stacking_of_reg=make_rb();
+        if(stacking_of_reg==NULL)
+            return FALSE;
+    }
+
+    if(rb_insertp(stacking_of_reg, reg, st)==NULL)
+        return FALSE;
+    
+    st->reg=reg;
+    return TRUE;
+}
+
+
+/*}}}*/
+
 
 
 /*{{{ List processing */
@@ -89,30 +161,6 @@ static WStacking *link_list_after(WStacking *l1,
     l2->prev=i1;
     
     return l1;
-}
-
-
-WStacking *stacking_find(WStacking *st, WRegion *reg)
-{
-    while(st!=NULL){
-        if(st->reg==reg)
-            return st;
-        st=st->next;
-    }
-    
-    return NULL;
-}
-
-
-WStacking *stacking_find_mgr(WStacking *st, WRegion *reg)
-{
-    while(st!=NULL){
-        if(st->reg==reg)
-            return st;
-        st=st->mgr_next;
-    }
-    
-    return NULL;
 }
 
 
@@ -446,8 +494,10 @@ void stacking_do_raise(WStacking **stacking, WRegion *reg, Window fb_win,
 {
     WStacking *regst, *tmp;
     
-    regst=stacking_find(*stacking, reg);
-    
+    regst=ioncore_find_stacking(reg);
+
+#warning "TODO: check that on same list? (And elsewhere too?)"
+
     if(regst==NULL)
         return;
     
@@ -464,7 +514,7 @@ void stacking_do_lower(WStacking **stacking, WRegion *reg, Window fb_win,
 {
     WStacking *regst, *tmp;
     
-    regst=stacking_find(*stacking, reg);
+    regst=ioncore_find_stacking(reg);
     
     if(regst==NULL)
         return;

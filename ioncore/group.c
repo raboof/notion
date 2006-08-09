@@ -342,7 +342,8 @@ void group_managed_remove(WGroup *ws, WRegion *reg)
             ws->current_managed=NULL;
         }
         
-        free(st);
+        stacking_unassoc(st);
+        stacking_free(st);
     }
     
     region_unset_manager(reg, (WRegion*)ws);
@@ -502,7 +503,11 @@ WStacking *group_do_add_managed_default(WGroup *ws, WRegion *reg, int level,
     if(st==NULL)
         return NULL;
     
-    st->reg=reg;
+    if(!stacking_assoc(st, reg)){
+        stacking_free(st);
+        return  NULL;
+    }
+    
     st->level=level;
     st->szplcy=szplcy;
 
@@ -958,7 +963,12 @@ void group_stacking(WGroup *ws, Window *bottomret, Window *topret)
 
 WStacking *group_find_stacking(WGroup *ws, WRegion *r)
 {
-    return stacking_find_mgr(ws->managed_list, r);
+    WStacking *st;
+    
+    if(r==NULL || REGION_MANAGER(r)!=(WRegion*)ws)
+        return NULL;
+    
+    return ioncore_find_stacking(r);
 }
 
 

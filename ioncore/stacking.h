@@ -47,6 +47,7 @@ typedef bool WStackingFilter(WStacking *st, void *data);
 
 
 WStacking *create_stacking();
+void stacking_free(WStacking *st);
 
 
 void stacking_do_raise(WStacking **stacking, WRegion *reg, Window fb_win,
@@ -88,9 +89,6 @@ void stacking_iter_mgr_init(WStackingIterTmp *tmp,
 WRegion *stacking_iter_mgr(WStackingIterTmp *tmp);
 WStacking *stacking_iter_mgr_nodes(WStackingIterTmp *tmp);
 
-WStacking *stacking_find(WStacking *st, WRegion *reg);
-WStacking *stacking_find_mgr(WStacking *st, WRegion *reg);
-
 void stacking_weave(WStacking **stacking, WStacking **np, bool below);
 WStacking *stacking_unweave(WStacking **stacking, 
                             WStackingFilter *filt, void *filt_data);
@@ -99,5 +97,10 @@ WStacking *stacking_find_to_focus(WStacking *stacking, WStacking *to_try,
                                   WStackingFilter *include_filt, 
                                   WStackingFilter *approve_filt, 
                                   void *filt_data);
+
+
+WStacking *ioncore_find_stacking(WRegion *reg);
+void stacking_unassoc(WStacking *stacking);
+bool stacking_assoc(WStacking *stacking, WRegion *reg);
 
 #endif /* ION_IONCORE_STACKING_H */
