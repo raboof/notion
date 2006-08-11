@@ -97,14 +97,13 @@ bool de_get_colour(WRootWin *rootwin, DEColour *ret,
             warn(TR("Unable to allocate colour \"%s\"."), name);
 
         free(name);
-    }
-    
-    if(!ok && based_on!=NULL){
+    }else if(based_on!=NULL){
         return de_get_colour(rootwin, ret, based_on->data_table,
                              based_on->based_on, what, substitute);
-    }else if(!ok){
-        return de_duplicate_colour(rootwin, substitute, ret);
     }
+    
+    if(!ok)
+        ok=de_duplicate_colour(rootwin, substitute, ret);
     
     return ok;
 }
