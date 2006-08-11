@@ -1023,9 +1023,11 @@ WStacking *mplex_do_attach_after(WMPlex *mplex,
     reg=hnd((WWindow*)mplex, &fp, hnd_param);
     
     if(reg==NULL){
-        stacking_free(node);
-        if(lnode!=NULL)
+        if(lnode!=NULL){
+            node->lnode=NULL;
             free(lnode);
+        }
+        stacking_free(node);
         return NULL;
     }
     
