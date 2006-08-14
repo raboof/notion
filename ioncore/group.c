@@ -1178,22 +1178,24 @@ static ExtlTab group_get_configuration(WGroup *ws)
         
         subtab=region_get_configuration(st->reg);
 
-        extl_table_sets_i(subtab, "sizepolicy", st->szplcy);
-        extl_table_sets_i(subtab, "level", st->level);
+        if(subtab!=extl_table_none()){
+            extl_table_sets_i(subtab, "sizepolicy", st->szplcy);
+            extl_table_sets_i(subtab, "level", st->level);
         
-        tmpg=REGION_GEOM(st->reg);
-        tmpg.x-=REGION_GEOM(ws).x;
-        tmpg.y-=REGION_GEOM(ws).y;
+            tmpg=REGION_GEOM(st->reg);
+            tmpg.x-=REGION_GEOM(ws).x;
+            tmpg.y-=REGION_GEOM(ws).y;
+            
+            g=extl_table_from_rectangle(&tmpg);
+            extl_table_sets_t(subtab, "geom", g);
+            extl_unref_table(g);
+            
+            if(ws->bottom==st)
+                extl_table_sets_b(subtab, "bottom", TRUE);
         
-        g=extl_table_from_rectangle(&tmpg);
-        extl_table_sets_t(subtab, "geom", g);
-        extl_unref_table(g);
-        
-        if(ws->bottom==st)
-            extl_table_sets_b(subtab, "bottom", TRUE);
-        
-        extl_table_seti_t(mgds, ++n, subtab);
-        extl_unref_table(subtab);
+            extl_table_seti_t(mgds, ++n, subtab);
+            extl_unref_table(subtab);
+        }
     }
     
     extl_unref_table(mgds);
