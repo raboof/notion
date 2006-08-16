@@ -44,6 +44,7 @@ DECLSTRUCT(WStacking){
 
 
 typedef bool WStackingFilter(WStacking *st, void *data);
+typedef WStacking *WStackingIterator(void *data);
 
 
 WStacking *create_stacking();
@@ -97,6 +98,9 @@ WStacking *stacking_find_to_focus(WStacking *stacking, WStacking *to_try,
                                   WStackingFilter *include_filt, 
                                   WStackingFilter *approve_filt, 
                                   void *filt_data);
+uint stacking_min_level(WStacking *stacking, 
+                        WStackingFilter *include_filt, 
+                        void *filt_data);
 
 
 WStacking *ioncore_find_stacking(WRegion *reg);

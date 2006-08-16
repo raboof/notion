@@ -27,25 +27,26 @@ INTRCLASS(WSplitRegion);
 INTRCLASS(WSplitST);
 
 
-enum WSplitDir{
+typedef enum{
     SPLIT_HORIZONTAL,
     SPLIT_VERTICAL,
     SPLIT_ANY, /* Should only be used as parameter to *_nextto */
     SPLIT_NONE /* Should only be used internally */
-};
+} WSplitDir;
 
 
-enum WPrimaryNode{
+typedef enum{
     PRIMN_ANY,
     PRIMN_TL,
-    PRIMN_BR
-};
+    PRIMN_BR,
+    PRIMN_NONE
+} WPrimn;
 
 
-enum WSplitCurrent{
+typedef enum {
     SPLIT_CURRENT_TL,
     SPLIT_CURRENT_BR
-};
+} WSplitCurrent;
 
 
 DECLCLASS(WSplit){
@@ -107,6 +108,9 @@ extern int split_other_pos(WSplit *split, int dir);
 extern WSplitRegion *splittree_node_of(WRegion *reg);
 extern bool splittree_set_node_of(WRegion *reg, WSplitRegion *split);
 
+extern WPrimn primn_invert(WPrimn primn);
+extern WPrimn primn_none2any(WPrimn primn);
+
 /* Init/deinit */
 
 extern bool split_init(WSplit *split, const WRectangle *geom);
@@ -135,11 +139,11 @@ extern void splitst_deinit(WSplitST *split);
 DYNFUN void split_update_bounds(WSplit *node, bool recursive);
 extern void splitsplit_update_geom_from_children(WSplitSplit *node);
 DYNFUN void split_do_resize(WSplit *node, const WRectangle *ng, 
-                            int hprimn, int vprimn, bool transpose);
+                            WPrimn hprimn, WPrimn vprimn, bool transpose);
 extern void splitsplit_do_resize(WSplitSplit *node, const WRectangle *ng, 
-                                 int hprimn, int vprimn, bool transpose);
+                                 WPrimn hprimn, WPrimn vprimn, bool transpose);
 extern void split_resize(WSplit *node, const WRectangle *ng, 
-                         int hprimn, int vprimn);
+                         WPrimn hprimn, WPrimn vprimn);
 DYNFUN void splitinner_do_rqsize(WSplitInner *p, WSplit *node, 
                                  RootwardAmount *ha, RootwardAmount *va, 
                                  WRectangle *rg, bool tryonly);
@@ -153,7 +157,7 @@ extern void splittree_rqgeom(WSplit *node, int flags,
 
 DYNFUN void splitinner_replace(WSplitInner *node, WSplit *child, WSplit *what);
 extern WSplitRegion *splittree_split(WSplit *node, int dir, 
-                                     int primn, int minsize, 
+                                     WPrimn primn, int minsize, 
                                      WRegionSimpleCreateFn *fn,
                                      WWindow *parent);
 
@@ -168,14 +172,17 @@ extern void splittree_remove(WSplit *node, bool reclaim_space);
 /* Tree traversal */
 
 extern WSplit *split_find_root(WSplit *split);
-DYNFUN WSplit *split_current_todir(WSplit *node, int dir, int primn,
+DYNFUN WSplit *split_current_todir(WSplit *node, 
+                                   WPrimn hprimn, WPrimn vprimn,
                                    WSplitFilter *filter);
 DYNFUN WSplit *splitinner_nextto(WSplitInner *node, WSplit *child,
-                                 int dir, int primn, WSplitFilter *filter);
+                                 WPrimn hprimn, WPrimn vprimn, 
+                                 WSplitFilter *filter);
 DYNFUN WSplit *splitinner_current(WSplitInner *node);
 DYNFUN void splitinner_mark_current(WSplitInner *split, WSplit *child);
 DYNFUN void splitinner_forall(WSplitInner *node, WSplitFn *fn);
-extern WSplit *split_nextto(WSplit *node, int dir, int primn, 
+extern WSplit *split_nextto(WSplit *node,
+                            WPrimn hprimn, WPrimn vprimn,
                             WSplitFilter *filter);
 
 /* X window handling */

@@ -171,6 +171,28 @@ bool splittree_set_node_of(WRegion *reg, WSplitRegion *split)
 /*}}}*/
 
 
+/*{{{ Primn */
+
+
+WPrimn primn_invert(WPrimn primn)
+{
+    return (primn==PRIMN_TL
+            ? PRIMN_BR
+            : (primn==PRIMN_BR
+               ? PRIMN_TL
+               : primn));
+}
+
+
+WPrimn primn_none2any(WPrimn primn)
+{
+    return (primn==PRIMN_NONE ? PRIMN_ANY : primn);
+}
+
+
+/*}}}*/
+
+
 /*{{{ Create */
 
 
@@ -515,14 +537,16 @@ static WSplit *move_stdisp_out_of_way(WSplit *node)
 
 
 static void split_do_resize_default(WSplit *node, const WRectangle *ng, 
-                                    int hprimn, int vprimn, bool transpose)
+                                    WPrimn hprimn, WPrimn vprimn, 
+                                    bool transpose)
 {
     node->geom=*ng;
 }
 
 
 static void splitregion_do_resize(WSplitRegion *node, const WRectangle *ng, 
-                                  int hprimn, int vprimn, bool transpose)
+                                  WPrimn hprimn, WPrimn vprimn, 
+                                  bool transpose)
 {
     assert(node->reg!=NULL);
     region_fit(node->reg, ng, REGION_FIT_EXACT);
@@ -532,7 +556,8 @@ static void splitregion_do_resize(WSplitRegion *node, const WRectangle *ng,
 
 
 static void splitst_do_resize(WSplitST *node, const WRectangle *ng, 
-                              int hprimn, int vprimn, bool transpose)
+                              WPrimn hprimn, WPrimn vprimn, 
+                              bool transpose)
 {
     saw_stdisp=node;
 
@@ -602,7 +627,7 @@ static void get_minmaxunused(WSplit *node, int dir,
 
 
 void splitsplit_do_resize(WSplitSplit *node, const WRectangle *ng, 
-                          int hprimn, int vprimn, bool transpose)
+                          WPrimn hprimn, WPrimn vprimn, bool transpose)
 {
     assert(ng->w>=0 && ng->h>=0);
     assert(node->tl!=NULL && node->br!=NULL);
@@ -682,13 +707,14 @@ void splitsplit_do_resize(WSplitSplit *node, const WRectangle *ng,
 
 
 void split_do_resize(WSplit *node, const WRectangle *ng, 
-                     int hprimn, int vprimn, bool transpose)
+                     WPrimn hprimn, WPrimn vprimn, bool transpose)
 {
     CALL_DYN(split_do_resize, node, (node, ng, hprimn, vprimn, transpose));
 }
 
 
-void split_resize(WSplit *node, const WRectangle *ng, int hprimn, int vprimn)
+void split_resize(WSplit *node, const WRectangle *ng, 
+                  WPrimn hprimn, WPrimn vprimn)
 {
     split_update_bounds(node, TRUE);
     splittree_begin_resize();
@@ -741,11 +767,11 @@ static void splitsplit_do_rqsize(WSplitSplit *p, WSplit *node,
                                  RootwardAmount *ha, RootwardAmount *va, 
                                  WRectangle *rg, bool tryonly)
 {
-    int hprimn=PRIMN_ANY, vprimn=PRIMN_ANY;
+    WPrimn hprimn=PRIMN_ANY, vprimn=PRIMN_ANY;
     WRectangle og, pg, ng;
     RootwardAmount *ca;
     WSplit *other;
-    int thisnode;
+    WPrimn thisnode;
     int amount;
     
     assert(!ha->any || ha->tl==0);
@@ -1037,7 +1063,7 @@ void splitinner_replace(WSplitInner *split, WSplit *child, WSplit *what)
 }
 
 
-WSplitRegion *splittree_split(WSplit *node, int dir, int primn,
+WSplitRegion *splittree_split(WSplit *node, int dir, WPrimn primn,
                               int minsize, WRegionSimpleCreateFn *fn, 
                               WWindow *parent)
 {
@@ -1262,7 +1288,8 @@ static bool defaultfilter(WSplit *node)
 }
 
 
-static WSplit *split_current_todir_default(WSplit *node, int dir, int primn, 
+static WSplit *split_current_todir_default(WSplit *node, 
+                                           WPrimn hprimn, WPrimn vprimn,
                                            WSplitFilter *filter)
 {
     if(filter==NULL)
@@ -1272,32 +1299,28 @@ static WSplit *split_current_todir_default(WSplit *node, int dir, int primn,
 }
 
 
-static WSplit *splitsplit_current_todir(WSplitSplit *node, int dir, int primn,
+static WSplit *splitsplit_current_todir(WSplitSplit *node, 
+                                        WPrimn hprimn, WPrimn vprimn,
                                         WSplitFilter *filter)
 {
+    WPrimn primn=(node->dir==SPLIT_HORIZONTAL ? hprimn : vprimn);
     WSplit *first, *second, *ret;
     
-    if(node->dir==dir){
-        if(primn==PRIMN_TL){
-            first=node->tl;
-            second=node->br;
-        }else{
-            first=node->br;
-            second=node->tl;
-        }
+    if(primn==PRIMN_TL ||
+       (primn==PRIMN_ANY && node->current==SPLIT_CURRENT_TL)){
+        first=node->tl;
+        second=node->br;
+    }else if(primn==PRIMN_BR ||
+       (primn==PRIMN_ANY && node->current==SPLIT_CURRENT_BR)){
+        first=node->br;
+        second=node->tl;
     }else{
-        if(node->current==SPLIT_CURRENT_TL){
-            first=node->tl;
-            second=node->br;
-        }else{
-            first=node->br;
-            second=node->tl;
-        }
+        return NULL;
     }
-    
-    ret=split_current_todir(first, dir, primn, filter);
+        
+    ret=split_current_todir(first, hprimn, vprimn, filter);
     if(ret==NULL)
-        ret=split_current_todir(second, dir, primn, filter);
+        ret=split_current_todir(second, hprimn, vprimn, filter);
     if(ret==NULL && filter!=NULL){
         if(filter((WSplit*)node))
             ret=(WSplit*)node;
@@ -1307,27 +1330,41 @@ static WSplit *splitsplit_current_todir(WSplitSplit *node, int dir, int primn,
 }
 
 
-WSplit *split_current_todir(WSplit *node, int dir, int primn,
+WSplit *split_current_todir(WSplit *node, WPrimn hprimn, WPrimn vprimn,
                             WSplitFilter *filter)
 {
     WSplit *ret=NULL;
     CALL_DYN_RET(ret, WSplit*, split_current_todir, node, 
-                 (node, dir, primn, filter));
+                 (node, hprimn, vprimn, filter));
     return ret;
 }
 
 
 WSplit *splitsplit_nextto(WSplitSplit *node, WSplit *child,
-                          int dir, int primn, WSplitFilter *filter)
+                          WPrimn hprimn, WPrimn vprimn, 
+                          WSplitFilter *filter)
 {
-    WSplit *nnode=NULL;
+    WPrimn primn=(node->dir==SPLIT_HORIZONTAL ? hprimn : vprimn);
+    WSplit *split=NULL, *nnode=NULL;
     
-    if(dir==SPLIT_ANY || dir==node->dir){
-        /* PRIMN_ANY is ok */
-        if(node->tl==child && primn!=PRIMN_TL)
-            nnode=split_current_todir(node->br, dir, PRIMN_TL, filter);
-        else if(node->br==child && primn!=PRIMN_BR)
-            nnode=split_current_todir(node->tl, dir, PRIMN_BR, filter);
+    if(node->tl==child && (primn==PRIMN_BR || primn==PRIMN_ANY)){
+        split=node->br;
+        primn=PRIMN_TL;
+    }else if(node->br==child && (primn==PRIMN_TL || primn==PRIMN_ANY)){
+        split=node->tl;
+        primn=PRIMN_BR;
+    }
+    
+    if(split!=NULL){
+        if(node->dir==SPLIT_HORIZONTAL){
+            hprimn=primn;
+            vprimn=primn_none2any(vprimn);
+        }else{
+            vprimn=primn;
+            hprimn=primn_none2any(vprimn);
+        }
+        
+        nnode=split_current_todir(split, hprimn, vprimn, filter);
     }
    
     return nnode;
@@ -1335,19 +1372,22 @@ WSplit *splitsplit_nextto(WSplitSplit *node, WSplit *child,
 
 
 WSplit *splitinner_nextto(WSplitInner *node, WSplit *child,
-                          int dir, int primn, WSplitFilter *filter)
+                          WPrimn hprimn, WPrimn vprimn, 
+                          WSplitFilter *filter)
 {
     WSplit *ret=NULL;
     CALL_DYN_RET(ret, WSplit*, splitinner_nextto, node, 
-                 (node, child, dir, primn, filter));
+                 (node, child, hprimn, vprimn, filter));
     return ret;
 }
 
 
-WSplit *split_nextto(WSplit *node, int dir, int primn, WSplitFilter *filter)
+WSplit *split_nextto(WSplit *node, WPrimn hprimn, WPrimn vprimn, 
+                     WSplitFilter *filter)
 {
     while(node->parent!=NULL){
-        WSplit *ret=splitinner_nextto(node->parent, node, dir, primn, filter);
+        WSplit *ret=splitinner_nextto(node->parent, node, 
+                                      hprimn, vprimn, filter);
         if(ret!=NULL)
             return ret;
         node=(WSplit*)node->parent;

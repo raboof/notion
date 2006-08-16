@@ -314,8 +314,8 @@ bool groupws_phattach(WGroupWS *ws,
             /* TODO: should not need to scan for st, as we just 
              * created it
              */
-            st=group_find_stacking(ws, (WRegion*)p->frame);
-            stabove=group_find_stacking(ws, (WRegion*)p->stack_above);
+            st=group_find_stacking(&ws->grp, (WRegion*)p->frame);
+            stabove=group_find_stacking(&ws->grp, (WRegion*)p->stack_above);
             
             if(st!=NULL && stabove!=NULL){
                 st->above=stabove;

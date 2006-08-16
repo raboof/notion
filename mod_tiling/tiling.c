@@ -315,7 +315,7 @@ void tiling_unmanage_stdisp(WTiling *ws, bool permanent, bool nofocus)
            region_may_control_focus((WRegion*)ws)){
             setfocus=TRUE;
             tofocus=(WSplitRegion*)split_nextto((WSplit*)(ws->stdispnode), 
-                                                SPLIT_ANY, PRIMN_ANY,
+                                                PRIMN_ANY, PRIMN_ANY,
                                                 regnodefilter);
         }
         /* Reset node_of info here so tiling_managed_remove will not
@@ -711,8 +711,8 @@ void tiling_managed_remove(WTiling *ws, WRegion *reg)
     WSplitRegion *node=get_node_check(ws, reg);
     WRegion *other;
 
-    other=tiling_do_get_nextto(ws, reg, SPLIT_ANY, PRIMN_ANY, FALSE);
-    
+    other=tiling_do_navi_next(ws, reg, REGION_NAVI_ANY, TRUE, FALSE);
+
     tiling_do_managed_remove(ws, reg);
 
     if(node==(WSplitRegion*)(ws->stdispnode))
@@ -770,12 +770,12 @@ WPHolder *tiling_get_rescue_pholder_for(WTiling *ws, WRegion *mgd)
     
     if(node==NULL){
         if(ws->split_tree!=NULL){
-            split_current_todir(ws->split_tree, SPLIT_ANY, PRIMN_ANY, 
+            split_current_todir(ws->split_tree, PRIMN_ANY, PRIMN_ANY, 
                                 find_ph);
         }
     }else{
         while(node!=NULL){
-            split_nextto(node, SPLIT_ANY, PRIMN_ANY, find_ph);
+            split_nextto(node, PRIMN_ANY, PRIMN_ANY, find_ph);
             if(find_ph_result!=NULL)
                 break;
             node=(WSplit*)node->parent;
@@ -796,69 +796,117 @@ WPHolder *tiling_get_rescue_pholder_for(WTiling *ws, WRegion *mgd)
 /*{{{ Navigation */
 
 
-static void navi_to_dir_primn(WRegionNavi nh, int *dir, int *primn)
+static void navi_to_primn(WRegionNavi nh, WPrimn *hprimn, WPrimn *vprimn, 
+                          WPrimn choice)
 {
+    /* choice should be PRIMN_ANY or PRIMN_NONE */
+    
     switch(nh){
-    case REGION_NAVI_ANY:
-    case REGION_NAVI_FIRST:
-    case REGION_NAVI_LAST:
-        *primn=PRIMN_ANY;
-        *dir=SPLIT_ANY;
+    case REGION_NAVI_BEG:
+        *vprimn=PRIMN_TL;
+        *hprimn=PRIMN_TL;
+        break;
+        
+    case REGION_NAVI_END:
+        *vprimn=PRIMN_BR;
+        *hprimn=PRIMN_BR;
         break;
         
     case REGION_NAVI_LEFT:
-        *primn=PRIMN_TL;
-        *dir=SPLIT_HORIZONTAL;
+        *hprimn=PRIMN_TL;
+        *vprimn=choice;
         break;
         
     case REGION_NAVI_RIGHT:
-        *primn=PRIMN_BR;
-        *dir=SPLIT_HORIZONTAL;
+        *hprimn=PRIMN_BR;
+        *vprimn=choice;
         break;
         
     case REGION_NAVI_TOP:
-        *primn=PRIMN_TL;
-        *dir=SPLIT_VERTICAL;
+        *hprimn=choice;
+        *vprimn=PRIMN_TL;
         break;
         
     case REGION_NAVI_BOTTOM:
-        *primn=PRIMN_BR;
-        *dir=SPLIT_VERTICAL;
+        *hprimn=choice;
+        *vprimn=PRIMN_BR;
+        break;
+        
+    default:
+    case REGION_NAVI_ANY:
+        *hprimn=PRIMN_ANY;
+        *vprimn=PRIMN_ANY;
         break;
     }
 }
-        
 
-static bool get_split_dir_primn(const char *str, int *dir, int *primn)
+
+static WRegion *node_reg(WSplit *node)
 {
-    WRegionNavi nh;
+    WSplitRegion *rnode=OBJ_CAST(node, WSplitRegion);
+    return (rnode!=NULL ? rnode->reg : NULL);
+}
+
     
-    if(!ioncore_string_to_navi(str, &nh))
-        return FALSE;
+WRegion *tiling_do_navi_next(WTiling *ws, WRegion *reg, 
+                             WRegionNavi nh, bool nowrap,
+                             bool any)
+{
+    WSplitFilter *filter=(any ? NULL : nostdispfilter);
+    WPrimn hprimn, vprimn;
+    WRegion *nxt=NULL;
+
+    navi_to_primn(nh, &hprimn, &vprimn, PRIMN_NONE);
     
-    navi_to_dir_primn(nh, dir, primn);
+    if(reg==NULL)
+        reg=tiling_current(ws);
     
-    return TRUE;
+    if(reg!=NULL){
+        WSplitRegion *node=get_node_check(ws, reg);
+        if(node!=NULL){
+            nxt=node_reg(split_nextto((WSplit*)node, hprimn, vprimn, 
+                                      filter));
+        }
+    }
+    
+    if(nxt==NULL && !nowrap){
+        nxt=node_reg(split_current_todir(ws->split_tree, 
+                                         primn_none2any(primn_invert(hprimn)),
+                                         primn_none2any(primn_invert(vprimn)),
+                                         filter));
+    }
+    
+    return nxt;
 }
 
 
-WRegion *tiling_navi_next(WTiling *ws, WRegion *reg, WRegionNavi nh)
+WRegion *tiling_do_navi_first(WTiling *ws, WRegionNavi nh, bool any)
 {
-    int dir, primn;
+    WSplitFilter *filter=(any ? NULL : nostdispfilter);
+    WPrimn hprimn, vprimn;
     
-    navi_to_dir_primn(nh, &dir, &primn);
-    
-    return tiling_do_get_nextto(ws, reg, dir, primn, FALSE);
+    navi_to_primn(nh, &hprimn, &vprimn, PRIMN_ANY);
+
+    return node_reg(split_current_todir(ws->split_tree, 
+                                        hprimn, vprimn, filter));
 }
 
 
-WRegion *tiling_navi_first(WTiling *ws, WRegionNavi nh)
+WRegion *tiling_navi_next(WTiling *ws, WRegion *reg, 
+                          WRegionNavi nh, WRegionNaviData *data)
 {
-    int dir, primn;
+    WRegion *nxt=tiling_do_navi_next(ws, reg, nh, TRUE, FALSE);
     
-    navi_to_dir_primn(nh, &dir, &primn);
+    return region_navi_cont(&ws->reg, nxt, data);
+}
+
+
+WRegion *tiling_navi_first(WTiling *ws, WRegionNavi nh,
+                           WRegionNaviData *data)
+{
+    WRegion *reg=tiling_do_navi_first(ws, nh, FALSE);
     
-    return tiling_do_get_farthest(ws, dir, primn, FALSE);
+    return region_navi_cont(&ws->reg, reg, data);
 }
 
 
@@ -866,6 +914,32 @@ WRegion *tiling_navi_first(WTiling *ws, WRegionNavi nh)
 
 
 /*{{{ Split/unsplit */
+
+
+static bool get_split_dir_primn(const char *str, int *dir, int *primn)
+{
+    WPrimn hprimn, vprimn;
+    WRegionNavi nh;
+
+    if(!ioncore_string_to_navi(str, &nh))
+        return FALSE;
+    
+    navi_to_primn(nh, &hprimn, &vprimn, PRIMN_NONE);
+    
+    if(hprimn==PRIMN_NONE){
+        *dir=SPLIT_VERTICAL;
+        *primn=vprimn;
+    }else if(vprimn==PRIMN_NONE){
+        *dir=SPLIT_HORIZONTAL;
+        *primn=hprimn;
+    }else{
+        warn(TR("Invalid direction"));
+        return FALSE;
+    }
+    
+    return TRUE;
+}
+
 
 static bool get_split_dir_primn_float(const char *str, int *dir, int *primn,
                                       bool *floating)
@@ -949,6 +1023,7 @@ WFrame *tiling_split(WTiling *ws, WSplit *node, const char *dirstr)
 {
     if(!check_node(ws, node))
         return NULL;
+    
     return tiling_do_split(ws, node, dirstr,
                           SPLIT_MINS, SPLIT_MINS);
 }
@@ -1039,8 +1114,8 @@ WRegion *tiling_current(WTiling *ws)
 {
     WSplitRegion *node=NULL;
     if(ws->split_tree!=NULL){
-        node=(WSplitRegion*)split_current_todir(ws->split_tree, SPLIT_ANY,
-                                                PRIMN_ANY, NULL);
+        node=(WSplitRegion*)split_current_todir(ws->split_tree, 
+                                                PRIMN_ANY, PRIMN_ANY, NULL);
     }
     return (node ? node->reg : NULL);
 }
@@ -1072,27 +1147,6 @@ WSplit *tiling_split_tree(WTiling *ws)
 }
 
 
-static WRegion *tiling_do_get_nextto_default(WTiling *ws, WRegion *reg,
-                                            int dir, int primn, bool any)
-{
-    WSplitFilter *filter=(any ? NULL : nostdispfilter);
-    WSplitRegion *node=get_node_check(ws, reg);
-    if(node!=NULL)
-        node=(WSplitRegion*)split_nextto((WSplit*)node, dir, primn, filter);
-    return (node ? node->reg : NULL);
-}
-
-
-WRegion *tiling_do_get_nextto(WTiling *ws, WRegion *reg,
-                             int dir, int primn, bool any)
-{
-    WRegion *ret=NULL;
-    CALL_DYN_RET(ret, WRegion*, tiling_do_get_nextto, ws,
-                 (ws, reg, dir, primn, any));
-    return ret;
-}
-
-
 /*EXTL_DOC
  * Return the most previously active region next to \var{reg} in
  * direction \var{dirstr} (left/right/up/down). The region \var{reg}
@@ -1102,35 +1156,14 @@ WRegion *tiling_do_get_nextto(WTiling *ws, WRegion *reg,
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WRegion *tiling_nextto(WTiling *ws, WRegion *reg, const char *dirstr,
-                      bool any)
+                       bool any)
 {
-    int dir=0, primn=0;
+    WRegionNavi nh;
     
-    if(!get_split_dir_primn(dirstr, &dir, &primn))
+    if(!ioncore_string_to_navi(dirstr, &nh))
         return NULL;
     
-    return tiling_do_get_nextto(ws, reg, dir, primn, any);
-}
-
-
-static WRegion *tiling_do_get_farthest_default(WTiling *ws,
-                                              int dir, int primn, bool any)
-{
-    WSplitFilter *filter=(any ? NULL : nostdispfilter);
-    WSplitRegion *node=NULL;
-    if(ws->split_tree!=NULL)
-        node=(WSplitRegion*)split_current_todir(ws->split_tree, dir, primn, filter);
-    return (node ? node->reg : NULL);
-}
-
-
-WRegion *tiling_do_get_farthest(WTiling *ws, 
-                               int dir, int primn, bool any)
-{
-    WRegion *ret=NULL;
-    CALL_DYN_RET(ret, WRegion*, tiling_do_get_farthest, ws,
-                 (ws, dir, primn, any));
-    return ret;
+    return tiling_do_navi_next(ws, reg, nh, FALSE, any);
 }
 
 
@@ -1144,27 +1177,12 @@ EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WRegion *tiling_farthest(WTiling *ws, const char *dirstr, bool any)
 {
-    int dir=0, primn=0;
-
-    if(!get_split_dir_primn(dirstr, &dir, &primn))
+    WRegionNavi nh;
+    
+    if(!ioncore_string_to_navi(dirstr, &nh))
         return NULL;
     
-    return tiling_do_get_farthest(ws, dir, primn, any);
-}
-
-
-static WRegion *do_goto_dir(WTiling *ws, int dir, int primn)
-{
-    WRegion *reg=NULL, *curr=tiling_current(ws);
-    if(curr!=NULL)
-        reg=tiling_do_get_nextto(ws, curr, dir, primn, FALSE);
-    if(reg==NULL && primn!=PRIMN_ANY){
-        int primn2=(primn==PRIMN_TL ? PRIMN_BR : PRIMN_TL);
-        reg=tiling_do_get_farthest(ws, dir, primn2, FALSE);
-    }
-    if(reg!=NULL)
-        region_goto(reg);
-    return reg;
+    return tiling_do_navi_first(ws, nh, any);
 }
 
 
@@ -1178,54 +1196,22 @@ static WRegion *do_goto_dir(WTiling *ws, int dir, int primn)
  * actually have received the focus when this function returns.
  */
 EXTL_EXPORT_MEMBER
-WRegion *tiling_goto_dir(WTiling *ws, const char *dirstr)
+WRegion *tiling_goto_dir(WTiling *ws, const char *dirstr, bool nowrap)
 {
     int dir=0, primn=0;
-
-    if(!get_split_dir_primn(dirstr, &dir, &primn))
-        return NULL;
+    WRegionNavi nh;
+    WRegion *nxt;
     
-    return do_goto_dir(ws, dir, primn);
-}
-
-
-static WRegion *do_goto_dir_nowrap(WTiling *ws, int dir, int primn)
-{
-    WRegion *reg=NULL, *curr=tiling_current(ws);
-    if(curr!=NULL)
-        reg=tiling_do_get_nextto(ws, curr, dir, primn, FALSE);
-    if(reg!=NULL)
-        region_goto(reg);
-    return reg;
-}
-
-
-/*EXTL_DOC
- * Go to the most previously active region on \var{ws} next to \var{reg} in
- * direction \var{dirstr} (up/down/left/right) without wrapping around.
- */
-EXTL_EXPORT_MEMBER
-WRegion *tiling_goto_dir_nowrap(WTiling *ws, const char *dirstr)
-{
-    int dir=0, primn=0;
-
-    if(!get_split_dir_primn(dirstr, &dir, &primn))
+    if(!ioncore_string_to_navi(dirstr, &nh))
         return NULL;
+
+    nxt=tiling_do_navi_next(ws, NULL, nh, nowrap, FALSE);
     
-    return do_goto_dir_nowrap(ws, dir, primn);
+    if(nxt!=NULL)
+        region_goto(nxt);
+    
+    return nxt;
 }
-
-
-/*EXTL_DOC
- * Find region on \var{ws} overlapping coordinates $(x, y)$.
- */
-/*EXTL_EXPORT_MEMBER
-WRegion *tiling_region_at(WTiling *ws, int x, int y)
-{
-    if(ws->split_tree==NULL)
-        return NULL;
-    return split_region_at(ws->split_tree, x, y);
-}*/
 
 
 /*EXTL_DOC
@@ -1412,17 +1398,23 @@ EXTL_EXPORT_AS(WTiling, set_floating_at)
 bool tiling_set_floating_at_extl(WTiling *ws, WRegion *reg, const char *how,
                                 const char *dirstr)
 {
+    WPrimn hprimn=PRIMN_ANY, vprimn=PRIMN_ANY;
+    WSplitSplit *split, *nsplit;
     WSplit *node;
-    WSplitSplit *split;
-    WSplitSplit *nsplit;
-    int dir=SPLIT_ANY, primn=PRIMN_ANY;
     
     node=(WSplit*)get_node_check(ws, reg);
     if(node==NULL)
         return FALSE;
     
-    if(dirstr!=NULL && !get_split_dir_primn(dirstr, &dir, &primn))
-        return FALSE;
+    
+    if(dirstr!=NULL){
+        WRegionNavi nh;
+        
+        if(!ioncore_string_to_navi(dirstr, &nh))
+            return FALSE;
+    
+        navi_to_primn(nh, &hprimn, &vprimn, PRIMN_NONE);
+    }
 
     while(TRUE){
         split=OBJ_CAST(node->parent, WSplitSplit);
@@ -1431,11 +1423,13 @@ bool tiling_set_floating_at_extl(WTiling *ws, WRegion *reg, const char *how,
             return FALSE;
         }
 
-        if(!(primn==PRIMN_TL && node!=split->br) &&
-           !(primn==PRIMN_BR && node!=split->tl) &&
-           !(dir!=SPLIT_ANY && split->dir!=dir) &&
-           !(OBJ_IS(split->tl, WSplitST) || OBJ_IS(split->br, WSplitST))){
-            break;
+        if(!OBJ_IS(split->tl, WSplitST) && !OBJ_IS(split->br, WSplitST)){
+            WPrimn tmp=(split->dir==SPLIT_VERTICAL ? vprimn : hprimn);
+            if(tmp==PRIMN_ANY 
+               || (node==split->tl && tmp==PRIMN_BR)
+               || (node==split->br && tmp==PRIMN_TL)){
+                break;
+            }
         }
         
         node=(WSplit*)split;
@@ -1781,12 +1775,6 @@ static DynFunTab tiling_dynfuntab[]={
     {region_stacking,
      tiling_stacking},
     
-    {(DynFun*)tiling_do_get_nextto,
-     (DynFun*)tiling_do_get_nextto_default},
-
-    {(DynFun*)tiling_do_get_farthest,
-     (DynFun*)tiling_do_get_farthest_default},
-     
     {(DynFun*)region_navi_first,
      (DynFun*)tiling_navi_first},
     

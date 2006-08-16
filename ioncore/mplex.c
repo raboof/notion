@@ -41,6 +41,7 @@
 #include "sizepolicy.h"
 #include "stacking.h"
 #include "group.h"
+#include "navi.h"
 
 
 #define SUBS_MAY_BE_MAPPED(MPLEX) \
@@ -915,6 +916,122 @@ bool mplex_is_hidden(WMPlex *mplex, WRegion *reg)
     WStacking *node=mplex_find_stacking(mplex, reg);
     
     return (node!=NULL && STACKING_IS_HIDDEN(node));
+}
+
+
+/*}}}*/
+
+
+/*{{{ Navigation */
+
+
+static WStacking *mplex_nxt(WMPlex *mplex, WStacking *st, bool wrap)
+{
+    return (st->mgr_next!=NULL 
+            ? st->mgr_next 
+            : (wrap ? mplex->mgd : NULL));
+}
+
+
+static WStacking *mplex_prv(WMPlex *mplex, WStacking *st, bool wrap)
+{
+    return (st!=mplex->mgd
+            ? st->mgr_prev
+            : (wrap ? st->mgr_prev : NULL));
+}
+
+
+typedef WStacking *NxtFn(WMPlex *mplex, WStacking *st, bool wrap);
+
+
+static WRegion *do_navi(WMPlex *mplex, WStacking *sti, 
+                        NxtFn *fn, WRegionNaviData *data)
+{
+    WStacking *st, *stacking;
+    uint min_level=0;
+    bool wrap=FALSE;
+    
+    stacking=mplex_get_stacking(mplex);
+    
+    if(stacking!=NULL)
+        min_level=stacking_min_level(stacking, mapped_filt, NULL);
+
+    st=sti;
+    while(1){
+        st=fn(mplex, st, wrap); 
+        
+        if(st==NULL || st==sti)
+            break;
+        
+        if(st->hidden)
+            continue;
+        
+        if(OBJ_IS(st->reg, WGroup)){
+            /* WGroup navigation code should respect modal stuff. */
+            WRegion *res=region_navi_cont((WRegion*)mplex, st->reg, data);
+            if(res!=NULL){
+                if(res!=st->reg){
+                    return res;
+                }else{
+                    #warning "TODO: What to do?"
+                }
+            }
+        }else{
+            if(st->level>=min_level && !(st->reg->flags&REGION_SKIP_FOCUS))
+                return region_navi_cont((WRegion*)mplex, st->reg, data);
+        }
+    }
+    
+    return NULL;
+}
+                        
+
+WRegion *mplex_navi_first(WMPlex *mplex, WRegionNavi nh,
+                          WRegionNaviData *data)
+{
+    WStacking *lst=mplex->mgd;
+
+    if(lst==NULL)
+        return region_navi_cont((WRegion*)mplex, NULL, data);
+    
+    if(nh==REGION_NAVI_ANY){
+        /* ? */
+    }
+    
+    if(nh==REGION_NAVI_ANY || nh==REGION_NAVI_END || 
+       nh==REGION_NAVI_BOTTOM || nh==REGION_NAVI_RIGHT){
+        return do_navi(mplex, lst, mplex_prv, data);
+    }else{
+        return do_navi(mplex, lst->mgr_prev, mplex_nxt, data);
+    }
+}
+
+    
+WRegion *mplex_navi_next(WMPlex *mplex, WRegion *rel, WRegionNavi nh,
+                         WRegionNaviData *data)
+{
+    WStacking *st;
+    
+    if(rel!=NULL){
+        st=mplex_find_stacking(mplex, rel);
+        if(st==NULL)
+            return NULL;
+    }else if(mplex->mx_current!=NULL){
+        st=mplex->mx_current->st;
+    }else{
+        return mplex_navi_first(mplex, nh, data);
+    }
+        
+    if(nh==REGION_NAVI_ANY){
+        /* ? */
+    }
+    
+    if(nh==REGION_NAVI_ANY || nh==REGION_NAVI_END || 
+       nh==REGION_NAVI_BOTTOM || nh==REGION_NAVI_RIGHT){
+        return do_navi(mplex, st, mplex_nxt, data);
+    }else{
+        return do_navi(mplex, st, mplex_prv, data);
+    }
 }
 
 
@@ -1899,6 +2016,12 @@ static DynFunTab mplex_dynfuntab[]={
 
     {(DynFun*)region_may_destroy,
      (DynFun*)mplex_may_destroy},
+    
+    {(DynFun*)region_navi_first,
+     (DynFun*)mplex_navi_first},
+    
+    {(DynFun*)region_navi_next,
+     (DynFun*)mplex_navi_next},
     
     END_DYNFUNTAB
 };

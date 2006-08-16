@@ -812,37 +812,59 @@ void group_managed_rqgeom(WGroup *ws, WRegion *reg,
 /*{{{ Circulate */
 
 
-static WStacking *nxt(WGroup *ws, WStacking *st)
+static WStacking *nxt(WGroup *ws, WStacking *st, bool wrap)
 {
-    return (st->mgr_next!=NULL ? st->mgr_next : ws->managed_list);
+    return (st->mgr_next!=NULL 
+            ? st->mgr_next 
+            : (wrap ? ws->managed_list : NULL));
 }
 
 
-static bool stacking_ok(WGroup *ws, WStacking *st)
+static WStacking *prv(WGroup *ws, WStacking *st, bool wrap)
+{
+    return (st!=ws->managed_list 
+            ? st->mgr_prev
+            : (wrap ? st->mgr_prev : NULL));
+}
+
+
+typedef WStacking *NxtFn(WGroup *ws, WStacking *st, bool wrap);
+
+
+static bool mapped_filt(WStacking *st, void *unused)
 {
     return (st->reg!=NULL && REGION_IS_MAPPED(st->reg));
 }
 
-       
-static WStacking *do_get_next(WGroup *ws, WStacking *sti)
+
+static bool focusable(WGroup *ws, WStacking *st, uint min_level)
 {
-    WStacking *st=nxt(ws, sti);
-    
-    for(; st!=sti; st=nxt(ws, st)){
-        if(stacking_ok(ws, st))
-            return st;
-    }
-    
-    return NULL;
+    return (st->reg!=NULL
+            && REGION_IS_MAPPED(st->reg)
+            && !(st->reg->flags&REGION_SKIP_FOCUS)
+            && st->level>=min_level);
 }
 
        
-static WStacking *do_get_prev(WGroup *ws, WStacking *sti)
+static WStacking *do_get_next(WGroup *ws, WStacking *sti,
+                              NxtFn *fn, bool wrap)
 {
-    WStacking *st=sti->mgr_prev;
+    WStacking *st, *stacking;
+    uint min_level=0;
     
-    for(; st!=sti; st=st->mgr_prev){
-        if(stacking_ok(ws, st))
+    stacking=group_get_stacking(ws);
+    
+    if(stacking!=NULL)
+        min_level=stacking_min_level(stacking, mapped_filt, NULL);
+
+    st=sti;
+    while(1){
+        st=fn(ws, st, wrap); 
+        
+        if(st==NULL || st==sti)
+            break;
+        
+        if(focusable(ws, st, min_level))
             return st;
     }
     
@@ -863,40 +885,46 @@ static WStacking *group_do_navi_first(WGroup *ws, WRegionNavi nh)
         return ws->current_managed;
     }
     
-    if(nh==REGION_NAVI_ANY || nh==REGION_NAVI_FIRST || 
+    if(nh==REGION_NAVI_ANY || nh==REGION_NAVI_END || 
        nh==REGION_NAVI_BOTTOM || nh==REGION_NAVI_RIGHT){
-        return do_get_next(ws, lst->prev);
+        return do_get_next(ws, lst, prv, TRUE);
     }else{
-        return do_get_prev(ws, lst);
+        return do_get_next(ws, lst->mgr_prev, nxt, TRUE);
     }
 }
 
 
-static WRegion *group_navi_first(WGroup *ws, WRegionNavi nh)
+static WRegion *group_navi_first(WGroup *ws, WRegionNavi nh,
+                                 WRegionNaviData *data)
 {
     WStacking *st=group_do_navi_first(ws, nh);
-    return (st!=NULL ? st->reg : NULL);
+    
+    return region_navi_cont(&ws->reg, (st!=NULL ? st->reg : NULL), data);
 }
 
 
-static WStacking *group_do_navi_next(WGroup *ws, WStacking *st, WRegionNavi nh)
+static WStacking *group_do_navi_next(WGroup *ws, WStacking *st, 
+                                     WRegionNavi nh, bool wrap)
 {
     if(st==NULL)
         return group_do_navi_first(ws, nh);
     
-    if(nh==REGION_NAVI_ANY || nh==REGION_NAVI_FIRST || 
+    if(nh==REGION_NAVI_ANY || nh==REGION_NAVI_END || 
        nh==REGION_NAVI_BOTTOM || nh==REGION_NAVI_RIGHT){
-        return do_get_next(ws, st);
+        return do_get_next(ws, st, nxt, wrap);
     }else{
-        return do_get_prev(ws, st);
+        return do_get_next(ws, st, prv, wrap);
     }
 }
 
-static WRegion *group_navi_next(WGroup *ws, WRegion *reg, WRegionNavi nh)
+static WRegion *group_navi_next(WGroup *ws, WRegion *reg, 
+                                WRegionNavi nh, WRegionNaviData *data)
 {
     WStacking *st=group_find_stacking(ws, reg);
-    st=group_do_navi_next(ws, st, nh);
-    return (st!=NULL ? st->reg : NULL);
+    
+    st=group_do_navi_next(ws, st, nh, FALSE);
+    
+    return region_navi_cont(&ws->reg, (st!=NULL ? st->reg : NULL), data);
 }
 
 
@@ -907,7 +935,7 @@ EXTL_EXPORT_MEMBER
 WRegion *group_circulate(WGroup *ws)
 {
     WStacking *st=group_do_navi_next(ws, ws->current_managed, 
-                                     REGION_NAVI_FIRST);
+                                     REGION_NAVI_END, TRUE);
     
     if(st==NULL)
         return NULL;
@@ -926,7 +954,7 @@ EXTL_EXPORT_MEMBER
 WRegion *group_backcirculate(WGroup *ws)
 {
     WStacking *st=group_do_navi_next(ws, ws->current_managed, 
-                                     REGION_NAVI_LAST);
+                                     REGION_NAVI_BEG, TRUE);
         
     if(st==NULL)
         return NULL;

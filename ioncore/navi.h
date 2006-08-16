@@ -18,18 +18,26 @@
 
 typedef enum{
     REGION_NAVI_ANY,
-    REGION_NAVI_FIRST,
-    REGION_NAVI_LAST,
+    REGION_NAVI_BEG, /* FIRST, PREV */
+    REGION_NAVI_END, /* LAST, NEXT */
     REGION_NAVI_LEFT,
     REGION_NAVI_RIGHT, 
     REGION_NAVI_TOP,
     REGION_NAVI_BOTTOM
 } WRegionNavi;
 
+INTRSTRUCT(WRegionNaviData);
 
-extern WRegion *region_navi_first(WRegion *reg, WRegionNavi nh);
-extern WRegion *region_navi_next(WRegion *reg, WRegion *mgd, WRegionNavi nh);
+DYNFUN WRegion *region_navi_next(WRegion *reg, WRegion *rel, WRegionNavi nh,
+                                 WRegionNaviData *data);
+DYNFUN WRegion *region_navi_first(WRegion *reg, WRegionNavi nh,
+                                  WRegionNaviData *data);
+
+extern WRegion *region_navi_cont(WRegion *reg, WRegion *res, 
+                                 WRegionNaviData *data);
 
 extern bool ioncore_string_to_navi(const char *str, WRegionNavi *nv);
+
+extern WRegionNavi ioncore_navi_reverse(WRegionNavi nh);
 
 #endif /* ION_IONCORE_NAVI_H */

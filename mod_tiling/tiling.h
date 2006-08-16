@@ -19,6 +19,7 @@
 #include <ioncore/screen.h>
 #include <ioncore/rectangle.h>
 #include <ioncore/pholder.h>
+#include <ioncore/navi.h>
 #include "split.h"
 
 
@@ -45,13 +46,8 @@ extern ExtlTab tiling_resize_tree(WTiling *ws, WSplit *node, ExtlTab g);
 extern WRegion *tiling_current(WTiling *ws);
 extern WRegion *tiling_nextto(WTiling *ws, WRegion *reg, const char *str, bool any);
 extern WRegion *tiling_farthest(WTiling *ws, const char *str, bool any);
-extern WRegion *tiling_goto_dir(WTiling *ws, const char *str);
+extern WRegion *tiling_goto_dir(WTiling *ws, const char *str, bool nowrap);
 extern WRegion *tiling_region_at(WTiling *ws, int x, int y);
-
-DYNFUN WRegion *tiling_do_get_nextto(WTiling *ws, WRegion *reg,
-                                    int dir, int primn, bool any);
-DYNFUN WRegion *tiling_do_get_farthest(WTiling *ws, 
-                                      int dir, int primn, bool any);
 
 extern WFrame *tiling_split_top(WTiling *ws, const char *dirstr);
 extern WFrame *tiling_split_at(WTiling *ws, WFrame *frame, 
@@ -68,6 +64,16 @@ extern void tiling_do_managed_remove(WTiling *ws, WRegion *reg);
 
 DYNFUN bool tiling_managed_add(WTiling *ws, WRegion *reg);
 extern bool tiling_managed_add_default(WTiling *ws, WRegion *reg);
+
+extern WRegion *tiling_do_navi_next(WTiling *ws, WRegion *reg, 
+                                    WRegionNavi nh, bool nowrap,
+                                    bool any);
+extern WRegion *tiling_do_navi_first(WTiling *ws, WRegionNavi nh, 
+                                     bool any);
+extern WRegion *tiling_navi_next(WTiling *ws, WRegion *reg, 
+                                 WRegionNavi nh, WRegionNaviData *data);
+extern WRegion *tiling_navi_first(WTiling *ws, WRegionNavi nh,
+                                  WRegionNaviData *data);
 
 /* Inherited dynfun implementations */
 
