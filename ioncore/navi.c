@@ -103,6 +103,8 @@ DECLSTRUCT(WRegionNaviData){
     ExtlFn descend_filter;
     WRegion *startpoint;
     bool nowrap;
+    Obj *no_ascend;
+    Obj *no_descend;
 };
 
 
@@ -114,6 +116,8 @@ static bool may_ascend(WRegion *to, WRegion *from, WRegionNaviData *data)
         r=extl_call(data->ascend_filter, "oo", "b", to, from, &v);
         extl_unprotect(NULL);
         return (r && v);
+    }else if(data->no_ascend!=NULL){
+        return (data->no_ascend!=(Obj*)from);
     }else{
         return !OBJ_IS(from, WMPlex);
     }
@@ -128,6 +132,8 @@ static bool may_descend(WRegion *to, WRegion *from, WRegionNaviData *data)
         r=extl_call(data->descend_filter, "oo", "b", to, from, &v);
         extl_unprotect(NULL);
         return (r && v);
+    }else if(data->no_descend!=NULL){
+        return (data->no_descend!=(Obj*)from);
     }else{
         return !OBJ_IS(to, WMPlex);
     }
@@ -196,7 +202,11 @@ static bool get_param(WRegionNaviData *data, const char *dirstr, ExtlTab param)
     
     data->ascend_filter=extl_fn_none();
     data->descend_filter=extl_fn_none();
+    data->no_ascend=NULL;
+    data->no_descend=NULL;
     
+    extl_table_gets_o(param, "no_ascend", &data->no_ascend);
+    extl_table_gets_o(param, "no_descend", &data->no_descend);
     extl_table_gets_f(param, "ascend_filter", &data->ascend_filter);
     extl_table_gets_f(param, "descend_filter", &data->descend_filter);
     data->nowrap=extl_table_is_bool_set(param, "nowrap");
@@ -205,21 +215,26 @@ static bool get_param(WRegionNaviData *data, const char *dirstr, ExtlTab param)
 }
 
 
-static WRegion *finish(WRegionNaviData *data, WRegion *res)
+static WRegion *release(WRegionNaviData *data, WRegion *res)
 {
     extl_unref_fn(data->ascend_filter);
     extl_unref_fn(data->descend_filter);
     
-    if(res!=NULL)
-        region_goto(res);
-    
     return res;
 }
 
-/*WRegion *rel, */
+
+/*EXTL_DOC
+ * Find region next from \var{reg} in direction \var{dirstr}
+ * (up/down/left/right/next/prev/any). The table param may
+ * contain the boolean field \var{nowrap}, instructing not to wrap 
+ * around, and the \class{WRegion}s \var{no_ascend} and \var{no_descend},
+ * and functions \var{ascend_filter} and \var{descend_filter} from
+ * \var{WRegion}s (\var{to}, \var{from}), used to decide when to descend
+ * or ascend into another region. (TODO: more detailed explanation.)
+ */
 EXTL_EXPORT
-WRegion *ioncore_goto_next(WRegion *reg, 
-                           const char *dirstr, ExtlTab param)
+WRegion *ioncore_navi_next(WRegion *reg, const char *dirstr, ExtlTab param)
 {
     WRegionNaviData data;
     WRegion *mgr;
@@ -240,12 +255,17 @@ WRegion *ioncore_goto_next(WRegion *reg,
     data.startpoint=reg;
     data.descend=FALSE;
     
-    return finish(&data, region_navi_next(mgr, reg, data.nh, &data));
+    return release(&data, region_navi_next(mgr, reg, data.nh, &data));
 }
 
 
+/*EXTL_DOC
+ * Find first region within \var{reg} in direction \var{dirstr}
+ * (up/down/left/right/beg/end/any). For information on \var{param},
+ * see \fnref{ioncore.navi_next}.
+ */
 EXTL_EXPORT
-WRegion *ioncore_goto_first(WRegion *reg, const char *dirstr, ExtlTab param)
+WRegion *ioncore_navi_first(WRegion *reg, const char *dirstr, ExtlTab param)
 {
     WRegionNaviData data;
     
@@ -260,6 +280,39 @@ WRegion *ioncore_goto_first(WRegion *reg, const char *dirstr, ExtlTab param)
     data.startpoint=reg;
     data.descend=TRUE;
     
-    return finish(&data, region_navi_first(reg, data.nh, &data));
+    return release(&data, region_navi_first(reg, data.nh, &data));
 }
+
+
+static WRegion *do_goto(WRegion *res)
+{
+    if(res!=NULL)
+        region_goto(res);
+    return res;
+}
+
+
+/*EXTL_DOC
+ * Go to region next from \var{reg} in direction \var{dirstr}
+ * (up/down/left/right/next/prev/any). For information on \var{param},
+ * see \fnref{ioncore.navi_next}.
+ */
+EXTL_EXPORT
+WRegion *ioncore_goto_next(WRegion *reg, const char *dirstr, ExtlTab param)
+{
+    return do_goto(ioncore_navi_next(reg, dirstr, param));
+}
+
+
+/*EXTL_DOC
+ * Go to first region within \var{reg} in direction \var{dirstr}
+ * (up/down/left/right/beg/end/any). For information on \var{param},
+ * see \fnref{ioncore.navi_next}.
+ */
+EXTL_EXPORT
+WRegion *ioncore_goto_first(WRegion *reg, const char *dirstr, ExtlTab param)
+{
+    return do_goto(ioncore_navi_first(reg, dirstr, param));
+}
+
 

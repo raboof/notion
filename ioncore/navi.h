@@ -40,4 +40,13 @@ extern bool ioncore_string_to_navi(const char *str, WRegionNavi *nv);
 
 extern WRegionNavi ioncore_navi_reverse(WRegionNavi nh);
 
+extern WRegion *ioncore_goto_next(WRegion *reg, const char *dirstr, 
+                                  ExtlTab param);
+extern WRegion *ioncore_goto_first(WRegion *reg, const char *dirstr, 
+                                   ExtlTab param);
+extern WRegion *ioncore_navi_next(WRegion *reg, const char *dirstr, 
+                                  ExtlTab param);
+extern WRegion *ioncore_navi_first(WRegion *reg, const char *dirstr, 
+                                   ExtlTab param);
+
 #endif /* ION_IONCORE_NAVI_H */
