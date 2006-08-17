@@ -120,7 +120,8 @@ static WRegBindingInfo *find_rbind(WRegion *reg, WBindmap *bindmap,
 
 static WRegBindingInfo *region_do_add_bindmap_owned(WRegion *reg, 
                                                     WBindmap *bindmap, 
-                                                    WRegion *owner)
+                                                    WRegion *owner,
+                                                    bool first)
 {
     WRegBindingInfo *rbind;
     
@@ -144,7 +145,7 @@ static WRegBindingInfo *region_do_add_bindmap_owned(WRegion *reg,
     
     /* Link to reg's rbind list*/ {
         WRegBindingInfo *b=reg->bindings;
-        if(owner==NULL){
+        if(first){
             LINK_ITEM_FIRST(b, rbind, next, prev);
         }else{
             LINK_ITEM_LAST(b, rbind, next, prev);
@@ -160,7 +161,7 @@ bool region_add_bindmap_owned(WRegion *reg, WBindmap *bindmap, WRegion *owner)
 {
     if(find_rbind(reg, bindmap, owner)!=NULL)
         return FALSE;
-    return (region_do_add_bindmap_owned(reg, bindmap, owner)!=NULL);
+    return (region_do_add_bindmap_owned(reg, bindmap, owner, FALSE)!=NULL);
 }
 
 
@@ -223,7 +224,7 @@ WBinding *region_lookup_keybinding(WRegion *reg, const XKeyEvent *ev,
     int i;
     
     *binding_owner_ret=reg;
-    
+
     for(rbind=(WRegBindingInfo*)reg->bindings; rbind!=NULL; rbind=rbind->next){
         bindmap=rbind->bindmap;
         
@@ -283,11 +284,34 @@ WBinding *region_lookup_binding(WRegion *reg, int act, uint state,
 /*{{{ Update */
 
 
+static void add_bindings(WRegion *reg, WRegion *r2)
+{
+    WRegion *rx=REGION_MANAGER(r2);
+    WRegBindingInfo *rbind, *rb2;
+    WBinding *binding=NULL;
+    
+    if(rx!=NULL && REGION_PARENT_REG(rx)==reg){
+        /* The recursion is here to get the bindmaps correctly ordered. */
+        add_bindings(reg, rx);
+    }
+    
+    if(r2->flags&REGION_GRAB_ON_PARENT){
+        for(rb2=(WRegBindingInfo*)r2->bindings; rb2!=NULL; rb2=rb2->next){
+            rbind=find_rbind(reg, rb2->bindmap, r2);
+            if(rbind==NULL){
+                rbind=region_do_add_bindmap_owned(reg, rb2->bindmap, 
+                                                  r2, TRUE);
+            }
+            if(rbind!=NULL)
+                rbind->tmp=1;
+        }
+    }
+}
+
+
 void region_do_update_owned_grabs(WRegion *reg)
 {
     WRegBindingInfo *rbind, *rb2;
-    WBinding *binding=NULL;
-    WRegion *r2;
 
     reg->flags&=~REGION_BINDING_UPDATE_SCHEDULED;
     
@@ -296,20 +320,9 @@ void region_do_update_owned_grabs(WRegion *reg)
         rbind->tmp=0;
     
     /* make new grabs */
-    r2=reg->active_sub;
-    while(r2!=NULL && REGION_PARENT_REG(r2)==reg){
-        if(r2->flags&REGION_GRAB_ON_PARENT){
-            for(rb2=(WRegBindingInfo*)r2->bindings; rb2!=NULL; rb2=rbind->next){
-                rbind=find_rbind(reg, rb2->bindmap, r2);
-                if(rbind==NULL)
-                    rbind=region_do_add_bindmap_owned(reg, rb2->bindmap, r2);
-                if(rbind!=NULL)
-                    rbind->tmp=1;
-            }
-        }
-        r2=REGION_MANAGER(r2);
-    }
-
+    if(reg->active_sub!=NULL)
+        add_bindings(reg, reg->active_sub);
+    
     /* remove old grabs */
     for(rbind=(WRegBindingInfo*)reg->bindings; rbind!=NULL; rbind=rb2){
         rb2=rbind->next;
