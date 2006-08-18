@@ -28,6 +28,8 @@ local compiled2str=setmetatable({}, {__mode="k"})
 -- \type{WFoobar} is a class.
 function ioncore.compile_cmd(cmd, guard)
     local guardcode=""
+    local gfn=nil
+    
     if guard then
         local st, en, condition=string.find(guard, "^_sub:([%w-_]+)$")
         if not condition then
@@ -37,33 +39,39 @@ function ioncore.compile_cmd(cmd, guard)
         else
             guardcode='if not obj_is(_sub, "'..condition..'") then return end; '
         end
+    
+        local gfncode="return function(_, _sub) "..guardcode.." return true end"
+        local gfn, gerr=loadstring(gfncode, guardcode)
+        if not gfn then
+            ioncore.warn_traced(TR("Error compiling guard: %s", gerr))
+        end
+        gfn=gfn()
     end
 
-    local gfncode="return function(_, _sub) "..guardcode.." return true end"
-    local gfn, gerr=loadstring(gfncode)
-    if not gfn then
-        ioncore.warn_traced(TR("Error compiling guard: %s", gerr))
+    local function guarded(gfn, fn)
+        if not gfn then
+            return fn
+        else
+            return function(_, _sub, _rawsub) 
+                if gfn(_, _sub, _rawsub) then 
+                    cmd(_, _sub, _rawsub) 
+                end
+            end
+        end
     end
-    gfn=gfn()
     
     if type(cmd)=="string" then
-        local fncode=("return function(_, _sub) "
-                      ..guardcode.."return ("..cmd..") end")
-        local fn, err=loadstring(fncode)
+        local fncode=("return function(_, _sub, _rawsub) local d = "
+                       ..cmd.." end")
+        local fn, err=loadstring(fncode, cmd)
         if not fn then
-            ioncore.warn_traced(TR("Error in command string: ", err))
+            ioncore.warn_traced(TR("Error in command string: ")..err)
             return
         end
-        fn=fn()
         compiled2str[fn]=cmd
-        return fn, gfn
+        return guarded(gfn, fn())
     elseif type(cmd)=="function" then
-        if gfn then
-            return function(_, _sub) 
-                       if gfn(_, _sub) then cmd(_, _sub) end 
-                   end, gfn
-        end
-        return cmd
+        return guarded(gfn, cmd)
     end
 
     ioncore.warn_traced(TR("Invalid command"))
