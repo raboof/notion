@@ -180,4 +180,6 @@ extern bool region_same_rootwin(const WRegion *reg1, const WRegion *reg2);
 
 extern bool region_manager_allows_destroying(WRegion *reg);
 
+extern WRegion *region_managed_within(WRegion *reg, WRegion *mgd);
+
 #endif /* ION_IONCORE_REGION_H */

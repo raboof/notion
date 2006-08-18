@@ -23,7 +23,7 @@ extern bool region_is_activity_r(WRegion *reg);
 
 extern ExtlTab ioncore_activity_list();
 extern WRegion *ioncore_activity_first();
-extern bool ioncore_activity_goto();
+extern bool ioncore_goto_activity();
 
 extern WHook *region_activity_hook;
 

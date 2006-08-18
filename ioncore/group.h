@@ -58,9 +58,6 @@ extern bool group_init(WGroup *grp, WWindow *parent, const WFitParams *fp);
 extern WGroup *create_group(WWindow *parent, const WFitParams *fp);
 extern void group_deinit(WGroup *grp);
 
-extern WRegion *group_circulate(WGroup *ws);
-extern WRegion *group_backcirculate(WGroup *ws);
-
 extern WRegion *group_load(WWindow *par, const WFitParams *fp, 
                            ExtlTab tab);
 extern void group_do_load(WGroup *ws, ExtlTab tab);

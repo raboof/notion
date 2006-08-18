@@ -69,6 +69,19 @@ defbindings("WScreen", {
     
     bdoc("Display the window list menu."),
     mpress("Button2", "mod_menu.pmenu(_, _sub, 'windowlist')"),
+
+    bdoc("Circulate focus and raise the newly focused frame."),
+    -- Left/right work better than next/prev in conjuction with tiling
+    -- navigation. So as long as there's no geometric navigation hack
+    -- for floating stuff, let's use those.
+    kpress(META.."Tab", "ioncore.goto_next(_rawsub, 'right')", 
+           "_sub:non-nil"),
+    submap(META.."K", { 
+        bdoc("Backwards-circulate focus and raise the newly focused frame."),
+        kpress(META.."Tab", "ioncore.goto_next(_rawsub, 'left')", 
+               "_sub:non-nil"),
+    }),
+
 })
 
 
@@ -253,12 +266,6 @@ defbindings("WFloatFrame", {
 -- of these bindings.
 
 defbindings("WGroupWS", {
-    bdoc("Circulate focus and raise the newly focused frame."),
-    kpress(META.."Tab", "WGroupWS.raise(_, WGroupWS.circulate(_))"),
-    submap(META.."K", { 
-        bdoc("Backwards-circulate focus and raise the newly focused frame."),
-        kpress("Tab", "WGroupWS.raise(_, WGroupWS.backcirculate(_))"),
-    }),
     bdoc("Raise/lower active frame."),
     kpress(META.."P", "WGroupWS.lower(_, _sub)", "_sub:non-nil"),
     kpress(META.."N", "WGroupWS.raise(_, _sub)", "_sub:non-nil"),

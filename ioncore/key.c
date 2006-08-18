@@ -182,20 +182,14 @@ static bool do_key(WRegion *reg, XKeyEvent *ev)
     grabbed=(oreg->flags&REGION_BINDINGS_ARE_GRABBED);
     
     if(grabbed){
-        /*if(subreg!=NULL && REGION_PARENT_REG(subreg)==reg){
-            reg=subreg;
-            subreg=NULL;
-        }*/
-        
         /* Find the deepest nested active window grabbing this key. */
         while(reg->active_sub!=NULL)
             reg=reg->active_sub;
         
         do{
-            /*if(reg->flags&REGION_BINDINGS_ARE_GRABBED){*/
-                binding=region_lookup_keybinding(reg, ev, oreg->submapstat, 
-                                                 &binding_owner);
-            /*}*/
+            binding=region_lookup_keybinding(reg, ev, oreg->submapstat, 
+                                             &binding_owner);
+            
             if(binding!=NULL)
                 break;
             if(OBJ_IS(reg, WRootWin))
@@ -215,7 +209,8 @@ static bool do_key(WRegion *reg, XKeyEvent *ev)
                 return grabbed;
             else
                 clear_subs(oreg);
-        }else{
+        }else if(binding_owner!=NULL){
+            WRegion *mgd=region_managed_within(binding_owner, subreg);
             bool subs=(oreg->submapstat!=NULL);
             
             clear_subs(oreg);
@@ -223,19 +218,10 @@ static bool do_key(WRegion *reg, XKeyEvent *ev)
             if(grabbed)
                 XUngrabKeyboard(ioncore_g.dpy, CurrentTime);
             
-            /* Find something binding_owner can understand. */
-            /* TODO: What if there are multiple 'owner' grabs? */
-            while(subreg!=NULL){
-                if(REGION_PARENT_REG(subreg)!=reg){
-                    subreg=NULL;
-                    break;
-                }
-                if(REGION_MANAGER(subreg)==binding_owner)
-                    break;
-                subreg=REGION_MANAGER(subreg);
-            }
-            
-            extl_call(binding->func, "oo", NULL, binding_owner, subreg);
+            /* TODO: having to pass both mgd and subreg for some handlers
+             * to work is ugly and complex.
+             */
+            extl_call(binding->func, "ooo", NULL, binding_owner, mgd, subreg);
             
             if(ev->state!=0 && !subs && binding->wait)
                 waitrelease(oreg);
@@ -267,7 +253,6 @@ static void submapgrab(WRegion *reg)
 
 void ioncore_do_handle_keypress(XKeyEvent *ev)
 {
-
     WRegion *reg=(WRegion*)XWINDOW_REGION_OF(ev->window);
     
     if(reg!=NULL){

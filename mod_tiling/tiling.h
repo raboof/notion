@@ -46,7 +46,6 @@ extern ExtlTab tiling_resize_tree(WTiling *ws, WSplit *node, ExtlTab g);
 extern WRegion *tiling_current(WTiling *ws);
 extern WRegion *tiling_nextto(WTiling *ws, WRegion *reg, const char *str, bool any);
 extern WRegion *tiling_farthest(WTiling *ws, const char *str, bool any);
-extern WRegion *tiling_goto_dir(WTiling *ws, const char *str, bool nowrap);
 extern WRegion *tiling_region_at(WTiling *ws, int x, int y);
 
 extern WFrame *tiling_split_top(WTiling *ws, const char *dirstr);

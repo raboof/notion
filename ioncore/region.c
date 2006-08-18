@@ -761,6 +761,21 @@ bool region_handle_drop(WRegion *reg, int x, int y, WRegion *dropped)
 }
 
 
+WRegion *region_managed_within(WRegion *reg, WRegion *mgd)
+{
+    while(mgd!=NULL && 
+          (REGION_PARENT_REG(mgd)==reg ||
+           REGION_PARENT_REG(mgd)==REGION_PARENT_REG(reg))){
+        
+        if(REGION_MANAGER(mgd)==reg)
+            return mgd;
+        mgd=REGION_MANAGER(mgd);
+    }
+    
+    return NULL;
+}
+
+
 /*}}}*/
 
 

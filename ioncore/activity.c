@@ -154,7 +154,7 @@ WRegion *ioncore_activity_first()
  * Go to first region on activity list.
  */
 EXTL_EXPORT
-bool ioncore_activity_goto()
+bool ioncore_goto_activity()
 {
     WRegion *reg=ioncore_activity_first();
     

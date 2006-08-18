@@ -809,7 +809,7 @@ void group_managed_rqgeom(WGroup *ws, WRegion *reg,
 /*}}}*/
 
 
-/*{{{ Circulate */
+/*{{{ Navigation */
 
 
 static WStacking *nxt(WGroup *ws, WStacking *st, bool wrap)
@@ -925,44 +925,6 @@ static WRegion *group_navi_next(WGroup *ws, WRegion *reg,
     st=group_do_navi_next(ws, st, nh, FALSE);
     
     return region_navi_cont(&ws->reg, (st!=NULL ? st->reg : NULL), data);
-}
-
-
-/*EXTL_DOC
- * Activate next object in stacking order on \var{ws}.
- */
-EXTL_EXPORT_MEMBER
-WRegion *group_circulate(WGroup *ws)
-{
-    WStacking *st=group_do_navi_next(ws, ws->current_managed, 
-                                     REGION_NAVI_END, TRUE);
-    
-    if(st==NULL)
-        return NULL;
-    
-    if(st!=NULL && region_may_control_focus((WRegion*)ws))
-       region_goto(st->reg);
-    
-    return st->reg;
-}
-
-
-/*EXTL_DOC
- * Activate previous object in stacking order on \var{ws}.
- */
-EXTL_EXPORT_MEMBER
-WRegion *group_backcirculate(WGroup *ws)
-{
-    WStacking *st=group_do_navi_next(ws, ws->current_managed, 
-                                     REGION_NAVI_BEG, TRUE);
-        
-    if(st==NULL)
-        return NULL;
-    
-    if(st!=NULL && region_may_control_focus((WRegion*)ws))
-       region_goto(st->reg);
-    
-    return st->reg;
 }
 
 

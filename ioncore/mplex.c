@@ -195,26 +195,12 @@ WStacking *mplex_find_stacking(WMPlex *mplex, WRegion *reg)
 }
 
 
-static WRegion *mgr_within_mplex(WMPlex *mplex, WRegion *reg)
-{
-    WRegion *mpr=(WRegion*)mplex;
-    
-    while(reg!=NULL && REGION_PARENT_REG(reg)==mpr){
-        if(REGION_MANAGER(reg)==mpr)
-            return reg;
-        reg=REGION_MANAGER(reg);
-    }
-    
-    return NULL;
-}
-
-
 WStacking *mplex_current_node(WMPlex *mplex)
 {
     WRegion *reg;
     
     reg=REGION_ACTIVE_SUB(mplex);
-    reg=mgr_within_mplex(mplex, reg);
+    reg=region_managed_within((WRegion*)mplex, reg);
     
     return (reg==NULL ? NULL : mplex_find_stacking(mplex, reg));
 }
@@ -651,7 +637,7 @@ static void mplex_do_remanage_stdisp(WMPlex *mplex, WRegion *sub)
     /* Move stdisp */
     if(sub!=NULL && CAN_MANAGE_STDISP(sub)){
         if(stdisp!=NULL){
-            WRegion *mgr=mgr_within_mplex(mplex, stdisp);
+            WRegion *mgr=region_managed_within((WRegion*)mplex, stdisp);
             if(mgr!=sub){
                 if(mgr!=NULL){
                     if(CAN_MANAGE_STDISP(mgr))
@@ -1427,7 +1413,7 @@ void mplex_managed_remove(WMPlex *mplex, WRegion *sub)
     
     if(stdisp!=NULL){
         if(CAN_MANAGE_STDISP(sub) && 
-           mgr_within_mplex(mplex, stdisp)==sub){
+           region_managed_within((WRegion*)mplex, stdisp)==sub){
             region_unmanage_stdisp(sub, TRUE, TRUE);
             region_detach_manager(stdisp);
         }
@@ -1552,7 +1538,7 @@ bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg,
             REGION_PARENT(reg)==(WWindow*)mplex));
     
     if(oldstdisp!=NULL){
-        mgr=mgr_within_mplex(mplex, oldstdisp);
+        mgr=region_managed_within((WRegion*)mplex, oldstdisp);
         
         if(!CAN_MANAGE_STDISP(mgr))
             mgr=NULL;

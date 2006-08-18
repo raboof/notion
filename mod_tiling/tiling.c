@@ -1187,34 +1187,6 @@ WRegion *tiling_farthest(WTiling *ws, const char *dirstr, bool any)
 
 
 /*EXTL_DOC
- * Go to the most previously active region on \var{ws} next to \var{reg} in
- * direction \var{dirstr} (up/down/left/right), wrapping around to a most 
- * recently active farthest region in the opposite direction if \var{reg} 
- * is already the further region in the given direction.
- * 
- * Note that this function is asynchronous; the region will not
- * actually have received the focus when this function returns.
- */
-EXTL_EXPORT_MEMBER
-WRegion *tiling_goto_dir(WTiling *ws, const char *dirstr, bool nowrap)
-{
-    int dir=0, primn=0;
-    WRegionNavi nh;
-    WRegion *nxt;
-    
-    if(!ioncore_string_to_navi(dirstr, &nh))
-        return NULL;
-
-    nxt=tiling_do_navi_next(ws, NULL, nh, nowrap, FALSE);
-    
-    if(nxt!=NULL)
-        region_goto(nxt);
-    
-    return nxt;
-}
-
-
-/*EXTL_DOC
  * For region \var{reg} managed by \var{ws} return the \type{WSplit}
  * a leaf of which \var{reg} is.
  */
