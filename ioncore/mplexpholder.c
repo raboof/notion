@@ -131,8 +131,8 @@ bool mplexpholder_init(WMPlexPHolder *ph, WMPlex *mplex, WStacking *st,
         
         if(!(param->flags&MPLEX_ATTACH_UNNUMBERED)){
             int index=(param->flags&MPLEX_ATTACH_INDEX
-                       ? mplex_default_index(mplex)
-                       : param->index);
+                       ? param->index
+                       : mplex_default_index(mplex));
             WLListNode *or_after=llist_index_to_after(mplex->mx_list, 
                                                       mplex->mx_current, 
                                                       index);
