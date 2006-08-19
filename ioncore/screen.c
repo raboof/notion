@@ -245,6 +245,8 @@ void screen_notify(WScreen *scr, const char *str)
     WInfoWin *iw=(WInfoWin*)(scr->notifywin_watch.obj);
     WFitParams fp;
     
+    /* TODO: manage normally now! */
+    
     if(iw!=NULL){
         infowin_set_text(iw, str);
         return;
@@ -264,7 +266,7 @@ void screen_notify(WScreen *scr, const char *str)
     watch_setup(&(scr->notifywin_watch), (Obj*)iw, NULL);
 
     infowin_set_text(iw, str);
-    region_raise((WRegion*)iw);
+    region_restack((WRegion*)iw, None, Above);
     region_map((WRegion*)iw);
 }
 

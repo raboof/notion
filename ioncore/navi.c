@@ -105,6 +105,7 @@ DECLSTRUCT(WRegionNaviData){
     bool nowrap;
     Obj *no_ascend;
     Obj *no_descend;
+    bool nofront;
 };
 
 
@@ -210,6 +211,7 @@ static bool get_param(WRegionNaviData *data, const char *dirstr, ExtlTab param)
     extl_table_gets_f(param, "ascend_filter", &data->ascend_filter);
     extl_table_gets_f(param, "descend_filter", &data->descend_filter);
     data->nowrap=extl_table_is_bool_set(param, "nowrap");
+    data->nofront=extl_table_is_bool_set(param, "nofront");
     
     return TRUE;
 }
@@ -286,8 +288,11 @@ WRegion *ioncore_navi_first(WRegion *reg, const char *dirstr, ExtlTab param)
 
 static WRegion *do_goto(WRegion *res)
 {
-    if(res!=NULL)
+    if(res!=NULL){
+        /* TODO: deep rqorder? */
+        region_rqorder(res, REGION_ORDER_FRONT);
         region_goto(res);
+    }
     return res;
 }
 
@@ -295,7 +300,9 @@ static WRegion *do_goto(WRegion *res)
 /*EXTL_DOC
  * Go to region next from \var{reg} in direction \var{dirstr}
  * (up/down/left/right/next/prev/any). For information on \var{param},
- * see \fnref{ioncore.navi_next}.
+ * see \fnref{ioncore.navi_next}. Additionally this function supports
+ * the boolean \var{nofront} field, for not bringing the object to
+ * front.
  */
 EXTL_EXPORT
 WRegion *ioncore_goto_next(WRegion *reg, const char *dirstr, ExtlTab param)
@@ -307,7 +314,9 @@ WRegion *ioncore_goto_next(WRegion *reg, const char *dirstr, ExtlTab param)
 /*EXTL_DOC
  * Go to first region within \var{reg} in direction \var{dirstr}
  * (up/down/left/right/beg/end/any). For information on \var{param},
- * see \fnref{ioncore.navi_next}.
+ * see \fnref{ioncore.navi_next}. Additionally this function supports
+ * the boolean \var{nofront} field, for not bringing the object to
+ * front.
  */
 EXTL_EXPORT
 WRegion *ioncore_goto_first(WRegion *reg, const char *dirstr, ExtlTab param)

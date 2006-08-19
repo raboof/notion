@@ -70,15 +70,19 @@ defbindings("WScreen", {
     bdoc("Display the window list menu."),
     mpress("Button2", "mod_menu.pmenu(_, _sub, 'windowlist')"),
 
-    bdoc("Circulate focus and raise the newly focused frame."),
+    bdoc("Forward-circulate focus."),
     -- Left/right work better than next/prev in conjuction with tiling
     -- navigation. So as long as there's no geometric navigation hack
     -- for floating stuff, let's use those.
     kpress(META.."Tab", "ioncore.goto_next(_rawsub, 'right')", 
            "_sub:non-nil"),
     submap(META.."K", { 
-        bdoc("Backwards-circulate focus and raise the newly focused frame."),
-        kpress(META.."Tab", "ioncore.goto_next(_rawsub, 'left')", 
+        bdoc("Backward-circulate focus."),
+        kpress("AnyModifier+Tab", "ioncore.goto_next(_rawsub, 'left')", 
+               "_sub:non-nil"),
+        
+        bdoc("Raise focused object, if possible."),
+        kpress("AnyModifier+R", "WRegion.rqorder(_rawsub, 'front')",
                "_sub:non-nil"),
     }),
 
@@ -250,25 +254,15 @@ defbindings("WFloatFrame", {
     mdblclick("Button1@tab", "WFloatFrame.set_shaded(_, 'toggle')"),
     
     bdoc("Raise the frame."),
-    mpress("Button1@tab", "WGroupWS.raise(WRegion.manager(_), _)"),
-    mpress("Button1@border", "WGroupWS.raise(WRegion.manager(_), _)"),
-    mclick(META.."Button1", "WGroupWS.raise(WRegion.manager(_), _)"),
+    mpress("Button1@tab", "WRegion.rqorder(_, 'front')"),
+    mpress("Button1@border", "WRegion.rqorder(_, 'front')"),
+    mclick(META.."Button1", "WRegion.rqorder(_, 'front')"),
     
     bdoc("Lower the frame."),
-    mclick(META.."Button3", "WGroupWS.lower(WRegion.manager(_), _)"),
+    mclick(META.."Button3", "WRegion.rqorder(_, 'back')"),
     
     bdoc("Move the frame."),
     mdrag("Button1@tab", "WFrame.p_move(_)"),
-})
-
-
--- Bindings for "groups". Note that "tilings" override some
--- of these bindings.
-
-defbindings("WGroupWS", {
-    bdoc("Raise/lower active frame."),
-    kpress(META.."P", "WGroupWS.lower(_, _sub)", "_sub:non-nil"),
-    kpress(META.."N", "WGroupWS.raise(_, _sub)", "_sub:non-nil"),
 })
 
 

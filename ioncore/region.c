@@ -612,19 +612,7 @@ WRegion *region_get_manager_chk(WRegion *p, const ClassDescr *descr)
 /*}}}*/
 
 
-/*{{{ Stacking */
-
-
-void region_raise(WRegion *reg)
-{
-    region_restack(reg, None, Above);
-}
-
-
-void region_lower(WRegion *reg)
-{
-    region_restack(reg, None, Below);
-}
+/*{{{ Stacking and ordering */
 
 
 static void region_stacking_default(WRegion *reg, 
@@ -645,6 +633,47 @@ void region_stacking(WRegion *reg, Window *bottomret, Window *topret)
 void region_restack(WRegion *reg, Window other, int mode)
 {
     CALL_DYN(region_restack, reg, (reg, other, mode));
+}
+
+
+
+bool region_managed_rqorder(WRegion *reg, WRegion *sub, WRegionOrder order)
+{
+    bool ret=FALSE;
+    CALL_DYN_RET(ret, bool, region_managed_rqorder, reg, (reg, sub, order));
+    return ret;
+}
+
+
+bool region_rqorder(WRegion *reg, WRegionOrder order)
+{
+    WRegion *mgr=REGION_MANAGER(reg);
+    
+    if(mgr==NULL)
+        return FALSE;
+    else
+        return region_managed_rqorder(mgr, reg, order);
+}
+
+
+/*EXTL_DOC
+ * Request ordering. Currently supported values for \var{ord}
+ * are 'front' and 'back'.
+ */
+EXTL_EXPORT_AS(WRegion, rqorder)
+bool region_rqorder_extl(WRegion *reg, const char *ord)
+{
+    WRegionOrder order;
+    
+    if(strcmp(ord, "front")==0){
+        order=REGION_ORDER_FRONT;
+    }else if(strcmp(ord, "back")==0){
+        order=REGION_ORDER_BACK;
+    }else{
+        return FALSE;
+    }
+    
+    return region_rqorder(reg, order);
 }
 
 

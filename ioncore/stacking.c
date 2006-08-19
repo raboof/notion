@@ -384,42 +384,15 @@ static WStacking *unweave_subtree(WStacking **stacking, WStacking *regst)
 }
 
 
-void stacking_do_raise(WStacking **stacking, WRegion *reg, Window fb_win,
-                       WStackingFilter *filt, void *filt_data)
+void stacking_restack(WStacking **stacking, WStacking *st, Window fb_win,
+                      WStackingFilter *filt, void *filt_data, bool lower)
 {
-    WStacking *regst, *tmp;
-    
-    regst=ioncore_find_stacking(reg);
+    WStacking *tmp=unweave_subtree(stacking, st);
 
-#warning "TODO: check that on same list? (And elsewhere too?)"
+    #warning "TODO: special handling of regst->above!=NULL on lower?"
+    
+    stacking_do_weave(stacking, &tmp, lower, fb_win);
 
-    if(regst==NULL)
-        return;
-    
-    tmp=unweave_subtree(stacking, regst);
-    
-    stacking_do_weave(stacking, &tmp, FALSE, fb_win);
-    
-    assert(tmp==NULL);
-}
-
-
-void stacking_do_lower(WStacking **stacking, WRegion *reg, Window fb_win,
-                       WStackingFilter *filt, void *filt_data)
-{
-    WStacking *regst, *tmp;
-    
-    regst=ioncore_find_stacking(reg);
-    
-    if(regst==NULL)
-        return;
-
-#warning "TODO: special handling of regst->above!=NULL?"
-
-    tmp=unweave_subtree(stacking, regst);
-    
-    stacking_do_weave(stacking, &tmp, TRUE, fb_win);
-    
     assert(tmp==NULL);
 }
 

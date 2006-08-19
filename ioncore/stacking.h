@@ -23,6 +23,9 @@
 #define STACKING_LEVEL_MODAL1 1024
 
 
+#define STACKING_IS_HIDDEN(ST) ((ST)->hidden)
+
+
 DECLSTRUCT(WStacking){
     WRegion *reg;
     WStacking *next, *prev;
@@ -40,41 +43,27 @@ DECLSTRUCT(WStacking){
 };
 
 
-#define STACKING_IS_HIDDEN(ST) ((ST)->hidden)
-
-
 typedef bool WStackingFilter(WStacking *st, void *data);
 typedef WStacking *WStackingIterator(void *data);
 
-
-WStacking *create_stacking();
-void stacking_free(WStacking *st);
-
-
-void stacking_do_raise(WStacking **stacking, WRegion *reg, Window fb_win,
-                       WStackingFilter *filt, void *filt_data);
-
-void stacking_do_lower(WStacking **stacking, WRegion *reg, Window fb_win,
-                       WStackingFilter *filt, void *filt_data);
-
-void stacking_restack(WStacking **stacking, Window other, int mode,
-                      WStacking *other_on_list,
-                      WStackingFilter *filt, void *filt_data);
-
-void stacking_stacking(WStacking *stacking, Window *bottomret, Window *topret,
-                       WStackingFilter *filt, void *filt_data);
-
-WStacking **window_get_stackingp(WWindow *wwin);
-WStacking *window_get_stacking(WWindow *wwin);
-
-/* Returns the topmost node with 'above' pointing to st. */
-WStacking *stacking_unstack(WWindow *par, WStacking *st);
 
 DECLSTRUCT(WStackingIterTmp){
     WStacking *st;
     WStackingFilter *filt;
     void *filt_data;
 };
+
+
+WStacking **window_get_stackingp(WWindow *wwin);
+WStacking *window_get_stacking(WWindow *wwin);
+
+
+WStacking *create_stacking();
+
+void stacking_free(WStacking *st);
+
+/* Returns the topmost node with 'above' pointing to st. */
+WStacking *stacking_unstack(WWindow *par, WStacking *st);
 
 void stacking_iter_init(WStackingIterTmp *tmp,
                         WStacking *st,
@@ -93,6 +82,9 @@ WStacking *stacking_iter_mgr_nodes(WStackingIterTmp *tmp);
 void stacking_weave(WStacking **stacking, WStacking **np, bool below);
 WStacking *stacking_unweave(WStacking **stacking, 
                             WStackingFilter *filt, void *filt_data);
+
+void stacking_restack(WStacking **stacking, WStacking *st, Window fb_win,
+                      WStackingFilter *filt, void *filt_data, bool lower);
 
 WStacking *stacking_find_to_focus(WStacking *stacking, WStacking *to_try,
                                   WStackingFilter *include_filt, 

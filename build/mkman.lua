@@ -276,7 +276,8 @@ for l in f:lines() do
     l=string.gsub(l, '%s*BINDINGS:([%w%.]+)%s*', 
                   function(s)
                       if not bindings[s] then
-                          error('No bindings for '..s)
+                          --error('No bindings for '..s)
+                          return "?"
                       end
                       local db=docgroup_bindings(bindings[s])
                       return write_bindings_man(db)

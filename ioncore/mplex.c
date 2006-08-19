@@ -705,11 +705,13 @@ static void mplex_do_node_display(WMPlex *mplex, WStacking *node,
          * no visible netscape windows.
          */
         {
+            #warning "TODO: less ugly hack"
             WGroup *grp=(WGroup*)OBJ_CAST(sub, WGroupCW);
-            if(grp!=NULL && grp->bottom!=NULL)
-                group_lower(grp, grp->bottom->reg);
+            if(grp!=NULL && grp->bottom!=NULL){
+                region_managed_rqorder((WRegion*)grp, grp->bottom->reg, 
+                                       REGION_ORDER_BACK);
+            }
         }
-        /*region_lower(sub);*/
         
         if(call_changed)
             mplex_managed_changed(mplex, MPLEX_CHANGE_SWITCHONLY, TRUE, sub);
@@ -807,7 +809,7 @@ static void mplex_refocus(WMPlex *mplex, bool warp)
 /*}}}*/
 
 
-/*{{{ switch exports */
+/*{{{ Switch exports */
 
 
 static void do_switch(WMPlex *mplex, WLListNode *node)
@@ -1018,6 +1020,32 @@ WRegion *mplex_navi_next(WMPlex *mplex, WRegion *rel, WRegionNavi nh,
     }else{
         return do_navi(mplex, st, mplex_prv, data);
     }
+}
+
+
+/*}}}*/
+
+
+/*{{{ Stacking */
+
+
+bool mplex_managed_rqorder(WMPlex *mplex, WRegion *reg, WRegionOrder order)
+{
+    WStacking **stackingp=mplex_get_stackingp(mplex);
+    WStacking *st;
+
+    if(stackingp==NULL || *stackingp==NULL)
+        return FALSE;
+
+    st=mplex_find_stacking(mplex, reg);
+    
+    if(st==NULL)
+        return FALSE;
+    
+    stacking_restack(stackingp, st, None, NULL, NULL,
+                     (order!=REGION_ORDER_FRONT));
+    
+    return TRUE;
 }
 
 
@@ -2008,6 +2036,9 @@ static DynFunTab mplex_dynfuntab[]={
     
     {(DynFun*)region_navi_next,
      (DynFun*)mplex_navi_next},
+    
+    {(DynFun*)region_managed_rqorder,
+     (DynFun*)mplex_managed_rqorder},
     
     END_DYNFUNTAB
 };

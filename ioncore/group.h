@@ -88,8 +88,8 @@ extern bool group_rescue_clientwins(WGroup *ws, WPHolder *ph);
 extern bool group_rqclose(WGroup *ws);
 extern bool group_rqclose_relocate(WGroup *ws);
 
-extern void group_raise(WGroup *ws, WRegion *reg);
-extern void group_lower(WGroup *ws, WRegion *reg);
+extern bool group_managed_rqorder(WGroup *grp, WRegion *sub, 
+                                  WRegionOrder order);
 
 extern WStacking *group_find_stacking(WGroup *ws, WRegion *r);
 extern WStacking *group_find_to_focus(WGroup *ws, WStacking *to_try);

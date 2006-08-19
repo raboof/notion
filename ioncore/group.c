@@ -934,20 +934,30 @@ static WRegion *group_navi_next(WGroup *ws, WRegion *reg,
 /*{{{ Stacking */
 
 
+/* 
+ * Note: Managed objects are considered to be stacked separately from the
+ * group, slightly violating expectations.
+ */
+
 void group_stacking(WGroup *ws, Window *bottomret, Window *topret)
 {
-    Window win;
-    /*WStacking *stacking=group_get_stacking(ws);
-
-    if(stacking!=NULL)
-        stacking_stacking(stacking, bottomret, topret, wsfilt, ws);
-    */
-    win=region_xwindow((WRegion*)ws);
+    Window win=region_xwindow((WRegion*)ws);
     
-    /*if(*bottomret==None)*/
-        *bottomret=win;
-    /*if(*topret==None)*/
-        *topret=win;
+    *bottomret=win;
+    *topret=win;
+}
+
+
+void group_restack(WGroup *ws, Window other, int mode)
+{
+    Window win;
+    
+    win=region_xwindow((WRegion*)ws);
+    if(win!=None){
+        xwindow_restack(win, other, mode);
+        other=win;
+        mode=Above;
+    }
 }
 
 
@@ -980,109 +990,23 @@ static WStacking *find_stacking_if_not_on_ws(WGroup *ws, Window w)
 }
 
 
-void group_restack(WGroup *ws, Window other, int mode)
+bool group_managed_rqorder(WGroup *grp, WRegion *reg, WRegionOrder order)
 {
-    Window win;
-#if 0
-    WStacking *other_on_list=NULL;
-    WWindow *par=REGION_PARENT(ws);
-    WStacking **stackingp=group_get_stackingp(ws);
+    WStacking **stackingp=group_get_stackingp(grp);
+    WStacking *st;
 
-    if(stackingp==NULL)
-       return;
-       
-    assert(mode==Above || mode==Below);
-    assert(par!=NULL);
+    if(stackingp==NULL || *stackingp==NULL)
+        return FALSE;
+
+    st=group_find_stacking(grp, reg);
     
-    {
-        /* Need to find the point on the list to insert to. */
-        Window root=None, parent=None, *children=NULL;
-        uint i, n=0;
-        /* Use XQueryTree to get things in stacking order. */
-        XQueryTree(ioncore_g.dpy, region_xwindow((WRegion*)par),
-                   &root, &parent, &children, &n);
-        if(mode==Above){
-            WStacking *st;
-            for(i=n; i>0; ){
-                i--;
-                if(children[i]==other)
-                    break;
-                st=find_stacking_if_not_on_ws(ws, children[i]);
-                if(st!=NULL)
-                    other_on_list=st;
-            }
-        }else{
-            WStacking *st;
-            for(i=0; i<n; i++){
-                if(children[i]==other)
-                    break;
-                st=find_stacking_if_not_on_ws(ws, children[i]);
-                if(st!=NULL)
-                    other_on_list=st;
-            }
-        }
-        XFree(children);
-    }
-#endif
+    if(st==NULL)
+        return FALSE;
     
-    win=region_xwindow((WRegion*)ws);
-    if(win!=None){
-        xwindow_restack(win, other, mode);
-        other=win;
-        mode=Above;
-    }
-#if 0    
-    if(*stackingp==NULL)
-        return;
+    stacking_restack(stackingp, st, None, NULL, NULL,
+                     (order!=REGION_ORDER_FRONT));
     
-    stacking_restack(stackingp, other, mode, other_on_list, wsfilt, ws);
-#endif    
-}
-
-
-/*EXTL_DOC
- * Raise \var{reg} that must be managed by \var{ws}.
- * If \var{reg} is \code{nil}, this function silently fails.
- */
-EXTL_EXPORT_MEMBER
-void group_raise(WGroup *ws, WRegion *reg)
-{
-    WStacking **stackingp=group_get_stackingp(ws);
-
-    if(reg==NULL || stackingp==NULL || *stackingp==NULL)
-        return;
-
-    if(REGION_MANAGER(reg)!=(WRegion*)ws){
-        warn(TR("Region not managed by the workspace."));
-        return;
-    }
-    
-    stacking_do_raise(stackingp, reg, 
-                      None /*region_xwindow((WRegion*)ws)*/,
-                      NULL, NULL);
-}
-
-
-/*EXTL_DOC
- * Lower \var{reg} that must be managed by \var{ws}.
- * If \var{reg} is \code{nil}, this function silently fails.
- */
-EXTL_EXPORT_MEMBER
-void group_lower(WGroup *ws, WRegion *reg)
-{
-    WStacking **stackingp=group_get_stackingp(ws);
-
-    if(reg==NULL || stackingp==NULL || *stackingp==NULL)
-        return;
-
-    if(REGION_MANAGER(reg)!=(WRegion*)ws){
-        warn(TR("Region not managed by the workspace."));
-        return;
-    }
-    
-    stacking_do_lower(stackingp, reg, 
-                      None /*region_xwindow((WRegion*)ws)*/,
-                      NULL, NULL);
+    return TRUE;
 }
 
 
@@ -1251,6 +1175,7 @@ static DynFunTab group_dynfuntab[]={
 
     {region_do_set_focus, 
      group_do_set_focus},
+    
     {region_managed_activated, 
      group_managed_activated},
     
@@ -1298,6 +1223,9 @@ static DynFunTab group_dynfuntab[]={
     
     {(DynFun*)region_navi_next,
      (DynFun*)group_navi_next},
+    
+    {(DynFun*)region_managed_rqorder,
+     (DynFun*)group_managed_rqorder},
     
     END_DYNFUNTAB
 };

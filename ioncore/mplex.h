@@ -165,6 +165,11 @@ extern bool mplex_set_hidden(WMPlex *mplex, WRegion *reg, int sp);
 
 extern void mplex_do_set_focus(WMPlex *mplex, bool warp);
 
+/* Stacking */
+
+extern bool mplex_managed_rqorder(WMPlex *mplex, WRegion *sub, 
+                                  WRegionOrder order);
+
 /* Misc */
 
 extern WRegion *mplex_current(WMPlex *mplex);

@@ -58,6 +58,12 @@
 typedef int WRegionFitMode;
 
 
+typedef enum{
+    REGION_ORDER_FRONT,
+    REGION_ORDER_BACK
+} WRegionOrder;
+
+
 INTRSTRUCT(WFitParams);
 DECLSTRUCT(WFitParams){
     WRectangle g;
@@ -132,6 +138,8 @@ DYNFUN void region_managed_activated(WRegion *reg, WRegion *sub);
 DYNFUN void region_managed_inactivated(WRegion *reg, WRegion *sub);
 DYNFUN void region_managed_notify(WRegion *reg, WRegion *sub);
 DYNFUN bool region_managed_may_destroy(WRegion *mgr, WRegion *reg);
+DYNFUN bool region_managed_rqorder(WRegion *reg, WRegion *sub, 
+                                   WRegionOrder order);
 
 DYNFUN void region_child_removed(WRegion *reg, WRegion *sub);
 
@@ -142,11 +150,10 @@ DYNFUN void region_stacking(WRegion *reg, Window *bottomret, Window *topret);
 
 DYNFUN bool region_handle_drop(WRegion *reg, int x, int y, WRegion *dropped);
 
+extern bool region_rqorder(WRegion *reg, WRegionOrder order);
+
 extern bool region_prepare_focus(WRegion *reg, int flags,
                                  WPrepareFocusResult *res);
-
-extern void region_raise(WRegion *reg);
-extern void region_lower(WRegion *reg);
 
 extern void region_fit(WRegion *reg, const WRectangle *geom, 
                        WRegionFitMode mode);
