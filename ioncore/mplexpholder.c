@@ -43,7 +43,7 @@ static void do_link_ph(WMPlexPHolder *ph,
         if(after->after!=NULL){
             LINK_ITEM_AFTER(after->after->phs, after, ph, next, prev);
         }else{
-            assert(on_ph_list(mplex->mx_phs, ph));
+            assert(on_ph_list(mplex->mx_phs, after));
             LINK_ITEM_AFTER(mplex->mx_phs, after, ph, next, prev);
         }
         ph->after=after->after;
@@ -61,8 +61,7 @@ static void do_unlink_ph(WMPlexPHolder *ph, WMPlex *mplex)
 {
     if(ph->after!=NULL){
         UNLINK_ITEM(ph->after->phs, ph, next, prev);
-    }else if(mplex!=NULL){
-        assert(on_ph_list(mplex->mx_phs, ph));
+    }else if(mplex!=NULL && on_ph_list(mplex->mx_phs, ph)){
         UNLINK_ITEM(mplex->mx_phs, ph, next, prev);
     }else{
         assert(ph->next==NULL && ph->prev==NULL);
@@ -230,7 +229,6 @@ bool mplexpholder_do_attach(WMPlexPHolder *ph,
 {
     WMPlex *mplex=(WMPlex*)ph->mplex_watch.obj;
     WStacking *nnode=NULL;
-    WMPlexPHolder *ph2, *ph3=NULL;
     
     if(mplex==NULL)
         return FALSE;
@@ -245,13 +243,11 @@ bool mplexpholder_do_attach(WMPlexPHolder *ph,
         frp.trs_fn=hnd;
         frp.trs_fnparams=hnd_param;
         
-        nnode=mplex_do_attach_after(mplex, ph->after, 
-                                    &ph->param, grouped_handler, &frp);
+        nnode=mplex_do_attach_pholder(mplex, ph, grouped_handler, &frp);
     }
     
     if(nnode==NULL)
-        nnode=mplex_do_attach_after(mplex, ph->after, 
-                                    &ph->param, hnd, hnd_param);
+        nnode=mplex_do_attach_pholder(mplex, ph, hnd, hnd_param);
     
     if(nnode==NULL)
         return FALSE;
@@ -259,7 +255,7 @@ bool mplexpholder_do_attach(WMPlexPHolder *ph,
     if(nnode->lnode!=NULL){
         /* Move following placeholders after new node */
         while(ph->next!=NULL){
-            ph2=ph->next;
+            WMPlexPHolder *ph2=ph->next;
             do_unlink_ph(ph2, mplex);
             LINK_ITEM_FIRST(nnode->lnode->phs, ph2, next, prev);
         }

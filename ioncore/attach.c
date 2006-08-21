@@ -103,13 +103,12 @@ bool region__attach_reparent_check(WRegion *mgr, WRegion *reg)
 {
     WRegion *reg2;
     
-    if(REGION_MANAGER(reg)==mgr){
+    /*if(REGION_MANAGER(reg)==mgr){
         warn(TR("Same manager."));
         return FALSE;
-    }
+    }*/
     
     /* Check that reg is not a parent or manager of mgr */
-    reg2=mgr;
     for(reg2=mgr; reg2!=NULL; reg2=REGION_MANAGER(reg2)){
         if(reg2==reg)
             goto err;

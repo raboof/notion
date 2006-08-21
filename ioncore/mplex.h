@@ -131,11 +131,10 @@ extern WRegion *mplex_attach_new(WMPlex *mplex, ExtlTab param);
 
 extern WRegion *mplex_do_attach(WMPlex *mplex, WRegionAttachHandler *hnd,
                                 void *hnd_param, WMPlexAttachParams *param);
-extern WStacking *mplex_do_attach_after(WMPlex *mplex, 
-                                        WLListNode *after, 
-                                        WMPlexAttachParams *param,
-                                        WRegionAttachHandler *hnd,
-                                        void *hnd_param);
+extern WStacking *mplex_do_attach_pholder(WMPlex *mplex, 
+                                          WMPlexPHolder *ph,
+                                          WRegionAttachHandler *hnd,
+                                          void *hnd_param);
 
 extern void mplex_attach_tagged(WMPlex *mplex);
 

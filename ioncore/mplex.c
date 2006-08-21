@@ -1082,16 +1082,20 @@ static void mplex_unstack(WMPlex *mplex, WStacking *st)
 }
 
 
-WStacking *mplex_do_attach_after(WMPlex *mplex, 
-                                 WLListNode *after,
-                                 WMPlexAttachParams *param,
-                                 WRegionAttachHandler *hnd,
-                                 void *hnd_param)
+/* WMPlexWPHolder is used for position marking in order to allow
+ * WLListNodes be safely removed in the attach handler hnd, that
+ * could remove something this mplex is managing.
+ */
+WStacking *mplex_do_attach_pholder(WMPlex *mplex, 
+                                   WMPlexPHolder *ph,
+                                   WRegionAttachHandler *hnd,
+                                   void *hnd_param)
 {
     WRegion *reg;
     WFitParams fp;
     WStacking *node=NULL;
     WLListNode *lnode=NULL;
+    WMPlexAttachParams *param=&ph->param;
     WSizePolicy szplcy;
     bool mx_was_empty, sw, modal;
     uint level;
@@ -1172,7 +1176,9 @@ WStacking *mplex_do_attach_after(WMPlex *mplex,
     node->level=level;
     
     if(lnode!=NULL){
-        llist_link_after(&(mplex->mx_list), after, lnode);
+        llist_link_after(&(mplex->mx_list), 
+                         (ph!=NULL ? ph->after : NULL), 
+                         lnode);
         mplex->mx_count++;
     }
     
@@ -1197,28 +1203,20 @@ WStacking *mplex_do_attach_after(WMPlex *mplex,
 }
 
 
-static WLListNode *mplex_get_after(WMPlex *mplex, 
-                                   bool index_given, int index)
-{
-    if(!index_given)
-        index=mplex_default_index(mplex);
-
-    return llist_index_to_after(mplex->mx_list, mplex->mx_current, index);
-}
-    
-
 WRegion *mplex_do_attach(WMPlex *mplex, WRegionAttachHandler *hnd,
                          void *hnd_param, WMPlexAttachParams *param)
 {
-    WLListNode *after=NULL;
+    WMPlexPHolder *ph;
     WStacking *node;
     
-    if(!(param->flags&MPLEX_ATTACH_UNNUMBERED)){
-        after=mplex_get_after(mplex, param->flags&MPLEX_ATTACH_INDEX, 
-                              param->index);
-    }
+    ph=create_mplexpholder(mplex, NULL, param);
+    
+    if(ph==NULL)
+        return NULL;
 
-    node=mplex_do_attach_after(mplex, after, param, hnd, hnd_param);
+    node=mplex_do_attach_pholder(mplex, ph, hnd, hnd_param);
+    
+    destroy_obj((Obj*)ph);
     
     return (node!=NULL ? node->reg : NULL);
 }
@@ -1232,9 +1230,6 @@ WRegion *mplex_do_attach(WMPlex *mplex, WRegionAttachHandler *hnd,
 WRegion *mplex_attach_simple(WMPlex *mplex, WRegion *reg, int flags)
 {
     WMPlexAttachParams par;
-    
-    if(reg==(WRegion*)mplex)
-        return FALSE;
     
     par.flags=flags&~MPLEX_ATTACH_SET_FLAGS;
     
