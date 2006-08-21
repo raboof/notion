@@ -933,7 +933,7 @@ typedef WStacking *NxtFn(WMPlex *mplex, WStacking *st, bool wrap);
 
 
 static WRegion *do_navi(WMPlex *mplex, WStacking *sti, 
-                        NxtFn *fn, WRegionNaviData *data)
+                        NxtFn *fn, WRegionNaviData *data, bool sti_ok)
 {
     WStacking *st, *stacking;
     uint min_level=0;
@@ -948,26 +948,28 @@ static WRegion *do_navi(WMPlex *mplex, WStacking *sti,
     while(1){
         st=fn(mplex, st, wrap); 
         
-        if(st==NULL || st==sti)
+        if(st==NULL || (st==sti && !sti_ok))
             break;
         
-        if(st->hidden)
-            continue;
-        
-        if(OBJ_IS(st->reg, WGroup)){
-            /* WGroup navigation code should respect modal stuff. */
-            WRegion *res=region_navi_cont((WRegion*)mplex, st->reg, data);
-            if(res!=NULL){
-                if(res!=st->reg){
-                    return res;
-                }else{
-                    #warning "TODO: What to do?"
+        if(!st->hidden){
+            if(OBJ_IS(st->reg, WGroup)){
+                /* WGroup navigation code should respect modal stuff. */
+                WRegion *res=region_navi_cont((WRegion*)mplex, st->reg, data);
+                if(res!=NULL){
+                    if(res!=st->reg){
+                        return res;
+                    }else{
+                        #warning "TODO: What to do?"
+                    }
                 }
+            }else{
+                if(st->level>=min_level && !(st->reg->flags&REGION_SKIP_FOCUS))
+                    return region_navi_cont((WRegion*)mplex, st->reg, data);
             }
-        }else{
-            if(st->level>=min_level && !(st->reg->flags&REGION_SKIP_FOCUS))
-                return region_navi_cont((WRegion*)mplex, st->reg, data);
         }
+	        
+        if(st==sti)
+            break;
     }
     
     return NULL;
@@ -988,9 +990,9 @@ WRegion *mplex_navi_first(WMPlex *mplex, WRegionNavi nh,
     
     if(nh==REGION_NAVI_ANY || nh==REGION_NAVI_END || 
        nh==REGION_NAVI_BOTTOM || nh==REGION_NAVI_RIGHT){
-        return do_navi(mplex, lst, mplex_prv, data);
+        return do_navi(mplex, lst, mplex_prv, data, TRUE);
     }else{
-        return do_navi(mplex, lst->mgr_prev, mplex_nxt, data);
+        return do_navi(mplex, lst->mgr_prev, mplex_nxt, data, TRUE);
     }
 }
 
@@ -1016,9 +1018,9 @@ WRegion *mplex_navi_next(WMPlex *mplex, WRegion *rel, WRegionNavi nh,
     
     if(nh==REGION_NAVI_ANY || nh==REGION_NAVI_END || 
        nh==REGION_NAVI_BOTTOM || nh==REGION_NAVI_RIGHT){
-        return do_navi(mplex, st, mplex_nxt, data);
+        return do_navi(mplex, st, mplex_nxt, data, FALSE);
     }else{
-        return do_navi(mplex, st, mplex_prv, data);
+        return do_navi(mplex, st, mplex_prv, data, FALSE);
     }
 }
 

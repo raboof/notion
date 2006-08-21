@@ -847,7 +847,7 @@ static bool focusable(WGroup *ws, WStacking *st, uint min_level)
 
        
 static WStacking *do_get_next(WGroup *ws, WStacking *sti,
-                              NxtFn *fn, bool wrap)
+                              NxtFn *fn, bool wrap, bool sti_ok)
 {
     WStacking *st, *stacking;
     uint min_level=0;
@@ -867,6 +867,9 @@ static WStacking *do_get_next(WGroup *ws, WStacking *sti,
         if(focusable(ws, st, min_level))
             return st;
     }
+
+    if(sti_ok && focusable(ws, sti, min_level))
+        return st;
     
     return NULL;
 }
@@ -887,9 +890,9 @@ static WStacking *group_do_navi_first(WGroup *ws, WRegionNavi nh)
     
     if(nh==REGION_NAVI_ANY || nh==REGION_NAVI_END || 
        nh==REGION_NAVI_BOTTOM || nh==REGION_NAVI_RIGHT){
-        return do_get_next(ws, lst, prv, TRUE);
+        return do_get_next(ws, lst, prv, TRUE, TRUE);
     }else{
-        return do_get_next(ws, lst->mgr_prev, nxt, TRUE);
+        return do_get_next(ws, lst->mgr_prev, nxt, TRUE, TRUE);
     }
 }
 
@@ -911,9 +914,9 @@ static WStacking *group_do_navi_next(WGroup *ws, WStacking *st,
     
     if(nh==REGION_NAVI_ANY || nh==REGION_NAVI_END || 
        nh==REGION_NAVI_BOTTOM || nh==REGION_NAVI_RIGHT){
-        return do_get_next(ws, st, nxt, wrap);
+        return do_get_next(ws, st, nxt, wrap, FALSE);
     }else{
-        return do_get_next(ws, st, prv, wrap);
+        return do_get_next(ws, st, prv, wrap, FALSE);
     }
 }
 

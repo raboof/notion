@@ -150,7 +150,7 @@ static WRegion *region_navi_descend(WRegion *reg, WRegionNaviData *data)
         
         data->descend=TRUE;
         data->nh=ioncore_navi_reverse(data->nh);
-        
+
         nxt=region_navi_first(reg, data->nh, data);
         
         data->descend=FALSE;
