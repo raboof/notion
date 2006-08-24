@@ -43,6 +43,8 @@ DECLSTRUCT(Edln){
 bool edln_insstr(Edln *edln, const char *str);
 bool edln_insstr_n(Edln *edln, const char *str, int len,
                    bool update, bool movepoint);
+bool edln_transpose_chars(Edln *edln);
+bool edln_transpose_words(Edln *edln);
 void edln_back(Edln *edln);
 void edln_forward(Edln *edln);
 void edln_bol(Edln *edln);

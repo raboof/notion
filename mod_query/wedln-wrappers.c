@@ -32,6 +32,24 @@ void wedln_forward(WEdln *wedln)
 }
 
 /*EXTL_DOC
+ * Transpose characters.
+ */
+EXTL_EXPORT_MEMBER
+void wedln_transpose_chars(WEdln *wedln)
+{
+    edln_transpose_chars(&(wedln->edln));
+}
+
+/*EXTL_DOC
+ * Transpose words.
+ */
+EXTL_EXPORT_MEMBER
+void wedln_transpose_words(WEdln *wedln)
+{
+    edln_transpose_words(&(wedln->edln));
+}
+
+/*EXTL_DOC
  * Go to the beginning of line.
  */
 EXTL_EXPORT_MEMBER

@@ -200,6 +200,88 @@ bool edln_insstr_n(Edln *edln, const char *str, int l,
 /*}}}*/
 
 
+/*{{{ Transpose */
+
+
+bool edln_transpose_chars(Edln *edln)
+{
+    int off1, off2, pos;
+    char *buf;
+
+    if((edln->point==0) || (edln->psize<2))
+        return FALSE;
+
+    pos=edln->point;
+    if(edln->point==edln->psize)
+        pos=pos-str_prevoff(edln->p, edln->point);
+
+    off1=str_nextoff(edln->p, pos);
+    off2=str_prevoff(edln->p, pos);
+
+    buf=ALLOC_N(char, off2);
+    if(buf==NULL)
+        return FALSE;
+    memmove(buf, &(edln->p[pos-off2]), off2);
+    memmove(&(edln->p[pos-off2]), &(edln->p[pos]), off1);
+    memmove(&(edln->p[pos-off2+off1]), buf, off2);
+    FREE(buf);
+
+    if(edln->point!=edln->psize)
+        edln->point+=off1;
+
+    UPDATE_CHANGED(0);
+    return TRUE;
+}
+
+
+bool edln_transpose_words(Edln *edln)
+{
+    int m1, m2, m3, m4, off1, off2, oldp;
+    char *buf;
+
+    if((edln->point==edln->psize) || (edln->psize<3))
+        return FALSE;
+
+    oldp=edln->point;
+    edln_bskip_word(edln);
+    m1=edln->point;
+    edln_skip_word(edln);
+    m2=edln->point;
+    edln_skip_word(edln);
+    if(edln->point==m2)
+        goto noact;
+    m4=edln->point;
+    edln_bskip_word(edln);
+    if(edln->point==m1)
+        goto noact;
+    m3=edln->point;
+
+    off1=m4-m3;
+    off2=m3-m2;
+
+    buf=ALLOC_N(char, m4-m1);
+    if(buf==NULL)
+        goto noact;
+    memmove(buf, &(edln->p[m3]), off1);
+    memmove(buf+off1, &(edln->p[m2]), off2);
+    memmove(buf+off1+off2, &(edln->p[m1]), m2-m1);
+    memmove(&(edln->p[m1]), buf, m4-m1);
+    FREE(buf);
+
+    edln->point=m4;
+    UPDATE_CHANGED(0);
+    return TRUE;
+
+noact:
+    edln->point=oldp;
+    UPDATE_MOVED(edln->point);
+    return FALSE;
+}
+
+
+/*}}}*/
+
+
 /*{{{ Movement */
 
 
