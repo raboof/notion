@@ -44,8 +44,6 @@ defbindings("WEdln", {
     
     bdoc("Transpose characters."),
     kpress("Control+T", "WEdln.transpose_chars(_)"),
---    bdoc("Transpose words."),
---    kpress("Mod1+T", "WEdln.transpose_words(_)"),
 
     bdoc("Select next/previous (matching) history entry."),
     kpress("Control+P", "WEdln.history_prev(_)"),
@@ -71,6 +69,9 @@ defbindings("WEdln", {
         
         bdoc("Clear mark/cancel selection."),
         kpress("G", "WEdln.clear_mark(_)"),
+
+        --bdoc("Transpose words."),
+        --kpress("T", "WEdln.transpose_words(_)"),
     }),
 
     bdoc("Try to complete the entered text or cycle through completions."),
