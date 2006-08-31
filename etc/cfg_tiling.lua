@@ -13,7 +13,7 @@ defbindings("WTiling", {
     kpress(META.."N", "ioncore.goto_next(_sub, 'down', {no_ascend=_})"),
     kpress(META.."Tab", "ioncore.goto_next(_sub, 'right')"),
     submap(META.."K", {
-        kpress(META.."Tab", "ioncore.goto_next(_sub, 'left')"),
+        kpress("Tab", "ioncore.goto_next(_sub, 'left')"),
         
         bdoc("Split current frame horizontally."),
         kpress("S", "WTiling.split_at(_, _sub, 'right', true)"),
@@ -28,8 +28,21 @@ defbindings("WTiling", {
 -- that are common to all frame types and multiplexes are defined in
 -- ion-bindings.lua.
 
---defbindings("WFrame-on-WTiling", {
---})
+defbindings("WFrame-on-WTiling", {
+    submap(META.."K", {
+        bdoc("Detach window from tiling"),
+        kpress("D", "mod_tiling.detach(_sub)"),
+    }),
+})
+
+
+-- Should really only apply to frames in groups!
+--[[defbindings("WFrame", {
+    submap(META.."K", {
+        bdoc("Make frame bottom"),
+        kpress("B", "mod_tiling.mkbottom(_)"),
+    }),
+})]]
 
 -- Context menu for tiled workspaces.
 
