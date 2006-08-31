@@ -23,6 +23,15 @@ DECLSTRUCT(WRectangle){
     int w, h;
 };
 
+#define RECTANGLE_SAME   0x00
+#define RECTANGLE_X_DIFF 0x01
+#define RECTANGLE_Y_DIFF 0x02
+#define RECTANGLE_POS_DIFF (RECTANGLE_X_DIFF|RECTANGLE_Y_DIFF)
+#define RECTANGLE_W_DIFF 0x04
+#define RECTANGLE_H_DIFF 0x08
+#define RECTANGLE_SZ_DIFF (RECTANGLE_W_DIFF|RECTANGLE_H_DIFF)
+
+extern int rectangle_compare(const WRectangle *g, const WRectangle *h);
 extern bool rectangle_contains(const WRectangle *g, int x, int y);
 extern void rectangle_constrain(WRectangle *g, const WRectangle *bounds);
 

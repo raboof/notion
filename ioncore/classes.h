@@ -41,4 +41,6 @@ INTRSTRUCT(WStackingIterTmp);
 
 INTRSTRUCT(WSubmapState);
 
+INTRSTRUCT(WRegionAttachData);
+
 #endif /* ION_IONCORE_CLASSES_H */

@@ -24,24 +24,33 @@
 
 INTRSTRUCT(WGroupAttachParams);
 
+typedef WRegionSimpleCreateFn WGroupMkFrameFn;
+
+
 DECLSTRUCT(WGroupAttachParams){
     uint level_set:1;
     uint szplcy_set:1;
     uint geom_set:1;
+    uint pos_not_ok:1;
     uint switchto_set:1;
     uint switchto:1;
     
     uint modal:1;
     uint bottom:1;
-    uint passive:1;
+    
+    uint framed_inner_geom:1;
     
     uint level;
     WRectangle geom;
     WSizePolicy szplcy;
+    int framed_gravity;
+    WGroupMkFrameFn *framed_mkframe;
+    WRegion *stack_above;
 };
 
 #define GROUPATTACHPARAMS_INIT \
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, {0, 0, 0, 0}, 0}
+    {0, 0, 0, 0, 0,  0, 0,  0, 0,  0, {0, 0, 0, 0}, 0, 0, NULL, NULL}
+
 
 DECLCLASS(WGroup){
     WRegion reg;
@@ -70,11 +79,18 @@ extern WStacking *group_do_add_managed_default(WGroup *ws, WRegion *reg,
                                                int level, WSizePolicy szplcy);
 
 extern WRegion *group_do_attach(WGroup *ws, 
-                                WRegionAttachHandler *fn, void *fnparams, 
-                                const WGroupAttachParams *param);
+                                WGroupAttachParams *param,
+                                WRegionAttachData *data);
+extern bool group_do_attach_final(WGroup *ws, 
+                                  WRegion *reg,
+                                  const WGroupAttachParams *param);
 
 extern WRegion *group_attach(WGroup *ws, WRegion *reg, ExtlTab param);
 extern WRegion *group_attach_new(WGroup *ws, ExtlTab param);
+
+extern WRegion *group_do_attach_framed(WGroup *ws, 
+                                       const WGroupAttachParams *param,
+                                       WRegionAttachData *data);
 
 extern void group_manage_stdisp(WGroup *ws, WRegion *stdisp, 
                                 const WMPlexSTDispInfo *di);

@@ -76,6 +76,8 @@ DECLSTRUCT(WMPlexChangedParams){
 };
 
 
+#define MPLEXATTACHPARAMS_INIT {0, 0, {0, 0, 0, 0}, 0, 0}
+
 DECLSTRUCT(WMPlexAttachParams){
     int flags;
     int index;
@@ -129,12 +131,12 @@ extern WRegion *mplex_attach_simple(WMPlex *mplex, WRegion *reg,
 extern WRegion *mplex_attach(WMPlex *mplex, WRegion *reg, ExtlTab param);
 extern WRegion *mplex_attach_new(WMPlex *mplex, ExtlTab param);
 
-extern WRegion *mplex_do_attach(WMPlex *mplex, WRegionAttachHandler *hnd,
-                                void *hnd_param, WMPlexAttachParams *param);
-extern WStacking *mplex_do_attach_pholder(WMPlex *mplex, 
-                                          WMPlexPHolder *ph,
-                                          WRegionAttachHandler *hnd,
-                                          void *hnd_param);
+extern WRegion *mplex_do_attach_pholder(WMPlex *mplex, WMPlexPHolder *ph,
+                                        WRegionAttachData *data);
+extern WRegion *mplex_do_attach(WMPlex *mplex, WMPlexAttachParams *param,
+                                WRegionAttachData *data);
+extern WRegion *mplex_do_attach_new(WMPlex *mplex, WMPlexAttachParams *param,
+                                    WRegionCreateFn *fn, void *fn_param);
 
 extern void mplex_attach_tagged(WMPlex *mplex);
 

@@ -116,7 +116,7 @@ static bool do_leave_fullscreen(WRegion *reg, WPHolder **fs_pholder,
     
     cf=region_may_control_focus(reg);
     
-    if(!pholder_attach(*fs_pholder, reg, swf)){
+    if(!pholder_attach(*fs_pholder, swf, reg)){
         warn(TR("Failed to return from full screen mode; remaining manager "
                 "or parent from previous location refused to manage us."));
         return FALSE;

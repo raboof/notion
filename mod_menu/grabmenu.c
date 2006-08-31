@@ -81,10 +81,9 @@ WMenu *mod_menu_do_grabmenu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
                MPLEX_ATTACH_SIZEPOLICY);
     par.szplcy=SIZEPOLICY_FULL_BOUNDS;
 
-    menu=(WMenu*)mplex_do_attach(mplex,
-                                 (WRegionAttachHandler*)create_menu,
-                                 (void*)&fnp, 
-                                 &par);
+    menu=(WMenu*)mplex_do_attach_new(mplex, &par,
+                                     (WRegionCreateFn*)create_menu,
+                                     (void*)&fnp); 
     
     if(menu==NULL)
         return FALSE;

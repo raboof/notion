@@ -32,10 +32,10 @@ static bool on_ph_list(WMPlexPHolder *ll, WMPlexPHolder *ph)
 }
 
 
-static void do_link_ph(WMPlexPHolder *ph, 
-                       WMPlex *mplex,
-                       WMPlexPHolder *after,
-                       WLListNode *or_after)
+static void mplexpholder_do_link(WMPlexPHolder *ph, 
+                                 WMPlex *mplex,
+                                 WMPlexPHolder *after,
+                                 WLListNode *or_after)
 {
     assert(mplex==(WMPlex*)ph->mplex_watch.obj && mplex!=NULL);
     
@@ -57,7 +57,7 @@ static void do_link_ph(WMPlexPHolder *ph,
 }
 
 
-static void do_unlink_ph(WMPlexPHolder *ph, WMPlex *mplex)
+void mplexpholder_do_unlink(WMPlexPHolder *ph, WMPlex *mplex)
 {
     if(ph->after!=NULL){
         UNLINK_ITEM(ph->after->phs, ph, next, prev);
@@ -82,7 +82,7 @@ static void do_unlink_ph(WMPlexPHolder *ph, WMPlex *mplex)
 static void mplex_watch_handler(Watch *watch, Obj *mplex)
 {
     WMPlexPHolder *ph=FIELD_TO_STRUCT(WMPlexPHolder, mplex_watch, watch);
-    do_unlink_ph(ph, (WMPlex*)mplex);
+    mplexpholder_do_unlink(ph, (WMPlex*)mplex);
     pholder_redirect(&(ph->ph), (WRegion*)mplex);
 }
 
@@ -112,9 +112,9 @@ bool mplexpholder_init(WMPlexPHolder *ph, WMPlex *mplex, WStacking *st,
     
     if(st!=NULL){
         if(st->lnode!=NULL)
-            do_link_ph(ph, mplex, 
-                       LIST_LAST(st->lnode->phs, next, prev), 
-                       st->lnode);
+            mplexpholder_do_link(ph, mplex, 
+                                 LIST_LAST(st->lnode->phs, next, prev), 
+                                 st->lnode);
         else
             ph->param.flags|=MPLEX_ATTACH_UNNUMBERED;
         
@@ -141,7 +141,7 @@ bool mplexpholder_init(WMPlexPHolder *ph, WMPlex *mplex, WStacking *st,
                                      : LIST_LAST(mplex->mx_phs, next, prev))
                                   : NULL);
 
-            do_link_ph(ph, mplex, after, or_after);
+            mplexpholder_do_link(ph, mplex, after, or_after);
         }
     }
     
@@ -159,7 +159,7 @@ WMPlexPHolder *create_mplexpholder(WMPlex *mplex,
 
 void mplexpholder_deinit(WMPlexPHolder *ph)
 {
-    do_unlink_ph(ph, (WMPlex*)ph->mplex_watch.obj);
+    mplexpholder_do_unlink(ph, (WMPlex*)ph->mplex_watch.obj);
     watch_reset(&(ph->mplex_watch));
     pholder_deinit(&(ph->ph));
 }
@@ -171,17 +171,11 @@ void mplexpholder_deinit(WMPlexPHolder *ph)
 /*{{{ Move, attach, layer */
 
 
-typedef struct{
-    WRegionAttachHandler *trs_fn;
-    void *trs_fnparams;
-} GroupedParam;
-
-
 WRegion *grouped_handler(WWindow *par, 
                          const WFitParams *fp, 
                          void *frp_)
 {
-    GroupedParam *frp=(GroupedParam*)frp_;
+    WRegionAttachData *data=(WRegionAttachData*)frp_;
     WGroupAttachParams param=GROUPATTACHPARAMS_INIT;
     WGroupCW *cwg;
     WRegion *reg;
@@ -205,7 +199,7 @@ WRegion *grouped_handler(WWindow *par,
         param.szplcy_set=TRUE;
     }
     
-    reg=group_do_attach(&cwg->grp, frp->trs_fn, frp->trs_fnparams, &param);
+    reg=group_do_attach(&cwg->grp, &param, data);
     
     if(reg==NULL){
         destroy_obj((Obj*)cwg);
@@ -223,12 +217,11 @@ WRegion *grouped_handler(WWindow *par,
 }
 
 
-bool mplexpholder_do_attach(WMPlexPHolder *ph, 
-                            WRegionAttachHandler *hnd, void *hnd_param, 
-                            int flags)
+bool mplexpholder_do_attach(WMPlexPHolder *ph, int flags,
+                            WRegionAttachData *data)
 {
     WMPlex *mplex=(WMPlex*)ph->mplex_watch.obj;
-    WStacking *nnode=NULL;
+    WRegion *reg=NULL;
     
     if(mplex==NULL)
         return FALSE;
@@ -239,29 +232,19 @@ bool mplexpholder_do_attach(WMPlexPHolder *ph,
         ph->param.flags&=~MPLEX_ATTACH_SWITCHTO;
     
     if(ph->initial){
-        GroupedParam frp;
-        frp.trs_fn=hnd;
-        frp.trs_fnparams=hnd_param;
+        WRegionAttachData gd;
         
-        nnode=mplex_do_attach_pholder(mplex, ph, grouped_handler, &frp);
+        gd.type=REGION_ATTACH_NEW;
+        gd.u.n.fn=grouped_handler;
+        gd.u.n.param=data;
+        
+        reg=mplex_do_attach_pholder(mplex, ph, &gd);
     }
     
-    if(nnode==NULL)
-        nnode=mplex_do_attach_pholder(mplex, ph, hnd, hnd_param);
+    if(reg==NULL)
+        reg=mplex_do_attach_pholder(mplex, ph, data);
     
-    if(nnode==NULL)
-        return FALSE;
-    
-    if(nnode->lnode!=NULL){
-        /* Move following placeholders after new node */
-        while(ph->next!=NULL){
-            WMPlexPHolder *ph2=ph->next;
-            do_unlink_ph(ph2, mplex);
-            LINK_ITEM_FIRST(nnode->lnode->phs, ph2, next, prev);
-        }
-    }
-
-    return TRUE;
+    return (reg!=NULL);
 }
 
 
@@ -270,7 +253,7 @@ bool mplexpholder_move(WMPlexPHolder *ph, WMPlex *mplex,
                        WLListNode *or_after)
 
 {
-    do_unlink_ph(ph, (WMPlex*)ph->mplex_watch.obj);
+    mplexpholder_do_unlink(ph, (WMPlex*)ph->mplex_watch.obj);
 
     watch_reset(&(ph->mplex_watch));
     
@@ -280,7 +263,7 @@ bool mplexpholder_move(WMPlexPHolder *ph, WMPlex *mplex,
     if(!watch_setup(&(ph->mplex_watch), (Obj*)mplex, mplex_watch_handler))
         return FALSE;
 
-    do_link_ph(ph, mplex, after, or_after);
+    mplexpholder_do_link(ph, mplex, after, or_after);
     
     return TRUE;
 }
@@ -320,8 +303,8 @@ void mplex_move_phs(WMPlex *mplex, WLListNode *node,
     while(node->phs!=NULL){
         ph=node->phs;
         
-        do_unlink_ph(ph, mplex);
-        do_link_ph(ph, mplex, after, or_after);
+        mplexpholder_do_unlink(ph, mplex);
+        mplexpholder_do_link(ph, mplex, after, or_after);
         
         after=ph;
     }

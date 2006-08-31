@@ -9,6 +9,8 @@
  * (at your option) any later version.
  */
 
+#include <string.h>
+
 #include <libtu/objp.h>
 #include <libextl/extl.h>
 #include <libmainloop/defer.h>

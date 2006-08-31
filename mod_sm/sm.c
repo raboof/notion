@@ -57,7 +57,7 @@ static bool sm_do_manage(WClientWin *cwin, const WManageParams *param)
     if(ph==NULL)
         return FALSE;
     
-    ret=pholder_attach(ph, (WRegion*)cwin, 0);
+    ret=pholder_attach(ph, 0, (WRegion*)cwin);
     
     destroy_obj((Obj*)ph);
     

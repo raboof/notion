@@ -45,9 +45,8 @@ WEdln *mod_query_do_query(WMPlex *mplex, const char *prompt, const char *dflt,
                MPLEX_ATTACH_SIZEPOLICY);
     par.szplcy=SIZEPOLICY_FULL_BOUNDS;
 
-    return (WEdln*)mplex_do_attach(mplex,
-                                   (WRegionAttachHandler*)create_wedln,
-                                   (void*)&fnp, 
-                                   &par);
+    return (WEdln*)mplex_do_attach_new(mplex, &par,
+                                       (WRegionCreateFn*)create_wedln,
+                                       (void*)&fnp); 
 }
 

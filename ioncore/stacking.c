@@ -42,7 +42,7 @@ void stacking_free(WStacking *st)
 {
     assert(st->mgr_next==NULL && st->mgr_prev==NULL &&
            st->next==NULL && st->prev==NULL &&
-           st->above==NULL &&
+           /*st->above==NULL &&*/
            st->lnode==NULL &&
            st->reg==NULL);
     

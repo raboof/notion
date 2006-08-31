@@ -21,16 +21,18 @@ INTRCLASS(WGroupPHolder);
 DECLCLASS(WGroupPHolder){
     WPHolder ph;
     Watch group_watch;
-    WRectangle geom;
-    uint level;
-    WSizePolicy szplcy;
+    Watch stack_above_watch;
+    WGroupAttachParams param;
 };
 
 extern WGroupPHolder *create_grouppholder(WGroup *group, 
-                                          const WStacking *st);
+                                          const WStacking *either_st,
+                                          const WGroupAttachParams *or_param);
 
-extern bool grouppholder_init(WGroupPHolder *ph, WGroup *group,
-                              const WStacking *st);
+extern bool grouppholder_init(WGroupPHolder *ph, 
+                              WGroup *group,
+                              const WStacking *either_st,
+                              const WGroupAttachParams *or_param);
 
 extern void grouppholder_deinit(WGroupPHolder *ph);
 
@@ -38,10 +40,8 @@ extern bool grouppholder_do_goto(WGroupPHolder *ph);
 
 extern WRegion *grouppholder_do_target(WGroupPHolder *ph);
 
-extern bool grouppholder_do_attach(WGroupPHolder *ph, 
-                                   WRegionAttachHandler *hnd,
-                                   void *hnd_param,
-                                   int flags);
+extern bool grouppholder_do_attach(WGroupPHolder *ph, int flags, 
+                                   WRegionAttachData *data);
 
 extern WGroupPHolder *group_managed_get_pholder(WGroup *group, 
                                                 WRegion *mgd);

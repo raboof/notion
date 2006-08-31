@@ -32,12 +32,17 @@ static void group_watch_handler(Watch *watch, Obj *ws)
 }
 
 
+static WGroupAttachParams dummy_param=GROUPATTACHPARAMS_INIT;
+
+
 bool grouppholder_init(WGroupPHolder *ph, WGroup *ws,
-                       const WStacking *st)
+                       const WStacking *st,
+                       const WGroupAttachParams *param)
 {
     pholder_init(&(ph->ph));
 
     watch_init(&(ph->group_watch));
+    watch_init(&(ph->stack_above_watch));
     
     if(ws!=NULL){
         if(!watch_setup(&(ph->group_watch), (Obj*)ws, 
@@ -47,32 +52,59 @@ bool grouppholder_init(WGroupPHolder *ph, WGroup *ws,
         }
     }
     
-    /* TODO? Just link to the stacking structure to remember 
-     * stacking order? 
-     */
+    if(param==NULL)
+        param=&dummy_param;
     
-    ph->szplcy=st->szplcy;
-    ph->level=st->level;
-    
-    if(st->reg!=NULL)
-        ph->geom=REGION_GEOM(st->reg);
-    else
-        ph->geom=REGION_GEOM(ws);
+    if(st!=NULL){
+        /* TODO? Just link to the stacking structure to remember 
+         * stacking order? 
+         */
+        
+        ph->param.szplcy_set=TRUE;
+        ph->param.szplcy=st->szplcy;
+        ph->param.level_set=TRUE;
+        ph->param.level=st->level;
+        
+        if(st->reg!=NULL){
+            ph->param.geom_set=TRUE;
+            ph->param.geom=REGION_GEOM(st->reg);
+        }
+        
+        if(st->above!=NULL && st->above->reg!=NULL)
+            ph->param.stack_above=st->above->reg;
+        
+        ph->param.modal=FALSE;
+        ph->param.bottom=(st==ws->bottom);
+        /*ph->passive=FALSE;*/
+    }else{
+        ph->param=*param;
+    }
+
+    ph->param.switchto_set=FALSE;
+
+    if(ph->param.stack_above!=NULL){
+        /* We must move stack_above pointer into a Watch. */
+        watch_setup(&(ph->stack_above_watch), 
+                    (Obj*)ph->param.stack_above, NULL);
+        ph->param.stack_above=NULL;
+    }
     
     return TRUE;
 }
  
 
 WGroupPHolder *create_grouppholder(WGroup *ws,
-                                   const WStacking *st)
+                                   const WStacking *st,
+                                   const WGroupAttachParams *param)
 {
-    CREATEOBJ_IMPL(WGroupPHolder, grouppholder, (p, ws, st));
+    CREATEOBJ_IMPL(WGroupPHolder, grouppholder, (p, ws, st, param));
 }
 
 
 void grouppholder_deinit(WGroupPHolder *ph)
 {
     watch_reset(&(ph->group_watch));
+    watch_reset(&(ph->stack_above_watch));
     pholder_deinit(&(ph->ph));
 }
 
@@ -83,33 +115,24 @@ void grouppholder_deinit(WGroupPHolder *ph)
 /*{{{ Dynfuns */
 
 
-bool grouppholder_do_attach(WGroupPHolder *ph, 
-                            WRegionAttachHandler *hnd, void *hnd_param,
-                            int flags)
+bool grouppholder_do_attach(WGroupPHolder *ph, int flags,
+                            WRegionAttachData *data)
 {
     WGroup *ws=(WGroup*)ph->group_watch.obj;
     WRegion *reg;
-    WGroupAttachParams param;
 
     if(ws==NULL)
         return FALSE;
 
-    param.level_set=1;
-    param.level=ph->level;
+    ph->param.switchto_set=1;
+    ph->param.switchto=(flags&PHOLDER_ATTACH_SWITCHTO ? 1 : 0);
     
-    param.szplcy_set=1;
-    param.szplcy=ph->szplcy;
+    /* Get stack_above from Watch. */
+    ph->param.stack_above=(WRegion*)ph->stack_above_watch.obj;
     
-    param.geom_set=1;
-    param.geom=ph->geom;
+    reg=group_do_attach(ws, &ph->param, data);
     
-    param.switchto_set=1;
-    param.switchto=(flags&PHOLDER_ATTACH_SWITCHTO ? 1 : 0);
-    
-    /* Should these be remembered? */
-    param.bottom=0;
-    
-    reg=group_do_attach(ws, hnd, hnd_param, &param);
+    ph->param.stack_above=NULL;
 
     return (reg!=NULL);
 }
@@ -145,7 +168,7 @@ WGroupPHolder *group_managed_get_pholder(WGroup *ws, WRegion *mgd)
     if(mgd==NULL)
         return NULL;
     else
-        return create_grouppholder(ws, st);
+        return create_grouppholder(ws, st, NULL);
 }
 
 

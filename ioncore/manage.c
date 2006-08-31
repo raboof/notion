@@ -116,7 +116,7 @@ bool clientwin_do_manage_default(WClientWin *cwin,
     /* Not in full-screen mode; use the placeholder to attach. */
     
     swf=(param->switchto ? PHOLDER_ATTACH_SWITCHTO : 0);
-    ok=pholder_attach(ph, (WRegion*)cwin, swf);
+    ok=pholder_attach(ph, swf, (WRegion*)cwin);
     destroy_obj((Obj*)ph);
     
     return ok;
@@ -192,7 +192,7 @@ bool region_manage_clientwin(WRegion *reg, WClientWin *cwin,
     if(ph==NULL)
         return FALSE;
     
-    ret=pholder_attach(ph, (WRegion*)cwin, swf);
+    ret=pholder_attach(ph, swf, (WRegion*)cwin);
     
     destroy_obj((Obj*)ph);
     
@@ -240,7 +240,7 @@ bool region_rescue_some_clientwins(WRegion *reg, WPHolder *ph,
             if(!region_rescue_clientwins(tosave, ph))
                 fails++;
         }else{
-            if(!pholder_attach(ph, tosave, 0))
+            if(!pholder_attach(ph, 0, tosave))
                 fails++;
         }
     }

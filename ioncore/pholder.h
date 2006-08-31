@@ -31,11 +31,10 @@ DECLCLASS(WPHolder){
 extern bool pholder_init(WPHolder *ph);
 extern void pholder_deinit(WPHolder *ph);
 
-DYNFUN bool pholder_do_attach(WPHolder *ph, 
-                              WRegionAttachHandler *hnd, void *hnd_param,
-                              int flags);
+DYNFUN bool pholder_do_attach(WPHolder *ph, int flags,
+                              WRegionAttachData *data);
 
-extern bool pholder_attach(WPHolder *ph, WRegion *reg, int flags);
+extern bool pholder_attach(WPHolder *ph, int flags, WRegion *reg);
 
 DYNFUN WRegion *pholder_do_target(WPHolder *ph);
 

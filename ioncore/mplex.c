@@ -1088,17 +1088,11 @@ static void mplex_unstack(WMPlex *mplex, WStacking *st)
  * WLListNodes be safely removed in the attach handler hnd, that
  * could remove something this mplex is managing.
  */
-WStacking *mplex_do_attach_pholder(WMPlex *mplex, 
-                                   WMPlexPHolder *ph,
-                                   WRegionAttachHandler *hnd,
-                                   void *hnd_param)
+bool mplex_do_attach_final(WMPlex *mplex, WRegion *reg, WMPlexPHolder *ph)
 {
-    WRegion *reg;
-    WFitParams fp;
     WStacking *node=NULL;
     WLListNode *lnode=NULL;
     WMPlexAttachParams *param=&ph->param;
-    WSizePolicy szplcy;
     bool mx_was_empty, sw, modal;
     uint level;
     
@@ -1121,31 +1115,16 @@ WStacking *mplex_do_attach_pholder(WMPlex *mplex,
             ? modal && !(param->flags&MPLEX_ATTACH_HIDDEN)
             : mx_was_empty || !(param->flags&MPLEX_ATTACH_HIDDEN)));
     
-    szplcy=(param->flags&MPLEX_ATTACH_SIZEPOLICY &&
-            param->szplcy!=SIZEPOLICY_DEFAULT
-            ? param->szplcy
-            : (param->flags&MPLEX_ATTACH_UNNUMBERED
-               ? SIZEPOLICY_FULL_BOUNDS
-               : SIZEPOLICY_FULL_EXACT));
-    
-    mplex_managed_geom(mplex, &(fp.g));
-    
-    sizepolicy(&szplcy, NULL, 
-               (param->flags&MPLEX_ATTACH_GEOM 
-                ? &(param->geom)
-                : NULL),
-               0, &fp);
-
     node=create_stacking();
     
     if(node==NULL)
-        return NULL;
+        return FALSE;
     
     if(!(param->flags&MPLEX_ATTACH_UNNUMBERED)){
         lnode=ALLOC(WLListNode);
         if(lnode==NULL){
             stacking_free(node);
-            return NULL;
+            return FALSE;
         }
         lnode->next=NULL;
         lnode->prev=NULL;
@@ -1154,27 +1133,17 @@ WStacking *mplex_do_attach_pholder(WMPlex *mplex,
         node->lnode=lnode;
     }
     
-    if(param->flags&MPLEX_ATTACH_WHATEVER)
-        fp.mode|=REGION_FIT_WHATEVER;
-        
-    reg=hnd((WWindow*)mplex, &fp, hnd_param);
-    
-    if(reg==NULL){
+    if(!stacking_assoc(node, reg)){
         if(lnode!=NULL){
             node->lnode=NULL;
             free(lnode);
         }
         stacking_free(node);
-        return NULL;
-    }
-    
-    if(!stacking_assoc(node, reg)){
-        #warning "TODO: What to do?"
-        node->reg=reg;
+        return FALSE;
     }
 
     node->hidden=TRUE;
-    node->szplcy=szplcy;
+    node->szplcy=param->szplcy;
     node->level=level;
     
     if(lnode!=NULL){
@@ -1182,6 +1151,13 @@ WStacking *mplex_do_attach_pholder(WMPlex *mplex,
                          (ph!=NULL ? ph->after : NULL), 
                          lnode);
         mplex->mx_count++;
+        
+        /* Move following placeholders after new node */
+        while(ph->next!=NULL){
+            WMPlexPHolder *ph2=ph->next;
+            mplexpholder_do_unlink(ph2, mplex);
+            LINK_ITEM_FIRST(lnode->phs, ph2, next, prev);
+        }
     }
     
     region_set_manager(reg, (WRegion*)mplex);
@@ -1201,26 +1177,77 @@ WStacking *mplex_do_attach_pholder(WMPlex *mplex,
     if(lnode!=NULL)
         mplex_managed_changed(mplex, MPLEX_CHANGE_ADD, sw, reg);
     
-    return node;
+    return TRUE;
 }
 
 
-WRegion *mplex_do_attach(WMPlex *mplex, WRegionAttachHandler *hnd,
-                         void *hnd_param, WMPlexAttachParams *param)
+WRegion *mplex_do_attach_pholder(WMPlex *mplex, WMPlexPHolder *ph,
+                                 WRegionAttachData *data)
+{
+    WMPlexAttachParams *param=&(ph->param);
+    WSizePolicy szplcy=param->szplcy;
+    WFitParams fp;
+    WRegion *reg;
+    
+    param->szplcy=(param->flags&MPLEX_ATTACH_SIZEPOLICY &&
+                   param->szplcy!=SIZEPOLICY_DEFAULT
+                   ? param->szplcy
+                   : (param->flags&MPLEX_ATTACH_UNNUMBERED
+                      ? SIZEPOLICY_FULL_BOUNDS
+                      : SIZEPOLICY_FULL_EXACT));
+    
+    mplex_managed_geom(mplex, &(fp.g));
+    
+    sizepolicy(&param->szplcy, NULL, 
+               (param->flags&MPLEX_ATTACH_GEOM 
+                ? &(param->geom)
+                : NULL),
+               0, &fp);
+    
+    if(param->flags&MPLEX_ATTACH_WHATEVER)
+        fp.mode|=REGION_FIT_WHATEVER;
+    
+    reg=region_attach_helper((WRegion*)mplex, 
+                             (WWindow*)mplex, &fp,
+                             (WRegionDoAttachFn*)mplex_do_attach_final,
+                             (void*)ph, data);
+    
+    /* restore */
+    ph->param.szplcy=szplcy;
+    
+    return reg;
+}
+
+
+WRegion *mplex_do_attach(WMPlex *mplex, WMPlexAttachParams *param,
+                         WRegionAttachData *data)
 {
     WMPlexPHolder *ph;
-    WStacking *node;
+    WRegion *reg;
     
     ph=create_mplexpholder(mplex, NULL, param);
     
     if(ph==NULL)
         return NULL;
 
-    node=mplex_do_attach_pholder(mplex, ph, hnd, hnd_param);
+    reg=mplex_do_attach_pholder(mplex, ph, data);
     
     destroy_obj((Obj*)ph);
     
-    return (node!=NULL ? node->reg : NULL);
+    return reg;
+}
+
+
+WRegion *mplex_do_attach_new(WMPlex *mplex, WMPlexAttachParams *param,
+                             WRegionCreateFn *fn, void *fn_param)
+{
+    WRegionAttachData data;
+    
+    data.type=REGION_ATTACH_NEW;
+    data.u.n.fn=fn;
+    data.u.n.param=fn_param;
+    
+    return mplex_do_attach(mplex, param, &data);
 }
 
 
@@ -1231,13 +1258,15 @@ WRegion *mplex_do_attach(WMPlex *mplex, WRegionAttachHandler *hnd,
 
 WRegion *mplex_attach_simple(WMPlex *mplex, WRegion *reg, int flags)
 {
-    WMPlexAttachParams par;
+    WMPlexAttachParams param;
+    WRegionAttachData data;
     
-    par.flags=flags&~MPLEX_ATTACH_SET_FLAGS;
+    param.flags=flags&~MPLEX_ATTACH_SET_FLAGS;
     
-    return region__attach_reparent((WRegion*)mplex, reg,
-                                   (WRegionDoAttachFn*)mplex_do_attach, 
-                                   &par);
+    data.type=REGION_ATTACH_REPARENT;
+    data.u.reg=reg;
+    
+    return mplex_do_attach(mplex, &param, &data);
 }
 
 
@@ -1298,15 +1327,17 @@ EXTL_EXPORT_MEMBER
 WRegion *mplex_attach(WMPlex *mplex, WRegion *reg, ExtlTab param)
 {
     WMPlexAttachParams par;
-    get_params(mplex, param, &par);
-    
-    /* region__attach_reparent should do better checks. */
-    if(reg==NULL || reg==(WRegion*)mplex)
+    WRegionAttachData data;
+
+    if(reg==NULL)
         return NULL;
     
-    return region__attach_reparent((WRegion*)mplex, reg,
-                                   (WRegionDoAttachFn*)mplex_do_attach, 
-                                   &par);
+    get_params(mplex, param, &par);
+    
+    data.type=REGION_ATTACH_REPARENT;
+    data.u.reg=reg;
+    
+    return mplex_do_attach(mplex, &par, &data);
 }
 
 
@@ -1339,11 +1370,14 @@ EXTL_EXPORT_MEMBER
 WRegion *mplex_attach_new(WMPlex *mplex, ExtlTab param)
 {
     WMPlexAttachParams par;
+    WRegionAttachData data;
+    
     get_params(mplex, param, &par);
     
-    return region__attach_load((WRegion*)mplex, param,
-                               (WRegionDoAttachFn*)mplex_do_attach, 
-                               &par);
+    data.type=REGION_ATTACH_LOAD;
+    data.u.tab=param;
+    
+    return mplex_do_attach(mplex, &par, &data);
 }
 
 
@@ -1609,13 +1643,10 @@ static StringIntMap pos_map[]={
 };
 
 
-static WRegion *do_attach_stdisp(WMPlex *mplex, WRegionAttachHandler *handler,
-                                 void *handlerparams, const WFitParams *fp)
+static bool do_attach_stdisp(WRegion *mplex, WRegion *reg, void *unused)
 {
-    return handler((WWindow*)mplex, fp, handlerparams);
-    /* We do not manage the stdisp, so manager is not set in this
-     * function unlike a true "attach" function.
-     */
+    /* We do not actually manage the stdisp. */
+    return TRUE;
 }
 
 
@@ -1659,6 +1690,7 @@ WRegion *mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t)
     extl_table_gets_s(t, "action", &s);
     
     if(s==NULL || strcmp(s, "replace")==0){
+        WRegionAttachData data;
         WFitParams fp;
         int o2;
         
@@ -1673,9 +1705,13 @@ WRegion *mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t)
          */
         extl_table_gets_rectangle(t, "geom", &(fp.g));
         
-        stdisp=region__attach_load((WRegion*)mplex, t,
-                                   (WRegionDoAttachFn*)do_attach_stdisp, 
-                                   (void*)&fp);
+        data.type=REGION_ATTACH_LOAD;
+        data.u.tab=t;
+            
+        stdisp=region_attach_helper((WRegion*)mplex, 
+                                    (WWindow*)mplex, &fp,
+                                    do_attach_stdisp, NULL,
+                                    &data);
         
         if(stdisp==NULL)
             return NULL;
@@ -1938,6 +1974,7 @@ void mplex_load_contents(WMPlex *mplex, ExtlTab tab)
             if(extl_table_geti_t(substab, i, &subtab)){
                 /*mplex_attach_new(mplex, subtab);*/
                 WMPlexAttachParams par;
+                WRegionAttachData data;
                 char *tmp=NULL;
                 
                 get_params(mplex, subtab, &par);
@@ -1948,11 +1985,12 @@ void mplex_load_contents(WMPlex *mplex, ExtlTab tab)
                 tmp_par=&par;
                 tmp_mplex=mplex;
                 
+                data.type=REGION_ATTACH_LOAD;
+                data.u.tab=subtab;
+                
                 ioncore_set_sm_pholder_callback(pholder_callback);
     
-                region__attach_load((WRegion*)mplex, subtab,
-                                    (WRegionDoAttachFn*)mplex_do_attach, 
-                                    &par);
+                mplex_do_attach(mplex, &par, &data);
 
                 tmp_mplex=NULL;
                 

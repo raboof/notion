@@ -27,8 +27,6 @@ extern bool groupcw_init(WGroupCW *cwg, WWindow *parent, const WFitParams *fp);
 extern WGroupCW *create_groupcw(WWindow *parent, const WFitParams *fp);
 extern void groupcw_deinit(WGroupCW *cwg);
 
-extern bool groupcw_attach_transient(WGroupCW *cwg, WRegion *transient);
-
 extern WPHolder *groupcw_prepare_manage(WGroupCW *cwg, 
                                         const WClientWin *cwin2,
                                         const WManageParams *param, 

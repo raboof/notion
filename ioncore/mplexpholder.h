@@ -42,9 +42,8 @@ extern void mplexpholder_deinit(WMPlexPHolder *ph);
 
 extern int mplexpholder_layer(WMPlexPHolder *ph);
 
-extern bool mplexpholder_do_attach(WMPlexPHolder *ph, 
-                                   WRegionAttachHandler *hnd, void *hnd_param, 
-                                   int flags);
+extern bool mplexpholder_do_attach(WMPlexPHolder *ph, int flags,
+                                   WRegionAttachData *data);
 
 extern bool mplexpholder_do_goto(WMPlexPHolder *ph);
 
@@ -53,6 +52,8 @@ extern WRegion *mplexpholder_do_target(WMPlexPHolder *ph);
 extern bool mplexpholder_move(WMPlexPHolder *ph, WMPlex *mplex, 
                               WMPlexPHolder *after,
                               WLListNode *or_after);
+
+extern void mplexpholder_do_unlink(WMPlexPHolder *ph, WMPlex *mplex);
 
 extern void mplex_move_phs(WMPlex *mplex, WLListNode *node,
                            WMPlexPHolder *after,

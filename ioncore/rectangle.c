@@ -10,8 +10,9 @@
  */
 
 #include <libtu/minmax.h>
-#include "common.h"
 #include <libextl/extl.h>
+
+#include "common.h"
 #include "rectangle.h"
 
 
@@ -38,3 +39,10 @@ void rectangle_debugprint(const WRectangle *g, const char *n)
 }
 
 
+int rectangle_compare(const WRectangle *g, const WRectangle *h)
+{
+    return ((g->x!=h->x ? RECTANGLE_X_DIFF : 0) |
+            (g->y!=h->y ? RECTANGLE_Y_DIFF : 0) |
+            (g->w!=h->w ? RECTANGLE_W_DIFF : 0) |
+            (g->h!=h->h ? RECTANGLE_H_DIFF : 0));
+}

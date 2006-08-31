@@ -20,7 +20,6 @@
 #include "resize.h"
 #include "pholder.h"
 #include "names.h"
-#include "basicpholder.h"
 
 
 #define DFLT_SZPLCY SIZEPOLICY_FREE_GLUE__SOUTH
@@ -29,20 +28,10 @@
 /*{{{ Add/remove managed */
 
 
-typedef struct{
-    WRegionAttachHandler *trs_fn;
-    void *trs_fnparams;
-} FramedParam;
-
-
-WRegion *framed_handler(WWindow *par, 
-                        const WFitParams *fp, 
-                        void *frp_)
+static WRegion *create_transient_frame(WWindow *par, 
+                                       const WFitParams *fp)
 {
-    FramedParam *frp=(FramedParam*)frp_;
-    WMPlexAttachParams param;
     WFrame *frame;
-    WRegion *reg;
 
     frame=create_frame(par, fp, "frame-transientcontainer");
         
@@ -59,13 +48,16 @@ WRegion *framed_handler(WWindow *par,
                    FRAME_SZH_USEMINMAX|
                    FRAME_FWD_CWIN_RQGEOM);
 
+    return (WRegion*)frame;
+}
+
+#if 0
+{
     param.flags=(fp->mode&REGION_FIT_WHATEVER
                  ? MPLEX_ATTACH_WHATEVER
                  : 0);
     
-    reg=mplex_do_attach((WMPlex*)frame, 
-                        frp->trs_fn, frp->trs_fnparams, 
-                        &param);
+    reg=mplex_do_attach((WMPlex*)frame, &param, data);
     
     if(reg==NULL){
         destroy_obj((Obj*)frame);
@@ -93,16 +85,14 @@ WRegion *framed_handler(WWindow *par,
 
     return (WRegion*)frame;
 }
+#endif
 
 
-static WRegion *groupcw_do_attach_transient(WGroupCW *cwg,
-                                            WRegionAttachHandler *fn,
-                                            void *fnparams,
-                                            WRegion *thereg /* unused? */)
+static WPHolder *groupcw_transient_pholder(WGroupCW *cwg, 
+                                           const WClientWin *cwin,
+                                           const WManageParams *mp)
 {
     WGroupAttachParams param=GROUPATTACHPARAMS_INIT;
-    WRegion *reg=NULL;
-    WStacking *st;
     
     param.level_set=1;
     param.level=STACKING_LEVEL_MODAL1;
@@ -113,38 +103,19 @@ static WRegion *groupcw_do_attach_transient(WGroupCW *cwg,
     param.switchto_set=1;
     param.switchto=1;
     
-    if(ioncore_g.framed_transients){
-        FramedParam frp;
-        frp.trs_fn=fn;
-        frp.trs_fnparams=fnparams;
+    if(!ioncore_g.framed_transients){
+        return (WPHolder*)create_grouppholder(&cwg->grp, NULL, &param);
+    }else{
+        param.geom_set=1;
+        param.geom=mp->geom;
         
-        reg=group_do_attach(&cwg->grp, framed_handler, &frp, &param);
+        param.framed_inner_geom=TRUE;
+        param.pos_not_ok=TRUE;
+        param.framed_gravity=mp->gravity;
+        param.framed_mkframe=create_transient_frame;
+        
+        return (WPHolder*)create_grouprescueph(&cwg->grp, NULL, &param);
     }
-        
-    if(reg==NULL)
-        reg=group_do_attach(&cwg->grp, fn, fnparams, &param);
-    
-    return reg;
-}
-
-
-static WRegion *groupcw_do_attach_transient_simple(WGroupCW *cwg, 
-                                                   WRegionAttachHandler *fn,
-                                                   void *fnparams)
-{
-    return groupcw_do_attach_transient(cwg, fn, fnparams, NULL);
-}
-
-
-
-bool groupcw_attach_transient(WGroupCW *cwg, WRegion *reg)
-{
-    if(reg==NULL)
-        return FALSE;
-    return (region__attach_reparent((WRegion*)cwg, reg,
-                                    ((WRegionDoAttachFn*)
-                                     groupcw_do_attach_transient), 
-                                    reg)!=NULL);
 }
 
 
@@ -158,9 +129,7 @@ WPHolder *groupcw_prepare_manage(WGroupCW *cwg, const WClientWin *cwin,
     if(clientwin_get_transient_mode(cwin)!=TRANSIENT_MODE_CURRENT)
         return NULL;
     
-    return (WPHolder*)create_basicpholder((WRegion*)cwg,
-                                          ((WRegionDoAttachFnSimple*)
-                                           groupcw_do_attach_transient_simple));
+    return groupcw_transient_pholder(cwg, cwin, param);
 }
 
 
@@ -191,11 +160,8 @@ WPHolder *groupcw_prepare_manage_transient(WGroupCW *cwg,
                                                          param,
                                                          unused);
     
-    if(ph==NULL && groupcw_should_manage_transient(cwg, param->tfor)){
-        ph=(WPHolder*)create_basicpholder((WRegion*)cwg,
-                                          ((WRegionDoAttachFnSimple*)
-                                           groupcw_do_attach_transient_simple));
-    }
+    if(ph==NULL && groupcw_should_manage_transient(cwg, param->tfor))
+        ph=groupcw_transient_pholder((WRegion*)cwg, transient, param);
 
     return ph;
 }

@@ -86,9 +86,9 @@ static WFrame *create(WMPlex *mplex, int flags)
     par.geom.x=(sw-par.geom.w)/2;
     par.geom.y=(sh-par.geom.h)/2;
 
-    sp=(WFrame*)mplex_do_attach((WMPlex*)mplex,
-                                (WRegionAttachHandler*)create_frame,
-                                "frame-scratchpad", &par);
+    sp=(WFrame*)mplex_do_attach_new((WMPlex*)mplex, &par,
+                                    (WRegionCreateFn*)create_frame,
+                                    "frame-scratchpad");
     
 
     if(sp==NULL){

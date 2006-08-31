@@ -42,12 +42,6 @@ extern void floatframe_toggle_shade(WFloatFrame *frame);
 /* Geometry */
 
 extern void floatframe_offsets(const WFloatFrame *frame, WRectangle *off);
-extern void floatframe_geom_from_managed_geom(const WFloatFrame *frame, 
-                                              WRectangle *geom);
-extern void floatframe_geom_from_initial_geom(WFloatFrame *frame, 
-                                              WGroupWS *ws,
-                                              WRectangle *geom, 
-                                              int gravity);
 extern void floatframe_managed_geom(const WFloatFrame *frame, WRectangle *geom);
 extern void floatframe_bar_geom(const WFloatFrame *frame, WRectangle *geom);
 extern void floatframe_border_geom(const WFloatFrame *frame, WRectangle *geom);

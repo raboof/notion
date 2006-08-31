@@ -1458,49 +1458,31 @@ WSplit *load_splitst(WTiling *ws, const WRectangle *geom, ExtlTab tab)
 }
 
 
-static WRegion *do_attach(WTiling *ws, WRegionAttachHandler *handler,
-                          void *handlerparams, const WRectangle *geom)
+static bool do_attach(WTiling *ws, WRegion *reg, void *p)
 {
-    WWindow *par=REGION_PARENT(ws);
-    WFitParams fp;
-    assert(par!=NULL);
-    fp.g=*geom;
-    fp.mode=REGION_FIT_EXACT;
+    WSplitRegion *node=create_splitregion(&REGION_GEOM(reg), reg);
     
-    return handler(par, &fp, handlerparams);
-}
-
-
-WSplit *load_splitregion_doit(WTiling *ws, const WRectangle *geom, ExtlTab rt)
-{
-    WSplitRegion *node=NULL;
-    WRegion *reg;
-    
-    reg=region__attach_load((WRegion*)ws,
-                            rt, (WRegionDoAttachFn*)do_attach, 
-                            (void*)geom);
-        
-    if(reg!=NULL){
-        node=create_splitregion(geom, reg);
-        if(node==NULL){
-            destroy_obj((Obj*)reg);
-        }else{
-            if(!tiling_managed_add(ws, reg)){
-                node->reg=NULL;
-                destroy_obj((Obj*)node);
-                destroy_obj((Obj*)reg);
-                return NULL;
-            }
-        }
+    if(node==NULL)
+        return FALSE;
+            
+    if(!tiling_managed_add(ws, reg)){
+        node->reg=NULL;
+        destroy_obj((Obj*)node);
+        return FALSE;
     }
     
-    return (WSplit*)node;
+    *(WSplitRegion**)p=node;
+    
+    return TRUE;
 }
 
 
 WSplit *load_splitregion(WTiling *ws, const WRectangle *geom, ExtlTab tab)
 {
+    WWindow *par=REGION_PARENT(ws);
+    WRegionAttachData data;
     WSplit *node=NULL;
+    WFitParams fp;
     ExtlTab rt;
     
     if(!extl_table_gets_t(tab, "regparams", &rt)){
@@ -1508,7 +1490,15 @@ WSplit *load_splitregion(WTiling *ws, const WRectangle *geom, ExtlTab tab)
         return NULL;
     }
     
-    node=load_splitregion_doit(ws, geom, rt);
+    data.type=REGION_ATTACH_LOAD;
+    data.u.tab=rt;
+    
+    assert(par!=NULL);
+    fp.g=*geom;
+    fp.mode=REGION_FIT_EXACT;
+    
+    region_attach_helper((WRegion*)ws, par, &fp, 
+                         (WRegionDoAttachFn*)do_attach, &node, &data);
 
     extl_unref_table(rt);
     

@@ -27,7 +27,7 @@ static void basicpholder_watch_handler(Watch *watch, Obj *reg)
 
 
 bool basicpholder_init(WBasicPHolder *ph, WRegion *reg, 
-                       WRegionDoAttachFnSimple *hnd)
+                       WBasicPHolderHandler *hnd)
 {
     assert(reg!=NULL && hnd!=NULL);
     
@@ -47,7 +47,7 @@ bool basicpholder_init(WBasicPHolder *ph, WRegion *reg,
  
 
 WBasicPHolder *create_basicpholder(WRegion *reg, 
-                                   WRegionDoAttachFnSimple *hnd)
+                                   WBasicPHolderHandler *hnd)
 {
     CREATEOBJ_IMPL(WBasicPHolder, basicpholder, (p, reg, hnd));
 }
@@ -66,18 +66,15 @@ void basicpholder_deinit(WBasicPHolder *ph)
 /*{{{ Dynfuns */
 
 
-bool basicpholder_do_attach(WBasicPHolder *ph, 
-                            WRegionAttachHandler *hnd, void *hnd_param,
-                            int flags)
+bool basicpholder_do_attach(WBasicPHolder *ph, int flags,
+                            WRegionAttachData *data)
 {
     WRegion *reg=(WRegion*)ph->reg_watch.obj;
 
     if(reg==NULL || ph->hnd==NULL)
         return FALSE;
 
-    /* TODO: flags/switchto */
-    
-    return (ph->hnd(reg, hnd, hnd_param)!=NULL);
+    return ph->hnd(reg, flags, data);
 }
 
 

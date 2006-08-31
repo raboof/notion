@@ -23,27 +23,9 @@ DECLCLASS(WGroupWS){
 };
 
 
-INTRSTRUCT(WGroupWSPHAttachParams);
-
-DECLSTRUCT(WGroupWSPHAttachParams){
-    WFrame *frame;
-    WRectangle geom;
-    bool inner_geom;
-    bool pos_ok;
-    int gravity;
-    int aflags;
-    WRegion *stack_above;
-};
-
-
-extern void groupws_calc_placement(WGroupWS *ws, WRectangle *geom);
-
-extern WFloatFrame *groupws_create_frame(WGroupWS *ws, const WRectangle *geom, 
-                                         bool inner_geom, bool respect_pos,
-                                         int gravity);
-extern bool groupws_phattach(WGroupWS *ws, 
-                             WRegionAttachHandler *hnd, void *hnd_param,
-                             WGroupWSPHAttachParams *param);
+extern WFloatFrame *group_create_frame(WGroup *grp, const WRectangle *geom, 
+                                       bool inner_geom, bool respect_pos,
+                                       int gravity);
 
 extern WPHolder *groupws_prepare_manage(WGroupWS *ws, 
                                         const WClientWin *cwin,

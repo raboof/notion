@@ -16,19 +16,23 @@
 #include "pholder.h"
 #include "attach.h"
 
+
+typedef bool WBasicPHolderHandler(WRegion *reg, int flags,
+                                  WRegionAttachData *data);
+
 INTRCLASS(WBasicPHolder);
 
 DECLCLASS(WBasicPHolder){
     WPHolder ph;
     Watch reg_watch;
-    WRegionDoAttachFnSimple *hnd;
+    WBasicPHolderHandler* hnd;
 };
 
 extern WBasicPHolder *create_basicpholder(WRegion *reg,
-                                          WRegionDoAttachFnSimple *hnd);
+                                          WBasicPHolderHandler *hnd);
 
 extern bool basicpholder_init(WBasicPHolder *ph, WRegion *reg,
-                              WRegionDoAttachFnSimple *hnd);
+                              WBasicPHolderHandler *hnd);
 
 extern void basicpholder_deinit(WBasicPHolder *ph);
 
@@ -36,8 +40,7 @@ extern bool basicpholder_do_goto(WBasicPHolder *ph);
 
 extern WRegion *basicpholder_do_target(WBasicPHolder *ph);
 
-extern bool basicpholder_do_attach(WBasicPHolder *ph, 
-                                   WRegionAttachHandler *hnd, void *hnd_param,
-                                   int flags);
+extern bool basicpholder_do_attach(WBasicPHolder *ph, int flags,
+                                   WRegionAttachData *data);
 
 #endif /* ION_IONCORE_BASICPHOLDER_H */

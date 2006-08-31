@@ -17,40 +17,39 @@
 #include "window.h"
 
 
-typedef WRegion *WRegionAttachHandler(WWindow *parent, 
-                                      const WFitParams *fp, 
-                                      void *param);
-
-typedef WRegion *WRegionDoAttachFn(WRegion *reg, 
-                                   WRegionAttachHandler *handler,
-                                   void *handlerparams,
-                                   void *param);
-
-typedef WRegion *WRegionDoAttachFnSimple(WRegion *reg, 
-                                         WRegionAttachHandler *handler,
-                                         void *handlerparams);
+typedef WRegion *WRegionCreateFn(WWindow *parent, 
+                                 const WFitParams *fp, 
+                                 void *param);
 
 
-extern WRegion *region__attach_reparent(WRegion *mgr, WRegion *reg, 
-                                        WRegionDoAttachFn *fn, void *param);
-
-extern WRegion *region__attach_new(WRegion *mgr, WRegionSimpleCreateFn *cfn,
-                                   WRegionDoAttachFn *fn, void *param);
-
-extern WRegion *region__attach_load(WRegion *mgr, ExtlTab tab,
-                                    WRegionDoAttachFn *fn, void *param);
+typedef enum{
+    REGION_ATTACH_REPARENT,
+    REGION_ATTACH_NEW,
+    REGION_ATTACH_LOAD
+} WRegionAttachType;
 
 
-extern WRegion *region__attach_reparent_doit(WWindow *par, 
-                                             const WFitParams *fp, 
-                                             WRegion *reg);
+DECLSTRUCT(WRegionAttachData){
+    WRegionAttachType type;
+    union{
+        WRegion *reg;
+        struct{
+            WRegionCreateFn *fn;
+            void *param;
+        } n;
+        ExtlTab tab;
+    } u;
+};
 
-extern WRegion *region__attach_new_doit(WWindow *par, const WFitParams *fp,
-                                       WRegionSimpleCreateFn *fn);
 
-extern WRegion *region__attach_load_doit(WWindow *par, const WFitParams *fp, 
-                                         ExtlTab *tab);
+typedef bool WRegionDoAttachFn(WRegion *reg, WRegion *sub, void *param);
+typedef bool WRegionDoAttachFnSimple(WRegion *reg, WRegion *sub);
 
-extern bool region__attach_reparent_check(WRegion *mgr, WRegion *reg);
+extern WRegion *region_attach_helper(WRegion *mgr,
+                                     WWindow *par, WFitParams *fp,
+                                     WRegionDoAttachFn *fn, void *fn_param,
+                                     const WRegionAttachData *data);
+
+extern bool region_attach_reparent_check(WRegion *mgr, WRegion *reg);
 
 #endif /* ION_IONCORE_ATTACH_H */

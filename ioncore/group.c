@@ -15,29 +15,32 @@
 #include <libtu/objp.h>
 #include <libmainloop/defer.h>
 
-#include <ioncore/common.h>
-#include <ioncore/rootwin.h>
-#include <ioncore/focus.h>
-#include <ioncore/global.h>
-#include <ioncore/region.h>
-#include <ioncore/manage.h>
-#include <ioncore/screen.h>
-#include <ioncore/names.h>
-#include <ioncore/saveload.h>
-#include <ioncore/attach.h>
-#include <ioncore/regbind.h>
-#include <ioncore/frame-pointer.h>
-#include <ioncore/extlconv.h>
-#include <ioncore/xwindow.h>
-#include <ioncore/resize.h>
-#include <ioncore/stacking.h>
-#include <ioncore/sizepolicy.h>
-#include <ioncore/bindmaps.h>
-#include <ioncore/navi.h>
-#include <ioncore/llist.h>
-
+#include "common.h"
+#include "rootwin.h"
+#include "focus.h"
+#include "global.h"
+#include "region.h"
+#include "manage.h"
+#include "screen.h"
+#include "names.h"
+#include "saveload.h"
+#include "attach.h"
+#include "regbind.h"
+#include "extlconv.h"
+#include "xwindow.h"
+#include "resize.h"
+#include "stacking.h"
+#include "sizepolicy.h"
+#include "bindmaps.h"
+#include "navi.h"
+#include "sizehint.h"
+#include "llist.h"
+#include "mplex.h"
 #include "group.h"
 #include "grouppholder.h"
+#include "grouprescueph.h"
+#include "floatframe.h"
+#include "float-placement.h"
 
 
 static void group_place_stdisp(WGroup *ws, WWindow *parent,
@@ -525,18 +528,85 @@ WStacking *group_do_add_managed_default(WGroup *ws, WRegion *reg, int level,
 }
 
 
-WRegion *group_do_attach(WGroup *ws, 
-                         WRegionAttachHandler *fn, void *fnparams, 
-                         const WGroupAttachParams *param)
+bool group_do_attach_final(WGroup *ws, 
+                           WRegion *reg,
+                           const WGroupAttachParams *param)
 {
+    WStacking *st, *stabove=NULL;
+    WSizePolicy szplcy;
+    WFitParams fp;
+    WRectangle g;
+    int weak=0;
+    uint level;
+    bool sw;
+    
+    /* Fit */
+    szplcy=(param->szplcy_set
+            ? param->szplcy
+            : SIZEPOLICY_UNCONSTRAINED);
+        
+    if(!param->geom_set){
+        weak|=REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y;
+        g=REGION_GEOM(reg);
+    }else{
+        g=param->geom;
+    }
+    
+    if(!param->geom_set || param->pos_not_ok){
+        if(szplcy==SIZEPOLICY_UNCONSTRAINED ||
+           szplcy==SIZEPOLICY_FREE ||
+           (szplcy&SIZEPOLICY_MASK)==SIZEPOLICY_FREE_GLUE){
+            group_calc_placement(ws, &g);
+        }else{
+            weak|=REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y;
+        }
+    }
+
+    fp.g=REGION_GEOM(ws);
+
+    sizepolicy(&szplcy, reg, &g, weak, &fp);
+    
+    if(rectangle_compare(&fp.g, &REGION_GEOM(reg))!=RECTANGLE_SAME)
+        region_fitrep(reg, NULL, &fp);
+    
+    /* Stacking & add */
+    if(param->stack_above!=NULL)
+        stabove=group_find_stacking(ws, param->stack_above);
+
+    level=(stabove!=NULL
+           ? stabove->level
+           : (param->level_set 
+              ? param->level 
+              : STACKING_LEVEL_NORMAL));
+
+    st=group_do_add_managed(ws, reg, level, szplcy);
+    
+    if(st==NULL)
+        return FALSE;
+    
+    if(stabove!=NULL)
+        st->above=stabove;
+
+    /* Misc. */
+    if(param->bottom)
+        ws->bottom=st;
+    
+    sw=(param->switchto_set ? param->switchto : ioncore_g.switchto_new);
+    
+    if(sw || st->level>=STACKING_LEVEL_MODAL1)
+        group_refocus(ws, (sw ? st : NULL));
+    
+    return TRUE;
+}
+
+
+WRegion *group_do_attach(WGroup *ws, 
+                         /*const*/ WGroupAttachParams *param,
+                         WRegionAttachData *data)
+{
+    WFitParams fp;
     WWindow *par;
     WRegion *reg;
-    WFitParams fp;
-    WSizePolicy szplcy;
-    uint level;
-    WRectangle g;
-    WStacking *st;
-    bool sw;
 
     if(ws->bottom!=NULL && param->bottom){
         warn(TR("'bottom' already set."));
@@ -545,7 +615,7 @@ WRegion *group_do_attach(WGroup *ws,
     
     par=REGION_PARENT(ws);
     assert(par!=NULL);
-    
+
     if(param->geom_set){
         fp.g.x=param->geom.x+REGION_GEOM(ws).x;
         fp.g.y=param->geom.y+REGION_GEOM(ws).y;
@@ -557,41 +627,10 @@ WRegion *group_do_attach(WGroup *ws,
         fp.mode=REGION_FIT_WHATEVER;
     }
     
-    reg=fn(par, &fp, fnparams);
-    
-    if(reg==NULL)
-        return NULL;
-    
-    szplcy=(param->szplcy_set
-            ? param->szplcy
-            : SIZEPOLICY_UNCONSTRAINED);
-        
-    if(szplcy!=SIZEPOLICY_UNCONSTRAINED){
-        fp.g=REGION_GEOM(ws);
-
-        sizepolicy(&szplcy, reg, NULL, REGION_RQGEOM_WEAK_ALL, &fp);
-        
-        region_fitrep(reg, NULL, &fp);
-    }
-    
-    level=(param->level_set ? param->level : STACKING_LEVEL_NORMAL);
-
-    st=group_do_add_managed(ws, reg, level, szplcy);
-    
-    if(st==NULL){
-        /* TODO: ? If the region was created by fn, it could be destroyed... */
-        return NULL;
-    }
-    
-    if(param->bottom)
-        ws->bottom=st;
-    
-    sw=(param->switchto_set ? param->switchto : ioncore_g.switchto_new);
-    
-    if(sw || st->level>=STACKING_LEVEL_MODAL1)
-        group_refocus(ws, (sw ? st : NULL));
-    
-    return reg;
+    return region_attach_helper((WRegion*) ws, par, &fp, 
+                                (WRegionDoAttachFn*)group_do_attach_final,
+                                /*(const WRegionAttachParams*)*/param, data);
+    /*                            ^^^^ doesn't seem to work. */
 }
 
 
@@ -667,15 +706,17 @@ EXTL_EXPORT_MEMBER
 WRegion *group_attach(WGroup *ws, WRegion *reg, ExtlTab param)
 {
     WGroupAttachParams par;
-    get_params(ws, param, &par);
-    
-    /* region__attach_reparent should do better checks. */
-    if(reg==NULL || reg==(WRegion*)ws)
+    WRegionAttachData data;
+
+    if(reg==NULL)
         return NULL;
     
-    return region__attach_reparent((WRegion*)ws, reg,
-                                   (WRegionDoAttachFn*)group_do_attach, 
-                                   &par);
+    get_params(ws, param, &par);
+    
+    data.type=REGION_ATTACH_REPARENT;
+    data.u.reg=reg;
+    
+    return group_do_attach(ws, &par, &data);
 }
 
 
@@ -700,11 +741,154 @@ EXTL_EXPORT_MEMBER
 WRegion *group_attach_new(WGroup *ws, ExtlTab param)
 {
     WGroupAttachParams par;
+    WRegionAttachData data;
+
     get_params(ws, param, &par);
     
-    return region__attach_load((WRegion*)ws, param,
-                               (WRegionDoAttachFn*)group_do_attach, 
-                               &par);
+    data.type=REGION_ATTACH_LOAD;
+    data.u.tab=param;
+    
+    return group_do_attach(ws, &par, &data);
+}
+
+
+/*}}}*/
+
+
+/*{{{ Attach w/ frame */
+
+
+void frame_geom_from_initial_geom(WFrame *frame, 
+                                  WGroup *ws,
+                                  WRectangle *geom, 
+                                  int gravity)
+{
+    WRectangle off;
+#ifndef CF_NO_WSREL_INIT_GEOM
+    /* 'app -geometry -0-0' should place the app at the lower right corner
+     * of ws even if ws is nested etc.
+     */
+    int top=0, left=0, bottom=0, right=0;
+    WRootWin *root;
+    
+    root=region_rootwin_of((WRegion*)ws);
+    region_rootpos((WRegion*)ws, &left, &top);
+    right=REGION_GEOM(root).w-left-REGION_GEOM(ws).w;
+    bottom=REGION_GEOM(root).h-top-REGION_GEOM(ws).h;
+#endif
+
+    mplex_managed_geom(&frame->mplex, &off);
+    off.w=off.w-REGION_GEOM(frame).w;
+    off.h=off.h-REGION_GEOM(frame).h;
+
+    geom->w=maxof(geom->w, 0);
+    geom->h=maxof(geom->h, 0);
+    geom->w+=off.w;
+    geom->h+=off.h;
+#ifndef CF_NO_WSREL_INIT_GEOM
+    geom->x+=xgravity_deltax(gravity, -off.x+left, off.x+off.w+right);
+    geom->y+=xgravity_deltay(gravity, -off.y+top, off.y+off.h+bottom);
+    geom->x+=REGION_GEOM(ws).x;
+    geom->y+=REGION_GEOM(ws).y;
+#else
+    geom->x+=xgravity_deltax(gravity, -off.x, off.x+off.w);
+    geom->y+=xgravity_deltay(gravity, -off.y, off.y+off.h);
+    region_convert_root_geom(REGION_PARENT_REG(ws), geom);
+#endif
+}
+
+
+WRegion *group_do_attach_framed(WGroup *ws, 
+                                const WGroupAttachParams *ap__,
+                                WRegionAttachData *data)
+{
+    /* We will modify szplcy and pass things to group_do_attach_final, 
+     * so let's make a copy 
+     */
+    WGroupAttachParams ap_=*ap__, *ap=&ap_;
+    WMPlexAttachParams par=MPLEXATTACHPARAMS_INIT;
+    WWindow *parent=REGION_PARENT(ws);
+    /*WStacking *stacking=group_get_stacking(&ws->grp);
+    WStacking *st, *stabove;*/
+    WFitParams fp;
+    WRectangle rqg;
+    WFrame *frame;
+    WRegion *reg;
+    int weak=0;
+
+    assert(parent!=NULL);
+    
+    /* Create frame with dummy geometry */
+    if(ap->geom_set){
+        fp.g=ap->geom;
+        fp.mode=REGION_FIT_EXACT;
+    }else{
+        fp.g=REGION_GEOM(ws);
+        fp.mode=REGION_FIT_BOUNDS|REGION_FIT_WHATEVER;
+    }
+    
+    if(ap->framed_mkframe!=NULL)
+        frame=(WFrame*)(ap->framed_mkframe)(parent, &fp);
+    else
+        frame=(WFrame*)create_floatframe(parent, &fp);
+    
+    if(frame==NULL){
+        warn(TR("Failed to create a new frame."));
+        return NULL;
+    }
+    
+    /* Attach */
+    par.flags=MPLEX_ATTACH_WHATEVER;
+    
+    reg=mplex_do_attach((WMPlex*)frame, &par, data);
+    
+    if(reg==NULL){
+        destroy_obj((Obj*)frame);
+        return NULL;
+    }
+    
+    /* Adjust geometry */
+    if(!ap->geom_set){
+        WRectangle mg;
+        
+        mplex_managed_geom((WMPlex*)frame, &mg);
+
+        rqg.x=REGION_GEOM(frame).x;
+        rqg.y=REGION_GEOM(frame).y;
+        rqg.w=REGION_GEOM(reg).w+(REGION_GEOM(frame).w-mg.w);
+        rqg.h=REGION_GEOM(reg).h+(REGION_GEOM(frame).h-mg.h);
+        
+        ap->pos_not_ok=TRUE;
+        /*frame_geom_from_initial_geom(frame, ws, &rqg, ap->framed_gravity);*/
+    }else{
+        rqg=ap->geom;
+        
+        if(ap->framed_inner_geom){
+            frame_geom_from_initial_geom(frame, ws, &rqg, 
+                                         ap->framed_gravity);
+        }
+        
+        /* If the requested geometry does not overlap the workspaces's geometry, 
+         * position request is never honoured.
+         */
+        if((rqg.x+rqg.w<=REGION_GEOM(ws).x) ||
+           (rqg.y+rqg.h<=REGION_GEOM(ws).y) ||
+           (rqg.x>=REGION_GEOM(ws).x+REGION_GEOM(ws).w) ||
+           (rqg.y>=REGION_GEOM(ws).y+REGION_GEOM(ws).h)){
+            ap->pos_not_ok=TRUE;
+        }
+    }
+    
+    ap->geom_set=TRUE;
+    ap->geom=rqg;
+    
+    if(!group_do_attach_final(ws, (WRegion*)frame, ap)){
+        #warning "TODO: What to do to reg?"
+        destroy_obj((Obj*)frame);
+        return NULL;
+    }
+    
+    return (WRegion*)frame;
 }
 
 

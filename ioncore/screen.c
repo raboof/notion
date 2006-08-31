@@ -550,10 +550,9 @@ static bool create_initial_ws(WScreen *scr)
     
     par.flags=0;
     
-    reg=mplex_do_attach(&scr->mplex,
-                        (WRegionAttachHandler*)groupws_load_default, 
-                        NULL, 
-                        &par);
+    reg=mplex_do_attach_new(&scr->mplex, &par,
+                            (WRegionCreateFn*)groupws_load_default, 
+                            NULL);
     
     if(reg==NULL){
         warn(TR("Unable to create a workspace on screen %d."), scr->id);

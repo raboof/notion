@@ -1233,10 +1233,9 @@ WDock *mod_dock_create(ExtlTab tab)
         if(extl_table_is_bool_set(tab, "floating_hidden"))
             par.flags|=MPLEX_ATTACH_HIDDEN;
         
-        dock=(WDock*)mplex_do_attach((WMPlex*)screen, 
-                                     (WRegionAttachHandler*)create_dock,
-                                     NULL,
-                                     &par);
+        dock=(WDock*)mplex_do_attach_new((WMPlex*)screen, &par,
+                                         (WRegionCreateFn*)create_dock, 
+                                         NULL);
     }else{
         WFitParams fp;
         
@@ -1346,13 +1345,11 @@ WRegion *dock_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 /*{{{ Client window management setup */
 
 
-static WDockApp *dock_do_attach_(WDock *dock, 
-                                 WRegionAttachHandler *handler,
-                                 void *handlerparams)
+static bool dock_do_attach_final(WDock *dock, WRegion *reg, void *unused)
 {
     WDockApp *dockapp, *before_dockapp;
+    WRectangle geom;
     WFitParams fp;
-    WRegion *reg;
     bool draw_border=TRUE;
     int pos=INT_MAX;
      
@@ -1360,20 +1357,8 @@ static WDockApp *dock_do_attach_(WDock *dock,
     dockapp=ALLOC(WDockApp);
     
     if(dockapp==NULL)
-        return NULL;
+        return FALSE;
     
-    dock_get_tile_size(dock, &(fp.g));
-    fp.g.x=0;
-    fp.g.y=0;
-    fp.mode=REGION_FIT_WHATEVER|REGION_FIT_BOUNDS;
-
-    reg=handler((WWindow*)dock, &fp, handlerparams);
-    
-    if(reg==NULL){
-        free(dockapp);
-        return NULL;
-    }
-
     if(OBJ_IS(reg, WClientWin)){
         ExtlTab proptab=((WClientWin*)reg)->proptab;
         extl_table_gets_b(proptab, CLIENTWIN_WINPROP_BORDER, &draw_border);
@@ -1400,32 +1385,30 @@ static WDockApp *dock_do_attach_(WDock *dock,
 
     region_set_manager(reg, (WRegion*)dock);
     
-    fp.g=REGION_GEOM(reg);
+    geom=REGION_GEOM(reg);
     dock_managed_rqgeom(dock, reg, 
                         REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y,
-                        &(fp.g), NULL);
+                        &geom, NULL);
     
     region_map(reg);
 
-    return dockapp;
+    return TRUE;
 }
 
 
-static WRegion *dock_do_attach_simple(WDock *dock,
-                                      WRegionAttachHandler *handler,
-                                      void *handlerparams)
-{
-    WDockApp *da=dock_do_attach_(dock, handler, handlerparams);
-    return (da!=NULL ? da->reg : NULL);
-}
 
-
-static WRegion *dock_do_attach(WDock *dock,
-                               WRegionAttachHandler *handler,
-                               void *handlerparams,
-                               void *param UNUSED)
+static bool dock_do_attach(WDock *dock, WRegionAttachData *data)
 {
-    return dock_do_attach_simple(dock, handler, handlerparams);
+    WFitParams fp;
+    dock_get_tile_size(dock, &(fp.g));
+    fp.g.x=0;
+    fp.g.y=0;
+    fp.mode=REGION_FIT_WHATEVER|REGION_FIT_BOUNDS;
+    
+    return (region_attach_helper((WRegion*)dock, (WWindow*)dock, &fp,
+                                 (WRegionDoAttachFn*)dock_do_attach_final, 
+                                 NULL, data)
+            !=NULL);
 }
 
 
@@ -1435,10 +1418,13 @@ static WRegion *dock_do_attach(WDock *dock,
 EXTL_EXPORT_MEMBER
 bool dock_attach(WDock *dock, WRegion *reg)
 {
-    return (region__attach_reparent((WRegion*)dock, reg,
-                                    (WRegionDoAttachFn*)dock_do_attach, 
-                                    NULL)
-            !=NULL);
+    WRegionAttachData data;
+    WFitParams fp;
+    
+    data.type=REGION_ATTACH_REPARENT;
+    data.u.reg=reg;
+
+    return dock_do_attach(dock, &data);
 }
 
 
@@ -1449,11 +1435,17 @@ static bool dock_handle_drop(WDock *dock, int x, int y,
 }
 
 
-static WBasicPHolder *dock_managed_get_pholder(WDock *dock, WRegion *mgd)
+static bool dock_ph_handler(WDock *dock, int flags, WRegionAttachData *data)
 {
-    return create_basicpholder((WRegion*)dock, 
-                               ((WRegionDoAttachFnSimple*)
-                                dock_do_attach_simple));
+    return dock_do_attach(dock, data);
+}
+
+    
+static WPHolder *dock_managed_get_pholder(WDock *dock, WRegion *mgd)
+{
+    return (WPHolder*)create_basicpholder((WRegion*)dock,
+                                          ((WBasicPHolderHandler*)
+                                           dock_ph_handler));
 }
 
 
@@ -1463,10 +1455,10 @@ static WPHolder *dock_prepare_manage(WDock *dock, const WClientWin *cwin,
 {
     if(redir==MANAGE_REDIR_STRICT_YES)
         return NULL;
-    
-    return (WPHolder*)create_basicpholder((WRegion*)dock, 
-                                          ((WRegionDoAttachFnSimple*)
-                                           dock_do_attach_simple));
+
+    return (WPHolder*)create_basicpholder((WRegion*)dock,
+                                          ((WBasicPHolderHandler*)
+                                           dock_ph_handler));
 }
 
 

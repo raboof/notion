@@ -468,7 +468,7 @@ static void systray_adjust_size(WRegion *reg, WRectangle *g)
 
 
 static WRegion *statusbar_attach_simple(WStatusBar *sb,
-                                        WRegionAttachHandler *handler,
+                                        WRegionCreateFn *handler,
                                         void *handlerparams)
 {
     WRegion *reg;

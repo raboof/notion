@@ -110,7 +110,6 @@ DYNFUN WSplit *tiling_load_node(WTiling *ws, const WRectangle *geom, ExtlTab tab
 extern WSplit *tiling_load_node_default(WTiling *ws, const WRectangle *geom, ExtlTab tab);
 
 extern WSplit *load_splitregion(WTiling *ws, const WRectangle *geom, ExtlTab tab);
-extern WSplit *load_splitregion_doit(WTiling *ws, const WRectangle *geom, ExtlTab rt);
 extern WSplit *load_splitsplit(WTiling *ws, const WRectangle *geom, ExtlTab tab);
 extern WSplit *load_splitst(WTiling *ws, const WRectangle *geom, ExtlTab tab);
 

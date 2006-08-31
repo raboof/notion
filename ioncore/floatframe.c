@@ -90,18 +90,6 @@ void floatframe_offsets(const WFloatFrame *frame, WRectangle *off)
 }
 
 
-void floatframe_geom_from_managed_geom(const WFloatFrame *frame, 
-                                       WRectangle *geom)
-{
-    WRectangle off;
-    floatframe_offsets(frame, &off);
-    geom->x+=off.x;
-    geom->y+=off.y;
-    geom->w+=off.w;
-    geom->h+=off.h;
-}
-
-
 void floatframe_border_geom(const WFloatFrame *frame, WRectangle *geom)
 {
     geom->x=0;
@@ -138,44 +126,6 @@ void floatframe_managed_geom(const WFloatFrame *frame, WRectangle *geom)
 #define floatframe_border_inner_geom floatframe_managed_geom
 
 
-void floatframe_geom_from_initial_geom(WFloatFrame *frame, 
-                                       WGroupWS *ws,
-                                       WRectangle *geom, 
-                                       int gravity)
-{
-    WRectangle off;
-#ifndef CF_NO_WSREL_INIT_GEOM
-    /* 'app -geometry -0-0' should place the app at the lower right corner
-     * of ws even if ws is nested etc.
-     */
-    int top=0, left=0, bottom=0, right=0;
-    WRootWin *root;
-    
-    root=region_rootwin_of((WRegion*)ws);
-    region_rootpos((WRegion*)ws, &left, &top);
-    right=REGION_GEOM(root).w-left-REGION_GEOM(ws).w;
-    bottom=REGION_GEOM(root).h-top-REGION_GEOM(ws).h;
-#endif
-
-    floatframe_offsets(frame, &off);
-
-    geom->w=maxof(geom->w, 0);
-    geom->h=maxof(geom->h, 0);
-    geom->w+=off.w;
-    geom->h+=off.h;
-#ifndef CF_NO_WSREL_INIT_GEOM
-    geom->x+=xgravity_deltax(gravity, -off.x+left, off.x+off.w+right);
-    geom->y+=xgravity_deltay(gravity, -off.y+top, off.y+off.h+bottom);
-    geom->x+=REGION_GEOM(ws).x;
-    geom->y+=REGION_GEOM(ws).y;
-#else
-    geom->x+=xgravity_deltax(gravity, -off.x, off.x+off.w);
-    geom->y+=xgravity_deltay(gravity, -off.y, off.y+off.h);
-    region_convert_root_geom(REGION_PARENT_REG(ws), geom);
-#endif
-}
-
-    
 void floatframe_resize_hints(WFloatFrame *frame, XSizeHints *hints_ret)
 {
     frame_resize_hints(&frame->frame, hints_ret);
