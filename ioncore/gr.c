@@ -1,5 +1,5 @@
 /*
- * ion/ioncore/gr.h
+ * ion/ioncore/gr.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2006. 
  *

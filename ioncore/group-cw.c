@@ -20,7 +20,7 @@
 #include "resize.h"
 #include "pholder.h"
 #include "names.h"
-
+#include "grouprescueph.h"
 
 #define DFLT_SZPLCY SIZEPOLICY_FREE_GLUE__SOUTH
 
@@ -161,7 +161,7 @@ WPHolder *groupcw_prepare_manage_transient(WGroupCW *cwg,
                                                          unused);
     
     if(ph==NULL && groupcw_should_manage_transient(cwg, param->tfor))
-        ph=groupcw_transient_pholder((WRegion*)cwg, transient, param);
+        ph=groupcw_transient_pholder(cwg, transient, param);
 
     return ph;
 }

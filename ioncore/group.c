@@ -588,8 +588,10 @@ bool group_do_attach_final(WGroup *ws,
         st->above=stabove;
 
     /* Misc. */
-    if(param->bottom)
+    if(param->bottom){
+        #warning "stdisp?"
         ws->bottom=st;
+    }
     
     sw=(param->switchto_set ? param->switchto : ioncore_g.switchto_new);
     

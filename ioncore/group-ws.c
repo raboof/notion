@@ -93,8 +93,8 @@ void ioncore_groupws_get(ExtlTab t)
 /*{{{ Attach stuff */
 
 
-bool groupws_attach_framed(WGroupWS *ws, WRegion *reg,
-                           WGroupAttachParams *ap)
+static bool groupws_attach_framed(WGroupWS *ws, WGroupAttachParams *ap,
+                                  WRegion *reg)
 {
     WRegionAttachData data;
     
@@ -121,7 +121,7 @@ bool groupws_handle_drop(WGroupWS *ws, int x, int y,
     ap.pos_not_ok=FALSE;
     ap.framed_gravity=NorthWestGravity;
     
-    return groupws_attach_framed(ws, dropped, &ap);
+    return groupws_attach_framed(ws, &ap, dropped);
 }
 
 
@@ -179,7 +179,7 @@ bool groupws_attach_framed_extl(WGroupWS *ws, WClientWin *cwin, ExtlTab t)
         extl_unref_table(gt);
     }
     
-    return groupws_attach_framed(ws, (WRegion*)cwin, &ap);
+    return groupws_attach_framed(ws, &ap, (WRegion*)cwin);
 }
 
 

@@ -23,10 +23,6 @@ DECLCLASS(WGroupWS){
 };
 
 
-extern WFloatFrame *group_create_frame(WGroup *grp, const WRectangle *geom, 
-                                       bool inner_geom, bool respect_pos,
-                                       int gravity);
-
 extern WPHolder *groupws_prepare_manage(WGroupWS *ws, 
                                         const WClientWin *cwin,
                                         const WManageParams *param, 
