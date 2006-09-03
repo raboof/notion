@@ -33,6 +33,9 @@
 
 WHook *region_notify_hook=NULL;
 
+static void region_notify_change_(WRegion *reg, const char *how, 
+                                  Obj *detail);
+
 
 /*{{{ Init & deinit */
 
@@ -515,31 +518,38 @@ void region_detach_manager(WRegion *reg)
 }
 
 
-/* This should only be called within region_managed_remove */
+/* This should only be called within region_managed_remove,
+ * _after_ any managed lists and other essential structures
+ * of mgr have been broken.
+ */
 void region_unset_manager(WRegion *reg, WRegion *mgr)
 {
     if(reg->manager!=mgr)
         return;
     
-    /*region_notify_change(reg, "unset_manager");*/
+    reg->manager=NULL;
     
     if(region_is_activity_r(reg))
         region_clear_mgd_activity(mgr);
 
-    reg->manager=NULL;
+    region_notify_change_(reg, "unset_manager", (Obj*)mgr);
 }
 
 
+/* This should be called within region attach routines,
+ * _after_ any managed lists and other essential structures
+ * of mgr have been set up.
+ */
 void region_set_manager(WRegion *reg, WRegion *mgr)
 {
     assert(reg->manager==NULL);
     
     reg->manager=mgr;
-
+    
     if(region_is_activity_r(reg))
         region_mark_mgd_activity(mgr);
     
-    /*region_notify_change(reg, "set_manager");*/
+    region_notify_change_(reg, "set_manager", (Obj*)mgr);
 }
 
 
@@ -770,8 +780,9 @@ static bool mrsh_not(WHookDummy *fn, void *p)
 {
     WRegion *reg=(WRegion*)((void**)p)[0];
     const char *how=(const char*)((void**)p)[1];
+    Obj *detail=(Obj*)((void**)p)[2];
     
-    fn(reg, how);
+    fn(reg, how, detail);
     
     return TRUE;
 }
@@ -781,28 +792,38 @@ static bool mrshe_not(ExtlFn fn, void *p)
 {
     WRegion *reg=(WRegion*)((void**)p)[0];
     const char *how=(const char*)((void**)p)[1];
+    Obj *detail=(Obj*)((void**)p)[2];
     
-    extl_call(fn, "os", NULL, reg, how);
+    extl_call(fn, "oso", NULL, reg, how, detail);
     
     return TRUE;
+}
+
+
+static void region_notify_change_(WRegion *reg, const char *how, 
+                                  Obj *detail)
+{
+    const void *p[3];
+    
+    p[0]=reg;
+    p[1]=how;
+    p[2]=detail;
+
+    extl_protect(NULL);
+    hook_call(region_notify_hook, p, mrsh_not, mrshe_not),
+    extl_unprotect(NULL);
+    
 }
 
 
 void region_notify_change(WRegion *reg, const char *how)
 {
     WRegion *mgr=REGION_MANAGER(reg);
-    const void *p[2];
-    
-    p[0]=reg;
-    p[1]=how;
 
     if(mgr!=NULL)
         region_managed_notify(mgr, reg, how);
-
-    extl_protect(NULL);
-    hook_call(region_notify_hook, p, mrsh_not, mrshe_not),
-    extl_unprotect(NULL);
     
+    region_notify_change_(reg, how, NULL);
 }
 
 

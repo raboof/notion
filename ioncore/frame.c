@@ -656,7 +656,6 @@ bool frame_is_numbers(WFrame *frame)
 
 void frame_managed_notify(WFrame *frame, WRegion *sub, const char *how)
 {
-    /* TODO: Should only draw/update the affected tab.*/
     update_attrs(frame);
     frame_recalc_bar(frame);
     frame_draw_bar(frame, FALSE);

@@ -514,13 +514,13 @@ WStacking *group_do_add_managed_default(WGroup *ws, WRegion *reg, int level,
     st->level=level;
     st->szplcy=szplcy;
 
-    LINK_ITEM(ws->managed_list, st, mgr_next, mgr_prev);
-    region_set_manager(reg, (WRegion*)ws);
-    
     LINK_ITEM_FIRST(tmp, st, next, prev);
     stacking_weave(stackingp, &tmp, FALSE);
     assert(tmp==NULL);
-    
+
+    LINK_ITEM(ws->managed_list, st, mgr_next, mgr_prev);
+    region_set_manager(reg, (WRegion*)ws);
+
     if(region_is_fully_mapped((WRegion*)ws))
         region_map(reg);
 

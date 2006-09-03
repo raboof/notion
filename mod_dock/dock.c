@@ -1466,17 +1466,16 @@ static void dock_managed_remove(WDock *dock, WRegion *reg)
 {
 
     WDockApp *dockapp=dock_find_dockapp(dock, reg);
-    if(dockapp!=NULL){
-        UNLINK_ITEM(dock->dockapps, dockapp, next, prev);
-        free(dockapp);
-    }else{
-        warn("Dockapp not found.");
-    }
+    
+    if(dockapp==NULL)
+        return;
+    
+    UNLINK_ITEM(dock->dockapps, dockapp, next, prev);
+    free(dockapp);
 
     region_unset_manager(reg, (WRegion*)dock);
 
     dock_resize(dock);
-
 }
 
 

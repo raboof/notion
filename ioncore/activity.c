@@ -31,8 +31,10 @@ void region_mark_mgd_activity(WRegion *mgr)
     mgr_marked=region_is_activity_r(mgr);
     mgr->mgd_activity++;
     
-    if(!mgr_marked)
+    if(!mgr_marked){
+        region_notify_change(mgr, "sub-activity");
         region_mark_mgd_activity(REGION_MANAGER(mgr));
+    }
 }
 
 
@@ -43,8 +45,10 @@ void region_clear_mgd_activity(WRegion *mgr)
     
     mgr->mgd_activity=maxof(0, mgr->mgd_activity-1);
     
-    if(!region_is_activity_r(mgr))
+    if(!region_is_activity_r(mgr)){
+        region_notify_change(mgr, "sub-activity");
         region_clear_mgd_activity(REGION_MANAGER(mgr));
+    }
 }
     
     

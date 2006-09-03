@@ -1160,13 +1160,13 @@ bool mplex_do_attach_final(WMPlex *mplex, WRegion *reg, WMPlexPHolder *ph)
         }
     }
     
-    region_set_manager(reg, (WRegion*)mplex);
-    
     LINK_ITEM(mplex->mgd, node, mgr_next, mgr_prev);
 
     if(!OBJ_IS(reg, WGroup))
         mplex_stack(mplex, node);
     
+    region_set_manager(reg, (WRegion*)mplex);
+
     if(sw)
         mplex_do_node_goto_sw(mplex, node, FALSE);
     else if(lnode==NULL && !(param->flags&MPLEX_ATTACH_HIDDEN))
@@ -1508,15 +1508,15 @@ void mplex_managed_remove(WMPlex *mplex, WRegion *sub)
         node->lnode=NULL;
         mx=TRUE;
     }
-        
-    mplex_unstack(mplex, node);
-    
-    region_unset_manager(sub, (WRegion*)mplex);
     
     UNLINK_ITEM(mplex->mgd, node, mgr_next, mgr_prev);
     
+    mplex_unstack(mplex, node);
+    
     stacking_unassoc(node);
     stacking_free(node);
+
+    region_unset_manager(sub, (WRegion*)mplex);
     
     if(OBJ_IS_BEING_DESTROYED(mplex))
         return;

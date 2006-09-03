@@ -9,9 +9,12 @@
  * (at your option) any later version.
  */
 
+#include <string.h>
+
 #include <libtu/objp.h>
 #include <libtu/minmax.h>
 #include <libmainloop/defer.h>
+
 #include "common.h"
 #include "global.h"
 #include "screen.h"
@@ -316,15 +319,10 @@ static char *screen_managed_activity(WScreen *scr)
 }
 
 
-static void screen_managed_notify(WScreen *scr, WRegion *sub, const char *how)
+static void screen_notify_activity(WScreen *scr)
 {
-    char *notstr;
-    
-    if(ioncore_g.opmode!=IONCORE_OPMODE_NORMAL)
-        return;
-    
     if(ioncore_g.screen_notify){
-        notstr=screen_managed_activity(scr);
+        char *notstr=screen_managed_activity(scr);
         if(notstr!=NULL){
             screen_notify(scr, notstr);
             free(notstr);
@@ -333,6 +331,16 @@ static void screen_managed_notify(WScreen *scr, WRegion *sub, const char *how)
     }
 
     screen_unnotify(scr);
+}
+
+
+static void screen_managed_notify(WScreen *scr, WRegion *reg, const char *how)
+{
+    if(strcmp(how, "sub-activity")==0){
+        /* TODO: multiple calls */
+        mainloop_defer_action((Obj*)scr, 
+                              (WDeferredAction*)screen_notify_activity);
+    }
 }
 
 
@@ -601,11 +609,11 @@ static DynFunTab screen_dynfuntab[]={
     {mplex_managed_changed, 
      screen_managed_changed},
     
-    {mplex_managed_geom, 
-     screen_managed_geom},
-
     {region_managed_notify, 
      screen_managed_notify},
+    
+    {mplex_managed_geom, 
+     screen_managed_geom},
 
     {(DynFun*)region_get_configuration,
      (DynFun*)screen_get_configuration},

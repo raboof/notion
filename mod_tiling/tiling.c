@@ -684,16 +684,16 @@ bool tiling_rescue_clientwins(WTiling *ws, WPHolder *ph)
 
 void tiling_do_managed_remove(WTiling *ws, WRegion *reg)
 {
-    region_unset_manager(reg, (WRegion*)ws);
-    
     if(STDISP_OF(ws)==reg){
         ws->stdispnode->regnode.reg=NULL;
     }else{
         ptrlist_remove(&(ws->managed_list), reg);
     }
-    
+
     if(OBJ_IS(reg, WFrame))
         region_remove_bindmap(reg, mod_tiling_frame_bindmap);
+    
+    region_unset_manager(reg, (WRegion*)ws);
 }
 
 

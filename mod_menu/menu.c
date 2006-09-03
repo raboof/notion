@@ -668,11 +668,11 @@ static void menu_managed_remove(WMenu *menu, WRegion *sub)
     
     if(sub!=(WRegion*)menu->submenu)
         return;
-
-    menu->submenu=NULL;
     
-    region_unset_manager(sub, (WRegion*)menu);
+    menu->submenu=NULL;
 
+    region_unset_manager(sub, (WRegion*)menu);
+    
     if(mcf)
         region_do_set_focus((WRegion*)menu, FALSE);
 }

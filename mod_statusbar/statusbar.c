@@ -534,10 +534,11 @@ static void statusbar_managed_remove(WStatusBar *sb, WRegion *reg)
     WSBElem *el;
         
     ptrlist_remove(&sb->traywins, (Obj*)reg);
-    region_unset_manager(reg, (WRegion*)sb);
     
     el=statusbar_unassociate_systray(sb, reg);
     
+    region_unset_manager(reg, (WRegion*)sb);
+
     if(el!=NULL && ioncore_g.opmode!=IONCORE_OPMODE_DEINIT){
         do_calc_systray_w(sb, el);
         statusbar_rearrange(sb, TRUE);
