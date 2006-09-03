@@ -9,8 +9,11 @@
  * (at your option) any later version.
  */
 
+#include <string.h>
+
 #include <libtu/objp.h>
 #include <libmainloop/defer.h>
+
 #include "common.h"
 #include "group-cw.h"
 #include "clientwin.h"
@@ -222,11 +225,12 @@ const char *groupcw_displayname(WGroupCW *cwg)
 }
 
 
-void groupcw_managed_notify(WGroupCW *cwg, WRegion *reg)
+void groupcw_managed_notify(WGroupCW *cwg, WRegion *reg, const char *how)
 {
-    if(group_bottom(&cwg->grp)==reg){
-        /* Title may have changed */
-        region_notify_change((WRegion*)cwg);
+    if(group_bottom(&cwg->grp)==reg 
+       && strcmp(how, "name")==0){
+        /* Title has changed */
+        region_notify_change((WRegion*)cwg, how);
     }
 }
 

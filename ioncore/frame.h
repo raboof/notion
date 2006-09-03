@@ -91,7 +91,7 @@ extern bool frame_is_numbers(WFrame *frame);
 extern int frame_default_index(WFrame *frame);
 
 /* Misc */
-extern void frame_managed_notify(WFrame *frame, WRegion *sub);
+extern void frame_managed_notify(WFrame *frame, WRegion *sub, const char *how);
 extern void frame_managed_remove(WFrame *frame, WRegion *reg);
 
 /* Save/load */

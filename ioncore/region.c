@@ -31,6 +31,9 @@
 #define D2(X)
 
 
+WHook *region_notify_hook=NULL;
+
+
 /*{{{ Init & deinit */
 
 
@@ -222,9 +225,9 @@ bool region_managed_prepare_focus(WRegion *mgr, WRegion *reg,
 }
 
 
-void region_managed_notify(WRegion *mgr, WRegion *reg)
+void region_managed_notify(WRegion *mgr, WRegion *reg, const char *how)
 {
-    CALL_DYN(region_managed_notify, mgr, (mgr, reg));
+    CALL_DYN(region_managed_notify, mgr, (mgr, reg, how));
 }
 
 
@@ -251,12 +254,6 @@ WRegion *region_current(WRegion *mgr)
 void region_child_removed(WRegion *reg, WRegion *sub)
 {
     CALL_DYN(region_child_removed, reg, (reg, sub));
-}
-
-
-void region_manager_changed(WRegion *reg, WRegion *mgr_or_null)
-{
-    CALL_DYN(region_manager_changed, reg, (reg, mgr_or_null));
 }
 
 
@@ -523,10 +520,13 @@ void region_unset_manager(WRegion *reg, WRegion *mgr)
 {
     if(reg->manager!=mgr)
         return;
-    reg->manager=NULL;
     
-    if(!OBJ_IS_BEING_DESTROYED(reg))
-        region_manager_changed(reg, NULL);
+    /*region_notify_change(reg, "unset_manager");*/
+    
+    if(region_is_activity_r(reg))
+        region_clear_mgd_activity(mgr);
+
+    reg->manager=NULL;
 }
 
 
@@ -535,8 +535,11 @@ void region_set_manager(WRegion *reg, WRegion *mgr)
     assert(reg->manager==NULL);
     
     reg->manager=mgr;
+
+    if(region_is_activity_r(reg))
+        region_mark_mgd_activity(mgr);
     
-    region_manager_changed(reg, mgr);
+    /*region_notify_change(reg, "set_manager");*/
 }
 
 
@@ -763,12 +766,43 @@ void region_rootpos(WRegion *reg, int *xret, int *yret)
 }
 
 
-void region_notify_change(WRegion *reg)
+static bool mrsh_not(WHookDummy *fn, void *p)
+{
+    WRegion *reg=(WRegion*)((void**)p)[0];
+    const char *how=(const char*)((void**)p)[1];
+    
+    fn(reg, how);
+    
+    return TRUE;
+}
+
+
+static bool mrshe_not(ExtlFn fn, void *p)
+{
+    WRegion *reg=(WRegion*)((void**)p)[0];
+    const char *how=(const char*)((void**)p)[1];
+    
+    extl_call(fn, "os", NULL, reg, how);
+    
+    return TRUE;
+}
+
+
+void region_notify_change(WRegion *reg, const char *how)
 {
     WRegion *mgr=REGION_MANAGER(reg);
+    const void *p[2];
     
+    p[0]=reg;
+    p[1]=how;
+
     if(mgr!=NULL)
-        region_managed_notify(mgr, reg);
+        region_managed_notify(mgr, reg, how);
+
+    extl_protect(NULL);
+    hook_call(region_notify_hook, p, mrsh_not, mrshe_not),
+    extl_unprotect(NULL);
+    
 }
 
 

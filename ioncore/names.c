@@ -416,7 +416,7 @@ static bool do_set_name(bool (*fn)(WRegion *reg, WNamespace *ns, const char *p),
     if(nm!=NULL)
         free(nm);
 
-    region_notify_change(reg);
+    region_notify_change(reg, "name");
     
     return ret;
 }

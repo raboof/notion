@@ -18,14 +18,11 @@
 #include "activity.h"
 
 
-WHook *region_activity_hook=NULL;
-
 static ObjList *actlist=NULL;
 
 
-static void propagate_activity(WRegion *reg)
+void region_mark_mgd_activity(WRegion *mgr)
 {
-    WRegion *mgr=region_manager(reg);
     bool mgr_marked;
     
     if(mgr==NULL)
@@ -33,26 +30,33 @@ static void propagate_activity(WRegion *reg)
     
     mgr_marked=region_is_activity_r(mgr);
     mgr->mgd_activity++;
-    region_managed_notify(mgr, reg);
     
     if(!mgr_marked)
-        propagate_activity(mgr);
+        region_mark_mgd_activity(REGION_MANAGER(mgr));
+}
+
+
+void region_clear_mgd_activity(WRegion *mgr)
+{
+    if(mgr==NULL)
+        return;
+    
+    mgr->mgd_activity=maxof(0, mgr->mgd_activity-1);
+    
+    if(!region_is_activity_r(mgr))
+        region_clear_mgd_activity(REGION_MANAGER(mgr));
+}
+    
+    
+static void propagate_activity(WRegion *reg)
+{
+    region_mark_mgd_activity(REGION_MANAGER(reg));
 }
 
 
 static void propagate_clear(WRegion *reg)
 {
-    WRegion *mgr=region_manager(reg);
-    bool mgr_notify_always;
-    
-    if(mgr==NULL)
-        return;
-    
-    mgr->mgd_activity=maxof(0, mgr->mgd_activity-1);
-    region_managed_notify(mgr, reg);
-    
-    if(!region_is_activity_r(mgr))
-        propagate_clear(mgr);
+    region_clear_mgd_activity(REGION_MANAGER(reg));
 }
 
 
@@ -81,10 +85,8 @@ bool region_set_activity(WRegion *reg, int sp)
             propagate_clear(reg);
     }
     
-    extl_protect(NULL);
-    hook_call_o(region_activity_hook, (Obj*)reg);
-    extl_unprotect(NULL);
-
+    region_notify_change(reg, "activity");
+    
     return nset;
 }
 

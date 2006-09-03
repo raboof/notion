@@ -21,10 +21,11 @@ extern bool region_set_activity(WRegion *reg, int sp);
 extern bool region_is_activity(WRegion* re);
 extern bool region_is_activity_r(WRegion *reg);
 
+extern void region_mark_mgd_activity(WRegion *mgr);
+extern void region_clear_mgd_activity(WRegion *mgr);
+
 extern ExtlTab ioncore_activity_list();
 extern WRegion *ioncore_activity_first();
 extern bool ioncore_goto_activity();
-
-extern WHook *region_activity_hook;
 
 #endif /* ION_IONCORE_ACTIVITY_H */

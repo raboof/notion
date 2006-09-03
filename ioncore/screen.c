@@ -316,7 +316,7 @@ static char *screen_managed_activity(WScreen *scr)
 }
 
 
-static void screen_managed_notify(WScreen *scr, WRegion *sub)
+static void screen_managed_notify(WScreen *scr, WRegion *sub, const char *how)
 {
     char *notstr;
     

@@ -13,6 +13,7 @@
 #define ION_IONCORE_REGION_H
 
 #include <libtu/obj.h>
+#include <libmainloop/hooks.h>
 #include "common.h"
 #include "rectangle.h"
 
@@ -136,14 +137,12 @@ DYNFUN bool region_managed_prepare_focus(WRegion *reg, WRegion *sub,
                                          int flags, WPrepareFocusResult *res);
 DYNFUN void region_managed_activated(WRegion *reg, WRegion *sub);
 DYNFUN void region_managed_inactivated(WRegion *reg, WRegion *sub);
-DYNFUN void region_managed_notify(WRegion *reg, WRegion *sub);
+DYNFUN void region_managed_notify(WRegion *reg, WRegion *sub, const char *how);
 DYNFUN bool region_managed_may_destroy(WRegion *mgr, WRegion *reg);
 DYNFUN bool region_managed_rqorder(WRegion *reg, WRegion *sub, 
                                    WRegionOrder order);
 
 DYNFUN void region_child_removed(WRegion *reg, WRegion *sub);
-
-DYNFUN void region_manager_changed(WRegion *reg, WRegion *mgr_or_null);
 
 DYNFUN void region_restack(WRegion *reg, Window other, int mode);
 DYNFUN void region_stacking(WRegion *reg, Window *bottomret, Window *topret);
@@ -163,7 +162,7 @@ extern bool region_reparent(WRegion *reg, WWindow *target,
 extern void region_updategr_default(WRegion *reg);
 
 extern void region_rootpos(WRegion *reg, int *xret, int *yret);
-extern void region_notify_change(WRegion *reg);
+extern void region_notify_change(WRegion *reg, const char *how);
 
 extern bool region_goto(WRegion *reg);
 extern bool region_goto_flags(WRegion *reg, int flags);
@@ -188,5 +187,7 @@ extern bool region_same_rootwin(const WRegion *reg1, const WRegion *reg2);
 extern bool region_manager_allows_destroying(WRegion *reg);
 
 extern WRegion *region_managed_within(WRegion *reg, WRegion *mgd);
+
+extern WHook *region_notify_hook;
 
 #endif /* ION_IONCORE_REGION_H */

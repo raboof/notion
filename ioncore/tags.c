@@ -34,7 +34,7 @@ bool region_set_tagged(WRegion *reg, int sp)
             reg->flags|=REGION_TAGGED;
             objlist_insert_last(&taglist, (Obj*)reg);
         }
-        region_notify_change(reg);
+        region_notify_change(reg, "tag");
     }
 
     return nset;
@@ -97,7 +97,7 @@ WRegion *ioncore_tags_take_first()
     
     if(reg!=NULL){
         reg->flags&=~REGION_TAGGED;
-        region_notify_change(reg);
+        region_notify_change(reg, "tag");
     }
     
     return reg;
