@@ -39,13 +39,13 @@ defbindings("WScreen", {
     
     submap(META.."K", {
         bdoc("Go to first region demanding attention or previously active one."),
-        kpress("K", "ioncore.activity_goto() or ioncore.goto_previous()"),
+        kpress("K", "ioncore.goto_activity() or ioncore.goto_previous()"),
 
         --bdoc("Go to previous active object."),
         --kpress("K", "ioncore.goto_previous()"),
         
         --bdoc("Go to first object on activity/urgency list."),
-        --kpress("I", "ioncore.activity_goto()"),
+        --kpress("I", "ioncore.goto_activity()"),
         
         bdoc("Clear all tags."),
         kpress("T", "ioncore.clear_tags()"),
