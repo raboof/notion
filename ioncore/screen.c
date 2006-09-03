@@ -245,29 +245,31 @@ void screen_notify(WScreen *scr, const char *str)
     WInfoWin *iw=(WInfoWin*)(scr->notifywin_watch.obj);
     WFitParams fp;
     
-    /* TODO: manage normally now! */
-    
-    if(iw!=NULL){
-        infowin_set_text(iw, str);
-        return;
+    if(iw==NULL){
+        WMPlexAttachParams param=MPLEXATTACHPARAMS_INIT;
+        
+        param.flags=(MPLEX_ATTACH_UNNUMBERED|
+                     MPLEX_ATTACH_SIZEPOLICY|
+                     MPLEX_ATTACH_GEOM|
+                     MPLEX_ATTACH_LEVEL);
+        param.szplcy=SIZEPOLICY_GRAVITY_NORTHWEST;
+        param.level=STACKING_LEVEL_ON_TOP;
+        param.geom.x=0;
+        param.geom.y=0;
+        param.geom.w=1;
+        param.geom.h=1;
+        
+        iw=(WInfoWin*)mplex_do_attach_new(&scr->mplex, &param,
+                                          (WRegionCreateFn*)create_infowin, 
+                                          "actnotify");
+        
+        if(iw==NULL)
+            return;
+
+        watch_setup(&(scr->notifywin_watch), (Obj*)iw, NULL);
     }
 
-    fp.mode=REGION_FIT_EXACT;
-    fp.g.x=0;
-    fp.g.y=0;
-    fp.g.w=1;
-    fp.g.h=1;
-    
-    iw=create_infowin((WWindow*)scr, &fp, "actnotify");
-    
-    if(iw==NULL)
-        return;
-    
-    watch_setup(&(scr->notifywin_watch), (Obj*)iw, NULL);
-
     infowin_set_text(iw, str);
-    region_restack((WRegion*)iw, None, Above);
-    region_map((WRegion*)iw);
 }
 
 
@@ -275,8 +277,8 @@ void screen_unnotify(WScreen *scr)
 {
     Obj *iw=scr->notifywin_watch.obj;
     if(iw!=NULL){
-        mainloop_defer_destroy(iw);
         watch_reset(&(scr->notifywin_watch));
+        mainloop_defer_destroy(iw);
     }
 }
 
