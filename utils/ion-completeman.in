@@ -65,7 +65,7 @@ grepper() {
 }
 
 scan() {
-    if test "x$ION_MC_MANPATH" != "x"; then
+    if test "x$ION_MANPATH" != "x"; then
         mpath="$ION_MANPATH"
     elif test "x$MANPATH" != "x"; then
         mpath="$MANPATH"
