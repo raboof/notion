@@ -63,7 +63,7 @@ bool ioncore_handle_event(XEvent *ev)
         ioncore_handle_property(&(ev->xproperty));
         break;
     CASE_EVENT(FocusIn)
-        ioncore_handle_focus_in(&(ev->xfocus));
+        ioncore_handle_focus_in(&(ev->xfocus), FALSE);
         break;
     CASE_EVENT(FocusOut)
         ioncore_handle_focus_out(&(ev->xfocus));
@@ -372,7 +372,7 @@ static bool pointer_in_root(Window root1)
 
 
 
-void ioncore_handle_focus_in(const XFocusChangeEvent *ev)
+void ioncore_handle_focus_in(const XFocusChangeEvent *ev, bool skip)
 {
     WRegion *reg;
     WWindow *wwin, *tmp;
@@ -398,7 +398,8 @@ void ioncore_handle_focus_in(const XFocusChangeEvent *ev)
         if((ev->detail==NotifyPointerRoot || ev->detail==NotifyDetailNone) &&
            pointer_in_root(ev->window) && ioncore_g.focus_next==NULL){
             /* Restore focus */
-            region_set_focus(reg);
+            if(!skip)
+                region_set_focus(reg);
             return;
         }
         /*return;*/
@@ -502,7 +503,7 @@ void ioncore_handle_buttonpress(XEvent *ev)
             ioncore_handle_grabs(ev);
             break;
         CASE_EVENT(FocusIn)
-            ioncore_handle_focus_in(&(ev->xfocus));
+            ioncore_handle_focus_in(&(ev->xfocus), FALSE);
             break;
         CASE_EVENT(FocusOut)
             ioncore_handle_focus_out(&(ev->xfocus));

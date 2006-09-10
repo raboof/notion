@@ -173,7 +173,7 @@ static void skip_focusenter()
         if(ev.type==FocusOut)
             ioncore_handle_focus_out(&(ev.xfocus));
         else if(ev.type==FocusIn)
-            ioncore_handle_focus_in(&(ev.xfocus));
+            ioncore_handle_focus_in(&(ev.xfocus), TRUE);
         /*else if(ev.type==EnterNotify)
             handle_enter_window(&ev);*/
     }
