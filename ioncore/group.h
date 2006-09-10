@@ -31,7 +31,6 @@ DECLSTRUCT(WGroupAttachParams){
     uint level_set:1;
     uint szplcy_set:1;
     uint geom_set:1;
-    uint pos_not_ok:1;
     uint switchto_set:1;
     uint switchto:1;
     
@@ -42,6 +41,7 @@ DECLSTRUCT(WGroupAttachParams){
     
     uint level;
     WRectangle geom;
+    int geom_weak;
     WSizePolicy szplcy;
     int framed_gravity;
     WGroupMkFrameFn *framed_mkframe;
@@ -49,7 +49,7 @@ DECLSTRUCT(WGroupAttachParams){
 };
 
 #define GROUPATTACHPARAMS_INIT \
-    {0, 0, 0, 0, 0,  0, 0,  0, 0,  0, {0, 0, 0, 0}, 0, 0, NULL, NULL}
+    {0, 0, 0, 0,  0, 0,  0, 0,  0, {0, 0, 0, 0}, 0, 0, 0, NULL, NULL}
 
 
 DECLCLASS(WGroup){

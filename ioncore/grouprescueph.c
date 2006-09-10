@@ -13,9 +13,10 @@
 #include <libtu/obj.h>
 #include <libtu/pointer.h>
 
-#include <ioncore/common.h>
+#include "common.h"
 #include "group.h"
 #include "grouprescueph.h"
+#include "resize.h"
 
 
 /*{{{ Init/deinit */
@@ -119,7 +120,9 @@ WGroupRescuePH *groupws_get_rescue_pholder_for(WGroupWS *ws,
     ap.geom_set=TRUE;
     ap.geom=REGION_GEOM(forwhat);
 
-    ap.pos_not_ok=(REGION_PARENT(forwhat)!=REGION_PARENT(ws));
+    ap.geom_weak=(REGION_PARENT(forwhat)!=REGION_PARENT(ws)
+                  ? REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y
+                  : 0);
     ap.framed_inner_geom=FALSE;
     ap.framed_gravity=StaticGravity;
 

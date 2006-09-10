@@ -25,6 +25,7 @@
 #include "group-ws.h"
 #include "grouprescueph.h"
 #include "float-placement.h"
+#include "resize.h"
 
 
 /*{{{ Settings */
@@ -117,8 +118,8 @@ bool groupws_handle_drop(WGroupWS *ws, int x, int y,
     ap.geom.y=y;
     ap.geom.w=REGION_GEOM(dropped).w;
     ap.geom.h=REGION_GEOM(dropped).h;
+    ap.geom_weak=0;
     ap.framed_inner_geom=TRUE;
-    ap.pos_not_ok=FALSE;
     ap.framed_gravity=NorthWestGravity;
     
     return groupws_attach_framed(ws, &ap, dropped);
@@ -174,7 +175,9 @@ bool groupws_attach_framed_extl(WGroupWS *ws, WClientWin *cwin, ExtlTab t)
         ap.geom.h=maxof(ap.geom.h, 1);
         
         ap.geom_set=(size==2);
-        ap.pos_not_ok=(pos!=2);
+        ap.geom_weak=(pos!=2
+                      ? REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y
+                      : 0);
         
         extl_unref_table(gt);
     }
@@ -214,26 +217,17 @@ static WMPlex *find_existing(WGroupWS *ws)
 static WGroupRescuePH *groupws_prepare_manage_in_frame(WGroupWS *ws, 
                                                        const WClientWin *cwin,
                                                        const WManageParams *param, 
-                                                       bool respect_pos,
+                                                       int geom_weak,
                                                        WRegion *stack_above)
 {
     WGroupAttachParams ap=GROUPATTACHPARAMS_INIT;
 
-    if(param->maprq && ioncore_g.opmode!=IONCORE_OPMODE_INIT){
-        /* When the window is mapped by application request, position
-         * request is only honoured if the position was given by the user
-         * and in case of a transient (the app may know better where to 
-         * place them) or if we're initialising.
-         */
-        respect_pos=(param->tfor!=NULL || param->userpos);
-    }
-    
     ap.geom_set=TRUE;
     ap.geom=param->geom;
     
     ap.framed_inner_geom=TRUE;
     ap.framed_gravity=param->gravity;
-    ap.pos_not_ok=!respect_pos;
+    ap.geom_weak=geom_weak;
     ap.stack_above=stack_above;
 
     return create_grouprescueph(&ws->grp, NULL, &ap);
@@ -243,7 +237,7 @@ static WGroupRescuePH *groupws_prepare_manage_in_frame(WGroupWS *ws,
 static WPHolder *groupws_do_prepare_manage(WGroupWS *ws, 
                                            const WClientWin *cwin,
                                            const WManageParams *param, 
-                                           int redir, bool respect_pos)
+                                           int redir, int geom_weak)
 {
     WPHolder *ph;
     
@@ -261,7 +255,7 @@ static WPHolder *groupws_do_prepare_manage(WGroupWS *ws,
         return NULL;
 
     return (WPHolder*)groupws_prepare_manage_in_frame(ws, cwin, param,
-                                                      respect_pos, NULL);
+                                                      geom_weak, NULL);
 }
 
 
@@ -270,14 +264,25 @@ WPHolder *groupws_prepare_manage(WGroupWS *ws, const WClientWin *cwin,
                                  int redir)
 {
     WRegion *b=(ws->grp.bottom!=NULL ? ws->grp.bottom->reg : NULL);
+    int weak=0;
     
+    if(param->maprq && ioncore_g.opmode!=IONCORE_OPMODE_INIT
+       && !param->userpos){
+        /* When the window is mapped by application request, position
+         * request is only honoured if the position was given by the user
+         * and in case of a transient (the app may know better where to 
+         * place them) or if we're initialising.
+         */
+        weak=REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y;
+    }
+
     if(b!=NULL && HAS_DYN(b, region_prepare_manage)){
         WPHolder *ph=region_prepare_manage(b, cwin, param, redir);
         if(ph!=NULL)
             return ph;
     }
     
-    return groupws_do_prepare_manage(ws, cwin, param, redir, TRUE);
+    return groupws_do_prepare_manage(ws, cwin, param, redir, weak);
 }
 
 
@@ -295,7 +300,7 @@ WPHolder *groupws_prepare_manage_transient(WGroupWS *ws, const WClientWin *cwin,
         return NULL;
     
     return (WPHolder*)groupws_prepare_manage_in_frame(ws, cwin, param, 
-                                                      TRUE, stack_above);
+                                                      0, stack_above);
 }
 
 

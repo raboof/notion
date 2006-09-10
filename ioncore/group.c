@@ -536,8 +536,8 @@ bool group_do_attach_final(WGroup *ws,
     WSizePolicy szplcy;
     WFitParams fp;
     WRectangle g;
-    int weak=0;
     uint level;
+    int weak;
     bool sw;
     
     /* Fit */
@@ -546,20 +546,19 @@ bool group_do_attach_final(WGroup *ws,
             : SIZEPOLICY_UNCONSTRAINED);
         
     if(!param->geom_set){
-        weak|=REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y;
+        weak=REGION_RQGEOM_WEAK_ALL;
         g=REGION_GEOM(reg);
     }else{
+        weak=param->geom_weak;
         g=param->geom;
     }
     
-    if(!param->geom_set || param->pos_not_ok){
-        if(szplcy==SIZEPOLICY_UNCONSTRAINED ||
-           szplcy==SIZEPOLICY_FREE ||
-           (szplcy&SIZEPOLICY_MASK)==SIZEPOLICY_FREE_GLUE){
-            group_calc_placement(ws, &g);
-        }else{
-            weak|=REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y;
-        }
+    if((weak&(REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y))
+       ==(REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y) &&
+        (szplcy==SIZEPOLICY_UNCONSTRAINED ||
+         szplcy==SIZEPOLICY_FREE ||
+         szplcy==SIZEPOLICY_FREE_GLUE /* without flags */)){
+        group_calc_placement(ws, &g);
     }
 
     fp.g=REGION_GEOM(ws);
@@ -816,7 +815,6 @@ WRegion *group_do_attach_framed(WGroup *ws,
     WRectangle rqg;
     WFrame *frame;
     WRegion *reg;
-    int weak=0;
 
     assert(parent!=NULL);
     
@@ -860,7 +858,7 @@ WRegion *group_do_attach_framed(WGroup *ws,
         rqg.w=REGION_GEOM(reg).w+(REGION_GEOM(frame).w-mg.w);
         rqg.h=REGION_GEOM(reg).h+(REGION_GEOM(frame).h-mg.h);
         
-        ap->pos_not_ok=TRUE;
+        ap->geom_weak|=REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_X;
         /*frame_geom_from_initial_geom(frame, ws, &rqg, ap->framed_gravity);*/
     }else{
         rqg=ap->geom;
@@ -877,7 +875,7 @@ WRegion *group_do_attach_framed(WGroup *ws,
            (rqg.y+rqg.h<=REGION_GEOM(ws).y) ||
            (rqg.x>=REGION_GEOM(ws).x+REGION_GEOM(ws).w) ||
            (rqg.y>=REGION_GEOM(ws).y+REGION_GEOM(ws).h)){
-            ap->pos_not_ok=TRUE;
+            ap->geom_weak|=REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_X;
         }
     }
     

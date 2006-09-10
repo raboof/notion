@@ -111,9 +111,9 @@ static WPHolder *groupcw_transient_pholder(WGroupCW *cwg,
     }else{
         param.geom_set=1;
         param.geom=mp->geom;
+        param.geom_weak=REGION_RQGEOM_WEAK_ALL;
         
         param.framed_inner_geom=TRUE;
-        param.pos_not_ok=TRUE;
         param.framed_gravity=mp->gravity;
         param.framed_mkframe=create_transient_frame;
         
