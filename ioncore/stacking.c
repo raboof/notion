@@ -181,6 +181,12 @@ WStacking *stacking_unstack(WWindow *par, WStacking *regst)
         /*st=st->next;*/
     }
     
+    if(nxt==NULL)
+        nxt=regst->above;
+    
+    if(regst->above==NULL)
+        regst->above=NULL;
+    
     return nxt;
 }
 
@@ -556,6 +562,38 @@ WStacking *stacking_find_to_focus(WStacking *stacking, WStacking *to_try,
     }while(st!=stacking);
     
     return NULL;
+}
+
+
+static bool mapped_filt(WStacking *st, void *unused)
+{
+    return (st->reg!=NULL && REGION_IS_MAPPED(st->reg));
+}
+
+
+static bool mgr_filt(WStacking *st, void *mgr_)
+{
+    return (st->reg!=NULL && REGION_MANAGER(st->reg)==(WRegion*)mgr_);
+}
+
+
+WStacking *stacking_find_to_focus_mapped(WStacking *stacking, 
+                                         WStacking *to_try,
+                                         WRegion *mgr)
+{
+    if(mgr==NULL){
+        return stacking_find_to_focus(stacking, to_try, mapped_filt, 
+                                      NULL, NULL);
+    }else{
+        return stacking_find_to_focus(stacking, to_try, mapped_filt, 
+                                      mgr_filt, mgr);
+    }
+}
+
+
+uint stacking_min_level_mapped(WStacking *stacking)
+{
+    return stacking_min_level(stacking, mapped_filt, NULL);
 }
 
 

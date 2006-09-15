@@ -520,12 +520,6 @@ static void mplex_managed_rqgeom(WMPlex *mplex, WRegion *sub,
 /*{{{ Focus  */
 
 
-static bool mapped_filt(WStacking *st, void *unused)
-{
-    return (st->reg!=NULL && REGION_IS_MAPPED(st->reg));
-}
-
-
 static WRegion *mplex_do_to_focus(WMPlex *mplex, WStacking *to_try)
 {
     WStacking *stacking=mplex_get_stacking(mplex);
@@ -534,10 +528,10 @@ static WRegion *mplex_do_to_focus(WMPlex *mplex, WStacking *to_try)
     if(stacking==NULL)
         return NULL;
 
-    if(to_try!=NULL && !mapped_filt(to_try, mplex))
+    if(to_try!=NULL && (to_try->reg==NULL || !REGION_IS_MAPPED(to_try->reg)))
         to_try=NULL;
 
-    st=stacking_find_to_focus(stacking, to_try, mapped_filt, NULL, NULL);
+    st=stacking_find_to_focus_mapped(stacking, to_try, NULL);
     
     if(st!=NULL)
         return st->reg;
@@ -560,12 +554,6 @@ WRegion *mplex_to_focus(WMPlex *mplex)
 }
 
 
-static bool mgr_filt(WStacking *st, void *mgr_)
-{
-    return (st->reg!=NULL && REGION_MANAGER(st->reg)==(WRegion*)mgr_);
-}
-
-
 static WRegion *mplex_do_to_focus_on(WMPlex *mplex, WStacking *node,
                                      WStacking *to_try)
 {
@@ -575,12 +563,10 @@ static WRegion *mplex_do_to_focus_on(WMPlex *mplex, WStacking *node,
     if(stacking==NULL)
         return NULL;
 
-    if(to_try!=NULL && !mapped_filt(to_try, mplex))
+    if(to_try!=NULL && (to_try->reg==NULL || !REGION_IS_MAPPED(to_try->reg)))
         to_try=NULL;
     
-    st=stacking_find_to_focus(stacking, to_try, 
-                              mapped_filt, mgr_filt, 
-                              node->reg);
+    st=stacking_find_to_focus_mapped(stacking, to_try, node->reg);
     
     return (st!=NULL ? st->reg : NULL);
 }
@@ -942,7 +928,7 @@ static WRegion *do_navi(WMPlex *mplex, WStacking *sti,
     stacking=mplex_get_stacking(mplex);
     
     if(stacking!=NULL)
-        min_level=stacking_min_level(stacking, mapped_filt, NULL);
+        min_level=stacking_min_level_mapped(stacking);
 
     st=sti;
     while(1){

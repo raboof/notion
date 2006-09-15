@@ -211,26 +211,25 @@ static void group_unmap(WGroup *ws)
 }
 
 
-WStacking *group_find_to_focus(WGroup *ws, WStacking *to_try)
+static WStacking *find_to_focus(WGroup *ws, WStacking *st, bool group_only)
 {
     WStacking *stacking=group_get_stacking(ws);
-        
+    
     if(stacking==NULL)
-        return NULL;
-
-    return stacking_find_to_focus(stacking, to_try, wsfilt, NULL, ws);
+        return st;
+                                
+    return stacking_find_to_focus_mapped(stacking, st, 
+                                         (group_only ? (WRegion*)ws : NULL));
 }
 
 
-static bool group_refocus(WGroup *ws, WStacking *st)
+static bool group_refocus_(WGroup *ws, WStacking *st)
 {
-    WStacking *stf=group_find_to_focus(ws, st);
-
-    if(stf!=ws->current_managed && stf->reg!=NULL){
+    if(st!=ws->current_managed && st->reg!=NULL){
         if(region_may_control_focus((WRegion*)ws))
-            region_set_focus(stf->reg);
+            region_set_focus(st->reg);
         else
-            ws->current_managed=stf;
+            ws->current_managed=st;
         return TRUE;
     }
     
@@ -253,8 +252,8 @@ static void group_do_set_focus(WGroup *ws, bool warp)
     WStacking *st=ws->current_managed;
     
     if(st==NULL || st->reg==NULL)
-        st=group_find_to_focus(ws, NULL);
-
+        st=find_to_focus(ws, NULL, TRUE);
+    
     if(st!=NULL && st->reg!=NULL)
         region_do_set_focus(st->reg, warp);
     else
@@ -280,10 +279,13 @@ static bool group_managed_prepare_focus(WGroup *ws, WRegion *reg,
         return mplex_do_prepare_focus(mplex, node, st,
                                       flags, res);
     }else{
+        WStacking *stacking;
+        
         if(!region_prepare_focus((WRegion*)ws, flags, res))
             return FALSE;
 
-        st=group_find_to_focus(ws, st);
+        stacking=group_get_stacking(ws);
+        st=find_to_focus(ws, st, FALSE);
         
 #warning "TODO: raise in some cases (not enter-window)?"
         
@@ -352,21 +354,24 @@ void group_managed_remove(WGroup *ws, WRegion *reg)
     region_unset_manager(reg, (WRegion*)ws);
 
     if(!dest && !ds){
-       if(was_bottom && !was_stdisp && ws->managed_stdisp==NULL){
-           /* We should probably be managing any stdisp, that 'bottom' 
-            * was managing.
-            */
-           WMPlex *mplex=OBJ_CAST(REGION_MANAGER(ws), WMPlex);
+        if(was_bottom && !was_stdisp && ws->managed_stdisp==NULL){
+            /* We should probably be managing any stdisp, that 'bottom' 
+             * was managing.
+             */
+            WMPlex *mplex=OBJ_CAST(REGION_MANAGER(ws), WMPlex);
             
-           if(mplex!=NULL 
-              && mplex->mx_current!=NULL 
-              && mplex->mx_current->st->reg==(WRegion*)ws){
-               mplex_remanage_stdisp(mplex);
-           }
-       }
-    
-        if(cur)
-            group_refocus(ws, next_st);
+            if(mplex!=NULL 
+               && mplex->mx_current!=NULL 
+               && mplex->mx_current->st->reg==(WRegion*)ws){
+                mplex_remanage_stdisp(mplex);
+            }
+        }
+        
+        if(cur){
+            WStacking *stf=find_to_focus(ws, next_st, TRUE);
+            if(stf!=NULL)
+                region_warp(stf->reg);
+        }
     }else if(dest && !ds){
         mainloop_defer_destroy((Obj*)ws);
     }
@@ -594,8 +599,14 @@ bool group_do_attach_final(WGroup *ws,
     
     sw=(param->switchto_set ? param->switchto : ioncore_g.switchto_new);
     
-    if(sw || st->level>=STACKING_LEVEL_MODAL1)
-        group_refocus(ws, (sw ? st : NULL));
+    if(sw || st->level>=STACKING_LEVEL_MODAL1){
+        WStacking *stf=find_to_focus(ws, st, FALSE);
+        
+        if(stf==st){
+            /* Ok, the new region can be focused */
+            group_refocus_(ws, stf);
+        }
+    }
     
     return TRUE;
 }
