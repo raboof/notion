@@ -12,9 +12,7 @@ translate_grepsafe() {
     # and doesn't support simple and intuitive escaping and we have to
     # do it the hard way with the collations [.[.] and [.].] standing 
     # for [ and ], respectively.
-    sed 's:^[ \t]*\(.*\)[ \t]*$:\1:;
-         s:[[.[.][.].].*$^\\]:\\&:g;
-         s:^\([0-9]\+\)[ \t]\+\(.*\)$:\2[^.]*[.]?:'
+    sed 's:^[ \t]*\(.*\)[ \t]*$:\1:; s:[[.[.][.].].*$^\\]:\\&:g'
 }
 
 case "$1" in
