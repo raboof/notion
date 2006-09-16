@@ -323,18 +323,18 @@ void splitst_deinit(WSplitST *split)
 
 static void splitregion_update_bounds(WSplitRegion *node, bool recursive)
 {
-    XSizeHints hints;
+    WSizeHints hints;
     WSplit *snode=(WSplit*)node;
     
     assert(node->reg!=NULL);
     
     region_size_hints(node->reg, &hints);
     
-    snode->min_w=maxof(1, hints.flags&PMinSize ? hints.min_width : 1);
+    snode->min_w=maxof(1, hints.min_set ? hints.min_width : 1);
     snode->max_w=INT_MAX;
     snode->unused_w=-1;
 
-    snode->min_h=maxof(1, hints.flags&PMinSize ? hints.min_height : 1);
+    snode->min_h=maxof(1, hints.min_set ? hints.min_height : 1);
     snode->max_h=INT_MAX;
     snode->unused_h=-1;
 }
@@ -350,11 +350,11 @@ static void splitst_update_bounds(WSplitST *node, bool rec)
         snode->max_w=CF_STDISP_MIN_SZ;
         snode->max_h=CF_STDISP_MIN_SZ;
     }else{
-        XSizeHints hints;
+        WSizeHints hints;
         region_size_hints(node->regnode.reg, &hints);
-        snode->min_w=maxof(1, hints.flags&PMinSize ? hints.min_width : 1);
+        snode->min_w=maxof(1, hints.min_set ? hints.min_width : 1);
         snode->max_w=maxof(snode->min_w, hints.min_width);
-        snode->min_h=maxof(1, hints.flags&PMinSize ? hints.min_height : 1);
+        snode->min_h=maxof(1, hints.min_set ? hints.min_height : 1);
         snode->max_h=maxof(snode->min_h, hints.min_height);
     }
 

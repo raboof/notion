@@ -324,11 +324,13 @@ static void statusbar_do_update_natural_size(WStatusBar *p)
 }
 
 
-void statusbar_size_hints(WStatusBar *p, XSizeHints *h)
+void statusbar_size_hints(WStatusBar *p, WSizeHints *h)
 {
-    h->flags=PMaxSize|PMinSize;
+    h->min_set=TRUE;
     h->min_width=p->natural_w;
     h->min_height=p->natural_h;
+    
+    h->max_set=TRUE;
     h->max_width=p->natural_w;
     h->max_height=p->natural_h;
 }

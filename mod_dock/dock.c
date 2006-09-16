@@ -843,11 +843,13 @@ static void dock_rqgeom_clientwin(WDock *dock, WClientWin *cwin,
 }
 
 
-void dock_size_hints(WDock *dock, XSizeHints *hints)
+void dock_size_hints(WDock *dock, WSizeHints *hints)
 {
-    hints->flags=PMinSize|PMaxSize;
+    hints->min_set=TRUE;
     hints->min_width=dock->min_w;
     hints->min_height=dock->min_h;
+    
+    hints->max_set=TRUE;
     hints->max_width=dock->max_w;
     hints->max_height=dock->max_h;
 }

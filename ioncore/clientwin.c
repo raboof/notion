@@ -1065,9 +1065,9 @@ static void clientwin_activated(WClientWin *cwin)
 }
 
 
-static void clientwin_resize_hints(WClientWin *cwin, XSizeHints *hints_ret)
+static void clientwin_resize_hints(WClientWin *cwin, WSizeHints *hints_ret)
 {
-    *hints_ret=cwin->size_hints;
+    xsizehints_to_sizehints(&cwin->size_hints, hints_ret);
 }
 
 

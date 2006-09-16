@@ -16,6 +16,7 @@
 #include "frame.h"
 #include "infowin.h"
 #include "rectangle.h"
+#include "sizehint.h"
 
 
 /* To make it easier for region_managed_rqgeom handlers, the geom
@@ -44,10 +45,9 @@
 
 typedef void WDrawRubberbandFn(WRootWin *rw, const WRectangle *geom);
 
-
 DECLCLASS(WMoveresMode){
     Obj obj;
-    XSizeHints hints;
+    WSizeHints hints;
     int dx1, dx2, dy1, dy2;
     WRectangle origgeom;
     WRectangle geom;
@@ -115,7 +115,7 @@ extern void region_managed_rqgeom_allow(WRegion *reg, WRegion *sub,
 DYNFUN void region_rqgeom_clientwin(WRegion *reg, WClientWin *cwin,
                                     int flags, const WRectangle *geom);
 
-DYNFUN void region_size_hints(WRegion *reg, XSizeHints *hints_ret);
+DYNFUN void region_size_hints(WRegion *reg, WSizeHints *hints_ret);
 DYNFUN int region_orientation(WRegion *reg);
 
 extern void region_size_hints_correct(WRegion *reg, 

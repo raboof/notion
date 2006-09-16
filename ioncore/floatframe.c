@@ -126,17 +126,17 @@ void floatframe_managed_geom(const WFloatFrame *frame, WRectangle *geom)
 #define floatframe_border_inner_geom floatframe_managed_geom
 
 
-void floatframe_resize_hints(WFloatFrame *frame, XSizeHints *hints_ret)
+void floatframe_size_hints(WFloatFrame *frame, WSizeHints *hints_ret)
 {
-    frame_resize_hints(&frame->frame, hints_ret);
+    frame_size_hints(&frame->frame, hints_ret);
     
     if(frame->frame.flags&FRAME_SHADED){
         hints_ret->min_height=frame->frame.bar_h;
         hints_ret->max_height=frame->frame.bar_h;
         hints_ret->base_height=frame->frame.bar_h;
-        if(!(hints_ret->flags&PMaxSize)){
+        if(!hints_ret->max_set){
             hints_ret->max_width=INT_MAX;
-            hints_ret->flags|=PMaxSize;
+            hints_ret->max_set=TRUE;
         }
     }
 }
@@ -394,7 +394,7 @@ static DynFunTab floatframe_dynfuntab[]={
 
     {frame_brushes_updated, floatframe_brushes_updated},
     
-    {region_size_hints, floatframe_resize_hints},
+    {region_size_hints, floatframe_size_hints},
     
     END_DYNFUNTAB
 };

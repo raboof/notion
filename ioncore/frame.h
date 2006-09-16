@@ -22,6 +22,7 @@
 #include "mplex.h"
 #include "gr.h"
 #include "rectangle.h"
+#include "sizehint.h"
 
 #define FRAME_TAB_HIDE    0x0004
 #define FRAME_SAVED_VERT  0x0008
@@ -68,7 +69,7 @@ extern bool frame_rqclose(WFrame *frame);
 
 /* Resize and reparent */
 extern bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp);
-extern void frame_resize_hints(WFrame *frame, XSizeHints *hints_ret);
+extern void frame_size_hints(WFrame *frame, WSizeHints *hints_ret);
 
 /* Focus */
 extern void frame_activated(WFrame *frame);

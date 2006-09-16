@@ -17,6 +17,7 @@
 #include <ioncore/common.h>
 #include <ioncore/gr.h>
 #include <ioncore/manage.h>
+#include <ioncore/sizehint.h>
 
 
 #define STATUSBAR_NX_STR "?"
@@ -79,7 +80,7 @@ extern WRegion *statusbar_load(WWindow *par, const WFitParams *fp,
                                ExtlTab tab);
 
 extern void statusbar_set_natural_w(WStatusBar *p, const char *str);
-extern void statusbar_size_hints(WStatusBar *p, XSizeHints *h);
+extern void statusbar_size_hints(WStatusBar *p, WSizeHints *h);
 extern void statusbar_updategr(WStatusBar *p);
 extern void statusbar_set_contents(WStatusBar *sb, ExtlTab t);
 

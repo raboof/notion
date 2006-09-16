@@ -142,9 +142,9 @@ static void moveres_draw_infowin(WMoveresMode *mode)
         w=mode->geom.w;
         h=mode->geom.h;
         
-        if((mode->hints.flags&PResizeInc) &&
+        if((mode->hints.inc_set) &&
            (mode->hints.width_inc>1 || mode->hints.height_inc>1)){
-            if(mode->hints.flags&PBaseSize){
+            if(mode->hints.base_set){
                 w-=mode->hints.base_width;
                 h-=mode->hints.base_height;
             }
@@ -258,9 +258,9 @@ static bool moveresmode_init(WMoveresMode *mode, WRegion *reg,
         }
     }
     
-    if(!mode->hints.flags&PMinSize || mode->hints.min_width<1)
+    if(!mode->hints.min_set || mode->hints.min_width<1)
         mode->hints.min_width=1;
-    if(!mode->hints.flags&PMinSize || mode->hints.min_height<1)
+    if(!mode->hints.min_set || mode->hints.min_height<1)
         mode->hints.min_height=1;
     
     /* Set up info window */
@@ -354,7 +354,7 @@ static void moveresmode_delta(WMoveresMode *mode,
     if(h<=0)
         h=mode->hints.min_height;
     
-    xsizehints_correct(&mode->hints, &w, &h, TRUE);
+    sizehints_correct(&mode->hints, &w, &h, TRUE, TRUE);
     
     /* Do not modify coordinates and sizes that were not requested to be
      * changed. 
@@ -576,36 +576,37 @@ void region_managed_rqgeom_unallow(WRegion *mgr, WRegion *reg,
 }
 
 
-void region_size_hints(WRegion *reg, XSizeHints *hints_ret)
+void region_size_hints(WRegion *reg, WSizeHints *hints_ret)
 {
-    hints_ret->flags=0;
+    sizehints_clear(hints_ret);
+    
     {
         CALL_DYN(region_size_hints, reg, (reg, hints_ret));
     }
-    if(!(hints_ret->flags&PMinSize)){
+    
+    if(!hints_ret->min_set){
         hints_ret->min_width=1;
         hints_ret->min_height=1;
     }
-    if(!(hints_ret->flags&PBaseSize)){
+    if(!hints_ret->base_set){
         hints_ret->base_width=0;
         hints_ret->base_height=0;
     }
-    if(!(hints_ret->flags&PMaxSize)){
+    if(!hints_ret->max_set){
         hints_ret->max_width=INT_MAX;
         hints_ret->max_height=INT_MAX;
     }
-    /*hints_ret->flags|=(PMinSize|PBaseSize|PMaxSize);*/
 }
 
 
 void region_size_hints_correct(WRegion *reg, 
                                int *wp, int *hp, bool min)
 {
-    XSizeHints hints;
+    WSizeHints hints;
     
     region_size_hints(reg, &hints);
     
-    xsizehints_correct(&hints, wp, hp, min);
+    sizehints_correct(&hints, wp, hp, min, FALSE);
 }
 
 
@@ -628,28 +629,26 @@ EXTL_SAFE
 EXTL_EXPORT_AS(WRegion, size_hints)
 ExtlTab region_size_hints_extl(WRegion *reg)
 {
-    XSizeHints hints;
+    WSizeHints hints;
     ExtlTab tab;
     
     region_size_hints(reg, &hints);
     
     tab=extl_create_table();
     
-    /* Base size is always guaranteed to be set. */
-    extl_table_sets_i(tab, "base_w", hints.base_width);
-    extl_table_sets_i(tab, "base_h", hints.base_height);
-    /* Minimum size is always guaranteed to be set. */
-    extl_table_sets_i(tab, "min_w", hints.min_width);
-    extl_table_sets_i(tab, "min_h", hints.min_height);
-    if(hints.flags&PMaxSize){
-        extl_table_sets_i(tab, "max_w", hints.max_width);
-        extl_table_sets_i(tab, "max_h", hints.max_height);
-    }
-    if(hints.flags&PBaseSize){
+    if(hints.base_set){
         extl_table_sets_i(tab, "base_w", hints.base_width);
         extl_table_sets_i(tab, "base_h", hints.base_height);
     }
-    if(hints.flags&PResizeInc){
+    if(hints.min_set){
+        extl_table_sets_i(tab, "min_w", hints.min_width);
+        extl_table_sets_i(tab, "min_h", hints.min_height);
+    }
+    if(hints.max_set){
+        extl_table_sets_i(tab, "max_w", hints.max_width);
+        extl_table_sets_i(tab, "max_h", hints.max_height);
+    }
+    if(hints.inc_set){
         extl_table_sets_i(tab, "inc_w", hints.width_inc);
         extl_table_sets_i(tab, "inc_h", hints.height_inc);
     }
@@ -771,7 +770,7 @@ void frame_maximize_horiz(WFrame *frame)
 
 uint region_min_h(WRegion *reg)
 {
-    XSizeHints hints;
+    WSizeHints hints;
     region_size_hints(reg, &hints);
     return hints.min_height;
 }
@@ -779,7 +778,7 @@ uint region_min_h(WRegion *reg)
 
 uint region_min_w(WRegion *reg)
 {
-    XSizeHints hints;
+    WSizeHints hints;
     region_size_hints(reg, &hints);
     return hints.min_width;
 }

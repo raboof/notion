@@ -1244,13 +1244,13 @@ WRegion* group_current(WGroup *ws)
 }
 
 
-void group_size_hints(WGroup *ws, XSizeHints *hints_ret)
+void group_size_hints(WGroup *ws, WSizeHints *hints_ret)
 {
     if(ws->bottom==NULL || ws->bottom->reg==NULL){
-        hints_ret->flags=0;
+        sizehints_clear(hints_ret);
     }else{
         region_size_hints(ws->bottom->reg, hints_ret);
-        hints_ret->flags&=PMinSize;
+        hints_ret->no_constrain=TRUE;
     }
 }
 

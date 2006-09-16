@@ -46,10 +46,10 @@ static void do_correct_aspect(int max_w, int max_h, int ax, int ay,
 }
 
 
-static void correct_aspect(int max_w, int max_h, const XSizeHints *hints,
+static void correct_aspect(int max_w, int max_h, const WSizeHints *hints,
                            int *wret, int *hret)
 {
-    if(!(hints->flags&PAspect))
+    if(!hints->aspect_set)
         return;
     
     if(*wret*hints->max_aspect.y>*hret*hints->max_aspect.x){
@@ -66,37 +66,35 @@ static void correct_aspect(int max_w, int max_h, const XSizeHints *hints,
 }
 
 
-void xsizehints_correct(const XSizeHints *hints, int *wp, int *hp, bool min)
+void sizehints_correct(const WSizeHints *hints, int *wp, int *hp, 
+                       bool min, bool override_no_constrain)
 {
     int w=*wp;
     int h=*hp;
     int bs=0;
     
     if(min){
-        if(w<hints->min_width)
-            w=hints->min_width;
-        if(h<hints->min_height)
-            h=hints->min_height;
-        
-        correct_aspect(w, h, hints, &w, &h);
-    }else{
-        if(w>=hints->min_width && h>=hints->min_height)
-            correct_aspect(w, h, hints, &w, &h);
+        w=maxof(w, hints->min_width);
+        h=maxof(h, hints->min_height);
     }
     
-    if(hints->flags&PMaxSize){
-        if(w>hints->max_width)
-            w=hints->max_width;
-        if(h>hints->max_height)
-            h=hints->max_height;
+    if(hints->no_constrain && !override_no_constrain)
+        return;
+
+    if(w>=hints->min_width && h>=hints->min_height)
+        correct_aspect(w, h, hints, &w, &h);
+    
+    if(hints->max_set){
+        w=minof(w, hints->max_width);
+        h=minof(h, hints->max_height);
     }
 
-    if(hints->flags&PResizeInc){
+    if(hints->inc_set){
         /* base size should be set to 0 if none given by user program */
-        bs=(hints->flags&PBaseSize ? hints->base_width : 0);
+        bs=(hints->base_set ? hints->base_width : 0);
         if(w>bs)
             w=((w-bs)/hints->width_inc)*hints->width_inc+bs;
-        bs=(hints->flags&PBaseSize ? hints->base_height : 0);
+        bs=(hints->base_set ? hints->base_height : 0);
         if(h>bs)
             h=((h-bs)/hints->height_inc)*hints->height_inc+bs;
     }
@@ -109,7 +107,7 @@ void xsizehints_correct(const XSizeHints *hints, int *wp, int *hp, bool min)
 /*}}}*/
 
 
-/*{{{ xwindow_get_sizehints */
+/*{{{ X size hints sanity adjustment */
 
 
 void xsizehints_sanity_adjust(XSizeHints *hints)
@@ -170,15 +168,15 @@ void xsizehints_sanity_adjust(XSizeHints *hints)
 /*{{{ xsizehints_adjust_for */
 
 
-void xsizehints_adjust_for(XSizeHints *hints, WRegion *reg)
+void sizehints_adjust_for(WSizeHints *hints, WRegion *reg)
 {
-    XSizeHints tmp_hints;
+    WSizeHints tmp_hints;
     
     region_size_hints(reg, &tmp_hints);
     
-    if(tmp_hints.flags&PMinSize){
-        if(!(hints->flags&PMinSize)){
-            hints->flags|=PMinSize;
+    if(tmp_hints.min_set){
+        if(!hints->min_set){
+            hints->min_set=TRUE;
             hints->min_width=tmp_hints.min_width;
             hints->min_height=tmp_hints.min_height;
         }else{
@@ -189,13 +187,13 @@ void xsizehints_adjust_for(XSizeHints *hints, WRegion *reg)
         }
     }
     
-    if(tmp_hints.flags&PMaxSize && hints->flags&PMaxSize){
+    if(tmp_hints.max_set && hints->max_set){
         hints->max_width=maxof(hints->max_width,
                                tmp_hints.max_width);
         hints->max_height=maxof(hints->max_height,
                                 tmp_hints.max_height);
     }else{
-        hints->flags&=~PMaxSize;
+        hints->max_set=FALSE;
     }
 }
 
@@ -247,6 +245,47 @@ int xgravity_deltay(int gravity, int top, int bottom)
         return -hoff/2;
     }
     return 0;
+}
+
+
+/*}}}*/
+
+
+/*{{{ Init */
+
+
+void xsizehints_to_sizehints(const XSizeHints *xh, WSizeHints *hints)
+{
+    hints->max_width=xh->max_width;
+    hints->max_height=xh->max_height;
+    hints->min_width=xh->min_width;
+    hints->min_height=xh->min_height;
+    hints->base_width=xh->base_width;
+    hints->base_height=xh->base_height;
+    hints->width_inc=xh->width_inc;
+    hints->height_inc=xh->height_inc;
+    hints->min_aspect.x=xh->min_aspect.x;
+    hints->min_aspect.y=xh->min_aspect.y;
+    hints->max_aspect.x=xh->max_aspect.x;
+    hints->max_aspect.y=xh->max_aspect.y;
+    
+    hints->max_set=((xh->flags&PMaxSize)!=0);
+    hints->min_set=((xh->flags&PMinSize)!=0);
+    hints->base_set=((xh->flags&PBaseSize)!=0);
+    hints->inc_set=((xh->flags&PResizeInc)!=0);
+    hints->aspect_set=((xh->flags&PAspect)!=0);
+    hints->no_constrain=0;
+}
+
+
+void sizehints_clear(WSizeHints *hints)
+{
+    hints->max_set=0;
+    hints->min_set=0;
+    hints->inc_set=0;
+    hints->base_set=0;
+    hints->aspect_set=0;
+    hints->no_constrain=0;
 }
 
 

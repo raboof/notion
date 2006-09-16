@@ -372,7 +372,7 @@ bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp)
 }
 
 
-void frame_resize_hints(WFrame *frame, XSizeHints *hints_ret)
+void frame_size_hints(WFrame *frame, WSizeHints *hints_ret)
 {
     WRectangle subgeom;
     WLListIterTmp tmp;
@@ -386,26 +386,29 @@ void frame_resize_hints(WFrame *frame, XSizeHints *hints_ret)
 
     if(FRAME_CURRENT(frame)!=NULL){
         region_size_hints(FRAME_CURRENT(frame), hints_ret);
-        if(!(frame->flags&FRAME_SZH_USEMINMAX))
-            hints_ret->flags&=PResizeInc|PBaseSize;
+        if(!(frame->flags&FRAME_SZH_USEMINMAX)){
+            hints_ret->max_set=0;
+            hints_ret->min_set=0;
+            /*hints_ret->no_constrain=TRUE;*/
+        }
     }else{
-        hints_ret->flags=0;
+        sizehints_clear(hints_ret);
     }
     
     FRAME_MX_FOR_ALL(sub, frame, tmp){
-        xsizehints_adjust_for(hints_ret, sub);
+        sizehints_adjust_for(hints_ret, sub);
     }
     
-    if(!(hints_ret->flags&PBaseSize)){
+    if(!hints_ret->base_set){
         hints_ret->base_width=0;
         hints_ret->base_height=0;
-        hints_ret->flags|=PBaseSize;
+        hints_ret->base_set=TRUE;
     }
 
-    if(!(hints_ret->flags&PMinSize)){
+    if(!hints_ret->min_set){
         hints_ret->min_width=0;
         hints_ret->min_height=0;
-        hints_ret->flags|=PMinSize;
+        hints_ret->min_set=TRUE;
     }
     
     hints_ret->base_width+=woff;
@@ -811,7 +814,7 @@ WRegion *frame_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 
 
 static DynFunTab frame_dynfuntab[]={
-    {region_size_hints, frame_resize_hints},
+    {region_size_hints, frame_size_hints},
 
     {mplex_managed_changed, frame_managed_changed},
     {mplex_size_changed, frame_size_changed_default},

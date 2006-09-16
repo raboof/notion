@@ -241,10 +241,10 @@ static int limit_and_encode_mode(int *left, int *right,
 
 static void resize_units(WMoveresMode *mode, int *wret, int *hret)
 {
-    XSizeHints *h=&(mode->hints);
+    WSizeHints *h=&(mode->hints);
     *wret=1;
     *hret=1;
-    if(h->flags&PResizeInc && (h->width_inc>1 || h->height_inc>1)){
+    if(h->inc_set && (h->width_inc>1 || h->height_inc>1)){
         *wret=h->width_inc;
         *hret=h->height_inc;
     }
