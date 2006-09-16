@@ -463,31 +463,18 @@ static void systray_adjust_size(WRegion *reg, WRectangle *g)
 
 
 
-static WRegion *statusbar_attach_simple(WStatusBar *sb,
-                                        WRegionCreateFn *handler,
-                                        void *handlerparams)
+static WRegion *statusbar_do_attach_final(WStatusBar *sb,
+                                          WRegion *reg,
+                                          void *unused)
 {
-    WRegion *reg;
     WFitParams fp;
     WSBElem *el;
     
-    fp.g.x=0;
-    fp.g.y=0;
-    fp.mode=REGION_FIT_WHATEVER|REGION_FIT_BOUNDS;
-
-    reg=handler((WWindow*)sb, &fp, handlerparams);
-    
-    if(reg==NULL)
+    if(!ptrlist_insert_last(&sb->traywins, (Obj*)reg))
         return NULL;
-    
-    if(!ptrlist_insert_last(&sb->traywins, (Obj*)reg)){
-        /* TODO: failure handling */
-        return NULL;
-    }
     
     el=statusbar_associate_systray(sb, reg);
     if(el==NULL){
-        /* TODO: failure handling */
         ptrlist_remove(&sb->traywins, (Obj*)reg);
         return NULL;
     }
@@ -511,6 +498,30 @@ static WRegion *statusbar_attach_simple(WStatusBar *sb,
 }
 
 
+static bool statusbar_do_attach(WStatusBar *sb, WRegionAttachData *data)
+{
+    WFitParams fp;
+    
+    fp.g.x=0;
+    fp.g.y=0;
+    fp.g.h=CF_STATUSBAR_SYSTRAY_HEIGHT;
+    fp.g.w=CF_STATUSBAR_SYSTRAY_HEIGHT;
+    fp.mode=REGION_FIT_WHATEVER|REGION_FIT_BOUNDS;
+    
+    return (region_attach_helper((WRegion*)sb, (WWindow*)sb, &fp,
+                                 (WRegionDoAttachFn*)statusbar_do_attach_final, 
+                                 NULL, data)
+            !=NULL);
+}
+
+
+static bool statusbar_attach_ph(WStatusBar *sb, int flags,
+                                WRegionAttachData *data)
+{
+    return statusbar_do_attach(sb, data);
+}
+
+
 static WPHolder *statusbar_prepare_manage(WStatusBar *sb, 
                                           const WClientWin *cwin,
                                           const WManageParams *param,
@@ -520,8 +531,8 @@ static WPHolder *statusbar_prepare_manage(WStatusBar *sb,
         return NULL;
     
     return (WPHolder*)create_basicpholder((WRegion*)sb, 
-                                          ((WRegionDoAttachFnSimple*)
-                                           statusbar_attach_simple));
+                                          ((WBasicPHolderHandler*)
+                                           statusbar_attach_ph));
 }
 
 
