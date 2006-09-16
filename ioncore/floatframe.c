@@ -231,7 +231,7 @@ static void floatframe_recalc_bar(WFloatFrame *frame)
                  +bdw.right+bdw.left);
 
         FRAME_MX_FOR_ALL(sub, &(frame->frame), itmp){
-            p=region_name(sub);
+            p=region_displayname(sub);
             if(p==NULL)
                 continue;
             
