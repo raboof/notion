@@ -657,7 +657,6 @@ static void dockapp_calc_preferred_size(WDock *dock, int grow,
                                         const WRectangle *tile_size,
                                         WDockApp *da)
 {
-    XSizeHints hints;
     int w=da->geom.w, h=da->geom.h;
     
     if(grow==DOCK_GROW_UP || grow==DOCK_GROW_DOWN){
@@ -668,8 +667,7 @@ static void dockapp_calc_preferred_size(WDock *dock, int grow,
         da->geom.h=minof(h, tile_size->h);
     }
     
-    region_size_hints(da->reg, &hints);
-    xsizehints_correct(&hints, &(da->geom.w), &(da->geom.h), TRUE);
+    region_size_hints_correct(da->reg, &(da->geom.w), &(da->geom.h), TRUE);
 }
 
 

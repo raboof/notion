@@ -598,6 +598,17 @@ void region_size_hints(WRegion *reg, XSizeHints *hints_ret)
 }
 
 
+void region_size_hints_correct(WRegion *reg, 
+                               int *wp, int *hp, bool min)
+{
+    XSizeHints hints;
+    
+    region_size_hints(reg, &hints);
+    
+    xsizehints_correct(&hints, wp, hp, min);
+}
+
+
 int region_orientation(WRegion *reg)
 {
     int ret=REGION_ORIENTATION_NONE;
@@ -652,16 +663,6 @@ ExtlTab region_size_hints_extl(WRegion *reg)
 /*{{{ Restore size, maximize, shade */
 
 
-static void correct_frame_size(WFrame *frame, int *w, int *h)
-{
-    XSizeHints hints;
-    int wdiff, hdiff;
-    
-    region_size_hints((WRegion*)frame, &hints);
-    xsizehints_correct(&hints, w, h, TRUE);
-}
-
-
 static bool rqh(WFrame *frame, int y, int h)
 {
     WRectangle geom, rgeom;
@@ -673,7 +674,7 @@ static bool rqh(WFrame *frame, int y, int h)
     geom.h=h;
     
     dummy_w=geom.w;
-    correct_frame_size(frame, &dummy_w, &(geom.h));
+    region_size_hints_correct((WRegion*)frame,  &dummy_w, &(geom.h), TRUE);
     
     region_rqgeom((WRegion*)frame, REGION_RQGEOM_VERT_ONLY, &geom, &rgeom);
     
@@ -722,7 +723,7 @@ static bool rqw(WFrame *frame, int x, int w)
     geom.h=REGION_GEOM(frame).h;
     
     dummy_h=geom.h;
-    correct_frame_size(frame, &(geom.w), &dummy_h);
+    region_size_hints_correct((WRegion*)frame,  &(geom.w), &dummy_h, TRUE);
     
     region_rqgeom((WRegion*)frame, REGION_RQGEOM_HORIZ_ONLY, &geom, &rgeom);
     

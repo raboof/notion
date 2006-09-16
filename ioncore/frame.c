@@ -446,7 +446,6 @@ static void frame_rqgeom_clientwin(WFrame *frame, WClientWin *cwin,
                                    int rqflags, const WRectangle *geom_)
 {
     int gravity=NorthWestGravity;
-    XSizeHints hints;
     WRectangle off;
     WRegion *par;
     WRectangle geom=*geom_;
@@ -471,8 +470,7 @@ static void frame_rqgeom_clientwin(WFrame *frame, WClientWin *cwin,
     geom.w+=off.w;
     geom.h+=off.h;
     
-    region_size_hints((WRegion*)frame, &hints);
-    xsizehints_correct(&hints, &(geom.w), &(geom.h), TRUE);
+    region_size_hints_correct((WRegion*)frame, &(geom.w), &(geom.h), TRUE);
     
     /* If WEAK_? is set, then geom.(x|y) is root-relative as it was not 
      * requested by the client and clientwin_handle_configure_request has

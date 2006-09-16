@@ -456,13 +456,9 @@ static void statusbar_arrange_systray(WStatusBar *p)
 
 static void systray_adjust_size(WRegion *reg, WRectangle *g)
 {
-    XSizeHints hints;
-    
-    region_size_hints(reg, &hints);
-
     g->h=CF_STATUSBAR_SYSTRAY_HEIGHT;
     
-    xsizehints_correct(&hints, &g->w, &g->h, TRUE);
+    region_size_hints_correct(reg, &g->w, &g->h, TRUE);
 }
 
 

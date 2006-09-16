@@ -118,6 +118,9 @@ DYNFUN void region_rqgeom_clientwin(WRegion *reg, WClientWin *cwin,
 DYNFUN void region_size_hints(WRegion *reg, XSizeHints *hints_ret);
 DYNFUN int region_orientation(WRegion *reg);
 
+extern void region_size_hints_correct(WRegion *reg, 
+                                      int *wp, int *hp, bool min);
+
 extern uint region_min_h(WRegion *reg);
 extern uint region_min_w(WRegion *reg);
 
