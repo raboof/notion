@@ -127,7 +127,7 @@ bool groupws_handle_drop(WGroupWS *ws, int x, int y,
 
 
 /*EXTL_DOC
- * Attach client window \var{cwin} on \var{ws}.
+ * Attach region \var{reg} on \var{ws}.
  * At least the following fields in \var{t} are supported:
  * 
  * \begin{tabularx}{\linewidth}{lX}
@@ -139,12 +139,12 @@ bool groupws_handle_drop(WGroupWS *ws, int x, int y,
  * \end{tabularx}
  */
 EXTL_EXPORT_AS(WGroupWS, attach_framed)
-bool groupws_attach_framed_extl(WGroupWS *ws, WClientWin *cwin, ExtlTab t)
+bool groupws_attach_framed_extl(WGroupWS *ws, WRegion *reg, ExtlTab t)
 {
     WGroupAttachParams ap=GROUPATTACHPARAMS_INIT;
     ExtlTab gt;
     
-    if(cwin==NULL)
+    if(reg==NULL)
         return FALSE;
     
     ap.framed_inner_geom=TRUE;
@@ -182,7 +182,7 @@ bool groupws_attach_framed_extl(WGroupWS *ws, WClientWin *cwin, ExtlTab t)
         extl_unref_table(gt);
     }
     
-    return groupws_attach_framed(ws, &ap, (WRegion*)cwin);
+    return groupws_attach_framed(ws, &ap, reg);
 }
 
 
