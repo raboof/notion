@@ -29,9 +29,7 @@ INTRCLASS(WSplitST);
 
 typedef enum{
     SPLIT_HORIZONTAL,
-    SPLIT_VERTICAL,
-    SPLIT_ANY, /* Should only be used as parameter to *_nextto */
-    SPLIT_NONE /* Should only be used internally */
+    SPLIT_VERTICAL
 } WSplitDir;
 
 

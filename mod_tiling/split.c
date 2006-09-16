@@ -1654,21 +1654,29 @@ void splitsplit_flip(WSplitSplit *split)
     splittree_end_resize();
 }
 
+typedef enum{
+    FLIP_VERTICAL,
+    FLIP_HORIZONTAL,
+    FLIP_NONE,
+    FLIP_ANY
+} FlipDir;
 
-static int flipdir=SPLIT_VERTICAL;
+
+static FlipDir flipdir=FLIP_VERTICAL;
 
 
 static void do_flip(WSplit *split)
 {
     WSplitSplit *ss=OBJ_CAST(split, WSplitSplit);
+    
     if(ss!=NULL){
-        if((ss->dir==flipdir || flipdir==SPLIT_ANY)
-           && !OBJ_IS(ss->tl, WSplitST)
+        if((flipdir==FLIP_ANY
+            || (ss->dir==SPLIT_VERTICAL && flipdir==FLIP_VERTICAL)
+            || (ss->dir==SPLIT_HORIZONTAL && flipdir==FLIP_HORIZONTAL)) 
+           && !OBJ_IS(ss->tl, WSplitST) 
            && !OBJ_IS(ss->br, WSplitST)){
             splitsplit_flip_(ss);
-        }else{
         }
-
     }
     
     if(OBJ_IS(ss, WSplitInner))
@@ -1676,7 +1684,7 @@ static void do_flip(WSplit *split)
 }
 
     
-static void splittree_flip_dir(WSplit *splittree, int dir)
+static void splittree_flip_dir(WSplit *splittree, FlipDir dir)
 {
     /* todo stdisp outta way */
     if(OBJ_IS(splittree, WSplitInner)){
@@ -1687,7 +1695,7 @@ static void splittree_flip_dir(WSplit *splittree, int dir)
 
 
 static bool split_fliptrans_to(WSplit *node, const WRectangle *geom, 
-                              int trans, int flip)
+                              bool trans, FlipDir flip)
 {
     WRectangle rg;
     WSplit *node2;
@@ -1712,7 +1720,7 @@ static bool split_fliptrans_to(WSplit *node, const WRectangle *geom,
     
     split_do_resize(node2, &rg, PRIMN_ANY, PRIMN_ANY, trans);
     
-    if(flip!=SPLIT_NONE)
+    if(flip!=FLIP_NONE)
         splittree_flip_dir(node2, flip);
 
     splittree_end_resize();
@@ -1723,7 +1731,7 @@ static bool split_fliptrans_to(WSplit *node, const WRectangle *geom,
 
 bool split_transpose_to(WSplit *node, const WRectangle *geom)
 {
-    return split_fliptrans_to(node, geom, TRUE, SPLIT_ANY);
+    return split_fliptrans_to(node, geom, TRUE, FLIP_ANY);
 }
 
 
@@ -1741,16 +1749,16 @@ void split_transpose(WSplit *node)
 
 bool split_rotate_to(WSplit *node, const WRectangle *geom, int rotation)
 {
-    int flip=SPLIT_NONE;
+    FlipDir flip=FLIP_NONE;
     bool trans=FALSE;
     
     if(rotation==SCREEN_ROTATION_90){
-        flip=SPLIT_HORIZONTAL;
+        flip=FLIP_HORIZONTAL;
         trans=TRUE;
     }else if(rotation==SCREEN_ROTATION_180){
-        flip=SPLIT_ANY;
+        flip=FLIP_ANY;
     }else if(rotation==SCREEN_ROTATION_270){
-        flip=SPLIT_VERTICAL;
+        flip=FLIP_VERTICAL;
         trans=TRUE;
     }
 
