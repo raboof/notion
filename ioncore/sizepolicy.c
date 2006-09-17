@@ -93,12 +93,8 @@ static void gravity_stretch_policy(int szplcy, WRegion *reg,
     w=(ws ? max_geom.w : minof(rq_geom->w, max_geom.w));
     h=(hs ? max_geom.h : minof(rq_geom->h, max_geom.h));
     
-    if(reg!=NULL && (rq_geom->w!=w || rq_geom->h!=h)){
-        /* Only apply size hint correction if we altered the 
-         * requested geometry.
-         */
+    if(reg!=NULL)
         region_size_hints_correct(reg,  &w, &h, FALSE);
-    }
     
     fp->g.w=w;
     fp->g.h=h;
@@ -266,9 +262,15 @@ void sizepolicy(WSizePolicy *szplcy, WRegion *reg,
         
     case SIZEPOLICY_FREE:
         rectangle_constrain(&tmp, &(fp->g));
-    case SIZEPOLICY_UNCONSTRAINED:
         if(reg!=NULL)
             region_size_hints_correct(reg, &tmp.w, &tmp.h, FALSE);
+        fp->g=tmp;
+        fp->mode=REGION_FIT_EXACT;
+        break;
+        
+    case SIZEPOLICY_UNCONSTRAINED:
+        if(reg!=NULL)
+            region_size_hints_correct(reg, &tmp.w, &tmp.h, TRUE);
         fp->g=tmp;
         fp->mode=REGION_FIT_EXACT;
         break;

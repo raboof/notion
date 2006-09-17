@@ -533,6 +533,16 @@ WStacking *group_do_add_managed_default(WGroup *ws, WRegion *reg, int level,
 }
 
 
+static void geom_group_to_parent(WGroup *ws, const WRectangle *g, 
+                                 WRectangle *wg)
+{
+    wg->x=g->x+REGION_GEOM(ws).x;
+    wg->y=g->y+REGION_GEOM(ws).y;
+    wg->w=maxof(1, g->w);
+    wg->h=maxof(1, g->h);
+}
+
+
 bool group_do_attach_final(WGroup *ws, 
                            WRegion *reg,
                            const WGroupAttachParams *param)
@@ -555,7 +565,7 @@ bool group_do_attach_final(WGroup *ws,
         g=REGION_GEOM(reg);
     }else{
         weak=param->geom_weak;
-        g=param->geom;
+        geom_group_to_parent(ws, &param->geom, &g);
     }
     
     if((weak&(REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y))
@@ -567,9 +577,10 @@ bool group_do_attach_final(WGroup *ws,
     }
 
     fp.g=REGION_GEOM(ws);
+    fp.mode=REGION_FIT_EXACT;
 
     sizepolicy(&szplcy, reg, &g, weak, &fp);
-    
+
     if(rectangle_compare(&fp.g, &REGION_GEOM(reg))!=RECTANGLE_SAME)
         region_fitrep(reg, NULL, &fp);
     
@@ -629,16 +640,13 @@ WRegion *group_do_attach(WGroup *ws,
     assert(par!=NULL);
 
     if(param->geom_set){
-        fp.g.x=param->geom.x+REGION_GEOM(ws).x;
-        fp.g.y=param->geom.y+REGION_GEOM(ws).y;
-        fp.g.w=maxof(param->geom.w, 1);
-        fp.g.h=maxof(param->geom.h, 1);
+        geom_group_to_parent(ws, &param->geom, &fp.g);
         fp.mode=REGION_FIT_EXACT;
     }else{
         fp.g=REGION_GEOM(ws);
-        fp.mode=REGION_FIT_WHATEVER;
+        fp.mode=REGION_FIT_BOUNDS|REGION_FIT_WHATEVER;
     }
-    
+
     return region_attach_helper((WRegion*) ws, par, &fp, 
                                 (WRegionDoAttachFn*)group_do_attach_final,
                                 /*(const WRegionAttachParams*)*/param, data);
@@ -831,7 +839,7 @@ WRegion *group_do_attach_framed(WGroup *ws,
     
     /* Create frame with dummy geometry */
     if(ap->geom_set){
-        fp.g=ap->geom;
+        geom_group_to_parent(ws, &ap->geom, &fp.g);
         fp.mode=REGION_FIT_EXACT;
     }else{
         fp.g=REGION_GEOM(ws);
@@ -864,8 +872,8 @@ WRegion *group_do_attach_framed(WGroup *ws,
         
         mplex_managed_geom((WMPlex*)frame, &mg);
 
-        rqg.x=REGION_GEOM(frame).x;
-        rqg.y=REGION_GEOM(frame).y;
+        rqg.x=REGION_GEOM(frame).x-REGION_GEOM(ws).x;
+        rqg.y=REGION_GEOM(frame).y-REGION_GEOM(ws).y;
         rqg.w=REGION_GEOM(reg).w+(REGION_GEOM(frame).w-mg.w);
         rqg.h=REGION_GEOM(reg).h+(REGION_GEOM(frame).h-mg.h);
         
@@ -990,7 +998,7 @@ void group_managed_rqgeom(WGroup *ws, WRegion *reg,
         fp.mode=REGION_FIT_EXACT;
     }else{
         fp.g=REGION_GEOM(ws);
-        sizepolicy(&st->szplcy, reg, geom, flags, &fp);
+        sizepolicy(&st->szplcy, reg, geom, 0 /* flags */, &fp);
     }
     
     if(geomret!=NULL)

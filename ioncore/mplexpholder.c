@@ -194,9 +194,13 @@ WRegion *grouped_handler(WWindow *par,
     
     if(!(fp->mode&REGION_FIT_WHATEVER)){
         param.geom_set=1;
-        param.geom=fp->g;
+        param.geom.x=0;
+        param.geom.y=0;
+        param.geom.w=fp->g.w;
+        param.geom.h=fp->g.h;
         param.szplcy=SIZEPOLICY_FULL_EXACT;
         param.szplcy_set=TRUE;
+    }else{
     }
     
     reg=group_do_attach(&cwg->grp, &param, data);
@@ -206,12 +210,13 @@ WRegion *grouped_handler(WWindow *par,
         return NULL;
     }
     
+    /*
     st=group_find_stacking(&cwg->grp, reg);
     
     if(st!=NULL){
         st->szplcy=SIZEPOLICY_FULL_EXACT;
         REGION_GEOM(cwg)=REGION_GEOM(reg);
-    }
+    }*/
     
     return (WRegion*)cwg;
 }

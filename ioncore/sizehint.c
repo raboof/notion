@@ -78,8 +78,11 @@ void sizehints_correct(const WSizeHints *hints, int *wp, int *hp,
         h=maxof(h, hints->min_height);
     }
     
-    if(hints->no_constrain && !override_no_constrain)
+    if(hints->no_constrain && !override_no_constrain){
+        *wp=w;
+        *hp=h;
         return;
+    }
 
     if(w>=hints->min_width && h>=hints->min_height)
         correct_aspect(w, h, hints, &w, &h);
