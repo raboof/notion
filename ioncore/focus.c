@@ -161,6 +161,12 @@ static void check_clear_await(WRegion *reg)
 }
 
 
+bool ioncore_await_focus()
+{
+    return (await_watch.obj!=NULL);
+}
+
+
 /*}}}*/
 
 

@@ -308,53 +308,43 @@ void ioncore_handle_expose(const XExposeEvent *ev)
 void ioncore_handle_enter_window(XEvent *ev)
 {
     XEnterWindowEvent *eev=&(ev->xcrossing);
-    WRegion *reg=NULL, *freg=NULL, *mgr=NULL;
-    bool more=TRUE;
+    WRegion *reg=NULL;
     
     if(ioncore_g.input_mode!=IONCORE_INPUTMODE_NORMAL)
         return;
-
-    do{
-        if(eev->mode!=NotifyNormal && !ioncore_g.warp_enabled)
-            continue;
-        /*if(eev->detail==NotifyNonlinearVirtual)
-            continue;*/
-
-        reg=XWINDOW_REGION_OF_T(eev->window, WRegion);
-        
-        if(reg==NULL)
-            continue;
-
-        D(fprintf(stderr, "E: %p %s %d %d\n", reg, OBJ_TYPESTR(reg),
-                  eev->mode, eev->detail));
-        
-        /* If an EnterWindow event was already found that we're going to
-         * handle, do not note subsequent events if they are into an 
-         * ancestor of the window of freg.
-         */
-        if(freg!=NULL){
-            WRegion *r2=freg;
-            while(r2!=NULL){
-                if(r2==reg)
-                    break;
-                r2=REGION_PARENT_REG(r2);
-            }
-            if(r2!=NULL)
-                continue;
-        }
-        
-        if(!REGION_IS_ACTIVE(reg))
-            freg=reg;
-    }while(freg!=NULL && XCheckMaskEvent(ioncore_g.dpy, EnterWindowMask, ev));
-
-    if(freg==NULL)
+    
+    if(ioncore_await_focus())
         return;
     
-    if(!region_skip_focus(freg)){
-        region_goto_flags(freg, (REGION_GOTO_FOCUS|
-                                 REGION_GOTO_NOWARP|
-                                 REGION_GOTO_ENTERWINDOW));
+    if(eev->mode!=NotifyNormal && !ioncore_g.warp_enabled)
+        return;
+
+    reg=XWINDOW_REGION_OF_T(eev->window, WRegion);
+    
+    if(reg==NULL)
+        return;
+
+    if(REGION_IS_ACTIVE(reg))
+        return;
+    
+    if(region_skip_focus(reg))
+        return;
+    
+    /* If a child of 'reg' is to be focused, do not process this
+     * event.
+     */
+    if(ioncore_g.focus_next!=NULL){
+        WRegion *r2=ioncore_g.focus_next;
+        while(r2!=NULL){
+            if(r2==reg)
+                return;
+            r2=REGION_PARENT_REG(r2);
+        }
     }
+        
+    region_goto_flags(reg, (REGION_GOTO_FOCUS|
+                            REGION_GOTO_NOWARP|
+                            REGION_GOTO_ENTERWINDOW));
 }
 
 
@@ -388,8 +378,8 @@ void ioncore_handle_focus_in(const XFocusChangeEvent *ev, bool skip)
     if(ev->mode==NotifyGrab)
         return;
 
-    if(ev->detail==NotifyPointer)
-        return;
+    /*if(ev->detail==NotifyPointer)
+        return;*/
     
     /* Root windows appear either as WRootWins or WScreens */
     if(ev->window==region_root_of(reg)){
@@ -434,8 +424,8 @@ void ioncore_handle_focus_out(const XFocusChangeEvent *ev)
     if(ev->mode==NotifyGrab)
         return;
 
-    if(ev->detail==NotifyPointer)
-        return;
+    /*if(ev->detail==NotifyPointer)
+        return;*/
 
     D(if(OBJ_IS(reg, WRootWin))
       fprintf(stderr, "scr-out %d %d %d\n", ((WRootWin*)reg)->xscr, ev->mode, ev->detail));
