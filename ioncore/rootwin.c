@@ -321,6 +321,11 @@ static bool xinerama_sanity_check(XineramaScreenInfo *xi, int nxi)
                 return FALSE;
             }
         }
+        
+        if(xi[i].width<=0 || xi[i].height<=0){
+            warn(TR("Xinerama sanity check failed; zero size detected."));
+            return FALSE;
+        }
     }
     return TRUE;
 }
@@ -340,6 +345,11 @@ static bool xinerama_sanity_check(XRectangle *monitors, int nxi)
                         "screens detected."));
                 return FALSE;
             }
+        }
+        
+        if(monitors[i].width<=0 || monitors[i].height<=0){
+            warn(TR("Xinerama sanity check failed; zero size detected."));
+            return FALSE;
         }
     }
     return TRUE;
