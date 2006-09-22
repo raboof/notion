@@ -264,6 +264,8 @@ WPHolder *groupws_prepare_manage(WGroupWS *ws, const WClientWin *cwin,
                                  int redir)
 {
     WRegion *b=(ws->grp.bottom!=NULL ? ws->grp.bottom->reg : NULL);
+    WPHolder *ph=NULL;
+    bool act_b=(ws->grp.bottom==ws->grp.current_managed);
     int weak=0;
     
     if(param->maprq && ioncore_g.opmode!=IONCORE_OPMODE_INIT
@@ -276,13 +278,19 @@ WPHolder *groupws_prepare_manage(WGroupWS *ws, const WClientWin *cwin,
         weak=REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y;
     }
 
-    if(b!=NULL && HAS_DYN(b, region_prepare_manage)){
-        WPHolder *ph=region_prepare_manage(b, cwin, param, redir);
-        if(ph!=NULL)
-            return ph;
-    }
+    if(b!=NULL && !HAS_DYN(b, region_prepare_manage))
+        b=NULL;
     
-    return groupws_do_prepare_manage(ws, cwin, param, redir, weak);
+    if(b!=NULL && act_b)
+        ph=region_prepare_manage(b, cwin, param, redir);
+    
+    if(ph==NULL)
+        ph=groupws_do_prepare_manage(ws, cwin, param, redir, weak);
+
+    if(ph==NULL && b!=NULL && !act_b)
+        ph=region_prepare_manage(b, cwin, param, redir);
+    
+    return ph;
 }
 
 
