@@ -413,8 +413,6 @@ void stacking_restack(WStacking **stacking, WStacking *st, Window fb_win,
 {
     WStacking *tmp=unweave_subtree(stacking, st, lower);
 
-    #warning "TODO: special handling of regst->above!=NULL on lower?"
-    
     stacking_do_weave(stacking, &tmp, lower, fb_win);
 
     assert(tmp==NULL);
