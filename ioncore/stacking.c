@@ -218,8 +218,6 @@ WStacking *stacking_unweave(WStacking **stacking,
     WStacking *np=NULL;
     WStacking *st, *next;
 
-    /* TODO: above-list? */
-    
     for(st=*stacking; st!=NULL; st=st->next){
         st->to_unweave=2;
         if(st->above==NULL && cf(filt, filt_data, st))
@@ -362,6 +360,20 @@ static bool is_above(WStacking *st, WStacking *p)
 }
 
 
+static void collect_first(WStacking **dst, WStacking **src, WStacking *st)
+{
+    UNLINK_ITEM(*src, st, next, prev);
+    LINK_ITEM_FIRST(*dst, st, next, prev);
+}
+
+
+static void collect_last(WStacking **dst, WStacking **src, WStacking *st)
+{
+    UNLINK_ITEM(*src, st, next, prev);
+    LINK_ITEM_LAST(*dst, st, next, prev);
+}
+
+
 static void collect_above(WStacking **dst, WStacking **src, WStacking *regst)
 {
     WStacking *stabove, *stnext;
@@ -369,20 +381,26 @@ static void collect_above(WStacking **dst, WStacking **src, WStacking *regst)
     for(stabove=*src; stabove!=NULL; stabove=stnext){
         stnext=stabove->next;
         
-        if(is_above(stabove, regst)){
-            UNLINK_ITEM(*src, stabove, next, prev);
-            LINK_ITEM_LAST(*dst, stabove, next, prev);
-        }
+        if(is_above(stabove, regst))
+            collect_last(dst, src, stabove);
     }
 }
 
 
-static WStacking *unweave_subtree(WStacking **stacking, WStacking *regst)
+static WStacking *unweave_subtree(WStacking **stacking, WStacking *regst,
+                                  bool parents)
 {
     WStacking *tmp=NULL;
     
-    UNLINK_ITEM(*stacking, regst, next, prev);
-    LINK_ITEM(tmp, regst, next, prev);
+    if(parents){
+        WStacking *st=regst;
+        while(st!=NULL){
+            collect_first(&tmp, stacking, st);
+            st=st->above;
+        }
+    }else{
+        collect_first(&tmp, stacking, regst);
+    }
     
     collect_above(&tmp, stacking, regst);
     
@@ -393,7 +411,7 @@ static WStacking *unweave_subtree(WStacking **stacking, WStacking *regst)
 void stacking_restack(WStacking **stacking, WStacking *st, Window fb_win,
                       WStackingFilter *filt, void *filt_data, bool lower)
 {
-    WStacking *tmp=unweave_subtree(stacking, st);
+    WStacking *tmp=unweave_subtree(stacking, st, lower);
 
     #warning "TODO: special handling of regst->above!=NULL on lower?"
     
