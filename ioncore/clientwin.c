@@ -733,17 +733,6 @@ static bool mrsh_u_extl(ExtlFn fn, void *param)
 
 static void clientwin_do_unmapped(WClientWin *cwin, Window win)
 {
-    /*bool cf=region_may_control_focus((WRegion*)cwin);*/
-    WPHolder *ph=region_get_rescue_pholder((WRegion*)cwin);
-    
-    if(ph==NULL){
-        warn(TR("Failed to rescue some client windows."));
-    }else{
-        if(!region_rescue_clientwins((WRegion*)cwin, ph))
-            warn(TR("Failed to rescue some client windows."));
-        destroy_obj((Obj*)ph);
-    }
-    
 #warning "TODO"    
     /*
     if(cf && cwin->fs_pholder!=NULL)
