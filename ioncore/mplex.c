@@ -42,6 +42,7 @@
 #include "stacking.h"
 #include "group.h"
 #include "navi.h"
+#include "groupedpholder.h"
 
 
 #define SUBS_MAY_BE_MAPPED(MPLEX) \
@@ -1432,8 +1433,11 @@ WPHolder *mplex_prepare_manage(WMPlex *mplex, const WClientWin *cwin,
     
     mph=create_mplexpholder(mplex, NULL, &ap);
     
-    if(mph!=NULL)
-        mph->initial=TRUE;
+    if(mph!=NULL){
+        WGroupedPHolder *gph=create_groupedpholder((WPHolder*)mph);
+        if(gph!=NULL)
+            return (WPHolder*)gph;
+    }
     
     return (WPHolder*)mph;
 }

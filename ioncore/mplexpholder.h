@@ -23,7 +23,6 @@ DECLCLASS(WMPlexPHolder){
     WLListNode *after;
     WMPlexPHolder *next, *prev;
     WMPlexAttachParams param;
-    bool initial;
 };
 
 

@@ -34,6 +34,9 @@ extern void pholder_deinit(WPHolder *ph);
 DYNFUN bool pholder_do_attach(WPHolder *ph, int flags,
                               WRegionAttachData *data);
 
+extern bool pholder_attach_(WPHolder *ph, int flags, 
+                            WRegionAttachData *data);
+
 extern bool pholder_attach(WPHolder *ph, int flags, WRegion *reg);
 
 DYNFUN WRegion *pholder_do_target(WPHolder *ph);

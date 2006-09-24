@@ -51,7 +51,7 @@ static WRegion *add_fn_reparent(WWindow *par, const WFitParams *fp,
 }
 
 
-static bool pholder_attach_(WPHolder *ph, int flags, WRegionAttachData *data)
+bool pholder_attach_(WPHolder *ph, int flags, WRegionAttachData *data)
 {
     if(ph->redirect!=NULL)
         return pholder_attach_(ph->redirect, flags, data);

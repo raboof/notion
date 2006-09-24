@@ -17,7 +17,6 @@
 #include "mplex.h"
 #include "mplexpholder.h"
 #include "llist.h"
-#include "group-cw.h"
 
 
 static void mplex_watch_handler(Watch *watch, Obj *mplex);
@@ -101,7 +100,6 @@ bool mplexpholder_init(WMPlexPHolder *ph, WMPlex *mplex, WStacking *st,
     ph->after=NULL;
     ph->next=NULL;
     ph->prev=NULL;
-    ph->initial=FALSE;
     ph->param.flags=0;
     
     if(!watch_setup(&(ph->mplex_watch), (Obj*)mplex, mplex_watch_handler)){
@@ -173,57 +171,6 @@ void mplexpholder_deinit(WMPlexPHolder *ph)
 /*{{{ Move, attach, layer */
 
 
-WRegion *grouped_handler(WWindow *par, 
-                         const WFitParams *fp, 
-                         void *frp_)
-{
-    WRegionAttachData *data=(WRegionAttachData*)frp_;
-    WGroupAttachParams param=GROUPATTACHPARAMS_INIT;
-    WGroupCW *cwg;
-    WRegion *reg;
-    WStacking *st;
-
-    cwg=create_groupcw(par, fp);
-    
-    if(cwg==NULL)
-        return NULL;
-    
-    param.level_set=1;
-    param.level=STACKING_LEVEL_BOTTOM;
-    param.switchto_set=1;
-    param.switchto=1;
-    param.bottom=1;
-    
-    if(!(fp->mode&REGION_FIT_WHATEVER)){
-        param.geom_set=1;
-        param.geom.x=0;
-        param.geom.y=0;
-        param.geom.w=fp->g.w;
-        param.geom.h=fp->g.h;
-        param.szplcy=SIZEPOLICY_FULL_EXACT;
-        param.szplcy_set=TRUE;
-    }else{
-    }
-    
-    reg=group_do_attach(&cwg->grp, &param, data);
-    
-    if(reg==NULL){
-        destroy_obj((Obj*)cwg);
-        return NULL;
-    }
-    
-    /*
-    st=group_find_stacking(&cwg->grp, reg);
-    
-    if(st!=NULL){
-        st->szplcy=SIZEPOLICY_FULL_EXACT;
-        REGION_GEOM(cwg)=REGION_GEOM(reg);
-    }*/
-    
-    return (WRegion*)cwg;
-}
-
-
 bool mplexpholder_do_attach(WMPlexPHolder *ph, int flags,
                             WRegionAttachData *data)
 {
@@ -238,18 +185,7 @@ bool mplexpholder_do_attach(WMPlexPHolder *ph, int flags,
     else
         ph->param.flags&=~MPLEX_ATTACH_SWITCHTO;
     
-    if(ph->initial){
-        WRegionAttachData gd;
-        
-        gd.type=REGION_ATTACH_NEW;
-        gd.u.n.fn=grouped_handler;
-        gd.u.n.param=data;
-        
-        reg=mplex_do_attach_pholder(mplex, ph, &gd);
-    }
-    
-    if(reg==NULL)
-        reg=mplex_do_attach_pholder(mplex, ph, data);
+    reg=mplex_do_attach_pholder(mplex, ph, data);
     
     return (reg!=NULL);
 }
