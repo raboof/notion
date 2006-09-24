@@ -42,7 +42,7 @@ WGroupedPHolder *create_groupedpholder(WPHolder *cont)
 void groupedpholder_deinit(WGroupedPHolder *ph)
 {
     if(ph->cont!=NULL){
-        /*destroy_obj((Obj*)ph->cont);*/
+        destroy_obj((Obj*)ph->cont);
         ph->cont=NULL;
     }
     
