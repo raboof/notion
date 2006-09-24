@@ -40,6 +40,8 @@ static void mplexpholder_do_link(WMPlexPHolder *ph,
     assert(mplex==(WMPlex*)ph->mplex_watch.obj && mplex!=NULL);
     
     if(after!=NULL){
+        assert(after->after==or_after);
+        
         if(after->after!=NULL){
             LINK_ITEM_AFTER(after->after->phs, after, ph, next, prev);
         }else{

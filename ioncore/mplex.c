@@ -1139,11 +1139,8 @@ bool mplex_do_attach_final(WMPlex *mplex, WRegion *reg, WMPlexPHolder *ph)
         mplex->mx_count++;
         
         /* Move following placeholders after new node */
-        while(ph->next!=NULL){
-            WMPlexPHolder *ph2=ph->next;
-            mplexpholder_do_unlink(ph2, mplex);
-            LINK_ITEM_FIRST(lnode->phs, ph2, next, prev);
-        }
+        while(ph->next!=NULL)
+            mplexpholder_move(ph->next, mplex, NULL, lnode);
     }
     
     LINK_ITEM(mplex->mgd, node, mgr_next, mgr_prev);
