@@ -76,6 +76,11 @@
 #define COPYFROMTO(new, p, len) \
 	(void)memcpy((char *)(new), (char *)(p), (int)(len))
 
+#ifndef NGROUPS
+/* Hopefully one of these is defined... */
+#define NGROUPS NGROUPS_MAX
+#endif
+
 typedef struct dirent DIRENTRY;
 
 static void el_add_slash(char *path,char *p)
