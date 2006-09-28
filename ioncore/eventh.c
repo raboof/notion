@@ -378,8 +378,8 @@ void ioncore_handle_focus_in(const XFocusChangeEvent *ev, bool skip)
     if(ev->mode==NotifyGrab)
         return;
 
-    /*if(ev->detail==NotifyPointer)
-        return;*/
+    if(ev->detail==NotifyPointer)
+        return;
     
     /* Root windows appear either as WRootWins or WScreens */
     if(ev->window==region_root_of(reg)){
@@ -424,8 +424,8 @@ void ioncore_handle_focus_out(const XFocusChangeEvent *ev)
     if(ev->mode==NotifyGrab)
         return;
 
-    /*if(ev->detail==NotifyPointer)
-        return;*/
+    if(ev->detail==NotifyPointer)
+        return;
 
     D(if(OBJ_IS(reg, WRootWin))
       fprintf(stderr, "scr-out %d %d %d\n", ((WRootWin*)reg)->xscr, ev->mode, ev->detail));
