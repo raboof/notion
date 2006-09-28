@@ -725,7 +725,7 @@ static void get_params(WGroup *ws, ExtlTab tab, WGroupAttachParams *par)
 EXTL_EXPORT_MEMBER
 WRegion *group_attach(WGroup *ws, WRegion *reg, ExtlTab param)
 {
-    WGroupAttachParams par;
+    WGroupAttachParams par=GROUPATTACHPARAMS_INIT;
     WRegionAttachData data;
 
     if(reg==NULL)
@@ -760,7 +760,7 @@ WRegion *group_attach(WGroup *ws, WRegion *reg, ExtlTab param)
 EXTL_EXPORT_MEMBER
 WRegion *group_attach_new(WGroup *ws, ExtlTab param)
 {
-    WGroupAttachParams par;
+    WGroupAttachParams par=GROUPATTACHPARAMS_INIT;
     WRegionAttachData data;
 
     get_params(ws, param, &par);
