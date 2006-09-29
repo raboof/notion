@@ -23,7 +23,9 @@
 #include "bindmaps.h"
 #include "xwindow.h"
 #include "group-ws.h"
+#include "group-cw.h"
 #include "grouprescueph.h"
+#include "groupedpholder.h"
 #include "float-placement.h"
 #include "resize.h"
 
@@ -214,36 +216,19 @@ static WMPlex *find_existing(WGroupWS *ws)
 }
 
 
-static WGroupRescuePH *groupws_prepare_manage_in_frame(WGroupWS *ws, 
-                                                       const WClientWin *cwin,
-                                                       const WManageParams *param, 
-                                                       int geom_weak,
-                                                       WRegion *stack_above)
-{
-    WGroupAttachParams ap=GROUPATTACHPARAMS_INIT;
-
-    ap.geom_set=TRUE;
-    ap.geom=param->geom;
-    
-    ap.framed_inner_geom=TRUE;
-    ap.framed_gravity=param->gravity;
-    ap.geom_weak=geom_weak;
-    ap.stack_above=stack_above;
-
-    return create_grouprescueph(&ws->grp, NULL, &ap);
-}
-
-
 static WPHolder *groupws_do_prepare_manage(WGroupWS *ws, 
                                            const WClientWin *cwin,
                                            const WManageParams *param, 
                                            int redir, int geom_weak)
 {
-    WPHolder *ph;
+    WGroupRescuePH *rph=NULL;
+    WGroupedPHolder *gph=NULL;
+    WGroupAttachParams ap=GROUPATTACHPARAMS_INIT;
     
     if(redir==MANAGE_REDIR_PREFER_YES){
         WMPlex *m=find_existing(ws);
         if(m!=NULL){
+            WPHolder *ph;
             ph=region_prepare_manage((WRegion*)m, cwin, param,
                                      MANAGE_REDIR_STRICT_YES);
             if(ph!=NULL)
@@ -254,8 +239,20 @@ static WPHolder *groupws_do_prepare_manage(WGroupWS *ws,
     if(redir==MANAGE_REDIR_STRICT_YES)
         return NULL;
 
-    return (WPHolder*)groupws_prepare_manage_in_frame(ws, cwin, param,
-                                                      geom_weak, NULL);
+    ap.geom_set=TRUE;
+    ap.geom=param->geom;
+    
+    ap.framed_inner_geom=TRUE;
+    ap.framed_gravity=param->gravity;
+    ap.geom_weak=geom_weak;
+    ap.stack_above=NULL;
+
+    rph=create_grouprescueph(&ws->grp, NULL, &ap);
+    
+    if(rph!=NULL)
+        gph=create_groupedpholder((WPHolder*)rph);
+    
+    return (gph!=NULL ? (WPHolder*)gph : (WPHolder*)rph);
 }
 
 
@@ -298,17 +295,27 @@ WPHolder *groupws_prepare_manage_transient(WGroupWS *ws, const WClientWin *cwin,
                                            const WManageParams *param,
                                            int unused)
 {
-    WRegion *stack_above;
+    WGroupAttachParams ap=GROUPATTACHPARAMS_INIT;
+    WGroupRescuePH *rph=NULL;
     
-    stack_above=OBJ_CAST(REGION_PARENT(param->tfor), WRegion);
-    if(stack_above==NULL)
+    ap.stack_above=OBJ_CAST(REGION_PARENT(param->tfor), WRegion);
+    if(ap.stack_above==NULL)
         return NULL;
-    ws=REGION_MANAGER_CHK(stack_above, WGroupWS);
+    ws=REGION_MANAGER_CHK(ap.stack_above, WGroupWS);
     if(ws==NULL)
         return NULL;
     
-    return (WPHolder*)groupws_prepare_manage_in_frame(ws, cwin, param, 
-                                                      0, stack_above);
+    ap.geom_set=TRUE;
+    ap.geom=param->geom;
+    
+    ap.framed_inner_geom=TRUE;
+    ap.framed_gravity=param->gravity;
+    ap.geom_weak=0;
+    ap.framed_mkframe=create_transient_frame;
+
+    rph=create_grouprescueph(&ws->grp, NULL, &ap);
+    
+    return (WPHolder*)rph;
 }
 
 

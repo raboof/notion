@@ -39,4 +39,7 @@ extern WPHolder *groupcw_prepare_manage_transient(WGroupCW *cwg,
 
 extern WRegion *groupcw_load(WWindow *par, const WFitParams *fp, ExtlTab tab);
 
+extern WRegion *create_transient_frame(WWindow *par, 
+                                       const WFitParams *fp);
+
 #endif /* ION_IONCORE_GROUPCW_H */

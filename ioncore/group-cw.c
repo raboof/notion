@@ -31,8 +31,8 @@
 /*{{{ Add/remove managed */
 
 
-static WRegion *create_transient_frame(WWindow *par, 
-                                       const WFitParams *fp)
+WRegion *create_transient_frame(WWindow *par, 
+                                const WFitParams *fp)
 {
     WFrame *frame;
 
