@@ -149,13 +149,17 @@ static void netwm_state_change_rq(WClientWin *cwin,
             cwin->flags|=CLIENTWIN_FS_RQ;
             if(!clientwin_enter_fullscreen(cwin, sw))
                 cwin->flags&=~CLIENTWIN_FS_RQ;
+        }else{
+            /* Should not be set.. */
+            cwin->flags&=~CLIENTWIN_FS_RQ;
         }
     }else{
         if(ev->data.l[0]==_NET_WM_STATE_REMOVE || 
            ev->data.l[0]==_NET_WM_STATE_TOGGLE){
             bool sw=clientwin_fullscreen_may_switchto(cwin);
+            cwin->flags&=~CLIENTWIN_FS_RQ;
             clientwin_leave_fullscreen(cwin, sw);
-        }else if(REGION_IS_FULLSCREEN(cwin)){
+        }else{
             /* Set the flag */
             cwin->flags|=CLIENTWIN_FS_RQ;
         }

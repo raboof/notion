@@ -1054,9 +1054,16 @@ static void clientwin_activated(WClientWin *cwin)
 }
 
 
-static void clientwin_resize_hints(WClientWin *cwin, WSizeHints *hints_ret)
+static void clientwin_size_hints(WClientWin *cwin, WSizeHints *hints_ret)
 {
-    xsizehints_to_sizehints(&cwin->size_hints, hints_ret);
+    if(cwin->flags&CLIENTWIN_FS_RQ){
+        /* Do not use size hints, when full screen mode has been
+         * requested by the client window itself.
+         */
+        sizehints_clear(hints_ret);
+    }else{
+        xsizehints_to_sizehints(&cwin->size_hints, hints_ret);
+    }
 }
 
 
@@ -1381,7 +1388,7 @@ static DynFunTab clientwin_dynfuntab[]={
      clientwin_activated},
     
     {region_size_hints, 
-     clientwin_resize_hints},
+     clientwin_size_hints},
     
     {(DynFun*)region_rqclose, 
      (DynFun*)clientwin_rqclose},
