@@ -56,6 +56,27 @@ void groupedpholder_deinit(WGroupedPHolder *ph)
 /*{{{ Attach */
 
 
+static bool grouped_do_attach_final(WGroupCW *cwg, 
+                                    WRegion *reg,
+                                    WGroupAttachParams *param)
+{
+    if(!param->geom_set){
+        /* Comm. hack */
+        REGION_GEOM(cwg)=REGION_GEOM(reg);
+    }
+
+    param->geom_set=1;
+    param->geom.x=0;
+    param->geom.y=0;
+    param->geom.w=REGION_GEOM(reg).w;
+    param->geom.h=REGION_GEOM(reg).h;
+    param->szplcy=SIZEPOLICY_FULL_EXACT;
+    param->szplcy_set=TRUE;
+    
+    return group_do_attach_final(&cwg->grp, reg, param);
+}
+
+
 WRegion *grouped_handler(WWindow *par, 
                          const WFitParams *fp, 
                          void *frp_)
@@ -78,23 +99,19 @@ WRegion *grouped_handler(WWindow *par,
     param.bottom=1;
     
     if(!(fp->mode&REGION_FIT_WHATEVER)){
-        param.geom_set=1;
-        param.geom.x=0;
-        param.geom.y=0;
-        param.geom.w=fp->g.w;
-        param.geom.h=fp->g.h;
-        param.szplcy=SIZEPOLICY_FULL_EXACT;
-        param.szplcy_set=TRUE;
-    }else{
+        /* Comm. hack */
+        param.geom_set=TRUE;
     }
     
-    reg=group_do_attach(&cwg->grp, &param, data);
+    reg=region_attach_helper((WRegion*)cwg, par, fp, 
+                             (WRegionDoAttachFn*)grouped_do_attach_final,
+                             &param, data);
     
     if(reg==NULL){
         destroy_obj((Obj*)cwg);
         return NULL;
     }
-    
+
     return (WRegion*)cwg;
 }
 

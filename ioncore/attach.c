@@ -108,7 +108,7 @@ static WRegion *doit_load(WRegion *mgr,
 }
 
 WRegion *region_attach_helper(WRegion *mgr,
-                              WWindow *par, WFitParams *fp,
+                              WWindow *par, const WFitParams *fp,
                               WRegionDoAttachFn *fn, void *fn_param,
                               const WRegionAttachData *data)
 {
