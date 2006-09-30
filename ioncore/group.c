@@ -134,6 +134,8 @@ bool group_fitrep(WGroup *ws, WWindow *par, const WFitParams *fp)
     oldpar=REGION_PARENT(ws);
     
     if(par==NULL){
+        if(fp->mode&REGION_FIT_WHATEVER)
+            return TRUE;
         REGION_GEOM(ws)=fp->g;
     }else{
         if(!region_same_rootwin((WRegion*)ws, (WRegion*)par))
@@ -151,7 +153,12 @@ bool group_fitrep(WGroup *ws, WWindow *par, const WFitParams *fp)
         XReparentWindow(ioncore_g.dpy, ws->dummywin, par->win, -1, -1);
         region_set_parent((WRegion*)ws, par);
 
-        REGION_GEOM(ws)=fp->g;
+        REGION_GEOM(ws).x=fp->g.x;
+        REGION_GEOM(ws).y=fp->g.y;
+        if(!(fp->mode&REGION_FIT_WHATEVER)){
+            REGION_GEOM(ws).w=fp->g.w;
+            REGION_GEOM(ws).h=fp->g.h;
+        }
         
         if(oldpar!=NULL)
             unweaved=stacking_unweave(&oldpar->stacking, wsfilt, (void*)ws);
@@ -163,14 +170,19 @@ bool group_fitrep(WGroup *ws, WWindow *par, const WFitParams *fp)
         if(st->reg==NULL)
             continue;
         
-        fp2=*fp;
+        fp2.mode=REGION_FIT_EXACT;
 
         g=REGION_GEOM(st->reg);
         g.x+=xdiff;
         g.y+=ydiff;
         
-        sizepolicy(&st->szplcy, st->reg, &g, REGION_RQGEOM_WEAK_ALL, &fp2);
-
+        if(fp->mode&REGION_FIT_WHATEVER){
+            fp2.g=g;
+        }else{
+            fp2.g=REGION_GEOM(ws);
+            sizepolicy(&st->szplcy, st->reg, &g, REGION_RQGEOM_WEAK_ALL, &fp2);
+        }
+        
         if(!region_fitrep(st->reg, par, &fp2)){
             warn(TR("Error reparenting %s."), region_name(st->reg));
             region_detach_manager(st->reg);
@@ -845,6 +857,7 @@ WRegion *group_do_attach_framed(WGroup *ws,
     }else{
         fp.g=REGION_GEOM(ws);
         fp.mode=REGION_FIT_BOUNDS|REGION_FIT_WHATEVER;
+        par.flags|=MPLEX_ATTACH_WHATEVER;
     }
     
     if(ap->framed_mkframe!=NULL)
@@ -858,8 +871,6 @@ WRegion *group_do_attach_framed(WGroup *ws,
     }
     
     /* Attach */
-    par.flags=MPLEX_ATTACH_WHATEVER;
-    
     reg=mplex_do_attach((WMPlex*)frame, &par, data);
     
     if(reg==NULL){
