@@ -111,7 +111,7 @@ bool tiling_fitrep(WTiling *ws, WWindow *par, const WFitParams *fp)
         region_unset_parent((WRegion*)ws);
         
         XReparentWindow(ioncore_g.dpy, ws->dummywin, 
-                        par->win, fp->g.x, fp->g.h);
+                        par->win, fp->g.x, fp->g.y);
         
         region_set_parent((WRegion*)ws, par);
     

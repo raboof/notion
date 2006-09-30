@@ -77,8 +77,10 @@ void xwindow_restack(Window win, Window other, int stack_mode)
     
     wcmask=CWStackMode;
     wc.stack_mode=stack_mode;
-    if((wc.sibling=other)!=None)
+    if(other!=None){
+        wc.sibling=other;
         wcmask|=CWSibling;
+    }
 
     XConfigureWindow(ioncore_g.dpy, win, wcmask, &wc);
 }

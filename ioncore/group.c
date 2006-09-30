@@ -125,7 +125,7 @@ static void group_fit(WGroup *ws, const WRectangle *geom)
 bool group_fitrep(WGroup *ws, WWindow *par, const WFitParams *fp)
 {
     WGroupIterTmp tmp;
-    WStacking *unweaved;
+    WStacking *unweaved=NULL;
     int xdiff=0, ydiff=0;
     WStacking *st;
     WWindow *oldpar;
@@ -152,11 +152,9 @@ bool group_fitrep(WGroup *ws, WWindow *par, const WFitParams *fp)
         region_set_parent((WRegion*)ws, par);
 
         REGION_GEOM(ws)=fp->g;
-    
-        if(oldpar!=NULL){
+        
+        if(oldpar!=NULL)
             unweaved=stacking_unweave(&oldpar->stacking, wsfilt, (void*)ws);
-            stacking_weave(&par->stacking, &unweaved, FALSE);
-        }
     }
 
     FOR_ALL_NODES_IN_GROUP(ws, st, tmp){
@@ -179,6 +177,9 @@ bool group_fitrep(WGroup *ws, WWindow *par, const WFitParams *fp)
         }
     }
     
+    if(unweaved!=NULL)
+        stacking_weave(&par->stacking, &unweaved, FALSE);
+
     return TRUE;
 }
 
