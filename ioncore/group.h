@@ -20,6 +20,7 @@
 #include <ioncore/rectangle.h>
 #include <ioncore/pholder.h>
 #include <ioncore/stacking.h>
+#include <ioncore/framedpholder.h>
 
 
 INTRSTRUCT(WGroupAttachParams);
@@ -31,25 +32,23 @@ DECLSTRUCT(WGroupAttachParams){
     uint level_set:1;
     uint szplcy_set:1;
     uint geom_set:1;
+    uint geom_weak_set:1;
     uint switchto_set:1;
-    uint switchto:1;
     
+    uint switchto:1;
     uint modal:1;
     uint bottom:1;
     
-    uint framed_inner_geom:1;
+    int geom_weak;
+    WRectangle geom;
     
     uint level;
-    WRectangle geom;
-    int geom_weak;
     WSizePolicy szplcy;
-    int framed_gravity;
-    WGroupMkFrameFn *framed_mkframe;
     WRegion *stack_above;
 };
 
 #define GROUPATTACHPARAMS_INIT \
-    {0, 0, 0, 0,  0, 0,  0, 0,  0, {0, 0, 0, 0}, 0, 0, 0, NULL, NULL}
+    {0, 0, 0, 0, 0,  0, 0, 0,  0, {0, 0, 0, 0},  0, 0, NULL}
 
 
 DECLCLASS(WGroup){
@@ -87,10 +86,6 @@ extern bool group_do_attach_final(WGroup *ws,
 
 extern WRegion *group_attach(WGroup *ws, WRegion *reg, ExtlTab param);
 extern WRegion *group_attach_new(WGroup *ws, ExtlTab param);
-
-extern WRegion *group_do_attach_framed(WGroup *ws, 
-                                       const WGroupAttachParams *param,
-                                       WRegionAttachData *data);
 
 extern void group_manage_stdisp(WGroup *ws, WRegion *stdisp, 
                                 const WMPlexSTDispInfo *di);

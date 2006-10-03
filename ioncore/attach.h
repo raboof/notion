@@ -21,6 +21,10 @@ typedef WRegion *WRegionCreateFn(WWindow *parent,
                                  const WFitParams *fp, 
                                  void *param);
 
+typedef WRegion *WRegionAttachFn(WRegion *reg, 
+                                 void *param, 
+                                 WRegionAttachData *data);
+
 
 typedef enum{
     REGION_ATTACH_REPARENT,

@@ -11,7 +11,6 @@
 
 #include <libtu/objp.h>
 #include <libtu/obj.h>
-#include <libtu/pointer.h>
 
 #include "group.h"
 #include "group-cw.h"

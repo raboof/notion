@@ -23,8 +23,8 @@ SOURCES=binding.c conf-bindings.c cursor.c event.c exec.c focus.c         \
 	kbresize.c rectangle.c xwindow.c presize.c extlrx.c               \
         pholder.c mplexpholder.c llist.c basicpholder.c sizepolicy.c      \
         stacking.c group.c grouppholder.c group-cw.c navi.c		  \
-        group-ws.c grouprescueph.c floatframe.c float-placement.c	  \
-        groupedpholder.c
+        group-ws.c floatframe.c float-placement.c	                  \
+        groupedpholder.c framedpholder.c
 
 LUA_SOURCES=\
 	ioncore_ext.lua ioncore_luaext.lua ioncore_bindings.lua \

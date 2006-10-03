@@ -24,8 +24,9 @@
 #include "xwindow.h"
 #include "group-ws.h"
 #include "group-cw.h"
-#include "grouprescueph.h"
+#include "grouppholder.h"
 #include "groupedpholder.h"
+#include "framedpholder.h"
 #include "float-placement.h"
 #include "resize.h"
 
@@ -96,7 +97,9 @@ void ioncore_groupws_get(ExtlTab t)
 /*{{{ Attach stuff */
 
 
-static bool groupws_attach_framed(WGroupWS *ws, WGroupAttachParams *ap,
+static bool groupws_attach_framed(WGroupWS *ws, 
+                                  WGroupAttachParams *ap,
+                                  WFramedParam *fp,
                                   WRegion *reg)
 {
     WRegionAttachData data;
@@ -104,7 +107,9 @@ static bool groupws_attach_framed(WGroupWS *ws, WGroupAttachParams *ap,
     data.type=REGION_ATTACH_REPARENT;
     data.u.reg=reg;
     
-    return (group_do_attach_framed(&ws->grp, ap, &data)!=NULL);
+    return (region_attach_framed((WRegion*)ws, fp,
+                                 (WRegionAttachFn*)group_do_attach,
+                                 ap, &data)!=NULL);
 }
 
 
@@ -112,19 +117,19 @@ bool groupws_handle_drop(WGroupWS *ws, int x, int y,
                          WRegion *dropped)
 {
     WGroupAttachParams ap=GROUPATTACHPARAMS_INIT;
+    WFramedParam fp=FRAMEDPARAM_INIT;
     
     ap.switchto_set=TRUE;
     ap.switchto=TRUE;
-    ap.geom_set=TRUE;
-    ap.geom.x=x;
-    ap.geom.y=y;
-    ap.geom.w=REGION_GEOM(dropped).w;
-    ap.geom.h=REGION_GEOM(dropped).h;
-    ap.geom_weak=0;
-    ap.framed_inner_geom=TRUE;
-    ap.framed_gravity=NorthWestGravity;
     
-    return groupws_attach_framed(ws, &ap, dropped);
+    fp.inner_geom_gravity_set=TRUE;
+    fp.inner_geom.x=x;
+    fp.inner_geom.y=y;
+    fp.inner_geom.w=REGION_GEOM(dropped).w;
+    fp.inner_geom.h=REGION_GEOM(dropped).h;
+    fp.gravity=NorthWestGravity;
+    
+    return groupws_attach_framed(ws, &ap, &fp, dropped);
 }
 
 
@@ -144,13 +149,13 @@ EXTL_EXPORT_AS(WGroupWS, attach_framed)
 bool groupws_attach_framed_extl(WGroupWS *ws, WRegion *reg, ExtlTab t)
 {
     WGroupAttachParams ap=GROUPATTACHPARAMS_INIT;
+    WFramedParam fp=FRAMEDPARAM_INIT;
     ExtlTab gt;
     
     if(reg==NULL)
         return FALSE;
     
-    ap.framed_inner_geom=TRUE;
-    ap.framed_gravity=ForgetGravity;
+    fp.gravity=ForgetGravity;
     
     if(extl_table_is_bool_set(t, "switchto")){
         ap.switchto_set=TRUE;
@@ -160,8 +165,8 @@ bool groupws_attach_framed_extl(WGroupWS *ws, WRegion *reg, ExtlTab t)
     if(extl_table_gets_t(t, "geom", &gt)){
         int pos=0, size=0;
         
-        ap.geom.x=0;
-        ap.geom.y=0;
+        fp.inner_geom.x=0;
+        fp.inner_geom.y=0;
 
         if(extl_table_gets_i(gt, "x", &(ap.geom.x)))
             pos++;
@@ -173,18 +178,15 @@ bool groupws_attach_framed_extl(WGroupWS *ws, WRegion *reg, ExtlTab t)
         if(extl_table_gets_i(gt, "h", &(ap.geom.h)))
             size++;
         
-        ap.geom.w=maxof(ap.geom.w, 1);
-        ap.geom.h=maxof(ap.geom.h, 1);
+        fp.inner_geom.w=maxof(fp.inner_geom.w, 1);
+        fp.inner_geom.h=maxof(fp.inner_geom.h, 1);
         
-        ap.geom_set=(size==2);
-        ap.geom_weak=(pos!=2
-                      ? REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y
-                      : 0);
+        fp.inner_geom_gravity_set=(size==2 && pos==2);
         
         extl_unref_table(gt);
     }
     
-    return groupws_attach_framed(ws, &ap, reg);
+    return groupws_attach_framed(ws, &ap, &fp, reg);
 }
 
 
@@ -221,9 +223,9 @@ static WPHolder *groupws_do_prepare_manage(WGroupWS *ws,
                                            const WManageParams *param, 
                                            int redir, int geom_weak)
 {
-    WGroupRescuePH *rph=NULL;
-    WGroupedPHolder *gph=NULL;
     WGroupAttachParams ap=GROUPATTACHPARAMS_INIT;
+    WFramedParam fp=FRAMEDPARAM_INIT;
+    WPHolder *ph;
     
     if(redir==MANAGE_REDIR_PREFER_YES){
         WMPlex *m=find_existing(ws);
@@ -239,20 +241,22 @@ static WPHolder *groupws_do_prepare_manage(WGroupWS *ws,
     if(redir==MANAGE_REDIR_STRICT_YES)
         return NULL;
 
-    ap.geom_set=TRUE;
-    ap.geom=param->geom;
+    fp.inner_geom_gravity_set=TRUE;
+    fp.inner_geom=param->geom;
+    fp.gravity=param->gravity;
     
-    ap.framed_inner_geom=TRUE;
-    ap.framed_gravity=param->gravity;
+    ap.geom_weak_set=1;
     ap.geom_weak=geom_weak;
-    ap.stack_above=NULL;
 
-    rph=create_grouprescueph(&ws->grp, NULL, &ap);
+    ph=(WPHolder*)create_grouppholder(&ws->grp, NULL, &ap);
     
-    if(rph!=NULL)
-        gph=create_groupedpholder((WPHolder*)rph);
+    if(ph!=NULL)
+        ph=pholder_either((WPHolder*)create_framedpholder(ph, &fp), ph);
     
-    return (gph!=NULL ? (WPHolder*)gph : (WPHolder*)rph);
+    if(ph!=NULL)
+        ph=pholder_either((WPHolder*)create_groupedpholder((WPHolder*)ph), ph);
+    
+    return ph;
 }
 
 
@@ -296,7 +300,8 @@ WPHolder *groupws_prepare_manage_transient(WGroupWS *ws, const WClientWin *cwin,
                                            int unused)
 {
     WGroupAttachParams ap=GROUPATTACHPARAMS_INIT;
-    WGroupRescuePH *rph=NULL;
+    WFramedParam fp=FRAMEDPARAM_INIT;
+    WPHolder *ph;
     
     ap.stack_above=OBJ_CAST(REGION_PARENT(param->tfor), WRegion);
     if(ap.stack_above==NULL)
@@ -305,17 +310,38 @@ WPHolder *groupws_prepare_manage_transient(WGroupWS *ws, const WClientWin *cwin,
     if(ws==NULL)
         return NULL;
     
-    ap.geom_set=TRUE;
-    ap.geom=param->geom;
+    fp.inner_geom_gravity_set=TRUE;
+    fp.inner_geom=param->geom;
+    fp.gravity=param->gravity;
+    fp.mkframe=create_transient_frame;
     
-    ap.framed_inner_geom=TRUE;
-    ap.framed_gravity=param->gravity;
+    ap.geom_weak_set=1;
     ap.geom_weak=0;
-    ap.framed_mkframe=create_transient_frame;
 
-    rph=create_grouprescueph(&ws->grp, NULL, &ap);
+    ph=(WPHolder*)create_grouppholder(&ws->grp, NULL, &ap);
     
-    return (WPHolder*)rph;
+    return pholder_either((WPHolder*)create_framedpholder(ph, &fp), ph);
+}
+
+
+WPHolder *groupws_get_rescue_pholder_for(WGroupWS *ws, 
+                                         WRegion *forwhat)
+{
+    WGroupAttachParams ap=GROUPATTACHPARAMS_INIT;
+    WFramedParam fp=FRAMEDPARAM_INIT;
+    WPHolder *ph;
+    
+    ap.geom_set=TRUE;
+    ap.geom=REGION_GEOM(forwhat);
+
+    ap.geom_weak_set=1;
+    ap.geom_weak=(REGION_PARENT(forwhat)!=REGION_PARENT(ws)
+                  ? REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y
+                  : 0);
+
+    ph=(WPHolder*)create_grouppholder(&ws->grp, NULL, &ap);
+    
+    return pholder_either((WPHolder*)create_framedpholder(ph, &fp), ph);
 }
 
 

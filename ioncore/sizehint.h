@@ -49,5 +49,6 @@ extern void sizehints_correct(const WSizeHints *hints, int *wp, int *hp,
 
 extern int xgravity_deltax(int gravity, int left, int right);
 extern int xgravity_deltay(int gravity, int top, int bottom);
+extern void xgravity_translate(int gravity, WRegion *reg, WRectangle *geom);
 
 #endif /* ION_IONCORE_SIZEHINT_H */

@@ -192,6 +192,12 @@ WPHolder *region_get_rescue_pholder(WRegion *reg)
 }
 
 
+WPHolder *pholder_either(WPHolder *a, WPHolder *b)
+{
+    return (a!=NULL ? a : b);
+}
+
+
 static DynFunTab pholder_dynfuntab[]={
     {(DynFun*)pholder_do_check_reparent, 
      (DynFun*)pholder_do_check_reparent_default},

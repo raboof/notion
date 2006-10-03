@@ -16,6 +16,7 @@
 #include <ioncore/focus.h>
 #include <ioncore/group.h>
 #include <ioncore/group-ws.h>
+#include <ioncore/framedpholder.h>
 #include "tiling.h"
 
 
@@ -77,10 +78,15 @@ bool mod_tiling_detach(WRegion *reg)
     data.type=REGION_ATTACH_REPARENT;
     data.u.reg=reg;
     
-    if(detach_framed)
-        return (group_do_attach_framed(grp, &ap, &data)!=NULL);
-    else
+    if(detach_framed){
+        WFramedParam fp=FRAMEDPARAM_INIT;
+        
+        return (region_attach_framed((WRegion*)grp, &fp,
+                                     (WRegionAttachFn*)group_do_attach,
+                                     &ap, &data)!=NULL);
+    }else{
         return (group_do_attach(grp, &ap, &data)!=NULL);
+    }
 }
 
 

@@ -23,7 +23,9 @@
 #include "resize.h"
 #include "pholder.h"
 #include "names.h"
-#include "grouprescueph.h"
+#include "framedpholder.h"
+#include "grouppholder.h"
+
 
 #define DFLT_SZPLCY SIZEPOLICY_FREE_GLUE__SOUTH
 
@@ -96,6 +98,8 @@ static WPHolder *groupcw_transient_pholder(WGroupCW *cwg,
                                            const WManageParams *mp)
 {
     WGroupAttachParams param=GROUPATTACHPARAMS_INIT;
+    WFramedParam fp=FRAMEDPARAM_INIT;
+    WPHolder *ph;
     
     param.level_set=1;
     param.level=STACKING_LEVEL_MODAL1;
@@ -105,19 +109,24 @@ static WPHolder *groupcw_transient_pholder(WGroupCW *cwg,
     
     param.switchto_set=1;
     param.switchto=1;
+
+    param.geom_weak_set=1;
+    param.geom_weak=REGION_RQGEOM_WEAK_ALL;
     
     if(!ioncore_g.framed_transients){
+        param.geom_set=TRUE;
+        param.geom=mp->geom;
+        
         return (WPHolder*)create_grouppholder(&cwg->grp, NULL, &param);
     }else{
-        param.geom_set=1;
-        param.geom=mp->geom;
-        param.geom_weak=REGION_RQGEOM_WEAK_ALL;
+        fp.inner_geom_gravity_set=1;
+        fp.inner_geom=mp->geom;
+        fp.gravity=ForgetGravity;
+        fp.mkframe=create_transient_frame;
         
-        param.framed_inner_geom=TRUE;
-        param.framed_gravity=mp->gravity;
-        param.framed_mkframe=create_transient_frame;
+        ph=(WPHolder*)create_grouppholder(&cwg->grp, NULL, &param);
         
-        return (WPHolder*)create_grouprescueph(&cwg->grp, NULL, &param);
+        return pholder_either((WPHolder*)create_framedpholder(ph, &fp), ph);
     }
 }
 

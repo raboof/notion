@@ -38,7 +38,6 @@
 #include "mplex.h"
 #include "group.h"
 #include "grouppholder.h"
-#include "grouprescueph.h"
 #include "floatframe.h"
 #include "float-placement.h"
 
@@ -572,15 +571,28 @@ bool group_do_attach_final(WGroup *ws,
     szplcy=(param->szplcy_set
             ? param->szplcy
             : SIZEPOLICY_UNCONSTRAINED);
-        
-    if(!param->geom_set){
-        weak=REGION_RQGEOM_WEAK_ALL;
-        g=REGION_GEOM(reg);
-    }else{
-        weak=param->geom_weak;
-        geom_group_to_parent(ws, &param->geom, &g);
-    }
     
+    weak=(param->geom_weak_set
+          ? param->geom_weak
+          : (param->geom_set
+             ? 0
+             : REGION_RQGEOM_WEAK_ALL));
+    
+    if(param->geom_set)
+        geom_group_to_parent(ws, &param->geom, &g);
+    else
+        g=REGION_GEOM(reg);
+    
+    /* If the requested geometry does not overlap the workspaces's geometry, 
+     * position request is never honoured.
+     */
+    if((g.x+g.w<=REGION_GEOM(ws).x) ||
+       (g.y+g.h<=REGION_GEOM(ws).y) ||
+       (g.x>=REGION_GEOM(ws).x+REGION_GEOM(ws).w) ||
+       (g.y>=REGION_GEOM(ws).y+REGION_GEOM(ws).h)){
+        weak|=REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_X;
+    }
+
     if((weak&(REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y))
        ==(REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y) &&
         (szplcy==SIZEPOLICY_UNCONSTRAINED ||
@@ -782,144 +794,6 @@ WRegion *group_attach_new(WGroup *ws, ExtlTab param)
     data.u.tab=param;
     
     return group_do_attach(ws, &par, &data);
-}
-
-
-/*}}}*/
-
-
-/*{{{ Attach w/ frame */
-
-
-void frame_geom_from_initial_geom(WFrame *frame, 
-                                  WGroup *ws,
-                                  WRectangle *geom, 
-                                  int gravity)
-{
-    WRectangle off;
-#ifndef CF_NO_WSREL_INIT_GEOM
-    /* 'app -geometry -0-0' should place the app at the lower right corner
-     * of ws even if ws is nested etc.
-     */
-    int top=0, left=0, bottom=0, right=0;
-    WRootWin *root;
-    
-    root=region_rootwin_of((WRegion*)ws);
-    region_rootpos((WRegion*)ws, &left, &top);
-    right=REGION_GEOM(root).w-left-REGION_GEOM(ws).w;
-    bottom=REGION_GEOM(root).h-top-REGION_GEOM(ws).h;
-#endif
-
-    mplex_managed_geom(&frame->mplex, &off);
-    off.w=off.w-REGION_GEOM(frame).w;
-    off.h=off.h-REGION_GEOM(frame).h;
-
-    geom->w=maxof(geom->w, 0);
-    geom->h=maxof(geom->h, 0);
-    geom->w+=off.w;
-    geom->h+=off.h;
-#ifndef CF_NO_WSREL_INIT_GEOM
-    geom->x+=xgravity_deltax(gravity, -off.x+left, off.x+off.w+right);
-    geom->y+=xgravity_deltay(gravity, -off.y+top, off.y+off.h+bottom);
-    geom->x+=REGION_GEOM(ws).x;
-    geom->y+=REGION_GEOM(ws).y;
-#else
-    geom->x+=xgravity_deltax(gravity, -off.x, off.x+off.w);
-    geom->y+=xgravity_deltay(gravity, -off.y, off.y+off.h);
-    region_convert_root_geom(REGION_PARENT_REG(ws), geom);
-#endif
-}
-
-
-WRegion *group_do_attach_framed(WGroup *ws, 
-                                const WGroupAttachParams *ap__,
-                                WRegionAttachData *data)
-{
-    /* We will modify szplcy and pass things to group_do_attach_final, 
-     * so let's make a copy 
-     */
-    WGroupAttachParams ap_=*ap__, *ap=&ap_;
-    WMPlexAttachParams par=MPLEXATTACHPARAMS_INIT;
-    WWindow *parent=REGION_PARENT(ws);
-    /*WStacking *stacking=group_get_stacking(&ws->grp);
-    WStacking *st, *stabove;*/
-    WFitParams fp;
-    WRectangle rqg;
-    WFrame *frame;
-    WRegion *reg;
-
-    assert(parent!=NULL);
-    
-    /* Create frame with dummy geometry */
-    if(ap->geom_set){
-        geom_group_to_parent(ws, &ap->geom, &fp.g);
-        fp.mode=REGION_FIT_EXACT;
-    }else{
-        fp.g=REGION_GEOM(ws);
-        fp.mode=REGION_FIT_BOUNDS|REGION_FIT_WHATEVER;
-        par.flags|=MPLEX_ATTACH_WHATEVER;
-    }
-    
-    if(ap->framed_mkframe!=NULL)
-        frame=(WFrame*)(ap->framed_mkframe)(parent, &fp);
-    else
-        frame=(WFrame*)create_floatframe(parent, &fp);
-    
-    if(frame==NULL){
-        warn(TR("Failed to create a new frame."));
-        return NULL;
-    }
-    
-    /* Attach */
-    reg=mplex_do_attach((WMPlex*)frame, &par, data);
-    
-    if(reg==NULL){
-        destroy_obj((Obj*)frame);
-        return NULL;
-    }
-    
-    /* Adjust geometry */
-    if(!ap->geom_set){
-        WRectangle mg;
-        
-        mplex_managed_geom((WMPlex*)frame, &mg);
-
-        rqg.x=REGION_GEOM(frame).x-REGION_GEOM(ws).x;
-        rqg.y=REGION_GEOM(frame).y-REGION_GEOM(ws).y;
-        rqg.w=REGION_GEOM(reg).w+(REGION_GEOM(frame).w-mg.w);
-        rqg.h=REGION_GEOM(reg).h+(REGION_GEOM(frame).h-mg.h);
-        
-        ap->geom_weak|=REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_X;
-        /*frame_geom_from_initial_geom(frame, ws, &rqg, ap->framed_gravity);*/
-    }else{
-        rqg=ap->geom;
-        
-        if(ap->framed_inner_geom){
-            frame_geom_from_initial_geom(frame, ws, &rqg, 
-                                         ap->framed_gravity);
-        }
-        
-        /* If the requested geometry does not overlap the workspaces's geometry, 
-         * position request is never honoured.
-         */
-        if((rqg.x+rqg.w<=REGION_GEOM(ws).x) ||
-           (rqg.y+rqg.h<=REGION_GEOM(ws).y) ||
-           (rqg.x>=REGION_GEOM(ws).x+REGION_GEOM(ws).w) ||
-           (rqg.y>=REGION_GEOM(ws).y+REGION_GEOM(ws).h)){
-            ap->geom_weak|=REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_X;
-        }
-    }
-    
-    ap->geom_set=TRUE;
-    ap->geom=rqg;
-    
-    if(!group_do_attach_final(ws, (WRegion*)frame, ap)){
-        #warning "TODO: What to do to reg?"
-        destroy_obj((Obj*)frame);
-        return NULL;
-    }
-    
-    return (WRegion*)frame;
 }
 
 

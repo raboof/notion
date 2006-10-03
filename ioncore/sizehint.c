@@ -17,6 +17,7 @@
 #include "region.h"
 #include "resize.h"
 #include "sizehint.h"
+#include "rootwin.h"
 
 
 /*{{{ xsizehints_correct */
@@ -248,6 +249,21 @@ int xgravity_deltay(int gravity, int top, int bottom)
         return -hoff/2;
     }
     return 0;
+}
+
+
+void xgravity_translate(int gravity, WRegion *reg, WRectangle *geom)
+{
+    int top=0, left=0, bottom=0, right=0;
+    WRootWin *root;
+
+    root=region_rootwin_of(reg);
+    region_rootpos(reg, &left, &top);
+    right=REGION_GEOM(root).w-left-REGION_GEOM(reg).w;
+    bottom=REGION_GEOM(root).h-top-REGION_GEOM(reg).h;
+
+    geom->x+=xgravity_deltax(gravity, left, right);
+    geom->y+=xgravity_deltay(gravity, top, bottom);
 }
 
 

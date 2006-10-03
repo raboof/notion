@@ -53,6 +53,8 @@ extern bool pholder_goto(WPHolder *ph);
 
 extern bool pholder_redirect(WPHolder *ph, WRegion *old_target);
 
+extern WPHolder *pholder_either(WPHolder *a, WPHolder *b);
+
 DYNFUN WPHolder *region_managed_get_pholder(WRegion *reg, WRegion *mgd);
 DYNFUN WPHolder *region_get_rescue_pholder_for(WRegion *reg, WRegion *mgd);
 
