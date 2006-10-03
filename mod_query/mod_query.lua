@@ -1135,30 +1135,46 @@ end
 
 
 --DOC
--- Show information about a client window.
-function mod_query.show_clientwin(mplex, cwin)
+-- Show information about a region tree 
+function mod_query.show_tree(mplex, reg, max_depth)
     local function indent(s)
         local i="    "
         return i..string.gsub(s, "\n", "\n"..i)
     end
     
-    local function get_info(cwin)
+    local function get_info(reg, indent, d)
+        if not reg then
+            return (indent .. "No region")
+        end
+        
         local function n(s) return (s or "") end
-        local i=cwin:get_ident()
-        local s=TR("Title: %s\nClass: %s\nRole: %s\nInstance: %s\nXID: 0x%x",
-                   n(cwin:name()), n(i.class), n(i.role), n(i.instance), 
-                   cwin:xid())
-        local t=TR("\nTransients:\n")
-        for k, v in pairs(cwin:managed_list()) do
-            if obj_is(v, "WClientWin") then
-                s=s..t..indent(get_info(v))
-                t="\n"
+
+        local s=string.format("%s%s \"%s\"", indent, obj_typename(reg),
+                              n(reg:name()))
+        indent = indent .. "  "
+        if obj_is(reg, "WClientWin") then
+            local i=reg:get_ident()
+            s=s .. TR("\n%sClass: %s\n%sRole: %s\n%sInstance: %s\n%sXID: 0x%x",
+                      indent, n(i.class), 
+                      indent, n(i.role), 
+                      indent, n(i.instance), 
+                      indent, reg:xid())
+        end
+        
+        if (not max_depth or max_depth > d) and reg.managed_list then
+            local mgd=reg:managed_list()
+            if #mgd > 0 then
+                s=s .. "\n" .. indent .. "---"
+                for k, v in pairs(mgd) do
+                    s=s .. "\n" .. get_info(v, indent, d+1)
+                end
             end
         end
+        
         return s
     end
     
-    mod_query.message(mplex, get_info(cwin))
+    mod_query.message(mplex, get_info(reg, "", 0))
 end
 
 -- }}}

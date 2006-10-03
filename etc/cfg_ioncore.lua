@@ -358,6 +358,5 @@ defctxmenu("WFrame", "Frame", {
                                 "_sub:non-nil"),
     menuentry("Attach tagged",  "WFrame.attach_tagged(_)"),
     menuentry("Clear tags",     "ioncore.clear_tags()"),
-    menuentry("Window info",    "mod_query.show_clientwin(_, _sub)",
-                                "_sub:WClientWin"),
+    menuentry("Window info",    "mod_query.show_tree(_, _sub)"),
 })
