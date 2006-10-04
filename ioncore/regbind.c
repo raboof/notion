@@ -157,17 +157,11 @@ static WRegBindingInfo *region_do_add_bindmap_owned(WRegion *reg,
 }
 
 
-bool region_add_bindmap_owned(WRegion *reg, WBindmap *bindmap, WRegion *owner)
-{
-    if(find_rbind(reg, bindmap, owner)!=NULL)
-        return FALSE;
-    return (region_do_add_bindmap_owned(reg, bindmap, owner, FALSE)!=NULL);
-}
-
-
 bool region_add_bindmap(WRegion *reg, WBindmap *bindmap)
 {
-    return region_add_bindmap_owned(reg, bindmap, NULL);
+    if(find_rbind(reg, bindmap, NULL)!=NULL)
+        return FALSE;
+    return (region_do_add_bindmap_owned(reg, bindmap, NULL, TRUE)!=NULL);
 }
 
 
@@ -188,19 +182,11 @@ static void remove_rbind(WRegion *reg, WRegBindingInfo *rbind)
 }
 
 
-void region_remove_bindmap_owned(WRegion *reg, WBindmap *bindmap,
-                                 WRegion *owner)
-{
-    WRegBindingInfo *rbind=find_rbind(reg, bindmap, owner);
-    
-    if(rbind!=NULL /*&& rbind->owner==owner*/)
-        remove_rbind(reg, rbind);
-}
-
-
 void region_remove_bindmap(WRegion *reg, WBindmap *bindmap)
 {
-    region_remove_bindmap_owned(reg, bindmap, NULL);
+    WRegBindingInfo *rbind=find_rbind(reg, bindmap, NULL);
+    if(rbind!=NULL)
+        remove_rbind(reg, rbind);
 }
 
 

@@ -25,11 +25,8 @@ DECLSTRUCT(WSubmapState){
 
 
 extern bool region_add_bindmap(WRegion *reg, WBindmap *bindmap);
-extern bool region_add_bindmap_owned(WRegion *reg, WBindmap *bindmap,
-                                     WRegion *owner);
 extern void region_remove_bindmap(WRegion *reg, WBindmap *bindmap);
-extern void region_remove_bindmap_owned(WRegion *reg, WBindmap *bindmap,
-                                        WRegion *owner);
+
 extern void region_remove_bindings(WRegion *reg);
 
 extern WBinding *region_lookup_keybinding(WRegion *reg, const XKeyEvent *ev,
