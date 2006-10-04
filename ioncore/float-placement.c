@@ -34,14 +34,19 @@ static void ggeom(WRegion *reg, WRectangle *geom)
 }
 
 
+#define IGNORE_ST(ST, WS) ((ST)->reg==NULL || (ST)==(WS)->bottom)
+
 static WRegion* is_occupied(WGroup *ws, const WRectangle *r)
 {
-    WRegion *reg;
-    WRectangle p;
     WGroupIterTmp tmp;
+    WStacking *st;
+    WRectangle p;
     
-    FOR_ALL_MANAGED_BY_GROUP(ws, reg, tmp){
-        ggeom(reg, &p);
+    FOR_ALL_NODES_IN_GROUP(ws, st, tmp){
+        if(IGNORE_ST(st, ws))
+            continue;
+        
+        ggeom(st->reg, &p);
         
         if(r->x>=p.x+p.w)
             continue;
@@ -51,7 +56,7 @@ static WRegion* is_occupied(WGroup *ws, const WRectangle *r)
             continue;
         if(r->y+r->h<=p.y)
             continue;
-        return reg;
+        return st->reg;
     }
     
     return NULL;
@@ -60,13 +65,16 @@ static WRegion* is_occupied(WGroup *ws, const WRectangle *r)
 
 static int next_least_x(WGroup *ws, int x)
 {
-    WRegion *reg;
     WRectangle p;
     int retx=REGION_GEOM(ws).x+REGION_GEOM(ws).w;
     WGroupIterTmp tmp;
+    WStacking *st;
     
-    FOR_ALL_MANAGED_BY_GROUP(ws, reg, tmp){
-        ggeom(reg, &p);
+    FOR_ALL_NODES_IN_GROUP(ws, st, tmp){
+        if(IGNORE_ST(st, ws))
+            continue;
+        
+        ggeom(st->reg, &p);
         
         if(p.x+p.w>x && p.x+p.w<retx)
             retx=p.x+p.w;
@@ -78,13 +86,16 @@ static int next_least_x(WGroup *ws, int x)
 
 static int next_lowest_y(WGroup *ws, int y)
 {
-    WRegion *reg;
     WRectangle p;
     int rety=REGION_GEOM(ws).y+REGION_GEOM(ws).h;
     WGroupIterTmp tmp;
+    WStacking *st;
     
-    FOR_ALL_MANAGED_BY_GROUP(ws, reg, tmp){
-        ggeom(reg, &p);
+    FOR_ALL_NODES_IN_GROUP(ws, st, tmp){
+        if(IGNORE_ST(st, ws))
+            continue;
+        
+        ggeom(st->reg, &p);
         
         if(p.y+p.h>y && p.y+p.h<rety)
             rety=p.y+p.h;
