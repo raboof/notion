@@ -49,23 +49,22 @@ tavallisessa kokoonpanossa. Sinun tarvitse ymmärtää nämä suhteet
 tietääksesi milloin mitkäkin alempana kuvattavat näppäinsidonnat 
 ovat käytettävissäsi. Jos kaipaat vielä tarkempaa kuvausta, esimerkiksi
 tehdäksesi omat asetustiedostot, katso Ionin seittisivulta saatavaa 
-yksityiskohtaisempaa  dokumentaatiota.
+yksityiskohtaisempaa dokumentaatiota.
 
 Ylimmän tason olioita, joilla on merkitystä tässä yhteydessä, 
 kutsutaan \fBnäytöiksi\fP. Ne vastaavat fyysisiä näyttöjä. Näytöt
-sisältävät \fBtyöpöytiä\fP ja kokoruudun tilassa olevia
-\fBasiakasikkunoita\fP. Nämä oliot ovat \fBlomitettu\fP siten, että
-vain yksi voi näkyä kerrallaan.
+sisältävät \fBtyöpöytiä\fP (jotka ovat itse eräänlaisia \fBryhmiä\fP)
+ja kokoruudun tilassa olevia \fBasiakasikkunoita\fP. Nämä oliot ovat 
+\fBlomitettu\fP siten, että vain yksi voi näkyä kerrallaan.
 
-Ion tukee tällä hetkellä kahdentyyppisiä työpöytiä: \fBlaatoittavia\fP
-Ionin perinteiseen tapaan ja tavanomaisempia \fBkelluvia\fP työpöytiä
-PWM:n tapaan. Työpöydät eivät ole näkyviä olioita, vaan lähinnä 
-kokoelmia samanaikaisesti näytettäviä \fBkehyksiä\fP.
-
-Näyttöjen tapaan kehykset lomittavat muita olioita, mutta tässä
-tapauksessa lähinnä asiakasikkunoita. Kehykset ovat suurimman osan
-ajasta ainut asia, minkä näet Ionista. Niillä voi olla reunakoristukset, 
-ja lisäksi kehyksissä on \fBvälilehti\fP jokaiselle lomitetulle oliolle.
+Työpöydät voivat vuorostaan sisältää \fBlaatoituksia\fP sekä
+kelluvia/irroitettuja \fBkehyksiä\fP. Laatoitukset taasen sisältävät
+\fBkehyksiä\fP laatoitettuna täyttämään koko näytön, sekä mahdollisesti
+tilapalkin tai telakan (dock). Näyttöjen tapaan kehykset lomittavat 
+muita olioita, mutta tässä tapauksessa lähinnä asiakasikkuna\fBryhmiä\fP. 
+Kehykset ovat suurimman osan ajasta ainut asia, minkä näet Ionista. Niillä
+voi olla reunakoristukset, ja lisäksi kehyksissä on \fBvälilehti\fP 
+jokaiselle lomitetulle oliolle.
 
 \fBKyselyt\fP ovat näyttöjen tai kehysten alaosiin imestyviä laatikoita,
 jotka odottavat sinulta tekstin syöttöä jonkin siitä riippuvan toiminnon
@@ -87,39 +86,45 @@ jonka asetustiedosto määrittelee alla olevat sidonnat.
 
 BINDINGS:WScreen
 
-.".SS Kehyksiä ja näyttöjä, sekä niiden lapsia käsittelevät sidonnat
+.SS Näytöillä tai ylimmän tason kehyksissä toimivat sidonnat
 
 BINDINGS:WMPlex.toplevel
 
+.SS Näytöillä tai (kaikissa) kehyksissä toimivat sidonnat
+
 BINDINGS:WMPlex
 
-.SS Kaikkia kehyksiä (myös väliaikaisikkuneiden), sekä niiden lapsia käsittelevät sidonnat
+.SS Kaikissa kehyksissä toimivat sidonnat
 
 BINDINGS:WFrame
 
-.SS Ylimmän tason kehyksiä (ei väliaikaisikkunoiden), sekä niiden lapsia käsittelevät sidonnat
+.SS Ylimmän tason kehyksissä (ei ns. transient-dialogi) toimivat sidonnat
 
 BINDINGS:WFrame.toplevel
 
-.SS Siirto ja koonmuutostilan sidonnat
-
-BINDINGS:WMoveresMode
-
-.SS Laatoitettavien työpöytien sidonnat [mod_ionws]
-
-BINDINGS:WTiling
-
-.SS Kelluvien työpöytien ja kehyksien sidonnat [mod_floatws]
-
-BINDINGS:WGroupWS
+.SS Kelluvissa/irroitetuissa kehyksissä toimivat sidonnat
 
 BINDINGS:WFloatFrame
 
-.SS Kysely- ja viestilaatikoiden sidonnat [mod_query]
+.SS Laatoituksien sidonnat [mod_tiling]
+
+BINDINGS:WTiling
+
+.SS Asiakasikkunoiden sidonnat
+
+BINDINGS:WClientWin
+
+BINDINGS:WGroupCW
+
+.SS Siirto- ja koonmuutostilan sidonnat
+
+BINDINGS:WMoveresMode
+
+.SS Viestilaatikoiden ja kyselyiden sidonnat [mod_query]
 
 BINDINGS:WInput
 
-.SS Sidonnat tekstinmuokkaukseen kyselyissä [mod_query]
+.SS Tekstinmuokkaussidonnat kyselyihin [mod_query]
 
 Nämä näppäinsidonnat vastaavat tekstieditorin \fIjoe(1)\fP sidontoja.
 Leikkaus ja liimaus toimii kuitenkin tavanomaisemmin, joskin näppäimet

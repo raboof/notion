@@ -94,15 +94,15 @@ defbindings("WScreen", {
 -- These bindings affect client windows directly.
 
 defbindings("WClientWin", {
-    bdoc("Nudge current client window. This might help with some "..
+    bdoc("Nudge the client window. This might help with some "..
          "programs' resizing problems."),
     kpress_wait(META.."L", "WClientWin.nudge(_)"),
     
     submap(META.."K", {
-       bdoc("Kill client owning current client window."),
+       bdoc("Kill client owning the client window."),
        kpress("C", "WClientWin.kill(_)"),
        
-       bdoc("Send next key press to current client window. "..
+       bdoc("Send next key press to the client window. "..
             "Some programs may not allow this by default."),
        kpress("Q", "WClientWin.quote_next(_)"),
     }),

@@ -52,19 +52,18 @@ explanation, needed for writing custom bindings configuration files,
 see the additional documentation available from the Ion Web page.
 
 The top-level objects that matter in the case at hand are \fBscreens\fP.
-They correspond to physical screens. Screens contain \fBworkspaces\fP and 
-\fBclient windows\fP put in full screen mode. These objects are
-\fBmultiplixed\fP in the sense that only one can be displayed at a time.
+They correspond to physical screens. Screens contain \fBworkspaces\fP
+(which are a kind of \fBgroup\fP), and \fBclient windows\fP put into full
+screen mode. These objects are \fBmultiplexed\fP in the sense that only
+one can be displayed at a time.
 
-Ion currently supports two types of workspaces; \fBtiled\fP of the
-traditional Ion-style and more conventional \fBfloating\fP workspaces
-of the PWM flavour. Workspaces are not visible objects but rather 
-collections of simultaneously visible \fBframes\fP.
-
-Akin to screens, frames multiplex other objects, but in this case mostly
-client windows. Most of the time, frames are the only trace of Ion you
-see on the screen. Frames may have border decorations, and they have
-a \fBtab\fP for each multiplexed object.
+Workspaces themselves may contain \fBtilings\fP and detached/floating
+\fBframes\fP. Tilings themselves contain \fBframes\fP tiled to fill the
+screen, and possibly a statusbar or dock. Akin to screens, frames multiplex
+other objects, but in this case mostly client window \fBgroups\fP. Most of 
+the time, frames are the only trace of Ion you see on the screen. Frames 
+may have border decorations, and they have a \fBtab\fP for each multiplexed
+object.
 
 \fBQueries\fP are boxes that appear at the bottoms of frames or screens 
 to ask you for textual input to execute an action that depends on it.
@@ -85,11 +84,11 @@ the module that whose configuration file defines these bindings.
 
 BINDINGS:WScreen
 
-.".SS Bindings operating on top-level frames and screens and their children
+.SS Bindings operating on top-level frames and screens and their children
 
 BINDINGS:WMPlex.toplevel
 
-.".SS Bindings operating on frames and screens and their children
+.SS Bindings operating on frames and screens and their children
 
 BINDINGS:WMPlex
 
@@ -101,19 +100,23 @@ BINDINGS:WFrame
 
 BINDINGS:WFrame.toplevel
 
-.SS Move/resize mode bindings
+.SS Bindings for floating/detached frames
 
-BINDINGS:WMoveresMode
+BINDINGS:WFloatFrame
 
-.SS Bindings for tilers [mod_tiling]
+.SS Bindings for tilings [mod_tiling]
 
 BINDINGS:WTiling
 
-.SS Bindings for groups and floating frames
+.SS Bindings for client windows
 
-BINDINGS:WGroupWS
+BINDINGS:WClientWin
 
-BINDINGS:WFloatFrame
+BINDINGS:WGroupCW
+
+.SS Move/resize mode bindings
+
+BINDINGS:WMoveresMode
 
 .SS Bindings for message boxes and queries [mod_query]
 
