@@ -128,9 +128,11 @@ void floatframe_managed_geom(const WFloatFrame *frame, WRectangle *geom)
 
 void floatframe_size_hints(WFloatFrame *frame, WSizeHints *hints_ret)
 {
+    int f=frame->frame.flags&(FRAME_SHADED|FRAME_SHADED_TOGGLE);
+    
     frame_size_hints(&frame->frame, hints_ret);
     
-    if(frame->frame.flags&FRAME_SHADED){
+    if(f==FRAME_SHADED || f==FRAME_SHADED_TOGGLE){
         hints_ret->min_height=frame->frame.bar_h;
         hints_ret->max_height=frame->frame.bar_h;
         hints_ret->base_height=frame->frame.bar_h;

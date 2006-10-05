@@ -571,7 +571,11 @@ static void frame_do_toggle_shade(WFrame *frame, int shaded_h)
         geom.h=shaded_h;
     }
     
+    frame->flags|=FRAME_SHADED_TOGGLE;
+    
     region_rqgeom((WRegion*)frame, REGION_RQGEOM_H_ONLY, &geom, NULL);
+
+    frame->flags&=~FRAME_SHADED_TOGGLE;
 }
 
 
