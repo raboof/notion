@@ -10,17 +10,15 @@
 --
 
 
+local group_tmpl={type="WGroupWS", switchto=true}
+
 --DOC
--- Create new workspace on screen \var{scr}. If \var{ws_type} is
--- set, then a workspace of that type is created. Otherwise
--- workspace type is taken from the \code{default_ws_type} setting 
--- returned by \fnref{ioncore.get}.
-function ioncore.create_ws(scr, name)
-    local t=table.copy(ioncore.get().default_ws_params or {})
-    
-    t.type="WGroupWS"
-    t.name=name
-    t.switchto=true
+-- Create new workspace on screen \var{scr}. The table \var{tmpl}
+-- may be used to override parts of \code{default_ws_params},
+-- and \var{no_default} may be set to \code{true} to complete ignore it.
+function ioncore.create_ws(scr, tmpl, no_default)
+    local dflt=(not no_default and ioncore.get().default_ws_params) or {}
+    local t=table.join(table.join(tmpl or {}, dflt), group_tmpl)
     
     return scr:attach_new(t)
 end

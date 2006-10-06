@@ -167,6 +167,11 @@ defbindings("WMPlex.toplevel", {
     
     bdoc("Query for a client window to attach."),
     kpress(META.."A", "mod_query.query_attachclient(_)"),
+    
+    bdoc("Display context menu."),
+    --kpress(META.."M", "mod_menu.menu(_, _sub, 'ctxmenu')"),
+    kpress(META.."M", "mod_query.query_menu(_, 'ctxmenu', 'Context menu: ')"),
+
 })
 
 
@@ -182,10 +187,8 @@ defbindings("WFrame", {
         kpress("H", "WFrame.maximize_horiz(_)"),
         kpress("V", "WFrame.maximize_vert(_)"),
     }),
-
-    bdoc("Display frame context menu."),
-    kpress(META.."M", "mod_query.query_menu(_, 'ctxmenu', 'Context menu: ')"),
-    --kpress(META.."M", "mod_menu.menu(_, _sub, 'ctxmenu')"),
+    
+    bdoc("Display context menu."),
     mpress("Button3", "mod_menu.pmenu(_, _sub, 'ctxmenu')"),
     
     bdoc("Begin move/resize mode."),
@@ -360,3 +363,14 @@ defctxmenu("WFrame", "Frame", {
     menuentry("Clear tags",     "ioncore.clear_tags()"),
     menuentry("Window info",    "mod_query.show_tree(_, _sub)"),
 })
+
+
+-- Context menu for screens
+defctxmenu("WScreen", "Screen", {
+    menuentry("New workspace",  "ioncore.create_ws(_)"),
+    menuentry("New empty workspace",
+                                "ioncore.create_ws(_, nil, true)"),
+    menuentry("Close workspace","WRegion.rqclose(_sub)"),
+})
+
+    

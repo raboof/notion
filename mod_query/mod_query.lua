@@ -403,13 +403,14 @@ function mod_query.workspace_handler(mplex, name)
     end
 
     local scr=mplex:screen_of()
+    
+    local function mkfs()
+	if not ioncore.create_ws(scr, {name=name}) then
+            error(TR("Unknown error"))
+        end
+    end
 
-    mod_query.call_warn(mplex, 
-                        function()
-			    if not ioncore.create_ws(scr, name) then
-                                error(TR("Unknown error"))
-                            end
-                        end)
+    mod_query.call_warn(mplex, mkws)
 end
 
 
