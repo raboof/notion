@@ -624,8 +624,9 @@ static void mplex_do_remanage_stdisp(WMPlex *mplex, WRegion *sub)
     /* Move stdisp */
     if(sub!=NULL && CAN_MANAGE_STDISP(sub)){
         if(stdisp!=NULL){
-            WRegion *mgr=region_managed_within((WRegion*)mplex, stdisp);
-            if(mgr!=sub){
+            WRegion *mgrw=region_managed_within((WRegion*)mplex, stdisp);
+            if(mgrw!=sub){
+                WRegion *mgr=REGION_MANAGER(stdisp);
                 if(mgr!=NULL){
                     if(CAN_MANAGE_STDISP(mgr))
                         region_unmanage_stdisp(mgr, FALSE, FALSE);

@@ -322,8 +322,7 @@ void tiling_unmanage_stdisp(WTiling *ws, bool permanent, bool nofocus)
          * remove the node.
          */
         splittree_set_node_of(od, NULL);
-        tiling_managed_remove(ws, od);
-        /*ws->stdispnode->u.reg=NULL;*/
+        tiling_do_managed_remove(ws, od);
     }
     
     if(permanent){
@@ -712,7 +711,7 @@ void tiling_managed_remove(WTiling *ws, WRegion *reg)
     WRegion *other;
 
     other=tiling_do_navi_next(ws, reg, REGION_NAVI_ANY, TRUE, FALSE);
-
+    
     tiling_do_managed_remove(ws, reg);
 
     if(node==(WSplitRegion*)(ws->stdispnode))
