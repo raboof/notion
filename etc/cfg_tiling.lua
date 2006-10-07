@@ -31,7 +31,7 @@ defbindings("WTiling", {
 defbindings("WFrame-on-WTiling", {
     submap(META.."K", {
         bdoc("Detach window from tiled frame"),
-        kpress("D", "mod_tiling.detach(_sub)"),
+        kpress("D", "mod_tiling.detach(_sub)", "_sub:non-nil"),
     }),
 })
 
@@ -77,6 +77,21 @@ defctxmenu("WTiling", "Tiling", {
         menuentry("Flip", "WTiling.flip_at(_)"),
         menuentry("Transpose", "WTiling.transpose_at(_)"),
     }),
+})
+
+
+-- Context menu entries for tiled frames.
+
+defctxmenu("WFrame-on-WTiling", "Tiled frame", {
+    menuentry("Detach", "mod_tiling.detach(_sub)", "_sub:non-nil"),
+})
+
+
+-- Extra context menu extra entries for floatframes. 
+
+defctxmenu("WFloatFrame", "Floating frame", {
+    append=true,
+    menuentry("New tiling", "mod_tiling.mkbottom(_)"),
 })
 
 
