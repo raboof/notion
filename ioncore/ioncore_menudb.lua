@@ -275,8 +275,7 @@ local function get_ctxmenu(reg, sub, is_par)
         return m3
     end
     
-    for s in classes(reg) do
-        local m2=ioncore.evalmenu("ctxmenu-"..s)
+    local function add_ctxmenu(m2)
         if m2 then
             if is_par then
                 m2=cp(m2)
@@ -284,6 +283,16 @@ local function get_ctxmenu(reg, sub, is_par)
 
             m=table.icat(m, m2)
             m.label=(m2.label or m.label)
+        end
+    end
+    
+    local mgr=reg:manager()
+    local mgrname=(mgr and mgr:name()) or nil
+    
+    for s in classes(reg) do
+        add_ctxmenu(ioncore.evalmenu("ctxmenu-"..s))
+        if mgrname then
+            add_ctxmenu(ioncore.evalmenu("ctxmenu-"..s.."-on-"..mgrname))
         end
     end
     return m
