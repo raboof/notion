@@ -42,16 +42,22 @@ end
 
 
 --DOC
+-- Add entries that do not exist in \var{t1} from \var{t2} to \var{t1}.
+function table.append(t1, t2)
+    for k, v in pairs(t2) do
+        if t1[k]==nil then
+            t1[k]=v
+        end
+    end
+    return t1
+end
+
+
+--DOC
 -- Create a table containing all entries from \var{t1} and those from
 -- \var{t2} that are missing from \var{t1}.
 function table.join(t1, t2)
-    local t=table.copy(t1, false)
-    for k, v in pairs(t2) do
-        if t[k]==nil then
-            t[k]=v
-        end
-    end
-    return t
+    return table.append(table.copy(t1, false), t2)
 end
 
 

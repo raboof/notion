@@ -20,9 +20,21 @@ local menus={}
 
 --DOC
 -- Define a new menu with \var{name} being the menu's name and \var{tab} 
--- being a table of menu entries.
-function ioncore.defmenu(name, tab)
-    menus[name]=tab
+-- being a table of menu entries. If \var{tab.append} is set, the entries 
+-- are appended to previously-defined ones, if possible.
+function ioncore.defmenu(name, tab, add)
+    if menus[name] and type(tab)=="table" and tab.append then
+        if type(menus[name])~="table" then
+            ioncore.warn(TR("Unable to append to non-table menu"))
+        else
+            table.append(menus[name] or {}, tab)
+        end
+    else
+        menus[name]=tab
+    end
+    
+    -- Remove extra cruft...
+    menus[name].append=nil
 end
 
 --DOC
@@ -35,14 +47,14 @@ end
 -- Define context menu for context \var{ctx}, \var{tab} being a table 
 -- of menu entries.
 function ioncore.defctxmenu(ctx, ...)
-    local tab
+    local tab, add
     if #arg>1 and type(arg[1])=="string" then
         tab=arg[2]
         tab.label=ioncore.gettext(arg[1])
     else
         tab=arg[1]
     end
-    menus["ctxmenu-"..ctx]=tab
+    ioncore.defmenu("ctxmenu-"..ctx, tab)
 end
 
 --DOC
@@ -275,14 +287,14 @@ local function get_ctxmenu(reg, sub, is_par)
         return m3
     end
     
-    local function add_ctxmenu(m2)
+    local function add_ctxmenu(m2, use_label)
         if m2 then
             if is_par then
                 m2=cp(m2)
             end
 
             m=table.icat(m, m2)
-            m.label=(m2.label or m.label)
+            m.label=(use_label and m2.label) or m.label
         end
     end
     
@@ -290,9 +302,10 @@ local function get_ctxmenu(reg, sub, is_par)
     local mgrname=(mgr and mgr:name()) or nil
     
     for s in classes(reg) do
-        add_ctxmenu(ioncore.evalmenu("ctxmenu-"..s))
+        add_ctxmenu(ioncore.evalmenu("ctxmenu-"..s), true)
         if mgrname then
-            add_ctxmenu(ioncore.evalmenu("ctxmenu-"..s.."-on-"..mgrname))
+            add_ctxmenu(ioncore.evalmenu("ctxmenu-"..s.."-on-"..mgrname), 
+                        false)
         end
     end
     return m
