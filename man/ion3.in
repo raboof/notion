@@ -104,9 +104,10 @@ BINDINGS:WFrame.toplevel
 
 BINDINGS:WFloatFrame
 
-.SS Bindings for tilings [mod_tiling]
+.SS Bindings for tilings and tiled frames [mod_tiling]
 
 BINDINGS:WTiling
+BINDINGS:WFrame-on-WTiling
 
 .SS Bindings for client windows
 

@@ -30,19 +30,19 @@ defbindings("WTiling", {
 
 defbindings("WFrame-on-WTiling", {
     submap(META.."K", {
-        bdoc("Detach window from tiling"),
+        bdoc("Detach window from tiled frame"),
         kpress("D", "mod_tiling.detach(_sub)"),
     }),
 })
 
 
--- Should really only apply to frames in groups!
---[[defbindings("WFrame", {
+defbindings("WFloatFrame", {
     submap(META.."K", {
-        bdoc("Make frame bottom"),
+        bdoc("Tile frame, if no tiling exists on the workspace"),
         kpress("B", "mod_tiling.mkbottom(_)"),
     }),
-})]]
+})
+
 
 -- Context menu for tiled workspaces.
 

@@ -106,9 +106,10 @@ BINDINGS:WFrame.toplevel
 
 BINDINGS:WFloatFrame
 
-.SS Laatoituksien sidonnat [mod_tiling]
+.SS Laatoituksien ja laatoitettujen kehysten sidonnat [mod_tiling]
 
 BINDINGS:WTiling
+BINDINGS:WFrame-on-WTiling
 
 .SS Asiakasikkunoiden sidonnat
 

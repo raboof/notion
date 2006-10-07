@@ -1,3 +1,10 @@
+--
+-- build/mkman.lua
+--
+-- Translates bindings from Ion configuration into a listing for
+-- manual pages.
+--
+
 
 -- Translations {{{
 
@@ -118,8 +125,13 @@ local function dobindings(fn, bindings)
     end
     
     function p.defbindings(context, bnd)
-        assert(not bindings[context])
-        bindings[context]=bnd
+        if not bindings[context] then
+            bindings[context]=bnd
+        else
+            for _, v in ipairs(bnd) do
+                table.insert(bindings[context], v)
+            end
+        end
     end
 
     local function dummy() 
@@ -273,7 +285,7 @@ if not of then
 end
 
 for l in f:lines() do
-    l=string.gsub(l, '%s*BINDINGS:([%w%.]+)%s*', 
+    l=string.gsub(l, '%s*BINDINGS:([%w%.%-]+)%s*', 
                   function(s)
                       if not bindings[s] then
                           --error('No bindings for '..s)
