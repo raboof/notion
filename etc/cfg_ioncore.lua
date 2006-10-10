@@ -71,19 +71,21 @@ defbindings("WScreen", {
     mpress("Button2", "mod_menu.pmenu(_, _sub, 'windowlist')"),
 
     bdoc("Forward-circulate focus."),
-    -- Left/right work better than next/prev in conjuction with tiling
-    -- navigation. So as long as there's no geometric navigation hack
-    -- for floating stuff, let's use those.
-    kpress(META.."Tab", "ioncore.goto_next(_rawsub, 'right')", 
-           "_sub:non-nil"),
+    -- '_chld' used here stands to for an actual child window that may not
+    -- be managed by the screen itself, unlike '_sub', that is likely to be
+    -- the managing group of that window. The right/left directions are
+    -- used instead of next/prev, because they work better in conjunction
+    -- with tilings.
+    kpress(META.."Tab", "ioncore.goto_next(_chld, 'right')", 
+           "_chld:non-nil"),
     submap(META.."K", { 
         bdoc("Backward-circulate focus."),
-        kpress("AnyModifier+Tab", "ioncore.goto_next(_rawsub, 'left')", 
-               "_sub:non-nil"),
+        kpress("AnyModifier+Tab", "ioncore.goto_next(_chld, 'left')", 
+               "_chld:non-nil"),
         
         bdoc("Raise focused object, if possible."),
-        kpress("AnyModifier+R", "WRegion.rqorder(_rawsub, 'front')",
-               "_sub:non-nil"),
+        kpress("AnyModifier+R", "WRegion.rqorder(_chld, 'front')",
+               "_chld:non-nil"),
     }),
 
 })

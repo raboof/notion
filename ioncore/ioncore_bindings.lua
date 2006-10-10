@@ -32,15 +32,23 @@ function ioncore.compile_cmd(cmd, guard)
     
     if guard then
         local st, en, condition=string.find(guard, "^_sub:([%w-_]+)$")
+        local sub='_sub'
+        if not condition then
+            st, en, condition=string.find(guard, "^_chld:([%w-_]+)$")
+            if condition then
+                sub='_chld'
+            end
+        end
+        
         if not condition then
             ioncore.warn_traced(TR("Invalid guard %s.", guard))
         elseif condition=="non-nil" then
-            guardcode='if not _sub then return end; '
+            guardcode='if not '..sub..' then return end; '
         else
-            guardcode='if not obj_is(_sub, "'..condition..'") then return end; '
+            guardcode='if not obj_is('..sub..', "'..condition..'") then return end; '
         end
-    
-        local gfncode="return function(_, _sub) "..guardcode.." return true end"
+        
+        local gfncode="return function(_, _sub, _chld) "..guardcode.." return true end"
         local gfn, gerr=loadstring(gfncode, guardcode)
         if not gfn then
             ioncore.warn_traced(TR("Error compiling guard: %s", gerr))
@@ -52,16 +60,16 @@ function ioncore.compile_cmd(cmd, guard)
         if not gfn then
             return fn
         else
-            return function(_, _sub, _rawsub) 
-                if gfn(_, _sub, _rawsub) then 
-                    cmd(_, _sub, _rawsub) 
+            return function(_, _sub, _chld) 
+                if gfn(_, _sub, _chld) then 
+                    cmd(_, _sub, _chld) 
                 end
             end
         end
     end
     
     if type(cmd)=="string" then
-        local fncode=("return function(_, _sub, _rawsub) local d = "
+        local fncode=("return function(_, _sub, _chld) local d = "
                        ..cmd.." end")
         local fn, err=loadstring(fncode, cmd)
         if not fn then
