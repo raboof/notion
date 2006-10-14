@@ -42,7 +42,7 @@ static bool floatframe_init(WFloatFrame *frame, WWindow *parent,
     frame->tab_min_w=0;
     frame->bar_max_width_q=1.0;
     
-    if(!frame_init((WFrame*)frame, parent, fp, "frame-floating"))
+    if(!frame_init((WFrame*)frame, parent, fp, FRAME_MODE_FLOATING))
         return FALSE;
     
     frame->frame.flags|=(FRAME_BAR_OUTSIDE|

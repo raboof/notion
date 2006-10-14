@@ -38,7 +38,7 @@ WRegion *create_transient_frame(WWindow *par,
 {
     WFrame *frame;
 
-    frame=create_frame(par, fp, "frame-transientcontainer");
+    frame=create_frame(par, fp, FRAME_MODE_TRANSIENT);
         
     if(frame==NULL)
         return NULL;

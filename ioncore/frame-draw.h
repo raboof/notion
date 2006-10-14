@@ -38,4 +38,7 @@ extern void frame_updategr(WFrame *frame);
 
 extern void ioncore_frame_stylefn(const char **frame, const char **tab);
 
+extern const char *framemode_get_style(WFrameMode mode);
+extern const char *framemode_get_tab_style(WFrameMode mode);
+
 #endif /* ION_IONCORE_FRAME_DRAW_H */

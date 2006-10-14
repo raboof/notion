@@ -552,7 +552,7 @@ static WRegion *create_initial_frame(WTiling *ws, WWindow *parent,
 
 static WRegion *create_frame_tiling(WWindow *parent, const WFitParams *fp)
 {
-    return (WRegion*)create_frame(parent, fp, "frame-tiled");
+    return (WRegion*)create_frame(parent, fp, FRAME_MODE_TILED);
 }
 
 

@@ -14,7 +14,6 @@
 #include <libtu/obj.h>
 #include <libtu/objp.h>
 #include <libtu/minmax.h>
-#include <libtu/stringstore.h>
 #include <libmainloop/defer.h>
 
 #include "common.h"
@@ -55,13 +54,10 @@ WHook *frame_managed_changed_hook=NULL;
 
 
 bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
-                const char *style)
+                WFrameMode mode)
 {
     WRectangle mg;
 
-    if(style==NULL)
-        style="frame";
-    
     frame->flags=0;
     frame->saved_w=0;
     frame->saved_h=0;
@@ -74,15 +70,10 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
     frame->tr_mode=GR_TRANSPARENCY_DEFAULT;
     frame->brush=NULL;
     frame->bar_brush=NULL;
-    frame->style=stringstore_alloc(style);
-    
-    if(frame->style==STRINGID_NONE)
-        return FALSE;
+    frame->mode=mode;
 
-    if(!mplex_init((WMPlex*)frame, parent, fp)){
-        stringstore_free(frame->style);
+    if(!mplex_init((WMPlex*)frame, parent, fp))
         return FALSE;
-    }
     
     frame_initialise_gr(frame);
     frame_initialise_titles(frame);
@@ -101,9 +92,9 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
 }
 
 
-WFrame *create_frame(WWindow *parent, const WFitParams *fp, const char *style)
+WFrame *create_frame(WWindow *parent, const WFitParams *fp, WFrameMode mode)
 {
-    CREATEOBJ_IMPL(WFrame, frame, (p, parent, fp, style));
+    CREATEOBJ_IMPL(WFrame, frame, (p, parent, fp, mode));
 }
 
 
@@ -111,7 +102,6 @@ void frame_deinit(WFrame *frame)
 {
     frame_free_titles(frame);
     frame_release_brushes(frame);
-    stringstore_free(frame->style);
     mplex_deinit((WMPlex*)frame);
 }
 
@@ -739,6 +729,7 @@ ExtlTab frame_get_configuration(WFrame *frame)
 {
     ExtlTab tab=mplex_get_configuration(&frame->mplex);
     
+    extl_table_sets_i(tab, "mode", frame->mode);
     extl_table_sets_i(tab, "flags", frame->flags);
     
     if(frame->flags&FRAME_SAVED_VERT){
@@ -749,8 +740,6 @@ ExtlTab frame_get_configuration(WFrame *frame)
         extl_table_sets_i(tab, "saved_x", frame->saved_x);
         extl_table_sets_i(tab, "saved_w", frame->saved_w);
     }
-    
-    extl_table_sets_s(tab, "frame_style", stringstore_get(frame->style));
     
     return tab;
 }
@@ -794,18 +783,27 @@ void frame_do_load(WFrame *frame, ExtlTab tab)
 
 WRegion *frame_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 {
-    char *style=NULL;
+    int mode=FRAME_MODE_UNKNOWN;
     WFrame *frame;
     
-    extl_table_gets_s(tab, "frame_style", &style);
+    if(!extl_table_gets_i(tab, "mode", &mode)){
+        #warning "TODO: Remove  Backwards compatibility hack"
+        char *style=NULL;
+        if(extl_table_gets_s(tab, "frame_style", &style)){
+            if(strcmp(style, "frame-tiled")==0)
+                mode=FRAME_MODE_TILED;
+            else if(strcmp(style, "frame-floating")==0)
+                mode=FRAME_MODE_FLOATING;
+            else if(strcmp(style, "frame-transientcontainer")==0)
+                mode=FRAME_MODE_TRANSIENT;
+            free(style);
+        }
+    }
     
-    frame=create_frame(par, fp, style);
+    frame=create_frame(par, fp, mode);
     
     if(frame!=NULL)
         frame_do_load(frame, tab);
-    
-    if(style!=NULL)
-        free(style);
     
     return (WRegion*)frame;
 }

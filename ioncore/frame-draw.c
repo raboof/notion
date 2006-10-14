@@ -309,29 +309,49 @@ void frame_updategr(WFrame *frame)
 }
 
 
+const char *framemode_get_style(WFrameMode mode)
+{
+    if(mode==FRAME_MODE_TILED)
+        return "frame-tiled";
+    if(mode==FRAME_MODE_FLOATING)
+        return "frame-floating";
+    if(mode==FRAME_MODE_TRANSIENT)
+        return "frame-transient";
+    else
+        return "frame";
+}
+
+
+const char *framemode_get_tab_style(WFrameMode mode)
+{
+    if(mode==FRAME_MODE_TILED)
+        return "tab-frame-tiled";
+    if(mode==FRAME_MODE_FLOATING)
+        return "tab-frame-floating";
+    if(mode==FRAME_MODE_TRANSIENT)
+        return "tab-frame-transient";
+    else
+        return "tab-frame";
+}
+        
+
 void frame_initialise_gr(WFrame *frame)
 {
     Window win=frame->mplex.win.win;
     GrBorderWidths bdw;
     GrFontExtents fnte;
     WRootWin *rw=region_rootwin_of((WRegion*)frame);
-    const char *style=stringstore_get(frame->style);
-    char *tab_style;
-    
-    assert(style!=NULL);
+    const char *style=framemode_get_style(frame->mode);
+    const char *tab_style=framemode_get_tab_style(frame->mode);
     
     frame->bar_h=0;
     
     frame->brush=gr_get_brush(win, rw, style);
+    
     if(frame->brush==NULL)
         return;
     
-    tab_style=scat("tab-", style);
-    if(tab_style==NULL)
-        return;
-    
     frame->bar_brush=grbrush_get_slave(frame->brush, rw, tab_style);
-    free(tab_style);
     
     if(frame->bar_brush==NULL)
         return;

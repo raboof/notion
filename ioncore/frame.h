@@ -34,9 +34,18 @@
 #define FRAME_MAXED_VERT  0x0200
 #define FRAME_MAXED_HORIZ 0x0400
 #define FRAME_MIN_HORIZ   0x0800
-#define FRAME_SZH_USEMINMAX 0x1000
-#define FRAME_FWD_CWIN_RQGEOM 0x2000
+
+#define FRAME_SZH_USEMINMAX 0x1000 /**/
+#define FRAME_FWD_CWIN_RQGEOM 0x2000 /**/
+
 #define FRAME_SHOW_NUMBERS 0x4000
+
+typedef enum{
+    FRAME_MODE_UNKNOWN,
+    FRAME_MODE_TILED,
+    FRAME_MODE_FLOATING,
+    FRAME_MODE_TRANSIENT
+} WFrameMode;
 
 typedef void WFrameStyleFn(const char **, const char **);
 
@@ -44,12 +53,12 @@ DECLCLASS(WFrame){
     WMPlex mplex;
     
     int flags;
+    WFrameMode mode;
     int saved_w, saved_h;
     int saved_x, saved_y;
     
     int tab_dragged_idx;
     
-    StringId style;
     GrBrush *brush;
     GrBrush *bar_brush;
     GrTransparency tr_mode;
@@ -61,9 +70,9 @@ DECLCLASS(WFrame){
 
 /* Create/destroy */
 extern WFrame *create_frame(WWindow *parent, const WFitParams *fp,
-                            const char *style);
+                            WFrameMode mode);
 extern bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
-                       const char *style);
+                       WFrameMode mode);
 extern void frame_deinit(WFrame *frame);
 extern bool frame_rqclose(WFrame *frame);
 
