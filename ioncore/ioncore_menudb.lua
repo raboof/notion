@@ -309,7 +309,7 @@ local function get_ctxmenu(reg, sub, is_par)
             add_ctxmenu(ioncore.evalmenu(nm.."."..mode), false)
         end
         if mgrname then
-            add_ctxmenu(ioncore.evalmenu(nm.."-on-"..mgrname), false)
+            add_ctxmenu(ioncore.evalmenu(nm.."@"..mgrname), false)
         end
     end
     return m

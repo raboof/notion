@@ -28,7 +28,7 @@ defbindings("WTiling", {
 -- that are common to all frame types and multiplexes are defined in
 -- ion-bindings.lua.
 
-defbindings("WFrame-on-WTiling", {
+defbindings("WFrame@WTiling", {
     submap(META.."K", {
         bdoc("Detach window from tiled frame"),
         kpress("D", "mod_tiling.detach(_sub)", "_sub:non-nil"),
@@ -82,7 +82,7 @@ defctxmenu("WTiling", "Tiling", {
 
 -- Context menu entries for tiled frames.
 
-defctxmenu("WFrame-on-WTiling", "Tiled frame", {
+defctxmenu("WFrame@WTiling", "Tiled frame", {
     menuentry("Detach", "mod_tiling.detach(_sub)", "_sub:non-nil"),
 })
 

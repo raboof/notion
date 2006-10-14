@@ -99,7 +99,7 @@ void mod_tiling_deinit()
     }
     
     if(mod_tiling_frame_bindmap!=NULL){
-        ioncore_free_bindmap("WFrame-on-WTiling", mod_tiling_frame_bindmap);
+        ioncore_free_bindmap("WFrame@WTiling", mod_tiling_frame_bindmap);
         mod_tiling_frame_bindmap=NULL;
     }
     
@@ -140,7 +140,7 @@ bool mod_tiling_init()
             
     mod_tiling_tiling_bindmap=ioncore_alloc_bindmap("WTiling", NULL);
     
-    mod_tiling_frame_bindmap=ioncore_alloc_bindmap_frame("WFrame-on-WTiling");
+    mod_tiling_frame_bindmap=ioncore_alloc_bindmap_frame("WFrame@WTiling");
 
     if(mod_tiling_tiling_bindmap==NULL || mod_tiling_frame_bindmap==NULL)
         goto err;
