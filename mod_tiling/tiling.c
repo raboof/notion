@@ -493,6 +493,7 @@ void tiling_manage_stdisp(WTiling *ws, WRegion *stdisp,
 bool tiling_managed_add_default(WTiling *ws, WRegion *reg)
 {
     Window bottom=None, top=None;
+    WFrame *frame;
     
     if(STDISP_OF(ws)!=reg){
         if(!ptrlist_insert_last(&(ws->managed_list), reg))
@@ -501,8 +502,11 @@ bool tiling_managed_add_default(WTiling *ws, WRegion *reg)
     
     region_set_manager(reg, (WRegion*)ws);
     
-    if(OBJ_IS(reg, WFrame))
-        region_add_bindmap(reg, mod_tiling_frame_bindmap);
+    frame=OBJ_CAST(reg, WFrame);
+    if(frame!=NULL){
+        frame_set_mode(frame, FRAME_MODE_TILED);
+        region_add_bindmap((WRegion*)frame, mod_tiling_frame_bindmap);
+    }
     
     if(REGION_IS_MAPPED(ws))
         region_map(reg);

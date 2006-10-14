@@ -514,6 +514,7 @@ WStacking *group_do_add_managed_default(WGroup *ws, WRegion *reg, int level,
     WStacking *st=NULL, *tmp=NULL;
     Window bottom=None, top=None;
     WStacking **stackingp=group_get_stackingp(ws);
+    WFrame *frame;
     
     if(stackingp==NULL)
         return NULL;
@@ -528,6 +529,10 @@ WStacking *group_do_add_managed_default(WGroup *ws, WRegion *reg, int level,
         return  NULL;
     }
     
+    frame=OBJ_CAST(reg, WFrame);
+    if(frame!=NULL)
+        frame_set_mode(frame, FRAME_MODE_FLOATING);
+
     st->level=level;
     st->szplcy=szplcy;
 

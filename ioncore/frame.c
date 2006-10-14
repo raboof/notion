@@ -143,6 +143,9 @@ static void frame_add_mode_bindmaps(WFrame *frame)
 
 void frame_set_mode(WFrame *frame, WFrameMode mode)
 {
+    if(frame->mode==mode)
+        return;
+    
     frame_clear_shape(frame);
     
     frame_release_brushes(frame);
