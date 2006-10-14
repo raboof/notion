@@ -325,6 +325,8 @@ void frame_brushes_updated(WFrame *frame)
         barmode=FRAME_BAR_SHAPED;
     else if(frame->mode==FRAME_MODE_TRANSIENT)
         barmode=FRAME_BAR_NONE;
+    else if(frame->mode==FRAME_MODE_TILED_ALT)
+        barmode=FRAME_BAR_NONE;
     
     if(grbrush_get_extra(frame->brush, "bar", 's', &s)){
         if(strcmp(s, "inside")==0)
