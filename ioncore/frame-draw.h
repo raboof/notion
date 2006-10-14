@@ -15,21 +15,14 @@
 #include "frame.h"
 #include "rectangle.h"
 
-DYNFUN void frame_draw_bar(const WFrame *frame, bool complete);
-DYNFUN void frame_recalc_bar(WFrame *frame);
-DYNFUN void frame_bar_geom(const WFrame *frame, WRectangle *geom);
-DYNFUN void frame_border_geom(const WFrame *frame, WRectangle *geom);
-DYNFUN void frame_border_inner_geom(const WFrame *frame, WRectangle *geom);
-DYNFUN void frame_brushes_updated(WFrame *frame);
-
-extern void frame_draw_default(const WFrame *frame, bool complete);
-extern void frame_draw_bar_default(const WFrame *frame, bool complete);
-extern void frame_recalc_bar_default(WFrame *frame);
-extern void frame_border_geom_default(const WFrame *frame, WRectangle *geom);
-extern void frame_border_inner_geom_default(const WFrame *frame, WRectangle *geom);
-extern void frame_bar_geom_default(const WFrame *frame, WRectangle *geom);
-extern void frame_managed_geom_default(const WFrame *frame, WRectangle *geom);
-extern void frame_brushes_updated_default(WFrame *frame);
+extern void frame_draw(const WFrame *frame, bool complete);
+extern void frame_draw_bar(const WFrame *frame, bool complete);
+extern void frame_recalc_bar(WFrame *frame);
+extern void frame_bar_geom(const WFrame *frame, WRectangle *geom);
+extern void frame_border_geom(const WFrame *frame, WRectangle *geom);
+extern void frame_border_inner_geom(const WFrame *frame, WRectangle *geom);
+extern void frame_brushes_updated(WFrame *frame);
+extern void frame_managed_geom(const WFrame *frame, WRectangle *geom);
 
 extern void frame_initialise_gr(WFrame *frame);
 extern void frame_release_brushes(WFrame *frame);

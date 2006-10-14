@@ -30,48 +30,6 @@
 #define BAR_H(FRAME) (FRAME)->bar_h
 
 
-/*{{{ Dynfuns */
-
-
-void frame_recalc_bar(WFrame *frame)
-{
-    CALL_DYN(frame_recalc_bar, frame, (frame));
-}
-
-
-void frame_draw_bar(const WFrame *frame, bool complete)
-{
-    CALL_DYN(frame_draw_bar, frame, (frame, complete));
-}
-
-
-void frame_bar_geom(const WFrame *frame, WRectangle *geom)
-{
-    CALL_DYN(frame_bar_geom, frame, (frame, geom));
-}
-
-
-void frame_border_geom(const WFrame *frame, WRectangle *geom)
-{
-    CALL_DYN(frame_border_geom, frame, (frame, geom));
-}
-
-
-void frame_border_inner_geom(const WFrame *frame, WRectangle *geom)
-{
-    CALL_DYN(frame_border_inner_geom, frame, (frame, geom));
-}
-
-
-void frame_brushes_updated(WFrame *frame)
-{
-    CALL_DYN(frame_brushes_updated, frame, (frame));
-}
-
-
-/*}}}*/
-
-
 /*{{{ (WFrame) dynfun default implementations */
 
 
@@ -88,7 +46,7 @@ static uint get_spacing(const WFrame *frame)
 }
 
 
-void frame_border_geom_default(const WFrame *frame, WRectangle *geom)
+void frame_border_geom(const WFrame *frame, WRectangle *geom)
 {
     geom->x=0;
     geom->y=0;
@@ -102,12 +60,11 @@ void frame_border_geom_default(const WFrame *frame, WRectangle *geom)
 }
 
 
-void frame_border_inner_geom_default(const WFrame *frame, 
-                                        WRectangle *geom)
+void frame_border_inner_geom(const WFrame *frame, WRectangle *geom)
 {
     GrBorderWidths bdw;
     
-    frame_border_geom_default(frame, geom);
+    frame_border_geom(frame, geom);
 
     if(frame->brush!=NULL){
         grbrush_get_border_widths(frame->brush, &bdw);
@@ -120,13 +77,13 @@ void frame_border_inner_geom_default(const WFrame *frame,
 }
 
 
-void frame_bar_geom_default(const WFrame *frame, WRectangle *geom)
+void frame_bar_geom(const WFrame *frame, WRectangle *geom)
 {
     uint off;
     
     if(BAR_INSIDE_BORDER(frame)){
         off=get_spacing(frame);
-        frame_border_inner_geom_default(frame, geom);
+        frame_border_inner_geom(frame, geom);
     }else{
         off=0;
         geom->x=0;
@@ -142,11 +99,11 @@ void frame_bar_geom_default(const WFrame *frame, WRectangle *geom)
 }
 
 
-void frame_managed_geom_default(const WFrame *frame, WRectangle *geom)
+void frame_managed_geom(const WFrame *frame, WRectangle *geom)
 {
     uint spacing=get_spacing(frame);
     
-    frame_border_inner_geom_default(frame, geom);
+    frame_border_inner_geom(frame, geom);
     
     geom->x+=spacing;
     geom->y+=spacing;
@@ -266,7 +223,7 @@ static int init_title(WFrame *frame, int i)
 }
 
 
-void frame_recalc_bar_default(WFrame *frame)
+void frame_recalc_bar(WFrame *frame)
 {
     int textw, i;
     WLListIterTmp tmp;
@@ -312,7 +269,7 @@ void frame_recalc_bar_default(WFrame *frame)
 }
 
 
-void frame_draw_bar_default(const WFrame *frame, bool complete)
+void frame_draw_bar(const WFrame *frame, bool complete)
 {
     WRectangle geom;
     const char *cattr=(REGION_IS_ACTIVE(frame) 
@@ -335,7 +292,7 @@ void frame_draw_bar_default(const WFrame *frame, bool complete)
 }
 
 
-void frame_draw_default(const WFrame *frame, bool complete)
+void frame_draw(const WFrame *frame, bool complete)
 {
     WRectangle geom;
     const char *attr=(REGION_IS_ACTIVE(frame) 
@@ -355,7 +312,7 @@ void frame_draw_default(const WFrame *frame, bool complete)
 }
 
 
-void frame_brushes_updated_default(WFrame *frame)
+void frame_brushes_updated(WFrame *frame)
 {
     WFrameBarMode barmode=FRAME_BAR_INSIDE;
     ExtlTab tab;

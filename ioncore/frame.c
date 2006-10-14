@@ -890,19 +890,10 @@ static DynFunTab frame_dynfuntab[]={
      (DynFun*)frame_get_configuration},
 
     {window_draw, 
-     frame_draw_default},
-    {frame_draw_bar, 
-     frame_draw_bar_default},
-    {frame_recalc_bar, 
-     frame_recalc_bar_default},
-    {frame_bar_geom, 
-     frame_bar_geom_default},
-    {frame_border_geom, 
-     frame_border_geom_default},
-    {frame_border_inner_geom, 
-     frame_border_inner_geom_default},
+     frame_draw},
+    
     {mplex_managed_geom, 
-     frame_managed_geom_default},
+     frame_managed_geom},
 
     {region_updategr, 
      frame_updategr},
@@ -916,9 +907,6 @@ static DynFunTab frame_dynfuntab[]={
     
     {(DynFun*)mplex_default_index,
      (DynFun*)frame_default_index},
-    
-    {frame_brushes_updated, 
-     frame_brushes_updated_default},
     
     END_DYNFUNTAB
 };
