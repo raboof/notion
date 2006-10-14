@@ -300,12 +300,16 @@ local function get_ctxmenu(reg, sub, is_par)
     
     local mgr=reg:manager()
     local mgrname=(mgr and mgr:name()) or nil
-    
+    local mode=(reg.mode and reg:mode())
+
     for s in classes(reg) do
-        add_ctxmenu(ioncore.evalmenu("ctxmenu-"..s), true)
+        local nm="ctxmenu-"..s
+        add_ctxmenu(ioncore.evalmenu(nm), true)
+        if mode then
+            add_ctxmenu(ioncore.evalmenu(nm.."."..mode), false)
+        end
         if mgrname then
-            add_ctxmenu(ioncore.evalmenu("ctxmenu-"..s.."-on-"..mgrname), 
-                        false)
+            add_ctxmenu(ioncore.evalmenu(nm.."-on-"..mgrname), false)
         end
     end
     return m
