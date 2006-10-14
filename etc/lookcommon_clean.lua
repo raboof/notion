@@ -41,3 +41,20 @@ de.defstyle("tab-frame-tiled", {
     spacing = 1,
 })
 
+de.defstyle("frame-tiled", {
+    based_on = "frame",
+    shadow_pixels = 0,
+    highlight_pixels = 0,
+    padding_pixels = 0,
+    spacing = 1,
+})
+
+de.defstyle("frame-tiled-alt", {
+    based_on = "frame-tiled",
+    bar = "none",
+})
+
+de.defstyle("frame-floating", {
+    based_on = "frame",
+    bar = "shaped"
+})

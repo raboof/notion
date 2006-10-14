@@ -249,14 +249,11 @@ defbindings("WFrame.toplevel", {
     }),
 })
 
+-- Bindings for floating frames.
 
--- Frame bindings. These work in (floating/PWM-style) frames. Some bindings
--- that are common to all frame types and multiplexes are defined in
--- ion-bindings.lua.
-
-defbindings("WFloatFrame", {
+defbindings("WFrame.floating", {
     bdoc("Toggle shade mode"),
-    mdblclick("Button1@tab", "WFloatFrame.set_shaded(_, 'toggle')"),
+    mdblclick("Button1@tab", "WFrame.set_shaded(_, 'toggle')"),
     
     bdoc("Raise the frame."),
     mpress("Button1@tab", "WRegion.rqorder(_, 'front')"),

@@ -47,5 +47,11 @@ de.defstyle("frame-tiled", {
 
 de.defstyle("frame-floating", {
     based_on = "frame",
-    border_style = "ridge"
+    border_style = "ridge",
+    bar = "shaped"
+})
+
+de.defstyle("frame-tiled-alt", {
+    based_on = "frame-tiled",
+    bar = "none",
 })

@@ -35,18 +35,6 @@ de.defstyle("frame", {
     }),
 })
 
-de.defstyle("frame-tiled", {
-    based_on = "frame",
-    border_style = "inlaid",
-    padding_pixels = 0,
-    spacing = 1,
-})
-
-de.defstyle("frame-floating", {
-    based_on = "frame",
-    border_style = "ridge"
-})
-
 de.defstyle("tab", {
     based_on = "*",
     font = "-*-helvetica-medium-r-normal-*-12-*-*-*-*-*-*-*",

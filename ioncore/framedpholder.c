@@ -13,7 +13,7 @@
 #include <libtu/obj.h>
 #include <libtu/minmax.h>
 
-#include "floatframe.h"
+#include "frame.h"
 #include "framedpholder.h"
 #include "sizehint.h"
 
@@ -79,7 +79,7 @@ WRegion *framed_handler(WWindow *par,
     if(param->mkframe!=NULL)
         frame=(WFrame*)(param->mkframe)(par, fp);
     else
-        frame=(WFrame*)create_floatframe(par, fp);
+        frame=create_frame(par, fp, FRAME_MODE_FLOATING);
     
     if(frame==NULL)
         return NULL;

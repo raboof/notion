@@ -36,7 +36,7 @@ defbindings("WFrame-on-WTiling", {
 })
 
 
-defbindings("WFloatFrame", {
+defbindings("WFrame.floating", {
     submap(META.."K", {
         bdoc("Tile frame, if no tiling exists on the workspace"),
         kpress("B", "mod_tiling.mkbottom(_)"),
@@ -89,7 +89,7 @@ defctxmenu("WFrame-on-WTiling", "Tiled frame", {
 
 -- Extra context menu extra entries for floatframes. 
 
-defctxmenu("WFloatFrame", "Floating frame", {
+defctxmenu("WFrame.floating", "Floating frame", {
     append=true,
     menuentry("New tiling", "mod_tiling.mkbottom(_)"),
 })

@@ -38,7 +38,7 @@
 #include "mplex.h"
 #include "group.h"
 #include "grouppholder.h"
-#include "floatframe.h"
+#include "frame.h"
 #include "float-placement.h"
 
 

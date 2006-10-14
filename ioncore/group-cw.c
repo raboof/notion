@@ -36,61 +36,8 @@
 WRegion *create_transient_frame(WWindow *par, 
                                 const WFitParams *fp)
 {
-    WFrame *frame;
-
-    frame=create_frame(par, fp, FRAME_MODE_TRANSIENT);
-        
-    if(frame==NULL)
-        return NULL;
-    
-    region_remove_bindmap((WRegion*)frame, 
-                          ioncore_mplex_toplevel_bindmap);
-    region_remove_bindmap((WRegion*)frame, 
-                          ioncore_frame_toplevel_bindmap);
-    
-    frame->flags|=(FRAME_DEST_EMPTY|
-                   FRAME_TAB_HIDE|
-                   FRAME_SZH_USEMINMAX|
-                   FRAME_FWD_CWIN_RQGEOM);
-
-    return (WRegion*)frame;
+    return (WRegion*)create_frame(par, fp, FRAME_MODE_TRANSIENT);
 }
-
-#if 0
-{
-    param.flags=(fp->mode&REGION_FIT_WHATEVER
-                 ? MPLEX_ATTACH_WHATEVER
-                 : 0);
-    
-    reg=mplex_do_attach((WMPlex*)frame, &param, data);
-    
-    if(reg==NULL){
-        destroy_obj((Obj*)frame);
-        return NULL;
-    }
-
-    if(fp->mode&REGION_FIT_WHATEVER){
-        WRectangle mg;
-        WFitParams fp2;
-        
-        mplex_managed_geom((WMPlex*)frame, &mg);
-
-        fp2.g.x=fp->g.x;
-        fp2.g.y=fp->g.y;
-        fp2.g.w=REGION_GEOM(reg).w;
-        fp2.g.h=REGION_GEOM(reg).h;
-        /* frame borders */
-        fp2.g.w+=REGION_GEOM(frame).w-mg.w;
-        fp2.g.h+=REGION_GEOM(frame).h-mg.h;
-    
-        fp2.mode=REGION_FIT_EXACT;
-        
-        region_fitrep((WRegion*)frame, NULL, &fp2);
-    }
-
-    return (WRegion*)frame;
-}
-#endif
 
 
 static WPHolder *groupcw_transient_pholder(WGroupCW *cwg, 

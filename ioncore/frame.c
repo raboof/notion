@@ -49,6 +49,11 @@ static void frame_free_titles(WFrame *frame);
 
 WHook *frame_managed_changed_hook=NULL;
 
+#define IS_FLOATING_MODE(FRAME) \
+    ((FRAME)->mode==FRAME_MODE_FLOATING || (FRAME)->mode==FRAME_MODE_TRANSIENT)
+#define FORWARD_CWIN_RQGEOM(FRAME) IS_FLOATING_MODE(FRAME)
+#define USE_MINMAX(FRAME) IS_FLOATING_MODE(FRAME)
+#define DEST_EMPTY(FRAME) IS_FLOATING_MODE(FRAME)
 
 /*{{{ Destroy/create frame */
 
@@ -67,11 +72,14 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
     frame->titles=NULL;
     frame->titles_n=0;
     frame->bar_h=0;
+    frame->bar_w=fp->g.w;
     frame->tr_mode=GR_TRANSPARENCY_DEFAULT;
     frame->brush=NULL;
     frame->bar_brush=NULL;
     frame->mode=mode;
-
+    frame->tab_min_w=0;
+    frame->bar_max_width_q=1.0;
+    
     if(!mplex_init((WMPlex*)frame, parent, fp))
         return FALSE;
     
@@ -80,7 +88,17 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
     
     region_add_bindmap((WRegion*)frame, ioncore_frame_bindmap);
     region_add_bindmap((WRegion*)frame, ioncore_frame_toplevel_bindmap);
-
+    
+    if(mode==FRAME_MODE_TILED || mode==FRAME_MODE_TILED_ALT){
+	region_add_bindmap((WRegion*)frame, ioncore_frame_toplevel_bindmap);
+        region_add_bindmap((WRegion*)frame, ioncore_frame_tiled_bindmap);
+    }else if(mode==FRAME_MODE_FLOATING){
+	region_add_bindmap((WRegion*)frame, ioncore_frame_toplevel_bindmap);
+        region_add_bindmap((WRegion*)frame, ioncore_frame_floating_bindmap);
+    }else if(mode==FRAME_MODE_TRANSIENT){
+        region_add_bindmap((WRegion*)frame, ioncore_frame_transient_bindmap);
+    }
+    
     mplex_managed_geom((WMPlex*)frame, &mg);
     
     if(mg.h<=1)
@@ -376,7 +394,7 @@ void frame_size_hints(WFrame *frame, WSizeHints *hints_ret)
 
     if(FRAME_CURRENT(frame)!=NULL){
         region_size_hints(FRAME_CURRENT(frame), hints_ret);
-        if(!(frame->flags&FRAME_SZH_USEMINMAX)){
+        if(!USE_MINMAX(frame)){
             hints_ret->max_set=0;
             hints_ret->min_set=0;
             /*hints_ret->no_constrain=TRUE;*/
@@ -407,6 +425,20 @@ void frame_size_hints(WFrame *frame, WSizeHints *hints_ret)
     hints_ret->max_height+=hoff;
     hints_ret->min_width+=woff;
     hints_ret->min_height+=hoff;
+    
+    if(frame->mode==FRAME_MODE_FLOATING){
+        int f=frame->flags&(FRAME_SHADED|FRAME_SHADED_TOGGLE);
+        
+        if(f==FRAME_SHADED || f==FRAME_SHADED_TOGGLE){
+            hints_ret->min_height=frame->bar_h;
+            hints_ret->max_height=frame->bar_h;
+            hints_ret->base_height=frame->bar_h;
+            if(!hints_ret->max_set){
+                hints_ret->max_width=INT_MAX;
+                hints_ret->max_set=TRUE;
+            }
+        }
+    }
 }
 
 
@@ -443,7 +475,7 @@ static void frame_rqgeom_clientwin(WFrame *frame, WClientWin *cwin,
     WRegion *par;
     WRectangle geom=*geom_;
     
-    if(!(frame->flags&FRAME_FWD_CWIN_RQGEOM)){
+    if(FORWARD_CWIN_RQGEOM(frame)){
         region_managed_rqgeom((WRegion*)frame, (WRegion*)cwin,
                               rqflags, geom_, NULL);
         return;
@@ -504,49 +536,6 @@ static void frame_rqgeom_clientwin(WFrame *frame, WClientWin *cwin,
 /*{{{ Misc. */
 
 
-bool frame_set_tabbar(WFrame *frame, int sp)
-{
-    bool set=!(frame->flags&FRAME_TAB_HIDE);
-    bool nset=libtu_do_setparam(sp, set);
-    
-    if(!nset && frame->flags&FRAME_SHADED)
-        return set;
-    
-    if(XOR(nset, set)){
-        frame->flags^=FRAME_TAB_HIDE;
-        mplex_size_changed(&(frame->mplex), FALSE, TRUE);
-        mplex_fit_managed(&(frame->mplex));
-        XClearWindow(ioncore_g.dpy, frame->mplex.win.win);
-        window_draw((WWindow*)frame, TRUE);
-    }
-    
-    return !(frame->flags&FRAME_TAB_HIDE);
-}
-
-
-/*EXTL_DOC
- * Set tab-bar visibility according to the parameter \var{how} 
- * (set/unset/toggle). Resulting state is returned, which may not be
- * what was requested.
- */
-EXTL_EXPORT_AS(WFrame, set_tabbar)
-bool frame_set_tabbar_extl(WFrame *frame, const char *how)
-{
-    return frame_set_tabbar(frame, libtu_string_to_setparam(how));
-}
-
-
-/*EXTL_DOC
- * Is \var{frame}'s tab-bar visible?
- */
-EXTL_SAFE
-EXTL_EXPORT_MEMBER
-bool frame_is_tabbar(WFrame *frame)
-{
-    return (frame->flags&FRAME_TAB_HIDE);
-}
-
-
 static void frame_do_toggle_shade(WFrame *frame, int shaded_h)
 {
     WRectangle geom=REGION_GEOM(frame);
@@ -556,7 +545,7 @@ static void frame_do_toggle_shade(WFrame *frame, int shaded_h)
             return;
         geom.h=frame->saved_h;
     }else{
-        if(frame->flags&FRAME_TAB_HIDE)
+        if(frame->barmode==FRAME_BAR_NONE)
             return;
         geom.h=shaded_h;
     }
@@ -660,9 +649,15 @@ void frame_managed_notify(WFrame *frame, WRegion *sub, const char *how)
 static void frame_size_changed_default(WFrame *frame,
                                        bool wchg, bool hchg)
 {
+    int bar_w=frame->bar_w;
+    
     if(wchg)
         frame_recalc_bar(frame);
-    /* We should get a request from X to draw the frame... */
+    
+    if(frame->mode==FRAME_MODE_FLOATING &&
+       (hchg || (wchg && bar_w==frame->bar_w))){
+        frame_shaped_set_shape(frame);
+    }
 }
 
 
@@ -688,14 +683,14 @@ static void frame_managed_changed(WFrame *frame, int mode, bool sw,
 }
 
 
-#define EMPTY_SHOULD_BE_DESTROYED(FRAME) \
-    ((FRAME)->flags&FRAME_DEST_EMPTY && FRAME_MCOUNT(FRAME)==0 && \
+#define EMPTY_AND_SHOULD_BE_DESTROYED(FRAME) \
+    (DEST_EMPTY(frame) && FRAME_MCOUNT(FRAME)==0 && \
      !OBJ_IS_BEING_DESTROYED(frame))
 
 
 static void frame_destroy_empty(WFrame *frame)
 {
-    if(EMPTY_SHOULD_BE_DESTROYED(frame))
+    if(EMPTY_AND_SHOULD_BE_DESTROYED(frame))
         destroy_obj((Obj*)frame);
 }
 
@@ -703,7 +698,7 @@ static void frame_destroy_empty(WFrame *frame)
 void frame_managed_remove(WFrame *frame, WRegion *reg)
 {
     mplex_managed_remove((WMPlex*)frame, reg);
-    if(EMPTY_SHOULD_BE_DESTROYED(frame)){
+    if(EMPTY_AND_SHOULD_BE_DESTROYED(frame)){
         mainloop_defer_action((Obj*)frame, 
                               (WDeferredAction*)frame_destroy_empty);
     }
@@ -730,12 +725,12 @@ ExtlTab frame_get_configuration(WFrame *frame)
     ExtlTab tab=mplex_get_configuration(&frame->mplex);
     
     extl_table_sets_i(tab, "mode", frame->mode);
-    extl_table_sets_i(tab, "flags", frame->flags);
-    
+
     if(frame->flags&FRAME_SAVED_VERT){
         extl_table_sets_i(tab, "saved_y", frame->saved_y);
         extl_table_sets_i(tab, "saved_h", frame->saved_h);
     }
+
     if(frame->flags&FRAME_SAVED_HORIZ){
         extl_table_sets_i(tab, "saved_x", frame->saved_x);
         extl_table_sets_i(tab, "saved_w", frame->saved_w);
@@ -750,18 +745,6 @@ void frame_do_load(WFrame *frame, ExtlTab tab)
 {
     int flags=0;
     int p=0, s=0;
-    
-    extl_table_gets_i(tab, "flags", &flags);
-    
-    if(flags&FRAME_TAB_HIDE){
-        frame->flags&=~FRAME_SHADED;
-        frame->flags|=FRAME_TAB_HIDE;
-    }
-
-    frame->flags|=flags&(FRAME_DEST_EMPTY|
-                         FRAME_MAXED_VERT|
-                         FRAME_MAXED_HORIZ|
-                         FRAME_SZH_USEMINMAX);
     
     if(extl_table_gets_i(tab, "saved_x", &p) &&
        extl_table_gets_i(tab, "saved_w", &s)){
@@ -787,7 +770,7 @@ WRegion *frame_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
     WFrame *frame;
     
     if(!extl_table_gets_i(tab, "mode", &mode)){
-        #warning "TODO: Remove  Backwards compatibility hack"
+        #warning "TODO: Remove backwards compatibility hack"
         char *style=NULL;
         if(extl_table_gets_s(tab, "frame_style", &style)){
             if(strcmp(style, "frame-tiled")==0)

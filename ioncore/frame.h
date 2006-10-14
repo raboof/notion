@@ -24,30 +24,36 @@
 #include "rectangle.h"
 #include "sizehint.h"
 
-#define FRAME_TAB_HIDE    0x0004
 #define FRAME_SAVED_VERT  0x0008
 #define FRAME_SAVED_HORIZ 0x0010
 #define FRAME_SHADED      0x0020
 #define FRAME_SHADED_TOGGLE 0x0040
-#define FRAME_BAR_OUTSIDE 0x0080
-#define FRAME_DEST_EMPTY  0x0100
+/*#define FRAME_DEST_EMPTY  0x0100*/
 #define FRAME_MAXED_VERT  0x0200
 #define FRAME_MAXED_HORIZ 0x0400
 #define FRAME_MIN_HORIZ   0x0800
 
-#define FRAME_SZH_USEMINMAX 0x1000 /**/
-#define FRAME_FWD_CWIN_RQGEOM 0x2000 /**/
+/*#define FRAME_SZH_USEMINMAX 0x1000 */
+/*#define FRAME_FWD_CWIN_RQGEOM 0x2000 */
 
 #define FRAME_SHOW_NUMBERS 0x4000
 
 typedef enum{
     FRAME_MODE_UNKNOWN,
     FRAME_MODE_TILED,
+    FRAME_MODE_TILED_ALT,
     FRAME_MODE_FLOATING,
     FRAME_MODE_TRANSIENT
 } WFrameMode;
 
-typedef void WFrameStyleFn(const char **, const char **);
+typedef enum{
+    FRAME_BAR_INSIDE,
+    FRAME_BAR_OUTSIDE,
+    FRAME_BAR_SHAPED,
+    FRAME_BAR_NONE
+} WFrameBarMode;
+        
+
 
 DECLCLASS(WFrame){
     WMPlex mplex;
@@ -62,9 +68,14 @@ DECLCLASS(WFrame){
     GrBrush *brush;
     GrBrush *bar_brush;
     GrTransparency tr_mode;
-    int bar_h;
     GrTextElem *titles;
     int titles_n;
+    
+    /* Bar stuff */
+    WFrameBarMode barmode;
+    int bar_w, bar_h;
+    double bar_max_width_q;
+    int tab_min_w;
 };
 
 

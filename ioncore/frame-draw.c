@@ -9,6 +9,8 @@
  * (at your option) any later version.
  */
 
+#include <string.h>
+
 #include <libtu/objp.h>
 #include <libtu/minmax.h>
 
@@ -21,8 +23,10 @@
 #include "gr.h"
 
 
-#define BAR_INSIDE_BORDER(FRAME) (!((FRAME)->flags&FRAME_BAR_OUTSIDE))
-#define BAR_OFF(FRAME) (0)
+#define BAR_INSIDE_BORDER(FRAME) \
+    ((FRAME)->barmode==FRAME_BAR_INSIDE || (FRAME)->barmode==FRAME_BAR_NONE)
+#define BAR_EXISTS(FRAME) ((FRAME)->barmode!=FRAME_BAR_NONE)
+#define BAR_H(FRAME) (FRAME)->bar_h
 
 
 /*{{{ Dynfuns */
@@ -31,7 +35,6 @@
 void frame_recalc_bar(WFrame *frame)
 {
     CALL_DYN(frame_recalc_bar, frame, (frame));
-    
 }
 
 
@@ -91,11 +94,9 @@ void frame_border_geom_default(const WFrame *frame, WRectangle *geom)
     geom->w=REGION_GEOM(frame).w;
     geom->h=REGION_GEOM(frame).h;
     
-    if(!BAR_INSIDE_BORDER(frame) && 
-       !(frame->flags&FRAME_TAB_HIDE) &&
-       frame->brush!=NULL){
-        geom->y+=frame->bar_h+BAR_OFF(frame);
-        geom->h-=frame->bar_h+2*BAR_OFF(frame);
+    if(!BAR_INSIDE_BORDER(frame) && frame->brush!=NULL){
+        geom->y+=frame->bar_h;
+        geom->h=maxof(0, geom->h-frame->bar_h);
     }
 }
 
@@ -112,12 +113,9 @@ void frame_border_inner_geom_default(const WFrame *frame,
 
         geom->x+=bdw.left;
         geom->y+=bdw.top;
-        geom->w-=bdw.left+bdw.right;
-        geom->h-=bdw.top+bdw.bottom;
+        geom->w=maxof(0, geom->w-(bdw.left+bdw.right));
+        geom->h=maxof(0, geom->h-(bdw.top+bdw.bottom));
     }
-    
-    geom->w=maxof(geom->w, 0);
-    geom->h=maxof(geom->h, 0);
 }
 
 
@@ -129,17 +127,17 @@ void frame_bar_geom_default(const WFrame *frame, WRectangle *geom)
         off=get_spacing(frame);
         frame_border_inner_geom_default(frame, geom);
     }else{
-        off=BAR_OFF(frame);
+        off=0;
         geom->x=0;
         geom->y=0;
-        geom->w=REGION_GEOM(frame).w;
+        geom->w=(frame->barmode==FRAME_BAR_SHAPED
+                 ? frame->bar_w
+                 : REGION_GEOM(frame).w);
     }
     geom->x+=off;
     geom->y+=off;
     geom->w=maxof(0, geom->w-2*off);
-
-    geom->h=(frame->flags&FRAME_TAB_HIDE 
-             ? 0 : frame->bar_h);
+    geom->h=BAR_H(frame);
 }
 
 
@@ -154,13 +152,95 @@ void frame_managed_geom_default(const WFrame *frame, WRectangle *geom)
     geom->w-=2*spacing;
     geom->h-=2*spacing;
     
-    if(BAR_INSIDE_BORDER(frame) && !(frame->flags&FRAME_TAB_HIDE)){
+    if(BAR_INSIDE_BORDER(frame) && BAR_EXISTS(frame)){
         geom->y+=frame->bar_h+spacing;
         geom->h-=frame->bar_h+spacing;
     }
     
     geom->w=maxof(geom->w, 0);
     geom->h=maxof(geom->h, 0);
+}
+
+
+void frame_shaped_set_shape(WFrame *frame)
+{
+    WRectangle gs[2];
+    int n=0;
+    
+    if(frame->brush!=NULL){
+        if(BAR_EXISTS(frame)){
+            frame_bar_geom(frame, gs+n);
+            n++;
+        }
+        frame_border_geom(frame, gs+n);
+        n++;
+    
+        grbrush_set_window_shape(frame->brush, TRUE, n, gs);
+    }
+}
+
+
+#define CF_TAB_MAX_TEXT_X_OFF 10
+
+
+static void frame_shaped_recalc_bar_size(WFrame *frame)
+{
+    int bar_w=0, textw=0, tmaxw=frame->tab_min_w, tmp=0;
+    WLListIterTmp itmp;
+    WRegion *sub;
+    const char *p;
+    GrBorderWidths bdw;
+    char *title;
+    uint bdtotal;
+    int i, m;
+    
+    if(frame->bar_brush==NULL)
+        return;
+    
+    m=FRAME_MCOUNT(frame);
+    
+    if(m>0){
+        grbrush_get_border_widths(frame->bar_brush, &bdw);
+        bdtotal=((m-1)*(bdw.tb_ileft+bdw.tb_iright)
+                 +bdw.right+bdw.left);
+
+        FRAME_MX_FOR_ALL(sub, frame, itmp){
+            p=region_displayname(sub);
+            if(p==NULL)
+                continue;
+            
+            textw=grbrush_get_text_width(frame->bar_brush,
+                                         p, strlen(p));
+            if(textw>tmaxw)
+                tmaxw=textw;
+        }
+
+        bar_w=frame->bar_max_width_q*REGION_GEOM(frame).w;
+        if(bar_w<frame->tab_min_w && 
+           REGION_GEOM(frame).w>frame->tab_min_w)
+            bar_w=frame->tab_min_w;
+        
+        tmp=bar_w-bdtotal-m*tmaxw;
+        
+        if(tmp>0){
+            /* No label truncation needed, good. See how much can be padded. */
+            tmp/=m*2;
+            if(tmp>CF_TAB_MAX_TEXT_X_OFF)
+                tmp=CF_TAB_MAX_TEXT_X_OFF;
+            bar_w=(tmaxw+tmp*2)*m+bdtotal;
+        }else{
+            /* Some labels must be truncated */
+        }
+    }else{
+        bar_w=frame->tab_min_w;
+        if(bar_w>frame->bar_max_width_q*REGION_GEOM(frame).w)
+            bar_w=frame->bar_max_width_q*REGION_GEOM(frame).w;
+    }
+
+    if(frame->bar_w!=bar_w){
+        frame->bar_w=bar_w;
+        frame_shaped_set_shape(frame);
+    }
 }
 
 
@@ -188,6 +268,9 @@ void frame_recalc_bar_default(WFrame *frame)
 
     if(frame->bar_brush==NULL || frame->titles==NULL)
         return;
+    
+    if(frame->mode==FRAME_MODE_FLOATING)
+        frame_shaped_recalc_bar_size(frame);
     
     i=0;
     
@@ -228,9 +311,9 @@ void frame_draw_bar_default(const WFrame *frame, bool complete)
     const char *cattr=(REGION_IS_ACTIVE(frame) 
                        ? "active" : "inactive");
     
-    if(frame->bar_brush==NULL ||
-       frame->flags&FRAME_TAB_HIDE ||
-       frame->titles==NULL){
+    if(frame->bar_brush==NULL
+       || !BAR_EXISTS(frame)
+       || frame->titles==NULL){
         return;
     }
     
@@ -267,18 +350,59 @@ void frame_draw_default(const WFrame *frame, bool complete)
 
 void frame_brushes_updated_default(WFrame *frame)
 {
+    WFrameBarMode barmode=FRAME_BAR_INSIDE;
     ExtlTab tab;
-    bool b=TRUE;
+    char *s;
 
     if(frame->brush==NULL)
         return;
     
-    grbrush_get_extra(frame->brush, "bar_inside_border", 'b', &b);
+    if(frame->mode==FRAME_MODE_FLOATING)
+        barmode=FRAME_BAR_SHAPED;
+    else if(frame->mode==FRAME_MODE_TRANSIENT)
+        barmode=FRAME_BAR_NONE;
     
-    if(b)
-        frame->flags&=~FRAME_BAR_OUTSIDE;
-    else
-        frame->flags|=FRAME_BAR_OUTSIDE;
+    if(grbrush_get_extra(frame->brush, "bar", 's', &s)){
+        if(strcmp(s, "inside")==0)
+            barmode=FRAME_BAR_INSIDE;
+        else if(strcmp(s, "outside")==0)
+            barmode=FRAME_BAR_OUTSIDE;
+        else if(strcmp(s, "shaped")==0)
+            barmode=FRAME_BAR_SHAPED;
+        else if(strcmp(s, "none")==0)
+            barmode=FRAME_BAR_NONE;
+	free(s);
+    }
+        
+    frame->barmode=barmode;
+    
+    if(barmode==FRAME_BAR_NONE || frame->bar_brush==NULL){
+        frame->bar_h=0;
+    }else{
+        GrBorderWidths bdw;
+        GrFontExtents fnte;
+
+        grbrush_get_border_widths(frame->bar_brush, &bdw);
+        grbrush_get_font_extents(frame->bar_brush, &fnte);
+
+        frame->bar_h=bdw.top+bdw.bottom+fnte.max_height;
+    }
+    
+    /* shaped mode stuff */
+    frame->tab_min_w=100;
+    frame->bar_max_width_q=0.95;
+    
+    if(grbrush_get_extra(frame->brush, "floatframe_tab_min_w",
+                         'i', &(frame->tab_min_w))){
+        if(frame->tab_min_w<=0)
+            frame->tab_min_w=1;
+    }
+    
+    if(grbrush_get_extra(frame->brush, "floatframe_bar_max_w_q", 
+                         'd', &(frame->bar_max_width_q))){
+        if(frame->bar_max_width_q<=0.0 || frame->bar_max_width_q>1.0)
+            frame->bar_max_width_q=1.0;
+    }
 }
 
 
@@ -338,13 +462,9 @@ const char *framemode_get_tab_style(WFrameMode mode)
 void frame_initialise_gr(WFrame *frame)
 {
     Window win=frame->mplex.win.win;
-    GrBorderWidths bdw;
-    GrFontExtents fnte;
     WRootWin *rw=region_rootwin_of((WRegion*)frame);
     const char *style=framemode_get_style(frame->mode);
     const char *tab_style=framemode_get_tab_style(frame->mode);
-    
-    frame->bar_h=0;
     
     frame->brush=gr_get_brush(win, rw, style);
     
@@ -355,11 +475,6 @@ void frame_initialise_gr(WFrame *frame)
     
     if(frame->bar_brush==NULL)
         return;
-    
-    grbrush_get_border_widths(frame->bar_brush, &bdw);
-    grbrush_get_font_extents(frame->bar_brush, &fnte);
-    
-    frame->bar_h=bdw.top+bdw.bottom+fnte.max_height;
     
     frame_brushes_updated(frame);
 }

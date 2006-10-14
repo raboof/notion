@@ -55,7 +55,6 @@
 #include "activity.h"
 #include "group-cw.h"
 #include "group-ws.h"
-#include "floatframe.h"
 
 #include "../version.h"
 #include "exports.h"
@@ -297,8 +296,6 @@ static bool register_classes()
                                      (WRegionLoadCreateFn*)mplex_load);
     fail|=!ioncore_register_regclass(&CLASSDESCR(WFrame), 
                                      (WRegionLoadCreateFn*)frame_load);
-    fail|=!ioncore_register_regclass(&CLASSDESCR(WFloatFrame), 
-                                     (WRegionLoadCreateFn*)floatframe_load);
     fail|=!ioncore_register_regclass(&CLASSDESCR(WInfoWin), 
                                      (WRegionLoadCreateFn*)infowin_load);
     fail|=!ioncore_register_regclass(&CLASSDESCR(WGroupCW), 

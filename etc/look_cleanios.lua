@@ -25,15 +25,6 @@ de.defstyle("frame", {
     transparent_background = false,
 })
 
-
-de.defstyle("frame-tiled", {
-    based_on = "frame",
-    shadow_pixels = 0,
-    highlight_pixels = 0,
-    padding_pixels = 0,
-    spacing = 1,
-})
-
 de.defstyle("tab", {
     based_on = "*",
     font = "-*-helvetica-bold-r-normal-*-10-*-*-*-*-*-*-*",

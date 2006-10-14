@@ -38,6 +38,8 @@ extern void frame_updategr(WFrame *frame);
 
 extern void ioncore_frame_stylefn(const char **frame, const char **tab);
 
+extern void frame_shaped_set_shape(WFrame *frame);
+
 extern const char *framemode_get_style(WFrameMode mode);
 extern const char *framemode_get_tab_style(WFrameMode mode);
 

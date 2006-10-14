@@ -1069,11 +1069,8 @@ WFrame *tiling_split_at(WTiling *ws, WFrame *frame, const char *dirstr,
 
     curr=mplex_mx_current(&(frame->mplex));
     
-    if(attach_current && curr!=NULL){
-        if(mplex_mx_count(&(frame->mplex))<=1)
-            frame->flags&=~FRAME_DEST_EMPTY;
+    if(attach_current && curr!=NULL)
         mplex_attach_simple(&(newframe->mplex), curr, MPLEX_ATTACH_SWITCHTO);
-    }
     
     if(region_may_control_focus((WRegion*)frame))
         region_goto((WRegion*)newframe);
