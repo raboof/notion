@@ -97,6 +97,9 @@ static WRegion *mkbottom_fn(WWindow *parent, const WFitParams *fp,
     WTiling *tiling;
     WSplitRegion *node=NULL;
     
+    if(!region_fitrep(reg, parent, fp))
+        return NULL;
+    
     tiling=create_tiling(parent, fp, NULL, FALSE);
     
     if(tiling==NULL)
@@ -108,7 +111,7 @@ static WRegion *mkbottom_fn(WWindow *parent, const WFitParams *fp,
         tiling->split_tree->ws_if_root=tiling;
         
         region_detach_manager(reg);
-
+        
         if(tiling_managed_add(tiling, reg))
             return (WRegion*)tiling;
         
