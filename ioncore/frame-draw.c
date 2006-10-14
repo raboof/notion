@@ -13,6 +13,7 @@
 
 #include <libtu/objp.h>
 #include <libtu/minmax.h>
+#include <libtu/map.h>
 
 #include "common.h"
 #include "frame.h"
@@ -162,7 +163,7 @@ void frame_managed_geom_default(const WFrame *frame, WRectangle *geom)
 }
 
 
-void frame_shaped_set_shape(WFrame *frame)
+void frame_set_shape(WFrame *frame)
 {
     WRectangle gs[2];
     int n=0;
@@ -177,6 +178,12 @@ void frame_shaped_set_shape(WFrame *frame)
     
         grbrush_set_window_shape(frame->brush, TRUE, n, gs);
     }
+}
+
+
+void frame_clear_shape(WFrame *frame)
+{
+    grbrush_set_window_shape(frame->brush, TRUE, 0, NULL);
 }
 
 
@@ -239,7 +246,7 @@ static void frame_shaped_recalc_bar_size(WFrame *frame)
 
     if(frame->bar_w!=bar_w){
         frame->bar_w=bar_w;
-        frame_shaped_set_shape(frame);
+        frame_set_shape(frame);
     }
 }
 
@@ -269,7 +276,7 @@ void frame_recalc_bar_default(WFrame *frame)
     if(frame->bar_brush==NULL || frame->titles==NULL)
         return;
     
-    if(frame->mode==FRAME_MODE_FLOATING)
+    if(frame->barmode==FRAME_BAR_SHAPED)
         frame_shaped_recalc_bar_size(frame);
     
     i=0;
@@ -414,15 +421,9 @@ void frame_brushes_updated_default(WFrame *frame)
 
 void frame_updategr(WFrame *frame)
 {
-    Window win=frame->mplex.win.win;
-    WRectangle geom;
-    WRegion *sub;
-    
     frame_release_brushes(frame);
     
     frame_initialise_gr(frame);
-
-    mplex_managed_geom(&frame->mplex, &geom);
     
     /* Update children */
     region_updategr_default((WRegion*)frame);
@@ -433,29 +434,43 @@ void frame_updategr(WFrame *frame)
 }
 
 
+StringIntMap frame_styles[]={
+    {"frame-tiled", FRAME_MODE_TILED},
+    {"frame-tiled-alt", FRAME_MODE_TILED_ALT},
+    {"frame-floating", FRAME_MODE_FLOATING},
+    {"frame-transient", FRAME_MODE_TRANSIENT},
+    END_STRINGINTMAP
+};
+
+
+StringIntMap frame_tab_styles[]={
+    {"tab-frame-tiled", FRAME_MODE_TILED},
+    {"tab-frame-tiled-alt", FRAME_MODE_TILED_ALT},
+    {"tab-frame-floating", FRAME_MODE_FLOATING},
+    {"tab-frame-transient", FRAME_MODE_TRANSIENT},
+    END_STRINGINTMAP
+};
+
+
 const char *framemode_get_style(WFrameMode mode)
 {
-    if(mode==FRAME_MODE_TILED)
-        return "frame-tiled";
-    if(mode==FRAME_MODE_FLOATING)
-        return "frame-floating";
-    if(mode==FRAME_MODE_TRANSIENT)
-        return "frame-transient";
-    else
-        return "frame";
+    return stringintmap_key(frame_styles, mode, "frame");
 }
 
 
 const char *framemode_get_tab_style(WFrameMode mode)
 {
-    if(mode==FRAME_MODE_TILED)
-        return "tab-frame-tiled";
-    if(mode==FRAME_MODE_FLOATING)
-        return "tab-frame-floating";
-    if(mode==FRAME_MODE_TRANSIENT)
-        return "tab-frame-transient";
-    else
-        return "tab-frame";
+    return stringintmap_key(frame_tab_styles, mode, "tab-frame");
+}
+
+
+bool framemode_from_style(WFrameMode *mode, const char *str)
+{
+    int idx=stringintmap_ndx(frame_styles, str);
+    if(idx<0)
+	return FALSE;
+    *mode=frame_styles[idx].value;
+    return TRUE;
 }
         
 

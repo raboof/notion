@@ -87,6 +87,11 @@ extern bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
 extern void frame_deinit(WFrame *frame);
 extern bool frame_rqclose(WFrame *frame);
 
+/* Mode */
+
+extern void frame_set_mode(WFrame *frame, WFrameMode mode);
+extern WFrameMode frame_mode(WFrame *frame);
+
 /* Resize and reparent */
 extern bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp);
 extern void frame_size_hints(WFrame *frame, WSizeHints *hints_ret);
@@ -102,8 +107,6 @@ extern int frame_nth_tab_x(WFrame *frame, int n);
 extern int frame_tab_at_x(WFrame *frame, int x);
 extern void frame_update_attr_nth(WFrame *frame, int i);
 
-extern bool frame_set_tabbar(WFrame *frame, int sp);
-extern bool frame_is_tabbar(WFrame *frame);
 extern bool frame_set_shaded(WFrame *frame, int sp);
 extern bool frame_is_shaded(WFrame *frame);
 extern bool frame_set_numbers(WFrame *frame, int sp);

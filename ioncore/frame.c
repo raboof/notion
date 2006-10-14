@@ -46,6 +46,8 @@ extern void frame_initialise_gr(WFrame *frame);
 static bool frame_initialise_titles(WFrame *frame);
 static void frame_free_titles(WFrame *frame);
 
+static void frame_add_mode_bindmaps(WFrame *frame);
+
 
 WHook *frame_managed_changed_hook=NULL;
 
@@ -54,6 +56,7 @@ WHook *frame_managed_changed_hook=NULL;
 #define FORWARD_CWIN_RQGEOM(FRAME) IS_FLOATING_MODE(FRAME)
 #define USE_MINMAX(FRAME) IS_FLOATING_MODE(FRAME)
 #define DEST_EMPTY(FRAME) IS_FLOATING_MODE(FRAME)
+
 
 /*{{{ Destroy/create frame */
 
@@ -89,15 +92,7 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
     region_add_bindmap((WRegion*)frame, ioncore_frame_bindmap);
     region_add_bindmap((WRegion*)frame, ioncore_frame_toplevel_bindmap);
     
-    if(mode==FRAME_MODE_TILED || mode==FRAME_MODE_TILED_ALT){
-	region_add_bindmap((WRegion*)frame, ioncore_frame_toplevel_bindmap);
-        region_add_bindmap((WRegion*)frame, ioncore_frame_tiled_bindmap);
-    }else if(mode==FRAME_MODE_FLOATING){
-	region_add_bindmap((WRegion*)frame, ioncore_frame_toplevel_bindmap);
-        region_add_bindmap((WRegion*)frame, ioncore_frame_floating_bindmap);
-    }else if(mode==FRAME_MODE_TRANSIENT){
-        region_add_bindmap((WRegion*)frame, ioncore_frame_transient_bindmap);
-    }
+    frame_add_mode_bindmaps(frame);
     
     mplex_managed_geom((WMPlex*)frame, &mg);
     
@@ -121,6 +116,84 @@ void frame_deinit(WFrame *frame)
     frame_free_titles(frame);
     frame_release_brushes(frame);
     mplex_deinit((WMPlex*)frame);
+}
+
+
+/*}}}*/
+
+
+/*{{{ Mode switching */
+
+
+static void frame_add_mode_bindmaps(WFrame *frame)
+{
+    WFrameMode mode=frame->mode;
+    
+    if(mode==FRAME_MODE_TILED || mode==FRAME_MODE_TILED_ALT){
+	region_add_bindmap((WRegion*)frame, ioncore_frame_toplevel_bindmap);
+        region_add_bindmap((WRegion*)frame, ioncore_frame_tiled_bindmap);
+    }else if(mode==FRAME_MODE_FLOATING){
+	region_add_bindmap((WRegion*)frame, ioncore_frame_toplevel_bindmap);
+        region_add_bindmap((WRegion*)frame, ioncore_frame_floating_bindmap);
+    }else if(mode==FRAME_MODE_TRANSIENT){
+        region_add_bindmap((WRegion*)frame, ioncore_frame_transient_bindmap);
+    }
+}
+
+
+void frame_set_mode(WFrame *frame, WFrameMode mode)
+{
+    frame_clear_shape(frame);
+    
+    frame_release_brushes(frame);
+    
+    region_remove_bindmap((WRegion*)frame, ioncore_frame_toplevel_bindmap);
+    region_remove_bindmap((WRegion*)frame, ioncore_frame_tiled_bindmap);
+    region_remove_bindmap((WRegion*)frame, ioncore_frame_floating_bindmap);
+    region_remove_bindmap((WRegion*)frame, ioncore_frame_transient_bindmap);
+    
+    frame->mode=mode;
+
+    frame_add_mode_bindmaps(frame);
+    
+    frame_initialise_gr(frame);
+    
+    mplex_fit_managed(&frame->mplex);
+    frame_recalc_bar(frame);
+    frame_set_background(frame, TRUE);
+}
+
+
+WFrameMode frame_mode(WFrame *frame)
+{
+    return frame->mode;
+}
+
+
+/*EXTL_DOC
+ * Get frame mode.
+ */
+EXTL_EXPORT_AS(WFrame, mode)
+const char *frame_mode_extl(WFrame *frame)
+{
+    return framemode_get_style(frame->mode);
+}
+
+
+/*EXTL_DOC
+ * Set frame mode.
+ */
+EXTL_EXPORT_AS(WFrame, set_mode)
+bool frame_set_mode_extl(WFrame *frame, const char *modestr)
+{
+    WFrameMode mode;
+    
+    if(!framemode_from_style(&mode, modestr))
+	return FALSE;
+    
+    frame_set_mode(frame, mode);
+    
+    return TRUE;
 }
 
 
@@ -654,9 +727,9 @@ static void frame_size_changed_default(WFrame *frame,
     if(wchg)
         frame_recalc_bar(frame);
     
-    if(frame->mode==FRAME_MODE_FLOATING &&
-       (hchg || (wchg && bar_w==frame->bar_w))){
-        frame_shaped_set_shape(frame);
+    if(frame->barmode==FRAME_BAR_SHAPED &&
+       ((!wchg && hchg) || (wchg && bar_w==frame->bar_w))){
+        frame_set_shape(frame);
     }
 }
 

@@ -36,11 +36,11 @@ extern void frame_release_brushes(WFrame *frame);
 extern bool frame_set_background(WFrame *frame, bool set_always);
 extern void frame_updategr(WFrame *frame);
 
-extern void ioncore_frame_stylefn(const char **frame, const char **tab);
-
-extern void frame_shaped_set_shape(WFrame *frame);
+extern void frame_set_shape(WFrame *frame);
+extern void frame_clear_shape(WFrame *frame);
 
 extern const char *framemode_get_style(WFrameMode mode);
 extern const char *framemode_get_tab_style(WFrameMode mode);
+extern bool framemode_from_style(WFrameMode *mode, const char *str);
 
 #endif /* ION_IONCORE_FRAME_DRAW_H */
