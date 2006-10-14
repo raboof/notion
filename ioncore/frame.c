@@ -14,6 +14,7 @@
 #include <libtu/obj.h>
 #include <libtu/objp.h>
 #include <libtu/minmax.h>
+#include <libtu/map.h>
 #include <libmainloop/defer.h>
 
 #include "common.h"
@@ -173,13 +174,22 @@ WFrameMode frame_mode(WFrame *frame)
 }
 
 
+StringIntMap frame_modes[]={
+    {"tiled", FRAME_MODE_TILED},
+    {"tiled-alt", FRAME_MODE_TILED_ALT},
+    {"floating", FRAME_MODE_FLOATING},
+    {"transient", FRAME_MODE_TRANSIENT},
+    END_STRINGINTMAP
+};
+
+
 /*EXTL_DOC
  * Get frame mode.
  */
 EXTL_EXPORT_AS(WFrame, mode)
 const char *frame_mode_extl(WFrame *frame)
 {
-    return framemode_get_style(frame->mode);
+    return stringintmap_key(frame_modes, frame->mode, NULL);
 }
 
 
@@ -190,11 +200,13 @@ EXTL_EXPORT_AS(WFrame, set_mode)
 bool frame_set_mode_extl(WFrame *frame, const char *modestr)
 {
     WFrameMode mode;
+    int idx;
     
-    if(!framemode_from_style(&mode, modestr))
+    idx=stringintmap_ndx(frame_modes, modestr);
+    if(idx<0)
 	return FALSE;
     
-    frame_set_mode(frame, mode);
+    frame_set_mode(frame, frame_modes[idx].value);
     
     return TRUE;
 }
@@ -374,7 +386,7 @@ static void do_init_title(WFrame *frame, int i, WRegion *sub)
     update_attr(frame, i, sub);
 }
 
-    
+
 static bool frame_initialise_titles(WFrame *frame)
 {
     int i, n=FRAME_MCOUNT(frame);

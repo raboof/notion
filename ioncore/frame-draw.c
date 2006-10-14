@@ -391,15 +391,6 @@ void frame_updategr(WFrame *frame)
 }
 
 
-StringIntMap frame_styles[]={
-    {"frame-tiled", FRAME_MODE_TILED},
-    {"frame-tiled-alt", FRAME_MODE_TILED_ALT},
-    {"frame-floating", FRAME_MODE_FLOATING},
-    {"frame-transient", FRAME_MODE_TRANSIENT},
-    END_STRINGINTMAP
-};
-
-
 StringIntMap frame_tab_styles[]={
     {"tab-frame-tiled", FRAME_MODE_TILED},
     {"tab-frame-tiled-alt", FRAME_MODE_TILED_ALT},
@@ -409,27 +400,19 @@ StringIntMap frame_tab_styles[]={
 };
 
 
-const char *framemode_get_style(WFrameMode mode)
-{
-    return stringintmap_key(frame_styles, mode, "frame");
-}
-
-
 const char *framemode_get_tab_style(WFrameMode mode)
 {
     return stringintmap_key(frame_tab_styles, mode, "tab-frame");
 }
 
 
-bool framemode_from_style(WFrameMode *mode, const char *str)
+const char *framemode_get_style(WFrameMode mode)
 {
-    int idx=stringintmap_ndx(frame_styles, str);
-    if(idx<0)
-	return FALSE;
-    *mode=frame_styles[idx].value;
-    return TRUE;
+    const char *p=framemode_get_tab_style(mode);
+    assert(p!=NULL);
+    return (p+4);
 }
-        
+
 
 void frame_initialise_gr(WFrame *frame)
 {
