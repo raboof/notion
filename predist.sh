@@ -49,8 +49,8 @@ EOF
 
 }
 
-getlib http://iki.fi/tuomov/repos/libtu-3 libtu
-getlib http://iki.fi/tuomov/repos/libextl-3 libextl
+getlib http://modeemi.fi/~tuomov/repos/libtu-3 libtu
+getlib http://modeemi.fi/~tuomov/repos/libextl-3 libextl
 
 ##
 ## Makefiles
