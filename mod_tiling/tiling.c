@@ -503,10 +503,8 @@ bool tiling_managed_add_default(WTiling *ws, WRegion *reg)
     region_set_manager(reg, (WRegion*)ws);
     
     frame=OBJ_CAST(reg, WFrame);
-    if(frame!=NULL){
+    if(frame!=NULL)
         frame_set_mode(frame, FRAME_MODE_TILED);
-        region_add_bindmap((WRegion*)frame, mod_tiling_frame_bindmap);
-    }
     
     if(REGION_IS_MAPPED(ws))
         region_map(reg);
@@ -693,9 +691,6 @@ void tiling_do_managed_remove(WTiling *ws, WRegion *reg)
         ptrlist_remove(&(ws->managed_list), reg);
     }
 
-    if(OBJ_IS(reg, WFrame))
-        region_remove_bindmap(reg, mod_tiling_frame_bindmap);
-    
     region_unset_manager(reg, (WRegion*)ws);
 }
 

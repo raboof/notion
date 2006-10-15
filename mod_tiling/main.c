@@ -39,7 +39,6 @@ char mod_tiling_ion_api_version[]=ION_API_VERSION;
 
 
 WBindmap *mod_tiling_tiling_bindmap=NULL;
-WBindmap *mod_tiling_frame_bindmap=NULL;
 
 int mod_tiling_raise_delay=CF_RAISE_DELAY;
 
@@ -98,11 +97,6 @@ void mod_tiling_deinit()
         mod_tiling_tiling_bindmap=NULL;
     }
     
-    if(mod_tiling_frame_bindmap!=NULL){
-        ioncore_free_bindmap("WFrame@WTiling", mod_tiling_frame_bindmap);
-        mod_tiling_frame_bindmap=NULL;
-    }
-    
     if(tiling_placement_alt!=NULL){
         destroy_obj((Obj*)tiling_placement_alt);
         tiling_placement_alt=NULL;
@@ -139,10 +133,8 @@ bool mod_tiling_init()
         goto err;
             
     mod_tiling_tiling_bindmap=ioncore_alloc_bindmap("WTiling", NULL);
-    
-    mod_tiling_frame_bindmap=ioncore_alloc_bindmap_frame("WFrame@WTiling");
 
-    if(mod_tiling_tiling_bindmap==NULL || mod_tiling_frame_bindmap==NULL)
+    if(mod_tiling_tiling_bindmap==NULL)
         goto err;
 
     if(!mod_tiling_register_exports())
