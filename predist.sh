@@ -29,7 +29,7 @@ if test "$1" != "-snapshot"; then
     else
         versdef="#define ION_VERSION \"${release}\""
         perl -p -i -e "s/^#define ION_VERSION.*/$versdef/" version.h
-        perl -p -i -e "s/ION_VERSION/$release/" configure.ac
+        perl -p -i -e "s/ION_VERSION/$release/" build/ac/configure.ac
     fi
 fi
 
