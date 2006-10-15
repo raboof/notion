@@ -1342,7 +1342,7 @@ WRegion *mplex_attach(WMPlex *mplex, WRegion *reg, ExtlTab param)
  *  \var{level} & (integer) Stacking level. \\
  *  \var{modal} & (boolean) Shortcut for modal stacking level. \\
  *  \var{hidden} & (boolean) Start hidden (some interplay with 
- *                  \var{switchto}).
+ *                  \var{switchto}). \\
  *  \var{sizepolicy} & (integer) Size policy.
  *                     (TODO: document them somewhere.) \\
  *  \var{geom} & (table) Geometry specification. \\

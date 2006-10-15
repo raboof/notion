@@ -56,7 +56,7 @@
  *  \var{framed_transients} & (boolean) Put transients in nested frames. \\
  *  \var{float_placement_method} & (string) How to place floating frames.
  *                          One of ''udlr'' (up-down, then left-right), 
- *                          ''lrud'' (left-right, then up-down) or ''random''.
+ *                          ''lrud'' (left-right, then up-down) or ''random''. \\
  *  \var{default_ws_layout} & (table) Default workspace layout;
  *                          The \var{managed} field of \type{WGroup}
  *                          load parameters. \\
