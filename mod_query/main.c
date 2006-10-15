@@ -61,6 +61,7 @@ ModQueryConfig mod_query_config={
 
 /*EXTL_DOC
  * Set module configuration. The following are supported:
+ *
  * \begin{tabularx}{\linewidth}{lX}
  *  \tabhead{Field & Description}
  *  \var{autoshowcompl} & (boolean) Is auto-show-completions enabled?
