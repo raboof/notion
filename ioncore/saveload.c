@@ -14,18 +14,19 @@
 #include <unistd.h>
 
 #include <libtu/objp.h>
+#include <libextl/readconfig.h>
+#include <libextl/extl.h>
 
 #include "common.h"
 #include "global.h"
 #include "region.h"
-#include <libextl/readconfig.h>
 #include "screen.h"
 #include "saveload.h"
 #include "names.h"
 #include "attach.h"
 #include "reginfo.h"
-#include <libextl/extl.h>
 #include "extlconv.h"
+#include "group-ws.h"
 
 
 static bool loading_layout=FALSE;
@@ -80,10 +81,41 @@ WRegion *create_region_load(WWindow *par, const WFitParams *fp,
     WRegionLoadCreateFn* fn=NULL;
     WRegClassInfo *info=NULL;
     WRegion *reg=NULL;
+    bool grouped=FALSE;
+    char *grouped_name=NULL;
     
     if(!extl_table_gets_s(tab, "type", &objclass))
         return NULL;
-
+        
+    /* Backwards compatibility hack. */
+    if(strcmp(objclass, "WFloatWS")==0){
+        objclass=scopy("WGroupWS");
+    }else if(strcmp(objclass, "WIonWS")==0){
+        WGroupWS *ws=create_groupws(par, fp);
+        if(ws!=NULL){
+            extl_table_gets_s(tab, "name", &name);
+            extl_table_sets_s(tab, "type", "WTiling");
+            extl_table_sets_b(tab, "bottom", TRUE);
+            extl_table_sets_b(tab, "bottom_last_close", TRUE);
+            
+            if(name!=NULL)
+                region_set_name((WRegion*)ws, name);
+            
+            reg=group_attach_new((WGroup*)ws, tab);
+            
+            if(reg!=NULL)
+                return (WRegion*)ws;
+            
+            destroy_obj((Obj*)ws);
+        }
+        objclass=scopy("WTiling");
+    }else if(strcmp(objclass, "WFloatFrame")==0){
+        objclass=scopy("WFrame");
+    }
+    
+    if(objclass==NULL)
+        return NULL;
+    
     info=ioncore_lookup_regclass(objclass, FALSE);
     if(info!=NULL)
         fn=info->lc_fn;
