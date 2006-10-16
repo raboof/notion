@@ -22,7 +22,7 @@ Building and installing
 
    b) Alternatively, go to the directory `build/ac`, run `autoreconf`
       and then `./configure`. Switch back to the top directory afterwards.
-      See `builc/ac/README.autoconf` for details on parameters, especially 
+      See `build/ac/README.autoconf` for details on parameters, especially 
       if you are using the Debian Lua packages. If you try this method and 
       it fails for some reason, please make sure `build/ac/system-ac.mk` 
       does not exist before falling back to alternative a). Also in such
