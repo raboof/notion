@@ -1,7 +1,7 @@
 #
 # Czech language translations for Ion3.
 #
-# Copyright (c) Miroslav Kure 2004,2005.
+# Copyright (c) Miroslav Kure 2004,2005,2006.
 #
 # This file is distributed under the same license as the Ion3 package.
 #
@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ion3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-11-16 15:15+0100\n"
-"PO-Revision-Date: 2005-11-16 18:01+0100\n"
+"POT-Creation-Date: 2006-10-16 08:28+0200\n"
+"PO-Revision-Date: 2006-10-16 09:29+0200\n"
 "Last-Translator: Miroslav Kure <kurem at debian.cz>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
@@ -147,40 +147,36 @@ msgstr "Nebyl zadán modul pro zavedení."
 msgid "Invalid arguments."
 msgstr "Neplatné argumenty."
 
-#: ../ioncore/screen.c:290
+#: ../ioncore/screen.c:298
 msgid "act: "
 msgstr "act: "
 
-#: ../ioncore/screen.c:471
+#: ../ioncore/screen.c:481
 msgid "Only workspace may not be destroyed."
 msgstr "Poslední pracovní plocha nemù¾e být zru¹ena."
 
-#: ../ioncore/screen.c:479
+#: ../ioncore/screen.c:489
 msgid "Screens may not be destroyed."
 msgstr "Obrazovky nesmí být znièeny."
 
-#: ../ioncore/screen.c:515
+#: ../ioncore/screen.c:525
 msgid "Invalid offset."
 msgstr "Neplatné odsazení"
 
-#: ../ioncore/screen.c:596
-msgid "Could not find a complete workspace class. Please load some modules."
-msgstr "Nemohu najít úplnou tøídu pracovní plochy. Zaveïte nìjaké moduly."
-
-#: ../ioncore/screen.c:606
+#: ../ioncore/screen.c:568
 #, c-format
 msgid "Unable to create a workspace on screen %d."
 msgstr "Nemohu vytvoøit pracovní plochu na obrazovce %d."
 
-#: ../ioncore/sizehint.c:149
+#: ../ioncore/sizehint.c:151
 msgid "Invalid client-supplied width/height increment."
 msgstr "Klient zadal neplatný pøírùstek ¹íøky/vý¹ky."
 
-#: ../ioncore/sizehint.c:157
+#: ../ioncore/sizehint.c:159
 msgid "Invalid client-supplied aspect-ratio."
 msgstr "Klient zadal neplatný pomìr stran."
 
-#: ../ioncore/ioncore.c:69
+#: ../ioncore/ioncore.c:74
 msgid ""
 "This program is free software; you can redistribute it and/or\n"
 "modify it under the terms of the GNU Lesser General Public\n"
@@ -200,16 +196,16 @@ msgstr ""
 "JAKÉKOLIV ZÁRUKY. Pro více podrobností se podívejte do licence GNU\n"
 "Lesser General Public License.\n"
 
-#: ../ioncore/ioncore.c:150
+#: ../ioncore/ioncore.c:155
 msgid "No encoding given in LC_CTYPE."
 msgstr "V LC_CTYPE není zadáno kódování."
 
-#: ../ioncore/ioncore.c:425
+#: ../ioncore/ioncore.c:437
 #, c-format
 msgid "Could not connect to X display '%s'"
 msgstr "Nemohu se pøipojit na X displej \"%s\""
 
-#: ../ioncore/ioncore.c:477
+#: ../ioncore/ioncore.c:489
 msgid "Could not find a screen to manage."
 msgstr "Nemohu najít obrazovku, kterou bych mohl spravovat."
 
@@ -229,12 +225,12 @@ msgstr "Vstupní metoda nepodporuje mùj pøedpøipravený typ."
 msgid "Failed to create input context."
 msgstr "Selhalo vytvoøení vstupního kontextu."
 
-#: ../ioncore/clientwin.c:434
+#: ../ioncore/clientwin.c:411
 #, c-format
 msgid "The transient_for hint for \"%s\" points to itself."
 msgstr "Nápovìda transient_for pro \"%s\" ukazuje sama na sebe."
 
-#: ../ioncore/clientwin.c:438
+#: ../ioncore/clientwin.c:415
 #, c-format
 msgid ""
 "Client window \"%s\" has broken transient_for hint. (\"Extended WM hints\" "
@@ -243,46 +239,36 @@ msgstr ""
 "Klientské okno \"%s\" má poru¹enou nápovìdu transient_for. (Schizofrenie "
 "více rodièù \"Extended WM hints\"?)"
 
-#: ../ioncore/clientwin.c:443
+#: ../ioncore/clientwin.c:420
 #, c-format
 msgid "The transient_for window for \"%s\" is not on the same screen."
 msgstr "Okno transient_for pro \"%s\" není na stejné obrazovce."
 
-#: ../ioncore/clientwin.c:463 ../ioncore/clientwin.c:550
-#: ../ioncore/clientwin.c:1811
+#: ../ioncore/clientwin.c:440 ../ioncore/clientwin.c:527
+#: ../ioncore/clientwin.c:1319
 #, c-format
 msgid "Window %#x disappeared."
 msgstr "Okno %#x zmizelo."
 
-#: ../ioncore/clientwin.c:570
+#: ../ioncore/clientwin.c:547
 msgid "Unable to find a matching root window!"
 msgstr "Nemohu najít odpovídající koøenové okno!"
 
-#: ../ioncore/clientwin.c:605
+#: ../ioncore/clientwin.c:582
 #, c-format
 msgid "Unable to manage client window %#x."
 msgstr "Nemohu spravovat klientské okno %#x."
 
-#: ../ioncore/clientwin.c:656
+#: ../ioncore/clientwin.c:633
 msgid "Changes is WM_TRANSIENT_FOR property are unsupported."
 msgstr "Zmìny vlastnosti WM_TRANSIENT_FOR nejsou podporovány."
 
-#: ../ioncore/clientwin.c:971 ../ioncore/clientwin.c:974
-msgid "Failed to rescue some client windows."
-msgstr "Záchrana nìkterých klientských oken selhala."
-
 #
-#: ../ioncore/clientwin.c:1049
+#: ../ioncore/clientwin.c:810
 msgid "Client does not support the WM_DELETE protocol."
 msgstr "Klient nepodporuje protokol WM_DELETE."
 
-#: ../ioncore/clientwin.c:1362 ../mod_ionws/ionws.c:95
-#: ../mod_floatws/floatws.c:148
-#, c-format
-msgid "Error reparenting %s."
-msgstr "Chyba zmìny rodièe %s."
-
-#: ../ioncore/clientwin.c:1817
+#: ../ioncore/clientwin.c:1325
 msgid "Saved client window does not want to be managed."
 msgstr "Ulo¾ené klientské okno nechce být spravováno."
 
@@ -291,55 +277,59 @@ msgstr "Ulo¾ené klientské okno nechce být spravováno."
 msgid "Unable to store colourmap watch info."
 msgstr "Nemohu ulo¾it informace o barevné mapì."
 
-#: ../ioncore/region.c:38
+#: ../ioncore/region.c:46
 msgid "Creating region with negative width or height!"
 msgstr "Vytváøím oblast se zápornou ¹íøkou nebo vý¹kou!"
 
-#: ../ioncore/region.c:82
+#: ../ioncore/region.c:94
 #, c-format
 msgid "Destroying object \"%s\" with client windows as children."
 msgstr "Nièím objekt \"%s\" spoleènì s klientskými okny jako dìtmi."
 
-#: ../ioncore/region.c:382
+#: ../ioncore/region.c:395
 msgid "Failed to rescue some client windows - not closing."
 msgstr "Záchrana nìkterých klientských oken selhala - nezavírám."
 
-#: ../ioncore/attach.c:93 ../ioncore/pholder.c:47
+#: ../ioncore/attach.c:71 ../ioncore/pholder.c:46
 msgid "Unable to reparent."
 msgstr "Nemohu zmìnit rodièe."
 
-#: ../ioncore/attach.c:106
-msgid "Same manager."
-msgstr "Stejný mana¾er."
-
-#: ../ioncore/attach.c:125 ../ioncore/frame-pointer.c:296
+#: ../ioncore/attach.c:157 ../ioncore/frame-pointer.c:282
 #, c-format
 msgid "Attempt to make region %s manage its ancestor %s."
 msgstr "Pokus, aby oblast %s spravovala svého pøedka %s."
 
-#: ../ioncore/manage.c:78
+#: ../ioncore/manage.c:77
 msgid "Unable to find a screen for a new client window."
 msgstr "Nemohu najít obrazovku pro nové klientské okno."
 
-#: ../ioncore/rootwin.c:221
+#: ../ioncore/rootwin.c:223
 #, c-format
 msgid "Unable to redirect root window events for screen %d."
 msgstr "Nemohu pøesmìrovat události koøenového okna na obrazovce %d."
 
-#: ../ioncore/rootwin.c:317
+#: ../ioncore/rootwin.c:319 ../ioncore/rootwin.c:344
 msgid "Xinerama sanity check failed; overlapping screens detected."
 msgstr "Kontrola Xineramy selhala: byly nalezeny pøekrývající se obrazovky."
 
-#: ../ioncore/rootwin.c:343
+#: ../ioncore/rootwin.c:326 ../ioncore/rootwin.c:351
+msgid "Xinerama sanity check failed; zero size detected."
+msgstr "Kontrola Xineramy selhala: byla nalezena nulová velikost."
+
+#: ../ioncore/rootwin.c:379 ../ioncore/rootwin.c:397
 msgid "Don't know how to get Xinerama information for multiple X root windows."
 msgstr "Nevím, jak zpracovat informace z Xineramy pro více koøenových oken."
 
-#: ../ioncore/rootwin.c:379
+#: ../ioncore/rootwin.c:393
+msgid "Error retrieving Xinerama information."
+msgstr "Chyba pøi získávání informaci z Xineramy."
+
+#: ../ioncore/rootwin.c:432 ../ioncore/rootwin.c:451
 #, c-format
 msgid "Unable to setup Xinerama screen %d."
 msgstr "Nemohu nastavit obrazovku Xineramy %d."
 
-#: ../ioncore/rootwin.c:393
+#: ../ioncore/rootwin.c:464
 #, c-format
 msgid "Unable to setup X screen %d."
 msgstr "Nemohu nastavit X obrazovku %d."
@@ -399,37 +389,37 @@ msgstr "Nemohu získat nastavení pro obrazovku %d."
 msgid "Unable to save layout."
 msgstr "Nemohu ulo¾it rozlo¾ení."
 
-#: ../ioncore/conf.c:140
+#: ../ioncore/conf.c:144
 msgid "User directory can not be set."
 msgstr "U¾ivatelský adresáø nemù¾e být nastaven."
 
-#: ../ioncore/conf.c:214
+#: ../ioncore/conf.c:218
 msgid "Some bindmaps were empty, loading ioncore_efbb."
 msgstr "Nìkteré tabulky kláves jsou prázdné, nahrávám ioncore_efbb."
 
-#: ../ioncore/fullscreen.c:95
+#: ../ioncore/fullscreen.c:98
 msgid "Failed to enter full screen mode."
 msgstr "Selhal pøechod do celoobrazovkového re¾imu."
 
-#: ../ioncore/fullscreen.c:130
+#: ../ioncore/fullscreen.c:120
 msgid ""
-"WClientWin failed to return from full screen mode; remaining manager or "
-"parent from previous location refused to manage us."
+"Failed to return from full screen mode; remaining manager or parent from "
+"previous location refused to manage us."
 msgstr ""
-"WClientWin se nedokázal vrátit z celoobrazovkového re¾imu; zbývající správce "
-"nebo rodiè z pøedchozího umístìní nás nechce spravovat."
+"Návrat z celoobrazovkového re¾imu se nezdaøil; zbývající správce nebo rodiè "
+"z pøedchozího umístìní nás nechce spravovat."
 
-#: ../ioncore/mplex.c:136
+#: ../ioncore/mplex.c:169
 msgid "Refusing to destroy - not empty."
 msgstr "Odmítám zru¹it - není prázdné."
 
 #
-#: ../ioncore/mplex.c:1349
+#: ../ioncore/mplex.c:1670
 msgid "Invalid position setting."
 msgstr "Neplatné nastavení pozice."
 
 #
-#: ../ioncore/mplex.c:1384
+#: ../ioncore/mplex.c:1710
 msgid "Invalid action setting."
 msgstr "Neplatné nastavení akce."
 
@@ -447,100 +437,121 @@ msgstr "Nemohu najít ¹tìtec pro styl \"%s\"."
 msgid "No drawing engines loaded, trying \"de\"."
 msgstr "Nebyly nahrány ¾ádné vykreslovací jednotky, zkou¹ím \"%s\"."
 
-#
-#: ../mod_ionws/ionws.c:76
-msgid "Split not on workspace."
-msgstr "Rozdìlení není na pracovní plo¹e."
+#: ../ioncore/group.c:186 ../mod_tiling/tiling.c:96
+#, c-format
+msgid "Error reparenting %s."
+msgstr "Chyba zmìny rodièe %s."
 
-#: ../mod_ionws/ionws.c:333
-msgid "Unable to create a node for status display."
-msgstr "Nemohu vytvoøit uzel pro stavový øádek."
-
-#: ../mod_ionws/ionws.c:346
-msgid "Unable to create new split for status display."
-msgstr "Nemohu vytvoøit nové rozdìlení pro stavový øádek."
-
-#: ../mod_ionws/ionws.c:601 ../mod_floatws/floatws.c:413
+#: ../ioncore/group.c:484 ../mod_tiling/tiling.c:667
 msgid "Workspace not empty - refusing to destroy."
 msgstr "Pracovní plocha není prázdná - odmítám zru¹it."
 
-#
-#: ../mod_ionws/ionws.c:740 ../mod_ionws/ionws.c:764
-msgid "Invalid split type parameter."
-msgstr "Neplatný parametr typu rozdìlení."
+#: ../ioncore/group.c:665
+msgid "'bottom' already set."
+msgstr "'bottom' je ji¾ nastaven."
+
+#: ../ioncore/navi.c:45
+msgid "Invalid parameter."
+msgstr "Neplatný parametr"
+
+#: ../ioncore/navi.c:72
+msgid "Invalid direction parameter."
+msgstr "Neplatný parametr smìru."
+
+#: ../ioncore/group-ws.c:67
+#, c-format
+msgid "Unknown placement method \"%s\"."
+msgstr "Neznámý zpùsob umístìní \"%s\"."
 
 #
-#: ../mod_ionws/ionws.c:796 ../mod_ionws/split.c:992
+#: ../mod_tiling/tiling.c:77
+msgid "Split not on workspace."
+msgstr "Rozdìlení není na pracovní plo¹e."
+
+#: ../mod_tiling/tiling.c:373
+msgid "Unable to create a node for status display."
+msgstr "Nemohu vytvoøit uzel pro stavový øádek."
+
+#: ../mod_tiling/tiling.c:386
+msgid "Unable to create new split for status display."
+msgstr "Nemohu vytvoøit nové rozdìlení pro stavový øádek."
+
+#: ../mod_tiling/tiling.c:939
+msgid "Invalid direction"
+msgstr "Neplatný smìr"
+
+#
+#: ../mod_tiling/tiling.c:972 ../mod_tiling/split.c:1018
 msgid "Invalid node."
 msgstr "Neplatný uzel."
 
 #
-#: ../mod_ionws/ionws.c:815
+#: ../mod_tiling/tiling.c:991
 msgid "Unable to split."
 msgstr "Nemohu rozdìlit."
 
-#: ../mod_ionws/ionws.c:920
+#: ../mod_tiling/tiling.c:1094
 msgid "Nil frame."
 msgstr "Prázdný rám."
 
-#: ../mod_ionws/ionws.c:925
+#: ../mod_tiling/tiling.c:1099
 msgid "The frame is not managed by the workspace."
 msgstr "Rám není spravován pracovní plochou."
 
-#: ../mod_ionws/ionws.c:1141
+#: ../mod_tiling/tiling.c:1198
 msgid "Nil parameter."
 msgstr "Prázdný parametr."
 
-#: ../mod_ionws/ionws.c:1146
+#: ../mod_tiling/tiling.c:1203
 msgid "Manager doesn't match."
 msgstr "Správce se neshoduje."
 
-#: ../mod_ionws/ionws.c:1183
+#: ../mod_tiling/tiling.c:1240
 msgid "The status display is not a valid parameter for this routine."
 msgstr "Stavový displej není v této rutinì platným parametrem."
 
-#: ../mod_ionws/ionws.c:1274
+#: ../mod_tiling/tiling.c:1331
 msgid "Refusing to float split directly containing the status display."
 msgstr "Odmítám rozdìlit pøímo prvek obsahující stavový displej."
 
-#: ../mod_ionws/ionws.c:1331
+#: ../mod_tiling/tiling.c:1394
 msgid "No suitable split here."
 msgstr "®ádné vhodné rozdìlení."
 
 #
-#: ../mod_ionws/ionws.c:1365
+#: ../mod_tiling/tiling.c:1430
 msgid "Could not get split tree."
 msgstr "Nemohu získat strom rozdìlení"
 
-#: ../mod_ionws/ionws.c:1386
+#: ../mod_tiling/tiling.c:1451
 msgid "Workspace already has a status display node."
 msgstr "Pracovní plocha ji¾ obsahuje stavový displej."
 
 #
-#: ../mod_ionws/ionws.c:1442
+#: ../mod_tiling/tiling.c:1489
 msgid "Missing region parameters."
 msgstr "Chybìjící parametry oblasti."
 
-#: ../mod_ionws/ionws.c:1478 ../mod_ionws/splitfloat.c:780
+#: ../mod_tiling/tiling.c:1533 ../mod_tiling/splitfloat.c:780
 msgid "Invalid direction."
 msgstr "Neplatný smìr."
 
 #
-#: ../mod_ionws/ionws.c:1552
+#: ../mod_tiling/tiling.c:1608
 msgid "No split type given."
 msgstr "Nebyl zadán typ rozdìlení."
 
-#: ../mod_ionws/ionws.c:1565
+#: ../mod_tiling/tiling.c:1621
 msgid "Unknown split type."
 msgstr "Neznámý typ rozdìlení."
 
 #
 #
-#: ../mod_ionws/ionws.c:1605
+#: ../mod_tiling/tiling.c:1661
 msgid "The workspace is empty."
 msgstr "Pracovní plocha je prázdná."
 
-#: ../mod_ionws/placement.c:106 ../mod_panews/placement.c:300
+#: ../mod_tiling/placement.c:106 ../mod_panews/placement.c:300
 #, c-format
 msgid ""
 "Ooops... could not find a region to attach client window to on workspace %s."
@@ -549,60 +560,53 @@ msgstr ""
 "klientské okno."
 
 #
-#: ../mod_ionws/split.c:502
+#: ../mod_tiling/split.c:524
 msgid "Unable to move the status display out of way."
 msgstr "Nemohu pøesunout stavový øádek tak, aby nezavazel."
 
-#: ../mod_ionws/split.c:911
+#: ../mod_tiling/split.c:937
 msgid "REGION_RQGEOM_TRYONLY unsupported for status display."
 msgstr "REGION_RQGEOM_TRYONLY není stavovým displejem podporován."
 
 #
-#: ../mod_ionws/split.c:1056
+#: ../mod_tiling/split.c:1082
 msgid "Splitting the status display is not allowed."
 msgstr "Rozdìlení stavového displeje není povoleno."
 
-#: ../mod_ionws/split.c:1087 ../mod_ionws/splitfloat.c:903
+#: ../mod_tiling/split.c:1113 ../mod_tiling/splitfloat.c:903
 msgid "Unable to split: not enough free space."
 msgstr "Nelze rozdìlit: nedostatek volného místa."
 
-#: ../mod_ionws/split.c:1816
+#: ../mod_tiling/split.c:1864
 #, c-format
 msgid "Unable to get configuration for %s."
 msgstr "Nemohu získat nastavení pro %s."
 
-#: ../mod_ionws/split-stdisp.c:602 ../mod_ionws/split-stdisp.c:627
+#: ../mod_tiling/split-stdisp.c:602 ../mod_tiling/split-stdisp.c:627
 msgid "Status display in bad split configuration."
 msgstr "Stavový øádek se nachází v chybné konfiguraci rozdìlení."
 
-#: ../mod_ionws/split-stdisp.c:667
+#: ../mod_tiling/split-stdisp.c:667
 msgid "Status display badly located in split tree."
 msgstr "Stavový øádek je ve stromu rozdìlení umístìn na ¹patném místì."
 
-#
-#: ../mod_floatws/floatws.c:478
-msgid "Failure to create a new frame."
-msgstr "Chyba pøi vytváøení nového rámu."
+#: ../mod_tiling/ops.c:28
+msgid "Already detached"
+msgstr "Ji¾ je odpojen"
 
-#
-#: ../mod_floatws/floatws.c:1149 ../mod_floatws/floatws.c:1227
-msgid "Region not managed by the workspace."
-msgstr "Oblast není spravována pracovní plochou."
+#: ../mod_tiling/ops.c:142
+msgid "Not member of a group"
+msgstr "Není èlenem skupiny"
 
-#: ../mod_floatws/floatws.c:1348
-msgid "No geometry specified."
-msgstr "Nebyla zadána geometrie."
-
-#: ../mod_floatws/placement.c:124
-#, c-format
-msgid "Unknown placement method \"%s\"."
-msgstr "Neznámý zpùsob umístìní \"%s\"."
+#: ../mod_tiling/ops.c:147
+msgid "Manager group already has bottom"
+msgstr "Øídící skupina ji¾ je na dnì"
 
 #: ../mod_panews/panews.c:195
 msgid "Unable to re-initialise workspace. Destroying."
 msgstr "Nemohu znovu inicializovat pracovní plochu. Nièím."
 
-#: ../mod_panews/panews.c:263
+#: ../mod_panews/panews.c:265
 msgid "Refusing to close non-empty workspace."
 msgstr "Odmítám zavøít neprázdnou pracovní plochu."
 
@@ -626,40 +630,44 @@ msgstr "Prázdné menu."
 msgid "Failed to set session directory."
 msgstr "Selhalo nastavení adresáøe s relací."
 
-#: ../mod_sm/sm_session.c:85
+#: ../mod_sm/sm_session.c:86
 msgid "Too many ICE connections."
 msgstr "Pøíli¹ mnoho ICE spojení."
 
-#: ../mod_sm/sm_session.c:227
+#: ../mod_sm/sm_session.c:228
 msgid "Failed to save session state"
 msgstr "Selhalo ulo¾ení stavu sezení."
 
-#: ../mod_sm/sm_session.c:246
+#: ../mod_sm/sm_session.c:247
 msgid "Failed to request save-yourself-phase2 from session manager."
 msgstr "Selhalo vy¾ádání save-yourself-phase2 od správce sezení."
 
 #
-#: ../mod_sm/sm_session.c:295
+#: ../mod_sm/sm_session.c:296
 msgid "SESSION_MANAGER environment variable not set."
 msgstr "Promìnná SESSION_MANAGER není nastavena."
 
-#: ../mod_sm/sm_session.c:300
+#: ../mod_sm/sm_session.c:301
 msgid "Session Manager: IceAddConnectionWatch failed."
 msgstr "Správce sezení: IceAddConnectionWatch selhalo."
 
 #
-#: ../mod_sm/sm_session.c:325
+#: ../mod_sm/sm_session.c:326
 msgid "Unable to connect to the session manager."
 msgstr "Nemohu se pøipojit ke správci sezení."
 
-#: ../mod_sp/main.c:70
-#, c-format
-msgid "Unable to create scratchpad for screen %d."
-msgstr "Nemohu vytvoøit poznámkový blok pro obrazovku %d."
+#: ../mod_sp/main.c:95
+msgid "Unable to create scratchpad."
+msgstr "Nemohu vytvoøit poznámkový blok."
 
-#: ../mod_statusbar/main.c:74
+#: ../mod_statusbar/main.c:75
 msgid "reading a pipe"
 msgstr "ètu rouru"
+
+#: ../mod_statusbar/statusbar.c:1047
+#, c-format
+msgid "[ %date || load: %load ] %filler%systray"
+msgstr "[ %date || vytí¾ení: %load ] %filler%systray"
 
 #: ../de/init.c:42
 #, c-format
@@ -676,22 +684,22 @@ msgstr "Neznámý styl okraje \"%s\"."
 msgid "Unable to allocate colour \"%s\"."
 msgstr "Nemohu alokovat barvu \"%s\"."
 
-#: ../de/init.c:161
+#: ../de/init.c:160
 #, c-format
 msgid "Corrupt substyle table %d."
 msgstr "Poru¹ená tabulka stylù %d."
 
-#: ../de/init.c:194
+#: ../de/init.c:193
 #, c-format
 msgid "Unknown text alignment \"%s\"."
 msgstr "Neznámý textový prvek \"%s\"."
 
-#: ../de/init.c:264
+#: ../de/init.c:263
 #, c-format
 msgid "'based_on' for %s points back to the style itself."
 msgstr "Èást 'based_on' stylu %s ukazuje sama na sebe."
 
-#: ../de/init.c:267
+#: ../de/init.c:266
 #, c-format
 msgid "Unknown base style \"%s\"."
 msgstr "Neznámý základní styl \"%s\"."
@@ -719,65 +727,65 @@ msgstr "Nahrání zálo¾ního fontu selhalo."
 msgid "Style %s still in use [%d] but the module is being unloaded!"
 msgstr "Styl %s se stále pou¾ívá [%d], ale modul se ji¾ ru¹í z pamìti!"
 
-#: ../ion/ion.c:41 ../pwm/pwm.c:41
+#: ../ion/ion.c:42 ../pwm/pwm.c:42
 msgid "X display to use"
 msgstr "X displej, který se má pou¾ít"
 
-#: ../ion/ion.c:44 ../pwm/pwm.c:44
+#: ../ion/ion.c:45 ../pwm/pwm.c:45
 msgid "Configuration file"
 msgstr "Konfiguraèní soubor"
 
-#: ../ion/ion.c:47 ../pwm/pwm.c:47
+#: ../ion/ion.c:48 ../pwm/pwm.c:48
 msgid "Add directory to search path"
 msgstr "Pøidá adresáø do prohledávané cesty"
 
-#: ../ion/ion.c:50 ../pwm/pwm.c:50
+#: ../ion/ion.c:51 ../pwm/pwm.c:51
 msgid "Manage default root window/non-Xinerama screen only"
 msgstr "Spravuje pouze implicitní koøenové okno/obrazovku bez Xineramy"
 
-#: ../ion/ion.c:54
+#: ../ion/ion.c:55
 msgid "Use Xinerama screen information (default: 1/yes)"
 msgstr "Pou¾ít Xineramu (implicitnì: 1/ano)"
 
-#: ../ion/ion.c:57 ../pwm/pwm.c:57
+#: ../ion/ion.c:58 ../pwm/pwm.c:58
 msgid "Ignored: not compiled with Xinerama support"
 msgstr "Ignorováno: program je sestaven bez podpory Xineramy"
 
-#: ../ion/ion.c:61 ../pwm/pwm.c:61
+#: ../ion/ion.c:62 ../pwm/pwm.c:62
 msgid "Name of session (affects savefiles)"
 msgstr "Jméno sezení (ovlivní místo ulo¾ení)"
 
-#: ../ion/ion.c:64 ../pwm/pwm.c:64
+#: ../ion/ion.c:65 ../pwm/pwm.c:65
 msgid "Session manager client ID"
 msgstr "Klientské ID správce sezení"
 
-#: ../ion/ion.c:67 ../pwm/pwm.c:67
+#: ../ion/ion.c:68 ../pwm/pwm.c:68
 msgid "Do not create startup error log and display it with xmessage."
 msgstr ""
 "Nevytváøet záznam o chybách pøi startu a nezobrazovat jej pomocí xmessage."
 
-#: ../ion/ion.c:71 ../pwm/pwm.c:71
+#: ../ion/ion.c:72 ../pwm/pwm.c:72
 msgid "Show this help"
 msgstr "Zobrazí tuto nápovìdu"
 
-#: ../ion/ion.c:74 ../pwm/pwm.c:74
+#: ../ion/ion.c:75 ../pwm/pwm.c:75
 msgid "Show program version"
 msgstr "Zobrazí verzi programu"
 
-#: ../ion/ion.c:77 ../pwm/pwm.c:77
+#: ../ion/ion.c:78 ../pwm/pwm.c:78
 msgid "Show about text"
 msgstr "Zobrazí nìco o programu"
 
-#: ../ion/ion.c:92
+#: ../ion/ion.c:93
 msgid "Could not get user configuration file directory."
 msgstr "Nemohu získat u¾ivatelùv adresáø s nastavením."
 
-#: ../ion/ion.c:106
+#: ../ion/ion.c:107
 #, c-format
 msgid "%s/welcome.txt"
 msgstr "%s/welcome.cs.txt"
 
-#: ../ion/ion.c:139 ../pwm/pwm.c:86
+#: ../ion/ion.c:140 ../pwm/pwm.c:87
 #, c-format
 msgid ""
 "Usage: %s [options]\n"
@@ -786,28 +794,28 @@ msgstr ""
 "Pou¾ití: %s [volby]\n"
 "\n"
 
-#: ../ion/ion.c:199 ../pwm/pwm.c:149
+#: ../ion/ion.c:200 ../pwm/pwm.c:150
 msgid "Invalid parameter to -xinerama."
 msgstr "Neplatný parametr pro -xinerama."
 
 #
-#: ../ion/ion.c:218 ../pwm/pwm.c:168
+#: ../ion/ion.c:219 ../pwm/pwm.c:169
 msgid "Invalid command line."
 msgstr "Neplatná pøíkazová øádka."
 
-#: ../ion/ion.c:239
+#: ../ion/ion.c:241
 msgid "Ion startup error log:\n"
 msgstr "Záznam chyb pøi startu Ionu:\n"
 
-#: ../ion/ion.c:249 ../pwm/pwm.c:199
+#: ../ion/ion.c:252 ../pwm/pwm.c:202
 msgid "Refusing to start due to encountered errors."
 msgstr "Odmítám se spustit kvùli zaznamenaným chybám."
 
-#: ../pwm/pwm.c:54
+#: ../pwm/pwm.c:55
 msgid "Use Xinerama screen information (default: 0/no)"
 msgstr "Pou¾ít Xineramu (implicitnì: 0/ne) "
 
-#: ../pwm/pwm.c:189
+#: ../pwm/pwm.c:191
 msgid "PWM startup error log:\n"
 msgstr "Záznam chyb pøi startu PWM:\n"
 
@@ -867,32 +875,32 @@ msgstr "Interní chyba."
 msgid "Unable to initialize Lua."
 msgstr "Nemohu inicializovat Lua."
 
-#: ../libextl/luaextl.c:1316
+#: ../libextl/luaextl.c:1336
 msgid ""
 "Too many return values. Use a C compiler that has va_copy to support more."
 msgstr ""
 "Pøíli¹ mnoho návratových hodnot. Pou¾ijte kompilátor C, který obsahuje "
 "va_copy."
 
-#: ../libextl/luaextl.c:1336
+#: ../libextl/luaextl.c:1356
 msgid "Returned dead object."
 msgstr "Vrácen mrtvý objekt."
 
-#: ../libextl/luaextl.c:1339
+#: ../libextl/luaextl.c:1359
 #, c-format
 msgid "Invalid return value (expected '%c', got lua type \"%s\")."
 msgstr "Neplatná návratová hodnota (oèekávána %c, obdr¾en lua typ \"%s\")."
 
-#: ../libextl/luaextl.c:1375 ../libextl/luaextl.c:1730
+#: ../libextl/luaextl.c:1395 ../libextl/luaextl.c:1750
 msgid "Stack full."
 msgstr "Zásobník je plný."
 
-#: ../libextl/luaextl.c:1741
+#: ../libextl/luaextl.c:1761
 #, c-format
 msgid "Argument %d to %s is a dead object."
 msgstr "Argument %d pro %s je mrtvý objekt."
 
-#: ../libextl/luaextl.c:1744
+#: ../libextl/luaextl.c:1764
 #, c-format
 msgid ""
 "Argument %d to %s is of invalid type. (Argument template is '%s', got lua "
@@ -901,36 +909,36 @@ msgstr ""
 "Argument %d pro %s má neplatný typ. (©ablona argumentu je '%s', dostal jsem "
 "lua typ %s)."
 
-#: ../libextl/luaextl.c:1801
+#: ../libextl/luaextl.c:1827
 msgid "L1 call handler upvalues corrupt."
 msgstr "Obsluha volání L1 je poru¹ená."
 
-#: ../libextl/luaextl.c:1806
+#: ../libextl/luaextl.c:1832
 msgid "Called function has been unregistered."
 msgstr "Volaná funkce byla byla odregistrována."
 
-#: ../libextl/luaextl.c:1817
+#: ../libextl/luaextl.c:1843
 #, c-format
 msgid "Attempt to call an unsafe function \"%s\" in restricted mode."
 msgstr "Pokus o volání nebezpeèné funkce \"%s\" v omezeném re¾imu."
 
-#: ../libextl/luaextl.c:1930
+#: ../libextl/luaextl.c:1956
 #, c-format
 msgid ""
 "Function '%s' has more parameters than the level 1 call handler can handle"
 msgstr "Funkce '%s' má víc parametrù, ne¾ lze zpracovat obsluhou v 1. úrovni"
 
 #
-#: ../libextl/luaextl.c:2347
+#: ../libextl/luaextl.c:2373
 msgid "Maximal serialisation depth reached."
 msgstr "Dosa¾ena maximální hloubka serializace."
 
-#: ../libextl/luaextl.c:2368
+#: ../libextl/luaextl.c:2394
 #, c-format
 msgid "Unable to serialise type %s."
 msgstr "Nemohu serializovat typ %s."
 
-#: ../libextl/luaextl.c:2399
+#: ../libextl/luaextl.c:2425
 msgid "-- This file has been generated by Ion. Do not edit.\n"
 msgstr "-- Tento soubor byl vytvoøen Ionem. Neupravujte jej.\n"
 
@@ -943,24 +951,38 @@ msgstr ""
 "Kontrola typu selhala ve druhé úrovni obsluhy volání pro parametr %d "
 "(obdr¾el %s, oèekával %s)."
 
-#: ../etc/cfg_floatws.lua:34
+#: ../etc/cfg_ioncore.lua:263
 msgid "Lower the frame."
 msgstr "Pøesune rám do pozadí"
 
-#: ../etc/cfg_bindings.lua:173
-msgid "Display frame context menu."
-msgstr "Zobrazí kontextové menu rámu."
+#: ../etc/cfg_ioncore.lua:336
+msgid "Rxvt"
+msgstr "Rxvt"
 
-#: ../mod_query/mod_query.lua:477
+#
+#: ../etc/cfg_ioncore.lua:23
+msgid ""
+"Switch to n:th object (workspace, full screen client window) within current "
+"screen."
+msgstr ""
+"Pøepne se na n-tý objekt (pracovní plochu, celoobrazovkové okno) na aktuální "
+"obrazovce."
+
+#
+#: ../etc/cfg_ioncore.lua:104
+msgid "Kill client owning the client window."
+msgstr "Ukonèí klienta vlastnícího klientské okno."
+
+#: ../mod_query/mod_query.lua:459
 msgid "Exit Ion/Shutdown session (y/n)?"
 msgstr "Ukonèit Ion/ukonèit sezení (y/n)?"
 
 #
-#: ../etc/cfg_bindings.lua:43
+#: ../etc/cfg_ioncore.lua:54
 msgid "Go to n:th screen on multihead setup."
 msgstr "U víceobrazovkového nastavení pøejde na n-tou obrazovku."
 
-#: ../mod_statusbar/mod_statusbar.lua:365
+#: ../mod_statusbar/mod_statusbar.lua:321
 msgid "Failed to create statusbar."
 msgstr "Selhalo vytvoøení stavového øádku."
 
@@ -968,60 +990,68 @@ msgstr "Selhalo vytvoøení stavového øádku."
 msgid "Not a directory."
 msgstr "Není adresáøem."
 
-#: ../mod_query/mod_query.lua:863
+#: ../etc/cfg_ioncore.lua:86
+msgid "Raise focused object, if possible."
+msgstr "Pokud je to mo¾né, pøesune zamìøený objekt nahoru."
+
+#: ../etc/cfg_ioncore.lua:117
+msgid "Toggle client window group full-screen mode"
+msgstr "Pøepne skupinu klientského okna do celoobrazovkového re¾imu."
+
+#: ../mod_query/mod_query.lua:864
 msgid "SSH to:"
 msgstr "SSH na:"
 
-#: ../etc/cfg_menus.lua:28
+#: ../etc/cfg_ioncore.lua:348
 msgid "Restart"
 msgstr "Restartovat"
 
-#: ../ioncore/ioncore_menudb.lua:155
+#: ../ioncore/ioncore_menudb.lua:180
 msgid "Cannot save selection."
 msgstr "Nemohu ulo¾it výbìr."
 
-#: ../etc/cfg_bindings.lua:208
+#: ../etc/cfg_ioncore.lua:281
 msgid "End the resize mode."
 msgstr "Ukonèí re¾im zmìny velikosti."
 
-#: ../ioncore/ioncore_bindings.lua:34
+#: ../etc/cfg_ioncore.lua:337
+msgid "Opera"
+msgstr "Opera"
+
+#: ../ioncore/ioncore_bindings.lua:44
 msgid "Invalid guard %s."
 msgstr "Neplatná ochrana %s."
 
-#: ../etc/cfg_ionws.lua:56
+#: ../etc/cfg_tiling.lua:68
 msgid "Below"
 msgstr "Dole"
 
-#: ../etc/cfg_bindings.lua:109
+#: ../etc/cfg_ioncore.lua:150
 msgid "Query for Lua code to execute."
 msgstr "Zeptá se na lua kód, který má vykonat."
 
 #
-#: ../etc/cfg_bindings.lua:47
+#: ../etc/cfg_ioncore.lua:58
 msgid "Go to next/previous screen on multihead setup."
 msgstr "Ve víceobrazovkovém nastavení pøejde na dal¹í/pøedchozí obrazovku."
 
-#: ../mod_query/mod_query.lua:428
-msgid "none"
-msgstr "¾ádná"
-
-#: ../etc/cfg_bindings.lua:221
+#: ../etc/cfg_ioncore.lua:294
 msgid "Shrink in specified direction."
 msgstr "Zmen¹uje v zadaném smìru."
 
-#: ../etc/cfg_bindings.lua:162
+#: ../etc/cfg_ioncore.lua:188 ../etc/cfg_ioncore.lua:243
 msgid "Maximize the frame horizontally/vertically."
 msgstr "Maximalizuje rám horizontálnì/vertikálnì."
 
-#: ../etc/cfg_bindings.lua:158
-msgid "Move current object within the frame left/right."
-msgstr "Pøesune objekt v rámu vlevo/vpravo."
+#: ../etc/cfg_ioncore.lua:339
+msgid "Konqueror"
+msgstr "Konqueror"
 
-#: ../pwm/cfg_pwm_menus.lua:12 ../etc/cfg_menus.lua:9
+#: ../pwm/cfg_pwm.lua:82 ../etc/cfg_ioncore.lua:324
 msgid "Lock screen"
 msgstr "Zamknout obrazovku"
 
-#: ../mod_statusbar/mod_statusbar.lua:347
+#: ../mod_statusbar/mod_statusbar.lua:299
 msgid "Screen not found."
 msgstr "Obrazovka nebyla nalezna."
 
@@ -1029,59 +1059,57 @@ msgstr "Obrazovka nebyla nalezna."
 msgid "Toggle scratchpad."
 msgstr "Zapne poznámkový blok."
 
-#: ../etc/cfg_bindings.lua:184
+#: ../etc/cfg_ioncore.lua:203
 msgid "Resize the frame."
 msgstr "Zmìní velikost rámu."
 
-#: ../etc/cfg_bindings.lua:191
+#: ../etc/cfg_ioncore.lua:210
 msgid "Move objects between frames by dragging and dropping the tab."
 msgstr "Pøesune objekty mezi rámy pomocí ta¾ení za zálo¾ku."
 
-#: ../ioncore/ioncore_wd.lua:84 ../mod_statusbar/mod_statusbar.lua:289
-msgid "Could not find %s"
-msgstr "Nemohu najít %s"
+#: ../mod_query/mod_query.lua:1158
+msgid ""
+"\n"
+"%sClass: %s\n"
+"%sRole: %s\n"
+"%sInstance: %s\n"
+"%sXID: 0x%x"
+msgstr ""
+"\n"
+"%sTøída: %s\n"
+"%sRole: %s\n"
+"%sInstance: %s\n"
+"%sXID: 0x%x"
 
-#: ../mod_statusbar/mod_statusbar.lua:353
+#: ../mod_statusbar/mod_statusbar.lua:305
 msgid "Screen already has an stdisp. Refusing to create a statusbar."
 msgstr "Obrazovka ji¾ obsahuje stdisp. Odmítám vytvoøit stavový øádek."
 
-#: ../etc/cfg_ionws.lua:43 ../etc/cfg_ionws.lua:63
+#: ../etc/cfg_tiling.lua:55 ../etc/cfg_tiling.lua:75
 msgid "Split horizontally"
 msgstr "Rozdìlit horizontálnì"
 
-#: ../etc/cfg_bindings.lua:112
+#: ../etc/cfg_ioncore.lua:153
 msgid "Query for host to connect to with SSH."
 msgstr "Zeptá se na jméno poèítaèe, ke kterému se má pøipojit pomocí SSH."
 
 #
-#: ../etc/cfg_bindings.lua:231
+#: ../etc/cfg_ioncore.lua:304
 msgid "Move in specified direction."
 msgstr "Posune se v zadaném smìru."
-
-#
-#: ../mod_statusbar/mod_statusbar.lua:32
-msgid "mail"
-msgstr "po¹ta"
-
-#: ../mod_query/mod_query.lua:1124
-msgid ""
-"\n"
-"Transients:\n"
-msgstr ""
-"\n"
-"Doèasná okna:\n"
 
 #: ../etc/cfg_dock.lua:39
 msgid "Pos-BL"
 msgstr "Pozice LD"
 
-#: ../etc/cfg_menu.lua:23
-msgid "Select next/previous menu entry."
-msgstr "V menu vybere dal¹í/pøedchozí polo¾ku."
+#
+#: ../etc/cfg_ioncore.lua:369
+msgid "New workspace"
+msgstr "Nová pracovní plocha"
 
-#: ../etc/cfg_ionws.lua:49
-msgid "Float split"
-msgstr "Plovoucí rozdìlení"
+#: ../ioncore/ioncore_menudb.lua:28
+msgid "Unable to append to non-table menu"
+msgstr "Nelze pøidat do netabulkového menu"
 
 #: ../etc/cfg_dock.lua:40
 msgid "Pos-BR"
@@ -1092,82 +1120,62 @@ msgid "Recursive table - unable to deepcopy"
 msgstr "Rekurzivní tabulka - nemohu provést hlubokou kopii"
 
 #
-#: ../etc/cfg_bindings.lua:211
+#: ../etc/cfg_ioncore.lua:284
 msgid "Grow in specified direction."
 msgstr "Roste v zadaném smìru."
 
-#: ../ioncore/ioncore_bindings.lua:69
+#: ../ioncore/ioncore_bindings.lua:85
 msgid "Invalid command"
 msgstr "Neplatný pøíkaz"
 
-#: ../ioncore/ioncore_menudb.lua:169 ../mod_query/mod_query.lua:273
+#: ../ioncore/ioncore_menudb.lua:194 ../mod_query/mod_query.lua:273
 msgid "Too much result data"
 msgstr "Pøíli¹ mnoho výsledkù"
 
-#: ../mod_query/mod_query.lua:428
-msgid "Workspace type (%s):"
-msgstr "Typ pracovní plochy (%s):"
-
-#: ../etc/cfg_bindings.lua:36
-msgid "Go to previous active object."
-msgstr "Pøejde na pøedchozí aktivní objekt."
-
-#: ../etc/cfg_ionws.lua:41 ../etc/cfg_ionws.lua:61
+#: ../etc/cfg_tiling.lua:53 ../etc/cfg_tiling.lua:73
 msgid "Split vertically"
 msgstr "Rozdìlit vertikálnì"
 
-#: ../mod_query/mod_query.lua:1089
-msgid "No entry '%s'"
-msgstr "®ádný záznam '%s'"
+#: ../etc/cfg_ioncore.lua:82
+msgid "Backward-circulate focus."
+msgstr "Cykluje vzad."
 
-#
-#
-#: ../etc/cfg_bindings.lua:83
-msgid "Toggle fullscreen mode of current client window."
-msgstr "Zapne celoobrazovkový re¾im u aktuálního klientského okna."
+#: ../etc/cfg_tiling.lua:18
+msgid "Split current frame horizontally."
+msgstr "Rozdìlí rám horizontálnì."
 
-#: ../etc/cfg_bindings.lua:97
+#: ../etc/cfg_ioncore.lua:138
 msgid "Query for manual page to be displayed."
 msgstr "Zeptá se na manuálovou stánku, kterou má zobrazit."
 
-#: ../etc/cfg_bindings.lua:100
+#: ../etc/cfg_ioncore.lua:141
 msgid "Show the Ion manual page."
 msgstr "Zobrazí manuálovou stránku Ionu."
 
-#: ../etc/cfg_bindings.lua:54
+#: ../etc/cfg_ioncore.lua:65
 msgid "Display the main menu."
 msgstr "Zobrazí hlavní menu."
 
 #
-#: ../etc/cfg_bindings.lua:103
+#: ../etc/cfg_ioncore.lua:144
 msgid "Run a terminal emulator."
 msgstr "Spustí emulátor terminálu."
 
-#: ../etc/cfg_bindings.lua:123
+#: ../etc/cfg_ioncore.lua:164
 msgid "Query for workspace to go to or create a new one."
 msgstr "Zeptá se na pracovní plochu, na kterou má pøejít, nebo ji vytvoøit."
 
-#: ../etc/cfg_menus.lua:37
-msgid "Kill"
-msgstr "Ukonèit"
+#: ../etc/cfg_ioncore.lua:255
+msgid "Toggle shade mode"
+msgstr "Pøepne stínový re¾im"
 
-#: ../pwm/cfg_pwm_menus.lua:24 ../etc/cfg_menus.lua:36
+#: ../pwm/cfg_pwm.lua:93 ../etc/cfg_ioncore.lua:356
 msgid "Close"
 msgstr "Zavøít"
 
-#: ../mod_query/mod_query.lua:1121
-msgid ""
-"Title: %s\n"
-"Class: %s\n"
-"Role: %s\n"
-"Instance: %s\n"
-"XID: 0x%x"
-msgstr ""
-"Název: %s\n"
-"Tøída: %s\n"
-"Role: %s\n"
-"Instance: %s\n"
-"XID: 0x%x"
+#: ../mod_query/mod_query.lua:447
+msgid "Go to or create workspace:"
+msgstr "Vytvoøit nebo pøejít na pracovní plochu:"
 
 #: ../etc/cfg_query.lua:35
 msgid "Delete one word forward/backward."
@@ -1177,39 +1185,48 @@ msgstr "Sma¾e slovo pøed/za kurzorem."
 msgid "Go to end/beginning."
 msgstr "Skoèí na konec/zaèátek."
 
-#: ../etc/cfg_ionws.lua:47 ../etc/cfg_ionws.lua:66
+#: ../etc/cfg_tiling.lua:59 ../etc/cfg_tiling.lua:78
 msgid "Transpose"
 msgstr "Transponovat"
 
-#: ../etc/cfg_bindings.lua:154
+#: ../etc/cfg_ioncore.lua:235
 msgid "Switch to next/previous object within the frame."
 msgstr "Pøepne se na dal¹í/pøedchozí objekt v rámu."
 
-#: ../mod_statusbar/mod_statusbar.lua:179
-msgid "WStatusBar expected."
-msgstr "Oèekáván WStatusBar."
-
-#: ../mod_query/mod_query.lua:486
+#: ../mod_query/mod_query.lua:468
 msgid "Restart Ion (y/n)?"
 msgstr "Restartovat Ion (y/n)?"
 
-#: ../etc/cfg_dock.lua:38
-msgid "Pos-TR"
-msgstr "Pozice PH"
+#
+#: ../etc/cfg_ioncore.lua:99
+msgid ""
+"Nudge the client window. This might help with some programs' resizing "
+"problems."
+msgstr ""
+"Postrèí klientské okno. To mù¾e pomoci nìkterým programùm, které mají "
+"problémy se zmìnou velikosti."
 
-#: ../mod_query/mod_query.lua:1019
-msgid "Lua code: "
-msgstr "Lua kód: "
+#: ../etc/cfg_tiling.lua:94
+msgid "New tiling"
+msgstr "Vytvoøit dla¾dice"
 
-#: ../mod_query/mod_query.lua:451
+#: ../mod_query/mod_query.lua:1038
+msgid "Lua code:"
+msgstr "Lua kód:"
+
+#: ../etc/cfg_ioncore.lua:160
+msgid "Query for file to view."
+msgstr "Zeptá se na soubor, který chcete zobrazit."
+
+#: ../mod_query/mod_query.lua:433
 msgid "Attach window:"
 msgstr "Pøipojit okno:"
 
-#: ../etc/cfg_bindings.lua:188 ../etc/cfg_floatws.lua:37
+#: ../etc/cfg_ioncore.lua:207 ../etc/cfg_ioncore.lua:266
 msgid "Move the frame."
 msgstr "Pøesune rám."
 
-#: ../pwm/cfg_pwm_menus.lua:11 ../etc/cfg_menus.lua:8
+#: ../pwm/cfg_pwm.lua:81 ../etc/cfg_ioncore.lua:323
 msgid "Programs"
 msgstr "Programy"
 
@@ -1225,345 +1242,50 @@ msgstr "Rùst dolù"
 msgid "Grow-U"
 msgstr "Rùst nahoru"
 
-#: ../mod_query/mod_query.lua:1034
+#: ../mod_query/mod_query.lua:1054
 msgid "Unknown menu %s."
 msgstr "Neznámé menu %s."
-
-#: ../etc/cfg_floatws.lua:12
-msgid "Backwards-circulate focus and raise the newly focused frame."
-msgstr "Zpìtnì cykluje mezi rámy a pøesune je nahoru."
-
-#: ../etc/cfg_menus.lua:43
-msgid "Window info"
-msgstr "Informace o oknì"
-
-#
-#: ../etc/cfg_query.lua:58
-msgid "Set mark/begin selection."
-msgstr "Nastaví znaèku/zaèátek výbìru."
-
-#: ../etc/cfg_menus.lua:29
-msgid "Restart TWM"
-msgstr "Restartovat TWM"
-
-#: ../etc/cfg_ionws.lua:9
-msgid "Split current frame vertically."
-msgstr "Rozdìlí rám vertikálnì."
-
-#
-#
-#: ../etc/cfg_bindings.lua:51
-msgid "Create a new workspace of chosen default type."
-msgstr "Vytvoøí novou pracovní plochu vybraného typu."
-
-#
-#: ../etc/cfg_floatws.lua:29
-msgid "Raise the frame."
-msgstr "Pøesune rám do popøedí."
-
-#: ../etc/cfg_floatws.lua:45
-msgid "(Un)stick"
-msgstr "(Pøi/Od)lepit"
-
-#: ../mod_query/mod_query.lua:371 ../mod_query/mod_query.lua:381
-msgid "Could not find client window %s."
-msgstr "Nemohu najít klientské okno %s."
-
-#: ../etc/cfg_query.lua:86
-msgid "Close the query/message box, not executing bound actions."
-msgstr "Zavøe okno s dotazem/zprávou, ani¾ by se spustily svázané akce.."
-
-#
-#: ../etc/cfg_bindings.lua:170
-msgid "Query for a client window to attach to active frame."
-msgstr "Zeptá se na klientské okno, které se má pøipojit k aktivnímu rámu."
-
-#: ../mod_query/mod_query.lua:731
-msgid "Run:"
-msgstr "Spustit:"
-
-#: ../etc/cfg_panews.lua:11
-msgid "Resize the area."
-msgstr "Zmìní velikost oblasti."
-
-#
-#: ../etc/cfg_bindings.lua:89
-msgid "Kill client owning current client window."
-msgstr "Ukonèí klienta vlastnícího aktuální klientské okno."
-
-#: ../mod_query/mod_query.lua:889
-msgid "Manual page (%s):"
-msgstr "Manuálová stránka (%s):"
-
-#: ../etc/cfg_ionws.lua:19
-msgid "Split current frame horizontally."
-msgstr "Rozdìlí rám horizontálnì."
-
-#: ../etc/cfg_ionws.lua:50
-msgid "At left"
-msgstr "Vlevo"
-
-#
-#: ../etc/cfg_bindings.lua:126
-msgid "Query for a client window to go to."
-msgstr "Dotá¾e se na klientské okno, do nìho¾ má pøejít."
-
-#: ../build/mkman.lua:204
-msgid "%s %s"
-msgstr "%s %s"
-
-#: ../etc/cfg_query.lua:42
-msgid "Delete the whole line."
-msgstr "Sma¾e celý øádek."
 
 #: ../build/mkman.lua:190
 msgid "drag"
 msgstr "ta¾ení"
 
-#: ../mod_query/mod_query.lua:423
-msgid "Unknown error"
-msgstr "Neznámá chyba"
-
-#: ../etc/cfg_bindings.lua:177 ../etc/cfg_panews.lua:8
-msgid "Begin move/resize mode."
-msgstr "Zahájí re¾im pøesunu/zmìny velikosti."
-
-#: ../etc/cfg_bindings.lua:138
-msgid "Tag current object within the frame."
-msgstr "Oznaèí aktuální objekt v rámu."
-
-#: ../etc/cfg_bindings.lua:142
-msgid "Switch to n:th object within the frame."
-msgstr "Pøepne se do n-tého objektu v rámu."
-
-#: ../etc/cfg_bindings.lua:205
-msgid "Cancel the resize mode."
-msgstr "Zru¹í re¾im zmìny velikosti."
-
-#: ../build/mkman.lua:189
-msgid "click"
-msgstr "kliknutí"
-
-#: ../build/mkman.lua:188
-msgid "press"
-msgstr "stisk"
-
-#: ../mod_query/mod_query.lua:440
-msgid "Go to window:"
-msgstr "Jít do okna:"
-
-#: ../etc/cfg_query.lua:27
-msgid "Delete next character."
-msgstr "Sma¾e následující znak."
-
-#: ../etc/cfg_dock.lua:41
-msgid "Grow-L"
-msgstr "Rùst vlevo"
-
-#: ../etc/cfg_dock.lua:37
-msgid "Pos-TL"
-msgstr "Pozice LH"
-
-#: ../etc/cfg_dock.lua:28
-msgid "Toggle floating dock."
-msgstr "Zapne plovoucí dok."
-
-#: ../etc/cfg_query.lua:31
-msgid "Delete previous character."
-msgstr "Sma¾e pøedchozí znak."
-
-#
-#: ../etc/cfg_bindings.lua:92
-msgid ""
-"Send next key press to current client window. Some programs may not allow "
-"this by default."
-msgstr ""
-"Po¹le následující stisk klávesy klientskému oknu. Nìkteré programy to "
-"implicitnì nepovolují."
-
-#: ../mod_query/mod_query.lua:779
-msgid "Failed to open ~/.ssh/config"
-msgstr "Selhalo otevøení ~/.ssh/config"
-
-#: ../etc/cfg_ionws.lua:46 ../etc/cfg_ionws.lua:65
-msgid "Flip"
-msgstr "Obrátit"
-
-#: ../etc/cfg_menu.lua:11
-msgid "Close the menu."
-msgstr "Zavøe menu."
-
-#
-#: ../etc/cfg_bindings.lua:31
-msgid "Switch to next/previous object within current screen."
-msgstr "Pøepne se na dal¹í/pøedchozí objekt v aktuální obrazovce."
-
-#: ../etc/cfg_query.lua:91
-msgid "Scroll the message or completions up/down."
-msgstr "Roluje zprávu nebo seznam dokonèení nahoru/dolù."
-
-#: ../etc/cfg_menus.lua:11
-msgid "About Ion"
-msgstr "O Ionu"
-
-#: ../etc/cfg_query.lua:78
-msgid "Close the query and execute bound action."
-msgstr "Zavøe dotaz a spustí svázanou akci."
-
-#: ../etc/cfg_query.lua:71
-msgid "Try to complete the entered text or cycle through completions."
-msgstr "Zkusí doplnit zadaný text nebo bude cyklovat mezi mo¾nostmi."
-
-#
-#: ../etc/cfg_query.lua:67
-msgid "Clear mark/cancel selection."
-msgstr "Sma¾e znaèku/zru¹í výbìr."
-
-#: ../etc/cfg_ionws.lua:38
-msgid "Destroy frame"
-msgstr "Znièit rám"
-
-#: ../etc/cfg_menus.lua:42
-msgid "Clear tags"
-msgstr "Vyèistit znaèky"
+#: ../etc/cfg_ioncore.lua:363
+msgid "Window info"
+msgstr "Informace o oknì"
 
 #
 #: ../etc/cfg_query.lua:61
-msgid "Cut selection."
-msgstr "Vyjme výbìr."
+msgid "Set mark/begin selection."
+msgstr "Nastaví znaèku/zaèátek výbìru."
 
-#: ../etc/cfg_query.lua:53
-msgid "Paste from the clipboard."
-msgstr "Vlo¾í ze schránky."
+#: ../etc/cfg_ioncore.lua:349
+msgid "Restart TWM"
+msgstr "Restartovat TWM"
 
-#: ../etc/cfg_query.lua:45
-msgid "Select next/previous (matching) history entry."
-msgstr "Vybere dal¹í/pøedchozí (odpovídající) polo¾ku historie."
-
-#: ../mod_query/mod_query.lua:383
-msgid "Cannot attach: different root windows."
-msgstr "Nemohu pøipojit: rùzná koøenová okna."
-
-#: ../build/mkman.lua:191
-msgid "double click"
-msgstr "dvojité kliknutí"
-
-#: ../etc/cfg_query.lua:39
-msgid "Delete to end of line."
-msgstr "Sma¾e text do konce øádky."
-
-#: ../etc/cfg_menu.lua:29
-msgid "Clear the menu's typeahead find buffer."
-msgstr "Vyma¾e buffer pro dopøedné hledání v menu."
-
-#: ../etc/cfg_bindings.lua:115
-msgid "Query for file to edit."
-msgstr "Zeptá se na soubor, který chcete upravit."
-
-#
-#: ../etc/cfg_bindings.lua:39
-msgid "Clear all tags."
-msgstr "Vyèistí v¹echny znaèky."
-
-#: ../mod_query/mod_query.lua:1086
-msgid "%s:"
-msgstr "%s:"
-
-#: ../etc/cfg_dock.lua:42
-msgid "Grow-R"
-msgstr "Rùst vpravo"
-
-#: ../pwm/cfg_pwm_menus.lua:15 ../pwm/cfg_pwm_menus.lua:23
-msgid "New"
-msgstr "Nový"
-
-#: ../mod_query/mod_query.lua:494
-msgid "Frame name:"
-msgstr "Název rámu:"
-
-#: ../etc/cfg_query.lua:11
-msgid "Move one character forward/backward."
-msgstr "Posune se o znak vpøed/vzad."
-
-#: ../etc/cfg_bindings.lua:58
-msgid "Display the window list menu."
-msgstr "Zobrazí menu se seznamem oken."
-
-#: ../etc/cfg_floatws.lua:26
-msgid "Toggle shade mode"
-msgstr "Pøepne stínový re¾im"
-
-#: ../etc/cfg_floatws.lua:15
-msgid "Raise/lower active frame."
-msgstr "Pøesune aktivní rám do popøedí/pozadí."
-
-#
-#: ../etc/cfg_bindings.lua:18
-msgid ""
-"Switch to n:th object (workspace, full screen client window) within current "
-"screen."
-msgstr ""
-"Pøepne se na n-tý objekt (pracovní plochu, celoobrazovkové okno) na aktuální "
-"obrazovce."
-
-#: ../etc/cfg_ionws.lua:60
-msgid "At root"
-msgstr "Na koøenu"
-
-#: ../etc/cfg_bindings.lua:75
-msgid "Close current object."
-msgstr "Zavøe aktuální objekt."
-
-#
-#: ../etc/cfg_query.lua:64
-msgid "Copy selection."
-msgstr "Zkopíruje výbìr."
-
-#: ../ioncore/ioncore_menudb.lua:195
-msgid "Refresh list"
-msgstr "Obnovit seznam"
-
-#: ../etc/cfg_ionws.lua:54
-msgid "Above"
-msgstr "Nahoøe"
-
-#: ../ioncore/ioncore_menudb.lua:159
-msgid "Save look selection in %s?"
-msgstr "Ulo¾it nastavení vzhledu do %s?"
-
-#: ../pwm/cfg_pwm_menus.lua:13 ../etc/cfg_menus.lua:10
-msgid "Help"
-msgstr "Nápovìda"
-
-#: ../etc/cfg_ionws.lua:52
-msgid "At right"
-msgstr "Vpravo"
+#: ../etc/cfg_tiling.lua:8
+msgid "Split current frame vertically."
+msgstr "Rozdìlí rám vertikálnì."
 
 #
 #
-#: ../etc/cfg_menu.lua:17
-msgid "Activate current menu entry."
-msgstr "Aktivuje vybranou polo¾ku v menu."
+#: ../etc/cfg_ioncore.lua:62
+msgid "Create a new workspace of chosen default type."
+msgstr "Vytvoøí novou pracovní plochu vybraného typu."
 
-#: ../etc/cfg_menus.lua:39
-msgid "Toggle tag"
-msgstr "(Od)znaèit"
+#
+#: ../etc/cfg_ioncore.lua:258
+msgid "Raise the frame."
+msgstr "Pøesune rám do popøedí."
 
-#: ../etc/cfg_menus.lua:41
-msgid "Attach tagged"
-msgstr "Pøipojit oznaèené"
+#
+#: ../etc/cfg_ioncore.lua:170
+msgid "Query for a client window to attach."
+msgstr "Dotá¾e se na klientské okno, které má pøipojit."
 
-#: ../pwm/cfg_pwm_menus.lua:16 ../etc/cfg_menus.lua:12
-msgid "Styles"
-msgstr "Styly"
-
-#: ../mod_statusbar/mod_statusbar.lua:227
-msgid "ion-statusd quit."
-msgstr "ion-statusd konèí."
-
-#: ../mod_query/mod_query.lua:407
-msgid "Unable to create workspace: no screen."
-msgstr "Nemohu vytvoøit pracovní plochu: obrazovka neexistuje."
+#: ../mod_query/mod_query.lua:374 ../mod_query/mod_query.lua:384
+msgid "Could not find client window %s."
+msgstr "Nemohu najít klientské okno %s."
 
 #: ../ioncore/ioncore_efbb.lua:12
 msgid ""
@@ -1581,23 +1303,350 @@ msgstr ""
 "  Mod1+C -> close\n"
 "  Mod1+K P/N -> WFrame.switch_next/switch_prev\n"
 
-#: ../etc/cfg_bindings.lua:106
+#: ../build/mkman.lua:204
+msgid "%s %s"
+msgstr "%s %s"
+
+#: ../etc/cfg_query.lua:92
+msgid "Close the query/message box, not executing bound actions."
+msgstr "Zavøe okno s dotazem/zprávou, ani¾ by se spustily svázané akce.."
+
+#: ../etc/cfg_query.lua:39
+msgid "Delete to end of line."
+msgstr "Sma¾e text do konce øádky."
+
+#: ../etc/cfg_ioncore.lua:147
 msgid "Query for command line to execute."
 msgstr "Zeptá se na pøíkaz, který má spustit."
 
-#: ../mod_statusbar/mod_statusbar.lua:32
-msgid "load"
-msgstr "vytí¾ení"
+#: ../mod_query/mod_query.lua:732
+msgid "Run:"
+msgstr "Spustit:"
 
-#: ../etc/cfg_ionws.lua:22
+#: ../ioncore/ioncore_ext.lua:87
+msgid "Frame"
+msgstr "Rám"
+
+#: ../build/mkman.lua:189
+msgid "click"
+msgstr "kliknutí"
+
+#: ../mod_query/mod_query.lua:1081
+msgid "Missing submenu "
+msgstr "Chybìjící podmenu"
+
+#: ../mod_query/mod_query.lua:890
+msgid "Manual page (%s):"
+msgstr "Manuálová stránka (%s):"
+
+#: ../build/mkman.lua:188
+msgid "press"
+msgstr "stisk"
+
+#: ../etc/cfg_panews.lua:11
+msgid "Resize the area."
+msgstr "Zmìní velikost oblasti."
+
+#: ../etc/cfg_query.lua:27
+msgid "Delete next character."
+msgstr "Sma¾e následující znak."
+
+#: ../etc/cfg_dock.lua:41
+msgid "Grow-L"
+msgstr "Rùst vlevo"
+
+#: ../etc/cfg_dock.lua:38
+msgid "Pos-TR"
+msgstr "Pozice PH"
+
+#: ../etc/cfg_tiling.lua:33
+msgid "Detach window from tiled frame"
+msgstr "Odpojí okno od dla¾dicového rámu"
+
+#
+#: ../etc/cfg_ioncore.lua:167
+msgid "Query for a client window to go to."
+msgstr "Dotá¾e se na klientské okno, do nìho¾ má pøejít."
+
+#: ../etc/cfg_dock.lua:37
+msgid "Pos-TL"
+msgstr "Pozice LH"
+
+#: ../etc/cfg_dock.lua:28
+msgid "Toggle floating dock."
+msgstr "Zapne plovoucí dok."
+
+#: ../etc/cfg_menu.lua:29
+msgid "Clear the menu's typeahead find buffer."
+msgstr "Vyma¾e buffer pro dopøedné hledání v menu."
+
+#: ../mod_query/mod_query.lua:409
+msgid "Unknown error"
+msgstr "Neznámá chyba"
+
+#: ../etc/cfg_ioncore.lua:196 ../etc/cfg_panews.lua:8
+msgid "Begin move/resize mode."
+msgstr "Zahájí re¾im pøesunu/zmìny velikosti."
+
+#: ../etc/cfg_ioncore.lua:219
+msgid "Tag current object within the frame."
+msgstr "Oznaèí aktuální objekt v rámu."
+
+#: ../etc/cfg_ioncore.lua:223
+msgid "Switch to n:th object within the frame."
+msgstr "Pøepne se do n-tého objektu v rámu."
+
+#: ../mod_statusbar/mod_statusbar.lua:285
+msgid "Failed to start ion-statusd."
+msgstr "Selhalo spu¹tìní ion-statusd."
+
+#: ../etc/cfg_menu.lua:23
+msgid "Select next/previous menu entry."
+msgstr "V menu vybere dal¹í/pøedchozí polo¾ku."
+
+#: ../etc/cfg_ioncore.lua:340
+msgid "Dillo"
+msgstr "Dillo"
+
+#: ../mod_query/mod_query.lua:422
+msgid "Go to window:"
+msgstr "Jít do okna:"
+
+#: ../etc/cfg_ioncore.lua:335
+msgid "W3M"
+msgstr "W3M"
+
+#: ../etc/cfg_ioncore.lua:370
+msgid "New empty workspace"
+msgstr "Nová prázdná pracovní plocha"
+
+#: ../etc/cfg_tiling.lua:41
+msgid "Tile frame, if no tiling exists on the workspace"
+msgstr ""
+"Zmìní rám na dla¾dice (pokud zatím dla¾dice na pracovní plo¹e neexistují)."
+
+#: ../etc/cfg_menu.lua:11
+msgid "Close the menu."
+msgstr "Zavøe menu."
+
+#: ../etc/cfg_query.lua:97
+msgid "Scroll the message or completions up/down."
+msgstr "Roluje zprávu nebo seznam dokonèení nahoru/dolù."
+
+#: ../etc/cfg_query.lua:84
+msgid "Close the query and execute bound action."
+msgstr "Zavøe dotaz a spustí svázanou akci."
+
+#: ../mod_query/mod_query.lua:780
+msgid "Failed to open ~/.ssh/config"
+msgstr "Selhalo otevøení ~/.ssh/config"
+
+#: ../etc/cfg_query.lua:77
+msgid "Try to complete the entered text or cycle through completions."
+msgstr "Zkusí doplnit zadaný text nebo bude cyklovat mezi mo¾nostmi."
+
+#
+#: ../etc/cfg_ioncore.lua:372
+msgid "Close workspace"
+msgstr "Zavøít pracovní plochu"
+
+#
+#: ../etc/cfg_ioncore.lua:36
+msgid "Switch to next/previous object within current screen."
+msgstr "Pøepne se na dal¹í/pøedchozí objekt v aktuální obrazovce."
+
+#
+#: ../etc/cfg_query.lua:70
+msgid "Clear mark/cancel selection."
+msgstr "Sma¾e znaèku/zru¹í výbìr."
+
+#: ../etc/cfg_ioncore.lua:326
+msgid "About Ion"
+msgstr "O Ionu"
+
+#: ../etc/cfg_tiling.lua:62
+msgid "At left"
+msgstr "Vlevo"
+
+#
+#: ../etc/cfg_query.lua:64
+msgid "Cut selection."
+msgstr "Vyjme výbìr."
+
+#: ../etc/cfg_query.lua:56
+msgid "Paste from the clipboard."
+msgstr "Vlo¾í ze schránky."
+
+#: ../etc/cfg_ioncore.lua:73
+msgid "Forward-circulate focus."
+msgstr "Cykluje vpøed."
+
+#: ../etc/cfg_ioncore.lua:362
+msgid "Clear tags"
+msgstr "Vyèistit znaèky"
+
+#: ../etc/cfg_query.lua:48
+msgid "Select next/previous (matching) history entry."
+msgstr "Vybere dal¹í/pøedchozí (odpovídající) polo¾ku historie."
+
+#: ../etc/cfg_query.lua:45
+msgid "Transpose characters."
+msgstr "Transponuje znaky."
+
+#: ../etc/cfg_query.lua:42
+msgid "Delete the whole line."
+msgstr "Sma¾e celý øádek."
+
+#: ../mod_query/mod_query.lua:386
+msgid "Cannot attach: different root windows."
+msgstr "Nemohu pøipojit: rùzná koøenová okna."
+
+#: ../build/mkman.lua:191
+msgid "double click"
+msgstr "dvojité kliknutí"
+
+#: ../etc/cfg_query.lua:31
+msgid "Delete previous character."
+msgstr "Sma¾e pøedchozí znak."
+
+#
+#: ../ioncore/ioncore_ext.lua:88
+msgid "Workspace"
+msgstr "Pracovní plocha"
+
+#: ../etc/cfg_ioncore.lua:156
+msgid "Query for file to edit."
+msgstr "Zeptá se na soubor, který chcete upravit."
+
+#
+#: ../etc/cfg_ioncore.lua:50
+msgid "Clear all tags."
+msgstr "Vyèistí v¹echny znaèky."
+
+#: ../etc/cfg_ioncore.lua:199
+msgid "Switch the frame to display the object indicated by the tab."
+msgstr "Pøepne rám, aby zobrazoval objekt urèený zálo¾kou."
+
+#: ../etc/cfg_dock.lua:42
+msgid "Grow-R"
+msgstr "Rùst vpravo"
+
+#: ../pwm/cfg_pwm.lua:85 ../pwm/cfg_pwm.lua:92
+msgid "New"
+msgstr "Nový"
+
+#: ../mod_query/mod_query.lua:476
+msgid "Frame name:"
+msgstr "Název rámu:"
+
+#: ../etc/cfg_query.lua:11
+msgid "Move one character forward/backward."
+msgstr "Posune se o znak vpøed/vzad."
+
+#: ../etc/cfg_ioncore.lua:70
+msgid "Display the window list menu."
+msgstr "Zobrazí menu se seznamem oken."
+
+#: ../mod_query/mod_query.lua:1117
+msgid "No entry '%s'"
+msgstr "®ádný záznam '%s'"
+
+#: ../etc/cfg_tiling.lua:72
+msgid "At root"
+msgstr "Na koøenu"
+
+#: ../etc/cfg_tiling.lua:66
+msgid "Above"
+msgstr "Nahoøe"
+
+#: ../etc/cfg_tiling.lua:64
+msgid "At right"
+msgstr "Vpravo"
+
+#: ../etc/cfg_ioncore.lua:131
+msgid "Close current object."
+msgstr "Zavøe aktuální objekt."
+
+#
+#: ../etc/cfg_query.lua:67
+msgid "Copy selection."
+msgstr "Zkopíruje výbìr."
+
+#
+#: ../pwm/cfg_pwm.lua:84
+msgid "Workspaces"
+msgstr "Pracovní plochy"
+
+#: ../etc/cfg_tiling.lua:61
+msgid "Float split"
+msgstr "Plovoucí okraj"
+
+#: ../etc/cfg_tiling.lua:58 ../etc/cfg_tiling.lua:77
+msgid "Flip"
+msgstr "Obrátit"
+
+#
+#: ../etc/cfg_ioncore.lua:107
+msgid ""
+"Send next key press to the client window. Some programs may not allow this "
+"by default."
+msgstr ""
+"Po¹le následující stisk klávesy klientskému oknu. Nìkteré programy to "
+"implicitnì nepovolují."
+
+#: ../etc/cfg_tiling.lua:50
+msgid "Destroy frame"
+msgstr "Znièit rám"
+
+#
+#
+#: ../etc/cfg_menu.lua:17
+msgid "Activate current menu entry."
+msgstr "Aktivuje vybranou polo¾ku v menu."
+
+#: ../etc/cfg_ioncore.lua:359
+msgid "Toggle tag"
+msgstr "(Od)znaèit"
+
+#: ../etc/cfg_ioncore.lua:361
+msgid "Attach tagged"
+msgstr "Pøipojit oznaèené"
+
+#: ../pwm/cfg_pwm.lua:86 ../etc/cfg_ioncore.lua:327
+msgid "Styles"
+msgstr "Styly"
+
+#: ../etc/cfg_tiling.lua:21
 msgid "Destroy current frame."
 msgstr "Znièí aktuální rám."
 
-#: ../mod_query/mod_query.lua:523
+#: ../etc/cfg_ioncore.lua:41
+msgid "Go to first region demanding attention or previously active one."
+msgstr ""
+"Pøejde do prvního regionu vy¾adujícího pozornost nebo do pøedchozího "
+"aktivního."
+
+#: ../ioncore/ioncore_menudb.lua:184
+msgid "Save look selection in %s?"
+msgstr "Ulo¾it nastavení vzhledu do %s?"
+
+#: ../pwm/cfg_pwm.lua:83 ../etc/cfg_ioncore.lua:325
+msgid "Help"
+msgstr "Nápovìda"
+
+#: ../etc/cfg_tiling.lua:11
+msgid "Go to frame above/below/right/left of current frame."
+msgstr "Pøejde do rámu nad/pod/vpravo/vlevo od aktuálního rámu."
+
+#: ../mod_statusbar/mod_statusbar.lua:190
+msgid "ion-statusd quit."
+msgstr "ion-statusd konèí."
+
+#: ../mod_query/mod_query.lua:505
 msgid "Edit file:"
 msgstr "Upravit soubor:"
 
-#: ../etc/cfg_menus.lua:19
+#: ../etc/cfg_ioncore.lua:334
 msgid "XTerm"
 msgstr "XTerm"
 
@@ -1605,96 +1654,167 @@ msgstr "XTerm"
 msgid "%s %s at %s"
 msgstr "%s %s na %s"
 
-#: ../pwm/cfg_pwm_menus.lua:26
+#: ../pwm/cfg_pwm.lua:95
 msgid "List"
 msgstr "Seznam"
 
-#: ../etc/cfg_ionws.lua:12
-msgid "Go to frame above/below/right/left of current frame."
-msgstr "Pøejde do rámu nad/pod/vpravo/vlevo od aktuálního rámu."
-
-#: ../ioncore/ioncore_bindings.lua:54
-msgid "Error in command string: "
-msgstr "Chyba v pøíkazu: "
-
-#: ../mod_statusbar/mod_statusbar.lua:313
-msgid "Failed to start ion-statusd."
-msgstr "Selhalo spu¹tìní ion-statusd."
-
-#: ../etc/cfg_menus.lua:30
+#: ../etc/cfg_ioncore.lua:350
 msgid "Exit"
 msgstr "Ukonèit"
 
-#: ../etc/cfg_menus.lua:27
-msgid "Save"
-msgstr "Ulo¾it"
+#: ../ioncore/ioncore_bindings.lua:76
+msgid "Error in command string: "
+msgstr "Chyba v pøíkazu: "
 
-#: ../mod_statusbar/mod_statusbar.lua:309
+#: ../etc/cfg_ioncore.lua:278
+msgid "Cancel the resize mode."
+msgstr "Zru¹í re¾im zmìny velikosti."
+
+#: ../etc/cfg_ioncore.lua:239
+msgid "Move current object within the frame left/right."
+msgstr "Pøesune objekt v rámu vlevo/vpravo."
+
+#: ../ioncore/ioncore_wd.lua:84 ../mod_statusbar/mod_statusbar.lua:259
+msgid "Could not find %s"
+msgstr "Nemohu najít %s"
+
+#: ../mod_statusbar/mod_statusbar.lua:281
 msgid "Errors starting ion-statusd:\n"
 msgstr "Chyba pøi startu ion-statusd:\n"
 
-#: ../mod_query/mod_query.lua:534
+#: ../mod_query/mod_query.lua:516
 msgid "View file:"
 msgstr "Prohlédnout soubor:"
 
-#: ../mod_query/mod_query.lua:465
-msgid "Go to or create workspace:"
-msgstr "Vytvoøit nebo pøejít na pracovní plochu:"
+#: ../etc/cfg_ioncore.lua:357
+msgid "Kill"
+msgstr "Ukonèit"
 
-#: ../etc/cfg_menus.lua:20
-msgid "Mozilla Firefox"
-msgstr "Mozilla Firefox"
+#: ../etc/cfg_ioncore.lua:347
+msgid "Save"
+msgstr "Ulo¾it"
 
-#: ../mod_query/mod_query.lua:505
+#: ../etc/cfg_tiling.lua:86
+msgid "Detach"
+msgstr "Odpojit"
+
+#: ../mod_query/mod_query.lua:487
 msgid "Workspace name:"
 msgstr "Název pracovní plochy:"
 
-#: ../ioncore/ioncore_bindings.lua:45
-msgid "Error compiling guard: %s"
-msgstr "Chyba pøi sestavení strá¾ce: %s"
+#: ../etc/cfg_ioncore.lua:338
+msgid "Links"
+msgstr "Links"
 
-#: ../etc/cfg_bindings.lua:180
-msgid "Switch the frame to display the object indicated by the tab."
-msgstr "Pøepne rám, aby zobrazoval objekt urèený zálo¾kou."
-
-#: ../etc/cfg_bindings.lua:166
+#: ../etc/cfg_ioncore.lua:247
 msgid "Attach tagged objects to this frame."
 msgstr "Pøipojí oznaèené objekty k tomuto rámu."
 
-#
-#: ../pwm/cfg_pwm_menus.lua:14
-msgid "Workspaces"
-msgstr "Pracovní plochy"
+#: ../mod_query/mod_query.lua:1114
+msgid "%s:"
+msgstr "%s:"
 
-#: ../etc/cfg_floatws.lua:9
-msgid "Circulate focus and raise the newly focused frame."
-msgstr "Cykluje mezi rámy a pøesune je nahoru."
+#: ../ioncore/ioncore_bindings.lua:54
+msgid "Error compiling guard: %s"
+msgstr "Chyba pøi sestavení strá¾ce: %s"
 
 #
-#: ../etc/cfg_menus.lua:21
+#: ../etc/cfg_ioncore.lua:341
 msgid "Run..."
 msgstr "Spustit..."
 
-#: ../etc/cfg_bindings.lua:119
-msgid "Query for file to view."
-msgstr "Zeptá se na soubor, který chcete zobrazit."
+#: ../ioncore/ioncore_menudb.lua:220
+msgid "Refresh list"
+msgstr "Obnovit seznam"
 
-#: ../mod_query/mod_query.lua:754
+#: ../mod_query/mod_query.lua:755
 msgid "Failed to open ~/.ssh/known_hosts"
 msgstr "Selhalo otevøení ~/.ssh/known_hosts"
 
-#: ../pwm/cfg_pwm_menus.lua:17 ../etc/cfg_menus.lua:13
+#: ../pwm/cfg_pwm.lua:87 ../etc/cfg_ioncore.lua:328
 msgid "Session"
 msgstr "Sezení"
 
+#: ../etc/cfg_ioncore.lua:173 ../etc/cfg_ioncore.lua:193
+msgid "Display context menu."
+msgstr "Zobrazí kontextové menu."
+
+#~ msgid "Could not find a complete workspace class. Please load some modules."
+#~ msgstr "Nemohu najít úplnou tøídu pracovní plochy. Zaveïte nìjaké moduly."
+
+#~ msgid "Failed to rescue some client windows."
+#~ msgstr "Záchrana nìkterých klientských oken selhala."
+
+#~ msgid "Same manager."
+#~ msgstr "Stejný mana¾er."
+
 #
-#: ../etc/cfg_bindings.lua:78
-msgid ""
-"Nudge current client window. This might help with some programs' resizing "
-"problems."
-msgstr ""
-"Postrèí aktuální klientské okno. To mù¾e pomoci nìkterým programùm, které "
-"mají problémy se zmìnou velikosti."
+#~ msgid "Invalid split type parameter."
+#~ msgstr "Neplatný parametr typu rozdìlení."
+
+#
+#~ msgid "Failure to create a new frame."
+#~ msgstr "Chyba pøi vytváøení nového rámu."
+
+#
+#~ msgid "Region not managed by the workspace."
+#~ msgstr "Oblast není spravována pracovní plochou."
+
+#~ msgid "No geometry specified."
+#~ msgstr "Nebyla zadána geometrie."
+
+#~ msgid "none"
+#~ msgstr "¾ádná"
+
+#
+#~ msgid "mail"
+#~ msgstr "po¹ta"
+
+#~ msgid ""
+#~ "\n"
+#~ "Transients:\n"
+#~ msgstr ""
+#~ "\n"
+#~ "Doèasná okna:\n"
+
+#~ msgid "Workspace type (%s):"
+#~ msgstr "Typ pracovní plochy (%s):"
+
+#~ msgid "Go to previous active object."
+#~ msgstr "Pøejde na pøedchozí aktivní objekt."
+
+#
+#
+#~ msgid "Toggle fullscreen mode of current client window."
+#~ msgstr "Zapne celoobrazovkový re¾im u aktuálního klientského okna."
+
+#~ msgid "WStatusBar expected."
+#~ msgstr "Oèekáván WStatusBar."
+
+#~ msgid "Backwards-circulate focus and raise the newly focused frame."
+#~ msgstr "Zpìtnì cykluje mezi rámy a pøesune je nahoru."
+
+#~ msgid "(Un)stick"
+#~ msgstr "(Pøi/Od)lepit"
+
+#
+#~ msgid "Query for a client window to attach to active frame."
+#~ msgstr "Zeptá se na klientské okno, které se má pøipojit k aktivnímu rámu."
+
+#~ msgid "Raise/lower active frame."
+#~ msgstr "Pøesune aktivní rám do popøedí/pozadí."
+
+#~ msgid "Unable to create workspace: no screen."
+#~ msgstr "Nemohu vytvoøit pracovní plochu: obrazovka neexistuje."
+
+#~ msgid "load"
+#~ msgstr "vytí¾ení"
+
+#~ msgid "Mozilla Firefox"
+#~ msgstr "Mozilla Firefox"
+
+#~ msgid "Circulate focus and raise the newly focused frame."
+#~ msgstr "Cykluje mezi rámy a pøesune je nahoru."
 
 #~ msgid "Restart PWM"
 #~ msgstr "Restartovat PWM"
@@ -1744,9 +1864,6 @@ msgstr ""
 
 #~ msgid "Vertically at root"
 #~ msgstr "Vertikálnì na koøenu"
-
-#~ msgid "Transpose at root"
-#~ msgstr "Transponovat na koøenu"
 
 #~ msgid "Flip&transpose"
 #~ msgstr "Obrátit&transponovat"
