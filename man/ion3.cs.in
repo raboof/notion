@@ -50,19 +50,17 @@ objektù. Podrobnìj¹í popis nutný pro psaní vlastních pøizpùsobení naleznete
 na webových stránkách Ionu.
 
 Nejvy¹¹ími objekty jsou \fBobrazovky\fP, které odpovídají fyzickým
-obrazovkám. Obrazovky obsahují \fBpracovní plochy\fP a 
-\fBklientská okna\fP v celoobrazovkovém re¾imu. V jeden okam¾ik mù¾e být
-na obrazovce zobrazen právì jeden takový objekt.
+obrazovkám. Obrazovky obsahují \fBpracovní plochy\fP (co¾ je nìco jako
+\fBskupiny\fP) a \fBklientská okna\fP v celoobrazovkovém re¾imu. V jeden
+okam¾ik mù¾e být na obrazovce zobrazen právì jeden takový objekt.
 
-Ion momentálnì podporuje dva typy pracovních ploch: tradièní
-\fBdla¾dicový\fP (klasický Ion) a bì¾nìj¹í \fBplovoucí\fP (PWM).
-Pracovní plochy samy o sobì nejsou vidìt a slou¾í hlavnì jako kontejnery
-pro skupiny \fBrámù\fP.
-
-Podobnì jako obrazovky obsahují i rámy dal¹í objekty, ale v tomto pøípadì
-ji¾ jde vìt¹inou o klientská okna. Po vìt¹inu èasu bývají rámy jedinou
-viditelnou èástí Ionu - volitelnì mohou mít kolem sebe orámování a pro
-ka¾dého potomka zobrazují \fBzálo¾ku\fP.
+Pracovní plochy mohou obsahovat \fBdla¾dice\fP a odpojené/plovoucí
+\fBrámy\fP. Dla¾dice obsahují \fBrámy\fP tak, aby bezezbytku vyplnily
+(vydlá¾dily) celou obrazovku, a pøípadnì stavový øádek a dok. Podobnì
+jako obrazovky obsahují i rámy dal¹í objekty, ale v tomto pøípadì ji¾
+jde vìt¹inou o \fBskupiny\fP klientských oken. Po vìt¹inu èasu bývají
+rámy jedinou viditelnou èástí Ionu - volitelnì mohou mít kolem sebe
+orámování a pro ka¾dého potomka zobrazují \fBzálo¾ku\fP.
 
 Dal¹í viditelnou èástí jsou \fBdotazy\fP. Nejde o nic jiného ne¾ obdélníky,
 které se objeví ve spodní èásti rámù nebo obrazovek v¾dy, kdy¾ se Ion ptá
@@ -72,11 +70,11 @@ který se má spustit). Vìt¹ina dotazù podporuje doplòování klávesou tab.
 
 .SH PØIØAZENÍ
 
-Toto jsou implicitní pøiøazení klávesových zkratek. Pøiøazení modifikátoru
+Toto jsou výchozí pøiøazení klávesových zkratek. Pøiøazení modifikátoru
 (\fBMod1\fP) závisí na systému. Na PCèkách s XFree86 bude nejspí¹ navázán
 na levou klávesu Alt (\fBAlt_L\fP). Na Sunech je obvykle namapován na klávesy
 s diamanty (\fBMeta_L\fP, \fBMeta_R\fP). Konkrétní pøiøazení zjistíte
-programem \fIxmodmap(1x)\fP.
+programem \fIxmodmap(1)\fP.
 
 Øetìzec v hranatých závorkách urèuje modul, jeho¾ konfiguraèní soubor
 definuje toto pøiøazení.
@@ -85,29 +83,42 @@ definuje toto pøiøazení.
 
 BINDINGS:WScreen
 
-.".SS Pøiøazení pro práci s rámy a obrazovkami a jejich potomky
+.SS Pøiøazení pro práci s nejvy¹¹ími rámy a obrazovkami a jejich potomky
+
+BINDINGS:WMPlex.toplevel
+
+.SS Pøiøazení pro práci s rámy a obrazovkami a jejich potomky
 
 BINDINGS:WMPlex
 
-.SS Pøiøazení pro práci s rámy a jejich potomky
+.SS Pøiøazení pro práci se v¹emi rámy (vèetnì doèasných) a jejich potomky
 
 BINDINGS:WFrame
+
+.SS Pøiøazení pro práci s nejvy¹¹ími rámy (ne s doèasnými) a jejich potomky
+
+BINDINGS:WFrame.toplevel
+
+.SS Pøiøazení pro práci s plovoucími/odpojenými rámy
+
+BINDINGS:WFloatFrame
+
+.SS Pøiøazení pro dla¾dicové plochy a rámy [mod_tiling]
+
+BINDINGS:WTiling
+BINDINGS:WFrame-on-WTiling
+
+.SS Pøiøazení pro kientská okna
+
+BINDINGS:WClientWin
+
+BINDINGS:WGroupWS
 
 .SS Pøiøazení pro pøesun/zmìnu velikosti
 
 BINDINGS:WMoveresMode
 
-.SS Pøiøazení pro dla¾dicové pracovní plochy [mod_ionws]
-
-BINDINGS:WTiling
-
-.SS Pøiøazení pro plovoucí pracovní plochy a rámy [mod_floatws]
-
-BINDINGS:WGroupWS
-
-BINDINGS:WFloatFrame
-
-.SS Pøiøazení pro zprávy a dotazy [mod_query]
+.SS Pøiøazení pro informaèní zprávy a dotazy [mod_query]
 
 BINDINGS:WInput
 
