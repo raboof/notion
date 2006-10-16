@@ -11,6 +11,12 @@ include $(TOPDIR)/modulelist.mk
 
 ######################################
 
+SOURCES=pwm.c
+
+ETC = cfg_pwm.lua
+
+TARGETS = pwm3
+
 INCLUDES += $(X11_INCLUDES) 
 INCLUDES += $(LIBMAINLOOP_INCLUDES) $(LIBTU_INCLUDES) $(LIBEXTL_INCLUDES)
 INCLUDES += -I..
@@ -45,11 +51,6 @@ DEFINES += -DPWM_ETCDIR=\"$(PWM_ETCDIR)\"
 endif
 
 CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
-
-SOURCES=pwm.c
-
-ETC = cfg_pwm.lua
-TARGETS = pwm3
 
 ######################################
 

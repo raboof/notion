@@ -11,6 +11,10 @@ include $(TOPDIR)/modulelist.mk
 
 ######################################
 
+SOURCES=ion.c
+
+TARGETS=ion3
+
 INCLUDES += $(X11_INCLUDES) 
 INCLUDES += $(LIBMAINLOOP_INCLUDES) $(LIBTU_INCLUDES) $(LIBEXTL_INCLUDES)
 INCLUDES += -I..
@@ -39,10 +43,6 @@ DEFINES += -DETCDIR=\"$(ETCDIR)\" -DSHAREDIR=\"$(SHAREDIR)\" \
 	   -DLCDIR=\"$(LCDIR)\" -DLOCALEDIR=\"$(LOCALEDIR)\"
 
 CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
-
-SOURCES=ion.c
-
-TARGETS=ion3
 
 ######################################
 
