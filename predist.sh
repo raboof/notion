@@ -41,7 +41,7 @@ fi
 getlib() {
     do_darcs_export $1 $2
     rm $2/build/rules.mk $2/system.mk
-    ln -s ../build/rules.mk $2/build/rules.mk
+    #ln -s ../../build/rules.mk $2/build/rules.mk
     cat > $2/build/system-inc.mk << EOF
 TOPDIR := \$(TOPDIR)/..
 include \$(TOPDIR)/build/system-inc.mk
