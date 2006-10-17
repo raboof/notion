@@ -425,8 +425,7 @@ bool group_init(WGroup *ws, WWindow *par, const WFitParams *fp)
     XSaveContext(ioncore_g.dpy, ws->dummywin, ioncore_g.win_context,
                  (XPointer)ws);
     
-    ((WRegion*)ws)->flags|=(REGION_PLEASE_WARP|
-                            REGION_GRAB_ON_PARENT);
+    ((WRegion*)ws)->flags|=REGION_GRAB_ON_PARENT;
     
     region_add_bindmap((WRegion*)ws, ioncore_group_bindmap);
     
