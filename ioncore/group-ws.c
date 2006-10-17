@@ -267,6 +267,7 @@ WPHolder *groupws_prepare_manage(WGroupWS *ws, const WClientWin *cwin,
     WRegion *b=(ws->grp.bottom!=NULL ? ws->grp.bottom->reg : NULL);
     WPHolder *ph=NULL;
     bool act_b=(ws->grp.bottom==ws->grp.current_managed);
+    bool always_float, use_bottom;
     int weak=0;
     
     if(param->maprq && ioncore_g.opmode!=IONCORE_OPMODE_INIT
@@ -282,13 +283,17 @@ WPHolder *groupws_prepare_manage(WGroupWS *ws, const WClientWin *cwin,
     if(b!=NULL && !HAS_DYN(b, region_prepare_manage))
         b=NULL;
     
-    if(b!=NULL && act_b)
+    use_bottom=(act_b
+                ? !extl_table_is_bool_set(cwin->proptab, "float")
+                : act_b);
+    
+    if(b!=NULL && use_bottom)
         ph=region_prepare_manage(b, cwin, param, redir);
     
     if(ph==NULL)
         ph=groupws_do_prepare_manage(ws, cwin, param, redir, weak);
 
-    if(ph==NULL && b!=NULL && !act_b)
+    if(ph==NULL && b!=NULL && !use_bottom)
         ph=region_prepare_manage(b, cwin, param, redir);
     
     return ph;
