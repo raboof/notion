@@ -707,35 +707,25 @@ static void mplex_do_node_display(WMPlex *mplex, WStacking *node,
 }
 
 
-static bool mplex_do_node_goto(WMPlex *mplex, WStacking *node,
-                               bool call_changed, int flags)
+static bool mplex_refocus(WMPlex *mplex, WStacking *node, bool warp)
 {
+    WRegion *foc=NULL;
     bool ret=TRUE;
     
-    mplex_do_node_display(mplex, node, call_changed);
-    
-    if(flags&REGION_GOTO_FOCUS){
-        WRegion *foc=mplex_to_focus_on(mplex, node, NULL);
-        
-        if(foc==NULL){
-            ret=FALSE;
-            foc=mplex_to_focus(mplex);
-        }
-        
-        if(foc!=NULL && !REGION_IS_ACTIVE(foc))
-            region_maybewarp(foc, !(flags&REGION_GOTO_NOWARP));
+    if(node!=NULL){
+        foc=mplex_to_focus_on(mplex, node, NULL);
+        ret=(foc!=NULL);
     }
+        
+    if(foc==NULL){
+        ret=FALSE;
+        foc=mplex_to_focus(mplex);
+    }
+        
+    if(foc!=NULL && !REGION_IS_ACTIVE(foc))
+        region_maybewarp(foc, warp);
     
     return ret;
-}
-
-
-static bool mplex_do_node_goto_sw(WMPlex *mplex, WStacking *node,
-                                  bool call_changed)
-{
-    bool mcf=region_may_control_focus((WRegion*)mplex);
-    int flags=(mcf ? REGION_GOTO_FOCUS : 0)/*|REGION_GOTO_NOWARP*/;
-    return mplex_do_node_goto(mplex, node, call_changed, flags);
 }
 
 
@@ -786,24 +776,24 @@ bool mplex_managed_prepare_focus(WMPlex *mplex, WRegion *disp,
 }
 
 
-static void mplex_refocus(WMPlex *mplex, bool warp)
-{
-    WRegion *reg=mplex_to_focus(mplex);
-    
-    if(reg!=NULL && reg!=REGION_ACTIVE_SUB(mplex))
-        region_maybewarp(reg, warp);
-}
-
 /*}}}*/
 
 
 /*{{{ Switch exports */
 
 
-static void do_switch(WMPlex *mplex, WLListNode *node)
+static void do_switch(WMPlex *mplex, WLListNode *lnode)
 {
-    if(node!=NULL)
-        mplex_do_node_goto_sw(mplex, node->st, TRUE);
+    WStacking *node=(lnode!=NULL ? lnode->st : NULL);
+    
+    if(node!=NULL){
+        bool mcf=region_may_control_focus((WRegion*)mplex);
+    
+        mplex_do_node_display(mplex, node, TRUE);
+        
+        if(mcf)
+            mplex_refocus(mplex, node, FALSE);
+    }
 }
 
 
@@ -859,12 +849,13 @@ bool mplex_set_hidden(WMPlex *mplex, WRegion *reg, int sp)
         if(REGION_IS_MAPPED(mplex) && !MPLEX_MGD_UNVIEWABLE(mplex))
             region_unmap(reg);
         
-        if(mcf)
-            mplex_refocus(mplex, TRUE);
+        /* lnode -> switch next? */
     }else if(hidden && !nhidden){
-        mplex_do_node_goto(mplex, node, TRUE,
-                           (mcf ? REGION_GOTO_FOCUS : 0));
+        mplex_do_node_display(mplex, node, TRUE);
     }
+    
+    if(mcf)
+        mplex_refocus(mplex, (nhidden ? NULL : node), FALSE);
     
     return STACKING_IS_HIDDEN(node);
 }
@@ -1152,13 +1143,14 @@ bool mplex_do_attach_final(WMPlex *mplex, WRegion *reg, WMPlexPHolder *ph)
     
     region_set_manager(reg, (WRegion*)mplex);
 
-    if(sw)
-        mplex_do_node_goto_sw(mplex, node, FALSE);
-    else if(lnode==NULL && !(param->flags&MPLEX_ATTACH_HIDDEN))
+    if(sw || (lnode==NULL && !(param->flags&MPLEX_ATTACH_HIDDEN)))
         mplex_do_node_display(mplex, node, FALSE);
     else
         region_unmap(reg);
-
+    
+    if(sw && region_may_control_focus((WRegion*)mplex))
+        mplex_refocus(mplex, node, FALSE);
+    
     if(lnode!=NULL)
         mplex_managed_changed(mplex, MPLEX_CHANGE_ADD, sw, reg);
     
@@ -1509,15 +1501,12 @@ void mplex_managed_remove(WMPlex *mplex, WRegion *sub)
     if(OBJ_IS_BEING_DESTROYED(mplex))
         return;
     
-    if(next!=NULL){
-        if(hadfocus)
-            mplex_do_node_goto_sw(mplex, next, FALSE);
-        else
-            mplex_do_node_display(mplex, next, FALSE);
-    }else if(hadfocus && mcf){
-        mplex_refocus(mplex, TRUE);
-    }
+    if(next!=NULL)
+        mplex_do_node_display(mplex, next, FALSE);
 
+    if(hadfocus && mcf)
+        mplex_refocus(mplex, next, FALSE);
+    
     if(mx)
         mplex_managed_changed(mplex, MPLEX_CHANGE_REMOVE, next!=NULL, sub);
 }
