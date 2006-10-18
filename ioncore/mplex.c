@@ -198,12 +198,18 @@ WStacking *mplex_find_stacking(WMPlex *mplex, WRegion *reg)
 
 WStacking *mplex_current_node(WMPlex *mplex)
 {
+    WStacking *st=NULL;
     WRegion *reg;
     
     reg=REGION_ACTIVE_SUB(mplex);
     reg=region_managed_within((WRegion*)mplex, reg);
-    
-    return (reg==NULL ? NULL : mplex_find_stacking(mplex, reg));
+    if(reg!=NULL)
+        st=mplex_find_stacking(mplex, reg);
+
+    if(st!=NULL)
+        return st;
+    else
+        return (mplex->mx_current!=NULL ? mplex->mx_current->st : NULL);
 }
 
 
