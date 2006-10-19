@@ -1,7 +1,7 @@
 
 LIBS_SUBDIRS = libmainloop
 
-LIBTU_DIR = $(TOPDIR)/../libtu
+LIBTU_DIR = $(TOPDIR)/../libtu-3
 LIBTU_INCLUDES = 
 LIBTU_LIBS = -ltu
 
@@ -9,7 +9,7 @@ LIBMAINLOOP_DIR = $(TOPDIR)/libmainloop
 LIBMAINLOOP_INCLUDES = -I$(TOPDIR)
 LIBMAINLOOP_LIBS = -L$(LIBMAINLOOP_DIR) -lmainloop
 
-LIBEXTL_DIR = $(TOPDIR)/../libextl
+LIBEXTL_DIR = $(TOPDIR)/../libextl-3
 LIBEXTL_INCLUDES =
 LIBEXTL_LIBS = -lextl
 

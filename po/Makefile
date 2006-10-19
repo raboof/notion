@@ -10,16 +10,15 @@ XGETTEXT = xgettext
 #MSGFMT = msgfmt -c
 MSGFMT = msgfmt
 MSGMERGE = msgmerge
-LXGETTEXT = $(LUA) $(TOPDIR)/build/lxgettext.lua
+MSGCAT = msgcat
+LXGETTEXT = lua-xgettext
 
 TRANSLATIONS := fi cs de ru
 MO_FILES := $(patsubst %,%.mo, $(TRANSLATIONS))
 PO_FILES := $(patsubst %,%.po, $(TRANSLATIONS))
 
 POTDIRS=../ioncore \
-	../mod_ionws \
-	../mod_floatws \
-	../mod_panews \
+	../mod_tiling \
 	../mod_query \
 	../mod_menu \
 	../mod_sm \
@@ -58,11 +57,22 @@ potdirs_potfiles:
 
 pot: $(POTFILE)
 
-$(POTFILE): potfiles
-	$(XGETTEXT) -kTR -kDUMMY_TR -o $(POTFILE).tmp -f potfiles_c
-	$(LXGETTEXT) -k TR -k bdoc -k submenu -k menuentry \
-		-o $(POTFILE) -a $(POTFILE).tmp -f potfiles_lua
-	$(RM) $(POTFILE).tmp
+$(POTFILE)_c: potfiles
+	$(XGETTEXT) -kTR -kDUMMY_TR -o $@ -f potfiles_c
+
+$(POTFILE)_lua: potfiles
+	$(LXGETTEXT) -k TR -k bdoc -k submenu -k menuentry -o $@ \
+		`cat potfiles_lua`
+
+$(POTFILE): $(POTFILE)_c $(POTFILE)_lua
+	#
+	# GNU gettext sucks bigtime, and refuses to work on POT
+	# files without encoding set. Therefore we'll just have to
+	# use plain old cat and hope that there aren't dupes.
+	#
+	#msgcat -o $@ $+
+	#
+	cat $+ > $@
 
 %.mo: %.po
 	$(MSGFMT) -o $@ $<

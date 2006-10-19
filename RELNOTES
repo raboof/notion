@@ -1,8 +1,14 @@
 
+ion-3ds-200610??
+----------------
+
+Fixes some (expected, but minor) issues in the previous release.
+
+
 ion-3ds-20061015
 ----------------
 
- * WIonWS and WFloatWS and the corresponding modules are also gone, and
+ * WIonWS and WFloatWS and the corresponding modules are gone, and
    your custom configuration files will be broken with regard to these.
    However, a partial backwards compatibility hack exists for layout 
    savefiles.
@@ -10,7 +16,7 @@ ion-3ds-20061015
    The F9 and META-F9 bindings now by default create workspaces with
    a tiled layout of two frames. To create an "empty" workspace,
    corresponding to the old WFloatWS, use the context menu (META-M)
-   and chose "new-empty-workspace". It is also possible to change 
+   and choose "new-empty-workspace". It is also possible to change 
    the default layout.
 
  * Note that if you restart from an old version to this new version of Ion,
@@ -21,9 +27,8 @@ ion-3ds-20061015
    and some old bindings may not work exactly as expected anymore. In
    particular, those for switching to full-screen mode. 
 
-   **
-   It is probably best to start from scratch with your custom bindings.
-   **
+   **It is probably best to start from scratch with your custom 
+     bindings.**
 
  * `WFrame.set_tabbar` is gone. If you absolutely want to get rid off 
    the tabs, you must change the frame's "mode" with `WFrame.set_mode`. 
@@ -33,7 +38,7 @@ ion-3ds-20061015
  * The rather popular `detach.lua` script from the scripts repository
    is obsoleted now, as Ion includes detach functionality in itself.
    To detach a window, use META-K D in the default bindings. To tile
-   an existing from an a workspace that doesn't have a tiling yet,
+   an existing frame from a workspace that doesn't have a tiling yet,
    use META-K B.
    
 
