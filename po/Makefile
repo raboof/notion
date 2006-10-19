@@ -83,7 +83,14 @@ _install:
 		$(INSTALL) -m $(DATA_MODE) $$i.mo $(LOCALEDIR)/$$i/LC_MESSAGES/ion3.mo ; \
 	done
 
-update_translations: pot
-	for i in $(PO_FILES); do \
-		$(MSGMERGE) -U $$i $(POTFILE); \
-	done
+update_fi: pot
+	$(MSGMERGE) -U fi.po $(POTFILE)
+
+update_cs: pot
+	$(MSGMERGE) -U cs.po $(POTFILE)
+
+update_ru: pot
+	$(MSGMERGE) -U ru.po $(POTFILE)
+
+update_de: pot
+	$(MSGMERGE) -U de.po $(POTFILE)
