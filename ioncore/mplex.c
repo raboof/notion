@@ -798,7 +798,7 @@ static void do_switch(WMPlex *mplex, WLListNode *lnode)
         mplex_do_node_display(mplex, node, TRUE);
         
         if(mcf)
-            mplex_refocus(mplex, node, FALSE);
+            mplex_refocus(mplex, node, TRUE);
     }
 }
 
