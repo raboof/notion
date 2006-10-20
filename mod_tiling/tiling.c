@@ -503,8 +503,11 @@ bool tiling_managed_add_default(WTiling *ws, WRegion *reg)
     region_set_manager(reg, (WRegion*)ws);
     
     frame=OBJ_CAST(reg, WFrame);
-    if(frame!=NULL)
-        frame_set_mode(frame, FRAME_MODE_TILED);
+    if(frame!=NULL){
+        WFrameMode mode=frame_mode(frame);
+        if(mode!=FRAME_MODE_TILED && mode!=FRAME_MODE_TILED_ALT)
+            frame_set_mode(frame, FRAME_MODE_TILED);
+    }
     
     if(REGION_IS_MAPPED(ws))
         region_map(reg);
