@@ -733,11 +733,10 @@ static bool mrsh_u_extl(ExtlFn fn, void *param)
 
 static void clientwin_do_unmapped(WClientWin *cwin, Window win)
 {
-#warning "TODO"    
-    /*
-    if(cf && cwin->fs_pholder!=NULL)
+    bool mcf=region_may_control_focus((WRegion*)cwin);
+
+    if(mcf && cwin->fs_pholder!=NULL)
         pholder_goto(cwin->fs_pholder);
-     */
     
     destroy_obj((Obj*)cwin);
     
