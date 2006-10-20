@@ -727,8 +727,8 @@ static bool mplex_refocus(WMPlex *mplex, WStacking *node, bool warp)
         ret=FALSE;
         foc=mplex_to_focus(mplex);
     }
-        
-    if(foc!=NULL && !REGION_IS_ACTIVE(foc))
+    
+    if(foc!=NULL /* && !REGION_IS_ACTIVE(foc) */ )
         region_maybewarp(foc, warp);
     
     return ret;
@@ -1078,8 +1078,10 @@ bool mplex_do_attach_final(WMPlex *mplex, WRegion *reg, WMPlexPHolder *ph)
     WStacking *node=NULL;
     WLListNode *lnode=NULL;
     WMPlexAttachParams *param=&ph->param;
-    bool mx_was_empty, sw, modal;
+    bool mx_was_empty, sw, modal, mcf;
     uint level;
+    
+    mcf=region_may_control_focus((WRegion*)mplex);
     
     mx_was_empty=(mplex->mx_list==NULL);
     
@@ -1154,7 +1156,7 @@ bool mplex_do_attach_final(WMPlex *mplex, WRegion *reg, WMPlexPHolder *ph)
     else
         region_unmap(reg);
     
-    if(sw && region_may_control_focus((WRegion*)mplex))
+    if(sw && mcf)
         mplex_refocus(mplex, node, FALSE);
     
     if(lnode!=NULL)
