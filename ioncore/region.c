@@ -871,6 +871,9 @@ WRegion *region_managed_within(WRegion *reg, WRegion *mgd)
 static DynFunTab region_dynfuntab[]={
     {region_managed_rqgeom,
      region_managed_rqgeom_allow},
+     
+    {region_managed_rqgeom_absolute,
+     region_managed_rqgeom_absolute_default},
     
     {region_updategr, 
      region_updategr_default},

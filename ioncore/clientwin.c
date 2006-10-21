@@ -1133,10 +1133,9 @@ void clientwin_handle_configure_request(WClientWin *cwin,
     cwin->flags|=CLIENTWIN_NEED_CFGNTFY;
 
     if(ev->value_mask&(CWX|CWY|CWWidth|CWHeight)){
-        WRectangle geom;
-        WRegion *mgr;
         int rqflags=REGION_RQGEOM_WEAK_ALL;
         int gdx=0, gdy=0;
+        WRectangle geom;
 
         /* Do I need to insert another disparaging comment on the person who
          * invented special server-supported window borders that are not 
@@ -1149,10 +1148,6 @@ void clientwin_handle_configure_request(WClientWin *cwin,
                                -cwin->orig_bw, -cwin->orig_bw);
         }
         
-        /* Rootpos is usually wrong here, but managers (frames) that respect
-         * position at all, should define region_rqgeom_clientwin to
-         * handle this how they see fit.
-         */
         region_rootpos((WRegion*)cwin, &(geom.x), &(geom.y));
         geom.w=REGION_GEOM(cwin).w;
         geom.h=REGION_GEOM(cwin).h;
@@ -1184,21 +1179,8 @@ void clientwin_handle_configure_request(WClientWin *cwin,
             rqflags&=~REGION_RQGEOM_WEAK_Y;
         }
         
-        mgr=region_manager((WRegion*)cwin);
-        if(mgr!=NULL && HAS_DYN(mgr, region_rqgeom_clientwin)){
-            /* Manager gets to decide how to handle position request. */
-            region_rqgeom_clientwin(mgr, cwin, rqflags, &geom);
-        }else{
-            region_convert_root_geom(REGION_PARENT_REG((WRegion*)cwin),
-                                     &geom);
-            rqflags|=(REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y);
-            region_rqgeom((WRegion*)cwin, rqflags, &geom, NULL);
-            /* Just use any known available space wanted or give up some */
-            /* Temporary hack. */
-            /*REGION_GEOM(cwin).w=geom.w;
-            REGION_GEOM(cwin).h=geom.h;
-            region_fitrep((WRegion*)cwin, NULL, &(cwin->last_fp));*/
-        }
+        region_rqgeom((WRegion*)cwin, rqflags|REGION_RQGEOM_ABSOLUTE, 
+                      &geom, NULL);
     }
 
     if(cwin->flags&CLIENTWIN_NEED_CFGNTFY){

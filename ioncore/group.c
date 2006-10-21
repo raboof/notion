@@ -878,8 +878,8 @@ void group_manage_stdisp(WGroup *ws, WRegion *stdisp,
 
 
 void group_managed_rqgeom(WGroup *ws, WRegion *reg,
-                            int flags, const WRectangle *geom,
-                            WRectangle *geomret)
+                          int flags, const WRectangle *geom,
+                          WRectangle *geomret)
 {
     WFitParams fp;
     WStacking *st;
@@ -891,7 +891,7 @@ void group_managed_rqgeom(WGroup *ws, WRegion *reg,
         fp.mode=REGION_FIT_EXACT;
     }else{
         fp.g=REGION_GEOM(ws);
-        sizepolicy(&st->szplcy, reg, geom, 0 /* flags */, &fp);
+        sizepolicy(&st->szplcy, reg, geom, flags, &fp);
     }
     
     if(geomret!=NULL)
@@ -899,6 +899,23 @@ void group_managed_rqgeom(WGroup *ws, WRegion *reg,
     
     if(!(flags&REGION_RQGEOM_TRYONLY))
         region_fitrep(reg, NULL, &fp);
+}
+
+
+void group_managed_rqgeom_absolute(WGroup *grp,
+                                   WRegion *sub, int flags, 
+                                   const WRectangle *geom,
+                                   WRectangle *geomret)
+{
+    if(grp->bottom!=NULL && grp->bottom->reg==sub){
+        region_rqgeom((WRegion*)grp, flags, geom, geomret);
+        if(!(flags&REGION_RQGEOM_TRYONLY) && geomret!=NULL)
+            *geomret=REGION_GEOM(sub);
+    }else{
+        region_managed_rqgeom((WRegion*)grp, sub, 
+                              flags&~REGION_RQGEOM_ABSOLUTE, 
+                              geom, geomret);
+    }
 }
 
 
@@ -1307,6 +1324,9 @@ static DynFunTab group_dynfuntab[]={
 
     {region_managed_rqgeom,
      group_managed_rqgeom},
+     
+    {region_managed_rqgeom_absolute,
+     group_managed_rqgeom_absolute},
     
     {(DynFun*)group_do_add_managed,
      (DynFun*)group_do_add_managed_default},

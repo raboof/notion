@@ -554,36 +554,38 @@ void frame_activated(WFrame *frame)
 /*{{{ Client window rqgeom */
 
 
-/* geom parameter==client requested geometry minus border crap */
-static void frame_rqgeom_clientwin(WFrame *frame, WClientWin *cwin,
-                                   int rqflags, const WRectangle *geom_)
+static void frame_managed_rqgeom_absolute(WFrame *frame, WRegion *sub,
+                                          int rqflags, const WRectangle *geom_,
+                                          WRectangle *geomret)
 {
-    int gravity=NorthWestGravity;
+    int gravity=ForgetGravity;
     WRectangle off;
     WRegion *par;
     WRectangle geom=*geom_;
     
-    if(FORWARD_CWIN_RQGEOM(frame)){
-        region_managed_rqgeom((WRegion*)frame, (WRegion*)cwin,
-                              rqflags, geom_, NULL);
+    if(!FORWARD_CWIN_RQGEOM(frame)){
+        region_managed_rqgeom_absolute_default((WRegion*)frame, sub, 
+                                               rqflags, geom_, geomret);
         return;
     }
-    
-    if(cwin->size_hints.flags&PWinGravity)
-        gravity=cwin->size_hints.win_gravity;
 
+    /* client window gravity */ {
+        WClientWin *cwin=OBJ_CAST(sub, WClientWin);
+        
+        if(cwin!=NULL && cwin->size_hints.flags&PWinGravity)
+            gravity=cwin->size_hints.win_gravity;
+    }
+    
     mplex_managed_geom(&frame->mplex, &off);
     off.x=-off.x;
     off.y=-off.y;
     off.w=REGION_GEOM(frame).w-off.w;
     off.h=REGION_GEOM(frame).h-off.h;
 
-    geom.w=maxof(geom.w, 0);
-    geom.h=maxof(geom.h, 0);
-    geom.w+=off.w;
-    geom.h+=off.h;
+    geom.w=maxof(geom.w+off.w, 0);
+    geom.h=maxof(geom.h+off.h, 0);
     
-    region_size_hints_correct((WRegion*)frame, &(geom.w), &(geom.h), TRUE);
+    /*region_size_hints_correct((WRegion*)frame, &(geom.w), &(geom.h), TRUE);*/
     
     /* If WEAK_? is set, then geom.(x|y) is root-relative as it was not 
      * requested by the client and clientwin_handle_configure_request has
@@ -597,24 +599,18 @@ static void frame_rqgeom_clientwin(WFrame *frame, WClientWin *cwin,
         geom.x+=xgravity_deltax(gravity, -off.x, off.x+off.w);
 
     if(rqflags&REGION_RQGEOM_WEAK_Y)
-        geom.y+=off.y;  /* geom.y was clientwin root relative y */
+        geom.y+=off.y;
     else
         geom.y+=xgravity_deltay(gravity, -off.y, off.y+off.h);
-
-    par=REGION_PARENT_REG(frame);
-    region_convert_root_geom(par, &geom);
-    if(par!=NULL){
-        if(geom.x+geom.w<4)
-            geom.x=-geom.w+4;
-        if(geom.x>REGION_GEOM(par).w-4)
-            geom.x=REGION_GEOM(par).w-4;
-        if(geom.y+geom.h<4)
-            geom.y=-geom.h+4;
-        if(geom.y>REGION_GEOM(par).h-4)
-            geom.y=REGION_GEOM(par).h-4;
+    
+    region_rqgeom((WRegion*)frame, rqflags, &geom, geomret);
+    
+    if(geomret!=NULL){
+        geomret->x-=off.x;
+        geomret->y-=off.y;
+        geomret->w-=off.w;
+        geomret->h-=off.h;
     }
-
-    region_rqgeom((WRegion*)frame, rqflags, &geom, NULL);
 }
 
 
@@ -913,7 +909,8 @@ static DynFunTab frame_dynfuntab[]={
     {(DynFun*)region_fitrep,
      (DynFun*)frame_fitrep},
 
-    {region_rqgeom_clientwin, frame_rqgeom_clientwin},
+    {region_managed_rqgeom_absolute, 
+     frame_managed_rqgeom_absolute},
 
     {region_managed_remove, frame_managed_remove},
     

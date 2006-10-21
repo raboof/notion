@@ -836,13 +836,6 @@ static void dock_managed_rqgeom(WDock *dock, WRegion *reg, int flags,
 }
 
 
-static void dock_rqgeom_clientwin(WDock *dock, WClientWin *cwin,
-                                  int rqflags, const WRectangle *geom)
-{
-    dock_managed_rqgeom_(dock, (WRegion*)cwin, rqflags, geom, NULL, FALSE);
-}
-
-
 void dock_size_hints(WDock *dock, WSizeHints *hints)
 {
     hints->min_set=TRUE;
@@ -1687,7 +1680,6 @@ static DynFunTab dock_dynfuntab[]={
     {(DynFun*)region_orientation, (DynFun*)dock_orientation},
     {(DynFun*)region_may_destroy, (DynFun*)dock_may_destroy},
     {(DynFun*)region_handle_drop, (DynFun*)dock_handle_drop},
-    {(DynFun*)region_rqgeom_clientwin, (DynFun*)dock_rqgeom_clientwin},
 
     {(DynFun*)region_managed_get_pholder,
      (DynFun*)dock_managed_get_pholder},

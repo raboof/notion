@@ -491,20 +491,27 @@ bool moveresmode_do_end(WMoveresMode *mode, bool apply)
 void region_rqgeom(WRegion *reg, int flags, const WRectangle *geom,
                    WRectangle *geomret)
 {
-    bool tryonly=(flags&REGION_RQGEOM_TRYONLY);
+    WRegion *mgr=REGION_MANAGER(reg);
     
-    if(REGION_MANAGER(reg)!=NULL){
-        region_managed_rqgeom(REGION_MANAGER(reg), reg, flags, geom,
-                              geomret);
+    if(mgr!=NULL){
+        if(flags&REGION_RQGEOM_ABSOLUTE)
+            region_managed_rqgeom_absolute(mgr, reg, flags, geom, geomret);
+        else
+            region_managed_rqgeom(mgr, reg, flags, geom, geomret);
     }else{
+        WRectangle tmp;
+        
+        if(flags&REGION_RQGEOM_ABSOLUTE){
+            region_absolute_geom_to_parent(reg, geom, &tmp);
+            geom=&tmp;
+        }
+        
         if(geomret!=NULL)
             *geomret=REGION_GEOM(reg);
-        if(!tryonly)
+        
+        if(!(flags&REGION_RQGEOM_TRYONLY))
             region_fit(reg, geom, REGION_FIT_EXACT);
     }
-
-    /*if(!tryonly && geomret!=NULL)
-        *geomret=REGION_GEOM(reg);*/
 }
 
 
@@ -520,6 +527,7 @@ ExtlTab region_rqgeom_extl(WRegion *reg, ExtlTab g)
     WRectangle geom=REGION_GEOM(reg);
     WRectangle ogeom=REGION_GEOM(reg);
     int flags=REGION_RQGEOM_WEAK_ALL;
+    
     
     if(extl_table_gets_i(g, "x", &(geom.x)))
        flags&=~REGION_RQGEOM_WEAK_X;
@@ -548,10 +556,12 @@ void region_managed_rqgeom(WRegion *mgr, WRegion *reg,
 }
 
 
-void region_rqgeom_clientwin(WRegion *mgr, WClientWin *cwin,
-                             int flags, const WRectangle *geom)
+void region_managed_rqgeom_absolute(WRegion *mgr, WRegion *reg,
+                                    int flags, const WRectangle *geom,
+                                    WRectangle *geomret)
 {
-    CALL_DYN(region_rqgeom_clientwin, mgr, (mgr, cwin, flags, geom));
+    CALL_DYN(region_managed_rqgeom_absolute, mgr,
+             (mgr, reg, flags, geom, geomret));
 }
 
 
@@ -573,6 +583,20 @@ void region_managed_rqgeom_unallow(WRegion *mgr, WRegion *reg,
 {
     if(geomret!=NULL)
         *geomret=REGION_GEOM(reg);
+}
+
+
+void region_managed_rqgeom_absolute_default(WRegion *mgr, WRegion *reg,
+                                            int flags, 
+                                            const WRectangle *geom,
+                                            WRectangle *geomret)
+{
+    WRectangle geom2;
+    
+    region_absolute_geom_to_parent(reg, geom, &geom2);
+    
+    region_managed_rqgeom(mgr, reg, flags&~REGION_RQGEOM_ABSOLUTE,
+                          &geom2, geomret);
 }
 
 
@@ -791,6 +815,25 @@ void region_convert_root_geom(WRegion *reg, WRectangle *geom)
         region_rootpos(reg, &rx, &ry);
         geom->x-=rx;
         geom->y-=ry;
+    }
+}
+
+
+void region_absolute_geom_to_parent(WRegion *reg, const WRectangle *rgeom,
+                                    WRectangle *pgeom)
+{
+    WRegion *parent=REGION_PARENT_REG(reg);
+    
+    pgeom->w=rgeom->w;
+    pgeom->h=rgeom->h;
+    
+    if(parent==NULL){
+        pgeom->x=rgeom->x;
+        pgeom->y=rgeom->y;
+    }else{
+        region_rootpos(reg, &pgeom->x, &pgeom->y);
+        pgeom->x=rgeom->x-pgeom->x;
+        pgeom->y=rgeom->y-pgeom->y;
     }
 }
 

@@ -32,6 +32,7 @@
 #define REGION_RQGEOM_WEAK_H    0x0008
 #define REGION_RQGEOM_WEAK_ALL  0x000f
 #define REGION_RQGEOM_TRYONLY   0x0010
+#define REGION_RQGEOM_ABSOLUTE  0x0020
 
 #define REGION_RQGEOM_NORMAL    0
 #define REGION_RQGEOM_VERT_ONLY (REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_W)
@@ -91,6 +92,10 @@ extern WMoveresMode *moveres_mode(WRegion *reg);
 DYNFUN void region_managed_rqgeom(WRegion *reg, WRegion *sub, int flags, 
                                   const WRectangle *geom,
                                   WRectangle *geomret);
+DYNFUN void region_managed_rqgeom_absolute(WRegion *reg, 
+                                           WRegion *sub, int flags, 
+                                           const WRectangle *geom,
+                                           WRectangle *geomret);
 
 extern void region_rqgeom(WRegion *reg, int flags, 
                           const WRectangle *geom,
@@ -109,11 +114,12 @@ extern void region_managed_rqgeom_allow(WRegion *reg, WRegion *sub,
                                         const WRectangle *geom, 
                                         WRectangle *geomret);
 
-/* This function expects a root-relative geometry and the client expects
- * the gravity size hint be taken into account.
- */
-DYNFUN void region_rqgeom_clientwin(WRegion *reg, WClientWin *cwin,
-                                    int flags, const WRectangle *geom);
+extern void region_managed_rqgeom_absolute_default(WRegion *reg, 
+                                                   WRegion *sub,
+                                                   int flags, 
+                                                   const WRectangle *geom, 
+                                                   WRectangle *geomret);
+
 
 DYNFUN void region_size_hints(WRegion *reg, WSizeHints *hints_ret);
 DYNFUN int region_orientation(WRegion *reg);
@@ -128,5 +134,9 @@ extern void frame_maximize_vert(WFrame *frame);
 extern void frame_maximize_horiz(WFrame *frame);
 
 extern void region_convert_root_geom(WRegion *reg, WRectangle *geom);
+
+extern void region_absolute_geom_to_parent(WRegion *reg, 
+                                           const WRectangle *rgeom,
+                                           WRectangle *pgeom);
 
 #endif /* ION_IONCORE_RESIZE_H */
