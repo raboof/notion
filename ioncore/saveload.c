@@ -97,6 +97,7 @@ WRegion *create_region_load(WWindow *par, const WFitParams *fp,
             extl_table_sets_s(tab, "type", "WTiling");
             extl_table_sets_b(tab, "bottom", TRUE);
             extl_table_sets_b(tab, "bottom_last_close", TRUE);
+            extl_table_sets_i(tab, "sizepolicy", SIZEPOLICY_FULL_EXACT);
             
             if(name!=NULL)
                 region_set_name((WRegion*)ws, name);
