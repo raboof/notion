@@ -514,7 +514,7 @@ void frame_size_hints(WFrame *frame, WSizeHints *hints_ret)
     hints_ret->min_width+=woff;
     hints_ret->min_height+=hoff;
     
-    if(frame->mode==FRAME_MODE_FLOATING){
+    if(frame->barmode==FRAME_BAR_SHAPED){
         int f=frame->flags&(FRAME_SHADED|FRAME_SHADED_TOGGLE);
         
         if(f==FRAME_SHADED || f==FRAME_SHADED_TOGGLE){
@@ -620,44 +620,40 @@ static void frame_managed_rqgeom_absolute(WFrame *frame, WRegion *sub,
 /*{{{ Misc. */
 
 
-static void frame_do_toggle_shade(WFrame *frame, int shaded_h)
+bool frame_set_shaded(WFrame *frame, int sp)
 {
+    bool set=(frame->flags&FRAME_SHADED);
+    bool nset=libtu_do_setparam(sp, set);
     WRectangle geom=REGION_GEOM(frame);
+    GrBorderWidths bdw;
+    int h;
 
-    if(frame->flags&FRAME_SHADED){
+    if(!XOR(nset, set))
+        return nset;
+        
+    if(!nset){
         if(!(frame->flags&FRAME_SAVED_VERT))
-            return;
+            return FALSE;
         geom.h=frame->saved_h;
     }else{
-        if(frame->barmode==FRAME_BAR_NONE)
-            return;
-        geom.h=shaded_h;
+        if(frame->barmode==FRAME_BAR_NONE){
+            return FALSE;
+        }else if(frame->barmode==FRAME_BAR_SHAPED){
+            geom.h=frame->bar_h;
+        }else{
+            WRectangle tmp;
+            
+            frame_border_inner_geom(frame, &tmp);
+            
+            geom.h=geom.h-tmp.h;
+        }
     }
     
     frame->flags|=FRAME_SHADED_TOGGLE;
     
     region_rqgeom((WRegion*)frame, REGION_RQGEOM_H_ONLY, &geom, NULL);
-
-    frame->flags&=~FRAME_SHADED_TOGGLE;
-}
-
-
-bool frame_set_shaded(WFrame *frame, int sp)
-{
-    bool set=(frame->flags&FRAME_SHADED);
-    bool nset=libtu_do_setparam(sp, set);
-    GrBorderWidths bdw;
-    int h=frame->bar_h;
-
-    if(!XOR(nset, set))
-        return nset;
     
-    if(!(frame->flags&FRAME_BAR_OUTSIDE) && frame->brush!=NULL){
-        grbrush_get_border_widths(frame->brush, &bdw);
-        h+=bdw.top+bdw.bottom+2*bdw.spacing;
-    }
-
-    frame_do_toggle_shade((WFrame*)frame, h);
+    frame->flags&=~FRAME_SHADED_TOGGLE;
     
     return (frame->flags&FRAME_SHADED);
 }
