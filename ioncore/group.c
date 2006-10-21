@@ -164,17 +164,15 @@ bool group_fitrep(WGroup *ws, WWindow *par, const WFitParams *fp)
     }
 
     FOR_ALL_NODES_IN_GROUP(ws, st, tmp){
-        WFitParams fp2;
+        WFitParams fp2=*fp;
         
         if(st->reg==NULL)
             continue;
         
-        fp2.mode=REGION_FIT_EXACT;
-
         g=REGION_GEOM(st->reg);
         g.x+=xdiff;
         g.y+=ydiff;
-        
+
         if(fp->mode&REGION_FIT_WHATEVER){
             fp2.g=g;
         }else{

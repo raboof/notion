@@ -98,10 +98,8 @@ static void gravity_stretch_policy(int szplcy, WRegion *reg,
     
     fp->g.w=w;
     fp->g.h=h;
-
-    do_gravity(&max_geom, szplcy, &(fp->g));
     
-    fp->mode=REGION_FIT_EXACT;
+    do_gravity(&max_geom, szplcy, &(fp->g));
 }
 
 
@@ -194,8 +192,6 @@ static void sizepolicy_free_snap(WSizePolicy *szplcy, WRegion *reg,
         fp->g.y=fit_y(rq_geom->y, h, &max_geom);
     }
     
-    fp->mode=REGION_FIT_EXACT;
-    
     (*szplcy)&=~(SIZEPOLICY_VERT_MASK|SIZEPOLICY_HORIZ_MASK);
     
     *szplcy|=( (fullw || fp->g.x<=max_geom.x ? SIZEPOLICY_HORIZ_LEFT : 0)
@@ -209,7 +205,7 @@ void sizepolicy(WSizePolicy *szplcy, WRegion *reg,
                 const WRectangle *rq_geom, int rq_flags,
                 WFitParams *fp)
 {
-    /* TODO: use WEAK_* in rq_flags */
+    uint extra=fp->mode&REGION_FIT_ROTATE;
     
     WRectangle tmp;
     if(rq_geom!=NULL)
@@ -230,6 +226,8 @@ void sizepolicy(WSizePolicy *szplcy, WRegion *reg,
         rq_flags&=~(REGION_RQGEOM_WEAK_W|REGION_RQGEOM_WEAK_H);
     }
 
+    fp->mode=REGION_FIT_EXACT|extra;
+    
     switch((*szplcy)&SIZEPOLICY_MASK){
     case SIZEPOLICY_GRAVITY:
         gravity_stretch_policy(*szplcy, reg, &tmp, fp, FALSE, FALSE);
@@ -265,14 +263,12 @@ void sizepolicy(WSizePolicy *szplcy, WRegion *reg,
         if(reg!=NULL)
             region_size_hints_correct(reg, &tmp.w, &tmp.h, FALSE);
         fp->g=tmp;
-        fp->mode=REGION_FIT_EXACT;
         break;
         
     case SIZEPOLICY_UNCONSTRAINED:
         if(reg!=NULL)
             region_size_hints_correct(reg, &tmp.w, &tmp.h, TRUE);
         fp->g=tmp;
-        fp->mode=REGION_FIT_EXACT;
         break;
 
     case SIZEPOLICY_FREE_GLUE:
@@ -281,7 +277,7 @@ void sizepolicy(WSizePolicy *szplcy, WRegion *reg,
         
     case SIZEPOLICY_FULL_BOUNDS:
     default:
-        fp->mode=REGION_FIT_BOUNDS;
+        fp->mode=REGION_FIT_BOUNDS|extra;
         break;
     }
 }
