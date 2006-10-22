@@ -66,6 +66,11 @@ static StringIntMap frame_areas[]={
 /*{{{ Exports */
 
 
+static WRegion *create_frame_scratchpad(WWindow *parent, const WFitParams *fp,
+                                        void *unused)
+{
+    return (WRegion*)create_frame(parent, fp, FRAME_MODE_UNKNOWN);
+}
 
 
 static WFrame *create(WMPlex *mplex, int flags)
@@ -87,8 +92,8 @@ static WFrame *create(WMPlex *mplex, int flags)
     par.geom.y=(sh-par.geom.h)/2;
 
     sp=(WFrame*)mplex_do_attach_new((WMPlex*)mplex, &par,
-                                    (WRegionCreateFn*)create_frame,
-                                    "frame-scratchpad");
+                                    create_frame_scratchpad,
+                                    NULL);
     
 
     if(sp==NULL){
