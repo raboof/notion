@@ -732,7 +732,10 @@ void wedln_complete(WEdln *wedln, const char *cycle, const char *mode)
     
     if(cyclei!=0 && mod_query_config.autoshowcompl && 
        wedln->compl_list.nstrs>0){
-        wedln_next_completion(wedln);
+        if(cyclei>0)
+            wedln_next_completion(wedln);
+        else
+            wedln_prev_completion(wedln);
     }else{
         int oldid=wedln->compl_waiting_id;
     
