@@ -172,7 +172,7 @@ defbindings("WMPlex.toplevel", {
     
     bdoc("Display context menu."),
     --kpress(META.."M", "mod_menu.menu(_, _sub, 'ctxmenu')"),
-    kpress(META.."M", "mod_query.query_menu(_, 'ctxmenu', 'Context menu: ')"),
+    kpress(META.."M", "mod_query.query_menu(_, 'ctxmenu', 'Context menu:')"),
 
 })
 

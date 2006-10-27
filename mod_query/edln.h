@@ -65,6 +65,7 @@ void edln_cut(Edln *edln);
 void edln_copy(Edln *edln);
 void edln_history_prev(Edln *edln, bool match);
 void edln_history_next(Edln *edln, bool match);
+uint edln_history_matches(Edln *edln, char ***h_ret);
 bool edln_set_context(Edln *edln, const char *str);
 
 bool edln_init(Edln *edln, const char *dflt);

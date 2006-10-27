@@ -625,16 +625,23 @@ static void edln_do_set_hist(Edln *edln, int e, bool match)
 }
 
 
+static char *history_search_str(Edln *edln)
+{
+    char *sstr;
+    char tmp=edln->p[edln->point];
+    edln->p[edln->point]='\0';
+    sstr=scat(edln->context ? edln->context : "*:", edln->p);
+    edln->p[edln->point]=tmp;
+    return sstr;
+}
+
+
 static int search(Edln *edln, int from, bool bwd, bool match)
 {
     int e;
     
     if(match && edln->point>0){
-        char *tmpstr;
-        char tmp=edln->p[edln->point];
-        edln->p[edln->point]='\0';
-        tmpstr=scat(edln->context ? edln->context : "*:", edln->p);
-        edln->p[edln->point]=tmp;
+        char *tmpstr=history_search_str(edln);
         if(tmpstr==NULL)
             return edln->histent;
         e=mod_query_history_search(tmpstr, from, bwd);
@@ -679,6 +686,24 @@ void edln_history_next(Edln *edln, bool match)
         edln->modified=TRUE;
         UPDATE_NEW();
     }
+}
+
+
+uint edln_history_matches(Edln *edln, char ***h_ret)
+{
+    char *tmpstr=history_search_str(edln);
+    uint ret;
+    
+    if(tmpstr==NULL){
+        *h_ret=NULL;
+        return 0;
+    }
+        
+    ret=mod_query_history_complete(tmpstr, h_ret);
+    
+    free(tmpstr);
+    
+    return ret;
 }
 
 

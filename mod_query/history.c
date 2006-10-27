@@ -116,6 +116,13 @@ static bool match(const char *h, const char *b)
 }
 
 
+static const char *skip_colon(const char *s)
+{
+    const char *p=strchr(s, ':');
+    return (p!=NULL ? p+1 : s);
+}
+
+
 /*EXTL_DOC
  * Try to find matching history entry.
  */
@@ -137,6 +144,34 @@ int mod_query_history_search(const char *s, int from, bool bwd)
 }
 
 
+uint mod_query_history_complete(const char *s, char ***h_ret)
+{
+    char **h=ALLOC_N(char *, hist_count);
+    int i, n=0;
+    
+    if(h==NULL)
+        return 0;
+    
+    for(i=0; i<hist_count; i++){
+        uint j=get_index(i);
+        if(j<0)
+            break;
+        if(match(hist[j], s)){
+            h[n]=scopy(skip_colon(hist[j]));
+            if(h[n]!=NULL)
+                n++;
+        }
+    }
+    
+    if(n==0)
+        free(h);
+    else
+        *h_ret=h;
+    
+    return n;
+}
+
+
 /*EXTL_DOC
  * Return table of history entries.
  */
@@ -154,4 +189,3 @@ ExtlTab mod_query_history_table()
     
     return tab;
 }
-

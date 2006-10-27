@@ -13,6 +13,7 @@
 
 #include <libtu/objp.h>
 #include <libtu/minmax.h>
+#include <libtu/setparam.h>
 #include <libextl/extl.h>
 #include <libmainloop/defer.h>
 #include <libmainloop/signal.h>
@@ -465,62 +466,54 @@ void wedln_scrolldown_completions(WEdln *wedln)
 }
 
 
-static ExtlExportedFn *sc_safe_fns[]={
-    (ExtlExportedFn*)&complproxy_set_completions,
-    NULL
-};
-
-
-static ExtlSafelist sc_safelist=EXTL_SAFELIST_INIT(sc_safe_fns);
-
-
-static int wedln_alloc_compl_id(WEdln *wedln)
-{
-    int id=wedln->compl_waiting_id+1;
-    wedln->compl_waiting_id=maxof(0, wedln->compl_waiting_id+1);
-    return id;
-}
-
-static bool wedln_do_call_completor(WEdln *wedln, int id, bool tabc)
-{
-    const char *p=wedln->edln.p;
-    int point=wedln->edln.point;
-    WComplProxy *proxy=create_complproxy(wedln, id, tabc);
-    
-    if(proxy==NULL)
-        return FALSE;
-    
-    /* Set Lua-side to own the proxy: it gets freed by Lua's GC */
-    ((Obj*)proxy)->flags|=OBJ_EXTL_OWNED;
-    
-    if(p==NULL){
-        p="";
-        point=0;
-    }
-    
-    extl_protect(&sc_safelist);
-    extl_call(wedln->completor, "osi", NULL, proxy, p, point);
-    extl_unprotect(&sc_safelist);
-    
-    return TRUE;
-}
-
-
-
-static void timed_complete(WTimer *tmr, Obj *obj)
-{
-    WEdln *wedln=(WEdln*)obj;
-    
-    if(wedln!=NULL){
-        int id=wedln->compl_timed_id;
-        wedln->compl_timed_id=-1;
-        if(id==wedln->compl_waiting_id && id>=0)
-            wedln_do_call_completor((WEdln*)obj, id, FALSE);
-    }
-}
-
-
 static int update_nocompl=0;
+
+
+static void free_completions(char **ptr, int i)
+{
+    while(i>0){
+        i--;
+        free(ptr[i]);
+    }
+    free(ptr);
+}
+
+
+bool wedln_do_set_completions(WEdln *wedln, char **ptr, 
+                              int n, char *beg, char *end, 
+                              bool autoshow_select_first)
+{    
+    int sel=-1;
+    
+    if(wedln->compl_beg!=NULL)
+        free(wedln->compl_beg);
+    
+    if(wedln->compl_end!=NULL)
+        free(wedln->compl_end);
+    
+    wedln->compl_beg=beg;
+    wedln->compl_end=end;
+    wedln->compl_current_id=-1;
+    
+    n=edln_do_completions(&(wedln->edln), ptr, n, beg, end, 
+                          !mod_query_config.autoshowcompl);
+
+    if(mod_query_config.autoshowcompl && n>0 && autoshow_select_first){
+        update_nocompl++;
+        edln_set_completion(&(wedln->edln), ptr[0], beg, end);
+        update_nocompl--;
+        sel=0;
+    }
+
+    if(n>1 || (mod_query_config.autoshowcompl && n>0)){
+        wedln_show_completions(wedln, ptr, n, sel);
+        return TRUE;
+    }
+    
+    free_completions(ptr, n);
+    
+    return FALSE;
+}
 
 
 void wedln_set_completions(WEdln *wedln, ExtlTab completions, 
@@ -528,7 +521,6 @@ void wedln_set_completions(WEdln *wedln, ExtlTab completions,
 {
     int n=0, i=0;
     char **ptr=NULL, *beg=NULL, *end=NULL, *p=NULL;
-    int sel=-1;
     
     n=extl_table_get_n(completions);
     
@@ -551,41 +543,23 @@ void wedln_set_completions(WEdln *wedln, ExtlTab completions,
     extl_table_gets_s(completions, "common_beg", &beg);
     extl_table_gets_s(completions, "common_end", &end);
     
-    if(wedln->compl_beg!=NULL)
-        free(wedln->compl_beg);
-    
-    if(wedln->compl_end!=NULL)
-        free(wedln->compl_end);
-    
-    wedln->compl_beg=beg;
-    wedln->compl_end=end;
-    wedln->compl_current_id=-1;
-    
-    n=edln_do_completions(&(wedln->edln), ptr, n, beg, end, 
-                          !mod_query_config.autoshowcompl);
-    i=n;
-
-    if(mod_query_config.autoshowcompl && n>0 && autoshow_select_first){
-        update_nocompl++;
-        edln_set_completion(&(wedln->edln), ptr[0], beg, end);
-        update_nocompl--;
-        sel=0;
-    }
-
-    if(n>1 || (mod_query_config.autoshowcompl && n>0)){
-        wedln_show_completions(wedln, ptr, n, sel);
+    if(wedln_do_set_completions(wedln, ptr, n, beg, end, 
+                                autoshow_select_first)){
         return;
     }
     
 allocfail:
     wedln_hide_completions(wedln);
+    free_completions(ptr, i);
     while(i>0){
         i--;
-        free(ptr[i]);
+        /* edln_do_completions may NULL things */
+        if(ptr[i]!=NULL)
+            free(ptr[i]);
     }
     free(ptr);
 }
-
+    
 
 static void wedln_do_select_completion(WEdln *wedln, int n)
 {
@@ -596,6 +570,82 @@ static void wedln_do_select_completion(WEdln *wedln, int n)
     edln_set_completion(&(wedln->edln), wedln->compl_list.strs[n],
                         wedln->compl_beg, wedln->compl_end);
     update_nocompl--;
+}
+
+
+
+static ExtlExportedFn *sc_safe_fns[]={
+    (ExtlExportedFn*)&complproxy_set_completions,
+    NULL
+};
+
+
+static ExtlSafelist sc_safelist=EXTL_SAFELIST_INIT(sc_safe_fns);
+
+
+static int wedln_alloc_compl_id(WEdln *wedln)
+{
+    int id=wedln->compl_waiting_id+1;
+    wedln->compl_waiting_id=maxof(0, wedln->compl_waiting_id+1);
+    return id;
+}
+
+static bool wedln_do_call_completor(WEdln *wedln, int id, bool tabc)
+{
+    if(wedln->compl_history_mode){
+        uint n;
+        char **h=NULL;
+        
+        wedln->compl_waiting_id=id;
+
+        n=edln_history_matches(&wedln->edln, &h);
+        
+        if(n==0){
+            wedln_hide_completions(wedln);
+            return FALSE;
+        }
+        
+        if(wedln_do_set_completions(wedln, h, n, NULL, NULL, tabc)){
+            wedln->compl_current_id=id;
+            return TRUE;
+        }
+        
+        return FALSE;
+    }else{
+        const char *p=wedln->edln.p;
+        int point=wedln->edln.point;
+        WComplProxy *proxy=create_complproxy(wedln, id, tabc);
+        
+        if(proxy==NULL)
+            return FALSE;
+        
+        /* Set Lua-side to own the proxy: it gets freed by Lua's GC */
+        ((Obj*)proxy)->flags|=OBJ_EXTL_OWNED;
+        
+        if(p==NULL){
+            p="";
+            point=0;
+        }
+        
+        extl_protect(&sc_safelist);
+        extl_call(wedln->completor, "osi", NULL, proxy, p, point);
+        extl_unprotect(&sc_safelist);
+        
+        return TRUE;
+    }
+}
+
+
+static void timed_complete(WTimer *tmr, Obj *obj)
+{
+    WEdln *wedln=(WEdln*)obj;
+    
+    if(wedln!=NULL){
+        int id=wedln->compl_timed_id;
+        wedln->compl_timed_id=-1;
+        if(id==wedln->compl_waiting_id && id>=0)
+            wedln_do_call_completor((WEdln*)obj, id, FALSE);
+    }
 }
 
 
@@ -657,19 +707,46 @@ bool wedln_prev_completion(WEdln *wedln)
 /*EXTL_DOC
  * Call completion handler with the text between the beginning of line and
  * current cursor position, or select next completion from list if in
- * auto-show-completions mode and \var{cycle} is set.
+ * auto-show-completions mode and \var{cycle} is set. The \var{mode} may
+ * be ``history'' or ``normal''. If it is not set, the previous mdoe
+ * is used.
  */
 EXTL_EXPORT_MEMBER
-void wedln_complete(WEdln *wedln, bool cycle)
+void wedln_complete(WEdln *wedln, bool cycle, const char *mode)
 {
-    if(cycle && mod_query_config.autoshowcompl && wedln->compl_list.nstrs>0){
+    bool valid=TRUE;
+    
+    if(mode!=NULL){
+        if(strcmp(mode, "history")==0){
+            valid=wedln->compl_history_mode;
+            wedln->compl_history_mode=TRUE;
+        }else if(strcmp(mode, "normal")==0){
+            valid=!wedln->compl_history_mode;
+            wedln->compl_history_mode=FALSE;
+        }
+    }
+    
+    if(cycle && valid && mod_query_config.autoshowcompl 
+       && wedln->compl_list.nstrs>0){
         wedln_next_completion(wedln);
     }else{
         int oldid=wedln->compl_waiting_id;
     
-        if(!wedln_do_call_completor(wedln, wedln_alloc_compl_id(wedln), cycle))
+        if(!wedln_do_call_completor(wedln, wedln_alloc_compl_id(wedln), 
+                                    cycle && valid)){
             wedln->compl_waiting_id=oldid;
+        }
     }
+}
+
+
+/*EXTL_DOC
+ * Get history completion mode.
+ */
+EXTL_EXPORT_MEMBER
+bool wedln_is_histcompl(WEdln *wedln)
+{
+    return wedln->compl_history_mode;
 }
 
 
@@ -774,6 +851,7 @@ static bool wedln_init(WEdln *wedln, WWindow *par, const WFitParams *fp,
     wedln->compl_beg=NULL;
     wedln->compl_end=NULL;
     wedln->compl_tab=FALSE;
+    wedln->compl_history_mode=FALSE;
     
     if(!input_init((WInput*)wedln, par, fp)){
         edln_deinit(&(wedln->edln));
