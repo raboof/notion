@@ -575,7 +575,9 @@ bool group_do_attach_final(WGroup *ws,
     /* Fit */
     szplcy=(param->szplcy_set
             ? param->szplcy
-            : SIZEPOLICY_UNCONSTRAINED);
+            : (param->bottom
+               ? SIZEPOLICY_FULL_EXACT
+               : SIZEPOLICY_UNCONSTRAINED));
     
     weak=(param->geom_weak_set
           ? param->geom_weak
