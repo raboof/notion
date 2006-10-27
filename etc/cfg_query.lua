@@ -75,15 +75,14 @@ defbindings("WEdln", {
     }),
 
     bdoc("Try to complete the entered text or cycle through completions."),
-    -- true => forward cycle through completions in auto-show-completions 
-    kpress("Tab", "WEdln.complete(_, true, 'normal')"), 
-    -- false => do not cycle; force evaluation of new completions
-    kpress("Control+Tab", "WEdln.complete(_, false, 'normal')"),
-    kpress("Shift+Tab", "WEdln.prev_completion(_)"),
+    kpress("Tab", "WEdln.complete(_, 'next', 'normal')"), 
+    kpress("Shift+Tab", "WEdln.complete(_, 'prev', 'normal')"),
+    -- Do not cycle; only force evaluation of new completions
+    kpress("Control+Tab", "WEdln.complete(_, nil, 'normal')"),
     
     bdoc("Toggle on history completion mode"),
-    kpress("Control+R", "WEdln.complete(_, true, 'history')"),
-    kpress("Control+S", "WEdln.prev_completion(_)"),
+    kpress("Control+R", "WEdln.complete(_, 'next', 'history')"),
+    kpress("Control+S", "WEdln.complete(_, 'prev', 'history')"),
     
     bdoc("Close the query and execute bound action."),
     kpress("Control+M", "WEdln.finish(_)"),

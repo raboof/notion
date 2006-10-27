@@ -479,9 +479,8 @@ static void free_completions(char **ptr, int i)
 }
 
 
-bool wedln_do_set_completions(WEdln *wedln, char **ptr, 
-                              int n, char *beg, char *end, 
-                              bool autoshow_select_first)
+bool wedln_do_set_completions(WEdln *wedln, char **ptr, int n, 
+                              char *beg, char *end, int cycle)
 {    
     int sel=-1;
     
@@ -498,11 +497,11 @@ bool wedln_do_set_completions(WEdln *wedln, char **ptr,
     n=edln_do_completions(&(wedln->edln), ptr, n, beg, end, 
                           !mod_query_config.autoshowcompl);
 
-    if(mod_query_config.autoshowcompl && n>0 && autoshow_select_first){
+    if(mod_query_config.autoshowcompl && n>0 && cycle!=0){
         update_nocompl++;
-        edln_set_completion(&(wedln->edln), ptr[0], beg, end);
+        sel=(cycle>0 ? 0 : n-1);
+        edln_set_completion(&(wedln->edln), ptr[sel], beg, end);
         update_nocompl--;
-        sel=0;
     }
 
     if(n>1 || (mod_query_config.autoshowcompl && n>0)){
@@ -516,8 +515,7 @@ bool wedln_do_set_completions(WEdln *wedln, char **ptr,
 }
 
 
-void wedln_set_completions(WEdln *wedln, ExtlTab completions, 
-                           bool autoshow_select_first)
+void wedln_set_completions(WEdln *wedln, ExtlTab completions, int cycle)
 {
     int n=0, i=0;
     char **ptr=NULL, *beg=NULL, *end=NULL, *p=NULL;
@@ -543,10 +541,8 @@ void wedln_set_completions(WEdln *wedln, ExtlTab completions,
     extl_table_gets_s(completions, "common_beg", &beg);
     extl_table_gets_s(completions, "common_end", &end);
     
-    if(wedln_do_set_completions(wedln, ptr, n, beg, end, 
-                                autoshow_select_first)){
+    if(wedln_do_set_completions(wedln, ptr, n, beg, end, cycle))
         return;
-    }
     
 allocfail:
     wedln_hide_completions(wedln);
@@ -590,7 +586,7 @@ static int wedln_alloc_compl_id(WEdln *wedln)
     return id;
 }
 
-static bool wedln_do_call_completor(WEdln *wedln, int id, bool tabc)
+static bool wedln_do_call_completor(WEdln *wedln, int id, int cycle)
 {
     if(wedln->compl_history_mode){
         uint n;
@@ -605,7 +601,7 @@ static bool wedln_do_call_completor(WEdln *wedln, int id, bool tabc)
             return FALSE;
         }
         
-        if(wedln_do_set_completions(wedln, h, n, NULL, NULL, tabc)){
+        if(wedln_do_set_completions(wedln, h, n, NULL, NULL, cycle)){
             wedln->compl_current_id=id;
             return TRUE;
         }
@@ -614,7 +610,7 @@ static bool wedln_do_call_completor(WEdln *wedln, int id, bool tabc)
     }else{
         const char *p=wedln->edln.p;
         int point=wedln->edln.point;
-        WComplProxy *proxy=create_complproxy(wedln, id, tabc);
+        WComplProxy *proxy=create_complproxy(wedln, id, cycle);
         
         if(proxy==NULL)
             return FALSE;
@@ -706,15 +702,16 @@ bool wedln_prev_completion(WEdln *wedln)
 
 /*EXTL_DOC
  * Call completion handler with the text between the beginning of line and
- * current cursor position, or select next completion from list if in
- * auto-show-completions mode and \var{cycle} is set. The \var{mode} may
- * be ``history'' or ``normal''. If it is not set, the previous mdoe
- * is used.
+ * current cursor position, or select next/previous completion from list if in
+ * auto-show-completions mode and \var{cycle} is set to ``next'' or ``prev'',
+ * respectively. The \var{mode} may be ``history'' or ``normal''. If it is 
+ * not set, the previous mode is used.
  */
 EXTL_EXPORT_MEMBER
-void wedln_complete(WEdln *wedln, bool cycle, const char *mode)
+void wedln_complete(WEdln *wedln, const char *cycle, const char *mode)
 {
     bool valid=TRUE;
+    int cyclei=0;
     
     if(mode!=NULL){
         if(strcmp(mode, "history")==0){
@@ -726,14 +723,21 @@ void wedln_complete(WEdln *wedln, bool cycle, const char *mode)
         }
     }
     
-    if(cycle && valid && mod_query_config.autoshowcompl 
-       && wedln->compl_list.nstrs>0){
+    if(cycle!=NULL && valid){
+        if(strcmp(cycle, "next")==0)
+            cyclei=1;
+        else if(strcmp(cycle, "prev")==0)
+            cyclei=-1;
+    }
+    
+    if(cyclei!=0 && mod_query_config.autoshowcompl && 
+       wedln->compl_list.nstrs>0){
         wedln_next_completion(wedln);
     }else{
         int oldid=wedln->compl_waiting_id;
     
         if(!wedln_do_call_completor(wedln, wedln_alloc_compl_id(wedln), 
-                                    cycle && valid)){
+                                    cyclei)){
             wedln->compl_waiting_id=oldid;
         }
     }

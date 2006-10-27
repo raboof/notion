@@ -1,4 +1,11 @@
 
+ion-3ds-20061???
+----------------
+
+ * Note that the parametrisation of WEdln.complete has changed,
+   and the second cycle parameter must be 'next' now instead of
+   `true`.
+
 ion-3ds-20061020
 ----------------
 

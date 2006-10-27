@@ -24,11 +24,11 @@ DECLCLASS(WComplProxy){
     Obj o;
     Watch wedln_watch;
     int id;
-    bool tabc;
+    int cycle;
 };
 
 
-extern WComplProxy *create_complproxy(WEdln *wedln, int id, bool tabc);
+extern WComplProxy *create_complproxy(WEdln *wedln, int id, int cycle);
 
 extern bool complproxy_set_completions(WComplProxy *proxy, ExtlTab compls);
 
