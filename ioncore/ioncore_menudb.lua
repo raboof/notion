@@ -22,19 +22,17 @@ local menus={}
 -- Define a new menu with \var{name} being the menu's name and \var{tab} 
 -- being a table of menu entries. If \var{tab.append} is set, the entries 
 -- are appended to previously-defined ones, if possible.
-function ioncore.defmenu(name, tab, add)
+function ioncore.defmenu(name, tab)
     if menus[name] and type(tab)=="table" and tab.append then
         if type(menus[name])~="table" then
             ioncore.warn(TR("Unable to append to non-table menu"))
+            return
         else
-            table.append(menus[name] or {}, tab)
+            table.append(menus[name], tab)
         end
     else
         menus[name]=tab
     end
-    
-    -- Remove extra cruft...
-    menus[name].append=nil
 end
 
 --DOC
