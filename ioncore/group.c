@@ -817,14 +817,14 @@ static int stdisp_szplcy(const WMPlexSTDispInfo *di, WRegion *stdisp)
     if(di->fullsize){
         if(region_orientation(stdisp)==REGION_ORIENTATION_VERTICAL){
             if(pos==MPLEX_STDISP_TL || pos==MPLEX_STDISP_BL)
-                return SIZEPOLICY_GRAVITY_WEST;
+                return SIZEPOLICY_STRETCH_LEFT;
             else
-                return SIZEPOLICY_GRAVITY_EAST;
+                return SIZEPOLICY_STRETCH_RIGHT;
         }else{
             if(pos==MPLEX_STDISP_TL || pos==MPLEX_STDISP_TR)
-                return SIZEPOLICY_GRAVITY_NORTH;
+                return SIZEPOLICY_STRETCH_TOP;
             else
-                return SIZEPOLICY_GRAVITY_SOUTH;
+                return SIZEPOLICY_STRETCH_BOTTOM;
         }
     }else{
         if(pos==MPLEX_STDISP_TL)
