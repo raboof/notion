@@ -565,8 +565,8 @@ bool menu_init(WMenu *menu, WWindow *par, const WFitParams *fp,
     menu->submenu=NULL;
     menu->typeahead=NULL;
     
-    menu->gm_ksb=0;
-    menu->gm_mod=0;
+    menu->gm_kcb=0;
+    menu->gm_state=0;
     
     if(!window_init((WWindow*)menu, par, fp))
         goto fail;

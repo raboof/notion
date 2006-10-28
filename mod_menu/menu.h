@@ -48,7 +48,7 @@ DECLCLASS(WMenu){
     
     char *typeahead;
     
-    uint gm_ksb, gm_mod;
+    uint gm_kcb, gm_state;
 };
 
 

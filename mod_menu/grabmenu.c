@@ -9,12 +9,14 @@
  * (at your option) any later version.
  */
 
+#include <libextl/extl.h>
+
 #include <ioncore/common.h>
 #include <ioncore/pointer.h>
 #include <ioncore/grab.h>
 #include <ioncore/binding.h>
 #include <ioncore/conf-bindings.h>
-#include <libextl/extl.h>
+#include <ioncore/key.h>
 #include "menu.h"
 #include "mkmenu.h"
 
@@ -35,13 +37,8 @@ static bool grabmenu_handler(WRegion *reg, XEvent *xev)
     if(reg==NULL)
         return FALSE;
     
-    if(menu->gm_mod!=AnyModifier && menu->gm_mod!=ev->state)
-        return FALSE;
-    
-    if(ev->keycode!=XKeysymToKeycode(ioncore_g.dpy, menu->gm_ksb))
-        return FALSE;
-       
-    menu_select_next(menu);
+    if(menu->gm_state==ev->state && ev->keycode==menu->gm_kcb)
+        menu_select_next(menu);
     
     return FALSE;
 }
@@ -54,20 +51,14 @@ WMenu *mod_menu_do_grabmenu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
 {
     WMenuCreateParams fnp;
     WMPlexAttachParams par;
-    uint mod=0, ksb=0;
     WMenu *menu;
-    char *key=NULL;
+    XKeyEvent *ev;
     
-    if(!extl_table_gets_s(param, "key", &key))
+    ev=ioncore_current_key_event();
+    
+    if(ev==NULL)
         return NULL;
     
-    if(!ioncore_parse_keybut(key, &mod, &ksb, FALSE, TRUE)){
-        free(key);
-        return NULL;
-    }
-
-    free(key);
-
     fnp.handler=handler;
     fnp.tab=tab;
     fnp.pmenu_mode=FALSE;
@@ -88,8 +79,8 @@ WMenu *mod_menu_do_grabmenu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
     if(menu==NULL)
         return FALSE;
  
-    menu->gm_ksb=ksb;
-    menu->gm_mod=mod;
+    menu->gm_kcb=ev->keycode;
+    menu->gm_state=ev->state;
     
     ioncore_grab_establish((WRegion*)menu, grabmenu_handler, NULL, 0);
     
