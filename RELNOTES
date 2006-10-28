@@ -1,10 +1,26 @@
 
-ion-3ds-20061???
+ion-3ds-20061029
 ----------------
+
+Mostly this release still fixes issues in the big 3ds-20061015 release,
+but in addition there are some improvements in the query department:
+
+ * Query activation key now cycles completions (So e.g. the
+   in the context menu activated with META+M, this same key
+   can be used to cycle through the alternatives.) This does
+   not work for queries activated by submap bindings.
+
+ * Likewise, it is no longer necessary to specify the key to
+   use for cycling for `mod_menu.grabmenu`.
+
+ * Control+R can now be used for history completion in queries.
+   (Currently matching is done for full string up to 'point', but 
+   this may be changed to substring match.)
 
  * Note that the parametrisation of WEdln.complete has changed,
    and the second cycle parameter must be 'next' now instead of
    `true`.
+
 
 ion-3ds-20061020
 ----------------
