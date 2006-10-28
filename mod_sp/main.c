@@ -16,7 +16,6 @@
 #include <libextl/readconfig.h>
 #include <libmainloop/hooks.h>
 
-#include <ioncore/conf-bindings.h>
 #include <ioncore/saveload.h>
 #include <ioncore/screen.h>
 #include <ioncore/mplex.h>
@@ -24,8 +23,6 @@
 #include <ioncore/global.h>
 #include <ioncore/framep.h>
 #include <ioncore/frame.h>
-#include <ioncore/regbind.h>
-#include <ioncore/bindmaps.h>
 #include <ioncore/names.h>
 
 #include "main.h"
@@ -46,18 +43,6 @@ char mod_sp_ion_api_version[]=ION_API_VERSION;
 
 
 #define SP_NAME  "*scratchpad*"
-
-
-WBindmap *mod_sp_scratchpad_bindmap=NULL;
-
-
-static StringIntMap frame_areas[]={
-    {"border",     FRAME_AREA_BORDER},
-    {"tab",        FRAME_AREA_TAB},
-    {"empty_tab",  FRAME_AREA_TAB},
-    {"client",     FRAME_AREA_CLIENT},
-    END_STRINGINTMAP
-};
 
 
 /*}}}*/
@@ -100,7 +85,6 @@ static WFrame *create(WMPlex *mplex, int flags)
         warn(TR("Unable to create scratchpad."));
     }
     
-    region_add_bindmap((WRegion*)sp, mod_sp_scratchpad_bindmap);
     region_set_name((WRegion*)sp, SP_NAME);
     
     return sp;
@@ -177,10 +161,6 @@ bool mod_sp_set_shown(WFrame *sp, const char *how)
 
 void mod_sp_deinit()
 {
-    if(mod_sp_scratchpad_bindmap!=NULL){
-        ioncore_free_bindmap("WFrame-as-scratchpad", mod_sp_scratchpad_bindmap);
-        mod_sp_scratchpad_bindmap=NULL;
-    }
     mod_sp_unregister_exports();
 }
 
@@ -210,13 +190,6 @@ bool mod_sp_init()
     if(!mod_sp_register_exports())
         return FALSE;
 
-    mod_sp_scratchpad_bindmap=ioncore_alloc_bindmap("WFrame-as-scratchpad", NULL);
-    
-    if(mod_sp_scratchpad_bindmap==NULL){
-        mod_sp_deinit();
-        return FALSE;
-    }
-    
     extl_read_config("cfg_sp", NULL, FALSE);
     
     if(ioncore_g.opmode==IONCORE_OPMODE_INIT){
