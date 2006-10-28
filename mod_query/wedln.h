@@ -19,6 +19,7 @@
 #include <ioncore/window.h>
 #include <ioncore/xic.h>
 #include <ioncore/rectangle.h>
+#include <ioncore/binding.h>
 #include "listing.h"
 #include "input.h"
 #include "edln.h"
@@ -57,6 +58,8 @@ DECLCLASS(WEdln){
     int compl_timed_id;
     uint compl_tab:1;
     uint compl_history_mode:1;
+    
+    WBindmap *cycle_bindmap;
 };
 
 extern WEdln *create_wedln(WWindow *par, const WFitParams *fp,

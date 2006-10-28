@@ -9,14 +9,48 @@
  * (at your option) any later version.
  */
 
-#include <limits.h>
-#include <unistd.h>
-#include <string.h>
-
 #include <libextl/extl.h>
+
+#include <ioncore/common.h>
+#include <ioncore/global.h>
+#include <ioncore/binding.h>
+#include <ioncore/regbind.h>
+#include <ioncore/key.h>
 #include "query.h"
 #include "wedln.h"
 
+
+static void create_cycle_binding(WEdln *wedln, XKeyEvent *ev, ExtlFn cycle)
+{
+    WBindmap *bindmap=create_bindmap();
+    WBinding b;
+    
+    if(bindmap==NULL)
+        return;
+        
+    b.ksb=XKeycodeToKeysym(ioncore_g.dpy, ev->keycode, 0);
+    b.kcb=ev->keycode;
+    b.state=ev->state;
+    b.act=BINDING_KEYPRESS;
+    b.area=0;
+    b.wait=FALSE;
+    b.submap=NULL;
+    b.func=extl_ref_fn(cycle);
+    
+    if(!bindmap_add_binding(bindmap, &b)){
+        extl_unref_fn(b.func);
+        bindmap_destroy(bindmap);
+        return;
+    }
+    
+    if(!region_add_bindmap((WRegion*)wedln, bindmap)){
+        bindmap_destroy(bindmap);
+        return;
+    }
+    
+    wedln->cycle_bindmap=bindmap;
+}
+    
 
 /*--lowlevel routine not to be called by the user--EXTL_DOC
  * Show a query window in \var{mplex} with prompt \var{prompt}, initial
@@ -28,11 +62,13 @@
  */
 EXTL_EXPORT
 WEdln *mod_query_do_query(WMPlex *mplex, const char *prompt, const char *dflt,
-                          ExtlFn handler, ExtlFn completor)
+                          ExtlFn handler, ExtlFn completor, ExtlFn cycle)
 {
     WRectangle geom;
     WEdlnCreateParams fnp;
     WMPlexAttachParams par;
+    XKeyEvent *ev=ioncore_current_key_event();
+    WEdln *wedln;
 
     fnp.prompt=prompt;
     fnp.dflt=dflt;
@@ -45,8 +81,14 @@ WEdln *mod_query_do_query(WMPlex *mplex, const char *prompt, const char *dflt,
                MPLEX_ATTACH_SIZEPOLICY);
     par.szplcy=SIZEPOLICY_FULL_BOUNDS;
 
-    return (WEdln*)mplex_do_attach_new(mplex, &par,
-                                       (WRegionCreateFn*)create_wedln,
-                                       (void*)&fnp); 
+    wedln=(WEdln*)mplex_do_attach_new(mplex, &par,
+                                      (WRegionCreateFn*)create_wedln,
+                                      (void*)&fnp); 
+                                      
+    if(wedln!=NULL && ev!=NULL && cycle!=extl_fn_none())
+        create_cycle_binding(wedln, ev, cycle);
+        
+    
+    return wedln;
 }
 

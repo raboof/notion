@@ -860,6 +860,8 @@ static bool wedln_init(WEdln *wedln, WWindow *par, const WFitParams *fp,
     wedln->compl_tab=FALSE;
     wedln->compl_history_mode=FALSE;
     
+    wedln->cycle_bindmap=NULL;
+    
     if(!input_init((WInput*)wedln, par, fp)){
         edln_deinit(&(wedln->edln));
         free(wedln->prompt);
@@ -901,6 +903,9 @@ static void wedln_deinit(WEdln *wedln)
     if(wedln->autoshowcompl_timer!=NULL)
         destroy_obj((Obj*)wedln->autoshowcompl_timer);
 
+    if(wedln->cycle_bindmap!=NULL)
+        bindmap_destroy(wedln->cycle_bindmap);
+    
     extl_unref_fn(wedln->completor);
     extl_unref_fn(wedln->handler);
     
