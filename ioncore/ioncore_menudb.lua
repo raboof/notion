@@ -263,7 +263,23 @@ local function classes(reg)
 end
 
 
-local function get_ctxmenu(reg, sub, is_par)    
+local function modeparts(mode)
+    if not mode then
+        return function() return end
+    end
+    
+    local f, s, v=string.gmatch(mode, "(%-?[^-]+)");
+    
+    local function nxt(_, m)
+        v = f(s, v)
+        return (v and (m .. v))
+    end
+    
+    return nxt, nil, ""
+end
+
+
+local function get_ctxmenu(reg, sub, is_par)
     local m={}
     
     local function cp(m2)
@@ -305,8 +321,8 @@ local function get_ctxmenu(reg, sub, is_par)
     for s in classes(reg) do
         local nm="ctxmenu-"..s
         add_ctxmenu(ioncore.evalmenu(nm), true)
-        if mode then
-            add_ctxmenu(ioncore.evalmenu(nm.."."..mode), false)
+        for m in modeparts(mode) do
+            add_ctxmenu(ioncore.evalmenu(nm.."."..m), false)
         end
         if mgrname then
             add_ctxmenu(ioncore.evalmenu(nm.."@"..mgrname), false)
