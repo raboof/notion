@@ -48,6 +48,9 @@
 #define SUBS_MAY_BE_MAPPED(MPLEX) \
     (REGION_IS_MAPPED(MPLEX) && !MPLEX_MGD_UNVIEWABLE(MPLEX))
 
+#define PASSIVE(ST) ((ST)->level<=STACKING_LEVEL_MODAL1          \
+                     && ((ST)->reg==NULL                         \
+                         || (ST)->reg->flags&REGION_SKIP_FOCUS))
 
 #define CAN_MANAGE_STDISP(REG) HAS_DYN(REG, region_manage_stdisp)
 
@@ -860,7 +863,7 @@ bool mplex_set_hidden(WMPlex *mplex, WRegion *reg, int sp)
         mplex_do_node_display(mplex, node, TRUE);
     }
     
-    if(mcf)
+    if(mcf && !PASSIVE(node))
         mplex_refocus(mplex, (nhidden ? NULL : node), FALSE);
     
     return STACKING_IS_HIDDEN(node);
@@ -948,7 +951,7 @@ static WRegion *do_navi(WMPlex *mplex, WStacking *sti,
                     }
                 }
             }else{
-                if(st->level>=min_level && !(st->reg->flags&REGION_SKIP_FOCUS))
+                if(st->level>=min_level && !PASSIVE(st))
                     return region_navi_cont((WRegion*)mplex, st->reg, data);
             }
         }
