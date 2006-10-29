@@ -153,7 +153,7 @@ uint mod_query_history_complete(const char *s, char ***h_ret)
         return 0;
     
     for(i=0; i<hist_count; i++){
-        uint j=get_index(i);
+        int j=get_index(i);
         if(j<0)
             break;
         if(match(hist[j], s)){
