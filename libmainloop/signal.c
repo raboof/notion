@@ -73,12 +73,14 @@ static void do_timer_set()
         val.it_value.tv_sec=queue->when.tv_sec-val.it_value.tv_sec;
         if(val.it_value.tv_usec<0)
             val.it_value.tv_usec=0;
-        while(val.it_value.tv_usec>=USECS_IN_SEC){
-            val.it_value.tv_sec++;
-            val.it_value.tv_usec-=USECS_IN_SEC;
-        }
-        if(val.it_value.tv_sec<0)
-            val.it_value.tv_sec=0;
+        /* POSIX and some kernels have been designed by absolute morons and 
+         * contain idiotic artificial restrictions on the value of tv_usec, 
+         * that will only cause more code being run and clock cycles being 
+         * spent to do the same thing, as the kernel will in any case convert
+         * the seconds to some other units.
+         */
+         val.it_value.tv_sec+=val.it_value.tv_usec/USECS_IN_SEC;
+         val.it_value.tv_usec%=USECS_IN_SEC;
     }else{
         had_tmr=TRUE;
         return;
