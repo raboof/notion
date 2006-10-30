@@ -46,7 +46,7 @@ static bool placement_mrsh_extl(ExtlFn fn, WTilingPlacementParams *param)
     
     mp=manageparams_to_table(param->mp);
     
-    extl_table_sets_o(t, "ws", (Obj*)param->ws);
+    extl_table_sets_o(t, "tiling", (Obj*)param->ws);
     extl_table_sets_o(t, "reg", (Obj*)param->reg);
     extl_table_sets_t(t, "mp", mp);
     
@@ -57,7 +57,7 @@ static bool placement_mrsh_extl(ExtlFn fn, WTilingPlacementParams *param)
     extl_unprotect(NULL);
     
     if(ret){
-        Obj *tmp;
+        Obj *tmp=NULL;
         
         extl_table_gets_o(t, "res_frame", &tmp);
         
