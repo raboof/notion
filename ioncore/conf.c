@@ -57,9 +57,8 @@
  *  \var{float_placement_method} & (string) How to place floating frames.
  *                          One of ''udlr'' (up-down, then left-right), 
  *                          ''lrud'' (left-right, then up-down) or ''random''. \\
- *  \var{default_ws_layout} & (table) Default workspace layout;
- *                          The \var{managed} field of \type{WGroup}
- *                          load parameters. \\
+ *  \var{default_ws_params} & (table) Default workspace layout; the 
+ *                          attach/creation parameters for a \type{WGroup}. \\
  * \end{tabularx}
  * 
  * When a keyboard resize function is called, and at most \var{kbresize_t_max} 
