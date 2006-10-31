@@ -255,7 +255,7 @@ static bool submapgrab_handler(WRegion* reg, XEvent *xev)
     XKeyEvent *ev=&xev->xkey;
     if(ev->type!=KeyPress)
         return FALSE;
-    if (ioncore_ismod(ev->keycode))
+    if(ioncore_ismod(ev->keycode))
         return FALSE;
     return !do_key(reg, ev);
 }
