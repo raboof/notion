@@ -636,8 +636,21 @@ bool group_do_attach_final(WGroup *ws,
 
     /* Misc. */
     if(param->bottom){
-        #warning "stdisp?"
         ws->bottom=st;
+        
+        if(HAS_DYN(reg, region_manage_stdisp) && ws->managed_stdisp!=NULL){
+            WMPlex *mplex=OBJ_CAST(REGION_MANAGER(ws), WMPlex);
+            if(mplex!=NULL){ /* should always hold */
+                WMPlexSTDispInfo di;
+                WRegion *stdisp=NULL;
+                mplex_get_stdisp(mplex, &stdisp, &di);
+                if(stdisp!=NULL){
+                    assert(stdisp==ws->managed_stdisp->reg);
+                    /* WARNING! Calls back to group code (managed_remove). */
+                    region_manage_stdisp(reg, stdisp, &di);
+                }
+            }
+        }
     }
     
     sw=(param->switchto_set ? param->switchto : ioncore_g.switchto_new);
