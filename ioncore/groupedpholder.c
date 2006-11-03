@@ -115,8 +115,8 @@ WRegion *grouped_handler(WWindow *par,
 }
 
 
-bool groupedpholder_do_attach(WGroupedPHolder *ph, int flags,
-                              WRegionAttachData *data)
+WRegion *groupedpholder_do_attach(WGroupedPHolder *ph, int flags,
+                                  WRegionAttachData *data)
 {
     WRegionAttachData data2;
     

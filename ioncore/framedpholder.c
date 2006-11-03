@@ -146,8 +146,8 @@ WRegion *region_attach_framed(WRegion *reg, WFramedParam *param,
 }
 
 
-bool framedpholder_do_attach(WFramedPHolder *ph, int flags,
-                             WRegionAttachData *data)
+WRegion *framedpholder_do_attach(WFramedPHolder *ph, int flags,
+                                 WRegionAttachData *data)
 {
     WRegionAttachData data2;
     AP ap;

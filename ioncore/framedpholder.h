@@ -50,8 +50,8 @@ extern bool framedpholder_do_goto(WFramedPHolder *ph);
 
 extern WRegion *framedpholder_do_target(WFramedPHolder *ph);
 
-extern bool framedpholder_do_attach(WFramedPHolder *ph, int flags,
-                                     WRegionAttachData *data);
+extern WRegion *framedpholder_do_attach(WFramedPHolder *ph, int flags,
+                                        WRegionAttachData *data);
 
 extern WRegion *region_attach_framed(WRegion *reg, WFramedParam *param,
                                      WRegionAttachFn *fn, void *fn_param,

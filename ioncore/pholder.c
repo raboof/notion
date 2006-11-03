@@ -29,12 +29,12 @@ void pholder_deinit(WPHolder *ph)
 }
 
 
-bool pholder_do_attach(WPHolder *ph, int flags,
-                       WRegionAttachData *data)
+WRegion *pholder_do_attach(WPHolder *ph, int flags,
+                           WRegionAttachData *data)
 
 {
-    bool ret=FALSE;
-    CALL_DYN_RET(ret, bool, pholder_do_attach, ph, (ph, flags, data));
+    WRegion *ret=NULL;
+    CALL_DYN_RET(ret, WRegion*, pholder_do_attach, ph, (ph, flags, data));
     return ret;
 }
 
@@ -51,7 +51,7 @@ static WRegion *add_fn_reparent(WWindow *par, const WFitParams *fp,
 }
 
 
-bool pholder_attach_(WPHolder *ph, int flags, WRegionAttachData *data)
+WRegion *pholder_attach_(WPHolder *ph, int flags, WRegionAttachData *data)
 {
     if(ph->redirect!=NULL)
         return pholder_attach_(ph->redirect, flags, data);
@@ -67,7 +67,7 @@ bool pholder_attach(WPHolder *ph, int flags, WRegion *reg)
     data.type=REGION_ATTACH_REPARENT;
     data.u.reg=reg;
     
-    return pholder_attach_(ph, flags, &data);
+    return (pholder_attach_(ph, flags, &data)!=NULL);
 }
 
 

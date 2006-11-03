@@ -115,8 +115,8 @@ void grouppholder_deinit(WGroupPHolder *ph)
 /*{{{ Dynfuns */
 
 
-bool grouppholder_do_attach(WGroupPHolder *ph, int flags,
-                            WRegionAttachData *data)
+WRegion *grouppholder_do_attach(WGroupPHolder *ph, int flags,
+                                WRegionAttachData *data)
 {
     WGroup *ws=(WGroup*)ph->group_watch.obj;
     WRegion *reg;
@@ -134,7 +134,7 @@ bool grouppholder_do_attach(WGroupPHolder *ph, int flags,
     
     ph->param.stack_above=NULL;
 
-    return (reg!=NULL);
+    return reg;
 }
 
 

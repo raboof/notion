@@ -33,7 +33,7 @@ extern bool groupedpholder_do_goto(WGroupedPHolder *ph);
 
 extern WRegion *groupedpholder_do_target(WGroupedPHolder *ph);
 
-extern bool groupedpholder_do_attach(WGroupedPHolder *ph, int flags,
-                                     WRegionAttachData *data);
+extern WRegion *groupedpholder_do_attach(WGroupedPHolder *ph, int flags,
+                                         WRegionAttachData *data);
 
 #endif /* ION_IONCORE_GROUPEDPHOLDER_H */

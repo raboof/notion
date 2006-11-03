@@ -66,8 +66,8 @@ void basicpholder_deinit(WBasicPHolder *ph)
 /*{{{ Dynfuns */
 
 
-bool basicpholder_do_attach(WBasicPHolder *ph, int flags,
-                            WRegionAttachData *data)
+WRegion *basicpholder_do_attach(WBasicPHolder *ph, int flags,
+                                WRegionAttachData *data)
 {
     WRegion *reg=(WRegion*)ph->reg_watch.obj;
 

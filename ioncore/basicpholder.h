@@ -17,8 +17,8 @@
 #include "attach.h"
 
 
-typedef bool WBasicPHolderHandler(WRegion *reg, int flags,
-                                  WRegionAttachData *data);
+typedef WRegion *WBasicPHolderHandler(WRegion *reg, int flags,
+                                      WRegionAttachData *data);
 
 INTRCLASS(WBasicPHolder);
 
@@ -40,7 +40,7 @@ extern bool basicpholder_do_goto(WBasicPHolder *ph);
 
 extern WRegion *basicpholder_do_target(WBasicPHolder *ph);
 
-extern bool basicpholder_do_attach(WBasicPHolder *ph, int flags,
-                                   WRegionAttachData *data);
+extern WRegion *basicpholder_do_attach(WBasicPHolder *ph, int flags,
+                                       WRegionAttachData *data);
 
 #endif /* ION_IONCORE_BASICPHOLDER_H */

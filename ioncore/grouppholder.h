@@ -40,8 +40,8 @@ extern bool grouppholder_do_goto(WGroupPHolder *ph);
 
 extern WRegion *grouppholder_do_target(WGroupPHolder *ph);
 
-extern bool grouppholder_do_attach(WGroupPHolder *ph, int flags, 
-                                   WRegionAttachData *data);
+extern WRegion *grouppholder_do_attach(WGroupPHolder *ph, int flags, 
+                                       WRegionAttachData *data);
 
 extern WGroupPHolder *group_managed_get_pholder(WGroup *group, 
                                                 WRegion *mgd);

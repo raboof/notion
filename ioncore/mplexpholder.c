@@ -171,8 +171,8 @@ void mplexpholder_deinit(WMPlexPHolder *ph)
 /*{{{ Move, attach, layer */
 
 
-bool mplexpholder_do_attach(WMPlexPHolder *ph, int flags,
-                            WRegionAttachData *data)
+WRegion *mplexpholder_do_attach(WMPlexPHolder *ph, int flags,
+                                WRegionAttachData *data)
 {
     WMPlex *mplex=(WMPlex*)ph->mplex_watch.obj;
     WRegion *reg=NULL;
@@ -185,9 +185,7 @@ bool mplexpholder_do_attach(WMPlexPHolder *ph, int flags,
     else
         ph->param.flags&=~MPLEX_ATTACH_SWITCHTO;
     
-    reg=mplex_do_attach_pholder(mplex, ph, data);
-    
-    return (reg!=NULL);
+    return mplex_do_attach_pholder(mplex, ph, data);
 }
 
 

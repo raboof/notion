@@ -1390,7 +1390,7 @@ static bool dock_do_attach_final(WDock *dock, WRegion *reg, void *unused)
 
 
 
-static bool dock_do_attach(WDock *dock, WRegionAttachData *data)
+static WRegion *dock_do_attach(WDock *dock, WRegionAttachData *data)
 {
     WFitParams fp;
     dock_get_tile_size(dock, &(fp.g));
@@ -1398,10 +1398,9 @@ static bool dock_do_attach(WDock *dock, WRegionAttachData *data)
     fp.g.y=0;
     fp.mode=REGION_FIT_WHATEVER|REGION_FIT_BOUNDS;
     
-    return (region_attach_helper((WRegion*)dock, (WWindow*)dock, &fp,
-                                 (WRegionDoAttachFn*)dock_do_attach_final, 
-                                 NULL, data)
-            !=NULL);
+    return region_attach_helper((WRegion*)dock, (WWindow*)dock, &fp,
+                                (WRegionDoAttachFn*)dock_do_attach_final, 
+                                NULL, data);
 }
 
 
@@ -1417,7 +1416,7 @@ bool dock_attach(WDock *dock, WRegion *reg)
     data.type=REGION_ATTACH_REPARENT;
     data.u.reg=reg;
 
-    return dock_do_attach(dock, &data);
+    return (dock_do_attach(dock, &data)!=NULL);
 }
 
 
@@ -1428,7 +1427,7 @@ static bool dock_handle_drop(WDock *dock, int x, int y,
 }
 
 
-static bool dock_ph_handler(WDock *dock, int flags, WRegionAttachData *data)
+static WRegion *dock_ph_handler(WDock *dock, int flags, WRegionAttachData *data)
 {
     return dock_do_attach(dock, data);
 }

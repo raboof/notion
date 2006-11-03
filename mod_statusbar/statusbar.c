@@ -500,7 +500,7 @@ static WRegion *statusbar_do_attach_final(WStatusBar *sb,
 }
 
 
-static bool statusbar_do_attach(WStatusBar *sb, WRegionAttachData *data)
+static WRegion *statusbar_do_attach(WStatusBar *sb, WRegionAttachData *data)
 {
     WFitParams fp;
     
@@ -510,15 +510,14 @@ static bool statusbar_do_attach(WStatusBar *sb, WRegionAttachData *data)
     fp.g.w=CF_STATUSBAR_SYSTRAY_HEIGHT;
     fp.mode=REGION_FIT_WHATEVER|REGION_FIT_BOUNDS;
     
-    return (region_attach_helper((WRegion*)sb, (WWindow*)sb, &fp,
-                                 (WRegionDoAttachFn*)statusbar_do_attach_final, 
-                                 NULL, data)
-            !=NULL);
+    return region_attach_helper((WRegion*)sb, (WWindow*)sb, &fp,
+                                (WRegionDoAttachFn*)statusbar_do_attach_final, 
+                                NULL, data);
 }
 
 
-static bool statusbar_attach_ph(WStatusBar *sb, int flags,
-                                WRegionAttachData *data)
+static WRegion *statusbar_attach_ph(WStatusBar *sb, int flags,
+                                    WRegionAttachData *data)
 {
     return statusbar_do_attach(sb, data);
 }
