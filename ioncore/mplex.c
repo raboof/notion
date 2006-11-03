@@ -1081,7 +1081,7 @@ bool mplex_do_attach_final(WMPlex *mplex, WRegion *reg, WMPlexPHolder *ph)
     WStacking *node=NULL;
     WLListNode *lnode=NULL;
     WMPlexAttachParams *param=&ph->param;
-    bool mx_was_empty, sw, modal, mcf;
+    bool mx_was_empty, sw, modal, mcf, hidden;
     uint level;
     
     mcf=region_may_control_focus((WRegion*)mplex);
@@ -1100,10 +1100,17 @@ bool mplex_do_attach_final(WMPlex *mplex, WRegion *reg, WMPlexPHolder *ph)
                  ? STACKING_LEVEL_NORMAL
                  : STACKING_LEVEL_BOTTOM)));
     
-    sw=((param->flags&MPLEX_ATTACH_SWITCHTO)
-        || (param->flags&MPLEX_ATTACH_UNNUMBERED
-            ? modal && !(param->flags&MPLEX_ATTACH_HIDDEN)
-            : mx_was_empty || !(param->flags&MPLEX_ATTACH_HIDDEN)));
+    hidden=(param->flags&MPLEX_ATTACH_HIDDEN
+            && (param->flags&MPLEX_ATTACH_UNNUMBERED
+                || !mx_was_empty));
+    
+    sw=(!hidden && (param->flags&MPLEX_ATTACH_SWITCHTO 
+                    || (param->flags&MPLEX_ATTACH_UNNUMBERED
+                        ? modal
+                        : (mplex_current_node(mplex)==NULL))));
+    
+    hidden=(hidden || (!sw && !(param->flags&MPLEX_ATTACH_UNNUMBERED)));
+    
     
     node=create_stacking();
     
@@ -1153,8 +1160,8 @@ bool mplex_do_attach_final(WMPlex *mplex, WRegion *reg, WMPlexPHolder *ph)
         mplex_stack(mplex, node);
     
     region_set_manager(reg, (WRegion*)mplex);
-
-    if(sw || (lnode==NULL && !(param->flags&MPLEX_ATTACH_HIDDEN)))
+    
+    if(!hidden)
         mplex_do_node_display(mplex, node, FALSE);
     else
         region_unmap(reg);
@@ -1344,8 +1351,9 @@ WRegion *mplex_attach(WMPlex *mplex, WRegion *reg, ExtlTab param)
  *                \fnref{WMPlex.set_index}. \\
  *  \var{level} & (integer) Stacking level. \\
  *  \var{modal} & (boolean) Shortcut for modal stacking level. \\
- *  \var{hidden} & (boolean) Start hidden (some interplay with 
- *                  \var{switchto}). \\
+ *  \var{hidden} & (boolean) Attach hidden, if not prevented
+ *                  by e.g. the mutually exclusive list being empty.
+ *                  This option overrides \var{switchto}. \\
  *  \var{sizepolicy} & (integer) Size policy.
  *                     (TODO: document them somewhere.) \\
  *  \var{geom} & (table) Geometry specification. \\
