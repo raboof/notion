@@ -485,6 +485,9 @@ void frame_size_hints(WFrame *frame, WSizeHints *hints_ret)
         if(!USE_MINMAX(frame)){
             hints_ret->max_set=0;
             hints_ret->min_set=0;
+            hints_ret->base_set=0;
+            hints_ret->aspect_set=0;
+            hints_ret->no_constrain=FALSE;
             /*hints_ret->no_constrain=TRUE;*/
         }
     }else{
