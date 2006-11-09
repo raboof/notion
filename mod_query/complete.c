@@ -73,7 +73,7 @@ static int compare(const void *p1, const void *p2)
     
     v1=(const char **)p1;
     v2=(const char **)p2;
-    return strcmp(*v1, *v2);
+    return strcoll(*v1, *v2);
 }
 
 
