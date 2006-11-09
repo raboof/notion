@@ -35,7 +35,7 @@ extern bool complproxy_set_completions(WComplProxy *proxy, ExtlTab compls);
 
 extern int edln_do_completions(Edln *edln, char **completions, int ncomp,
                                const char *beg, const char *end,
-                               bool setcommon);
+                               bool setcommon, bool nosort);
 extern void edln_set_completion(Edln *edln, const char *comp, 
                                 const char *beg, const char *end);
 

@@ -480,7 +480,8 @@ static void free_completions(char **ptr, int i)
 
 
 bool wedln_do_set_completions(WEdln *wedln, char **ptr, int n, 
-                              char *beg, char *end, int cycle)
+                              char *beg, char *end, int cycle,
+                              bool nosort)
 {    
     int sel=-1;
     
@@ -495,7 +496,7 @@ bool wedln_do_set_completions(WEdln *wedln, char **ptr, int n,
     wedln->compl_current_id=-1;
     
     n=edln_do_completions(&(wedln->edln), ptr, n, beg, end, 
-                          !mod_query_config.autoshowcompl);
+                          !mod_query_config.autoshowcompl, nosort);
 
     if(mod_query_config.autoshowcompl && n>0 && cycle!=0){
         update_nocompl++;
@@ -541,7 +542,7 @@ void wedln_set_completions(WEdln *wedln, ExtlTab completions, int cycle)
     extl_table_gets_s(completions, "common_beg", &beg);
     extl_table_gets_s(completions, "common_end", &end);
     
-    if(wedln_do_set_completions(wedln, ptr, n, beg, end, cycle))
+    if(wedln_do_set_completions(wedln, ptr, n, beg, end, cycle, FALSE))
         return;
     
 allocfail:
@@ -601,7 +602,7 @@ static bool wedln_do_call_completor(WEdln *wedln, int id, int cycle)
             return FALSE;
         }
         
-        if(wedln_do_set_completions(wedln, h, n, NULL, NULL, cycle)){
+        if(wedln_do_set_completions(wedln, h, n, NULL, NULL, cycle, TRUE)){
             wedln->compl_current_id=id;
             return TRUE;
         }

@@ -120,7 +120,8 @@ void edln_set_completion(Edln *edln, const char *comp,
 
 
 int edln_do_completions(Edln *edln, char **completions, int ncomp,
-                        const char *beg, const char *end, bool setcommon)
+                        const char *beg, const char *end, bool setcommon,
+                        bool nosort)
 {
     int len;
     int i;
@@ -130,7 +131,8 @@ int edln_do_completions(Edln *edln, char **completions, int ncomp,
     }else if(ncomp==1){
         len=strlen(completions[0]);
     }else{
-        qsort(completions, ncomp, sizeof(char**), compare);
+        if(!nosort)
+            qsort(completions, ncomp, sizeof(char**), compare);
         len=get_common_part_rmdup(completions, &ncomp);
     }
     
