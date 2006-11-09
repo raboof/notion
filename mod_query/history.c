@@ -52,8 +52,21 @@ bool mod_query_history_push(const char *str)
 
 void mod_query_history_push_(char *str)
 {
-    if(hist_count>0 && strcmp(hist[hist_head], str)==0)
-        return;
+    int ndx=mod_query_history_search(str, 0, FALSE);
+    
+    if(ndx==0){
+        return; /* First entry already */
+    }else if(ndx>0){
+        int i, j;
+        i=get_index(ndx);
+        free(hist[i]);
+        hist_count--;
+        while(++ndx<hist_count){
+            j=get_index(ndx);
+            hist[i]=hist[j];
+            i=j;
+        }
+    }
     
     hist_head--;
     if(hist_head<0)
@@ -124,7 +137,10 @@ static const char *skip_colon(const char *s)
 
 
 /*EXTL_DOC
- * Try to find matching history entry.
+ * Try to find matching history entry. Returns -1 if none was
+ * found. The parameter \var{from} specifies where to start 
+ * searching from, and \var{bwd} causes backward search from
+ * that point.
  */
 EXTL_SAFE
 EXTL_EXPORT
