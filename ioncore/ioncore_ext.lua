@@ -80,11 +80,15 @@ package.loaded["ioncore"]=true
 
 
 local function dummy_gettext_hack()
-    -- For context menu labels in configuration files. 
-    -- Alternative would be to hack lxgettext to support parsing
-    -- the second argument to a function, or using TR in the
-    -- configuration files, but I don't want the latter.
+    -- Extra translations for context menus etc. I don't want extra
+    -- TR calls in the configuration files, or parsing the string 
+    -- parameters to kpress etc. for translations.
     TR("Frame")
+    TR("Screen")
     TR("Workspace")
+    TR("Tiling")
+    TR("Tiled frame")
+    TR("Floating frame")
+    TR("Context menu:")
+    TR("Main menu:")
 end
-

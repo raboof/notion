@@ -1081,6 +1081,8 @@ function mod_query.query_menu(mplex, themenu, prompt)
     
     if not prompt then
         prompt=menuname..":"
+    else
+        prompt=TR(prompt)
     end
 
     local function xform_name(n, is_submenu)
