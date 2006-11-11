@@ -27,7 +27,7 @@
 #include "exports.h"
 
 
-#define CF_STATUSD_TIMEOUT_SEC 2
+#define CF_STATUSD_TIMEOUT_SEC 5
 
 
 /*{{{ Module information */
@@ -85,13 +85,6 @@ static bool process_pipe(int fd, ExtlFn fn,
 
 
 #define USEC 1000000
-static void normalise_tv(struct timeval *tv)
-{
-    while(tv->tv_usec>USEC){
-        tv->tv_sec++;
-        tv->tv_usec-=USEC;
-    }
-}
 
 
 static bool wait_statusd_init(int outfd, int errfd, ExtlFn dh, ExtlFn eh)
@@ -101,7 +94,8 @@ static bool wait_statusd_init(int outfd, int errfd, ExtlFn dh, ExtlFn eh)
     int nfds=maxof(outfd, errfd);
     int retval;
     bool dummy, doneseen, eagain=FALSE;
-
+    const char *timeout_msg=TR("ion-statusd launch timeout.");
+    
     if(gettimeofday(&endtime, NULL)!=0){
         warn_err();
         return FALSE;
@@ -110,24 +104,23 @@ static bool wait_statusd_init(int outfd, int errfd, ExtlFn dh, ExtlFn eh)
     now=endtime;
     endtime.tv_sec+=CF_STATUSD_TIMEOUT_SEC;
     
-    normalise_tv(&endtime);
-    
     while(1){
         FD_ZERO(&rfds);
 
-        normalise_tv(&now);
-    
         /* Calculate remaining time */
         if(now.tv_sec>endtime.tv_sec){
-            return FALSE;
+            goto timeout;
         }else if(now.tv_sec==endtime.tv_sec){
             if(now.tv_usec>=endtime.tv_usec)
-                return FALSE;
+                goto timeout;
             tv.tv_sec=0;
             tv.tv_usec=endtime.tv_usec-now.tv_usec;
         }else{
-            tv.tv_usec=USEC-now.tv_usec+endtime.tv_sec;
-            tv.tv_sec=endtime.tv_sec-(now.tv_sec+1);
+            tv.tv_usec=USEC+endtime.tv_usec-now.tv_usec;
+            tv.tv_sec=-1+endtime.tv_sec-now.tv_sec;
+            /* Kernel lameness tuner: */
+            tv.tv_sec+=tv.tv_usec/USEC;
+            tv.tv_usec%=USEC;
         }
         
         FD_SET(outfd, &rfds);
@@ -152,8 +145,7 @@ static bool wait_statusd_init(int outfd, int errfd, ExtlFn dh, ExtlFn eh)
                 }
             }
         }else if(retval==0){
-            /* Timeout */
-            return FALSE;
+            goto timeout;
         }
         
         if(gettimeofday(&now, NULL)!=0){
@@ -161,7 +153,12 @@ static bool wait_statusd_init(int outfd, int errfd, ExtlFn dh, ExtlFn eh)
             return FALSE;
         }
     }
-
+    
+    return TRUE;
+    
+timeout:
+    warn(TR("ion-statusd timed out."));
+    return FALSE;
 }
 
 
