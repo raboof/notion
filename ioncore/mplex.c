@@ -864,7 +864,7 @@ bool mplex_set_hidden(WMPlex *mplex, WRegion *reg, int sp)
     }
     
     if(mcf && !PASSIVE(node))
-        mplex_refocus(mplex, (nhidden ? NULL : node), FALSE);
+        mplex_refocus(mplex, (nhidden ? NULL : node), TRUE);
     
     return STACKING_IS_HIDDEN(node);
 }
