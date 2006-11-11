@@ -280,8 +280,7 @@ static void get_textarea_geom(WEdln *wedln, int mode, WRectangle *geom)
 {
     get_inner_geom(wedln, mode, geom);
     geom->x+=wedln->prompt_w;
-    geom->w-=wedln->prompt_w;
-    geom->w=maxof(0, geom->w);
+    geom->w=maxof(0, geom->w - wedln->prompt_w - wedln->info_w);
 }
 
 
@@ -298,6 +297,12 @@ static void wedln_calc_size(WEdln *wedln, WRectangle *geom)
         wedln->prompt_w=grbrush_get_text_width(WEDLN_BRUSH(wedln),
                                                wedln->prompt, 
                                                wedln->prompt_len);
+    }
+    
+    if(wedln->info!=NULL){
+        wedln->info_w=grbrush_get_text_width(WEDLN_BRUSH(wedln),
+                                             wedln->info, 
+                                             wedln->info_len);
     }
 
     th=get_textarea_height(wedln, wedln->compl_list.strs!=NULL);
@@ -359,10 +364,11 @@ void wedln_draw_completions(WEdln *wedln, bool complete)
     }
 }
 
-    
-void wedln_draw_textarea(WEdln *wedln)
+
+void wedln_draw_textarea(WEdln *wedln)    
 {
     WRectangle geom;
+    int ty;
     const char *style=(REGION_IS_ACTIVE(wedln) ? "active" : "inactive");
 
     if(WEDLN_BRUSH(wedln)==NULL)
@@ -374,19 +380,29 @@ void wedln_draw_textarea(WEdln *wedln)
     
     grbrush_draw_border(WEDLN_BRUSH(wedln), &geom, style);
 
+    get_inner_geom(wedln, G_CURRENT, &geom);
+
+    ty=calc_text_y(wedln, &geom);
+
     if(wedln->prompt!=NULL){
-        int ty;
         const char *promptstyle=(REGION_IS_ACTIVE(wedln) 
-                                 ? "active-prompt" : "inactive-prompt");
-        
-        get_inner_geom(wedln, G_CURRENT, &geom);
-        ty=calc_text_y(wedln, &geom);
-        
+                                 ? "active-prompt" 
+                                 : "inactive-prompt");
         grbrush_draw_string(WEDLN_BRUSH(wedln), geom.x, ty,
                             wedln->prompt, wedln->prompt_len, TRUE, 
                             promptstyle);
     }
-
+    
+    if(wedln->info!=NULL){
+        int x=geom.x+geom.w-wedln->info_w;
+        const char *promptstyle=(REGION_IS_ACTIVE(wedln) 
+                                 ? "active-prompt-info" 
+                                 : "inactive-prompt-info");
+        grbrush_draw_string(WEDLN_BRUSH(wedln), x, ty,
+                            wedln->info, wedln->info_len, TRUE, 
+                            promptstyle);
+    }
+        
     get_textarea_geom(wedln, G_CURRENT, &geom);
     
     wedln_draw_str_box(wedln, &geom, wedln->vstart, wedln->edln.p, 0,
@@ -412,6 +428,39 @@ void wedln_draw(WEdln *wedln, bool complete)
     wedln_draw_textarea(wedln);
     
     grbrush_end(WEDLN_BRUSH(wedln));
+}
+
+
+/*}}} */
+
+
+/*{{{ Info area */
+
+
+static void wedln_set_info(WEdln *wedln, const char *info)
+{
+    char *p;
+    
+    if(wedln->info!=NULL){
+        free(wedln->info);
+        wedln->info=NULL;
+        wedln->info_w=0;
+        wedln->info_len=0;
+    }
+    
+    if(info!=NULL){
+        wedln->info=scat3("  [", info, "]");
+        if(wedln->info!=NULL){
+            wedln->info_len=strlen(wedln->info);
+            if(WEDLN_BRUSH(wedln)!=NULL){
+                wedln->info_w=grbrush_get_text_width(WEDLN_BRUSH(wedln),
+                                                     wedln->info, 
+                                                     wedln->info_len);
+            }
+        }
+    }
+    
+    wedln_draw_textarea(wedln);
 }
 
 
@@ -722,6 +771,12 @@ void wedln_complete(WEdln *wedln, const char *cycle, const char *mode)
             valid=!wedln->compl_history_mode;
             wedln->compl_history_mode=FALSE;
         }
+        if(!valid){
+            wedln_set_info(wedln,
+                           (wedln->compl_history_mode
+                            ? TR("history")
+                            : NULL));
+        }
     }
     
     if(cycle!=NULL && valid){
@@ -861,6 +916,10 @@ static bool wedln_init(WEdln *wedln, WWindow *par, const WFitParams *fp,
     wedln->compl_tab=FALSE;
     wedln->compl_history_mode=FALSE;
     
+    wedln->info=NULL;
+    wedln->info_len=0;
+    wedln->info_w=0;
+    
     wedln->cycle_bindmap=NULL;
     
     if(!input_init((WInput*)wedln, par, fp)){
@@ -891,6 +950,9 @@ static void wedln_deinit(WEdln *wedln)
 {
     if(wedln->prompt!=NULL)
         free(wedln->prompt);
+        
+    if(wedln->info!=NULL)
+        free(wedln->info);
 
     if(wedln->compl_beg!=NULL)
         free(wedln->compl_beg);

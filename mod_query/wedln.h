@@ -43,6 +43,11 @@ DECLCLASS(WEdln){
     char *prompt;
     int prompt_len;
     int prompt_w;
+    
+    char *info;
+    int info_len;
+    int info_w;
+    
     int vstart;
     
     ExtlFn handler;
