@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ion3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-10-19 19:35+0300\n"
+"POT-Creation-Date: 2006-11-11 17:36+0200\n"
 "PO-Revision-Date: 2004-07-31 23:50+0300\n"
 "Last-Translator: Tuomo Valkonen <tuomov at iki.fi>\n"
 "Language-Team: none\n"
@@ -253,7 +253,7 @@ msgid "The transient_for window for \"%s\" is not on the same screen."
 msgstr "Ikkunan \"%s\" transient_for neuvo osoittaa eri näytölle."
 
 #: ../ioncore/clientwin.c:440 ../ioncore/clientwin.c:527
-#: ../ioncore/clientwin.c:1319
+#: ../ioncore/clientwin.c:1300
 #, c-format
 msgid "Window %#x disappeared."
 msgstr "Ikkuna %#x katosi."
@@ -272,11 +272,11 @@ msgid "Changes is WM_TRANSIENT_FOR property are unsupported."
 msgstr "Muutoksia WM_TRANSIENT_FOR ominaisuudessa ei tueta."
 
 #
-#: ../ioncore/clientwin.c:810
+#: ../ioncore/clientwin.c:809
 msgid "Client does not support the WM_DELETE protocol."
 msgstr "Asiakasikkuna ei tue WM_DELETE-protokollaa."
 
-#: ../ioncore/clientwin.c:1325
+#: ../ioncore/clientwin.c:1306
 msgid "Saved client window does not want to be managed."
 msgstr "Talletettu asiakasikkuna ei halua sitä hallittavan."
 
@@ -348,12 +348,12 @@ msgstr "X-ruudun %d hallittavaksi saattaminen epäonnistui."
 msgid "Corrupt instance number %s."
 msgstr "Rikkinäinen instanssinumero %s."
 
-#: ../ioncore/saveload.c:124
+#: ../ioncore/saveload.c:125
 #, c-format
 msgid "Unknown class \"%s\", cannot create region."
 msgstr "Luokka \"%s\" on tuntematon. Aluetta ei voida luoda."
 
-#: ../ioncore/saveload.c:204
+#: ../ioncore/saveload.c:205
 #, c-format
 msgid ""
 "There were errors loading layout. Backing up current layout savefile as\n"
@@ -372,38 +372,38 @@ msgstr ""
 "tilanteen aiheuttavat virheet (mahdollisesti puuttuva moduuli?) muissa\n"
 "asetustiedostoissasi."
 
-#: ../ioncore/saveload.c:247
+#: ../ioncore/saveload.c:248
 msgid "Unable to get file for layout backup."
 msgstr "Sijoittelun varmuuskopiolle ei voitu muodostaa tiedostonimeä."
 
-#: ../ioncore/saveload.c:251
+#: ../ioncore/saveload.c:252
 #, c-format
 msgid "Backup file %s already exists."
 msgstr "Varmuuskopio %s on jo olemassa."
 
-#: ../ioncore/saveload.c:257
+#: ../ioncore/saveload.c:258
 msgid "Failed backup."
 msgstr "Varmuuskopionti epäonnistui."
 
 #
-#: ../ioncore/saveload.c:262
+#: ../ioncore/saveload.c:263
 msgid "Unable to initialise layout on any screen."
 msgstr "Sijoittelun alustus epäonnistui kaikilla näytöillä."
 
-#: ../ioncore/saveload.c:282
+#: ../ioncore/saveload.c:283
 #, c-format
 msgid "Unable to get configuration for screen %d."
 msgstr "Ruudun %d asetukset puuttuvat."
 
-#: ../ioncore/saveload.c:295
+#: ../ioncore/saveload.c:296
 msgid "Unable to save layout."
 msgstr "Sijoittelun talletus epäonnistui."
 
-#: ../ioncore/conf.c:144
+#: ../ioncore/conf.c:143
 msgid "User directory can not be set."
 msgstr "Käyttäjän hakemistoa ei pystytä asettamaan."
 
-#: ../ioncore/conf.c:218
+#: ../ioncore/conf.c:217
 msgid "Some bindmaps were empty, loading ioncore_efbb."
 msgstr "Jotkut sidontakartat olivat tyhjiä. Ladataan ioncore_efbb."
 
@@ -420,17 +420,17 @@ msgstr ""
 "tai vanhempi kieltäytyi hallitsemasta ikkunaa."
 
 #
-#: ../ioncore/mplex.c:169
+#: ../ioncore/mplex.c:172
 msgid "Refusing to destroy - not empty."
 msgstr "Tuhoamisesta kieltäydytään - ei tyhjä."
 
 #
-#: ../ioncore/mplex.c:1665
+#: ../ioncore/mplex.c:1678
 msgid "Invalid position setting."
 msgstr "Virheellinen paikka-asetus."
 
 #
-#: ../ioncore/mplex.c:1705
+#: ../ioncore/mplex.c:1718
 msgid "Invalid action setting."
 msgstr "Virheellinen toiminto-asetus."
 
@@ -448,17 +448,17 @@ msgstr "Tyylille '%s' ei löytynyt pensseliä."
 msgid "No drawing engines loaded, trying \"de\"."
 msgstr "Yhtään piirtomoottoria ei ole ladattu. Yritetään oletusta \"de\"."
 
-#: ../ioncore/group.c:186 ../mod_tiling/tiling.c:96
+#: ../ioncore/group.c:184 ../mod_tiling/tiling.c:96
 #, c-format
 msgid "Error reparenting %s."
 msgstr "Virhe alueen %s vanhemman vaihdossa."
 
 #
-#: ../ioncore/group.c:483 ../mod_tiling/tiling.c:665
+#: ../ioncore/group.c:481 ../mod_tiling/tiling.c:668
 msgid "Workspace not empty - refusing to destroy."
 msgstr "Työpöytää ei voida tuhota, koska se ei ole tyhjä."
 
-#: ../ioncore/group.c:667
+#: ../ioncore/group.c:680
 msgid "'bottom' already set."
 msgstr "'pohja' on jo asetettu."
 
@@ -490,78 +490,78 @@ msgstr "Solmun luonti tilanäytölle epäonnistui."
 msgid "Unable to create new split for status display."
 msgstr "Uuden jaon tekeminen tilanäytölle epäonnistui."
 
-#: ../mod_tiling/tiling.c:934
+#: ../mod_tiling/tiling.c:937
 msgid "Invalid direction"
 msgstr "Virheellinen suunta."
 
 #
-#: ../mod_tiling/tiling.c:967 ../mod_tiling/split.c:1018
+#: ../mod_tiling/tiling.c:970 ../mod_tiling/split.c:1018
 msgid "Invalid node."
 msgstr "Epäkelpo solmu."
 
 #
-#: ../mod_tiling/tiling.c:986
+#: ../mod_tiling/tiling.c:989
 msgid "Unable to split."
 msgstr "Halkaisu ei ole mahdollista."
 
-#: ../mod_tiling/tiling.c:1089
+#: ../mod_tiling/tiling.c:1092
 msgid "Nil frame."
 msgstr "Kehys on asettamatta."
 
-#: ../mod_tiling/tiling.c:1094
+#: ../mod_tiling/tiling.c:1097
 msgid "The frame is not managed by the workspace."
 msgstr "Kehys ei ole tämän työpöydän hallinnoima."
 
-#: ../mod_tiling/tiling.c:1193
+#: ../mod_tiling/tiling.c:1196
 msgid "Nil parameter."
 msgstr "Parametri on asettamatta."
 
-#: ../mod_tiling/tiling.c:1198
+#: ../mod_tiling/tiling.c:1201
 msgid "Manager doesn't match."
 msgstr "Hallitsija on väärä."
 
-#: ../mod_tiling/tiling.c:1235
+#: ../mod_tiling/tiling.c:1238
 msgid "The status display is not a valid parameter for this routine."
 msgstr "Tilanäyttö ei ole kelpo parametri tälle toiminnolle."
 
-#: ../mod_tiling/tiling.c:1326
+#: ../mod_tiling/tiling.c:1329
 msgid "Refusing to float split directly containing the status display."
 msgstr "Tilanäytön suoraan sisältävää jakoa ei voida kelluttaa."
 
-#: ../mod_tiling/tiling.c:1389
+#: ../mod_tiling/tiling.c:1392
 msgid "No suitable split here."
 msgstr "Ei sopivaa jakoa tässä."
 
 #
-#: ../mod_tiling/tiling.c:1425
+#: ../mod_tiling/tiling.c:1428
 msgid "Could not get split tree."
 msgstr "Halkaisupuu puuttuu."
 
-#: ../mod_tiling/tiling.c:1446
+#: ../mod_tiling/tiling.c:1449
 msgid "Workspace already has a status display node."
 msgstr "Työpöydällä on jo solmu tilanäytölle."
 
 #
-#: ../mod_tiling/tiling.c:1484
+#: ../mod_tiling/tiling.c:1487
 msgid "Missing region parameters."
 msgstr "Alueen parameterit puuttuu."
 
-#: ../mod_tiling/tiling.c:1528 ../mod_tiling/splitfloat.c:780
+#: ../mod_tiling/tiling.c:1531 ../mod_tiling/splitfloat.c:780
 msgid "Invalid direction."
 msgstr "Virheellinen suunta."
 
 #
-#: ../mod_tiling/tiling.c:1603
+#: ../mod_tiling/tiling.c:1606
 msgid "No split type given."
 msgstr "Halkaisun tyyppiä ei ole asetettu."
 
-#: ../mod_tiling/tiling.c:1616
+#: ../mod_tiling/tiling.c:1619
 msgid "Unknown split type."
 msgstr "Tuntematon halkaisutyyppi."
 
 #
 #
-#: ../mod_tiling/tiling.c:1656
+#: ../mod_tiling/tiling.c:1659
 msgid "The workspace is empty."
 msgstr "Työpöytä on tyhjä."
 
@@ -614,6 +614,10 @@ msgstr "Ei jäsenenä missään ryhmässä"
 msgid "Manager group already has bottom"
 msgstr "Managerilla on jo 'pohja'"
 
+#: ../mod_query/wedln.c:777
+msgid "history"
+msgstr "hist.täyd."
+
 #: ../mod_query/fwarn.c:34
 msgid "Error:\n"
 msgstr "Virhe:\n"
@@ -654,7 +658,7 @@ msgstr "Virhe istunnonhallinan kutsussa IceAddConnectionWatch."
 msgid "Unable to connect to the session manager."
 msgstr "Yhteydenotto istunnonhallintaohjelmaan epäonnistui."
 
-#: ../mod_sp/main.c:95
+#: ../mod_sp/main.c:85
 msgid "Unable to create scratchpad."
 msgstr "Suttausalueen luonti epäonnistui."
 
@@ -662,7 +666,7 @@ msgstr "Suttausalueen luonti epäonnistui."
 msgid "reading a pipe"
 msgstr "putken luku"
 
-#: ../mod_statusbar/statusbar.c:1047
+#: ../mod_statusbar/statusbar.c:1046
 #, c-format
 msgid "[ %date || load: %load ] %filler%systray"
 msgstr ""
@@ -885,7 +889,7 @@ msgstr ""
 
 #: ../../libextl-3/luaextl.c:1356
 msgid "Returned dead object."
-msgstr ""
+msgstr "Kuollut olio palautettu."
 
 #: ../../libextl-3/luaextl.c:1359
 #, c-format
@@ -1100,9 +1104,27 @@ msgstr "Virhe vahdin käännössä. %s"
 msgid "Invalid guard %s."
 msgstr "Virheellinen vahti %s."
 
+msgid "Main menu:"
+msgstr "Päävalikko:"
+
+msgid "Context menu:"
+msgstr "Kontekstivalikko:"
+
+msgid "Floating frame"
+msgstr "Kelluva kehys"
+
+msgid "Tiled frame"
+msgstr "Laatoitettu kehys"
+
+msgid "Tiling"
+msgstr "Laatoitus"
+
 #
 msgid "Workspace"
 msgstr "Työpöytä"
+
+msgid "Screen"
+msgstr "Näyttö"
 
 msgid "Frame"
 msgstr "Kehys"
@@ -1188,7 +1210,6 @@ msgstr "Avaa SSH-yhteys:"
 msgid "Manual page (%s):"
 msgstr "Ohjesivu (%s):"
 
-#, fuzzy
 msgid "Lua code:"
 msgstr "Lua-koodia:"
 
@@ -1202,7 +1223,7 @@ msgid "%s:"
 msgstr ""
 
 msgid "No entry '%s'"
-msgstr "Kirjausta '%s' ei löydy."
+msgstr "Tuntematon valinta '%s'."
 
 msgid ""
 "\n"
@@ -1210,7 +1231,8 @@ msgid ""
 "%sRole: %s\n"
 "%sInstance: %s\n"
 "%sXID: 0x%x"
-msgstr "\n"
+msgstr ""
+"\n"
 "Luokka(class): %s\n"
 "Rooli(role): %s\n"
 "Instanssi(instance): %s\n"
@@ -1260,7 +1282,8 @@ msgid "Switch to next/previous object within current screen."
 msgstr "Siirry seuraavaan/edelliseen tämänhetkisen näytön lomittamaan olioon."
 
 msgid "Go to first region demanding attention or previously active one."
-msgstr "Mene ensimmäiseen huomiota vaativaan alueeseen, tai edelliseen aktiiviseen."
+msgstr ""
+"Mene ensimmäiseen huomiota vaativaan alueeseen, tai edelliseen aktiiviseen."
 
 #
 msgid "Clear all tags."
@@ -1314,7 +1337,6 @@ msgstr ""
 "Lähetä seuraava näppäinpainallus aktiiviselle asiakasikkunalle. Kaikki "
 "ohjelmat eivät välttämättä salli tätä oletuksena."
 
-#, fuzzy
 msgid "Toggle client window group full-screen mode"
 msgstr "Muuta asiakasikkunaryhmän kokoruudun tilaa"
 
@@ -1540,6 +1562,9 @@ msgstr "Lopeta tekstin valinta."
 msgid "Try to complete the entered text or cycle through completions."
 msgstr "Yritä täydentää syötetty teksti tai selaa täydennyksiä."
 
+msgid "Complete from history"
+msgstr "Täydennä historiasta"
+
 msgid "Close the query and execute bound action."
 msgstr "Sulje kysely ja suorita sidottu toiminta."
 
@@ -1655,9 +1680,6 @@ msgstr "%s %s osassa %s"
 
 #~ msgid "Refresh list"
 #~ msgstr "Virkistä lista"
-
-#~ msgid "%s menu:"
-#~ msgstr "Valikko %s"
 
 #~ msgid "Unable to create workspace: no screen."
 #~ msgstr "Ei voida luoda työpöytää: ei ruutua."

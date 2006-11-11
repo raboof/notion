@@ -80,7 +80,7 @@ defbindings("WEdln", {
     -- Do not cycle; only force evaluation of new completions
     kpress("Control+Tab", "WEdln.complete(_, nil, 'normal')"),
     
-    bdoc("Toggle on history completion mode"),
+    bdoc("Complete from history"),
     kpress("Control+R", "WEdln.complete(_, 'next', 'history')"),
     kpress("Control+S", "WEdln.complete(_, 'prev', 'history')"),
     
