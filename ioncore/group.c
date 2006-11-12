@@ -891,7 +891,7 @@ void group_manage_stdisp(WGroup *ws, WRegion *stdisp,
 
 
 void group_managed_rqgeom(WGroup *ws, WRegion *reg,
-                          int flags, const WRectangle *geom,
+                          const WRQGeomParams *rq,
                           WRectangle *geomret)
 {
     WFitParams fp;
@@ -900,34 +900,34 @@ void group_managed_rqgeom(WGroup *ws, WRegion *reg,
     st=group_find_stacking(ws, reg);
 
     if(st==NULL){
-        fp.g=*geom;
+        fp.g=rq->geom;
         fp.mode=REGION_FIT_EXACT;
     }else{
         fp.g=REGION_GEOM(ws);
-        sizepolicy(&st->szplcy, reg, geom, flags, &fp);
+        sizepolicy(&st->szplcy, reg, &rq->geom, rq->flags, &fp);
     }
     
     if(geomret!=NULL)
         *geomret=fp.g;
     
-    if(!(flags&REGION_RQGEOM_TRYONLY))
+    if(!(rq->flags&REGION_RQGEOM_TRYONLY))
         region_fitrep(reg, NULL, &fp);
 }
 
 
-void group_managed_rqgeom_absolute(WGroup *grp,
-                                   WRegion *sub, int flags, 
-                                   const WRectangle *geom,
+void group_managed_rqgeom_absolute(WGroup *grp, WRegion *sub, 
+                                   const WRQGeomParams *rq,
                                    WRectangle *geomret)
 {
     if(grp->bottom!=NULL && grp->bottom->reg==sub){
-        region_rqgeom((WRegion*)grp, flags, geom, geomret);
-        if(!(flags&REGION_RQGEOM_TRYONLY) && geomret!=NULL)
+        region_rqgeom((WRegion*)grp, rq, geomret);
+        if(!(rq->flags&REGION_RQGEOM_TRYONLY) && geomret!=NULL)
             *geomret=REGION_GEOM(sub);
     }else{
-        region_managed_rqgeom((WRegion*)grp, sub, 
-                              flags&~REGION_RQGEOM_ABSOLUTE, 
-                              geom, geomret);
+        WRQGeomParams rq2=*rq;
+        rq2.flags&=~REGION_RQGEOM_ABSOLUTE;
+
+        region_managed_rqgeom((WRegion*)grp, sub, &rq2, geomret);
     }
 }
 

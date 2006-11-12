@@ -188,24 +188,25 @@ static void infowin_do_set_text(WInfoWin *p, const char *str)
 
 static void infowin_resize(WInfoWin *p)
 {
-    int rqflags=REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y;
+    WRQGeomParams rq=RQGEOMPARAMS_INIT;
     const char *str=INFOWIN_BUFFER(p);
-    WRectangle g;
     GrBorderWidths bdw;
     GrFontExtents fnte;
     
-    g.x=REGION_GEOM(p).x;
-    g.y=REGION_GEOM(p).y;
+    rq.flags=REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y;
+    
+    rq.geom.x=REGION_GEOM(p).x;
+    rq.geom.y=REGION_GEOM(p).y;
     
     grbrush_get_border_widths(p->brush, &bdw);
     grbrush_get_font_extents(p->brush, &fnte);
         
-    g.w=bdw.left+bdw.right;
-    g.w+=grbrush_get_text_width(p->brush, str, strlen(str));
-    g.h=fnte.max_height+bdw.top+bdw.bottom;
+    rq.geom.w=bdw.left+bdw.right;
+    rq.geom.w+=grbrush_get_text_width(p->brush, str, strlen(str));
+    rq.geom.h=fnte.max_height+bdw.top+bdw.bottom;
 
-    if(g.w!=REGION_GEOM(p).w || g.h!=REGION_GEOM(p).h)
-        region_rqgeom((WRegion*)p, rqflags, &g, NULL);
+    if(rectangle_compare(&rq.geom, &REGION_GEOM(p))!=RECTANGLE_SAME)
+        region_rqgeom((WRegion*)p, &rq, NULL);
 }
 
 

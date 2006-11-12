@@ -558,61 +558,61 @@ void frame_activated(WFrame *frame)
 
 
 static void frame_managed_rqgeom_absolute(WFrame *frame, WRegion *sub,
-                                          int rqflags, const WRectangle *geom_,
+                                          const WRQGeomParams *rq,
                                           WRectangle *geomret)
 {
-    int gravity=ForgetGravity;
-    WRectangle off;
-    WRegion *par;
-    WRectangle geom=*geom_;
-    
     if(!FORWARD_CWIN_RQGEOM(frame)){
         region_managed_rqgeom_absolute_default((WRegion*)frame, sub, 
-                                               rqflags, geom_, geomret);
-        return;
-    }
-
-    /* client window gravity */ {
-        WClientWin *cwin=OBJ_CAST(sub, WClientWin);
+                                               rq, geomret);
+    }else{
+        WRQGeomParams rq2=RQGEOMPARAMS_INIT;
+        int gravity=ForgetGravity;
+        WRectangle off;
+        WRegion *par;
         
-        if(cwin!=NULL && cwin->size_hints.flags&PWinGravity)
-            gravity=cwin->size_hints.win_gravity;
-    }
-    
-    mplex_managed_geom(&frame->mplex, &off);
-    off.x=-off.x;
-    off.y=-off.y;
-    off.w=REGION_GEOM(frame).w-off.w;
-    off.h=REGION_GEOM(frame).h-off.h;
+        rq2.geom=rq->geom;
+        rq2.flags=rq->flags&(REGION_RQGEOM_WEAK_ALL
+                             |REGION_RQGEOM_TRYONLY
+                             |REGION_RQGEOM_ABSOLUTE);
 
-    geom.w=maxof(geom.w+off.w, 0);
-    geom.h=maxof(geom.h+off.h, 0);
+        if(rq->flags&REGION_RQGEOM_GRAVITY)
+            gravity=rq->gravity;
     
-    /*region_size_hints_correct((WRegion*)frame, &(geom.w), &(geom.h), TRUE);*/
-    
-    /* If WEAK_? is set, then geom.(x|y) is root-relative as it was not 
-     * requested by the client and clientwin_handle_configure_request has
-     * no better guess. Otherwise the coordinates are those requested by 
-     * the client (modulo borders/gravity) and we interpret them to be 
-     * root-relative coordinates for this frame modulo gravity.
-     */
-    if(rqflags&REGION_RQGEOM_WEAK_X)
-        geom.x+=off.x;
-    else
-        geom.x+=xgravity_deltax(gravity, -off.x, off.x+off.w);
+        mplex_managed_geom(&frame->mplex, &off);
+        off.x=-off.x;
+        off.y=-off.y;
+        off.w=REGION_GEOM(frame).w-off.w;
+        off.h=REGION_GEOM(frame).h-off.h;
 
-    if(rqflags&REGION_RQGEOM_WEAK_Y)
-        geom.y+=off.y;
-    else
-        geom.y+=xgravity_deltay(gravity, -off.y, off.y+off.h);
+        rq2.geom.w=maxof(rq2.geom.w+off.w, 0);
+        rq2.geom.h=maxof(rq2.geom.h+off.h, 0);
     
-    region_rqgeom((WRegion*)frame, rqflags, &geom, geomret);
+        /*region_size_hints_correct((WRegion*)frame, &(geom.w), &(geom.h), TRUE);*/
     
-    if(geomret!=NULL){
-        geomret->x-=off.x;
-        geomret->y-=off.y;
-        geomret->w-=off.w;
-        geomret->h-=off.h;
+        /* If WEAK_? is set, then geom.(x|y) is root-relative as it was not 
+         * requested by the client and clientwin_handle_configure_request has
+         * no better guess. Otherwise the coordinates are those requested by 
+         * the client (modulo borders/gravity) and we interpret them to be 
+         * root-relative coordinates for this frame modulo gravity.
+         */
+        if(rq->flags&REGION_RQGEOM_WEAK_X)
+            rq2.geom.x+=off.x;
+        else
+            rq2.geom.x+=xgravity_deltax(gravity, -off.x, off.x+off.w);
+	
+        if(rq->flags&REGION_RQGEOM_WEAK_Y)
+            rq2.geom.y+=off.y;
+        else
+            rq2.geom.y+=xgravity_deltay(gravity, -off.y, off.y+off.h);
+        
+        region_rqgeom((WRegion*)frame, &rq2, geomret);
+        
+        if(geomret!=NULL){
+            geomret->x-=off.x;
+            geomret->y-=off.y;
+            geomret->w-=off.w;
+            geomret->h-=off.h;
+        }
     }
 }
 
@@ -627,34 +627,37 @@ bool frame_set_shaded(WFrame *frame, int sp)
 {
     bool set=(frame->flags&FRAME_SHADED);
     bool nset=libtu_do_setparam(sp, set);
-    WRectangle geom=REGION_GEOM(frame);
+    WRQGeomParams rq=RQGEOMPARAMS_INIT;
     GrBorderWidths bdw;
     int h;
 
     if(!XOR(nset, set))
         return nset;
+
+    rq.flags=REGION_RQGEOM_H_ONLY;
+    rq.geom=REGION_GEOM(frame);
         
     if(!nset){
         if(!(frame->flags&FRAME_SAVED_VERT))
             return FALSE;
-        geom.h=frame->saved_h;
+        rq.geom.h=frame->saved_h;
     }else{
         if(frame->barmode==FRAME_BAR_NONE){
             return FALSE;
         }else if(frame->barmode==FRAME_BAR_SHAPED){
-            geom.h=frame->bar_h;
+            rq.geom.h=frame->bar_h;
         }else{
             WRectangle tmp;
             
             frame_border_inner_geom(frame, &tmp);
             
-            geom.h=geom.h-tmp.h;
+            rq.geom.h=rq.geom.h-tmp.h;
         }
     }
     
     frame->flags|=FRAME_SHADED_TOGGLE;
     
-    region_rqgeom((WRegion*)frame, REGION_RQGEOM_H_ONLY, &geom, NULL);
+    region_rqgeom((WRegion*)frame, &rq, NULL);
     
     frame->flags&=~FRAME_SHADED_TOGGLE;
     

@@ -134,12 +134,12 @@ bool tiling_fitrep(WTiling *ws, WWindow *par, const WFitParams *fp)
 
 
 void tiling_managed_rqgeom(WTiling *ws, WRegion *mgd, 
-                          int flags, const WRectangle *geom,
-                          WRectangle *geomret)
+                           const WRQGeomParams *rq,
+                           WRectangle *geomret)
 {
     WSplitRegion *node=get_node_check(ws, mgd);
     if(node!=NULL && ws->split_tree!=NULL)
-        splittree_rqgeom((WSplit*)node, flags, geom, geomret);
+        splittree_rqgeom((WSplit*)node, rq->flags, &rq->geom, geomret);
 }
 
 

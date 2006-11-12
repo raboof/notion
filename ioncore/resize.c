@@ -321,29 +321,29 @@ static void moveresmode_delta(WMoveresMode *mode,
                               int dx1, int dx2, int dy1, int dy2,
                               WRectangle *rret)
 {
-    WRectangle geom;
-    int w=0, h=0;
     int realdx1, realdx2, realdy1, realdy2;
+    WRQGeomParams rq=RQGEOMPARAMS_INIT;
+    int w=0, h=0;
     
     realdx1=(mode->dx1+=dx1);
     realdx2=(mode->dx2+=dx2);
     realdy1=(mode->dy1+=dy1);
     realdy2=(mode->dy2+=dy2);
-    geom=mode->origgeom;
+    rq.geom=mode->origgeom;
     
     /* snap */
     if(mode->snap_enabled){
         WRectangle *sg=&mode->snapgeom;
         int er=CF_EDGE_RESISTANCE;
         
-        if(mode->dx1!=0 && geom.x+mode->dx1<sg->x && geom.x+mode->dx1>sg->x-er)
-            realdx1=sg->x-geom.x;
-        if(mode->dx2!=0 && geom.x+geom.w+mode->dx2>sg->x+sg->w && geom.x+geom.w+mode->dx2<sg->x+sg->w+er)
-            realdx2=sg->x+sg->w-geom.x-geom.w;
-        if(mode->dy1!=0 && geom.y+mode->dy1<sg->y && geom.y+mode->dy1>sg->y-er)
-            realdy1=sg->y-geom.y;
-        if(mode->dy2!=0 && geom.y+geom.h+mode->dy2>sg->y+sg->h && geom.y+geom.h+mode->dy2<sg->y+sg->h+er)
-            realdy2=sg->y+sg->h-geom.y-geom.h;
+        if(mode->dx1!=0 && rq.geom.x+mode->dx1<sg->x && rq.geom.x+mode->dx1>sg->x-er)
+            realdx1=sg->x-rq.geom.x;
+        if(mode->dx2!=0 && rq.geom.x+rq.geom.w+mode->dx2>sg->x+sg->w && rq.geom.x+rq.geom.w+mode->dx2<sg->x+sg->w+er)
+            realdx2=sg->x+sg->w-rq.geom.x-rq.geom.w;
+        if(mode->dy1!=0 && rq.geom.y+mode->dy1<sg->y && rq.geom.y+mode->dy1>sg->y-er)
+            realdy1=sg->y-rq.geom.y;
+        if(mode->dy2!=0 && rq.geom.y+rq.geom.h+mode->dy2>sg->y+sg->h && rq.geom.y+rq.geom.h+mode->dy2<sg->y+sg->h+er)
+            realdy2=sg->y+sg->h-rq.geom.y-rq.geom.h;
     }
     
     w=mode->origgeom.w-realdx1+realdx2;
@@ -362,36 +362,38 @@ static void moveresmode_delta(WMoveresMode *mode,
     
     if(mode->dx1==mode->dx2){
         if(mode->dx1==0 || realdx1!=mode->dx1)
-            geom.x+=realdx1;
+            rq.geom.x+=realdx1;
         else
-            geom.x+=realdx2;
+            rq.geom.x+=realdx2;
     }else{
-        geom.w=w;
+        rq.geom.w=w;
         if(mode->dx1==0 || realdx1!=mode->dx1)
-            geom.x+=realdx1;
+            rq.geom.x+=realdx1;
         else
-            geom.x+=mode->origgeom.w-geom.w;
+            rq.geom.x+=mode->origgeom.w-rq.geom.w;
     }
     
     
     if(mode->dy1==mode->dy2){
         if(mode->dy1==0 || realdy1!=mode->dy1)
-            geom.y+=realdy1;
+            rq.geom.y+=realdy1;
         else
-            geom.y+=realdy2;
+            rq.geom.y+=realdy2;
     }else{
-        geom.h=h;
+        rq.geom.h=h;
         if(mode->dy1==0 || realdy1!=mode->dy1)
-            geom.y+=realdy1;
+            rq.geom.y+=realdy1;
         else
-            geom.y+=mode->origgeom.h-geom.h;
+            rq.geom.y+=mode->origgeom.h-rq.geom.h;
     }
     
     if(XOR_RESIZE)
         moveres_draw_rubberband(mode);
     
-    if(mode->reg!=NULL)
-        region_rqgeom(mode->reg, mode->rqflags, &geom, &mode->geom);
+    if(mode->reg!=NULL){
+        rq.flags=mode->rqflags;
+        region_rqgeom(mode->reg, &rq, &mode->geom);
+    }
     
     if(!mode->resize_cumulative){
         mode->dx1=0;
@@ -463,9 +465,12 @@ bool moveresmode_do_end(WMoveresMode *mode, bool apply)
     if(XOR_RESIZE){
         moveres_draw_rubberband(mode);
         if(apply){
-            WRectangle g2=mode->geom;
-            region_rqgeom(reg, mode->rqflags&~REGION_RQGEOM_TRYONLY,
-                          &g2, &mode->geom);
+            WRQGeomParams rq=RQGEOMPARAMS_INIT;
+            
+            rq.geom=mode->geom;
+            rq.flags=mode->rqflags&~REGION_RQGEOM_TRYONLY;
+
+            region_rqgeom(reg, &rq, &mode->geom);
         }
         XUngrabServer(ioncore_g.dpy);
     }
@@ -488,29 +493,29 @@ bool moveresmode_do_end(WMoveresMode *mode, bool apply)
 /*{{{ Request and other dynfuns */
 
 
-void region_rqgeom(WRegion *reg, int flags, const WRectangle *geom,
+void region_rqgeom(WRegion *reg, const WRQGeomParams *rq,
                    WRectangle *geomret)
 {
     WRegion *mgr=REGION_MANAGER(reg);
     
     if(mgr!=NULL){
-        if(flags&REGION_RQGEOM_ABSOLUTE)
-            region_managed_rqgeom_absolute(mgr, reg, flags, geom, geomret);
+        if(rq->flags&REGION_RQGEOM_ABSOLUTE)
+            region_managed_rqgeom_absolute(mgr, reg, rq, geomret);
         else
-            region_managed_rqgeom(mgr, reg, flags, geom, geomret);
+            region_managed_rqgeom(mgr, reg, rq, geomret);
     }else{
         WRectangle tmp;
         
-        if(flags&REGION_RQGEOM_ABSOLUTE){
-            region_absolute_geom_to_parent(reg, geom, &tmp);
-            geom=&tmp;
-        }
+        if(rq->flags&REGION_RQGEOM_ABSOLUTE)
+            region_absolute_geom_to_parent(reg, &rq->geom, &tmp);
+        else
+            tmp=rq->geom;
         
         if(geomret!=NULL)
-            *geomret=REGION_GEOM(reg);
+            *geomret=tmp;
         
-        if(!(flags&REGION_RQGEOM_TRYONLY))
-            region_fit(reg, geom, REGION_FIT_EXACT);
+        if(!(rq->flags&REGION_RQGEOM_TRYONLY))
+            region_fit(reg, &tmp, REGION_FIT_EXACT);
     }
 }
 
@@ -524,61 +529,63 @@ void region_rqgeom(WRegion *reg, int flags, const WRectangle *geom,
 EXTL_EXPORT_AS(WRegion, rqgeom)
 ExtlTab region_rqgeom_extl(WRegion *reg, ExtlTab g)
 {
-    WRectangle geom=REGION_GEOM(reg);
     WRectangle ogeom=REGION_GEOM(reg);
-    int flags=REGION_RQGEOM_WEAK_ALL;
+    WRQGeomParams rq=RQGEOMPARAMS_INIT;
     
     
-    if(extl_table_gets_i(g, "x", &(geom.x)))
-       flags&=~REGION_RQGEOM_WEAK_X;
-    if(extl_table_gets_i(g, "y", &(geom.y)))
-       flags&=~REGION_RQGEOM_WEAK_Y;
-    if(extl_table_gets_i(g, "w", &(geom.w)))
-       flags&=~REGION_RQGEOM_WEAK_W;
-    if(extl_table_gets_i(g, "h", &(geom.h)))
-       flags&=~REGION_RQGEOM_WEAK_H;
+    rq.geom=ogeom;
+    rq.flags=REGION_RQGEOM_WEAK_ALL;
+    
+    
+    if(extl_table_gets_i(g, "x", &(rq.geom.x)))
+       rq.flags&=~REGION_RQGEOM_WEAK_X;
+    if(extl_table_gets_i(g, "y", &(rq.geom.y)))
+       rq.flags&=~REGION_RQGEOM_WEAK_Y;
+    if(extl_table_gets_i(g, "w", &(rq.geom.w)))
+       rq.flags&=~REGION_RQGEOM_WEAK_W;
+    if(extl_table_gets_i(g, "h", &(rq.geom.h)))
+       rq.flags&=~REGION_RQGEOM_WEAK_H;
 
-    geom.w=maxof(1, geom.w);
-    geom.h=maxof(1, geom.h);
+    rq.geom.w=maxof(1, rq.geom.w);
+    rq.geom.h=maxof(1, rq.geom.h);
     
-    region_rqgeom(reg, flags, &geom, &ogeom);
+    region_rqgeom(reg, &rq, &ogeom);
     
     return extl_table_from_rectangle(&ogeom);
 }
 
 
 void region_managed_rqgeom(WRegion *mgr, WRegion *reg,
-                           int flags, const WRectangle *geom,
+                           const WRQGeomParams *rq,
                            WRectangle *geomret)
 {
-    CALL_DYN(region_managed_rqgeom, mgr,
-             (mgr, reg, flags, geom, geomret));
+    CALL_DYN(region_managed_rqgeom, mgr, (mgr, reg, rq, geomret));
 }
 
 
 void region_managed_rqgeom_absolute(WRegion *mgr, WRegion *reg,
-                                    int flags, const WRectangle *geom,
+                                    const WRQGeomParams *rq,
                                     WRectangle *geomret)
 {
     CALL_DYN(region_managed_rqgeom_absolute, mgr,
-             (mgr, reg, flags, geom, geomret));
+             (mgr, reg, rq, geomret));
 }
 
 
 void region_managed_rqgeom_allow(WRegion *mgr, WRegion *reg,
-                                 int flags, const WRectangle *geom,
+                                 const WRQGeomParams *rq,
                                  WRectangle *geomret)
 {
     if(geomret!=NULL)
-        *geomret=*geom;
+        *geomret=rq->geom;
     
-    if(!(flags&REGION_RQGEOM_TRYONLY))
-        region_fit(reg, geom, REGION_FIT_EXACT);
+    if(!(rq->flags&REGION_RQGEOM_TRYONLY))
+        region_fit(reg, &rq->geom, REGION_FIT_EXACT);
 }
 
 
 void region_managed_rqgeom_unallow(WRegion *mgr, WRegion *reg,
-                                   int flags, const WRectangle *geom,
+                                   const WRQGeomParams *rq,
                                    WRectangle *geomret)
 {
     if(geomret!=NULL)
@@ -587,16 +594,15 @@ void region_managed_rqgeom_unallow(WRegion *mgr, WRegion *reg,
 
 
 void region_managed_rqgeom_absolute_default(WRegion *mgr, WRegion *reg,
-                                            int flags, 
-                                            const WRectangle *geom,
+                                            const WRQGeomParams *rq,
                                             WRectangle *geomret)
 {
-    WRectangle geom2;
+    WRQGeomParams rq2=RQGEOMPARAMS_INIT;
     
-    region_absolute_geom_to_parent(reg, geom, &geom2);
+    rq2.flags=rq->flags&~REGION_RQGEOM_ABSOLUTE;
+    region_absolute_geom_to_parent(reg, &rq->geom, &rq2.geom);
     
-    region_managed_rqgeom(mgr, reg, flags&~REGION_RQGEOM_ABSOLUTE,
-                          &geom2, geomret);
+    region_managed_rqgeom(mgr, reg, &rq2, geomret);
 }
 
 
@@ -688,18 +694,21 @@ ExtlTab region_size_hints_extl(WRegion *reg)
 
 static bool rqh(WFrame *frame, int y, int h)
 {
-    WRectangle geom, rgeom;
+    WRQGeomParams rq=RQGEOMPARAMS_INIT;
+    WRectangle rgeom;
     int dummy_w;
     
-    geom.x=REGION_GEOM(frame).x;
-    geom.w=REGION_GEOM(frame).w;
-    geom.y=y;
-    geom.h=h;
+    rq.flags=REGION_RQGEOM_VERT_ONLY;
     
-    dummy_w=geom.w;
-    region_size_hints_correct((WRegion*)frame,  &dummy_w, &(geom.h), TRUE);
+    rq.geom.x=REGION_GEOM(frame).x;
+    rq.geom.w=REGION_GEOM(frame).w;
+    rq.geom.y=y;
+    rq.geom.h=h;
     
-    region_rqgeom((WRegion*)frame, REGION_RQGEOM_VERT_ONLY, &geom, &rgeom);
+    dummy_w=rq.geom.w;
+    region_size_hints_correct((WRegion*)frame, &dummy_w, &(rq.geom.h), TRUE);
+    
+    region_rqgeom((WRegion*)frame, &rq, &rgeom);
     
     return (abs(rgeom.y-REGION_GEOM(frame).y)>1 ||
             abs(rgeom.h-REGION_GEOM(frame).h)>1);
@@ -737,18 +746,21 @@ void frame_maximize_vert(WFrame *frame)
 
 static bool rqw(WFrame *frame, int x, int w)
 {
-    WRectangle geom, rgeom;
+    WRQGeomParams rq=RQGEOMPARAMS_INIT;
+    WRectangle rgeom;
     int dummy_h;
 
-    geom.x=x;
-    geom.w=w;
-    geom.y=REGION_GEOM(frame).y;
-    geom.h=REGION_GEOM(frame).h;
+    rq.flags=REGION_RQGEOM_HORIZ_ONLY;
     
-    dummy_h=geom.h;
-    region_size_hints_correct((WRegion*)frame,  &(geom.w), &dummy_h, TRUE);
+    rq.geom.x=x;
+    rq.geom.w=w;
+    rq.geom.y=REGION_GEOM(frame).y;
+    rq.geom.h=REGION_GEOM(frame).h;
     
-    region_rqgeom((WRegion*)frame, REGION_RQGEOM_HORIZ_ONLY, &geom, &rgeom);
+    dummy_h=rq.geom.h;
+    region_size_hints_correct((WRegion*)frame, &(rq.geom.w), &dummy_h, TRUE);
+    
+    region_rqgeom((WRegion*)frame, &rq, &rgeom);
     
     return (abs(rgeom.x-REGION_GEOM(frame).x)>1 ||
             abs(rgeom.w-REGION_GEOM(frame).w)>1);

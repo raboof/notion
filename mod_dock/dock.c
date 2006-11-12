@@ -806,15 +806,20 @@ static void dock_managed_rqgeom_(WDock *dock, WRegion *reg, int flags,
     
     /* Fit dock to new geom if required */
     if(!(flags&REGION_RQGEOM_TRYONLY)){
-        int rqgeomflags=REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y;
+        WRQGeomParams rq=RQGEOMPARAMS_INIT;
         
         dock_set_minmax(dock, grow, &border_dock_geom);
         
         if(just_update_minmax)
             return;
         
+        rq.flags=REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y;
+        rq.geom=border_dock_geom;
+
         dock->arrange_called=FALSE;
-        region_rqgeom((WRegion*)dock, rqgeomflags, &border_dock_geom, NULL);
+        
+        region_rqgeom((WRegion*)dock, &rq, NULL);
+        
         if(!dock->arrange_called)
             dock_arrange_dockapps(dock, &REGION_GEOM(dock), NULL, NULL);
         
@@ -829,10 +834,11 @@ static void dock_managed_rqgeom_(WDock *dock, WRegion *reg, int flags,
     }
 }
 
-static void dock_managed_rqgeom(WDock *dock, WRegion *reg, int flags,
-                                const WRectangle *geom, WRectangle *geomret)
+static void dock_managed_rqgeom(WDock *dock, WRegion *reg, 
+                                const WRQGeomParams *rq, 
+                                WRectangle *geomret)
 {
-    dock_managed_rqgeom_(dock, reg, flags, geom, geomret, FALSE);
+    dock_managed_rqgeom_(dock, reg, rq->flags, &rq->geom, geomret, FALSE);
 }
 
 
@@ -924,7 +930,7 @@ static void dock_draw(WDock *dock, bool complete)
 EXTL_EXPORT_MEMBER
 void dock_resize(WDock *dock)
 {
-    dock_managed_rqgeom(dock, NULL, 0, NULL, NULL);
+    dock_managed_rqgeom_(dock, NULL, 0, NULL, NULL, FALSE);
     dock_draw(dock, TRUE);
     
 }
@@ -1252,16 +1258,17 @@ WDock *mod_dock_create(ExtlTab tab)
     
     /* Final setup */    
     if(floating){
-        WRectangle dg;
+        WRQGeomParams rq=RQGEOMPARAMS_INIT;
         const WRectangle *pg=&REGION_GEOM(screen);
         
         /* Just calculate real min/max size */
         dock_managed_rqgeom_(dock, NULL, 0, NULL, NULL, TRUE);
         
-        dg.w=minof(dock->min_w, pg->w);
-        dg.h=minof(dock->min_h, pg->h);
-        calc_dock_pos(&dg, pg, dock->pos);
-        region_rqgeom((WRegion*)dock, 0, &dg, NULL);
+        rq.geom.w=minof(dock->min_w, pg->w);
+        rq.geom.h=minof(dock->min_h, pg->h);
+        calc_dock_pos(&rq.geom, pg, dock->pos);
+        
+        region_rqgeom((WRegion*)dock, &rq, NULL);
         
         return dock;
     }else{
@@ -1379,9 +1386,9 @@ static bool dock_do_attach_final(WDock *dock, WRegion *reg, void *unused)
     region_set_manager(reg, (WRegion*)dock);
     
     geom=REGION_GEOM(reg);
-    dock_managed_rqgeom(dock, reg, 
-                        REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y,
-                        &geom, NULL);
+    dock_managed_rqgeom_(dock, reg, 
+                         REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y,
+                         &geom, NULL, FALSE);
     
     region_map(reg);
 

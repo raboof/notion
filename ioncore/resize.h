@@ -33,6 +33,7 @@
 #define REGION_RQGEOM_WEAK_ALL  0x000f
 #define REGION_RQGEOM_TRYONLY   0x0010
 #define REGION_RQGEOM_ABSOLUTE  0x0020
+#define REGION_RQGEOM_GRAVITY   0x0040
 
 #define REGION_RQGEOM_NORMAL    0
 #define REGION_RQGEOM_VERT_ONLY (REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_W)
@@ -44,7 +45,19 @@
 #define REGION_ORIENTATION_HORIZONTAL 1
 #define REGION_ORIENTATION_VERTICAL 2
 
+
+#define RQGEOMPARAMS_INIT {{0, 0, 0, 0}, 0, 0}
+
+
+DECLSTRUCT(WRQGeomParams){
+    WRectangle geom;
+    int flags;
+    int gravity;
+};
+
+
 typedef void WDrawRubberbandFn(WRootWin *rw, const WRectangle *geom);
+
 
 DECLCLASS(WMoveresMode){
     Obj obj;
@@ -62,6 +75,7 @@ DECLCLASS(WMoveresMode){
     int rqflags;
     WInfoWin *infowin;
 };
+
 
 extern WMoveresMode *region_begin_resize(WRegion *reg, 
                                          WDrawRubberbandFn *rubfn,
@@ -89,35 +103,29 @@ extern WMoveresMode *moveres_mode(WRegion *reg);
 /* Note: even if REGION_RQGEOM_(X|Y|W|H) are not all specified, the
  * geom parameter should contain a proper geometry!
  */
-DYNFUN void region_managed_rqgeom(WRegion *reg, WRegion *sub, int flags, 
-                                  const WRectangle *geom,
+DYNFUN void region_managed_rqgeom(WRegion *reg, WRegion *sub, 
+                                  const WRQGeomParams *rqgp,
                                   WRectangle *geomret);
-DYNFUN void region_managed_rqgeom_absolute(WRegion *reg, 
-                                           WRegion *sub, int flags, 
-                                           const WRectangle *geom,
+DYNFUN void region_managed_rqgeom_absolute(WRegion *reg, WRegion *sub, 
+                                           const WRQGeomParams *rqgp,
                                            WRectangle *geomret);
 
-extern void region_rqgeom(WRegion *reg, int flags, 
-                          const WRectangle *geom,
+extern void region_rqgeom(WRegion *reg, const WRQGeomParams *rqgp,
                           WRectangle *geomret);
 
 /* Implementation for regions that do not allow subregions to resize
  * themselves; default is to give the size the region wants.
  */
 extern void region_managed_rqgeom_unallow(WRegion *reg, WRegion *sub,
-                                          int flags, 
-                                          const WRectangle *geom,
+                                          const WRQGeomParams *rq,
                                           WRectangle *geomret);
 /* default */
 extern void region_managed_rqgeom_allow(WRegion *reg, WRegion *sub,
-                                        int flags, 
-                                        const WRectangle *geom, 
+                                        const WRQGeomParams *rq,
                                         WRectangle *geomret);
 
-extern void region_managed_rqgeom_absolute_default(WRegion *reg, 
-                                                   WRegion *sub,
-                                                   int flags, 
-                                                   const WRectangle *geom, 
+extern void region_managed_rqgeom_absolute_default(WRegion *reg, WRegion *sub,
+                                                   const WRQGeomParams *rq,
                                                    WRectangle *geomret);
 
 

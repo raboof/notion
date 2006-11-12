@@ -81,8 +81,8 @@ extern void tiling_map(WTiling *ws);
 extern void tiling_unmap(WTiling *ws);
 extern ExtlTab tiling_get_configuration(WTiling *ws);
 extern void tiling_managed_rqgeom(WTiling *ws, WRegion *reg,
-                                 int flags, const WRectangle *geom,
-                                 WRectangle *geomret);
+                                  const WRQGeomParams *rq,
+                                  WRectangle *geomret);
 extern void tiling_managed_remove(WTiling *ws, WRegion *reg);
 extern void tiling_managed_activated(WTiling *ws, WRegion *reg);
 extern bool tiling_rescue_clientwins(WTiling *ws, WPHolder *ph);

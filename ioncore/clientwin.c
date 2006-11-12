@@ -1133,10 +1133,16 @@ void clientwin_handle_configure_request(WClientWin *cwin,
     cwin->flags|=CLIENTWIN_NEED_CFGNTFY;
 
     if(ev->value_mask&(CWX|CWY|CWWidth|CWHeight)){
-        int rqflags=REGION_RQGEOM_WEAK_ALL;
+        WRQGeomParams rq=RQGEOMPARAMS_INIT;
         int gdx=0, gdy=0;
-        WRectangle geom;
 
+        rq.flags=REGION_RQGEOM_WEAK_ALL|REGION_RQGEOM_ABSOLUTE;
+        
+        if(cwin->size_hints.flags&PWinGravity){
+            rq.flags|=REGION_RQGEOM_GRAVITY;
+            rq.gravity=cwin->size_hints.win_gravity;
+        }
+        
         /* Do I need to insert another disparaging comment on the person who
          * invented special server-supported window borders that are not 
          * accounted for in the window size? Keep it simple, stupid!
@@ -1148,39 +1154,38 @@ void clientwin_handle_configure_request(WClientWin *cwin,
                                -cwin->orig_bw, -cwin->orig_bw);
         }
         
-        region_rootpos((WRegion*)cwin, &(geom.x), &(geom.y));
-        geom.w=REGION_GEOM(cwin).w;
-        geom.h=REGION_GEOM(cwin).h;
+        region_rootpos((WRegion*)cwin, &(rq.geom.x), &(rq.geom.y));
+        rq.geom.w=REGION_GEOM(cwin).w;
+        rq.geom.h=REGION_GEOM(cwin).h;
         
         if(ev->value_mask&CWWidth){
             /* If x was not changed, keep reference point where it was */
             if(cwin->size_hints.flags&PWinGravity){
-                geom.x+=xgravity_deltax(cwin->size_hints.win_gravity, 0,
-                                       ev->width-geom.w);
+                rq.geom.x+=xgravity_deltax(cwin->size_hints.win_gravity, 0,
+                                           ev->width-rq.geom.w);
             }
-            geom.w=maxof(ev->width, 1);
-            rqflags&=~REGION_RQGEOM_WEAK_W;
+            rq.geom.w=maxof(ev->width, 1);
+            rq.flags&=~REGION_RQGEOM_WEAK_W;
         }
         if(ev->value_mask&CWHeight){
             /* If y was not changed, keep reference point where it was */
             if(cwin->size_hints.flags&PWinGravity){
-                geom.y+=xgravity_deltay(cwin->size_hints.win_gravity, 0,
-                                       ev->height-geom.h);
+                rq.geom.y+=xgravity_deltay(cwin->size_hints.win_gravity, 0,
+                                           ev->height-rq.geom.h);
             }
-            geom.h=maxof(ev->height, 1);
-            rqflags&=~REGION_RQGEOM_WEAK_H;
+            rq.geom.h=maxof(ev->height, 1);
+            rq.flags&=~REGION_RQGEOM_WEAK_H;
         }
         if(ev->value_mask&CWX){
-            geom.x=ev->x+gdx;
-            rqflags&=~REGION_RQGEOM_WEAK_X;
+            rq.geom.x=ev->x+gdx;
+            rq.flags&=~REGION_RQGEOM_WEAK_X;
         }
         if(ev->value_mask&CWY){
-            geom.y=ev->y+gdy;
-            rqflags&=~REGION_RQGEOM_WEAK_Y;
+            rq.geom.y=ev->y+gdy;
+            rq.flags&=~REGION_RQGEOM_WEAK_Y;
         }
         
-        region_rqgeom((WRegion*)cwin, rqflags|REGION_RQGEOM_ABSOLUTE, 
-                      &geom, NULL);
+        region_rqgeom((WRegion*)cwin, &rq, NULL);
     }
 
     if(cwin->flags&CLIENTWIN_NEED_CFGNTFY){

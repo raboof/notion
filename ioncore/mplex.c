@@ -501,7 +501,7 @@ void mplex_fit_managed(WMPlex *mplex)
 
 
 static void mplex_managed_rqgeom(WMPlex *mplex, WRegion *sub,
-                                 int flags, const WRectangle *geom, 
+                                 const WRQGeomParams *rq,
                                  WRectangle *geomret)
 {
     WRectangle rg;
@@ -514,12 +514,12 @@ static void mplex_managed_rqgeom(WMPlex *mplex, WRegion *sub,
 
     mplex_managed_geom(mplex, &fp.g);
 
-    sizepolicy(&node->szplcy, sub, geom, flags, &fp);
+    sizepolicy(&node->szplcy, sub, &rq->geom, &rq->flags, &fp);
     
     if(geomret!=NULL)
         *geomret=fp.g;
     
-    if(!(flags&REGION_RQGEOM_TRYONLY))
+    if(!(rq->flags&REGION_RQGEOM_TRYONLY))
         region_fitrep(sub, NULL, &fp);
 }
 

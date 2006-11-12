@@ -240,16 +240,17 @@ static void statusbar_free_elems(WStatusBar *sb)
 
 static void statusbar_resize(WStatusBar *p)
 {
-    int rqflags=REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y;
-    WRectangle g;
+    WRQGeomParams rq=RQGEOMPARAMS_INIT;
     
-    g.w=p->natural_w;
-    g.h=p->natural_h;
-    g.x=REGION_GEOM(p).x;
-    g.y=REGION_GEOM(p).y;
+    rq.flags=REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y;
+    
+    rq.geom.w=p->natural_w;
+    rq.geom.h=p->natural_h;
+    rq.geom.x=REGION_GEOM(p).x;
+    rq.geom.y=REGION_GEOM(p).y;
 
-    if(g.w!=REGION_GEOM(p).w || g.h!=REGION_GEOM(p).h)
-    region_rqgeom((WRegion*)p, rqflags, &g, NULL);
+    if(rectangle_compare(&rq.geom, &REGION_GEOM(p))!=RECTANGLE_SAME)
+        region_rqgeom((WRegion*)p, &rq, NULL);
 }
 
 
@@ -554,20 +555,20 @@ static void statusbar_managed_remove(WStatusBar *sb, WRegion *reg)
 }
 
 
-static void statusbar_managed_rqgeom(WStatusBar *sb, WRegion *reg, int flags,
-                                     const WRectangle *geom, 
+static void statusbar_managed_rqgeom(WStatusBar *sb, WRegion *reg, 
+                                     const WRQGeomParams *rq,
                                      WRectangle *geomret)
 {
     WRectangle g;
     
     g.x=REGION_GEOM(reg).x;
     g.y=REGION_GEOM(reg).y;
-    g.w=geom->w;
-    g.h=geom->h;
+    g.w=rq->geom.w;
+    g.h=rq->geom.h;
 
     systray_adjust_size(reg, &g);
 
-    if(flags&REGION_RQGEOM_TRYONLY){
+    if(rq->flags&REGION_RQGEOM_TRYONLY){
         if(geomret!=NULL)
             *geomret=g;
         return;

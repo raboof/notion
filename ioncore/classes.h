@@ -42,4 +42,6 @@ INTRSTRUCT(WSubmapState);
 
 INTRSTRUCT(WRegionAttachData);
 
+INTRSTRUCT(WRQGeomParams);
+
 #endif /* ION_IONCORE_CLASSES_H */
