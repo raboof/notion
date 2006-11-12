@@ -54,6 +54,22 @@ static WGroup *find_group(WRegion *reg, bool *detach_framed)
 }
 
 
+static void get_relative_geom(WRectangle *g, WRegion *reg, WRegion *mgr)
+{
+    WWindow *rel=REGION_PARENT(mgr), *w;
+    
+    *g=REGION_GEOM(reg);
+    
+    for(w=REGION_PARENT(reg); 
+        w!=rel && (WRegion*)w!=mgr; 
+        w=REGION_PARENT(w)){
+        
+        g->x+=REGION_GEOM(w).x;
+        g->y+=REGION_GEOM(w).y;
+    }
+}
+
+
 /*EXTL_DOC
  * Detach \var{reg}, i.e. make it managed by its nearest ancestor
  * \type{WGroup}, framed if \var{reg} is not itself \type{WFrame}.
@@ -73,6 +89,13 @@ bool mod_tiling_detach(WRegion *reg)
     
     ap.switchto_set=TRUE;
     ap.switchto=region_may_control_focus(reg);
+    
+    ap.geom_set=TRUE;
+    get_relative_geom(&ap.geom, reg, (WRegion*)grp);
+    
+    /* TODO: Retain (root-relative) geometry of reg for framed 
+     * detach instead of making a frame of this size?
+     */
     
     data.type=REGION_ATTACH_REPARENT;
     data.u.reg=reg;
