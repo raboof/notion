@@ -24,14 +24,20 @@ defbindings("WTiling", {
 })
 
 
--- Frame bindings. These work in (Ion/tiled-style) frames. Some bindings
--- that are common to all frame types and multiplexes are defined in
--- ion-bindings.lua.
+-- Frame bindings
 
 defbindings("WFrame.tiled", {
     submap(META.."K", {
         bdoc("Detach window from tiled frame"),
         kpress("D", "mod_tiling.detach(_sub)", "_sub:non-nil"),
+    }),
+})
+
+
+defbindings("WFrame.transient", {
+    submap(META.."K", {
+        bdoc("Detach transient frame"),
+        kpress("D", "mod_tiling.detach(_)", "_sub:non-nil"),
     }),
 })
 
@@ -83,7 +89,15 @@ defctxmenu("WTiling", "Tiling", {
 -- Context menu entries for tiled frames.
 
 defctxmenu("WFrame.tiled", "Tiled frame", {
-    menuentry("Detach", "mod_tiling.detach(_sub)", "_sub:non-nil"),
+    menuentry("Detach window", "mod_tiling.detach(_sub)", "_sub:non-nil"),
+})
+
+
+-- Context menu entries for transient frames.
+
+defctxmenu("WFrame.transient", "Transient frame", {
+    append=true,
+    menuentry("Detach", "mod_tiling.detach(_)", "_sub:non-nil"),
 })
 
 

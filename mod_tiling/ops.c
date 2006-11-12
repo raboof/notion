@@ -23,11 +23,7 @@
 static WGroup *find_group(WRegion *reg, bool *detach_framed)
 {
     WRegion *mgr=REGION_MANAGER(reg);
-    
-    if(OBJ_IS(mgr, WGroup)){
-        warn(TR("Already detached"));
-        return NULL;
-    }
+    bool was_grouped=FALSE;
     
     if(OBJ_IS(mgr, WMPlex)){
         WMPlex *mplex=(WMPlex*)mgr;
@@ -41,7 +37,7 @@ static WGroup *find_group(WRegion *reg, bool *detach_framed)
             }
         }
     }else{
-        #warning "TODO: frame style should probably change."
+        was_grouped=OBJ_IS(mgr, WGroup);
         *detach_framed=FALSE;
     }
     
@@ -51,6 +47,9 @@ static WGroup *find_group(WRegion *reg, bool *detach_framed)
             break;
     }
 
+    if(mgr==NULL && was_grouped)
+        warn(TR("Already detached."));
+    
     return (WGroup*)mgr;
 }
 
