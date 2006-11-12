@@ -439,6 +439,7 @@ void wedln_draw(WEdln *wedln, bool complete)
 
 static void wedln_set_info(WEdln *wedln, const char *info)
 {
+    WRectangle tageom;
     char *p;
     
     if(wedln->info!=NULL){
@@ -459,6 +460,9 @@ static void wedln_set_info(WEdln *wedln, const char *info)
             }
         }
     }
+    
+    get_textarea_geom(wedln, G_CURRENT, &tageom);
+    wedln_update_cursor(wedln, tageom.w);
     
     wedln_draw_textarea(wedln);
 }
