@@ -648,10 +648,10 @@ static void mplex_do_remanage_stdisp(WMPlex *mplex, WRegion *sub)
         }else{
             region_unmanage_stdisp(sub, TRUE, FALSE);
         }
-    }else if(stdisp!=NULL){
+    }/*else if(stdisp!=NULL){
         region_detach_manager(stdisp);
         region_unmap(stdisp);
-    }
+    }*/
 }
 
 
