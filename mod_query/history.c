@@ -17,7 +17,7 @@
 #include "history.h"
 
 
-#define HISTORY_SIZE 256
+#define HISTORY_SIZE 1024
 
 
 static int hist_head=HISTORY_SIZE;
