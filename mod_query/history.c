@@ -60,12 +60,12 @@ void mod_query_history_push_(char *str)
         int i, j;
         i=get_index(ndx);
         free(hist[i]);
-        hist_count--;
         while(++ndx<hist_count){
             j=get_index(ndx);
             hist[i]=hist[j];
             i=j;
         }
+        hist_count--;
     }
     
     hist_head--;
