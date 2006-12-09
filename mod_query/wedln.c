@@ -759,7 +759,9 @@ bool wedln_prev_completion(WEdln *wedln)
  * current cursor position, or select next/previous completion from list if in
  * auto-show-completions mode and \var{cycle} is set to ``next'' or ``prev'',
  * respectively. The \var{mode} may be ``history'' or ``normal''. If it is 
- * not set, the previous mode is used.
+ * not set, the previous mode is used. Normally next entry is not cycled to
+ * despite the setting of \var{cycle} if mode switch occurs. To override
+ * this, use ``next-always'' and ``prev-always'' for \var{cycle}.
  */
 EXTL_EXPORT_MEMBER
 void wedln_complete(WEdln *wedln, const char *cycle, const char *mode)
@@ -783,14 +785,17 @@ void wedln_complete(WEdln *wedln, const char *cycle, const char *mode)
         }
     }
     
-    if(cycle!=NULL && valid){
-        if(strcmp(cycle, "next")==0)
+    if(cycle!=NULL){
+        if((valid && strcmp(cycle, "next")==0) || 
+           strcmp(cycle, "next-always")==0){
             cyclei=1;
-        else if(strcmp(cycle, "prev")==0)
+        }else if((valid && strcmp(cycle, "prev")==0) || 
+                 strcmp(cycle, "prev-always")==0){
             cyclei=-1;
+        }
     }
     
-    if(cyclei!=0 && mod_query_config.autoshowcompl && 
+    if(valid && cyclei!=0 && mod_query_config.autoshowcompl && 
        wedln->compl_list.nstrs>0){
         if(cyclei>0)
             wedln_next_completion(wedln);
