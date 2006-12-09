@@ -75,7 +75,7 @@ DECLSTRUCT(WGlobal){
     bool warp_enabled;
     bool switchto_new;
     bool screen_notify;
-    bool frame_add_last;
+    int frame_default_index;
     bool framed_transients;
     
     /*bool save_enabled;*/

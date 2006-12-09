@@ -793,10 +793,7 @@ void frame_managed_remove(WFrame *frame, WRegion *reg)
 
 int frame_default_index(WFrame *frame)
 {
-    if(ioncore_g.frame_add_last)
-        return LLIST_INDEX_LAST;
-    else
-        return LLIST_INDEX_AFTER_CURRENT;
+    return ioncore_g.frame_default_index;
 }
 
 

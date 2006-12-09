@@ -15,6 +15,7 @@
 #include <libtu/map.h>
 #include <libtu/minmax.h>
 #include <libtu/objp.h>
+#include <libtu/map.h>
 #include <libextl/readconfig.h>
 
 #include "common.h"
@@ -25,6 +26,15 @@
 #include "kbresize.h"
 #include "reginfo.h"
 #include "group-ws.h"
+#include "llist.h"
+
+
+StringIntMap frame_idxs[]={
+    {"last", LLIST_INDEX_LAST},
+    {"next",  LLIST_INDEX_AFTER_CURRENT},
+    {"next-act",  LLIST_INDEX_AFTER_CURRENT_ACT},
+    END_STRINGINTMAP
+};
 
 
 /*EXTL_DOC
@@ -43,8 +53,11 @@
  *                        to a newly mapped client window? \\
  *  \var{screen_notify} & (boolean) Should notification tooltips be displayed
  *                        for hidden workspaces with activity? \\
- *  \var{frame_add_last} & (boolean) Add new regions in frames last instead
- *                        of after current region. \\
+ *  \var{frame_default_index} & (string) Specifies where to add new regions
+ *                        on the mutually exclusive list of a frame. One of
+ *                        ''last'', ''next'' (for after current), ''next-act''
+ *                        (for after current and anything with activity right
+ *                        after it). \\
  *  \var{dblclick_delay} & (integer) Delay between clicks of a double click.\\
  *  \var{kbresize_delay} & (integer) Delay in milliseconds for ending keyboard
  *                         resize mode after inactivity. \\
@@ -73,15 +86,21 @@ EXTL_EXPORT
 void ioncore_set(ExtlTab tab)
 {
     int dd, rd;
-    char *wst;
+    char *wst, *tmp;
     ExtlTab t;
     
     extl_table_gets_b(tab, "opaque_resize", &(ioncore_g.opaque_resize));
     extl_table_gets_b(tab, "warp", &(ioncore_g.warp_enabled));
     extl_table_gets_b(tab, "switchto", &(ioncore_g.switchto_new));
     extl_table_gets_b(tab, "screen_notify", &(ioncore_g.screen_notify));
-    extl_table_gets_b(tab, "frame_add_last", &(ioncore_g.frame_add_last));
     extl_table_gets_b(tab, "framed_transients", &(ioncore_g.framed_transients));
+    
+    if(extl_table_gets_s(tab, "frame_default_index", &tmp)){
+        ioncore_g.frame_default_index=stringintmap_value(frame_idxs, 
+                                                         tmp,
+                                                         ioncore_g.frame_default_index);
+        free(tmp);
+    }
     
     if(extl_table_gets_i(tab, "dblclick_delay", &dd))
         ioncore_g.dblclick_delay=maxof(0, dd);
@@ -106,7 +125,11 @@ ExtlTab ioncore_get()
     extl_table_sets_b(tab, "switchto", ioncore_g.switchto_new);
     extl_table_sets_i(tab, "dblclick_delay", ioncore_g.dblclick_delay);
     extl_table_sets_b(tab, "screen_notify", ioncore_g.screen_notify);
-    extl_table_sets_b(tab, "frame_add_last", ioncore_g.frame_add_last);
+
+    extl_table_sets_s(tab, "frame_default_index", 
+                      stringintmap_key(frame_idxs, 
+                                       ioncore_g.frame_default_index,
+                                       NULL));
     
     ioncore_get_moveres_accel(tab);
     

@@ -49,7 +49,8 @@ extern WLListNode *llist_index_to_after(WLListNode *list,
                                         int index);
 extern void llist_unlink(WLListNode **list, WLListNode *node);
 
-#define LLIST_INDEX_LAST (-1)
-#define LLIST_INDEX_AFTER_CURRENT (-2)
+#define LLIST_INDEX_LAST              (-1)
+#define LLIST_INDEX_AFTER_CURRENT     (-2)
+#define LLIST_INDEX_AFTER_CURRENT_ACT (-3)
 
 #endif /* ION_IONCORE_LLIST_H */

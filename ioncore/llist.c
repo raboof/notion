@@ -11,6 +11,7 @@
 
 #include "common.h"
 #include "llist.h"
+#include "activity.h"
 
 
 /*{{{ WMPlex numbered/mut.ex. list stuff */
@@ -67,9 +68,18 @@ WLListNode *llist_index_to_after(WLListNode *list,
                                  WLListNode *current,
                                  int index)
 {
-    WLListNode *after=NULL;
-    
-    if(index==LLIST_INDEX_AFTER_CURRENT){
+    if(index==LLIST_INDEX_AFTER_CURRENT_ACT){
+        WLListNode *after=current;
+        while(after!=NULL){
+            WLListNode *nxt=after->next;
+            if(nxt==NULL || nxt->st==NULL || nxt->st->reg==NULL)
+                break;
+            if(!region_is_activity_r(nxt->st->reg))
+                break;
+            after=nxt;
+        }
+        return after;
+    }else if(index==LLIST_INDEX_AFTER_CURRENT){
         return current;
     }else if(index<0){
         return (list!=NULL ? list->prev : NULL);

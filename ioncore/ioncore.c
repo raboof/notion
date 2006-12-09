@@ -55,6 +55,7 @@
 #include "activity.h"
 #include "group-cw.h"
 #include "group-ws.h"
+#include "llist.h"
 
 #include "../version.h"
 #include "exports.h"
@@ -334,7 +335,7 @@ static void init_global()
     
     ioncore_g.screen_notify=TRUE;
     
-    ioncore_g.frame_add_last=FALSE;
+    ioncore_g.frame_default_index=LLIST_INDEX_AFTER_CURRENT_ACT;
     
     ioncore_g.framed_transients=TRUE;
 }
