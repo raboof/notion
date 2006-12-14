@@ -108,6 +108,12 @@ static WSizePolicy get_sizepolicy_winprop(WClientWin *cwin,
 }
 
 
+#define SIZEHINT_PROPS (CLIENTWIN_PROP_MAXSIZE| \
+                        CLIENTWIN_PROP_MINSIZE| \
+                        CLIENTWIN_PROP_ASPECT| \
+                        CLIENTWIN_PROP_IGNORE_RSZINC)
+
+
 static void clientwin_get_winprops(WClientWin *cwin)
 {
     ExtlTab tab, tab2;
@@ -564,8 +570,16 @@ again:
     param.gravity=(cwin->size_hints.flags&PWinGravity
                    ? cwin->size_hints.win_gravity
                    : ForgetGravity);
-    
     param.tfor=clientwin_get_transient_for(cwin);
+    
+    if(cwin->flags&SIZEHINT_PROPS){
+        /* If size hints have been messed with, readjust requested geometry
+         * here. If programs themselves give incompatible geometries and
+         * things don't look good then, it's their fault.
+         */
+        region_size_hints_correct((WRegion*)cwin, &param.geom.w, &param.geom.h,
+                                  FALSE);
+    }
 
     if(!handle_target_prop(cwin, &param)){
         bool managed;
