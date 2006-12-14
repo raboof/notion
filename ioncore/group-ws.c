@@ -311,9 +311,6 @@ WPHolder *groupws_prepare_manage_transient(WGroupWS *ws, const WClientWin *cwin,
     ap.stack_above=OBJ_CAST(REGION_PARENT(param->tfor), WRegion);
     if(ap.stack_above==NULL)
         return NULL;
-    ws=REGION_MANAGER_CHK(ap.stack_above, WGroupWS);
-    if(ws==NULL)
-        return NULL;
     
     fp.inner_geom_gravity_set=TRUE;
     fp.inner_geom=param->geom;
