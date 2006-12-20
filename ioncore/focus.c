@@ -106,6 +106,7 @@ WRegion *ioncore_goto_previous()
 
 
 static Watch await_watch=WATCH_INIT;
+static bool await_warp=FALSE;
 
 
 static void await_watch_handler(Watch *watch, WRegion *prev)
@@ -132,6 +133,7 @@ void region_set_await_focus(WRegion *reg)
         watch_setup(&await_watch, (Obj*)reg,
                     (WatchHandler*)await_watch_handler);
     }
+    await_warp=FALSE;
 }
 
 
@@ -164,6 +166,12 @@ static void check_clear_await(WRegion *reg)
 bool ioncore_await_focus()
 {
     return (await_watch.obj!=NULL);
+}
+
+
+bool ioncore_await_warp()
+{
+    return (ioncore_await_focus() && await_warp);
 }
 
 
@@ -321,6 +329,25 @@ bool region_may_control_focus(WRegion *reg)
 
 
 /*{{{ set_focus, warp */
+
+
+/*Time ioncore_focus_time=CurrentTime;*/
+
+
+void region_finalise_focusing(WRegion* reg, Window win, bool warp)
+{
+    if(warp)
+        region_do_warp(reg);
+    
+    region_set_await_focus(reg);
+    /*xwindow_do_set_focus(win);*/
+    XSetInputFocus(ioncore_g.dpy, win, RevertToParent, 
+                   CurrentTime/*ioncore_focus_time*/);
+    /*ioncore_focus_time=CurrentTime;*/
+    
+    await_warp=warp;
+}
+
 
 
 static WRegion *find_warp_to_reg(WRegion *reg)

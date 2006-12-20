@@ -305,31 +305,38 @@ void ioncore_handle_expose(const XExposeEvent *ev)
 /*{{{ Enter window, focus */
 
 
+/*extern Time ioncore_focus_time;*/
+
+
 void ioncore_handle_enter_window(XEvent *ev)
 {
     XEnterWindowEvent *eev=&(ev->xcrossing);
     WRegion *reg=NULL;
+    /*WRegion *oldfoc;*/
     
     if(ioncore_g.input_mode!=IONCORE_INPUTMODE_NORMAL)
         return;
     
-    if(ioncore_await_focus())
+    /*if(ioncore_g.focus_next!=NULL && ioncore_focus_time==CurrentTime)
+        return;*/
+        
+    if(ioncore_await_warp())
         return;
     
     if(eev->mode!=NotifyNormal && !ioncore_g.warp_enabled)
         return;
-
+        
     reg=XWINDOW_REGION_OF_T(eev->window, WRegion);
     
     if(reg==NULL)
         return;
-
+        
     if(REGION_IS_ACTIVE(reg))
         return;
-    
+        
     if(region_skip_focus(reg))
         return;
-    
+        
     /* If a child of 'reg' is to be focused, do not process this
      * event.
      */
@@ -341,10 +348,15 @@ void ioncore_handle_enter_window(XEvent *ev)
             r2=REGION_PARENT_REG(r2);
         }
     }
-        
+    
+    /*oldfoc=ioncore_g.focus_next;*/
+    
     region_goto_flags(reg, (REGION_GOTO_FOCUS|
                             REGION_GOTO_NOWARP|
                             REGION_GOTO_ENTERWINDOW));
+                            
+    /*if(ioncore_g.focus_next!=oldfoc)
+        ioncore_focus_time=eev->time;*/
 }
 
 

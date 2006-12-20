@@ -165,11 +165,7 @@ void tiling_unmap(WTiling *ws)
 
 void tiling_fallback_focus(WTiling *ws, bool warp)
 {
-    if(warp)
-        region_do_warp((WRegion*)ws);
-    
-    region_set_await_focus((WRegion*)ws);
-    xwindow_do_set_focus(ws->dummywin);
+    region_finalise_focusing((WRegion*)ws, ws->dummywin, warp);
 }
 
 

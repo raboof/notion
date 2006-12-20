@@ -160,7 +160,7 @@ void ioncore_get_event(XEvent *ev, long mask)
 /*{{{ Flush */
 
 
-static void skip_focusenter()
+static void process_focusenter()
 {
     XEvent ev;
     WRegion *r;
@@ -174,8 +174,8 @@ static void skip_focusenter()
             ioncore_handle_focus_out(&(ev.xfocus));
         else if(ev.type==FocusIn)
             ioncore_handle_focus_in(&(ev.xfocus), TRUE);
-        /*else if(ev.type==EnterNotify)
-            handle_enter_window(&ev);*/
+        else if(ev.type==EnterNotify)
+            ioncore_handle_enter_window(&ev);
     }
 }
 
@@ -187,7 +187,7 @@ void ioncore_flush()
         bool warp=ioncore_g.warp_next;
         WRegion *next=ioncore_g.focus_next;
         ioncore_g.focus_next=NULL;
-        skip_focusenter();
+        process_focusenter();
         region_do_set_focus(next, warp);
     }
     

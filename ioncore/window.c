@@ -181,11 +181,7 @@ void window_unmap(WWindow *wwin)
 
 void window_do_set_focus(WWindow *wwin, bool warp)
 {
-    if(warp)
-        region_do_warp((WRegion*)wwin);
-    
-    region_set_await_focus((WRegion*)wwin);
-    xwindow_do_set_focus(wwin->win);
+    region_finalise_focusing((WRegion*)wwin, wwin->win, warp);
 }
 
 

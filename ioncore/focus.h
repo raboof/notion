@@ -28,9 +28,12 @@ extern void region_maybewarp(WRegion *reg, bool warp);
 extern void region_do_warp(WRegion *reg);
 extern bool region_do_warp_default(WRegion *reg);
 
+extern void region_finalise_focusing(WRegion* reg, Window win, bool warp);
+
 /* Awaiting focus state */
 extern void region_set_await_focus(WRegion *reg);
 extern bool ioncore_await_focus();
+extern bool ioncore_await_warp();
 
 /* Event handling */
 extern void region_got_focus(WRegion *reg);

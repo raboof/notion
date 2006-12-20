@@ -247,16 +247,6 @@ static bool group_refocus_(WGroup *ws, WStacking *st)
 }
 
 
-static void group_fallback_focus(WGroup *ws, bool warp)
-{
-    if(warp)
-        region_do_warp((WRegion*)ws);
-    
-    region_set_await_focus((WRegion*)ws);
-    xwindow_do_set_focus(ws->dummywin);
-}
-
-
 static void group_do_set_focus(WGroup *ws, bool warp)
 {
     WStacking *st=ws->current_managed;
@@ -267,7 +257,7 @@ static void group_do_set_focus(WGroup *ws, bool warp)
     if(st!=NULL && st->reg!=NULL)
         region_do_set_focus(st->reg, warp);
     else
-        group_fallback_focus(ws, warp);
+        region_finalise_focusing((WRegion*)ws, ws->dummywin, warp);
 }
 
 
