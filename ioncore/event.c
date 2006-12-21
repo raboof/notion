@@ -164,6 +164,7 @@ static void process_focusenter()
 {
     XEvent ev;
     WRegion *r;
+    long mask=EnterWindowMask|
     
     XSync(ioncore_g.dpy, False);
     
@@ -174,8 +175,8 @@ static void process_focusenter()
             ioncore_handle_focus_out(&(ev.xfocus));
         else if(ev.type==FocusIn)
             ioncore_handle_focus_in(&(ev.xfocus), TRUE);
-        else if(ev.type==EnterNotify)
-            ioncore_handle_enter_window(&ev);
+        /*else if(ev.type==EnterNotify && !skip_enter)
+            ioncore_handle_enter_window(&ev);*/
     }
 }
 
@@ -186,9 +187,12 @@ void ioncore_flush()
        ioncore_g.input_mode==IONCORE_INPUTMODE_NORMAL){
         bool warp=ioncore_g.warp_next;
         WRegion *next=ioncore_g.focus_next;
+        
         ioncore_g.focus_next=NULL;
-        process_focusenter();
+        
         region_do_set_focus(next, warp);
+        
+        process_focusenter();
     }
     
     XFlush(ioncore_g.dpy);
@@ -230,7 +234,7 @@ void ioncore_mainloop()
         ioncore_flush();
 
         if(QLength(ioncore_g.dpy)>0)
-           ioncore_x_connection_handler(ioncore_g.conn, NULL);
+            ioncore_x_connection_handler(ioncore_g.conn, NULL);
         else
             mainloop_select();
     }

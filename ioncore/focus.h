@@ -33,7 +33,6 @@ extern void region_finalise_focusing(WRegion* reg, Window win, bool warp);
 /* Awaiting focus state */
 extern void region_set_await_focus(WRegion *reg);
 extern bool ioncore_await_focus();
-extern bool ioncore_await_warp();
 
 /* Event handling */
 extern void region_got_focus(WRegion *reg);

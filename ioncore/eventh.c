@@ -308,11 +308,10 @@ void ioncore_handle_expose(const XExposeEvent *ev)
 /*extern Time ioncore_focus_time;*/
 
 
-void ioncore_handle_enter_window(XEvent *ev)
+static void do_handle_enter_window(XEvent *ev)
 {
     XEnterWindowEvent *eev=&(ev->xcrossing);
     WRegion *reg=NULL;
-    /*WRegion *oldfoc;*/
     
     if(ioncore_g.input_mode!=IONCORE_INPUTMODE_NORMAL)
         return;
@@ -320,11 +319,11 @@ void ioncore_handle_enter_window(XEvent *ev)
     /*if(ioncore_g.focus_next!=NULL && ioncore_focus_time==CurrentTime)
         return;*/
         
-    if(ioncore_await_warp())
+    /*if(ioncore_await_warp())
         return;
     
     if(eev->mode!=NotifyNormal && !ioncore_g.warp_enabled)
-        return;
+        return;*/
         
     reg=XWINDOW_REGION_OF_T(eev->window, WRegion);
     
@@ -349,14 +348,20 @@ void ioncore_handle_enter_window(XEvent *ev)
         }
     }
     
-    /*oldfoc=ioncore_g.focus_next;*/
-    
     region_goto_flags(reg, (REGION_GOTO_FOCUS|
                             REGION_GOTO_NOWARP|
                             REGION_GOTO_ENTERWINDOW));
-                            
-    /*if(ioncore_g.focus_next!=oldfoc)
-        ioncore_focus_time=eev->time;*/
+}
+
+
+void ioncore_handle_enter_window(XEvent *ev)
+{
+    do{
+        /* *sigh*, it doesn't seem reasonably simply possible to
+         * process events in-order.
+         */
+        do_handle_enter_window(ev);
+    }while(XCheckMaskEvent(ioncore_g.dpy, EnterWindowMask, ev));
 }
 
 
