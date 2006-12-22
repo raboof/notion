@@ -382,9 +382,8 @@ static bool pointer_in_root(Window root1)
 void ioncore_handle_focus_in(const XFocusChangeEvent *ev, bool skip)
 {
     WRegion *reg;
-    WWindow *wwin, *tmp;
-    Colormap cmap=None;
-
+    WWindow *wwin;
+    
     reg=XWINDOW_REGION_OF_T(ev->window, WRegion);
     
     if(reg==NULL)

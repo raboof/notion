@@ -160,23 +160,14 @@ void ioncore_get_event(XEvent *ev, long mask)
 /*{{{ Flush */
 
 
-static void process_focusenter()
+static void skip_enterwindow()
 {
     XEvent ev;
-    WRegion *r;
-    long mask=EnterWindowMask|
     
     XSync(ioncore_g.dpy, False);
     
-    while(XCheckMaskEvent(ioncore_g.dpy,
-                          EnterWindowMask|FocusChangeMask, &ev)){
+    while(XCheckMaskEvent(ioncore_g.dpy, EnterWindowMask, &ev)){
         ioncore_update_timestamp(&ev);
-        if(ev.type==FocusOut)
-            ioncore_handle_focus_out(&(ev.xfocus));
-        else if(ev.type==FocusIn)
-            ioncore_handle_focus_in(&(ev.xfocus), TRUE);
-        /*else if(ev.type==EnterNotify && !skip_enter)
-            ioncore_handle_enter_window(&ev);*/
     }
 }
 
@@ -192,7 +183,10 @@ void ioncore_flush()
         
         region_do_set_focus(next, warp);
         
-        process_focusenter();
+        /* Just greedily eating it all away that X has to offer
+         * seems to be the best we can do with Xlib.
+         */
+        skip_enterwindow();
     }
     
     XFlush(ioncore_g.dpy);
