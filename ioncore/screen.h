@@ -47,6 +47,7 @@ DECLCLASS(WScreen){
     WRectangle managed_off;
     WScreen *next_scr, *prev_scr;
     Watch notifywin_watch;
+    Watch infowin_watch;
 };
 
 extern WScreen *create_screen(WRootWin *rootwin, int id, 
@@ -61,6 +62,8 @@ extern bool screen_init_layout(WScreen *scr, ExtlTab tab);
 
 extern void screen_notify(WScreen *scr, const char *notstr);
 extern void screen_unnotify(WScreen *scr);
+extern void screen_windowinfo(WScreen *scr, const char *name, const char *attr);
+extern void screen_nowindowinfo(WScreen *scr);
 
 extern WPHolder *screen_get_rescue_pholder_for(WScreen *scr, WRegion *mgd);
 

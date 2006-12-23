@@ -45,7 +45,7 @@ bool debrush_init(DEBrush *brush, Window win,
         return FALSE;
     }
     
-    if(MATCHES("tab-frame", stylename)){
+    if(MATCHES("tab-frame", stylename) || MATCHES("tab-info", stylename)){
         brush->extras_fn=debrush_tab_extras;
         if(!style->tabbrush_data_ok)
             destyle_create_tab_gcs(style);

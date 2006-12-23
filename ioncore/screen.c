@@ -38,9 +38,14 @@
 #include "llist.h"
 #include "group-ws.h"
 #include "mplex.h"
+#include "tags.h"
 
 
 WHook *screen_managed_changed_hook=NULL;
+
+
+static void screen_update_infowin(WScreen *scr);
+
 
 
 /*{{{ Init/deinit */
@@ -65,6 +70,7 @@ static bool screen_init(WScreen *scr, WRootWin *rootwin,
     scr->rotation=SCREEN_ROTATION_0;
     
     watch_init(&(scr->notifywin_watch));
+    watch_init(&(scr->infowin_watch));
 
     if(useroot){
         win=WROOTWIN_ROOT(rootwin);
@@ -195,26 +201,28 @@ static bool screen_fitrep(WScreen *scr, WWindow *par, const WFitParams *fp)
 }
 
 
+
+
 static void screen_managed_changed(WScreen *scr, int mode, bool sw, 
                                    WRegion *reg_)
 {
-    const char *n=NULL;
-    WRegion *reg;
-
     if(ioncore_g.opmode==IONCORE_OPMODE_DEINIT)
         return;
     
-    reg=mplex_mx_current(&(scr->mplex));
-
     if(sw && scr->atom_workspace!=None){
+        WRegion *reg=mplex_mx_current(&(scr->mplex));
+        const char *n=NULL;
+        
         if(reg!=NULL)
-            n=region_name(reg);
+            n=region_displayname(reg);
         
         xwindow_set_string_property(region_root_of((WRegion*)scr),
                                     scr->atom_workspace, 
                                     n==NULL ? "" : n);
     }
-
+    
+    screen_update_infowin(scr);
+    
     mplex_call_changed_hook((WMPlex*)scr,
                             screen_managed_changed_hook,
                             mode, sw, reg_);
@@ -236,6 +244,20 @@ static void screen_unmap(WScreen *scr)
     mplex_unmap((WMPlex*)scr);
 }
 
+void screen_inactivated(WScreen *scr)
+{
+    screen_update_infowin(scr);
+}
+
+
+void screen_activated(WScreen *scr)
+{
+    screen_update_infowin(scr);
+}
+
+
+/*}}}*/
+
 
 /*}}}*/
 
@@ -243,9 +265,12 @@ static void screen_unmap(WScreen *scr)
 /*{{{ Notifications */
 
 
-void screen_notify(WScreen *scr, const char *str)
+static void do_notify(WScreen *scr, Watch *watch, bool right,
+                      const char *str,
+                      char *style, const char *attr)
 {
-    WInfoWin *iw=(WInfoWin*)(scr->notifywin_watch.obj);
+
+    WInfoWin *iw=(WInfoWin*)(watch->obj);
     WFitParams fp;
     
     if(iw==NULL){
@@ -255,24 +280,44 @@ void screen_notify(WScreen *scr, const char *str)
                      MPLEX_ATTACH_SIZEPOLICY|
                      MPLEX_ATTACH_GEOM|
                      MPLEX_ATTACH_LEVEL);
-        param.szplcy=SIZEPOLICY_GRAVITY_NORTHWEST;
         param.level=STACKING_LEVEL_ON_TOP;
-        param.geom.x=0;
+        
+        if(!right){
+            param.szplcy=SIZEPOLICY_GRAVITY_NORTHWEST;
+            param.geom.x=0;
+        }else{
+            param.szplcy=SIZEPOLICY_GRAVITY_NORTHEAST;
+            param.geom.x=REGION_GEOM(scr).w-1;
+        }
+        
         param.geom.y=0;
         param.geom.w=1;
         param.geom.h=1;
         
         iw=(WInfoWin*)mplex_do_attach_new(&scr->mplex, &param,
                                           (WRegionCreateFn*)create_infowin, 
-                                          "actnotify");
+                                          style);
         
         if(iw==NULL)
             return;
 
-        watch_setup(&(scr->notifywin_watch), (Obj*)iw, NULL);
+        watch_setup(watch, (Obj*)iw, NULL);
     }
 
+    infowin_set_attr2(iw, attr, NULL);
     infowin_set_text(iw, str);
+}
+
+
+void screen_notify(WScreen *scr, const char *str)
+{
+    do_notify(scr, &scr->notifywin_watch, FALSE, str, "actnotify", NULL);
+}
+
+
+void screen_windowinfo(WScreen *scr, const char *str, const char *attr)
+{
+    do_notify(scr, &scr->infowin_watch, TRUE, str, "tab-info", attr);
 }
 
 
@@ -281,6 +326,16 @@ void screen_unnotify(WScreen *scr)
     Obj *iw=scr->notifywin_watch.obj;
     if(iw!=NULL){
         watch_reset(&(scr->notifywin_watch));
+        mainloop_defer_destroy(iw);
+    }
+}
+
+
+void screen_nowindowinfo(WScreen *scr)
+{
+    Obj *iw=scr->infowin_watch.obj;
+    if(iw!=NULL){
+        watch_reset(&(scr->infowin_watch));
         mainloop_defer_destroy(iw);
     }
 }
@@ -331,6 +386,36 @@ static void screen_notify_activity(WScreen *scr)
     }
 
     screen_unnotify(scr);
+    
+    screen_update_infowin(scr);
+}
+
+
+static void screen_notify_tag(WScreen *scr)
+{
+    screen_update_infowin(scr);
+}
+
+
+static void screen_update_infowin(WScreen *scr)
+{
+    WRegion *reg=mplex_mx_current(&(scr->mplex));
+    bool tag=(reg!=NULL && region_is_tagged(reg));
+    bool act=(reg!=NULL && region_is_activity_r(reg));
+    
+    if(tag || act){
+        const char *n=region_displayname(reg);
+        char *attr=NULL;
+        
+        libtu_asprintf(&attr, "%s-selected-%s-not_dragged-%s",
+                       (REGION_IS_ACTIVE(scr) ? "active" : "inactive"),
+                       (tag ? "tagged" : "not_tagged"),
+                       (act ? "activity" : "no_activity"));
+        
+        screen_windowinfo(scr, n, attr); /* NULL attr ok */
+    }else{
+        screen_nowindowinfo(scr);
+    }
 }
 
 
@@ -340,6 +425,9 @@ static void screen_managed_notify(WScreen *scr, WRegion *reg, const char *how)
         /* TODO: multiple calls */
         mainloop_defer_action((Obj*)scr, 
                               (WDeferredAction*)screen_notify_activity);
+    }else if(strcmp(how, "tag")==0){
+        mainloop_defer_action((Obj*)scr, 
+                              (WDeferredAction*)screen_notify_tag);
     }
 }
 
@@ -599,6 +687,12 @@ static DynFunTab screen_dynfuntab[]={
     
     {region_unmap, 
      screen_unmap},
+     
+    {region_activated, 
+     screen_activated},
+     
+    {region_inactivated, 
+     screen_inactivated},
     
     {(DynFun*)region_managed_may_destroy,
      (DynFun*)screen_managed_may_destroy},
