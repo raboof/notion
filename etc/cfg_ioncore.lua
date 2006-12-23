@@ -135,6 +135,9 @@ defbindings("WMPlex", {
 -- Frames for transient windows ignore this bindmap
 
 defbindings("WMPlex.toplevel", {
+    bdoc("Toggle tag of current object."),
+    kpress(META.."T", "WRegion.set_tagged(_sub, 'toggle')", "_sub:non-nil"),
+
     bdoc("Query for manual page to be displayed."),
     kpress(ALTMETA.."F1", "mod_query.query_man(_, ':man')"),
 
