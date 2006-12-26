@@ -401,7 +401,7 @@ static void screen_update_infowin(WScreen *scr)
 {
     WRegion *reg=mplex_mx_current(&(scr->mplex));
     bool tag=(reg!=NULL && region_is_tagged(reg));
-    bool act=(reg!=NULL && region_is_activity_r(reg));
+    bool act=(reg!=NULL && region_is_activity_r(reg) && !REGION_IS_ACTIVE(scr));
     
     if(tag || act){
         const char *n=region_displayname(reg);
