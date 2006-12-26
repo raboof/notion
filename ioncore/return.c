@@ -157,18 +157,25 @@ WPHolder *region_get_return(WRegion *reg)
 /*{{{ Unset */
 
 
-static void do_remove_node(Rb_node node)
+static WPHolder *do_remove_node_step1(Rb_node node)
 {
-   Obj *ph=(Obj*)node->v.val;
+   WPHolder *ph=(WPHolder*)node->v.val;
    Watch *watch=(Watch*)node->k.key;
             
    rb_delete_node(node);
             
    watch_reset(watch);
    free(watch);
-            
+   
+   return ph;
+}
+
+
+static void do_remove_node(Rb_node node)
+{
+   WPHolder *ph=do_remove_node_step1(node);
    if(ph!=NULL)
-       destroy_obj(ph);
+       destroy_obj((Obj*)ph);
 }
 
 
@@ -182,6 +189,17 @@ void region_unset_return(WRegion *reg)
         do_remove_node(node);
 }
 
+WPHolder *region_unset_get_return(WRegion *reg)
+{
+    Rb_node node; 
+    
+    node=do_find(reg);
+    
+    if(node!=NULL)
+        return do_remove_node_step1(node);
+    else
+        return NULL;
+}
 
 
 /*}}}*/
