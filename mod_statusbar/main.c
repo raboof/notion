@@ -94,7 +94,6 @@ static bool wait_statusd_init(int outfd, int errfd, ExtlFn dh, ExtlFn eh)
     int nfds=maxof(outfd, errfd);
     int retval;
     bool dummy, doneseen, eagain=FALSE;
-    const char *timeout_msg=TR("ion-statusd launch timeout.");
     
     if(gettimeofday(&endtime, NULL)!=0){
         warn_err();
