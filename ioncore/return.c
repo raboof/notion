@@ -87,7 +87,7 @@ bool region_do_set_return(WRegion *reg, WPHolder *ph)
 }
 
 
-static WPHolder *make_return_pholder(WRegion *reg)
+WPHolder *region_make_return_pholder(WRegion *reg)
 {
     WRegion *mgr=region_manager(reg);
     
@@ -98,9 +98,10 @@ static WPHolder *make_return_pholder(WRegion *reg)
 }
 
 
+/*
 extern WPHolder *region_set_return(WRegion *reg)
 {
-    WPHolder *ph=make_return_pholder(reg);
+    WPHolder *ph=region_make_return_pholder(reg);
     
     if(ph!=NULL){
         if(region_do_set_return(reg, ph))
@@ -110,6 +111,7 @@ extern WPHolder *region_set_return(WRegion *reg)
     
     return NULL;
 }
+*/
 
 
 /*}}}*/

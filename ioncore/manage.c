@@ -20,6 +20,7 @@
 #include "pointer.h"
 #include "netwm.h"
 #include "extlconv.h"
+#include "return.h"
 
 
 /*{{{ Add */
@@ -106,7 +107,7 @@ bool clientwin_do_manage_default(WClientWin *cwin,
             return TRUE;
         }
         
-        if(!region_set_return(ph))
+        if(!region_do_set_return((WRegion*)cwin, ph))
             destroy_obj((Obj*)ph);
         
         return TRUE;

@@ -21,12 +21,14 @@
  */
 extern bool region_do_set_return(WRegion *reg, WPHolder *ph);
 
-extern WPHolder *region_set_return(WRegion *reg);
+/*extern WPHolder *region_set_return(WRegion *reg);*/
 
 extern WPHolder *region_get_return(WRegion *reg);
 
 extern void region_unset_return(WRegion *reg);
 
 extern WPHolder *region_unset_get_return(WRegion *reg);
+
+extern WPHolder *region_make_return_pholder(WRegion *reg);
 
 #endif /* ION_IONCORE_RETURN_H */

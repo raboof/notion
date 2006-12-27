@@ -78,11 +78,9 @@ static bool do_fullscreen_scr(WRegion *reg, WScreen *scr, bool switchto)
     int rootx, rooty;
     bool wasfs=TRUE;
     int swf=(switchto ? MPLEX_ATTACH_SWITCHTO : 0);
-    WRegion *mgr=REGION_MANAGER(reg);
-    WPHolder *ph=NULL;
+    WPHolder *ph;
     
-    if(mgr!=NULL)
-        ph=region_managed_get_pholder(mgr, reg);
+    ph=region_make_return_pholder(reg);
     
     if(!mplex_attach_simple((WMPlex*)scr, reg, swf)){
         warn(TR("Failed to enter full screen mode."));
