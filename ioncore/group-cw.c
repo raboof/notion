@@ -200,7 +200,6 @@ void groupcw_managed_notify(WGroupCW *cwg, WRegion *reg, const char *how)
 bool groupcw_init(WGroupCW *cwg, WWindow *parent, const WFitParams *fp)
 {
     cwg->transient_szplcy=DFLT_SZPLCY;
-    /*cwg->fs_pholder=NULL;*/
     
     if(!group_init(&(cwg->grp), parent, fp))
         return FALSE;

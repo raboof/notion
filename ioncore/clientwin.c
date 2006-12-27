@@ -41,6 +41,7 @@
 #include "netwm.h"
 #include "xwindow.h"
 #include "bindmaps.h"
+#include "return.h"
 
 
 static void set_clientwin_state(WClientWin *cwin, int state);
@@ -345,8 +346,6 @@ static bool clientwin_init(WClientWin *cwin, WWindow *par, Window win,
     cwin->cmapwins=NULL;
     cwin->n_cmapwins=0;
     cwin->event_mask=IONCORE_EVENTMASK_CLIENTWIN;
-
-    cwin->fs_pholder=NULL;
 
     region_init(&(cwin->region), par, &fp);
 
@@ -721,12 +720,6 @@ void clientwin_deinit(WClientWin *cwin)
     
     clientwin_clear_colormaps(cwin);
     
-    if(cwin->fs_pholder!=NULL){
-        WPHolder *ph=cwin->fs_pholder;
-        cwin->fs_pholder=NULL;
-        destroy_obj((Obj*)ph);
-    }
-    
     region_deinit((WRegion*)cwin);
 }
 
@@ -748,9 +741,10 @@ static bool mrsh_u_extl(ExtlFn fn, void *param)
 static void clientwin_do_unmapped(WClientWin *cwin, Window win)
 {
     bool mcf=region_may_control_focus((WRegion*)cwin);
-
-    if(mcf && cwin->fs_pholder!=NULL)
-        pholder_goto(cwin->fs_pholder);
+    WPHolder *ph=region_get_return((WRegion*)cwin);
+    
+    if(mcf && ph!=NULL)
+        pholder_goto(ph);
     
     destroy_obj((Obj*)cwin);
     
@@ -981,15 +975,8 @@ static bool clientwin_fitrep(WClientWin *cwin, WWindow *np,
         region_set_parent((WRegion*)cwin, np);
         sendconfig_clientwin(cwin);
         
-        if(!REGION_IS_FULLSCREEN(cwin) && cwin->fs_pholder!=NULL){
-            WPHolder *ph=cwin->fs_pholder;
-            cwin->fs_pholder=NULL;
+        if(!REGION_IS_FULLSCREEN(cwin))
             cwin->flags&=~CLIENTWIN_FS_RQ;
-            /* Can't destroy it yet - messes up mplex placeholder
-             * reorganisation.
-             */
-            mainloop_defer_destroy((Obj*)ph);
-        }
 
         netwm_update_state(cwin);
     }

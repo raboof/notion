@@ -58,8 +58,6 @@ DECLCLASS(WClientWin){
 
     XSizeHints size_hints;
     
-    WPHolder *fs_pholder;
-    
     ExtlTab proptab;
 };
 

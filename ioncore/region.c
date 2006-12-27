@@ -26,6 +26,7 @@
 #include "extlconv.h"
 #include "activity.h"
 #include "region-iter.h"
+#include "return.h"
 
 
 #define D2(X)
@@ -532,6 +533,8 @@ void region_unset_manager(WRegion *reg, WRegion *mgr)
     if(region_is_activity_r(reg))
         region_clear_mgd_activity(mgr);
 
+    region_unset_return(reg);
+    
     region_notify_change_(reg, "unset_manager", (Obj*)mgr);
 }
 

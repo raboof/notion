@@ -21,6 +21,7 @@
 #include "mwmhints.h"
 #include "focus.h"
 #include "group-cw.h"
+#include "return.h"
 
 
 bool clientwin_fullscreen_may_switchto(WClientWin *cwin)
@@ -72,58 +73,51 @@ bool clientwin_check_fullscreen_request(WClientWin *cwin, int w, int h,
 }
 
 
-static void destroy_pholder(WPHolder **fs_pholder)
-{
-    WPHolder *ph=*fs_pholder;
-    *fs_pholder=NULL;
-    destroy_obj((Obj*)ph);
-}
-
-
-static bool do_fullscreen_scr(WRegion *reg, WPHolder **fs_pholder,
-                              WScreen *scr, bool switchto)
+static bool do_fullscreen_scr(WRegion *reg, WScreen *scr, bool switchto)
 {
     int rootx, rooty;
     bool wasfs=TRUE;
     int swf=(switchto ? MPLEX_ATTACH_SWITCHTO : 0);
     WRegion *mgr=REGION_MANAGER(reg);
+    WPHolder *ph=NULL;
     
-    if(*fs_pholder!=NULL)
-        destroy_pholder(fs_pholder);
-        
-    if(*fs_pholder==NULL && mgr!=NULL)
-        *fs_pholder=region_managed_get_pholder(mgr, reg);
+    if(mgr!=NULL)
+        ph=region_managed_get_pholder(mgr, reg);
     
     if(!mplex_attach_simple((WMPlex*)scr, reg, swf)){
         warn(TR("Failed to enter full screen mode."));
-        if(*fs_pholder!=NULL)
-            destroy_pholder(fs_pholder);
+        if(ph!=NULL)
+            destroy_obj((Obj*)ph);
         return FALSE;
     }
-
+    
+    if(ph!=NULL){
+        if(!region_do_set_return(reg, ph))
+            destroy_obj((Obj*)ph);
+    }
+    
     return TRUE;
 }
 
 
-static bool do_leave_fullscreen(WRegion *reg, WPHolder **fs_pholder, 
-                                bool switchto)
+static bool do_leave_fullscreen(WRegion *reg, bool switchto)
 {    
-    bool cf;
     int swf=(switchto ? PHOLDER_ATTACH_SWITCHTO : 0);
+    WPHolder *ph=region_unset_get_return(reg);
+    bool cf;
     
-    if(*fs_pholder==NULL)
+    if(ph==NULL)
         return FALSE;
     
     cf=region_may_control_focus(reg);
     
-    if(!pholder_attach(*fs_pholder, swf, reg)){
+    if(!pholder_attach(ph, swf, reg)){
         warn(TR("Failed to return from full screen mode; remaining manager "
                 "or parent from previous location refused to manage us."));
         return FALSE;
     }
     
-    if(*fs_pholder!=NULL)
-        destroy_pholder(fs_pholder);
+    destroy_obj((Obj*)ph);
         
     if(cf)
         region_goto(reg);
@@ -144,8 +138,7 @@ static WRegion *get_group(WClientWin *cwin)
 
 bool clientwin_fullscreen_scr(WClientWin *cwin, WScreen *scr, bool switchto)
 {
-    WRegion *reg=get_group(cwin);
-    return do_fullscreen_scr(reg, &cwin->fs_pholder, scr, switchto);
+    return do_fullscreen_scr(get_group(cwin), scr, switchto);
 }
 
 
@@ -162,10 +155,10 @@ bool clientwin_enter_fullscreen(WClientWin *cwin, bool switchto)
     return clientwin_fullscreen_scr(cwin, scr, switchto);
 }
 
+
 bool clientwin_leave_fullscreen(WClientWin *cwin, bool switchto)
 {
-    WRegion *reg=get_group(cwin);
-    return do_leave_fullscreen(reg, &cwin->fs_pholder, switchto);
+    return do_leave_fullscreen(get_group(cwin), switchto);
 }
 
 

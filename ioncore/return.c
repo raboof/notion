@@ -173,9 +173,10 @@ static WPHolder *do_remove_node_step1(Rb_node node)
 
 static void do_remove_node(Rb_node node)
 {
-   WPHolder *ph=do_remove_node_step1(node);
-   if(ph!=NULL)
-       destroy_obj((Obj*)ph);
+    WPHolder *ph=do_remove_node_step1(node);
+    if(ph!=NULL)
+        mainloop_defer_destroy((Obj*)ph);
+        /*destroy_obj((Obj*)ph);*/
 }
 
 

@@ -105,8 +105,10 @@ bool clientwin_do_manage_default(WClientWin *cwin,
             destroy_obj((Obj*)ph);
             return TRUE;
         }
-        assert(cwin->fs_pholder==NULL);
-        cwin->fs_pholder=ph;
+        
+        if(!region_set_return(ph))
+            destroy_obj((Obj*)ph);
+        
         return TRUE;
     }
         
