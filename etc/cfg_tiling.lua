@@ -29,7 +29,10 @@ defbindings("WTiling", {
 defbindings("WFrame", {
     submap(META.."K", {
         bdoc("Detach a window from or reattach to a tiled frame"),
-        kpress("D", "mod_tiling.detach(_sub, 'toggle')", "_sub:non-nil"),
+        -- Detach whole frames when in transient mode.
+        kpress("D", 
+               "mod_tiling.detach(_:mode()=='transient' and _ or _sub, 'toggle')", 
+               "_sub:non-nil"),
     }),
 })
 
@@ -80,16 +83,12 @@ defctxmenu("WTiling", "Tiling", {
 
 -- Context menu entries for tiled frames.
 
-defctxmenu("WFrame.tiled", "Tiled frame", {
-    menuentry("Detach window", "mod_tiling.detach(_sub)", "_sub:non-nil"),
-})
-
-
--- Context menu entries for transient frames.
-
-defctxmenu("WFrame.transient", "Transient frame", {
+defctxmenu("WFrame", "Frame", {
     append=true,
-    menuentry("Detach", "mod_tiling.detach(_)", "_sub:non-nil"),
+    -- Detach whole frames when in transient mode.
+    menuentry("De/reattach", 
+              "mod_tiling.detach(_:mode()=='transient' and _ or _sub, 'toggle')", 
+              "_sub:non-nil"),
 })
 
 
