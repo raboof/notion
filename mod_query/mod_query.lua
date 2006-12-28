@@ -1086,7 +1086,7 @@ function mod_query.query_menu(mplex, themenu, prompt)
     end
 
     local function xform_name(n, is_submenu)
-        return (string.lower(string.gsub(n, "[-%s]+", "-"))
+        return (string.lower(string.gsub(n, "[-/%s]+", "-"))
                 ..(is_submenu and "/" or ""))
     end
 
