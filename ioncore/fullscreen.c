@@ -68,29 +68,27 @@ bool region_enter_fullscreen(WRegion *reg, bool switchto)
 
 
 bool region_leave_fullscreen(WRegion *reg, bool switchto)
-{    
+{
     int swf=(switchto ? PHOLDER_ATTACH_SWITCHTO : 0);
     WPHolder *ph=region_unset_get_return(reg);
-    bool cf;
     
     if(ph==NULL)
         return FALSE;
     
-    cf=region_may_control_focus(reg);
-    
-    if(!pholder_attach(ph, swf, reg)){
+    if(!pholder_attach_mcfgoto(ph, swf, reg)){
         warn(TR("Failed to return from full screen mode; remaining manager "
                 "or parent from previous location refused to manage us."));
         return FALSE;
     }
     
     destroy_obj((Obj*)ph);
-        
-    if(cf)
-        region_goto(reg);
     
     return TRUE;
 }
+
+
+/*#undef REGION_IS_FULLSCREEN
+#define REGION_IS_FULLSCREEN(REG) (region_get_return((WRegion*)REG)!=NULL)*/
 
 
 static bool region_set_fullscreen(WRegion *reg, int sp)

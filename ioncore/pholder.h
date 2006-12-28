@@ -39,6 +39,8 @@ extern WRegion *pholder_attach_(WPHolder *ph, int flags,
 
 extern bool pholder_attach(WPHolder *ph, int flags, WRegion *reg);
 
+extern bool pholder_attach_mcfgoto(WPHolder *ph, int flags, WRegion *reg);
+
 DYNFUN WRegion *pholder_do_target(WPHolder *ph);
 
 extern WRegion *pholder_target(WPHolder *ph);

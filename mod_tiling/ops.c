@@ -10,6 +10,7 @@
  */
 
 #include <libtu/objp.h>
+#include <libtu/setparam.h>
 
 #include <ioncore/common.h>
 #include <ioncore/mplex.h>
@@ -17,6 +18,7 @@
 #include <ioncore/group.h>
 #include <ioncore/group-ws.h>
 #include <ioncore/framedpholder.h>
+#include <ioncore/return.h>
 #include "tiling.h"
 
 
@@ -70,22 +72,12 @@ static void get_relative_geom(WRectangle *g, WRegion *reg, WRegion *mgr)
 }
 
 
-/*EXTL_DOC
- * Detach \var{reg}, i.e. make it managed by its nearest ancestor
- * \type{WGroup}, framed if \var{reg} is not itself \type{WFrame}.
- */
-EXTL_EXPORT
-bool mod_tiling_detach(WRegion *reg)
+bool mod_tiling_do_detach(WRegion *reg, WGroup *grp, bool detach_framed)
 {
-    bool detach_framed=!OBJ_IS(reg, WFrame);
     WGroupAttachParams ap=GROUPATTACHPARAMS_INIT;
     WRegionAttachData data;
-    WGroup *grp;
-    
-    grp=find_group(reg, &detach_framed);
-    
-    if(grp==NULL)
-        return FALSE;
+    WPHolder *ph;
+    bool ret;
     
     ap.switchto_set=TRUE;
     ap.switchto=region_may_control_focus(reg);
@@ -100,15 +92,69 @@ bool mod_tiling_detach(WRegion *reg)
     data.type=REGION_ATTACH_REPARENT;
     data.u.reg=reg;
     
+    ph=region_make_return_pholder(reg);
+    
     if(detach_framed){
         WFramedParam fp=FRAMEDPARAM_INIT;
         
-        return (region_attach_framed((WRegion*)grp, &fp,
-                                     (WRegionAttachFn*)group_do_attach,
-                                     &ap, &data)!=NULL);
+        ret=(region_attach_framed((WRegion*)grp, &fp,
+                                  (WRegionAttachFn*)group_do_attach,
+                                  &ap, &data)!=NULL);
     }else{
-        return (group_do_attach(grp, &ap, &data)!=NULL);
+        ret=(group_do_attach(grp, &ap, &data)!=NULL);
     }
+    
+    if(ret){
+        if(!region_do_set_return(reg, ph))
+            destroy_obj((Obj*)ph);
+    }
+    
+    return ret;
+}
+
+
+bool mod_tiling_detach(WRegion *reg, int sp)
+{
+    WPHolder *ph=region_get_return(reg);
+    bool set=(ph!=NULL);
+    bool nset=libtu_do_setparam(sp, set);
+    
+    if(!XOR(nset, set))
+        return set;
+
+    if(!set){
+        bool detach_framed=!OBJ_IS(reg, WFrame);
+        WGroup *grp=find_group(reg, &detach_framed);
+    
+        if(grp==NULL)
+            return TRUE;
+            
+        return mod_tiling_do_detach(reg, grp, detach_framed);
+    }else{
+        if(!pholder_attach_mcfgoto(ph, PHOLDER_ATTACH_SWITCHTO, reg)){
+            warn(TR("Failed to reattach."));    
+            return TRUE;
+        }
+        region_unset_return(reg);
+        return FALSE;
+    }
+}
+
+
+/*EXTL_DOC
+ * Detach or reattach \var{reg}, depending on whether \var{how}
+ * is 'set'/'unset'/'toggle'. (Detaching means making \var{reg} 
+ * managed by its nearest ancestor \type{WGroup}, framed if \var{reg} is
+ * not itself \type{WFrame}. Reattaching means making it managed where
+ * it used to be managed, if a return-placeholder exists.)
+ */
+EXTL_EXPORT_AS(mod_tiling, detach)
+bool mod_tiling_detach_extl(WRegion *reg, const char *how)
+{
+    if(how==NULL)
+        how="set";
+    
+    return mod_tiling_detach(reg, libtu_string_to_setparam(how));
 }
 
 

@@ -10,6 +10,7 @@
  */
 
 #include <libtu/rb.h>
+#include <libmainloop/defer.h>
 
 #include "region.h"
 #include "pholder.h"

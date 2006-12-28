@@ -13,6 +13,7 @@
 #include "common.h"
 #include "attach.h"
 #include "pholder.h"
+#include "focus.h"
 
 
 bool pholder_init(WPHolder *ph)
@@ -68,6 +69,20 @@ bool pholder_attach(WPHolder *ph, int flags, WRegion *reg)
     data.u.reg=reg;
     
     return (pholder_attach_(ph, flags, &data)!=NULL);
+}
+
+
+bool pholder_attach_mcfgoto(WPHolder *ph, int flags, WRegion *reg)
+{
+    bool cf=region_may_control_focus(reg);
+    
+    if(!pholder_attach(ph, flags, reg))
+        return FALSE;
+        
+    if(cf)
+        region_goto(reg);
+    
+    return TRUE;
 }
 
 

@@ -26,18 +26,10 @@ defbindings("WTiling", {
 
 -- Frame bindings
 
-defbindings("WFrame.tiled", {
+defbindings("WFrame", {
     submap(META.."K", {
-        bdoc("Detach window from tiled frame"),
-        kpress("D", "mod_tiling.detach(_sub)", "_sub:non-nil"),
-    }),
-})
-
-
-defbindings("WFrame.transient", {
-    submap(META.."K", {
-        bdoc("Detach transient frame"),
-        kpress("D", "mod_tiling.detach(_)", "_sub:non-nil"),
+        bdoc("Detach a window from or reattach to a tiled frame"),
+        kpress("D", "mod_tiling.detach(_sub, 'toggle')", "_sub:non-nil"),
     }),
 })
 
