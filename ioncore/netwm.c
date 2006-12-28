@@ -100,7 +100,7 @@ int netwm_check_initial_fullscreen(WClientWin *cwin, bool sw)
     
     for(i=0; i<n; i++){
         if(data[i]==(long)atom_net_wm_state_fullscreen){
-            ret=clientwin_enter_fullscreen(cwin, sw);
+            ret=region_enter_fullscreen((WRegion*)cwin, sw);
             break;
         }
     }
@@ -147,7 +147,7 @@ static void netwm_state_change_rq(WClientWin *cwin,
            ev->data.l[0]==_NET_WM_STATE_TOGGLE){
             bool sw=clientwin_fullscreen_may_switchto(cwin);
             cwin->flags|=CLIENTWIN_FS_RQ;
-            if(!clientwin_enter_fullscreen(cwin, sw))
+            if(!region_enter_fullscreen((WRegion*)cwin, sw))
                 cwin->flags&=~CLIENTWIN_FS_RQ;
         }else{
             /* Should not be set.. */
@@ -158,7 +158,7 @@ static void netwm_state_change_rq(WClientWin *cwin,
            ev->data.l[0]==_NET_WM_STATE_TOGGLE){
             bool sw=clientwin_fullscreen_may_switchto(cwin);
             cwin->flags&=~CLIENTWIN_FS_RQ;
-            clientwin_leave_fullscreen(cwin, sw);
+            region_leave_fullscreen((WRegion*)cwin, sw);
         }else{
             /* Set the flag */
             cwin->flags|=CLIENTWIN_FS_RQ;
