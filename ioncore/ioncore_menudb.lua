@@ -28,7 +28,9 @@ function ioncore.defmenu(name, tab)
             ioncore.warn(TR("Unable to append to non-table menu"))
             return
         else
-            table.append(menus[name], tab)
+            for k, v in ipairs(tab) do
+                table.insert(menus[name], v)
+            end
         end
     else
         menus[name]=tab
