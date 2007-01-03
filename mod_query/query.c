@@ -20,7 +20,7 @@
 #include "wedln.h"
 
 
-static void create_cycle_binding(WEdln *wedln, XKeyEvent *ev, ExtlFn cycle)
+static void create_cycle_binding(WEdln *wedln, uint kcb, uint state, ExtlFn cycle)
 {
     WBindmap *bindmap=create_bindmap();
     WBinding b;
@@ -28,9 +28,9 @@ static void create_cycle_binding(WEdln *wedln, XKeyEvent *ev, ExtlFn cycle)
     if(bindmap==NULL)
         return;
         
-    b.ksb=XKeycodeToKeysym(ioncore_g.dpy, ev->keycode, 0);
-    b.kcb=ev->keycode;
-    b.state=ev->state;
+    b.ksb=XKeycodeToKeysym(ioncore_g.dpy, kcb, 0);
+    b.kcb=kcb;
+    b.state=state;
     b.act=BINDING_KEYPRESS;
     b.area=0;
     b.wait=FALSE;
@@ -67,7 +67,6 @@ WEdln *mod_query_do_query(WMPlex *mplex, const char *prompt, const char *dflt,
     WRectangle geom;
     WEdlnCreateParams fnp;
     WMPlexAttachParams par;
-    XKeyEvent *ev=ioncore_current_key_event();
     WEdln *wedln;
 
     fnp.prompt=prompt;
@@ -85,9 +84,13 @@ WEdln *mod_query_do_query(WMPlex *mplex, const char *prompt, const char *dflt,
                                       (WRegionCreateFn*)create_wedln,
                                       (void*)&fnp); 
                                       
-    if(wedln!=NULL && ev!=NULL && cycle!=extl_fn_none())
-        create_cycle_binding(wedln, ev, cycle);
+    if(wedln!=NULL && cycle!=extl_fn_none()){
+        uint kcb, state; 
+        bool sub;
         
+        if(ioncore_current_key(&kcb, &state, &sub) && !sub)
+            create_cycle_binding(wedln, kcb, state, cycle);
+    }
     
     return wedln;
 }

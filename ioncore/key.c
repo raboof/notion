@@ -172,11 +172,20 @@ static bool add_sub(WRegion *reg, uint key, uint state)
 
 
 static XKeyEvent *current_key_event=NULL;
+static uint current_kcb, current_state;
+static bool current_submap;
 
-
-XKeyEvent *ioncore_current_key_event()
+/* Note: state set to AnyModifier for submaps */
+bool ioncore_current_key(uint *kcb, uint *state, bool *sub)
 {
-    return current_key_event;
+    if(current_kcb==0)
+        return FALSE;
+        
+    *kcb=current_kcb;
+    *state=current_state;
+    *sub=current_submap;
+    
+    return TRUE;
 }
 
 
@@ -227,15 +236,16 @@ static bool do_key(WRegion *reg, XKeyEvent *ev)
             if(grabbed)
                 XUngrabKeyboard(ioncore_g.dpy, CurrentTime);
             
-            if(!subs)
-                current_key_event=ev;
-                
+            current_kcb=ev->keycode;
+            current_state=ev->state;
+            current_submap=subs;
+            
             /* TODO: having to pass both mgd and subreg for some handlers
              * to work is ugly and complex.
              */
             extl_call(binding->func, "ooo", NULL, binding_owner, mgd, subreg);
             
-            current_key_event=NULL;
+            current_kcb=0;
             
             if(ev->state!=0 && !subs && binding->wait)
                 waitrelease(oreg);

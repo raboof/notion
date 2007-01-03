@@ -19,6 +19,6 @@
 
 extern void ioncore_do_handle_keypress(XKeyEvent *ev);
 extern void clientwin_quote_next(WClientWin *cwin);
-extern XKeyEvent *ioncore_current_key_event();
+extern bool ioncore_current_key(uint *kcb, uint *state, bool *sub);
 
 #endif /* ION_IONCORE_KEY_H */

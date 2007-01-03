@@ -37,8 +37,10 @@ static bool grabmenu_handler(WRegion *reg, XEvent *xev)
     if(reg==NULL)
         return FALSE;
     
-    if(menu->gm_state==ev->state && ev->keycode==menu->gm_kcb)
+    if((menu->gm_state==ev->state || menu->gm_state==AnyModifier) 
+       && ev->keycode==menu->gm_kcb){
         menu_select_next(menu);
+    }
     
     return FALSE;
 }
@@ -53,11 +55,16 @@ WMenu *mod_menu_do_grabmenu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
     WMPlexAttachParams par;
     WMenu *menu;
     XKeyEvent *ev;
+    uint state, kcb;
+    bool sub;
     
-    ev=ioncore_current_key_event();
-    
-    if(ev==NULL)
+    if(!ioncore_current_key(&kcb, &state, &sub))
         return NULL;
+    
+    if(state==0){
+        /* TODO: cycle key? */
+        return mod_menu_do_menu(mplex, handler, tab, param);
+    }
     
     fnp.handler=handler;
     fnp.tab=tab;
@@ -79,8 +86,8 @@ WMenu *mod_menu_do_grabmenu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
     if(menu==NULL)
         return FALSE;
  
-    menu->gm_kcb=ev->keycode;
-    menu->gm_state=ev->state;
+    menu->gm_kcb=kcb;
+    menu->gm_state=state;
     
     ioncore_grab_establish((WRegion*)menu, grabmenu_handler, NULL, 0);
     
