@@ -514,7 +514,7 @@ static void mplex_managed_rqgeom(WMPlex *mplex, WRegion *sub,
 
     mplex_managed_geom(mplex, &fp.g);
 
-    sizepolicy(&node->szplcy, sub, &rq->geom, &rq->flags, &fp);
+    sizepolicy(&node->szplcy, sub, &rq->geom, rq->flags, &fp);
     
     if(geomret!=NULL)
         *geomret=fp.g;
