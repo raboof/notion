@@ -45,7 +45,7 @@ extern bool region_may_control_focus(WRegion *reg);
 extern bool region_is_active(WRegion *reg);
 
 /* Focus history */
-extern void region_focuslist_remove(WRegion *reg);
+extern void region_focuslist_remove_with_mgrs(WRegion *reg);
 extern void region_focuslist_push(WRegion *reg);
 extern void region_focuslist_move_after(WRegion *reg, WRegion *after);
 extern void region_focuslist_deinit(WRegion *reg);

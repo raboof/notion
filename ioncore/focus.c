@@ -35,22 +35,27 @@ WHook *region_inactivated_hook=NULL;
 /*{{{ Focus list */
 
 
-void region_focuslist_remove(WRegion *reg)
+void region_focuslist_remove_with_mgrs(WRegion *reg)
 {
+    WRegion *mgrp=region_manager_or_parent(reg);
+    
     UNLINK_ITEM(ioncore_g.focus_current, reg, active_next, active_prev);
+    
+    if(mgrp!=NULL)
+        region_focuslist_remove_with_mgrs(mgrp);
 }
 
 
 void region_focuslist_push(WRegion *reg)
 {
-    region_focuslist_remove(reg);
+    region_focuslist_remove_with_mgrs(reg);
     LINK_ITEM_FIRST(ioncore_g.focus_current, reg, active_next, active_prev);
 }
 
 
 void region_focuslist_move_after(WRegion *reg, WRegion *after)
 {
-    region_focuslist_remove(reg);
+    region_focuslist_remove_with_mgrs(reg);
     LINK_ITEM_AFTER(ioncore_g.focus_current, after, reg, 
                     active_next, active_prev);
 }
@@ -62,8 +67,8 @@ void region_focuslist_deinit(WRegion *reg)
     
     if(replace!=NULL)
         region_focuslist_move_after(replace, reg);
-    
-    region_focuslist_remove(reg);
+        
+    UNLINK_ITEM(ioncore_g.focus_current, reg, active_next, active_prev);
 }
 
 
