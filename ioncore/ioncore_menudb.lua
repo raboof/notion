@@ -152,6 +152,34 @@ function menus.workspacelist()
     return sort(entries)
 end
 
+local function focuslist(do_act)
+    local entries={}
+    local seen={}
+    local iter_=addto(entries)
+    
+    local function iter(obj) 
+        if obj_is(obj, "WClientWin") then
+            iter_(obj)
+            seen[obj]=true
+        end
+        return true
+    end
+    
+    local function iter2(obj)
+        return (seen[obj] or iter(obj))
+    end
+    
+    if do_act then
+        ioncore.activity_i(iter)
+    end
+    ioncore.focushistory_i(iter2)
+    
+    return entries
+end
+
+menus.focuslist=function() return focuslist(true) end
+menus.focuslist_=function() return focuslist(false) end
+
 -- }}}
 
 
