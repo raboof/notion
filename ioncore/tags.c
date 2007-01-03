@@ -70,7 +70,7 @@ bool region_is_tagged(WRegion *reg)
 EXTL_EXPORT
 void ioncore_clear_tags()
 {
-    while(ioncore_tags_take_first()!=NULL)
+    while(ioncore_tagged_take_first()!=NULL)
         /* nothing */;
 }
 
@@ -86,13 +86,13 @@ void ioncore_clear_tags()
  */
 EXTL_SAFE
 EXTL_EXPORT
-WRegion *ioncore_tags_first()
+WRegion *ioncore_tagged_first()
 {
     return (WRegion*)OBJLIST_FIRST(WRegion*, taglist);
 }
 
 
-WRegion *ioncore_tags_take_first()
+WRegion *ioncore_tagged_take_first()
 {
     WRegion *reg=(WRegion*)objlist_take_first(&taglist);
     

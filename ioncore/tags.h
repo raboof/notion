@@ -19,7 +19,7 @@ extern bool region_set_tagged(WRegion *reg, int sp);
 extern bool region_is_tagged(WRegion *reg);
 
 extern void ioncore_clear_tags();
-extern WRegion *ioncore_tags_first();
-extern WRegion *ioncore_tags_take_first();
+extern WRegion *ioncore_tagged_first();
+extern WRegion *ioncore_tagged_take_first();
 
 #endif /* ION_IONCORE_TAGS_H */

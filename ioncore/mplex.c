@@ -1390,7 +1390,7 @@ void mplex_attach_tagged(WMPlex *mplex)
 {
     WRegion *reg;
     
-    while((reg=ioncore_tags_take_first())!=NULL)
+    while((reg=ioncore_tagged_take_first())!=NULL)
         mplex_attach_simple(mplex, reg, 0);
 }
 
