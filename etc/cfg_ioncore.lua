@@ -36,10 +36,12 @@ defbindings("WScreen", {
     bdoc("Switch to next/previous object within current screen."),
     kpress(META.."comma", "WScreen.switch_prev(_)"),
     kpress(META.."period", "WScreen.switch_next(_)"),
-    
+
     submap(META.."K", {
         bdoc("Go to first region demanding attention or previously active one."),
-        kpress("K", "ioncore.goto_activity() or ioncore.goto_previous()"),
+        kpress("K", "mod_menu.grabmenu(_, _sub, 'focuslist')"),
+        -- Alternative without (cyclable) menu
+        --kpress("K", "ioncore.goto_activity() or ioncore.goto_previous()"),
 
         --bdoc("Go to previous active object."),
         --kpress("K", "ioncore.goto_previous()"),
