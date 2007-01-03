@@ -104,6 +104,34 @@ WRegion *ioncore_goto_previous()
 }
 
 
+/*EXTL_DOC
+ * Iterate over focus history until \var{iterfn} returns \code{false}.
+ * The function itself returns \code{true} if it reaches the end of list
+ * without this happening.
+ */
+EXTL_EXPORT
+bool ioncore_focushistory_i(ExtlFn iterfn)
+{
+    WRegion *next;
+    
+    if(ioncore_g.focus_current==NULL)
+        return FALSE;
+    
+    /* Find the first region on focus history list that isn't currently
+     * active.
+     */
+    for(next=ioncore_g.focus_current->active_next;
+        next!=NULL; 
+        next=next->active_next){
+        
+        if(!extl_iter_obj(iterfn, (Obj*)next))
+            return FALSE;
+    }
+    
+    return TRUE;
+}
+
+
 /*}}}*/
 
 

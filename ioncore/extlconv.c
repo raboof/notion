@@ -19,21 +19,43 @@
 /*{{{ Object list */
 
 
-ExtlTab extl_obj_iterable_to_table(ObjIterator *iter, void *st)
+bool extl_iter_objlist_(ExtlFn fn, ObjIterator *iter, void *st)
 {
-    ExtlTab tab=extl_create_table();
-    int i=1;
     Obj *obj;
     
     while(1){
         obj=iter(st);
         if(obj==NULL)
             break;
-        if(extl_table_seti_o(tab, i, obj))
-            i++;
+        if(!extl_iter_obj(fn, obj))
+            return FALSE;
     }
     
-    return tab;
+    return TRUE;
+}
+
+
+bool extl_iter_objlist(ExtlFn fn, ObjList *list)
+{
+    ObjListIterTmp tmp;
+    
+    objlist_iter_init(&tmp, list);
+    
+    return extl_iter_objlist_(fn, (ObjIterator*)objlist_iter, &tmp);
+}
+
+
+bool extl_iter_obj(ExtlFn fn, Obj *obj)
+{
+    bool ret1, ret2=FALSE;
+    
+    extl_protect(NULL);
+    
+    ret1=extl_call(fn, "o", "b", obj, &ret2);
+    
+    extl_unprotect(NULL);
+    
+    return (ret1 && ret2);
 }
 
 

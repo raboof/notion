@@ -1146,16 +1146,19 @@ WRegion *group_bottom(WGroup *ws)
 
 
 /*EXTL_DOC
- * Returns a list of regions managed by the workspace (frames, mostly).
+ * Iterate over managed regions of \var{ws} until \var{iterfn} returns
+ * \code{false}.
+ * The function itself returns \code{true} if it reaches the end of list
+ * without this happening.
  */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
-ExtlTab group_managed_list(WGroup *ws)
+bool group_managed_i(WGroup *ws, ExtlFn iterfn)
 {
     WGroupIterTmp tmp;
     group_iter_init(&tmp, ws);
     
-    return extl_obj_iterable_to_table((ObjIterator*)group_iter, &tmp);
+    return extl_iter_objlist_(iterfn, (ObjIterator*)group_iter, &tmp);
 }
 
 

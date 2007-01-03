@@ -43,8 +43,8 @@ DYNFUN const char *region_displayname(WRegion *reg);
 
 extern char *region_make_label(WRegion *reg, int maxw, GrBrush *brush);
 
-extern ExtlTab ioncore_region_list(const char *typenam);
-extern ExtlTab ioncore_clientwin_list();
+extern bool ioncore_region_i(ExtlFn fn, const char *typenam);
+extern bool ioncore_clientwin_i(ExtlFn fn);
 extern WRegion *ioncore_lookup_region(const char *cname, const char *typenam);
 extern WClientWin *ioncore_lookup_clientwin(const char *cname);
 

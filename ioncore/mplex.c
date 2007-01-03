@@ -266,31 +266,36 @@ WRegion *mplex_mx_nth(WMPlex *mplex, uint n)
 
 
 /*EXTL_DOC
- * Returns a list of regions on the numbered/mutually exclusive list of 
- * \var{mplex}.
+ * Iterate over numbered/mutually exclusive region list of \var{mplex} 
+ * until \var{iterfn} returns \code{false}.
+ * The function itself returns \code{true} if it reaches the end of list
+ * without this happening.
  */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
-ExtlTab mplex_mx_list(WMPlex *mplex)
+bool mplex_mx_i(WMPlex *mplex, ExtlFn iterfn)
 {
     WLListIterTmp tmp;
     llist_iter_init(&tmp, mplex->mx_list);
     
-    return extl_obj_iterable_to_table((ObjIterator*)llist_iter_regions, &tmp);
+    return extl_iter_objlist_(iterfn, (ObjIterator*)llist_iter_regions, &tmp);
 }
 
 
 /*EXTL_DOC
- * Returns a list of all regions managed by \var{mplex}.
+ * Iterate over managed regions of \var{mplex} until \var{iterfn} returns
+ * \code{false}.
+ * The function itself returns \code{true} if it reaches the end of list
+ * without this happening.
  */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
-ExtlTab mplex_managed_list(WMPlex *mplex)
+bool mplex_managed_i(WMPlex *mplex, ExtlFn iterfn)
 {
     WMPlexIterTmp tmp;
     mplex_iter_init(&tmp, mplex);
     
-    return extl_obj_iterable_to_table((ObjIterator*)mplex_iter, &tmp);
+    return extl_iter_objlist_(iterfn, (ObjIterator*)mplex_iter, &tmp);
 }
 
 

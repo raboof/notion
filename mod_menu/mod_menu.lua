@@ -29,11 +29,11 @@ assert(mod_menu and menudb)
 local function menu_(reg, sub, menu_or_name, fn, check)
     if check then
         -- Check that no other menus are open in reg.
-        local l=reg:managed_list()
-        for i, r in pairs(l) do
-            if obj_is(r, "WMenu") then
-                return
-            end
+        local ok=reg:managed_i(function(r) 
+                                   return not obj_is(r, "WMenu") 
+                               end)
+        if not ok then
+            return
         end
     end
 

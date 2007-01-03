@@ -119,21 +119,37 @@ end
 
 -- Workspace and window lists {{{
 
-local function makelist(list)
-    local function mkentry(tgt)
-        return menuentry(tgt:name(), function() tgt:goto() end)
+local function addto(list)
+    return function(tgt)
+        local e=menuentry(tgt:name(), function() tgt:goto() end)
+        table.insert(list, e)
+        return true
     end
-    local entries=table.map(mkentry, list)
+end
+    
+local function sort(entries)
     table.sort(entries, function(a, b) return a.name < b.name end)
     return entries
 end
 
 function menus.windowlist()
-    return makelist(ioncore.clientwin_list())
+    local entries={}
+    ioncore.clientwin_i(addto(entries))
+    return sort(entries)
 end
 
 function menus.workspacelist()
-    return makelist(ioncore.region_list("WGenWS"))
+    local entries={}
+    local iter_=addto(entries)
+    
+    local function iter(obj) 
+        return (not obj_is(obj, "WGroupWS") 
+                or iter_(obj))
+    end
+    
+    ioncore.region_i(iter)
+    
+    return sort(entries)
 end
 
 -- }}}

@@ -60,12 +60,13 @@ function mod_query.query(mplex, prompt, initvalue, handler, completor,
     end
 
     -- Check that no other queries are open in the mplex.
-    local l=mplex:managed_list()
-    for i, r in pairs(l) do
-        if obj_is(r, "WEdln") then
-            return
-        end
+    local ok=mplex:managed_i(function(r) 
+                                 return not obj_is(r, "WEdln") 
+                             end)
+    if not ok then
+        return
     end
+    
     local wedln=mod_query.do_query(mplex, prompt, initvalue, 
                                    handle_it, completor, cycle)
     if context then
@@ -340,36 +341,48 @@ function mod_query.call_warn(mplex, fn)
 end
 
 
-function mod_query.complete_name(str, list)
-    local entries={}
+function mod_query.complete_name(str, iter)
     local l=string.len(str)
-    for i, reg in pairs(list) do
-        local nm=reg:name()
-        if nm and string.sub(nm, 1, l)==str then
-            table.insert(entries, nm)
-        end
-    end
+    local entries={}
+    
+    iter(function(reg)
+             local nm=reg:name()
+             if nm and string.sub(nm, 1, l)==str then
+                 table.insert(entries, nm)
+             end
+             return true
+        end)
+        
     if #entries==0 then
-        for i, reg in pairs(list) do
-            local nm=reg:name()
-            if nm and string.find(nm, str, 1, true) then
-                table.insert(entries, nm)
-            end
-        end
+        iter(function(reg)
+                 local nm=reg:name()
+                 if nm and string.find(nm, str, 1, true) then
+                     table.insert(entries, nm)
+                 end
+                 return true
+             end)
     end
+    
     return entries
 end
 
+
 function mod_query.complete_clientwin(str)
-    return mod_query.complete_name(str, ioncore.clientwin_list())
+    return mod_query.complete_name(str, ioncore.clientwin_i)
 end
 
 function mod_query.complete_workspace(str)
-    return mod_query.complete_name(str, ioncore.region_list("WGroupWS"))
+    local function iter(fn) 
+        return ioncore.region_i(function(obj)
+                                    return (not obj_is(obj, "WGroupWS")
+                                            or fn(obj))
+                                end)
+    end
+    return mod_query.complete_name(str, iter)
 end
 
 function mod_query.complete_region(str)
-    return mod_query.complete_name(str, ioncore.region_list())
+    return mod_query.complete_name(str, ioncore.region_i)
 end
 
 
@@ -1188,14 +1201,16 @@ function mod_query.show_tree(mplex, reg, max_depth)
                       indent, reg:xid())
         end
         
-        if (not max_depth or max_depth > d) and reg.managed_list then
-            local mgd=reg:managed_list()
-            if #mgd > 0 then
-                s=s .. "\n" .. indent .. "---"
-                for k, v in pairs(mgd) do
-                    s=s .. "\n" .. get_info(v, indent, d+1)
-                end
-            end
+        if (not max_depth or max_depth > d) and reg.managed_i then
+            local first=true
+            reg:managed_i(function(sub)
+                              if first then
+                                  s=s .. "\n" .. indent .. "---"
+                                  first=false
+                              end
+                              s=s .. "\n" .. get_info(sub, indent, d+1)
+                              return true
+                          end)
         end
         
         return s

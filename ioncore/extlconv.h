@@ -15,10 +15,13 @@
 #include <libextl/extl.h>
 #include <libtu/iterable.h>
 #include <libtu/setparam.h>
+#include <libtu/objlist.h>
 #include "common.h"
 #include "region.h"
 
-extern ExtlTab extl_obj_iterable_to_table(ObjIterator *iter, void *st);
+extern bool extl_iter_obj(ExtlFn fn, Obj *obj);
+extern bool extl_iter_objlist_(ExtlFn fn, ObjIterator *iter, void *st);
+extern bool extl_iter_objlist(ExtlFn fn, ObjList *list);
 
 extern bool extl_table_is_bool_set(ExtlTab tab, const char *entry);
 

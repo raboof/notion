@@ -13,6 +13,7 @@
 #include <libtu/setparam.h>
 #include "region.h"
 #include "tags.h"
+#include "extlconv.h"
 
 
 static ObjList *taglist=NULL;
@@ -104,29 +105,15 @@ WRegion *ioncore_tags_take_first()
 }
 
 /*EXTL_DOC
- * Returns a list of tagged regions.
+ * Iterate over tagged regions until \var{iterfn} returns \code{false}.
+ * The function itself returns \code{true} if it reaches the end of list
+ * without this happening.
  */
 EXTL_SAFE
 EXTL_EXPORT
-ExtlTab ioncore_tagged_list()
+bool ioncore_tagged_i(ExtlFn iterfn)
 {
-    int n=0;
-    ExtlTab tab;
-    WRegion *region;
-    ObjListIterTmp tmp;
-
-    region=ioncore_tags_first();
-    if(!region)
-        return extl_table_none();
-
-    tab=extl_create_table();
-
-    FOR_ALL_ON_OBJLIST(WRegion*, region, taglist, tmp){
-        if(extl_table_seti_o(tab, n+1, (Obj*)region))
-            n++;
-    }
-
-    return tab;
+    return extl_iter_objlist(iterfn, taglist);
 }
 
 

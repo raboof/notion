@@ -1125,17 +1125,20 @@ WRegion *tiling_current(WTiling *ws)
 
 
 /*EXTL_DOC
- * Returns a list of regions managed by the workspace (frames, mostly).
+ * Iterate over managed regions of \var{ws} until \var{iterfn} returns
+ * \code{false}.
+ * The function itself returns \code{true} if it reaches the end of list
+ * without this happening.
  */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
-ExtlTab tiling_managed_list(WTiling *ws)
+bool tiling_managed_i(WTiling *ws, ExtlFn iterfn)
 {
     PtrListIterTmp tmp;
     
     ptrlist_iter_init(&tmp, ws->managed_list);
     
-    return extl_obj_iterable_to_table((ObjIterator*)ptrlist_iter, &tmp);
+    return extl_iter_objlist_(iterfn, (ObjIterator*)ptrlist_iter, &tmp);
 }
 
 

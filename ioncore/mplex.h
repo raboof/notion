@@ -176,9 +176,11 @@ extern bool mplex_managed_rqorder(WMPlex *mplex, WRegion *sub,
 extern WRegion *mplex_current(WMPlex *mplex);
 extern bool mplex_may_destroy(WMPlex *mplex);
 
+extern bool mplex_managed_i(WMPlex *mplex, ExtlFn iterfn);
+
 extern int mplex_mx_count(WMPlex *mplex);
 extern WRegion *mplex_mx_nth(WMPlex *mplex, uint n);
-extern ExtlTab mplex_mx_list(WMPlex *mplex);
+extern bool mplex_mx_i(WMPlex *mplex, ExtlFn iterfn);
 extern WRegion *mplex_mx_current(WMPlex *mplex);
 
 extern void mplex_call_changed_hook(WMPlex *mplex, WHook *hook, 

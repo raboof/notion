@@ -537,16 +537,13 @@ WClientWin *ioncore_lookup_clientwin(const char *name)
 }
 
 
-static ExtlTab do_list(WNamespace *ns, const char *typenam)
+static bool do_list(ExtlFn fn, WNamespace *ns, const char *typenam)
 {
-    ExtlTab tab;
     Rb_node node;
     int n=0;
     
     if(!ns->initialised)
-        return extl_table_none();
-    
-    tab=extl_create_table();
+        return FALSE;
     
     rb_traverse(node, ns->rb){
         WRegion *reg=(WRegion*)node->v.val;
@@ -556,33 +553,38 @@ static ExtlTab do_list(WNamespace *ns, const char *typenam)
         if(typenam!=NULL && !obj_is_str((Obj*)reg, typenam))
             continue;
 
-        if(extl_table_seti_o(tab, n+1, (Obj*)reg))
-            n++;
+        if(!extl_iter_obj(fn, (Obj*)reg))
+            return FALSE;
     }
     
-    return tab;
+    return TRUE;
 }
 
 
 /*EXTL_DOC
- * Find all non-client window regions inheriting \var{typenam}.
+ * Iterate over all non-client window regions with (inherited) class
+ * \var{typenam} until \var{iterfn} returns \code{false}.
+ * The function itself returns \code{true} if it reaches the end of list
+ * without this happening.
  */
 EXTL_SAFE
 EXTL_EXPORT
-ExtlTab ioncore_region_list(const char *typenam)
+bool ioncore_region_i(ExtlFn fn, const char *typenam)
 {
-    return do_list(&ioncore_internal_ns, typenam);
+    return do_list(fn, &ioncore_internal_ns, typenam);
 }
 
 
 /*EXTL_DOC
- * Return a list of all client windows.
+ * Iterate over client windows until \var{iterfn} returns \code{false}.
+ * The function itself returns \code{true} if it reaches the end of list
+ * without this happening.
  */
 EXTL_SAFE
 EXTL_EXPORT
-ExtlTab ioncore_clientwin_list()
+bool ioncore_clientwin_i(ExtlFn fn)
 {
-    return do_list(&ioncore_clientwin_ns, NULL);
+    return do_list(fn, &ioncore_clientwin_ns, NULL);
 }
 
 

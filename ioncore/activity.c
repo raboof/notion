@@ -124,22 +124,15 @@ bool region_is_activity_r(WRegion *reg)
 
 
 /*EXTL_DOC
- * Return list of regions with activity/urgency bit set.
+ * Iterate over activity list until \var{iterfn} returns \code{false}.
+ * The function itself returns \code{true} if it reaches the end of list
+ * without this happening.
  */
 EXTL_SAFE
 EXTL_EXPORT
-ExtlTab ioncore_activity_list()
+bool ioncore_activity_i(ExtlFn iterfn)
 {
-    ExtlTab t=extl_create_table();
-    ObjListIterTmp tmp;
-    Obj *obj;
-    int i=1;
-    
-    FOR_ALL_ON_OBJLIST(Obj*, obj, actlist, tmp){
-        extl_table_seti_o(t, i, obj);
-    }
-    
-    return t;
+    return extl_iter_objlist(iterfn, actlist);
 }
 
 
