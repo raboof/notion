@@ -117,8 +117,7 @@ defbindings("WClientWin", {
 
 defbindings("WGroupCW", {
     bdoc("Toggle client window group full-screen mode"),
-    kpress_wait(META.."Return",
-                "WClientWin.set_fullscreen(_:bottom(), 'toggle')"),
+    kpress_wait(META.."Return", "WGroup.set_fullscreen(_, 'toggle')"),
 })
 
 

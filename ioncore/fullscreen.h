@@ -21,12 +21,11 @@
 
 extern bool clientwin_check_fullscreen_request(WClientWin *cwin, 
                                                int w, int h, bool switchto);
+extern bool clientwin_fullscreen_may_switchto(WClientWin *cwin);
+
 extern bool region_fullscreen_scr(WRegion *reg, WScreen *vp, bool switchto);
 extern bool region_enter_fullscreen(WRegion *reg, bool switchto);
 extern bool region_leave_fullscreen(WRegion *reg, bool switchto);
 
-extern bool clientwin_set_fullscreen(WClientWin *cwin, int sp);
-extern bool clientwin_is_fullscreen(WClientWin *cwin);
-extern bool clientwin_fullscreen_may_switchto(WClientWin *cwin);
 
 #endif /* ION_IONCORE_FULLSCREEN_H */

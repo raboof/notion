@@ -166,46 +166,29 @@ bool clientwin_check_fullscreen_request(WClientWin *cwin, int w, int h,
 /*}}}*/
 
 
-
-/*{{{ Client window exports */
-
-
-static WRegion *get_group(WClientWin *cwin)
-{
-    WGroupCW *cwg=OBJ_CAST(REGION_MANAGER(cwin), WGroupCW);
-    
-    return ((cwg!=NULL && group_bottom(&cwg->grp)==(WRegion*)cwin)
-            ? (WRegion*)cwg
-            : (WRegion*)cwin);
-}
-
-
-bool clientwin_set_fullscreen(WClientWin *cwin, int sp)
-{
-    return region_set_fullscreen(get_group(cwin), sp);
-}
+/*{{{ Group exports */
 
 
 /*EXTL_DOC
- * Set client window \var{cwin} full screen state according to the 
+ * Set client window \var{reg} full screen state according to the 
  * parameter \var{how} (set/unset/toggle). Resulting state is returned,
  * which may not be what was requested.
  */
-EXTL_EXPORT_AS(WClientWin, set_fullscreen)
-bool clientwin_set_fullscreen_extl(WClientWin *cwin, const char *how)
+EXTL_EXPORT_AS(WGroup, set_fullscreen)
+bool group_set_fullscreen_extl(WGroup *grp, const char *how)
 {
-    return clientwin_set_fullscreen(cwin, libtu_string_to_setparam(how));
+    return region_set_fullscreen((WRegion*)grp, libtu_string_to_setparam(how));
 }
 
 
 /*EXTL_DOC
- * Is \var{cwin} in full screen mode?
+ * Is \var{reg} in full screen mode?
  */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
-bool clientwin_is_fullscreen(WClientWin *cwin)
+bool group_is_fullscreen(WGroup *grp)
 {
-    return REGION_IS_FULLSCREEN(cwin);
+    return REGION_IS_FULLSCREEN(grp);
 }
 
 
