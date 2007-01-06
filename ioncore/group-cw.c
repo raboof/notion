@@ -33,13 +33,6 @@
 /*{{{ Add/remove managed */
 
 
-WRegion *create_transient_frame(WWindow *par, 
-                                const WFitParams *fp)
-{
-    return (WRegion*)create_frame(par, fp, FRAME_MODE_TRANSIENT);
-}
-
-
 static WPHolder *groupcw_transient_pholder(WGroupCW *cwg, 
                                            const WClientWin *cwin,
                                            const WManageParams *mp)
@@ -69,7 +62,7 @@ static WPHolder *groupcw_transient_pholder(WGroupCW *cwg,
         fp.inner_geom_gravity_set=1;
         fp.inner_geom=mp->geom;
         fp.gravity=ForgetGravity;
-        fp.mkframe=create_transient_frame;
+        fp.mode=FRAME_MODE_TRANSIENT;
         
         ph=(WPHolder*)create_grouppholder(&cwg->grp, NULL, &param);
         

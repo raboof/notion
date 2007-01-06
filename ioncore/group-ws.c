@@ -315,7 +315,7 @@ WPHolder *groupws_prepare_manage_transient(WGroupWS *ws, const WClientWin *cwin,
     fp.inner_geom_gravity_set=TRUE;
     fp.inner_geom=param->geom;
     fp.gravity=param->gravity;
-    fp.mkframe=create_transient_frame;
+    fp.mode=FRAME_MODE_TRANSIENT;
     
     ap.geom_weak_set=1;
     ap.geom_weak=0;

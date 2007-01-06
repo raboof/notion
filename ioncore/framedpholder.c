@@ -76,10 +76,10 @@ WRegion *framed_handler(WWindow *par,
     WFrame *frame;
     WRegion *reg;
     
-    if(param->mkframe!=NULL)
+    /*if(param->mkframe!=NULL)
         frame=(WFrame*)(param->mkframe)(par, fp);
-    else
-        frame=create_frame(par, fp, FRAME_MODE_FLOATING);
+    else*/
+    frame=create_frame(par, fp, param->mode);
     
     if(frame==NULL)
         return NULL;

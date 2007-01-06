@@ -15,19 +15,21 @@
 #include "common.h"
 #include "pholder.h"
 #include "attach.h"
+#include "frame.h"
 
 INTRCLASS(WFramedPHolder);
 INTRSTRUCT(WFramedParam);
 
 
-#define FRAMEDPARAM_INIT {0, 0, {0, 0, 0, 0}, NULL}
+#define FRAMEDPARAM_INIT {0, 0, {0, 0, 0, 0}, FRAME_MODE_FLOATING /*, NULL*/}
 
 
 DECLSTRUCT(WFramedParam){
     uint inner_geom_gravity_set:1;
     int gravity;
     WRectangle inner_geom;
-    WRegionSimpleCreateFn *mkframe;
+    WFrameMode mode;
+    /*WRegionSimpleCreateFn *mkframe;*/
 };
 
 
