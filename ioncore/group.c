@@ -584,17 +584,20 @@ bool group_do_attach_final(WGroup *ws,
      * position request is never honoured.
      */
     if((g.x+g.w<=REGION_GEOM(ws).x) ||
-       (g.y+g.h<=REGION_GEOM(ws).y) ||
-       (g.x>=REGION_GEOM(ws).x+REGION_GEOM(ws).w) ||
+       (g.x>=REGION_GEOM(ws).x+REGION_GEOM(ws).w)){
+        weak|=REGION_RQGEOM_WEAK_X;
+    }
+       
+    if((g.y+g.h<=REGION_GEOM(ws).y) ||
        (g.y>=REGION_GEOM(ws).y+REGION_GEOM(ws).h)){
-        weak|=REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_X;
+        weak|=REGION_RQGEOM_WEAK_Y;
     }
 
-    if((weak&(REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y))
-       ==(REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y) &&
+    if(weak&(REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y) &&
         (szplcy==SIZEPOLICY_UNCONSTRAINED ||
          szplcy==SIZEPOLICY_FREE ||
          szplcy==SIZEPOLICY_FREE_GLUE /* without flags */)){
+        /* TODO: use 'weak'? */
         group_calc_placement(ws, &g);
     }
 
