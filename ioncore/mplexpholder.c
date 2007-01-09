@@ -265,6 +265,7 @@ static WRegion *mplexpholder_attach_recreate(WMPlexPHolder *ph, int flags,
 {
     WRegionAttachData data2;
     WFramedPHolder *fph;
+    WPHolder *root;
     WRegion *reg;
     RP rp;
     
@@ -274,10 +275,9 @@ static WRegion *mplexpholder_attach_recreate(WMPlexPHolder *ph, int flags,
     
     fph=rp.ph_head->recreate_pholder;
     
-    /* TODO check staleness */
     if(fph==NULL)
         return NULL;
-        
+    
     rp.ph=ph;
     rp.data=data;
     rp.param=&fph->param;
@@ -286,7 +286,7 @@ static WRegion *mplexpholder_attach_recreate(WMPlexPHolder *ph, int flags,
     data2.u.n.fn=recreate_handler;
     data2.u.n.param=&rp;
     
-    reg=pholder_attach_(fph->cont, flags, &data2); /* == frame */
+    reg=pholder_do_attach(fph->cont, flags, &data2); /* == frame */
     
     if(reg!=NULL){
         destroy_obj((Obj*)fph);
@@ -337,12 +337,17 @@ bool mplexpholder_move(WMPlexPHolder *ph, WMPlex *mplex,
 
 bool mplexpholder_do_goto(WMPlexPHolder *ph)
 {
-    WMPlex *mplex=(WMPlex*)ph->mplex_watch.obj;
+    WRegion *reg=(WRegion*)ph->mplex_watch.obj;
     
-    if(mplex!=NULL)
-        return region_goto((WRegion*)mplex);
-    
-    return FALSE;
+    if(reg!=NULL){
+        return region_goto(reg);
+    }else{
+        WFramedPHolder *fph=get_recreate_ph(ph);
+        
+        return (fph!=NULL
+                ? pholder_do_goto((WPHolder*)fph)
+                : FALSE);
+    }
 }
 
 
@@ -355,10 +360,31 @@ WRegion *mplexpholder_do_target(WMPlexPHolder *ph)
     }else{
         WFramedPHolder *fph=get_recreate_ph(ph);
         
-        if(fph!=NULL)
-            return pholder_do_target((WPHolder*)fph);
-        else
+        return (fph!=NULL
+                ? pholder_do_target((WPHolder*)fph)
+                : NULL);
+    }
+}
+
+
+WPHolder *mplexpholder_do_root(WMPlexPHolder *ph)
+{
+    WRegion *reg=(WRegion*)ph->mplex_watch.obj;
+    
+    if(reg!=NULL){
+        return &ph->ph;
+    }else{
+        WFramedPHolder *fph=get_recreate_ph(ph);
+        WPHolder *root;
+        
+        if(fph==NULL)
             return NULL;
+    
+        root=pholder_root((WPHolder*)fph);
+    
+        return (root!=(WPHolder*)fph
+                ? root
+                : &ph->ph);
     }
 }
 
@@ -436,6 +462,9 @@ static DynFunTab mplexpholder_dynfuntab[]={
 
     {(DynFun*)pholder_do_target, 
      (DynFun*)mplexpholder_do_target},
+     
+    {(DynFun*)pholder_do_root, 
+     (DynFun*)mplexpholder_do_root},
 
     END_DYNFUNTAB
 };

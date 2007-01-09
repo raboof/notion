@@ -49,6 +49,8 @@ extern WRegion *mplexpholder_do_attach(WMPlexPHolder *ph, int flags,
 
 extern bool mplexpholder_do_goto(WMPlexPHolder *ph);
 
+extern WPHolder *mplexpholder_do_root(WMPlexPHolder *ph);
+
 extern WRegion *mplexpholder_do_target(WMPlexPHolder *ph);
 
 extern bool mplexpholder_move(WMPlexPHolder *ph, WMPlex *mplex, 

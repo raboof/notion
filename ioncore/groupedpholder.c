@@ -127,7 +127,7 @@ WRegion *groupedpholder_do_attach(WGroupedPHolder *ph, int flags,
     data2.u.n.fn=grouped_handler;
     data2.u.n.param=data;
         
-    return pholder_attach_(ph->cont, flags, &data2);
+    return pholder_do_attach(ph->cont, flags, &data2);
 }
 
 
@@ -139,19 +139,32 @@ WRegion *groupedpholder_do_attach(WGroupedPHolder *ph, int flags,
 
 bool groupedpholder_do_goto(WGroupedPHolder *ph)
 {
-    if(ph->cont!=NULL)
-        return pholder_goto(ph->cont);
-    
-    return FALSE;
+    return (ph->cont!=NULL
+            ? pholder_goto(ph->cont)
+            : FALSE);
 }
 
 
 WRegion *groupedpholder_do_target(WGroupedPHolder *ph)
 {
-    if(ph->cont!=NULL)
-        return pholder_target(ph->cont);
+    return (ph->cont!=NULL
+            ? pholder_target(ph->cont)
+            : NULL);
+}
+
+
+WPHolder *groupedpholder_do_root(WGroupedPHolder *ph)
+{
+    WPHolder *root;
     
-    return NULL;
+    if(ph->cont==NULL)
+        return NULL;
+    
+    root=pholder_root(ph->cont);
+    
+    return (root!=ph->cont 
+            ? root
+            : &ph->ph);
 }
 
 
@@ -170,6 +183,9 @@ static DynFunTab groupedpholder_dynfuntab[]={
 
     {(DynFun*)pholder_do_target, 
      (DynFun*)groupedpholder_do_target},
+     
+    {(DynFun*)pholder_do_root, 
+     (DynFun*)groupedpholder_do_root},
     
     END_DYNFUNTAB
 };

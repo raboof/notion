@@ -167,7 +167,7 @@ WRegion *framedpholder_do_attach(WFramedPHolder *ph, int flags,
     ap.data=data;
     ap.param=&ph->param;
         
-    return pholder_attach_(ph->cont, flags, &data2);
+    return pholder_do_attach(ph->cont, flags, &data2);
 }
 
 
@@ -179,19 +179,32 @@ WRegion *framedpholder_do_attach(WFramedPHolder *ph, int flags,
 
 bool framedpholder_do_goto(WFramedPHolder *ph)
 {
-    if(ph->cont!=NULL)
-        return pholder_goto(ph->cont);
-    
-    return FALSE;
+    return (ph->cont!=NULL
+            ? pholder_goto(ph->cont)
+            : FALSE);
 }
 
 
 WRegion *framedpholder_do_target(WFramedPHolder *ph)
 {
-    if(ph->cont!=NULL)
-        return pholder_target(ph->cont);
+    return (ph->cont!=NULL
+            ? pholder_target(ph->cont)
+            : NULL);
+}
+
+
+WPHolder *framedpholder_do_root(WFramedPHolder *ph)
+{
+    WPHolder *root;
     
-    return NULL;
+    if(ph->cont==NULL)
+        return NULL;
+    
+    root=pholder_root(ph->cont);
+    
+    return (root!=ph->cont 
+            ? root
+            : &ph->ph);
 }
 
 
@@ -210,6 +223,9 @@ static DynFunTab framedpholder_dynfuntab[]={
 
     {(DynFun*)pholder_do_target, 
      (DynFun*)framedpholder_do_target},
+     
+    {(DynFun*)pholder_do_root, 
+     (DynFun*)framedpholder_do_root},
     
     END_DYNFUNTAB
 };

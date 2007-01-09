@@ -54,10 +54,15 @@ static WRegion *add_fn_reparent(WWindow *par, const WFitParams *fp,
 
 WRegion *pholder_attach_(WPHolder *ph, int flags, WRegionAttachData *data)
 {
-    if(ph->redirect!=NULL)
-        return pholder_attach_(ph->redirect, flags, data);
-    else
-        return pholder_do_attach(ph, flags, data);
+    WPHolder *root=pholder_root(ph);
+    
+    /* Use the root, so that extra containers are not added from
+     * stale chains.
+     */
+    
+    return (root==NULL
+            ? NULL
+            : pholder_do_attach(root, flags, data));
 }
 
 
@@ -96,10 +101,9 @@ WRegion *pholder_do_target(WPHolder *ph)
 
 WRegion *pholder_target(WPHolder *ph)
 {
-    if(ph->redirect!=NULL)
-        return pholder_target(ph->redirect);
-    else
-        return pholder_do_target(ph);
+    return (ph->redirect!=NULL
+            ? pholder_target(ph->redirect)
+            : pholder_do_target(ph));
 }
 
 
@@ -141,12 +145,38 @@ bool pholder_do_goto(WPHolder *ph)
 
 bool pholder_goto(WPHolder *ph)
 {
-    if(ph->redirect!=NULL)
-        return pholder_goto(ph->redirect);
-    else
-        return pholder_do_goto(ph);
+    return (ph->redirect!=NULL
+            ? pholder_goto(ph->redirect)
+            : pholder_do_goto(ph));
 }
 
+
+WPHolder *pholder_do_root_default(WPHolder *ph)
+{
+    return ph;
+}
+
+
+WPHolder *pholder_do_root(WPHolder *ph)
+{
+    WPHolder *ret=NULL;
+    CALL_DYN_RET(ret, WPHolder*, pholder_do_root, ph, (ph));
+    return ret;
+}
+
+
+WPHolder *pholder_root(WPHolder *ph)
+{
+    return (ph->redirect!=NULL
+            ? pholder_root(ph->redirect)
+            : pholder_do_root(ph));
+}
+
+
+bool pholder_stale(WPHolder *ph)
+{
+    return (pholder_root(ph)!=ph);
+}
 
 
 bool pholder_redirect(WPHolder *ph, WRegion *old_target)
@@ -216,6 +246,9 @@ WPHolder *pholder_either(WPHolder *a, WPHolder *b)
 static DynFunTab pholder_dynfuntab[]={
     {(DynFun*)pholder_do_check_reparent, 
      (DynFun*)pholder_do_check_reparent_default},
+     
+    {(DynFun*)pholder_do_root, 
+     (DynFun*)pholder_do_root_default},
 
     END_DYNFUNTAB
 };
