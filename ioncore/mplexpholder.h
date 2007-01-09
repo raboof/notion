@@ -16,10 +16,13 @@
 #include "pholder.h"
 #include "mplex.h"
 #include "attach.h"
+#include "framedpholder.h"
+
 
 DECLCLASS(WMPlexPHolder){
     WPHolder ph;
     Watch mplex_watch;
+    WFramedPHolder *recreate_pholder; /* only on first of list */
     WLListNode *after;
     WMPlexPHolder *next, *prev;
     WMPlexAttachParams param;

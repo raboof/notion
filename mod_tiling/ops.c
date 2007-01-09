@@ -22,39 +22,6 @@
 #include "tiling.h"
 
 
-static WGroup *find_group(WRegion *reg, bool *detach_framed)
-{
-    WRegion *mgr=REGION_MANAGER(reg);
-    bool was_grouped=FALSE;
-    
-    if(OBJ_IS(mgr, WMPlex)){
-        WMPlex *mplex=(WMPlex*)mgr;
-        *detach_framed=TRUE;
-        mgr=REGION_MANAGER(mgr);
-        if(OBJ_IS(mgr, WGroup)){
-            assert(mplex->mgd!=NULL);
-            if(mplex->mgd->reg==reg && mplex->mgd->mgr_next==NULL){
-                /* Nothing to detach */
-                return NULL;
-            }
-        }
-    }else{
-        was_grouped=OBJ_IS(mgr, WGroup);
-        *detach_framed=FALSE;
-    }
-    
-    while(mgr!=NULL){
-        mgr=REGION_MANAGER(mgr);
-        if(OBJ_IS(mgr, WGroup))
-            break;
-    }
-
-    if(mgr==NULL && was_grouped)
-        warn(TR("Already detached."));
-    
-    return (WGroup*)mgr;
-}
-
 
 static void get_relative_geom(WRectangle *g, WRegion *reg, WRegion *mgr)
 {
@@ -72,70 +39,124 @@ static void get_relative_geom(WRectangle *g, WRegion *reg, WRegion *mgr)
 }
 
 
-bool mod_tiling_do_detach(WRegion *reg, WGroup *grp, bool detach_framed)
+bool mod_tiling_do_detach(WRegion *reg, WGroup *grp, WFrameMode framemode)
 {
     WGroupAttachParams ap=GROUPATTACHPARAMS_INIT;
     WRegionAttachData data;
     WPHolder *ph;
+    bool newph=FALSE;
     bool ret;
     
     ap.switchto_set=TRUE;
     ap.switchto=region_may_control_focus(reg);
     
-    ap.geom_set=TRUE;
-    get_relative_geom(&ap.geom, reg, (WRegion*)grp);
-    
-    /* TODO: Retain (root-relative) geometry of reg for framed 
-     * detach instead of making a frame of this size?
-     */
-    
     data.type=REGION_ATTACH_REPARENT;
     data.u.reg=reg;
     
-    ph=region_make_return_pholder(reg);
+    ph=region_unset_get_return(reg);
     
-    if(detach_framed){
-        WFramedParam fp=FRAMEDPARAM_INIT;
+    if(ph==NULL){
+        ph=region_make_return_pholder(reg);
+        newph=TRUE;
+    }
+    
+    if(framemode!=FRAME_MODE_UNKNOWN){
+        WFramedParam fpa=FRAMEDPARAM_INIT;
         
-        ret=(region_attach_framed((WRegion*)grp, &fp,
+        fpa.mode=framemode;
+        fpa.inner_geom_gravity_set=TRUE;
+        fpa.gravity=ForgetGravity;
+        
+        ap.geom_weak_set=TRUE;
+        ap.geom_weak=0;
+        
+        get_relative_geom(&fpa.inner_geom, reg, (WRegion*)grp);
+
+        ret=(region_attach_framed((WRegion*)grp, &fpa,
                                   (WRegionAttachFn*)group_do_attach,
                                   &ap, &data)!=NULL);
     }else{
+        ap.geom_set=TRUE;
+        get_relative_geom(&ap.geom, reg, (WRegion*)grp);
+        
         ret=(group_do_attach(grp, &ap, &data)!=NULL);
     }
     
-    if(ret){
-        if(!region_do_set_return(reg, ph))
-            destroy_obj((Obj*)ph);
-    }
+    if(!ret && newph)
+        destroy_obj((Obj*)ph);
+    else if(!region_do_set_return(reg, ph))
+        destroy_obj((Obj*)ph);
     
     return ret;
 }
 
 
+static WRegion *check_mplex(WRegion *reg, WFrameMode *mode)
+{
+    WMPlex *mplex=OBJ_CAST(REGION_MANAGER(reg), WMPlex);
+    
+    if(OBJ_IS(reg, WWindow) || mplex==NULL){
+        *mode=FRAME_MODE_UNKNOWN;
+        return reg;
+    }
+        
+    *mode=FRAME_MODE_FLOATING;
+    
+    if(OBJ_IS(mplex, WFrame)
+       && frame_mode((WFrame*)mplex)==FRAME_MODE_TRANSIENT){
+        *mode=FRAME_MODE_TRANSIENT;
+    }
+    
+    return (WRegion*)mplex;
+}
+
+
+static WGroup *find_group(WRegion *reg)
+{
+    WRegion *mgr=REGION_MANAGER(reg);
+    
+    while(mgr!=NULL){
+        mgr=REGION_MANAGER(mgr);
+        if(OBJ_IS(mgr, WGroup))
+            break;
+    }
+    
+    return (WGroup*)mgr;
+}
+
+
+
 bool mod_tiling_detach(WRegion *reg, int sp)
 {
     WPHolder *ph=region_get_return(reg);
-    bool set=(ph!=NULL);
-    bool nset=libtu_do_setparam(sp, set);
+    WFrameMode mode;
+    WGroup *grp;
+    bool set, nset;
+    
+    grp=find_group(check_mplex(reg, &mode));
+    
+    /* reg is only considered detached if there's no higher-level group
+     * to attach to, thus causing 'toggle' to cycle.
+     */
+    set=(grp==NULL);
+    nset=libtu_do_setparam(sp, set);
     
     if(!XOR(nset, set))
         return set;
 
     if(!set){
-        bool detach_framed=!OBJ_IS(reg, WFrame);
-        WGroup *grp=find_group(reg, &detach_framed);
-    
-        if(grp==NULL)
-            return TRUE;
-            
-        return mod_tiling_do_detach(reg, grp, detach_framed);
+        return mod_tiling_do_detach(reg, grp, mode);
     }else{
-        if(!pholder_attach_mcfgoto(ph, PHOLDER_ATTACH_SWITCHTO, reg)){
-            warn(TR("Failed to reattach."));    
-            return TRUE;
+        WPHolder *ph=region_get_return(reg);
+        
+        if(ph!=NULL){
+            if(!pholder_attach_mcfgoto(ph, PHOLDER_ATTACH_SWITCHTO, reg)){
+                warn(TR("Failed to reattach."));    
+                return TRUE;
+            }
+            region_unset_return(reg);
         }
-        region_unset_return(reg);
+        
         return FALSE;
     }
 }

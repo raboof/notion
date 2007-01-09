@@ -17,6 +17,7 @@
 #include "mplex.h"
 #include "mplexpholder.h"
 #include "llist.h"
+#include "framedpholder.h"
 
 
 static void mplex_watch_handler(Watch *watch, Obj *mplex);
@@ -60,12 +61,28 @@ static void mplexpholder_do_link(WMPlexPHolder *ph,
 
 void mplexpholder_do_unlink(WMPlexPHolder *ph, WMPlex *mplex)
 {
+    if(ph->recreate_pholder!=NULL){
+        if(ph->prev!=NULL)
+            ph->prev->recreate_pholder=ph->recreate_pholder;
+        else
+            destroy_obj((Obj*)ph->recreate_pholder);
+        ph->recreate_pholder=NULL;
+    }
+    
     if(ph->after!=NULL){
         UNLINK_ITEM(ph->after->phs, ph, next, prev);
     }else if(mplex!=NULL && on_ph_list(mplex->mx_phs, ph)){
         UNLINK_ITEM(mplex->mx_phs, ph, next, prev);
     }else{
-        assert(ph->next==NULL && ph->prev==NULL);
+        WMPlexPHolder *next=ph->next;
+    
+        assert((ph->next==NULL && ph->prev==NULL)
+               || ph->mplex_watch.obj==NULL);
+        
+        if(ph->next!=NULL)
+            ph->next->prev=ph->prev;
+        if(ph->prev!=NULL)
+            ph->prev->next=next;
     }
     
     ph->after=NULL;
@@ -101,6 +118,7 @@ bool mplexpholder_init(WMPlexPHolder *ph, WMPlex *mplex, WStacking *st,
     ph->next=NULL;
     ph->prev=NULL;
     ph->param.flags=0;
+    ph->recreate_pholder=NULL;
     
     if(!watch_setup(&(ph->mplex_watch), (Obj*)mplex, mplex_watch_handler)){
         pholder_deinit(&(ph->ph));
@@ -171,14 +189,121 @@ void mplexpholder_deinit(WMPlexPHolder *ph)
 /*{{{ Move, attach, layer */
 
 
+typedef struct{
+    WMPlexPHolder *ph, *ph_head;
+    WRegionAttachData *data;
+    WFramedParam *param;
+} RP;
+
+
+WRegion *recreate_handler(WWindow *par, 
+                          const WFitParams *fp, 
+                          void *rp_)
+{
+    RP *rp=(RP*)rp_;
+    WMPlexPHolder *ph=rp->ph, *ph_head=rp->ph_head, *phtmp;
+    WFramedParam *param=rp->param;
+    WFrame *frame;
+    WRegion *reg;
+    
+    frame=create_frame(par, fp, param->mode);
+    
+    if(frame==NULL)
+        return NULL;
+    
+    /* Move pholders to frame */
+    frame->mplex.mx_phs=ph_head;
+    
+    for(phtmp=frame->mplex.mx_phs; phtmp!=NULL; phtmp=phtmp->next)
+        watch_setup(&(phtmp->mplex_watch), (Obj*)frame, mplex_watch_handler);
+        
+    /* Attach */
+    if(fp->mode&(REGION_FIT_BOUNDS|REGION_FIT_WHATEVER))
+        ph->param.flags|=MPLEX_ATTACH_WHATEVER;
+    
+    reg=mplex_do_attach_pholder(&frame->mplex, ph, rp->data);
+
+    ph->param.flags&=~MPLEX_ATTACH_WHATEVER;
+
+    if(reg==NULL){
+        /* Try to recover */
+        for(phtmp=frame->mplex.mx_phs; phtmp!=NULL; phtmp=phtmp->next)
+            watch_reset(&(phtmp->mplex_watch));
+        frame->mplex.mx_phs=NULL;
+    
+        destroy_obj((Obj*)frame);
+        
+        return NULL;
+    }else{
+        frame_adjust_to_initial(frame, fp, param, reg);
+        
+        return (WRegion*)frame;
+    }
+}
+
+
+static WMPlexPHolder *get_head(WMPlexPHolder *ph)
+{
+    while(1){
+        if(ph->prev->next==NULL)
+            break;
+        ph=ph->prev;
+    }
+    
+    return ph;
+}
+
+
+static WFramedPHolder *get_recreate_ph(WMPlexPHolder *ph)
+{
+    return get_head(ph)->recreate_pholder;
+}
+
+    
+static WRegion *mplexpholder_attach_recreate(WMPlexPHolder *ph, int flags,
+                                             WRegionAttachData *data)
+{
+    WRegionAttachData data2;
+    WFramedPHolder *fph;
+    WRegion *reg;
+    RP rp;
+    
+    rp.ph_head=get_head(ph);
+    
+    assert(rp.ph_head!=NULL);
+    
+    fph=rp.ph_head->recreate_pholder;
+    
+    /* TODO check staleness */
+    if(fph==NULL)
+        return NULL;
+        
+    rp.ph=ph;
+    rp.data=data;
+    rp.param=&fph->param;
+    
+    data2.type=REGION_ATTACH_NEW;
+    data2.u.n.fn=recreate_handler;
+    data2.u.n.param=&rp;
+    
+    reg=pholder_attach_(fph->cont, flags, &data2); /* == frame */
+    
+    if(reg!=NULL){
+        destroy_obj((Obj*)fph);
+        rp.ph_head->recreate_pholder=NULL;
+    }
+
+    return reg;
+}
+
+
 WRegion *mplexpholder_do_attach(WMPlexPHolder *ph, int flags,
                                 WRegionAttachData *data)
 {
     WMPlex *mplex=(WMPlex*)ph->mplex_watch.obj;
-    WRegion *reg=NULL;
     
     if(mplex==NULL)
-        return FALSE;
+        return mplexpholder_attach_recreate(ph, flags, data);
     
     if(flags&PHOLDER_ATTACH_SWITCHTO)
         ph->param.flags|=MPLEX_ATTACH_SWITCHTO;
@@ -223,7 +348,18 @@ bool mplexpholder_do_goto(WMPlexPHolder *ph)
 
 WRegion *mplexpholder_do_target(WMPlexPHolder *ph)
 {
-    return (WRegion*)ph->mplex_watch.obj;
+    WRegion *reg=(WRegion*)ph->mplex_watch.obj;
+    
+    if(reg!=NULL){
+        return reg;
+    }else{
+        WFramedPHolder *fph=get_recreate_ph(ph);
+        
+        if(fph!=NULL)
+            return pholder_do_target((WPHolder*)fph);
+        else
+            return NULL;
+    }
 }
 
 

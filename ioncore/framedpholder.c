@@ -65,37 +65,13 @@ typedef struct{
 } AP;
 
 
-WRegion *framed_handler(WWindow *par, 
-                        const WFitParams *fp, 
-                        void *ap_)
+void frame_adjust_to_initial(WFrame *frame, const WFitParams *fp, 
+                             const WFramedParam *param, WRegion *reg)
 {
-    AP *ap=(AP*)ap_;
-    WMPlexAttachParams mp=MPLEXATTACHPARAMS_INIT;
-    WFramedParam *param=ap->param;
     WRectangle rqg, mg;
-    WFrame *frame;
-    WRegion *reg;
-    
-    /*if(param->mkframe!=NULL)
-        frame=(WFrame*)(param->mkframe)(par, fp);
-    else*/
-    frame=create_frame(par, fp, param->mode);
-    
-    if(frame==NULL)
-        return NULL;
-    
-    if(fp->mode&(REGION_FIT_BOUNDS|REGION_FIT_WHATEVER))
-        mp.flags|=MPLEX_ATTACH_WHATEVER;
-
-    reg=mplex_do_attach(&frame->mplex, &mp, ap->data);
-    
-    if(reg==NULL){
-        destroy_obj((Obj*)frame);
-        return NULL;
-    }
-
+ 
     if(!(fp->mode&(REGION_FIT_BOUNDS|REGION_FIT_WHATEVER)))
-        return (WRegion*)frame;
+        return;
 
     mplex_managed_geom((WMPlex*)frame, &mg);
 
@@ -111,9 +87,9 @@ WRegion *framed_handler(WWindow *par,
         int bt=mg.y;
         int bb=REGION_GEOM(frame).h-(mg.y+mg.h);
         
-        rqg.x=(fp->g.x+param->inner_geom.x+
+        rqg.x=(/*fp->g.x+*/param->inner_geom.x+
                xgravity_deltax(param->gravity, bl, br));
-        rqg.y=(fp->g.y+param->inner_geom.y+
+        rqg.y=(/*fp->g.y+*/param->inner_geom.y+
                xgravity_deltay(param->gravity, bt, bb));
         rqg.w=maxof(1, param->inner_geom.w+(REGION_GEOM(frame).w-mg.w));
         rqg.h=maxof(1, param->inner_geom.h+(REGION_GEOM(frame).h-mg.h));
@@ -123,6 +99,35 @@ WRegion *framed_handler(WWindow *par,
         rectangle_constrain(&rqg, &fp->g);
     
     region_fit((WRegion*)frame, &rqg, REGION_FIT_EXACT);
+}
+
+
+WRegion *framed_handler(WWindow *par, 
+                        const WFitParams *fp, 
+                        void *ap_)
+{
+    AP *ap=(AP*)ap_;
+    WMPlexAttachParams mp=MPLEXATTACHPARAMS_INIT;
+    WFramedParam *param=ap->param;
+    WFrame *frame;
+    WRegion *reg;
+    
+    frame=create_frame(par, fp, param->mode);
+    
+    if(frame==NULL)
+        return NULL;
+    
+    if(fp->mode&(REGION_FIT_BOUNDS|REGION_FIT_WHATEVER))
+        mp.flags|=MPLEX_ATTACH_WHATEVER;
+
+    reg=mplex_do_attach(&frame->mplex, &mp, ap->data);
+    
+    if(reg==NULL){
+        destroy_obj((Obj*)frame);
+        return NULL;
+    }
+    
+    frame_adjust_to_initial(frame, fp, param, reg);
     
     return (WRegion*)frame;
 }

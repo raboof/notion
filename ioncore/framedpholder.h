@@ -17,12 +17,10 @@
 #include "attach.h"
 #include "frame.h"
 
-INTRCLASS(WFramedPHolder);
-INTRSTRUCT(WFramedParam);
-
 
 #define FRAMEDPARAM_INIT {0, 0, {0, 0, 0, 0}, FRAME_MODE_FLOATING /*, NULL*/}
 
+INTRSTRUCT(WFramedParam);
 
 DECLSTRUCT(WFramedParam){
     uint inner_geom_gravity_set:1;
@@ -58,5 +56,8 @@ extern WRegion *framedpholder_do_attach(WFramedPHolder *ph, int flags,
 extern WRegion *region_attach_framed(WRegion *reg, WFramedParam *param,
                                      WRegionAttachFn *fn, void *fn_param,
                                      WRegionAttachData *data);
+
+extern void frame_adjust_to_initial(WFrame *frame, const WFitParams *fp, 
+                                    const WFramedParam *param, WRegion *reg);
 
 #endif /* ION_IONCORE_FRAMEDPHOLDER_H */

@@ -35,7 +35,7 @@ static WRegion *doit_new(WRegion *mgr,
     
     if(reg==NULL)
         return NULL;
-    
+        
     if(!cont(mgr, reg, cont_param)){
         destroy_obj((Obj*)reg);
         return NULL;

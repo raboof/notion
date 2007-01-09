@@ -39,6 +39,8 @@
 #include "gr.h"
 #include "activity.h"
 #include "llist.h"
+#include "framedpholder.h"
+#include "return.h"
 
 
 extern bool frame_set_background(WFrame *frame, bool set_always);
@@ -620,6 +622,73 @@ static void frame_managed_rqgeom_absolute(WFrame *frame, WRegion *sub,
 /*}}}*/
 
 
+/*{{{ Frame recreate pholder stuff */
+
+
+static WFramedPHolder *frame_make_recreate_pholder(WFrame *frame)
+{
+    WPHolder *ph;
+    WFramedPHolder *fph;
+    WFramedParam fparam=FRAMEDPARAM_INIT;
+    
+    ph=region_make_return_pholder((WRegion*)frame);
+    
+    if(ph==NULL)
+        return NULL;
+        
+    fparam.mode=frame->mode;
+    
+    fph=create_framedpholder(ph, &fparam);
+    
+    if(fph==NULL){
+        destroy_obj((Obj*)ph);
+        return NULL;
+    }
+    
+    return fph;
+}
+
+
+static void mplex_flatten_phs(WMPlex *mplex)
+{
+    WLListNode *node;
+    WLListIterTmp tmp;
+
+    FOR_ALL_NODES_ON_LLIST(node, mplex->mx_list, tmp){
+        WMPlexPHolder *last=(mplex->mx_phs==NULL ? NULL : mplex->mx_phs->prev);
+        mplex_move_phs(mplex, node, last, NULL);
+    }
+}
+
+
+static void frame_modify_pholders(WFrame *frame)
+{
+    WFramedPHolder *fph;
+    WMPlexPHolder *phs, *ph;
+    
+    mplex_flatten_phs(&frame->mplex);
+    
+    if(frame->mplex.mx_phs==NULL)
+        return;
+    
+    fph=frame_make_recreate_pholder(frame);
+    
+    if(fph==NULL)
+        return;
+    
+    phs=frame->mplex.mx_phs;
+    frame->mplex.mx_phs=NULL;
+    
+    phs->recreate_pholder=fph;
+    
+    for(ph=phs; ph!=NULL; ph=ph->next)
+        watch_reset(&ph->mplex_watch);
+}
+
+
+/*}}}*/
+
+
 /*{{{ Misc. */
 
 
@@ -776,8 +845,10 @@ static void frame_managed_changed(WFrame *frame, int mode, bool sw,
 
 static void frame_destroy_empty(WFrame *frame)
 {
-    if(EMPTY_AND_SHOULD_BE_DESTROYED(frame))
+    if(EMPTY_AND_SHOULD_BE_DESTROYED(frame)){
+        frame_modify_pholders(frame);
         destroy_obj((Obj*)frame);
+    }
 }
 
 

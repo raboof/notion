@@ -668,7 +668,7 @@ WRegion *group_do_attach(WGroup *ws,
     WFitParams fp;
     WWindow *par;
     WRegion *reg;
-
+    
     if(ws->bottom!=NULL && param->bottom){
         warn(TR("'bottom' already set."));
         return NULL;
@@ -684,7 +684,7 @@ WRegion *group_do_attach(WGroup *ws,
         fp.g=REGION_GEOM(ws);
         fp.mode=REGION_FIT_BOUNDS|REGION_FIT_WHATEVER;
     }
-
+    
     return region_attach_helper((WRegion*) ws, par, &fp, 
                                 (WRegionDoAttachFn*)group_do_attach_final,
                                 /*(const WRegionAttachParams*)*/param, data);
@@ -1085,8 +1085,6 @@ void group_restack(WGroup *ws, Window other, int mode)
 
 WStacking *group_find_stacking(WGroup *ws, WRegion *r)
 {
-    WStacking *st;
-    
     if(r==NULL || REGION_MANAGER(r)!=(WRegion*)ws)
         return NULL;
     

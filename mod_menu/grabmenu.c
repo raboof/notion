@@ -84,7 +84,7 @@ WMenu *mod_menu_do_grabmenu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
                                      (void*)&fnp); 
     
     if(menu==NULL)
-        return FALSE;
+        return NULL;
  
     menu->gm_kcb=kcb;
     menu->gm_state=state;
