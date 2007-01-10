@@ -644,10 +644,10 @@ static int search(Edln *edln, int from, bool bwd, bool match)
         char *tmpstr=history_search_str(edln);
         if(tmpstr==NULL)
             return edln->histent;
-        e=mod_query_history_search(tmpstr, from, bwd);
+        e=mod_query_history_search(tmpstr, from, bwd, FALSE);
         free(tmpstr);
     }else{
-        e=mod_query_history_search(edln->context, from, bwd);
+        e=mod_query_history_search(edln->context, from, bwd, FALSE);
     }
     
     return e;

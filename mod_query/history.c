@@ -52,7 +52,7 @@ bool mod_query_history_push(const char *str)
 
 void mod_query_history_push_(char *str)
 {
-    int ndx=mod_query_history_search(str, 0, FALSE);
+    int ndx=mod_query_history_search(str, 0, FALSE, TRUE);
     
     if(ndx==0){
         return; /* First entry already */
@@ -110,7 +110,7 @@ void mod_query_history_clear()
 
 
 
-static bool match(const char *h, const char *b)
+static bool match(const char *h, const char *b, bool exact)
 {
     const char *h_;
     
@@ -124,8 +124,10 @@ static bool match(const char *h, const char *b)
         if(h_!=NULL)
             h=h_+1;
     }
-        
-    return (strncmp(h, b, strlen(b))==0);
+    
+    return (exact
+            ? strcmp(h, b)==0
+            : strncmp(h, b, strlen(b))==0);
 }
 
 
@@ -140,17 +142,18 @@ static const char *skip_colon(const char *s)
  * Try to find matching history entry. Returns -1 if none was
  * found. The parameter \var{from} specifies where to start 
  * searching from, and \var{bwd} causes backward search from
- * that point.
+ * that point. If \var{exact} is not set, \var{s} only required
+ * to be a prefix of the match.
  */
 EXTL_SAFE
 EXTL_EXPORT
-int mod_query_history_search(const char *s, int from, bool bwd)
+int mod_query_history_search(const char *s, int from, bool bwd, bool exact)
 {
     while(1){
         int i=get_index(from);
         if(i<0)
             return -1;
-        if(match(hist[i], s))
+        if(match(hist[i], s, exact))
             return from;
         if(bwd)
             from--;
@@ -172,7 +175,7 @@ uint mod_query_history_complete(const char *s, char ***h_ret)
         int j=get_index(i);
         if(j<0)
             break;
-        if(match(hist[j], s)){
+        if(match(hist[j], s, FALSE)){
             h[n]=scopy(skip_colon(hist[j]));
             if(h[n]!=NULL)
                 n++;

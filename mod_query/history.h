@@ -19,7 +19,8 @@ extern const char *mod_query_history_get(int n);
 extern bool mod_query_history_push(const char *s);
 extern void mod_query_history_push_(char *s);
 extern void mod_query_history_clear();
-extern int mod_query_history_search(const char *s, int from, bool bwd);
+extern int mod_query_history_search(const char *s, int from, bool bwd, 
+                                    bool exact);
 extern uint mod_query_history_complete(const char *s, char ***h_ret);
 extern ExtlTab mod_query_history_table();
 
