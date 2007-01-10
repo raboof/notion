@@ -73,9 +73,7 @@ bool grouppholder_init(WGroupPHolder *ph, WGroup *ws,
         if(st->above!=NULL && st->above->reg!=NULL)
             ph->param.stack_above=st->above->reg;
         
-        ph->param.modal=FALSE;
         ph->param.bottom=(st==ws->bottom);
-        /*ph->passive=FALSE;*/
     }else{
         ph->param=*param;
     }

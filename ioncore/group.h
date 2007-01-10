@@ -36,7 +36,6 @@ DECLSTRUCT(WGroupAttachParams){
     uint switchto_set:1;
     
     uint switchto:1;
-    uint modal:1;
     uint bottom:1;
     
     int geom_weak;
@@ -48,7 +47,7 @@ DECLSTRUCT(WGroupAttachParams){
 };
 
 #define GROUPATTACHPARAMS_INIT \
-    {0, 0, 0, 0, 0,  0, 0, 0,  0, {0, 0, 0, 0},  0, 0, NULL}
+    {0, 0, 0, 0, 0,  0, 0,   0, {0, 0, 0, 0},  0, 0, NULL}
 
 
 DECLCLASS(WGroup){
