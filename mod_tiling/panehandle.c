@@ -1,5 +1,5 @@
 /*
- * ion/panews/panehandle.c
+ * ion/mod_tiling/panehandle.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2006. 
  *

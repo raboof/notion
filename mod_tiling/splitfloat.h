@@ -1,5 +1,5 @@
 /*
- * ion/panews/splitfloat.h
+ * ion/mod_tiling/splitfloat.h
  *
  * Copyright (c) Tuomo Valkonen 1999-2006. 
  *
@@ -9,8 +9,8 @@
  * (at your option) any later version.
  */
 
-#ifndef ION_PANEWS_SPLITFLOAT_H
-#define ION_PANEWS_SPLITFLOAT_H
+#ifndef ION_MOD_TILING_SPLITFLOAT_H
+#define ION_MOD_TILING_SPLITFLOAT_H
 
 #include <ioncore/common.h>
 #include <ioncore/gr.h>
@@ -53,4 +53,4 @@ extern WSplitRegion *splittree_split_floating(WSplit *node, int dir,
                                               WRegionSimpleCreateFn *fn, 
                                               WTiling *ws);
 
-#endif /* ION_PANEWS_SPLITFLOAT_H */
+#endif /* ION_MOD_TILING_SPLITFLOAT_H */

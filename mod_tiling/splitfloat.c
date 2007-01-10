@@ -1,5 +1,5 @@
 /*
- * ion/panews/splitext.c
+ * ion/mod_tiling/splitext.c
  *
  * Copyright (c) Tuomo Valkonen 1999-2006. 
  *
