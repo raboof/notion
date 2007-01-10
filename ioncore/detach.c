@@ -178,6 +178,9 @@ bool ioncore_detach(WRegion *reg, int sp)
  * managed by its nearest ancestor \type{WGroup}, framed if \var{reg} is
  * not itself \type{WFrame}. Reattaching means making it managed where
  * it used to be managed, if a return-placeholder exists.)
+ * If \var{reg} is the 'bottom' of some group, the whole group is
+ * detached. If \var{reg} is a \type{WWindow}, it is put into a 
+ * frame.
  */
 EXTL_EXPORT_AS(ioncore, detach)
 bool ioncore_detach_extl(WRegion *reg, const char *how)
