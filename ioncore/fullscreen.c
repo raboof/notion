@@ -33,21 +33,25 @@ bool region_fullscreen_scr(WRegion *reg, WScreen *scr, bool switchto)
     int rootx, rooty;
     bool wasfs=TRUE;
     int swf=(switchto ? MPLEX_ATTACH_SWITCHTO : 0);
-    WPHolder *ph;
+    WPHolder *ph=NULL;
+    bool newph=FALSE, ret;
+
+    ph=region_unset_get_return(reg);
     
-    ph=region_make_return_pholder(reg);
+    if(ph==NULL){
+        ph=region_make_return_pholder(reg);
+        newph=TRUE;
+    }
     
-    if(!mplex_attach_simple((WMPlex*)scr, reg, swf)){
+    ret=(mplex_attach_simple((WMPlex*)scr, reg, swf)!=NULL);
+    
+    if(!ret)
         warn(TR("Failed to enter full screen mode."));
-        if(ph!=NULL)
-            destroy_obj((Obj*)ph);
-        return FALSE;
-    }
     
-    if(ph!=NULL){
-        if(!region_do_set_return(reg, ph))
-            destroy_obj((Obj*)ph);
-    }
+    if(!ret && newph)
+        destroy_obj((Obj*)ph);
+    else if(!region_do_set_return(reg, ph))
+        destroy_obj((Obj*)ph);
     
     return TRUE;
 }
