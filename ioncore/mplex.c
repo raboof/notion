@@ -1389,9 +1389,12 @@ EXTL_EXPORT_MEMBER
 void mplex_attach_tagged(WMPlex *mplex)
 {
     WRegion *reg;
+    int flags=MPLEX_ATTACH_SWITCHTO;
     
-    while((reg=ioncore_tagged_take_first())!=NULL)
-        mplex_attach_simple(mplex, reg, 0);
+    while((reg=ioncore_tagged_take_first())!=NULL){
+        mplex_attach_simple(mplex, reg, flags);
+        flags=0;
+    }
 }
 
 
