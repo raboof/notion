@@ -24,20 +24,7 @@ defbindings("WTiling", {
 })
 
 
--- Frame and mplex bindings
-
-defbindings("WMPlex", {
-    submap(META.."K", {
-        bdoc("Detach (float) or reattach a window to its previous location."),
-        -- By using _chld instead of _sub, we can detach/reattach queries
-        -- attached to a group. The detach code checks if the parameter 
-        -- (_chld) is a group 'bottom' and detaches the whole group in that
-        -- case.
-        kpress("D", "mod_tiling.detach(_chld, 'toggle')", 
-               "_chld:non-nil"),
-    }),
-})
-
+-- Frame bindings
 
 defbindings("WFrame.floating", {
     submap(META.."K", {
@@ -80,15 +67,6 @@ defctxmenu("WTiling", "Tiling", {
         menuentry("Flip", "WTiling.flip_at(_)"),
         menuentry("Transpose", "WTiling.transpose_at(_)"),
     }),
-})
-
-
--- Context menu entries for tiled frames.
-
-defctxmenu("WFrame", "Frame", {
-    append=true,
-    menuentry("De/reattach", "mod_tiling.detach(_chld, 'toggle')", 
-              "_chld:non-nil"),
 })
 
 

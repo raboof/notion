@@ -129,6 +129,15 @@ defbindings("WGroupCW", {
 defbindings("WMPlex", {
     bdoc("Close current object."),
     kpress_wait(META.."C", "WRegion.rqclose_propagate(_, _sub)"),
+    
+    submap(META.."K", {
+        bdoc("Detach (float) or reattach an object to its previous location."),
+        -- By using _chld instead of _sub, we can detach/reattach queries
+        -- attached to a group. The detach code checks if the parameter 
+        -- (_chld) is a group 'bottom' and detaches the whole group in that
+        -- case.
+        kpress("D", "ioncore.detach(_chld, 'toggle')", "_chld:non-nil"),
+    }),
 })
 
 -- Frames for transient windows ignore this bindmap
@@ -357,6 +366,8 @@ defctxmenu("WFrame", "Frame", {
     menuentry("Close",          "WRegion.rqclose_propagate(_, _sub)"),
     menuentry("Kill",           "WClientWin.kill(_sub)",
                                 "_sub:WClientWin"),
+    menuentry("De/reattach",    "ioncore.detach(_sub, 'toggle')", 
+                                "_sub:non-nil"),
     menuentry("Toggle tag",     "WRegion.set_tagged(_sub, 'toggle')",
                                 "_sub:non-nil"),
     menuentry("Attach tagged",  "WFrame.attach_tagged(_)"),
