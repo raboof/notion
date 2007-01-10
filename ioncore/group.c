@@ -1186,6 +1186,17 @@ Window group_xwindow(const WGroup *ws)
 }
 
 
+WRegion *region_group_if_bottom(WRegion *reg)
+{
+    WGroup *grp=REGION_MANAGER_CHK(reg, WGroup);
+    
+    if(grp!=NULL && group_bottom(grp)==reg)
+        return (WRegion*)grp;
+    else
+        return reg;
+}
+
+
 /*}}}*/
 
 

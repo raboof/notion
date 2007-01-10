@@ -104,7 +104,7 @@ bool mod_tiling_do_detach(WRegion *reg, WGroup *grp, WFrameMode framemode)
 
 static WRegion *check_mplex(WRegion *reg, WFrameMode *mode)
 {
-    WMPlex *mplex=OBJ_CAST(REGION_MANAGER(reg), WMPlex);
+    WMPlex *mplex=REGION_MANAGER_CHK(reg, WMPlex);
     
     if(OBJ_IS(reg, WWindow) || mplex==NULL){
         *mode=FRAME_MODE_UNKNOWN;
@@ -136,13 +136,14 @@ static WGroup *find_group(WRegion *reg)
 }
 
 
-
 bool mod_tiling_detach(WRegion *reg, int sp)
 {
     WPHolder *ph=region_get_return(reg);
     WFrameMode mode;
     WGroup *grp;
     bool set, nset;
+    
+    reg=region_group_if_bottom(reg);
     
     grp=find_group(check_mplex(reg, &mode));
     

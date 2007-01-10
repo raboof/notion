@@ -24,13 +24,17 @@ defbindings("WTiling", {
 })
 
 
--- Frame bindings
+-- Frame and mplex bindings
 
-defbindings("WFrame", {
+defbindings("WMPlex", {
     submap(META.."K", {
         bdoc("Detach (float) or reattach a window to its previous location."),
-        kpress("D", "mod_tiling.detach(_sub, 'toggle')", 
-               "_sub:non-nil"),
+        -- By using _chld instead of _sub, we can detach/reattach queries
+        -- attached to a group. The detach code checks if the parameter 
+        -- (_chld) is a group 'bottom' and detaches the whole group in that
+        -- case.
+        kpress("D", "mod_tiling.detach(_chld, 'toggle')", 
+               "_chld:non-nil"),
     }),
 })
 
@@ -83,8 +87,8 @@ defctxmenu("WTiling", "Tiling", {
 
 defctxmenu("WFrame", "Frame", {
     append=true,
-    menuentry("De/reattach", "mod_tiling.detach(_sub, 'toggle')", 
-              "_sub:non-nil"),
+    menuentry("De/reattach", "mod_tiling.detach(_chld, 'toggle')", 
+              "_chld:non-nil"),
 })
 
 
