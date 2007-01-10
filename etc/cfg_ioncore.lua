@@ -124,9 +124,7 @@ defbindings("WGroupCW", {
 -- WMPlex context bindings
 --
 -- These bindings work in frames and on screens. The innermost of such
--- contexts/objects always gets to handle the key press. Most of these 
--- bindings define actions on client windows. (Remember that client windows 
--- can be put in fullscreen mode and therefore may not have a frame.)
+-- contexts/objects always gets to handle the key press. 
 
 defbindings("WMPlex", {
     bdoc("Close current object."),
@@ -183,9 +181,8 @@ defbindings("WMPlex.toplevel", {
 
 -- WFrame context bindings
 --
--- These bindings are common to all types of frames. The rest of frame
--- bindings that differ between frame types are defined in the modules' 
--- configuration files.
+-- These bindings are common to all types of frames. Some additional
+-- frame bindings are found in some modules' configuration files.
 
 defbindings("WFrame", {
     submap(META.."K", {
