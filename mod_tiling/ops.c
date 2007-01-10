@@ -11,6 +11,7 @@
 
 #include <libtu/objp.h>
 #include <libtu/setparam.h>
+#include <libtu/minmax.h>
 
 #include <ioncore/common.h>
 #include <ioncore/mplex.h>
@@ -76,6 +77,16 @@ bool mod_tiling_do_detach(WRegion *reg, WGroup *grp, WFrameMode framemode)
                                   (WRegionAttachFn*)group_do_attach,
                                   &ap, &data)!=NULL);
     }else{
+        WStacking *st=ioncore_find_stacking(reg);
+        
+        if(st!=NULL){
+            ap.szplcy=st->szplcy;
+            ap.szplcy_set=TRUE;
+            
+            ap.level=maxof(st->level, STACKING_LEVEL_NORMAL);
+            ap.level_set=TRUE;
+        }
+        
         ap.geom_set=TRUE;
         get_relative_geom(&ap.geom, reg, (WRegion*)grp);
         
