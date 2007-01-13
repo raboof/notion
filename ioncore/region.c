@@ -767,25 +767,27 @@ void region_rootpos(WRegion *reg, int *xret, int *yret)
 }
 
 
-static bool mrsh_not(WHookDummy *fn, void *p)
+typedef struct{
+    WRegion *reg;
+    WRegionNotify how;
+    Obj *detail;
+} MRSHP;
+
+static bool mrsh_not(WHookDummy *fn, void *p_)
 {
-    WRegion *reg=(WRegion*)((void**)p)[0];
-    const char *how=(const char*)((void**)p)[1];
-    Obj *detail=(Obj*)((void**)p)[2];
+    MRSHP *p=(MRSHP*)p_;
     
-    fn(reg, how, detail);
+    fn(p->reg, p->how, p->detail);
     
     return TRUE;
 }
 
 
-static bool mrshe_not(ExtlFn fn, void *p)
+static bool mrshe_not(ExtlFn fn, void *p_)
 {
-    WRegion *reg=(WRegion*)((void**)p)[0];
-    const char *how=(const char*)((void**)p)[1];
-    Obj *detail=(Obj*)((void**)p)[2];
+    MRSHP *p=(MRSHP*)p_;
     
-    extl_call(fn, "oso", NULL, reg, how, detail);
+    extl_call(fn, "oso", NULL, p->reg, stringstore_get(p->how), p->detail);
     
     return TRUE;
 }
@@ -794,14 +796,14 @@ static bool mrshe_not(ExtlFn fn, void *p)
 static void region_notify_change_(WRegion *reg, WRegionNotify how,
                                   Obj *detail)
 {
-    const void *p[3];
+    MRSHP p;
     
-    p[0]=reg;
-    p[1]=stringstore_get(how);
-    p[2]=detail;
+    p.reg=reg;
+    p.how=how;
+    p.detail=detail;
 
     extl_protect(NULL);
-    hook_call(region_notify_hook, p, mrsh_not, mrshe_not),
+    hook_call(region_notify_hook, &p, mrsh_not, mrshe_not),
     extl_unprotect(NULL);
     
 }
