@@ -25,8 +25,6 @@
 
 
 WHook *region_do_warp_alt=NULL;
-WHook *region_activated_hook=NULL;
-WHook *region_inactivated_hook=NULL;
 
 
 /*}}}*/
@@ -206,9 +204,24 @@ bool ioncore_await_focus()
 /*{{{ Events */
 
 
+static void broadcast_upto_parent(WRegion *reg, const char *str)
+{
+    WRegion *tmp=reg;
+    
+    while(tmp!=NULL){
+        region_notify_change(tmp, str);
+        
+        tmp=REGION_MANAGER(tmp);
+
+        if(REGION_PARENT_REG(reg)==tmp)
+            break;
+    }
+}
+
+
 void region_got_focus(WRegion *reg)
 {
-    WRegion *par, *mgr, *tmp;
+    WRegion *par;
     
     check_clear_await(reg);
     
@@ -230,21 +243,7 @@ void region_got_focus(WRegion *reg)
         }
 
         region_activated(reg);
-        
-        mgr=REGION_MANAGER(reg);
-        tmp=reg;
-        while(mgr!=NULL){
-            /* We need to loop over managing non-windows (workspaces) here to
-             * signal their managers.
-             */
-            region_managed_activated(mgr, tmp);
-            
-            if(REGION_PARENT_REG(reg)==mgr)
-                break;
-            
-            tmp=mgr;
-            mgr=REGION_MANAGER(mgr);
-        }
+        broadcast_upto_parent(reg, "activated");
     }else{
         D(fprintf(stderr, "got focus (act) %s [%p]\n", OBJ_TYPESTR(reg), reg);)
     }
@@ -256,16 +255,12 @@ void region_got_focus(WRegion *reg)
      */
     if(reg->active_sub==NULL && !OBJ_IS(reg, WClientWin))
         rootwin_install_colormap(region_rootwin_of(reg), None); 
-    
-    extl_protect(NULL);
-    hook_call_o(region_activated_hook, (Obj*)reg);
-    extl_unprotect(NULL);
 }
 
 
 void region_lost_focus(WRegion *reg)
 {
-    WRegion *r, *par;
+    WRegion *par;
     
     if(!REGION_IS_ACTIVE(reg)){
         D(fprintf(stderr, "lost focus (inact) %s [%p:]\n", OBJ_TYPESTR(reg), reg);)
@@ -293,14 +288,9 @@ void region_lost_focus(WRegion *reg)
     D(fprintf(stderr, "lost focus (act) %s [%p:]\n", OBJ_TYPESTR(reg), reg);)
     
     reg->flags&=~REGION_ACTIVE;
-    region_inactivated(reg);
-    r=REGION_MANAGER(reg);
-    if(r!=NULL)
-        region_managed_inactivated(r, reg);
     
-    extl_protect(NULL);
-    hook_call_o(region_inactivated_hook, (Obj*)reg);
-    extl_unprotect(NULL);
+    region_inactivated(reg);
+    broadcast_upto_parent(reg, "inactivated");
 }
 
 

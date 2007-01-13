@@ -267,8 +267,6 @@ static bool init_hooks()
     INIT_HOOK_(ioncore_deinit_hook);
     INIT_HOOK_(screen_managed_changed_hook);
     INIT_HOOK_(frame_managed_changed_hook);
-    INIT_HOOK_(region_activated_hook);
-    INIT_HOOK_(region_inactivated_hook);
     INIT_HOOK_(clientwin_mapped_hook);
     INIT_HOOK_(clientwin_unmapped_hook);
     INIT_HOOK_(clientwin_property_change_hook);

@@ -378,9 +378,10 @@ void group_managed_remove(WGroup *ws, WRegion *reg)
 }
 
 
-static void group_managed_activated(WGroup *ws, WRegion *reg)
+static void group_managed_notify(WGroup *ws, WRegion *reg, const char *how)
 {
-    ws->current_managed=group_find_stacking(ws, reg);
+    if(strcmp(how, "activated")==0)
+        ws->current_managed=group_find_stacking(ws, reg);
 }
 
 
@@ -1310,8 +1311,8 @@ static DynFunTab group_dynfuntab[]={
     {region_do_set_focus, 
      group_do_set_focus},
     
-    {region_managed_activated, 
-     group_managed_activated},
+    {region_managed_notify, 
+     group_managed_notify},
     
     {region_managed_remove,
      group_managed_remove},

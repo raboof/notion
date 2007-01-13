@@ -52,10 +52,8 @@ extern void region_focuslist_deinit(WRegion *reg);
 
 extern WRegion *ioncore_goto_previous();
 
-/* Handlers to these shook should take WRegion* as parameter. */
+/* Handlers to this hook should take WRegion* as parameter. */
 extern WHook *region_do_warp_alt;
-extern WHook *region_activated_hook;
-extern WHook *region_inactivated_hook;
 
 /* Misc. */
 extern bool region_skip_focus(WRegion *reg);

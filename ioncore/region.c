@@ -193,18 +193,6 @@ void region_do_set_focus(WRegion *reg, bool warp)
 /*{{{ Manager region dynfuns */
 
 
-void region_managed_activated(WRegion *mgr, WRegion *reg)
-{
-    CALL_DYN(region_managed_activated, mgr, (mgr, reg));
-}
-
-
-void region_managed_inactivated(WRegion *mgr, WRegion *reg)
-{
-    CALL_DYN(region_managed_inactivated, mgr, (mgr, reg));
-}
-
-
 static bool region_managed_prepare_focus_default(WRegion *mgr, WRegion *reg, 
                                                  int flags, 
                                                  WPrepareFocusResult *res)

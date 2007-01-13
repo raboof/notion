@@ -135,8 +135,6 @@ DYNFUN WRegion *region_managed_control_focus(WRegion *mgr, WRegion *reg);
 DYNFUN void region_managed_remove(WRegion *reg, WRegion *sub);
 DYNFUN bool region_managed_prepare_focus(WRegion *reg, WRegion *sub, 
                                          int flags, WPrepareFocusResult *res);
-DYNFUN void region_managed_activated(WRegion *reg, WRegion *sub);
-DYNFUN void region_managed_inactivated(WRegion *reg, WRegion *sub);
 DYNFUN void region_managed_notify(WRegion *reg, WRegion *sub, const char *how);
 DYNFUN bool region_managed_may_destroy(WRegion *mgr, WRegion *reg);
 DYNFUN bool region_managed_rqorder(WRegion *reg, WRegion *sub, 
