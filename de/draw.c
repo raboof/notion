@@ -408,7 +408,7 @@ void debrush_draw_textboxes(DEBrush *brush, const WRectangle *geom,
     
     grbrush_get_border_widths(&(brush->grbrush), &bdw);
     
-    for(i=0; i<n; i++){
+    for(i=0; ; i++){
         g.w=bdw.left+elem[i].iw+bdw.right;
         cg=debrush_get_colour_group2(brush, common_attrib, elem[i].attr);
         
@@ -416,6 +416,9 @@ void debrush_draw_textboxes(DEBrush *brush, const WRectangle *geom,
             debrush_do_draw_textbox(brush, &g, elem[i].text, cg, needfill,
                                     common_attrib, elem[i].attr);
         }
+        
+        if(i==n-1)
+            break;
         
         g.x+=g.w;
         if(bdw.spacing>0 && needfill){
