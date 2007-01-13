@@ -19,12 +19,10 @@ de.defstyle("*", {
 
 de.defstyle("frame", {
     based_on = "*",
-    padding_colour = "#545d75",
     background_colour = "black",
     de.substyle("active", {
         shadow_colour = "grey",
         highlight_colour = "grey",
-        padding_colour = "#545d75",
         background_colour = "black",
     }),
 })

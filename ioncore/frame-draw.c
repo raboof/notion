@@ -82,7 +82,7 @@ void frame_bar_geom(const WFrame *frame, WRectangle *geom)
     uint off;
     
     if(BAR_INSIDE_BORDER(frame)){
-        off=get_spacing(frame);
+        off=0; /*get_spacing(frame);*/
         frame_border_inner_geom(frame, geom);
     }else{
         off=0;
@@ -105,10 +105,12 @@ void frame_managed_geom(const WFrame *frame, WRectangle *geom)
     
     frame_border_inner_geom(frame, geom);
     
+    /*
     geom->x+=spacing;
     geom->y+=spacing;
     geom->w-=2*spacing;
     geom->h-=2*spacing;
+    */
     
     if(BAR_INSIDE_BORDER(frame) && BAR_EXISTS(frame)){
         geom->y+=frame->bar_h+spacing;

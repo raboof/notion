@@ -45,7 +45,7 @@ de.defstyle("frame-tiled", {
     based_on = "frame",
     shadow_pixels = 0,
     highlight_pixels = 0,
-    padding_pixels = 0,
+    padding_pixels = 1,
     spacing = 1,
 })
 

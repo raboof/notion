@@ -20,7 +20,6 @@ de.defstyle("*", {
 
 de.defstyle("frame", {
     based_on = "*",
-    padding_colour = "#d8d8d8",
     background_colour = "#000000",
     transparent_background = false,
 })
