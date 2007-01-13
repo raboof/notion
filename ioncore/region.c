@@ -112,6 +112,7 @@ void region_deinit(WRegion *reg)
     }
 
     region_detach_manager(reg);
+    region_unset_return(reg);
     region_unset_parent(reg);
     region_remove_bindings(reg);
     

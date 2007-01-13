@@ -12,40 +12,17 @@
 #include <libtu/rb.h>
 #include <libmainloop/defer.h>
 
+#include "common.h"
+#include "global.h"
 #include "region.h"
 #include "pholder.h"
 #include "return.h"
 
 
-/* {{{{ Storage tree and sorting */
+/*{{{ Storage tree */
+
 
 static Rb_node retrb=NULL;
-
-
-int watch_cmp(Watch *w1, Watch *w2)
-{
-    if(w1->obj < w2->obj)
-        return -1;
-    else if(w1->obj == w2->obj)
-        return 0;
-    else
-        return 1;
-}
-
-
-static void do_remove_node(Rb_node node);
-
-
-static void retrb_watch_handler(Watch *watch, Obj *obj)
-{
-    Rb_node node;
-    int found=0;
-    
-    node=rb_find_gkey_n(retrb, &watch, (Rb_compfn*)watch_cmp, &found);
-    
-    if(found)
-        do_remove_node(node);
-}
 
 
 /*}}}*/
@@ -58,8 +35,9 @@ static void retrb_watch_handler(Watch *watch, Obj *obj)
 bool region_do_set_return(WRegion *reg, WPHolder *ph)
 {
     Rb_node node;
-    Watch *watch;
     int found=0;
+    
+    assert(!OBJ_IS_BEING_DESTROYED(reg));
     
     region_unset_return(reg);
     
@@ -69,20 +47,9 @@ bool region_do_set_return(WRegion *reg, WPHolder *ph)
             return FALSE;
     }
     
-    watch=ALLOC(Watch);
+    node=rb_insertp(retrb, reg, ph);
     
-    if(watch==NULL)
-        return FALSE;
-        
-    watch_init(watch);
-    watch_setup(watch, (Obj*)reg, &retrb_watch_handler);
-    
-    node=rb_insertg(retrb, watch, ph, (Rb_compfn*)watch_cmp);
-    
-    if(node==NULL){
-        watch_reset(watch);
-        free(watch);
-    }
+    region_notify_change(reg, ioncore_g.notifies.set_return);
     
     return (node!=NULL);
 }
@@ -122,18 +89,13 @@ extern WPHolder *region_set_return(WRegion *reg)
 
 Rb_node do_find(WRegion *reg)
 {
-    Watch watch;
     int found=0;
     Rb_node node;
     
     if(retrb==NULL)
         return NULL;
     
-    watch_init(&watch);
-    
-    watch.obj=(Obj*)reg;
-    
-    node=rb_find_gkey_n(retrb, &watch, (Rb_compfn*)watch_cmp, &found);
+    node=rb_find_pkey_n(retrb, reg, &found);
     
     return (found ? node : NULL);
 }
@@ -160,38 +122,15 @@ WPHolder *region_get_return(WRegion *reg)
 /*{{{ Unset */
 
 
-static WPHolder *do_remove_node_step1(Rb_node node)
+static WPHolder *do_remove_node(Rb_node node)
 {
-   WPHolder *ph=(WPHolder*)node->v.val;
-   Watch *watch=(Watch*)node->k.key;
-            
-   rb_delete_node(node);
-            
-   watch_reset(watch);
-   free(watch);
+    WPHolder *ph=(WPHolder*)node->v.val;
    
-   return ph;
+    rb_delete_node(node);
+   
+    return ph;
 }
 
-
-static void do_remove_node(Rb_node node)
-{
-    WPHolder *ph=do_remove_node_step1(node);
-    if(ph!=NULL)
-        mainloop_defer_destroy((Obj*)ph);
-        /*destroy_obj((Obj*)ph);*/
-}
-
-
-void region_unset_return(WRegion *reg)
-{
-    Rb_node node; 
-    
-    node=do_find(reg);
-    
-    if(node!=NULL)
-        do_remove_node(node);
-}
 
 WPHolder *region_unset_get_return(WRegion *reg)
 {
@@ -199,10 +138,21 @@ WPHolder *region_unset_get_return(WRegion *reg)
     
     node=do_find(reg);
     
-    if(node!=NULL)
-        return do_remove_node_step1(node);
-    else
+    if(node!=NULL){
+        region_notify_change(reg, ioncore_g.notifies.unset_return);
+        return do_remove_node(node);
+    }else{
         return NULL;
+    }
+}
+
+
+void region_unset_return(WRegion *reg)
+{
+    WPHolder *ph=region_unset_get_return(reg);
+    
+    if(ph!=NULL)
+        mainloop_defer_destroy((Obj*)ph);
 }
 
 
