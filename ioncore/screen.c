@@ -419,13 +419,13 @@ static void screen_update_infowin(WScreen *scr)
 }
 
 
-static void screen_managed_notify(WScreen *scr, WRegion *reg, const char *how)
+static void screen_managed_notify(WScreen *scr, WRegion *reg, WRegionNotify how)
 {
-    if(strcmp(how, "sub-activity")==0){
+    if(how==ioncore_g.notifies.sub_activity){
         /* TODO: multiple calls */
         mainloop_defer_action((Obj*)scr, 
                               (WDeferredAction*)screen_notify_activity);
-    }else if(strcmp(how, "tag")==0){
+    }else if(how==ioncore_g.notifies.tag){
         mainloop_defer_action((Obj*)scr, 
                               (WDeferredAction*)screen_notify_tag);
     }

@@ -793,7 +793,7 @@ bool frame_is_numbers(WFrame *frame)
 }
 
 
-void frame_managed_notify(WFrame *frame, WRegion *sub, const char *how)
+void frame_managed_notify(WFrame *frame, WRegion *sub, WRegionNotify how)
 {
     update_attrs(frame);
     frame_recalc_bar(frame);

@@ -378,9 +378,9 @@ void group_managed_remove(WGroup *ws, WRegion *reg)
 }
 
 
-static void group_managed_notify(WGroup *ws, WRegion *reg, const char *how)
+static void group_managed_notify(WGroup *ws, WRegion *reg, WRegionNotify how)
 {
-    if(strcmp(how, "activated")==0)
+    if(how==ioncore_g.notifies.activated)
         ws->current_managed=group_find_stacking(ws, reg);
 }
 

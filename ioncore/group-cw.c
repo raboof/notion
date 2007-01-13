@@ -174,10 +174,9 @@ const char *groupcw_displayname(WGroupCW *cwg)
 }
 
 
-void groupcw_managed_notify(WGroupCW *cwg, WRegion *reg, const char *how)
+void groupcw_managed_notify(WGroupCW *cwg, WRegion *reg, WRegionNotify how)
 {
-    if(group_bottom(&cwg->grp)==reg 
-       && strcmp(how, "name")==0){
+    if(group_bottom(&cwg->grp)==reg && how==ioncore_g.notifies.name){
         /* Title has changed */
         region_notify_change((WRegion*)cwg, how);
     }

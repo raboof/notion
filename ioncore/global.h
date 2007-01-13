@@ -17,6 +17,8 @@
 #include <X11/Xutil.h>
 #include <X11/Xresource.h>
 
+#include <libtu/stringstore.h>
+
 #include "rootwin.h"
 #include "screen.h"
 #include "window.h"
@@ -36,6 +38,7 @@ enum{
 };
 
 INTRSTRUCT(WGlobal);
+
 
 DECLSTRUCT(WGlobal){
     int argc;
@@ -85,6 +88,17 @@ DECLSTRUCT(WGlobal){
     bool enc_utf8; /* mb encoding is utf8? */
     
     const char *sm_client_id;
+    
+    struct{
+        StringId activated,
+                 inactivated,
+                 activity,
+                 sub_activity,
+                 name,
+                 unset_manager,
+                 set_manager,
+                 tag;
+    } notifies;
 };
 
 

@@ -11,6 +11,8 @@
 
 #include <libtu/objlist.h>
 #include <libtu/setparam.h>
+
+#include "global.h"
 #include "region.h"
 #include "tags.h"
 #include "extlconv.h"
@@ -35,7 +37,7 @@ bool region_set_tagged(WRegion *reg, int sp)
             reg->flags|=REGION_TAGGED;
             objlist_insert_last(&taglist, (Obj*)reg);
         }
-        region_notify_change(reg, "tag");
+        region_notify_change(reg, ioncore_g.notifies.tag);
     }
 
     return nset;
@@ -98,7 +100,7 @@ WRegion *ioncore_tagged_take_first()
     
     if(reg!=NULL){
         reg->flags&=~REGION_TAGGED;
-        region_notify_change(reg, "tag");
+        region_notify_change(reg, ioncore_g.notifies.tag);
     }
     
     return reg;

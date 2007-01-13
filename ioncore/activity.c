@@ -32,7 +32,7 @@ void region_mark_mgd_activity(WRegion *mgr)
     mgr->mgd_activity++;
     
     if(!mgr_marked){
-        region_notify_change(mgr, "sub-activity");
+        region_notify_change(mgr, ioncore_g.notifies.sub_activity);
         region_mark_mgd_activity(REGION_MANAGER(mgr));
     }
 }
@@ -46,7 +46,7 @@ void region_clear_mgd_activity(WRegion *mgr)
     mgr->mgd_activity=maxof(0, mgr->mgd_activity-1);
     
     if(!region_is_activity_r(mgr)){
-        region_notify_change(mgr, "sub-activity");
+        region_notify_change(mgr, ioncore_g.notifies.sub_activity);
         region_clear_mgd_activity(REGION_MANAGER(mgr));
     }
 }
@@ -89,7 +89,7 @@ bool region_set_activity(WRegion *reg, int sp)
             propagate_clear(reg);
     }
     
-    region_notify_change(reg, "activity");
+    region_notify_change(reg, ioncore_g.notifies.activity);
     
     return nset;
 }

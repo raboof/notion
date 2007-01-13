@@ -34,7 +34,7 @@
 
 WHook *region_notify_hook=NULL;
 
-static void region_notify_change_(WRegion *reg, const char *how, 
+static void region_notify_change_(WRegion *reg, WRegionNotify how,
                                   Obj *detail);
 
 
@@ -217,7 +217,7 @@ bool region_managed_prepare_focus(WRegion *mgr, WRegion *reg,
 }
 
 
-void region_managed_notify(WRegion *mgr, WRegion *reg, const char *how)
+void region_managed_notify(WRegion *mgr, WRegion *reg, WRegionNotify how)
 {
     CALL_DYN(region_managed_notify, mgr, (mgr, reg, how));
 }
@@ -523,7 +523,7 @@ void region_unset_manager(WRegion *reg, WRegion *mgr)
 
     region_unset_return(reg);
     
-    region_notify_change_(reg, "unset_manager", (Obj*)mgr);
+    region_notify_change_(reg, ioncore_g.notifies.unset_manager, (Obj*)mgr);
 }
 
 
@@ -540,7 +540,7 @@ void region_set_manager(WRegion *reg, WRegion *mgr)
     if(region_is_activity_r(reg))
         region_mark_mgd_activity(mgr);
     
-    region_notify_change_(reg, "set_manager", (Obj*)mgr);
+    region_notify_change_(reg, ioncore_g.notifies.set_manager, (Obj*)mgr);
 }
 
 
@@ -791,13 +791,13 @@ static bool mrshe_not(ExtlFn fn, void *p)
 }
 
 
-static void region_notify_change_(WRegion *reg, const char *how, 
+static void region_notify_change_(WRegion *reg, WRegionNotify how,
                                   Obj *detail)
 {
     const void *p[3];
     
     p[0]=reg;
-    p[1]=how;
+    p[1]=stringstore_get(how);
     p[2]=detail;
 
     extl_protect(NULL);
@@ -807,7 +807,7 @@ static void region_notify_change_(WRegion *reg, const char *how,
 }
 
 
-void region_notify_change(WRegion *reg, const char *how)
+void region_notify_change(WRegion *reg, WRegionNotify how)
 {
     WRegion *mgr=REGION_MANAGER(reg);
 

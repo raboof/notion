@@ -306,7 +306,11 @@ static bool register_classes()
 }
 
 
-static void init_global()
+#define INITSTR(NM)                             \
+    ioncore_g.notifies.NM=stringstore_alloc(#NM); \
+    if(ioncore_g.notifies.NM==STRINGID_NONE) return FALSE;
+    
+static bool init_global()
 {
     /* argc, argv must be set be the program */
     ioncore_g.dpy=NULL;
@@ -336,13 +340,25 @@ static void init_global()
     ioncore_g.frame_default_index=LLIST_INDEX_AFTER_CURRENT_ACT;
     
     ioncore_g.framed_transients=TRUE;
+    
+    INITSTR(activated);
+    INITSTR(inactivated);
+    INITSTR(activity);
+    INITSTR(sub_activity);
+    INITSTR(name);
+    INITSTR(unset_manager);
+    INITSTR(set_manager);
+    INITSTR(tag);
+    
+    return TRUE;
 }
 
 
 bool ioncore_init(const char *prog, int argc, char *argv[],
                   const char *localedir)
 {
-    init_global();
+    if(!init_global())
+        return FALSE;
     
     progname=prog;
     ioncore_g.argc=argc;

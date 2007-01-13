@@ -19,6 +19,7 @@
 #include <libextl/extl.h>
 
 #include "common.h"
+#include "global.h"
 #include "region.h"
 #include "clientwin.h"
 #include "names.h"
@@ -416,7 +417,7 @@ static bool do_set_name(bool (*fn)(WRegion *reg, WNamespace *ns, const char *p),
     if(nm!=NULL)
         free(nm);
 
-    region_notify_change(reg, "name");
+    region_notify_change(reg, ioncore_g.notifies.name);
     
     return ret;
 }

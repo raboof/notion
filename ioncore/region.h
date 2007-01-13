@@ -13,6 +13,7 @@
 #define ION_IONCORE_REGION_H
 
 #include <libtu/obj.h>
+#include <libtu/stringstore.h>
 #include <libmainloop/hooks.h>
 #include "common.h"
 #include "rectangle.h"
@@ -57,6 +58,8 @@
 
 
 typedef int WRegionFitMode;
+
+typedef StringId WRegionNotify;
 
 
 typedef enum{
@@ -135,7 +138,7 @@ DYNFUN WRegion *region_managed_control_focus(WRegion *mgr, WRegion *reg);
 DYNFUN void region_managed_remove(WRegion *reg, WRegion *sub);
 DYNFUN bool region_managed_prepare_focus(WRegion *reg, WRegion *sub, 
                                          int flags, WPrepareFocusResult *res);
-DYNFUN void region_managed_notify(WRegion *reg, WRegion *sub, const char *how);
+DYNFUN void region_managed_notify(WRegion *reg, WRegion *sub, WRegionNotify how);
 DYNFUN bool region_managed_may_destroy(WRegion *mgr, WRegion *reg);
 DYNFUN bool region_managed_rqorder(WRegion *reg, WRegion *sub, 
                                    WRegionOrder order);
@@ -160,7 +163,7 @@ extern bool region_reparent(WRegion *reg, WWindow *target,
 extern void region_updategr_default(WRegion *reg);
 
 extern void region_rootpos(WRegion *reg, int *xret, int *yret);
-extern void region_notify_change(WRegion *reg, const char *how);
+extern void region_notify_change(WRegion *reg, WRegionNotify how);
 
 extern bool region_goto(WRegion *reg);
 extern bool region_goto_flags(WRegion *reg, int flags);
