@@ -116,10 +116,12 @@ static bool screen_init(WScreen *scr, WRootWin *rootwin,
         }
     }
 
-    /* Add rootwin's bindings to screens (ungrabbed) so that bindings
-     * are called with the proper region.
+    /* Add all the needed bindings here; mplex does nothing so that
+     * frames don't have to remove extra bindings.
      */
-    region_add_bindmap((WRegion*)scr, ioncore_rootwin_bindmap);
+    region_add_bindmap((WRegion*)scr, ioncore_screen_bindmap);
+    region_add_bindmap((WRegion*)scr, ioncore_mplex_bindmap);
+    region_add_bindmap((WRegion*)scr, ioncore_mplex_toplevel_bindmap);
 
     LINK_ITEM(ioncore_g.screens, scr, next_scr, prev_scr);
     

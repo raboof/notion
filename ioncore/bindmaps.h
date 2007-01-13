@@ -15,7 +15,7 @@
 #ifndef ION_IONCORE_BINDMAP_H
 #define ION_IONCORE_BINDMAP_H
 
-extern WBindmap *ioncore_rootwin_bindmap;
+extern WBindmap *ioncore_screen_bindmap;
 extern WBindmap *ioncore_mplex_bindmap;
 extern WBindmap *ioncore_mplex_toplevel_bindmap;
 extern WBindmap *ioncore_frame_bindmap;

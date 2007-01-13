@@ -23,7 +23,7 @@
  */
 
 
-WBindmap *ioncore_rootwin_bindmap=NULL;
+WBindmap *ioncore_screen_bindmap=NULL;
 WBindmap *ioncore_mplex_bindmap=NULL;
 WBindmap *ioncore_mplex_toplevel_bindmap=NULL;
 WBindmap *ioncore_frame_bindmap=NULL;
@@ -56,7 +56,7 @@ static StringIntMap frame_areas[]={
 
 void ioncore_deinit_bindmaps()
 {
-    DO_FREE(rootwin, "WScreen");
+    DO_FREE(screen, "WScreen");
     DO_FREE(mplex, "WMPlex");
     DO_FREE(mplex_toplevel, "WMPlex.toplevel");
     DO_FREE(frame, "WFrame");
@@ -86,7 +86,7 @@ bool ioncore_init_bindmaps()
     if(known_bindmaps==NULL)
         return FALSE;
     
-    DO_ALLOC(rootwin, "WScreen", NULL);
+    DO_ALLOC(screen, "WScreen", NULL);
     DO_ALLOC(mplex, "WMPlex", NULL);
     DO_ALLOC(mplex_toplevel, "WMPlex.toplevel", NULL);
     DO_ALLOC(frame, "WFrame", frame_areas);

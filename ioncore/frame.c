@@ -93,7 +93,7 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
     frame_initialise_titles(frame);
     
     region_add_bindmap((WRegion*)frame, ioncore_frame_bindmap);
-    region_add_bindmap((WRegion*)frame, ioncore_frame_toplevel_bindmap);
+    region_add_bindmap((WRegion*)frame, ioncore_mplex_bindmap);
     
     frame_add_mode_bindmaps(frame);
     
@@ -133,9 +133,11 @@ static void frame_add_mode_bindmaps(WFrame *frame)
     WFrameMode mode=frame->mode;
     
     if(mode==FRAME_MODE_TILED || mode==FRAME_MODE_TILED_ALT){
+	region_add_bindmap((WRegion*)frame, ioncore_mplex_toplevel_bindmap);
 	region_add_bindmap((WRegion*)frame, ioncore_frame_toplevel_bindmap);
         region_add_bindmap((WRegion*)frame, ioncore_frame_tiled_bindmap);
     }else if(mode==FRAME_MODE_FLOATING){
+	region_add_bindmap((WRegion*)frame, ioncore_mplex_toplevel_bindmap);
 	region_add_bindmap((WRegion*)frame, ioncore_frame_toplevel_bindmap);
         region_add_bindmap((WRegion*)frame, ioncore_frame_floating_bindmap);
     }else if(mode==FRAME_MODE_TRANSIENT){
@@ -153,6 +155,7 @@ void frame_set_mode(WFrame *frame, WFrameMode mode)
     
     frame_release_brushes(frame);
     
+    region_remove_bindmap((WRegion*)frame, ioncore_mplex_toplevel_bindmap);
     region_remove_bindmap((WRegion*)frame, ioncore_frame_toplevel_bindmap);
     region_remove_bindmap((WRegion*)frame, ioncore_frame_tiled_bindmap);
     region_remove_bindmap((WRegion*)frame, ioncore_frame_floating_bindmap);

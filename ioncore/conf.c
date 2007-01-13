@@ -232,7 +232,7 @@ bool ioncore_read_main_config(const char *cfgfile)
     
     ret=extl_read_config(cfgfile, ".", TRUE);
     
-    unset+=(ioncore_rootwin_bindmap->nbindings==0);
+    unset+=(ioncore_screen_bindmap->nbindings==0);
     unset+=(ioncore_mplex_bindmap->nbindings==0);
     unset+=(ioncore_frame_bindmap->nbindings==0);
     

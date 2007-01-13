@@ -122,9 +122,6 @@ bool mplex_do_init(WMPlex *mplex, WWindow *parent, Window win,
     
     window_select_input(&(mplex->win), IONCORE_EVENTMASK_CWINMGR);
     
-    region_add_bindmap((WRegion*)mplex, ioncore_mplex_bindmap);
-    region_add_bindmap((WRegion*)mplex, ioncore_mplex_toplevel_bindmap);
-    
     region_register((WRegion*)mplex);
     
     /* Call this to set MPLEX_MANAGED_UNVIEWABLE if necessary. */

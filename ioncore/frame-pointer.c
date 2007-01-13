@@ -138,7 +138,7 @@ static bool tabdrag_kbd_handler(WRegion *reg, XEvent *xev)
     
     assert(reg!=NULL);
 
-    binding=bindmap_lookup_binding(ioncore_rootwin_bindmap, BINDING_KEYPRESS,
+    binding=bindmap_lookup_binding(ioncore_screen_bindmap, BINDING_KEYPRESS,
                                    ev->state&~BUTTONS_MASK, ev->keycode);
     
     if(binding!=NULL && binding->func!=extl_fn_none()){
