@@ -204,21 +204,6 @@ WRegion *ioncore_await_focus()
 /*{{{ Events */
 
 
-static void broadcast_upto_parent(WRegion *reg, WRegionNotify how)
-{
-    WRegion *tmp=reg;
-    
-    while(tmp!=NULL){
-        region_notify_change(tmp, how);
-        
-        tmp=REGION_MANAGER(tmp);
-
-        if(REGION_PARENT_REG(reg)==tmp)
-            break;
-    }
-}
-
-
 void region_got_focus(WRegion *reg)
 {
     WRegion *par;
@@ -245,7 +230,7 @@ void region_got_focus(WRegion *reg)
         }
         
         region_activated(reg);
-        broadcast_upto_parent(reg, ioncore_g.notifies.activated);
+        region_notify_change(reg, ioncore_g.notifies.activated);
     }else{
         D(fprintf(stderr, "got focus (act) %s [%p]\n", OBJ_TYPESTR(reg), reg);)
     }
@@ -293,7 +278,7 @@ void region_lost_focus(WRegion *reg)
     region_unset_manager_pseudoactivity(reg);
     
     region_inactivated(reg);
-    broadcast_upto_parent(reg, ioncore_g.notifies.inactivated);
+    region_notify_change(reg, ioncore_g.notifies.inactivated);
 }
 
 
