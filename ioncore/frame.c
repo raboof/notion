@@ -132,17 +132,18 @@ static void frame_add_mode_bindmaps(WFrame *frame)
 {
     WFrameMode mode=frame->mode;
     
-    if(mode==FRAME_MODE_TILED || mode==FRAME_MODE_TILED_ALT){
-	region_add_bindmap((WRegion*)frame, ioncore_mplex_toplevel_bindmap);
-	region_add_bindmap((WRegion*)frame, ioncore_frame_toplevel_bindmap);
-        region_add_bindmap((WRegion*)frame, ioncore_frame_tiled_bindmap);
-    }else if(mode==FRAME_MODE_FLOATING){
+    if(mode==FRAME_MODE_FLOATING){
 	region_add_bindmap((WRegion*)frame, ioncore_mplex_toplevel_bindmap);
 	region_add_bindmap((WRegion*)frame, ioncore_frame_toplevel_bindmap);
         region_add_bindmap((WRegion*)frame, ioncore_frame_floating_bindmap);
     }else if(mode==FRAME_MODE_TRANSIENT){
         region_add_bindmap((WRegion*)frame, ioncore_frame_transient_bindmap);
-    }
+    }else{
+        /* mode==FRAME_MODE_TILED || mode==FRAME_MODE_TILED_ALT || mode==FRAME_MODE_UNKNOWN */
+	region_add_bindmap((WRegion*)frame, ioncore_mplex_toplevel_bindmap);
+	region_add_bindmap((WRegion*)frame, ioncore_frame_toplevel_bindmap);
+        region_add_bindmap((WRegion*)frame, ioncore_frame_tiled_bindmap);
+    } 
 }
 
 
@@ -180,6 +181,7 @@ WFrameMode frame_mode(WFrame *frame)
 
 
 StringIntMap frame_modes[]={
+    {"unknown", FRAME_MODE_UNKNOWN},
     {"tiled", FRAME_MODE_TILED},
     {"tiled-alt", FRAME_MODE_TILED_ALT},
     {"floating", FRAME_MODE_FLOATING},
