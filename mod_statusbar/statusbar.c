@@ -10,6 +10,7 @@
  */
 
 #include <string.h>
+#include <limits.h>
 
 #include <libtu/objp.h>
 #include <libtu/minmax.h>
@@ -332,7 +333,7 @@ void statusbar_size_hints(WStatusBar *p, WSizeHints *h)
     h->min_height=p->natural_h;
     
     h->max_set=TRUE;
-    h->max_width=p->natural_w;
+    h->max_width=INT_MAX;/*p->natural_w;*/
     h->max_height=p->natural_h;
 }
 
