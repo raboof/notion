@@ -48,16 +48,8 @@ static OptParserOpt pwm_opts[]={
      DUMMY_TR("Add directory to search path")},
 
     {OPT_ID('o'), "oneroot",  0, NULL,
-     DUMMY_TR("Manage default root window/non-Xinerama screen only")},
+     DUMMY_TR("Manage default screen only")},
 
-#if defined(CF_XINERAMA) || defined(CF_SUN_XINERAMA)
-    {OPT_ID('x'), "xinerama", OPT_ARG, "1|0",
-     DUMMY_TR("Use Xinerama screen information (default: 0/no)")},
-#else
-    {OPT_ID('x'), "xinerama", OPT_ARG, "?",
-     DUMMY_TR("Ignored: not compiled with Xinerama support")},
-#endif
-    
     {OPT_ID('s'), "session",  OPT_ARG, "session_name", 
      DUMMY_TR("Name of session (affects savefiles)")},
     
@@ -97,7 +89,7 @@ int main(int argc, char*argv[])
     const char *cfgfile="cfg_pwm";
     const char *display=NULL;
     char *cmd=NULL;
-    int stflags=IONCORE_STARTUP_NOXINERAMA;
+    int stflags=0;
     int opt;
     ErrorLog el;
     FILE *ef=NULL;
@@ -138,17 +130,6 @@ int main(int argc, char*argv[])
             break;
         case OPT_ID('o'):
             stflags|=IONCORE_STARTUP_ONEROOT;
-            break;
-        case OPT_ID('x'):
-            {
-                const char *p=optparser_get_arg();
-                if(strcmp(p, "1")==0)
-                    stflags&=~IONCORE_STARTUP_NOXINERAMA;
-                else if(strcmp(p, "0")==0)
-                    stflags|=IONCORE_STARTUP_NOXINERAMA;
-                else
-                    warn(TR("Invalid parameter to -xinerama."));
-            }
             break;
         case OPT_ID('s'):
             extl_set_sessiondir(optparser_get_arg());

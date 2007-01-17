@@ -82,13 +82,6 @@ X11_PREFIX=/usr/X11R6
 X11_LIBS=-L$(X11_PREFIX)/lib -lX11 -lXext
 X11_INCLUDES=-I$(X11_PREFIX)/include
 
-# Change commenting to disable Xinerama support
-XINERAMA_LIBS=-lXinerama
-DEFINES += -DCF_XINERAMA
-# For Solaris
-#XINERAMA_LIBS=
-#DEFINES += -DCF_SUN_XINERAMA
-
 # XFree86 libraries up to 4.3.0 have a bug that will cause Ion to segfault
 # if Opera is used when i18n support is enabled. The following setting
 # should work around that situation.

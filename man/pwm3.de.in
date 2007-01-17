@@ -32,11 +32,6 @@ Setzt einen Sitzungsnamen. Diese Option beeinflusst wo der Arbeitsbereich und
 andere Sicherungsdateien abgelegt werden (~/.pwm3/sitzungs_name wenn die Option
 gesetzt wurde).
 .TP
-.B \-xinerama 0|1
-Wenn Ion mit Xinerama Unterstützung kompiliert wurde, kann diese Option benutzt
-werden um sie 'an = 1' oder 'aus = 0' zu stellen. Die Voreinstelllung ist
-Xineramas Screeninformation 'NICHT' zu benutzen.
-.TP
 .B \-help
 Zeigt die Hilfe für die Kommandozeilenoptionen
 .TP

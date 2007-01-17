@@ -29,12 +29,6 @@ parametrillä tai DISPLAY ympäristömuuttujalla.
 .B \-sessionname session_name
 Istunnon nimi. Tämä vaikuttaa talletustiedostojen sijaintiin.
 .TP
-.B \-xinerama 0|1
-PWM ei oletuksena käytä Xinerama-tietoa Ionista poiketen. Jos se kuitenkin
-käännettiin Xinerama-tuella, voidaan tuo tieto ottaa käyttää asettamalla
-tämän parametrin arvoksi 1. Tuolloin kaikilla Xinerama-näytöillä on 
-erilliset työpöydät.
-.TP
 .B \-help
 Näytä komentorivin ohje.
 .TP

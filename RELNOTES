@@ -1,4 +1,11 @@
 
+ion-3ds-2007????
+----------------
+
+  * Xinerama support is gone. It had bitrotted, and I will not
+    waste time fixing it.
+
+
 ion-3ds-20061223
 ----------------
 

@@ -439,10 +439,7 @@ static void screen_managed_notify(WScreen *scr, WRegion *reg, WRegionNotify how)
 
 
 /*EXTL_DOC
- * Find the screen with numerical id \var{id}. If Xinerama is
- * not present, \var{id} corresponds to X screen numbers. Otherwise
- * the ids are some arbitrary ordering of Xinerama rootwins.
- * If \var{id} is $-1$, the screen with the highest id is returned.
+ * Find the screen with numerical id \var{id}. 
  */
 EXTL_SAFE
 EXTL_EXPORT

@@ -497,7 +497,7 @@ static bool ioncore_init_x(const char *display, int stflags)
     ioncore_init_session(XDisplayName(display));
 
     for(i=drw; i<nrw; i++)
-        ioncore_manage_rootwin(i, stflags&IONCORE_STARTUP_NOXINERAMA);
+        ioncore_manage_rootwin(i);
 
     if(ioncore_g.rootwins==NULL){
         if(nrw-drw>1)

@@ -16,7 +16,6 @@
 #include "common.h"
 
 #define IONCORE_STARTUP_ONEROOT    0x0001
-#define IONCORE_STARTUP_NOXINERAMA 0x0002
 
 extern bool ioncore_init(const char *prog, int argc, char *argv[],
                          const char *localedir);

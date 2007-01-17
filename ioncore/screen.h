@@ -72,11 +72,6 @@ extern void screen_nowindowinfo(WScreen *scr);
 
 extern WPHolder *screen_get_rescue_pholder_for(WScreen *scr, WRegion *mgd);
 
-/* For viewports corresponding to Xinerama rootwins <id> is initially set
- * to the Xinerama screen number. When Xinerama is not enabled, <id> is
- * the X screen number (which is the same for all Xinerama rootwins).
- * For all other viewports <id> is undefined.
- */
 extern WScreen *ioncore_find_screen_id(int id);
 extern WScreen *ioncore_goto_screen_id(int id);
 extern WScreen *ioncore_goto_next_screen();

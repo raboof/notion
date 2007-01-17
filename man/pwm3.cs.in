@@ -30,10 +30,6 @@ obrazovku (koøenové okno). (Tedy ne v¹echny, které byly zadány v parametru
 Nastaví název sezení. Tato volba ovlivní, kam se ulo¾í pracovní plochy
 a ostatní soubory. Pokud není nastavená, pou¾ije se ~/.pwm3/session_name.
 .TP
-.B \-xinerama 0|1
-Jestli¾e byl Ioncore sestaven s podporou Xineramy, mù¾ete touto volbou
-povolit/zakázat (1/0) její pou¾ití. Implicitnì je Xinerama _zakázána_.
-.TP
 .B \-help
 Zobrazí nápovìdu k pøíkazovým parametrùm
 .TP

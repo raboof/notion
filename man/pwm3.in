@@ -31,11 +31,6 @@ in the DISPLAY environment variable.
 Set session name. This option affects where workspace and other save files are
 put (~/.pwm3/session_name if option set).
 .TP
-.B \-xinerama 0|1
-If Ioncore was compiled with Xinerama support, this option can be used to
-enable/disable (1/0) the use of it. The default is _not_ to use Xinerama
-screen information.
-.TP
 .B \-help
 Show help on command line options
 .TP
