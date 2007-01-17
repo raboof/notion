@@ -493,9 +493,7 @@ void region_detach_manager(WRegion *reg)
              * be made to work.
              */
             par->active_sub=mgr;
-            /*if(region_xwindow(mgr)!=None){*/
-                region_do_set_focus(mgr, FALSE);
-            /*}*/
+            region_maybewarp_now(mgr, FALSE);
         }
     }
 

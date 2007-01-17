@@ -370,7 +370,7 @@ void group_managed_remove(WGroup *ws, WRegion *reg)
         if(cur){
             WStacking *stf=find_to_focus(ws, next_st, TRUE);
             if(stf!=NULL)
-                region_warp(stf->reg);
+                region_maybewarp_now(stf->reg, FALSE);
         }
     }else if(dest && !ds){
         mainloop_defer_destroy((Obj*)ws);

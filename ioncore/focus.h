@@ -17,18 +17,20 @@
 #include "window.h"
 #include "region.h"
 
-DYNFUN void region_do_set_focus(WRegion *reg, bool warp);
 
 /* Delayed (until return to main loop) warp/focus */
-extern void region_warp(WRegion *reg);
-extern void region_set_focus(WRegion *reg);
 extern void region_maybewarp(WRegion *reg, bool warp);
+/* warp/focus now; do not skip enter window events etc. in mainloop */
+extern void region_maybewarp_now(WRegion *reg, bool warp);
 
-/* Immediate warp/focus */
-extern void region_do_warp(WRegion *reg);
-extern bool region_do_warp_default(WRegion *reg);
+extern void region_warp(WRegion *reg); /* maybewarp TRUE */
+extern void region_set_focus(WRegion *reg); /* maybewarp FALSE */
 
 extern void region_finalise_focusing(WRegion* reg, Window win, bool warp);
+
+DYNFUN void region_do_set_focus(WRegion *reg, bool warp);
+extern void region_do_warp(WRegion *reg);
+extern bool region_do_warp_default(WRegion *reg);
 
 /* Awaiting focus state */
 extern void region_set_await_focus(WRegion *reg);
