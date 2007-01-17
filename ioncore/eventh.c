@@ -397,8 +397,7 @@ void ioncore_handle_focus_in(const XFocusChangeEvent *ev, bool skip)
     if(ev->detail==NotifyPointer)
         return;
     
-    /* Root windows appear either as WRootWins or WScreens */
-    if(ev->window==region_root_of(reg)){
+    if(ev->window==region_root_of(reg)){ /* OBJ_IS(reg, WRootWin) */
         D(fprintf(stderr, "scr-in %d %d %d\n", ROOTWIN_OF(reg)->xscr,
                   ev->mode, ev->detail));
         if((ev->detail==NotifyPointerRoot || ev->detail==NotifyDetailNone) &&
@@ -408,7 +407,6 @@ void ioncore_handle_focus_in(const XFocusChangeEvent *ev, bool skip)
                 region_set_focus(reg);
             return;
         }
-        /*return;*/
     }
 
     /* Input contexts */
