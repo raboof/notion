@@ -74,7 +74,7 @@ void region_init(WRegion *reg, WWindow *par, const WFitParams *fp)
         reg->rootwin=((WRegion*)par)->rootwin;
         region_set_parent(reg, par);
     }else{
-        assert(OBJ_IS(reg, WRootWin));/* || OBJ_IS(reg, WScreen));*/
+        assert(OBJ_IS(reg, WRootWin));
     }
 }
 

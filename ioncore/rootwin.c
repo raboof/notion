@@ -215,7 +215,7 @@ static WRootWin *preinit_rootwin(int xscr)
     redirect_error=FALSE;
 
     XSetErrorHandler(my_redirect_error_handler);
-    XSelectInput(dpy, root, IONCORE_EVENTMASK_ROOT);
+    XSelectInput(dpy, root, IONCORE_EVENTMASK_ROOT|IONCORE_EVENTMASK_SCREEN);
     XSync(dpy, 0);
     XSetErrorHandler(my_error_handler);
 
@@ -245,14 +245,12 @@ static WRootWin *preinit_rootwin(int xscr)
     fp.g.w=DisplayWidth(dpy, xscr);
     fp.g.h=DisplayHeight(dpy, xscr);
     
-    if(!window_do_init((WWindow*)rootwin, NULL, root, &fp)){
+    if(!screen_init((WScreen*)rootwin, NULL, &fp, xscr, root)){
         free(rootwin);
         return NULL;
     }
 
-    /* Note: this mask isn't right if some WScreen auses the same window. */
-    ((WWindow*)rootwin)->event_mask=IONCORE_EVENTMASK_ROOT;
-    
+    ((WWindow*)rootwin)->event_mask=IONCORE_EVENTMASK_ROOT|IONCORE_EVENTMASK_SCREEN;
     ((WRegion*)rootwin)->flags|=REGION_BINDINGS_ARE_GRABBED|REGION_PLEASE_WARP;
     ((WRegion*)rootwin)->rootwin=rootwin;
     
@@ -264,7 +262,7 @@ static WRootWin *preinit_rootwin(int xscr)
     preinit_gr(rootwin);
     netwm_init_rootwin(rootwin);
     
-    region_add_bindmap((WRegion*)rootwin, ioncore_screen_bindmap);
+    /*region_add_bindmap((WRegion*)rootwin, ioncore_screen_bindmap);*/
     
     return rootwin;
 }
@@ -272,7 +270,10 @@ static WRootWin *preinit_rootwin(int xscr)
 
 static Atom net_virtual_roots=None;
 
+#undef CF_XINERAMA
+#undef CF_SUN_XINERAMA
 
+#if defined(CF_XINERAMA) | defined(CF_SUN_XINERAMA)
 static WScreen *add_screen(WRootWin *rw, int id, const WRectangle *geom, 
                            bool useroot)
 {
@@ -304,6 +305,7 @@ static WScreen *add_screen(WRootWin *rw, int id, const WRectangle *geom,
 
     return scr;
 }
+#endif
 
 
 #ifdef CF_XINERAMA
@@ -416,6 +418,7 @@ WRootWin *ioncore_manage_rootwin(int xscr, bool noxinerama)
     net_virtual_roots=XInternAtom(ioncore_g.dpy, "_NET_VIRTUAL_ROOTS", False);
     XDeleteProperty(ioncore_g.dpy, WROOTWIN_ROOT(rootwin), net_virtual_roots);
 
+#if defined(CF_XINERAMA) || defined(CF_SUN_XINERAMA)
 #ifdef CF_XINERAMA
     if(xi!=NULL && nxi!=0 && xinerama_sanity_check(xi, nxi)){
         bool useroot=FALSE;
@@ -435,7 +438,7 @@ WRootWin *ioncore_manage_rootwin(int xscr, bool noxinerama)
         }
         XFree(xi);
     }else
-#elif defined(CF_SUN_XINERAMA)
+#else
     if(nxi!=0 && xinerama_sanity_check(monitors, nxi)){
         bool useroot=FALSE;
         WRectangle geom;
@@ -452,19 +455,16 @@ WRootWin *ioncore_manage_rootwin(int xscr, bool noxinerama)
                 fail++;
             }
         }
-    }else
-#endif
-    {
-        nxi=1;
-        if(!add_screen(rootwin, xscr, &REGION_GEOM(rootwin), TRUE))
-            fail++;
     }
-    
+#endif
+
     if(fail==nxi){
         warn(TR("Unable to setup X screen %d."), xscr);
         destroy_obj((Obj*)rootwin);
         return NULL;
     }
+#endif
+    
     
     /* */ {
         /* TODO: typed LINK_ITEM */
@@ -498,7 +498,9 @@ void rootwin_deinit(WRootWin *rw)
     
     XFreeGC(ioncore_g.dpy, rw->xor_gc);
     
-    window_deinit((WWindow*)rw);
+    rw->scr.mplex.win.win=None;
+
+    screen_deinit(&rw->scr);
 }
 
 
@@ -506,29 +508,6 @@ void rootwin_deinit(WRootWin *rw)
 
 
 /*{{{ region dynfun implementations */
-
-
-static void rootwin_do_set_focus(WRootWin *rootwin, bool warp)
-{
-    WRegion *sub;
-    
-    sub=REGION_ACTIVE_SUB(rootwin);
-    
-    if(sub==NULL || !REGION_IS_MAPPED(sub)){
-        WScreen *scr;
-        FOR_ALL_SCREENS(scr){
-            if(REGION_IS_MAPPED(scr)){
-                sub=(WRegion*)scr;
-                break;
-            }
-        }
-    }
-
-    if(sub!=NULL)
-        region_do_set_focus(sub, warp);
-    else
-        window_do_set_focus((WWindow*)rootwin, warp);
-}
 
 
 static bool rootwin_fitrep(WRootWin *rootwin, WWindow *par, 
@@ -551,28 +530,10 @@ static void rootwin_unmap(WRootWin *rootwin)
 }
 
 
-static void rootwin_managed_remove(WRootWin *rootwin, WRegion *reg)
-{
-    region_unset_manager(reg, (WRegion*)rootwin);
-}
-
-
-static Window rootwin_x_window(WRootWin *rootwin)
-{
-    return WROOTWIN_ROOT(rootwin);
-}
-
-
 /*}}}*/
 
 
 /*{{{ Misc */
-
-
-static bool scr_ok(WRegion *r)
-{
-    return (OBJ_IS(r, WScreen) && REGION_IS_MAPPED(r));
-}
 
 
 /*EXTL_DOC
@@ -582,22 +543,17 @@ EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WScreen *rootwin_current_scr(WRootWin *rootwin)
 {
-    WRegion *r=REGION_ACTIVE_SUB(rootwin);
-    WScreen *scr;
-    
-    /* There should be no non-WScreen as children or managed by us, but... */
-    
-    if(r!=NULL && scr_ok(r))
-        return (WScreen*)r;
+    WScreen *scr, *fb=NULL;
     
     FOR_ALL_SCREENS(scr){
-        if(REGION_MANAGER(scr)==(WRegion*)rootwin
-           && REGION_IS_MAPPED(scr)){
-            break;
+        if(REGION_MANAGER(scr)==(WRegion*)rootwin && REGION_IS_MAPPED(scr)){
+            fb=scr;
+            if(REGION_IS_ACTIVE(scr))
+                return scr;
         }
     }
     
-    return scr;
+    return (fb ? fb : &rootwin->scr);
 }
 
 
@@ -610,16 +566,13 @@ WScreen *rootwin_current_scr(WRootWin *rootwin)
 static DynFunTab rootwin_dynfuntab[]={
     {region_map, rootwin_map},
     {region_unmap, rootwin_unmap},
-    {region_do_set_focus, rootwin_do_set_focus},
-    {(DynFun*)region_xwindow, (DynFun*)rootwin_x_window},
     {(DynFun*)region_fitrep, (DynFun*)rootwin_fitrep},
-    {region_managed_remove, rootwin_managed_remove},
     END_DYNFUNTAB
 };
 
 
 EXTL_EXPORT
-IMPLCLASS(WRootWin, WWindow, rootwin_deinit, rootwin_dynfuntab);
+IMPLCLASS(WRootWin, WScreen, rootwin_deinit, rootwin_dynfuntab);
 
     
 /*}}}*/

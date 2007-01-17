@@ -17,8 +17,10 @@
 #include "screen.h"
 #include "gr.h"
 #include "rectangle.h"
+#include "screen.h"
 
-#define WROOTWIN_ROOT(X) ((X)->wwin.win)
+
+#define WROOTWIN_ROOT(X) (((WWindow*)(X))->win)
 #define FOR_ALL_ROOTWINS(RW)         \
     for(RW=ioncore_g.rootwins;         \
         RW!=NULL;                    \
@@ -26,7 +28,7 @@
 
 
 DECLCLASS(WRootWin){
-    WWindow wwin;
+    WScreen scr;
     int xscr;
     
     Colormap default_cmap;

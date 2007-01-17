@@ -108,8 +108,8 @@ DECLCLASS(WMPlex){
 extern WMPlex *create_mplex(WWindow *parent, const WFitParams *fp);
 extern bool mplex_init(WMPlex *mplex, WWindow *parent,
                        const WFitParams *fp);
-extern bool mplex_do_init(WMPlex *mplex, WWindow *parent, Window win,
-                          const WFitParams *fp, bool create);
+extern bool mplex_do_init(WMPlex *mplex, WWindow *parent, 
+                          const WFitParams *fp, Window win);
 extern void mplex_deinit(WMPlex *mplex);
 
 /* Resize and reparent */

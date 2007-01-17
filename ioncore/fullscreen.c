@@ -140,8 +140,9 @@ bool clientwin_check_fullscreen_request(WClientWin *cwin, int w, int h,
     FOR_ALL_SCREENS(scr){
         if(!region_same_rootwin((WRegion*)scr, (WRegion*)cwin))
             continue;
-        /* TODO: if there are multiple possible rootwins, use the one with
-         * requested position, if any.
+        /* Only Mplayer supports single Xinerama region FS to my knowledge, 
+         * and doesn't set position, so we also don't check position here, 
+         * and instead take the first screen with matching size.
          */
         if(REGION_GEOM(scr).w==w && REGION_GEOM(scr).h==h){
             cwin->flags|=CLIENTWIN_FS_RQ;
@@ -153,16 +154,6 @@ bool clientwin_check_fullscreen_request(WClientWin *cwin, int w, int h,
         }
     }
     
-    rwgeom=&REGION_GEOM(region_rootwin_of((WRegion*)cwin));
-                        
-    /* Catch Xinerama-unaware apps here */
-    if(rwgeom->w==w && rwgeom->h==h){
-        cwin->flags|=CLIENTWIN_FS_RQ;
-        if(region_enter_fullscreen((WRegion*)cwin, sw))
-            return TRUE;
-        cwin->flags&=~CLIENTWIN_FS_RQ;
-    }
-
     return FALSE;
 }
 

@@ -94,8 +94,8 @@ WStacking *mplex_iter_nodes(WMPlexIterTmp *tmp)
 /*{{{ Destroy/create mplex */
 
 
-bool mplex_do_init(WMPlex *mplex, WWindow *parent, Window win,
-                   const WFitParams *fp, bool create)
+bool mplex_do_init(WMPlex *mplex, WWindow *parent, 
+                   const WFitParams *fp, Window win)
 {
     mplex->flags=0;
     
@@ -110,13 +110,8 @@ bool mplex_do_init(WMPlex *mplex, WWindow *parent, Window win,
     mplex->stdispinfo.pos=MPLEX_STDISP_BL;
     mplex->stdispinfo.fullsize=FALSE;
     
-    if(create){
-        if(!window_init((WWindow*)mplex, parent, fp))
-            return FALSE;
-    }else{
-        if(!window_do_init((WWindow*)mplex, parent, win, fp))
-            return FALSE;
-    }
+    if(!window_do_init((WWindow*)mplex, parent, fp, win))
+        return FALSE;
     
     mplex->win.region.flags|=REGION_BINDINGS_ARE_GRABBED;
     
@@ -133,7 +128,7 @@ bool mplex_do_init(WMPlex *mplex, WWindow *parent, Window win,
 
 bool mplex_init(WMPlex *mplex, WWindow *parent, const WFitParams *fp)
 {
-    return mplex_do_init(mplex, parent, None, fp, TRUE);
+    return mplex_do_init(mplex, parent, fp, None);
 }
 
 

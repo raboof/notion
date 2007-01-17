@@ -57,9 +57,17 @@ void window_release(WWindow *wwin)
 /*{{{ Init, create */
 
 
-bool window_do_init(WWindow *wwin, WWindow *par, Window win,
-                    const WFitParams *fp)
+bool window_do_init(WWindow *wwin, WWindow *par, 
+                    const WFitParams *fp, Window win)
 {
+    if(win==None){
+        assert(par!=NULL);
+        win=create_xwindow(region_rootwin_of((WRegion*)par),
+                           par->win, &(fp->g));
+        if(win==None)
+            return FALSE;
+    }
+
     wwin->win=win;
     wwin->xic=NULL;
     wwin->event_mask=0;
@@ -67,10 +75,8 @@ bool window_do_init(WWindow *wwin, WWindow *par, Window win,
     
     region_init(&(wwin->region), par, fp);
     
-    if(win!=None){
-        XSaveContext(ioncore_g.dpy, win, ioncore_g.win_context, 
-                     (XPointer)wwin);
-    }
+    XSaveContext(ioncore_g.dpy, win, ioncore_g.win_context, 
+                 (XPointer)wwin);
     
     return TRUE;
 }
@@ -78,14 +84,7 @@ bool window_do_init(WWindow *wwin, WWindow *par, Window win,
 
 bool window_init(WWindow *wwin, WWindow *par, const WFitParams *fp)
 {
-    Window win;
-    
-    win=create_xwindow(region_rootwin_of((WRegion*)par),
-                       par->win, &(fp->g));
-    if(win==None)
-        return FALSE;
-    /* window_init does not fail */
-    return window_do_init(wwin, par, win, fp);
+    return window_do_init(wwin, par, fp, None);
 }
 
 
@@ -98,6 +97,7 @@ void window_deinit(WWindow *wwin)
 
     if(wwin->win!=None){
         XDeleteContext(ioncore_g.dpy, wwin->win, ioncore_g.win_context);
+        /* Probably should not try destroy if root window... */
         XDestroyWindow(ioncore_g.dpy, wwin->win);
     }
     

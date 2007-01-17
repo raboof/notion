@@ -17,7 +17,6 @@
 #include "common.h"
 #include "mplex.h"
 #include "rectangle.h"
-#include "rootwin.h"
 #include "pholder.h"
 
 #define FOR_ALL_SCREENS(SCR)   \
@@ -50,9 +49,15 @@ DECLCLASS(WScreen){
     Watch infowin_watch;
 };
 
-extern WScreen *create_screen(WRootWin *rootwin, int id, 
-                              const WFitParams *fp,
-                              bool useroot);
+/* rootwin should only be set if parent is NULL, and this WScreen is
+ * actually a root window.
+ */
+extern bool screen_init(WScreen *scr, WRootWin *parent, 
+                        const WFitParams *fp, int id, Window rootwin);
+
+extern WScreen *create_screen(WRootWin *parent, const WFitParams *fp, int id);
+
+extern void screen_deinit(WScreen *scr);
 
 extern int screen_id(WScreen *scr);
 

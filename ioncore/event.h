@@ -37,6 +37,10 @@
                                      PropertyChangeMask|FocusChangeMask|  \
                                      StructureNotifyMask|EnterWindowMask)
 
+#define IONCORE_EVENTMASK_SCREEN (FocusChangeMask|EnterWindowMask|   \
+                                  KeyPressMask|KeyReleaseMask|       \
+                                  ButtonPressMask|ButtonReleaseMask)
+
 extern void ioncore_x_connection_handler(int conn, void *unused);
 extern void ioncore_flush();
 extern void ioncore_get_event(XEvent *ev, long mask);

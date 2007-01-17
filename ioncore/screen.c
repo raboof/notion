@@ -51,16 +51,16 @@ static void screen_update_infowin(WScreen *scr);
 /*{{{ Init/deinit */
 
 
-static bool screen_init(WScreen *scr, WRootWin *rootwin,
-                        int id, const WFitParams *fp, bool useroot)
+bool screen_init(WScreen *scr, WRootWin *parent,
+                 const WFitParams *fp, int id, Window rootwin)
 {
     Window win;
     XSetWindowAttributes attr;
     ulong attrflags=0;
+    bool is_root=FALSE;
     
     scr->id=id;
     scr->atom_workspace=None;
-    scr->uses_root=useroot;
     scr->managed_off.x=0;
     scr->managed_off.y=0;
     scr->managed_off.w=0;
@@ -72,38 +72,40 @@ static bool screen_init(WScreen *scr, WRootWin *rootwin,
     watch_init(&(scr->notifywin_watch));
     watch_init(&(scr->infowin_watch));
 
-    if(useroot){
-        win=WROOTWIN_ROOT(rootwin);
+    if(parent==NULL){
+        win=rootwin;
+        is_root=TRUE;
     }else{
         attr.background_pixmap=ParentRelative;
         attrflags=CWBackPixmap;
         
-        win=XCreateWindow(ioncore_g.dpy, WROOTWIN_ROOT(rootwin),
+        win=XCreateWindow(ioncore_g.dpy, WROOTWIN_ROOT(parent),
                           fp->g.x, fp->g.y, fp->g.w, fp->g.h, 0, 
-                          DefaultDepth(ioncore_g.dpy, rootwin->xscr),
+                          DefaultDepth(ioncore_g.dpy, parent->xscr),
                           InputOutput,
-                          DefaultVisual(ioncore_g.dpy, rootwin->xscr),
+                          DefaultVisual(ioncore_g.dpy, parent->xscr),
                           attrflags, &attr);
         if(win==None)
             return FALSE;
+            
     }
 
-    if(!mplex_do_init((WMPlex*)scr, (WWindow*)rootwin, win, fp, FALSE))
+    if(!mplex_do_init((WMPlex*)scr, (WWindow*)parent, fp, win)){
+        if(!is_root)
+            XDestroyWindow(ioncore_g.dpy, win);
         return FALSE;
+    }
 
     /*scr->mplex.win.region.rootwin=rootwin;
     region_set_parent((WRegion*)scr, (WRegion*)rootwin);*/
     scr->mplex.flags|=MPLEX_ADD_TO_END;
     scr->mplex.win.region.flags|=REGION_BINDINGS_ARE_GRABBED;
-    if(useroot)
-        scr->mplex.win.region.flags|=REGION_MAPPED;
     
-    window_select_input(&(scr->mplex.win),
-                        FocusChangeMask|EnterWindowMask|
-                        KeyPressMask|KeyReleaseMask|
-                        ButtonPressMask|ButtonReleaseMask|
-                        (useroot ? IONCORE_EVENTMASK_ROOT : 0));
-
+    if(!is_root){
+        scr->mplex.win.region.flags|=REGION_MAPPED;
+        window_select_input((WWindow*)scr, IONCORE_EVENTMASK_SCREEN);
+    }
+    
     if(id==0){
         scr->atom_workspace=XInternAtom(ioncore_g.dpy, 
                                         "_ION_WORKSPACE", False);
@@ -129,19 +131,15 @@ static bool screen_init(WScreen *scr, WRootWin *rootwin,
 }
 
 
-WScreen *create_screen(WRootWin *rootwin, int id, const WFitParams *fp,
-                       bool useroot)
+WScreen *create_screen(WRootWin *parent, const WFitParams *fp, int id)
 {
-    CREATEOBJ_IMPL(WScreen, screen, (p, rootwin, id, fp, useroot));
+    CREATEOBJ_IMPL(WScreen, screen, (p, parent, fp, id, None));
 }
 
 
 void screen_deinit(WScreen *scr)
 {
     UNLINK_ITEM(ioncore_g.screens, scr, next_scr, prev_scr);
-    
-    if(scr->uses_root)
-        scr->mplex.win.win=None;
     
     mplex_deinit((WMPlex*)scr);
 }
