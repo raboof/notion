@@ -226,6 +226,14 @@ bool ioncore_init_layout()
     FOR_ALL_SCREENS(scr){
         ExtlTab scrtab=extl_table_none();
         bool scrok=FALSE;
+        
+        /* Potential Xinerama or such support should set the screen ID
+         * of the root window to less than zero, and number its own
+         * fake screens up from 0.
+         */
+        if(screen_id(scr)<0)
+            continue;
+
         if(ok)
             scrok=extl_table_geti_t(tab, screen_id(scr), &scrtab);
         
@@ -278,7 +286,14 @@ bool ioncore_save_layout()
         return FALSE;
     
     FOR_ALL_SCREENS(scr){
-        ExtlTab scrtab=region_get_configuration((WRegion*)scr);
+        ExtlTab scrtab;
+        
+        /* See note above */
+        if(screen_id(scr)<0)
+            continue;
+            
+        scrtab=region_get_configuration((WRegion*)scr);
+        
         if(scrtab==extl_table_none()){
             warn(TR("Unable to get configuration for screen %d."),
                  screen_id(scr));
