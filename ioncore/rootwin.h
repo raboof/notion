@@ -46,7 +46,7 @@ extern void rootwin_deinit(WRootWin *rootwin);
 extern WScreen *rootwin_current_scr(WRootWin *rootwin);
 
 extern void rootwin_manage_initial_windows(WRootWin *rootwin);
-extern WRootWin *ioncore_manage_rootwin(int xscr);
+extern WRootWin *create_rootwin(int xscr);
 
 #endif /* ION_IONCORE_ROOTWIN_H */
 

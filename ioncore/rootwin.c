@@ -195,13 +195,14 @@ static void preinit_gr(WRootWin *rootwin)
 }
 
 
-static WRootWin *preinit_rootwin(int xscr)
+static Atom net_virtual_roots=None;
+
+
+static bool rootwin_init(WRootWin *rootwin, int xscr)
 {
     Display *dpy=ioncore_g.dpy;
-    WRootWin *rootwin;
     WFitParams fp;
     Window root;
-    int i;
     
     /* Try to select input on the root window */
     root=RootWindow(dpy, xscr);
@@ -216,17 +217,9 @@ static WRootWin *preinit_rootwin(int xscr)
     if(redirect_error){
         warn(TR("Unable to redirect root window events for screen %d."),
              xscr);
-        return NULL;
+        return FALSE;
     }
     
-    rootwin=ALLOC(WRootWin);
-    
-    if(rootwin==NULL)
-        return NULL;
-    
-    /* Init the struct */
-    OBJ_INIT(rootwin, WRootWin);
-
     rootwin->xscr=xscr;
     rootwin->default_cmap=DefaultColormap(dpy, xscr);
     rootwin->tmpwins=NULL;
@@ -241,7 +234,7 @@ static WRootWin *preinit_rootwin(int xscr)
     
     if(!screen_init((WScreen*)rootwin, NULL, &fp, xscr, root)){
         free(rootwin);
-        return NULL;
+        return FALSE;
     }
 
     ((WWindow*)rootwin)->event_mask=IONCORE_EVENTMASK_ROOT|IONCORE_EVENTMASK_SCREEN;
@@ -256,27 +249,8 @@ static WRootWin *preinit_rootwin(int xscr)
     preinit_gr(rootwin);
     netwm_init_rootwin(rootwin);
     
-    /*region_add_bindmap((WRegion*)rootwin, ioncore_screen_bindmap);*/
-    
-    return rootwin;
-}
-
-
-static Atom net_virtual_roots=None;
-
-
-WRootWin *ioncore_manage_rootwin(int xscr)
-{
-    WRootWin *rootwin;
-    int nxi=0, fail=0;
-    
-    rootwin=preinit_rootwin(xscr);
-
-    if(rootwin==NULL)
-        return NULL;
-    
     net_virtual_roots=XInternAtom(ioncore_g.dpy, "_NET_VIRTUAL_ROOTS", False);
-    XDeleteProperty(ioncore_g.dpy, WROOTWIN_ROOT(rootwin), net_virtual_roots);
+    XDeleteProperty(ioncore_g.dpy, root, net_virtual_roots);
 
     /* */ {
         /* TODO: typed LINK_ITEM */
@@ -285,9 +259,15 @@ WRootWin *ioncore_manage_rootwin(int xscr)
         ioncore_g.rootwins=(WRootWin*)tmp;
     }
 
-    xwindow_set_cursor(WROOTWIN_ROOT(rootwin), IONCORE_CURSOR_DEFAULT);
+    xwindow_set_cursor(root, IONCORE_CURSOR_DEFAULT);
     
-    return rootwin;
+    return TRUE;
+}
+
+
+WRootWin *create_rootwin(int xscr)
+{
+    CREATEOBJ_IMPL(WRootWin, rootwin, (p, xscr));
 }
 
 
