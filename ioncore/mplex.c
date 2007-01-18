@@ -918,11 +918,11 @@ typedef WStacking *NxtFn(WMPlex *mplex, WStacking *st, bool wrap);
 
 
 static WRegion *do_navi(WMPlex *mplex, WStacking *sti, 
-                        NxtFn *fn, WRegionNaviData *data, bool sti_ok)
+                        NxtFn *fn, WRegionNaviData *data, 
+                        bool sti_ok, bool wrap)
 {
     WStacking *st, *stacking;
     uint min_level=0;
-    bool wrap=FALSE;
     
     stacking=mplex_get_stacking(mplex);
     
@@ -965,20 +965,22 @@ WRegion *mplex_navi_first(WMPlex *mplex, WRegionNavi nh,
                           WRegionNaviData *data)
 {
     WStacking *lst=mplex->mgd;
-
-    if(lst==NULL)
-        return region_navi_cont((WRegion*)mplex, NULL, data);
+    WRegion *res=NULL;
     
-    if(nh==REGION_NAVI_ANY){
-        /* ? */
+    if(lst!=NULL){
+        if(nh==REGION_NAVI_ANY){
+            /* ? */
+        }
+    
+        if(nh==REGION_NAVI_ANY || nh==REGION_NAVI_END || 
+           nh==REGION_NAVI_BOTTOM || nh==REGION_NAVI_RIGHT){
+            res=do_navi(mplex, lst, mplex_prv, data, TRUE, TRUE);
+        }else{
+            res=do_navi(mplex, lst->mgr_prev, mplex_nxt, data, TRUE, TRUE);
+        }
     }
     
-    if(nh==REGION_NAVI_ANY || nh==REGION_NAVI_END || 
-       nh==REGION_NAVI_BOTTOM || nh==REGION_NAVI_RIGHT){
-        return do_navi(mplex, lst, mplex_prv, data, TRUE);
-    }else{
-        return do_navi(mplex, lst->mgr_prev, mplex_nxt, data, TRUE);
-    }
+    return region_navi_cont((WRegion*)mplex, res, data);
 }
 
     
@@ -986,6 +988,7 @@ WRegion *mplex_navi_next(WMPlex *mplex, WRegion *rel, WRegionNavi nh,
                          WRegionNaviData *data)
 {
     WStacking *st;
+    WRegion *res;
     
     if(rel!=NULL){
         st=mplex_find_stacking(mplex, rel);
@@ -996,17 +999,19 @@ WRegion *mplex_navi_next(WMPlex *mplex, WRegion *rel, WRegionNavi nh,
     }else{
         return mplex_navi_first(mplex, nh, data);
     }
-        
+    
     if(nh==REGION_NAVI_ANY){
         /* ? */
     }
     
     if(nh==REGION_NAVI_ANY || nh==REGION_NAVI_END || 
        nh==REGION_NAVI_BOTTOM || nh==REGION_NAVI_RIGHT){
-        return do_navi(mplex, st, mplex_nxt, data, FALSE);
+        res=do_navi(mplex, st, mplex_nxt, data, FALSE, FALSE);
     }else{
-        return do_navi(mplex, st, mplex_prv, data, FALSE);
+        res=do_navi(mplex, st, mplex_prv, data, FALSE, FALSE);
     }
+    
+    return region_navi_cont((WRegion*)mplex, res, data);
 }
 
 

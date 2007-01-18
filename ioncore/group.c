@@ -989,7 +989,7 @@ static WStacking *do_get_next(WGroup *ws, WStacking *sti,
     }
 
     if(sti_ok && focusable(ws, sti, min_level))
-        return st;
+        return sti;
     
     return NULL;
 }

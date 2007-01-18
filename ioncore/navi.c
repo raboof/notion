@@ -120,6 +120,7 @@ static bool may_ascend(WRegion *to, WRegion *from, WRegionNaviData *data)
     }else if(data->no_ascend!=NULL){
         return (data->no_ascend!=(Obj*)from);
     }else{
+        /* Set to TRUE for cycling out of nested workspaces etc. */
         return !OBJ_IS(from, WMPlex);
     }
 }
@@ -136,6 +137,7 @@ static bool may_descend(WRegion *to, WRegion *from, WRegionNaviData *data)
     }else if(data->no_descend!=NULL){
         return (data->no_descend!=(Obj*)from);
     }else{
+        /* Set to TRUE for cycling into nested workspaces etc. */
         return !OBJ_IS(to, WMPlex);
     }
 }
