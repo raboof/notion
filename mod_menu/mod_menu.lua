@@ -1,7 +1,7 @@
 --
 -- ion/mod_menu/mod_menu.lua -- Menu opening helper routines.
 -- 
--- Copyright (c) Tuomo Valkonen 2004-2006.
+-- Copyright (c) Tuomo Valkonen 2004-2007.
 --
 -- Ion is free software; you can redistribute it and/or modify it under
 -- the terms of the GNU Lesser General Public License as published by

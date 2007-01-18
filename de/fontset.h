@@ -1,7 +1,7 @@
 /*
  * ion/de/fontset.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2006. 
+ * Copyright (c) Tuomo Valkonen 1999-2007. 
  *
  * Ion is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by

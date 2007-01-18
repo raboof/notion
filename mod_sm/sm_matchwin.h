@@ -1,7 +1,7 @@
 /*
  * ion/mod_sm/sm_mathcwin.c
  *
- * Copyright (c) Tuomo Valkonen 2004-2006. 
+ * Copyright (c) Tuomo Valkonen 2004-2007. 
  * 
  * Based on the code of the 'sm' module for Ion1 by an unknown contributor.
  *
