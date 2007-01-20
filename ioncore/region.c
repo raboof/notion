@@ -34,8 +34,8 @@
 
 WHook *region_notify_hook=NULL;
 
-static void region_notify_change_(WRegion *reg, WRegionNotify how,
-                                  Obj *detail);
+
+static void region_notify_change_(WRegion *reg, WRegionNotify how);
 
 
 /*{{{ Init & deinit */
@@ -104,6 +104,8 @@ static void destroy_children(WRegion *reg)
 
 void region_deinit(WRegion *reg)
 {
+    region_notify_change(reg, ioncore_g.notifies.deinit);
+    
     destroy_children(reg);
 
     if(ioncore_g.focus_next==reg){
@@ -564,6 +566,8 @@ void region_unset_manager(WRegion *reg, WRegion *mgr)
 {
     if(reg->manager!=mgr)
         return;
+        
+    region_notify_change_(reg, ioncore_g.notifies.unset_manager);
     
     region_unset_manager_pseudoactivity(reg);
     
@@ -571,10 +575,8 @@ void region_unset_manager(WRegion *reg, WRegion *mgr)
     
     if(region_is_activity_r(reg))
         region_clear_mgd_activity(mgr);
-
-    region_unset_return(reg);
     
-    region_notify_change_(reg, ioncore_g.notifies.unset_manager, (Obj*)mgr);
+    region_unset_return(reg);
 }
 
 
@@ -593,7 +595,7 @@ void region_set_manager(WRegion *reg, WRegion *mgr)
     if(region_is_activity_r(reg))
         region_mark_mgd_activity(mgr);
     
-    region_notify_change_(reg, ioncore_g.notifies.set_manager, (Obj*)mgr);
+    region_notify_change_(reg, ioncore_g.notifies.set_manager);
 }
 
 
@@ -823,42 +825,39 @@ void region_rootpos(WRegion *reg, int *xret, int *yret)
 typedef struct{
     WRegion *reg;
     WRegionNotify how;
-    Obj *detail;
 } MRSHP;
 
-static bool mrsh_not(WHookDummy *fn, void *p_)
+
+static bool mrsh_notify_change(WHookDummy *fn, void *p_)
 {
     MRSHP *p=(MRSHP*)p_;
     
-    fn(p->reg, p->how, p->detail);
+    fn(p->reg, p->how);
     
     return TRUE;
 }
 
 
-static bool mrshe_not(ExtlFn fn, void *p_)
+static bool mrshe_notify_change(ExtlFn fn, void *p_)
 {
     MRSHP *p=(MRSHP*)p_;
     
-    extl_call(fn, "oso", NULL, p->reg, stringstore_get(p->how), p->detail);
+    extl_call(fn, "os", NULL, p->reg, stringstore_get(p->how));
     
     return TRUE;
 }
 
 
-static void region_notify_change_(WRegion *reg, WRegionNotify how,
-                                  Obj *detail)
+static void region_notify_change_(WRegion *reg, WRegionNotify how)
 {
     MRSHP p;
     
     p.reg=reg;
     p.how=how;
-    p.detail=detail;
-
-    extl_protect(NULL);
-    hook_call(region_notify_hook, &p, mrsh_not, mrshe_not),
-    extl_unprotect(NULL);
     
+    extl_protect(NULL);
+    hook_call(region_notify_hook, &p, mrsh_notify_change, mrshe_notify_change),
+    extl_unprotect(NULL);
 }
 
 
@@ -869,7 +868,7 @@ void region_notify_change(WRegion *reg, WRegionNotify how)
     if(mgr!=NULL)
         region_managed_notify(mgr, reg, how);
     
-    region_notify_change_(reg, how, NULL);
+    region_notify_change_(reg, how);
 }
 
 
