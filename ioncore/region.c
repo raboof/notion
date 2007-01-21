@@ -483,6 +483,7 @@ void region_detach_manager(WRegion *reg)
     if(mgr==NULL)
         return;
     
+#if 0
     /* Restore activity state to non-parent manager */
     if(region_may_control_focus(reg)){
         WRegion *par=REGION_PARENT_REG(reg);
@@ -496,12 +497,42 @@ void region_detach_manager(WRegion *reg)
             region_maybewarp_now(mgr, FALSE);
         }
     }
+#endif
 
     region_set_activity(reg, SETPARAM_UNSET);
 
     region_managed_remove(mgr, reg);
 
     assert(REGION_MANAGER(reg)==NULL);
+}
+
+
+void region_unset_manager_pseudoactivity(WRegion *reg)
+{
+    WRegion *mgr=reg->manager;
+    
+    if(mgr==NULL || !REGION_IS_PSEUDOACTIVE(mgr))
+        return;
+        
+    mgr->flags&=~REGION_PSEUDOACTIVE;
+    
+    region_unset_manager_pseudoactivity(mgr);
+}
+
+
+void region_set_manager_pseudoactivity(WRegion *reg)
+{
+    WRegion *mgr=reg->manager, *par=REGION_PARENT_REG(reg);
+    
+    if(!REGION_IS_ACTIVE(reg) && !REGION_IS_PSEUDOACTIVE(reg))
+        return;
+        
+    if(mgr==NULL || mgr==par || REGION_IS_PSEUDOACTIVE(mgr))
+        return;
+    
+    mgr->flags|=REGION_PSEUDOACTIVE;
+    
+    region_set_manager_pseudoactivity(mgr);
 }
 
 
@@ -513,6 +544,8 @@ void region_unset_manager(WRegion *reg, WRegion *mgr)
 {
     if(reg->manager!=mgr)
         return;
+    
+    region_unset_manager_pseudoactivity(reg);
     
     reg->manager=NULL;
     
@@ -534,6 +567,8 @@ void region_set_manager(WRegion *reg, WRegion *mgr)
     assert(reg->manager==NULL);
     
     reg->manager=mgr;
+    
+    region_set_manager_pseudoactivity(reg);
     
     if(region_is_activity_r(reg))
         region_mark_mgd_activity(mgr);

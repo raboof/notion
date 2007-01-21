@@ -234,14 +234,16 @@ void region_got_focus(WRegion *reg)
     
     if(!REGION_IS_ACTIVE(reg)){
         D(fprintf(stderr, "got focus (inact) %s [%p]\n", OBJ_TYPESTR(reg), reg);)
+        
         reg->flags|=REGION_ACTIVE;
+        region_set_manager_pseudoactivity(reg);
         
         par=REGION_PARENT_REG(reg);
         if(par!=NULL){
             par->active_sub=reg;
             region_update_owned_grabs(par);
         }
-
+        
         region_activated(reg);
         broadcast_upto_parent(reg, ioncore_g.notifies.activated);
     }else{
@@ -288,6 +290,7 @@ void region_lost_focus(WRegion *reg)
     D(fprintf(stderr, "lost focus (act) %s [%p:]\n", OBJ_TYPESTR(reg), reg);)
     
     reg->flags&=~REGION_ACTIVE;
+    region_unset_manager_pseudoactivity(reg);
     
     region_inactivated(reg);
     broadcast_upto_parent(reg, ioncore_g.notifies.inactivated);
@@ -313,28 +316,14 @@ bool region_is_active(WRegion *reg)
 
 bool region_may_control_focus(WRegion *reg)
 {
-    WRegion *par, *r2;
-    
     if(OBJ_IS_BEING_DESTROYED(reg))
         return FALSE;
 
-    if(REGION_IS_ACTIVE(reg))
+    if(REGION_IS_ACTIVE(reg) || REGION_IS_PSEUDOACTIVE(reg))
         return TRUE;
     
     if(region_is_await(reg))
         return TRUE;
-    
-    par=REGION_PARENT_REG(reg);
-    
-    if(par==NULL || !REGION_IS_ACTIVE(par))
-        return FALSE;
-    
-    r2=par->active_sub;
-    while(r2!=NULL && r2!=par){
-        if(r2==reg)
-            return TRUE;
-        r2=REGION_MANAGER(r2);
-    }
 
     return FALSE;
 }

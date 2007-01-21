@@ -18,27 +18,29 @@
 #include "common.h"
 #include "rectangle.h"
 
-#define REGION_MAPPED        0x0001
-#define REGION_ACTIVE        0x0002
-#define REGION_HAS_GRABS     0x0004
-#define REGION_TAGGED        0x0008
+#define REGION_MAPPED               0x0001
+#define REGION_ACTIVE               0x0002
+#define REGION_HAS_GRABS            0x0004
+#define REGION_TAGGED               0x0008
+#define REGION_PSEUDOACTIVE         0x0010
 #define REGION_BINDINGS_ARE_GRABBED 0x0020
-#define REGION_GRAB_ON_PARENT 0x0040
-#define REGION_ACTIVITY      0x0100
-#define REGION_SKIP_FOCUS    0x0200
-#define REGION_CWINS_BEING_RESCUED 0x0400
-#define REGION_PLEASE_WARP   0x0800
+#define REGION_GRAB_ON_PARENT       0x0040
+#define REGION_ACTIVITY             0x0100
+#define REGION_SKIP_FOCUS           0x0200
+#define REGION_CWINS_BEING_RESCUED  0x0400
+#define REGION_PLEASE_WARP          0x0800
 #define REGION_BINDING_UPDATE_SCHEDULED 0x1000
 
-#define REGION_GOTO_FOCUS    0x0001
-#define REGION_GOTO_NOWARP   0x0002
-#define REGION_GOTO_ENTERWINDOW 0x0004
+#define REGION_GOTO_FOCUS           0x0001
+#define REGION_GOTO_NOWARP          0x0002
+#define REGION_GOTO_ENTERWINDOW     0x0004
 
 /* Use region_is_fully_mapped instead for most cases. */
 #define REGION_IS_MAPPED(R)     (((WRegion*)(R))->flags&REGION_MAPPED)
 #define REGION_MARK_MAPPED(R)   (((WRegion*)(R))->flags|=REGION_MAPPED)
 #define REGION_MARK_UNMAPPED(R) (((WRegion*)(R))->flags&=~REGION_MAPPED)
 #define REGION_IS_ACTIVE(R)     (((WRegion*)(R))->flags&REGION_ACTIVE)
+#define REGION_IS_PSEUDOACTIVE(R) (((WRegion*)(R))->flags&REGION_PSEUDOACTIVE)
 #define REGION_IS_TAGGED(R)     (((WRegion*)(R))->flags&REGION_TAGGED)
 #define REGION_IS_URGENT(R)     (((WRegion*)(R))->flags&REGION_URGENT)
 #define REGION_GEOM(R)          (((WRegion*)(R))->geom)
@@ -188,6 +190,9 @@ extern bool region_same_rootwin(const WRegion *reg1, const WRegion *reg2);
 extern bool region_manager_allows_destroying(WRegion *reg);
 
 extern WRegion *region_managed_within(WRegion *reg, WRegion *mgd);
+
+extern void region_set_manager_pseudoactivity(WRegion *reg);
+extern void region_unset_manager_pseudoactivity(WRegion *reg);
 
 extern WHook *region_notify_hook;
 
