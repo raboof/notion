@@ -559,6 +559,74 @@ void frame_activated(WFrame *frame)
 }
 
 
+void frame_quasiactivation(WFrame *frame, WRegion *reg, bool act)
+{
+    bool was, is;
+    
+    was=(frame->quasiactive_count>0);
+    
+    frame->quasiactive_count=maxof(0, frame->quasiactive_count 
+                                       + (act ? 1 : -1));
+                                       
+    is=(frame->quasiactive_count>0);
+    
+    if(was!=is && !REGION_IS_ACTIVE(frame))
+        window_draw((WWindow*)frame, FALSE);
+}
+
+
+static bool actinact(WRegion *reg, bool act)
+{
+    WPHolder *returnph=region_get_return(reg);
+    WFrame *frame;
+    
+    if(returnph==NULL || pholder_stale(returnph))
+        return FALSE;
+    
+    frame=OBJ_CAST(pholder_target(returnph), WFrame);
+    
+    if(frame!=NULL){
+        /* Ok, reg has return placeholder set to a frame: 
+         * do quasiactivation/inactivation 
+         */
+        frame_quasiactivation(frame, reg, act);
+    }
+    
+    return TRUE;
+}
+
+
+static bool activated(WRegion *reg)
+{
+    return actinact(reg, TRUE);
+}
+
+
+static bool inactivated(WRegion *reg)
+{
+    return actinact(reg, FALSE);
+}
+
+
+void ioncore_frame_quasiactivation_notify(WRegion *reg, 
+                                          WRegionNotify how)
+{
+    if(how==ioncore_g.notifies.activated || 
+       how==ioncore_g.notifies.pseudoactivated){
+        activated(reg);
+    }else if(how==ioncore_g.notifies.inactivated ||
+             how==ioncore_g.notifies.pseudoinactivated){
+        inactivated(reg);
+    }else if(how==ioncore_g.notifies.set_return){
+        if(REGION_IS_ACTIVE(reg) || REGION_IS_PSEUDOACTIVE(reg))
+            activated(reg);
+    }else if(how==ioncore_g.notifies.unset_return){
+        if(REGION_IS_ACTIVE(reg) || REGION_IS_PSEUDOACTIVE(reg))
+            inactivated(reg);
+    }
+}
+
+
 /*}}}*/
 
 

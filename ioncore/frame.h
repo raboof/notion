@@ -64,6 +64,7 @@ DECLCLASS(WFrame){
     int saved_x, saved_y;
     
     int tab_dragged_idx;
+    uint quasiactive_count;
     
     GrBrush *brush;
     GrBrush *bar_brush;
@@ -117,6 +118,8 @@ extern int frame_default_index(WFrame *frame);
 /* Misc */
 extern void frame_managed_notify(WFrame *frame, WRegion *sub, WRegionNotify how);
 extern void frame_managed_remove(WFrame *frame, WRegion *reg);
+
+extern void ioncore_frame_quasiactivation_notify(WRegion *reg, WRegionNotify how);
 
 /* Save/load */
 extern ExtlTab frame_get_configuration(WFrame *frame);

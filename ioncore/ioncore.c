@@ -270,8 +270,8 @@ static bool init_hooks()
     INIT_HOOK_(clientwin_mapped_hook);
     INIT_HOOK_(clientwin_unmapped_hook);
     INIT_HOOK_(clientwin_property_change_hook);
-    INIT_HOOK_(region_notify_hook);
     
+    INIT_HOOK(region_notify_hook, ioncore_frame_quasiactivation_notify);
     INIT_HOOK(clientwin_do_manage_alt, clientwin_do_manage_default);
     INIT_HOOK(ioncore_handle_event_alt, ioncore_handle_event);
     INIT_HOOK(region_do_warp_alt, region_do_warp_default);
@@ -348,7 +348,12 @@ static bool init_global()
     INITSTR(name);
     INITSTR(unset_manager);
     INITSTR(set_manager);
+    INITSTR(unset_return);
+    INITSTR(set_return);
+    INITSTR(pseudoactivated);
+    INITSTR(pseudoinactivated);
     INITSTR(tag);
+    INITSTR(deinit);
     
     return TRUE;
 }

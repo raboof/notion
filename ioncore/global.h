@@ -97,7 +97,12 @@ DECLSTRUCT(WGlobal){
                  name,
                  unset_manager,
                  set_manager,
-                 tag;
+                 tag,
+                 set_return,
+                 unset_return,
+                 pseudoactivated,
+                 pseudoinactivated,
+                 deinit;
     } notifies;
 };
 

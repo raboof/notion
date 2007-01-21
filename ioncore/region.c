@@ -531,12 +531,14 @@ void region_detach_manager(WRegion *reg)
 
 void region_unset_manager_pseudoactivity(WRegion *reg)
 {
-    WRegion *mgr=reg->manager;
+    WRegion *mgr=reg->manager, *par=REGION_PARENT_REG(reg);
     
-    if(mgr==NULL || !REGION_IS_PSEUDOACTIVE(mgr))
+    if(mgr==NULL || mgr==par || !REGION_IS_PSEUDOACTIVE(mgr))
         return;
         
     mgr->flags&=~REGION_PSEUDOACTIVE;
+    
+    region_notify_change(mgr, ioncore_g.notifies.pseudoinactivated);
     
     region_unset_manager_pseudoactivity(mgr);
 }
@@ -553,6 +555,8 @@ void region_set_manager_pseudoactivity(WRegion *reg)
         return;
     
     mgr->flags|=REGION_PSEUDOACTIVE;
+    
+    region_notify_change(mgr, ioncore_g.notifies.pseudoactivated);
     
     region_set_manager_pseudoactivity(mgr);
 }
