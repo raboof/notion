@@ -389,8 +389,10 @@ void group_managed_remove(WGroup *ws, WRegion *reg)
 
 static void group_managed_notify(WGroup *ws, WRegion *reg, WRegionNotify how)
 {
-    if(how==ioncore_g.notifies.activated)
+    if(how==ioncore_g.notifies.activated || 
+       how==ioncore_g.notifies.pseudoactivated){
         ws->current_managed=group_find_stacking(ws, reg);
+    }
 }
 
 

@@ -267,7 +267,7 @@ WPHolder *groupws_prepare_manage(WGroupWS *ws, const WClientWin *cwin,
     WRegion *b=(ws->grp.bottom!=NULL ? ws->grp.bottom->reg : NULL);
     WPHolder *ph=NULL;
     bool act_b=(ws->grp.bottom==ws->grp.current_managed);
-    bool always_float, use_bottom;
+    bool use_bottom;
     int weak=0;
     
     if(param->maprq && ioncore_g.opmode!=IONCORE_OPMODE_INIT
