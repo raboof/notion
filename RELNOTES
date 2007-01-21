@@ -1,4 +1,19 @@
 
+ion-3ds-2007????
+----------------
+
+  * There's been changes in padding/spacing usage in styles. Frames
+    no surround stuff inside borders with spacing, but with padding.
+    spacing is only used to space things within the borders (all the
+    tabs and the client window from eachother). Consequently, custom
+    style may need to be updated to reflect this, by increasing 
+    padding, possibly also altering removing colour (to set it to
+    background colour). 
+
+  * Xinerama support is gone. It had bitrotted, and I will not
+    waste time fixing it.
+
+
 ion-3ds-20061223
 ----------------
 
