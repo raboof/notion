@@ -695,6 +695,8 @@ void clientwin_deinit(WClientWin *cwin)
     WRegion *reg;
     
     if(cwin->win!=None){
+        region_pointer_focus_hack(&cwin->region);
+
         xwindow_unmanaged_selectinput(cwin->win, 0);
         XUnmapWindow(ioncore_g.dpy, cwin->win);
         
@@ -837,6 +839,8 @@ static void set_clientwin_state(WClientWin *cwin, int state)
 
 static void hide_clientwin(WClientWin *cwin)
 {
+    region_pointer_focus_hack(&cwin->region);
+
     if(cwin->flags&CLIENTWIN_PROP_ACROBATIC){
         XMoveWindow(ioncore_g.dpy, cwin->win,
                     -2*REGION_GEOM(cwin).w, -2*REGION_GEOM(cwin).h);

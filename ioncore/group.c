@@ -368,9 +368,17 @@ void group_managed_remove(WGroup *ws, WRegion *reg)
         }
         
         if(cur){
+            /* This may still potentially cause problems when focus
+             * change is pending. Perhaps we should use region_await_focus,
+             * if it is pointing to our child (and region_may_control_focus 
+             * fail if it is pointing somewhere else).
+             */
             WStacking *stf=find_to_focus(ws, next_st, TRUE);
-            if(stf!=NULL)
+            if(stf!=NULL && mcf){
                 region_maybewarp_now(stf->reg, FALSE);
+            }else{
+                ws->current_managed=stf;
+            }
         }
     }else if(dest && !ds){
         mainloop_defer_destroy((Obj*)ws);

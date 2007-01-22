@@ -92,9 +92,11 @@ void window_deinit(WWindow *wwin)
 {
     region_deinit((WRegion*)wwin);
     
+    region_pointer_focus_hack(&wwin->region);
+    
     if(wwin->xic!=NULL)
         XDestroyIC(wwin->xic);
-
+        
     if(wwin->win!=None){
         XDeleteContext(ioncore_g.dpy, wwin->win, ioncore_g.win_context);
         /* Probably should not try destroy if root window... */
@@ -174,6 +176,8 @@ void window_map(WWindow *wwin)
 
 void window_unmap(WWindow *wwin)
 {
+    region_pointer_focus_hack(&wwin->region);
+
     XUnmapWindow(ioncore_g.dpy, wwin->win);
     REGION_MARK_UNMAPPED(wwin);
 }

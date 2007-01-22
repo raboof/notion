@@ -305,9 +305,6 @@ void ioncore_handle_expose(const XExposeEvent *ev)
 /*{{{ Enter window, focus */
 
 
-/*extern Time ioncore_focus_time;*/
-
-
 static void do_handle_enter_window(XEvent *ev)
 {
     XEnterWindowEvent *eev=&(ev->xcrossing);
@@ -316,15 +313,6 @@ static void do_handle_enter_window(XEvent *ev)
     if(ioncore_g.input_mode!=IONCORE_INPUTMODE_NORMAL)
         return;
     
-    /*if(ioncore_g.focus_next!=NULL && ioncore_focus_time==CurrentTime)
-        return;*/
-        
-    /*if(ioncore_await_warp())
-        return;
-    
-    if(eev->mode!=NotifyNormal && !ioncore_g.warp_enabled)
-        return;*/
-        
     reg=XWINDOW_REGION_OF_T(eev->window, WRegion);
     
     if(reg==NULL)
@@ -335,9 +323,10 @@ static void do_handle_enter_window(XEvent *ev)
         
     if(region_skip_focus(reg))
         return;
-        
+
     /* If a child of 'reg' is to be focused, do not process this
-     * event.
+     * event. (ioncore_g.focus_next should only be set here by
+     * another call to use from ioncore_handle_enter_window below.)
      */
     if(ioncore_g.focus_next!=NULL){
         WRegion *r2=ioncore_g.focus_next;

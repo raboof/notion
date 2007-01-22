@@ -192,9 +192,9 @@ static void check_clear_await(WRegion *reg)
 }
 
 
-bool ioncore_await_focus()
+WRegion *ioncore_await_focus()
 {
-    return (await_watch.obj!=NULL);
+    return (WRegion*)(await_watch.obj);
 }
 
 
@@ -452,4 +452,49 @@ WRegion *ioncore_current()
     return ioncore_g.focus_current;
 }
 
+
 /*}}}*/
+
+
+/*{{{ Pointer focus hack */
+
+
+/* This ugly hack tries to prevent focus change, when the pointer is
+ * in a window to be unmapped (or destroyed), and that does not have
+ * the focus, or should not soon have it.
+ */
+void region_pointer_focus_hack(WRegion *reg)
+{
+    WRegion *act=ioncore_await_focus();
+    const WRectangle *g=&REGION_GEOM(reg);
+    int x, y;
+    
+    if(ioncore_g.opmode!=IONCORE_OPMODE_NORMAL)
+        return;
+    
+    if(!REGION_IS_ACTIVE(reg) && act==NULL)
+        act=ioncore_g.focus_current;
+        
+    if(act==NULL || OBJ_IS_BEING_DESTROYED(act))
+        return;
+        
+    /* Ok, anything under us should not get focus as we're unmapped:
+     * Either we don't have the focus, or focus change somewhere else
+     * is pending.
+     *
+     * It might be possible to do the pointer check more efficiently
+     * by trying to maintain our internal pointer containment state
+     * by tracking Enter/Leave events...
+     */
+    
+    xwindow_pointer_pos(region_xwindow(reg), &x, &y);
+    
+    if(x>=0 && y>=0 && x<g->w && y<g->h){
+        D(fprintf(stderr, "Pointer here and shouldn't alter focus!\n"));
+        region_set_focus(act);
+    }
+}
+
+
+/*}}}*/
+

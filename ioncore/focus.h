@@ -34,7 +34,7 @@ extern bool region_do_warp_default(WRegion *reg);
 
 /* Awaiting focus state */
 extern void region_set_await_focus(WRegion *reg);
-extern bool ioncore_await_focus();
+extern WRegion *ioncore_await_focus();
 
 /* Event handling */
 extern void region_got_focus(WRegion *reg);
@@ -60,5 +60,7 @@ extern WHook *region_do_warp_alt;
 /* Misc. */
 extern bool region_skip_focus(WRegion *reg);
 WRegion *ioncore_current();
+
+extern void region_pointer_focus_hack(WRegion *reg);
 
 #endif /* ION_IONCORE_FOCUS_H */
