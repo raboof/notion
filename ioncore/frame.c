@@ -193,6 +193,7 @@ StringIntMap frame_modes[]={
 /*EXTL_DOC
  * Get frame mode.
  */
+EXTL_SAFE
 EXTL_EXPORT_AS(WFrame, mode)
 const char *frame_mode_extl(WFrame *frame)
 {
