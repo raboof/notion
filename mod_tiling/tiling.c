@@ -731,7 +731,7 @@ void tiling_managed_remove(WTiling *ws, WRegion *reg)
     
     if(!ds){
         if(other==NULL)
-            mainloop_defer_destroy((Obj*)ws);
+            region_dispose((WRegion*)ws, mcf);
         else if(act && mcf)
             region_warp(other);
     }

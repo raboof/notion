@@ -1602,17 +1602,14 @@ bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg,
         
         if(!CAN_MANAGE_STDISP(mgr))
             mgr=NULL;
-        
-        if(oldstdisp!=reg){
-            mainloop_defer_destroy((Obj*)oldstdisp);
-            watch_reset(&(mplex->stdispwatch));
-        }
     }
     
     if(din!=NULL)
         mplex->stdispinfo=*din;
     
     if(reg==NULL){
+        watch_reset(&(mplex->stdispwatch));
+        
         if(mgr!=NULL){
             region_unmanage_stdisp(mgr, TRUE, FALSE);
             if(oldstdisp!=NULL)
@@ -1623,6 +1620,9 @@ bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg,
         
         mplex_remanage_stdisp(mplex);
     }
+    
+    if(oldstdisp!=NULL && oldstdisp!=reg)
+        region_dispose((WRegion*)oldstdisp, FALSE);
     
     return TRUE;
 }

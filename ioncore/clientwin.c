@@ -742,13 +742,7 @@ static bool mrsh_u_extl(ExtlFn fn, void *param)
 
 static void clientwin_do_unmapped(WClientWin *cwin, Window win)
 {
-    bool mcf=region_may_control_focus((WRegion*)cwin);
-    WPHolder *ph=region_get_return((WRegion*)cwin);
-    
-    if(mcf && ph!=NULL)
-        pholder_goto(ph);
-    
-    destroy_obj((Obj*)cwin);
+    region_dispose_((WRegion*)cwin);
     
     hook_call(clientwin_unmapped_hook, &win, mrsh_u_c, mrsh_u_extl);
 }

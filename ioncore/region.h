@@ -174,6 +174,9 @@ extern bool region_is_fully_mapped(WRegion *reg);
 
 extern void region_detach_manager(WRegion *reg);
 
+extern void region_dispose(WRegion *reg, bool was_mcf);
+extern void region_dispose_(WRegion *reg);
+
 extern WWindow *region_parent(WRegion *reg);
 extern WRegion *region_manager(WRegion *reg);
 extern WRegion *region_manager_or_parent(WRegion *reg);

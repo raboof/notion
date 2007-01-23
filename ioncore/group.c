@@ -40,6 +40,7 @@
 #include "grouppholder.h"
 #include "frame.h"
 #include "float-placement.h"
+#include "return.h"
 
 
 static void group_place_stdisp(WGroup *ws, WWindow *parent,
@@ -352,7 +353,7 @@ void group_managed_remove(WGroup *ws, WRegion *reg)
     }
     
     region_unset_manager(reg, (WRegion*)ws);
-
+    
     if(!dest && !ds){
         if(was_bottom && !was_stdisp && ws->managed_stdisp==NULL){
             /* We should probably be managing any stdisp, that 'bottom' 
@@ -381,7 +382,7 @@ void group_managed_remove(WGroup *ws, WRegion *reg)
             }
         }
     }else if(dest && !ds){
-        mainloop_defer_destroy((Obj*)ws);
+        region_dispose((WRegion*)ws, mcf);
     }
 }
 
