@@ -550,10 +550,20 @@ end
 
 
 --DOC
--- This function asks for a name new for the workspace on which the
--- query resides.
-function mod_query.query_renameworkspace(mplex)
-    local ws=ioncore.find_manager(mplex, "WGroupWS")
+-- This function asks for a name new for the workspace \var{ws},
+-- or the one on which \var{mplex} resides, if it is not set.
+-- If \var{mplex} is not set, one is looked for.
+function mod_query.query_renameworkspace(mplex, ws)
+    if not mplex then
+        assert(ws)
+        mplex=ioncore.find_manager(ws, "WMPlex")
+    elseif not ws then
+        assert(mplex)
+        ws=ioncore.find_manager(mplex, "WGroupWS")
+    end
+    
+    assert(mplex and ws)
+    
     mod_query.query(mplex, TR("Workspace name:"), ws:name(),
                     function(mplex, str) ws:set_name(str) end,
                     nil, "framename")
