@@ -218,16 +218,13 @@ end
 local MAXDEPTH=10
 
 
-function mod_query.complete_from_list(list, str)
+function mod_query.complete_keys(list, str)
     local results={}
     local len=string.len(str)
-    if len==0 then
-        results=list
-    else
-        for _, m in pairs(list) do
-            if string.sub(m, 1, len)==str then
-                table.insert(results, m)
-            end
+
+   for m, _ in pairs(list) do
+       if string.sub(m, 1, len)==str then
+           table.insert(results, m)
         end
     end
     
@@ -432,22 +429,58 @@ function mod_query.attachclient_handler(frame, str)
 end
 
 
+local mq_layouts={}
+
+--DOC
+-- Returns table of configured workspace layouts, key giving the
+-- layout name, and the attach/creation params, similarly to
+-- \code{default_ws_params} of \fnref{ioncore.set}.
+function mod_query.layouts()
+    return mq_layouts
+end
+
 function mod_query.workspace_handler(mplex, name)
     local ws=ioncore.lookup_region(name, "WGroupWS")
     if ws then
         ws:goto()
-        return
-    end
+    else
+        local layouts=table.copy(mod_query.layouts())
+        
+        layouts.empty = { managed={} }
+        layouts.default = ioncore.get().default_ws_params
+        
+        local function create_handler(mplex_, layout)
+            if not layout or layout=="" then
+                layout = "default"
+            end
+            
+            local lo=layouts[layout];
+            
+            if not lo then
+                mod_query.warn(mplex_, TR("Unknown layout"))
+            else
+                local scr=mplex:screen_of()
+                
+                local function mkws()
+                    local lo_=table.copy(lo)
+                    lo_.name=lo
+                    if not ioncore.create_ws(scr, lo_) then
+                        error(TR("Unknown error"))
+                    end
+                end
 
-    local scr=mplex:screen_of()
-    
-    local function mkws()
-	if not ioncore.create_ws(scr, {name=name}) then
-            error(TR("Unknown error"))
+                mod_query.call_warn(mplex, mkws)
+            end
         end
-    end
 
-    mod_query.call_warn(mplex, mkws)
+        local function compl_layout(str)
+            return mod_query.complete_keys(layouts, str)
+        end
+        
+        mod_query.query(mplex, TR("New workspace layout (default):"), nil,
+                        create_handler, mod_query.make_completor(compl_layout),
+                        "workspacelayout")
+    end
 end
 
 
