@@ -376,11 +376,9 @@ defctxmenu("WFrame", "Frame", {
 })
 
 
--- Context menu for screens
-defctxmenu("WScreen", "Screen", {
-    menuentry("New workspace",  "ioncore.create_ws(_)"),
-    menuentry("New empty workspace",
-                                "ioncore.create_ws(_, nil, true)"),
-    menuentry("Close workspace","WRegion.rqclose(_sub)"),
+-- Context menu for workspaces
+defctxmenu("WGroupWS", "Workspace", {
+    menuentry("Close",          "WRegion.rqclose(_)"),
+    menuentry("Rename",         "mod_query.query_renameworkspace(nil, _)"),
 })
 
