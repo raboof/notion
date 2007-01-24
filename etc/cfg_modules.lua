@@ -8,3 +8,6 @@ dopath("mod_tiling")
 dopath("mod_statusbar")
 --dopath("mod_dock")
 dopath("mod_sp")
+
+-- Load some layouts
+dopath("cfg_layouts")

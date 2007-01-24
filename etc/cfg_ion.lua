@@ -52,5 +52,9 @@ dopath("cfg_modules")
 --dopath("mod_dock")
 --dopath("mod_sp")
 
+-- Define some default layouts. This is also done by cfg_modules
+-- if loaded.
+--dopath("cfg_layouts", true)
+
 -- Deprecated.
 dopath("cfg_user", true)
