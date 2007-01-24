@@ -41,9 +41,6 @@
 #define CF_CURSOR_DRAG XC_cross
 #define CF_CURSOR_WAITKEY XC_icon
 
-#define CF_STR_EMPTY "<empty frame>"
-#define CF_STR_EMPTY_LEN 13
-
 #define CF_STDISP_MIN_SZ 8
 
 #endif /* ION_CONFIG_H */

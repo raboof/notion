@@ -241,7 +241,8 @@ void frame_recalc_bar(WFrame *frame)
     if(FRAME_MCOUNT(frame)==0){
         textw=init_title(frame, i);
         if(textw>0){
-            title=grbrush_make_label(frame->bar_brush, CF_STR_EMPTY, textw);
+            title=grbrush_make_label(frame->bar_brush, TR("<empty frame>"), 
+                                     textw);
             frame->titles[i].text=title;
         }
         return;
