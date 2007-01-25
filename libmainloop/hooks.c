@@ -95,6 +95,9 @@ EXTL_SAFE
 EXTL_EXPORT
 WHook *mainloop_get_hook(const char *name)
 {
+    if(name==NULL)
+        return NULL;
+    
     if(named_hooks!=NULL){
         bool found=FALSE;
         Rb_node node=rb_find_key_n(named_hooks, name, &found);
