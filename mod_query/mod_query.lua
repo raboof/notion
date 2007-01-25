@@ -463,7 +463,7 @@ function mod_query.workspace_handler(mplex, name)
                 
                 local function mkws()
                     local lo_=table.copy(lo)
-                    lo_.name=lo
+                    lo_.name=name
                     if not ioncore.create_ws(scr, lo_) then
                         error(TR("Unknown error"))
                     end
