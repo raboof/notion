@@ -544,7 +544,8 @@ static void free_completions(char **ptr, int i)
 {
     while(i>0){
         i--;
-        free(ptr[i]);
+        if(ptr[i]!=NULL)
+            free(ptr[i]);
     }
     free(ptr);
 }
@@ -613,19 +614,14 @@ void wedln_set_completions(WEdln *wedln, ExtlTab completions, int cycle)
     extl_table_gets_s(completions, "common_beg", &beg);
     extl_table_gets_s(completions, "common_end", &end);
     
-    if(wedln_do_set_completions(wedln, ptr, n, beg, end, cycle, FALSE))
-        return;
+    if(!wedln_do_set_completions(wedln, ptr, n, beg, end, cycle, FALSE))
+        wedln_hide_completions(wedln);
+
+    return;
     
 allocfail:
     wedln_hide_completions(wedln);
     free_completions(ptr, i);
-    while(i>0){
-        i--;
-        /* edln_do_completions may NULL things */
-        if(ptr[i]!=NULL)
-            free(ptr[i]);
-    }
-    free(ptr);
 }
     
 
