@@ -51,7 +51,7 @@ DECLSTRUCT(WSBElem){
     char *meter;
     int max_w;
     char *tmpl;
-    char *attr;
+    GrAttr attr;
     int zeropad;
     int x;
     PtrList *traywins;

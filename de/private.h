@@ -15,7 +15,10 @@
 #define DE_SUB_IND " ->"
 #define DE_SUB_IND_LEN 3
 
-#define MATCHES(S, A) (gr_stylespec_score(S, A)>0)
-#define MATCHES2(S, A1, A2) (gr_stylespec_score2(S, A1, A2)>0)
+#define MATCHES(S, A) (gr_stylespec_score(&(S), A)>0)
+#define MATCHES2(S, A1, A2) (gr_stylespec_score2(&(S), A1, A2)>0)
 
+#define ENSURE_INITSPEC(S, NM) \
+    if((S).attrs==NULL) gr_stylespec_load(&(S), NM);
+    
 #endif /* ION_DE_PRIVATE_H */

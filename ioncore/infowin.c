@@ -45,7 +45,8 @@ bool infowin_init(WInfoWin *p, WWindow *parent, const WFitParams *fp,
         goto fail2;
     
     p->brush=NULL;
-    p->attr=NULL;
+    
+    gr_stylespec_init(&p->attr);
     
     infowin_updategr(p);
     
@@ -62,7 +63,8 @@ bool infowin_init(WInfoWin *p, WWindow *parent, const WFitParams *fp,
 
     return TRUE;
 
-fail3:    
+fail3:
+    gr_stylespec_unalloc(&p->attr);
     free(p->style);
 fail2:
     free(p->buffer);
@@ -86,11 +88,6 @@ void infowin_deinit(WInfoWin *p)
         p->buffer=NULL;
     }
 
-    if(p->attr!=NULL){
-        free(p->attr);
-        p->attr=NULL;
-    }
-    
     if(p->style!=NULL){
         free(p->style);
         p->style=NULL;
@@ -100,6 +97,8 @@ void infowin_deinit(WInfoWin *p)
         grbrush_release(p->brush);
         p->brush=NULL;
     }
+    
+    gr_stylespec_unalloc(&p->attr);
     
     window_deinit(&(p->wwin));
 }
@@ -124,7 +123,8 @@ void infowin_draw(WInfoWin *p, bool complete)
     g.h=REGION_GEOM(p).h;
 
     grbrush_begin(p->brush, &g, GRBRUSH_NO_CLEAR_OK);
-    grbrush_draw_textbox(p->brush, &g, p->buffer, p->attr, TRUE);
+    grbrush_init_attr(p->brush, &p->attr);
+    grbrush_draw_textbox(p->brush, &g, p->buffer, TRUE);
     grbrush_end(p->brush);
 }
 
@@ -157,25 +157,9 @@ void infowin_updategr(WInfoWin *p)
 /*{{{ Content-setting */
 
 
-bool infowin_set_attr2(WInfoWin *p, const char *attr1, const char *attr2)
+GrStyleSpec *infowin_stylespec(WInfoWin *p)
 {
-    char *p2=NULL;
-    
-    if(attr1!=NULL){
-        if(attr2==NULL)
-            p2=scopy(attr1);
-        else
-            libtu_asprintf(&p2, "%s-%s", attr1, attr2);
-        if(p2==NULL)
-            return FALSE;
-    }
-    
-    if(p->attr)
-        free(p->attr);
-    
-    p->attr=p2;
-    
-    return TRUE;
+    return &p->attr;
 }
 
 

@@ -41,8 +41,7 @@ extern void setup_listing(WListing *l, char **strs, int nstrs, bool onecol);
 extern void deinit_listing(WListing *l);
 extern void fit_listing(GrBrush *brush, const WRectangle *geom, WListing *l);
 extern void draw_listing(GrBrush *brush, const WRectangle *geom, WListing *l, 
-                         bool complete, const char *style, 
-                         const char *selstyle);
+                         bool complete, GrAttr selattr);
 extern bool scrollup_listing(WListing *l);
 extern bool scrolldown_listing(WListing *l);
 extern bool listing_select(WListing *l, int i);

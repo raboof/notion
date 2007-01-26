@@ -24,6 +24,7 @@
 #include <ioncore/event.h>
 #include <ioncore/resize.h>
 #include <ioncore/gr.h>
+#include <ioncore/gr-util.h>
 #include <ioncore/names.h>
 #include <ioncore/strings.h>
 #include <ioncore/basicpholder.h>
@@ -42,7 +43,6 @@ static int statusbar_systray_x(WStatusBar *p);
 static void statusbar_rearrange(WStatusBar *sb, bool rs);
 static void do_calc_systray_w(WStatusBar *p, WSBElem *el);
 static void statusbar_calc_systray_w(WStatusBar *p);
-
 
 static WStatusBar *statusbars=NULL;
 
@@ -114,6 +114,7 @@ void statusbar_deinit(WStatusBar *p)
 
 /*{{{ Content stuff */
 
+
 static void init_sbelem(WSBElem *el)
 {
     el->type=WSBELEM_NONE;
@@ -122,7 +123,7 @@ static void init_sbelem(WSBElem *el)
     el->text=NULL;
     el->max_w=0;
     el->tmpl=NULL;
-    el->attr=NULL;
+    el->attr=GRATTR_NONE;
     el->stretch=0;
     el->align=WSBELEM_ALIGN_CENTER;
     el->zeropad=0;
@@ -203,8 +204,8 @@ static void free_sbelems(WSBElem *el, int n)
             free(el[i].meter);
         if(el[i].tmpl!=NULL)
             free(el[i].tmpl);
-        if(el[i].attr!=NULL)
-            free(el[i].attr);
+        if(el[i].attr!=GRATTR_NONE)
+            stringstore_free(el[i].attr);
         if(el[i].traywins!=NULL)
             ptrlist_clear(&el[i].traywins);
     }
@@ -855,9 +856,9 @@ void statusbar_update(WStatusBar *sb, ExtlTab t)
             el->text=NULL;
         }
 
-        if(el->attr!=NULL){
-            free(el->attr);
-            el->attr=NULL;
+        if(el->attr!=GRATTR_NONE){
+            stringstore_free(el->attr);
+            el->attr=GRATTR_NONE;
         }
         
         if(el->meter!=NULL){
@@ -903,7 +904,11 @@ void statusbar_update(WStatusBar *sb, ExtlTab t)
             
             attrnm=scat(el->meter, "_hint");
             if(attrnm!=NULL){
-                extl_table_gets_s(t, attrnm, &(el->attr));
+                char *s;
+                if(extl_table_gets_s(t, attrnm, &s)){
+                    el->attr=stringstore_alloc(s);
+                    free(s);
+                }
                 free(attrnm);
             }
         }

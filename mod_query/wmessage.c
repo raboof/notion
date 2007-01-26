@@ -16,6 +16,7 @@
 #include <ioncore/strings.h>
 #include <ioncore/global.h>
 #include <ioncore/event.h>
+#include <ioncore/gr-util.h>
 #include "wmessage.h"
 #include "inputp.h"
 
@@ -77,9 +78,21 @@ static void wmsg_calc_size(WMessage *wmsg, WRectangle *geom)
 /*{{{ Draw */
 
 
+GR_DEFATTR(active);
+GR_DEFATTR(inactive);
+
+
+static void init_attr()
+{
+    GR_ALLOCATTR_BEGIN;
+    GR_ALLOCATTR(active);
+    GR_ALLOCATTR(inactive);
+    GR_ALLOCATTR_END;
+}
+
+
 static void wmsg_draw(WMessage *wmsg, bool complete)
 {
-    const char *style=(REGION_IS_ACTIVE(wmsg) ? "active" : "inactive");
     WRectangle geom;
     
     if(WMSG_BRUSH(wmsg)==NULL)
@@ -90,8 +103,12 @@ static void wmsg_draw(WMessage *wmsg, bool complete)
     grbrush_begin(WMSG_BRUSH(wmsg), &geom, 
                   (complete ? 0 : GRBRUSH_NO_CLEAR_OK));
     
+    grbrush_set_attr(WMSG_BRUSH(wmsg), REGION_IS_ACTIVE(wmsg)
+                                       ? GR_ATTR(active)
+                                       : GR_ATTR(inactive));
+    
     draw_listing(WMSG_BRUSH(wmsg), &geom, &(wmsg->listing), 
-                 FALSE, style, style);
+                 FALSE, GRATTR_NONE);
     
     grbrush_end(WMSG_BRUSH(wmsg));
 }
@@ -173,6 +190,8 @@ static bool wmsg_init(WMessage *wmsg, WWindow *par, const WFitParams *fp,
             break;
         p=p+l+1;
     }
+    
+    init_attr();
     
     init_listing(&(wmsg->listing));
     setup_listing(&(wmsg->listing), ptr, k, TRUE);

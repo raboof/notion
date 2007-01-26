@@ -26,16 +26,16 @@
 
 
 static DEColourGroup *destyle_get_colour_group2(DEStyle *style,
-                                                const char *attr_p1,
-                                                const char *attr_p2)
+                                                const GrStyleSpec *a1,
+                                                const GrStyleSpec *a2)
 {
     int i, score, maxscore=0;
     DEColourGroup *maxg=&(style->cgrp);
     
     while(style!=NULL){
         for(i=0; i<style->n_extra_cgrps; i++){
-            score=gr_stylespec_score2(style->extra_cgrps[i].spec,
-                                      attr_p1, attr_p2);
+            score=gr_stylespec_score2(&style->extra_cgrps[i].spec, a1, a2);
+            
             if(score>maxscore){
                 maxg=&(style->extra_cgrps[i]);
                 maxscore=score;
@@ -49,16 +49,22 @@ static DEColourGroup *destyle_get_colour_group2(DEStyle *style,
 
 
 DEColourGroup *debrush_get_colour_group2(DEBrush *brush, 
-                                         const char *attr_p1,
-                                         const char *attr_p2)
+                                         const GrStyleSpec *a1,
+                                         const GrStyleSpec *a2)
 {
-    return destyle_get_colour_group2(brush->d, attr_p1, attr_p2);
+    return destyle_get_colour_group2(brush->d, a1, a2);
 }
 
 
-DEColourGroup *debrush_get_colour_group(DEBrush *brush, const char *attr)
+DEColourGroup *debrush_get_colour_group(DEBrush *brush, const GrStyleSpec *attr)
 {
     return destyle_get_colour_group2(brush->d, attr, NULL);
+}
+
+
+DEColourGroup *debrush_get_current_colour_group(DEBrush *brush)
+{
+    return debrush_get_colour_group(brush, debrush_get_current_attr(brush));
 }
 
 
@@ -160,11 +166,12 @@ void debrush_do_draw_border(DEBrush *brush, WRectangle geom,
 }
 
 
+
+    
 void debrush_draw_border(DEBrush *brush, 
-                         const WRectangle *geom,
-                         const char *attrib)
+                         const WRectangle *geom)
 {
-    DEColourGroup *cg=debrush_get_colour_group(brush, attrib);
+    DEColourGroup *cg=debrush_get_current_colour_group(brush);
     if(cg!=NULL)
         debrush_do_draw_border(brush, *geom, cg);
 }
@@ -223,9 +230,9 @@ void debrush_do_draw_borderline(DEBrush *brush, WRectangle geom,
 
 
 void debrush_draw_borderline(DEBrush *brush, const WRectangle *geom,
-                             const char *attrib, GrBorderLine line)
+                             GrBorderLine line)
 {
-    DEColourGroup *cg=debrush_get_colour_group(brush, attrib);
+    DEColourGroup *cg=debrush_get_current_colour_group(brush);
     if(cg!=NULL)
         debrush_do_draw_borderline(brush, *geom, cg, line);
 }
@@ -251,10 +258,16 @@ static void copy_masked(DEBrush *brush, Drawable src, Drawable dst,
 }
 
 
+static GrStyleSpec dragged_spec=GR_STYLESPEC_INIT;
+static GrStyleSpec tagged_spec=GR_STYLESPEC_INIT;
+static GrStyleSpec submenu_spec=GR_STYLESPEC_INIT;
+
+
 void debrush_tab_extras(DEBrush *brush, const WRectangle *g, 
                         DEColourGroup *cg, GrBorderWidths *bdw,
                         GrFontExtents *fnte,
-                        const char *a1, const char *a2,
+                        const GrStyleSpec *a1, 
+                        const GrStyleSpec *a2,
                         bool pre)
 {
     DEStyle *d=brush->d;
@@ -263,9 +276,12 @@ void debrush_tab_extras(DEBrush *brush, const WRectangle *g,
      * with shared GC:s.
      */
     static bool swapped=FALSE;
+
+    ENSURE_INITSPEC(dragged_spec, "dragged");
+    ENSURE_INITSPEC(tagged_spec, "tagged");
     
     if(pre){
-        if(!MATCHES2("*-*-*-dragged", a1, a2))
+        if(!MATCHES2(dragged_spec, a1, a2))
             return;
         
         tmp=d->normal_gc;
@@ -276,7 +292,7 @@ void debrush_tab_extras(DEBrush *brush, const WRectangle *g,
         return;
     }
     
-    if(MATCHES2("*-*-tagged", a1, a2)){
+    if(MATCHES2(tagged_spec, a1, a2)){
         XSetForeground(ioncore_g.dpy, d->copy_gc, cg->fg);
             
         copy_masked(brush, d->tag_pixmap, brush->win, 0, 0,
@@ -298,10 +314,13 @@ void debrush_tab_extras(DEBrush *brush, const WRectangle *g,
 }
 
 
-void debrush_menuentry_extras(DEBrush *brush, const WRectangle *g, 
-                              DEColourGroup *cg, GrBorderWidths *bdw,
+void debrush_menuentry_extras(DEBrush *brush, 
+                              const WRectangle *g, 
+                              DEColourGroup *cg, 
+                              GrBorderWidths *bdw,
                               GrFontExtents *fnte,
-                              const char *a1, const char *a2, 
+                              const GrStyleSpec *a1, 
+                              const GrStyleSpec *a2, 
                               bool pre)
 {
     int tx, ty;
@@ -309,7 +328,9 @@ void debrush_menuentry_extras(DEBrush *brush, const WRectangle *g,
     if(pre)
         return;
     
-    if(!MATCHES2("*-*-submenu", a1, a2))
+    ENSURE_INITSPEC(submenu_spec, "submenu");
+    
+    if(!MATCHES2(submenu_spec, a1, a2))
         return;
         
     ty=(g->y+bdw->top+fnte->baseline
@@ -336,10 +357,13 @@ void debrush_do_draw_box(DEBrush *brush, const WRectangle *geom,
 }
 
 
-static void debrush_do_draw_textbox(DEBrush *brush, const WRectangle *geom, 
-                                    const char *text, DEColourGroup *cg, 
+static void debrush_do_draw_textbox(DEBrush *brush, 
+                                    const WRectangle *geom, 
+                                    const char *text, 
+                                    DEColourGroup *cg, 
                                     bool needfill,
-                                    const char *a1, const char *a2)
+                                    const GrStyleSpec *a1, 
+                                    const GrStyleSpec *a2)
 {
     uint len;
     GrBorderWidths bdw;
@@ -386,10 +410,11 @@ static void debrush_do_draw_textbox(DEBrush *brush, const WRectangle *geom,
 
 
 void debrush_draw_textbox(DEBrush *brush, const WRectangle *geom, 
-                          const char *text, const char *attr, 
-                          bool needfill)
+                          const char *text, bool needfill)
 {
+    GrStyleSpec *attr=debrush_get_current_attr(brush);
     DEColourGroup *cg=debrush_get_colour_group(brush, attr);
+    
     if(cg!=NULL){
         debrush_do_draw_textbox(brush, geom, text, cg, needfill, 
                                 attr, NULL);
@@ -399,22 +424,25 @@ void debrush_draw_textbox(DEBrush *brush, const WRectangle *geom,
 
 void debrush_draw_textboxes(DEBrush *brush, const WRectangle *geom,
                             int n, const GrTextElem *elem, 
-                            bool needfill, const char *common_attrib)
+                            bool needfill)
 {
+    GrStyleSpec *common_attrib;
     WRectangle g=*geom;
     DEColourGroup *cg;
     GrBorderWidths bdw;
     int i;
     
+    common_attrib=debrush_get_current_attr(brush);
+    
     grbrush_get_border_widths(&(brush->grbrush), &bdw);
     
     for(i=0; ; i++){
         g.w=bdw.left+elem[i].iw+bdw.right;
-        cg=debrush_get_colour_group2(brush, common_attrib, elem[i].attr);
+        cg=debrush_get_colour_group2(brush, common_attrib, &elem[i].attr);
         
         if(cg!=NULL){
             debrush_do_draw_textbox(brush, &g, elem[i].text, cg, needfill,
-                                    common_attrib, elem[i].attr);
+                                    common_attrib, &elem[i].attr);
         }
         
         if(i==n-1)
@@ -493,9 +521,9 @@ void debrush_enable_transparency(DEBrush *brush, GrTransparency mode)
 }
 
 
-void debrush_fill_area(DEBrush *brush, const WRectangle *geom, const char *attr)
+void debrush_fill_area(DEBrush *brush, const WRectangle *geom)
 {
-    DEColourGroup *cg=debrush_get_colour_group(brush, attr);
+    DEColourGroup *cg=debrush_get_current_colour_group(brush);
     GC gc=brush->d->normal_gc;
 
     if(cg==NULL)
@@ -558,8 +586,12 @@ static void debrush_clear_clipping_rectangle(DEBrush *brush)
 
 void debrush_begin(DEBrush *brush, const WRectangle *geom, int flags)
 {
+    
     if(flags&GRBRUSH_AMEND)
         flags|=GRBRUSH_NO_CLEAR_OK;
+    
+    if(!(flags&GRBRUSH_KEEP_ATTR))
+        debrush_init_attr(brush, NULL);
     
     if(!(flags&GRBRUSH_NO_CLEAR_OK))
         debrush_clear_area(brush, geom);

@@ -28,6 +28,8 @@
 #include <ioncore/event.h>
 #include <ioncore/xwindow.h>
 #include <ioncore/names.h>
+#include <ioncore/gr.h>
+#include <ioncore/gr-util.h>
 #include "menu.h"
 #include "main.h"
 
@@ -85,22 +87,38 @@ static void get_inner_geom(WMenu *menu, WRectangle *geom)
 }
 
 
+GR_DEFATTR(active);
+GR_DEFATTR(inactive);
+GR_DEFATTR(selected);
+GR_DEFATTR(unselected);
+GR_DEFATTR(normal);
+GR_DEFATTR(submenu);
+
+
+static void init_attr()
+{
+    GR_ALLOCATTR_BEGIN;
+    GR_ALLOCATTR(active);
+    GR_ALLOCATTR(inactive);
+    GR_ALLOCATTR(selected);
+    GR_ALLOCATTR(unselected);
+    GR_ALLOCATTR(normal);
+    GR_ALLOCATTR(submenu);
+    GR_ALLOCATTR_END;
+}
+
+
 static void menu_draw_entry(WMenu *menu, int i, const WRectangle *igeom,
                             bool complete)
 {
     WRectangle geom;
     int a;
+    GrAttr sa, suba;
 
-    static const char *attrs[]={
-        "active-selected-normal",
-        "active-selected-submenu",
-        "active-unselected-normal",
-        "active-unselected-submenu",
-        "inactive-selected-normal",
-        "inactive-selected-submenu",
-        "inactive-unselected-normal",
-        "inactive-unselected-submenu",
-    };
+    sa=(menu->selected_entry==i 
+        ? GR_ATTR(selected) : GR_ATTR(unselected));
+    suba=(menu->entries[i].flags&WMENUENTRY_SUBMENU
+          ? GR_ATTR(submenu) : GR_ATTR(normal));
     
     if(menu->entry_brush==NULL)
         return;
@@ -109,14 +127,16 @@ static void menu_draw_entry(WMenu *menu, int i, const WRectangle *igeom,
     geom.h=menu->entry_h;
     geom.y+=(i-menu->first_entry)*(menu->entry_h+menu->entry_spacing);
     
-    a=((REGION_IS_ACTIVE(menu) ? 0 : 4)
-       |(menu->selected_entry==i ? 0 : 2)
-       |(menu->entries[i].flags&WMENUENTRY_SUBMENU ? 1 : 0));
-
-    grbrush_begin(menu->entry_brush, &geom, GRBRUSH_AMEND);
+    grbrush_begin(menu->entry_brush, &geom, GRBRUSH_AMEND|GRBRUSH_KEEP_ATTR);
+    
+    grbrush_set_attr(menu->entry_brush, sa);
+    grbrush_set_attr(menu->entry_brush, suba);
 
     grbrush_draw_textbox(menu->entry_brush, &geom, menu->entries[i].title, 
-                         attrs[a], complete);
+                         complete);
+    
+    grbrush_unset_attr(menu->entry_brush, suba);
+    grbrush_unset_attr(menu->entry_brush, sa);
     
     grbrush_end(menu->entry_brush);
 }
@@ -124,11 +144,15 @@ static void menu_draw_entry(WMenu *menu, int i, const WRectangle *igeom,
     
 void menu_draw_entries(WMenu *menu, bool complete)
 {
+    GrAttr aa=(REGION_IS_ACTIVE(menu) ? GR_ATTR(active) : GR_ATTR(inactive));
     WRectangle igeom;
     int i, mx;
-
+    
     if(menu->entry_brush==NULL)
         return;
+        
+    grbrush_init_attr(menu->entry_brush, NULL);
+    grbrush_set_attr(menu->entry_brush, aa);
     
     get_inner_geom(menu, &igeom);
     
@@ -142,8 +166,8 @@ void menu_draw_entries(WMenu *menu, bool complete)
 
 void menu_draw(WMenu *menu, bool complete)
 {
+    GrAttr aa=(REGION_IS_ACTIVE(menu) ? GR_ATTR(active) : GR_ATTR(inactive));
     WRectangle geom;
-    const char *substyle=(REGION_IS_ACTIVE(menu) ? "active" : "inactive");
     
     if(menu->brush==NULL)
         return;
@@ -153,7 +177,9 @@ void menu_draw(WMenu *menu, bool complete)
     grbrush_begin(menu->brush, &geom, 
                   (complete ? 0 : GRBRUSH_NO_CLEAR_OK));
     
-    grbrush_draw_border(menu->brush, &geom, substyle);
+    grbrush_set_attr(menu->brush, aa);
+    
+    grbrush_draw_border(menu->brush, &geom);
     
     menu_draw_entries(menu, FALSE);
     
@@ -575,7 +601,9 @@ bool menu_init(WMenu *menu, WWindow *par, const WFitParams *fp,
     
     if(!menu_init_gr(menu, region_rootwin_of((WRegion*)par), win))
         goto fail2;
-
+        
+    init_attr();
+    
     menu_firstfit(menu, params->submenu_mode, &(params->refg));
     
     window_select_input(&(menu->win), IONCORE_EVENTMASK_NORMAL);

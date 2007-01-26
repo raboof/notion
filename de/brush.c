@@ -29,14 +29,23 @@
 /*{{{ Brush creation and releasing */
 
 
+static GrStyleSpec tabframe_spec=GR_STYLESPEC_INIT;
+static GrStyleSpec tabinfo_spec=GR_STYLESPEC_INIT;
+static GrStyleSpec tabmenuentry_spec=GR_STYLESPEC_INIT;
+
+
 bool debrush_init(DEBrush *brush, Window win,
-                  const char *stylename, DEStyle *style)
+                  const GrStyleSpec *spec, DEStyle *style)
 {
+    GrStyleSpec tmp;
+    
     brush->d=style;
     brush->extras_fn=NULL;
     brush->indicator_w=0;
     brush->win=win;
     brush->clip_set=FALSE;
+    
+    gr_stylespec_init(&brush->current_attr);
     
     style->usecount++;
 
@@ -45,11 +54,15 @@ bool debrush_init(DEBrush *brush, Window win,
         return FALSE;
     }
     
-    if(MATCHES("tab-frame", stylename) || MATCHES("tab-info", stylename)){
+    ENSURE_INITSPEC(tabframe_spec, "tab-frame");
+    ENSURE_INITSPEC(tabinfo_spec, "tab-info");
+    ENSURE_INITSPEC(tabmenuentry_spec, "tab-menuentry");
+    
+    if(MATCHES(tabframe_spec, spec) || MATCHES(tabinfo_spec, spec)){
         brush->extras_fn=debrush_tab_extras;
         if(!style->tabbrush_data_ok)
             destyle_create_tab_gcs(style);
-    }else if(MATCHES("tab-menuentry", stylename)){
+    }else if(MATCHES(tabmenuentry_spec, spec)){
         brush->extras_fn=debrush_menuentry_extras;
         brush->indicator_w=grbrush_get_text_width((GrBrush*)brush, 
                                                   DE_SUB_IND, 
@@ -60,22 +73,32 @@ bool debrush_init(DEBrush *brush, Window win,
 }
 
 
-DEBrush *create_debrush(Window win, const char *stylename, DEStyle *style)
+DEBrush *create_debrush(Window win, const GrStyleSpec *spec, DEStyle *style)
 {
-    CREATEOBJ_IMPL(DEBrush, debrush, (p, win, stylename, style));
+    CREATEOBJ_IMPL(DEBrush, debrush, (p, win, spec, style));
 }
 
 
 static DEBrush *do_get_brush(Window win, WRootWin *rootwin, 
                              const char *stylename, bool slave)
 {
-    DEStyle *style=de_get_style(rootwin, stylename);
+    DEStyle *style;
     DEBrush *brush;
+    GrStyleSpec spec;
     
-    if(style==NULL)
+    if(!gr_stylespec_load(&spec, stylename))
         return NULL;
     
-    brush=create_debrush(win, stylename, style);
+    style=de_get_style(rootwin, &spec);
+    
+    if(style==NULL){
+        gr_stylespec_unalloc(&spec);
+        return NULL;
+    }
+    
+    brush=create_debrush(win, &spec, style);
+
+    gr_stylespec_unalloc(&spec);
     
     /* Set background colour */
     if(brush!=NULL && !slave){
@@ -104,6 +127,7 @@ void debrush_deinit(DEBrush *brush)
 {
     destyle_unref(brush->d);
     brush->d=NULL;
+    gr_stylespec_unalloc(&brush->current_attr);
     grbrush_deinit(&(brush->grbrush));
 }
 
@@ -115,6 +139,40 @@ void debrush_release(DEBrush *brush)
 
 
 /*}}}*/
+
+
+/*{{{ Attributes */
+
+
+void debrush_init_attr(DEBrush *brush, const GrStyleSpec *spec)
+{
+    gr_stylespec_unalloc(&brush->current_attr);
+
+    if(spec!=NULL)
+        gr_stylespec_append(&brush->current_attr, spec);
+}
+
+    
+void debrush_set_attr(DEBrush *brush, GrAttr attr)
+{
+    gr_stylespec_set(&brush->current_attr, attr);
+}
+
+
+void debrush_unset_attr(DEBrush *brush, GrAttr attr)
+{
+    gr_stylespec_unset(&brush->current_attr, attr);
+}
+
+
+GrStyleSpec *debrush_get_current_attr(DEBrush *brush)
+{
+    return &brush->current_attr;
+}
+
+
+/*}}}*/
+
 
 
 /*{{{ Border widths and extra information */
@@ -190,6 +248,9 @@ static DynFunTab debrush_dynfuntab[]={
     {(DynFun*)grbrush_get_slave, (DynFun*)debrush_get_slave},
     {grbrush_begin, debrush_begin},
     {grbrush_end, debrush_end},
+    {grbrush_init_attr, debrush_init_attr},
+    {grbrush_set_attr, debrush_set_attr},
+    {grbrush_unset_attr, debrush_unset_attr},
     END_DYNFUNTAB
 };
 

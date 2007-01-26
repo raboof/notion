@@ -25,10 +25,12 @@ INTRCLASS(DEBrush);
 
 
 typedef void DEBrushExtrasFn(DEBrush *brush, 
-                             const WRectangle *g, DEColourGroup *cg,
+                             const WRectangle *g, 
+                             DEColourGroup *cg,
                              GrBorderWidths *bdw,
                              GrFontExtents *fnte,
-                             const char *a1, const char *a2,
+                             const GrStyleSpec *a1,
+                             const GrStyleSpec *a2,
                              bool pre);
 
 DECLCLASS(DEBrush){
@@ -38,15 +40,17 @@ DECLCLASS(DEBrush){
     int indicator_w;
     Window win;
     bool clip_set;
+    
+    GrStyleSpec current_attr;
 };
 
 extern DEBrush *de_get_brush(Window win, WRootWin *rootwin,
                              const char *style);
 
 extern DEBrush *create_debrush(Window win, 
-                               const char *stylename, DEStyle *style);
+                               const GrStyleSpec *spec, DEStyle *style);
 extern bool debrush_init(DEBrush *brush, Window win,
-                         const char *stylename, DEStyle *style);
+                         const GrStyleSpec *spec, DEStyle *style);
 extern void debrush_deinit(DEBrush *brush);
 
 extern DEBrush *debrush_get_slave(DEBrush *brush, WRootWin *rootwin, 
@@ -56,17 +60,23 @@ extern void debrush_release(DEBrush *brush);
 
 
 extern DEColourGroup *debrush_get_colour_group2(DEBrush *brush, 
-                                                const char *attr_p1,
-                                                const char *attr_p2);
+                                                const GrStyleSpec *a1,
+                                                const GrStyleSpec *a2);
 
 extern DEColourGroup *debrush_get_colour_group(DEBrush *brush, 
-                                               const char *attr);
+                                               const GrStyleSpec *attr);
 
+extern DEColourGroup *debrush_get_current_colour_group(DEBrush *brush);
 
 /* Begin/end */
 
 extern void debrush_begin(DEBrush *brush, const WRectangle *geom, int flags);
 extern void debrush_end(DEBrush *brush);
+
+extern void debrush_init_attr(DEBrush *brush, const GrStyleSpec *spec);
+extern void debrush_set_attr(DEBrush *brush, GrAttr attr);
+extern void debrush_unset_attr(DEBrush *brush, GrAttr attr);
+extern GrStyleSpec *debrush_get_current_attr(DEBrush *brush);
 
 /* Information */
 
@@ -77,18 +87,16 @@ extern bool debrush_get_extra(DEBrush *brush, const char *key, char type,
 /* Borders & boxes */
 
 extern void debrush_draw_border(DEBrush *brush, 
-                                const WRectangle *geom,
-                                const char *attrib);
+                                const WRectangle *geom);
 extern void debrush_draw_borderline(DEBrush *brush, const WRectangle *geom,
-                                    const char *attrib, GrBorderLine line);
+                                    GrBorderLine line);
 
 extern void debrush_draw_textbox(DEBrush *brush, const WRectangle *geom,
-                                 const char *text, const char *attr,
-                                 bool needfill);
+                                 const char *text, bool needfill);
 
 extern void debrush_draw_textboxes(DEBrush *brush, const WRectangle *geom, 
                                    int n, const GrTextElem *elem, 
-                                   bool needfill, const char *common_attrib);
+                                   bool needfill);
 
 extern DEBrushExtrasFn debrush_tab_extras;
 extern DEBrushExtrasFn debrush_menuentry_extras;
@@ -100,8 +108,7 @@ extern void debrush_set_window_shape(DEBrush *brush, bool rough,
 
 extern void debrush_enable_transparency(DEBrush *brush, GrTransparency mode);
 
-extern void debrush_fill_area(DEBrush *brush, const WRectangle *geom, 
-                              const char *attr);
+extern void debrush_fill_area(DEBrush *brush, const WRectangle *geom);
 extern void debrush_clear_area(DEBrush *brush, const WRectangle *geom);
 
 

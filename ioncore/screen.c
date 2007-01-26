@@ -39,6 +39,8 @@
 #include "group-ws.h"
 #include "mplex.h"
 #include "tags.h"
+#include "gr.h"
+#include "gr-util.h"
 
 
 WHook *screen_managed_changed_hook=NULL;
@@ -266,8 +268,7 @@ void screen_activated(WScreen *scr)
 
 
 static void do_notify(WScreen *scr, Watch *watch, bool right,
-                      const char *str,
-                      char *style, const char *attr)
+                      const char *str, char *style)
 {
 
     WInfoWin *iw=(WInfoWin*)(watch->obj);
@@ -304,20 +305,19 @@ static void do_notify(WScreen *scr, Watch *watch, bool right,
         watch_setup(watch, (Obj*)iw, NULL);
     }
 
-    infowin_set_attr2(iw, attr, NULL);
     infowin_set_text(iw, str);
 }
 
 
 void screen_notify(WScreen *scr, const char *str)
 {
-    do_notify(scr, &scr->notifywin_watch, FALSE, str, "actnotify", NULL);
+    do_notify(scr, &scr->notifywin_watch, FALSE, str, "actnotify");
 }
 
 
-void screen_windowinfo(WScreen *scr, const char *str, const char *attr)
+void screen_windowinfo(WScreen *scr, const char *str)
 {
-    do_notify(scr, &scr->infowin_watch, TRUE, str, "tab-info", attr);
+    do_notify(scr, &scr->infowin_watch, TRUE, str, "tab-info");
 }
 
 
@@ -397,22 +397,60 @@ static void screen_notify_tag(WScreen *scr)
 }
 
 
+GR_DEFATTR(active);
+GR_DEFATTR(inactive);
+GR_DEFATTR(selected);
+GR_DEFATTR(tagged);
+GR_DEFATTR(not_tagged);
+GR_DEFATTR(not_dragged);
+GR_DEFATTR(activity);
+GR_DEFATTR(no_activity);
+
+
+static void init_attr()
+{
+    GR_ALLOCATTR_BEGIN;
+    GR_ALLOCATTR(active);
+    GR_ALLOCATTR(inactive);
+    GR_ALLOCATTR(selected);
+    GR_ALLOCATTR(tagged);
+    GR_ALLOCATTR(not_tagged);
+    GR_ALLOCATTR(not_dragged);
+    GR_ALLOCATTR(no_activity);
+    GR_ALLOCATTR(activity);
+    GR_ALLOCATTR_END;
+}
+
+
 static void screen_update_infowin(WScreen *scr)
 {
     WRegion *reg=mplex_mx_current(&(scr->mplex));
     bool tag=(reg!=NULL && region_is_tagged(reg));
     bool act=(reg!=NULL && region_is_activity_r(reg) && !REGION_IS_ACTIVE(scr));
+    bool sac=REGION_IS_ACTIVE(scr);
     
     if(tag || act){
         const char *n=region_displayname(reg);
-        char *attr=NULL;
+        WInfoWin *iw;
+                
+        screen_windowinfo(scr, n);
         
-        libtu_asprintf(&attr, "%s-selected-%s-not_dragged-%s",
-                       (REGION_IS_ACTIVE(scr) ? "active" : "inactive"),
-                       (tag ? "tagged" : "not_tagged"),
-                       (act ? "activity" : "no_activity"));
+        iw=(WInfoWin*)scr->infowin_watch.obj;
         
-        screen_windowinfo(scr, n, attr); /* NULL attr ok */
+        if(iw!=NULL){
+            GrStyleSpec *spec=infowin_stylespec(iw);
+            
+            init_attr();
+            
+            gr_stylespec_unalloc(spec);
+            
+            gr_stylespec_set(spec, GR_ATTR(selected));
+            gr_stylespec_set(spec, GR_ATTR(not_dragged));
+            gr_stylespec_set(spec, sac ? GR_ATTR(active) : GR_ATTR(inactive));
+            gr_stylespec_set(spec, tag ? GR_ATTR(tagged) : GR_ATTR(not_tagged));
+            gr_stylespec_set(spec, act ? GR_ATTR(activity) : GR_ATTR(no_activity));
+        }
+            
     }else{
         screen_nowindowinfo(scr);
     }

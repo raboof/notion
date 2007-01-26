@@ -119,7 +119,7 @@ void destyle_create_tab_gcs(DEStyle *style)
 static DEStyle *styles=NULL;
 
 
-DEStyle *de_get_style(WRootWin *rootwin, const char *stylename)
+DEStyle *de_get_style(WRootWin *rootwin, const GrStyleSpec *spec)
 {
     DEStyle *style, *maxstyle=NULL;
     int score, maxscore=0;
@@ -127,7 +127,7 @@ DEStyle *de_get_style(WRootWin *rootwin, const char *stylename)
     for(style=styles; style!=NULL; style=style->next){
         if(style->rootwin!=rootwin)
             continue;
-        score=gr_stylespec_score(style->style, stylename);
+        score=gr_stylespec_score(&style->spec, spec);
         if(score>maxscore){
             maxstyle=style;
             maxscore=score;
@@ -160,8 +160,7 @@ void destyle_deinit(DEStyle *style)
     
     UNLINK_ITEM(styles, style, next, prev);
     
-    if(style->style!=NULL)
-        free(style->style);
+    gr_stylespec_unalloc(&style->spec);
     
     if(style->font!=NULL){
         de_free_font(style->font);
@@ -206,8 +205,7 @@ static void dump_style(DEStyle *style)
 
 bool destyle_init(DEStyle *style, WRootWin *rootwin, const char *name)
 {
-    style->style=scopy(name);
-    if(style->style==NULL)
+    if(!gr_stylespec_load(&style->spec, name))
         return FALSE;
     
     style->based_on=NULL;
@@ -228,12 +226,12 @@ bool destyle_init(DEStyle *style, WRootWin *rootwin, const char *name)
     style->textalign=DEALIGN_CENTER;
 
     style->cgrp_alloced=FALSE;
-    style->cgrp.spec=NULL;
     style->cgrp.bg=DE_BLACK(rootwin);
     style->cgrp.pad=DE_BLACK(rootwin);
     style->cgrp.fg=DE_WHITE(rootwin);
     style->cgrp.hl=DE_WHITE(rootwin);
     style->cgrp.sh=DE_WHITE(rootwin);
+    gr_stylespec_init(&style->cgrp.spec);
     
     style->font=NULL;
     
@@ -268,17 +266,18 @@ static DEStyle *do_create_style(WRootWin *rootwin, const char *name)
 DEStyle *de_create_style(WRootWin *rootwin, const char *name)
 {
     DEStyle *oldstyle, *style;
-
+    uint score;
+    
     style=do_create_style(rootwin, name);
     
     if(style==NULL)
         return NULL;
     
     for(oldstyle=styles; oldstyle!=NULL; oldstyle=oldstyle->next){
-        if(oldstyle->rootwin==rootwin && oldstyle->style!=NULL && 
-           strcmp(oldstyle->style, name)==0){
+        if(oldstyle->rootwin!=rootwin)
+            continue;
+        if(gr_stylespec_equals(&oldstyle->spec, &style->spec))
             break;
-        }
     }
     
     if(oldstyle!=NULL && !oldstyle->is_fallback)
@@ -312,8 +311,8 @@ void de_deinit_styles()
     for(style=styles; style!=NULL; style=next){
         next=style->next;
         if(style->usecount>1){
-            warn(TR("Style %s still in use [%d] but the module "
-                    "is being unloaded!"), style->style, style->usecount);
+            warn(TR("Style is still in use [%d] but the module "
+                    "is being unloaded!"), style->usecount);
         }
         dump_style(style);
     }

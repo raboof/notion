@@ -35,4 +35,8 @@ extern void frame_clear_shape(WFrame *frame);
 extern const char *framemode_get_style(WFrameMode mode);
 extern const char *framemode_get_tab_style(WFrameMode mode);
 
+extern void frame_update_attr(WFrame *frame, int i, WRegion *reg);
+
+extern void frame_setup_dragwin_style(WFrame *frame, GrStyleSpec *spec, int tab);
+
 #endif /* ION_IONCORE_FRAME_DRAW_H */

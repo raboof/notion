@@ -12,6 +12,7 @@
 #include <string.h>
 
 #include <libtu/objp.h>
+#include <libtu/minmax.h>
 #include <libextl/readconfig.h>
 #include <libmainloop/hooks.h>
 #include "common.h"
@@ -147,67 +148,256 @@ GrBrush *gr_get_brush(Window win, WRootWin *rootwin, const char *style)
 /*{{{ Scoring */
 
 
-uint gr_stylespec_score2(const char *spec, const char *attrib, 
-                         const char *attrib_p2)
+static GrAttr star_id=STRINGID_NONE;
+
+
+static int cmp(const void *a_, const void *b_)
+{
+    StringId a=*(const StringId*)a_;
+    StringId b=((const GrAttrScore*)b_)->attr;
+    
+    return (a < b ? -1 : ((a == b) ? 0 : 1));
+}
+
+
+static uint scorefind(const GrStyleSpec *attr, StringId id)
+{
+    GrAttrScore *res;
+    
+    if(attr->attrs==NULL)
+        return 0;
+    
+    if(star_id==STRINGID_NONE)
+        star_id=stringstore_alloc("*");
+    
+    if(id==star_id)
+        return 1;
+    
+    res=bsearch(&id, attr->attrs, attr->n, sizeof(GrAttrScore), cmp);
+    
+    return (res==NULL ? 0 : 2*res->score);
+}
+
+
+uint gr_stylespec_score2(const GrStyleSpec *spec, const GrStyleSpec *attr1, 
+                         const GrStyleSpec *attr2)
 {
     uint score=0;
-    uint a=0;
-    uint mult=1;
-
-    if(attrib==NULL){
-        if(spec==NULL || strcmp(spec, "*")==0)
-            return 1;
-        return 0;
+    uint i;
+    
+    for(i=0; i<spec->n; i++){
+        int sc=scorefind(attr1, spec->attrs[i].attr);
+        
+        if(attr2!=NULL)
+            sc=maxof(sc, scorefind(attr2, spec->attrs[i].attr));
+        
+        if(sc==0){
+            score=0;
+            break;
+        }
+        
+        score+=sc;
     }
     
-    while(1){
-        if(*spec=='*'){
-            score=score+mult;
-            spec++;
-            attrib=strchr(attrib, '-');
-        }else{
-            while(1){
-                if(*attrib=='\0'){
-                    attrib=NULL;
-                    break;
-                }
-                if(*attrib=='-')
-                    break;
-                if(*spec!=*attrib)
-                    return 0;
-                attrib++;
-                spec++;
-            }
-            score=score+2*mult;
-        }
-        
-        if(*spec=='\0')
-            return score;
-        else if(*spec!='-')
-            return 0;
-        
-        if(attrib==NULL){
-            if(a==0 && attrib_p2!=NULL){
-                attrib=attrib_p2;
-                a++;
-            }else{
-                return 0;
-            }
-        }else{
-            attrib++;
-        }
-
-        spec++;
-        mult=mult*3;
-    }
+    return score;
 }
 
 
-uint gr_stylespec_score(const char *spec, const char *attrib)
+uint gr_stylespec_score(const GrStyleSpec *spec, const GrStyleSpec *attr)
 {
-    return gr_stylespec_score2(spec, attrib, NULL);
+    return gr_stylespec_score2(spec, attr, NULL);
 }
 
+
+static uint count_dashes(const char *str)
+{
+    uint n=0;
+    
+    if(str!=NULL){
+        while(1){
+            const char *p=strchr(str, '-');
+            if(p==NULL)
+                break;
+            n++;
+            str=p+1;
+        }
+    }
+    
+    return n;
+}
+    
+    
+
+bool gr_stylespec_load(GrStyleSpec *spec, const char *str)
+{
+    uint score=count_dashes(str)+1;
+    
+    gr_stylespec_init(spec);
+    
+    while(str!=NULL){
+        GrAttr a;
+        const char *p=strchr(str, '-');
+    
+        if(p==NULL){
+            a=stringstore_alloc(str);
+            str=p;
+        }else{
+            a=stringstore_alloc_n(str, p-str);
+            str=p+1;
+        }
+        
+        if(a==STRINGID_NONE)
+            goto fail;
+            
+        if(!gr_stylespec_add(spec, a, score))
+            goto fail;
+            
+        stringstore_free(a);
+        
+        score--;
+    }
+    
+    return TRUE;
+    
+fail:
+    gr_stylespec_unalloc(spec);
+    
+    return FALSE;
+}
+
+
+void gr_stylespec_unalloc(GrStyleSpec *spec)
+{
+    uint i;
+    
+    for(i=0; i<spec->n; i++)
+        stringstore_free(spec->attrs[i].attr);
+    
+    if(spec->attrs!=NULL){
+        free(spec->attrs);
+        spec->attrs=NULL;
+    }
+    
+    spec->n=0;
+}
+
+
+void gr_stylespec_init(GrStyleSpec *spec)
+{
+    spec->attrs=NULL;
+    spec->n=0;
+}
+
+
+static bool gr_stylespec_find_(GrStyleSpec *spec, GrAttr a, int *idx_ge)
+{
+    bool found=FALSE;
+    uint i;
+    
+    for(i=0; i<spec->n; i++){
+        if(spec->attrs[i].attr>=a){
+            found=(spec->attrs[i].attr==a);
+            break;
+        }
+    }
+    
+    *idx_ge=i;
+    return found;
+}
+
+bool gr_stylespec_add(GrStyleSpec *spec, GrAttr a, uint score)
+{
+    static const uint sz=sizeof(GrAttrScore);
+    GrAttrScore *idsn;
+    int idx_ge;
+    
+    if(a==GRATTR_NONE || score==0)
+        return TRUE;
+    
+    if(gr_stylespec_find_(spec, a, &idx_ge)){
+        spec->attrs[idx_ge].score+=score;
+        return TRUE;
+    }
+    
+    idsn=(GrAttrScore*)realloc(spec->attrs, (spec->n+1)*sz);
+    
+    if(idsn==NULL)
+        return FALSE;
+        
+    stringstore_ref(a);
+        
+    memmove(idsn+idx_ge+1, idsn+idx_ge, (spec->n-idx_ge)*sz);
+    
+    idsn[idx_ge].attr=a;
+    idsn[idx_ge].score=score;
+    spec->attrs=idsn;
+    spec->n++;
+    
+    return TRUE;
+}
+
+
+bool gr_stylespec_set(GrStyleSpec *spec, GrAttr a)
+{
+    return gr_stylespec_add(spec, a, 1);
+}
+
+
+void gr_stylespec_unset(GrStyleSpec *spec, GrAttr a)
+{
+    static const uint sz=sizeof(GrAttrScore);
+    GrAttrScore *idsn;
+    int idx_ge;
+    
+    if(a==GRATTR_NONE)
+        return;
+    
+    if(!gr_stylespec_find_(spec, a, &idx_ge))
+        return;
+    
+    stringstore_free(spec->attrs[idx_ge].attr);
+    
+    memmove(spec->attrs+idx_ge, spec->attrs+idx_ge+1,
+            (spec->n-idx_ge-1)*sz);
+            
+    spec->n--;
+    
+    idsn=(GrAttrScore*)realloc(spec->attrs, (spec->n)*sz);
+    
+    if(idsn!=NULL || spec->n==0)
+        spec->attrs=idsn;
+}
+
+
+bool gr_stylespec_append(GrStyleSpec *dst, const GrStyleSpec *src)
+{
+    uint i;
+    bool ok=TRUE;
+    
+    for(i=0; i<src->n; i++){
+        if(!gr_stylespec_add(dst, src->attrs[i].attr, src->attrs[i].score))
+            ok=FALSE;
+    }
+    
+    return ok;
+}
+
+
+bool gr_stylespec_equals(const GrStyleSpec *s1, const GrStyleSpec *s2)
+{
+    uint i;
+    
+    if(s1->n!=s2->n)
+        return FALSE;
+        
+    for(i=0; i<s1->n; i++){
+        if(s1->attrs[i].attr!=s2->attrs[i].attr)
+            return FALSE;
+    }
+    
+    return TRUE;
+}
+    
 
 /*}}}*/
 
@@ -294,17 +484,16 @@ DYNFUN bool grbrush_get_extra(GrBrush *brush, const char *key,
 /*{{{ Dynfuns/Borders */
 
 
-void grbrush_draw_border(GrBrush *brush, const WRectangle *geom,
-                         const char *attrib)
+void grbrush_draw_border(GrBrush *brush, const WRectangle *geom)
 {
-    CALL_DYN(grbrush_draw_border, brush, (brush, geom, attrib));
+    CALL_DYN(grbrush_draw_border, brush, (brush, geom));
 }
 
 
 void grbrush_draw_borderline(GrBrush *brush, const WRectangle *geom,
-                             const char *attrib, GrBorderLine line)
+                             GrBorderLine line)
 {
-    CALL_DYN(grbrush_draw_borderline, brush, (brush, geom, attrib, line));
+    CALL_DYN(grbrush_draw_borderline, brush, (brush, geom, line));
 }
 
 
@@ -315,11 +504,9 @@ void grbrush_draw_borderline(GrBrush *brush, const WRectangle *geom,
 
 
 void grbrush_draw_string(GrBrush *brush, int x, int y,
-                         const char *str, int len, bool needfill,
-                         const char *attrib)
+                         const char *str, int len, bool needfill)
 {
-    CALL_DYN(grbrush_draw_string, brush, 
-             (brush, x, y, str, len, needfill, attrib));
+    CALL_DYN(grbrush_draw_string, brush, (brush, x, y, str, len, needfill));
 }
 
 
@@ -339,19 +526,16 @@ uint grbrush_get_text_width(GrBrush *brush, const char *text, uint len)
 
 
 void grbrush_draw_textbox(GrBrush *brush, const WRectangle *geom,
-                          const char *text, const char *attr,
-                          bool needfill)
+                          const char *text, bool needfill)
 {
-    CALL_DYN(grbrush_draw_textbox, brush, 
-             (brush, geom, text, attr, needfill));
+    CALL_DYN(grbrush_draw_textbox, brush, (brush, geom, text, needfill));
 }
 
 void grbrush_draw_textboxes(GrBrush *brush, const WRectangle *geom,
                             int n, const GrTextElem *elem, 
-                            bool needfill, const char *common_attrib)
+                            bool needfill)
 {
-    CALL_DYN(grbrush_draw_textboxes, brush, 
-             (brush, geom, n, elem, needfill, common_attrib));
+    CALL_DYN(grbrush_draw_textboxes, brush, (brush, geom, n, elem, needfill));
 }
 
 
@@ -374,16 +558,33 @@ void grbrush_enable_transparency(GrBrush *brush, GrTransparency tr)
 }
 
 
-void grbrush_fill_area(GrBrush *brush, const WRectangle *geom,
-                       const char *attr)
+void grbrush_fill_area(GrBrush *brush, const WRectangle *geom)
 {
-    CALL_DYN(grbrush_fill_area, brush, (brush, geom, attr));
+    CALL_DYN(grbrush_fill_area, brush, (brush, geom));
 }
 
 
 void grbrush_clear_area(GrBrush *brush, const WRectangle *geom)
 {
     CALL_DYN(grbrush_clear_area, brush, (brush, geom));
+}
+
+
+void grbrush_init_attr(GrBrush *brush, const GrStyleSpec *spec)
+{
+    CALL_DYN(grbrush_init_attr, brush, (brush, spec));
+}
+
+
+void grbrush_set_attr(GrBrush *brush, GrAttr attr)
+{
+    CALL_DYN(grbrush_set_attr, brush, (brush, attr));
+}
+
+
+void grbrush_unset_attr(GrBrush *brush, GrAttr attr)
+{
+    CALL_DYN(grbrush_unset_attr, brush, (brush, attr));
 }
 
 

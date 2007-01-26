@@ -12,6 +12,8 @@
 #ifndef ION_IONCORE_GR_H
 #define ION_IONCORE_GR_H
 
+#include <libtu/stringstore.h>
+
 #include "common.h"
 #include "rectangle.h"
 
@@ -42,10 +44,28 @@ typedef struct{
     uint spacing;
 } GrBorderWidths;
 
+typedef StringId GrAttr;
+
+#define GRATTR_NONE STRINGID_NONE
+
+#define GR_STYLESPEC_INIT {0, NULL}
+
+typedef struct{
+    GrAttr attr;
+    uint score;
+} GrAttrScore;
+
+typedef struct{
+    uint n;
+    GrAttrScore *attrs;
+} GrStyleSpec;
+
+#define GR_TEXTELEM_INIT {NULL, 0, GR_STYLESPEC_INIT}
+
 typedef struct{
     char *text;
     int iw;
-    char *attr;
+    GrStyleSpec attr;
 } GrTextElem;
 
 typedef enum{
@@ -66,6 +86,7 @@ typedef enum{
 #define GRBRUSH_AMEND       0x0001
 #define GRBRUSH_NEED_CLIP   0x0004
 #define GRBRUSH_NO_CLEAR_OK 0x0008 /* implied by GRBRUSH_AMEND */
+#define GRBRUSH_KEEP_ATTR   0x0010
 
 /* Engines etc. */
 
@@ -78,31 +99,30 @@ extern bool gr_select_engine(const char *engine);
 extern void gr_refresh();
 extern void gr_read_config();
 
-/* Stylespecs are of the from attr1-attr2-etc. We require that each attr in
- * 'spec' matches the one at same index in 'attrib' when '*' matches anything.
- * The score increment for exact match is 2*3^index and 1*3^index for '*' 
- * match. If all elements of 'spec' match those of 'attrib' exactly, the 
- * accumulated score is returned. Otherwise the matching fails and zero is
- * returned. For example:
- *  
- *  spec        attrib            score
- *     foo-*-baz     foo-bar-baz        2+1*3+2*3^2 = 23
- *  foo-bar          foo-bar-baz        2+2*3         = 8
- *  foo-baz          foo-bar-baz        0
- * 
- * gr_stylespec_score2 continues matching from attrib_p2 (if not NULL) when
- * it has reached end of attrib.
- */
-extern uint gr_stylespec_score(const char *spec, const char *attrib);
-extern uint gr_stylespec_score2(const char *spec, const char *attrib, 
-                                const char *attrib_p2);
+ /* Every star ('*') element of 'spec' increases score by one.
+  * Every other element of 'spec' found in 'attr' increases the score by the
+  * number set in attr times two. Any element of 'spec' (other than star),
+  *  not found in 'attr', forces score to zero.
+  */
+extern uint gr_stylespec_score(const GrStyleSpec *spec, const GrStyleSpec *attr);
+extern uint gr_stylespec_score2(const GrStyleSpec *spec, const GrStyleSpec *attr,
+                                const GrStyleSpec *attr2);
+
+extern void gr_stylespec_init(GrStyleSpec *spec);
+extern bool gr_stylespec_set(GrStyleSpec *spec, GrAttr a);
+extern void gr_stylespec_unset(GrStyleSpec *spec, GrAttr a);
+extern bool gr_stylespec_add(GrStyleSpec *spec, GrAttr a, uint score);
+extern bool gr_stylespec_append(GrStyleSpec *dst, const GrStyleSpec *src);
+extern bool gr_stylespec_load(GrStyleSpec *spec, const char *str);
+extern void gr_stylespec_unalloc(GrStyleSpec *spec);
+extern bool gr_stylespec_equals(const GrStyleSpec *s1, const GrStyleSpec *s2);
 
 /* GrBrush */
 
 extern GrBrush *gr_get_brush(Window win, WRootWin *rootwin,
                              const char *style);
 
-extern GrBrush *grbrush_get_slave(GrBrush *brush, WRootWin *rootwin, 
+DYNFUN GrBrush *grbrush_get_slave(GrBrush *brush, WRootWin *rootwin, 
                                   const char *style);
 
 extern void grbrush_release(GrBrush *brush);
@@ -110,18 +130,23 @@ extern void grbrush_release(GrBrush *brush);
 extern bool grbrush_init(GrBrush *brush);
 extern void grbrush_deinit(GrBrush *brush);
 
-extern void grbrush_begin(GrBrush *brush, const WRectangle *geom,
+DYNFUN void grbrush_begin(GrBrush *brush, const WRectangle *geom,
                           int flags);
-extern void grbrush_end(GrBrush *brush);
+DYNFUN void grbrush_end(GrBrush *brush);
+
+/* Attributes */
+
+DYNFUN void grbrush_init_attr(GrBrush *brush, const GrStyleSpec *spec);
+DYNFUN void grbrush_set_attr(GrBrush *brush, GrAttr attr);
+DYNFUN void grbrush_unset_attr(GrBrush *brush, GrAttr attr);
 
 /* Border drawing */
 
 DYNFUN void grbrush_get_border_widths(GrBrush *brush, GrBorderWidths *bdi);
 
-DYNFUN void grbrush_draw_border(GrBrush *brush, const WRectangle *geom,
-                                const char *attrib);
+DYNFUN void grbrush_draw_border(GrBrush *brush, const WRectangle *geom);
 DYNFUN void grbrush_draw_borderline(GrBrush *brush, const WRectangle *geom,
-                                    const char *attrib, GrBorderLine line);
+                                    GrBorderLine line);
 
 /* String drawing */
 
@@ -130,18 +155,16 @@ DYNFUN void grbrush_get_font_extents(GrBrush *brush, GrFontExtents *fnti);
 DYNFUN uint grbrush_get_text_width(GrBrush *brush, const char *text, uint len);
 
 DYNFUN void grbrush_draw_string(GrBrush *brush, int x, int y,
-                                const char *str, int len, bool needfill,
-                                const char *attrib);
+                                const char *str, int len, bool needfill);
 
 /* Textbox drawing */
 
 DYNFUN void grbrush_draw_textbox(GrBrush *brush, const WRectangle *geom,
-                                 const char *text, const char *attr,
-                                 bool needfill);
+                                 const char *text, bool needfill);
 
 DYNFUN void grbrush_draw_textboxes(GrBrush *brush, const WRectangle *geom,
                                    int n, const GrTextElem *elem, 
-                                   bool needfill, const char *common_attrib);
+                                   bool needfill);
 
 /* Misc */
 
@@ -155,8 +178,7 @@ DYNFUN void grbrush_set_window_shape(GrBrush *brush, bool rough,
 
 DYNFUN void grbrush_enable_transparency(GrBrush *brush, GrTransparency mode);
 
-DYNFUN void grbrush_fill_area(GrBrush *brush, const WRectangle *geom, 
-                              const char *attr);
+DYNFUN void grbrush_fill_area(GrBrush *brush, const WRectangle *geom);
 DYNFUN void grbrush_clear_area(GrBrush *brush, const WRectangle *geom);
 
 DYNFUN bool grbrush_get_extra(GrBrush *brush, const char *key, 

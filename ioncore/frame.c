@@ -307,46 +307,6 @@ int frame_nth_tab_iw(WFrame *frame, int n)
 
 
 
-static void update_attr(WFrame *frame, int i, WRegion *reg)
-{
-    int flags=0;
-    static char *attrs[]={
-        "unselected-not_tagged-not_dragged-no_activity",
-        "selected-not_tagged-not_dragged-no_activity",
-        "unselected-tagged-not_dragged-no_activity",
-        "selected-tagged-not_dragged-no_activity",
-        "unselected-not_tagged-dragged-no_activity",
-        "selected-not_tagged-dragged-no_activity",
-        "unselected-tagged-dragged-no_activity",
-        "selected-tagged-dragged-no_activity",
-        "unselected-not_tagged-not_dragged-activity",
-        "selected-not_tagged-not_dragged-activity",
-        "unselected-tagged-not_dragged-activity",
-        "selected-tagged-not_dragged-activity",
-        "unselected-not_tagged-dragged-activity",
-        "selected-not_tagged-dragged-activity",
-        "unselected-tagged-dragged-activity",
-        "selected-tagged-dragged-activity"
-    };
-
-    if(i>=frame->titles_n){
-        /* Might happen when deinitialising */
-        return;
-    }
-    
-    if(reg==FRAME_CURRENT(frame))
-        flags|=0x01;
-    if(reg!=NULL && reg->flags&REGION_TAGGED)
-        flags|=0x02;
-    if(i==frame->tab_dragged_idx)
-        flags|=0x04;
-    if(reg!=NULL && region_is_activity_r(reg))
-        flags|=0x08;
-    
-    frame->titles[i].attr=attrs[flags];
-}
-
-
 void frame_update_attr_nth(WFrame *frame, int i)
 {
     WRegion *reg;
@@ -354,18 +314,18 @@ void frame_update_attr_nth(WFrame *frame, int i)
     if(i<0 || i>=frame->titles_n)
         return;
 
-    update_attr(frame, i, mplex_mx_nth((WMPlex*)frame, i));
+    frame_update_attr(frame, i, mplex_mx_nth((WMPlex*)frame, i));
 }
 
 
-static void update_attrs(WFrame *frame)
+static void frame_update_attrs(WFrame *frame)
 {
     int i=0;
     WRegion *sub;
     WLListIterTmp tmp;
     
     FRAME_MX_FOR_ALL(sub, frame, tmp){
-        update_attr(frame, i, sub);
+        frame_update_attr(frame, i, sub);
         i++;
     }
 }
@@ -379,6 +339,7 @@ static void frame_free_titles(WFrame *frame)
         for(i=0; i<frame->titles_n; i++){
             if(frame->titles[i].text)
                 free(frame->titles[i].text);
+            gr_stylespec_unalloc(&frame->titles[i].attr);
         }
         free(frame->titles);
         frame->titles=NULL;
@@ -391,7 +352,10 @@ static void do_init_title(WFrame *frame, int i, WRegion *sub)
 {
     frame->titles[i].text=NULL;
     frame->titles[i].iw=frame_nth_tab_iw(frame, i);
-    update_attr(frame, i, sub);
+    
+    gr_stylespec_init(&frame->titles[i].attr);
+    
+    frame_update_attr(frame, i, sub);
 }
 
 
@@ -869,7 +833,7 @@ bool frame_is_numbers(WFrame *frame)
 
 void frame_managed_notify(WFrame *frame, WRegion *sub, WRegionNotify how)
 {
-    update_attrs(frame);
+    frame_update_attrs(frame);
     frame_recalc_bar(frame);
     frame_draw_bar(frame, FALSE);
 }
@@ -898,7 +862,7 @@ static void frame_managed_changed(WFrame *frame, int mode, bool sw,
     if(mode!=MPLEX_CHANGE_SWITCHONLY)
         frame_initialise_titles(frame);
     else
-        update_attrs(frame);
+        frame_update_attrs(frame);
 
     if(sw)
         need_draw=!frame_set_background(frame, FALSE);

@@ -267,10 +267,9 @@ void debrush_do_draw_string(DEBrush *brush, int x, int y,
 
 
 void debrush_draw_string(DEBrush *brush, int x, int y,
-                         const char *str, int len, bool needfill,
-                         const char *attrib)
+                         const char *str, int len, bool needfill)
 {
-    DEColourGroup *cg=debrush_get_colour_group(brush, attrib);
+    DEColourGroup *cg=debrush_get_current_colour_group(brush);
     if(cg!=NULL)
         debrush_do_draw_string(brush, x, y, str, len, needfill, cg);
 }

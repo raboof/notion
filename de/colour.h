@@ -24,7 +24,7 @@ typedef unsigned long DEColour;
 
 
 DECLSTRUCT(DEColourGroup){
-    char *spec;
+    GrStyleSpec spec;
     DEColour bg, hl, sh, fg, pad;
 };
 

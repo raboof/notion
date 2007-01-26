@@ -23,8 +23,8 @@ DECLCLASS(WInfoWin){
     WWindow wwin;
     GrBrush *brush;
     char *buffer;
-    char *attr;
     char *style;
+    GrStyleSpec attr;
 };
 
 #define INFOWIN_BRUSH(INFOWIN) ((INFOWIN)->brush)
@@ -38,7 +38,7 @@ extern WInfoWin *create_infowin(WWindow *parent, const WFitParams *fp,
 extern void infowin_deinit(WInfoWin *p);
 
 extern void infowin_set_text(WInfoWin *p, const char *s);
-extern bool infowin_set_attr2(WInfoWin *p, const char *a1, const char *a2);
+extern GrStyleSpec *infowin_stylespec(WInfoWin *p);
 
 extern WRegion *infowin_load(WWindow *par, const WFitParams *fp, ExtlTab tab);
 

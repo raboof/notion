@@ -46,7 +46,7 @@ DECLSTRUCT(DEBorder){
 
 
 DECLSTRUCT(DEStyle){
-    char *style;
+    GrStyleSpec spec;
     int usecount;
     bool is_fallback;
     
@@ -91,7 +91,7 @@ extern void destyle_create_tab_gcs(DEStyle *style);
 extern void de_reset();
 extern void de_deinit_styles();
 
-extern DEStyle *de_get_style(WRootWin *rootwin, const char *name);
+extern DEStyle *de_get_style(WRootWin *rootwin, const GrStyleSpec *spec);
 
 
 #endif /* ION_DE_STYLE_H */

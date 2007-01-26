@@ -56,10 +56,7 @@ void de_free_colour_group(WRootWin *rootwin, DEColourGroup *cg)
     
     XFreeColors(ioncore_g.dpy, rootwin->default_cmap, pixels, 5, 0);
     
-    if(cg->spec!=NULL){
-        free(cg->spec);
-        cg->spec=NULL;
-    }
+    gr_stylespec_unalloc(&cg->spec);
 }
 
 

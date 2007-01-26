@@ -113,7 +113,7 @@ static void panehandle_draw(WPaneHandle *pwin, bool complete)
     
     grbrush_begin(pwin->brush, &g, (complete ? 0 : GRBRUSH_NO_CLEAR_OK));
     
-    grbrush_draw_borderline(pwin->brush, &g, NULL, pwin->bline);
+    grbrush_draw_borderline(pwin->brush, &g, pwin->bline);
     
     grbrush_end(pwin->brush);
 }

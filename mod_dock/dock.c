@@ -905,7 +905,7 @@ static void dock_draw(WDock *dock, bool complete)
         {
             WRectangle geom=REGION_GEOM(dock);
             geom.x=geom.y=0;
-            grbrush_draw_border(dock->brush, &geom, "dock");
+            grbrush_draw_border(dock->brush, &geom);
         }
         break;
     case DOCK_OUTLINE_STYLE_EACH:
@@ -913,8 +913,7 @@ static void dock_draw(WDock *dock, bool complete)
             WDockApp *dockapp;
             for(dockapp=dock->dockapps; dockapp!=NULL;
                 dockapp=dockapp->next){
-                grbrush_draw_border(dock->brush, &dockapp->tile_geom, 
-                                    "dock");
+                grbrush_draw_border(dock->brush, &dockapp->tile_geom);
             }
         }
         break;

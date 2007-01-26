@@ -25,6 +25,7 @@
 #include <ioncore/selection.h>
 #include <ioncore/event.h>
 #include <ioncore/regbind.h>
+#include <ioncore/gr-util.h>
 #include "edln.h"
 #include "wedln.h"
 #include "inputp.h"
@@ -50,12 +51,14 @@ static int calc_text_y(WEdln *wedln, const WRectangle *geom)
 
 static int wedln_draw_strsect(WEdln *wedln, const WRectangle *geom, 
                               int x, int y, const char *str, int len,
-                              const char *attr)
+                              GrAttr a)
 {
     if(len==0)
         return 0;
     
-    grbrush_draw_string(WEDLN_BRUSH(wedln), x, y, str, len, TRUE, attr);
+    grbrush_set_attr(WEDLN_BRUSH(wedln), a);
+    grbrush_draw_string(WEDLN_BRUSH(wedln), x, y, str, len, TRUE);
+    grbrush_unset_attr(WEDLN_BRUSH(wedln), a);
     
     return grbrush_get_text_width(WEDLN_BRUSH(wedln), str, len);
 }
@@ -73,9 +76,34 @@ static void dispu(const char* s, int l)
 }
 #endif
 
-#define DSTRSECT(LEN, INV) \
-    if(LEN>0){tx+=wedln_draw_strsect(wedln, geom, geom->x+tx, ty, str, LEN, INV); \
-     str+=LEN; len-=LEN;}
+#define DSTRSECT(LEN, A)                                    \
+    if(LEN>0){                                              \
+        tx+=wedln_draw_strsect(wedln, geom, geom->x+tx, ty, \
+                               str, LEN, GR_ATTR(A));       \
+        str+=LEN; len-=LEN;                                 \
+    }
+
+
+GR_DEFATTR(active);
+GR_DEFATTR(inactive);
+GR_DEFATTR(normal);
+GR_DEFATTR(selection);
+GR_DEFATTR(cursor);
+GR_DEFATTR(prompt);
+GR_DEFATTR(info);
+
+static void init_attr()
+{
+    GR_ALLOCATTR_BEGIN;
+    GR_ALLOCATTR(active);
+    GR_ALLOCATTR(inactive);
+    GR_ALLOCATTR(normal);
+    GR_ALLOCATTR(selection);
+    GR_ALLOCATTR(cursor);
+    GR_ALLOCATTR(prompt);
+    GR_ALLOCATTR(info);
+    GR_ALLOCATTR_END;
+}
 
 
 static void wedln_do_draw_str_box(WEdln *wedln, const WRectangle *geom,
@@ -83,43 +111,30 @@ static void wedln_do_draw_str_box(WEdln *wedln, const WRectangle *geom,
                                   int mark, int tx)
 {
     int len=strlen(str), ll=0, ty=0;
-    const char *normalstyle=(REGION_IS_ACTIVE(wedln)
-                             ? "active-normal" : "inactive-normal");
-    const char *selectionstyle=(REGION_IS_ACTIVE(wedln)
-                                ? "active-selection" : "inactive-selection");
-    const char *cursorstyle=(REGION_IS_ACTIVE(wedln)
-                             ? "active-cursor" : "inactive-cursor");
-    
-    /*if(tx<geom->w){
-        WRectangle g=*geom;
-        g.x+=tx;
-        g.w-=tx;
-        grbrush_clear_area(WEDLN_BRUSH(wedln), &g);
-    }*/
     
     ty=calc_text_y(wedln, geom);
 
     if(mark<=cursor){
         if(mark>=0){
-            DSTRSECT(mark, normalstyle);
-            DSTRSECT(cursor-mark, selectionstyle);
+            DSTRSECT(mark, normal);
+            DSTRSECT(cursor-mark, selection);
         }else{
-            DSTRSECT(cursor, normalstyle);
+            DSTRSECT(cursor, normal);
         }
         if(len==0){
             tx+=wedln_draw_strsect(wedln, geom, geom->x+tx, ty,
-                                   " ", 1, cursorstyle);
+                                   " ", 1, GR_ATTR(cursor));
         }else{
             ll=str_nextoff(str, 0);
-            DSTRSECT(ll, cursorstyle);
+            DSTRSECT(ll, cursor);
         }
     }else{
-        DSTRSECT(cursor, normalstyle);
+        DSTRSECT(cursor, normal);
         ll=str_nextoff(str, 0);
-        DSTRSECT(ll, cursorstyle);
-        DSTRSECT(mark-cursor-ll, selectionstyle);
+        DSTRSECT(ll, cursor);
+        DSTRSECT(mark-cursor-ll, selection);
     }
-    DSTRSECT(len, normalstyle);
+    DSTRSECT(len, normal);
 
     if(tx<geom->w){
         WRectangle g=*geom;
@@ -150,7 +165,8 @@ static void wedln_draw_str_box(WEdln *wedln, const WRectangle *geom,
     if(dstart!=0)
         tx=grbrush_get_text_width(WEDLN_BRUSH(wedln), str+vstart, dstart);
 
-    grbrush_begin(WEDLN_BRUSH(wedln), geom, GRBRUSH_AMEND|GRBRUSH_NEED_CLIP);
+    grbrush_begin(WEDLN_BRUSH(wedln), geom, 
+                  GRBRUSH_AMEND|GRBRUSH_KEEP_ATTR|GRBRUSH_NEED_CLIP);
     
     wedln_do_draw_str_box(wedln, geom, str+vstart+dstart, point, mark, tx);
 
@@ -350,17 +366,10 @@ void wedln_draw_completions(WEdln *wedln, bool complete)
     WRectangle geom;
     
     if(wedln->compl_list.strs!=NULL && WEDLN_BRUSH(wedln)!=NULL){
-        const char *style=(REGION_IS_ACTIVE(wedln) 
-                           ? "active" 
-                           : "inactive");
-        const char *selstyle=(REGION_IS_ACTIVE(wedln) 
-                              ? "active-selection" 
-                              : "inactive-selection");
-        
         get_completions_geom(wedln, G_CURRENT, &geom);
         
         draw_listing(WEDLN_BRUSH(wedln), &geom, &(wedln->compl_list), 
-                     complete, style, selstyle);
+                     complete, GR_ATTR(selection));
     }
 }
 
@@ -369,7 +378,6 @@ void wedln_draw_textarea(WEdln *wedln)
 {
     WRectangle geom;
     int ty;
-    const char *style=(REGION_IS_ACTIVE(wedln) ? "active" : "inactive");
 
     if(WEDLN_BRUSH(wedln)==NULL)
         return;
@@ -378,30 +386,29 @@ void wedln_draw_textarea(WEdln *wedln)
     
     /*grbrush_begin(WEDLN_BRUSH(wedln), &geom, GRBRUSH_AMEND);*/
     
-    grbrush_draw_border(WEDLN_BRUSH(wedln), &geom, style);
+    grbrush_draw_border(WEDLN_BRUSH(wedln), &geom);
 
     get_inner_geom(wedln, G_CURRENT, &geom);
 
     ty=calc_text_y(wedln, &geom);
 
+    grbrush_set_attr(WEDLN_BRUSH(wedln), GR_ATTR(prompt));
+   
     if(wedln->prompt!=NULL){
-        const char *promptstyle=(REGION_IS_ACTIVE(wedln) 
-                                 ? "active-prompt" 
-                                 : "inactive-prompt");
         grbrush_draw_string(WEDLN_BRUSH(wedln), geom.x, ty,
-                            wedln->prompt, wedln->prompt_len, TRUE, 
-                            promptstyle);
+                            wedln->prompt, wedln->prompt_len, TRUE);
     }
     
     if(wedln->info!=NULL){
         int x=geom.x+geom.w-wedln->info_w;
-        const char *promptstyle=(REGION_IS_ACTIVE(wedln) 
-                                 ? "active-prompt-info" 
-                                 : "inactive-prompt-info");
+        
+        grbrush_set_attr(WEDLN_BRUSH(wedln), GR_ATTR(info));
         grbrush_draw_string(WEDLN_BRUSH(wedln), x, ty,
-                            wedln->info, wedln->info_len, TRUE, 
-                            promptstyle);
+                            wedln->info, wedln->info_len, TRUE);
+        grbrush_unset_attr(WEDLN_BRUSH(wedln), GR_ATTR(info));
     }
+
+    grbrush_unset_attr(WEDLN_BRUSH(wedln), GR_ATTR(prompt));
         
     get_textarea_geom(wedln, G_CURRENT, &geom);
     
@@ -412,7 +419,7 @@ void wedln_draw_textarea(WEdln *wedln)
 }
 
 
-void wedln_draw(WEdln *wedln, bool complete)
+static void wedln_draw_(WEdln *wedln, bool complete, bool completions)
 {
     WRectangle g;
     int f=(complete ? 0 : GRBRUSH_NO_CLEAR_OK);
@@ -424,12 +431,23 @@ void wedln_draw(WEdln *wedln, bool complete)
     
     grbrush_begin(WEDLN_BRUSH(wedln), &g, f);
     
-    wedln_draw_completions(wedln, FALSE);
+    grbrush_set_attr(WEDLN_BRUSH(wedln), REGION_IS_ACTIVE(wedln) 
+                                         ? GR_ATTR(active) 
+                                         : GR_ATTR(inactive));
+
+    if(completions)
+        wedln_draw_completions(wedln, FALSE);
+    
     wedln_draw_textarea(wedln);
     
     grbrush_end(WEDLN_BRUSH(wedln));
 }
 
+
+void wedln_draw(WEdln *wedln, bool complete)
+{
+    wedln_draw_(wedln, complete, TRUE);
+}
 
 /*}}} */
 
@@ -464,7 +482,7 @@ static void wedln_set_info(WEdln *wedln, const char *info)
     get_textarea_geom(wedln, G_CURRENT, &tageom);
     wedln_update_cursor(wedln, tageom.w);
     
-    wedln_draw_textarea(wedln);
+    wedln_draw_(wedln, FALSE, FALSE);
 }
 
 
@@ -899,6 +917,8 @@ static bool wedln_init(WEdln *wedln, WWindow *par, const WFitParams *fp,
 {
     wedln->vstart=0;
 
+    init_attr();
+    
     if(!wedln_init_prompt(wedln, params->prompt))
         return FALSE;
     

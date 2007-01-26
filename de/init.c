@@ -28,6 +28,32 @@
 #include "exports.h"
 
 
+/*{{{ Style specifications */
+
+
+static bool get_spec(ExtlTab tab, const char *name, GrStyleSpec *spec,
+                     char **pat_ret)
+{
+    char *str;
+    bool res;
+    
+    if(!extl_table_gets_s(tab, name, &str))
+        return FALSE;
+        
+    res=gr_stylespec_load(spec, str);
+    
+    if(pat_ret==NULL)
+        free(str);
+    else
+        *pat_ret=str;
+    
+    return res;
+}
+
+
+/*}}}*/
+
+
 /*{{{ Borders */
 
 
@@ -141,15 +167,18 @@ void de_get_extra_cgrps(WRootWin *rootwin, DEStyle *style, ExtlTab tab)
         return;
 
     for(i=0; i<n-nfailed; i++){
+        GrStyleSpec spec;
+        
         if(!extl_table_geti_t(tab, i+1, &sub))
             goto err;
-        if(!extl_table_gets_s(sub, "substyle_pattern", &name)){
+        
+        if(!get_spec(sub, "substyle_pattern", &spec, NULL)){
             extl_unref_table(sub);
             goto err;
         }
         
-        /*de_init_colour_group(rootwin, style->extra_cgrps+i-nfailed);*/
-        style->extra_cgrps[i-nfailed].spec=name;
+        style->extra_cgrps[i-nfailed].spec=spec;
+        
         de_get_colour_group(rootwin, style->extra_cgrps+i-nfailed, sub, 
                             style);
         
@@ -237,6 +266,8 @@ void de_get_nonfont(WRootWin *rootwin, DEStyle *style, ExtlTab tab)
 }
 
 
+
+
 /*EXTL_DOC
  * Define a style for the root window \var{rootwin}. 
  */
@@ -246,8 +277,9 @@ bool de_defstyle_rootwin(WRootWin *rootwin, const char *name, ExtlTab tab)
     DEStyle *style;
     char *fnt;
     uint n;
+    char *based_on_name;
     DEStyle *based_on=NULL;
-    char *based_on_name=NULL;
+    GrStyleSpec based_on_spec;
 
     if(name==NULL)
         return FALSE;
@@ -257,18 +289,22 @@ bool de_defstyle_rootwin(WRootWin *rootwin, const char *name, ExtlTab tab)
     if(style==NULL)
         return FALSE;
 
-    if(extl_table_gets_s(tab, "based_on", &based_on_name)){
-        based_on=de_get_style(rootwin, based_on_name);
+    if(get_spec(tab, "based_on", &based_on_spec, &based_on_name)){
+        based_on=de_get_style(rootwin, &based_on_spec);
+        
+        gr_stylespec_unalloc(&based_on_spec);
+
         if(based_on==style){
             warn(TR("'based_on' for %s points back to the style itself."),
                  name);
         }else if(based_on==NULL){
-            warn(TR("Unknown base style \"%s\"."), based_on);
+            warn(TR("Unknown base style. \"%s\""), based_on_name);
         }else{
             style->based_on=based_on;
             based_on->usecount++;
             /* Copy simple parameters */
         }
+        
         free(based_on_name);
     }
 

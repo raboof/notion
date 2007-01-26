@@ -109,7 +109,7 @@ void statusbar_calculate_xs(WStatusBar *sb)
 
 static void draw_elems(GrBrush *brush, WRectangle *g, int ty,
                        WSBElem *elems, int nelems, bool needfill, 
-                       const char *dfltattr, bool complete)
+                       bool complete)
 {
     int prevx=g->x;
     int maxx=g->x+g->w;
@@ -125,8 +125,13 @@ static void draw_elems(GrBrush *brush, WRectangle *g, int ty,
             const char *s=(elems->text!=NULL
                            ? elems->text 
                            : STATUSBAR_NX_STR);
-            grbrush_draw_string(brush, elems->x, ty, s, strlen(s), needfill, 
-                                elems->attr ? elems->attr : dfltattr);
+            
+            grbrush_set_attr(brush, elems->attr);
+                
+            grbrush_draw_string(brush, elems->x, ty, s, strlen(s), needfill);
+            
+            grbrush_unset_attr(brush, elems->attr);
+            
             prevx=elems->x+elems->text_w;
         }
         elems++;
@@ -162,7 +167,7 @@ void statusbar_draw(WStatusBar *sb, bool complete)
     
     grbrush_begin(sb->brush, &g, (complete ? 0 : GRBRUSH_NO_CLEAR_OK));
     
-    grbrush_draw_border(sb->brush, &g, NULL);
+    grbrush_draw_border(sb->brush, &g);
     
     if(sb->elems==NULL)
         return;
@@ -174,8 +179,7 @@ void statusbar_draw(WStatusBar *sb, bool complete)
 
     ty=(g.y+fnte.baseline+(g.h-fnte.max_height)/2);
         
-    draw_elems(sb->brush, &g, ty, sb->elems, sb->nelems,
-               TRUE, NULL, complete);
+    draw_elems(sb->brush, &g, ty, sb->elems, sb->nelems, TRUE, complete);
     
     grbrush_end(sb->brush);
 }

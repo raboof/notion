@@ -20,14 +20,82 @@
 #include "framep.h"
 #include "frame-draw.h"
 #include "strings.h"
+#include "activity.h"
 #include "names.h"
 #include "gr.h"
+#include "gr-util.h"
 
 
 #define BAR_INSIDE_BORDER(FRAME) \
     ((FRAME)->barmode==FRAME_BAR_INSIDE || (FRAME)->barmode==FRAME_BAR_NONE)
 #define BAR_EXISTS(FRAME) ((FRAME)->barmode!=FRAME_BAR_NONE)
 #define BAR_H(FRAME) (FRAME)->bar_h
+
+
+/*{{{ Attributes */
+
+
+GR_DEFATTR(active);
+GR_DEFATTR(inactive);
+GR_DEFATTR(selected);
+GR_DEFATTR(unselected);
+GR_DEFATTR(tagged);
+GR_DEFATTR(not_tagged);
+GR_DEFATTR(dragged);
+GR_DEFATTR(not_dragged);
+GR_DEFATTR(activity);
+GR_DEFATTR(no_activity);
+GR_DEFATTR(quasiactive);
+GR_DEFATTR(not_quasiactive);
+
+
+static void ensure_create_attrs()
+{
+    GR_ALLOCATTR_BEGIN;
+    GR_ALLOCATTR(active);
+    GR_ALLOCATTR(inactive);
+    GR_ALLOCATTR(selected);
+    GR_ALLOCATTR(unselected);
+    GR_ALLOCATTR(tagged);
+    GR_ALLOCATTR(not_tagged);
+    GR_ALLOCATTR(dragged);
+    GR_ALLOCATTR(not_dragged);
+    GR_ALLOCATTR(no_activity);
+    GR_ALLOCATTR(activity);
+    GR_ALLOCATTR(quasiactive);
+    GR_ALLOCATTR(not_quasiactive);
+    GR_ALLOCATTR_END;
+}
+    
+
+void frame_update_attr(WFrame *frame, int i, WRegion *reg)
+{
+    GrStyleSpec *spec;
+    bool selected, tagged, dragged, activity;
+    
+    if(i>=frame->titles_n){
+        /* Might happen when deinitialising */
+        return;
+    }
+    
+    ensure_create_attrs();
+    
+    spec=&frame->titles[i].attr;
+    
+    selected=(reg==FRAME_CURRENT(frame));
+    tagged=(reg!=NULL && reg->flags&REGION_TAGGED);
+    dragged=(i==frame->tab_dragged_idx);
+    activity=(reg!=NULL && region_is_activity_r(reg));
+    
+    gr_stylespec_unalloc(spec);
+    gr_stylespec_set(spec, selected ? GR_ATTR(selected) : GR_ATTR(unselected));
+    gr_stylespec_set(spec, tagged ? GR_ATTR(tagged) : GR_ATTR(not_tagged));
+    gr_stylespec_set(spec, dragged ? GR_ATTR(dragged) : GR_ATTR(not_dragged));
+    gr_stylespec_set(spec, activity ? GR_ATTR(activity) : GR_ATTR(no_activity));
+}
+
+
+/*}}}*/
 
 
 /*{{{ (WFrame) dynfun default implementations */
@@ -272,11 +340,22 @@ void frame_recalc_bar(WFrame *frame)
 }
 
 
+static void set_common_attrs(const WFrame *frame, GrBrush *brush)
+{
+    ensure_create_attrs();
+    
+    grbrush_set_attr(brush, REGION_IS_ACTIVE(frame) 
+                            ? GR_ATTR(active) 
+                            : GR_ATTR(inactive));
+    grbrush_set_attr(brush, frame->quasiactive_count>0 
+                            ? GR_ATTR(quasiactive)
+                            : GR_ATTR(not_quasiactive));
+}
+
+                      
 void frame_draw_bar(const WFrame *frame, bool complete)
 {
     WRectangle geom;
-    const char *cattr=(REGION_IS_ACTIVE(frame) 
-                       ? "active" : "inactive");
     
     if(frame->bar_brush==NULL
        || !BAR_EXISTS(frame)
@@ -288,27 +367,29 @@ void frame_draw_bar(const WFrame *frame, bool complete)
 
     grbrush_begin(frame->bar_brush, &geom, GRBRUSH_AMEND);
     
+    set_common_attrs(frame, frame->bar_brush);
+    
     grbrush_draw_textboxes(frame->bar_brush, &geom, frame->titles_n, 
-                           frame->titles, complete, cattr);
+                           frame->titles, complete);
     
     grbrush_end(frame->bar_brush);
 }
 
-
 void frame_draw(const WFrame *frame, bool complete)
 {
     WRectangle geom;
-    const char *attr=(REGION_IS_ACTIVE(frame) 
-                      ? "active" : "inactive");
     
     if(frame->brush==NULL)
         return;
-    
+        
     frame_border_geom(frame, &geom);
     
     grbrush_begin(frame->brush, &geom, (complete ? 0 : GRBRUSH_NO_CLEAR_OK));
     
-    grbrush_draw_border(frame->brush, &geom, attr);
+    set_common_attrs(frame, frame->brush);
+    
+    grbrush_draw_border(frame->brush, &geom);
+    
     frame_draw_bar(frame, TRUE);
     
     grbrush_end(frame->brush);
@@ -481,4 +562,18 @@ bool frame_set_background(WFrame *frame, bool set_always)
 }
 
 
+void frame_setup_dragwin_style(WFrame *frame, GrStyleSpec *spec, int tab)
+{
+    gr_stylespec_append(spec, &frame->titles[tab].attr);
+    
+    gr_stylespec_set(spec, REGION_IS_ACTIVE(frame) 
+                           ? GR_ATTR(active) 
+                           : GR_ATTR(inactive));
+    gr_stylespec_set(spec, frame->quasiactive_count>0 
+                           ? GR_ATTR(quasiactive)
+                           : GR_ATTR(not_quasiactive));
+}
+
+
 /*}}}*/
+
