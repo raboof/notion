@@ -17,16 +17,6 @@ de.defstyle("*", {
     text_align = "center",
 })
 
-de.defstyle("frame", {
-    based_on = "*",
-    background_colour = "black",
-    de.substyle("active", {
-        shadow_colour = "grey",
-        highlight_colour = "grey",
-        background_colour = "black",
-    }),
-})
-
 de.defstyle("tab", {
     based_on = "*",
     font = "-misc-fixed-medium-r-*-*-13-*-*-*-*-60-*-*",

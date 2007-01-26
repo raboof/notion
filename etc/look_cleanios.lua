@@ -18,12 +18,6 @@ de.defstyle("*", {
     text_align = "center",
 })
 
-de.defstyle("frame", {
-    based_on = "*",
-    background_colour = "#000000",
-    transparent_background = false,
-})
-
 de.defstyle("tab", {
     based_on = "*",
     font = "-*-helvetica-bold-r-normal-*-10-*-*-*-*-*-*-*",

@@ -29,13 +29,6 @@ de.defstyle("*", {
 })
 
 
-de.defstyle("frame", {
-    based_on = "*",
-    background_colour = "#000000",
-    transparent_background = false,
-})
-
-
 de.defstyle("tab", {
     based_on = "*",
     font = "-*-helvetica-medium-r-normal-*-12-*-*-*-*-*-*-*",

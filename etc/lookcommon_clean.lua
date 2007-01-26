@@ -20,18 +20,18 @@ de.defstyle("stdisp", {
 
 de.defstyle("actnotify", {
     based_on = "*",
-    shadow_colour = "#e0c0c0",
-    highlight_colour = "#e0c0c0",
-    background_colour = "#990000",
+    shadow_colour = "#c04040",
+    highlight_colour = "#c04040",
+    background_colour = "#901010",
     foreground_colour = "#eeeeee",
 })
 
 de.defstyle("tab-frame", {
     based_on = "tab",
-    de.substyle("*-*-*-*-activity", {
-        shadow_colour = "#e0c0c0",
-        highlight_colour = "#e0c0c0",
-        background_colour = "#990000",
+    de.substyle("activity", {
+        shadow_colour = "#c04040",
+        highlight_colour = "#c04040",
+        background_colour = "#901010",
         foreground_colour = "#eeeeee",
     }),
 })
@@ -39,6 +39,16 @@ de.defstyle("tab-frame", {
 de.defstyle("tab-frame-tiled", {
     based_on = "tab-frame",
     spacing = 1,
+})
+
+de.defstyle("frame", {
+    based_on = "*",
+    background_colour = "#000000",
+    transparent_background = false,
+    de.substyle("quasiactive", {
+        -- Something detached from the frame is active
+        padding_colour = "#901010",
+    }),
 })
 
 de.defstyle("frame-tiled", {
