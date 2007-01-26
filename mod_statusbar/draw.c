@@ -127,9 +127,11 @@ static void draw_elems(GrBrush *brush, WRectangle *g, int ty,
                            : STATUSBAR_NX_STR);
             
             grbrush_set_attr(brush, elems->attr);
+            grbrush_set_attr(brush, elems->meter);
                 
             grbrush_draw_string(brush, elems->x, ty, s, strlen(s), needfill);
             
+            grbrush_unset_attr(brush, elems->meter);
             grbrush_unset_attr(brush, elems->attr);
             
             prevx=elems->x+elems->text_w;

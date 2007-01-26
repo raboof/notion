@@ -48,10 +48,10 @@ DECLSTRUCT(WSBElem){
     int stretch;
     int text_w;
     char *text;
-    char *meter;
     int max_w;
     char *tmpl;
-    GrAttr attr;
+    StringId meter;
+    StringId attr;
     int zeropad;
     int x;
     PtrList *traywins;

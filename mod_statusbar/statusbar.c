@@ -118,12 +118,12 @@ void statusbar_deinit(WStatusBar *p)
 static void init_sbelem(WSBElem *el)
 {
     el->type=WSBELEM_NONE;
-    el->meter=NULL;
     el->text_w=0;
     el->text=NULL;
     el->max_w=0;
     el->tmpl=NULL;
-    el->attr=GRATTR_NONE;
+    el->meter=STRINGID_NONE;
+    el->attr=STRINGID_NONE;
     el->stretch=0;
     el->align=WSBELEM_ALIGN_CENTER;
     el->zeropad=0;
@@ -132,6 +132,20 @@ static void init_sbelem(WSBElem *el)
 }
 
 
+static bool gets_stringstore(ExtlTab t, const char *str, StringId *id)
+{
+    char *s;
+    
+    if(extl_table_gets_s(t, str, &s)){
+        *id=stringstore_alloc(s);
+        free(s);
+        return (*id!=STRINGID_NONE);
+    }
+    
+    return FALSE;
+}
+
+    
 static WSBElem *get_sbelems(ExtlTab t, int *nret, int *filleridxret)
 {
     int i, n=extl_table_get_n(t);
@@ -159,15 +173,20 @@ static WSBElem *get_sbelems(ExtlTab t, int *nret, int *filleridxret)
                 if(el[i].type==WSBELEM_TEXT || el[i].type==WSBELEM_STRETCH){
                     extl_table_gets_s(tt, "text", &(el[i].text));
                 }else if(el[i].type==WSBELEM_METER){
-                    extl_table_gets_s(tt, "meter", &(el[i].meter));
+                    gets_stringstore(tt, "meter", &(el[i].meter));
                     extl_table_gets_s(tt, "tmpl", &(el[i].tmpl));
                     extl_table_gets_i(tt, "align", &(el[i].align));
                     extl_table_gets_i(tt, "zeropad", &(el[i].zeropad));
                     el[i].zeropad=maxof(el[i].zeropad, 0);
                 }else if(el[i].type==WSBELEM_SYSTRAY){
-                    extl_table_gets_s(tt, "meter", &(el[i].meter));
+                    const char *tmp;
+                    
+                    gets_stringstore(tt, "meter", &(el[i].meter));
                     extl_table_gets_i(tt, "align", &(el[i].align));
-                    if(el[i].meter==NULL || strcmp(el[i].meter, "systray")==0)
+                    
+                    tmp=stringstore_get(el[i].meter);
+                    
+                    if(tmp==NULL || strcmp(tmp, "systray")==0)
                         systrayidx=i;
                 }else if(el[i].type==WSBELEM_FILLER){
                     *filleridxret=i;
@@ -200,11 +219,11 @@ static void free_sbelems(WSBElem *el, int n)
     for(i=0; i<n; i++){
         if(el[i].text!=NULL)
             free(el[i].text);
-        if(el[i].meter!=NULL)
-            free(el[i].meter);
         if(el[i].tmpl!=NULL)
             free(el[i].tmpl);
-        if(el[i].attr!=GRATTR_NONE)
+        if(el[i].meter!=STRINGID_NONE)
+            stringstore_free(el[i].meter);
+        if(el[i].attr!=STRINGID_NONE)
             stringstore_free(el[i].attr);
         if(el[i].traywins!=NULL)
             ptrlist_clear(&el[i].traywins);
@@ -356,17 +375,22 @@ static WSBElem *statusbar_associate_systray(WStatusBar *sb, WRegion *reg)
         extl_table_gets_s(cwin->proptab, "statusbar", &name);
     
     for(i=0; i<sb->nelems; i++){
+        const char *meter;
+        
         if(sb->elems[i].type!=WSBELEM_SYSTRAY)
             continue;
-        if(sb->elems[i].meter==NULL){
+        
+        meter=stringstore_get(sb->elems[i].meter);
+        
+        if(meter==NULL){
             fbel=&sb->elems[i];
             continue;
         }
-        if(name!=NULL && strcmp(sb->elems[i].meter, name)==0){
+        if(name!=NULL && strcmp(meter, name)==0){
             el=&sb->elems[i];
             break;
         }
-        if(strcmp(sb->elems[i].meter, "systray")==0)
+        if(strcmp(meter, "systray")==0)
             fbel=&sb->elems[i];
     }
     
@@ -723,7 +747,7 @@ ExtlTab statusbar_get_template_table(WStatusBar *sb)
         
         extl_table_sets_i(tt, "type", sb->elems[i].type);
         extl_table_sets_s(tt, "text", sb->elems[i].text);
-        extl_table_sets_s(tt, "meter", sb->elems[i].meter);
+        extl_table_sets_s(tt, "meter", stringstore_get(sb->elems[i].meter));
         extl_table_sets_s(tt, "tmpl", sb->elems[i].tmpl);
         extl_table_sets_i(tt, "align", sb->elems[i].align);
         extl_table_sets_i(tt, "zeropad", sb->elems[i].zeropad);
@@ -846,6 +870,8 @@ void statusbar_update(WStatusBar *sb, ExtlTab t)
         return;
     
     for(i=0; i<sb->nelems; i++){
+        const char *meter;
+        
         el=&(sb->elems[i]);
         
         if(el->type!=WSBELEM_METER)
@@ -861,11 +887,13 @@ void statusbar_update(WStatusBar *sb, ExtlTab t)
             el->attr=GRATTR_NONE;
         }
         
-        if(el->meter!=NULL){
+        meter=stringstore_get(el->meter);
+        
+        if(meter!=NULL){
             const char *str;
             char *attrnm;
             
-            extl_table_gets_s(t, el->meter, &(el->text));
+            extl_table_gets_s(t, meter, &(el->text));
             
             if(el->text==NULL){
                 str=STATUSBAR_NX_STR;
@@ -902,7 +930,7 @@ void statusbar_update(WStatusBar *sb, ExtlTab t)
                 grow=TRUE;
             }
             
-            attrnm=scat(el->meter, "_hint");
+            attrnm=scat(meter, "_hint");
             if(attrnm!=NULL){
                 char *s;
                 if(extl_table_gets_s(t, attrnm, &s)){
