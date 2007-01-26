@@ -55,6 +55,7 @@ void mod_query_history_push_(char *str)
     int ndx=mod_query_history_search(str, 0, FALSE, TRUE);
     
     if(ndx==0){
+        free(str);
         return; /* First entry already */
     }else if(ndx>0){
         int i, j;
