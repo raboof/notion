@@ -31,14 +31,6 @@ local DIE_TIMEOUT_NO_ERRORCODE=2 -- 2 seconds
 -- Generic helper functions {{{
 
 
-function mod_query.make_completor(completefn)
-    local function completor(cp, str, point)
-        cp:set_completions(completefn(str, point))
-    end
-    return completor
-end
-
-
 --DOC
 -- Low-level query routine. \var{mplex} is the \type{WMPlex} to display
 -- the query in, \var{prompt} the prompt string, and \var{initvalue}
@@ -176,6 +168,20 @@ function mod_query.file_completor(wedln, str)
 end
 
 
+function mod_query.get_initdir(mplex)
+    --if mod_query.last_dir then
+    --    return mod_query.last_dir
+    --end
+    local wd=(ioncore.get_dir_for(mplex) or os.getenv("PWD"))
+    if wd==nil then
+        wd="/"
+    elseif string.sub(wd, -1)~="/" then
+        wd=wd .. "/"
+    end
+    return wd
+end
+
+
 function mod_query.query_execfile(mplex, prompt, prog)
     assert(prog~=nil)
     local function handle_execwith(mplex, str)
@@ -201,36 +207,10 @@ function mod_query.query_execwith(mplex, prompt, dflt, prog, completor,
 end
 
 
-function mod_query.get_initdir(mplex)
-    --if mod_query.last_dir then
-    --    return mod_query.last_dir
-    --end
-    local wd=(ioncore.get_dir_for(mplex) or os.getenv("PWD"))
-    if wd==nil then
-        wd="/"
-    elseif string.sub(wd, -1)~="/" then
-        wd=wd .. "/"
-    end
-    return wd
-end
+-- }}}
 
 
-local MAXDEPTH=10
-
-
-function mod_query.complete_keys(list, str)
-    local results={}
-    local len=string.len(str)
-
-   for m, _ in pairs(list) do
-       if string.sub(m, 1, len)==str then
-           table.insert(results, m)
-        end
-    end
-    
-    return results
-end    
-
+-- Completion helpers {{{
 
 local pipes={}
 
@@ -323,6 +303,70 @@ function mod_query.popen_completions(cp, cmd, fn, reshnd)
 end
 
 
+local function mk_completion_test(str, sub_ok)
+    if not str then
+        return function(s) return true end
+    elseif sub_ok then
+        return function(s) return string.find(s, str, 1, true) end
+    else
+        local len=string.len(str)
+        return function(s) return string.sub(s, 1, len)==str end
+    end
+end
+
+local function mk_completion_add(str, sub_ok, entries)
+    local tst=mk_completion_test(str, sub_ok)
+    
+    return function(s) 
+               if s and tst(s) then
+                   table.insert(entries, s)
+               end
+           end
+end
+
+
+function mod_query.complete_keys(list, str, sub_ok)
+    local results={}
+    local test_add=mk_completion_add(str, sub_ok, results)
+    
+    for m, _ in pairs(list) do
+        test_add(m)
+    end
+
+    return results
+end    
+
+
+function mod_query.complete_name(str, iter)
+    local sub_ok_first=true
+    local entries={}
+    local tst_add=mk_completion_add(str, sub_ok_first, entries)
+    
+    iter(function(reg)
+             tst_add(reg:name())
+             return true
+         end)
+    
+    if #entries==0 and not sub_ok_first then
+        local tst_add2=mk_completion_add(str, true, entries)
+        iter(function(reg)
+                 tst_add2(reg:name())
+                 return true
+             end)
+    end
+    
+    return entries
+end
+
+
+function mod_query.make_completor(completefn)
+    local function completor(cp, str, point)
+        cp:set_completions(completefn(str, point))
+    end
+    return completor
+end
+
+
 -- }}}
 
 
@@ -338,35 +382,10 @@ function mod_query.call_warn(mplex, fn)
 end
 
 
-function mod_query.complete_name(str, iter)
-    local l=string.len(str)
-    local entries={}
-    
-    iter(function(reg)
-             local nm=reg:name()
-             if nm and string.sub(nm, 1, l)==str then
-                 table.insert(entries, nm)
-             end
-             return true
-        end)
-        
-    if #entries==0 then
-        iter(function(reg)
-                 local nm=reg:name()
-                 if nm and string.find(nm, str, 1, true) then
-                     table.insert(entries, nm)
-                 end
-                 return true
-             end)
-    end
-    
-    return entries
-end
-
-
 function mod_query.complete_clientwin(str)
     return mod_query.complete_name(str, ioncore.clientwin_i)
 end
+
 
 function mod_query.complete_workspace(str)
     local function iter(fn) 
@@ -377,6 +396,7 @@ function mod_query.complete_workspace(str)
     end
     return mod_query.complete_name(str, iter)
 end
+
 
 function mod_query.complete_region(str)
     return mod_query.complete_name(str, ioncore.region_i)
@@ -392,6 +412,7 @@ function mod_query.gotoclient_handler(frame, str)
         cwin:goto()
     end
 end
+
 
 function mod_query.attachclient_handler(frame, str)
     local cwin=ioncore.lookup_clientwin(str)
@@ -439,6 +460,7 @@ function mod_query.layouts()
     return mq_layouts
 end
 
+
 function mod_query.workspace_handler(mplex, name)
     local ws=ioncore.lookup_region(name, "WGroupWS")
     if ws then
@@ -474,7 +496,7 @@ function mod_query.workspace_handler(mplex, name)
         end
 
         local function compl_layout(str)
-            return mod_query.complete_keys(layouts, str)
+            return mod_query.complete_keys(layouts, str, true)
         end
         
         mod_query.query(mplex, TR("New workspace layout (default):"), nil,
@@ -822,6 +844,8 @@ end
 
 
 mod_query.known_hosts={}
+mod_query.hostnicks={}
+mod_query.ssh_completions={}
 
 
 function mod_query.get_known_hosts(mplex)
@@ -845,8 +869,6 @@ function mod_query.get_known_hosts(mplex)
 end
 
 
-mod_query.hostnicks={}
-
 function mod_query.get_hostnicks(mplex)
     mod_query.hostnicks={}
     local f
@@ -856,7 +878,7 @@ function mod_query.get_hostnicks(mplex)
     if h then
         f=io.open(h.."/.ssh/config")
     end
-    if not f then 
+    if not f then
         warn(TR("Failed to open ~/.ssh/config"))
         return
     end
@@ -893,21 +915,10 @@ function mod_query.complete_ssh(str)
     end
     
     local res = {}
-    
-    if string.len(host)==0 then
-        if string.len(user)==0 then
-            return mod_query.ssh_completions
-        end
-        
-        for _, v in ipairs(mod_query.ssh_completions) do
-            table.insert(res, user .. v)
-        end
-        return res
-    end
+    local tst = mk_completion_test(host, true)
     
     for _, v in ipairs(mod_query.ssh_completions) do
-        local s, e=string.find(v, host, 1, true)
-        if s==1 and e>=1 then
+        if tst(v) then
             table.insert(res, user .. v)
         end
     end
@@ -915,7 +926,6 @@ function mod_query.complete_ssh(str)
     return res
 end
 
-mod_query.ssh_completions={}
 
 --DOC
 -- This query asks for a host to connect to with SSH. 
@@ -1172,13 +1182,7 @@ function mod_query.query_menu(mplex, themenu, prompt)
     local ntab=xform_menu({}, menu, "")
     
     local function complete(str)
-        local results={}
-        for s, e in pairs(ntab) do
-            if string.find(s, str, 1, true) then
-                table.insert(results, s)
-            end
-        end
-        return results
+        return mod_query.complete_keys(ntab, str, true)
     end
     
     local function handle(mplex, str)
