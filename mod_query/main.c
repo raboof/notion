@@ -87,6 +87,7 @@ void mod_query_set(ExtlTab tab)
  * Get module configuration. For more information see
  * \fnref{mod_query.set}.
  */
+EXTL_SAFE
 EXTL_EXPORT
 ExtlTab mod_query_get()
 {
