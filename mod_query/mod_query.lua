@@ -511,8 +511,7 @@ function mod_query.workspace_handler(mplex, name)
         end
 
         local function compl_layout(str)
-            -- casei_ok = false, because everything is already lower case
-            return mod_query.complete_keys(layouts, str, true, false)
+            return mod_query.complete_keys(layouts, str, true, true)
         end
         
         mod_query.query(mplex, TR("New workspace layout (default):"), nil,
@@ -1198,7 +1197,8 @@ function mod_query.query_menu(mplex, themenu, prompt)
     local ntab=xform_menu({}, menu, "")
     
     local function complete(str)
-        return mod_query.complete_keys(ntab, str, true, true)
+        -- casei_ok false, because everything is already in lower case
+        return mod_query.complete_keys(ntab, str, true, false)
     end
     
     local function handle(mplex, str)
