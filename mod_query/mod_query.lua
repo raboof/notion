@@ -303,19 +303,33 @@ function mod_query.popen_completions(cp, cmd, fn, reshnd)
 end
 
 
-local function mk_completion_test(str, sub_ok)
+local function mk_completion_test(str, sub_ok, casei_ok)
     if not str then
         return function(s) return true end
-    elseif sub_ok then
-        return function(s) return string.find(s, str, 1, true) end
+    end
+    
+    local function mk(str, sub_ok)
+        if sub_ok then
+            return function(s) return string.find(s, str, 1, true) end
+        else
+            local len=string.len(str)
+            return function(s) return string.sub(s, 1, len)==str end
+        end
+    end
+    
+    local casei=(casei_ok and mod_query.get().caseicompl)
+    
+    if not casei then
+        return mk(str, sub_ok)
     else
-        local len=string.len(str)
-        return function(s) return string.sub(s, 1, len)==str end
+        local fn=mk(string.lower(str), sub_ok)
+        return function(s) return fn(string.lower(s)) end
     end
 end
 
-local function mk_completion_add(str, sub_ok, entries)
-    local tst=mk_completion_test(str, sub_ok)
+
+local function mk_completion_add(entries, str, sub_ok, casei_ok)
+    local tst=mk_completion_test(str, sub_ok, casei_ok)
     
     return function(s) 
                if s and tst(s) then
@@ -325,9 +339,9 @@ local function mk_completion_add(str, sub_ok, entries)
 end
 
 
-function mod_query.complete_keys(list, str, sub_ok)
+function mod_query.complete_keys(list, str, sub_ok, casei_ok)
     local results={}
-    local test_add=mk_completion_add(str, sub_ok, results)
+    local test_add=mk_completion_add(results, str, sub_ok, casei_ok)
     
     for m, _ in pairs(list) do
         test_add(m)
@@ -339,8 +353,9 @@ end
 
 function mod_query.complete_name(str, iter)
     local sub_ok_first=true
+    local casei_ok=true
     local entries={}
-    local tst_add=mk_completion_add(str, sub_ok_first, entries)
+    local tst_add=mk_completion_add(entries, str, sub_ok_first, casei_ok)
     
     iter(function(reg)
              tst_add(reg:name())
@@ -348,7 +363,7 @@ function mod_query.complete_name(str, iter)
          end)
     
     if #entries==0 and not sub_ok_first then
-        local tst_add2=mk_completion_add(str, true, entries)
+        local tst_add2=mk_completion_add(entries, str, true, casei_ok)
         iter(function(reg)
                  tst_add2(reg:name())
                  return true
@@ -496,7 +511,8 @@ function mod_query.workspace_handler(mplex, name)
         end
 
         local function compl_layout(str)
-            return mod_query.complete_keys(layouts, str, true)
+            -- casei_ok = false, because everything is already lower case
+            return mod_query.complete_keys(layouts, str, true, false)
         end
         
         mod_query.query(mplex, TR("New workspace layout (default):"), nil,
@@ -915,7 +931,7 @@ function mod_query.complete_ssh(str)
     end
     
     local res = {}
-    local tst = mk_completion_test(host, true)
+    local tst = mk_completion_test(host, true, false)
     
     for _, v in ipairs(mod_query.ssh_completions) do
         if tst(v) then
@@ -1182,7 +1198,7 @@ function mod_query.query_menu(mplex, themenu, prompt)
     local ntab=xform_menu({}, menu, "")
     
     local function complete(str)
-        return mod_query.complete_keys(ntab, str, true)
+        return mod_query.complete_keys(ntab, str, true, true)
     end
     
     local function handle(mplex, str)
