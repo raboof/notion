@@ -70,7 +70,7 @@ BINDINGS:WMoveresMode
 
 BINDINGS:WGroupWS
 
-BINDINGS:WFloatFrame
+BINDINGS:WFrame.floating
 
 .SS Bindings for menus [mod_menu]
 

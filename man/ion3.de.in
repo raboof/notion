@@ -102,12 +102,13 @@ BINDINGS:WMoveresMode
 .SS Bindungen zum teilen der Arbeitsfläche [mod_ionws]
 
 BINDINGS:WTiling
+.\" BINDINGS:WFrame.tiled
 
 .SS Bindungen für den fliessenden Arbeitsbereich und Frames [mod_floatws]
 
 BINDINGS:WGroupWS
 
-BINDINGS:WFloatFrame
+BINDINGS:WFrame.floating
 
 .SS Bindungen für Message- und Anfrageboxen [mod_query]
 

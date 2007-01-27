@@ -69,7 +69,7 @@ BINDINGS:WMoveresMode
 
 BINDINGS:WGroupWS
 
-BINDINGS:WFloatFrame
+BINDINGS:WFrame.floating
 
 .SS Valikoiden sidonnat [mod_menu]
 

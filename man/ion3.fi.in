@@ -100,12 +100,12 @@ BINDINGS:WFrame.toplevel
 
 .SS Kelluvissa/irroitetuissa kehyksissä toimivat sidonnat
 
-BINDINGS:WFloatFrame
+BINDINGS:WFrame.floating
 
 .SS Laatoituksien ja laatoitettujen kehysten sidonnat [mod_tiling]
 
 BINDINGS:WTiling
-BINDINGS:WFrame-on-WTiling
+.\" BINDINGS:WFrame.tiled
 
 .SS Asiakasikkunoiden sidonnat
 

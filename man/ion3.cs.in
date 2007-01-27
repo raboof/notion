@@ -97,12 +97,12 @@ BINDINGS:WFrame.toplevel
 
 .SS Pøiøazení pro práci s plovoucími/odpojenými rámy
 
-BINDINGS:WFloatFrame
+BINDINGS:WFrame.floating
 
 .SS Pøiøazení pro dla¾dicové plochy a rámy [mod_tiling]
 
 BINDINGS:WTiling
-BINDINGS:WFrame-on-WTiling
+.\" BINDINGS:WFrame.tiled
 
 .SS Pøiøazení pro kientská okna
 

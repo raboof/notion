@@ -97,12 +97,12 @@ BINDINGS:WFrame.toplevel
 
 .SS Bindings for floating/detached frames
 
-BINDINGS:WFloatFrame
+BINDINGS:WFrame.floating
 
 .SS Bindings for tilings and tiled frames [mod_tiling]
 
 BINDINGS:WTiling
-BINDINGS:WFrame-on-WTiling
+.\" BINDINGS:WFrame.tiled
 
 .SS Bindings for client windows
 
