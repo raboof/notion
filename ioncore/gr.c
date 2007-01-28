@@ -160,7 +160,7 @@ static int cmp(const void *a_, const void *b_)
 }
 
 
-static uint scorefind(const GrStyleSpec *attr, StringId id)
+static uint scorefind(const GrStyleSpec *attr, const GrAttrScore *spec)
 {
     GrAttrScore *res;
     
@@ -170,10 +170,14 @@ static uint scorefind(const GrStyleSpec *attr, StringId id)
     if(star_id==STRINGID_NONE)
         star_id=stringstore_alloc("*");
     
-    if(id==star_id)
-        return 1;
+    if(spec->attr==star_id){
+        /* Since every item occurs only once on the list, with a score,
+         * return the score of the star in the spec, instead of one.
+         */
+        return spec->score;
+    }
     
-    res=bsearch(&id, attr->attrs, attr->n, sizeof(GrAttrScore), cmp);
+    res=bsearch(&spec->attr, attr->attrs, attr->n, sizeof(GrAttrScore), cmp);
     
     return (res==NULL ? 0 : 2*res->score);
 }
@@ -186,10 +190,10 @@ uint gr_stylespec_score2(const GrStyleSpec *spec, const GrStyleSpec *attr1,
     uint i;
     
     for(i=0; i<spec->n; i++){
-        int sc=scorefind(attr1, spec->attrs[i].attr);
+        int sc=scorefind(attr1, &spec->attrs[i]);
         
         if(attr2!=NULL)
-            sc=maxof(sc, scorefind(attr2, spec->attrs[i].attr));
+            sc=maxof(sc, scorefind(attr2, &spec->attrs[i]));
         
         if(sc==0){
             score=0;

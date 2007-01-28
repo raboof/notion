@@ -28,7 +28,7 @@ de.defstyle("actnotify", {
 
 de.defstyle("tab-frame", {
     based_on = "tab",
-    de.substyle("activity", {
+    de.substyle("*-*-*-*-activity", {
         shadow_colour = "#c04040",
         highlight_colour = "#c04040",
         background_colour = "#901010",
