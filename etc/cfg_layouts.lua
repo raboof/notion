@@ -50,6 +50,6 @@ local full_tiled = {
 
 -- Let the world know about them
 
-ioncore.set{ default_ws_params = horizontally_split }
-mod_query.layouts().hsplit = horizontally_split
-mod_query.layouts().full = full_tiled
+ioncore.deflayout("default", horizontally_split)
+ioncore.deflayout("hsplit", horizontally_split)
+ioncore.deflayout("full", full_tiled)

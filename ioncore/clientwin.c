@@ -42,6 +42,7 @@
 #include "xwindow.h"
 #include "bindmaps.h"
 #include "return.h"
+#include "conf.h"
 
 
 static void set_clientwin_state(WClientWin *cwin, int state);
@@ -79,22 +80,6 @@ void clientwin_get_protocols(WClientWin *cwin)
 }
 
 
-static bool get_winprop_fn_set=FALSE;
-static ExtlFn get_winprop_fn;
-
-/*EXTL_DOC
- * Set function used to look up winprops.
- */
-EXTL_EXPORT
-void ioncore_set_get_winprop_fn(ExtlFn fn)
-{
-    if(get_winprop_fn_set)
-        extl_unref_fn(get_winprop_fn);
-    get_winprop_fn=extl_ref_fn(fn);
-    get_winprop_fn_set=TRUE;
-}
-
-
 static WSizePolicy get_sizepolicy_winprop(WClientWin *cwin,
                                           const char *propname,
                                           WSizePolicy value)
@@ -119,17 +104,8 @@ static void clientwin_get_winprops(WClientWin *cwin)
 {
     ExtlTab tab, tab2;
     int i1, i2;
-    bool ret;
     
-    if(!get_winprop_fn_set)
-        return;
-    
-    extl_protect(NULL);
-    ret=extl_call(get_winprop_fn, "o", "t", cwin, &tab);
-    extl_unprotect(NULL);
-
-    if(!ret)
-        return;
+    tab=ioncore_get_winprop(cwin);
     
     cwin->proptab=tab;
     

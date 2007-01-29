@@ -68,7 +68,7 @@ function ioncore.getwinprop(cwin)
     end
 end
 
-ioncore.set_get_winprop_fn(ioncore.getwinprop)
+ioncore.set{_get_winprop=ioncore.getwinprop}
 
 local function ensure_winproptab(class, role, instance)
     if not winprops[class] then

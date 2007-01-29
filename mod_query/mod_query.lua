@@ -465,43 +465,24 @@ function mod_query.attachclient_handler(frame, str)
 end
 
 
-local mq_layouts={}
-
---DOC
--- Returns table of configured workspace layouts, key giving the
--- layout name, and the attach/creation params, similarly to
--- \code{default_ws_params} of \fnref{ioncore.set}.
-function mod_query.layouts()
-    return mq_layouts
-end
-
-
 function mod_query.workspace_handler(mplex, name)
     local ws=ioncore.lookup_region(name, "WGroupWS")
     if ws then
         ws:goto()
     else
-        local layouts=table.copy(mod_query.layouts())
-        
-        layouts.empty = { managed={} }
-        layouts.default = ioncore.get().default_ws_params
-        
         local function create_handler(mplex_, layout)
             if not layout or layout=="" then
-                layout = "default"
+                layout="default"
             end
             
-            local lo=layouts[layout];
-            
-            if not lo then
+            if not ioncore.getlayout(layout) then
                 mod_query.warn(mplex_, TR("Unknown layout"))
             else
                 local scr=mplex:screen_of()
                 
                 local function mkws()
-                    local lo_=table.copy(lo)
-                    lo_.name=name
-                    if not ioncore.create_ws(scr, lo_) then
+                    local tmpl={name=name}
+                    if not ioncore.create_ws(scr, tmpl, layout) then
                         error(TR("Unknown error"))
                     end
                 end
@@ -511,7 +492,8 @@ function mod_query.workspace_handler(mplex, name)
         end
 
         local function compl_layout(str)
-            return mod_query.complete_keys(layouts, str, true, true)
+            local los=ioncore.getlayout(nil, true)
+            return mod_query.complete_keys(los, str, true, true)
         end
         
         mod_query.query(mplex, TR("New workspace layout (default):"), nil,

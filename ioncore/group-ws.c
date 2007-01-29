@@ -29,27 +29,11 @@
 #include "framedpholder.h"
 #include "float-placement.h"
 #include "resize.h"
+#include "conf.h"
 
 
 /*{{{ Settings */
 
-
-static bool default_ws_params_set=FALSE;
-static ExtlTab default_ws_params;
-
-
-/*EXTL_DOC
- * Set module basic settings. Currently only the \code{placement_method} 
- * parameter is supported.
- *
- * The method can be one  of ''udlr'', ''lrud'' (default) and ''random''. 
- * The ''udlr'' method looks for free space starting from top the top left
- * corner of the workspace moving first down keeping the x coordinate fixed.
- * If it find no free space, it start looking similarly at next x coordinate
- * unoccupied by other objects and so on. ''lrud' is the same but with the 
- * role of coordinates changed and both fall back to ''random'' placement 
- * if no free area was found.
- */
 
 void ioncore_groupws_set(ExtlTab tab)
 {
@@ -67,13 +51,6 @@ void ioncore_groupws_set(ExtlTab tab)
             warn(TR("Unknown placement method \"%s\"."), method);
         free(method);
     }
-    
-    if(extl_table_gets_t(tab, "default_ws_params", &t)){
-        if(default_ws_params_set)
-            extl_unref_table(default_ws_params);
-        default_ws_params=t;
-        default_ws_params_set=TRUE;
-    }
 }
 
 
@@ -85,9 +62,6 @@ void ioncore_groupws_get(ExtlTab t)
                        : (ioncore_placement_method==PLACEMENT_LRUD
                           ? "lrud" 
                           : "random")));
-    
-    if(default_ws_params_set)
-        extl_table_sets_t(t, "default_ws_params", default_ws_params);
 }
 
 
@@ -396,9 +370,7 @@ WRegion *groupws_load(WWindow *par, const WFitParams *fp,
 
 WRegion *groupws_load_default(WWindow *par, const WFitParams *fp)
 {
-    return groupws_load(par, fp, (default_ws_params_set
-                                  ? default_ws_params
-                                  : extl_table_none()));
+    return groupws_load(par, fp, ioncore_get_layout("default"));
 }
 
 

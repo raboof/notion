@@ -14,4 +14,7 @@
 
 extern bool ioncore_read_main_config(const char *cfgfile);
 
+extern ExtlTab ioncore_get_winprop(WClientWin *cwin);
+extern ExtlTab ioncore_get_layout(const char *str);
+
 #endif /* ION_IONCORE_CONF_H */

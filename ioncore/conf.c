@@ -36,6 +36,12 @@ StringIntMap frame_idxs[]={
     END_STRINGINTMAP
 };
 
+static bool get_winprop_fn_set=FALSE;
+static ExtlFn get_winprop_fn;
+
+static bool get_layout_fn_set=FALSE;
+static ExtlFn get_layout_fn;
+
 
 /*EXTL_DOC
  * Set ioncore basic settings. The table \var{tab} may contain the
@@ -70,8 +76,6 @@ StringIntMap frame_idxs[]={
  *  \var{float_placement_method} & (string) How to place floating frames.
  *                          One of ''udlr'' (up-down, then left-right), 
  *                          ''lrud'' (left-right, then up-down) or ''random''. \\
- *  \var{default_ws_params} & (table) Default workspace layout; the 
- *                          attach/creation parameters for a \type{WGroup}. \\
  * \end{tabularx}
  * 
  * When a keyboard resize function is called, and at most \var{kbresize_t_max} 
@@ -88,6 +92,7 @@ void ioncore_set(ExtlTab tab)
     int dd, rd;
     char *wst, *tmp;
     ExtlTab t;
+    ExtlFn fn;
     
     extl_table_gets_b(tab, "opaque_resize", &(ioncore_g.opaque_resize));
     extl_table_gets_b(tab, "warp", &(ioncore_g.warp_enabled));
@@ -108,6 +113,22 @@ void ioncore_set(ExtlTab tab)
     ioncore_set_moveres_accel(tab);
     
     ioncore_groupws_set(tab);
+    
+    /* Internal -- therefore undocumented above */
+    if(extl_table_gets_f(tab, "_get_winprop", &fn)){
+        if(get_winprop_fn_set)
+            extl_unref_fn(get_winprop_fn);
+        get_winprop_fn=fn;
+        get_winprop_fn_set=TRUE;
+    }
+    
+    if(extl_table_gets_f(tab, "_get_layout", &fn)){
+        if(get_layout_fn_set)
+            extl_unref_fn(get_layout_fn);
+        get_layout_fn=fn;
+        get_layout_fn_set=TRUE;
+    }
+    
 }
 
 
@@ -137,7 +158,35 @@ ExtlTab ioncore_get()
     
     return tab;
 }
-        
+
+
+ExtlTab ioncore_get_winprop(WClientWin *cwin)
+{
+    ExtlTab tab=extl_table_none();
+    
+    if(get_winprop_fn_set){
+        extl_protect(NULL);
+        extl_call(get_winprop_fn, "o", "t", cwin, &tab);
+        extl_unprotect(NULL);
+    }
+    
+    return tab;
+}
+
+
+ExtlTab ioncore_get_layout(const char *layout)
+{
+    ExtlTab tab=extl_table_none();
+    
+    if(get_layout_fn_set){
+        extl_protect(NULL);
+        extl_call(get_layout_fn, "s", "t", layout, &tab);
+        extl_unprotect(NULL);
+    }
+    
+    return tab;
+}
+    
 
 /*EXTL_DOC
  * Get important directories (userdir, sessiondir, searchpath).
