@@ -91,14 +91,16 @@ end
 --DOC
 -- The basic name-based winprop matching criteria.
 function ioncore.match_winprop_name(prop, cwin)
-    local nm=cwin:name()
     if not prop.name then
         return true
-    elseif nm then
-        local st, en=string.find(nm, prop.name)
-        return (st and en)
     else
-        return false
+        local nm=cwin:name()
+        if nm then
+            local st, en=string.find(nm, prop.name)
+            return (st and en)
+        else
+            return false
+        end
     end
 end
 
