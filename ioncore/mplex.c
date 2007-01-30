@@ -1925,7 +1925,7 @@ ExtlTab mplex_get_configuration(WMPlex *mplex)
     tab=region_get_base_configuration((WRegion*)mplex);
     
     subs=extl_create_table();
-    extl_table_sets_t(tab, "subs", subs);
+    extl_table_sets_t(tab, "managed", subs);
     
     /* First the numbered/mutually exclusive nodes */
     FOR_ALL_NODES_ON_LLIST(lnode, mplex->mx_list, ltmp){
@@ -1969,7 +1969,8 @@ void mplex_load_contents(WMPlex *mplex, ExtlTab tab)
         extl_unref_table(subtab);
     }*/
     
-    if(extl_table_gets_t(tab, "subs", &substab)){
+    if(extl_table_gets_t(tab, "managed", &substab) ||
+       extl_table_gets_t(tab, "subs", &substab)){
         n=extl_table_get_n(substab);
         for(i=1; i<=n; i++){
             if(extl_table_geti_t(substab, i, &subtab)){
