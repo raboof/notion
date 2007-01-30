@@ -170,28 +170,6 @@ bool groupws_attach_framed_extl(WGroupWS *ws, WRegion *reg, ExtlTab t)
 /*{{{ groupws_prepare_manage */
 
 
-#define REG_OK(R) OBJ_IS(R, WMPlex)
-
-
-static WMPlex *find_existing(WGroupWS *ws)
-{
-    WGroupIterTmp tmp;
-    WRegion *r=(ws->grp.current_managed!=NULL 
-                ? ws->grp.current_managed->reg 
-                : NULL);
-    
-    if(r!=NULL && REG_OK(r))
-        return (WMPlex*)r;
-    
-    FOR_ALL_MANAGED_BY_GROUP(&ws->grp, r, tmp){
-        if(REG_OK(r))
-            return (WMPlex*)r;
-    }
-    
-    return NULL;
-}
-
-
 static WPHolder *groupws_do_prepare_manage(WGroupWS *ws, 
                                            const WClientWin *cwin,
                                            const WManageParams *param, 
@@ -202,13 +180,22 @@ static WPHolder *groupws_do_prepare_manage(WGroupWS *ws,
     WPHolder *ph;
     
     if(redir==MANAGE_REDIR_PREFER_YES){
-        WMPlex *m=find_existing(ws);
-        if(m!=NULL){
-            WPHolder *ph;
-            ph=region_prepare_manage((WRegion*)m, cwin, param,
-                                     MANAGE_REDIR_STRICT_YES);
-            if(ph!=NULL)
-                return ph;
+        WRegion *r=(ws->grp.current_managed!=NULL 
+                    ? ws->grp.current_managed->reg 
+                    : NULL);
+        WGroupIterTmp tmp;
+        WPHolder *ph=NULL;
+        
+        if(r!=NULL)
+            ph=region_prepare_manage(r, cwin, param, MANAGE_REDIR_PREFER_YES);
+        
+        if(ph==NULL){
+            FOR_ALL_MANAGED_BY_GROUP(&ws->grp, r, tmp){
+                ph=region_prepare_manage(r, cwin, param, 
+                                         MANAGE_REDIR_PREFER_YES);
+                if(ph!=NULL)
+                    break;
+            }
         }
     }
     
