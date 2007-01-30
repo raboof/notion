@@ -41,6 +41,7 @@
 #include "tags.h"
 #include "gr.h"
 #include "gr-util.h"
+#include "conf.h"
 
 
 WHook *screen_managed_changed_hook=NULL;
@@ -679,13 +680,13 @@ static WRegion *do_create_initial(WWindow *parent, const WFitParams *fp,
 static bool create_initial_ws(WScreen *scr)
 {
     WRegion *reg=NULL;
-    WMPlexAttachParams par;
-    
-    par.flags=0;
+    WMPlexAttachParams par=MPLEXATTACHPARAMS_INIT;
+    ExtlTab lo=ioncore_get_layout("default");
     
     reg=mplex_do_attach_new(&scr->mplex, &par,
-                            (WRegionCreateFn*)groupws_load_default, 
-                            NULL);
+                            (WRegionCreateFn*)groupws_load_, &lo);
+    
+    extl_unref_table(lo);
     
     if(reg==NULL){
         warn(TR("Unable to create a workspace on screen %d."), scr->id);

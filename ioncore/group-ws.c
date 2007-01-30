@@ -353,7 +353,7 @@ void groupws_deinit(WGroupWS *ws)
 
 
 WRegion *groupws_load(WWindow *par, const WFitParams *fp, 
-                       ExtlTab tab)
+                      ExtlTab tab)
 {
     WGroupWS *ws;
     
@@ -368,9 +368,10 @@ WRegion *groupws_load(WWindow *par, const WFitParams *fp,
 }
 
 
-WRegion *groupws_load_default(WWindow *par, const WFitParams *fp)
+WRegion *groupws_load_(WWindow *par, const WFitParams *fp, 
+                       const ExtlTab *tab)
 {
-    return groupws_load(par, fp, ioncore_get_layout("default"));
+    return groupws_load(par, fp, *tab);
 }
 
 

@@ -19,6 +19,9 @@ ion-3ds-2007????
     other layouts as well, known by `mod_query.query_workspace` (F9).
     Some default layouts are configured in `cfg_layout.lua`.
 
+  * It is now possible to automatically create new workspaces for
+    windows with the `new_group` winprop.
+
 
 ion-3ds-20061223
 ----------------

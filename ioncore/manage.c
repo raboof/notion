@@ -21,6 +21,8 @@
 #include "netwm.h"
 #include "extlconv.h"
 #include "return.h"
+#include "conf.h"
+#include "group-ws.h"
 
 
 /*{{{ Add */
@@ -61,6 +63,75 @@ WScreen *clientwin_find_suitable_screen(WClientWin *cwin,
 }
 
 
+/*extern WRegion *ioncore_newly_created;*/
+
+
+static WPHolder *try_target(WClientWin *cwin, const WManageParams *param, 
+                            const char *target)
+{
+    WRegion *r=ioncore_lookup_region(target, NULL);
+        
+    if(r==NULL)
+        return FALSE;
+            
+    return region_prepare_manage(r, cwin, param, MANAGE_REDIR_PREFER_NO);
+}
+
+
+static bool handle_target_winprops(WClientWin *cwin, const WManageParams *param,
+                                   WScreen *scr, WPHolder **ph_ret)
+{
+    char *layout=NULL, *target=NULL;
+    WPHolder *ph=NULL;
+    bool mgd=FALSE;
+    
+    if(extl_table_gets_s(cwin->proptab, "target", &target))
+        ph=try_target(cwin, param, target);
+    
+    if(ph==NULL && extl_table_gets_s(cwin->proptab, "new_group", &layout)){
+        ExtlTab lo=ioncore_get_layout(layout);
+        
+        free(layout);
+        
+        if(lo!=extl_table_none()){
+            WMPlexAttachParams par=MPLEXATTACHPARAMS_INIT;
+            WRegion *reg;
+            
+            if(param->switchto)
+                par.flags|=MPLEX_ATTACH_SWITCHTO;
+            
+            /*ioncore_newly_created=(WRegion*)cwin;*/
+            
+            reg=mplex_do_attach_new(&scr->mplex, &par,
+                                    (WRegionCreateFn*)groupws_load_, &lo);
+                                    
+            /*ioncore_newly_created=NULL;*/
+            
+            mgd=(region_manager((WRegion*)cwin)!=NULL);
+            
+            if(reg!=NULL && !mgd){
+                ph=try_target(cwin, param, target);
+                
+                if(ph==NULL){
+                    ph=region_prepare_manage(reg, cwin, param, 
+                                             MANAGE_REDIR_PREFER_YES);
+
+                    if(ph==NULL)
+                        destroy_obj((Obj*)reg);
+                }
+            }
+        }
+    }
+    
+    if(target!=NULL)
+        free(target);
+    
+    *ph_ret=ph;
+    
+    return mgd;
+}
+
+
 bool clientwin_do_manage_default(WClientWin *cwin, 
                                  const WManageParams *param)
 {
@@ -85,24 +156,29 @@ bool clientwin_do_manage_default(WClientWin *cwin,
         return FALSE;
     }
     
+    if(handle_target_winprops(cwin, param, scr, &ph))
+        return TRUE;
+        
     if(ph==NULL){
         /* Find a placeholder for non-fullscreen state */
         ph=region_prepare_manage((WRegion*)scr, cwin, param,
                                  MANAGE_REDIR_PREFER_YES);
-    }
-    
-    /* Check fullscreen mode */
-    if(extl_table_gets_b(cwin->proptab, "fullscreen", &tmp))
-        fs=tmp;
 
-    if(fs<0)
-        fs=netwm_check_initial_fullscreen(cwin, param->switchto);
+        /* Check fullscreen mode. (This is intentionally not done
+         * for transients and windows with target winprops.)
+         */
+        if(extl_table_gets_b(cwin->proptab, "fullscreen", &tmp))
+            fs=tmp;
+
+        if(fs<0)
+            fs=netwm_check_initial_fullscreen(cwin, param->switchto);
     
-    if(fs<0){
-        fs=clientwin_check_fullscreen_request(cwin, 
-                                              param->geom.w,
-                                              param->geom.h,
-                                              param->switchto);
+        if(fs<0){
+            fs=clientwin_check_fullscreen_request(cwin, 
+                                                  param->geom.w,
+                                                  param->geom.h,
+                                                  param->switchto);
+        }
     }
 
     if(fs>0){

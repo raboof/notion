@@ -40,8 +40,9 @@ extern WGroupWS *create_groupws(WWindow *parent, const WFitParams *fp);
 extern bool groupws_init(WGroupWS *ws, WWindow *parent, const WFitParams *fp);
 extern void groupws_deinit(WGroupWS *ws);
 
-extern WRegion *groupws_load_default(WWindow *par, const WFitParams *fp);
 extern WRegion *groupws_load(WWindow *par, const WFitParams *fp, ExtlTab tab);
+extern WRegion *groupws_load_(WWindow *par, const WFitParams *fp, 
+                              const ExtlTab *tab);
 
 extern void ioncore_groupws_set(ExtlTab tab);
 extern void ioncore_groupws_get(ExtlTab t);

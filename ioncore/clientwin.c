@@ -351,26 +351,6 @@ static WClientWin *create_clientwin(WWindow *par, Window win,
 }
 
 
-static bool handle_target_prop(WClientWin *cwin, const WManageParams *param)
-{
-    WRegion *r=NULL;
-    char *target_name=NULL;
-    
-    if(extl_table_gets_s(cwin->proptab, "target", &target_name)){
-        r=ioncore_lookup_region(target_name, NULL);
-        
-        free(target_name);
-    
-        if(r!=NULL){
-            if(region_manage_clientwin(r, cwin, param, 
-                                       MANAGE_REDIR_PREFER_NO))
-                return TRUE;
-        }
-    }
-    
-    return FALSE;
-}
-
 
 WClientWin *clientwin_get_transient_for(const WClientWin *cwin)
 {
@@ -459,6 +439,7 @@ WClientWin* ioncore_manage_clientwin(Window win, bool maprq)
     XWMHints *hints;
     int init_state=NormalState;
     WManageParams param=MANAGEPARAMS_INIT;
+    void *mrshpm[2];
 
     param.dockapp=FALSE;
     
@@ -556,21 +537,14 @@ again:
                                   FALSE);
     }
 
-    if(!handle_target_prop(cwin, &param)){
-        bool managed;
-        void *mrshpm[2];
+    mrshpm[0]=cwin;
+    mrshpm[1]=&param;
         
-        mrshpm[0]=cwin;
-        mrshpm[1]=&param;
-        
-        managed=hook_call_alt(clientwin_do_manage_alt, &mrshpm, 
-                              (WHookMarshall*)do_manage_mrsh,
-                              (WHookMarshallExtl*)do_manage_mrsh_extl);
-
-        if(!managed){
-            warn(TR("Unable to manage client window %#x."), win);
-            goto failure;
-        }
+    if(!hook_call_alt(clientwin_do_manage_alt, &mrshpm, 
+                      (WHookMarshall*)do_manage_mrsh,
+                      (WHookMarshallExtl*)do_manage_mrsh_extl)){
+        warn(TR("Unable to manage client window %#x."), win);
+        goto failure;
     }
     
     if(ioncore_g.opmode==IONCORE_OPMODE_NORMAL &&
@@ -578,7 +552,6 @@ again:
        !region_skip_focus((WRegion*)cwin)){
         region_set_activity((WRegion*)cwin, SETPARAM_SET);
     }
-    
     
     if(postmanage_check(cwin, &attr)){
         if(param.jumpto && ioncore_g.focus_next==NULL)

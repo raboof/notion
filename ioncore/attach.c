@@ -90,21 +90,31 @@ static WRegion *wrap_load(WWindow *par, const WFitParams *fp,
 }
 
 
+WRegion *ioncore_newly_created=NULL;
+
+
 static WRegion *doit_load(WRegion *mgr,
                           WWindow *par, const WFitParams *fp,
                           WRegionDoAttachFn *cont, void *cont_param,
                           ExtlTab tab)
 {
-    WRegion *reg;
+    WRegion *reg=NULL;
     
     if(extl_table_gets_o(tab, "reg", (Obj**)&reg)){
         if(!OBJ_IS(reg, WRegion))
             return FALSE;
-        return doit_reparent(mgr, par, fp, cont, cont_param, reg);
-    }
+    }/*else if(extl_table_is_bool_set(tab, "reg_use_new")){
+        reg=ioncore_newly_created;
+        if(reg==NULL)
+            return NULL;
+    }*/
     
-    return doit_new(mgr, par, fp, cont, cont_param,
-                    (WRegionCreateFn*)wrap_load, &tab);
+    if(reg!=NULL){
+        return doit_reparent(mgr, par, fp, cont, cont_param, reg);
+    }else{
+        return doit_new(mgr, par, fp, cont, cont_param,
+                        (WRegionCreateFn*)wrap_load, &tab);
+    }
 }
 
 WRegion *region_attach_helper(WRegion *mgr,
