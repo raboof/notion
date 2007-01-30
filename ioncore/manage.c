@@ -72,7 +72,7 @@ static WPHolder *try_target(WClientWin *cwin, const WManageParams *param,
     WRegion *r=ioncore_lookup_region(target, NULL);
         
     if(r==NULL)
-        return FALSE;
+        return NULL;
             
     return region_prepare_manage(r, cwin, param, MANAGE_REDIR_PREFER_NO);
 }
@@ -110,12 +110,13 @@ static bool handle_target_winprops(WClientWin *cwin, const WManageParams *param,
             mgd=(region_manager((WRegion*)cwin)!=NULL);
             
             if(reg!=NULL && !mgd){
-                ph=try_target(cwin, param, target);
+                if(target!=NULL)
+                    ph=try_target(cwin, param, target);
                 
                 if(ph==NULL){
                     ph=region_prepare_manage(reg, cwin, param, 
                                              MANAGE_REDIR_PREFER_YES);
-
+                    
                     if(ph==NULL)
                         destroy_obj((Obj*)reg);
                 }
@@ -142,13 +143,6 @@ bool clientwin_do_manage_default(WClientWin *cwin,
     int swf;
     bool ok, tmp;
 
-    /* Check if param->tfor or any of its managers want to manage cwin. */
-    if(param->tfor!=NULL){
-        assert(param->tfor!=cwin);
-        ph=region_prepare_manage_transient((WRegion*)param->tfor, cwin, 
-                                           param, 0);
-    }
-    
     /* Find a suitable screen */
     scr=clientwin_find_suitable_screen(cwin, param);
     if(scr==NULL){
@@ -159,6 +153,13 @@ bool clientwin_do_manage_default(WClientWin *cwin,
     if(handle_target_winprops(cwin, param, scr, &ph))
         return TRUE;
         
+    /* Check if param->tfor or any of its managers want to manage cwin. */
+    if(ph==NULL && param->tfor!=NULL){
+        assert(param->tfor!=cwin);
+        ph=region_prepare_manage_transient((WRegion*)param->tfor, cwin, 
+                                           param, 0);
+    }
+
     if(ph==NULL){
         /* Find a placeholder for non-fullscreen state */
         ph=region_prepare_manage((WRegion*)scr, cwin, param,
