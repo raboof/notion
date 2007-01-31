@@ -36,6 +36,23 @@ de.defstyle("tab-frame", {
     }),
 })
 
+de.defstyle("tab-menuentry", {
+    based_on = "tab",
+    de.substyle("*-*-*-unselected-activity", {
+        shadow_colour = "#c04040",
+        highlight_colour = "#c04040",
+        background_colour = "#901010",
+        foreground_colour = "#eeeeee",
+    }),
+    
+    de.substyle("*-*-*-selected-activity", {
+        shadow_colour = "#c04040",
+        highlight_colour = "#c04040",
+        background_colour = "#b03030",
+        foreground_colour = "#ffffff",
+    }),
+})
+
 de.defstyle("tab-frame-tiled", {
     based_on = "tab-frame",
     spacing = 1,
