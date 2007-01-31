@@ -120,8 +120,9 @@ end
 -- Workspace and window lists {{{
 
 local function addto(list)
-    return function(tgt)
+    return function(tgt, attr)
         local e=menuentry(tgt:name(), function() tgt:goto() end)
+        e.attr=attr;
         table.insert(list, e)
         return true
     end
@@ -157,22 +158,27 @@ local function focuslist(do_act)
     local seen={}
     local iter_=addto(entries)
     
-    local function iter(obj) 
+    local function iter(obj, attr) 
         if obj_is(obj, "WClientWin") then
-            iter_(obj)
+            iter_(obj, attr)
             seen[obj]=true
         end
         return true
     end
     
-    local function iter2(obj)
+    local function iter_act(obj)
+        return iter(obj, "activity")
+    end
+    
+    local function iter_foc(obj)
         return (seen[obj] or iter(obj))
     end
     
     if do_act then
-        ioncore.activity_i(iter)
+        ioncore.activity_i(iter_act)
     end
-    ioncore.focushistory_i(iter2)
+    
+    ioncore.focushistory_i(iter_foc)
     
     return entries
 end
