@@ -112,13 +112,10 @@ static void menu_draw_entry(WMenu *menu, int i, const WRectangle *igeom,
                             bool complete)
 {
     WRectangle geom;
-    int a;
-    GrAttr sa, suba;
+    GrAttr sa, aa;
 
-    sa=(menu->selected_entry==i 
-        ? GR_ATTR(selected) : GR_ATTR(unselected));
-    suba=(menu->entries[i].flags&WMENUENTRY_SUBMENU
-          ? GR_ATTR(submenu) : GR_ATTR(normal));
+    aa=(REGION_IS_ACTIVE(menu) ? GR_ATTR(active) : GR_ATTR(inactive));
+    sa=(menu->selected_entry==i ? GR_ATTR(selected) : GR_ATTR(unselected));
     
     if(menu->entry_brush==NULL)
         return;
@@ -129,14 +126,13 @@ static void menu_draw_entry(WMenu *menu, int i, const WRectangle *igeom,
     
     grbrush_begin(menu->entry_brush, &geom, GRBRUSH_AMEND|GRBRUSH_KEEP_ATTR);
     
+    grbrush_init_attr(menu->entry_brush, &menu->entries[i].attr);
+    
+    grbrush_set_attr(menu->entry_brush, aa);
     grbrush_set_attr(menu->entry_brush, sa);
-    grbrush_set_attr(menu->entry_brush, suba);
 
     grbrush_draw_textbox(menu->entry_brush, &geom, menu->entries[i].title, 
                          complete);
-    
-    grbrush_unset_attr(menu->entry_brush, suba);
-    grbrush_unset_attr(menu->entry_brush, sa);
     
     grbrush_end(menu->entry_brush);
 }
@@ -144,16 +140,12 @@ static void menu_draw_entry(WMenu *menu, int i, const WRectangle *igeom,
     
 void menu_draw_entries(WMenu *menu, bool complete)
 {
-    GrAttr aa=(REGION_IS_ACTIVE(menu) ? GR_ATTR(active) : GR_ATTR(inactive));
     WRectangle igeom;
     int i, mx;
     
     if(menu->entry_brush==NULL)
         return;
         
-    grbrush_init_attr(menu->entry_brush, NULL);
-    grbrush_set_attr(menu->entry_brush, aa);
-    
     get_inner_geom(menu, &igeom);
     
     mx=menu->first_entry+menu->vis_entries;
@@ -517,9 +509,8 @@ static void menu_release_gr(WMenu *menu)
 
 static WMenuEntry *preprocess_menu(ExtlTab tab, int *n_entries)
 {
-    ExtlTab entry, sub;
-    ExtlFn fn;
     WMenuEntry *entries;
+    ExtlTab entry;
     int i, n;
     
     n=extl_table_get_n(tab);
@@ -532,23 +523,48 @@ static WMenuEntry *preprocess_menu(ExtlTab tab, int *n_entries)
     
     if(entries==NULL)
         return NULL;
-
+        
+    init_attr();
+    
     /* Initialise entries and check submenus */
     for(i=1; i<=n; i++){
-        entries[i-1].title=NULL;
-        entries[i-1].flags=0;
-        if(extl_table_getis(tab, i, "submenu_fn", 'f', &fn)){
-            entries[i-1].flags|=WMENUENTRY_SUBMENU;
-            extl_unref_fn(fn);
-        }else if(extl_table_getis(tab, i, "submenu", 't', &sub)){
-            entries[i-1].flags|=WMENUENTRY_SUBMENU;
-            extl_unref_table(sub);
+        WMenuEntry *ent=&entries[i-1];
+        
+        ent->title=NULL;
+        ent->flags=0;
+        
+        gr_stylespec_init(&ent->attr);
+        
+        if(extl_table_geti_t(tab, i, &entry)){
+            char *attr;
+            ExtlTab sub;
+            ExtlFn fn;
+            
+            if(extl_table_gets_s(entry, "attr", &attr)){
+                gr_stylespec_load_(&ent->attr, attr, TRUE);
+                free(attr);
+            }
+            
+            if(extl_table_gets_f(entry, "submenu_fn", &fn)){
+                ent->flags|=WMENUENTRY_SUBMENU;
+                extl_unref_fn(fn);
+            }else if(extl_table_gets_t(entry, "submenu", &sub)){
+                ent->flags|=WMENUENTRY_SUBMENU;
+                extl_unref_table(sub);
+            }
+            
+            if(ent->flags&WMENUENTRY_SUBMENU)
+                gr_stylespec_set(&ent->attr, GR_ATTR(submenu));
+            
+            extl_unref_table(entry);
         }
     }
     
     return entries;
 }
 
+
+static void deinit_entries(WMenu *menu);
 
 
 bool menu_init(WMenu *menu, WWindow *par, const WFitParams *fp,
@@ -571,9 +587,9 @@ bool menu_init(WMenu *menu, WWindow *par, const WFitParams *fp,
 
     menu->last_fp=*fp;
     
-    if(params->pmenu_mode)
+    if(params->pmenu_mode){
         menu->selected_entry=-1;
-    else{
+    }else{
         menu->selected_entry=params->initial-1;
         if(menu->selected_entry<0)
            menu->selected_entry=0;
@@ -619,7 +635,7 @@ fail2:
 fail:
     extl_unref_table(menu->tab);
     extl_unref_fn(menu->handler);
-    free(menu->entries);
+    deinit_entries(menu);
     return FALSE;
 }
 
@@ -631,11 +647,22 @@ WMenu *create_menu(WWindow *par, const WFitParams *fp,
 }
 
 
-
-void menu_deinit(WMenu *menu)
+static void deinit_entries(WMenu *menu)
 {
     int i;
     
+    for(i=0; i<menu->n_entries; i++){
+        gr_stylespec_unalloc(&menu->entries[i].attr);
+        if(menu->entries[i].title!=NULL)
+            free(menu->entries[i].title);
+    }
+    
+    free(menu->entries);
+}
+
+
+void menu_deinit(WMenu *menu)
+{
     menu_typeahead_clear(menu);
     
     if(menu->submenu!=NULL)
@@ -644,11 +671,10 @@ void menu_deinit(WMenu *menu)
     extl_unref_table(menu->tab);
     extl_unref_fn(menu->handler);
     
-    for(i=0; i<menu->n_entries; i++)
-        free(menu->entries[i].title);
-    free(menu->entries);
+    deinit_entries(menu);
     
     menu_release_gr(menu);
+    
     window_deinit((WWindow*)menu);
 }
 

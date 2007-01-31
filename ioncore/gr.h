@@ -113,9 +113,11 @@ extern bool gr_stylespec_set(GrStyleSpec *spec, GrAttr a);
 extern void gr_stylespec_unset(GrStyleSpec *spec, GrAttr a);
 extern bool gr_stylespec_add(GrStyleSpec *spec, GrAttr a, uint score);
 extern bool gr_stylespec_append(GrStyleSpec *dst, const GrStyleSpec *src);
-extern bool gr_stylespec_load(GrStyleSpec *spec, const char *str);
 extern void gr_stylespec_unalloc(GrStyleSpec *spec);
 extern bool gr_stylespec_equals(const GrStyleSpec *s1, const GrStyleSpec *s2);
+extern bool gr_stylespec_load(GrStyleSpec *spec, const char *str);
+extern bool gr_stylespec_load_(GrStyleSpec *spec, const char *str, 
+                               bool no_order_score);
 
 /* GrBrush */
 

@@ -231,10 +231,9 @@ static uint count_dashes(const char *str)
 }
     
     
-
-bool gr_stylespec_load(GrStyleSpec *spec, const char *str)
+bool gr_stylespec_load_(GrStyleSpec *spec, const char *str, bool no_order_score)
 {
-    uint score=count_dashes(str)+1;
+    uint score=(no_order_score ? 1 : count_dashes(str)+1);
     
     gr_stylespec_init(spec);
     
@@ -258,7 +257,8 @@ bool gr_stylespec_load(GrStyleSpec *spec, const char *str)
             
         stringstore_free(a);
         
-        score--;
+        if(!no_order_score)
+            score--;
     }
     
     return TRUE;
@@ -267,6 +267,12 @@ fail:
     gr_stylespec_unalloc(spec);
     
     return FALSE;
+}
+
+
+bool gr_stylespec_load(GrStyleSpec *spec, const char *str)
+{
+    return gr_stylespec_load_(spec, str, FALSE);
 }
 
 

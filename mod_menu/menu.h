@@ -25,6 +25,7 @@ INTRSTRUCT(WMenuEntry);
 DECLSTRUCT(WMenuEntry){
     char *title;
     int flags;
+    GrStyleSpec attr;
 };
 
 DECLCLASS(WMenu){
