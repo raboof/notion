@@ -47,22 +47,6 @@ de.defstyle("tab", {
     text_align = "center",
 })
 
-de.defstyle("tab-menuentry", {
-    based_on = "tab",
-    text_align = "left",
-    de.substyle("inactive-selected", {
-        shadow_colour = "grey",
-        highlight_colour = "grey",
-        background_colour = "#8a999e",
-        foreground_colour = "grey",
-    }),
-})
-
-de.defstyle("tab-menuentry-big", {
-    based_on = "tab-menuentry",
-    padding_pixels = 7,
-})
-
 de.defstyle("input", {
     based_on = "*",
     shadow_colour = "grey",
@@ -85,6 +69,11 @@ de.defstyle("input", {
 })
 
 dopath("lookcommon_clean")
+
+de.defstyle("tab-menuentry-big", {
+    based_on = "tab-menuentry",
+    padding_pixels = 7,
+})
 
 gr.refresh()
 

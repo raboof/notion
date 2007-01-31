@@ -36,8 +36,15 @@ de.defstyle("tab-frame", {
     }),
 })
 
+de.defstyle("tab-frame-tiled", {
+    based_on = "tab-frame",
+    spacing = 1,
+})
+
 de.defstyle("tab-menuentry", {
     based_on = "tab",
+    text_align = "left",
+    
     de.substyle("*-*-*-unselected-activity", {
         shadow_colour = "#c04040",
         highlight_colour = "#c04040",
@@ -51,11 +58,6 @@ de.defstyle("tab-menuentry", {
         background_colour = "#b03030",
         foreground_colour = "#ffffff",
     }),
-})
-
-de.defstyle("tab-frame-tiled", {
-    based_on = "tab-frame",
-    spacing = 1,
 })
 
 de.defstyle("frame", {

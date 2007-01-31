@@ -48,18 +48,6 @@ de.defstyle("tab", {
     text_align = "center",
 })
 
-de.defstyle("tab-menuentry", {
-    based_on = "tab",
-    text_align = "left",
-    spacing = 1,
-})
-
-de.defstyle("tab-menuentry-big", {
-    based_on = "tab-menuentry",
-    font = "-*-helvetica-medium-r-normal-*-17-*-*-*-*-*-*-*",
-    padding_pixels = 7,
-})
-
 de.defstyle("input-edln", {
     based_on = "*",
     de.substyle("*-cursor", {
@@ -73,6 +61,12 @@ de.defstyle("input-edln", {
 })
 
 dopath("lookcommon_clean")
+
+de.defstyle("tab-menuentry-big", {
+    based_on = "tab-menuentry",
+    font = "-*-helvetica-medium-r-normal-*-17-*-*-*-*-*-*-*",
+    padding_pixels = 7,
+})
 
 gr.refresh()
 
