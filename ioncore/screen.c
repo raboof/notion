@@ -683,10 +683,13 @@ static bool create_initial_ws(WScreen *scr)
     WMPlexAttachParams par=MPLEXATTACHPARAMS_INIT;
     ExtlTab lo=ioncore_get_layout("default");
     
-    reg=mplex_do_attach_new(&scr->mplex, &par,
-                            (WRegionCreateFn*)groupws_load_, &lo);
-    
-    extl_unref_table(lo);
+    if(lo==extl_table_none()){
+        reg=mplex_do_attach_new(&scr->mplex, &par,
+                                (WRegionCreateFn*)create_groupws, NULL);
+    }else{
+        reg=mplex_attach_new_(&scr->mplex, &par, 0, lo);
+        extl_unref_table(lo);
+    }
     
     if(reg==NULL){
         warn(TR("Unable to create a workspace on screen %d."), scr->id);

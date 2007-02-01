@@ -129,6 +129,8 @@ extern WRegion *mplex_attach_simple(WMPlex *mplex, WRegion *reg,
                                     int flags);
 
 extern WRegion *mplex_attach(WMPlex *mplex, WRegion *reg, ExtlTab param);
+extern WRegion *mplex_attach_new_(WMPlex *mplex, WMPlexAttachParams *partmpl,
+                                  int mask, ExtlTab param);
 extern WRegion *mplex_attach_new(WMPlex *mplex, ExtlTab param);
 
 extern WRegion *mplex_do_attach_pholder(WMPlex *mplex, WMPlexPHolder *ph,

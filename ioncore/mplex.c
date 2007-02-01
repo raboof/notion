@@ -1267,15 +1267,15 @@ WRegion *mplex_attach_simple(WMPlex *mplex, WRegion *reg, int flags)
 }
 
 
-static void get_params(WMPlex *mplex, ExtlTab tab, WMPlexAttachParams *par)
+static void get_params(WMPlex *mplex, ExtlTab tab, int mask,
+                       WMPlexAttachParams *par)
 {
     int layer=1;
     int tmp;
+    int ok=~mask;
     
-    par->flags=0;
-    
-    if(extl_table_gets_i(tab, "layer", &tmp)){
-        /* backwards compatibility */
+    if(mask==0 && extl_table_gets_i(tab, "layer", &tmp)){
+        /* backwards compatibility. No need to consider masked cases */
         if(tmp==2){
             par->flags|=MPLEX_ATTACH_UNNUMBERED;
             if(!extl_table_is_bool_set(tab, "passive"))
@@ -1284,34 +1284,36 @@ static void get_params(WMPlex *mplex, ExtlTab tab, WMPlexAttachParams *par)
     }
 
     if(extl_table_gets_i(tab, "level", &tmp)){
-        if(tmp>=0){
+        if(tmp>=0 && ok&MPLEX_ATTACH_LEVEL){
             par->flags|=MPLEX_ATTACH_LEVEL;
             par->level=tmp;
         }
     }
     
     if(extl_table_is_bool_set(tab, "modal"))
-        par->flags|=MPLEX_ATTACH_MODAL;
+        par->flags|=MPLEX_ATTACH_MODAL&ok;
 
     if(extl_table_is_bool_set(tab, "unnumbered"))
-        par->flags|=MPLEX_ATTACH_UNNUMBERED;
+        par->flags|=MPLEX_ATTACH_UNNUMBERED&ok;
     
     if(extl_table_is_bool_set(tab, "switchto"))
-        par->flags|=MPLEX_ATTACH_SWITCHTO;
+        par->flags|=MPLEX_ATTACH_SWITCHTO&ok;
 
     if(extl_table_is_bool_set(tab, "hidden"))
-        par->flags|=MPLEX_ATTACH_HIDDEN;
+        par->flags|=MPLEX_ATTACH_HIDDEN&ok;
 
     if(extl_table_gets_i(tab, "index", &(par->index)))
-        par->flags|=MPLEX_ATTACH_INDEX;
+        par->flags|=MPLEX_ATTACH_INDEX&ok;
 
     if(extl_table_gets_i(tab, "sizepolicy", &tmp)){
-        par->flags|=MPLEX_ATTACH_SIZEPOLICY;
-        par->szplcy=tmp;
+        if(ok&MPLEX_ATTACH_SIZEPOLICY){
+            par->flags|=MPLEX_ATTACH_SIZEPOLICY;
+            par->szplcy=tmp;
+        }
     }
     
     if(extl_table_gets_rectangle(tab, "geom", &par->geom))
-        par->flags|=MPLEX_ATTACH_GEOM;
+        par->flags|=MPLEX_ATTACH_GEOM&ok;
 }
 
 
@@ -1323,18 +1325,32 @@ static void get_params(WMPlex *mplex, ExtlTab tab, WMPlexAttachParams *par)
 EXTL_EXPORT_MEMBER
 WRegion *mplex_attach(WMPlex *mplex, WRegion *reg, ExtlTab param)
 {
-    WMPlexAttachParams par;
+    WMPlexAttachParams par=MPLEXATTACHPARAMS_INIT;
     WRegionAttachData data;
 
     if(reg==NULL)
         return NULL;
     
-    get_params(mplex, param, &par);
+    get_params(mplex, param, 0, &par);
     
     data.type=REGION_ATTACH_REPARENT;
     data.u.reg=reg;
     
     return mplex_do_attach(mplex, &par, &data);
+}
+
+
+WRegion *mplex_attach_new_(WMPlex *mplex, WMPlexAttachParams *par, 
+                           int mask, ExtlTab param)
+{
+    WRegionAttachData data;
+    
+    get_params(mplex, param, mask, par);
+    
+    data.type=REGION_ATTACH_LOAD;
+    data.u.tab=param;
+    
+    return mplex_do_attach(mplex, par, &data);
 }
 
 
@@ -1367,15 +1383,9 @@ WRegion *mplex_attach(WMPlex *mplex, WRegion *reg, ExtlTab param)
 EXTL_EXPORT_MEMBER
 WRegion *mplex_attach_new(WMPlex *mplex, ExtlTab param)
 {
-    WMPlexAttachParams par;
-    WRegionAttachData data;
+    WMPlexAttachParams par=MPLEXATTACHPARAMS_INIT;
     
-    get_params(mplex, param, &par);
-    
-    data.type=REGION_ATTACH_LOAD;
-    data.u.tab=param;
-    
-    return mplex_do_attach(mplex, &par, &data);
+    return mplex_attach_new_(mplex, &par, 0, param);
 }
 
 
@@ -1975,11 +1985,11 @@ void mplex_load_contents(WMPlex *mplex, ExtlTab tab)
         for(i=1; i<=n; i++){
             if(extl_table_geti_t(substab, i, &subtab)){
                 /*mplex_attach_new(mplex, subtab);*/
-                WMPlexAttachParams par;
+                WMPlexAttachParams par=MPLEXATTACHPARAMS_INIT;
                 WRegionAttachData data;
                 char *tmp=NULL;
                 
-                get_params(mplex, subtab, &par);
+                get_params(mplex, subtab, 0, &par);
                 
                 par.flags|=MPLEX_ATTACH_INDEX;
                 par.index=LLIST_INDEX_LAST;

@@ -355,13 +355,6 @@ WRegion *groupws_load(WWindow *par, const WFitParams *fp,
 }
 
 
-WRegion *groupws_load_(WWindow *par, const WFitParams *fp, 
-                       const ExtlTab *tab)
-{
-    return groupws_load(par, fp, *tab);
-}
-
-
 static DynFunTab groupws_dynfuntab[]={
     {(DynFun*)region_prepare_manage, 
      (DynFun*)groupws_prepare_manage},

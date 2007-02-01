@@ -95,6 +95,7 @@ static bool handle_target_winprops(WClientWin *cwin, const WManageParams *param,
         
         if(lo!=extl_table_none()){
             WMPlexAttachParams par=MPLEXATTACHPARAMS_INIT;
+            int mask=MPLEX_ATTACH_SWITCHTO;
             WRegion *reg;
             
             if(param->switchto)
@@ -102,9 +103,10 @@ static bool handle_target_winprops(WClientWin *cwin, const WManageParams *param,
             
             /*ioncore_newly_created=(WRegion*)cwin;*/
             
-            reg=mplex_do_attach_new(&scr->mplex, &par,
-                                    (WRegionCreateFn*)groupws_load_, &lo);
-                                    
+            reg=mplex_attach_new_(&scr->mplex, &par, mask, lo);
+            
+            extl_unref_table(lo);
+            
             /*ioncore_newly_created=NULL;*/
             
             mgd=(region_manager((WRegion*)cwin)!=NULL);

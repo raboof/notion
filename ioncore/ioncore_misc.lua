@@ -9,9 +9,11 @@
 -- (at your option) any later version.
 --
 
-local group_tmpl={type="WGroupWS", switchto=true}
+local group_tmpl = { type="WGroupWS" }
 
-local empty = { managed={} }
+local default_tmpl = { switchto=true }
+
+local empty = { type="WGroupWS", managed={} }
 
 local layouts={
     empty = empty,
@@ -24,12 +26,12 @@ local layouts={
 -- "empty" may not be defined.
 function ioncore.deflayout(name, tab)
     assert(layout ~= "empty")
-
+    
     if name=="default" and not tab then
-        tab = empty
+        layouts[name] = empty
+    else
+        layouts[name] = table.join(tab, group_tmpl)
     end
-
-    layouts[name] = tab
 end
 
 --DOC
@@ -51,9 +53,10 @@ ioncore.set{_get_layout=ioncore.getlayout}
 -- If no \var{layout} is given, "default" is used.
 function ioncore.create_ws(scr, tmpl, layout)
     local lo=ioncore.getlayout(layout or "default")
-    local t=table.join(table.join(tmpl or {}, lo), group_tmpl)
     
-    return scr:attach_new(t)
+    assert(lo, TR("Unknown layout"))
+    
+    return scr:attach_new(table.join(tmpl or default_tmpl, lo))
 end
 
 
