@@ -37,7 +37,6 @@
 #include "bindmaps.h"
 #include "regbind.h"
 #include "gr.h"
-#include "activity.h"
 #include "llist.h"
 #include "framedpholder.h"
 #include "return.h"
