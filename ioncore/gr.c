@@ -379,14 +379,41 @@ void gr_stylespec_unset(GrStyleSpec *spec, GrAttr a)
 }
 
 
+static bool gr_stylespec_do_init_from(GrStyleSpec *dst, const GrStyleSpec *src)
+{
+    uint i;
+    
+    if(src->n==0)
+        return TRUE;
+        
+    dst->attrs=ALLOC_N(GrAttrScore, src->n);
+    
+    if(dst->attrs==NULL)
+        return FALSE;
+    
+    for(i=0; i<src->n; i++){
+        dst->attrs[i]=src->attrs[i];
+        stringstore_ref(dst->attrs[i].attr);
+    }
+    
+    dst->n=src->n;
+    
+    return TRUE;
+}
+
+
 bool gr_stylespec_append(GrStyleSpec *dst, const GrStyleSpec *src)
 {
     uint i;
     bool ok=TRUE;
     
-    for(i=0; i<src->n; i++){
-        if(!gr_stylespec_add(dst, src->attrs[i].attr, src->attrs[i].score))
-            ok=FALSE;
+    if(dst->attrs==NULL){
+        ok=gr_stylespec_do_init_from(dst, src);
+    }else{
+        for(i=0; i<src->n; i++){
+            if(!gr_stylespec_add(dst, src->attrs[i].attr, src->attrs[i].score))
+                ok=FALSE;
+        }
     }
     
     return ok;
