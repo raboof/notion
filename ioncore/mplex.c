@@ -295,8 +295,8 @@ bool mplex_managed_i(WMPlex *mplex, ExtlFn iterfn)
  * Set index of \var{reg} within the multiplexer to \var{index} within 
  * the mutually exclusive list. Special values for \var{index} are:
  * \begin{tabularx}{\linewidth}{lX}
- *   $-1$ & After \fnref{WMPlex.mx_current}. \\
- *   $-2$ & Last. \\
+ *   $-1$ & Last. \\
+ *   $-2$ & After \fnref{WMPlex.mx_current}. \\
  * \end{tabularx}
  */
 EXTL_EXPORT_MEMBER
