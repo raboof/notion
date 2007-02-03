@@ -182,17 +182,18 @@ void debrush_get_border_widths(DEBrush *brush, GrBorderWidths *bdw)
 {
     DEStyle *style=brush->d;
     DEBorder *bd=&(style->border);
-    uint tmp;
+    uint tmp=0, spc=style->spacing;
     
     switch(bd->style){
     case DEBORDER_RIDGE:
+        tmp=spc;
     case DEBORDER_GROOVE:
-        tmp=bd->sh+bd->hl+bd->pad;
+        tmp+=bd->sh+bd->hl+bd->pad;
         bdw->top=tmp; bdw->bottom=tmp; bdw->left=tmp; bdw->right=tmp;
         break;
     case DEBORDER_INLAID:
-        tmp=bd->sh+bd->pad; bdw->top=tmp; bdw->left=tmp;
-        tmp=bd->hl+bd->pad; bdw->bottom=tmp; bdw->right=tmp;
+        tmp=bd->sh+bd->pad+spc; bdw->top=tmp; bdw->left=tmp;
+        tmp=bd->hl+bd->pad+spc; bdw->bottom=tmp; bdw->right=tmp;
         break;
     case DEBORDER_ELEVATED:
     default:
