@@ -1,5 +1,5 @@
 
-ion-3ds-2007????
+ion-3ds-20070203
 ----------------
 
   * There's been changes in padding/spacing usage in styles. Frames
@@ -9,6 +9,11 @@ ion-3ds-2007????
     Consequently, custom styles may need to be updated to reflect this,
     by increasing the padding, possibly also altering/removing colour 
     (to set it to background colour). 
+
+  * The use of drawing engine attributes has also changed, and strict
+    ordering of them in the styles is no longer necessary. Additionally,
+    much more attributes are supported, including the name of every
+    statusbar meter.
 
   * Xinerama support is gone. In addition to being problematic as such,
     it had bit-rotted, and I will not waste time fixing it.
