@@ -42,7 +42,7 @@ de.defstyle("tab", {
         shadow_colour = "black",
         highlight_colour = "black",
         background_colour = "#3f3f3f",
-        foreground_colour = "#9f9f9f",
+        foreground_colour = "#bfbfbf",
     }),
     de.substyle("active-unselected", {
         shadow_colour = "black",
@@ -53,8 +53,8 @@ de.defstyle("tab", {
     de.substyle("inactive-selected", {
         shadow_colour = "black",
         highlight_colour = "black",
-        background_colour = "#0f1f4f",
-        foreground_colour = "#9f9f9f",
+        background_colour = "#1f2f4f",
+        foreground_colour = "#bfbfbf",
     }),
     de.substyle("inactive-unselected", {
         shadow_colour = "black",
@@ -104,6 +104,11 @@ de.defstyle("input", {
         background_colour = "black",
         foreground_colour = "white",
     }),
+})
+
+de.defstyle("input-menu", {
+    based_on = "input",
+    padding_pixels=0,
 })
 
 dopath("lookcommon_clean")

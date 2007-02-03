@@ -17,19 +17,30 @@ de.defstyle("stdisp", {
 
 de.defstyle("actnotify", {
     based_on = "*",
-    shadow_colour = "#401010",
-    highlight_colour = "#eec0c0",
-    background_colour = "#990000",
-    foreground_colour = "#eeeeee",
+    shadow_colour = "#600808",
+    highlight_colour = "#c04040",
+    background_colour = "#b03030",
+    foreground_colour = "#ffffff",
 })
 
 de.defstyle("tab-frame", {
     based_on = "tab",
-    de.substyle("*-*-*-*-activity", {
-        shadow_colour = "#401010",
-        highlight_colour = "#eec0c0",
-        background_colour = "#990000",
+    -- TODO: some kind of amend option. It should not be necessary to 
+    -- duplicate this definition for both tab-frame and tab-menuentry,
+    -- or for each style, nor use more complex hacks to communicate
+    -- this stuff otherwise.
+    de.substyle("*-*-*-unselected-activity", {
+        shadow_colour = "#600808",
+        highlight_colour = "#c04040",
+        background_colour = "#901010",
         foreground_colour = "#eeeeee",
+    }),
+    
+    de.substyle("*-*-*-selected-activity", {
+        shadow_colour = "#600808",
+        highlight_colour = "#c04040",
+        background_colour = "#b03030",
+        foreground_colour = "#ffffff",
     }),
 })
 
@@ -54,4 +65,31 @@ de.defstyle("frame-floating", {
 de.defstyle("frame-tiled-alt", {
     based_on = "frame-tiled",
     bar = "none",
+})
+
+de.defstyle("tab-menuentry", {
+    based_on = "tab",
+    text_align = "left",
+    highlight_pixels = 0,
+    shadow_pixels = 0,
+    
+    de.substyle("*-*-*-unselected-activity", {
+        shadow_colour = "#600808",
+        highlight_colour = "#c04040",
+        background_colour = "#901010",
+        foreground_colour = "#eeeeee",
+    }),
+    
+    de.substyle("*-*-*-selected-activity", {
+        shadow_colour = "#600808",
+        highlight_colour = "#c04040",
+        background_colour = "#b03030",
+        foreground_colour = "#ffffff",
+    }),
+})
+
+de.defstyle("tab-menuentry-big", {
+    based_on = "tab-menuentry",
+    font = "-*-helvetica-medium-r-normal-*-17-*-*-*-*-*-*-*",
+    padding_pixels = 7,
 })

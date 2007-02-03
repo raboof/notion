@@ -59,19 +59,6 @@ de.defstyle("tab", {
     text_align = "center",
 })
 
-de.defstyle("tab-menuentry", {
-    based_on = "tab",
-    text_align = "left",
-    highlight_pixels = 0,
-    shadow_pixels = 0,
-})
-
-de.defstyle("tab-menuentry-big", {
-    based_on = "tab-menuentry",
-    font = "-*-helvetica-medium-r-normal-*-17-*-*-*-*-*-*-*",
-    padding_pixels = 7,
-})
-
 de.defstyle("input", {
     based_on = "*",
     shadow_colour = "#404040",

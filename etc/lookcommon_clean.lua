@@ -96,5 +96,6 @@ de.defstyle("frame-tiled-alt", {
 
 de.defstyle("frame-floating", {
     based_on = "frame",
-    bar = "shaped"
+    bar = "shaped",
+    padding_pixels = 0,
 })
