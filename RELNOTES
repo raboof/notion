@@ -4,7 +4,7 @@ ion-3ds-20070203
 
   * There's been changes in padding/spacing usage in styles. Frames
     now surround stuff inside borders not with `spacing` pixels, but
-    with `padding_pixels. Spacing is only used to space things within
+    with `padding_pixels`. Spacing is only used to space things within
     the borders (all the tabs and the client window from each other).
     Consequently, custom styles may need to be updated to reflect this,
     by increasing the padding, possibly also altering/removing colour 
