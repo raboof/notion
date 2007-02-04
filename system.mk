@@ -82,13 +82,14 @@ X11_PREFIX=/usr/X11R6
 X11_LIBS=-L$(X11_PREFIX)/lib -lX11 -lXext
 X11_INCLUDES=-I$(X11_PREFIX)/include
 
-# XFree86 libraries up to 4.3.0 have a bug that will cause Ion to segfault
-# if Opera is used when i18n support is enabled. The following setting
-# should work around that situation.
+# XFree86 libraries up to 4.3.0 have a bug that can cause a segfault.
+# The following setting  should  work around that situation.
 DEFINES += -DCF_XFREE86_TEXTPROP_BUG_WORKAROUND
 
-# Use the Xutf8 routines (XFree86 extension) instead of Xmb routines in
-# an UTF8 locale.
+# Use the Xutf8 routines (XFree86 extension) instead of the Xmb routines
+# in an UTF-8 locale. (No, you don't need this in UTF-8 locales, and 
+# most likely don't even want. It's only there because both Xmb and 
+# Xutf8 routines are broken, in different ways.)
 #DEFINES += -DCF_DE_USE_XUTF8
 
 # Remap F11 key to SunF36 and F12 to SunF37? You may want to set this
@@ -105,7 +106,6 @@ DEFINES += -DCF_XFREE86_TEXTPROP_BUG_WORKAROUND
 # If HAS_SYSTEM_ASPRINTF is not defined, an implementation
 # in sprintf_2.2/ is used.
 #HAS_SYSTEM_ASPRINTF=1
-
 
 # If you're on an archaic system (such as relatively recent *BSD releases)
 # without even dummy multibyte/widechar and localisation support, you may 
