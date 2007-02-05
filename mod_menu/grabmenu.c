@@ -46,6 +46,12 @@ static bool grabmenu_handler(WRegion *reg, XEvent *xev)
 }
 
 
+static void grabkilled_handler(WRegion *reg)
+{
+    region_dispose(reg, FALSE);
+}
+
+
 /*--lowlevel routine not to be called by the user--*/
 EXTL_EXPORT
 WMenu *mod_menu_do_grabmenu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
@@ -89,7 +95,8 @@ WMenu *mod_menu_do_grabmenu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
     menu->gm_kcb=kcb;
     menu->gm_state=state;
     
-    ioncore_grab_establish((WRegion*)menu, grabmenu_handler, NULL, 0);
+    ioncore_grab_establish((WRegion*)menu, grabmenu_handler, 
+                           grabkilled_handler, 0);
     
     return menu;
 }
