@@ -396,7 +396,7 @@ void region_maybewarp_now(WRegion *reg, bool warp)
 {
     ioncore_g.focus_next=NULL;
     /* TODO: what if focus isn't set? Should focus_next be reset then? */
-    region_do_set_focus(reg, warp);
+    region_do_set_focus(reg, warp && ioncore_g.warp_enabled);
 }
 
 
