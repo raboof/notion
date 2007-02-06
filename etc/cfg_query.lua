@@ -110,8 +110,12 @@ defbindings("WInput", {
 mod_query.set{
      -- Auto-show completions?    
      autoshowcompl=true,
+     
      -- Delay for completion after latest keypress/modification in 
      -- milliseconds
      autoshowcompl_delay=250,
+     
+     -- Case-insensitive completion? (Some queries only.)
+     caseicompl=true,
 }
 --]]
