@@ -312,7 +312,10 @@ static void do_handle_enter_window(XEvent *ev)
     
     if(ioncore_g.input_mode!=IONCORE_INPUTMODE_NORMAL)
         return;
-    
+        
+    if(eev->mode!=NotifyNormal && !ioncore_g.warp_enabled)
+        return;
+                
     reg=XWINDOW_REGION_OF_T(eev->window, WRegion);
     
     if(reg==NULL)
