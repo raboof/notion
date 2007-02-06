@@ -117,7 +117,7 @@ void ioncore_grab_establish(WRegion *reg, GrabHandler *func,
         current_grab->eventmask=eventmask;
         current_grab->remove=FALSE;
         current_grab->cursor=IONCORE_CURSOR_DEFAULT;
-        current_grab->confine_to=region_root_of(reg);
+        current_grab->confine_to=None; /*region_root_of(reg);*/
         current_grab->sqid=last_sqid++;
         do_grab_install(current_grab);
     }
