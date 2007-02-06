@@ -389,18 +389,6 @@ void ioncore_handle_focus_in(const XFocusChangeEvent *ev, bool skip)
     if(ev->detail==NotifyPointer)
         return;
     
-    if(ev->window==region_root_of(reg)){ /* OBJ_IS(reg, WRootWin) */
-        D(fprintf(stderr, "scr-in %d %d %d\n", ROOTWIN_OF(reg)->xscr,
-                  ev->mode, ev->detail));
-        if((ev->detail==NotifyPointerRoot || ev->detail==NotifyDetailNone) &&
-           pointer_in_root(ev->window) && ioncore_g.focus_next==NULL){
-            /* Restore focus */
-            if(!skip)
-                region_set_focus(reg);
-            return;
-        }
-    }
-
     /* Input contexts */
     if(OBJ_IS(reg, WWindow)){
         wwin=(WWindow*)reg;
@@ -412,6 +400,16 @@ void ioncore_handle_focus_in(const XFocusChangeEvent *ev, bool skip)
         netwm_set_active(reg);
     
     region_got_focus(reg);
+    
+    /* Restore focus if it was returned to a root window and we don't
+     * know of a pending focus change.
+     */
+    if(!skip 
+       && ev->window==region_root_of(reg) /* OBJ_IS(reg, WRootWin) */
+       && (ev->detail==NotifyPointerRoot || ev->detail==NotifyDetailNone)
+       && ioncore_g.focus_next==NULL && ioncore_await_focus()==NULL){
+        region_set_focus(reg);
+    }
 }
 
 
