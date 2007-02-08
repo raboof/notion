@@ -407,7 +407,8 @@ void ioncore_handle_focus_in(const XFocusChangeEvent *ev, bool skip)
     if(!skip 
        && ev->window==region_root_of(reg) /* OBJ_IS(reg, WRootWin) */
        && (ev->detail==NotifyPointerRoot || ev->detail==NotifyDetailNone)
-       && ioncore_g.focus_next==NULL && ioncore_await_focus()==NULL){
+       && ioncore_g.focus_next==NULL /*&& ioncore_await_focus()==NULL*/
+       && pointer_in_root(ev->window)){
         region_set_focus(reg);
     }
 }
