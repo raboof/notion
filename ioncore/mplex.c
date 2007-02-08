@@ -1084,12 +1084,20 @@ bool mplex_do_attach_final(WMPlex *mplex, WRegion *reg, WMPlexPHolder *ph)
     WLListNode *lnode=NULL;
     WMPlexAttachParams *param=&ph->param;
     bool mx_was_empty, sw, modal, mcf, hidden;
+    WSizePolicy szplcy;
     uint level;
     
     mcf=region_may_control_focus((WRegion*)mplex);
     
     mx_was_empty=(mplex->mx_list==NULL);
     
+    szplcy=((param->flags&MPLEX_ATTACH_SIZEPOLICY &&
+             param->szplcy!=SIZEPOLICY_DEFAULT)
+            ? param->szplcy
+            : (param->flags&MPLEX_ATTACH_UNNUMBERED
+               ? SIZEPOLICY_FULL_BOUNDS
+               : SIZEPOLICY_FULL_EXACT));
+
     modal=(param->flags&MPLEX_ATTACH_LEVEL
            ? param->level>=STACKING_LEVEL_MODAL1
            : param->flags&MPLEX_ATTACH_MODAL);
@@ -1112,7 +1120,6 @@ bool mplex_do_attach_final(WMPlex *mplex, WRegion *reg, WMPlexPHolder *ph)
                         : (mplex_current_node(mplex)==NULL))));
     
     hidden=(hidden || (!sw && !(param->flags&MPLEX_ATTACH_UNNUMBERED)));
-    
     
     node=create_stacking();
     
@@ -1142,7 +1149,7 @@ bool mplex_do_attach_final(WMPlex *mplex, WRegion *reg, WMPlexPHolder *ph)
     }
 
     node->hidden=TRUE;
-    node->szplcy=param->szplcy;
+    node->szplcy=szplcy;
     node->level=level;
     
     if(lnode!=NULL){
@@ -1163,6 +1170,19 @@ bool mplex_do_attach_final(WMPlex *mplex, WRegion *reg, WMPlexPHolder *ph)
     
     region_set_manager(reg, (WRegion*)mplex);
     
+    if(!(param->flags&MPLEX_ATTACH_WHATEVER)){
+        WFitParams fp;
+        
+        mplex_managed_geom(mplex, &(fp.g));
+        
+        sizepolicy(&node->szplcy, reg, 
+                   (param->flags&MPLEX_ATTACH_GEOM ? &(param->geom) : NULL),
+                   0, &fp);
+        
+        if(rectangle_compare(&fp.g, &REGION_GEOM(reg))!=RECTANGLE_SAME)
+            region_fitrep(reg, NULL, &fp);
+    }
+    
     if(!hidden)
         mplex_do_node_display(mplex, node, FALSE);
     else
@@ -1182,37 +1202,19 @@ WRegion *mplex_do_attach_pholder(WMPlex *mplex, WMPlexPHolder *ph,
                                  WRegionAttachData *data)
 {
     WMPlexAttachParams *param=&(ph->param);
-    WSizePolicy szplcy=param->szplcy;
     WFitParams fp;
-    WRegion *reg;
     
-    param->szplcy=(param->flags&MPLEX_ATTACH_SIZEPOLICY &&
-                   param->szplcy!=SIZEPOLICY_DEFAULT
-                   ? param->szplcy
-                   : (param->flags&MPLEX_ATTACH_UNNUMBERED
-                      ? SIZEPOLICY_FULL_BOUNDS
-                      : SIZEPOLICY_FULL_EXACT));
+    if(param->flags&MPLEX_ATTACH_GEOM)
+        fp.g=param->geom;
+    else
+        mplex_managed_geom(mplex, &(fp.g));
     
-    mplex_managed_geom(mplex, &(fp.g));
+    fp.mode=REGION_FIT_WHATEVER|REGION_FIT_BOUNDS;
     
-    sizepolicy(&param->szplcy, NULL, 
-               (param->flags&MPLEX_ATTACH_GEOM 
-                ? &(param->geom)
-                : NULL),
-               0, &fp);
-    
-    if(param->flags&MPLEX_ATTACH_WHATEVER)
-        fp.mode|=REGION_FIT_WHATEVER;
-    
-    reg=region_attach_helper((WRegion*)mplex, 
-                             (WWindow*)mplex, &fp,
-                             (WRegionDoAttachFn*)mplex_do_attach_final,
-                             (void*)ph, data);
-    
-    /* restore */
-    ph->param.szplcy=szplcy;
-    
-    return reg;
+    return region_attach_helper((WRegion*)mplex, 
+                                (WWindow*)mplex, &fp,
+                                (WRegionDoAttachFn*)mplex_do_attach_final,
+                                (void*)ph, data);
 }
 
 
@@ -1456,7 +1458,7 @@ WPHolder *mplex_prepare_manage(WMPlex *mplex, const WClientWin *cwin,
     
     ap.flags=((param->switchto ? MPLEX_ATTACH_SWITCHTO : 0)
               |MPLEX_ATTACH_SIZEPOLICY);
-    ap.szplcy=SIZEPOLICY_FULL_BOUNDS;
+    ap.szplcy=SIZEPOLICY_FULL_EXACT;
     
     mph=create_mplexpholder(mplex, NULL, &ap);
     
