@@ -50,6 +50,9 @@ function mod_query.query(mplex, prompt, initvalue, handler, completor,
     local function cycle(wedln)
         wedln:complete('next', 'normal')
     end
+    local function bcycle(wedln)
+        wedln:complete('prev', 'normal')
+    end
 
     -- Check that no other queries are open in the mplex.
     local ok=mplex:managed_i(function(r) 
@@ -60,7 +63,7 @@ function mod_query.query(mplex, prompt, initvalue, handler, completor,
     end
     
     local wedln=mod_query.do_query(mplex, prompt, initvalue, 
-                                   handle_it, completor, cycle)
+                                   handle_it, completor, cycle, bcycle)
     if context then
         wedln:set_context(context)
     end

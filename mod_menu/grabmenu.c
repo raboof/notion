@@ -37,9 +37,13 @@ static bool grabmenu_handler(WRegion *reg, XEvent *xev)
     if(reg==NULL)
         return FALSE;
     
-    if((menu->gm_state==ev->state || menu->gm_state==AnyModifier) 
-       && ev->keycode==menu->gm_kcb){
-        menu_select_next(menu);
+    if(ev->keycode==menu->gm_kcb){
+        if(menu->gm_state==ev->state)
+            menu_select_next(menu);
+        else if((menu->gm_state|ShiftMask)==ev->state)
+            menu_select_prev(menu);
+        else if(menu->gm_state==AnyModifier)
+            menu_select_next(menu);
     }
     
     return FALSE;
@@ -68,8 +72,16 @@ WMenu *mod_menu_do_grabmenu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
         return NULL;
     
     if(state==0){
-        /* TODO: cycle key? */
-        return mod_menu_do_menu(mplex, handler, tab, param);
+        WMenu *menu=mod_menu_do_menu(mplex, handler, tab, param);
+        /*
+        if(menu!=NULL && cycle!=extl_fn_none()){
+            uint kcb, state; 
+        
+            menu->cycle_bindmap=region_add_cycle_bindmap((WRegion*)menu,
+                                                         kcb, state, ???,
+                                                         ???);
+        }*/
+        return menu;
     }
     
     fnp.handler=handler;

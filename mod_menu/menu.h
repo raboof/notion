@@ -16,6 +16,7 @@
 #include <ioncore/window.h>
 #include <ioncore/gr.h>
 #include <ioncore/rectangle.h>
+#include <ioncore/binding.h>
 
 INTRCLASS(WMenu);
 INTRSTRUCT(WMenuEntry);
@@ -50,6 +51,8 @@ DECLCLASS(WMenu){
     char *typeahead;
     
     uint gm_kcb, gm_state;
+    
+    /*WBindmap *cycle_bindmap;*/
 };
 
 

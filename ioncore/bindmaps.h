@@ -42,5 +42,11 @@ extern WBindmap *ioncore_lookup_bindmap(const char *name);
 extern bool ioncore_do_defbindings(const char *name, ExtlTab tab);
 extern ExtlTab ioncore_do_getbindings();
 
+extern WBindmap *ioncore_create_cycle_bindmap(uint kcb, uint state, 
+                                              ExtlFn cycle, ExtlFn bcycle);
+extern WBindmap *region_add_cycle_bindmap(WRegion *reg, 
+                                          uint kcb, uint state, 
+                                          ExtlFn cycle, ExtlFn bcycle);
+
 #endif /* ION_IONCORE_BINDMAP_H */
 

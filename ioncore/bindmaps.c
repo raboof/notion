@@ -10,12 +10,14 @@
  */
 
 #include <libtu/rb.h>
+#include <libextl/extl.h>
 #include "common.h"
 #include "conf-bindings.h"
 #include "binding.h"
-#include <libextl/extl.h>
 #include "framep.h"
 #include "bindmaps.h"
+#include "global.h"
+#include "regbind.h"
 
 
 /* 
@@ -196,5 +198,55 @@ ExtlTab ioncore_do_getbindings()
     }
     
     return tab;
+}
+
+
+WBindmap *ioncore_create_cycle_bindmap(uint kcb, uint state, 
+                                       ExtlFn cycle, ExtlFn bcycle)
+{
+    WBindmap *bindmap=create_bindmap();
+    WBinding b;
+    
+    if(bindmap==NULL)
+        return NULL;
+        
+    b.ksb=XKeycodeToKeysym(ioncore_g.dpy, kcb, 0);
+    b.kcb=kcb;
+    b.state=state;
+    b.act=BINDING_KEYPRESS;
+    b.area=0;
+    b.wait=FALSE;
+    b.submap=NULL;
+    b.func=extl_ref_fn(cycle);
+    
+    if(!bindmap_add_binding(bindmap, &b)){
+        extl_unref_fn(b.func);
+        bindmap_destroy(bindmap);
+        return NULL;
+    }
+    
+    if((b.state&ShiftMask)==0 && bcycle!=extl_fn_none()){
+        b.func=extl_ref_fn(bcycle);
+        b.state|=ShiftMask;
+        bindmap_add_binding(bindmap, &b);
+    }
+    
+    return bindmap;
+}
+
+
+WBindmap *region_add_cycle_bindmap(WRegion *reg, uint kcb, uint state, 
+                                   ExtlFn cycle, ExtlFn bcycle)
+{
+    WBindmap *bindmap=ioncore_create_cycle_bindmap(kcb, state, cycle, bcycle);
+    
+    if(bindmap!=NULL){
+        if(!region_add_bindmap(reg, bindmap)){
+            bindmap_destroy(bindmap);
+            return NULL;
+        }
+    }
+    
+    return bindmap;
 }
 

@@ -20,38 +20,6 @@
 #include "wedln.h"
 
 
-static void create_cycle_binding(WEdln *wedln, uint kcb, uint state, ExtlFn cycle)
-{
-    WBindmap *bindmap=create_bindmap();
-    WBinding b;
-    
-    if(bindmap==NULL)
-        return;
-        
-    b.ksb=XKeycodeToKeysym(ioncore_g.dpy, kcb, 0);
-    b.kcb=kcb;
-    b.state=state;
-    b.act=BINDING_KEYPRESS;
-    b.area=0;
-    b.wait=FALSE;
-    b.submap=NULL;
-    b.func=extl_ref_fn(cycle);
-    
-    if(!bindmap_add_binding(bindmap, &b)){
-        extl_unref_fn(b.func);
-        bindmap_destroy(bindmap);
-        return;
-    }
-    
-    if(!region_add_bindmap((WRegion*)wedln, bindmap)){
-        bindmap_destroy(bindmap);
-        return;
-    }
-    
-    wedln->cycle_bindmap=bindmap;
-}
-    
-
 /*--lowlevel routine not to be called by the user--EXTL_DOC
  * Show a query window in \var{mplex} with prompt \var{prompt}, initial
  * contents \var{dflt}. The function \var{handler} is called with
@@ -62,7 +30,8 @@ static void create_cycle_binding(WEdln *wedln, uint kcb, uint state, ExtlFn cycl
  */
 EXTL_EXPORT
 WEdln *mod_query_do_query(WMPlex *mplex, const char *prompt, const char *dflt,
-                          ExtlFn handler, ExtlFn completor, ExtlFn cycle)
+                          ExtlFn handler, ExtlFn completor, 
+                          ExtlFn cycle, ExtlFn bcycle)
 {
     WRectangle geom;
     WEdlnCreateParams fnp;
@@ -88,8 +57,11 @@ WEdln *mod_query_do_query(WMPlex *mplex, const char *prompt, const char *dflt,
         uint kcb, state; 
         bool sub;
         
-        if(ioncore_current_key(&kcb, &state, &sub) && !sub)
-            create_cycle_binding(wedln, kcb, state, cycle);
+        if(ioncore_current_key(&kcb, &state, &sub) && !sub){
+            wedln->cycle_bindmap=region_add_cycle_bindmap((WRegion*)wedln,
+                                                          kcb, state, cycle,
+                                                          bcycle);
+        }
     }
     
     return wedln;

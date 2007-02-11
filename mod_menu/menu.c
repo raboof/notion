@@ -584,7 +584,8 @@ bool menu_init(WMenu *menu, WWindow *par, const WFitParams *fp,
     menu->handler=extl_ref_fn(params->handler);
     menu->pmenu_mode=params->pmenu_mode;
     menu->big_mode=params->big_mode;
-
+    /*menu->cycle_bindmap=NULL;*/
+    
     menu->last_fp=*fp;
     
     if(params->pmenu_mode){
@@ -668,6 +669,9 @@ void menu_deinit(WMenu *menu)
     if(menu->submenu!=NULL)
         destroy_obj((Obj*)menu->submenu);
     
+    /*if(menu->cycle_bindmap!=NULL)
+        bindmap_destroy(menu->cycle_bindmap);*/
+
     extl_unref_table(menu->tab);
     extl_unref_fn(menu->handler);
     
