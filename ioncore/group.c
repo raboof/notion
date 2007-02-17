@@ -1202,18 +1202,20 @@ Window group_xwindow(const WGroup *ws)
  * Returns the group of \var{reg}, if it is managed by one,
  * and \var{reg} itself otherwise.
  */
+/*EXTL_EXPORT_MEMBER
 WRegion *region_group_of(WRegion *reg)
 {
     WRegion *mgr=REGION_MANAGER(reg);
     
     return (OBJ_IS(mgr, WGroup) ? mgr : reg);
-}
+}*/
 
 
 /*EXTL_DOC
  * Returns the group of \var{reg}, if \var{reg} is its bottom,
  * and \var{reg} itself otherwise.
  */
+EXTL_EXPORT_MEMBER
 WRegion *region_groupleader_of(WRegion *reg)
 {
     WGroup *grp=REGION_MANAGER_CHK(reg, WGroup);
