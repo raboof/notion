@@ -104,7 +104,9 @@ extern bool group_managed_rqorder(WGroup *grp, WRegion *sub,
 extern WStacking *group_find_stacking(WGroup *ws, WRegion *r);
 extern WStacking *group_find_to_focus(WGroup *ws, WStacking *to_try);
 
-extern WRegion *region_group_if_bottom(WRegion *reg);
+extern WRegion *region_groupleader_of(WRegion *reg);
+extern WRegion *region_group_of(WRegion *reg);
+
 
 typedef WStackingFilter WGroupIterFilter;
 typedef WStackingIterTmp WGroupIterTmp;

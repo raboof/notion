@@ -141,7 +141,7 @@ bool ioncore_detach(WRegion *reg, int sp)
     WGroup *grp;
     bool set, nset;
     
-    reg=region_group_if_bottom(reg);
+    reg=region_groupleader_of(reg);
     
     grp=find_group(check_mplex(reg, &mode));
     

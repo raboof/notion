@@ -1198,14 +1198,29 @@ Window group_xwindow(const WGroup *ws)
 }
 
 
-WRegion *region_group_if_bottom(WRegion *reg)
+/*EXTL_DOC
+ * Returns the group of \var{reg}, if it is managed by one,
+ * and \var{reg} itself otherwise.
+ */
+WRegion *region_group_of(WRegion *reg)
+{
+    WRegion *mgr=REGION_MANAGER(reg);
+    
+    return (OBJ_IS(mgr, WGroup) ? mgr : reg);
+}
+
+
+/*EXTL_DOC
+ * Returns the group of \var{reg}, if \var{reg} is its bottom,
+ * and \var{reg} itself otherwise.
+ */
+WRegion *region_groupleader_of(WRegion *reg)
 {
     WGroup *grp=REGION_MANAGER_CHK(reg, WGroup);
     
-    if(grp!=NULL && group_bottom(grp)==reg)
-        return (WRegion*)grp;
-    else
-        return reg;
+    return ((grp!=NULL && group_bottom(grp)==reg)
+            ? (WRegion*)grp
+            : reg);
 }
 
 
