@@ -135,15 +135,56 @@ static bool handle_target_winprops(WClientWin *cwin, const WManageParams *param,
 }
 
 
+static bool try_fullscreen(WClientWin *cwin, WScreen *dflt, 
+                           const WManageParams *param)
+{
+    WScreen *fs_scr=NULL;
+    bool fs=FALSE, tmp;
+    
+    /* Check fullscreen mode. (This is intentionally not done
+     * for transients and windows with target winprops.)
+     */
+    if(extl_table_gets_b(cwin->proptab, "fullscreen", &tmp)){
+        if(!tmp)
+            return FALSE;
+        fs_scr=dflt;
+    }
+
+    if(fs_scr==NULL)
+        fs_scr=netwm_check_initial_fullscreen(cwin);
+
+    if(fs_scr==NULL)
+        fs_scr=clientwin_fullscreen_chkrq(cwin, param->geom.w, param->geom.h);
+    
+    if(fs_scr!=NULL){
+        WPHolder *fs_ph=region_prepare_manage((WRegion*)fs_scr, cwin, param,
+                                              MANAGE_REDIR_STRICT_NO);
+        
+        if(fs_ph!=NULL){
+            int swf=(param->switchto ? PHOLDER_ATTACH_SWITCHTO : 0);
+            
+            cwin->flags|=CLIENTWIN_FS_RQ;
+            
+            fs=pholder_attach(fs_ph, swf, (WRegion*)cwin);
+            
+            if(!fs)
+                cwin->flags&=~CLIENTWIN_FS_RQ;
+                
+            destroy_obj((Obj*)fs_ph);
+        }
+    }
+
+    return fs;
+}
+
+
 bool clientwin_do_manage_default(WClientWin *cwin, 
                                  const WManageParams *param)
 {
-    WRegion *r=NULL, *r2;
     WScreen *scr=NULL;
     WPHolder *ph=NULL;
-    int fs=-1;
-    int swf;
-    bool ok, tmp;
+    int swf=(param->switchto ? PHOLDER_ATTACH_SWITCHTO : 0);
+    bool ok;
 
     /* Find a suitable screen */
     scr=clientwin_find_suitable_screen(cwin, param);
@@ -167,44 +208,25 @@ bool clientwin_do_manage_default(WClientWin *cwin,
         ph=region_prepare_manage((WRegion*)scr, cwin, param,
                                  MANAGE_REDIR_PREFER_YES);
 
-        /* Check fullscreen mode. (This is intentionally not done
-         * for transients and windows with target winprops.)
-         */
-        if(extl_table_gets_b(cwin->proptab, "fullscreen", &tmp))
-            fs=tmp;
-
-        if(fs<0)
-            fs=netwm_check_initial_fullscreen(cwin, param->switchto);
-    
-        if(fs<0){
-            fs=clientwin_check_fullscreen_request(cwin, 
-                                                  param->geom.w,
-                                                  param->geom.h,
-                                                  param->switchto);
-        }
-    }
-
-    if(fs>0){
-        /* Full-screen mode succesfull. */
-        if(pholder_target(ph)==(WRegion*)scr){
-            /* Discard useless placeholder. */
+        if(try_fullscreen(cwin, scr, param)){
+            if(pholder_target(ph)!=(WRegion*)region_screen_of(cwin)){
+                WRegion *grp=region_groupleader_of((WRegion*)cwin);
+                if(region_do_set_return(grp, ph))
+                    return TRUE;
+            }
             destroy_obj((Obj*)ph);
             return TRUE;
         }
         
-        if(!region_do_set_return((WRegion*)cwin, ph))
-            destroy_obj((Obj*)ph);
-        
-        return TRUE;
     }
-        
+
     if(ph==NULL)
         return FALSE;
     
     /* Not in full-screen mode; use the placeholder to attach. */
     
-    swf=(param->switchto ? PHOLDER_ATTACH_SWITCHTO : 0);
     ok=pholder_attach(ph, swf, (WRegion*)cwin);
+    
     destroy_obj((Obj*)ph);
     
     return ok;

@@ -19,8 +19,7 @@
 
 #define REGION_IS_FULLSCREEN(REG) OBJ_IS(REGION_PARENT(REG), WScreen)
 
-extern bool clientwin_check_fullscreen_request(WClientWin *cwin, 
-                                               int w, int h, bool switchto);
+extern WScreen *clientwin_fullscreen_chkrq(WClientWin *cwin, int w, int h);
 extern bool clientwin_fullscreen_may_switchto(WClientWin *cwin);
 
 extern bool region_fullscreen_scr(WRegion *reg, WScreen *vp, bool switchto);

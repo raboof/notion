@@ -14,6 +14,7 @@
 
 #include "common.h"
 #include "rootwin.h"
+#include "screen.h"
 
 #define _NET_WM_STATE_REMOVE        0    /* remove/unset property */
 #define _NET_WM_STATE_ADD           1    /* add/set property */
@@ -22,7 +23,7 @@
 extern void netwm_init();
 extern void netwm_init_rootwin(WRootWin *rw);
 
-extern int netwm_check_initial_fullscreen(WClientWin *cwin, bool switchto);
+extern WScreen *netwm_check_initial_fullscreen(WClientWin *cwin);
 extern void netwm_update_state(WClientWin *cwin);
 extern void netwm_delete_state(WClientWin *cwin);
 extern void netwm_set_active(WRegion *reg);

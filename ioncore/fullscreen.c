@@ -20,7 +20,7 @@
 #include "fullscreen.h"
 #include "mwmhints.h"
 #include "focus.h"
-#include "group-cw.h"
+#include "group.h"
 #include "return.h"
 
 
@@ -125,8 +125,7 @@ bool clientwin_fullscreen_may_switchto(WClientWin *cwin)
 }
 
 
-bool clientwin_check_fullscreen_request(WClientWin *cwin, int w, int h,
-                                        bool sw)
+WScreen *clientwin_fullscreen_chkrq(WClientWin *cwin, int w, int h)
 {
     WScreen *scr;
     WMwmHints *mwm;
@@ -135,7 +134,7 @@ bool clientwin_check_fullscreen_request(WClientWin *cwin, int w, int h,
     mwm=xwindow_get_mwmhints(cwin->win);
     if(mwm==NULL || !(mwm->flags&MWM_HINTS_DECORATIONS) ||
        mwm->decorations!=0)
-        return FALSE;
+        return NULL;
     
     FOR_ALL_SCREENS(scr){
         if(!region_same_rootwin((WRegion*)scr, (WRegion*)cwin))
@@ -144,17 +143,11 @@ bool clientwin_check_fullscreen_request(WClientWin *cwin, int w, int h,
          * and doesn't set position, so we also don't check position here, 
          * and instead take the first screen with matching size.
          */
-        if(REGION_GEOM(scr).w==w && REGION_GEOM(scr).h==h){
-            cwin->flags|=CLIENTWIN_FS_RQ;
-            if(!region_fullscreen_scr((WRegion*)cwin, (WScreen*)scr, sw)){
-                cwin->flags&=~CLIENTWIN_FS_RQ;
-                return FALSE;
-            }
-            return TRUE;
-        }
+        if(REGION_GEOM(scr).w==w && REGION_GEOM(scr).h==h)
+            return scr;
     }
     
-    return FALSE;
+    return NULL;
 }
 
 

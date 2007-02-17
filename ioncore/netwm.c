@@ -22,6 +22,7 @@
 #include "focus.h"
 #include "xwindow.h"
 #include "extlconv.h"
+#include "group.h"
 
 
 /*{{{ Atoms */
@@ -85,7 +86,7 @@ void netwm_init_rootwin(WRootWin *rw)
 /*{{{ _NET_WM_STATE */
 
 
-int netwm_check_initial_fullscreen(WClientWin *cwin, bool sw)
+WScreen *netwm_check_initial_fullscreen(WClientWin *cwin)
 {
 
     int i, n;
@@ -96,18 +97,16 @@ int netwm_check_initial_fullscreen(WClientWin *cwin, bool sw)
                    1, TRUE, (uchar**)&data);
     
     if(n<0)
-        return -1;
+        return NULL;
     
     for(i=0; i<n; i++){
-        if(data[i]==(long)atom_net_wm_state_fullscreen){
-            ret=region_enter_fullscreen((WRegion*)cwin, sw);
-            break;
-        }
+        if(data[i]==(long)atom_net_wm_state_fullscreen)
+            return region_screen_of((WRegion*)cwin);
     }
     
     XFree((void*)data);
 
-    return ret;
+    return NULL;
 }
 
 
@@ -145,9 +144,10 @@ static void netwm_state_change_rq(WClientWin *cwin,
     if(!REGION_IS_FULLSCREEN(cwin)){
         if(ev->data.l[0]==_NET_WM_STATE_ADD || 
            ev->data.l[0]==_NET_WM_STATE_TOGGLE){
+            WRegion *grp=region_groupleader_of((WRegion*)cwin);
             bool sw=clientwin_fullscreen_may_switchto(cwin);
             cwin->flags|=CLIENTWIN_FS_RQ;
-            if(!region_enter_fullscreen((WRegion*)cwin, sw))
+            if(!region_enter_fullscreen(grp, sw))
                 cwin->flags&=~CLIENTWIN_FS_RQ;
         }else{
             /* Should not be set.. */
@@ -156,9 +156,10 @@ static void netwm_state_change_rq(WClientWin *cwin,
     }else{
         if(ev->data.l[0]==_NET_WM_STATE_REMOVE || 
            ev->data.l[0]==_NET_WM_STATE_TOGGLE){
+            WRegion *grp=region_groupleader_of((WRegion*)cwin);
             bool sw=clientwin_fullscreen_may_switchto(cwin);
             cwin->flags&=~CLIENTWIN_FS_RQ;
-            region_leave_fullscreen((WRegion*)cwin, sw);
+            region_leave_fullscreen(grp, sw);
         }else{
             /* Set the flag */
             cwin->flags|=CLIENTWIN_FS_RQ;

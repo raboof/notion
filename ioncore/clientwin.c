@@ -43,6 +43,7 @@
 #include "bindmaps.h"
 #include "return.h"
 #include "conf.h"
+#include "group.h"
 
 
 static void set_clientwin_state(WClientWin *cwin, int state);
@@ -1056,26 +1057,31 @@ ExtlTab clientwin_get_ident(WClientWin *cwin)
 /*{{{ ConfigureRequest */
 
 
-void clientwin_handle_configure_request(WClientWin *cwin,
-                                        XConfigureRequestEvent *ev)
+static bool check_fs_cfgrq(WClientWin *cwin, XConfigureRequestEvent *ev)
 {
-    if(ev->value_mask&CWBorderWidth)
-        cwin->orig_bw=ev->border_width;
-    
-    if(cwin->flags&CLIENTWIN_PROP_IGNORE_CFGRQ){
-        sendconfig_clientwin(cwin);
-        return;
-    }
-
     /* check full screen request */
     if((ev->value_mask&(CWWidth|CWHeight))==(CWWidth|CWHeight)){
-        bool sw=clientwin_fullscreen_may_switchto(cwin);
-        if(clientwin_check_fullscreen_request(cwin, ev->width, ev->height, sw))
-            return;
+        WRegion *grp=region_groupleader_of((WRegion*)cwin);
+        WScreen *scr=clientwin_fullscreen_chkrq(cwin, ev->width, ev->height);
+        
+        if(scr!=NULL && REGION_MANAGER(grp)!=(WRegion*)scr){
+            bool sw=clientwin_fullscreen_may_switchto(cwin);
+            
+            cwin->flags|=CLIENTWIN_FS_RQ;
+            
+            if(!region_fullscreen_scr(grp, scr, sw))
+                cwin->flags&=~CLIENTWIN_FS_RQ;
+        }
+        
+        return TRUE;
     }
 
-    cwin->flags|=CLIENTWIN_NEED_CFGNTFY;
+    return FALSE;
+}
 
+
+static bool check_normal_cfgrq(WClientWin *cwin, XConfigureRequestEvent *ev)
+{
     if(ev->value_mask&(CWX|CWY|CWWidth|CWHeight)){
         WRQGeomParams rq=RQGEOMPARAMS_INIT;
         int gdx=0, gdy=0;
@@ -1130,6 +1136,25 @@ void clientwin_handle_configure_request(WClientWin *cwin,
         }
         
         region_rqgeom((WRegion*)cwin, &rq, NULL);
+        
+        return TRUE;
+    }
+    
+    return FALSE;
+}
+
+
+void clientwin_handle_configure_request(WClientWin *cwin,
+                                        XConfigureRequestEvent *ev)
+{
+    if(ev->value_mask&CWBorderWidth)
+        cwin->orig_bw=ev->border_width;
+    
+    cwin->flags|=CLIENTWIN_FS_RQ;
+
+    if(!(cwin->flags&CLIENTWIN_PROP_IGNORE_CFGRQ)){
+        if(!check_fs_cfgrq(cwin, ev))
+            check_normal_cfgrq(cwin, ev);
     }
 
     if(cwin->flags&CLIENTWIN_NEED_CFGNTFY){
