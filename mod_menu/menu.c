@@ -949,10 +949,10 @@ static void menu_do_finish(WMenu *menu)
     
     ok=extl_table_geti_t(menu->tab, menu->selected_entry+1, &tab);
     
-    if(region_manager_allows_destroying((WRegion*)head))
-        destroy_obj((Obj*)head);
-    else if(head->submenu!=NULL)
-        destroy_obj((Obj*)head->submenu);
+    if(!region_rqdispose((WRegion*)head)){
+        if(head->submenu!=NULL)
+            region_dispose_((WRegion*)head->submenu, FALSE);
+    }
     
     if(ok)
         extl_call(handler, "t", NULL, tab);
@@ -988,8 +988,7 @@ void menu_finish(WMenu *menu)
 EXTL_EXPORT_MEMBER
 void menu_cancel(WMenu *menu)
 {
-    if(region_manager_allows_destroying((WRegion*)menu))
-        region_dispose((WRegion*)menu);
+    region_rqdispose((WRegion*)menu);
 }
 
 

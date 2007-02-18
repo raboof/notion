@@ -141,7 +141,7 @@ DYNFUN void region_managed_remove(WRegion *reg, WRegion *sub);
 DYNFUN bool region_managed_prepare_focus(WRegion *reg, WRegion *sub, 
                                          int flags, WPrepareFocusResult *res);
 DYNFUN void region_managed_notify(WRegion *reg, WRegion *sub, WRegionNotify how);
-DYNFUN bool region_managed_may_destroy(WRegion *mgr, WRegion *reg);
+DYNFUN bool region_managed_rqdispose(WRegion *mgr, WRegion *reg);
 DYNFUN bool region_managed_rqorder(WRegion *reg, WRegion *sub, 
                                    WRegionOrder order);
 
@@ -174,8 +174,9 @@ extern bool region_is_fully_mapped(WRegion *reg);
 
 extern void region_detach_manager(WRegion *reg);
 
-extern void region_dispose_(WRegion *reg, bool was_mcf);
-extern void region_dispose(WRegion *reg);
+extern bool region_dispose_(WRegion *reg, bool not_simple);
+extern bool region_dispose(WRegion *reg);
+extern bool region_rqdispose(WRegion *reg);
 
 extern WWindow *region_parent(WRegion *reg);
 extern WRegion *region_manager(WRegion *reg);
@@ -189,8 +190,6 @@ extern WRootWin *region_rootwin_of(const WRegion *reg);
 extern Window region_root_of(const WRegion *reg);
 extern WScreen *region_screen_of(WRegion *reg);
 extern bool region_same_rootwin(const WRegion *reg1, const WRegion *reg2);
-
-extern bool region_manager_allows_destroying(WRegion *reg);
 
 extern WRegion *region_managed_within(WRegion *reg, WRegion *mgd);
 

@@ -583,28 +583,29 @@ int screen_id(WScreen *scr)
 }
 
 
-static bool screen_managed_may_destroy(WScreen *scr, WRegion *reg)
+static bool screen_managed_rqdispose(WScreen *scr, WRegion *reg)
 {
-    bool onmxlist=FALSE;
+    bool onmxlist=FALSE, others=FALSE;
     WLListNode *lnode;
     WLListIterTmp tmp;
-
-    if(OBJ_IS(reg, WClientWin))
-        return TRUE;
     
-    FOR_ALL_NODES_ON_LLIST(lnode, scr->mplex.mx_list, tmp){
-        if(lnode->st->reg==reg)
-            onmxlist=TRUE;
-        else /*if(OBJ_IS(node->reg, WGenWS))*/
-            return TRUE;
+    if(OBJ_IS(reg, WGroupWS)){
+        FOR_ALL_NODES_ON_LLIST(lnode, scr->mplex.mx_list, tmp){
+            if(lnode->st->reg==reg){
+                onmxlist=TRUE;
+            }else if(OBJ_IS(lnode->st->reg, WGroupWS)){
+                others=TRUE;
+                break;
+            }
+        }
+
+        if(onmxlist && !others){
+            warn(TR("Only workspace may not be destroyed."));
+            return FALSE;
+        }
     }
     
-    if(!onmxlist)
-        return TRUE;
-    
-    warn(TR("Only workspace may not be destroyed."));
-    
-    return FALSE;
+    return region_dispose(reg);
 }
 
 
@@ -733,8 +734,8 @@ static DynFunTab screen_dynfuntab[]={
     {region_inactivated, 
      screen_inactivated},
     
-    {(DynFun*)region_managed_may_destroy,
-     (DynFun*)screen_managed_may_destroy},
+    {(DynFun*)region_managed_rqdispose,
+     (DynFun*)screen_managed_rqdispose},
 
     {(DynFun*)region_may_destroy,
      (DynFun*)screen_may_destroy},

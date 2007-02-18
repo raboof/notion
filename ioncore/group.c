@@ -301,13 +301,13 @@ static bool group_managed_prepare_focus(WGroup *ws, WRegion *reg,
 }
 
 
-static bool group_essentially_empty(WGroup *ws)
+static bool group_essentially_empty(WGroup *ws, WRegion *except)
 {
     WGroupIterTmp tmp;
     WStacking *st;
     
     FOR_ALL_NODES_IN_GROUP(ws, st, tmp){
-        if(st!=ws->managed_stdisp)
+        if(st->reg!=except && st!=ws->managed_stdisp)
             return FALSE;
     }
     
@@ -339,7 +339,7 @@ void group_managed_remove(WGroup *ws, WRegion *reg)
         if(st==ws->bottom){
             ws->bottom=NULL;
             was_bottom=TRUE;
-            if(ws->bottom_last_close && group_essentially_empty(ws))
+            if(ws->bottom_last_close && group_essentially_empty(ws, NULL))
                 dest=TRUE;
         }
             
@@ -478,16 +478,21 @@ bool group_rescue_clientwins(WGroup *ws, WPHolder *ph)
 
 bool group_may_destroy(WGroup *ws)
 {
-    bool ret=group_essentially_empty(ws);
+    bool ret=group_essentially_empty(ws, NULL);
     if(!ret)
         warn(TR("Workspace not empty - refusing to destroy."));
     return ret;
 }
 
 
-static bool group_managed_may_destroy(WGroup *ws, WRegion *reg)
+static bool group_managed_rqdispose(WGroup *ws, WRegion *reg)
 {
-    return TRUE;
+    if(ws->bottom_last_close && group_bottom(ws)==reg){
+        if(group_essentially_empty(ws, reg))
+            return region_rqdispose((WRegion*)ws);
+    }
+    
+    return region_dispose(reg);
 }
 
 
@@ -1351,8 +1356,8 @@ static DynFunTab group_dynfuntab[]={
     {(DynFun*)region_may_destroy,
      (DynFun*)group_may_destroy},
 
-    {(DynFun*)region_managed_may_destroy,
-     (DynFun*)group_managed_may_destroy},
+    {(DynFun*)region_managed_rqdispose,
+     (DynFun*)group_managed_rqdispose},
 
     {(DynFun*)region_current,
      (DynFun*)group_current},

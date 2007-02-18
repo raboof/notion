@@ -648,18 +648,17 @@ void tiling_deinit(WTiling *ws)
 }
 
 
-bool tiling_managed_may_destroy(WTiling *ws, WRegion *reg)
+bool tiling_managed_rqdispose(WTiling *ws, WRegion *reg)
 {
     WTilingIterTmp tmp;
     WRegion *mgd;
 
     FOR_ALL_MANAGED_BY_TILING(mgd, ws, tmp){
-        if(mgd!=STDISP_OF(ws) && mgd!=reg){
-            return TRUE;
-        }
+        if(mgd!=STDISP_OF(ws) && mgd!=reg)
+            return region_dispose(reg);
     }
     
-    return region_manager_allows_destroying((WRegion*)ws);
+    return region_rqdispose((WRegion*)ws);
 }
 
 
@@ -713,7 +712,6 @@ void tiling_managed_remove(WTiling *ws, WRegion *reg)
 {
     bool ds=OBJ_IS_BEING_DESTROYED(ws);
     bool act=REGION_IS_ACTIVE(reg);
-    bool mcf=region_may_control_focus((WRegion*)ws);
     WSplitRegion *node=get_node_check(ws, reg);
     WRegion *other;
 
@@ -731,8 +729,8 @@ void tiling_managed_remove(WTiling *ws, WRegion *reg)
     
     if(!ds){
         if(other==NULL)
-            region_dispose_((WRegion*)ws, mcf);
-        else if(act && mcf)
+            region_dispose((WRegion*)ws);
+        else if(act && region_may_control_focus((WRegion*)ws))
             region_warp(other);
     }
 }
@@ -1716,8 +1714,8 @@ static DynFunTab tiling_dynfuntab[]={
     {(DynFun*)region_get_configuration,
      (DynFun*)tiling_get_configuration},
 
-    {(DynFun*)region_managed_may_destroy,
-     (DynFun*)tiling_managed_may_destroy},
+    {(DynFun*)region_managed_rqdispose,
+     (DynFun*)tiling_managed_rqdispose},
 
     {(DynFun*)region_may_destroy,
      (DynFun*)tiling_may_destroy},

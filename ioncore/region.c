@@ -368,30 +368,12 @@ bool region_reparent(WRegion *reg, WWindow *par,
 
 static bool region_rqclose_default(WRegion *reg, bool relocate)
 {
-    WPHolder *ph;
-    bool refuse=TRUE;
-    
-    if((!relocate && !region_may_destroy(reg)) ||
-       !region_manager_allows_destroying(reg)){
+    if(!relocate && !region_may_destroy(reg))
         return FALSE;
-    }
     
-    ph=region_get_rescue_pholder(reg);
-    
-    if(ph!=NULL){
-        refuse=!region_rescue_clientwins(reg, ph);
-        destroy_obj((Obj*)ph);
-    }
-
-    if(refuse){
-        warn(TR("Failed to rescue some client windows - not closing."));
-        return FALSE;
-    }
-
-    region_dispose(reg);
-    
-    return TRUE;
+    return region_rqdispose(reg);
 }
+
 
 
 /*EXTL_DOC
@@ -451,27 +433,56 @@ bool region_may_destroy(WRegion *reg)
 }
 
 
-bool region_managed_may_destroy(WRegion *mgr, WRegion *reg)
+static bool region_managed_rqdispose_default(WRegion *mgr, WRegion *reg)
+{
+    return region_dispose(reg);
+}
+
+
+bool region_managed_rqdispose(WRegion *mgr, WRegion *reg)
 {
     bool ret=TRUE;
-    CALL_DYN_RET(ret, bool, region_managed_may_destroy, mgr, (mgr, reg));
+    CALL_DYN_RET(ret, bool, region_managed_rqdispose, mgr, (mgr, reg));
     return ret;
 }
 
 
-bool region_manager_allows_destroying(WRegion *reg)
+bool region_rqdispose(WRegion *reg)
 {
     WRegion *mgr=REGION_MANAGER(reg);
     
-    if(mgr==NULL)
-        return TRUE;
-    
-    return region_managed_may_destroy(mgr, reg);
+    if(mgr!=NULL){
+        return region_managed_rqdispose(mgr, reg);
+    }else{
+        if(!region_may_destroy(reg)){
+            return FALSE;
+        }else{
+            return region_dispose(reg);
+        }
+    }
 }
 
 
-void region_dispose_(WRegion *reg, bool was_mcf)
+bool region_dispose_(WRegion *reg, bool not_simple)
 {
+    bool rescue=not_simple;
+    bool was_mcf=(not_simple && region_may_control_focus(reg));
+    
+    if(rescue){
+        WPHolder *ph=region_get_rescue_pholder(reg);
+    
+        if(ph!=NULL){
+            bool refuse=!region_rescue_clientwins(reg, ph);
+            
+            destroy_obj((Obj*)ph);
+
+            if(refuse){
+                warn(TR("Failed to rescue some client windows - not closing."));
+                return FALSE;
+            }
+        }
+    }
+
     if(was_mcf){
         WPHolder *ph=region_get_return(reg);
         if(ph!=NULL)
@@ -479,12 +490,14 @@ void region_dispose_(WRegion *reg, bool was_mcf)
     }
 
     mainloop_defer_destroy((Obj*)reg);
+    
+    return TRUE;
 }
 
 
-void region_dispose(WRegion *reg)
+bool region_dispose(WRegion *reg)
 {
-    region_dispose_(reg, region_may_control_focus(reg));
+    return region_dispose_(reg, TRUE);
 }
 
 
@@ -937,6 +950,9 @@ static DynFunTab region_dynfuntab[]={
 
     {(DynFun*)region_managed_prepare_focus,
      (DynFun*)region_managed_prepare_focus_default},
+     
+    {(DynFun*)region_managed_rqdispose,
+     (DynFun*)region_managed_rqdispose_default},
 
     {(DynFun*)region_rqclose_propagate,
      (DynFun*)region_rqclose_propagate_default},
