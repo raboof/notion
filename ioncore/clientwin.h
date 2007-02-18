@@ -37,6 +37,7 @@
 #define CLIENTWIN_NEED_CFGNTFY       0x01000
 #define CLIENTWIN_USE_NET_WM_NAME    0x10000
 #define CLIENTWIN_FS_RQ              0x20000
+#define CLIENTWIN_UNMAP_RQ           0x40000
 
 
 DECLCLASS(WClientWin){

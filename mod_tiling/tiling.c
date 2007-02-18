@@ -710,9 +710,9 @@ static bool nostdispfilter(WSplit *node)
 
 void tiling_managed_remove(WTiling *ws, WRegion *reg)
 {
-    bool ds=OBJ_IS_BEING_DESTROYED(ws);
     bool act=REGION_IS_ACTIVE(reg);
     WSplitRegion *node=get_node_check(ws, reg);
+    bool ds=OBJ_IS_BEING_DESTROYED(ws);
     WRegion *other;
 
     other=tiling_do_navi_next(ws, reg, REGION_NAVI_ANY, TRUE, FALSE);
@@ -722,15 +722,35 @@ void tiling_managed_remove(WTiling *ws, WRegion *reg)
     if(node==(WSplitRegion*)(ws->stdispnode))
         ws->stdispnode=NULL;
     
-    if(node==NULL)
-        return;
+    if(node!=NULL){
+        bool reused=FALSE;
+        
+        if(other==NULL && !ds){
+            WWindow *par=REGION_PARENT(ws);
+            WFitParams fp;
+            
+            assert(par!=NULL);
+            
+            fp.g=node->split.geom;
+            fp.mode=REGION_FIT_EXACT;
+            
+            other=(ws->create_frame_fn)(par, &fp);
+            
+            if(other!=NULL){
+                node->reg=other;
+                tiling_managed_add(ws, other);
+                reused=TRUE;
+            }else{
+                warn(TR("Tiling in useless state."));
+            }
+        }
+        
+        if(!reused)
+            splittree_remove((WSplit*)node, (!ds && other!=NULL));
+    }
     
-    splittree_remove((WSplit*)node, (!ds && other!=NULL));
-    
-    if(!ds){
-        if(other==NULL)
-            region_dispose((WRegion*)ws);
-        else if(act && region_may_control_focus((WRegion*)ws))
+    if(!OBJ_IS_BEING_DESTROYED(ws) && other!=NULL){
+        if(act && region_may_control_focus((WRegion*)ws))
             region_warp(other);
     }
 }

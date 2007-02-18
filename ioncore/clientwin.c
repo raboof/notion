@@ -692,7 +692,13 @@ static bool mrsh_u_extl(ExtlFn fn, void *param)
 
 static void clientwin_do_unmapped(WClientWin *cwin, Window win)
 {
-    region_dispose((WRegion*)cwin);
+    cwin->flags|=CLIENTWIN_UNMAP_RQ;
+    
+    /* First try a graceful chain-dispose */
+    if(!region_rqdispose((WRegion*)cwin)){
+        /* But force dispose anyway */
+        region_dispose((WRegion*)cwin);
+    }
     
     hook_call(clientwin_unmapped_hook, &win, mrsh_u_c, mrsh_u_extl);
 }

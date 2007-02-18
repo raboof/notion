@@ -342,15 +342,18 @@ bool region_rescue_some_clientwins(WRegion *reg, WPHolder *ph,
     
     while(TRUE){
         WRegion *tosave=iter(st);
+        WClientWin *cwin;
         
         if(tosave==NULL)
             break;
         
-        if(!OBJ_IS(tosave, WClientWin)){
+        cwin=OBJ_CAST(tosave, WClientWin);
+        
+        if(cwin==NULL){
             if(!region_rescue_clientwins(tosave, ph))
                 fails++;
-        }else{
-            if(!pholder_attach(ph, 0, tosave))
+        }else if(!(cwin->flags&CLIENTWIN_UNMAP_RQ)){
+            if(!pholder_attach(ph, 0, (WRegion*)cwin))
                 fails++;
         }
     }

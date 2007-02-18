@@ -301,28 +301,12 @@ static bool group_managed_prepare_focus(WGroup *ws, WRegion *reg,
 }
 
 
-static bool group_essentially_empty(WGroup *ws, WRegion *except)
-{
-    WGroupIterTmp tmp;
-    WStacking *st;
-    
-    FOR_ALL_NODES_IN_GROUP(ws, st, tmp){
-        if(st->reg!=except && st!=ws->managed_stdisp)
-            return FALSE;
-    }
-    
-    return TRUE;
-}
-
-
 void group_managed_remove(WGroup *ws, WRegion *reg)
 {
     bool mcf=region_may_control_focus((WRegion*)ws);
-    bool ds=OBJ_IS_BEING_DESTROYED(ws);
     WStacking *st, *next_st=NULL;
     bool was_stdisp=FALSE, was_bottom=FALSE;
-    bool dest=FALSE;
-    bool cur=FALSE;
+    bool was_current=FALSE;
     
     st=group_find_stacking(ws, reg);
 
@@ -339,13 +323,11 @@ void group_managed_remove(WGroup *ws, WRegion *reg)
         if(st==ws->bottom){
             ws->bottom=NULL;
             was_bottom=TRUE;
-            if(ws->bottom_last_close && group_essentially_empty(ws, NULL))
-                dest=TRUE;
         }
             
         if(st==ws->current_managed){
-            cur=TRUE;
             ws->current_managed=NULL;
+            was_current=TRUE;
         }
         
         stacking_unassoc(st);
@@ -354,7 +336,7 @@ void group_managed_remove(WGroup *ws, WRegion *reg)
     
     region_unset_manager(reg, (WRegion*)ws);
     
-    if(!dest && !ds){
+    if(!OBJ_IS_BEING_DESTROYED(ws)){
         if(was_bottom && !was_stdisp && ws->managed_stdisp==NULL){
             /* We should probably be managing any stdisp, that 'bottom' 
              * was managing.
@@ -368,7 +350,7 @@ void group_managed_remove(WGroup *ws, WRegion *reg)
             }
         }
         
-        if(cur){
+        if(was_current){
             /* This may still potentially cause problems when focus
              * change is pending. Perhaps we should use region_await_focus,
              * if it is pointing to our child (and region_may_control_focus 
@@ -381,8 +363,6 @@ void group_managed_remove(WGroup *ws, WRegion *reg)
                 ws->current_managed=stf;
             }
         }
-    }else if(dest && !ds){
-        region_dispose((WRegion*)ws);
     }
 }
 
@@ -476,19 +456,40 @@ bool group_rescue_clientwins(WGroup *ws, WPHolder *ph)
 }
 
 
+static bool group_empty_for_bottom_stdisp(WGroup *ws)
+{
+    WGroupIterTmp tmp;
+    WStacking *st;
+    
+    FOR_ALL_NODES_IN_GROUP(ws, st, tmp){
+        if(st!=ws->bottom && st!=ws->managed_stdisp)
+            return FALSE;
+    }
+    
+    return TRUE;
+}
+
+
 bool group_may_destroy(WGroup *ws)
 {
-    bool ret=group_essentially_empty(ws, NULL);
-    if(!ret)
-        warn(TR("Workspace not empty - refusing to destroy."));
-    return ret;
+    if(group_empty_for_bottom_stdisp(ws)){
+        if(ws->bottom!=NULL && ws->bottom->reg!=NULL){
+            if(region_may_destroy(ws->bottom->reg))
+                return TRUE;
+        }else{
+            return TRUE;
+        }
+    }
+
+    warn(TR("Workspace not empty - refusing to destroy."));
+    return FALSE;
 }
 
 
 static bool group_managed_rqdispose(WGroup *ws, WRegion *reg)
 {
     if(ws->bottom_last_close && group_bottom(ws)==reg){
-        if(group_essentially_empty(ws, reg))
+        if(group_empty_for_bottom_stdisp(ws))
             return region_rqdispose((WRegion*)ws);
     }
     
