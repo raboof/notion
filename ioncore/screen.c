@@ -609,7 +609,7 @@ static bool screen_managed_rqdispose(WScreen *scr, WRegion *reg)
 }
 
 
-static bool screen_may_destroy(WScreen *scr)
+static bool screen_may_dispose(WScreen *scr)
 {
     warn(TR("Screens may not be destroyed."));
     return FALSE;
@@ -737,8 +737,8 @@ static DynFunTab screen_dynfuntab[]={
     {(DynFun*)region_managed_rqdispose,
      (DynFun*)screen_managed_rqdispose},
 
-    {(DynFun*)region_may_destroy,
-     (DynFun*)screen_may_destroy},
+    {(DynFun*)region_may_dispose,
+     (DynFun*)screen_may_dispose},
 
     {mplex_managed_changed, 
      screen_managed_changed},

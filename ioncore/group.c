@@ -470,11 +470,11 @@ static bool group_empty_for_bottom_stdisp(WGroup *ws)
 }
 
 
-bool group_may_destroy(WGroup *ws)
+bool group_may_dispose(WGroup *ws)
 {
     if(group_empty_for_bottom_stdisp(ws)){
         if(ws->bottom!=NULL && ws->bottom->reg!=NULL){
-            if(region_may_destroy(ws->bottom->reg))
+            if(region_may_dispose(ws->bottom->reg))
                 return TRUE;
         }else{
             return TRUE;
@@ -1356,8 +1356,8 @@ static DynFunTab group_dynfuntab[]={
     {(DynFun*)region_get_configuration, 
      (DynFun*)group_get_configuration},
 
-    {(DynFun*)region_may_destroy,
-     (DynFun*)group_may_destroy},
+    {(DynFun*)region_may_dispose,
+     (DynFun*)group_may_dispose},
 
     {(DynFun*)region_managed_rqdispose,
      (DynFun*)group_managed_rqdispose},

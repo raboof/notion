@@ -91,7 +91,6 @@ extern WPHolder *tiling_get_rescue_pholder_for(WTiling *ws, WRegion *mgd);
 extern void tiling_do_set_focus(WTiling *ws, bool warp);
 extern bool tiling_managed_prepare_focus(WTiling *ws, WRegion *reg, 
                                         int flags, WPrepareFocusResult *res);
-extern bool tiling_managed_may_destroy(WTiling *ws, WRegion *reg);
 extern void tiling_manage_stdisp(WTiling *ws, WRegion *stdisp, 
                                 const WMPlexSTDispInfo *di);
 extern void tiling_unmanage_stdisp(WTiling *ws, bool permanent, bool nofocus);

@@ -176,7 +176,7 @@ extern bool mplex_managed_rqorder(WMPlex *mplex, WRegion *sub,
 /* Misc */
 
 extern WRegion *mplex_current(WMPlex *mplex);
-extern bool mplex_may_destroy(WMPlex *mplex);
+extern bool mplex_may_dispose(WMPlex *mplex);
 
 extern bool mplex_managed_i(WMPlex *mplex, ExtlFn iterfn);
 

@@ -662,7 +662,7 @@ bool tiling_managed_rqdispose(WTiling *ws, WRegion *reg)
 }
 
 
-bool tiling_may_destroy(WTiling *ws, WRegion *reg)
+bool tiling_may_dispose(WTiling *ws, WRegion *reg)
 {
     WTilingIterTmp tmp;
     WRegion *mgd;
@@ -1737,8 +1737,8 @@ static DynFunTab tiling_dynfuntab[]={
     {(DynFun*)region_managed_rqdispose,
      (DynFun*)tiling_managed_rqdispose},
 
-    {(DynFun*)region_may_destroy,
-     (DynFun*)tiling_may_destroy},
+    {(DynFun*)region_may_dispose,
+     (DynFun*)tiling_may_dispose},
 
     {(DynFun*)region_current,
      (DynFun*)tiling_current},

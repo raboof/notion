@@ -135,7 +135,7 @@ DYNFUN bool region_rqclose(WRegion *reg, bool relocate);
 DYNFUN WRegion *region_rqclose_propagate(WRegion *reg, WRegion *maybe_sub);
 DYNFUN WRegion *region_current(WRegion *mgr);
 DYNFUN void region_notify_rootpos(WRegion *reg, int x, int y);
-DYNFUN bool region_may_destroy(WRegion *reg);
+DYNFUN bool region_may_dispose(WRegion *reg);
 DYNFUN WRegion *region_managed_control_focus(WRegion *mgr, WRegion *reg);
 DYNFUN void region_managed_remove(WRegion *reg, WRegion *sub);
 DYNFUN bool region_managed_prepare_focus(WRegion *reg, WRegion *sub, 

@@ -368,7 +368,7 @@ bool region_reparent(WRegion *reg, WWindow *par,
 
 static bool region_rqclose_default(WRegion *reg, bool relocate)
 {
-    if(!relocate && !region_may_destroy(reg))
+    if(!relocate && !region_may_dispose(reg))
         return FALSE;
     
     return region_rqdispose(reg);
@@ -425,10 +425,10 @@ WRegion *region_rqclose_propagate(WRegion *reg, WRegion *maybe_sub)
 }
 
 
-bool region_may_destroy(WRegion *reg)
+bool region_may_dispose(WRegion *reg)
 {
     bool ret=TRUE;
-    CALL_DYN_RET(ret, bool, region_may_destroy, reg, (reg));
+    CALL_DYN_RET(ret, bool, region_may_dispose, reg, (reg));
     return ret;
 }
 
@@ -454,7 +454,7 @@ bool region_rqdispose(WRegion *reg)
     if(mgr!=NULL){
         return region_managed_rqdispose(mgr, reg);
     }else{
-        if(!region_may_destroy(reg)){
+        if(!region_may_dispose(reg)){
             return FALSE;
         }else{
             return region_dispose(reg);
