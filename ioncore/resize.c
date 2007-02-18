@@ -478,7 +478,7 @@ bool moveresmode_do_end(WMoveresMode *mode, bool apply)
         set_saved(mode, reg);
     
     if(mode->infowin!=NULL){
-        region_dispose((WRegion*)mode->infowin, FALSE);
+        region_dispose_((WRegion*)mode->infowin, FALSE);
         mode->infowin=NULL;
     }
     destroy_obj((Obj*)mode);

@@ -692,7 +692,7 @@ static bool mrsh_u_extl(ExtlFn fn, void *param)
 
 static void clientwin_do_unmapped(WClientWin *cwin, Window win)
 {
-    region_dispose_((WRegion*)cwin);
+    region_dispose((WRegion*)cwin);
     
     hook_call(clientwin_unmapped_hook, &win, mrsh_u_c, mrsh_u_extl);
 }

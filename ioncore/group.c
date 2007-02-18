@@ -382,7 +382,7 @@ void group_managed_remove(WGroup *ws, WRegion *reg)
             }
         }
     }else if(dest && !ds){
-        region_dispose((WRegion*)ws, mcf);
+        region_dispose((WRegion*)ws);
     }
 }
 

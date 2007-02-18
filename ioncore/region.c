@@ -369,7 +369,7 @@ bool region_reparent(WRegion *reg, WWindow *par,
 static bool region_rqclose_default(WRegion *reg, bool relocate)
 {
     WPHolder *ph;
-    bool refuse=TRUE, mcf;
+    bool refuse=TRUE;
     
     if((!relocate && !region_may_destroy(reg)) ||
        !region_manager_allows_destroying(reg)){
@@ -377,7 +377,6 @@ static bool region_rqclose_default(WRegion *reg, bool relocate)
     }
     
     ph=region_get_rescue_pholder(reg);
-    mcf=region_may_control_focus(reg);
     
     if(ph!=NULL){
         refuse=!region_rescue_clientwins(reg, ph);
@@ -389,7 +388,7 @@ static bool region_rqclose_default(WRegion *reg, bool relocate)
         return FALSE;
     }
 
-    region_dispose(reg, mcf);
+    region_dispose(reg);
     
     return TRUE;
 }
@@ -471,7 +470,7 @@ bool region_manager_allows_destroying(WRegion *reg)
 }
 
 
-void region_dispose(WRegion *reg, bool was_mcf)
+void region_dispose_(WRegion *reg, bool was_mcf)
 {
     if(was_mcf){
         WPHolder *ph=region_get_return(reg);
@@ -483,9 +482,9 @@ void region_dispose(WRegion *reg, bool was_mcf)
 }
 
 
-void region_dispose_(WRegion *reg)
+void region_dispose(WRegion *reg)
 {
-    region_dispose(reg, region_may_control_focus(reg));
+    region_dispose_(reg, region_may_control_focus(reg));
 }
 
 

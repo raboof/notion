@@ -989,7 +989,7 @@ EXTL_EXPORT_MEMBER
 void menu_cancel(WMenu *menu)
 {
     if(region_manager_allows_destroying((WRegion*)menu))
-        region_dispose_((WRegion*)menu);
+        region_dispose((WRegion*)menu);
 }
 
 
