@@ -1251,6 +1251,8 @@ static ExtlTab group_get_configuration(WGroup *ws)
     
     mgds=extl_create_table();
     
+    extl_table_sets_b(tab, "bottom_last_close", ws->bottom_last_close);
+    
     extl_table_sets_t(tab, "managed", mgds);
     
     /* TODO: stacking order messed up */
