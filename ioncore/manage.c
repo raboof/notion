@@ -209,7 +209,7 @@ bool clientwin_do_manage_default(WClientWin *cwin,
                                  MANAGE_REDIR_PREFER_YES);
 
         if(try_fullscreen(cwin, scr, param)){
-            if(pholder_target(ph)!=(WRegion*)region_screen_of(cwin)){
+            if(pholder_target(ph)!=(WRegion*)region_screen_of((WRegion*)cwin)){
                 WRegion *grp=region_groupleader_of((WRegion*)cwin);
                 if(region_do_set_return(grp, ph))
                     return TRUE;
