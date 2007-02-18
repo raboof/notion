@@ -15,6 +15,7 @@
 #include <ioncore/global.h>
 #include <ioncore/binding.h>
 #include <ioncore/regbind.h>
+#include <ioncore/bindmaps.h>
 #include <ioncore/key.h>
 #include "query.h"
 #include "wedln.h"
