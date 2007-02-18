@@ -1548,17 +1548,17 @@ void mplex_managed_remove(WMPlex *mplex, WRegion *sub)
 }
 
 
-bool mplex_rescue_clientwins(WMPlex *mplex, WPHolder *ph)
+bool mplex_rescue_clientwins(WMPlex *mplex, WRescueInfo *info)
 {
     bool ret1, ret2;
     WMPlexIterTmp tmp;
     
     mplex_iter_init(&tmp, mplex);
-    ret1=region_rescue_some_clientwins((WRegion*)mplex, ph,
+    ret1=region_rescue_some_clientwins((WRegion*)mplex, info,
                                        (WRegionIterator*)mplex_iter,
                                        &tmp);
     
-    ret2=region_rescue_child_clientwins((WRegion*)mplex, ph);
+    ret2=region_rescue_child_clientwins((WRegion*)mplex, info);
     
     return (ret1 && ret2);
 }

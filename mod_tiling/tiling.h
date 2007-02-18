@@ -20,6 +20,7 @@
 #include <ioncore/rectangle.h>
 #include <ioncore/pholder.h>
 #include <ioncore/navi.h>
+#include <ioncore/manage.h>
 #include "split.h"
 
 
@@ -85,7 +86,7 @@ extern void tiling_managed_rqgeom(WTiling *ws, WRegion *reg,
                                   WRectangle *geomret);
 extern void tiling_managed_remove(WTiling *ws, WRegion *reg);
 extern void tiling_managed_activated(WTiling *ws, WRegion *reg);
-extern bool tiling_rescue_clientwins(WTiling *ws, WPHolder *ph);
+extern bool tiling_rescue_clientwins(WTiling *ws, WRescueInfo *ph);
 extern WPHolder *tiling_get_rescue_pholder_for(WTiling *ws, WRegion *mgd);
 extern void tiling_do_set_focus(WTiling *ws, bool warp);
 extern bool tiling_managed_prepare_focus(WTiling *ws, WRegion *reg, 

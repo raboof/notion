@@ -469,17 +469,9 @@ bool region_dispose_(WRegion *reg, bool not_simple)
     bool was_mcf=(not_simple && region_may_control_focus(reg));
     
     if(rescue){
-        WPHolder *ph=region_get_rescue_pholder(reg);
-    
-        if(ph!=NULL){
-            bool refuse=!region_rescue_clientwins(reg, ph);
-            
-            destroy_obj((Obj*)ph);
-
-            if(refuse){
-                warn(TR("Failed to rescue some client windows - not closing."));
-                return FALSE;
-            }
+        if(!region_rescue(reg)){
+            warn(TR("Failed to rescue some client windows - not closing."));
+            return FALSE;
         }
     }
 

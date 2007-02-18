@@ -145,7 +145,7 @@ extern void mplex_attach_tagged(WMPlex *mplex);
 extern void mplex_managed_remove(WMPlex *mplex, WRegion *reg);
 extern void mplex_child_removed(WMPlex *mplex, WRegion *sub);
 
-extern bool mplex_rescue_clientwins(WMPlex *mplex, WPHolder *ph);
+extern bool mplex_rescue_clientwins(WMPlex *mplex, WRescueInfo *info);
 
 extern WPHolder *mplex_prepare_manage(WMPlex *mplex, const WClientWin *cwin,
                                       const WManageParams *param, int redir);

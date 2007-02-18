@@ -444,13 +444,13 @@ void group_deinit(WGroup *ws)
 
 
     
-bool group_rescue_clientwins(WGroup *ws, WPHolder *ph)
+bool group_rescue_clientwins(WGroup *ws, WRescueInfo *info)
 {
     WGroupIterTmp tmp;
     
     group_iter_init_nostdisp(&tmp, ws);
     
-    return region_rescue_some_clientwins((WRegion*)ws, ph,
+    return region_rescue_some_clientwins((WRegion*)ws, info,
                                          (WRegionIterator*)group_iter,
                                          &tmp);
 }

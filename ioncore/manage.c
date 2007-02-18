@@ -316,6 +316,13 @@ bool region_manage_clientwin(WRegion *reg, WClientWin *cwin,
 /*{{{ Rescue */
 
 
+DECLSTRUCT(WRescueInfo){
+    WPHolder *ph;
+    WRegion *get_rescue;
+    bool failed_get;
+};
+
+
 static WRegion *iter_children(void *st)
 {
     WRegion **nextp=(WRegion**)st;
@@ -325,19 +332,22 @@ static WRegion *iter_children(void *st)
 }
 
 
-bool region_rescue_child_clientwins(WRegion *reg, WPHolder *ph)
+bool region_rescue_child_clientwins(WRegion *reg, WRescueInfo *info)
 {
     WRegion *next=reg->children;
-    return region_rescue_some_clientwins(reg, ph, iter_children, &next);
+    return region_rescue_some_clientwins(reg, info, iter_children, &next);
 }
 
 
-bool region_rescue_some_clientwins(WRegion *reg, WPHolder *ph,
+bool region_rescue_some_clientwins(WRegion *reg, WRescueInfo *info,
                                    WRegionIterator *iter, void *st)
 {
     bool res=FALSE;
     int fails=0;
 
+    if(info->failed_get)
+        return FALSE;
+    
     reg->flags|=REGION_CWINS_BEING_RESCUED;
     
     while(TRUE){
@@ -350,24 +360,52 @@ bool region_rescue_some_clientwins(WRegion *reg, WPHolder *ph,
         cwin=OBJ_CAST(tosave, WClientWin);
         
         if(cwin==NULL){
-            if(!region_rescue_clientwins(tosave, ph))
+            if(!region_rescue_clientwins(tosave, info)){
                 fails++;
+                if(info->failed_get)
+                    break;
+            }
         }else if(!(cwin->flags&CLIENTWIN_UNMAP_RQ)){
-            if(!pholder_attach(ph, 0, (WRegion*)cwin))
+            if(info->ph==NULL){
+                info->ph=region_get_rescue_pholder(info->get_rescue);
+                if(info->ph==NULL){
+                    info->failed_get=TRUE;
+                    break;
+                }
+            }
+            if(!pholder_attach(info->ph, 0, (WRegion*)cwin))
                 fails++;
         }
     }
     
     reg->flags&=~REGION_CWINS_BEING_RESCUED;
 
-    return (fails==0);
+    return (fails==0 && !info->failed_get);
 }
 
 
-bool region_rescue_clientwins(WRegion *reg, WPHolder *ph)
+bool region_rescue_clientwins(WRegion *reg, WRescueInfo *info)
 {
     bool ret=FALSE;
-    CALL_DYN_RET(ret, bool, region_rescue_clientwins, reg, (reg, ph));
+    CALL_DYN_RET(ret, bool, region_rescue_clientwins, reg, (reg, info));
+    return ret;
+}
+
+
+bool region_rescue(WRegion *reg)
+{
+    WRescueInfo info;
+    bool ret;
+    
+    info.ph=NULL;
+    info.get_rescue=reg;
+    info.failed_get=FALSE;
+    
+    ret=region_rescue_clientwins(reg, &info);
+    
+    if(info.ph!=NULL)
+        destroy_obj((Obj*)info.ph);
+    
     return ret;
 }
 

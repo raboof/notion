@@ -678,13 +678,13 @@ bool tiling_may_destroy(WTiling *ws, WRegion *reg)
 }
 
 
-bool tiling_rescue_clientwins(WTiling *ws, WPHolder *ph)
+bool tiling_rescue_clientwins(WTiling *ws, WRescueInfo *info)
 {
     WTilingIterTmp tmp;
     
     ptrlist_iter_init(&tmp, ws->managed_list);
     
-    return region_rescue_some_clientwins((WRegion*)ws, ph,
+    return region_rescue_some_clientwins((WRegion*)ws, info,
                                          (WRegionIterator*)ptrlist_iter, 
                                          &tmp);
 }

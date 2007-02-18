@@ -93,7 +93,7 @@ extern void group_managed_remove(WGroup *ws, WRegion *reg);
 
 extern WRegion *group_bottom(WGroup *ws);
 
-extern bool group_rescue_clientwins(WGroup *ws, WPHolder *ph);
+extern bool group_rescue_clientwins(WGroup *ws, WRescueInfo *info);
 
 extern bool group_rqclose(WGroup *ws);
 extern bool group_rqclose_relocate(WGroup *ws);
