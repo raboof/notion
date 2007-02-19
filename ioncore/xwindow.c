@@ -112,10 +112,10 @@ void xwindow_set_cursor(Window win, int cursor)
 bool xwindow_pointer_pos(Window rel, int *px, int *py)
 {
     Window win=None, realroot=None;
-    int wx=0, wy=0;
+    int rx=0, ry=0;
     uint mask=0;
     return XQueryPointer(ioncore_g.dpy, rel, &realroot, &win,
-                         px, py, &wx, &wy, &mask);
+                         &rx, &ry, px, py, &mask);
 }
 
 /*}}}*/
