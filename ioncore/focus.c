@@ -459,10 +459,14 @@ void region_pointer_focus_hack(WRegion *reg)
     
     if(!REGION_IS_ACTIVE(reg) && act==NULL)
         act=ioncore_g.focus_current;
-        
-    if(act==NULL || OBJ_IS_BEING_DESTROYED(act))
+    
+    if(act==NULL || 
+       OBJ_IS_BEING_DESTROYED(act) || 
+       !region_is_fully_mapped(act) ||
+       region_skip_focus(act)){
         return;
-        
+    }
+    
     /* Ok, anything under us should not get focus as we're unmapped:
      * Either we don't have the focus, or focus change somewhere else
      * is pending.
