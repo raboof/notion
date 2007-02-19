@@ -875,27 +875,17 @@ static void frame_managed_changed(WFrame *frame, int mode, bool sw,
 }
 
 
-#define EMPTY_AND_SHOULD_BE_DESTROYED(FRAME) \
-    (DEST_EMPTY(frame) && FRAME_MCOUNT(FRAME)==0 && \
-     !OBJ_IS_BEING_DESTROYED(frame))
-
-
-static void frame_destroy_empty(WFrame *frame)
+bool frame_managed_rqdispose(WFrame *frame, WRegion *reg)
 {
-    if(EMPTY_AND_SHOULD_BE_DESTROYED(frame)){
-        frame_modify_pholders(frame);
-        destroy_obj((Obj*)frame);
+    if(DEST_EMPTY(frame) &&
+       frame->mplex.mgd!=NULL && 
+       frame->mplex.mgd->reg==reg && 
+       frame->mplex.mgd->next==NULL){
+        if(region_rqdispose((WRegion*)frame))
+            return TRUE;
     }
-}
-
-
-void frame_managed_remove(WFrame *frame, WRegion *reg)
-{
-    mplex_managed_remove((WMPlex*)frame, reg);
-    if(EMPTY_AND_SHOULD_BE_DESTROYED(frame)){
-        mainloop_defer_action((Obj*)frame, 
-                              (WDeferredAction*)frame_destroy_empty);
-    }
+    
+    return region_dispose(reg);
 }
 
 
@@ -1015,12 +1005,13 @@ static DynFunTab frame_dynfuntab[]={
 
     {(DynFun*)region_fitrep,
      (DynFun*)frame_fitrep},
+     
+    {(DynFun*)region_managed_rqdispose,
+     (DynFun*)frame_managed_rqdispose},
 
     {region_managed_rqgeom_absolute, 
      frame_managed_rqgeom_absolute},
 
-    {region_managed_remove, frame_managed_remove},
-    
     {(DynFun*)mplex_default_index,
      (DynFun*)frame_default_index},
     

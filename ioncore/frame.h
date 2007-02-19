@@ -117,7 +117,7 @@ extern int frame_default_index(WFrame *frame);
 
 /* Misc */
 extern void frame_managed_notify(WFrame *frame, WRegion *sub, WRegionNotify how);
-extern void frame_managed_remove(WFrame *frame, WRegion *reg);
+extern bool frame_managed_rqdispose(WFrame *frame, WRegion *reg);
 
 extern void ioncore_frame_quasiactivation_notify(WRegion *reg, WRegionNotify how);
 
