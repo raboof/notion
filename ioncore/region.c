@@ -467,6 +467,7 @@ bool region_dispose_(WRegion *reg, bool not_simple)
 {
     bool rescue=not_simple;
     bool was_mcf=(not_simple && region_may_control_focus(reg));
+    WPHolder *ph=NULL;
     
     if(rescue){
         if(!region_rescue(reg)){
@@ -475,13 +476,22 @@ bool region_dispose_(WRegion *reg, bool not_simple)
         }
     }
 
-    if(was_mcf){
-        WPHolder *ph=region_get_return(reg);
-        if(ph!=NULL)
-            pholder_goto(ph);
-    }
+    if(was_mcf)
+        ph=region_unset_get_return(reg);
+    
+    #warning "TODO: continuations instead of this ugly hack"
+    region_detach_manager(reg);
+    region_unmap(reg);
+    
+    if(ioncore_g.focus_next==reg)
+        ioncore_g.focus_next=NULL;
 
     mainloop_defer_destroy((Obj*)reg);
+    
+    if(ph!=NULL){
+        pholder_goto(ph);
+        destroy_obj((Obj*)ph);
+    }
     
     return TRUE;
 }
