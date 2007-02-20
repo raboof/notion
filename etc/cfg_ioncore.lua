@@ -331,7 +331,7 @@ defbindings("WMoveresMode", {
 -- Main menu
 defmenu("mainmenu", {
     menuentry("Run...",         "mod_query.query_exec(_)"),
-    menuentry("XTerm",          "ioncore.exec_on(_, 'xterm')"),
+    menuentry("Terminal",       "ioncore.exec_on(_, XTERM or 'xterm')"),
     menuentry("Lock screen",    "ioncore.exec_on(_, 'xlock')"),
     menuentry("Help",           "mod_query.query_man(_)"),
     menuentry("About Ion",      "mod_query.show_about_ion(_)"),
