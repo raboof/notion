@@ -95,10 +95,30 @@ static WSizePolicy get_sizepolicy_winprop(WClientWin *cwin,
 }
 
 
-#define SIZEHINT_PROPS (CLIENTWIN_PROP_MAXSIZE| \
-                        CLIENTWIN_PROP_MINSIZE| \
-                        CLIENTWIN_PROP_ASPECT| \
-                        CLIENTWIN_PROP_IGNORE_RSZINC)
+#define SIZEHINT_PROPS (CLIENTWIN_PROP_MAXSIZE|   \
+                        CLIENTWIN_PROP_MINSIZE|   \
+                        CLIENTWIN_PROP_ASPECT|    \
+                        CLIENTWIN_PROP_RSZINC|    \
+                        CLIENTWIN_PROP_I_MAXSIZE| \
+                        CLIENTWIN_PROP_I_MINSIZE| \
+                        CLIENTWIN_PROP_I_ASPECT|  \
+                        CLIENTWIN_PROP_I_RSZINC)
+
+
+#define DO_SZH(NAME, FLAG, IFLAG, SZHFLAG, W, H, C)  \
+    if(extl_table_is_bool_set(tab, "ignore_" NAME)){ \
+        cwin->flags|=IFLAG;                          \
+    }else if(extl_table_gets_t(tab, NAME, &tab2)){   \
+        if(extl_table_gets_i(tab2, "w", &i1) &&      \
+           extl_table_gets_i(tab2, "h", &i2)){       \
+            cwin->size_hints.W=i1;                   \
+            cwin->size_hints.H=i2;                   \
+            C                                        \
+            cwin->size_hints.flags|=SZHFLAG;         \
+            cwin->flags|=FLAG;                       \
+        }                                            \
+        extl_unref_table(tab2);                      \
+    }
 
 
 static void clientwin_get_winprops(WClientWin *cwin)
@@ -119,44 +139,21 @@ static void clientwin_get_winprops(WClientWin *cwin)
     if(extl_table_is_bool_set(tab, "acrobatic"))
         cwin->flags|=CLIENTWIN_PROP_ACROBATIC;
     
-    if(extl_table_gets_t(tab, "max_size", &tab2)){
-        if(extl_table_gets_i(tab2, "w", &i1) &&
-           extl_table_gets_i(tab2, "h", &i2)){
-            cwin->size_hints.max_width=i1;
-            cwin->size_hints.max_height=i2;
-            cwin->size_hints.flags|=PMaxSize;
-            cwin->flags|=CLIENTWIN_PROP_MAXSIZE;
-        }
-        extl_unref_table(tab2);
-    }
+    DO_SZH("max_size", CLIENTWIN_PROP_MAXSIZE, CLIENTWIN_PROP_I_MAXSIZE,
+           PMaxSize, max_width, max_height, );
+           
+    DO_SZH("min_size", CLIENTWIN_PROP_MINSIZE, CLIENTWIN_PROP_I_MINSIZE,
+           PMinSize, min_width, min_height, );
+           
+    DO_SZH("resizeinc", CLIENTWIN_PROP_RSZINC, CLIENTWIN_PROP_I_RSZINC,
+           PResizeInc, width_inc, height_inc, );
 
-    if(extl_table_gets_t(tab, "min_size", &tab2)){
-        if(extl_table_gets_i(tab2, "w", &i1) &&
-           extl_table_gets_i(tab2, "h", &i2)){
-            cwin->size_hints.min_width=i1;
-            cwin->size_hints.min_height=i2;
-            cwin->size_hints.flags|=PMinSize;
-            cwin->flags|=CLIENTWIN_PROP_MINSIZE;
-        }
-        extl_unref_table(tab2);
-    }
-
-    if(extl_table_gets_t(tab, "aspect", &tab2)){
-        if(extl_table_gets_i(tab2, "w", &i1) &&
-           extl_table_gets_i(tab2, "h", &i2)){
-            cwin->size_hints.min_aspect.x=i1;
-            cwin->size_hints.max_aspect.x=i1;
-            cwin->size_hints.min_aspect.y=i2;
-            cwin->size_hints.max_aspect.y=i2;
-            cwin->size_hints.flags|=PAspect;
-            cwin->flags|=CLIENTWIN_PROP_ASPECT;
-        }
-        extl_unref_table(tab2);
-    }
-    
-    if(extl_table_is_bool_set(tab, "ignore_resizeinc"))
-        cwin->flags|=CLIENTWIN_PROP_IGNORE_RSZINC;
-
+    DO_SZH("aspect", CLIENTWIN_PROP_ASPECT, CLIENTWIN_PROP_I_ASPECT,
+           PAspect, min_aspect.x, min_aspect.y, 
+           { cwin->size_hints.max_aspect.x=i1;
+             cwin->size_hints.max_aspect.y=i2;
+           });
+           
     if(extl_table_is_bool_set(tab, "ignore_cfgrq"))
         cwin->flags|=CLIENTWIN_PROP_IGNORE_CFGRQ;
 
@@ -176,26 +173,37 @@ void clientwin_get_size_hints(WClientWin *cwin)
     
     xwindow_get_sizehints(cwin->win, &(cwin->size_hints));
     
-    if(cwin->flags&CLIENTWIN_PROP_MAXSIZE){
+    if(cwin->flags&CLIENTWIN_PROP_I_MAXSIZE){
+        cwin->size_hints.flags&=~PMaxSize;
+    }else if(cwin->flags&CLIENTWIN_PROP_MAXSIZE){
         cwin->size_hints.max_width=tmp.max_width;
         cwin->size_hints.max_height=tmp.max_height;
         cwin->size_hints.flags|=PMaxSize;
     }
-
-    if(cwin->flags&CLIENTWIN_PROP_MINSIZE){
+    
+    if(cwin->flags&CLIENTWIN_PROP_I_MINSIZE){
+        cwin->size_hints.flags&=~PMinSize;
+    }else if(cwin->flags&CLIENTWIN_PROP_MINSIZE){
         cwin->size_hints.min_width=tmp.min_width;
         cwin->size_hints.min_height=tmp.min_height;
         cwin->size_hints.flags|=PMinSize;
     }
     
-    if(cwin->flags&CLIENTWIN_PROP_ASPECT){
+    if(cwin->flags&CLIENTWIN_PROP_I_ASPECT){
+        cwin->size_hints.flags&=~PAspect;
+    }else if(cwin->flags&CLIENTWIN_PROP_ASPECT){
         cwin->size_hints.min_aspect=tmp.min_aspect;
         cwin->size_hints.max_aspect=tmp.max_aspect;
         cwin->size_hints.flags|=PAspect;
     }
     
-    if(cwin->flags&CLIENTWIN_PROP_IGNORE_RSZINC)
+    if(cwin->flags&CLIENTWIN_PROP_I_RSZINC){
         cwin->size_hints.flags&=~PResizeInc;
+    }else if(cwin->flags&CLIENTWIN_PROP_RSZINC){
+        cwin->size_hints.width_inc=tmp.width_inc;
+        cwin->size_hints.height_inc=tmp.height_inc;
+        cwin->size_hints.flags|=PResizeInc;
+    }
 }
 
 
