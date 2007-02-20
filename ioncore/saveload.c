@@ -187,10 +187,34 @@ ExtlTab region_get_base_configuration(WRegion *reg)
 }
 
 
+static bool get_config_clientwins=TRUE;
+
+
 ExtlTab region_get_configuration(WRegion *reg)
 {
     ExtlTab tab=extl_table_none();
-    CALL_DYN_RET(tab, ExtlTab, region_get_configuration, reg, (reg));
+    if(get_config_clientwins || !OBJ_IS(reg, WClientWin)){
+        CALL_DYN_RET(tab, ExtlTab, region_get_configuration, reg, (reg));
+    }
+    return tab;
+}
+
+
+/*EXTL_DOC
+ * Get configuration tree. If \var{clientwins} is unset, client windows
+ * are filtered out.
+ */
+EXTL_EXPORT_AS(WRegion, get_configuration)
+ExtlTab region_get_configuration_extl(WRegion *reg, bool clientwins)
+{
+    ExtlTab tab;
+    
+    get_config_clientwins=clientwins;
+    
+    tab=region_get_configuration(reg);
+    
+    get_config_clientwins=TRUE;
+    
     return tab;
 }
 
