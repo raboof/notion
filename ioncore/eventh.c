@@ -348,6 +348,9 @@ static void do_handle_enter_window(XEvent *ev)
 
 void ioncore_handle_enter_window(XEvent *ev)
 {
+    if(ioncore_g.no_mousefocus)
+        return;
+    
     do{
         /* *sigh*, it doesn't seem reasonably simply possible to
          * process events in-order.

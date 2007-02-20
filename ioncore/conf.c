@@ -76,6 +76,7 @@ static ExtlFn get_layout_fn;
  *  \var{float_placement_method} & (string) How to place floating frames.
  *                          One of ''udlr'' (up-down, then left-right), 
  *                          ''lrud'' (left-right, then up-down) or ''random''. \\
+ *  \var{mousefocus} & String: ''disable'' or ''sloppy''. \\
  * \end{tabularx}
  * 
  * When a keyboard resize function is called, and at most \var{kbresize_t_max} 
@@ -105,6 +106,13 @@ void ioncore_set(ExtlTab tab)
                                                          tmp,
                                                          ioncore_g.frame_default_index);
         free(tmp);
+    }
+
+    if(extl_table_gets_s(tab, "mousefocus", &tmp)){
+        if(strcmp(tmp, "disabled")==0)
+            ioncore_g.no_mousefocus=TRUE;
+        else if(strcmp(tmp, "sloppy")==0)
+            ioncore_g.no_mousefocus=FALSE;
     }
     
     if(extl_table_gets_i(tab, "dblclick_delay", &dd))

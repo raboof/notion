@@ -80,8 +80,7 @@ DECLSTRUCT(WGlobal){
     bool screen_notify;
     int frame_default_index;
     bool framed_transients;
-    
-    /*bool save_enabled;*/
+    bool no_mousefocus;
     
     bool use_mb; /* use mb routines? */
     bool enc_sb; /* 8-bit charset? If unset, use_mb must be set. */
