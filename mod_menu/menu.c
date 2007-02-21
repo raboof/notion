@@ -988,7 +988,7 @@ void menu_finish(WMenu *menu)
 EXTL_EXPORT_MEMBER
 void menu_cancel(WMenu *menu)
 {
-    region_rqdispose((WRegion*)menu);
+    region_defer_rqdispose((WRegion*)menu);
 }
 
 

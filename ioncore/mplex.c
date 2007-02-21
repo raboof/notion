@@ -1634,7 +1634,7 @@ bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg,
     }
     
     if(oldstdisp!=NULL && oldstdisp!=reg)
-        region_dispose_((WRegion*)oldstdisp, FALSE);
+        mainloop_defer_destroy((Obj*)oldstdisp);
     
     return TRUE;
 }

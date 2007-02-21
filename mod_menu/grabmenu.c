@@ -52,7 +52,7 @@ static bool grabmenu_handler(WRegion *reg, XEvent *xev)
 
 static void grabkilled_handler(WRegion *reg)
 {
-    region_dispose_(reg, FALSE);
+    destroy_obj((Obj*)reg);
 }
 
 

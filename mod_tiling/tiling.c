@@ -266,13 +266,6 @@ Window tiling_xwindow(const WTiling *ws)
 }
 
 
-/*
-WRegion *tiling_rqclose_propagate(WTiling *ws, WRegion *maybe_sub)
-{
-    return (region_rqclose((WRegion*)ws, FALSE) ? (WRegion*)ws : NULL);
-}
-*/
-
 WPHolder *tiling_prepare_manage_transient(WTiling *ws,
                                           const WClientWin *transient,
                                           const WManageParams *param,
@@ -1109,19 +1102,12 @@ WFrame *tiling_split_at(WTiling *ws, WFrame *frame, const char *dirstr,
  * and, if possible, destroy the frame.
  */
 EXTL_EXPORT_MEMBER
-bool tiling_unsplit_at(WTiling *ws, WFrame *frame)
+void tiling_unsplit_at(WTiling *ws, WFrame *frame)
 {
-    if(frame==NULL){
-        warn(TR("Nil frame."));
-        return FALSE;
-    }
+    if(frame==NULL || REGION_MANAGER(frame)!=(WRegion*)ws)
+        return;
     
-    if(REGION_MANAGER(frame)!=(WRegion*)ws){
-        warn(TR("The frame is not managed by the workspace."));
-        return FALSE;
-    }
-    
-    return region_rqclose((WRegion*)frame, TRUE);
+    region_defer_rqdispose((WRegion*)frame);
 }
 
 

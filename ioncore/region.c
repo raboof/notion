@@ -366,14 +366,11 @@ bool region_reparent(WRegion *reg, WWindow *par,
 /*{{{ Close */
 
 
-static bool region_rqclose_default(WRegion *reg, bool relocate)
+static void region_rqclose_default(WRegion *reg, bool relocate)
 {
-    if(!relocate && !region_may_dispose(reg))
-        return FALSE;
-    
-    return region_rqdispose(reg);
+    if(relocate || region_may_dispose(reg))
+        region_defer_rqdispose(reg);
 }
-
 
 
 /*EXTL_DOC
@@ -381,19 +378,16 @@ static bool region_rqclose_default(WRegion *reg, bool relocate)
  * depends on whether the particular type of region in question has
  * implemented the feature and, in case of client windows, whether
  * the client supports the \code{WM_DELETE} protocol (see also
- * \fnref{WClientWin.kill}). If the operation is likely to succeed,
- * \code{true} is returned, otherwise \code{false}. In most cases the
- * region will not have been actually destroyed when this function returns.
- * If \var{relocate} is not set, and \var{reg} manages other regions, it
- * will not be closed. Otherwise the managed regions will be attempted
- * to be relocated.
+ * \fnref{WClientWin.kill}). The region will not be destroyed when
+ * this function returns. To find out if and when it is destroyed,
+ * use the "deinit" notification. If \var{relocate} is not set, and
+ * \var{reg} manages other regions, it will not be closed. Otherwise
+ * the managed regions will be attempted to be relocated.
  */
 EXTL_EXPORT_MEMBER
-bool region_rqclose(WRegion *reg, bool relocate)
+void region_rqclose(WRegion *reg, bool relocate)
 {
-    bool ret=FALSE;
-    CALL_DYN_RET(ret, bool, region_rqclose, reg, (reg, relocate));
-    return ret;
+    CALL_DYN(region_rqclose, reg, (reg, relocate));
 }
 
 
@@ -402,9 +396,13 @@ static WRegion *region_rqclose_propagate_default(WRegion *reg,
 {
     if(maybe_sub==NULL)
         maybe_sub=region_current(reg);
-    if(maybe_sub!=NULL)
+    
+    if(maybe_sub!=NULL){
         return region_rqclose_propagate(maybe_sub, NULL);
-    return (region_rqclose(reg, FALSE) ? reg : NULL);
+    }else{
+        region_rqclose(reg, FALSE);
+        return reg;
+    }
 }
 
 
@@ -412,8 +410,8 @@ static WRegion *region_rqclose_propagate_default(WRegion *reg,
  * Recursively attempt to close a region or one of the regions managed by 
  * it. If \var{sub} is set, it will be used as the managed region, otherwise
  * \fnref{WRegion.current}\code{(reg)}. The object to be closed is
- * returned or NULL if nothing can be closed. Also see notes for
- * \fnref{WRegion.rqclose}.
+ * returned, or NULL if nothing can be closed. For further details, see
+ * notes for \fnref{WRegion.rqclose}.
  */
 EXTL_EXPORT_MEMBER
 WRegion *region_rqclose_propagate(WRegion *reg, WRegion *maybe_sub)
@@ -479,14 +477,7 @@ bool region_dispose_(WRegion *reg, bool not_simple)
     if(was_mcf)
         ph=region_unset_get_return(reg);
     
-    #warning "TODO: continuations instead of this ugly hack"
-    region_detach_manager(reg);
-    region_unmap(reg);
-    
-    if(ioncore_g.focus_next==reg)
-        ioncore_g.focus_next=NULL;
-
-    mainloop_defer_destroy((Obj*)reg);
+    destroy_obj((Obj*)reg);
     
     if(ph!=NULL){
         pholder_goto(ph);
@@ -500,6 +491,12 @@ bool region_dispose_(WRegion *reg, bool not_simple)
 bool region_dispose(WRegion *reg)
 {
     return region_dispose_(reg, TRUE);
+}
+
+
+void region_defer_rqdispose(WRegion *reg)
+{
+    mainloop_defer_action((Obj*)reg, (WDeferredAction*)region_rqdispose);
 }
 
 

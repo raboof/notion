@@ -1011,8 +1011,7 @@ static void wedln_do_finish(WEdln *wedln)
     wedln->handler=extl_fn_none();
     p=edln_finish(&(wedln->edln));
     
-    /*region_rqdispose((WRegion*)wedln);*/
-    destroy_obj((Obj*)wedln);
+    region_rqdispose((WRegion*)wedln);
     
     if(p!=NULL)
         extl_call(handler, "s", NULL, p);

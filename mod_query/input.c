@@ -161,7 +161,7 @@ void input_deinit(WInput *input)
 EXTL_EXPORT_MEMBER
 void input_cancel(WInput *input)
 {
-    region_rqdispose((WRegion*)input);
+    region_defer_rqdispose((WRegion*)input);
 }
 
 

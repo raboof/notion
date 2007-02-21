@@ -326,7 +326,7 @@ void screen_unnotify(WScreen *scr)
     Obj *iw=scr->notifywin_watch.obj;
     if(iw!=NULL){
         watch_reset(&(scr->notifywin_watch));
-        region_dispose_((WRegion*)iw, FALSE);
+        mainloop_defer_destroy((Obj*)iw);
     }
 }
 
@@ -336,7 +336,7 @@ void screen_nowindowinfo(WScreen *scr)
     Obj *iw=scr->infowin_watch.obj;
     if(iw!=NULL){
         watch_reset(&(scr->infowin_watch));
-        region_dispose_((WRegion*)iw, FALSE);
+        mainloop_defer_destroy((Obj*)iw);
     }
 }
 

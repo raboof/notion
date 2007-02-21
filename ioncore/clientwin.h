@@ -72,7 +72,7 @@ extern void clientwin_get_size_hints(WClientWin *cwin);
 extern void clientwin_unmapped(WClientWin *cwin);
 extern void clientwin_destroyed(WClientWin *cwin);
 extern void clientwin_kill(WClientWin *cwin);
-extern bool clientwin_rqclose(WClientWin *cwin, bool relocate_ignored);
+extern void clientwin_rqclose(WClientWin *cwin, bool relocate_ignored);
 
 extern void clientwin_tfor_changed(WClientWin *cwin);
 

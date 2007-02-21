@@ -131,7 +131,7 @@ DYNFUN Window region_xwindow(const WRegion *reg);
 DYNFUN void region_activated(WRegion *reg);
 DYNFUN void region_inactivated(WRegion *reg);
 DYNFUN void region_updategr(WRegion *reg);
-DYNFUN bool region_rqclose(WRegion *reg, bool relocate);
+DYNFUN void region_rqclose(WRegion *reg, bool relocate);
 DYNFUN WRegion *region_rqclose_propagate(WRegion *reg, WRegion *maybe_sub);
 DYNFUN WRegion *region_current(WRegion *mgr);
 DYNFUN void region_notify_rootpos(WRegion *reg, int x, int y);
@@ -177,6 +177,7 @@ extern void region_detach_manager(WRegion *reg);
 extern bool region_dispose_(WRegion *reg, bool not_simple);
 extern bool region_dispose(WRegion *reg);
 extern bool region_rqdispose(WRegion *reg);
+extern void region_defer_rqdispose(WRegion *reg);
 
 extern WWindow *region_parent(WRegion *reg);
 extern WRegion *region_manager(WRegion *reg);

@@ -762,7 +762,7 @@ void clientwin_kill(WClientWin *cwin)
 }
 
 
-bool clientwin_rqclose(WClientWin *cwin, bool relocate_ignored)
+void clientwin_rqclose(WClientWin *cwin, bool relocate_ignored)
 {
     /* Ignore relocate parameter -- client windows can always be 
      * destroyed by the application in any case, so way may just as
@@ -772,10 +772,8 @@ bool clientwin_rqclose(WClientWin *cwin, bool relocate_ignored)
     if(cwin->flags&CLIENTWIN_P_WM_DELETE){
         send_clientmsg(cwin->win, ioncore_g.atom_wm_delete, 
                        ioncore_get_timestamp());
-        return TRUE;
     }else{
         warn(TR("Client does not support the WM_DELETE protocol."));
-        return FALSE;
     }
 }
 

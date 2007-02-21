@@ -52,7 +52,7 @@ extern WRegion *tiling_region_at(WTiling *ws, int x, int y);
 extern WFrame *tiling_split_top(WTiling *ws, const char *dirstr);
 extern WFrame *tiling_split_at(WTiling *ws, WFrame *frame, 
                               const char *dirstr, bool attach_current);
-extern bool tiling_unsplit_at(WTiling *ws, WFrame *frame);
+extern void tiling_unsplit_at(WTiling *ws, WFrame *frame);
 
 extern WSplitSplit *tiling_set_floating(WTiling *ws, WSplitSplit *split, 
                                        int sp);
