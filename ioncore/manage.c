@@ -22,6 +22,7 @@
 #include "extlconv.h"
 #include "return.h"
 #include "conf.h"
+#include "detach.h"
 #include "group-ws.h"
 
 
@@ -184,7 +185,7 @@ bool clientwin_do_manage_default(WClientWin *cwin,
     WScreen *scr=NULL;
     WPHolder *ph=NULL;
     int swf=(param->switchto ? PHOLDER_ATTACH_SWITCHTO : 0);
-    bool ok;
+    bool ok, uq=FALSE;
 
     /* Find a suitable screen */
     scr=clientwin_find_suitable_screen(cwin, param);
@@ -201,6 +202,7 @@ bool clientwin_do_manage_default(WClientWin *cwin,
         assert(param->tfor!=cwin);
         ph=region_prepare_manage_transient((WRegion*)param->tfor, cwin, 
                                            param, 0);
+        uq=TRUE;
     }
 
     if(ph==NULL){
@@ -228,6 +230,9 @@ bool clientwin_do_manage_default(WClientWin *cwin,
     ok=pholder_attach(ph, swf, (WRegion*)cwin);
     
     destroy_obj((Obj*)ph);
+    
+    if(uq && ok)
+        ioncore_unsqueeze((WRegion*)cwin);
     
     return ok;
 }
