@@ -16,5 +16,7 @@
 
 extern bool ioncore_detach(WRegion *reg, int sp);
 
+extern void ioncore_unsqueeze(WRegion *reg);
+
 #endif /* ION_IONCORE_DETACH_H */
 

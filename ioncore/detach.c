@@ -20,6 +20,8 @@
 #include <ioncore/group-ws.h>
 #include <ioncore/framedpholder.h>
 #include <ioncore/return.h>
+#include <ioncore/sizehint.h>
+#include <ioncore/resize.h>
 
 
 static void get_relative_geom(WRectangle *g, WRegion *reg, WRegion *mgr)
@@ -189,6 +191,41 @@ bool ioncore_detach_extl(WRegion *reg, const char *how)
         how="set";
     
     return ioncore_detach(reg, libtu_string_to_setparam(how));
+}
+
+
+void do_unsqueeze(WRegion *reg)
+{
+    WSizeHints hints;
+    
+    if(REGION_MANAGER_CHK(reg, WScreen)!=NULL)
+        return;
+    
+    region_size_hints(reg, &hints);
+
+    if(!hints.min_set)
+        return;
+        
+    if(hints.min_width<=REGION_GEOM(reg).w &&
+       hints.min_height<=REGION_GEOM(reg).h){
+        return;
+    }
+    
+    if(!ioncore_detach(reg, SETPARAM_SET))
+        return;
+        
+    do_unsqueeze(reg);
+}
+
+
+/*EXTL_DOC
+ * Try to detach \var{reg} if it fits poorly in its 
+ * current location.
+ */
+EXTL_EXPORT
+void ioncore_unsqueeze(WRegion *reg)
+{
+    do_unsqueeze(region_groupleader_of(reg));
 }
 
 
