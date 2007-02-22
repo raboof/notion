@@ -232,7 +232,7 @@ bool clientwin_do_manage_default(WClientWin *cwin,
     destroy_obj((Obj*)ph);
     
     if(uq && ok)
-        ioncore_unsqueeze((WRegion*)cwin);
+        ioncore_unsqueeze((WRegion*)cwin, FALSE);
     
     return ok;
 }

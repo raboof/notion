@@ -14,6 +14,7 @@
 #include <libtu/minmax.h>
 
 #include <ioncore/common.h>
+#include <ioncore/global.h>
 #include <ioncore/mplex.h>
 #include <ioncore/focus.h>
 #include <ioncore/group.h>
@@ -220,12 +221,15 @@ void do_unsqueeze(WRegion *reg)
 
 /*EXTL_DOC
  * Try to detach \var{reg} if it fits poorly in its 
- * current location.
+ * current location. This function does not do anything,
+ * unless \var{override} is set or the \var{unsqueeze} option
+ * of \fnref{ioncore.set} is set.
  */
 EXTL_EXPORT
-void ioncore_unsqueeze(WRegion *reg)
+void ioncore_unsqueeze(WRegion *reg, bool override)
 {
-    do_unsqueeze(region_groupleader_of(reg));
+    if(ioncore_g.unsqueeze_enabled || override)
+        do_unsqueeze(region_groupleader_of(reg));
 }
 
 

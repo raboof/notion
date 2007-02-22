@@ -331,6 +331,7 @@ static bool init_global()
     ioncore_g.warp_enabled=TRUE;
     ioncore_g.switchto_new=TRUE;
     ioncore_g.no_mousefocus=FALSE;
+    ioncore_g.unsqueeze_enabled=TRUE;
     
     ioncore_g.enc_utf8=FALSE;
     ioncore_g.enc_sb=TRUE;

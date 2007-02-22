@@ -77,6 +77,7 @@ static ExtlFn get_layout_fn;
  *                          One of ''udlr'' (up-down, then left-right), 
  *                          ''lrud'' (left-right, then up-down) or ''random''. \\
  *  \var{mousefocus} & String: ''disable'' or ''sloppy''. \\
+ *  \var{unsqueeze} & (boolean) Auto-unsqueeze transients/menus/queries/etc. \\
  * \end{tabularx}
  * 
  * When a keyboard resize function is called, and at most \var{kbresize_t_max} 
@@ -100,6 +101,7 @@ void ioncore_set(ExtlTab tab)
     extl_table_gets_b(tab, "switchto", &(ioncore_g.switchto_new));
     extl_table_gets_b(tab, "screen_notify", &(ioncore_g.screen_notify));
     extl_table_gets_b(tab, "framed_transients", &(ioncore_g.framed_transients));
+    extl_table_gets_b(tab, "unsqueeze", &(ioncore_g.unsqueeze_enabled));
     
     if(extl_table_gets_s(tab, "frame_default_index", &tmp)){
         ioncore_g.frame_default_index=stringintmap_value(frame_idxs, 
