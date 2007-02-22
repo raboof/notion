@@ -57,17 +57,15 @@ end
 -- to use a bigger style by setting the field \var{big} to \code{true}.
 function mod_menu.menu(mplex, sub, menu_or_name, param) 
    local function menu_stdmenu(m, s, menu)
-      return mod_menu.do_menu(m, s, menu, param)
+        return ioncore.unsqueeze(mod_menu.do_menu(m, s, menu, param))
    end
    return menu_(mplex, sub, menu_or_name, menu_stdmenu, true)
 end
 
 -- Compatibility
 function mod_menu.bigmenu(mplex, sub, menu_or_name, initial) 
-    local function menu_bigmenu(m, s, menu)
-      return mod_menu.do_menu(m, s, menu, {big=true, initial=initial})
-    end
-    return menu_(mplex, sub, menu_or_name, menu_bigmenu, true)
+    local param={big=true, initial=initial}
+    return mod_menu.menu(mplex, sub, menu_or_name, param)
 end
 
 --DOC

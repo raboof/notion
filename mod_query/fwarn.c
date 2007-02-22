@@ -19,11 +19,11 @@
 #include "fwarn.h"
 
 
-/*EXTL_DOC
+/*(internal) EXTL_DOC
  * Display an error message box in the multiplexer \var{mplex}.
  */
 EXTL_EXPORT
-WMessage *mod_query_warn(WMPlex *mplex, const char *p)
+WMessage *mod_query_do_warn(WMPlex *mplex, const char *p)
 {
     char *p2;
     WMessage *wmsg;
@@ -36,18 +36,19 @@ WMessage *mod_query_warn(WMPlex *mplex, const char *p)
     if(p2==NULL)
         return NULL;
     
-    wmsg=mod_query_message(mplex, p2);
+    wmsg=mod_query_do_message(mplex, p2);
     
     free(p2);
     
     return wmsg;
 }
 
-/*EXTL_DOC
+
+/*(internal) EXTL_DOC
  * Display a message in the \var{mplex}.
  */
 EXTL_EXPORT
-WMessage *mod_query_message(WMPlex *mplex, const char *p)
+WMessage *mod_query_do_message(WMPlex *mplex, const char *p)
 {
     WMPlexAttachParams par;
 

@@ -32,6 +32,20 @@ local DIE_TIMEOUT_NO_ERRORCODE=2 -- 2 seconds
 
 
 --DOC
+-- Display an error message box in the multiplexer \var{mplex}.
+function mod_query.warn(mplex, str)
+    ioncore.unsqueeze(mod_query.do_warn(mplex, str))
+end
+
+
+--DOC
+-- Display a message in \var{mplex}.
+function mod_query.message(mplex, str)
+    ioncore.unsqueeze(mod_query.do_message(mplex, str))
+end
+
+
+--DOC
 -- Low-level query routine. \var{mplex} is the \type{WMPlex} to display
 -- the query in, \var{prompt} the prompt string, and \var{initvalue}
 -- the initial contents of the query box. \var{handler} is a function
@@ -64,8 +78,13 @@ function mod_query.query(mplex, prompt, initvalue, handler, completor,
     
     local wedln=mod_query.do_query(mplex, prompt, initvalue, 
                                    handle_it, completor, cycle, bcycle)
-    if context then
-        wedln:set_context(context)
+                                   
+    if wedln then
+        ioncore.unsqueeze(wedln)
+        
+        if context then
+            wedln:set_context(context)
+        end
     end
     
     return wedln

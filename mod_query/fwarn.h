@@ -15,7 +15,7 @@
 #include <ioncore/mplex.h>
 #include "wmessage.h"
 
-extern WMessage *mod_query_message(WMPlex *mplex, const char *p);
-extern WMessage *mod_query_fwarn(WMPlex *mplex, const char *p);
+extern WMessage *mod_query_do_message(WMPlex *mplex, const char *p);
+extern WMessage *mod_query_do_fwarn(WMPlex *mplex, const char *p);
 
 #endif /* ION_MOD_QUERY_FWARN_H */
