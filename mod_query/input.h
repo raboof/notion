@@ -39,4 +39,7 @@ DYNFUN void input_scrolldown(WInput *input);
 DYNFUN void input_calc_size(WInput *input, WRectangle *geom);
 DYNFUN const char *input_style(WInput *input);
 
+extern void mod_query_get_minimum_extents(GrBrush *brush, bool with_spacing, 
+                                          int *w, int *h);
+
 #endif /* ION_MOD_QUERY_INPUT_H */

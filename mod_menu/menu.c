@@ -30,6 +30,8 @@
 #include <ioncore/names.h>
 #include <ioncore/gr.h>
 #include <ioncore/gr-util.h>
+#include <ioncore/sizehint.h>
+#include <ioncore/resize.h>
 #include "menu.h"
 #include "main.h"
 
@@ -388,6 +390,26 @@ bool menu_fitrep(WMenu *menu, WWindow *par, const WFitParams *fp)
         region_fitrep((WRegion*)(menu->submenu), par, fp);
     
     return TRUE;
+}
+
+
+void menu_size_hints(WMenu *menu, WSizeHints *hints_ret)
+{
+    int n=menu->n_entries;
+    int w=menu->max_entry_w;
+    int h=menu->entry_h*n + menu->entry_spacing*maxof(0, n-1);
+
+    if(menu->brush!=NULL){
+        GrBorderWidths bdw;
+        grbrush_get_border_widths(menu->brush, &bdw);
+        
+        w+=bdw.left+bdw.right;
+        h+=bdw.top+bdw.bottom;
+    }
+    
+    hints_ret->min_set=TRUE;
+    hints_ret->min_width=w;
+    hints_ret->min_height=h;
 }
 
 
@@ -1419,6 +1441,7 @@ static DynFunTab menu_dynfuntab[]={
     {window_insstr, menu_insstr},
     {region_restack, menu_restack},
     {region_stacking, menu_stacking},
+    {region_size_hints, menu_size_hints},
     END_DYNFUNTAB
 };
 

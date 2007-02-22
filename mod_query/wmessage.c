@@ -11,12 +11,14 @@
 
 #include <string.h>
 
-#include <ioncore/common.h>
 #include <libtu/objp.h>
+#include <ioncore/common.h>
 #include <ioncore/strings.h>
 #include <ioncore/global.h>
 #include <ioncore/event.h>
 #include <ioncore/gr-util.h>
+#include <ioncore/sizehint.h>
+#include <ioncore/resize.h>
 #include "wmessage.h"
 #include "inputp.h"
 
@@ -69,6 +71,22 @@ static void wmsg_calc_size(WMessage *wmsg, WRectangle *geom)
     geom->w=max_geom.w;
     geom->y=max_geom.y+max_geom.h-geom->h;
     geom->x=max_geom.x;
+}
+
+
+void wmsg_size_hints(WMessage *wmsg, WSizeHints *hints_ret)
+{
+    int w=1, h=1;
+    
+    if(WMSG_BRUSH(wmsg)!=NULL){
+        mod_query_get_minimum_extents(WMSG_BRUSH(wmsg), FALSE, &w, &h);
+
+        w+=grbrush_get_text_width(WMSG_BRUSH(wmsg), "xxxxx", 5);
+    }
+    
+    hints_ret->min_set=TRUE;
+    hints_ret->min_width=w;
+    hints_ret->min_height=h;
 }
 
 
@@ -233,12 +251,12 @@ static const char *wmsg_style(WMessage *wmsg)
 
 
 static DynFunTab wmsg_dynfuntab[]={
-    {window_draw,        wmsg_draw},
-    {input_calc_size,     wmsg_calc_size},
-    {input_scrollup,     wmsg_scrollup},
-    {input_scrolldown,    wmsg_scrolldown},
-    {(DynFun*)input_style,
-     (DynFun*)wmsg_style},
+    {window_draw, wmsg_draw},
+    {input_calc_size, wmsg_calc_size},
+    {input_scrollup, wmsg_scrollup},
+    {input_scrolldown, wmsg_scrolldown},
+    {(DynFun*)input_style, (DynFun*)wmsg_style},
+    {region_size_hints, wmsg_size_hints},
     END_DYNFUNTAB
 };
 

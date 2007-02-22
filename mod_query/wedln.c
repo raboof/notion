@@ -26,6 +26,8 @@
 #include <ioncore/event.h>
 #include <ioncore/regbind.h>
 #include <ioncore/gr-util.h>
+#include <ioncore/sizehint.h>
+#include <ioncore/resize.h>
 #include "edln.h"
 #include "wedln.h"
 #include "inputp.h"
@@ -225,14 +227,12 @@ static bool wedln_update_cursor(WEdln *wedln, int iw)
 
 static int get_textarea_height(WEdln *wedln, bool with_spacing)
 {
-    GrBorderWidths bdw;
-    GrFontExtents fnte;
+    int w=1, h=1;
     
-    grbrush_get_border_widths(WEDLN_BRUSH(wedln), &bdw);
-    grbrush_get_font_extents(WEDLN_BRUSH(wedln), &fnte);
+    if(WEDLN_BRUSH(wedln)!=NULL)
+        mod_query_get_minimum_extents(WEDLN_BRUSH(wedln), with_spacing, &w, &h);
     
-    return (fnte.max_height+bdw.top+bdw.bottom+
-            (with_spacing ? bdw.spacing : 0));
+    return h;
 }
 
 
@@ -352,6 +352,22 @@ static void wedln_calc_size(WEdln *wedln, WRectangle *geom)
     tageom=*geom;
     get_textarea_geom(wedln, G_NORESET, &tageom);
     wedln_update_cursor(wedln, tageom.w);
+}
+
+
+void wedln_size_hints(WEdln *wedln, WSizeHints *hints_ret)
+{
+    int w=1, h=1;
+    
+    if(WEDLN_BRUSH(wedln)!=NULL){
+        mod_query_get_minimum_extents(WEDLN_BRUSH(wedln), FALSE, &w, &h);
+        w+=wedln->prompt_w+wedln->info_w;
+        w+=grbrush_get_text_width(WEDLN_BRUSH(wedln), "xxxxxxxxxx", 10);
+    }
+        
+    hints_ret->min_set=TRUE;
+    hints_ret->min_width=w;
+    hints_ret->min_height=h;
 }
 
 
@@ -1076,6 +1092,7 @@ static DynFunTab wedln_dynfuntab[]={
     {input_scrolldown, wedln_scrolldown_completions},
     {window_insstr, wedln_insstr},
     {(DynFun*)input_style, (DynFun*)wedln_style},
+    {region_size_hints, wedln_size_hints},
     END_DYNFUNTAB
 };
 

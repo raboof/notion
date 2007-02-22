@@ -186,6 +186,29 @@ static void input_activated(WInput *input)
 /*}}}*/
 
 
+/*{{{{ Misc */
+
+
+void mod_query_get_minimum_extents(GrBrush *brush, bool with_spacing, 
+                                   int *w, int *h)
+{
+    GrBorderWidths bdw;
+    GrFontExtents fnte;
+    int spc;
+    
+    grbrush_get_border_widths(brush, &bdw);
+    grbrush_get_font_extents(brush, &fnte);
+    
+    spc=(with_spacing ? bdw.spacing : 0);
+    
+    *h=(fnte.max_height+bdw.top+bdw.bottom+spc);
+    *w=(bdw.left+bdw.right+spc);
+}
+
+
+/*}}}*/
+
+
 /*{{{ Dynamic function table and class implementation */
 
 
