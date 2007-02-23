@@ -99,10 +99,9 @@ static bool pholder_do_check_reparent_default(WPHolder *ph, WRegion *reg)
 {
     WRegion *target=pholder_do_target(ph);
     
-    if(target==NULL)
-        return FALSE;
-    else
-        return region_attach_reparent_check(target, reg);
+    return (target==NULL 
+            ? FALSE
+            : region_ancestor_check(target, reg));
 }
 
 

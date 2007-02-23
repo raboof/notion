@@ -23,15 +23,21 @@ static WRegion *mkbottom_fn(WWindow *parent, const WFitParams *fp,
     WRegion *reg=(WRegion*)param;
     WTiling *tiling;
     WSplitRegion *node=NULL;
+    WRegion *disposeroot;
     
     if(!region_fitrep(reg, parent, fp))
+        return NULL;
+        
+    disposeroot=region_disposeroot(reg);
+    
+    if(disposeroot==NULL)
         return NULL;
     
     tiling=create_tiling(parent, fp, NULL, FALSE);
     
     if(tiling==NULL)
         return NULL;
-    
+        
     node=create_splitregion(&REGION_GEOM(tiling), reg);
     if(node!=NULL){
         tiling->split_tree=(WSplit*)node;
@@ -39,8 +45,10 @@ static WRegion *mkbottom_fn(WWindow *parent, const WFitParams *fp,
         
         region_detach_manager(reg);
         
-        if(tiling_managed_add(tiling, reg))
+        if(tiling_managed_add(tiling, reg)){
+            region_postdetach_dispose(reg, disposeroot);
             return (WRegion*)tiling;
+        }
         
         #warning "TODO: reattach?"
         

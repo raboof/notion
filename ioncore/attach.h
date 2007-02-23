@@ -54,7 +54,9 @@ extern WRegion *region_attach_helper(WRegion *mgr,
                                      WRegionDoAttachFn *fn, void *fn_param,
                                      const WRegionAttachData *data);
 
-extern bool region_attach_reparent_check(WRegion *mgr, WRegion *reg);
+extern bool region_ancestor_check(WRegion *dst, WRegion *reg);
+
+extern void region_postdetach_dispose(WRegion *reg, WRegion *disposeroot);
 
 
 #endif /* ION_IONCORE_ATTACH_H */

@@ -51,9 +51,20 @@ static WRegion *doit_reparent(WRegion *mgr,
                               WRegion *reg)
 {
     WFitParams fp2;
-
-    if(!region_attach_reparent_check(mgr, reg))
+    WRegion *disposeroot;
+    
+    if(!region_ancestor_check(mgr, reg)){
+        warn(TR("Attempt to make region %s manage its ancestor %s."),
+             region_name(mgr), region_name(reg));
         return NULL;
+    }
+    
+    disposeroot=region_disposeroot(reg);
+    
+    if(disposeroot==NULL){
+        /* Region may not be reparented */
+        return NULL;
+    }
     
     if(fp->mode&REGION_FIT_WHATEVER){
         /* fp->g is not final; substitute size with current to avoid
@@ -78,7 +89,9 @@ static WRegion *doit_reparent(WRegion *mgr,
         #warning "TODO: What?"
         return NULL;
     }
-       
+    
+    region_postdetach_dispose(reg, disposeroot);
+    
     return reg;
 }
 
@@ -138,35 +151,35 @@ WRegion *region_attach_helper(WRegion *mgr,
 /*}}}*/
 
 
-/*{{{ Reparent check */
+/*{{{ Reparent check etc. */
 
 
-bool region_attach_reparent_check(WRegion *mgr, WRegion *reg)
+bool region_ancestor_check(WRegion *dst, WRegion *reg)
 {
     WRegion *reg2;
     
-    /*if(REGION_MANAGER(reg)==mgr){
-        warn(TR("Same manager."));
-        return FALSE;
-    }*/
-    
     /* Check that reg is not a parent or manager of mgr */
-    for(reg2=mgr; reg2!=NULL; reg2=REGION_MANAGER(reg2)){
+    for(reg2=dst; reg2!=NULL; reg2=REGION_MANAGER(reg2)){
         if(reg2==reg)
-            goto err;
+            return FALSE;
     }
     
-    for(reg2=REGION_PARENT_REG(mgr); reg2!=NULL; reg2=REGION_PARENT_REG(reg2)){
+    for(reg2=REGION_PARENT_REG(dst); reg2!=NULL; reg2=REGION_PARENT_REG(reg2)){
         if(reg2==reg)
-            goto err;
+            return FALSE;
     }
 
     return TRUE;
-    
-err:
-    warn(TR("Attempt to make region %s manage its ancestor %s."),
-         region_name(mgr), region_name(reg));
-    return FALSE;
+}
+
+
+void region_postdetach_dispose(WRegion *reg, WRegion *disposeroot)
+{
+    /* disposeroot should be destroyed (as empty and useless) unless it 
+     * still, in fact, is an ancestor of reg.
+     */
+    if(disposeroot!=reg && region_ancestor_check(reg, disposeroot))
+        region_dispose(disposeroot);
 }
 
 
