@@ -42,6 +42,8 @@ extern WTiling *create_tiling(WWindow *parent, const WFitParams *fp,
 extern WTiling *create_tiling_simple(WWindow *parent, const WFitParams *fp);
 extern void tiling_deinit(WTiling *ws);
 
+extern bool tiling_do_attach_initial(WTiling *tiling, WRegion *reg);
+
 extern ExtlTab tiling_resize_tree(WTiling *ws, WSplit *node, ExtlTab g);
 
 extern WRegion *tiling_current(WTiling *ws);

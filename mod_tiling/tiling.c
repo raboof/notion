@@ -528,30 +528,25 @@ bool tiling_managed_add(WTiling *ws, WRegion *reg)
 }
 
 
-static WRegion *create_initial_frame(WTiling *ws, WWindow *parent,
-                                     const WFitParams *fp)
+bool tiling_do_attach_initial(WTiling *ws, WRegion *reg)
 {
-    WRegion *reg=ws->create_frame_fn(parent, fp);
-
-    if(reg==NULL)
-        return NULL;
+    assert(ws->split_tree==NULL);
     
-    ws->split_tree=(WSplit*)create_splitregion(&(fp->g), reg);
-    if(ws->split_tree==NULL){
-        destroy_obj((Obj*)reg);
-        return NULL;
-    }
+    ws->split_tree=(WSplit*)create_splitregion(&REGION_GEOM(reg), reg);
+    if(ws->split_tree==NULL)
+        return FALSE;
+    
     ws->split_tree->ws_if_root=ws;
     
     if(!tiling_managed_add(ws, reg)){
-        destroy_obj((Obj*)reg);
         destroy_obj((Obj*)ws->split_tree);
-        return NULL;
+        ws->split_tree=NULL;
+        return FALSE;
     }
-
-    return reg;
+    
+    return TRUE;
 }
-
+                                      
 
 static WRegion *create_frame_tiling(WWindow *parent, const WFitParams *fp)
 {
@@ -582,7 +577,18 @@ bool tiling_init(WTiling *ws, WWindow *parent, const WFitParams *fp,
                     REGION_PLEASE_WARP);
     
     if(ci){
-        if(create_initial_frame(ws, parent, fp)==NULL){
+        WRegionAttachData data;
+        WRegion *res;
+        
+        data.type=REGION_ATTACH_NEW;
+        data.u.n.fn=(WRegionCreateFn*)ws->create_frame_fn;
+        data.u.n.param=NULL;
+    
+        res=region_attach_helper((WRegion*)ws, parent, fp,
+                                 (WRegionDoAttachFn*)tiling_do_attach_initial, 
+                                 NULL, &data);
+
+        if(res==NULL){
             XDestroyWindow(ioncore_g.dpy, ws->dummywin);
             return FALSE;
         }

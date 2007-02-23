@@ -20,44 +20,32 @@
 static WRegion *mkbottom_fn(WWindow *parent, const WFitParams *fp, 
                             void *param)
 {
-    WRegion *reg=(WRegion*)param;
+    WRegion *reg=(WRegion*)param, *res;
+    WRegionAttachData data;
     WTiling *tiling;
-    WSplitRegion *node=NULL;
-    WRegion *disposeroot;
-    
-    if(!region_fitrep(reg, parent, fp))
-        return NULL;
-        
-    disposeroot=region_disposeroot(reg);
-    
-    if(disposeroot==NULL)
-        return NULL;
     
     tiling=create_tiling(parent, fp, NULL, FALSE);
     
     if(tiling==NULL)
         return NULL;
-        
-    node=create_splitregion(&REGION_GEOM(tiling), reg);
-    if(node!=NULL){
-        tiling->split_tree=(WSplit*)node;
-        tiling->split_tree->ws_if_root=tiling;
-        
-        region_detach_manager(reg);
-        
-        if(tiling_managed_add(tiling, reg)){
-            region_postdetach_dispose(reg, disposeroot);
-            return (WRegion*)tiling;
-        }
-        
-        #warning "TODO: reattach?"
-        
-        destroy_obj((Obj*)tiling->split_tree);
-        tiling->split_tree=NULL;
-    }
     
-    destroy_obj((Obj*)tiling);
-    return NULL;
+    data.type=REGION_ATTACH_REPARENT;
+    data.u.reg=reg;
+    
+    /* Warning! Potentially dangerous call to remove a `reg` from the same
+     * group we're being attached to, and from the attach routine of which
+     * this function is called from!
+     */
+    res=region_attach_helper((WRegion*)tiling, parent, fp,
+                             (WRegionDoAttachFn*)tiling_do_attach_initial, 
+                             NULL, &data);
+    
+    if(res==NULL){
+        destroy_obj((Obj*)tiling);
+        return NULL;
+    }
+        
+    return (WRegion*)tiling;
 }
 
 
@@ -71,7 +59,6 @@ bool mod_tiling_mkbottom(WRegion *reg)
     WGroup *grp=REGION_MANAGER_CHK(reg, WGroup);
     WGroupAttachParams ap=GROUPATTACHPARAMS_INIT;
     WRegionAttachData data;
-    WRegion *tiling;
     
     if(grp==NULL){
         warn(TR("Not member of a group"));
@@ -98,6 +85,6 @@ bool mod_tiling_mkbottom(WRegion *reg)
     data.u.n.fn=mkbottom_fn;
     data.u.n.param=reg;
     
-    /* kele... poisto samalla kuin attach */
+    /* See the "Warning!" above. */
     return (group_do_attach(grp, &ap, &data)!=NULL);
 }
