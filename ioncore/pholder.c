@@ -40,18 +40,6 @@ WRegion *pholder_do_attach(WPHolder *ph, int flags,
 }
 
 
-static WRegion *add_fn_reparent(WWindow *par, const WFitParams *fp, 
-                                WRegion *reg)
-{
-    if(!region_fitrep(reg, par, fp)){
-        warn(TR("Unable to reparent."));
-        return NULL;
-    }
-    region_detach_manager(reg);
-    return reg;
-}
-
-
 WRegion *pholder_attach_(WPHolder *ph, int flags, WRegionAttachData *data)
 {
     WPHolder *root=pholder_root(ph);

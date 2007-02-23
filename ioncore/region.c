@@ -509,29 +509,11 @@ void region_defer_rqdispose(WRegion *reg)
 /* Routine to call to unmanage a region */
 void region_detach_manager(WRegion *reg)
 {
-    WRegion *mgr;
-    
-    mgr=REGION_MANAGER(reg);
+    WRegion *mgr=REGION_MANAGER(reg);
     
     if(mgr==NULL)
         return;
     
-#if 0
-    /* Restore activity state to non-parent manager */
-    if(region_may_control_focus(reg)){
-        WRegion *par=REGION_PARENT_REG(reg);
-        if(par!=NULL && mgr!=par && REGION_PARENT_REG(mgr)==par){
-            /* REGION_ACTIVE shouldn't be set for windowless regions
-             * but make the parent's active_sub point to it
-             * nevertheless so that region_may_control_focus can
-             * be made to work.
-             */
-            par->active_sub=mgr;
-            region_maybewarp_now(mgr, FALSE);
-        }
-    }
-#endif
-
     region_set_activity(reg, SETPARAM_UNSET);
 
     region_managed_remove(mgr, reg);
