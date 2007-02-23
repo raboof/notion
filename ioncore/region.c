@@ -431,33 +431,43 @@ bool region_may_dispose(WRegion *reg)
 }
 
 
-static bool region_managed_rqdispose_default(WRegion *mgr, WRegion *reg)
+static WRegion *region_managed_disposeroot_default(WRegion *mgr, WRegion *reg)
 {
-    return region_dispose(reg);
+    return reg;
 }
 
 
-bool region_managed_rqdispose(WRegion *mgr, WRegion *reg)
+WRegion *region_managed_disposeroot(WRegion *mgr, WRegion *reg)
 {
-    bool ret=TRUE;
-    CALL_DYN_RET(ret, bool, region_managed_rqdispose, mgr, (mgr, reg));
+    WRegion *ret=NULL;
+    CALL_DYN_RET(ret, WRegion*, region_managed_disposeroot, mgr, (mgr, reg));
     return ret;
+}
+
+
+WRegion *region_disposeroot(WRegion *reg)
+{
+    WRegion *mgr=REGION_MANAGER(reg);
+    
+    return (mgr!=NULL
+            ? region_managed_disposeroot(mgr, reg)
+            : reg);
 }
 
 
 bool region_rqdispose(WRegion *reg)
 {
-    WRegion *mgr=REGION_MANAGER(reg);
+    WRegion *root;
     
-    if(mgr!=NULL){
-        return region_managed_rqdispose(mgr, reg);
-    }else{
-        if(!region_may_dispose(reg)){
-            return FALSE;
-        }else{
-            return region_dispose(reg);
-        }
-    }
+    if(!region_may_dispose(reg))
+        return FALSE;
+    
+    root=region_disposeroot(reg);
+    
+    if(root==NULL)
+        return FALSE;
+
+    return region_dispose(root);
 }
 
 
@@ -932,8 +942,8 @@ static DynFunTab region_dynfuntab[]={
     {(DynFun*)region_managed_prepare_focus,
      (DynFun*)region_managed_prepare_focus_default},
      
-    {(DynFun*)region_managed_rqdispose,
-     (DynFun*)region_managed_rqdispose_default},
+    {(DynFun*)region_managed_disposeroot,
+     (DynFun*)region_managed_disposeroot_default},
 
     {(DynFun*)region_rqclose_propagate,
      (DynFun*)region_rqclose_propagate_default},

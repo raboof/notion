@@ -486,14 +486,14 @@ bool group_may_dispose(WGroup *ws)
 }
 
 
-static bool group_managed_rqdispose(WGroup *ws, WRegion *reg)
+static WRegion *group_managed_disposeroot(WGroup *ws, WRegion *reg)
 {
     if(ws->bottom_last_close && group_bottom(ws)==reg){
         if(group_empty_for_bottom_stdisp(ws))
-            return region_rqdispose((WRegion*)ws);
+            return region_disposeroot((WRegion*)ws);
     }
     
-    return region_dispose(reg);
+    return reg;
 }
 
 
@@ -1359,8 +1359,8 @@ static DynFunTab group_dynfuntab[]={
     {(DynFun*)region_may_dispose,
      (DynFun*)group_may_dispose},
 
-    {(DynFun*)region_managed_rqdispose,
-     (DynFun*)group_managed_rqdispose},
+    {(DynFun*)region_managed_disposeroot,
+     (DynFun*)group_managed_disposeroot},
 
     {(DynFun*)region_current,
      (DynFun*)group_current},

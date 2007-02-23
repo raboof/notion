@@ -141,7 +141,7 @@ DYNFUN void region_managed_remove(WRegion *reg, WRegion *sub);
 DYNFUN bool region_managed_prepare_focus(WRegion *reg, WRegion *sub, 
                                          int flags, WPrepareFocusResult *res);
 DYNFUN void region_managed_notify(WRegion *reg, WRegion *sub, WRegionNotify how);
-DYNFUN bool region_managed_rqdispose(WRegion *mgr, WRegion *reg);
+DYNFUN WRegion *region_managed_disposeroot(WRegion *mgr, WRegion *reg);
 DYNFUN bool region_managed_rqorder(WRegion *reg, WRegion *sub, 
                                    WRegionOrder order);
 
@@ -173,6 +173,8 @@ extern bool region_goto_flags(WRegion *reg, int flags);
 extern bool region_is_fully_mapped(WRegion *reg);
 
 extern void region_detach_manager(WRegion *reg);
+
+extern WRegion *region_disposeroot(WRegion *reg);
 
 extern bool region_dispose_(WRegion *reg, bool not_simple);
 extern bool region_dispose(WRegion *reg);

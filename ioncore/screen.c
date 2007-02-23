@@ -582,7 +582,7 @@ int screen_id(WScreen *scr)
 }
 
 
-static bool screen_managed_rqdispose(WScreen *scr, WRegion *reg)
+static WRegion *screen_managed_disposeroot(WScreen *scr, WRegion *reg)
 {
     bool onmxlist=FALSE, others=FALSE;
     WLListNode *lnode;
@@ -599,12 +599,12 @@ static bool screen_managed_rqdispose(WScreen *scr, WRegion *reg)
         }
 
         if(onmxlist && !others){
-            warn(TR("Only workspace may not be destroyed."));
-            return FALSE;
+            warn(TR("Only workspace may not be destroyed/detached."));
+            return NULL;
         }
     }
     
-    return region_dispose(reg);
+    return reg;
 }
 
 
@@ -733,8 +733,8 @@ static DynFunTab screen_dynfuntab[]={
     {region_inactivated, 
      screen_inactivated},
     
-    {(DynFun*)region_managed_rqdispose,
-     (DynFun*)screen_managed_rqdispose},
+    {(DynFun*)region_managed_disposeroot,
+     (DynFun*)screen_managed_disposeroot},
 
     {(DynFun*)region_may_dispose,
      (DynFun*)screen_may_dispose},

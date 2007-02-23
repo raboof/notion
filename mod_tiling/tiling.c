@@ -641,17 +641,17 @@ void tiling_deinit(WTiling *ws)
 }
 
 
-bool tiling_managed_rqdispose(WTiling *ws, WRegion *reg)
+WRegion *tiling_managed_disposeroot(WTiling *ws, WRegion *reg)
 {
     WTilingIterTmp tmp;
     WRegion *mgd;
 
     FOR_ALL_MANAGED_BY_TILING(mgd, ws, tmp){
         if(mgd!=STDISP_OF(ws) && mgd!=reg)
-            return region_dispose(reg);
+            return reg;
     }
     
-    return region_rqdispose((WRegion*)ws);
+    return region_disposeroot((WRegion*)ws);
 }
 
 
@@ -1720,8 +1720,8 @@ static DynFunTab tiling_dynfuntab[]={
     {(DynFun*)region_get_configuration,
      (DynFun*)tiling_get_configuration},
 
-    {(DynFun*)region_managed_rqdispose,
-     (DynFun*)tiling_managed_rqdispose},
+    {(DynFun*)region_managed_disposeroot,
+     (DynFun*)tiling_managed_disposeroot},
 
     {(DynFun*)region_may_dispose,
      (DynFun*)tiling_may_dispose},

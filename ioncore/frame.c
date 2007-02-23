@@ -875,17 +875,17 @@ static void frame_managed_changed(WFrame *frame, int mode, bool sw,
 }
 
 
-bool frame_managed_rqdispose(WFrame *frame, WRegion *reg)
+WRegion *frame_managed_disposeroot(WFrame *frame, WRegion *reg)
 {
     if(DEST_EMPTY(frame) &&
        frame->mplex.mgd!=NULL && 
        frame->mplex.mgd->reg==reg && 
        frame->mplex.mgd->next==NULL){
-        if(region_rqdispose((WRegion*)frame))
-            return TRUE;
+        WRegion *tmp=region_disposeroot((WRegion*)frame);
+        return (tmp!=NULL ? tmp : reg);
     }
     
-    return region_dispose(reg);
+    return reg;
 }
 
 
@@ -1006,8 +1006,8 @@ static DynFunTab frame_dynfuntab[]={
     {(DynFun*)region_fitrep,
      (DynFun*)frame_fitrep},
      
-    {(DynFun*)region_managed_rqdispose,
-     (DynFun*)frame_managed_rqdispose},
+    {(DynFun*)region_managed_disposeroot,
+     (DynFun*)frame_managed_disposeroot},
 
     {region_managed_rqgeom_absolute, 
      frame_managed_rqgeom_absolute},
