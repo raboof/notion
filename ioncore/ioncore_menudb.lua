@@ -175,10 +175,15 @@ local function focuslist(do_act)
     end
     
     if do_act then
+        -- Windows with activity first
         ioncore.activity_i(iter_act)
     end
     
+    -- The ones that have been focused in their lifetime
     ioncore.focushistory_i(iter_foc)
+    
+    -- And then the rest
+    ioncore.clientwin_i(iter_foc)
     
     return entries
 end
