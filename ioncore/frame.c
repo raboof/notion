@@ -950,19 +950,7 @@ WRegion *frame_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
     int mode=FRAME_MODE_UNKNOWN;
     WFrame *frame;
     
-    if(!extl_table_gets_i(tab, "mode", &mode)){
-        #warning "TODO: Remove backwards compatibility hack"
-        char *style=NULL;
-        if(extl_table_gets_s(tab, "frame_style", &style)){
-            if(strcmp(style, "frame-tiled")==0)
-                mode=FRAME_MODE_TILED;
-            else if(strcmp(style, "frame-floating")==0)
-                mode=FRAME_MODE_FLOATING;
-            else if(strcmp(style, "frame-transientcontainer")==0)
-                mode=FRAME_MODE_TRANSIENT;
-            free(style);
-        }
-    }
+    extl_table_gets_i(tab, "mode", &mode);
     
     frame=create_frame(par, fp, mode);
     
