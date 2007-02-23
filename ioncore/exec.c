@@ -28,10 +28,12 @@
 /*{{{ Exec */
 
 
-void ioncore_setup_environ(int xscr)
+static void ioncore_setup_display(WRootWin *rw)
 {
     char *tmp, *ptr;
     char *display;
+
+    /* Set up $DISPLAY */
     
     display=XDisplayName(ioncore_g.display);
     
@@ -50,11 +52,11 @@ void ioncore_setup_environ(int xscr)
             *ptr='\0';
     }
 
-    if(xscr>=0)
-        snprintf(tmp+strlen(tmp), 11, ".%u", (unsigned)xscr);
+    if(rw!=NULL)
+        snprintf(tmp+strlen(tmp), 11, ".%u", (unsigned)rw->xscr);
     
     putenv(tmp);
-    
+        
     /* No need to free it, we'll execve soon */
     /*free(tmp);*/
 
@@ -62,25 +64,15 @@ void ioncore_setup_environ(int xscr)
 }
 
 
-typedef struct{
-    WRootWin *rw;
-    const char *wd;
-} ExecP;
-
-
-static void setup_exec(void *p_)
+void ioncore_setup_environ(const WExecP *p)
 {
-    ExecP *p=(ExecP*)p_;
+    /* Set up $DISPLAY */
     
-    close(ioncore_g.conn);
+    ioncore_setup_display(p->target!=NULL 
+                          ? region_rootwin_of(p->target)
+                          : NULL);
     
-    ioncore_g.dpy=NULL;
-    
-#ifndef CF_NO_SETPGID
-    setpgid(0, 0);
-#endif
-    
-    ioncore_setup_environ(p->rw==NULL ? -1 : p->rw->xscr);
+    /* Set up working directory */
     
     if(p->wd!=NULL){
         if(chdir(p->wd)!=0)
@@ -89,13 +81,29 @@ static void setup_exec(void *p_)
 }
 
 
+WHook *ioncore_exec_environ_hook=NULL;
+
+
+static void setup_exec(void *execp)
+{
+    hook_call_p(ioncore_exec_environ_hook, execp, NULL);
+    
+#ifndef CF_NO_SETPGID
+    setpgid(0, 0);
+#endif
+    
+    ioncore_g.dpy=NULL;
+}
+
+
 EXTL_EXPORT
-int ioncore_do_exec_rw(WRootWin *rw, const char *cmd, const char *wd,
+int ioncore_do_exec_on(WRegion *reg, const char *cmd, const char *wd,
                        ExtlFn errh)
 {
-    ExecP p;
+    WExecP p;
     
-    p.rw=rw;
+    p.target=reg;
+    p.cmd=cmd;
     p.wd=wd;
     
     return mainloop_popen_bgread(cmd, setup_exec, (void*)&p, 
@@ -113,7 +121,7 @@ EXTL_SAFE
 EXTL_EXPORT
 int ioncore_exec(const char *cmd)
 {
-    return ioncore_do_exec_rw(NULL, cmd, NULL, extl_fn_none());
+    return ioncore_do_exec_on(NULL, cmd, NULL, extl_fn_none());
 }
 
 
@@ -126,10 +134,11 @@ EXTL_SAFE
 EXTL_EXPORT
 int ioncore_popen_bgread(const char *cmd, ExtlFn h, ExtlFn errh)
 {
-    ExecP p;
+    WExecP p;
     
-    p.rw=NULL;
+    p.target=NULL;
     p.wd=NULL;
+    p.cmd=cmd;
     
     return mainloop_popen_bgread(cmd, setup_exec, (void*)&p, h, errh);
 }
@@ -196,7 +205,7 @@ void ioncore_do_restart()
     ioncore_deinit();
     if(other!=NULL){
         if(ioncore_g.display!=NULL)
-            ioncore_setup_environ(-1);
+            ioncore_setup_display(NULL);
         mainloop_do_exec(other);
         warn_err_obj(other);
     }

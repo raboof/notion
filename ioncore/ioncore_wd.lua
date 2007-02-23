@@ -123,8 +123,7 @@ function ioncore.exec_on(reg, cmd, merr_internal)
             cmd='XTERMCMD='..string.shell_safe(XTERM)..' '..cmd
         end
     end
-    return ioncore.do_exec_rw(reg:rootwin_of(), cmd, 
-                              ioncore.get_dir_for(reg), 
+    return ioncore.do_exec_on(reg, cmd, ioncore.get_dir_for(reg), 
                               merr_internal)
 end
 

@@ -79,11 +79,3 @@ function ioncore.TR(s, ...)
     return string.format(ioncore.gettext(s), unpack(arg))
 end
 
-
---[[DOC
--- Run \var{cmd} with the environment variable DISPLAY set to point to the
--- root window of the X screen \var{reg} is on.
-function ioncore.exec_on(reg, cmd)
-    return ioncore.do_exec_rw(reg:rootwin_of(), cmd)
-end
---]]

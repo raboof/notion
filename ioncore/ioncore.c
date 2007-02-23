@@ -56,6 +56,7 @@
 #include "group-cw.h"
 #include "group-ws.h"
 #include "llist.h"
+#include "exec.h"
 
 #include "../version.h"
 #include "exports.h"
@@ -275,7 +276,8 @@ static bool init_hooks()
     INIT_HOOK(clientwin_do_manage_alt, clientwin_do_manage_default);
     INIT_HOOK(ioncore_handle_event_alt, ioncore_handle_event);
     INIT_HOOK(region_do_warp_alt, region_do_warp_default);
-
+    INIT_HOOK(ioncore_exec_environ_hook, ioncore_setup_environ);
+    
     mainloop_sigchld_hook=mainloop_register_hook("ioncore_sigchld_hook",
                                                  create_hook());
     mainloop_sigusr2_hook=mainloop_register_hook("ioncore_sigusr2_hook",

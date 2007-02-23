@@ -12,9 +12,10 @@
 #ifndef ION_IONCORE_EXEC_H
 #define ION_IONCORE_EXEC_H
 
+#include <libextl/extl.h>
+#include <libmainloop/hooks.h>
 #include "common.h"
 #include "rootwin.h"
-#include <libextl/extl.h>
 
 enum{
     IONCORE_SM_RESIGN,
@@ -24,11 +25,21 @@ enum{
     IONCORE_SM_SNAPSHOT
 };
 
-extern void ioncore_do_exec(const char *cmd);
-extern bool ioncore_exec_on_rootwin(WRootWin *rootwin, const char *cmd);
+
+INTRSTRUCT(WExecP);
+
+DECLSTRUCT(WExecP){
+    WRegion *target;
+    const char *cmd;
+    const char *wd;
+};
+
+
 extern bool ioncore_exec(const char *cmd);
-extern void ioncore_setup_environ(int scr);
+extern int ioncore_do_exec_on(WRegion *reg, const char *cmd, const char *wd,
+                              ExtlFn errh);
 extern bool ioncore_popen_bgread(const char *cmd, ExtlFn h, ExtlFn errh);
+extern void ioncore_setup_environ(const WExecP *p);
 
 extern bool ioncore_set_smhook(void (*fn)(int what));
 
@@ -43,5 +54,8 @@ extern void ioncore_do_restart();
 extern bool ioncore_do_snapshot();
 
 extern void ioncore_emergency_snapshot();
+
+/* const WExecP* parameter */
+extern WHook *ioncore_exec_environ_hook;
 
 #endif /* ION_IONCORE_EXEC_H */
