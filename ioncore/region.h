@@ -176,7 +176,6 @@ extern void region_detach_manager(WRegion *reg);
 
 extern WRegion *region_disposeroot(WRegion *reg);
 
-extern bool region_dispose_(WRegion *reg, bool not_simple);
 extern bool region_dispose(WRegion *reg);
 extern bool region_rqdispose(WRegion *reg);
 extern void region_defer_rqdispose(WRegion *reg);

@@ -973,7 +973,7 @@ static void menu_do_finish(WMenu *menu)
     
     if(!region_rqdispose((WRegion*)head)){
         if(head->submenu!=NULL)
-            region_dispose_((WRegion*)head->submenu, FALSE);
+            destroy_obj((Obj*)head->submenu);
     }
     
     if(ok)
