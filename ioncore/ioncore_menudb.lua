@@ -334,7 +334,7 @@ local function modeparts(mode)
 end
 
 
-local function get_ctxmenu(reg, sub, is_par)
+local function get_ctxmenu(reg, sub)
     local m={}
     
     local function cp(m2)
@@ -360,11 +360,7 @@ local function get_ctxmenu(reg, sub, is_par)
     
     local function add_ctxmenu(m2, use_label)
         if m2 then
-            if is_par then
-                m2=cp(m2)
-            end
-
-            m=table.icat(m, m2)
+            m=table.icat(m, cp(m2))
             m.label=(use_label and m2.label) or m.label
         end
     end
@@ -387,13 +383,14 @@ local function get_ctxmenu(reg, sub, is_par)
 end
 
 function menus.ctxmenu(reg, sub)
-    local m=get_ctxmenu(reg, sub, false);
+    local m=table.join(get_ctxmenu(sub, nil),
+                       get_ctxmenu(reg, sub));
     
     sub=reg
     reg=reg:manager()
     
     while reg do
-        local mm = get_ctxmenu(reg, sub, true)
+        local mm = get_ctxmenu(reg, sub)
         if #mm>0 then
             local nm=mm.label or obj_typename(reg)
             table.insert(m, ioncore.submenu(nm, mm))
