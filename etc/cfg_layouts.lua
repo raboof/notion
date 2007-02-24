@@ -2,6 +2,11 @@
 -- Layouts for Ion
 --
 
+--
+-- Helper routines and structures
+--
+
+-- Tiled frame template for the layouts below
 local a_frame = {
     type="WSplitRegion",
     regparams = {
@@ -10,46 +15,61 @@ local a_frame = {
     }
 }
 
+-- Helper function for generating splits for layouts
+local function mksplit(dir, tl, br, float)
+    return {
+        type = (float and "WSplitFloat" or "WSplitSplit"),
+        dir = dir,
+        tls = 1,
+        brs = 1,
+        tl = tl,
+        br = br,
+    }
+end
 
-local horizontally_split = {
-    -- Destroy workspace if the 'bottom' tiling is destroyed last
-    bottom_last_close = true,
-    -- Layout
-    managed = {
-        {
-            type = "WTiling",
-            bottom = true,
-            -- The default is a single 1:1 horizontal split
-            split_tree = {
-                type = "WSplitSplit",
-                dir = "horizontal",
-                tls = 1,
-                brs = 1,
-                tl = a_frame,
-                br = a_frame
+local function mktiling(split_tree)
+    return {
+        managed = {
+            {
+                type = "WTiling",
+                bottom = true, -- Make it the bottom of the group
+                split_tree = split_tree,
             }
-            -- For a single frame
-            --split_tree = nil
         }
     }
-}
+end
 
+--
+-- The layouts
+--
 
-local full_tiled = {
-    -- Destroy workspace if the 'bottom' tiling is destroyed last
-    bottom_last_close = true,
-    -- Layout
-    managed = {
-        {
-            type = "WTiling",
-            bottom = true,
-        }
-    }
-}
+-- Tiling with single 1:1 horizontal split
+ioncore.deflayout("hsplit", 
+    mktiling(mksplit("horizontal", a_frame, a_frame))
+)
 
+-- Tiling with single 1:1 vertical split
+ioncore.deflayout("vsplit",
+    mktiling(mksplit("vertical", a_frame, a_frame))
+)
 
--- Let the world know about them
+-- Tiling with single 1:1 floating horizontal split
+ioncore.deflayout("hfloat", 
+    mktiling(mksplit("horizontal", a_frame, a_frame, true))
+)
 
-ioncore.deflayout("default", horizontally_split)
-ioncore.deflayout("hsplit", horizontally_split)
-ioncore.deflayout("full", full_tiled)
+-- Tiling with single 1:1 floating vertical split
+ioncore.deflayout("vfloat", 
+    mktiling(mksplit("vertical", a_frame, a_frame, true))
+)
+
+-- Tiling with horizontal and then vertical splits
+ioncore.deflayout("2x2",
+    mktiling(mksplit("horizontal", 
+                     mksplit("vertical", a_frame, a_frame),
+                     mksplit("vertical", a_frame, a_frame))
+    )
+)
+
+-- Tiling with single full screen frame
+ioncore.deflayout("full", mktiling(a_frame))
