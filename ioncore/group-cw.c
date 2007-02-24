@@ -196,8 +196,6 @@ bool groupcw_init(WGroupCW *cwg, WWindow *parent, const WFitParams *fp)
     if(!group_init(&(cwg->grp), parent, fp))
         return FALSE;
     
-    cwg->grp.bottom_last_close=TRUE;
-
     region_add_bindmap((WRegion*)cwg, ioncore_groupcw_bindmap);
     
     return TRUE;

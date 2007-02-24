@@ -388,6 +388,7 @@ bool group_init(WGroup *ws, WWindow *par, const WFitParams *fp)
     ws->managed_stdisp=NULL;
     ws->bottom=NULL;
     ws->managed_list=NULL;
+    ws->bottom_last_close=TRUE;
     
     ws->dummywin=XCreateWindow(ioncore_g.dpy, par->win,
                                 fp->g.x, fp->g.y, 1, 1, 0,
@@ -1290,7 +1291,7 @@ void group_do_load(WGroup *ws, ExtlTab tab)
         extl_unref_table(substab);
     }
 
-    ws->bottom_last_close=extl_table_is_bool_set(tab, "bottom_last_close");
+    extl_table_gets_b(tab, "bottom_last_close", &ws->bottom_last_close);
 }
 
 

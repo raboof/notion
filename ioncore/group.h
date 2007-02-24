@@ -57,7 +57,7 @@ DECLCLASS(WGroup){
     WStacking *current_managed;
     WStacking *bottom;
     Window dummywin;
-    uint bottom_last_close:1;
+    bool bottom_last_close;
 };
 
 
