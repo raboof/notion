@@ -86,33 +86,6 @@ WRegion *create_region_load(WWindow *par, const WFitParams *fp,
     
     if(!extl_table_gets_s(tab, "type", &objclass))
         return NULL;
-        
-    /* Backwards compatibility hack. */
-    if(strcmp(objclass, "WFloatWS")==0){
-        objclass=scopy("WGroupWS");
-    }else if(strcmp(objclass, "WIonWS")==0){
-        WGroupWS *ws=create_groupws(par, fp);
-        if(ws!=NULL){
-            extl_table_gets_s(tab, "name", &name);
-            extl_table_sets_s(tab, "type", "WTiling");
-            extl_table_sets_b(tab, "bottom", TRUE);
-            extl_table_sets_b(tab, "bottom_last_close", TRUE);
-            extl_table_sets_i(tab, "sizepolicy", SIZEPOLICY_FULL_EXACT);
-            
-            if(name!=NULL)
-                region_set_name((WRegion*)ws, name);
-            
-            reg=group_attach_new((WGroup*)ws, tab);
-            
-            if(reg!=NULL)
-                return (WRegion*)ws;
-            
-            destroy_obj((Obj*)ws);
-        }
-        objclass=scopy("WTiling");
-    }else if(strcmp(objclass, "WFloatFrame")==0){
-        objclass=scopy("WFrame");
-    }
     
     if(objclass==NULL)
         return NULL;
