@@ -137,7 +137,8 @@ static void call_button(WBinding *binding, XButtonEvent *ev)
         return;
 
     p_curr_event=(XEvent*)ev;
-    extl_call(binding->func, "oo", NULL, p_reg, p_subreg);
+    extl_call(binding->func, "ooo", NULL, p_reg, p_subreg, 
+              (p_reg!=NULL ? p_reg->active_sub : NULL));
     p_curr_event=NULL;
 }
 

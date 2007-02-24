@@ -37,7 +37,7 @@ local function menu_(reg, sub, menu_or_name, fn, check)
         end
     end
 
-    menu=menudb.evalmenu(menu_or_name, {reg, sub})
+    menu=menudb.evalmenu(menu_or_name, reg, sub)
     
     return fn(reg, function(e) e.func(reg, sub) end, menu)
 end

@@ -63,21 +63,15 @@ function ioncore.getctxmenu(name)
     return menus["ctxmenu-"..name]
 end
 
-
-function ioncore.evalmenu(menu, args)
+function ioncore.evalmenu(menu, ...)
     if type(menu)=="string" then
-        return ioncore.evalmenu(menus[menu], args)
+        return ioncore.evalmenu(menus[menu], ...)
     elseif type(menu)=="function" then
-        if args then
-            return menu(unpack(args))
-        else
-            return menu()
-        end
+        return menu(...)
     elseif type(menu)=="table" then
         return menu
     end
 end
-
 
 --DOC
 -- Use this function to define normal menu entries. The string \var{name} 
@@ -106,7 +100,7 @@ function ioncore.submenu(name, sub_or_name, options)
     return {
         name=ioncore.gettext(name),
         submenu_fn=function()
-                       return ioncore.evalmenu(sub_or_name)
+                       return ioncore.evalmenu  (sub_or_name)
                    end,
         initial=options.initial,
         noautoexpand=options.noautoexpand,
@@ -382,21 +376,30 @@ local function get_ctxmenu(reg, sub)
     return m
 end
 
-function menus.ctxmenu(reg, sub)
-    local m=table.join(get_ctxmenu(sub, nil),
-                       get_ctxmenu(reg, sub));
+function menus.ctxmenu(reg, sub_or_chld)
+    local m, r, s
     
-    sub=reg
-    reg=reg:manager()
+    -- First, stuff between reg (inclusive) and sub_or_chld (inclusive)
+    -- at the top level in the menu.
+    r=(sub_or_chld or reg)
+    while r and s~=reg do
+        local mm=get_ctxmenu(r, s)
+        m=((m and table.icat(mm, m)) or mm)
+        s=r
+        r=r:manager()
+    end
     
-    while reg do
-        local mm = get_ctxmenu(reg, sub)
+    m=(m or {})
+    
+    -- Then stuff below reg (exclusive) as submenus
+    while r do
+        local mm = get_ctxmenu(r, s)
         if #mm>0 then
             local nm=mm.label or obj_typename(reg)
             table.insert(m, ioncore.submenu(nm, mm))
         end
-        sub=reg
-        reg=reg:manager()
+        s=r
+        r=r:manager()
     end
     
     return m

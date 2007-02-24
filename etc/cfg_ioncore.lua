@@ -65,7 +65,7 @@ defbindings("WScreen", {
     kpress(META.."F9", "ioncore.create_ws(_)"),
     
     bdoc("Display the main menu."),
-    kpress(ALTMETA.."F12", "mod_query.query_menu(_, 'mainmenu', 'Main menu:')"),
+    kpress(ALTMETA.."F12", "mod_query.query_menu(_, _sub, 'mainmenu', 'Main menu:')"),
     --kpress(ALTMETA.."F12", "mod_menu.menu(_, _sub, 'mainmenu', {big=true})"),
     mpress("Button3", "mod_menu.pmenu(_, _sub, 'mainmenu')"),
     
@@ -182,9 +182,8 @@ defbindings("WMPlex.toplevel", {
     kpress(META.."A", "mod_query.query_attachclient(_)"),
     
     bdoc("Display context menu."),
-    --kpress(META.."M", "mod_menu.menu(_, _sub, 'ctxmenu')"),
-    kpress(META.."M", "mod_query.query_menu(_, 'ctxmenu', 'Context menu:')"),
-
+    --kpress(META.."M", "mod_menu.menu(_, _chld, 'ctxmenu')"),
+    kpress(META.."M", "mod_query.query_menu(_, _chld, 'ctxmenu', 'Context menu:')"),
 })
 
 
@@ -201,7 +200,7 @@ defbindings("WFrame", {
     }),
     
     bdoc("Display context menu."),
-    mpress("Button3", "mod_menu.pmenu(_, _sub, 'ctxmenu')"),
+    mpress("Button3", "mod_menu.pmenu(_, _chld, 'ctxmenu')"),
     
     bdoc("Begin move/resize mode."),
     kpress(META.."R", "WFrame.begin_kbresize(_)"),
@@ -352,8 +351,6 @@ defmenu("sessionmenu", {
 -- Context menu (frame/client window actions)
 defctxmenu("WFrame", "Frame", {
     menuentry("Close",          "WRegion.rqclose_propagate(_, _sub)"),
-    menuentry("Kill",           "WClientWin.kill(_sub)",
-                                "_sub:WClientWin"),
     menuentry("De/reattach",    "ioncore.detach(_sub, 'toggle')", 
                                 "_sub:non-nil"),
     menuentry("Toggle tag",     "WRegion.set_tagged(_sub, 'toggle')",
@@ -370,3 +367,8 @@ defctxmenu("WGroupWS", "Workspace", {
     menuentry("Rename",         "mod_query.query_renameworkspace(nil, _)"),
 })
 
+
+-- Context menu for client windows
+defctxmenu("WClientWin", "Client window", {
+    menuentry("Kill",           "WClientWin.kill(_)"),
+})

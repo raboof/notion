@@ -1154,9 +1154,15 @@ end
 
 --DOC
 -- This query can be used to create a query of a defined menu.
-function mod_query.query_menu(mplex, themenu, prompt)
-    local _sub=mplex:current()
-    local menu=ioncore.evalmenu(themenu, {mplex, _sub})
+function mod_query.query_menu(mplex, sub, themenu, prompt)
+    if type(sub)=="string" then
+        -- Backwards compat. shift
+        prompt=themenu
+        themenu=sub
+        sub=nil
+    end
+    
+    local menu=ioncore.evalmenu(themenu, mplex, sub)
     local menuname=(type(themenu)=="string" and themenu or "?")
     
     if not menu then
