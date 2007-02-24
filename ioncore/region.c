@@ -423,6 +423,20 @@ WRegion *region_rqclose_propagate(WRegion *reg, WRegion *maybe_sub)
 }
 
 
+bool region_may_dispose_default(WRegion *reg)
+{
+    bool res=region_rescue_needed(reg);
+    
+    if(res){
+        const char *name=region_name(reg);
+        warn(TR("Can not destroy %s: contains client windows."),
+             (name!=NULL ? name : TR("(unknown)")));
+    }
+    
+    return !res;
+}
+
+
 bool region_may_dispose(WRegion *reg)
 {
     bool ret=TRUE;
@@ -932,6 +946,9 @@ static DynFunTab region_dynfuntab[]={
     
     {(DynFun*)region_rescue_clientwins,
      (DynFun*)region_rescue_child_clientwins},
+     
+    {(DynFun*)region_may_dispose,
+     (DynFun*)region_may_dispose_default},
 
     {(DynFun*)region_prepare_manage,
      (DynFun*)region_prepare_manage_default},

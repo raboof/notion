@@ -325,6 +325,7 @@ DECLSTRUCT(WRescueInfo){
     WPHolder *ph;
     WRegion *get_rescue;
     bool failed_get;
+    bool test;
 };
 
 
@@ -370,6 +371,9 @@ bool region_rescue_some_clientwins(WRegion *reg, WRescueInfo *info,
                 if(info->failed_get)
                     break;
             }
+        }else if(info->test){
+            fails++;
+            break;
         }else if(!(cwin->flags&CLIENTWIN_UNMAP_RQ)){
             if(info->ph==NULL){
                 info->ph=region_get_rescue_pholder(info->get_rescue);
@@ -403,6 +407,7 @@ bool region_rescue(WRegion *reg)
     bool ret;
     
     info.ph=NULL;
+    info.test=FALSE;
     info.get_rescue=reg;
     info.failed_get=FALSE;
     
@@ -412,6 +417,19 @@ bool region_rescue(WRegion *reg)
         destroy_obj((Obj*)info.ph);
     
     return ret;
+}
+
+
+bool region_rescue_needed(WRegion *reg)
+{
+    WRescueInfo info;
+    
+    info.ph=NULL;
+    info.test=TRUE;
+    info.get_rescue=reg;
+    info.failed_get=FALSE;
+    
+    return !region_rescue_clientwins(reg, &info);
 }
 
 
