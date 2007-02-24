@@ -37,7 +37,7 @@ extern WInfoWin *create_infowin(WWindow *parent, const WFitParams *fp,
 
 extern void infowin_deinit(WInfoWin *p);
 
-extern void infowin_set_text(WInfoWin *p, const char *s);
+extern void infowin_set_text(WInfoWin *p, const char *s, int maxw);
 extern GrStyleSpec *infowin_stylespec(WInfoWin *p);
 
 extern WRegion *infowin_load(WWindow *par, const WFitParams *fp, ExtlTab tab);

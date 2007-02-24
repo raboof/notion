@@ -19,6 +19,7 @@
 #include "resize.h"
 #include "gr.h"
 #include "event.h"
+#include "strings.h"
 
 
 /*{{{ Init/deinit */
@@ -198,9 +199,21 @@ static void infowin_resize(WInfoWin *p)
  * Set contents of the info window.
  */
 EXTL_EXPORT_MEMBER
-void infowin_set_text(WInfoWin *p, const char *str)
+void infowin_set_text(WInfoWin *p, const char *str, int maxw)
 {
-    infowin_do_set_text(p, str);
+    bool set=FALSE;
+    
+    if(maxw>0 && p->brush!=NULL){
+        char *tmp=grbrush_make_label(p->brush, str, maxw);
+        if(tmp!=NULL){
+            infowin_do_set_text(p, tmp);
+            free(tmp);
+            set=TRUE;
+        }
+    }
+    
+    if(!set)
+        infowin_do_set_text(p, str);
 
     infowin_resize(p);
     
