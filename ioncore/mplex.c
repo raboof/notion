@@ -1265,15 +1265,6 @@ static void get_params(WMPlex *mplex, ExtlTab tab, int mask,
     int tmp;
     int ok=~mask;
     
-    if(mask==0 && extl_table_gets_i(tab, "layer", &tmp)){
-        /* backwards compatibility. No need to consider masked cases */
-        if(tmp==2){
-            par->flags|=MPLEX_ATTACH_UNNUMBERED;
-            if(!extl_table_is_bool_set(tab, "passive"))
-                par->flags|=MPLEX_ATTACH_MODAL;
-        }
-    }
-
     if(extl_table_gets_i(tab, "level", &tmp)){
         if(tmp>=0 && ok&MPLEX_ATTACH_LEVEL){
             par->flags|=MPLEX_ATTACH_LEVEL;
