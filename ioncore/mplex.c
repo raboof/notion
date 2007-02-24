@@ -158,17 +158,6 @@ void mplex_deinit(WMPlex *mplex)
 }
 
 
-bool mplex_may_dispose(WMPlex *mplex)
-{
-    if(mplex->mgd!=NULL){
-        warn(TR("Refusing to destroy - not empty."));
-        return FALSE;
-    }
-    
-    return TRUE;
-}
-
-
 /*}}}*/
 
 
@@ -2077,9 +2066,6 @@ static DynFunTab mplex_dynfuntab[]={
     {(DynFun*)region_get_rescue_pholder_for,
      (DynFun*)mplex_get_rescue_pholder_for},
 
-    {(DynFun*)region_may_dispose,
-     (DynFun*)mplex_may_dispose},
-    
     {(DynFun*)region_navi_first,
      (DynFun*)mplex_navi_first},
     

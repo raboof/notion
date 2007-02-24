@@ -1155,18 +1155,6 @@ static void dock_deinit(WDock *dock)
 }
 
 
-bool dock_may_dispose(WDock *dock)
-{
-    if(dock->dockapps!=NULL){
-        warn_obj(modname, "Dock \"%s\" is still managing other objects "
-                " -- refusing to close.", region_name((WRegion*)dock));
-        return FALSE;
-    }
-
-    return TRUE;
-}
-
-
 EXTL_EXPORT
 WDock *mod_dock_create(ExtlTab tab)
 {
@@ -1683,7 +1671,6 @@ static DynFunTab dock_dynfuntab[]={
     {region_size_hints, dock_size_hints},
     {(DynFun*)region_fitrep, (DynFun*)dock_fitrep},
     {(DynFun*)region_orientation, (DynFun*)dock_orientation},
-    {(DynFun*)region_may_dispose, (DynFun*)dock_may_dispose},
     {(DynFun*)region_handle_drop, (DynFun*)dock_handle_drop},
 
     {(DynFun*)region_managed_get_pholder,

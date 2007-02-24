@@ -661,22 +661,6 @@ WRegion *tiling_managed_disposeroot(WTiling *ws, WRegion *reg)
 }
 
 
-bool tiling_may_dispose(WTiling *ws, WRegion *reg)
-{
-    WTilingIterTmp tmp;
-    WRegion *mgd;
-    
-    FOR_ALL_MANAGED_BY_TILING(mgd, ws, tmp){
-        if(mgd!=STDISP_OF(ws)){
-            warn(TR("Workspace not empty - refusing to destroy."));
-            return FALSE;
-        }
-    }
-    
-    return TRUE;
-}
-
-
 bool tiling_rescue_clientwins(WTiling *ws, WRescueInfo *info)
 {
     WTilingIterTmp tmp;
@@ -1728,9 +1712,6 @@ static DynFunTab tiling_dynfuntab[]={
 
     {(DynFun*)region_managed_disposeroot,
      (DynFun*)tiling_managed_disposeroot},
-
-    {(DynFun*)region_may_dispose,
-     (DynFun*)tiling_may_dispose},
 
     {(DynFun*)region_current,
      (DynFun*)tiling_current},
