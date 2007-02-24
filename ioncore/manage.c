@@ -401,19 +401,19 @@ bool region_rescue_clientwins(WRegion *reg, WRescueInfo *info)
 }
 
 
-bool region_rescue(WRegion *reg)
+bool region_rescue(WRegion *reg, WPHolder *ph_param)
 {
     WRescueInfo info;
     bool ret;
     
-    info.ph=NULL;
+    info.ph=ph_param;
     info.test=FALSE;
     info.get_rescue=reg;
     info.failed_get=FALSE;
     
     ret=region_rescue_clientwins(reg, &info);
     
-    if(info.ph!=NULL)
+    if(info.ph!=ph_param)
         destroy_obj((Obj*)info.ph);
     
     return ret;

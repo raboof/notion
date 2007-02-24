@@ -492,7 +492,7 @@ bool region_dispose_(WRegion *reg, bool not_simple)
     WPHolder *ph=NULL;
     
     if(rescue){
-        if(!region_rescue(reg)){
+        if(!region_rescue(reg, NULL)){
             warn(TR("Failed to rescue some client windows - not closing."));
             return FALSE;
         }
