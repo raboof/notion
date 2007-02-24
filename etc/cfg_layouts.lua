@@ -44,9 +44,9 @@ end
 --
 
 -- Tiling with single 1:1 horizontal split
-ioncore.deflayout("hsplit", 
-    mktiling(mksplit("horizontal", a_frame, a_frame))
-)
+local tmp=mktiling(mksplit("horizontal", a_frame, a_frame))
+ioncore.deflayout("hsplit", tmp)
+ioncore.deflayout("default", tmp)
 
 -- Tiling with single 1:1 vertical split
 ioncore.deflayout("vsplit",
