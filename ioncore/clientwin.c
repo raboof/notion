@@ -529,13 +529,15 @@ again:
 
     param.geom=REGION_GEOM(cwin);
     param.maprq=maprq;
-    param.userpos=(cwin->size_hints.flags&USPosition);
     param.switchto=(init_state!=IconicState && clientwin_get_switchto(cwin));
     param.jumpto=extl_table_is_bool_set(cwin->proptab, "jumpto");
     param.gravity=(cwin->size_hints.flags&PWinGravity
                    ? cwin->size_hints.win_gravity
                    : ForgetGravity);
     param.tfor=clientwin_get_transient_for(cwin);
+    
+    if(!extl_table_gets_b(cwin->proptab, "userpos", &param.userpos))
+        param.userpos=(cwin->size_hints.flags&USPosition);
     
     if(cwin->flags&SIZEHINT_PROPS){
         /* If size hints have been messed with, readjust requested geometry
