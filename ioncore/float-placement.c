@@ -34,18 +34,34 @@ static void ggeom(WRegion *reg, WRectangle *geom)
 }
 
 
+static bool st_filt(WStacking *st, void *lvl)
+{
+    uint level=*(uint*)lvl;
+    
+    return (st->reg!=NULL && 
+            REGION_IS_MAPPED(st->reg) && 
+            st->level==level);
+}
+
+
+#define FOR_ALL_STACKING_NODES(VAR, WS, LVL, TMP)          \
+    for(stacking_iter_init(&(TMP), group_get_stacking(ws), \
+                          st_filt, &LVL),                  \
+        VAR=stacking_iter_nodes(&(TMP));                   \
+        VAR!=NULL;                                         \
+        VAR=stacking_iter_nodes(&(TMP)))
+
+
 #define IGNORE_ST(ST, WS) ((ST)->reg==NULL || (ST)==(WS)->bottom)
 
-static WRegion* is_occupied(WGroup *ws, const WRectangle *r)
+
+static WRegion* is_occupied(WGroup *ws, uint level, const WRectangle *r)
 {
-    WGroupIterTmp tmp;
+    WStackingIterTmp tmp;
     WStacking *st;
     WRectangle p;
     
-    FOR_ALL_NODES_IN_GROUP(ws, st, tmp){
-        if(IGNORE_ST(st, ws))
-            continue;
-        
+    FOR_ALL_STACKING_NODES(st, ws, level, tmp){
         ggeom(st->reg, &p);
         
         if(r->x>=p.x+p.w)
@@ -63,17 +79,14 @@ static WRegion* is_occupied(WGroup *ws, const WRectangle *r)
 }
 
 
-static int next_least_x(WGroup *ws, int x)
+static int next_least_x(WGroup *ws, uint level, int x)
 {
     WRectangle p;
     int retx=REGION_GEOM(ws).x+REGION_GEOM(ws).w;
-    WGroupIterTmp tmp;
+    WStackingIterTmp tmp;
     WStacking *st;
     
-    FOR_ALL_NODES_IN_GROUP(ws, st, tmp){
-        if(IGNORE_ST(st, ws))
-            continue;
-        
+    FOR_ALL_STACKING_NODES(st, ws, level, tmp){
         ggeom(st->reg, &p);
         
         if(p.x+p.w>x && p.x+p.w<retx)
@@ -84,17 +97,15 @@ static int next_least_x(WGroup *ws, int x)
 }
 
 
-static int next_lowest_y(WGroup *ws, int y)
+
+static int next_lowest_y(WGroup *ws, uint level, int y)
 {
     WRectangle p;
     int rety=REGION_GEOM(ws).y+REGION_GEOM(ws).h;
-    WGroupIterTmp tmp;
+    WStackingIterTmp tmp;
     WStacking *st;
     
-    FOR_ALL_NODES_IN_GROUP(ws, st, tmp){
-        if(IGNORE_ST(st, ws))
-            continue;
-        
+    FOR_ALL_STACKING_NODES(st, ws, level, tmp){
         ggeom(st->reg, &p);
         
         if(p.y+p.h>y && p.y+p.h<rety)
@@ -105,7 +116,7 @@ static int next_lowest_y(WGroup *ws, int y)
 }
 
 
-static bool tiling_placement(WGroup *ws, WRectangle *g)
+static bool tiling_placement(WGroup *ws, uint level, WRectangle *g)
 {
     WRegion *p;
     WRectangle r, r2;
@@ -120,35 +131,35 @@ static bool tiling_placement(WGroup *ws, WRectangle *g)
     
     if(ioncore_placement_method==PLACEMENT_UDLR){
         while(r.x<maxx){
-            p=is_occupied(ws, &r);
+            p=is_occupied(ws, level, &r);
             while(p!=NULL && r.y+r.h<maxy){
                 ggeom(p, &r2);
                 r.y=r2.y+r2.h+1;
-                p=is_occupied(ws, &r);
+                p=is_occupied(ws, level, &r);
             }
             if(r.y+r.h<maxy && r.x+r.w<maxx){
                 g->x=r.x;
                 g->y=r.y;
                 return TRUE;
             }else{
-                r.x=next_least_x(ws, r.x);
+                r.x=next_least_x(ws, level, r.x);
                 r.y=0;
             }
         }
     }else{
         while(r.y<maxy){
-            p=is_occupied(ws, &r);
+            p=is_occupied(ws, level, &r);
             while(p!=NULL && r.x+r.w<maxx){
                 ggeom(p, &r2);
                 r.x=r2.x+r2.w+1;
-                p=is_occupied(ws, &r);
+                p=is_occupied(ws, level, &r);
             }
             if(r.y+r.h<maxy && r.x+r.w<maxx){
                 g->x=r.x;
                 g->y=r.y;
                 return TRUE;
             }else{
-                r.y=next_lowest_y(ws, r.y);
+                r.y=next_lowest_y(ws, level, r.y);
                 r.x=0;
             }
         }
@@ -159,10 +170,10 @@ static bool tiling_placement(WGroup *ws, WRectangle *g)
 }
 
 
-void group_calc_placement(WGroup *ws, WRectangle *geom)
+void group_calc_placement(WGroup *ws, uint level, WRectangle *geom)
 {
     if(ioncore_placement_method!=PLACEMENT_RANDOM){
-        if(tiling_placement(ws, geom))
+        if(tiling_placement(ws, level, geom))
             return;
     }
     random_placement(REGION_GEOM(ws), geom);

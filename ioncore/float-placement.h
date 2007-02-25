@@ -22,6 +22,7 @@ typedef enum{
 
 extern WFloatPlacement ioncore_placement_method;
 
-extern void group_calc_placement(WGroup *ws, WRectangle *geom);
+extern void group_calc_placement(WGroup *ws, uint level, 
+                                 WRectangle *geom);
 
 #endif /* ION_IONCORE_FLOAT_PLACEMENT_H */

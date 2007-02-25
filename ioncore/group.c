@@ -565,6 +565,16 @@ bool group_do_attach_final(WGroup *ws,
     int weak;
     bool sw;
     
+    /* Stacking  */
+    if(param->stack_above!=NULL)
+        stabove=group_find_stacking(ws, param->stack_above);
+
+    level=(stabove!=NULL
+           ? stabove->level
+           : (param->level_set 
+              ? param->level 
+              : STACKING_LEVEL_NORMAL));
+    
     /* Fit */
     szplcy=(param->szplcy_set
             ? param->szplcy
@@ -601,7 +611,7 @@ bool group_do_attach_final(WGroup *ws,
          szplcy==SIZEPOLICY_FREE ||
          szplcy==SIZEPOLICY_FREE_GLUE /* without flags */)){
         /* TODO: use 'weak'? */
-        group_calc_placement(ws, &g);
+        group_calc_placement(ws, level, &g);
     }
 
     fp.g=REGION_GEOM(ws);
@@ -612,16 +622,7 @@ bool group_do_attach_final(WGroup *ws,
     if(rectangle_compare(&fp.g, &REGION_GEOM(reg))!=RECTANGLE_SAME)
         region_fitrep(reg, NULL, &fp);
     
-    /* Stacking & add */
-    if(param->stack_above!=NULL)
-        stabove=group_find_stacking(ws, param->stack_above);
-
-    level=(stabove!=NULL
-           ? stabove->level
-           : (param->level_set 
-              ? param->level 
-              : STACKING_LEVEL_NORMAL));
-
+    /* Add */
     st=group_do_add_managed(ws, reg, level, szplcy);
     
     if(st==NULL)
