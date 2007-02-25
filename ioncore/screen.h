@@ -64,11 +64,6 @@ extern void screen_set_managed_offset(WScreen *scr, const WRectangle *off);
 
 extern bool screen_init_layout(WScreen *scr, ExtlTab tab);
 
-extern void screen_notify(WScreen *scr, const char *notstr);
-extern void screen_unnotify(WScreen *scr);
-extern void screen_windowinfo(WScreen *scr, const char *name);
-extern void screen_nowindowinfo(WScreen *scr);
-
 extern WPHolder *screen_get_rescue_pholder_for(WScreen *scr, WRegion *mgd);
 
 extern WScreen *ioncore_find_screen_id(int id);
