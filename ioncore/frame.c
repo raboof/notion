@@ -137,6 +137,7 @@ static void frame_add_mode_bindmaps(WFrame *frame)
         region_add_bindmap((WRegion*)frame, ioncore_frame_floating_bindmap);
     }else if(mode==FRAME_MODE_TRANSIENT){
         region_add_bindmap((WRegion*)frame, ioncore_frame_transient_bindmap);
+        region_add_bindmap((WRegion*)frame, ioncore_frame_floating_bindmap);
     }else{
         /* mode==FRAME_MODE_TILED || mode==FRAME_MODE_TILED_ALT || mode==FRAME_MODE_UNKNOWN */
 	region_add_bindmap((WRegion*)frame, ioncore_mplex_toplevel_bindmap);
