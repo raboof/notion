@@ -459,24 +459,12 @@ function mod_query.attachclient_handler(frame, str)
         return
     end
     
-    local reg=cwin:manager()
-    local attach
+    local reg=cwin:groupleader_of()
     
-    if not obj_is(reg, "WGroupCW") then
-        reg = cwin
-        attach = function()
-                     frame:attach_new {
-                         type = "WGroupCW", 
-                         switchto = true,
-                         managed = {{ reg = cwin, bottom = true }}
-                     }
-                 end
-    else
-        attach = function()
-                     frame:attach(reg, { switchto = true })
-                 end
+    local function attach()
+        frame:attach(reg, { switchto = true })
     end
-        
+    
     if frame:rootwin_of()~=reg:rootwin_of() then
         mod_query.warn(frame, TR("Cannot attach: different root windows."))
     elseif reg:manager()==frame then
