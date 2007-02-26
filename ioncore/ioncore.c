@@ -57,6 +57,8 @@
 #include "group-ws.h"
 #include "llist.h"
 #include "exec.h"
+#include "screen-notify.h"
+
 
 #include "../version.h"
 #include "exports.h"
@@ -254,12 +256,12 @@ static bool init_messages(const char *localedir)
 
 #define INIT_HOOK_(NM)                             \
     NM=mainloop_register_hook(#NM, create_hook()); \
-    if(NM==NULL) return FALSE;
+    if(NM==NULL) return FALSE
 
-#define INIT_HOOK(NM, DFLT)                           \
-    INIT_HOOK_(NM)                                    \
-    if(!hook_add(NM, (void (*)())DFLT)) return FALSE;
+#define ADD_HOOK_(NM, FN)                          \
+    if(!hook_add(NM, (void (*)())FN)) return FALSE
 
+#define INIT_HOOK(NM, DFLT) INIT_HOOK_(NM); ADD_HOOK_(NM, DFLT)
 
 static bool init_hooks()
 {
@@ -272,7 +274,10 @@ static bool init_hooks()
     INIT_HOOK_(clientwin_unmapped_hook);
     INIT_HOOK_(clientwin_property_change_hook);
     
-    INIT_HOOK(region_notify_hook, ioncore_frame_quasiactivation_notify);
+    INIT_HOOK_(region_notify_hook);
+    ADD_HOOK_(region_notify_hook, ioncore_frame_quasiactivation_notify);
+    ADD_HOOK_(region_notify_hook, ioncore_screen_activity_notify);
+    
     INIT_HOOK(clientwin_do_manage_alt, clientwin_do_manage_default);
     INIT_HOOK(ioncore_handle_event_alt, ioncore_handle_event);
     INIT_HOOK(region_do_warp_alt, region_do_warp_default);

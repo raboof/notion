@@ -9,6 +9,9 @@
  * (at your option) any later version.
  */
 
+#include <string.h>
+
+#include <libtu/minmax.h>
 #include <libmainloop/defer.h>
 
 #include "common.h"
@@ -22,10 +25,14 @@
 #include "names.h"
 #include "screen.h"
 #include "screen-notify.h"
+#include "strings.h"
 
 
-static void do_notify(WScreen *scr, Watch *watch, bool right,
-                      const char *str, char *style)
+/*{{{ Generic stuff */
+
+
+static WInfoWin *do_get_notifywin(WScreen *scr, Watch *watch, bool right,
+                                  char *style)
 {
 
     WInfoWin *iw=(WInfoWin*)(watch->obj);
@@ -56,101 +63,192 @@ static void do_notify(WScreen *scr, Watch *watch, bool right,
                                           (WRegionCreateFn*)create_infowin, 
                                           style);
         
-        if(iw==NULL)
-            return;
-
-        watch_setup(watch, (Obj*)iw, NULL);
+        if(iw!=NULL)
+            watch_setup(watch, (Obj*)iw, NULL);
     }
+    
+    return iw;
+}
 
-    infowin_set_text(iw, str);
+
+static void do_unnotify(Watch *watch)
+{    
+    Obj *iw=watch->obj;
+    if(iw!=NULL){
+        watch_reset(watch);
+        mainloop_defer_destroy((Obj*)iw);
+    }
+}
+
+
+/*}}}*/
+
+
+/*{{{ Notifywin */
+
+
+static WInfoWin *get_notifywin(WScreen *scr)
+{
+    return do_get_notifywin(scr, &scr->notifywin_watch, FALSE, "actnotify");
 }
 
 
 void screen_notify(WScreen *scr, const char *str)
 {
-    do_notify(scr, &scr->notifywin_watch, FALSE, str, "actnotify");
-}
-
-
-void screen_windowinfo(WScreen *scr, const char *str)
-{
-    do_notify(scr, &scr->infowin_watch, TRUE, str, "tab-info");
+    WInfoWin *iw=get_notifywin(scr);
+    
+    if(iw!=NULL){
+        int maxw=REGION_GEOM(scr).w/3;
+        infowin_set_text(iw, str, maxw);
+    }
 }
 
 
 void screen_unnotify(WScreen *scr)
 {
-    Obj *iw=scr->notifywin_watch.obj;
+    do_unnotify(&scr->notifywin_watch);
+}
+
+
+static bool ws_mapped(WScreen *scr, WRegion *reg)
+{
+    while(1){
+        WRegion *mgr=REGION_MANAGER(reg);
+        
+        if(mgr==NULL)
+            return FALSE;
+        
+        if(mgr==(WRegion*)scr)
+            return REGION_IS_MAPPED(reg);
+        
+        reg=mgr;
+    }
+}
+
+
+static void screen_managed_activity(WScreen *scr)
+{
+    char *notstr=NULL;
+    WRegion *reg;
+    ObjListIterTmp tmp;
+    PtrListIterTmp tmp2;
+    ObjList *actlist=ioncore_activity_list();
+    WInfoWin *iw=NULL;
+    PtrList *found=NULL;
+    int nfound=0, nadded=0;
+    int w=0, maxw=REGION_GEOM(scr).w/4;
+    
+    /* Lisäksi minimipituus (10ex tms.), ja sen yli menevät jätetään
+     * pois (+ n) 
+     */
+    FOR_ALL_ON_OBJLIST(WRegion*, reg, actlist, tmp){
+        if(region_screen_of(reg)!=scr || ws_mapped(scr, reg))
+            continue;
+        if(region_name(reg)==NULL)
+            continue;
+        if(ptrlist_insert_last(&found, reg))
+            nfound++;
+    }
+    
+    if(found==NULL)
+        goto unnotify;
+    
+    iw=get_notifywin(scr);
+    
+    if(iw==NULL)
+        return;
+        
+    if(iw->brush==NULL)
+        goto unnotify;
+    
+    notstr=scopy(TR("act: "));
+    
+    if(notstr==NULL)
+        goto unnotify;
+    
+    FOR_ALL_ON_PTRLIST(WRegion*, reg, found, tmp2){
+        const char *nm=region_name(reg);
+        char *nstr=NULL, *label=NULL;
+        
+        w=grbrush_get_text_width(iw->brush, notstr, strlen(notstr));
+
+        if(w>=maxw)
+            break;
+        
+        label=grbrush_make_label(iw->brush, nm, maxw-w);
+        if(label!=NULL){
+            nstr=(nadded>0
+                  ? scat3(notstr, ", ", label)
+                  : scat(notstr, label));
+            
+            if(nstr!=NULL){
+                free(notstr);
+                notstr=nstr;
+                nadded++;
+            }
+            free(label);
+        }
+    }
+    
+    if(nfound > nadded){
+        char *nstr=NULL;
+        
+        libtu_asprintf(&nstr, "%s  +%d", notstr, nfound-nadded);
+        
+        if(nstr!=NULL){
+            free(notstr);
+            notstr=nstr;
+        }
+    }
+    
+    ptrlist_clear(&found);
+    
+    infowin_set_text(iw, notstr, 0);
+    
+    free(notstr);
+    
+    return;
+
+unnotify:    
+    screen_unnotify(scr);
+}
+
+
+void screen_update_notifywin(WScreen *scr)
+{
+    if(ioncore_g.screen_notify)
+        screen_managed_activity(scr);
+    else
+        screen_unnotify(scr);
+}
+
+
+/*}}}*/
+
+
+/*{{{ Infowin */
+
+
+static WInfoWin *get_infowin(WScreen *scr)
+{
+    return do_get_notifywin(scr, &scr->infowin_watch, TRUE, "tab-info");
+}
+
+
+void screen_windowinfo(WScreen *scr, const char *str)
+{
+    WInfoWin *iw=get_infowin(scr);
+    
     if(iw!=NULL){
-        watch_reset(&(scr->notifywin_watch));
-        mainloop_defer_destroy((Obj*)iw);
+        int maxw=REGION_GEOM(scr).w/3;
+        infowin_set_text(iw, str, maxw);
     }
 }
 
 
 void screen_nowindowinfo(WScreen *scr)
 {
-    Obj *iw=scr->infowin_watch.obj;
-    if(iw!=NULL){
-        watch_reset(&(scr->infowin_watch));
-        mainloop_defer_destroy((Obj*)iw);
-    }
-}
-
-
-static char *addnot(char *str, WRegion *reg)
-{
-    const char *nm=region_name(reg);
-    char *nstr=NULL;
-    
-    if(nm==NULL)
-        return str;
-    
-    if(str==NULL)
-        return scat(TR("act: "), nm);
-
-    nstr=scat3(str, ", ", nm);
-    if(nstr!=NULL)
-        free(str);
-    return nstr;
-}
-
-
-static char *screen_managed_activity(WScreen *scr)
-{
-    char *notstr=NULL;
-    WMPlexIterTmp tmp;
-    WRegion *reg;
-    
-    FOR_ALL_MANAGED_BY_MPLEX(&scr->mplex, reg, tmp){
-        if(region_is_activity_r(reg) && !REGION_IS_MAPPED(reg))
-            notstr=addnot(notstr, reg);
-    }
-    
-    return notstr;
-}
-
-
-static void screen_notify_activity(WScreen *scr)
-{
-    if(ioncore_g.screen_notify){
-        char *notstr=screen_managed_activity(scr);
-        if(notstr!=NULL){
-            screen_notify(scr, notstr);
-            free(notstr);
-            return;
-        }
-    }
-
-    screen_unnotify(scr);
-    
-    screen_update_infowin(scr);
-}
-
-
-static void screen_notify_tag(WScreen *scr)
-{
-    screen_update_infowin(scr);
+    do_unnotify(&scr->infowin_watch);
 }
 
 
@@ -214,16 +312,33 @@ void screen_update_infowin(WScreen *scr)
 }
 
 
+/*}}}*/
+
+
+/*{{{ Notification callbacks */
+
+
 void screen_managed_notify(WScreen *scr, WRegion *reg, WRegionNotify how)
 {
-    if(how==ioncore_g.notifies.sub_activity){
-        /* TODO: multiple calls */
+    if(how==ioncore_g.notifies.tag){
         mainloop_defer_action((Obj*)scr, 
-                              (WDeferredAction*)screen_notify_activity);
-    }else if(how==ioncore_g.notifies.tag){
-        mainloop_defer_action((Obj*)scr, 
-                              (WDeferredAction*)screen_notify_tag);
+                              (WDeferredAction*)screen_update_infowin);
     }
 }
 
+
+void ioncore_screen_activity_notify(WRegion *reg, WRegionNotify how)
+{
+    if(how==ioncore_g.notifies.activity){
+        WScreen *scr=region_screen_of(reg);
+        /* TODO: multiple calls */
+        mainloop_defer_action((Obj*)scr, 
+                              (WDeferredAction*)screen_update_notifywin);
+        mainloop_defer_action((Obj*)scr, 
+                              (WDeferredAction*)screen_update_infowin);
+    }
+}
+
+
+/*}}}*/
 

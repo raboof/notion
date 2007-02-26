@@ -20,10 +20,8 @@
 void screen_managed_notify(WScreen *scr, WRegion *reg, WRegionNotify how);
 
 void screen_update_infowin(WScreen *scr);
+void screen_update_notifywin(WScreen *scr);
 
-extern void screen_notify(WScreen *scr, const char *notstr);
-extern void screen_unnotify(WScreen *scr);
-extern void screen_windowinfo(WScreen *scr, const char *name);
-extern void screen_nowindowinfo(WScreen *scr);
+extern void ioncore_screen_activity_notify(WRegion *reg, WRegionNotify how);
 
 #endif /* ION_IONCORE_SCREEN_NOTIFY_H */

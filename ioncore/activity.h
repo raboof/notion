@@ -27,5 +27,6 @@ extern void region_clear_mgd_activity(WRegion *mgr);
 extern bool ioncore_activity_i(ExtlFn fn);
 extern WRegion *ioncore_activity_first();
 extern bool ioncore_goto_activity();
+extern ObjList *ioncore_activity_list();
 
 #endif /* ION_IONCORE_ACTIVITY_H */

@@ -36,6 +36,7 @@
 #include "group-ws.h"
 #include "mplex.h"
 #include "conf.h"
+#include "activity.h"
 #include "screen-notify.h"
 
 
@@ -213,6 +214,9 @@ static void screen_managed_changed(WScreen *scr, int mode, bool sw,
                                     scr->atom_workspace, 
                                     n==NULL ? "" : n);
     }
+    
+    if(region_is_activity_r((WRegion*)scr))
+        screen_update_notifywin(scr);
     
     screen_update_infowin(scr);
     

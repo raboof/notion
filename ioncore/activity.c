@@ -149,6 +149,12 @@ WRegion *ioncore_activity_first()
 }
 
 
+ObjList *ioncore_activity_list()
+{
+    return actlist;
+}
+
+
 /*EXTL_DOC
  * Go to first region on activity list.
  */
