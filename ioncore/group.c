@@ -1143,6 +1143,7 @@ bool group_managed_rqorder(WGroup *grp, WRegion *reg, WRegionOrder order)
 /*EXTL_DOC
  * Returns the 'bottom' of \var{ws}.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WRegion *group_bottom(WGroup *ws)
 {
