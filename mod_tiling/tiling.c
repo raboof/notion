@@ -694,6 +694,7 @@ static bool nostdispfilter(WSplit *node)
 void tiling_managed_remove(WTiling *ws, WRegion *reg)
 {
     bool act=REGION_IS_ACTIVE(reg);
+    bool mcf=region_may_control_focus((WRegion*)ws);
     WSplitRegion *node=get_node_check(ws, reg);
     bool ds=OBJ_IS_BEING_DESTROYED(ws);
     WRegion *other;
@@ -732,10 +733,8 @@ void tiling_managed_remove(WTiling *ws, WRegion *reg)
             splittree_remove((WSplit*)node, (!ds && other!=NULL));
     }
     
-    if(!OBJ_IS_BEING_DESTROYED(ws) && other!=NULL){
-        if(act && region_may_control_focus((WRegion*)ws))
-            region_warp(other);
-    }
+    if(!OBJ_IS_BEING_DESTROYED(ws) && other!=NULL && act && mcf)
+        region_warp(other);
 }
 
 
