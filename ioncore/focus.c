@@ -457,6 +457,9 @@ void region_pointer_focus_hack(WRegion *reg)
     if(ioncore_g.opmode!=IONCORE_OPMODE_NORMAL)
         return;
     
+    if(ioncore_g.focus_next!=NULL)
+        return;
+    
     if(!REGION_IS_ACTIVE(reg) && act==NULL)
         act=ioncore_g.focus_current;
     
