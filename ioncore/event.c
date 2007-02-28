@@ -172,48 +172,29 @@ static void skip_enterwindow()
 }
 
 
-static void skip_focusenter()
+void ioncore_flushfocus()
 {
-    XEvent ev;
+    WRegion *next;
+    bool warp;
     
-    XSync(ioncore_g.dpy, False);
-
-    while(XCheckMaskEvent(ioncore_g.dpy,
-                          EnterWindowMask|FocusChangeMask, &ev)){
-        ioncore_update_timestamp(&ev);
-        if(ev.type==FocusOut)
-            ioncore_handle_focus_out(&(ev.xfocus));
-        else if(ev.type==FocusIn)
-            ioncore_handle_focus_in(&(ev.xfocus), TRUE);
-        /*else if(ev.type==EnterNotify)
-            handle_enter_window(&ev);*/
-    }
-}
-
-
-void ioncore_flush()
-{
-
-    if(ioncore_g.focus_next!=NULL && 
-       ioncore_g.input_mode==IONCORE_INPUTMODE_NORMAL){
-        bool warp=ioncore_g.warp_next;
-        WRegion *next=ioncore_g.focus_next;
+    if(ioncore_g.input_mode!=IONCORE_INPUTMODE_NORMAL)
+        return;
         
-        skip_focusenter();
-        
-        ioncore_g.focus_next=NULL;
+    next=ioncore_g.focus_next;
+    warp=ioncore_g.warp_next;
 
-        region_do_set_focus(next, warp);
+    if(next==NULL)
+        return;
         
-        /* Just greedily eating it all away that X has to offer
-         * seems to be the best we can do with Xlib.
-         */
-        if(warp)
-            skip_enterwindow();
+    ioncore_g.focus_next=NULL;
         
-    }
-    
-    XFlush(ioncore_g.dpy);
+    region_do_set_focus(next, warp);
+        
+    /* Just greedily eating it all away that X has to offer
+     * seems to be the best we can do with Xlib.
+     */
+    if(warp)
+        skip_enterwindow();
 }
 
 
@@ -249,12 +230,22 @@ void ioncore_mainloop()
     while(1){
         check_signals();
         mainloop_execute_deferred();
-        ioncore_flush();
         
-        if(QLength(ioncore_g.dpy)>0)
-            ioncore_x_connection_handler(ioncore_g.conn, NULL);
-        else
-            mainloop_select();
+        if(QLength(ioncore_g.dpy)==0){
+            XSync(ioncore_g.dpy, False);
+            
+            if(QLength(ioncore_g.dpy)==0){
+                ioncore_flushfocus();
+                XSync(ioncore_g.dpy, False);
+                
+                if(QLength(ioncore_g.dpy)==0){
+                    mainloop_select();
+                    continue;
+                }
+            }
+        }
+        
+        ioncore_x_connection_handler(ioncore_g.conn, NULL);
     }
 }
 

@@ -328,6 +328,7 @@ static bool init_global()
     ioncore_g.screens=NULL;
     ioncore_g.focus_next=NULL;
     ioncore_g.warp_next=FALSE;
+    ioncore_g.focus_next_source=IONCORE_FOCUSNEXT_OTHER;
     
     ioncore_g.focus_current=NULL;
 

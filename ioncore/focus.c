@@ -388,6 +388,7 @@ void region_do_warp(WRegion *reg)
 void region_maybewarp(WRegion *reg, bool warp)
 {
     ioncore_g.focus_next=reg;
+    ioncore_g.focus_next_source=IONCORE_FOCUSNEXT_OTHER;
     ioncore_g.warp_next=(warp && ioncore_g.warp_enabled);
 }
 

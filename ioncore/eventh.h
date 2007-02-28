@@ -22,7 +22,7 @@ extern void ioncore_handle_enter_window(XEvent *ev);
 extern void ioncore_handle_unmap_notify(const XUnmapEvent *ev);
 extern void ioncore_handle_destroy_notify(const XDestroyWindowEvent *ev);
 extern void ioncore_handle_client_message(const XClientMessageEvent *ev);
-extern void ioncore_handle_focus_in(const XFocusChangeEvent *ev, bool skip);
+extern void ioncore_handle_focus_in(const XFocusChangeEvent *ev);
 extern void ioncore_handle_focus_out(const XFocusChangeEvent *ev);
 extern void ioncore_handle_property(const XPropertyEvent *ev);
 extern void ioncore_handle_buttonpress(XEvent *ev);

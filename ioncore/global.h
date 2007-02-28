@@ -37,6 +37,13 @@ enum{
     IONCORE_OPMODE_DEINIT
 };
 
+enum{
+    IONCORE_FOCUSNEXT_OTHER,
+    IONCORE_FOCUSNEXT_ENTERWINDOW,
+    IONCORE_FOCUSNEXT_FALLBACK
+};
+
+
 INTRSTRUCT(WGlobal);
 
 
@@ -64,6 +71,7 @@ DECLSTRUCT(WGlobal){
     WScreen *screens;
     WRegion *focus_next;
     bool warp_next;
+    int focus_next_source;
     
     /* We could have a display WRegion but the screen-link could impose
      * some problems so these are handled as a special case.

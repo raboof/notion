@@ -63,7 +63,7 @@ bool ioncore_handle_event(XEvent *ev)
         ioncore_handle_property(&(ev->xproperty));
         break;
     CASE_EVENT(FocusIn)
-        ioncore_handle_focus_in(&(ev->xfocus), FALSE);
+        ioncore_handle_focus_in(&(ev->xfocus));
         break;
     CASE_EVENT(FocusOut)
         ioncore_handle_focus_out(&(ev->xfocus));
@@ -305,7 +305,7 @@ void ioncore_handle_expose(const XExposeEvent *ev)
 /*{{{ Enter window, focus */
 
 
-static void do_handle_enter_window(XEvent *ev)
+void ioncore_handle_enter_window(XEvent *ev)
 {
     XEnterWindowEvent *eev=&(ev->xcrossing);
     WRegion *reg=NULL;
@@ -326,7 +326,12 @@ static void do_handle_enter_window(XEvent *ev)
         
     if(region_skip_focus(reg))
         return;
-
+    
+    if(ioncore_g.focus_next!=NULL &&
+       ioncore_g.focus_next_source<IONCORE_FOCUSNEXT_ENTERWINDOW){
+        return;
+    }
+    
     /* If a child of 'reg' is to be focused, do not process this
      * event. (ioncore_g.focus_next should only be set here by
      * another call to use from ioncore_handle_enter_window below.)
@@ -340,23 +345,11 @@ static void do_handle_enter_window(XEvent *ev)
         }
     }
     
-    region_goto_flags(reg, (REGION_GOTO_FOCUS|
-                            REGION_GOTO_NOWARP|
-                            REGION_GOTO_ENTERWINDOW));
-}
-
-
-void ioncore_handle_enter_window(XEvent *ev)
-{
-    if(ioncore_g.no_mousefocus)
-        return;
-    
-    do{
-        /* *sigh*, it doesn't seem reasonably simply possible to
-         * process events in-order.
-         */
-        do_handle_enter_window(ev);
-    }while(XCheckMaskEvent(ioncore_g.dpy, EnterWindowMask, ev));
+    if(region_goto_flags(reg, (REGION_GOTO_FOCUS|
+                               REGION_GOTO_NOWARP|
+                               REGION_GOTO_ENTERWINDOW))){
+        ioncore_g.focus_next_source=IONCORE_FOCUSNEXT_ENTERWINDOW;
+    }
 }
 
 
@@ -373,8 +366,7 @@ static bool pointer_in_root(Window root1)
 }
 
 
-
-void ioncore_handle_focus_in(const XFocusChangeEvent *ev, bool skip)
+void ioncore_handle_focus_in(const XFocusChangeEvent *ev)
 {
     WRegion *reg;
     WWindow *wwin;
@@ -404,15 +396,23 @@ void ioncore_handle_focus_in(const XFocusChangeEvent *ev, bool skip)
     
     region_got_focus(reg);
     
-    /* Restore focus if it was returned to a root window and we don't
-     * know of a pending focus change.
-     */
-    if(!skip 
-       && ev->window==region_root_of(reg) /* OBJ_IS(reg, WRootWin) */
-       && (ev->detail==NotifyPointerRoot || ev->detail==NotifyDetailNone)
-       && ioncore_g.focus_next==NULL /*&& ioncore_await_focus()==NULL*/
-       && pointer_in_root(ev->window)){
-        region_set_focus(reg);
+    if(ioncore_g.focus_next!=NULL && 
+       ioncore_g.focus_next_source<IONCORE_FOCUSNEXT_FALLBACK){
+        return;
+    }
+    
+    if((ev->detail==NotifyPointerRoot || ev->detail==NotifyDetailNone) 
+       && ev->window==region_root_of(reg) /* OBJ_IS(reg, WRootWin) */){
+        /* Restore focus if it was returned to a root window and we don't
+         * know of a pending focus change.
+         */
+        if(pointer_in_root(ev->window)){
+            region_set_focus(reg);
+            ioncore_g.focus_next_source=IONCORE_FOCUSNEXT_FALLBACK;
+        }
+    }else{
+        /* Something got the focus, don't use fallback. */
+        ioncore_g.focus_next=NULL;
     }
 }
 
@@ -501,7 +501,7 @@ void ioncore_handle_buttonpress(XEvent *ev)
             ioncore_handle_grabs(ev);
             break;
         CASE_EVENT(FocusIn)
-            ioncore_handle_focus_in(&(ev->xfocus), FALSE);
+            ioncore_handle_focus_in(&(ev->xfocus));
             break;
         CASE_EVENT(FocusOut)
             ioncore_handle_focus_out(&(ev->xfocus));
