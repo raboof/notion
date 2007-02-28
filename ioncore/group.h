@@ -91,6 +91,8 @@ extern void group_manage_stdisp(WGroup *ws, WRegion *stdisp,
 
 extern void group_managed_remove(WGroup *ws, WRegion *reg);
 
+extern void group_managed_notify(WGroup *ws, WRegion *reg, WRegionNotify how);
+
 extern WRegion *group_bottom(WGroup *ws);
 
 extern bool group_rescue_clientwins(WGroup *ws, WRescueInfo *info);

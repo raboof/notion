@@ -367,7 +367,7 @@ void group_managed_remove(WGroup *ws, WRegion *reg)
 }
 
 
-static void group_managed_notify(WGroup *ws, WRegion *reg, WRegionNotify how)
+void group_managed_notify(WGroup *ws, WRegion *reg, WRegionNotify how)
 {
     if(how==ioncore_g.notifies.activated || 
        how==ioncore_g.notifies.pseudoactivated){

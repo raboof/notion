@@ -180,6 +180,8 @@ void groupcw_managed_notify(WGroupCW *cwg, WRegion *reg, WRegionNotify how)
         /* Title has changed */
         region_notify_change((WRegion*)cwg, how);
     }
+    
+    group_managed_notify(&cwg->grp, reg, how);
 }
 
 
